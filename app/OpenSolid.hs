@@ -35,7 +35,19 @@ module OpenSolid (
 ) where
 
 import qualified Data.Text
-import Prelude (Bool (..), Eq (..), IO, Ord (..), Show (..), fail, not, (&&), (>>), (>>=), (||))
+import Prelude (
+    Bool (..),
+    Eq (..),
+    IO,
+    Ord (..),
+    Show (..),
+    fail,
+    not,
+    (&&),
+    (>>),
+    (>>=),
+    (||),
+ )
 import qualified Prelude
 
 type String = Data.Text.Text
