@@ -16,6 +16,7 @@ main = do
     Debug.log "Integer product" (3 * 4)
     Debug.log "Volume in cubic centimeters" volumeInCubicCentimeters
     Debug.log "Integer division" (10 // 4)
+    Debug.log "True division" (10.0 / 4.0)
     Debug.log "Dot product" dotProduct
     Debug.log "Cross product" crossProduct
     Debug.log "Square root" squareRoot
