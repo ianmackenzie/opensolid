@@ -135,6 +135,8 @@ float n = Quantity (Prelude.fromIntegral n)
 {- HLINT ignore ifThenElse "Use if" -}
 ifThenElse :: Bool -> a -> a -> a
 ifThenElse condition whenTrue whenFalse =
+    -- We need to use 'case' here instead of if-then-else, since this function
+    -- is literally *implementing* if-then-else
     case condition of
         True -> whenTrue
         False -> whenFalse
