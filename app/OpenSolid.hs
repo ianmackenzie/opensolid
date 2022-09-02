@@ -1,7 +1,3 @@
-{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
-
-{-# HLINT ignore "Use if" #-}
-
 module OpenSolid (
     String,
     List,
@@ -124,6 +120,7 @@ fromString = Data.Text.pack
 float :: Int -> Float
 float n = Quantity (Prelude.fromIntegral n)
 
+{- HLINT ignore ifThenElse "Use if" -}
 ifThenElse :: Bool -> a -> a -> a
 ifThenElse condition whenTrue whenFalse =
     case condition of
