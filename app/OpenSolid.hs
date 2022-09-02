@@ -93,7 +93,7 @@ instance Multiplication Unitless Unitless Unitless where
 instance Multiplication Int Int Int where
     (*) = (Prelude.*)
 
-instance Multiplication lhsUnits rhsUnits resultUnits => Multiplication (Quantity lhsUnits) (Quantity rhsUnits) (Quantity resultUnits) where
+instance Multiplication units1 units2 units3 => Multiplication (Quantity units1) (Quantity units2) (Quantity units3) where
     (Quantity x) * (Quantity y) = Quantity (x Prelude.* y)
 
 class Division lhs rhs result | lhs rhs -> result where
@@ -102,7 +102,7 @@ class Division lhs rhs result | lhs rhs -> result where
 instance Division Unitless Unitless Unitless where
     Unitless / Unitless = Unitless
 
-instance Division lhsUnits rhsUnits resultUnits => Division (Quantity lhsUnits) (Quantity rhsUnits) (Quantity resultUnits) where
+instance Division units1 units2 units3 => Division (Quantity units1) (Quantity units2) (Quantity units3) where
     (Quantity x) / (Quantity y) = Quantity (x Prelude./ y)
 
 class Sqrt squared sqrt | squared -> sqrt where

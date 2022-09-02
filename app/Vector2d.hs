@@ -23,13 +23,13 @@ instance Addition (Vector2d units coordinates) (Vector2d units coordinates) (Vec
 instance Subtraction (Vector2d units coordinates) (Vector2d units coordinates) (Vector2d units coordinates) where
     (Vector2d (x1, y1)) - (Vector2d (x2, y2)) = Vector2d (x1 - x2, y1 - y2)
 
-instance Multiplication (Quantity lhsUnits) (Quantity rhsUnits) (Quantity resultUnits) => Multiplication (Quantity lhsUnits) (Vector2d rhsUnits coordinates) (Vector2d resultUnits coordinates) where
+instance Multiplication (Quantity units1) (Quantity units2) (Quantity units3) => Multiplication (Quantity units1) (Vector2d units2 coordinates) (Vector2d units3 coordinates) where
     scale * (Vector2d (x, y)) = Vector2d (scale * x, scale * y)
 
-instance Multiplication (Quantity lhsUnits) (Quantity rhsUnits) (Quantity resultUnits) => Multiplication (Vector2d lhsUnits coordinates) (Quantity rhsUnits) (Vector2d resultUnits coordinates) where
+instance Multiplication (Quantity units1) (Quantity units2) (Quantity units3) => Multiplication (Vector2d units1 coordinates) (Quantity units2) (Vector2d units3 coordinates) where
     (Vector2d (x, y)) * scale = Vector2d (x * scale, y * scale)
 
-instance Division (Quantity lhsUnits) (Quantity rhsUnits) (Quantity resultUnits) => Division (Vector2d lhsUnits coordinates) (Quantity rhsUnits) (Vector2d resultUnits coordinates) where
+instance Division (Quantity units1) (Quantity units2) (Quantity units3) => Division (Vector2d units1 coordinates) (Quantity units2) (Vector2d units3 coordinates) where
     (Vector2d (x, y)) / scale = Vector2d (x / scale, y / scale)
 
 zero :: Vector2d units coordinates
@@ -45,10 +45,10 @@ components :: Vector2d units coordinates -> (Quantity units, Quantity units)
 components (Vector2d components) = components
 
 dotProduct ::
-    Multiplication (Quantity lhsUnits) (Quantity rhsUnits) (Quantity resultUnits) =>
-    Vector2d lhsUnits coordinates ->
-    Vector2d rhsUnits coordinates ->
-    Quantity resultUnits
+    Multiplication (Quantity units1) (Quantity units2) (Quantity units3) =>
+    Vector2d units1 coordinates ->
+    Vector2d units2 coordinates ->
+    Quantity units3
 dotProduct v1 v2 = x1 * x2 + y1 * y2
   where
     (x1, y1) = components v1
