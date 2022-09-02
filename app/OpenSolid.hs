@@ -1,8 +1,6 @@
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 
 {-# HLINT ignore "Use if" #-}
-{-# HLINT ignore "Redundant lambda" #-}
-{-# HLINT ignore "Avoid lambda" #-}
 
 module OpenSolid (
     String,
@@ -142,10 +140,10 @@ identity = Prelude.id
 (<|) = identity
 
 (>>>) :: (a -> b) -> (b -> c) -> (a -> c)
-(>>>) f g = \x -> g (f x)
+(>>>) f g x = g (f x)
 
 (<<<) :: (b -> c) -> (a -> b) -> (a -> c)
-(<<<) f g = \x -> f (g x)
+(<<<) f g x = f (g x)
 
 infixr 0 <|
 
