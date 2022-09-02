@@ -17,6 +17,7 @@ main = do
     Debug.log "Volume in cubic centimeters" volumeInCubicCentimeters
     Debug.log "Integer division" (10 // 4)
     Debug.log "Dot product" dotProduct
+    Debug.log "Cross product" crossProduct
     Debug.log "Square root" squareRoot
   where
     k = 0.5
@@ -27,4 +28,5 @@ main = do
     v1 = Vector2d.meters 1.0 2.0
     v2 = k * Vector2d.meters 3.0 4.0
     dotProduct = Vector2d.dotProduct v1 v2
+    crossProduct = Vector2d.crossProduct v1 v2
     squareRoot = sqrt dotProduct
