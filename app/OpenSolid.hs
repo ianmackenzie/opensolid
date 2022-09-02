@@ -18,8 +18,6 @@ module OpenSolid (
     Division (..),
     Sqrt (..),
     (//),
-    DotProduct (..),
-    CrossProduct (..),
     Eq (..),
     Show (..),
     IO,
@@ -112,12 +110,6 @@ class Sqrt squared sqrt | squared -> sqrt where
 
 instance Sqrt squaredUnits units => Sqrt (Quantity squaredUnits) (Quantity units) where
     sqrt (Quantity x) = Quantity (Prelude.sqrt x)
-
-class DotProduct lhs rhs result | lhs rhs -> result where
-    (.) :: lhs -> rhs -> result
-
-class CrossProduct lhs rhs result | lhs rhs -> result where
-    (><) :: lhs -> rhs -> result
 
 (//) :: Int -> Int -> Int
 (//) = Prelude.quot
