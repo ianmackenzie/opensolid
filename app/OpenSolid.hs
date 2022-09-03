@@ -12,6 +12,7 @@ module OpenSolid (
     Multiplication (..),
     Division (..),
     Sqrt (..),
+    Concatenation (..),
     (//),
     Eq (..),
     Show (..),
@@ -122,6 +123,15 @@ instance Sqrt squaredUnits units => Sqrt (Quantity squaredUnits) (Quantity units
 
 (//) :: Int -> Int -> Int
 (//) = Prelude.quot
+
+class Concatenation a where
+    (++) :: a -> a -> a
+
+instance Concatenation String where
+    (++) = Data.Text.append
+
+instance Concatenation (List a) where
+    (++) = Prelude.mappend
 
 fromInteger :: Prelude.Integer -> Int
 fromInteger = Prelude.fromInteger
