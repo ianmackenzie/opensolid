@@ -52,6 +52,7 @@ executable opensolid-hs
         Area
         Volume
         Vector2d
+        Point2d
     default-extensions:
         NoImplicitPrelude
         OverloadedStrings
