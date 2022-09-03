@@ -22,6 +22,7 @@ main = do
     Debug.log "Cross product" crossProduct
     Debug.log "Square root" squareRoot
     Debug.log "Translated point" translatedPoint
+    Debug.log "Vector sum" vectorSum
   where
     k = 0.5
     area = Area.squareMeters 3.0
@@ -34,3 +35,4 @@ main = do
     crossProduct = Vector2d.crossProduct v1 v2
     squareRoot = sqrt dotProduct
     translatedPoint = Point2d.meters 2.0 3.0 + Vector2d.meters 4.0 5.0
+    vectorSum = Vector2d.meters 1.0 2.0 + Vector2d.meters 2.0 3.0
