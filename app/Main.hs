@@ -4,6 +4,7 @@ import qualified Area
 import qualified Debug
 import qualified Length
 import OpenSolid
+import qualified Point2d
 import Quantity (Quantity)
 import qualified Quantity
 import Units (Meters)
@@ -20,6 +21,7 @@ main = do
     Debug.log "Dot product" dotProduct
     Debug.log "Cross product" crossProduct
     Debug.log "Square root" squareRoot
+    Debug.log "Translated point" translatedPoint
   where
     k = 0.5
     area = Area.squareMeters 3.0
@@ -31,3 +33,4 @@ main = do
     dotProduct = Vector2d.dotProduct v1 v2
     crossProduct = Vector2d.crossProduct v1 v2
     squareRoot = sqrt dotProduct
+    translatedPoint = Point2d.meters 2.0 3.0 + Vector2d.meters 4.0 5.0
