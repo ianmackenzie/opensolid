@@ -4,6 +4,7 @@ module Quantity (
     baseUnit,
     baseUnits,
     inBaseUnits,
+    unwrap,
     sqrt,
 ) where
 
@@ -14,6 +15,9 @@ baseUnits (Quantity value) = Quantity value
 
 inBaseUnits :: Quantity units -> Float
 inBaseUnits (Quantity value) = Quantity value
+
+unwrap :: Quantity units -> Float
+unwrap = inBaseUnits
 
 zero :: Quantity units
 zero = baseUnits 0.0
