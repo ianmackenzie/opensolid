@@ -1,6 +1,7 @@
 module Length (
     Length,
     Meters,
+    zero,
     meter,
     centimeter,
     meters,
@@ -15,6 +16,9 @@ import qualified Quantity
 import Units (Meters)
 
 type Length = Quantity Meters
+
+zero :: Length
+zero = Quantity.zero
 
 meter :: Length
 meter = Quantity.baseUnit

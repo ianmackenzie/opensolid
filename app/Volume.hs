@@ -1,6 +1,7 @@
 module Volume (
     Volume,
     CubicMeters,
+    zero,
     cubicMeters,
     inCubicMeters,
     cubicMeter,
@@ -16,6 +17,9 @@ import qualified Quantity
 import Units (CubicMeters)
 
 type Volume = Quantity CubicMeters
+
+zero :: Volume
+zero = Quantity.zero
 
 cubicMeter :: Volume
 cubicMeter = Quantity.baseUnit

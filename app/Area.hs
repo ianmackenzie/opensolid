@@ -1,6 +1,7 @@
 module Area (
     Area,
     SquareMeters,
+    zero,
     squareMeters,
     inSquareMeters,
     squareMeter,
@@ -12,6 +13,9 @@ import qualified Quantity
 import Units (SquareMeters)
 
 type Area = Quantity SquareMeters
+
+zero :: Area
+zero = Quantity.zero
 
 squareMeter :: Area
 squareMeter = Quantity.baseUnit
