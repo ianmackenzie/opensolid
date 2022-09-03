@@ -5,5 +5,5 @@ module String (
 import qualified Data.Text
 import OpenSolid
 
-concat :: [String] -> String
+concat :: List String -> String
 concat = Data.Text.concat
