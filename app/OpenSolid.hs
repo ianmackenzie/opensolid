@@ -61,11 +61,14 @@ type List a = [a]
 type Int = Prelude.Int
 
 newtype Quantity units = Quantity Prelude.Double
-    deriving (Show, Eq)
+    deriving (Eq)
 
 data Unitless = Unitless
 
 type Float = Quantity Unitless
+
+instance Show Float where
+    show (Quantity x) = Prelude.show x
 
 class Negation a where
     negate :: a -> a

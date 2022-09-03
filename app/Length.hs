@@ -13,9 +13,13 @@ module Length (
 import OpenSolid
 import Quantity (Quantity)
 import qualified Quantity
+import qualified String
 import Units (Meters)
 
 type Length = Quantity Meters
+
+instance Show Length where
+    show length = String.toList ("Length.meters " ++ String.fromFloat (inMeters length))
 
 zero :: Length
 zero = Quantity.zero

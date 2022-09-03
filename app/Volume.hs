@@ -14,9 +14,13 @@ import qualified Length
 import OpenSolid
 import Quantity (Quantity)
 import qualified Quantity
+import qualified String
 import Units (CubicMeters)
 
 type Volume = Quantity CubicMeters
+
+instance Show Volume where
+    show volume = String.toList ("Volume.cubicMeters " ++ String.fromFloat (inCubicMeters volume))
 
 zero :: Volume
 zero = Quantity.zero
