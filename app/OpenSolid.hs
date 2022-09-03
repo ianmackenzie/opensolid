@@ -1,5 +1,6 @@
 module OpenSolid (
     String,
+    Char,
     List,
     Int,
     Quantity (..),
@@ -51,6 +52,8 @@ import Prelude (
 import qualified Prelude
 
 type String = Data.Text.Text
+
+type Char = Prelude.Char
 
 type List a = [a]
 
