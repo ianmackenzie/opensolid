@@ -3,6 +3,7 @@ module Vector2d (
     zero,
     xy,
     meters,
+    components,
     dotProduct,
     crossProduct,
 ) where
