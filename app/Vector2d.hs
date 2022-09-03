@@ -14,6 +14,7 @@ import qualified Quantity
 import Units (Meters)
 
 newtype Vector2d units coordinates = Vector2d (Quantity units, Quantity units)
+    deriving (Eq)
 
 instance Negation (Vector2d units coordinates) where
     negate (Vector2d (x, y)) = Vector2d (- x, - y)
