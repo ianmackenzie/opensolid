@@ -2,9 +2,10 @@ module OpenSolid (
     String,
     Char,
     List,
-    Int,
+    Count (..),
     Quantity (..),
     Unitless (..),
+    Int,
     Float,
     Negation (..),
     Addition (..),
@@ -58,14 +59,20 @@ type Char = Prelude.Char
 
 type List a = [a]
 
-type Int = Prelude.Int
+newtype Count units = Count Prelude.Int
+    deriving (Eq)
 
 newtype Quantity units = Quantity Prelude.Double
     deriving (Eq)
 
 data Unitless = Unitless
 
+type Int = Count Unitless
+
 type Float = Quantity Unitless
+
+instance Show Int where
+    show (Count n) = show n
 
 instance Show Float where
     show (Quantity x) = show x
@@ -73,28 +80,34 @@ instance Show Float where
 class Negation a where
     negate :: a -> a
 
-instance Negation Int where
-    negate = Prelude.negate
+instance Negation (Count units) where
+    negate (Count n) = Count (Prelude.negate n)
 
 instance Negation (Quantity units) where
     negate (Quantity x) = Quantity (Prelude.negate x)
 
-class Addition lhs rhs result | lhs rhs -> result where
-    (+) :: lhs -> rhs -> result
+class Addition lhs rhs where
+    type Sum lhs rhs :: * -> *
+    (+) :: lhs a -> rhs a -> (Sum lhs rhs) a
 
-instance Addition Int Int Int where
-    (+) = (Prelude.+)
+instance Addition Count Count where
+    type Sum Count Count = Count
+    (Count n) + (Count m) = Count (n Prelude.+ m)
 
-instance Addition (Quantity units) (Quantity units) (Quantity units) where
+instance Addition Quantity Quantity where
+    type Sum Quantity Quantity = Quantity
     (Quantity x) + (Quantity y) = Quantity (x Prelude.+ y)
 
-class Subtraction lhs rhs result | lhs rhs -> result where
-    (-) :: lhs -> rhs -> result
+class Subtraction lhs rhs where
+    type Difference lhs rhs :: * -> *
+    (-) :: lhs a -> rhs a -> (Difference lhs rhs) a
 
-instance Subtraction Int Int Int where
-    (-) = (Prelude.-)
+instance Subtraction Count Count where
+    type Difference Count Count = Count
+    (Count n) - (Count m) = Count (n Prelude.- m)
 
-instance Subtraction (Quantity units) (Quantity units) (Quantity units) where
+instance Subtraction Quantity Quantity where
+    type Difference Quantity Quantity = Quantity
     (Quantity x) - (Quantity y) = Quantity (x Prelude.- y)
 
 class Multiplication lhs rhs result | lhs rhs -> result where
@@ -103,8 +116,8 @@ class Multiplication lhs rhs result | lhs rhs -> result where
 instance Multiplication Unitless Unitless Unitless where
     Unitless * Unitless = Unitless
 
-instance Multiplication Int Int Int where
-    (*) = (Prelude.*)
+instance Multiplication units1 units2 units3 => Multiplication (Count units1) (Count units2) (Count units3) where
+    (Count n) * (Count m) = Count (n Prelude.* m)
 
 instance Multiplication units1 units2 units3 => Multiplication (Quantity units1) (Quantity units2) (Quantity units3) where
     (Quantity x) * (Quantity y) = Quantity (x Prelude.* y)
@@ -124,8 +137,8 @@ class Sqrt squared sqrt | squared -> sqrt where
 instance Sqrt squaredUnits units => Sqrt (Quantity squaredUnits) (Quantity units) where
     sqrt (Quantity x) = Quantity (Prelude.sqrt x)
 
-(//) :: Int -> Int -> Int
-(//) = Prelude.quot
+(//) :: Count units -> Count units -> Int
+(Count n) // (Count m) = Count (Prelude.quot n m)
 
 class Concatenation a where
     (++) :: a -> a -> a
@@ -137,7 +150,7 @@ instance Concatenation (List a) where
     (++) = Prelude.mappend
 
 fromInteger :: Prelude.Integer -> Int
-fromInteger = Prelude.fromInteger
+fromInteger n = Count (Prelude.fromInteger n)
 
 fromRational :: Prelude.Rational -> Float
 fromRational x = Quantity (Prelude.fromRational x)
@@ -146,7 +159,7 @@ fromString :: Prelude.String -> String
 fromString = Data.Text.pack
 
 float :: Int -> Float
-float n = Quantity (Prelude.fromIntegral n)
+float (Count n) = Quantity (Prelude.fromIntegral n)
 
 {- HLINT ignore ifThenElse "Use if" -}
 ifThenElse :: Bool -> a -> a -> a

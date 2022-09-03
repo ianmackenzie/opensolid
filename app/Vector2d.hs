@@ -28,10 +28,12 @@ instance Show (Vector2d Meters coordinates) where
 instance Negation (Vector2d units coordinates) where
     negate (Vector2d (x, y)) = Vector2d (- x, - y)
 
-instance Addition (Vector2d units coordinates) (Vector2d units coordinates) (Vector2d units coordinates) where
+instance Addition (Vector2d units) (Vector2d units) where
+    type Sum (Vector2d units) (Vector2d units) = Vector2d units
     (Vector2d (x1, y1)) + (Vector2d (x2, y2)) = Vector2d (x1 + x2, y1 + y2)
 
-instance Subtraction (Vector2d units coordinates) (Vector2d units coordinates) (Vector2d units coordinates) where
+instance Subtraction (Vector2d units) (Vector2d units) where
+    type Difference (Vector2d units) (Vector2d units) = Vector2d units
     (Vector2d (x1, y1)) - (Vector2d (x2, y2)) = Vector2d (x1 - x2, y1 - y2)
 
 instance Multiplication (Quantity units1) (Quantity units2) (Quantity units3) => Multiplication (Quantity units1) (Vector2d units2 coordinates) (Vector2d units3 coordinates) where

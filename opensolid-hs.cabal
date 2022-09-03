@@ -63,3 +63,4 @@ executable opensolid-hs
         UndecidableInstances
         RebindableSyntax
         MonoLocalBinds
+        TypeFamilies

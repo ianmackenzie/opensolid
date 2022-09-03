@@ -23,19 +23,22 @@ instance Show (Point2d coordinates) where
             yString = String.fromFloat (Length.inMeters y)
          in show ("Point2d.meters " ++ xString ++ " " ++ yString)
 
-instance Addition (Point2d coordinates) (Vector2d Meters coordinates) (Point2d coordinates) where
+instance Addition Point2d (Vector2d Meters) where
+    type Sum Point2d (Vector2d Meters) = Point2d
     point + vector = Point2d (px + vx, py + vy)
       where
         (px, py) = coordinates point
         (vx, vy) = Vector2d.components vector
 
-instance Subtraction (Point2d coordinates) (Vector2d Meters coordinates) (Point2d coordinates) where
+instance Subtraction Point2d (Vector2d Meters) where
+    type Difference Point2d (Vector2d Meters) = Point2d
     point - vector = Point2d (px - vx, py - vy)
       where
         (px, py) = coordinates point
         (vx, vy) = Vector2d.components vector
 
-instance Subtraction (Point2d coordinates) (Point2d coordinates) (Vector2d Meters coordinates) where
+instance Subtraction Point2d Point2d where
+    type Difference Point2d Point2d = Vector2d Meters
     p1 - p2 = Vector2d.xy (x1 - x2) (y1 - y2)
       where
         (x1, y1) = coordinates p1
