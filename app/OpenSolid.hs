@@ -68,7 +68,7 @@ data Unitless = Unitless
 type Float = Quantity Unitless
 
 instance Show Float where
-    show (Quantity x) = Prelude.show x
+    show (Quantity x) = show x
 
 class Negation a where
     negate :: a -> a
