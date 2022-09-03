@@ -1,5 +1,6 @@
 module Volume (
     Volume,
+    CubicMeters,
     cubicMeters,
     inCubicMeters,
     cubicMeter,

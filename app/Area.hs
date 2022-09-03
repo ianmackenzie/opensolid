@@ -1,5 +1,6 @@
 module Area (
     Area,
+    SquareMeters,
     squareMeters,
     inSquareMeters,
     squareMeter,

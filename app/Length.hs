@@ -1,5 +1,6 @@
 module Length (
     Length,
+    Meters,
     meter,
     centimeter,
     meters,
