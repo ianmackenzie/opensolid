@@ -52,17 +52,17 @@ dotProduct ::
     Vector2d units1 coordinates ->
     Vector2d units2 coordinates ->
     Quantity units3
-dotProduct v1 v2 = x1 * x2 + y1 * y2
-  where
-    (x1, y1) = components v1
-    (x2, y2) = components v2
+dotProduct v1 v2 =
+    let (x1, y1) = components v1
+        (x2, y2) = components v2
+     in x1 * x2 + y1 * y2
 
 crossProduct ::
     Multiplication (Quantity units1) (Quantity units2) (Quantity units3) =>
     Vector2d units1 coordinates ->
     Vector2d units2 coordinates ->
     Quantity units3
-crossProduct v1 v2 = x1 * y2 - y1 * x2
-  where
-    (x1, y1) = components v1
-    (x2, y2) = components v2
+crossProduct v1 v2 =
+    let (x1, y1) = components v1
+        (x2, y2) = components v2
+     in x1 * y2 - y1 * x2
