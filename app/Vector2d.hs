@@ -12,10 +12,18 @@ import qualified Length
 import OpenSolid
 import Quantity (Quantity)
 import qualified Quantity
+import qualified String
 import Units (Meters)
 
 newtype Vector2d units coordinates = Vector2d (Quantity units, Quantity units)
     deriving (Eq)
+
+instance Show (Vector2d Meters coordinates) where
+    show vector =
+        let (x, y) = components vector
+            xString = String.fromFloat (Length.inMeters x)
+            yString = String.fromFloat (Length.inMeters y)
+         in show ("Vector2d.meters " ++ xString ++ " " ++ yString)
 
 instance Negation (Vector2d units coordinates) where
     negate (Vector2d (x, y)) = Vector2d (- x, - y)
