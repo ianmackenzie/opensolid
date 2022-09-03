@@ -19,7 +19,7 @@ import Units (Meters)
 type Length = Quantity Meters
 
 instance Show Length where
-    show length = show ("Length.meters " ++ String.fromFloat (inMeters length))
+    show length = String.toList ("Length.meters " ++ String.fromFloat (inMeters length))
 
 zero :: Length
 zero = Quantity.zero

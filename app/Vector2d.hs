@@ -23,7 +23,7 @@ instance Show (Vector2d Meters coordinates) where
         let (x, y) = components vector
             xString = String.fromFloat (Length.inMeters x)
             yString = String.fromFloat (Length.inMeters y)
-         in show ("Vector2d.meters " ++ xString ++ " " ++ yString)
+         in String.toList ("Vector2d.meters " ++ xString ++ " " ++ yString)
 
 instance Negation (Vector2d units coordinates) where
     negate (Vector2d (x, y)) = Vector2d (- x, - y)

@@ -16,7 +16,7 @@ import Units (SquareMeters)
 type Area = Quantity SquareMeters
 
 instance Show Area where
-    show area = show ("Area.squareMeters " ++ String.fromFloat (inSquareMeters area))
+    show area = String.toList ("Area.squareMeters " ++ String.fromFloat (inSquareMeters area))
 
 zero :: Area
 zero = Quantity.zero

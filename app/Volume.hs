@@ -20,7 +20,7 @@ import Units (CubicMeters)
 type Volume = Quantity CubicMeters
 
 instance Show Volume where
-    show volume = show ("Volume.cubicMeters " ++ String.fromFloat (inCubicMeters volume))
+    show volume = String.toList ("Volume.cubicMeters " ++ String.fromFloat (inCubicMeters volume))
 
 zero :: Volume
 zero = Quantity.zero

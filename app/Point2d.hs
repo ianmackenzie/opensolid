@@ -21,7 +21,7 @@ instance Show (Point2d coordinates) where
         let (x, y) = coordinates point
             xString = String.fromFloat (Length.inMeters x)
             yString = String.fromFloat (Length.inMeters y)
-         in show ("Point2d.meters " ++ xString ++ " " ++ yString)
+         in String.toList ("Point2d.meters " ++ xString ++ " " ++ yString)
 
 instance Addition Point2d (Vector2d Meters) where
     type Sum Point2d (Vector2d Meters) = Point2d
