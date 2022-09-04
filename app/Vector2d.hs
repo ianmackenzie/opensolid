@@ -4,8 +4,7 @@ module Vector2d (
     xy,
     meters,
     components,
-    dotProduct,
-    crossProduct,
+    determinant,
 ) where
 
 import qualified Area
@@ -51,14 +50,24 @@ instance Subtraction (Vector2d units) (Vector2d units) where
     (Vector2d (x1, y1)) - (Vector2d (x2, y2)) =
         Vector2d (x1 - x2, y1 - y2)
 
-instance Multiplication (Quantity units1) (Quantity units2) (Quantity units3) => Multiplication (Quantity units1) (Vector2d units2 coordinates) (Vector2d units3 coordinates) where
-    scale * (Vector2d (x, y)) = Vector2d (scale * x, scale * y)
+instance Multiplication units1 units2 => Multiplication (Quantity units1) (Vector2d units2 coordinates) where
+    type Product (Quantity units1) (Vector2d units2 coordinates) = Vector2d (Product units1 units2) coordinates
+    scale * (Vector2d (x, y)) =
+        Vector2d (scale * x, scale * y)
 
-instance Multiplication (Quantity units1) (Quantity units2) (Quantity units3) => Multiplication (Vector2d units1 coordinates) (Quantity units2) (Vector2d units3 coordinates) where
-    (Vector2d (x, y)) * scale = Vector2d (x * scale, y * scale)
+instance Multiplication units1 units2 => Multiplication (Vector2d units1 coordinates) (Quantity units2) where
+    type Product (Vector2d units1 coordinates) (Quantity units2) = Vector2d (Product units1 units2) coordinates
+    (Vector2d (x, y)) * scale =
+        Vector2d (x * scale, y * scale)
 
-instance Division (Quantity units1) (Quantity units2) (Quantity units3) => Division (Vector2d units1 coordinates) (Quantity units2) (Vector2d units3 coordinates) where
+instance Division units1 units2 => Division (Vector2d units1 coordinates) (Quantity units2) where
+    type Quotient (Vector2d units1 coordinates) (Quantity units2) = Vector2d (Quotient units1 units2) coordinates
     (Vector2d (x, y)) / scale = Vector2d (x / scale, y / scale)
+
+instance Multiplication units1 units2 => DotProduct (Vector2d units1) (Vector2d units2) where
+    type DotProductResult (Vector2d units1) (Vector2d units2) = Quantity (Product units1 units2)
+    (Vector2d (x1, y1)) . (Vector2d (x2, y2)) =
+        x1 * x2 + y1 * y2
 
 zero :: Vector2d units coordinates
 zero = Vector2d (Quantity.zero, Quantity.zero)
@@ -71,25 +80,20 @@ meters :: Float -> Float -> Vector2d Meters coordinates
 meters x y =
     Vector2d (Length.meters x, Length.meters y)
 
+squareMeters :: Float -> Float -> Vector2d SquareMeters coordinates
+squareMeters x y =
+    Vector2d (Area.squareMeters x, Area.squareMeters y)
+
 components :: Vector2d units coordinates -> (Quantity units, Quantity units)
-components (Vector2d components) = components
+components (Vector2d components) =
+    components
 
-dotProduct ::
-    Multiplication (Quantity units1) (Quantity units2) (Quantity units3) =>
+determinant ::
+    Multiplication units1 units2 =>
     Vector2d units1 coordinates ->
     Vector2d units2 coordinates ->
-    Quantity units3
-dotProduct v1 v2 =
-    let (x1, y1) = components v1
-        (x2, y2) = components v2
-     in x1 * x2 + y1 * y2
-
-crossProduct ::
-    Multiplication (Quantity units1) (Quantity units2) (Quantity units3) =>
-    Vector2d units1 coordinates ->
-    Vector2d units2 coordinates ->
-    Quantity units3
-crossProduct v1 v2 =
+    Quantity (Product units1 units2)
+determinant v1 v2 =
     let (x1, y1) = components v1
         (x2, y2) = components v2
      in x1 * y2 - y1 * x2

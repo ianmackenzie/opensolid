@@ -19,7 +19,7 @@ main = do
     Debug.log "Integer division" (10 // 4)
     Debug.log "True division" (10.0 / 4.0)
     Debug.log "Dot product" dotProduct
-    Debug.log "Cross product" crossProduct
+    Debug.log "Determinant" determinant
     Debug.log "Square root" squareRoot
     Debug.log "Translated point" translatedPoint
     Debug.log "Vector sum" vectorSum
@@ -31,8 +31,8 @@ main = do
     volumeInCubicCentimeters = Volume.inCubicCentimeters volume
     v1 = Vector2d.meters 1.0 2.0
     v2 = k * Vector2d.meters 3.0 4.0
-    dotProduct = Vector2d.dotProduct v1 v2
-    crossProduct = Vector2d.crossProduct v1 v2
+    dotProduct = v1 . v2
+    determinant = Vector2d.determinant v1 v2
     squareRoot = sqrt dotProduct
     translatedPoint = Point2d.meters 2.0 3.0 + Vector2d.meters 4.0 5.0
     vectorSum = Vector2d.meters 1.0 2.0 + Vector2d.meters 2.0 3.0

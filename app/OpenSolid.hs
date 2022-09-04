@@ -12,6 +12,8 @@ module OpenSolid (
     Subtraction (..),
     Multiplication (..),
     Division (..),
+    DotProduct (..),
+    CrossProduct (..),
     Sqrt (..),
     Concatenation (..),
     (//),
@@ -119,32 +121,53 @@ instance Subtraction Quantity Quantity where
     (Quantity x) - (Quantity y) =
         Quantity (x Prelude.- y)
 
-class Multiplication lhs rhs result | lhs rhs -> result where
-    (*) :: lhs -> rhs -> result
+class Multiplication lhs rhs where
+    type Product lhs rhs
+    (*) :: lhs -> rhs -> Product lhs rhs
 
-instance Multiplication Unitless Unitless Unitless where
+instance Multiplication Unitless Unitless where
+    type Product Unitless Unitless = Unitless
     Unitless * Unitless = Unitless
 
-instance Multiplication units1 units2 units3 => Multiplication (Count units1) (Count units2) (Count units3) where
-    (Count n) * (Count m) = Count (n Prelude.* m)
+instance Multiplication units1 units2 => Multiplication (Count units1) (Count units2) where
+    type Product (Count units1) (Count units2) = Count (Product units1 units2)
+    (Count n) * (Count m) =
+        Count (n Prelude.* m)
 
-instance Multiplication units1 units2 units3 => Multiplication (Quantity units1) (Quantity units2) (Quantity units3) where
-    (Quantity x) * (Quantity y) = Quantity (x Prelude.* y)
+instance Multiplication units1 units2 => Multiplication (Quantity units1) (Quantity units2) where
+    type Product (Quantity units1) (Quantity units2) = Quantity (Product units1 units2)
+    (Quantity x) * (Quantity y) =
+        Quantity (x Prelude.* y)
 
-class Division lhs rhs result | lhs rhs -> result where
-    (/) :: lhs -> rhs -> result
+class Division lhs rhs where
+    type Quotient lhs rhs
+    (/) :: lhs -> rhs -> Quotient lhs rhs
 
-instance Division Unitless Unitless Unitless where
+instance Division Unitless Unitless where
+    type Quotient Unitless Unitless = Unitless
     Unitless / Unitless = Unitless
 
-instance Division units1 units2 units3 => Division (Quantity units1) (Quantity units2) (Quantity units3) where
-    (Quantity x) / (Quantity y) = Quantity (x Prelude./ y)
+instance Division units1 units2 => Division (Quantity units1) (Quantity units2) where
+    type Quotient (Quantity units1) (Quantity units2) = Quantity (Quotient units1 units2)
+    (Quantity x) / (Quantity y) =
+        Quantity (x Prelude./ y)
 
-class Sqrt squared sqrt | squared -> sqrt where
-    sqrt :: squared -> sqrt
+class DotProduct lhs rhs where
+    type DotProductResult lhs rhs
+    (.) :: lhs coordinates -> rhs coordinates -> DotProductResult lhs rhs
 
-instance Sqrt squaredUnits units => Sqrt (Quantity squaredUnits) (Quantity units) where
-    sqrt (Quantity x) = Quantity (Prelude.sqrt x)
+class CrossProduct lhs rhs where
+    type CrossProductResult lhs rhs :: * -> *
+    (><) :: lhs coordinates -> rhs coordinates -> (CrossProductResult lhs rhs) coordinates
+
+class Sqrt a where
+    type SquareRoot a
+    sqrt :: a -> SquareRoot a
+
+instance Sqrt units => Sqrt (Quantity units) where
+    type SquareRoot (Quantity units) = Quantity (SquareRoot units)
+    sqrt (Quantity x) =
+        Quantity (Prelude.sqrt x)
 
 (//) :: Count units -> Count units -> Int
 (Count n) // (Count m) =
