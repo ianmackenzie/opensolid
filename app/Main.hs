@@ -5,10 +5,7 @@ import qualified Debug
 import qualified Length
 import OpenSolid
 import qualified Point2d
-import Quantity (Quantity)
 import qualified Quantity
-import Units (Meters)
-import Vector2d (Vector2d)
 import qualified Vector2d
 import qualified Volume
 
