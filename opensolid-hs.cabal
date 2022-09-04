@@ -46,6 +46,7 @@ executable opensolid-hs
         OpenSolid
         Debug
         String
+        List
         Units
         Quantity
         Length
