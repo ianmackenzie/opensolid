@@ -72,19 +72,23 @@ type Int = Count Unitless
 type Float = Quantity Unitless
 
 instance Show Int where
-    show (Count n) = show n
+    show (Count n) =
+        show n
 
 instance Show Float where
-    show (Quantity x) = show x
+    show (Quantity x) =
+        show x
 
 class Negation a where
     negate :: a -> a
 
 instance Negation (Count units) where
-    negate (Count n) = Count (Prelude.negate n)
+    negate (Count n) =
+        Count (Prelude.negate n)
 
 instance Negation (Quantity units) where
-    negate (Quantity x) = Quantity (Prelude.negate x)
+    negate (Quantity x) =
+        Quantity (Prelude.negate x)
 
 class Addition lhs rhs where
     type Sum lhs rhs :: * -> *
@@ -92,11 +96,13 @@ class Addition lhs rhs where
 
 instance Addition Count Count where
     type Sum Count Count = Count
-    (Count n) + (Count m) = Count (n Prelude.+ m)
+    (Count n) + (Count m) =
+        Count (n Prelude.+ m)
 
 instance Addition Quantity Quantity where
     type Sum Quantity Quantity = Quantity
-    (Quantity x) + (Quantity y) = Quantity (x Prelude.+ y)
+    (Quantity x) + (Quantity y) =
+        Quantity (x Prelude.+ y)
 
 class Subtraction lhs rhs where
     type Difference lhs rhs :: * -> *
@@ -104,11 +110,13 @@ class Subtraction lhs rhs where
 
 instance Subtraction Count Count where
     type Difference Count Count = Count
-    (Count n) - (Count m) = Count (n Prelude.- m)
+    (Count n) - (Count m) =
+        Count (n Prelude.- m)
 
 instance Subtraction Quantity Quantity where
     type Difference Quantity Quantity = Quantity
-    (Quantity x) - (Quantity y) = Quantity (x Prelude.- y)
+    (Quantity x) - (Quantity y) =
+        Quantity (x Prelude.- y)
 
 class Multiplication lhs rhs result | lhs rhs -> result where
     (*) :: lhs -> rhs -> result
@@ -138,28 +146,35 @@ instance Sqrt squaredUnits units => Sqrt (Quantity squaredUnits) (Quantity units
     sqrt (Quantity x) = Quantity (Prelude.sqrt x)
 
 (//) :: Count units -> Count units -> Int
-(Count n) // (Count m) = Count (Prelude.quot n m)
+(Count n) // (Count m) =
+    Count (Prelude.quot n m)
 
 class Concatenation a where
     (++) :: a -> a -> a
 
 instance Concatenation String where
-    (++) = Data.Text.append
+    (++) =
+        Data.Text.append
 
 instance Concatenation (List a) where
-    (++) = Prelude.mappend
+    (++) =
+        Prelude.mappend
 
 fromInteger :: Prelude.Integer -> Int
-fromInteger n = Count (Prelude.fromInteger n)
+fromInteger n =
+    Count (Prelude.fromInteger n)
 
 fromRational :: Prelude.Rational -> Float
-fromRational x = Quantity (Prelude.fromRational x)
+fromRational x =
+    Quantity (Prelude.fromRational x)
 
 fromString :: Prelude.String -> String
-fromString = Data.Text.pack
+fromString =
+    Data.Text.pack
 
 float :: Int -> Float
-float (Count n) = Quantity (Prelude.fromIntegral n)
+float (Count n) =
+    Quantity (Prelude.fromIntegral n)
 
 {- HLINT ignore ifThenElse "Use if" -}
 ifThenElse :: Bool -> a -> a -> a
@@ -171,19 +186,24 @@ ifThenElse condition whenTrue whenFalse =
         False -> whenFalse
 
 identity :: a -> a
-identity = Prelude.id
+identity =
+    Prelude.id
 
 (|>) :: a -> (a -> b) -> b
-(|>) value function = function value
+(|>) value function =
+    function value
 
 (<|) :: (a -> b) -> a -> b
-(<|) = identity
+(<|) =
+    identity
 
 (>>>) :: (a -> b) -> (b -> c) -> (a -> c)
-(>>>) f g x = g (f x)
+(>>>) f g x =
+    g (f x)
 
 (<<<) :: (b -> c) -> (a -> b) -> (a -> c)
-(<<<) f g x = f (g x)
+(<<<) f g x =
+    f (g x)
 
 infixr 0 <|
 

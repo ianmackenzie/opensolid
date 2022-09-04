@@ -26,15 +26,18 @@ instance Show (Vector2d Meters coordinates) where
          in String.toList ("Vector2d.meters " ++ xString ++ " " ++ yString)
 
 instance Negation (Vector2d units coordinates) where
-    negate (Vector2d (x, y)) = Vector2d (- x, - y)
+    negate (Vector2d (x, y)) =
+        Vector2d (- x, - y)
 
 instance Addition (Vector2d units) (Vector2d units) where
     type Sum (Vector2d units) (Vector2d units) = Vector2d units
-    (Vector2d (x1, y1)) + (Vector2d (x2, y2)) = Vector2d (x1 + x2, y1 + y2)
+    (Vector2d (x1, y1)) + (Vector2d (x2, y2)) =
+        Vector2d (x1 + x2, y1 + y2)
 
 instance Subtraction (Vector2d units) (Vector2d units) where
     type Difference (Vector2d units) (Vector2d units) = Vector2d units
-    (Vector2d (x1, y1)) - (Vector2d (x2, y2)) = Vector2d (x1 - x2, y1 - y2)
+    (Vector2d (x1, y1)) - (Vector2d (x2, y2)) =
+        Vector2d (x1 - x2, y1 - y2)
 
 instance Multiplication (Quantity units1) (Quantity units2) (Quantity units3) => Multiplication (Quantity units1) (Vector2d units2 coordinates) (Vector2d units3 coordinates) where
     scale * (Vector2d (x, y)) = Vector2d (scale * x, scale * y)
@@ -49,10 +52,12 @@ zero :: Vector2d units coordinates
 zero = Vector2d (Quantity.zero, Quantity.zero)
 
 xy :: Quantity units -> Quantity units -> Vector2d units coordinates
-xy x y = Vector2d (x, y)
+xy x y =
+    Vector2d (x, y)
 
 meters :: Float -> Float -> Vector2d Meters coordinates
-meters x y = Vector2d (Length.meters x, Length.meters y)
+meters x y =
+    Vector2d (Length.meters x, Length.meters y)
 
 components :: Vector2d units coordinates -> (Quantity units, Quantity units)
 components (Vector2d components) = components

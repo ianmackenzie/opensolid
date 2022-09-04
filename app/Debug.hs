@@ -6,9 +6,10 @@ import OpenSolid
 import qualified String
 
 log :: Show a => String -> a -> IO ()
-log label value = Data.Text.IO.putStrLn line
-  where
-    line = String.concat [label, ": ", toString value]
+log label value =
+    let line = String.concat [label, ": ", toString value]
+     in Data.Text.IO.putStrLn line
 
 toString :: Show a => a -> String
-toString value = Data.Text.pack (show value)
+toString value =
+    Data.Text.pack (show value)
