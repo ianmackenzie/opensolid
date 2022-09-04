@@ -23,6 +23,7 @@ module OpenSolid (
     fromString,
     float,
     ifThenElse,
+    identity,
     Bool (..),
     Ord (..),
     (&&),
