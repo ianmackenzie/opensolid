@@ -112,9 +112,9 @@ instance Multiplication Unitless units => CrossProduct Direction3d (Vector3d uni
             z = dx * vy - dy * vx
          in Vector3d (x, y, z)
 
-zero :: Vector3d units coordinates
-zero =
-    Vector3d (Quantity.zero, Quantity.zero, Quantity.zero)
+instance Zero (Vector3d units coordinates) where
+    zero =
+        Vector3d (zero, zero, zero)
 
 xyz :: Quantity units -> Quantity units -> Quantity units -> Vector3d units coordinates
 xyz x y z =

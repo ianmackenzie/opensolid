@@ -22,9 +22,6 @@ type Volume = Quantity CubicMeters
 instance Show Volume where
     show volume = String.toList ("Volume.cubicMeters " ++ String.fromFloat (inCubicMeters volume))
 
-zero :: Volume
-zero = Quantity.zero
-
 cubicMeter :: Volume
 cubicMeter = Quantity.baseUnit
 

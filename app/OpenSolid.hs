@@ -7,6 +7,7 @@ module OpenSolid (
     Unitless (..),
     Int,
     Float,
+    Zero (..),
     Negation (..),
     Addition (..),
     Subtraction (..),
@@ -81,6 +82,17 @@ instance Show Int where
 instance Show Float where
     show (Quantity x) =
         show x
+
+class Zero a where
+    zero :: a
+
+instance Zero (Count units) where
+    zero =
+        let (Count n) = 0 in Count n
+
+instance Zero (Quantity units) where
+    zero =
+        let (Quantity x) = 0.0 in Quantity x
 
 class Negation a where
     negate :: a -> a

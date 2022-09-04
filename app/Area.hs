@@ -1,7 +1,6 @@
 module Area (
     Area,
     SquareMeters,
-    zero,
     squareMeters,
     inSquareMeters,
     squareMeter,
@@ -18,10 +17,6 @@ type Area = Quantity SquareMeters
 instance Show Area where
     show area =
         String.toList ("Area.squareMeters " ++ String.fromFloat (inSquareMeters area))
-
-zero :: Area
-zero =
-    Quantity.zero
 
 squareMeter :: Area
 squareMeter =

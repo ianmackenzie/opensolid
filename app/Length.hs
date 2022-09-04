@@ -1,7 +1,6 @@
 module Length (
     Length,
     Meters,
-    zero,
     meter,
     centimeter,
     meters,
@@ -21,10 +20,6 @@ type Length = Quantity Meters
 instance Show Length where
     show length =
         String.toList ("Length.meters " ++ String.fromFloat (inMeters length))
-
-zero :: Length
-zero =
-    Quantity.zero
 
 meter :: Length
 meter =

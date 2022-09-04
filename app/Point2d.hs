@@ -41,7 +41,7 @@ instance Subtraction Point2d Point2d where
 
 origin :: Point2d coordinates
 origin =
-    Point2d (Length.zero, Length.zero)
+    Point2d (zero, zero)
 
 xy :: Length -> Length -> Point2d coordinates
 xy x y =

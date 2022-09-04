@@ -57,14 +57,14 @@ instance Subtraction Interval Interval where
 instance Multiplication units1 units2 => Multiplication (Quantity units1) (Interval units2) where
     type Product (Quantity units1) (Interval units2) = Interval (Product units1 units2)
     quantity * (Interval (low, high)) =
-        if quantity >= Quantity.zero
+        if quantity >= zero
             then Interval (quantity * low, quantity * high)
             else Interval (quantity * high, quantity * low)
 
 instance Multiplication units1 units2 => Multiplication (Interval units1) (Quantity units2) where
     type Product (Interval units1) (Quantity units2) = Interval (Product units1 units2)
     (Interval (low, high)) * quantity =
-        if quantity >= Quantity.zero
+        if quantity >= zero
             then Interval (low * quantity, high * quantity)
             else Interval (high * quantity, low * quantity)
 
