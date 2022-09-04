@@ -22,6 +22,7 @@ main = do
     Debug.log "Translated point" translatedPoint
     Debug.log "Vector sum" vectorSum
     Debug.log "Cross product" crossProduct
+    Debug.log "Scaled vector" scaledVector
   where
     k = 0.5
     area = Area.squareMeters 3.0
@@ -36,3 +37,4 @@ main = do
     translatedPoint = Point2d.meters 2.0 3.0 + Vector2d.meters 4.0 5.0
     vectorSum = Vector2d.meters 1.0 2.0 + Vector2d.meters 2.0 3.0
     crossProduct = Vector3d.meters 1.0 2.0 3.0 >< Vector3d.meters 4.0 5.0 6.0
+    scaledVector = Length.meters 2.0 * Vector2d.meters 3.0 4.0
