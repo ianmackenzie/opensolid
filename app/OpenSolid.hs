@@ -61,10 +61,10 @@ type Char = Prelude.Char
 type List a = [a]
 
 newtype Count units = Count Prelude.Int
-    deriving (Eq)
+    deriving (Eq, Ord)
 
 newtype Quantity units = Quantity Prelude.Double
-    deriving (Eq)
+    deriving (Eq, Ord)
 
 data Unitless = Unitless
 
