@@ -8,22 +8,34 @@ module Vector2d (
     crossProduct,
 ) where
 
+import qualified Area
 import qualified Length
 import OpenSolid
 import Quantity (Quantity)
 import qualified Quantity
 import qualified String
-import Units (Meters)
+import Units (Meters, SquareMeters)
 
 newtype Vector2d units coordinates = Vector2d (Quantity units, Quantity units)
     deriving (Eq)
 
+instance Show (Vector2d Unitless coordinates) where
+    show =
+        showImpl "Vector2d.xy" identity
+
 instance Show (Vector2d Meters coordinates) where
-    show vector =
-        let (x, y) = components vector
-            xString = String.fromFloat (Length.inMeters x)
-            yString = String.fromFloat (Length.inMeters y)
-         in String.toList ("Vector2d.meters " ++ xString ++ " " ++ yString)
+    show =
+        showImpl "Vector2d.meters" Length.inMeters
+
+instance Show (Vector2d SquareMeters coordinates) where
+    show =
+        showImpl "Vector2d.squareMeters" Area.inSquareMeters
+
+showImpl functionName inCorrespondingUnits vector =
+    let (x, y) = components vector
+        xString = String.fromFloat (inCorrespondingUnits x)
+        yString = String.fromFloat (inCorrespondingUnits y)
+     in String.toList (functionName ++ " " ++ xString ++ " " ++ yString)
 
 instance Negation (Vector2d units coordinates) where
     negate (Vector2d (x, y)) =
