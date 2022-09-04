@@ -24,7 +24,7 @@ toList :: String -> List Char
 toList = Data.Text.unpack
 
 fromInt :: Int -> String
-fromInt n = fromList (Prelude.show n)
+fromInt (Count n) = fromList (Prelude.show n)
 
 fromFloat :: Float -> String
 fromFloat x = fromList (Prelude.show x)
