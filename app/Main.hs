@@ -2,6 +2,7 @@ module Main (main) where
 
 import qualified Area
 import qualified Debug
+import qualified Interval
 import qualified Length
 import OpenSolid
 import qualified Point2d
@@ -23,6 +24,8 @@ main = do
     Debug.log "Vector sum" vectorSum
     Debug.log "Cross product" crossProduct
     Debug.log "Scaled vector" scaledVector
+    Debug.log "Interval difference" intervalDifference
+    Debug.log "Interval product" intervalProduct
   where
     k = 0.5
     area = Area.squareMeters 3.0
@@ -38,3 +41,5 @@ main = do
     vectorSum = Vector2d.meters 1.0 2.0 + Vector2d.meters 2.0 3.0
     crossProduct = Vector3d.meters 1.0 2.0 3.0 >< Vector3d.meters 4.0 5.0 6.0
     scaledVector = Length.meters 2.0 * Vector2d.meters 3.0 4.0
+    intervalDifference = Interval.from (Length.meters 2.0) (Length.meters 3.0) - Length.centimeters 50.0
+    intervalProduct = Length.centimeters 20.0 * Interval.from (Length.meters 2.0) (Length.meters 3.0)

@@ -51,6 +51,7 @@ executable opensolid-hs
         Length
         Area
         Volume
+        Interval
         Vector2d
         Vector3d
         Point2d
