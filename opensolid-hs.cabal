@@ -52,6 +52,7 @@ executable opensolid-hs
         Area
         Volume
         Vector2d
+        Vector3d
         Point2d
     default-extensions:
         NoImplicitPrelude

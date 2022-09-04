@@ -7,6 +7,7 @@ import OpenSolid
 import qualified Point2d
 import qualified Quantity
 import qualified Vector2d
+import qualified Vector3d
 import qualified Volume
 
 main :: IO ()
@@ -20,6 +21,7 @@ main = do
     Debug.log "Square root" squareRoot
     Debug.log "Translated point" translatedPoint
     Debug.log "Vector sum" vectorSum
+    Debug.log "Cross product" crossProduct
   where
     k = 0.5
     area = Area.squareMeters 3.0
@@ -33,3 +35,4 @@ main = do
     squareRoot = sqrt dotProduct
     translatedPoint = Point2d.meters 2.0 3.0 + Vector2d.meters 4.0 5.0
     vectorSum = Vector2d.meters 1.0 2.0 + Vector2d.meters 2.0 3.0
+    crossProduct = Vector3d.meters 1.0 2.0 3.0 >< Vector3d.meters 4.0 5.0 6.0
