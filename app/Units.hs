@@ -11,30 +11,32 @@ class Division units1 units2 where
 class Sqrt units where
     type SquareRoot units
 
--- Unitless 'units' type and related generic arithmetic rules
+-- Unitless type
 
 data Unitless
 
-instance {-# OVERLAPPING #-} Multiplication Unitless Unitless where
+instance Multiplication Unitless Unitless where
     type Product Unitless Unitless = Unitless
 
-instance {-# OVERLAPPING #-} Multiplication Unitless units where
-    type Product Unitless units = units
-
-instance {-# OVERLAPPING #-} Multiplication units Unitless where
-    type Product units Unitless = units
-
-instance {-# OVERLAPPING #-} Division Unitless Unitless where
+instance Division Unitless Unitless where
     type Quotient Unitless Unitless = Unitless
-
-instance {-# OVERLAPPING #-} Division units Unitless where
-    type Quotient units Unitless = units
-
-instance {-# OVERLAPPING #-} Division units units where
-    type Quotient units units = Unitless
 
 instance Sqrt Unitless where
     type SquareRoot Unitless = Unitless
+
+-- Generic units arithmetic rules
+
+instance {-# OVERLAPS #-} Multiplication Unitless units where
+    type Product Unitless units = units
+
+instance {-# OVERLAPS #-} Multiplication units Unitless where
+    type Product units Unitless = units
+
+instance {-# OVERLAPS #-} Division units Unitless where
+    type Quotient units Unitless = units
+
+instance {-# OVERLAPS #-} Division units units where
+    type Quotient units units = Unitless
 
 -- Units
 
