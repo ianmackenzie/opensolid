@@ -61,6 +61,7 @@ executable opensolid-hs
         Vector2d
         Vector3d
         Point2d
+        Point3d
     default-extensions:
         NoImplicitPrelude
         OverloadedStrings
