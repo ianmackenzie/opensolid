@@ -53,8 +53,11 @@ executable opensolid-hs
         Area
         Volume
         Interval
+        Interval.Unsafe
         Direction2d
+        Direction2d.Unsafe
         Direction3d
+        Direction3d.Unsafe
         Vector2d
         Vector3d
         Point2d
