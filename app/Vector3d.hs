@@ -101,6 +101,11 @@ instance Multiplication (Quantity units) (Direction3d coordinates) where
     scale * (Direction3d x y z) =
         Vector3d (scale * x) (scale * y) (scale * z)
 
+instance Multiplication (Direction3d coordinates) (Quantity units) where
+    type Product (Direction3d coordinates) (Quantity units) = Vector3d units coordinates
+    (Direction3d x y z) * scale =
+        Vector3d (x * scale) (y * scale) (z * scale)
+
 instance CrossProduct (Vector3d units) Direction3d where
     type CrossProductResult (Vector3d units) Direction3d = Vector3d units
     (Vector3d vx vy vz) >< (Direction3d dx dy dz) =

@@ -56,6 +56,11 @@ instance Multiplication (Quantity units) (Direction2d coordinates) where
     scale * (Direction2d x y) =
         Vector2d (scale * x) (scale * y)
 
+instance Multiplication (Direction2d coordinates) (Quantity units) where
+    type Product (Direction2d coordinates) (Quantity units) = Vector2d units coordinates
+    (Direction2d x y) * scale =
+        Vector2d (x * scale) (y * scale)
+
 instance Units.Multiplication units1 units2 => Multiplication (Quantity units1) (Vector2d units2 coordinates) where
     type Product (Quantity units1) (Vector2d units2 coordinates) = Vector2d (Units.Product units1 units2) coordinates
     scale * (Vector2d x y) =
