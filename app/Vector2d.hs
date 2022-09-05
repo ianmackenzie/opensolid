@@ -89,8 +89,8 @@ x x =
     Vector2d x zero
 
 y :: Quantity units -> Vector2d units coordinates
-y =
-    Vector2d zero
+y y =
+    Vector2d zero y
 
 xy :: Quantity units -> Quantity units -> Vector2d units coordinates
 xy =

@@ -47,8 +47,8 @@ x x =
     Point2d x zero
 
 y :: Length -> Point2d coordinates
-y =
-    Point2d zero
+y y =
+    Point2d zero y
 
 xy :: Length -> Length -> Point2d coordinates
 xy =

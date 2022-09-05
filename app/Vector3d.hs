@@ -4,8 +4,8 @@ module Vector3d (
     y,
     z,
     xy,
-    yz,
     xz,
+    yz,
     xyz,
     meters,
 ) where
@@ -143,20 +143,20 @@ y y =
     Vector3d zero y zero
 
 z :: Quantity units -> Vector3d units coordinates
-z =
-    Vector3d zero zero
+z z =
+    Vector3d zero zero z
 
 xy :: Quantity units -> Quantity units -> Vector3d units coordinates
 xy x y =
     Vector3d x y zero
 
-yz :: Quantity units -> Quantity units -> Vector3d units coordinates
-yz =
-    Vector3d zero
-
 xz :: Quantity units -> Quantity units -> Vector3d units coordinates
-xz x =
-    Vector3d x zero
+xz x z =
+    Vector3d x zero z
+
+yz :: Quantity units -> Quantity units -> Vector3d units coordinates
+yz y z =
+    Vector3d zero y z
 
 xyz :: Quantity units -> Quantity units -> Quantity units -> Vector3d units coordinates
 xyz =
