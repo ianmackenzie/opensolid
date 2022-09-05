@@ -79,12 +79,12 @@ instance Units.Multiplication units1 units2 => DotProduct (Vector3d units1) (Vec
         x1 * x2 + y1 * y2 + z1 * z2
 
 instance DotProduct (Vector3d units) Direction3d where
-    type DotProductResult (Vector3d units) Direction3d = Quantity (Units.Product units Unitless)
+    type DotProductResult (Vector3d units) Direction3d = Quantity units
     (Vector3d vx vy vz) . (Direction3d dx dy dz) =
         vx * dx + vy * dy + vz * dz
 
 instance DotProduct Direction3d (Vector3d units) where
-    type DotProductResult Direction3d (Vector3d units) = Quantity (Units.Product Unitless units)
+    type DotProductResult Direction3d (Vector3d units) = Quantity units
     (Direction3d dx dy dz) . (Vector3d vx vy vz) =
         dx * vx + dy * vy + dz * vz
 
@@ -97,12 +97,12 @@ instance Units.Multiplication units1 units2 => CrossProduct (Vector3d units1) (V
          in Vector3d x y z
 
 instance Multiplication (Quantity units) (Direction3d coordinates) where
-    type Product (Quantity units) (Direction3d coordinates) = Vector3d (Units.Product units Unitless) coordinates
+    type Product (Quantity units) (Direction3d coordinates) = Vector3d units coordinates
     scale * (Direction3d x y z) =
         Vector3d (scale * x) (scale * y) (scale * z)
 
 instance CrossProduct (Vector3d units) Direction3d where
-    type CrossProductResult (Vector3d units) Direction3d = Vector3d (Units.Product units Unitless)
+    type CrossProductResult (Vector3d units) Direction3d = Vector3d units
     (Vector3d vx vy vz) >< (Direction3d dx dy dz) =
         let x = vy * dz - vz * dy
             y = vz * dx - vx * dz
@@ -110,7 +110,7 @@ instance CrossProduct (Vector3d units) Direction3d where
          in Vector3d x y z
 
 instance CrossProduct Direction3d (Vector3d units) where
-    type CrossProductResult Direction3d (Vector3d units) = Vector3d (Units.Product Unitless units)
+    type CrossProductResult Direction3d (Vector3d units) = Vector3d units
     (Direction3d dx dy dz) >< (Vector3d vx vy vz) =
         let x = dy * vz - dz * vy
             y = dz * vx - dx * vz
