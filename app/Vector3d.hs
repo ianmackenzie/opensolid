@@ -78,12 +78,12 @@ instance Units.Multiplication units1 units2 => DotProduct (Vector3d units1) (Vec
     (Vector3d x1 y1 z1) . (Vector3d x2 y2 z2) =
         x1 * x2 + y1 * y2 + z1 * z2
 
-instance Units.Multiplication units Unitless => DotProduct (Vector3d units) Direction3d where
+instance DotProduct (Vector3d units) Direction3d where
     type DotProductResult (Vector3d units) Direction3d = Quantity (Units.Product units Unitless)
     (Vector3d vx vy vz) . (Direction3d dx dy dz) =
         vx * dx + vy * dy + vz * dz
 
-instance Units.Multiplication Unitless units => DotProduct Direction3d (Vector3d units) where
+instance DotProduct Direction3d (Vector3d units) where
     type DotProductResult Direction3d (Vector3d units) = Quantity (Units.Product Unitless units)
     (Direction3d dx dy dz) . (Vector3d vx vy vz) =
         dx * vx + dy * vy + dz * vz
@@ -96,12 +96,12 @@ instance Units.Multiplication units1 units2 => CrossProduct (Vector3d units1) (V
             z = x1 * y2 - y1 * x2
          in Vector3d x y z
 
-instance Units.Multiplication units Unitless => Multiplication (Quantity units) (Direction3d coordinates) where
+instance Multiplication (Quantity units) (Direction3d coordinates) where
     type Product (Quantity units) (Direction3d coordinates) = Vector3d (Units.Product units Unitless) coordinates
     scale * (Direction3d x y z) =
         Vector3d (scale * x) (scale * y) (scale * z)
 
-instance Units.Multiplication units Unitless => CrossProduct (Vector3d units) Direction3d where
+instance CrossProduct (Vector3d units) Direction3d where
     type CrossProductResult (Vector3d units) Direction3d = Vector3d (Units.Product units Unitless)
     (Vector3d vx vy vz) >< (Direction3d dx dy dz) =
         let x = vy * dz - vz * dy
@@ -109,7 +109,7 @@ instance Units.Multiplication units Unitless => CrossProduct (Vector3d units) Di
             z = vx * dy - vy * dx
          in Vector3d x y z
 
-instance Units.Multiplication Unitless units => CrossProduct Direction3d (Vector3d units) where
+instance CrossProduct Direction3d (Vector3d units) where
     type CrossProductResult Direction3d (Vector3d units) = Vector3d (Units.Product Unitless units)
     (Direction3d dx dy dz) >< (Vector3d vx vy vz) =
         let x = dy * vz - dz * vy

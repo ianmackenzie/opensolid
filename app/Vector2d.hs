@@ -51,7 +51,7 @@ instance Subtraction (Vector2d units) (Vector2d units) where
     (Vector2d x1 y1) - (Vector2d x2 y2) =
         Vector2d (x1 - x2) (y1 - y2)
 
-instance Units.Multiplication units Unitless => Multiplication (Quantity units) (Direction2d coordinates) where
+instance Multiplication (Quantity units) (Direction2d coordinates) where
     type Product (Quantity units) (Direction2d coordinates) = Vector2d (Units.Product units Unitless) coordinates
     scale * (Direction2d x y) =
         Vector2d (scale * x) (scale * y)
