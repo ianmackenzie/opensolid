@@ -11,6 +11,7 @@ import Interval.Unsafe
 import OpenSolid
 import qualified Quantity
 import qualified String
+import qualified Units
 
 instance Show (Quantity units) => Show (Interval units) where
     show (Interval low high) =
@@ -52,22 +53,22 @@ instance Subtraction Interval Interval where
     (Interval low1 high1) - (Interval low2 high2) =
         Interval (low1 - high2) (high1 - low2)
 
-instance Multiplication units1 units2 => Multiplication (Quantity units1) (Interval units2) where
-    type Product (Quantity units1) (Interval units2) = Interval (Product units1 units2)
+instance Units.Multiplication units1 units2 => Multiplication (Quantity units1) (Interval units2) where
+    type Product (Quantity units1) (Interval units2) = Interval (Units.Product units1 units2)
     quantity * (Interval low high) =
         if quantity >= zero
             then Interval (quantity * low) (quantity * high)
             else Interval (quantity * high) (quantity * low)
 
-instance Multiplication units1 units2 => Multiplication (Interval units1) (Quantity units2) where
-    type Product (Interval units1) (Quantity units2) = Interval (Product units1 units2)
+instance Units.Multiplication units1 units2 => Multiplication (Interval units1) (Quantity units2) where
+    type Product (Interval units1) (Quantity units2) = Interval (Units.Product units1 units2)
     (Interval low high) * quantity =
         if quantity >= zero
             then Interval (low * quantity) (high * quantity)
             else Interval (high * quantity) (low * quantity)
 
-instance Multiplication units1 units2 => Multiplication (Interval units1) (Interval units2) where
-    type Product (Interval units1) (Interval units2) = Interval (Product units1 units2)
+instance Units.Multiplication units1 units2 => Multiplication (Interval units1) (Interval units2) where
+    type Product (Interval units1) (Interval units2) = Interval (Units.Product units1 units2)
     (Interval low1 high1) * (Interval low2 high2) =
         let ll = low1 * low2
             lh = low1 * high2

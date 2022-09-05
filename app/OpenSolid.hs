@@ -42,6 +42,8 @@ module OpenSolid (
 ) where
 
 import qualified Data.Text
+import Units (Unitless)
+import qualified Units
 import Prelude (
     Bool (..),
     Eq (..),
@@ -68,8 +70,6 @@ newtype Count units = Count Prelude.Int
 
 newtype Quantity units = Quantity Prelude.Double
     deriving (Eq, Ord)
-
-data Unitless = Unitless
 
 type Int = Count Unitless
 
@@ -137,17 +137,13 @@ class Multiplication lhs rhs where
     type Product lhs rhs
     (*) :: lhs -> rhs -> Product lhs rhs
 
-instance Multiplication Unitless Unitless where
-    type Product Unitless Unitless = Unitless
-    Unitless * Unitless = Unitless
-
-instance Multiplication units1 units2 => Multiplication (Count units1) (Count units2) where
-    type Product (Count units1) (Count units2) = Count (Product units1 units2)
+instance Units.Multiplication units1 units2 => Multiplication (Count units1) (Count units2) where
+    type Product (Count units1) (Count units2) = Count (Units.Product units1 units2)
     (Count n) * (Count m) =
         Count (n Prelude.* m)
 
-instance Multiplication units1 units2 => Multiplication (Quantity units1) (Quantity units2) where
-    type Product (Quantity units1) (Quantity units2) = Quantity (Product units1 units2)
+instance Units.Multiplication units1 units2 => Multiplication (Quantity units1) (Quantity units2) where
+    type Product (Quantity units1) (Quantity units2) = Quantity (Units.Product units1 units2)
     (Quantity x) * (Quantity y) =
         Quantity (x Prelude.* y)
 
@@ -155,12 +151,8 @@ class Division lhs rhs where
     type Quotient lhs rhs
     (/) :: lhs -> rhs -> Quotient lhs rhs
 
-instance Division Unitless Unitless where
-    type Quotient Unitless Unitless = Unitless
-    Unitless / Unitless = Unitless
-
-instance Division units1 units2 => Division (Quantity units1) (Quantity units2) where
-    type Quotient (Quantity units1) (Quantity units2) = Quantity (Quotient units1 units2)
+instance Units.Division units1 units2 => Division (Quantity units1) (Quantity units2) where
+    type Quotient (Quantity units1) (Quantity units2) = Quantity (Units.Quotient units1 units2)
     (Quantity x) / (Quantity y) =
         Quantity (x Prelude./ y)
 
@@ -176,8 +168,8 @@ class Sqrt a where
     type SquareRoot a
     sqrt :: a -> SquareRoot a
 
-instance Sqrt units => Sqrt (Quantity units) where
-    type SquareRoot (Quantity units) = Quantity (SquareRoot units)
+instance Units.Sqrt units => Sqrt (Quantity units) where
+    type SquareRoot (Quantity units) = Quantity (Units.SquareRoot units)
     sqrt (Quantity x) =
         Quantity (Prelude.sqrt x)
 
