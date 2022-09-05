@@ -1,6 +1,5 @@
 module Vector2d (
     Vector2d (..),
-    zero,
     meters,
     determinant,
 ) where
