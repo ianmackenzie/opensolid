@@ -1,5 +1,12 @@
 module Vector3d (
     Vector3d (..),
+    x,
+    y,
+    z,
+    xy,
+    yz,
+    xz,
+    xyz,
     meters,
 ) where
 
@@ -121,6 +128,34 @@ instance CrossProduct Direction3d Direction3d where
 instance Zero (Vector3d units coordinates) where
     zero =
         Vector3d zero zero zero
+
+x :: Quantity units -> Vector3d units coordinates
+x x =
+    Vector3d x zero zero
+
+y :: Quantity units -> Vector3d units coordinates
+y y =
+    Vector3d zero y zero
+
+z :: Quantity units -> Vector3d units coordinates
+z =
+    Vector3d zero zero
+
+xy :: Quantity units -> Quantity units -> Vector3d units coordinates
+xy x y =
+    Vector3d x y zero
+
+yz :: Quantity units -> Quantity units -> Vector3d units coordinates
+yz =
+    Vector3d zero
+
+xz :: Quantity units -> Quantity units -> Vector3d units coordinates
+xz x =
+    Vector3d x zero
+
+xyz :: Quantity units -> Quantity units -> Quantity units -> Vector3d units coordinates
+xyz =
+    Vector3d
 
 meters :: Float -> Float -> Float -> Vector3d Units.Meters coordinates
 meters x y z =

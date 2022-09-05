@@ -1,6 +1,9 @@
 module Point2d (
     Point2d (..),
     origin,
+    x,
+    y,
+    xy,
     meters,
 ) where
 
@@ -38,6 +41,18 @@ instance Subtraction Point2d Point2d where
 origin :: Point2d coordinates
 origin =
     Point2d zero zero
+
+x :: Length -> Point2d coordinates
+x x =
+    Point2d x zero
+
+y :: Length -> Point2d coordinates
+y =
+    Point2d zero
+
+xy :: Length -> Length -> Point2d coordinates
+xy =
+    Point2d
 
 meters :: Float -> Float -> Point2d coordinates
 meters x y =

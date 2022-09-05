@@ -1,5 +1,8 @@
 module Vector2d (
     Vector2d (..),
+    x,
+    y,
+    xy,
     meters,
     determinant,
 ) where
@@ -75,6 +78,18 @@ instance Units.Multiplication units1 units2 => DotProduct (Vector2d units1) (Vec
 instance Zero (Vector2d units coordinates) where
     zero =
         Vector2d zero zero
+
+x :: Quantity units -> Vector2d units coordinates
+x x =
+    Vector2d x zero
+
+y :: Quantity units -> Vector2d units coordinates
+y =
+    Vector2d zero
+
+xy :: Quantity units -> Quantity units -> Vector2d units coordinates
+xy =
+    Vector2d
 
 meters :: Float -> Float -> Vector2d Units.Meters coordinates
 meters x y =
