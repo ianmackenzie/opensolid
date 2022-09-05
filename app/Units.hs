@@ -1,5 +1,7 @@
 module Units where
 
+-- Units arithmetic type classes
+
 class Multiplication units1 units2 where
     type Product units1 units2
 
@@ -9,69 +11,38 @@ class Division units1 units2 where
 class Sqrt units where
     type SquareRoot units
 
--- Unitless
+-- Unitless 'units' type and related generic arithmetic rules
 
 data Unitless
 
-instance Multiplication Unitless Unitless where
+instance {-# OVERLAPPING #-} Multiplication Unitless Unitless where
     type Product Unitless Unitless = Unitless
 
-instance Division Unitless Unitless where
+instance {-# OVERLAPPING #-} Multiplication Unitless units where
+    type Product Unitless units = units
+
+instance {-# OVERLAPPING #-} Multiplication units Unitless where
+    type Product units Unitless = units
+
+instance {-# OVERLAPPING #-} Division Unitless Unitless where
     type Quotient Unitless Unitless = Unitless
+
+instance {-# OVERLAPPING #-} Division units Unitless where
+    type Quotient units Unitless = units
+
+instance {-# OVERLAPPING #-} Division units units where
+    type Quotient units units = Unitless
 
 instance Sqrt Unitless where
     type SquareRoot Unitless = Unitless
 
--- Meters
+-- Units
 
 data Meters
 
-instance Multiplication Unitless Meters where
-    type Product Unitless Meters = Meters
-
-instance Multiplication Meters Unitless where
-    type Product Meters Unitless = Meters
-
-instance Division Meters Meters where
-    type Quotient Meters Meters = Unitless
-
-instance Division Meters Unitless where
-    type Quotient Meters Unitless = Meters
-
--- Square meters
-
 data SquareMeters
 
-instance Multiplication Unitless SquareMeters where
-    type Product Unitless SquareMeters = SquareMeters
-
-instance Multiplication SquareMeters Unitless where
-    type Product SquareMeters Unitless = SquareMeters
-
-instance Division SquareMeters SquareMeters where
-    type Quotient SquareMeters SquareMeters = Unitless
-
-instance Division SquareMeters Unitless where
-    type Quotient SquareMeters Unitless = SquareMeters
-
-instance Sqrt SquareMeters where
-    type SquareRoot SquareMeters = Meters
-
--- Cubic meters
-
 data CubicMeters
-
-instance Multiplication Unitless CubicMeters where
-    type Product Unitless CubicMeters = CubicMeters
-
-instance Multiplication CubicMeters Unitless where
-    type Product CubicMeters Unitless = CubicMeters
-
-instance Division CubicMeters CubicMeters where
-    type Quotient CubicMeters CubicMeters = Unitless
-
-instance Division CubicMeters Unitless where
-    type Quotient CubicMeters Unitless = CubicMeters
 
 -- Products
 
@@ -94,3 +65,8 @@ instance Division CubicMeters SquareMeters where
 
 instance Division CubicMeters Meters where
     type Quotient CubicMeters Meters = SquareMeters
+
+-- Square roots
+
+instance Sqrt SquareMeters where
+    type SquareRoot SquareMeters = Meters
