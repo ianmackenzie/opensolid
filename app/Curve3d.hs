@@ -12,10 +12,8 @@ class IsCurve3d curve where
 data Curve3d coordinates = forall curve. IsCurve3d curve => Curve3d (curve coordinates)
 
 instance IsCurve3d Curve3d where
-    startPoint :: Curve3d coordinates -> Point3d coordinates
     startPoint (Curve3d curve) =
         startPoint curve
 
-    endPoint :: Curve3d coordinates -> Point3d coordinates
     endPoint (Curve3d curve) =
         endPoint curve
