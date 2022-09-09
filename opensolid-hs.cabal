@@ -63,6 +63,7 @@ executable opensolid-hs
         Vector3d
         Point2d
         Point3d
+        Curve3d
     default-extensions:
         NoImplicitPrelude
         OverloadedStrings
@@ -74,3 +75,5 @@ executable opensolid-hs
         MonoLocalBinds
         TypeFamilies
         StandaloneDeriving
+        ExistentialQuantification
+        InstanceSigs
