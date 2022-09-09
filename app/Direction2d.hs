@@ -12,12 +12,6 @@ import Quantity (Quantity)
 import qualified Quantity
 import qualified String
 
-instance Show (Direction2d coordinates) where
-    show (Direction2d x y) =
-        let xString = String.fromFloat x
-            yString = String.fromFloat y
-         in String.toList ("Direction2d (" ++ xString ++ ", " ++ yString ++ ")")
-
 instance Negation (Direction2d coordinates) where
     negate (Direction2d x y) =
         Direction2d (- x) (- y)

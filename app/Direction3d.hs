@@ -13,13 +13,6 @@ import Quantity (Quantity)
 import qualified Quantity
 import qualified String
 
-instance Show (Direction3d coordinates) where
-    show (Direction3d x y z) =
-        let xString = String.fromFloat x
-            yString = String.fromFloat y
-            zString = String.fromFloat z
-         in String.toList ("Direction3d (" ++ xString ++ ", " ++ yString ++ ", " ++ zString ++ ")")
-
 instance Negation (Direction3d coordinates) where
     negate (Direction3d x y z) =
         Direction3d (- x) (- y) (- z)
