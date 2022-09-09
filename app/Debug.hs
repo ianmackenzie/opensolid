@@ -1,6 +1,5 @@
 module Debug (log, toString) where
 
-import qualified Data.Text
 import qualified Data.Text.IO
 import OpenSolid
 import qualified String
@@ -12,4 +11,4 @@ log label value =
 
 toString :: Show a => a -> String
 toString value =
-    Data.Text.pack (show value)
+    String.fromList (show value)
