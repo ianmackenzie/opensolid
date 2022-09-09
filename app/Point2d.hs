@@ -10,6 +10,7 @@ module Point2d (
 import Length (Length, Meters)
 import qualified Length
 import OpenSolid
+import qualified Show
 import qualified String
 import Vector2d (Vector2d (..))
 import qualified Vector2d
@@ -18,10 +19,8 @@ data Point2d coordinates = Point2d Length Length
     deriving (Eq)
 
 instance Show (Point2d coordinates) where
-    show (Point2d x y) =
-        let xString = String.fromFloat (Length.inMeters x)
-            yString = String.fromFloat (Length.inMeters y)
-         in String.toList ("Point2d.meters " ++ xString ++ " " ++ yString)
+    showsPrec precedence (Point2d x y) =
+        Show.primitive precedence "Point2d.meters" [Length.inMeters x, Length.inMeters y]
 
 instance Addition Point2d (Vector2d Meters) where
     type Sum Point2d (Vector2d Meters) = Point2d

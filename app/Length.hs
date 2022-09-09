@@ -12,14 +12,14 @@ module Length (
 import OpenSolid
 import Quantity (Quantity)
 import qualified Quantity
-import qualified String
+import qualified Show
 import Units (Meters)
 
 type Length = Quantity Meters
 
 instance Show Length where
-    show length =
-        String.toList ("Length.meters " ++ String.fromFloat (inMeters length))
+    showsPrec precedence length =
+        Show.primitive precedence "Length.meters" [inMeters length]
 
 meter :: Length
 meter =

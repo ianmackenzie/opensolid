@@ -14,6 +14,7 @@ import qualified Length
 import OpenSolid
 import Quantity (Quantity)
 import qualified Quantity
+import qualified Show
 import qualified String
 import qualified Units
 
@@ -21,21 +22,19 @@ data Vector2d units coordinates = Vector2d (Quantity units) (Quantity units)
     deriving (Eq)
 
 instance Show (Vector2d Unitless coordinates) where
-    show =
+    showsPrec =
         showImpl "Vector2d" identity
 
 instance Show (Vector2d Units.Meters coordinates) where
-    show =
+    showsPrec =
         showImpl "Vector2d.meters" Length.inMeters
 
 instance Show (Vector2d Units.SquareMeters coordinates) where
-    show =
+    showsPrec =
         showImpl "Vector2d.squareMeters" Area.inSquareMeters
 
-showImpl functionName inCorrespondingUnits (Vector2d x y) =
-    let xString = String.fromFloat (inCorrespondingUnits x)
-        yString = String.fromFloat (inCorrespondingUnits y)
-     in String.toList (functionName ++ " " ++ xString ++ " " ++ yString)
+showImpl functionName inCorrespondingUnits precedence (Vector2d x y) =
+    Show.primitive precedence functionName [inCorrespondingUnits x, inCorrespondingUnits y]
 
 instance Negation (Vector2d units coordinates) where
     negate (Vector2d x y) =

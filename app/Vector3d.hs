@@ -20,6 +20,7 @@ import qualified Length as Vector3d
 import OpenSolid
 import Quantity (Quantity)
 import qualified Quantity
+import qualified Show
 import qualified String
 import qualified Units
 
@@ -27,22 +28,19 @@ data Vector3d units coordinates = Vector3d (Quantity units) (Quantity units) (Qu
     deriving (Eq)
 
 instance Show (Vector3d Unitless coordinates) where
-    show =
+    showsPrec =
         showImpl "Vector3d" identity
 
 instance Show (Vector3d Units.Meters coordinates) where
-    show =
+    showsPrec =
         showImpl "Vector3d.meters" Length.inMeters
 
 instance Show (Vector3d Units.SquareMeters coordinates) where
-    show =
+    showsPrec =
         showImpl "Vector3d.squareMeters" Area.inSquareMeters
 
-showImpl functionName inCorrespondingUnits (Vector3d x y z) =
-    let xString = String.fromFloat (inCorrespondingUnits x)
-        yString = String.fromFloat (inCorrespondingUnits y)
-        zString = String.fromFloat (inCorrespondingUnits z)
-     in String.toList (functionName ++ " " ++ xString ++ " " ++ yString ++ " " ++ zString)
+showImpl functionName inCorrespondingUnits precedence (Vector3d x y z) =
+    Show.primitive precedence functionName [inCorrespondingUnits x, inCorrespondingUnits y, inCorrespondingUnits z]
 
 instance Negation (Vector3d units coordinates) where
     negate (Vector3d x y z) =

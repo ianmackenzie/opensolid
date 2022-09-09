@@ -14,6 +14,7 @@ module Point3d (
 import Length (Length, Meters)
 import qualified Length
 import OpenSolid
+import qualified Show
 import qualified String
 import Vector3d (Vector3d (..))
 import qualified Vector3d
@@ -22,11 +23,8 @@ data Point3d coordinates = Point3d Length Length Length
     deriving (Eq)
 
 instance Show (Point3d coordinates) where
-    show (Point3d x y z) =
-        let xString = String.fromFloat (Length.inMeters x)
-            yString = String.fromFloat (Length.inMeters y)
-            zString = String.fromFloat (Length.inMeters z)
-         in String.toList ("Point3d.meters " ++ xString ++ " " ++ yString ++ " " ++ zString)
+    showsPrec precedence (Point3d x y z) =
+        Show.primitive precedence "Point3d.meters" [Length.inMeters x, Length.inMeters y, Length.inMeters z]
 
 instance Addition Point3d (Vector3d Meters) where
     type Sum Point3d (Vector3d Meters) = Point3d

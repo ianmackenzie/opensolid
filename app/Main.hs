@@ -2,14 +2,18 @@ module Main (main) where
 
 import qualified Area
 import qualified Debug
+import qualified Direction2d
 import qualified Interval
 import qualified Length
 import OpenSolid
+import Point2d (Point2d)
 import qualified Point2d
 import qualified Quantity
 import qualified Vector2d
 import qualified Vector3d
 import qualified Volume
+
+data MyPoints = MyPoints (Point2d ()) (Point2d ()) deriving (Show)
 
 main :: IO ()
 main = do
@@ -26,6 +30,9 @@ main = do
     Debug.log "Scaled vector" scaledVector
     Debug.log "Interval difference" intervalDifference
     Debug.log "Interval product" intervalProduct
+    Debug.log "Direction" Direction2d.x
+    Debug.log "Tuple" (Point2d.meters 1.0 2.0, Point2d.meters 3.0 4.0)
+    Debug.log "Custom type" (MyPoints (Point2d.meters 1.0 2.0) (Point2d.meters 3.0 4.0))
   where
     k = 0.5
     area = Area.squareMeters 3.0

@@ -9,14 +9,14 @@ module Area (
 import OpenSolid
 import Quantity (Quantity)
 import qualified Quantity
-import qualified String
+import qualified Show
 import Units (SquareMeters)
 
 type Area = Quantity SquareMeters
 
 instance Show Area where
-    show area =
-        String.toList ("Area.squareMeters " ++ String.fromFloat (inSquareMeters area))
+    showsPrec precedence area =
+        Show.primitive precedence "Area.squareMeters" [inSquareMeters area]
 
 squareMeter :: Area
 squareMeter =

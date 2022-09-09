@@ -14,13 +14,14 @@ import qualified Length
 import OpenSolid
 import Quantity (Quantity)
 import qualified Quantity
-import qualified String
+import qualified Show
 import Units (CubicMeters)
 
 type Volume = Quantity CubicMeters
 
 instance Show Volume where
-    show volume = String.toList ("Volume.cubicMeters " ++ String.fromFloat (inCubicMeters volume))
+    showsPrec precedence volume =
+        Show.primitive precedence "Volume.cubicMeters" [inCubicMeters volume]
 
 cubicMeter :: Volume
 cubicMeter = Quantity.baseUnit

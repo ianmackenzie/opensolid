@@ -13,12 +13,6 @@ import qualified Quantity
 import qualified String
 import qualified Units
 
-instance Show (Quantity units) => Show (Interval units) where
-    show (Interval low high) =
-        let lowString = String.fromList (show low)
-            highString = String.fromList (show high)
-         in String.toList ("Interval.from (" ++ lowString ++ ") (" ++ highString ++ ")")
-
 instance Negation (Interval units) where
     negate (Interval low high) =
         Interval (- high) (- low)

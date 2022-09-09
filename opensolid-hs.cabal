@@ -44,6 +44,7 @@ executable opensolid-hs
     default-language: Haskell2010
     other-modules:
         OpenSolid
+        Show
         Debug
         String
         List
@@ -72,3 +73,4 @@ executable opensolid-hs
         RebindableSyntax
         MonoLocalBinds
         TypeFamilies
+        StandaloneDeriving
