@@ -1,5 +1,6 @@
 module BoundingBox3d (
     BoundingBox3d (..),
+    singleton,
     hull2,
     hull3,
     hull4,
@@ -13,6 +14,14 @@ import Point3d (Point3d (..))
 import Units (Meters)
 
 data BoundingBox3d coordinates = BoundingBox3d (Interval Meters) (Interval Meters) (Interval Meters)
+
+singleton :: Point3d coordinates -> BoundingBox3d coordinates
+singleton point =
+    let (Point3d x y z) = point
+        xInterval = Interval.singleton x
+        yInterval = Interval.singleton y
+        zInterval = Interval.singleton z
+     in BoundingBox3d xInterval yInterval zInterval
 
 hull2 :: Point3d coordinates -> Point3d coordinates -> BoundingBox3d coordinates
 hull2 p1 p2 =
