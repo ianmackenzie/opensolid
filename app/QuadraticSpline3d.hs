@@ -18,10 +18,9 @@ instance IsCurve3d QuadraticSpline3d where
         p3
 
     pointOn (QuadraticSpline3d p1 p2 p3) t =
-        Point3d.interpolateFrom
-            (Point3d.interpolateFrom p1 p2 t)
-            (Point3d.interpolateFrom p2 p3 t)
-            t
+        let q1 = Point3d.interpolateFrom p1 p2 t
+            q2 = Point3d.interpolateFrom p2 p3 t
+         in Point3d.interpolateFrom q1 q2 t
 
     bisect (QuadraticSpline3d p1 p2 p3) =
         let q1 = Point3d.midpoint p1 p2
