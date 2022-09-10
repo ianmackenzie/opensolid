@@ -14,6 +14,40 @@ import Vector3d (Vector3d (..))
 
 data VectorBoundingBox3d units coordinates = VectorBoundingBox3d (Interval units) (Interval units) (Interval units)
 
+instance Negation (VectorBoundingBox3d units coordinates) where
+    negate (VectorBoundingBox3d x y z) =
+        VectorBoundingBox3d (- x) (- y) (- z)
+
+instance Addition (VectorBoundingBox3d units) (Vector3d units) where
+    type Sum (VectorBoundingBox3d units) (Vector3d units) = VectorBoundingBox3d units
+    (VectorBoundingBox3d x1 y1 z1) + (Vector3d x2 y2 z2) =
+        VectorBoundingBox3d (x1 + x2) (y1 + y2) (z1 + z2)
+
+instance Addition (Vector3d units) (VectorBoundingBox3d units) where
+    type Sum (Vector3d units) (VectorBoundingBox3d units) = VectorBoundingBox3d units
+    (Vector3d x1 y1 z1) + (VectorBoundingBox3d x2 y2 z2) =
+        VectorBoundingBox3d (x1 + x2) (y1 + y2) (z1 + z2)
+
+instance Addition (VectorBoundingBox3d units) (VectorBoundingBox3d units) where
+    type Sum (VectorBoundingBox3d units) (VectorBoundingBox3d units) = VectorBoundingBox3d units
+    (VectorBoundingBox3d x1 y1 z1) + (VectorBoundingBox3d x2 y2 z2) =
+        VectorBoundingBox3d (x1 + x2) (y1 + y2) (z1 + z2)
+
+instance Subtraction (VectorBoundingBox3d units) (Vector3d units) where
+    type Difference (VectorBoundingBox3d units) (Vector3d units) = VectorBoundingBox3d units
+    (VectorBoundingBox3d x1 y1 z1) - (Vector3d x2 y2 z2) =
+        VectorBoundingBox3d (x1 - x2) (y1 - y2) (z1 - z2)
+
+instance Subtraction (Vector3d units) (VectorBoundingBox3d units) where
+    type Difference (Vector3d units) (VectorBoundingBox3d units) = VectorBoundingBox3d units
+    (Vector3d x1 y1 z1) - (VectorBoundingBox3d x2 y2 z2) =
+        VectorBoundingBox3d (x1 - x2) (y1 - y2) (z1 - z2)
+
+instance Subtraction (VectorBoundingBox3d units) (VectorBoundingBox3d units) where
+    type Difference (VectorBoundingBox3d units) (VectorBoundingBox3d units) = VectorBoundingBox3d units
+    (VectorBoundingBox3d x1 y1 z1) - (VectorBoundingBox3d x2 y2 z2) =
+        VectorBoundingBox3d (x1 - x2) (y1 - y2) (z1 - z2)
+
 singleton :: Vector3d units coordinates -> VectorBoundingBox3d units coordinates
 singleton point =
     let (Vector3d x y z) = point
