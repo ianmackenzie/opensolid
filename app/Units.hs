@@ -26,16 +26,16 @@ instance Sqrt Unitless where
 
 -- Generic units arithmetic rules
 
-instance {-# OVERLAPS #-} Multiplication Unitless units where
+instance {-# INCOHERENT #-} Multiplication Unitless units where
     type Product Unitless units = units
 
-instance {-# OVERLAPS #-} Multiplication units Unitless where
+instance {-# INCOHERENT #-} Multiplication units Unitless where
     type Product units Unitless = units
 
-instance {-# OVERLAPS #-} Division units Unitless where
+instance {-# INCOHERENT #-} Division units Unitless where
     type Quotient units Unitless = units
 
-instance {-# OVERLAPS #-} Division units units where
+instance {-# INCOHERENT #-} Division units units where
     type Quotient units units = Unitless
 
 -- Units
