@@ -7,6 +7,7 @@ module Point2d (
     meters,
     midpoint,
     interpolateFrom,
+    distanceFrom,
 ) where
 
 import Length (Length, Meters)
@@ -75,3 +76,9 @@ midpoint p1 p2 =
         x = Quantity.midpoint x1 x2
         y = Quantity.midpoint y1 y2
      in Point2d x y
+
+distanceFrom :: Point2d coordinates -> Point2d coordinates -> Length
+distanceFrom p1 p2 =
+    let (Point2d x1 y1) = p1
+        (Point2d x2 y2) = p2
+     in Quantity.hypot2 (x2 - x1) (y2 - y1)

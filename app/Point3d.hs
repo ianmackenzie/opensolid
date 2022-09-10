@@ -11,6 +11,7 @@ module Point3d (
     meters,
     midpoint,
     interpolateFrom,
+    distanceFrom,
 ) where
 
 import Length (Length, Meters)
@@ -97,3 +98,9 @@ midpoint p1 p2 =
         y = Quantity.midpoint y1 y2
         z = Quantity.midpoint z1 z2
      in Point3d x y z
+
+distanceFrom :: Point3d coordinates -> Point3d coordinates -> Length
+distanceFrom p1 p2 =
+    let (Point3d x1 y1 z1) = p1
+        (Point3d x2 y2 z2) = p2
+     in Quantity.hypot3 (x2 - x1) (y2 - y1) (z2 - z1)
