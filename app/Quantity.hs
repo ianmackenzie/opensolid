@@ -5,9 +5,12 @@ module Quantity (
     inBaseUnits,
     interpolateFrom,
     midpoint,
+    hypot2,
+    hypot3,
 ) where
 
 import OpenSolid
+import qualified Prelude
 
 baseUnits :: Float -> Quantity units
 baseUnits (Quantity value) =
@@ -30,3 +33,11 @@ interpolateFrom a b t =
 midpoint :: Quantity units -> Quantity units -> Quantity units
 midpoint a b =
     a + 0.5 * (b - a)
+
+hypot2 :: Quantity units -> Quantity units -> Quantity units
+hypot2 (Quantity a) (Quantity b) =
+    Quantity (Prelude.sqrt (a Prelude.* a Prelude.+ b Prelude.* b))
+
+hypot3 :: Quantity units -> Quantity units -> Quantity units -> Quantity units
+hypot3 (Quantity a) (Quantity b) (Quantity c) =
+    Quantity (Prelude.sqrt (a Prelude.* a Prelude.+ b Prelude.* b Prelude.+ c Prelude.* c))
