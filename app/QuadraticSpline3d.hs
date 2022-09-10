@@ -22,6 +22,9 @@ instance IsCurve3d QuadraticSpline3d where
             q2 = Point3d.interpolateFrom p2 p3 t
          in Point3d.interpolateFrom q1 q2 t
 
+    reverse (QuadraticSpline3d p1 p2 p3) =
+        QuadraticSpline3d p3 p2 p1
+
     bisect (QuadraticSpline3d p1 p2 p3) =
         let q1 = Point3d.midpoint p1 p2
             q2 = Point3d.midpoint p2 p3
