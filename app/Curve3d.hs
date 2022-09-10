@@ -3,6 +3,7 @@ module Curve3d (
     IsCurve3d (..),
 ) where
 
+import BoundingBox3d (BoundingBox3d)
 import OpenSolid
 import Point3d (Point3d)
 
@@ -12,6 +13,7 @@ class IsCurve3d curve where
     pointOn :: curve coordinates -> Float -> Point3d coordinates
     reverse :: curve coordinates -> curve coordinates
     bisect :: curve coordinates -> (curve coordinates, curve coordinates)
+    boundingBox :: curve coordinates -> BoundingBox3d coordinates
 
 data Curve3d coordinates = forall curve. IsCurve3d curve => Curve3d (curve coordinates)
 
@@ -31,3 +33,6 @@ instance IsCurve3d Curve3d where
     bisect (Curve3d curve) =
         let (curve1, curve2) = bisect curve
          in (Curve3d curve1, Curve3d curve2)
+
+    boundingBox (Curve3d curve) =
+        boundingBox curve

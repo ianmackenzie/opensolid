@@ -1,5 +1,6 @@
 module QuadraticSpline3d (QuadraticSpline3d (..)) where
 
+import qualified BoundingBox3d
 import Curve3d (IsCurve3d (..))
 import Point3d (Point3d)
 import qualified Point3d
@@ -30,3 +31,6 @@ instance IsCurve3d QuadraticSpline3d where
             q2 = Point3d.midpoint p2 p3
             r = Point3d.midpoint q1 q2
          in (QuadraticSpline3d p1 q1 r, QuadraticSpline3d r q2 p3)
+
+    boundingBox (QuadraticSpline3d p1 p2 p3) =
+        BoundingBox3d.hull3 p1 p2 p3
