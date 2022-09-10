@@ -18,10 +18,10 @@ hull2 :: Point3d coordinates -> Point3d coordinates -> BoundingBox3d coordinates
 hull2 p1 p2 =
     let (Point3d x1 y1 z1) = p1
         (Point3d x2 y2 z2) = p2
-        x = Interval.from x1 x2
-        y = Interval.from y1 y2
-        z = Interval.from z1 z2
-     in BoundingBox3d x y z
+        xInterval = Interval.from x1 x2
+        yInterval = Interval.from y1 y2
+        zInterval = Interval.from z1 z2
+     in BoundingBox3d xInterval yInterval zInterval
 
 hull3 :: Point3d coordinates -> Point3d coordinates -> Point3d coordinates -> BoundingBox3d coordinates
 hull3 p1 p2 p3 =
@@ -34,10 +34,10 @@ hull3 p1 p2 p3 =
         maxY = max (max y1 y2) y3
         minZ = min (min z1 z2) z3
         maxZ = max (max z1 z2) z3
-        x = Interval minX maxX
-        y = Interval minY maxY
-        z = Interval minZ maxZ
-     in BoundingBox3d x y z
+        xInterval = Interval minX maxX
+        yInterval = Interval minY maxY
+        zInterval = Interval minZ maxZ
+     in BoundingBox3d xInterval yInterval zInterval
 
 hull4 :: Point3d coordinates -> Point3d coordinates -> Point3d coordinates -> Point3d coordinates -> BoundingBox3d coordinates
 hull4 p1 p2 p3 p4 =
@@ -51,7 +51,7 @@ hull4 p1 p2 p3 p4 =
         maxY = max (max (max y1 y2) y3) y4
         minZ = min (min (min z1 z2) z3) z4
         maxZ = max (max (max z1 z2) z3) z4
-        x = Interval minX maxX
-        y = Interval minY maxY
-        z = Interval minZ maxZ
-     in BoundingBox3d x y z
+        xInterval = Interval minX maxX
+        yInterval = Interval minY maxY
+        zInterval = Interval minZ maxZ
+     in BoundingBox3d xInterval yInterval zInterval
