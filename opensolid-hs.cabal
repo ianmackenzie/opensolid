@@ -64,6 +64,7 @@ executable opensolid-hs
         Point2d
         Point3d
         Curve3d
+        QuadraticSpline3d
     default-extensions:
         NoImplicitPrelude
         OverloadedStrings
