@@ -49,6 +49,7 @@ executable opensolid-hs
         String
         List
         Units
+        Verdict
         Quantity
         Length
         Area

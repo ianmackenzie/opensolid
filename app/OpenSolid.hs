@@ -2,6 +2,7 @@ module OpenSolid (
     String,
     Char,
     List,
+    Boolean (..),
     Count (..),
     Quantity (..),
     Unitless (..),
@@ -29,9 +30,6 @@ module OpenSolid (
     identity,
     Bool (..),
     Ord (..),
-    (&&),
-    (||),
-    not,
     (|>),
     (<|),
     (>>=),
@@ -44,6 +42,7 @@ module OpenSolid (
 import qualified Data.Text
 import Units (Unitless)
 import qualified Units
+import Verdict
 import Prelude (
     Bool (..),
     Eq (..),
@@ -51,11 +50,8 @@ import Prelude (
     Ord (..),
     Show (..),
     fail,
-    not,
-    (&&),
     (>>),
     (>>=),
-    (||),
  )
 import qualified Prelude
 
@@ -64,6 +60,39 @@ type String = Data.Text.Text
 type Char = Prelude.Char
 
 type List a = [a]
+
+class Boolean b where
+    not :: b -> b
+    (&&) :: b -> b -> b
+    (||) :: b -> b -> b
+
+instance Boolean Bool where
+    not = Prelude.not
+    (&&) = (Prelude.&&)
+    (||) = (Prelude.||)
+
+instance Boolean Verdict where
+    not verdict =
+        case verdict of
+            Definitely True -> Definitely False
+            Definitely False -> Definitely True
+            Indeterminate -> Indeterminate
+
+    v1 && v2 =
+        case (v1, v2) of
+            (Definitely True, _) -> v2
+            (_, Definitely True) -> v1
+            (Definitely False, _) -> Definitely False
+            (_, Definitely False) -> Definitely False
+            (Indeterminate, Indeterminate) -> Indeterminate
+
+    v1 || v2 =
+        case (v1, v2) of
+            (Definitely True, _) -> Definitely True
+            (_, Definitely True) -> Definitely True
+            (Definitely False, _) -> v2
+            (_, Definitely False) -> v1
+            (Indeterminate, Indeterminate) -> Indeterminate
 
 newtype Count units = Count Prelude.Int
     deriving (Eq, Ord)
