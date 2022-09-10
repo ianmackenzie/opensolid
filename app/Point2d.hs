@@ -5,11 +5,14 @@ module Point2d (
     y,
     xy,
     meters,
+    midpoint,
+    interpolateFrom,
 ) where
 
 import Length (Length, Meters)
 import qualified Length
 import OpenSolid
+import qualified Quantity
 import qualified Show
 import qualified String
 import Vector2d (Vector2d (..))
@@ -56,3 +59,19 @@ xy =
 meters :: Float -> Float -> Point2d coordinates
 meters x y =
     Point2d (Length.meters x) (Length.meters y)
+
+interpolateFrom :: Point2d coordinates -> Point2d coordinates -> Float -> Point2d coordinates
+interpolateFrom p1 p2 t =
+    let (Point2d x1 y1) = p1
+        (Point2d x2 y2) = p2
+        x = Quantity.interpolateFrom x1 x2 t
+        y = Quantity.interpolateFrom y1 y2 t
+     in Point2d x y
+
+midpoint :: Point2d coordinates -> Point2d coordinates -> Point2d coordinates
+midpoint p1 p2 =
+    let (Point2d x1 y1) = p1
+        (Point2d x2 y2) = p2
+        x = Quantity.midpoint x1 x2
+        y = Quantity.midpoint y1 y2
+     in Point2d x y

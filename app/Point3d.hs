@@ -9,11 +9,14 @@ module Point3d (
     yz,
     xyz,
     meters,
+    midpoint,
+    interpolateFrom,
 ) where
 
 import Length (Length, Meters)
 import qualified Length
 import OpenSolid
+import qualified Quantity
 import qualified Show
 import qualified String
 import Vector3d (Vector3d (..))
@@ -76,3 +79,21 @@ xyz =
 meters :: Float -> Float -> Float -> Point3d coordinates
 meters x y z =
     Point3d (Length.meters x) (Length.meters y) (Length.meters z)
+
+interpolateFrom :: Point3d coordinates -> Point3d coordinates -> Float -> Point3d coordinates
+interpolateFrom p1 p2 t =
+    let (Point3d x1 y1 z1) = p1
+        (Point3d x2 y2 z2) = p2
+        x = Quantity.interpolateFrom x1 x2 t
+        y = Quantity.interpolateFrom y1 y2 t
+        z = Quantity.interpolateFrom z1 z2 t
+     in Point3d x y z
+
+midpoint :: Point3d coordinates -> Point3d coordinates -> Point3d coordinates
+midpoint p1 p2 =
+    let (Point3d x1 y1 z1) = p1
+        (Point3d x2 y2 z2) = p2
+        x = Quantity.midpoint x1 x2
+        y = Quantity.midpoint y1 y2
+        z = Quantity.midpoint z1 z2
+     in Point3d x y z
