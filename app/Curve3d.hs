@@ -10,7 +10,7 @@ import Point3d (Point3d)
 class IsCurve3d curve where
     startPoint :: curve coordinates -> Point3d coordinates
     endPoint :: curve coordinates -> Point3d coordinates
-    pointOn :: curve coordinates -> Float -> Point3d coordinates
+    evaluate :: curve coordinates -> Float -> Point3d coordinates
     reverse :: curve coordinates -> curve coordinates
     bisect :: curve coordinates -> (curve coordinates, curve coordinates)
     boundingBox :: curve coordinates -> BoundingBox3d coordinates
@@ -24,8 +24,8 @@ instance IsCurve3d Curve3d where
     endPoint (Curve3d curve) =
         endPoint curve
 
-    pointOn (Curve3d curve) t =
-        pointOn curve t
+    evaluate (Curve3d curve) t =
+        evaluate curve t
 
     reverse (Curve3d curve) =
         Curve3d (reverse curve)
