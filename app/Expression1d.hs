@@ -1,5 +1,5 @@
 module Expression1d (
-    Expression1d,
+    Expression1d (Expression1d),
     bounds,
     derivative,
     zero,
