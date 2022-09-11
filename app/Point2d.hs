@@ -43,15 +43,15 @@ instance Subtraction Point2d Point2d where
 
 origin :: Point2d coordinates
 origin =
-    Point2d zero zero
+    Point2d Length.zero Length.zero
 
 x :: Length -> Point2d coordinates
 x x =
-    Point2d x zero
+    Point2d x Length.zero
 
 y :: Length -> Point2d coordinates
 y y =
-    Point2d zero y
+    Point2d Length.zero y
 
 xy :: Length -> Length -> Point2d coordinates
 xy =

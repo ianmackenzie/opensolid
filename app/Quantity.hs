@@ -1,5 +1,6 @@
 module Quantity (
     Quantity,
+    zero,
     baseUnit,
     baseUnits,
     inBaseUnits,
@@ -11,6 +12,10 @@ module Quantity (
 
 import OpenSolid
 import qualified Prelude
+
+zero :: Quantity units
+zero =
+    let (Quantity x) = 0.0 in Quantity x
 
 baseUnits :: Float -> Quantity units
 baseUnits (Quantity value) =

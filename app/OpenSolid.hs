@@ -8,7 +8,6 @@ module OpenSolid (
     Unitless (..),
     Int,
     Float,
-    Zero (..),
     Negation (..),
     Addition (..),
     Subtraction (..),
@@ -30,7 +29,9 @@ module OpenSolid (
     identity,
     otherwise,
     Bool (..),
-    Ord (..),
+    Comparison (..),
+    min,
+    max,
     (|>),
     (<|),
     (>>=),
@@ -48,7 +49,7 @@ import Prelude (
     Bool (..),
     Eq (..),
     IO,
-    Ord (..),
+    Ord (max, min),
     Show (..),
     fail,
     otherwise,
@@ -96,11 +97,18 @@ instance BooleanLogic Verdict where
             (_, Definitely False) -> v1
             (Indeterminate, Indeterminate) -> Indeterminate
 
+class Comparison lhs rhs where
+    type ComparisonResult lhs rhs
+    (<) :: lhs units -> rhs units -> ComparisonResult lhs rhs
+    (<=) :: lhs units -> rhs units -> ComparisonResult lhs rhs
+    (>=) :: lhs units -> rhs units -> ComparisonResult lhs rhs
+    (>) :: lhs units -> rhs units -> ComparisonResult lhs rhs
+
 newtype Count units = Count Prelude.Int
-    deriving (Eq, Ord)
+    deriving (Eq, Prelude.Ord)
 
 newtype Quantity units = Quantity Prelude.Double
-    deriving (Eq, Ord)
+    deriving (Eq, Prelude.Ord)
 
 type Int = Count Unitless
 
@@ -114,16 +122,35 @@ instance Show Float where
     show (Quantity x) =
         show x
 
-class Zero a where
-    zero :: a
+instance Comparison Count Count where
+    type ComparisonResult Count Count = Bool
 
-instance Zero (Count units) where
-    zero =
-        let (Count n) = 0 in Count n
+    (Count n) < (Count m) =
+        n Prelude.< m
 
-instance Zero (Quantity units) where
-    zero =
-        let (Quantity x) = 0.0 in Quantity x
+    (Count n) <= (Count m) =
+        n Prelude.<= m
+
+    (Count n) >= (Count m) =
+        n Prelude.>= m
+
+    (Count n) > (Count m) =
+        n Prelude.> m
+
+instance Comparison Quantity Quantity where
+    type ComparisonResult Quantity Quantity = Bool
+
+    (Quantity x) < (Quantity y) =
+        x Prelude.< y
+
+    (Quantity x) <= (Quantity y) =
+        x Prelude.<= y
+
+    (Quantity x) >= (Quantity y) =
+        x Prelude.>= y
+
+    (Quantity x) > (Quantity y) =
+        x Prelude.> y
 
 class Negation a where
     negate :: a -> a

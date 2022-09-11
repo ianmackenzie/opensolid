@@ -1,5 +1,6 @@
 module Vector3d (
     Vector3d (..),
+    zero,
     x,
     y,
     z,
@@ -128,33 +129,33 @@ instance CrossProduct Direction3d Direction3d where
             (z1 * x2 - x1 * z2)
             (x1 * y2 - y1 * x2)
 
-instance Zero (Vector3d units coordinates) where
-    zero =
-        Vector3d zero zero zero
+zero :: Vector3d units coordinates
+zero =
+    Vector3d Quantity.zero Quantity.zero Quantity.zero
 
 x :: Quantity units -> Vector3d units coordinates
 x x =
-    Vector3d x zero zero
+    Vector3d x Quantity.zero Quantity.zero
 
 y :: Quantity units -> Vector3d units coordinates
 y y =
-    Vector3d zero y zero
+    Vector3d Quantity.zero y Quantity.zero
 
 z :: Quantity units -> Vector3d units coordinates
 z z =
-    Vector3d zero zero z
+    Vector3d Quantity.zero Quantity.zero z
 
 xy :: Quantity units -> Quantity units -> Vector3d units coordinates
 xy x y =
-    Vector3d x y zero
+    Vector3d x y Quantity.zero
 
 xz :: Quantity units -> Quantity units -> Vector3d units coordinates
 xz x z =
-    Vector3d x zero z
+    Vector3d x Quantity.zero z
 
 yz :: Quantity units -> Quantity units -> Vector3d units coordinates
 yz y z =
-    Vector3d zero y z
+    Vector3d Quantity.zero y z
 
 xyz :: Quantity units -> Quantity units -> Quantity units -> Vector3d units coordinates
 xyz =

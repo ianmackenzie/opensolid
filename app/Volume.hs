@@ -23,6 +23,10 @@ instance Show Volume where
     showsPrec precedence volume =
         Show.primitive precedence "Volume.cubicMeters" [inCubicMeters volume]
 
+zero :: Volume
+zero =
+    Quantity.zero
+
 cubicMeter :: Volume
 cubicMeter = Quantity.baseUnit
 

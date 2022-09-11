@@ -1,6 +1,7 @@
 module Area (
     Area,
     SquareMeters,
+    zero,
     squareMeters,
     inSquareMeters,
     squareMeter,
@@ -17,6 +18,10 @@ type Area = Quantity SquareMeters
 instance Show Area where
     showsPrec precedence area =
         Show.primitive precedence "Area.squareMeters" [inSquareMeters area]
+
+zero :: Area
+zero =
+    Quantity.zero
 
 squareMeter :: Area
 squareMeter =

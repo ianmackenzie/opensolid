@@ -47,31 +47,31 @@ instance Subtraction Point3d Point3d where
 
 origin :: Point3d coordinates
 origin =
-    Point3d zero zero zero
+    Point3d Length.zero Length.zero Length.zero
 
 x :: Length -> Point3d coordinates
 x x =
-    Point3d x zero zero
+    Point3d x Length.zero Length.zero
 
 y :: Length -> Point3d coordinates
 y y =
-    Point3d zero y zero
+    Point3d Length.zero y Length.zero
 
 z :: Length -> Point3d coordinates
 z z =
-    Point3d zero zero z
+    Point3d Length.zero Length.zero z
 
 xy :: Length -> Length -> Point3d coordinates
 xy x y =
-    Point3d x y zero
+    Point3d x y Length.zero
 
 xz :: Length -> Length -> Point3d coordinates
 xz x z =
-    Point3d x zero z
+    Point3d x Length.zero z
 
 yz :: Length -> Length -> Point3d coordinates
 yz y z =
-    Point3d zero y z
+    Point3d Length.zero y z
 
 xyz :: Length -> Length -> Length -> Point3d coordinates
 xyz =

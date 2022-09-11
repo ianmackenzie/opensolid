@@ -12,6 +12,31 @@ import OpenSolid
 import qualified Quantity
 import qualified String
 import qualified Units
+import Verdict (Verdict)
+import qualified Verdict
+
+instance Comparison Interval Interval where
+    type ComparisonResult Interval Interval = Verdict
+
+    (Interval low1 high1) < (Interval low2 high2)
+        | high1 < low2 = Verdict.Definitely True
+        | low1 >= high2 = Verdict.Definitely False
+        | otherwise = Verdict.Indeterminate
+
+    (Interval low1 high1) <= (Interval low2 high2)
+        | high1 <= low2 = Verdict.Definitely True
+        | low1 > high2 = Verdict.Definitely False
+        | otherwise = Verdict.Indeterminate
+
+    (Interval low1 high1) >= (Interval low2 high2)
+        | low1 >= high2 = Verdict.Definitely True
+        | high1 < low2 = Verdict.Definitely False
+        | otherwise = Verdict.Indeterminate
+
+    (Interval low1 high1) > (Interval low2 high2)
+        | low1 > high2 = Verdict.Definitely True
+        | high1 <= low2 = Verdict.Definitely False
+        | otherwise = Verdict.Indeterminate
 
 instance Negation (Interval units) where
     negate (Interval low high) =
@@ -50,14 +75,14 @@ instance Subtraction Interval Interval where
 instance Units.Multiplication units1 units2 => Multiplication (Quantity units1) (Interval units2) where
     type Product (Quantity units1) (Interval units2) = Interval (Units.Product units1 units2)
     quantity * (Interval low high) =
-        if quantity >= zero
+        if quantity >= Quantity.zero
             then Interval (quantity * low) (quantity * high)
             else Interval (quantity * high) (quantity * low)
 
 instance Units.Multiplication units1 units2 => Multiplication (Interval units1) (Quantity units2) where
     type Product (Interval units1) (Quantity units2) = Interval (Units.Product units1 units2)
     (Interval low high) * quantity =
-        if quantity >= zero
+        if quantity >= Quantity.zero
             then Interval (low * quantity) (high * quantity)
             else Interval (high * quantity) (low * quantity)
 

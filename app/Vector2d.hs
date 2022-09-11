@@ -1,5 +1,6 @@
 module Vector2d (
     Vector2d (..),
+    zero,
     x,
     y,
     xy,
@@ -79,17 +80,17 @@ instance Units.Multiplication units1 units2 => DotProduct (Vector2d units1) (Vec
     (Vector2d x1 y1) . (Vector2d x2 y2) =
         x1 * x2 + y1 * y2
 
-instance Zero (Vector2d units coordinates) where
-    zero =
-        Vector2d zero zero
+zero :: Vector2d units coordinates
+zero =
+    Vector2d Quantity.zero Quantity.zero
 
 x :: Quantity units -> Vector2d units coordinates
 x x =
-    Vector2d x zero
+    Vector2d x Quantity.zero
 
 y :: Quantity units -> Vector2d units coordinates
 y y =
-    Vector2d zero y
+    Vector2d Quantity.zero y
 
 xy :: Quantity units -> Quantity units -> Vector2d units coordinates
 xy =

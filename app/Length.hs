@@ -1,6 +1,7 @@
 module Length (
     Length,
     Meters,
+    zero,
     meter,
     centimeter,
     meters,
@@ -20,6 +21,10 @@ type Length = Quantity Meters
 instance Show Length where
     showsPrec precedence length =
         Show.primitive precedence "Length.meters" [inMeters length]
+
+zero :: Length
+zero =
+    Quantity.zero
 
 meter :: Length
 meter =
