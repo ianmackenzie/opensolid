@@ -27,7 +27,9 @@ module OpenSolid (
     float,
     ifThenElse,
     identity,
+    always,
     otherwise,
+    undefined,
     Bool (..),
     (|>),
     (<|),
@@ -49,6 +51,7 @@ import Prelude (
     Show (..),
     fail,
     otherwise,
+    undefined,
     (>>),
     (>>=),
  )
@@ -200,6 +203,10 @@ ifThenElse condition whenTrue whenFalse =
 identity :: a -> a
 identity =
     Prelude.id
+
+always :: a -> b -> a
+always =
+    Prelude.const
 
 (|>) :: a -> (a -> b) -> b
 (|>) value function =
