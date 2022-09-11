@@ -63,7 +63,7 @@ executable opensolid-hs
         Vector3d
         Point2d
         Point3d
-        VectorBoundingBox3d
+        VectorBox3d
         BoundingBox3d
         Curve3d
         Line3d
