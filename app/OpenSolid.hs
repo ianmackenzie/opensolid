@@ -2,7 +2,7 @@ module OpenSolid (
     String,
     Char,
     List,
-    Boolean (..),
+    BooleanLogic (..),
     Count (..),
     Quantity (..),
     Unitless (..),
@@ -61,17 +61,17 @@ type Char = Prelude.Char
 
 type List a = [a]
 
-class Boolean b where
+class BooleanLogic b where
     not :: b -> b
     (&&) :: b -> b -> b
     (||) :: b -> b -> b
 
-instance Boolean Bool where
+instance BooleanLogic Bool where
     not = Prelude.not
     (&&) = (Prelude.&&)
     (||) = (Prelude.||)
 
-instance Boolean Verdict where
+instance BooleanLogic Verdict where
     not verdict =
         case verdict of
             Definitely True -> Definitely False
