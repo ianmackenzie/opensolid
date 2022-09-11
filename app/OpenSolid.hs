@@ -28,6 +28,7 @@ module OpenSolid (
     float,
     ifThenElse,
     identity,
+    otherwise,
     Bool (..),
     Ord (..),
     (|>),
@@ -50,6 +51,7 @@ import Prelude (
     Ord (..),
     Show (..),
     fail,
+    otherwise,
     (>>),
     (>>=),
  )
