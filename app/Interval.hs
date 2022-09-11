@@ -12,31 +12,6 @@ import OpenSolid
 import qualified Quantity
 import qualified String
 import qualified Units
-import Verdict (Verdict)
-import qualified Verdict
-
-instance Comparison Interval Interval where
-    type ComparisonResult Interval Interval = Verdict
-
-    (Interval low1 high1) < (Interval low2 high2)
-        | high1 < low2 = Verdict.Definitely True
-        | low1 >= high2 = Verdict.Definitely False
-        | otherwise = Verdict.Indeterminate
-
-    (Interval low1 high1) <= (Interval low2 high2)
-        | high1 <= low2 = Verdict.Definitely True
-        | low1 > high2 = Verdict.Definitely False
-        | otherwise = Verdict.Indeterminate
-
-    (Interval low1 high1) >= (Interval low2 high2)
-        | low1 >= high2 = Verdict.Definitely True
-        | high1 < low2 = Verdict.Definitely False
-        | otherwise = Verdict.Indeterminate
-
-    (Interval low1 high1) > (Interval low2 high2)
-        | low1 > high2 = Verdict.Definitely True
-        | high1 <= low2 = Verdict.Definitely False
-        | otherwise = Verdict.Indeterminate
 
 instance Negation (Interval units) where
     negate (Interval low high) =

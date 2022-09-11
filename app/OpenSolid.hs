@@ -2,7 +2,6 @@ module OpenSolid (
     String,
     Char,
     List,
-    BooleanLogic (..),
     Count (..),
     Quantity (..),
     Unitless (..),
@@ -19,6 +18,7 @@ module OpenSolid (
     Concatenation (..),
     (//),
     Eq (..),
+    Ord (..),
     Show (..),
     IO,
     fromInteger,
@@ -29,9 +29,6 @@ module OpenSolid (
     identity,
     otherwise,
     Bool (..),
-    Comparison (..),
-    min,
-    max,
     (|>),
     (<|),
     (>>=),
@@ -44,12 +41,11 @@ module OpenSolid (
 import qualified Data.Text
 import Units (Unitless)
 import qualified Units
-import Verdict
 import Prelude (
     Bool (..),
     Eq (..),
     IO,
-    Ord (max, min),
+    Ord (..),
     Show (..),
     fail,
     otherwise,
@@ -64,51 +60,11 @@ type Char = Prelude.Char
 
 type List a = [a]
 
-class BooleanLogic b where
-    not :: b -> b
-    (&&) :: b -> b -> b
-    (||) :: b -> b -> b
-
-instance BooleanLogic Bool where
-    not = Prelude.not
-    (&&) = (Prelude.&&)
-    (||) = (Prelude.||)
-
-instance BooleanLogic Verdict where
-    not verdict =
-        case verdict of
-            Definitely True -> Definitely False
-            Definitely False -> Definitely True
-            Indeterminate -> Indeterminate
-
-    v1 && v2 =
-        case (v1, v2) of
-            (Definitely True, _) -> v2
-            (_, Definitely True) -> v1
-            (Definitely False, _) -> Definitely False
-            (_, Definitely False) -> Definitely False
-            (Indeterminate, Indeterminate) -> Indeterminate
-
-    v1 || v2 =
-        case (v1, v2) of
-            (Definitely True, _) -> Definitely True
-            (_, Definitely True) -> Definitely True
-            (Definitely False, _) -> v2
-            (_, Definitely False) -> v1
-            (Indeterminate, Indeterminate) -> Indeterminate
-
-class Comparison lhs rhs where
-    type ComparisonResult lhs rhs
-    (<) :: lhs units -> rhs units -> ComparisonResult lhs rhs
-    (<=) :: lhs units -> rhs units -> ComparisonResult lhs rhs
-    (>=) :: lhs units -> rhs units -> ComparisonResult lhs rhs
-    (>) :: lhs units -> rhs units -> ComparisonResult lhs rhs
-
 newtype Count units = Count Prelude.Int
-    deriving (Eq, Prelude.Ord)
+    deriving (Eq, Ord)
 
 newtype Quantity units = Quantity Prelude.Double
-    deriving (Eq, Prelude.Ord)
+    deriving (Eq, Ord)
 
 type Int = Count Unitless
 
@@ -121,36 +77,6 @@ instance Show Int where
 instance Show Float where
     show (Quantity x) =
         show x
-
-instance Comparison Count Count where
-    type ComparisonResult Count Count = Bool
-
-    (Count n) < (Count m) =
-        n Prelude.< m
-
-    (Count n) <= (Count m) =
-        n Prelude.<= m
-
-    (Count n) >= (Count m) =
-        n Prelude.>= m
-
-    (Count n) > (Count m) =
-        n Prelude.> m
-
-instance Comparison Quantity Quantity where
-    type ComparisonResult Quantity Quantity = Bool
-
-    (Quantity x) < (Quantity y) =
-        x Prelude.< y
-
-    (Quantity x) <= (Quantity y) =
-        x Prelude.<= y
-
-    (Quantity x) >= (Quantity y) =
-        x Prelude.>= y
-
-    (Quantity x) > (Quantity y) =
-        x Prelude.> y
 
 class Negation a where
     negate :: a -> a
