@@ -9,6 +9,8 @@ module Vector3d (
     yz,
     xyz,
     meters,
+    midpoint,
+    interpolateFrom,
 ) where
 
 import qualified Area
@@ -168,3 +170,21 @@ meters x y z =
 squareMeters :: Float -> Float -> Float -> Vector3d Units.SquareMeters coordinates
 squareMeters x y z =
     Vector3d (Area.squareMeters x) (Area.squareMeters y) (Area.squareMeters z)
+
+interpolateFrom :: Vector3d units coordinates -> Vector3d units coordinates -> Float -> Vector3d units coordinates
+interpolateFrom v1 v2 t =
+    let (Vector3d x1 y1 z1) = v1
+        (Vector3d x2 y2 z2) = v2
+        x = Quantity.interpolateFrom x1 x2 t
+        y = Quantity.interpolateFrom y1 y2 t
+        z = Quantity.interpolateFrom z1 z2 t
+     in Vector3d x y z
+
+midpoint :: Vector3d units coordinates -> Vector3d units coordinates -> Vector3d units coordinates
+midpoint v1 v2 =
+    let (Vector3d x1 y1 z1) = v1
+        (Vector3d x2 y2 z2) = v2
+        x = Quantity.midpoint x1 x2
+        y = Quantity.midpoint y1 y2
+        z = Quantity.midpoint z1 z2
+     in Vector3d x y z
