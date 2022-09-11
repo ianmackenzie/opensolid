@@ -29,6 +29,7 @@ extra-source-files:
 
 executable opensolid-hs
     ghc-options:
+        "-Werror"
         "-dcore-lint"
     main-is:          Main.hs
 
