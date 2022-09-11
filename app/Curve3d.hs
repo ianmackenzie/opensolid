@@ -4,6 +4,7 @@ module Curve3d (
 ) where
 
 import BoundingBox3d (BoundingBox3d)
+import qualified BoundingBox3d
 import OpenSolid
 import Point3d (Point3d)
 
@@ -16,6 +17,25 @@ class IsCurve3d curve where
     boundingBox :: curve coordinates -> BoundingBox3d coordinates
 
 data Curve3d coordinates = forall curve. IsCurve3d curve => Curve3d (curve coordinates)
+
+instance IsCurve3d Point3d where
+    startPoint =
+        identity
+
+    endPoint =
+        identity
+
+    evaluate point t =
+        point
+
+    reverse =
+        identity
+
+    bisect point =
+        (point, point)
+
+    boundingBox =
+        BoundingBox3d.singleton
 
 instance IsCurve3d Curve3d where
     startPoint (Curve3d curve) =
