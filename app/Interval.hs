@@ -5,6 +5,7 @@ module Interval (
     lowerBound,
     upperBound,
     endpoints,
+    squared,
 ) where
 
 import Interval.Unsafe
@@ -91,3 +92,12 @@ upperBound interval =
 endpoints :: Interval units -> (Quantity units, Quantity units)
 endpoints (Interval low high) =
     (low, high)
+
+squared :: Units.Multiplication units units => Interval units -> Interval (Units.Product units units)
+squared (Interval low high)
+    | low >= Quantity.zero = Interval ll hh
+    | high <= Quantity.zero = Interval hh ll
+    | otherwise = Interval Quantity.zero (max ll hh)
+  where
+    ll = low * low
+    hh = high * high
