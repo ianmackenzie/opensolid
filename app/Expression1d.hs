@@ -6,10 +6,12 @@ module Expression1d (
     constant,
     parameter,
     squared,
+    roots,
 ) where
 
 import Interval (Interval)
 import qualified Interval
+import Interval.Unsafe
 import OpenSolid
 import qualified Quantity
 import qualified Units
@@ -119,3 +121,17 @@ squared expression =
         { bounds = \t -> let x = bounds expression t in Interval.squared x
         , derivative = 2.0 * expression * derivative expression
         }
+
+roots :: Expression1d units -> List Float
+roots expression =
+    findRoots 0.0 1.0 expression []
+
+findRoots :: Float -> Float -> Expression1d units -> List Float -> List Float
+findRoots low high expression accumulated =
+    if Interval.contains Quantity.zero (bounds expression (Interval low high))
+        then
+            let mid = Quantity.midpoint low high
+             in if low < mid && mid < high
+                    then findRoots low mid expression (findRoots mid high expression accumulated)
+                    else mid : accumulated
+        else accumulated
