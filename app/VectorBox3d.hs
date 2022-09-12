@@ -10,6 +10,7 @@ import Interval (Interval)
 import qualified Interval
 import Interval.Unsafe
 import OpenSolid
+import qualified Units
 import Vector3d (Vector3d (..))
 
 data VectorBox3d units coordinates = VectorBox3d (Interval units) (Interval units) (Interval units)
@@ -47,6 +48,26 @@ instance Subtraction (VectorBox3d units) (VectorBox3d units) where
     type Difference (VectorBox3d units) (VectorBox3d units) = VectorBox3d units
     (VectorBox3d x1 y1 z1) - (VectorBox3d x2 y2 z2) =
         VectorBox3d (x1 - x2) (y1 - y2) (z1 - z2)
+
+instance Units.Multiplication units1 units2 => Multiplication (Quantity units1) (VectorBox3d units2 coordinates) where
+    type Product (Quantity units1) (VectorBox3d units2 coordinates) = VectorBox3d (Units.Product units1 units2) coordinates
+    quantity * (VectorBox3d x y z) =
+        VectorBox3d (quantity * x) (quantity * y) (quantity * z)
+
+instance Units.Multiplication units1 units2 => Multiplication (VectorBox3d units1 coordinates) (Quantity units2) where
+    type Product (VectorBox3d units1 coordinates) (Quantity units2) = VectorBox3d (Units.Product units1 units2) coordinates
+    (VectorBox3d x y z) * quantity =
+        VectorBox3d (x * quantity) (y * quantity) (z * quantity)
+
+instance Units.Multiplication units1 units2 => Multiplication (Interval units1) (VectorBox3d units2 coordinates) where
+    type Product (Interval units1) (VectorBox3d units2 coordinates) = VectorBox3d (Units.Product units1 units2) coordinates
+    interval * (VectorBox3d x y z) =
+        VectorBox3d (interval * x) (interval * y) (interval * z)
+
+instance Units.Multiplication units1 units2 => Multiplication (VectorBox3d units1 coordinates) (Interval units2) where
+    type Product (VectorBox3d units1 coordinates) (Interval units2) = VectorBox3d (Units.Product units1 units2) coordinates
+    (VectorBox3d x y z) * interval =
+        VectorBox3d (x * interval) (y * interval) (z * interval)
 
 singleton :: Vector3d units coordinates -> VectorBox3d units coordinates
 singleton vector =
