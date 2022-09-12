@@ -3,6 +3,7 @@ module Main (main) where
 import qualified Area
 import qualified Debug
 import qualified Direction2d
+import qualified Expression1d
 import qualified Interval
 import qualified Length
 import OpenSolid
@@ -33,6 +34,8 @@ main = do
     Debug.log "Direction" Direction2d.x
     Debug.log "Tuple" (Point2d.meters 1.0 2.0, Point2d.meters 3.0 4.0)
     Debug.log "Custom type" (MyPoints (Point2d.meters 1.0 2.0) (Point2d.meters 3.0 4.0))
+    Debug.log "Roots" [-2.0 + t * 4.0 | t <- Expression1d.roots expression]
+    Debug.log "sqrt 2.0" (sqrt 2.0)
   where
     k = 0.5
     area = Area.squareMeters 3.0
@@ -50,3 +53,6 @@ main = do
     scaledVector = Length.meters 2.0 * Vector2d.meters 3.0 4.0
     intervalDifference = Interval.from (Length.meters 2.0) (Length.meters 3.0) - Length.centimeters 50.0
     intervalProduct = Length.centimeters 20.0 * Interval.from (Length.meters 2.0) (Length.meters 3.0)
+    t = Expression1d.parameter
+    x = -2.0 + t * 4.0
+    expression = Expression1d.squared x - 2.0
