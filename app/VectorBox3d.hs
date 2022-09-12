@@ -69,6 +69,45 @@ instance Units.Multiplication units1 units2 => Multiplication (VectorBox3d units
     (VectorBox3d x y z) * interval =
         VectorBox3d (x * interval) (y * interval) (z * interval)
 
+instance Units.Multiplication units1 units2 => DotProduct (VectorBox3d units1) (Vector3d units2) where
+    type DotProductResult (VectorBox3d units1) (Vector3d units2) = Interval (Units.Product units1 units2)
+    (VectorBox3d x1 y1 z1) . (Vector3d x2 y2 z2) =
+        x1 * x2 + y1 * y2 + z1 * z2
+
+instance Units.Multiplication units1 units2 => DotProduct (Vector3d units1) (VectorBox3d units2) where
+    type DotProductResult (Vector3d units1) (VectorBox3d units2) = Interval (Units.Product units1 units2)
+    (Vector3d x1 y1 z1) . (VectorBox3d x2 y2 z2) =
+        x1 * x2 + y1 * y2 + z1 * z2
+
+instance Units.Multiplication units1 units2 => DotProduct (VectorBox3d units1) (VectorBox3d units2) where
+    type DotProductResult (VectorBox3d units1) (VectorBox3d units2) = Interval (Units.Product units1 units2)
+    (VectorBox3d x1 y1 z1) . (VectorBox3d x2 y2 z2) =
+        x1 * x2 + y1 * y2 + z1 * z2
+
+instance Units.Multiplication units1 units2 => CrossProduct (VectorBox3d units1) (Vector3d units2) where
+    type CrossProductResult (VectorBox3d units1) (Vector3d units2) = VectorBox3d (Units.Product units1 units2)
+    (VectorBox3d x1 y1 z1) >< (Vector3d x2 y2 z2) =
+        let x = y1 * z2 - z1 * y2
+            y = z1 * x2 - x1 * z2
+            z = x1 * y2 - y1 * x2
+         in VectorBox3d x y z
+
+instance Units.Multiplication units1 units2 => CrossProduct (Vector3d units1) (VectorBox3d units2) where
+    type CrossProductResult (Vector3d units1) (VectorBox3d units2) = VectorBox3d (Units.Product units1 units2)
+    (Vector3d x1 y1 z1) >< (VectorBox3d x2 y2 z2) =
+        let x = y1 * z2 - z1 * y2
+            y = z1 * x2 - x1 * z2
+            z = x1 * y2 - y1 * x2
+         in VectorBox3d x y z
+
+instance Units.Multiplication units1 units2 => CrossProduct (VectorBox3d units1) (VectorBox3d units2) where
+    type CrossProductResult (VectorBox3d units1) (VectorBox3d units2) = VectorBox3d (Units.Product units1 units2)
+    (VectorBox3d x1 y1 z1) >< (VectorBox3d x2 y2 z2) =
+        let x = y1 * z2 - z1 * y2
+            y = z1 * x2 - x1 * z2
+            z = x1 * y2 - y1 * x2
+         in VectorBox3d x y z
+
 singleton :: Vector3d units coordinates -> VectorBox3d units coordinates
 singleton vector =
     let (Vector3d x y z) = vector
