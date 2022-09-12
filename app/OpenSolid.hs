@@ -14,12 +14,12 @@ module OpenSolid (
     Division (..),
     DotProduct (..),
     CrossProduct (..),
-    Sqrt (..),
     Concatenation (..),
     fromInteger,
     fromRational,
     fromString,
     float,
+    sqrt,
     ifThenElse,
     identity,
     always,
@@ -149,14 +149,9 @@ class CrossProduct lhs rhs where
     type CrossProductResult lhs rhs :: * -> *
     (><) :: lhs coordinates -> rhs coordinates -> (CrossProductResult lhs rhs) coordinates
 
-class Sqrt a where
-    type SquareRoot a
-    sqrt :: a -> SquareRoot a
-
-instance Units.Sqrt units => Sqrt (Quantity units) where
-    type SquareRoot (Quantity units) = Quantity (Units.SquareRoot units)
-    sqrt (Quantity x) =
-        Quantity (Prelude.sqrt x)
+sqrt :: Units.Sqrt units => Quantity units -> Quantity (Units.SquareRoot units)
+sqrt (Quantity x) =
+    Quantity (Prelude.sqrt x)
 
 class Concatenation a where
     (++) :: a -> a -> a
