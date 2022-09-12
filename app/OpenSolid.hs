@@ -1,10 +1,10 @@
 module OpenSolid (
+    module Prelude,
+    module Units,
     String,
-    Char,
     List,
     Count (..),
     Quantity (..),
-    Unitless (..),
     Int,
     Float,
     Negation (..),
@@ -16,11 +16,6 @@ module OpenSolid (
     CrossProduct (..),
     Sqrt (..),
     Concatenation (..),
-    (//),
-    Eq (..),
-    Ord (..),
-    Show (..),
-    IO,
     fromInteger,
     fromRational,
     fromString,
@@ -28,19 +23,10 @@ module OpenSolid (
     ifThenElse,
     identity,
     always,
-    otherwise,
-    undefined,
-    Bool (..),
     (|>),
     (<|),
-    (>>=),
-    (>>),
-    fail,
     (>>>),
     (<<<),
-    (&&),
-    (||),
-    not,
 ) where
 
 import qualified Data.Text
@@ -48,11 +34,14 @@ import Units (Unitless)
 import qualified Units
 import Prelude (
     Bool (..),
+    Char,
     Eq (..),
     IO,
     Ord (..),
     Show (..),
+    const,
     fail,
+    id,
     not,
     otherwise,
     undefined,
@@ -64,8 +53,6 @@ import Prelude (
 import qualified Prelude
 
 type String = Data.Text.Text
-
-type Char = Prelude.Char
 
 type List a = [a]
 
@@ -149,6 +136,11 @@ instance Units.Division units1 units2 => Division (Quantity units1) (Quantity un
     (Quantity x) / (Quantity y) =
         Quantity (x Prelude./ y)
 
+instance Units.Division units1 units2 => Division (Count units1) (Count units2) where
+    type Quotient (Count units1) (Count units2) = Count (Units.Quotient units1 units2)
+    (Count n) / (Count m) =
+        Count (Prelude.quot n m)
+
 class DotProduct lhs rhs where
     type DotProductResult lhs rhs
     (.) :: lhs coordinates -> rhs coordinates -> DotProductResult lhs rhs
@@ -165,10 +157,6 @@ instance Units.Sqrt units => Sqrt (Quantity units) where
     type SquareRoot (Quantity units) = Quantity (Units.SquareRoot units)
     sqrt (Quantity x) =
         Quantity (Prelude.sqrt x)
-
-(//) :: Count units -> Count units -> Int
-(Count n) // (Count m) =
-    Count (Prelude.quot n m)
 
 class Concatenation a where
     (++) :: a -> a -> a
