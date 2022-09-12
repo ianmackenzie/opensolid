@@ -1,11 +1,16 @@
 module Interval (
     Interval,
     singleton,
+    unit,
     from,
     lowerBound,
     upperBound,
+    isSingleton,
+    midpoint,
     endpoints,
     squared,
+    contains,
+    bisect,
 ) where
 
 import Interval.Unsafe
@@ -77,6 +82,10 @@ singleton :: Quantity units -> Interval units
 singleton value =
     Interval value value
 
+unit :: Interval Unitless
+unit =
+    Interval 0.0 1.0
+
 from :: Quantity units -> Quantity units -> Interval units
 from a b =
     Interval (min a b) (max a b)
@@ -88,6 +97,16 @@ lowerBound interval =
 upperBound :: Interval units -> Quantity units
 upperBound interval =
     let (Interval _ high) = interval in high
+
+isSingleton :: Interval units -> Bool
+isSingleton interval =
+    let (Interval low high) = interval
+     in low == high
+
+midpoint :: Interval units -> Quantity units
+midpoint interval =
+    let (Interval low high) = interval
+     in Quantity.midpoint low high
 
 endpoints :: Interval units -> (Quantity units, Quantity units)
 endpoints (Interval low high) =
@@ -102,3 +121,14 @@ squared interval
     (Interval low high) = interval
     ll = low * low
     hh = high * high
+
+contains :: Quantity units -> Interval units -> Bool
+contains quantity interval =
+    let (Interval low high) = interval
+     in low <= quantity && quantity <= high
+
+bisect :: Interval units -> (Interval units, Interval units)
+bisect interval =
+    let (Interval low high) = interval
+        mid = midpoint interval
+     in (Interval low mid, Interval mid high)
