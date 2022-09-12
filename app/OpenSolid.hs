@@ -149,10 +149,6 @@ class CrossProduct lhs rhs where
     type CrossProductResult lhs rhs :: * -> *
     (><) :: lhs coordinates -> rhs coordinates -> (CrossProductResult lhs rhs) coordinates
 
-sqrt :: Units.Sqrt units => Quantity units -> Quantity (Units.SquareRoot units)
-sqrt (Quantity x) =
-    Quantity (Prelude.sqrt x)
-
 class Concatenation a where
     (++) :: a -> a -> a
 
@@ -179,6 +175,10 @@ fromString =
 float :: Int -> Float
 float (Count n) =
     Quantity (Prelude.fromIntegral n)
+
+sqrt :: Units.Sqrt units => Quantity units -> Quantity (Units.SquareRoot units)
+sqrt (Quantity x) =
+    Quantity (Prelude.sqrt x)
 
 {- HLINT ignore ifThenElse "Use if" -}
 ifThenElse :: Bool -> a -> a -> a
