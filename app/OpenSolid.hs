@@ -38,6 +38,9 @@ module OpenSolid (
     fail,
     (>>>),
     (<<<),
+    (&&),
+    (||),
+    not,
 ) where
 
 import qualified Data.Text
@@ -50,10 +53,13 @@ import Prelude (
     Ord (..),
     Show (..),
     fail,
+    not,
     otherwise,
     undefined,
+    (&&),
     (>>),
     (>>=),
+    (||),
  )
 import qualified Prelude
 
