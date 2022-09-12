@@ -94,10 +94,11 @@ endpoints (Interval low high) =
     (low, high)
 
 squared :: Units.Multiplication units units => Interval units -> Interval (Units.Product units units)
-squared (Interval low high)
+squared interval
     | low >= Quantity.zero = Interval ll hh
     | high <= Quantity.zero = Interval hh ll
     | otherwise = Interval Quantity.zero (max ll hh)
   where
+    (Interval low high) = interval
     ll = low * low
     hh = high * high
