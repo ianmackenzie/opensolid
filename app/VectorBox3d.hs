@@ -4,6 +4,7 @@ module VectorBox3d (
     hull2,
     hull3,
     hull4,
+    squaredMagnitude,
 ) where
 
 import Interval (Interval)
@@ -157,3 +158,8 @@ hull4 v1 v2 v3 v4 =
         yInterval = Interval minY maxY
         zInterval = Interval minZ maxZ
      in VectorBox3d xInterval yInterval zInterval
+
+squaredMagnitude :: Units.Multiplication units units => VectorBox3d units coordinates -> Interval (Units.Product units units)
+squaredMagnitude vectorBox =
+    let (VectorBox3d x y z) = vectorBox
+     in Interval.squared x + Interval.squared y + Interval.squared z
