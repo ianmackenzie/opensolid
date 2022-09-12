@@ -2,6 +2,7 @@ module QuadraticSpline3d (QuadraticSpline3d (..)) where
 
 import qualified BoundingBox3d
 import Curve3d (IsCurve3d (..))
+import OpenSolid
 import Point3d (Point3d)
 import qualified Point3d
 
