@@ -67,6 +67,7 @@ executable opensolid-hs
         VectorBox3d
         BoundingBox3d
         Expression1d
+        Expression3d
         Curve3d
         Line3d
         QuadraticSpline3d
