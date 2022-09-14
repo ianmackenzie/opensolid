@@ -46,6 +46,12 @@ data SquareMeters
 
 data CubicMeters
 
+data Seconds
+
+data MetersPerSecond
+
+data MetersPerSecondSquared
+
 -- Products
 
 instance Multiplication Meters Meters where
@@ -57,6 +63,12 @@ instance Multiplication Meters SquareMeters where
 instance Multiplication SquareMeters Meters where
     type Product SquareMeters Meters = CubicMeters
 
+instance Multiplication Seconds MetersPerSecond where
+    type Product Seconds MetersPerSecond = Meters
+
+instance Multiplication Seconds MetersPerSecondSquared where
+    type Product Seconds MetersPerSecondSquared = MetersPerSecond
+
 -- Quotients
 
 instance Division SquareMeters Meters where
@@ -67,6 +79,12 @@ instance Division CubicMeters SquareMeters where
 
 instance Division CubicMeters Meters where
     type Quotient CubicMeters Meters = SquareMeters
+
+instance Division Meters Seconds where
+    type Quotient Meters Seconds = MetersPerSecond
+
+instance Division MetersPerSecond Seconds where
+    type Quotient MetersPerSecond Seconds = MetersPerSecondSquared
 
 -- Square roots
 
