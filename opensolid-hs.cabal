@@ -83,5 +83,4 @@ executable opensolid-hs
         TypeFamilies
         StandaloneDeriving
         ExistentialQuantification
-        InstanceSigs
         StrictData
