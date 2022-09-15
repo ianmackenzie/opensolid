@@ -23,6 +23,7 @@ module OpenSolid (
     ifThenElse,
     identity,
     always,
+    subtract,
     (|>),
     (<|),
     (>>>),
@@ -196,6 +197,10 @@ identity =
 always :: a -> b -> a
 always =
     Prelude.const
+
+subtract :: Subtraction lhs rhs => rhs a -> lhs a -> (Difference lhs rhs) a
+subtract b a =
+    a - b
 
 (|>) :: a -> (a -> b) -> b
 (|>) value function =
