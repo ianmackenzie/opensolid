@@ -28,19 +28,25 @@ zero =
     Quantity.zero
 
 cubicMeter :: Volume
-cubicMeter = Quantity.baseUnit
+cubicMeter =
+    Quantity.baseUnit
 
 cubicMeters :: Float -> Volume
-cubicMeters = Quantity.baseUnits
+cubicMeters =
+    Quantity.baseUnits
 
 inCubicMeters :: Volume -> Float
-inCubicMeters = Quantity.inBaseUnits
+inCubicMeters =
+    Quantity.inBaseUnits
 
 cubicCentimeter :: Volume
-cubicCentimeter = Length.centimeter * Length.centimeter * Length.centimeter
+cubicCentimeter =
+    Length.centimeter * Length.centimeter * Length.centimeter
 
 cubicCentimeters :: Float -> Volume
-cubicCentimeters = (* cubicCentimeter)
+cubicCentimeters =
+    (* cubicCentimeter)
 
 inCubicCentimeters :: Volume -> Float
-inCubicCentimeters = (/ cubicCentimeter)
+inCubicCentimeters =
+    (/ cubicCentimeter)
