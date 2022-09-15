@@ -42,7 +42,7 @@ parameter =
 instance Negation (Expression1d units) where
     negate expression =
         Expression1d
-            { bounds = \t -> - (bounds expression t)
+            { bounds = bounds expression >>> negate
             , derivative = - (derivative expression)
             }
 
@@ -50,7 +50,7 @@ instance Addition Expression1d Quantity where
     type Sum Expression1d Quantity = Expression1d
     expression + quantity =
         Expression1d
-            { bounds = \t -> bounds expression t + quantity
+            { bounds = bounds expression >>> (+ quantity)
             , derivative = derivative expression
             }
 
@@ -71,7 +71,7 @@ instance Subtraction Expression1d Quantity where
     type Difference Expression1d Quantity = Expression1d
     expression - quantity =
         Expression1d
-            { bounds = \t -> bounds expression t - quantity
+            { bounds = bounds expression >>> subtract quantity
             , derivative = derivative expression
             }
 
@@ -79,7 +79,7 @@ instance Subtraction Quantity Expression1d where
     type Difference Quantity Expression1d = Expression1d
     quantity - expression =
         Expression1d
-            { bounds = \t -> quantity - bounds expression t
+            { bounds = (quantity -) <<< bounds expression
             , derivative = - (derivative expression)
             }
 
@@ -95,7 +95,7 @@ instance Units.Multiplication units1 units2 => Multiplication (Quantity units1) 
     type Product (Quantity units1) (Expression1d units2) = Expression1d (Units.Product units1 units2)
     quantity * expression =
         Expression1d
-            { bounds = \t -> quantity * bounds expression t
+            { bounds = (quantity *) <<< bounds expression
             , derivative = quantity * derivative expression
             }
 
@@ -103,7 +103,7 @@ instance Units.Multiplication units1 units2 => Multiplication (Expression1d unit
     type Product (Expression1d units1) (Quantity units2) = Expression1d (Units.Product units1 units2)
     expression * quantity =
         Expression1d
-            { bounds = \t -> bounds expression t * quantity
+            { bounds = bounds expression >>> (* quantity)
             , derivative = derivative expression * quantity
             }
 
@@ -118,7 +118,7 @@ instance Units.Multiplication units1 units2 => Multiplication (Expression1d unit
 squared :: Units.Multiplication units units => Expression1d units -> Expression1d (Units.Product units units)
 squared expression =
     Expression1d
-        { bounds = \t -> let x = bounds expression t in Interval.squared x
+        { bounds = bounds expression >>> Interval.squared
         , derivative = 2.0 * expression * derivative expression
         }
 
