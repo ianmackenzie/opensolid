@@ -84,3 +84,4 @@ executable opensolid-hs
         StandaloneDeriving
         ExistentialQuantification
         InstanceSigs
+        StrictData

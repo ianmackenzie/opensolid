@@ -19,7 +19,7 @@ import qualified Show
 import qualified String
 import qualified Units
 
-data Vector2d units coordinates = Vector2d (Quantity units) (Quantity units)
+data Vector2d units coordinates = Vector2d !(Quantity units) !(Quantity units)
     deriving (Eq)
 
 instance Show (Vector2d Unitless coordinates) where

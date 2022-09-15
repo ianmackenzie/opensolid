@@ -23,7 +23,7 @@ import qualified String
 import Vector3d (Vector3d (..))
 import qualified Vector3d
 
-data Point3d coordinates = Point3d Length Length Length
+data Point3d coordinates = Point3d !Length !Length !Length
     deriving (Eq)
 
 instance Show (Point3d coordinates) where

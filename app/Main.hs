@@ -14,7 +14,7 @@ import qualified Vector2d
 import qualified Vector3d
 import qualified Volume
 
-data MyPoints = MyPoints (Point2d ()) (Point2d ()) deriving (Show)
+data MyPoints = MyPoints !(Point2d ()) !(Point2d ()) deriving (Show)
 
 main :: IO ()
 main = do

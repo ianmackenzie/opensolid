@@ -19,8 +19,8 @@ import VectorBox3d (VectorBox3d (..))
 import qualified VectorBox3d
 
 data Expression3d units coordinates = Expression3d
-    { bounds :: Interval Unitless -> VectorBox3d units coordinates
-    , derivative :: Expression3d units coordinates
+    { bounds :: !(Interval Unitless -> VectorBox3d units coordinates)
+    , derivative :: ~(Expression3d units coordinates)
     }
 
 zero :: Expression3d units coordinates

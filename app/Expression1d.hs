@@ -17,8 +17,8 @@ import qualified Quantity
 import qualified Units
 
 data Expression1d units = Expression1d
-    { bounds :: Interval Unitless -> Interval units
-    , derivative :: Expression1d units
+    { bounds :: !(Interval Unitless -> Interval units)
+    , derivative :: ~(Expression1d units)
     }
 
 zero :: Expression1d units

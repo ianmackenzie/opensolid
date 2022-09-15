@@ -14,7 +14,7 @@ import OpenSolid
 import qualified Units
 import Vector3d (Vector3d (..))
 
-data VectorBox3d units coordinates = VectorBox3d (Interval units) (Interval units) (Interval units)
+data VectorBox3d units coordinates = VectorBox3d !(Interval units) !(Interval units) !(Interval units)
 
 instance Negation (VectorBox3d units coordinates) where
     negate (VectorBox3d x y z) =

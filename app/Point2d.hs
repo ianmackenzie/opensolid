@@ -19,7 +19,7 @@ import qualified String
 import Vector2d (Vector2d (..))
 import qualified Vector2d
 
-data Point2d coordinates = Point2d Length Length
+data Point2d coordinates = Point2d !Length !Length
     deriving (Eq)
 
 instance Show (Point2d coordinates) where

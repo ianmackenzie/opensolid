@@ -27,7 +27,7 @@ import qualified Show
 import qualified String
 import qualified Units
 
-data Vector3d units coordinates = Vector3d (Quantity units) (Quantity units) (Quantity units)
+data Vector3d units coordinates = Vector3d !(Quantity units) !(Quantity units) !(Quantity units)
     deriving (Eq)
 
 instance Show (Vector3d Unitless coordinates) where

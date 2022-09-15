@@ -13,7 +13,7 @@ import OpenSolid
 import Point3d (Point3d (..))
 import Units (Meters)
 
-data BoundingBox3d coordinates = BoundingBox3d (Interval Meters) (Interval Meters) (Interval Meters)
+data BoundingBox3d coordinates = BoundingBox3d !(Interval Meters) !(Interval Meters) !(Interval Meters)
 
 singleton :: Point3d coordinates -> BoundingBox3d coordinates
 singleton point =
