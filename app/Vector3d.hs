@@ -43,7 +43,8 @@ instance Show (Vector3d Units.SquareMeters coordinates) where
         showImpl "Vector3d.squareMeters" Area.inSquareMeters
 
 showImpl functionName inCorrespondingUnits precedence (Vector3d x y z) =
-    Show.primitive precedence functionName [inCorrespondingUnits x, inCorrespondingUnits y, inCorrespondingUnits z]
+    let arguments = [inCorrespondingUnits x, inCorrespondingUnits y, inCorrespondingUnits z]
+     in Show.primitive precedence functionName arguments
 
 instance Negation (Vector3d units coordinates) where
     negate (Vector3d x y z) =
