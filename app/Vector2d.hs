@@ -6,6 +6,8 @@ module Vector2d (
     xy,
     meters,
     determinant,
+    magnitude,
+    squaredMagnitude,
 ) where
 
 import qualified Area
@@ -111,3 +113,11 @@ determinant ::
     Quantity (Units.Product units1 units2)
 determinant (Vector2d x1 y1) (Vector2d x2 y2) =
     x1 * y2 - y1 * x2
+
+magnitude :: Vector2d units coordinates -> Quantity units
+magnitude vector =
+    let (Vector2d x y) = vector in Quantity.hypot2 x y
+
+squaredMagnitude :: Units.Multiplication units units => Vector2d units coordinates -> Quantity (Units.Product units units)
+squaredMagnitude vector =
+    let (Vector2d x y) = vector in x * x + y * y

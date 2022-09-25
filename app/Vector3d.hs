@@ -11,6 +11,8 @@ module Vector3d (
     meters,
     midpoint,
     interpolateFrom,
+    magnitude,
+    squaredMagnitude,
 ) where
 
 import qualified Area
@@ -189,3 +191,11 @@ midpoint v1 v2 =
         y = Quantity.midpoint y1 y2
         z = Quantity.midpoint z1 z2
      in Vector3d x y z
+
+magnitude :: Vector3d units coordinates -> Quantity units
+magnitude vector =
+    let (Vector3d x y z) = vector in Quantity.hypot3 x y z
+
+squaredMagnitude :: Units.Multiplication units units => Vector3d units coordinates -> Quantity (Units.Product units units)
+squaredMagnitude vector =
+    let (Vector3d x y z) = vector in x * x + y * y + z * z
