@@ -6,6 +6,7 @@ module Interval (
     lowerBound,
     upperBound,
     isSingleton,
+    isAtomic,
     midpoint,
     endpoints,
     squared,
@@ -103,6 +104,12 @@ isSingleton :: Interval units -> Bool
 isSingleton interval =
     let (Interval low high) = interval
      in low == high
+
+isAtomic :: Interval units -> Bool
+isAtomic interval =
+    let (Interval low high) = interval
+        mid = midpoint interval
+     in mid == low || mid == high
 
 midpoint :: Interval units -> Quantity units
 midpoint interval =
