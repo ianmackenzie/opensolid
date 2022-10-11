@@ -6,6 +6,7 @@ module Quantity (
     inBaseUnits,
     interpolateFrom,
     midpoint,
+    abs,
     hypot2,
     hypot3,
 ) where
@@ -38,6 +39,10 @@ interpolateFrom a b t =
 midpoint :: Quantity units -> Quantity units -> Quantity units
 midpoint a b =
     a + 0.5 * (b - a)
+
+abs :: Quantity units -> Quantity units
+abs (Quantity value) =
+    Quantity (Prelude.abs value)
 
 hypot2 :: Quantity units -> Quantity units -> Quantity units
 hypot2 (Quantity a) (Quantity b) =
