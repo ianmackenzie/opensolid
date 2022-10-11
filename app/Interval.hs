@@ -11,6 +11,7 @@ module Interval (
     squared,
     contains,
     bisect,
+    abs,
 ) where
 
 import Interval.Unsafe
@@ -132,3 +133,11 @@ bisect interval =
     let (Interval low high) = interval
         mid = midpoint interval
      in (Interval low mid, Interval mid high)
+
+abs :: Interval units -> Interval units
+abs interval
+    | low >= Quantity.zero = interval
+    | high <= Quantity.zero = - interval
+    | otherwise = Interval Quantity.zero (max high (- low))
+  where
+    (Interval low high) = interval
