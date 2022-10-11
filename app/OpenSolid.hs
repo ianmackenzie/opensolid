@@ -1,6 +1,7 @@
 module OpenSolid (
     module Prelude,
     module Units,
+    module Result,
     String,
     List,
     Count (..),
@@ -33,6 +34,7 @@ module OpenSolid (
 ) where
 
 import qualified Data.Text
+import Result (Result (..))
 import Units (Unitless)
 import qualified Units
 import Prelude (
@@ -40,6 +42,7 @@ import Prelude (
     Char,
     Eq (..),
     IO,
+    Maybe (..),
     Ord (..),
     Show (..),
     const,
