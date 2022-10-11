@@ -21,7 +21,7 @@ import qualified Quantity
 import qualified Units
 
 data Expression1d units = Expression1d
-    { evaluate :: Float -> Quantity units
+    { evaluate :: !(Float -> Quantity units)
     , bounds :: !(Interval Unitless -> Interval units)
     , derivative :: ~(Expression1d units)
     }
