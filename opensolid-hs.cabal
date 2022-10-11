@@ -48,6 +48,8 @@ executable opensolid-hs
         Show
         Debug
         String
+        Maybe
+        Result
         List
         Units
         Quantity
