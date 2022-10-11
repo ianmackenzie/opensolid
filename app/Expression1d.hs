@@ -10,9 +10,12 @@ module Expression1d (
     roots,
 ) where
 
+import Expression1d.Root (Root (..))
+import qualified Expression1d.Root as Root
 import Interval (Interval)
 import qualified Interval
 import Interval.Unsafe
+import qualified List
 import OpenSolid
 import qualified Quantity
 import qualified Units
@@ -136,16 +139,91 @@ squared expression =
         , derivative = 2.0 * expression * derivative expression
         }
 
-roots :: Expression1d units -> List Float
-roots expression =
-    findRoots 0.0 1.0 expression []
+data Neighborhood
+    = HasRoot !(Interval Unitless) !Root
+    | NoRoot !(Interval Unitless)
 
-findRoots :: Float -> Float -> Expression1d units -> List Float -> List Float
-findRoots low high expression accumulated =
-    if Interval.contains Quantity.zero (bounds expression (Interval low high))
-        then
-            let mid = Quantity.midpoint low high
-             in if low < mid && mid < high
-                    then findRoots low mid expression (findRoots mid high expression accumulated)
-                    else mid : accumulated
-        else accumulated
+data Indeterminate = Indeterminate
+
+maxRootOrder :: Int
+maxRootOrder =
+    8
+
+roots :: Quantity units -> Expression1d units -> List Root
+roots tolerance expression =
+    case neighborhoods expression tolerance Interval.unit of
+        Ok neighborhoods -> List.collect neighborhoodRoot neighborhoods
+        Err Indeterminate -> []
+
+neighborhoods :: Expression1d units -> Quantity units -> Interval Unitless -> Result Indeterminate (List Neighborhood)
+neighborhoods expression tolerance domain =
+    case localNeighborhoods expression tolerance domain 0 of
+        Ok neighborhoods -> Ok neighborhoods
+        Err Indeterminate ->
+            if Interval.isAtomic domain
+                then Err Indeterminate
+                else do
+                    let (leftDomain, rightDomain) = Interval.bisect domain
+                    leftNeighborhoods <- neighborhoods expression tolerance leftDomain
+                    rightNeighborhoods <- neighborhoods expression tolerance rightDomain
+                    Ok (leftNeighborhoods ++ rightNeighborhoods)
+
+localNeighborhoods :: Expression1d units -> Quantity units -> Interval Unitless -> Int -> Result Indeterminate (List Neighborhood)
+localNeighborhoods expression tolerance domain order
+    | definitelyNonZero expression tolerance domain = Ok [NoRoot domain]
+    | order <= maxRootOrder = do
+        derivativeNeighborhoods <- localNeighborhoods (derivative expression) tolerance domain (order + 1)
+        Ok (List.combine (solve expression tolerance order) derivativeNeighborhoods)
+    -- We've passed the maximum root order and still haven't found a non-zero derivative
+    | otherwise = Err Indeterminate
+
+definitelyNonZero :: Expression1d units -> Quantity units -> Interval Unitless -> Bool
+definitelyNonZero expression tolerance domain =
+    let yInterval = bounds expression domain
+     in Interval.lowerBound yInterval >= tolerance || Interval.upperBound yInterval <= - tolerance
+
+solve :: Expression1d units -> Quantity units -> Int -> Neighborhood -> List Neighborhood
+solve expression tolerance order derivativeNeighborhood =
+    case derivativeNeighborhood of
+        NoRoot domain ->
+            case solveMonotonic expression domain of
+                Just x -> [HasRoot domain Root{value = x, order = order}]
+                Nothing -> [NoRoot domain]
+        HasRoot domain root ->
+            let rootX = Root.value root
+             in if Quantity.abs (evaluate expression rootX) <= tolerance
+                    then [HasRoot domain root]
+                    else
+                        let (x1, x2) = Interval.endpoints domain
+                            leftDomain = Interval.from x1 rootX
+                            rightDomain = Interval.from rootX x2
+                            leftNeighborhoods = solve expression tolerance order (NoRoot leftDomain)
+                            rightNeighborhoods = solve expression tolerance order (NoRoot rightDomain)
+                         in leftNeighborhoods ++ rightNeighborhoods
+
+solveMonotonic :: Expression1d units -> Interval Unitless -> Maybe Float
+solveMonotonic expression domain
+    | y1 <= Quantity.zero && y2 >= Quantity.zero = Just (bisectMonotonic expression x1 x2)
+    | y1 >= Quantity.zero && y2 <= Quantity.zero = Just (bisectMonotonic expression x2 x1)
+    | otherwise = Nothing
+  where
+    (x1, x2) = Interval.endpoints domain
+    y1 = evaluate expression x1
+    y2 = evaluate expression x2
+
+bisectMonotonic :: Expression1d units -> Float -> Float -> Float
+bisectMonotonic expression lowX highX =
+    let midX = Quantity.midpoint lowX highX
+     in if midX == lowX || midX == highX
+            then midX
+            else
+                let midY = evaluate expression midX
+                 in if midY >= Quantity.zero
+                        then bisectMonotonic expression lowX midX
+                        else bisectMonotonic expression midX highX
+
+neighborhoodRoot :: Neighborhood -> Maybe Root
+neighborhoodRoot neighborhood =
+    case neighborhood of
+        HasRoot _ root -> Just root
+        NoRoot _ -> Nothing

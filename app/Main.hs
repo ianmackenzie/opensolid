@@ -3,18 +3,26 @@ module Main (main) where
 import qualified Area
 import qualified Debug
 import qualified Direction2d
+import Expression1d (Expression1d)
 import qualified Expression1d
+import Expression1d.Root (Root)
+import qualified Expression1d.Root as Root
 import qualified Interval
 import qualified Length
 import OpenSolid
 import Point2d (Point2d)
 import qualified Point2d
 import qualified Quantity
+import qualified String
 import qualified Vector2d
 import qualified Vector3d
 import qualified Volume
 
 data MyPoints = MyPoints !(Point2d ()) !(Point2d ()) deriving (Show)
+
+showRoot :: Expression1d Unitless -> Root -> String
+showRoot x root =
+    String.fromInt (Root.order root) ++ ":" ++ String.fromFloat (Expression1d.evaluate x (Root.value root))
 
 main :: IO ()
 main = do
@@ -34,7 +42,7 @@ main = do
     Debug.log "Direction" Direction2d.x
     Debug.log "Tuple" (Point2d.meters 1.0 2.0, Point2d.meters 3.0 4.0)
     Debug.log "Custom type" (MyPoints (Point2d.meters 1.0 2.0) (Point2d.meters 3.0 4.0))
-    Debug.log "Roots" [-2.0 + t * 4.0 | t <- Expression1d.roots expression]
+    Debug.log "Roots" [showRoot x root | root <- roots]
     Debug.log "sqrt 2.0" (sqrt 2.0)
   where
     k = 0.5
@@ -54,5 +62,8 @@ main = do
     intervalDifference = Interval.from (Length.meters 2.0) (Length.meters 3.0) - Length.centimeters 50.0
     intervalProduct = Length.centimeters 20.0 * Interval.from (Length.meters 2.0) (Length.meters 3.0)
     t = Expression1d.parameter
-    x = -2.0 + t * 4.0
-    expression = Expression1d.squared x - 2.0
+    -- x = -2.0 + t * 4.0
+    -- y = Expression1d.squared x - 2.0
+    x = 3.0 * t
+    y = Expression1d.squared (x - 1.0) * (x - 2.0)
+    roots = Expression1d.roots 1e-12 y
