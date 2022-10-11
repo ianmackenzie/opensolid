@@ -23,6 +23,8 @@ module OpenSolid (
     ifThenElse,
     identity,
     always,
+    error,
+    notImplemented,
     subtract,
     (|>),
     (<|),
@@ -45,7 +47,6 @@ import Prelude (
     id,
     not,
     otherwise,
-    undefined,
     (&&),
     (>>),
     (>>=),
@@ -197,6 +198,14 @@ identity =
 always :: a -> b -> a
 always =
     Prelude.const
+
+error :: String -> a
+error message =
+    Prelude.error (Data.Text.unpack message)
+
+notImplemented :: a
+notImplemented =
+    error "Not implemented"
 
 subtract :: Subtraction lhs rhs => rhs a -> lhs a -> (Difference lhs rhs) a
 subtract b a =
