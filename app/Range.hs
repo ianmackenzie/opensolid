@@ -1,11 +1,9 @@
 module Range (
     Range,
     constant,
-    unit,
     from,
     minValue,
     maxValue,
-    isAtomic,
     midpoint,
     endpoints,
     squared,
@@ -82,10 +80,6 @@ instance Units.Multiplication units1 units2 => Multiplication (Range units1) (Ra
 constant :: Quantity units -> Range units
 constant value =
     Range value value
-
-unit :: Range Unitless
-unit =
-    Range 0.0 1.0
 
 from :: Quantity units -> Quantity units -> Range units
 from a b =

@@ -58,6 +58,7 @@ executable opensolid-hs
         Volume
         Range
         Range.Unsafe
+        Interval
         Direction2d
         Direction2d.Unsafe
         Direction3d
