@@ -193,7 +193,7 @@ solve expression tolerance order derivativeNeighborhood =
                 Nothing -> [NoRoot domain]
         HasRoot domain root ->
             let rootX = Root.value root
-             in if Quantity.abs (evaluate expression rootX) <= tolerance
+             in if abs (evaluate expression rootX) <= tolerance
                     then [HasRoot domain root]
                     else
                         let (x1, x2) = Interval.endpoints domain

@@ -12,7 +12,8 @@ module Range (
     abs,
 ) where
 
-import OpenSolid
+import OpenSolid hiding (abs)
+import qualified OpenSolid
 import qualified Quantity
 import Range.Unsafe
 import qualified String

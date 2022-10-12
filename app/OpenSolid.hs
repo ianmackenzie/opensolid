@@ -20,6 +20,7 @@ module OpenSolid (
     fromRational,
     fromString,
     float,
+    abs,
     sqrt,
     ifThenElse,
     identity,
@@ -180,6 +181,10 @@ fromString =
 float :: Int -> Float
 float (Count n) =
     Quantity (Prelude.fromIntegral n)
+
+abs :: Quantity units -> Quantity units
+abs (Quantity x) =
+    Quantity (Prelude.abs x)
 
 sqrt :: Units.Sqrt units => Quantity units -> Quantity (Units.SquareRoot units)
 sqrt (Quantity x) =
