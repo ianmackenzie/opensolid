@@ -1,36 +1,30 @@
 module BoundingBox3d (
     BoundingBox3d (..),
-    singleton,
+    constant,
     hull2,
     hull3,
     hull4,
 ) where
 
-import Interval (Interval)
-import qualified Interval
-import Interval.Unsafe
 import OpenSolid
 import Point3d (Point3d (..))
+import Range (Range)
+import qualified Range
+import Range.Unsafe
 import Units (Meters)
 
-data BoundingBox3d coordinates = BoundingBox3d !(Interval Meters) !(Interval Meters) !(Interval Meters)
+data BoundingBox3d coordinates = BoundingBox3d !(Range Meters) !(Range Meters) !(Range Meters)
 
-singleton :: Point3d coordinates -> BoundingBox3d coordinates
-singleton point =
+constant :: Point3d coordinates -> BoundingBox3d coordinates
+constant point =
     let (Point3d x y z) = point
-        xInterval = Interval.singleton x
-        yInterval = Interval.singleton y
-        zInterval = Interval.singleton z
-     in BoundingBox3d xInterval yInterval zInterval
+     in BoundingBox3d (Range.constant x) (Range.constant y) (Range.constant z)
 
 hull2 :: Point3d coordinates -> Point3d coordinates -> BoundingBox3d coordinates
 hull2 p1 p2 =
     let (Point3d x1 y1 z1) = p1
         (Point3d x2 y2 z2) = p2
-        xInterval = Interval.from x1 x2
-        yInterval = Interval.from y1 y2
-        zInterval = Interval.from z1 z2
-     in BoundingBox3d xInterval yInterval zInterval
+     in BoundingBox3d (Range.from x1 x2) (Range.from y1 y2) (Range.from z1 z2)
 
 hull3 :: Point3d coordinates -> Point3d coordinates -> Point3d coordinates -> BoundingBox3d coordinates
 hull3 p1 p2 p3 =
@@ -43,10 +37,7 @@ hull3 p1 p2 p3 =
         maxY = max (max y1 y2) y3
         minZ = min (min z1 z2) z3
         maxZ = max (max z1 z2) z3
-        xInterval = Interval minX maxX
-        yInterval = Interval minY maxY
-        zInterval = Interval minZ maxZ
-     in BoundingBox3d xInterval yInterval zInterval
+     in BoundingBox3d (Range minX maxX) (Range minY maxY) (Range minZ maxZ)
 
 hull4 :: Point3d coordinates -> Point3d coordinates -> Point3d coordinates -> Point3d coordinates -> BoundingBox3d coordinates
 hull4 p1 p2 p3 p4 =
@@ -60,7 +51,4 @@ hull4 p1 p2 p3 p4 =
         maxY = max (max (max y1 y2) y3) y4
         minZ = min (min (min z1 z2) z3) z4
         maxZ = max (max (max z1 z2) z3) z4
-        xInterval = Interval minX maxX
-        yInterval = Interval minY maxY
-        zInterval = Interval minZ maxZ
-     in BoundingBox3d xInterval yInterval zInterval
+     in BoundingBox3d (Range minX maxX) (Range minY maxY) (Range minZ maxZ)

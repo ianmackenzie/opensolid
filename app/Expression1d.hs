@@ -12,17 +12,17 @@ module Expression1d (
 
 import Expression1d.Root (Root (..))
 import qualified Expression1d.Root as Root
-import Interval (Interval)
-import qualified Interval
-import Interval.Unsafe
 import qualified List
 import OpenSolid
 import qualified Quantity
+import Range (Range)
+import qualified Range
+import Range.Unsafe
 import qualified Units
 
 data Expression1d units = Expression1d
     { evaluate :: !(Float -> Quantity units)
-    , bounds :: !(Interval Unitless -> Interval units)
+    , bounds :: !(Range Unitless -> Range units)
     , derivative :: ~(Expression1d units)
     }
 
@@ -34,7 +34,7 @@ constant :: Quantity units -> Expression1d units
 constant value =
     Expression1d
         { evaluate = always value
-        , bounds = always (Interval.singleton value)
+        , bounds = always (Range.constant value)
         , derivative = constant Quantity.zero
         }
 
@@ -135,13 +135,13 @@ squared :: Units.Multiplication units units => Expression1d units -> Expression1
 squared expression =
     Expression1d
         { evaluate = evaluate expression >>> (\value -> value * value)
-        , bounds = bounds expression >>> Interval.squared
+        , bounds = bounds expression >>> Range.squared
         , derivative = 2.0 * expression * derivative expression
         }
 
 data Neighborhood
-    = HasRoot !(Interval Unitless) !Root
-    | NoRoot !(Interval Unitless)
+    = HasRoot !(Range Unitless) !Root
+    | NoRoot !(Range Unitless)
 
 data Indeterminate = Indeterminate
 
@@ -151,24 +151,24 @@ maxRootOrder =
 
 roots :: Quantity units -> Expression1d units -> List Root
 roots tolerance expression =
-    case neighborhoods expression tolerance Interval.unit of
+    case neighborhoods expression tolerance Range.unit of
         Ok neighborhoods -> List.collect neighborhoodRoot neighborhoods
         Err Indeterminate -> []
 
-neighborhoods :: Expression1d units -> Quantity units -> Interval Unitless -> Result Indeterminate (List Neighborhood)
+neighborhoods :: Expression1d units -> Quantity units -> Range Unitless -> Result Indeterminate (List Neighborhood)
 neighborhoods expression tolerance domain =
     case localNeighborhoods expression tolerance domain 0 of
         Ok neighborhoods -> Ok neighborhoods
         Err Indeterminate ->
-            if Interval.isAtomic domain
+            if Range.isAtomic domain
                 then Err Indeterminate
                 else do
-                    let (leftDomain, rightDomain) = Interval.bisect domain
+                    let (leftDomain, rightDomain) = Range.bisect domain
                     leftNeighborhoods <- neighborhoods expression tolerance leftDomain
                     rightNeighborhoods <- neighborhoods expression tolerance rightDomain
                     Ok (leftNeighborhoods ++ rightNeighborhoods)
 
-localNeighborhoods :: Expression1d units -> Quantity units -> Interval Unitless -> Int -> Result Indeterminate (List Neighborhood)
+localNeighborhoods :: Expression1d units -> Quantity units -> Range Unitless -> Int -> Result Indeterminate (List Neighborhood)
 localNeighborhoods expression tolerance domain order
     | definitelyNonZero expression tolerance domain = Ok [NoRoot domain]
     | order <= maxRootOrder = do
@@ -177,10 +177,10 @@ localNeighborhoods expression tolerance domain order
     -- We've passed the maximum root order and still haven't found a non-zero derivative
     | otherwise = Err Indeterminate
 
-definitelyNonZero :: Expression1d units -> Quantity units -> Interval Unitless -> Bool
+definitelyNonZero :: Expression1d units -> Quantity units -> Range Unitless -> Bool
 definitelyNonZero expression tolerance domain =
-    let yInterval = bounds expression domain
-     in Interval.lowerBound yInterval >= tolerance || Interval.upperBound yInterval <= - tolerance
+    let yRange = bounds expression domain
+     in Range.minValue yRange >= tolerance || Range.maxValue yRange <= - tolerance
 
 solve :: Expression1d units -> Quantity units -> Int -> Neighborhood -> List Neighborhood
 solve expression tolerance order derivativeNeighborhood =
@@ -194,20 +194,20 @@ solve expression tolerance order derivativeNeighborhood =
              in if Quantity.abs (evaluate expression rootX) <= tolerance
                     then [HasRoot domain root]
                     else
-                        let (x1, x2) = Interval.endpoints domain
-                            leftDomain = Interval.from x1 rootX
-                            rightDomain = Interval.from rootX x2
+                        let (x1, x2) = Range.endpoints domain
+                            leftDomain = Range.from x1 rootX
+                            rightDomain = Range.from rootX x2
                             leftNeighborhoods = solve expression tolerance order (NoRoot leftDomain)
                             rightNeighborhoods = solve expression tolerance order (NoRoot rightDomain)
                          in leftNeighborhoods ++ rightNeighborhoods
 
-solveMonotonic :: Expression1d units -> Interval Unitless -> Maybe Float
+solveMonotonic :: Expression1d units -> Range Unitless -> Maybe Float
 solveMonotonic expression domain
     | y1 <= Quantity.zero && y2 >= Quantity.zero = Just (bisectMonotonic expression x1 x2)
     | y1 >= Quantity.zero && y2 <= Quantity.zero = Just (bisectMonotonic expression x2 x1)
     | otherwise = Nothing
   where
-    (x1, x2) = Interval.endpoints domain
+    (x1, x2) = Range.endpoints domain
     y1 = evaluate expression x1
     y2 = evaluate expression x2
 

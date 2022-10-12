@@ -34,8 +34,8 @@ instance IsCurve3d Point3d where
     bisect point =
         (point, point)
 
-    boundingBox =
-        BoundingBox3d.singleton
+    boundingBox point =
+        BoundingBox3d.constant point
 
 instance IsCurve3d Curve3d where
     startPoint (Curve3d curve) =

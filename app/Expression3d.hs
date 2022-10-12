@@ -10,9 +10,9 @@ module Expression3d (
 
 import Expression1d (Expression1d (Expression1d))
 import qualified Expression1d
-import Interval (Interval)
 import OpenSolid
 import qualified Quantity
+import Range (Range)
 import qualified Units
 import Vector3d (Vector3d (Vector3d))
 import qualified Vector3d
@@ -21,7 +21,7 @@ import qualified VectorBox3d
 
 data Expression3d units coordinates = Expression3d
     { evaluate :: !(Float -> Vector3d units coordinates)
-    , bounds :: !(Interval Unitless -> VectorBox3d units coordinates)
+    , bounds :: !(Range Unitless -> VectorBox3d units coordinates)
     , derivative :: ~(Expression3d units coordinates)
     }
 
@@ -33,7 +33,7 @@ constant :: Vector3d units coordinates -> Expression3d units coordinates
 constant vector =
     Expression3d
         { evaluate = always vector
-        , bounds = always (VectorBox3d.singleton vector)
+        , bounds = always (VectorBox3d.constant vector)
         , derivative = constant Vector3d.zero
         }
 
