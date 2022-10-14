@@ -2,6 +2,7 @@ module Quantity (
     Quantity,
     zero,
     infinity,
+    isNaN,
     baseUnit,
     baseUnits,
     inBaseUnits,
@@ -22,6 +23,10 @@ zero =
 infinity :: Quantity units
 infinity =
     coerce (1.0 / 0.0)
+
+isNaN :: Quantity units -> Bool
+isNaN (Quantity value) =
+    Prelude.isNaN value
 
 baseUnits :: Float -> Quantity units
 baseUnits (Quantity value) =
