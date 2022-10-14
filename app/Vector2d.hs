@@ -8,6 +8,8 @@ module Vector2d (
     determinant,
     magnitude,
     squaredMagnitude,
+    direction,
+    normalize,
 ) where
 
 import qualified Area
@@ -121,3 +123,21 @@ magnitude vector =
 squaredMagnitude :: Units.Multiplication units units => Vector2d units coordinates -> Quantity (Units.Product units units)
 squaredMagnitude vector =
     let (Vector2d x y) = vector in x * x + y * y
+
+direction :: Vector2d units coordinates -> Maybe (Direction2d coordinates)
+direction vector =
+    let m = magnitude vector
+     in if m == Quantity.zero
+            then Nothing
+            else
+                let (Vector2d x y) = vector
+                 in Just (Direction2d (x / m) (y / m))
+
+normalize :: Vector2d units coordinates -> Vector2d Unitless coordinates
+normalize vector =
+    let m = magnitude vector
+     in if m == Quantity.zero
+            then zero
+            else
+                let (Vector2d x y) = vector
+                 in Vector2d (x / m) (y / m)

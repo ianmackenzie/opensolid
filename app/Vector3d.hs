@@ -13,6 +13,8 @@ module Vector3d (
     interpolateFrom,
     magnitude,
     squaredMagnitude,
+    direction,
+    normalize,
 ) where
 
 import qualified Area
@@ -199,3 +201,21 @@ magnitude vector =
 squaredMagnitude :: Units.Multiplication units units => Vector3d units coordinates -> Quantity (Units.Product units units)
 squaredMagnitude vector =
     let (Vector3d x y z) = vector in x * x + y * y + z * z
+
+direction :: Vector3d units coordinates -> Maybe (Direction3d coordinates)
+direction vector =
+    let m = magnitude vector
+     in if m == Quantity.zero
+            then Nothing
+            else
+                let (Vector3d x y z) = vector
+                 in Just (Direction3d (x / m) (y / m) (z / m))
+
+normalize :: Vector3d units coordinates -> Vector3d Unitless coordinates
+normalize vector =
+    let m = magnitude vector
+     in if m == Quantity.zero
+            then zero
+            else
+                let (Vector3d x y z) = vector
+                 in Vector3d (x / m) (y / m) (z / m)
