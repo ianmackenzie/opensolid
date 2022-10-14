@@ -2,6 +2,8 @@ module Quantity (
     Quantity,
     zero,
     infinity,
+    positiveInfinity,
+    negativeInfinity,
     isNaN,
     baseUnit,
     baseUnits,
@@ -21,9 +23,17 @@ zero :: Quantity units
 zero =
     coerce 0.0
 
+positiveInfinity :: Quantity units
+positiveInfinity =
+    coerce (1.0 / 0.0)
+
+negativeInfinity :: Quantity units
+negativeInfinity =
+    negate positiveInfinity
+
 infinity :: Quantity units
 infinity =
-    coerce (1.0 / 0.0)
+    positiveInfinity
 
 isNaN :: Quantity units -> Bool
 isNaN (Quantity value) =
