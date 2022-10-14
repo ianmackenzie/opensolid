@@ -78,6 +78,26 @@ instance Units.Multiplication units1 units2 => Multiplication (Range units1) (Ra
             high = max (max (max ll lh) hl) hh
          in Range low high
 
+instance Units.Division units1 units2 => Division (Range units1) (Quantity units2) where
+    type Quotient (Range units1) (Quantity units2) = Range (Units.Quotient units1 units2)
+    (Range nl nh) / d
+        | d > Quantity.zero = Range (nl / d) (nh / d)
+        | d < Quantity.zero = Range (nh / d) (nl / d)
+        | otherwise = Range Quantity.negativeInfinity Quantity.positiveInfinity
+
+instance Units.Division units1 units2 => Division (Quantity units1) (Range units2) where
+    type Quotient (Quantity units1) (Range units2) = Range (Units.Quotient units1 units2)
+    n / (Range dl dh)
+        | dl > Quantity.zero || dh < Quantity.zero = Range (n / dh) (n / dl)
+        | otherwise = Range Quantity.negativeInfinity Quantity.positiveInfinity
+
+instance Units.Division units1 units2 => Division (Range units1) (Range units2) where
+    type Quotient (Range units1) (Range units2) = Range (Units.Quotient units1 units2)
+    (Range nl nh) / (Range dl dh)
+        | dl > Quantity.zero = Range (nl / dh) (nh / dl)
+        | dh < Quantity.zero = Range (nh / dh) (nl / dl)
+        | otherwise = Range Quantity.negativeInfinity Quantity.positiveInfinity
+
 constant :: Quantity units -> Range units
 constant value =
     Range value value
