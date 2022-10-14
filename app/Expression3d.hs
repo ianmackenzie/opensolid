@@ -49,9 +49,9 @@ xyz x y z =
 instance Negation (Expression3d units coordinates) where
     negate expression =
         Expression3d
-            { evaluate = \t -> - (evaluate expression t)
-            , bounds = \t -> - (bounds expression t)
-            , derivative = - (derivative expression)
+            { evaluate = evaluate expression >>> negate
+            , bounds = bounds expression >>> negate
+            , derivative = negate (derivative expression)
             }
 
 instance Addition (Expression3d units) (Vector3d units) where
@@ -92,7 +92,7 @@ instance Subtraction (Vector3d units) (Expression3d units) where
         Expression3d
             { evaluate = \t -> vector - evaluate expression t
             , bounds = \t -> vector - bounds expression t
-            , derivative = - (derivative expression)
+            , derivative = negate (derivative expression)
             }
 
 instance Subtraction (Expression3d units) (Expression3d units) where
