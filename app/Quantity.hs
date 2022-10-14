@@ -51,9 +51,14 @@ midpoint a b =
     a + 0.5 * (b - a)
 
 hypot2 :: Quantity units -> Quantity units -> Quantity units
-hypot2 (Quantity a) (Quantity b) =
-    Quantity (Prelude.sqrt (a Prelude.* a Prelude.+ b Prelude.* b))
+hypot2 x y =
+    let x' = (coerce x :: Float)
+        y' = (coerce y :: Float)
+     in coerce (sqrt (x' * x' + y' * y'))
 
 hypot3 :: Quantity units -> Quantity units -> Quantity units -> Quantity units
-hypot3 (Quantity a) (Quantity b) (Quantity c) =
-    Quantity (Prelude.sqrt (a Prelude.* a Prelude.+ b Prelude.* b Prelude.+ c Prelude.* c))
+hypot3 x y z =
+    let x' = (coerce x :: Float)
+        y' = (coerce y :: Float)
+        z' = (coerce z :: Float)
+     in coerce (sqrt (x' * x' + y' * y' + z' * z'))
