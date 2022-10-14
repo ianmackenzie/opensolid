@@ -10,9 +10,10 @@ module Range (
     contains,
     bisect,
     abs,
+    sqrt,
 ) where
 
-import OpenSolid hiding (abs)
+import OpenSolid hiding (abs, sqrt)
 import qualified OpenSolid
 import qualified Quantity
 import Range.Unsafe
@@ -138,6 +139,13 @@ squared range
     (Range low high) = range
     ll = low * low
     hh = high * high
+
+sqrt :: Units.Sqrt units => Range units -> Range (Units.SquareRoot units)
+sqrt range =
+    let (Range low high) = range
+        sqrtLow = OpenSolid.sqrt (max low Quantity.zero)
+        sqrtHigh = OpenSolid.sqrt (max high Quantity.zero)
+     in Range sqrtLow sqrtHigh
 
 contains :: Quantity units -> Range units -> Bool
 contains quantity range =
