@@ -10,6 +10,7 @@ module Quantity (
     midpoint,
     hypot2,
     hypot3,
+    clamp,
 ) where
 
 import Data.Coerce (coerce)
@@ -62,3 +63,9 @@ hypot3 x y z =
         y' = (coerce y :: Float)
         z' = (coerce z :: Float)
      in coerce (sqrt (x' * x' + y' * y' + z' * z'))
+
+clamp :: Quantity units -> Quantity units -> Quantity units -> Quantity units
+clamp low high value
+    | value < low = low
+    | value > high = high
+    | otherwise = value
