@@ -70,6 +70,16 @@ instance Units.Multiplication units1 units2 => Multiplication (VectorBox3d units
     (VectorBox3d x y z) * range =
         VectorBox3d (x * range) (y * range) (z * range)
 
+instance Units.Division units1 units2 => Division (VectorBox3d units1 coordinates) (Quantity units2) where
+    type Quotient (VectorBox3d units1 coordinates) (Quantity units2) = VectorBox3d (Units.Quotient units1 units2) coordinates
+    (VectorBox3d x y z) / quantity =
+        VectorBox3d (x / quantity) (y / quantity) (z / quantity)
+
+instance Units.Division units1 units2 => Division (VectorBox3d units1 coordinates) (Range units2) where
+    type Quotient (VectorBox3d units1 coordinates) (Range units2) = VectorBox3d (Units.Quotient units1 units2) coordinates
+    (VectorBox3d x y z) / range =
+        VectorBox3d (x / range) (y / range) (z / range)
+
 instance Units.Multiplication units1 units2 => DotProduct (VectorBox3d units1) (Vector3d units2) where
     type DotProductResult (VectorBox3d units1) (Vector3d units2) = Range (Units.Product units1 units2)
     (VectorBox3d x1 y1 z1) . (Vector3d x2 y2 z2) =
