@@ -101,6 +101,4 @@ midpoint p1 p2 =
 
 distanceFrom :: Point3d coordinates -> Point3d coordinates -> Length
 distanceFrom p1 p2 =
-    let (Point3d x1 y1 z1) = p1
-        (Point3d x2 y2 z2) = p2
-     in Quantity.hypot3 (x2 - x1) (y2 - y1) (z2 - z1)
+    Vector3d.magnitude (p2 - p1)
