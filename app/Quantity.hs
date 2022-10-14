@@ -1,6 +1,7 @@
 module Quantity (
     Quantity,
     zero,
+    infinity,
     baseUnit,
     baseUnits,
     inBaseUnits,
@@ -17,6 +18,10 @@ import qualified Prelude
 zero :: Quantity units
 zero =
     coerce 0.0
+
+infinity :: Quantity units
+infinity =
+    coerce (1.0 / 0.0)
 
 baseUnits :: Float -> Quantity units
 baseUnits (Quantity value) =
