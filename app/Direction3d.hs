@@ -15,7 +15,7 @@ import qualified String
 
 instance Negation (Direction3d coordinates) where
     negate (Direction3d x y z) =
-        Direction3d (- x) (- y) (- z)
+        Direction3d (negate x) (negate y) (negate z)
 
 instance DotProduct Direction3d Direction3d where
     type DotProductResult Direction3d Direction3d = Float

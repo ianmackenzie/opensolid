@@ -43,7 +43,7 @@ showImpl functionName inCorrespondingUnits precedence (Vector2d x y) =
 
 instance Negation (Vector2d units coordinates) where
     negate (Vector2d x y) =
-        Vector2d (- x) (- y)
+        Vector2d (negate x) (negate y)
 
 instance Addition (Vector2d units) (Vector2d units) where
     type Sum (Vector2d units) (Vector2d units) = Vector2d units

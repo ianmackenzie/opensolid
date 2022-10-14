@@ -52,7 +52,7 @@ showImpl functionName inCorrespondingUnits precedence (Vector3d x y z) =
 
 instance Negation (Vector3d units coordinates) where
     negate (Vector3d x y z) =
-        Vector3d (- x) (- y) (- z)
+        Vector3d (negate x) (negate y) (negate z)
 
 instance Addition (Vector3d units) (Vector3d units) where
     type Sum (Vector3d units) (Vector3d units) = Vector3d units

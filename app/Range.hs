@@ -21,7 +21,7 @@ import qualified Units
 
 instance Negation (Range units) where
     negate (Range low high) =
-        Range (- high) (- low)
+        Range (negate high) (negate low)
 
 instance Addition Range Quantity where
     type Sum Range Quantity = Range
@@ -134,6 +134,6 @@ abs :: Range units -> Range units
 abs range
     | low >= Quantity.zero = range
     | high <= Quantity.zero = - range
-    | otherwise = Range Quantity.zero (max high (- low))
+    | otherwise = Range Quantity.zero (max high (negate low))
   where
     (Range low high) = range

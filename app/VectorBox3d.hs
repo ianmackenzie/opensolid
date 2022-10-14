@@ -18,7 +18,7 @@ data VectorBox3d units coordinates = VectorBox3d !(Range units) !(Range units) !
 
 instance Negation (VectorBox3d units coordinates) where
     negate (VectorBox3d x y z) =
-        VectorBox3d (- x) (- y) (- z)
+        VectorBox3d (negate x) (negate y) (negate z)
 
 instance Addition (VectorBox3d units) (Vector3d units) where
     type Sum (VectorBox3d units) (Vector3d units) = VectorBox3d units
