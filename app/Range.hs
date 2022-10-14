@@ -11,8 +11,11 @@ module Range (
     bisect,
     abs,
     sqrt,
+    hypot2,
+    hypot3,
 ) where
 
+import Data.Coerce (coerce)
 import OpenSolid hiding (abs, sqrt)
 import qualified OpenSolid
 import qualified Quantity
@@ -165,3 +168,16 @@ abs range
     | otherwise = Range Quantity.zero (max high (negate low))
   where
     (Range low high) = range
+
+hypot2 :: Range units -> Range units -> Range units
+hypot2 x y =
+    let x' = (coerce x :: Range Unitless)
+        y' = (coerce y :: Range Unitless)
+     in coerce (sqrt (squared x' + squared y'))
+
+hypot3 :: Range units -> Range units -> Range units -> Range units
+hypot3 x y z =
+    let x' = (coerce x :: Range Unitless)
+        y' = (coerce y :: Range Unitless)
+        z' = (coerce z :: Range Unitless)
+     in coerce (sqrt (squared x' + squared y' + squared z'))
