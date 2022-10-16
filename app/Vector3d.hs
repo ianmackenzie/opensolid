@@ -195,7 +195,11 @@ midpoint v1 v2 =
 
 magnitude :: Vector3d units coordinates -> Quantity units
 magnitude vector =
-    let (Vector3d x y z) = vector in Quantity.hypot3 x y z
+    let (Vector3d x y z) = vector
+        ux = Quantity.inBaseUnits x
+        uy = Quantity.inBaseUnits y
+        uz = Quantity.inBaseUnits z
+     in Quantity.baseUnits (sqrt (ux * ux + uy * uy + uz * uz))
 
 squaredMagnitude :: Units.Multiplication units units => Vector3d units coordinates -> Quantity (Units.Product units units)
 squaredMagnitude vector =

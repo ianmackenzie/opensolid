@@ -118,7 +118,10 @@ determinant (Vector2d x1 y1) (Vector2d x2 y2) =
 
 magnitude :: Vector2d units coordinates -> Quantity units
 magnitude vector =
-    let (Vector2d x y) = vector in Quantity.hypot2 x y
+    let (Vector2d x y) = vector
+        ux = Quantity.inBaseUnits x
+        uy = Quantity.inBaseUnits y
+     in Quantity.baseUnits (sqrt (ux * ux + uy * uy))
 
 squaredMagnitude :: Units.Multiplication units units => Vector2d units coordinates -> Quantity (Units.Product units units)
 squaredMagnitude vector =
