@@ -11,9 +11,11 @@ module Interval (
     bisect,
     unit,
     isAtomic,
+    abs,
+    sqrt,
 ) where
 
-import OpenSolid
+import OpenSolid hiding (abs, sqrt)
 import Range (Range)
 import qualified Range
 import Range.Unsafe
@@ -65,3 +67,11 @@ isAtomic interval =
     let (Range low high) = interval
         mid = midpoint interval
      in mid == low || mid == high
+
+abs :: Interval -> Interval
+abs =
+    Range.abs
+
+sqrt :: Interval -> Interval
+sqrt =
+    Range.sqrt
