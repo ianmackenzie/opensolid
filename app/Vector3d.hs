@@ -18,7 +18,6 @@ module Vector3d (
 ) where
 
 import qualified Area
-import Data.Fixed (Uni)
 import Direction3d (Direction3d)
 import qualified Direction3d
 import Direction3d.Unsafe
