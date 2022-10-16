@@ -13,7 +13,6 @@ module Range (
     sqrt,
 ) where
 
-import Data.Coerce (coerce)
 import OpenSolid hiding (abs, sqrt)
 import qualified OpenSolid
 import qualified Quantity
