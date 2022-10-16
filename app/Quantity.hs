@@ -40,12 +40,12 @@ isNaN (Quantity value) =
     Prelude.isNaN value
 
 baseUnits :: Float -> Quantity units
-baseUnits (Quantity value) =
-    Quantity value
+baseUnits =
+    coerce
 
 inBaseUnits :: Quantity units -> Float
-inBaseUnits (Quantity value) =
-    Quantity value
+inBaseUnits =
+    coerce
 
 baseUnit :: Quantity units
 baseUnit =
