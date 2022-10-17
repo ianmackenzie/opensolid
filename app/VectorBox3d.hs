@@ -5,9 +5,14 @@ module VectorBox3d (
     hull3,
     hull4,
     squaredMagnitude,
+    magnitude,
+    normalize,
 ) where
 
+import Interval (Interval)
+import qualified Interval
 import OpenSolid
+import qualified Quantity
 import Range (Range)
 import qualified Range
 import Range.Unsafe
@@ -164,3 +169,23 @@ squaredMagnitude :: Units.Multiplication units units => VectorBox3d units coordi
 squaredMagnitude vectorBox =
     let (VectorBox3d x y z) = vectorBox
      in Range.squared x + Range.squared y + Range.squared z
+
+magnitude :: VectorBox3d units coordinates -> Range units
+magnitude vectorBox =
+    let (VectorBox3d x y z) = vectorBox
+        ux = Range.inBaseUnits x
+        uy = Range.inBaseUnits y
+        uz = Range.inBaseUnits z
+     in Range.baseUnits (Interval.sqrt (Interval.squared ux + Interval.squared uy + Interval.squared uz))
+
+normalize :: VectorBox3d units coordinates -> VectorBox3d Unitless coordinates
+normalize vectorBox =
+    let (VectorBox3d x y z) = vectorBox / magnitude vectorBox
+        nx = clampNormalized x
+        ny = clampNormalized y
+        nz = clampNormalized z
+     in VectorBox3d nx ny nz
+
+clampNormalized :: Interval -> Interval
+clampNormalized (Range low high) =
+    Range (Quantity.clamp (-1.0) 1.0 low) (Quantity.clamp (-1.0) 1.0 high)
