@@ -2,6 +2,8 @@ module Range (
     Range,
     constant,
     from,
+    baseUnits,
+    inBaseUnits,
     minValue,
     maxValue,
     midpoint,
@@ -106,6 +108,14 @@ constant value =
 from :: Quantity units -> Quantity units -> Range units
 from a b =
     Range (min a b) (max a b)
+
+baseUnits :: Range Unitless -> Range units
+baseUnits (Range low high) =
+    Range (Quantity.baseUnits low) (Quantity.baseUnits high)
+
+inBaseUnits :: Range units -> Range Unitless
+inBaseUnits (Range low high) =
+    Range (Quantity.inBaseUnits low) (Quantity.inBaseUnits high)
 
 minValue :: Range units -> Quantity units
 minValue range =
