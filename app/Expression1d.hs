@@ -7,6 +7,7 @@ module Expression1d (
     constant,
     parameter,
     squared,
+    sqrt,
     roots,
 ) where
 
