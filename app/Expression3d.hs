@@ -6,8 +6,10 @@ module Expression3d (
     zero,
     constant,
     squaredMagnitude,
+    magnitude,
 ) where
 
+import Data.Coerce (coerce)
 import Expression1d (Expression1d (Expression1d))
 import qualified Expression1d
 import Interval (Interval)
@@ -194,3 +196,8 @@ squaredMagnitude expression =
         (evaluate expression >>> Vector3d.squaredMagnitude)
         (bounds expression >>> VectorBox3d.squaredMagnitude)
         (2.0 * expression . derivative expression)
+
+magnitude :: Expression3d units coordinates -> Expression1d units
+magnitude expression =
+    let f = coerce expression :: Expression3d Unitless coordinates
+     in coerce (Expression1d.sqrt (squaredMagnitude f))
