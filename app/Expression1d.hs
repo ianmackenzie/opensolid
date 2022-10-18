@@ -10,6 +10,7 @@ module Expression1d (
     roots,
 ) where
 
+import Data.Coerce (coerce)
 import Expression1d.Root (Root (..))
 import qualified Expression1d.Root as Root
 import Interval (Interval)
@@ -131,6 +132,20 @@ instance Units.Multiplication units1 units2 => Multiplication (Expression1d unit
             { evaluate = \t -> evaluate expression1 t * evaluate expression2 t
             , bounds = \t -> bounds expression1 t * bounds expression2 t
             , derivative = derivative expression1 * expression2 + expression1 * derivative expression2
+            }
+
+instance Units.Division units1 units2 => Division (Expression1d units1) (Expression1d units2) where
+    type Quotient (Expression1d units1) (Expression1d units2) = Expression1d (Units.Quotient units1 units2)
+    expression1 / expression2 =
+        Expression1d
+            { evaluate = \t -> evaluate expression1 t / evaluate expression2 t
+            , bounds = \t -> bounds expression1 t / bounds expression2 t
+            , derivative =
+                let p = (coerce expression1 :: Expression1d Unitless)
+                    q = (coerce expression2 :: Expression1d Unitless)
+                    p' = derivative p
+                    q' = derivative q
+                 in coerce ((p' * q - p * q') / squared q)
             }
 
 squared :: Units.Multiplication units units => Expression1d units -> Expression1d (Units.Product units units)
