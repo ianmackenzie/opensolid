@@ -16,7 +16,8 @@ import qualified Expression1d.Root as Root
 import Interval (Interval)
 import qualified Interval
 import qualified List
-import OpenSolid
+import OpenSolid hiding (sqrt)
+import qualified OpenSolid
 import qualified Quantity
 import Range (Range)
 import qualified Range
@@ -154,6 +155,16 @@ squared expression =
         { evaluate = evaluate expression >>> (\value -> value * value)
         , bounds = bounds expression >>> Range.squared
         , derivative = 2.0 * expression * derivative expression
+        }
+
+sqrt :: Units.Sqrt units => Expression1d units -> Expression1d (Units.SquareRoot units)
+sqrt expression =
+    Expression1d
+        { evaluate = evaluate expression >>> OpenSolid.sqrt
+        , bounds = bounds expression >>> Range.sqrt
+        , derivative =
+            let f = (coerce expression :: Expression1d Unitless)
+             in coerce (derivative f / (2.0 * sqrt f))
         }
 
 data Neighborhood
