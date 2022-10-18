@@ -53,7 +53,7 @@ instance Negation (Expression1d units) where
         Expression1d
             { evaluate = evaluate expression >>> negate
             , bounds = bounds expression >>> negate
-            , derivative = - (derivative expression)
+            , derivative = negate (derivative expression)
             }
 
 instance Addition Expression1d Quantity where
@@ -94,7 +94,7 @@ instance Subtraction Quantity Expression1d where
         Expression1d
             { evaluate = (quantity -) <<< evaluate expression
             , bounds = (quantity -) <<< bounds expression
-            , derivative = - (derivative expression)
+            , derivative = negate (derivative expression)
             }
 
 instance Subtraction Expression1d Expression1d where
