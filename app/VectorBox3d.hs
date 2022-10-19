@@ -9,6 +9,7 @@ module VectorBox3d (
     normalize,
 ) where
 
+import Data.Coerce (coerce)
 import Interval (Interval)
 import qualified Interval
 import OpenSolid
@@ -172,11 +173,8 @@ squaredMagnitude vectorBox =
 
 magnitude :: VectorBox3d units coordinates -> Range units
 magnitude vectorBox =
-    let (VectorBox3d x y z) = vectorBox
-        ux = Range.inBaseUnits x
-        uy = Range.inBaseUnits y
-        uz = Range.inBaseUnits z
-     in Range.baseUnits (Interval.sqrt (Interval.squared ux + Interval.squared uy + Interval.squared uz))
+    let (VectorBox3d x y z) = coerce vectorBox :: VectorBox3d Unitless coordinates
+     in coerce (Interval.sqrt (Interval.squared x + Interval.squared y + Interval.squared z))
 
 normalize :: VectorBox3d units coordinates -> VectorBox3d Unitless coordinates
 normalize vectorBox =

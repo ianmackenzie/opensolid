@@ -18,6 +18,7 @@ module Vector3d (
 ) where
 
 import qualified Area
+import Data.Coerce (coerce)
 import Direction3d (Direction3d)
 import qualified Direction3d
 import Direction3d.Unsafe
@@ -195,11 +196,8 @@ midpoint v1 v2 =
 
 magnitude :: Vector3d units coordinates -> Quantity units
 magnitude vector =
-    let (Vector3d x y z) = vector
-        ux = Quantity.inBaseUnits x
-        uy = Quantity.inBaseUnits y
-        uz = Quantity.inBaseUnits z
-     in Quantity.baseUnits (sqrt (ux * ux + uy * uy + uz * uz))
+    let (Vector3d x y z) = coerce vector :: Vector3d Unitless coordinates
+     in coerce (sqrt (x * x + y * y + z * z))
 
 squaredMagnitude :: Units.Multiplication units units => Vector3d units coordinates -> Quantity (Units.Product units units)
 squaredMagnitude vector =
