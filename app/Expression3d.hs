@@ -7,6 +7,7 @@ module Expression3d (
     constant,
     squaredMagnitude,
     magnitude,
+    normalize,
 ) where
 
 import Data.Coerce (coerce)
@@ -214,3 +215,7 @@ magnitude :: Expression3d units coordinates -> Expression1d units
 magnitude expression =
     let f = coerce expression :: Expression3d Unitless coordinates
      in coerce (Expression1d.sqrt (squaredMagnitude f))
+
+normalize :: Expression3d units coordinates -> Expression3d Unitless coordinates
+normalize expression =
+    expression / magnitude expression
