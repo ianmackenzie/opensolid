@@ -143,8 +143,8 @@ instance Units.Division units1 units2 => Division (Expression1d units1) (Express
             { evaluate = \t -> evaluate expression1 t / evaluate expression2 t
             , bounds = \t -> bounds expression1 t / bounds expression2 t
             , derivative =
-                let p = (coerce expression1 :: Expression1d Unitless)
-                    q = (coerce expression2 :: Expression1d Unitless)
+                let p = coerce expression1 :: Expression1d Unitless
+                    q = coerce expression2 :: Expression1d Unitless
                     p' = derivative p
                     q' = derivative q
                  in coerce ((p' * q - p * q') / squared q)
@@ -164,7 +164,7 @@ sqrt expression =
         { evaluate = evaluate expression >>> OpenSolid.sqrt
         , bounds = bounds expression >>> Range.sqrt
         , derivative =
-            let f = (coerce expression :: Expression1d Unitless)
+            let f = coerce expression :: Expression1d Unitless
              in coerce (derivative f / (2.0 * sqrt f))
         }
 
