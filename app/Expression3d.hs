@@ -190,6 +190,19 @@ instance Units.Multiplication units1 units2 => CrossProduct (Expression3d units1
             (\t -> bounds expression1 t >< bounds expression2 t)
             (derivative expression1 >< expression2 + expression1 >< derivative expression2)
 
+instance Units.Division units1 units2 => Division (Expression3d units1 coordinates) (Expression1d units2) where
+    type Quotient (Expression3d units1 coordinates) (Expression1d units2) = Expression3d (Units.Quotient units1 units2) coordinates
+    expression1 / expression2 =
+        Expression3d
+            (\t -> evaluate expression1 t / Expression1d.evaluate expression2 t)
+            (\t -> bounds expression1 t / Expression1d.bounds expression2 t)
+            ( let p = coerce expression1 :: Expression3d Unitless coordinates
+                  q = coerce expression2 :: Expression1d Unitless
+                  p' = derivative p
+                  q' = Expression1d.derivative q
+               in coerce ((p' * q - p * q') / Expression1d.squared q)
+            )
+
 squaredMagnitude :: Units.Multiplication units units => Expression3d units coordinates -> Expression1d (Units.Product units units)
 squaredMagnitude expression =
     Expression1d
