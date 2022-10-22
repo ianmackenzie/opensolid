@@ -14,35 +14,12 @@ module Point3d (
     distanceFrom,
 ) where
 
-import Length (Length, Meters)
+import Length (Length)
 import qualified Length
 import OpenSolid
+import Point3d.Type
 import qualified Quantity
-import qualified Show
-import Vector3d (Vector3d (..))
 import qualified Vector3d
-
-data Point3d coordinates = Point3d !Length !Length !Length
-    deriving (Eq)
-
-instance Show (Point3d coordinates) where
-    showsPrec precedence (Point3d px py pz) =
-        Show.primitive precedence "Point3d.meters" [Length.inMeters px, Length.inMeters py, Length.inMeters pz]
-
-instance Addition Point3d (Vector3d Meters) where
-    type Sum Point3d (Vector3d Meters) = Point3d
-    (Point3d px py pz) + (Vector3d vx vy vz) =
-        Point3d (px + vx) (py + vy) (pz + vz)
-
-instance Subtraction Point3d (Vector3d Meters) where
-    type Difference Point3d (Vector3d Meters) = Point3d
-    (Point3d px py pz) - (Vector3d vx vy vz) =
-        Point3d (px - vx) (py - vy) (pz - vz)
-
-instance Subtraction Point3d Point3d where
-    type Difference Point3d Point3d = Vector3d Meters
-    (Point3d x1 y1 z1) - (Point3d x2 y2 z2) =
-        Vector3d (x1 - x2) (y1 - y2) (z1 - z2)
 
 origin :: Point3d coordinates
 origin =
@@ -100,4 +77,4 @@ midpoint p1 p2 =
 
 distanceFrom :: Point3d coordinates -> Point3d coordinates -> Length
 distanceFrom p1 p2 =
-    Vector3d.magnitude (p2 - p1)
+    Vector3d.magnitude (Vector3d.from p1 p2)
