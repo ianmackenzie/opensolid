@@ -3,6 +3,7 @@ module List (
     compact,
     collect,
     combine,
+    concat,
     foldl,
     foldr,
     reverse,
