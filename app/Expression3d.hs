@@ -5,6 +5,7 @@ module Expression3d (
     derivative,
     zero,
     constant,
+    xyz,
     squaredMagnitude,
     magnitude,
     normalize,
@@ -15,8 +16,6 @@ import Expression1d (Expression1d (Expression1d))
 import qualified Expression1d
 import Interval (Interval)
 import OpenSolid
-import qualified Quantity
-import Range (Range)
 import qualified Units
 import Vector3d (Vector3d (Vector3d))
 import qualified Vector3d

@@ -9,7 +9,6 @@ module String (
 
 import qualified Data.Text
 import OpenSolid
-import qualified Prelude
 
 concat :: List String -> String
 concat =

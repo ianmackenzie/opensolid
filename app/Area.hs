@@ -8,7 +8,6 @@ module Area (
 ) where
 
 import OpenSolid
-import Quantity (Quantity)
 import qualified Quantity
 import qualified Show
 import Units (SquareMeters)

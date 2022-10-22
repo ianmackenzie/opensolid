@@ -14,7 +14,6 @@ import Interval (Interval)
 import qualified Interval
 import OpenSolid
 import qualified Quantity
-import Range (Range)
 import qualified Range
 import Range.Unsafe
 import qualified Units
@@ -147,9 +146,6 @@ hull3 v1 v2 v3 =
         maxY = max (max y1 y2) y3
         minZ = min (min z1 z2) z3
         maxZ = max (max z1 z2) z3
-        xRange = Range minX maxX
-        yRange = Range minY maxY
-        zRange = Range minZ maxZ
      in VectorBox3d (Range minX maxX) (Range minY maxY) (Range minZ maxZ)
 
 hull4 :: Vector3d units coordinates -> Vector3d units coordinates -> Vector3d units coordinates -> Vector3d units coordinates -> VectorBox3d units coordinates

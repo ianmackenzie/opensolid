@@ -12,7 +12,7 @@ module Expression1d (
 ) where
 
 import Data.Coerce (coerce)
-import Expression1d.Root (Root (..))
+import Expression1d.Root (Root (Root))
 import qualified Expression1d.Root as Root
 import Interval (Interval)
 import qualified Interval
@@ -20,7 +20,6 @@ import qualified List
 import OpenSolid hiding (sqrt)
 import qualified OpenSolid
 import qualified Quantity
-import Range (Range)
 import qualified Range
 import Range.Unsafe
 import qualified Units
@@ -181,13 +180,13 @@ maxRootOrder =
 roots :: Quantity units -> Expression1d units -> List Root
 roots tolerance expression =
     case neighborhoods expression tolerance Interval.unit of
-        Ok neighborhoods -> List.collect neighborhoodRoot neighborhoods
+        Ok validNeighborhoods -> List.collect neighborhoodRoot validNeighborhoods
         Err Indeterminate -> []
 
 neighborhoods :: Expression1d units -> Quantity units -> Interval -> Result Indeterminate (List Neighborhood)
 neighborhoods expression tolerance domain =
     case localNeighborhoods expression tolerance domain 0 of
-        Ok neighborhoods -> Ok neighborhoods
+        Ok validNeighborhoods -> Ok validNeighborhoods
         Err Indeterminate ->
             if Interval.isAtomic domain
                 then Err Indeterminate
@@ -216,7 +215,7 @@ solve expression tolerance order derivativeNeighborhood =
     case derivativeNeighborhood of
         NoRoot domain ->
             case solveMonotonic expression domain of
-                Just x -> [HasRoot domain Root{value = x, order = order}]
+                Just x -> [HasRoot domain Root{Root.value = x, Root.order = order}]
                 Nothing -> [NoRoot domain]
         HasRoot domain root ->
             let rootX = Root.value root

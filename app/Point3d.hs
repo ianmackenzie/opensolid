@@ -19,7 +19,6 @@ import qualified Length
 import OpenSolid
 import qualified Quantity
 import qualified Show
-import qualified String
 import Vector3d (Vector3d (..))
 import qualified Vector3d
 
@@ -27,8 +26,8 @@ data Point3d coordinates = Point3d !Length !Length !Length
     deriving (Eq)
 
 instance Show (Point3d coordinates) where
-    showsPrec precedence (Point3d x y z) =
-        Show.primitive precedence "Point3d.meters" [Length.inMeters x, Length.inMeters y, Length.inMeters z]
+    showsPrec precedence (Point3d px py pz) =
+        Show.primitive precedence "Point3d.meters" [Length.inMeters px, Length.inMeters py, Length.inMeters pz]
 
 instance Addition Point3d (Vector3d Meters) where
     type Sum Point3d (Vector3d Meters) = Point3d
@@ -50,54 +49,54 @@ origin =
     Point3d Length.zero Length.zero Length.zero
 
 x :: Length -> Point3d coordinates
-x x =
-    Point3d x Length.zero Length.zero
+x px =
+    Point3d px Length.zero Length.zero
 
 y :: Length -> Point3d coordinates
-y y =
-    Point3d Length.zero y Length.zero
+y py =
+    Point3d Length.zero py Length.zero
 
 z :: Length -> Point3d coordinates
-z z =
-    Point3d Length.zero Length.zero z
+z pz =
+    Point3d Length.zero Length.zero pz
 
 xy :: Length -> Length -> Point3d coordinates
-xy x y =
-    Point3d x y Length.zero
+xy px py =
+    Point3d px py Length.zero
 
 xz :: Length -> Length -> Point3d coordinates
-xz x z =
-    Point3d x Length.zero z
+xz px pz =
+    Point3d px Length.zero pz
 
 yz :: Length -> Length -> Point3d coordinates
-yz y z =
-    Point3d Length.zero y z
+yz py pz =
+    Point3d Length.zero py pz
 
 xyz :: Length -> Length -> Length -> Point3d coordinates
 xyz =
     Point3d
 
 meters :: Float -> Float -> Float -> Point3d coordinates
-meters x y z =
-    Point3d (Length.meters x) (Length.meters y) (Length.meters z)
+meters px py pz =
+    Point3d (Length.meters px) (Length.meters py) (Length.meters pz)
 
 interpolateFrom :: Point3d coordinates -> Point3d coordinates -> Float -> Point3d coordinates
 interpolateFrom p1 p2 t =
     let (Point3d x1 y1 z1) = p1
         (Point3d x2 y2 z2) = p2
-        x = Quantity.interpolateFrom x1 x2 t
-        y = Quantity.interpolateFrom y1 y2 t
-        z = Quantity.interpolateFrom z1 z2 t
-     in Point3d x y z
+        px = Quantity.interpolateFrom x1 x2 t
+        py = Quantity.interpolateFrom y1 y2 t
+        pz = Quantity.interpolateFrom z1 z2 t
+     in Point3d px py pz
 
 midpoint :: Point3d coordinates -> Point3d coordinates -> Point3d coordinates
 midpoint p1 p2 =
     let (Point3d x1 y1 z1) = p1
         (Point3d x2 y2 z2) = p2
-        x = Quantity.midpoint x1 x2
-        y = Quantity.midpoint y1 y2
-        z = Quantity.midpoint z1 z2
-     in Point3d x y z
+        px = Quantity.midpoint x1 x2
+        py = Quantity.midpoint y1 y2
+        pz = Quantity.midpoint z1 z2
+     in Point3d px py pz
 
 distanceFrom :: Point3d coordinates -> Point3d coordinates -> Length
 distanceFrom p1 p2 =

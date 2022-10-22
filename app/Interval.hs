@@ -16,7 +16,6 @@ module Interval (
 ) where
 
 import OpenSolid hiding (abs, sqrt)
-import Range (Range)
 import qualified Range
 import Range.Unsafe
 

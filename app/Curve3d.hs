@@ -25,7 +25,7 @@ instance IsCurve3d Point3d where
     endPoint =
         identity
 
-    pointOn point t =
+    pointOn point _ =
         point
 
     reverse =

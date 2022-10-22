@@ -8,7 +8,6 @@ module BoundingBox3d (
 
 import OpenSolid
 import Point3d (Point3d (..))
-import Range (Range)
 import qualified Range
 import Range.Unsafe
 import Units (Meters)

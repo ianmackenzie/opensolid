@@ -6,24 +6,11 @@ module Direction2d (
     y,
     positiveY,
     negativeY,
+    determinant,
 ) where
 
-import qualified Area
 import Direction2d.Unsafe
-import qualified Length
 import OpenSolid
-import Quantity (Quantity)
-import qualified Quantity
-import qualified String
-
-instance Negation (Direction2d coordinates) where
-    negate (Direction2d x y) =
-        Direction2d (negate x) (negate y)
-
-instance DotProduct Direction2d Direction2d where
-    type DotProductResult Direction2d Direction2d = Float
-    (Direction2d x1 y1) . (Direction2d x2 y2) =
-        x1 * x2 + y1 * y2
 
 positiveX :: Direction2d coordinates
 positiveX =
