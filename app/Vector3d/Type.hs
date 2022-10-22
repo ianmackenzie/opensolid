@@ -22,7 +22,7 @@ instance Show (Vector3d Units.SquareMeters coordinates) where
     showsPrec =
         showImpl "Vector3d.squareMeters" Area.inSquareMeters
 
-showImpl :: String -> (Quantity units -> Float) -> Prelude.Int -> Vector3d units coordinates -> Prelude.ShowS
+showImpl :: String -> (Quantity units -> Float) -> Int -> Vector3d units coordinates -> Prelude.ShowS
 showImpl functionName inCorrespondingUnits precedence (Vector3d vx vy vz) =
     let arguments = [inCorrespondingUnits vx, inCorrespondingUnits vy, inCorrespondingUnits vz]
      in Show.primitive precedence functionName arguments

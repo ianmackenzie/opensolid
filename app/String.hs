@@ -27,7 +27,7 @@ toList =
     Data.Text.unpack
 
 fromInt :: Int -> String
-fromInt (Count n) =
+fromInt n =
     fromList (show n)
 
 fromFloat :: Float -> String

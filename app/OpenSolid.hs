@@ -4,9 +4,7 @@ module OpenSolid (
     module Result,
     String,
     List,
-    Count (..),
     Quantity (..),
-    Int,
     Float,
     Negation (..),
     Addition (..),
@@ -43,6 +41,7 @@ import Prelude (
     Char,
     Eq (..),
     IO,
+    Int,
     Maybe (..),
     Ord (..),
     Show (..),
@@ -62,19 +61,10 @@ type String = Data.Text.Text
 
 type List a = [a]
 
-newtype Count units = Count Prelude.Int
-    deriving (Eq, Ord)
-
 newtype Quantity units = Quantity Prelude.Double
     deriving (Eq, Ord)
 
-type Int = Count Unitless
-
 type Float = Quantity Unitless
-
-instance Show Int where
-    show (Count n) =
-        show n
 
 instance Show Float where
     show (Quantity x) =
@@ -83,9 +73,9 @@ instance Show Float where
 class Negation a where
     negate :: a -> a
 
-instance Negation (Count units) where
-    negate (Count n) =
-        Count (Prelude.negate n)
+instance Negation Int where
+    negate =
+        Prelude.negate
 
 instance Negation (Quantity units) where
     negate (Quantity x) =
@@ -94,9 +84,9 @@ instance Negation (Quantity units) where
 class Addition a where
     (+) :: a -> a -> a
 
-instance Addition (Count units) where
-    (Count n) + (Count m) =
-        Count (n Prelude.+ m)
+instance Addition Int where
+    n + m =
+        n Prelude.+ m
 
 instance Addition (Quantity units) where
     (Quantity x) + (Quantity y) =
@@ -105,9 +95,9 @@ instance Addition (Quantity units) where
 class Subtraction a where
     (-) :: a -> a -> a
 
-instance Subtraction (Count units) where
-    (Count n) - (Count m) =
-        Count (n Prelude.- m)
+instance Subtraction Int where
+    n - m =
+        n Prelude.- m
 
 instance Subtraction (Quantity units) where
     (Quantity x) - (Quantity y) =
@@ -117,10 +107,10 @@ class Multiplication lhs rhs where
     type Product lhs rhs
     (*) :: lhs -> rhs -> Product lhs rhs
 
-instance Units.Multiplication units1 units2 => Multiplication (Count units1) (Count units2) where
-    type Product (Count units1) (Count units2) = Count (Units.Product units1 units2)
-    (Count n) * (Count m) =
-        Count (n Prelude.* m)
+instance Multiplication Int Int where
+    type Product Int Int = Int
+    n * m =
+        n Prelude.* m
 
 instance Units.Multiplication units1 units2 => Multiplication (Quantity units1) (Quantity units2) where
     type Product (Quantity units1) (Quantity units2) = Quantity (Units.Product units1 units2)
@@ -136,10 +126,10 @@ instance Units.Division units1 units2 => Division (Quantity units1) (Quantity un
     (Quantity x) / (Quantity y) =
         Quantity (x Prelude./ y)
 
-instance Units.Division units1 units2 => Division (Count units1) (Count units2) where
-    type Quotient (Count units1) (Count units2) = Count (Units.Quotient units1 units2)
-    (Count n) / (Count m) =
-        Count (Prelude.quot n m)
+instance Division Int Int where
+    type Quotient Int Int = Int
+    (/) =
+        Prelude.quot
 
 class DotProduct lhs rhs where
     type DotProductResult lhs rhs
@@ -161,8 +151,8 @@ instance Concatenation (List a) where
         Prelude.mappend
 
 fromInteger :: Prelude.Integer -> Int
-fromInteger n =
-    Count (Prelude.fromInteger n)
+fromInteger =
+    Prelude.fromInteger
 
 fromRational :: Prelude.Rational -> Float
 fromRational x =
@@ -173,7 +163,7 @@ fromString =
     Data.Text.pack
 
 float :: Int -> Float
-float (Count n) =
+float n =
     Quantity (Prelude.fromIntegral n)
 
 abs :: Quantity units -> Quantity units

@@ -22,7 +22,7 @@ instance Show (Vector2d Units.SquareMeters coordinates) where
     showsPrec =
         showImpl "Vector2d.squareMeters" Area.inSquareMeters
 
-showImpl :: String -> (Quantity units -> Float) -> Prelude.Int -> Vector2d units coordinates -> Prelude.ShowS
+showImpl :: String -> (Quantity units -> Float) -> Int -> Vector2d units coordinates -> Prelude.ShowS
 showImpl functionName inCorrespondingUnits precedence (Vector2d xComponent yComponent) =
     Show.primitive precedence functionName [inCorrespondingUnits xComponent, inCorrespondingUnits yComponent]
 
