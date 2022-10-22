@@ -65,7 +65,9 @@ executable opensolid-hs
         Direction3d
         Direction3d.Unsafe
         Vector2d
+        Vector2d.Type
         Vector3d
+        Vector3d.Type
         Point2d
         Point3d
         VectorBox3d
