@@ -11,7 +11,6 @@ import qualified Length
 import OpenSolid
 import Point2d (Point2d)
 import qualified Point2d
-import qualified Quantity
 import qualified Range
 import qualified String
 import qualified Vector2d
@@ -55,15 +54,15 @@ main = do
     dotProduct = v1 . v2
     determinant = Vector2d.determinant v1 v2
     squareRoot = sqrt dotProduct
-    translatedPoint = Point2d.meters 2.0 3.0 + Vector2d.meters 4.0 5.0
+    translatedPoint = Point2d.meters 2.0 3.0 |> Point2d.translateBy (Vector2d.meters 4.0 5.0)
     vectorSum = Vector2d.meters 1.0 2.0 + Vector2d.meters 2.0 3.0
     crossProduct = Vector3d.meters 1.0 2.0 3.0 >< Vector3d.meters 4.0 5.0 6.0
     scaledVector = Length.meters 2.0 * Vector2d.meters 3.0 4.0
-    rangeDifference = Range.from (Length.meters 2.0) (Length.meters 3.0) - Length.centimeters 50.0
+    rangeDifference = Range.from (Length.meters 2.0) (Length.meters 3.0) - Range.constant (Length.centimeters 50.0)
     rangeProduct = Length.centimeters 20.0 * Range.from (Length.meters 2.0) (Length.meters 3.0)
     t = Expression1d.parameter
     -- x = -2.0 + t * 4.0
     -- y = Expression1d.squared x - 2.0
     x = 3.0 * t
-    y = Expression1d.squared (x - 1.0) * (x - 2.0)
+    y = Expression1d.squared (x - Expression1d.constant 1.0) * (x - Expression1d.constant 2.0)
     roots = Expression1d.roots 1e-12 y

@@ -56,22 +56,7 @@ instance Negation (Expression3d units coordinates) where
             , derivative = negate (derivative expression)
             }
 
-instance Addition (Expression3d units) (Vector3d units) where
-    type Sum (Expression3d units) (Vector3d units) = Expression3d units
-    expression + vector =
-        Expression3d
-            { evaluate = \t -> evaluate expression t + vector
-            , bounds = \t -> bounds expression t + vector
-            , derivative = derivative expression
-            }
-
-instance Addition (Vector3d units) (Expression3d units) where
-    type Sum (Vector3d units) (Expression3d units) = Expression3d units
-    vector + expression =
-        expression + vector
-
-instance Addition (Expression3d units) (Expression3d units) where
-    type Sum (Expression3d units) (Expression3d units) = Expression3d units
+instance Addition (Expression3d units coordinates) where
     expression1 + expression2 =
         Expression3d
             { evaluate = \t -> evaluate expression1 t + evaluate expression2 t
@@ -79,26 +64,7 @@ instance Addition (Expression3d units) (Expression3d units) where
             , derivative = derivative expression1 + derivative expression2
             }
 
-instance Subtraction (Expression3d units) (Vector3d units) where
-    type Difference (Expression3d units) (Vector3d units) = Expression3d units
-    expression - vector =
-        Expression3d
-            { evaluate = \t -> evaluate expression t - vector
-            , bounds = \t -> bounds expression t - vector
-            , derivative = derivative expression
-            }
-
-instance Subtraction (Vector3d units) (Expression3d units) where
-    type Difference (Vector3d units) (Expression3d units) = Expression3d units
-    vector - expression =
-        Expression3d
-            { evaluate = \t -> vector - evaluate expression t
-            , bounds = \t -> vector - bounds expression t
-            , derivative = negate (derivative expression)
-            }
-
-instance Subtraction (Expression3d units) (Expression3d units) where
-    type Difference (Expression3d units) (Expression3d units) = Expression3d units
+instance Subtraction (Expression3d units coordinates) where
     expression1 - expression2 =
         Expression3d
             { evaluate = \t -> evaluate expression1 t - evaluate expression2 t

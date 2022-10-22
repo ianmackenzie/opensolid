@@ -25,33 +25,11 @@ instance Negation (VectorBox3d units coordinates) where
     negate (VectorBox3d x y z) =
         VectorBox3d (negate x) (negate y) (negate z)
 
-instance Addition (VectorBox3d units) (Vector3d units) where
-    type Sum (VectorBox3d units) (Vector3d units) = VectorBox3d units
-    (VectorBox3d x1 y1 z1) + (Vector3d x2 y2 z2) =
-        VectorBox3d (x1 + x2) (y1 + y2) (z1 + z2)
-
-instance Addition (Vector3d units) (VectorBox3d units) where
-    type Sum (Vector3d units) (VectorBox3d units) = VectorBox3d units
-    (Vector3d x1 y1 z1) + (VectorBox3d x2 y2 z2) =
-        VectorBox3d (x1 + x2) (y1 + y2) (z1 + z2)
-
-instance Addition (VectorBox3d units) (VectorBox3d units) where
-    type Sum (VectorBox3d units) (VectorBox3d units) = VectorBox3d units
+instance Addition (VectorBox3d units coordinates) where
     (VectorBox3d x1 y1 z1) + (VectorBox3d x2 y2 z2) =
         VectorBox3d (x1 + x2) (y1 + y2) (z1 + z2)
 
-instance Subtraction (VectorBox3d units) (Vector3d units) where
-    type Difference (VectorBox3d units) (Vector3d units) = VectorBox3d units
-    (VectorBox3d x1 y1 z1) - (Vector3d x2 y2 z2) =
-        VectorBox3d (x1 - x2) (y1 - y2) (z1 - z2)
-
-instance Subtraction (Vector3d units) (VectorBox3d units) where
-    type Difference (Vector3d units) (VectorBox3d units) = VectorBox3d units
-    (Vector3d x1 y1 z1) - (VectorBox3d x2 y2 z2) =
-        VectorBox3d (x1 - x2) (y1 - y2) (z1 - z2)
-
-instance Subtraction (VectorBox3d units) (VectorBox3d units) where
-    type Difference (VectorBox3d units) (VectorBox3d units) = VectorBox3d units
+instance Subtraction (VectorBox3d units coordinates) where
     (VectorBox3d x1 y1 z1) - (VectorBox3d x2 y2 z2) =
         VectorBox3d (x1 - x2) (y1 - y2) (z1 - z2)
 

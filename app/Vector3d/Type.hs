@@ -31,13 +31,11 @@ instance Negation (Vector3d units coordinates) where
     negate (Vector3d vx vy vz) =
         Vector3d (negate vx) (negate vy) (negate vz)
 
-instance Addition (Vector3d units) (Vector3d units) where
-    type Sum (Vector3d units) (Vector3d units) = Vector3d units
+instance Addition (Vector3d units coordinates) where
     (Vector3d x1 y1 z1) + (Vector3d x2 y2 z2) =
         Vector3d (x1 + x2) (y1 + y2) (z1 + z2)
 
-instance Subtraction (Vector3d units) (Vector3d units) where
-    type Difference (Vector3d units) (Vector3d units) = Vector3d units
+instance Subtraction (Vector3d units coordinates) where
     (Vector3d x1 y1 z1) - (Vector3d x2 y2 z2) =
         Vector3d (x1 - x2) (y1 - y2) (z1 - z2)
 

@@ -58,22 +58,7 @@ instance Negation (Expression1d units) where
             , derivative = negate (derivative expression)
             }
 
-instance Addition Expression1d Quantity where
-    type Sum Expression1d Quantity = Expression1d
-    expression + quantity =
-        Expression1d
-            { evaluate = evaluate expression >>> (+ quantity)
-            , bounds = bounds expression >>> (+ quantity)
-            , derivative = derivative expression
-            }
-
-instance Addition Quantity Expression1d where
-    type Sum Quantity Expression1d = Expression1d
-    quantity + expression =
-        expression + quantity
-
-instance Addition Expression1d Expression1d where
-    type Sum Expression1d Expression1d = Expression1d
+instance Addition (Expression1d units) where
     expression1 + expression2 =
         Expression1d
             { evaluate = \t -> evaluate expression1 t + evaluate expression2 t
@@ -81,26 +66,7 @@ instance Addition Expression1d Expression1d where
             , derivative = derivative expression1 + derivative expression2
             }
 
-instance Subtraction Expression1d Quantity where
-    type Difference Expression1d Quantity = Expression1d
-    expression - quantity =
-        Expression1d
-            { evaluate = evaluate expression >>> subtract quantity
-            , bounds = bounds expression >>> subtract quantity
-            , derivative = derivative expression
-            }
-
-instance Subtraction Quantity Expression1d where
-    type Difference Quantity Expression1d = Expression1d
-    quantity - expression =
-        Expression1d
-            { evaluate = (quantity -) <<< evaluate expression
-            , bounds = (quantity -) <<< bounds expression
-            , derivative = negate (derivative expression)
-            }
-
-instance Subtraction Expression1d Expression1d where
-    type Difference Expression1d Expression1d = Expression1d
+instance Subtraction (Expression1d units) where
     expression1 - expression2 =
         Expression1d
             { evaluate = \t -> evaluate expression1 t - evaluate expression2 t

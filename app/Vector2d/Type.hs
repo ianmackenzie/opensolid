@@ -30,13 +30,11 @@ instance Negation (Vector2d units coordinates) where
     negate (Vector2d vx vy) =
         Vector2d (negate vx) (negate vy)
 
-instance Addition (Vector2d units) (Vector2d units) where
-    type Sum (Vector2d units) (Vector2d units) = Vector2d units
+instance Addition (Vector2d units coordinates) where
     (Vector2d x1 y1) + (Vector2d x2 y2) =
         Vector2d (x1 + x2) (y1 + y2)
 
-instance Subtraction (Vector2d units) (Vector2d units) where
-    type Difference (Vector2d units) (Vector2d units) = Vector2d units
+instance Subtraction (Vector2d units coordinates) where
     (Vector2d x1 y1) - (Vector2d x2 y2) =
         Vector2d (x1 - x2) (y1 - y2)
 

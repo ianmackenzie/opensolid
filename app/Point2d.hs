@@ -8,37 +8,17 @@ module Point2d (
     midpoint,
     interpolateFrom,
     distanceFrom,
+    translateBy,
 ) where
 
 import Length (Length, Meters)
 import qualified Length
 import OpenSolid
+import Point2d.Type
 import qualified Quantity
 import qualified Show
 import qualified Vector2d
 import Vector2d.Type
-
-data Point2d coordinates = Point2d !Length !Length
-    deriving (Eq)
-
-instance Show (Point2d coordinates) where
-    showsPrec precedence (Point2d px py) =
-        Show.primitive precedence "Point2d.meters" [Length.inMeters px, Length.inMeters py]
-
-instance Addition Point2d (Vector2d Meters) where
-    type Sum Point2d (Vector2d Meters) = Point2d
-    (Point2d px py) + (Vector2d vx vy) =
-        Point2d (px + vx) (py + vy)
-
-instance Subtraction Point2d (Vector2d Meters) where
-    type Difference Point2d (Vector2d Meters) = Point2d
-    (Point2d px py) - (Vector2d vx vy) =
-        Point2d (px - vx) (py - vy)
-
-instance Subtraction Point2d Point2d where
-    type Difference Point2d Point2d = Vector2d Meters
-    (Point2d x1 y1) - (Point2d x2 y2) =
-        Vector2d (x1 - x2) (y1 - y2)
 
 origin :: Point2d coordinates
 origin =
@@ -78,4 +58,10 @@ midpoint p1 p2 =
 
 distanceFrom :: Point2d coordinates -> Point2d coordinates -> Length
 distanceFrom p1 p2 =
-    Vector2d.magnitude (p2 - p1)
+    Vector2d.magnitude (Vector2d.from p1 p2)
+
+translateBy :: Vector2d Meters coordinates -> Point2d coordinates -> Point2d coordinates
+translateBy vector point =
+    let (Vector2d vx vy) = vector
+        (Point2d px py) = point
+     in Point2d (px + vx) (py + vy)

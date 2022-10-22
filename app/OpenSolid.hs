@@ -91,31 +91,25 @@ instance Negation (Quantity units) where
     negate (Quantity x) =
         Quantity (Prelude.negate x)
 
-class Addition lhs rhs where
-    type Sum lhs rhs :: * -> *
-    (+) :: lhs a -> rhs a -> (Sum lhs rhs) a
+class Addition a where
+    (+) :: a -> a -> a
 
-instance Addition Count Count where
-    type Sum Count Count = Count
+instance Addition (Count units) where
     (Count n) + (Count m) =
         Count (n Prelude.+ m)
 
-instance Addition Quantity Quantity where
-    type Sum Quantity Quantity = Quantity
+instance Addition (Quantity units) where
     (Quantity x) + (Quantity y) =
         Quantity (x Prelude.+ y)
 
-class Subtraction lhs rhs where
-    type Difference lhs rhs :: * -> *
-    (-) :: lhs a -> rhs a -> (Difference lhs rhs) a
+class Subtraction a where
+    (-) :: a -> a -> a
 
-instance Subtraction Count Count where
-    type Difference Count Count = Count
+instance Subtraction (Count units) where
     (Count n) - (Count m) =
         Count (n Prelude.- m)
 
-instance Subtraction Quantity Quantity where
-    type Difference Quantity Quantity = Quantity
+instance Subtraction (Quantity units) where
     (Quantity x) - (Quantity y) =
         Quantity (x Prelude.- y)
 
@@ -215,7 +209,7 @@ notImplemented :: a
 notImplemented =
     error "Not implemented"
 
-subtract :: Subtraction lhs rhs => rhs a -> lhs a -> (Difference lhs rhs) a
+subtract :: Subtraction a => a -> a -> a
 subtract b a =
     a - b
 

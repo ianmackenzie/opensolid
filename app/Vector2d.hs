@@ -6,6 +6,7 @@ module Vector2d (
     xy,
     meters,
     squareMeters,
+    from,
     determinant,
     magnitude,
     squaredMagnitude,
@@ -18,6 +19,7 @@ import Data.Coerce (coerce)
 import Direction2d.Unsafe
 import qualified Length
 import OpenSolid
+import Point2d.Type
 import qualified Quantity
 import qualified Units
 import Vector2d.Type
@@ -45,6 +47,12 @@ meters vx vy =
 squareMeters :: Float -> Float -> Vector2d Units.SquareMeters coordinates
 squareMeters vx vy =
     Vector2d (Area.squareMeters vx) (Area.squareMeters vy)
+
+from :: Point2d coordinates -> Point2d coordinates -> Vector2d Units.Meters coordinates
+from p1 p2 =
+    let (Point2d x1 y1) = p1
+        (Point2d x2 y2) = p2
+     in Vector2d (x2 - x1) (y2 - y1)
 
 determinant ::
     Units.Multiplication units1 units2 =>

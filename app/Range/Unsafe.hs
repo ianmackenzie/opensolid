@@ -13,33 +13,11 @@ instance Negation (Range units) where
     negate (Range low high) =
         Range (negate high) (negate low)
 
-instance Addition Range Quantity where
-    type Sum Range Quantity = Range
-    (Range low high) + quantity =
-        Range (low + quantity) (high + quantity)
-
-instance Addition Quantity Range where
-    type Sum Quantity Range = Range
-    quantity + (Range low high) =
-        Range (quantity + low) (quantity + high)
-
-instance Addition Range Range where
-    type Sum Range Range = Range
+instance Addition (Range units) where
     (Range low1 high1) + (Range low2 high2) =
         Range (low1 + low2) (high1 + high2)
 
-instance Subtraction Range Quantity where
-    type Difference Range Quantity = Range
-    (Range low high) - quantity =
-        Range (low - quantity) (high - quantity)
-
-instance Subtraction Quantity Range where
-    type Difference Quantity Range = Range
-    quantity - (Range low high) =
-        Range (quantity - high) (quantity - low)
-
-instance Subtraction Range Range where
-    type Difference Range Range = Range
+instance Subtraction (Range units) where
     (Range low1 high1) - (Range low2 high2) =
         Range (low1 - high2) (high1 - low2)
 
