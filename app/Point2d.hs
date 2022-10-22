@@ -16,7 +16,6 @@ import qualified Length
 import OpenSolid
 import Point2d.Type
 import qualified Quantity
-import qualified Show
 import qualified Vector2d
 import Vector2d.Type
 
