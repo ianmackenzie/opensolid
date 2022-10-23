@@ -66,6 +66,35 @@ newtype Quantity units = Quantity Prelude.Double
 
 type Float = Quantity Unitless
 
+instance Prelude.Num Float where
+    negate (Quantity x) =
+        Quantity (Prelude.negate x)
+
+    (Quantity x) + (Quantity y) =
+        Quantity (x Prelude.+ y)
+
+    (Quantity x) - (Quantity y) =
+        Quantity (x Prelude.- y)
+
+    (Quantity x) * (Quantity y) =
+        Quantity (x Prelude.* y)
+
+    abs (Quantity x) =
+        Quantity (Prelude.abs x)
+
+    signum (Quantity x) =
+        Quantity (Prelude.signum x)
+
+    fromInteger n =
+        Quantity (Prelude.fromInteger n)
+
+instance Prelude.Fractional Float where
+    (Quantity x) / (Quantity y) =
+        Quantity (x Prelude./ y)
+
+    fromRational x =
+        Quantity (Prelude.fromRational x)
+
 instance Show Float where
     show (Quantity x) =
         show x
@@ -155,8 +184,8 @@ fromInteger =
     Prelude.fromInteger
 
 fromRational :: Prelude.Rational -> Float
-fromRational x =
-    Quantity (Prelude.fromRational x)
+fromRational =
+    Prelude.fromRational
 
 fromString :: Prelude.String -> String
 fromString =
