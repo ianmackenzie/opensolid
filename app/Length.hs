@@ -12,14 +12,7 @@ module Length (
 
 import OpenSolid
 import qualified Quantity
-import qualified Show
 import Units (Meters)
-
-type Length = Quantity Meters
-
-instance Show Length where
-    showsPrec precedence length =
-        Show.primitive precedence "Length.meters" [inMeters length]
 
 zero :: Length
 zero =

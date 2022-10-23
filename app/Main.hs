@@ -63,6 +63,6 @@ main = do
     t = Expression1d.parameter
     -- x = -2.0 + t * 4.0
     -- y = Expression1d.squared x - 2.0
-    x = 3.0 * t
+    x = Expression1d.constant 3.0 * t
     y = Expression1d.squared (x - Expression1d.constant 1.0) * (x - Expression1d.constant 2.0)
     roots = Expression1d.roots 1e-12 y

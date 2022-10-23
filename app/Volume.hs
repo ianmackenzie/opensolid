@@ -1,6 +1,5 @@
 module Volume (
     Volume,
-    CubicMeters,
     zero,
     cubicMeters,
     inCubicMeters,
@@ -13,14 +12,6 @@ module Volume (
 import qualified Length
 import OpenSolid
 import qualified Quantity
-import qualified Show
-import Units (CubicMeters)
-
-type Volume = Quantity CubicMeters
-
-instance Show Volume where
-    showsPrec precedence volume =
-        Show.primitive precedence "Volume.cubicMeters" [inCubicMeters volume]
 
 zero :: Volume
 zero =

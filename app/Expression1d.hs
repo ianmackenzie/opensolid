@@ -74,24 +74,6 @@ instance Subtraction (Expression1d units) where
             , derivative = derivative expression1 - derivative expression2
             }
 
-instance Units.Multiplication units1 units2 => Multiplication (Quantity units1) (Expression1d units2) where
-    type Product (Quantity units1) (Expression1d units2) = Expression1d (Units.Product units1 units2)
-    quantity * expression =
-        Expression1d
-            { evaluate = (quantity *) <<< evaluate expression
-            , bounds = (quantity *) <<< bounds expression
-            , derivative = quantity * derivative expression
-            }
-
-instance Units.Multiplication units1 units2 => Multiplication (Expression1d units1) (Quantity units2) where
-    type Product (Expression1d units1) (Quantity units2) = Expression1d (Units.Product units1 units2)
-    expression * quantity =
-        Expression1d
-            { evaluate = evaluate expression >>> (* quantity)
-            , bounds = bounds expression >>> (* quantity)
-            , derivative = derivative expression * quantity
-            }
-
 instance Units.Multiplication units1 units2 => Multiplication (Expression1d units1) (Expression1d units2) where
     type Product (Expression1d units1) (Expression1d units2) = Expression1d (Units.Product units1 units2)
     expression1 * expression2 =
@@ -120,7 +102,7 @@ squared expression =
     Expression1d
         { evaluate = evaluate expression >>> (\value -> value * value)
         , bounds = bounds expression >>> Range.squared
-        , derivative = 2.0 * expression * derivative expression
+        , derivative = constant 2.0 * expression * derivative expression
         }
 
 sqrt :: Units.Sqrt units => Expression1d units -> Expression1d (Units.SquareRoot units)
@@ -130,7 +112,7 @@ sqrt expression =
         , bounds = bounds expression >>> Range.sqrt
         , derivative =
             let f = coerce expression :: Expression1d Unitless
-             in coerce (derivative f / (2.0 * sqrt f))
+             in coerce (derivative f / (constant 2.0 * sqrt f))
         }
 
 data Neighborhood

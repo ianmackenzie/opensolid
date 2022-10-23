@@ -93,3 +93,4 @@ executable opensolid-hs
         StandaloneDeriving
         ExistentialQuantification
         StrictData
+        FunctionalDependencies

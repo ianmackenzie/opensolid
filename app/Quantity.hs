@@ -17,49 +17,49 @@ import Data.Coerce (coerce)
 import OpenSolid
 import qualified Prelude
 
-zero :: Quantity units
+zero :: Quantity quantity => quantity
 zero =
     coerce 0.0
 
-positiveInfinity :: Quantity units
+positiveInfinity :: Quantity quantity => quantity
 positiveInfinity =
     coerce (1.0 / 0.0)
 
-negativeInfinity :: Quantity units
+negativeInfinity :: Quantity quantity => quantity
 negativeInfinity =
     negate positiveInfinity
 
-infinity :: Quantity units
+infinity :: Quantity quantity => quantity
 infinity =
     positiveInfinity
 
-isNaN :: Quantity units -> Bool
-isNaN (Quantity value) =
-    Prelude.isNaN value
+isNaN :: Quantity quantity => quantity -> Bool
+isNaN quantity =
+    Prelude.isNaN (coerce quantity :: Float)
 
-baseUnits :: Float -> Quantity units
+baseUnits :: Quantity quantity => Float -> quantity
 baseUnits =
     coerce
 
-inBaseUnits :: Quantity units -> Float
+inBaseUnits :: Quantity quantity => quantity -> Float
 inBaseUnits =
     coerce
 
-baseUnit :: Quantity units
+baseUnit :: Quantity quantity => quantity
 baseUnit =
     baseUnits 1.0
 
-interpolateFrom :: Quantity units -> Quantity units -> Float -> Quantity units
+interpolateFrom :: Quantity quantity => quantity -> quantity -> Float -> quantity
 interpolateFrom a b t =
     if t <= 0.5
         then a + (b - a) * t
         else b + (a - b) * (1.0 - t)
 
-midpoint :: Quantity units -> Quantity units -> Quantity units
+midpoint :: Quantity quantity => quantity -> quantity -> quantity
 midpoint a b =
     a + 0.5 * (b - a)
 
-clamp :: Quantity units -> Quantity units -> Quantity units -> Quantity units
+clamp :: Quantity quantity => quantity -> quantity -> quantity -> quantity
 clamp low high value
     | value < low = low
     | value > high = high

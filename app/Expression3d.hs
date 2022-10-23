@@ -72,24 +72,6 @@ instance Subtraction (Expression3d units coordinates) where
             , derivative = derivative expression1 - derivative expression2
             }
 
-instance Units.Multiplication units1 units2 => Multiplication (Quantity units1) (Expression3d units2 coordinates) where
-    type Product (Quantity units1) (Expression3d units2 coordinates) = Expression3d (Units.Product units1 units2) coordinates
-    quantity * expression =
-        Expression3d
-            { evaluate = (quantity *) <<< evaluate expression
-            , bounds = (quantity *) <<< bounds expression
-            , derivative = quantity * derivative expression
-            }
-
-instance Units.Multiplication units1 units2 => Multiplication (Expression3d units1 coordinates) (Quantity units2) where
-    type Product (Expression3d units1 coordinates) (Quantity units2) = Expression3d (Units.Product units1 units2) coordinates
-    expression * quantity =
-        Expression3d
-            { evaluate = evaluate expression >>> (* quantity)
-            , bounds = bounds expression >>> (* quantity)
-            , derivative = derivative expression * quantity
-            }
-
 instance Units.Multiplication units1 units2 => Multiplication (Expression1d units1) (Expression3d units2 coordinates) where
     type Product (Expression1d units1) (Expression3d units2 coordinates) = Expression3d (Units.Product units1 units2) coordinates
     expression1d * expression3d =
@@ -108,22 +90,6 @@ instance Units.Multiplication units1 units2 => Multiplication (Expression3d unit
             , derivative = derivative expression3d * expression1d + expression3d * Expression1d.derivative expression1d
             }
 
-instance Units.Multiplication units1 units2 => DotProduct (Expression3d units1) (Vector3d units2) where
-    type DotProductResult (Expression3d units1) (Vector3d units2) = Expression1d (Units.Product units1 units2)
-    expression . vector =
-        Expression1d
-            (evaluate expression >>> (. vector))
-            (bounds expression >>> (. vector))
-            (derivative expression . vector)
-
-instance Units.Multiplication units1 units2 => DotProduct (Vector3d units1) (Expression3d units2) where
-    type DotProductResult (Vector3d units1) (Expression3d units2) = Expression1d (Units.Product units1 units2)
-    vector . expression =
-        Expression1d
-            ((vector .) <<< evaluate expression)
-            ((vector .) <<< bounds expression)
-            (vector . derivative expression)
-
 instance Units.Multiplication units1 units2 => DotProduct (Expression3d units1) (Expression3d units2) where
     type DotProductResult (Expression3d units1) (Expression3d units2) = Expression1d (Units.Product units1 units2)
     expression1 . expression2 =
@@ -131,22 +97,6 @@ instance Units.Multiplication units1 units2 => DotProduct (Expression3d units1) 
             (\t -> evaluate expression1 t . evaluate expression2 t)
             (\t -> bounds expression1 t . bounds expression2 t)
             (derivative expression1 . expression2 + expression1 . derivative expression2)
-
-instance Units.Multiplication units1 units2 => CrossProduct (Expression3d units1) (Vector3d units2) where
-    type CrossProductResult (Expression3d units1) (Vector3d units2) = Expression3d (Units.Product units1 units2)
-    expression >< vector =
-        Expression3d
-            (evaluate expression >>> (>< vector))
-            (bounds expression >>> (>< vector))
-            (derivative expression >< vector)
-
-instance Units.Multiplication units1 units2 => CrossProduct (Vector3d units1) (Expression3d units2) where
-    type CrossProductResult (Vector3d units1) (Expression3d units2) = Expression3d (Units.Product units1 units2)
-    vector >< expression =
-        Expression3d
-            ((vector ><) <<< evaluate expression)
-            ((vector ><) <<< bounds expression)
-            (vector >< derivative expression)
 
 instance Units.Multiplication units1 units2 => CrossProduct (Expression3d units1) (Expression3d units2) where
     type CrossProductResult (Expression3d units1) (Expression3d units2) = Expression3d (Units.Product units1 units2)
@@ -174,7 +124,7 @@ squaredMagnitude expression =
     Expression1d
         (evaluate expression >>> Vector3d.squaredMagnitude)
         (bounds expression >>> VectorBox3d.squaredMagnitude)
-        (2.0 * expression . derivative expression)
+        (Expression1d.constant 2.0 * expression . derivative expression)
 
 magnitude :: Expression3d units coordinates -> Expression1d units
 magnitude expression =
