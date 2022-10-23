@@ -174,7 +174,7 @@ localNeighborhoods expression tolerance domain order
 definitelyNonZero :: Expression1d units -> Quantity units -> Interval -> Bool
 definitelyNonZero expression tolerance domain =
     let yRange = bounds expression domain
-     in Range.minValue yRange >= tolerance || Range.maxValue yRange <= - tolerance
+     in Range.minValue yRange >= tolerance || Range.maxValue yRange <= negate tolerance
 
 solve :: Expression1d units -> Quantity units -> Int -> Neighborhood -> List Neighborhood
 solve expression tolerance order derivativeNeighborhood =
