@@ -1,42 +1,64 @@
 module Range.Unsafe (Range (..)) where
 
 import OpenSolid
-import qualified Quantity
-import qualified Units
+import qualified Scalar
+import UnitCoercion
 
-data Range units = Range !(Quantity units) !(Quantity units)
-    deriving (Eq)
+data Range scalar = Range !scalar !scalar
+    deriving (Eq, Show)
 
-deriving instance Show (Quantity units) => Show (Range units)
+instance UnitCoercion (Range scalar) (Range Float)
 
-instance Negation (Range units) where
+instance Scalar scalar => Negation (Range scalar) where
     negate (Range low high) =
         Range (negate high) (negate low)
 
-instance Addition (Range units) where
+instance Scalar scalar => Addition (Range scalar) where
     (Range low1 high1) + (Range low2 high2) =
         Range (low1 + low2) (high1 + high2)
 
-instance Subtraction (Range units) where
+instance Scalar scalar => Subtraction (Range scalar) where
     (Range low1 high1) - (Range low2 high2) =
         Range (low1 - high2) (high1 - low2)
 
-instance Units.Multiplication units1 units2 => Multiplication (Quantity units1) (Range units2) where
-    type Product (Quantity units1) (Range units2) = Range (Units.Product units1 units2)
-    quantity * (Range low high) =
-        if quantity >= Quantity.zero
-            then Range (quantity * low) (quantity * high)
-            else Range (quantity * high) (quantity * low)
+scalarRangeMultiplication :: (Scalar scalar1, Scalar scalar2, Scalar scalarProduct, Multiplication scalar1 scalar2 scalarProduct) => scalar1 -> Range scalar2 -> Range scalarProduct
+scalarRangeMultiplication value (Range low high) =
+    if value >= Scalar.zero
+        then Range (value * low) (value * high)
+        else Range (value * high) (value * low)
 
-instance Units.Multiplication units1 units2 => Multiplication (Range units1) (Quantity units2) where
-    type Product (Range units1) (Quantity units2) = Range (Units.Product units1 units2)
-    (Range low high) * quantity =
-        if quantity >= Quantity.zero
-            then Range (low * quantity) (high * quantity)
-            else Range (high * quantity) (low * quantity)
+rangeScalarMultiplication :: (Scalar scalar1, Scalar scalar2, Scalar scalarProduct, Multiplication scalar2 scalar1 scalarProduct) => Range scalar1 -> scalar2 -> Range scalarProduct
+rangeScalarMultiplication =
+    flip scalarRangeMultiplication
 
-instance Units.Multiplication units1 units2 => Multiplication (Range units1) (Range units2) where
-    type Product (Range units1) (Range units2) = Range (Units.Product units1 units2)
+scalarRangeDivision :: (Scalar scalar1, Scalar scalar2, Scalar scalarQuotient, Division scalar1 scalar2 scalarQuotient) => scalar1 -> Range scalar2 -> Range scalarQuotient
+scalarRangeDivision n (Range dl dh)
+    | dl > Scalar.zero || dh < Scalar.zero = Range (n / dh) (n / dl)
+    | otherwise = Range Scalar.negativeInfinity Scalar.positiveInfinity
+
+rangeScalarDivision :: (Scalar scalar1, Scalar scalar2, Scalar scalarQuotient, Division scalar1 scalar2 scalarQuotient) => Range scalar1 -> scalar2 -> Range scalarQuotient
+rangeScalarDivision (Range nl nh) d
+    | d > Scalar.zero = Range (nl / d) (nh / d)
+    | d < Scalar.zero = Range (nh / d) (nl / d)
+    | otherwise = Range Scalar.negativeInfinity Scalar.positiveInfinity
+
+instance Scalar scalar => Multiplication Float (Range scalar) (Range scalar) where
+    (*) =
+        scalarRangeMultiplication
+
+instance Scalar scalar => Multiplication (Range scalar) Float (Range scalar) where
+    (*) =
+        rangeScalarMultiplication
+
+instance (Scalar scalar, Scalar result, Multiplication (Quantity units) scalar result) => Multiplication (Quantity units) (Range scalar) (Range result) where
+    (*) =
+        scalarRangeMultiplication
+
+instance (Scalar scalar, Scalar result, Multiplication (Quantity units) scalar result) => Multiplication (Range scalar) (Quantity units) (Range result) where
+    (*) =
+        rangeScalarMultiplication
+
+instance (Scalar scalar1, Scalar scalar2, Scalar result, Multiplication scalar1 scalar2 result) => Multiplication (Range scalar1) (Range scalar2) (Range result) where
     (Range low1 high1) * (Range low2 high2) =
         let ll = low1 * low2
             lh = low1 * high2
@@ -46,22 +68,24 @@ instance Units.Multiplication units1 units2 => Multiplication (Range units1) (Ra
             high = max (max (max ll lh) hl) hh
          in Range low high
 
-instance Units.Division units1 units2 => Division (Range units1) (Quantity units2) where
-    type Quotient (Range units1) (Quantity units2) = Range (Units.Quotient units1 units2)
-    (Range nl nh) / d
-        | d > Quantity.zero = Range (nl / d) (nh / d)
-        | d < Quantity.zero = Range (nh / d) (nl / d)
-        | otherwise = Range Quantity.negativeInfinity Quantity.positiveInfinity
+instance (Scalar scalar, Scalar result, Division Float scalar result) => Division Float (Range scalar) (Range result) where
+    (/) =
+        scalarRangeDivision
 
-instance Units.Division units1 units2 => Division (Quantity units1) (Range units2) where
-    type Quotient (Quantity units1) (Range units2) = Range (Units.Quotient units1 units2)
-    n / (Range dl dh)
-        | dl > Quantity.zero || dh < Quantity.zero = Range (n / dh) (n / dl)
-        | otherwise = Range Quantity.negativeInfinity Quantity.positiveInfinity
+instance (Scalar scalar, Scalar result, Division (Quantity units) scalar result) => Division (Quantity units) (Range scalar) (Range result) where
+    (/) =
+        scalarRangeDivision
 
-instance Units.Division units1 units2 => Division (Range units1) (Range units2) where
-    type Quotient (Range units1) (Range units2) = Range (Units.Quotient units1 units2)
+instance Scalar scalar => Division (Range scalar) Float (Range scalar) where
+    (/) =
+        rangeScalarDivision
+
+instance (Scalar scalar, Scalar result, Division scalar (Quantity units) result) => Division (Range scalar) (Quantity units) (Range result) where
+    (/) =
+        rangeScalarDivision
+
+instance (Scalar scalar1, Scalar scalar2, Scalar result, Division scalar1 scalar2 result) => Division (Range scalar1) (Range scalar2) (Range result) where
     (Range nl nh) / (Range dl dh)
-        | dl > Quantity.zero = Range (nl / dh) (nh / dl)
-        | dh < Quantity.zero = Range (nh / dh) (nl / dl)
-        | otherwise = Range Quantity.negativeInfinity Quantity.positiveInfinity
+        | dl > Scalar.zero = Range (nl / dh) (nh / dl)
+        | dh < Scalar.zero = Range (nh / dh) (nl / dl)
+        | otherwise = Range Scalar.negativeInfinity Scalar.positiveInfinity

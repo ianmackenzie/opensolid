@@ -10,9 +10,8 @@ import OpenSolid
 import Point3d (Point3d (..))
 import qualified Range
 import Range.Unsafe
-import Units (Meters)
 
-data BoundingBox3d coordinates = BoundingBox3d !(Range Meters) !(Range Meters) !(Range Meters)
+data BoundingBox3d coordinates = BoundingBox3d !(Range Length) !(Range Length) !(Range Length)
 
 constant :: Point3d coordinates -> BoundingBox3d coordinates
 constant point =

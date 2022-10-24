@@ -1,16 +1,17 @@
 module OpenSolid (
     module Prelude,
-    module Units,
     module Result,
+    Float,
     String,
     List,
-    Quantity (..),
-    Float,
+    Scalar,
+    Sqrt,
     Negation (..),
     Addition (..),
     Subtraction (..),
     Multiplication (..),
     Division (..),
+    (//),
     DotProduct (..),
     CrossProduct (..),
     Concatenation (..),
@@ -18,8 +19,6 @@ module OpenSolid (
     fromRational,
     fromString,
     float,
-    abs,
-    sqrt,
     ifThenElse,
     identity,
     always,
@@ -30,12 +29,16 @@ module OpenSolid (
     (<|),
     (>>>),
     (<<<),
+    Quantity (..),
+    Length,
+    Area,
+    Volume,
 ) where
 
+import Data.Coerce (Coercible)
 import qualified Data.Text
 import Result (Result (..))
-import Units (Unitless)
-import qualified Units
+import UnitCoercion
 import Prelude (
     Bool (..),
     Char,
@@ -47,6 +50,7 @@ import Prelude (
     Show (..),
     const,
     fail,
+    flip,
     id,
     not,
     otherwise,
@@ -61,118 +65,96 @@ type String = Data.Text.Text
 
 type List a = [a]
 
-newtype Quantity units = Quantity Prelude.Double
-    deriving (Eq, Ord)
+type Float = Prelude.Double
 
-type Float = Quantity Unitless
+class
+    ( Eq scalar
+    , Ord scalar
+    , Show scalar
+    , Coercible scalar Float
+    , Coercible Float scalar
+    , UnitCoercion scalar Float
+    , Negation scalar
+    , Addition scalar
+    , Subtraction scalar
+    , Multiplication scalar Float scalar
+    , Multiplication Float scalar scalar
+    , Division scalar Float scalar
+    , Division scalar scalar Float
+    ) =>
+    Scalar scalar
 
-instance Show Float where
-    show (Quantity x) =
-        show x
+instance Scalar Float
+
+class (Scalar scalar, Scalar sqrtScalar) => Sqrt scalar sqrtScalar | scalar -> sqrtScalar
+
+instance Sqrt Float Float
 
 class Negation a where
     negate :: a -> a
 
-instance Negation Int where
-    negate =
-        Prelude.negate
+instance Negation Int where negate = Prelude.negate
 
-instance Negation (Quantity units) where
-    negate (Quantity x) =
-        Quantity (Prelude.negate x)
+instance Negation Float where negate = Prelude.negate
 
 class Addition a where
     (+) :: a -> a -> a
 
-instance Addition Int where
-    n + m =
-        n Prelude.+ m
+instance Addition Int where n + m = n Prelude.+ m
 
-instance Addition (Quantity units) where
-    (Quantity x) + (Quantity y) =
-        Quantity (x Prelude.+ y)
+instance Addition Float where x + y = x Prelude.+ y
 
 class Subtraction a where
     (-) :: a -> a -> a
 
-instance Subtraction Int where
-    n - m =
-        n Prelude.- m
+instance Subtraction Int where n - m = n Prelude.- m
 
-instance Subtraction (Quantity units) where
-    (Quantity x) - (Quantity y) =
-        Quantity (x Prelude.- y)
+instance Subtraction Float where x - y = x Prelude.- y
 
-class Multiplication lhs rhs where
-    type Product lhs rhs
-    (*) :: lhs -> rhs -> Product lhs rhs
+class Multiplication lhs rhs result | lhs rhs -> result where
+    (*) :: lhs -> rhs -> result
 
-instance Multiplication Int Int where
-    type Product Int Int = Int
-    n * m =
-        n Prelude.* m
+instance Multiplication Int Int Int where n * m = n Prelude.* m
 
-instance Units.Multiplication units1 units2 => Multiplication (Quantity units1) (Quantity units2) where
-    type Product (Quantity units1) (Quantity units2) = Quantity (Units.Product units1 units2)
-    (Quantity x) * (Quantity y) =
-        Quantity (x Prelude.* y)
+instance Multiplication Float Float Float where x * y = x Prelude.* y
 
-class Division lhs rhs where
-    type Quotient lhs rhs
-    (/) :: lhs -> rhs -> Quotient lhs rhs
+class Division lhs rhs result | lhs rhs -> result where
+    (/) :: lhs -> rhs -> result
 
-instance Units.Division units1 units2 => Division (Quantity units1) (Quantity units2) where
-    type Quotient (Quantity units1) (Quantity units2) = Quantity (Units.Quotient units1 units2)
-    (Quantity x) / (Quantity y) =
-        Quantity (x Prelude./ y)
+instance Division Float Float Float where x / y = x Prelude./ y
 
-instance Division Int Int where
-    type Quotient Int Int = Int
-    (/) =
-        Prelude.quot
+(//) :: Int -> Int -> Int
+(//) =
+    Prelude.quot
 
-class DotProduct lhs rhs where
-    type DotProductResult lhs rhs
-    (.) :: lhs coordinates -> rhs coordinates -> DotProductResult lhs rhs
+class DotProduct lhs rhs result | lhs rhs -> result where
+    (.) :: lhs coordinates -> rhs coordinates -> result
 
-class CrossProduct lhs rhs where
-    type CrossProductResult lhs rhs :: * -> *
-    (><) :: lhs coordinates -> rhs coordinates -> (CrossProductResult lhs rhs) coordinates
+class CrossProduct lhs rhs result | lhs rhs -> result where
+    (><) :: lhs coordinates -> rhs coordinates -> result coordinates
 
 class Concatenation a where
     (++) :: a -> a -> a
 
-instance Concatenation String where
-    (++) =
-        Data.Text.append
+instance Concatenation String where (++) = Data.Text.append
 
-instance Concatenation (List a) where
-    (++) =
-        Prelude.mappend
+instance Concatenation (List a) where (++) = Prelude.mappend
 
 fromInteger :: Prelude.Integer -> Int
 fromInteger =
     Prelude.fromInteger
 
 fromRational :: Prelude.Rational -> Float
-fromRational x =
-    Quantity (Prelude.fromRational x)
+fromRational =
+    Prelude.fromRational
 
 fromString :: Prelude.String -> String
 fromString =
     Data.Text.pack
 
 float :: Int -> Float
-float n =
-    Quantity (Prelude.fromIntegral n)
-
-abs :: Quantity units -> Quantity units
-abs (Quantity x) =
-    Quantity (Prelude.abs x)
-
-sqrt :: Units.Sqrt units => Quantity units -> Quantity (Units.SquareRoot units)
-sqrt (Quantity x) =
-    Quantity (Prelude.sqrt x)
+float =
+    Prelude.fromIntegral
 
 {- HLINT ignore ifThenElse "Use if" -}
 ifThenElse :: Bool -> a -> a -> a
@@ -225,8 +207,88 @@ infixl 0 |>
 
 infixl 6 +, -
 
-infixl 7 *, /
+infixl 7 *, /, //
 
 infixl 9 <<<
 
 infixr 9 >>>
+
+newtype Quantity units = Quantity Float deriving (Eq, Ord, Show, Negation, Addition, Subtraction)
+
+instance UnitCoercion (Quantity units) Float
+
+instance Multiplication Float (Quantity units) (Quantity units) where
+    x * (Quantity y) =
+        Quantity (x * y)
+
+instance Multiplication (Quantity units) Float (Quantity units) where
+    (Quantity x) * y =
+        Quantity (x * y)
+
+instance Division (Quantity units) Float (Quantity units) where
+    (Quantity x) / y =
+        Quantity (x / y)
+
+instance Division (Quantity units) (Quantity units) Float where
+    (Quantity x) / (Quantity y) =
+        x / y
+
+instance Scalar (Quantity units)
+
+quantityMultiplication :: Quantity a -> Quantity b -> Quantity c
+quantityMultiplication (Quantity x) (Quantity y) =
+    Quantity (x * y)
+
+quantityDivision :: Quantity a -> Quantity b -> Quantity c
+quantityDivision (Quantity x) (Quantity y) =
+    Quantity (x / y)
+
+data Meters
+
+type Length = Quantity Meters
+
+data Seconds
+
+type Duration = Quantity Seconds
+
+data MetersPerSecond
+
+type Speed = Quantity MetersPerSecond
+
+data MetersPerSecondSquared
+
+type Acceleration = Quantity MetersPerSecondSquared
+
+data SquareMeters
+
+type Area = Quantity SquareMeters
+
+data CubicMeters
+
+type Volume = Quantity CubicMeters
+
+instance Multiplication Length Length Area where (*) = quantityMultiplication
+
+instance Multiplication Length Area Volume where (*) = quantityMultiplication
+
+instance Multiplication Area Length Volume where (*) = quantityMultiplication
+
+instance Multiplication Duration Speed Length where (*) = quantityMultiplication
+
+instance Multiplication Speed Duration Length where (*) = quantityMultiplication
+
+instance Multiplication Duration Acceleration Speed where (*) = quantityMultiplication
+
+instance Multiplication Acceleration Duration Speed where (*) = quantityMultiplication
+
+instance Division Area Length Length where (/) = quantityDivision
+
+instance Division Volume Area Length where (/) = quantityDivision
+
+instance Division Volume Length Area where (/) = quantityDivision
+
+instance Division Length Duration Speed where (/) = quantityDivision
+
+instance Division Speed Duration Acceleration where (/) = quantityDivision
+
+instance Sqrt Area Length

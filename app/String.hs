@@ -31,5 +31,5 @@ fromInt n =
     fromList (show n)
 
 fromFloat :: Float -> String
-fromFloat (Quantity x) =
+fromFloat x =
     fromList (show x)
