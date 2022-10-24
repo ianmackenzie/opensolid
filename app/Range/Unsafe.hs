@@ -43,20 +43,16 @@ rangeScalarDivision (Range nl nh) d
     | otherwise = Range Scalar.negativeInfinity Scalar.positiveInfinity
 
 instance Scalar scalar => Multiplication Float (Range scalar) (Range scalar) where
-    (*) =
-        scalarRangeMultiplication
+    (*) = scalarRangeMultiplication
 
 instance Scalar scalar => Multiplication (Range scalar) Float (Range scalar) where
-    (*) =
-        rangeScalarMultiplication
+    (*) = rangeScalarMultiplication
 
 instance (Scalar scalar, Scalar result, Multiplication (Quantity units) scalar result) => Multiplication (Quantity units) (Range scalar) (Range result) where
-    (*) =
-        scalarRangeMultiplication
+    (*) = scalarRangeMultiplication
 
 instance (Scalar scalar, Scalar result, Multiplication (Quantity units) scalar result) => Multiplication (Range scalar) (Quantity units) (Range result) where
-    (*) =
-        rangeScalarMultiplication
+    (*) = rangeScalarMultiplication
 
 instance (Scalar scalar1, Scalar scalar2, Scalar result, Multiplication scalar1 scalar2 result) => Multiplication (Range scalar1) (Range scalar2) (Range result) where
     (Range low1 high1) * (Range low2 high2) =
@@ -69,20 +65,16 @@ instance (Scalar scalar1, Scalar scalar2, Scalar result, Multiplication scalar1 
          in Range low high
 
 instance (Scalar scalar, Scalar result, Division Float scalar result) => Division Float (Range scalar) (Range result) where
-    (/) =
-        scalarRangeDivision
+    (/) = scalarRangeDivision
 
 instance (Scalar scalar, Scalar result, Division (Quantity units) scalar result) => Division (Quantity units) (Range scalar) (Range result) where
-    (/) =
-        scalarRangeDivision
+    (/) = scalarRangeDivision
 
 instance Scalar scalar => Division (Range scalar) Float (Range scalar) where
-    (/) =
-        rangeScalarDivision
+    (/) = rangeScalarDivision
 
 instance (Scalar scalar, Scalar result, Division scalar (Quantity units) result) => Division (Range scalar) (Quantity units) (Range result) where
-    (/) =
-        rangeScalarDivision
+    (/) = rangeScalarDivision
 
 instance (Scalar scalar1, Scalar scalar2, Scalar result, Division scalar1 scalar2 result) => Division (Range scalar1) (Range scalar2) (Range result) where
     (Range nl nh) / (Range dl dh)
