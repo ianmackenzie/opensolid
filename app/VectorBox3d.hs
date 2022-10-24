@@ -9,111 +9,132 @@ module VectorBox3d (
     normalize,
 ) where
 
-import Data.Coerce (coerce)
-import Interval (Interval)
-import qualified Interval
+import qualified Float
 import OpenSolid
-import qualified Quantity
 import qualified Range
 import Range.Unsafe
-import qualified Units
+import UnitCoercion
 import Vector3d (Vector3d (..))
 
-data VectorBox3d units coordinates = VectorBox3d !(Range units) !(Range units) !(Range units)
+data VectorBox3d scalar coordinates = VectorBox3d !(Range scalar) !(Range scalar) !(Range scalar)
 
-instance Negation (VectorBox3d units coordinates) where
+instance UnitCoercion (VectorBox3d scalar coordinates) (VectorBox3d Float coordinates)
+
+instance Scalar scalar => Negation (VectorBox3d scalar coordinates) where
     negate (VectorBox3d x y z) =
         VectorBox3d (negate x) (negate y) (negate z)
 
-instance Addition (VectorBox3d units coordinates) where
+instance Scalar scalar => Addition (VectorBox3d scalar coordinates) where
     (VectorBox3d x1 y1 z1) + (VectorBox3d x2 y2 z2) =
         VectorBox3d (x1 + x2) (y1 + y2) (z1 + z2)
 
-instance Subtraction (VectorBox3d units coordinates) where
+instance Scalar scalar => Subtraction (VectorBox3d scalar coordinates) where
     (VectorBox3d x1 y1 z1) - (VectorBox3d x2 y2 z2) =
         VectorBox3d (x1 - x2) (y1 - y2) (z1 - z2)
 
-instance Units.Multiplication units1 units2 => Multiplication (Quantity units1) (VectorBox3d units2 coordinates) where
-    type Product (Quantity units1) (VectorBox3d units2 coordinates) = VectorBox3d (Units.Product units1 units2) coordinates
-    quantity * (VectorBox3d x y z) =
-        VectorBox3d (quantity * x) (quantity * y) (quantity * z)
+instance Scalar scalar => Multiplication Float (VectorBox3d scalar coordinates) (VectorBox3d scalar coordinates) where
+    value * (VectorBox3d x y z) =
+        VectorBox3d (value * x) (value * y) (value * z)
 
-instance Units.Multiplication units1 units2 => Multiplication (VectorBox3d units1 coordinates) (Quantity units2) where
-    type Product (VectorBox3d units1 coordinates) (Quantity units2) = VectorBox3d (Units.Product units1 units2) coordinates
-    (VectorBox3d x y z) * quantity =
-        VectorBox3d (x * quantity) (y * quantity) (z * quantity)
+instance (Scalar scalar, Scalar result, Multiplication (Quantity units) scalar result) => Multiplication (Quantity units) (VectorBox3d scalar coordinates) (VectorBox3d result coordinates) where
+    value * (VectorBox3d x y z) =
+        VectorBox3d (value * x) (value * y) (value * z)
 
-instance Units.Multiplication units1 units2 => Multiplication (Range units1) (VectorBox3d units2 coordinates) where
-    type Product (Range units1) (VectorBox3d units2 coordinates) = VectorBox3d (Units.Product units1 units2) coordinates
+instance Scalar scalar => Multiplication (VectorBox3d scalar coordinates) Float (VectorBox3d scalar coordinates) where
+    (VectorBox3d x y z) * value =
+        VectorBox3d (value * x) (value * y) (value * z)
+
+instance (Scalar scalar, Scalar result, Multiplication (Quantity units) scalar result) => Multiplication (VectorBox3d scalar coordinates) (Quantity units) (VectorBox3d result coordinates) where
+    (VectorBox3d x y z) * value =
+        VectorBox3d (value * x) (value * y) (value * z)
+
+instance (Scalar scalar1, Scalar scalar2, Scalar result, Multiplication scalar1 scalar2 result) => Multiplication (Range scalar1) (VectorBox3d scalar2 coordinates) (VectorBox3d result coordinates) where
     range * (VectorBox3d x y z) =
         VectorBox3d (range * x) (range * y) (range * z)
 
-instance Units.Multiplication units1 units2 => Multiplication (VectorBox3d units1 coordinates) (Range units2) where
-    type Product (VectorBox3d units1 coordinates) (Range units2) = VectorBox3d (Units.Product units1 units2) coordinates
+instance (Scalar scalar1, Scalar scalar2, Scalar result, Multiplication scalar1 scalar2 result) => Multiplication (VectorBox3d scalar1 coordinates) (Range scalar2) (VectorBox3d result coordinates) where
     (VectorBox3d x y z) * range =
         VectorBox3d (x * range) (y * range) (z * range)
 
-instance Units.Division units1 units2 => Division (VectorBox3d units1 coordinates) (Quantity units2) where
-    type Quotient (VectorBox3d units1 coordinates) (Quantity units2) = VectorBox3d (Units.Quotient units1 units2) coordinates
-    (VectorBox3d x y z) / quantity =
-        VectorBox3d (x / quantity) (y / quantity) (z / quantity)
+instance Scalar scalar => Division (VectorBox3d scalar coordinates) Float (VectorBox3d scalar coordinates) where
+    (VectorBox3d x y z) / scalar =
+        VectorBox3d (x / scalar) (y / scalar) (z / scalar)
 
-instance Units.Division units1 units2 => Division (VectorBox3d units1 coordinates) (Range units2) where
-    type Quotient (VectorBox3d units1 coordinates) (Range units2) = VectorBox3d (Units.Quotient units1 units2) coordinates
+instance (Scalar scalar, Scalar result, Division scalar (Quantity units) result) => Division (VectorBox3d scalar coordinates) (Quantity units) (VectorBox3d result coordinates) where
+    (VectorBox3d x y z) / scalar =
+        VectorBox3d (x / scalar) (y / scalar) (z / scalar)
+
+instance (Scalar scalar1, Scalar scalar2, Scalar result, Division scalar1 scalar2 result) => Division (VectorBox3d scalar1 coordinates) (Range scalar2) (VectorBox3d result coordinates) where
     (VectorBox3d x y z) / range =
         VectorBox3d (x / range) (y / range) (z / range)
 
-instance Units.Multiplication units1 units2 => DotProduct (VectorBox3d units1) (Vector3d units2) where
-    type DotProductResult (VectorBox3d units1) (Vector3d units2) = Range (Units.Product units1 units2)
-    (VectorBox3d x1 y1 z1) . (Vector3d x2 y2 z2) =
-        x1 * x2 + y1 * y2 + z1 * z2
-
-instance Units.Multiplication units1 units2 => DotProduct (Vector3d units1) (VectorBox3d units2) where
-    type DotProductResult (Vector3d units1) (VectorBox3d units2) = Range (Units.Product units1 units2)
+instance Scalar scalar => DotProduct (Vector3d Float) (VectorBox3d scalar) (Range scalar) where
     (Vector3d x1 y1 z1) . (VectorBox3d x2 y2 z2) =
         x1 * x2 + y1 * y2 + z1 * z2
 
-instance Units.Multiplication units1 units2 => DotProduct (VectorBox3d units1) (VectorBox3d units2) where
-    type DotProductResult (VectorBox3d units1) (VectorBox3d units2) = Range (Units.Product units1 units2)
+instance (Scalar scalar, Scalar result, Multiplication (Quantity units) scalar result) => DotProduct (Vector3d (Quantity units)) (VectorBox3d scalar) (Range result) where
+    (Vector3d x1 y1 z1) . (VectorBox3d x2 y2 z2) =
+        x1 * x2 + y1 * y2 + z1 * z2
+
+instance Scalar scalar => DotProduct (VectorBox3d scalar) (Vector3d Float) (Range scalar) where
+    (VectorBox3d x1 y1 z1) . (Vector3d x2 y2 z2) =
+        x1 * x2 + y1 * y2 + z1 * z2
+
+instance (Scalar scalar, Scalar result, Multiplication (Quantity units) scalar result) => DotProduct (VectorBox3d scalar) (Vector3d (Quantity units)) (Range result) where
+    (VectorBox3d x1 y1 z1) . (Vector3d x2 y2 z2) =
+        x1 * x2 + y1 * y2 + z1 * z2
+
+instance (Scalar scalar1, Scalar scalar2, Scalar result, Multiplication scalar1 scalar2 result) => DotProduct (VectorBox3d scalar1) (VectorBox3d scalar2) (Range result) where
     (VectorBox3d x1 y1 z1) . (VectorBox3d x2 y2 z2) =
         x1 * x2 + y1 * y2 + z1 * z2
 
-instance Units.Multiplication units1 units2 => CrossProduct (VectorBox3d units1) (Vector3d units2) where
-    type CrossProductResult (VectorBox3d units1) (Vector3d units2) = VectorBox3d (Units.Product units1 units2)
-    (VectorBox3d x1 y1 z1) >< (Vector3d x2 y2 z2) =
-        let x = y1 * z2 - z1 * y2
-            y = z1 * x2 - x1 * z2
-            z = x1 * y2 - y1 * x2
-         in VectorBox3d x y z
-
-instance Units.Multiplication units1 units2 => CrossProduct (Vector3d units1) (VectorBox3d units2) where
-    type CrossProductResult (Vector3d units1) (VectorBox3d units2) = VectorBox3d (Units.Product units1 units2)
+instance Scalar scalar => CrossProduct (Vector3d Float) (VectorBox3d scalar) (VectorBox3d scalar) where
     (Vector3d x1 y1 z1) >< (VectorBox3d x2 y2 z2) =
         let x = y1 * z2 - z1 * y2
             y = z1 * x2 - x1 * z2
             z = x1 * y2 - y1 * x2
          in VectorBox3d x y z
 
-instance Units.Multiplication units1 units2 => CrossProduct (VectorBox3d units1) (VectorBox3d units2) where
-    type CrossProductResult (VectorBox3d units1) (VectorBox3d units2) = VectorBox3d (Units.Product units1 units2)
+instance (Scalar scalar, Scalar result, Multiplication (Quantity units) scalar result) => CrossProduct (Vector3d (Quantity units)) (VectorBox3d scalar) (VectorBox3d result) where
+    (Vector3d x1 y1 z1) >< (VectorBox3d x2 y2 z2) =
+        let x = y1 * z2 - z1 * y2
+            y = z1 * x2 - x1 * z2
+            z = x1 * y2 - y1 * x2
+         in VectorBox3d x y z
+
+instance Scalar scalar => CrossProduct (VectorBox3d scalar) (Vector3d Float) (VectorBox3d scalar) where
+    (VectorBox3d x1 y1 z1) >< (Vector3d x2 y2 z2) =
+        let x = y1 * z2 - z1 * y2
+            y = z1 * x2 - x1 * z2
+            z = x1 * y2 - y1 * x2
+         in VectorBox3d x y z
+
+instance (Scalar scalar, Scalar result, Multiplication (Quantity units) scalar result) => CrossProduct (VectorBox3d scalar) (Vector3d (Quantity units)) (VectorBox3d result) where
+    (VectorBox3d x1 y1 z1) >< (Vector3d x2 y2 z2) =
+        let x = y1 * z2 - z1 * y2
+            y = z1 * x2 - x1 * z2
+            z = x1 * y2 - y1 * x2
+         in VectorBox3d x y z
+
+instance (Scalar scalar1, Scalar scalar2, Scalar result, Multiplication scalar1 scalar2 result) => CrossProduct (VectorBox3d scalar1) (VectorBox3d scalar2) (VectorBox3d result) where
     (VectorBox3d x1 y1 z1) >< (VectorBox3d x2 y2 z2) =
         let x = y1 * z2 - z1 * y2
             y = z1 * x2 - x1 * z2
             z = x1 * y2 - y1 * x2
          in VectorBox3d x y z
 
-constant :: Vector3d units coordinates -> VectorBox3d units coordinates
+constant :: Scalar scalar => Vector3d scalar coordinates -> VectorBox3d scalar coordinates
 constant vector =
     let (Vector3d x y z) = vector
      in VectorBox3d (Range.constant x) (Range.constant y) (Range.constant z)
 
-hull2 :: Vector3d units coordinates -> Vector3d units coordinates -> VectorBox3d units coordinates
+hull2 :: Scalar scalar => Vector3d scalar coordinates -> Vector3d scalar coordinates -> VectorBox3d scalar coordinates
 hull2 v1 v2 =
     let (Vector3d x1 y1 z1) = v1
         (Vector3d x2 y2 z2) = v2
      in VectorBox3d (Range.from x1 x2) (Range.from y1 y2) (Range.from z1 z2)
 
-hull3 :: Vector3d units coordinates -> Vector3d units coordinates -> Vector3d units coordinates -> VectorBox3d units coordinates
+hull3 :: Scalar scalar => Vector3d scalar coordinates -> Vector3d scalar coordinates -> Vector3d scalar coordinates -> VectorBox3d scalar coordinates
 hull3 v1 v2 v3 =
     let (Vector3d x1 y1 z1) = v1
         (Vector3d x2 y2 z2) = v2
@@ -126,7 +147,7 @@ hull3 v1 v2 v3 =
         maxZ = max (max z1 z2) z3
      in VectorBox3d (Range minX maxX) (Range minY maxY) (Range minZ maxZ)
 
-hull4 :: Vector3d units coordinates -> Vector3d units coordinates -> Vector3d units coordinates -> Vector3d units coordinates -> VectorBox3d units coordinates
+hull4 :: Scalar scalar => Vector3d scalar coordinates -> Vector3d scalar coordinates -> Vector3d scalar coordinates -> Vector3d scalar coordinates -> VectorBox3d scalar coordinates
 hull4 v1 v2 v3 v4 =
     let (Vector3d x1 y1 z1) = v1
         (Vector3d x2 y2 z2) = v2
@@ -140,17 +161,17 @@ hull4 v1 v2 v3 v4 =
         maxZ = max (max (max z1 z2) z3) z4
      in VectorBox3d (Range minX maxX) (Range minY maxY) (Range minZ maxZ)
 
-squaredMagnitude :: Units.Multiplication units units => VectorBox3d units coordinates -> Range (Units.Product units units)
+squaredMagnitude :: (Scalar scalar, Scalar squaredScalar, Multiplication scalar scalar squaredScalar) => VectorBox3d scalar coordinates -> Range squaredScalar
 squaredMagnitude vectorBox =
     let (VectorBox3d x y z) = vectorBox
      in Range.squared x + Range.squared y + Range.squared z
 
-magnitude :: VectorBox3d units coordinates -> Range units
+magnitude :: Scalar scalar => VectorBox3d scalar coordinates -> Range scalar
 magnitude vectorBox =
-    let (VectorBox3d x y z) = coerce vectorBox :: VectorBox3d Unitless coordinates
-     in coerce (Interval.sqrt (Interval.squared x + Interval.squared y + Interval.squared z))
+    let (VectorBox3d x y z) = dropUnits vectorBox
+     in addUnits (Range.sqrt (Range.squared x + Range.squared y + Range.squared z))
 
-normalize :: VectorBox3d units coordinates -> VectorBox3d Unitless coordinates
+normalize :: Scalar scalar => VectorBox3d scalar coordinates -> VectorBox3d Float coordinates
 normalize vectorBox =
     let (VectorBox3d x y z) = vectorBox / magnitude vectorBox
         nx = clampNormalized x
@@ -158,6 +179,6 @@ normalize vectorBox =
         nz = clampNormalized z
      in VectorBox3d nx ny nz
 
-clampNormalized :: Interval -> Interval
+clampNormalized :: Range Float -> Range Float
 clampNormalized (Range low high) =
-    Range (Quantity.clamp (-1.0) 1.0 low) (Quantity.clamp (-1.0) 1.0 high)
+    Range (Float.clamp (-1.0) 1.0 low) (Float.clamp (-1.0) 1.0 high)

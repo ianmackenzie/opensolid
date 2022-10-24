@@ -11,38 +11,36 @@ module Expression1d (
     roots,
 ) where
 
-import Data.Coerce (coerce)
 import Expression1d.Root (Root (Root))
 import qualified Expression1d.Root as Root
-import Interval (Interval)
-import qualified Interval
 import qualified List
-import OpenSolid hiding (sqrt)
-import qualified OpenSolid
-import qualified Quantity
+import OpenSolid
 import qualified Range
 import Range.Unsafe
-import qualified Units
+import qualified Scalar
+import UnitCoercion
 
-data Expression1d units = Expression1d
-    { evaluate :: !(Float -> Quantity units)
-    , bounds :: !(Interval -> Range units)
-    , derivative :: ~(Expression1d units)
+data Expression1d scalar = Expression1d
+    { evaluate :: !(Float -> scalar)
+    , bounds :: !(Range Float -> Range scalar)
+    , derivative :: ~(Expression1d scalar)
     }
 
-zero :: Expression1d units
-zero =
-    constant Quantity.zero
+instance UnitCoercion (Expression1d scalar) (Expression1d Float)
 
-constant :: Quantity units -> Expression1d units
+zero :: Scalar scalar => Expression1d scalar
+zero =
+    constant Scalar.zero
+
+constant :: Scalar scalar => scalar -> Expression1d scalar
 constant value =
     Expression1d
         { evaluate = always value
         , bounds = always (Range.constant value)
-        , derivative = constant Quantity.zero
+        , derivative = constant Scalar.zero
         }
 
-parameter :: Expression1d Unitless
+parameter :: Expression1d Float
 parameter =
     Expression1d
         { evaluate = identity
@@ -50,7 +48,7 @@ parameter =
         , derivative = constant 1.0
         }
 
-instance Negation (Expression1d units) where
+instance Scalar scalar => Negation (Expression1d scalar) where
     negate expression =
         Expression1d
             { evaluate = evaluate expression >>> negate
@@ -58,7 +56,7 @@ instance Negation (Expression1d units) where
             , derivative = negate (derivative expression)
             }
 
-instance Addition (Expression1d units) where
+instance Scalar scalar => Addition (Expression1d scalar) where
     expression1 + expression2 =
         Expression1d
             { evaluate = \t -> evaluate expression1 t + evaluate expression2 t
@@ -66,7 +64,7 @@ instance Addition (Expression1d units) where
             , derivative = derivative expression1 + derivative expression2
             }
 
-instance Subtraction (Expression1d units) where
+instance Scalar scalar => Subtraction (Expression1d scalar) where
     expression1 - expression2 =
         Expression1d
             { evaluate = \t -> evaluate expression1 t - evaluate expression2 t
@@ -74,8 +72,7 @@ instance Subtraction (Expression1d units) where
             , derivative = derivative expression1 - derivative expression2
             }
 
-instance Units.Multiplication units1 units2 => Multiplication (Expression1d units1) (Expression1d units2) where
-    type Product (Expression1d units1) (Expression1d units2) = Expression1d (Units.Product units1 units2)
+instance (Scalar scalar1, Scalar scalar2, Scalar result, Multiplication scalar1 scalar2 result) => Multiplication (Expression1d scalar1) (Expression1d scalar2) (Expression1d result) where
     expression1 * expression2 =
         Expression1d
             { evaluate = \t -> evaluate expression1 t * evaluate expression2 t
@@ -83,21 +80,20 @@ instance Units.Multiplication units1 units2 => Multiplication (Expression1d unit
             , derivative = derivative expression1 * expression2 + expression1 * derivative expression2
             }
 
-instance Units.Division units1 units2 => Division (Expression1d units1) (Expression1d units2) where
-    type Quotient (Expression1d units1) (Expression1d units2) = Expression1d (Units.Quotient units1 units2)
+instance (Scalar scalar1, Scalar scalar2, Scalar result, Division scalar1 scalar2 result) => Division (Expression1d scalar1) (Expression1d scalar2) (Expression1d result) where
     expression1 / expression2 =
         Expression1d
             { evaluate = \t -> evaluate expression1 t / evaluate expression2 t
             , bounds = \t -> bounds expression1 t / bounds expression2 t
             , derivative =
-                let p = coerce expression1 :: Expression1d Unitless
-                    q = coerce expression2 :: Expression1d Unitless
+                let p = dropUnits expression1
+                    q = dropUnits expression2
                     p' = derivative p
                     q' = derivative q
-                 in coerce ((p' * q - p * q') / squared q)
+                 in addUnits ((p' * q - p * q') / squared q)
             }
 
-squared :: Units.Multiplication units units => Expression1d units -> Expression1d (Units.Product units units)
+squared :: (Scalar scalar, Scalar squaredScalar, Multiplication scalar scalar squaredScalar) => Expression1d scalar -> Expression1d squaredScalar
 squared expression =
     Expression1d
         { evaluate = evaluate expression >>> (\value -> value * value)
@@ -105,19 +101,19 @@ squared expression =
         , derivative = constant 2.0 * expression * derivative expression
         }
 
-sqrt :: Units.Sqrt units => Expression1d units -> Expression1d (Units.SquareRoot units)
+sqrt :: Sqrt scalar sqrtQuantity => Expression1d scalar -> Expression1d sqrtQuantity
 sqrt expression =
     Expression1d
-        { evaluate = evaluate expression >>> OpenSolid.sqrt
+        { evaluate = evaluate expression >>> Scalar.sqrt
         , bounds = bounds expression >>> Range.sqrt
         , derivative =
-            let f = coerce expression :: Expression1d Unitless
-             in coerce (derivative f / (constant 2.0 * sqrt f))
+            let f = dropUnits expression :: Expression1d Float
+             in addUnits (derivative f / (constant 2.0 * sqrt f))
         }
 
 data Neighborhood
-    = HasRoot !Interval !Root
-    | NoRoot !Interval
+    = HasRoot !(Range Float) !Root
+    | NoRoot !(Range Float)
 
 data Indeterminate = Indeterminate
 
@@ -125,26 +121,26 @@ maxRootOrder :: Int
 maxRootOrder =
     8
 
-roots :: Quantity units -> Expression1d units -> List Root
+roots :: Scalar scalar => scalar -> Expression1d scalar -> List Root
 roots tolerance expression =
-    case neighborhoods expression tolerance Interval.unit of
+    case neighborhoods expression tolerance Range.unit of
         Ok validNeighborhoods -> List.collect neighborhoodRoot validNeighborhoods
         Err Indeterminate -> []
 
-neighborhoods :: Expression1d units -> Quantity units -> Interval -> Result Indeterminate (List Neighborhood)
+neighborhoods :: Scalar scalar => Expression1d scalar -> scalar -> Range Float -> Result Indeterminate (List Neighborhood)
 neighborhoods expression tolerance domain =
     case localNeighborhoods expression tolerance domain 0 of
         Ok validNeighborhoods -> Ok validNeighborhoods
         Err Indeterminate ->
-            if Interval.isAtomic domain
+            if Range.isAtomic domain
                 then Err Indeterminate
                 else do
-                    let (leftDomain, rightDomain) = Interval.bisect domain
+                    let (leftDomain, rightDomain) = Range.bisect domain
                     leftNeighborhoods <- neighborhoods expression tolerance leftDomain
                     rightNeighborhoods <- neighborhoods expression tolerance rightDomain
                     Ok (leftNeighborhoods ++ rightNeighborhoods)
 
-localNeighborhoods :: Expression1d units -> Quantity units -> Interval -> Int -> Result Indeterminate (List Neighborhood)
+localNeighborhoods :: Scalar scalar => Expression1d scalar -> scalar -> Range Float -> Int -> Result Indeterminate (List Neighborhood)
 localNeighborhoods expression tolerance domain order
     | definitelyNonZero expression tolerance domain = Ok [NoRoot domain]
     | order <= maxRootOrder = do
@@ -153,12 +149,12 @@ localNeighborhoods expression tolerance domain order
     -- We've passed the maximum root order and still haven't found a non-zero derivative
     | otherwise = Err Indeterminate
 
-definitelyNonZero :: Expression1d units -> Quantity units -> Interval -> Bool
+definitelyNonZero :: Scalar scalar => Expression1d scalar -> scalar -> Range Float -> Bool
 definitelyNonZero expression tolerance domain =
     let yRange = bounds expression domain
-     in Range.minValue yRange >= tolerance || Range.maxValue yRange <= - tolerance
+     in Range.minValue yRange >= tolerance || Range.maxValue yRange <= negate tolerance
 
-solve :: Expression1d units -> Quantity units -> Int -> Neighborhood -> List Neighborhood
+solve :: Scalar scalar => Expression1d scalar -> scalar -> Int -> Neighborhood -> List Neighborhood
 solve expression tolerance order derivativeNeighborhood =
     case derivativeNeighborhood of
         NoRoot domain ->
@@ -167,34 +163,34 @@ solve expression tolerance order derivativeNeighborhood =
                 Nothing -> [NoRoot domain]
         HasRoot domain root ->
             let rootX = Root.value root
-             in if abs (evaluate expression rootX) <= tolerance
+             in if Scalar.abs (evaluate expression rootX) <= tolerance
                     then [HasRoot domain root]
                     else
-                        let (x1, x2) = Interval.endpoints domain
-                            leftDomain = Interval.from x1 rootX
-                            rightDomain = Interval.from rootX x2
+                        let (x1, x2) = Range.endpoints domain
+                            leftDomain = Range.from x1 rootX
+                            rightDomain = Range.from rootX x2
                             leftNeighborhoods = solve expression tolerance order (NoRoot leftDomain)
                             rightNeighborhoods = solve expression tolerance order (NoRoot rightDomain)
                          in leftNeighborhoods ++ rightNeighborhoods
 
-solveMonotonic :: Expression1d units -> Interval -> Maybe Float
+solveMonotonic :: Scalar scalar => Expression1d scalar -> Range Float -> Maybe Float
 solveMonotonic expression domain
-    | y1 <= Quantity.zero && y2 >= Quantity.zero = Just (bisectMonotonic expression x1 x2)
-    | y1 >= Quantity.zero && y2 <= Quantity.zero = Just (bisectMonotonic expression x2 x1)
+    | y1 <= Scalar.zero && y2 >= Scalar.zero = Just (bisectMonotonic expression x1 x2)
+    | y1 >= Scalar.zero && y2 <= Scalar.zero = Just (bisectMonotonic expression x2 x1)
     | otherwise = Nothing
   where
-    (x1, x2) = Interval.endpoints domain
+    (x1, x2) = Range.endpoints domain
     y1 = evaluate expression x1
     y2 = evaluate expression x2
 
-bisectMonotonic :: Expression1d units -> Float -> Float -> Float
+bisectMonotonic :: Scalar scalar => Expression1d scalar -> Float -> Float -> Float
 bisectMonotonic expression lowX highX =
-    let midX = Quantity.midpoint lowX highX
+    let midX = Scalar.midpoint lowX highX
      in if midX == lowX || midX == highX
             then midX
             else
                 let midY = evaluate expression midX
-                 in if midY >= Quantity.zero
+                 in if midY >= Scalar.zero
                         then bisectMonotonic expression lowX midX
                         else bisectMonotonic expression midX highX
 

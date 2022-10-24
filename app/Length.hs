@@ -1,6 +1,4 @@
 module Length (
-    Length,
-    Meters,
     zero,
     meter,
     centimeter,
@@ -11,24 +9,24 @@ module Length (
 ) where
 
 import OpenSolid
-import qualified Quantity
-import Units (Meters)
+import qualified Scalar
+import UnitCoercion
 
 zero :: Length
 zero =
-    Quantity.zero
+    Scalar.zero
 
 meter :: Length
 meter =
-    Quantity.baseUnit
+    meters 1.0
 
 meters :: Float -> Length
 meters =
-    Quantity.baseUnits
+    addUnits
 
 inMeters :: Length -> Float
 inMeters =
-    Quantity.inBaseUnits
+    dropUnits
 
 centimeter :: Length
 centimeter =

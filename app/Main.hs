@@ -7,6 +7,7 @@ import Expression1d (Expression1d)
 import qualified Expression1d
 import Expression1d.Root (Root)
 import qualified Expression1d.Root as Root
+import qualified Float
 import qualified Length
 import OpenSolid
 import Point2d (Point2d)
@@ -19,7 +20,7 @@ import qualified Volume
 
 data MyPoints = MyPoints !(Point2d ()) !(Point2d ()) deriving (Show)
 
-showRoot :: Expression1d Unitless -> Root -> String
+showRoot :: Expression1d Float -> Root -> String
 showRoot x root =
     String.fromInt (Root.order root) ++ ":" ++ String.fromFloat (Expression1d.evaluate x (Root.value root))
 
@@ -27,7 +28,7 @@ main :: IO ()
 main = do
     Debug.log "Integer product" (3 * 4)
     Debug.log "Volume in cubic centimeters" volumeInCubicCentimeters
-    Debug.log "Integer division" (10 / 4)
+    Debug.log "Integer division" (10 // 4)
     Debug.log "True division" (10.0 / 4.0)
     Debug.log "Dot product" dotProduct
     Debug.log "Determinant" determinant
@@ -42,7 +43,7 @@ main = do
     Debug.log "Tuple" (Point2d.meters 1.0 2.0, Point2d.meters 3.0 4.0)
     Debug.log "Custom type" (MyPoints (Point2d.meters 1.0 2.0) (Point2d.meters 3.0 4.0))
     Debug.log "Roots" [showRoot x root | root <- roots]
-    Debug.log "sqrt 2.0" (sqrt 2.0)
+    Debug.log "sqrt 2.0" (Float.sqrt 2.0)
   where
     k = 0.5
     area = Area.squareMeters 3.0
@@ -53,7 +54,7 @@ main = do
     v2 = k * Vector2d.meters 3.0 4.0
     dotProduct = v1 . v2
     determinant = Vector2d.determinant v1 v2
-    squareRoot = sqrt dotProduct
+    squareRoot = Area.sqrt dotProduct
     translatedPoint = Point2d.meters 2.0 3.0 |> Point2d.translateBy (Vector2d.meters 4.0 5.0)
     vectorSum = Vector2d.meters 1.0 2.0 + Vector2d.meters 2.0 3.0
     crossProduct = Vector3d.meters 1.0 2.0 3.0 >< Vector3d.meters 4.0 5.0 6.0

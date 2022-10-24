@@ -4,7 +4,8 @@ module OpenSolid (
     Float,
     String,
     List,
-    Quantity,
+    Scalar,
+    Sqrt,
     Negation (..),
     Addition (..),
     Subtraction (..),
@@ -18,8 +19,6 @@ module OpenSolid (
     fromRational,
     fromString,
     float,
-    abs,
-    sqrt,
     ifThenElse,
     identity,
     always,
@@ -30,14 +29,16 @@ module OpenSolid (
     (<|),
     (>>>),
     (<<<),
+    Quantity (..),
     Length,
     Area,
     Volume,
 ) where
 
-import Data.Coerce (Coercible, coerce)
+import Data.Coerce (Coercible)
 import qualified Data.Text
 import Result (Result (..))
+import UnitCoercion
 import Prelude (
     Bool (..),
     Char,
@@ -49,6 +50,7 @@ import Prelude (
     Show (..),
     const,
     fail,
+    flip,
     id,
     not,
     otherwise,
@@ -65,95 +67,78 @@ type List a = [a]
 
 type Float = Prelude.Double
 
-class (Eq a, Ord a, Coercible a Float, Coercible Float a) => Quantity a
+class
+    ( Eq scalar
+    , Ord scalar
+    , Show scalar
+    , Coercible scalar Float
+    , Coercible Float scalar
+    , UnitCoercion scalar Float
+    , Negation scalar
+    , Addition scalar
+    , Subtraction scalar
+    , Multiplication scalar Float scalar
+    , Multiplication Float scalar scalar
+    , Division scalar Float scalar
+    , Division scalar scalar Float
+    ) =>
+    Scalar scalar
 
-instance Quantity Float
+instance Scalar Float
+
+class (Scalar scalar, Scalar sqrtScalar) => Sqrt scalar sqrtScalar | scalar -> sqrtScalar
+
+instance Sqrt Float Float
 
 class Negation a where
     negate :: a -> a
 
-instance {-# INCOHERENT #-} Negation Int where
-    negate =
-        Prelude.negate
+instance Negation Int where negate = Prelude.negate
 
-instance {-# INCOHERENT #-} Quantity quantity => Negation quantity where
-    negate quantity =
-        coerce (Prelude.negate (coerce quantity :: Float))
+instance Negation Float where negate = Prelude.negate
 
 class Addition a where
     (+) :: a -> a -> a
 
-instance {-# INCOHERENT #-} Addition Int where
-    n + m =
-        n Prelude.+ m
+instance Addition Int where n + m = n Prelude.+ m
 
-instance {-# INCOHERENT #-} Quantity quantity => Addition quantity where
-    x + y =
-        coerce ((coerce x :: Float) Prelude.+ (coerce y :: Float))
+instance Addition Float where x + y = x Prelude.+ y
 
 class Subtraction a where
     (-) :: a -> a -> a
 
-instance {-# INCOHERENT #-} Subtraction Int where
-    n - m =
-        n Prelude.- m
+instance Subtraction Int where n - m = n Prelude.- m
 
-instance {-# INCOHERENT #-} Quantity quantity => Subtraction quantity where
-    x - y =
-        coerce ((coerce x :: Float) Prelude.- (coerce y :: Float))
+instance Subtraction Float where x - y = x Prelude.- y
 
 class Multiplication lhs rhs result | lhs rhs -> result where
     (*) :: lhs -> rhs -> result
 
-instance {-# INCOHERENT #-} Multiplication Int Int Int where
-    n * m =
-        n Prelude.* m
+instance Multiplication Int Int Int where n * m = n Prelude.* m
 
-instance {-# INCOHERENT #-} Quantity quantity => Multiplication Float quantity quantity where
-    x * y =
-        coerce (x Prelude.* (coerce y :: Float))
-
-instance {-# INCOHERENT #-} Quantity quantity => Multiplication quantity Float quantity where
-    x * y =
-        coerce ((coerce x :: Float) Prelude.* y)
+instance Multiplication Float Float Float where x * y = x Prelude.* y
 
 class Division lhs rhs result | lhs rhs -> result where
     (/) :: lhs -> rhs -> result
 
-instance {-# INCOHERENT #-} Division Float Float Float where
-    x / y =
-        x Prelude./ y
-
-instance {-# INCOHERENT #-} Quantity quantity => Division quantity Float quantity where
-    x / y =
-        coerce (coerce x Prelude./ y)
-
-instance {-# INCOHERENT #-} Quantity quantity => Division quantity quantity Float where
-    x / y =
-        coerce ((coerce x :: Float) Prelude./ (coerce y :: Float))
+instance Division Float Float Float where x / y = x Prelude./ y
 
 (//) :: Int -> Int -> Int
 (//) =
     Prelude.quot
 
-class DotProduct lhs rhs where
-    type DotProductResult lhs rhs
-    (.) :: lhs coordinates -> rhs coordinates -> DotProductResult lhs rhs
+class DotProduct lhs rhs result | lhs rhs -> result where
+    (.) :: lhs coordinates -> rhs coordinates -> result
 
-class CrossProduct lhs rhs where
-    type CrossProductResult lhs rhs :: * -> *
-    (><) :: lhs coordinates -> rhs coordinates -> (CrossProductResult lhs rhs) coordinates
+class CrossProduct lhs rhs result | lhs rhs -> result where
+    (><) :: lhs coordinates -> rhs coordinates -> result coordinates
 
 class Concatenation a where
     (++) :: a -> a -> a
 
-instance Concatenation String where
-    (++) =
-        Data.Text.append
+instance Concatenation String where (++) = Data.Text.append
 
-instance Concatenation (List a) where
-    (++) =
-        Prelude.mappend
+instance Concatenation (List a) where (++) = Prelude.mappend
 
 fromInteger :: Prelude.Integer -> Int
 fromInteger =
@@ -170,20 +155,6 @@ fromString =
 float :: Int -> Float
 float =
     Prelude.fromIntegral
-
-abs :: Quantity quantity => quantity -> quantity
-abs quantity =
-    coerce (Prelude.abs (coerce quantity :: Float))
-
-class Sqrt a where
-    type SqrtResult a
-    sqrt :: a -> SqrtResult a
-
-instance Sqrt Float where
-    type SqrtResult Float = Float
-
-    sqrt =
-        Prelude.sqrt
 
 {- HLINT ignore ifThenElse "Use if" -}
 ifThenElse :: Bool -> a -> a -> a
@@ -236,90 +207,88 @@ infixl 0 |>
 
 infixl 6 +, -
 
-infixl 7 *, /
+infixl 7 *, /, //
 
 infixl 9 <<<
 
 infixr 9 >>>
 
-newtype Length = Length Float
-    deriving (Eq, Ord, Show)
+newtype Quantity units = Quantity Float deriving (Eq, Ord, Show, Negation, Addition, Subtraction)
 
-instance Quantity Length
+instance UnitCoercion (Quantity units) Float
 
-newtype Duration = Duration Float
-    deriving (Eq, Ord, Show)
+instance Multiplication Float (Quantity units) (Quantity units) where
+    x * (Quantity y) =
+        Quantity (x * y)
 
-instance Quantity Duration
+instance Multiplication (Quantity units) Float (Quantity units) where
+    (Quantity x) * y =
+        Quantity (x * y)
 
-newtype Speed = Speed Float
-    deriving (Eq, Ord, Show)
+instance Division (Quantity units) Float (Quantity units) where
+    (Quantity x) / y =
+        Quantity (x / y)
 
-instance Quantity Speed
+instance Division (Quantity units) (Quantity units) Float where
+    (Quantity x) / (Quantity y) =
+        x / y
 
-newtype Acceleration = Acceleration Float
-    deriving (Eq, Ord, Show)
+instance Scalar (Quantity units)
 
-instance Quantity Acceleration
+quantityMultiplication :: Quantity a -> Quantity b -> Quantity c
+quantityMultiplication (Quantity x) (Quantity y) =
+    Quantity (x * y)
 
-newtype Area = Area Float
-    deriving (Eq, Ord, Show)
+quantityDivision :: Quantity a -> Quantity b -> Quantity c
+quantityDivision (Quantity x) (Quantity y) =
+    Quantity (x / y)
 
-instance Quantity Area
+data Meters
 
-newtype Volume = Volume Float
-    deriving (Eq, Ord, Show)
+type Length = Quantity Meters
 
-instance Quantity Volume
+data Seconds
 
-quantityMultiplication :: (Quantity a, Quantity b, Quantity c) => a -> b -> c
-quantityMultiplication a b =
-    coerce ((coerce a :: Float) Prelude.* (coerce b :: Float))
+type Duration = Quantity Seconds
 
-quantityDivision :: (Quantity a, Quantity b, Quantity c) => a -> b -> c
-quantityDivision a b =
-    coerce ((coerce a :: Float) Prelude./ (coerce b :: Float))
+data MetersPerSecond
 
-quantitySqrt :: (Quantity a, Quantity b) => a -> b
-quantitySqrt a =
-    coerce (Prelude.sqrt (coerce a :: Float))
+type Speed = Quantity MetersPerSecond
 
-instance {-# INCOHERENT #-} Multiplication Length Length Area where
-    (*) = quantityMultiplication
+data MetersPerSecondSquared
 
-instance {-# INCOHERENT #-} Multiplication Length Area Volume where
-    (*) = quantityMultiplication
+type Acceleration = Quantity MetersPerSecondSquared
 
-instance {-# INCOHERENT #-} Multiplication Area Length Volume where
-    (*) = quantityMultiplication
+data SquareMeters
 
-instance {-# INCOHERENT #-} Multiplication Duration Speed Length where
-    (*) = quantityMultiplication
+type Area = Quantity SquareMeters
 
-instance {-# INCOHERENT #-} Multiplication Speed Duration Length where
-    (*) = quantityMultiplication
+data CubicMeters
 
-instance {-# INCOHERENT #-} Multiplication Duration Acceleration Speed where
-    (*) = quantityMultiplication
+type Volume = Quantity CubicMeters
 
-instance {-# INCOHERENT #-} Multiplication Acceleration Duration Speed where
-    (*) = quantityMultiplication
+instance Multiplication Length Length Area where (*) = quantityMultiplication
 
-instance {-# INCOHERENT #-} Division Area Length Length where
-    (/) = quantityDivision
+instance Multiplication Length Area Volume where (*) = quantityMultiplication
 
-instance {-# INCOHERENT #-} Division Volume Area Length where
-    (/) = quantityDivision
+instance Multiplication Area Length Volume where (*) = quantityMultiplication
 
-instance {-# INCOHERENT #-} Division Volume Length Area where
-    (/) = quantityDivision
+instance Multiplication Duration Speed Length where (*) = quantityMultiplication
 
-instance {-# INCOHERENT #-} Division Length Duration Speed where
-    (/) = quantityDivision
+instance Multiplication Speed Duration Length where (*) = quantityMultiplication
 
-instance {-# INCOHERENT #-} Division Speed Duration Acceleration where
-    (/) = quantityDivision
+instance Multiplication Duration Acceleration Speed where (*) = quantityMultiplication
 
-instance Sqrt Area where
-    type SqrtResult Area = Length
-    sqrt = quantitySqrt
+instance Multiplication Acceleration Duration Speed where (*) = quantityMultiplication
+
+instance Division Area Length Length where (/) = quantityDivision
+
+instance Division Volume Area Length where (/) = quantityDivision
+
+instance Division Volume Length Area where (/) = quantityDivision
+
+instance Division Length Duration Speed where (/) = quantityDivision
+
+instance Division Speed Duration Acceleration where (/) = quantityDivision
+
+instance Sqrt Area Length

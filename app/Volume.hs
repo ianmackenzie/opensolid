@@ -1,6 +1,13 @@
 module Volume (
-    Volume,
     zero,
+    positiveInfinity,
+    negativeInfinity,
+    infinity,
+    isNaN,
+    interpolateFrom,
+    midpoint,
+    abs,
+    clamp,
     cubicMeters,
     inCubicMeters,
     cubicMeter,
@@ -11,23 +18,56 @@ module Volume (
 
 import qualified Length
 import OpenSolid
-import qualified Quantity
+import qualified Scalar
+import UnitCoercion
 
 zero :: Volume
 zero =
-    Quantity.zero
+    Scalar.zero
+
+positiveInfinity :: Volume
+positiveInfinity =
+    Scalar.positiveInfinity
+
+negativeInfinity :: Volume
+negativeInfinity =
+    Scalar.negativeInfinity
+
+infinity :: Volume
+infinity =
+    Scalar.infinity
+
+isNaN :: Volume -> Bool
+isNaN =
+    Scalar.isNaN
+
+interpolateFrom :: Volume -> Volume -> Float -> Volume
+interpolateFrom =
+    Scalar.interpolateFrom
+
+midpoint :: Volume -> Volume -> Volume
+midpoint =
+    Scalar.midpoint
+
+abs :: Volume -> Volume
+abs =
+    Scalar.abs
+
+clamp :: Volume -> Volume -> Volume -> Volume
+clamp =
+    Scalar.clamp
 
 cubicMeter :: Volume
 cubicMeter =
-    Quantity.baseUnit
+    cubicMeters 1.0
 
 cubicMeters :: Float -> Volume
 cubicMeters =
-    Quantity.baseUnits
+    addUnits
 
 inCubicMeters :: Volume -> Float
 inCubicMeters =
-    Quantity.inBaseUnits
+    dropUnits
 
 cubicCentimeter :: Volume
 cubicCentimeter =

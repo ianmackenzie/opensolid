@@ -2,6 +2,7 @@ module Range (
     Range,
     constant,
     from,
+    unit,
     minValue,
     maxValue,
     isAtomic,
@@ -14,75 +15,77 @@ module Range (
     sqrt,
 ) where
 
-import OpenSolid hiding (abs, sqrt)
-import qualified OpenSolid
-import qualified Quantity
+import OpenSolid
 import Range.Unsafe
-import qualified Units
+import qualified Scalar
 
-constant :: Quantity units -> Range units
+constant :: Scalar scalar => scalar -> Range scalar
 constant value =
     Range value value
 
-from :: Quantity units -> Quantity units -> Range units
+from :: Scalar scalar => scalar -> scalar -> Range scalar
 from a b =
     Range (min a b) (max a b)
 
-minValue :: Range units -> Quantity units
+unit :: Range Float
+unit =
+    Range 0.0 1.0
+
+minValue :: Scalar scalar => Range scalar -> scalar
 minValue range =
     let (Range low _) = range in low
 
-maxValue :: Range units -> Quantity units
+maxValue :: Scalar scalar => Range scalar -> scalar
 maxValue range =
     let (Range _ high) = range in high
 
-isAtomic :: Range units -> Bool
+isAtomic :: Scalar scalar => Range scalar -> Bool
 isAtomic range =
     let (Range low high) = range
         mid = midpoint range
      in mid == low || mid == high
 
-midpoint :: Range units -> Quantity units
+midpoint :: Scalar scalar => Range scalar -> scalar
 midpoint range =
     let (Range low high) = range
-     in Quantity.midpoint low high
+     in Scalar.midpoint low high
 
-endpoints :: Range units -> (Quantity units, Quantity units)
+endpoints :: Scalar scalar => Range scalar -> (scalar, scalar)
 endpoints (Range low high) =
     (low, high)
 
-squared :: Units.Multiplication units units => Range units -> Range (Units.Product units units)
+squared :: (Scalar scalar, Scalar squaredScalar, Multiplication scalar scalar squaredScalar) => Range scalar -> Range squaredScalar
 squared range
-    | low >= Quantity.zero = Range ll hh
-    | high <= Quantity.zero = Range hh ll
-    | otherwise = Range Quantity.zero (max ll hh)
+    | low >= Scalar.zero = Range ll hh
+    | high <= Scalar.zero = Range hh ll
+    | otherwise = Range Scalar.zero (max ll hh)
   where
     (Range low high) = range
     ll = low * low
     hh = high * high
 
-sqrt :: Units.Sqrt units => Range units -> Range (Units.SquareRoot units)
+sqrt :: (Scalar scalar, Scalar sqrtScalar, Sqrt scalar sqrtScalar) => Range scalar -> Range sqrtScalar
 sqrt range =
     let (Range low high) = range
-        sqrtLow = OpenSolid.sqrt (max low Quantity.zero)
-        sqrtHigh = OpenSolid.sqrt (max high Quantity.zero)
+        sqrtLow = Scalar.sqrt (max low Scalar.zero)
+        sqrtHigh = Scalar.sqrt (max high Scalar.zero)
      in Range sqrtLow sqrtHigh
 
-contains :: Quantity units -> Range units -> Bool
-contains quantity range =
+contains :: Scalar scalar => scalar -> Range scalar -> Bool
+contains scalar range =
     let (Range low high) = range
-     in low <= quantity && quantity <= high
+     in low <= scalar && scalar <= high
 
-bisect :: Range units -> (Range units, Range units)
+bisect :: Scalar scalar => Range scalar -> (Range scalar, Range scalar)
 bisect range =
     let (Range low high) = range
         mid = midpoint range
      in (Range low mid, Range mid high)
 
-abs :: Range units -> Range units
+abs :: Scalar scalar => Range scalar -> Range scalar
 abs range
-    | low >= Quantity.zero = range
-    | high <= Quantity.zero = - range
-    | otherwise = Range Quantity.zero (max high (negate low))
+    | low >= Scalar.zero = range
+    | high <= Scalar.zero = negate range
+    | otherwise = Range Scalar.zero (max high (negate low))
   where
     (Range low high) = range
