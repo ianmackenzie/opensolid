@@ -13,12 +13,12 @@ import qualified Float
 import OpenSolid
 import qualified Range
 import Range.Unsafe
-import UnitCoercion
+import qualified Units
 import Vector3d (Vector3d (..))
 
 data VectorBox3d scalar coordinates = VectorBox3d !(Range scalar) !(Range scalar) !(Range scalar)
 
-instance UnitCoercion (VectorBox3d scalar coordinates) (VectorBox3d Float coordinates)
+instance Units.Coercion (VectorBox3d scalar coordinates) (VectorBox3d Float coordinates)
 
 instance Scalar scalar => Negation (VectorBox3d scalar coordinates) where
     negate (VectorBox3d x y z) =
@@ -168,8 +168,8 @@ squaredMagnitude vectorBox =
 
 magnitude :: Scalar scalar => VectorBox3d scalar coordinates -> Range scalar
 magnitude vectorBox =
-    let (VectorBox3d x y z) = dropUnits vectorBox
-     in addUnits (Range.sqrt (Range.squared x + Range.squared y + Range.squared z))
+    let (VectorBox3d x y z) = Units.drop vectorBox
+     in Units.add (Range.sqrt (Range.squared x + Range.squared y + Range.squared z))
 
 normalize :: Scalar scalar => VectorBox3d scalar coordinates -> VectorBox3d Float coordinates
 normalize vectorBox =

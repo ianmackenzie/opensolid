@@ -38,7 +38,7 @@ module OpenSolid (
 import Data.Coerce (Coercible)
 import qualified Data.Text
 import Result (Result (..))
-import UnitCoercion
+import qualified Units
 import Prelude (
     Bool (..),
     Char,
@@ -73,7 +73,7 @@ class
     , Show scalar
     , Coercible scalar Float
     , Coercible Float scalar
-    , UnitCoercion scalar Float
+    , Units.Coercion scalar Float
     , Negation scalar
     , Addition scalar
     , Subtraction scalar
@@ -215,7 +215,7 @@ infixr 9 >>>
 
 newtype Quantity units = Quantity Float deriving (Eq, Ord, Show, Negation, Addition, Subtraction)
 
-instance UnitCoercion (Quantity units) Float
+instance Units.Coercion (Quantity units) Float
 
 instance Multiplication Float (Quantity units) (Quantity units) where
     x * (Quantity y) =

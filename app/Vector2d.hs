@@ -23,7 +23,7 @@ import qualified Length
 import OpenSolid
 import Point2d.Type
 import qualified Scalar
-import UnitCoercion
+import qualified Units
 import Vector2d.Type
 
 zero :: Scalar scalar => Vector2d scalar coordinates
@@ -83,9 +83,9 @@ determinant (Vector2d x1 y1) (Vector2d x2 y2) =
 magnitude :: Scalar scalar => Vector2d scalar coordinates -> scalar
 magnitude vector =
     let (Vector2d vx vy) = vector
-        fx = dropUnits vx
-        fy = dropUnits vy
-     in addUnits (Float.sqrt (fx * fx + fy * fy))
+        fx = Units.drop vx
+        fy = Units.drop vy
+     in Units.add (Float.sqrt (fx * fx + fy * fy))
 
 squaredMagnitude :: (Scalar scalar, Scalar squaredScalar, Multiplication scalar scalar squaredScalar) => Vector2d scalar coordinates -> squaredScalar
 squaredMagnitude vector =

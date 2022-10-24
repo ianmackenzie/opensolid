@@ -46,7 +46,7 @@ executable opensolid-hs
     default-language: Haskell2010
     other-modules:
         OpenSolid
-        UnitCoercion
+        Units
         Debug
         String
         Maybe

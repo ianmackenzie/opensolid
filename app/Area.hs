@@ -16,7 +16,7 @@ module Area (
 
 import OpenSolid
 import qualified Scalar
-import UnitCoercion
+import qualified Units
 
 zero :: Area
 zero =
@@ -64,8 +64,8 @@ squareMeter =
 
 squareMeters :: Float -> Area
 squareMeters =
-    addUnits
+    Units.add
 
 inSquareMeters :: Area -> Float
 inSquareMeters =
-    dropUnits
+    Units.drop

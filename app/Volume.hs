@@ -19,7 +19,7 @@ module Volume (
 import qualified Length
 import OpenSolid
 import qualified Scalar
-import UnitCoercion
+import qualified Units
 
 zero :: Volume
 zero =
@@ -63,11 +63,11 @@ cubicMeter =
 
 cubicMeters :: Float -> Volume
 cubicMeters =
-    addUnits
+    Units.add
 
 inCubicMeters :: Volume -> Float
 inCubicMeters =
-    dropUnits
+    Units.drop
 
 cubicCentimeter :: Volume
 cubicCentimeter =

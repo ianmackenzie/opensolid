@@ -18,7 +18,7 @@ import OpenSolid
 import qualified Range
 import Range.Unsafe
 import qualified Scalar
-import UnitCoercion
+import qualified Units
 
 data Expression1d scalar = Expression1d
     { evaluate :: !(Float -> scalar)
@@ -26,7 +26,7 @@ data Expression1d scalar = Expression1d
     , derivative :: ~(Expression1d scalar)
     }
 
-instance UnitCoercion (Expression1d scalar) (Expression1d Float)
+instance Units.Coercion (Expression1d scalar) (Expression1d Float)
 
 zero :: Scalar scalar => Expression1d scalar
 zero =
@@ -86,11 +86,11 @@ instance (Scalar scalar1, Scalar scalar2, Scalar result, Division scalar1 scalar
             { evaluate = \t -> evaluate expression1 t / evaluate expression2 t
             , bounds = \t -> bounds expression1 t / bounds expression2 t
             , derivative =
-                let p = dropUnits expression1
-                    q = dropUnits expression2
+                let p = Units.drop expression1
+                    q = Units.drop expression2
                     p' = derivative p
                     q' = derivative q
-                 in addUnits ((p' * q - p * q') / squared q)
+                 in Units.add ((p' * q - p * q') / squared q)
             }
 
 squared :: (Scalar scalar, Scalar squaredScalar, Multiplication scalar scalar squaredScalar) => Expression1d scalar -> Expression1d squaredScalar
@@ -107,8 +107,8 @@ sqrt expression =
         { evaluate = evaluate expression >>> Scalar.sqrt
         , bounds = bounds expression >>> Range.sqrt
         , derivative =
-            let f = dropUnits expression :: Expression1d Float
-             in addUnits (derivative f / (constant 2.0 * sqrt f))
+            let f = Units.drop expression :: Expression1d Float
+             in Units.add (derivative f / (constant 2.0 * sqrt f))
         }
 
 data Neighborhood

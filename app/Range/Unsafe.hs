@@ -2,12 +2,12 @@ module Range.Unsafe (Range (..)) where
 
 import OpenSolid
 import qualified Scalar
-import UnitCoercion
+import qualified Units
 
 data Range scalar = Range !scalar !scalar
     deriving (Eq, Show)
 
-instance UnitCoercion (Range scalar) (Range Float)
+instance Units.Coercion (Range scalar) (Range Float)
 
 instance Scalar scalar => Negation (Range scalar) where
     negate (Range low high) =

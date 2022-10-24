@@ -15,7 +15,7 @@ import Expression1d (Expression1d (Expression1d))
 import qualified Expression1d
 import OpenSolid
 import Range (Range)
-import UnitCoercion
+import qualified Units
 import Vector3d (Vector3d (Vector3d))
 import qualified Vector3d
 import VectorBox3d (VectorBox3d (..))
@@ -27,7 +27,7 @@ data Expression3d scalar coordinates = Expression3d
     , derivative :: ~(Expression3d scalar coordinates)
     }
 
-instance UnitCoercion (Expression3d scalar coordinates) (Expression3d Float coordinates)
+instance Units.Coercion (Expression3d scalar coordinates) (Expression3d Float coordinates)
 
 zero :: Scalar scalar => Expression3d scalar coordinates
 zero =
@@ -124,11 +124,11 @@ instance (Scalar scalar1, Scalar scalar2, Scalar result, Division scalar1 scalar
         Expression3d
             (\t -> evaluate expression1 t / Expression1d.evaluate expression2 t)
             (\t -> bounds expression1 t / Expression1d.bounds expression2 t)
-            ( let p = dropUnits expression1
-                  q = dropUnits expression2
+            ( let p = Units.drop expression1
+                  q = Units.drop expression2
                   p' = derivative p
                   q' = Expression1d.derivative q
-               in addUnits ((p' * q - p * q') / Expression1d.squared q)
+               in Units.add ((p' * q - p * q') / Expression1d.squared q)
             )
 
 squaredMagnitude :: (Scalar scalar, Scalar squaredScalar, Multiplication scalar scalar squaredScalar) => Expression3d scalar coordinates -> Expression1d squaredScalar
@@ -140,8 +140,8 @@ squaredMagnitude expression =
 
 magnitude :: Scalar scalar => Expression3d scalar coordinates -> Expression1d scalar
 magnitude expression =
-    let f = dropUnits expression
-     in addUnits (Expression1d.sqrt (squaredMagnitude f))
+    let f = Units.drop expression
+     in Units.add (Expression1d.sqrt (squaredMagnitude f))
 
 normalize :: Scalar scalar => Expression3d scalar coordinates -> Expression3d Float coordinates
 normalize expression =

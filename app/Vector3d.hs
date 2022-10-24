@@ -26,7 +26,7 @@ import qualified Length
 import OpenSolid
 import Point3d.Type
 import qualified Scalar
-import UnitCoercion
+import qualified Units
 import Vector3d.Type
 
 zero :: Scalar scalar => Vector3d scalar coordinates
@@ -96,10 +96,10 @@ midpoint v1 v2 =
 magnitude :: Scalar scalar => Vector3d scalar coordinates -> scalar
 magnitude vector =
     let (Vector3d vx vy vz) = vector
-        fx = dropUnits vx
-        fy = dropUnits vy
-        fz = dropUnits vz
-     in addUnits (Float.sqrt (fx * fx + fy * fy + fz * fz))
+        fx = Units.drop vx
+        fy = Units.drop vy
+        fz = Units.drop vz
+     in Units.add (Float.sqrt (fx * fx + fy * fy + fz * fz))
 
 squaredMagnitude :: (Scalar scalar, Scalar squaredScalar, Multiplication scalar scalar squaredScalar) => Vector3d scalar coordinates -> squaredScalar
 squaredMagnitude vector =

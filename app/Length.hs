@@ -18,7 +18,7 @@ module Length (
 
 import OpenSolid
 import qualified Scalar
-import UnitCoercion
+import qualified Units
 
 zero :: Length
 zero =
@@ -62,11 +62,11 @@ meter =
 
 meters :: Float -> Length
 meters =
-    addUnits
+    Units.add
 
 inMeters :: Length -> Float
 inMeters =
-    dropUnits
+    Units.drop
 
 centimeter :: Length
 centimeter =
