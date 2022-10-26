@@ -27,8 +27,8 @@ module OpenSolid (
     subtract,
     (|>),
     (<|),
-    (>>>),
-    (<<<),
+    (>>),
+    (<<),
     Quantity (..),
     Length,
     Area,
@@ -55,8 +55,6 @@ import Prelude (
     not,
     otherwise,
     (&&),
-    (>>),
-    (>>=),
     (||),
  )
 import qualified Prelude
@@ -193,12 +191,12 @@ subtract b a =
 (<|) =
     identity
 
-(>>>) :: (a -> b) -> (b -> c) -> (a -> c)
-(>>>) f g x =
+(>>) :: (a -> b) -> (b -> c) -> (a -> c)
+(>>) f g x =
     g (f x)
 
-(<<<) :: (b -> c) -> (a -> b) -> (a -> c)
-(<<<) f g x =
+(<<) :: (b -> c) -> (a -> b) -> (a -> c)
+(<<) f g x =
     f (g x)
 
 infixr 0 <|
@@ -209,9 +207,9 @@ infixl 6 +, -
 
 infixl 7 *, /, //
 
-infixl 9 <<<
+infixl 9 <<
 
-infixr 9 >>>
+infixr 9 >>
 
 newtype Quantity units = Quantity Float deriving (Eq, Ord, Show, Negation, Addition, Subtraction)
 

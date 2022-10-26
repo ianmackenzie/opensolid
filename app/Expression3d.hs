@@ -52,8 +52,8 @@ xyz x y z =
 instance Scalar scalar => Negation (Expression3d scalar coordinates) where
     negate expression =
         Expression3d
-            { evaluate = evaluate expression >>> negate
-            , bounds = bounds expression >>> negate
+            { evaluate = evaluate expression >> negate
+            , bounds = bounds expression >> negate
             , derivative = negate (derivative expression)
             }
 
@@ -134,8 +134,8 @@ instance (Scalar scalar1, Scalar scalar2, Scalar result, Division scalar1 scalar
 squaredMagnitude :: (Scalar scalar, Scalar squaredScalar, Multiplication scalar scalar squaredScalar) => Expression3d scalar coordinates -> Expression1d squaredScalar
 squaredMagnitude expression =
     Expression1d
-        (evaluate expression >>> Vector3d.squaredMagnitude)
-        (bounds expression >>> VectorBox3d.squaredMagnitude)
+        (evaluate expression >> Vector3d.squaredMagnitude)
+        (bounds expression >> VectorBox3d.squaredMagnitude)
         (Expression1d.constant 2.0 * expression <> derivative expression)
 
 magnitude :: Scalar scalar => Expression3d scalar coordinates -> Expression1d scalar

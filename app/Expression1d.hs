@@ -17,6 +17,7 @@ import qualified List
 import OpenSolid
 import qualified Range
 import Range.Unsafe
+import qualified Result
 import qualified Scalar
 import qualified Units
 
@@ -51,8 +52,8 @@ parameter =
 instance Scalar scalar => Negation (Expression1d scalar) where
     negate expression =
         Expression1d
-            { evaluate = evaluate expression >>> negate
-            , bounds = bounds expression >>> negate
+            { evaluate = evaluate expression >> negate
+            , bounds = bounds expression >> negate
             , derivative = negate (derivative expression)
             }
 
@@ -96,16 +97,16 @@ instance (Scalar scalar1, Scalar scalar2, Scalar result, Division scalar1 scalar
 squared :: (Scalar scalar, Scalar squaredScalar, Multiplication scalar scalar squaredScalar) => Expression1d scalar -> Expression1d squaredScalar
 squared expression =
     Expression1d
-        { evaluate = evaluate expression >>> (\value -> value * value)
-        , bounds = bounds expression >>> Range.squared
+        { evaluate = evaluate expression >> (\value -> value * value)
+        , bounds = bounds expression >> Range.squared
         , derivative = constant 2.0 * expression * derivative expression
         }
 
 sqrt :: Sqrt scalar sqrtQuantity => Expression1d scalar -> Expression1d sqrtQuantity
 sqrt expression =
     Expression1d
-        { evaluate = evaluate expression >>> Scalar.sqrt
-        , bounds = bounds expression >>> Range.sqrt
+        { evaluate = evaluate expression >> Scalar.sqrt
+        , bounds = bounds expression >> Range.sqrt
         , derivative =
             let f = Units.drop expression :: Expression1d Float
              in Units.add (derivative f / (constant 2.0 * sqrt f))
@@ -134,7 +135,7 @@ neighborhoods expression tolerance domain =
         Err Indeterminate ->
             if Range.isAtomic domain
                 then Err Indeterminate
-                else do
+                else Result.do
                     let (leftDomain, rightDomain) = Range.bisect domain
                     leftNeighborhoods <- neighborhoods expression tolerance leftDomain
                     rightNeighborhoods <- neighborhoods expression tolerance rightDomain
@@ -143,7 +144,7 @@ neighborhoods expression tolerance domain =
 localNeighborhoods :: Scalar scalar => Expression1d scalar -> scalar -> Range Float -> Int -> Result Indeterminate (List Neighborhood)
 localNeighborhoods expression tolerance domain order
     | definitelyNonZero expression tolerance domain = Ok [NoRoot domain]
-    | order <= maxRootOrder = do
+    | order <= maxRootOrder = Result.do
         derivativeNeighborhoods <- localNeighborhoods (derivative expression) tolerance domain (order + 1)
         Ok (List.combine (solve expression tolerance order) derivativeNeighborhoods)
     -- We've passed the maximum root order and still haven't found a non-zero derivative

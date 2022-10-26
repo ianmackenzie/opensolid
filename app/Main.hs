@@ -9,6 +9,7 @@ import Expression1d.Root (Root)
 import qualified Expression1d.Root as Root
 import qualified Float
 import qualified Length
+import qualified List
 import OpenSolid
 import Point2d (Point2d)
 import qualified Point2d
@@ -17,6 +18,7 @@ import qualified String
 import qualified Vector2d
 import qualified Vector3d
 import qualified Volume
+import qualified Prelude
 
 data MyPoints = MyPoints !(Point2d ()) !(Point2d ()) deriving (Show)
 
@@ -24,8 +26,14 @@ showRoot :: Expression1d Float -> Root -> String
 showRoot x root =
     String.fromInt (Root.order root) ++ ":" ++ String.fromFloat (Expression1d.evaluate x (Root.value root))
 
+listTest :: List (Int, Int)
+listTest = List.do
+    a <- [1 .. 10]
+    b <- [1 .. 10]
+    [(a, b) | a + b == 10]
+
 main :: IO ()
-main = do
+main = Prelude.do
     Debug.log "Integer product" (3 * 4)
     Debug.log "Volume in cubic centimeters" volumeInCubicCentimeters
     Debug.log "Integer division" (10 // 4)
@@ -44,6 +52,7 @@ main = do
     Debug.log "Custom type" (MyPoints (Point2d.meters 1.0 2.0) (Point2d.meters 3.0 4.0))
     Debug.log "Roots" [showRoot x root | root <- roots]
     Debug.log "sqrt 2.0" (Float.sqrt 2.0)
+    Debug.log "List test" listTest
   where
     k = 0.5
     area = Area.squareMeters 3.0

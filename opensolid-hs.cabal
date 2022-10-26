@@ -94,3 +94,4 @@ executable opensolid-hs
         StrictData
         FunctionalDependencies
         GeneralizedNewtypeDeriving
+        QualifiedDo

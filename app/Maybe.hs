@@ -2,6 +2,7 @@ module Maybe (
     map,
     map2,
     withDefault,
+    (>>=),
 ) where
 
 import qualified Data.Maybe
@@ -13,7 +14,7 @@ map =
     Prelude.fmap
 
 map2 :: (a -> b -> c) -> Maybe a -> Maybe b -> Maybe c
-map2 function maybeA maybeB = do
+map2 function maybeA maybeB = Maybe.do
     valueA <- maybeA
     valueB <- maybeB
     Just (function valueA valueB)
@@ -21,3 +22,7 @@ map2 function maybeA maybeB = do
 withDefault :: a -> Maybe a -> a
 withDefault value maybe =
     Data.Maybe.fromMaybe value maybe
+
+(>>=) :: Maybe a -> (a -> Maybe b) -> Maybe b
+(>>=) =
+    (Prelude.>>=)

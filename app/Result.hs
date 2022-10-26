@@ -5,9 +5,9 @@ module Result (
     andThen,
     withDefault,
     mapError,
+    (>>=),
 ) where
 
-import Prelude ((>>=))
 import qualified Prelude
 
 data Result x a
@@ -48,7 +48,7 @@ map =
     Prelude.fmap
 
 map2 :: (a -> b -> value) -> Result x a -> Result x b -> Result x value
-map2 function result1 result2 = do
+map2 function result1 result2 = Result.do
     value1 <- result1
     value2 <- result2
     Ok (function value1 value2)
@@ -62,3 +62,7 @@ mapError function result =
     case result of
         Ok value -> Ok value
         Err error -> Err (function error)
+
+(>>=) :: Result x a -> (a -> Result x b) -> Result x b
+(>>=) =
+    (Prelude.>>=)

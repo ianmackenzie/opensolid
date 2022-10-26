@@ -7,11 +7,13 @@ module List (
     foldl,
     foldr,
     reverse,
+    (>>=),
 ) where
 
 import qualified Data.List
 import qualified Data.Maybe
 import OpenSolid
+import qualified Prelude
 
 map :: (a -> b) -> List a -> List b
 map =
@@ -44,3 +46,7 @@ foldr =
 reverse :: List a -> List a
 reverse =
     Data.List.reverse
+
+(>>=) :: List a -> (a -> List b) -> List b
+(>>=) =
+    (Prelude.>>=)
