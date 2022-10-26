@@ -49,7 +49,6 @@ import Prelude (
     Ord (..),
     Show (..),
     const,
-    fail,
     flip,
     id,
     not,

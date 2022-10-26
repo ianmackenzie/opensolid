@@ -79,6 +79,8 @@ executable opensolid-hs
         Curve3d
         Line3d
         QuadraticSpline3d
+        Script
+        Script.Internal
     default-extensions:
         NoImplicitPrelude
         OverloadedStrings

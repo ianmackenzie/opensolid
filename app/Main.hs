@@ -14,11 +14,12 @@ import OpenSolid
 import Point2d (Point2d)
 import qualified Point2d
 import qualified Range
+import Script (IOError, Script)
+import qualified Script
 import qualified String
 import qualified Vector2d
 import qualified Vector3d
 import qualified Volume
-import qualified Prelude
 
 data MyPoints = MyPoints !(Point2d ()) !(Point2d ()) deriving (Show)
 
@@ -32,28 +33,29 @@ listTest = List.do
     b <- [1 .. 10]
     [(a, b) | a + b == 10]
 
-main :: IO ()
-main = Prelude.do
-    Debug.log "Integer product" (3 * 4)
-    Debug.log "Volume in cubic centimeters" volumeInCubicCentimeters
-    Debug.log "Integer division" (10 // 4)
-    Debug.log "True division" (10.0 / 4.0)
-    Debug.log "Dot product" dotProduct
-    Debug.log "Determinant" determinant
-    Debug.log "Square root" squareRoot
-    Debug.log "Translated point" translatedPoint
-    Debug.log "Vector sum" vectorSum
-    Debug.log "Cross product" crossProduct
-    Debug.log "Scaled vector" scaledVector
-    Debug.log "Range difference" rangeDifference
-    Debug.log "Range product" rangeProduct
-    Debug.log "Direction" Direction2d.x
-    Debug.log "Tuple" (Point2d.meters 1.0 2.0, Point2d.meters 3.0 4.0)
-    Debug.log "Custom type" (MyPoints (Point2d.meters 1.0 2.0) (Point2d.meters 3.0 4.0))
-    Debug.log "Roots" [showRoot x root | root <- roots]
-    Debug.log "sqrt 2.0" (Float.sqrt 2.0)
-    Debug.log "List test" listTest
+script :: Script IOError ()
+script = Script.do
+    log "Integer product" (3 * 4)
+    log "Volume in cubic centimeters" volumeInCubicCentimeters
+    log "Integer division" (10 // 4)
+    log "True division" (10.0 / 4.0)
+    log "Dot product" dotProduct
+    log "Determinant" determinant
+    log "Square root" squareRoot
+    log "Translated point" translatedPoint
+    log "Vector sum" vectorSum
+    log "Cross product" crossProduct
+    log "Scaled vector" scaledVector
+    log "Range difference" rangeDifference
+    log "Range product" rangeProduct
+    log "Direction" Direction2d.x
+    log "Tuple" (Point2d.meters 1.0 2.0, Point2d.meters 3.0 4.0)
+    log "Custom type" (MyPoints (Point2d.meters 1.0 2.0) (Point2d.meters 3.0 4.0))
+    log "Roots" [showRoot x root | root <- roots]
+    log "sqrt 2.0" (Float.sqrt 2.0)
+    log "List test" listTest
   where
+    log label value = Script.printLine (label ++ ": " ++ Debug.toString value)
     k = 0.5
     area = Area.squareMeters 3.0
     length = Length.centimeters 3.0
@@ -74,3 +76,7 @@ main = Prelude.do
     x = Expression1d.constant 3.0 * t
     y = Expression1d.squared (x - Expression1d.constant 1.0) * (x - Expression1d.constant 2.0)
     roots = Expression1d.roots 1e-12 y
+
+main :: Script.Program
+main =
+    Script.run script
