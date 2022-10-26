@@ -38,7 +38,7 @@ instance (Scalar scalar1, Scalar scalar2, Scalar result, Division scalar1 scalar
         Vector3d (vx / scale) (vy / scale) (vz / scale)
 
 instance (Scalar scalar1, Scalar scalar2, Scalar result, Multiplication scalar1 scalar2 result) => DotProduct (Vector3d scalar1) (Vector3d scalar2) result where
-    (Vector3d x1 y1 z1) . (Vector3d x2 y2 z2) =
+    (Vector3d x1 y1 z1) <> (Vector3d x2 y2 z2) =
         x1 * x2 + y1 * y2 + z1 * z2
 
 instance (Scalar scalar1, Scalar scalar2, Scalar result, Multiplication scalar1 scalar2 result) => CrossProduct (Vector3d scalar1) (Vector3d scalar2) (Vector3d result) where

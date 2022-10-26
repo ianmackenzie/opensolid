@@ -106,11 +106,11 @@ instance (Scalar scalar, Scalar result, Multiplication (Quantity units) scalar r
             }
 
 instance (Scalar scalar1, Scalar scalar2, Scalar result, Multiplication scalar1 scalar2 result) => DotProduct (Expression3d scalar1) (Expression3d scalar2) (Expression1d result) where
-    expression1 . expression2 =
+    expression1 <> expression2 =
         Expression1d
-            (\t -> evaluate expression1 t . evaluate expression2 t)
-            (\t -> bounds expression1 t . bounds expression2 t)
-            (derivative expression1 . expression2 + expression1 . derivative expression2)
+            (\t -> evaluate expression1 t <> evaluate expression2 t)
+            (\t -> bounds expression1 t <> bounds expression2 t)
+            (derivative expression1 <> expression2 + expression1 <> derivative expression2)
 
 instance (Scalar scalar1, Scalar scalar2, Scalar result, Multiplication scalar1 scalar2 result) => CrossProduct (Expression3d scalar1) (Expression3d scalar2) (Expression3d result) where
     expression1 >< expression2 =
@@ -136,7 +136,7 @@ squaredMagnitude expression =
     Expression1d
         (evaluate expression >>> Vector3d.squaredMagnitude)
         (bounds expression >>> VectorBox3d.squaredMagnitude)
-        (Expression1d.constant 2.0 * expression . derivative expression)
+        (Expression1d.constant 2.0 * expression <> derivative expression)
 
 magnitude :: Scalar scalar => Expression3d scalar coordinates -> Expression1d scalar
 magnitude expression =

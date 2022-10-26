@@ -11,15 +11,15 @@ instance Negation (Direction2d coordinates) where
         Direction2d (negate x) (negate y)
 
 instance DotProduct Direction2d Direction2d Float where
-    (Direction2d x1 y1) . (Direction2d x2 y2) =
+    (Direction2d x1 y1) <> (Direction2d x2 y2) =
         x1 * x2 + y1 * y2
 
 instance Scalar scalar => DotProduct (Vector2d scalar) Direction2d scalar where
-    (Vector2d vx vy) . (Direction2d dx dy) =
+    (Vector2d vx vy) <> (Direction2d dx dy) =
         vx * dx + vy * dy
 
 instance Scalar scalar => DotProduct Direction2d (Vector2d scalar) scalar where
-    (Direction2d dx dy) . (Vector2d vx vy) =
+    (Direction2d dx dy) <> (Vector2d vx vy) =
         dx * vx + dy * vy
 
 instance Scalar scalar => Multiplication scalar (Direction2d coordinates) (Vector2d scalar coordinates) where

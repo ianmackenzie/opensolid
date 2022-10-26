@@ -38,5 +38,5 @@ instance (Scalar scalar1, Scalar scalar2, Scalar result, Division scalar1 scalar
         Vector2d (vx / scale) (vy / scale)
 
 instance (Scalar scalar1, Scalar scalar2, Scalar result, Multiplication scalar1 scalar2 result) => DotProduct (Vector2d scalar1) (Vector2d scalar2) result where
-    (Vector2d x1 y1) . (Vector2d x2 y2) =
+    (Vector2d x1 y1) <> (Vector2d x2 y2) =
         x1 * x2 + y1 * y2

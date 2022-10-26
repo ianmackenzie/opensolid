@@ -69,23 +69,23 @@ instance (Scalar scalar1, Scalar scalar2, Scalar result, Division scalar1 scalar
         VectorBox3d (x / range) (y / range) (z / range)
 
 instance Scalar scalar => DotProduct (Vector3d Float) (VectorBox3d scalar) (Range scalar) where
-    (Vector3d x1 y1 z1) . (VectorBox3d x2 y2 z2) =
+    (Vector3d x1 y1 z1) <> (VectorBox3d x2 y2 z2) =
         x1 * x2 + y1 * y2 + z1 * z2
 
 instance (Scalar scalar, Scalar result, Multiplication (Quantity units) scalar result) => DotProduct (Vector3d (Quantity units)) (VectorBox3d scalar) (Range result) where
-    (Vector3d x1 y1 z1) . (VectorBox3d x2 y2 z2) =
+    (Vector3d x1 y1 z1) <> (VectorBox3d x2 y2 z2) =
         x1 * x2 + y1 * y2 + z1 * z2
 
 instance Scalar scalar => DotProduct (VectorBox3d scalar) (Vector3d Float) (Range scalar) where
-    (VectorBox3d x1 y1 z1) . (Vector3d x2 y2 z2) =
+    (VectorBox3d x1 y1 z1) <> (Vector3d x2 y2 z2) =
         x1 * x2 + y1 * y2 + z1 * z2
 
 instance (Scalar scalar, Scalar result, Multiplication (Quantity units) scalar result) => DotProduct (VectorBox3d scalar) (Vector3d (Quantity units)) (Range result) where
-    (VectorBox3d x1 y1 z1) . (Vector3d x2 y2 z2) =
+    (VectorBox3d x1 y1 z1) <> (Vector3d x2 y2 z2) =
         x1 * x2 + y1 * y2 + z1 * z2
 
 instance (Scalar scalar1, Scalar scalar2, Scalar result, Multiplication scalar1 scalar2 result) => DotProduct (VectorBox3d scalar1) (VectorBox3d scalar2) (Range result) where
-    (VectorBox3d x1 y1 z1) . (VectorBox3d x2 y2 z2) =
+    (VectorBox3d x1 y1 z1) <> (VectorBox3d x2 y2 z2) =
         x1 * x2 + y1 * y2 + z1 * z2
 
 instance Scalar scalar => CrossProduct (Vector3d Float) (VectorBox3d scalar) (VectorBox3d scalar) where

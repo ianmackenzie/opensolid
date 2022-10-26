@@ -11,15 +11,15 @@ instance Negation (Direction3d coordinates) where
         Direction3d (negate x) (negate y) (negate z)
 
 instance DotProduct Direction3d Direction3d Float where
-    (Direction3d x1 y1 z1) . (Direction3d x2 y2 z2) =
+    (Direction3d x1 y1 z1) <> (Direction3d x2 y2 z2) =
         x1 * x2 + y1 * y2 + z1 * z2
 
 instance Scalar scalar => DotProduct (Vector3d scalar) Direction3d scalar where
-    (Vector3d vx vy vz) . (Direction3d dx dy dz) =
+    (Vector3d vx vy vz) <> (Direction3d dx dy dz) =
         vx * dx + vy * dy + vz * dz
 
 instance Scalar scalar => DotProduct Direction3d (Vector3d scalar) scalar where
-    (Direction3d dx dy dz) . (Vector3d vx vy vz) =
+    (Direction3d dx dy dz) <> (Vector3d vx vy vz) =
         dx * vx + dy * vy + dz * vz
 
 instance Scalar scalar => Multiplication scalar (Direction3d coordinates) (Vector3d scalar coordinates) where

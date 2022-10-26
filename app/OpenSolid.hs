@@ -128,7 +128,7 @@ instance Division Float Float Float where x / y = x Prelude./ y
     Prelude.quot
 
 class DotProduct lhs rhs result | lhs rhs -> result where
-    (.) :: lhs coordinates -> rhs coordinates -> result
+    (<>) :: lhs coordinates -> rhs coordinates -> result
 
 class CrossProduct lhs rhs result | lhs rhs -> result where
     (><) :: lhs coordinates -> rhs coordinates -> result coordinates
