@@ -4,14 +4,16 @@ module BoundingBox3d (
     hull2,
     hull3,
     hull4,
+    aggregate,
+    overlaps,
 ) where
 
+import BoundingBox3d.Type
+import qualified Bounds
 import OpenSolid
 import Point3d (Point3d (..))
 import qualified Range
 import Range.Unsafe
-
-data BoundingBox3d coordinates = BoundingBox3d !(Range Length) !(Range Length) !(Range Length)
 
 constant :: Point3d coordinates -> BoundingBox3d coordinates
 constant point =
@@ -50,3 +52,11 @@ hull4 p1 p2 p3 p4 =
         minZ = min (min (min z1 z2) z3) z4
         maxZ = max (max (max z1 z2) z3) z4
      in BoundingBox3d (Range minX maxX) (Range minY maxY) (Range minZ maxZ)
+
+aggregate :: BoundingBox3d coordinates -> BoundingBox3d coordinates -> BoundingBox3d coordinates
+aggregate =
+    Bounds.aggregate
+
+overlaps :: BoundingBox3d coordinates -> BoundingBox3d coordinates -> Bool
+overlaps =
+    Bounds.overlaps

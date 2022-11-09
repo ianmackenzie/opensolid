@@ -54,6 +54,8 @@ executable opensolid-hs
         List
         Float
         Scalar
+        Bounds
+        Bounded
         Length
         Area
         Volume
@@ -73,6 +75,7 @@ executable opensolid-hs
         Point3d.Type
         VectorBox3d
         BoundingBox3d
+        BoundingBox3d.Type
         Expression1d
         Expression1d.Root
         Expression3d

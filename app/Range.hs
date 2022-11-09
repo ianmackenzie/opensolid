@@ -13,8 +13,11 @@ module Range (
     bisect,
     abs,
     sqrt,
+    aggregate,
+    overlaps,
 ) where
 
+import qualified Bounds
 import OpenSolid
 import Range.Unsafe
 import qualified Scalar
@@ -89,3 +92,11 @@ abs range
     | otherwise = Range Scalar.zero (max high (negate low))
   where
     (Range low high) = range
+
+aggregate :: Scalar scalar => Range scalar -> Range scalar -> Range scalar
+aggregate =
+    Bounds.aggregate
+
+overlaps :: Scalar scalar => Range scalar -> Range scalar -> Bool
+overlaps =
+    Bounds.overlaps

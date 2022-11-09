@@ -1,5 +1,6 @@
 module Range.Unsafe (Range (..)) where
 
+import Bounds
 import OpenSolid
 import qualified Scalar
 import qualified Units
@@ -81,3 +82,10 @@ instance (Scalar scalar1, Scalar scalar2, Scalar result, Division scalar1 scalar
         | dl > Scalar.zero = Range (nl / dh) (nh / dl)
         | dh < Scalar.zero = Range (nh / dh) (nl / dl)
         | otherwise = Range Scalar.negativeInfinity Scalar.positiveInfinity
+
+instance Scalar scalar => Bounds (Range scalar) where
+    aggregate (Range low1 high1) (Range low2 high2) =
+        Range (min low1 low2) (max high1 high2)
+
+    overlaps (Range low1 high1) (Range low2 high2) =
+        high1 >= low2 && low1 <= high2
