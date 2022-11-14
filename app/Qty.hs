@@ -1,4 +1,4 @@
-module Scalar (
+module Qty (
     zero,
     positiveInfinity,
     negativeInfinity,
@@ -16,41 +16,41 @@ import Data.Coerce (coerce)
 import OpenSolid
 import qualified Prelude
 
-zero :: Scalar scalar => scalar
+zero :: Qty a
 zero =
     coerce 0.0
 
-positiveInfinity :: Scalar scalar => scalar
+positiveInfinity :: Qty a
 positiveInfinity =
     coerce (1.0 / 0.0)
 
-negativeInfinity :: Scalar scalar => scalar
+negativeInfinity :: Qty a
 negativeInfinity =
     negate positiveInfinity
 
-infinity :: Scalar scalar => scalar
+infinity :: Qty a
 infinity =
     positiveInfinity
 
-isNaN :: Scalar scalar => scalar -> Bool
+isNaN :: Qty a -> Bool
 isNaN value =
-    Prelude.isNaN (coerce value :: Float)
+    Prelude.isNaN (unQty value)
 
-interpolateFrom :: Scalar scalar => scalar -> scalar -> Float -> scalar
+interpolateFrom :: Qty a -> Qty a -> Float -> Qty a
 interpolateFrom a b t =
     if t <= 0.5
         then a + (b - a) * t
         else b + (a - b) * (1.0 - t)
 
-midpoint :: Scalar scalar => scalar -> scalar -> scalar
+midpoint :: Qty a -> Qty a -> Qty a
 midpoint a b =
     0.5 * (a + b)
 
-abs :: Scalar scalar => scalar -> scalar
+abs :: Qty a -> Qty a
 abs value =
-    coerce (Prelude.abs (coerce value :: Float))
+    coerce (Prelude.abs (unQty value))
 
-clamp :: Scalar scalar => scalar -> scalar -> scalar -> scalar
+clamp :: Qty a -> Qty a -> Qty a -> Qty a
 clamp a b value
     | value < low = low
     | value > high = high
@@ -59,6 +59,6 @@ clamp a b value
     low = min a b
     high = max a b
 
-sqrt :: Sqrt scalar sqrtScalar => scalar -> sqrtScalar
+sqrt :: Sqrt (Qty a) (Qty b) => Qty a -> Qty b
 sqrt value =
-    coerce (Prelude.sqrt (coerce value :: Float))
+    coerce (Prelude.sqrt (unQty value))

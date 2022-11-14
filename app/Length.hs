@@ -17,44 +17,44 @@ module Length (
 ) where
 
 import OpenSolid
-import qualified Scalar
+import qualified Qty
 import qualified Units
 
 zero :: Length
 zero =
-    Scalar.zero
+    Qty.zero
 
 positiveInfinity :: Length
 positiveInfinity =
-    Scalar.positiveInfinity
+    Qty.positiveInfinity
 
 negativeInfinity :: Length
 negativeInfinity =
-    Scalar.negativeInfinity
+    Qty.negativeInfinity
 
 infinity :: Length
 infinity =
-    Scalar.infinity
+    Qty.infinity
 
 isNaN :: Length -> Bool
 isNaN =
-    Scalar.isNaN
+    Qty.isNaN
 
 interpolateFrom :: Length -> Length -> Float -> Length
 interpolateFrom =
-    Scalar.interpolateFrom
+    Qty.interpolateFrom
 
 midpoint :: Length -> Length -> Length
 midpoint =
-    Scalar.midpoint
+    Qty.midpoint
 
 abs :: Length -> Length
 abs =
-    Scalar.abs
+    Qty.abs
 
 clamp :: Length -> Length -> Length -> Length
 clamp =
-    Scalar.clamp
+    Qty.clamp
 
 meter :: Length
 meter =

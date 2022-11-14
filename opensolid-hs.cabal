@@ -53,7 +53,7 @@ executable opensolid-hs
         Result
         List
         Float
-        Scalar
+        Qty
         Bounds
         Bounded
         Length

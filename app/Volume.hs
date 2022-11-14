@@ -18,44 +18,44 @@ module Volume (
 
 import qualified Length
 import OpenSolid
-import qualified Scalar
+import qualified Qty
 import qualified Units
 
 zero :: Volume
 zero =
-    Scalar.zero
+    Qty.zero
 
 positiveInfinity :: Volume
 positiveInfinity =
-    Scalar.positiveInfinity
+    Qty.positiveInfinity
 
 negativeInfinity :: Volume
 negativeInfinity =
-    Scalar.negativeInfinity
+    Qty.negativeInfinity
 
 infinity :: Volume
 infinity =
-    Scalar.infinity
+    Qty.infinity
 
 isNaN :: Volume -> Bool
 isNaN =
-    Scalar.isNaN
+    Qty.isNaN
 
 interpolateFrom :: Volume -> Volume -> Float -> Volume
 interpolateFrom =
-    Scalar.interpolateFrom
+    Qty.interpolateFrom
 
 midpoint :: Volume -> Volume -> Volume
 midpoint =
-    Scalar.midpoint
+    Qty.midpoint
 
 abs :: Volume -> Volume
 abs =
-    Scalar.abs
+    Qty.abs
 
 clamp :: Volume -> Volume -> Volume -> Volume
 clamp =
-    Scalar.clamp
+    Qty.clamp
 
 cubicMeter :: Volume
 cubicMeter =

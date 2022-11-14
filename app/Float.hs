@@ -12,44 +12,44 @@ module Float (
 ) where
 
 import OpenSolid
-import qualified Scalar
+import qualified Qty
 
 zero :: Float
 zero =
-    Scalar.zero
+    Qty.zero
 
 positiveInfinity :: Float
 positiveInfinity =
-    Scalar.positiveInfinity
+    Qty.positiveInfinity
 
 negativeInfinity :: Float
 negativeInfinity =
-    Scalar.negativeInfinity
+    Qty.negativeInfinity
 
 infinity :: Float
 infinity =
-    Scalar.infinity
+    Qty.infinity
 
 isNaN :: Float -> Bool
 isNaN =
-    Scalar.isNaN
+    Qty.isNaN
 
 interpolateFrom :: Float -> Float -> Float -> Float
 interpolateFrom =
-    Scalar.interpolateFrom
+    Qty.interpolateFrom
 
 midpoint :: Float -> Float -> Float
 midpoint =
-    Scalar.midpoint
+    Qty.midpoint
 
 abs :: Float -> Float
 abs =
-    Scalar.abs
+    Qty.abs
 
 clamp :: Float -> Float -> Float -> Float
 clamp =
-    Scalar.clamp
+    Qty.clamp
 
 sqrt :: Float -> Float
 sqrt =
-    Scalar.sqrt
+    Qty.sqrt

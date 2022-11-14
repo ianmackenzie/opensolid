@@ -15,30 +15,30 @@ import Expression1d.Root (Root (Root))
 import qualified Expression1d.Root as Root
 import qualified List
 import OpenSolid
+import qualified Qty
 import qualified Range
 import Range.Unsafe
 import qualified Result
-import qualified Scalar
 import qualified Units
 
-data Expression1d scalar = Expression1d
-    { evaluate :: !(Float -> scalar)
-    , bounds :: !(Range Float -> Range scalar)
-    , derivative :: ~(Expression1d scalar)
+data Expression1d qty = Expression1d
+    { evaluate :: !(Float -> qty)
+    , bounds :: !(Range Float -> Range qty)
+    , derivative :: ~(Expression1d qty)
     }
 
-instance Units.Coercion (Expression1d scalar) (Expression1d Float)
+instance Units.Coercion (Expression1d (Qty a)) (Expression1d Float)
 
-zero :: Scalar scalar => Expression1d scalar
+zero :: Expression1d (Qty a)
 zero =
-    constant Scalar.zero
+    constant Qty.zero
 
-constant :: Scalar scalar => scalar -> Expression1d scalar
+constant :: Qty a -> Expression1d (Qty a)
 constant value =
     Expression1d
         { evaluate = always value
         , bounds = always (Range.constant value)
-        , derivative = constant Scalar.zero
+        , derivative = constant Qty.zero
         }
 
 parameter :: Expression1d Float
@@ -49,7 +49,7 @@ parameter =
         , derivative = constant 1.0
         }
 
-instance Scalar scalar => Negation (Expression1d scalar) where
+instance Negation (Expression1d (Qty a)) where
     negate expression =
         Expression1d
             { evaluate = evaluate expression >> negate
@@ -57,7 +57,7 @@ instance Scalar scalar => Negation (Expression1d scalar) where
             , derivative = negate (derivative expression)
             }
 
-instance Scalar scalar => Addition (Expression1d scalar) where
+instance Addition Expression1d Expression1d Expression1d (Qty a) where
     expression1 + expression2 =
         Expression1d
             { evaluate = \t -> evaluate expression1 t + evaluate expression2 t
@@ -65,7 +65,7 @@ instance Scalar scalar => Addition (Expression1d scalar) where
             , derivative = derivative expression1 + derivative expression2
             }
 
-instance Scalar scalar => Subtraction (Expression1d scalar) where
+instance Subtraction Expression1d Expression1d Expression1d (Qty a) where
     expression1 - expression2 =
         Expression1d
             { evaluate = \t -> evaluate expression1 t - evaluate expression2 t
@@ -73,7 +73,7 @@ instance Scalar scalar => Subtraction (Expression1d scalar) where
             , derivative = derivative expression1 - derivative expression2
             }
 
-instance (Scalar scalar1, Scalar scalar2, Scalar result, Multiplication scalar1 scalar2 result) => Multiplication (Expression1d scalar1) (Expression1d scalar2) (Expression1d result) where
+instance Multiplication (Qty a) (Qty b) (Qty c) => Multiplication (Expression1d (Qty a)) (Expression1d (Qty b)) (Expression1d (Qty c)) where
     expression1 * expression2 =
         Expression1d
             { evaluate = \t -> evaluate expression1 t * evaluate expression2 t
@@ -81,7 +81,7 @@ instance (Scalar scalar1, Scalar scalar2, Scalar result, Multiplication scalar1 
             , derivative = derivative expression1 * expression2 + expression1 * derivative expression2
             }
 
-instance (Scalar scalar1, Scalar scalar2, Scalar result, Division scalar1 scalar2 result) => Division (Expression1d scalar1) (Expression1d scalar2) (Expression1d result) where
+instance Division (Qty a) (Qty b) (Qty c) => Division (Expression1d (Qty a)) (Expression1d (Qty b)) (Expression1d (Qty c)) where
     expression1 / expression2 =
         Expression1d
             { evaluate = \t -> evaluate expression1 t / evaluate expression2 t
@@ -94,7 +94,7 @@ instance (Scalar scalar1, Scalar scalar2, Scalar result, Division scalar1 scalar
                  in Units.add ((p' * q - p * q') / squared q)
             }
 
-squared :: (Scalar scalar, Scalar squaredScalar, Multiplication scalar scalar squaredScalar) => Expression1d scalar -> Expression1d squaredScalar
+squared :: Multiplication (Qty a) (Qty a) (Qty b) => Expression1d (Qty a) -> Expression1d (Qty b)
 squared expression =
     Expression1d
         { evaluate = evaluate expression >> (\value -> value * value)
@@ -102,10 +102,10 @@ squared expression =
         , derivative = constant 2.0 * expression * derivative expression
         }
 
-sqrt :: Sqrt scalar sqrtQuantity => Expression1d scalar -> Expression1d sqrtQuantity
+sqrt :: Sqrt (Qty a) (Qty b) => Expression1d (Qty a) -> Expression1d (Qty b)
 sqrt expression =
     Expression1d
-        { evaluate = evaluate expression >> Scalar.sqrt
+        { evaluate = evaluate expression >> Qty.sqrt
         , bounds = bounds expression >> Range.sqrt
         , derivative =
             let f = Units.drop expression :: Expression1d Float
@@ -122,13 +122,13 @@ maxRootOrder :: Int
 maxRootOrder =
     8
 
-roots :: Scalar scalar => scalar -> Expression1d scalar -> List Root
+roots :: Qty a -> Expression1d (Qty a) -> List Root
 roots tolerance expression =
     case neighborhoods expression tolerance Range.unit of
         Ok validNeighborhoods -> List.collect neighborhoodRoot validNeighborhoods
         Err Indeterminate -> []
 
-neighborhoods :: Scalar scalar => Expression1d scalar -> scalar -> Range Float -> Result Indeterminate (List Neighborhood)
+neighborhoods :: Expression1d (Qty a) -> Qty a -> Range Float -> Result Indeterminate (List Neighborhood)
 neighborhoods expression tolerance domain =
     case localNeighborhoods expression tolerance domain 0 of
         Ok validNeighborhoods -> Ok validNeighborhoods
@@ -141,7 +141,7 @@ neighborhoods expression tolerance domain =
                     rightNeighborhoods <- neighborhoods expression tolerance rightDomain
                     Ok (leftNeighborhoods ++ rightNeighborhoods)
 
-localNeighborhoods :: Scalar scalar => Expression1d scalar -> scalar -> Range Float -> Int -> Result Indeterminate (List Neighborhood)
+localNeighborhoods :: Expression1d (Qty a) -> Qty a -> Range Float -> Int -> Result Indeterminate (List Neighborhood)
 localNeighborhoods expression tolerance domain order
     | definitelyNonZero expression tolerance domain = Ok [NoRoot domain]
     | order <= maxRootOrder = Result.do
@@ -150,12 +150,12 @@ localNeighborhoods expression tolerance domain order
     -- We've passed the maximum root order and still haven't found a non-zero derivative
     | otherwise = Err Indeterminate
 
-definitelyNonZero :: Scalar scalar => Expression1d scalar -> scalar -> Range Float -> Bool
+definitelyNonZero :: Expression1d (Qty a) -> Qty a -> Range Float -> Bool
 definitelyNonZero expression tolerance domain =
     let yRange = bounds expression domain
      in Range.minValue yRange >= tolerance || Range.maxValue yRange <= negate tolerance
 
-solve :: Scalar scalar => Expression1d scalar -> scalar -> Int -> Neighborhood -> List Neighborhood
+solve :: Expression1d (Qty a) -> Qty a -> Int -> Neighborhood -> List Neighborhood
 solve expression tolerance order derivativeNeighborhood =
     case derivativeNeighborhood of
         NoRoot domain ->
@@ -164,7 +164,7 @@ solve expression tolerance order derivativeNeighborhood =
                 Nothing -> [NoRoot domain]
         HasRoot domain root ->
             let rootX = Root.value root
-             in if Scalar.abs (evaluate expression rootX) <= tolerance
+             in if Qty.abs (evaluate expression rootX) <= tolerance
                     then [HasRoot domain root]
                     else
                         let (x1, x2) = Range.endpoints domain
@@ -174,24 +174,24 @@ solve expression tolerance order derivativeNeighborhood =
                             rightNeighborhoods = solve expression tolerance order (NoRoot rightDomain)
                          in leftNeighborhoods ++ rightNeighborhoods
 
-solveMonotonic :: Scalar scalar => Expression1d scalar -> Range Float -> Maybe Float
+solveMonotonic :: Expression1d (Qty a) -> Range Float -> Maybe Float
 solveMonotonic expression domain
-    | y1 <= Scalar.zero && y2 >= Scalar.zero = Just (bisectMonotonic expression x1 x2)
-    | y1 >= Scalar.zero && y2 <= Scalar.zero = Just (bisectMonotonic expression x2 x1)
+    | y1 <= Qty.zero && y2 >= Qty.zero = Just (bisectMonotonic expression x1 x2)
+    | y1 >= Qty.zero && y2 <= Qty.zero = Just (bisectMonotonic expression x2 x1)
     | otherwise = Nothing
   where
     (x1, x2) = Range.endpoints domain
     y1 = evaluate expression x1
     y2 = evaluate expression x2
 
-bisectMonotonic :: Scalar scalar => Expression1d scalar -> Float -> Float -> Float
+bisectMonotonic :: Expression1d (Qty a) -> Float -> Float -> Float
 bisectMonotonic expression lowX highX =
-    let midX = Scalar.midpoint lowX highX
+    let midX = Qty.midpoint lowX highX
      in if midX == lowX || midX == highX
             then midX
             else
                 let midY = evaluate expression midX
-                 in if midY >= Scalar.zero
+                 in if midY >= Qty.zero
                         then bisectMonotonic expression lowX midX
                         else bisectMonotonic expression midX highX
 

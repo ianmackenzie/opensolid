@@ -15,48 +15,48 @@ module Area (
 ) where
 
 import OpenSolid
-import qualified Scalar
+import qualified Qty
 import qualified Units
 
 zero :: Area
 zero =
-    Scalar.zero
+    Qty.zero
 
 positiveInfinity :: Area
 positiveInfinity =
-    Scalar.positiveInfinity
+    Qty.positiveInfinity
 
 negativeInfinity :: Area
 negativeInfinity =
-    Scalar.negativeInfinity
+    Qty.negativeInfinity
 
 infinity :: Area
 infinity =
-    Scalar.infinity
+    Qty.infinity
 
 isNaN :: Area -> Bool
 isNaN =
-    Scalar.isNaN
+    Qty.isNaN
 
 interpolateFrom :: Area -> Area -> Float -> Area
 interpolateFrom =
-    Scalar.interpolateFrom
+    Qty.interpolateFrom
 
 midpoint :: Area -> Area -> Area
 midpoint =
-    Scalar.midpoint
+    Qty.midpoint
 
 abs :: Area -> Area
 abs =
-    Scalar.abs
+    Qty.abs
 
 clamp :: Area -> Area -> Area -> Area
 clamp =
-    Scalar.clamp
+    Qty.clamp
 
 sqrt :: Area -> Length
 sqrt =
-    Scalar.sqrt
+    Qty.sqrt
 
 squareMeter :: Area
 squareMeter =

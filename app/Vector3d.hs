@@ -25,39 +25,39 @@ import qualified Float
 import qualified Length
 import OpenSolid
 import Point3d.Type
-import qualified Scalar
+import qualified Qty
 import qualified Units
 import Vector3d.Type
 
-zero :: Scalar scalar => Vector3d scalar coordinates
+zero :: Vector3d (Qty a) coordinates
 zero =
-    Vector3d Scalar.zero Scalar.zero Scalar.zero
+    Vector3d Qty.zero Qty.zero Qty.zero
 
-x :: Scalar scalar => scalar -> Vector3d scalar coordinates
+x :: Qty a -> Vector3d (Qty a) coordinates
 x vx =
-    Vector3d vx Scalar.zero Scalar.zero
+    Vector3d vx Qty.zero Qty.zero
 
-y :: Scalar scalar => scalar -> Vector3d scalar coordinates
+y :: Qty a -> Vector3d (Qty a) coordinates
 y vy =
-    Vector3d Scalar.zero vy Scalar.zero
+    Vector3d Qty.zero vy Qty.zero
 
-z :: Scalar scalar => scalar -> Vector3d scalar coordinates
+z :: Qty a -> Vector3d (Qty a) coordinates
 z vz =
-    Vector3d Scalar.zero Scalar.zero vz
+    Vector3d Qty.zero Qty.zero vz
 
-xy :: Scalar scalar => scalar -> scalar -> Vector3d scalar coordinates
+xy :: Qty a -> Qty a -> Vector3d (Qty a) coordinates
 xy vx vz =
-    Vector3d vx vz Scalar.zero
+    Vector3d vx vz Qty.zero
 
-xz :: Scalar scalar => scalar -> scalar -> Vector3d scalar coordinates
+xz :: Qty a -> Qty a -> Vector3d (Qty a) coordinates
 xz vx vz =
-    Vector3d vx Scalar.zero vz
+    Vector3d vx Qty.zero vz
 
-yz :: Scalar scalar => scalar -> scalar -> Vector3d scalar coordinates
+yz :: Qty a -> Qty a -> Vector3d (Qty a) coordinates
 yz vy vz =
-    Vector3d Scalar.zero vy vz
+    Vector3d Qty.zero vy vz
 
-xyz :: Scalar scalar => scalar -> scalar -> scalar -> Vector3d scalar coordinates
+xyz :: Qty a -> Qty a -> Qty a -> Vector3d (Qty a) coordinates
 xyz =
     Vector3d
 
@@ -75,25 +75,25 @@ from p1 p2 =
         (Point3d x2 y2 z2) = p2
      in Vector3d (x2 - x1) (y2 - y1) (z2 - z1)
 
-interpolateFrom :: Scalar scalar => Vector3d scalar coordinates -> Vector3d scalar coordinates -> Float -> Vector3d scalar coordinates
+interpolateFrom :: Vector3d (Qty a) coordinates -> Vector3d (Qty a) coordinates -> Float -> Vector3d (Qty a) coordinates
 interpolateFrom v1 v2 t =
     let (Vector3d x1 y1 z1) = v1
         (Vector3d x2 y2 z2) = v2
-        vx = Scalar.interpolateFrom x1 x2 t
-        vy = Scalar.interpolateFrom y1 y2 t
-        vz = Scalar.interpolateFrom z1 z2 t
+        vx = Qty.interpolateFrom x1 x2 t
+        vy = Qty.interpolateFrom y1 y2 t
+        vz = Qty.interpolateFrom z1 z2 t
      in Vector3d vx vy vz
 
-midpoint :: Scalar scalar => Vector3d scalar coordinates -> Vector3d scalar coordinates -> Vector3d scalar coordinates
+midpoint :: Vector3d (Qty a) coordinates -> Vector3d (Qty a) coordinates -> Vector3d (Qty a) coordinates
 midpoint v1 v2 =
     let (Vector3d x1 y1 z1) = v1
         (Vector3d x2 y2 z2) = v2
-        vx = Scalar.midpoint x1 x2
-        vy = Scalar.midpoint y1 y2
-        vz = Scalar.midpoint z1 z2
+        vx = Qty.midpoint x1 x2
+        vy = Qty.midpoint y1 y2
+        vz = Qty.midpoint z1 z2
      in Vector3d vx vy vz
 
-magnitude :: Scalar scalar => Vector3d scalar coordinates -> scalar
+magnitude :: Vector3d (Qty a) coordinates -> Qty a
 magnitude vector =
     let (Vector3d vx vy vz) = vector
         fx = Units.drop vx
@@ -101,23 +101,23 @@ magnitude vector =
         fz = Units.drop vz
      in Units.add (Float.sqrt (fx * fx + fy * fy + fz * fz))
 
-squaredMagnitude :: (Scalar scalar, Scalar squaredScalar, Multiplication scalar scalar squaredScalar) => Vector3d scalar coordinates -> squaredScalar
+squaredMagnitude :: Multiplication (Qty a) (Qty a) (Qty b) => Vector3d (Qty a) coordinates -> Qty b
 squaredMagnitude vector =
     let (Vector3d vx vy vz) = vector in vx * vx + vy * vy + vz * vz
 
-direction :: Scalar scalar => Vector3d scalar coordinates -> Maybe (Direction3d coordinates)
+direction :: Vector3d (Qty a) coordinates -> Maybe (Direction3d coordinates)
 direction vector =
     let m = magnitude vector
-     in if m == Scalar.zero
+     in if m == Qty.zero
             then Nothing
             else
                 let (Vector3d vx vy vz) = vector
                  in Just (Direction3d (vx / m) (vy / m) (vz / m))
 
-normalize :: Scalar scalar => Vector3d scalar coordinates -> Vector3d Float coordinates
+normalize :: Vector3d (Qty a) coordinates -> Vector3d Float coordinates
 normalize vector =
     let m = magnitude vector
-     in if m == Scalar.zero
+     in if m == Qty.zero
             then zero
             else
                 let (Vector3d vx vy vz) = vector

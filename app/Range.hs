@@ -19,14 +19,14 @@ module Range (
 
 import qualified Bounds
 import OpenSolid
+import qualified Qty
 import Range.Unsafe
-import qualified Scalar
 
-constant :: Scalar scalar => scalar -> Range scalar
+constant :: Qty a -> Range (Qty a)
 constant value =
     Range value value
 
-from :: Scalar scalar => scalar -> scalar -> Range scalar
+from :: Qty a -> Qty a -> Range (Qty a)
 from a b =
     Range (min a b) (max a b)
 
@@ -34,69 +34,69 @@ unit :: Range Float
 unit =
     Range 0.0 1.0
 
-minValue :: Scalar scalar => Range scalar -> scalar
+minValue :: Range (Qty a) -> Qty a
 minValue range =
     let (Range low _) = range in low
 
-maxValue :: Scalar scalar => Range scalar -> scalar
+maxValue :: Range (Qty a) -> Qty a
 maxValue range =
     let (Range _ high) = range in high
 
-isAtomic :: Scalar scalar => Range scalar -> Bool
+isAtomic :: Range (Qty a) -> Bool
 isAtomic range =
     let (Range low high) = range
         mid = midpoint range
      in mid == low || mid == high
 
-midpoint :: Scalar scalar => Range scalar -> scalar
+midpoint :: Range (Qty a) -> Qty a
 midpoint range =
     let (Range low high) = range
-     in Scalar.midpoint low high
+     in Qty.midpoint low high
 
-endpoints :: Scalar scalar => Range scalar -> (scalar, scalar)
+endpoints :: Range (Qty a) -> (Qty a, Qty a)
 endpoints (Range low high) =
     (low, high)
 
-squared :: (Scalar scalar, Scalar squaredScalar, Multiplication scalar scalar squaredScalar) => Range scalar -> Range squaredScalar
+squared :: Multiplication (Qty a) (Qty a) (Qty b) => Range (Qty a) -> Range (Qty b)
 squared range
-    | low >= Scalar.zero = Range ll hh
-    | high <= Scalar.zero = Range hh ll
-    | otherwise = Range Scalar.zero (max ll hh)
+    | low >= Qty.zero = Range ll hh
+    | high <= Qty.zero = Range hh ll
+    | otherwise = Range Qty.zero (max ll hh)
   where
     (Range low high) = range
     ll = low * low
     hh = high * high
 
-sqrt :: (Scalar scalar, Scalar sqrtScalar, Sqrt scalar sqrtScalar) => Range scalar -> Range sqrtScalar
+sqrt :: Sqrt (Qty a) (Qty b) => Range (Qty a) -> Range (Qty b)
 sqrt range =
     let (Range low high) = range
-        sqrtLow = Scalar.sqrt (max low Scalar.zero)
-        sqrtHigh = Scalar.sqrt (max high Scalar.zero)
+        sqrtLow = Qty.sqrt (max low Qty.zero)
+        sqrtHigh = Qty.sqrt (max high Qty.zero)
      in Range sqrtLow sqrtHigh
 
-contains :: Scalar scalar => scalar -> Range scalar -> Bool
-contains scalar range =
+contains :: Qty a -> Range (Qty a) -> Bool
+contains value range =
     let (Range low high) = range
-     in low <= scalar && scalar <= high
+     in low <= value && value <= high
 
-bisect :: Scalar scalar => Range scalar -> (Range scalar, Range scalar)
+bisect :: Range (Qty a) -> (Range (Qty a), Range (Qty a))
 bisect range =
     let (Range low high) = range
         mid = midpoint range
      in (Range low mid, Range mid high)
 
-abs :: Scalar scalar => Range scalar -> Range scalar
+abs :: Range (Qty a) -> Range (Qty a)
 abs range
-    | low >= Scalar.zero = range
-    | high <= Scalar.zero = negate range
-    | otherwise = Range Scalar.zero (max high (negate low))
+    | low >= Qty.zero = range
+    | high <= Qty.zero = negate range
+    | otherwise = Range Qty.zero (max high (negate low))
   where
     (Range low high) = range
 
-aggregate :: Scalar scalar => Range scalar -> Range scalar -> Range scalar
+aggregate :: Range (Qty a) -> Range (Qty a) -> Range (Qty a)
 aggregate =
     Bounds.aggregate
 
-overlaps :: Scalar scalar => Range scalar -> Range scalar -> Bool
+overlaps :: Range (Qty a) -> Range (Qty a) -> Bool
 overlaps =
     Bounds.overlaps

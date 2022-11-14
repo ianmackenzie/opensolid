@@ -1,10 +1,12 @@
 module OpenSolid (
     module Prelude,
     module Result,
+    Nbr (..),
+    Qty (..),
+    Int,
     Float,
     String,
     List,
-    Scalar,
     Sqrt,
     Negation (..),
     Addition (..),
@@ -29,22 +31,20 @@ module OpenSolid (
     (<|),
     (>>),
     (<<),
-    Quantity (..),
     Length,
     Area,
     Volume,
 ) where
 
-import Data.Coerce (Coercible)
 import qualified Data.Text
 import Result (Result (..))
 import qualified Units
 import Prelude (
     Bool (..),
     Char,
+    Enum,
     Eq (..),
     IO,
-    Int,
     Maybe (..),
     Ord (..),
     Show (..),
@@ -62,73 +62,86 @@ type String = Data.Text.Text
 
 type List a = [a]
 
-type Float = Prelude.Double
+newtype Nbr units = Nbr {unNbr :: Prelude.Int} deriving (Eq, Ord, Enum)
 
-class
-    ( Eq scalar
-    , Ord scalar
-    , Show scalar
-    , Coercible scalar Float
-    , Coercible Float scalar
-    , Units.Coercion scalar Float
-    , Negation scalar
-    , Addition scalar
-    , Subtraction scalar
-    , Multiplication scalar Float scalar
-    , Multiplication Float scalar scalar
-    , Division scalar Float scalar
-    , Division scalar scalar Float
-    ) =>
-    Scalar scalar
+newtype Qty units = Qty {unQty :: Prelude.Double} deriving (Eq, Ord)
 
-instance Scalar Float
+instance Show Int where
+    show (Nbr n) =
+        Prelude.show n
 
-class (Scalar scalar, Scalar sqrtScalar) => Sqrt scalar sqrtScalar | scalar -> sqrtScalar
+instance Show Float where
+    show (Qty x) =
+        Prelude.show x
 
-instance Sqrt Float Float
+instance {-# OVERLAPS #-} Show (Nbr units) where
+    showsPrec precedence (Nbr n) =
+        let string = 'N' : 'b' : 'r' : ' ' : Prelude.show n
+         in Prelude.showParen (Nbr precedence > 10) (Prelude.showString string)
+
+instance {-# OVERLAPS #-} Show (Qty units) where
+    showsPrec precedence (Qty x) =
+        let string = 'Q' : 't' : 'y' : ' ' : Prelude.show x
+         in Prelude.showParen (Nbr precedence > 10) (Prelude.showString string)
+
+data Unitless
+
+type Int = Nbr Unitless
+
+type Float = Qty Unitless
 
 class Negation a where
     negate :: a -> a
 
-instance Negation Int where negate = Prelude.negate
+class Addition p q r a | p q -> r where
+    (+) :: p a -> q a -> r a
 
-instance Negation Float where negate = Prelude.negate
+class Subtraction p q r a | p q -> r where
+    (-) :: p a -> q a -> r a
 
-class Addition a where
-    (+) :: a -> a -> a
+class Multiplication a b c | a b -> c where
+    (*) :: a -> b -> c
 
-instance Addition Int where n + m = n Prelude.+ m
+class Division a b c | a b -> c where
+    (/) :: a -> b -> c
 
-instance Addition Float where x + y = x Prelude.+ y
+instance Negation (Nbr units) where
+    negate (Nbr n) =
+        Nbr (Prelude.negate n)
 
-class Subtraction a where
-    (-) :: a -> a -> a
+instance Negation (Qty units) where
+    negate (Qty x) =
+        Qty (Prelude.negate x)
 
-instance Subtraction Int where n - m = n Prelude.- m
+instance Addition Nbr Nbr Nbr a where
+    (Nbr n) + (Nbr m) =
+        Nbr (n Prelude.+ m)
 
-instance Subtraction Float where x - y = x Prelude.- y
+instance Addition Qty Qty Qty a where
+    (Qty x) + (Qty y) =
+        Qty (x Prelude.+ y)
 
-class Multiplication lhs rhs result | lhs rhs -> result where
-    (*) :: lhs -> rhs -> result
+instance Subtraction Nbr Nbr Nbr a where
+    (Nbr n) - (Nbr m) =
+        Nbr (n Prelude.- m)
 
-instance Multiplication Int Int Int where n * m = n Prelude.* m
+instance Subtraction Qty Qty Qty a where
+    (Qty x) - (Qty y) =
+        Qty (x Prelude.- y)
 
-instance Multiplication Float Float Float where x * y = x Prelude.* y
+class Sqrt a b | a -> b
 
-class Division lhs rhs result | lhs rhs -> result where
-    (/) :: lhs -> rhs -> result
-
-instance Division Float Float Float where x / y = x Prelude./ y
+instance Sqrt Float Float
 
 (//) :: Int -> Int -> Int
-(//) =
-    Prelude.quot
+(Nbr n) // (Nbr m) =
+    Nbr (Prelude.quot n m)
 
-class DotProduct lhs rhs result | lhs rhs -> result where
-    (<>) :: lhs coordinates -> rhs coordinates -> result
+class DotProduct p q r a | p q -> r where
+    (<>) :: p a -> q a -> r
 
-class CrossProduct lhs rhs result | lhs rhs -> result where
-    (><) :: lhs coordinates -> rhs coordinates -> result coordinates
+class CrossProduct p q r a | p q -> r where
+    (><) :: p a -> q a -> r a
 
 class Concatenation a where
     (++) :: a -> a -> a
@@ -139,19 +152,19 @@ instance Concatenation (List a) where (++) = Prelude.mappend
 
 fromInteger :: Prelude.Integer -> Int
 fromInteger =
-    Prelude.fromInteger
+    Prelude.fromInteger >> Nbr
 
 fromRational :: Prelude.Rational -> Float
 fromRational =
-    Prelude.fromRational
+    Prelude.fromRational >> Qty
 
 fromString :: Prelude.String -> String
 fromString =
     Data.Text.pack
 
 float :: Int -> Float
-float =
-    Prelude.fromIntegral
+float (Nbr n) =
+    Qty (Prelude.fromIntegral n)
 
 {- HLINT ignore ifThenElse "Use if" -}
 ifThenElse :: Bool -> a -> a -> a
@@ -178,7 +191,7 @@ notImplemented :: a
 notImplemented =
     error "Not implemented"
 
-subtract :: Subtraction a => a -> a -> a
+subtract :: Subtraction p q r a => q a -> p a -> r a
 subtract b a =
     a - b
 
@@ -210,59 +223,88 @@ infixl 9 <<
 
 infixr 9 >>
 
-newtype Quantity units = Quantity Float deriving (Eq, Ord, Show, Negation, Addition, Subtraction)
+instance Units.Coercion (Nbr units) Int
 
-instance Units.Coercion (Quantity units) Float
+instance Units.Coercion (Qty units) Float
 
-instance Multiplication Float (Quantity units) (Quantity units) where
-    x * (Quantity y) =
-        Quantity (x * y)
+instance Multiplication Int Int Int where
+    (Nbr n) * (Nbr m) =
+        Nbr (n Prelude.* m)
 
-instance Multiplication (Quantity units) Float (Quantity units) where
-    (Quantity x) * y =
-        Quantity (x * y)
+instance {-# INCOHERENT #-} Multiplication Float Float Float where
+    (Qty x) * (Qty y) =
+        Qty (x Prelude.* y)
 
-instance Division (Quantity units) Float (Quantity units) where
-    (Quantity x) / y =
-        Quantity (x / y)
+instance {-# INCOHERENT #-} Multiplication Float (Qty units) (Qty units) where
+    (Qty x) * (Qty y) =
+        Qty (x Prelude.* y)
 
-instance Division (Quantity units) (Quantity units) Float where
-    (Quantity x) / (Quantity y) =
-        x / y
+instance {-# INCOHERENT #-} Multiplication (Qty units) Float (Qty units) where
+    (Qty x) * (Qty y) =
+        Qty (x Prelude.* y)
 
-instance Scalar (Quantity units)
+instance {-# INCOHERENT #-} Division Float Float Float where
+    (Qty x) / (Qty y) =
+        Qty (x Prelude./ y)
 
-quantityMultiplication :: Quantity a -> Quantity b -> Quantity c
-quantityMultiplication (Quantity x) (Quantity y) =
-    Quantity (x * y)
+instance {-# INCOHERENT #-} Division (Qty units) Float (Qty units) where
+    (Qty x) / (Qty y) =
+        Qty (x Prelude./ y)
 
-quantityDivision :: Quantity a -> Quantity b -> Quantity c
-quantityDivision (Quantity x) (Quantity y) =
-    Quantity (x / y)
+instance {-# INCOHERENT #-} Division (Qty units) (Qty units) Float where
+    (Qty x) / (Qty y) =
+        Qty (x Prelude./ y)
+
+quantityMultiplication :: Qty a -> Qty b -> Qty c
+quantityMultiplication (Qty x) (Qty y) =
+    Qty (x Prelude.* y)
+
+quantityDivision :: Qty a -> Qty b -> Qty c
+quantityDivision (Qty x) (Qty y) =
+    Qty (x Prelude./ y)
+
+showQty :: String -> Prelude.Int -> Qty a -> Prelude.ShowS
+showQty suffix =
+    let suffixCharacters = Data.Text.unpack (" " ++ suffix)
+     in \precedence (Qty x) ->
+            let string = Prelude.mappend (Prelude.show x) suffixCharacters
+             in Prelude.showParen (Nbr precedence > 10) (Prelude.showString string)
 
 data Meters
 
-type Length = Quantity Meters
+type Length = Qty Meters
+
+instance Show Length where showsPrec = showQty "m"
 
 data Seconds
 
-type Duration = Quantity Seconds
+type Duration = Qty Seconds
+
+instance Show Duration where showsPrec = showQty "s"
 
 data MetersPerSecond
 
-type Speed = Quantity MetersPerSecond
+type Speed = Qty MetersPerSecond
+
+instance Show Speed where showsPrec = showQty "m/s"
 
 data MetersPerSecondSquared
 
-type Acceleration = Quantity MetersPerSecondSquared
+type Acceleration = Qty MetersPerSecondSquared
+
+instance Show Acceleration where showsPrec = showQty "m/s^2"
 
 data SquareMeters
 
-type Area = Quantity SquareMeters
+type Area = Qty SquareMeters
+
+instance Show Area where showsPrec = showQty "m^2"
 
 data CubicMeters
 
-type Volume = Quantity CubicMeters
+type Volume = Qty CubicMeters
+
+instance Show Volume where showsPrec = showQty "m^3"
 
 instance Multiplication Length Length Area where (*) = quantityMultiplication
 
