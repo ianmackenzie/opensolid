@@ -120,7 +120,7 @@ squaredMagnitude expression =
     Expression1d
         (evaluate expression >> Vector3d.squaredMagnitude)
         (bounds expression >> VectorBox3d.squaredMagnitude)
-        (Expression1d.constant 2.0 * expression <> derivative expression)
+        (2.0 * expression <> derivative expression)
 
 magnitude :: Expression3d (Qty a) coordinates -> Expression1d (Qty a)
 magnitude expression =

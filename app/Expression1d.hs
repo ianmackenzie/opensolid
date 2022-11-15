@@ -73,6 +73,22 @@ instance Subtraction Expression1d Expression1d Expression1d (Qty a) where
             , derivative = derivative expression1 - derivative expression2
             }
 
+instance Multiplication (Qty a) (Qty b) (Qty c) => Multiplication (Qty a) (Expression1d (Qty b)) (Expression1d (Qty c)) where
+    value * expression =
+        Expression1d
+            { evaluate = \t -> value * evaluate expression t
+            , bounds = \t -> value * bounds expression t
+            , derivative = value * derivative expression
+            }
+
+instance Multiplication (Qty a) (Qty b) (Qty c) => Multiplication (Expression1d (Qty a)) (Qty b) (Expression1d (Qty c)) where
+    expression * value =
+        Expression1d
+            { evaluate = \t -> evaluate expression t * value
+            , bounds = \t -> bounds expression t * value
+            , derivative = derivative expression * value
+            }
+
 instance Multiplication (Qty a) (Qty b) (Qty c) => Multiplication (Expression1d (Qty a)) (Expression1d (Qty b)) (Expression1d (Qty c)) where
     expression1 * expression2 =
         Expression1d

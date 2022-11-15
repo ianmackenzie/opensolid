@@ -73,7 +73,7 @@ script = Script.do
     rangeDifference = Range.from (Length.meters 2.0) (Length.meters 3.0) - Range.constant (Length.centimeters 50.0)
     rangeProduct = Length.centimeters 20.0 * Range.from (Length.meters 2.0) (Length.meters 3.0)
     t = Expression1d.parameter
-    x = Expression1d.constant 3.0 * t
+    x = 3.0 * t
     y = Expression1d.squared (x - Expression1d.constant 1.0) * (x - Expression1d.constant 2.0)
     roots = Expression1d.roots 1e-12 y
 
