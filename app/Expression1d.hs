@@ -14,7 +14,7 @@ module Expression1d (
 import Expression1d.Root (Root (Root))
 import qualified Expression1d.Root as Root
 import qualified List
-import OpenSolid
+import OpenSolid hiding (sqrt, zero)
 import qualified Qty
 import qualified Range
 import Range.Unsafe
@@ -209,7 +209,7 @@ solve expression tolerance order derivativeNeighborhood =
         NoRoot domain -> [solveMonotonic expression order domain]
         HasRoot domain root ->
             let rootX = Root.value root
-             in if Qty.abs (evaluate expression rootX) <= tolerance
+             in if abs (evaluate expression rootX) <= tolerance
                     then [HasRoot domain root]
                     else
                         let (x1, x2) = Range.endpoints domain

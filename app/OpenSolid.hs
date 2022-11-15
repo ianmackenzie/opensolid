@@ -27,6 +27,12 @@ module OpenSolid (
     error,
     notImplemented,
     subtract,
+    zero,
+    infinity,
+    isNaN,
+    abs,
+    clamp,
+    sqrt,
     (|>),
     (<|),
     (>>),
@@ -44,6 +50,7 @@ module OpenSolid (
     MetersPerSecondSquared,
 ) where
 
+import Data.Coerce (coerce)
 import qualified Data.Text
 import Result (Result (..))
 import qualified Units
@@ -192,6 +199,35 @@ notImplemented =
 subtract :: Subtraction p q r => q a -> p a -> r a
 subtract b a =
     a - b
+
+zero :: Qty units
+zero =
+    coerce 0.0
+
+infinity :: Qty units
+infinity =
+    coerce (1.0 / 0.0)
+
+isNaN :: Qty units -> Bool
+isNaN value =
+    Prelude.isNaN (unQty value)
+
+abs :: Qty units -> Qty units
+abs value =
+    Qty (Prelude.abs (unQty value))
+
+clamp :: Qty units -> Qty units -> Qty units -> Qty units
+clamp a b value
+    | value < low = low
+    | value > high = high
+    | otherwise = value
+  where
+    low = min a b
+    high = max a b
+
+sqrt :: Sqrt (Qty units) (Qty b) => Qty units -> Qty b
+sqrt value =
+    Qty (Prelude.sqrt (unQty value))
 
 (|>) :: a -> (a -> b) -> b
 (|>) value function =

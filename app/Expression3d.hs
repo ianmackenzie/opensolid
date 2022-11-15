@@ -13,7 +13,7 @@ module Expression3d (
 
 import Expression1d (Expression1d (Expression1d))
 import qualified Expression1d
-import OpenSolid
+import OpenSolid hiding (zero)
 import Range (Range)
 import qualified Units
 import Vector3d (Vector3d (Vector3d))

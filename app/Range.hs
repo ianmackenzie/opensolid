@@ -18,7 +18,7 @@ module Range (
 ) where
 
 import qualified Bounds
-import OpenSolid
+import OpenSolid hiding (abs, sqrt)
 import qualified Qty
 import Range.Unsafe
 
@@ -59,9 +59,9 @@ endpoints (Range low high) =
 
 squared :: Multiplication (Qty units1) (Qty units1) (Qty units2) => Range units1 -> Range units2
 squared range
-    | low >= Qty.zero = Range ll hh
-    | high <= Qty.zero = Range hh ll
-    | otherwise = Range Qty.zero (max ll hh)
+    | low >= zero = Range ll hh
+    | high <= zero = Range hh ll
+    | otherwise = Range zero (max ll hh)
   where
     (Range low high) = range
     ll = low * low
@@ -70,8 +70,8 @@ squared range
 sqrt :: Sqrt (Qty units1) (Qty units2) => Range units1 -> Range units2
 sqrt range =
     let (Range low high) = range
-        sqrtLow = Qty.sqrt (max low Qty.zero)
-        sqrtHigh = Qty.sqrt (max high Qty.zero)
+        sqrtLow = Qty.sqrt (max low zero)
+        sqrtHigh = Qty.sqrt (max high zero)
      in Range sqrtLow sqrtHigh
 
 contains :: Qty units -> Range units -> Bool
@@ -87,9 +87,9 @@ bisect range =
 
 abs :: Range units -> Range units
 abs range
-    | low >= Qty.zero = range
-    | high <= Qty.zero = negate range
-    | otherwise = Range Qty.zero (max high (negate low))
+    | low >= zero = range
+    | high <= zero = negate range
+    | otherwise = Range zero (max high (negate low))
   where
     (Range low high) = range
 

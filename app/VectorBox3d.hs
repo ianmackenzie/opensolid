@@ -10,7 +10,6 @@ module VectorBox3d (
 ) where
 
 import OpenSolid
-import qualified Qty
 import qualified Range
 import Range.Unsafe
 import qualified Units
@@ -147,4 +146,4 @@ normalize vectorBox =
 
 clampNormalized :: Range Unitless -> Range Unitless
 clampNormalized (Range low high) =
-    Range (Qty.clamp (-1.0) 1.0 low) (Qty.clamp (-1.0) 1.0 high)
+    Range (clamp (-1.0) 1.0 low) (clamp (-1.0) 1.0 high)

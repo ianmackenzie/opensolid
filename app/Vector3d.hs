@@ -22,7 +22,7 @@ module Vector3d (
 import qualified Area
 import Direction3d.Unsafe
 import qualified Length
-import OpenSolid
+import OpenSolid hiding (zero)
 import Point3d.Type
 import qualified Qty
 import qualified Units
@@ -98,7 +98,7 @@ magnitude vector =
         fx = Units.drop vx
         fy = Units.drop vy
         fz = Units.drop vz
-     in Units.add (Qty.sqrt (fx * fx + fy * fy + fz * fz))
+     in Units.add (sqrt (fx * fx + fy * fy + fz * fz))
 
 squaredMagnitude :: Multiplication (Qty units1) (Qty units1) (Qty units2) => Vector3d units1 coordinates -> Qty units2
 squaredMagnitude vector =

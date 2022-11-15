@@ -19,7 +19,7 @@ module Vector2d (
 import qualified Area
 import Direction2d.Unsafe
 import qualified Length
-import OpenSolid
+import OpenSolid hiding (zero)
 import Point2d.Type
 import qualified Qty
 import qualified Units
@@ -84,7 +84,7 @@ magnitude vector =
     let (Vector2d vx vy) = vector
         fx = Units.drop vx
         fy = Units.drop vy
-     in Units.add (Qty.sqrt (fx * fx + fy * fy))
+     in Units.add (sqrt (fx * fx + fy * fy))
 
 squaredMagnitude :: Multiplication (Qty units1) (Qty units1) (Qty units2) => Vector2d units1 coordinates -> Qty units2
 squaredMagnitude vector =

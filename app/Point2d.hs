@@ -14,20 +14,21 @@ module Point2d (
 import qualified Length
 import OpenSolid
 import Point2d.Type
+import qualified Qty
 import qualified Vector2d
 import Vector2d.Type
 
 origin :: Point2d coordinates
 origin =
-    Point2d Length.zero Length.zero
+    Point2d zero zero
 
 x :: Length -> Point2d coordinates
 x px =
-    Point2d px Length.zero
+    Point2d px zero
 
 y :: Length -> Point2d coordinates
 y py =
-    Point2d Length.zero py
+    Point2d zero py
 
 xy :: Length -> Length -> Point2d coordinates
 xy =
@@ -41,16 +42,16 @@ interpolateFrom :: Point2d coordinates -> Point2d coordinates -> Float -> Point2
 interpolateFrom p1 p2 t =
     let (Point2d x1 y1) = p1
         (Point2d x2 y2) = p2
-        px = Length.interpolateFrom x1 x2 t
-        py = Length.interpolateFrom y1 y2 t
+        px = Qty.interpolateFrom x1 x2 t
+        py = Qty.interpolateFrom y1 y2 t
      in Point2d px py
 
 midpoint :: Point2d coordinates -> Point2d coordinates -> Point2d coordinates
 midpoint p1 p2 =
     let (Point2d x1 y1) = p1
         (Point2d x2 y2) = p2
-        px = Length.midpoint x1 x2
-        py = Length.midpoint y1 y2
+        px = Qty.midpoint x1 x2
+        py = Qty.midpoint y1 y2
      in Point2d px py
 
 distanceFrom :: Point2d coordinates -> Point2d coordinates -> Length

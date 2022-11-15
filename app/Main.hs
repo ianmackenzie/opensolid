@@ -9,7 +9,6 @@ import qualified List
 import OpenSolid
 import Point2d (Point2d)
 import qualified Point2d
-import qualified Qty
 import qualified Range
 import Script (IOError, Script)
 import qualified Script
@@ -44,7 +43,7 @@ script = Script.do
     log "Tuple" (Point2d.meters 1.0 2.0, Point2d.meters 3.0 4.0)
     log "Custom type" (MyPoints (Point2d.meters 1.0 2.0) (Point2d.meters 3.0 4.0))
     log "Roots" roots
-    log "sqrt 2.0" (Qty.sqrt 2.0)
+    log "sqrt 2.0" (sqrt 2.0)
     log "List test" listTest
   where
     log label value = Script.printLine (label ++ ": " ++ Debug.toString value)
@@ -57,7 +56,7 @@ script = Script.do
     v2 = k * Vector2d.meters 3.0 4.0
     dotProduct = v1 <> v2
     determinant = Vector2d.determinant v1 v2
-    squareRoot = Area.sqrt dotProduct
+    squareRoot = sqrt dotProduct
     translatedPoint = Point2d.meters 2.0 3.0 |> Point2d.translateBy (Vector2d.meters 4.0 5.0)
     vectorSum = Vector2d.meters 1.0 2.0 + Vector2d.meters 2.0 3.0
     crossProduct = Vector3d.meters 1.0 2.0 3.0 >< Vector3d.meters 4.0 5.0 6.0

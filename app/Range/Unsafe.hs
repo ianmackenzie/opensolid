@@ -2,7 +2,6 @@ module Range.Unsafe (Range (..)) where
 
 import Bounds
 import OpenSolid
-import qualified Qty
 import qualified Units
 
 data Range units = Range !(Qty units) !(Qty units)
@@ -42,26 +41,26 @@ instance Subtraction Qty Range Range where
 
 qtyRangeMultiplication :: Multiplication (Qty units1) (Qty units2) (Qty units3) => Qty units1 -> Range units2 -> Range units3
 qtyRangeMultiplication value (Range low high) =
-    if value >= Qty.zero
+    if value >= zero
         then Range (value * low) (value * high)
         else Range (value * high) (value * low)
 
 rangeQtyMultiplication :: Multiplication (Qty units1) (Qty units2) (Qty units3) => Range units1 -> Qty units2 -> Range units3
 rangeQtyMultiplication (Range low high) value =
-    if value >= Qty.zero
+    if value >= zero
         then Range (low * value) (high * value)
         else Range (high * value) (low * value)
 
 qtyRangeDivision :: Division (Qty units1) (Qty units2) (Qty units3) => Qty units1 -> Range units2 -> Range units3
 qtyRangeDivision n (Range dl dh)
-    | dl > Qty.zero || dh < Qty.zero = Range (n / dh) (n / dl)
-    | otherwise = Range Qty.negativeInfinity Qty.positiveInfinity
+    | dl > zero || dh < zero = Range (n / dh) (n / dl)
+    | otherwise = Range (-infinity) infinity
 
 rangeQtyDivision :: Division (Qty units1) (Qty units2) (Qty units3) => Range units1 -> Qty units2 -> Range units3
 rangeQtyDivision (Range nl nh) d
-    | d > Qty.zero = Range (nl / d) (nh / d)
-    | d < Qty.zero = Range (nh / d) (nl / d)
-    | otherwise = Range Qty.negativeInfinity Qty.positiveInfinity
+    | d > zero = Range (nl / d) (nh / d)
+    | d < zero = Range (nh / d) (nl / d)
+    | otherwise = Range (-infinity) infinity
 
 instance Multiplication (Qty units1) (Qty units2) (Qty units3) => Multiplication (Qty units1) (Range units2) (Range units3) where
     (*) = qtyRangeMultiplication
@@ -87,9 +86,9 @@ instance Division (Qty units1) (Qty units2) (Qty units3) => Division (Range unit
 
 instance (Division (Qty units1) (Qty units2) (Qty units3)) => Division (Range units1) (Range units2) (Range units3) where
     (Range nl nh) / (Range dl dh)
-        | dl > Qty.zero = Range (nl / dh) (nh / dl)
-        | dh < Qty.zero = Range (nh / dh) (nl / dl)
-        | otherwise = Range Qty.negativeInfinity Qty.positiveInfinity
+        | dl > zero = Range (nl / dh) (nh / dl)
+        | dh < zero = Range (nh / dh) (nl / dl)
+        | otherwise = Range (-infinity) infinity
 
 instance Bounds (Range units) where
     aggregate (Range low1 high1) (Range low2 high2) =
