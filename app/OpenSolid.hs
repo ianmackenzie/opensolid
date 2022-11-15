@@ -253,12 +253,12 @@ instance {-# INCOHERENT #-} Division (Qty units) (Qty units) Float where
     (Qty x) / (Qty y) =
         Qty (x Prelude./ y)
 
-qtyMultiplication :: Qty units1 -> Qty units2 -> Qty units3
-qtyMultiplication (Qty x) (Qty y) =
+multiplyQtys :: Qty units1 -> Qty units2 -> Qty units3
+multiplyQtys (Qty x) (Qty y) =
     Qty (x Prelude.* y)
 
-qtyDivision :: Qty units1 -> Qty units2 -> Qty units3
-qtyDivision (Qty x) (Qty y) =
+divideQtys :: Qty units1 -> Qty units2 -> Qty units3
+divideQtys (Qty x) (Qty y) =
     Qty (x Prelude./ y)
 
 showQty :: String -> Prelude.Int -> Qty units -> Prelude.ShowS
@@ -304,28 +304,28 @@ type Volume = Qty CubicMeters
 
 instance Show Volume where showsPrec = showQty "m^3"
 
-instance Multiplication Length Length Area where (*) = qtyMultiplication
+instance Multiplication Length Length Area where (*) = multiplyQtys
 
-instance Multiplication Length Area Volume where (*) = qtyMultiplication
+instance Multiplication Length Area Volume where (*) = multiplyQtys
 
-instance Multiplication Area Length Volume where (*) = qtyMultiplication
+instance Multiplication Area Length Volume where (*) = multiplyQtys
 
-instance Multiplication Duration Speed Length where (*) = qtyMultiplication
+instance Multiplication Duration Speed Length where (*) = multiplyQtys
 
-instance Multiplication Speed Duration Length where (*) = qtyMultiplication
+instance Multiplication Speed Duration Length where (*) = multiplyQtys
 
-instance Multiplication Duration Acceleration Speed where (*) = qtyMultiplication
+instance Multiplication Duration Acceleration Speed where (*) = multiplyQtys
 
-instance Multiplication Acceleration Duration Speed where (*) = qtyMultiplication
+instance Multiplication Acceleration Duration Speed where (*) = multiplyQtys
 
-instance Division Area Length Length where (/) = qtyDivision
+instance Division Area Length Length where (/) = divideQtys
 
-instance Division Volume Area Length where (/) = qtyDivision
+instance Division Volume Area Length where (/) = divideQtys
 
-instance Division Volume Length Area where (/) = qtyDivision
+instance Division Volume Length Area where (/) = divideQtys
 
-instance Division Length Duration Speed where (/) = qtyDivision
+instance Division Length Duration Speed where (/) = divideQtys
 
-instance Division Speed Duration Acceleration where (/) = qtyDivision
+instance Division Speed Duration Acceleration where (/) = divideQtys
 
 instance Sqrt Area Length
