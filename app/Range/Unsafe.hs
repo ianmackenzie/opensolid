@@ -5,53 +5,71 @@ import OpenSolid
 import qualified Qty
 import qualified Units
 
-data Range qty = Range !qty !qty
-    deriving (Eq, Show)
+data Range units = Range !(Qty units) !(Qty units)
+    deriving (Eq)
 
-instance Units.Coercion (Range (Qty a)) (Range Float)
+deriving instance Show (Qty units) => Show (Range units)
 
-instance Negation (Range (Qty a)) where
+instance Units.Coercion (Range units) (Range Unitless)
+
+instance Negation (Range units) where
     negate (Range low high) =
         Range (negate high) (negate low)
 
-instance Addition Range Range Range (Qty a) where
+instance Addition Range Range Range where
     (Range low1 high1) + (Range low2 high2) =
         Range (low1 + low2) (high1 + high2)
 
-instance Subtraction Range Range Range (Qty a) where
+instance Addition Range Qty Range where
+    (Range low high) + value =
+        Range (low + value) (high + value)
+
+instance Addition Qty Range Range where
+    value + (Range low high) =
+        Range (value + low) (value + high)
+
+instance Subtraction Range Range Range where
     (Range low1 high1) - (Range low2 high2) =
         Range (low1 - high2) (high1 - low2)
 
-qtyRangeMultiplication :: Multiplication (Qty a) (Qty b) (Qty c) => Qty a -> Range (Qty b) -> Range (Qty c)
+instance Subtraction Range Qty Range where
+    (Range low high) - value =
+        Range (low - value) (high - value)
+
+instance Subtraction Qty Range Range where
+    value - (Range low high) =
+        Range (value - high) (value - low)
+
+qtyRangeMultiplication :: Multiplication (Qty units1) (Qty units2) (Qty units3) => Qty units1 -> Range units2 -> Range units3
 qtyRangeMultiplication value (Range low high) =
     if value >= Qty.zero
         then Range (value * low) (value * high)
         else Range (value * high) (value * low)
 
-rangeQtyMultiplication :: Multiplication (Qty a) (Qty b) (Qty c) => Range (Qty a) -> Qty b -> Range (Qty c)
+rangeQtyMultiplication :: Multiplication (Qty units1) (Qty units2) (Qty units3) => Range units1 -> Qty units2 -> Range units3
 rangeQtyMultiplication (Range low high) value =
     if value >= Qty.zero
         then Range (low * value) (high * value)
         else Range (high * value) (low * value)
 
-qtyRangeDivision :: Division (Qty a) (Qty b) (Qty c) => Qty a -> Range (Qty b) -> Range (Qty c)
+qtyRangeDivision :: Division (Qty units1) (Qty units2) (Qty units3) => Qty units1 -> Range units2 -> Range units3
 qtyRangeDivision n (Range dl dh)
     | dl > Qty.zero || dh < Qty.zero = Range (n / dh) (n / dl)
     | otherwise = Range Qty.negativeInfinity Qty.positiveInfinity
 
-rangeQtyDivision :: Division (Qty a) (Qty b) (Qty c) => Range (Qty a) -> Qty b -> Range (Qty c)
+rangeQtyDivision :: Division (Qty units1) (Qty units2) (Qty units3) => Range units1 -> Qty units2 -> Range units3
 rangeQtyDivision (Range nl nh) d
     | d > Qty.zero = Range (nl / d) (nh / d)
     | d < Qty.zero = Range (nh / d) (nl / d)
     | otherwise = Range Qty.negativeInfinity Qty.positiveInfinity
 
-instance Multiplication (Qty a) (Qty b) (Qty c) => Multiplication (Qty a) (Range (Qty b)) (Range (Qty c)) where
+instance Multiplication (Qty units1) (Qty units2) (Qty units3) => Multiplication (Qty units1) (Range units2) (Range units3) where
     (*) = qtyRangeMultiplication
 
-instance Multiplication (Qty a) (Qty b) (Qty c) => Multiplication (Range (Qty a)) (Qty b) (Range (Qty c)) where
+instance Multiplication (Qty units1) (Qty units2) (Qty units3) => Multiplication (Range units1) (Qty units2) (Range units3) where
     (*) = rangeQtyMultiplication
 
-instance Multiplication (Qty a) (Qty b) (Qty c) => Multiplication (Range (Qty a)) (Range (Qty b)) (Range (Qty c)) where
+instance Multiplication (Qty units1) (Qty units2) (Qty units3) => Multiplication (Range units1) (Range units2) (Range units3) where
     (Range low1 high1) * (Range low2 high2) =
         let ll = low1 * low2
             lh = low1 * high2
@@ -61,19 +79,19 @@ instance Multiplication (Qty a) (Qty b) (Qty c) => Multiplication (Range (Qty a)
             high = max (max (max ll lh) hl) hh
          in Range low high
 
-instance Division (Qty a) (Qty b) (Qty c) => Division (Qty a) (Range (Qty b)) (Range (Qty c)) where
+instance Division (Qty units1) (Qty units2) (Qty units3) => Division (Qty units1) (Range units2) (Range units3) where
     (/) = qtyRangeDivision
 
-instance Division (Qty a) (Qty b) (Qty c) => Division (Range (Qty a)) (Qty b) (Range (Qty c)) where
+instance Division (Qty units1) (Qty units2) (Qty units3) => Division (Range units1) (Qty units2) (Range units3) where
     (/) = rangeQtyDivision
 
-instance (Division (Qty a) (Qty b) (Qty c)) => Division (Range (Qty a)) (Range (Qty b)) (Range (Qty c)) where
+instance (Division (Qty units1) (Qty units2) (Qty units3)) => Division (Range units1) (Range units2) (Range units3) where
     (Range nl nh) / (Range dl dh)
         | dl > Qty.zero = Range (nl / dh) (nh / dl)
         | dh < Qty.zero = Range (nh / dh) (nl / dl)
         | otherwise = Range Qty.negativeInfinity Qty.positiveInfinity
 
-instance Bounds (Range (Qty a)) where
+instance Bounds (Range units) where
     aggregate (Range low1 high1) (Range low2 high2) =
         Range (min low1 low2) (max high1 high2)
 

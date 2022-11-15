@@ -57,7 +57,7 @@ distanceFrom :: Point2d coordinates -> Point2d coordinates -> Length
 distanceFrom p1 p2 =
     Vector2d.magnitude (Vector2d.from p1 p2)
 
-translateBy :: Vector2d Length coordinates -> Point2d coordinates -> Point2d coordinates
+translateBy :: Vector2d Meters coordinates -> Point2d coordinates -> Point2d coordinates
 translateBy vector point =
     let (Vector2d vx vy) = vector
         (Point2d px py) = point

@@ -21,19 +21,19 @@ import Range.Unsafe
 import qualified Result
 import qualified Units
 
-data Expression1d qty = Expression1d
-    { evaluate :: !(Float -> qty)
-    , bounds :: !(Range Float -> Range qty)
-    , derivative :: ~(Expression1d qty)
+data Expression1d units = Expression1d
+    { evaluate :: !(Float -> Qty units)
+    , bounds :: !(Range Unitless -> Range units)
+    , derivative :: ~(Expression1d units)
     }
 
-instance Units.Coercion (Expression1d (Qty a)) (Expression1d Float)
+instance Units.Coercion (Expression1d units) (Expression1d Unitless)
 
-zero :: Expression1d (Qty a)
+zero :: Expression1d units
 zero =
     constant Qty.zero
 
-constant :: Qty a -> Expression1d (Qty a)
+constant :: Qty units -> Expression1d units
 constant value =
     Expression1d
         { evaluate = always value
@@ -41,7 +41,7 @@ constant value =
         , derivative = constant Qty.zero
         }
 
-parameter :: Expression1d Float
+parameter :: Expression1d Unitless
 parameter =
     Expression1d
         { evaluate = identity
@@ -49,7 +49,7 @@ parameter =
         , derivative = constant 1.0
         }
 
-instance Negation (Expression1d (Qty a)) where
+instance Negation (Expression1d units) where
     negate expression =
         Expression1d
             { evaluate = evaluate expression >> negate
@@ -57,7 +57,7 @@ instance Negation (Expression1d (Qty a)) where
             , derivative = negate (derivative expression)
             }
 
-instance Addition Expression1d Expression1d Expression1d (Qty a) where
+instance Addition Expression1d Expression1d Expression1d where
     expression1 + expression2 =
         Expression1d
             { evaluate = \t -> evaluate expression1 t + evaluate expression2 t
@@ -65,7 +65,23 @@ instance Addition Expression1d Expression1d Expression1d (Qty a) where
             , derivative = derivative expression1 + derivative expression2
             }
 
-instance Subtraction Expression1d Expression1d Expression1d (Qty a) where
+instance Addition Expression1d Qty Expression1d where
+    expression + value =
+        Expression1d
+            { evaluate = \t -> evaluate expression t + value
+            , bounds = \t -> bounds expression t + value
+            , derivative = derivative expression
+            }
+
+instance Addition Qty Expression1d Expression1d where
+    value + expression =
+        Expression1d
+            { evaluate = \t -> value + evaluate expression t
+            , bounds = \t -> value + bounds expression t
+            , derivative = derivative expression
+            }
+
+instance Subtraction Expression1d Expression1d Expression1d where
     expression1 - expression2 =
         Expression1d
             { evaluate = \t -> evaluate expression1 t - evaluate expression2 t
@@ -73,7 +89,23 @@ instance Subtraction Expression1d Expression1d Expression1d (Qty a) where
             , derivative = derivative expression1 - derivative expression2
             }
 
-instance Multiplication (Qty a) (Qty b) (Qty c) => Multiplication (Qty a) (Expression1d (Qty b)) (Expression1d (Qty c)) where
+instance Subtraction Expression1d Qty Expression1d where
+    expression - value =
+        Expression1d
+            { evaluate = \t -> evaluate expression t - value
+            , bounds = \t -> bounds expression t - value
+            , derivative = derivative expression
+            }
+
+instance Subtraction Qty Expression1d Expression1d where
+    value - expression =
+        Expression1d
+            { evaluate = \t -> value - evaluate expression t
+            , bounds = \t -> value - bounds expression t
+            , derivative = negate (derivative expression)
+            }
+
+instance Multiplication (Qty units1) (Qty units2) (Qty units3) => Multiplication (Qty units1) (Expression1d units2) (Expression1d units3) where
     value * expression =
         Expression1d
             { evaluate = \t -> value * evaluate expression t
@@ -81,7 +113,7 @@ instance Multiplication (Qty a) (Qty b) (Qty c) => Multiplication (Qty a) (Expre
             , derivative = value * derivative expression
             }
 
-instance Multiplication (Qty a) (Qty b) (Qty c) => Multiplication (Expression1d (Qty a)) (Qty b) (Expression1d (Qty c)) where
+instance Multiplication (Qty units1) (Qty units2) (Qty units3) => Multiplication (Expression1d units1) (Qty units2) (Expression1d units3) where
     expression * value =
         Expression1d
             { evaluate = \t -> evaluate expression t * value
@@ -89,7 +121,7 @@ instance Multiplication (Qty a) (Qty b) (Qty c) => Multiplication (Expression1d 
             , derivative = derivative expression * value
             }
 
-instance Multiplication (Qty a) (Qty b) (Qty c) => Multiplication (Expression1d (Qty a)) (Expression1d (Qty b)) (Expression1d (Qty c)) where
+instance Multiplication (Qty units1) (Qty units2) (Qty units3) => Multiplication (Expression1d units1) (Expression1d units2) (Expression1d units3) where
     expression1 * expression2 =
         Expression1d
             { evaluate = \t -> evaluate expression1 t * evaluate expression2 t
@@ -97,7 +129,7 @@ instance Multiplication (Qty a) (Qty b) (Qty c) => Multiplication (Expression1d 
             , derivative = derivative expression1 * expression2 + expression1 * derivative expression2
             }
 
-instance Division (Qty a) (Qty b) (Qty c) => Division (Expression1d (Qty a)) (Expression1d (Qty b)) (Expression1d (Qty c)) where
+instance Division (Qty units1) (Qty units2) (Qty units3) => Division (Expression1d units1) (Expression1d units2) (Expression1d units3) where
     expression1 / expression2 =
         Expression1d
             { evaluate = \t -> evaluate expression1 t / evaluate expression2 t
@@ -110,7 +142,7 @@ instance Division (Qty a) (Qty b) (Qty c) => Division (Expression1d (Qty a)) (Ex
                  in Units.add ((p' * q - p * q') / squared q)
             }
 
-squared :: Multiplication (Qty a) (Qty a) (Qty b) => Expression1d (Qty a) -> Expression1d (Qty b)
+squared :: Multiplication (Qty units1) (Qty units1) (Qty units2) => Expression1d units1 -> Expression1d units2
 squared expression =
     Expression1d
         { evaluate = evaluate expression >> (\value -> value * value)
@@ -118,19 +150,19 @@ squared expression =
         , derivative = constant 2.0 * expression * derivative expression
         }
 
-sqrt :: Sqrt (Qty a) (Qty b) => Expression1d (Qty a) -> Expression1d (Qty b)
+sqrt :: Sqrt (Qty units1) (Qty units2) => Expression1d units1 -> Expression1d units2
 sqrt expression =
     Expression1d
         { evaluate = evaluate expression >> Qty.sqrt
         , bounds = bounds expression >> Range.sqrt
         , derivative =
-            let f = Units.drop expression :: Expression1d Float
+            let f = Units.drop expression
              in Units.add (derivative f / (constant 2.0 * sqrt f))
         }
 
 data Neighborhood
-    = HasRoot !(Range Float) !Root
-    | NoRoot !(Range Float)
+    = HasRoot !(Range Unitless) !Root
+    | NoRoot !(Range Unitless)
 
 data Indeterminate = Indeterminate
 
@@ -138,13 +170,13 @@ maxRootOrder :: Int
 maxRootOrder =
     8
 
-roots :: Qty a -> Expression1d (Qty a) -> List Root
+roots :: Qty units -> Expression1d units -> List Root
 roots tolerance expression =
     case neighborhoods expression tolerance Range.unit of
         Ok validNeighborhoods -> List.collect neighborhoodRoot validNeighborhoods
         Err Indeterminate -> []
 
-neighborhoods :: Expression1d (Qty a) -> Qty a -> Range Float -> Result Indeterminate (List Neighborhood)
+neighborhoods :: Expression1d units -> Qty units -> Range Unitless -> Result Indeterminate (List Neighborhood)
 neighborhoods expression tolerance domain =
     case localNeighborhoods expression tolerance domain 0 of
         Ok validNeighborhoods -> Ok validNeighborhoods
@@ -157,7 +189,7 @@ neighborhoods expression tolerance domain =
                     rightNeighborhoods <- neighborhoods expression tolerance rightDomain
                     Ok (leftNeighborhoods ++ rightNeighborhoods)
 
-localNeighborhoods :: Expression1d (Qty a) -> Qty a -> Range Float -> Int -> Result Indeterminate (List Neighborhood)
+localNeighborhoods :: Expression1d units -> Qty units -> Range Unitless -> Int -> Result Indeterminate (List Neighborhood)
 localNeighborhoods expression tolerance domain order
     | definitelyNonZero expression tolerance domain = Ok [NoRoot domain]
     | order <= maxRootOrder = Result.do
@@ -166,12 +198,12 @@ localNeighborhoods expression tolerance domain order
     -- We've passed the maximum root order and still haven't found a non-zero derivative
     | otherwise = Err Indeterminate
 
-definitelyNonZero :: Expression1d (Qty a) -> Qty a -> Range Float -> Bool
+definitelyNonZero :: Expression1d units -> Qty units -> Range Unitless -> Bool
 definitelyNonZero expression tolerance domain =
     let yRange = bounds expression domain
      in Range.minValue yRange >= tolerance || Range.maxValue yRange <= negate tolerance
 
-solve :: Expression1d (Qty a) -> Qty a -> Int -> Neighborhood -> List Neighborhood
+solve :: Expression1d units -> Qty units -> Int -> Neighborhood -> List Neighborhood
 solve expression tolerance order derivativeNeighborhood =
     case derivativeNeighborhood of
         NoRoot domain ->
@@ -190,7 +222,7 @@ solve expression tolerance order derivativeNeighborhood =
                             rightNeighborhoods = solve expression tolerance order (NoRoot rightDomain)
                          in leftNeighborhoods ++ rightNeighborhoods
 
-solveMonotonic :: Expression1d (Qty a) -> Range Float -> Maybe Float
+solveMonotonic :: Expression1d units -> Range Unitless -> Maybe Float
 solveMonotonic expression domain
     | y1 <= Qty.zero && y2 >= Qty.zero = Just (bisectMonotonic expression x1 x2)
     | y1 >= Qty.zero && y2 <= Qty.zero = Just (bisectMonotonic expression x2 x1)
@@ -200,7 +232,7 @@ solveMonotonic expression domain
     y1 = evaluate expression x1
     y2 = evaluate expression x2
 
-bisectMonotonic :: Expression1d (Qty a) -> Float -> Float -> Float
+bisectMonotonic :: Expression1d units -> Float -> Float -> Float
 bisectMonotonic expression lowX highX =
     let midX = Qty.midpoint lowX highX
      in if midX == lowX || midX == highX

@@ -31,9 +31,17 @@ module OpenSolid (
     (<|),
     (>>),
     (<<),
+    Unitless,
     Length,
+    Meters,
     Area,
+    SquareMeters,
     Volume,
+    CubicMeters,
+    Speed,
+    MetersPerSecond,
+    Acceleration,
+    MetersPerSecondSquared,
 ) where
 
 import qualified Data.Text
@@ -74,16 +82,6 @@ instance Show Float where
     show (Qty x) =
         Prelude.show x
 
-instance {-# OVERLAPS #-} Show (Nbr units) where
-    showsPrec precedence (Nbr n) =
-        let string = 'N' : 'b' : 'r' : ' ' : Prelude.show n
-         in Prelude.showParen (Nbr precedence > 10) (Prelude.showString string)
-
-instance {-# OVERLAPS #-} Show (Qty units) where
-    showsPrec precedence (Qty x) =
-        let string = 'Q' : 't' : 'y' : ' ' : Prelude.show x
-         in Prelude.showParen (Nbr precedence > 10) (Prelude.showString string)
-
 data Unitless
 
 type Int = Nbr Unitless
@@ -93,10 +91,10 @@ type Float = Qty Unitless
 class Negation a where
     negate :: a -> a
 
-class Addition p q r a | p q -> r where
+class Addition p q r | p q -> r where
     (+) :: p a -> q a -> r a
 
-class Subtraction p q r a | p q -> r where
+class Subtraction p q r | p q -> r where
     (-) :: p a -> q a -> r a
 
 class Multiplication a b c | a b -> c where
@@ -113,19 +111,19 @@ instance Negation (Qty units) where
     negate (Qty x) =
         Qty (Prelude.negate x)
 
-instance Addition Nbr Nbr Nbr a where
+instance Addition Nbr Nbr Nbr where
     (Nbr n) + (Nbr m) =
         Nbr (n Prelude.+ m)
 
-instance Addition Qty Qty Qty a where
+instance Addition Qty Qty Qty where
     (Qty x) + (Qty y) =
         Qty (x Prelude.+ y)
 
-instance Subtraction Nbr Nbr Nbr a where
+instance Subtraction Nbr Nbr Nbr where
     (Nbr n) - (Nbr m) =
         Nbr (n Prelude.- m)
 
-instance Subtraction Qty Qty Qty a where
+instance Subtraction Qty Qty Qty where
     (Qty x) - (Qty y) =
         Qty (x Prelude.- y)
 
@@ -137,10 +135,10 @@ instance Sqrt Float Float
 (Nbr n) // (Nbr m) =
     Nbr (Prelude.quot n m)
 
-class DotProduct p q r a | p q -> r where
+class DotProduct p q r | p q -> r where
     (<>) :: p a -> q a -> r
 
-class CrossProduct p q r a | p q -> r where
+class CrossProduct p q r | p q -> r where
     (><) :: p a -> q a -> r a
 
 class Concatenation a where
@@ -191,7 +189,7 @@ notImplemented :: a
 notImplemented =
     error "Not implemented"
 
-subtract :: Subtraction p q r a => q a -> p a -> r a
+subtract :: Subtraction p q r => q a -> p a -> r a
 subtract b a =
     a - b
 
@@ -255,17 +253,17 @@ instance {-# INCOHERENT #-} Division (Qty units) (Qty units) Float where
     (Qty x) / (Qty y) =
         Qty (x Prelude./ y)
 
-quantityMultiplication :: Qty a -> Qty b -> Qty c
-quantityMultiplication (Qty x) (Qty y) =
+qtyMultiplication :: Qty units1 -> Qty units2 -> Qty units3
+qtyMultiplication (Qty x) (Qty y) =
     Qty (x Prelude.* y)
 
-quantityDivision :: Qty a -> Qty b -> Qty c
-quantityDivision (Qty x) (Qty y) =
+qtyDivision :: Qty units1 -> Qty units2 -> Qty units3
+qtyDivision (Qty x) (Qty y) =
     Qty (x Prelude./ y)
 
-showQty :: String -> Prelude.Int -> Qty a -> Prelude.ShowS
+showQty :: String -> Prelude.Int -> Qty units -> Prelude.ShowS
 showQty suffix =
-    let suffixCharacters = Data.Text.unpack (" " ++ suffix)
+    let suffixCharacters = ' ' : Data.Text.unpack suffix
      in \precedence (Qty x) ->
             let string = Prelude.mappend (Prelude.show x) suffixCharacters
              in Prelude.showParen (Nbr precedence > 10) (Prelude.showString string)
@@ -306,28 +304,28 @@ type Volume = Qty CubicMeters
 
 instance Show Volume where showsPrec = showQty "m^3"
 
-instance Multiplication Length Length Area where (*) = quantityMultiplication
+instance Multiplication Length Length Area where (*) = qtyMultiplication
 
-instance Multiplication Length Area Volume where (*) = quantityMultiplication
+instance Multiplication Length Area Volume where (*) = qtyMultiplication
 
-instance Multiplication Area Length Volume where (*) = quantityMultiplication
+instance Multiplication Area Length Volume where (*) = qtyMultiplication
 
-instance Multiplication Duration Speed Length where (*) = quantityMultiplication
+instance Multiplication Duration Speed Length where (*) = qtyMultiplication
 
-instance Multiplication Speed Duration Length where (*) = quantityMultiplication
+instance Multiplication Speed Duration Length where (*) = qtyMultiplication
 
-instance Multiplication Duration Acceleration Speed where (*) = quantityMultiplication
+instance Multiplication Duration Acceleration Speed where (*) = qtyMultiplication
 
-instance Multiplication Acceleration Duration Speed where (*) = quantityMultiplication
+instance Multiplication Acceleration Duration Speed where (*) = qtyMultiplication
 
-instance Division Area Length Length where (/) = quantityDivision
+instance Division Area Length Length where (/) = qtyDivision
 
-instance Division Volume Area Length where (/) = quantityDivision
+instance Division Volume Area Length where (/) = qtyDivision
 
-instance Division Volume Length Area where (/) = quantityDivision
+instance Division Volume Length Area where (/) = qtyDivision
 
-instance Division Length Duration Speed where (/) = quantityDivision
+instance Division Length Duration Speed where (/) = qtyDivision
 
-instance Division Speed Duration Acceleration where (/) = quantityDivision
+instance Division Speed Duration Acceleration where (/) = qtyDivision
 
 instance Sqrt Area Length

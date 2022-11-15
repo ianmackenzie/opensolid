@@ -52,7 +52,6 @@ executable opensolid-hs
         Maybe
         Result
         List
-        Float
         Qty
         Bounds
         Bounded

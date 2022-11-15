@@ -16,41 +16,41 @@ import Data.Coerce (coerce)
 import OpenSolid
 import qualified Prelude
 
-zero :: Qty a
+zero :: Qty units
 zero =
     coerce 0.0
 
-positiveInfinity :: Qty a
+positiveInfinity :: Qty units
 positiveInfinity =
     coerce (1.0 / 0.0)
 
-negativeInfinity :: Qty a
+negativeInfinity :: Qty units
 negativeInfinity =
     negate positiveInfinity
 
-infinity :: Qty a
+infinity :: Qty units
 infinity =
     positiveInfinity
 
-isNaN :: Qty a -> Bool
+isNaN :: Qty units -> Bool
 isNaN value =
     Prelude.isNaN (unQty value)
 
-interpolateFrom :: Qty a -> Qty a -> Float -> Qty a
+interpolateFrom :: Qty units -> Qty units -> Float -> Qty units
 interpolateFrom a b t =
     if t <= 0.5
         then a + (b - a) * t
         else b + (a - b) * (1.0 - t)
 
-midpoint :: Qty a -> Qty a -> Qty a
+midpoint :: Qty units -> Qty units -> Qty units
 midpoint a b =
     0.5 * (a + b)
 
-abs :: Qty a -> Qty a
+abs :: Qty units -> Qty units
 abs value =
-    coerce (Prelude.abs (unQty value))
+    Qty (Prelude.abs (unQty value))
 
-clamp :: Qty a -> Qty a -> Qty a -> Qty a
+clamp :: Qty units -> Qty units -> Qty units -> Qty units
 clamp a b value
     | value < low = low
     | value > high = high
@@ -59,6 +59,6 @@ clamp a b value
     low = min a b
     high = max a b
 
-sqrt :: Sqrt (Qty a) (Qty b) => Qty a -> Qty b
+sqrt :: Sqrt (Qty units) (Qty b) => Qty units -> Qty b
 sqrt value =
-    coerce (Prelude.sqrt (unQty value))
+    Qty (Prelude.sqrt (unQty value))

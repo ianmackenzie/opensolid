@@ -5,7 +5,7 @@ import OpenSolid
 import Range (Range)
 import qualified Range
 
-data BoundingBox3d coordinates = BoundingBox3d !(Range Length) !(Range Length) !(Range Length)
+data BoundingBox3d coordinates = BoundingBox3d !(Range Meters) !(Range Meters) !(Range Meters)
 
 instance Bounds (BoundingBox3d coordinates) where
     aggregate (BoundingBox3d x1 y1 z1) (BoundingBox3d x2 y2 z2) =

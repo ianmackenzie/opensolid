@@ -7,12 +7,12 @@ import Expression1d (Expression1d)
 import qualified Expression1d
 import Expression1d.Root (Root)
 import qualified Expression1d.Root as Root
-import qualified Float
 import qualified Length
 import qualified List
 import OpenSolid
 import Point2d (Point2d)
 import qualified Point2d
+import qualified Qty
 import qualified Range
 import Script (IOError, Script)
 import qualified Script
@@ -23,7 +23,7 @@ import qualified Volume
 
 data MyPoints = MyPoints !(Point2d ()) !(Point2d ()) deriving (Show)
 
-showRoot :: Expression1d Float -> Root -> String
+showRoot :: Expression1d Unitless -> Root -> String
 showRoot x root =
     String.fromInt (Root.order root) ++ ":" ++ String.fromFloat (Expression1d.evaluate x (Root.value root))
 
@@ -52,7 +52,7 @@ script = Script.do
     log "Tuple" (Point2d.meters 1.0 2.0, Point2d.meters 3.0 4.0)
     log "Custom type" (MyPoints (Point2d.meters 1.0 2.0) (Point2d.meters 3.0 4.0))
     log "Roots" [showRoot x root | root <- roots]
-    log "sqrt 2.0" (Float.sqrt 2.0)
+    log "sqrt 2.0" (Qty.sqrt 2.0)
     log "List test" listTest
   where
     log label value = Script.printLine (label ++ ": " ++ Debug.toString value)
@@ -70,11 +70,11 @@ script = Script.do
     vectorSum = Vector2d.meters 1.0 2.0 + Vector2d.meters 2.0 3.0
     crossProduct = Vector3d.meters 1.0 2.0 3.0 >< Vector3d.meters 4.0 5.0 6.0
     scaledVector = Length.meters 2.0 * Vector2d.meters 3.0 4.0
-    rangeDifference = Range.from (Length.meters 2.0) (Length.meters 3.0) - Range.constant (Length.centimeters 50.0)
+    rangeDifference = Range.from (Length.meters 2.0) (Length.meters 3.0) - Length.centimeters 50.0
     rangeProduct = Length.centimeters 20.0 * Range.from (Length.meters 2.0) (Length.meters 3.0)
     t = Expression1d.parameter
     x = 3.0 * t
-    y = Expression1d.squared (x - Expression1d.constant 1.0) * (x - Expression1d.constant 2.0)
+    y = Expression1d.squared (x - 1.0) * (x - 2.0)
     roots = Expression1d.roots 1e-12 y
 
 main :: Script.Program
