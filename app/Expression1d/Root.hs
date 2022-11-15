@@ -1,5 +1,15 @@
-module Expression1d.Root (Root (..)) where
+module Expression1d.Root (
+    Root (..),
+    Sign (..),
+) where
 
 import OpenSolid
 
-data Root = Root {value :: !Float, order :: !Int}
+data Sign = Positive | Negative deriving (Eq, Show)
+
+data Root = Root
+    { value :: !Float
+    , order :: !Int
+    , sign :: !Sign
+    }
+    deriving (Eq, Show)

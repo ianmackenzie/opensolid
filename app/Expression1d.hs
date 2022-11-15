@@ -206,10 +206,7 @@ definitelyNonZero expression tolerance domain =
 solve :: Expression1d units -> Qty units -> Int -> Neighborhood -> List Neighborhood
 solve expression tolerance order derivativeNeighborhood =
     case derivativeNeighborhood of
-        NoRoot domain ->
-            case solveMonotonic expression domain of
-                Just x -> [HasRoot domain Root{Root.value = x, Root.order = order}]
-                Nothing -> [NoRoot domain]
+        NoRoot domain -> [solveMonotonic expression order domain]
         HasRoot domain root ->
             let rootX = Root.value root
              in if Qty.abs (evaluate expression rootX) <= tolerance
@@ -222,11 +219,11 @@ solve expression tolerance order derivativeNeighborhood =
                             rightNeighborhoods = solve expression tolerance order (NoRoot rightDomain)
                          in leftNeighborhoods ++ rightNeighborhoods
 
-solveMonotonic :: Expression1d units -> Range Unitless -> Maybe Float
-solveMonotonic expression domain
-    | y1 <= Qty.zero && y2 >= Qty.zero = Just (bisectMonotonic expression x1 x2)
-    | y1 >= Qty.zero && y2 <= Qty.zero = Just (bisectMonotonic expression x2 x1)
-    | otherwise = Nothing
+solveMonotonic :: Expression1d units -> Int -> Range Unitless -> Neighborhood
+solveMonotonic expression order domain
+    | y1 <= Qty.zero && y2 >= Qty.zero = HasRoot domain Root{Root.value = bisectMonotonic expression x1 x2, Root.order = order, Root.sign = Root.Positive}
+    | y1 >= Qty.zero && y2 <= Qty.zero = HasRoot domain Root{Root.value = bisectMonotonic expression x2 x1, Root.order = order, Root.sign = Root.Negative}
+    | otherwise = NoRoot domain
   where
     (x1, x2) = Range.endpoints domain
     y1 = evaluate expression x1
