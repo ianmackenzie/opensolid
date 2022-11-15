@@ -289,6 +289,26 @@ instance {-# INCOHERENT #-} Division (Qty units) (Qty units) Float where
     (Qty x) / (Qty y) =
         Qty (x Prelude./ y)
 
+instance Multiplication Int (Qty units) (Qty units) where
+    n * x =
+        float n * x
+
+instance Multiplication (Qty units) Int (Qty units) where
+    x * n =
+        x * float n
+
+instance Division Int Int Float where
+    n / m =
+        float n / float m
+
+instance Division (Qty units) Int (Qty units) where
+    x / n =
+        x / float n
+
+instance Division Float (Qty units1) (Qty units2) => Division Int (Qty units1) (Qty units2) where
+    n / x =
+        float n / x
+
 multiplyQtys :: Qty units1 -> Qty units2 -> Qty units3
 multiplyQtys (Qty x) (Qty y) =
     Qty (x Prelude.* y)

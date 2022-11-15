@@ -29,7 +29,7 @@ script = Script.do
     log "Integer product" (3 * 4)
     log "Volume in cubic centimeters" volumeInCubicCentimeters
     log "Integer division" (10 // 4)
-    log "True division" (10.0 / 4.0)
+    log "True division" (10 / 4)
     log "Dot product" dotProduct
     log "Determinant" determinant
     log "Square root" squareRoot
