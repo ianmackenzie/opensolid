@@ -260,13 +260,13 @@ infixl 9 <<
 
 infixr 9 >>
 
-newtype Arg (label :: Symbol) a = Arg a deriving (Eq, Show)
+newtype Arg (label :: Symbol) value = Arg value deriving (Eq, Show)
 
-class FromLabel (label :: Symbol) a where
-    fromLabel :: a -> Arg label a
+class NamedArgument (label :: Symbol) value where
+    fromLabel :: value -> Arg label value
     fromLabel = Arg
 
-instance FromLabel (label :: Symbol) a
+instance NamedArgument (label :: Symbol) value
 
 instance Units.Coercion (Nbr units) Int
 
