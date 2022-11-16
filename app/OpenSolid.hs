@@ -225,7 +225,7 @@ clamp a b value
     low = min a b
     high = max a b
 
-sqrt :: Sqrt (Qty units) (Qty b) => Qty units -> Qty b
+sqrt :: Sqrt (Qty units1) (Qty units2) => Qty units1 -> Qty units2
 sqrt value =
     Qty (Prelude.sqrt (unQty value))
 
