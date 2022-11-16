@@ -37,6 +37,8 @@ module OpenSolid (
     (<|),
     (>>),
     (<<),
+    Arg (..),
+    fromLabel,
     Unitless,
     Length,
     Meters,
@@ -52,6 +54,7 @@ module OpenSolid (
 
 import Data.Coerce (coerce)
 import qualified Data.Text
+import GHC.TypeLits (Symbol)
 import Result (Result (..))
 import qualified Units
 import Prelude (
@@ -256,6 +259,14 @@ infixl 7 *, /, //
 infixl 9 <<
 
 infixr 9 >>
+
+newtype Arg (label :: Symbol) a = Arg a deriving (Eq, Show)
+
+class FromLabel (label :: Symbol) a where
+    fromLabel :: a -> Arg label a
+    fromLabel = Arg
+
+instance FromLabel (label :: Symbol) a
 
 instance Units.Coercion (Nbr units) Int
 

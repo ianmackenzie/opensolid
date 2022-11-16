@@ -24,6 +24,10 @@ listTest = List.do
     b <- [1 .. 10]
     [(a, b) | a + b == 10]
 
+equalWithin :: Arg "tolerance" Length -> Length -> Length -> Bool
+equalWithin (Arg eps) x y =
+    abs (x - y) <= eps
+
 script :: Script IOError ()
 script = Script.do
     log "Integer product" (3 * 4)
@@ -45,6 +49,8 @@ script = Script.do
     log "Roots" roots
     log "sqrt 2.0" (sqrt 2.0)
     log "List test" listTest
+    log "Named argument" arg
+    log "Equality test" (equalWithin (#tolerance Length.centimeter) (Length.meters 1.0) (Length.meters 1.005))
   where
     log label value = Script.printLine (label ++ ": " ++ Debug.toString value)
     k = 0.5
@@ -67,6 +73,7 @@ script = Script.do
     x = 3.0 * t
     y = Expression1d.squared (x - 1.0) * (x - 2.0)
     roots = Expression1d.roots 1e-12 y
+    arg = #radius (Length.meters 3.0)
 
 main :: Script.Program
 main =

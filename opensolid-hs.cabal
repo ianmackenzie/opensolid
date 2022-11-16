@@ -99,3 +99,5 @@ executable opensolid-hs
         FunctionalDependencies
         GeneralizedNewtypeDeriving
         QualifiedDo
+        OverloadedLabels
+        DataKinds
