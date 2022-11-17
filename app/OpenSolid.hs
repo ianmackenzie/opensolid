@@ -159,12 +159,12 @@ instance Concatenation String where (++) = Data.Text.append
 instance Concatenation (List a) where (++) = Prelude.mappend
 
 fromInteger :: Prelude.Integer -> Int
-fromInteger =
-    Prelude.fromInteger >> Nbr
+fromInteger n =
+    Nbr (Prelude.fromInteger n)
 
 fromRational :: Prelude.Rational -> Float
-fromRational =
-    Prelude.fromRational >> Qty
+fromRational x =
+    Qty (Prelude.fromRational x)
 
 fromString :: Prelude.String -> String
 fromString =
