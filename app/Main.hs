@@ -1,9 +1,9 @@
 module Main (main) where
 
 import qualified Area
+import qualified Curve1d
 import qualified Debug
 import qualified Direction2d
-import qualified Expression1d
 import qualified Length
 import qualified List
 import OpenSolid
@@ -69,10 +69,10 @@ script = Script.do
     scaledVector = Length.meters 2.0 * Vector2d.meters 3.0 4.0
     rangeDifference = Range.from (Length.meters 2.0) (Length.meters 3.0) - Length.centimeters 50.0
     rangeProduct = Length.centimeters 20.0 * Range.from (Length.meters 2.0) (Length.meters 3.0)
-    t = Expression1d.parameter
+    t = Curve1d.parameter
     x = 3.0 * t
-    y = Expression1d.squared (x - 1.0) * (x - 2.0)
-    roots = Expression1d.roots 1e-12 y
+    y = Curve1d.squared (x - 1.0) * (x - 2.0)
+    roots = Curve1d.roots 1e-12 y
     arg = #radius (Length.meters 3.0)
 
 main :: Script.Program

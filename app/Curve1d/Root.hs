@@ -1,4 +1,4 @@
-module Expression1d.Root (
+module Curve1d.Root (
     Root (..),
     Sign (..),
 ) where
