@@ -136,9 +136,9 @@ instance Subtraction Qty Curve1d Curve1d where
     value - curve =
         constant value - curve
 
-data Product units = forall units1 units2. Multiplication (Qty units1) (Qty units2) (Qty units) => Product (Curve1d units1) (Curve1d units2)
+data Product units1 units2 = Product (Curve1d units1) (Curve1d units2)
 
-instance IsCurve1d (Product units) units where
+instance Multiplication (Qty units1) (Qty units2) (Qty units3) => IsCurve1d (Product units1 units2) units3 where
     pointOn (Product curve1 curve2) t =
         pointOn curve1 t * pointOn curve2 t
 
@@ -160,9 +160,9 @@ instance Multiplication (Qty units1) (Qty units2) (Qty units3) => Multiplication
     value * curve =
         constant value * curve
 
-data Quotient units = forall units1 units2. Division (Qty units1) (Qty units2) (Qty units) => Quotient (Curve1d units1) (Curve1d units2)
+data Quotient units1 units2 = Quotient (Curve1d units1) (Curve1d units2)
 
-instance IsCurve1d (Quotient units) units where
+instance Division (Qty units1) (Qty units2) (Qty units3) => IsCurve1d (Quotient units1 units2) units3 where
     pointOn (Quotient curve1 curve2) t =
         pointOn curve1 t / pointOn curve2 t
 
