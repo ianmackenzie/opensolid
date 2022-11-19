@@ -21,6 +21,9 @@ import qualified Range
 import Range.Unsafe
 import qualified Result
 import qualified Units
+import Vector3d (Vector3d)
+import {-# SOURCE #-} VectorCurve3d (VectorCurve3d)
+import {-# SOURCE #-} qualified VectorCurve3d
 
 class IsCurve1d curve units | curve -> units where
     pointOn :: curve -> Float -> Qty units
@@ -159,6 +162,14 @@ instance Multiplication (Qty units1) (Qty units2) (Qty units3) => Multiplication
 instance Multiplication (Qty units1) (Qty units2) (Qty units3) => Multiplication (Qty units1) (Curve1d units2) (Curve1d units3) where
     value * curve =
         constant value * curve
+
+instance Multiplication (Qty units1) (Qty units2) (Qty units3) => Multiplication (Curve1d units1) (Vector3d units2 coordinates) (VectorCurve3d units3 coordinates) where
+    curve * vector =
+        curve * VectorCurve3d.constant vector
+
+instance Multiplication (Qty units1) (Qty units2) (Qty units3) => Multiplication (Vector3d units1 coordinates) (Curve1d units2) (VectorCurve3d units3 coordinates) where
+    vector * curve =
+        VectorCurve3d.constant vector * curve
 
 data Quotient units1 units2 = Quotient (Curve1d units1) (Curve1d units2)
 

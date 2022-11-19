@@ -77,7 +77,7 @@ executable opensolid-hs
         BoundingBox3d.Type
         Curve1d
         Curve1d.Root
-        Expression3d
+        VectorCurve3d
         Curve3d
         Line3d
         QuadraticSpline3d
