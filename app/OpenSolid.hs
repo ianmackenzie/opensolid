@@ -53,8 +53,9 @@ module OpenSolid (
 ) where
 
 import Data.Coerce (coerce)
+import Data.Proxy (Proxy (Proxy))
 import qualified Data.Text
-import GHC.TypeLits (Symbol)
+import GHC.TypeLits (KnownSymbol, Symbol, symbolVal)
 import Result (Result (..))
 import qualified Units
 import Prelude (
@@ -86,13 +87,11 @@ newtype Qty units = Qty {unQty :: Prelude.Double} deriving (Eq, Ord)
 
 instance Show Int where
     show (Nbr n) =
-        Prelude.show n
+        show n
 
-instance Show Float where
-    show (Qty x) =
-        Prelude.show x
+data Units (symbol :: Symbol)
 
-data Unitless
+type Unitless = Units ""
 
 type Int = Nbr Unitless
 
@@ -328,48 +327,38 @@ divideQtys :: Qty units1 -> Qty units2 -> Qty units3
 divideQtys (Qty x) (Qty y) =
     Qty (x Prelude./ y)
 
-showQty :: String -> Prelude.Int -> Qty units -> Prelude.ShowS
-showQty suffix =
-    let suffixCharacters = ' ' : Data.Text.unpack suffix
-     in \precedence (Qty x) ->
-            let string = Prelude.mappend (Prelude.show x) suffixCharacters
-             in Prelude.showParen (Nbr precedence > 10) (Prelude.showString string)
+instance KnownSymbol symbol => Show (Qty (Units symbol)) where
+    showsPrec precedence (Qty x) =
+        case symbolVal (Proxy :: Proxy symbol) of
+            [] ->
+                showsPrec precedence x
+            suffix ->
+                let string = Prelude.mappend (show x) (' ' : suffix)
+                 in Prelude.showParen (Nbr precedence > 10) (Prelude.showString string)
 
-data Meters
+type Meters = Units "m"
 
 type Length = Qty Meters
 
-instance Show Length where showsPrec = showQty "m"
-
-data Seconds
+type Seconds = Units "s"
 
 type Duration = Qty Seconds
 
-instance Show Duration where showsPrec = showQty "s"
-
-data MetersPerSecond
+type MetersPerSecond = Units "m/s"
 
 type Speed = Qty MetersPerSecond
 
-instance Show Speed where showsPrec = showQty "m/s"
-
-data MetersPerSecondSquared
+type MetersPerSecondSquared = Units "m/s^2"
 
 type Acceleration = Qty MetersPerSecondSquared
 
-instance Show Acceleration where showsPrec = showQty "m/s^2"
-
-data SquareMeters
+type SquareMeters = Units "m^2"
 
 type Area = Qty SquareMeters
 
-instance Show Area where showsPrec = showQty "m^2"
-
-data CubicMeters
+type CubicMeters = Units "m^3"
 
 type Volume = Qty CubicMeters
-
-instance Show Volume where showsPrec = showQty "m^3"
 
 instance Multiplication Length Length Area where (*) = multiplyQtys
 
