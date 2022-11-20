@@ -1,4 +1,5 @@
 module List (
+    isEmpty,
     map,
     compact,
     collect,
@@ -14,6 +15,10 @@ import qualified Data.List
 import qualified Data.Maybe
 import OpenSolid
 import qualified Prelude
+
+isEmpty :: List a -> Bool
+isEmpty =
+    Prelude.null
 
 map :: (a -> b) -> List a -> List b
 map =
