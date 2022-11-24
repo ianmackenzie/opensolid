@@ -277,27 +277,27 @@ instance Multiplication Int Int Int where
     (Nbr n) * (Nbr m) =
         Nbr (n Prelude.* m)
 
-instance {-# INCOHERENT #-} Multiplication Float Float Float where
+class Product qty1 qty2 qty3 | qty1 qty2 -> qty3
+
+instance {-# INCOHERENT #-} Product Float Float Float
+
+instance {-# INCOHERENT #-} Product Float (Qty units) (Qty units)
+
+instance {-# INCOHERENT #-} Product (Qty units) Float (Qty units)
+
+class Quotient qty1 qty2 qty3 | qty1 qty2 -> qty3
+
+instance {-# INCOHERENT #-} Quotient Float Float Float
+
+instance {-# INCOHERENT #-} Quotient (Qty units) (Qty units) Float
+
+instance {-# INCOHERENT #-} Quotient (Qty units) Float (Qty units)
+
+instance Product (Qty units1) (Qty units2) (Qty units3) => Multiplication (Qty units1) (Qty units2) (Qty units3) where
     (Qty x) * (Qty y) =
         Qty (x Prelude.* y)
 
-instance {-# INCOHERENT #-} Multiplication Float (Qty units) (Qty units) where
-    (Qty x) * (Qty y) =
-        Qty (x Prelude.* y)
-
-instance {-# INCOHERENT #-} Multiplication (Qty units) Float (Qty units) where
-    (Qty x) * (Qty y) =
-        Qty (x Prelude.* y)
-
-instance {-# INCOHERENT #-} Division Float Float Float where
-    (Qty x) / (Qty y) =
-        Qty (x Prelude./ y)
-
-instance {-# INCOHERENT #-} Division (Qty units) Float (Qty units) where
-    (Qty x) / (Qty y) =
-        Qty (x Prelude./ y)
-
-instance {-# INCOHERENT #-} Division (Qty units) (Qty units) Float where
+instance Quotient (Qty units1) (Qty units2) (Qty units3) => Division (Qty units1) (Qty units2) (Qty units3) where
     (Qty x) / (Qty y) =
         Qty (x Prelude./ y)
 
@@ -320,14 +320,6 @@ instance Division (Qty units) Int (Qty units) where
 instance Division Float (Qty units1) (Qty units2) => Division Int (Qty units1) (Qty units2) where
     n / x =
         float n / x
-
-multiplyQtys :: Qty units1 -> Qty units2 -> Qty units3
-multiplyQtys (Qty x) (Qty y) =
-    Qty (x Prelude.* y)
-
-divideQtys :: Qty units1 -> Qty units2 -> Qty units3
-divideQtys (Qty x) (Qty y) =
-    Qty (x Prelude./ y)
 
 instance KnownSymbol symbol => Show (Qty (Units symbol)) where
     showsPrec precedence (Qty x) =
@@ -362,28 +354,28 @@ type CubicMeters = Units "m^3"
 
 type Volume = Qty CubicMeters
 
-instance Multiplication Length Length Area where (*) = multiplyQtys
+instance Product Length Length Area
 
-instance Multiplication Length Area Volume where (*) = multiplyQtys
+instance Product Length Area Volume
 
-instance Multiplication Area Length Volume where (*) = multiplyQtys
+instance Product Area Length Volume
 
-instance Multiplication Duration Speed Length where (*) = multiplyQtys
+instance Product Duration Speed Length
 
-instance Multiplication Speed Duration Length where (*) = multiplyQtys
+instance Product Speed Duration Length
 
-instance Multiplication Duration Acceleration Speed where (*) = multiplyQtys
+instance Product Duration Acceleration Speed
 
-instance Multiplication Acceleration Duration Speed where (*) = multiplyQtys
+instance Product Acceleration Duration Speed
 
-instance Division Area Length Length where (/) = divideQtys
+instance Quotient Area Length Length
 
-instance Division Volume Area Length where (/) = divideQtys
+instance Quotient Volume Area Length
 
-instance Division Volume Length Area where (/) = divideQtys
+instance Quotient Volume Length Area
 
-instance Division Length Duration Speed where (/) = divideQtys
+instance Quotient Length Duration Speed
 
-instance Division Speed Duration Acceleration where (/) = divideQtys
+instance Quotient Speed Duration Acceleration
 
 instance Sqrt Area Length
