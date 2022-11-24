@@ -213,12 +213,12 @@ infinity =
     coerce (1.0 / 0.0)
 
 isNaN :: Qty units -> Bool
-isNaN value =
-    Prelude.isNaN (unQty value)
+isNaN (Qty x) =
+    Prelude.isNaN x
 
 abs :: Qty units -> Qty units
-abs value =
-    Qty (Prelude.abs (unQty value))
+abs (Qty x) =
+    Qty (Prelude.abs x)
 
 clamp :: Qty units -> Qty units -> Qty units -> Qty units
 clamp a b value
@@ -230,8 +230,8 @@ clamp a b value
     high = max a b
 
 sqrt :: Sqrt (Qty units1) (Qty units2) => Qty units1 -> Qty units2
-sqrt value =
-    Qty (Prelude.sqrt (unQty value))
+sqrt (Qty x) =
+    Qty (Prelude.sqrt x)
 
 (|>) :: a -> (a -> b) -> b
 (|>) value function =
