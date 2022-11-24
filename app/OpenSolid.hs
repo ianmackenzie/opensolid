@@ -46,6 +46,8 @@ module OpenSolid (
     SquareMeters,
     Volume,
     CubicMeters,
+    Duration,
+    Seconds,
     Speed,
     MetersPerSecond,
     Acceleration,
