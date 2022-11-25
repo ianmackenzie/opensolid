@@ -33,6 +33,13 @@ module OpenSolid (
     abs,
     clamp,
     sqrt,
+    sin,
+    cos,
+    tan,
+    asin,
+    acos,
+    atan,
+    atan2,
     (|>),
     (<|),
     (>>),
@@ -40,6 +47,8 @@ module OpenSolid (
     Arg (..),
     fromLabel,
     Unitless,
+    Angle,
+    Radians,
     Length,
     Meters,
     Area,
@@ -251,6 +260,34 @@ sqrt :: Sqrt (Qty units1) (Qty units2) => Qty units1 -> Qty units2
 sqrt (Qty x) =
     Qty (Prelude.sqrt x)
 
+sin :: Angle -> Float
+sin (Qty x) =
+    Qty (Prelude.sin x)
+
+cos :: Angle -> Float
+cos (Qty x) =
+    Qty (Prelude.cos x)
+
+tan :: Angle -> Float
+tan (Qty x) =
+    Qty (Prelude.tan x)
+
+asin :: Float -> Angle
+asin (Qty x) =
+    Qty (Prelude.asin x)
+
+acos :: Float -> Angle
+acos (Qty x) =
+    Qty (Prelude.acos x)
+
+atan :: Float -> Angle
+atan (Qty x) =
+    Qty (Prelude.atan x)
+
+atan2 :: Qty units -> Qty units -> Angle
+atan2 (Qty y) (Qty x) =
+    Qty (Prelude.atan2 y x)
+
 (|>) :: a -> (a -> b) -> b
 (|>) value function =
     function value
@@ -347,6 +384,10 @@ instance KnownSymbol symbol => Show (Qty (Units symbol)) where
             suffix ->
                 let string = Prelude.mappend (show x) (' ' : suffix)
                  in Prelude.showParen (Nbr precedence > 10) (Prelude.showString string)
+
+type Radians = Units "rad"
+
+type Angle = Qty Radians
 
 type Meters = Units "m"
 
