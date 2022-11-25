@@ -5,6 +5,13 @@ module Qty (
     interpolateFrom,
     midpoint,
     sqrt,
+    sin,
+    cos,
+    tan,
+    asin,
+    acos,
+    atan,
+    atan2,
     abs,
     clamp,
 ) where
