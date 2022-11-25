@@ -9,13 +9,15 @@ module Curve1d (
     parameter,
     squared,
     sqrt,
+    sin,
+    cos,
     roots,
 ) where
 
 import Curve1d.Root (Root (Root))
 import qualified Curve1d.Root as Root
 import qualified List
-import OpenSolid hiding (sqrt, zero)
+import OpenSolid hiding (cos, sin, sqrt, zero)
 import qualified Qty
 import qualified Range
 import Range.Unsafe
@@ -231,6 +233,38 @@ instance Sqrt (Qty units1) (Qty units2) => IsCurve1d (SquareRoot units1) units2 
 sqrt :: Sqrt (Qty units1) (Qty units2) => Curve1d units1 -> Curve1d units2
 sqrt curve =
     Curve1d (SquareRoot curve)
+
+newtype Sin = Sin (Curve1d Radians)
+
+instance IsCurve1d Sin Unitless where
+    pointOn (Sin curve) t =
+        Qty.sin (pointOn curve t)
+
+    segmentBounds (Sin curve) t =
+        Range.sin (segmentBounds curve t)
+
+    derivative (Sin curve) =
+        cos curve * Units.drop (derivative curve)
+
+sin :: Curve1d Radians -> Curve1d Unitless
+sin curve =
+    Curve1d (Sin curve)
+
+newtype Cos = Cos (Curve1d Radians)
+
+instance IsCurve1d Cos Unitless where
+    pointOn (Cos curve) t =
+        Qty.cos (pointOn curve t)
+
+    segmentBounds (Cos curve) t =
+        Range.cos (segmentBounds curve t)
+
+    derivative (Cos curve) =
+        negate (sin curve) * Units.drop (derivative curve)
+
+cos :: Curve1d Radians -> Curve1d Unitless
+cos curve =
+    Curve1d (Cos curve)
 
 data Neighborhood
     = HasRoot !(Range Unitless) !Root
