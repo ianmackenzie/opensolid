@@ -97,7 +97,25 @@ type Unitless = Units ""
 
 type Int = Nbr Unitless
 
+deriving instance Prelude.Num Int
+
+deriving instance Prelude.Real Int
+
+deriving instance Prelude.Integral Int
+
 type Float = Qty Unitless
+
+deriving instance Prelude.Num Float
+
+deriving instance Prelude.Real Float
+
+deriving instance Prelude.Fractional Float
+
+deriving instance Prelude.RealFrac Float
+
+deriving instance Prelude.Floating Float
+
+deriving instance Prelude.RealFloat Float
 
 class Negation a where
     negate :: a -> a
