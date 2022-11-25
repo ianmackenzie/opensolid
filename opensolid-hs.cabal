@@ -55,6 +55,7 @@ executable opensolid-hs
         Qty
         Bounds
         Bounded
+        Angle
         Length
         Area
         Volume
