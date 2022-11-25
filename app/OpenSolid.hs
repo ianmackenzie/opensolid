@@ -42,6 +42,7 @@ module OpenSolid (
     acos,
     atan,
     atan2,
+    pi,
     (|>),
     (<|),
     (>>),
@@ -297,6 +298,10 @@ atan (Qty x) =
 atan2 :: Qty units -> Qty units -> Angle
 atan2 (Qty y) (Qty x) =
     Qty (Prelude.atan2 y x)
+
+pi :: Float
+pi =
+    Prelude.pi
 
 (|>) :: a -> (a -> b) -> b
 (|>) value function =
