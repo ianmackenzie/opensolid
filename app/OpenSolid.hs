@@ -452,4 +452,8 @@ instance Quotient Length Duration Speed
 
 instance Quotient Speed Duration Acceleration
 
+instance Product Length Angle Length
+
+instance Product Angle Length Length
+
 instance Sqrt Area Length
