@@ -8,6 +8,7 @@ module Range (
     isAtomic,
     midpoint,
     endpoints,
+    width,
     squared,
     contains,
     bisect,
@@ -56,6 +57,10 @@ midpoint range =
 endpoints :: Range units -> (Qty units, Qty units)
 endpoints (Range low high) =
     (low, high)
+
+width :: Range units -> Qty units
+width (Range low high) =
+    high - low
 
 squared :: Multiplication (Qty units1) (Qty units1) (Qty units2) => Range units1 -> Range units2
 squared range
