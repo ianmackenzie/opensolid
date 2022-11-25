@@ -16,10 +16,13 @@ module Range (
     sqrt,
     aggregate,
     overlaps,
+    sin,
+    cos,
 ) where
 
+import qualified Angle
 import qualified Bounds
-import OpenSolid hiding (abs, sqrt)
+import OpenSolid hiding (abs, cos, sin, sqrt, tan)
 import qualified Qty
 import Range.Unsafe
 
@@ -105,3 +108,36 @@ aggregate =
 overlaps :: Range units -> Range units -> Bool
 overlaps =
     Bounds.overlaps
+
+sin :: Range Radians -> Range Unitless
+sin range =
+    let (Range low high) = range
+        (includesMin, includesMax) = sinIncludesMinMax range
+        newLow = if includesMin then -1.0 else min (Qty.sin low) (Qty.sin high)
+        newHigh = if includesMax then 1.0 else max (Qty.sin low) (Qty.sin high)
+     in Range newLow newHigh
+
+cos :: Range Radians -> Range Unitless
+cos range =
+    let (Range low high) = range
+        (includesMin, includesMax) = cosIncludesMinMax range
+        newLow = if includesMin then -1.0 else min (Qty.cos low) (Qty.cos high)
+        newHigh = if includesMax then 1.0 else max (Qty.cos low) (Qty.cos high)
+     in Range newLow newHigh
+
+sinIncludesMinMax :: Range Radians -> (Bool, Bool)
+sinIncludesMinMax range =
+    cosIncludesMinMax (range - Angle.radians (pi / 2))
+
+cosIncludesMinMax :: Range Radians -> (Bool, Bool)
+cosIncludesMinMax interval =
+    ( cosIncludesMax (interval + Angle.radians pi)
+    , cosIncludesMax interval
+    )
+
+cosIncludesMax :: Range Radians -> Bool
+cosIncludesMax (Range low high) =
+    let twoPi = Angle.radians (2 * pi)
+        minBranch = floor (low / twoPi)
+        maxBranch = floor (high / twoPi)
+     in minBranch /= maxBranch
