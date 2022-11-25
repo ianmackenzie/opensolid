@@ -8,6 +8,7 @@ module Script (
     succeed,
     fail,
     printLine,
+    forEach,
 ) where
 
 import qualified Data.Text.IO
@@ -41,3 +42,11 @@ fail =
 printLine :: String -> Script IOError ()
 printLine string =
     Internal.perform (Data.Text.IO.putStrLn string)
+
+forEach :: (a -> Script x ()) -> List a -> Script x ()
+forEach function values =
+    case values of
+        [] -> Script.succeed ()
+        first : rest -> do
+            function first
+            forEach function rest
