@@ -32,6 +32,8 @@ module OpenSolid (
     isNaN,
     abs,
     clamp,
+    floor,
+    ceiling,
     sqrt,
     sin,
     cos,
@@ -255,6 +257,14 @@ clamp a b value
   where
     low = min a b
     high = max a b
+
+floor :: Float -> Int
+floor (Qty x) =
+    Nbr (Prelude.floor x)
+
+ceiling :: Float -> Int
+ceiling (Qty x) =
+    Nbr (Prelude.ceiling x)
 
 sqrt :: Sqrt (Qty units1) (Qty units2) => Qty units1 -> Qty units2
 sqrt (Qty x) =
