@@ -269,8 +269,9 @@ cos curve =
 data Neighborhood
     = HasRoot !(Range Unitless) !Root
     | NoRoot !(Range Unitless)
+    deriving (Show)
 
-data Indeterminate = Indeterminate
+data Indeterminate = Indeterminate deriving (Show)
 
 maxRootOrder :: Int
 maxRootOrder =
