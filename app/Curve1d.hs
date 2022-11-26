@@ -322,8 +322,8 @@ solve curve tolerance order derivativeNeighborhood =
                         let (x1, x2) = Range.endpoints domain
                             leftDomain = Range.from x1 rootX
                             rightDomain = Range.from rootX x2
-                            leftNeighborhoods = solve curve tolerance order (NoRoot leftDomain)
-                            rightNeighborhoods = solve curve tolerance order (NoRoot rightDomain)
+                            leftNeighborhoods = if x1 < rootX then solve curve tolerance order (NoRoot leftDomain) else []
+                            rightNeighborhoods = if rootX < x2 then solve curve tolerance order (NoRoot rightDomain) else []
                          in leftNeighborhoods ++ rightNeighborhoods
 
 solveMonotonic :: Curve1d units -> Int -> Range Unitless -> Neighborhood
