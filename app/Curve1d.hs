@@ -14,14 +14,11 @@ module Curve1d (
     roots,
 ) where
 
-import Curve1d.Root (Root (Root))
-import qualified Curve1d.Root as Root
 import qualified List
 import OpenSolid hiding (cos, sin, sqrt, zero)
 import qualified Qty
 import qualified Range
 import Range.Unsafe
-import qualified Result
 import qualified Units
 import Vector3d (Vector3d)
 import {-# SOURCE #-} VectorCurve3d (VectorCurve3d)
@@ -211,71 +208,61 @@ cos :: Curve1d Radians -> Curve1d Unitless
 cos curve =
     Cos curve
 
-data Neighborhood
-    = HasRoot !(Range Unitless) !Root
-    | NoRoot !(Range Unitless)
-    deriving (Show)
-
-data Indeterminate = Indeterminate deriving (Show)
-
-maxRootOrder :: Int
-maxRootOrder =
-    8
-
-roots :: Qty units -> Curve1d units -> List Root
+roots :: Qty units -> Curve1d units -> List Float
 roots tolerance curve =
-    case neighborhoods curve tolerance Range.unit of
-        Ok validNeighborhoods -> List.collect neighborhoodRoot validNeighborhoods
-        Err Indeterminate -> []
+    let firstDerivative = derivative curve
+        secondDerivative = derivative firstDerivative
+        root0 = [0.0 | abs (pointOn curve 0.0) <= tolerance]
+        root1 = [1.0 | abs (pointOn curve 1.0) <= tolerance]
+     in deduplicate (root0 ++ solve tolerance curve firstDerivative secondDerivative Range.unit ++ root1)
 
-neighborhoods :: Curve1d units -> Qty units -> Range Unitless -> Result Indeterminate (List Neighborhood)
-neighborhoods curve tolerance domain =
-    case localNeighborhoods curve tolerance domain 0 of
-        Ok validNeighborhoods -> Ok validNeighborhoods
-        Err Indeterminate ->
-            if Range.isAtomic domain
-                then Err Indeterminate
-                else Result.do
-                    let (leftDomain, rightDomain) = Range.bisect domain
-                    leftNeighborhoods <- neighborhoods curve tolerance leftDomain
-                    rightNeighborhoods <- neighborhoods curve tolerance rightDomain
-                    Ok (leftNeighborhoods ++ rightNeighborhoods)
+deduplicate :: List Float -> List Float
+deduplicate list =
+    List.foldr prependRoot [] list
 
-localNeighborhoods :: Curve1d units -> Qty units -> Range Unitless -> Int -> Result Indeterminate (List Neighborhood)
-localNeighborhoods curve tolerance domain order
-    | definitelyNonZero curve tolerance domain = Ok [NoRoot domain]
-    | order <= maxRootOrder = Result.do
-        derivativeNeighborhoods <- localNeighborhoods (derivative curve) tolerance domain (order + 1)
-        Ok (List.combine (solve curve tolerance order) derivativeNeighborhoods)
-    -- We've passed the maximum root order and still haven't found a non-zero derivative
-    | otherwise = Err Indeterminate
+prependRoot :: Float -> List Float -> List Float
+prependRoot root list =
+    if List.head list == Just root then list else root : list
 
-definitelyNonZero :: Curve1d units -> Qty units -> Range Unitless -> Bool
-definitelyNonZero curve tolerance domain =
-    let yRange = segmentBounds curve domain
-     in Range.minValue yRange >= tolerance || Range.maxValue yRange <= negate tolerance
-
-solve :: Curve1d units -> Qty units -> Int -> Neighborhood -> List Neighborhood
-solve curve tolerance order derivativeNeighborhood =
-    case derivativeNeighborhood of
-        NoRoot domain -> [solveMonotonic curve order domain]
-        HasRoot domain root ->
-            let rootX = Root.value root
-             in if abs (pointOn curve rootX) <= tolerance
-                    then [HasRoot domain root]
+solve :: Qty units -> Curve1d units -> Curve1d units -> Curve1d units -> Range Unitless -> List Float
+solve tolerance curve firstDerivative secondDerivative domain
+    | nonZero curve tolerance domain = []
+    | resolution firstDerivative domain > 0.5 = List.compact [solveMonotonic curve domain]
+    | resolution secondDerivative domain > 0.5 =
+        case solveMonotonic firstDerivative domain of
+            Just rootX ->
+                if abs (pointOn curve rootX) <= tolerance
+                    then [rootX]
                     else
                         let (x1, x2) = Range.endpoints domain
-                            leftDomain = Range.from x1 rootX
-                            rightDomain = Range.from rootX x2
-                            leftNeighborhoods = if x1 < rootX then solve curve tolerance order (NoRoot leftDomain) else []
-                            rightNeighborhoods = if rootX < x2 then solve curve tolerance order (NoRoot rightDomain) else []
-                         in leftNeighborhoods ++ rightNeighborhoods
+                            leftRoot = solveMonotonic curve (Range.from x1 rootX)
+                            rightRoot = solveMonotonic curve (Range.from rootX x2)
+                         in List.compact [leftRoot, rightRoot]
+            Nothing -> List.compact [solveMonotonic curve domain]
+    | Range.isAtomic domain = []
+    | otherwise =
+        let (leftDomain, rightDomain) = Range.bisect domain
+            leftRoots = solve tolerance curve firstDerivative secondDerivative leftDomain
+            rightRoots = solve tolerance curve firstDerivative secondDerivative rightDomain
+         in leftRoots ++ rightRoots
 
-solveMonotonic :: Curve1d units -> Int -> Range Unitless -> Neighborhood
-solveMonotonic curve order domain
-    | y1 <= Qty.zero && y2 >= Qty.zero = HasRoot domain Root{Root.value = bisectMonotonic curve x1 x2, Root.order = order, Root.sign = Root.Positive}
-    | y1 >= Qty.zero && y2 <= Qty.zero = HasRoot domain Root{Root.value = bisectMonotonic curve x2 x1, Root.order = order, Root.sign = Root.Negative}
-    | otherwise = NoRoot domain
+nonZero :: Curve1d units -> Qty units -> Range Unitless -> Bool
+nonZero curve tolerance domain =
+    let range = segmentBounds curve domain
+     in Range.minValue range >= tolerance || Range.maxValue range <= negate tolerance
+
+resolution :: Curve1d units -> Range Unitless -> Float
+resolution curve domain =
+    let absMagnitude = Range.abs (segmentBounds curve domain)
+        minMagnitude = Range.minValue absMagnitude
+        maxMagnitude = Range.maxValue absMagnitude
+     in if maxMagnitude == Qty.zero then 0.0 else minMagnitude / maxMagnitude
+
+solveMonotonic :: Curve1d units -> Range Unitless -> Maybe Float
+solveMonotonic curve domain
+    | y1 <= Qty.zero && y2 >= Qty.zero = Just (bisectMonotonic curve x1 x2)
+    | y1 >= Qty.zero && y2 <= Qty.zero = Just (bisectMonotonic curve x2 x1)
+    | otherwise = Nothing
   where
     (x1, x2) = Range.endpoints domain
     y1 = pointOn curve x1
@@ -291,9 +278,3 @@ bisectMonotonic curve lowX highX =
                  in if midY >= Qty.zero
                         then bisectMonotonic curve lowX midX
                         else bisectMonotonic curve midX highX
-
-neighborhoodRoot :: Neighborhood -> Maybe Root
-neighborhoodRoot neighborhood =
-    case neighborhood of
-        HasRoot _ root -> Just root
-        NoRoot _ -> Nothing
