@@ -1,5 +1,6 @@
 module List (
     isEmpty,
+    head,
     map,
     compact,
     collect,
@@ -20,6 +21,10 @@ import qualified Prelude
 isEmpty :: List a -> Bool
 isEmpty =
     Prelude.null
+
+head :: List a -> Maybe a
+head (first : _) = Just first
+head [] = Nothing
 
 map :: (a -> b) -> List a -> List b
 map =
