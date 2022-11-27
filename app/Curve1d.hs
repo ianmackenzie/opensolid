@@ -32,239 +32,184 @@ class IsCurve1d curve units | curve -> units where
     segmentBounds :: curve -> Range Unitless -> Range units
     derivative :: curve -> Curve1d units
 
-data Curve1d units = forall curve. IsCurve1d curve units => Curve1d curve
-
-instance IsCurve1d (Curve1d units) units where
-    pointOn (Curve1d curve) t =
-        pointOn curve t
-
-    segmentBounds (Curve1d curve) t =
-        segmentBounds curve t
-
-    derivative (Curve1d curve) =
-        derivative curve
+data Curve1d units where
+    Curve1d :: forall curve units. IsCurve1d curve units => curve -> Curve1d units
+    Zero :: Curve1d units
+    Constant :: Qty units -> Curve1d units
+    Parameter :: Curve1d Unitless
+    Negated :: Curve1d units -> Curve1d units
+    Sum :: Curve1d units -> Curve1d units -> Curve1d units
+    Difference :: Curve1d units -> Curve1d units -> Curve1d units
+    Product :: forall units1 units2 units3. Multiplication (Qty units1) (Qty units2) (Qty units3) => Curve1d units1 -> Curve1d units2 -> Curve1d units3
+    Quotient :: forall units1 units2 units3. Division (Qty units1) (Qty units2) (Qty units3) => Curve1d units1 -> Curve1d units2 -> Curve1d units3
+    Squared :: forall units1 units2. Multiplication (Qty units1) (Qty units1) (Qty units2) => Curve1d units1 -> Curve1d units2
+    SquareRoot :: forall units1 units2. Sqrt (Qty units1) (Qty units2) => Curve1d units1 -> Curve1d units2
+    Sin :: Curve1d Radians -> Curve1d Unitless
+    Cos :: Curve1d Radians -> Curve1d Unitless
 
 instance Units.Coercion (Curve1d units) (Curve1d Unitless)
 
+instance IsCurve1d (Curve1d units) units where
+    pointOn curve t =
+        case curve of
+            Curve1d c -> pointOn c t
+            Zero -> Qty.zero
+            Constant x -> x
+            Parameter -> t
+            Negated c -> negate (pointOn c t)
+            Sum c1 c2 -> pointOn c1 t + pointOn c2 t
+            Difference c1 c2 -> pointOn c1 t - pointOn c2 t
+            Product c1 c2 -> pointOn c1 t * pointOn c2 t
+            Quotient c1 c2 -> pointOn c1 t / pointOn c2 t
+            Squared c -> let x = pointOn c t in x * x
+            SquareRoot c -> Qty.sqrt (pointOn c t)
+            Sin c -> Qty.sin (pointOn c t)
+            Cos c -> Qty.cos (pointOn c t)
+
+    segmentBounds curve t =
+        case curve of
+            Curve1d c -> segmentBounds c t
+            Zero -> Range.constant Qty.zero
+            Constant value -> Range.constant value
+            Parameter -> t
+            Negated c -> negate (segmentBounds c t)
+            Sum c1 c2 -> segmentBounds c1 t + segmentBounds c2 t
+            Difference c1 c2 -> segmentBounds c1 t - segmentBounds c2 t
+            Product c1 c2 -> segmentBounds c1 t * segmentBounds c2 t
+            Quotient c1 c2 -> segmentBounds c1 t / segmentBounds c2 t
+            Squared c -> let x = segmentBounds c t in Range.squared x
+            SquareRoot c -> Range.sqrt (segmentBounds c t)
+            Sin c -> Range.sin (segmentBounds c t)
+            Cos c -> Range.cos (segmentBounds c t)
+
+    derivative curve =
+        case curve of
+            Curve1d c -> derivative c
+            Zero -> zero
+            Constant _ -> zero
+            Parameter -> constant 1.0
+            Negated c -> negate (derivative c)
+            Sum c1 c2 -> derivative c1 + derivative c2
+            Difference c1 c2 -> derivative c1 - derivative c2
+            Product c1 c2 -> derivative c1 * c2 + c1 * derivative c2
+            Quotient c1 c2 ->
+                let p = Units.drop c1
+                    q = Units.drop c2
+                    d = (derivative p * q - p * derivative q) / squared q
+                 in Units.add d
+            Squared c -> 2.0 * c * derivative c
+            SquareRoot c -> let f = Units.drop c in Units.add (derivative f / (2.0 * sqrt f))
+            Sin c -> cos c * Units.drop (derivative c)
+            Cos c -> negate (sin c) * Units.drop (derivative c)
+
 zero :: Curve1d units
 zero =
-    constant Qty.zero
-
-newtype Constant units = Constant (Qty units)
-
-instance IsCurve1d (Constant units) units where
-    pointOn (Constant value) _ =
-        value
-
-    segmentBounds (Constant value) _ =
-        Range.constant value
-
-    derivative (Constant _) =
-        zero
+    Zero
 
 constant :: Qty units -> Curve1d units
 constant value =
-    Curve1d (Constant value)
-
-data Parameter = Parameter
-
-instance IsCurve1d Parameter Unitless where
-    pointOn Parameter t = t
-    segmentBounds Parameter t = t
-    derivative Parameter = constant 1.0
+    if value == Qty.zero then Zero else Constant value
 
 parameter :: Curve1d Unitless
 parameter =
-    Curve1d Parameter
-
-newtype Negated units = Negated (Curve1d units)
-
-instance IsCurve1d (Negated units) units where
-    pointOn (Negated curve) t =
-        negate (pointOn curve t)
-
-    segmentBounds (Negated curve) t =
-        negate (segmentBounds curve t)
-
-    derivative (Negated curve) =
-        negate (derivative curve)
+    Parameter
 
 instance Negation (Curve1d units) where
-    negate curve =
-        Curve1d (Negated curve)
-
-data Sum units = Sum (Curve1d units) (Curve1d units)
-
-instance IsCurve1d (Sum units) units where
-    pointOn (Sum curve1 curve2) t =
-        pointOn curve1 t + pointOn curve2 t
-
-    segmentBounds (Sum curve1 curve2) t =
-        segmentBounds curve1 t + segmentBounds curve2 t
-
-    derivative (Sum curve1 curve2) =
-        derivative curve1 + derivative curve2
+    negate Zero = Zero
+    negate (Constant x) = Constant (negate x)
+    negate (Negated curve) = curve
+    negate (Product c1 c2) = negate c1 * c2
+    negate curve = Negated curve
 
 instance Addition Curve1d Curve1d Curve1d where
-    curve1 + curve2 =
-        Curve1d (Sum curve1 curve2)
+    Zero + curve = curve
+    curve + Zero = curve
+    Constant x + Constant y = constant (x + y)
+    curve1 + curve2 = Sum curve1 curve2
 
 instance Addition Curve1d Qty Curve1d where
-    curve + value =
-        curve + constant value
+    curve + value = curve + constant value
 
 instance Addition Qty Curve1d Curve1d where
-    value + curve =
-        constant value + curve
-
-data Difference units = Difference (Curve1d units) (Curve1d units)
-
-instance IsCurve1d (Difference units) units where
-    pointOn (Difference curve1 curve2) t =
-        pointOn curve1 t - pointOn curve2 t
-
-    segmentBounds (Difference curve1 curve2) t =
-        segmentBounds curve1 t - segmentBounds curve2 t
-
-    derivative (Difference curve1 curve2) =
-        derivative curve1 - derivative curve2
+    value + curve = constant value + curve
 
 instance Subtraction Curve1d Curve1d Curve1d where
-    curve1 - curve2 =
-        Curve1d (Difference curve1 curve2)
+    Zero - curve = negate curve
+    curve - Zero = curve
+    Constant x - Constant y = constant (x - y)
+    curve1 - curve2 = Difference curve1 curve2
 
 instance Subtraction Curve1d Qty Curve1d where
-    curve - value =
-        curve - constant value
+    curve - value = curve - constant value
 
 instance Subtraction Qty Curve1d Curve1d where
-    value - curve =
-        constant value - curve
-
-data Product units1 units2 = Product (Curve1d units1) (Curve1d units2)
-
-instance Multiplication (Qty units1) (Qty units2) (Qty units3) => IsCurve1d (Product units1 units2) units3 where
-    pointOn (Product curve1 curve2) t =
-        pointOn curve1 t * pointOn curve2 t
-
-    segmentBounds (Product curve1 curve2) t =
-        segmentBounds curve1 t * segmentBounds curve2 t
-
-    derivative (Product curve1 curve2) =
-        derivative curve1 * curve2 + curve1 * derivative curve2
+    value - curve = constant value - curve
 
 instance Multiplication (Qty units1) (Qty units2) (Qty units3) => Multiplication (Curve1d units1) (Curve1d units2) (Curve1d units3) where
-    curve1 * curve2 =
-        Curve1d (Product curve1 curve2)
+    Zero * _ = Zero
+    _ * Zero = Zero
+    Constant x * Constant y = Constant (x * y)
+    Constant x * Negated c = negate x * c
+    c1 * c2@(Constant _) = Units.add (Units.drop c2 * Units.drop c1)
+    Constant x * Product (Constant y) c = Units.add (Product (Constant (Units.drop x * Units.drop y)) (Units.drop c))
+    curve1 * curve2 = Product curve1 curve2
 
 instance Multiplication (Qty units1) (Qty units2) (Qty units3) => Multiplication (Curve1d units1) (Qty units2) (Curve1d units3) where
-    curve * value =
-        curve * constant value
+    curve * value = curve * constant value
 
 instance Multiplication (Qty units1) (Qty units2) (Qty units3) => Multiplication (Qty units1) (Curve1d units2) (Curve1d units3) where
-    value * curve =
-        constant value * curve
+    value * curve = constant value * curve
 
 instance Multiplication (Qty units1) (Qty units2) (Qty units3) => Multiplication (Curve1d units1) (Vector3d units2 coordinates) (VectorCurve3d units3 coordinates) where
-    curve * vector =
-        curve * VectorCurve3d.constant vector
+    curve * vector = curve * VectorCurve3d.constant vector
 
 instance Multiplication (Qty units1) (Qty units2) (Qty units3) => Multiplication (Vector3d units1 coordinates) (Curve1d units2) (VectorCurve3d units3 coordinates) where
-    vector * curve =
-        VectorCurve3d.constant vector * curve
-
-data Quotient units1 units2 = Quotient (Curve1d units1) (Curve1d units2)
-
-instance Division (Qty units1) (Qty units2) (Qty units3) => IsCurve1d (Quotient units1 units2) units3 where
-    pointOn (Quotient curve1 curve2) t =
-        pointOn curve1 t / pointOn curve2 t
-
-    segmentBounds (Quotient curve1 curve2) t =
-        segmentBounds curve1 t / segmentBounds curve2 t
-
-    derivative (Quotient curve1 curve2) =
-        let p = Units.drop curve1
-            q = Units.drop curve2
-            p' = derivative p
-            q' = derivative q
-         in Units.add ((p' * q - p * q') / squared q)
+    vector * curve = VectorCurve3d.constant vector * curve
 
 instance Division (Qty units1) (Qty units2) (Qty units3) => Division (Curve1d units1) (Curve1d units2) (Curve1d units3) where
-    curve1 / curve2 =
-        Curve1d (Quotient curve1 curve2)
+    Zero / _ = Zero
+    Constant x / Constant y = Constant (x / y)
+    curve / Constant x = Units.add ((1.0 / Units.drop x) * Units.drop curve)
+    curve1 / curve2 = Quotient curve1 curve2
 
 instance Division (Qty units1) (Qty units2) (Qty units3) => Division (Curve1d units1) (Qty units2) (Curve1d units3) where
-    curve / value =
-        curve / constant value
+    curve / value = curve / constant value
 
 instance Division (Qty units1) (Qty units2) (Qty units3) => Division (Qty units1) (Curve1d units2) (Curve1d units3) where
-    value / curve =
-        constant value / curve
-
-newtype Squared units = Squared (Curve1d units)
-
-instance Multiplication (Qty units1) (Qty units1) (Qty units2) => IsCurve1d (Squared units1) units2 where
-    pointOn (Squared curve) t =
-        let x = pointOn curve t in x * x
-
-    segmentBounds (Squared curve) t =
-        let x = segmentBounds curve t in Range.squared x
-
-    derivative (Squared curve) =
-        2.0 * Curve1d curve * derivative curve
+    value / curve = constant value / curve
 
 squared :: Multiplication (Qty units1) (Qty units1) (Qty units2) => Curve1d units1 -> Curve1d units2
 squared curve =
-    Curve1d (Squared curve)
+    case curve of
+        Zero -> Zero
+        Constant x -> Constant (x * x)
+        Negated c -> squared c
+        Cos c -> Units.add (cosSquared c)
+        Sin c -> Units.add (sinSquared c)
+        _ -> Squared curve
 
-newtype SquareRoot units = SquareRoot (Curve1d units)
+cosSquared :: Curve1d Radians -> Curve1d Unitless
+cosSquared c =
+    0.5 * cos (2.0 * c) + 0.5
 
-instance Sqrt (Qty units1) (Qty units2) => IsCurve1d (SquareRoot units1) units2 where
-    pointOn (SquareRoot curve) t =
-        Qty.sqrt (pointOn curve t)
-
-    segmentBounds (SquareRoot curve) t =
-        Range.sqrt (segmentBounds curve t)
-
-    derivative (SquareRoot curve) =
-        let f = Units.drop curve
-         in Units.add (derivative f / (2.0 * sqrt f))
+sinSquared :: Curve1d Radians -> Curve1d Unitless
+sinSquared c =
+    0.5 - 0.5 * cos (2.0 * c)
 
 sqrt :: Sqrt (Qty units1) (Qty units2) => Curve1d units1 -> Curve1d units2
 sqrt curve =
-    Curve1d (SquareRoot curve)
-
-newtype Sin = Sin (Curve1d Radians)
-
-instance IsCurve1d Sin Unitless where
-    pointOn (Sin curve) t =
-        Qty.sin (pointOn curve t)
-
-    segmentBounds (Sin curve) t =
-        Range.sin (segmentBounds curve t)
-
-    derivative (Sin curve) =
-        cos curve * Units.drop (derivative curve)
+    case curve of
+        Zero -> Zero
+        Constant x -> Constant (Qty.sqrt x)
+        _ -> SquareRoot curve
 
 sin :: Curve1d Radians -> Curve1d Unitless
 sin curve =
-    Curve1d (Sin curve)
-
-newtype Cos = Cos (Curve1d Radians)
-
-instance IsCurve1d Cos Unitless where
-    pointOn (Cos curve) t =
-        Qty.cos (pointOn curve t)
-
-    segmentBounds (Cos curve) t =
-        Range.cos (segmentBounds curve t)
-
-    derivative (Cos curve) =
-        negate (sin curve) * Units.drop (derivative curve)
+    Sin curve
 
 cos :: Curve1d Radians -> Curve1d Unitless
 cos curve =
-    Curve1d (Cos curve)
+    Cos curve
 
 data Neighborhood
     = HasRoot !(Range Unitless) !Root

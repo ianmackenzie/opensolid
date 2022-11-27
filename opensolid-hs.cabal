@@ -103,3 +103,5 @@ executable opensolid-hs
         OverloadedLabels
         DataKinds
         ScopedTypeVariables
+        GADTs
+        RoleAnnotations
