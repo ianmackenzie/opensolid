@@ -146,6 +146,8 @@ instance Multiplication (Qty units1) (Qty units2) (Qty units3) => Multiplication
     Zero * _ = Zero
     _ * Zero = Zero
     Constant x * Constant y = Constant (x * y)
+    Constant x * curve | Units.drop x == 1.0 = Units.add (Units.drop curve)
+    Constant x * curve | Units.drop x == -1.0 = Units.add (Units.drop (negate curve))
     Constant x * Negated c = negate x * c
     c1 * c2@(Constant _) = Units.add (Units.drop c2 * Units.drop c1)
     Constant x * Product (Constant y) c = Units.add (Product (Constant (Units.drop x * Units.drop y)) (Units.drop c))
@@ -202,11 +204,17 @@ sqrt curve =
 
 sin :: Curve1d Radians -> Curve1d Unitless
 sin curve =
-    Sin curve
+    case curve of
+        Zero -> Zero
+        Constant x -> constant (Qty.sin x)
+        _ -> Sin curve
 
 cos :: Curve1d Radians -> Curve1d Unitless
 cos curve =
-    Cos curve
+    case curve of
+        Zero -> Constant 1.0
+        Constant x -> constant (Qty.cos x)
+        _ -> Cos curve
 
 roots :: Qty units -> Curve1d units -> List Float
 roots tolerance curve =
