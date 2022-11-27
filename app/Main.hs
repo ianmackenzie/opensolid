@@ -1,5 +1,6 @@
 module Main (main) where
 
+import qualified Angle
 import qualified Area
 import qualified Curve1d
 import qualified Debug
@@ -51,6 +52,7 @@ script = Script.do
     log "List test" listTest
     log "Named argument" arg
     log "Equality test" (equalWithin (#tolerance Length.centimeter) (Length.meters 1.0) (Length.meters 1.005))
+    log "Roots" expressionRoots
   where
     log label value = Script.printLine (label ++ ": " ++ Debug.toString value)
     k = 0.5
@@ -74,6 +76,9 @@ script = Script.do
     y = Curve1d.squared (x - 1.0) * (x - 2.0)
     roots = Curve1d.roots 1e-12 y
     arg = #radius (Length.meters 3.0)
+    theta = Angle.radians (2 * pi) * t
+    expression = Curve1d.squared (Curve1d.sin theta)
+    expressionRoots = Curve1d.roots 1e-12 expression
 
 main :: Script.Program
 main =
