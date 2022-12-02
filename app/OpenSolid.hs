@@ -83,10 +83,14 @@ import Prelude (
     Show (..),
     const,
     flip,
+    fmap,
     id,
     not,
     otherwise,
+    pure,
+    ($),
     (&&),
+    (.),
     (||),
  )
 import qualified Prelude
