@@ -9,6 +9,7 @@ module String (
 
 import qualified Data.Text
 import OpenSolid
+import qualified TextShow
 
 concat :: List String -> String
 concat =
@@ -27,9 +28,9 @@ toList =
     Data.Text.unpack
 
 fromInt :: Int -> String
-fromInt n =
-    fromList (show n)
+fromInt (Nbr n) =
+    TextShow.showt n
 
 fromFloat :: Float -> String
-fromFloat x =
-    fromList (show x)
+fromFloat (Qty x) =
+    TextShow.showt x
