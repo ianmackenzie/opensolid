@@ -1,7 +1,7 @@
 module Point3d.Type (Point3d (..)) where
 
 import Bounded
-import BoundingBox3d.Type
+import {-# SOURCE #-} BoundingBox3d (BoundingBox3d (..))
 import OpenSolid
 import qualified Range
 

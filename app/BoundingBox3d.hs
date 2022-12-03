@@ -8,12 +8,20 @@ module BoundingBox3d (
     overlaps,
 ) where
 
-import BoundingBox3d.Type
-import qualified Bounds
+import Bounds
 import OpenSolid
 import Point3d (Point3d (..))
 import qualified Range
 import Range.Unsafe
+
+data BoundingBox3d coordinates = BoundingBox3d !(Range Meters) !(Range Meters) !(Range Meters)
+
+instance Bounds (BoundingBox3d coordinates) where
+    aggregate (BoundingBox3d x1 y1 z1) (BoundingBox3d x2 y2 z2) =
+        BoundingBox3d (Range.aggregate x1 x2) (Range.aggregate y1 y2) (Range.aggregate z1 z2)
+
+    overlaps (BoundingBox3d x1 y1 z1) (BoundingBox3d x2 y2 z2) =
+        Range.overlaps x1 x2 && Range.overlaps y1 y2 && Range.overlaps z1 z2
 
 constant :: Point3d coordinates -> BoundingBox3d coordinates
 constant point =
@@ -52,9 +60,3 @@ hull4 p1 p2 p3 p4 =
         minZ = min (min (min z1 z2) z3) z4
         maxZ = max (max (max z1 z2) z3) z4
      in BoundingBox3d (Range minX maxX) (Range minY maxY) (Range minZ maxZ)
-
-aggregate :: BoundingBox3d coordinates -> BoundingBox3d coordinates -> BoundingBox3d coordinates
-aggregate = Bounds.aggregate
-
-overlaps :: BoundingBox3d coordinates -> BoundingBox3d coordinates -> Bool
-overlaps = Bounds.overlaps
