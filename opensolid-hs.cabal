@@ -105,3 +105,4 @@ executable opensolid-hs
         ScopedTypeVariables
         GADTs
         RoleAnnotations
+        RankNTypes

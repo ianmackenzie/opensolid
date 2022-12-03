@@ -1,12 +1,12 @@
 module OpenSolid (
     module Prelude,
-    module Result,
     Nbr (..),
     Qty (..),
     Int,
     Float,
     String,
     List,
+    Result (..),
     Sqrt,
     Negation (..),
     Addition (..),
@@ -47,8 +47,11 @@ module OpenSolid (
     (<|),
     (>>),
     (<<),
-    Arg (..),
+    Named (..),
+    Name,
     fromLabel,
+    Get (..),
+    Set (..),
     Unitless,
     Angle,
     Radians,
@@ -70,7 +73,6 @@ import Data.Coerce (coerce)
 import Data.Proxy (Proxy (Proxy))
 import qualified Data.Text
 import GHC.TypeLits (KnownSymbol, Symbol, symbolVal)
-import Result (Result (..))
 import qualified Units
 import Prelude (
     Bool (..),
@@ -80,7 +82,7 @@ import Prelude (
     IO,
     Maybe (..),
     Ord (..),
-    Show (..),
+    Show,
     const,
     flip,
     fmap,
@@ -99,13 +101,32 @@ type String = Data.Text.Text
 
 type List a = [a]
 
+data Result x a
+    = Ok !a
+    | Err !x
+    deriving (Show, Eq)
+
+instance Prelude.Functor (Result x) where
+    fmap function (Ok value) = Ok (function value)
+    fmap _ (Err err) = Err err
+
+instance Prelude.Applicative (Result x) where
+    pure = Ok
+
+    Ok function <*> Ok value = Ok (function value)
+    Err err <*> _ = Err err
+    Ok _ <*> Err err = Err err
+
+instance Prelude.Monad (Result x) where
+    Ok value >>= function = function value
+    Err err >>= _ = Err err
+
 newtype Nbr units = Nbr {unNbr :: Prelude.Int} deriving (Eq, Ord, Enum)
 
 newtype Qty units = Qty {unQty :: Prelude.Double} deriving (Eq, Ord)
 
 instance Show Int where
-    show (Nbr n) =
-        show n
+    show (Nbr n) = Prelude.show n
 
 data Units (symbol :: Symbol)
 
@@ -149,36 +170,29 @@ class Division a b c | a b -> c where
     (/) :: a -> b -> c
 
 instance Negation (Nbr units) where
-    negate (Nbr n) =
-        Nbr (Prelude.negate n)
+    negate (Nbr n) = Nbr (Prelude.negate n)
 
 instance Negation (Qty units) where
-    negate (Qty x) =
-        Qty (Prelude.negate x)
+    negate (Qty x) = Qty (Prelude.negate x)
 
 instance Addition Nbr Nbr Nbr where
-    (Nbr n) + (Nbr m) =
-        Nbr (n Prelude.+ m)
+    (Nbr n) + (Nbr m) = Nbr (n Prelude.+ m)
 
 instance Addition Qty Qty Qty where
-    (Qty x) + (Qty y) =
-        Qty (x Prelude.+ y)
+    (Qty x) + (Qty y) = Qty (x Prelude.+ y)
 
 instance Subtraction Nbr Nbr Nbr where
-    (Nbr n) - (Nbr m) =
-        Nbr (n Prelude.- m)
+    (Nbr n) - (Nbr m) = Nbr (n Prelude.- m)
 
 instance Subtraction Qty Qty Qty where
-    (Qty x) - (Qty y) =
-        Qty (x Prelude.- y)
+    (Qty x) - (Qty y) = Qty (x Prelude.- y)
 
 class Sqrt a b | a -> b
 
 instance Sqrt Float Float
 
 (//) :: Int -> Int -> Int
-(Nbr n) // (Nbr m) =
-    Nbr (Prelude.quot n m)
+(Nbr n) // (Nbr m) = Nbr (Prelude.quot n m)
 
 class DotProduct p q r | p q -> r where
     (<>) :: p a -> q a -> r
@@ -189,70 +203,54 @@ class CrossProduct p q r | p q -> r where
 class Concatenation a where
     (++) :: a -> a -> a
 
-instance Concatenation String where (++) = Data.Text.append
+instance Concatenation String where
+    (++) = Data.Text.append
 
-instance Concatenation (List a) where (++) = Prelude.mappend
+instance Concatenation (List a) where
+    (++) = Prelude.mappend
 
 fromInteger :: Prelude.Integer -> Int
-fromInteger n =
-    Nbr (Prelude.fromInteger n)
+fromInteger n = Nbr (Prelude.fromInteger n)
 
 fromRational :: Prelude.Rational -> Float
-fromRational x =
-    Qty (Prelude.fromRational x)
+fromRational x = Qty (Prelude.fromRational x)
 
 fromString :: Prelude.String -> String
-fromString =
-    Data.Text.pack
+fromString = Data.Text.pack
 
 float :: Int -> Float
-float (Nbr n) =
-    Qty (Prelude.fromIntegral n)
+float (Nbr n) = Qty (Prelude.fromIntegral n)
 
-{- HLINT ignore ifThenElse "Use if" -}
 ifThenElse :: Bool -> a -> a -> a
-ifThenElse condition whenTrue whenFalse =
-    -- We need to use 'case' here instead of if-then-else, since this function
-    -- is literally *implementing* if-then-else
-    case condition of
-        True -> whenTrue
-        False -> whenFalse
+ifThenElse True ifBranch _ = ifBranch
+ifThenElse False _ elseBranch = elseBranch
 
 identity :: a -> a
-identity =
-    Prelude.id
+identity = Prelude.id
 
 always :: a -> b -> a
-always =
-    Prelude.const
+always = const
 
 error :: String -> a
-error message =
-    Prelude.error (Data.Text.unpack message)
+error message = Prelude.error (Data.Text.unpack message)
 
 notImplemented :: a
-notImplemented =
-    error "Not implemented"
+notImplemented = error "Not implemented"
 
 subtract :: Subtraction p q r => q a -> p a -> r a
-subtract b a =
-    a - b
+subtract b a = a - b
 
 zero :: Qty units
-zero =
-    coerce 0.0
+zero = coerce 0.0
 
 infinity :: Qty units
-infinity =
-    coerce (1.0 / 0.0)
+infinity = coerce (1.0 / 0.0)
 
 isNaN :: Qty units -> Bool
-isNaN (Qty x) =
-    Prelude.isNaN x
+isNaN (Qty x) = Prelude.isNaN x
 
 abs :: Qty units -> Qty units
-abs (Qty x) =
-    Qty (Prelude.abs x)
+abs (Qty x) = Qty (Prelude.abs x)
 
 clamp :: Qty units -> Qty units -> Qty units -> Qty units
 clamp a b value
@@ -264,64 +262,49 @@ clamp a b value
     high = max a b
 
 floor :: Float -> Int
-floor (Qty x) =
-    Nbr (Prelude.floor x)
+floor (Qty x) = Nbr (Prelude.floor x)
 
 ceiling :: Float -> Int
-ceiling (Qty x) =
-    Nbr (Prelude.ceiling x)
+ceiling (Qty x) = Nbr (Prelude.ceiling x)
 
 sqrt :: Sqrt (Qty units1) (Qty units2) => Qty units1 -> Qty units2
-sqrt (Qty x) =
-    Qty (Prelude.sqrt x)
+sqrt (Qty x) = Qty (Prelude.sqrt x)
 
 sin :: Angle -> Float
-sin (Qty x) =
-    Qty (Prelude.sin x)
+sin (Qty x) = Qty (Prelude.sin x)
 
 cos :: Angle -> Float
-cos (Qty x) =
-    Qty (Prelude.cos x)
+cos (Qty x) = Qty (Prelude.cos x)
 
 tan :: Angle -> Float
-tan (Qty x) =
-    Qty (Prelude.tan x)
+tan (Qty x) = Qty (Prelude.tan x)
 
 asin :: Float -> Angle
-asin (Qty x) =
-    Qty (Prelude.asin x)
+asin (Qty x) = Qty (Prelude.asin x)
 
 acos :: Float -> Angle
-acos (Qty x) =
-    Qty (Prelude.acos x)
+acos (Qty x) = Qty (Prelude.acos x)
 
 atan :: Float -> Angle
-atan (Qty x) =
-    Qty (Prelude.atan x)
+atan (Qty x) = Qty (Prelude.atan x)
 
 atan2 :: Qty units -> Qty units -> Angle
-atan2 (Qty y) (Qty x) =
-    Qty (Prelude.atan2 y x)
+atan2 (Qty y) (Qty x) = Qty (Prelude.atan2 y x)
 
 pi :: Float
-pi =
-    Prelude.pi
+pi = Prelude.pi
 
 (|>) :: a -> (a -> b) -> b
-(|>) value function =
-    function value
+(|>) value function = function value
 
 (<|) :: (a -> b) -> a -> b
-(<|) =
-    identity
+(<|) = identity
 
 (>>) :: (a -> b) -> (b -> c) -> (a -> c)
-(>>) f g x =
-    g (f x)
+(>>) f g x = g (f x)
 
 (<<) :: (b -> c) -> (a -> b) -> (a -> c)
-(<<) f g x =
-    f (g x)
+(<<) f g x = f (g x)
 
 infixr 0 <|
 
@@ -335,21 +318,63 @@ infixl 9 <<
 
 infixr 9 >>
 
-newtype Arg (label :: Symbol) value = Arg value deriving (Eq, Show)
+newtype Named (name :: Symbol) value = Named value deriving (Eq)
 
-class NamedArgument (label :: Symbol) value where
-    fromLabel :: value -> Arg label value
-    fromLabel = Arg
+instance (KnownSymbol name, Show value) => Show (Named name value) where
+    showsPrec precedence (Named value) =
+        let string = '#' : symbolVal (Proxy :: Proxy name) ++ (' ' : Prelude.showsPrec (unNbr 10) value [])
+         in Prelude.showParen (Nbr precedence >= 10) (Prelude.showString string)
 
-instance NamedArgument (label :: Symbol) value
+class Nameable (name :: Symbol) value where
+    fromLabel :: value -> Named name value
+    fromLabel = Named
+
+instance Nameable (name :: Symbol) value
+
+type Name (name :: Symbol) = forall value. value -> Named name value
+
+class Get (name :: Symbol) value record | record name -> value where
+    get :: Name name -> record -> value
+
+instance forall name value field2. Get name value (Named name value, field2) where
+    get _ (Named value, _) = value
+
+instance forall name value field1. Get name value (field1, Named name value) where
+    get _ (_, Named value) = value
+
+instance forall name value field2 field3. Get name value (Named name value, field2, field3) where
+    get _ (Named value, _, _) = value
+
+instance forall name value field1 field3. Get name value (field1, Named name value, field3) where
+    get _ (_, Named value, _) = value
+
+instance forall name value field1 field2. Get name value (field1, field2, Named name value) where
+    get _ (_, _, Named value) = value
+
+class Set (name :: Symbol) value record | record name -> value where
+    set :: Name name -> value -> record -> record
+
+instance forall name value field2. Set name value (Named name value, field2) where
+    set _ value (Named _, field2) = (Named value, field2)
+
+instance forall name value field1. Set name value (field1, Named name value) where
+    set _ value (field1, Named _) = (field1, Named value)
+
+instance forall name value field2 field3. Set name value (Named name value, field2, field3) where
+    set _ value (Named _, field2, field3) = (Named value, field2, field3)
+
+instance forall name value field1 field3. Set name value (field1, Named name value, field3) where
+    set _ value (field1, Named _, field3) = (field1, Named value, field3)
+
+instance forall name value field1 field2. Set name value (field1, field2, Named name value) where
+    set _ value (field1, field2, Named _) = (field1, field2, Named value)
 
 instance Units.Coercion (Nbr units) Int
 
 instance Units.Coercion (Qty units) Float
 
 instance Multiplication Int Int Int where
-    (Nbr n) * (Nbr m) =
-        Nbr (n Prelude.* m)
+    (Nbr n) * (Nbr m) = Nbr (n Prelude.* m)
 
 class Product qty1 qty2 qty3 | qty1 qty2 -> qty3
 
@@ -368,41 +393,33 @@ instance {-# INCOHERENT #-} Quotient (Qty units) (Qty units) Float
 instance {-# INCOHERENT #-} Quotient (Qty units) Float (Qty units)
 
 instance Product (Qty units1) (Qty units2) (Qty units3) => Multiplication (Qty units1) (Qty units2) (Qty units3) where
-    (Qty x) * (Qty y) =
-        Qty (x Prelude.* y)
+    (Qty x) * (Qty y) = Qty (x Prelude.* y)
 
 instance Quotient (Qty units1) (Qty units2) (Qty units3) => Division (Qty units1) (Qty units2) (Qty units3) where
-    (Qty x) / (Qty y) =
-        Qty (x Prelude./ y)
+    (Qty x) / (Qty y) = Qty (x Prelude./ y)
 
 instance Multiplication Int (Qty units) (Qty units) where
-    n * x =
-        float n * x
+    n * x = float n * x
 
 instance Multiplication (Qty units) Int (Qty units) where
-    x * n =
-        x * float n
+    x * n = x * float n
 
 instance Division Int Int Float where
-    n / m =
-        float n / float m
+    n / m = float n / float m
 
 instance Division (Qty units) Int (Qty units) where
-    x / n =
-        x / float n
+    x / n = x / float n
 
 instance Division Float (Qty units1) (Qty units2) => Division Int (Qty units1) (Qty units2) where
-    n / x =
-        float n / x
+    n / x = float n / x
+
+instance {-# OVERLAPS #-} Show Float where
+    show (Qty x) = Prelude.show x
 
 instance KnownSymbol symbol => Show (Qty (Units symbol)) where
     showsPrec precedence (Qty x) =
-        case symbolVal (Proxy :: Proxy symbol) of
-            [] ->
-                showsPrec precedence x
-            suffix ->
-                let string = Prelude.mappend (show x) (' ' : suffix)
-                 in Prelude.showParen (Nbr precedence > 10) (Prelude.showString string)
+        let string = Prelude.shows x (' ' : symbolVal (Proxy :: Proxy symbol))
+         in Prelude.showParen (Nbr precedence >= 10) (Prelude.showString string)
 
 type Radians = Units "rad"
 

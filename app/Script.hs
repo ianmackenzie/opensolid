@@ -22,31 +22,21 @@ import qualified Prelude
 type Program = Prelude.IO ()
 
 run :: Script IOError () -> Program
-run script =
-    case script of
-        Internal.Succeed () ->
-            System.Exit.exitSuccess
-        Internal.Fail ioError ->
-            Prelude.ioError ioError
-        Internal.Perform io ->
-            io Prelude.>>= run
+run (Internal.Succeed ()) = System.Exit.exitSuccess
+run (Internal.Fail ioError) = Prelude.ioError ioError
+run (Internal.Perform io) = io Prelude.>>= run
 
 succeed :: a -> Script x a
-succeed =
-    Internal.Succeed
+succeed = Internal.Succeed
 
 fail :: x -> Script x a
-fail =
-    Internal.Fail
+fail = Internal.Fail
 
 printLine :: String -> Script IOError ()
-printLine string =
-    Internal.perform (Data.Text.IO.putStrLn string)
+printLine string = Internal.perform (Data.Text.IO.putStrLn string)
 
 forEach :: (a -> Script x ()) -> List a -> Script x ()
-forEach function values =
-    case values of
-        [] -> Script.succeed ()
-        first : rest -> do
-            function first
-            forEach function rest
+forEach _ [] = succeed ()
+forEach function (first : rest) = do
+    function first
+    forEach function rest

@@ -54,9 +54,7 @@ hull4 p1 p2 p3 p4 =
      in BoundingBox3d (Range minX maxX) (Range minY maxY) (Range minZ maxZ)
 
 aggregate :: BoundingBox3d coordinates -> BoundingBox3d coordinates -> BoundingBox3d coordinates
-aggregate =
-    Bounds.aggregate
+aggregate = Bounds.aggregate
 
 overlaps :: BoundingBox3d coordinates -> BoundingBox3d coordinates -> Bool
-overlaps =
-    Bounds.overlaps
+overlaps = Bounds.overlaps

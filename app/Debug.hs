@@ -1,5 +1,5 @@
 module Debug (
-    toString,
+    show,
     trace,
     log,
 ) where
@@ -7,15 +7,13 @@ module Debug (
 import qualified Debug.Trace
 import OpenSolid
 import qualified String
+import qualified Prelude
 
-toString :: Show a => a -> String
-toString value =
-    String.fromList (show value)
+show :: Show a => a -> String
+show value = String.fromList (Prelude.show value)
 
 trace :: String -> a -> a
-trace message value =
-    Debug.Trace.trace (String.toList message) value
+trace message value = Debug.Trace.trace (String.toList message) value
 
 log :: Show a => String -> a -> a
-log label value =
-    trace (label ++ ": " ++ toString value) value
+log label value = trace (label ++ ": " ++ show value) value

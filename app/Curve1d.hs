@@ -100,16 +100,13 @@ instance IsCurve1d (Curve1d units) units where
             Cos c -> negate (sin c) * Units.drop (derivative c)
 
 zero :: Curve1d units
-zero =
-    Zero
+zero = Zero
 
 constant :: Qty units -> Curve1d units
-constant value =
-    if value == Qty.zero then Zero else Constant value
+constant value = if value == Qty.zero then Zero else Constant value
 
 parameter :: Curve1d Unitless
-parameter =
-    Parameter
+parameter = Parameter
 
 instance Negation (Curve1d units) where
     negate Zero = Zero
@@ -178,43 +175,33 @@ instance Division (Qty units1) (Qty units2) (Qty units3) => Division (Qty units1
     value / curve = constant value / curve
 
 squared :: Multiplication (Qty units1) (Qty units1) (Qty units2) => Curve1d units1 -> Curve1d units2
-squared curve =
-    case curve of
-        Zero -> Zero
-        Constant x -> Constant (x * x)
-        Negated c -> squared c
-        Cos c -> Units.add (cosSquared c)
-        Sin c -> Units.add (sinSquared c)
-        _ -> Squared curve
+squared Zero = Zero
+squared (Constant x) = Constant (x * x)
+squared (Negated c) = squared c
+squared (Cos c) = Units.add (cosSquared c)
+squared (Sin c) = Units.add (sinSquared c)
+squared curve = Squared curve
 
 cosSquared :: Curve1d Radians -> Curve1d Unitless
-cosSquared c =
-    0.5 * cos (2.0 * c) + 0.5
+cosSquared c = 0.5 * cos (2.0 * c) + 0.5
 
 sinSquared :: Curve1d Radians -> Curve1d Unitless
-sinSquared c =
-    0.5 - 0.5 * cos (2.0 * c)
+sinSquared c = 0.5 - 0.5 * cos (2.0 * c)
 
 sqrt :: Sqrt (Qty units1) (Qty units2) => Curve1d units1 -> Curve1d units2
-sqrt curve =
-    case curve of
-        Zero -> Zero
-        Constant x -> Constant (Qty.sqrt x)
-        _ -> SquareRoot curve
+sqrt Zero = Zero
+sqrt (Constant x) = Constant (Qty.sqrt x)
+sqrt curve = SquareRoot curve
 
 sin :: Curve1d Radians -> Curve1d Unitless
-sin curve =
-    case curve of
-        Zero -> Zero
-        Constant x -> constant (Qty.sin x)
-        _ -> Sin curve
+sin Zero = Zero
+sin (Constant x) = constant (Qty.sin x)
+sin curve = Sin curve
 
 cos :: Curve1d Radians -> Curve1d Unitless
-cos curve =
-    case curve of
-        Zero -> Constant 1.0
-        Constant x -> constant (Qty.cos x)
-        _ -> Cos curve
+cos Zero = Constant 1.0
+cos (Constant x) = constant (Qty.cos x)
+cos curve = Cos curve
 
 roots :: Qty units -> Curve1d units -> List Float
 roots tolerance curve =
@@ -225,12 +212,10 @@ roots tolerance curve =
      in deduplicate (root0 ++ solve tolerance curve firstDerivative secondDerivative Range.unit ++ root1)
 
 deduplicate :: List Float -> List Float
-deduplicate list =
-    List.foldr prependRoot [] list
+deduplicate list = List.foldr prependRoot [] list
 
 prependRoot :: Float -> List Float -> List Float
-prependRoot root list =
-    if List.head list == Just root then list else root : list
+prependRoot root list = if List.head list == Just root then list else root : list
 
 solve :: Qty units -> Curve1d units -> Curve1d units -> Curve1d units -> Range Unitless -> List Float
 solve tolerance curve firstDerivative secondDerivative domain

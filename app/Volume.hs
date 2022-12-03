@@ -12,25 +12,19 @@ import OpenSolid
 import qualified Units
 
 cubicMeter :: Volume
-cubicMeter =
-    cubicMeters 1.0
+cubicMeter = cubicMeters 1.0
 
 cubicMeters :: Float -> Volume
-cubicMeters =
-    Units.add
+cubicMeters = Units.add
 
 inCubicMeters :: Volume -> Float
-inCubicMeters =
-    Units.drop
+inCubicMeters = Units.drop
 
 cubicCentimeter :: Volume
-cubicCentimeter =
-    Length.centimeter * Length.centimeter * Length.centimeter
+cubicCentimeter = Length.centimeter * Length.centimeter * Length.centimeter
 
 cubicCentimeters :: Float -> Volume
-cubicCentimeters =
-    (* cubicCentimeter)
+cubicCentimeters = (* cubicCentimeter)
 
 inCubicCentimeters :: Volume -> Float
-inCubicCentimeters =
-    (/ cubicCentimeter)
+inCubicCentimeters = (/ cubicCentimeter)

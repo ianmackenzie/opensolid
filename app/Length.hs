@@ -11,25 +11,19 @@ import OpenSolid
 import qualified Units
 
 meter :: Length
-meter =
-    meters 1.0
+meter = meters 1.0
 
 meters :: Float -> Length
-meters =
-    Units.add
+meters = Units.add
 
 inMeters :: Length -> Float
-inMeters =
-    Units.drop
+inMeters = Units.drop
 
 centimeter :: Length
-centimeter =
-    meters 0.01
+centimeter = meters 0.01
 
 centimeters :: Float -> Length
-centimeters =
-    (* centimeter)
+centimeters = (* centimeter)
 
 inCentimeters :: Length -> Float
-inCentimeters =
-    (/ centimeter)
+inCentimeters = (/ centimeter)

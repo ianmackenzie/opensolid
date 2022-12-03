@@ -27,24 +27,19 @@ import qualified Qty
 import Range.Unsafe
 
 constant :: Qty units -> Range units
-constant value =
-    Range value value
+constant value = Range value value
 
 from :: Qty units -> Qty units -> Range units
-from a b =
-    Range (min a b) (max a b)
+from a b = Range (min a b) (max a b)
 
 unit :: Range Unitless
-unit =
-    Range 0.0 1.0
+unit = Range 0.0 1.0
 
 minValue :: Range units -> Qty units
-minValue range =
-    let (Range low _) = range in low
+minValue (Range low _) = low
 
 maxValue :: Range units -> Qty units
-maxValue range =
-    let (Range _ high) = range in high
+maxValue (Range _ high) = high
 
 isAtomic :: Range units -> Bool
 isAtomic range =
@@ -53,39 +48,29 @@ isAtomic range =
      in mid == low || mid == high
 
 midpoint :: Range units -> Qty units
-midpoint range =
-    let (Range low high) = range
-     in Qty.midpoint low high
+midpoint (Range low high) = Qty.midpoint low high
 
 endpoints :: Range units -> (Qty units, Qty units)
-endpoints (Range low high) =
-    (low, high)
+endpoints (Range low high) = (low, high)
 
 width :: Range units -> Qty units
-width (Range low high) =
-    high - low
+width (Range low high) = high - low
 
 squared :: Multiplication (Qty units1) (Qty units1) (Qty units2) => Range units1 -> Range units2
-squared range
+squared (Range low high)
     | low >= zero = Range ll hh
     | high <= zero = Range hh ll
     | otherwise = Range zero (max ll hh)
   where
-    (Range low high) = range
     ll = low * low
     hh = high * high
 
 sqrt :: Sqrt (Qty units1) (Qty units2) => Range units1 -> Range units2
-sqrt range =
-    let (Range low high) = range
-        sqrtLow = Qty.sqrt (max low zero)
-        sqrtHigh = Qty.sqrt (max high zero)
-     in Range sqrtLow sqrtHigh
+sqrt (Range low high) =
+    Range (Qty.sqrt (max low zero)) (Qty.sqrt (max high zero))
 
 contains :: Qty units -> Range units -> Bool
-contains value range =
-    let (Range low high) = range
-     in low <= value && value <= high
+contains value (Range low high) = low <= value && value <= high
 
 bisect :: Range units -> (Range units, Range units)
 bisect range =
@@ -102,12 +87,10 @@ abs range
     (Range low high) = range
 
 aggregate :: Range units -> Range units -> Range units
-aggregate =
-    Bounds.aggregate
+aggregate = Bounds.aggregate
 
 overlaps :: Range units -> Range units -> Bool
-overlaps =
-    Bounds.overlaps
+overlaps = Bounds.overlaps
 
 sin :: Range Radians -> Range Unitless
 sin range =
@@ -126,18 +109,12 @@ cos range =
      in Range newLow newHigh
 
 sinIncludesMinMax :: Range Radians -> (Bool, Bool)
-sinIncludesMinMax range =
-    cosIncludesMinMax (range - Angle.radians (pi / 2))
+sinIncludesMinMax range = cosIncludesMinMax (range - Angle.radians (pi / 2))
 
 cosIncludesMinMax :: Range Radians -> (Bool, Bool)
-cosIncludesMinMax interval =
-    ( cosIncludesMax (interval + Angle.radians pi)
-    , cosIncludesMax interval
-    )
+cosIncludesMinMax interval = (cosIncludesMax (interval + Angle.radians pi), cosIncludesMax interval)
 
 cosIncludesMax :: Range Radians -> Bool
 cosIncludesMax (Range low high) =
     let twoPi = Angle.radians (2 * pi)
-        minBranch = floor (low / twoPi)
-        maxBranch = floor (high / twoPi)
-     in minBranch /= maxBranch
+     in floor (low / twoPi) /= floor (high / twoPi)

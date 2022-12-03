@@ -19,40 +19,29 @@ class IsCurve3d curve where
 data Curve3d coordinates = forall curve. IsCurve3d curve => Curve3d (curve coordinates)
 
 instance IsCurve3d Point3d where
-    startPoint =
-        identity
+    startPoint = identity
 
-    endPoint =
-        identity
+    endPoint = identity
 
-    pointOn point _ =
-        point
+    pointOn point _ = point
 
-    reverse =
-        identity
+    reverse = identity
 
-    bisect point =
-        (point, point)
+    bisect point = (point, point)
 
-    boundingBox point =
-        BoundingBox3d.constant point
+    boundingBox point = BoundingBox3d.constant point
 
 instance IsCurve3d Curve3d where
-    startPoint (Curve3d curve) =
-        startPoint curve
+    startPoint (Curve3d curve) = startPoint curve
 
-    endPoint (Curve3d curve) =
-        endPoint curve
+    endPoint (Curve3d curve) = endPoint curve
 
-    pointOn (Curve3d curve) t =
-        pointOn curve t
+    pointOn (Curve3d curve) t = pointOn curve t
 
-    reverse (Curve3d curve) =
-        Curve3d (reverse curve)
+    reverse (Curve3d curve) = Curve3d (reverse curve)
 
     bisect (Curve3d curve) =
         let (curve1, curve2) = bisect curve
          in (Curve3d curve1, Curve3d curve2)
 
-    boundingBox (Curve3d curve) =
-        boundingBox curve
+    boundingBox (Curve3d curve) = boundingBox curve

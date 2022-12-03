@@ -12,44 +12,35 @@ deriving instance Show (Qty units) => Show (Range units)
 instance Units.Coercion (Range units) (Range Unitless)
 
 instance Negation (Range units) where
-    negate (Range low high) =
-        Range (negate high) (negate low)
+    negate (Range low high) = Range (negate high) (negate low)
 
 instance Addition Range Range Range where
-    (Range low1 high1) + (Range low2 high2) =
-        Range (low1 + low2) (high1 + high2)
+    (Range low1 high1) + (Range low2 high2) = Range (low1 + low2) (high1 + high2)
 
 instance Addition Range Qty Range where
-    (Range low high) + value =
-        Range (low + value) (high + value)
+    (Range low high) + value = Range (low + value) (high + value)
 
 instance Addition Qty Range Range where
-    value + (Range low high) =
-        Range (value + low) (value + high)
+    value + (Range low high) = Range (value + low) (value + high)
 
 instance Subtraction Range Range Range where
-    (Range low1 high1) - (Range low2 high2) =
-        Range (low1 - high2) (high1 - low2)
+    (Range low1 high1) - (Range low2 high2) = Range (low1 - high2) (high1 - low2)
 
 instance Subtraction Range Qty Range where
-    (Range low high) - value =
-        Range (low - value) (high - value)
+    (Range low high) - value = Range (low - value) (high - value)
 
 instance Subtraction Qty Range Range where
-    value - (Range low high) =
-        Range (value - high) (value - low)
+    value - (Range low high) = Range (value - high) (value - low)
 
 qtyRangeMultiplication :: Multiplication (Qty units1) (Qty units2) (Qty units3) => Qty units1 -> Range units2 -> Range units3
-qtyRangeMultiplication value (Range low high) =
-    if value >= zero
-        then Range (value * low) (value * high)
-        else Range (value * high) (value * low)
+qtyRangeMultiplication value (Range low high)
+    | value >= zero = Range (value * low) (value * high)
+    | otherwise = Range (value * high) (value * low)
 
 rangeQtyMultiplication :: Multiplication (Qty units1) (Qty units2) (Qty units3) => Range units1 -> Qty units2 -> Range units3
-rangeQtyMultiplication (Range low high) value =
-    if value >= zero
-        then Range (low * value) (high * value)
-        else Range (high * value) (low * value)
+rangeQtyMultiplication (Range low high) value
+    | value >= zero = Range (low * value) (high * value)
+    | otherwise = Range (high * value) (low * value)
 
 qtyRangeDivision :: Division (Qty units1) (Qty units2) (Qty units3) => Qty units1 -> Range units2 -> Range units3
 qtyRangeDivision n (Range dl dh)
@@ -91,8 +82,6 @@ instance (Division (Qty units1) (Qty units2) (Qty units3)) => Division (Range un
         | otherwise = Range (-infinity) infinity
 
 instance Bounds (Range units) where
-    aggregate (Range low1 high1) (Range low2 high2) =
-        Range (min low1 low2) (max high1 high2)
+    aggregate (Range low1 high1) (Range low2 high2) = Range (min low1 low2) (max high1 high2)
 
-    overlaps (Range low1 high1) (Range low2 high2) =
-        high1 >= low2 && low1 <= high2
+    overlaps (Range low1 high1) (Range low2 high2) = low1 <= high2 && low2 <= high1

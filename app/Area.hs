@@ -8,13 +8,10 @@ import OpenSolid
 import qualified Units
 
 squareMeter :: Area
-squareMeter =
-    squareMeters 1.0
+squareMeter = squareMeters 1.0
 
 squareMeters :: Float -> Area
-squareMeters =
-    Units.add
+squareMeters = Units.add
 
 inSquareMeters :: Area -> Float
-inSquareMeters =
-    Units.drop
+inSquareMeters = Units.drop

@@ -11,25 +11,19 @@ import OpenSolid
 import qualified Units
 
 radian :: Angle
-radian =
-    radians 1.0
+radian = radians 1.0
 
 radians :: Float -> Angle
-radians =
-    Units.add
+radians = Units.add
 
 inRadians :: Angle -> Float
-inRadians =
-    Units.drop
+inRadians = Units.drop
 
 degree :: Angle
-degree =
-    radians (pi / 180)
+degree = radians (pi / 180)
 
 degrees :: Float -> Angle
-degrees =
-    (* degree)
+degrees = (* degree)
 
 inDegrees :: Angle -> Float
-inDegrees =
-    (/ degree)
+inDegrees = (/ degree)
