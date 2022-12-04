@@ -61,7 +61,6 @@ executable opensolid-hs
         Area
         Volume
         Range
-        Range.Unsafe
         Direction2d
         Direction3d
         Vector2d

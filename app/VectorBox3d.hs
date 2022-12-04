@@ -10,8 +10,8 @@ module VectorBox3d (
 ) where
 
 import OpenSolid
+import Range (Range)
 import qualified Range
-import Range.Unsafe
 import qualified Units
 import Vector3d (Vector3d (..))
 
@@ -90,7 +90,7 @@ hull3 (Vector3d x1 y1 z1) (Vector3d x2 y2 z2) (Vector3d x3 y3 z3) =
         maxY = max (max y1 y2) y3
         minZ = min (min z1 z2) z3
         maxZ = max (max z1 z2) z3
-     in VectorBox3d (Range minX maxX) (Range minY maxY) (Range minZ maxZ)
+     in VectorBox3d (Range.unsafe minX maxX) (Range.unsafe minY maxY) (Range.unsafe minZ maxZ)
 
 hull4 :: Vector3d units coordinates -> Vector3d units coordinates -> Vector3d units coordinates -> Vector3d units coordinates -> VectorBox3d units coordinates
 hull4 (Vector3d x1 y1 z1) (Vector3d x2 y2 z2) (Vector3d x3 y3 z3) (Vector3d x4 y4 z4) =
@@ -100,7 +100,7 @@ hull4 (Vector3d x1 y1 z1) (Vector3d x2 y2 z2) (Vector3d x3 y3 z3) (Vector3d x4 y
         maxY = max (max (max y1 y2) y3) y4
         minZ = min (min (min z1 z2) z3) z4
         maxZ = max (max (max z1 z2) z3) z4
-     in VectorBox3d (Range minX maxX) (Range minY maxY) (Range minZ maxZ)
+     in VectorBox3d (Range.unsafe minX maxX) (Range.unsafe minY maxY) (Range.unsafe minZ maxZ)
 
 squaredMagnitude :: Multiplication (Qty units1) (Qty units1) (Qty units2) => VectorBox3d units1 coordinates -> Range units2
 squaredMagnitude (VectorBox3d x y z) = Range.squared x + Range.squared y + Range.squared z
@@ -119,4 +119,7 @@ normalize vectorBox =
      in VectorBox3d nx ny nz
 
 clampNormalized :: Range Unitless -> Range Unitless
-clampNormalized (Range low high) = Range (clamp (-1.0) 1.0 low) (clamp (-1.0) 1.0 high)
+clampNormalized range =
+    Range.unsafe
+        (clamp (-1.0) 1.0 (Range.minValue range))
+        (clamp (-1.0) 1.0 (Range.maxValue range))

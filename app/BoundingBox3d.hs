@@ -11,8 +11,8 @@ module BoundingBox3d (
 import Bounds
 import OpenSolid
 import Point3d (Point3d (..))
+import Range (Range)
 import qualified Range
-import Range.Unsafe
 
 data BoundingBox3d coordinates = BoundingBox3d !(Range Meters) !(Range Meters) !(Range Meters)
 
@@ -39,7 +39,7 @@ hull3 (Point3d x1 y1 z1) (Point3d x2 y2 z2) (Point3d x3 y3 z3) =
         maxY = max (max y1 y2) y3
         minZ = min (min z1 z2) z3
         maxZ = max (max z1 z2) z3
-     in BoundingBox3d (Range minX maxX) (Range minY maxY) (Range minZ maxZ)
+     in BoundingBox3d (Range.unsafe minX maxX) (Range.unsafe minY maxY) (Range.unsafe minZ maxZ)
 
 hull4 :: Point3d coordinates -> Point3d coordinates -> Point3d coordinates -> Point3d coordinates -> BoundingBox3d coordinates
 hull4 (Point3d x1 y1 z1) (Point3d x2 y2 z2) (Point3d x3 y3 z3) (Point3d x4 y4 z4) =
@@ -49,4 +49,4 @@ hull4 (Point3d x1 y1 z1) (Point3d x2 y2 z2) (Point3d x3 y3 z3) (Point3d x4 y4 z4
         maxY = max (max (max y1 y2) y3) y4
         minZ = min (min (min z1 z2) z3) z4
         maxZ = max (max (max z1 z2) z3) z4
-     in BoundingBox3d (Range minX maxX) (Range minY maxY) (Range minZ maxZ)
+     in BoundingBox3d (Range.unsafe minX maxX) (Range.unsafe minY maxY) (Range.unsafe minZ maxZ)

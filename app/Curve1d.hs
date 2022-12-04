@@ -17,8 +17,8 @@ module Curve1d (
 import qualified List
 import OpenSolid hiding (cos, sin, sqrt, zero)
 import qualified Qty
+import Range (Range)
 import qualified Range
-import Range.Unsafe
 import qualified Units
 import Vector3d (Vector3d)
 import {-# SOURCE #-} VectorCurve3d (VectorCurve3d)
