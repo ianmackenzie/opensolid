@@ -20,7 +20,7 @@ import qualified Area
 import Direction2d.Unsafe
 import qualified Length
 import OpenSolid hiding (zero)
-import Point2d.Type
+import {-# SOURCE #-} Point2d (Point2d (..))
 import qualified Qty
 import qualified Units
 import Vector2d.Type

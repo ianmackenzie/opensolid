@@ -71,9 +71,7 @@ executable opensolid-hs
         Vector3d
         Vector3d.Type
         Point2d
-        Point2d.Type
         Point3d
-        Point3d.Type
         VectorBox3d
         BoundingBox3d
         Curve1d

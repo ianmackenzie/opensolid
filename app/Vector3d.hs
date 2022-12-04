@@ -23,7 +23,7 @@ import qualified Area
 import Direction3d.Unsafe
 import qualified Length
 import OpenSolid hiding (zero)
-import Point3d.Type
+import {-# SOURCE #-} Point3d (Point3d (..))
 import qualified Qty
 import qualified Units
 import Vector3d.Type

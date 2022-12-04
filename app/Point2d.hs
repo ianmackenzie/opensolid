@@ -13,10 +13,12 @@ module Point2d (
 
 import qualified Length
 import OpenSolid
-import Point2d.Type
 import qualified Qty
 import qualified Vector2d
 import Vector2d.Type
+
+data Point2d coordinates = Point2d !Length !Length
+    deriving (Eq, Show)
 
 origin :: Point2d coordinates
 origin = Point2d zero zero

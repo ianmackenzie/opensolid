@@ -14,11 +14,19 @@ module Point3d (
     distanceFrom,
 ) where
 
+import Bounded (Bounded (..))
+import {-# SOURCE #-} BoundingBox3d (BoundingBox3d (..))
 import qualified Length
 import OpenSolid
-import Point3d.Type
 import qualified Qty
+import qualified Range
 import qualified Vector3d
+
+data Point3d coordinates = Point3d !Length !Length !Length
+    deriving (Eq, Show)
+
+instance Bounded (Point3d coordinates) (BoundingBox3d coordinates) where
+    bounds (Point3d px py pz) = BoundingBox3d (Range.constant px) (Range.constant py) (Range.constant pz)
 
 origin :: Point3d coordinates
 origin = Point3d zero zero zero
