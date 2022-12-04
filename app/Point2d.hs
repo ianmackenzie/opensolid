@@ -14,8 +14,8 @@ module Point2d (
 import qualified Length
 import OpenSolid
 import qualified Qty
+import Vector2d (Vector2d (..))
 import qualified Vector2d
-import Vector2d.Type
 
 data Point2d coordinates = Point2d !Length !Length
     deriving (Eq, Show)
