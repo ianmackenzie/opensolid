@@ -7,6 +7,7 @@ import qualified Debug
 import qualified Direction2d
 import qualified Length
 import qualified List
+import qualified Maybe
 import OpenSolid
 import Point2d (Point2d)
 import qualified Point2d
@@ -64,6 +65,7 @@ script = Script.do
     log "Baby name" (getName baby)
     log "Baby age" (get #age baby)
     log "Blue values" (List.map (get #blue) colors)
+    log "Or test" (Vector3d.direction Vector3d.zero |> Maybe.orErr "Zero vector")
   where
     log label value = Script.printLine (label ++ ": " ++ Debug.show value)
     k = 0.5

@@ -3,8 +3,9 @@ module Result (
     map2,
     andThen,
     withDefault,
-    mapError,
+    mapErr,
     (>>=),
+    orErr,
 ) where
 
 import OpenSolid
@@ -27,9 +28,13 @@ andThen :: (a -> Result x b) -> Result x a -> Result x b
 andThen function (Ok value) = function value
 andThen _ (Err err) = Err err
 
-mapError :: (x -> y) -> Result x a -> Result y a
-mapError _ (Ok value) = Ok value
-mapError function (Err err) = Err (function err)
+mapErr :: (x -> y) -> Result x a -> Result y a
+mapErr _ (Ok value) = Ok value
+mapErr function (Err err) = Err (function err)
 
 (>>=) :: Result x a -> (a -> Result x b) -> Result x b
 result >>= function = andThen function result
+
+orErr :: y -> Result x a -> Result y a
+orErr _ (Ok value) = Ok value
+orErr err (Err _) = Err err

@@ -3,6 +3,7 @@ module Maybe (
     map2,
     withDefault,
     (>>=),
+    orErr,
 ) where
 
 import OpenSolid
@@ -23,3 +24,7 @@ withDefault value Nothing = value
 
 (>>=) :: Maybe a -> (a -> Maybe b) -> Maybe b
 (>>=) = (Prelude.>>=)
+
+orErr :: x -> Maybe a -> Result x a
+orErr _ (Just value) = Ok value
+orErr err Nothing = Err err
