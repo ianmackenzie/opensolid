@@ -68,13 +68,13 @@ rangeQtyMultiplication (Range low high) value
 qtyRangeDivision :: Division (Qty units1) (Qty units2) (Qty units3) => Qty units1 -> Range units2 -> Range units3
 qtyRangeDivision n (Range dl dh)
     | dl > zero || dh < zero = Range (n / dh) (n / dl)
-    | otherwise = Range (-infinity) infinity
+    | otherwise = Range -infinity infinity
 
 rangeQtyDivision :: Division (Qty units1) (Qty units2) (Qty units3) => Range units1 -> Qty units2 -> Range units3
 rangeQtyDivision (Range nl nh) d
     | d > zero = Range (nl / d) (nh / d)
     | d < zero = Range (nh / d) (nl / d)
-    | otherwise = Range (-infinity) infinity
+    | otherwise = Range -infinity infinity
 
 instance Multiplication (Qty units1) (Qty units2) (Qty units3) => Multiplication (Qty units1) (Range units2) (Range units3) where
     (*) = qtyRangeMultiplication
@@ -102,7 +102,7 @@ instance (Division (Qty units1) (Qty units2) (Qty units3)) => Division (Range un
     (Range nl nh) / (Range dl dh)
         | dl > zero = Range (nl / dh) (nh / dl)
         | dh < zero = Range (nh / dh) (nl / dl)
-        | otherwise = Range (-infinity) infinity
+        | otherwise = Range -infinity infinity
 
 instance Bounds (Range units) where
     aggregate (Range low1 high1) (Range low2 high2) = Range (min low1 low2) (max high1 high2)
@@ -167,8 +167,8 @@ bisect range =
 abs :: Range units -> Range units
 abs range
     | low >= zero = range
-    | high <= zero = negate range
-    | otherwise = Range zero (max high (negate low))
+    | high <= zero = -range
+    | otherwise = Range zero (max high -low)
   where
     (Range low high) = range
 

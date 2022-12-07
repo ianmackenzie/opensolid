@@ -121,5 +121,5 @@ normalize vectorBox =
 clampNormalized :: Range Unitless -> Range Unitless
 clampNormalized range =
     Range.unsafe
-        (clamp (-1.0) 1.0 (Range.minValue range))
-        (clamp (-1.0) 1.0 (Range.maxValue range))
+        (clamp -1.0 1.0 (Range.minValue range))
+        (clamp -1.0 1.0 (Range.maxValue range))
