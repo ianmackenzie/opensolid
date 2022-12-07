@@ -5,6 +5,7 @@ import qualified Area
 import qualified Curve1d
 import qualified Debug
 import qualified Direction2d
+import Direction3d ()
 import qualified Length
 import qualified List
 import qualified Maybe
