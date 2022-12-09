@@ -4,7 +4,7 @@ module OpenSolid (
     Qty (..),
     Int,
     Float,
-    String,
+    Text,
     List,
     Result (..),
     Negation (..),
@@ -76,7 +76,7 @@ import Prelude (
  )
 import Prelude qualified
 
-type String = Data.Text.Text
+type Text = Data.Text.Text
 
 type List a = [a]
 
@@ -178,7 +178,7 @@ class CrossProduct p q r | p q -> r where
 class Concatenation a where
     (++) :: a -> a -> a
 
-instance Concatenation String where
+instance Concatenation Text where
     (++) = Data.Text.append
 
 instance Concatenation (List a) where
@@ -190,7 +190,7 @@ fromInteger n = Nbr (Prelude.fromInteger n)
 fromRational :: Prelude.Rational -> Float
 fromRational x = Qty (Prelude.fromRational x)
 
-fromString :: Prelude.String -> String
+fromString :: Prelude.String -> Text
 fromString = Data.Text.pack
 
 float :: Int -> Float
@@ -206,7 +206,7 @@ identity = Prelude.id
 always :: a -> b -> a
 always = const
 
-error :: String -> a
+error :: Text -> a
 error message = Prelude.error (Data.Text.unpack message)
 
 notImplemented :: a

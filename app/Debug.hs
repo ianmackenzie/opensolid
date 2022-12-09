@@ -6,14 +6,14 @@ module Debug (
 
 import Debug.Trace qualified
 import OpenSolid
-import String qualified
+import Text qualified
 import Prelude qualified
 
-show :: Show a => a -> String
-show value = String.fromList (Prelude.show value)
+show :: Show a => a -> Text
+show value = Text.fromChars (Prelude.show value)
 
-trace :: String -> a -> a
-trace message value = Debug.Trace.trace (String.toList message) value
+trace :: Text -> a -> a
+trace message value = Debug.Trace.trace (Text.toChars message) value
 
-log :: Show a => String -> a -> a
+log :: Show a => Text -> a -> a
 log label value = trace (label ++ ": " ++ show value) value

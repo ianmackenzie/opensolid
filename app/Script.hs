@@ -44,8 +44,8 @@ succeed = Succeed
 fail :: x -> Script x a
 fail = Fail
 
-printLine :: String -> Script IOError ()
-printLine string = perform (Data.Text.IO.putStrLn string)
+printLine :: Text -> Script IOError ()
+printLine text = perform (Data.Text.IO.putStrLn text)
 
 forEach :: (a -> Script x ()) -> List a -> Script x ()
 forEach _ [] = succeed ()

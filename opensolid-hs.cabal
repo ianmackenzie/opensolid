@@ -50,7 +50,7 @@ executable opensolid-hs
         Float
         Units
         Debug
-        String
+        Text
         Maybe
         Result
         List
