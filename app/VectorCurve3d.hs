@@ -13,14 +13,14 @@ module VectorCurve3d (
 ) where
 
 import Curve1d (Curve1d (Curve1d), IsCurve1d)
-import qualified Curve1d
+import Curve1d qualified
 import OpenSolid hiding (zero)
 import Range (Range)
-import qualified Units
+import Units qualified
 import Vector3d (Vector3d (Vector3d))
-import qualified Vector3d
+import Vector3d qualified
 import VectorBox3d (VectorBox3d (VectorBox3d))
-import qualified VectorBox3d
+import VectorBox3d qualified
 
 class IsVectorCurve3d curve units coordinates | curve -> units, curve -> coordinates where
     pointOn :: curve -> Float -> Vector3d units coordinates

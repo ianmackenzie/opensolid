@@ -14,15 +14,15 @@ module Curve1d (
     roots,
 ) where
 
-import qualified List
+import List qualified
 import OpenSolid hiding (cos, sin, sqrt, zero)
-import qualified Qty
+import Qty qualified
 import Range (Range)
-import qualified Range
-import qualified Units
+import Range qualified
+import Units qualified
 import Vector3d (Vector3d)
 import {-# SOURCE #-} VectorCurve3d (VectorCurve3d)
-import {-# SOURCE #-} qualified VectorCurve3d
+import {-# SOURCE #-} VectorCurve3d qualified
 
 class IsCurve1d curve units | curve -> units where
     pointOn :: curve -> Float -> Qty units

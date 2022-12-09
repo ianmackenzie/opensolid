@@ -1,9 +1,9 @@
 module Line3d (Line3d (..)) where
 
-import qualified BoundingBox3d
+import BoundingBox3d qualified
 import Curve3d (IsCurve3d (..))
 import Point3d (Point3d)
-import qualified Point3d
+import Point3d qualified
 
 data Line3d coordinates
     = Line3d !(Point3d coordinates) !(Point3d coordinates)

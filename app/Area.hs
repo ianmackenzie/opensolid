@@ -5,7 +5,7 @@ module Area (
 ) where
 
 import OpenSolid
-import qualified Units
+import Units qualified
 
 squareMeter :: Area
 squareMeter = squareMeters 1.0

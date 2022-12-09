@@ -71,9 +71,9 @@ module OpenSolid (
 
 import Data.Coerce (coerce)
 import Data.Proxy (Proxy (Proxy))
-import qualified Data.Text
+import Data.Text qualified
 import GHC.TypeLits (KnownSymbol, Symbol, symbolVal)
-import qualified Units
+import Units qualified
 import Prelude (
     Bool (..),
     Char,
@@ -95,7 +95,7 @@ import Prelude (
     (.),
     (||),
  )
-import qualified Prelude
+import Prelude qualified
 
 type String = Data.Text.Text
 

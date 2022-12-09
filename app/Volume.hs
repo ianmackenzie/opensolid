@@ -7,9 +7,9 @@ module Volume (
     inCubicCentimeters,
 ) where
 
-import qualified Length
+import Length qualified
 import OpenSolid
-import qualified Units
+import Units qualified
 
 cubicMeter :: Volume
 cubicMeter = cubicMeters 1.0

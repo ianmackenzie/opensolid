@@ -8,7 +8,7 @@ module Angle (
 ) where
 
 import OpenSolid
-import qualified Units
+import Units qualified
 
 radian :: Angle
 radian = radians 1.0

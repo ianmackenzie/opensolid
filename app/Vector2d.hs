@@ -16,14 +16,14 @@ module Vector2d (
     normalize,
 ) where
 
-import qualified Area
+import Area qualified
 import {-# SOURCE #-} Direction2d (Direction2d)
-import {-# SOURCE #-} qualified Direction2d
-import qualified Length
+import {-# SOURCE #-} Direction2d qualified
+import Length qualified
 import OpenSolid hiding (zero)
 import {-# SOURCE #-} Point2d (Point2d (..))
-import qualified Qty
-import qualified Units
+import Qty qualified
+import Units qualified
 
 data Vector2d units coordinates = Vector2d !(Qty units) !(Qty units)
     deriving (Eq)

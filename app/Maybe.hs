@@ -7,7 +7,7 @@ module Maybe (
 ) where
 
 import OpenSolid
-import qualified Prelude
+import Prelude qualified
 
 map :: (a -> b) -> Maybe a -> Maybe b
 map = fmap

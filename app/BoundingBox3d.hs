@@ -12,7 +12,7 @@ import Bounds
 import OpenSolid
 import Point3d (Point3d (..))
 import Range (Range)
-import qualified Range
+import Range qualified
 
 data BoundingBox3d coordinates = BoundingBox3d !(Range Meters) !(Range Meters) !(Range Meters)
 

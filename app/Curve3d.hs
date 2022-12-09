@@ -4,7 +4,7 @@ module Curve3d (
 ) where
 
 import BoundingBox3d (BoundingBox3d)
-import qualified BoundingBox3d
+import BoundingBox3d qualified
 import OpenSolid
 import Point3d (Point3d)
 

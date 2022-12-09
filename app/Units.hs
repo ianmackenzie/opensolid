@@ -1,7 +1,7 @@
 module Units (Coercion (..)) where
 
 import Unsafe.Coerce (unsafeCoerce)
-import qualified Prelude
+import Prelude qualified
 
 class Coercion a b | a -> b where
     drop :: a -> b

@@ -7,9 +7,9 @@ module String (
     fromFloat,
 ) where
 
-import qualified Data.Text
+import Data.Text qualified
 import OpenSolid
-import qualified TextShow
+import TextShow qualified
 
 concat :: List String -> String
 concat = Data.Text.concat

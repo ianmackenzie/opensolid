@@ -4,10 +4,10 @@ module Debug (
     log,
 ) where
 
-import qualified Debug.Trace
+import Debug.Trace qualified
 import OpenSolid
-import qualified String
-import qualified Prelude
+import String qualified
+import Prelude qualified
 
 show :: Show a => a -> String
 show value = String.fromList (Prelude.show value)

@@ -11,8 +11,8 @@ module VectorBox3d (
 
 import OpenSolid
 import Range (Range)
-import qualified Range
-import qualified Units
+import Range qualified
+import Units qualified
 import Vector3d (Vector3d (..))
 
 data VectorBox3d units coordinates = VectorBox3d !(Range units) !(Range units) !(Range units)

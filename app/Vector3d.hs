@@ -19,14 +19,14 @@ module Vector3d (
     normalize,
 ) where
 
-import qualified Area
+import Area qualified
 import {-# SOURCE #-} Direction3d (Direction3d)
-import {-# SOURCE #-} qualified Direction3d
-import qualified Length
+import {-# SOURCE #-} Direction3d qualified
+import Length qualified
 import OpenSolid hiding (zero)
 import {-# SOURCE #-} Point3d (Point3d (..))
-import qualified Qty
-import qualified Units
+import Qty qualified
+import Units qualified
 
 data Vector3d units coordinates = Vector3d !(Qty units) !(Qty units) !(Qty units)
     deriving (Eq)

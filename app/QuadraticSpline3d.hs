@@ -1,9 +1,9 @@
 module QuadraticSpline3d (QuadraticSpline3d (..)) where
 
-import qualified BoundingBox3d
+import BoundingBox3d qualified
 import Curve3d (IsCurve3d (..))
 import Point3d (Point3d)
-import qualified Point3d
+import Point3d qualified
 
 data QuadraticSpline3d coordinates
     = QuadraticSpline3d

@@ -21,11 +21,11 @@ module Range (
     cos,
 ) where
 
-import qualified Angle
+import Angle qualified
 import Bounds (Bounds (..))
 import OpenSolid hiding (abs, cos, sin, sqrt, tan)
-import qualified Qty
-import qualified Units
+import Qty qualified
+import Units qualified
 
 data Range units = Range !(Qty units) !(Qty units)
     deriving (Eq)

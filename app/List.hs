@@ -13,10 +13,10 @@ module List (
     (>>=),
 ) where
 
-import qualified Data.List
-import qualified Data.Maybe
+import Data.List qualified
+import Data.Maybe qualified
 import OpenSolid
-import qualified Prelude
+import Prelude qualified
 
 isEmpty :: List a -> Bool
 isEmpty = Prelude.null

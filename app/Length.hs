@@ -8,7 +8,7 @@ module Length (
 ) where
 
 import OpenSolid
-import qualified Units
+import Units qualified
 
 meter :: Length
 meter = meters 1.0

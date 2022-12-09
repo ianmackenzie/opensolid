@@ -10,12 +10,12 @@ module Script (
     forEach,
 ) where
 
-import qualified Control.Exception
-import qualified Data.Text.IO
+import Control.Exception qualified
+import Data.Text.IO qualified
 import OpenSolid hiding ((>>))
-import qualified System.Exit
+import System.Exit qualified
 import Prelude (IOError)
-import qualified Prelude
+import Prelude qualified
 
 data Script x a
     = Succeed a

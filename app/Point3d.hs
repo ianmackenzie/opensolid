@@ -16,11 +16,11 @@ module Point3d (
 
 import Bounded (Bounded (..))
 import {-# SOURCE #-} BoundingBox3d (BoundingBox3d (..))
-import qualified Length
+import Length qualified
 import OpenSolid
-import qualified Qty
-import qualified Range
-import qualified Vector3d
+import Qty qualified
+import Range qualified
+import Vector3d qualified
 
 data Point3d coordinates = Point3d !Length !Length !Length
     deriving (Eq, Show)

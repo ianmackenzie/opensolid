@@ -1,23 +1,23 @@
 module Main (main) where
 
-import qualified Angle
-import qualified Area
-import qualified Curve1d
-import qualified Debug
-import qualified Direction2d
+import Angle qualified
+import Area qualified
+import Curve1d qualified
+import Debug qualified
+import Direction2d qualified
 import Direction3d ()
-import qualified Length
-import qualified List
-import qualified Maybe
+import Length qualified
+import List qualified
+import Maybe qualified
 import OpenSolid
 import Point2d (Point2d)
-import qualified Point2d
-import qualified Range
+import Point2d qualified
+import Range qualified
 import Script (IOError, Script)
-import qualified Script
-import qualified Vector2d
-import qualified Vector3d
-import qualified Volume
+import Script qualified
+import Vector2d qualified
+import Vector3d qualified
+import Volume qualified
 
 data MyPoints = MyPoints !(Point2d ()) !(Point2d ()) deriving (Show)
 

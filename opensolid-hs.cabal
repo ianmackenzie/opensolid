@@ -98,3 +98,4 @@ executable opensolid-hs
         RoleAnnotations
         RankNTypes
         LexicalNegation
+        ImportQualifiedPost

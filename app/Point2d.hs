@@ -11,11 +11,11 @@ module Point2d (
     translateBy,
 ) where
 
-import qualified Length
+import Length qualified
 import OpenSolid
-import qualified Qty
+import Qty qualified
 import Vector2d (Vector2d (..))
-import qualified Vector2d
+import Vector2d qualified
 
 data Point2d coordinates = Point2d !Length !Length
     deriving (Eq, Show)
