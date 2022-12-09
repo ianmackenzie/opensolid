@@ -21,13 +21,13 @@ data Point2d coordinates = Point2d !Length !Length
     deriving (Eq, Show)
 
 origin :: Point2d coordinates
-origin = Point2d zero zero
+origin = Point2d Qty.zero Qty.zero
 
 x :: Length -> Point2d coordinates
-x px = Point2d px zero
+x px = Point2d px Qty.zero
 
 y :: Length -> Point2d coordinates
-y py = Point2d zero py
+y py = Point2d Qty.zero py
 
 xy :: Length -> Length -> Point2d coordinates
 xy = Point2d

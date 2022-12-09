@@ -47,6 +47,7 @@ executable opensolid-hs
     default-language: Haskell2010
     other-modules:
         OpenSolid
+        Float
         Units
         Debug
         String

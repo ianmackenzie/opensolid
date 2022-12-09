@@ -5,18 +5,37 @@ module Qty (
     interpolateFrom,
     midpoint,
     sqrt,
-    sin,
-    cos,
-    tan,
-    asin,
-    acos,
-    atan,
-    atan2,
     abs,
     clamp,
 ) where
 
+import Data.Coerce (coerce)
 import OpenSolid
+import Prelude qualified
+
+zero :: Qty units
+zero = coerce 0.0
+
+infinity :: Qty units
+infinity = coerce (1.0 / 0.0)
+
+isNaN :: Qty units -> Bool
+isNaN (Qty x) = Prelude.isNaN x
+
+sqrt :: Sqrt (Qty units1) (Qty units2) => Qty units1 -> Qty units2
+sqrt (Qty x) = Qty (Prelude.sqrt x)
+
+abs :: Qty units -> Qty units
+abs (Qty x) = Qty (Prelude.abs x)
+
+clamp :: Qty units -> Qty units -> Qty units -> Qty units
+clamp a b value
+    | value < low = low
+    | value > high = high
+    | otherwise = value
+  where
+    low = min a b
+    high = max a b
 
 interpolateFrom :: Qty units -> Qty units -> Float -> Qty units
 interpolateFrom a b t

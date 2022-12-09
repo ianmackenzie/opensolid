@@ -7,12 +7,12 @@ module OpenSolid (
     String,
     List,
     Result (..),
-    Sqrt,
     Negation (..),
     Addition (..),
     Subtraction (..),
     Multiplication (..),
     Division (..),
+    Sqrt,
     (//),
     DotProduct (..),
     CrossProduct (..),
@@ -27,22 +27,6 @@ module OpenSolid (
     error,
     notImplemented,
     subtract,
-    zero,
-    infinity,
-    isNaN,
-    abs,
-    clamp,
-    floor,
-    ceiling,
-    sqrt,
-    sin,
-    cos,
-    tan,
-    asin,
-    acos,
-    atan,
-    atan2,
-    pi,
     (|>),
     (<|),
     (>>),
@@ -65,7 +49,6 @@ module OpenSolid (
     MetersPerSecondSquared,
 ) where
 
-import Data.Coerce (coerce)
 import Data.Proxy (Proxy (Proxy))
 import Data.Text qualified
 import GHC.TypeLits (KnownSymbol, Symbol, symbolVal)
@@ -183,10 +166,6 @@ instance Subtraction Nbr Nbr Nbr where
 instance Subtraction Qty Qty Qty where
     (Qty x) - (Qty y) = Qty (x Prelude.- y)
 
-class Sqrt a b | a -> b
-
-instance Sqrt Float Float
-
 (//) :: Int -> Int -> Int
 (Nbr n) // (Nbr m) = Nbr (Prelude.quot n m)
 
@@ -235,60 +214,6 @@ notImplemented = error "Not implemented"
 
 subtract :: Subtraction p q r => q a -> p a -> r a
 subtract b a = a - b
-
-zero :: Qty units
-zero = coerce 0.0
-
-infinity :: Qty units
-infinity = coerce (1.0 / 0.0)
-
-isNaN :: Qty units -> Bool
-isNaN (Qty x) = Prelude.isNaN x
-
-abs :: Qty units -> Qty units
-abs (Qty x) = Qty (Prelude.abs x)
-
-clamp :: Qty units -> Qty units -> Qty units -> Qty units
-clamp a b value
-    | value < low = low
-    | value > high = high
-    | otherwise = value
-  where
-    low = min a b
-    high = max a b
-
-floor :: Float -> Int
-floor (Qty x) = Nbr (Prelude.floor x)
-
-ceiling :: Float -> Int
-ceiling (Qty x) = Nbr (Prelude.ceiling x)
-
-sqrt :: Sqrt (Qty units1) (Qty units2) => Qty units1 -> Qty units2
-sqrt (Qty x) = Qty (Prelude.sqrt x)
-
-sin :: Angle -> Float
-sin (Qty x) = Qty (Prelude.sin x)
-
-cos :: Angle -> Float
-cos (Qty x) = Qty (Prelude.cos x)
-
-tan :: Angle -> Float
-tan (Qty x) = Qty (Prelude.tan x)
-
-asin :: Float -> Angle
-asin (Qty x) = Qty (Prelude.asin x)
-
-acos :: Float -> Angle
-acos (Qty x) = Qty (Prelude.acos x)
-
-atan :: Float -> Angle
-atan (Qty x) = Qty (Prelude.atan x)
-
-atan2 :: Qty units -> Qty units -> Angle
-atan2 (Qty y) (Qty x) = Qty (Prelude.atan2 y x)
-
-pi :: Float
-pi = Prelude.pi
 
 (|>) :: a -> (a -> b) -> b
 (|>) value function = function value
@@ -359,6 +284,10 @@ instance Division (Qty units) Int (Qty units) where
 
 instance Division Float (Qty units1) (Qty units2) => Division Int (Qty units1) (Qty units2) where
     n / x = float n / x
+
+class Sqrt a b | a -> b
+
+instance Sqrt Float Float
 
 instance {-# OVERLAPS #-} Show Float where
     show (Qty x) = Prelude.show x

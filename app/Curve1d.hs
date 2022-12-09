@@ -14,8 +14,9 @@ module Curve1d (
     roots,
 ) where
 
+import Angle qualified
 import List qualified
-import OpenSolid hiding (cos, sin, sqrt, zero)
+import OpenSolid
 import Qty qualified
 import Range (Range)
 import Range qualified
@@ -60,8 +61,8 @@ instance IsCurve1d (Curve1d units) units where
             Quotient c1 c2 -> pointOn c1 t / pointOn c2 t
             Squared c -> let x = pointOn c t in x * x
             SquareRoot c -> Qty.sqrt (pointOn c t)
-            Sin c -> Qty.sin (pointOn c t)
-            Cos c -> Qty.cos (pointOn c t)
+            Sin c -> Angle.sin (pointOn c t)
+            Cos c -> Angle.cos (pointOn c t)
 
     segmentBounds curve t =
         case curve of
@@ -195,20 +196,20 @@ sqrt curve = SquareRoot curve
 
 sin :: Curve1d Radians -> Curve1d Unitless
 sin Zero = Zero
-sin (Constant x) = constant (Qty.sin x)
+sin (Constant x) = constant (Angle.sin x)
 sin curve = Sin curve
 
 cos :: Curve1d Radians -> Curve1d Unitless
 cos Zero = Constant 1.0
-cos (Constant x) = constant (Qty.cos x)
+cos (Constant x) = constant (Angle.cos x)
 cos curve = Cos curve
 
 roots :: Qty units -> Curve1d units -> List Float
 roots tolerance curve =
     let firstDerivative = derivative curve
         secondDerivative = derivative firstDerivative
-        root0 = [0.0 | abs (pointOn curve 0.0) <= tolerance]
-        root1 = [1.0 | abs (pointOn curve 1.0) <= tolerance]
+        root0 = [0.0 | Qty.abs (pointOn curve 0.0) <= tolerance]
+        root1 = [1.0 | Qty.abs (pointOn curve 1.0) <= tolerance]
      in deduplicate (root0 ++ solve tolerance curve firstDerivative secondDerivative Range.unit ++ root1)
 
 deduplicate :: List Float -> List Float
@@ -224,7 +225,7 @@ solve tolerance curve firstDerivative secondDerivative domain
     | resolution secondDerivative domain > 0.5 =
         case solveMonotonic firstDerivative domain of
             Just rootX ->
-                if abs (pointOn curve rootX) <= tolerance
+                if Qty.abs (pointOn curve rootX) <= tolerance
                     then [rootX]
                     else
                         let (x1, x2) = Range.endpoints domain

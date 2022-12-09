@@ -14,7 +14,7 @@ module VectorCurve3d (
 
 import Curve1d (Curve1d (Curve1d), IsCurve1d)
 import Curve1d qualified
-import OpenSolid hiding (zero)
+import OpenSolid
 import Range (Range)
 import Units qualified
 import Vector3d (Vector3d (Vector3d))

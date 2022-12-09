@@ -1,4 +1,11 @@
 module Angle (
+    sin,
+    cos,
+    tan,
+    asin,
+    acos,
+    atan,
+    atan2,
     radians,
     inRadians,
     radian,
@@ -7,8 +14,31 @@ module Angle (
     degree,
 ) where
 
+import Float qualified
 import OpenSolid
 import Units qualified
+import Prelude qualified
+
+sin :: Angle -> Float
+sin (Qty x) = Qty (Prelude.sin x)
+
+cos :: Angle -> Float
+cos (Qty x) = Qty (Prelude.cos x)
+
+tan :: Angle -> Float
+tan (Qty x) = Qty (Prelude.tan x)
+
+asin :: Float -> Angle
+asin (Qty x) = Qty (Prelude.asin x)
+
+acos :: Float -> Angle
+acos (Qty x) = Qty (Prelude.acos x)
+
+atan :: Float -> Angle
+atan (Qty x) = Qty (Prelude.atan x)
+
+atan2 :: Qty units -> Qty units -> Angle
+atan2 (Qty y) (Qty x) = Qty (Prelude.atan2 y x)
 
 radian :: Angle
 radian = radians 1.0
@@ -20,7 +50,7 @@ inRadians :: Angle -> Float
 inRadians = Units.drop
 
 degree :: Angle
-degree = radians (pi / 180)
+degree = radians (Float.pi / 180.0)
 
 degrees :: Float -> Angle
 degrees = (* degree)

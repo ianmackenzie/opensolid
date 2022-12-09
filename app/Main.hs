@@ -6,12 +6,14 @@ import Curve1d qualified
 import Debug qualified
 import Direction2d qualified
 import Direction3d ()
+import Float qualified
 import Length qualified
 import List qualified
 import Maybe qualified
 import OpenSolid
 import Point2d (Point2d)
 import Point2d qualified
+import Qty qualified
 import Range qualified
 import Script (IOError, Script)
 import Script qualified
@@ -28,7 +30,7 @@ listTest = List.do
     [(a, b) | a + b == 10]
 
 equalWithin :: "tolerance" ::: Length -> Length -> Length -> Bool
-equalWithin tolerance x y = abs (x - y) <= tolerance
+equalWithin tolerance x y = Qty.abs (x - y) <= tolerance
 
 script :: Script IOError ()
 script = Script.do
@@ -49,7 +51,7 @@ script = Script.do
     log "Tuple" (Point2d.meters 1.0 2.0, Point2d.meters 3.0 4.0)
     log "Custom type" (MyPoints (Point2d.meters 1.0 2.0) (Point2d.meters 3.0 4.0))
     log "Roots" roots
-    log "sqrt 2.0" (sqrt 2.0)
+    log "sqrt 2.0" (Qty.sqrt 2.0)
     log "List test" listTest
     log "Equality test" (equalWithin Length.centimeter (Length.meters 1.0) (Length.meters 1.005))
     log "Roots" expressionRoots
@@ -65,7 +67,7 @@ script = Script.do
     v2 = k * Vector2d.meters 3.0 4.0
     dotProduct = v1 <> v2
     determinant = Vector2d.determinant v1 v2
-    squareRoot = sqrt dotProduct
+    squareRoot = Qty.sqrt dotProduct
     translatedPoint = Point2d.meters 2.0 3.0 |> Point2d.translateBy (Vector2d.meters 4.0 5.0)
     vectorSum = Vector2d.meters 1.0 2.0 + Vector2d.meters 2.0 3.0
     crossProduct = Vector3d.meters 1.0 2.0 3.0 >< Vector3d.meters 4.0 5.0 6.0
@@ -76,7 +78,7 @@ script = Script.do
     x = 3.0 * t
     y = Curve1d.squared (x - 1.0) * (x - 2.0)
     roots = Curve1d.roots 1e-12 y
-    theta = Angle.radians (2 * pi) * t
+    theta = Angle.radians (2 * Float.pi) * t
     expression = Curve1d.squared (Curve1d.sin theta)
     expressionRoots = Curve1d.roots 1e-12 expression
 

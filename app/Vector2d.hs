@@ -20,7 +20,7 @@ import Area qualified
 import {-# SOURCE #-} Direction2d (Direction2d)
 import {-# SOURCE #-} Direction2d qualified
 import Length qualified
-import OpenSolid hiding (zero)
+import OpenSolid
 import {-# SOURCE #-} Point2d (Point2d (..))
 import Qty qualified
 import Units qualified
@@ -91,7 +91,7 @@ magnitude :: Vector2d units coordinates -> Qty units
 magnitude (Vector2d vx vy) =
     let fx = Units.drop vx
         fy = Units.drop vy
-     in Units.add (sqrt (fx * fx + fy * fy))
+     in Units.add (Qty.sqrt (fx * fx + fy * fy))
 
 squaredMagnitude :: Multiplication (Qty units1) (Qty units1) (Qty units2) => Vector2d units1 coordinates -> Qty units2
 squaredMagnitude (Vector2d vx vy) = vx * vx + vy * vy

@@ -23,7 +23,7 @@ import Area qualified
 import {-# SOURCE #-} Direction3d (Direction3d)
 import {-# SOURCE #-} Direction3d qualified
 import Length qualified
-import OpenSolid hiding (zero)
+import OpenSolid
 import {-# SOURCE #-} Point3d (Point3d (..))
 import Qty qualified
 import Units qualified
@@ -107,7 +107,7 @@ magnitude (Vector3d vx vy vz) =
     let fx = Units.drop vx
         fy = Units.drop vy
         fz = Units.drop vz
-     in Units.add (sqrt (fx * fx + fy * fy + fz * fz))
+     in Units.add (Qty.sqrt (fx * fx + fy * fy + fz * fz))
 
 squaredMagnitude :: Multiplication (Qty units1) (Qty units1) (Qty units2) => Vector3d units1 coordinates -> Qty units2
 squaredMagnitude (Vector3d vx vy vz) = vx * vx + vy * vy + vz * vz

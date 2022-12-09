@@ -29,25 +29,25 @@ instance Bounded (Point3d coordinates) (BoundingBox3d coordinates) where
     bounds (Point3d px py pz) = BoundingBox3d (Range.constant px) (Range.constant py) (Range.constant pz)
 
 origin :: Point3d coordinates
-origin = Point3d zero zero zero
+origin = Point3d Qty.zero Qty.zero Qty.zero
 
 x :: Length -> Point3d coordinates
-x px = Point3d px zero zero
+x px = Point3d px Qty.zero Qty.zero
 
 y :: Length -> Point3d coordinates
-y py = Point3d zero py zero
+y py = Point3d Qty.zero py Qty.zero
 
 z :: Length -> Point3d coordinates
-z pz = Point3d zero zero pz
+z pz = Point3d Qty.zero Qty.zero pz
 
 xy :: Length -> Length -> Point3d coordinates
-xy px py = Point3d px py zero
+xy px py = Point3d px py Qty.zero
 
 xz :: Length -> Length -> Point3d coordinates
-xz px pz = Point3d px zero pz
+xz px pz = Point3d px Qty.zero pz
 
 yz :: Length -> Length -> Point3d coordinates
-yz py pz = Point3d zero py pz
+yz py pz = Point3d Qty.zero py pz
 
 xyz :: Length -> Length -> Length -> Point3d coordinates
 xyz = Point3d
