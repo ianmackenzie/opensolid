@@ -27,14 +27,8 @@ listTest = List.do
     b <- [1 .. 10]
     [(a, b) | a + b == 10]
 
-equalWithin :: Named "tolerance" Length -> Length -> Length -> Bool
-equalWithin (Named tolerance) x y = abs (x - y) <= tolerance
-
-data Age = Young | MiddleAged | Old deriving (Eq, Show)
-
-getName :: Get "name" String record => record -> String
-getName record =
-    get #name record
+equalWithin :: "tolerance" ::: Length -> Length -> Length -> Bool
+equalWithin tolerance x y = abs (x - y) <= tolerance
 
 script :: Script IOError ()
 script = Script.do
@@ -57,15 +51,8 @@ script = Script.do
     log "Roots" roots
     log "sqrt 2.0" (sqrt 2.0)
     log "List test" listTest
-    log "Named argument" arg
-    log "Equality test" (equalWithin (#tolerance Length.centimeter) (Length.meters 1.0) (Length.meters 1.005))
+    log "Equality test" (equalWithin Length.centimeter (Length.meters 1.0) (Length.meters 1.005))
     log "Roots" expressionRoots
-    log "First name field" firstName
-    log "Person age" (get #age person)
-    log "Updated person" newPerson
-    log "Baby name" (getName baby)
-    log "Baby age" (get #age baby)
-    log "Blue values" (List.map (get #blue) colors)
     log "Or test" (Vector3d.direction Vector3d.zero |> Maybe.orErr "Zero vector")
   where
     log label value = Script.printLine (label ++ ": " ++ Debug.show value)
@@ -89,15 +76,9 @@ script = Script.do
     x = 3.0 * t
     y = Curve1d.squared (x - 1.0) * (x - 2.0)
     roots = Curve1d.roots 1e-12 y
-    arg = #radius (Length.meters 3.0)
     theta = Angle.radians (2 * pi) * t
     expression = Curve1d.squared (Curve1d.sin theta)
     expressionRoots = Curve1d.roots 1e-12 expression
-    person = (#age 40, #firstName "Ian", #lastName "Mackenzie")
-    firstName = get #firstName person
-    newPerson = person |> set #age 41
-    baby = (#name "Kiana", #age Young)
-    colors = [(#red 255, #green 0, #blue 0), (#red 0, #green 0, #blue 255)]
 
 main :: IO ()
 main =

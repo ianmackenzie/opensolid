@@ -47,11 +47,7 @@ module OpenSolid (
     (<|),
     (>>),
     (<<),
-    Named (..),
-    Name,
-    fromLabel,
-    Get (..),
-    Set (..),
+    (:::),
     Unitless,
     Angle,
     Radians,
@@ -318,56 +314,7 @@ infixl 9 <<
 
 infixr 9 >>
 
-newtype Named (name :: Symbol) value = Named value deriving (Eq)
-
-instance (KnownSymbol name, Show value) => Show (Named name value) where
-    showsPrec precedence (Named value) =
-        let string = '#' : symbolVal (Proxy :: Proxy name) ++ (' ' : Prelude.showsPrec (unNbr 10) value [])
-         in Prelude.showParen (Nbr precedence >= 10) (Prelude.showString string)
-
-class Nameable (name :: Symbol) value where
-    fromLabel :: value -> Named name value
-    fromLabel = Named
-
-instance Nameable (name :: Symbol) value
-
-type Name (name :: Symbol) = forall value. value -> Named name value
-
-class Get (name :: Symbol) value record | record name -> value where
-    get :: Name name -> record -> value
-
-instance forall name value field2. Get name value (Named name value, field2) where
-    get _ (Named value, _) = value
-
-instance forall name value field1. Get name value (field1, Named name value) where
-    get _ (_, Named value) = value
-
-instance forall name value field2 field3. Get name value (Named name value, field2, field3) where
-    get _ (Named value, _, _) = value
-
-instance forall name value field1 field3. Get name value (field1, Named name value, field3) where
-    get _ (_, Named value, _) = value
-
-instance forall name value field1 field2. Get name value (field1, field2, Named name value) where
-    get _ (_, _, Named value) = value
-
-class Set (name :: Symbol) value record | record name -> value where
-    set :: Name name -> value -> record -> record
-
-instance forall name value field2. Set name value (Named name value, field2) where
-    set _ value (Named _, field2) = (Named value, field2)
-
-instance forall name value field1. Set name value (field1, Named name value) where
-    set _ value (field1, Named _) = (field1, Named value)
-
-instance forall name value field2 field3. Set name value (Named name value, field2, field3) where
-    set _ value (Named _, field2, field3) = (Named value, field2, field3)
-
-instance forall name value field1 field3. Set name value (field1, Named name value, field3) where
-    set _ value (field1, Named _, field3) = (field1, Named value, field3)
-
-instance forall name value field1 field2. Set name value (field1, field2, Named name value) where
-    set _ value (field1, field2, Named _) = (field1, field2, Named value)
+type (name :: Symbol) ::: a = a
 
 instance Units.Coercion (Nbr units) Int
 

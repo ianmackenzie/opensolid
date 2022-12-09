@@ -99,3 +99,4 @@ executable opensolid-hs
         RankNTypes
         LexicalNegation
         ImportQualifiedPost
+        TypeOperators
