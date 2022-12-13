@@ -21,11 +21,16 @@ data Script x a
     | Perform (IO (Script x a))
 
 instance Functor (Script x) where
-    fmap function script = script >>= (succeed . function)
+    fmap function (Succeed value) = Succeed (function value)
+    fmap _ (Fail err) = Fail err
+    fmap function (Perform io) = Perform (fmap (fmap function) io)
 
 instance Applicative (Script x) where
     pure = succeed
-    script1 <*> script2 = script1 >>= (`fmap` script2)
+
+    Succeed function <*> script = fmap function script
+    Fail err <*> _ = Fail err
+    Perform io <*> script = Perform (fmap (<*> script) io)
 
 instance Monad (Script x) where
     Succeed value >>= function = function value
