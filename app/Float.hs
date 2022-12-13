@@ -2,6 +2,7 @@ module Float (
     ceiling,
     floor,
     pi,
+    pow,
 ) where
 
 import OpenSolid
@@ -15,3 +16,6 @@ ceiling (Qty x) = Nbr (Prelude.ceiling x)
 
 pi :: Float
 pi = Prelude.pi
+
+pow :: Float -> Float -> Float
+pow = (Prelude.**)
