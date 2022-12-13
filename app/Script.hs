@@ -38,7 +38,7 @@ perform io = Perform (Control.Exception.catch (fmap succeed io) (pure . fail))
 run :: Script IOError () -> IO ()
 run (Succeed ()) = System.Exit.exitSuccess
 run (Fail ioError) = Prelude.ioError ioError
-run (Perform io) = io Prelude.>>= run
+run (Perform io) = io >>= run
 
 succeed :: a -> Script x a
 succeed = Succeed
