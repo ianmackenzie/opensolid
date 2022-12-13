@@ -29,8 +29,6 @@ module OpenSolid (
     subtract,
     (|>),
     (<|),
-    (>>),
-    (<<),
     (:::),
     Unitless,
     Angle,
@@ -54,12 +52,15 @@ import Data.Text qualified
 import GHC.TypeLits (KnownSymbol, Symbol, symbolVal)
 import Units qualified
 import Prelude (
+    Applicative (..),
     Bool (..),
     Char,
     Enum,
     Eq (..),
+    Functor (..),
     IO,
     Maybe (..),
+    Monad (..),
     Ord (..),
     Show,
     const,
@@ -221,12 +222,6 @@ subtract b a = a - b
 (<|) :: (a -> b) -> a -> b
 (<|) = identity
 
-(>>) :: (a -> b) -> (b -> c) -> (a -> c)
-(>>) f g x = g (f x)
-
-(<<) :: (b -> c) -> (a -> b) -> (a -> c)
-(<<) f g x = f (g x)
-
 infixr 0 <|
 
 infixl 0 |>
@@ -234,10 +229,6 @@ infixl 0 |>
 infixl 6 +, -
 
 infixl 7 *, /, //
-
-infixl 9 <<
-
-infixr 9 >>
 
 type (name :: Symbol) ::: a = a
 

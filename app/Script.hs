@@ -2,8 +2,6 @@ module Script (
     Script,
     IOError,
     run,
-    (>>),
-    (>>=),
     succeed,
     fail,
     printLine,
@@ -12,7 +10,7 @@ module Script (
 
 import Control.Exception qualified
 import Data.Text.IO qualified
-import OpenSolid hiding ((>>))
+import OpenSolid
 import System.Exit qualified
 import Prelude (IOError)
 import Prelude qualified
@@ -22,16 +20,20 @@ data Script x a
     | Fail x
     | Perform (IO (Script x a))
 
-(>>) :: Script x () -> Script x a -> Script x a
-script1 >> script2 = script1 >>= (\() -> script2)
+instance Functor (Script x) where
+    fmap function script = script >>= (succeed . function)
 
-(>>=) :: Script x a -> (a -> Script x b) -> Script x b
-Succeed value >>= function = function value
-Fail err >>= _ = Fail err
-Perform io >>= function = Perform (fmap (>>= function) io)
+instance Applicative (Script x) where
+    pure = succeed
+    script1 <*> script2 = script1 >>= (`fmap` script2)
+
+instance Monad (Script x) where
+    Succeed value >>= function = function value
+    Fail err >>= _ = Fail err
+    Perform io >>= function = Perform (fmap (>>= function) io)
 
 perform :: IO a -> Script IOError a
-perform io = Perform (Control.Exception.catch (fmap Succeed io) (pure << Fail))
+perform io = Perform (Control.Exception.catch (fmap succeed io) (pure . fail))
 
 run :: Script IOError () -> IO ()
 run (Succeed ()) = System.Exit.exitSuccess

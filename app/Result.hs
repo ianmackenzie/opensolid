@@ -32,9 +32,6 @@ mapErr :: (x -> y) -> Result x a -> Result y a
 mapErr _ (Ok value) = Ok value
 mapErr function (Err err) = Err (function err)
 
-(>>=) :: Result x a -> (a -> Result x b) -> Result x b
-result >>= function = andThen function result
-
 orErr :: y -> Result x a -> Result y a
 orErr _ (Ok value) = Ok value
 orErr err (Err _) = Err err

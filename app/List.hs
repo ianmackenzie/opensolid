@@ -51,6 +51,3 @@ reverse = Data.List.reverse
 
 drop :: Int -> List a -> List a
 drop (Nbr n) list = Prelude.drop n list
-
-(>>=) :: List a -> (a -> List b) -> List b
-(>>=) = (Prelude.>>=)

@@ -8,7 +8,6 @@ import Direction2d qualified
 import Direction3d ()
 import Float qualified
 import Length qualified
-import List qualified
 import Maybe qualified
 import OpenSolid
 import Point2d (Point2d)
@@ -24,7 +23,7 @@ import Volume qualified
 data MyPoints = MyPoints !(Point2d ()) !(Point2d ()) deriving (Show)
 
 listTest :: List (Int, Int)
-listTest = List.do
+listTest = do
     a <- [1 .. 10]
     b <- [1 .. 10]
     [(a, b) | a + b == 10]
@@ -33,7 +32,7 @@ equalWithin :: "tolerance" ::: Length -> Length -> Length -> Bool
 equalWithin tolerance x y = Qty.abs (x - y) <= tolerance
 
 script :: Script IOError ()
-script = Script.do
+script = do
     log "Integer product" (3 * 4)
     log "Volume in cubic centimeters" volumeInCubicCentimeters
     log "Integer division" (10 // 4)

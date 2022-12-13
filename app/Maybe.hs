@@ -7,7 +7,6 @@ module Maybe (
 ) where
 
 import OpenSolid
-import Prelude qualified
 
 map :: (a -> b) -> Maybe a -> Maybe b
 map = fmap
@@ -21,9 +20,6 @@ map2 function maybeA maybeB = do
 withDefault :: a -> Maybe a -> a
 withDefault _ (Just value) = value
 withDefault value Nothing = value
-
-(>>=) :: Maybe a -> (a -> Maybe b) -> Maybe b
-(>>=) = (Prelude.>>=)
 
 orErr :: x -> Maybe a -> Result x a
 orErr _ (Just value) = Ok value
