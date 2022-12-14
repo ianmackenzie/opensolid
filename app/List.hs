@@ -11,10 +11,12 @@ module List (
     reverse,
     drop,
     (>>=),
+    sum,
 ) where
 
 import Data.List qualified
 import Data.Maybe qualified
+import Generic qualified
 import OpenSolid
 import Prelude qualified
 
@@ -51,3 +53,6 @@ reverse = Data.List.reverse
 
 drop :: Int -> List a -> List a
 drop (Nbr n) list = Prelude.drop n list
+
+sum :: (Generic.Zero p, Addition p p p) => List (p a) -> p a
+sum = foldl (+) Generic.zero

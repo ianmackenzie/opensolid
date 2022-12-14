@@ -22,6 +22,7 @@ module Vector3d (
 import Area qualified
 import {-# SOURCE #-} Direction3d (Direction3d)
 import {-# SOURCE #-} Direction3d qualified
+import Generic qualified
 import Length qualified
 import OpenSolid
 import {-# SOURCE #-} Point3d (Point3d (..))
@@ -32,6 +33,9 @@ data Vector3d units coordinates = Vector3d !(Qty units) !(Qty units) !(Qty units
     deriving (Eq)
 
 deriving instance Show (Qty units) => Show (Vector3d units coordinates)
+
+instance Generic.Zero (Vector3d units) where
+    zero = zero
 
 instance Negation (Vector3d units coordinates) where
     negate (Vector3d vx vy vz) = Vector3d (negate vx) (negate vy) (negate vz)

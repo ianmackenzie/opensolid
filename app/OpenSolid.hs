@@ -47,9 +47,11 @@ module OpenSolid (
     MetersPerSecondSquared,
 ) where
 
+import Data.Coerce (coerce)
 import Data.Proxy (Proxy (Proxy))
 import Data.Text qualified
 import GHC.TypeLits (KnownSymbol, Symbol, symbolVal)
+import Generic qualified
 import Units qualified
 import Prelude (
     Applicative (..),
@@ -154,6 +156,12 @@ instance Negation (Nbr units) where
 
 instance Negation (Qty units) where
     negate (Qty x) = Qty (Prelude.negate x)
+
+instance Generic.Zero Nbr where
+    zero = coerce 0
+
+instance Generic.Zero Qty where
+    zero = coerce 0.0
 
 instance Addition Nbr Nbr Nbr where
     (Nbr n) + (Nbr m) = Nbr (n Prelude.+ m)

@@ -9,16 +9,21 @@ module VectorBox3d (
     normalize,
 ) where
 
+import Generic qualified
 import OpenSolid
 import Qty qualified
 import Range (Range)
 import Range qualified
 import Units qualified
 import Vector3d (Vector3d (..))
+import Vector3d qualified
 
 data VectorBox3d units coordinates = VectorBox3d !(Range units) !(Range units) !(Range units)
 
 instance Units.Coercion (VectorBox3d units coordinates) (VectorBox3d Unitless coordinates)
+
+instance Generic.Zero (VectorBox3d units) where
+    zero = constant Vector3d.zero
 
 instance Negation (VectorBox3d units coordinates) where
     negate (VectorBox3d x y z) = VectorBox3d (negate x) (negate y) (negate z)

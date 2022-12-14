@@ -46,6 +46,7 @@ executable opensolid-hs
     hs-source-dirs:   app
     default-language: Haskell2010
     other-modules:
+        Generic
         OpenSolid
         Float
         Units

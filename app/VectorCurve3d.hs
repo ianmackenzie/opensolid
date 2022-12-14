@@ -14,6 +14,7 @@ module VectorCurve3d (
 
 import Curve1d (Curve1d (Curve1d), IsCurve1d)
 import Curve1d qualified
+import Generic qualified
 import OpenSolid
 import Range (Range)
 import Units qualified
@@ -60,6 +61,9 @@ constant vector =
 zero :: VectorCurve3d units coordinates
 zero =
     constant Vector3d.zero
+
+instance Generic.Zero (VectorCurve3d units) where
+    zero = zero
 
 data XYZ units coordinates = XYZ (Curve1d units) (Curve1d units) (Curve1d units)
 

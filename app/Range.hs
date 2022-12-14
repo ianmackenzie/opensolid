@@ -24,6 +24,7 @@ module Range (
 import Angle qualified
 import Bounds (Bounds (..))
 import Float qualified
+import Generic qualified
 import OpenSolid
 import Qty qualified
 import Units qualified
@@ -37,6 +38,9 @@ instance Units.Coercion (Range units) (Range Unitless)
 
 instance Negation (Range units) where
     negate (Range low high) = Range (negate high) (negate low)
+
+instance Generic.Zero Range where
+    zero = constant Qty.zero
 
 instance Addition Range Range Range where
     (Range low1 high1) + (Range low2 high2) = Range (low1 + low2) (high1 + high2)

@@ -19,6 +19,7 @@ module Vector2d (
 import Area qualified
 import {-# SOURCE #-} Direction2d (Direction2d)
 import {-# SOURCE #-} Direction2d qualified
+import Generic qualified
 import Length qualified
 import OpenSolid
 import {-# SOURCE #-} Point2d (Point2d (..))
@@ -29,6 +30,9 @@ data Vector2d units coordinates = Vector2d !(Qty units) !(Qty units)
     deriving (Eq)
 
 deriving instance Show (Qty units) => Show (Vector2d units coordinates)
+
+instance Generic.Zero (Vector2d units) where
+    zero = zero
 
 instance Negation (Vector2d units coordinates) where
     negate (Vector2d vx vy) = Vector2d (negate vx) (negate vy)

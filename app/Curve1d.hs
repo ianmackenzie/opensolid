@@ -15,6 +15,7 @@ module Curve1d (
 ) where
 
 import Angle qualified
+import Generic qualified
 import List qualified
 import OpenSolid
 import Qty qualified
@@ -108,6 +109,9 @@ constant value = if value == Qty.zero then Zero else Constant value
 
 parameter :: Curve1d Unitless
 parameter = Parameter
+
+instance Generic.Zero Curve1d where
+    zero = Zero
 
 instance Negation (Curve1d units) where
     negate Zero = Zero
