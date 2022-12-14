@@ -19,6 +19,8 @@ module Range (
     overlaps,
     sin,
     cos,
+    interpolate,
+    interpolationParameter,
 ) where
 
 import Angle qualified
@@ -206,3 +208,14 @@ cosIncludesMax :: Range Radians -> Bool
 cosIncludesMax (Range low high) =
     let twoPi = Angle.radians (2 * Float.pi)
      in Float.floor (low / twoPi) /= Float.floor (high / twoPi)
+
+interpolate :: Range units -> Float -> Qty units
+interpolate (Range low high) t =
+    Qty.interpolateFrom low high t
+
+interpolationParameter :: Range units -> Qty units -> Float
+interpolationParameter (Range low high) value
+    | low < high = (value - low) / (high - low)
+    | value < low = -Qty.infinity
+    | value > high = Qty.infinity
+    | otherwise = 0.0
