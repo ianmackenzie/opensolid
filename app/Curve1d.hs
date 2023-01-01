@@ -123,6 +123,7 @@ instance Negation (Curve1d units) where
     negate Zero = Zero
     negate (Constant x) = Constant (negate x)
     negate (Negated curve) = curve
+    negate (Difference c1 c2) = Difference c2 c1
     negate (Product c1 c2) = negate c1 * c2
     negate curve = Negated curve
 
