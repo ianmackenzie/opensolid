@@ -41,8 +41,8 @@ data Curve1d units where
     Difference :: Curve1d units -> Curve1d units -> Curve1d units
     Product :: forall units1 units2 units3. Multiplication (Qty units1) (Qty units2) (Qty units3) => Curve1d units1 -> Curve1d units2 -> Curve1d units3
     Quotient :: forall units1 units2 units3. Division (Qty units1) (Qty units2) (Qty units3) => Curve1d units1 -> Curve1d units2 -> Curve1d units3
-    Squared :: forall units1 units2. Multiplication (Qty units1) (Qty units1) (Qty units2) => Curve1d units1 -> Curve1d units2
-    SquareRoot :: forall units1 units2. Sqrt (Qty units1) (Qty units2) => Curve1d units1 -> Curve1d units2
+    Squared :: forall units1 units2. Squared (Qty units1) (Qty units2) => Curve1d units1 -> Curve1d units2
+    SquareRoot :: forall units1 units2. Squared (Qty units1) (Qty units2) => Curve1d units2 -> Curve1d units1
     Sin :: Curve1d Radians -> Curve1d Unitless
     Cos :: Curve1d Radians -> Curve1d Unitless
 
@@ -179,7 +179,7 @@ instance Division (Qty units1) (Qty units2) (Qty units3) => Division (Curve1d un
 instance Division (Qty units1) (Qty units2) (Qty units3) => Division (Qty units1) (Curve1d units2) (Curve1d units3) where
     value / curve = constant value / curve
 
-squared :: Multiplication (Qty units1) (Qty units1) (Qty units2) => Curve1d units1 -> Curve1d units2
+squared :: Squared (Qty units1) (Qty units2) => Curve1d units1 -> Curve1d units2
 squared Zero = Zero
 squared (Constant x) = Constant (x * x)
 squared (Negated c) = squared c
@@ -193,7 +193,7 @@ cosSquared c = 0.5 * cos (2.0 * c) + 0.5
 sinSquared :: Curve1d Radians -> Curve1d Unitless
 sinSquared c = 0.5 - 0.5 * cos (2.0 * c)
 
-sqrt :: Sqrt (Qty units1) (Qty units2) => Curve1d units1 -> Curve1d units2
+sqrt :: Squared (Qty units1) (Qty units2) => Curve1d units2 -> Curve1d units1
 sqrt Zero = Zero
 sqrt (Constant x) = Constant (Qty.sqrt x)
 sqrt curve = SquareRoot curve

@@ -255,7 +255,7 @@ instance Division (Qty units1) (Qty units2) (Qty units3) => Division (VectorCurv
 
 newtype SquaredMagnitudeOf units coordinates = SquaredMagnitudeOf (VectorCurve3d units coordinates)
 
-instance Multiplication (Qty units1) (Qty units1) (Qty units2) => IsCurve1d (SquaredMagnitudeOf units1 coordinates) units2 where
+instance Squared (Qty units1) (Qty units2) => IsCurve1d (SquaredMagnitudeOf units1 coordinates) units2 where
     pointOn (SquaredMagnitudeOf expression) t =
         Vector3d.squaredMagnitude (pointOn expression t)
 
@@ -265,7 +265,7 @@ instance Multiplication (Qty units1) (Qty units1) (Qty units2) => IsCurve1d (Squ
     derivative (SquaredMagnitudeOf expression) =
         2.0 * expression <> derivative expression
 
-squaredMagnitude :: Multiplication (Qty units1) (Qty units1) (Qty units2) => VectorCurve3d units1 coordinates -> Curve1d units2
+squaredMagnitude :: Squared (Qty units1) (Qty units2) => VectorCurve3d units1 coordinates -> Curve1d units2
 squaredMagnitude expression =
     Curve1d (SquaredMagnitudeOf expression)
 

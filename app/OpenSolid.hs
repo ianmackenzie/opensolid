@@ -13,7 +13,7 @@ module OpenSolid (
     Subtraction (..),
     Multiplication (..),
     Division (..),
-    Sqrt,
+    Squared,
     (//),
     DotProduct (..),
     CrossProduct (..),
@@ -295,9 +295,9 @@ instance Division (Qty units) Int (Qty units) where
 instance Division Float (Qty units1) (Qty units2) => Division Int (Qty units1) (Qty units2) where
     n / x = float n / x
 
-class Sqrt a b | a -> b
+class Product a a b => Squared a b | a -> b, b -> a
 
-instance Sqrt Float Float
+instance Squared Float Float
 
 instance {-# OVERLAPS #-} Show Float where
     show (Qty x) = Prelude.show x
@@ -363,4 +363,4 @@ instance Product Length Angle Length
 
 instance Product Angle Length Length
 
-instance Sqrt Area Length
+instance Squared Length Area

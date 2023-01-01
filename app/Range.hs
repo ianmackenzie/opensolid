@@ -149,7 +149,7 @@ endpoints (Range low high) = (low, high)
 width :: Range units -> Qty units
 width (Range low high) = high - low
 
-squared :: Multiplication (Qty units1) (Qty units1) (Qty units2) => Range units1 -> Range units2
+squared :: Squared (Qty units1) (Qty units2) => Range units1 -> Range units2
 squared (Range low high)
     | low >= Qty.zero = Range ll hh
     | high <= Qty.zero = Range hh ll
@@ -158,7 +158,7 @@ squared (Range low high)
     ll = low * low
     hh = high * high
 
-sqrt :: Sqrt (Qty units1) (Qty units2) => Range units1 -> Range units2
+sqrt :: Squared (Qty units1) (Qty units2) => Range units2 -> Range units1
 sqrt (Range low high) =
     Range (Qty.sqrt (max low Qty.zero)) (Qty.sqrt (max high Qty.zero))
 

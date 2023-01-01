@@ -26,7 +26,8 @@ sign value = if value >= zero then Positive else Negative
 isNaN :: Qty units -> Bool
 isNaN (Qty x) = Prelude.isNaN x
 
-sqrt :: Sqrt (Qty units1) (Qty units2) => Qty units1 -> Qty units2
+sqrt :: Squared (Qty units1) (Qty units2) => Qty units2 -> Qty units1
+sqrt x | x <= Qty.zero = Qty.zero
 sqrt (Qty x) = Qty (Prelude.sqrt x)
 
 abs :: Qty units -> Qty units
