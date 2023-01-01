@@ -4,6 +4,7 @@ module OpenSolid (
     Qty (..),
     Int,
     Float,
+    Sign (..),
     Text,
     List,
     Result (..),
@@ -136,6 +137,8 @@ deriving instance Prelude.Floating Float
 
 deriving instance Prelude.RealFloat Float
 
+data Sign = Positive | Negative deriving (Eq, Show)
+
 class Negation a where
     negate :: a -> a
 
@@ -156,6 +159,10 @@ instance Negation (Nbr units) where
 
 instance Negation (Qty units) where
     negate (Qty x) = Qty (Prelude.negate x)
+
+instance Negation Sign where
+    negate Positive = Negative
+    negate Negative = Positive
 
 instance Generic.Zero Nbr where
     zero = coerce 0
@@ -246,6 +253,10 @@ instance Units.Coercion (Qty units) Float
 
 instance Multiplication Int Int Int where
     (Nbr n) * (Nbr m) = Nbr (n Prelude.* m)
+
+instance Multiplication Sign Sign Sign where
+    Positive * sign = sign
+    Negative * sign = -sign
 
 class Product qty1 qty2 qty3 | qty1 qty2 -> qty3
 

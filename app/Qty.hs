@@ -1,6 +1,7 @@
 module Qty (
     zero,
     infinity,
+    sign,
     isNaN,
     interpolateFrom,
     midpoint,
@@ -18,6 +19,9 @@ zero = coerce 0.0
 
 infinity :: Qty units
 infinity = coerce (1.0 / 0.0)
+
+sign :: Qty units -> Sign
+sign value = if value >= zero then Positive else Negative
 
 isNaN :: Qty units -> Bool
 isNaN (Qty x) = Prelude.isNaN x
