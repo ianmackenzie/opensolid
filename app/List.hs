@@ -2,6 +2,7 @@ module List (
     isEmpty,
     head,
     map,
+    filter,
     compact,
     collect,
     combine,
@@ -29,6 +30,9 @@ head [] = Nothing
 
 map :: (a -> b) -> List a -> List b
 map = Data.List.map
+
+filter :: (a -> Bool) -> List a -> List a
+filter = Data.List.filter
 
 compact :: List (Maybe a) -> List a
 compact = Data.Maybe.catMaybes
