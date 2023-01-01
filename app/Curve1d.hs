@@ -15,12 +15,18 @@ module Curve1d (
 ) where
 
 import Angle qualified
+import Curve1d.Region (Region (Region))
+import Curve1d.Region qualified as Region
+import Curve1d.Root (Root (Root))
+import Curve1d.Root qualified as Root
+import Float qualified
 import Generic qualified
 import List qualified
 import OpenSolid
 import Qty qualified
 import Range (Range)
 import Range qualified
+import Result qualified
 import Units qualified
 import Vector3d (Vector3d)
 import {-# SOURCE #-} VectorCurve3d (VectorCurve3d)
@@ -208,71 +214,182 @@ cos Zero = Constant 1.0
 cos (Constant x) = constant (Angle.cos x)
 cos curve = Cos curve
 
-roots :: Qty units -> Curve1d units -> List Float
-roots tolerance curve =
-    let firstDerivative = derivative curve
-        secondDerivative = derivative firstDerivative
-        root0 = [0.0 | Qty.abs (pointOn curve 0.0) <= tolerance]
-        root1 = [1.0 | Qty.abs (pointOn curve 1.0) <= tolerance]
-     in deduplicate (root0 ++ solve tolerance curve firstDerivative secondDerivative Range.unit ++ root1)
+isZero :: Qty units -> Curve1d units -> Bool
+isZero tolerance curve =
+    Qty.abs (List.sum [weight * pointOn curve x | (weight, x) <- quadraturePoints]) <= tolerance
 
-deduplicate :: List Float -> List Float
-deduplicate list = List.foldr prependRoot [] list
+maxRootOrder :: Int
+maxRootOrder = 4
 
-prependRoot :: Float -> List Float -> List Float
-prependRoot root list = if List.head list == Just root then list else root : list
+-- From https://en.wikipedia.org/wiki/Gaussian_quadrature#Gauss%E2%80%93Legendre_quadrature
+quadraturePoints :: List (Float, Float)
+quadraturePoints =
+    let x1 = Qty.sqrt ((3 / 7) - (2 / 7) * Qty.sqrt (6 / 5))
+        x2 = Qty.sqrt ((3 / 7) + (2 / 7) * Qty.sqrt (6 / 5))
+        weight1 = (18.0 + Qty.sqrt 30.0) / 36
+        weight2 = (18.0 - Qty.sqrt 30.0) / 36
+        quadratureInterval = Range.from -1.0 1.0
+     in [ (Range.interpolationParameter quadratureInterval -x2, weight2 / 2)
+        , (Range.interpolationParameter quadratureInterval -x1, weight1 / 2)
+        , (Range.interpolationParameter quadratureInterval x1, weight1 / 2)
+        , (Range.interpolationParameter quadratureInterval x2, weight2 / 2)
+        ]
 
-solve :: Qty units -> Curve1d units -> Curve1d units -> Curve1d units -> Range Unitless -> List Float
-solve tolerance curve firstDerivative secondDerivative domain
-    | nonZero curve tolerance domain = []
-    | resolution firstDerivative domain > 0.5 = List.compact [solveMonotonic curve domain]
-    | resolution secondDerivative domain > 0.5 =
-        case solveMonotonic firstDerivative domain of
-            Just rootX ->
-                if Qty.abs (pointOn curve rootX) <= tolerance
-                    then [rootX]
-                    else
-                        let (x1, x2) = Range.endpoints domain
-                            leftRoot = solveMonotonic curve (Range.from x1 rootX)
-                            rightRoot = solveMonotonic curve (Range.from rootX x2)
-                         in List.compact [leftRoot, rightRoot]
-            Nothing -> List.compact [solveMonotonic curve domain]
-    | Range.isAtomic domain = []
+----- ROOT FINDING -----
+
+data IsZero = IsZero deriving (Eq, Show)
+
+roots :: Qty units -> Curve1d units -> Result IsZero (List Root)
+roots _ Zero = Err IsZero
+roots tolerance (Constant value) = if Qty.abs value <= tolerance then Err IsZero else Ok []
+roots tolerance curve | isZero tolerance curve = Err IsZero
+roots tolerance curve = do
+    let (root0, x0) = solveEndpoint tolerance curve 0.0
+    let (root1, x1) = solveEndpoint tolerance curve 1.0
+    resolvedRegions <- regions (Range.from x0 x1) tolerance curve
+    let mergedRegions = List.collapse Region.merge resolvedRegions
+    let solutions = List.combine (solve tolerance curve curve 0) mergedRegions
+    Ok (root0 ++ List.foldr prependRoot root1 solutions)
+
+data Solution
+    = Solution Root Float
+    | NonZero (Range Unitless) Sign
+    deriving (Eq, Show)
+
+prependRoot :: Solution -> List Root -> List Root
+prependRoot (Solution root _) acc = root : acc
+prependRoot (NonZero _ _) acc = acc
+
+solve :: Qty units -> Curve1d units -> Curve1d units -> Int -> Region -> List Solution
+solve tolerance originalCurve curveDerivative derivativeOrder region
+    | derivativeOrder == nonZeroDerivativeOrder = [NonZero domain nonZeroDerivativeSign]
     | otherwise =
-        let (leftDomain, rightDomain) = Range.bisect domain
-            leftRoots = solve tolerance curve firstDerivative secondDerivative leftDomain
-            rightRoots = solve tolerance curve firstDerivative secondDerivative rightDomain
-         in leftRoots ++ rightRoots
-
-nonZero :: Curve1d units -> Qty units -> Range Unitless -> Bool
-nonZero curve tolerance domain =
-    let range = segmentBounds curve domain
-     in Range.minValue range >= tolerance || Range.maxValue range <= negate tolerance
-
-resolution :: Curve1d units -> Range Unitless -> Float
-resolution curve domain =
-    let absMagnitude = Range.abs (segmentBounds curve domain)
-        minMagnitude = Range.minValue absMagnitude
-        maxMagnitude = Range.maxValue absMagnitude
-     in if maxMagnitude == Qty.zero then 0.0 else minMagnitude / maxMagnitude
-
-solveMonotonic :: Curve1d units -> Range Unitless -> Maybe Float
-solveMonotonic curve domain
-    | y1 <= Qty.zero && y2 >= Qty.zero = Just (bisectMonotonic curve x1 x2)
-    | y1 >= Qty.zero && y2 <= Qty.zero = Just (bisectMonotonic curve x2 x1)
-    | otherwise = Nothing
+        let nextDerivative = derivative curveDerivative
+            higherOrderSolutions = solve tolerance originalCurve nextDerivative (derivativeOrder + 1) region
+            -- Solve for a root of this derivative within a non-zero region of the next higher
+            -- derivative
+            lift (NonZero subdomain nextDerivativeSign)
+                -- Minimum point on the derivative curve is positive, so must be entirely positive
+                | minY > Qty.zero = [NonZero subdomain Positive]
+                -- Maximum point on the derivative curve is negative, so must be entirely negative
+                | maxY < Qty.zero = [NonZero subdomain Negative]
+                -- Otherwise, solve for a root of the derivative curve by bisection. If that is also a root of
+                -- the original curve, then report it as such. Otherwise, then to the left and right of the root
+                -- are non-zero regions of the derivative curve.
+                | otherwise =
+                    let rootX = bisectMonotonic curveDerivative minX maxX minY maxY
+                     in if Qty.abs (pointOn originalCurve rootX) <= tolerance
+                            then
+                                let root = Root rootX derivativeOrder nextDerivativeSign
+                                    width = computeWidth tolerance (derivativeOrder + 1) (pointOn nextDerivative rootX)
+                                 in [Solution root width]
+                            else
+                                [ NonZero (Range.from (Range.minValue subdomain) rootX) -nextDerivativeSign
+                                , NonZero (Range.from rootX (Range.maxValue subdomain)) nextDerivativeSign
+                                ]
+              where
+                minX = if nextDerivativeSign == Positive then Range.minValue subdomain else Range.maxValue subdomain
+                maxX = if nextDerivativeSign == Positive then Range.maxValue subdomain else Range.minValue subdomain
+                minY = pointOn curveDerivative minX
+                maxY = pointOn curveDerivative maxX
+            -- Check if a high-order root should in fact be a lower-order root (e.g. in y=x^3+x
+            -- the 3rd derivative is zero at x=0 but it is in fact a 0th-order root, not a
+            -- 2nd-order root)
+            lift (Solution currentRoot currentWidth)
+                | width < currentWidth = [Solution (Root rootX (derivativeOrder - 1) (Qty.sign rootY)) width]
+                | otherwise = [Solution currentRoot currentWidth]
+              where
+                rootX = Root.value currentRoot
+                rootY = pointOn curveDerivative rootX
+                width = computeWidth tolerance derivativeOrder rootY
+         in List.combine lift higherOrderSolutions
   where
-    (x1, x2) = Range.endpoints domain
-    y1 = pointOn curve x1
-    y2 = pointOn curve x2
+    (Region domain nonZeroDerivativeOrder nonZeroDerivativeSign) = region
 
-bisectMonotonic :: Curve1d units -> Float -> Float -> Float
-bisectMonotonic curve lowX highX =
+bisectMonotonic :: Curve1d units -> Float -> Float -> Qty units -> Qty units -> Float
+bisectMonotonic curve lowX highX lowY highY =
     let midX = Qty.midpoint lowX highX
      in if midX == lowX || midX == highX
-            then midX
+            then if -lowY <= highY then lowX else highX
             else
                 let midY = pointOn curve midX
                  in if midY >= Qty.zero
-                        then bisectMonotonic curve lowX midX
-                        else bisectMonotonic curve midX highX
+                        then bisectMonotonic curve lowX midX lowY midY
+                        else bisectMonotonic curve midX highX midY highY
+
+regions :: Range Unitless -> Qty units -> Curve1d units -> Result IsZero (List Region)
+regions domain tolerance curve =
+    case resolve domain tolerance curve of
+        Just region -> Ok [region]
+        Nothing -> do
+            (leftDomain, rightDomain) <- Range.bisect domain |> Result.orErr IsZero
+            leftRegions <- regions leftDomain tolerance curve
+            rightRegions <- regions rightDomain tolerance curve
+            Ok (leftRegions ++ rightRegions)
+
+resolve :: Range Unitless -> Qty units -> Curve1d units -> Maybe Region
+resolve domain tolerance curve
+    | Range.minValue range >= tolerance = Just (region Positive)
+    | Range.maxValue range <= -tolerance = Just (region Negative)
+    | otherwise = resolveDerivative domain (derivative curve) 1
+  where
+    range = segmentBounds curve domain
+    region sign = Region domain 0 sign
+
+resolveDerivative :: Range Unitless -> Curve1d units -> Int -> Maybe Region
+resolveDerivative domain curveDerivative derivativeOrder
+    | derivativeResolution >= 0.5 = Just (region Positive)
+    | derivativeResolution <= -0.5 = Just (region Negative)
+    | derivativeOrder <= maxRootOrder = resolveDerivative domain (derivative curveDerivative) (derivativeOrder + 1)
+    | otherwise = Nothing
+  where
+    derivativeResolution = resolution domain curveDerivative
+    region derivativeSign = Region domain derivativeOrder derivativeSign
+
+resolution :: Range Unitless -> Curve1d units -> Float
+resolution domain curveDerivative
+    | minValue > Qty.zero = minValue / maxValue
+    | maxValue < Qty.zero = -(maxValue / minValue)
+    | otherwise = 0.0
+  where
+    range = segmentBounds curveDerivative domain
+    minValue = Range.minValue range
+    maxValue = Range.maxValue range
+
+solveEndpoint :: Qty units -> Curve1d units -> Float -> (List Root, Float)
+solveEndpoint tolerance curve endpointX | Qty.abs (pointOn curve endpointX) > tolerance = ([], endpointX)
+solveEndpoint tolerance curve endpointX = check (derivative curve) 1 Qty.infinity Nothing
+  where
+    check curveDerivative derivativeOrder currentMinWidth currentBest =
+        let derivativeValue = pointOn curveDerivative endpointX
+            rootWidth = computeWidth tolerance derivativeOrder derivativeValue
+            updatedMinWidth = min rootWidth currentMinWidth
+            rootOrder = derivativeOrder - 1
+            updatedBest =
+                if updatedMinWidth < currentMinWidth
+                    then Just (Root endpointX rootOrder (Qty.sign derivativeValue), curveDerivative)
+                    else currentBest
+         in if rootOrder < maxRootOrder
+                then check (derivative curveDerivative) (derivativeOrder + 1) updatedMinWidth updatedBest
+                else case updatedBest of
+                    Just (root, associatedDerivative) -> resolveEndpoint root associatedDerivative 0.5
+                    Nothing -> ([], endpointX)
+    resolveEndpoint root curveDerivative innerX =
+        let domain = Range.from endpointX innerX
+         in if Qty.abs (resolution domain curveDerivative) >= 0.5
+                then ([root], innerX)
+                else
+                    let midX = Qty.midpoint endpointX innerX
+                     in if midX == endpointX || midX == innerX
+                            then ([], endpointX)
+                            else resolveEndpoint root curveDerivative midX
+
+computeWidth :: Qty units -> Int -> Qty units -> Float
+computeWidth tolerance 1 derivativeValue = tolerance / Qty.abs derivativeValue
+computeWidth tolerance 2 derivativeValue = Qty.sqrt (2 * tolerance / Qty.abs derivativeValue)
+computeWidth tolerance derivativeOrder derivativeValue =
+    Float.pow (factorial derivativeOrder * tolerance / Qty.abs derivativeValue) (1.0 / float derivativeOrder)
+
+factorial :: Int -> Int
+factorial 0 = 1
+factorial n = n * factorial (n - 1)

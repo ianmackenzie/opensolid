@@ -3,15 +3,14 @@ module Range (
     unsafe,
     constant,
     from,
-    unit,
     minValue,
     maxValue,
-    isAtomic,
     midpoint,
     endpoints,
     width,
     squared,
     contains,
+    IsAtomic (..),
     bisect,
     abs,
     sqrt,
@@ -125,20 +124,11 @@ constant value = Range value value
 from :: Qty units -> Qty units -> Range units
 from a b = Range (min a b) (max a b)
 
-unit :: Range Unitless
-unit = Range 0.0 1.0
-
 minValue :: Range units -> Qty units
 minValue (Range low _) = low
 
 maxValue :: Range units -> Qty units
 maxValue (Range _ high) = high
-
-isAtomic :: Range units -> Bool
-isAtomic range =
-    let (Range low high) = range
-        mid = midpoint range
-     in mid == low || mid == high
 
 midpoint :: Range units -> Qty units
 midpoint (Range low high) = Qty.midpoint low high
@@ -165,11 +155,15 @@ sqrt (Range low high) =
 contains :: Qty units -> Range units -> Bool
 contains value (Range low high) = low <= value && value <= high
 
-bisect :: Range units -> (Range units, Range units)
+data IsAtomic = IsAtomic
+
+bisect :: Range units -> Result IsAtomic (Range units, Range units)
 bisect range =
     let (Range low high) = range
         mid = midpoint range
-     in (Range low mid, Range mid high)
+     in if mid == low || mid == high
+            then Err IsAtomic
+            else Ok (Range low mid, Range mid high)
 
 abs :: Range units -> Range units
 abs range

@@ -72,6 +72,8 @@ executable opensolid-hs
         VectorBox3d
         BoundingBox3d
         Curve1d
+        Curve1d.Root
+        Curve1d.Region
         VectorCurve3d
         Curve3d
         Line3d
