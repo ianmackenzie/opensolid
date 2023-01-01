@@ -88,5 +88,4 @@ script = do
     stringChunks = ["T", "h", "is", " ", "i", "s", " ", "a", " ", "t", "es", "t"]
 
 main :: IO ()
-main =
-    Script.run script
+main = Script.run script
