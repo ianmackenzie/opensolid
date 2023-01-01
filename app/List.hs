@@ -12,7 +12,6 @@ module List (
     foldr,
     reverse,
     drop,
-    (>>=),
     sum,
 ) where
 
