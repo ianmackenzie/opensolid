@@ -8,6 +8,7 @@ import Direction2d qualified
 import Direction3d ()
 import Float qualified
 import Length qualified
+import List qualified
 import Maybe qualified
 import OpenSolid
 import Point2d (Point2d)
@@ -55,6 +56,7 @@ script = do
     log "Equality test" (equalWithin Length.centimeter (Length.meters 1.0) (Length.meters 1.005))
     log "Roots" expressionRoots
     log "Or test" (Vector3d.direction Vector3d.zero |> Maybe.orErr "Zero vector")
+    log "Collapse test" (List.collapse joinStringChunks stringChunks |> List.filter (/= " "))
   where
     log label value = Script.printLine (label ++ ": " ++ Debug.show value)
     k = 0.5
@@ -80,6 +82,10 @@ script = do
     theta = Angle.radians (2 * Float.pi) * t
     expression = Curve1d.squared (Curve1d.sin theta)
     expressionRoots = Curve1d.roots 1e-12 expression
+    joinStringChunks " " _ = Nothing
+    joinStringChunks _ " " = Nothing
+    joinStringChunks s1 s2 = Just (s1 ++ s2)
+    stringChunks = ["T", "h", "is", " ", "i", "s", " ", "a", " ", "t", "es", "t"]
 
 main :: IO ()
 main =
