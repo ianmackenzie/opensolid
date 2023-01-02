@@ -20,6 +20,7 @@ dependencies:
 
 ghc-options:
 - -Wall
+- -Werror
 - -Wcompat
 - -Widentities
 - -Wincomplete-record-updates
@@ -30,6 +31,7 @@ ghc-options:
 - -Wmissing-home-modules
 - -Wpartial-fields
 - -Wsafe
+- -dcore-lint
 
 default-extensions:
 - NoImplicitPrelude
