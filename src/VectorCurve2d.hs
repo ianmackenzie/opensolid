@@ -15,6 +15,7 @@ module VectorCurve2d (
 import Curve1d (Curve1d (Curve1d), IsCurve1d)
 import Curve1d qualified
 import Data.Kind (Type)
+import Generic qualified
 import OpenSolid
 import Range (Range)
 import Units qualified
@@ -87,6 +88,9 @@ instance IsVectorCurve2d (VectorCurve2d units coordinates) units coordinates whe
                     p' = derivative p
                     q' = Curve1d.derivative q
                  in Units.add ((p' * q - p * q') / Curve1d.squared q)
+
+instance Generic.Zero (VectorCurve2d units) where
+    zero = Zero
 
 instance Negation (VectorCurve2d units coordinates) where
     negate Zero = Zero
