@@ -3,6 +3,7 @@ module Main (main) where
 import Angle qualified
 import Area qualified
 import Curve1d qualified
+import Curve2d qualified
 import Debug qualified
 import Direction2d qualified
 import Direction3d ()
@@ -14,6 +15,7 @@ import OpenSolid
 import Point2d (Point2d)
 import Point2d qualified
 import Qty qualified
+import QuadraticSpline2d (QuadraticSpline2d (QuadraticSpline2d))
 import Range qualified
 import Script (IOError, Script)
 import Script qualified
@@ -31,6 +33,13 @@ listTest = do
 
 equalWithin :: "tolerance" ::: Length -> Length -> Length -> Bool
 equalWithin tolerance x y = Qty.abs (x - y) <= tolerance
+
+testSpline :: QuadraticSpline2d coordinates
+testSpline =
+    QuadraticSpline2d
+        (Point2d.meters 0.0 0.0)
+        (Point2d.meters 1.0 2.0)
+        (Point2d.meters 2.0 0.0)
 
 script :: Script IOError ()
 script = do
@@ -57,7 +66,12 @@ script = do
     log "Roots" expressionRoots
     log "Or test" (Vector3d.direction Vector3d.zero |> Maybe.orErr "Zero vector")
     log "Collapse test" (List.collapse joinStringChunks stringChunks |> List.filter (/= " "))
+    log "Start parameter value" (Curve2d.parameterValue tolerance Point2d.origin testSpline)
+    log "End parameter value" (Curve2d.parameterValue tolerance (Point2d.meters 2.0 0.0) testSpline)
+    log "Mid parameter value" (Curve2d.parameterValue tolerance (Point2d.meters 1.0 1.0) testSpline)
+    log "Off-curve parameter value" (Curve2d.parameterValue tolerance (Point2d.meters 1.0 1.1) testSpline)
   where
+    tolerance = Length.meters 1e-9
     log label value = Script.printLine (label ++ ": " ++ Debug.show value)
     k = 0.5
     area = Area.squareMeters 3.0

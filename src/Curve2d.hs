@@ -2,13 +2,18 @@ module Curve2d (
     Curve2d (Curve2d),
     IsCurve2d (..),
     constant,
+    parameterValue,
 ) where
 
-import BoundingBox2d (BoundingBox2d)
+import BoundingBox2d (BoundingBox2d (BoundingBox2d))
 import BoundingBox2d qualified
+import Control.Applicative ((<|>))
 import OpenSolid
-import Point2d (Point2d)
+import Point2d (Point2d (Point2d))
+import Point2d qualified
+import Qty qualified
 import Range (Range)
+import Range qualified
 import VectorCurve2d (VectorCurve2d)
 import VectorCurve2d qualified
 
@@ -48,3 +53,29 @@ instance IsCurve2d Point2d where
 
 constant :: Point2d coordinates -> Curve2d coordinates
 constant = Curve2d
+
+parameterValue :: IsCurve2d curve => Length -> Point2d coordinates -> curve coordinates -> Maybe Float
+parameterValue tolerance point curve
+    | Point2d.distanceFrom point (startPoint curve) <= tolerance = Just 0.0
+    | Point2d.distanceFrom point (endPoint curve) <= tolerance = Just 1.0
+    | otherwise = find tolerance point curve (derivative curve) (Range.from 0.0 1.0)
+
+find :: IsCurve2d curve => Length -> Point2d coordinates -> curve coordinates -> VectorCurve2d Meters coordinates -> Range Unitless -> Maybe Float
+find tolerance point curve curveDerivative domain
+    | outside bounds tolerance point = Nothing
+    | not ((point - bounds) <> derivativeBounds |> Range.contains Qty.zero) = Nothing
+    | Range.isAtomic domain = Just (Range.minValue domain)
+    | otherwise =
+        let (leftDomain, rightDomain) = Range.bisect domain
+         in find tolerance point curve curveDerivative leftDomain <|> find tolerance point curve curveDerivative rightDomain
+  where
+    bounds = segmentBounds curve domain
+    derivativeBounds = VectorCurve2d.segmentBounds curveDerivative domain
+
+outside :: BoundingBox2d coordinates -> Length -> Point2d coordinates -> Bool
+outside (BoundingBox2d bx by) tolerance (Point2d px py)
+    | px > Range.maxValue bx + tolerance = True
+    | px < Range.minValue bx - tolerance = True
+    | py > Range.maxValue by + tolerance = True
+    | py < Range.minValue by - tolerance = True
+    | otherwise = False
