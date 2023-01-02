@@ -13,6 +13,7 @@ import OpenSolid
 import Point2d (Point2d (..))
 import Range (Range)
 import Range qualified
+import VectorBox2d (VectorBox2d (VectorBox2d))
 
 data BoundingBox2d coordinates = BoundingBox2d (Range Meters) (Range Meters)
 
@@ -22,6 +23,12 @@ instance Bounds (BoundingBox2d coordinates) where
 
     overlaps (BoundingBox2d x1 y1) (BoundingBox2d x2 y2) =
         Range.overlaps x1 x2 && Range.overlaps y1 y2
+
+instance Subtraction Point2d BoundingBox2d (VectorBox2d Meters) where
+    (Point2d px py) - (BoundingBox2d bx by) = VectorBox2d (px - bx) (py - by)
+
+instance Subtraction BoundingBox2d Point2d (VectorBox2d Meters) where
+    (BoundingBox2d bx by) - (Point2d px py) = VectorBox2d (bx - px) (by - py)
 
 constant :: Point2d coordinates -> BoundingBox2d coordinates
 constant (Point2d x y) =
