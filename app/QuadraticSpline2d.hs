@@ -8,7 +8,6 @@ import OpenSolid
 import Point2d (Point2d (Point2d))
 import Point2d qualified
 import Range qualified
-import Vector2d qualified
 
 data QuadraticSpline2d coordinates
     = QuadraticSpline2d
