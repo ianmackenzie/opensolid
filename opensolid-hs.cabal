@@ -80,6 +80,7 @@ executable opensolid-hs
         VectorCurve3d
         Curve2d
         Curve3d
+        Line2d
         Line3d
         QuadraticSpline3d
         Script
