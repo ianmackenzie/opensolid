@@ -1,6 +1,7 @@
 module Curve2d (
     Curve2d (Curve2d),
     IsCurve2d (..),
+    constant,
 ) where
 
 import BoundingBox2d (BoundingBox2d)
@@ -44,3 +45,6 @@ instance IsCurve2d Point2d where
     reverse = identity
     bisect point = (point, point)
     boundingBox = BoundingBox2d.constant
+
+constant :: Point2d coordinates -> Curve2d coordinates
+constant = Curve2d
