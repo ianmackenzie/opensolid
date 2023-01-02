@@ -16,7 +16,6 @@ module Angle (
 
 import Float qualified
 import OpenSolid
-import Units qualified
 import Prelude qualified
 
 sin :: Angle -> Float
@@ -44,10 +43,10 @@ radian :: Angle
 radian = radians 1.0
 
 radians :: Float -> Angle
-radians = Units.add
+radians (Qty x) = Qty x
 
 inRadians :: Angle -> Float
-inRadians = Units.drop
+inRadians (Qty x) = Qty x
 
 degree :: Angle
 degree = radians (Float.pi / 180.0)

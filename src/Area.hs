@@ -5,13 +5,12 @@ module Area (
 ) where
 
 import OpenSolid
-import Units qualified
 
 squareMeter :: Area
 squareMeter = squareMeters 1.0
 
 squareMeters :: Float -> Area
-squareMeters = Units.add
+squareMeters (Qty x) = Qty x
 
 inSquareMeters :: Area -> Float
-inSquareMeters = Units.drop
+inSquareMeters (Qty x) = Qty x

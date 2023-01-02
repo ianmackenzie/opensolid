@@ -8,16 +8,15 @@ module Length (
 ) where
 
 import OpenSolid
-import Units qualified
 
 meter :: Length
 meter = meters 1.0
 
 meters :: Float -> Length
-meters = Units.add
+meters (Qty x) = Qty x
 
 inMeters :: Length -> Float
-inMeters = Units.drop
+inMeters (Qty x) = Qty x
 
 centimeter :: Length
 centimeter = meters 0.01
