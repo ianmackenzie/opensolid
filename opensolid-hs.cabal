@@ -82,6 +82,7 @@ executable opensolid-hs
         Curve3d
         Line2d
         Line3d
+        QuadraticSpline2d
         QuadraticSpline3d
         Script
     default-extensions:
