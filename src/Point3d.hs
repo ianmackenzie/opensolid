@@ -12,6 +12,7 @@ module Point3d (
     midpoint,
     interpolateFrom,
     distanceFrom,
+    equalWithin,
 ) where
 
 import Bounded (Bounded (..))
@@ -75,3 +76,6 @@ midpoint (Point3d x1 y1 z1) (Point3d x2 y2 z2) =
 
 distanceFrom :: Point3d coordinates -> Point3d coordinates -> Length
 distanceFrom p1 p2 = Vector3d.magnitude (p2 - p1)
+
+equalWithin :: Length -> Point3d coordinates -> Point3d coordinates -> Bool
+equalWithin tolerance p1 p2 = distanceFrom p1 p2 <= tolerance

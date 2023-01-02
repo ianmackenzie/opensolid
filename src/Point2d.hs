@@ -9,6 +9,7 @@ module Point2d (
     interpolateFrom,
     distanceFrom,
     translateBy,
+    equalWithin,
 ) where
 
 import Length qualified
@@ -57,3 +58,6 @@ distanceFrom p1 p2 = Vector2d.magnitude (p2 - p1)
 
 translateBy :: Vector2d Meters coordinates -> Point2d coordinates -> Point2d coordinates
 translateBy (Vector2d vx vy) (Point2d px py) = Point2d (px + vx) (py + vy)
+
+equalWithin :: Length -> Point2d coordinates -> Point2d coordinates -> Bool
+equalWithin tolerance p1 p2 = distanceFrom p1 p2 <= tolerance
