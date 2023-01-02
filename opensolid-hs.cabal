@@ -78,6 +78,7 @@ executable opensolid-hs
         Curve1d.Region
         VectorCurve2d
         VectorCurve3d
+        Curve2d
         Curve3d
         Line3d
         QuadraticSpline3d
