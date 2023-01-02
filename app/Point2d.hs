@@ -20,6 +20,15 @@ import Vector2d qualified
 data Point2d coordinates = Point2d !Length !Length
     deriving (Eq, Show)
 
+instance Addition Point2d (Vector2d Meters) Point2d where
+    (Point2d px py) + (Vector2d vx vy) = Point2d (px + vx) (py + vy)
+
+instance Subtraction Point2d (Vector2d Meters) Point2d where
+    (Point2d px py) - (Vector2d vx vy) = Point2d (px - vx) (py - vy)
+
+instance Subtraction Point2d Point2d (Vector2d Meters) where
+    (Point2d x1 y1) - (Point2d x2 y2) = Vector2d (x1 - x2) (y1 - y2)
+
 origin :: Point2d coordinates
 origin = Point2d Qty.zero Qty.zero
 
@@ -44,7 +53,7 @@ midpoint (Point2d x1 y1) (Point2d x2 y2) =
     Point2d (Qty.midpoint x1 x2) (Qty.midpoint y1 y2)
 
 distanceFrom :: Point2d coordinates -> Point2d coordinates -> Length
-distanceFrom p1 p2 = Vector2d.magnitude (Vector2d.from p1 p2)
+distanceFrom p1 p2 = Vector2d.magnitude (p2 - p1)
 
 translateBy :: Vector2d Meters coordinates -> Point2d coordinates -> Point2d coordinates
 translateBy (Vector2d vx vy) (Point2d px py) = Point2d (px + vx) (py + vy)

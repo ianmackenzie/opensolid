@@ -20,10 +20,20 @@ import Length qualified
 import OpenSolid
 import Qty qualified
 import Range qualified
+import Vector3d (Vector3d (Vector3d))
 import Vector3d qualified
 
 data Point3d coordinates = Point3d !Length !Length !Length
     deriving (Eq, Show)
+
+instance Addition Point3d (Vector3d Meters) Point3d where
+    (Point3d px py pz) + (Vector3d vx vy vz) = Point3d (px + vx) (py + vy) (pz + vz)
+
+instance Subtraction Point3d (Vector3d Meters) Point3d where
+    (Point3d px py pz) - (Vector3d vx vy vz) = Point3d (px - vx) (py - vy) (pz - vz)
+
+instance Subtraction Point3d Point3d (Vector3d Meters) where
+    (Point3d x1 y1 z1) - (Point3d x2 y2 z2) = Vector3d (x1 - x2) (y1 - y2) (z1 - z2)
 
 instance Bounded (Point3d coordinates) (BoundingBox3d coordinates) where
     bounds (Point3d px py pz) = BoundingBox3d (Range.constant px) (Range.constant py) (Range.constant pz)
@@ -64,4 +74,4 @@ midpoint (Point3d x1 y1 z1) (Point3d x2 y2 z2) =
     Point3d (Qty.midpoint x1 x2) (Qty.midpoint y1 y2) (Qty.midpoint z1 z2)
 
 distanceFrom :: Point3d coordinates -> Point3d coordinates -> Length
-distanceFrom p1 p2 = Vector3d.magnitude (Vector3d.from p1 p2)
+distanceFrom p1 p2 = Vector3d.magnitude (p2 - p1)
