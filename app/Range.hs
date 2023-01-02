@@ -3,6 +3,7 @@ module Range (
     unsafe,
     constant,
     from,
+    hull3,
     minValue,
     maxValue,
     midpoint,
@@ -123,6 +124,9 @@ constant value = Range value value
 
 from :: Qty units -> Qty units -> Range units
 from a b = Range (min a b) (max a b)
+
+hull3 :: Qty units -> Qty units -> Qty units -> Range units
+hull3 a b c = Range (min a (min b c)) (max a (max b c))
 
 minValue :: Range units -> Qty units
 minValue (Range low _) = low
