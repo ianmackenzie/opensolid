@@ -11,8 +11,8 @@ module Range (
     width,
     squared,
     contains,
-    IsAtomic (..),
     bisect,
+    isAtomic,
     abs,
     sqrt,
     aggregate,
@@ -159,15 +159,15 @@ sqrt (Range low high) =
 contains :: Qty units -> Range units -> Bool
 contains value (Range low high) = low <= value && value <= high
 
-data IsAtomic = IsAtomic
+bisect :: Range units -> (Range units, Range units)
+bisect (Range low high) =
+    let mid = Qty.midpoint low high
+     in (Range low mid, Range mid high)
 
-bisect :: Range units -> Result IsAtomic (Range units, Range units)
-bisect range =
-    let (Range low high) = range
-        mid = midpoint range
-     in if mid == low || mid == high
-            then Err IsAtomic
-            else Ok (Range low mid, Range mid high)
+isAtomic :: Range units -> Bool
+isAtomic (Range low high) =
+    let mid = Qty.midpoint low high
+     in mid == low || mid == high
 
 abs :: Range units -> Range units
 abs range

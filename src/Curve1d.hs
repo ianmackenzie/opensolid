@@ -26,7 +26,6 @@ import OpenSolid
 import Qty qualified
 import Range (Range)
 import Range qualified
-import Result qualified
 import Units qualified
 import Vector2d (Vector2d)
 import Vector3d (Vector3d)
@@ -332,10 +331,13 @@ regions domain tolerance curve =
     case resolve domain tolerance curve of
         Just region -> Ok [region]
         Nothing -> do
-            (leftDomain, rightDomain) <- Range.bisect domain |> Result.orErr IsZero
+            (leftDomain, rightDomain) <- bisect domain
             leftRegions <- regions leftDomain tolerance curve
             rightRegions <- regions rightDomain tolerance curve
             Ok (leftRegions ++ rightRegions)
+
+bisect :: Range Unitless -> Result IsZero (Range Unitless, Range Unitless)
+bisect domain = if Range.isAtomic domain then Err IsZero else Ok (Range.bisect domain)
 
 resolve :: Range Unitless -> Qty units -> Curve1d units -> Maybe Region
 resolve domain tolerance curve
