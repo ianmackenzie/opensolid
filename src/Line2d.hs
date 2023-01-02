@@ -9,7 +9,7 @@ import Range qualified
 import VectorCurve2d qualified
 
 data Line2d coordinates
-    = Line2d !(Point2d coordinates) !(Point2d coordinates)
+    = Line2d (Point2d coordinates) (Point2d coordinates)
 
 instance IsCurve2d Line2d where
     startPoint (Line2d p1 _) = p1

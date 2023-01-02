@@ -13,7 +13,7 @@ module Direction2d (
 import OpenSolid
 import Vector2d (Vector2d (..))
 
-data Direction2d coordinates = Direction2d !Float !Float
+data Direction2d coordinates = Direction2d Float Float
     deriving (Eq, Show)
 
 instance Negation (Direction2d coordinates) where

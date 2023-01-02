@@ -29,7 +29,7 @@ import {-# SOURCE #-} Point3d (Point3d (..))
 import Qty qualified
 import Units qualified
 
-data Vector3d units coordinates = Vector3d !(Qty units) !(Qty units) !(Qty units)
+data Vector3d units coordinates = Vector3d (Qty units) (Qty units) (Qty units)
     deriving (Eq)
 
 deriving instance Show (Qty units) => Show (Vector3d units coordinates)

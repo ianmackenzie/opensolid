@@ -11,9 +11,9 @@ import Range qualified
 
 data QuadraticSpline2d coordinates
     = QuadraticSpline2d
-        !(Point2d coordinates)
-        !(Point2d coordinates)
-        !(Point2d coordinates)
+        (Point2d coordinates)
+        (Point2d coordinates)
+        (Point2d coordinates)
 
 instance IsCurve2d QuadraticSpline2d where
     startPoint (QuadraticSpline2d p1 _ _) = p1

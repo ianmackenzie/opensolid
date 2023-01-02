@@ -26,7 +26,7 @@ import {-# SOURCE #-} Point2d (Point2d (..))
 import Qty qualified
 import Units qualified
 
-data Vector2d units coordinates = Vector2d !(Qty units) !(Qty units)
+data Vector2d units coordinates = Vector2d (Qty units) (Qty units)
     deriving (Eq)
 
 deriving instance Show (Qty units) => Show (Vector2d units coordinates)

@@ -7,9 +7,9 @@ import Point3d qualified
 
 data QuadraticSpline3d coordinates
     = QuadraticSpline3d
-        !(Point3d coordinates)
-        !(Point3d coordinates)
-        !(Point3d coordinates)
+        (Point3d coordinates)
+        (Point3d coordinates)
+        (Point3d coordinates)
 
 instance IsCurve3d QuadraticSpline3d where
     startPoint (QuadraticSpline3d p1 _ _) = p1

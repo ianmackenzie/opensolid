@@ -4,6 +4,6 @@ import Bounds
 import OpenSolid
 import Range (Range)
 
-data BoundingBox3d coordinates = BoundingBox3d !(Range Meters) !(Range Meters) !(Range Meters)
+data BoundingBox3d coordinates = BoundingBox3d (Range Meters) (Range Meters) (Range Meters)
 
 instance Bounds (BoundingBox3d coordinates)

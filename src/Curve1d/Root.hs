@@ -7,9 +7,9 @@ import OpenSolid
 import Qty qualified
 
 data Root = Root
-    { value :: !Float
-    , order :: !Int
-    , sign :: !Sign
+    { value :: Float
+    , order :: Int
+    , sign :: Sign
     }
     deriving (Eq, Show)
 

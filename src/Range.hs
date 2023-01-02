@@ -31,7 +31,7 @@ import OpenSolid
 import Qty qualified
 import Units qualified
 
-data Range units = Range !(Qty units) !(Qty units)
+data Range units = Range (Qty units) (Qty units)
     deriving (Eq)
 
 deriving instance Show (Qty units) => Show (Range units)

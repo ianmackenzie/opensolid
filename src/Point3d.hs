@@ -23,7 +23,7 @@ import Range qualified
 import Vector3d (Vector3d (Vector3d))
 import Vector3d qualified
 
-data Point3d coordinates = Point3d !Length !Length !Length
+data Point3d coordinates = Point3d Length Length Length
     deriving (Eq, Show)
 
 instance Addition Point3d (Vector3d Meters) Point3d where

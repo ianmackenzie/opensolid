@@ -18,7 +18,7 @@ import Units qualified
 import Vector2d (Vector2d (..))
 import Vector2d qualified
 
-data VectorBox2d units coordinates = VectorBox2d !(Range units) !(Range units)
+data VectorBox2d units coordinates = VectorBox2d (Range units) (Range units)
 
 instance Units.Coercion (VectorBox2d units coordinates) (VectorBox2d Unitless coordinates)
 

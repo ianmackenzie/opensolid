@@ -86,8 +86,8 @@ type Text = Data.Text.Text
 type List a = [a]
 
 data Result x a
-    = Ok !a
-    | Err !x
+    = Ok a
+    | Err x
     deriving (Show, Eq)
 
 instance Prelude.Functor (Result x) where

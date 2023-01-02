@@ -14,7 +14,7 @@ import Point3d (Point3d (..))
 import Range (Range)
 import Range qualified
 
-data BoundingBox3d coordinates = BoundingBox3d !(Range Meters) !(Range Meters) !(Range Meters)
+data BoundingBox3d coordinates = BoundingBox3d (Range Meters) (Range Meters) (Range Meters)
 
 instance Bounds (BoundingBox3d coordinates) where
     aggregate (BoundingBox3d x1 y1 z1) (BoundingBox3d x2 y2 z2) =

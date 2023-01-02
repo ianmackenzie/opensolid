@@ -6,7 +6,7 @@ import Point3d (Point3d)
 import Point3d qualified
 
 data Line3d coordinates
-    = Line3d !(Point3d coordinates) !(Point3d coordinates)
+    = Line3d (Point3d coordinates) (Point3d coordinates)
 
 instance IsCurve3d Line3d where
     startPoint (Line3d p1 _) = p1

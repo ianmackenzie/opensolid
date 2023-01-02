@@ -18,7 +18,7 @@ import Units qualified
 import Vector3d (Vector3d (..))
 import Vector3d qualified
 
-data VectorBox3d units coordinates = VectorBox3d !(Range units) !(Range units) !(Range units)
+data VectorBox3d units coordinates = VectorBox3d (Range units) (Range units) (Range units)
 
 instance Units.Coercion (VectorBox3d units coordinates) (VectorBox3d Unitless coordinates)
 

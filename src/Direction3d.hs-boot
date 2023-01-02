@@ -5,6 +5,6 @@ module Direction3d (
 
 import OpenSolid
 
-data Direction3d coordinates = Direction3d !Float !Float !Float
+data Direction3d coordinates = Direction3d Float Float Float
 
 unsafe :: Float -> Float -> Float -> Direction3d coordinates
