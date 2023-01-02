@@ -14,6 +14,7 @@ module VectorCurve3d (
 
 import Curve1d (Curve1d (Curve1d), IsCurve1d)
 import Curve1d qualified
+import Data.Kind (Type)
 import Generic qualified
 import OpenSolid
 import Range (Range)
@@ -28,17 +29,13 @@ class IsVectorCurve3d curve units coordinates | curve -> units, curve -> coordin
     segmentBounds :: curve -> Range Unitless -> VectorBox3d units coordinates
     derivative :: curve -> VectorCurve3d units coordinates
 
+type VectorCurve3d :: Type -> Type -> Type
 data VectorCurve3d units coordinates = forall curve. IsVectorCurve3d curve units coordinates => VectorCurve3d curve
 
 instance IsVectorCurve3d (VectorCurve3d units coordinates) units coordinates where
-    pointOn (VectorCurve3d curve) t =
-        pointOn curve t
-
-    segmentBounds (VectorCurve3d curve) t =
-        segmentBounds curve t
-
-    derivative (VectorCurve3d curve) =
-        derivative curve
+    pointOn (VectorCurve3d curve) = pointOn curve
+    segmentBounds (VectorCurve3d curve) = segmentBounds curve
+    derivative (VectorCurve3d curve) = derivative curve
 
 instance Units.Coercion (VectorCurve3d units coordinates) (VectorCurve3d Unitless coordinates)
 
@@ -77,9 +74,10 @@ instance IsVectorCurve3d (XYZ units coordinates) units coordinates where
     derivative (XYZ x y z) =
         xyz (Curve1d.derivative x) (Curve1d.derivative y) (Curve1d.derivative z)
 
-xyz :: Curve1d units -> Curve1d units -> Curve1d units -> VectorCurve3d units coordinates
+xyz :: forall units coordinates. Curve1d units -> Curve1d units -> Curve1d units -> VectorCurve3d units coordinates
 xyz x y z =
-    VectorCurve3d (XYZ x y z)
+    let impl :: XYZ units coordinates = XYZ x y z
+     in VectorCurve3d impl
 
 newtype Negated units coordinates = Negated (VectorCurve3d units coordinates)
 

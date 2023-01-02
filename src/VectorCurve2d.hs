@@ -14,6 +14,7 @@ module VectorCurve2d (
 
 import Curve1d (Curve1d (Curve1d), IsCurve1d)
 import Curve1d qualified
+import Data.Kind (Type)
 import OpenSolid
 import Range (Range)
 import Units qualified
@@ -27,6 +28,7 @@ class IsVectorCurve2d curve units coordinates | curve -> units, curve -> coordin
     segmentBounds :: curve -> Range Unitless -> VectorBox2d units coordinates
     derivative :: curve -> VectorCurve2d units coordinates
 
+type VectorCurve2d :: Type -> Type -> Type
 data VectorCurve2d units coordinates where
     VectorCurve2d :: forall curve units coordinates. IsVectorCurve2d curve units coordinates => curve -> VectorCurve2d units coordinates
     Zero :: VectorCurve2d units coordinates

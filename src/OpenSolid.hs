@@ -49,6 +49,7 @@ module OpenSolid (
 ) where
 
 import Data.Coerce (coerce)
+import Data.Kind (Type)
 import Data.Proxy (Proxy (Proxy))
 import Data.Text qualified
 import GHC.TypeLits (KnownSymbol, Symbol, symbolVal)
@@ -104,8 +105,10 @@ instance Prelude.Monad (Result x) where
     Ok value >>= function = function value
     Err err >>= _ = Err err
 
+type Nbr :: Type -> Type
 newtype Nbr units = Nbr {unNbr :: Prelude.Int} deriving (Eq, Ord, Enum)
 
+type Qty :: Type -> Type
 newtype Qty units = Qty {unQty :: Prelude.Double} deriving (Eq, Ord)
 
 instance Show Int where

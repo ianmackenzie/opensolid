@@ -29,14 +29,14 @@ instance IsCurve3d Point3d where
 
     bisect point = (point, point)
 
-    boundingBox point = BoundingBox3d.constant point
+    boundingBox = BoundingBox3d.constant
 
 instance IsCurve3d Curve3d where
     startPoint (Curve3d curve) = startPoint curve
 
     endPoint (Curve3d curve) = endPoint curve
 
-    pointOn (Curve3d curve) t = pointOn curve t
+    pointOn (Curve3d curve) = pointOn curve
 
     reverse (Curve3d curve) = Curve3d (reverse curve)
 

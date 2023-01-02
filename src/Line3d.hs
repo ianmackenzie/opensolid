@@ -13,7 +13,7 @@ instance IsCurve3d Line3d where
 
     endPoint (Line3d _ p2) = p2
 
-    pointOn (Line3d p1 p2) t = Point3d.interpolateFrom p1 p2 t
+    pointOn (Line3d p1 p2) = Point3d.interpolateFrom p1 p2
 
     reverse (Line3d p1 p2) = Line3d p2 p1
 

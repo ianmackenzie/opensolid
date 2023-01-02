@@ -66,7 +66,7 @@ reverse :: List a -> List a
 reverse = Data.List.reverse
 
 drop :: Int -> List a -> List a
-drop (Nbr n) list = Prelude.drop n list
+drop (Nbr n) = Prelude.drop n
 
 sum :: (Generic.Zero p, Addition p p p) => List (p a) -> p a
 sum = foldl (+) Generic.zero

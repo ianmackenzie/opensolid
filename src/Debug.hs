@@ -13,7 +13,7 @@ show :: Show a => a -> Text
 show value = Text.fromChars (Prelude.show value)
 
 trace :: Text -> a -> a
-trace message value = Debug.Trace.trace (Text.toChars message) value
+trace message = Debug.Trace.trace (Text.toChars message)
 
 log :: Show a => Text -> a -> a
 log label value = trace (label ++ ": " ++ show value) value

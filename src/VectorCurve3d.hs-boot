@@ -4,11 +4,13 @@ module VectorCurve3d (
 ) where
 
 import {-# SOURCE #-} Curve1d (Curve1d)
+import Data.Kind (Type)
 import OpenSolid
 import Vector3d (Vector3d)
 
 type role VectorCurve3d nominal nominal
 
+type VectorCurve3d :: Type -> Type -> Type
 data VectorCurve3d units coordinates
 
 constant :: Vector3d units coordinates -> VectorCurve3d units coordinates

@@ -16,7 +16,7 @@ instance IsCurve2d Line2d where
 
     endPoint (Line2d _ p2) = p2
 
-    pointOn (Line2d p1 p2) t = Point2d.interpolateFrom p1 p2 t
+    pointOn (Line2d p1 p2) = Point2d.interpolateFrom p1 p2
 
     segmentBounds line t =
         BoundingBox2d.hull2
