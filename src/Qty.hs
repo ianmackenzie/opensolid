@@ -5,6 +5,7 @@ module Qty (
     isNaN,
     interpolateFrom,
     midpoint,
+    squared,
     sqrt,
     abs,
     clamp,
@@ -25,6 +26,9 @@ sign value = if value >= zero then Positive else Negative
 
 isNaN :: Qty units -> Bool
 isNaN (Qty x) = Prelude.isNaN x
+
+squared :: Squared (Qty units1) (Qty units2) => Qty units1 -> Qty units2
+squared x = x * x
 
 sqrt :: Squared (Qty units1) (Qty units2) => Qty units2 -> Qty units1
 sqrt x | x <= Qty.zero = Qty.zero
