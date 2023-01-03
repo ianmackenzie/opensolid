@@ -6,11 +6,12 @@ module QuadraticSpline2d (
 import BoundingBox2d (BoundingBox2d (BoundingBox2d))
 import BoundingBox2d qualified
 import Curve1d qualified
-import Curve2d (IsCurve2d (..))
+import Curve2d (Curve2d (Curve2d), IsCurve2d (..))
 import OpenSolid
 import Point2d (Point2d (Point2d))
 import Point2d qualified
 import Range qualified
+import VectorCurve2d (VectorCurve2d)
 
 data QuadraticSpline2d coordinates
     = QuadraticSpline2d
@@ -74,6 +75,12 @@ instance IsCurve2d QuadraticSpline2d where
          in (QuadraticSpline2d p1 q1 r, QuadraticSpline2d r q2 p3)
 
     boundingBox (QuadraticSpline2d p1 p2 p3) = BoundingBox2d.hull3 p1 p2 p3
+
+instance Subtraction QuadraticSpline2d Point2d (VectorCurve2d Meters) where
+    spline - point = Curve2d spline - point
+
+instance Subtraction Point2d QuadraticSpline2d (VectorCurve2d Meters) where
+    point - spline = Curve2d spline - point
 
 fromControlPoints :: Point2d coordinates -> Point2d coordinates -> Point2d coordinates -> QuadraticSpline2d coordinates
 fromControlPoints = QuadraticSpline2d

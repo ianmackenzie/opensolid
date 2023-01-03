@@ -18,7 +18,12 @@ import Result qualified
 import VectorCurve2d (IsVectorCurve2d, VectorCurve2d (VectorCurve2d))
 import VectorCurve2d qualified
 
-class IsCurve2d curve where
+class
+    ( Subtraction Point2d curve (VectorCurve2d Meters)
+    , Subtraction curve Point2d (VectorCurve2d Meters)
+    ) =>
+    IsCurve2d curve
+    where
     startPoint :: curve coordinates -> Point2d coordinates
     endPoint :: curve coordinates -> Point2d coordinates
     pointOn :: curve coordinates -> Float -> Point2d coordinates
@@ -42,15 +47,23 @@ instance IsCurve2d Curve2d where
          in (Curve2d curve1, Curve2d curve2)
     boundingBox (Curve2d curve) = boundingBox curve
 
-instance IsCurve2d Point2d where
-    startPoint = identity
-    endPoint = identity
-    pointOn = always
-    segmentBounds point _ = BoundingBox2d.constant point
+newtype Constant coordinates = Constant (Point2d coordinates)
+
+instance IsCurve2d Constant where
+    startPoint (Constant point) = point
+    endPoint (Constant point) = point
+    pointOn (Constant point) _ = point
+    segmentBounds (Constant point) _ = BoundingBox2d.constant point
     derivative _ = VectorCurve2d.zero
     reverse = identity
     bisect point = (point, point)
-    boundingBox = BoundingBox2d.constant
+    boundingBox (Constant point) = BoundingBox2d.constant point
+
+instance Subtraction Constant Point2d (VectorCurve2d Meters) where
+    Constant p1 - p2 = VectorCurve2d.constant (p1 - p2)
+
+instance Subtraction Point2d Constant (VectorCurve2d Meters) where
+    p1 - Constant p2 = VectorCurve2d.constant (p1 - p2)
 
 data PointCurveDifference coordinates = PointCurveDifference (Point2d coordinates) (Curve2d coordinates)
 
@@ -73,13 +86,13 @@ instance Subtraction Curve2d Point2d (VectorCurve2d Meters) where
     curve - point = VectorCurve2d (CurvePointDifference curve point)
 
 constant :: Point2d coordinates -> Curve2d coordinates
-constant = Curve2d
+constant point = Curve2d (Constant point)
 
 data IsCoincidentWithPoint = IsCoincidentWithPoint deriving (Eq, Show)
 
 parameterValues :: IsCurve2d curve => Length -> Point2d coordinates -> curve coordinates -> Result IsCoincidentWithPoint (List Float)
 parameterValues tolerance point curve =
-    VectorCurve2d.squaredMagnitude (Curve2d curve - point)
+    VectorCurve2d.squaredMagnitude (curve - point)
         |> Curve1d.roots (Qty.squared tolerance)
         |> Result.map (List.map Root.value)
         |> Result.orErr IsCoincidentWithPoint

@@ -1,11 +1,12 @@
 module Line2d (Line2d (..)) where
 
 import BoundingBox2d qualified
-import Curve2d (IsCurve2d (..))
+import Curve2d (Curve2d (Curve2d), IsCurve2d (..))
 import OpenSolid
 import Point2d (Point2d)
 import Point2d qualified
 import Range qualified
+import VectorCurve2d (VectorCurve2d)
 import VectorCurve2d qualified
 
 data Line2d coordinates
@@ -32,3 +33,9 @@ instance IsCurve2d Line2d where
          in (Line2d p1 midpoint, Line2d midpoint p2)
 
     boundingBox (Line2d p1 p2) = BoundingBox2d.hull2 p1 p2
+
+instance Subtraction Line2d Point2d (VectorCurve2d Meters) where
+    line - point = Curve2d line - point
+
+instance Subtraction Point2d Line2d (VectorCurve2d Meters) where
+    point - line = point - Curve2d line
