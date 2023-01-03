@@ -1,5 +1,5 @@
 module VectorCurve2d (
-    VectorCurve2d,
+    VectorCurve2d (..),
     IsVectorCurve2d,
     pointOn,
     segmentBounds,
