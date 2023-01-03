@@ -10,7 +10,7 @@ import VectorCurve2d (VectorCurve2d)
 import VectorCurve2d qualified
 
 data Line2d coordinates
-    = Line2d (Point2d coordinates) (Point2d coordinates)
+    = Line2d (Point2d Meters coordinates) (Point2d Meters coordinates)
 
 instance IsCurve2d Line2d where
     startPoint (Line2d p1 _) = p1
@@ -34,8 +34,8 @@ instance IsCurve2d Line2d where
 
     boundingBox (Line2d p1 p2) = BoundingBox2d.hull2 p1 p2
 
-instance Subtraction Line2d Point2d (VectorCurve2d Meters) where
+instance Subtraction Line2d (Point2d Meters) (VectorCurve2d Meters) where
     line - point = Curve2d line - point
 
-instance Subtraction Point2d Line2d (VectorCurve2d Meters) where
+instance Subtraction (Point2d Meters) Line2d (VectorCurve2d Meters) where
     point - line = point - Curve2d line

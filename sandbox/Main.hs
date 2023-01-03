@@ -24,7 +24,7 @@ import Vector2d qualified
 import Vector3d qualified
 import Volume qualified
 
-data MyPoints = MyPoints (Point2d ()) (Point2d ()) deriving (Show)
+data MyPoints = MyPoints (Point2d Meters ()) (Point2d Meters ()) deriving (Show)
 
 listTest :: List (Int, Int)
 listTest = do

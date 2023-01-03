@@ -19,14 +19,14 @@ import VectorCurve2d (IsVectorCurve2d, VectorCurve2d (VectorCurve2d))
 import VectorCurve2d qualified
 
 class
-    ( Subtraction Point2d curve (VectorCurve2d Meters)
-    , Subtraction curve Point2d (VectorCurve2d Meters)
+    ( Subtraction (Point2d Meters) curve (VectorCurve2d Meters)
+    , Subtraction curve (Point2d Meters) (VectorCurve2d Meters)
     ) =>
     IsCurve2d curve
     where
-    startPoint :: curve coordinates -> Point2d coordinates
-    endPoint :: curve coordinates -> Point2d coordinates
-    pointOn :: curve coordinates -> Float -> Point2d coordinates
+    startPoint :: curve coordinates -> Point2d Meters coordinates
+    endPoint :: curve coordinates -> Point2d Meters coordinates
+    pointOn :: curve coordinates -> Float -> Point2d Meters coordinates
     segmentBounds :: curve coordinates -> Range Unitless -> BoundingBox2d coordinates
     derivative :: curve coordinates -> VectorCurve2d Meters coordinates
     reverse :: curve coordinates -> curve coordinates
@@ -47,7 +47,7 @@ instance IsCurve2d Curve2d where
          in (Curve2d curve1, Curve2d curve2)
     boundingBox (Curve2d curve) = boundingBox curve
 
-newtype Constant coordinates = Constant (Point2d coordinates)
+newtype Constant coordinates = Constant (Point2d Meters coordinates)
 
 instance IsCurve2d Constant where
     startPoint (Constant point) = point
@@ -59,38 +59,38 @@ instance IsCurve2d Constant where
     bisect point = (point, point)
     boundingBox (Constant point) = BoundingBox2d.constant point
 
-instance Subtraction Constant Point2d (VectorCurve2d Meters) where
+instance Subtraction Constant (Point2d Meters) (VectorCurve2d Meters) where
     Constant p1 - p2 = VectorCurve2d.constant (p1 - p2)
 
-instance Subtraction Point2d Constant (VectorCurve2d Meters) where
+instance Subtraction (Point2d Meters) Constant (VectorCurve2d Meters) where
     p1 - Constant p2 = VectorCurve2d.constant (p1 - p2)
 
-data PointCurveDifference coordinates = PointCurveDifference (Point2d coordinates) (Curve2d coordinates)
+data PointCurveDifference coordinates = PointCurveDifference (Point2d Meters coordinates) (Curve2d coordinates)
 
 instance IsVectorCurve2d (PointCurveDifference coordinates) Meters coordinates where
     pointOn (PointCurveDifference point curve) t = point - pointOn curve t
     segmentBounds (PointCurveDifference point curve) t = point - segmentBounds curve t
     derivative (PointCurveDifference _ curve) = -(derivative curve)
 
-instance Subtraction Point2d Curve2d (VectorCurve2d Meters) where
+instance Subtraction (Point2d Meters) Curve2d (VectorCurve2d Meters) where
     point - curve = VectorCurve2d (PointCurveDifference point curve)
 
-data CurvePointDifference coordinates = CurvePointDifference (Curve2d coordinates) (Point2d coordinates)
+data CurvePointDifference coordinates = CurvePointDifference (Curve2d coordinates) (Point2d Meters coordinates)
 
 instance IsVectorCurve2d (CurvePointDifference coordinates) Meters coordinates where
     pointOn (CurvePointDifference curve point) t = pointOn curve t - point
     segmentBounds (CurvePointDifference curve point) t = segmentBounds curve t - point
     derivative (CurvePointDifference curve _) = derivative curve
 
-instance Subtraction Curve2d Point2d (VectorCurve2d Meters) where
+instance Subtraction Curve2d (Point2d Meters) (VectorCurve2d Meters) where
     curve - point = VectorCurve2d (CurvePointDifference curve point)
 
-constant :: Point2d coordinates -> Curve2d coordinates
+constant :: Point2d Meters coordinates -> Curve2d coordinates
 constant point = Curve2d (Constant point)
 
 data IsCoincidentWithPoint = IsCoincidentWithPoint deriving (Eq, Show)
 
-parameterValues :: IsCurve2d curve => Length -> Point2d coordinates -> curve coordinates -> Result IsCoincidentWithPoint (List Float)
+parameterValues :: IsCurve2d curve => Length -> Point2d Meters coordinates -> curve coordinates -> Result IsCoincidentWithPoint (List Float)
 parameterValues tolerance point curve =
     VectorCurve2d.squaredMagnitude (curve - point)
         |> Curve1d.roots (Qty.squared tolerance)
