@@ -111,10 +111,10 @@ magnitude (Vector3d vx vy vz) =
     let fx = Units.drop vx
         fy = Units.drop vy
         fz = Units.drop vz
-     in Units.add (Qty.sqrt (fx * fx + fy * fy + fz * fz))
+     in Units.add (Qty.sqrt (Qty.squared fx + Qty.squared fy + Qty.squared fz))
 
-squaredMagnitude :: Multiplication (Qty units1) (Qty units1) (Qty units2) => Vector3d units1 coordinates -> Qty units2
-squaredMagnitude (Vector3d vx vy vz) = vx * vx + vy * vy + vz * vz
+squaredMagnitude :: Squared (Qty units1) (Qty units2) => Vector3d units1 coordinates -> Qty units2
+squaredMagnitude (Vector3d vx vy vz) = Qty.squared vx + Qty.squared vy + Qty.squared vz
 
 direction :: Vector3d units coordinates -> Maybe (Direction3d coordinates)
 direction vector =

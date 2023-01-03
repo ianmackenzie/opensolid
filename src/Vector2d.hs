@@ -95,10 +95,10 @@ magnitude :: Vector2d units coordinates -> Qty units
 magnitude (Vector2d vx vy) =
     let fx = Units.drop vx
         fy = Units.drop vy
-     in Units.add (Qty.sqrt (fx * fx + fy * fy))
+     in Units.add (Qty.sqrt (Qty.squared fx + Qty.squared fy))
 
-squaredMagnitude :: Multiplication (Qty units1) (Qty units1) (Qty units2) => Vector2d units1 coordinates -> Qty units2
-squaredMagnitude (Vector2d vx vy) = vx * vx + vy * vy
+squaredMagnitude :: Squared (Qty units1) (Qty units2) => Vector2d units1 coordinates -> Qty units2
+squaredMagnitude (Vector2d vx vy) = Qty.squared vx + Qty.squared vy
 
 direction :: Vector2d units coordinates -> Maybe (Direction2d coordinates)
 direction vector =
