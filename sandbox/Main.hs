@@ -15,7 +15,8 @@ import OpenSolid
 import Point2d (Point2d)
 import Point2d qualified
 import Qty qualified
-import QuadraticSpline2d (QuadraticSpline2d (QuadraticSpline2d))
+import QuadraticSpline2d (QuadraticSpline2d)
+import QuadraticSpline2d qualified
 import Range qualified
 import Script (IOError, Script)
 import Script qualified
@@ -36,7 +37,7 @@ equalWithin tolerance x y = Qty.abs (x - y) <= tolerance
 
 testSpline :: QuadraticSpline2d coordinates
 testSpline =
-    QuadraticSpline2d
+    QuadraticSpline2d.fromControlPoints
         (Point2d.meters 0.0 0.0)
         (Point2d.meters 1.0 2.0)
         (Point2d.meters 2.0 0.0)

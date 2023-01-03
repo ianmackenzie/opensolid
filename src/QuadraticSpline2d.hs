@@ -1,4 +1,7 @@
-module QuadraticSpline2d (QuadraticSpline2d (..)) where
+module QuadraticSpline2d (
+    QuadraticSpline2d,
+    fromControlPoints,
+) where
 
 import BoundingBox2d (BoundingBox2d (BoundingBox2d))
 import BoundingBox2d qualified
@@ -71,3 +74,6 @@ instance IsCurve2d QuadraticSpline2d where
          in (QuadraticSpline2d p1 q1 r, QuadraticSpline2d r q2 p3)
 
     boundingBox (QuadraticSpline2d p1 p2 p3) = BoundingBox2d.hull3 p1 p2 p3
+
+fromControlPoints :: Point2d coordinates -> Point2d coordinates -> Point2d coordinates -> QuadraticSpline2d coordinates
+fromControlPoints = QuadraticSpline2d
