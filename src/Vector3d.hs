@@ -10,7 +10,6 @@ module Vector3d (
     xyz,
     meters,
     squareMeters,
-    from,
     midpoint,
     interpolateFrom,
     magnitude,
@@ -25,7 +24,6 @@ import {-# SOURCE #-} Direction3d qualified
 import Generic qualified
 import Length qualified
 import OpenSolid
-import {-# SOURCE #-} Point3d (Point3d (..))
 import Qty qualified
 import Units qualified
 
@@ -94,9 +92,6 @@ meters vx vy vz = Vector3d (Length.meters vx) (Length.meters vy) (Length.meters 
 
 squareMeters :: Float -> Float -> Float -> Vector3d SquareMeters coordinates
 squareMeters vx vy vz = Vector3d (Area.squareMeters vx) (Area.squareMeters vy) (Area.squareMeters vz)
-
-from :: Point3d coordinates -> Point3d coordinates -> Vector3d Meters coordinates
-from (Point3d x1 y1 z1) (Point3d x2 y2 z2) = Vector3d (x2 - x1) (y2 - y1) (z2 - z1)
 
 interpolateFrom :: Vector3d units coordinates -> Vector3d units coordinates -> Float -> Vector3d units coordinates
 interpolateFrom (Vector3d x1 y1 z1) (Vector3d x2 y2 z2) t =

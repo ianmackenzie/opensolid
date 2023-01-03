@@ -6,7 +6,6 @@ module Vector2d (
     xy,
     meters,
     squareMeters,
-    from,
     midpoint,
     interpolateFrom,
     determinant,
@@ -22,7 +21,6 @@ import {-# SOURCE #-} Direction2d qualified
 import Generic qualified
 import Length qualified
 import OpenSolid
-import {-# SOURCE #-} Point2d (Point2d (..))
 import Qty qualified
 import Units qualified
 
@@ -72,9 +70,6 @@ meters vx vy = Vector2d (Length.meters vx) (Length.meters vy)
 
 squareMeters :: Float -> Float -> Vector2d SquareMeters coordinates
 squareMeters vx vy = Vector2d (Area.squareMeters vx) (Area.squareMeters vy)
-
-from :: Point2d coordinates -> Point2d coordinates -> Vector2d Meters coordinates
-from (Point2d x1 y1) (Point2d x2 y2) = Vector2d (x2 - x1) (y2 - y1)
 
 interpolateFrom :: Vector2d units coordinates -> Vector2d units coordinates -> Float -> Vector2d units coordinates
 interpolateFrom (Vector2d x1 y1) (Vector2d x2 y2) t =
