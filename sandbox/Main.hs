@@ -67,10 +67,10 @@ script = do
     log "Roots" expressionRoots
     log "Or test" (Vector3d.direction Vector3d.zero |> Maybe.orErr "Zero vector")
     log "Collapse test" (List.collapse joinStringChunks stringChunks |> List.filter (/= " "))
-    log "Start parameter value" (Curve2d.parameterValue tolerance Point2d.origin testSpline)
-    log "End parameter value" (Curve2d.parameterValue tolerance (Point2d.meters 2.0 0.0) testSpline)
-    log "Mid parameter value" (Curve2d.parameterValue tolerance (Point2d.meters 1.0 1.0) testSpline)
-    log "Off-curve parameter value" (Curve2d.parameterValue tolerance (Point2d.meters 1.0 1.1) testSpline)
+    log "Start parameter value" (Curve2d.parameterValues tolerance Point2d.origin testSpline)
+    log "End parameter value" (Curve2d.parameterValues tolerance (Point2d.meters 2.0 0.0) testSpline)
+    log "Mid parameter value" (Curve2d.parameterValues tolerance (Point2d.meters 1.0 1.0) testSpline)
+    log "Off-curve parameter value" (Curve2d.parameterValues tolerance (Point2d.meters 1.0 1.1) testSpline)
   where
     tolerance = Length.meters 1e-9
     log label value = Script.printLine (label ++ ": " ++ Debug.show value)

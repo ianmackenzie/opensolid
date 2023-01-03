@@ -2,19 +2,20 @@ module Curve2d (
     Curve2d (Curve2d),
     IsCurve2d (..),
     constant,
-    parameterValue,
+    parameterValues,
 ) where
 
-import BoundingBox2d (BoundingBox2d (BoundingBox2d))
+import BoundingBox2d (BoundingBox2d)
 import BoundingBox2d qualified
-import Control.Applicative ((<|>))
+import Curve1d qualified
+import Curve1d.Root qualified as Root
+import List qualified
 import OpenSolid
-import Point2d (Point2d (Point2d))
-import Point2d qualified
+import Point2d (Point2d)
 import Qty qualified
 import Range (Range)
-import Range qualified
-import VectorCurve2d (VectorCurve2d)
+import Result qualified
+import VectorCurve2d (IsVectorCurve2d, VectorCurve2d (VectorCurve2d))
 import VectorCurve2d qualified
 
 class IsCurve2d curve where
@@ -51,31 +52,34 @@ instance IsCurve2d Point2d where
     bisect point = (point, point)
     boundingBox = BoundingBox2d.constant
 
+data PointCurveDifference coordinates = PointCurveDifference (Point2d coordinates) (Curve2d coordinates)
+
+instance IsVectorCurve2d (PointCurveDifference coordinates) Meters coordinates where
+    pointOn (PointCurveDifference point curve) t = point - pointOn curve t
+    segmentBounds (PointCurveDifference point curve) t = point - segmentBounds curve t
+    derivative (PointCurveDifference _ curve) = -(derivative curve)
+
+instance Subtraction Point2d Curve2d (VectorCurve2d Meters) where
+    point - curve = VectorCurve2d (PointCurveDifference point curve)
+
+data CurvePointDifference coordinates = CurvePointDifference (Curve2d coordinates) (Point2d coordinates)
+
+instance IsVectorCurve2d (CurvePointDifference coordinates) Meters coordinates where
+    pointOn (CurvePointDifference curve point) t = pointOn curve t - point
+    segmentBounds (CurvePointDifference curve point) t = segmentBounds curve t - point
+    derivative (CurvePointDifference curve _) = derivative curve
+
+instance Subtraction Curve2d Point2d (VectorCurve2d Meters) where
+    curve - point = VectorCurve2d (CurvePointDifference curve point)
+
 constant :: Point2d coordinates -> Curve2d coordinates
 constant = Curve2d
 
-parameterValue :: IsCurve2d curve => Length -> Point2d coordinates -> curve coordinates -> Maybe Float
-parameterValue tolerance point curve
-    | Point2d.distanceFrom point (startPoint curve) <= tolerance = Just 0.0
-    | Point2d.distanceFrom point (endPoint curve) <= tolerance = Just 1.0
-    | otherwise = find tolerance point curve (derivative curve) (Range.from 0.0 1.0)
+data IsCoincidentWithPoint = IsCoincidentWithPoint deriving (Eq, Show)
 
-find :: IsCurve2d curve => Length -> Point2d coordinates -> curve coordinates -> VectorCurve2d Meters coordinates -> Range Unitless -> Maybe Float
-find tolerance point curve curveDerivative domain
-    | outside bounds tolerance point = Nothing
-    | not ((point - bounds) <> derivativeBounds |> Range.contains Qty.zero) = Nothing
-    | Range.isAtomic domain = Just (Range.minValue domain)
-    | otherwise =
-        let (leftDomain, rightDomain) = Range.bisect domain
-         in find tolerance point curve curveDerivative leftDomain <|> find tolerance point curve curveDerivative rightDomain
-  where
-    bounds = segmentBounds curve domain
-    derivativeBounds = VectorCurve2d.segmentBounds curveDerivative domain
-
-outside :: BoundingBox2d coordinates -> Length -> Point2d coordinates -> Bool
-outside (BoundingBox2d bx by) tolerance (Point2d px py)
-    | px > Range.maxValue bx + tolerance = True
-    | px < Range.minValue bx - tolerance = True
-    | py > Range.maxValue by + tolerance = True
-    | py < Range.minValue by - tolerance = True
-    | otherwise = False
+parameterValues :: IsCurve2d curve => Length -> Point2d coordinates -> curve coordinates -> Result IsCoincidentWithPoint (List Float)
+parameterValues tolerance point curve =
+    VectorCurve2d.squaredMagnitude (Curve2d curve - point)
+        |> Curve1d.roots (Qty.squared tolerance)
+        |> Result.map (List.map Root.value)
+        |> Result.orErr IsCoincidentWithPoint
