@@ -151,7 +151,7 @@ class Addition p q r | p q -> r where
 class Subtraction p q r | p q -> r where
     (-) :: p a -> q a -> r a
 
-class Multiplication a b c | a b -> c where
+class Multiplication b a c => Multiplication a b c | a b -> c where
     (*) :: a -> b -> c
 
 class Division a b c | a b -> c where

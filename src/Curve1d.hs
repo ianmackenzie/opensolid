@@ -156,7 +156,7 @@ instance Multiplication (Qty units1) (Qty units2) (Qty units3) => Multiplication
     Constant x * curve | Units.drop x == 1.0 = Units.add (Units.drop curve)
     Constant x * curve | Units.drop x == -1.0 = Units.add (Units.drop (negate curve))
     Constant x * Negated c = negate x * c
-    c1 * c2@(Constant _) = Units.add (Units.drop c2 * Units.drop c1)
+    c1 * c2@(Constant _) = c2 * c1
     Constant x * Product (Constant y) c = Units.add (Product (Constant (Units.drop x * Units.drop y)) (Units.drop c))
     curve1 * curve2 = Product curve1 curve2
 
