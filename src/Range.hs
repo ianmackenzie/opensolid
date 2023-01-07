@@ -197,9 +197,9 @@ sinIncludesMinMax :: Range Radians -> (Bool, Bool)
 sinIncludesMinMax range = cosIncludesMinMax (range - Angle.radians (Float.pi / 2))
 
 cosIncludesMinMax :: Range Radians -> (Bool, Bool)
-cosIncludesMinMax interval =
-    ( cosIncludesMax (interval + Angle.radians Float.pi)
-    , cosIncludesMax interval
+cosIncludesMinMax range =
+    ( cosIncludesMax (range + Angle.radians Float.pi)
+    , cosIncludesMax range
     )
 
 cosIncludesMax :: Range Radians -> Bool
