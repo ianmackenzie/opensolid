@@ -22,7 +22,6 @@ import Generic qualified
 import Length qualified
 import OpenSolid
 import Qty qualified
-import Units qualified
 
 data Vector2d units coordinates = Vector2d (Qty units) (Qty units)
     deriving (Eq)
@@ -87,10 +86,7 @@ determinant ::
 determinant (Vector2d x1 y1) (Vector2d x2 y2) = x1 * y2 - y1 * x2
 
 magnitude :: Vector2d units coordinates -> Qty units
-magnitude (Vector2d vx vy) =
-    let fx = Units.drop vx
-        fy = Units.drop vy
-     in Units.add (Qty.sqrt (Qty.squared fx + Qty.squared fy))
+magnitude (Vector2d vx vy) = Qty.hypot2 vx vy
 
 squaredMagnitude :: Squared (Qty units1) (Qty units2) => Vector2d units1 coordinates -> Qty units2
 squaredMagnitude (Vector2d vx vy) = Qty.squared vx + Qty.squared vy

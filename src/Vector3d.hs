@@ -25,7 +25,6 @@ import Generic qualified
 import Length qualified
 import OpenSolid
 import Qty qualified
-import Units qualified
 
 data Vector3d units coordinates = Vector3d (Qty units) (Qty units) (Qty units)
     deriving (Eq)
@@ -102,11 +101,7 @@ midpoint (Vector3d x1 y1 z1) (Vector3d x2 y2 z2) =
     Vector3d (Qty.midpoint x1 x2) (Qty.midpoint y1 y2) (Qty.midpoint z1 z2)
 
 magnitude :: Vector3d units coordinates -> Qty units
-magnitude (Vector3d vx vy vz) =
-    let fx = Units.drop vx
-        fy = Units.drop vy
-        fz = Units.drop vz
-     in Units.add (Qty.sqrt (Qty.squared fx + Qty.squared fy + Qty.squared fz))
+magnitude (Vector3d vx vy vz) = Qty.hypot3 vx vy vz
 
 squaredMagnitude :: Squared (Qty units1) (Qty units2) => Vector3d units1 coordinates -> Qty units2
 squaredMagnitude (Vector3d vx vy vz) = Qty.squared vx + Qty.squared vy + Qty.squared vz

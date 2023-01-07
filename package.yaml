@@ -59,6 +59,7 @@ default-extensions:
 - ImportQualifiedPost
 - TypeOperators
 - StandaloneKindSignatures
+- UndecidableSuperClasses
 
 library:
   source-dirs: src

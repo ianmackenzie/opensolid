@@ -15,6 +15,8 @@ module Range (
     isAtomic,
     abs,
     sqrt,
+    hypot2,
+    hypot3,
     aggregate,
     overlaps,
     sin,
@@ -155,6 +157,70 @@ squared (Range low high)
 sqrt :: Squared (Qty units1) (Qty units2) => Range units2 -> Range units1
 sqrt (Range low high) =
     Range (Qty.sqrt (max low Qty.zero)) (Qty.sqrt (max high Qty.zero))
+
+hypot2 :: Range units -> Range units -> Range units
+hypot2 x y
+    | px && py = Range (Qty.hypot2 xl yl) high
+    | px && ny = Range (Qty.hypot2 xl yh) high
+    | nx && py = Range (Qty.hypot2 xh yl) high
+    | nx && ny = Range (Qty.hypot2 xh yh) high
+    | px = Range xl high
+    | nx = Range -xh high
+    | py = Range yl high
+    | ny = Range -yh high
+    | otherwise = Range Qty.zero high
+  where
+    (Range xl xh) = x
+    (Range yl yh) = y
+    px = xl >= Qty.zero
+    nx = xh <= Qty.zero
+    py = yl >= Qty.zero
+    ny = yh <= Qty.zero
+    mx = max (Qty.abs xl) (Qty.abs xh)
+    my = max (Qty.abs yl) (Qty.abs yh)
+    high = Qty.hypot2 mx my
+
+hypot3 :: Range units -> Range units -> Range units -> Range units
+hypot3 x y z
+    | px && py && pz = Range (Qty.hypot3 xl yl zl) high
+    | px && py && nz = Range (Qty.hypot3 xl yl zh) high
+    | px && ny && pz = Range (Qty.hypot3 xl yh zl) high
+    | px && ny && nz = Range (Qty.hypot3 xl yh zh) high
+    | nx && py && pz = Range (Qty.hypot3 xh yl zl) high
+    | nx && py && nz = Range (Qty.hypot3 xh yl zh) high
+    | nx && ny && pz = Range (Qty.hypot3 xh yh zl) high
+    | nx && ny && nz = Range (Qty.hypot3 xh yh zh) high
+    | py && pz = Range (Qty.hypot2 yl zl) high
+    | py && nz = Range (Qty.hypot2 yl zh) high
+    | ny && pz = Range (Qty.hypot2 yh zl) high
+    | ny && nz = Range (Qty.hypot2 yh zh) high
+    | px && pz = Range (Qty.hypot2 xl zl) high
+    | px && nz = Range (Qty.hypot2 xl zh) high
+    | nx && pz = Range (Qty.hypot2 xh zl) high
+    | nx && nz = Range (Qty.hypot2 xh zh) high
+    | px && py = Range (Qty.hypot2 xl yl) high
+    | px && ny = Range (Qty.hypot2 xl yh) high
+    | nx && py = Range (Qty.hypot2 xh yl) high
+    | nx && ny = Range (Qty.hypot2 xh yh) high
+    | px = Range xl high
+    | nx = Range -xh high
+    | py = Range yl high
+    | ny = Range -yh high
+    | otherwise = Range Qty.zero high
+  where
+    (Range xl xh) = x
+    (Range yl yh) = y
+    (Range zl zh) = z
+    px = xl >= Qty.zero
+    nx = xh <= Qty.zero
+    py = yl >= Qty.zero
+    ny = yh <= Qty.zero
+    pz = zl >= Qty.zero
+    nz = zh <= Qty.zero
+    mx = max (Qty.abs xl) (Qty.abs xh)
+    my = max (Qty.abs yl) (Qty.abs yh)
+    mz = max (Qty.abs zl) (Qty.abs zh)
+    high = Qty.hypot3 mx my mz
 
 contains :: Qty units -> Range units -> Bool
 contains value (Range low high) = low <= value && value <= high

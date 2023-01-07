@@ -87,9 +87,7 @@ squaredMagnitude :: Squared (Qty units1) (Qty units2) => VectorBox2d units1 coor
 squaredMagnitude (VectorBox2d x y) = Range.squared x + Range.squared y
 
 magnitude :: VectorBox2d units coordinates -> Range units
-magnitude vectorBox =
-    let (VectorBox2d x y) = Units.drop vectorBox
-     in Units.add (Range.sqrt (Range.squared x + Range.squared y))
+magnitude (VectorBox2d x y) = Range.hypot2 x y
 
 normalize :: VectorBox2d units coordinates -> VectorBox2d Unitless coordinates
 normalize vectorBox =

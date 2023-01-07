@@ -82,12 +82,7 @@ instance IsVectorCurve2d (VectorCurve2d units coordinates) units coordinates whe
             Difference c1 c2 -> derivative c1 - derivative c2
             Product1d2d c1 c2 -> Curve1d.derivative c1 * c2 + c1 * derivative c2
             Product2d1d c1 c2 -> derivative c1 * c2 + c1 * Curve1d.derivative c2
-            Quotient c1 c2 ->
-                let p = Units.drop c1
-                    q = Units.drop c2
-                    p' = derivative p
-                    q' = Curve1d.derivative q
-                 in Units.add ((p' * q - p * q') / Curve1d.squared q)
+            Quotient c1 c2 -> derivative c1 / c2 + curve * (Curve1d.derivative c2 / c2)
 
 instance Generic.Zero (VectorCurve2d units) where
     zero = Zero
@@ -169,20 +164,25 @@ constant = Constant
 xy :: Curve1d units -> Curve1d units -> VectorCurve2d units coordinates
 xy = XY
 
+newtype MagnitudeOf units coordinates = MagnitudeOf (VectorCurve2d units coordinates)
+
+instance IsCurve1d (MagnitudeOf units coordinates) units where
+    pointOn (MagnitudeOf curve) t = Vector2d.magnitude (pointOn curve t)
+    segmentBounds (MagnitudeOf curve) t = VectorBox2d.magnitude (segmentBounds curve t)
+    derivative (MagnitudeOf curve) = derivative curve <> normalize curve
+
 newtype SquaredMagnitudeOf units coordinates = SquaredMagnitudeOf (VectorCurve2d units coordinates)
 
 instance Squared (Qty units1) (Qty units2) => IsCurve1d (SquaredMagnitudeOf units1 coordinates) units2 where
-    pointOn (SquaredMagnitudeOf expression) t = Vector2d.squaredMagnitude (pointOn expression t)
-    segmentBounds (SquaredMagnitudeOf expression) t = VectorBox2d.squaredMagnitude (segmentBounds expression t)
-    derivative (SquaredMagnitudeOf expression) = 2.0 * expression <> derivative expression
+    pointOn (SquaredMagnitudeOf curve) t = Vector2d.squaredMagnitude (pointOn curve t)
+    segmentBounds (SquaredMagnitudeOf curve) t = VectorBox2d.squaredMagnitude (segmentBounds curve t)
+    derivative (SquaredMagnitudeOf curve) = 2.0 * curve <> derivative curve
 
 squaredMagnitude :: Squared (Qty units1) (Qty units2) => VectorCurve2d units1 coordinates -> Curve1d units2
-squaredMagnitude expression = Curve1d (SquaredMagnitudeOf expression)
+squaredMagnitude curve = Curve1d (SquaredMagnitudeOf curve)
 
 magnitude :: VectorCurve2d units coordinates -> Curve1d units
-magnitude expression =
-    let f = Units.drop expression
-     in Units.add (Curve1d.sqrt (squaredMagnitude f))
+magnitude curve = Curve1d (MagnitudeOf curve)
 
 normalize :: VectorCurve2d units coordinates -> VectorCurve2d Unitless coordinates
-normalize expression = expression / magnitude expression
+normalize curve = curve / magnitude curve

@@ -261,7 +261,7 @@ instance Multiplication Sign Sign Sign where
     Positive * sign = sign
     Negative * sign = -sign
 
-class Product qty1 qty2 qty3 | qty1 qty2 -> qty3
+class (Product qty2 qty1 qty3, Quotient qty3 qty1 qty2, Quotient qty3 qty2 qty1) => Product qty1 qty2 qty3 | qty1 qty2 -> qty3
 
 instance {-# INCOHERENT #-} Product Float Float Float
 
@@ -269,7 +269,7 @@ instance {-# INCOHERENT #-} Product Float (Qty units) (Qty units)
 
 instance {-# INCOHERENT #-} Product (Qty units) Float (Qty units)
 
-class Quotient qty1 qty2 qty3 | qty1 qty2 -> qty3
+class (Product qty3 qty2 qty1, Quotient qty1 qty3 qty2) => Quotient qty1 qty2 qty3 | qty1 qty2 -> qty3
 
 instance {-# INCOHERENT #-} Quotient Float Float Float
 
@@ -360,10 +360,10 @@ instance Quotient Volume Length Area
 
 instance Quotient Length Duration Speed
 
+instance Quotient Length Speed Duration
+
 instance Quotient Speed Duration Acceleration
 
-instance Product Length Angle Length
-
-instance Product Angle Length Length
+instance Quotient Speed Acceleration Duration
 
 instance Squared Length Area

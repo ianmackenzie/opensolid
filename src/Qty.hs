@@ -7,6 +7,8 @@ module Qty (
     midpoint,
     squared,
     sqrt,
+    hypot2,
+    hypot3,
     abs,
     clamp,
 ) where
@@ -33,6 +35,14 @@ squared x = x * x
 sqrt :: Squared (Qty units1) (Qty units2) => Qty units2 -> Qty units1
 sqrt x | x <= Qty.zero = Qty.zero
 sqrt (Qty x) = Qty (Prelude.sqrt x)
+
+hypot2 :: Qty units -> Qty units -> Qty units
+hypot2 (Qty x) (Qty y) =
+    Qty (Prelude.sqrt (x Prelude.* x Prelude.+ y Prelude.* y))
+
+hypot3 :: Qty units -> Qty units -> Qty units -> Qty units
+hypot3 (Qty x) (Qty y) (Qty z) =
+    Qty (Prelude.sqrt (x Prelude.* x Prelude.+ y Prelude.* y Prelude.+ z Prelude.* z))
 
 abs :: Qty units -> Qty units
 abs (Qty x) = Qty (Prelude.abs x)

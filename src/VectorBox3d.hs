@@ -112,9 +112,7 @@ squaredMagnitude :: Squared (Qty units1) (Qty units2) => VectorBox3d units1 coor
 squaredMagnitude (VectorBox3d x y z) = Range.squared x + Range.squared y + Range.squared z
 
 magnitude :: VectorBox3d units coordinates -> Range units
-magnitude vectorBox =
-    let (VectorBox3d x y z) = Units.drop vectorBox
-     in Units.add (Range.sqrt (Range.squared x + Range.squared y + Range.squared z))
+magnitude (VectorBox3d x y z) = Range.hypot3 x y z
 
 normalize :: VectorBox3d units coordinates -> VectorBox3d Unitless coordinates
 normalize vectorBox =
