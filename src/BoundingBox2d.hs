@@ -6,6 +6,7 @@ module BoundingBox2d (
     hull4,
     aggregate,
     overlaps,
+    interpolate,
 ) where
 
 import Bounds
@@ -54,3 +55,7 @@ hull4 (Point2d x1 y1) (Point2d x2 y2) (Point2d x3 y3) (Point2d x4 y4) =
         minY = min (min (min y1 y2) y3) y4
         maxY = max (max (max y1 y2) y3) y4
      in BoundingBox2d (Range.unsafe minX maxX) (Range.unsafe minY maxY)
+
+interpolate :: BoundingBox2d coordinates -> Float -> Float -> Point2d Meters coordinates
+interpolate (BoundingBox2d x y) u v =
+    Point2d (Range.interpolate x u) (Range.interpolate y v)

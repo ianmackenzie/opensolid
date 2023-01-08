@@ -6,6 +6,7 @@ module BoundingBox3d (
     hull4,
     aggregate,
     overlaps,
+    interpolate,
 ) where
 
 import Bounds
@@ -58,3 +59,7 @@ hull4 (Point3d x1 y1 z1) (Point3d x2 y2 z2) (Point3d x3 y3 z3) (Point3d x4 y4 z4
         minZ = min (min (min z1 z2) z3) z4
         maxZ = max (max (max z1 z2) z3) z4
      in BoundingBox3d (Range.unsafe minX maxX) (Range.unsafe minY maxY) (Range.unsafe minZ maxZ)
+
+interpolate :: BoundingBox3d coordinates -> Float -> Float -> Float -> Point3d coordinates
+interpolate (BoundingBox3d x y z) u v w =
+    Point3d (Range.interpolate x u) (Range.interpolate y v) (Range.interpolate z w)

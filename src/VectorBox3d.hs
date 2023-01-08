@@ -7,6 +7,7 @@ module VectorBox3d (
     squaredMagnitude,
     magnitude,
     normalize,
+    interpolate,
 ) where
 
 import Generic qualified
@@ -129,3 +130,7 @@ clampNormalized range =
     Range.unsafe
         (Qty.clamp -1.0 1.0 (Range.minValue range))
         (Qty.clamp -1.0 1.0 (Range.maxValue range))
+
+interpolate :: VectorBox3d units coordinates -> Float -> Float -> Float -> Vector3d units coordinates
+interpolate (VectorBox3d x y z) u v w =
+    Vector3d (Range.interpolate x u) (Range.interpolate y v) (Range.interpolate z w)

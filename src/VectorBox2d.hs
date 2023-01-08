@@ -7,6 +7,7 @@ module VectorBox2d (
     squaredMagnitude,
     magnitude,
     normalize,
+    interpolate,
 ) where
 
 import Generic qualified
@@ -103,3 +104,7 @@ clampNormalized range =
     Range.unsafe
         (Qty.clamp -1.0 1.0 (Range.minValue range))
         (Qty.clamp -1.0 1.0 (Range.maxValue range))
+
+interpolate :: VectorBox2d units coordinates -> Float -> Float -> Vector2d units coordinates
+interpolate (VectorBox2d x y) u v =
+    Vector2d (Range.interpolate x u) (Range.interpolate y v)
