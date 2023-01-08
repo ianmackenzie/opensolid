@@ -15,9 +15,9 @@ import VectorCurve2d (VectorCurve2d)
 
 data QuadraticSpline2d coordinates
     = QuadraticSpline2d
-        (Point2d Meters coordinates)
-        (Point2d Meters coordinates)
-        (Point2d Meters coordinates)
+        (Point2d coordinates)
+        (Point2d coordinates)
+        (Point2d coordinates)
 
 instance IsCurve2d QuadraticSpline2d where
     startPoint (QuadraticSpline2d p1 _ _) = p1
@@ -76,11 +76,11 @@ instance IsCurve2d QuadraticSpline2d where
 
     boundingBox (QuadraticSpline2d p1 p2 p3) = BoundingBox2d.hull3 p1 p2 p3
 
-instance Subtraction QuadraticSpline2d (Point2d Meters) (VectorCurve2d Meters) where
+instance Subtraction QuadraticSpline2d Point2d (VectorCurve2d Meters) where
     spline - point = Curve2d spline - point
 
-instance Subtraction (Point2d Meters) QuadraticSpline2d (VectorCurve2d Meters) where
+instance Subtraction Point2d QuadraticSpline2d (VectorCurve2d Meters) where
     point - spline = Curve2d spline - point
 
-fromControlPoints :: Point2d Meters coordinates -> Point2d Meters coordinates -> Point2d Meters coordinates -> QuadraticSpline2d coordinates
+fromControlPoints :: Point2d coordinates -> Point2d coordinates -> Point2d coordinates -> QuadraticSpline2d coordinates
 fromControlPoints = QuadraticSpline2d
