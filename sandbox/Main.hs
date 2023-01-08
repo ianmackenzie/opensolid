@@ -33,9 +33,6 @@ listTest = do
     b <- [1 .. 10]
     [(a, b) | a + b == 10]
 
-equalWithin :: Length -> Length -> Length -> Bool
-equalWithin tolerance x y = Qty.abs (x - y) <= tolerance
-
 joinTextChunks :: Text -> Text -> Maybe Text
 joinTextChunks " " _ = Nothing
 joinTextChunks _ " " = Nothing
@@ -99,7 +96,7 @@ script = do
     let roots = let ?tolerance = 1e-12 in Curve1d.roots y
     log "Roots" roots
     log "sqrt 2.0" (Qty.sqrt 2.0)
-    log "Equality test" (equalWithin Length.centimeter (Length.meters 1.0) (Length.meters 1.005))
+    log "Equality test" (let ?tolerance = Length.centimeter in Length.meters 1.0 ~= Length.meters 1.005)
     let theta = Angle.radians (2 * Float.pi) * t
     let expression = Curve1d.squared (Curve1d.sin theta)
     let expressionRoots = let ?tolerance = 1e-12 in Curve1d.roots expression

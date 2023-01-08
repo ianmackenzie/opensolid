@@ -221,7 +221,7 @@ cos curve = Cos curve
 
 isZero :: Tolerance units => Curve1d units -> Bool
 isZero curve =
-    Qty.abs (List.sum [weight * pointOn curve x | (weight, x) <- quadraturePoints]) <= ?tolerance
+    List.sum [weight * pointOn curve x | (weight, x) <- quadraturePoints] ~= Qty.zero
 
 maxRootOrder :: Int
 maxRootOrder = 4
@@ -246,7 +246,7 @@ data IsZero = IsZero deriving (Eq, Show)
 
 roots :: Tolerance units => Curve1d units -> Result IsZero (List Root)
 roots Zero = Err IsZero
-roots (Constant value) = if Qty.abs value <= ?tolerance then Err IsZero else Ok []
+roots (Constant value) = if value ~= Qty.zero then Err IsZero else Ok []
 roots curve | isZero curve = Err IsZero
 roots curve = do
     let (root0, x0) = solveEndpoint curve 0.0
@@ -285,7 +285,7 @@ solve curveDerivative derivativeOrder region
                 -- are non-zero regions of the derivative curve.
                 | otherwise =
                     let rootX = bisectMonotonic curveDerivative minX maxX minY maxY
-                     in if Qty.abs (pointOn ?originalCurve rootX) <= ?tolerance
+                     in if pointOn ?originalCurve rootX ~= Qty.zero
                             then
                                 let root = Root rootX derivativeOrder nextDerivativeSign
                                     width = computeWidth (derivativeOrder + 1) (pointOn nextDerivative rootX)
@@ -370,7 +370,7 @@ resolution domain curveDerivative
     maxValue = Range.maxValue range
 
 solveEndpoint :: Tolerance units => Curve1d units -> Float -> (List Root, Float)
-solveEndpoint curve endpointX | Qty.abs (pointOn curve endpointX) > ?tolerance = ([], endpointX)
+solveEndpoint curve endpointX | not (pointOn curve endpointX ~= Qty.zero) = ([], endpointX)
 solveEndpoint curve endpointX = check (derivative curve) 1 Qty.infinity Nothing
   where
     check curveDerivative derivativeOrder currentMinWidth currentBest =
