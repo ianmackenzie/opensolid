@@ -254,6 +254,8 @@ type Tolerance units = ?tolerance :: Qty units
 class ApproximateEquality a units where
     (~=) :: Tolerance units => a -> a -> Bool
 
+infix 4 ~=
+
 instance ApproximateEquality (Qty units) units where
     x ~= y = let (Qty delta) = x - y in Qty (Prelude.abs delta) <= ?tolerance
 
