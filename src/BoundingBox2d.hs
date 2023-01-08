@@ -16,6 +16,7 @@ import Range qualified
 import VectorBox2d (VectorBox2d (VectorBox2d))
 
 data BoundingBox2d coordinates = BoundingBox2d (Range Meters) (Range Meters)
+    deriving (Show)
 
 instance Bounds (BoundingBox2d coordinates) where
     aggregate (BoundingBox2d x1 y1) (BoundingBox2d x2 y2) =
