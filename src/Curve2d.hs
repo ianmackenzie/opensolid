@@ -90,7 +90,7 @@ constant point = Curve2d (Constant point)
 
 data IsCoincidentWithPoint = IsCoincidentWithPoint deriving (Eq, Show)
 
-parameterValues :: (IsCurve2d curve, Tolerance Meters) => Point2d coordinates -> curve coordinates -> Result IsCoincidentWithPoint (List Float)
+parameterValues :: (Tolerance Meters, IsCurve2d curve) => Point2d coordinates -> curve coordinates -> Result IsCoincidentWithPoint (List Float)
 parameterValues point curve =
     let ?tolerance = Qty.squared ?tolerance
      in Curve1d.roots (VectorCurve2d.squaredMagnitude (curve - point))
