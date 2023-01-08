@@ -30,7 +30,6 @@ module OpenSolid (
     subtract,
     (|>),
     (<|),
-    (:::),
     Unitless,
     Angle,
     Radians,
@@ -248,7 +247,6 @@ infixl 6 +, -
 
 infixl 7 *, /, //
 
-type (name :: Symbol) ::: a = a
 
 instance Units.Coercion (Nbr units) Int
 
