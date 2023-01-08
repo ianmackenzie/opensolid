@@ -31,6 +31,7 @@ module OpenSolid (
     (|>),
     (<|),
     Tolerance,
+    ApproximateEquality (..),
     Unitless,
     Angle,
     Radians,
@@ -249,6 +250,12 @@ infixl 6 +, -
 infixl 7 *, /, //
 
 type Tolerance units = ?tolerance :: Qty units
+
+class ApproximateEquality a units where
+    (~=) :: Tolerance units => a -> a -> Bool
+
+instance ApproximateEquality (Qty units) units where
+    x ~= y = let (Qty delta) = x - y in Qty (Prelude.abs delta) <= ?tolerance
 
 instance Units.Coercion (Nbr units) Int
 
