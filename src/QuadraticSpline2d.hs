@@ -35,6 +35,7 @@ instance IsCurve2d QuadraticSpline2d where
             t2 = Range.maxValue t
             r1 = 1.0 - t1
             r2 = 1.0 - t2
+
             (Point2d ax ay) = a
             (Point2d bx by) = b
             (Point2d cx cy) = c
