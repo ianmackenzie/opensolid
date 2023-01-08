@@ -346,10 +346,13 @@ resolve domain curve
     range = segmentBounds curve domain
     region sign = Region domain 0 sign
 
+minDerivativeResolution :: Float
+minDerivativeResolution = 0.5
+
 resolveDerivative :: Range Unitless -> Curve1d units -> Int -> Maybe Region
 resolveDerivative domain curveDerivative derivativeOrder
-    | derivativeResolution >= 0.5 = Just (region Positive)
-    | derivativeResolution <= -0.5 = Just (region Negative)
+    | derivativeResolution >= minDerivativeResolution = Just (region Positive)
+    | derivativeResolution <= -minDerivativeResolution = Just (region Negative)
     | derivativeOrder <= maxRootOrder = resolveDerivative domain (derivative curveDerivative) (derivativeOrder + 1)
     | otherwise = Nothing
   where
@@ -388,7 +391,7 @@ solveEndpoint curve endpointX = check (derivative curve) 1 Qty.infinity Nothing
 resolveEndpoint :: Root -> Curve1d units -> Float -> Float -> (List Root, Float)
 resolveEndpoint root curveDerivative endpointX innerX =
     let domain = Range.from endpointX innerX
-     in if Qty.abs (resolution domain curveDerivative) >= 0.5
+     in if Qty.abs (resolution domain curveDerivative) >= minDerivativeResolution
             then ([root], innerX)
             else
                 let midX = Qty.midpoint endpointX innerX
