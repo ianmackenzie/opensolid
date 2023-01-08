@@ -60,6 +60,7 @@ default-extensions:
 - TypeOperators
 - StandaloneKindSignatures
 - UndecidableSuperClasses
+- ImplicitParams
 
 library:
   source-dirs: src
