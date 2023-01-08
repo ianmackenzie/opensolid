@@ -1,6 +1,7 @@
 module Script (
     Script,
     IOError,
+    Program,
     run,
     succeed,
     fail,
@@ -39,6 +40,8 @@ instance Monad (Script x) where
 
 perform :: IO a -> Script IOError a
 perform io = Perform (Control.Exception.catch (fmap succeed io) (pure . fail))
+
+type Program = Script IOError ()
 
 run :: Script IOError () -> IO ()
 run (Succeed ()) = System.Exit.exitSuccess
