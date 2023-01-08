@@ -14,6 +14,7 @@ import Text qualified
 import Vector3d qualified
 import VectorBox3d (VectorBox3d (VectorBox3d))
 import VectorBox3d qualified
+import Prelude qualified
 
 groupName :: Text -> Hedgehog.GroupName
 groupName name = Data.String.fromString (Text.toChars name)
@@ -51,9 +52,16 @@ quantityContainedIn :: Range Meters -> Length -> Bool
 quantityContainedIn range value =
     value >= Range.minValue range - tolerance && value <= Range.maxValue range + tolerance
 
+testLimit :: Int -> Hedgehog.TestLimit
+testLimit count = Prelude.fromInteger (Prelude.toInteger count)
+
+withNumTests :: Int -> Hedgehog.Property -> Hedgehog.Property
+withNumTests count = Hedgehog.withTests (testLimit count)
+
 testVectorBox3dMagnitude :: Hedgehog.Property
 testVectorBox3dMagnitude =
-    Hedgehog.property
+    withNumTests 1000
+        <| Hedgehog.property
         <| do
             vectorBox <- Hedgehog.forAll vectorBox3d
             u <- Hedgehog.forAll parameterValue
