@@ -9,7 +9,6 @@ module Point2d (
     interpolateFrom,
     distanceFrom,
     translateBy,
-    equalWithin,
 ) where
 
 import Length qualified
@@ -29,6 +28,9 @@ instance Subtraction Point2d (Vector2d Meters) Point2d where
 
 instance Subtraction Point2d Point2d (Vector2d Meters) where
     (Point2d x1 y1) - (Point2d x2 y2) = Vector2d (x1 - x2) (y1 - y2)
+
+instance ApproximateEquality (Point2d coordinates) Meters where
+    p1 ~= p2 = distanceFrom p1 p2 ~= Qty.zero
 
 origin :: Point2d coordinates
 origin = Point2d Qty.zero Qty.zero
@@ -58,6 +60,3 @@ distanceFrom p1 p2 = Vector2d.magnitude (p2 - p1)
 
 translateBy :: Vector2d Meters coordinates -> Point2d coordinates -> Point2d coordinates
 translateBy (Vector2d vx vy) (Point2d px py) = Point2d (px + vx) (py + vy)
-
-equalWithin :: Length -> Point2d coordinates -> Point2d coordinates -> Bool
-equalWithin tolerance p1 p2 = distanceFrom p1 p2 <= tolerance

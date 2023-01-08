@@ -12,7 +12,6 @@ module Point3d (
     midpoint,
     interpolateFrom,
     distanceFrom,
-    equalWithin,
 ) where
 
 import Bounded (Bounded (..))
@@ -35,6 +34,9 @@ instance Subtraction Point3d (Vector3d Meters) Point3d where
 
 instance Subtraction Point3d Point3d (Vector3d Meters) where
     (Point3d x1 y1 z1) - (Point3d x2 y2 z2) = Vector3d (x1 - x2) (y1 - y2) (z1 - z2)
+
+instance ApproximateEquality (Point3d coordinates) Meters where
+    p1 ~= p2 = distanceFrom p1 p2 ~= Qty.zero
 
 instance Bounded (Point3d coordinates) (BoundingBox3d coordinates) where
     bounds (Point3d px py pz) = BoundingBox3d (Range.constant px) (Range.constant py) (Range.constant pz)
@@ -76,6 +78,3 @@ midpoint (Point3d x1 y1 z1) (Point3d x2 y2 z2) =
 
 distanceFrom :: Point3d coordinates -> Point3d coordinates -> Length
 distanceFrom p1 p2 = Vector3d.magnitude (p2 - p1)
-
-equalWithin :: Length -> Point3d coordinates -> Point3d coordinates -> Bool
-equalWithin tolerance p1 p2 = distanceFrom p1 p2 <= tolerance
