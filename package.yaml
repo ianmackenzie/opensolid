@@ -62,6 +62,7 @@ default-extensions:
 - StandaloneKindSignatures
 - UndecidableSuperClasses
 - ImplicitParams
+- ConstraintKinds
 
 library:
   source-dirs: src

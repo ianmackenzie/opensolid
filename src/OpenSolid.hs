@@ -30,6 +30,7 @@ module OpenSolid (
     subtract,
     (|>),
     (<|),
+    Tolerance,
     Unitless,
     Angle,
     Radians,
@@ -247,6 +248,7 @@ infixl 6 +, -
 
 infixl 7 *, /, //
 
+type Tolerance units = ?tolerance :: Qty units
 
 instance Units.Coercion (Nbr units) Int
 
