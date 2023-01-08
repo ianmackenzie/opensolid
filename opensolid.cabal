@@ -49,6 +49,7 @@ library
       List
       Maybe
       OpenSolid
+      Pair
       Point2d
       Point3d
       Qty
