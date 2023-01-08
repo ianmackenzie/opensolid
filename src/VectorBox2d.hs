@@ -20,6 +20,8 @@ import Vector2d qualified
 
 data VectorBox2d units coordinates = VectorBox2d (Range units) (Range units)
 
+deriving instance Show (Qty units) => Show (VectorBox2d units coordinates)
+
 instance Units.Coercion (VectorBox2d units coordinates) (VectorBox2d Unitless coordinates)
 
 instance Generic.Zero (VectorBox2d units) where
