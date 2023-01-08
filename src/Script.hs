@@ -4,6 +4,7 @@ module Script (
     Program,
     run,
     succeed,
+    error,
     fail,
     printLine,
     forEach,
@@ -14,46 +15,50 @@ import Control.Exception qualified
 import Data.Text.IO qualified
 import OpenSolid
 import System.Exit qualified
+import Text qualified
 import Prelude (IOError)
 import Prelude qualified
 
 data Script x a
     = Succeed a
-    | Fail x
+    | Error x
     | Perform (IO (Script x a))
 
 instance Functor (Script x) where
     fmap function (Succeed value) = Succeed (function value)
-    fmap _ (Fail err) = Fail err
+    fmap _ (Error err) = Error err
     fmap function (Perform io) = Perform (fmap (fmap function) io)
 
 instance Applicative (Script x) where
     pure = succeed
 
     Succeed function <*> script = fmap function script
-    Fail err <*> _ = Fail err
+    Error err <*> _ = Error err
     Perform io <*> script = Perform (fmap (<*> script) io)
 
 instance Monad (Script x) where
     Succeed value >>= function = function value
-    Fail err >>= _ = Fail err
+    Error err >>= _ = Error err
     Perform io >>= function = Perform (fmap (>>= function) io)
 
 perform :: IO a -> Script IOError a
-perform io = Perform (Control.Exception.catch (fmap succeed io) (pure . fail))
+perform io = Perform (Control.Exception.catch (fmap succeed io) (pure . error))
 
 type Program = Script IOError ()
 
 run :: Script IOError () -> IO ()
 run (Succeed ()) = System.Exit.exitSuccess
-run (Fail ioError) = Prelude.ioError ioError
+run (Error ioError) = Prelude.ioError ioError
 run (Perform io) = io >>= run
 
 succeed :: a -> Script x a
 succeed = Succeed
 
-fail :: x -> Script x a
-fail = Fail
+error :: x -> Script x a
+error = Error
+
+fail :: Text -> Script IOError a
+fail message = Error (Prelude.userError (Text.toChars message))
 
 printLine :: Text -> Script IOError ()
 printLine text = perform (Data.Text.IO.putStrLn text)
