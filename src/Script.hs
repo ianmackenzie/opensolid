@@ -7,6 +7,7 @@ module Script (
     fail,
     printLine,
     forEach,
+    perform,
 ) where
 
 import Control.Exception qualified
