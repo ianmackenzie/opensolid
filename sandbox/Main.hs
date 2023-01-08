@@ -107,6 +107,7 @@ script = do
     log "Or test" (Vector3d.direction Vector3d.zero |> Maybe.orErr "Zero vector")
     testParameterValues
     testListCollapse
+    Script.printLine "Unicode output test: ✅❌🙂"
 
 main :: IO ()
 main = Script.run script
