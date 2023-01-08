@@ -25,7 +25,7 @@ module OpenSolid (
     ifThenElse,
     identity,
     always,
-    error,
+    internalError,
     notImplemented,
     subtract,
     (|>),
@@ -225,11 +225,11 @@ identity = Prelude.id
 always :: a -> b -> a
 always = const
 
-error :: Text -> a
-error message = Prelude.error (Data.Text.unpack message)
+internalError :: Text -> a
+internalError message = Prelude.error (Data.Text.unpack message)
 
 notImplemented :: a
-notImplemented = error "Not implemented"
+notImplemented = internalError "Not implemented"
 
 subtract :: Subtraction p q r => q a -> p a -> r a
 subtract b a = a - b
