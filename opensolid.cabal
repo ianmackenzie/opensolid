@@ -33,7 +33,6 @@ library
       BoundingBox3d
       Bounds
       Curve1d
-      Curve1d.Region
       Curve1d.Root
       Curve2d
       Curve2d.Intersection
@@ -68,9 +67,7 @@ library
       VectorCurve3d
       Volume
   other-modules:
-      Paths_opensolid
-  autogen-modules:
-      Paths_opensolid
+      Curve1d.Region
   hs-source-dirs:
       src
   default-extensions:
