@@ -63,6 +63,7 @@ default-extensions:
 - UndecidableSuperClasses
 - ImplicitParams
 - ConstraintKinds
+- PatternSynonyms
 
 library:
   source-dirs: src

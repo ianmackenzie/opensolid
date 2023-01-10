@@ -5,6 +5,8 @@ module Direction2d (
 
 import OpenSolid
 
-data Direction2d coordinates = Direction2d Float Float
+type role Direction2d phantom
+
+data Direction2d coordinates
 
 unsafe :: Float -> Float -> Direction2d coordinates

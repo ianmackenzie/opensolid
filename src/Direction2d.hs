@@ -1,5 +1,5 @@
 module Direction2d (
-    Direction2d,
+    Direction2d (Direction2d),
     unsafe,
     x,
     positiveX,
@@ -13,11 +13,16 @@ module Direction2d (
 import OpenSolid
 import Vector2d (Vector2d (..))
 
-data Direction2d coordinates = Direction2d Float Float
+data Direction2d coordinates = Unsafe Float Float
     deriving (Eq, Show)
 
+{-# COMPLETE Direction2d #-}
+
+pattern Direction2d :: Float -> Float -> Direction2d coordinates
+pattern Direction2d x y = Unsafe x y
+
 instance Negation (Direction2d coordinates) where
-    negate (Direction2d dx dy) = Direction2d (negate dx) (negate dy)
+    negate (Direction2d dx dy) = unsafe (negate dx) (negate dy)
 
 instance DotProduct Direction2d Direction2d Float where
     (Direction2d x1 y1) <> (Direction2d x2 y2) = x1 * x2 + y1 * y2
@@ -35,16 +40,16 @@ instance Multiplication (Direction2d coordinates) (Qty units) (Vector2d units co
     (Direction2d dx dy) * scale = Vector2d (dx * scale) (dy * scale)
 
 unsafe :: Float -> Float -> Direction2d coordinates
-unsafe = Direction2d
+unsafe = Unsafe
 
 positiveX :: Direction2d coordinates
-positiveX = Direction2d 1.0 0.0
+positiveX = unsafe 1.0 0.0
 
 negativeX :: Direction2d coordinates
 negativeX = negate positiveX
 
 positiveY :: Direction2d coordinates
-positiveY = Direction2d 0.0 1.0
+positiveY = unsafe 0.0 1.0
 
 negativeY :: Direction2d coordinates
 negativeY = negate positiveY
