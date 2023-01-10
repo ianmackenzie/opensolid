@@ -33,7 +33,7 @@ parameterValue :: Hedgehog.Gen Float
 parameterValue = Hedgehog.Gen.realFloat (Hedgehog.Range.constant 0.0 1.0)
 
 length :: Hedgehog.Gen Length
-length = fmap Length.meters (Hedgehog.Gen.realFloat (Hedgehog.Range.constant -5.0 5.0))
+length = fmap Length.meters (Hedgehog.Gen.realFloat (Hedgehog.Range.constantFrom 0.0 -5.0 5.0))
 
 lengthRange :: Hedgehog.Gen (Range Meters)
 lengthRange = do
