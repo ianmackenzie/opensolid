@@ -18,6 +18,7 @@ data Direction2d coordinates = Unsafe Float Float
 
 {-# COMPLETE Direction2d #-}
 
+{-# INLINE Direction2d #-}
 pattern Direction2d :: Float -> Float -> Direction2d coordinates
 pattern Direction2d x y <- Unsafe x y
 
