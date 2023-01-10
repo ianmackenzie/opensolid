@@ -21,7 +21,7 @@ data Direction3d coordinates = Unsafe Float Float Float
 {-# COMPLETE Direction3d #-}
 
 pattern Direction3d :: Float -> Float -> Float -> Direction3d coordinates
-pattern Direction3d x y z = Unsafe x y z
+pattern Direction3d x y z <- Unsafe x y z
 
 instance Negation (Direction3d coordinates) where
     negate (Direction3d dx dy dz) = unsafe (negate dx) (negate dy) (negate dz)
