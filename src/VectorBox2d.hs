@@ -13,7 +13,7 @@ module VectorBox2d (
 import Generic qualified
 import OpenSolid
 import Qty qualified
-import Range (Range)
+import Range (Range (..))
 import Range qualified
 import Units qualified
 import Vector2d (Vector2d (..))
@@ -100,10 +100,10 @@ normalize vectorBox =
      in VectorBox2d nx ny
 
 clampNormalized :: Range Unitless -> Range Unitless
-clampNormalized range =
+clampNormalized (Range low high) =
     Range.unsafe
-        (Qty.clamp -1.0 1.0 (Range.minValue range))
-        (Qty.clamp -1.0 1.0 (Range.maxValue range))
+        (Qty.clamp -1.0 1.0 low)
+        (Qty.clamp -1.0 1.0 high)
 
 interpolate :: VectorBox2d units coordinates -> Float -> Float -> Vector2d units coordinates
 interpolate (VectorBox2d x y) u v =

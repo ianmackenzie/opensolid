@@ -10,6 +10,7 @@ import Curve2d (Curve2d (Curve2d), IsCurve2d (..))
 import OpenSolid
 import Point2d (Point2d (Point2d))
 import Point2d qualified
+import Range (Range (..))
 import Range qualified
 import VectorCurve2d (VectorCurve2d)
 
@@ -29,10 +30,8 @@ instance IsCurve2d QuadraticSpline2d where
             q2 = Point2d.interpolateFrom p2 p3 t
          in Point2d.interpolateFrom q1 q2 t
 
-    segmentBounds spline t =
+    segmentBounds spline (Range t1 t2) =
         let (QuadraticSpline2d a b c) = spline
-            t1 = Range.minValue t
-            t2 = Range.maxValue t
             r1 = 1.0 - t1
             r2 = 1.0 - t2
 

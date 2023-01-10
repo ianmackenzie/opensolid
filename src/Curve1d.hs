@@ -24,7 +24,7 @@ import Generic qualified
 import List qualified
 import OpenSolid
 import Qty qualified
-import Range (Range)
+import Range (Range (..))
 import Range qualified
 import Units qualified
 import Vector2d (Vector2d)
@@ -339,11 +339,11 @@ bisect domain = if Range.isAtomic domain then Err IsZero else Ok (Range.bisect d
 
 resolve :: Tolerance units => Range Unitless -> Curve1d units -> Maybe Region
 resolve domain curve
-    | Range.minValue range >= ?tolerance = Just (region Positive)
-    | Range.maxValue range <= negate ?tolerance = Just (region Negative)
+    | minValue >= ?tolerance = Just (region Positive)
+    | maxValue <= negate ?tolerance = Just (region Negative)
     | otherwise = resolveDerivative domain (derivative curve) 1
   where
-    range = segmentBounds curve domain
+    Range minValue maxValue = segmentBounds curve domain
     region sign = Region domain 0 sign
 
 minDerivativeResolution :: Float

@@ -7,7 +7,7 @@ import Length qualified
 import List qualified
 import OpenSolid
 import Pair qualified
-import Range (Range)
+import Range (Range (..))
 import Range qualified
 import Script qualified
 import Text qualified
@@ -49,8 +49,8 @@ vectorBox3d = do
     return (VectorBox3d x y z)
 
 quantityContainedIn :: Range Meters -> Length -> Bool
-quantityContainedIn range value =
-    value >= Range.minValue range - tolerance && value <= Range.maxValue range + tolerance
+quantityContainedIn (Range low high) value =
+    value >= low - tolerance && value <= high + tolerance
 
 testLimit :: Int -> Hedgehog.TestLimit
 testLimit count = Prelude.fromInteger (Prelude.toInteger count)

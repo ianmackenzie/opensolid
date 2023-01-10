@@ -5,7 +5,7 @@ import Curve2d (Curve2d (Curve2d), IsCurve2d (..))
 import OpenSolid
 import Point2d (Point2d)
 import Point2d qualified
-import Range qualified
+import Range (Range (..))
 import VectorCurve2d (VectorCurve2d)
 import VectorCurve2d qualified
 
@@ -19,10 +19,8 @@ instance IsCurve2d Line2d where
 
     pointOn (Line2d p1 p2) = Point2d.interpolateFrom p1 p2
 
-    segmentBounds line t =
-        BoundingBox2d.hull2
-            (pointOn line (Range.minValue t))
-            (pointOn line (Range.maxValue t))
+    segmentBounds line (Range t1 t2) =
+        BoundingBox2d.hull2 (pointOn line t1) (pointOn line t2)
 
     derivative (Line2d p1 p2) = VectorCurve2d.constant (p2 - p1)
 
