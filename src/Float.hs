@@ -8,9 +8,11 @@ module Float (
 import OpenSolid
 import Prelude qualified
 
+{-# INLINE floor #-}
 floor :: Float -> Int
 floor (Qty x) = Nbr (Prelude.floor x)
 
+{-# INLINE ceiling #-}
 ceiling :: Float -> Int
 ceiling (Qty x) = Nbr (Prelude.ceiling x)
 

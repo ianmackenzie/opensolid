@@ -130,18 +130,22 @@ from a b = Range (min a b) (max a b)
 hull3 :: Qty units -> Qty units -> Qty units -> Range units
 hull3 a b c = Range (min a (min b c)) (max a (max b c))
 
+{-# INLINE minValue #-}
 minValue :: Range units -> Qty units
 minValue (Range low _) = low
 
+{-# INLINE maxValue #-}
 maxValue :: Range units -> Qty units
 maxValue (Range _ high) = high
 
+{-# INLINE midpoint #-}
 midpoint :: Range units -> Qty units
 midpoint (Range low high) = Qty.midpoint low high
 
 endpoints :: Range units -> (Qty units, Qty units)
 endpoints (Range low high) = (low, high)
 
+{-# INLINE width #-}
 width :: Range units -> Qty units
 width (Range low high) = high - low
 

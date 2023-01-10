@@ -5,9 +5,11 @@ module Pair (
     mapSecond,
 ) where
 
+{-# INLINE first #-}
 first :: (a, b) -> a
 first (a, _) = a
 
+{-# INLINE second #-}
 second :: (a, b) -> b
 second (_, b) = b
 

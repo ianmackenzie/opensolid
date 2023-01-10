@@ -29,6 +29,7 @@ sign value = if value >= zero then Positive else Negative
 isNaN :: Qty units -> Bool
 isNaN (Qty x) = Prelude.isNaN x
 
+{-# INLINE squared #-}
 squared :: Squared (Qty units1) (Qty units2) => Qty units1 -> Qty units2
 squared x = x * x
 
@@ -44,6 +45,7 @@ hypot3 :: Qty units -> Qty units -> Qty units -> Qty units
 hypot3 (Qty x) (Qty y) (Qty z) =
     Qty (Prelude.sqrt (x Prelude.* x Prelude.+ y Prelude.* y Prelude.+ z Prelude.* z))
 
+{-# INLINE abs #-}
 abs :: Qty units -> Qty units
 abs (Qty x) = Qty (Prelude.abs x)
 
@@ -61,5 +63,6 @@ interpolateFrom a b t
     | t <= 0.5 = a + (b - a) * t
     | otherwise = b + (a - b) * (1.0 - t)
 
+{-# INLINE midpoint #-}
 midpoint :: Qty units -> Qty units -> Qty units
 midpoint a b = 0.5 * (a + b)

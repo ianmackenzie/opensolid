@@ -159,9 +159,11 @@ class Division a b c | a b -> c where
     (/) :: a -> b -> c
 
 instance Negation (Nbr units) where
+    {-# INLINE negate #-}
     negate (Nbr n) = Nbr (Prelude.negate n)
 
 instance Negation (Qty units) where
+    {-# INLINE negate #-}
     negate (Qty x) = Qty (Prelude.negate x)
 
 instance Negation Sign where
@@ -175,17 +177,22 @@ instance Generic.Zero Qty where
     zero = coerce 0.0
 
 instance Addition Nbr Nbr Nbr where
+    {-# INLINE (+) #-}
     (Nbr n) + (Nbr m) = Nbr (n Prelude.+ m)
 
 instance Addition Qty Qty Qty where
+    {-# INLINE (+) #-}
     (Qty x) + (Qty y) = Qty (x Prelude.+ y)
 
 instance Subtraction Nbr Nbr Nbr where
+    {-# INLINE (-) #-}
     (Nbr n) - (Nbr m) = Nbr (n Prelude.- m)
 
 instance Subtraction Qty Qty Qty where
+    {-# INLINE (-) #-}
     (Qty x) - (Qty y) = Qty (x Prelude.- y)
 
+{-# INLINE (//) #-}
 (//) :: Int -> Int -> Int
 (Nbr n) // (Nbr m) = Nbr (Prelude.quot n m)
 
@@ -204,15 +211,18 @@ instance Concatenation Text where
 instance Concatenation (List a) where
     (++) = Prelude.mappend
 
+{-# INLINE fromInteger #-}
 fromInteger :: Prelude.Integer -> Int
 fromInteger n = Nbr (Prelude.fromInteger n)
 
+{-# INLINE fromRational #-}
 fromRational :: Prelude.Rational -> Float
 fromRational x = Qty (Prelude.fromRational x)
 
 fromString :: Prelude.String -> Text
 fromString = Data.Text.pack
 
+{-# INLINE float #-}
 float :: Int -> Float
 float (Nbr n) = Qty (Prelude.fromIntegral n)
 
@@ -235,9 +245,11 @@ notImplemented = internalError "Not implemented"
 subtract :: Subtraction p q r => q a -> p a -> r a
 subtract b a = a - b
 
+{-# INLINE (|>) #-}
 (|>) :: a -> (a -> b) -> b
 (|>) value function = function value
 
+{-# INLINE (<|) #-}
 (<|) :: (a -> b) -> a -> b
 (<|) = identity
 
@@ -264,6 +276,7 @@ instance Units.Coercion (Nbr units) Int
 instance Units.Coercion (Qty units) Float
 
 instance Multiplication Int Int Int where
+    {-# INLINE (*) #-}
     (Nbr n) * (Nbr m) = Nbr (n Prelude.* m)
 
 instance Multiplication Sign Sign Sign where
@@ -287,24 +300,31 @@ instance {-# INCOHERENT #-} Quotient (Qty units) (Qty units) Float
 instance {-# INCOHERENT #-} Quotient (Qty units) Float (Qty units)
 
 instance Product (Qty units1) (Qty units2) (Qty units3) => Multiplication (Qty units1) (Qty units2) (Qty units3) where
+    {-# INLINE (*) #-}
     (Qty x) * (Qty y) = Qty (x Prelude.* y)
 
 instance Quotient (Qty units1) (Qty units2) (Qty units3) => Division (Qty units1) (Qty units2) (Qty units3) where
+    {-# INLINE (/) #-}
     (Qty x) / (Qty y) = Qty (x Prelude./ y)
 
 instance Multiplication Int (Qty units) (Qty units) where
+    {-# INLINE (*) #-}
     n * x = float n * x
 
 instance Multiplication (Qty units) Int (Qty units) where
+    {-# INLINE (*) #-}
     x * n = x * float n
 
 instance Division Int Int Float where
+    {-# INLINE (/) #-}
     n / m = float n / float m
 
 instance Division (Qty units) Int (Qty units) where
+    {-# INLINE (/) #-}
     x / n = x / float n
 
 instance Division Float (Qty units1) (Qty units2) => Division Int (Qty units1) (Qty units2) where
+    {-# INLINE (/) #-}
     n / x = float n / x
 
 class Product a a b => Squared a b | a -> b, b -> a
