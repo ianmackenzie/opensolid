@@ -13,6 +13,7 @@ module List (
     reverse,
     drop,
     sum,
+    sort,
 ) where
 
 import Data.List qualified
@@ -70,3 +71,6 @@ drop (Nbr n) = Prelude.drop n
 
 sum :: (Generic.Zero p, Addition p p p) => List (p a) -> p a
 sum = foldl (+) Generic.zero
+
+sort :: Ord a => List a -> List a
+sort = Data.List.sort
