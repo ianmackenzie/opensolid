@@ -1,4 +1,3 @@
-import Data.String qualified
 import Hedgehog (Property)
 import Hedgehog qualified
 import Hedgehog.Gen qualified
@@ -16,15 +15,9 @@ import VectorBox3d (VectorBox3d (VectorBox3d))
 import VectorBox3d qualified
 import Prelude qualified
 
-groupName :: Text -> Hedgehog.GroupName
-groupName name = Data.String.fromString (Text.toChars name)
-
-propertyName :: Text -> Hedgehog.PropertyName
-propertyName name = Data.String.fromString (Text.toChars name)
-
 group :: Text -> List (Text, Property) -> Hedgehog.Group
 group name properties =
-  Hedgehog.Group (groupName name) (List.map (Pair.mapFirst propertyName) properties)
+  Hedgehog.Group (Text.toString name) (List.map (Pair.mapFirst Text.toString) properties)
 
 tolerance :: Length
 tolerance = Length.meters 1e-12

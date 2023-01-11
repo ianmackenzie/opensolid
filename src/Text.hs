@@ -3,11 +3,13 @@ module Text
   , join
   , fromChars
   , toChars
+  , toString
   , fromInt
   , fromFloat
   )
 where
 
+import Data.String qualified
 import Data.Text qualified
 import OpenSolid
 import TextShow qualified
@@ -23,6 +25,9 @@ fromChars = Data.Text.pack
 
 toChars :: Text -> List Char
 toChars = Data.Text.unpack
+
+toString :: Data.String.IsString a => Text -> a
+toString text = Data.String.fromString (toChars text)
 
 fromInt :: Int -> Text
 fromInt (Nbr n) = TextShow.showt n
