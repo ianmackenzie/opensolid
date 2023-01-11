@@ -52,11 +52,8 @@ quantityContainedIn :: Range Meters -> Length -> Bool
 quantityContainedIn (Range low high) value =
   value >= low - tolerance && value <= high + tolerance
 
-testLimit :: Int -> Hedgehog.TestLimit
-testLimit count = Prelude.fromInteger (Prelude.toInteger count)
-
 withNumTests :: Int -> Hedgehog.Property -> Hedgehog.Property
-withNumTests count = Hedgehog.withTests (testLimit count)
+withNumTests count = Hedgehog.withTests (Prelude.fromIntegral count)
 
 testVectorBox3dMagnitude :: Hedgehog.Property
 testVectorBox3dMagnitude =
