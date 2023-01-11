@@ -1,18 +1,19 @@
-module Angle (
-    sin,
-    cos,
-    tan,
-    asin,
-    acos,
-    atan,
-    atan2,
-    radians,
-    inRadians,
-    radian,
-    degrees,
-    inDegrees,
-    degree,
-) where
+module Angle
+  ( sin
+  , cos
+  , tan
+  , asin
+  , acos
+  , atan
+  , atan2
+  , radians
+  , inRadians
+  , radian
+  , degrees
+  , inDegrees
+  , degree
+  )
+where
 
 import Float qualified
 import OpenSolid

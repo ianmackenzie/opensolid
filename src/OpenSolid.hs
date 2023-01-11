@@ -1,53 +1,54 @@
-module OpenSolid (
-    module Prelude,
-    Nbr (..),
-    Qty (..),
-    Int,
-    Float,
-    Sign (..),
-    Text,
-    List,
-    Result (..),
-    Negation (..),
-    Addition (..),
-    Subtraction (..),
-    Multiplication (..),
-    Division (..),
-    Squared,
-    (//),
-    DotProduct (..),
-    CrossProduct (..),
-    Concatenation (..),
-    fromInteger,
-    fromRational,
-    fromString,
-    float,
-    ifThenElse,
-    identity,
-    always,
-    internalError,
-    notImplemented,
-    subtract,
-    (|>),
-    (<|),
-    Tolerance,
-    ApproximateEquality (..),
-    Unitless,
-    Angle,
-    Radians,
-    Length,
-    Meters,
-    Area,
-    SquareMeters,
-    Volume,
-    CubicMeters,
-    Duration,
-    Seconds,
-    Speed,
-    MetersPerSecond,
-    Acceleration,
-    MetersPerSecondSquared,
-) where
+module OpenSolid
+  ( module Prelude
+  , Nbr (..)
+  , Qty (..)
+  , Int
+  , Float
+  , Sign (..)
+  , Text
+  , List
+  , Result (..)
+  , Negation (..)
+  , Addition (..)
+  , Subtraction (..)
+  , Multiplication (..)
+  , Division (..)
+  , Squared
+  , (//)
+  , DotProduct (..)
+  , CrossProduct (..)
+  , Concatenation (..)
+  , fromInteger
+  , fromRational
+  , fromString
+  , float
+  , ifThenElse
+  , identity
+  , always
+  , internalError
+  , notImplemented
+  , subtract
+  , (|>)
+  , (<|)
+  , Tolerance
+  , ApproximateEquality (..)
+  , Unitless
+  , Angle
+  , Radians
+  , Length
+  , Meters
+  , Area
+  , SquareMeters
+  , Volume
+  , CubicMeters
+  , Duration
+  , Seconds
+  , Speed
+  , MetersPerSecond
+  , Acceleration
+  , MetersPerSecondSquared
+  )
+where
 
 import Data.Coerce (coerce)
 import Data.Kind (Type)
@@ -56,30 +57,30 @@ import Data.Text qualified
 import GHC.TypeLits (KnownSymbol, Symbol, symbolVal)
 import Generic qualified
 import Units qualified
-import Prelude (
-    Applicative (..),
-    Bool (..),
-    Char,
-    Enum,
-    Eq (..),
-    Functor (..),
-    IO,
-    Maybe (..),
-    Monad (..),
-    Ord (..),
-    Show,
-    const,
-    flip,
-    fmap,
-    id,
-    not,
-    otherwise,
-    pure,
-    ($),
-    (&&),
-    (.),
-    (||),
- )
+import Prelude
+  ( Applicative (..)
+  , Bool (..)
+  , Char
+  , Enum
+  , Eq (..)
+  , Functor (..)
+  , IO
+  , Maybe (..)
+  , Monad (..)
+  , Ord (..)
+  , Show
+  , const
+  , flip
+  , fmap
+  , id
+  , not
+  , otherwise
+  , pure
+  , ($)
+  , (&&)
+  , (.)
+  , (||)
+  )
 import Prelude qualified
 
 type Text = Data.Text.Text
@@ -87,24 +88,24 @@ type Text = Data.Text.Text
 type List a = [a]
 
 data Result x a
-    = Ok a
-    | Err x
-    deriving (Show, Eq)
+  = Ok a
+  | Err x
+  deriving (Show, Eq)
 
 instance Prelude.Functor (Result x) where
-    fmap function (Ok value) = Ok (function value)
-    fmap _ (Err err) = Err err
+  fmap function (Ok value) = Ok (function value)
+  fmap _ (Err err) = Err err
 
 instance Prelude.Applicative (Result x) where
-    pure = Ok
+  pure = Ok
 
-    Ok function <*> Ok value = Ok (function value)
-    Err err <*> _ = Err err
-    Ok _ <*> Err err = Err err
+  Ok function <*> Ok value = Ok (function value)
+  Err err <*> _ = Err err
+  Ok _ <*> Err err = Err err
 
 instance Prelude.Monad (Result x) where
-    Ok value >>= function = function value
-    Err err >>= _ = Err err
+  Ok value >>= function = function value
+  Err err >>= _ = Err err
 
 type Nbr :: Type -> Type
 newtype Nbr units = Nbr {unNbr :: Prelude.Int} deriving (Eq, Ord, Enum)
@@ -113,7 +114,7 @@ type Qty :: Type -> Type
 newtype Qty units = Qty {unQty :: Prelude.Double} deriving (Eq, Ord)
 
 instance Show Int where
-    show (Nbr n) = Prelude.show n
+  show (Nbr n) = Prelude.show n
 
 data Units (symbol :: Symbol)
 
@@ -144,72 +145,72 @@ deriving instance Prelude.RealFloat Float
 data Sign = Positive | Negative deriving (Eq, Show)
 
 class Negation a where
-    negate :: a -> a
+  negate :: a -> a
 
 class Addition p q r | p q -> r where
-    (+) :: p a -> q a -> r a
+  (+) :: p a -> q a -> r a
 
 class Subtraction p q r | p q -> r where
-    (-) :: p a -> q a -> r a
+  (-) :: p a -> q a -> r a
 
 class Multiplication b a c => Multiplication a b c | a b -> c where
-    (*) :: a -> b -> c
+  (*) :: a -> b -> c
 
 class Division a b c | a b -> c where
-    (/) :: a -> b -> c
+  (/) :: a -> b -> c
 
 instance Negation (Nbr units) where
-    {-# INLINE negate #-}
-    negate (Nbr n) = Nbr (Prelude.negate n)
+  {-# INLINE negate #-}
+  negate (Nbr n) = Nbr (Prelude.negate n)
 
 instance Negation (Qty units) where
-    {-# INLINE negate #-}
-    negate (Qty x) = Qty (Prelude.negate x)
+  {-# INLINE negate #-}
+  negate (Qty x) = Qty (Prelude.negate x)
 
 instance Negation Sign where
-    negate Positive = Negative
-    negate Negative = Positive
+  negate Positive = Negative
+  negate Negative = Positive
 
 instance Generic.Zero Nbr where
-    zero = coerce 0
+  zero = coerce 0
 
 instance Generic.Zero Qty where
-    zero = coerce 0.0
+  zero = coerce 0.0
 
 instance Addition Nbr Nbr Nbr where
-    {-# INLINE (+) #-}
-    (Nbr n) + (Nbr m) = Nbr (n Prelude.+ m)
+  {-# INLINE (+) #-}
+  (Nbr n) + (Nbr m) = Nbr (n Prelude.+ m)
 
 instance Addition Qty Qty Qty where
-    {-# INLINE (+) #-}
-    (Qty x) + (Qty y) = Qty (x Prelude.+ y)
+  {-# INLINE (+) #-}
+  (Qty x) + (Qty y) = Qty (x Prelude.+ y)
 
 instance Subtraction Nbr Nbr Nbr where
-    {-# INLINE (-) #-}
-    (Nbr n) - (Nbr m) = Nbr (n Prelude.- m)
+  {-# INLINE (-) #-}
+  (Nbr n) - (Nbr m) = Nbr (n Prelude.- m)
 
 instance Subtraction Qty Qty Qty where
-    {-# INLINE (-) #-}
-    (Qty x) - (Qty y) = Qty (x Prelude.- y)
+  {-# INLINE (-) #-}
+  (Qty x) - (Qty y) = Qty (x Prelude.- y)
 
 {-# INLINE (//) #-}
 (//) :: Int -> Int -> Int
 (Nbr n) // (Nbr m) = Nbr (Prelude.quot n m)
 
 class DotProduct p q r | p q -> r where
-    (<>) :: p a -> q a -> r
+  (<>) :: p a -> q a -> r
 
 class CrossProduct p q r | p q -> r where
-    (><) :: p a -> q a -> r a
+  (><) :: p a -> q a -> r a
 
 class Concatenation a where
-    (++) :: a -> a -> a
+  (++) :: a -> a -> a
 
 instance Concatenation Text where
-    (++) = Data.Text.append
+  (++) = Data.Text.append
 
 instance Concatenation (List a) where
-    (++) = Prelude.mappend
+  (++) = Prelude.mappend
 
 {-# INLINE fromInteger #-}
 fromInteger :: Prelude.Integer -> Int
@@ -264,24 +265,24 @@ infixl 7 *, /, //
 type Tolerance units = ?tolerance :: Qty units
 
 class ApproximateEquality a units where
-    (~=) :: Tolerance units => a -> a -> Bool
+  (~=) :: Tolerance units => a -> a -> Bool
 
 infix 4 ~=
 
 instance ApproximateEquality (Qty units) units where
-    x ~= y = let (Qty delta) = x - y in Qty (Prelude.abs delta) <= ?tolerance
+  x ~= y = let (Qty delta) = x - y in Qty (Prelude.abs delta) <= ?tolerance
 
 instance Units.Coercion (Nbr units) Int
 
 instance Units.Coercion (Qty units) Float
 
 instance Multiplication Int Int Int where
-    {-# INLINE (*) #-}
-    (Nbr n) * (Nbr m) = Nbr (n Prelude.* m)
+  {-# INLINE (*) #-}
+  (Nbr n) * (Nbr m) = Nbr (n Prelude.* m)
 
 instance Multiplication Sign Sign Sign where
-    Positive * sign = sign
-    Negative * sign = -sign
+  Positive * sign = sign
+  Negative * sign = -sign
 
 class (Product qty2 qty1 qty3, Quotient qty3 qty1 qty2, Quotient qty3 qty2 qty1) => Product qty1 qty2 qty3 | qty1 qty2 -> qty3
 
@@ -300,44 +301,44 @@ instance {-# INCOHERENT #-} Quotient (Qty units) (Qty units) Float
 instance {-# INCOHERENT #-} Quotient (Qty units) Float (Qty units)
 
 instance Product (Qty units1) (Qty units2) (Qty units3) => Multiplication (Qty units1) (Qty units2) (Qty units3) where
-    {-# INLINE (*) #-}
-    (Qty x) * (Qty y) = Qty (x Prelude.* y)
+  {-# INLINE (*) #-}
+  (Qty x) * (Qty y) = Qty (x Prelude.* y)
 
 instance Quotient (Qty units1) (Qty units2) (Qty units3) => Division (Qty units1) (Qty units2) (Qty units3) where
-    {-# INLINE (/) #-}
-    (Qty x) / (Qty y) = Qty (x Prelude./ y)
+  {-# INLINE (/) #-}
+  (Qty x) / (Qty y) = Qty (x Prelude./ y)
 
 instance Multiplication Int (Qty units) (Qty units) where
-    {-# INLINE (*) #-}
-    n * x = float n * x
+  {-# INLINE (*) #-}
+  n * x = float n * x
 
 instance Multiplication (Qty units) Int (Qty units) where
-    {-# INLINE (*) #-}
-    x * n = x * float n
+  {-# INLINE (*) #-}
+  x * n = x * float n
 
 instance Division Int Int Float where
-    {-# INLINE (/) #-}
-    n / m = float n / float m
+  {-# INLINE (/) #-}
+  n / m = float n / float m
 
 instance Division (Qty units) Int (Qty units) where
-    {-# INLINE (/) #-}
-    x / n = x / float n
+  {-# INLINE (/) #-}
+  x / n = x / float n
 
 instance Division Float (Qty units1) (Qty units2) => Division Int (Qty units1) (Qty units2) where
-    {-# INLINE (/) #-}
-    n / x = float n / x
+  {-# INLINE (/) #-}
+  n / x = float n / x
 
 class Product a a b => Squared a b | a -> b, b -> a
 
 instance Squared Float Float
 
 instance {-# OVERLAPS #-} Show Float where
-    show (Qty x) = Prelude.show x
+  show (Qty x) = Prelude.show x
 
 instance KnownSymbol symbol => Show (Qty (Units symbol)) where
-    showsPrec precedence (Qty x) =
-        let string = Prelude.shows x (' ' : symbolVal (Proxy :: Proxy symbol))
-         in Prelude.showParen (Nbr precedence >= 10) (Prelude.showString string)
+  showsPrec precedence (Qty x) =
+    let string = Prelude.shows x (' ' : symbolVal (Proxy :: Proxy symbol))
+     in Prelude.showParen (Nbr precedence >= 10) (Prelude.showString string)
 
 type Radians = Units "rad"
 

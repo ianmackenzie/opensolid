@@ -1,7 +1,8 @@
-module VectorCurve3d (
-    VectorCurve3d,
-    constant,
-) where
+module VectorCurve3d
+  ( VectorCurve3d
+  , constant
+  )
+where
 
 import {-# SOURCE #-} Curve1d (Curve1d)
 import Data.Kind (Type)

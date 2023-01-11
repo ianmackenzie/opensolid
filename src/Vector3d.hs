@@ -1,22 +1,23 @@
-module Vector3d (
-    Vector3d (..),
-    zero,
-    x,
-    y,
-    z,
-    xy,
-    xz,
-    yz,
-    xyz,
-    meters,
-    squareMeters,
-    midpoint,
-    interpolateFrom,
-    magnitude,
-    squaredMagnitude,
-    direction,
-    normalize,
-) where
+module Vector3d
+  ( Vector3d (..)
+  , zero
+  , x
+  , y
+  , z
+  , xy
+  , xz
+  , yz
+  , xyz
+  , meters
+  , squareMeters
+  , midpoint
+  , interpolateFrom
+  , magnitude
+  , squaredMagnitude
+  , direction
+  , normalize
+  )
+where
 
 import Area qualified
 import {-# SOURCE #-} Direction3d (Direction3d)
@@ -27,40 +28,40 @@ import OpenSolid
 import Qty qualified
 
 data Vector3d units coordinates = Vector3d (Qty units) (Qty units) (Qty units)
-    deriving (Eq)
+  deriving (Eq)
 
 deriving instance Show (Qty units) => Show (Vector3d units coordinates)
 
 instance Generic.Zero (Vector3d units) where
-    zero = zero
+  zero = zero
 
 instance Negation (Vector3d units coordinates) where
-    negate (Vector3d vx vy vz) = Vector3d (negate vx) (negate vy) (negate vz)
+  negate (Vector3d vx vy vz) = Vector3d (negate vx) (negate vy) (negate vz)
 
 instance Addition (Vector3d units) (Vector3d units) (Vector3d units) where
-    (Vector3d x1 y1 z1) + (Vector3d x2 y2 z2) = Vector3d (x1 + x2) (y1 + y2) (z1 + z2)
+  (Vector3d x1 y1 z1) + (Vector3d x2 y2 z2) = Vector3d (x1 + x2) (y1 + y2) (z1 + z2)
 
 instance Subtraction (Vector3d units) (Vector3d units) (Vector3d units) where
-    (Vector3d x1 y1 z1) - (Vector3d x2 y2 z2) = Vector3d (x1 - x2) (y1 - y2) (z1 - z2)
+  (Vector3d x1 y1 z1) - (Vector3d x2 y2 z2) = Vector3d (x1 - x2) (y1 - y2) (z1 - z2)
 
 instance Multiplication (Qty units1) (Qty units2) (Qty units3) => Multiplication (Qty units1) (Vector3d units2 coordinates) (Vector3d units3 coordinates) where
-    scale * (Vector3d vx vy vz) = Vector3d (scale * vx) (scale * vy) (scale * vz)
+  scale * (Vector3d vx vy vz) = Vector3d (scale * vx) (scale * vy) (scale * vz)
 
 instance Multiplication (Qty units1) (Qty units2) (Qty units3) => Multiplication (Vector3d units1 coordinates) (Qty units2) (Vector3d units3 coordinates) where
-    (Vector3d vx vy vz) * scale = Vector3d (vx * scale) (vy * scale) (vz * scale)
+  (Vector3d vx vy vz) * scale = Vector3d (vx * scale) (vy * scale) (vz * scale)
 
 instance Division (Qty units1) (Qty units2) (Qty units3) => Division (Vector3d units1 coordinates) (Qty units2) (Vector3d units3 coordinates) where
-    (Vector3d vx vy vz) / scale = Vector3d (vx / scale) (vy / scale) (vz / scale)
+  (Vector3d vx vy vz) / scale = Vector3d (vx / scale) (vy / scale) (vz / scale)
 
 instance Multiplication (Qty units1) (Qty units2) (Qty units3) => DotProduct (Vector3d units1) (Vector3d units2) (Qty units3) where
-    (Vector3d x1 y1 z1) <> (Vector3d x2 y2 z2) = x1 * x2 + y1 * y2 + z1 * z2
+  (Vector3d x1 y1 z1) <> (Vector3d x2 y2 z2) = x1 * x2 + y1 * y2 + z1 * z2
 
 instance Multiplication (Qty units1) (Qty units2) (Qty units3) => CrossProduct (Vector3d units1) (Vector3d units2) (Vector3d units3) where
-    (Vector3d x1 y1 z1) >< (Vector3d x2 y2 z2) =
-        Vector3d
-            (y1 * z2 - z1 * y2)
-            (z1 * x2 - x1 * z2)
-            (x1 * y2 - y1 * x2)
+  (Vector3d x1 y1 z1) >< (Vector3d x2 y2 z2) =
+    Vector3d
+      (y1 * z2 - z1 * y2)
+      (z1 * x2 - x1 * z2)
+      (x1 * y2 - y1 * x2)
 
 zero :: Vector3d units coordinates
 zero = Vector3d Qty.zero Qty.zero Qty.zero
@@ -90,15 +91,20 @@ meters :: Float -> Float -> Float -> Vector3d Meters coordinates
 meters vx vy vz = Vector3d (Length.meters vx) (Length.meters vy) (Length.meters vz)
 
 squareMeters :: Float -> Float -> Float -> Vector3d SquareMeters coordinates
-squareMeters vx vy vz = Vector3d (Area.squareMeters vx) (Area.squareMeters vy) (Area.squareMeters vz)
+squareMeters vx vy vz =
+  Vector3d (Area.squareMeters vx) (Area.squareMeters vy) (Area.squareMeters vz)
 
-interpolateFrom :: Vector3d units coordinates -> Vector3d units coordinates -> Float -> Vector3d units coordinates
+interpolateFrom
+  :: Vector3d units coordinates
+  -> Vector3d units coordinates
+  -> Float
+  -> Vector3d units coordinates
 interpolateFrom (Vector3d x1 y1 z1) (Vector3d x2 y2 z2) t =
-    Vector3d (Qty.interpolateFrom x1 x2 t) (Qty.interpolateFrom y1 y2 t) (Qty.interpolateFrom z1 z2 t)
+  Vector3d (Qty.interpolateFrom x1 x2 t) (Qty.interpolateFrom y1 y2 t) (Qty.interpolateFrom z1 z2 t)
 
 midpoint :: Vector3d units coordinates -> Vector3d units coordinates -> Vector3d units coordinates
 midpoint (Vector3d x1 y1 z1) (Vector3d x2 y2 z2) =
-    Vector3d (Qty.midpoint x1 x2) (Qty.midpoint y1 y2) (Qty.midpoint z1 z2)
+  Vector3d (Qty.midpoint x1 x2) (Qty.midpoint y1 y2) (Qty.midpoint z1 z2)
 
 magnitude :: Vector3d units coordinates -> Qty units
 magnitude (Vector3d vx vy vz) = Qty.hypot3 vx vy vz
@@ -108,18 +114,18 @@ squaredMagnitude (Vector3d vx vy vz) = Qty.squared vx + Qty.squared vy + Qty.squ
 
 direction :: Vector3d units coordinates -> Maybe (Direction3d coordinates)
 direction vector =
-    let m = magnitude vector
-     in if m == Qty.zero
-            then Nothing
-            else
-                let (Vector3d vx vy vz) = vector
-                 in Just (Direction3d.unsafe (vx / m) (vy / m) (vz / m))
+  let m = magnitude vector
+   in if m == Qty.zero
+        then Nothing
+        else
+          let (Vector3d vx vy vz) = vector
+           in Just (Direction3d.unsafe (vx / m) (vy / m) (vz / m))
 
 normalize :: Vector3d units coordinates -> Vector3d Unitless coordinates
 normalize vector =
-    let m = magnitude vector
-     in if m == Qty.zero
-            then zero
-            else
-                let (Vector3d vx vy vz) = vector
-                 in Vector3d (vx / m) (vy / m) (vz / m)
+  let m = magnitude vector
+   in if m == Qty.zero
+        then zero
+        else
+          let (Vector3d vx vy vz) = vector
+           in Vector3d (vx / m) (vy / m) (vz / m)

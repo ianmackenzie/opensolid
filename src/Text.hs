@@ -1,11 +1,12 @@
-module Text (
-    concat,
-    join,
-    fromChars,
-    toChars,
-    fromInt,
-    fromFloat,
-) where
+module Text
+  ( concat
+  , join
+  , fromChars
+  , toChars
+  , fromInt
+  , fromFloat
+  )
+where
 
 import Data.Text qualified
 import OpenSolid

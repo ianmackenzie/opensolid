@@ -1,12 +1,13 @@
-module Result (
-    map,
-    map2,
-    andThen,
-    withDefault,
-    mapErr,
-    (>>=),
-    orErr,
-) where
+module Result
+  ( map
+  , map2
+  , andThen
+  , withDefault
+  , mapErr
+  , (>>=)
+  , orErr
+  )
+where
 
 import OpenSolid
 
@@ -20,9 +21,9 @@ map _ (Err err) = Err err
 
 map2 :: (a -> b -> value) -> Result x a -> Result x b -> Result x value
 map2 function result1 result2 = do
-    value1 <- result1
-    value2 <- result2
-    Ok (function value1 value2)
+  value1 <- result1
+  value2 <- result2
+  Ok (function value1 value2)
 
 andThen :: (a -> Result x b) -> Result x a -> Result x b
 andThen function (Ok value) = function value

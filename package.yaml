@@ -64,6 +64,7 @@ default-extensions:
 - ImplicitParams
 - ConstraintKinds
 - PatternSynonyms
+- MultiWayIf
 
 library:
   source-dirs: src

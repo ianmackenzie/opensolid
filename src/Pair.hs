@@ -1,9 +1,10 @@
-module Pair (
-    first,
-    second,
-    mapFirst,
-    mapSecond,
-) where
+module Pair
+  ( first
+  , second
+  , mapFirst
+  , mapSecond
+  )
+where
 
 {-# INLINE first #-}
 first :: (a, b) -> a

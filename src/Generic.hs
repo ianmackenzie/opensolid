@@ -1,4 +1,4 @@
 module Generic (Zero (..)) where
 
 class Zero p where
-    zero :: p a
+  zero :: p a

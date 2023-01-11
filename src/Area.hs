@@ -1,8 +1,9 @@
-module Area (
-    squareMeters,
-    inSquareMeters,
-    squareMeter,
-) where
+module Area
+  ( squareMeters
+  , inSquareMeters
+  , squareMeter
+  )
+where
 
 import OpenSolid
 

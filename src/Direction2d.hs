@@ -1,20 +1,21 @@
-module Direction2d (
-    Direction2d (Direction2d),
-    unsafe,
-    x,
-    positiveX,
-    negativeX,
-    y,
-    positiveY,
-    negativeY,
-    determinant,
-) where
+module Direction2d
+  ( Direction2d (Direction2d)
+  , unsafe
+  , x
+  , positiveX
+  , negativeX
+  , y
+  , positiveY
+  , negativeY
+  , determinant
+  )
+where
 
 import OpenSolid
 import Vector2d (Vector2d (..))
 
 data Direction2d coordinates = Unsafe Float Float
-    deriving (Eq, Show)
+  deriving (Eq, Show)
 
 {-# COMPLETE Direction2d #-}
 
@@ -23,22 +24,22 @@ pattern Direction2d :: Float -> Float -> Direction2d coordinates
 pattern Direction2d x y <- Unsafe x y
 
 instance Negation (Direction2d coordinates) where
-    negate (Direction2d dx dy) = unsafe (negate dx) (negate dy)
+  negate (Direction2d dx dy) = unsafe (negate dx) (negate dy)
 
 instance DotProduct Direction2d Direction2d Float where
-    (Direction2d x1 y1) <> (Direction2d x2 y2) = x1 * x2 + y1 * y2
+  (Direction2d x1 y1) <> (Direction2d x2 y2) = x1 * x2 + y1 * y2
 
 instance DotProduct (Vector2d units) Direction2d (Qty units) where
-    (Vector2d vx vy) <> (Direction2d dx dy) = vx * dx + vy * dy
+  (Vector2d vx vy) <> (Direction2d dx dy) = vx * dx + vy * dy
 
 instance DotProduct Direction2d (Vector2d units) (Qty units) where
-    (Direction2d dx dy) <> (Vector2d vx vy) = dx * vx + dy * vy
+  (Direction2d dx dy) <> (Vector2d vx vy) = dx * vx + dy * vy
 
 instance Multiplication (Qty units) (Direction2d coordinates) (Vector2d units coordinates) where
-    scale * (Direction2d dx dy) = Vector2d (scale * dx) (scale * dy)
+  scale * (Direction2d dx dy) = Vector2d (scale * dx) (scale * dy)
 
 instance Multiplication (Direction2d coordinates) (Qty units) (Vector2d units coordinates) where
-    (Direction2d dx dy) * scale = Vector2d (dx * scale) (dy * scale)
+  (Direction2d dx dy) * scale = Vector2d (dx * scale) (dy * scale)
 
 unsafe :: Float -> Float -> Direction2d coordinates
 unsafe = Unsafe

@@ -1,9 +1,10 @@
-module Float (
-    ceiling,
-    floor,
-    pi,
-    pow,
-) where
+module Float
+  ( ceiling
+  , floor
+  , pi
+  , pow
+  )
+where
 
 import OpenSolid
 import Prelude qualified

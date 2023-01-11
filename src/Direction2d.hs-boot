@@ -1,7 +1,8 @@
-module Direction2d (
-    Direction2d,
-    unsafe,
-) where
+module Direction2d
+  ( Direction2d
+  , unsafe
+  )
+where
 
 import OpenSolid
 

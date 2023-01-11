@@ -1,8 +1,9 @@
-module Debug (
-    show,
-    trace,
-    log,
-) where
+module Debug
+  ( show
+  , trace
+  , log
+  )
+where
 
 import Debug.Trace qualified
 import OpenSolid

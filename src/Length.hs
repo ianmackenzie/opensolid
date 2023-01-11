@@ -1,11 +1,12 @@
-module Length (
-    meter,
-    centimeter,
-    meters,
-    inMeters,
-    centimeters,
-    inCentimeters,
-) where
+module Length
+  ( meter
+  , centimeter
+  , meters
+  , inMeters
+  , centimeters
+  , inCentimeters
+  )
+where
 
 import OpenSolid
 

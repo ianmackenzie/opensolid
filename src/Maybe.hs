@@ -1,10 +1,11 @@
-module Maybe (
-    map,
-    map2,
-    withDefault,
-    (>>=),
-    orErr,
-) where
+module Maybe
+  ( map
+  , map2
+  , withDefault
+  , (>>=)
+  , orErr
+  )
+where
 
 import OpenSolid
 
@@ -13,9 +14,9 @@ map = fmap
 
 map2 :: (a -> b -> c) -> Maybe a -> Maybe b -> Maybe c
 map2 function maybeA maybeB = do
-    valueA <- maybeA
-    valueB <- maybeB
-    Just (function valueA valueB)
+  valueA <- maybeA
+  valueB <- maybeB
+  Just (function valueA valueB)
 
 withDefault :: a -> Maybe a -> a
 withDefault _ (Just value) = value

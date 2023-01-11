@@ -1,11 +1,12 @@
-module Volume (
-    cubicMeters,
-    inCubicMeters,
-    cubicMeter,
-    cubicCentimeter,
-    cubicCentimeters,
-    inCubicCentimeters,
-) where
+module Volume
+  ( cubicMeters
+  , inCubicMeters
+  , cubicMeter
+  , cubicCentimeter
+  , cubicCentimeters
+  , inCubicCentimeters
+  )
+where
 
 import Length qualified
 import OpenSolid

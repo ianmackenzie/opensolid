@@ -1,7 +1,8 @@
-module Curve2d (
-    Curve2d (Curve2d),
-    IsCurve2d,
-) where
+module Curve2d
+  ( Curve2d (Curve2d)
+  , IsCurve2d
+  )
+where
 
 import Data.Kind (Type)
 
