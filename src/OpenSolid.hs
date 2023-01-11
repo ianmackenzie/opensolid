@@ -17,7 +17,7 @@ module OpenSolid
   , (//)
   , DotProduct (..)
   , CrossProduct (..)
-  , Concatenation (..)
+  , (++)
   , fromInteger
   , fromRational
   , fromString
@@ -203,14 +203,8 @@ class DotProduct p q r | p q -> r where
 class CrossProduct p q r | p q -> r where
   (><) :: p a -> q a -> r a
 
-class Concatenation a where
-  (++) :: a -> a -> a
-
-instance Concatenation Text where
-  (++) = Data.Text.append
-
-instance Concatenation (List a) where
-  (++) = Prelude.mappend
+(++) :: Prelude.Monoid a => a -> a -> a
+(++) = Prelude.mappend
 
 {-# INLINE fromInteger #-}
 fromInteger :: Prelude.Integer -> Int
