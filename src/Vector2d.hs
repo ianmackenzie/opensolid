@@ -11,6 +11,7 @@ module Vector2d
   , determinant
   , magnitude
   , squaredMagnitude
+  , IsZero (..)
   , direction
   , normalize
   )
@@ -96,14 +97,16 @@ magnitude (Vector2d vx vy) = Qty.hypot2 vx vy
 squaredMagnitude :: Squared (Qty units1) (Qty units2) => Vector2d units1 coordinates -> Qty units2
 squaredMagnitude (Vector2d vx vy) = Qty.squared vx + Qty.squared vy
 
-direction :: Vector2d units coordinates -> Maybe (Direction2d coordinates)
+data IsZero = IsZero
+
+direction :: Vector2d units coordinates -> Result IsZero (Direction2d coordinates)
 direction vector =
   let m = magnitude vector
    in if m == Qty.zero
-        then Nothing
+        then Err IsZero
         else
           let (Vector2d vx vy) = vector
-           in Just (Direction2d.unsafe (vx / m) (vy / m))
+           in Ok (Direction2d.unsafe (vx / m) (vy / m))
 
 normalize :: Vector2d units coordinates -> Vector2d Unitless coordinates
 normalize vector =

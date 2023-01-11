@@ -101,7 +101,7 @@ script = do
   let expression = Curve1d.squared (Curve1d.sin theta)
   let expressionRoots = let ?tolerance = 1e-12 in Curve1d.roots expression
   log "Roots" expressionRoots
-  log "Or test" (Vector3d.direction Vector3d.zero |> Maybe.orErr "Zero vector")
+  log "Or test" (List.head ([] :: List Int) |> Maybe.orErr "Empty list")
   testParameterValues
   testListCollapse
   Script.printLine "Unicode output test: ✅❌🙂"

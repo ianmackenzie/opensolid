@@ -14,6 +14,7 @@ module Vector3d
   , interpolateFrom
   , magnitude
   , squaredMagnitude
+  , IsZero (..)
   , direction
   , normalize
   )
@@ -112,14 +113,16 @@ magnitude (Vector3d vx vy vz) = Qty.hypot3 vx vy vz
 squaredMagnitude :: Squared (Qty units1) (Qty units2) => Vector3d units1 coordinates -> Qty units2
 squaredMagnitude (Vector3d vx vy vz) = Qty.squared vx + Qty.squared vy + Qty.squared vz
 
-direction :: Vector3d units coordinates -> Maybe (Direction3d coordinates)
+data IsZero = IsZero
+
+direction :: Vector3d units coordinates -> Result IsZero (Direction3d coordinates)
 direction vector =
   let m = magnitude vector
    in if m == Qty.zero
-        then Nothing
+        then Err IsZero
         else
           let (Vector3d vx vy vz) = vector
-           in Just (Direction3d.unsafe (vx / m) (vy / m) (vz / m))
+           in Ok (Direction3d.unsafe (vx / m) (vy / m) (vz / m))
 
 normalize :: Vector3d units coordinates -> Vector3d Unitless coordinates
 normalize vector =
