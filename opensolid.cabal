@@ -79,22 +79,17 @@ library
       UndecidableInstances
       RebindableSyntax
       MonoLocalBinds
-      TypeFamilies
+      KindSignatures
       StandaloneDeriving
-      ExistentialQuantification
       StrictData
       FunctionalDependencies
       GeneralizedNewtypeDeriving
-      QualifiedDo
-      OverloadedLabels
       DataKinds
       ScopedTypeVariables
       GADTs
       RoleAnnotations
-      RankNTypes
       LexicalNegation
       ImportQualifiedPost
-      TypeOperators
       StandaloneKindSignatures
       UndecidableSuperClasses
       ImplicitParams
@@ -126,22 +121,17 @@ executable sandbox
       UndecidableInstances
       RebindableSyntax
       MonoLocalBinds
-      TypeFamilies
+      KindSignatures
       StandaloneDeriving
-      ExistentialQuantification
       StrictData
       FunctionalDependencies
       GeneralizedNewtypeDeriving
-      QualifiedDo
-      OverloadedLabels
       DataKinds
       ScopedTypeVariables
       GADTs
       RoleAnnotations
-      RankNTypes
       LexicalNegation
       ImportQualifiedPost
-      TypeOperators
       StandaloneKindSignatures
       UndecidableSuperClasses
       ImplicitParams
@@ -175,22 +165,17 @@ test-suite opensolid-test
       UndecidableInstances
       RebindableSyntax
       MonoLocalBinds
-      TypeFamilies
+      KindSignatures
       StandaloneDeriving
-      ExistentialQuantification
       StrictData
       FunctionalDependencies
       GeneralizedNewtypeDeriving
-      QualifiedDo
-      OverloadedLabels
       DataKinds
       ScopedTypeVariables
       GADTs
       RoleAnnotations
-      RankNTypes
       LexicalNegation
       ImportQualifiedPost
-      TypeOperators
       StandaloneKindSignatures
       UndecidableSuperClasses
       ImplicitParams
