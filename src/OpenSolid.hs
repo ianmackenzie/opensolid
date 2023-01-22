@@ -1,5 +1,6 @@
 module OpenSolid
   ( module Prelude
+  , module Control.Category
   , Nbr (..)
   , Qty (..)
   , Int
@@ -50,6 +51,7 @@ module OpenSolid
   )
 where
 
+import Control.Category ((<<<), (>>>))
 import Data.Coerce (coerce)
 import Data.Kind (Type)
 import Data.Proxy (Proxy (Proxy))
