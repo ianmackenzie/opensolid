@@ -1,3 +1,8 @@
+-- Set in package.yaml, but hlint/HLS doesn't seem to notice it there
+-- Can remove this if doing so no longer triggers warnings in ifThenElse
+-- (e.g. an update to hlint or HLS notices the extension in package.yaml/opensolid.cabal)
+{-# LANGUAGE Strict #-}
+
 module OpenSolid
   ( module Prelude
   , module Control.Category
@@ -224,8 +229,8 @@ float :: Int -> Float
 float (Nbr n) = Qty (Prelude.fromIntegral n)
 
 ifThenElse :: Bool -> a -> a -> a
-ifThenElse True ifBranch _ = ifBranch
-ifThenElse False _ elseBranch = elseBranch
+ifThenElse True ifBranch ~_ = ifBranch
+ifThenElse False ~_ elseBranch = elseBranch
 
 identity :: a -> a
 identity = Prelude.id
