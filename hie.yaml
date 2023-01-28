@@ -1,0 +1,10 @@
+cradle:
+  stack:
+    - path: "./src"
+      component: "opensolid:lib"
+
+    - path: "./sandbox/Main.hs"
+      component: "opensolid:exe:sandbox"
+
+    - path: "./test"
+      component: "opensolid:test:opensolid-test"
