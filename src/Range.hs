@@ -23,6 +23,8 @@ module Range
   , cos
   , interpolate
   , interpolationParameter
+  , any
+  , all
   )
 where
 
@@ -275,3 +277,37 @@ interpolationParameter (Range low high) value
   | value < low = -Qty.infinity
   | value > high = Qty.infinity
   | otherwise = 0.0
+
+any :: (Range units -> Assessment Bool) -> Range units -> Assessment Bool
+any assess range =
+  let assessment = assess range
+   in case assessment of
+        Definitely _ -> assessment
+        Indeterminate | Range.isAtomic range -> Indeterminate
+        Indeterminate ->
+          let (left, right) = Range.bisect range
+           in case any assess left of
+                Definitely True -> Definitely True
+                Definitely False -> any assess right
+                Indeterminate ->
+                  case any assess right of
+                    Definitely True -> Definitely True
+                    Definitely False -> Indeterminate
+                    Indeterminate -> Indeterminate
+
+all :: (Range units -> Assessment Bool) -> Range units -> Assessment Bool
+all assess range =
+  let assessment = assess range
+   in case assessment of
+        Definitely _ -> assessment
+        Indeterminate | Range.isAtomic range -> Indeterminate
+        Indeterminate ->
+          let (left, right) = Range.bisect range
+           in case all assess left of
+                Definitely True -> all assess right
+                Definitely False -> Definitely False
+                Indeterminate ->
+                  case all assess right of
+                    Definitely True -> Indeterminate
+                    Definitely False -> Definitely False
+                    Indeterminate -> Indeterminate
