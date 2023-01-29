@@ -265,7 +265,7 @@ infixl 7 *, /, //
 
 type Tolerance units = ?tolerance :: Qty units
 
-class ApproximateEquality a units where
+class ApproximateEquality a units | a -> units where
   (~=) :: Tolerance units => a -> a -> Bool
 
 infix 4 ~=
