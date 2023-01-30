@@ -70,7 +70,7 @@ instance Subtraction Point2d Constant (VectorCurve2d Meters) where
 
 data PointCurveDifference coordinates = PointCurveDifference (Point2d coordinates) (Curve2d coordinates)
 
-instance IsVectorCurve2d (PointCurveDifference coordinates) Meters coordinates where
+instance IsVectorCurve2d PointCurveDifference Meters where
   pointOn (PointCurveDifference point curve) t = point - pointOn curve t
   segmentBounds (PointCurveDifference point curve) t = point - segmentBounds curve t
   derivative (PointCurveDifference _ curve) = -(derivative curve)
@@ -80,7 +80,7 @@ instance Subtraction Point2d Curve2d (VectorCurve2d Meters) where
 
 data CurvePointDifference coordinates = CurvePointDifference (Curve2d coordinates) (Point2d coordinates)
 
-instance IsVectorCurve2d (CurvePointDifference coordinates) Meters coordinates where
+instance IsVectorCurve2d CurvePointDifference Meters where
   pointOn (CurvePointDifference curve point) t = pointOn curve t - point
   segmentBounds (CurvePointDifference curve point) t = segmentBounds curve t - point
   derivative (CurvePointDifference curve _) = derivative curve

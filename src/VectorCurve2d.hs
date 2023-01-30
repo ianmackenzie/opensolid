@@ -25,14 +25,14 @@ import Vector2d qualified
 import VectorBox2d (VectorBox2d (VectorBox2d))
 import VectorBox2d qualified
 
-class IsVectorCurve2d curve units coordinates | curve -> units, curve -> coordinates where
-  pointOn :: curve -> Float -> Vector2d units coordinates
-  segmentBounds :: curve -> Range Unitless -> VectorBox2d units coordinates
-  derivative :: curve -> VectorCurve2d units coordinates
+class IsVectorCurve2d curve units | curve -> units where
+  pointOn :: curve coordinates -> Float -> Vector2d units coordinates
+  segmentBounds :: curve coordinates -> Range Unitless -> VectorBox2d units coordinates
+  derivative :: curve coordinates -> VectorCurve2d units coordinates
 
 type VectorCurve2d :: Type -> Type -> Type
 data VectorCurve2d units coordinates where
-  VectorCurve2d :: forall curve units coordinates. IsVectorCurve2d curve units coordinates => curve -> VectorCurve2d units coordinates
+  VectorCurve2d :: forall curve units coordinates. IsVectorCurve2d curve units => curve coordinates -> VectorCurve2d units coordinates
   Zero :: VectorCurve2d units coordinates
   Constant :: Vector2d units coordinates -> VectorCurve2d units coordinates
   XY :: Curve1d units -> Curve1d units -> VectorCurve2d units coordinates
@@ -45,7 +45,7 @@ data VectorCurve2d units coordinates where
 
 instance Units.Coercion (VectorCurve2d units coordinates) (VectorCurve2d Unitless coordinates)
 
-instance IsVectorCurve2d (VectorCurve2d units coordinates) units coordinates where
+instance IsVectorCurve2d (VectorCurve2d units) units where
   pointOn curve t =
     case curve of
       VectorCurve2d c -> pointOn c t
