@@ -13,6 +13,7 @@ module Vector2d
   , squaredMagnitude
   , IsZero (..)
   , direction
+  , magnitudeAndDirection
   , normalize
   )
 where
@@ -107,6 +108,15 @@ direction vector =
         else
           let (Vector2d vx vy) = vector
            in Ok (Direction2d.unsafe (vx / m) (vy / m))
+
+magnitudeAndDirection :: Vector2d units coordinates -> Result IsZero (Qty units, Direction2d coordinates)
+magnitudeAndDirection vector =
+  let m = magnitude vector
+   in if m == Qty.zero
+        then Err IsZero
+        else
+          let (Vector2d vx vy) = vector
+           in Ok (m, Direction2d.unsafe (vx / m) (vy / m))
 
 normalize :: Vector2d units coordinates -> Vector2d Unitless coordinates
 normalize vector =
