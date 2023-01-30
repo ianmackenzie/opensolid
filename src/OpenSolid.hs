@@ -37,6 +37,7 @@ module OpenSolid
   , subtract
   , (|>)
   , (<|)
+  , ToleranceIn
   , Tolerance
   , ApproximateEquality (..)
   , Unitless
@@ -266,10 +267,12 @@ infixl 6 +, -
 
 infixl 7 *, /, //
 
-type Tolerance units = ?tolerance :: Qty units
+type ToleranceIn units = ?tolerance :: Qty units
+
+type Tolerance = ToleranceIn Meters
 
 class ApproximateEquality a units | a -> units where
-  (~=) :: Tolerance units => a -> a -> Bool
+  (~=) :: ToleranceIn units => a -> a -> Bool
 
 infix 4 ~=
 

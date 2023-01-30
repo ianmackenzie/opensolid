@@ -3,6 +3,7 @@ module Main (main) where
 import Angle qualified
 import Area qualified
 import Curve1d qualified
+import Curve2d (Curve2d (..))
 import Curve2d qualified
 import Debug qualified
 import Direction2d qualified
@@ -43,16 +44,16 @@ testListCollapse =
   let textChunks = ["T", "h", "is", " ", "i", "s", " ", "a", " ", "t", "es", "t"]
    in log "Collapsed list" (List.collapse joinTextChunks textChunks |> List.filter (/= " "))
 
-testParameterValues :: Script.Program
-testParameterValues = do
+testCurveFind :: Script.Program
+testCurveFind = do
   let p1 = Point2d.meters 0.0 0.0
   let p2 = Point2d.meters 1.0 2.0
   let p3 = Point2d.meters 2.0 0.0
-  let testSpline = QuadraticSpline2d.fromControlPoints p1 p2 p3
-  log "Start parameter value" (Curve2d.parameterValues Point2d.origin testSpline)
-  log "End parameter value" (Curve2d.parameterValues (Point2d.meters 2.0 0.0) testSpline)
-  log "Mid parameter value" (Curve2d.parameterValues (Point2d.meters 1.0 1.0) testSpline)
-  log "Off-curve parameter value" (Curve2d.parameterValues (Point2d.meters 1.0 1.1) testSpline)
+  let testSpline = Curve2d (QuadraticSpline2d.fromControlPoints p1 p2 p3)
+  log "Start parameter value" (Curve2d.find Point2d.origin testSpline)
+  log "End parameter value" (Curve2d.find (Point2d.meters 2.0 0.0) testSpline)
+  log "Mid parameter value" (Curve2d.find (Point2d.meters 1.0 1.0) testSpline)
+  log "Off-curve parameter value" (Curve2d.find (Point2d.meters 1.0 1.1) testSpline)
   where
     ?tolerance = Length.meters 1e-9
 
@@ -101,7 +102,7 @@ script = do
   let expression = Curve1d.squared (Curve1d.sin theta)
   let expressionRoots = let ?tolerance = 1e-12 in Curve1d.roots expression
   log "Roots" expressionRoots
-  testParameterValues
+  testCurveFind
   log "Maybe.orErr" (List.map (Maybe.orErr "Bad") [Just 1, Nothing, Just 2, Nothing, Just 3])
   testListCollapse
   Script.printLine "Unicode output test: ✅❌🙂"
