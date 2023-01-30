@@ -71,8 +71,7 @@ script = do
   let v2 = 0.5 * Vector2d.meters 3.0 4.0
   let dotProduct = v1 <> v2
   log "Dot product" dotProduct
-  let determinant = Vector2d.determinant v1 v2
-  log "Determinant" determinant
+  log "2D cross product" (v1 >< v2)
   let squareRoot = Qty.sqrt dotProduct
   log "Square root" squareRoot
   let translatedPoint = Point2d.meters 2.0 3.0 |> Point2d.translateBy (Vector2d.meters 4.0 5.0)

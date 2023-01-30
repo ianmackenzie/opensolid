@@ -7,7 +7,6 @@ module Direction2d
   , y
   , positiveY
   , negativeY
-  , determinant
   , rotateLeft
   , rotateRight
   )
@@ -37,6 +36,15 @@ instance DotProduct (Vector2d units) Direction2d (Qty units) where
 instance DotProduct Direction2d (Vector2d units) (Qty units) where
   (Direction2d dx dy) <> (Vector2d vx vy) = dx * vx + dy * vy
 
+instance coordinates ~ coordinates' => CrossProduct (Direction2d coordinates) (Direction2d coordinates') Float where
+  Direction2d x1 y1 >< Direction2d x2 y2 = x1 * y2 - y1 * x2
+
+instance coordinates ~ coordinates' => CrossProduct (Vector2d units coordinates) (Direction2d coordinates') (Qty units) where
+  Vector2d vx vy >< Direction2d dx dy = vx * dy - vy * dx
+
+instance coordinates ~ coordinates' => CrossProduct (Direction2d coordinates) (Vector2d units coordinates') (Qty units) where
+  Direction2d dx dy >< Vector2d vx vy = dx * vy - dy * vx
+
 instance Multiplication (Qty units) (Direction2d coordinates) (Vector2d units coordinates) where
   scale * (Direction2d dx dy) = Vector2d (scale * dx) (scale * dy)
 
@@ -63,9 +71,6 @@ x = positiveX
 
 y :: Direction2d coordinates
 y = positiveY
-
-determinant :: Direction2d coordinates -> Direction2d coordinates -> Float
-determinant (Direction2d x1 y1) (Direction2d x2 y2) = x1 * y2 - y1 * x2
 
 rotateLeft :: Direction2d coordinates -> Direction2d coordinates
 rotateLeft (Direction2d dx dy) = unsafe -dy dx

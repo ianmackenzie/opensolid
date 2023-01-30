@@ -55,6 +55,9 @@ instance Division (Qty units1) (Qty units2) (Qty units3) => Division (Vector2d u
 instance Multiplication (Qty units1) (Qty units2) (Qty units3) => DotProduct (Vector2d units1) (Vector2d units2) (Qty units3) where
   (Vector2d x1 y1) <> (Vector2d x2 y2) = x1 * x2 + y1 * y2
 
+instance (Multiplication (Qty units1) (Qty units2) (Qty units3), coordinates ~ coordinates') => CrossProduct (Vector2d units1 coordinates) (Vector2d units2 coordinates') (Qty units3) where
+  Vector2d x1 y1 >< Vector2d x2 y2 = x1 * y2 - y1 * x2
+
 zero :: Vector2d units coordinates
 zero = Vector2d Qty.zero Qty.zero
 

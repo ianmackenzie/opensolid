@@ -220,15 +220,15 @@ instance Multiplication (Qty units1) (Qty units2) (Qty units3) => IsVectorCurve3
   derivative (CrossProductOf curve1 curve2) =
     derivative curve1 >< curve2 + curve1 >< derivative curve2
 
-instance Multiplication (Qty units1) (Qty units2) (Qty units3) => CrossProduct (VectorCurve3d units1) (VectorCurve3d units2) (VectorCurve3d units3) where
+instance (Multiplication (Qty units1) (Qty units2) (Qty units3), coordinates ~ coordinates') => CrossProduct (VectorCurve3d units1 coordinates) (VectorCurve3d units2 coordinates') (VectorCurve3d units3 coordinates) where
   curve1 >< curve2 =
     VectorCurve3d (CrossProductOf curve1 curve2)
 
-instance Multiplication (Qty units1) (Qty units2) (Qty units3) => CrossProduct (Vector3d units1) (VectorCurve3d units2) (VectorCurve3d units3) where
+instance (Multiplication (Qty units1) (Qty units2) (Qty units3), coordinates ~ coordinates') => CrossProduct (Vector3d units1 coordinates) (VectorCurve3d units2 coordinates') (VectorCurve3d units3 coordinates) where
   vector >< curve =
     VectorCurve3d (CrossProductOf (constant vector) curve)
 
-instance Multiplication (Qty units1) (Qty units2) (Qty units3) => CrossProduct (VectorCurve3d units1) (Vector3d units2) (VectorCurve3d units3) where
+instance (Multiplication (Qty units1) (Qty units2) (Qty units3), coordinates ~ coordinates') => CrossProduct (VectorCurve3d units1 coordinates) (Vector3d units2 coordinates') (VectorCurve3d units3 coordinates) where
   curve >< vector =
     VectorCurve3d (CrossProductOf curve (constant vector))
 

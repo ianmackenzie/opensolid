@@ -57,7 +57,7 @@ instance Division (Qty units1) (Qty units2) (Qty units3) => Division (Vector3d u
 instance Multiplication (Qty units1) (Qty units2) (Qty units3) => DotProduct (Vector3d units1) (Vector3d units2) (Qty units3) where
   (Vector3d x1 y1 z1) <> (Vector3d x2 y2 z2) = x1 * x2 + y1 * y2 + z1 * z2
 
-instance Multiplication (Qty units1) (Qty units2) (Qty units3) => CrossProduct (Vector3d units1) (Vector3d units2) (Vector3d units3) where
+instance (Multiplication (Qty units1) (Qty units2) (Qty units3), coordinates ~ coordinates') => CrossProduct (Vector3d units1 coordinates) (Vector3d units2 coordinates') (Vector3d units3 coordinates) where
   (Vector3d x1 y1 z1) >< (Vector3d x2 y2 z2) =
     Vector3d
       (y1 * z2 - z1 * y2)

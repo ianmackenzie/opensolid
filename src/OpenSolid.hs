@@ -211,8 +211,8 @@ instance Subtraction Qty Qty Qty where
 class DotProduct p q r | p q -> r where
   (<>) :: p a -> q a -> r
 
-class CrossProduct p q r | p q -> r where
-  (><) :: p a -> q a -> r a
+class CrossProduct a b c | a b -> c where
+  (><) :: a -> b -> c
 
 (++) :: Prelude.Monoid a => a -> a -> a
 (++) = Prelude.mappend

@@ -65,21 +65,21 @@ instance Multiplication (Qty units1) (Qty units2) (Qty units3) => DotProduct (Ve
 instance Multiplication (Qty units1) (Qty units2) (Qty units3) => DotProduct (VectorBox3d units1) (VectorBox3d units2) (Range units3) where
   (VectorBox3d x1 y1 z1) <> (VectorBox3d x2 y2 z2) = x1 * x2 + y1 * y2 + z1 * z2
 
-instance Multiplication (Qty units1) (Qty units2) (Qty units3) => CrossProduct (Vector3d units1) (VectorBox3d units2) (VectorBox3d units3) where
+instance (Multiplication (Qty units1) (Qty units2) (Qty units3), coordinates ~ coordinates') => CrossProduct (Vector3d units1 coordinates) (VectorBox3d units2 coordinates') (VectorBox3d units3 coordinates) where
   (Vector3d x1 y1 z1) >< (VectorBox3d x2 y2 z2) =
     VectorBox3d
       (y1 * z2 - z1 * y2)
       (z1 * x2 - x1 * z2)
       (x1 * y2 - y1 * x2)
 
-instance Multiplication (Qty units1) (Qty units2) (Qty units3) => CrossProduct (VectorBox3d units1) (Vector3d units2) (VectorBox3d units3) where
+instance (Multiplication (Qty units1) (Qty units2) (Qty units3), coordinates ~ coordinates') => CrossProduct (VectorBox3d units1 coordinates) (Vector3d units2 coordinates') (VectorBox3d units3 coordinates) where
   (VectorBox3d x1 y1 z1) >< (Vector3d x2 y2 z2) =
     VectorBox3d
       (y1 * z2 - z1 * y2)
       (z1 * x2 - x1 * z2)
       (x1 * y2 - y1 * x2)
 
-instance Multiplication (Qty units1) (Qty units2) (Qty units3) => CrossProduct (VectorBox3d units1) (VectorBox3d units2) (VectorBox3d units3) where
+instance (Multiplication (Qty units1) (Qty units2) (Qty units3), coordinates ~ coordinates') => CrossProduct (VectorBox3d units1 coordinates) (VectorBox3d units2 coordinates') (VectorBox3d units3 coordinates) where
   (VectorBox3d x1 y1 z1) >< (VectorBox3d x2 y2 z2) =
     VectorBox3d
       (y1 * z2 - z1 * y2)
