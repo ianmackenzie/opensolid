@@ -11,7 +11,7 @@ module OpenSolid
   , Int
   , Float
   , Sign (..)
-  , Assessment (..)
+  , Indeterminate (..)
   , Text
   , List
   , Result (..)
@@ -152,21 +152,7 @@ deriving instance Prelude.RealFloat Float
 
 data Sign = Positive | Negative deriving (Eq, Show)
 
-data Assessment a = Definitely a | Indeterminate deriving (Eq, Show)
-
-instance Functor Assessment where
-  fmap f (Definitely value) = Definitely (f value)
-  fmap _ Indeterminate = Indeterminate
-
-instance Applicative Assessment where
-  pure = Definitely
-  Definitely f <*> Definitely value = Definitely (f value)
-  Indeterminate <*> ~_ = Indeterminate
-  Definitely _ <*> Indeterminate = Indeterminate
-
-instance Monad Assessment where
-  Definitely value >>= f = f value
-  Indeterminate >>= ~_ = Indeterminate
+data Indeterminate = Indeterminate
 
 class Negation a where
   negate :: a -> a

@@ -278,36 +278,36 @@ interpolationParameter (Range low high) value
   | value > high = Qty.infinity
   | otherwise = 0.0
 
-any :: (Range units -> Assessment Bool) -> Range units -> Assessment Bool
+any :: (Range units -> Result Indeterminate Bool) -> Range units -> Result Indeterminate Bool
 any assess range =
   let assessment = assess range
    in case assessment of
-        Definitely _ -> assessment
-        Indeterminate | Range.isAtomic range -> Indeterminate
-        Indeterminate ->
+        Ok _ -> assessment
+        Err Indeterminate | Range.isAtomic range -> Err Indeterminate
+        Err Indeterminate ->
           let (left, right) = Range.bisect range
            in case any assess left of
-                Definitely True -> Definitely True
-                Definitely False -> any assess right
-                Indeterminate ->
+                Ok True -> Ok True
+                Ok False -> any assess right
+                Err Indeterminate ->
                   case any assess right of
-                    Definitely True -> Definitely True
-                    Definitely False -> Indeterminate
-                    Indeterminate -> Indeterminate
+                    Ok True -> Ok True
+                    Ok False -> Err Indeterminate
+                    Err Indeterminate -> Err Indeterminate
 
-all :: (Range units -> Assessment Bool) -> Range units -> Assessment Bool
+all :: (Range units -> Result Indeterminate Bool) -> Range units -> Result Indeterminate Bool
 all assess range =
   let assessment = assess range
    in case assessment of
-        Definitely _ -> assessment
-        Indeterminate | Range.isAtomic range -> Indeterminate
-        Indeterminate ->
+        Ok _ -> assessment
+        Err Indeterminate | Range.isAtomic range -> Err Indeterminate
+        Err Indeterminate ->
           let (left, right) = Range.bisect range
            in case all assess left of
-                Definitely True -> all assess right
-                Definitely False -> Definitely False
-                Indeterminate ->
+                Ok True -> all assess right
+                Ok False -> Ok False
+                Err Indeterminate ->
                   case all assess right of
-                    Definitely True -> Indeterminate
-                    Definitely False -> Definitely False
-                    Indeterminate -> Indeterminate
+                    Ok True -> Err Indeterminate
+                    Ok False -> Ok False
+                    Err Indeterminate -> Err Indeterminate
