@@ -8,6 +8,8 @@ module Direction2d
   , positiveY
   , negativeY
   , determinant
+  , rotateLeft
+  , rotateRight
   )
 where
 
@@ -64,3 +66,9 @@ y = positiveY
 
 determinant :: Direction2d coordinates -> Direction2d coordinates -> Float
 determinant (Direction2d x1 y1) (Direction2d x2 y2) = x1 * y2 - y1 * x2
+
+rotateLeft :: Direction2d coordinates -> Direction2d coordinates
+rotateLeft (Direction2d dx dy) = unsafe -dy dx
+
+rotateRight :: Direction2d coordinates -> Direction2d coordinates
+rotateRight (Direction2d dx dy) = unsafe dy -dx
