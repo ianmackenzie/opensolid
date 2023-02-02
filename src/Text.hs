@@ -30,7 +30,7 @@ toString :: Data.String.IsString a => Text -> a
 toString text = Data.String.fromString (toChars text)
 
 fromInt :: Int -> Text
-fromInt (Nbr n) = TextShow.showt n
+fromInt = TextShow.showt
 
 fromFloat :: Float -> Text
 fromFloat (Qty x) = TextShow.showt x

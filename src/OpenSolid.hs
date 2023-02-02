@@ -6,9 +6,7 @@
 module OpenSolid
   ( module Prelude
   , module Control.Category
-  , Nbr (..)
   , Qty (..)
-  , Int
   , Float
   , Sign (..)
   , Indeterminate (..)
@@ -74,6 +72,7 @@ import Prelude
   , Eq (..)
   , Functor (..)
   , IO
+  , Int
   , Maybe (..)
   , Monad (..)
   , Ord (..)
@@ -116,26 +115,12 @@ instance Prelude.Monad (Result x) where
   Ok value >>= function = function value
   Err err >>= _ = Err err
 
-type Nbr :: Type -> Type
-newtype Nbr units = Nbr {unNbr :: Prelude.Int} deriving (Eq, Ord, Enum)
-
 type Qty :: Type -> Type
 newtype Qty units = Qty {unQty :: Prelude.Double} deriving (Eq, Ord)
-
-instance Show Int where
-  show (Nbr n) = Prelude.show n
 
 data Units (symbol :: Symbol)
 
 type Unitless = Units ""
-
-type Int = Nbr Unitless
-
-deriving instance Prelude.Num Int
-
-deriving instance Prelude.Real Int
-
-deriving instance Prelude.Integral Int
 
 type Float = Qty Unitless
 
@@ -158,21 +143,17 @@ data Indeterminate = Indeterminate
 class Negation a where
   negate :: a -> a
 
-class Addition p q r | p q -> r where
-  (+) :: p a -> q a -> r a
+class Addition a b c | a b -> c where
+  (+) :: a -> b -> c
 
-class Subtraction p q r | p q -> r where
-  (-) :: p a -> q a -> r a
+class Subtraction a b c | a b -> c where
+  (-) :: a -> b -> c
 
 class Multiplication b a c => Multiplication a b c | a b -> c where
   (*) :: a -> b -> c
 
 class Division a b c | a b -> c where
   (/) :: a -> b -> c
-
-instance Negation (Nbr units) where
-  {-# INLINE negate #-}
-  negate (Nbr n) = Nbr (Prelude.negate n)
 
 instance Negation (Qty units) where
   {-# INLINE negate #-}
@@ -182,31 +163,25 @@ instance Negation Sign where
   negate Positive = Negative
   negate Negative = Positive
 
-instance Generic.Zero Nbr where
-  zero = coerce 0
-
-instance Generic.Zero Qty where
+instance Generic.Zero (Qty units) where
   zero = coerce 0.0
 
-instance Addition Nbr Nbr Nbr where
-  {-# INLINE (+) #-}
-  (Nbr n) + (Nbr m) = Nbr (n Prelude.+ m)
+instance Addition Int Int Int where
+  (+) = (Prelude.+)
 
-instance Addition Qty Qty Qty where
+instance units ~ units' => Addition (Qty units) (Qty units') (Qty units) where
   {-# INLINE (+) #-}
   (Qty x) + (Qty y) = Qty (x Prelude.+ y)
 
-instance Subtraction Nbr Nbr Nbr where
-  {-# INLINE (-) #-}
-  (Nbr n) - (Nbr m) = Nbr (n Prelude.- m)
+instance Subtraction Int Int Int where
+  (-) = (Prelude.-)
 
-instance Subtraction Qty Qty Qty where
+instance units ~ units' => Subtraction (Qty units) (Qty units') (Qty units) where
   {-# INLINE (-) #-}
   (Qty x) - (Qty y) = Qty (x Prelude.- y)
 
-{-# INLINE (//) #-}
 (//) :: Int -> Int -> Int
-(Nbr n) // (Nbr m) = Nbr (Prelude.quot n m)
+(//) = Prelude.quot
 
 class DotProduct p q r | p q -> r where
   (<>) :: p a -> q a -> r
@@ -219,7 +194,7 @@ class CrossProduct a b c | a b -> c where
 
 {-# INLINE fromInteger #-}
 fromInteger :: Prelude.Integer -> Int
-fromInteger n = Nbr (Prelude.fromInteger n)
+fromInteger = Prelude.fromInteger
 
 {-# INLINE fromRational #-}
 fromRational :: Prelude.Rational -> Float
@@ -230,7 +205,7 @@ fromString = Data.Text.pack
 
 {-# INLINE float #-}
 float :: Int -> Float
-float (Nbr n) = Qty (Prelude.fromIntegral n)
+float = Prelude.fromIntegral
 
 ifThenElse :: Bool -> a -> a -> a
 ifThenElse True ifBranch ~_ = ifBranch
@@ -248,7 +223,7 @@ internalError message = Prelude.error (Data.Text.unpack message)
 notImplemented :: a
 notImplemented = internalError "Not implemented"
 
-subtract :: Subtraction p q r => q a -> p a -> r a
+subtract :: Subtraction a b c => b -> a -> c
 subtract b a = a - b
 
 {-# INLINE (|>) #-}
@@ -279,13 +254,10 @@ infix 4 ~=
 instance ApproximateEquality (Qty units) units where
   x ~= y = let (Qty delta) = x - y in Qty (Prelude.abs delta) <= ?tolerance
 
-instance Units.Coercion (Nbr units) Int
-
 instance Units.Coercion (Qty units) Float
 
 instance Multiplication Int Int Int where
-  {-# INLINE (*) #-}
-  (Nbr n) * (Nbr m) = Nbr (n Prelude.* m)
+  (*) = (Prelude.*)
 
 instance Multiplication Sign Sign Sign where
   Positive * sign = sign
@@ -345,7 +317,7 @@ instance {-# OVERLAPS #-} Show Float where
 instance KnownSymbol symbol => Show (Qty (Units symbol)) where
   showsPrec precedence (Qty x) =
     let string = Prelude.shows x (' ' : symbolVal (Proxy :: Proxy symbol))
-     in Prelude.showParen (Nbr precedence >= 10) (Prelude.showString string)
+     in Prelude.showParen (precedence >= 10) (Prelude.showString string)
 
 type Radians = Units "rad"
 

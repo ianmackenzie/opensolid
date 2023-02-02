@@ -33,16 +33,16 @@ data Vector3d units coordinates = Vector3d (Qty units) (Qty units) (Qty units)
 
 deriving instance Show (Qty units) => Show (Vector3d units coordinates)
 
-instance Generic.Zero (Vector3d units) where
+instance Generic.Zero (Vector3d units coordinates) where
   zero = zero
 
 instance Negation (Vector3d units coordinates) where
   negate (Vector3d vx vy vz) = Vector3d (negate vx) (negate vy) (negate vz)
 
-instance Addition (Vector3d units) (Vector3d units) (Vector3d units) where
+instance (units ~ units', coordinates ~ coordinates') => Addition (Vector3d units coordinates) (Vector3d units' coordinates') (Vector3d units coordinates) where
   (Vector3d x1 y1 z1) + (Vector3d x2 y2 z2) = Vector3d (x1 + x2) (y1 + y2) (z1 + z2)
 
-instance Subtraction (Vector3d units) (Vector3d units) (Vector3d units) where
+instance (units ~ units', coordinates ~ coordinates') => Subtraction (Vector3d units coordinates) (Vector3d units' coordinates') (Vector3d units coordinates) where
   (Vector3d x1 y1 z1) - (Vector3d x2 y2 z2) = Vector3d (x1 - x2) (y1 - y2) (z1 - z2)
 
 instance Multiplication (Qty units1) (Qty units2) (Qty units3) => Multiplication (Qty units1) (Vector3d units2 coordinates) (Vector3d units3 coordinates) where

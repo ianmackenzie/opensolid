@@ -27,13 +27,13 @@ import Vector3d qualified
 data Point3d coordinates = Point3d Length Length Length
   deriving (Eq, Show)
 
-instance Addition Point3d (Vector3d Meters) Point3d where
+instance coordinates ~ coordinates' => Addition (Point3d coordinates) (Vector3d Meters coordinates') (Point3d coordinates) where
   (Point3d px py pz) + (Vector3d vx vy vz) = Point3d (px + vx) (py + vy) (pz + vz)
 
-instance Subtraction Point3d (Vector3d Meters) Point3d where
+instance coordinates ~ coordinates' => Subtraction (Point3d coordinates) (Vector3d Meters coordinates') (Point3d coordinates) where
   (Point3d px py pz) - (Vector3d vx vy vz) = Point3d (px - vx) (py - vy) (pz - vz)
 
-instance Subtraction Point3d Point3d (Vector3d Meters) where
+instance coordinates ~ coordinates' => Subtraction (Point3d coordinates) (Point3d coordinates') (Vector3d Meters coordinates) where
   (Point3d x1 y1 z1) - (Point3d x2 y2 z2) = Vector3d (x1 - x2) (y1 - y2) (z1 - z2)
 
 instance ApproximateEquality (Point3d coordinates) Meters where

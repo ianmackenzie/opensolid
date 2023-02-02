@@ -60,7 +60,7 @@ zero :: VectorCurve3d units coordinates
 zero =
   constant Vector3d.zero
 
-instance Generic.Zero (VectorCurve3d units) where
+instance Generic.Zero (VectorCurve3d units coordinates) where
   zero = zero
 
 data XYZ units coordinates = XYZ (Curve1d units) (Curve1d units) (Curve1d units)
@@ -108,15 +108,15 @@ instance IsVectorCurve3d (Sum units coordinates) units coordinates where
   derivative (Sum curve1 curve2) =
     derivative curve1 + derivative curve2
 
-instance Addition (VectorCurve3d units) (VectorCurve3d units) (VectorCurve3d units) where
+instance coordinates ~ coordinates' => Addition (VectorCurve3d units coordinates) (VectorCurve3d units coordinates') (VectorCurve3d units coordinates) where
   curve1 + curve2 =
     VectorCurve3d (Sum curve1 curve2)
 
-instance Addition (VectorCurve3d units) (Vector3d units) (VectorCurve3d units) where
+instance coordinates ~ coordinates' => Addition (VectorCurve3d units coordinates) (Vector3d units coordinates') (VectorCurve3d units coordinates) where
   curve + vector =
     curve + constant vector
 
-instance Addition (Vector3d units) (VectorCurve3d units) (VectorCurve3d units) where
+instance coordinates ~ coordinates' => Addition (Vector3d units coordinates) (VectorCurve3d units coordinates') (VectorCurve3d units coordinates) where
   vector + curve =
     constant vector + curve
 
@@ -132,15 +132,15 @@ instance IsVectorCurve3d (Difference units coordinates) units coordinates where
   derivative (Difference curve1 curve2) =
     derivative curve1 - derivative curve2
 
-instance Subtraction (VectorCurve3d units) (VectorCurve3d units) (VectorCurve3d units) where
+instance coordinates ~ coordinates' => Subtraction (VectorCurve3d units coordinates) (VectorCurve3d units coordinates') (VectorCurve3d units coordinates) where
   curve1 - curve2 =
     VectorCurve3d (Difference curve1 curve2)
 
-instance Subtraction (VectorCurve3d units) (Vector3d units) (VectorCurve3d units) where
+instance coordinates ~ coordinates' => Subtraction (VectorCurve3d units coordinates) (Vector3d units coordinates') (VectorCurve3d units coordinates) where
   curve - vector =
     curve - constant vector
 
-instance Subtraction (Vector3d units) (VectorCurve3d units) (VectorCurve3d units) where
+instance coordinates ~ coordinates' => Subtraction (Vector3d units coordinates) (VectorCurve3d units coordinates') (VectorCurve3d units coordinates) where
   vector - curve =
     constant vector - curve
 

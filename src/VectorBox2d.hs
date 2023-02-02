@@ -26,17 +26,29 @@ deriving instance Show (Qty units) => Show (VectorBox2d units coordinates)
 
 instance Units.Coercion (VectorBox2d units coordinates) (VectorBox2d Unitless coordinates)
 
-instance Generic.Zero (VectorBox2d units) where
+instance Generic.Zero (VectorBox2d units coordinates) where
   zero = constant Vector2d.zero
 
 instance Negation (VectorBox2d units coordinates) where
   negate (VectorBox2d x y) = VectorBox2d (negate x) (negate y)
 
-instance Addition (VectorBox2d units) (VectorBox2d units) (VectorBox2d units) where
+instance (units ~ units', coordinates ~ coordinates') => Addition (VectorBox2d units coordinates) (VectorBox2d units' coordinates') (VectorBox2d units coordinates) where
   (VectorBox2d x1 y1) + (VectorBox2d x2 y2) = VectorBox2d (x1 + x2) (y1 + y2)
 
-instance Subtraction (VectorBox2d units) (VectorBox2d units) (VectorBox2d units) where
+instance (units ~ units', coordinates ~ coordinates') => Addition (VectorBox2d units coordinates) (Vector2d units' coordinates') (VectorBox2d units coordinates) where
+  (VectorBox2d x1 y1) + (Vector2d x2 y2) = VectorBox2d (x1 + x2) (y1 + y2)
+
+instance (units ~ units', coordinates ~ coordinates') => Addition (Vector2d units coordinates) (VectorBox2d units' coordinates') (VectorBox2d units coordinates) where
+  (Vector2d x1 y1) + (VectorBox2d x2 y2) = VectorBox2d (x1 + x2) (y1 + y2)
+
+instance (units ~ units', coordinates ~ coordinates') => Subtraction (VectorBox2d units coordinates) (VectorBox2d units' coordinates') (VectorBox2d units coordinates) where
   (VectorBox2d x1 y1) - (VectorBox2d x2 y2) = VectorBox2d (x1 - x2) (y1 - y2)
+
+instance (units ~ units', coordinates ~ coordinates') => Subtraction (VectorBox2d units coordinates) (Vector2d units' coordinates') (VectorBox2d units coordinates) where
+  (VectorBox2d x1 y1) - (Vector2d x2 y2) = VectorBox2d (x1 - x2) (y1 - y2)
+
+instance (units ~ units', coordinates ~ coordinates') => Subtraction (Vector2d units coordinates) (VectorBox2d units' coordinates') (VectorBox2d units coordinates) where
+  (Vector2d x1 y1) - (VectorBox2d x2 y2) = VectorBox2d (x1 - x2) (y1 - y2)
 
 instance Multiplication (Qty units1) (Qty units2) (Qty units3) => Multiplication (Qty units1) (VectorBox2d units2 coordinates) (VectorBox2d units3 coordinates) where
   value * (VectorBox2d x y) = VectorBox2d (value * x) (value * y)

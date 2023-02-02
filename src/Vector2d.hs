@@ -31,16 +31,16 @@ data Vector2d units coordinates = Vector2d (Qty units) (Qty units)
 
 deriving instance Show (Qty units) => Show (Vector2d units coordinates)
 
-instance Generic.Zero (Vector2d units) where
+instance Generic.Zero (Vector2d units coordinates) where
   zero = zero
 
 instance Negation (Vector2d units coordinates) where
   negate (Vector2d vx vy) = Vector2d (negate vx) (negate vy)
 
-instance Addition (Vector2d units) (Vector2d units) (Vector2d units) where
+instance (units ~ units', coordinates ~ coordinates') => Addition (Vector2d units coordinates) (Vector2d units' coordinates') (Vector2d units coordinates) where
   (Vector2d x1 y1) + (Vector2d x2 y2) = Vector2d (x1 + x2) (y1 + y2)
 
-instance Subtraction (Vector2d units) (Vector2d units) (Vector2d units) where
+instance (units ~ units', coordinates ~ coordinates') => Subtraction (Vector2d units coordinates) (Vector2d units' coordinates') (Vector2d units coordinates) where
   (Vector2d x1 y1) - (Vector2d x2 y2) = Vector2d (x1 - x2) (y1 - y2)
 
 instance Multiplication (Qty units1) (Qty units2) (Qty units3) => Multiplication (Qty units1) (Vector2d units2 coordinates) (Vector2d units3 coordinates) where

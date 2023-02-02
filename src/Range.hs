@@ -52,25 +52,25 @@ instance Units.Coercion (Range units) (Range Unitless)
 instance Negation (Range units) where
   negate (Range low high) = unsafe (negate high) (negate low)
 
-instance Generic.Zero Range where
+instance Generic.Zero (Range units) where
   zero = constant Qty.zero
 
-instance Addition Range Range Range where
+instance units ~ units' => Addition (Range units) (Range units') (Range units) where
   (Range low1 high1) + (Range low2 high2) = unsafe (low1 + low2) (high1 + high2)
 
-instance Addition Range Qty Range where
+instance units ~ units' => Addition (Range units) (Qty units') (Range units) where
   (Range low high) + value = unsafe (low + value) (high + value)
 
-instance Addition Qty Range Range where
+instance units ~ units' => Addition (Qty units) (Range units') (Range units) where
   value + (Range low high) = unsafe (value + low) (value + high)
 
-instance Subtraction Range Range Range where
+instance units ~ units' => Subtraction (Range units) (Range units') (Range units) where
   (Range low1 high1) - (Range low2 high2) = unsafe (low1 - high2) (high1 - low2)
 
-instance Subtraction Range Qty Range where
+instance units ~ units' => Subtraction (Range units) (Qty units') (Range units) where
   (Range low high) - value = unsafe (low - value) (high - value)
 
-instance Subtraction Qty Range Range where
+instance units ~ units' => Subtraction (Qty units) (Range units') (Range units) where
   value - (Range low high) = unsafe (value - high) (value - low)
 
 instance Multiplication (Qty units1) (Qty units2) (Qty units3) => Multiplication (Qty units1) (Range units2) (Range units3) where

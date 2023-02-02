@@ -11,11 +11,11 @@ import Prelude qualified
 
 {-# INLINE floor #-}
 floor :: Float -> Int
-floor (Qty x) = Nbr (Prelude.floor x)
+floor (Qty x) = Prelude.floor x
 
 {-# INLINE ceiling #-}
 ceiling :: Float -> Int
-ceiling (Qty x) = Nbr (Prelude.ceiling x)
+ceiling (Qty x) = Prelude.ceiling x
 
 pi :: Float
 pi = Prelude.pi

@@ -26,17 +26,29 @@ deriving instance Show (Qty units) => Show (VectorBox3d units coordinates)
 
 instance Units.Coercion (VectorBox3d units coordinates) (VectorBox3d Unitless coordinates)
 
-instance Generic.Zero (VectorBox3d units) where
+instance Generic.Zero (VectorBox3d units coordinates) where
   zero = constant Vector3d.zero
 
 instance Negation (VectorBox3d units coordinates) where
   negate (VectorBox3d x y z) = VectorBox3d (negate x) (negate y) (negate z)
 
-instance Addition (VectorBox3d units) (VectorBox3d units) (VectorBox3d units) where
+instance (units ~ units', coordinates ~ coordinates') => Addition (VectorBox3d units coordinates) (VectorBox3d units' coordinates') (VectorBox3d units coordinates) where
   (VectorBox3d x1 y1 z1) + (VectorBox3d x2 y2 z2) = VectorBox3d (x1 + x2) (y1 + y2) (z1 + z2)
 
-instance Subtraction (VectorBox3d units) (VectorBox3d units) (VectorBox3d units) where
+instance (units ~ units', coordinates ~ coordinates') => Addition (VectorBox3d units coordinates) (Vector3d units' coordinates') (VectorBox3d units coordinates) where
+  (VectorBox3d x1 y1 z1) + (Vector3d x2 y2 z2) = VectorBox3d (x1 + x2) (y1 + y2) (z1 + z2)
+
+instance (units ~ units', coordinates ~ coordinates') => Addition (Vector3d units coordinates) (VectorBox3d units' coordinates') (VectorBox3d units coordinates) where
+  (Vector3d x1 y1 z1) + (VectorBox3d x2 y2 z2) = VectorBox3d (x1 + x2) (y1 + y2) (z1 + z2)
+
+instance (units ~ units', coordinates ~ coordinates') => Subtraction (VectorBox3d units coordinates) (VectorBox3d units' coordinates') (VectorBox3d units coordinates) where
   (VectorBox3d x1 y1 z1) - (VectorBox3d x2 y2 z2) = VectorBox3d (x1 - x2) (y1 - y2) (z1 - z2)
+
+instance (units ~ units', coordinates ~ coordinates') => Subtraction (VectorBox3d units coordinates) (Vector3d units' coordinates') (VectorBox3d units coordinates) where
+  (VectorBox3d x1 y1 z1) - (Vector3d x2 y2 z2) = VectorBox3d (x1 - x2) (y1 - y2) (z1 - z2)
+
+instance (units ~ units', coordinates ~ coordinates') => Subtraction (Vector3d units coordinates) (VectorBox3d units' coordinates') (VectorBox3d units coordinates) where
+  (Vector3d x1 y1 z1) - (VectorBox3d x2 y2 z2) = VectorBox3d (x1 - x2) (y1 - y2) (z1 - z2)
 
 instance Multiplication (Qty units1) (Qty units2) (Qty units3) => Multiplication (Qty units1) (VectorBox3d units2 coordinates) (VectorBox3d units3 coordinates) where
   value * (VectorBox3d x y z) = VectorBox3d (value * x) (value * y) (value * z)

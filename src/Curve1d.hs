@@ -115,7 +115,7 @@ constant value = if value == Qty.zero then Zero else Constant value
 parameter :: Curve1d Unitless
 parameter = Parameter
 
-instance Generic.Zero Curve1d where
+instance Generic.Zero (Curve1d units) where
   zero = Zero
 
 instance Negation (Curve1d units) where
@@ -126,28 +126,28 @@ instance Negation (Curve1d units) where
   negate (Product c1 c2) = negate c1 * c2
   negate curve = Negated curve
 
-instance Addition Curve1d Curve1d Curve1d where
+instance units ~ units' => Addition (Curve1d units) (Curve1d units') (Curve1d units) where
   Zero + curve = curve
   curve + Zero = curve
   Constant x + Constant y = constant (x + y)
   curve1 + curve2 = Sum curve1 curve2
 
-instance Addition Curve1d Qty Curve1d where
+instance units ~ units' => Addition (Curve1d units) (Qty units') (Curve1d units) where
   curve + value = curve + constant value
 
-instance Addition Qty Curve1d Curve1d where
+instance units ~ units' => Addition (Qty units) (Curve1d units') (Curve1d units) where
   value + curve = constant value + curve
 
-instance Subtraction Curve1d Curve1d Curve1d where
+instance units ~ units' => Subtraction (Curve1d units) (Curve1d units') (Curve1d units) where
   Zero - curve = negate curve
   curve - Zero = curve
   Constant x - Constant y = constant (x - y)
   curve1 - curve2 = Difference curve1 curve2
 
-instance Subtraction Curve1d Qty Curve1d where
+instance units ~ units' => Subtraction (Curve1d units) (Qty units') (Curve1d units) where
   curve - value = curve - constant value
 
-instance Subtraction Qty Curve1d Curve1d where
+instance units ~ units' => Subtraction (Qty units) (Curve1d units') (Curve1d units) where
   value - curve = constant value - curve
 
 instance Multiplication (Qty units1) (Qty units2) (Qty units3) => Multiplication (Curve1d units1) (Curve1d units2) (Curve1d units3) where

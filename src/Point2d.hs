@@ -26,13 +26,13 @@ import Vector2d qualified
 data Point2d coordinates = Point2d Length Length
   deriving (Eq, Show)
 
-instance Addition Point2d (Vector2d Meters) Point2d where
+instance coordinates ~ coordinates' => Addition (Point2d coordinates) (Vector2d Meters coordinates') (Point2d coordinates) where
   (Point2d px py) + (Vector2d vx vy) = Point2d (px + vx) (py + vy)
 
-instance Subtraction Point2d (Vector2d Meters) Point2d where
+instance coordinates ~ coordinates' => Subtraction (Point2d coordinates) (Vector2d Meters coordinates') (Point2d coordinates) where
   (Point2d px py) - (Vector2d vx vy) = Point2d (px - vx) (py - vy)
 
-instance Subtraction Point2d Point2d (Vector2d Meters) where
+instance coordinates ~ coordinates' => Subtraction (Point2d coordinates) (Point2d coordinates') (Vector2d Meters coordinates) where
   (Point2d x1 y1) - (Point2d x2 y2) = Vector2d (x1 - x2) (y1 - y2)
 
 instance ApproximateEquality (Point2d coordinates) Meters where

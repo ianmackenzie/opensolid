@@ -62,7 +62,7 @@ instance IsVectorCurve2d PointCurveDifference Meters where
   segmentBounds (PointCurveDifference point curve) t = point - segmentBounds curve t
   derivative (PointCurveDifference _ curve) = -(derivative curve)
 
-instance Subtraction Point2d Curve2d (VectorCurve2d Meters) where
+instance coordinates ~ coordinates' => Subtraction (Point2d coordinates) (Curve2d coordinates') (VectorCurve2d Meters coordinates) where
   point - curve = VectorCurve2d (PointCurveDifference point curve)
 
 data CurvePointDifference coordinates = CurvePointDifference (Curve2d coordinates) (Point2d coordinates)
@@ -72,7 +72,7 @@ instance IsVectorCurve2d CurvePointDifference Meters where
   segmentBounds (CurvePointDifference curve point) t = segmentBounds curve t - point
   derivative (CurvePointDifference curve _) = derivative curve
 
-instance Subtraction Curve2d Point2d (VectorCurve2d Meters) where
+instance coordinates ~ coordinates' => Subtraction (Curve2d coordinates) (Point2d coordinates') (VectorCurve2d Meters coordinates) where
   curve - point = VectorCurve2d (CurvePointDifference curve point)
 
 data IsCoincidentWithPoint = IsCoincidentWithPoint deriving (Eq, Show)

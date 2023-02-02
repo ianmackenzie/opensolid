@@ -27,10 +27,10 @@ instance Bounds (BoundingBox2d coordinates) where
   overlaps (BoundingBox2d x1 y1) (BoundingBox2d x2 y2) =
     Range.overlaps x1 x2 && Range.overlaps y1 y2
 
-instance Subtraction Point2d BoundingBox2d (VectorBox2d Meters) where
+instance coordinates ~ coordinates' => Subtraction (Point2d coordinates) (BoundingBox2d coordinates') (VectorBox2d Meters coordinates) where
   (Point2d px py) - (BoundingBox2d bx by) = VectorBox2d (px - bx) (py - by)
 
-instance Subtraction BoundingBox2d Point2d (VectorBox2d Meters) where
+instance coordinates ~ coordinates' => Subtraction (BoundingBox2d coordinates) (Point2d coordinates') (VectorBox2d Meters coordinates) where
   (BoundingBox2d bx by) - (Point2d px py) = VectorBox2d (bx - px) (by - py)
 
 constant :: Point2d coordinates -> BoundingBox2d coordinates

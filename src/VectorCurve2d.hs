@@ -85,7 +85,7 @@ instance IsVectorCurve2d (VectorCurve2d units) units where
       Product2d1d c1 c2 -> derivative c1 * c2 + c1 * Curve1d.derivative c2
       Quotient c1 c2 -> derivative c1 / c2 + curve * (Curve1d.derivative c2 / c2)
 
-instance Generic.Zero (VectorCurve2d units) where
+instance Generic.Zero (VectorCurve2d units coordinates) where
   zero = Zero
 
 instance Negation (VectorCurve2d units coordinates) where
@@ -98,24 +98,24 @@ instance Negation (VectorCurve2d units coordinates) where
   negate (Product2d1d c1 c2) = Product2d1d c1 -c2
   negate curve = Negated curve
 
-instance Addition (VectorCurve2d units) (VectorCurve2d units) (VectorCurve2d units) where
+instance coordinates ~ coordinates' => Addition (VectorCurve2d units coordinates) (VectorCurve2d units coordinates') (VectorCurve2d units coordinates) where
   -- TODO add special cases
   c1 + c2 = Sum c1 c2
 
-instance Addition (VectorCurve2d units) (Vector2d units) (VectorCurve2d units) where
+instance coordinates ~ coordinates' => Addition (VectorCurve2d units coordinates) (Vector2d units coordinates') (VectorCurve2d units coordinates) where
   curve + vector = curve + constant vector
 
-instance Addition (Vector2d units) (VectorCurve2d units) (VectorCurve2d units) where
+instance coordinates ~ coordinates' => Addition (Vector2d units coordinates) (VectorCurve2d units coordinates') (VectorCurve2d units coordinates) where
   vector + curve = constant vector + curve
 
-instance Subtraction (VectorCurve2d units) (VectorCurve2d units) (VectorCurve2d units) where
+instance coordinates ~ coordinates' => Subtraction (VectorCurve2d units coordinates) (VectorCurve2d units coordinates') (VectorCurve2d units coordinates) where
   -- TODO add special cases
   c1 - c2 = Difference c1 c2
 
-instance Subtraction (VectorCurve2d units) (Vector2d units) (VectorCurve2d units) where
+instance coordinates ~ coordinates' => Subtraction (VectorCurve2d units coordinates) (Vector2d units coordinates') (VectorCurve2d units coordinates) where
   curve - vector = curve - constant vector
 
-instance Subtraction (Vector2d units) (VectorCurve2d units) (VectorCurve2d units) where
+instance coordinates ~ coordinates' => Subtraction (Vector2d units coordinates) (VectorCurve2d units coordinates') (VectorCurve2d units coordinates) where
   vector - curve = constant vector + curve
 
 instance Multiplication (Qty units1) (Qty units2) (Qty units3) => Multiplication (Curve1d units1) (VectorCurve2d units2 coordinates) (VectorCurve2d units3 coordinates) where
