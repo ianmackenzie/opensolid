@@ -12,6 +12,7 @@ module Vector2d
   , determinant
   , magnitude
   , squaredMagnitude
+  , angle
   , IsZero (..)
   , direction
   , magnitudeAndDirection
@@ -105,6 +106,9 @@ magnitude (Vector2d vx vy) = Qty.hypot2 vx vy
 
 squaredMagnitude :: Squared (Qty units1) (Qty units2) => Vector2d units1 coordinates -> Qty units2
 squaredMagnitude (Vector2d vx vy) = Qty.squared vx + Qty.squared vy
+
+angle :: Vector2d units coordinates -> Angle
+angle (Vector2d vx vy) = Angle.atan2 vy vx
 
 data IsZero = IsZero
 
