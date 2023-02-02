@@ -84,16 +84,9 @@ import Prelude
   , Monad (..)
   , Ord (..)
   , Show
-  , const
-  , flip
-  , fmap
-  , id
   , not
   , otherwise
-  , pure
-  , ($)
   , (&&)
-  , (.)
   , (||)
   )
 import Prelude qualified
@@ -222,7 +215,7 @@ identity :: a -> a
 identity = Prelude.id
 
 always :: a -> b -> a
-always = const
+always = Prelude.const
 
 infallible :: Result Void a -> a
 infallible (Ok value) = value
