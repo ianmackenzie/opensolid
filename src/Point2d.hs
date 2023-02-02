@@ -8,6 +8,7 @@ module Point2d
   , midpoint
   , interpolateFrom
   , distanceFrom
+  , angleFrom
   , translateBy
   , signedDistanceAlong
   , signedDistanceFrom
@@ -71,6 +72,9 @@ midpoint (Point2d x1 y1) (Point2d x2 y2) =
 
 distanceFrom :: Point2d coordinates -> Point2d coordinates -> Length
 distanceFrom p1 p2 = Vector2d.magnitude (p2 - p1)
+
+angleFrom :: Point2d coordinates -> Point2d coordinates -> Angle
+angleFrom p1 p2 = Vector2d.angle (p2 - p1)
 
 translateBy :: Vector2d Meters coordinates -> Point2d coordinates -> Point2d coordinates
 translateBy (Vector2d vx vy) (Point2d px py) = Point2d (px + vx) (py + vy)
