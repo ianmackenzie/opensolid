@@ -2,6 +2,9 @@ module List
   ( isEmpty
   , head
   , map
+  , map2
+  , map3
+  , map4
   , filter
   , compact
   , collect
@@ -14,6 +17,9 @@ module List
   , drop
   , sum
   , sort
+  , sortAndDeduplicate
+  , all
+  , any
   )
 where
 
@@ -32,6 +38,15 @@ head [] = Nothing
 
 map :: (a -> b) -> List a -> List b
 map = Data.List.map
+
+map2 :: (a -> b -> c) -> List a -> List b -> List c
+map2 = Data.List.zipWith
+
+map3 :: (a -> b -> c -> d) -> List a -> List b -> List c -> List d
+map3 = Data.List.zipWith3
+
+map4 :: (a -> b -> c -> d -> e) -> List a -> List b -> List c -> List d -> List e
+map4 = Data.List.zipWith4
 
 filter :: (a -> Bool) -> List a -> List a
 filter = Data.List.filter
@@ -75,3 +90,23 @@ sum = foldl (+) Generic.zero
 
 sort :: Ord a => List a -> List a
 sort = Data.List.sort
+
+sortAndDeduplicate :: Ord a => List a -> List a
+sortAndDeduplicate list = deduplicate (sort list)
+
+deduplicate :: Eq a => List a -> List a
+deduplicate [] = []
+deduplicate (first : rest) = dedup first rest
+
+dedup :: Eq a => a -> List a -> List a
+dedup current [] = [current]
+dedup current (next : remaining) =
+  if current == next
+    then dedup current remaining
+    else current : dedup next remaining
+
+all :: List Bool -> Bool
+all = Prelude.and
+
+any :: List Bool -> Bool
+any = Prelude.or
