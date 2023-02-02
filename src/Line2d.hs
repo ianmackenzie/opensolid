@@ -31,6 +31,7 @@ import VectorCurve2d qualified
 
 data Line2d coordinates
   = Line2d (Point2d coordinates) (Point2d coordinates)
+  deriving (Eq, Show)
 
 startPoint :: Line2d coordinates -> Point2d coordinates
 startPoint (Line2d p1 _) = p1
