@@ -43,7 +43,7 @@ instance Monad (Script x) where
   Perform io >>= function = Perform (fmap (>>= function) io)
 
 perform :: IO a -> Script IOError a
-perform io = Perform (Control.Exception.catch (fmap succeed io) (pure . error))
+perform io = Perform (Control.Exception.catch (fmap succeed io) (pure <<< error))
 
 type Program = Script IOError ()
 
