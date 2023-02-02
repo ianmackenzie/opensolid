@@ -6,6 +6,7 @@ module Vector2d
   , xy
   , meters
   , squareMeters
+  , polar
   , midpoint
   , interpolateFrom
   , determinant
@@ -18,6 +19,7 @@ module Vector2d
   )
 where
 
+import Angle qualified
 import Area qualified
 import {-# SOURCE #-} Direction2d (Direction2d)
 import {-# SOURCE #-} Direction2d qualified
@@ -75,6 +77,9 @@ meters vx vy = Vector2d (Length.meters vx) (Length.meters vy)
 
 squareMeters :: Float -> Float -> Vector2d SquareMeters coordinates
 squareMeters vx vy = Vector2d (Area.squareMeters vx) (Area.squareMeters vy)
+
+polar :: Qty units -> Angle -> Vector2d units coordinates
+polar r theta = Vector2d (r * Angle.cos theta) (r * Angle.sin theta)
 
 interpolateFrom
   :: Vector2d units coordinates
