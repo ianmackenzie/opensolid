@@ -33,66 +33,66 @@ instance Negation (VectorBox3d units coordinates) where
   negate (VectorBox3d x y z) = VectorBox3d (negate x) (negate y) (negate z)
 
 instance (units ~ units', coordinates ~ coordinates') => Addition (VectorBox3d units coordinates) (VectorBox3d units' coordinates') (VectorBox3d units coordinates) where
-  (VectorBox3d x1 y1 z1) + (VectorBox3d x2 y2 z2) = VectorBox3d (x1 + x2) (y1 + y2) (z1 + z2)
+  VectorBox3d x1 y1 z1 + VectorBox3d x2 y2 z2 = VectorBox3d (x1 + x2) (y1 + y2) (z1 + z2)
 
 instance (units ~ units', coordinates ~ coordinates') => Addition (VectorBox3d units coordinates) (Vector3d units' coordinates') (VectorBox3d units coordinates) where
-  (VectorBox3d x1 y1 z1) + (Vector3d x2 y2 z2) = VectorBox3d (x1 + x2) (y1 + y2) (z1 + z2)
+  VectorBox3d x1 y1 z1 + Vector3d x2 y2 z2 = VectorBox3d (x1 + x2) (y1 + y2) (z1 + z2)
 
 instance (units ~ units', coordinates ~ coordinates') => Addition (Vector3d units coordinates) (VectorBox3d units' coordinates') (VectorBox3d units coordinates) where
-  (Vector3d x1 y1 z1) + (VectorBox3d x2 y2 z2) = VectorBox3d (x1 + x2) (y1 + y2) (z1 + z2)
+  Vector3d x1 y1 z1 + VectorBox3d x2 y2 z2 = VectorBox3d (x1 + x2) (y1 + y2) (z1 + z2)
 
 instance (units ~ units', coordinates ~ coordinates') => Subtraction (VectorBox3d units coordinates) (VectorBox3d units' coordinates') (VectorBox3d units coordinates) where
-  (VectorBox3d x1 y1 z1) - (VectorBox3d x2 y2 z2) = VectorBox3d (x1 - x2) (y1 - y2) (z1 - z2)
+  VectorBox3d x1 y1 z1 - VectorBox3d x2 y2 z2 = VectorBox3d (x1 - x2) (y1 - y2) (z1 - z2)
 
 instance (units ~ units', coordinates ~ coordinates') => Subtraction (VectorBox3d units coordinates) (Vector3d units' coordinates') (VectorBox3d units coordinates) where
-  (VectorBox3d x1 y1 z1) - (Vector3d x2 y2 z2) = VectorBox3d (x1 - x2) (y1 - y2) (z1 - z2)
+  VectorBox3d x1 y1 z1 - Vector3d x2 y2 z2 = VectorBox3d (x1 - x2) (y1 - y2) (z1 - z2)
 
 instance (units ~ units', coordinates ~ coordinates') => Subtraction (Vector3d units coordinates) (VectorBox3d units' coordinates') (VectorBox3d units coordinates) where
-  (Vector3d x1 y1 z1) - (VectorBox3d x2 y2 z2) = VectorBox3d (x1 - x2) (y1 - y2) (z1 - z2)
+  Vector3d x1 y1 z1 - VectorBox3d x2 y2 z2 = VectorBox3d (x1 - x2) (y1 - y2) (z1 - z2)
 
 instance Multiplication (Qty units1) (Qty units2) (Qty units3) => Multiplication (Qty units1) (VectorBox3d units2 coordinates) (VectorBox3d units3 coordinates) where
-  value * (VectorBox3d x y z) = VectorBox3d (value * x) (value * y) (value * z)
+  value * VectorBox3d x y z = VectorBox3d (value * x) (value * y) (value * z)
 
 instance Multiplication (Qty units1) (Qty units2) (Qty units3) => Multiplication (VectorBox3d units1 coordinates) (Qty units2) (VectorBox3d units3 coordinates) where
-  (VectorBox3d x y z) * value = VectorBox3d (x * value) (y * value) (z * value)
+  VectorBox3d x y z * value = VectorBox3d (x * value) (y * value) (z * value)
 
 instance Multiplication (Qty units1) (Qty units2) (Qty units3) => Multiplication (Range units1) (VectorBox3d units2 coordinates) (VectorBox3d units3 coordinates) where
-  range * (VectorBox3d x y z) = VectorBox3d (range * x) (range * y) (range * z)
+  range * VectorBox3d x y z = VectorBox3d (range * x) (range * y) (range * z)
 
 instance Multiplication (Qty units1) (Qty units2) (Qty units3) => Multiplication (VectorBox3d units1 coordinates) (Range units2) (VectorBox3d units3 coordinates) where
-  (VectorBox3d x y z) * range = VectorBox3d (x * range) (y * range) (z * range)
+  VectorBox3d x y z * range = VectorBox3d (x * range) (y * range) (z * range)
 
 instance Division (Qty units1) (Qty units2) (Qty units3) => Division (VectorBox3d units1 coordinates) (Qty units2) (VectorBox3d units3 coordinates) where
-  (VectorBox3d x y z) / value = VectorBox3d (x / value) (y / value) (z / value)
+  VectorBox3d x y z / value = VectorBox3d (x / value) (y / value) (z / value)
 
 instance Division (Qty units1) (Qty units2) (Qty units3) => Division (VectorBox3d units1 coordinates) (Range units2) (VectorBox3d units3 coordinates) where
-  (VectorBox3d x y z) / range = VectorBox3d (x / range) (y / range) (z / range)
+  VectorBox3d x y z / range = VectorBox3d (x / range) (y / range) (z / range)
 
 instance Multiplication (Qty units1) (Qty units2) (Qty units3) => DotProduct (Vector3d units1) (VectorBox3d units2) (Range units3) where
-  (Vector3d x1 y1 z1) <> (VectorBox3d x2 y2 z2) = x1 * x2 + y1 * y2 + z1 * z2
+  Vector3d x1 y1 z1 <> VectorBox3d x2 y2 z2 = x1 * x2 + y1 * y2 + z1 * z2
 
 instance Multiplication (Qty units1) (Qty units2) (Qty units3) => DotProduct (VectorBox3d units1) (Vector3d units2) (Range units3) where
-  (VectorBox3d x1 y1 z1) <> (Vector3d x2 y2 z2) = x1 * x2 + y1 * y2 + z1 * z2
+  VectorBox3d x1 y1 z1 <> Vector3d x2 y2 z2 = x1 * x2 + y1 * y2 + z1 * z2
 
 instance Multiplication (Qty units1) (Qty units2) (Qty units3) => DotProduct (VectorBox3d units1) (VectorBox3d units2) (Range units3) where
-  (VectorBox3d x1 y1 z1) <> (VectorBox3d x2 y2 z2) = x1 * x2 + y1 * y2 + z1 * z2
+  VectorBox3d x1 y1 z1 <> VectorBox3d x2 y2 z2 = x1 * x2 + y1 * y2 + z1 * z2
 
 instance (Multiplication (Qty units1) (Qty units2) (Qty units3), coordinates ~ coordinates') => CrossProduct (Vector3d units1 coordinates) (VectorBox3d units2 coordinates') (VectorBox3d units3 coordinates) where
-  (Vector3d x1 y1 z1) >< (VectorBox3d x2 y2 z2) =
+  Vector3d x1 y1 z1 >< VectorBox3d x2 y2 z2 =
     VectorBox3d
       (y1 * z2 - z1 * y2)
       (z1 * x2 - x1 * z2)
       (x1 * y2 - y1 * x2)
 
 instance (Multiplication (Qty units1) (Qty units2) (Qty units3), coordinates ~ coordinates') => CrossProduct (VectorBox3d units1 coordinates) (Vector3d units2 coordinates') (VectorBox3d units3 coordinates) where
-  (VectorBox3d x1 y1 z1) >< (Vector3d x2 y2 z2) =
+  VectorBox3d x1 y1 z1 >< Vector3d x2 y2 z2 =
     VectorBox3d
       (y1 * z2 - z1 * y2)
       (z1 * x2 - x1 * z2)
       (x1 * y2 - y1 * x2)
 
 instance (Multiplication (Qty units1) (Qty units2) (Qty units3), coordinates ~ coordinates') => CrossProduct (VectorBox3d units1 coordinates) (VectorBox3d units2 coordinates') (VectorBox3d units3 coordinates) where
-  (VectorBox3d x1 y1 z1) >< (VectorBox3d x2 y2 z2) =
+  VectorBox3d x1 y1 z1 >< VectorBox3d x2 y2 z2 =
     VectorBox3d
       (y1 * z2 - z1 * y2)
       (z1 * x2 - x1 * z2)

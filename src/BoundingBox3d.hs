@@ -28,10 +28,10 @@ instance Bounds (BoundingBox3d coordinates) where
     Range.overlaps x1 x2 && Range.overlaps y1 y2 && Range.overlaps z1 z2
 
 instance coordinates ~ coordinates' => Subtraction (Point3d coordinates) (BoundingBox3d coordinates') (VectorBox3d Meters coordinates) where
-  (Point3d px py pz) - (BoundingBox3d bx by bz) = VectorBox3d (px - bx) (py - by) (pz - bz)
+  Point3d px py pz - BoundingBox3d bx by bz = VectorBox3d (px - bx) (py - by) (pz - bz)
 
 instance coordinates ~ coordinates' => Subtraction (BoundingBox3d coordinates) (Point3d coordinates') (VectorBox3d Meters coordinates) where
-  (BoundingBox3d bx by bz) - (Point3d px py pz) = VectorBox3d (bx - px) (by - py) (bz - pz)
+  BoundingBox3d bx by bz - Point3d px py pz = VectorBox3d (bx - px) (by - py) (bz - pz)
 
 constant :: Point3d coordinates -> BoundingBox3d coordinates
 constant (Point3d x y z) =

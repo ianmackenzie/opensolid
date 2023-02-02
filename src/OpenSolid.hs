@@ -178,14 +178,14 @@ instance Addition Int Int Int where
 
 instance units ~ units' => Addition (Qty units) (Qty units') (Qty units) where
   {-# INLINE (+) #-}
-  (Qty x) + (Qty y) = Qty (x Prelude.+ y)
+  Qty x + Qty y = Qty (x Prelude.+ y)
 
 instance Subtraction Int Int Int where
   (-) = (Prelude.-)
 
 instance units ~ units' => Subtraction (Qty units) (Qty units') (Qty units) where
   {-# INLINE (-) #-}
-  (Qty x) - (Qty y) = Qty (x Prelude.- y)
+  Qty x - Qty y = Qty (x Prelude.- y)
 
 (//) :: Int -> Int -> Int
 (//) = Prelude.quot
