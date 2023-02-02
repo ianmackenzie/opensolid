@@ -4,6 +4,7 @@ module VectorBox2d
   , hull2
   , hull3
   , hull4
+  , polar
   , squaredMagnitude
   , magnitude
   , normalize
@@ -107,6 +108,9 @@ hull4 (Vector2d x1 y1) (Vector2d x2 y2) (Vector2d x3 y3) (Vector2d x4 y4) =
       minY = min (min (min y1 y2) y3) y4
       maxY = max (max (max y1 y2) y3) y4
    in VectorBox2d (Range.unsafe minX maxX) (Range.unsafe minY maxY)
+
+polar :: Range units -> Range Radians -> VectorBox2d units coordinates
+polar r theta = VectorBox2d (r * Range.cos theta) (r * Range.sin theta)
 
 squaredMagnitude :: Squared (Qty units1) (Qty units2) => VectorBox2d units1 coordinates -> Range units2
 squaredMagnitude (VectorBox2d x y) = Range.squared x + Range.squared y
