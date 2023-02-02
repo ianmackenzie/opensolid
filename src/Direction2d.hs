@@ -7,11 +7,17 @@ module Direction2d
   , y
   , positiveY
   , negativeY
+  , fromAngle
+  , toAngle
+  , degrees
+  , radians
+  , angleFrom
   , rotateLeft
   , rotateRight
   )
 where
 
+import Angle qualified
 import OpenSolid
 import Vector2d (Vector2d (..))
 
@@ -71,6 +77,21 @@ x = positiveX
 
 y :: Direction2d coordinates
 y = positiveY
+
+fromAngle :: Angle -> Direction2d coordinates
+fromAngle angle = unsafe (Angle.cos angle) (Angle.sin angle)
+
+toAngle :: Direction2d coordinates -> Angle
+toAngle (Direction2d dx dy) = Angle.atan2 dy dx
+
+degrees :: Float -> Direction2d coordinates
+degrees value = fromAngle (Angle.degrees value)
+
+radians :: Float -> Direction2d coordinates
+radians value = fromAngle (Angle.radians value)
+
+angleFrom :: Direction2d coordinates -> Direction2d coordinates -> Angle
+angleFrom d1 d2 = Angle.atan2 (d1 >< d2) (d1 <> d2)
 
 rotateLeft :: Direction2d coordinates -> Direction2d coordinates
 rotateLeft (Direction2d dx dy) = unsafe -dy dx

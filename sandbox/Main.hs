@@ -56,6 +56,14 @@ testCurveFind = do
  where
   ?tolerance = Length.meters 1e-9
 
+testDirection2dAngleFrom :: Script.Program
+testDirection2dAngleFrom = do
+  let angle start end =
+        Direction2d.angleFrom (Direction2d.degrees (float start)) (Direction2d.degrees (float end))
+          |> Angle.inDegrees
+  log "Direction2d.angleFrom (Direction2d.degrees 10) (Direction2d.degrees 30)" (angle 10 30)
+  log "Direction2d.angleFrom (Direction2d.degrees 10) (Direction2d.degrees 350)" (angle 10 350)
+
 script :: Script.Program
 script = do
   log "Integer product" (3 * 4)
@@ -104,6 +112,7 @@ script = do
   log "?!" (List.map (?! "Bad") [Just 1, Nothing, Just 2, Nothing, Just 3])
   testListCollapse
   Script.printLine "Unicode output test: ✅❌🙂"
+  testDirection2dAngleFrom
 
 main :: IO ()
 main = Script.run script
