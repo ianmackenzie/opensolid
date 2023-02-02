@@ -16,12 +16,14 @@ where
 
 import {-# SOURCE #-} Axis2d (Axis2d)
 import {-# SOURCE #-} Axis2d qualified
+import {-# SOURCE #-} BoundingBox2d (BoundingBox2d (..))
 import Direction2d qualified
 import Length qualified
 import OpenSolid
 import Qty qualified
 import Vector2d (Vector2d (..))
 import Vector2d qualified
+import VectorBox2d (VectorBox2d (..))
 
 data Point2d coordinates = Point2d Length Length
   deriving (Eq, Show)
@@ -34,6 +36,12 @@ instance coordinates ~ coordinates' => Subtraction (Point2d coordinates) (Vector
 
 instance coordinates ~ coordinates' => Subtraction (Point2d coordinates) (Point2d coordinates') (Vector2d Meters coordinates) where
   Point2d x1 y1 - Point2d x2 y2 = Vector2d (x1 - x2) (y1 - y2)
+
+instance coordinates ~ coordinates' => Addition (Point2d coordinates) (VectorBox2d Meters coordinates') (BoundingBox2d coordinates) where
+  Point2d px py + VectorBox2d vx vy = BoundingBox2d (px + vx) (py + vy)
+
+instance coordinates ~ coordinates' => Subtraction (Point2d coordinates) (VectorBox2d Meters coordinates') (BoundingBox2d coordinates) where
+  Point2d px py - VectorBox2d vx vy = BoundingBox2d (px - vx) (py - vy)
 
 instance ApproximateEquality (Point2d coordinates) Meters where
   p1 ~= p2 = distanceFrom p1 p2 ~= Qty.zero
