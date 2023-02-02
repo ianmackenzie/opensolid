@@ -159,66 +159,63 @@ sqrt (Range low high) =
     (Qty.sqrt (max high Qty.zero))
 
 hypot2 :: Range units -> Range units -> Range units
-hypot2 (Range xl xh) (Range yl yh) =
-  let px = xl >= Qty.zero
-      nx = xh <= Qty.zero
-      py = yl >= Qty.zero
-      ny = yh <= Qty.zero
-      mx = max (Qty.abs xl) (Qty.abs xh)
-      my = max (Qty.abs yl) (Qty.abs yh)
-      high = Qty.hypot2 mx my
-   in if
-          | px && py -> unsafe (Qty.hypot2 xl yl) high
-          | px && ny -> unsafe (Qty.hypot2 xl yh) high
-          | nx && py -> unsafe (Qty.hypot2 xh yl) high
-          | nx && ny -> unsafe (Qty.hypot2 xh yh) high
-          | px -> unsafe xl high
-          | nx -> unsafe -xh high
-          | py -> unsafe yl high
-          | ny -> unsafe -yh high
-          | otherwise -> unsafe Qty.zero high
+hypot2 (Range xMin xMax) (Range yMin yMax)
+  | positiveX && positiveY = unsafe (Qty.hypot2 xMin yMin) maxMagnitude
+  | positiveX && negativeY = unsafe (Qty.hypot2 xMin yMax) maxMagnitude
+  | negativeX && positiveY = unsafe (Qty.hypot2 xMax yMin) maxMagnitude
+  | negativeX && negativeY = unsafe (Qty.hypot2 xMax yMax) maxMagnitude
+  | positiveX = unsafe xMin maxMagnitude
+  | negativeX = unsafe -xMax maxMagnitude
+  | positiveY = unsafe yMin maxMagnitude
+  | negativeY = unsafe -yMax maxMagnitude
+  | otherwise = unsafe Qty.zero maxMagnitude
+ where
+  positiveX = xMin >= Qty.zero
+  negativeX = xMax <= Qty.zero
+  positiveY = yMin >= Qty.zero
+  negativeY = yMax <= Qty.zero
+  xMagnitude = max (Qty.abs xMin) (Qty.abs xMax)
+  yMagnitude = max (Qty.abs yMin) (Qty.abs yMax)
+  maxMagnitude = Qty.hypot2 xMagnitude yMagnitude
 
 hypot3 :: Range units -> Range units -> Range units -> Range units
-hypot3 x y z =
-  let (Range xl xh) = x
-      (Range yl yh) = y
-      (Range zl zh) = z
-      px = xl >= Qty.zero
-      nx = xh <= Qty.zero
-      py = yl >= Qty.zero
-      ny = yh <= Qty.zero
-      pz = zl >= Qty.zero
-      nz = zh <= Qty.zero
-      mx = max (Qty.abs xl) (Qty.abs xh)
-      my = max (Qty.abs yl) (Qty.abs yh)
-      mz = max (Qty.abs zl) (Qty.abs zh)
-      high = Qty.hypot3 mx my mz
-   in if
-          | px && py && pz -> unsafe (Qty.hypot3 xl yl zl) high
-          | px && py && nz -> unsafe (Qty.hypot3 xl yl zh) high
-          | px && ny && pz -> unsafe (Qty.hypot3 xl yh zl) high
-          | px && ny && nz -> unsafe (Qty.hypot3 xl yh zh) high
-          | nx && py && pz -> unsafe (Qty.hypot3 xh yl zl) high
-          | nx && py && nz -> unsafe (Qty.hypot3 xh yl zh) high
-          | nx && ny && pz -> unsafe (Qty.hypot3 xh yh zl) high
-          | nx && ny && nz -> unsafe (Qty.hypot3 xh yh zh) high
-          | py && pz -> unsafe (Qty.hypot2 yl zl) high
-          | py && nz -> unsafe (Qty.hypot2 yl zh) high
-          | ny && pz -> unsafe (Qty.hypot2 yh zl) high
-          | ny && nz -> unsafe (Qty.hypot2 yh zh) high
-          | px && pz -> unsafe (Qty.hypot2 xl zl) high
-          | px && nz -> unsafe (Qty.hypot2 xl zh) high
-          | nx && pz -> unsafe (Qty.hypot2 xh zl) high
-          | nx && nz -> unsafe (Qty.hypot2 xh zh) high
-          | px && py -> unsafe (Qty.hypot2 xl yl) high
-          | px && ny -> unsafe (Qty.hypot2 xl yh) high
-          | nx && py -> unsafe (Qty.hypot2 xh yl) high
-          | nx && ny -> unsafe (Qty.hypot2 xh yh) high
-          | px -> unsafe xl high
-          | nx -> unsafe -xh high
-          | py -> unsafe yl high
-          | ny -> unsafe -yh high
-          | otherwise -> unsafe Qty.zero high
+hypot3 (Range xMin xMax) (Range yMin yMax) (Range zMin zMax)
+  | positiveX && positiveY && positiveZ = unsafe (Qty.hypot3 xMin yMin zMin) maxMagnitude
+  | positiveX && positiveY && negativeZ = unsafe (Qty.hypot3 xMin yMin zMax) maxMagnitude
+  | positiveX && negativeY && positiveZ = unsafe (Qty.hypot3 xMin yMax zMin) maxMagnitude
+  | positiveX && negativeY && negativeZ = unsafe (Qty.hypot3 xMin yMax zMax) maxMagnitude
+  | negativeX && positiveY && positiveZ = unsafe (Qty.hypot3 xMax yMin zMin) maxMagnitude
+  | negativeX && positiveY && negativeZ = unsafe (Qty.hypot3 xMax yMin zMax) maxMagnitude
+  | negativeX && negativeY && positiveZ = unsafe (Qty.hypot3 xMax yMax zMin) maxMagnitude
+  | negativeX && negativeY && negativeZ = unsafe (Qty.hypot3 xMax yMax zMax) maxMagnitude
+  | positiveY && positiveZ = unsafe (Qty.hypot2 yMin zMin) maxMagnitude
+  | positiveY && negativeZ = unsafe (Qty.hypot2 yMin zMax) maxMagnitude
+  | negativeY && positiveZ = unsafe (Qty.hypot2 yMax zMin) maxMagnitude
+  | negativeY && negativeZ = unsafe (Qty.hypot2 yMax zMax) maxMagnitude
+  | positiveX && positiveZ = unsafe (Qty.hypot2 xMin zMin) maxMagnitude
+  | positiveX && negativeZ = unsafe (Qty.hypot2 xMin zMax) maxMagnitude
+  | negativeX && positiveZ = unsafe (Qty.hypot2 xMax zMin) maxMagnitude
+  | negativeX && negativeZ = unsafe (Qty.hypot2 xMax zMax) maxMagnitude
+  | positiveX && positiveY = unsafe (Qty.hypot2 xMin yMin) maxMagnitude
+  | positiveX && negativeY = unsafe (Qty.hypot2 xMin yMax) maxMagnitude
+  | negativeX && positiveY = unsafe (Qty.hypot2 xMax yMin) maxMagnitude
+  | negativeX && negativeY = unsafe (Qty.hypot2 xMax yMax) maxMagnitude
+  | positiveX = unsafe xMin maxMagnitude
+  | negativeX = unsafe -xMax maxMagnitude
+  | positiveY = unsafe yMin maxMagnitude
+  | negativeY = unsafe -yMax maxMagnitude
+  | otherwise = unsafe Qty.zero maxMagnitude
+ where
+  positiveX = xMin >= Qty.zero
+  negativeX = xMax <= Qty.zero
+  positiveY = yMin >= Qty.zero
+  negativeY = yMax <= Qty.zero
+  positiveZ = zMin >= Qty.zero
+  negativeZ = zMax <= Qty.zero
+  xMagnitude = max (Qty.abs xMin) (Qty.abs xMax)
+  yMagnitude = max (Qty.abs yMin) (Qty.abs yMax)
+  zMagnitude = max (Qty.abs zMin) (Qty.abs zMax)
+  maxMagnitude = Qty.hypot3 xMagnitude yMagnitude zMagnitude
 
 contains :: Qty units -> Range units -> Bool
 contains value (Range low high) = low <= value && value <= high
