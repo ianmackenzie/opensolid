@@ -96,6 +96,7 @@ library
       ImplicitParams
       ConstraintKinds
       PatternSynonyms
+      BlockArguments
   ghc-options: -Wall -Werror -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-signatures -Wmissing-exported-signatures -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wsafe -dcore-lint
   build-depends:
       base >=4.7 && <5
@@ -137,6 +138,7 @@ executable sandbox
       ImplicitParams
       ConstraintKinds
       PatternSynonyms
+      BlockArguments
   ghc-options: -Wall -Werror -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-signatures -Wmissing-exported-signatures -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wsafe -dcore-lint -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
@@ -180,6 +182,7 @@ test-suite opensolid-test
       ImplicitParams
       ConstraintKinds
       PatternSynonyms
+      BlockArguments
   ghc-options: -Wall -Werror -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-signatures -Wmissing-exported-signatures -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wsafe -dcore-lint -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5

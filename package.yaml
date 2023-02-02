@@ -59,6 +59,7 @@ default-extensions:
 - ImplicitParams
 - ConstraintKinds
 - PatternSynonyms
+- BlockArguments
 
 library:
   source-dirs: src
