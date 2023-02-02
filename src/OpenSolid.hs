@@ -6,6 +6,7 @@
 module OpenSolid
   ( module Prelude
   , module Control.Category
+  , module Data.Void
   , Qty (..)
   , Float
   , Sign (..)
@@ -30,6 +31,7 @@ module OpenSolid
   , ifThenElse
   , identity
   , always
+  , infallible
   , internalError
   , notImplemented
   , subtract
@@ -65,6 +67,7 @@ import Data.Functor.Identity (Identity (..))
 import Data.Kind (Type)
 import Data.Proxy (Proxy (Proxy))
 import Data.Text qualified
+import Data.Void (Void)
 import GHC.TypeLits (KnownSymbol, Symbol, symbolVal)
 import Generic qualified
 import Units qualified
@@ -220,6 +223,9 @@ identity = Prelude.id
 
 always :: a -> b -> a
 always = const
+
+infallible :: Result Void a -> a
+infallible (Ok value) = value
 
 internalError :: Text -> a
 internalError message = Prelude.error (Data.Text.unpack message)
