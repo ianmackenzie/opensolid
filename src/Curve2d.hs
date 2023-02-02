@@ -16,7 +16,6 @@ import Point2d (Point2d)
 import Qty qualified
 import Range (Range (..))
 import Range qualified
-import Result qualified
 import VectorBox2d qualified
 import VectorCurve2d (IsVectorCurve2d, VectorCurve2d (VectorCurve2d))
 import VectorCurve2d qualified
@@ -79,8 +78,7 @@ data IsCoincidentWithPoint = IsCoincidentWithPoint deriving (Eq, Show)
 
 passesThrough :: Tolerance => Point2d coordinates -> Curve2d coordinates -> Bool
 passesThrough point curve =
-  Range.any (nearby point curve) (Range.from 0.0 1.0)
-    |> Result.withDefault False
+  Range.any (nearby point curve) (Range.from 0.0 1.0) ?= False
 
 nearby :: Tolerance => Point2d coordinates -> Curve2d coordinates -> Range Unitless -> Result Indeterminate Bool
 nearby point curve domain
@@ -91,10 +89,9 @@ nearby point curve domain
     distance = VectorBox2d.magnitude (point - segmentBounds curve domain)
 
 find :: Tolerance => Point2d coordinates -> Curve2d coordinates -> Result IsCoincidentWithPoint (List Float)
-find point curve =
-  Curve1d.roots (VectorCurve2d.squaredMagnitude (curve - point))
-    |> Result.map (List.map Root.value)
-    |> Result.orErr IsCoincidentWithPoint
+find point curve = do
+  roots <- Curve1d.roots (VectorCurve2d.squaredMagnitude (curve - point)) ?! IsCoincidentWithPoint
+  Ok (List.map Root.value roots)
   where
     ?tolerance = Qty.squared ?tolerance
 

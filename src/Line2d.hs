@@ -25,7 +25,6 @@ import OpenSolid
 import Point2d (Point2d)
 import Point2d qualified
 import Range (Range (..))
-import Result qualified
 import Vector2d (Vector2d)
 import Vector2d qualified
 import VectorCurve2d qualified
@@ -76,10 +75,13 @@ vector (Line2d p1 p2) = p2 - p1
 data IsDegenerate = IsDegenerate
 
 direction :: Line2d coordinates -> Result IsDegenerate (Direction2d coordinates)
-direction line = Vector2d.direction (vector line) |> Result.orErr IsDegenerate
+direction line = Vector2d.direction (vector line) ?! IsDegenerate
 
 lengthAndDirection :: Line2d coordinates -> Result IsDegenerate (Length, Direction2d coordinates)
-lengthAndDirection line = Vector2d.magnitudeAndDirection (vector line) |> Result.orErr IsDegenerate
+lengthAndDirection line = Vector2d.magnitudeAndDirection (vector line) ?! IsDegenerate
 
 axis :: Line2d coordinates -> Result IsDegenerate (Axis2d coordinates)
-axis line = direction line |> Result.map (Axis2d.through (Line2d.startPoint line))
+axis line = do
+  axisDirection <- direction line
+  let axisOrigin = Line2d.startPoint line
+  Ok (Axis2d.through axisOrigin axisDirection)

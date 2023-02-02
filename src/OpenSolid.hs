@@ -35,6 +35,9 @@ module OpenSolid
   , subtract
   , (|>)
   , (<|)
+  , (??)
+  , (?=)
+  , (?!)
   , ToleranceIn
   , Tolerance
   , ApproximateEquality (..)
@@ -58,6 +61,7 @@ where
 
 import Control.Category ((<<<), (>>>))
 import Data.Coerce (coerce)
+import Data.Functor.Identity (Identity (..))
 import Data.Kind (Type)
 import Data.Proxy (Proxy (Proxy))
 import Data.Text qualified
@@ -234,9 +238,28 @@ subtract b a = a - b
 (<|) :: (a -> b) -> a -> b
 (<|) = identity
 
+class Nullable nullable where
+  (??) :: forall applicative a. Applicative applicative => nullable a -> applicative a -> applicative a
+
+instance Nullable Maybe where
+  Just value ?? ~_ = pure value
+  Nothing ?? ~fallback = fallback
+
+instance Nullable (Result x) where
+  Ok value ?? ~_ = pure value
+  Err _ ?? ~fallback = fallback
+
+(?=) :: Nullable nullable => nullable a -> a -> a
+(?=) nullable ~fallback = runIdentity (nullable ?? Identity fallback)
+
+(?!) :: Nullable nullable => nullable a -> x -> Result x a
+(?!) nullable ~err = nullable ?? Err err
+
 infixr 0 <|
 
 infixl 0 |>
+
+infixr 2 ??, ?=, ?!
 
 infixl 6 +, -
 

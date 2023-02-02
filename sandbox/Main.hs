@@ -11,7 +11,6 @@ import Direction3d ()
 import Float qualified
 import Length qualified
 import List qualified
-import Maybe qualified
 import OpenSolid
 import Point2d (Point2d)
 import Point2d qualified
@@ -102,7 +101,7 @@ script = do
   let expressionRoots = let ?tolerance = 1e-12 in Curve1d.roots expression
   log "Roots" expressionRoots
   testCurveFind
-  log "Maybe.orErr" (List.map (Maybe.orErr "Bad") [Just 1, Nothing, Just 2, Nothing, Just 3])
+  log "?!" (List.map (?! "Bad") [Just 1, Nothing, Just 2, Nothing, Just 3])
   testListCollapse
   Script.printLine "Unicode output test: ✅❌🙂"
 
