@@ -255,8 +255,8 @@ roots curve = do
   let mergedRegions = List.collapse Region.merge resolvedRegions
   let solutions = List.combine (solve curve 0) mergedRegions
   Ok (root0 ++ List.foldr prependRoot root1 solutions)
-  where
-    ?originalCurve = curve
+ where
+  ?originalCurve = curve
 
 data Solution
   = Solution Root Float
@@ -296,12 +296,12 @@ solve curveDerivative derivativeOrder region =
                             [ NonZero (Range.from x1 rootX) -nextDerivativeSign
                             , NonZero (Range.from rootX x2) nextDerivativeSign
                             ]
-                where
-                  Range x1 x2 = subdomain
-                  minX = if nextDerivativeSign == Positive then x1 else x2
-                  maxX = if nextDerivativeSign == Positive then x2 else x1
-                  minY = pointOn curveDerivative minX
-                  maxY = pointOn curveDerivative maxX
+               where
+                Range x1 x2 = subdomain
+                minX = if nextDerivativeSign == Positive then x1 else x2
+                maxX = if nextDerivativeSign == Positive then x2 else x1
+                minY = pointOn curveDerivative minX
+                maxY = pointOn curveDerivative maxX
               -- Check if a high-order root should in fact be a lower-order root (e.g. in y=x^3+x
               -- the 3rd derivative is zero at x=0 but it is in fact a 0th-order root, not a
               -- 2nd-order root)
@@ -343,8 +343,8 @@ resolve domain curve
   | minValue >= ?tolerance = Just (Region domain 0 Positive)
   | maxValue <= negate ?tolerance = Just (Region domain 0 Negative)
   | otherwise = resolveDerivative domain (derivative curve) 1
-  where
-    Range minValue maxValue = segmentBounds curve domain
+ where
+  Range minValue maxValue = segmentBounds curve domain
 
 minDerivativeResolution :: Float
 minDerivativeResolution = 0.5
@@ -355,35 +355,35 @@ resolveDerivative domain curveDerivative derivativeOrder
   | derivativeResolution <= -minDerivativeResolution = Just (Region domain derivativeOrder Negative)
   | derivativeOrder <= maxRootOrder = resolveDerivative domain (derivative curveDerivative) (derivativeOrder + 1)
   | otherwise = Nothing
-  where
-    derivativeResolution = resolution domain curveDerivative
+ where
+  derivativeResolution = resolution domain curveDerivative
 
 resolution :: Range Unitless -> Curve1d units -> Float
 resolution domain curveDerivative
   | minValue > Qty.zero = minValue / maxValue
   | maxValue < Qty.zero = negate (maxValue / minValue)
   | otherwise = 0.0
-  where
-    Range minValue maxValue = segmentBounds curveDerivative domain
+ where
+  Range minValue maxValue = segmentBounds curveDerivative domain
 
 solveEndpoint :: ToleranceIn units => Curve1d units -> Float -> (List Root, Float)
 solveEndpoint curve endpointX | not (pointOn curve endpointX ~= Qty.zero) = ([], endpointX)
 solveEndpoint curve endpointX = check (derivative curve) 1 Qty.infinity Nothing
-  where
-    check curveDerivative derivativeOrder currentMinWidth currentBest =
-      let derivativeValue = pointOn curveDerivative endpointX
-          rootWidth = computeWidth derivativeOrder derivativeValue
-          updatedMinWidth = min rootWidth currentMinWidth
-          rootOrder = derivativeOrder - 1
-          updatedBest =
-            if updatedMinWidth < currentMinWidth
-              then Just (Root endpointX rootOrder (Qty.sign derivativeValue), curveDerivative)
-              else currentBest
-       in if rootOrder < maxRootOrder
-            then check (derivative curveDerivative) (derivativeOrder + 1) updatedMinWidth updatedBest
-            else case updatedBest of
-              Just (root, associatedDerivative) -> resolveEndpoint root associatedDerivative endpointX 0.5
-              Nothing -> ([], endpointX)
+ where
+  check curveDerivative derivativeOrder currentMinWidth currentBest =
+    let derivativeValue = pointOn curveDerivative endpointX
+        rootWidth = computeWidth derivativeOrder derivativeValue
+        updatedMinWidth = min rootWidth currentMinWidth
+        rootOrder = derivativeOrder - 1
+        updatedBest =
+          if updatedMinWidth < currentMinWidth
+            then Just (Root endpointX rootOrder (Qty.sign derivativeValue), curveDerivative)
+            else currentBest
+     in if rootOrder < maxRootOrder
+          then check (derivative curveDerivative) (derivativeOrder + 1) updatedMinWidth updatedBest
+          else case updatedBest of
+            Just (root, associatedDerivative) -> resolveEndpoint root associatedDerivative endpointX 0.5
+            Nothing -> ([], endpointX)
 
 resolveEndpoint :: Root -> Curve1d units -> Float -> Float -> (List Root, Float)
 resolveEndpoint root curveDerivative endpointX innerX =

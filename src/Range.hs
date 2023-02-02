@@ -148,9 +148,9 @@ squared (Range low high)
   | low >= Qty.zero = unsafe ll hh
   | high <= Qty.zero = unsafe hh ll
   | otherwise = unsafe Qty.zero (max ll hh)
-  where
-    ll = low * low
-    hh = high * high
+ where
+  ll = low * low
+  hh = high * high
 
 sqrt :: Squared (Qty units1) (Qty units2) => Range units2 -> Range units1
 sqrt (Range low high) =

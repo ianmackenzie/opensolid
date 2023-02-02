@@ -53,8 +53,8 @@ testCurveFind = do
   log "End parameter value" (Curve2d.find (Point2d.meters 2.0 0.0) testSpline)
   log "Mid parameter value" (Curve2d.find (Point2d.meters 1.0 1.0) testSpline)
   log "Off-curve parameter value" (Curve2d.find (Point2d.meters 1.0 1.1) testSpline)
-  where
-    ?tolerance = Length.meters 1e-9
+ where
+  ?tolerance = Length.meters 1e-9
 
 script :: Script.Program
 script = do

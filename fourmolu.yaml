@@ -2,7 +2,7 @@ indentation: 2
 function-arrows: leading
 comma-style: leading
 import-export-style: leading
-indent-wheres: true
+indent-wheres: false
 record-brace-space: false
 newlines-between-decls: 1
 haddock-style: multi-line

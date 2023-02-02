@@ -55,9 +55,9 @@ clamp a b value
   | value < low = low
   | value > high = high
   | otherwise = value
-  where
-    low = min a b
-    high = max a b
+ where
+  low = min a b
+  high = max a b
 
 interpolateFrom :: Qty units -> Qty units -> Float -> Qty units
 interpolateFrom a b t =

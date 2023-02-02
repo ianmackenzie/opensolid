@@ -85,15 +85,16 @@ nearby point curve domain
   | Range.minValue distance > ?tolerance = Ok False
   | Range.maxValue distance <= ?tolerance = Ok True
   | otherwise = Err Indeterminate
-  where
-    distance = VectorBox2d.magnitude (point - segmentBounds curve domain)
+ where
+  distance = VectorBox2d.magnitude (point - segmentBounds curve domain)
 
 find :: Tolerance => Point2d coordinates -> Curve2d coordinates -> Result IsCoincidentWithPoint (List Float)
 find point curve = do
-  roots <- Curve1d.roots (VectorCurve2d.squaredMagnitude (curve - point)) ?! IsCoincidentWithPoint
+  let squaredDistanceFromCurve = VectorCurve2d.squaredMagnitude (point - curve)
+  roots <- Curve1d.roots squaredDistanceFromCurve ?! IsCoincidentWithPoint
   Ok (List.map Root.value roots)
-  where
-    ?tolerance = Qty.squared ?tolerance
+ where
+  ?tolerance = Qty.squared ?tolerance
 
 _overlappingSegments :: Tolerance => Curve2d coordinates -> Curve2d coordinates -> List (Range Unitless)
 _overlappingSegments curve1 curve2 =
