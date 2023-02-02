@@ -3,6 +3,7 @@ module Curve2d
   , IsCurve2d (..)
   , passesThrough
   , find
+  , overlappingSegments
   )
 where
 
@@ -14,6 +15,7 @@ import List qualified
 import OpenSolid
 import Point2d (Point2d)
 import Qty qualified
+import Quadrature qualified
 import Range (Range (..))
 import Range qualified
 import VectorBox2d qualified
@@ -96,22 +98,26 @@ find point curve = do
  where
   ?tolerance = Qty.squared ?tolerance
 
-_overlappingSegments :: Tolerance => Curve2d coordinates -> Curve2d coordinates -> List (Range Unitless)
-_overlappingSegments curve1 curve2 =
+overlappingSegments :: Tolerance => Curve2d coordinates -> Curve2d coordinates -> List (Range Unitless)
+overlappingSegments curve1 curve2 =
   case (find (startPoint curve2) curve1, find (endPoint curve2) curve1) of
-    -- curve1 is a single point coincident with the start point of curve2,
+    (Ok start2us, Ok end2us) ->
+      let u0 = [0.0 | passesThrough (startPoint curve1) curve2]
+          u1 = [1.0 | passesThrough (endPoint curve1) curve2]
+          uValues = List.sortAndDeduplicate (List.concat [u0, u1, start2us, end2us])
+          candidateDomains = List.map2 Range.from uValues (List.drop 1 uValues)
+       in List.filter (overlappingSegment curve1 curve2) candidateDomains
+    -- curve1 is actually a single point coincident with the start point of curve2,
     -- so all of curve1 overlaps with curve2
     (Err IsCoincidentWithPoint, _) -> [Range.from 0.0 1.0]
-    -- curve1 is a single point coincident with the end point of curve2,
+    -- curve1 is actually a single point coincident with the end point of curve2,
     -- so all of curve1 overlaps with curve2
     (_, Err IsCoincidentWithPoint) -> [Range.from 0.0 1.0]
-    -- Otherwise, check various segments bounded by curve endpoints,
-    -- using the parameter values associated with those endpoints
-    (Ok _startPoint2us, Ok _endPoint2us) ->
-      let _u0 = [0.0 | passesThrough (startPoint curve1) curve2]
-          _u1 = [1.0 | passesThrough (endPoint curve1) curve2]
-          _uValues =
-            List.concat [_u0, _u1, _startPoint2us, _endPoint2us]
-              |> List.sort
-              |> List.collapse (\u1 u2 -> if u1 == u2 then Just u1 else Nothing)
-       in notImplemented
+
+samplingPoints :: Curve2d coordinates -> Range Unitless -> List (Point2d coordinates)
+samplingPoints curve domain =
+  [pointOn curve (Range.interpolate domain t) | t <- Quadrature.points]
+
+overlappingSegment :: Tolerance => Curve2d coordinates -> Curve2d coordinates -> Range Unitless -> Bool
+overlappingSegment curve1 curve2 domain1 =
+  List.all [passesThrough point1 curve2 | point1 <- samplingPoints curve1 domain1]
