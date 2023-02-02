@@ -69,6 +69,7 @@ library
       Volume
   other-modules:
       Curve1d.Region
+      Quadrature
   hs-source-dirs:
       src
   default-extensions:

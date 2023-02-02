@@ -25,6 +25,7 @@ import Generic qualified
 import List qualified
 import OpenSolid
 import Qty qualified
+import Quadrature qualified
 import Range (Range (..))
 import Range qualified
 import Units qualified
@@ -221,24 +222,10 @@ cos (Constant x) = constant (Angle.cos x)
 cos curve = Cos curve
 
 isZero :: ToleranceIn units => Curve1d units -> Bool
-isZero curve = List.sum [weight * pointOn curve x | (weight, x) <- quadraturePoints] ~= Qty.zero
+isZero curve = List.all [pointOn curve t ~= Qty.zero | t <- Quadrature.points]
 
 maxRootOrder :: Int
 maxRootOrder = 4
-
--- From https://en.wikipedia.org/wiki/Gaussian_quadrature#Gauss%E2%80%93Legendre_quadrature
-quadraturePoints :: List (Float, Float)
-quadraturePoints =
-  let x1 = Qty.sqrt ((3 / 7) - (2 / 7) * Qty.sqrt (6 / 5))
-      x2 = Qty.sqrt ((3 / 7) + (2 / 7) * Qty.sqrt (6 / 5))
-      weight1 = (18.0 + Qty.sqrt 30.0) / 36
-      weight2 = (18.0 - Qty.sqrt 30.0) / 36
-      quadratureInterval = Range.from -1.0 1.0
-   in [ (Range.interpolationParameter quadratureInterval -x2, weight2 / 2)
-      , (Range.interpolationParameter quadratureInterval -x1, weight1 / 2)
-      , (Range.interpolationParameter quadratureInterval x1, weight1 / 2)
-      , (Range.interpolationParameter quadratureInterval x2, weight2 / 2)
-      ]
 
 ----- ROOT FINDING -----
 

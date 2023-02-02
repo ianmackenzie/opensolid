@@ -65,6 +65,7 @@ library:
   source-dirs: src
   other-modules:
   - Curve1d.Region
+  - Quadrature
 
 executables:
   sandbox:
