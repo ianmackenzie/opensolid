@@ -75,13 +75,33 @@ testArc2dFrom = do
   log "arc4" (Arc2d.from Point2d.origin (Point2d.meters 1.0 1.0) (Angle.degrees -180.0))
   log "arc1 point" (Result.map (`Arc2d.pointOn` 0.5) arc1)
 
-testCurveOverlap :: Script.Program
-testCurveOverlap = do
+testCurveOverlap1 :: Script.Program
+testCurveOverlap1 = do
   let arc1 = Arc2d.from (Point2d.meters 1.0 0.0) (Point2d.meters -1.0 0.0) (Angle.degrees 180.0)
   let arc2 = Arc2d.from (Point2d.meters 0.0 -1.0) (Point2d.meters 0.0 1.0) (Angle.degrees 180.0)
   let curve1 = Curve2d arc1
   let curve2 = Curve2d arc2
-  log "Overlaps" (Curve2d.overlappingSegments curve2 curve1)
+  log "Overlaps" (Curve2d.overlappingSegments curve1 curve2)
+ where
+  ?tolerance = Length.meters 1e-9
+
+testCurveOverlap2 :: Script.Program
+testCurveOverlap2 = do
+  let arc1 =
+        Arc2d.with
+          (#centerPoint Point2d.origin)
+          (#radius (Length.meters 1.0))
+          (#startAngle (Angle.degrees -45.0))
+          (#sweptAngle (Angle.degrees 270.0))
+  let arc2 =
+        Arc2d.with
+          (#centerPoint Point2d.origin)
+          (#radius (Length.meters 1.0))
+          (#startAngle (Angle.degrees 0.0))
+          (#sweptAngle (Angle.degrees -180.0))
+  let curve1 = Curve2d arc1
+  let curve2 = Curve2d arc2
+  log "Overlaps" (Curve2d.overlappingSegments curve1 curve2)
  where
   ?tolerance = Length.meters 1e-9
 
@@ -135,7 +155,8 @@ script = do
   Script.printLine "Unicode output test: ✅❌🙂"
   testDirection2dAngleFrom
   testArc2dFrom
-  testCurveOverlap
+  testCurveOverlap1
+  testCurveOverlap2
 
 main :: IO ()
 main = Script.run script
