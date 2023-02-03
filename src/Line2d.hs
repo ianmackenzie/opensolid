@@ -1,12 +1,12 @@
 module Line2d
   ( Line2d (..)
-  , Line2d.startPoint
-  , Line2d.endPoint
-  , Line2d.pointOn
-  , Line2d.segmentBounds
-  , Line2d.reverse
-  , Line2d.bisect
-  , Line2d.boundingBox
+  , startPoint
+  , endPoint
+  , pointOn
+  , segmentBounds
+  , reverse
+  , bisect
+  , boundingBox
   , length
   , direction
   , lengthAndDirection
@@ -27,6 +27,7 @@ import Point2d qualified
 import Range (Range (..))
 import Vector2d (Vector2d)
 import Vector2d qualified
+import VectorCurve2d (VectorCurve2d)
 import VectorCurve2d qualified
 
 data Line2d coordinates
@@ -46,6 +47,9 @@ segmentBounds :: Line2d coordinates -> Range Unitless -> BoundingBox2d coordinat
 segmentBounds line (Range t1 t2) =
   BoundingBox2d.hull2 (Line2d.pointOn line t1) (Line2d.pointOn line t2)
 
+derivative :: Line2d coordinates -> VectorCurve2d Meters coordinates
+derivative line = VectorCurve2d.constant (vector line)
+
 reverse :: Line2d coordinates -> Line2d coordinates
 reverse (Line2d p1 p2) = Line2d p2 p1
 
@@ -57,15 +61,15 @@ bisect (Line2d p1 p2) =
 boundingBox :: Line2d coordinates -> BoundingBox2d coordinates
 boundingBox (Line2d p1 p2) = BoundingBox2d.hull2 p1 p2
 
-instance IsCurve2d Line2d where
-  startPoint = Line2d.startPoint
-  endPoint = Line2d.endPoint
-  pointOn = Line2d.pointOn
-  segmentBounds = Line2d.segmentBounds
-  derivative line = VectorCurve2d.constant (vector line)
-  reverse = Line2d.reverse
-  bisect = Line2d.bisect
-  boundingBox = Line2d.boundingBox
+instance IsCurve2d (Line2d coordinates) coordinates where
+  startPointImpl = startPoint
+  endPointImpl = endPoint
+  pointOnImpl = pointOn
+  segmentBoundsImpl = segmentBounds
+  derivativeImpl = derivative
+  reverseImpl = reverse
+  bisectImpl = bisect
+  boundingBoxImpl = boundingBox
 
 length :: Line2d coordinates -> Length
 length (Line2d p1 p2) = Point2d.distanceFrom p1 p2

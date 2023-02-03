@@ -1,6 +1,13 @@
 module Curve2d
   ( Curve2d (Curve2d)
   , IsCurve2d (..)
+  , startPoint
+  , endPoint
+  , segmentBounds
+  , derivative
+  , reverse
+  , bisect
+  , boundingBox
   , passesThrough
   , find
   , overlappingSegments
@@ -22,39 +29,81 @@ import VectorBox2d qualified
 import VectorCurve2d (IsVectorCurve2d, VectorCurve2d (VectorCurve2d))
 import VectorCurve2d qualified
 
-class IsCurve2d curve where
-  startPoint :: curve coordinates -> Point2d coordinates
-  endPoint :: curve coordinates -> Point2d coordinates
-  pointOn :: curve coordinates -> Float -> Point2d coordinates
-  segmentBounds :: curve coordinates -> Range Unitless -> BoundingBox2d coordinates
-  derivative :: curve coordinates -> VectorCurve2d Meters coordinates
-  reverse :: curve coordinates -> curve coordinates
-  bisect :: curve coordinates -> (curve coordinates, curve coordinates)
-  boundingBox :: curve coordinates -> BoundingBox2d coordinates
+class IsCurve2d curve coordinates | curve -> coordinates where
+  startPointImpl :: curve -> Point2d coordinates
+  endPointImpl :: curve -> Point2d coordinates
+  pointOnImpl :: curve -> Float -> Point2d coordinates
+  segmentBoundsImpl :: curve -> Range Unitless -> BoundingBox2d coordinates
+  derivativeImpl :: curve -> VectorCurve2d Meters coordinates
+  reverseImpl :: curve -> curve
+  bisectImpl :: curve -> (curve, curve)
+  boundingBoxImpl :: curve -> BoundingBox2d coordinates
 
-data Curve2d coordinates = forall curve. IsCurve2d curve => Curve2d (curve coordinates)
+data Curve2d coordinates = forall curve. IsCurve2d curve coordinates => Curve2d curve
 
-instance IsCurve2d Curve2d where
-  startPoint (Curve2d curve) = startPoint curve
-  endPoint (Curve2d curve) = endPoint curve
-  pointOn (Curve2d curve) t = pointOn curve t
-  segmentBounds (Curve2d curve) t = segmentBounds curve t
-  derivative (Curve2d curve) = derivative curve
-  reverse (Curve2d curve) = Curve2d (reverse curve)
-  bisect (Curve2d curve) =
-    let (curve1, curve2) = bisect curve
-     in (Curve2d curve1, Curve2d curve2)
-  boundingBox (Curve2d curve) = boundingBox curve
+startPoint :: Curve2d coordinates -> Point2d coordinates
+startPoint (Curve2d curve) = startPointImpl curve
 
-instance IsCurve2d Point2d where
-  startPoint point = point
-  endPoint point = point
-  pointOn point _ = point
-  segmentBounds point _ = BoundingBox2d.constant point
-  derivative _ = VectorCurve2d.zero
-  reverse = identity
-  bisect point = (point, point)
-  boundingBox point = BoundingBox2d.constant point
+endPoint :: Curve2d coordinates -> Point2d coordinates
+endPoint (Curve2d curve) = endPointImpl curve
+
+pointOn :: Curve2d coordinates -> Float -> Point2d coordinates
+pointOn (Curve2d curve) t = pointOnImpl curve t
+
+segmentBounds :: Curve2d coordinates -> Range Unitless -> BoundingBox2d coordinates
+segmentBounds (Curve2d curve) t = segmentBoundsImpl curve t
+
+derivative :: Curve2d coordinates -> VectorCurve2d Meters coordinates
+derivative (Curve2d curve) = derivativeImpl curve
+
+reverse :: Curve2d coordinates -> Curve2d coordinates
+reverse (Curve2d curve) = Curve2d (reverseImpl curve)
+
+bisect :: Curve2d coordinates -> (Curve2d coordinates, Curve2d coordinates)
+bisect (Curve2d curve) =
+  let (curve1, curve2) = bisectImpl curve
+   in (Curve2d curve1, Curve2d curve2)
+
+boundingBox :: Curve2d coordinates -> BoundingBox2d coordinates
+boundingBox (Curve2d curve) = boundingBoxImpl curve
+
+instance IsCurve2d (Curve2d coordinates) coordinates where
+  startPointImpl = startPoint
+  endPointImpl = endPoint
+  pointOnImpl = pointOn
+  segmentBoundsImpl = segmentBounds
+  derivativeImpl = derivative
+  reverseImpl = reverse
+  bisectImpl = bisect
+  boundingBoxImpl = boundingBox
+
+instance IsCurve2d (Point2d coordinates) coordinates where
+  startPointImpl point = point
+  endPointImpl point = point
+  pointOnImpl point _ = point
+  segmentBoundsImpl point _ = BoundingBox2d.constant point
+  derivativeImpl _ = VectorCurve2d.zero
+  reverseImpl = identity
+  bisectImpl point = (point, point)
+  boundingBoxImpl point = BoundingBox2d.constant point
+
+instance (IsCurve2d x coordinates, IsCurve2d a coordinates', coordinates ~ coordinates') => IsCurve2d (Result x a) coordinates where
+  startPointImpl (Err curve) = startPointImpl curve
+  startPointImpl (Ok curve) = startPointImpl curve
+  endPointImpl (Err curve) = endPointImpl curve
+  endPointImpl (Ok curve) = endPointImpl curve
+  pointOnImpl (Err curve) = pointOnImpl curve
+  pointOnImpl (Ok curve) = pointOnImpl curve
+  segmentBoundsImpl (Err curve) = segmentBoundsImpl curve
+  segmentBoundsImpl (Ok curve) = segmentBoundsImpl curve
+  derivativeImpl (Err curve) = derivativeImpl curve
+  derivativeImpl (Ok curve) = derivativeImpl curve
+  reverseImpl (Err curve) = let r = reverseImpl curve in Err r
+  reverseImpl (Ok curve) = let r = reverseImpl curve in Ok r
+  bisectImpl (Err curve) = let (c1, c2) = bisectImpl curve in (Err c1, Err c2)
+  bisectImpl (Ok curve) = let (c1, c2) = bisectImpl curve in (Ok c1, Ok c2)
+  boundingBoxImpl (Err curve) = boundingBoxImpl curve
+  boundingBoxImpl (Ok curve) = boundingBoxImpl curve
 
 data PointCurveDifference coordinates = PointCurveDifference (Point2d coordinates) (Curve2d coordinates)
 

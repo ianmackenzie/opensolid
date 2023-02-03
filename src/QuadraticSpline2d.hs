@@ -1,13 +1,13 @@
 module QuadraticSpline2d
   ( QuadraticSpline2d
-  , QuadraticSpline2d.startPoint
-  , QuadraticSpline2d.endPoint
-  , QuadraticSpline2d.pointOn
-  , QuadraticSpline2d.segmentBounds
-  , QuadraticSpline2d.reverse
-  , QuadraticSpline2d.bisect
-  , QuadraticSpline2d.boundingBox
-  , QuadraticSpline2d.derivative
+  , startPoint
+  , endPoint
+  , pointOn
+  , segmentBounds
+  , reverse
+  , bisect
+  , boundingBox
+  , derivative
   , fromControlPoints
   , controlPoints
   )
@@ -93,15 +93,15 @@ bisect (QuadraticSpline2d p1 p2 p3) =
 boundingBox :: QuadraticSpline2d coordinates -> BoundingBox2d coordinates
 boundingBox (QuadraticSpline2d p1 p2 p3) = BoundingBox2d.hull3 p1 p2 p3
 
-instance IsCurve2d QuadraticSpline2d where
-  startPoint = QuadraticSpline2d.startPoint
-  endPoint = QuadraticSpline2d.endPoint
-  pointOn = QuadraticSpline2d.pointOn
-  segmentBounds = QuadraticSpline2d.segmentBounds
-  derivative = QuadraticSpline2d.derivative
-  reverse = QuadraticSpline2d.reverse
-  bisect = QuadraticSpline2d.bisect
-  boundingBox = QuadraticSpline2d.boundingBox
+instance IsCurve2d (QuadraticSpline2d coordinates) coordinates where
+  startPointImpl = startPoint
+  endPointImpl = endPoint
+  pointOnImpl = pointOn
+  segmentBoundsImpl = segmentBounds
+  derivativeImpl = derivative
+  reverseImpl = reverse
+  bisectImpl = bisect
+  boundingBoxImpl = boundingBox
 
 fromControlPoints :: Point2d coordinates -> Point2d coordinates -> Point2d coordinates -> QuadraticSpline2d coordinates
 fromControlPoints = QuadraticSpline2d
