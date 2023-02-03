@@ -7,6 +7,7 @@ module Arc2d
   , reverse
   , bisect
   , boundingBox
+  , with
   , from
   , centerPoint
   , radius
@@ -89,6 +90,20 @@ instance IsCurve2d (Arc2d coordinates) coordinates where
   reverseImpl = reverse
   bisectImpl = bisect
   boundingBoxImpl = boundingBox
+
+with
+  :: Named "centerPoint" (Point2d coordinates)
+  -> Named "radius" Length
+  -> Named "startAngle" Angle
+  -> Named "sweptAngle" Angle
+  -> Arc2d coordinates
+with (Named givenCenterPoint) (Named givenRadius) (Named givenStartAngle) (Named givenSweptAngle) =
+  Arc2d
+    { centerPoint = givenCenterPoint
+    , radius = givenRadius
+    , startAngle = givenStartAngle
+    , sweptAngle = givenSweptAngle
+    }
 
 from :: Point2d coordinates -> Point2d coordinates -> Angle -> Result (Line2d coordinates) (Arc2d coordinates)
 from p1 p2 theta =
