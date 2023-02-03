@@ -255,51 +255,49 @@ prependRoot (Solution root _) acc = root : acc
 prependRoot (NonZero _ _) acc = acc
 
 solve :: (ToleranceIn units, ?originalCurve :: Curve1d units) => Curve1d units -> Int -> Region -> List Solution
-solve curveDerivative derivativeOrder region =
-  let Region domain nonZeroDerivativeOrder nonZeroDerivativeSign = region
-   in if derivativeOrder == nonZeroDerivativeOrder
-        then [NonZero domain nonZeroDerivativeSign]
-        else
-          let nextDerivative = derivative curveDerivative
-              higherOrderSolutions = solve nextDerivative (derivativeOrder + 1) region
-              -- Solve for a root of this derivative within a non-zero region of the next higher
-              -- derivative
-              lift (NonZero subdomain nextDerivativeSign)
-                -- Minimum point on the derivative curve is positive, so must be entirely positive
-                | minY > Qty.zero = [NonZero subdomain Positive]
-                -- Maximum point on the derivative curve is negative, so must be entirely negative
-                | maxY < Qty.zero = [NonZero subdomain Negative]
-                -- Otherwise, solve for a root of the derivative curve by bisection. If that is also a root of
-                -- the original curve, then report it as such. Otherwise, then to the left and right of the root
-                -- are non-zero regions of the derivative curve.
-                | otherwise =
-                    let rootX = bisectMonotonic curveDerivative minX maxX minY maxY
-                     in if pointOn ?originalCurve rootX ~= Qty.zero
-                          then
-                            let root = Root rootX derivativeOrder nextDerivativeSign
-                                width = computeWidth (derivativeOrder + 1) (pointOn nextDerivative rootX)
-                             in [Solution root width]
-                          else
-                            [ NonZero (Range.from x1 rootX) -nextDerivativeSign
-                            , NonZero (Range.from rootX x2) nextDerivativeSign
-                            ]
-               where
-                Range x1 x2 = subdomain
-                minX = if nextDerivativeSign == Positive then x1 else x2
-                maxX = if nextDerivativeSign == Positive then x2 else x1
-                minY = pointOn curveDerivative minX
-                maxY = pointOn curveDerivative maxX
-              -- Check if a high-order root should in fact be a lower-order root (e.g. in y=x^3+x
-              -- the 3rd derivative is zero at x=0 but it is in fact a 0th-order root, not a
-              -- 2nd-order root)
-              lift (Solution currentRoot currentWidth) =
-                let rootX = Root.value currentRoot
-                    rootY = pointOn curveDerivative rootX
-                    width = computeWidth derivativeOrder rootY
-                 in if width < currentWidth
-                      then [Solution (Root rootX (derivativeOrder - 1) (Qty.sign rootY)) width]
-                      else [Solution currentRoot currentWidth]
-           in List.combine lift higherOrderSolutions
+solve curveDerivative derivativeOrder region@(Region domain nonZeroDerivativeOrder nonZeroDerivativeSign)
+  | derivativeOrder == nonZeroDerivativeOrder = [NonZero domain nonZeroDerivativeSign]
+  | otherwise =
+      let nextDerivative = derivative curveDerivative
+          higherOrderSolutions = solve nextDerivative (derivativeOrder + 1) region
+          -- Solve for a root of this derivative within a non-zero region of the next higher
+          -- derivative
+          lift (NonZero subdomain nextDerivativeSign)
+            -- Minimum point on the derivative curve is positive, so must be entirely positive
+            | minY > Qty.zero = [NonZero subdomain Positive]
+            -- Maximum point on the derivative curve is negative, so must be entirely negative
+            | maxY < Qty.zero = [NonZero subdomain Negative]
+            -- Otherwise, solve for a root of the derivative curve by bisection. If that is also a root of
+            -- the original curve, then report it as such. Otherwise, then to the left and right of the root
+            -- are non-zero regions of the derivative curve.
+            | otherwise =
+                let rootX = bisectMonotonic curveDerivative minX maxX minY maxY
+                 in if pointOn ?originalCurve rootX ~= Qty.zero
+                      then
+                        let root = Root rootX derivativeOrder nextDerivativeSign
+                            width = computeWidth (derivativeOrder + 1) (pointOn nextDerivative rootX)
+                         in [Solution root width]
+                      else
+                        [ NonZero (Range.from x1 rootX) -nextDerivativeSign
+                        , NonZero (Range.from rootX x2) nextDerivativeSign
+                        ]
+           where
+            Range x1 x2 = subdomain
+            minX = if nextDerivativeSign == Positive then x1 else x2
+            maxX = if nextDerivativeSign == Positive then x2 else x1
+            minY = pointOn curveDerivative minX
+            maxY = pointOn curveDerivative maxX
+          -- Check if a high-order root should in fact be a lower-order root (e.g. in y=x^3+x
+          -- the 3rd derivative is zero at x=0 but it is in fact a 0th-order root, not a
+          -- 2nd-order root)
+          lift (Solution currentRoot currentWidth) =
+            let rootX = Root.value currentRoot
+                rootY = pointOn curveDerivative rootX
+                width = computeWidth derivativeOrder rootY
+             in if width < currentWidth
+                  then [Solution (Root rootX (derivativeOrder - 1) (Qty.sign rootY)) width]
+                  else [Solution currentRoot currentWidth]
+       in List.combine lift higherOrderSolutions
 
 bisectMonotonic :: Curve1d units -> Float -> Float -> Qty units -> Qty units -> Float
 bisectMonotonic curve lowX highX lowY highY =
