@@ -260,6 +260,7 @@ solve curveDerivative derivativeOrder region@(Region domain nonZeroDerivativeOrd
   | otherwise =
       let nextDerivative = derivative curveDerivative
           higherOrderSolutions = solve nextDerivative (derivativeOrder + 1) region
+
           -- Solve for a root of this derivative within a non-zero region of the next higher
           -- derivative
           lift (NonZero subdomain nextDerivativeSign)
@@ -287,6 +288,7 @@ solve curveDerivative derivativeOrder region@(Region domain nonZeroDerivativeOrd
             maxX = if nextDerivativeSign == Positive then x2 else x1
             minY = pointOn curveDerivative minX
             maxY = pointOn curveDerivative maxX
+
           -- Check if a high-order root should in fact be a lower-order root (e.g. in y=x^3+x
           -- the 3rd derivative is zero at x=0 but it is in fact a 0th-order root, not a
           -- 2nd-order root)
