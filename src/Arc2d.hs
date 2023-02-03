@@ -63,9 +63,9 @@ derivative :: Arc2d coordinates -> VectorCurve2d Meters coordinates
 derivative arc =
   let theta = startAngle arc + Curve1d.parameter * sweptAngle arc
       r = radius arc
-      vx = -r * Curve1d.sin theta
-      vy = r * Curve1d.cos theta
-   in VectorCurve2d.xy vx vy
+      x = r * Curve1d.cos theta
+      y = r * Curve1d.sin theta
+   in VectorCurve2d.xy (Curve1d.derivative x) (Curve1d.derivative y)
 
 reverse :: Arc2d coordinates -> Arc2d coordinates
 reverse arc =
