@@ -1,6 +1,7 @@
 module Main (main) where
 
 import Angle qualified
+import Arc2d qualified
 import Area qualified
 import Curve1d qualified
 import Curve2d (Curve2d (..))
@@ -17,6 +18,7 @@ import Point2d qualified
 import Qty qualified
 import QuadraticSpline2d qualified
 import Range qualified
+import Result qualified
 import Script qualified
 import Vector2d qualified
 import Vector3d qualified
@@ -63,6 +65,15 @@ testDirection2dAngleFrom = do
           |> Angle.inDegrees
   log "Direction2d.angleFrom (Direction2d.degrees 10) (Direction2d.degrees 30)" (angle 10 30)
   log "Direction2d.angleFrom (Direction2d.degrees 10) (Direction2d.degrees 350)" (angle 10 350)
+
+testArc2dFrom :: Script.Program
+testArc2dFrom = do
+  let arc1 = Arc2d.from Point2d.origin (Point2d.meters 1.0 1.0) (Angle.degrees 90.0)
+  log "arc1" arc1
+  log "arc2" (Arc2d.from Point2d.origin (Point2d.meters 1.0 1.0) (Angle.degrees -90.0))
+  log "arc3" (Arc2d.from Point2d.origin (Point2d.meters 1.0 1.0) (Angle.degrees 180.0))
+  log "arc4" (Arc2d.from Point2d.origin (Point2d.meters 1.0 1.0) (Angle.degrees -180.0))
+  log "arc1 point" (Result.map (`Arc2d.pointOn` 0.5) arc1)
 
 script :: Script.Program
 script = do
@@ -113,6 +124,7 @@ script = do
   testListCollapse
   Script.printLine "Unicode output test: ✅❌🙂"
   testDirection2dAngleFrom
+  testArc2dFrom
 
 main :: IO ()
 main = Script.run script
