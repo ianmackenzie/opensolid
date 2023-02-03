@@ -43,6 +43,8 @@ module OpenSolid
   , ToleranceIn
   , Tolerance
   , ApproximateEquality (..)
+  , Named (..)
+  , fromLabel
   , Unitless
   , Angle
   , Radians
@@ -275,6 +277,19 @@ infix 4 ~=
 
 instance ApproximateEquality (Qty units) units where
   x ~= y = let (Qty delta) = x - y in Qty (Prelude.abs delta) <= ?tolerance
+
+newtype Named (name :: Symbol) value = Named value deriving (Eq)
+
+instance (KnownSymbol name, Show value) => Show (Named name value) where
+  showsPrec precedence (Named value) =
+    let string = '#' : symbolVal (Proxy :: Proxy name) ++ (' ' : Prelude.showsPrec 10 value [])
+     in Prelude.showParen (precedence >= 10) (Prelude.showString string)
+
+class Nameable (name :: Symbol) value where
+  fromLabel :: value -> Named name value
+  fromLabel = Named
+
+instance Nameable (name :: Symbol) value
 
 instance Units.Coercion (Qty units) Float
 

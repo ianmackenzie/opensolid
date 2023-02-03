@@ -60,6 +60,7 @@ default-extensions:
 - ConstraintKinds
 - PatternSynonyms
 - BlockArguments
+- OverloadedLabels
 
 library:
   source-dirs: src
