@@ -149,19 +149,14 @@ find point curve = do
 
 overlappingSegments :: Tolerance => Curve2d coordinates -> Curve2d coordinates -> List (Range Unitless)
 overlappingSegments curve1 curve2 =
-  case (find (startPoint curve2) curve1, find (endPoint curve2) curve1) of
-    (Ok start2us, Ok end2us) ->
-      let u0 = [0.0 | passesThrough (startPoint curve1) curve2]
-          u1 = [1.0 | passesThrough (endPoint curve1) curve2]
-          uValues = List.sortAndDeduplicate (List.concat [u0, u1, start2us, end2us])
-          candidateDomains = List.map2 Range.from uValues (List.drop 1 uValues)
-       in List.filter (overlappingSegment curve1 curve2) candidateDomains
-    -- curve1 is actually a single point coincident with the start point of curve2,
-    -- so all of curve1 overlaps with curve2
-    (Err IsCoincidentWithPoint, _) -> [Range.from 0.0 1.0]
-    -- curve1 is actually a single point coincident with the end point of curve2,
-    -- so all of curve1 overlaps with curve2
-    (_, Err IsCoincidentWithPoint) -> [Range.from 0.0 1.0]
+  let u0 = [0.0 | passesThrough (startPoint curve1) curve2]
+      u1 = [1.0 | passesThrough (endPoint curve1) curve2]
+      start2us = find (startPoint curve2) curve1 ?= []
+      end2us = find (endPoint curve2) curve1 ?= []
+      candidateUValues = List.concat [u0, u1, start2us, end2us]
+      uValues = List.sortAndDeduplicate candidateUValues
+      candidateDomains = List.map2 Range.from uValues (List.drop 1 uValues)
+   in List.filter (overlappingSegment curve1 curve2) candidateDomains
 
 samplingPoints :: Curve2d coordinates -> Range Unitless -> List (Point2d coordinates)
 samplingPoints curve domain =
