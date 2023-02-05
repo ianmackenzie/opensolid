@@ -7,6 +7,7 @@ module OpenSolid
   ( module Prelude
   , module Control.Category
   , module Data.Void
+  , module Data.Kind
   , Qty (..)
   , Float
   , Sign (..)
@@ -40,7 +41,6 @@ module OpenSolid
   , (??)
   , (?=)
   , (?!)
-  , ToleranceIn
   , Tolerance
   , ApproximateEquality (..)
   , Named (..)
@@ -116,6 +116,8 @@ instance Prelude.Applicative (Result x) where
 instance Prelude.Monad (Result x) where
   Ok value >>= function = function value
   Err err >>= _ = Err err
+
+type role Qty nominal
 
 type Qty :: Type -> Type
 newtype Qty units = Qty {unQty :: Prelude.Double} deriving (Eq, Ord)
@@ -266,12 +268,10 @@ infixl 6 +, -
 
 infixl 7 *, /, //
 
-type ToleranceIn units = ?tolerance :: Qty units
-
-type Tolerance = ToleranceIn Meters
+type Tolerance units = ?tolerance :: Qty units
 
 class ApproximateEquality a units | a -> units where
-  (~=) :: ToleranceIn units => a -> a -> Bool
+  (~=) :: Tolerance units => a -> a -> Bool
 
 infix 4 ~=
 

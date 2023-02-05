@@ -6,8 +6,9 @@ where
 
 import OpenSolid
 
-type role Direction3d phantom
+type role Direction3d nominal
 
+type Direction3d :: Type -> Type
 data Direction3d coordinates
 
 unsafe :: Float -> Float -> Float -> Direction3d coordinates

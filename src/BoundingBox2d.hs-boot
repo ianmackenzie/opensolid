@@ -4,6 +4,9 @@ import Bounds
 import OpenSolid
 import Range (Range)
 
-data BoundingBox2d coordinates = BoundingBox2d (Range Meters) (Range Meters)
+type role BoundingBox2d nominal nominal
 
-instance Bounds (BoundingBox2d coordinates)
+type BoundingBox2d :: Type -> Type -> Type
+data BoundingBox2d units coordinates = BoundingBox2d (Range units) (Range units)
+
+instance Bounds (BoundingBox2d units coordinates)

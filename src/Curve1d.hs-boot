@@ -1,6 +1,6 @@
 module Curve1d (Curve1d) where
 
-import Data.Kind (Type)
+import OpenSolid
 
 type role Curve1d nominal
 

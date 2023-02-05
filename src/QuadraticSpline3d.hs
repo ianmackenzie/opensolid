@@ -9,13 +9,13 @@ import Curve3d (IsCurve3d (..))
 import Point3d (Point3d)
 import Point3d qualified
 
-data QuadraticSpline3d coordinates
+data QuadraticSpline3d units coordinates
   = QuadraticSpline3d
-      (Point3d coordinates)
-      (Point3d coordinates)
-      (Point3d coordinates)
+      (Point3d units coordinates)
+      (Point3d units coordinates)
+      (Point3d units coordinates)
 
-instance IsCurve3d QuadraticSpline3d where
+instance IsCurve3d (QuadraticSpline3d units coordinates) units coordinates where
   startPoint (QuadraticSpline3d p1 _ _) = p1
 
   endPoint (QuadraticSpline3d _ _ p3) = p3
@@ -36,8 +36,8 @@ instance IsCurve3d QuadraticSpline3d where
   boundingBox (QuadraticSpline3d p1 p2 p3) = BoundingBox3d.hull3 p1 p2 p3
 
 fromControlPoints
-  :: Point3d coordinates
-  -> Point3d coordinates
-  -> Point3d coordinates
-  -> QuadraticSpline3d coordinates
+  :: Point3d units coordinates
+  -> Point3d units coordinates
+  -> Point3d units coordinates
+  -> QuadraticSpline3d units coordinates
 fromControlPoints = QuadraticSpline3d

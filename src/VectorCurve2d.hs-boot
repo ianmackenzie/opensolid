@@ -5,7 +5,6 @@ module VectorCurve2d
 where
 
 import {-# SOURCE #-} Curve1d (Curve1d)
-import Data.Kind (Type)
 import OpenSolid
 import Vector2d (Vector2d)
 

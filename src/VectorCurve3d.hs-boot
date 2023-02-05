@@ -5,7 +5,6 @@ module VectorCurve3d
 where
 
 import {-# SOURCE #-} Curve1d (Curve1d)
-import Data.Kind (Type)
 import OpenSolid
 import Vector3d (Vector3d)
 

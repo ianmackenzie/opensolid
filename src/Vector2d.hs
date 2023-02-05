@@ -29,6 +29,9 @@ import Length qualified
 import OpenSolid
 import Qty qualified
 
+type role Vector2d nominal nominal
+
+type Vector2d :: Type -> Type -> Type
 data Vector2d units coordinates = Vector2d (Qty units) (Qty units)
   deriving (Eq)
 

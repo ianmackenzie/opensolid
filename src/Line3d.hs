@@ -5,10 +5,10 @@ import Curve3d (IsCurve3d (..))
 import Point3d (Point3d)
 import Point3d qualified
 
-data Line3d coordinates
-  = Line3d (Point3d coordinates) (Point3d coordinates)
+data Line3d units coordinates
+  = Line3d (Point3d units coordinates) (Point3d units coordinates)
 
-instance IsCurve3d Line3d where
+instance IsCurve3d (Line3d units coordinates) units coordinates where
   startPoint (Line3d p1 _) = p1
 
   endPoint (Line3d _ p2) = p2

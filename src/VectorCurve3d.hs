@@ -15,7 +15,6 @@ where
 
 import Curve1d (Curve1d (Curve1d), IsCurve1d)
 import Curve1d qualified
-import Data.Kind (Type)
 import Generic qualified
 import OpenSolid
 import Range (Range)

@@ -6,11 +6,13 @@ module Axis2d
 where
 
 import Direction2d (Direction2d)
+import OpenSolid
 import {-# SOURCE #-} Point2d (Point2d)
 
-type role Axis2d phantom
+type role Axis2d nominal nominal
 
-data Axis2d coordinates
+type Axis2d :: Type -> Type -> Type
+data Axis2d units coordinates
 
-originPoint :: Axis2d coordinates -> Point2d coordinates
-direction :: Axis2d coordinates -> Direction2d coordinates
+originPoint :: Axis2d units coordinates -> Point2d units coordinates
+direction :: Axis2d units coordinates -> Direction2d coordinates

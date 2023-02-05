@@ -21,6 +21,9 @@ import Angle qualified
 import OpenSolid
 import Vector2d (Vector2d (..))
 
+type role Direction2d nominal
+
+type Direction2d :: Type -> Type
 data Direction2d coordinates = Unsafe Float Float
   deriving (Eq, Show)
 

@@ -16,6 +16,9 @@ where
 import OpenSolid
 import Vector3d (Vector3d (..))
 
+type role Direction3d nominal
+
+type Direction3d :: Type -> Type
 data Direction3d coordinates = Unsafe Float Float Float
   deriving (Eq, Show)
 
