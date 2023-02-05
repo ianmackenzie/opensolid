@@ -25,6 +25,7 @@ import Qty qualified
 import Quadrature qualified
 import Range (Range (..))
 import Range qualified
+import Units
 import VectorBox2d qualified
 import VectorCurve2d (IsVectorCurve2d, VectorCurve2d (VectorCurve2d))
 import VectorCurve2d qualified
@@ -139,15 +140,15 @@ nearby point curve domain
  where
   distance = VectorBox2d.magnitude (point - segmentBounds curve domain)
 
-find :: (Tolerance units, Squared (Qty units) (Qty squaredUnits)) => Point2d units coordinates -> Curve2d units coordinates -> Result IsCoincidentWithPoint (List Float)
+find :: Tolerance units => Point2d units coordinates -> Curve2d units coordinates -> Result IsCoincidentWithPoint (List Float)
 find point curve = do
-  let squaredDistanceFromCurve = VectorCurve2d.squaredMagnitude (point - curve)
+  let squaredDistanceFromCurve = VectorCurve2d.squaredMagnitude (Units.drop (point - curve))
   roots <- Curve1d.roots squaredDistanceFromCurve ?! IsCoincidentWithPoint
   Ok (List.map Root.value roots)
  where
-  ?tolerance = Qty.squared ?tolerance
+  ?tolerance = Qty.squared (Units.drop ?tolerance)
 
-overlappingSegments :: (Tolerance units, Squared (Qty units) (Qty squaredUnits)) => Curve2d units coordinates -> Curve2d units coordinates -> List (Range Unitless)
+overlappingSegments :: Tolerance units => Curve2d units coordinates -> Curve2d units coordinates -> List (Range Unitless)
 overlappingSegments curve1 curve2 =
   let u0 = [0.0 | passesThrough (startPoint curve1) curve2]
       u1 = [1.0 | passesThrough (endPoint curve1) curve2]
