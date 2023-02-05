@@ -122,9 +122,7 @@ type role Qty nominal
 type Qty :: Type -> Type
 newtype Qty units = Qty Prelude.Double deriving (Eq, Ord, Show)
 
-data Units (symbol :: Symbol)
-
-type Unitless = Units ""
+data Unitless
 
 type Float = Qty Unitless
 
@@ -348,31 +346,31 @@ class Product a a b => Squared a b | a -> b, b -> a
 
 instance Squared Float Float
 
-type Radians = Units "rad"
+data Radians
 
 type Angle = Qty Radians
 
-type Meters = Units "m"
+data Meters
 
 type Length = Qty Meters
 
-type Seconds = Units "s"
+data Seconds
 
 type Duration = Qty Seconds
 
-type MetersPerSecond = Units "m/s"
+data MetersPerSecond
 
 type Speed = Qty MetersPerSecond
 
-type MetersPerSecondSquared = Units "m/s^2"
+data MetersPerSecondSquared
 
 type Acceleration = Qty MetersPerSecondSquared
 
-type SquareMeters = Units "m^2"
+data SquareMeters
 
 type Area = Qty SquareMeters
 
-type CubicMeters = Units "m^3"
+data CubicMeters
 
 type Volume = Qty CubicMeters
 
