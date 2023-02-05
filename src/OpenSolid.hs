@@ -64,14 +64,12 @@ module OpenSolid
 where
 
 import Control.Category ((<<<), (>>>))
-import Data.Coerce (coerce)
 import Data.Functor.Identity (Identity (..))
 import Data.Kind (Type)
 import Data.Proxy (Proxy (Proxy))
 import Data.Text qualified
 import Data.Void (Void)
 import GHC.TypeLits (KnownSymbol, Symbol, symbolVal)
-import Generic qualified
 import Prelude
   ( Applicative (..)
   , Bool (..)
@@ -163,9 +161,6 @@ instance Negation (Qty units) where
 instance Negation Sign where
   negate Positive = Negative
   negate Negative = Positive
-
-instance Generic.Zero (Qty units) where
-  zero = coerce 0.0
 
 instance Addition Int Int Int where
   (+) = (Prelude.+)
