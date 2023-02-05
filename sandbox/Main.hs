@@ -27,7 +27,7 @@ import Volume qualified
 log :: Show a => Text -> a -> Script.Program
 log label value = Script.printLine (label ++ ": " ++ Debug.show value)
 
-data MyPoints = MyPoints (Point2d Meters ()) (Point2d Meters ()) deriving (Show)
+data MyPoints = MyPoints (Point2d Void Meters) (Point2d Void Meters) deriving (Show)
 
 listTest :: List (Int, Int)
 listTest = do

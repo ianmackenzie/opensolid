@@ -7,6 +7,6 @@ import Range (Range)
 type role BoundingBox2d nominal nominal
 
 type BoundingBox2d :: Type -> Type -> Type
-data BoundingBox2d units coordinates = BoundingBox2d (Range units) (Range units)
+data BoundingBox2d coordinates units = BoundingBox2d (Range units) (Range units)
 
-instance Bounds (BoundingBox2d units coordinates)
+instance Bounds (BoundingBox2d coordinates units)

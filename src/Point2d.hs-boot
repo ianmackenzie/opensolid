@@ -5,4 +5,4 @@ import OpenSolid
 type role Point2d nominal nominal
 
 type Point2d :: Type -> Type -> Type
-data Point2d units coordinates
+data Point2d coordinates units

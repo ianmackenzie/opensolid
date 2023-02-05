@@ -34,7 +34,7 @@ lengthRange = do
   b <- length
   return (Range.from a b)
 
-vectorBox3d :: Hedgehog.Gen (VectorBox3d Meters coordinates)
+vectorBox3d :: Hedgehog.Gen (VectorBox3d coordinates Meters)
 vectorBox3d = do
   x <- lengthRange
   y <- lengthRange

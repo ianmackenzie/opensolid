@@ -39,25 +39,25 @@ instance Negation (Direction2d coordinates) where
 instance coordinates ~ coordinates' => DotProduct (Direction2d coordinates) (Direction2d coordinates') Float where
   Direction2d x1 y1 <> Direction2d x2 y2 = x1 * x2 + y1 * y2
 
-instance coordinates ~ coordinates' => DotProduct (Vector2d units coordinates) (Direction2d coordinates') (Qty units) where
+instance coordinates ~ coordinates' => DotProduct (Vector2d coordinates units) (Direction2d coordinates') (Qty units) where
   Vector2d vx vy <> Direction2d dx dy = vx * dx + vy * dy
 
-instance coordinates ~ coordinates' => DotProduct (Direction2d coordinates) (Vector2d units coordinates') (Qty units) where
+instance coordinates ~ coordinates' => DotProduct (Direction2d coordinates) (Vector2d coordinates' units) (Qty units) where
   Direction2d dx dy <> Vector2d vx vy = dx * vx + dy * vy
 
 instance coordinates ~ coordinates' => CrossProduct (Direction2d coordinates) (Direction2d coordinates') Float where
   Direction2d x1 y1 >< Direction2d x2 y2 = x1 * y2 - y1 * x2
 
-instance coordinates ~ coordinates' => CrossProduct (Vector2d units coordinates) (Direction2d coordinates') (Qty units) where
+instance coordinates ~ coordinates' => CrossProduct (Vector2d coordinates units) (Direction2d coordinates') (Qty units) where
   Vector2d vx vy >< Direction2d dx dy = vx * dy - vy * dx
 
-instance coordinates ~ coordinates' => CrossProduct (Direction2d coordinates) (Vector2d units coordinates') (Qty units) where
+instance coordinates ~ coordinates' => CrossProduct (Direction2d coordinates) (Vector2d coordinates' units) (Qty units) where
   Direction2d dx dy >< Vector2d vx vy = dx * vy - dy * vx
 
-instance Multiplication (Qty units) (Direction2d coordinates) (Vector2d units coordinates) where
+instance Multiplication (Qty units) (Direction2d coordinates) (Vector2d coordinates units) where
   scale * Direction2d dx dy = Vector2d (scale * dx) (scale * dy)
 
-instance Multiplication (Direction2d coordinates) (Qty units) (Vector2d units coordinates) where
+instance Multiplication (Direction2d coordinates) (Qty units) (Vector2d coordinates units) where
   Direction2d dx dy * scale = Vector2d (dx * scale) (dy * scale)
 
 unsafe :: Float -> Float -> Direction2d coordinates

@@ -30,45 +30,45 @@ import VectorBox2d qualified
 import VectorCurve2d (IsVectorCurve2d, VectorCurve2d (VectorCurve2d))
 import VectorCurve2d qualified
 
-class IsCurve2d curve units coordinates | curve -> units, curve -> coordinates where
-  startPointImpl :: curve -> Point2d units coordinates
-  endPointImpl :: curve -> Point2d units coordinates
-  pointOnImpl :: curve -> Float -> Point2d units coordinates
-  segmentBoundsImpl :: curve -> Range Unitless -> BoundingBox2d units coordinates
-  derivativeImpl :: curve -> VectorCurve2d units coordinates
+class IsCurve2d curve coordinates units | curve -> units, curve -> coordinates where
+  startPointImpl :: curve -> Point2d coordinates units
+  endPointImpl :: curve -> Point2d coordinates units
+  pointOnImpl :: curve -> Float -> Point2d coordinates units
+  segmentBoundsImpl :: curve -> Range Unitless -> BoundingBox2d coordinates units
+  derivativeImpl :: curve -> VectorCurve2d coordinates units
   reverseImpl :: curve -> curve
   bisectImpl :: curve -> (curve, curve)
-  boundingBoxImpl :: curve -> BoundingBox2d units coordinates
+  boundingBoxImpl :: curve -> BoundingBox2d coordinates units
 
-data Curve2d units coordinates = forall curve. IsCurve2d curve units coordinates => Curve2d curve
+data Curve2d coordinates units = forall curve. IsCurve2d curve coordinates units => Curve2d curve
 
-startPoint :: Curve2d units coordinates -> Point2d units coordinates
+startPoint :: Curve2d coordinates units -> Point2d coordinates units
 startPoint (Curve2d curve) = startPointImpl curve
 
-endPoint :: Curve2d units coordinates -> Point2d units coordinates
+endPoint :: Curve2d coordinates units -> Point2d coordinates units
 endPoint (Curve2d curve) = endPointImpl curve
 
-pointOn :: Curve2d units coordinates -> Float -> Point2d units coordinates
+pointOn :: Curve2d coordinates units -> Float -> Point2d coordinates units
 pointOn (Curve2d curve) t = pointOnImpl curve t
 
-segmentBounds :: Curve2d units coordinates -> Range Unitless -> BoundingBox2d units coordinates
+segmentBounds :: Curve2d coordinates units -> Range Unitless -> BoundingBox2d coordinates units
 segmentBounds (Curve2d curve) t = segmentBoundsImpl curve t
 
-derivative :: Curve2d units coordinates -> VectorCurve2d units coordinates
+derivative :: Curve2d coordinates units -> VectorCurve2d coordinates units
 derivative (Curve2d curve) = derivativeImpl curve
 
-reverse :: Curve2d units coordinates -> Curve2d units coordinates
+reverse :: Curve2d coordinates units -> Curve2d coordinates units
 reverse (Curve2d curve) = Curve2d (reverseImpl curve)
 
-bisect :: Curve2d units coordinates -> (Curve2d units coordinates, Curve2d units coordinates)
+bisect :: Curve2d coordinates units -> (Curve2d coordinates units, Curve2d coordinates units)
 bisect (Curve2d curve) =
   let (curve1, curve2) = bisectImpl curve
    in (Curve2d curve1, Curve2d curve2)
 
-boundingBox :: Curve2d units coordinates -> BoundingBox2d units coordinates
+boundingBox :: Curve2d coordinates units -> BoundingBox2d coordinates units
 boundingBox (Curve2d curve) = boundingBoxImpl curve
 
-instance IsCurve2d (Curve2d units coordinates) units coordinates where
+instance IsCurve2d (Curve2d coordinates units) coordinates units where
   startPointImpl = startPoint
   endPointImpl = endPoint
   pointOnImpl = pointOn
@@ -78,7 +78,7 @@ instance IsCurve2d (Curve2d units coordinates) units coordinates where
   bisectImpl = bisect
   boundingBoxImpl = boundingBox
 
-instance IsCurve2d (Point2d units coordinates) units coordinates where
+instance IsCurve2d (Point2d coordinates units) coordinates units where
   startPointImpl point = point
   endPointImpl point = point
   pointOnImpl point _ = point
@@ -88,7 +88,7 @@ instance IsCurve2d (Point2d units coordinates) units coordinates where
   bisectImpl point = (point, point)
   boundingBoxImpl point = BoundingBox2d.constant point
 
-instance (IsCurve2d x units coordinates, IsCurve2d a units' coordinates', units ~ units', coordinates ~ coordinates') => IsCurve2d (Result x a) units coordinates where
+instance (IsCurve2d x coordinates units, IsCurve2d a coordinates' units', units ~ units', coordinates ~ coordinates') => IsCurve2d (Result x a) coordinates units where
   startPointImpl (Err curve) = startPointImpl curve
   startPointImpl (Ok curve) = startPointImpl curve
   endPointImpl (Err curve) = endPointImpl curve
@@ -106,33 +106,33 @@ instance (IsCurve2d x units coordinates, IsCurve2d a units' coordinates', units 
   boundingBoxImpl (Err curve) = boundingBoxImpl curve
   boundingBoxImpl (Ok curve) = boundingBoxImpl curve
 
-data PointCurveDifference units coordinates = PointCurveDifference (Point2d units coordinates) (Curve2d units coordinates)
+data PointCurveDifference coordinates units = PointCurveDifference (Point2d coordinates units) (Curve2d coordinates units)
 
-instance IsVectorCurve2d (PointCurveDifference units coordinates) units coordinates where
+instance IsVectorCurve2d (PointCurveDifference coordinates units) coordinates units where
   pointOn (PointCurveDifference point curve) t = point - pointOn curve t
   segmentBounds (PointCurveDifference point curve) t = point - segmentBounds curve t
   derivative (PointCurveDifference _ curve) = -(derivative curve)
 
-instance (units ~ units', coordinates ~ coordinates') => Subtraction (Point2d units coordinates) (Curve2d units' coordinates') (VectorCurve2d units coordinates) where
+instance (units ~ units', coordinates ~ coordinates') => Subtraction (Point2d coordinates units) (Curve2d coordinates' units') (VectorCurve2d coordinates units) where
   point - curve = VectorCurve2d (PointCurveDifference point curve)
 
-data CurvePointDifference units coordinates = CurvePointDifference (Curve2d units coordinates) (Point2d units coordinates)
+data CurvePointDifference coordinates units = CurvePointDifference (Curve2d coordinates units) (Point2d coordinates units)
 
-instance IsVectorCurve2d (CurvePointDifference units coordinates) units coordinates where
+instance IsVectorCurve2d (CurvePointDifference coordinates units) coordinates units where
   pointOn (CurvePointDifference curve point) t = pointOn curve t - point
   segmentBounds (CurvePointDifference curve point) t = segmentBounds curve t - point
   derivative (CurvePointDifference curve _) = derivative curve
 
-instance (units ~ units', coordinates ~ coordinates') => Subtraction (Curve2d units coordinates) (Point2d units' coordinates') (VectorCurve2d units coordinates) where
+instance (units ~ units', coordinates ~ coordinates') => Subtraction (Curve2d coordinates units) (Point2d coordinates' units') (VectorCurve2d coordinates units) where
   curve - point = VectorCurve2d (CurvePointDifference curve point)
 
 data IsCoincidentWithPoint = IsCoincidentWithPoint deriving (Eq, Show)
 
-passesThrough :: Tolerance units => Point2d units coordinates -> Curve2d units coordinates -> Bool
+passesThrough :: Tolerance units => Point2d coordinates units -> Curve2d coordinates units -> Bool
 passesThrough point curve =
   Range.any (nearby point curve) (Range.from 0.0 1.0) ?= False
 
-nearby :: Tolerance units => Point2d units coordinates -> Curve2d units coordinates -> Range Unitless -> Result Indeterminate Bool
+nearby :: Tolerance units => Point2d coordinates units -> Curve2d coordinates units -> Range Unitless -> Result Indeterminate Bool
 nearby point curve domain
   | Range.minValue distance > ?tolerance = Ok False
   | Range.maxValue distance <= ?tolerance = Ok True
@@ -140,7 +140,7 @@ nearby point curve domain
  where
   distance = VectorBox2d.magnitude (point - segmentBounds curve domain)
 
-find :: Tolerance units => Point2d units coordinates -> Curve2d units coordinates -> Result IsCoincidentWithPoint (List Float)
+find :: Tolerance units => Point2d coordinates units -> Curve2d coordinates units -> Result IsCoincidentWithPoint (List Float)
 find point curve = do
   let squaredDistanceFromCurve = VectorCurve2d.squaredMagnitude (Units.drop (point - curve))
   roots <- Curve1d.roots squaredDistanceFromCurve ?! IsCoincidentWithPoint
@@ -148,7 +148,7 @@ find point curve = do
  where
   ?tolerance = Qty.squared (Units.drop ?tolerance)
 
-overlappingSegments :: Tolerance units => Curve2d units coordinates -> Curve2d units coordinates -> List (Range Unitless)
+overlappingSegments :: Tolerance units => Curve2d coordinates units -> Curve2d coordinates units -> List (Range Unitless)
 overlappingSegments curve1 curve2 =
   let u0 = [0.0 | passesThrough (startPoint curve1) curve2]
       u1 = [1.0 | passesThrough (endPoint curve1) curve2]
@@ -159,10 +159,10 @@ overlappingSegments curve1 curve2 =
       candidateDomains = List.map2 Range.from uValues (List.drop 1 uValues)
    in List.filter (overlappingSegment curve1 curve2) candidateDomains
 
-samplingPoints :: Curve2d units coordinates -> Range Unitless -> List (Point2d units coordinates)
+samplingPoints :: Curve2d coordinates units -> Range Unitless -> List (Point2d coordinates units)
 samplingPoints curve domain =
   [pointOn curve (Range.interpolate domain t) | t <- Quadrature.points]
 
-overlappingSegment :: Tolerance units => Curve2d units coordinates -> Curve2d units coordinates -> Range Unitless -> Bool
+overlappingSegment :: Tolerance units => Curve2d coordinates units -> Curve2d coordinates units -> Range Unitless -> Bool
 overlappingSegment curve1 curve2 domain1 =
   List.all [passesThrough point1 curve2 | point1 <- samplingPoints curve1 domain1]
