@@ -70,13 +70,13 @@ instance Division (Qty units1) (Qty units2) (Qty units3) => Division (VectorBox2
 instance Division (Qty units1) (Qty units2) (Qty units3) => Division (VectorBox2d units1 coordinates) (Range units2) (VectorBox2d units3 coordinates) where
   VectorBox2d x y / range = VectorBox2d (x / range) (y / range)
 
-instance Multiplication (Qty units1) (Qty units2) (Qty units3) => DotProduct (Vector2d units1) (VectorBox2d units2) (Range units3) where
+instance (Multiplication (Qty units1) (Qty units2) (Qty units3), coordinates ~ coordinates') => DotProduct (Vector2d units1 coordinates) (VectorBox2d units2 coordinates') (Range units3) where
   Vector2d x1 y1 <> VectorBox2d x2 y2 = x1 * x2 + y1 * y2
 
-instance Multiplication (Qty units1) (Qty units2) (Qty units3) => DotProduct (VectorBox2d units1) (Vector2d units2) (Range units3) where
+instance (Multiplication (Qty units1) (Qty units2) (Qty units3), coordinates ~ coordinates') => DotProduct (VectorBox2d units1 coordinates) (Vector2d units2 coordinates') (Range units3) where
   VectorBox2d x1 y1 <> Vector2d x2 y2 = x1 * x2 + y1 * y2
 
-instance Multiplication (Qty units1) (Qty units2) (Qty units3) => DotProduct (VectorBox2d units1) (VectorBox2d units2) (Range units3) where
+instance (Multiplication (Qty units1) (Qty units2) (Qty units3), coordinates ~ coordinates') => DotProduct (VectorBox2d units1 coordinates) (VectorBox2d units2 coordinates') (Range units3) where
   VectorBox2d x1 y1 <> VectorBox2d x2 y2 = x1 * x2 + y1 * y2
 
 constant :: Vector2d units coordinates -> VectorBox2d units coordinates

@@ -36,13 +36,13 @@ pattern Direction2d x y <- Unsafe x y
 instance Negation (Direction2d coordinates) where
   negate (Direction2d dx dy) = unsafe (negate dx) (negate dy)
 
-instance DotProduct Direction2d Direction2d Float where
+instance coordinates ~ coordinates' => DotProduct (Direction2d coordinates) (Direction2d coordinates') Float where
   Direction2d x1 y1 <> Direction2d x2 y2 = x1 * x2 + y1 * y2
 
-instance DotProduct (Vector2d units) Direction2d (Qty units) where
+instance coordinates ~ coordinates' => DotProduct (Vector2d units coordinates) (Direction2d coordinates') (Qty units) where
   Vector2d vx vy <> Direction2d dx dy = vx * dx + vy * dy
 
-instance DotProduct Direction2d (Vector2d units) (Qty units) where
+instance coordinates ~ coordinates' => DotProduct (Direction2d coordinates) (Vector2d units coordinates') (Qty units) where
   Direction2d dx dy <> Vector2d vx vy = dx * vx + dy * vy
 
 instance coordinates ~ coordinates' => CrossProduct (Direction2d coordinates) (Direction2d coordinates') Float where

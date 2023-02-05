@@ -195,15 +195,15 @@ instance Multiplication (Qty units1) (Qty units2) (Qty units) => IsCurve1d (DotP
   derivative (DotProductOf curve1 curve2) =
     derivative curve1 <> curve2 + curve1 <> derivative curve2
 
-instance Multiplication (Qty units1) (Qty units2) (Qty units3) => DotProduct (VectorCurve3d units1) (VectorCurve3d units2) (Curve1d units3) where
+instance (Multiplication (Qty units1) (Qty units2) (Qty units3), coordinates ~ coordinates') => DotProduct (VectorCurve3d units1 coordinates) (VectorCurve3d units2 coordinates') (Curve1d units3) where
   curve1 <> curve2 =
     Curve1d (DotProductOf curve1 curve2)
 
-instance Multiplication (Qty units1) (Qty units2) (Qty units3) => DotProduct (VectorCurve3d units1) (Vector3d units2) (Curve1d units3) where
+instance (Multiplication (Qty units1) (Qty units2) (Qty units3), coordinates ~ coordinates') => DotProduct (VectorCurve3d units1 coordinates) (Vector3d units2 coordinates') (Curve1d units3) where
   curve <> vector =
     Curve1d (DotProductOf curve (constant vector))
 
-instance Multiplication (Qty units1) (Qty units2) (Qty units3) => DotProduct (Vector3d units1) (VectorCurve3d units2) (Curve1d units3) where
+instance (Multiplication (Qty units1) (Qty units2) (Qty units3), coordinates ~ coordinates') => DotProduct (Vector3d units1 coordinates) (VectorCurve3d units2 coordinates') (Curve1d units3) where
   vector <> curve =
     Curve1d (DotProductOf (constant vector) curve)
 

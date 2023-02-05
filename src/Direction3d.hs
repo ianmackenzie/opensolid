@@ -31,13 +31,13 @@ pattern Direction3d x y z <- Unsafe x y z
 instance Negation (Direction3d coordinates) where
   negate (Direction3d dx dy dz) = unsafe (negate dx) (negate dy) (negate dz)
 
-instance DotProduct Direction3d Direction3d Float where
+instance coordinates ~ coordinates' => DotProduct (Direction3d coordinates) (Direction3d coordinates') Float where
   Direction3d x1 y1 z1 <> Direction3d x2 y2 z2 = x1 * x2 + y1 * y2 + z1 * z2
 
-instance DotProduct (Vector3d units) Direction3d (Qty units) where
+instance coordinates ~ coordinates' => DotProduct (Vector3d units coordinates) (Direction3d coordinates') (Qty units) where
   Vector3d vx vy vz <> Direction3d dx dy dz = vx * dx + vy * dy + vz * dz
 
-instance DotProduct Direction3d (Vector3d units) (Qty units) where
+instance coordinates ~ coordinates' => DotProduct (Direction3d coordinates) (Vector3d units coordinates') (Qty units) where
   Direction3d dx dy dz <> Vector3d vx vy vz = dx * vx + dy * vy + dz * vz
 
 instance Multiplication (Qty units) (Direction3d coordinates) (Vector3d units coordinates) where

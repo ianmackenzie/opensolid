@@ -145,14 +145,14 @@ instance Multiplication (Qty units1) (Qty units2) (Qty units3) => IsCurve1d (Dot
   segmentBounds (DotProductOf c1 c2) t = segmentBounds c1 t <> segmentBounds c2 t
   derivative (DotProductOf c1 c2) = derivative c1 <> c2 + c1 <> derivative c2
 
-instance Multiplication (Qty units1) (Qty units2) (Qty units3) => DotProduct (VectorCurve2d units1) (VectorCurve2d units2) (Curve1d units3) where
+instance (Multiplication (Qty units1) (Qty units2) (Qty units3), coordinates ~ coordinates') => DotProduct (VectorCurve2d units1 coordinates) (VectorCurve2d units2 coordinates') (Curve1d units3) where
   -- TODO add special cases
   curve1 <> curve2 = Curve1d (DotProductOf curve1 curve2)
 
-instance Multiplication (Qty units1) (Qty units2) (Qty units3) => DotProduct (VectorCurve2d units1) (Vector2d units2) (Curve1d units3) where
+instance (Multiplication (Qty units1) (Qty units2) (Qty units3), coordinates ~ coordinates') => DotProduct (VectorCurve2d units1 coordinates) (Vector2d units2 coordinates') (Curve1d units3) where
   curve <> vector = curve <> constant vector
 
-instance Multiplication (Qty units1) (Qty units2) (Qty units3) => DotProduct (Vector2d units1) (VectorCurve2d units2) (Curve1d units3) where
+instance (Multiplication (Qty units1) (Qty units2) (Qty units3), coordinates ~ coordinates') => DotProduct (Vector2d units1 coordinates) (VectorCurve2d units2 coordinates') (Curve1d units3) where
   vector <> curve = constant vector <> curve
 
 zero :: VectorCurve2d units coordinates

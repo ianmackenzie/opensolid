@@ -66,13 +66,13 @@ instance Division (Qty units1) (Qty units2) (Qty units3) => Division (VectorBox3
 instance Division (Qty units1) (Qty units2) (Qty units3) => Division (VectorBox3d units1 coordinates) (Range units2) (VectorBox3d units3 coordinates) where
   VectorBox3d x y z / range = VectorBox3d (x / range) (y / range) (z / range)
 
-instance Multiplication (Qty units1) (Qty units2) (Qty units3) => DotProduct (Vector3d units1) (VectorBox3d units2) (Range units3) where
+instance (Multiplication (Qty units1) (Qty units2) (Qty units3), coordinates ~ coordinates') => DotProduct (Vector3d units1 coordinates) (VectorBox3d units2 coordinates') (Range units3) where
   Vector3d x1 y1 z1 <> VectorBox3d x2 y2 z2 = x1 * x2 + y1 * y2 + z1 * z2
 
-instance Multiplication (Qty units1) (Qty units2) (Qty units3) => DotProduct (VectorBox3d units1) (Vector3d units2) (Range units3) where
+instance (Multiplication (Qty units1) (Qty units2) (Qty units3), coordinates ~ coordinates') => DotProduct (VectorBox3d units1 coordinates) (Vector3d units2 coordinates') (Range units3) where
   VectorBox3d x1 y1 z1 <> Vector3d x2 y2 z2 = x1 * x2 + y1 * y2 + z1 * z2
 
-instance Multiplication (Qty units1) (Qty units2) (Qty units3) => DotProduct (VectorBox3d units1) (VectorBox3d units2) (Range units3) where
+instance (Multiplication (Qty units1) (Qty units2) (Qty units3), coordinates ~ coordinates') => DotProduct (VectorBox3d units1 coordinates) (VectorBox3d units2 coordinates') (Range units3) where
   VectorBox3d x1 y1 z1 <> VectorBox3d x2 y2 z2 = x1 * x2 + y1 * y2 + z1 * z2
 
 instance (Multiplication (Qty units1) (Qty units2) (Qty units3), coordinates ~ coordinates') => CrossProduct (Vector3d units1 coordinates) (VectorBox3d units2 coordinates') (VectorBox3d units3 coordinates) where

@@ -56,7 +56,7 @@ instance Multiplication (Qty units1) (Qty units2) (Qty units3) => Multiplication
 instance Division (Qty units1) (Qty units2) (Qty units3) => Division (Vector2d units1 coordinates) (Qty units2) (Vector2d units3 coordinates) where
   Vector2d vx vy / scale = Vector2d (vx / scale) (vy / scale)
 
-instance Multiplication (Qty units1) (Qty units2) (Qty units3) => DotProduct (Vector2d units1) (Vector2d units2) (Qty units3) where
+instance (Multiplication (Qty units1) (Qty units2) (Qty units3), coordinates ~ coordinates') => DotProduct (Vector2d units1 coordinates) (Vector2d units2 coordinates') (Qty units3) where
   Vector2d x1 y1 <> Vector2d x2 y2 = x1 * x2 + y1 * y2
 
 instance (Multiplication (Qty units1) (Qty units2) (Qty units3), coordinates ~ coordinates') => CrossProduct (Vector2d units1 coordinates) (Vector2d units2 coordinates') (Qty units3) where
