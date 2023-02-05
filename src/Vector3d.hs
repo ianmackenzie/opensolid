@@ -29,9 +29,7 @@ import OpenSolid
 import Qty qualified
 
 data Vector3d units coordinates = Vector3d (Qty units) (Qty units) (Qty units)
-  deriving (Eq)
-
-deriving instance Show (Qty units) => Show (Vector3d units coordinates)
+  deriving (Eq, Show)
 
 instance Generic.Zero (Vector3d units coordinates) where
   zero = zero

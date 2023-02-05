@@ -30,9 +30,7 @@ type role Point2d nominal nominal
 
 type Point2d :: Type -> Type -> Type
 data Point2d units coordinates = Point2d (Qty units) (Qty units)
-  deriving (Eq)
-
-deriving instance Show (Qty units) => Show (Point2d units coordinates)
+  deriving (Eq, Show)
 
 instance (units ~ units', coordinates ~ coordinates') => Addition (Point2d units coordinates) (Vector2d units' coordinates') (Point2d units coordinates) where
   Point2d px py + Vector2d vx vy = Point2d (px + vx) (py + vy)

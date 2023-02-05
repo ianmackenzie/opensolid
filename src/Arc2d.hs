@@ -42,9 +42,7 @@ data Arc2d units coordinates = Arc2d
   , startAngle :: Angle
   , sweptAngle :: Angle
   }
-  deriving (Eq)
-
-deriving instance Show (Qty units) => Show (Arc2d units coordinate)
+  deriving (Eq, Show)
 
 pointOn :: Arc2d units coordinates -> Float -> Point2d units coordinates
 pointOn arc t =

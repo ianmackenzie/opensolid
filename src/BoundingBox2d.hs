@@ -20,9 +20,7 @@ import VectorBox2d (VectorBox2d (VectorBox2d))
 type role BoundingBox2d nominal nominal
 
 type BoundingBox2d :: Type -> Type -> Type
-data BoundingBox2d units coordinates = BoundingBox2d (Range units) (Range units)
-
-deriving instance Show (Qty units) => Show (BoundingBox2d units coordinates)
+data BoundingBox2d units coordinates = BoundingBox2d (Range units) (Range units) deriving (Show)
 
 instance Bounds (BoundingBox2d units coordinates) where
   aggregate (BoundingBox2d x1 y1) (BoundingBox2d x2 y2) =

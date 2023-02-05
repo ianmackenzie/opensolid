@@ -32,9 +32,7 @@ import VectorCurve2d qualified
 
 data Line2d units coordinates
   = Line2d (Point2d units coordinates) (Point2d units coordinates)
-  deriving (Eq)
-
-deriving instance Show (Qty units) => Show (Line2d units coordinates)
+  deriving (Eq, Show)
 
 startPoint :: Line2d units coordinates -> Point2d units coordinates
 startPoint (Line2d p1 _) = p1

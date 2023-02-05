@@ -25,9 +25,7 @@ import Vector3d (Vector3d (Vector3d))
 import Vector3d qualified
 
 data Point3d units coordinates = Point3d (Qty units) (Qty units) (Qty units)
-  deriving (Eq)
-
-deriving instance Show (Qty units) => Show (Point3d units coordinates)
+  deriving (Eq, Show)
 
 instance (units ~ units', coordinates ~ coordinates') => Addition (Point3d units coordinates) (Vector3d units' coordinates') (Point3d units coordinates) where
   Point3d px py pz + Vector3d vx vy vz = Point3d (px + vx) (py + vy) (pz + vz)

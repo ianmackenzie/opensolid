@@ -120,7 +120,7 @@ instance Prelude.Monad (Result x) where
 type role Qty nominal
 
 type Qty :: Type -> Type
-newtype Qty units = Qty {unQty :: Prelude.Double} deriving (Eq, Ord)
+newtype Qty units = Qty Prelude.Double deriving (Eq, Ord, Show)
 
 data Units (symbol :: Symbol)
 
@@ -347,14 +347,6 @@ instance Division Float (Qty units1) (Qty units2) => Division Int (Qty units1) (
 class Product a a b => Squared a b | a -> b, b -> a
 
 instance Squared Float Float
-
-instance {-# OVERLAPS #-} Show Float where
-  show (Qty x) = Prelude.show x
-
-instance KnownSymbol symbol => Show (Qty (Units symbol)) where
-  showsPrec precedence (Qty x) =
-    let string = Prelude.shows x (' ' : symbolVal (Proxy :: Proxy symbol))
-     in Prelude.showParen (precedence >= 10) (Prelude.showString string)
 
 type Radians = Units "rad"
 

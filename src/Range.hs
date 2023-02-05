@@ -37,15 +37,13 @@ import Qty qualified
 import Units qualified
 
 data Range units = Unsafe (Qty units) (Qty units)
-  deriving (Eq)
+  deriving (Eq, Show)
 
 {-# COMPLETE Range #-}
 
 {-# INLINE Range #-}
 pattern Range :: Qty units -> Qty units -> Range units
 pattern Range low high <- Unsafe low high
-
-deriving instance Show (Qty units) => Show (Range units)
 
 instance Units.Coercion (Range units) (Range Unitless)
 

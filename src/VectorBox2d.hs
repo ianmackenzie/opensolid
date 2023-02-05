@@ -24,9 +24,7 @@ import Vector2d qualified
 type role VectorBox2d nominal nominal
 
 type VectorBox2d :: Type -> Type -> Type
-data VectorBox2d units coordinates = VectorBox2d (Range units) (Range units)
-
-deriving instance Show (Qty units) => Show (VectorBox2d units coordinates)
+data VectorBox2d units coordinates = VectorBox2d (Range units) (Range units) deriving (Show)
 
 instance Units.Coercion (VectorBox2d units coordinates) (VectorBox2d Unitless coordinates)
 

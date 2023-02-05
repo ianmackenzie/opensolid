@@ -33,9 +33,7 @@ type role Vector2d nominal nominal
 
 type Vector2d :: Type -> Type -> Type
 data Vector2d units coordinates = Vector2d (Qty units) (Qty units)
-  deriving (Eq)
-
-deriving instance Show (Qty units) => Show (Vector2d units coordinates)
+  deriving (Eq, Show)
 
 instance Generic.Zero (Vector2d units coordinates) where
   zero = zero
