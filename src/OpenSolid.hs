@@ -72,7 +72,6 @@ import Data.Text qualified
 import Data.Void (Void)
 import GHC.TypeLits (KnownSymbol, Symbol, symbolVal)
 import Generic qualified
-import Units qualified
 import Prelude
   ( Applicative (..)
   , Bool (..)
@@ -288,8 +287,6 @@ class Nameable (name :: Symbol) value where
   fromLabel = Named
 
 instance Nameable (name :: Symbol) value
-
-instance Units.Coercion (Qty units) Float
 
 instance Multiplication Int Int Int where
   (*) = (Prelude.*)

@@ -42,7 +42,7 @@ data VectorCurve2d coordinates units where
   Product2d1d :: forall units1 units2 coordinates units3. Multiplication (Qty units1) (Qty units2) (Qty units3) => VectorCurve2d coordinates units1 -> Curve1d units2 -> VectorCurve2d coordinates units3
   Quotient :: forall units1 units2 coordinates units3. Division (Qty units1) (Qty units2) (Qty units3) => VectorCurve2d coordinates units1 -> Curve1d units2 -> VectorCurve2d coordinates units3
 
-instance Units.Coercion (VectorCurve2d coordinates units) (VectorCurve2d coordinates Unitless)
+instance Units.Coercion (VectorCurve2d coordinates)
 
 instance IsVectorCurve2d (VectorCurve2d coordinates units) coordinates units where
   pointOn curve t =

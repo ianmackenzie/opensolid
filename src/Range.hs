@@ -45,7 +45,7 @@ data Range units = Unsafe (Qty units) (Qty units)
 pattern Range :: Qty units -> Qty units -> Range units
 pattern Range low high <- Unsafe low high
 
-instance Units.Coercion (Range units) (Range Unitless)
+instance Units.Coercion Range
 
 instance Negation (Range units) where
   negate (Range low high) = unsafe (negate high) (negate low)

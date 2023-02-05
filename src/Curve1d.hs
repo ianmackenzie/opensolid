@@ -56,7 +56,7 @@ data Curve1d units where
   Sin :: Curve1d Radians -> Curve1d Unitless
   Cos :: Curve1d Radians -> Curve1d Unitless
 
-instance Units.Coercion (Curve1d units) (Curve1d Unitless)
+instance Units.Coercion Curve1d
 
 instance IsCurve1d (Curve1d units) units where
   pointOn curve t =

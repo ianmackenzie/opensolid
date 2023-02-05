@@ -26,7 +26,7 @@ type role VectorBox2d nominal nominal
 type VectorBox2d :: Type -> Type -> Type
 data VectorBox2d coordinates units = VectorBox2d (Range units) (Range units) deriving (Show)
 
-instance Units.Coercion (VectorBox2d coordinates units) (VectorBox2d coordinates Unitless)
+instance Units.Coercion (VectorBox2d coordinates)
 
 instance Generic.Zero (VectorBox2d coordinates units) where
   zero = constant Vector2d.zero

@@ -22,7 +22,7 @@ import Vector3d qualified
 
 data VectorBox3d coordinates units = VectorBox3d (Range units) (Range units) (Range units) deriving (Show)
 
-instance Units.Coercion (VectorBox3d coordinates units) (VectorBox3d coordinates Unitless)
+instance Units.Coercion (VectorBox3d coordinates)
 
 instance Generic.Zero (VectorBox3d coordinates units) where
   zero = constant Vector3d.zero
