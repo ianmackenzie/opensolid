@@ -37,7 +37,6 @@ module OpenSolid
   , notImplemented
   , subtract
   , (|>)
-  , (<|)
   , (??)
   , (?=)
   , (?!)
@@ -87,6 +86,7 @@ import Prelude
   , Show
   , not
   , otherwise
+  , ($)
   , (&&)
   , (||)
   )
@@ -231,10 +231,6 @@ subtract b a = a - b
 (|>) :: a -> (a -> b) -> b
 (|>) value function = function value
 
-{-# INLINE (<|) #-}
-(<|) :: (a -> b) -> a -> b
-(<|) = identity
-
 class Nullable nullable where
   (??) :: forall applicative a. Applicative applicative => nullable a -> applicative a -> applicative a
 
@@ -251,8 +247,6 @@ instance Nullable (Result x) where
 
 (?!) :: Nullable nullable => nullable a -> x -> Result x a
 (?!) nullable ~err = nullable ?? Err err
-
-infixr 0 <|
 
 infixl 0 |>
 
