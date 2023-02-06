@@ -12,6 +12,11 @@ module Angle
   , degrees
   , inDegrees
   , degree
+  , fullTurn
+  , halfTurn
+  , quarterTurn
+  , turns
+  , inTurns
   )
 where
 
@@ -57,3 +62,18 @@ degrees = (* degree)
 
 inDegrees :: Angle -> Float
 inDegrees = (/ degree)
+
+fullTurn :: Angle
+fullTurn = radians (2.0 * Float.pi)
+
+halfTurn :: Angle
+halfTurn = turns 0.5
+
+quarterTurn :: Angle
+quarterTurn = turns 0.25
+
+turns :: Float -> Angle
+turns = (* fullTurn)
+
+inTurns :: Angle -> Float
+inTurns = (/ fullTurn)
