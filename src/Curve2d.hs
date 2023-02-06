@@ -18,6 +18,7 @@ import BoundingBox2d (BoundingBox2d)
 import BoundingBox2d qualified
 import Curve1d qualified
 import Curve1d.Root qualified as Root
+import Generic (Units)
 import List qualified
 import OpenSolid
 import Point2d (Point2d)
@@ -25,7 +26,7 @@ import Qty qualified
 import Quadrature qualified
 import Range (Range (..))
 import Range qualified
-import Units
+import Units qualified
 import VectorBox2d qualified
 import VectorCurve2d (IsVectorCurve2d, VectorCurve2d (VectorCurve2d))
 import VectorCurve2d qualified
@@ -41,6 +42,8 @@ class IsCurve2d curve coordinates units | curve -> units, curve -> coordinates w
   boundingBoxImpl :: curve -> BoundingBox2d coordinates units
 
 data Curve2d coordinates units = forall curve. IsCurve2d curve coordinates units => Curve2d curve
+
+instance Units.Coercion (Curve2d coordinates)
 
 startPoint :: Curve2d coordinates units -> Point2d coordinates units
 startPoint (Curve2d curve) = startPointImpl curve
@@ -141,12 +144,15 @@ nearby point curve domain
   distance = VectorBox2d.magnitude (point - segmentBounds curve domain)
 
 find :: Tolerance units => Point2d coordinates units -> Curve2d coordinates units -> Result IsCoincidentWithPoint (List Float)
-find point curve = do
-  let squaredDistanceFromCurve = VectorCurve2d.squaredMagnitude (Units.drop (point - curve))
+find = Units.callT2 find'
+
+find' :: Tolerance Units => Point2d coordinates Units -> Curve2d coordinates Units -> Result IsCoincidentWithPoint (List Float)
+find' point curve = do
+  let squaredDistanceFromCurve = VectorCurve2d.squaredMagnitude (point - curve)
   roots <- Curve1d.roots squaredDistanceFromCurve ?! IsCoincidentWithPoint
   Ok (List.map Root.value roots)
  where
-  ?tolerance = Qty.squared (Units.drop ?tolerance)
+  ?tolerance = Qty.squared ?tolerance
 
 overlappingSegments :: Tolerance units => Curve2d coordinates units -> Curve2d coordinates units -> List (Range Unitless)
 overlappingSegments curve1 curve2 =

@@ -45,6 +45,8 @@ module OpenSolid
   , ApproximateEquality (..)
   , Named (..)
   , fromLabel
+  , IsProduct
+  , IsQuotient
   , Unitless
   , Angle
   , Radians
@@ -290,27 +292,27 @@ instance Multiplication Sign Sign Sign where
   Positive * sign = sign
   Negative * sign = -sign
 
-class (Product qty2 qty1 qty3, Quotient qty3 qty1 qty2, Quotient qty3 qty2 qty1) => Product qty1 qty2 qty3 | qty1 qty2 -> qty3
+class (IsProduct qty2 qty1 qty3, IsQuotient qty3 qty1 qty2, IsQuotient qty3 qty2 qty1) => IsProduct qty1 qty2 qty3 | qty1 qty2 -> qty3
 
-instance {-# INCOHERENT #-} Product Float Float Float
+instance {-# INCOHERENT #-} IsProduct Float Float Float
 
-instance {-# INCOHERENT #-} Product Float (Qty units) (Qty units)
+instance {-# INCOHERENT #-} IsProduct Float (Qty units) (Qty units)
 
-instance {-# INCOHERENT #-} Product (Qty units) Float (Qty units)
+instance {-# INCOHERENT #-} IsProduct (Qty units) Float (Qty units)
 
-class (Product qty3 qty2 qty1, Quotient qty1 qty3 qty2) => Quotient qty1 qty2 qty3 | qty1 qty2 -> qty3
+class (IsProduct qty3 qty2 qty1, IsQuotient qty1 qty3 qty2) => IsQuotient qty1 qty2 qty3 | qty1 qty2 -> qty3
 
-instance {-# INCOHERENT #-} Quotient Float Float Float
+instance {-# INCOHERENT #-} IsQuotient Float Float Float
 
-instance {-# INCOHERENT #-} Quotient (Qty units) (Qty units) Float
+instance {-# INCOHERENT #-} IsQuotient (Qty units) (Qty units) Float
 
-instance {-# INCOHERENT #-} Quotient (Qty units) Float (Qty units)
+instance {-# INCOHERENT #-} IsQuotient (Qty units) Float (Qty units)
 
-instance Product (Qty units1) (Qty units2) (Qty units3) => Multiplication (Qty units1) (Qty units2) (Qty units3) where
+instance IsProduct (Qty units1) (Qty units2) (Qty units3) => Multiplication (Qty units1) (Qty units2) (Qty units3) where
   {-# INLINE (*) #-}
   (Qty x) * (Qty y) = Qty (x Prelude.* y)
 
-instance Quotient (Qty units1) (Qty units2) (Qty units3) => Division (Qty units1) (Qty units2) (Qty units3) where
+instance IsQuotient (Qty units1) (Qty units2) (Qty units3) => Division (Qty units1) (Qty units2) (Qty units3) where
   {-# INLINE (/) #-}
   (Qty x) / (Qty y) = Qty (x Prelude./ y)
 
@@ -334,7 +336,7 @@ instance Division Float (Qty units1) (Qty units2) => Division Int (Qty units1) (
   {-# INLINE (/) #-}
   n / x = float n / x
 
-class Product a a b => Squared a b | a -> b, b -> a
+class IsProduct a a b => Squared a b | a -> b, b -> a
 
 instance Squared Float Float
 
@@ -366,32 +368,32 @@ data CubicMeters
 
 type Volume = Qty CubicMeters
 
-instance Product Length Length Area
+instance IsProduct Length Length Area
 
-instance Product Length Area Volume
+instance IsProduct Length Area Volume
 
-instance Product Area Length Volume
+instance IsProduct Area Length Volume
 
-instance Product Duration Speed Length
+instance IsProduct Duration Speed Length
 
-instance Product Speed Duration Length
+instance IsProduct Speed Duration Length
 
-instance Product Duration Acceleration Speed
+instance IsProduct Duration Acceleration Speed
 
-instance Product Acceleration Duration Speed
+instance IsProduct Acceleration Duration Speed
 
-instance Quotient Area Length Length
+instance IsQuotient Area Length Length
 
-instance Quotient Volume Area Length
+instance IsQuotient Volume Area Length
 
-instance Quotient Volume Length Area
+instance IsQuotient Volume Length Area
 
-instance Quotient Length Duration Speed
+instance IsQuotient Length Duration Speed
 
-instance Quotient Length Speed Duration
+instance IsQuotient Length Speed Duration
 
-instance Quotient Speed Duration Acceleration
+instance IsQuotient Speed Duration Acceleration
 
-instance Quotient Speed Acceleration Duration
+instance IsQuotient Speed Acceleration Duration
 
 instance Squared Length Area
