@@ -3,6 +3,7 @@ module Line2d
   , from
   , startPoint
   , endPoint
+  , midpoint
   , pointOn
   , segmentBounds
   , reverse
@@ -44,6 +45,9 @@ startPoint (Line2d p1 _) = p1
 endPoint :: Line2d coordinates units -> Point2d coordinates units
 endPoint (Line2d _ p2) = p2
 
+midpoint :: Line2d coordinates units -> Point2d coordinates units
+midpoint (Line2d p1 p2) = Point2d.midpoint p1 p2
+
 pointOn :: Line2d coordinates units -> Float -> Point2d coordinates units
 pointOn (Line2d p1 p2) = Point2d.interpolateFrom p1 p2
 
@@ -59,8 +63,8 @@ reverse (Line2d p1 p2) = Line2d p2 p1
 
 bisect :: Line2d coordinates units -> (Line2d coordinates units, Line2d coordinates units)
 bisect (Line2d p1 p2) =
-  let midpoint = Point2d.midpoint p1 p2
-   in (Line2d p1 midpoint, Line2d midpoint p2)
+  let mid = Point2d.midpoint p1 p2
+   in (Line2d p1 mid, Line2d mid p2)
 
 boundingBox :: Line2d coordinates units -> BoundingBox2d coordinates units
 boundingBox (Line2d p1 p2) = BoundingBox2d.hull2 p1 p2
