@@ -1,5 +1,6 @@
 module Line2d
   ( Line2d (..)
+  , from
   , startPoint
   , endPoint
   , pointOn
@@ -33,6 +34,9 @@ import VectorCurve2d qualified
 data Line2d coordinates units
   = Line2d (Point2d coordinates units) (Point2d coordinates units)
   deriving (Eq, Show)
+
+from :: Point2d coordinates units -> Point2d coordinates units -> Line2d coordinates units
+from = Line2d
 
 startPoint :: Line2d coordinates units -> Point2d coordinates units
 startPoint (Line2d p1 _) = p1
