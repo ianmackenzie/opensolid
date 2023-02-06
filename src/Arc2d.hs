@@ -22,12 +22,14 @@ import Curve1d qualified
 import Curve2d (IsCurve2d (..))
 import Direction2d qualified
 import Line2d (Line2d (..))
+import Line2d qualified
 import OpenSolid
 import Point2d (Point2d)
 import Point2d qualified
 import Qty qualified
 import Range (Range)
 import Range qualified
+import Units qualified
 import Vector2d qualified
 import VectorBox2d qualified
 import VectorCurve2d (VectorCurve2d)
@@ -93,19 +95,31 @@ instance IsCurve2d (Arc2d coordinates units) coordinates units where
   bisectImpl = bisect
   boundingBoxImpl = boundingBox
 
-with
-  :: Named "centerPoint" (Point2d coordinates units)
-  -> Named "radius" (Qty units)
-  -> Named "startAngle" Angle
-  -> Named "sweptAngle" Angle
-  -> Arc2d coordinates units
-with (Named givenCenterPoint) (Named givenRadius) (Named givenStartAngle) (Named givenSweptAngle) =
-  Arc2d
-    { centerPoint = givenCenterPoint
-    , radius = givenRadius
-    , startAngle = givenStartAngle
-    , sweptAngle = givenSweptAngle
-    }
+class Arguments a b | a -> b where
+  build :: a -> b
+
+with :: Arguments a b => a -> b
+with = build
+
+instance
+  ( centerPoint ~ Point2d coordinates units
+  , radius ~ Qty units
+  )
+  => Arguments
+      ( Named "centerPoint" centerPoint
+      , Named "radius" radius
+      , Named "startAngle" Angle
+      , Named "sweptAngle" Angle
+      )
+      (Arc2d coordinates units)
+  where
+  build (Named givenCenterPoint, Named givenRadius, Named givenStartAngle, Named givenSweptAngle) =
+    Arc2d
+      { centerPoint = givenCenterPoint
+      , radius = givenRadius
+      , startAngle = givenStartAngle
+      , sweptAngle = givenSweptAngle
+      }
 
 from :: Point2d coordinates units -> Point2d coordinates units -> Angle -> Result (Line2d coordinates units) (Arc2d coordinates units)
 from p1 p2 theta =
