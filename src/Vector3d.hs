@@ -114,19 +114,13 @@ squaredMagnitude (Vector3d vx vy vz) = Qty.squared vx + Qty.squared vy + Qty.squ
 data IsZero = IsZero
 
 direction :: Vector3d coordinates units -> Result IsZero (Direction3d coordinates)
-direction vector =
-  let m = magnitude vector
-   in if m == Qty.zero
-        then Err IsZero
-        else
-          let (Vector3d vx vy vz) = vector
-           in Ok (Direction3d.unsafe (vx / m) (vy / m) (vz / m))
+direction vector@(Vector3d vx vy vz) = do
+  magnitude' <- validate (/= Qty.zero) (magnitude vector) ?? Err IsZero
+  Ok (Direction3d.unsafe (vx / magnitude') (vy / magnitude') (vz / magnitude'))
 
 normalize :: Vector3d coordinates units -> Vector3d coordinates Unitless
-normalize vector =
-  let m = magnitude vector
-   in if m == Qty.zero
+normalize vector@(Vector3d vx vy vz) =
+  let magnitude' = magnitude vector
+   in if magnitude' == Qty.zero
         then zero
-        else
-          let (Vector3d vx vy vz) = vector
-           in Vector3d (vx / m) (vy / m) (vz / m)
+        else Vector3d (vx / magnitude') (vy / magnitude') (vz / magnitude')

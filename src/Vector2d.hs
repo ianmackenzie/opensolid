@@ -114,28 +114,16 @@ angle (Vector2d vx vy) = Angle.atan2 vy vx
 data IsZero = IsZero
 
 direction :: Vector2d coordinates units -> Result IsZero (Direction2d coordinates)
-direction vector =
-  let m = magnitude vector
-   in if m == Qty.zero
-        then Err IsZero
-        else
-          let (Vector2d vx vy) = vector
-           in Ok (Direction2d.unsafe (vx / m) (vy / m))
+direction vector@(Vector2d vx vy) = do
+  magnitude' <- validate (/= Qty.zero) (magnitude vector) ?? Err IsZero
+  Ok (Direction2d.unsafe (vx / magnitude') (vy / magnitude'))
 
 magnitudeAndDirection :: Vector2d coordinates units -> Result IsZero (Qty units, Direction2d coordinates)
-magnitudeAndDirection vector =
-  let m = magnitude vector
-   in if m == Qty.zero
-        then Err IsZero
-        else
-          let (Vector2d vx vy) = vector
-           in Ok (m, Direction2d.unsafe (vx / m) (vy / m))
+magnitudeAndDirection vector@(Vector2d vx vy) = do
+  magnitude' <- validate (/= Qty.zero) (magnitude vector) ?? Err IsZero
+  Ok (magnitude', Direction2d.unsafe (vx / magnitude') (vy / magnitude'))
 
 normalize :: Vector2d coordinates units -> Vector2d coordinates Unitless
-normalize vector =
-  let m = magnitude vector
-   in if m == Qty.zero
-        then zero
-        else
-          let (Vector2d vx vy) = vector
-           in Vector2d (vx / m) (vy / m)
+normalize vector@(Vector2d vx vy) =
+  let magnitude' = magnitude vector
+   in if magnitude' == Qty.zero then zero else Vector2d (vx / magnitude') (vy / magnitude')

@@ -39,7 +39,8 @@ module OpenSolid
   , (|>)
   , (??)
   , (?=)
-  , (?!)
+  , validate
+  , Invalid (..)
   , Tolerance
   , ApproximateEquality (..)
   , Named (..)
@@ -231,6 +232,12 @@ subtract b a = a - b
 (|>) :: a -> (a -> b) -> b
 (|>) value function = function value
 
+data Invalid = Invalid
+
+{-# INLINE validate #-}
+validate :: (a -> Bool) -> a -> Result Invalid a
+validate function value = if function value then Ok value else Err Invalid
+
 class Nullable nullable where
   (??) :: forall applicative a. Applicative applicative => nullable a -> applicative a -> applicative a
 
@@ -245,12 +252,9 @@ instance Nullable (Result x) where
 (?=) :: Nullable nullable => nullable a -> a -> a
 (?=) nullable ~fallback = runIdentity (nullable ?? Identity fallback)
 
-(?!) :: Nullable nullable => nullable a -> x -> Result x a
-(?!) nullable ~err = nullable ?? Err err
-
 infixl 0 |>
 
-infixr 2 ??, ?=, ?!
+infixr 2 ??, ?=
 
 infixl 6 +, -
 

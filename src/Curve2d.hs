@@ -145,7 +145,7 @@ nearby point curve domain
 find :: Tolerance units => Point2d coordinates units -> Curve2d coordinates units -> Result IsCoincidentWithPoint (List Float)
 find point curve = do
   let squaredDistanceFromCurve = VectorCurve2d.squaredMagnitude (Units.wrap (point - curve))
-  roots <- Curve1d.roots squaredDistanceFromCurve ?! IsCoincidentWithPoint
+  roots <- Curve1d.roots squaredDistanceFromCurve ?? Err IsCoincidentWithPoint
   Ok (List.map Root.value roots)
  where
   ?tolerance = Qty.squared (Units.wrap ?tolerance)

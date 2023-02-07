@@ -88,10 +88,10 @@ vector (Line2d p1 p2) = p2 - p1
 data IsDegenerate = IsDegenerate
 
 direction :: Line2d coordinates units -> Result IsDegenerate (Direction2d coordinates)
-direction line = Vector2d.direction (vector line) ?! IsDegenerate
+direction line = Vector2d.direction (vector line) ?? Err IsDegenerate
 
 lengthAndDirection :: Line2d coordinates units -> Result IsDegenerate (Qty units, Direction2d coordinates)
-lengthAndDirection line = Vector2d.magnitudeAndDirection (vector line) ?! IsDegenerate
+lengthAndDirection line = Vector2d.magnitudeAndDirection (vector line) ?? Err IsDegenerate
 
 axis :: Line2d coordinates units -> Result IsDegenerate (Axis2d coordinates units)
 axis line = do

@@ -152,7 +152,7 @@ script = do
   let expressionRoots = let ?tolerance = 1e-12 in Curve1d.roots expression
   log "Roots" expressionRoots
   testCurveFind
-  log "?!" (List.map (?! "Bad") [Just 1, Nothing, Just 2, Nothing, Just 3])
+  log "??" (List.map (?? Err "Bad") [Just 1, Nothing, Just 2, Nothing, Just 3])
   testListCollapse
   Script.printLine "Unicode output test: ✅❌🙂"
   testDirection2dAngleFrom

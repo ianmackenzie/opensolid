@@ -156,59 +156,51 @@ instance
       )
       (Result EndpointsCoincidentOrTooFarApart (Arc2d coordinates units))
   where
-  build (Named givenStartPoint, Named givenEndPoint, Named givenRadius, Named angleSign, Named largeAngle) =
+  build (Named givenStartPoint, Named givenEndPoint, Named givenRadius, Named angleSign, Named largeAngle) = do
     let startPoint' = Units.wrap givenStartPoint
-        endPoint' = Units.wrap givenEndPoint
-        radius' = Units.wrap givenRadius
-        chord' = Line2d.from startPoint' endPoint'
-        squaredRadius' = Qty.squared radius'
-        squaredHalfLength' = Qty.squared (0.5 * Line2d.length chord')
-     in if squaredHalfLength' > squaredRadius'
-          then Err EndpointsTooFarApart
-          else do
-            chordDirection <- Line2d.direction chord' ?! EndpointsCoincident
-            let offsetDirection = Direction2d.rotateLeft chordDirection
-            let offsetMagnitude' = Qty.sqrt (squaredRadius' - squaredHalfLength')
-            let offsetDistance' =
-                  case (angleSign, largeAngle) of
-                    (Positive, False) -> offsetMagnitude'
-                    (Negative, False) -> -offsetMagnitude'
-                    (Negative, True) -> offsetMagnitude'
-                    (Positive, True) -> -offsetMagnitude'
-            let centerPoint' = Line2d.midpoint chord' + offsetDirection * offsetDistance'
-            let halfLength' = Qty.sqrt squaredHalfLength'
-            let shortAngle' = 2.0 * Units.wrap (Angle.asin (halfLength' / radius'))
-            let fullTurn' = Units.wrap Angle.fullTurn
-            let sweptAngle' =
-                  case (angleSign, largeAngle) of
-                    (Positive, False) -> shortAngle'
-                    (Negative, False) -> -shortAngle'
-                    (Negative, True) -> shortAngle' - fullTurn'
-                    (Positive, True) -> fullTurn' - shortAngle'
-            Ok $
-              with
-                ( #centerPoint (Units.unwrap centerPoint')
-                , #startPoint (Units.unwrap startPoint')
-                , #sweptAngle (Units.unwrap sweptAngle')
-                )
+    let endPoint' = Units.wrap givenEndPoint
+    let radius' = Units.wrap givenRadius
+    let chord' = Line2d.from startPoint' endPoint'
+    chordDirection <- Line2d.direction chord' ?? Err EndpointsCoincident
+    let squaredRadius' = Qty.squared radius'
+    let squaredHalfLength' = Qty.squared (0.5 * Line2d.length chord')
+    squaredOffsetMagnitude' <- validate (>= Qty.zero) (squaredRadius' - squaredHalfLength') ?? Err EndpointsTooFarApart
+    let offsetMagnitude' = Qty.sqrt squaredOffsetMagnitude'
+    let offsetDirection = Direction2d.rotateLeft chordDirection
+    let offsetDistance' =
+          case (angleSign, largeAngle) of
+            (Positive, False) -> offsetMagnitude'
+            (Negative, False) -> -offsetMagnitude'
+            (Negative, True) -> offsetMagnitude'
+            (Positive, True) -> -offsetMagnitude'
+    let centerPoint' = Line2d.midpoint chord' + offsetDirection * offsetDistance'
+    let halfLength' = Qty.sqrt squaredHalfLength'
+    let shortAngle' = 2.0 * Units.wrap (Angle.asin (halfLength' / radius'))
+    let fullTurn' = Units.wrap Angle.fullTurn
+    let sweptAngle' =
+          case (angleSign, largeAngle) of
+            (Positive, False) -> shortAngle'
+            (Negative, False) -> -shortAngle'
+            (Negative, True) -> shortAngle' - fullTurn'
+            (Positive, True) -> fullTurn' - shortAngle'
+    Ok $
+      with
+        ( #centerPoint (Units.unwrap centerPoint')
+        , #startPoint (Units.unwrap startPoint')
+        , #sweptAngle (Units.unwrap sweptAngle')
+        )
 
 from :: Point2d coordinates units -> Point2d coordinates units -> Angle -> Result (Line2d coordinates units) (Arc2d coordinates units)
-from p1 p2 theta =
-  case Vector2d.magnitudeAndDirection (p2 - p1) of
-    Err Vector2d.IsZero -> Err (Line2d p1 p2)
-    Ok (distance, direction) ->
-      let halfAngle = 0.5 * theta
-          denominator = Angle.tan halfAngle
-       in if denominator == Qty.zero
-            then Err (Line2d p1 p2)
-            else
-              let halfDistance = 0.5 * distance
-                  offset = halfDistance / denominator
-                  center = Point2d.midpoint p1 p2 + offset * Direction2d.rotateLeft direction
-               in Ok
-                    Arc2d
-                      { centerPoint = center
-                      , radius = Point2d.distanceFrom center p1
-                      , startAngle = Point2d.angleFrom center p1
-                      , sweptAngle = theta
-                      }
+from p1 p2 theta = do
+  (distance, direction) <- Vector2d.magnitudeAndDirection (p2 - p1) ?? Err (Line2d p1 p2)
+  let tanHalfAngle = Angle.tan (0.5 * theta)
+  denominator <- validate (/= Qty.zero) tanHalfAngle ?? Err (Line2d p1 p2)
+  let offset = 0.5 * distance / denominator
+  let center = Point2d.midpoint p1 p2 + offset * Direction2d.rotateLeft direction
+  Ok
+    Arc2d
+      { centerPoint = center
+      , radius = Point2d.distanceFrom center p1
+      , startAngle = Point2d.angleFrom center p1
+      , sweptAngle = theta
+      }
