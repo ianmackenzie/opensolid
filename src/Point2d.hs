@@ -9,7 +9,6 @@ module Point2d
   , interpolateFrom
   , distanceFrom
   , angleFrom
-  , translateBy
   , signedDistanceAlong
   , signedDistanceFrom
   )
@@ -81,9 +80,6 @@ distanceFrom p1 p2 = Vector2d.magnitude (p2 - p1)
 
 angleFrom :: Point2d coordinates units -> Point2d coordinates units -> Angle
 angleFrom p1 p2 = Vector2d.angle (p2 - p1)
-
-translateBy :: Vector2d coordinates units -> Point2d coordinates units -> Point2d coordinates units
-translateBy (Vector2d vx vy) (Point2d px py) = Point2d (px + vx) (py + vy)
 
 signedDistanceAlong :: Axis2d coordinates units -> Point2d coordinates units -> Qty units
 signedDistanceAlong axis point =

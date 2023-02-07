@@ -20,6 +20,7 @@ import QuadraticSpline2d qualified
 import Range qualified
 import Result qualified
 import Script qualified
+import Transform2d qualified
 import Vector2d qualified
 import Vector3d qualified
 import Volume qualified
@@ -124,8 +125,18 @@ script = do
   log "2D cross product" (v1 >< v2)
   let squareRoot = Qty.sqrt dotProduct
   log "Square root" squareRoot
-  let translatedPoint = Point2d.meters 2.0 3.0 |> Point2d.translateBy (Vector2d.meters 4.0 5.0)
+  let translatedPoint = Point2d.meters 2.0 3.0 |> Transform2d.translateBy (Vector2d.meters 4.0 5.0)
   log "Translated point" translatedPoint
+  let originalPoint = Point2d.origin
+  let compositeTransform =
+        Transform2d.sequence
+          [ Transform2d.translationBy (Vector2d.meters 2.0 0.0)
+          , Transform2d.rotationAround Point2d.origin (Angle.degrees 45.0)
+          , Transform2d.scalingAbout Point2d.origin 2.0
+          ]
+          :: Transform2d.Similarity coordinates Meters
+  let transformedPoint = Transform2d.apply compositeTransform originalPoint
+  log "Transformed point" transformedPoint
   let vectorSum = Vector2d.meters 1.0 2.0 + Vector2d.meters 2.0 3.0
   log "Vector sum" vectorSum
   let crossProduct = Vector3d.meters 1.0 2.0 3.0 >< Vector3d.meters 4.0 5.0 6.0
