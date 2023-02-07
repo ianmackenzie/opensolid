@@ -16,6 +16,7 @@ module Vector3d
   , squaredMagnitude
   , IsZero (..)
   , direction
+  , magnitudeAndDirection
   , normalize
   )
 where
@@ -117,6 +118,11 @@ direction :: Vector3d coordinates units -> Result IsZero (Direction3d coordinate
 direction vector@(Vector3d vx vy vz) = do
   magnitude' <- validate (/= Qty.zero) (magnitude vector) ?? Err IsZero
   Ok (Direction3d.unsafe (vx / magnitude') (vy / magnitude') (vz / magnitude'))
+
+magnitudeAndDirection :: Vector3d coordinates units -> Result IsZero (Qty units, Direction3d coordinates)
+magnitudeAndDirection vector@(Vector3d vx vy vz) = do
+  magnitude' <- validate (/= Qty.zero) (magnitude vector) ?? Err IsZero
+  Ok (magnitude', Direction3d.unsafe (vx / magnitude') (vy / magnitude') (vz / magnitude'))
 
 normalize :: Vector3d coordinates units -> Vector3d coordinates Unitless
 normalize vector@(Vector3d vx vy vz) =
