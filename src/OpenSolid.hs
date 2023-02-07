@@ -252,9 +252,7 @@ instance Nullable (Result x) where
 (?=) :: Nullable nullable => nullable a -> a -> a
 (?=) nullable ~fallback = runIdentity (nullable ?? Identity fallback)
 
-infixl 0 |>
-
-infixr 2 ??, ?=
+infixl 0 |>, ??, ?=
 
 infixl 6 +, -
 
