@@ -178,6 +178,11 @@ script = do
   let rotationTransformation = Transform2d.rotationAround Point2d.origin (Angle.degrees 90.0)
   let rotatedPointsWithTransformation = List.map (Transform2d.apply rotationTransformation) originalPoints
   log "Rotated points with transformation" rotatedPointsWithTransformation
+  let transformedAxis =
+        Axis2d.x
+          |> Transform2d.translateInOwn Axis2d.direction (Length.meters 2.0)
+          |> Transform2d.rotateAroundOwn Axis2d.originPoint (Angle.degrees 90.0)
+  log "Transformed axis" transformedAxis
 
 main :: IO ()
 main = Script.run script

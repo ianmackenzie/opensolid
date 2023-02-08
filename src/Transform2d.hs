@@ -10,15 +10,25 @@ module Transform2d
   , Affine
   , sequence
   , translateBy
+  , translateIn
+  , translateInOwn
+  , translateAlong
+  , translateAlongOwn
   , rotateAround
+  , rotateAroundOwn
   , translationBy
+  , translationIn
+  , translationAlong
   , rotationAround
   , scaleAbout
+  , scaleAboutOwn
   , scalingAbout
   )
 where
 
 import Angle qualified
+import {-# SOURCE #-} Axis2d (Axis2d)
+import {-# SOURCE #-} Axis2d qualified
 import Direction2d (Direction2d (..))
 import Direction2d qualified
 import List qualified
@@ -102,6 +112,48 @@ translateBy
   -> a
 translateBy vector = apply (translationBy vector :: Transform2d NoScale coordinates units)
 
+translationIn :: Direction2d coordinates -> Qty units -> Transform2d category coordinates units
+translationIn direction distance = translationBy (direction * distance)
+
+translateIn
+  :: forall a coordinates units
+   . Transformation2d a NoScale coordinates units
+  => Direction2d coordinates
+  -> Qty units
+  -> a
+  -> a
+translateIn direction distance = apply (translationIn direction distance :: Transform2d NoScale coordinates units)
+
+translateInOwn
+  :: forall a coordinates units
+   . Transformation2d a NoScale coordinates units
+  => (a -> Direction2d coordinates)
+  -> Qty units
+  -> a
+  -> a
+translateInOwn direction distance value = translateIn (direction value) distance value
+
+translationAlong :: Axis2d coordinates units -> Qty units -> Transform2d category coordinates units
+translationAlong axis distance = translationIn (Axis2d.direction axis) distance
+
+translateAlong
+  :: forall a coordinates units
+   . Transformation2d a NoScale coordinates units
+  => Axis2d coordinates units
+  -> Qty units
+  -> a
+  -> a
+translateAlong axis distance = apply (translationAlong axis distance :: Transform2d NoScale coordinates units)
+
+translateAlongOwn
+  :: forall a coordinates units
+   . Transformation2d a NoScale coordinates units
+  => (a -> Axis2d coordinates units)
+  -> Qty units
+  -> a
+  -> a
+translateAlongOwn axis distance value = translateAlong (axis value) distance value
+
 rotationAround :: Point2d coordinates units -> Angle -> Transform2d category coordinates units
 rotationAround (Point2d cx cy) angle =
   let cos = Angle.cos angle
@@ -119,6 +171,15 @@ rotateAround
   -> a
 rotateAround point angle = apply (rotationAround point angle :: Transform2d NoScale coordinates units)
 
+rotateAroundOwn
+  :: forall a coordinates units
+   . Transformation2d a NoScale coordinates units
+  => (a -> Point2d coordinates units)
+  -> Angle
+  -> a
+  -> a
+rotateAroundOwn point angle value = rotateAround (point value) angle value
+
 scalingAbout :: Point2d coordinates units -> Float -> Transform2d (Scale category) coordinates units
 scalingAbout (Point2d cx cy) scale =
   let tx = cx - scale * cx
@@ -133,3 +194,12 @@ scaleAbout
   -> a
   -> a
 scaleAbout point scale = apply (scalingAbout point scale :: Transform2d (Scale NoShear) coordinates units)
+
+scaleAboutOwn
+  :: forall a coordinates units
+   . Transformation2d a (Scale NoShear) coordinates units
+  => (a -> Point2d coordinates units)
+  -> Float
+  -> a
+  -> a
+scaleAboutOwn point scale value = scaleAbout (point value) scale value
