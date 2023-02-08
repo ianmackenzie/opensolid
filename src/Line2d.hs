@@ -28,7 +28,6 @@ import Point2d (Point2d)
 import Point2d qualified
 import Range (Range (..))
 import Transform2d (Transformation2d (..))
-import Transformable
 import Vector2d (Vector2d)
 import Vector2d qualified
 import VectorCurve2d (VectorCurve2d)
@@ -40,7 +39,7 @@ data Line2d coordinates units
 
 instance
   (coordinates ~ coordinates', units ~ units')
-  => Transformation2d (Line2d coordinates units) Deformable coordinates' units'
+  => Transformation2d (Line2d coordinates units) 'True 'True coordinates' units'
   where
   apply transformation (Line2d p1 p2) = Line2d (apply transformation p1) (apply transformation p2)
 

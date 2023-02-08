@@ -21,25 +21,23 @@ import List qualified
 import OpenSolid hiding (identity)
 import Point2d (Point2d (..))
 import Qty qualified
-import Transformable
 import Vector2d (Vector2d (..))
 
-type Transform2d :: Type -> Type -> Type -> Type
-data Transform2d category coordinates units
+data Transform2d (scale :: Bool) (shear :: Bool) coordinates units
   = Transform2d Float Float Float Float (Qty units) (Qty units)
 
-type Rigid coordinates units = Transform2d Transformable coordinates units
+type Rigid coordinates units = Transform2d 'False 'False coordinates units
 
-type Similarity coordinates units = Transform2d Scalable coordinates units
+type Similarity coordinates units = Transform2d 'True 'False coordinates units
 
-type Affine coordinates units = Transform2d Deformable coordinates units
+type Affine coordinates units = Transform2d 'True 'True coordinates units
 
-class Transformation2d a category coordinates units | a -> coordinates where
-  apply :: Transform2d category coordinates units -> a -> a
+class Transformation2d a (scale :: Bool) (shear :: Bool) coordinates units | a -> coordinates where
+  apply :: Transform2d scale shear coordinates units -> a -> a
 
 instance
   (coordinates ~ coordinates', units ~ units')
-  => Transformation2d (Point2d coordinates units) category coordinates' units'
+  => Transformation2d (Point2d coordinates units) scale shear coordinates' units'
   where
   apply (Transform2d m11 m12 m21 m22 tx ty) (Point2d x y) =
     Point2d
@@ -48,7 +46,7 @@ instance
 
 instance
   (coordinates ~ coordinates', units ~ units')
-  => Transformation2d (Vector2d coordinates units) category coordinates' units'
+  => Transformation2d (Vector2d coordinates units) scale shear coordinates' units'
   where
   apply (Transform2d m11 m12 m21 m22 _ _) (Vector2d x y) =
     Vector2d
@@ -56,19 +54,19 @@ instance
       (m21 * x + m22 * y)
 
 instance
-  (coordinates ~ coordinates', category ~ Transformable)
-  => Transformation2d (Direction2d coordinates) category coordinates' units
+  (coordinates ~ coordinates', scale ~ 'False, shear ~ 'False)
+  => Transformation2d (Direction2d coordinates) scale shear coordinates' units
   where
   apply (Transform2d m11 m12 m21 m22 _ _) (Direction2d x y) =
     Direction2d.unsafe
       (m11 * x + m12 * y)
       (m21 * x + m22 * y)
 
-sequence :: List (Transform2d category coordinates units) -> Transform2d category coordinates units
+sequence :: List (Transform2d scale shear coordinates units) -> Transform2d scale shear coordinates units
 sequence (first : rest) = List.foldl compose first rest
 sequence [] = identity
 
-compose :: Transform2d category coordinates units -> Transform2d category coordinates units -> Transform2d category coordinates units
+compose :: Transform2d scale shear coordinates units -> Transform2d scale shear coordinates units -> Transform2d scale shear coordinates units
 compose (Transform2d a11 a12 a21 a22 ax ay) (Transform2d b11 b12 b21 b22 bx by) =
   let m11 = b11 * a11 + b12 * a21
       m12 = b11 * a12 + b12 * a22
@@ -78,21 +76,21 @@ compose (Transform2d a11 a12 a21 a22 ax ay) (Transform2d b11 b12 b21 b22 bx by) 
       ty = b21 * ax + b22 * ay + by
    in Transform2d m11 m12 m21 m22 tx ty
 
-identity :: Transform2d category coordinates units
+identity :: Transform2d scale shear coordinates units
 identity = Transform2d 1.0 0.0 0.0 1.0 Qty.zero Qty.zero
 
-translationBy :: Vector2d coordinates units -> Transform2d category coordinates units
+translationBy :: Vector2d coordinates units -> Transform2d scale shear coordinates units
 translationBy (Vector2d x y) = Transform2d 1.0 0.0 0.0 1.0 x y
 
 translateBy
   :: forall a coordinates units
-   . Transformation2d a Transformable coordinates units
+   . Transformation2d a 'False 'False coordinates units
   => Vector2d coordinates units
   -> a
   -> a
-translateBy vector = apply (translationBy vector :: Transform2d Transformable coordinates units)
+translateBy vector = apply (translationBy vector :: Transform2d 'False 'False coordinates units)
 
-rotationAround :: Point2d coordinates units -> Angle -> Transform2d category coordinates units
+rotationAround :: Point2d coordinates units -> Angle -> Transform2d scale shear coordinates units
 rotationAround (Point2d cx cy) angle =
   let cos = Angle.cos angle
       sin = Angle.sin angle
@@ -102,14 +100,14 @@ rotationAround (Point2d cx cy) angle =
 
 rotateAround
   :: forall a coordinates units
-   . Transformation2d a Transformable coordinates units
+   . Transformation2d a 'False 'False coordinates units
   => Point2d coordinates units
   -> Angle
   -> a
   -> a
-rotateAround point angle = apply (rotationAround point angle :: Transform2d Transformable coordinates units)
+rotateAround point angle = apply (rotationAround point angle :: Transform2d 'False 'False coordinates units)
 
-scalingAbout :: IsScalable category => Point2d coordinates units -> Float -> Transform2d category coordinates units
+scalingAbout :: Point2d coordinates units -> Float -> Transform2d 'True shear coordinates units
 scalingAbout (Point2d cx cy) scale =
   let tx = cx - scale * cx
       ty = cy - scale * cy
@@ -117,9 +115,9 @@ scalingAbout (Point2d cx cy) scale =
 
 scaleAbout
   :: forall a coordinates units
-   . Transformation2d a Scalable coordinates units
+   . Transformation2d a 'True 'False coordinates units
   => Point2d coordinates units
   -> Float
   -> a
   -> a
-scaleAbout point scale = apply (scalingAbout point scale :: Transform2d Scalable coordinates units)
+scaleAbout point scale = apply (scalingAbout point scale :: Transform2d 'True 'False coordinates units)
