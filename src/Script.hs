@@ -45,6 +45,9 @@ instance Bind (Script x) where
   Error err >>= _ = Error err
   Perform io >>= function = Perform (fmap (>>= function) io)
 
+instance Prelude.Monad (Script x) where
+  (>>=) = (>>=)
+
 perform :: IO a -> Script IOError a
 perform io = Perform (Control.Exception.catch (fmap succeed io) (pure Prelude.. error))
 

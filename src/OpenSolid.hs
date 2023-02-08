@@ -133,6 +133,9 @@ instance Bind (Result x) where
   Ok value >>= function = function value
   Err err >>= _ = Err err
 
+instance Prelude.Monad (Result x) where
+  (>>=) = (>>=)
+
 type role Qty nominal
 
 type Qty :: Type -> Type
