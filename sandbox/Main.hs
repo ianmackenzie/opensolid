@@ -3,6 +3,7 @@ module Main (main) where
 import Angle qualified
 import Arc2d qualified
 import Area qualified
+import Axis2d qualified
 import Curve1d qualified
 import Curve2d (Curve2d (..))
 import Curve2d qualified
@@ -169,6 +170,14 @@ script = do
   testArc2dFrom
   testCurveOverlap1
   testCurveOverlap2
+  log "Rotated axis" (Axis2d.x |> Transform2d.rotateAround (Point2d.meters 1.0 0.0) (Angle.degrees 90.0))
+  let originalPoints = [Point2d.meters 1.0 0.0, Point2d.meters 2.0 0.0, Point2d.meters 3.0 0.0]
+  let rotationFunction = Transform2d.rotateAround Point2d.origin (Angle.degrees 90.0)
+  let rotatedPointsWithFunction = List.map rotationFunction originalPoints
+  log "Rotated points with function" rotatedPointsWithFunction
+  let rotationTransformation = Transform2d.rotationAround Point2d.origin (Angle.degrees 90.0)
+  let rotatedPointsWithTransformation = List.map (Transform2d.apply rotationTransformation) originalPoints
+  log "Rotated points with transformation" rotatedPointsWithTransformation
 
 main :: IO ()
 main = Script.run script
