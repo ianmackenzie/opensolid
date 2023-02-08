@@ -5,7 +5,6 @@
 
 module OpenSolid
   ( module Prelude
-  , module Control.Category
   , module Data.Void
   , module Data.Kind
   , Qty (..)
@@ -45,6 +44,7 @@ module OpenSolid
   , ApproximateEquality (..)
   , Named (..)
   , fromLabel
+  , Composition (..)
   , IsProduct
   , IsQuotient
   , Unitless
@@ -65,7 +65,6 @@ module OpenSolid
   )
 where
 
-import Control.Category ((<<<), (>>>))
 import Data.Functor.Identity (Identity (..))
 import Data.Kind (Type)
 import Data.Proxy (Proxy (Proxy))
@@ -280,6 +279,14 @@ class Nameable (name :: Symbol) value where
   fromLabel = Named
 
 instance Nameable (name :: Symbol) value
+
+class Composition a b c | a b -> c where
+  (>>>) :: a -> b -> c
+  (<<<) :: b -> a -> c
+  second <<< first = first >>> second
+
+instance Composition (a -> b) (b -> c) (a -> c) where
+  f >>> g = g Prelude.. f
 
 instance Multiplication Int Int Int where
   (*) = (Prelude.*)

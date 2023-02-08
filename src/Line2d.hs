@@ -27,7 +27,7 @@ import OpenSolid
 import Point2d (Point2d)
 import Point2d qualified
 import Range (Range (..))
-import Transform2d (Transformation2d (..))
+import Transform2d (Deformation2d (..), Scaling2d (..), Transformation2d (..))
 import Vector2d (Vector2d)
 import Vector2d qualified
 import VectorCurve2d (VectorCurve2d)
@@ -37,11 +37,26 @@ data Line2d coordinates units
   = Line2d (Point2d coordinates units) (Point2d coordinates units)
   deriving (Eq, Show)
 
+map :: (Point2d coordinates units -> Point2d coordinates' units') -> Line2d coordinates units -> Line2d coordinates' units'
+map function (Line2d p1 p2) = Line2d (function p1) (function p2)
+
 instance
   (coordinates ~ coordinates', units ~ units')
-  => Transformation2d (Line2d coordinates units) category coordinates' units'
+  => Transformation2d (Line2d coordinates units) coordinates' units'
   where
-  apply transformation (Line2d p1 p2) = Line2d (apply transformation p1) (apply transformation p2)
+  transformBy transformation = map (transformBy transformation)
+
+instance
+  (coordinates ~ coordinates', units ~ units')
+  => Scaling2d (Line2d coordinates units) coordinates' units'
+  where
+  scaleBy scaling = map (scaleBy scaling)
+
+instance
+  (coordinates ~ coordinates', units ~ units')
+  => Deformation2d (Line2d coordinates units) coordinates' units'
+  where
+  deformBy deformation = map (deformBy deformation)
 
 from :: Point2d coordinates units -> Point2d coordinates units -> Line2d coordinates units
 from = Line2d
