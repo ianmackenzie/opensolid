@@ -131,8 +131,8 @@ script = do
   let originalPoint = Point2d.origin
   let compositeTransform =
         Transform2d.translationBy (Vector2d.meters 2.0 0.0)
-          >>> Transform2d.rotationAround Point2d.origin (Angle.degrees 45.0)
-          >>> Transform2d.scalingAbout Point2d.origin 2.0
+          >> Transform2d.rotationAround Point2d.origin (Angle.degrees 45.0)
+          >> Transform2d.scalingAbout Point2d.origin 2.0
   let transformedPoint = Transform2d.scaleBy compositeTransform originalPoint
   log "Transformed point" transformedPoint
   let vectorSum = Vector2d.meters 1.0 2.0 + Vector2d.meters 2.0 3.0

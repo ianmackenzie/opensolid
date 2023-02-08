@@ -37,7 +37,10 @@ instance Applicative (Script x) where
   Error err <*> _ = Error err
   Perform io <*> script = Perform (fmap (<*> script) io)
 
-instance Monad (Script x) where
+instance Composition (Script x ()) (Script x a) (Script x a) where
+  script1 >> script2 = script1 >>= (\() -> script2)
+
+instance Bind (Script x) where
   Succeed value >>= function = function value
   Error err >>= _ = Error err
   Perform io >>= function = Perform (fmap (>>= function) io)
@@ -50,7 +53,7 @@ type Program = Script IOError ()
 run :: Script IOError () -> IO ()
 run (Succeed ()) = System.Exit.exitSuccess
 run (Error ioError) = Prelude.ioError ioError
-run (Perform io) = io >>= run
+run (Perform io) = io Prelude.>>= run
 
 succeed :: a -> Script x a
 succeed = Succeed

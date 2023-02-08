@@ -19,7 +19,7 @@ import {-# SOURCE #-} Axis2d (Axis2d)
 import {-# SOURCE #-} Axis2d qualified
 import Direction2d (Direction2d (..))
 import Direction2d qualified
-import OpenSolid hiding (identity, (>>))
+import OpenSolid hiding (identity)
 import Point2d (Point2d (..))
 import Qty qualified
 import Vector2d (Vector2d (..))
@@ -170,52 +170,52 @@ instance
   (coordinates ~ coordinates', units ~ units')
   => Composition (Transformation coordinates units) (Transformation coordinates' units') (Transformation coordinates units)
   where
-  Transformation matrix1 >>> Transformation matrix2 = Transformation (matrix2 * matrix1)
+  Transformation matrix1 >> Transformation matrix2 = Transformation (matrix2 * matrix1)
 
 instance
   (coordinates ~ coordinates', units ~ units')
   => Composition (Transformation coordinates units) (Scaling coordinates' units') (Scaling coordinates units)
   where
-  Transformation matrix1 >>> Scaling matrix2 = Scaling (matrix2 * matrix1)
+  Transformation matrix1 >> Scaling matrix2 = Scaling (matrix2 * matrix1)
 
 instance
   (coordinates ~ coordinates', units ~ units')
   => Composition (Transformation coordinates units) (Deformation coordinates' units') (Deformation coordinates units)
   where
-  Transformation matrix1 >>> Deformation matrix2 = Deformation (matrix2 * matrix1)
+  Transformation matrix1 >> Deformation matrix2 = Deformation (matrix2 * matrix1)
 
 instance
   (coordinates ~ coordinates', units ~ units')
   => Composition (Scaling coordinates units) (Transformation coordinates' units') (Scaling coordinates units)
   where
-  Scaling matrix1 >>> Transformation matrix2 = Scaling (matrix2 * matrix1)
+  Scaling matrix1 >> Transformation matrix2 = Scaling (matrix2 * matrix1)
 
 instance
   (coordinates ~ coordinates', units ~ units')
   => Composition (Scaling coordinates units) (Scaling coordinates' units') (Scaling coordinates units)
   where
-  Scaling matrix1 >>> Scaling matrix2 = Scaling (matrix2 * matrix1)
+  Scaling matrix1 >> Scaling matrix2 = Scaling (matrix2 * matrix1)
 
 instance
   (coordinates ~ coordinates', units ~ units')
   => Composition (Scaling coordinates units) (Deformation coordinates' units') (Deformation coordinates units)
   where
-  Scaling matrix1 >>> Deformation matrix2 = Deformation (matrix2 * matrix1)
+  Scaling matrix1 >> Deformation matrix2 = Deformation (matrix2 * matrix1)
 
 instance
   (coordinates ~ coordinates', units ~ units')
   => Composition (Deformation coordinates units) (Transformation coordinates' units') (Deformation coordinates units)
   where
-  Deformation matrix1 >>> Transformation matrix2 = Deformation (matrix2 * matrix1)
+  Deformation matrix1 >> Transformation matrix2 = Deformation (matrix2 * matrix1)
 
 instance
   (coordinates ~ coordinates', units ~ units')
   => Composition (Deformation coordinates units) (Scaling coordinates' units') (Deformation coordinates units)
   where
-  Deformation matrix1 >>> Scaling matrix2 = Deformation (matrix2 * matrix1)
+  Deformation matrix1 >> Scaling matrix2 = Deformation (matrix2 * matrix1)
 
 instance
   (coordinates ~ coordinates', units ~ units')
   => Composition (Deformation coordinates units) (Deformation coordinates' units') (Deformation coordinates units)
   where
-  Deformation matrix1 >>> Deformation matrix2 = Deformation (matrix2 * matrix1)
+  Deformation matrix1 >> Deformation matrix2 = Deformation (matrix2 * matrix1)

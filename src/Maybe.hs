@@ -2,7 +2,6 @@ module Maybe
   ( map
   , map2
   , withDefault
-  , (>>=)
   , orErr
   )
 where

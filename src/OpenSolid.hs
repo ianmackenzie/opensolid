@@ -7,6 +7,8 @@ module OpenSolid
   ( module Prelude
   , module Data.Void
   , module Data.Kind
+  , Composition (..)
+  , Bind (..)
   , Qty (..)
   , Float
   , Sign (..)
@@ -44,7 +46,6 @@ module OpenSolid
   , ApproximateEquality (..)
   , Named (..)
   , fromLabel
-  , Composition (..)
   , IsProduct
   , IsQuotient
   , Unitless
@@ -81,7 +82,6 @@ import Prelude
   , IO
   , Int
   , Maybe (..)
-  , Monad (..)
   , Ord (..)
   , Show
   , not
@@ -91,6 +91,23 @@ import Prelude
   , (||)
   )
 import Prelude qualified
+
+class Composition a b c | a b -> c where
+  (>>) :: a -> b -> c
+  (<<) :: b -> a -> c
+  second << first = first >> second
+
+instance Composition (a -> b) (b -> c) (a -> c) where
+  f >> g = g Prelude.. f
+
+class Bind m where
+  (>>=) :: m a -> (a -> m b) -> m b
+
+instance Bind Maybe where
+  (>>=) = (Prelude.>>=)
+
+instance Bind [] where
+  (>>=) = (Prelude.>>=)
 
 type Text = Data.Text.Text
 
@@ -112,7 +129,7 @@ instance Prelude.Applicative (Result x) where
   Err err <*> _ = Err err
   Ok _ <*> Err err = Err err
 
-instance Prelude.Monad (Result x) where
+instance Bind (Result x) where
   Ok value >>= function = function value
   Err err >>= _ = Err err
 
@@ -279,14 +296,6 @@ class Nameable (name :: Symbol) value where
   fromLabel = Named
 
 instance Nameable (name :: Symbol) value
-
-class Composition a b c | a b -> c where
-  (>>>) :: a -> b -> c
-  (<<<) :: b -> a -> c
-  second <<< first = first >>> second
-
-instance Composition (a -> b) (b -> c) (a -> c) where
-  f >>> g = g Prelude.. f
 
 instance Multiplication Int Int Int where
   (*) = (Prelude.*)
