@@ -9,6 +9,7 @@ where
 import Direction2d (Direction2d)
 import OpenSolid
 import Point2d (Point2d)
+import Transform2d (NoScale, Transformation2d (..))
 
 type role Axis2d nominal nominal
 
@@ -17,6 +18,15 @@ data Axis2d coordinates units = Axis2d
   { originPoint :: Point2d coordinates units
   , direction :: Direction2d coordinates
   }
+
+instance
+  (coordinates ~ coordinates', units ~ units')
+  => Transformation2d (Axis2d coordinates units) NoScale coordinates' units'
+  where
+  apply transformation axis =
+    Axis2d
+      (apply transformation (originPoint axis))
+      (apply transformation (direction axis))
 
 through :: Point2d coordinates units -> Direction2d coordinates -> Axis2d coordinates units
 through = Axis2d
