@@ -73,12 +73,12 @@ import Data.Text qualified
 import Data.Void (Void)
 import GHC.TypeLits (KnownSymbol, Symbol, symbolVal)
 import Prelude
-  ( Applicative (..)
+  ( Applicative
   , Bool (..)
   , Char
   , Enum
   , Eq (..)
-  , Functor (..)
+  , Functor
   , IO
   , Int
   , Maybe (..)
@@ -261,11 +261,11 @@ class Nullable nullable where
   (??) :: forall applicative a. Applicative applicative => nullable a -> applicative a -> applicative a
 
 instance Nullable Maybe where
-  Just value ?? ~_ = pure value
+  Just value ?? ~_ = Prelude.pure value
   Nothing ?? ~fallback = fallback
 
 instance Nullable (Result x) where
-  Ok value ?? ~_ = pure value
+  Ok value ?? ~_ = Prelude.pure value
   Err _ ?? ~fallback = fallback
 
 (?=) :: Nullable nullable => nullable a -> a -> a

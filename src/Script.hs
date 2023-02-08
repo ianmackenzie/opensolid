@@ -7,6 +7,7 @@ module Script
   , error
   , fail
   , printLine
+  , map
   , forEach
   , perform
   )
@@ -25,17 +26,20 @@ data Script x a
   | Error x
   | Perform (IO (Script x a))
 
+map :: (a -> b) -> Script x a -> Script x b
+map function (Succeed value) = Succeed (function value)
+map _ (Error err) = Error err
+map function (Perform io) = Perform (Prelude.fmap (map function) io)
+
 instance Functor (Script x) where
-  fmap function (Succeed value) = Succeed (function value)
-  fmap _ (Error err) = Error err
-  fmap function (Perform io) = Perform (fmap (fmap function) io)
+  fmap = map
 
 instance Applicative (Script x) where
   pure = succeed
 
-  Succeed function <*> script = fmap function script
+  Succeed function <*> script = map function script
   Error err <*> _ = Error err
-  Perform io <*> script = Perform (fmap (<*> script) io)
+  Perform io <*> script = Perform (Prelude.fmap (Prelude.<*> script) io)
 
 instance Composition (Script x ()) (Script x a) (Script x a) where
   script1 >> script2 = script1 >>= (\() -> script2)
@@ -43,13 +47,14 @@ instance Composition (Script x ()) (Script x a) (Script x a) where
 instance Bind (Script x) where
   Succeed value >>= function = function value
   Error err >>= _ = Error err
-  Perform io >>= function = Perform (fmap (>>= function) io)
+  Perform io >>= function = Perform (Prelude.fmap (>>= function) io)
 
 instance Prelude.Monad (Script x) where
   (>>=) = (>>=)
 
 perform :: IO a -> Script IOError a
-perform io = Perform (Control.Exception.catch (fmap succeed io) (pure Prelude.. error))
+perform io =
+  Perform (Control.Exception.catch (Prelude.fmap succeed io) (Prelude.pure Prelude.. error))
 
 type Program = Script IOError ()
 

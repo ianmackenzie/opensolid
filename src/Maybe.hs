@@ -7,9 +7,10 @@ module Maybe
 where
 
 import OpenSolid
+import Prelude qualified
 
 map :: (a -> b) -> Maybe a -> Maybe b
-map = fmap
+map = Prelude.fmap
 
 map2 :: (a -> b -> c) -> Maybe a -> Maybe b -> Maybe c
 map2 function maybeA maybeB = do
