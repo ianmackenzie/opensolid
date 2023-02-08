@@ -22,6 +22,7 @@ data Axis2d coordinates units = Axis2d
   { originPoint :: Point2d coordinates units
   , direction :: Direction2d coordinates
   }
+  deriving (Eq, Show)
 
 instance
   (coordinates ~ coordinates', units ~ units')
