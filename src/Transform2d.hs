@@ -11,6 +11,7 @@ module Transform2d
   , translationAlong
   , rotationAround
   , scalingAbout
+  , scalingAlong
   )
 where
 
@@ -64,6 +65,21 @@ scalingAbout (Point2d cx cy) scale =
 
 newtype Deformation coordinates units = Deformation (Matrix units)
 
+scalingAlong :: Axis2d coordinates units -> Float -> Deformation coordinates units
+scalingAlong axis scale =
+  let Direction2d dx dy = Axis2d.direction axis
+      Point2d x0 y0 = Axis2d.originPoint axis
+      dx2 = dx * dx
+      dy2 = dy * dy
+      m11 = scale * dx2 + dy2
+      m12 = (scale - 1.0) * dx * dy
+      m21 = m12
+      m22 = scale * dy2 + dx2
+      tx = x0 - m11 * x0 - m12 * y0
+      ty = y0 - m21 * x0 - m22 * y0
+      matrix = Matrix m11 m12 m21 m22 tx ty
+   in Deformation matrix
+
 class Transformation2d a coordinates units where
   transformBy :: Transformation coordinates units -> a -> a
 
@@ -107,6 +123,9 @@ class Transformation2d a coordinates units => Scaling2d a coordinates units wher
 
 class Scaling2d a coordinates units => Deformation2d a coordinates units where
   deformBy :: Deformation coordinates units -> a -> a
+
+  scaleAlong :: Axis2d coordinates units -> Float -> a -> a
+  scaleAlong axis scale = deformBy (scalingAlong axis scale)
 
 instance
   (coordinates ~ coordinates')
