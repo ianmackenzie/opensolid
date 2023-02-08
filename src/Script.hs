@@ -31,10 +31,10 @@ map function (Succeed value) = Succeed (function value)
 map _ (Error err) = Error err
 map function (Perform io) = Perform (Prelude.fmap (map function) io)
 
-instance Functor (Script x) where
+instance Prelude.Functor (Script x) where
   fmap = map
 
-instance Applicative (Script x) where
+instance Prelude.Applicative (Script x) where
   pure = succeed
 
   Succeed function <*> script = map function script

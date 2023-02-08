@@ -4,9 +4,21 @@
 {-# LANGUAGE Strict #-}
 
 module OpenSolid
-  ( module Prelude
-  , module Data.Void
-  , module Data.Kind
+  ( Bool (..)
+  , Char
+  , Eq (..)
+  , Int
+  , Maybe (..)
+  , Ord (..)
+  , Show
+  , IO
+  , not
+  , otherwise
+  , ($)
+  , (&&)
+  , (||)
+  , Void
+  , Type
   , Composition (..)
   , Bind (..)
   , Qty (..)
@@ -73,12 +85,9 @@ import Data.Text qualified
 import Data.Void (Void)
 import GHC.TypeLits (KnownSymbol, Symbol, symbolVal)
 import Prelude
-  ( Applicative
-  , Bool (..)
+  ( Bool (..)
   , Char
-  , Enum
   , Eq (..)
-  , Functor
   , IO
   , Int
   , Maybe (..)
@@ -258,7 +267,7 @@ validate :: (a -> Bool) -> a -> Result Invalid a
 validate function value = if function value then Ok value else Err Invalid
 
 class Nullable nullable where
-  (??) :: forall applicative a. Applicative applicative => nullable a -> applicative a -> applicative a
+  (??) :: forall applicative a. Prelude.Applicative applicative => nullable a -> applicative a -> applicative a
 
 instance Nullable Maybe where
   Just value ?? ~_ = Prelude.pure value

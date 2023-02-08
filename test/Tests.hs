@@ -26,20 +26,20 @@ parameterValue :: Hedgehog.Gen Float
 parameterValue = Hedgehog.Gen.realFloat (Hedgehog.Range.constant 0.0 1.0)
 
 length :: Hedgehog.Gen Length
-length = fmap Length.meters (Hedgehog.Gen.realFloat (Hedgehog.Range.constantFrom 0.0 -5.0 5.0))
+length = Prelude.fmap Length.meters (Hedgehog.Gen.realFloat (Hedgehog.Range.constantFrom 0.0 -5.0 5.0))
 
 lengthRange :: Hedgehog.Gen (Range Meters)
-lengthRange = do
+lengthRange = Prelude.do
   a <- length
   b <- length
-  return (Range.from a b)
+  Prelude.return (Range.from a b)
 
 vectorBox3d :: Hedgehog.Gen (VectorBox3d coordinates Meters)
-vectorBox3d = do
+vectorBox3d = Prelude.do
   x <- lengthRange
   y <- lengthRange
   z <- lengthRange
-  return (VectorBox3d x y z)
+  Prelude.return (VectorBox3d x y z)
 
 quantityContainedIn :: Range Meters -> Length -> Bool
 quantityContainedIn (Range low high) value =
@@ -50,7 +50,7 @@ withNumTests count = Hedgehog.withTests (Prelude.fromIntegral count)
 
 testVectorBox3dMagnitude :: Hedgehog.Property
 testVectorBox3dMagnitude =
-  do
+  Prelude.do
     vectorBox <- Hedgehog.forAll vectorBox3d
     u <- Hedgehog.forAll parameterValue
     v <- Hedgehog.forAll parameterValue
