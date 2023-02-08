@@ -61,7 +61,6 @@ library
       Script
       Text
       Transform2d
-      Transformable
       Units
       Vector2d
       Vector3d

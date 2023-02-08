@@ -39,7 +39,7 @@ data Line2d coordinates units
 
 instance
   (coordinates ~ coordinates', units ~ units')
-  => Transformation2d (Line2d coordinates units) 'True 'True coordinates' units'
+  => Transformation2d (Line2d coordinates units) category coordinates' units'
   where
   apply transformation (Line2d p1 p2) = Line2d (apply transformation p1) (apply transformation p2)
 
