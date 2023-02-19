@@ -157,9 +157,9 @@ instance
       (Result EndpointsCoincidentOrTooFarApart (Arc2d coordinates units))
   where
   build (Named givenStartPoint, Named givenEndPoint, Named givenRadius, Named angleSign, Named largeAngle) = do
-    let startPoint' = Units.wrap givenStartPoint
-    let endPoint' = Units.wrap givenEndPoint
-    let radius' = Units.wrap givenRadius
+    let startPoint' = Units.generalize givenStartPoint
+    let endPoint' = Units.generalize givenEndPoint
+    let radius' = Units.generalize givenRadius
     let chord' = Line2d.from startPoint' endPoint'
     chordDirection <- Line2d.direction chord' ?? Err EndpointsCoincident
     let squaredRadius' = Qty.squared radius'
@@ -175,8 +175,8 @@ instance
             (Positive, True) -> -offsetMagnitude'
     let centerPoint' = Line2d.midpoint chord' + offsetDirection * offsetDistance'
     let halfLength' = Qty.sqrt squaredHalfLength'
-    let shortAngle' = 2.0 * Units.wrap (Angle.asin (halfLength' / radius'))
-    let fullTurn' = Units.wrap Angle.fullTurn
+    let shortAngle' = 2.0 * Units.generalize (Angle.asin (halfLength' / radius'))
+    let fullTurn' = Units.generalize Angle.fullTurn
     let sweptAngle' =
           case (angleSign, largeAngle) of
             (Positive, False) -> shortAngle'
@@ -185,9 +185,9 @@ instance
             (Positive, True) -> fullTurn' - shortAngle'
     Ok $
       with
-        ( #centerPoint (Units.unwrap centerPoint')
-        , #startPoint (Units.unwrap startPoint')
-        , #sweptAngle (Units.unwrap sweptAngle')
+        ( #centerPoint (Units.specialize centerPoint')
+        , #startPoint (Units.specialize startPoint')
+        , #sweptAngle (Units.specialize sweptAngle')
         )
 
 from :: Point2d coordinates units -> Point2d coordinates units -> Angle -> Result (Line2d coordinates units) (Arc2d coordinates units)

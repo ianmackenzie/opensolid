@@ -2,8 +2,8 @@ module Units
   ( Coercion
   , drop
   , add
-  , wrap
-  , unwrap
+  , generalize
+  , specialize
   )
 where
 
@@ -30,8 +30,8 @@ drop = unsafeCoerce
 add :: Coercion a => a Unitless -> a units
 add = unsafeCoerce
 
-wrap :: Coercion a => a units -> a (Units units)
-wrap = unsafeCoerce
+generalize :: Coercion a => a units -> a (Units units)
+generalize = unsafeCoerce
 
-unwrap :: Coercion a => a (Units units) -> a units
-unwrap = unsafeCoerce
+specialize :: Coercion a => a (Units units) -> a units
+specialize = unsafeCoerce
