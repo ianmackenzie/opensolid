@@ -64,6 +64,8 @@ default-extensions:
 - OverloadedLabels
 - RankNTypes
 - QualifiedDo
+- TypeFamilies
+- TypeOperators
 
 library:
   source-dirs: src
