@@ -103,7 +103,7 @@ library
       OverloadedLabels
       RankNTypes
       QualifiedDo
-  ghc-options: -Wall -Werror -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-signatures -Wmissing-exported-signatures -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wsafe -dcore-lint
+  ghc-options: -Wall -Werror -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-signatures -Wmissing-exported-signatures -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wsafe -dcore-lint -Wno-unticked-promoted-constructors
   build-depends:
       base >=4.7 && <5
     , hedgehog
@@ -148,7 +148,7 @@ executable sandbox
       OverloadedLabels
       RankNTypes
       QualifiedDo
-  ghc-options: -Wall -Werror -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-signatures -Wmissing-exported-signatures -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wsafe -dcore-lint -threaded -rtsopts -with-rtsopts=-N
+  ghc-options: -Wall -Werror -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-signatures -Wmissing-exported-signatures -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wsafe -dcore-lint -Wno-unticked-promoted-constructors -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
     , hedgehog
@@ -195,7 +195,7 @@ test-suite opensolid-test
       OverloadedLabels
       RankNTypes
       QualifiedDo
-  ghc-options: -Wall -Werror -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-signatures -Wmissing-exported-signatures -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wsafe -dcore-lint -threaded -rtsopts -with-rtsopts=-N
+  ghc-options: -Wall -Werror -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-signatures -Wmissing-exported-signatures -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wsafe -dcore-lint -Wno-unticked-promoted-constructors -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
     , hedgehog

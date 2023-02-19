@@ -33,6 +33,7 @@ ghc-options:
 - -Wpartial-fields
 - -Wsafe
 - -dcore-lint
+- -Wno-unticked-promoted-constructors
 
 default-extensions:
 - NoImplicitPrelude
