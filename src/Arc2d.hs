@@ -159,37 +159,33 @@ instance
       (Result EndpointsCoincidentOrTooFarApart (Arc2d coordinates units))
   where
   build (Named givenStartPoint, Named givenEndPoint, Named givenRadius, Named angleSign, Named largeAngle) = do
-    let startPoint' = Units.generalize givenStartPoint
-    let endPoint' = Units.generalize givenEndPoint
-    let radius' = Units.generalize givenRadius
-    let chord' = Line2d.from startPoint' endPoint'
-    chordDirection <- Line2d.direction chord' ?? Err EndpointsCoincident
-    let squaredRadius' = Qty.squared radius'
-    let squaredHalfLength' = Qty.squared (0.5 * Line2d.length chord')
-    squaredOffsetMagnitude' <- validate (>= Qty.zero) (squaredRadius' - squaredHalfLength') ?? Err EndpointsTooFarApart
-    let offsetMagnitude' = Qty.sqrt squaredOffsetMagnitude'
+    let chord = Line2d.from givenStartPoint givenEndPoint
+    chordDirection <- Line2d.direction chord ?? Err EndpointsCoincident
+    let squaredRadius = Qty.squared (Units.generalize givenRadius)
+    let squaredHalfLength = Qty.squared (Units.generalize (0.5 * Line2d.length chord))
+    squaredOffsetMagnitude <- validate (>= Qty.zero) (squaredRadius - squaredHalfLength) ?? Err EndpointsTooFarApart
+    let offsetMagnitude = Units.specialize (Qty.sqrt squaredOffsetMagnitude)
     let offsetDirection = Direction2d.rotateLeft chordDirection
-    let offsetDistance' =
+    let offsetDistance =
           case (angleSign, largeAngle) of
-            (Positive, False) -> offsetMagnitude'
-            (Negative, False) -> -offsetMagnitude'
-            (Negative, True) -> offsetMagnitude'
-            (Positive, True) -> -offsetMagnitude'
-    let centerPoint' = Line2d.midpoint chord' + offsetDirection * offsetDistance'
-    let halfLength' = Qty.sqrt squaredHalfLength'
-    let shortAngle' = 2.0 * Units.generalize (Angle.asin (halfLength' / radius'))
-    let fullTurn' = Units.generalize Angle.fullTurn
-    let sweptAngle' =
+            (Positive, False) -> offsetMagnitude
+            (Negative, False) -> -offsetMagnitude
+            (Negative, True) -> offsetMagnitude
+            (Positive, True) -> -offsetMagnitude
+    let computedCenterPoint = Line2d.midpoint chord + offsetDirection * offsetDistance
+    let halfLength = Units.specialize (Qty.sqrt squaredHalfLength)
+    let shortAngle = 2.0 * Angle.asin (halfLength / givenRadius)
+    let computedSweptAngle =
           case (angleSign, largeAngle) of
-            (Positive, False) -> shortAngle'
-            (Negative, False) -> -shortAngle'
-            (Negative, True) -> shortAngle' - fullTurn'
-            (Positive, True) -> fullTurn' - shortAngle'
+            (Positive, False) -> shortAngle
+            (Negative, False) -> -shortAngle
+            (Negative, True) -> shortAngle - Angle.fullTurn
+            (Positive, True) -> Angle.fullTurn - shortAngle
     Ok $
       with
-        ( #centerPoint (Units.specialize centerPoint')
-        , #startPoint (Units.specialize startPoint')
-        , #sweptAngle (Units.specialize sweptAngle')
+        ( #centerPoint computedCenterPoint
+        , #startPoint givenStartPoint
+        , #sweptAngle computedSweptAngle
         )
 
 from :: Point2d coordinates units -> Point2d coordinates units -> Angle -> Result (Line2d coordinates units) (Arc2d coordinates units)
