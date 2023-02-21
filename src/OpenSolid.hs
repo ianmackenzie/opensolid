@@ -222,7 +222,7 @@ fromInteger = Prelude.fromInteger
 
 {-# INLINE fromRational #-}
 fromRational :: Prelude.Rational -> Float
-fromRational x = Qty (Prelude.fromRational x)
+fromRational = Prelude.fromRational
 
 fromString :: Prelude.String -> Text
 fromString = Data.Text.pack
