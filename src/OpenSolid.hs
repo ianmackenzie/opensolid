@@ -17,7 +17,6 @@ module OpenSolid
   , ($)
   , (&&)
   , (||)
-  , Void
   , Type
   , Composition (..)
   , Bind (..)
@@ -45,7 +44,6 @@ module OpenSolid
   , ifThenElse
   , identity
   , always
-  , infallible
   , internalError
   , notImplemented
   , subtract
@@ -82,7 +80,6 @@ import Data.Functor.Identity (Identity (..))
 import Data.Kind (Type)
 import Data.Proxy (Proxy (Proxy))
 import Data.Text qualified
-import Data.Void (Void)
 import GHC.TypeLits (KnownSymbol, Symbol, symbolVal)
 import Prelude
   ( Bool (..)
@@ -243,9 +240,6 @@ identity = Prelude.id
 
 always :: a -> b -> a
 always = Prelude.const
-
-infallible :: Result Void a -> a
-infallible (Ok value) = value
 
 internalError :: Text -> a
 internalError message = Prelude.error (Data.Text.unpack message)
