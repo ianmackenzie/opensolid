@@ -207,10 +207,10 @@ instance units ~ units' => Subtraction (Qty units) (Qty units') (Qty units) wher
 (//) :: Int -> Int -> Int
 (//) = Prelude.quot
 
-class DotProduct a b c | a b -> c where
+class DotProduct b a c => DotProduct a b c | a b -> c where
   (<>) :: a -> b -> c
 
-class CrossProduct a b c | a b -> c where
+class CrossProduct b a c => CrossProduct a b c | a b -> c where
   (><) :: a -> b -> c
 
 (++) :: Prelude.Monoid a => a -> a -> a
