@@ -32,15 +32,19 @@ data GenericProductOf units1 units2
 
 data GenericQuotientOf units1 units2
 
+{-# INLINE drop #-}
 drop :: Coercion a => a units -> a Unitless
 drop = unsafeCoerce
 
+{-# INLINE add #-}
 add :: Coercion a => a Unitless -> a units
 add = unsafeCoerce
 
+{-# INLINE generalize #-}
 generalize :: Coercion a => a units -> a (Generic units)
 generalize = unsafeCoerce
 
+{-# INLINE specialize #-}
 specialize :: (Coercion a, Specialize genericUnits units) => a genericUnits -> a units
 specialize = unsafeCoerce
 
