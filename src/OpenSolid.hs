@@ -55,6 +55,8 @@ module OpenSolid
   , ApproximateEquality (..)
   , Named (..)
   , fromLabel
+  , (.*)
+  , (./)
   )
 where
 
@@ -321,3 +323,25 @@ instance Division (Qty units) Int (Qty units) where
 instance Units.Quotient Unitless units1 units2 => Division Int (Qty units1) (Qty units2) where
   {-# INLINE (/) #-}
   n / x = float n / x
+
+(.*)
+  :: ( Units.Coercion a
+     , Units.Coercion b
+     , Units.Coercion c
+     , Multiplication (a Unitless) (b Unitless) (c Unitless)
+     )
+  => a units1
+  -> b units2
+  -> c (Units.GenericProduct units1 units2)
+(.*) lhs rhs = Units.add (Units.drop lhs * Units.drop rhs)
+
+(./)
+  :: ( Units.Coercion a
+     , Units.Coercion b
+     , Units.Coercion c
+     , Division (a Unitless) (b Unitless) (c Unitless)
+     )
+  => a units1
+  -> b units2
+  -> c (Units.GenericQuotient units1 units2)
+(./) lhs rhs = Units.add (Units.drop lhs / Units.drop rhs)

@@ -1,5 +1,8 @@
 module Units
   ( Coercion
+  , Generic
+  , GenericProduct
+  , GenericQuotient
   , drop
   , add
   , generalize
@@ -25,7 +28,9 @@ class Coercion (a :: Type -> Type)
 
 data Generic units
 
-data GenericSquared units
+data GenericProductOf units1 units2
+
+data GenericQuotientOf units1 units2
 
 drop :: Coercion a => a units -> a Unitless
 drop = unsafeCoerce
@@ -36,7 +41,7 @@ add = unsafeCoerce
 generalize :: Coercion a => a units -> a (Generic units)
 generalize = unsafeCoerce
 
-specialize :: Coercion a => a (Generic units) -> a units
+specialize :: (Coercion a, Specialize genericUnits units) => a genericUnits -> a units
 specialize = unsafeCoerce
 
 class
@@ -121,8 +126,46 @@ instance Squared Unitless Unitless
 
 instance Squared Meters SquareMeters
 
-instance Product (Generic units) (Generic units) (GenericSquared units)
+instance Product (Generic units) (Generic units) (GenericProductOf units units)
 
-instance Quotient (GenericSquared units) (Generic units) (Generic units)
+instance Quotient (GenericProductOf units units) (Generic units) (Generic units)
 
-instance Squared (Generic units) (GenericSquared units)
+instance Quotient Unitless (Generic units) (GenericQuotientOf Unitless units)
+
+instance Product (Generic units) (GenericQuotientOf Unitless units) Unitless
+
+instance Product (GenericQuotientOf Unitless units) (Generic units) Unitless
+
+instance Quotient Unitless (GenericQuotientOf Unitless units) (Generic units)
+
+type family GenericProduct units1 units2 where
+  GenericProduct (Generic units1) (Generic units2) = GenericProductOf units1 units2
+  GenericProduct (GenericQuotientOf Unitless units2) (Generic units1) = GenericQuotientOf units1 units2
+  GenericProduct (Generic units1) (GenericQuotientOf Unitless units2) = GenericQuotientOf units1 units2
+  GenericProduct (GenericQuotientOf units1 units2) (Generic units2) = Generic units1
+  GenericProduct (GenericQuotientOf units1 units2) (GenericQuotientOf units2 units1) = Unitless
+
+type family GenericQuotient units1 units2 where
+  GenericQuotient (Generic units1) (Generic units2) = GenericQuotientOf units1 units2
+  GenericQuotient (GenericProductOf units units) (Generic units) = Generic units
+  GenericQuotient (GenericProductOf units1 units2) (Generic units1) = Generic units2
+  GenericQuotient (GenericProductOf units1 units2) (Generic units2) = Generic units1
+  GenericQuotient (Generic units1) (GenericQuotientOf units1 units2) = Generic units2
+  GenericQuotient (GenericProductOf units1 units2) (GenericProductOf units2 units2) = GenericQuotientOf units1 units2
+  GenericQuotient (GenericProductOf units2 units1) (GenericProductOf units2 units2) = GenericQuotientOf units1 units2
+  GenericQuotient (GenericProductOf units1 units1) (GenericProductOf units1 units2) = GenericQuotientOf units1 units2
+  GenericQuotient (GenericProductOf units1 units1) (GenericProductOf units2 units1) = GenericQuotientOf units1 units2
+  GenericQuotient (GenericProductOf units1 units3) (GenericProductOf units2 units3) = GenericQuotientOf units1 units2
+  GenericQuotient (GenericProductOf units3 units1) (GenericProductOf units3 units2) = GenericQuotientOf units1 units2
+  GenericQuotient (GenericProductOf units3 units1) (GenericProductOf units2 units3) = GenericQuotientOf units1 units2
+  GenericQuotient (GenericProductOf units1 units3) (GenericProductOf units3 units2) = GenericQuotientOf units1 units2
+
+instance Squared (Generic units) (GenericProductOf units units)
+
+class Specialize genericUnits specificUnits | genericUnits -> specificUnits
+
+instance Specialize (Generic units) units
+
+instance Product units1 units2 units3 => Specialize (GenericProductOf units1 units2) units3
+
+instance Quotient units1 units2 units3 => Specialize (GenericQuotientOf units1 units2) units3

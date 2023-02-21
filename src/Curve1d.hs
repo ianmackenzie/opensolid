@@ -184,7 +184,7 @@ instance Units.Product units1 units2 units3 => Multiplication (Vector3d coordina
 instance Units.Quotient units1 units2 units3 => Division (Curve1d units1) (Curve1d units2) (Curve1d units3) where
   Zero / _ = Zero
   Constant x / Constant y = Constant (x / y)
-  curve / Constant x = Units.add ((1.0 / Units.drop x) * Units.drop curve)
+  curve / Constant x = Units.specialize ((1.0 / Units.generalize x) .* Units.generalize curve)
   curve1 / curve2 = Quotient curve1 curve2
 
 instance Units.Quotient units1 units2 units3 => Division (Curve1d units1) (Qty units2) (Curve1d units3) where

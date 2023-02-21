@@ -242,11 +242,11 @@ instance Units.Quotient units1 units2 units3 => IsVectorCurve3d (Quotient units1
     segmentBounds vectorCurve3d t / Curve1d.segmentBounds curve1d t
 
   derivative (Quotient vectorCurve3d curve1d) =
-    let p = Units.drop vectorCurve3d
-        q = Units.drop curve1d
+    let p = Units.generalize vectorCurve3d
+        q = Units.generalize curve1d
         p' = derivative p
         q' = Curve1d.derivative q
-     in Units.add ((p' * q - p * q') / Curve1d.squared q)
+     in Units.specialize ((p' .* q - p .* q') ./ Curve1d.squared q)
 
 instance Units.Quotient units1 units2 units3 => Division (VectorCurve3d coordinates units1) (Curve1d units2) (VectorCurve3d coordinates units3) where
   vectorCurve3d / curve1d =
@@ -270,8 +270,7 @@ squaredMagnitude expression =
 
 magnitude :: VectorCurve3d coordinates units -> Curve1d units
 magnitude expression =
-  let f = Units.drop expression
-   in Units.add (Curve1d.sqrt (squaredMagnitude f))
+  Units.specialize (Curve1d.sqrt (squaredMagnitude (Units.generalize expression)))
 
 normalize :: VectorCurve3d coordinates units -> VectorCurve3d coordinates Unitless
 normalize expression =
