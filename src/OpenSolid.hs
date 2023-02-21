@@ -32,7 +32,6 @@ module OpenSolid
   , Subtraction (..)
   , Multiplication (..)
   , Division (..)
-  , Squared
   , (//)
   , DotProduct (..)
   , CrossProduct (..)
@@ -56,23 +55,6 @@ module OpenSolid
   , ApproximateEquality (..)
   , Named (..)
   , fromLabel
-  , IsProduct
-  , IsQuotient
-  , Unitless
-  , Angle
-  , Radians
-  , Length
-  , Meters
-  , Area
-  , SquareMeters
-  , Volume
-  , CubicMeters
-  , Duration
-  , Seconds
-  , Speed
-  , MetersPerSecond
-  , Acceleration
-  , MetersPerSecondSquared
   )
 where
 
@@ -81,6 +63,8 @@ import Data.Kind (Type)
 import Data.Proxy (Proxy (Proxy))
 import Data.Text qualified
 import GHC.TypeLits (KnownSymbol, Symbol, symbolVal)
+import Units (Unitless)
+import Units qualified
 import Prelude
   ( Bool (..)
   , Char
@@ -147,7 +131,7 @@ type role Qty nominal
 type Qty :: Type -> Type
 newtype Qty units = Qty Prelude.Double deriving (Eq, Ord, Show)
 
-data Unitless
+instance Units.Coercion Qty
 
 type Float = Qty Unitless
 
@@ -310,27 +294,11 @@ instance Multiplication Sign Sign Sign where
   Positive * sign = sign
   Negative * sign = -sign
 
-class (IsProduct qty2 qty1 qty3, IsQuotient qty3 qty1 qty2, IsQuotient qty3 qty2 qty1) => IsProduct qty1 qty2 qty3 | qty1 qty2 -> qty3
-
-instance {-# INCOHERENT #-} IsProduct Float Float Float
-
-instance {-# INCOHERENT #-} IsProduct Float (Qty units) (Qty units)
-
-instance {-# INCOHERENT #-} IsProduct (Qty units) Float (Qty units)
-
-class (IsProduct qty3 qty2 qty1, IsQuotient qty1 qty3 qty2) => IsQuotient qty1 qty2 qty3 | qty1 qty2 -> qty3
-
-instance {-# INCOHERENT #-} IsQuotient Float Float Float
-
-instance {-# INCOHERENT #-} IsQuotient (Qty units) (Qty units) Float
-
-instance {-# INCOHERENT #-} IsQuotient (Qty units) Float (Qty units)
-
-instance IsProduct (Qty units1) (Qty units2) (Qty units3) => Multiplication (Qty units1) (Qty units2) (Qty units3) where
+instance Units.Product units1 units2 units3 => Multiplication (Qty units1) (Qty units2) (Qty units3) where
   {-# INLINE (*) #-}
   (Qty x) * (Qty y) = Qty (x Prelude.* y)
 
-instance IsQuotient (Qty units1) (Qty units2) (Qty units3) => Division (Qty units1) (Qty units2) (Qty units3) where
+instance Units.Quotient units1 units2 units3 => Division (Qty units1) (Qty units2) (Qty units3) where
   {-# INLINE (/) #-}
   (Qty x) / (Qty y) = Qty (x Prelude./ y)
 
@@ -350,68 +318,6 @@ instance Division (Qty units) Int (Qty units) where
   {-# INLINE (/) #-}
   x / n = x / float n
 
-instance Division Float (Qty units1) (Qty units2) => Division Int (Qty units1) (Qty units2) where
+instance Units.Quotient Unitless units1 units2 => Division Int (Qty units1) (Qty units2) where
   {-# INLINE (/) #-}
   n / x = float n / x
-
-class IsProduct a a b => Squared a b | a -> b, b -> a
-
-instance Squared Float Float
-
-data Radians
-
-type Angle = Qty Radians
-
-data Meters
-
-type Length = Qty Meters
-
-data Seconds
-
-type Duration = Qty Seconds
-
-data MetersPerSecond
-
-type Speed = Qty MetersPerSecond
-
-data MetersPerSecondSquared
-
-type Acceleration = Qty MetersPerSecondSquared
-
-data SquareMeters
-
-type Area = Qty SquareMeters
-
-data CubicMeters
-
-type Volume = Qty CubicMeters
-
-instance IsProduct Length Length Area
-
-instance IsProduct Length Area Volume
-
-instance IsProduct Area Length Volume
-
-instance IsProduct Duration Speed Length
-
-instance IsProduct Speed Duration Length
-
-instance IsProduct Duration Acceleration Speed
-
-instance IsProduct Acceleration Duration Speed
-
-instance IsQuotient Area Length Length
-
-instance IsQuotient Volume Area Length
-
-instance IsQuotient Volume Length Area
-
-instance IsQuotient Length Duration Speed
-
-instance IsQuotient Length Speed Duration
-
-instance IsQuotient Speed Duration Acceleration
-
-instance IsQuotient Speed Acceleration Duration
-
-instance Squared Length Area

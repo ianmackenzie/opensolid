@@ -22,6 +22,7 @@ import Point2d (Point2d (Point2d))
 import Point2d qualified
 import Range (Range (..))
 import Range qualified
+import Units (Unitless)
 import VectorCurve2d (VectorCurve2d)
 
 data QuadraticSpline2d coordinates units

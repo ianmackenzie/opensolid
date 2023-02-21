@@ -10,6 +10,7 @@ where
 import OpenSolid
 import Range (Range)
 import Range qualified
+import Units (Unitless)
 
 data Region = Region
   { domain :: Range Unitless

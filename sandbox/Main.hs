@@ -18,6 +18,7 @@ import Point2d (Point2d)
 import Point2d qualified
 import Qty qualified
 import QuadraticSpline2d qualified
+import Units (Meters)
 import Range qualified
 import Result qualified
 import Script qualified

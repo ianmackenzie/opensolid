@@ -21,6 +21,7 @@ import Length qualified
 import OpenSolid
 import Qty qualified
 import Range qualified
+import Units (Meters)
 import Vector3d (Vector3d (Vector3d))
 import Vector3d qualified
 

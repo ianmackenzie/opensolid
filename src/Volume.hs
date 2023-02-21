@@ -1,5 +1,6 @@
 module Volume
-  ( cubicMeters
+  ( Volume
+  , cubicMeters
   , inCubicMeters
   , cubicMeter
   , cubicCentimeter
@@ -10,6 +11,9 @@ where
 
 import Length qualified
 import OpenSolid
+import Units (CubicMeters)
+
+type Volume = Qty CubicMeters
 
 cubicMeter :: Volume
 cubicMeter = cubicMeters 1.0

@@ -28,6 +28,7 @@ import Point2d (Point2d)
 import Point2d qualified
 import Range (Range (..))
 import Transform2d (Deformation2d (..), Scaling2d (..), Transformation2d (..))
+import Units (Unitless)
 import Vector2d (Vector2d)
 import Vector2d qualified
 import VectorCurve2d (VectorCurve2d)

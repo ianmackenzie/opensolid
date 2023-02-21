@@ -28,6 +28,8 @@ import Generic qualified
 import Length qualified
 import OpenSolid
 import Qty qualified
+import Units (Meters, SquareMeters, Unitless)
+import Units qualified
 
 data Vector3d coordinates units = Vector3d (Qty units) (Qty units) (Qty units)
   deriving (Eq, Show)
@@ -44,19 +46,19 @@ instance (units ~ units', coordinates ~ coordinates') => Addition (Vector3d coor
 instance (units ~ units', coordinates ~ coordinates') => Subtraction (Vector3d coordinates units) (Vector3d coordinates' units') (Vector3d coordinates units) where
   Vector3d x1 y1 z1 - Vector3d x2 y2 z2 = Vector3d (x1 - x2) (y1 - y2) (z1 - z2)
 
-instance Multiplication (Qty units1) (Qty units2) (Qty units3) => Multiplication (Qty units1) (Vector3d coordinates units2) (Vector3d coordinates units3) where
+instance Units.Product units1 units2 units3 => Multiplication (Qty units1) (Vector3d coordinates units2) (Vector3d coordinates units3) where
   scale * Vector3d vx vy vz = Vector3d (scale * vx) (scale * vy) (scale * vz)
 
-instance Multiplication (Qty units1) (Qty units2) (Qty units3) => Multiplication (Vector3d coordinates units1) (Qty units2) (Vector3d coordinates units3) where
+instance Units.Product units1 units2 units3 => Multiplication (Vector3d coordinates units1) (Qty units2) (Vector3d coordinates units3) where
   Vector3d vx vy vz * scale = Vector3d (vx * scale) (vy * scale) (vz * scale)
 
-instance Division (Qty units1) (Qty units2) (Qty units3) => Division (Vector3d coordinates units1) (Qty units2) (Vector3d coordinates units3) where
+instance Units.Quotient units1 units2 units3 => Division (Vector3d coordinates units1) (Qty units2) (Vector3d coordinates units3) where
   Vector3d vx vy vz / scale = Vector3d (vx / scale) (vy / scale) (vz / scale)
 
-instance (Multiplication (Qty units1) (Qty units2) (Qty units3), coordinates ~ coordinates') => DotProduct (Vector3d coordinates units1) (Vector3d coordinates' units2) (Qty units3) where
+instance (Units.Product units1 units2 units3, coordinates ~ coordinates') => DotProduct (Vector3d coordinates units1) (Vector3d coordinates' units2) (Qty units3) where
   Vector3d x1 y1 z1 <> Vector3d x2 y2 z2 = x1 * x2 + y1 * y2 + z1 * z2
 
-instance (Multiplication (Qty units1) (Qty units2) (Qty units3), coordinates ~ coordinates') => CrossProduct (Vector3d coordinates units1) (Vector3d coordinates' units2) (Vector3d coordinates units3) where
+instance (Units.Product units1 units2 units3, coordinates ~ coordinates') => CrossProduct (Vector3d coordinates units1) (Vector3d coordinates' units2) (Vector3d coordinates units3) where
   Vector3d x1 y1 z1 >< Vector3d x2 y2 z2 =
     Vector3d
       (y1 * z2 - z1 * y2)
@@ -109,7 +111,7 @@ midpoint (Vector3d x1 y1 z1) (Vector3d x2 y2 z2) =
 magnitude :: Vector3d coordinates units -> Qty units
 magnitude (Vector3d vx vy vz) = Qty.hypot3 vx vy vz
 
-squaredMagnitude :: Squared (Qty units1) (Qty units2) => Vector3d coordinates units1 -> Qty units2
+squaredMagnitude :: Units.Squared units1 units2 => Vector3d coordinates units1 -> Qty units2
 squaredMagnitude (Vector3d vx vy vz) = Qty.squared vx + Qty.squared vy + Qty.squared vz
 
 data IsZero = IsZero

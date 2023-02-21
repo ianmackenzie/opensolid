@@ -34,6 +34,7 @@ import Float qualified
 import Generic qualified
 import OpenSolid
 import Qty qualified
+import Units (Radians, Unitless)
 import Units qualified
 
 data Range units = Unsafe (Qty units) (Qty units)
@@ -71,13 +72,13 @@ instance units ~ units' => Subtraction (Range units) (Qty units') (Range units) 
 instance units ~ units' => Subtraction (Qty units) (Range units') (Range units) where
   value - Range low high = unsafe (value - high) (value - low)
 
-instance Multiplication (Qty units1) (Qty units2) (Qty units3) => Multiplication (Qty units1) (Range units2) (Range units3) where
+instance Units.Product units1 units2 units3 => Multiplication (Qty units1) (Range units2) (Range units3) where
   value * Range low high = from (value * low) (value * high)
 
-instance Multiplication (Qty units1) (Qty units2) (Qty units3) => Multiplication (Range units1) (Qty units2) (Range units3) where
+instance Units.Product units1 units2 units3 => Multiplication (Range units1) (Qty units2) (Range units3) where
   Range low high * value = from (low * value) (high * value)
 
-instance Multiplication (Qty units1) (Qty units2) (Qty units3) => Multiplication (Range units1) (Range units2) (Range units3) where
+instance Units.Product units1 units2 units3 => Multiplication (Range units1) (Range units2) (Range units3) where
   Range low1 high1 * Range low2 high2 =
     let ll = low1 * low2
         lh = low1 * high2
@@ -87,19 +88,19 @@ instance Multiplication (Qty units1) (Qty units2) (Qty units3) => Multiplication
         high = max (max (max ll lh) hl) hh
      in unsafe low high
 
-instance Division (Qty units1) (Qty units2) (Qty units3) => Division (Qty units1) (Range units2) (Range units3) where
+instance Units.Quotient units1 units2 units3 => Division (Qty units1) (Range units2) (Range units3) where
   n / Range dl dh =
     if dl > Qty.zero || dh < Qty.zero
       then unsafe (n / dh) (n / dl)
       else unsafe -Qty.infinity Qty.infinity
 
-instance Division (Qty units1) (Qty units2) (Qty units3) => Division (Range units1) (Qty units2) (Range units3) where
+instance Units.Quotient units1 units2 units3 => Division (Range units1) (Qty units2) (Range units3) where
   Range nl nh / d
     | d > Qty.zero = unsafe (nl / d) (nh / d)
     | d < Qty.zero = unsafe (nh / d) (nl / d)
     | otherwise = unsafe -Qty.infinity Qty.infinity
 
-instance (Division (Qty units1) (Qty units2) (Qty units3)) => Division (Range units1) (Range units2) (Range units3) where
+instance Units.Quotient units1 units2 units3 => Division (Range units1) (Range units2) (Range units3) where
   Range nl nh / Range dl dh
     | dl > Qty.zero = unsafe (nl / dh) (nh / dl)
     | dh < Qty.zero = unsafe (nh / dh) (nl / dl)
@@ -141,7 +142,7 @@ endpoints (Range low high) = (low, high)
 width :: Range units -> Qty units
 width (Range low high) = high - low
 
-squared :: Squared (Qty units1) (Qty units2) => Range units1 -> Range units2
+squared :: Units.Squared units1 units2 => Range units1 -> Range units2
 squared (Range low high)
   | low >= Qty.zero = unsafe ll hh
   | high <= Qty.zero = unsafe hh ll
@@ -150,7 +151,7 @@ squared (Range low high)
   ll = low * low
   hh = high * high
 
-sqrt :: Squared (Qty units1) (Qty units2) => Range units2 -> Range units1
+sqrt :: Units.Squared units1 units2 => Range units2 -> Range units1
 sqrt (Range low high) =
   unsafe
     (Qty.sqrt (max low Qty.zero))

@@ -16,6 +16,7 @@ module Arc2d
   )
 where
 
+import Angle (Angle)
 import Angle qualified
 import BoundingBox2d (BoundingBox2d)
 import Curve1d qualified
@@ -29,6 +30,7 @@ import Point2d qualified
 import Qty qualified
 import Range (Range)
 import Range qualified
+import Units (Unitless)
 import Units qualified
 import Vector2d qualified
 import VectorBox2d qualified

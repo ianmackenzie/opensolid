@@ -32,10 +32,10 @@ isNaN :: Qty units -> Bool
 isNaN (Qty x) = Prelude.isNaN x
 
 {-# INLINE squared #-}
-squared :: Squared (Qty units1) (Qty units2) => Qty units1 -> Qty units2
+squared :: Units.Squared units1 units2 => Qty units1 -> Qty units2
 squared x = x * x
 
-sqrt :: Squared (Qty units1) (Qty units2) => Qty units2 -> Qty units1
+sqrt :: Units.Squared units1 units2 => Qty units2 -> Qty units1
 sqrt x | x <= Qty.zero = Qty.zero
 sqrt (Qty x) = Qty (Prelude.sqrt x)
 

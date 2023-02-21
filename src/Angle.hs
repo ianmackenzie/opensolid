@@ -1,5 +1,6 @@
 module Angle
-  ( sin
+  ( Angle
+  , sin
   , cos
   , tan
   , asin
@@ -22,7 +23,10 @@ where
 
 import Float qualified
 import OpenSolid
+import Units (Radians)
 import Prelude qualified
+
+type Angle = Qty Radians
 
 sin :: Angle -> Float
 sin (Qty x) = Qty (Prelude.sin x)

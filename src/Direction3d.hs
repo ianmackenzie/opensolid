@@ -14,6 +14,7 @@ module Direction3d
 where
 
 import OpenSolid
+import Units (Unitless)
 import Vector3d (Vector3d (..))
 
 type role Direction3d nominal

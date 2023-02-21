@@ -25,6 +25,7 @@ import Qty qualified
 import Quadrature qualified
 import Range (Range (..))
 import Range qualified
+import Units (Unitless)
 import Units qualified
 import VectorBox2d qualified
 import VectorCurve2d (IsVectorCurve2d, VectorCurve2d (VectorCurve2d))

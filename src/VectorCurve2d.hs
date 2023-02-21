@@ -18,6 +18,7 @@ import Curve1d qualified
 import Generic qualified
 import OpenSolid
 import Range (Range)
+import Units (Unitless)
 import Units qualified
 import Vector2d (Vector2d)
 import Vector2d qualified
@@ -38,9 +39,9 @@ data VectorCurve2d coordinates units where
   Negated :: VectorCurve2d coordinates units -> VectorCurve2d coordinates units
   Sum :: VectorCurve2d coordinates units -> VectorCurve2d coordinates units -> VectorCurve2d coordinates units
   Difference :: VectorCurve2d coordinates units -> VectorCurve2d coordinates units -> VectorCurve2d coordinates units
-  Product1d2d :: forall units1 units2 coordinates units3. Multiplication (Qty units1) (Qty units2) (Qty units3) => Curve1d units1 -> VectorCurve2d coordinates units2 -> VectorCurve2d coordinates units3
-  Product2d1d :: forall units1 units2 coordinates units3. Multiplication (Qty units1) (Qty units2) (Qty units3) => VectorCurve2d coordinates units1 -> Curve1d units2 -> VectorCurve2d coordinates units3
-  Quotient :: forall units1 units2 coordinates units3. Division (Qty units1) (Qty units2) (Qty units3) => VectorCurve2d coordinates units1 -> Curve1d units2 -> VectorCurve2d coordinates units3
+  Product1d2d :: forall units1 units2 coordinates units3. Units.Product units1 units2 units3 => Curve1d units1 -> VectorCurve2d coordinates units2 -> VectorCurve2d coordinates units3
+  Product2d1d :: forall units1 units2 coordinates units3. Units.Product units1 units2 units3 => VectorCurve2d coordinates units1 -> Curve1d units2 -> VectorCurve2d coordinates units3
+  Quotient :: forall units1 units2 coordinates units3. Units.Quotient units1 units2 units3 => VectorCurve2d coordinates units1 -> Curve1d units2 -> VectorCurve2d coordinates units3
 
 instance Units.Coercion (VectorCurve2d coordinates)
 
@@ -117,42 +118,42 @@ instance coordinates ~ coordinates' => Subtraction (VectorCurve2d coordinates un
 instance coordinates ~ coordinates' => Subtraction (Vector2d coordinates units) (VectorCurve2d coordinates' units) (VectorCurve2d coordinates units) where
   vector - curve = constant vector + curve
 
-instance Multiplication (Qty units1) (Qty units2) (Qty units3) => Multiplication (Curve1d units1) (VectorCurve2d coordinates units2) (VectorCurve2d coordinates units3) where
+instance Units.Product units1 units2 units3 => Multiplication (Curve1d units1) (VectorCurve2d coordinates units2) (VectorCurve2d coordinates units3) where
   -- TODO add special cases
   c1 * c2 = Product1d2d c1 c2
 
-instance Multiplication (Qty units1) (Qty units2) (Qty units3) => Multiplication (Qty units1) (VectorCurve2d coordinates units2) (VectorCurve2d coordinates units3) where
+instance Units.Product units1 units2 units3 => Multiplication (Qty units1) (VectorCurve2d coordinates units2) (VectorCurve2d coordinates units3) where
   c1 * c2 = Curve1d.constant c1 * c2
 
-instance Multiplication (Qty units1) (Qty units2) (Qty units3) => Multiplication (VectorCurve2d coordinates units1) (Curve1d units2) (VectorCurve2d coordinates units3) where
+instance Units.Product units1 units2 units3 => Multiplication (VectorCurve2d coordinates units1) (Curve1d units2) (VectorCurve2d coordinates units3) where
   -- TODO add special cases
   c1 * c2 = Product2d1d c1 c2
 
-instance Multiplication (Qty units1) (Qty units2) (Qty units3) => Multiplication (VectorCurve2d coordinates units1) (Qty units2) (VectorCurve2d coordinates units3) where
+instance Units.Product units1 units2 units3 => Multiplication (VectorCurve2d coordinates units1) (Qty units2) (VectorCurve2d coordinates units3) where
   curve * value = curve * Curve1d.constant value
 
-instance Division (Qty units1) (Qty units2) (Qty units3) => Division (VectorCurve2d coordinates units1) (Curve1d units2) (VectorCurve2d coordinates units3) where
+instance Units.Quotient units1 units2 units3 => Division (VectorCurve2d coordinates units1) (Curve1d units2) (VectorCurve2d coordinates units3) where
   -- TODO add special cases
   c1 / c2 = Quotient c1 c2
 
-instance Division (Qty units1) (Qty units2) (Qty units3) => Division (VectorCurve2d coordinates units1) (Qty units2) (VectorCurve2d coordinates units3) where
+instance Units.Quotient units1 units2 units3 => Division (VectorCurve2d coordinates units1) (Qty units2) (VectorCurve2d coordinates units3) where
   curve / value = curve / Curve1d.constant value
 
 data DotProductOf units1 coordinates units2 = DotProductOf (VectorCurve2d coordinates units1) (VectorCurve2d coordinates units2)
 
-instance Multiplication (Qty units1) (Qty units2) (Qty units3) => IsCurve1d (DotProductOf units1 coordinates units2) units3 where
+instance Units.Product units1 units2 units3 => IsCurve1d (DotProductOf units1 coordinates units2) units3 where
   pointOn (DotProductOf c1 c2) t = pointOn c1 t <> pointOn c2 t
   segmentBounds (DotProductOf c1 c2) t = segmentBounds c1 t <> segmentBounds c2 t
   derivative (DotProductOf c1 c2) = derivative c1 <> c2 + c1 <> derivative c2
 
-instance (Multiplication (Qty units1) (Qty units2) (Qty units3), coordinates ~ coordinates') => DotProduct (VectorCurve2d coordinates units1) (VectorCurve2d coordinates' units2) (Curve1d units3) where
+instance (Units.Product units1 units2 units3, coordinates ~ coordinates') => DotProduct (VectorCurve2d coordinates units1) (VectorCurve2d coordinates' units2) (Curve1d units3) where
   -- TODO add special cases
   curve1 <> curve2 = Curve1d (DotProductOf curve1 curve2)
 
-instance (Multiplication (Qty units1) (Qty units2) (Qty units3), coordinates ~ coordinates') => DotProduct (VectorCurve2d coordinates units1) (Vector2d coordinates' units2) (Curve1d units3) where
+instance (Units.Product units1 units2 units3, coordinates ~ coordinates') => DotProduct (VectorCurve2d coordinates units1) (Vector2d coordinates' units2) (Curve1d units3) where
   curve <> vector = curve <> constant vector
 
-instance (Multiplication (Qty units1) (Qty units2) (Qty units3), coordinates ~ coordinates') => DotProduct (Vector2d coordinates units1) (VectorCurve2d coordinates' units2) (Curve1d units3) where
+instance (Units.Product units1 units2 units3, coordinates ~ coordinates') => DotProduct (Vector2d coordinates units1) (VectorCurve2d coordinates' units2) (Curve1d units3) where
   vector <> curve = constant vector <> curve
 
 zero :: VectorCurve2d coordinates units
@@ -173,12 +174,12 @@ instance IsCurve1d (MagnitudeOf coordinates units) units where
 
 newtype SquaredMagnitudeOf coordinates units = SquaredMagnitudeOf (VectorCurve2d coordinates units)
 
-instance Squared (Qty units1) (Qty units2) => IsCurve1d (SquaredMagnitudeOf coordinates units1) units2 where
+instance Units.Squared units1 units2 => IsCurve1d (SquaredMagnitudeOf coordinates units1) units2 where
   pointOn (SquaredMagnitudeOf curve) t = Vector2d.squaredMagnitude (pointOn curve t)
   segmentBounds (SquaredMagnitudeOf curve) t = VectorBox2d.squaredMagnitude (segmentBounds curve t)
   derivative (SquaredMagnitudeOf curve) = 2.0 * curve <> derivative curve
 
-squaredMagnitude :: Squared (Qty units1) (Qty units2) => VectorCurve2d coordinates units1 -> Curve1d units2
+squaredMagnitude :: Units.Squared units1 units2 => VectorCurve2d coordinates units1 -> Curve1d units2
 squaredMagnitude curve = Curve1d (SquaredMagnitudeOf curve)
 
 magnitude :: VectorCurve2d coordinates units -> Curve1d units

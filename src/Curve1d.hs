@@ -28,6 +28,7 @@ import Qty qualified
 import Quadrature qualified
 import Range (Range (..))
 import Range qualified
+import Units (Radians, Unitless)
 import Units qualified
 import Vector2d (Vector2d)
 import Vector3d (Vector3d)
@@ -49,10 +50,10 @@ data Curve1d units where
   Negated :: Curve1d units -> Curve1d units
   Sum :: Curve1d units -> Curve1d units -> Curve1d units
   Difference :: Curve1d units -> Curve1d units -> Curve1d units
-  Product :: forall units1 units2 units3. Multiplication (Qty units1) (Qty units2) (Qty units3) => Curve1d units1 -> Curve1d units2 -> Curve1d units3
-  Quotient :: forall units1 units2 units3. Division (Qty units1) (Qty units2) (Qty units3) => Curve1d units1 -> Curve1d units2 -> Curve1d units3
-  Squared :: forall units1 units2. Squared (Qty units1) (Qty units2) => Curve1d units1 -> Curve1d units2
-  SquareRoot :: forall units1 units2. Squared (Qty units1) (Qty units2) => Curve1d units2 -> Curve1d units1
+  Product :: forall units1 units2 units3. Units.Product units1 units2 units3 => Curve1d units1 -> Curve1d units2 -> Curve1d units3
+  Quotient :: forall units1 units2 units3. Units.Quotient units1 units2 units3 => Curve1d units1 -> Curve1d units2 -> Curve1d units3
+  Squared :: forall units1 units2. Units.Squared units1 units2 => Curve1d units1 -> Curve1d units2
+  SquareRoot :: forall units1 units2. Units.Squared units1 units2 => Curve1d units2 -> Curve1d units1
   Sin :: Curve1d Radians -> Curve1d Unitless
   Cos :: Curve1d Radians -> Curve1d Unitless
 
@@ -151,7 +152,7 @@ instance units ~ units' => Subtraction (Curve1d units) (Qty units') (Curve1d uni
 instance units ~ units' => Subtraction (Qty units) (Curve1d units') (Curve1d units) where
   value - curve = constant value - curve
 
-instance Multiplication (Qty units1) (Qty units2) (Qty units3) => Multiplication (Curve1d units1) (Curve1d units2) (Curve1d units3) where
+instance Units.Product units1 units2 units3 => Multiplication (Curve1d units1) (Curve1d units2) (Curve1d units3) where
   Zero * _ = Zero
   _ * Zero = Zero
   Constant x * Constant y = Constant (x * y)
@@ -162,37 +163,37 @@ instance Multiplication (Qty units1) (Qty units2) (Qty units3) => Multiplication
   Constant x * Product (Constant y) c = Units.add (Product (Constant (Units.drop x * Units.drop y)) (Units.drop c))
   curve1 * curve2 = Product curve1 curve2
 
-instance Multiplication (Qty units1) (Qty units2) (Qty units3) => Multiplication (Curve1d units1) (Qty units2) (Curve1d units3) where
+instance Units.Product units1 units2 units3 => Multiplication (Curve1d units1) (Qty units2) (Curve1d units3) where
   curve * value = curve * constant value
 
-instance Multiplication (Qty units1) (Qty units2) (Qty units3) => Multiplication (Qty units1) (Curve1d units2) (Curve1d units3) where
+instance Units.Product units1 units2 units3 => Multiplication (Qty units1) (Curve1d units2) (Curve1d units3) where
   value * curve = constant value * curve
 
-instance Multiplication (Qty units1) (Qty units2) (Qty units3) => Multiplication (Curve1d units1) (Vector2d coordinates units2) (VectorCurve2d coordinates units3) where
+instance Units.Product units1 units2 units3 => Multiplication (Curve1d units1) (Vector2d coordinates units2) (VectorCurve2d coordinates units3) where
   curve * vector = curve * VectorCurve2d.constant vector
 
-instance Multiplication (Qty units1) (Qty units2) (Qty units3) => Multiplication (Vector2d coordinates units1) (Curve1d units2) (VectorCurve2d coordinates units3) where
+instance Units.Product units1 units2 units3 => Multiplication (Vector2d coordinates units1) (Curve1d units2) (VectorCurve2d coordinates units3) where
   vector * curve = VectorCurve2d.constant vector * curve
 
-instance Multiplication (Qty units1) (Qty units2) (Qty units3) => Multiplication (Curve1d units1) (Vector3d coordinates units2) (VectorCurve3d coordinates units3) where
+instance Units.Product units1 units2 units3 => Multiplication (Curve1d units1) (Vector3d coordinates units2) (VectorCurve3d coordinates units3) where
   curve * vector = curve * VectorCurve3d.constant vector
 
-instance Multiplication (Qty units1) (Qty units2) (Qty units3) => Multiplication (Vector3d coordinates units1) (Curve1d units2) (VectorCurve3d coordinates units3) where
+instance Units.Product units1 units2 units3 => Multiplication (Vector3d coordinates units1) (Curve1d units2) (VectorCurve3d coordinates units3) where
   vector * curve = VectorCurve3d.constant vector * curve
 
-instance Division (Qty units1) (Qty units2) (Qty units3) => Division (Curve1d units1) (Curve1d units2) (Curve1d units3) where
+instance Units.Quotient units1 units2 units3 => Division (Curve1d units1) (Curve1d units2) (Curve1d units3) where
   Zero / _ = Zero
   Constant x / Constant y = Constant (x / y)
   curve / Constant x = Units.add ((1.0 / Units.drop x) * Units.drop curve)
   curve1 / curve2 = Quotient curve1 curve2
 
-instance Division (Qty units1) (Qty units2) (Qty units3) => Division (Curve1d units1) (Qty units2) (Curve1d units3) where
+instance Units.Quotient units1 units2 units3 => Division (Curve1d units1) (Qty units2) (Curve1d units3) where
   curve / value = curve / constant value
 
-instance Division (Qty units1) (Qty units2) (Qty units3) => Division (Qty units1) (Curve1d units2) (Curve1d units3) where
+instance Units.Quotient units1 units2 units3 => Division (Qty units1) (Curve1d units2) (Curve1d units3) where
   value / curve = constant value / curve
 
-squared :: Squared (Qty units1) (Qty units2) => Curve1d units1 -> Curve1d units2
+squared :: Units.Squared units1 units2 => Curve1d units1 -> Curve1d units2
 squared Zero = Zero
 squared (Constant x) = Constant (x * x)
 squared (Negated c) = squared c
@@ -206,7 +207,7 @@ cosSquared c = 0.5 * cos (2.0 * c) + 0.5
 sinSquared :: Curve1d Radians -> Curve1d Unitless
 sinSquared c = 0.5 - 0.5 * cos (2.0 * c)
 
-sqrt :: Squared (Qty units1) (Qty units2) => Curve1d units2 -> Curve1d units1
+sqrt :: Units.Squared units1 units2 => Curve1d units2 -> Curve1d units1
 sqrt Zero = Zero
 sqrt (Constant x) = Constant (Qty.sqrt x)
 sqrt curve = SquareRoot curve

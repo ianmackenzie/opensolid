@@ -17,6 +17,7 @@ module Direction2d
   )
 where
 
+import Angle (Angle)
 import Angle qualified
 import OpenSolid
 import Vector2d (Vector2d (..))

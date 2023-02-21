@@ -18,6 +18,7 @@ import Curve1d qualified
 import Generic qualified
 import OpenSolid
 import Range (Range)
+import Units (Unitless)
 import Units qualified
 import Vector3d (Vector3d (Vector3d))
 import Vector3d qualified
@@ -147,7 +148,7 @@ data Product1d3d units1 coordinates units2 = Product1d3d (Curve1d units1) (Vecto
 
 data Product3d1d units1 coordinates units2 = Product3d1d (VectorCurve3d coordinates units1) (Curve1d units2)
 
-instance Multiplication (Qty units1) (Qty units2) (Qty units3) => IsVectorCurve3d (Product3d1d units1 coordinates units2) coordinates units3 where
+instance Units.Product units1 units2 units3 => IsVectorCurve3d (Product3d1d units1 coordinates units2) coordinates units3 where
   pointOn (Product3d1d vectorCurve3d curve1d) t =
     pointOn vectorCurve3d t * Curve1d.pointOn curve1d t
 
@@ -157,7 +158,7 @@ instance Multiplication (Qty units1) (Qty units2) (Qty units3) => IsVectorCurve3
   derivative (Product3d1d vectorCurve3d curve1d) =
     derivative vectorCurve3d * curve1d + vectorCurve3d * Curve1d.derivative curve1d
 
-instance Multiplication (Qty units1) (Qty units2) (Qty units3) => IsVectorCurve3d (Product1d3d units1 coordinates units2) coordinates units3 where
+instance Units.Product units1 units2 units3 => IsVectorCurve3d (Product1d3d units1 coordinates units2) coordinates units3 where
   pointOn (Product1d3d curve1d vectorCurve3d) t =
     Curve1d.pointOn curve1d t * pointOn vectorCurve3d t
 
@@ -167,25 +168,25 @@ instance Multiplication (Qty units1) (Qty units2) (Qty units3) => IsVectorCurve3
   derivative (Product1d3d curve1d vectorCurve3d) =
     Curve1d.derivative curve1d * vectorCurve3d + curve1d * derivative vectorCurve3d
 
-instance Multiplication (Qty units1) (Qty units2) (Qty units3) => Multiplication (VectorCurve3d coordinates units1) (Curve1d units2) (VectorCurve3d coordinates units3) where
+instance Units.Product units1 units2 units3 => Multiplication (VectorCurve3d coordinates units1) (Curve1d units2) (VectorCurve3d coordinates units3) where
   vectorCurve3d * curve1d =
     VectorCurve3d (Product3d1d vectorCurve3d curve1d)
 
-instance Multiplication (Qty units1) (Qty units2) (Qty units3) => Multiplication (Curve1d units1) (VectorCurve3d coordinates units2) (VectorCurve3d coordinates units3) where
+instance Units.Product units1 units2 units3 => Multiplication (Curve1d units1) (VectorCurve3d coordinates units2) (VectorCurve3d coordinates units3) where
   curve1d * vectorCurve3d =
     VectorCurve3d (Product1d3d curve1d vectorCurve3d)
 
-instance Multiplication (Qty units1) (Qty units2) (Qty units3) => Multiplication (VectorCurve3d coordinates units1) (Qty units2) (VectorCurve3d coordinates units3) where
+instance Units.Product units1 units2 units3 => Multiplication (VectorCurve3d coordinates units1) (Qty units2) (VectorCurve3d coordinates units3) where
   curve * value =
     VectorCurve3d (Product3d1d curve (Curve1d.constant value))
 
-instance Multiplication (Qty units1) (Qty units2) (Qty units3) => Multiplication (Qty units1) (VectorCurve3d coordinates units2) (VectorCurve3d coordinates units3) where
+instance Units.Product units1 units2 units3 => Multiplication (Qty units1) (VectorCurve3d coordinates units2) (VectorCurve3d coordinates units3) where
   value * curve =
     VectorCurve3d (Product1d3d (Curve1d.constant value) curve)
 
 data DotProductOf units1 coordinates units2 = DotProductOf (VectorCurve3d coordinates units1) (VectorCurve3d coordinates units2)
 
-instance Multiplication (Qty units1) (Qty units2) (Qty units) => IsCurve1d (DotProductOf units1 coordinates units2) units where
+instance Units.Product units1 units2 units => IsCurve1d (DotProductOf units1 coordinates units2) units where
   pointOn (DotProductOf curve1 curve2) t =
     pointOn curve1 t <> pointOn curve2 t
 
@@ -195,21 +196,21 @@ instance Multiplication (Qty units1) (Qty units2) (Qty units) => IsCurve1d (DotP
   derivative (DotProductOf curve1 curve2) =
     derivative curve1 <> curve2 + curve1 <> derivative curve2
 
-instance (Multiplication (Qty units1) (Qty units2) (Qty units3), coordinates ~ coordinates') => DotProduct (VectorCurve3d coordinates units1) (VectorCurve3d coordinates' units2) (Curve1d units3) where
+instance (Units.Product units1 units2 units3, coordinates ~ coordinates') => DotProduct (VectorCurve3d coordinates units1) (VectorCurve3d coordinates' units2) (Curve1d units3) where
   curve1 <> curve2 =
     Curve1d (DotProductOf curve1 curve2)
 
-instance (Multiplication (Qty units1) (Qty units2) (Qty units3), coordinates ~ coordinates') => DotProduct (VectorCurve3d coordinates units1) (Vector3d coordinates' units2) (Curve1d units3) where
+instance (Units.Product units1 units2 units3, coordinates ~ coordinates') => DotProduct (VectorCurve3d coordinates units1) (Vector3d coordinates' units2) (Curve1d units3) where
   curve <> vector =
     Curve1d (DotProductOf curve (constant vector))
 
-instance (Multiplication (Qty units1) (Qty units2) (Qty units3), coordinates ~ coordinates') => DotProduct (Vector3d coordinates units1) (VectorCurve3d coordinates' units2) (Curve1d units3) where
+instance (Units.Product units1 units2 units3, coordinates ~ coordinates') => DotProduct (Vector3d coordinates units1) (VectorCurve3d coordinates' units2) (Curve1d units3) where
   vector <> curve =
     Curve1d (DotProductOf (constant vector) curve)
 
 data CrossProductOf units1 coordinates units2 = CrossProductOf (VectorCurve3d coordinates units1) (VectorCurve3d coordinates units2)
 
-instance Multiplication (Qty units1) (Qty units2) (Qty units3) => IsVectorCurve3d (CrossProductOf units1 coordinates units2) coordinates units3 where
+instance Units.Product units1 units2 units3 => IsVectorCurve3d (CrossProductOf units1 coordinates units2) coordinates units3 where
   pointOn (CrossProductOf curve1 curve2) t =
     pointOn curve1 t >< pointOn curve2 t
 
@@ -219,21 +220,21 @@ instance Multiplication (Qty units1) (Qty units2) (Qty units3) => IsVectorCurve3
   derivative (CrossProductOf curve1 curve2) =
     derivative curve1 >< curve2 + curve1 >< derivative curve2
 
-instance (Multiplication (Qty units1) (Qty units2) (Qty units3), coordinates ~ coordinates') => CrossProduct (VectorCurve3d coordinates units1) (VectorCurve3d coordinates' units2) (VectorCurve3d coordinates units3) where
+instance (Units.Product units1 units2 units3, coordinates ~ coordinates') => CrossProduct (VectorCurve3d coordinates units1) (VectorCurve3d coordinates' units2) (VectorCurve3d coordinates units3) where
   curve1 >< curve2 =
     VectorCurve3d (CrossProductOf curve1 curve2)
 
-instance (Multiplication (Qty units1) (Qty units2) (Qty units3), coordinates ~ coordinates') => CrossProduct (Vector3d coordinates units1) (VectorCurve3d coordinates' units2) (VectorCurve3d coordinates units3) where
+instance (Units.Product units1 units2 units3, coordinates ~ coordinates') => CrossProduct (Vector3d coordinates units1) (VectorCurve3d coordinates' units2) (VectorCurve3d coordinates units3) where
   vector >< curve =
     VectorCurve3d (CrossProductOf (constant vector) curve)
 
-instance (Multiplication (Qty units1) (Qty units2) (Qty units3), coordinates ~ coordinates') => CrossProduct (VectorCurve3d coordinates units1) (Vector3d coordinates' units2) (VectorCurve3d coordinates units3) where
+instance (Units.Product units1 units2 units3, coordinates ~ coordinates') => CrossProduct (VectorCurve3d coordinates units1) (Vector3d coordinates' units2) (VectorCurve3d coordinates units3) where
   curve >< vector =
     VectorCurve3d (CrossProductOf curve (constant vector))
 
 data Quotient units1 coordinates units2 = Quotient (VectorCurve3d coordinates units1) (Curve1d units2)
 
-instance Division (Qty units1) (Qty units2) (Qty units3) => IsVectorCurve3d (Quotient units1 coordinates units2) coordinates units3 where
+instance Units.Quotient units1 units2 units3 => IsVectorCurve3d (Quotient units1 coordinates units2) coordinates units3 where
   pointOn (Quotient vectorCurve3d curve1d) t =
     pointOn vectorCurve3d t / Curve1d.pointOn curve1d t
 
@@ -247,13 +248,13 @@ instance Division (Qty units1) (Qty units2) (Qty units3) => IsVectorCurve3d (Quo
         q' = Curve1d.derivative q
      in Units.add ((p' * q - p * q') / Curve1d.squared q)
 
-instance Division (Qty units1) (Qty units2) (Qty units3) => Division (VectorCurve3d coordinates units1) (Curve1d units2) (VectorCurve3d coordinates units3) where
+instance Units.Quotient units1 units2 units3 => Division (VectorCurve3d coordinates units1) (Curve1d units2) (VectorCurve3d coordinates units3) where
   vectorCurve3d / curve1d =
     VectorCurve3d (Quotient vectorCurve3d curve1d)
 
 newtype SquaredMagnitudeOf coordinates units = SquaredMagnitudeOf (VectorCurve3d coordinates units)
 
-instance Squared (Qty units1) (Qty units2) => IsCurve1d (SquaredMagnitudeOf coordinates units1) units2 where
+instance Units.Squared units1 units2 => IsCurve1d (SquaredMagnitudeOf coordinates units1) units2 where
   pointOn (SquaredMagnitudeOf expression) t =
     Vector3d.squaredMagnitude (pointOn expression t)
 
@@ -263,7 +264,7 @@ instance Squared (Qty units1) (Qty units2) => IsCurve1d (SquaredMagnitudeOf coor
   derivative (SquaredMagnitudeOf expression) =
     2.0 * expression <> derivative expression
 
-squaredMagnitude :: Squared (Qty units1) (Qty units2) => VectorCurve3d coordinates units1 -> Curve1d units2
+squaredMagnitude :: Units.Squared units1 units2 => VectorCurve3d coordinates units1 -> Curve1d units2
 squaredMagnitude expression =
   Curve1d (SquaredMagnitudeOf expression)
 

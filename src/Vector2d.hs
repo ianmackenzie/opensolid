@@ -20,6 +20,7 @@ module Vector2d
   )
 where
 
+import Angle (Angle)
 import Angle qualified
 import Area qualified
 import {-# SOURCE #-} Direction2d (Direction2d)
@@ -28,6 +29,8 @@ import Generic qualified
 import Length qualified
 import OpenSolid
 import Qty qualified
+import Units (Meters, SquareMeters, Unitless)
+import Units qualified
 
 type role Vector2d nominal nominal
 
@@ -47,19 +50,19 @@ instance (units ~ units', coordinates ~ coordinates') => Addition (Vector2d coor
 instance (units ~ units', coordinates ~ coordinates') => Subtraction (Vector2d coordinates units) (Vector2d coordinates' units') (Vector2d coordinates units) where
   Vector2d x1 y1 - Vector2d x2 y2 = Vector2d (x1 - x2) (y1 - y2)
 
-instance Multiplication (Qty units1) (Qty units2) (Qty units3) => Multiplication (Qty units1) (Vector2d coordinates units2) (Vector2d coordinates units3) where
+instance Units.Product units1 units2 units3 => Multiplication (Qty units1) (Vector2d coordinates units2) (Vector2d coordinates units3) where
   scale * Vector2d vx vy = Vector2d (scale * vx) (scale * vy)
 
-instance Multiplication (Qty units1) (Qty units2) (Qty units3) => Multiplication (Vector2d coordinates units1) (Qty units2) (Vector2d coordinates units3) where
+instance Units.Product units1 units2 units3 => Multiplication (Vector2d coordinates units1) (Qty units2) (Vector2d coordinates units3) where
   Vector2d vx vy * scale = Vector2d (vx * scale) (vy * scale)
 
-instance Division (Qty units1) (Qty units2) (Qty units3) => Division (Vector2d coordinates units1) (Qty units2) (Vector2d coordinates units3) where
+instance Units.Quotient units1 units2 units3 => Division (Vector2d coordinates units1) (Qty units2) (Vector2d coordinates units3) where
   Vector2d vx vy / scale = Vector2d (vx / scale) (vy / scale)
 
-instance (Multiplication (Qty units1) (Qty units2) (Qty units3), coordinates ~ coordinates') => DotProduct (Vector2d coordinates units1) (Vector2d coordinates' units2) (Qty units3) where
+instance (Units.Product units1 units2 units3, coordinates ~ coordinates') => DotProduct (Vector2d coordinates units1) (Vector2d coordinates' units2) (Qty units3) where
   Vector2d x1 y1 <> Vector2d x2 y2 = x1 * x2 + y1 * y2
 
-instance (Multiplication (Qty units1) (Qty units2) (Qty units3), coordinates ~ coordinates') => CrossProduct (Vector2d coordinates units1) (Vector2d coordinates' units2) (Qty units3) where
+instance (Units.Product units1 units2 units3, coordinates ~ coordinates') => CrossProduct (Vector2d coordinates units1) (Vector2d coordinates' units2) (Qty units3) where
   Vector2d x1 y1 >< Vector2d x2 y2 = x1 * y2 - y1 * x2
 
 zero :: Vector2d coordinates units
@@ -96,7 +99,7 @@ midpoint (Vector2d x1 y1) (Vector2d x2 y2) =
   Vector2d (Qty.midpoint x1 x2) (Qty.midpoint y1 y2)
 
 determinant
-  :: Multiplication (Qty units1) (Qty units2) (Qty units3)
+  :: Units.Product units1 units2 units3
   => Vector2d coordinates units1
   -> Vector2d coordinates units2
   -> Qty units3
@@ -105,7 +108,7 @@ determinant (Vector2d x1 y1) (Vector2d x2 y2) = x1 * y2 - y1 * x2
 magnitude :: Vector2d coordinates units -> Qty units
 magnitude (Vector2d vx vy) = Qty.hypot2 vx vy
 
-squaredMagnitude :: Squared (Qty units1) (Qty units2) => Vector2d coordinates units1 -> Qty units2
+squaredMagnitude :: Units.Squared units1 units2 => Vector2d coordinates units1 -> Qty units2
 squaredMagnitude (Vector2d vx vy) = Qty.squared vx + Qty.squared vy
 
 angle :: Vector2d coordinates units -> Angle
