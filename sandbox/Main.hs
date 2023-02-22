@@ -18,11 +18,11 @@ import Point2d (Point2d)
 import Point2d qualified
 import Qty qualified
 import QuadraticSpline2d qualified
-import Units (Meters)
 import Range qualified
 import Result qualified
 import Script qualified
 import Transform2d qualified
+import Units (Meters)
 import Vector2d qualified
 import Vector3d qualified
 import Volume qualified
