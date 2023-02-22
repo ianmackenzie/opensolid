@@ -45,7 +45,7 @@ generalize :: Coercion a => a units -> a (Generic units)
 generalize = unsafeCoerce
 
 {-# INLINE specialize #-}
-specialize :: (Coercion a, Specialize genericUnits units) => a genericUnits -> a units
+specialize :: (Coercion a, Specialize genericUnits specificUnits) => a genericUnits -> a specificUnits
 specialize = unsafeCoerce
 
 class
