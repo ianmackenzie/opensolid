@@ -2,6 +2,7 @@ module Float
   ( ceiling
   , floor
   , pi
+  , tau
   , pow
   )
 where
@@ -19,6 +20,9 @@ ceiling (Qty x) = Prelude.ceiling x
 
 pi :: Float
 pi = Prelude.pi
+
+tau :: Float
+tau = 2.0 * pi
 
 pow :: Float -> Float -> Float
 pow = (Prelude.**)

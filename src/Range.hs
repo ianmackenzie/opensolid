@@ -250,18 +250,15 @@ cos range@(Range low high) =
    in unsafe newLow newHigh
 
 sinIncludesMinMax :: Range Radians -> (Bool, Bool)
-sinIncludesMinMax range = cosIncludesMinMax (range - Angle.radians (Float.pi / 2))
+sinIncludesMinMax range = cosIncludesMinMax (range - Angle.quarterTurn)
 
 cosIncludesMinMax :: Range Radians -> (Bool, Bool)
 cosIncludesMinMax range =
-  ( cosIncludesMax (range + Angle.radians Float.pi)
-  , cosIncludesMax range
-  )
+  (cosIncludesMax (range + Angle.halfTurn), cosIncludesMax range)
 
 cosIncludesMax :: Range Radians -> Bool
 cosIncludesMax (Range low high) =
-  let twoPi = Angle.radians (2 * Float.pi)
-   in Float.floor (low / twoPi) /= Float.floor (high / twoPi)
+  Float.floor (low / Angle.fullTurn) /= Float.floor (high / Angle.fullTurn)
 
 interpolate :: Range units -> Float -> Qty units
 interpolate (Range low high) t =

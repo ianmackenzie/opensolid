@@ -10,7 +10,6 @@ import Curve2d qualified
 import Debug qualified
 import Direction2d qualified
 import Direction3d ()
-import Float qualified
 import Length qualified
 import List qualified
 import OpenSolid
@@ -159,7 +158,7 @@ script = do
   log "Roots" roots
   log "sqrt 2.0" (Qty.sqrt 2.0)
   log "Equality test" (let ?tolerance = Length.centimeter in Length.meters 1.0 ~= Length.meters 1.005)
-  let theta = Angle.radians (2 * Float.pi) * t
+  let theta = Angle.fullTurn * t
   let expression = Curve1d.squared (Curve1d.sin theta)
   let expressionRoots = let ?tolerance = 1e-12 in Curve1d.roots expression
   log "Roots" expressionRoots

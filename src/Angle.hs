@@ -59,7 +59,7 @@ inRadians :: Angle -> Float
 inRadians (Qty x) = Qty x
 
 degree :: Angle
-degree = radians (Float.pi / 180.0)
+degree = fullTurn / 360.0
 
 degrees :: Float -> Angle
 degrees = (* degree)
@@ -68,7 +68,7 @@ inDegrees :: Angle -> Float
 inDegrees = (/ degree)
 
 fullTurn :: Angle
-fullTurn = radians (2.0 * Float.pi)
+fullTurn = radians Float.tau
 
 halfTurn :: Angle
 halfTurn = turns 0.5
