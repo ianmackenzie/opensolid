@@ -10,12 +10,16 @@ module Direction3d
   , negativeY
   , positiveZ
   , negativeZ
+  , angleFrom
   )
 where
 
+import Angle (Angle)
+import Angle qualified
 import OpenSolid
 import Units (Unitless)
 import Vector3d (Vector3d (..))
+import Vector3d qualified
 
 type role Direction3d nominal
 
@@ -97,3 +101,6 @@ y = positiveY
 
 z :: Direction3d coordinates
 z = positiveZ
+
+angleFrom :: Direction3d coordinates -> Direction3d coordinates -> Angle
+angleFrom d1 d2 = Angle.atan2 (Vector3d.magnitude (d1 >< d2)) (d1 <> d2)
