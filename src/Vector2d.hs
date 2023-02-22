@@ -38,6 +38,8 @@ type Vector2d :: Type -> Type -> Type
 data Vector2d coordinates units = Vector2d (Qty units) (Qty units)
   deriving (Eq, Show)
 
+instance Units.Coercion (Vector2d coordinates)
+
 instance Generic.Zero (Vector2d coordinates units) where
   zero = zero
 

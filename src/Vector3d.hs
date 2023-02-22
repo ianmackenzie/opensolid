@@ -34,6 +34,8 @@ import Units qualified
 data Vector3d coordinates units = Vector3d (Qty units) (Qty units) (Qty units)
   deriving (Eq, Show)
 
+instance Units.Coercion (Vector3d coordinates)
+
 instance Generic.Zero (Vector3d coordinates units) where
   zero = zero
 
