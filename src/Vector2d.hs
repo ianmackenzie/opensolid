@@ -43,6 +43,9 @@ instance Units.Coercion (Vector2d coordinates)
 instance Generic.Zero (Vector2d coordinates units) where
   zero = zero
 
+instance ApproximateEquality (Vector2d coordinates units) units where
+  v1 ~= v2 = magnitude (v1 - v2) ~= Qty.zero
+
 instance Negation (Vector2d coordinates units) where
   negate (Vector2d vx vy) = Vector2d (negate vx) (negate vy)
 

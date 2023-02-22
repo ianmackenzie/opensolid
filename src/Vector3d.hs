@@ -39,6 +39,9 @@ instance Units.Coercion (Vector3d coordinates)
 instance Generic.Zero (Vector3d coordinates units) where
   zero = zero
 
+instance ApproximateEquality (Vector3d coordinates units) units where
+  v1 ~= v2 = magnitude (v1 - v2) ~= Qty.zero
+
 instance Negation (Vector3d coordinates units) where
   negate (Vector3d vx vy vz) = Vector3d (negate vx) (negate vy) (negate vz)
 
