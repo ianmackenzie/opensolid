@@ -17,7 +17,8 @@ where
 import Angle (Angle)
 import Angle qualified
 import OpenSolid
-import Units (Unitless)
+import Qty qualified
+import Units (Radians, Unitless)
 import Vector3d (Vector3d (..))
 import Vector3d qualified
 
@@ -32,6 +33,9 @@ data Direction3d coordinates = Unsafe Float Float Float
 {-# INLINE Direction3d #-}
 pattern Direction3d :: Float -> Float -> Float -> Direction3d coordinates
 pattern Direction3d x y z <- Unsafe x y z
+
+instance ApproximateEquality (Direction3d coordinates) Radians where
+  d1 ~= d2 = angleFrom d1 d2 ~= Qty.zero
 
 instance Negation (Direction3d coordinates) where
   negate (Direction3d dx dy dz) = unsafe (negate dx) (negate dy) (negate dz)

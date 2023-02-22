@@ -20,6 +20,8 @@ where
 import Angle (Angle)
 import Angle qualified
 import OpenSolid
+import Qty qualified
+import Units (Radians)
 import Vector2d (Vector2d (..))
 
 type role Direction2d nominal
@@ -33,6 +35,9 @@ data Direction2d coordinates = Unsafe Float Float
 {-# INLINE Direction2d #-}
 pattern Direction2d :: Float -> Float -> Direction2d coordinates
 pattern Direction2d x y <- Unsafe x y
+
+instance ApproximateEquality (Direction2d coordinates) Radians where
+  d1 ~= d2 = angleFrom d1 d2 ~= Qty.zero
 
 instance Negation (Direction2d coordinates) where
   negate (Direction2d dx dy) = unsafe (negate dx) (negate dy)
