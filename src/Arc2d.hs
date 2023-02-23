@@ -22,7 +22,7 @@ import BoundingBox2d (BoundingBox2d)
 import Curve1d qualified
 import Curve2d (IsCurve2d (..))
 import Direction2d qualified
-import Line2d (Line2d (..))
+import Line2d (Line2d)
 import Line2d qualified
 import OpenSolid
 import Point2d (Point2d)
@@ -190,9 +190,9 @@ instance
 
 from :: Point2d coordinates units -> Point2d coordinates units -> Angle -> Result (Line2d coordinates units) (Arc2d coordinates units)
 from p1 p2 theta = do
-  (distance, direction) <- Vector2d.magnitudeAndDirection (p2 - p1) ?? Err (Line2d p1 p2)
+  (distance, direction) <- Vector2d.magnitudeAndDirection (p2 - p1) ?? Err (Line2d.from p1 p2)
   let tanHalfAngle = Angle.tan (0.5 * theta)
-  denominator <- validate (/= Qty.zero) tanHalfAngle ?? Err (Line2d p1 p2)
+  denominator <- validate (/= Qty.zero) tanHalfAngle ?? Err (Line2d.from p1 p2)
   let offset = 0.5 * distance / denominator
   let center = Point2d.midpoint p1 p2 + offset * Direction2d.rotateLeft direction
   Ok

@@ -1,5 +1,5 @@
 module Line2d
-  ( Line2d (..)
+  ( Line2d
   , from
   , startPoint
   , endPoint
