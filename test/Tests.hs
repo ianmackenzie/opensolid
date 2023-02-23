@@ -14,6 +14,8 @@ import Vector3d qualified
 import VectorBox3d (VectorBox3d (VectorBox3d))
 import VectorBox3d qualified
 import Prelude qualified
+import Length (Length)
+import Units (Meters)
 
 group :: Text -> List (Text, Property) -> Hedgehog.Group
 group name properties =
