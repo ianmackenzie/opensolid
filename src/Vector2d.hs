@@ -123,12 +123,12 @@ data IsZero = IsZero
 
 direction :: Vector2d coordinates units -> Result IsZero (Direction2d coordinates)
 direction vector@(Vector2d vx vy) = do
-  magnitude' <- validate (/= Qty.zero) (magnitude vector) ?? Err IsZero
+  magnitude' <- validate (/= Qty.zero) (magnitude vector) ?? Error IsZero
   Ok (Direction2d.unsafe (vx / magnitude') (vy / magnitude'))
 
 magnitudeAndDirection :: Vector2d coordinates units -> Result IsZero (Qty units, Direction2d coordinates)
 magnitudeAndDirection vector@(Vector2d vx vy) = do
-  magnitude' <- validate (/= Qty.zero) (magnitude vector) ?? Err IsZero
+  magnitude' <- validate (/= Qty.zero) (magnitude vector) ?? Error IsZero
   Ok (magnitude', Direction2d.unsafe (vx / magnitude') (vy / magnitude'))
 
 normalize :: Vector2d coordinates units -> Vector2d coordinates Unitless

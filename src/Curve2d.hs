@@ -92,21 +92,21 @@ instance IsCurve2d (Point2d coordinates units) coordinates units where
   boundingBoxImpl point = BoundingBox2d.constant point
 
 instance (IsCurve2d x coordinates units, IsCurve2d a coordinates' units', units ~ units', coordinates ~ coordinates') => IsCurve2d (Result x a) coordinates units where
-  startPointImpl (Err curve) = startPointImpl curve
+  startPointImpl (Error curve) = startPointImpl curve
   startPointImpl (Ok curve) = startPointImpl curve
-  endPointImpl (Err curve) = endPointImpl curve
+  endPointImpl (Error curve) = endPointImpl curve
   endPointImpl (Ok curve) = endPointImpl curve
-  pointOnImpl (Err curve) = pointOnImpl curve
+  pointOnImpl (Error curve) = pointOnImpl curve
   pointOnImpl (Ok curve) = pointOnImpl curve
-  segmentBoundsImpl (Err curve) = segmentBoundsImpl curve
+  segmentBoundsImpl (Error curve) = segmentBoundsImpl curve
   segmentBoundsImpl (Ok curve) = segmentBoundsImpl curve
-  derivativeImpl (Err curve) = derivativeImpl curve
+  derivativeImpl (Error curve) = derivativeImpl curve
   derivativeImpl (Ok curve) = derivativeImpl curve
-  reverseImpl (Err curve) = let r = reverseImpl curve in Err r
+  reverseImpl (Error curve) = let r = reverseImpl curve in Error r
   reverseImpl (Ok curve) = let r = reverseImpl curve in Ok r
-  bisectImpl (Err curve) = let (c1, c2) = bisectImpl curve in (Err c1, Err c2)
+  bisectImpl (Error curve) = let (c1, c2) = bisectImpl curve in (Error c1, Error c2)
   bisectImpl (Ok curve) = let (c1, c2) = bisectImpl curve in (Ok c1, Ok c2)
-  boundingBoxImpl (Err curve) = boundingBoxImpl curve
+  boundingBoxImpl (Error curve) = boundingBoxImpl curve
   boundingBoxImpl (Ok curve) = boundingBoxImpl curve
 
 data PointCurveDifference coordinates units = PointCurveDifference (Point2d coordinates units) (Curve2d coordinates units)
@@ -139,14 +139,14 @@ nearby :: Tolerance units => Point2d coordinates units -> Curve2d coordinates un
 nearby point curve domain
   | Range.minValue distance > ?tolerance = Ok False
   | Range.maxValue distance <= ?tolerance = Ok True
-  | otherwise = Err Indeterminate
+  | otherwise = Error Indeterminate
  where
   distance = VectorBox2d.magnitude (point - segmentBounds curve domain)
 
 find :: Tolerance units => Point2d coordinates units -> Curve2d coordinates units -> Result IsCoincidentWithPoint (List Float)
 find point curve = do
   let squaredDistanceFromCurve = VectorCurve2d.squaredMagnitude (Units.generalize (point - curve))
-  roots <- Curve1d.roots squaredDistanceFromCurve ?? Err IsCoincidentWithPoint
+  roots <- Curve1d.roots squaredDistanceFromCurve ?? Error IsCoincidentWithPoint
   Ok (List.map Root.value roots)
  where
   ?tolerance = Qty.squared (Units.generalize ?tolerance)

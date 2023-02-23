@@ -107,23 +107,23 @@ type List a = [a]
 
 data Result x a
   = Ok a
-  | Err x
+  | Error x
   deriving (Show, Eq)
 
 instance Prelude.Functor (Result x) where
   fmap function (Ok value) = Ok (function value)
-  fmap _ (Err err) = Err err
+  fmap _ (Error err) = Error err
 
 instance Prelude.Applicative (Result x) where
   pure = Ok
 
   Ok function <*> Ok value = Ok (function value)
-  Err err <*> _ = Err err
-  Ok _ <*> Err err = Err err
+  Error err <*> _ = Error err
+  Ok _ <*> Error err = Error err
 
 instance Bind (Result x) where
   Ok value >>= function = function value
-  Err err >>= _ = Err err
+  Error err >>= _ = Error err
 
 instance Prelude.Monad (Result x) where
   (>>=) = (>>=)
@@ -244,7 +244,7 @@ data Invalid = Invalid
 
 {-# INLINE validate #-}
 validate :: (a -> Bool) -> a -> Result Invalid a
-validate function value = if function value then Ok value else Err Invalid
+validate function value = if function value then Ok value else Error Invalid
 
 class Nullable nullable where
   (??) :: forall applicative a. Prelude.Applicative applicative => nullable a -> applicative a -> applicative a
@@ -255,7 +255,7 @@ instance Nullable Maybe where
 
 instance Nullable (Result x) where
   Ok value ?? ~_ = Prelude.pure value
-  Err _ ?? ~fallback = fallback
+  Error _ ?? ~fallback = fallback
 
 (?=) :: Nullable nullable => nullable a -> a -> a
 (?=) nullable ~fallback = runIdentity (nullable ?? Identity fallback)

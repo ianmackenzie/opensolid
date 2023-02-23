@@ -160,10 +160,10 @@ instance
   where
   build (Named givenStartPoint, Named givenEndPoint, Named givenRadius, Named angleSign, Named largeAngle) = do
     let chord = Line2d.from givenStartPoint givenEndPoint
-    chordDirection <- Line2d.direction chord ?? Err EndpointsCoincident
+    chordDirection <- Line2d.direction chord ?? Error EndpointsCoincident
     let squaredRadius = Qty.squared (Units.generalize givenRadius)
     let squaredHalfLength = Qty.squared (Units.generalize (0.5 * Line2d.length chord))
-    squaredOffsetMagnitude <- validate (>= Qty.zero) (squaredRadius - squaredHalfLength) ?? Err EndpointsTooFarApart
+    squaredOffsetMagnitude <- validate (>= Qty.zero) (squaredRadius - squaredHalfLength) ?? Error EndpointsTooFarApart
     let offsetMagnitude = Units.specialize (Qty.sqrt squaredOffsetMagnitude)
     let offsetDirection = Direction2d.rotateLeft chordDirection
     let offsetDistance =
@@ -190,9 +190,9 @@ instance
 
 from :: Point2d coordinates units -> Point2d coordinates units -> Angle -> Result (Line2d coordinates units) (Arc2d coordinates units)
 from p1 p2 theta = do
-  (distance, direction) <- Vector2d.magnitudeAndDirection (p2 - p1) ?? Err (Line2d.from p1 p2)
+  (distance, direction) <- Vector2d.magnitudeAndDirection (p2 - p1) ?? Error (Line2d.from p1 p2)
   let tanHalfAngle = Angle.tan (0.5 * theta)
-  denominator <- validate (/= Qty.zero) tanHalfAngle ?? Err (Line2d.from p1 p2)
+  denominator <- validate (/= Qty.zero) tanHalfAngle ?? Error (Line2d.from p1 p2)
   let offset = 0.5 * distance / denominator
   let center = Point2d.midpoint p1 p2 + offset * Direction2d.rotateLeft direction
   Ok

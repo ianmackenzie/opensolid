@@ -16,19 +16,18 @@ where
 import Control.Exception qualified
 import Data.Text.IO qualified
 import OpenSolid
+import Result qualified
 import System.Exit qualified
 import Text qualified
 import Prelude (IOError)
 import Prelude qualified
 
 data Script x a
-  = Succeed a
-  | Error x
+  = Done (Result x a)
   | Perform (IO (Script x a))
 
 map :: (a -> b) -> Script x a -> Script x b
-map function (Succeed value) = Succeed (function value)
-map _ (Error err) = Error err
+map function (Done result) = Done (Result.map function result)
 map function (Perform io) = Perform (Prelude.fmap (map function) io)
 
 instance Prelude.Functor (Script x) where
@@ -37,16 +36,16 @@ instance Prelude.Functor (Script x) where
 instance Prelude.Applicative (Script x) where
   pure = succeed
 
-  Succeed function <*> script = map function script
-  Error err <*> _ = Error err
+  Done (Ok function) <*> script = map function script
+  Done (Error err) <*> _ = Done (Error err)
   Perform io <*> script = Perform (Prelude.fmap (Prelude.<*> script) io)
 
 instance Composition (Script x ()) (Script x a) (Script x a) where
   script1 >> script2 = script1 >>= (\() -> script2)
 
 instance Bind (Script x) where
-  Succeed value >>= function = function value
-  Error err >>= _ = Error err
+  Done (Ok value) >>= function = function value
+  Done (Error err) >>= _ = Done (Error err)
   Perform io >>= function = Perform (Prelude.fmap (>>= function) io)
 
 instance Prelude.Monad (Script x) where
@@ -59,18 +58,18 @@ perform io =
 type Program = Script IOError ()
 
 run :: Script IOError () -> IO ()
-run (Succeed ()) = System.Exit.exitSuccess
-run (Error ioError) = Prelude.ioError ioError
+run (Done (Ok ())) = System.Exit.exitSuccess
+run (Done (Error ioError)) = Prelude.ioError ioError
 run (Perform io) = io Prelude.>>= run
 
 succeed :: a -> Script x a
-succeed = Succeed
+succeed value = Done (Ok value)
 
 error :: x -> Script x a
-error = Error
+error err = Done (Error err)
 
 fail :: Text -> Script IOError a
-fail message = Error (Prelude.userError (Text.toChars message))
+fail message = Done (Error (Prelude.userError (Text.toChars message)))
 
 printLine :: Text -> Script IOError ()
 printLine text = perform (Data.Text.IO.putStrLn text)

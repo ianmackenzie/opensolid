@@ -276,31 +276,31 @@ any assess range =
   let assessment = assess range
    in case assessment of
         Ok _ -> assessment
-        Err Indeterminate | Range.isAtomic range -> Err Indeterminate
-        Err Indeterminate ->
+        Error Indeterminate | Range.isAtomic range -> Error Indeterminate
+        Error Indeterminate ->
           let (left, right) = Range.bisect range
            in case any assess left of
                 Ok True -> Ok True
                 Ok False -> any assess right
-                Err Indeterminate ->
+                Error Indeterminate ->
                   case any assess right of
                     Ok True -> Ok True
-                    Ok False -> Err Indeterminate
-                    Err Indeterminate -> Err Indeterminate
+                    Ok False -> Error Indeterminate
+                    Error Indeterminate -> Error Indeterminate
 
 all :: (Range units -> Result Indeterminate Bool) -> Range units -> Result Indeterminate Bool
 all assess range =
   let assessment = assess range
    in case assessment of
         Ok _ -> assessment
-        Err Indeterminate | Range.isAtomic range -> Err Indeterminate
-        Err Indeterminate ->
+        Error Indeterminate | Range.isAtomic range -> Error Indeterminate
+        Error Indeterminate ->
           let (left, right) = Range.bisect range
            in case all assess left of
                 Ok True -> all assess right
                 Ok False -> Ok False
-                Err Indeterminate ->
+                Error Indeterminate ->
                   case all assess right of
-                    Ok True -> Err Indeterminate
+                    Ok True -> Error Indeterminate
                     Ok False -> Ok False
-                    Err Indeterminate -> Err Indeterminate
+                    Error Indeterminate -> Error Indeterminate

@@ -24,4 +24,4 @@ withDefault value Nothing = value
 
 orErr :: x -> Maybe a -> Result x a
 orErr _ (Just value) = Ok value
-orErr err Nothing = Err err
+orErr err Nothing = Error err

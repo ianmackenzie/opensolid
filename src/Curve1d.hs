@@ -233,9 +233,9 @@ maxRootOrder = 4
 data IsZero = IsZero deriving (Eq, Show)
 
 roots :: Tolerance units => Curve1d units -> Result IsZero (List Root)
-roots Zero = Err IsZero
-roots (Constant value) = if value ~= Qty.zero then Err IsZero else Ok []
-roots curve | isZero curve = Err IsZero
+roots Zero = Error IsZero
+roots (Constant value) = if value ~= Qty.zero then Error IsZero else Ok []
+roots curve | isZero curve = Error IsZero
 roots curve = do
   let (root0, x0) = solveEndpoint curve 0.0
   let (root1, x1) = solveEndpoint curve 1.0
@@ -324,7 +324,7 @@ regions domain curve =
       Ok (leftRegions ++ rightRegions)
 
 bisect :: Range Unitless -> Result IsZero (Range Unitless, Range Unitless)
-bisect domain = if Range.isAtomic domain then Err IsZero else Ok (Range.bisect domain)
+bisect domain = if Range.isAtomic domain then Error IsZero else Ok (Range.bisect domain)
 
 resolve :: Tolerance units => Range Unitless -> Curve1d units -> Maybe Region
 resolve domain curve
