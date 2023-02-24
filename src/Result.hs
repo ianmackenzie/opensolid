@@ -1,6 +1,5 @@
 module Result
   ( map
-  , map2
   , andThen
   , withDefault
   , mapErr
@@ -18,12 +17,6 @@ withDefault fallback (Error _) = fallback
 map :: (a -> value) -> Result x a -> Result x value
 map function (Ok value) = Ok (function value)
 map _ (Error err) = Error err
-
-map2 :: (a -> b -> value) -> Result x a -> Result x b -> Result x value
-map2 function result1 result2 = do
-  value1 <- result1
-  value2 <- result2
-  Ok (function value1 value2)
 
 andThen :: (a -> Result x b) -> Result x a -> Result x b
 andThen function (Ok value) = function value
