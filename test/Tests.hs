@@ -2,6 +2,7 @@ import Hedgehog (Property)
 import Hedgehog qualified
 import Hedgehog.Gen qualified
 import Hedgehog.Range qualified
+import Length (Length)
 import Length qualified
 import List qualified
 import OpenSolid
@@ -10,12 +11,11 @@ import Range (Range (..))
 import Range qualified
 import Script qualified
 import Text qualified
+import Units (Meters)
 import Vector3d qualified
 import VectorBox3d (VectorBox3d (VectorBox3d))
 import VectorBox3d qualified
 import Prelude qualified
-import Length (Length)
-import Units (Meters)
 
 group :: Text -> List (Text, Property) -> Hedgehog.Group
 group name properties =
@@ -72,7 +72,7 @@ tests =
     ]
 
 script :: Script.Program
-script = do
+script = Script.do
   success <- Script.perform (Hedgehog.checkParallel tests)
   if success then Script.succeed () else Script.fail "Test failed"
 

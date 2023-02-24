@@ -10,6 +10,8 @@ module Script
   , map
   , forEach
   , perform
+  , (>>=)
+  , (>>)
   )
 where
 
@@ -43,13 +45,10 @@ instance Prelude.Applicative (Script x) where
 instance Composition (Script x ()) (Script x a) (Script x a) where
   script1 >> script2 = script1 >>= (\() -> script2)
 
-instance Bind (Script x) where
-  Done (Ok value) >>= function = function value
-  Done (Error err) >>= _ = Done (Error err)
-  Perform io >>= function = Perform (Prelude.fmap (>>= function) io)
-
-instance Prelude.Monad (Script x) where
-  (>>=) = (>>=)
+(>>=) :: Script x a -> (a -> Script x b) -> Script x b
+Done (Ok value) >>= function = function value
+Done (Error err) >>= _ = Done (Error err)
+Perform io >>= function = Perform (Prelude.fmap (>>= function) io)
 
 perform :: IO a -> Script IOError a
 perform io =

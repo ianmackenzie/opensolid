@@ -25,6 +25,7 @@ import Qty qualified
 import Quadrature qualified
 import Range (Range (..))
 import Range qualified
+import Result qualified
 import Units (Unitless)
 import Units qualified
 import VectorBox2d qualified
@@ -144,7 +145,7 @@ nearby point curve domain
   distance = VectorBox2d.magnitude (point - segmentBounds curve domain)
 
 find :: Tolerance units => Point2d coordinates units -> Curve2d coordinates units -> Result IsCoincidentWithPoint (List Float)
-find point curve = do
+find point curve = Result.do
   let squaredDistanceFromCurve = VectorCurve2d.squaredMagnitude (Units.generalize (point - curve))
   roots <- Curve1d.roots squaredDistanceFromCurve ?? Error IsCoincidentWithPoint
   Ok (List.map Root.value roots)

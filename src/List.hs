@@ -20,6 +20,7 @@ module List
   , sortAndDeduplicate
   , all
   , any
+  , (>>=)
   )
 where
 
@@ -28,6 +29,9 @@ import Data.Maybe qualified
 import Generic qualified
 import OpenSolid
 import Prelude qualified
+
+(>>=) :: List a -> (a -> List b) -> List b
+(>>=) = (Prelude.>>=)
 
 isEmpty :: List a -> Bool
 isEmpty = Prelude.null

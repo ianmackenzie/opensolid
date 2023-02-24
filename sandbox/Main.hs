@@ -34,12 +34,10 @@ data World
 data MyPoints = MyPoints (Point2d World Meters) (Point2d World Meters) deriving (Show)
 
 listTest :: List (Int, Int)
-listTest =
-  [ (a, b)
-  | a <- [1 .. 10]
-  , b <- [1 .. 10]
-  , a + b == 10
-  ]
+listTest = List.do
+  a <- [1 .. 10]
+  b <- [1 .. 10]
+  [(a, b) | a + b == 10]
 
 joinTextChunks :: Text -> Text -> Maybe Text
 joinTextChunks " " _ = Nothing
@@ -52,7 +50,7 @@ testListCollapse =
    in log "Collapsed list" (List.collapse joinTextChunks textChunks |> List.filter (/= " "))
 
 testCurveFind :: Script.Program
-testCurveFind = do
+testCurveFind = Script.do
   let p1 = Point2d.meters 0.0 0.0
   let p2 = Point2d.meters 1.0 2.0
   let p3 = Point2d.meters 2.0 0.0
@@ -65,7 +63,7 @@ testCurveFind = do
   ?tolerance = Length.meters 1e-9
 
 testDirection2dAngleFrom :: Script.Program
-testDirection2dAngleFrom = do
+testDirection2dAngleFrom = Script.do
   let angle start end =
         Direction2d.angleFrom (Direction2d.degrees (float start)) (Direction2d.degrees (float end))
           |> Angle.inDegrees
@@ -73,7 +71,7 @@ testDirection2dAngleFrom = do
   log "Direction2d.angleFrom (Direction2d.degrees 10) (Direction2d.degrees 350)" (angle 10 350)
 
 testArc2dFrom :: Script.Program
-testArc2dFrom = do
+testArc2dFrom = Script.do
   let arc1 = Arc2d.from Point2d.origin (Point2d.meters 1.0 1.0) (Angle.degrees 90.0)
   log "arc1" arc1
   log "arc2" (Arc2d.from Point2d.origin (Point2d.meters 1.0 1.0) (Angle.degrees -90.0))
@@ -82,7 +80,7 @@ testArc2dFrom = do
   log "arc1 point" (Result.map (`Arc2d.pointOn` 0.5) arc1)
 
 testCurveOverlap1 :: Script.Program
-testCurveOverlap1 = do
+testCurveOverlap1 = Script.do
   let arc1 = Arc2d.from (Point2d.meters 1.0 0.0) (Point2d.meters -1.0 0.0) (Angle.degrees 180.0)
   let arc2 = Arc2d.from (Point2d.meters 0.0 -1.0) (Point2d.meters 0.0 1.0) (Angle.degrees 180.0)
   let curve1 = Curve2d arc1
@@ -92,7 +90,7 @@ testCurveOverlap1 = do
   ?tolerance = Length.meters 1e-9
 
 testCurveOverlap2 :: Script.Program
-testCurveOverlap2 = do
+testCurveOverlap2 = Script.do
   let arc1 =
         Arc2d.with
           ( #centerPoint Point2d.origin
@@ -114,7 +112,7 @@ testCurveOverlap2 = do
   ?tolerance = Length.meters 1e-9
 
 script :: Script.Program
-script = do
+script = Script.do
   log "Integer product" (3 * 4)
   log "Integer division" (10 // 4)
   log "True division" (10 / 4)

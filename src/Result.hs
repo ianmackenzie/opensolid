@@ -10,6 +10,10 @@ where
 
 import OpenSolid
 
+(>>=) :: Result x a -> (a -> Result x b) -> Result x b
+Ok value >>= function = function value
+Error error >>= _ = Error error
+
 withDefault :: a -> Result x a -> a
 withDefault _ (Ok value) = value
 withDefault fallback (Error _) = fallback

@@ -29,6 +29,7 @@ import Generic qualified
 import Length qualified
 import OpenSolid
 import Qty qualified
+import Result qualified
 import Units (Meters, SquareMeters, Unitless)
 import Units qualified
 
@@ -122,12 +123,12 @@ angle (Vector2d vx vy) = Angle.atan2 vy vx
 data IsZero = IsZero
 
 direction :: Vector2d coordinates units -> Result IsZero (Direction2d coordinates)
-direction vector@(Vector2d vx vy) = do
+direction vector@(Vector2d vx vy) = Result.do
   magnitude' <- validate (/= Qty.zero) (magnitude vector) ?? Error IsZero
   Ok (Direction2d.unsafe (vx / magnitude') (vy / magnitude'))
 
 magnitudeAndDirection :: Vector2d coordinates units -> Result IsZero (Qty units, Direction2d coordinates)
-magnitudeAndDirection vector@(Vector2d vx vy) = do
+magnitudeAndDirection vector@(Vector2d vx vy) = Result.do
   magnitude' <- validate (/= Qty.zero) (magnitude vector) ?? Error IsZero
   Ok (magnitude', Direction2d.unsafe (vx / magnitude') (vy / magnitude'))
 

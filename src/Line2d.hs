@@ -27,6 +27,7 @@ import OpenSolid
 import Point2d (Point2d)
 import Point2d qualified
 import Range (Range (..))
+import Result qualified
 import Transform2d (Deformation2d (..), Scaling2d (..), Transformation2d (..))
 import Units (Unitless)
 import Vector2d (Vector2d)
@@ -117,7 +118,7 @@ lengthAndDirection :: Line2d coordinates units -> Result IsDegenerate (Qty units
 lengthAndDirection line = Vector2d.magnitudeAndDirection (vector line) ?? Error IsDegenerate
 
 axis :: Line2d coordinates units -> Result IsDegenerate (Axis2d coordinates units)
-axis line = do
+axis line = Result.do
   axisDirection <- direction line
   let axisOrigin = Line2d.startPoint line
   Ok (Axis2d.through axisOrigin axisDirection)

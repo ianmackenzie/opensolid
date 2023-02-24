@@ -19,7 +19,6 @@ module OpenSolid
   , (||)
   , Type
   , Composition (..)
-  , Bind (..)
   , Qty (..)
   , Float
   , Sign (..)
@@ -92,9 +91,6 @@ class Composition a b c | a b -> c where
 instance Composition (a -> b) (b -> c) (a -> c) where
   f >> g = g Prelude.. f
 
-class Bind m where
-  (>>=) :: m a -> (a -> m b) -> m b
-
 type Text = Data.Text.Text
 
 type List a = [a]
@@ -114,13 +110,6 @@ instance Prelude.Applicative (Result x) where
   Ok function <*> Ok value = Ok (function value)
   Error err <*> _ = Error err
   Ok _ <*> Error err = Error err
-
-instance Bind (Result x) where
-  Ok value >>= function = function value
-  Error err >>= _ = Error err
-
-instance Prelude.Monad (Result x) where
-  (>>=) = (>>=)
 
 type role Qty nominal
 
