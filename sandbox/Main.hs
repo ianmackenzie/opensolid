@@ -34,10 +34,12 @@ data World
 data MyPoints = MyPoints (Point2d World Meters) (Point2d World Meters) deriving (Show)
 
 listTest :: List (Int, Int)
-listTest = do
-  a <- [1 .. 10]
-  b <- [1 .. 10]
-  [(a, b) | a + b == 10]
+listTest =
+  [ (a, b)
+  | a <- [1 .. 10]
+  , b <- [1 .. 10]
+  , a + b == 10
+  ]
 
 joinTextChunks :: Text -> Text -> Maybe Text
 joinTextChunks " " _ = Nothing

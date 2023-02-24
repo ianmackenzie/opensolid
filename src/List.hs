@@ -58,7 +58,7 @@ collect :: (a -> Maybe b) -> List a -> List b
 collect = Data.Maybe.mapMaybe
 
 combine :: (a -> List b) -> List a -> List b
-combine function list = list >>= function
+combine function list = Prelude.concatMap function list
 
 concat :: List (List a) -> List a
 concat = Data.List.concat

@@ -95,12 +95,6 @@ instance Composition (a -> b) (b -> c) (a -> c) where
 class Bind m where
   (>>=) :: m a -> (a -> m b) -> m b
 
-instance Bind Maybe where
-  (>>=) = (Prelude.>>=)
-
-instance Bind [] where
-  (>>=) = (Prelude.>>=)
-
 type Text = Data.Text.Text
 
 type List a = [a]
