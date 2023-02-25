@@ -122,6 +122,9 @@ angle (Vector2d vx vy) = Angle.atan2 vy vx
 
 data IsZero = IsZero
 
+instance IsError IsZero where
+  errorMessage IsZero = "Vector2d is zero"
+
 direction :: Vector2d coordinates units -> Result IsZero (Direction2d coordinates)
 direction vector@(Vector2d vx vy) = Result.do
   magnitude' <- validate (/= Qty.zero) (magnitude vector) ?? Error IsZero

@@ -6,6 +6,7 @@ module Text
   , toString
   , fromInt
   , fromFloat
+  , replace
   )
 where
 
@@ -34,3 +35,6 @@ fromInt = TextShow.showt
 
 fromFloat :: Float -> Text
 fromFloat (Qty x) = TextShow.showt x
+
+replace :: Text -> Text -> Text -> Text
+replace = Data.Text.replace

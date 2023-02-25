@@ -1,4 +1,5 @@
 - ignore: {name: "Eta reduce"}
+- ignore: {name: "Avoid lambda"}
 - ignore: {name: "Use <$>"}
 - ignore: {name: "Replace case with maybe"}
 - ignore: {name: "Replace case with fromMaybe"}

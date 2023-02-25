@@ -11,6 +11,7 @@ import Debug qualified
 import Direction2d qualified
 import Direction3d ()
 import Length qualified
+import Line2d qualified
 import List qualified
 import OpenSolid
 import Point2d (Point2d)
@@ -21,6 +22,7 @@ import Range qualified
 import Result qualified
 import Script qualified
 import Transform2d qualified
+import Try qualified
 import Units (Meters)
 import Vector2d qualified
 import Vector3d qualified
@@ -37,7 +39,8 @@ listTest :: List (Int, Int)
 listTest = List.do
   a <- [1 .. 10]
   b <- [1 .. 10]
-  [(a, b) | a + b == 10]
+  a + b == 10
+  [(a, b)]
 
 joinTextChunks :: Text -> Text -> Maybe Text
 joinTextChunks " " _ = Nothing
@@ -81,11 +84,9 @@ testArc2dFrom = Script.do
 
 testCurveOverlap1 :: Script.Program
 testCurveOverlap1 = Script.do
-  let arc1 = Arc2d.from (Point2d.meters 1.0 0.0) (Point2d.meters -1.0 0.0) (Angle.degrees 180.0)
-  let arc2 = Arc2d.from (Point2d.meters 0.0 -1.0) (Point2d.meters 0.0 1.0) (Angle.degrees 180.0)
-  let curve1 = Curve2d arc1
-  let curve2 = Curve2d arc2
-  log "Overlaps" (Curve2d.overlappingSegments curve1 curve2)
+  arc1 <- Arc2d.from (Point2d.meters 1.0 0.0) (Point2d.meters -1.0 0.0) (Angle.degrees 180.0)
+  arc2 <- Arc2d.from (Point2d.meters 0.0 -1.0) (Point2d.meters 0.0 1.0) (Angle.degrees 180.0)
+  log "Overlaps" (Curve2d.overlappingSegments (Curve2d arc1) (Curve2d arc2))
  where
   ?tolerance = Length.meters 1e-9
 
@@ -105,11 +106,25 @@ testCurveOverlap2 = Script.do
           , #startAngle (Angle.degrees -45.0)
           , #sweptAngle (Angle.degrees 270.0)
           )
-  let curve1 = Curve2d arc1
-  let curve2 = Curve2d arc2
-  log "Overlaps" (Curve2d.overlappingSegments curve1 curve2)
+  log "Overlaps" (Curve2d.overlappingSegments (Curve2d arc1) (Curve2d arc2))
  where
   ?tolerance = Length.meters 1e-9
+
+getCrossProduct :: Result Text Float
+getCrossProduct =
+  Try.withContext "In getCrossProduct:" $
+    Try.do
+      vectorDirection <- Vector2d.direction (Vector2d.meters 2.0 3.0)
+      lineDirection <- Try.withContext "When getting line direction:" $ Line2d.direction (Line2d.from Point2d.origin Point2d.origin)
+      Ok (vectorDirection >< lineDirection)
+
+testTry :: Script.Program
+testTry =
+  case Try.withContext "In testTry:" getCrossProduct of
+    Ok crossProduct ->
+      log "Got cross product" crossProduct
+    Error message ->
+      Script.printLine message
 
 script :: Script.Program
 script = Script.do
@@ -163,7 +178,6 @@ script = Script.do
   let expressionRoots = let ?tolerance = 1e-12 in Curve1d.roots expression
   log "Roots" expressionRoots
   testCurveFind
-  log "??" (List.map (?? Error "Bad") [Just 1, Nothing, Just 2, Nothing, Just 3])
   testListCollapse
   Script.printLine "Unicode output test: ✅❌🙂"
   testDirection2dAngleFrom
@@ -183,6 +197,7 @@ script = Script.do
           |> Transform2d.translateInOwn Axis2d.direction (Length.meters 2.0)
           |> Transform2d.rotateAroundOwn Axis2d.originPoint (Angle.degrees 90.0)
   log "Transformed axis" transformedAxis
+  testTry
 
 main :: IO ()
 main = Script.run script

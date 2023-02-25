@@ -14,6 +14,7 @@ module Line2d
   , lengthAndDirection
   , axis
   , vector
+  , IsDegenerate
   )
 where
 
@@ -110,6 +111,9 @@ vector :: Line2d coordinates units -> Vector2d coordinates units
 vector (Line2d p1 p2) = p2 - p1
 
 data IsDegenerate = IsDegenerate
+
+instance IsError IsDegenerate where
+  errorMessage IsDegenerate = "Line2d is degenerate (start and end points are equal)"
 
 direction :: Line2d coordinates units -> Result IsDegenerate (Direction2d coordinates)
 direction line = Vector2d.direction (vector line) ?? Error IsDegenerate

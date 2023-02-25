@@ -61,6 +61,7 @@ library
       Script
       Text
       Transform2d
+      Try
       Units
       Vector2d
       Vector3d

@@ -21,6 +21,7 @@ module List
   , all
   , any
   , (>>=)
+  , (>>)
   )
 where
 

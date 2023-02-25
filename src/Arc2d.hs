@@ -1,5 +1,7 @@
 module Arc2d
   ( Arc2d
+  , EndpointsCoincidentOrTooFarApart (..)
+  , IsLine (..)
   , startPoint
   , endPoint
   , pointOn
@@ -145,6 +147,10 @@ instance
 
 data EndpointsCoincidentOrTooFarApart = EndpointsCoincident | EndpointsTooFarApart
 
+instance IsError EndpointsCoincidentOrTooFarApart where
+  errorMessage EndpointsCoincident = "Given Arc2d endpoints are coincident"
+  errorMessage EndpointsTooFarApart = "Given Arc2d endpoints are too far apart"
+
 instance
   ( startPoint ~ Point2d coordinates units
   , endPoint ~ Point2d coordinates units
@@ -189,11 +195,16 @@ instance
         , #sweptAngle computedSweptAngle
         )
 
-from :: Point2d coordinates units -> Point2d coordinates units -> Angle -> Result (Line2d coordinates units) (Arc2d coordinates units)
+newtype IsLine coordinates units = IsLine (Line2d coordinates units) deriving (Eq, Show)
+
+instance IsError (IsLine coordinates units) where
+  errorMessage (IsLine _) = "Arc is actually just a straight line"
+
+from :: Point2d coordinates units -> Point2d coordinates units -> Angle -> Result (IsLine coordinates units) (Arc2d coordinates units)
 from p1 p2 theta = Result.do
-  (distance, direction) <- Vector2d.magnitudeAndDirection (p2 - p1) ?? Error (Line2d.from p1 p2)
+  (distance, direction) <- Vector2d.magnitudeAndDirection (p2 - p1) ?? Error (IsLine (Line2d.from p1 p2))
   let tanHalfAngle = Angle.tan (0.5 * theta)
-  denominator <- validate (/= Qty.zero) tanHalfAngle ?? Error (Line2d.from p1 p2)
+  denominator <- validate (/= Qty.zero) tanHalfAngle ?? Error (IsLine (Line2d.from p1 p2))
   let offset = 0.5 * distance / denominator
   let center = Point2d.midpoint p1 p2 + offset * Direction2d.rotateLeft direction
   Ok

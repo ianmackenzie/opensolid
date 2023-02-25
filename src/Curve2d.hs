@@ -132,9 +132,12 @@ instance (units ~ units', coordinates ~ coordinates') => Subtraction (Curve2d co
 
 data IsCoincidentWithPoint = IsCoincidentWithPoint deriving (Eq, Show)
 
+instance IsError IsCoincidentWithPoint where
+  errorMessage IsCoincidentWithPoint = "Curve is in fact a single point coincident with the given point"
+
 passesThrough :: Tolerance units => Point2d coordinates units -> Curve2d coordinates units -> Bool
 passesThrough point curve =
-  Range.any (nearby point curve) (Range.from 0.0 1.0) ?= False
+  Range.any (nearby point curve) (Range.from 0.0 1.0) |> Result.withDefault False
 
 nearby :: Tolerance units => Point2d coordinates units -> Curve2d coordinates units -> Range Unitless -> Result Indeterminate Bool
 nearby point curve domain
@@ -156,8 +159,8 @@ overlappingSegments :: Tolerance units => Curve2d coordinates units -> Curve2d c
 overlappingSegments curve1 curve2 =
   let u0 = [0.0 | passesThrough (startPoint curve1) curve2]
       u1 = [1.0 | passesThrough (endPoint curve1) curve2]
-      start2us = find (startPoint curve2) curve1 ?= []
-      end2us = find (endPoint curve2) curve1 ?= []
+      start2us = find (startPoint curve2) curve1 |> Result.withDefault []
+      end2us = find (endPoint curve2) curve1 |> Result.withDefault []
       candidateUValues = List.concat [u0, u1, start2us, end2us]
       uValues = List.sortAndDeduplicate candidateUValues
       candidateDomains = List.map2 Range.from uValues (List.drop 1 uValues)

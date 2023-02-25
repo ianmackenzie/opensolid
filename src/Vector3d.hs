@@ -122,6 +122,9 @@ squaredMagnitude (Vector3d vx vy vz) = Qty.squared vx + Qty.squared vy + Qty.squ
 
 data IsZero = IsZero
 
+instance IsError IsZero where
+  errorMessage IsZero = "Vector3d is zero"
+
 direction :: Vector3d coordinates units -> Result IsZero (Direction3d coordinates)
 direction vector@(Vector3d vx vy vz) = Result.do
   magnitude' <- validate (/= Qty.zero) (magnitude vector) ?? Error IsZero

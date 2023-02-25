@@ -1,10 +1,8 @@
 module Script
   ( Script
-  , IOError
   , Program
   , run
   , succeed
-  , error
   , fail
   , printLine
   , map
@@ -20,60 +18,60 @@ import Data.Text.IO qualified
 import OpenSolid
 import Result qualified
 import System.Exit qualified
+import System.IO.Error qualified
 import Text qualified
-import Prelude (IOError)
 import Prelude qualified
 
-data Script x a
-  = Done (Result x a)
-  | Perform (IO (Script x a))
+data Script a
+  = Done (Result Text a)
+  | Perform (IO (Script a))
 
-map :: (a -> b) -> Script x a -> Script x b
+map :: (a -> b) -> Script a -> Script b
 map function (Done result) = Done (Result.map function result)
 map function (Perform io) = Perform (Prelude.fmap (map function) io)
 
-instance Prelude.Functor (Script x) where
-  fmap = map
-
-instance Prelude.Applicative (Script x) where
-  pure = succeed
-
-  Done (Ok function) <*> script = map function script
-  Done (Error err) <*> _ = Done (Error err)
-  Perform io <*> script = Perform (Prelude.fmap (Prelude.<*> script) io)
-
-instance Composition (Script x ()) (Script x a) (Script x a) where
+instance Composition (Script ()) (Script a) (Script a) where
   script1 >> script2 = script1 >>= (\() -> script2)
 
-(>>=) :: Script x a -> (a -> Script x b) -> Script x b
-Done (Ok value) >>= function = function value
-Done (Error err) >>= _ = Done (Error err)
-Perform io >>= function = Perform (Prelude.fmap (>>= function) io)
+class Bind lhs where
+  (>>=) :: lhs a -> (a -> Script b) -> Script b
 
-perform :: IO a -> Script IOError a
+instance Bind Script where
+  Done (Ok value) >>= function = function value
+  Done (Error err) >>= _ = Done (Error err)
+  Perform io >>= function = Perform (Prelude.fmap (>>= function) io)
+
+instance Bind (Result x) where
+  Ok value >>= function = function value
+  Error err >>= _ = Done (Error (errorMessage err))
+
+perform :: IO a -> Script a
 perform io =
-  Perform (Control.Exception.catch (Prelude.fmap succeed io) (Prelude.pure Prelude.. error))
+  Perform $
+    Control.Exception.catch
+      (Prelude.fmap succeed io)
+      ( \ioError ->
+          let message = Text.fromChars (System.IO.Error.ioeGetErrorString ioError)
+           in Prelude.pure (fail message)
+      )
 
-type Program = Script IOError ()
+type Program = Script ()
 
-run :: Script IOError () -> IO ()
+run :: Script () -> IO ()
 run (Done (Ok ())) = System.Exit.exitSuccess
-run (Done (Error ioError)) = Prelude.ioError ioError
+run (Done (Error message)) = Prelude.ioError (Prelude.userError (Text.toChars message))
 run (Perform io) = io Prelude.>>= run
 
-succeed :: a -> Script x a
+succeed :: a -> Script a
 succeed value = Done (Ok value)
 
-error :: x -> Script x a
-error err = Done (Error err)
+fail :: IsError x => x -> Script a
+fail err = Done (Error (errorMessage err))
 
-fail :: Text -> Script IOError a
-fail message = Done (Error (Prelude.userError (Text.toChars message)))
-
-printLine :: Text -> Script IOError ()
+printLine :: Text -> Script ()
 printLine text = perform (Data.Text.IO.putStrLn text)
 
-forEach :: (a -> Script x ()) -> List a -> Script x ()
+forEach :: (a -> Script ()) -> List a -> Script ()
 forEach _ [] = succeed ()
 forEach function (first : rest) = do
   function first

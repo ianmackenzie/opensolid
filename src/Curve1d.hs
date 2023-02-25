@@ -233,6 +233,9 @@ maxRootOrder = 4
 
 data IsZero = IsZero deriving (Eq, Show)
 
+instance IsError IsZero where
+  errorMessage IsZero = "Curve1d is zero everywhere"
+
 roots :: Tolerance units => Curve1d units -> Result IsZero (List Root)
 roots Zero = Error IsZero
 roots (Constant value) = if value ~= Qty.zero then Error IsZero else Ok []

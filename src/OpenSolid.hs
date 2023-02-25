@@ -26,6 +26,8 @@ module OpenSolid
   , Text
   , List
   , Result (..)
+  , (??)
+  , IsError (..)
   , Negation (..)
   , Addition (..)
   , Subtraction (..)
@@ -46,8 +48,6 @@ module OpenSolid
   , notImplemented
   , subtract
   , (|>)
-  , (??)
-  , (?=)
   , validate
   , Invalid (..)
   , Tolerance
@@ -59,7 +59,6 @@ module OpenSolid
   )
 where
 
-import Data.Functor.Identity (Identity (..))
 import Data.Kind (Type)
 import Data.Proxy (Proxy (Proxy))
 import Data.Text qualified
@@ -91,25 +90,37 @@ class Composition a b c | a b -> c where
 instance Composition (a -> b) (b -> c) (a -> c) where
   f >> g = g Prelude.. f
 
+instance Composition (List a) Bool (List a) where
+  list >> True = list
+  _ >> False = []
+
+instance Composition Bool (List a) (List a) where
+  True >> list = list
+  False >> _ = []
+
 type Text = Data.Text.Text
 
 type List a = [a]
 
-data Result x a
-  = Ok a
-  | Error x
-  deriving (Show, Eq)
+class IsError error where
+  errorMessage :: error -> Text
 
-instance Prelude.Functor (Result x) where
-  fmap function (Ok value) = Ok (function value)
-  fmap _ (Error err) = Error err
+instance IsError Text where
+  errorMessage = identity
 
-instance Prelude.Applicative (Result x) where
-  pure = Ok
+data Result x a where
+  Ok :: a -> Result x a
+  Error :: IsError x => x -> Result x a
 
-  Ok function <*> Ok value = Ok (function value)
-  Error err <*> _ = Error err
-  Ok _ <*> Error err = Error err
+(??) :: Result x a -> Result y a -> Result y a
+Ok value ?? _ = Ok value
+Error _ ?? fallback = fallback
+
+infixl 0 ??
+
+deriving instance (Eq x, Eq a) => Eq (Result x a)
+
+deriving instance (Show x, Show a) => Show (Result x a)
 
 type role Qty nominal
 
@@ -135,6 +146,9 @@ deriving instance Prelude.RealFloat Float
 data Sign = Positive | Negative deriving (Eq, Show)
 
 data Indeterminate = Indeterminate
+
+instance IsError Indeterminate where
+  errorMessage Indeterminate = "Result is indeterminate"
 
 class Negation a where
   negate :: a -> a
@@ -225,25 +239,14 @@ subtract b a = a - b
 
 data Invalid = Invalid
 
+instance IsError Invalid where
+  errorMessage Invalid = "Validation failed"
+
 {-# INLINE validate #-}
 validate :: (a -> Bool) -> a -> Result Invalid a
 validate function value = if function value then Ok value else Error Invalid
 
-class Nullable nullable where
-  (??) :: forall applicative a. Prelude.Applicative applicative => nullable a -> applicative a -> applicative a
-
-instance Nullable Maybe where
-  Just value ?? ~_ = Prelude.pure value
-  Nothing ?? ~fallback = fallback
-
-instance Nullable (Result x) where
-  Ok value ?? ~_ = Prelude.pure value
-  Error _ ?? ~fallback = fallback
-
-(?=) :: Nullable nullable => nullable a -> a -> a
-(?=) nullable ~fallback = runIdentity (nullable ?? Identity fallback)
-
-infixl 0 |>, ??, ?=
+infixl 0 |>
 
 infixl 6 +, -
 
