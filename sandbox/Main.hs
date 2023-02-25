@@ -59,10 +59,14 @@ testCurveFind = Script.do
   let p2 = Point2d.meters 1.0 2.0
   let p3 = Point2d.meters 2.0 0.0
   let testSpline = Curve2d (QuadraticSpline2d.fromControlPoints p1 p2 p3)
-  log "Start parameter value" (Curve2d.find Point2d.origin testSpline)
-  log "End parameter value" (Curve2d.find (Point2d.meters 2.0 0.0) testSpline)
-  log "Mid parameter value" (Curve2d.find (Point2d.meters 1.0 1.0) testSpline)
-  log "Off-curve parameter value" (Curve2d.find (Point2d.meters 1.0 1.1) testSpline)
+  [startParameterValue] <- Curve2d.parameterValues Point2d.origin testSpline
+  [endParameterValue] <- Curve2d.parameterValues (Point2d.meters 2.0 0.0) testSpline
+  [midParameterValue] <- Curve2d.parameterValues (Point2d.meters 1.0 1.0) testSpline
+  offCurveParameterValues <- Curve2d.parameterValues (Point2d.meters 1.0 1.1) testSpline
+  log "Start parameter value" startParameterValue
+  log "End parameter value" endParameterValue
+  log "Mid parameter value" midParameterValue
+  log "Off-curve parameter values" offCurveParameterValues
  where
   ?tolerance = Length.meters 1e-9
 
@@ -126,6 +130,18 @@ testTry =
       log "Got cross product" crossProduct
     Error message ->
       Script.printLine message
+
+patternMatchError :: Result Text Float
+patternMatchError = Try.do
+  let line = Line2d.from Point2d.origin (Point2d.meters 3.0 0.0)
+  [t1, t2] <- Curve2d.parameterValues (Point2d.meters 1.0 0.0) (Curve2d line)
+  Ok (t2 - t1)
+ where
+  ?tolerance = Length.meters 1e-9
+
+testPatternMatchErrorInTryDo :: Script ()
+testPatternMatchErrorInTryDo =
+  log "Pattern match error" patternMatchError
 
 script :: Script ()
 script = Script.do
@@ -199,6 +215,7 @@ script = Script.do
           |> Transform2d.rotateAroundOwn Axis2d.originPoint (Angle.degrees 90.0)
   log "Transformed axis" transformedAxis
   testTry
+  testPatternMatchErrorInTryDo
 
 main :: IO ()
 main = Script.run script

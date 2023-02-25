@@ -1,4 +1,9 @@
-module Try ((>>=), withContext) where
+module Try
+  ( (>>=)
+  , fail
+  , withContext
+  )
+where
 
 import OpenSolid
 import Result qualified
@@ -13,3 +18,6 @@ withContext context result = result |> Result.mapError (errorMessage >> addConte
 
 addContext :: Text -> Text -> Text
 addContext context text = context ++ "\n  " ++ Text.replace "\n" "\n  " text
+
+fail :: Text -> Result Text a
+fail = Error
