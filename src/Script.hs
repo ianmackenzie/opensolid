@@ -1,6 +1,5 @@
 module Script
   ( Script
-  , Program
   , run
   , succeed
   , fail
@@ -54,8 +53,6 @@ perform io =
           let message = Text.fromChars (System.IO.Error.ioeGetErrorString ioError)
            in Prelude.pure (fail message)
       )
-
-type Program = Script ()
 
 run :: Script () -> IO ()
 run (Done (Ok ())) = System.Exit.exitSuccess

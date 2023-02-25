@@ -20,6 +20,7 @@ import Qty qualified
 import QuadraticSpline2d qualified
 import Range qualified
 import Result qualified
+import Script (Script)
 import Script qualified
 import Transform2d qualified
 import Try qualified
@@ -28,7 +29,7 @@ import Vector2d qualified
 import Vector3d qualified
 import Volume qualified
 
-log :: Show a => Text -> a -> Script.Program
+log :: Show a => Text -> a -> Script ()
 log label value = Script.printLine (label ++ ": " ++ Debug.show value)
 
 data World
@@ -47,12 +48,12 @@ joinTextChunks " " _ = Nothing
 joinTextChunks _ " " = Nothing
 joinTextChunks s1 s2 = Just (s1 ++ s2)
 
-testListCollapse :: Script.Program
+testListCollapse :: Script ()
 testListCollapse =
   let textChunks = ["T", "h", "is", " ", "i", "s", " ", "a", " ", "t", "es", "t"]
    in log "Collapsed list" (List.collapse joinTextChunks textChunks |> List.filter (/= " "))
 
-testCurveFind :: Script.Program
+testCurveFind :: Script ()
 testCurveFind = Script.do
   let p1 = Point2d.meters 0.0 0.0
   let p2 = Point2d.meters 1.0 2.0
@@ -65,7 +66,7 @@ testCurveFind = Script.do
  where
   ?tolerance = Length.meters 1e-9
 
-testDirection2dAngleFrom :: Script.Program
+testDirection2dAngleFrom :: Script ()
 testDirection2dAngleFrom = Script.do
   let angle start end =
         Direction2d.angleFrom (Direction2d.degrees (float start)) (Direction2d.degrees (float end))
@@ -73,7 +74,7 @@ testDirection2dAngleFrom = Script.do
   log "Direction2d.angleFrom (Direction2d.degrees 10) (Direction2d.degrees 30)" (angle 10 30)
   log "Direction2d.angleFrom (Direction2d.degrees 10) (Direction2d.degrees 350)" (angle 10 350)
 
-testArc2dFrom :: Script.Program
+testArc2dFrom :: Script ()
 testArc2dFrom = Script.do
   let arc1 = Arc2d.from Point2d.origin (Point2d.meters 1.0 1.0) (Angle.degrees 90.0)
   log "arc1" arc1
@@ -82,7 +83,7 @@ testArc2dFrom = Script.do
   log "arc4" (Arc2d.from Point2d.origin (Point2d.meters 1.0 1.0) (Angle.degrees -180.0))
   log "arc1 point" (Result.map (`Arc2d.pointOn` 0.5) arc1)
 
-testCurveOverlap1 :: Script.Program
+testCurveOverlap1 :: Script ()
 testCurveOverlap1 = Script.do
   arc1 <- Arc2d.from (Point2d.meters 1.0 0.0) (Point2d.meters -1.0 0.0) (Angle.degrees 180.0)
   arc2 <- Arc2d.from (Point2d.meters 0.0 -1.0) (Point2d.meters 0.0 1.0) (Angle.degrees 180.0)
@@ -90,7 +91,7 @@ testCurveOverlap1 = Script.do
  where
   ?tolerance = Length.meters 1e-9
 
-testCurveOverlap2 :: Script.Program
+testCurveOverlap2 :: Script ()
 testCurveOverlap2 = Script.do
   let arc1 =
         Arc2d.with
@@ -118,7 +119,7 @@ getCrossProduct =
       lineDirection <- Try.withContext "When getting line direction:" $ Line2d.direction (Line2d.from Point2d.origin Point2d.origin)
       Ok (vectorDirection >< lineDirection)
 
-testTry :: Script.Program
+testTry :: Script ()
 testTry =
   case Try.withContext "In testTry:" getCrossProduct of
     Ok crossProduct ->
@@ -126,7 +127,7 @@ testTry =
     Error message ->
       Script.printLine message
 
-script :: Script.Program
+script :: Script ()
 script = Script.do
   log "Integer product" (3 * 4)
   log "Integer division" (10 // 4)

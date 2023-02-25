@@ -9,6 +9,7 @@ import OpenSolid
 import Pair qualified
 import Range (Range (..))
 import Range qualified
+import Script (Script)
 import Script qualified
 import Text qualified
 import Units (Meters)
@@ -71,7 +72,7 @@ tests =
     [ ("VectorBox3d.magnitude", testVectorBox3dMagnitude)
     ]
 
-script :: Script.Program
+script :: Script ()
 script = Script.do
   success <- Script.perform (Hedgehog.checkParallel tests)
   if success then Script.succeed () else Script.fail "Test failed"
