@@ -37,9 +37,14 @@ import Prelude qualified
 isEmpty :: List a -> Bool
 isEmpty = Prelude.null
 
-head :: List a -> Maybe a
-head (first : _) = Just first
-head [] = Nothing
+data IsEmpty = IsEmpty deriving (Eq, Show)
+
+instance IsError IsEmpty where
+  errorMessage IsEmpty = "List is empty"
+
+head :: List a -> Result IsEmpty a
+head (first : _) = Ok first
+head [] = Error IsEmpty
 
 map :: (a -> b) -> List a -> List b
 map = Data.List.map

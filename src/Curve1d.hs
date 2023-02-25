@@ -320,8 +320,8 @@ bisectMonotonic curve lowX highX lowY highY =
 regions :: Tolerance units => Range Unitless -> Curve1d units -> Result IsZero (List Region)
 regions domain curve =
   case resolve domain curve of
-    Just region -> Ok [region]
-    Nothing -> Result.do
+    Ok region -> Ok [region]
+    Error Indeterminate -> Result.do
       (leftDomain, rightDomain) <- bisect domain
       leftRegions <- regions leftDomain curve
       rightRegions <- regions rightDomain curve
@@ -330,10 +330,10 @@ regions domain curve =
 bisect :: Range Unitless -> Result IsZero (Range Unitless, Range Unitless)
 bisect domain = if Range.isAtomic domain then Error IsZero else Ok (Range.bisect domain)
 
-resolve :: Tolerance units => Range Unitless -> Curve1d units -> Maybe Region
+resolve :: Tolerance units => Range Unitless -> Curve1d units -> Result Indeterminate Region
 resolve domain curve
-  | minValue >= ?tolerance = Just (Region domain 0 Positive)
-  | maxValue <= negate ?tolerance = Just (Region domain 0 Negative)
+  | minValue >= ?tolerance = Ok (Region domain 0 Positive)
+  | maxValue <= negate ?tolerance = Ok (Region domain 0 Negative)
   | otherwise = resolveDerivative domain (derivative curve) 1
  where
   Range minValue maxValue = segmentBounds curve domain
@@ -341,12 +341,12 @@ resolve domain curve
 minDerivativeResolution :: Float
 minDerivativeResolution = 0.5
 
-resolveDerivative :: Range Unitless -> Curve1d units -> Int -> Maybe Region
+resolveDerivative :: Range Unitless -> Curve1d units -> Int -> Result Indeterminate Region
 resolveDerivative domain curveDerivative derivativeOrder
-  | derivativeResolution >= minDerivativeResolution = Just (Region domain derivativeOrder Positive)
-  | derivativeResolution <= -minDerivativeResolution = Just (Region domain derivativeOrder Negative)
+  | derivativeResolution >= minDerivativeResolution = Ok (Region domain derivativeOrder Positive)
+  | derivativeResolution <= -minDerivativeResolution = Ok (Region domain derivativeOrder Negative)
   | derivativeOrder <= maxRootOrder = resolveDerivative domain (derivative curveDerivative) (derivativeOrder + 1)
-  | otherwise = Nothing
+  | otherwise = Error Indeterminate
  where
   derivativeResolution = resolution domain curveDerivative
 
