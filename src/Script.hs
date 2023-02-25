@@ -56,7 +56,7 @@ perform io =
 
 run :: Script () -> IO ()
 run (Done (Ok ())) = System.Exit.exitSuccess
-run (Done (Error message)) = Prelude.ioError (Prelude.userError (Text.toChars message))
+run (Done (Error message)) = run (printLine message) Prelude.>> System.Exit.exitFailure
 run (Perform io) = io Prelude.>>= run
 
 succeed :: a -> Script a
