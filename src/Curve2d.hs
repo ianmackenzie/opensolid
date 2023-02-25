@@ -9,7 +9,7 @@ module Curve2d
   , bisect
   , boundingBox
   , passesThrough
-  , find
+  , parameterValues
   , overlappingSegments
   )
 where
@@ -147,8 +147,8 @@ nearby point curve domain
  where
   distance = VectorBox2d.magnitude (point - segmentBounds curve domain)
 
-find :: Tolerance units => Point2d coordinates units -> Curve2d coordinates units -> Result IsCoincidentWithPoint (List Float)
-find point curve = Result.do
+parameterValues :: Tolerance units => Point2d coordinates units -> Curve2d coordinates units -> Result IsCoincidentWithPoint (List Float)
+parameterValues point curve = Result.do
   let squaredDistanceFromCurve = VectorCurve2d.squaredMagnitude (Units.generalize (point - curve))
   roots <- Curve1d.roots squaredDistanceFromCurve ?? Error IsCoincidentWithPoint
   Ok (List.map Root.value roots)
@@ -159,8 +159,8 @@ overlappingSegments :: Tolerance units => Curve2d coordinates units -> Curve2d c
 overlappingSegments curve1 curve2 =
   let u0 = [0.0 | passesThrough (startPoint curve1) curve2]
       u1 = [1.0 | passesThrough (endPoint curve1) curve2]
-      start2us = find (startPoint curve2) curve1 |> Result.withDefault []
-      end2us = find (endPoint curve2) curve1 |> Result.withDefault []
+      start2us = parameterValues (startPoint curve2) curve1 |> Result.withDefault []
+      end2us = parameterValues (endPoint curve2) curve1 |> Result.withDefault []
       candidateUValues = List.concat [u0, u1, start2us, end2us]
       uValues = List.sortAndDeduplicate candidateUValues
       candidateDomains = List.map2 Range.from uValues (List.drop 1 uValues)
