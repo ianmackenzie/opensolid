@@ -123,6 +123,6 @@ lengthAndDirection line = Vector2d.magnitudeAndDirection (vector line) ?? Error 
 
 axis :: Line2d coordinates units -> Result IsDegenerate (Axis2d coordinates units)
 axis line = Result.do
-  axisDirection <- direction line
   let axisOrigin = Line2d.startPoint line
+  axisDirection <- direction line
   Ok (Axis2d.through axisOrigin axisDirection)
