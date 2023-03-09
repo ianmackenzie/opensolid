@@ -66,6 +66,8 @@ default-extensions:
 - QualifiedDo
 - TypeFamilies
 - TypeOperators
+- OverloadedRecordDot
+- MagicHash
 
 library:
   source-dirs: src

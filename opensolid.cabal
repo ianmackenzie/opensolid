@@ -1,6 +1,6 @@
 cabal-version: 2.2
 
--- This file has been generated from package.yaml by hpack version 0.35.0.
+-- This file has been generated from package.yaml by hpack version 0.35.1.
 --
 -- see: https://github.com/sol/hpack
 
@@ -106,6 +106,8 @@ library
       QualifiedDo
       TypeFamilies
       TypeOperators
+      OverloadedRecordDot
+      MagicHash
   ghc-options: -Wall -Werror -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-signatures -Wmissing-exported-signatures -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wsafe -dcore-lint -Wno-unticked-promoted-constructors
   build-depends:
       base >=4.7 && <5
@@ -153,6 +155,8 @@ executable sandbox
       QualifiedDo
       TypeFamilies
       TypeOperators
+      OverloadedRecordDot
+      MagicHash
   ghc-options: -Wall -Werror -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-signatures -Wmissing-exported-signatures -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wsafe -dcore-lint -Wno-unticked-promoted-constructors -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
@@ -202,6 +206,8 @@ test-suite opensolid-test
       QualifiedDo
       TypeFamilies
       TypeOperators
+      OverloadedRecordDot
+      MagicHash
   ghc-options: -Wall -Werror -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-signatures -Wmissing-exported-signatures -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wsafe -dcore-lint -Wno-unticked-promoted-constructors -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
