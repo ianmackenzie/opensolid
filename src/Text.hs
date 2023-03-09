@@ -7,13 +7,18 @@ module Text
   , fromInt
   , fromFloat
   , replace
+  , toInt
+  , toFloat
   )
 where
 
 import Data.String qualified
 import Data.Text qualified
+import Data.Text.Read
 import OpenSolid
+import Result qualified
 import TextShow qualified
+import Prelude qualified
 
 concat :: List Text -> Text
 concat = Data.Text.concat
@@ -35,6 +40,19 @@ fromInt = TextShow.showt
 
 fromFloat :: Float -> Text
 fromFloat (Qty x) = TextShow.showt x
+
+toNum :: Prelude.Num a => Reader a -> Text -> Result Text a
+toNum reader text =
+  case Data.Text.Read.signed reader text of
+    Prelude.Right (value, "") -> Ok value
+    Prelude.Right (_, suffix) -> Error ("Could not parse '" ++ text ++ "' as a number - has extra trailing text '" ++ suffix)
+    Prelude.Left message -> Error (fromChars message)
+
+toInt :: Text -> Result Text Int
+toInt = toNum Data.Text.Read.decimal
+
+toFloat :: Text -> Result Text Float
+toFloat = toNum Data.Text.Read.double >> Result.map Qty
 
 replace :: Text -> Text -> Text -> Text
 replace = Data.Text.replace
