@@ -1,5 +1,5 @@
 module Point3d
-  ( Point3d (..)
+  ( Point3d (Point3d, xCoordinate, yCoordinate, zCoordinate)
   , origin
   , x
   , y
@@ -25,7 +25,7 @@ import Units (Meters)
 import Vector3d (Vector3d (Vector3d))
 import Vector3d qualified
 
-data Point3d coordinates units = Point3d (Qty units) (Qty units) (Qty units)
+data Point3d coordinates units = Point3d {xCoordinate :: Qty units, yCoordinate :: Qty units, zCoordinate :: Qty units}
   deriving (Eq, Show)
 
 instance (units ~ units', coordinates ~ coordinates') => Addition (Point3d coordinates units) (Vector3d coordinates' units') (Point3d coordinates units) where

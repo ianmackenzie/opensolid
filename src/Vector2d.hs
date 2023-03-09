@@ -1,5 +1,5 @@
 module Vector2d
-  ( Vector2d (..)
+  ( Vector2d (Vector2d, xComponent, yComponent)
   , zero
   , x
   , y
@@ -36,7 +36,7 @@ import Units qualified
 type role Vector2d nominal nominal
 
 type Vector2d :: Type -> Type -> Type
-data Vector2d coordinates units = Vector2d (Qty units) (Qty units)
+data Vector2d coordinates units = Vector2d {xComponent :: Qty units, yComponent :: Qty units}
   deriving (Eq, Show)
 
 instance Units.Coercion (Vector2d coordinates)

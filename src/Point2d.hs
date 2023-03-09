@@ -1,5 +1,5 @@
 module Point2d
-  ( Point2d (..)
+  ( Point2d (Point2d, xCoordinate, yCoordinate)
   , origin
   , x
   , y
@@ -30,7 +30,7 @@ import VectorBox2d (VectorBox2d (..))
 type role Point2d nominal nominal
 
 type Point2d :: Type -> Type -> Type
-data Point2d coordinates units = Point2d (Qty units) (Qty units)
+data Point2d coordinates units = Point2d {xCoordinate :: Qty units, yCoordinate :: Qty units}
   deriving (Eq, Show)
 
 instance Units.Coercion (Point2d coordinates)

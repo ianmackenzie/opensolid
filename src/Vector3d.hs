@@ -1,5 +1,5 @@
 module Vector3d
-  ( Vector3d (..)
+  ( Vector3d (Vector3d, xComponent, yComponent, zComponent)
   , zero
   , x
   , y
@@ -32,7 +32,7 @@ import Result qualified
 import Units (Meters, SquareMeters, Unitless)
 import Units qualified
 
-data Vector3d coordinates units = Vector3d (Qty units) (Qty units) (Qty units)
+data Vector3d coordinates units = Vector3d {xComponent :: Qty units, yComponent :: Qty units, zComponent :: Qty units}
   deriving (Eq, Show)
 
 instance Units.Coercion (Vector3d coordinates)
