@@ -4,6 +4,7 @@ module Result
   , andThen
   , withDefault
   , mapError
+  , toMaybe
   )
 where
 
@@ -28,3 +29,7 @@ andThen _ (Error err) = Error err
 mapError :: IsError y => (x -> y) -> Result x a -> Result y a
 mapError _ (Ok value) = Ok value
 mapError function (Error err) = Error (function err)
+
+toMaybe :: Result x a -> Maybe a
+toMaybe (Ok value) = Just value
+toMaybe (Error _) = Nothing
