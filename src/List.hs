@@ -5,6 +5,9 @@ module List
   , map2
   , map3
   , map4
+  , zip
+  , zip3
+  , zip4
   , filter
   , compact
   , collect
@@ -48,6 +51,15 @@ head [] = Error IsEmpty
 
 map :: (a -> b) -> List a -> List b
 map = Data.List.map
+
+zip :: List a -> List b -> List (a, b)
+zip = Data.List.zip
+
+zip3 :: List a -> List b -> List c -> List (a, b, c)
+zip3 = Data.List.zip3
+
+zip4 :: List a -> List b -> List c -> List d -> List (a, b, c, d)
+zip4 = Data.List.zip4
 
 map2 :: (a -> b -> c) -> List a -> List b -> List c
 map2 = Data.List.zipWith
