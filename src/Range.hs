@@ -111,9 +111,11 @@ instance Bounds (Range units) where
 
   overlaps (Range low1 high1) (Range low2 high2) = low1 <= high2 && low2 <= high1
 
+{-# INLINE unsafe #-}
 unsafe :: Qty units -> Qty units -> Range units
 unsafe = Unsafe
 
+{-# INLINE constant #-}
 constant :: Qty units -> Range units
 constant value = unsafe value value
 
