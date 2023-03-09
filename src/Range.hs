@@ -218,8 +218,8 @@ hypot3 (Range xMin xMax) (Range yMin yMax) (Range zMin zMax)
   zMagnitude = max (Qty.abs zMin) (Qty.abs zMax)
   maxMagnitude = Qty.hypot3 xMagnitude yMagnitude zMagnitude
 
-contains :: Qty units -> Range units -> Bool
-contains value (Range low high) = low <= value && value <= high
+contains :: Tolerance units => Qty units -> Range units -> Bool
+contains value (Range low high) = low - ?tolerance <= value && value <= high + ?tolerance
 
 bisect :: Range units -> (Range units, Range units)
 bisect (Range low high) =

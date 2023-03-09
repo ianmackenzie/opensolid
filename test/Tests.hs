@@ -22,9 +22,6 @@ group :: Text -> List (Text, Property) -> Hedgehog.Group
 group name properties =
   Hedgehog.Group (Text.toString name) (List.map (Pair.mapFirst Text.toString) properties)
 
-tolerance :: Length
-tolerance = Length.meters 1e-12
-
 parameterValue :: Hedgehog.Gen Float
 parameterValue = Hedgehog.Gen.realFloat (Hedgehog.Range.constant 0.0 1.0)
 
@@ -44,14 +41,10 @@ vectorBox3d = Prelude.do
   z <- lengthRange
   Prelude.return (VectorBox3d x y z)
 
-quantityContainedIn :: Range Meters -> Length -> Bool
-quantityContainedIn (Range low high) value =
-  value >= low - tolerance && value <= high + tolerance
-
 withNumTests :: Int -> Hedgehog.Property -> Hedgehog.Property
 withNumTests count = Hedgehog.withTests (Prelude.fromIntegral count)
 
-testVectorBox3dMagnitude :: Hedgehog.Property
+testVectorBox3dMagnitude :: Tolerance Meters => Hedgehog.Property
 testVectorBox3dMagnitude =
   Prelude.do
     vectorBox <- Hedgehog.forAll vectorBox3d
@@ -61,7 +54,7 @@ testVectorBox3dMagnitude =
     let vector = VectorBox3d.interpolate vectorBox u v w
     let magnitude = Vector3d.magnitude vector
     let magnitudeRange = VectorBox3d.magnitude vectorBox
-    Hedgehog.assert (quantityContainedIn magnitudeRange magnitude)
+    Hedgehog.assert (Range.contains magnitude magnitudeRange)
     |> Hedgehog.property
     |> withNumTests 1000
 
@@ -71,6 +64,8 @@ tests =
     "Tests"
     [ ("VectorBox3d.magnitude", testVectorBox3dMagnitude)
     ]
+ where
+  ?tolerance = Length.meters 1e-12
 
 script :: Script ()
 script = Script.do
