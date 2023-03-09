@@ -87,7 +87,7 @@ class Composition a b c | a b -> c where
   (<<) :: b -> a -> c
   second << first = first >> second
 
-instance Composition (a -> b) (b -> c) (a -> c) where
+instance b ~ b' => Composition (a -> b) (b' -> c) (a -> c) where
   f >> g = g Prelude.. f
 
 instance Composition (List a) Bool (List a) where
