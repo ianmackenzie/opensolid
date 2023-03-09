@@ -13,6 +13,7 @@ module List
   , collect
   , combine
   , concat
+  , collate
   , collapse
   , foldl
   , foldr
@@ -84,6 +85,13 @@ combine function list = Prelude.concatMap function list
 
 concat :: List (List a) -> List a
 concat = Data.List.concat
+
+collate :: List (Result x a) -> Result x (List a)
+collate [] = Ok []
+collate (firstResult : remainingResults) = Result.do
+  firstItem <- firstResult
+  remainingItems <- collate remainingResults
+  Ok (firstItem : remainingItems)
 
 collapse :: (a -> a -> Maybe a) -> List a -> List a
 collapse _ [] = []
