@@ -1,10 +1,8 @@
 module Axis2d
-  ( Axis2d
+  ( Axis2d (originPoint, direction)
   , x
   , y
   , through
-  , direction
-  , originPoint
   )
 where
 

@@ -68,8 +68,8 @@ newtype Deformation coordinates units = Deformation (Matrix units)
 
 scalingAlong :: Axis2d coordinates units -> Float -> Deformation coordinates units
 scalingAlong axis scale =
-  let Direction2d dx dy = Axis2d.direction axis
-      Point2d x0 y0 = Axis2d.originPoint axis
+  let Direction2d dx dy = axis.direction
+      Point2d x0 y0 = axis.originPoint
       dx2 = dx * dx
       dy2 = dy * dy
       m11 = scale * dx2 + dy2

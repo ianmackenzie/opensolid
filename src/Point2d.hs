@@ -87,8 +87,8 @@ angleFrom p1 p2 = Vector2d.angle (p2 - p1)
 
 signedDistanceAlong :: Axis2d coordinates units -> Point2d coordinates units -> Qty units
 signedDistanceAlong axis point =
-  (point - Axis2d.originPoint axis) <> Axis2d.direction axis
+  (point - axis.originPoint) <> axis.direction
 
 signedDistanceFrom :: Axis2d coordinates units -> Point2d coordinates units -> Qty units
 signedDistanceFrom axis point =
-  (point - Axis2d.originPoint axis) <> Direction2d.rotateLeft (Axis2d.direction axis)
+  (point - axis.originPoint) <> Direction2d.rotateLeft axis.direction
