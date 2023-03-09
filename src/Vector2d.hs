@@ -129,16 +129,18 @@ instance IsError IsZero where
   errorMessage IsZero = "Vector2d is zero"
 
 direction :: Vector2d coordinates units -> Result IsZero (Direction2d coordinates)
-direction vector@(Vector2d vx vy) = Result.do
-  magnitude' <- validate (/= Qty.zero) (magnitude vector) ?? Error IsZero
-  Ok (Direction2d.unsafe (vx / magnitude') (vy / magnitude'))
+direction vector = Result.do
+  let Vector2d vx vy = vector
+  vm <- validate (/= Qty.zero) (magnitude vector) ?? Error IsZero
+  Ok (Direction2d.unsafe (vx / vm) (vy / vm))
 
 magnitudeAndDirection :: Vector2d coordinates units -> Result IsZero (Qty units, Direction2d coordinates)
-magnitudeAndDirection vector@(Vector2d vx vy) = Result.do
-  magnitude' <- validate (/= Qty.zero) (magnitude vector) ?? Error IsZero
-  Ok (magnitude', Direction2d.unsafe (vx / magnitude') (vy / magnitude'))
+magnitudeAndDirection vector = Result.do
+  let Vector2d vx vy = vector
+  vm <- validate (/= Qty.zero) (magnitude vector) ?? Error IsZero
+  Ok (vm, Direction2d.unsafe (vx / vm) (vy / vm))
 
 normalize :: Vector2d coordinates units -> Vector2d coordinates Unitless
-normalize vector@(Vector2d vx vy) =
-  let magnitude' = magnitude vector
-   in if magnitude' == Qty.zero then zero else Vector2d (vx / magnitude') (vy / magnitude')
+normalize vector =
+  let Vector2d vx vy = vector; vm = magnitude vector
+   in if vm == Qty.zero then zero else Vector2d (vx / vm) (vy / vm)

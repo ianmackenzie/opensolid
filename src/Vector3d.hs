@@ -129,18 +129,18 @@ instance IsError IsZero where
   errorMessage IsZero = "Vector3d is zero"
 
 direction :: Vector3d coordinates units -> Result IsZero (Direction3d coordinates)
-direction vector@(Vector3d vx vy vz) = Result.do
-  magnitude' <- validate (/= Qty.zero) (magnitude vector) ?? Error IsZero
-  Ok (Direction3d.unsafe (vx / magnitude') (vy / magnitude') (vz / magnitude'))
+direction vector = Result.do
+  let Vector3d vx vy vz = vector
+  vm <- validate (/= Qty.zero) (magnitude vector) ?? Error IsZero
+  Ok (Direction3d.unsafe (vx / vm) (vy / vm) (vz / vm))
 
 magnitudeAndDirection :: Vector3d coordinates units -> Result IsZero (Qty units, Direction3d coordinates)
-magnitudeAndDirection vector@(Vector3d vx vy vz) = Result.do
-  magnitude' <- validate (/= Qty.zero) (magnitude vector) ?? Error IsZero
-  Ok (magnitude', Direction3d.unsafe (vx / magnitude') (vy / magnitude') (vz / magnitude'))
+magnitudeAndDirection vector = Result.do
+  let Vector3d vx vy vz = vector
+  vm <- validate (/= Qty.zero) (magnitude vector) ?? Error IsZero
+  Ok (vm, Direction3d.unsafe (vx / vm) (vy / vm) (vz / vm))
 
 normalize :: Vector3d coordinates units -> Vector3d coordinates Unitless
-normalize vector@(Vector3d vx vy vz) =
-  let magnitude' = magnitude vector
-   in if magnitude' == Qty.zero
-        then zero
-        else Vector3d (vx / magnitude') (vy / magnitude') (vz / magnitude')
+normalize vector =
+  let Vector3d vx vy vz = vector; vm = magnitude vector
+   in if vm == Qty.zero then zero else Vector3d (vx / vm) (vy / vm) (vz / vm)
