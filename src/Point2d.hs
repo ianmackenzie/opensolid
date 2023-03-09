@@ -50,7 +50,10 @@ instance (units ~ units', coordinates ~ coordinates') => Addition (Point2d coord
 instance (units ~ units', coordinates ~ coordinates') => Subtraction (Point2d coordinates units) (VectorBox2d coordinates' units') (BoundingBox2d coordinates units) where
   Point2d px py - VectorBox2d vx vy = BoundingBox2d (px - vx) (py - vy)
 
-instance ApproximateEquality (Point2d coordinates units) units where
+instance
+  (coordinates ~ coordinates', units ~ units')
+  => ApproximateEquality (Point2d coordinates units) (Point2d coordinates' units') units
+  where
   p1 ~= p2 = distanceFrom p1 p2 ~= Qty.zero
 
 origin :: Point2d coordinates units

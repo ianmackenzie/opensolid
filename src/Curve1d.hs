@@ -60,6 +60,12 @@ data Curve1d units where
 
 instance Units.Coercion Curve1d
 
+instance units ~ units' => ApproximateEquality (Curve1d units) (Curve1d units') units where
+  curve1 ~= curve2 = isZero (curve1 - curve2)
+
+instance units ~ units' => ApproximateEquality (Curve1d units) (Qty units') units where
+  curve ~= value = isZero (curve - value)
+
 instance IsCurve1d (Curve1d units) units where
   pointOn curve t =
     case curve of

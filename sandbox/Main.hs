@@ -143,6 +143,18 @@ testPatternMatchErrorInTryDo :: Script ()
 testPatternMatchErrorInTryDo =
   log "Pattern match error" patternMatchError
 
+testCurve1dApproximateEquality :: Script ()
+testCurve1dApproximateEquality = Script.do
+  let t = Curve1d.parameter
+  let theta = Angle.radian * t
+  log "sin(x) = cos(x)" (Curve1d.sin theta ~= Curve1d.cos theta)
+  log "sin(x) = cos(pi/2 - x)" (Curve1d.sin theta ~= Curve1d.cos (Angle.degrees 90.0 - theta))
+  let sumOfSquares = Curve1d.squared (Curve1d.sin theta) + Curve1d.squared (Curve1d.cos theta)
+  log "sin^2(x) + cos^2(x) = 1" (sumOfSquares ~= 1.0)
+  log "sin^2(x) + cos^2(x) = 2" (sumOfSquares ~= 2.0)
+ where
+  ?tolerance = 1e-9
+
 script :: Script ()
 script = Script.do
   log "Integer product" (3 * 4)
@@ -216,6 +228,7 @@ script = Script.do
   log "Transformed axis" transformedAxis
   testTry
   testPatternMatchErrorInTryDo
+  testCurve1dApproximateEquality
 
 main :: IO ()
 main = Script.run script

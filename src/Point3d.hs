@@ -37,7 +37,10 @@ instance (units ~ units', coordinates ~ coordinates') => Subtraction (Point3d co
 instance (units ~ units', coordinates ~ coordinates') => Subtraction (Point3d coordinates units) (Point3d coordinates' units') (Vector3d coordinates units) where
   Point3d x1 y1 z1 - Point3d x2 y2 z2 = Vector3d (x1 - x2) (y1 - y2) (z1 - z2)
 
-instance ApproximateEquality (Point3d coordinates units) units where
+instance
+  (coordinates ~ coordinates', units ~ units')
+  => ApproximateEquality (Point3d coordinates units) (Point3d coordinates' units') units
+  where
   p1 ~= p2 = distanceFrom p1 p2 ~= Qty.zero
 
 instance Bounded (Point3d coordinates units) (BoundingBox3d coordinates units) where

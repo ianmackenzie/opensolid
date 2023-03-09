@@ -254,12 +254,12 @@ infixl 7 *, /, //
 
 type Tolerance units = ?tolerance :: Qty units
 
-class ApproximateEquality a units | a -> units where
-  (~=) :: Tolerance units => a -> a -> Bool
+class ApproximateEquality a b units | a -> units, b -> units where
+  (~=) :: Tolerance units => a -> b -> Bool
 
 infix 4 ~=
 
-instance ApproximateEquality (Qty units) units where
+instance units ~ units' => ApproximateEquality (Qty units) (Qty units') units where
   x ~= y = let (Qty delta) = x - y in Qty (Prelude.abs delta) <= ?tolerance
 
 newtype Named (name :: Symbol) value = Named value deriving (Eq)

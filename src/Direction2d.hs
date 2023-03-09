@@ -36,7 +36,10 @@ data Direction2d coordinates = Unsafe Float Float
 pattern Direction2d :: Float -> Float -> Direction2d coordinates
 pattern Direction2d x y <- Unsafe x y
 
-instance ApproximateEquality (Direction2d coordinates) Radians where
+instance
+  coordinates ~ coordinates'
+  => ApproximateEquality (Direction2d coordinates) (Direction2d coordinates) Radians
+  where
   d1 ~= d2 = angleFrom d1 d2 ~= Qty.zero
 
 instance Negation (Direction2d coordinates) where
