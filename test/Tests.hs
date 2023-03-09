@@ -60,8 +60,7 @@ testVectorBox3dMagnitude =
 
 tests :: Hedgehog.Group
 tests =
-  group
-    "Tests"
+  group "Tests" $
     [ ("VectorBox3d.magnitude", testVectorBox3dMagnitude)
     ]
  where
