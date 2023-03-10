@@ -127,12 +127,18 @@ hull3 a b c = unsafe (min a (min b c)) (max a (max b c))
 midpoint :: Range units -> Qty units
 midpoint (Range low high) = Qty.midpoint low high
 
+instance HasField "midpoint" (Range units) (Qty units) where
+  getField = midpoint
+
 endpoints :: Range units -> (Qty units, Qty units)
 endpoints (Range low high) = (low, high)
 
 {-# INLINE width #-}
 width :: Range units -> Qty units
 width (Range low high) = high - low
+
+instance HasField "width" (Range units) (Qty units) where
+  getField = width
 
 squared :: Units.Squared units1 units2 => Range units1 -> Range units2
 squared (Range low high)
@@ -220,6 +226,9 @@ isAtomic :: Range units -> Bool
 isAtomic (Range low high) =
   let mid = Qty.midpoint low high
    in mid == low || mid == high
+
+instance HasField "isAtomic" (Range units) Bool where
+  getField = isAtomic
 
 abs :: Range units -> Range units
 abs range@(Range low high)
