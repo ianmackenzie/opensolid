@@ -304,7 +304,7 @@ solve curveDerivative derivativeOrder region
           -- the 3rd derivative is zero at x=0 but it is in fact a 0th-order root, not a
           -- 2nd-order root)
           lift (Solution currentRoot currentWidth) =
-            let rootX = Root.value currentRoot
+            let rootX = currentRoot.value
                 rootY = pointOn curveDerivative rootX
                 width = computeWidth derivativeOrder rootY
              in if width < currentWidth
@@ -334,15 +334,15 @@ regions domain curve =
       Ok (leftRegions ++ rightRegions)
 
 bisect :: Range Unitless -> Result IsZero (Range Unitless, Range Unitless)
-bisect domain = if Range.isAtomic domain then Error IsZero else Ok (Range.bisect domain)
+bisect domain = if domain.isAtomic then Error IsZero else Ok (Range.bisect domain)
 
 resolve :: Tolerance units => Range Unitless -> Curve1d units -> Result Indeterminate Region
 resolve domain curve
-  | minValue >= ?tolerance = Ok (Region domain 0 Positive)
-  | maxValue <= negate ?tolerance = Ok (Region domain 0 Negative)
+  | curveBounds.minValue >= ?tolerance = Ok (Region domain 0 Positive)
+  | curveBounds.maxValue <= negate ?tolerance = Ok (Region domain 0 Negative)
   | otherwise = resolveDerivative domain (derivative curve) 1
  where
-  Range minValue maxValue = segmentBounds curve domain
+  curveBounds = segmentBounds curve domain
 
 minDerivativeResolution :: Float
 minDerivativeResolution = 0.5
@@ -358,11 +358,11 @@ resolveDerivative domain curveDerivative derivativeOrder
 
 resolution :: Range Unitless -> Curve1d units -> Float
 resolution domain curveDerivative
-  | minValue > Qty.zero = minValue / maxValue
-  | maxValue < Qty.zero = negate (maxValue / minValue)
+  | derivativeBounds.minValue > Qty.zero = derivativeBounds.minValue / derivativeBounds.maxValue
+  | derivativeBounds.maxValue < Qty.zero = negate (derivativeBounds.maxValue / derivativeBounds.minValue)
   | otherwise = 0.0
  where
-  Range minValue maxValue = segmentBounds curveDerivative domain
+  derivativeBounds = segmentBounds curveDerivative domain
 
 solveEndpoint :: Tolerance units => Curve1d units -> Float -> (List Root, Float)
 solveEndpoint curve endpointX | not (pointOn curve endpointX ~= Qty.zero) = ([], endpointX)
