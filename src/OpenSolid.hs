@@ -40,6 +40,7 @@ module OpenSolid
   , fromInteger
   , fromRational
   , fromString
+  , HasField (..)
   , float
   , ifThenElse
   , identity
@@ -62,6 +63,7 @@ where
 import Data.Kind (Type)
 import Data.Proxy (Proxy (Proxy))
 import Data.Text qualified
+import GHC.Records (HasField (..))
 import GHC.TypeLits (KnownSymbol, Symbol, symbolVal)
 import Units (Unitless)
 import Units qualified
