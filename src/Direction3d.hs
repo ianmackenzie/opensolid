@@ -1,5 +1,5 @@
 module Direction3d
-  ( Direction3d (Direction3d)
+  ( Direction3d (Direction3d, xComponent, yComponent, zComponent)
   , unsafe
   , x
   , y
@@ -25,14 +25,14 @@ import Vector3d qualified
 type role Direction3d nominal
 
 type Direction3d :: Type -> Type
-data Direction3d coordinates = Unsafe Float Float Float
+data Direction3d coordinates = Direction3d# {xComponent :: Float, yComponent :: Float, zComponent :: Float}
   deriving (Eq, Show)
 
 {-# COMPLETE Direction3d #-}
 
 {-# INLINE Direction3d #-}
 pattern Direction3d :: Float -> Float -> Float -> Direction3d coordinates
-pattern Direction3d x y z <- Unsafe x y z
+pattern Direction3d x y z <- Direction3d# x y z
 
 instance
   coordinates ~ coordinates'
@@ -80,7 +80,7 @@ instance coordinates ~ coordinates' => CrossProduct (Direction3d coordinates) (D
       (x1 * y2 - y1 * x2)
 
 unsafe :: Float -> Float -> Float -> Direction3d coordinates
-unsafe = Unsafe
+unsafe = Direction3d#
 
 positiveX :: Direction3d coordinates
 positiveX = unsafe 1.0 0.0 0.0

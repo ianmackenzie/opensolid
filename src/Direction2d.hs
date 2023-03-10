@@ -1,5 +1,5 @@
 module Direction2d
-  ( Direction2d (Direction2d)
+  ( Direction2d (Direction2d, xComponent, yComponent)
   , unsafe
   , x
   , positiveX
@@ -27,14 +27,14 @@ import Vector2d (Vector2d (..))
 type role Direction2d nominal
 
 type Direction2d :: Type -> Type
-data Direction2d coordinates = Unsafe Float Float
+data Direction2d coordinates = Direction2d# {xComponent :: Float, yComponent :: Float}
   deriving (Eq, Show)
 
 {-# COMPLETE Direction2d #-}
 
 {-# INLINE Direction2d #-}
 pattern Direction2d :: Float -> Float -> Direction2d coordinates
-pattern Direction2d x y <- Unsafe x y
+pattern Direction2d x y <- Direction2d# x y
 
 instance
   coordinates ~ coordinates'
@@ -70,7 +70,7 @@ instance Multiplication (Direction2d coordinates) (Qty units) (Vector2d coordina
   Direction2d dx dy * scale = Vector2d (dx * scale) (dy * scale)
 
 unsafe :: Float -> Float -> Direction2d coordinates
-unsafe = Unsafe
+unsafe = Direction2d#
 
 positiveX :: Direction2d coordinates
 positiveX = unsafe 1.0 0.0
