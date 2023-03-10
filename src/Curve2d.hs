@@ -141,8 +141,8 @@ passesThrough point curve =
 
 nearby :: Tolerance units => Point2d coordinates units -> Curve2d coordinates units -> Range Unitless -> Result Indeterminate Bool
 nearby point curve domain
-  | Range.minValue distance > ?tolerance = Ok False
-  | Range.maxValue distance <= ?tolerance = Ok True
+  | distance.minValue > ?tolerance = Ok False
+  | distance.maxValue <= ?tolerance = Ok True
   | otherwise = Error Indeterminate
  where
   distance = VectorBox2d.magnitude (point - segmentBounds curve domain)
