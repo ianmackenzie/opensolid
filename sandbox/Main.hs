@@ -229,6 +229,7 @@ script = Script.do
   testTry
   testPatternMatchErrorInTryDo
   testCurve1dApproximateEquality
+  log "Axis2d.x.originPoint" Axis2d.x.originPoint
 
 main :: IO ()
 main = Script.run script
