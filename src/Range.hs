@@ -277,31 +277,33 @@ any assess range =
   let assessment = assess range
    in case assessment of
         Ok _ -> assessment
-        Error Indeterminate | Range.isAtomic range -> Error Indeterminate
-        Error Indeterminate ->
-          let (left, right) = Range.bisect range
-           in case any assess left of
-                Ok True -> Ok True
-                Ok False -> any assess right
-                Error Indeterminate ->
-                  case any assess right of
+        Error Indeterminate
+          | isAtomic range -> Error Indeterminate
+          | otherwise ->
+              let (left, right) = Range.bisect range
+               in case any assess left of
                     Ok True -> Ok True
-                    Ok False -> Error Indeterminate
-                    Error Indeterminate -> Error Indeterminate
+                    Ok False -> any assess right
+                    Error Indeterminate ->
+                      case any assess right of
+                        Ok True -> Ok True
+                        Ok False -> Error Indeterminate
+                        Error Indeterminate -> Error Indeterminate
 
 all :: (Range units -> Result Indeterminate Bool) -> Range units -> Result Indeterminate Bool
 all assess range =
   let assessment = assess range
    in case assessment of
         Ok _ -> assessment
-        Error Indeterminate | Range.isAtomic range -> Error Indeterminate
-        Error Indeterminate ->
-          let (left, right) = Range.bisect range
-           in case all assess left of
-                Ok True -> all assess right
-                Ok False -> Ok False
-                Error Indeterminate ->
-                  case all assess right of
-                    Ok True -> Error Indeterminate
+        Error Indeterminate
+          | isAtomic range -> Error Indeterminate
+          | otherwise ->
+              let (left, right) = Range.bisect range
+               in case all assess left of
+                    Ok True -> all assess right
                     Ok False -> Ok False
-                    Error Indeterminate -> Error Indeterminate
+                    Error Indeterminate ->
+                      case all assess right of
+                        Ok True -> Error Indeterminate
+                        Ok False -> Ok False
+                        Error Indeterminate -> Error Indeterminate
