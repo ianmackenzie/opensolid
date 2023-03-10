@@ -5,7 +5,7 @@ module Curve1d.Region
 where
 
 import OpenSolid
-import Range (Range)
+import Range (Range (Range))
 import Range qualified
 import Units (Unitless)
 
@@ -17,7 +17,7 @@ data Region = Region
   deriving (Eq, Show)
 
 merge :: Region -> Region -> Maybe Region
-merge (Region leftDomain leftOrder leftSign) (Region rightDomain rightOrder rightSign) =
-  if leftOrder == rightOrder && leftSign == rightSign && Range.maxValue leftDomain == Range.minValue rightDomain
-    then Just (Region (Range.aggregate leftDomain rightDomain) leftOrder leftSign)
-    else Nothing
+merge (Region (Range low1 high1) order1 sign1) (Region (Range low2 high2) order2 sign2)
+  | order1 == order2 && sign1 == sign2 && high1 == low2 =
+      Just (Region (Range.unsafe low1 high2) order1 sign1)
+  | otherwise = Nothing
