@@ -1,8 +1,5 @@
 module Curve1d.Region
-  ( Region (Region)
-  , domain
-  , nonZeroDerivativeOrder
-  , nonZeroDerivativeSign
+  ( Region (Region, domain, nonZeroDerivativeOrder, nonZeroDerivativeSign)
   , merge
   )
 where
