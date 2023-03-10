@@ -1,8 +1,6 @@
 module Line2d
-  ( Line2d
+  ( Line2d (startPoint, endPoint)
   , from
-  , startPoint
-  , endPoint
   , midpoint
   , pointOn
   , segmentBounds
@@ -36,8 +34,10 @@ import Vector2d qualified
 import VectorCurve2d (VectorCurve2d)
 import VectorCurve2d qualified
 
-data Line2d coordinates units
-  = Line2d (Point2d coordinates units) (Point2d coordinates units)
+data Line2d coordinates units = Line2d
+  { startPoint :: Point2d coordinates units
+  , endPoint :: Point2d coordinates units
+  }
   deriving (Eq, Show)
 
 map :: (Point2d coordinates units -> Point2d coordinates' units') -> Line2d coordinates units -> Line2d coordinates' units'
@@ -63,12 +63,6 @@ instance
 
 from :: Point2d coordinates units -> Point2d coordinates units -> Line2d coordinates units
 from = Line2d
-
-startPoint :: Line2d coordinates units -> Point2d coordinates units
-startPoint (Line2d p1 _) = p1
-
-endPoint :: Line2d coordinates units -> Point2d coordinates units
-endPoint (Line2d _ p2) = p2
 
 midpoint :: Line2d coordinates units -> Point2d coordinates units
 midpoint (Line2d p1 p2) = Point2d.midpoint p1 p2
@@ -123,6 +117,5 @@ lengthAndDirection line = Vector2d.magnitudeAndDirection (vector line) ?? Error 
 
 axis :: Line2d coordinates units -> Result IsDegenerate (Axis2d coordinates units)
 axis line = Result.do
-  let axisOrigin = Line2d.startPoint line
   axisDirection <- direction line
-  Ok (Axis2d.through axisOrigin axisDirection)
+  Ok (Axis2d.through line.startPoint axisDirection)
