@@ -1,11 +1,9 @@
 module Range
-  ( Range (Range)
+  ( Range (Range, minValue, maxValue)
   , unsafe
   , constant
   , from
   , hull3
-  , minValue
-  , maxValue
   , midpoint
   , endpoints
   , width
@@ -37,14 +35,14 @@ import Qty qualified
 import Units (Radians, Unitless)
 import Units qualified
 
-data Range units = Unsafe (Qty units) (Qty units)
+data Range units = Range# {minValue :: Qty units, maxValue :: Qty units}
   deriving (Eq, Show)
 
 {-# COMPLETE Range #-}
 
 {-# INLINE Range #-}
 pattern Range :: Qty units -> Qty units -> Range units
-pattern Range low high <- Unsafe low high
+pattern Range low high <- Range# low high
 
 instance Units.Coercion Range
 
@@ -113,7 +111,7 @@ instance Bounds (Range units) where
 
 {-# INLINE unsafe #-}
 unsafe :: Qty units -> Qty units -> Range units
-unsafe = Unsafe
+unsafe = Range#
 
 {-# INLINE constant #-}
 constant :: Qty units -> Range units
@@ -124,14 +122,6 @@ from a b = if a <= b then unsafe a b else unsafe b a
 
 hull3 :: Qty units -> Qty units -> Qty units -> Range units
 hull3 a b c = unsafe (min a (min b c)) (max a (max b c))
-
-{-# INLINE minValue #-}
-minValue :: Range units -> Qty units
-minValue (Range low _) = low
-
-{-# INLINE maxValue #-}
-maxValue :: Range units -> Qty units
-maxValue (Range _ high) = high
 
 {-# INLINE midpoint #-}
 midpoint :: Range units -> Qty units
