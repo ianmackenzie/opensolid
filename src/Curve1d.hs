@@ -266,8 +266,8 @@ prependRoot (Solution root _) acc = root : acc
 prependRoot (NonZero _ _) acc = acc
 
 solve :: (Tolerance units, ?originalCurve :: Curve1d units) => Curve1d units -> Int -> Region -> List Solution
-solve curveDerivative derivativeOrder region@(Region domain nonZeroDerivativeOrder nonZeroDerivativeSign)
-  | derivativeOrder == nonZeroDerivativeOrder = [NonZero domain nonZeroDerivativeSign]
+solve curveDerivative derivativeOrder region
+  | derivativeOrder == region.nonZeroDerivativeOrder = [NonZero region.domain region.nonZeroDerivativeSign]
   | otherwise =
       let nextDerivative = derivative curveDerivative
           higherOrderSolutions = solve nextDerivative (derivativeOrder + 1) region
