@@ -32,11 +32,74 @@ where
 import Data.List qualified
 import Data.Maybe qualified
 import Generic qualified
-import OpenSolid
+import OpenSolid hiding ((>>))
+import Result qualified
 import Prelude qualified
 
-(>>=) :: List a -> (a -> List b) -> List b
-(>>=) = (Prelude.>>=)
+(>>) :: Bool -> List a -> List a
+True >> list = list
+False >> _ = []
+
+class Bind a b c | a b -> c where
+  (>>=) :: a -> b -> c
+
+instance
+  a ~ a'
+  => Bind
+      (List a)
+      (a' -> List b)
+      (List b)
+  where
+  (>>=) = (Prelude.>>=)
+
+instance
+  a ~ a'
+  => Bind
+      (Maybe a)
+      (a' -> List b)
+      (List b)
+  where
+  Just value >>= function = function value
+  Nothing >>= _ = []
+
+instance
+  a ~ a'
+  => Bind
+      (Result x a)
+      (a' -> List b)
+      (Result x (List b))
+  where
+  Ok value >>= function = Ok (function value)
+  Error error >>= _ = Error error
+
+instance
+  (x ~ x', a ~ a')
+  => Bind
+      (Result x (List a))
+      (a' -> List b)
+      (Result x (List b))
+  where
+  Error error >>= _ = Error error
+  Ok items >>= function = Ok (combine function items)
+
+instance
+  (x ~ x', a ~ a')
+  => Bind
+      (Result x (List a))
+      (a' -> Result x' (List b))
+      (Result x (List b))
+  where
+  Error error >>= _ = Error error
+  Ok items >>= function = items >>= function
+
+instance
+  a ~ a'
+  => Bind
+      (List a)
+      (a' -> Result x (List b))
+      (Result x (List b))
+  where
+  list >>= function = Result.map concat (collate (map function list))
 
 isEmpty :: List a -> Bool
 isEmpty = Prelude.null

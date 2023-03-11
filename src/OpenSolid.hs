@@ -92,14 +92,6 @@ class Composition a b c | a b -> c where
 instance b ~ b' => Composition (a -> b) (b' -> c) (a -> c) where
   f >> g = g Prelude.. f
 
-instance Composition (List a) Bool (List a) where
-  list >> True = list
-  _ >> False = []
-
-instance Composition Bool (List a) (List a) where
-  True >> list = list
-  False >> _ = []
-
 type Text = Data.Text.Text
 
 type List a = [a]

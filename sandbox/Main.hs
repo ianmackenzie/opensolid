@@ -22,6 +22,7 @@ import Range qualified
 import Result qualified
 import Script (Script)
 import Script qualified
+import Text qualified
 import Transform2d qualified
 import Try qualified
 import Units (Meters)
@@ -42,6 +43,30 @@ listTest = List.do
   b <- [1 .. 10]
   a + b == 10
   [(a, b)]
+
+listFilterTest :: List Int
+listFilterTest = List.do
+  text <- ["1", "a", "-2", "", "+3"]
+  parsed <- Result.toMaybe (Text.toInt text)
+  [parsed]
+
+parsingSuccess :: Result Text (List Int)
+parsingSuccess = List.do
+  text <- ["1", "-2", "+3"]
+  parsed <- Text.toInt text
+  [parsed]
+
+parsingFailure :: Result Text (List Int)
+parsingFailure = List.do
+  text <- ["1", "a", "-2", "b", "+3"]
+  parsed <- Text.toInt text
+  [parsed]
+
+parsingResults :: List (Result Text Int)
+parsingResults = List.do
+  text <- ["1", "a", "-2", "b", "+3"]
+  let parseResult = Text.toInt text
+  [parseResult]
 
 joinTextChunks :: Text -> Text -> Maybe Text
 joinTextChunks " " _ = Nothing
@@ -230,6 +255,10 @@ script = Script.do
   testPatternMatchErrorInTryDo
   testCurve1dApproximateEquality
   log "Axis2d.x.originPoint" Axis2d.x.originPoint
+  log "List filter test" listFilterTest
+  log "Parsing success" parsingSuccess
+  log "Parsing failure" parsingFailure
+  log "Parsing results" parsingResults
 
 main :: IO ()
 main = Script.run script
