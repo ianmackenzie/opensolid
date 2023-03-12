@@ -130,17 +130,9 @@ instance Squared Unitless Unitless
 
 instance Squared Meters SquareMeters
 
-instance Product (Generic units) (Generic units) (GenericProductOf units units)
+instance units ~ units' => Product (Generic units) (Generic units') (GenericProductOf units units)
 
-instance Quotient (GenericProductOf units units) (Generic units) (Generic units)
-
-instance Quotient Unitless (Generic units) (GenericQuotientOf Unitless units)
-
-instance Product (Generic units) (GenericQuotientOf Unitless units) Unitless
-
-instance Product (GenericQuotientOf Unitless units) (Generic units) Unitless
-
-instance Quotient Unitless (GenericQuotientOf Unitless units) (Generic units)
+instance (units ~ units', units ~ units'') => Quotient (GenericProductOf units units') (Generic units'') (Generic units)
 
 type family GenericProduct units1 units2 where
   GenericProduct (Generic units1) (Generic units2) = GenericProductOf units1 units2
