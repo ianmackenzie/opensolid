@@ -6,7 +6,6 @@ module Try
   )
 where
 
-import List qualified
 import OpenSolid hiding (Bind ((>>=)), Compose ((>>)))
 import OpenSolid qualified
 import Result qualified
@@ -14,72 +13,26 @@ import Script (Script)
 import Script qualified
 import Text qualified
 
-class Compose a b c | a b -> c where
-  (>>) :: a -> b -> c
+class MapError p q | p -> q where
+  mapError :: p a -> q a
 
-instance IsError x => Compose (Script x ()) (Script Text a) (Script Text a) where
-  script1 >> script2 = Script.mapError errorMessage script1 OpenSolid.>> script2
+instance IsError x => MapError (Result x) (Result Text) where
+  mapError = Result.mapError errorMessage
 
-class Bind a b c | a b -> c where
-  (>>=) :: a -> b -> c
+instance IsError x => MapError (Script x) (Script Text) where
+  mapError = Script.mapError errorMessage
 
-instance
-  (IsError x, a ~ a')
-  => Bind
-      (Result x a)
-      (a' -> List b)
-      (Result Text (List b))
-  where
-  Ok value >>= function = Ok (function value)
-  Error error >>= _ = Error (errorMessage error)
+instance MapError [] [] where
+  mapError = identity
 
-instance
-  (IsError x, a ~ a')
-  => Bind
-      (Result x (List a))
-      (a' -> List b)
-      (Result Text (List b))
-  where
-  Error error >>= _ = Error (errorMessage error)
-  Ok items >>= function = Ok (List.combine function items)
+instance MapError Maybe Maybe where
+  mapError = identity
 
-instance
-  (IsError x, a ~ a')
-  => Bind
-      (List a)
-      (a' -> Result x (List b))
-      (Result Text (List b))
-  where
-  list >>= function = Result.map List.concat (List.collate (List.map (function OpenSolid.>> Result.mapError errorMessage) list))
+(>>) :: (MapError p q, OpenSolid.Compose (q a) b c) => p a -> b -> c
+first >> second = mapError first OpenSolid.>> second
 
-instance
-  (IsError x, a ~ a', text ~ Text)
-  => Bind
-      (Result x a)
-      (a' -> Result text b)
-      (Result Text b)
-  where
-  Ok value >>= function = function value
-  Error error >>= _ = Error (errorMessage error)
-
-instance
-  (IsError x, a ~ a', text ~ Text)
-  => Bind
-      (Result x a)
-      (a' -> Script text b)
-      (Script Text b)
-  where
-  Ok value >>= function = function value
-  Error error >>= _ = Script.fail (errorMessage error)
-
-instance
-  (IsError x, a ~ a')
-  => Bind
-      (Script x a)
-      (a' -> Script Text b)
-      (Script Text b)
-  where
-  script >>= function = Script.mapError errorMessage script OpenSolid.>>= function
+(>>=) :: (MapError p q, OpenSolid.Bind q b) => p a -> (a -> b) -> b
+value >>= function = mapError value OpenSolid.>>= function
 
 withContext :: IsError x => Text -> Result x a -> Result Text a
 withContext context result = result |> Result.mapError (errorMessage OpenSolid.>> addContext context)

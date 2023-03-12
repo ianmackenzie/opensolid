@@ -24,24 +24,16 @@ data Result x a where
   Ok :: a -> Result x a
   Error :: IsError x => x -> Result x a
 
-instance
-  (x ~ x', a ~ a')
-  => Bind
-      (Result x a)
-      (a' -> Result x' b)
-      (Result x b)
-  where
+instance x ~ x' => Bind (Result x) (Result x' b) where
   Ok value >>= function = function value
   Error error >>= _ = Error error
 
-instance
-  a ~ a'
-  => Bind
-      (List a)
-      (a' -> Result x (List b))
-      (Result x (List b))
-  where
-  list >>= function = Result.map List.concat (List.collate (List.map function list))
+instance Bind [] (Result x (List b)) where
+  [] >>= _ = Ok []
+  list >>= function =
+    List.map function list
+      |> List.collate
+      |> Result.map List.concat
 
 instance Fail (Result Text a) where
   fail = Error

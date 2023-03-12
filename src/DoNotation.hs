@@ -18,13 +18,13 @@ instance Compose Bool (List a) (List a) where
   True >> list = list
   False >> _ = []
 
-class Bind a b c | a b -> c where
-  (>>=) :: a -> b -> c
+class Bind p b where
+  (>>=) :: p a -> (a -> b) -> b
 
-instance a ~ a' => Bind (List a) (a' -> List b) (List b) where
+instance Bind [] (List b) where
   (>>=) = (Prelude.>>=)
 
-instance a ~ a' => Bind (Maybe a) (a' -> List b) (List b) where
+instance Bind Maybe (List b) where
   Just value >>= function = function value
   Nothing >>= _ = []
 
