@@ -183,6 +183,11 @@ testCurve1dApproximateEquality = do
  where
   ?tolerance = 1e-9
 
+testScriptIteration :: Script Text ()
+testScriptIteration = do
+  number <- [1 .. 3]
+  Script.printLine ("Looping: " ++ Text.fromInt number)
+
 script :: Script Text ()
 script = do
   log "Integer product" (3 * 4)
@@ -262,6 +267,7 @@ script = do
   log "Parsing success" parsingSuccess
   log "Parsing failure" parsingFailure
   log "Parsing results" parsingResults
+  testScriptIteration
 
 main :: IO ()
 main = Script.run script
