@@ -55,13 +55,13 @@ parsingSuccess :: Result Text (List Int)
 parsingSuccess = do
   text <- ["1", "-2", "+3"]
   parsed <- Text.toInt text
-  [parsed]
+  Ok [parsed]
 
 parsingFailure :: Result Text (List Int)
 parsingFailure = do
   text <- ["1", "a", "-2", "b", "+3"]
   parsed <- Text.toInt text
-  [parsed]
+  Ok [parsed]
 
 parsingResults :: List (Result Text Int)
 parsingResults = do
