@@ -1,5 +1,6 @@
 module Qty
-  ( zero
+  ( Qty (..)
+  , zero
   , infinity
   , sign
   , isNaN
@@ -14,10 +15,74 @@ module Qty
   )
 where
 
+import Arithmetic
+import Basics
 import Data.Coerce (coerce)
-import OpenSolid
+import {-# SOURCE #-} Float (Float, fromRational)
+import {-# SOURCE #-} Float qualified
+import Generic qualified
+import Sign (Sign (..))
+import Units (Unitless)
 import Units qualified
 import Prelude qualified
+
+type role Qty nominal
+
+type Qty :: Type -> Type
+newtype Qty units = Qty Prelude.Double deriving (Eq, Ord, Show)
+
+instance Units.Coercion Qty
+
+instance Generic.Zero (Qty units) where
+  zero = coerce 0.0
+
+deriving instance Prelude.Num Float
+
+deriving instance Prelude.Real Float
+
+deriving instance Prelude.Fractional Float
+
+deriving instance Prelude.RealFrac Float
+
+deriving instance Prelude.Floating Float
+
+deriving instance Prelude.RealFloat Float
+
+instance Negation (Qty units) where
+  {-# INLINE negate #-}
+  negate (Qty x) = Qty (Prelude.negate x)
+
+instance units ~ units' => Addition (Qty units) (Qty units') (Qty units) where
+  {-# INLINE (+) #-}
+  Qty x + Qty y = Qty (x Prelude.+ y)
+
+instance units ~ units' => Subtraction (Qty units) (Qty units') (Qty units) where
+  {-# INLINE (-) #-}
+  Qty x - Qty y = Qty (x Prelude.- y)
+
+instance Units.Product units1 units2 units3 => Multiplication (Qty units1) (Qty units2) (Qty units3) where
+  {-# INLINE (*) #-}
+  (Qty x) * (Qty y) = Qty (x Prelude.* y)
+
+instance Units.Quotient units1 units2 units3 => Division (Qty units1) (Qty units2) (Qty units3) where
+  {-# INLINE (/) #-}
+  (Qty x) / (Qty y) = Qty (x Prelude./ y)
+
+instance Multiplication Int (Qty units) (Qty units) where
+  {-# INLINE (*) #-}
+  n * x = Float.fromInt n * x
+
+instance Multiplication (Qty units) Int (Qty units) where
+  {-# INLINE (*) #-}
+  x * n = x * Float.fromInt n
+
+instance Division (Qty units) Int (Qty units) where
+  {-# INLINE (/) #-}
+  x / n = x / Float.fromInt n
+
+instance Units.Quotient Unitless units1 units2 => Division Int (Qty units1) (Qty units2) where
+  {-# INLINE (/) #-}
+  n / x = Float.fromInt n / x
 
 zero :: Qty units
 zero = coerce 0.0

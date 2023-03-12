@@ -1,5 +1,6 @@
 module Text
-  ( concat
+  ( Text
+  , concat
   , join
   , fromChars
   , toChars
@@ -12,10 +13,14 @@ module Text
   )
 where
 
+import Basics
 import Data.String qualified
 import Data.Text qualified
 import Data.Text.Read
-import OpenSolid
+import Float (Float)
+import List (List)
+import Qty (Qty (Qty))
+import Result (Result (..))
 import Result qualified
 import TextShow qualified
 import Prelude qualified
@@ -52,7 +57,7 @@ toInt :: Text -> Result Text Int
 toInt = toNum Data.Text.Read.decimal
 
 toFloat :: Text -> Result Text Float
-toFloat = toNum Data.Text.Read.double >> Result.map Qty
+toFloat text = Result.map Qty (toNum Data.Text.Read.double text)
 
 replace :: Text -> Text -> Text -> Text
 replace = Data.Text.replace

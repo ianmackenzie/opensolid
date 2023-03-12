@@ -1,5 +1,8 @@
 module Result
-  ( (>>=)
+  ( Result (..)
+  , IsError (..)
+  , (??)
+  , (>>=)
   , map
   , andThen
   , withDefault
@@ -8,7 +11,27 @@ module Result
   )
 where
 
-import OpenSolid
+import Basics
+
+class IsError error where
+  errorMessage :: error -> Text
+
+instance IsError Text where
+  errorMessage text = text
+
+data Result x a where
+  Ok :: a -> Result x a
+  Error :: IsError x => x -> Result x a
+
+(??) :: Result x a -> Result y a -> Result y a
+Ok value ?? _ = Ok value
+Error _ ?? fallback = fallback
+
+infixl 0 ??
+
+deriving instance (Eq x, Eq a) => Eq (Result x a)
+
+deriving instance (Show x, Show a) => Show (Result x a)
 
 (>>=) :: Result x a -> (a -> Result x b) -> Result x b
 Ok value >>= function = function value

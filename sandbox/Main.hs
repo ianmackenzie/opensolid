@@ -10,6 +10,7 @@ import Curve2d qualified
 import Debug qualified
 import Direction2d qualified
 import Direction3d ()
+import Float qualified
 import Length qualified
 import Line2d qualified
 import List qualified
@@ -98,7 +99,9 @@ testCurveFind = Script.do
 testDirection2dAngleFrom :: Script ()
 testDirection2dAngleFrom = Script.do
   let angle start end =
-        Direction2d.angleFrom (Direction2d.degrees (float start)) (Direction2d.degrees (float end))
+        Direction2d.angleFrom
+          (Direction2d.degrees (Float.fromInt start))
+          (Direction2d.degrees (Float.fromInt end))
           |> Angle.inDegrees
   log "Direction2d.angleFrom (Direction2d.degrees 10) (Direction2d.degrees 30)" (angle 10 30)
   log "Direction2d.angleFrom (Direction2d.degrees 10) (Direction2d.degrees 350)" (angle 10 350)

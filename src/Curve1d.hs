@@ -398,7 +398,9 @@ computeWidth :: Tolerance units => Int -> Qty units -> Float
 computeWidth 1 derivativeValue = ?tolerance / Qty.abs derivativeValue
 computeWidth 2 derivativeValue = Qty.sqrt (2 * ?tolerance / Qty.abs derivativeValue)
 computeWidth derivativeOrder derivativeValue =
-  Float.pow (factorial derivativeOrder * ?tolerance / Qty.abs derivativeValue) (1.0 / float derivativeOrder)
+  Float.pow
+    (factorial derivativeOrder * ?tolerance / Qty.abs derivativeValue)
+    (1.0 / Float.fromInt derivativeOrder)
 
 factorial :: Int -> Int
 factorial 0 = 1

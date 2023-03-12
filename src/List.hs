@@ -1,5 +1,6 @@
 module List
-  ( isEmpty
+  ( List
+  , isEmpty
   , head
   , map
   , map2
@@ -29,12 +30,16 @@ module List
   )
 where
 
+import Arithmetic
+import Basics hiding ((>>))
 import Data.List qualified
 import Data.Maybe qualified
 import Generic qualified
-import OpenSolid hiding ((>>))
+import Result (IsError (..), Result (..))
 import Result qualified
 import Prelude qualified
+
+type List a = [a]
 
 (>>) :: Bool -> List a -> List a
 True >> list = list

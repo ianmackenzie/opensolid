@@ -1,11 +1,13 @@
 module Maybe
-  ( map
+  ( Maybe (..)
+  , map
   , withDefault
   , orError
   )
 where
 
-import OpenSolid
+import Basics
+import Result (IsError, Result (..))
 import Prelude qualified
 
 map :: (a -> b) -> Maybe a -> Maybe b

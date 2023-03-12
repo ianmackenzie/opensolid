@@ -1,5 +1,8 @@
 module Float
-  ( ceiling
+  ( Float
+  , fromRational
+  , fromInt
+  , ceiling
   , floor
   , pi
   , tau
@@ -7,8 +10,20 @@ module Float
   )
 where
 
-import OpenSolid
+import Arithmetic
+import Basics
+import Qty (Qty (..))
+import Units (Unitless)
 import Prelude qualified
+
+type Float = Qty Unitless
+
+{-# INLINE fromRational #-}
+fromRational :: Prelude.Rational -> Float
+fromRational = Prelude.fromRational
+
+fromInt :: Int -> Float
+fromInt = Prelude.fromIntegral
 
 {-# INLINE floor #-}
 floor :: Float -> Int

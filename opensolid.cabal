@@ -29,7 +29,9 @@ library
       Angle
       Arc2d
       Area
+      Arithmetic
       Axis2d
+      Basics
       Bounded
       BoundingBox2d
       BoundingBox3d
@@ -59,6 +61,7 @@ library
       Range
       Result
       Script
+      Sign
       Text
       Transform2d
       Try
