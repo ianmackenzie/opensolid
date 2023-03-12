@@ -29,7 +29,7 @@ map :: (a -> b) -> Script a -> Script b
 map function (Done result) = Done (Result.map function result)
 map function (Perform io) = Perform (Prelude.fmap (map function) io)
 
-instance Composition (Script ()) (Script a) (Script a) where
+instance Compose (Script ()) (Script a) (Script a) where
   script1 >> script2 = script1 >>= (\() -> script2)
 
 class Bind lhs where

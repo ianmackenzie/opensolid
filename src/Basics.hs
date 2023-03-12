@@ -31,7 +31,7 @@ module Basics
   , internalError
   , notImplemented
   , (|>)
-  , Composition ((>>))
+  , Compose ((>>))
   , (<<)
   , Named (Named)
   , fromLabel
@@ -93,13 +93,13 @@ notImplemented = internalError "Not implemented"
 
 infixl 0 |>
 
-class Composition a b c | a b -> c where
+class Compose a b c | a b -> c where
   (>>) :: a -> b -> c
 
-(<<) :: Composition a b c => b -> a -> c
+(<<) :: Compose a b c => b -> a -> c
 second << first = first >> second
 
-instance b ~ b' => Composition (a -> b) (b' -> c) (a -> c) where
+instance b ~ b' => Compose (a -> b) (b' -> c) (a -> c) where
   f >> g = g Prelude.. f
 
 newtype Named (name :: Symbol) value = Named value deriving (Eq)

@@ -188,7 +188,7 @@ instance units ~ units' => Multiplication (Matrix units) (Matrix units') (Matrix
 
 instance
   (coordinates ~ coordinates', units ~ units')
-  => Composition
+  => Compose
       (Transformation coordinates units)
       (Transformation coordinates' units')
       (Transformation coordinates units)
@@ -197,7 +197,7 @@ instance
 
 instance
   (coordinates ~ coordinates', units ~ units')
-  => Composition
+  => Compose
       (Transformation coordinates units)
       (Scaling coordinates' units')
       (Scaling coordinates units)
@@ -206,7 +206,7 @@ instance
 
 instance
   (coordinates ~ coordinates', units ~ units')
-  => Composition
+  => Compose
       (Transformation coordinates units)
       (Deformation coordinates' units')
       (Deformation coordinates units)
@@ -215,7 +215,7 @@ instance
 
 instance
   (coordinates ~ coordinates', units ~ units')
-  => Composition
+  => Compose
       (Scaling coordinates units)
       (Transformation coordinates' units')
       (Scaling coordinates units)
@@ -224,7 +224,7 @@ instance
 
 instance
   (coordinates ~ coordinates', units ~ units')
-  => Composition
+  => Compose
       (Scaling coordinates units)
       (Scaling coordinates' units')
       (Scaling coordinates units)
@@ -233,7 +233,7 @@ instance
 
 instance
   (coordinates ~ coordinates', units ~ units')
-  => Composition
+  => Compose
       (Scaling coordinates units)
       (Deformation coordinates' units')
       (Deformation coordinates units)
@@ -242,7 +242,7 @@ instance
 
 instance
   (coordinates ~ coordinates', units ~ units')
-  => Composition
+  => Compose
       (Deformation coordinates units)
       (Transformation coordinates' units')
       (Deformation coordinates units)
@@ -251,7 +251,7 @@ instance
 
 instance
   (coordinates ~ coordinates', units ~ units')
-  => Composition
+  => Compose
       (Deformation coordinates units)
       (Scaling coordinates' units')
       (Deformation coordinates units)
@@ -260,7 +260,7 @@ instance
 
 instance
   (coordinates ~ coordinates', units ~ units')
-  => Composition
+  => Compose
       (Deformation coordinates units)
       (Deformation coordinates' units')
       (Deformation coordinates units)
