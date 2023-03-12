@@ -166,7 +166,7 @@ patternMatchError = Try.do
 
 testPatternMatchErrorInTryDo :: Script ()
 testPatternMatchErrorInTryDo =
-  log "Pattern match error" patternMatchError
+  log "Pattern match error (expected)" patternMatchError
 
 testCurve1dApproximateEquality :: Script ()
 testCurve1dApproximateEquality = Script.do
