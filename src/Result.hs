@@ -29,7 +29,6 @@ instance x ~ x' => Bind (Result x) (Result x' b) where
   Error error >>= _ = Error error
 
 instance Bind [] (Result x (List b)) where
-  [] >>= _ = Ok []
   list >>= function =
     List.map function list
       |> List.collate
