@@ -24,6 +24,10 @@ data Result x a where
   Ok :: a -> Result x a
   Error :: IsError x => x -> Result x a
 
+deriving instance (Eq x, Eq a) => Eq (Result x a)
+
+deriving instance (Show x, Show a) => Show (Result x a)
+
 instance x ~ x' => Bind (Result x) (Result x' b) where
   Ok value >>= function = function value
   Error error >>= _ = Error error
@@ -42,10 +46,6 @@ Ok value ?? _ = Ok value
 Error _ ?? fallback = fallback
 
 infixl 0 ??
-
-deriving instance (Eq x, Eq a) => Eq (Result x a)
-
-deriving instance (Show x, Show a) => Show (Result x a)
 
 withDefault :: a -> Result x a -> a
 withDefault _ (Ok value) = value
