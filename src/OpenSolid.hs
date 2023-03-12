@@ -11,8 +11,6 @@ module OpenSolid
   , validate
   , Tolerance
   , ApproximateEquality ((~=))
-  , (.*)
-  , (./)
   )
 where
 
@@ -23,8 +21,6 @@ import List (List)
 import Qty (Qty (..))
 import Result (IsError (errorMessage), Result (Error, Ok), (??))
 import Sign (Sign (Negative, Positive))
-import Units (Unitless)
-import Units qualified
 import Prelude qualified
 
 data Indeterminate = Indeterminate
@@ -49,25 +45,3 @@ infix 4 ~=
 
 instance units ~ units' => ApproximateEquality (Qty units) (Qty units') units where
   x ~= y = let (Qty delta) = x - y in Qty (Prelude.abs delta) <= ?tolerance
-
-(.*)
-  :: ( Units.Coercion a
-     , Units.Coercion b
-     , Units.Coercion c
-     , Multiplication (a Unitless) (b Unitless) (c Unitless)
-     )
-  => a units1
-  -> b units2
-  -> c (Units.GenericProduct units1 units2)
-(.*) lhs rhs = Units.add (Units.drop lhs * Units.drop rhs)
-
-(./)
-  :: ( Units.Coercion a
-     , Units.Coercion b
-     , Units.Coercion c
-     , Division (a Unitless) (b Unitless) (c Unitless)
-     )
-  => a units1
-  -> b units2
-  -> c (Units.GenericQuotient units1 units2)
-(./) lhs rhs = Units.add (Units.drop lhs / Units.drop rhs)

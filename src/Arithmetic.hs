@@ -8,12 +8,16 @@ module Arithmetic
   , (//)
   , DotProduct ((<>))
   , CrossProduct ((><))
+  , (.*)
+  , (./)
   )
 where
 
 import Basics
 import {-# SOURCE #-} Float (Float)
 import {-# SOURCE #-} Qty (Qty (Qty))
+import Units (Unitless)
+import Units qualified
 import Prelude qualified
 
 class Negation a where
@@ -58,3 +62,25 @@ instance Division Int Int Float where
 infixl 6 +, -
 
 infixl 7 *, /, //
+
+(.*)
+  :: ( Units.Coercion a
+     , Units.Coercion b
+     , Units.Coercion c
+     , Multiplication (a Unitless) (b Unitless) (c Unitless)
+     )
+  => a units1
+  -> b units2
+  -> c (Units.GenericProduct units1 units2)
+(.*) lhs rhs = Units.add (Units.drop lhs * Units.drop rhs)
+
+(./)
+  :: ( Units.Coercion a
+     , Units.Coercion b
+     , Units.Coercion c
+     , Division (a Unitless) (b Unitless) (c Unitless)
+     )
+  => a units1
+  -> b units2
+  -> c (Units.GenericQuotient units1 units2)
+(./) lhs rhs = Units.add (Units.drop lhs / Units.drop rhs)
