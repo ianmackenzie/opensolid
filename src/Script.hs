@@ -49,6 +49,16 @@ instance
   Ok value >>= function = function value
   Error err >>= _ = Done (Error err)
 
+instance
+  (a ~ a')
+  => Bind
+      (List a)
+      (a' -> Script x ())
+      (Script x ())
+  where
+  [] >>= _ = succeed ()
+  (first : rest) >>= function = function first >> (rest >>= function)
+
 map :: (a -> b) -> Script x a -> Script x b
 map function (Done result) = Done (Result.map function result)
 map function (Perform io) = Perform (Prelude.fmap (map function) io)
@@ -82,7 +92,4 @@ printLine :: Text -> Script Text ()
 printLine text = perform (Data.Text.IO.putStrLn text)
 
 forEach :: (a -> Script x ()) -> List a -> Script x ()
-forEach _ [] = succeed ()
-forEach function (first : rest) = do
-  function first
-  forEach function rest
+forEach function list = do item <- list; function item
