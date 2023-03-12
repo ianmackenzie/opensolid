@@ -35,7 +35,7 @@ instance
   Error error >>= _ = Error error
 
 instance
-  (x ~ x', a ~ a')
+  a ~ a'
   => Bind
       (Result x (List a))
       (a' -> List b)
