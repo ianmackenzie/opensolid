@@ -39,32 +39,32 @@ data World
 data MyPoints = MyPoints (Point2d World Meters) (Point2d World Meters) deriving (Show)
 
 listTest :: List (Int, Int)
-listTest = List.do
+listTest = do
   a <- [1 .. 10]
   b <- [1 .. 10]
   a + b == 10
   [(a, b)]
 
 listFilterTest :: List Int
-listFilterTest = List.do
+listFilterTest = do
   text <- ["1", "a", "-2", "", "+3"]
   parsed <- Result.toMaybe (Text.toInt text)
   [parsed]
 
 parsingSuccess :: Result Text (List Int)
-parsingSuccess = List.do
+parsingSuccess = do
   text <- ["1", "-2", "+3"]
   parsed <- Text.toInt text
   [parsed]
 
 parsingFailure :: Result Text (List Int)
-parsingFailure = List.do
+parsingFailure = do
   text <- ["1", "a", "-2", "b", "+3"]
   parsed <- Text.toInt text
   [parsed]
 
 parsingResults :: List (Result Text Int)
-parsingResults = List.do
+parsingResults = do
   text <- ["1", "a", "-2", "b", "+3"]
   let parseResult = Text.toInt text
   [parseResult]
@@ -80,7 +80,7 @@ testListCollapse =
    in log "Collapsed list" (List.collapse joinTextChunks textChunks |> List.filter (/= " "))
 
 testCurveFind :: Script ()
-testCurveFind = Script.do
+testCurveFind = do
   let p1 = Point2d.meters 0.0 0.0
   let p2 = Point2d.meters 1.0 2.0
   let p3 = Point2d.meters 2.0 0.0
@@ -97,7 +97,7 @@ testCurveFind = Script.do
   ?tolerance = Length.meters 1e-9
 
 testDirection2dAngleFrom :: Script ()
-testDirection2dAngleFrom = Script.do
+testDirection2dAngleFrom = do
   let angle start end =
         Direction2d.angleFrom
           (Direction2d.degrees (Float.fromInt start))
@@ -107,7 +107,7 @@ testDirection2dAngleFrom = Script.do
   log "Direction2d.angleFrom (Direction2d.degrees 10) (Direction2d.degrees 350)" (angle 10 350)
 
 testArc2dFrom :: Script ()
-testArc2dFrom = Script.do
+testArc2dFrom = do
   let arc1 = Arc2d.from Point2d.origin (Point2d.meters 1.0 1.0) (Angle.degrees 90.0)
   log "arc1" arc1
   log "arc2" (Arc2d.from Point2d.origin (Point2d.meters 1.0 1.0) (Angle.degrees -90.0))
@@ -116,7 +116,7 @@ testArc2dFrom = Script.do
   log "arc1 point" (Result.map (`Arc2d.pointOn` 0.5) arc1)
 
 testCurveOverlap1 :: Script ()
-testCurveOverlap1 = Script.do
+testCurveOverlap1 = do
   arc1 <- Arc2d.from (Point2d.meters 1.0 0.0) (Point2d.meters -1.0 0.0) (Angle.degrees 180.0)
   arc2 <- Arc2d.from (Point2d.meters 0.0 -1.0) (Point2d.meters 0.0 1.0) (Angle.degrees 180.0)
   log "Overlaps" (Curve2d.overlappingSegments (Curve2d arc1) (Curve2d arc2))
@@ -124,7 +124,7 @@ testCurveOverlap1 = Script.do
   ?tolerance = Length.meters 1e-9
 
 testCurveOverlap2 :: Script ()
-testCurveOverlap2 = Script.do
+testCurveOverlap2 = do
   let arc1 =
         Arc2d.with
           ( #centerPoint Point2d.origin
@@ -172,7 +172,7 @@ testPatternMatchErrorInTryDo =
   log "Pattern match error (expected)" patternMatchError
 
 testCurve1dApproximateEquality :: Script ()
-testCurve1dApproximateEquality = Script.do
+testCurve1dApproximateEquality = do
   let t = Curve1d.parameter
   let theta = Angle.radian * t
   log "sin(x) = cos(x)" (Curve1d.sin theta ~= Curve1d.cos theta)
@@ -184,7 +184,7 @@ testCurve1dApproximateEquality = Script.do
   ?tolerance = 1e-9
 
 script :: Script ()
-script = Script.do
+script = do
   log "Integer product" (3 * 4)
   log "Integer division" (10 // 4)
   log "True division" (10 / 4)

@@ -29,7 +29,6 @@ import Generic qualified
 import Length qualified
 import OpenSolid
 import Qty qualified
-import Result qualified
 import Units (Meters, SquareMeters, Unitless)
 import Units qualified
 
@@ -129,13 +128,13 @@ instance IsError IsZero where
   errorMessage IsZero = "Vector2d is zero"
 
 direction :: Vector2d coordinates units -> Result IsZero (Direction2d coordinates)
-direction vector = Result.do
+direction vector = do
   let Vector2d vx vy = vector
   vm <- validate (/= Qty.zero) (magnitude vector) ?? Error IsZero
   Ok (Direction2d.unsafe (vx / vm) (vy / vm))
 
 magnitudeAndDirection :: Vector2d coordinates units -> Result IsZero (Qty units, Direction2d coordinates)
-magnitudeAndDirection vector = Result.do
+magnitudeAndDirection vector = do
   let Vector2d vx vy = vector
   vm <- validate (/= Qty.zero) (magnitude vector) ?? Error IsZero
   Ok (vm, Direction2d.unsafe (vx / vm) (vy / vm))

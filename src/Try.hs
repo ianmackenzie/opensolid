@@ -5,7 +5,7 @@ module Try
   )
 where
 
-import OpenSolid
+import OpenSolid hiding ((>>=))
 import Result qualified
 import Text qualified
 
@@ -18,6 +18,3 @@ withContext context result = result |> Result.mapError (errorMessage >> addConte
 
 addContext :: Text -> Text -> Text
 addContext context text = context ++ "\n  " ++ Text.replace "\n" "\n  " text
-
-fail :: Text -> Result Text a
-fail = Error

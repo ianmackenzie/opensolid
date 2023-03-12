@@ -32,7 +32,6 @@ import Point2d qualified
 import Qty qualified
 import Range (Range)
 import Range qualified
-import Result qualified
 import Units (Unitless)
 import Units qualified
 import Vector2d qualified
@@ -165,7 +164,7 @@ instance
       )
       (Result EndpointsCoincidentOrTooFarApart (Arc2d coordinates units))
   where
-  build (Named givenStartPoint, Named givenEndPoint, Named givenRadius, Named angleSign, Named largeAngle) = Result.do
+  build (Named givenStartPoint, Named givenEndPoint, Named givenRadius, Named angleSign, Named largeAngle) = do
     let chord = Line2d.from givenStartPoint givenEndPoint
     chordDirection <- Line2d.direction chord ?? Error EndpointsCoincident
     let squaredRadius = Qty.squared (Units.generalize givenRadius)
@@ -201,7 +200,7 @@ instance IsError (IsLine coordinates units) where
   errorMessage (IsLine _) = "Arc is actually just a straight line"
 
 from :: Point2d coordinates units -> Point2d coordinates units -> Angle -> Result (IsLine coordinates units) (Arc2d coordinates units)
-from p1 p2 theta = Result.do
+from p1 p2 theta = do
   (distance, direction) <- Vector2d.magnitudeAndDirection (p2 - p1) ?? Error (IsLine (Line2d.from p1 p2))
   let tanHalfAngle = Angle.tan (0.5 * theta)
   denominator <- validate (/= Qty.zero) tanHalfAngle ?? Error (IsLine (Line2d.from p1 p2))

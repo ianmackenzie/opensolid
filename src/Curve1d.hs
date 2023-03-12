@@ -28,7 +28,6 @@ import Qty qualified
 import Quadrature qualified
 import Range (Range (..))
 import Range qualified
-import Result qualified
 import Units (Radians, Unitless)
 import Units qualified
 import Vector2d (Vector2d)
@@ -246,7 +245,7 @@ roots :: Tolerance units => Curve1d units -> Result IsZero (List Root)
 roots Zero = Error IsZero
 roots (Constant value) = if value ~= Qty.zero then Error IsZero else Ok []
 roots curve | isZero curve = Error IsZero
-roots curve = Result.do
+roots curve = do
   let (root0, x0) = solveEndpoint curve 0.0
   let (root1, x1) = solveEndpoint curve 1.0
   resolvedRegions <- regions (Range.from x0 x1) curve
@@ -327,7 +326,7 @@ regions :: Tolerance units => Range Unitless -> Curve1d units -> Result IsZero (
 regions domain curve =
   case resolve domain curve of
     Ok region -> Ok [region]
-    Error Indeterminate -> Result.do
+    Error Indeterminate -> do
       (leftDomain, rightDomain) <- bisect domain
       leftRegions <- regions leftDomain curve
       rightRegions <- regions rightDomain curve

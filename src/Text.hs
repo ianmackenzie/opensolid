@@ -18,7 +18,6 @@ import Data.String qualified
 import Data.Text qualified
 import Data.Text.Read
 import Float (Float)
-import List (List)
 import Qty (Qty (Qty))
 import Result (Result (..))
 import Result qualified

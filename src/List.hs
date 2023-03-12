@@ -25,86 +25,17 @@ module List
   , sortAndDeduplicate
   , all
   , any
-  , (>>=)
-  , (>>)
   )
 where
 
 import Arithmetic
-import Basics hiding ((>>))
+import Basics
 import Data.List qualified
 import Data.Maybe qualified
 import Generic qualified
-import Result (IsError (..), Result (..))
-import Result qualified
+import {-# SOURCE #-} Result (IsError (..), Result (..))
+import {-# SOURCE #-} Result qualified
 import Prelude qualified
-
-type List a = [a]
-
-(>>) :: Bool -> List a -> List a
-True >> list = list
-False >> _ = []
-
-class Bind a b c | a b -> c where
-  (>>=) :: a -> b -> c
-
-instance
-  a ~ a'
-  => Bind
-      (List a)
-      (a' -> List b)
-      (List b)
-  where
-  (>>=) = (Prelude.>>=)
-
-instance
-  a ~ a'
-  => Bind
-      (Maybe a)
-      (a' -> List b)
-      (List b)
-  where
-  Just value >>= function = function value
-  Nothing >>= _ = []
-
-instance
-  a ~ a'
-  => Bind
-      (Result x a)
-      (a' -> List b)
-      (Result x (List b))
-  where
-  Ok value >>= function = Ok (function value)
-  Error error >>= _ = Error error
-
-instance
-  (x ~ x', a ~ a')
-  => Bind
-      (Result x (List a))
-      (a' -> List b)
-      (Result x (List b))
-  where
-  Error error >>= _ = Error error
-  Ok items >>= function = Ok (combine function items)
-
-instance
-  (x ~ x', a ~ a')
-  => Bind
-      (Result x (List a))
-      (a' -> Result x' (List b))
-      (Result x (List b))
-  where
-  Error error >>= _ = Error error
-  Ok items >>= function = items >>= function
-
-instance
-  a ~ a'
-  => Bind
-      (List a)
-      (a' -> Result x (List b))
-      (Result x (List b))
-  where
-  list >>= function = Result.map concat (collate (map function list))
 
 isEmpty :: List a -> Bool
 isEmpty = Prelude.null
@@ -156,10 +87,8 @@ concat = Data.List.concat
 
 collate :: List (Result x a) -> Result x (List a)
 collate [] = Ok []
-collate (firstResult : remainingResults) = Result.do
-  firstItem <- firstResult
-  remainingItems <- collate remainingResults
-  Ok (firstItem : remainingItems)
+collate (Ok firstValue : remainingResults) = Result.map (firstValue :) (collate remainingResults)
+collate (Error error : _) = Error error
 
 collapse :: (a -> a -> Maybe a) -> List a -> List a
 collapse _ [] = []

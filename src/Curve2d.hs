@@ -148,7 +148,7 @@ nearby point curve domain
   distance = VectorBox2d.magnitude (point - segmentBounds curve domain)
 
 parameterValues :: Tolerance units => Point2d coordinates units -> Curve2d coordinates units -> Result IsCoincidentWithPoint (List Float)
-parameterValues point curve = Result.do
+parameterValues point curve = do
   let squaredDistanceFromCurve = VectorCurve2d.squaredMagnitude (Units.generalize (point - curve))
   roots <- Curve1d.roots squaredDistanceFromCurve ?? Error IsCoincidentWithPoint
   Ok (List.map Root.value roots)

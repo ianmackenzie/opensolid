@@ -6,6 +6,7 @@ module OpenSolid
   , module Float
   , module List
   , module Sign
+  , module DoNotation
   , Indeterminate (Indeterminate)
   , Invalid (Invalid)
   , validate
@@ -16,6 +17,7 @@ where
 
 import Arithmetic
 import Basics
+import DoNotation
 import Float (Float, fromRational)
 import List (List)
 import Qty (Qty (..))

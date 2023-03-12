@@ -2,7 +2,6 @@ module Result
   ( Result (..)
   , IsError (..)
   , (??)
-  , (>>=)
   , map
   , andThen
   , withDefault
@@ -12,6 +11,8 @@ module Result
 where
 
 import Basics
+import DoNotation
+import List qualified
 
 class IsError error where
   errorMessage :: error -> Text
@@ -23,6 +24,48 @@ data Result x a where
   Ok :: a -> Result x a
   Error :: IsError x => x -> Result x a
 
+instance
+  a ~ a'
+  => Bind
+      (Result x a)
+      (a' -> List b)
+      (Result x (List b))
+  where
+  Ok value >>= function = Ok (function value)
+  Error error >>= _ = Error error
+
+instance
+  (x ~ x', a ~ a')
+  => Bind
+      (Result x (List a))
+      (a' -> List b)
+      (Result x (List b))
+  where
+  Error error >>= _ = Error error
+  Ok items >>= function = Ok (List.combine function items)
+
+instance
+  a ~ a'
+  => Bind
+      (List a)
+      (a' -> Result x (List b))
+      (Result x (List b))
+  where
+  list >>= function = Result.map List.concat (List.collate (List.map function list))
+
+instance
+  (x ~ x', a ~ a')
+  => Bind
+      (Result x a)
+      (a' -> Result x' b)
+      (Result x b)
+  where
+  Ok value >>= function = function value
+  Error error >>= _ = Error error
+
+instance Fail (Result Text a) where
+  fail = Error
+
 (??) :: Result x a -> Result y a -> Result y a
 Ok value ?? _ = Ok value
 Error _ ?? fallback = fallback
@@ -32,10 +75,6 @@ infixl 0 ??
 deriving instance (Eq x, Eq a) => Eq (Result x a)
 
 deriving instance (Show x, Show a) => Show (Result x a)
-
-(>>=) :: Result x a -> (a -> Result x b) -> Result x b
-Ok value >>= function = function value
-Error error >>= _ = Error error
 
 withDefault :: a -> Result x a -> a
 withDefault _ (Ok value) = value

@@ -4,7 +4,8 @@
 {-# LANGUAGE Strict #-}
 
 module Basics
-  ( ifThenElse
+  ( List
+  , ifThenElse
   , fromString
   , fromInteger
   , otherwise
@@ -31,8 +32,6 @@ module Basics
   , internalError
   , notImplemented
   , (|>)
-  , Compose ((>>))
-  , (<<)
   , Named (Named)
   , fromLabel
   )
@@ -60,6 +59,8 @@ import Prelude
   , (||)
   )
 import Prelude qualified
+
+type List a = [a]
 
 ifThenElse :: Bool -> a -> a -> a
 ifThenElse True ifBranch ~_ = ifBranch
@@ -92,15 +93,6 @@ notImplemented = internalError "Not implemented"
 (|>) value function = function value
 
 infixl 0 |>
-
-class Compose a b c | a b -> c where
-  (>>) :: a -> b -> c
-
-(<<) :: Compose a b c => b -> a -> c
-second << first = first >> second
-
-instance b ~ b' => Compose (a -> b) (b' -> c) (a -> c) where
-  f >> g = g Prelude.. f
 
 newtype Named (name :: Symbol) value = Named value deriving (Eq)
 
