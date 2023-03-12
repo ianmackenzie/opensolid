@@ -22,6 +22,8 @@ module Basics
   , (++)
   , Maybe (Just, Nothing)
   , Type
+  , Constraint
+  , Symbol
   , HasField (getField)
   , Text
   , identity
@@ -36,7 +38,7 @@ module Basics
   )
 where
 
-import Data.Kind (Type)
+import Data.Kind (Constraint, Type)
 import Data.Proxy (Proxy (Proxy))
 import Data.Text (Text)
 import Data.Text qualified
