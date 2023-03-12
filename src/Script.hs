@@ -5,6 +5,7 @@ module Script
   , fail
   , printLine
   , map
+  , mapError
   , forEach
   , perform
   )
@@ -20,27 +21,31 @@ import System.IO.Error qualified
 import Text qualified
 import Prelude qualified
 
-data Script a
-  = Done (Result Text a)
-  | Perform (IO (Script a))
+data Script x a
+  = Done (Result x a)
+  | Perform (IO (Script x a))
 
-instance Compose (Script ()) (Script a) (Script a) where
+instance x ~ x' => Compose (Script x ()) (Script x' a) (Script x a) where
   script1 >> script2 = script1 >>= (\() -> script2)
 
-instance a ~ a' => Bind (Script a') (a' -> Script b) (Script b) where
+instance (x ~ x', a ~ a') => Bind (Script x a) (a' -> Script x' b) (Script x b) where
   Done (Ok value) >>= function = function value
   Done (Error err) >>= _ = Done (Error err)
   Perform io >>= function = Perform (Prelude.fmap (>>= function) io)
 
-instance a ~ a' => Bind (Result x a) (a' -> Script b) (Script b) where
+instance (x ~ x', a ~ a') => Bind (Result x a) (a' -> Script x' b) (Script x b) where
   Ok value >>= function = function value
-  Error err >>= _ = Done (Error (errorMessage err))
+  Error err >>= _ = Done (Error err)
 
-map :: (a -> b) -> Script a -> Script b
+map :: (a -> b) -> Script x a -> Script x b
 map function (Done result) = Done (Result.map function result)
 map function (Perform io) = Perform (Prelude.fmap (map function) io)
 
-perform :: IO a -> Script a
+mapError :: (IsError x, IsError y) => (x -> y) -> Script x a -> Script y a
+mapError function (Done result) = Done (Result.mapError function result)
+mapError function (Perform io) = Perform (Prelude.fmap (mapError function) io)
+
+perform :: IO a -> Script Text a
 perform io =
   Perform $
     Control.Exception.catch
@@ -50,21 +55,21 @@ perform io =
            in Prelude.pure (fail message)
       )
 
-run :: Script () -> IO ()
+run :: Script x () -> IO ()
 run (Done (Ok ())) = System.Exit.exitSuccess
-run (Done (Error message)) = run (printLine message) Prelude.>> System.Exit.exitFailure
+run (Done (Error err)) = run (printLine (errorMessage err)) Prelude.>> System.Exit.exitFailure
 run (Perform io) = io Prelude.>>= run
 
-succeed :: a -> Script a
+succeed :: a -> Script x a
 succeed value = Done (Ok value)
 
-instance Fail (Script a) where
+instance Fail (Script Text a) where
   fail message = Done (Error message)
 
-printLine :: Text -> Script ()
+printLine :: Text -> Script Text ()
 printLine text = perform (Data.Text.IO.putStrLn text)
 
-forEach :: (a -> Script ()) -> List a -> Script ()
+forEach :: (a -> Script x ()) -> List a -> Script x ()
 forEach _ [] = succeed ()
 forEach function (first : rest) = do
   function first
