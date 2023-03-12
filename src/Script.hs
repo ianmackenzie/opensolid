@@ -28,12 +28,24 @@ data Script x a
 instance x ~ x' => Compose (Script x ()) (Script x' a) (Script x a) where
   script1 >> script2 = script1 >>= (\() -> script2)
 
-instance (x ~ x', a ~ a') => Bind (Script x a) (a' -> Script x' b) (Script x b) where
+instance
+  (x ~ x', a ~ a')
+  => Bind
+      (Script x a)
+      (a' -> Script x' b)
+      (Script x b)
+  where
   Done (Ok value) >>= function = function value
   Done (Error err) >>= _ = Done (Error err)
   Perform io >>= function = Perform (Prelude.fmap (>>= function) io)
 
-instance (x ~ x', a ~ a') => Bind (Result x a) (a' -> Script x' b) (Script x b) where
+instance
+  (x ~ x', a ~ a')
+  => Bind
+      (Result x a)
+      (a' -> Script x' b)
+      (Script x b)
+  where
   Ok value >>= function = function value
   Error err >>= _ = Done (Error err)
 
