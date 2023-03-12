@@ -57,8 +57,7 @@ map function (Ok value) = Ok (function value)
 map _ (Error err) = Error err
 
 andThen :: (a -> Result x b) -> Result x a -> Result x b
-andThen function (Ok value) = function value
-andThen _ (Error err) = Error err
+andThen function result = result >>= function
 
 mapError :: IsError y => (x -> y) -> Result x a -> Result y a
 mapError _ (Ok value) = Ok value
