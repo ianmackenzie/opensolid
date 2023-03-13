@@ -6,7 +6,7 @@ module Try
   )
 where
 
-import OpenSolid hiding (Bind ((>>=)), Compose ((>>)))
+import OpenSolid hiding ((>>), (>>=))
 import OpenSolid qualified
 import Result qualified
 import Script (Script)
@@ -28,14 +28,14 @@ instance MapError [] [] where
 instance MapError Maybe Maybe where
   mapError = identity
 
-(>>) :: (MapError p q, OpenSolid.Compose (q a) b c) => p a -> b -> c
+(>>) :: (MapError p q, Compose (q a) b c) => p a -> b -> c
 first >> second = mapError first OpenSolid.>> second
 
-(>>=) :: (MapError p q, OpenSolid.Bind q b) => p a -> (a -> b) -> b
+(>>=) :: (MapError p q, Bind q b) => p a -> (a -> b) -> b
 value >>= function = mapError value OpenSolid.>>= function
 
 withContext :: IsError x => Text -> Result x a -> Result Text a
-withContext context result = result |> Result.mapError (errorMessage OpenSolid.>> addContext context)
+withContext context = Result.mapError (errorMessage OpenSolid.>> addContext context)
 
 addContext :: Text -> Text -> Text
 addContext context text = context ++ "\n  " ++ Text.replace "\n" "\n  " text

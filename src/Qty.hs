@@ -106,16 +106,16 @@ sqrt (Qty x) = Qty (Prelude.sqrt x)
 
 hypot2 :: Qty units -> Qty units -> Qty units
 hypot2 x y =
-  let x2 = Qty.squared (Units.generalize x)
-      y2 = Qty.squared (Units.generalize y)
-   in Units.specialize (sqrt (x2 + y2))
+  let xSquared = Qty.squared (Units.generalize x)
+      ySquared = Qty.squared (Units.generalize y)
+   in Units.specialize (sqrt (xSquared + ySquared))
 
 hypot3 :: Qty units -> Qty units -> Qty units -> Qty units
 hypot3 x y z =
-  let x2 = Qty.squared (Units.generalize x)
-      y2 = Qty.squared (Units.generalize y)
-      z2 = Qty.squared (Units.generalize z)
-   in Units.specialize (sqrt (x2 + y2 + z2))
+  let xSquared = Qty.squared (Units.generalize x)
+      ySquared = Qty.squared (Units.generalize y)
+      zSquared = Qty.squared (Units.generalize z)
+   in Units.specialize (sqrt (xSquared + ySquared + zSquared))
 
 {-# INLINE abs #-}
 abs :: Qty units -> Qty units
