@@ -32,7 +32,7 @@ import Float qualified
 import Generic qualified
 import OpenSolid
 import Qty qualified
-import Units (Radians, Unitless)
+import Units (HasUnits, Radians, Unitless)
 import Units qualified
 
 data Range units = Range# {minValue :: Qty units, maxValue :: Qty units}
@@ -44,7 +44,7 @@ data Range units = Range# {minValue :: Qty units, maxValue :: Qty units}
 pattern Range :: Qty units -> Qty units -> Range units
 pattern Range low high <- Range# low high
 
-instance Units.Coercion Range
+instance HasUnits Range
 
 instance Negation (Range units) where
   negate (Range low high) = unsafe (negate high) (negate low)

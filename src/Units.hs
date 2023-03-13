@@ -1,5 +1,5 @@
 module Units
-  ( Coercion
+  ( HasUnits
   , Generic
   , GenericProduct
   , GenericQuotient
@@ -24,7 +24,7 @@ where
 import Data.Kind (Type)
 import Unsafe.Coerce (unsafeCoerce)
 
-class Coercion (a :: Type -> Type)
+class HasUnits (a :: Type -> Type)
 
 data Generic units
 
@@ -33,19 +33,19 @@ data GenericProductOf units1 units2
 data GenericQuotientOf units1 units2
 
 {-# INLINE drop #-}
-drop :: Coercion a => a units -> a Unitless
+drop :: HasUnits a => a units -> a Unitless
 drop = unsafeCoerce
 
 {-# INLINE add #-}
-add :: Coercion a => a Unitless -> a units
+add :: HasUnits a => a Unitless -> a units
 add = unsafeCoerce
 
 {-# INLINE generalize #-}
-generalize :: Coercion a => a units -> a (Generic units)
+generalize :: HasUnits a => a units -> a (Generic units)
 generalize = unsafeCoerce
 
 {-# INLINE specialize #-}
-specialize :: (Coercion a, Specialize genericUnits specificUnits) => a genericUnits -> a specificUnits
+specialize :: (HasUnits a, Specialize genericUnits specificUnits) => a genericUnits -> a specificUnits
 specialize = unsafeCoerce
 
 class

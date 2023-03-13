@@ -29,7 +29,7 @@ import Generic qualified
 import Length qualified
 import OpenSolid
 import Qty qualified
-import Units (Meters, SquareMeters, Unitless)
+import Units (HasUnits, Meters, SquareMeters, Unitless)
 import Units qualified
 
 type role Vector2d nominal nominal
@@ -38,7 +38,7 @@ type Vector2d :: Type -> Type -> Type
 data Vector2d coordinates units = Vector2d {xComponent :: Qty units, yComponent :: Qty units}
   deriving (Eq, Show)
 
-instance Units.Coercion (Vector2d coordinates)
+instance HasUnits (Vector2d coordinates)
 
 instance Generic.Zero (Vector2d coordinates units) where
   zero = zero

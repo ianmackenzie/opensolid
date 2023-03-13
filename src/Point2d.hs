@@ -33,7 +33,7 @@ type Point2d :: Type -> Type -> Type
 data Point2d coordinates units = Point2d {xCoordinate :: Qty units, yCoordinate :: Qty units}
   deriving (Eq, Show)
 
-instance Units.Coercion (Point2d coordinates)
+instance HasUnits (Point2d coordinates)
 
 instance (units ~ units', coordinates ~ coordinates') => Addition (Point2d coordinates units) (Vector2d coordinates' units') (Point2d coordinates units) where
   Point2d px py + Vector2d vx vy = Point2d (px + vx) (py + vy)

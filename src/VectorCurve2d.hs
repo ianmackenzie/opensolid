@@ -18,7 +18,7 @@ import Curve1d qualified
 import Generic qualified
 import OpenSolid
 import Range (Range)
-import Units (Unitless)
+import Units (HasUnits, Unitless)
 import Units qualified
 import Vector2d (Vector2d)
 import Vector2d qualified
@@ -43,7 +43,7 @@ data VectorCurve2d coordinates units where
   Product2d1d :: forall units1 units2 coordinates units3. Units.Product units1 units2 units3 => VectorCurve2d coordinates units1 -> Curve1d units2 -> VectorCurve2d coordinates units3
   Quotient :: forall units1 units2 coordinates units3. Units.Quotient units1 units2 units3 => VectorCurve2d coordinates units1 -> Curve1d units2 -> VectorCurve2d coordinates units3
 
-instance Units.Coercion (VectorCurve2d coordinates)
+instance HasUnits (VectorCurve2d coordinates)
 
 instance IsVectorCurve2d (VectorCurve2d coordinates units) coordinates units where
   pointOn curve t =

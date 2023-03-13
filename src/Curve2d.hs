@@ -26,7 +26,7 @@ import Quadrature qualified
 import Range (Range (..))
 import Range qualified
 import Result qualified
-import Units (Unitless)
+import Units (HasUnits, Unitless)
 import Units qualified
 import VectorBox2d qualified
 import VectorCurve2d (IsVectorCurve2d, VectorCurve2d (VectorCurve2d))
@@ -44,7 +44,7 @@ class IsCurve2d curve coordinates units | curve -> units, curve -> coordinates w
 
 data Curve2d coordinates units = forall curve. IsCurve2d curve coordinates units => Curve2d curve
 
-instance Units.Coercion (Curve2d coordinates)
+instance HasUnits (Curve2d coordinates)
 
 startPoint :: Curve2d coordinates units -> Point2d coordinates units
 startPoint (Curve2d curve) = startPointImpl curve

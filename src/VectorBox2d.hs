@@ -17,7 +17,7 @@ import OpenSolid
 import Qty qualified
 import Range (Range (..))
 import Range qualified
-import Units (Radians, Unitless)
+import Units (HasUnits, Radians, Unitless)
 import Units qualified
 import Vector2d (Vector2d (..))
 import Vector2d qualified
@@ -27,7 +27,7 @@ type role VectorBox2d nominal nominal
 type VectorBox2d :: Type -> Type -> Type
 data VectorBox2d coordinates units = VectorBox2d (Range units) (Range units) deriving (Show)
 
-instance Units.Coercion (VectorBox2d coordinates)
+instance HasUnits (VectorBox2d coordinates)
 
 instance Generic.Zero (VectorBox2d coordinates units) where
   zero = constant Vector2d.zero
