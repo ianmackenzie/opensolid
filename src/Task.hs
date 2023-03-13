@@ -17,8 +17,6 @@ import DoNotation
 import OpenSolid
 import Result qualified
 import System.Exit qualified
-import System.IO.Error qualified
-import Text qualified
 import Prelude qualified
 
 data Task x a
@@ -49,15 +47,11 @@ mapError :: IsError y => (x -> y) -> Task x a -> Task y a
 mapError function (Done result) = Done (Result.mapError function result)
 mapError function (Perform io) = Perform (Prelude.fmap (mapError function) io)
 
-perform :: IO a -> Task Text a
+perform :: IO a -> Task IOError a
 perform io =
   Perform $
-    Control.Exception.catch
-      (Prelude.fmap succeed io)
-      ( \ioError ->
-          let message = Text.fromChars (System.IO.Error.ioeGetErrorString ioError)
-           in Prelude.pure (fail message)
-      )
+    Control.Exception.catch (Prelude.fmap succeed io) $
+      (\ioError -> Prelude.pure (Done (Error ioError)))
 
 run :: Task x () -> IO ()
 run (Done (Ok ())) = System.Exit.exitSuccess
@@ -71,7 +65,7 @@ instance Fail (Task Text a) where
   fail message = Done (Error message)
 
 printLine :: Text -> Task Text ()
-printLine text = perform (Data.Text.IO.putStrLn text)
+printLine text = perform (Data.Text.IO.putStrLn text) |> mapError errorMessage
 
 forEach :: (a -> Task x ()) -> List a -> Task x ()
 forEach function list = do item <- list; function item
