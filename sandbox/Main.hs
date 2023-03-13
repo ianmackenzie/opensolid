@@ -21,8 +21,8 @@ import Qty qualified
 import QuadraticSpline2d qualified
 import Range qualified
 import Result qualified
-import Script (Script)
-import Script qualified
+import Task (Task)
+import Task qualified
 import Text qualified
 import Transform2d qualified
 import Try qualified
@@ -31,8 +31,8 @@ import Vector2d qualified
 import Vector3d qualified
 import Volume qualified
 
-log :: Show a => Text -> a -> Script Text ()
-log label value = Script.printLine (label ++ ": " ++ Debug.show value)
+log :: Show a => Text -> a -> Task Text ()
+log label value = Task.printLine (label ++ ": " ++ Debug.show value)
 
 data World
 
@@ -74,12 +74,12 @@ joinTextChunks " " _ = Nothing
 joinTextChunks _ " " = Nothing
 joinTextChunks s1 s2 = Just (s1 ++ s2)
 
-testListCollapse :: Script Text ()
+testListCollapse :: Task Text ()
 testListCollapse =
   let textChunks = ["T", "h", "is", " ", "i", "s", " ", "a", " ", "t", "es", "t"]
    in log "Collapsed list" (List.collapse joinTextChunks textChunks |> List.filter (/= " "))
 
-testCurveFind :: Script Text ()
+testCurveFind :: Task Text ()
 testCurveFind = Try.do
   let p1 = Point2d.meters 0.0 0.0
   let p2 = Point2d.meters 1.0 2.0
@@ -96,7 +96,7 @@ testCurveFind = Try.do
  where
   ?tolerance = Length.meters 1e-9
 
-testDirection2dAngleFrom :: Script Text ()
+testDirection2dAngleFrom :: Task Text ()
 testDirection2dAngleFrom = do
   let angle start end =
         Direction2d.angleFrom
@@ -106,7 +106,7 @@ testDirection2dAngleFrom = do
   log "Direction2d.angleFrom (Direction2d.degrees 10) (Direction2d.degrees 30)" (angle 10 30)
   log "Direction2d.angleFrom (Direction2d.degrees 10) (Direction2d.degrees 350)" (angle 10 350)
 
-testArc2dFrom :: Script Text ()
+testArc2dFrom :: Task Text ()
 testArc2dFrom = Try.do
   let arc1 = Arc2d.from Point2d.origin (Point2d.meters 1.0 1.0) (Angle.degrees 90.0)
   log "arc1" arc1
@@ -115,7 +115,7 @@ testArc2dFrom = Try.do
   log "arc4" (Arc2d.from Point2d.origin (Point2d.meters 1.0 1.0) (Angle.degrees -180.0))
   log "arc1 point" (Result.map (`Arc2d.pointOn` 0.5) arc1)
 
-testCurveOverlap1 :: Script Text ()
+testCurveOverlap1 :: Task Text ()
 testCurveOverlap1 = Try.do
   arc1 <- Arc2d.from (Point2d.meters 1.0 0.0) (Point2d.meters -1.0 0.0) (Angle.degrees 180.0)
   arc2 <- Arc2d.from (Point2d.meters 0.0 -1.0) (Point2d.meters 0.0 1.0) (Angle.degrees 180.0)
@@ -123,7 +123,7 @@ testCurveOverlap1 = Try.do
  where
   ?tolerance = Length.meters 1e-9
 
-testCurveOverlap2 :: Script Text ()
+testCurveOverlap2 :: Task Text ()
 testCurveOverlap2 = do
   let arc1 =
         Arc2d.with
@@ -151,13 +151,13 @@ getCrossProduct =
       lineDirection <- Try.withContext "When getting line direction:" $ Line2d.direction (Line2d.from Point2d.origin Point2d.origin)
       Ok (vectorDirection >< lineDirection)
 
-testTry :: Script Text ()
+testTry :: Task Text ()
 testTry =
   case Try.withContext "In testTry:" getCrossProduct of
     Ok crossProduct ->
       log "Got cross product" crossProduct
     Error message ->
-      Script.printLine message
+      Task.printLine message
 
 patternMatchError :: Result Text Float
 patternMatchError = Try.do
@@ -167,11 +167,11 @@ patternMatchError = Try.do
  where
   ?tolerance = Length.meters 1e-9
 
-testPatternMatchErrorInTryDo :: Script Text ()
+testPatternMatchErrorInTryDo :: Task Text ()
 testPatternMatchErrorInTryDo =
   log "Pattern match error (expected)" patternMatchError
 
-testCurve1dApproximateEquality :: Script Text ()
+testCurve1dApproximateEquality :: Task Text ()
 testCurve1dApproximateEquality = do
   let t = Curve1d.parameter
   let theta = Angle.radian * t
@@ -183,12 +183,12 @@ testCurve1dApproximateEquality = do
  where
   ?tolerance = 1e-9
 
-testScriptIteration :: Script Text ()
-testScriptIteration = do
+testTaskIteration :: Task Text ()
+testTaskIteration = do
   number <- [1 .. 3]
-  Script.printLine ("Looping: " ++ Text.fromInt number)
+  Task.printLine ("Looping: " ++ Text.fromInt number)
 
-script :: Script Text ()
+script :: Task Text ()
 script = do
   log "Integer product" (3 * 4)
   log "Integer division" (10 // 4)
@@ -241,7 +241,7 @@ script = do
   log "Roots" expressionRoots
   testCurveFind
   testListCollapse
-  Script.printLine "Unicode output test: ✅❌🙂"
+  Task.printLine "Unicode output test: ✅❌🙂"
   testDirection2dAngleFrom
   testArc2dFrom
   testCurveOverlap1
@@ -267,7 +267,7 @@ script = do
   log "Parsing success" parsingSuccess
   log "Parsing failure" parsingFailure
   log "Parsing results" parsingResults
-  testScriptIteration
+  testTaskIteration
 
 main :: IO ()
-main = Script.run script
+main = Task.run script

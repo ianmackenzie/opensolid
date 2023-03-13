@@ -9,8 +9,8 @@ where
 import OpenSolid hiding ((>>), (>>=))
 import OpenSolid qualified
 import Result qualified
-import Script (Script)
-import Script qualified
+import Task (Task)
+import Task qualified
 import Text qualified
 
 class MapError p q | p -> q where
@@ -19,8 +19,8 @@ class MapError p q | p -> q where
 instance IsError x => MapError (Result x) (Result Text) where
   mapError = Result.mapError errorMessage
 
-instance IsError x => MapError (Script x) (Script Text) where
-  mapError = Script.mapError errorMessage
+instance IsError x => MapError (Task x) (Task Text) where
+  mapError = Task.mapError errorMessage
 
 instance MapError [] [] where
   mapError = identity

@@ -9,8 +9,8 @@ import OpenSolid
 import Pair qualified
 import Range (Range (..))
 import Range qualified
-import Script (Script)
-import Script qualified
+import Task (Task)
+import Task qualified
 import Text qualified
 import Units (Meters)
 import Vector3d qualified
@@ -66,10 +66,10 @@ tests =
  where
   ?tolerance = Length.meters 1e-12
 
-script :: Script Text ()
+script :: Task Text ()
 script = do
-  success <- Script.perform (Hedgehog.checkParallel tests)
-  if success then Script.succeed () else Script.fail "Test failed"
+  success <- Task.perform (Hedgehog.checkParallel tests)
+  if success then Task.succeed () else Task.fail "Test failed"
 
 main :: IO ()
-main = Script.run script
+main = Task.run script
