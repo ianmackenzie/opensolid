@@ -183,7 +183,7 @@ testCurve1dApproximateEquality = do
 testTaskIteration :: Task Text ()
 testTaskIteration = do
   number <- [1 .. 3]
-  print ("Looping: " ++ Text.fromInt number)
+  log "Looping" number
 
 script :: Task Text ()
 script = do
