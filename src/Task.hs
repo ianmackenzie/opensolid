@@ -39,6 +39,11 @@ instance Bind [] (Task x ()) where
   [] >>= _ = succeed ()
   (first : rest) >>= function = function first >> (rest >>= function)
 
+instance Bind [] (Task x (List b)) where
+  [] >>= _ = succeed []
+  (first : rest) >>= function =
+    function first >>= (\firstResults -> map (firstResults ++) (rest >>= function))
+
 map :: (a -> b) -> Task x a -> Task x b
 map function (Done result) = Done (Result.map function result)
 map function (Perform io) = Perform (Prelude.fmap (map function) io)

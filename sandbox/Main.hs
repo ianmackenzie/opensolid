@@ -185,6 +185,24 @@ testTaskIteration = do
   number <- [1 .. 3]
   log "Looping" number
 
+doublingTask :: Text -> Task Text Int
+doublingTask input = do
+  value <- Text.toInt input
+  let doubled = 2 * value
+  Task.succeed doubled
+
+doubleManyTask :: Task Text (List Int)
+doubleManyTask = do
+  text <- ["1", "-2", "+3"]
+  doubled <- doublingTask text
+  Task.succeed [doubled]
+
+testTaskSequencing :: Task Text ()
+testTaskSequencing = do
+  doubledValues <- doubleManyTask
+  doubledValue <- doubledValues
+  log "Doubled value" doubledValue
+
 script :: Task Text ()
 script = do
   log "Integer product" (3 * 4)
@@ -255,6 +273,7 @@ script = do
   log "Parsing failure" parsingFailure
   log "Parsing results" parsingResults
   testTaskIteration
+  testTaskSequencing
 
 main :: IO ()
 main = Task.run script
