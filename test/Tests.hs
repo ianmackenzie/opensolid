@@ -66,7 +66,7 @@ tests =
  where
   ?tolerance = Length.meters 1e-12
 
-script :: Script ()
+script :: Script Text ()
 script = do
   success <- Script.perform (Hedgehog.checkParallel tests)
   if success then Script.succeed () else Script.fail "Test failed"
