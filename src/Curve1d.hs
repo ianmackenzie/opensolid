@@ -403,5 +403,4 @@ computeWidth derivativeOrder derivativeValue =
     (1.0 / Float.fromInt derivativeOrder)
 
 factorial :: Int -> Int
-factorial 0 = 1
-factorial n = n * factorial (n - 1)
+factorial 0 = 1; factorial n = n * factorial (n - 1)
