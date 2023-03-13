@@ -364,23 +364,24 @@ resolution domain curveDerivative
   derivativeBounds = segmentBounds curveDerivative domain
 
 solveEndpoint :: Tolerance units => Curve1d units -> Float -> (List Root, Float)
-solveEndpoint curve endpointX | not (pointOn curve endpointX ~= Qty.zero) = ([], endpointX)
-solveEndpoint curve endpointX = check (derivative curve) 1 Qty.infinity Nothing
- where
-  check curveDerivative derivativeOrder currentMinWidth currentBest =
-    let derivativeValue = pointOn curveDerivative endpointX
-        rootWidth = computeWidth derivativeOrder derivativeValue
-        updatedMinWidth = min rootWidth currentMinWidth
-        rootOrder = derivativeOrder - 1
-        updatedBest =
-          if updatedMinWidth < currentMinWidth
-            then Just (Root endpointX rootOrder (Qty.sign derivativeValue), curveDerivative)
-            else currentBest
-     in if rootOrder < maxRootOrder
-          then check (derivative curveDerivative) (derivativeOrder + 1) updatedMinWidth updatedBest
-          else case updatedBest of
-            Just (root, associatedDerivative) -> resolveEndpoint root associatedDerivative endpointX 0.5
-            Nothing -> ([], endpointX)
+solveEndpoint curve endpointX
+  | pointOn curve endpointX ~= Qty.zero =
+      let check curveDerivative derivativeOrder currentMinWidth currentBest =
+            let derivativeValue = pointOn curveDerivative endpointX
+                rootWidth = computeWidth derivativeOrder derivativeValue
+                updatedMinWidth = min rootWidth currentMinWidth
+                rootOrder = derivativeOrder - 1
+                updatedBest =
+                  if updatedMinWidth < currentMinWidth
+                    then Just (Root endpointX rootOrder (Qty.sign derivativeValue), curveDerivative)
+                    else currentBest
+             in if rootOrder < maxRootOrder
+                  then check (derivative curveDerivative) (derivativeOrder + 1) updatedMinWidth updatedBest
+                  else case updatedBest of
+                    Just (root, associatedDerivative) -> resolveEndpoint root associatedDerivative endpointX 0.5
+                    Nothing -> ([], endpointX)
+       in check (derivative curve) 1 Qty.infinity Nothing
+  | otherwise = ([], endpointX)
 
 resolveEndpoint :: Root -> Curve1d units -> Float -> Float -> (List Root, Float)
 resolveEndpoint root curveDerivative endpointX innerX =
