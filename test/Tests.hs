@@ -12,6 +12,7 @@ import Range qualified
 import Task (Task)
 import Task qualified
 import Text qualified
+import Try qualified
 import Units (Meters)
 import Vector3d qualified
 import VectorBox3d (VectorBox3d (VectorBox3d))
@@ -67,7 +68,7 @@ tests =
   ?tolerance = Length.meters 1e-12
 
 script :: Task Text ()
-script = do
+script = Try.do
   success <- Task.perform (Hedgehog.checkParallel tests)
   if success then Task.succeed () else Task.fail "Test failed"
 
