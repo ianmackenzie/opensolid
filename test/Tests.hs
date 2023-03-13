@@ -9,7 +9,6 @@ import OpenSolid
 import Pair qualified
 import Range (Range (..))
 import Range qualified
-import Task (Task)
 import Task qualified
 import Text qualified
 import Try qualified

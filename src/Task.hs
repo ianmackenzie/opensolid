@@ -3,7 +3,6 @@ module Task
   , run
   , succeed
   , fail
-  , printLine
   , map
   , mapError
   , forEach
@@ -11,12 +10,13 @@ module Task
   )
 where
 
+import Basics
 import Control.Exception qualified
-import Data.Text.IO qualified
 import DoNotation
-import OpenSolid
+import Result (IsError (errorMessage), Result (Error, Ok))
 import Result qualified
 import System.Exit qualified
+import Text qualified
 import Prelude qualified
 
 data Task x a
@@ -55,7 +55,7 @@ perform io =
 
 run :: Task x () -> IO ()
 run (Done (Ok ())) = System.Exit.exitSuccess
-run (Done (Error err)) = run (printLine (errorMessage err)) Prelude.>> System.Exit.exitFailure
+run (Done (Error error)) = System.Exit.die (Text.toChars (errorMessage error))
 run (Perform io) = io Prelude.>>= run
 
 succeed :: a -> Task x a
@@ -63,9 +63,6 @@ succeed value = Done (Ok value)
 
 instance Fail (Task Text a) where
   fail message = Done (Error message)
-
-printLine :: Text -> Task Text ()
-printLine text = perform (Data.Text.IO.putStrLn text) |> mapError errorMessage
 
 forEach :: (a -> Task x ()) -> List a -> Task x ()
 forEach function list = do item <- list; function item

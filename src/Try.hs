@@ -9,7 +9,6 @@ where
 import OpenSolid hiding ((>>), (>>=))
 import OpenSolid qualified
 import Result qualified
-import Task (Task)
 import Task qualified
 import Text qualified
 

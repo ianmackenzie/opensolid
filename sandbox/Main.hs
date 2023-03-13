@@ -21,7 +21,6 @@ import Qty qualified
 import QuadraticSpline2d qualified
 import Range qualified
 import Result qualified
-import Task (Task)
 import Task qualified
 import Text qualified
 import Transform2d qualified
@@ -32,7 +31,7 @@ import Vector3d qualified
 import Volume qualified
 
 log :: Show a => Text -> a -> Task Text ()
-log label value = Task.printLine (label ++ ": " ++ Debug.show value)
+log label value = print (label ++ ": " ++ Debug.show value)
 
 data World
 
@@ -154,10 +153,8 @@ getCrossProduct =
 testTry :: Task Text ()
 testTry =
   case Try.withContext "In testTry:" getCrossProduct of
-    Ok crossProduct ->
-      log "Got cross product" crossProduct
-    Error message ->
-      Task.printLine message
+    Ok crossProduct -> log "Got cross product" crossProduct
+    Error message -> print message
 
 patternMatchError :: Result Text Float
 patternMatchError = Try.do
@@ -186,7 +183,7 @@ testCurve1dApproximateEquality = do
 testTaskIteration :: Task Text ()
 testTaskIteration = do
   number <- [1 .. 3]
-  Task.printLine ("Looping: " ++ Text.fromInt number)
+  print ("Looping: " ++ Text.fromInt number)
 
 script :: Task Text ()
 script = do
@@ -241,7 +238,7 @@ script = do
   log "Roots" expressionRoots
   testCurveFind
   testListCollapse
-  Task.printLine "Unicode output test: ✅❌🙂"
+  print "Unicode output test: ✅❌🙂"
   testDirection2dAngleFrom
   testArc2dFrom
   testCurveOverlap1
