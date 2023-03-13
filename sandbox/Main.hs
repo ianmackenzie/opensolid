@@ -204,13 +204,6 @@ script = do
   log "Square root" squareRoot
   let translatedPoint = Point2d.meters 2.0 3.0 |> Transform2d.translateBy (Vector2d.meters 4.0 5.0)
   log "Translated point" translatedPoint
-  let originalPoint = Point2d.origin
-  let compositeTransform =
-        Transform2d.translationBy (Vector2d.meters 2.0 0.0)
-          >> Transform2d.rotationAround Point2d.origin (Angle.degrees 45.0)
-          >> Transform2d.scalingAbout Point2d.origin 2.0
-  let transformedPoint = Transform2d.scaleBy compositeTransform originalPoint
-  log "Transformed point" transformedPoint
   let vectorSum = Vector2d.meters 1.0 2.0 + Vector2d.meters 2.0 3.0
   log "Vector sum" vectorSum
   let crossProduct = Vector3d.meters 1.0 2.0 3.0 >< Vector3d.meters 4.0 5.0 6.0
@@ -246,11 +239,8 @@ script = do
   log "Rotated axis" (Axis2d.x |> Transform2d.rotateAround (Point2d.meters 1.0 0.0) (Angle.degrees 90.0))
   let originalPoints = [Point2d.meters 1.0 0.0, Point2d.meters 2.0 0.0, Point2d.meters 3.0 0.0]
   let rotationFunction = Transform2d.rotateAround Point2d.origin (Angle.degrees 90.0)
-  let rotatedPointsWithFunction = List.map rotationFunction originalPoints
-  log "Rotated points with function" rotatedPointsWithFunction
-  let rotationTransformation = Transform2d.rotationAround Point2d.origin (Angle.degrees 90.0)
-  let rotatedPointsWithTransformation = List.map (Transform2d.transformBy rotationTransformation) originalPoints
-  log "Rotated points with transformation" rotatedPointsWithTransformation
+  let rotatedPoints = List.map rotationFunction originalPoints
+  log "Rotated points" rotatedPoints
   let transformedAxis =
         Axis2d.x
           |> Transform2d.translateInOwn Axis2d.direction (Length.meters 2.0)

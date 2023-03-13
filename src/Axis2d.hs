@@ -11,7 +11,7 @@ import Direction2d qualified
 import OpenSolid
 import Point2d (Point2d)
 import Point2d qualified
-import Transform2d (Transformation2d (..))
+import Transform2d (Transformable2d (..))
 
 type role Axis2d nominal nominal
 
@@ -24,7 +24,7 @@ data Axis2d coordinates units = Axis2d
 
 instance
   (coordinates ~ coordinates', units ~ units')
-  => Transformation2d (Axis2d coordinates units) coordinates' units'
+  => Transformable2d (Axis2d coordinates units) coordinates' units'
   where
   transformBy transformation axis =
     Axis2d

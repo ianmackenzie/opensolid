@@ -1,17 +1,10 @@
 module Transform2d
-  ( Transformation2d (..)
-  , Scaling2d (..)
-  , Deformation2d (..)
+  ( Transformable2d (..)
+  , Scalable2d (..)
+  , Deformable2d (..)
   , Transformation
   , Scaling
   , Deformation
-  , identity
-  , translationBy
-  , translationIn
-  , translationAlong
-  , rotationAround
-  , scalingAbout
-  , scalingAlong
   )
 where
 
@@ -23,22 +16,14 @@ import Direction2d (Direction2d (..))
 import Direction2d qualified
 import OpenSolid hiding (identity)
 import Point2d (Point2d (..))
-import Qty qualified
 import Vector2d (Vector2d (..))
 
 data Matrix units = Matrix Float Float Float Float (Qty units) (Qty units)
 
 newtype Transformation coordinates units = Transformation (Matrix units)
 
-identity :: Transformation coordinates units
-identity =
-  let matrix = Matrix 1.0 0.0 0.0 1.0 Qty.zero Qty.zero
-   in Transformation matrix
-
 translationBy :: Vector2d coordinates units -> Transformation coordinate units
-translationBy (Vector2d vx vy) =
-  let matrix = Matrix 1.0 0.0 0.0 1.0 vx vy
-   in Transformation matrix
+translationBy (Vector2d vx vy) = Transformation (Matrix 1.0 0.0 0.0 1.0 vx vy)
 
 translationIn :: Direction2d coordinates -> Qty units -> Transformation coordinates units
 translationIn direction distance = translationBy (direction * distance)
@@ -52,8 +37,7 @@ rotationAround (Point2d cx cy) angle =
       sin = Angle.sin angle
       tx = cx - (cos * cx - sin * cy)
       ty = cy - (sin * cx + cos * cy)
-      matrix = Matrix cos -sin sin cos tx ty
-   in Transformation matrix
+   in Transformation (Matrix cos -sin sin cos tx ty)
 
 newtype Scaling coordinates units = Scaling (Matrix units)
 
@@ -61,8 +45,7 @@ scalingAbout :: Point2d coordinates units -> Float -> Scaling coordinates units
 scalingAbout (Point2d cx cy) scale =
   let tx = cx - scale * cx
       ty = cy - scale * cy
-      matrix = Matrix scale 0.0 0.0 scale tx ty
-   in Scaling matrix
+   in Scaling (Matrix scale 0.0 0.0 scale tx ty)
 
 newtype Deformation coordinates units = Deformation (Matrix units)
 
@@ -78,51 +61,42 @@ scalingAlong axis scale =
       m22 = scale * dy2 + dx2
       tx = x0 - m11 * x0 - m12 * y0
       ty = y0 - m21 * x0 - m22 * y0
-      matrix = Matrix m11 m12 m21 m22 tx ty
-   in Deformation matrix
+   in Deformation (Matrix m11 m12 m21 m22 tx ty)
 
-class Transformation2d a coordinates units where
+class Transformable2d a coordinates units where
   transformBy :: Transformation coordinates units -> a -> a
 
   translateBy :: Vector2d coordinates units -> a -> a
-  translateBy vector =
-    transformBy (translationBy vector :: Transformation coordinates units)
+  translateBy vector = transformBy (translationBy vector :: Transformation coordinates units)
 
   translateIn :: Direction2d coordinates -> Qty units -> a -> a
-  translateIn direction distance =
-    transformBy (translationIn direction distance)
+  translateIn direction distance = transformBy (translationIn direction distance)
 
   translateInOwn :: (a -> Direction2d coordinates) -> Qty units -> a -> a
-  translateInOwn direction distance value =
-    translateIn (direction value) distance value
+  translateInOwn direction distance value = translateIn (direction value) distance value
 
   translateAlong :: Axis2d coordinates units -> Qty units -> a -> a
-  translateAlong axis distance =
-    transformBy (translationAlong axis distance)
+  translateAlong axis distance = transformBy (translationAlong axis distance)
 
   translateAlongOwn :: (a -> Axis2d coordinates units) -> Qty units -> a -> a
-  translateAlongOwn axis distance value =
-    translateAlong (axis value) distance value
+  translateAlongOwn axis distance value = translateAlong (axis value) distance value
 
   rotateAround :: Point2d coordinates units -> Angle -> a -> a
-  rotateAround centerPoint angle =
-    transformBy (rotationAround centerPoint angle)
+  rotateAround centerPoint angle = transformBy (rotationAround centerPoint angle)
 
   rotateAroundOwn :: (a -> Point2d coordinates units) -> Angle -> a -> a
-  rotateAroundOwn centerPoint angle value =
-    rotateAround (centerPoint value) angle value
+  rotateAroundOwn centerPoint angle value = rotateAround (centerPoint value) angle value
 
-class Transformation2d a coordinates units => Scaling2d a coordinates units where
+class Transformable2d a coordinates units => Scalable2d a coordinates units where
   scaleBy :: Scaling coordinates units -> a -> a
 
   scaleAbout :: Point2d coordinates units -> Float -> a -> a
-  scaleAbout centerPoint scale =
-    scaleBy (scalingAbout centerPoint scale)
+  scaleAbout centerPoint scale = scaleBy (scalingAbout centerPoint scale)
 
   scaleAboutOwn :: (a -> Point2d coordinates units) -> Float -> a -> a
   scaleAboutOwn centerPoint scale value = scaleAbout (centerPoint value) scale value
 
-class Scaling2d a coordinates units => Deformation2d a coordinates units where
+class Scalable2d a coordinates units => Deformable2d a coordinates units where
   deformBy :: Deformation coordinates units -> a -> a
 
   scaleAlong :: Axis2d coordinates units -> Float -> a -> a
@@ -130,7 +104,7 @@ class Scaling2d a coordinates units => Deformation2d a coordinates units where
 
 instance
   (coordinates ~ coordinates')
-  => Transformation2d (Direction2d coordinates) coordinates' units
+  => Transformable2d (Direction2d coordinates) coordinates' units
   where
   translateBy _ vector = vector
   transformBy (Transformation (Matrix m11 m12 m21 m22 _ _)) (Direction2d x y) =
@@ -138,7 +112,7 @@ instance
 
 instance
   (coordinates ~ coordinates', units ~ units')
-  => Transformation2d (Vector2d coordinates units) coordinates' units'
+  => Transformable2d (Vector2d coordinates units) coordinates' units'
   where
   translateBy _ vector = vector
   transformBy (Transformation (Matrix m11 m12 m21 m22 _ _)) (Vector2d x y) =
@@ -146,19 +120,19 @@ instance
 
 instance
   (coordinates ~ coordinates', units ~ units')
-  => Scaling2d (Vector2d coordinates units) coordinates' units'
+  => Scalable2d (Vector2d coordinates units) coordinates' units'
   where
   scaleBy (Scaling matrix) = transformBy (Transformation matrix)
 
 instance
   (coordinates ~ coordinates', units ~ units')
-  => Deformation2d (Vector2d coordinates units) coordinates' units'
+  => Deformable2d (Vector2d coordinates units) coordinates' units'
   where
   deformBy (Deformation matrix) = transformBy (Transformation matrix)
 
 instance
   (coordinates ~ coordinates', units ~ units')
-  => Transformation2d (Point2d coordinates units) coordinates' units'
+  => Transformable2d (Point2d coordinates units) coordinates' units'
   where
   translateBy displacement point = point + displacement
   transformBy (Transformation (Matrix m11 m12 m21 m22 tx ty)) (Point2d x y) =
@@ -166,103 +140,12 @@ instance
 
 instance
   (coordinates ~ coordinates', units ~ units')
-  => Scaling2d (Point2d coordinates units) coordinates' units'
+  => Scalable2d (Point2d coordinates units) coordinates' units'
   where
   scaleBy (Scaling matrix) = transformBy (Transformation matrix)
 
 instance
   (coordinates ~ coordinates', units ~ units')
-  => Deformation2d (Point2d coordinates units) coordinates' units'
+  => Deformable2d (Point2d coordinates units) coordinates' units'
   where
   deformBy (Deformation matrix) = transformBy (Transformation matrix)
-
-instance units ~ units' => Multiplication (Matrix units) (Matrix units') (Matrix units) where
-  Matrix b11 b12 b21 b22 bx by * Matrix a11 a12 a21 a22 ax ay =
-    let m11 = b11 * a11 + b12 * a21
-        m12 = b11 * a12 + b12 * a22
-        m21 = b21 * a11 + b22 * a21
-        m22 = b21 * a12 + b22 * a22
-        x = b11 * ax + b12 * ay + bx
-        y = b21 * ax + b22 * ay + by
-     in Matrix m11 m12 m21 m22 x y
-
-instance
-  (coordinates ~ coordinates', units ~ units')
-  => Compose
-      (Transformation coordinates units)
-      (Transformation coordinates' units')
-      (Transformation coordinates units)
-  where
-  Transformation matrix1 >> Transformation matrix2 = Transformation (matrix2 * matrix1)
-
-instance
-  (coordinates ~ coordinates', units ~ units')
-  => Compose
-      (Transformation coordinates units)
-      (Scaling coordinates' units')
-      (Scaling coordinates units)
-  where
-  Transformation matrix1 >> Scaling matrix2 = Scaling (matrix2 * matrix1)
-
-instance
-  (coordinates ~ coordinates', units ~ units')
-  => Compose
-      (Transformation coordinates units)
-      (Deformation coordinates' units')
-      (Deformation coordinates units)
-  where
-  Transformation matrix1 >> Deformation matrix2 = Deformation (matrix2 * matrix1)
-
-instance
-  (coordinates ~ coordinates', units ~ units')
-  => Compose
-      (Scaling coordinates units)
-      (Transformation coordinates' units')
-      (Scaling coordinates units)
-  where
-  Scaling matrix1 >> Transformation matrix2 = Scaling (matrix2 * matrix1)
-
-instance
-  (coordinates ~ coordinates', units ~ units')
-  => Compose
-      (Scaling coordinates units)
-      (Scaling coordinates' units')
-      (Scaling coordinates units)
-  where
-  Scaling matrix1 >> Scaling matrix2 = Scaling (matrix2 * matrix1)
-
-instance
-  (coordinates ~ coordinates', units ~ units')
-  => Compose
-      (Scaling coordinates units)
-      (Deformation coordinates' units')
-      (Deformation coordinates units)
-  where
-  Scaling matrix1 >> Deformation matrix2 = Deformation (matrix2 * matrix1)
-
-instance
-  (coordinates ~ coordinates', units ~ units')
-  => Compose
-      (Deformation coordinates units)
-      (Transformation coordinates' units')
-      (Deformation coordinates units)
-  where
-  Deformation matrix1 >> Transformation matrix2 = Deformation (matrix2 * matrix1)
-
-instance
-  (coordinates ~ coordinates', units ~ units')
-  => Compose
-      (Deformation coordinates units)
-      (Scaling coordinates' units')
-      (Deformation coordinates units)
-  where
-  Deformation matrix1 >> Scaling matrix2 = Deformation (matrix2 * matrix1)
-
-instance
-  (coordinates ~ coordinates', units ~ units')
-  => Compose
-      (Deformation coordinates units)
-      (Deformation coordinates' units')
-      (Deformation coordinates units)
-  where
-  Deformation matrix1 >> Deformation matrix2 = Deformation (matrix2 * matrix1)

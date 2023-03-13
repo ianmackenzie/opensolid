@@ -26,7 +26,7 @@ import OpenSolid
 import Point2d (Point2d)
 import Point2d qualified
 import Range (Range (..))
-import Transform2d (Deformation2d (..), Scaling2d (..), Transformation2d (..))
+import Transform2d (Deformable2d (..), Scalable2d (..), Transformable2d (..))
 import Units (Unitless)
 import Vector2d (Vector2d)
 import Vector2d qualified
@@ -44,19 +44,19 @@ map function (Line2d p1 p2) = Line2d (function p1) (function p2)
 
 instance
   (coordinates ~ coordinates', units ~ units')
-  => Transformation2d (Line2d coordinates units) coordinates' units'
+  => Transformable2d (Line2d coordinates units) coordinates' units'
   where
   transformBy transformation = map (transformBy transformation)
 
 instance
   (coordinates ~ coordinates', units ~ units')
-  => Scaling2d (Line2d coordinates units) coordinates' units'
+  => Scalable2d (Line2d coordinates units) coordinates' units'
   where
   scaleBy scaling = map (scaleBy scaling)
 
 instance
   (coordinates ~ coordinates', units ~ units')
-  => Deformation2d (Line2d coordinates units) coordinates' units'
+  => Deformable2d (Line2d coordinates units) coordinates' units'
   where
   deformBy deformation = map (deformBy deformation)
 
