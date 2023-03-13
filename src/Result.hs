@@ -13,12 +13,17 @@ where
 import Basics
 import DoNotation
 import List qualified
+import System.IO.Error qualified
+import Text qualified
 
 class IsError error where
   errorMessage :: error -> Text
 
 instance IsError Text where
   errorMessage text = text
+
+instance IsError IOError where
+  errorMessage ioError = Text.fromChars (System.IO.Error.ioeGetErrorString ioError)
 
 data Result x a where
   Ok :: a -> Result x a

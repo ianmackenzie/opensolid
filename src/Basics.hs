@@ -20,6 +20,7 @@ module Basics
   , (&&)
   , (||)
   , IO
+  , IOError
   , (++)
   , Maybe (Just, Nothing)
   , Type
@@ -48,6 +49,7 @@ import Prelude
   , Char
   , Eq (..)
   , IO
+  , IOError
   , Int
   , Maybe (..)
   , Ord (..)
