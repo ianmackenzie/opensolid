@@ -45,7 +45,7 @@ map :: (a -> b) -> Script x a -> Script x b
 map function (Done result) = Done (Result.map function result)
 map function (Perform io) = Perform (Prelude.fmap (map function) io)
 
-mapError :: (IsError x, IsError y) => (x -> y) -> Script x a -> Script y a
+mapError :: IsError y => (x -> y) -> Script x a -> Script y a
 mapError function (Done result) = Done (Result.mapError function result)
 mapError function (Perform io) = Perform (Prelude.fmap (mapError function) io)
 
