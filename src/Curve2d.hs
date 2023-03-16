@@ -92,24 +92,6 @@ instance IsCurve2d (Point2d coordinates units) coordinates units where
   bisectImpl point = (point, point)
   boundingBoxImpl point = BoundingBox2d.constant point
 
-instance (IsCurve2d x coordinates units, IsCurve2d a coordinates' units', units ~ units', coordinates ~ coordinates') => IsCurve2d (Result x a) coordinates units where
-  startPointImpl (Error curve) = startPointImpl curve
-  startPointImpl (Ok curve) = startPointImpl curve
-  endPointImpl (Error curve) = endPointImpl curve
-  endPointImpl (Ok curve) = endPointImpl curve
-  pointOnImpl (Error curve) = pointOnImpl curve
-  pointOnImpl (Ok curve) = pointOnImpl curve
-  segmentBoundsImpl (Error curve) = segmentBoundsImpl curve
-  segmentBoundsImpl (Ok curve) = segmentBoundsImpl curve
-  derivativeImpl (Error curve) = derivativeImpl curve
-  derivativeImpl (Ok curve) = derivativeImpl curve
-  reverseImpl (Error curve) = let r = reverseImpl curve in Error r
-  reverseImpl (Ok curve) = let r = reverseImpl curve in Ok r
-  bisectImpl (Error curve) = let (c1, c2) = bisectImpl curve in (Error c1, Error c2)
-  bisectImpl (Ok curve) = let (c1, c2) = bisectImpl curve in (Ok c1, Ok c2)
-  boundingBoxImpl (Error curve) = boundingBoxImpl curve
-  boundingBoxImpl (Ok curve) = boundingBoxImpl curve
-
 data PointCurveDifference coordinates units = PointCurveDifference (Point2d coordinates units) (Curve2d coordinates units)
 
 instance IsVectorCurve2d (PointCurveDifference coordinates units) coordinates units where
