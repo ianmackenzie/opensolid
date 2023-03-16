@@ -1,6 +1,6 @@
 module Task
   ( Task
-  , run
+  , toIO
   , succeed
   , fail
   , map
@@ -58,10 +58,10 @@ perform io =
     Control.Exception.catch (Prelude.fmap succeed io) $
       (\ioError -> Prelude.pure (Done (Error ioError)))
 
-run :: Task x () -> IO ()
-run (Done (Ok ())) = System.Exit.exitSuccess
-run (Done (Error error)) = System.Exit.die (Text.toChars (errorMessage error))
-run (Perform io) = io Prelude.>>= run
+toIO :: Task x () -> IO ()
+toIO (Done (Ok ())) = System.Exit.exitSuccess
+toIO (Done (Error error)) = System.Exit.die (Text.toChars (errorMessage error))
+toIO (Perform io) = io Prelude.>>= toIO
 
 succeed :: a -> Task x a
 succeed value = Done (Ok value)

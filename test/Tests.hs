@@ -72,4 +72,4 @@ script = Try.do
   if success then Task.succeed () else Task.fail "Test failed"
 
 main :: IO ()
-main = Task.run script
+main = Task.toIO script

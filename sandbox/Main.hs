@@ -276,4 +276,4 @@ script = do
   testTaskSequencing
 
 main :: IO ()
-main = Task.run script
+main = Task.toIO script
