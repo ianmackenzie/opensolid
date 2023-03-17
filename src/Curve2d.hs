@@ -139,13 +139,15 @@ parameterValues point curve = do
 
 overlappingSegments :: Tolerance units => Curve2d coordinates units -> Curve2d coordinates units -> List (Range Unitless)
 overlappingSegments curve1 curve2 =
-  let u0 = [0.0 | passesThrough (startPoint curve1) curve2]
-      u1 = [1.0 | passesThrough (endPoint curve1) curve2]
-      start2us = parameterValues (startPoint curve2) curve1 |> Result.withDefault []
-      end2us = parameterValues (endPoint curve2) curve1 |> Result.withDefault []
-      candidateUValues = List.concat [u0, u1, start2us, end2us]
-      uValues = List.sortAndDeduplicate candidateUValues
-      candidateDomains = List.map2 Range.from uValues (List.drop 1 uValues)
+  let segmentEndpoints =
+        List.sortAndDeduplicate $
+          List.concat
+            [ [0.0 | passesThrough (startPoint curve1) curve2]
+            , [1.0 | passesThrough (endPoint curve1) curve2]
+            , parameterValues (startPoint curve2) curve1 |> Result.withDefault []
+            , parameterValues (endPoint curve2) curve1 |> Result.withDefault []
+            ]
+      candidateDomains = List.successive Range.from segmentEndpoints
    in List.filter (overlappingSegment curve1 curve2) candidateDomains
 
 samplingPoints :: Curve2d coordinates units -> Range Unitless -> List (Point2d coordinates units)
