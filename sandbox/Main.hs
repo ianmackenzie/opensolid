@@ -274,6 +274,8 @@ script = do
   log "Parsing results" parsingResults
   testTaskIteration
   testTaskSequencing
+  log "Successive deltas" (List.successive subtract [0, 1, 4, 9, 16, 25])
+  log "Successive intervals" (List.successive Range.from [1.0, 2.0, 3.0, 4.0])
 
 main :: IO ()
 main = Task.toIO script

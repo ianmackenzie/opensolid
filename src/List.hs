@@ -25,6 +25,7 @@ module List
   , sortAndDeduplicate
   , all
   , any
+  , successive
   )
 where
 
@@ -137,3 +138,6 @@ all = Prelude.and
 
 any :: List Bool -> Bool
 any = Prelude.or
+
+successive :: (a -> a -> b) -> List a -> List b
+successive function list = map2 function list (drop 1 list)
