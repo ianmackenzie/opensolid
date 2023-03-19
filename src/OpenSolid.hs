@@ -1,5 +1,6 @@
 module OpenSolid
   ( module Basics
+  , module Concatenate
   , module Arithmetic
   , module Result
   , module Coalesce
@@ -21,6 +22,7 @@ where
 import Arithmetic
 import Basics
 import Coalesce (Coalesce ((??)))
+import Concatenate (Concatenate ((++)))
 import Data.Text.IO qualified
 import DoNotation
 import Float (Float, fromRational)

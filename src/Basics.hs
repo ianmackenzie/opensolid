@@ -21,7 +21,6 @@ module Basics
   , (||)
   , IO
   , IOError
-  , (++)
   , Maybe (Just, Nothing)
   , Type
   , Constraint
@@ -75,9 +74,6 @@ fromString = Data.Text.pack
 fromInteger :: Prelude.Integer -> Int
 fromInteger = Prelude.fromInteger
 
-(++) :: Prelude.Monoid a => a -> a -> a
-(++) = Prelude.mappend
-
 identity :: a -> a
 identity = Prelude.id
 
@@ -100,7 +96,7 @@ newtype Named (name :: Symbol) value = Named value deriving (Eq)
 
 instance (KnownSymbol name, Show value) => Show (Named name value) where
   showsPrec precedence (Named value) =
-    let string = '#' : symbolVal (Proxy :: Proxy name) ++ (' ' : Prelude.showsPrec 10 value [])
+    let string = '#' : symbolVal (Proxy :: Proxy name) Prelude.++ (' ' : Prelude.showsPrec 10 value [])
      in Prelude.showParen (precedence >= 10) (Prelude.showString string)
 
 class Nameable (name :: Symbol) value where

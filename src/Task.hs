@@ -11,6 +11,7 @@ module Task
 where
 
 import Basics
+import Concatenate
 import Control.Exception qualified
 import DoNotation
 import Result (IsError (errorMessage), Result (Error, Ok))

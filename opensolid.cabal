@@ -37,6 +37,7 @@ library
       BoundingBox3d
       Bounds
       Coalesce
+      Concatenate
       Curve1d
       Curve1d.Root
       Curve2d

@@ -278,6 +278,7 @@ script = do
   testTaskSequencing
   log "Successive deltas" (List.successive subtract [0, 1, 4, 9, 16, 25])
   log "Successive intervals" (List.successive Range.from [1.0, 2.0, 3.0, 4.0])
+  log "Prepend Maybe to List" (Just 1 ++ [2, 3])
 
 main :: IO ()
 main = Task.toIO script
