@@ -20,7 +20,6 @@ import Point2d qualified
 import Qty qualified
 import QuadraticSpline2d qualified
 import Range qualified
-import Result qualified
 import Task qualified
 import Text qualified
 import Transform2d qualified
@@ -47,7 +46,7 @@ listTest = do
 listFilterTest :: List Int
 listFilterTest = do
   text <- ["1", "a", "-2", "", "+3"]
-  parsed <- Result.toMaybe (Text.toInt text)
+  parsed <- Text.toInt text ?? Nothing
   [parsed]
 
 parsingSuccess :: Result Text (List Int)

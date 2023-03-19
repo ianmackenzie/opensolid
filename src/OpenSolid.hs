@@ -2,6 +2,7 @@ module OpenSolid
   ( module Basics
   , module Arithmetic
   , module Result
+  , module Coalesce
   , module Qty
   , module Float
   , module List
@@ -19,12 +20,13 @@ where
 
 import Arithmetic
 import Basics
+import Coalesce (Coalesce ((??)))
 import Data.Text.IO qualified
 import DoNotation
 import Float (Float, fromRational)
 import List (List)
 import Qty (Qty (..))
-import Result (IsError (errorMessage), Result (Error, Ok), (??))
+import Result (IsError (errorMessage), Result (Error, Ok))
 import Sign (Sign (Negative, Positive))
 import Task (Task)
 import Task qualified

@@ -1,11 +1,9 @@
 module Result
   ( Result (..)
   , IsError (..)
-  , (??)
   , map
   , withDefault
   , mapError
-  , toMaybe
   )
 where
 
@@ -45,12 +43,6 @@ instance Bind [] (Result x (List b)) where
 instance Fail (Result Text a) where
   fail = Error
 
-(??) :: Result x a -> Result y a -> Result y a
-Ok value ?? _ = Ok value
-Error _ ?? fallback = fallback
-
-infixl 0 ??
-
 withDefault :: a -> Result x a -> a
 withDefault _ (Ok value) = value
 withDefault fallback (Error _) = fallback
@@ -62,7 +54,3 @@ map _ (Error err) = Error err
 mapError :: IsError y => (x -> y) -> Result x a -> Result y a
 mapError _ (Ok value) = Ok value
 mapError function (Error err) = Error (function err)
-
-toMaybe :: Result x a -> Maybe a
-toMaybe (Ok value) = Just value
-toMaybe (Error _) = Nothing
