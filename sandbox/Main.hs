@@ -107,12 +107,15 @@ testDirection2dAngleFrom = do
 
 testArc2dFrom :: Task Text ()
 testArc2dFrom = Try.do
-  let arc1 = Arc2d.from Point2d.origin (Point2d.meters 1.0 1.0) (Angle.degrees 90.0)
+  arc1 <- Arc2d.from Point2d.origin (Point2d.meters 1.0 1.0) (Angle.degrees 90.0)
+  arc2 <- Arc2d.from Point2d.origin (Point2d.meters 1.0 1.0) (Angle.degrees -90.0)
+  arc3 <- Arc2d.from Point2d.origin (Point2d.meters 1.0 1.0) (Angle.degrees 180.0)
+  arc4 <- Arc2d.from Point2d.origin (Point2d.meters 1.0 1.0) (Angle.degrees -180.0)
   log "arc1" arc1
-  log "arc2" (Arc2d.from Point2d.origin (Point2d.meters 1.0 1.0) (Angle.degrees -90.0))
-  log "arc3" (Arc2d.from Point2d.origin (Point2d.meters 1.0 1.0) (Angle.degrees 180.0))
-  log "arc4" (Arc2d.from Point2d.origin (Point2d.meters 1.0 1.0) (Angle.degrees -180.0))
-  log "arc1 point" (Result.map (`Arc2d.pointOn` 0.5) arc1)
+  log "arc2" arc2
+  log "arc3" arc3
+  log "arc4" arc4
+  log "arc1 point" (Arc2d.pointOn arc1 0.5)
 
 testCurveOverlap1 :: Task Text ()
 testCurveOverlap1 = Try.do
