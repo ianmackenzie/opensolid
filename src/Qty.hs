@@ -22,7 +22,7 @@ import {-# SOURCE #-} Float (Float, fromRational)
 import {-# SOURCE #-} Float qualified
 import Generic qualified
 import Sign (Sign (..))
-import Units (HasUnits, Unitless)
+import Units (Unitless)
 import Units qualified
 import Prelude qualified
 
@@ -31,7 +31,7 @@ type role Qty nominal
 type Qty :: Type -> Type
 newtype Qty units = Qty Prelude.Double deriving (Eq, Ord, Show)
 
-instance HasUnits Qty
+instance (units1 ~ units1', units2 ~ units2') => Units.Coercion units1 units2 (Qty units1') (Qty units2')
 
 instance Generic.Zero (Qty units) where
   zero = coerce 0.0

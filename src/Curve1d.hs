@@ -28,7 +28,7 @@ import Qty qualified
 import Quadrature qualified
 import Range (Range (..))
 import Range qualified
-import Units (HasUnits, Radians, Unitless)
+import Units (Radians, Unitless)
 import Units qualified
 import Vector2d (Vector2d)
 import Vector3d (Vector3d)
@@ -57,7 +57,7 @@ data Curve1d units where
   Sin :: Curve1d Radians -> Curve1d Unitless
   Cos :: Curve1d Radians -> Curve1d Unitless
 
-instance HasUnits Curve1d
+instance (units1 ~ units1', units2 ~ units2') => Units.Coercion units1 units2 (Curve1d units1') (Curve1d units2')
 
 instance units ~ units' => ApproximateEquality (Curve1d units) (Curve1d units') units where
   curve1 ~= curve2 = isZero (curve1 - curve2)

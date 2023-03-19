@@ -16,7 +16,7 @@ where
 import Basics
 import {-# SOURCE #-} Float (Float)
 import {-# SOURCE #-} Qty (Qty (Qty))
-import Units (HasUnits, Unitless)
+import Units (Unitless)
 import Units qualified
 import Prelude qualified
 
@@ -64,15 +64,25 @@ infixl 6 +, -
 infixl 7 *, /, //
 
 (.*)
-  :: (HasUnits a, HasUnits b, HasUnits c, Multiplication (a Unitless) (b Unitless) (c Unitless))
-  => a units1
-  -> b units2
-  -> c (Units.GenericProduct units1 units2)
+  :: ( Units.Coercion unitsA Unitless a aUnitless
+     , Units.Coercion unitsB Unitless b bUnitless
+     , Units.Coercion Unitless unitsC cUnitless c
+     , Units.GenericProduct unitsA unitsB ~ unitsC
+     , Multiplication aUnitless bUnitless cUnitless
+     )
+  => a
+  -> b
+  -> c
 (.*) lhs rhs = Units.add (Units.drop lhs * Units.drop rhs)
 
 (./)
-  :: (HasUnits a, HasUnits b, HasUnits c, Division (a Unitless) (b Unitless) (c Unitless))
-  => a units1
-  -> b units2
-  -> c (Units.GenericQuotient units1 units2)
+  :: ( Units.Coercion unitsA Unitless a aUnitless
+     , Units.Coercion unitsB Unitless b bUnitless
+     , Units.Coercion Unitless unitsC cUnitless c
+     , Units.GenericQuotient unitsA unitsB ~ unitsC
+     , Division aUnitless bUnitless cUnitless
+     )
+  => a
+  -> b
+  -> c
 (./) lhs rhs = Units.add (Units.drop lhs / Units.drop rhs)

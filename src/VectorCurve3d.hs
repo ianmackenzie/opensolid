@@ -18,7 +18,7 @@ import Curve1d qualified
 import Generic qualified
 import OpenSolid
 import Range (Range)
-import Units (HasUnits, Unitless)
+import Units (Unitless)
 import Units qualified
 import Vector3d (Vector3d (Vector3d))
 import Vector3d qualified
@@ -38,7 +38,9 @@ instance IsVectorCurve3d (VectorCurve3d coordinates units) coordinates units whe
   segmentBounds (VectorCurve3d curve) = segmentBounds curve
   derivative (VectorCurve3d curve) = derivative curve
 
-instance HasUnits (VectorCurve3d coordinates)
+instance
+  (units1 ~ units1', units2 ~ units2', coordinates ~ coordinates')
+  => Units.Coercion units1 units2 (VectorCurve3d coordinates units1') (VectorCurve3d coordinates' units2')
 
 newtype Constant coordinates units = Constant (Vector3d coordinates units)
 

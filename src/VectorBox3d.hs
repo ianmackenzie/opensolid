@@ -16,14 +16,16 @@ import OpenSolid
 import Qty qualified
 import Range (Range (..))
 import Range qualified
-import Units (HasUnits, Unitless)
+import Units (Unitless)
 import Units qualified
 import Vector3d (Vector3d (..))
 import Vector3d qualified
 
 data VectorBox3d coordinates units = VectorBox3d (Range units) (Range units) (Range units) deriving (Show)
 
-instance HasUnits (VectorBox3d coordinates)
+instance
+  (units1 ~ units1', units2 ~ units2', coordinates ~ coordinates')
+  => Units.Coercion units1 units2 (VectorBox3d coordinates units1') (VectorBox3d coordinates' units2')
 
 instance Generic.Zero (VectorBox3d coordinates units) where
   zero = constant Vector3d.zero

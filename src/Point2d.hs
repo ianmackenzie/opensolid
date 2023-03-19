@@ -22,7 +22,8 @@ import Direction2d qualified
 import Length qualified
 import OpenSolid
 import Qty qualified
-import Units
+import Units (Meters)
+import Units qualified
 import Vector2d (Vector2d (..))
 import Vector2d qualified
 import VectorBox2d (VectorBox2d (..))
@@ -33,7 +34,9 @@ type Point2d :: Type -> Type -> Type
 data Point2d coordinates units = Point2d {xCoordinate :: Qty units, yCoordinate :: Qty units}
   deriving (Eq, Show)
 
-instance HasUnits (Point2d coordinates)
+instance
+  (units1 ~ units1', units2 ~ units2', coordinates ~ coordinates')
+  => Units.Coercion units1 units2 (Point2d coordinates units1') (Point2d coordinates' units2')
 
 instance (units ~ units', coordinates ~ coordinates') => Addition (Point2d coordinates units) (Vector2d coordinates' units') (Point2d coordinates units) where
   Point2d px py + Vector2d vx vy = Point2d (px + vx) (py + vy)

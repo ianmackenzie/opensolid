@@ -28,13 +28,15 @@ import Generic qualified
 import Length qualified
 import OpenSolid
 import Qty qualified
-import Units (HasUnits, Meters, SquareMeters, Unitless)
+import Units (Meters, SquareMeters, Unitless)
 import Units qualified
 
 data Vector3d coordinates units = Vector3d {xComponent :: Qty units, yComponent :: Qty units, zComponent :: Qty units}
   deriving (Eq, Show)
 
-instance HasUnits (Vector3d coordinates)
+instance
+  (units1 ~ units1', units2 ~ units2', coordinates ~ coordinates')
+  => Units.Coercion units1 units2 (Vector3d coordinates units1') (Vector3d coordinates' units2')
 
 instance Generic.Zero (Vector3d coordinates units) where
   zero = zero
