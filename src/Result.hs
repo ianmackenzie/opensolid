@@ -3,7 +3,6 @@ module Result
   , IsError (..)
   , (??)
   , map
-  , andThen
   , withDefault
   , mapError
   , toMaybe
@@ -59,9 +58,6 @@ withDefault fallback (Error _) = fallback
 map :: (a -> value) -> Result x a -> Result x value
 map function (Ok value) = Ok (function value)
 map _ (Error err) = Error err
-
-andThen :: (a -> Result x b) -> Result x a -> Result x b
-andThen function result = result >>= function
 
 mapError :: IsError y => (x -> y) -> Result x a -> Result y a
 mapError _ (Ok value) = Ok value
