@@ -148,11 +148,12 @@ testCurveOverlap2 = do
 
 getCrossProduct :: Result Text Float
 getCrossProduct =
-  Try.withContext "In getCrossProduct:" $
-    Try.do
-      vectorDirection <- Vector2d.direction (Vector2d.meters 2.0 3.0)
-      lineDirection <- Try.withContext "When getting line direction:" $ Line2d.direction (Line2d.from Point2d.origin Point2d.origin)
-      Ok (vectorDirection >< lineDirection)
+  Try.withContext "In getCrossProduct:" $ Try.do
+    vectorDirection <- Vector2d.direction (Vector2d.meters 2.0 3.0)
+    lineDirection <-
+      Try.withContext "When getting line direction:" $
+        Line2d.direction (Line2d.from Point2d.origin Point2d.origin)
+    Ok (vectorDirection >< lineDirection)
 
 testTry :: Task Text ()
 testTry =
