@@ -170,14 +170,14 @@ constant = Constant
 xy :: Curve1d units -> Curve1d units -> VectorCurve2d (Coordinates space units)
 xy = XY
 
-newtype MagnitudeOf coordinateSystem = MagnitudeOf (VectorCurve2d coordinateSystem)
+newtype MagnitudeOf (coordinateSystem :: CoordinateSystem) = MagnitudeOf (VectorCurve2d coordinateSystem)
 
 instance IsCurve1d (MagnitudeOf (Coordinates space units)) units where
   pointOn (MagnitudeOf curve) t = Vector2d.magnitude (pointOn curve t)
   segmentBounds (MagnitudeOf curve) t = VectorBox2d.magnitude (segmentBounds curve t)
   derivative (MagnitudeOf curve) = derivative curve <> normalize curve
 
-newtype SquaredMagnitudeOf coordinateSystem = SquaredMagnitudeOf (VectorCurve2d coordinateSystem)
+newtype SquaredMagnitudeOf (coordinateSystem :: CoordinateSystem) = SquaredMagnitudeOf (VectorCurve2d coordinateSystem)
 
 instance Units.Squared units1 units2 => IsCurve1d (SquaredMagnitudeOf (Coordinates space units1)) units2 where
   pointOn (SquaredMagnitudeOf curve) t = Vector2d.squaredMagnitude (pointOn curve t)
