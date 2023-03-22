@@ -9,15 +9,14 @@ import OpenSolid
 import Units qualified
 import Vector2d (Vector2d)
 
-type role VectorCurve2d nominal nominal
+type role VectorCurve2d nominal
 
-type VectorCurve2d :: Type -> Type -> Type
-data VectorCurve2d coordinates units
+data VectorCurve2d (coordinateSystem :: CoordinateSystem)
 
-constant :: Vector2d coordinates units -> VectorCurve2d coordinates units
+constant :: Vector2d (Coordinates space units) -> VectorCurve2d (Coordinates space units)
 
-instance Units.Product units1 units2 units3 => Multiplication (Curve1d units1) (VectorCurve2d coordinates units2) (VectorCurve2d coordinates units3)
+instance Units.Product units1 units2 units3 => Multiplication (Curve1d units1) (VectorCurve2d (Coordinates space units2)) (VectorCurve2d (Coordinates space units3))
 
-instance Units.Product units1 units2 units3 => Multiplication (VectorCurve2d coordinates units1) (Curve1d units2) (VectorCurve2d coordinates units3)
+instance Units.Product units1 units2 units3 => Multiplication (VectorCurve2d (Coordinates space units1)) (Curve1d units2) (VectorCurve2d (Coordinates space units3))
 
-instance Units.Quotient units1 units2 units3 => Division (VectorCurve2d coordinates units1) (Curve1d units2) (VectorCurve2d coordinates units3)
+instance Units.Quotient units1 units2 units3 => Division (VectorCurve2d (Coordinates space units1)) (Curve1d units2) (VectorCurve2d (Coordinates space units3))

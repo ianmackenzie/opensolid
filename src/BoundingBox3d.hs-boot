@@ -1,12 +1,16 @@
 module BoundingBox3d (BoundingBox3d (..)) where
 
 import Bounds
+import CoordinateSystem (Units)
 import OpenSolid
 import Range (Range)
 
-type role BoundingBox3d nominal nominal
+type role BoundingBox3d nominal
 
-type BoundingBox3d :: Type -> Type -> Type
-data BoundingBox3d coordinates units = BoundingBox3d (Range units) (Range units) (Range units)
+data BoundingBox3d (coordinateSystem :: CoordinateSystem)
+  = BoundingBox3d
+      (Range (Units coordinateSystem))
+      (Range (Units coordinateSystem))
+      (Range (Units coordinateSystem))
 
-instance Bounds (BoundingBox3d coordinates units)
+instance Bounds (BoundingBox3d (Coordinates space units))

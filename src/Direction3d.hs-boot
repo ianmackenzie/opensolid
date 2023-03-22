@@ -8,7 +8,6 @@ import OpenSolid
 
 type role Direction3d nominal
 
-type Direction3d :: Type -> Type
-data Direction3d coordinates
+data Direction3d (space :: Type)
 
-unsafe :: Float -> Float -> Float -> Direction3d coordinates
+unsafe :: Float -> Float -> Float -> Direction3d space

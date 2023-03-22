@@ -10,6 +10,7 @@ module OpenSolid
   , module Sign
   , module Task
   , module DoNotation
+  , module CoordinateSystem
   , Indeterminate (Indeterminate)
   , Invalid (Invalid)
   , validate
@@ -23,6 +24,7 @@ import Arithmetic
 import Basics
 import Coalesce (Coalesce ((??)))
 import Concatenate (Concatenate ((++)))
+import CoordinateSystem (CoordinateSystem (Coordinates))
 import Data.Text.IO qualified
 import DoNotation
 import Float (Float, fromRational)

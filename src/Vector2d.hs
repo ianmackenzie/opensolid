@@ -23,6 +23,7 @@ where
 import Angle (Angle)
 import Angle qualified
 import Area qualified
+import CoordinateSystem (Units)
 import {-# SOURCE #-} Direction2d (Direction2d)
 import {-# SOURCE #-} Direction2d qualified
 import Generic qualified
@@ -32,96 +33,99 @@ import Qty qualified
 import Units (Meters, SquareMeters, Unitless)
 import Units qualified
 
-type role Vector2d nominal nominal
+type role Vector2d nominal
 
-type Vector2d :: Type -> Type -> Type
-data Vector2d coordinates units = Vector2d {xComponent :: Qty units, yComponent :: Qty units}
+data Vector2d (coordinateSystem :: CoordinateSystem) = Vector2d
+  { xComponent :: Qty (Units coordinateSystem)
+  , yComponent :: Qty (Units coordinateSystem)
+  }
   deriving (Eq, Show)
 
 instance
-  (units1 ~ units1', units2 ~ units2', coordinates ~ coordinates')
-  => Units.Coercion units1 units2 (Vector2d coordinates units1') (Vector2d coordinates' units2')
+  (units1 ~ units1', units2 ~ units2', space ~ space')
+  => Units.Coercion
+      units1
+      units2
+      (Vector2d (Coordinates space units1'))
+      (Vector2d (Coordinates space' units2'))
 
-instance Generic.Zero (Vector2d coordinates units) where
+instance Generic.Zero (Vector2d (Coordinates space units)) where
   zero = zero
 
-instance
-  (coordinates ~ coordinates', units ~ units')
-  => ApproximateEquality (Vector2d coordinates units) (Vector2d coordinates' units') units
-  where
+instance (space ~ space', units ~ units') => ApproximateEquality (Vector2d (Coordinates space units)) (Vector2d (Coordinates space' units')) units where
   v1 ~= v2 = magnitude (v1 - v2) ~= Qty.zero
 
-instance Negation (Vector2d coordinates units) where
+instance Negation (Vector2d (Coordinates space units)) where
   negate (Vector2d vx vy) = Vector2d (negate vx) (negate vy)
 
-instance (units ~ units', coordinates ~ coordinates') => Addition (Vector2d coordinates units) (Vector2d coordinates' units') (Vector2d coordinates units) where
+instance (space ~ space', units ~ units') => Addition (Vector2d (Coordinates space units)) (Vector2d (Coordinates space' units')) (Vector2d (Coordinates space units)) where
   Vector2d x1 y1 + Vector2d x2 y2 = Vector2d (x1 + x2) (y1 + y2)
 
-instance (units ~ units', coordinates ~ coordinates') => Subtraction (Vector2d coordinates units) (Vector2d coordinates' units') (Vector2d coordinates units) where
+instance (space ~ space', units ~ units') => Subtraction (Vector2d (Coordinates space units)) (Vector2d (Coordinates space' units')) (Vector2d (Coordinates space units)) where
   Vector2d x1 y1 - Vector2d x2 y2 = Vector2d (x1 - x2) (y1 - y2)
 
-instance Units.Product units1 units2 units3 => Multiplication (Qty units1) (Vector2d coordinates units2) (Vector2d coordinates units3) where
+instance Units.Product units1 units2 units3 => Multiplication (Qty units1) (Vector2d (Coordinates space units2)) (Vector2d (Coordinates space units3)) where
   scale * Vector2d vx vy = Vector2d (scale * vx) (scale * vy)
 
-instance Units.Product units1 units2 units3 => Multiplication (Vector2d coordinates units1) (Qty units2) (Vector2d coordinates units3) where
+instance Units.Product units1 units2 units3 => Multiplication (Vector2d (Coordinates space units1)) (Qty units2) (Vector2d (Coordinates space units3)) where
   Vector2d vx vy * scale = Vector2d (vx * scale) (vy * scale)
 
-instance Units.Quotient units1 units2 units3 => Division (Vector2d coordinates units1) (Qty units2) (Vector2d coordinates units3) where
+instance Units.Quotient units1 units2 units3 => Division (Vector2d (Coordinates space units1)) (Qty units2) (Vector2d (Coordinates space units3)) where
   Vector2d vx vy / scale = Vector2d (vx / scale) (vy / scale)
 
-instance (Units.Product units1 units2 units3, coordinates ~ coordinates') => DotProduct (Vector2d coordinates units1) (Vector2d coordinates' units2) (Qty units3) where
+instance (Units.Product units1 units2 units3, space ~ space') => DotProduct (Vector2d (Coordinates space units1)) (Vector2d (Coordinates space' units2)) (Qty units3) where
   Vector2d x1 y1 <> Vector2d x2 y2 = x1 * x2 + y1 * y2
 
-instance (Units.Product units1 units2 units3, coordinates ~ coordinates') => CrossProduct (Vector2d coordinates units1) (Vector2d coordinates' units2) (Qty units3) where
+instance (Units.Product units1 units2 units3, space ~ space') => CrossProduct (Vector2d (Coordinates space units1)) (Vector2d (Coordinates space' units2)) (Qty units3) where
   Vector2d x1 y1 >< Vector2d x2 y2 = x1 * y2 - y1 * x2
 
-zero :: Vector2d coordinates units
+zero :: Vector2d (Coordinates space units)
 zero = Vector2d Qty.zero Qty.zero
 
-x :: Qty units -> Vector2d coordinates units
+x :: Qty units -> Vector2d (Coordinates space units)
 x vx = Vector2d vx Qty.zero
 
-y :: Qty units -> Vector2d coordinates units
+y :: Qty units -> Vector2d (Coordinates space units)
 y vy = Vector2d Qty.zero vy
 
-xy :: Qty units -> Qty units -> Vector2d coordinates units
+xy :: Qty units -> Qty units -> Vector2d (Coordinates space units)
 xy = Vector2d
 
-meters :: Float -> Float -> Vector2d coordinates Meters
+meters :: Float -> Float -> Vector2d (Coordinates space Meters)
 meters vx vy = Vector2d (Length.meters vx) (Length.meters vy)
 
-squareMeters :: Float -> Float -> Vector2d coordinates SquareMeters
+squareMeters :: Float -> Float -> Vector2d (Coordinates space SquareMeters)
 squareMeters vx vy = Vector2d (Area.squareMeters vx) (Area.squareMeters vy)
 
-polar :: Qty units -> Angle -> Vector2d coordinates units
+polar :: Qty units -> Angle -> Vector2d (Coordinates space units)
 polar r theta = Vector2d (r * Angle.cos theta) (r * Angle.sin theta)
 
 interpolateFrom
-  :: Vector2d coordinates units
-  -> Vector2d coordinates units
+  :: Vector2d (Coordinates space units)
+  -> Vector2d (Coordinates space units)
   -> Float
-  -> Vector2d coordinates units
+  -> Vector2d (Coordinates space units)
 interpolateFrom (Vector2d x1 y1) (Vector2d x2 y2) t =
   Vector2d (Qty.interpolateFrom x1 x2 t) (Qty.interpolateFrom y1 y2 t)
 
-midpoint :: Vector2d coordinates units -> Vector2d coordinates units -> Vector2d coordinates units
+midpoint :: Vector2d (Coordinates space units) -> Vector2d (Coordinates space units) -> Vector2d (Coordinates space units)
 midpoint (Vector2d x1 y1) (Vector2d x2 y2) =
   Vector2d (Qty.midpoint x1 x2) (Qty.midpoint y1 y2)
 
 determinant
   :: Units.Product units1 units2 units3
-  => Vector2d coordinates units1
-  -> Vector2d coordinates units2
+  => Vector2d (Coordinates space units1)
+  -> Vector2d (Coordinates space units2)
   -> Qty units3
 determinant (Vector2d x1 y1) (Vector2d x2 y2) = x1 * y2 - y1 * x2
 
-magnitude :: Vector2d coordinates units -> Qty units
+magnitude :: Vector2d (Coordinates space units) -> Qty units
 magnitude (Vector2d vx vy) = Qty.hypot2 vx vy
 
-squaredMagnitude :: Units.Squared units1 units2 => Vector2d coordinates units1 -> Qty units2
+squaredMagnitude :: Units.Squared units1 units2 => Vector2d (Coordinates space units1) -> Qty units2
 squaredMagnitude (Vector2d vx vy) = Qty.squared vx + Qty.squared vy
 
-angle :: Vector2d coordinates units -> Angle
+angle :: Vector2d (Coordinates space units) -> Angle
 angle (Vector2d vx vy) = Angle.atan2 vy vx
 
 data IsZero = IsZero
@@ -129,19 +133,19 @@ data IsZero = IsZero
 instance IsError IsZero where
   errorMessage IsZero = "Vector2d is zero"
 
-direction :: Vector2d coordinates units -> Result IsZero (Direction2d coordinates)
+direction :: Vector2d (Coordinates space units) -> Result IsZero (Direction2d space)
 direction vector = do
   let Vector2d vx vy = vector
   vm <- validate (/= Qty.zero) (magnitude vector) ?? Error IsZero
   Ok (Direction2d.unsafe (vx / vm) (vy / vm))
 
-magnitudeAndDirection :: Vector2d coordinates units -> Result IsZero (Qty units, Direction2d coordinates)
+magnitudeAndDirection :: Vector2d (Coordinates space units) -> Result IsZero (Qty units, Direction2d space)
 magnitudeAndDirection vector = do
   let Vector2d vx vy = vector
   vm <- validate (/= Qty.zero) (magnitude vector) ?? Error IsZero
   Ok (vm, Direction2d.unsafe (vx / vm) (vy / vm))
 
-normalize :: Vector2d coordinates units -> Vector2d coordinates Unitless
+normalize :: Vector2d (Coordinates space units) -> Vector2d (Coordinates space Unitless)
 normalize vector =
   let Vector2d vx vy = vector; vm = magnitude vector
    in if vm == Qty.zero then zero else Vector2d (vx / vm) (vy / vm)

@@ -6,6 +6,7 @@ module Axis2d
   )
 where
 
+import CoordinateSystem (Space)
 import Direction2d (Direction2d)
 import Direction2d qualified
 import OpenSolid
@@ -13,29 +14,25 @@ import Point2d (Point2d)
 import Point2d qualified
 import Transform2d (Transformable2d (..))
 
-type role Axis2d nominal nominal
+type role Axis2d nominal
 
-type Axis2d :: Type -> Type -> Type
-data Axis2d coordinates units = Axis2d
-  { originPoint :: Point2d coordinates units
-  , direction :: Direction2d coordinates
+data Axis2d (coordinateSystem :: CoordinateSystem) = Axis2d
+  { originPoint :: Point2d coordinateSystem
+  , direction :: Direction2d (Space coordinateSystem)
   }
   deriving (Eq, Show)
 
-instance
-  (coordinates ~ coordinates', units ~ units')
-  => Transformable2d (Axis2d coordinates units) coordinates' units'
-  where
+instance (space ~ space', units ~ units') => Transformable2d (Axis2d (Coordinates space units)) space' units' where
   transformBy transformation axis =
     Axis2d
       (transformBy transformation (originPoint axis))
       (transformBy transformation (direction axis))
 
-x :: Axis2d coordinates units
+x :: Axis2d (Coordinates space units)
 x = Axis2d Point2d.origin Direction2d.x
 
-y :: Axis2d coordinates units
+y :: Axis2d (Coordinates space units)
 y = Axis2d Point2d.origin Direction2d.y
 
-through :: Point2d coordinates units -> Direction2d coordinates -> Axis2d coordinates units
+through :: Point2d (Coordinates space units) -> Direction2d space -> Axis2d (Coordinates space units)
 through = Axis2d

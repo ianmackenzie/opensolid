@@ -2,15 +2,16 @@ module Line3d (Line3d (startPoint, endPoint)) where
 
 import BoundingBox3d qualified
 import Curve3d (IsCurve3d (..))
+import OpenSolid
 import Point3d (Point3d)
 import Point3d qualified
 
-data Line3d coordinates units = Line3d
-  { startPoint :: Point3d coordinates units
-  , endPoint :: Point3d coordinates units
+data Line3d (coordinateSystem :: CoordinateSystem) = Line3d
+  { startPoint :: Point3d coordinateSystem
+  , endPoint :: Point3d coordinateSystem
   }
 
-instance IsCurve3d (Line3d coordinates units) coordinates units where
+instance IsCurve3d (Line3d (Coordinates space units)) space units where
   startPoint (Line3d p1 _) = p1
 
   endPoint (Line3d _ p2) = p2

@@ -38,6 +38,7 @@ library
       Bounds
       Coalesce
       Concatenate
+      CoordinateSystem
       Curve1d
       Curve1d.Root
       Curve2d

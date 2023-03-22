@@ -25,29 +25,32 @@ import Vector2d qualified
 import VectorBox2d (VectorBox2d (VectorBox2d))
 import VectorBox2d qualified
 
-class IsVectorCurve2d curve coordinates units | curve -> units, curve -> coordinates where
-  pointOn :: curve -> Float -> Vector2d coordinates units
-  segmentBounds :: curve -> Range Unitless -> VectorBox2d coordinates units
-  derivative :: curve -> VectorCurve2d coordinates units
+class IsVectorCurve2d curve space units | curve -> space, curve -> units where
+  pointOn :: curve -> Float -> Vector2d (Coordinates space units)
+  segmentBounds :: curve -> Range Unitless -> VectorBox2d (Coordinates space units)
+  derivative :: curve -> VectorCurve2d (Coordinates space units)
 
-type VectorCurve2d :: Type -> Type -> Type
-data VectorCurve2d coordinates units where
-  VectorCurve2d :: forall curve coordinates units. IsVectorCurve2d curve coordinates units => curve -> VectorCurve2d coordinates units
-  Zero :: VectorCurve2d coordinates units
-  Constant :: Vector2d coordinates units -> VectorCurve2d coordinates units
-  XY :: Curve1d units -> Curve1d units -> VectorCurve2d coordinates units
-  Negated :: VectorCurve2d coordinates units -> VectorCurve2d coordinates units
-  Sum :: VectorCurve2d coordinates units -> VectorCurve2d coordinates units -> VectorCurve2d coordinates units
-  Difference :: VectorCurve2d coordinates units -> VectorCurve2d coordinates units -> VectorCurve2d coordinates units
-  Product1d2d :: forall units1 units2 coordinates units3. Units.Product units1 units2 units3 => Curve1d units1 -> VectorCurve2d coordinates units2 -> VectorCurve2d coordinates units3
-  Product2d1d :: forall units1 units2 coordinates units3. Units.Product units1 units2 units3 => VectorCurve2d coordinates units1 -> Curve1d units2 -> VectorCurve2d coordinates units3
-  Quotient :: forall units1 units2 coordinates units3. Units.Quotient units1 units2 units3 => VectorCurve2d coordinates units1 -> Curve1d units2 -> VectorCurve2d coordinates units3
+data VectorCurve2d (coordinateSystem :: CoordinateSystem) where
+  VectorCurve2d :: forall curve space units. IsVectorCurve2d curve space units => curve -> VectorCurve2d (Coordinates space units)
+  Zero :: VectorCurve2d (Coordinates space units)
+  Constant :: Vector2d (Coordinates space units) -> VectorCurve2d (Coordinates space units)
+  XY :: Curve1d units -> Curve1d units -> VectorCurve2d (Coordinates space units)
+  Negated :: VectorCurve2d (Coordinates space units) -> VectorCurve2d (Coordinates space units)
+  Sum :: VectorCurve2d (Coordinates space units) -> VectorCurve2d (Coordinates space units) -> VectorCurve2d (Coordinates space units)
+  Difference :: VectorCurve2d (Coordinates space units) -> VectorCurve2d (Coordinates space units) -> VectorCurve2d (Coordinates space units)
+  Product1d2d :: forall space units1 units2 units3. Units.Product units1 units2 units3 => Curve1d units1 -> VectorCurve2d (Coordinates space units2) -> VectorCurve2d (Coordinates space units3)
+  Product2d1d :: forall space units1 units2 units3. Units.Product units1 units2 units3 => VectorCurve2d (Coordinates space units1) -> Curve1d units2 -> VectorCurve2d (Coordinates space units3)
+  Quotient :: forall space units1 units2 units3. Units.Quotient units1 units2 units3 => VectorCurve2d (Coordinates space units1) -> Curve1d units2 -> VectorCurve2d (Coordinates space units3)
 
 instance
-  (units1 ~ units1', units2 ~ units2', coordinates ~ coordinates')
-  => Units.Coercion units1 units2 (VectorCurve2d coordinates units1') (VectorCurve2d coordinates' units2')
+  (units1 ~ units1', units2 ~ units2', space ~ space')
+  => Units.Coercion
+      units1
+      units2
+      (VectorCurve2d (Coordinates space units1'))
+      (VectorCurve2d (Coordinates space' units2'))
 
-instance IsVectorCurve2d (VectorCurve2d coordinates units) coordinates units where
+instance IsVectorCurve2d (VectorCurve2d (Coordinates space units)) space units where
   pointOn curve t =
     case curve of
       VectorCurve2d c -> pointOn c t
@@ -87,10 +90,10 @@ instance IsVectorCurve2d (VectorCurve2d coordinates units) coordinates units whe
       Product2d1d c1 c2 -> derivative c1 * c2 + c1 * Curve1d.derivative c2
       Quotient c1 c2 -> derivative c1 / c2 + curve * (Curve1d.derivative c2 / c2)
 
-instance Generic.Zero (VectorCurve2d coordinates units) where
+instance Generic.Zero (VectorCurve2d (Coordinates space units)) where
   zero = Zero
 
-instance Negation (VectorCurve2d coordinates units) where
+instance Negation (VectorCurve2d (Coordinates space units)) where
   negate Zero = Zero
   negate (Constant value) = Constant -value
   negate (XY x y) = XY -x -y
@@ -100,92 +103,92 @@ instance Negation (VectorCurve2d coordinates units) where
   negate (Product2d1d c1 c2) = Product2d1d c1 -c2
   negate curve = Negated curve
 
-instance coordinates ~ coordinates' => Addition (VectorCurve2d coordinates units) (VectorCurve2d coordinates' units) (VectorCurve2d coordinates units) where
+instance space ~ space' => Addition (VectorCurve2d (Coordinates space units)) (VectorCurve2d (Coordinates space' units)) (VectorCurve2d (Coordinates space units)) where
   -- TODO add special cases
   c1 + c2 = Sum c1 c2
 
-instance coordinates ~ coordinates' => Addition (VectorCurve2d coordinates units) (Vector2d coordinates' units) (VectorCurve2d coordinates units) where
+instance space ~ space' => Addition (VectorCurve2d (Coordinates space units)) (Vector2d (Coordinates space' units)) (VectorCurve2d (Coordinates space units)) where
   curve + vector = curve + constant vector
 
-instance coordinates ~ coordinates' => Addition (Vector2d coordinates units) (VectorCurve2d coordinates' units) (VectorCurve2d coordinates units) where
+instance space ~ space' => Addition (Vector2d (Coordinates space units)) (VectorCurve2d (Coordinates space' units)) (VectorCurve2d (Coordinates space units)) where
   vector + curve = constant vector + curve
 
-instance coordinates ~ coordinates' => Subtraction (VectorCurve2d coordinates units) (VectorCurve2d coordinates' units) (VectorCurve2d coordinates units) where
+instance space ~ space' => Subtraction (VectorCurve2d (Coordinates space units)) (VectorCurve2d (Coordinates space' units)) (VectorCurve2d (Coordinates space units)) where
   -- TODO add special cases
   c1 - c2 = Difference c1 c2
 
-instance coordinates ~ coordinates' => Subtraction (VectorCurve2d coordinates units) (Vector2d coordinates' units) (VectorCurve2d coordinates units) where
+instance space ~ space' => Subtraction (VectorCurve2d (Coordinates space units)) (Vector2d (Coordinates space' units)) (VectorCurve2d (Coordinates space units)) where
   curve - vector = curve - constant vector
 
-instance coordinates ~ coordinates' => Subtraction (Vector2d coordinates units) (VectorCurve2d coordinates' units) (VectorCurve2d coordinates units) where
+instance space ~ space' => Subtraction (Vector2d (Coordinates space units)) (VectorCurve2d (Coordinates space' units)) (VectorCurve2d (Coordinates space units)) where
   vector - curve = constant vector + curve
 
-instance Units.Product units1 units2 units3 => Multiplication (Curve1d units1) (VectorCurve2d coordinates units2) (VectorCurve2d coordinates units3) where
+instance Units.Product units1 units2 units3 => Multiplication (Curve1d units1) (VectorCurve2d (Coordinates space units2)) (VectorCurve2d (Coordinates space units3)) where
   -- TODO add special cases
   c1 * c2 = Product1d2d c1 c2
 
-instance Units.Product units1 units2 units3 => Multiplication (Qty units1) (VectorCurve2d coordinates units2) (VectorCurve2d coordinates units3) where
+instance Units.Product units1 units2 units3 => Multiplication (Qty units1) (VectorCurve2d (Coordinates space units2)) (VectorCurve2d (Coordinates space units3)) where
   c1 * c2 = Curve1d.constant c1 * c2
 
-instance Units.Product units1 units2 units3 => Multiplication (VectorCurve2d coordinates units1) (Curve1d units2) (VectorCurve2d coordinates units3) where
+instance Units.Product units1 units2 units3 => Multiplication (VectorCurve2d (Coordinates space units1)) (Curve1d units2) (VectorCurve2d (Coordinates space units3)) where
   -- TODO add special cases
   c1 * c2 = Product2d1d c1 c2
 
-instance Units.Product units1 units2 units3 => Multiplication (VectorCurve2d coordinates units1) (Qty units2) (VectorCurve2d coordinates units3) where
+instance Units.Product units1 units2 units3 => Multiplication (VectorCurve2d (Coordinates space units1)) (Qty units2) (VectorCurve2d (Coordinates space units3)) where
   curve * value = curve * Curve1d.constant value
 
-instance Units.Quotient units1 units2 units3 => Division (VectorCurve2d coordinates units1) (Curve1d units2) (VectorCurve2d coordinates units3) where
+instance Units.Quotient units1 units2 units3 => Division (VectorCurve2d (Coordinates space units1)) (Curve1d units2) (VectorCurve2d (Coordinates space units3)) where
   -- TODO add special cases
   c1 / c2 = Quotient c1 c2
 
-instance Units.Quotient units1 units2 units3 => Division (VectorCurve2d coordinates units1) (Qty units2) (VectorCurve2d coordinates units3) where
+instance Units.Quotient units1 units2 units3 => Division (VectorCurve2d (Coordinates space units1)) (Qty units2) (VectorCurve2d (Coordinates space units3)) where
   curve / value = curve / Curve1d.constant value
 
-data DotProductOf units1 coordinates units2 = DotProductOf (VectorCurve2d coordinates units1) (VectorCurve2d coordinates units2)
+data DotProductOf space units1 units2 = DotProductOf (VectorCurve2d (Coordinates space units1)) (VectorCurve2d (Coordinates space units2))
 
-instance Units.Product units1 units2 units3 => IsCurve1d (DotProductOf units1 coordinates units2) units3 where
+instance Units.Product units1 units2 units3 => IsCurve1d (DotProductOf space units1 units2) units3 where
   pointOn (DotProductOf c1 c2) t = pointOn c1 t <> pointOn c2 t
   segmentBounds (DotProductOf c1 c2) t = segmentBounds c1 t <> segmentBounds c2 t
   derivative (DotProductOf c1 c2) = derivative c1 <> c2 + c1 <> derivative c2
 
-instance (Units.Product units1 units2 units3, coordinates ~ coordinates') => DotProduct (VectorCurve2d coordinates units1) (VectorCurve2d coordinates' units2) (Curve1d units3) where
+instance (Units.Product units1 units2 units3, space ~ space') => DotProduct (VectorCurve2d (Coordinates space units1)) (VectorCurve2d (Coordinates space' units2)) (Curve1d units3) where
   -- TODO add special cases
   curve1 <> curve2 = Curve1d (DotProductOf curve1 curve2)
 
-instance (Units.Product units1 units2 units3, coordinates ~ coordinates') => DotProduct (VectorCurve2d coordinates units1) (Vector2d coordinates' units2) (Curve1d units3) where
+instance (Units.Product units1 units2 units3, space ~ space') => DotProduct (VectorCurve2d (Coordinates space units1)) (Vector2d (Coordinates space' units2)) (Curve1d units3) where
   curve <> vector = curve <> constant vector
 
-instance (Units.Product units1 units2 units3, coordinates ~ coordinates') => DotProduct (Vector2d coordinates units1) (VectorCurve2d coordinates' units2) (Curve1d units3) where
+instance (Units.Product units1 units2 units3, space ~ space') => DotProduct (Vector2d (Coordinates space units1)) (VectorCurve2d (Coordinates space' units2)) (Curve1d units3) where
   vector <> curve = constant vector <> curve
 
-zero :: VectorCurve2d coordinates units
+zero :: VectorCurve2d (Coordinates space units)
 zero = Zero
 
-constant :: Vector2d coordinates units -> VectorCurve2d coordinates units
+constant :: Vector2d (Coordinates space units) -> VectorCurve2d (Coordinates space units)
 constant = Constant
 
-xy :: Curve1d units -> Curve1d units -> VectorCurve2d coordinates units
+xy :: Curve1d units -> Curve1d units -> VectorCurve2d (Coordinates space units)
 xy = XY
 
-newtype MagnitudeOf coordinates units = MagnitudeOf (VectorCurve2d coordinates units)
+newtype MagnitudeOf coordinateSystem = MagnitudeOf (VectorCurve2d coordinateSystem)
 
-instance IsCurve1d (MagnitudeOf coordinates units) units where
+instance IsCurve1d (MagnitudeOf (Coordinates space units)) units where
   pointOn (MagnitudeOf curve) t = Vector2d.magnitude (pointOn curve t)
   segmentBounds (MagnitudeOf curve) t = VectorBox2d.magnitude (segmentBounds curve t)
   derivative (MagnitudeOf curve) = derivative curve <> normalize curve
 
-newtype SquaredMagnitudeOf coordinates units = SquaredMagnitudeOf (VectorCurve2d coordinates units)
+newtype SquaredMagnitudeOf coordinateSystem = SquaredMagnitudeOf (VectorCurve2d coordinateSystem)
 
-instance Units.Squared units1 units2 => IsCurve1d (SquaredMagnitudeOf coordinates units1) units2 where
+instance Units.Squared units1 units2 => IsCurve1d (SquaredMagnitudeOf (Coordinates space units1)) units2 where
   pointOn (SquaredMagnitudeOf curve) t = Vector2d.squaredMagnitude (pointOn curve t)
   segmentBounds (SquaredMagnitudeOf curve) t = VectorBox2d.squaredMagnitude (segmentBounds curve t)
   derivative (SquaredMagnitudeOf curve) = 2.0 * curve <> derivative curve
 
-squaredMagnitude :: Units.Squared units1 units2 => VectorCurve2d coordinates units1 -> Curve1d units2
+squaredMagnitude :: Units.Squared units1 units2 => VectorCurve2d (Coordinates space units1) -> Curve1d units2
 squaredMagnitude curve = Curve1d (SquaredMagnitudeOf curve)
 
-magnitude :: VectorCurve2d coordinates units -> Curve1d units
+magnitude :: VectorCurve2d (Coordinates space units) -> Curve1d units
 magnitude curve = Curve1d (MagnitudeOf curve)
 
-normalize :: VectorCurve2d coordinates units -> VectorCurve2d coordinates Unitless
+normalize :: VectorCurve2d (Coordinates space units) -> VectorCurve2d (Coordinates space Unitless)
 normalize curve = curve / magnitude curve

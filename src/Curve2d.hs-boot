@@ -6,9 +6,9 @@ where
 
 import OpenSolid
 
-class IsCurve2d curve coordinates units | curve -> units, curve -> coordinates
+class IsCurve2d curve space units | curve -> space, curve -> units
 
-type role Curve2d nominal nominal
+type role Curve2d nominal
 
-type Curve2d :: Type -> Type -> Type
-data Curve2d coordinates units = forall curve. IsCurve2d curve coordinates units => Curve2d curve
+data Curve2d (coordinateSystem :: CoordinateSystem) where
+  Curve2d :: IsCurve2d curve space units => curve -> Curve2d (Coordinates space units)

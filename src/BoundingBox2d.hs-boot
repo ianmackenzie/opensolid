@@ -1,12 +1,15 @@
 module BoundingBox2d (BoundingBox2d (..)) where
 
 import Bounds
+import CoordinateSystem (Units)
 import OpenSolid
 import Range (Range)
 
-type role BoundingBox2d nominal nominal
+type role BoundingBox2d nominal
 
-type BoundingBox2d :: Type -> Type -> Type
-data BoundingBox2d coordinates units = BoundingBox2d (Range units) (Range units)
+data BoundingBox2d (coordinateSystem :: CoordinateSystem)
+  = BoundingBox2d
+      (Range (Units coordinateSystem))
+      (Range (Units coordinateSystem))
 
-instance Bounds (BoundingBox2d coordinates units)
+instance Bounds (BoundingBox2d (Coordinates space units))

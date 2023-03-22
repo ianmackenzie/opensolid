@@ -32,9 +32,11 @@ import Volume qualified
 log :: Show a => Text -> a -> Task Text ()
 log label value = print (label ++ ": " ++ Debug.show value)
 
-data World
+data WorldSpace
 
-data MyPoints = MyPoints (Point2d World Meters) (Point2d World Meters) deriving (Show)
+type WorldCoordinates = Coordinates WorldSpace Meters
+
+data MyPoints = MyPoints (Point2d WorldCoordinates) (Point2d WorldCoordinates) deriving (Show)
 
 listTest :: List (Int, Int)
 listTest = do
