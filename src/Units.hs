@@ -21,8 +21,10 @@ module Units
   )
 where
 
+import Data.Kind (Constraint, Type)
 import Unsafe.Coerce (unsafeCoerce)
 
+type Coercion :: Type -> Type -> Type -> Type -> Constraint
 class Coercion u1 u2 a b | a -> u1, b -> u2, a u2 -> b
 
 data Generic units
