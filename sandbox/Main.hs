@@ -12,6 +12,7 @@ import Direction2d qualified
 import Direction3d ()
 import Float qualified
 import Length qualified
+import Line2d (Line2d)
 import Line2d qualified
 import List qualified
 import OpenSolid
@@ -20,6 +21,7 @@ import Point2d qualified
 import Qty qualified
 import QuadraticSpline2d qualified
 import Range qualified
+import Result qualified
 import Task qualified
 import Text qualified
 import Transform2d qualified
@@ -37,6 +39,12 @@ data WorldSpace
 type WorldCoordinates = WorldSpace @ Meters
 
 data MyPoints = MyPoints (Point2d WorldCoordinates) (Point2d WorldCoordinates) deriving (Show)
+
+offsetPoint :: Line2d (space @ units) -> Qty units -> Point2d (space @ units)
+offsetPoint line distance =
+  Result.withDefault line.startPoint $ do
+    direction <- Line2d.direction line
+    Ok (Line2d.midpoint line + distance * Direction2d.rotateLeft direction)
 
 listTest :: List (Int, Int)
 listTest = do
@@ -282,6 +290,8 @@ script = do
   log "Successive deltas" (List.successive subtract [0, 1, 4, 9, 16, 25])
   log "Successive intervals" (List.successive Range.from [1.0, 2.0, 3.0, 4.0])
   log "Prepend Maybe to List" (Just 1 ++ [2, 3])
+  let lineAlongX = Line2d.from (Point2d.meters 1.0 0.0) (Point2d.meters 3.0 0.0)
+  log "Offset point" (offsetPoint lineAlongX (Length.meters 1.0))
 
 main :: IO ()
 main = Task.toIO script
