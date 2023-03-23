@@ -50,24 +50,24 @@ data Arc2d (coordinateSystem :: CoordinateSystem) = Arc2d
   }
   deriving (Eq, Show)
 
-pointOn :: Arc2d (Coordinates space units) -> Float -> Point2d (Coordinates space units)
+pointOn :: Arc2d (space @ units) -> Float -> Point2d (space @ units)
 pointOn arc t =
   let theta = startAngle arc + t * sweptAngle arc
    in centerPoint arc + Vector2d.polar (radius arc) theta
 
-startPoint :: Arc2d (Coordinates space units) -> Point2d (Coordinates space units)
+startPoint :: Arc2d (space @ units) -> Point2d (space @ units)
 startPoint arc = pointOn arc 0.0
 
-endPoint :: Arc2d (Coordinates space units) -> Point2d (Coordinates space units)
+endPoint :: Arc2d (space @ units) -> Point2d (space @ units)
 endPoint arc = pointOn arc 1.0
 
-segmentBounds :: Arc2d (Coordinates space units) -> Range Unitless -> BoundingBox2d (Coordinates space units)
+segmentBounds :: Arc2d (space @ units) -> Range Unitless -> BoundingBox2d (space @ units)
 segmentBounds arc t =
   let r = Range.constant (radius arc)
       theta = startAngle arc + t * sweptAngle arc
    in centerPoint arc + VectorBox2d.polar r theta
 
-derivative :: Arc2d (Coordinates space units) -> VectorCurve2d (Coordinates space units)
+derivative :: Arc2d (space @ units) -> VectorCurve2d (space @ units)
 derivative arc =
   let theta = startAngle arc + Curve1d.parameter * sweptAngle arc
       r = radius arc
@@ -75,21 +75,21 @@ derivative arc =
       y = r * Curve1d.sin theta
    in VectorCurve2d.xy (Curve1d.derivative x) (Curve1d.derivative y)
 
-reverse :: Arc2d (Coordinates space units) -> Arc2d (Coordinates space units)
+reverse :: Arc2d (space @ units) -> Arc2d (space @ units)
 reverse arc =
   arc{startAngle = startAngle arc + sweptAngle arc, sweptAngle = -(sweptAngle arc)}
 
-bisect :: Arc2d (Coordinates space units) -> (Arc2d (Coordinates space units), Arc2d (Coordinates space units))
+bisect :: Arc2d (space @ units) -> (Arc2d (space @ units), Arc2d (space @ units))
 bisect arc =
   let halfSweptAngle = 0.5 * sweptAngle arc
       first = arc{sweptAngle = halfSweptAngle}
       second = arc{sweptAngle = halfSweptAngle, startAngle = startAngle arc + halfSweptAngle}
    in (first, second)
 
-boundingBox :: Arc2d (Coordinates space units) -> BoundingBox2d (Coordinates space units)
+boundingBox :: Arc2d (space @ units) -> BoundingBox2d (space @ units)
 boundingBox arc = segmentBounds arc (Range.from 0.0 1.0)
 
-instance IsCurve2d (Arc2d (Coordinates space units)) space units where
+instance IsCurve2d (Arc2d (space @ units)) space units where
   startPointImpl = startPoint
   endPointImpl = endPoint
   pointOnImpl = pointOn
@@ -106,7 +106,7 @@ with :: Arguments a b => a -> b
 with = build
 
 instance
-  ( centerPoint ~ Point2d (Coordinates space units)
+  ( centerPoint ~ Point2d (space @ units)
   , radius ~ Qty units
   )
   => Arguments
@@ -115,7 +115,7 @@ instance
       , Named "startAngle" Angle
       , Named "sweptAngle" Angle
       )
-      (Arc2d (Coordinates space units))
+      (Arc2d (space @ units))
   where
   build (Named givenCenterPoint, Named givenRadius, Named givenStartAngle, Named givenSweptAngle) =
     Arc2d
@@ -126,15 +126,15 @@ instance
       }
 
 instance
-  ( centerPoint ~ Point2d (Coordinates space units)
-  , startPoint ~ Point2d (Coordinates space units)
+  ( centerPoint ~ Point2d (space @ units)
+  , startPoint ~ Point2d (space @ units)
   )
   => Arguments
       ( Named "centerPoint" centerPoint
       , Named "startPoint" startPoint
       , Named "sweptAngle" Angle
       )
-      (Arc2d (Coordinates space units))
+      (Arc2d (space @ units))
   where
   build (Named givenCenterPoint, Named givenStartPoint, Named givenSweptAngle) =
     Arc2d
@@ -151,8 +151,8 @@ instance IsError EndpointsCoincidentOrTooFarApart where
   errorMessage EndpointsTooFarApart = "Given Arc2d endpoints are too far apart"
 
 instance
-  ( startPoint ~ Point2d (Coordinates space units)
-  , endPoint ~ Point2d (Coordinates space units)
+  ( startPoint ~ Point2d (space @ units)
+  , endPoint ~ Point2d (space @ units)
   , radius ~ Qty units
   )
   => Arguments
@@ -162,7 +162,7 @@ instance
       , Named "angleSign" Sign
       , Named "largeAngle" Bool
       )
-      (Result EndpointsCoincidentOrTooFarApart (Arc2d (Coordinates space units)))
+      (Result EndpointsCoincidentOrTooFarApart (Arc2d (space @ units)))
   where
   build (Named givenStartPoint, Named givenEndPoint, Named givenRadius, Named angleSign, Named largeAngle) = do
     let chord = Line2d.from givenStartPoint givenEndPoint
@@ -196,10 +196,10 @@ instance
 
 newtype IsLine (coordinateSystem :: CoordinateSystem) = IsLine (Line2d coordinateSystem) deriving (Eq, Show)
 
-instance IsError (IsLine (Coordinates space units)) where
+instance IsError (IsLine (space @ units)) where
   errorMessage (IsLine _) = "Arc is actually just a straight line"
 
-from :: Point2d (Coordinates space units) -> Point2d (Coordinates space units) -> Angle -> Result (IsLine (Coordinates space units)) (Arc2d (Coordinates space units))
+from :: Point2d (space @ units) -> Point2d (space @ units) -> Angle -> Result (IsLine (space @ units)) (Arc2d (space @ units))
 from p1 p2 theta = do
   (distance, direction) <- Vector2d.magnitudeAndDirection (p2 - p1) ?? Error (IsLine (Line2d.from p1 p2))
   let tanHalfAngle = Angle.tan (0.5 * theta)

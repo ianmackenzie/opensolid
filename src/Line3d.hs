@@ -11,7 +11,7 @@ data Line3d (coordinateSystem :: CoordinateSystem) = Line3d
   , endPoint :: Point3d coordinateSystem
   }
 
-instance IsCurve3d (Line3d (Coordinates space units)) space units where
+instance IsCurve3d (Line3d (space @ units)) space units where
   startPoint (Line3d p1 _) = p1
 
   endPoint (Line3d _ p2) = p2

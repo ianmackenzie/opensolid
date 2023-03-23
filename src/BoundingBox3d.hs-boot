@@ -13,4 +13,4 @@ data BoundingBox3d (coordinateSystem :: CoordinateSystem)
       (Range (Units coordinateSystem))
       (Range (Units coordinateSystem))
 
-instance Bounds (BoundingBox3d (Coordinates space units))
+instance Bounds (BoundingBox3d (space @ units))

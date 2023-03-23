@@ -1,5 +1,6 @@
 module CoordinateSystem
-  ( CoordinateSystem (Coordinates)
+  ( CoordinateSystem
+  , type (@)
   , Units
   , Space
   )
@@ -7,10 +8,12 @@ where
 
 import Basics
 
-data CoordinateSystem = Coordinates Type Type
+data CoordinateSystem = CoordinateSystem Type Type
+
+type space @ units = 'CoordinateSystem space units
 
 type family Space (coordinateSystem :: CoordinateSystem) where
-  Space (Coordinates space units) = space
+  Space (space @ units) = space
 
 type family Units (coordinateSystem :: CoordinateSystem) where
-  Units (Coordinates space units) = units
+  Units (space @ units) = units

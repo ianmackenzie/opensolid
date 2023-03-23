@@ -11,4 +11,4 @@ class IsCurve2d curve space units | curve -> space, curve -> units
 type role Curve2d nominal
 
 data Curve2d (coordinateSystem :: CoordinateSystem) where
-  Curve2d :: IsCurve2d curve space units => curve -> Curve2d (Coordinates space units)
+  Curve2d :: IsCurve2d curve space units => curve -> Curve2d (space @ units)

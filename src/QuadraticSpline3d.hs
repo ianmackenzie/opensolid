@@ -16,7 +16,7 @@ data QuadraticSpline3d (coordinateSystem :: CoordinateSystem)
       (Point3d coordinateSystem)
       (Point3d coordinateSystem)
 
-instance IsCurve3d (QuadraticSpline3d (Coordinates space units)) space units where
+instance IsCurve3d (QuadraticSpline3d (space @ units)) space units where
   startPoint (QuadraticSpline3d p1 _ _) = p1
 
   endPoint (QuadraticSpline3d _ _ p3) = p3
@@ -37,8 +37,8 @@ instance IsCurve3d (QuadraticSpline3d (Coordinates space units)) space units whe
   boundingBox (QuadraticSpline3d p1 p2 p3) = BoundingBox3d.hull3 p1 p2 p3
 
 fromControlPoints
-  :: Point3d (Coordinates space units)
-  -> Point3d (Coordinates space units)
-  -> Point3d (Coordinates space units)
-  -> QuadraticSpline3d (Coordinates space units)
+  :: Point3d (space @ units)
+  -> Point3d (space @ units)
+  -> Point3d (space @ units)
+  -> QuadraticSpline3d (space @ units)
 fromControlPoints = QuadraticSpline3d

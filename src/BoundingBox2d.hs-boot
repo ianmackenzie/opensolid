@@ -12,4 +12,4 @@ data BoundingBox2d (coordinateSystem :: CoordinateSystem)
       (Range (Units coordinateSystem))
       (Range (Units coordinateSystem))
 
-instance Bounds (BoundingBox2d (Coordinates space units))
+instance Bounds (BoundingBox2d (space @ units))

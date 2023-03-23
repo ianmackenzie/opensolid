@@ -47,25 +47,25 @@ instance Negation (Direction2d space) where
 instance space ~ space' => DotProduct (Direction2d space) (Direction2d space') Float where
   Direction2d x1 y1 <> Direction2d x2 y2 = x1 * x2 + y1 * y2
 
-instance space ~ space' => DotProduct (Vector2d (Coordinates space units)) (Direction2d space') (Qty units) where
+instance space ~ space' => DotProduct (Vector2d (space @ units)) (Direction2d space') (Qty units) where
   Vector2d vx vy <> Direction2d dx dy = vx * dx + vy * dy
 
-instance space ~ space' => DotProduct (Direction2d space) (Vector2d (Coordinates space' units)) (Qty units) where
+instance space ~ space' => DotProduct (Direction2d space) (Vector2d (space' @ units)) (Qty units) where
   Direction2d dx dy <> Vector2d vx vy = dx * vx + dy * vy
 
 instance space ~ space' => CrossProduct (Direction2d space) (Direction2d space') Float where
   Direction2d x1 y1 >< Direction2d x2 y2 = x1 * y2 - y1 * x2
 
-instance space ~ space' => CrossProduct (Vector2d (Coordinates space units)) (Direction2d space') (Qty units) where
+instance space ~ space' => CrossProduct (Vector2d (space @ units)) (Direction2d space') (Qty units) where
   Vector2d vx vy >< Direction2d dx dy = vx * dy - vy * dx
 
-instance space ~ space' => CrossProduct (Direction2d space) (Vector2d (Coordinates space' units)) (Qty units) where
+instance space ~ space' => CrossProduct (Direction2d space) (Vector2d (space' @ units)) (Qty units) where
   Direction2d dx dy >< Vector2d vx vy = dx * vy - dy * vx
 
-instance Multiplication (Qty units) (Direction2d space) (Vector2d (Coordinates space units)) where
+instance Multiplication (Qty units) (Direction2d space) (Vector2d (space @ units)) where
   scale * Direction2d dx dy = Vector2d (scale * dx) (scale * dy)
 
-instance Multiplication (Direction2d space) (Qty units) (Vector2d (Coordinates space units)) where
+instance Multiplication (Direction2d space) (Qty units) (Vector2d (space @ units)) where
   Direction2d dx dy * scale = Vector2d (dx * scale) (dy * scale)
 
 unsafe :: Float -> Float -> Direction2d space

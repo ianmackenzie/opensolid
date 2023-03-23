@@ -34,7 +34,7 @@ lengthRange = Prelude.do
   b <- length
   Prelude.return (Range.from a b)
 
-vectorBox3d :: Hedgehog.Gen (VectorBox3d (Coordinates space Meters))
+vectorBox3d :: Hedgehog.Gen (VectorBox3d (space @ Meters))
 vectorBox3d = Prelude.do
   x <- lengthRange
   y <- lengthRange

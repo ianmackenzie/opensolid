@@ -34,7 +34,7 @@ log label value = print (label ++ ": " ++ Debug.show value)
 
 data WorldSpace
 
-type WorldCoordinates = Coordinates WorldSpace Meters
+type WorldCoordinates = WorldSpace @ Meters
 
 data MyPoints = MyPoints (Point2d WorldCoordinates) (Point2d WorldCoordinates) deriving (Show)
 

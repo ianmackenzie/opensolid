@@ -24,7 +24,7 @@ import Arithmetic
 import Basics
 import Coalesce (Coalesce ((??)))
 import Concatenate (Concatenate ((++)))
-import CoordinateSystem (CoordinateSystem (Coordinates))
+import CoordinateSystem (CoordinateSystem, type (@))
 import Data.Text.IO qualified
 import DoNotation
 import Float (Float, fromRational)
