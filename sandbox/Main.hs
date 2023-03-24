@@ -42,7 +42,7 @@ data MyPoints = MyPoints (Point2d WorldCoordinates) (Point2d WorldCoordinates) d
 
 offsetPoint :: Line2d (space @ units) -> Qty units -> Point2d (space @ units)
 offsetPoint line distance =
-  Result.withDefault line.startPoint $ do
+  Result.withDefault line.startPoint do
     direction <- Line2d.direction line
     Ok (Line2d.midpoint line + distance * Direction2d.rotateLeft direction)
 
