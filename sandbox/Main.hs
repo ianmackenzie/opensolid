@@ -41,10 +41,9 @@ type WorldCoordinates = WorldSpace @ Meters
 data MyPoints = MyPoints (Point2d WorldCoordinates) (Point2d WorldCoordinates) deriving (Show)
 
 offsetPoint :: Line2d (space @ units) -> Qty units -> Point2d (space @ units)
-offsetPoint line distance =
-  Result.withDefault line.startPoint do
-    direction <- Line2d.direction line
-    Ok (Line2d.midpoint line + distance * Direction2d.rotateLeft direction)
+offsetPoint line distance = Result.withDefault line.startPoint do
+  direction <- Line2d.direction line
+  Ok (Line2d.midpoint line + distance * Direction2d.rotateLeft direction)
 
 listTest :: List (Int, Int)
 listTest = do
@@ -155,13 +154,12 @@ testCurveOverlap2 = do
   ?tolerance = Length.meters 1e-9
 
 getCrossProduct :: Result Text Float
-getCrossProduct =
-  Try.withContext "In getCrossProduct:" $ Try.do
-    vectorDirection <- Vector2d.direction (Vector2d.meters 2.0 3.0)
-    lineDirection <-
-      Try.withContext "When getting line direction:" $
-        Line2d.direction (Line2d.from Point2d.origin Point2d.origin)
-    Ok (vectorDirection >< lineDirection)
+getCrossProduct = Try.withContext "In getCrossProduct:" Try.do
+  vectorDirection <- Vector2d.direction (Vector2d.meters 2.0 3.0)
+  lineDirection <-
+    Try.withContext "When getting line direction:" $
+      Line2d.direction (Line2d.from Point2d.origin Point2d.origin)
+  Ok (vectorDirection >< lineDirection)
 
 testTry :: Task Text ()
 testTry =
