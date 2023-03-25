@@ -140,14 +140,14 @@ testCurveOverlap2 = do
           ( #centerPoint Point2d.origin
           , #radius (Length.meters 1.0)
           , #startAngle (Angle.degrees 0.0)
-          , #sweptAngle (Angle.degrees -180.0)
+          , #endAngle (Angle.degrees -180.0)
           )
   let arc2 =
         Arc2d.with
           ( #centerPoint Point2d.origin
           , #radius (Length.meters 1.0)
           , #startAngle (Angle.degrees -45.0)
-          , #sweptAngle (Angle.degrees 270.0)
+          , #endAngle (Angle.degrees 225.0)
           )
   log "Overlaps" (Curve2d.overlappingSegments (Curve2d arc1) (Curve2d arc2))
  where

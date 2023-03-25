@@ -46,14 +46,20 @@ data Arc2d (coordinateSystem :: CoordinateSystem) = Arc2d
   { centerPoint :: Point2d coordinateSystem
   , radius :: Qty (Units coordinateSystem)
   , startAngle :: Angle
-  , sweptAngle :: Angle
+  , endAngle :: Angle
   }
   deriving (Eq, Show)
 
+sweptAngle :: Arc2d (space @ units) -> Angle
+sweptAngle arc = arc.endAngle - arc.startAngle
+
+instance HasField "sweptAngle" (Arc2d (space @ units)) Angle where
+  getField = sweptAngle
+
 pointOn :: Arc2d (space @ units) -> Float -> Point2d (space @ units)
 pointOn arc t =
-  let theta = startAngle arc + t * sweptAngle arc
-   in centerPoint arc + Vector2d.polar (radius arc) theta
+  let theta = Qty.interpolateFrom arc.startAngle arc.endAngle t
+   in arc.centerPoint + Vector2d.polar arc.radius theta
 
 startPoint :: Arc2d (space @ units) -> Point2d (space @ units)
 startPoint arc = pointOn arc 0.0
@@ -63,28 +69,26 @@ endPoint arc = pointOn arc 1.0
 
 segmentBounds :: Arc2d (space @ units) -> Range Unitless -> BoundingBox2d (space @ units)
 segmentBounds arc t =
-  let r = Range.constant (radius arc)
-      theta = startAngle arc + t * sweptAngle arc
-   in centerPoint arc + VectorBox2d.polar r theta
+  let r = Range.constant arc.radius
+      theta = arc.startAngle + t * arc.sweptAngle
+   in arc.centerPoint + VectorBox2d.polar r theta
 
 derivative :: Arc2d (space @ units) -> VectorCurve2d (space @ units)
 derivative arc =
-  let theta = startAngle arc + Curve1d.parameter * sweptAngle arc
-      r = radius arc
+  let theta = arc.startAngle + Curve1d.parameter * arc.sweptAngle
+      r = arc.radius
       x = r * Curve1d.cos theta
       y = r * Curve1d.sin theta
    in VectorCurve2d.xy (Curve1d.derivative x) (Curve1d.derivative y)
 
 reverse :: Arc2d (space @ units) -> Arc2d (space @ units)
 reverse arc =
-  arc{startAngle = startAngle arc + sweptAngle arc, sweptAngle = -(sweptAngle arc)}
+  arc{startAngle = arc.endAngle, endAngle = arc.startAngle}
 
 bisect :: Arc2d (space @ units) -> (Arc2d (space @ units), Arc2d (space @ units))
 bisect arc =
-  let halfSweptAngle = 0.5 * sweptAngle arc
-      first = arc{sweptAngle = halfSweptAngle}
-      second = arc{sweptAngle = halfSweptAngle, startAngle = startAngle arc + halfSweptAngle}
-   in (first, second)
+  let midAngle = Qty.midpoint arc.startAngle arc.endAngle
+   in (arc{endAngle = midAngle}, arc{startAngle = midAngle})
 
 boundingBox :: Arc2d (space @ units) -> BoundingBox2d (space @ units)
 boundingBox arc = segmentBounds arc (Range.from 0.0 1.0)
@@ -113,16 +117,16 @@ instance
       ( Named "centerPoint" centerPoint
       , Named "radius" radius
       , Named "startAngle" Angle
-      , Named "sweptAngle" Angle
+      , Named "endAngle" Angle
       )
       (Arc2d (space @ units))
   where
-  build (Named givenCenterPoint, Named givenRadius, Named givenStartAngle, Named givenSweptAngle) =
+  build (Named givenCenterPoint, Named givenRadius, Named givenStartAngle, Named givenEndAngle) =
     Arc2d
       { centerPoint = givenCenterPoint
       , radius = givenRadius
       , startAngle = givenStartAngle
-      , sweptAngle = givenSweptAngle
+      , endAngle = givenEndAngle
       }
 
 instance
@@ -137,12 +141,13 @@ instance
       (Arc2d (space @ units))
   where
   build (Named givenCenterPoint, Named givenStartPoint, Named givenSweptAngle) =
-    Arc2d
-      { centerPoint = givenCenterPoint
-      , radius = Point2d.distanceFrom givenCenterPoint givenStartPoint
-      , startAngle = Point2d.angleFrom givenCenterPoint givenStartPoint
-      , sweptAngle = givenSweptAngle
-      }
+    let computedStartAngle = Point2d.angleFrom givenCenterPoint givenStartPoint
+     in Arc2d
+          { centerPoint = givenCenterPoint
+          , radius = Point2d.distanceFrom givenCenterPoint givenStartPoint
+          , startAngle = computedStartAngle
+          , endAngle = computedStartAngle + givenSweptAngle
+          }
 
 data EndpointsCoincidentOrTooFarApart = EndpointsCoincident | EndpointsTooFarApart
 
@@ -205,11 +210,12 @@ from p1 p2 theta = do
   let tanHalfAngle = Angle.tan (0.5 * theta)
   denominator <- validate (/= Qty.zero) tanHalfAngle ?? Error (IsLine (Line2d.from p1 p2))
   let offset = 0.5 * distance / denominator
-  let center = Point2d.midpoint p1 p2 + offset * Direction2d.rotateLeft direction
+  let computedCenterPoint = Point2d.midpoint p1 p2 + offset * Direction2d.rotateLeft direction
+  let computedStartAngle = Point2d.angleFrom computedCenterPoint p1
   Ok
     Arc2d
-      { centerPoint = center
-      , radius = Point2d.distanceFrom center p1
-      , startAngle = Point2d.angleFrom center p1
-      , sweptAngle = theta
+      { centerPoint = computedCenterPoint
+      , radius = Point2d.distanceFrom computedCenterPoint p1
+      , startAngle = computedStartAngle
+      , endAngle = computedStartAngle + theta
       }
