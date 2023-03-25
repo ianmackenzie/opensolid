@@ -75,13 +75,13 @@ positiveX :: Direction2d space
 positiveX = unsafe 1.0 0.0
 
 negativeX :: Direction2d space
-negativeX = negate positiveX
+negativeX = -positiveX
 
 positiveY :: Direction2d space
 positiveY = unsafe 0.0 1.0
 
 negativeY :: Direction2d space
-negativeY = negate positiveY
+negativeY = -positiveY
 
 x :: Direction2d space
 x = positiveX
