@@ -101,4 +101,4 @@ signedDistanceAlong axis point =
 
 signedDistanceFrom :: Axis2d (space @ units) -> Point2d (space @ units) -> Qty units
 signedDistanceFrom axis point =
-  (point - axis.originPoint) <> Direction2d.rotateLeft axis.direction
+  (point - axis.originPoint) <> Direction2d.perpendicularTo axis.direction

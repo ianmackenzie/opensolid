@@ -176,7 +176,7 @@ instance
     let squaredHalfLength = Qty.squared (Units.generalize (0.5 * Line2d.length chord))
     squaredOffsetMagnitude <- validate (>= Qty.zero) (squaredRadius - squaredHalfLength) ?? Error EndpointsTooFarApart
     let offsetMagnitude = Units.specialize (Qty.sqrt squaredOffsetMagnitude)
-    let offsetDirection = Direction2d.rotateLeft chordDirection
+    let offsetDirection = Direction2d.perpendicularTo chordDirection
     let offsetDistance =
           case (angleSign, largeAngle) of
             (Positive, False) -> offsetMagnitude
@@ -210,7 +210,7 @@ from p1 p2 theta = do
   let tanHalfAngle = Angle.tan (0.5 * theta)
   denominator <- validate (/= Qty.zero) tanHalfAngle ?? Error (IsLine (Line2d.from p1 p2))
   let offset = 0.5 * distance / denominator
-  let computedCenterPoint = Point2d.midpoint p1 p2 + offset * Direction2d.rotateLeft direction
+  let computedCenterPoint = Point2d.midpoint p1 p2 + offset * Direction2d.perpendicularTo direction
   let computedStartAngle = Point2d.angleFrom computedCenterPoint p1
   Ok
     Arc2d
