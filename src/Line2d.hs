@@ -22,6 +22,7 @@ import BoundingBox2d (BoundingBox2d)
 import BoundingBox2d qualified
 import Curve2d (IsCurve2d (..))
 import Direction2d (Direction2d)
+import Direction2d qualified
 import OpenSolid
 import Point2d (Point2d)
 import Point2d qualified
@@ -40,7 +41,7 @@ data Line2d (coordinateSystem :: CoordinateSystem) = Line2d
   deriving (Eq, Show)
 
 map :: (Point2d coordinateSystem1 -> Point2d coordinateSystem2) -> Line2d coordinateSystem1 -> Line2d coordinateSystem2
-map function (Line2d p1 p2) = Line2d (function p1) (function p2)
+map function line = Line2d (function line.startPoint) (function line.endPoint)
 
 instance
   (space ~ space', units ~ units')
@@ -64,28 +65,28 @@ from :: Point2d (space @ units) -> Point2d (space @ units) -> Line2d (space @ un
 from = Line2d
 
 midpoint :: Line2d (space @ units) -> Point2d (space @ units)
-midpoint (Line2d p1 p2) = Point2d.midpoint p1 p2
+midpoint line = Point2d.midpoint line.startPoint line.endPoint
 
 pointOn :: Line2d (space @ units) -> Float -> Point2d (space @ units)
-pointOn (Line2d p1 p2) = Point2d.interpolateFrom p1 p2
+pointOn line t = Point2d.interpolateFrom line.startPoint line.endPoint t
 
 segmentBounds :: Line2d (space @ units) -> Range Unitless -> BoundingBox2d (space @ units)
-segmentBounds line (Range t1 t2) =
-  BoundingBox2d.hull2 (Line2d.pointOn line t1) (Line2d.pointOn line t2)
+segmentBounds line range =
+  BoundingBox2d.hull2
+    (Line2d.pointOn line range.minValue)
+    (Line2d.pointOn line range.maxValue)
 
 derivative :: Line2d (space @ units) -> VectorCurve2d (space @ units)
 derivative line = VectorCurve2d.constant (vector line)
 
 reverse :: Line2d (space @ units) -> Line2d (space @ units)
-reverse (Line2d p1 p2) = Line2d p2 p1
+reverse line = Line2d line.endPoint line.startPoint
 
 bisect :: Line2d (space @ units) -> (Line2d (space @ units), Line2d (space @ units))
-bisect (Line2d p1 p2) =
-  let mid = Point2d.midpoint p1 p2
-   in (Line2d p1 mid, Line2d mid p2)
+bisect line = let mid = midpoint line in (Line2d line.startPoint mid, Line2d mid line.endPoint)
 
 boundingBox :: Line2d (space @ units) -> BoundingBox2d (space @ units)
-boundingBox (Line2d p1 p2) = BoundingBox2d.hull2 p1 p2
+boundingBox line = BoundingBox2d.hull2 line.startPoint line.endPoint
 
 instance IsCurve2d (Line2d (space @ units)) space units where
   startPointImpl = startPoint
@@ -98,10 +99,10 @@ instance IsCurve2d (Line2d (space @ units)) space units where
   boundingBoxImpl = boundingBox
 
 length :: Line2d (space @ units) -> Qty units
-length (Line2d p1 p2) = Point2d.distanceFrom p1 p2
+length line = Point2d.distanceFrom line.startPoint line.endPoint
 
 vector :: Line2d (space @ units) -> Vector2d (space @ units)
-vector (Line2d p1 p2) = p2 - p1
+vector line = line.endPoint - line.startPoint
 
 data IsDegenerate = IsDegenerate
 
@@ -109,7 +110,7 @@ instance IsError IsDegenerate where
   errorMessage IsDegenerate = "Line2d is degenerate (start and end points are equal)"
 
 direction :: Line2d (space @ units) -> Result IsDegenerate (Direction2d space)
-direction line = Vector2d.direction (vector line) ?? Error IsDegenerate
+direction line = Direction2d.from line.startPoint line.endPoint ?? Error IsDegenerate
 
 lengthAndDirection :: Line2d (space @ units) -> Result IsDegenerate (Qty units, Direction2d space)
 lengthAndDirection line = Vector2d.magnitudeAndDirection (vector line) ?? Error IsDegenerate
