@@ -15,7 +15,7 @@ import {-# SOURCE #-} Axis2d qualified
 import CoordinateSystem (Units)
 import Direction2d (Direction2d (..))
 import Direction2d qualified
-import OpenSolid hiding (identity)
+import OpenSolid
 import Point2d (Point2d (..))
 import Vector2d (Vector2d (..))
 
