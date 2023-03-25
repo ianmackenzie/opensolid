@@ -4,6 +4,7 @@ module Vector2d
   , x
   , y
   , xy
+  , from
   , meters
   , squareMeters
   , polar
@@ -29,6 +30,7 @@ import {-# SOURCE #-} Direction2d qualified
 import Generic qualified
 import Length qualified
 import OpenSolid
+import {-# SOURCE #-} Point2d (Point2d)
 import Qty qualified
 import Units (Meters, SquareMeters, Unitless)
 import Units qualified
@@ -90,6 +92,9 @@ y vy = Vector2d Qty.zero vy
 
 xy :: Qty units -> Qty units -> Vector2d (space @ units)
 xy = Vector2d
+
+from :: Point2d (space @ units) -> Point2d (space @ units) -> Vector2d (space @ units)
+from p1 p2 = p2 - p1
 
 meters :: Float -> Float -> Vector2d (space @ Meters)
 meters vx vy = Vector2d (Length.meters vx) (Length.meters vy)

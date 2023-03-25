@@ -7,6 +7,7 @@ module Direction2d
   , y
   , positiveY
   , negativeY
+  , from
   , fromAngle
   , toAngle
   , degrees
@@ -19,9 +20,11 @@ where
 import Angle (Angle)
 import Angle qualified
 import OpenSolid
+import {-# SOURCE #-} Point2d (Point2d)
 import Qty qualified
 import Units (Radians)
 import Vector2d (Vector2d (..))
+import Vector2d qualified
 
 type role Direction2d nominal
 
@@ -87,6 +90,14 @@ x = positiveX
 
 y :: Direction2d space
 y = positiveY
+
+data PointsAreCoincident = PointsAreCoincident
+
+instance IsError PointsAreCoincident where
+  errorMessage PointsAreCoincident = "Given points are coincident"
+
+from :: Point2d (space @ units) -> Point2d (space @ units) -> Result PointsAreCoincident (Direction2d space)
+from p1 p2 = Vector2d.direction (p2 - p1) ?? Error PointsAreCoincident
 
 fromAngle :: Angle -> Direction2d space
 fromAngle angle = unsafe (Angle.cos angle) (Angle.sin angle)
