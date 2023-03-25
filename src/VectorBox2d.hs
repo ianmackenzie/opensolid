@@ -81,13 +81,13 @@ instance Units.Quotient units1 units2 units3 => Division (VectorBox2d (space @ u
 instance Units.Quotient units1 units2 units3 => Division (VectorBox2d (space @ units1)) (Range units2) (VectorBox2d (space @ units3)) where
   VectorBox2d x y / range = VectorBox2d (x / range) (y / range)
 
-instance (Units.Product units1 units2 units3, coordinates ~ coordinates') => DotProduct (Vector2d (space @ units1)) (VectorBox2d (space' @ units2)) (Range units3) where
+instance (Units.Product units1 units2 units3, space ~ space') => DotProduct (Vector2d (space @ units1)) (VectorBox2d (space' @ units2)) (Range units3) where
   Vector2d x1 y1 <> VectorBox2d x2 y2 = x1 * x2 + y1 * y2
 
-instance (Units.Product units1 units2 units3, coordinates ~ coordinates') => DotProduct (VectorBox2d (space @ units1)) (Vector2d (space' @ units2)) (Range units3) where
+instance (Units.Product units1 units2 units3, space ~ space') => DotProduct (VectorBox2d (space @ units1)) (Vector2d (space' @ units2)) (Range units3) where
   VectorBox2d x1 y1 <> Vector2d x2 y2 = x1 * x2 + y1 * y2
 
-instance (Units.Product units1 units2 units3, coordinates ~ coordinates') => DotProduct (VectorBox2d (space @ units1)) (VectorBox2d (space' @ units2)) (Range units3) where
+instance (Units.Product units1 units2 units3, space ~ space') => DotProduct (VectorBox2d (space @ units1)) (VectorBox2d (space' @ units2)) (Range units3) where
   VectorBox2d x1 y1 <> VectorBox2d x2 y2 = x1 * x2 + y1 * y2
 
 constant :: Vector2d (space @ units) -> VectorBox2d (space @ units)
