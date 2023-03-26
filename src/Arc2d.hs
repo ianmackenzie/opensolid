@@ -15,6 +15,16 @@ module Arc2d
   , radius
   , startAngle
   , sweptAngle
+  , Arguments
+  , CenterPoint (CenterPoint)
+  , StartPoint (StartPoint)
+  , EndPoint (EndPoint)
+  , Radius (Radius)
+  , StartAngle (StartAngle)
+  , EndAngle (EndAngle)
+  , SweptAngle (SweptAngle)
+  , Direction (Clockwise, Counterclockwise)
+  , Size (Large, Small)
   )
 where
 
@@ -109,19 +119,35 @@ class Arguments a b | a -> b where
 with :: Arguments a b => a -> b
 with = build
 
+newtype CenterPoint (coordinateSystem :: CoordinateSystem) = CenterPoint (Point2d coordinateSystem)
+
+newtype StartPoint (coordinateSystem :: CoordinateSystem) = StartPoint (Point2d coordinateSystem)
+
+newtype EndPoint (coordinateSystem :: CoordinateSystem) = EndPoint (Point2d coordinateSystem)
+
+newtype Radius units = Radius (Qty units)
+
+newtype StartAngle = StartAngle Angle
+
+newtype EndAngle = EndAngle Angle
+
+newtype SweptAngle = SweptAngle Angle
+
+data Direction = Clockwise | Counterclockwise
+
+data Size = Large | Small
+
 instance
-  ( centerPoint ~ Point2d (space @ units)
-  , radius ~ Qty units
-  )
+  units ~ units'
   => Arguments
-      ( Named "centerPoint" centerPoint
-      , Named "radius" radius
-      , Named "startAngle" Angle
-      , Named "endAngle" Angle
+      ( CenterPoint (space @ units)
+      , Radius units'
+      , StartAngle
+      , EndAngle
       )
       (Arc2d (space @ units))
   where
-  build (Named givenCenterPoint, Named givenRadius, Named givenStartAngle, Named givenEndAngle) =
+  build (CenterPoint givenCenterPoint, Radius givenRadius, StartAngle givenStartAngle, EndAngle givenEndAngle) =
     Arc2d
       { centerPoint = givenCenterPoint
       , radius = givenRadius
@@ -130,17 +156,17 @@ instance
       }
 
 instance
-  ( centerPoint ~ Point2d (space @ units)
-  , startPoint ~ Point2d (space @ units)
+  ( space ~ space'
+  , units ~ units'
   )
   => Arguments
-      ( Named "centerPoint" centerPoint
-      , Named "startPoint" startPoint
-      , Named "sweptAngle" Angle
+      ( CenterPoint (space @ units)
+      , StartPoint (space @ units)
+      , SweptAngle
       )
       (Arc2d (space @ units))
   where
-  build (Named givenCenterPoint, Named givenStartPoint, Named givenSweptAngle) =
+  build (CenterPoint givenCenterPoint, StartPoint givenStartPoint, SweptAngle givenSweptAngle) =
     let computedStartAngle = Point2d.angleFrom givenCenterPoint givenStartPoint
      in Arc2d
           { centerPoint = givenCenterPoint
@@ -156,20 +182,20 @@ instance IsError EndpointsCoincidentOrTooFarApart where
   errorMessage EndpointsTooFarApart = "Given Arc2d endpoints are too far apart"
 
 instance
-  ( startPoint ~ Point2d (space @ units)
-  , endPoint ~ Point2d (space @ units)
-  , radius ~ Qty units
+  ( space ~ space'
+  , units ~ units'
+  , units ~ units''
   )
   => Arguments
-      ( Named "startPoint" startPoint
-      , Named "endPoint" endPoint
-      , Named "radius" radius
-      , Named "angleSign" Sign
-      , Named "largeAngle" Bool
+      ( StartPoint (space @ units)
+      , EndPoint (space' @ units')
+      , Radius units''
+      , Direction
+      , Size
       )
       (Result EndpointsCoincidentOrTooFarApart (Arc2d (space @ units)))
   where
-  build (Named givenStartPoint, Named givenEndPoint, Named givenRadius, Named angleSign, Named largeAngle) = do
+  build (StartPoint givenStartPoint, EndPoint givenEndPoint, Radius givenRadius, direction, size) = do
     let chord = Line2d.from givenStartPoint givenEndPoint
     chordDirection <- Line2d.direction chord ?? Error EndpointsCoincident
     let squaredRadius = Qty.squared (Units.generalize givenRadius)
@@ -178,25 +204,25 @@ instance
     let offsetMagnitude = Units.specialize (Qty.sqrt squaredOffsetMagnitude)
     let offsetDirection = Direction2d.perpendicularTo chordDirection
     let offsetDistance =
-          case (angleSign, largeAngle) of
-            (Positive, False) -> offsetMagnitude
-            (Negative, False) -> -offsetMagnitude
-            (Negative, True) -> offsetMagnitude
-            (Positive, True) -> -offsetMagnitude
+          case (direction, size) of
+            (Counterclockwise, Small) -> offsetMagnitude
+            (Clockwise, Small) -> -offsetMagnitude
+            (Clockwise, Large) -> offsetMagnitude
+            (Counterclockwise, Large) -> -offsetMagnitude
     let computedCenterPoint = Line2d.midpoint chord + offsetDirection * offsetDistance
     let halfLength = Units.specialize (Qty.sqrt squaredHalfLength)
     let shortAngle = 2.0 * Angle.asin (halfLength / givenRadius)
     let computedSweptAngle =
-          case (angleSign, largeAngle) of
-            (Positive, False) -> shortAngle
-            (Negative, False) -> -shortAngle
-            (Negative, True) -> shortAngle - Angle.fullTurn
-            (Positive, True) -> Angle.fullTurn - shortAngle
+          case (direction, size) of
+            (Counterclockwise, Small) -> shortAngle
+            (Clockwise, Small) -> -shortAngle
+            (Clockwise, Large) -> shortAngle - Angle.fullTurn
+            (Counterclockwise, Large) -> Angle.fullTurn - shortAngle
     Ok $
       with
-        ( #centerPoint computedCenterPoint
-        , #startPoint givenStartPoint
-        , #sweptAngle computedSweptAngle
+        ( CenterPoint computedCenterPoint
+        , StartPoint givenStartPoint
+        , SweptAngle computedSweptAngle
         )
 
 newtype IsLine (coordinateSystem :: CoordinateSystem) = IsLine (Line2d coordinateSystem) deriving (Eq, Show)

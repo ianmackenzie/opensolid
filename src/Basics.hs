@@ -24,7 +24,6 @@ module Basics
   , Maybe (Just, Nothing)
   , Type
   , Constraint
-  , Symbol
   , HasField (getField)
   , Text
   , identity
@@ -32,17 +31,13 @@ module Basics
   , internalError
   , notImplemented
   , (|>)
-  , Named (Named)
-  , fromLabel
   )
 where
 
 import Data.Kind (Constraint, Type)
-import Data.Proxy (Proxy (Proxy))
 import Data.Text (Text)
 import Data.Text qualified
 import GHC.Records (HasField (getField))
-import GHC.TypeLits (KnownSymbol, Symbol, symbolVal)
 import Prelude
   ( Bool (..)
   , Char
@@ -91,16 +86,3 @@ notImplemented = internalError "Not implemented"
 (|>) value function = function value
 
 infixl 0 |>
-
-newtype Named (name :: Symbol) value = Named value deriving (Eq)
-
-instance (KnownSymbol name, Show value) => Show (Named name value) where
-  showsPrec precedence (Named value) =
-    let string = '#' : symbolVal (Proxy :: Proxy name) Prelude.++ (' ' : Prelude.showsPrec 10 value [])
-     in Prelude.showParen (precedence >= 10) (Prelude.showString string)
-
-class Nameable (name :: Symbol) value where
-  fromLabel :: value -> Named name value
-  fromLabel = Named
-
-instance Nameable (name :: Symbol) value

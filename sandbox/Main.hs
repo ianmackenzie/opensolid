@@ -137,17 +137,17 @@ testCurveOverlap2 :: Task Text ()
 testCurveOverlap2 = do
   let arc1 =
         Arc2d.with
-          ( #centerPoint Point2d.origin
-          , #radius (Length.meters 1.0)
-          , #startAngle (Angle.degrees 0.0)
-          , #endAngle (Angle.degrees -180.0)
+          ( Arc2d.CenterPoint Point2d.origin
+          , Arc2d.Radius (Length.meters 1.0)
+          , Arc2d.StartAngle (Angle.degrees 0.0)
+          , Arc2d.EndAngle (Angle.degrees -180.0)
           )
   let arc2 =
         Arc2d.with
-          ( #centerPoint Point2d.origin
-          , #radius (Length.meters 1.0)
-          , #startAngle (Angle.degrees -45.0)
-          , #endAngle (Angle.degrees 225.0)
+          ( Arc2d.CenterPoint Point2d.origin
+          , Arc2d.Radius (Length.meters 1.0)
+          , Arc2d.StartAngle (Angle.degrees -45.0)
+          , Arc2d.EndAngle (Angle.degrees 225.0)
           )
   log "Overlaps" (Curve2d.overlappingSegments (Curve2d arc1) (Curve2d arc2))
  where
