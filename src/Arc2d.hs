@@ -161,7 +161,7 @@ instance
   )
   => Arguments
       ( CenterPoint (space @ units)
-      , StartPoint (space @ units)
+      , StartPoint (space' @ units')
       , SweptAngle
       )
       (Arc2d (space @ units))
