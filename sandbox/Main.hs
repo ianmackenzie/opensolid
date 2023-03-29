@@ -73,8 +73,7 @@ parsingFailure = do
 parsingResults :: List (Result Text Int)
 parsingResults = do
   text <- ["1", "a", "-2", "b", "+3"]
-  let parseResult = Text.toInt text
-  [parseResult]
+  [Text.toInt text]
 
 joinTextChunks :: Text -> Text -> Maybe Text
 joinTextChunks " " _ = Nothing
