@@ -23,7 +23,6 @@ module Basics
   , IOError
   , Maybe (Just, Nothing)
   , Type
-  , Constraint
   , HasField (getField)
   , Text
   , identity
@@ -34,7 +33,7 @@ module Basics
   )
 where
 
-import Data.Kind (Constraint, Type)
+import Data.Kind (Type)
 import Data.Text (Text)
 import Data.Text qualified
 import GHC.Records (HasField (getField))

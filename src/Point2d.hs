@@ -35,7 +35,7 @@ data Point2d (coordinateSystem :: CoordinateSystem) = Point2d
   { xCoordinate :: Qty (Units coordinateSystem)
   , yCoordinate :: Qty (Units coordinateSystem)
   }
-  deriving (Eq, Show)
+  deriving (Eq, Ord, Show)
 
 instance
   (units1 ~ units1', units2 ~ units2', space ~ space')
