@@ -25,25 +25,25 @@ data Task x a
   | Perform (IO (Task x a))
 
 instance x ~ x' => Compose (Task x ()) (Task x' a) (Task x a) where
-  script1 >> script2 = script1 >>= (\() -> script2)
+  compose script1 script2 = bind (always script2) script1
 
 instance x ~ x' => Bind (Task x) (Task x' b) where
-  Done (Ok value) >>= function = function value
-  Done (Error err) >>= _ = Done (Error err)
-  Perform io >>= function = Perform (Prelude.fmap (>>= function) io)
+  bind f (Done (Ok value)) = f value
+  bind _ (Done (Error err)) = Done (Error err)
+  bind f (Perform io) = Perform (Prelude.fmap (bind f) io)
 
 instance x ~ x' => Bind (Result x) (Task x' b) where
-  Ok value >>= function = function value
-  Error err >>= _ = Done (Error err)
+  bind f (Ok value) = f value
+  bind _ (Error err) = Done (Error err)
 
 instance Bind [] (Task x ()) where
-  [] >>= _ = succeed ()
-  (first : rest) >>= function = function first >> (rest >>= function)
+  bind _ [] = succeed ()
+  bind f (first : rest) = compose (f first) (bind f rest)
 
 instance Bind [] (Task x (List b)) where
-  [] >>= _ = succeed []
-  (first : rest) >>= function =
-    function first >>= (\firstResults -> map (firstResults ++) (rest >>= function))
+  bind _ [] = succeed []
+  bind f (first : rest) =
+    bind (\firstResults -> Task.map (firstResults ++) (bind f rest)) (f first)
 
 map :: (a -> b) -> Task x a -> Task x b
 map function (Done result) = Done (Result.map function result)

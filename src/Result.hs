@@ -31,12 +31,12 @@ deriving instance (Eq x, Eq a) => Eq (Result x a)
 deriving instance (Show x, Show a) => Show (Result x a)
 
 instance x ~ x' => Bind (Result x) (Result x' b) where
-  Ok value >>= function = function value
-  Error error >>= _ = Error error
+  bind f (Ok value) = f value
+  bind _ (Error error) = Error error
 
 instance Bind [] (Result x (List b)) where
-  list >>= function =
-    List.map function list
+  bind f list =
+    List.map f list
       |> List.collate
       |> Result.map List.concat
 

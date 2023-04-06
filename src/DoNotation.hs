@@ -1,7 +1,9 @@
 module DoNotation
-  ( Compose ((>>))
-  , Bind ((>>=))
+  ( Compose (compose)
+  , Bind (bind)
   , Fail (fail)
+  , (>>)
+  , (>>=)
   )
 where
 
@@ -9,24 +11,30 @@ import Basics
 import Prelude qualified
 
 class Compose a b c | a b -> c where
-  (>>) :: a -> b -> c
+  compose :: a -> b -> c
 
 instance b ~ b' => Compose (a -> b) (b' -> c) (a -> c) where
-  f >> g = g Prelude.. f
+  compose f g = g Prelude.. f
 
 instance Compose Bool (List a) (List a) where
-  True >> list = list
-  False >> _ = []
+  compose True list = list
+  compose False _ = []
 
 class Bind p b where
-  (>>=) :: p a -> (a -> b) -> b
+  bind :: (a -> b) -> p a -> b
 
 instance Bind [] (List b) where
-  (>>=) = (Prelude.>>=)
+  bind f list = list Prelude.>>= f
 
 instance Bind Maybe (List b) where
-  Just value >>= function = function value
-  Nothing >>= _ = []
+  bind f (Just value) = f value
+  bind _ Nothing = []
 
 class Fail a where
   fail :: Text -> a
+
+(>>) :: Compose a b c => a -> b -> c
+(>>) = compose
+
+(>>=) :: Bind p b => p a -> (a -> b) -> b
+a >>= f = bind f a
