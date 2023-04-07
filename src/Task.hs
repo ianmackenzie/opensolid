@@ -45,6 +45,24 @@ instance Bind [] (Task x (List b)) where
   bind f (first : rest) =
     bind (\firstResults -> Task.map (firstResults ++) (bind f rest)) (f first)
 
+instance Prelude.Functor (Task x) where
+  fmap f (Done result) = Done (Result.map f result)
+  fmap f (Perform io) = Perform (Prelude.fmap (Task.map f) io)
+
+instance Prelude.Applicative (Task x) where
+  pure = Ok >> Done
+  Done (Ok function) <*> task = Task.map function task
+  Done (Error error) <*> _ = Done (Error error)
+  Perform io <*> task = Perform (Prelude.fmap (Prelude.<*> task) io)
+
+instance Prelude.Monad (Task x) where
+  Done (Ok value) >>= function = function value
+  Done (Error error) >>= _ = Done (Error error)
+  Perform io >>= function = Perform (Prelude.fmap (Prelude.>>= function) io)
+
+instance Prelude.MonadFail (Task (List Char)) where
+  fail = Error >> Done
+
 map :: (a -> b) -> Task x a -> Task x b
 map function (Done result) = Done (Result.map function result)
 map function (Perform io) = Perform (Prelude.fmap (map function) io)
