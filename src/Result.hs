@@ -19,6 +19,9 @@ class IsError error where
 instance IsError Text where
   errorMessage text = text
 
+instance IsError (List Char) where
+  errorMessage = Text.fromChars
+
 instance IsError IOError where
   errorMessage ioError = Text.fromChars (System.IO.Error.ioeGetErrorString ioError)
 
