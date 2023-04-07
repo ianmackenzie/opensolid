@@ -12,6 +12,7 @@ import DoNotation
 import List qualified
 import System.IO.Error qualified
 import Text qualified
+import Prelude qualified
 
 class IsError error where
   errorMessage :: error -> Text
@@ -32,6 +33,23 @@ data Result x a where
 deriving instance (Eq x, Eq a) => Eq (Result x a)
 
 deriving instance (Show x, Show a) => Show (Result x a)
+
+instance Prelude.Functor (Result x) where
+  fmap f (Ok value) = Ok (f value)
+  fmap _ (Error error) = Error error
+
+instance Prelude.Applicative (Result x) where
+  pure = Ok
+  Ok function <*> Ok value = Ok (function value)
+  Error error <*> _ = Error error
+  Ok _ <*> Error error = Error error
+
+instance Prelude.Monad (Result x) where
+  Ok value >>= function = function value
+  Error error >>= _ = Error error
+
+instance Prelude.MonadFail (Result (List Char)) where
+  fail = Error
 
 instance x ~ x' => Bind (Result x) (Result x' b) where
   bind f (Ok value) = f value
