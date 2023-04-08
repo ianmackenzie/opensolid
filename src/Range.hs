@@ -3,6 +3,7 @@ module Range
   , unsafe
   , constant
   , from
+  , unit
   , hull3
   , midpoint
   , endpoints
@@ -119,6 +120,9 @@ constant value = unsafe value value
 
 from :: Qty units -> Qty units -> Range units
 from a b = if a <= b then unsafe a b else unsafe b a
+
+unit :: Range Unitless
+unit = unsafe 0.0 1.0
 
 hull3 :: Qty units -> Qty units -> Qty units -> Range units
 hull3 a b c = unsafe (min a (min b c)) (max a (max b c))
