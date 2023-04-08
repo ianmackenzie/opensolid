@@ -5,7 +5,7 @@ import CoordinateSystem (Units)
 import OpenSolid
 import Range (Range)
 
-type role BoundingBox3d nominal
+type role BoundingBox3d phantom
 
 data BoundingBox3d (coordinateSystem :: CoordinateSystem)
   = BoundingBox3d

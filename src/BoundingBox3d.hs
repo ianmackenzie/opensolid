@@ -18,7 +18,7 @@ import Range (Range)
 import Range qualified
 import VectorBox3d (VectorBox3d (VectorBox3d))
 
-type role BoundingBox3d nominal
+type role BoundingBox3d phantom
 
 data BoundingBox3d (coordinateSystem :: CoordinateSystem)
   = BoundingBox3d

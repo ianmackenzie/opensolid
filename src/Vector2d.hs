@@ -35,7 +35,7 @@ import Qty qualified
 import Units (Meters, SquareMeters, Unitless)
 import Units qualified
 
-type role Vector2d nominal
+type role Vector2d phantom
 
 data Vector2d (coordinateSystem :: CoordinateSystem) = Vector2d
   { xComponent :: Qty (Units coordinateSystem)

@@ -46,7 +46,7 @@ import VectorBox2d qualified
 import VectorCurve2d (VectorCurve2d)
 import VectorCurve2d qualified
 
-type role Arc2d nominal
+type role Arc2d phantom
 
 data Arc2d (coordinateSystem :: CoordinateSystem) = Arc2d
   { centerPoint :: Point2d coordinateSystem

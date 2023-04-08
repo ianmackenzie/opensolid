@@ -6,7 +6,7 @@ where
 
 import OpenSolid
 
-type role Direction2d nominal
+type role Direction2d phantom
 
 data Direction2d (space :: Type)
 

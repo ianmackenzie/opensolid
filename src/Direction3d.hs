@@ -22,7 +22,7 @@ import Units (Radians, Unitless)
 import Vector3d (Vector3d (..))
 import Vector3d qualified
 
-type role Direction3d nominal
+type role Direction3d phantom
 
 data Direction3d (space :: Type) = Direction3d# {xComponent :: Float, yComponent :: Float, zComponent :: Float}
   deriving (Eq, Show)

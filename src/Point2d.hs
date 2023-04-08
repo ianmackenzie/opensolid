@@ -29,7 +29,7 @@ import Vector2d (Vector2d (..))
 import Vector2d qualified
 import VectorBox2d (VectorBox2d (..))
 
-type role Point2d nominal
+type role Point2d phantom
 
 data Point2d (coordinateSystem :: CoordinateSystem) = Point2d
   { xCoordinate :: Qty (Units coordinateSystem)

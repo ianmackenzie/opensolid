@@ -26,7 +26,7 @@ import Units (Radians)
 import Vector2d (Vector2d (..))
 import Vector2d qualified
 
-type role Direction2d nominal
+type role Direction2d phantom
 
 data Direction2d (space :: Type) = Direction2d# {xComponent :: Float, yComponent :: Float}
   deriving (Eq, Show)
