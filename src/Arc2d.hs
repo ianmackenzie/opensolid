@@ -1,13 +1,10 @@
 module Arc2d
-  ( with
+  ( from
+  , with
   , Constraint (..)
   , BuildError
   , Direction (Clockwise, Counterclockwise)
   , Size (Large, Small)
-  , fromCenterPointRadiusStartAngleEndAngle
-  , fromCenterPointStartPointSweptAngle
-  , fromStartPointEndPointRadiusDirectionSize
-  , fromStartPointEndPointSweptAngle
   )
 where
 
@@ -45,13 +42,11 @@ data BuildError
   = UnsupportedConstraints
   | EndpointsCoincident
   | EndpointsTooFarApart
-  | ZeroSweptAngle
 
 instance IsError BuildError where
   errorMessage UnsupportedConstraints = "Unsupported set of constraints for Arc2d construction"
   errorMessage EndpointsCoincident = "Given Arc2d endpoints are coincident"
   errorMessage EndpointsTooFarApart = "Given Arc2d endpoints are too far apart"
-  errorMessage ZeroSweptAngle = "Given Arc2d swept angle is zero (therefore radius is infinity)"
 
 with :: List (Constraint (space @ units)) -> Result BuildError (Curve2d (space @ units))
 with constraints = case List.sort constraints of
@@ -64,7 +59,7 @@ with constraints = case List.sort constraints of
   [StartPoint p1, EndPoint p2, Radius r, Direction d, Size s] ->
     fromStartPointEndPointRadiusDirectionSize p1 p2 r d s
   [StartPoint p1, EndPoint p2, SweptAngle theta] ->
-    fromStartPointEndPointSweptAngle p1 p2 theta
+    Ok (from p1 p2 theta)
   _ -> Error UnsupportedConstraints
 
 fromCenterPointRadiusStartAngleEndAngle :: Point2d (space @ units) -> Qty units -> Angle -> Angle -> Curve2d (space @ units)
@@ -106,17 +101,21 @@ fromStartPointEndPointRadiusDirectionSize givenStartPoint givenEndPoint givenRad
           (Counterclockwise, Large) -> Angle.fullTurn - shortAngle
   Ok (fromCenterPointStartPointSweptAngle computedCenterPoint givenStartPoint computedSweptAngle)
 
-fromStartPointEndPointSweptAngle :: Point2d (space @ units) -> Point2d (space @ units) -> Angle -> Result BuildError (Curve2d (space @ units))
-fromStartPointEndPointSweptAngle p1 p2 theta = do
-  (distance, direction) <- Vector2d.magnitudeAndDirection (p2 - p1) ?? Error EndpointsCoincident
-  let tanHalfAngle = Angle.tan (0.5 * theta)
-  denominator <- validate (/= Qty.zero) tanHalfAngle ?? Error ZeroSweptAngle
-  let offset = 0.5 * distance / denominator
-  let computedCenterPoint = Point2d.midpoint p1 p2 + offset * Direction2d.perpendicularTo direction
-  let computedStartAngle = Point2d.angleFrom computedCenterPoint p1
-  Ok $
-    Curve2d.Arc
-      computedCenterPoint
-      (Point2d.distanceFrom computedCenterPoint p1)
-      computedStartAngle
-      (computedStartAngle + theta)
+from :: Point2d (space @ units) -> Point2d (space @ units) -> Angle -> Curve2d (space @ units)
+from p1 p2 theta =
+  case Vector2d.magnitudeAndDirection (p2 - p1) of
+    Ok (distance, direction) ->
+      let tanHalfAngle = Angle.tan (0.5 * theta)
+       in if tanHalfAngle == Qty.zero
+            then Curve2d.Line p1 p2
+            else
+              let offset = 0.5 * distance / tanHalfAngle
+                  computedCenterPoint = Point2d.midpoint p1 p2 + offset * Direction2d.perpendicularTo direction
+                  computedStartAngle = Point2d.angleFrom computedCenterPoint p1
+               in Curve2d.Arc
+                    computedCenterPoint
+                    (Point2d.distanceFrom computedCenterPoint p1)
+                    computedStartAngle
+                    (computedStartAngle + theta)
+    Error Vector2d.IsZero ->
+      Curve2d.Line p1 p2

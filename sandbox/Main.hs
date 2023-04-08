@@ -113,20 +113,17 @@ testDirection2dAngleFrom = do
 
 testArc2dFrom :: Task Text ()
 testArc2dFrom = Try.do
-  let testArc sweptAngle =
-        Arc2d.with
-          [ Arc2d.StartPoint Point2d.origin
-          , Arc2d.EndPoint (Point2d.meters 1.0 1.0)
-          , Arc2d.SweptAngle sweptAngle
-          ]
-  arc1 <- testArc (Angle.degrees 90.0)
-  arc2 <- testArc (Angle.degrees -90.0)
-  arc3 <- testArc (Angle.degrees 180.0)
-  arc4 <- testArc (Angle.degrees -180.0)
+  let testArc = Arc2d.from Point2d.origin (Point2d.meters 1.0 1.0)
+  let arc1 = testArc (Angle.degrees 90.0)
+  let arc2 = testArc (Angle.degrees -90.0)
+  let arc3 = testArc (Angle.degrees 180.0)
+  let arc4 = testArc (Angle.degrees -180.0)
+  let line = testArc Qty.zero
   log "arc1 point" (Curve2d.pointOn arc1 0.5)
   log "arc2 point" (Curve2d.pointOn arc2 0.5)
   log "arc3 point" (Curve2d.pointOn arc3 0.5)
   log "arc4 point" (Curve2d.pointOn arc4 0.5)
+  log "line point" (Curve2d.pointOn line 0.5)
 
 testCurveOverlap1 :: Task Text ()
 testCurveOverlap1 = Try.do
