@@ -119,16 +119,6 @@ instance IsCurve2d (Curve2d (space @ units)) (space @ units) where
   bisectImpl = bisect
   boundingBoxImpl = boundingBox
 
-instance IsCurve2d (Point2d (space @ units)) (space @ units) where
-  startPointImpl point = point
-  endPointImpl point = point
-  pointOnImpl point _ = point
-  segmentBoundsImpl point _ = BoundingBox2d.constant point
-  derivativeImpl _ = VectorCurve2d.zero
-  reverseImpl = identity
-  bisectImpl point = (point, point)
-  boundingBoxImpl point = BoundingBox2d.constant point
-
 data PointCurveDifference (coordinateSystem :: CoordinateSystem) = PointCurveDifference (Point2d coordinateSystem) (Curve2d coordinateSystem)
 
 instance IsVectorCurve2d (PointCurveDifference (space @ units)) (space @ units) where
