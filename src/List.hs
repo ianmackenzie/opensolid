@@ -6,7 +6,7 @@ module List
   , map2
   , map3
   , map4
-  , zip
+  , zip2
   , zip3
   , zip4
   , filter
@@ -53,8 +53,8 @@ head [] = Error IsEmpty
 map :: (a -> b) -> List a -> List b
 map = Data.List.map
 
-zip :: List a -> List b -> List (a, b)
-zip = Data.List.zip
+zip2 :: List a -> List b -> List (a, b)
+zip2 = Data.List.zip
 
 zip3 :: List a -> List b -> List c -> List (a, b, c)
 zip3 = Data.List.zip3
