@@ -1,4 +1,4 @@
-module Qty (Qty(Qty)) where
+module Qty (Qty (Qty)) where
 
 import Data.Kind (Type)
 import Prelude qualified
