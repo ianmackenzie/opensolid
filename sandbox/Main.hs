@@ -123,11 +123,10 @@ testArc2dFrom = Try.do
   arc2 <- testArc (Angle.degrees -90.0)
   arc3 <- testArc (Angle.degrees 180.0)
   arc4 <- testArc (Angle.degrees -180.0)
-  log "arc1" arc1
-  log "arc2" arc2
-  log "arc3" arc3
-  log "arc4" arc4
-  log "arc1 point" (Arc2d.pointOn arc1 0.5)
+  log "arc1 point" (Curve2d.pointOn arc1 0.5)
+  log "arc2 point" (Curve2d.pointOn arc2 0.5)
+  log "arc3 point" (Curve2d.pointOn arc3 0.5)
+  log "arc4 point" (Curve2d.pointOn arc4 0.5)
 
 testCurveOverlap1 :: Task Text ()
 testCurveOverlap1 = Try.do
@@ -143,7 +142,7 @@ testCurveOverlap1 = Try.do
       , Arc2d.EndPoint (Point2d.meters 0.0 1.0)
       , Arc2d.SweptAngle (Angle.degrees 180.0)
       ]
-  log "Overlaps" (Curve2d.overlappingSegments (Curve2d arc1) (Curve2d arc2))
+  log "Overlaps" (Curve2d.overlappingSegments arc1 arc2)
  where
   ?tolerance = Length.meters 1e-9
 
@@ -163,7 +162,7 @@ testCurveOverlap2 = Try.do
       , Arc2d.StartAngle (Angle.degrees -45.0)
       , Arc2d.EndAngle (Angle.degrees 225.0)
       ]
-  log "Overlaps" (Curve2d.overlappingSegments (Curve2d arc1) (Curve2d arc2))
+  log "Overlaps" (Curve2d.overlappingSegments arc1 arc2)
  where
   ?tolerance = Length.meters 1e-9
 
