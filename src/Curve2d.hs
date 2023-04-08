@@ -1,5 +1,5 @@
 module Curve2d
-  ( Curve2d (Curve2d)
+  ( Curve2d (Curve2d, Line)
   , IsCurve2d (..)
   , startPoint
   , endPoint
@@ -21,6 +21,7 @@ import Curve1d.Root qualified as Root
 import List qualified
 import OpenSolid
 import Point2d (Point2d)
+import Point2d qualified
 import Qty qualified
 import Quadrature qualified
 import Range (Range (..))
@@ -43,6 +44,7 @@ class IsCurve2d curve (coordinateSystem :: CoordinateSystem) | curve -> coordina
   boundingBoxImpl :: curve -> BoundingBox2d coordinateSystem
 
 data Curve2d (coordinateSystem :: CoordinateSystem) where
+  Line :: Point2d (space @ units) -> Point2d (space @ units) -> Curve2d (space @ units)
   Curve2d :: IsCurve2d curve (space @ units) => curve -> Curve2d (space @ units)
 
 instance
@@ -54,29 +56,40 @@ instance
       (Curve2d (space' @ units2'))
 
 startPoint :: Curve2d (space @ units) -> Point2d (space @ units)
+startPoint (Line p1 _) = p1
 startPoint (Curve2d curve) = startPointImpl curve
 
 endPoint :: Curve2d (space @ units) -> Point2d (space @ units)
+endPoint (Line _ p2) = p2
 endPoint (Curve2d curve) = endPointImpl curve
 
 pointOn :: Curve2d (space @ units) -> Float -> Point2d (space @ units)
+pointOn (Line p1 p2) t = Point2d.interpolateFrom p1 p2 t
 pointOn (Curve2d curve) t = pointOnImpl curve t
 
 segmentBounds :: Curve2d (space @ units) -> Range Unitless -> BoundingBox2d (space @ units)
+segmentBounds (Line p1 p2) t =
+  BoundingBox2d.hull2
+    (Point2d.interpolateFrom p1 p2 t.minValue)
+    (Point2d.interpolateFrom p1 p2 t.maxValue)
 segmentBounds (Curve2d curve) t = segmentBoundsImpl curve t
 
 derivative :: Curve2d (space @ units) -> VectorCurve2d (space @ units)
+derivative (Line p1 p2) = VectorCurve2d.constant (p2 - p1)
 derivative (Curve2d curve) = derivativeImpl curve
 
 reverse :: Curve2d (space @ units) -> Curve2d (space @ units)
+reverse (Line p1 p2) = Line p2 p1
 reverse (Curve2d curve) = Curve2d (reverseImpl curve)
 
 bisect :: Curve2d (space @ units) -> (Curve2d (space @ units), Curve2d (space @ units))
+bisect (Line p1 p2) = let mid = Point2d.midpoint p1 p2 in (Line p1 mid, Line mid p2)
 bisect (Curve2d curve) =
   let (curve1, curve2) = bisectImpl curve
    in (Curve2d curve1, Curve2d curve2)
 
 boundingBox :: Curve2d (space @ units) -> BoundingBox2d (space @ units)
+boundingBox (Line p1 p2) = BoundingBox2d.hull2 p1 p2
 boundingBox (Curve2d curve) = boundingBoxImpl curve
 
 instance IsCurve2d (Curve2d (space @ units)) (space @ units) where

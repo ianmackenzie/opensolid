@@ -31,7 +31,6 @@ import CoordinateSystem (Units)
 import Curve1d qualified
 import Curve2d (IsCurve2d (..))
 import Direction2d qualified
-import Line2d qualified
 import List qualified
 import OpenSolid
 import Point2d (Point2d)
@@ -172,10 +171,9 @@ fromStartPointEndPointRadiusDirectionSize
   -> Size
   -> Result BuildError (Arc2d (space @ units))
 fromStartPointEndPointRadiusDirectionSize givenStartPoint givenEndPoint givenRadius direction size = do
-  let chord = Line2d.from givenStartPoint givenEndPoint
-  chordDirection <- Line2d.direction chord ?? Error EndpointsCoincident
+  chordDirection <- Direction2d.from givenStartPoint givenEndPoint ?? Error EndpointsCoincident
   let squaredRadius = Qty.squared (Units.generalize givenRadius)
-  let squaredHalfLength = Qty.squared (Units.generalize (0.5 * Line2d.length chord))
+  let squaredHalfLength = Qty.squared (Units.generalize (0.5 * Point2d.distanceFrom givenStartPoint givenEndPoint))
   squaredOffsetMagnitude <- validate (>= Qty.zero) (squaredRadius - squaredHalfLength) ?? Error EndpointsTooFarApart
   let offsetMagnitude = Units.specialize (Qty.sqrt squaredOffsetMagnitude)
   let offsetDirection = Direction2d.perpendicularTo chordDirection
@@ -185,7 +183,7 @@ fromStartPointEndPointRadiusDirectionSize givenStartPoint givenEndPoint givenRad
           (Clockwise, Small) -> -offsetMagnitude
           (Clockwise, Large) -> offsetMagnitude
           (Counterclockwise, Large) -> -offsetMagnitude
-  let computedCenterPoint = Line2d.midpoint chord + offsetDirection * offsetDistance
+  let computedCenterPoint = Point2d.midpoint givenStartPoint givenEndPoint + offsetDirection * offsetDistance
   let halfLength = Units.specialize (Qty.sqrt squaredHalfLength)
   let shortAngle = 2.0 * Angle.asin (halfLength / givenRadius)
   let computedSweptAngle =
