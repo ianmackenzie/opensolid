@@ -45,19 +45,19 @@ map function line = Line2d (function line.startPoint) (function line.endPoint)
 
 instance
   (space ~ space', units ~ units')
-  => Transformable2d (Line2d (space @ units)) space' units'
+  => Transformable2d (Line2d (space @ units)) (space' @ units')
   where
   transformBy transformation = map (transformBy transformation)
 
 instance
   (space ~ space', units ~ units')
-  => Scalable2d (Line2d (space @ units)) space' units'
+  => Scalable2d (Line2d (space @ units)) (space' @ units')
   where
   scaleBy scaling = map (scaleBy scaling)
 
 instance
   (space ~ space', units ~ units')
-  => Deformable2d (Line2d (space @ units)) space' units'
+  => Deformable2d (Line2d (space @ units)) (space' @ units')
   where
   deformBy deformation = map (deformBy deformation)
 
@@ -88,7 +88,7 @@ bisect line = let mid = midpoint line in (Line2d line.startPoint mid, Line2d mid
 boundingBox :: Line2d (space @ units) -> BoundingBox2d (space @ units)
 boundingBox line = BoundingBox2d.hull2 line.startPoint line.endPoint
 
-instance IsCurve2d (Line2d (space @ units)) space units where
+instance IsCurve2d (Line2d (space @ units)) (space @ units) where
   startPointImpl = startPoint
   endPointImpl = endPoint
   pointOnImpl = pointOn

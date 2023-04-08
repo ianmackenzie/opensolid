@@ -25,13 +25,13 @@ import Vector2d qualified
 import VectorBox2d (VectorBox2d (VectorBox2d))
 import VectorBox2d qualified
 
-class IsVectorCurve2d curve space units | curve -> space, curve -> units where
-  pointOn :: curve -> Float -> Vector2d (space @ units)
-  segmentBounds :: curve -> Range Unitless -> VectorBox2d (space @ units)
-  derivative :: curve -> VectorCurve2d (space @ units)
+class IsVectorCurve2d curve (coordinateSystem :: CoordinateSystem) | curve -> coordinateSystem where
+  pointOn :: curve -> Float -> Vector2d coordinateSystem
+  segmentBounds :: curve -> Range Unitless -> VectorBox2d coordinateSystem
+  derivative :: curve -> VectorCurve2d coordinateSystem
 
 data VectorCurve2d (coordinateSystem :: CoordinateSystem) where
-  VectorCurve2d :: forall curve space units. IsVectorCurve2d curve space units => curve -> VectorCurve2d (space @ units)
+  VectorCurve2d :: forall curve coordinateSystem. IsVectorCurve2d curve coordinateSystem => curve -> VectorCurve2d coordinateSystem
   Zero :: VectorCurve2d (space @ units)
   Constant :: Vector2d (space @ units) -> VectorCurve2d (space @ units)
   XY :: Curve1d units -> Curve1d units -> VectorCurve2d (space @ units)
@@ -50,7 +50,7 @@ instance
       (VectorCurve2d (space @ units1'))
       (VectorCurve2d (space' @ units2'))
 
-instance IsVectorCurve2d (VectorCurve2d (space @ units)) space units where
+instance IsVectorCurve2d (VectorCurve2d (space @ units)) (space @ units) where
   pointOn curve t =
     case curve of
       VectorCurve2d c -> pointOn c t

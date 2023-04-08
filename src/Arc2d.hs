@@ -99,7 +99,7 @@ bisect arc =
 boundingBox :: Arc2d (space @ units) -> BoundingBox2d (space @ units)
 boundingBox arc = segmentBounds arc (Range.from 0.0 1.0)
 
-instance IsCurve2d (Arc2d (space @ units)) space units where
+instance IsCurve2d (Arc2d (space @ units)) (space @ units) where
   startPointImpl = startPoint
   endPointImpl = endPoint
   pointOnImpl = pointOn

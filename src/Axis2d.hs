@@ -22,7 +22,7 @@ data Axis2d (coordinateSystem :: CoordinateSystem) = Axis2d
   }
   deriving (Eq, Show)
 
-instance (space ~ space', units ~ units') => Transformable2d (Axis2d (space @ units)) space' units' where
+instance (space ~ space', units ~ units') => Transformable2d (Axis2d (space @ units)) (space' @ units') where
   transformBy transformation axis =
     Axis2d
       (transformBy transformation (originPoint axis))

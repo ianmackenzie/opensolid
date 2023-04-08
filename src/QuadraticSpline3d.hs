@@ -16,7 +16,7 @@ data QuadraticSpline3d (coordinateSystem :: CoordinateSystem)
       (Point3d coordinateSystem)
       (Point3d coordinateSystem)
 
-instance IsCurve3d (QuadraticSpline3d (space @ units)) space units where
+instance IsCurve3d (QuadraticSpline3d (space @ units)) (space @ units) where
   startPoint (QuadraticSpline3d p1 _ _) = p1
 
   endPoint (QuadraticSpline3d _ _ p3) = p3

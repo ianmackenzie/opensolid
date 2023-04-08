@@ -94,7 +94,7 @@ bisect (QuadraticSpline2d p1 p2 p3) =
 boundingBox :: QuadraticSpline2d (space @ units) -> BoundingBox2d (space @ units)
 boundingBox (QuadraticSpline2d p1 p2 p3) = BoundingBox2d.hull3 p1 p2 p3
 
-instance IsCurve2d (QuadraticSpline2d (space @ units)) space units where
+instance IsCurve2d (QuadraticSpline2d (space @ units)) (space @ units) where
   startPointImpl = startPoint
   endPointImpl = endPoint
   pointOnImpl = pointOn

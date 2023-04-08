@@ -32,18 +32,18 @@ import VectorBox2d qualified
 import VectorCurve2d (IsVectorCurve2d, VectorCurve2d (VectorCurve2d))
 import VectorCurve2d qualified
 
-class IsCurve2d curve space units | curve -> space, curve -> units where
-  startPointImpl :: curve -> Point2d (space @ units)
-  endPointImpl :: curve -> Point2d (space @ units)
-  pointOnImpl :: curve -> Float -> Point2d (space @ units)
-  segmentBoundsImpl :: curve -> Range Unitless -> BoundingBox2d (space @ units)
-  derivativeImpl :: curve -> VectorCurve2d (space @ units)
+class IsCurve2d curve (coordinateSystem :: CoordinateSystem) | curve -> coordinateSystem where
+  startPointImpl :: curve -> Point2d coordinateSystem
+  endPointImpl :: curve -> Point2d coordinateSystem
+  pointOnImpl :: curve -> Float -> Point2d coordinateSystem
+  segmentBoundsImpl :: curve -> Range Unitless -> BoundingBox2d coordinateSystem
+  derivativeImpl :: curve -> VectorCurve2d coordinateSystem
   reverseImpl :: curve -> curve
   bisectImpl :: curve -> (curve, curve)
-  boundingBoxImpl :: curve -> BoundingBox2d (space @ units)
+  boundingBoxImpl :: curve -> BoundingBox2d coordinateSystem
 
 data Curve2d (coordinateSystem :: CoordinateSystem) where
-  Curve2d :: IsCurve2d curve space units => curve -> Curve2d (space @ units)
+  Curve2d :: IsCurve2d curve (space @ units) => curve -> Curve2d (space @ units)
 
 instance
   (units1 ~ units1', units2 ~ units2', space ~ space')
@@ -79,7 +79,7 @@ bisect (Curve2d curve) =
 boundingBox :: Curve2d (space @ units) -> BoundingBox2d (space @ units)
 boundingBox (Curve2d curve) = boundingBoxImpl curve
 
-instance IsCurve2d (Curve2d (space @ units)) space units where
+instance IsCurve2d (Curve2d (space @ units)) (space @ units) where
   startPointImpl = startPoint
   endPointImpl = endPoint
   pointOnImpl = pointOn
@@ -89,7 +89,7 @@ instance IsCurve2d (Curve2d (space @ units)) space units where
   bisectImpl = bisect
   boundingBoxImpl = boundingBox
 
-instance IsCurve2d (Point2d (space @ units)) space units where
+instance IsCurve2d (Point2d (space @ units)) (space @ units) where
   startPointImpl point = point
   endPointImpl point = point
   pointOnImpl point _ = point
@@ -101,7 +101,7 @@ instance IsCurve2d (Point2d (space @ units)) space units where
 
 data PointCurveDifference (coordinateSystem :: CoordinateSystem) = PointCurveDifference (Point2d coordinateSystem) (Curve2d coordinateSystem)
 
-instance IsVectorCurve2d (PointCurveDifference (space @ units)) space units where
+instance IsVectorCurve2d (PointCurveDifference (space @ units)) (space @ units) where
   pointOn (PointCurveDifference point curve) t = point - pointOn curve t
   segmentBounds (PointCurveDifference point curve) t = point - segmentBounds curve t
   derivative (PointCurveDifference _ curve) = -(derivative curve)
@@ -111,7 +111,7 @@ instance (units ~ units', space ~ space') => Subtraction (Point2d (space @ units
 
 data CurvePointDifference (coordinateSystem :: CoordinateSystem) = CurvePointDifference (Curve2d coordinateSystem) (Point2d coordinateSystem)
 
-instance IsVectorCurve2d (CurvePointDifference (space @ units)) space units where
+instance IsVectorCurve2d (CurvePointDifference (space @ units)) (space @ units) where
   pointOn (CurvePointDifference curve point) t = pointOn curve t - point
   segmentBounds (CurvePointDifference curve point) t = segmentBounds curve t - point
   derivative (CurvePointDifference curve _) = derivative curve

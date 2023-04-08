@@ -26,15 +26,15 @@ import Vector3d qualified
 import VectorBox3d (VectorBox3d (VectorBox3d))
 import VectorBox3d qualified
 
-class IsVectorCurve3d curve space units | curve -> space, curve -> units where
-  pointOn :: curve -> Float -> Vector3d (space @ units)
-  segmentBounds :: curve -> Range Unitless -> VectorBox3d (space @ units)
-  derivative :: curve -> VectorCurve3d (space @ units)
+class IsVectorCurve3d curve (coordinateSystem :: CoordinateSystem) | curve -> coordinateSystem where
+  pointOn :: curve -> Float -> Vector3d coordinateSystem
+  segmentBounds :: curve -> Range Unitless -> VectorBox3d coordinateSystem
+  derivative :: curve -> VectorCurve3d coordinateSystem
 
 data VectorCurve3d (coordinateSystem :: CoordinateSystem) where
-  VectorCurve3d :: IsVectorCurve3d curve space units => curve -> VectorCurve3d (space @ units)
+  VectorCurve3d :: IsVectorCurve3d curve (space @ units) => curve -> VectorCurve3d (space @ units)
 
-instance IsVectorCurve3d (VectorCurve3d (space @ units)) space units where
+instance IsVectorCurve3d (VectorCurve3d (space @ units)) (space @ units) where
   pointOn (VectorCurve3d curve) = pointOn curve
   segmentBounds (VectorCurve3d curve) = segmentBounds curve
   derivative (VectorCurve3d curve) = derivative curve
@@ -49,7 +49,7 @@ instance
 
 newtype Constant (coordinateSystem :: CoordinateSystem) = Constant (Vector3d coordinateSystem)
 
-instance IsVectorCurve3d (Constant (space @ units)) space units where
+instance IsVectorCurve3d (Constant (space @ units)) (space @ units) where
   pointOn (Constant value) _ =
     value
 
@@ -76,7 +76,7 @@ data XYZ (coordinateSystem :: CoordinateSystem)
       (Curve1d (Units coordinateSystem))
       (Curve1d (Units coordinateSystem))
 
-instance IsVectorCurve3d (XYZ (space @ units)) space units where
+instance IsVectorCurve3d (XYZ (space @ units)) (space @ units) where
   pointOn (XYZ x y z) t =
     Vector3d (Curve1d.pointOn x t) (Curve1d.pointOn y t) (Curve1d.pointOn z t)
 
@@ -91,7 +91,7 @@ xyz x y z = let impl :: XYZ (space @ units) = XYZ x y z in VectorCurve3d impl
 
 newtype Negated (coordinateSystem :: CoordinateSystem) = Negated (VectorCurve3d coordinateSystem)
 
-instance IsVectorCurve3d (Negated (space @ units)) space units where
+instance IsVectorCurve3d (Negated (space @ units)) (space @ units) where
   pointOn (Negated curve) t =
     negate (pointOn curve t)
 
@@ -107,7 +107,7 @@ instance Negation (VectorCurve3d (space @ units)) where
 
 data Sum (coordinateSystem :: CoordinateSystem) = Sum (VectorCurve3d coordinateSystem) (VectorCurve3d coordinateSystem)
 
-instance IsVectorCurve3d (Sum (space @ units)) space units where
+instance IsVectorCurve3d (Sum (space @ units)) (space @ units) where
   pointOn (Sum curve1 curve2) t =
     pointOn curve1 t + pointOn curve2 t
 
@@ -131,7 +131,7 @@ instance space ~ space' => Addition (Vector3d (space @ units)) (VectorCurve3d (s
 
 data Difference (coordinateSystem :: CoordinateSystem) = Difference (VectorCurve3d coordinateSystem) (VectorCurve3d coordinateSystem)
 
-instance IsVectorCurve3d (Difference (space @ units)) space units where
+instance IsVectorCurve3d (Difference (space @ units)) (space @ units) where
   pointOn (Difference curve1 curve2) t =
     pointOn curve1 t - pointOn curve2 t
 
@@ -157,7 +157,7 @@ data Product1d3d space units1 units2 = Product1d3d (Curve1d units1) (VectorCurve
 
 data Product3d1d space units1 units2 = Product3d1d (VectorCurve3d (space @ units1)) (Curve1d units2)
 
-instance Units.Product units1 units2 units3 => IsVectorCurve3d (Product3d1d space units1 units2) space units3 where
+instance Units.Product units1 units2 units3 => IsVectorCurve3d (Product3d1d space units1 units2) (space @ units3) where
   pointOn (Product3d1d vectorCurve3d curve1d) t =
     pointOn vectorCurve3d t * Curve1d.pointOn curve1d t
 
@@ -167,7 +167,7 @@ instance Units.Product units1 units2 units3 => IsVectorCurve3d (Product3d1d spac
   derivative (Product3d1d vectorCurve3d curve1d) =
     derivative vectorCurve3d * curve1d + vectorCurve3d * Curve1d.derivative curve1d
 
-instance Units.Product units1 units2 units3 => IsVectorCurve3d (Product1d3d space units1 units2) space units3 where
+instance Units.Product units1 units2 units3 => IsVectorCurve3d (Product1d3d space units1 units2) (space @ units3) where
   pointOn (Product1d3d curve1d vectorCurve3d) t =
     Curve1d.pointOn curve1d t * pointOn vectorCurve3d t
 
@@ -219,7 +219,7 @@ instance (Units.Product units1 units2 units3, space ~ space') => DotProduct (Vec
 
 data CrossProductOf space units1 units2 = CrossProductOf (VectorCurve3d (space @ units1)) (VectorCurve3d (space @ units2))
 
-instance Units.Product units1 units2 units3 => IsVectorCurve3d (CrossProductOf space units1 units2) space units3 where
+instance Units.Product units1 units2 units3 => IsVectorCurve3d (CrossProductOf space units1 units2) (space @ units3) where
   pointOn (CrossProductOf curve1 curve2) t =
     pointOn curve1 t >< pointOn curve2 t
 
@@ -243,7 +243,7 @@ instance (Units.Product units1 units2 units3, space ~ space') => CrossProduct (V
 
 data Quotient space units1 units2 = Quotient (VectorCurve3d (space @ units1)) (Curve1d units2)
 
-instance Units.Quotient units1 units2 units3 => IsVectorCurve3d (Quotient space units1 units2) space units3 where
+instance Units.Quotient units1 units2 units3 => IsVectorCurve3d (Quotient space units1 units2) (space @ units3) where
   pointOn (Quotient vectorCurve3d curve1d) t =
     pointOn vectorCurve3d t / Curve1d.pointOn curve1d t
 
