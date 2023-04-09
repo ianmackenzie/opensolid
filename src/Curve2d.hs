@@ -119,24 +119,32 @@ instance IsCurve2d (Curve2d (space @ units)) (space @ units) where
   bisectImpl = bisect
   boundingBoxImpl = boundingBox
 
-data PointCurveDifference (coordinateSystem :: CoordinateSystem) = PointCurveDifference (Point2d coordinateSystem) (Curve2d coordinateSystem)
+data PointCurveDifference (coordinateSystem :: CoordinateSystem)
+  = PointCurveDifference (Point2d coordinateSystem) (Curve2d coordinateSystem)
 
 instance IsVectorCurve2d (PointCurveDifference (space @ units)) (space @ units) where
   pointOn (PointCurveDifference point curve) t = point - pointOn curve t
   segmentBounds (PointCurveDifference point curve) t = point - segmentBounds curve t
   derivative (PointCurveDifference _ curve) = -(derivative curve)
 
-instance (units ~ units', space ~ space') => Subtraction (Point2d (space @ units)) (Curve2d (space' @ units')) (VectorCurve2d (space @ units)) where
+instance
+  (units ~ units', space ~ space')
+  => Subtraction (Point2d (space @ units)) (Curve2d (space' @ units')) (VectorCurve2d (space @ units))
+  where
   point - curve = VectorCurve2d (PointCurveDifference point curve)
 
-data CurvePointDifference (coordinateSystem :: CoordinateSystem) = CurvePointDifference (Curve2d coordinateSystem) (Point2d coordinateSystem)
+data CurvePointDifference (coordinateSystem :: CoordinateSystem)
+  = CurvePointDifference (Curve2d coordinateSystem) (Point2d coordinateSystem)
 
 instance IsVectorCurve2d (CurvePointDifference (space @ units)) (space @ units) where
   pointOn (CurvePointDifference curve point) t = pointOn curve t - point
   segmentBounds (CurvePointDifference curve point) t = segmentBounds curve t - point
   derivative (CurvePointDifference curve _) = derivative curve
 
-instance (units ~ units', space ~ space') => Subtraction (Curve2d (space @ units)) (Point2d (space' @ units')) (VectorCurve2d (space @ units)) where
+instance
+  (units ~ units', space ~ space')
+  => Subtraction (Curve2d (space @ units)) (Point2d (space' @ units')) (VectorCurve2d (space @ units))
+  where
   curve - point = VectorCurve2d (CurvePointDifference curve point)
 
 data IsCoincidentWithPoint = IsCoincidentWithPoint deriving (Eq, Show)
