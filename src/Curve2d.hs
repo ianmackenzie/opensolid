@@ -154,7 +154,7 @@ instance IsError IsCoincidentWithPoint where
 
 passesThrough :: Tolerance units => Point2d (space @ units) -> Curve2d (space @ units) -> Bool
 passesThrough point curve =
-  Range.any (nearby point curve) (Range.from 0.0 1.0) |> Result.withDefault False
+  Range.any (nearby point curve) Range.unit |> Result.withDefault False
 
 nearby :: Tolerance units => Point2d (space @ units) -> Curve2d (space @ units) -> Range Unitless -> Result Indeterminate Bool
 nearby point curve domain
