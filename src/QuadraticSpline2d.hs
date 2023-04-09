@@ -1,22 +1,13 @@
 module QuadraticSpline2d
   ( QuadraticSpline2d
-  , startPoint
-  , endPoint
-  , pointOn
-  , segmentBounds
-  , reverse
-  , bisect
-  , boundingBox
-  , derivative
   , fromControlPoints
-  , controlPoints
   )
 where
 
 import BoundingBox2d (BoundingBox2d (BoundingBox2d))
 import BoundingBox2d qualified
 import Curve1d qualified
-import Curve2d (IsCurve2d (..))
+import Curve2d (Curve2d (Curve2d), IsCurve2d (..))
 import OpenSolid
 import Point2d (Point2d (Point2d))
 import Point2d qualified
@@ -108,13 +99,5 @@ fromControlPoints
   :: Point2d (space @ units)
   -> Point2d (space @ units)
   -> Point2d (space @ units)
-  -> QuadraticSpline2d (space @ units)
-fromControlPoints = QuadraticSpline2d
-
-controlPoints
-  :: QuadraticSpline2d (space @ units)
-  -> ( Point2d (space @ units)
-     , Point2d (space @ units)
-     , Point2d (space @ units)
-     )
-controlPoints (QuadraticSpline2d p1 p2 p3) = (p1, p2, p3)
+  -> Curve2d (space @ units)
+fromControlPoints p1 p2 p3 = Curve2d (QuadraticSpline2d p1 p2 p3)

@@ -5,7 +5,6 @@ import Arc2d qualified
 import Area qualified
 import Axis2d qualified
 import Curve1d qualified
-import Curve2d (Curve2d (..))
 import Curve2d qualified
 import Debug qualified
 import Direction2d qualified
@@ -89,7 +88,7 @@ testCurveFind = Try.do
   let p1 = Point2d.meters 0.0 0.0
   let p2 = Point2d.meters 1.0 2.0
   let p3 = Point2d.meters 2.0 0.0
-  let testSpline = Curve2d (QuadraticSpline2d.fromControlPoints p1 p2 p3)
+  let testSpline = QuadraticSpline2d.fromControlPoints p1 p2 p3
   [startParameterValue] <- Curve2d.parameterValues Point2d.origin testSpline
   [endParameterValue] <- Curve2d.parameterValues (Point2d.meters 2.0 0.0) testSpline
   [midParameterValue] <- Curve2d.parameterValues (Point2d.meters 1.0 1.0) testSpline
