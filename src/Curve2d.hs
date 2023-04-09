@@ -167,10 +167,17 @@ nearby point curve domain
 parameterValues :: Tolerance units => Point2d (space @ units) -> Curve2d (space @ units) -> Result IsCoincidentWithPoint (List Float)
 parameterValues point curve = do
   let squaredDistanceFromCurve = VectorCurve2d.squaredMagnitude (Units.generalize (point - curve))
-  roots <- Curve1d.roots squaredDistanceFromCurve ?? Error IsCoincidentWithPoint
-  Ok (List.map Root.value roots)
+  let squaredTolerance = Qty.squared (Units.generalize ?tolerance)
+  roots <- let ?tolerance = squaredTolerance in Curve1d.roots squaredDistanceFromCurve ?? Error IsCoincidentWithPoint
+  Ok [snapToEndpoint curve (startPoint curve) (endPoint curve) root.value | root <- roots]
+
+snapToEndpoint :: Tolerance units => Curve2d (space @ units) -> Point2d (space @ units) -> Point2d (space @ units) -> Float -> Float
+snapToEndpoint curve p0 p1 t
+  | p ~= p0 = 0.0
+  | p ~= p1 = 1.0
+  | otherwise = t
  where
-  ?tolerance = Qty.squared (Units.generalize ?tolerance)
+  p = pointOn curve t
 
 overlappingSegments :: Tolerance units => Curve2d (space @ units) -> Curve2d (space @ units) -> List (Range Unitless)
 overlappingSegments curve1 curve2 =
