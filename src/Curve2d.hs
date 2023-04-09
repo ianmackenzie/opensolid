@@ -179,23 +179,33 @@ snapToEndpoint curve p0 p1 t
  where
   p = pointOn curve t
 
-overlappingSegments :: Tolerance units => Curve2d (space @ units) -> Curve2d (space @ units) -> List (Range Unitless)
+overlappingSegments :: Tolerance units => Curve2d (space @ units) -> Curve2d (space @ units) -> List (Range Unitless, Range Unitless)
 overlappingSegments curve1 curve2 =
   let segmentEndpoints =
         List.sortAndDeduplicate $
           List.concat
-            [ [0.0 | passesThrough (startPoint curve1) curve2]
-            , [1.0 | passesThrough (endPoint curve1) curve2]
-            , parameterValues (startPoint curve2) curve1 |> Result.withDefault []
-            , parameterValues (endPoint curve2) curve1 |> Result.withDefault []
+            [ [(0.0, v) | v <- innerParameterValues (startPoint curve1) curve2]
+            , [(1.0, v) | v <- innerParameterValues (endPoint curve1) curve2]
+            , [(u, 0.0) | u <- innerParameterValues (startPoint curve2) curve1]
+            , [(u, 1.0) | u <- innerParameterValues (endPoint curve2) curve1]
             ]
-      candidateDomains = List.successive Range.from segmentEndpoints
+      candidateDomains = List.successive candidateDomain segmentEndpoints
    in List.filter (overlappingSegment curve1 curve2) candidateDomains
+
+innerParameterValues :: Tolerance units => Point2d (space @ units) -> Curve2d (space @ units) -> List Float
+innerParameterValues point curve =
+  parameterValues point curve
+    |> Result.withDefault []
+    |> List.filter (\t -> t /= 0.0 && t /= 1.0)
+
+candidateDomain :: (Float, Float) -> (Float, Float) -> (Range Unitless, Range Unitless)
+candidateDomain (u1, v1) (u2, v2) =
+  (Range.from u1 u2, Range.from v1 v2)
 
 samplingPoints :: Curve2d (space @ units) -> Range Unitless -> List (Point2d (space @ units))
 samplingPoints curve domain =
   [pointOn curve (Range.interpolate domain t) | t <- Quadrature.points]
 
-overlappingSegment :: Tolerance units => Curve2d (space @ units) -> Curve2d (space @ units) -> Range Unitless -> Bool
-overlappingSegment curve1 curve2 domain1 =
+overlappingSegment :: Tolerance units => Curve2d (space @ units) -> Curve2d (space @ units) -> (Range Unitless, Range Unitless) -> Bool
+overlappingSegment curve1 curve2 (domain1, _) =
   List.all [passesThrough point1 curve2 | point1 <- samplingPoints curve1 domain1]
