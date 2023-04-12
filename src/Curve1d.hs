@@ -343,23 +343,16 @@ resolve domain curve
  where
   curveBounds = segmentBounds curve domain
 
-minDerivativeResolution :: Float
-minDerivativeResolution = 0.5
+resolved :: Range units -> Bool
+resolved range = Range.resolution range >= 0.5
 
 resolveDerivative :: Range Unitless -> Curve1d units -> Int -> Result Indeterminate Region
 resolveDerivative domain curveDerivative derivativeOrder
-  | derivativeResolution >= minDerivativeResolution = Ok (Region domain derivativeOrder Positive)
-  | derivativeResolution <= -minDerivativeResolution = Ok (Region domain derivativeOrder Negative)
-  | derivativeOrder <= maxRootOrder = resolveDerivative domain (derivative curveDerivative) (derivativeOrder + 1)
+  | resolved derivativeBounds =
+      Ok (Region domain derivativeOrder (Qty.sign derivativeBounds.minValue))
+  | derivativeOrder <= maxRootOrder =
+      resolveDerivative domain (derivative curveDerivative) (derivativeOrder + 1)
   | otherwise = Error Indeterminate
- where
-  derivativeResolution = resolution domain curveDerivative
-
-resolution :: Range Unitless -> Curve1d units -> Float
-resolution domain curveDerivative
-  | derivativeBounds.minValue > Qty.zero = derivativeBounds.minValue / derivativeBounds.maxValue
-  | derivativeBounds.maxValue < Qty.zero = negate (derivativeBounds.maxValue / derivativeBounds.minValue)
-  | otherwise = 0.0
  where
   derivativeBounds = segmentBounds curveDerivative domain
 
@@ -386,7 +379,8 @@ solveEndpoint curve endpointX
 resolveEndpoint :: Root -> Curve1d units -> Float -> Float -> (List Root, Float)
 resolveEndpoint root curveDerivative endpointX innerX =
   let domain = Range.from endpointX innerX
-   in if Qty.abs (resolution domain curveDerivative) >= minDerivativeResolution
+      derivativeBounds = segmentBounds curveDerivative domain
+   in if resolved derivativeBounds
         then ([root], innerX)
         else
           let midX = Qty.midpoint endpointX innerX
