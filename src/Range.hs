@@ -24,6 +24,7 @@ module Range
   , interpolationParameter
   , any
   , all
+  , resolution
   )
 where
 
@@ -274,6 +275,12 @@ interpolationParameter (Range low high) value
   | low < high = (value - low) / (high - low)
   | value < low = -Qty.infinity
   | value > high = Qty.infinity
+  | otherwise = 0.0
+
+resolution :: Range units -> Float
+resolution (Range low high)
+  | low > Qty.zero = low / high
+  | high < Qty.zero = high / low
   | otherwise = 0.0
 
 any :: (Range units -> Result Indeterminate Bool) -> Range units -> Result Indeterminate Bool
