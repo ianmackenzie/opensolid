@@ -1,9 +1,9 @@
 module Sign (Sign (..)) where
 
 import Arithmetic
-import Prelude (Eq, Show)
+import Prelude (Eq, Ord, Show)
 
-data Sign = Positive | Negative deriving (Eq, Show)
+data Sign = Negative | Positive deriving (Eq, Ord, Show)
 
 instance Negation Sign where
   negate Positive = Negative
