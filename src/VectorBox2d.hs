@@ -92,6 +92,15 @@ instance (Units.Product units1 units2 units3, space ~ space') => DotProduct (Vec
 instance (Units.Product units1 units2 units3, space ~ space') => DotProduct (VectorBox2d (space @ units1)) (VectorBox2d (space' @ units2)) (Range units3) where
   VectorBox2d x1 y1 <> VectorBox2d x2 y2 = x1 * x2 + y1 * y2
 
+instance (Units.Product units1 units2 units3, space ~ space') => CrossProduct (Vector2d (space @ units1)) (VectorBox2d (space' @ units2)) (Range units3) where
+  Vector2d x1 y1 >< VectorBox2d x2 y2 = x1 * y2 - y1 * x2
+
+instance (Units.Product units1 units2 units3, space ~ space') => CrossProduct (VectorBox2d (space @ units1)) (Vector2d (space' @ units2)) (Range units3) where
+  VectorBox2d x1 y1 >< Vector2d x2 y2 = x1 * y2 - y1 * x2
+
+instance (Units.Product units1 units2 units3, space ~ space') => CrossProduct (VectorBox2d (space @ units1)) (VectorBox2d (space' @ units2)) (Range units3) where
+  VectorBox2d x1 y1 >< VectorBox2d x2 y2 = x1 * y2 - y1 * x2
+
 constant :: Vector2d (space @ units) -> VectorBox2d (space @ units)
 constant (Vector2d x y) = VectorBox2d (Range.constant x) (Range.constant y)
 
