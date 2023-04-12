@@ -6,6 +6,8 @@ module VectorBox3d
   , hull4
   , squaredMagnitude
   , magnitude
+  , maxMagnitude
+  , maxSquaredMagnitude
   , normalize
   , interpolate
   )
@@ -186,6 +188,20 @@ squaredMagnitude (VectorBox3d x y z) = Range.squared x + Range.squared y + Range
 
 magnitude :: VectorBox3d (space @ units) -> Range units
 magnitude (VectorBox3d x y z) = Range.hypot3 x y z
+
+maxMagnitude :: VectorBox3d (space @ units) -> Qty units
+maxMagnitude (VectorBox3d x y z) =
+  let xMagnitude = max (Qty.abs x.minValue) (Qty.abs x.maxValue)
+      yMagnitude = max (Qty.abs y.minValue) (Qty.abs y.maxValue)
+      zMagnitude = max (Qty.abs z.minValue) (Qty.abs z.maxValue)
+   in Qty.hypot3 xMagnitude yMagnitude zMagnitude
+
+maxSquaredMagnitude :: Units.Squared units1 units2 => VectorBox3d (space @ units1) -> Qty units2
+maxSquaredMagnitude (VectorBox3d x y z) =
+  let xMagnitude = max (Qty.abs x.minValue) (Qty.abs x.maxValue)
+      yMagnitude = max (Qty.abs y.minValue) (Qty.abs y.maxValue)
+      zMagnitude = max (Qty.abs z.minValue) (Qty.abs z.maxValue)
+   in Qty.squared xMagnitude + Qty.squared yMagnitude + Qty.squared zMagnitude
 
 normalize :: VectorBox3d (space @ units) -> VectorBox3d (space @ Unitless)
 normalize vectorBox =

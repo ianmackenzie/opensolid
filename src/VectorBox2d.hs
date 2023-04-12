@@ -7,6 +7,8 @@ module VectorBox2d
   , polar
   , squaredMagnitude
   , magnitude
+  , maxMagnitude
+  , maxSquaredMagnitude
   , normalize
   , interpolate
   )
@@ -129,6 +131,18 @@ squaredMagnitude (VectorBox2d x y) = Range.squared x + Range.squared y
 
 magnitude :: VectorBox2d (space @ units) -> Range units
 magnitude (VectorBox2d x y) = Range.hypot2 x y
+
+maxMagnitude :: VectorBox2d (space @ units) -> Qty units
+maxMagnitude (VectorBox2d x y) =
+  let xMagnitude = max (Qty.abs x.minValue) (Qty.abs x.maxValue)
+      yMagnitude = max (Qty.abs y.minValue) (Qty.abs y.maxValue)
+   in Qty.hypot2 xMagnitude yMagnitude
+
+maxSquaredMagnitude :: Units.Squared units1 units2 => VectorBox2d (space @ units1) -> Qty units2
+maxSquaredMagnitude (VectorBox2d x y) =
+  let xMagnitude = max (Qty.abs x.minValue) (Qty.abs x.maxValue)
+      yMagnitude = max (Qty.abs y.minValue) (Qty.abs y.maxValue)
+   in Qty.squared xMagnitude + Qty.squared yMagnitude
 
 normalize :: VectorBox2d (space @ units) -> VectorBox2d (space @ Unitless)
 normalize vectorBox =
