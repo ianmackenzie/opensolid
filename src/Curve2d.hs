@@ -204,7 +204,7 @@ candidateDomain (u1, v1) (u2, v2) =
 
 samplingPoints :: Curve2d (space @ units) -> Range Unitless -> List (Point2d (space @ units))
 samplingPoints curve domain =
-  [pointOn curve (Range.interpolate domain t) | t <- Quadrature.points]
+  [pointOn curve (Range.interpolate domain t) | t <- Quadrature.parameterValues]
 
 overlappingSegment :: Tolerance units => Curve2d (space @ units) -> Curve2d (space @ units) -> (Range Unitless, Range Unitless) -> Bool
 overlappingSegment curve1 curve2 (domain1, _) =
