@@ -40,6 +40,9 @@ instance (units ~ units', space ~ space') => Subtraction (Point3d (space @ units
 instance (units ~ units', space ~ space') => Subtraction (BoundingBox3d (space @ units)) (Point3d (space' @ units')) (VectorBox3d (space @ units)) where
   BoundingBox3d bx by bz - Point3d px py pz = VectorBox3d (bx - px) (by - py) (bz - pz)
 
+instance (units ~ units', space ~ space') => Subtraction (BoundingBox3d (space @ units)) (BoundingBox3d (space' @ units')) (VectorBox3d (space @ units)) where
+  BoundingBox3d x1 y1 z1 - BoundingBox3d x2 y2 z2 = VectorBox3d (x1 - x2) (y1 - y2) (z1 - z2)
+
 constant :: Point3d (space @ units) -> BoundingBox3d (space @ units)
 constant (Point3d x y z) =
   BoundingBox3d (Range.constant x) (Range.constant y) (Range.constant z)

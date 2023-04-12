@@ -17,6 +17,7 @@ import Point2d (Point2d (..))
 import Range (Range)
 import Range qualified
 import VectorBox2d (VectorBox2d (VectorBox2d))
+import VectorBox2d qualified
 
 type role BoundingBox2d phantom
 
@@ -38,6 +39,9 @@ instance (units ~ units', space ~ space') => Subtraction (Point2d (space @ units
 
 instance (units ~ units', space ~ space') => Subtraction (BoundingBox2d (space @ units)) (Point2d (space' @ units')) (VectorBox2d (space @ units)) where
   BoundingBox2d bx by - Point2d px py = VectorBox2d (bx - px) (by - py)
+
+instance (units ~ units', space ~ space') => Subtraction (BoundingBox2d (space @ units)) (BoundingBox2d (space' @ units')) (VectorBox2d (space @ units)) where
+  BoundingBox2d x1 y1 - BoundingBox2d x2 y2 = VectorBox2d (x1 - x2) (y1 - y2)
 
 constant :: Point2d (space @ units) -> BoundingBox2d (space @ units)
 constant (Point2d x y) =
