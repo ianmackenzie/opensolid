@@ -63,14 +63,6 @@ instance (units ~ units', space ~ space') => Subtraction (VectorBox3d (space @ u
 instance (units ~ units', space ~ space') => Subtraction (Vector3d (space @ units)) (VectorBox3d (space' @ units')) (VectorBox3d (space @ units)) where
   Vector3d x1 y1 z1 - VectorBox3d x2 y2 z2 = VectorBox3d (x1 - x2) (y1 - y2) (z1 - z2)
 
-instance Multiplication Sign (VectorBox3d (space @ units)) (VectorBox3d (space @ units)) where
-  Positive * vectorBox = vectorBox
-  Negative * vectorBox = -vectorBox
-
-instance Multiplication (VectorBox3d (space @ units)) Sign (VectorBox3d (space @ units)) where
-  vectorBox * Positive = vectorBox
-  vectorBox * Negative = -vectorBox
-
 instance Units.Product units1 units2 units3 => Multiplication (Qty units1) (VectorBox3d (space @ units2)) (VectorBox3d (space @ units3)) where
   value * VectorBox3d x y z = VectorBox3d (value * x) (value * y) (value * z)
 

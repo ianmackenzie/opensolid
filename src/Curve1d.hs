@@ -158,14 +158,6 @@ instance units ~ units' => Subtraction (Curve1d units) (Qty units') (Curve1d uni
 instance units ~ units' => Subtraction (Qty units) (Curve1d units') (Curve1d units) where
   value - curve = constant value - curve
 
-instance Multiplication (Curve1d units) Sign (Curve1d units) where
-  curve * Positive = curve
-  curve * Negative = -curve
-
-instance Multiplication Sign (Curve1d units) (Curve1d units) where
-  Positive * curve = curve
-  Negative * curve = -curve
-
 instance Units.Product units1 units2 units3 => Multiplication (Curve1d units1) (Curve1d units2) (Curve1d units3) where
   Zero * _ = Zero
   _ * Zero = Zero

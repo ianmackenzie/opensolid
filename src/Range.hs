@@ -72,14 +72,6 @@ instance units ~ units' => Subtraction (Range units) (Qty units') (Range units) 
 instance units ~ units' => Subtraction (Qty units) (Range units') (Range units) where
   value - Range low high = unsafe (value - high) (value - low)
 
-instance Multiplication Sign (Range units) (Range units) where
-  Positive * range = range
-  Negative * range = -range
-
-instance Multiplication (Range units) Sign (Range units) where
-  range * Positive = range
-  range * Negative = -range
-
 instance Units.Product units1 units2 units3 => Multiplication (Qty units1) (Range units2) (Range units3) where
   value * Range low high = from (value * low) (value * high)
 

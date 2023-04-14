@@ -123,14 +123,6 @@ instance space ~ space' => Subtraction (VectorCurve2d (space @ units)) (Vector2d
 instance space ~ space' => Subtraction (Vector2d (space @ units)) (VectorCurve2d (space' @ units)) (VectorCurve2d (space @ units)) where
   vector - curve = constant vector + curve
 
-instance Multiplication Sign (VectorCurve2d (space @ units)) (VectorCurve2d (space @ units)) where
-  Positive * curve = curve
-  Negative * curve = -curve
-
-instance Multiplication (VectorCurve2d (space @ units)) Sign (VectorCurve2d (space @ units)) where
-  curve * Positive = curve
-  curve * Negative = -curve
-
 instance Units.Product units1 units2 units3 => Multiplication (Curve1d units1) (VectorCurve2d (space @ units2)) (VectorCurve2d (space @ units3)) where
   -- TODO add special cases
   c1 * c2 = Product1d2d c1 c2

@@ -153,14 +153,6 @@ instance space ~ space' => Subtraction (Vector3d (space @ units)) (VectorCurve3d
   vector - curve =
     constant vector - curve
 
-instance Multiplication Sign (VectorCurve3d (space @ units)) (VectorCurve3d (space @ units)) where
-  Positive * curve = curve
-  Negative * curve = -curve
-
-instance Multiplication (VectorCurve3d (space @ units)) Sign (VectorCurve3d (space @ units)) where
-  curve * Positive = curve
-  curve * Negative = -curve
-
 data Product1d3d space units1 units2 = Product1d3d (Curve1d units1) (VectorCurve3d (space @ units2))
 
 data Product3d1d space units1 units2 = Product3d1d (VectorCurve3d (space @ units1)) (Curve1d units2)

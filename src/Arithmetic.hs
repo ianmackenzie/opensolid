@@ -16,12 +16,11 @@ where
 import Basics
 import {-# SOURCE #-} Float (Float)
 import {-# SOURCE #-} Qty (Qty (Qty))
-import {-# SOURCE #-} Sign (Sign)
 import Units (Unitless)
 import Units qualified
 import Prelude qualified
 
-class (Multiplication Sign a a, Multiplication a Sign a) => Negation a where
+class Negation a where
   negate :: a -> a
 
 class Addition a b c | a b -> c where

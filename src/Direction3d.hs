@@ -51,14 +51,6 @@ instance space ~ space' => DotProduct (Vector3d (space @ units)) (Direction3d sp
 instance space ~ space' => DotProduct (Direction3d space) (Vector3d (space' @ units)) (Qty units) where
   Direction3d dx dy dz <> Vector3d vx vy vz = dx * vx + dy * vy + dz * vz
 
-instance Multiplication Sign (Direction3d space) (Direction3d space) where
-  Positive * direction = direction
-  Negative * direction = -direction
-
-instance Multiplication (Direction3d space) Sign (Direction3d space) where
-  direction * Positive = direction
-  direction * Negative = -direction
-
 instance Multiplication (Qty units) (Direction3d space) (Vector3d (space @ units)) where
   scale * Direction3d dx dy dz = Vector3d (scale * dx) (scale * dy) (scale * dz)
 
