@@ -64,6 +64,14 @@ instance space ~ space' => CrossProduct (Vector2d (space @ units)) (Direction2d 
 instance space ~ space' => CrossProduct (Direction2d space) (Vector2d (space' @ units)) (Qty units) where
   Direction2d dx dy >< Vector2d vx vy = dx * vy - dy * vx
 
+instance Multiplication Sign (Direction2d space) (Direction2d space) where
+  Positive * direction = direction
+  Negative * direction = -direction
+
+instance Multiplication (Direction2d space) Sign (Direction2d space) where
+  direction * Positive = direction
+  direction * Negative = -direction
+
 instance Multiplication (Qty units) (Direction2d space) (Vector2d (space @ units)) where
   scale * Direction2d dx dy = Vector2d (scale * dx) (scale * dy)
 
