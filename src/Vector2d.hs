@@ -66,6 +66,14 @@ instance (space ~ space', units ~ units') => Addition (Vector2d (space @ units))
 instance (space ~ space', units ~ units') => Subtraction (Vector2d (space @ units)) (Vector2d (space' @ units')) (Vector2d (space @ units)) where
   Vector2d x1 y1 - Vector2d x2 y2 = Vector2d (x1 - x2) (y1 - y2)
 
+instance Multiplication Sign (Vector2d (space @ units)) (Vector2d (space @ units)) where
+  Positive * vector = vector
+  Negative * vector = -vector
+
+instance Multiplication (Vector2d (space @ units)) Sign (Vector2d (space @ units)) where
+  vector * Positive = vector
+  vector * Negative = -vector
+
 instance Units.Product units1 units2 units3 => Multiplication (Qty units1) (Vector2d (space @ units2)) (Vector2d (space @ units3)) where
   scale * Vector2d vx vy = Vector2d (scale * vx) (scale * vy)
 
