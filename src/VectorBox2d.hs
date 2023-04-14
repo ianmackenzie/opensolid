@@ -27,10 +27,10 @@ import Vector2d qualified
 
 type role VectorBox2d phantom
 
-data VectorBox2d (coordinateSystem :: CoordinateSystem)
-  = VectorBox2d
-      (Range (Units coordinateSystem))
-      (Range (Units coordinateSystem))
+data VectorBox2d (coordinateSystem :: CoordinateSystem) = VectorBox2d
+  { xComponent :: Range (Units coordinateSystem)
+  , yComponent :: Range (Units coordinateSystem)
+  }
   deriving (Show)
 
 instance

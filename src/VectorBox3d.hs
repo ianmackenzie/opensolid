@@ -24,11 +24,11 @@ import Units qualified
 import Vector3d (Vector3d (..))
 import Vector3d qualified
 
-data VectorBox3d (coordinateSystem :: CoordinateSystem)
-  = VectorBox3d
-      (Range (Units coordinateSystem))
-      (Range (Units coordinateSystem))
-      (Range (Units coordinateSystem))
+data VectorBox3d (coordinateSystem :: CoordinateSystem) = VectorBox3d
+  { xComponent :: Range (Units coordinateSystem)
+  , yComponent :: Range (Units coordinateSystem)
+  , zComponent :: Range (Units coordinateSystem)
+  }
   deriving (Show)
 
 instance
