@@ -17,7 +17,6 @@ import Point2d (Point2d (..))
 import Range (Range)
 import Range qualified
 import VectorBox2d (VectorBox2d (VectorBox2d))
-import VectorBox2d qualified
 
 type role BoundingBox2d phantom
 
