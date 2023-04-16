@@ -20,6 +20,8 @@ module Range
   , overlaps
   , sin
   , cos
+  , search
+  , search2
   , interpolate
   , interpolationParameter
   , any
@@ -323,3 +325,46 @@ all assess range =
                         Ok True -> Error Indeterminate
                         Ok False -> Ok False
                         Error Indeterminate -> Error Indeterminate
+
+search :: (Range units -> Bool) -> Range units -> List (Qty units)
+search predicate range = searchImpl predicate range []
+
+searchImpl :: (Range units -> Bool) -> Range units -> List (Qty units) -> List (Qty units)
+searchImpl predicate range accumulated =
+  case predicate range of
+    False -> accumulated
+    True
+      | isAtomic range -> range.minValue : accumulated
+      | otherwise ->
+          let (left, right) = bisect range
+           in accumulated
+                |> searchImpl predicate right
+                |> searchImpl predicate left
+
+search2 :: (Range units1 -> Range units2 -> Bool) -> Range units1 -> Range units2 -> List (Qty units1, Qty units2)
+search2 predicate u v = search2Impl predicate u v []
+
+search2Impl :: (Range units1 -> Range units2 -> Bool) -> Range units1 -> Range units2 -> List (Qty units1, Qty units2) -> List (Qty units1, Qty units2)
+search2Impl predicate u v accumulated =
+  case predicate u v of
+    False -> accumulated
+    True
+      | isAtomic u && isAtomic v -> (u.minValue, v.minValue) : accumulated
+      | isAtomic u ->
+          let (left, right) = bisect v
+           in accumulated
+                |> search2Impl predicate u right
+                |> search2Impl predicate u left
+      | isAtomic v ->
+          let (left, right) = bisect u
+           in accumulated
+                |> search2Impl predicate right v
+                |> search2Impl predicate left v
+      | otherwise ->
+          let (leftU, rightU) = bisect u
+              (leftV, rightV) = bisect v
+           in accumulated
+                |> search2Impl predicate rightU rightV
+                |> search2Impl predicate rightU leftV
+                |> search2Impl predicate leftU rightV
+                |> search2Impl predicate leftU leftV
