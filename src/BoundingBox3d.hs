@@ -34,6 +34,12 @@ instance Bounds (BoundingBox3d (space @ units)) where
   overlaps (BoundingBox3d x1 y1 z1) (BoundingBox3d x2 y2 z2) =
     Range.overlaps x1 x2 && Range.overlaps y1 y2 && Range.overlaps z1 z2
 
+  intersection (BoundingBox3d x1 y1 z1) (BoundingBox3d x2 y2 z2) = do
+    x <- intersection x1 x2
+    y <- intersection y1 y2
+    z <- intersection z1 z2
+    Just (BoundingBox3d x y z)
+
 instance (units ~ units', space ~ space') => Subtraction (Point3d (space @ units)) (BoundingBox3d (space' @ units')) (VectorBox3d (space @ units)) where
   Point3d px py pz - BoundingBox3d bx by bz = VectorBox3d (px - bx) (py - by) (pz - bz)
 

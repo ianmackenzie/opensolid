@@ -111,6 +111,11 @@ instance Bounds (Range units) where
 
   overlaps (Range low1 high1) (Range low2 high2) = low1 <= high2 && low2 <= high1
 
+  intersection (Range low1 high1) (Range low2 high2)
+    | high1 < low2 = Nothing
+    | low1 > high2 = Nothing
+    | otherwise = Just (unsafe (max low1 low2) (min high1 high2))
+
 {-# INLINE unsafe #-}
 unsafe :: Qty units -> Qty units -> Range units
 unsafe = Range#
