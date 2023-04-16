@@ -23,6 +23,10 @@ instance Compose Bool (List a) (List a) where
 class Bind p b where
   bind :: (a -> b) -> p a -> b
 
+instance Bind Maybe (Maybe b) where
+  bind f (Just value) = f value
+  bind _ Nothing = Nothing
+
 instance Bind [] (List b) where
   bind f list = list Prelude.>>= f
 
