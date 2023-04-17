@@ -42,6 +42,7 @@ library
       Curve1d
       Curve1d.Root
       Curve2d
+      Curve2d.Derivatives
       Curve2d.Intersection
       Curve3d
       Debug
