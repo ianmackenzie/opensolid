@@ -21,6 +21,7 @@ data QuadraticSpline2d (coordinateSystem :: CoordinateSystem)
       (Point2d coordinateSystem)
       (Point2d coordinateSystem)
       (Point2d coordinateSystem)
+  deriving (Show)
 
 startPoint :: QuadraticSpline2d (space @ units) -> Point2d (space @ units)
 startPoint (QuadraticSpline2d p1 _ _) = p1
