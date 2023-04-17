@@ -36,7 +36,7 @@ import VectorBox2d qualified
 import VectorCurve2d (IsVectorCurve2d, VectorCurve2d (VectorCurve2d))
 import VectorCurve2d qualified
 
-class IsCurve2d curve (coordinateSystem :: CoordinateSystem) | curve -> coordinateSystem where
+class Show curve => IsCurve2d curve (coordinateSystem :: CoordinateSystem) | curve -> coordinateSystem where
   startPointImpl :: curve -> Point2d coordinateSystem
   endPointImpl :: curve -> Point2d coordinateSystem
   pointOnImpl :: curve -> Float -> Point2d coordinateSystem
@@ -50,6 +50,8 @@ data Curve2d (coordinateSystem :: CoordinateSystem) where
   Line :: Point2d (space @ units) -> Point2d (space @ units) -> Curve2d (space @ units)
   Arc :: Point2d (space @ units) -> Qty units -> Angle -> Angle -> Curve2d (space @ units)
   Curve2d :: IsCurve2d curve (space @ units) => curve -> Curve2d (space @ units)
+
+deriving instance Show (Curve2d coordinateSystem)
 
 instance
   (units1 ~ units1', units2 ~ units2', space ~ space')

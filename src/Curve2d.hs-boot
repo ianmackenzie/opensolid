@@ -6,7 +6,7 @@ where
 
 import OpenSolid
 
-class IsCurve2d curve (coordinateSystem :: CoordinateSystem) | curve -> coordinateSystem
+class Show curve => IsCurve2d curve (coordinateSystem :: CoordinateSystem) | curve -> coordinateSystem where
 
 type role Curve2d nominal
 
