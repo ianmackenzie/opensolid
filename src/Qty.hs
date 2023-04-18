@@ -12,7 +12,9 @@ module Qty
   , hypot3
   , abs
   , clamp
+  , IsZero (IsZero)
   , nonZero
+  , IsNegative (IsNegative)
   , nonNegative
   )
 where

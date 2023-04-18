@@ -7,6 +7,7 @@ module Direction2d
   , y
   , positiveY
   , negativeY
+  , PointsAreCoincident (PointsAreCoincident)
   , from
   , fromAngle
   , toAngle

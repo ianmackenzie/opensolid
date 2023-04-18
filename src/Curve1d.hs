@@ -11,6 +11,7 @@ module Curve1d
   , sqrt
   , sin
   , cos
+  , IsZero (IsZero)
   , roots
   )
 where
