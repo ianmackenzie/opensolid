@@ -225,6 +225,48 @@ testTaskSequencing = do
   doubledValue <- doubledValues
   log "Doubled value" doubledValue
 
+testCurve2dIntersection :: Task Text ()
+testCurve2dIntersection = Try.do
+  arc1 <-
+    Arc2d.with
+      [ Arc2d.StartPoint Point2d.origin
+      , Arc2d.EndPoint (Point2d.meters 0.0 1.0)
+      , Arc2d.SweptAngle (Angle.degrees 180.0)
+      ]
+  arc2 <-
+    Arc2d.with
+      [ Arc2d.StartPoint Point2d.origin
+      , Arc2d.EndPoint (Point2d.meters 1.0 0.0)
+      , Arc2d.SweptAngle (Angle.degrees -180.0)
+      ]
+  intersections <- Curve2d.intersections arc1 arc2
+  intersection <- intersections
+  log "Intersection" intersection
+ where
+  ?tolerance = Length.meters 1e-9
+
+testCurve2dTangentIntersection :: Task Text ()
+testCurve2dTangentIntersection = Try.do
+  arc1 <-
+    Arc2d.with
+      [ Arc2d.CenterPoint Point2d.origin
+      , Arc2d.Radius Length.meter
+      , Arc2d.StartAngle Qty.zero
+      , Arc2d.EndAngle Angle.halfTurn
+      ]
+  arc2 <-
+    Arc2d.with
+      [ Arc2d.CenterPoint (Point2d.meters 0.0 1.5)
+      , Arc2d.Radius (Length.meters 0.5)
+      , Arc2d.StartAngle -Angle.halfTurn
+      , Arc2d.EndAngle Qty.zero
+      ]
+  intersections <- Curve2d.intersections arc1 arc2
+  intersection <- intersections
+  log "Tangent intersection" intersection
+ where
+  ?tolerance = Length.meters 1e-9
+
 script :: Task Text ()
 script = do
   log "Integer product" (3 * 4)
@@ -300,6 +342,8 @@ script = do
   log "Successive intervals" (List.successive Range.from [1.0, 2.0, 3.0, 4.0])
   log "Prepend Maybe to List" (Just 1 ++ [2, 3])
   log "Offset point" (offsetPoint (Point2d.meters 1.0 0.0) (Point2d.meters 3.0 0.0) (Length.meters 1.0))
+  testCurve2dIntersection
+  testCurve2dTangentIntersection
 
 main :: IO ()
 main = Task.toIO script

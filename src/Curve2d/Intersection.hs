@@ -2,9 +2,9 @@ module Curve2d.Intersection (Intersection (..)) where
 
 import OpenSolid
 
-data Intersection coordinates = Intersection
-  { parameterValue :: Float
-  , order :: Int
-  , sign :: Sign
+data Intersection = Intersection
+  { u :: Float
+  , v :: Float
+  , sign :: Maybe Sign
   }
-  deriving (Eq, Show)
+  deriving (Eq, Ord, Show)
