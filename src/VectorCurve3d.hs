@@ -196,13 +196,13 @@ instance Units.Product units1 units2 units3 => Multiplication (Qty units1) (Vect
 data DotProductOf space units1 units2 = DotProductOf (VectorCurve3d (space @ units1)) (VectorCurve3d (space @ units2))
 
 instance Units.Product units1 units2 units => IsCurve1d (DotProductOf space units1 units2) units where
-  evaluate (DotProductOf curve1 curve2) t =
+  evaluateImpl (DotProductOf curve1 curve2) t =
     evaluate curve1 t <> evaluate curve2 t
 
-  segmentBounds (DotProductOf curve1 curve2) t =
+  segmentBoundsImpl (DotProductOf curve1 curve2) t =
     segmentBounds curve1 t <> segmentBounds curve2 t
 
-  derivative (DotProductOf curve1 curve2) =
+  derivativeImpl (DotProductOf curve1 curve2) =
     derivative curve1 <> curve2 + curve1 <> derivative curve2
 
 instance (Units.Product units1 units2 units3, space ~ space') => DotProduct (VectorCurve3d (space @ units1)) (VectorCurve3d (space' @ units2)) (Curve1d units3) where
@@ -264,13 +264,13 @@ instance Units.Quotient units1 units2 units3 => Division (VectorCurve3d (space @
 newtype SquaredMagnitudeOf (coordinateSystem :: CoordinateSystem) = SquaredMagnitudeOf (VectorCurve3d coordinateSystem)
 
 instance Units.Squared units1 units2 => IsCurve1d (SquaredMagnitudeOf (space @ units1)) units2 where
-  evaluate (SquaredMagnitudeOf expression) t =
+  evaluateImpl (SquaredMagnitudeOf expression) t =
     Vector3d.squaredMagnitude (evaluate expression t)
 
-  segmentBounds (SquaredMagnitudeOf expression) t =
+  segmentBoundsImpl (SquaredMagnitudeOf expression) t =
     VectorBox3d.squaredMagnitude (segmentBounds expression t)
 
-  derivative (SquaredMagnitudeOf expression) =
+  derivativeImpl (SquaredMagnitudeOf expression) =
     2.0 * expression <> derivative expression
 
 squaredMagnitude :: Units.Squared units1 units2 => VectorCurve3d (space @ units1) -> Curve1d units2

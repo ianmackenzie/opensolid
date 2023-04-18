@@ -1,6 +1,6 @@
 module Curve1d
   ( Curve1d (Curve1d)
-  , IsCurve1d
+  , IsCurve1d(..)
   , evaluate
   , segmentBounds
   , derivative
@@ -38,9 +38,9 @@ import {-# SOURCE #-} VectorCurve3d (VectorCurve3d)
 import {-# SOURCE #-} VectorCurve3d qualified
 
 class IsCurve1d curve units | curve -> units where
-  evaluate :: curve -> Float -> Qty units
-  segmentBounds :: curve -> Range Unitless -> Range units
-  derivative :: curve -> Curve1d units
+  evaluateImpl :: curve -> Float -> Qty units
+  segmentBoundsImpl :: curve -> Range Unitless -> Range units
+  derivativeImpl :: curve -> Curve1d units
 
 data Curve1d units where
   Curve1d :: forall curve units. IsCurve1d curve units => curve -> Curve1d units
@@ -66,53 +66,9 @@ instance units ~ units' => ApproximateEquality (Curve1d units) (Qty units') unit
   curve ~= value = isZero (curve - value)
 
 instance IsCurve1d (Curve1d units) units where
-  evaluate curve t =
-    case curve of
-      Curve1d c -> evaluate c t
-      Zero -> Qty.zero
-      Constant x -> x
-      Parameter -> t
-      Negated c -> negate (evaluate c t)
-      Sum c1 c2 -> evaluate c1 t + evaluate c2 t
-      Difference c1 c2 -> evaluate c1 t - evaluate c2 t
-      Product c1 c2 -> evaluate c1 t * evaluate c2 t
-      Quotient c1 c2 -> evaluate c1 t / evaluate c2 t
-      Squared c -> let x = evaluate c t in x * x
-      SquareRoot c -> Qty.sqrt (evaluate c t)
-      Sin c -> Angle.sin (evaluate c t)
-      Cos c -> Angle.cos (evaluate c t)
-
-  segmentBounds curve t =
-    case curve of
-      Curve1d c -> segmentBounds c t
-      Zero -> Range.constant Qty.zero
-      Constant value -> Range.constant value
-      Parameter -> t
-      Negated c -> negate (segmentBounds c t)
-      Sum c1 c2 -> segmentBounds c1 t + segmentBounds c2 t
-      Difference c1 c2 -> segmentBounds c1 t - segmentBounds c2 t
-      Product c1 c2 -> segmentBounds c1 t * segmentBounds c2 t
-      Quotient c1 c2 -> segmentBounds c1 t / segmentBounds c2 t
-      Squared c -> let x = segmentBounds c t in Range.squared x
-      SquareRoot c -> Range.sqrt (segmentBounds c t)
-      Sin c -> Range.sin (segmentBounds c t)
-      Cos c -> Range.cos (segmentBounds c t)
-
-  derivative curve =
-    case curve of
-      Curve1d c -> derivative c
-      Zero -> zero
-      Constant _ -> zero
-      Parameter -> constant 1.0
-      Negated c -> negate (derivative c)
-      Sum c1 c2 -> derivative c1 + derivative c2
-      Difference c1 c2 -> derivative c1 - derivative c2
-      Product c1 c2 -> derivative c1 * c2 + c1 * derivative c2
-      Quotient c1 c2 -> derivative c1 / c2 + curve * (derivative c2 / c2)
-      Squared c -> 2.0 * c * derivative c
-      SquareRoot c -> derivative c / (2.0 * sqrt c)
-      Sin c -> cos c * Units.drop (derivative c)
-      Cos c -> negate (sin c) * Units.drop (derivative c)
+  evaluateImpl = evaluate
+  segmentBoundsImpl = segmentBounds
+  derivativeImpl = derivative
 
 zero :: Curve1d units
 zero = Zero
@@ -198,6 +154,57 @@ instance Units.Quotient units1 units2 units3 => Division (Curve1d units1) (Qty u
 
 instance Units.Quotient units1 units2 units3 => Division (Qty units1) (Curve1d units2) (Curve1d units3) where
   value / curve = constant value / curve
+
+evaluate :: Curve1d units -> Float -> Qty units
+evaluate curve t =
+    case curve of
+      Curve1d c -> evaluateImpl c t
+      Zero -> Qty.zero
+      Constant x -> x
+      Parameter -> t
+      Negated c -> negate (evaluate c t)
+      Sum c1 c2 -> evaluate c1 t + evaluate c2 t
+      Difference c1 c2 -> evaluate c1 t - evaluate c2 t
+      Product c1 c2 -> evaluate c1 t * evaluate c2 t
+      Quotient c1 c2 -> evaluate c1 t / evaluate c2 t
+      Squared c -> let x = evaluate c t in x * x
+      SquareRoot c -> Qty.sqrt (evaluate c t)
+      Sin c -> Angle.sin (evaluate c t)
+      Cos c -> Angle.cos (evaluate c t)
+
+segmentBounds :: Curve1d units -> Range Unitless -> Range units
+segmentBounds curve t =
+    case curve of
+      Curve1d c -> segmentBoundsImpl c t
+      Zero -> Range.constant Qty.zero
+      Constant value -> Range.constant value
+      Parameter -> t
+      Negated c -> negate (segmentBounds c t)
+      Sum c1 c2 -> segmentBounds c1 t + segmentBounds c2 t
+      Difference c1 c2 -> segmentBounds c1 t - segmentBounds c2 t
+      Product c1 c2 -> segmentBounds c1 t * segmentBounds c2 t
+      Quotient c1 c2 -> segmentBounds c1 t / segmentBounds c2 t
+      Squared c -> let x = segmentBounds c t in Range.squared x
+      SquareRoot c -> Range.sqrt (segmentBounds c t)
+      Sin c -> Range.sin (segmentBounds c t)
+      Cos c -> Range.cos (segmentBounds c t)
+
+derivative :: Curve1d units -> Curve1d units
+derivative curve =
+    case curve of
+      Curve1d c -> derivativeImpl c
+      Zero -> zero
+      Constant _ -> zero
+      Parameter -> constant 1.0
+      Negated c -> negate (derivative c)
+      Sum c1 c2 -> derivative c1 + derivative c2
+      Difference c1 c2 -> derivative c1 - derivative c2
+      Product c1 c2 -> derivative c1 * c2 + c1 * derivative c2
+      Quotient c1 c2 -> derivative c1 / c2 + curve * (derivative c2 / c2)
+      Squared c -> 2.0 * c * derivative c
+      SquareRoot c -> derivative c / (2.0 * sqrt c)
+      Sin c -> cos c * Units.drop (derivative c)
+      Cos c -> negate (sin c) * Units.drop (derivative c)
 
 squared :: Units.Squared units1 units2 => Curve1d units1 -> Curve1d units2
 squared Zero = Zero

@@ -147,9 +147,9 @@ instance Units.Quotient units1 units2 units3 => Division (VectorCurve2d (space @
 data DotProductOf space units1 units2 = DotProductOf (VectorCurve2d (space @ units1)) (VectorCurve2d (space @ units2))
 
 instance Units.Product units1 units2 units3 => IsCurve1d (DotProductOf space units1 units2) units3 where
-  evaluate (DotProductOf c1 c2) t = evaluate c1 t <> evaluate c2 t
-  segmentBounds (DotProductOf c1 c2) t = segmentBounds c1 t <> segmentBounds c2 t
-  derivative (DotProductOf c1 c2) = derivative c1 <> c2 + c1 <> derivative c2
+  evaluateImpl (DotProductOf c1 c2) t = evaluate c1 t <> evaluate c2 t
+  segmentBoundsImpl (DotProductOf c1 c2) t = segmentBounds c1 t <> segmentBounds c2 t
+  derivativeImpl (DotProductOf c1 c2) = derivative c1 <> c2 + c1 <> derivative c2
 
 instance (Units.Product units1 units2 units3, space ~ space') => DotProduct (VectorCurve2d (space @ units1)) (VectorCurve2d (space' @ units2)) (Curve1d units3) where
   -- TODO add special cases
@@ -173,16 +173,16 @@ xy = XY
 newtype MagnitudeOf (coordinateSystem :: CoordinateSystem) = MagnitudeOf (VectorCurve2d coordinateSystem)
 
 instance IsCurve1d (MagnitudeOf (space @ units)) units where
-  evaluate (MagnitudeOf curve) t = Vector2d.magnitude (evaluate curve t)
-  segmentBounds (MagnitudeOf curve) t = VectorBox2d.magnitude (segmentBounds curve t)
-  derivative (MagnitudeOf curve) = derivative curve <> normalize curve
+  evaluateImpl (MagnitudeOf curve) t = Vector2d.magnitude (evaluate curve t)
+  segmentBoundsImpl (MagnitudeOf curve) t = VectorBox2d.magnitude (segmentBounds curve t)
+  derivativeImpl (MagnitudeOf curve) = derivative curve <> normalize curve
 
 newtype SquaredMagnitudeOf (coordinateSystem :: CoordinateSystem) = SquaredMagnitudeOf (VectorCurve2d coordinateSystem)
 
 instance Units.Squared units1 units2 => IsCurve1d (SquaredMagnitudeOf (space @ units1)) units2 where
-  evaluate (SquaredMagnitudeOf curve) t = Vector2d.squaredMagnitude (evaluate curve t)
-  segmentBounds (SquaredMagnitudeOf curve) t = VectorBox2d.squaredMagnitude (segmentBounds curve t)
-  derivative (SquaredMagnitudeOf curve) = 2.0 * curve <> derivative curve
+  evaluateImpl (SquaredMagnitudeOf curve) t = Vector2d.squaredMagnitude (evaluate curve t)
+  segmentBoundsImpl (SquaredMagnitudeOf curve) t = VectorBox2d.squaredMagnitude (segmentBounds curve t)
+  derivativeImpl (SquaredMagnitudeOf curve) = 2.0 * curve <> derivative curve
 
 squaredMagnitude :: Units.Squared units1 units2 => VectorCurve2d (space @ units1) -> Curve1d units2
 squaredMagnitude curve = Curve1d (SquaredMagnitudeOf curve)
