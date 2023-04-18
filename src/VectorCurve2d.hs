@@ -1,6 +1,6 @@
 module VectorCurve2d
-  ( VectorCurve2d (..)
-  , IsVectorCurve2d
+  ( VectorCurve2d (VectorCurve2d)
+  , IsVectorCurve2d (..)
   , evaluate
   , segmentBounds
   , derivative
@@ -26,9 +26,9 @@ import VectorBox2d (VectorBox2d (VectorBox2d))
 import VectorBox2d qualified
 
 class IsVectorCurve2d curve (coordinateSystem :: CoordinateSystem) | curve -> coordinateSystem where
-  evaluate :: curve -> Float -> Vector2d coordinateSystem
-  segmentBounds :: curve -> Range Unitless -> VectorBox2d coordinateSystem
-  derivative :: curve -> VectorCurve2d coordinateSystem
+  evaluateImpl :: curve -> Float -> Vector2d coordinateSystem
+  segmentBoundsImpl :: curve -> Range Unitless -> VectorBox2d coordinateSystem
+  derivativeImpl :: curve -> VectorCurve2d coordinateSystem
 
 data VectorCurve2d (coordinateSystem :: CoordinateSystem) where
   VectorCurve2d :: forall curve coordinateSystem. IsVectorCurve2d curve coordinateSystem => curve -> VectorCurve2d coordinateSystem
@@ -51,44 +51,9 @@ instance
       (VectorCurve2d (space' @ units2'))
 
 instance IsVectorCurve2d (VectorCurve2d (space @ units)) (space @ units) where
-  evaluate curve t =
-    case curve of
-      VectorCurve2d c -> evaluate c t
-      Zero -> Vector2d.zero
-      Constant value -> value
-      XY x y -> Vector2d.xy (Curve1d.evaluate x t) (Curve1d.evaluate y t)
-      Negated c -> -(evaluate c t)
-      Sum c1 c2 -> evaluate c1 t + evaluate c2 t
-      Difference c1 c2 -> evaluate c1 t - evaluate c2 t
-      Product1d2d c1 c2 -> Curve1d.evaluate c1 t * evaluate c2 t
-      Product2d1d c1 c2 -> evaluate c1 t * Curve1d.evaluate c2 t
-      Quotient c1 c2 -> evaluate c1 t / Curve1d.evaluate c2 t
-
-  segmentBounds curve t =
-    case curve of
-      VectorCurve2d c -> segmentBounds c t
-      Zero -> VectorBox2d.constant Vector2d.zero
-      Constant value -> VectorBox2d.constant value
-      XY x y -> VectorBox2d (Curve1d.segmentBounds x t) (Curve1d.segmentBounds y t)
-      Negated c -> -(segmentBounds c t)
-      Sum c1 c2 -> segmentBounds c1 t + segmentBounds c2 t
-      Difference c1 c2 -> segmentBounds c1 t - segmentBounds c2 t
-      Product1d2d c1 c2 -> Curve1d.segmentBounds c1 t * segmentBounds c2 t
-      Product2d1d c1 c2 -> segmentBounds c1 t * Curve1d.segmentBounds c2 t
-      Quotient c1 c2 -> segmentBounds c1 t / Curve1d.segmentBounds c2 t
-
-  derivative curve =
-    case curve of
-      VectorCurve2d c -> derivative c
-      Zero -> Zero
-      Constant _ -> Zero
-      XY x y -> XY (Curve1d.derivative x) (Curve1d.derivative y)
-      Negated c -> -(derivative c)
-      Sum c1 c2 -> derivative c1 + derivative c2
-      Difference c1 c2 -> derivative c1 - derivative c2
-      Product1d2d c1 c2 -> Curve1d.derivative c1 * c2 + c1 * derivative c2
-      Product2d1d c1 c2 -> derivative c1 * c2 + c1 * Curve1d.derivative c2
-      Quotient c1 c2 -> derivative c1 / c2 + curve * (Curve1d.derivative c2 / c2)
+  evaluateImpl = evaluate
+  segmentBoundsImpl = segmentBounds
+  derivativeImpl = derivative
 
 instance Generic.Zero (VectorCurve2d (space @ units)) where
   zero = Zero
@@ -169,6 +134,48 @@ constant = Constant
 
 xy :: Curve1d units -> Curve1d units -> VectorCurve2d (space @ units)
 xy = XY
+
+evaluate :: VectorCurve2d (space @ units) -> Float -> Vector2d (space @ units)
+evaluate curve t =
+  case curve of
+    VectorCurve2d c -> evaluateImpl c t
+    Zero -> Vector2d.zero
+    Constant value -> value
+    XY x y -> Vector2d.xy (Curve1d.evaluate x t) (Curve1d.evaluate y t)
+    Negated c -> -(evaluate c t)
+    Sum c1 c2 -> evaluate c1 t + evaluate c2 t
+    Difference c1 c2 -> evaluate c1 t - evaluate c2 t
+    Product1d2d c1 c2 -> Curve1d.evaluate c1 t * evaluate c2 t
+    Product2d1d c1 c2 -> evaluate c1 t * Curve1d.evaluate c2 t
+    Quotient c1 c2 -> evaluate c1 t / Curve1d.evaluate c2 t
+
+segmentBounds :: VectorCurve2d (space @ units) -> Range Unitless -> VectorBox2d (space @ units)
+segmentBounds curve t =
+  case curve of
+    VectorCurve2d c -> segmentBoundsImpl c t
+    Zero -> VectorBox2d.constant Vector2d.zero
+    Constant value -> VectorBox2d.constant value
+    XY x y -> VectorBox2d (Curve1d.segmentBounds x t) (Curve1d.segmentBounds y t)
+    Negated c -> -(segmentBounds c t)
+    Sum c1 c2 -> segmentBounds c1 t + segmentBounds c2 t
+    Difference c1 c2 -> segmentBounds c1 t - segmentBounds c2 t
+    Product1d2d c1 c2 -> Curve1d.segmentBounds c1 t * segmentBounds c2 t
+    Product2d1d c1 c2 -> segmentBounds c1 t * Curve1d.segmentBounds c2 t
+    Quotient c1 c2 -> segmentBounds c1 t / Curve1d.segmentBounds c2 t
+
+derivative :: VectorCurve2d (space @ units) -> VectorCurve2d (space @ units)
+derivative curve =
+  case curve of
+    VectorCurve2d c -> derivativeImpl c
+    Zero -> Zero
+    Constant _ -> Zero
+    XY x y -> XY (Curve1d.derivative x) (Curve1d.derivative y)
+    Negated c -> -(derivative c)
+    Sum c1 c2 -> derivative c1 + derivative c2
+    Difference c1 c2 -> derivative c1 - derivative c2
+    Product1d2d c1 c2 -> Curve1d.derivative c1 * c2 + c1 * derivative c2
+    Product2d1d c1 c2 -> derivative c1 * c2 + c1 * Curve1d.derivative c2
+    Quotient c1 c2 -> derivative c1 / c2 + curve * (Curve1d.derivative c2 / c2)
 
 newtype MagnitudeOf (coordinateSystem :: CoordinateSystem) = MagnitudeOf (VectorCurve2d coordinateSystem)
 

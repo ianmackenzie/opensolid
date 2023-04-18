@@ -132,9 +132,9 @@ data PointCurveDifference (coordinateSystem :: CoordinateSystem)
   = PointCurveDifference (Point2d coordinateSystem) (Curve2d coordinateSystem)
 
 instance IsVectorCurve2d (PointCurveDifference (space @ units)) (space @ units) where
-  evaluate (PointCurveDifference point curve) t = point - evaluate curve t
-  segmentBounds (PointCurveDifference point curve) t = point - segmentBounds curve t
-  derivative (PointCurveDifference _ curve) = -(derivative curve)
+  evaluateImpl (PointCurveDifference point curve) t = point - evaluate curve t
+  segmentBoundsImpl (PointCurveDifference point curve) t = point - segmentBounds curve t
+  derivativeImpl (PointCurveDifference _ curve) = -(derivative curve)
 
 instance
   (units ~ units', space ~ space')
@@ -146,9 +146,9 @@ data CurvePointDifference (coordinateSystem :: CoordinateSystem)
   = CurvePointDifference (Curve2d coordinateSystem) (Point2d coordinateSystem)
 
 instance IsVectorCurve2d (CurvePointDifference (space @ units)) (space @ units) where
-  evaluate (CurvePointDifference curve point) t = evaluate curve t - point
-  segmentBounds (CurvePointDifference curve point) t = segmentBounds curve t - point
-  derivative (CurvePointDifference curve _) = derivative curve
+  evaluateImpl (CurvePointDifference curve point) t = evaluate curve t - point
+  segmentBoundsImpl (CurvePointDifference curve point) t = segmentBounds curve t - point
+  derivativeImpl (CurvePointDifference curve _) = derivative curve
 
 instance
   (units ~ units', space ~ space')
