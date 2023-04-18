@@ -12,6 +12,8 @@ module Qty
   , hypot3
   , abs
   , clamp
+  , nonZero
+  , nonNegative
   )
 where
 
@@ -21,6 +23,7 @@ import Data.Coerce (coerce)
 import {-# SOURCE #-} Float (Float, fromRational)
 import {-# SOURCE #-} Float qualified
 import Generic qualified
+import {-# SOURCE #-} Result (IsError (errorMessage), Result (Error, Ok))
 import Sign (Sign (..))
 import Units (Unitless)
 import Units qualified
@@ -139,3 +142,19 @@ interpolateFrom a b t =
 {-# INLINE midpoint #-}
 midpoint :: Qty units -> Qty units -> Qty units
 midpoint a b = 0.5 * (a + b)
+
+data IsZero = IsZero
+
+instance IsError IsZero where
+  errorMessage IsZero = "Value is zero"
+
+nonZero :: Qty units -> Result IsZero (Qty units)
+nonZero value = if value /= zero then Ok value else Error IsZero
+
+data IsNegative = IsNegative
+
+instance IsError IsNegative where
+  errorMessage IsNegative = "Value is negative"
+
+nonNegative :: Qty units -> Result IsNegative (Qty units)
+nonNegative value = if value >= zero then Ok value else Error IsNegative

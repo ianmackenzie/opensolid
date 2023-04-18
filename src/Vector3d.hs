@@ -147,13 +147,13 @@ instance IsError IsZero where
 direction :: Vector3d (space @ units) -> Result IsZero (Direction3d space)
 direction vector = do
   let Vector3d vx vy vz = vector
-  vm <- validate (/= Qty.zero) (magnitude vector) ?? Error IsZero
+  vm <- Qty.nonZero (magnitude vector) ?? Error IsZero
   Ok (Direction3d.unsafe (vx / vm) (vy / vm) (vz / vm))
 
 magnitudeAndDirection :: Vector3d (space @ units) -> Result IsZero (Qty units, Direction3d space)
 magnitudeAndDirection vector = do
   let Vector3d vx vy vz = vector
-  vm <- validate (/= Qty.zero) (magnitude vector) ?? Error IsZero
+  vm <- Qty.nonZero (magnitude vector) ?? Error IsZero
   Ok (vm, Direction3d.unsafe (vx / vm) (vy / vm) (vz / vm))
 
 normalize :: Vector3d (space @ units) -> Vector3d (space @ Unitless)

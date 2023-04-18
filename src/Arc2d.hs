@@ -81,7 +81,7 @@ fromStartPointEndPointRadiusDirectionSize givenStartPoint givenEndPoint givenRad
   chordDirection <- Direction2d.from givenStartPoint givenEndPoint ?? Error EndpointsCoincident
   let squaredRadius = Qty.squared (Units.generalize givenRadius)
   let squaredHalfLength = Qty.squared (Units.generalize (0.5 * Point2d.distanceFrom givenStartPoint givenEndPoint))
-  squaredOffsetMagnitude <- validate (>= Qty.zero) (squaredRadius - squaredHalfLength) ?? Error EndpointsTooFarApart
+  squaredOffsetMagnitude <- Qty.nonNegative (squaredRadius - squaredHalfLength) ?? Error EndpointsTooFarApart
   let offsetMagnitude = Units.specialize (Qty.sqrt squaredOffsetMagnitude)
   let offsetDirection = Direction2d.perpendicularTo chordDirection
   let offsetDistance =
