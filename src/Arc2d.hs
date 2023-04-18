@@ -19,6 +19,7 @@ import OpenSolid
 import Point2d (Point2d)
 import Point2d qualified
 import Qty qualified
+import Result qualified
 import Units qualified
 import Vector2d qualified
 
@@ -78,10 +79,14 @@ fromStartPointEndPointRadiusDirectionSize
   -> Size
   -> Result BuildError (Curve2d (space @ units))
 fromStartPointEndPointRadiusDirectionSize givenStartPoint givenEndPoint givenRadius direction size = do
-  chordDirection <- Direction2d.from givenStartPoint givenEndPoint ?? Error EndpointsCoincident
+  chordDirection <-
+    Direction2d.from givenStartPoint givenEndPoint
+      |> Result.mapError \Direction2d.PointsAreCoincident -> Arc2d.EndpointsCoincident
   let squaredRadius = Qty.squared (Units.generalize givenRadius)
   let squaredHalfLength = Qty.squared (Units.generalize (0.5 * Point2d.distanceFrom givenStartPoint givenEndPoint))
-  squaredOffsetMagnitude <- Qty.nonNegative (squaredRadius - squaredHalfLength) ?? Error EndpointsTooFarApart
+  squaredOffsetMagnitude <-
+    Qty.nonNegative (squaredRadius - squaredHalfLength)
+      |> Result.mapError \Qty.IsNegative -> Arc2d.EndpointsTooFarApart
   let offsetMagnitude = Units.specialize (Qty.sqrt squaredOffsetMagnitude)
   let offsetDirection = Direction2d.perpendicularTo chordDirection
   let offsetDistance =

@@ -3,7 +3,6 @@ module OpenSolid
   , module Concatenate
   , module Arithmetic
   , module Result
-  , module Coalesce
   , module Qty
   , module Float
   , module List
@@ -20,7 +19,6 @@ where
 
 import Arithmetic
 import Basics
-import Coalesce (Coalesce ((??)))
 import Concatenate (Concatenate ((++)))
 import CoordinateSystem (CoordinateSystem, type (@))
 import Data.Text.IO qualified

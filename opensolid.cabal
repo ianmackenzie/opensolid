@@ -36,7 +36,6 @@ library
       BoundingBox2d
       BoundingBox3d
       Bounds
-      Coalesce
       Concatenate
       CoordinateSystem
       Curve1d

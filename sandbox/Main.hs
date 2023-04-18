@@ -53,7 +53,7 @@ listTest = do
 listFilterTest :: List Int
 listFilterTest = do
   text <- ["1", "a", "-2", "", "+3"]
-  parsed <- Text.toInt text ?? Nothing
+  parsed <- Text.toInt text |> Result.orNothing
   [parsed]
 
 parsingSuccess :: Result Text (List Int)

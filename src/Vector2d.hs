@@ -32,6 +32,7 @@ import Length qualified
 import OpenSolid
 import {-# SOURCE #-} Point2d (Point2d)
 import Qty qualified
+import Result qualified
 import Units (Meters, SquareMeters, Unitless)
 import Units qualified
 
@@ -141,13 +142,13 @@ instance IsError IsZero where
 direction :: Vector2d (space @ units) -> Result IsZero (Direction2d space)
 direction vector = do
   let Vector2d vx vy = vector
-  vm <- Qty.nonZero (magnitude vector) ?? Error IsZero
+  vm <- Qty.nonZero (magnitude vector) |> Result.mapError \Qty.IsZero -> Vector2d.IsZero
   Ok (Direction2d.unsafe (vx / vm) (vy / vm))
 
 magnitudeAndDirection :: Vector2d (space @ units) -> Result IsZero (Qty units, Direction2d space)
 magnitudeAndDirection vector = do
   let Vector2d vx vy = vector
-  vm <- Qty.nonZero (magnitude vector) ?? Error IsZero
+  vm <- Qty.nonZero (magnitude vector) |> Result.mapError \Qty.IsZero -> Vector2d.IsZero
   Ok (vm, Direction2d.unsafe (vx / vm) (vy / vm))
 
 normalize :: Vector2d (space @ units) -> Vector2d (space @ Unitless)

@@ -29,6 +29,7 @@ import Generic qualified
 import Length qualified
 import OpenSolid
 import Qty qualified
+import Result qualified
 import Units (Meters, SquareMeters, Unitless)
 import Units qualified
 
@@ -147,13 +148,13 @@ instance IsError IsZero where
 direction :: Vector3d (space @ units) -> Result IsZero (Direction3d space)
 direction vector = do
   let Vector3d vx vy vz = vector
-  vm <- Qty.nonZero (magnitude vector) ?? Error IsZero
+  vm <- Qty.nonZero (magnitude vector) |> Result.mapError \Qty.IsZero -> Vector3d.IsZero
   Ok (Direction3d.unsafe (vx / vm) (vy / vm) (vz / vm))
 
 magnitudeAndDirection :: Vector3d (space @ units) -> Result IsZero (Qty units, Direction3d space)
 magnitudeAndDirection vector = do
   let Vector3d vx vy vz = vector
-  vm <- Qty.nonZero (magnitude vector) ?? Error IsZero
+  vm <- Qty.nonZero (magnitude vector) |> Result.mapError \Qty.IsZero -> Vector3d.IsZero
   Ok (vm, Direction3d.unsafe (vx / vm) (vy / vm) (vz / vm))
 
 normalize :: Vector3d (space @ units) -> Vector3d (space @ Unitless)

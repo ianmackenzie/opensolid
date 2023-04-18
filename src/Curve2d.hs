@@ -177,7 +177,10 @@ parameterValues :: Tolerance units => Point2d (space @ units) -> Curve2d (space 
 parameterValues point curve = do
   let squaredDistanceFromCurve = VectorCurve2d.squaredMagnitude (Units.generalize (point - curve))
   let squaredTolerance = Qty.squared (Units.generalize ?tolerance)
-  roots <- let ?tolerance = squaredTolerance in Curve1d.roots squaredDistanceFromCurve ?? Error IsCoincidentWithPoint
+  roots <-
+    let ?tolerance = squaredTolerance
+     in Curve1d.roots squaredDistanceFromCurve
+          |> Result.onError \Curve1d.IsZero -> Error IsCoincidentWithPoint
   Ok [root.value | root <- roots]
 
 overlappingSegments :: Tolerance units => Curve2d (space @ units) -> Curve2d (space @ units) -> List (Range Unitless, Range Unitless)
