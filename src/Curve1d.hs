@@ -1,7 +1,7 @@
 module Curve1d
   ( Curve1d (Curve1d)
   , IsCurve1d
-  , pointOn
+  , evaluate
   , segmentBounds
   , derivative
   , zero
@@ -38,7 +38,7 @@ import {-# SOURCE #-} VectorCurve3d (VectorCurve3d)
 import {-# SOURCE #-} VectorCurve3d qualified
 
 class IsCurve1d curve units | curve -> units where
-  pointOn :: curve -> Float -> Qty units
+  evaluate :: curve -> Float -> Qty units
   segmentBounds :: curve -> Range Unitless -> Range units
   derivative :: curve -> Curve1d units
 
@@ -66,21 +66,21 @@ instance units ~ units' => ApproximateEquality (Curve1d units) (Qty units') unit
   curve ~= value = isZero (curve - value)
 
 instance IsCurve1d (Curve1d units) units where
-  pointOn curve t =
+  evaluate curve t =
     case curve of
-      Curve1d c -> pointOn c t
+      Curve1d c -> evaluate c t
       Zero -> Qty.zero
       Constant x -> x
       Parameter -> t
-      Negated c -> negate (pointOn c t)
-      Sum c1 c2 -> pointOn c1 t + pointOn c2 t
-      Difference c1 c2 -> pointOn c1 t - pointOn c2 t
-      Product c1 c2 -> pointOn c1 t * pointOn c2 t
-      Quotient c1 c2 -> pointOn c1 t / pointOn c2 t
-      Squared c -> let x = pointOn c t in x * x
-      SquareRoot c -> Qty.sqrt (pointOn c t)
-      Sin c -> Angle.sin (pointOn c t)
-      Cos c -> Angle.cos (pointOn c t)
+      Negated c -> negate (evaluate c t)
+      Sum c1 c2 -> evaluate c1 t + evaluate c2 t
+      Difference c1 c2 -> evaluate c1 t - evaluate c2 t
+      Product c1 c2 -> evaluate c1 t * evaluate c2 t
+      Quotient c1 c2 -> evaluate c1 t / evaluate c2 t
+      Squared c -> let x = evaluate c t in x * x
+      SquareRoot c -> Qty.sqrt (evaluate c t)
+      Sin c -> Angle.sin (evaluate c t)
+      Cos c -> Angle.cos (evaluate c t)
 
   segmentBounds curve t =
     case curve of
@@ -229,7 +229,7 @@ cos (Constant x) = constant (Angle.cos x)
 cos curve = Cos curve
 
 isZero :: Tolerance units => Curve1d units -> Bool
-isZero curve = List.all [pointOn curve t ~= Qty.zero | t <- Quadrature.parameterValues]
+isZero curve = List.all [evaluate curve t ~= Qty.zero | t <- Quadrature.parameterValues]
 
 maxRootOrder :: Int
 maxRootOrder = 4
@@ -283,10 +283,10 @@ solve curveDerivative derivativeOrder region
             -- are non-zero regions of the derivative curve.
             | otherwise =
                 let rootX = bisectMonotonic curveDerivative minX maxX minY maxY
-                 in if pointOn ?originalCurve rootX ~= Qty.zero
+                 in if evaluate ?originalCurve rootX ~= Qty.zero
                       then
                         let root = Root rootX derivativeOrder nextDerivativeSign
-                            width = computeWidth (derivativeOrder + 1) (pointOn nextDerivative rootX)
+                            width = computeWidth (derivativeOrder + 1) (evaluate nextDerivative rootX)
                          in [Solution root width]
                       else
                         [ NonZero (Range.from x1 rootX) -nextDerivativeSign
@@ -296,15 +296,15 @@ solve curveDerivative derivativeOrder region
             Range x1 x2 = subdomain
             minX = if nextDerivativeSign == Positive then x1 else x2
             maxX = if nextDerivativeSign == Positive then x2 else x1
-            minY = pointOn curveDerivative minX
-            maxY = pointOn curveDerivative maxX
+            minY = evaluate curveDerivative minX
+            maxY = evaluate curveDerivative maxX
 
           -- Check if a high-order root should in fact be a lower-order root (e.g. in y=x^3+x
           -- the 3rd derivative is zero at x=0 but it is in fact a 0th-order root, not a
           -- 2nd-order root)
           lift (Solution currentRoot currentWidth) =
             let rootX = currentRoot.value
-                rootY = pointOn curveDerivative rootX
+                rootY = evaluate curveDerivative rootX
                 width = computeWidth derivativeOrder rootY
              in if width < currentWidth
                   then [Solution (Root rootX (derivativeOrder - 1) (Qty.sign rootY)) width]
@@ -317,7 +317,7 @@ bisectMonotonic curve lowX highX lowY highY =
    in if midX == lowX || midX == highX
         then if -lowY <= highY then lowX else highX
         else
-          let midY = pointOn curve midX
+          let midY = evaluate curve midX
            in if midY >= Qty.zero
                 then bisectMonotonic curve lowX midX lowY midY
                 else bisectMonotonic curve midX highX midY highY
@@ -358,9 +358,9 @@ resolveDerivative domain curveDerivative derivativeOrder
 
 solveEndpoint :: Tolerance units => Curve1d units -> Float -> (List Root, Float)
 solveEndpoint curve endpointX
-  | pointOn curve endpointX ~= Qty.zero =
+  | evaluate curve endpointX ~= Qty.zero =
       let check curveDerivative derivativeOrder currentMinWidth currentBest =
-            let derivativeValue = pointOn curveDerivative endpointX
+            let derivativeValue = evaluate curveDerivative endpointX
                 rootWidth = computeWidth derivativeOrder derivativeValue
                 updatedMinWidth = min rootWidth currentMinWidth
                 rootOrder = derivativeOrder - 1

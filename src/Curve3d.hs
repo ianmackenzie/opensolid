@@ -12,7 +12,7 @@ import Point3d (Point3d)
 class IsCurve3d curve (coordinateSystem :: CoordinateSystem) | curve -> coordinateSystem where
   startPoint :: curve -> Point3d coordinateSystem
   endPoint :: curve -> Point3d coordinateSystem
-  pointOn :: curve -> Float -> Point3d coordinateSystem
+  evaluate :: curve -> Float -> Point3d coordinateSystem
   reverse :: curve -> curve
   bisect :: curve -> (curve, curve)
   boundingBox :: curve -> BoundingBox3d coordinateSystem
@@ -23,7 +23,7 @@ data Curve3d (coordinateSystem :: CoordinateSystem) where
 instance IsCurve3d (Point3d (space @ units)) (space @ units) where
   startPoint = identity
   endPoint = identity
-  pointOn point _ = point
+  evaluate point _ = point
   reverse = identity
   bisect point = (point, point)
   boundingBox = BoundingBox3d.constant
@@ -31,7 +31,7 @@ instance IsCurve3d (Point3d (space @ units)) (space @ units) where
 instance IsCurve3d (Curve3d (space @ units)) (space @ units) where
   startPoint (Curve3d curve) = startPoint curve
   endPoint (Curve3d curve) = endPoint curve
-  pointOn (Curve3d curve) = pointOn curve
+  evaluate (Curve3d curve) = evaluate curve
   reverse (Curve3d curve) = Curve3d (reverse curve)
   bisect (Curve3d curve) =
     let (curve1, curve2) = bisect curve

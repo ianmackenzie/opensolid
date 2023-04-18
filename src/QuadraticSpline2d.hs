@@ -29,8 +29,8 @@ startPoint (QuadraticSpline2d p1 _ _) = p1
 endPoint :: QuadraticSpline2d (space @ units) -> Point2d (space @ units)
 endPoint (QuadraticSpline2d _ _ p3) = p3
 
-pointOn :: QuadraticSpline2d (space @ units) -> Float -> Point2d (space @ units)
-pointOn (QuadraticSpline2d p1 p2 p3) t =
+evaluate :: QuadraticSpline2d (space @ units) -> Float -> Point2d (space @ units)
+evaluate (QuadraticSpline2d p1 p2 p3) t =
   let q1 = Point2d.interpolateFrom p1 p2 t
       q2 = Point2d.interpolateFrom p2 p3 t
    in Point2d.interpolateFrom q1 q2 t
@@ -89,7 +89,7 @@ boundingBox (QuadraticSpline2d p1 p2 p3) = BoundingBox2d.hull3 p1 p2 p3
 instance IsCurve2d (QuadraticSpline2d (space @ units)) (space @ units) where
   startPointImpl = startPoint
   endPointImpl = endPoint
-  pointOnImpl = pointOn
+  evaluateImpl = evaluate
   segmentBoundsImpl = segmentBounds
   derivativeImpl = derivative
   reverseImpl = reverse

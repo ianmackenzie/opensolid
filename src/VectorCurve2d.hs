@@ -1,7 +1,7 @@
 module VectorCurve2d
   ( VectorCurve2d (..)
   , IsVectorCurve2d
-  , pointOn
+  , evaluate
   , segmentBounds
   , derivative
   , zero
@@ -26,7 +26,7 @@ import VectorBox2d (VectorBox2d (VectorBox2d))
 import VectorBox2d qualified
 
 class IsVectorCurve2d curve (coordinateSystem :: CoordinateSystem) | curve -> coordinateSystem where
-  pointOn :: curve -> Float -> Vector2d coordinateSystem
+  evaluate :: curve -> Float -> Vector2d coordinateSystem
   segmentBounds :: curve -> Range Unitless -> VectorBox2d coordinateSystem
   derivative :: curve -> VectorCurve2d coordinateSystem
 
@@ -51,18 +51,18 @@ instance
       (VectorCurve2d (space' @ units2'))
 
 instance IsVectorCurve2d (VectorCurve2d (space @ units)) (space @ units) where
-  pointOn curve t =
+  evaluate curve t =
     case curve of
-      VectorCurve2d c -> pointOn c t
+      VectorCurve2d c -> evaluate c t
       Zero -> Vector2d.zero
       Constant value -> value
-      XY x y -> Vector2d.xy (Curve1d.pointOn x t) (Curve1d.pointOn y t)
-      Negated c -> -(pointOn c t)
-      Sum c1 c2 -> pointOn c1 t + pointOn c2 t
-      Difference c1 c2 -> pointOn c1 t - pointOn c2 t
-      Product1d2d c1 c2 -> Curve1d.pointOn c1 t * pointOn c2 t
-      Product2d1d c1 c2 -> pointOn c1 t * Curve1d.pointOn c2 t
-      Quotient c1 c2 -> pointOn c1 t / Curve1d.pointOn c2 t
+      XY x y -> Vector2d.xy (Curve1d.evaluate x t) (Curve1d.evaluate y t)
+      Negated c -> -(evaluate c t)
+      Sum c1 c2 -> evaluate c1 t + evaluate c2 t
+      Difference c1 c2 -> evaluate c1 t - evaluate c2 t
+      Product1d2d c1 c2 -> Curve1d.evaluate c1 t * evaluate c2 t
+      Product2d1d c1 c2 -> evaluate c1 t * Curve1d.evaluate c2 t
+      Quotient c1 c2 -> evaluate c1 t / Curve1d.evaluate c2 t
 
   segmentBounds curve t =
     case curve of
@@ -147,7 +147,7 @@ instance Units.Quotient units1 units2 units3 => Division (VectorCurve2d (space @
 data DotProductOf space units1 units2 = DotProductOf (VectorCurve2d (space @ units1)) (VectorCurve2d (space @ units2))
 
 instance Units.Product units1 units2 units3 => IsCurve1d (DotProductOf space units1 units2) units3 where
-  pointOn (DotProductOf c1 c2) t = pointOn c1 t <> pointOn c2 t
+  evaluate (DotProductOf c1 c2) t = evaluate c1 t <> evaluate c2 t
   segmentBounds (DotProductOf c1 c2) t = segmentBounds c1 t <> segmentBounds c2 t
   derivative (DotProductOf c1 c2) = derivative c1 <> c2 + c1 <> derivative c2
 
@@ -173,14 +173,14 @@ xy = XY
 newtype MagnitudeOf (coordinateSystem :: CoordinateSystem) = MagnitudeOf (VectorCurve2d coordinateSystem)
 
 instance IsCurve1d (MagnitudeOf (space @ units)) units where
-  pointOn (MagnitudeOf curve) t = Vector2d.magnitude (pointOn curve t)
+  evaluate (MagnitudeOf curve) t = Vector2d.magnitude (evaluate curve t)
   segmentBounds (MagnitudeOf curve) t = VectorBox2d.magnitude (segmentBounds curve t)
   derivative (MagnitudeOf curve) = derivative curve <> normalize curve
 
 newtype SquaredMagnitudeOf (coordinateSystem :: CoordinateSystem) = SquaredMagnitudeOf (VectorCurve2d coordinateSystem)
 
 instance Units.Squared units1 units2 => IsCurve1d (SquaredMagnitudeOf (space @ units1)) units2 where
-  pointOn (SquaredMagnitudeOf curve) t = Vector2d.squaredMagnitude (pointOn curve t)
+  evaluate (SquaredMagnitudeOf curve) t = Vector2d.squaredMagnitude (evaluate curve t)
   segmentBounds (SquaredMagnitudeOf curve) t = VectorBox2d.squaredMagnitude (segmentBounds curve t)
   derivative (SquaredMagnitudeOf curve) = 2.0 * curve <> derivative curve
 

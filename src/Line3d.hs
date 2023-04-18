@@ -16,7 +16,7 @@ instance IsCurve3d (Line3d (space @ units)) (space @ units) where
 
   endPoint (Line3d _ p2) = p2
 
-  pointOn (Line3d p1 p2) = Point3d.interpolateFrom p1 p2
+  evaluate (Line3d p1 p2) = Point3d.interpolateFrom p1 p2
 
   reverse (Line3d p1 p2) = Line3d p2 p1
 

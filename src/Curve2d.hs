@@ -5,7 +5,7 @@ module Curve2d
   , IsCurve2d (..)
   , startPoint
   , endPoint
-  , pointOn
+  , evaluate
   , segmentBounds
   , derivative
   , reverse
@@ -46,7 +46,7 @@ import VectorCurve2d qualified
 class Show curve => IsCurve2d curve (coordinateSystem :: CoordinateSystem) | curve -> coordinateSystem where
   startPointImpl :: curve -> Point2d coordinateSystem
   endPointImpl :: curve -> Point2d coordinateSystem
-  pointOnImpl :: curve -> Float -> Point2d coordinateSystem
+  evaluateImpl :: curve -> Float -> Point2d coordinateSystem
   segmentBoundsImpl :: curve -> Range Unitless -> BoundingBox2d coordinateSystem
   derivativeImpl :: curve -> VectorCurve2d coordinateSystem
   reverseImpl :: curve -> curve
@@ -70,18 +70,18 @@ instance
 
 startPoint :: Curve2d (space @ units) -> Point2d (space @ units)
 startPoint (Line p1 _) = p1
-startPoint arc@(Arc{}) = pointOn arc 0.0
+startPoint arc@(Arc{}) = evaluate arc 0.0
 startPoint (Curve2d curve) = startPointImpl curve
 
 endPoint :: Curve2d (space @ units) -> Point2d (space @ units)
 endPoint (Line _ p2) = p2
-endPoint arc@(Arc{}) = pointOn arc 1.0
+endPoint arc@(Arc{}) = evaluate arc 1.0
 endPoint (Curve2d curve) = endPointImpl curve
 
-pointOn :: Curve2d (space @ units) -> Float -> Point2d (space @ units)
-pointOn (Line p1 p2) t = Point2d.interpolateFrom p1 p2 t
-pointOn (Arc p0 r a b) t = let theta = Qty.interpolateFrom a b t in p0 + Vector2d.polar r theta
-pointOn (Curve2d curve) t = pointOnImpl curve t
+evaluate :: Curve2d (space @ units) -> Float -> Point2d (space @ units)
+evaluate (Line p1 p2) t = Point2d.interpolateFrom p1 p2 t
+evaluate (Arc p0 r a b) t = let theta = Qty.interpolateFrom a b t in p0 + Vector2d.polar r theta
+evaluate (Curve2d curve) t = evaluateImpl curve t
 
 segmentBounds :: Curve2d (space @ units) -> Range Unitless -> BoundingBox2d (space @ units)
 segmentBounds (Line p1 p2) t =
@@ -121,7 +121,7 @@ boundingBox (Curve2d curve) = boundingBoxImpl curve
 instance IsCurve2d (Curve2d (space @ units)) (space @ units) where
   startPointImpl = startPoint
   endPointImpl = endPoint
-  pointOnImpl = pointOn
+  evaluateImpl = evaluate
   segmentBoundsImpl = segmentBounds
   derivativeImpl = derivative
   reverseImpl = reverse
@@ -132,7 +132,7 @@ data PointCurveDifference (coordinateSystem :: CoordinateSystem)
   = PointCurveDifference (Point2d coordinateSystem) (Curve2d coordinateSystem)
 
 instance IsVectorCurve2d (PointCurveDifference (space @ units)) (space @ units) where
-  pointOn (PointCurveDifference point curve) t = point - pointOn curve t
+  evaluate (PointCurveDifference point curve) t = point - evaluate curve t
   segmentBounds (PointCurveDifference point curve) t = point - segmentBounds curve t
   derivative (PointCurveDifference _ curve) = -(derivative curve)
 
@@ -146,7 +146,7 @@ data CurvePointDifference (coordinateSystem :: CoordinateSystem)
   = CurvePointDifference (Curve2d coordinateSystem) (Point2d coordinateSystem)
 
 instance IsVectorCurve2d (CurvePointDifference (space @ units)) (space @ units) where
-  pointOn (CurvePointDifference curve point) t = pointOn curve t - point
+  evaluate (CurvePointDifference curve point) t = evaluate curve t - point
   segmentBounds (CurvePointDifference curve point) t = segmentBounds curve t - point
   derivative (CurvePointDifference curve _) = derivative curve
 
@@ -205,12 +205,12 @@ candidateDomain start end =
 
 samplingPoints :: Curve2d (space @ units) -> Range Unitless -> List (Point2d (space @ units))
 samplingPoints curve domain =
-  [pointOn curve (Range.interpolate domain t) | t <- Quadrature.parameterValues]
+  [evaluate curve (Range.interpolate domain t) | t <- Quadrature.parameterValues]
 
 overlappingSegment :: Tolerance units => Curve2d (space @ units) -> Curve2d (space @ units) -> (Range Unitless, Range Unitless) -> Bool
 overlappingSegment curve1 curve2 (domain1, _) =
   let testPoints = samplingPoints curve1 domain1
-      midpoint = pointOn curve1 (Range.midpoint domain1)
+      midpoint = evaluate curve1 (Range.midpoint domain1)
       degenerateDomain = List.all [testPoint ~= midpoint | testPoint <- testPoints]
    in not degenerateDomain && List.all [passesThrough testPoint curve2 | testPoint <- testPoints]
 
@@ -352,8 +352,8 @@ isCrossingIntersection curve1 curve2 u v =
 
 crossingIntersection :: VectorCurve2d (space @ units) -> VectorCurve2d (space @ units) -> (Float, Float) -> Intersection
 crossingIntersection firstDerivative1 firstDerivative2 (u, v) =
-  let first1 = VectorCurve2d.pointOn firstDerivative1 u
-      first2 = VectorCurve2d.pointOn firstDerivative2 v
+  let first1 = VectorCurve2d.evaluate firstDerivative1 u
+      first2 = VectorCurve2d.evaluate firstDerivative2 v
       sign = Qty.sign (Units.generalize first1 >< Units.generalize first2)
    in Intersection u v (Just sign)
 
