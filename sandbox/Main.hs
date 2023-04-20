@@ -43,36 +43,6 @@ offsetPoint startPoint endPoint distance = Result.withDefault startPoint do
   direction <- Direction2d.from startPoint endPoint
   Ok (Point2d.midpoint startPoint endPoint + distance * Direction2d.perpendicularTo direction)
 
-listTest :: List (Int, Int)
-listTest = do
-  a <- [1 .. 10]
-  b <- [1 .. 10]
-  a + b == 10
-  [(a, b)]
-
-listFilterTest :: List Int
-listFilterTest = do
-  text <- ["1", "a", "-2", "", "+3"]
-  parsed <- Text.toInt text |> Result.orNothing
-  [parsed]
-
-parsingSuccess :: Result Text (List Int)
-parsingSuccess = do
-  text <- ["1", "-2", "+3"]
-  parsed <- Text.toInt text
-  Ok [parsed]
-
-parsingFailure :: Result Text (List Int)
-parsingFailure = do
-  text <- ["1", "a", "-2", "b", "+3"]
-  parsed <- Text.toInt text
-  Ok [parsed]
-
-parsingResults :: List (Result Text Int)
-parsingResults = do
-  text <- ["1", "a", "-2", "b", "+3"]
-  [Text.toInt text]
-
 joinTextChunks :: Text -> Text -> Maybe Text
 joinTextChunks " " _ = Nothing
 joinTextChunks _ " " = Nothing
@@ -298,7 +268,6 @@ script = do
   log "Range product" rangeProduct
   log "Direction" Direction2d.x
   log "Tuple" (Point2d.meters 1.0 2.0, Point2d.meters 3.0 4.0)
-  log "List test" listTest
   log "Custom type" (MyPoints (Point2d.meters 1.0 2.0) (Point2d.meters 3.0 4.0))
   let t = Curve1d.parameter
   let x = 3.0 * t
@@ -332,10 +301,6 @@ script = do
   testPatternMatchErrorInTryDo
   testCurve1dApproximateEquality
   log "Axis2d.x.originPoint" Axis2d.x.originPoint
-  log "List filter test" listFilterTest
-  log "Parsing success" parsingSuccess
-  log "Parsing failure" parsingFailure
-  log "Parsing results" parsingResults
   testTaskIteration
   testTaskSequencing
   log "Successive deltas" (List.successive subtract [0, 1, 4, 9, 16, 25])
