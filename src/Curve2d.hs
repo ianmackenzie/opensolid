@@ -214,8 +214,8 @@ overlappingSegment :: Tolerance units => Curve2d (space @ units) -> Curve2d (spa
 overlappingSegment curve1 curve2 (domain1, _) =
   let testPoints = samplingPoints curve1 domain1
       midpoint = evaluate curve1 (Range.midpoint domain1)
-      degenerateDomain = List.all [testPoint ~= midpoint | testPoint <- testPoints]
-   in not degenerateDomain && List.all [passesThrough testPoint curve2 | testPoint <- testPoints]
+      degenerateDomain = List.all (~= midpoint) testPoints
+   in not degenerateDomain && List.all (`passesThrough` curve2) testPoints
 
 newtype AreOverlapping = AreOverlapping (List (Range Unitless, Range Unitless))
 
@@ -268,10 +268,9 @@ tangentIntersection (Solution1 _ _ maybeIntersection) = maybeIntersection
 crossingIntersections :: Derivatives (space @ units) -> Derivatives (space @ units) -> List Solution -> Solution -> List Intersection
 crossingIntersections _ _ _ (Solution0 intersection) = [intersection]
 crossingIntersections _ _ _ (Solution1 _ _ (Just _)) = []
-crossingIntersections derivatives1 derivatives2 solutions (Solution1 u v Nothing) =
-  if List.any [neighborToTangentIntersection u v solution | solution <- solutions]
-    then []
-    else solve0 derivatives1 derivatives2 u v
+crossingIntersections derivatives1 derivatives2 solutions (Solution1 u v Nothing)
+  | List.any (neighborToTangentIntersection u v) solutions = []
+  | otherwise = solve0 derivatives1 derivatives2 u v
 
 neighborToTangentIntersection :: Range Unitless -> Range Unitless -> Solution -> Bool
 neighborToTangentIntersection _ _ (Solution0 _) = False

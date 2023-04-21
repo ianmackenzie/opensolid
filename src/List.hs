@@ -133,11 +133,11 @@ dedup current (next : remaining) =
     then dedup current remaining
     else current : dedup next remaining
 
-all :: List Bool -> Bool
-all = Prelude.and
+all :: (a -> Bool) -> List a -> Bool
+all = Prelude.all
 
-any :: List Bool -> Bool
-any = Prelude.or
+any :: (a -> Bool) -> List a -> Bool
+any = Prelude.any
 
 successive :: (a -> a -> b) -> List a -> List b
 successive function list = map2 function list (drop 1 list)
