@@ -5,6 +5,7 @@ module Result
   , withDefault
   , mapError
   , onError
+  , handleError
   , orNothing
   )
 where
@@ -81,6 +82,10 @@ mapError function (Error err) = Error (function err)
 onError :: (x -> Result y a) -> Result x a -> Result y a
 onError _ (Ok value) = Ok value
 onError function (Error error) = function error
+
+handleError :: (x -> a) -> Result x a -> a
+handleError _ (Ok value) = value
+handleError function (Error error) = function error
 
 orNothing :: Result x a -> Maybe a
 orNothing (Ok value) = Just value
