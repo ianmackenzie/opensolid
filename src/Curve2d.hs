@@ -206,6 +206,21 @@ findEndpointIntersections curve1 curve2 =
     , [Intersection u 1.0 Nothing | u <- parameterValues (endPoint curve2) curve1 |> Result.withDefault []]
     ]
 
+snapToEndpoint
+  :: Tolerance units
+  => Curve2d (space @ units)
+  -> Float
+  -> Float
+snapToEndpoint curve t
+  | t == 0.0 || t == 1.0 = t
+  | p ~= p0 = if List.all (~= p0) (samplingPoints curve (Range.from 0.0 t)) then 0.0 else t
+  | p ~= p1 = if List.all (~= p1) (samplingPoints curve (Range.from t 1.0)) then 1.0 else t
+  | otherwise = t
+ where
+  p = evaluate curve t
+  p0 = startPoint curve
+  p1 = endPoint curve
+
 candidateDomain :: Intersection -> Intersection -> (Range Unitless, Range Unitless)
 candidateDomain start end =
   (Range.from start.u end.u, Range.from start.v end.v)
