@@ -184,8 +184,8 @@ parameterValues point curve = do
   roots <-
     let ?tolerance = squaredTolerance
      in Curve1d.roots squaredDistanceFromCurve
-          |> Result.onError \Curve1d.IsZero -> Error IsCoincidentWithPoint
-  Ok [root.value | root <- roots]
+          |> Result.mapError \Curve1d.IsZero -> Curve2d.IsCoincidentWithPoint
+  Ok (List.map (Root.value >> snapToEndpoint curve) roots)
 
 overlappingSegments :: Tolerance units => Curve2d (space @ units) -> Curve2d (space @ units) -> List (Range Unitless, Range Unitless)
 overlappingSegments curve1 curve2 =
