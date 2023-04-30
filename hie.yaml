@@ -6,5 +6,8 @@ cradle:
     - path: "./sandbox/Main.hs"
       component: "opensolid:exe:sandbox"
 
+    - path: "./derivatives/Main.hs"
+      component: "opensolid:exe:derivatives"
+
     - path: "./test"
       component: "opensolid:test:opensolid-test"

@@ -38,6 +38,7 @@ library
       Bounds
       Concatenate
       CoordinateSystem
+      CubicSpline2d
       Curve1d
       Curve1d.Root
       Curve2d
@@ -119,6 +120,56 @@ library
   build-depends:
       base >=4.7 && <5
     , hedgehog
+    , text
+    , text-show
+  default-language: Haskell2010
+
+executable derivatives
+  main-is: Main.hs
+  other-modules:
+      Paths_opensolid
+  autogen-modules:
+      Paths_opensolid
+  hs-source-dirs:
+      derivatives
+  default-extensions:
+      NoImplicitPrelude
+      OverloadedStrings
+      MultiParamTypeClasses
+      FlexibleInstances
+      FlexibleContexts
+      UndecidableInstances
+      RebindableSyntax
+      MonoLocalBinds
+      KindSignatures
+      StandaloneDeriving
+      Strict
+      FunctionalDependencies
+      GeneralizedNewtypeDeriving
+      DataKinds
+      ScopedTypeVariables
+      GADTs
+      RoleAnnotations
+      LexicalNegation
+      ImportQualifiedPost
+      StandaloneKindSignatures
+      UndecidableSuperClasses
+      ImplicitParams
+      ConstraintKinds
+      PatternSynonyms
+      BlockArguments
+      OverloadedLabels
+      RankNTypes
+      QualifiedDo
+      TypeFamilies
+      TypeOperators
+      OverloadedRecordDot
+      MagicHash
+  ghc-options: -Wall -Werror -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-signatures -Wmissing-exported-signatures -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wsafe -dcore-lint -Wno-unticked-promoted-constructors -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+    , hedgehog
+    , opensolid
     , text
     , text-show
   default-language: Haskell2010
