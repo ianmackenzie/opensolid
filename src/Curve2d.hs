@@ -173,7 +173,11 @@ nearby point curve domain
  where
   distance = VectorBox2d.magnitude (point - segmentBounds curve domain)
 
-parameterValues :: Tolerance units => Point2d (space @ units) -> Curve2d (space @ units) -> Result IsCoincidentWithPoint (List Float)
+parameterValues
+  :: Tolerance units
+  => Point2d (space @ units)
+  -> Curve2d (space @ units)
+  -> Result Curve2d.IsCoincidentWithPoint (List Float)
 parameterValues point curve = do
   let squaredDistanceFromCurve = VectorCurve2d.squaredMagnitude (Units.generalize (point - curve))
   let squaredTolerance = Qty.squared (Units.generalize ?tolerance)
