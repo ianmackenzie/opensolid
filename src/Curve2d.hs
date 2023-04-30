@@ -332,7 +332,7 @@ findInnerIntersections
   -> Range Unitless
   -> List Intersection
 findInnerIntersections derivatives1 derivatives2 u v =
-  let solutions = solve derivatives1 derivatives2 u v
+  let solutions = findSolutions derivatives1 derivatives2 u v
    in List.combine (crossingIntersections derivatives1 derivatives2 solutions) solutions
         ++ List.collect tangentIntersection solutions
 
@@ -357,7 +357,7 @@ crossingIntersections _ _ _ (Solution0 intersection) = [intersection]
 crossingIntersections _ _ _ (Solution1 _ _ (Just _)) = []
 crossingIntersections derivatives1 derivatives2 solutions (Solution1 u v Nothing)
   | List.any (neighborToTangentIntersection u v) solutions = []
-  | otherwise = solve0 derivatives1 derivatives2 u v
+  | otherwise = findCrossingIntersections derivatives1 derivatives2 u v
 
 neighborToTangentIntersection :: Range Unitless -> Range Unitless -> Solution -> Bool
 neighborToTangentIntersection _ _ (Solution0 _) = False
@@ -365,14 +365,14 @@ neighborToTangentIntersection _ _ (Solution1 _ _ Nothing) = False
 neighborToTangentIntersection u1 v1 (Solution1 u2 v2 (Just _)) =
   Range.overlaps u1 u2 && Range.overlaps v1 v2
 
-solve
+findSolutions
   :: Tolerance units
   => Derivatives (space @ units)
   -> Derivatives (space @ units)
   -> Range Unitless
   -> Range Unitless
   -> List Solution
-solve derivatives1 derivatives2 u v =
+findSolutions derivatives1 derivatives2 u v =
   let bounds1 = segmentBounds derivatives1.curve u
       bounds2 = segmentBounds derivatives2.curve v
       difference = bounds1 - bounds2
@@ -383,22 +383,22 @@ solve derivatives1 derivatives2 u v =
           let firstBounds1 = VectorCurve2d.segmentBounds derivatives1.first u
               firstBounds2 = VectorCurve2d.segmentBounds derivatives1.first v
            in if resolvedFirst firstBounds1 firstBounds2
-                then List.map Solution0 (solve0 derivatives1 derivatives2 u v)
+                then List.map Solution0 (findCrossingIntersections derivatives1 derivatives2 u v)
                 else
                   let secondBounds1 = VectorCurve2d.segmentBounds derivatives1.second u
                       secondBounds2 = VectorCurve2d.segmentBounds derivatives2.second v
                    in if resolvedSecond firstBounds1 firstBounds2 secondBounds1 secondBounds2
-                        then [Solution1 u v (solve1 derivatives1 derivatives2 u v)]
+                        then [Solution1 u v (findTangentIntersection derivatives1 derivatives2 u v)]
                         else solveRecursively derivatives1 derivatives2 u v
 
-solve1
+findTangentIntersection
   :: Tolerance units
   => Derivatives (space @ units)
   -> Derivatives (space @ units)
   -> Range Unitless
   -> Range Unitless
   -> Maybe Intersection
-solve1 derivatives1 derivatives2 u v =
+findTangentIntersection derivatives1 derivatives2 u v =
   case Range.search2 (isTangentIntersection derivatives1 derivatives2) u v of
     [] -> Nothing
     (u0, v0) : _ -> Just (Intersection u0 v0 Nothing)
@@ -414,19 +414,19 @@ solveRecursively derivatives1 derivatives2 u v =
   let (leftU, rightU) = Range.bisect u
       (leftV, rightV) = Range.bisect v
    in List.concat
-        [ solve derivatives1 derivatives2 leftU leftV
-        , solve derivatives1 derivatives2 leftU rightV
-        , solve derivatives1 derivatives2 rightU leftV
-        , solve derivatives1 derivatives2 rightU rightV
+        [ findSolutions derivatives1 derivatives2 leftU leftV
+        , findSolutions derivatives1 derivatives2 leftU rightV
+        , findSolutions derivatives1 derivatives2 rightU leftV
+        , findSolutions derivatives1 derivatives2 rightU rightV
         ]
 
-solve0
+findCrossingIntersections
   :: Derivatives (space @ units)
   -> Derivatives (space @ units)
   -> Range Unitless
   -> Range Unitless
   -> List Intersection
-solve0 derivatives1 derivatives2 u v =
+findCrossingIntersections derivatives1 derivatives2 u v =
   Range.search2 (isCrossingIntersection derivatives1.curve derivatives2.curve) u v
     |> List.map (crossingIntersection derivatives1.first derivatives1.second)
 
