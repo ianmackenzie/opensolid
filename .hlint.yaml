@@ -4,3 +4,4 @@
 - ignore: {name: "Replace case with maybe"}
 - ignore: {name: "Replace case with fromMaybe"}
 - ignore: {name: "Redundant $"}
+- ignore: {name: "Avoid lambda using `infix`"}
