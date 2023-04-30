@@ -68,7 +68,7 @@ tests =
 
 script :: Task Text ()
 script = Try.do
-  success <- Task.perform (Hedgehog.checkParallel tests)
+  success <- Task.fromIO (Hedgehog.checkParallel tests)
   if success then Task.succeed () else Task.fail "Test failed"
 
 main :: IO ()

@@ -6,7 +6,7 @@ module Task
   , map
   , mapError
   , forEach
-  , perform
+  , fromIO
   )
 where
 
@@ -71,8 +71,8 @@ mapError :: IsError y => (x -> y) -> Task x a -> Task y a
 mapError function (Done result) = Done (Result.mapError function result)
 mapError function (Perform io) = Perform (Prelude.fmap (mapError function) io)
 
-perform :: IO a -> Task IOError a
-perform io =
+fromIO :: IO a -> Task IOError a
+fromIO io =
   Perform $
     Control.Exception.catch (Prelude.fmap succeed io) $
       (\ioError -> Prelude.pure (Done (Error ioError)))

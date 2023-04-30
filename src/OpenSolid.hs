@@ -48,6 +48,4 @@ instance units ~ units' => ApproximateEquality (Qty units) (Qty units') units wh
   x ~= y = let (Qty delta) = x - y in Qty (Prelude.abs delta) <= ?tolerance
 
 print :: Text -> Task Text ()
-print text =
-  Task.perform (Data.Text.IO.putStrLn text)
-    |> Task.mapError errorMessage
+print text = Task.fromIO (Data.Text.IO.putStrLn text) |> Task.mapError errorMessage
