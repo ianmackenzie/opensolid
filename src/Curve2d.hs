@@ -43,7 +43,11 @@ import VectorBox2d qualified
 import VectorCurve2d (IsVectorCurve2d, VectorCurve2d (VectorCurve2d))
 import VectorCurve2d qualified
 
-class Show curve => IsCurve2d curve (coordinateSystem :: CoordinateSystem) | curve -> coordinateSystem where
+class
+  Show curve =>
+  IsCurve2d curve (coordinateSystem :: CoordinateSystem)
+    | curve -> coordinateSystem
+  where
   startPointImpl :: curve -> Point2d coordinateSystem
   endPointImpl :: curve -> Point2d coordinateSystem
   evaluateImpl :: curve -> Float -> Point2d coordinateSystem
@@ -138,7 +142,10 @@ instance IsVectorCurve2d (PointCurveDifference (space @ units)) (space @ units) 
 
 instance
   (units ~ units', space ~ space')
-  => Subtraction (Point2d (space @ units)) (Curve2d (space' @ units')) (VectorCurve2d (space @ units))
+  => Subtraction
+      (Point2d (space @ units))
+      (Curve2d (space' @ units'))
+      (VectorCurve2d (space @ units))
   where
   point - curve = VectorCurve2d (PointCurveDifference point curve)
 
@@ -152,20 +159,29 @@ instance IsVectorCurve2d (CurvePointDifference (space @ units)) (space @ units) 
 
 instance
   (units ~ units', space ~ space')
-  => Subtraction (Curve2d (space @ units)) (Point2d (space' @ units')) (VectorCurve2d (space @ units))
+  => Subtraction
+      (Curve2d (space @ units))
+      (Point2d (space' @ units'))
+      (VectorCurve2d (space @ units))
   where
   curve - point = VectorCurve2d (CurvePointDifference curve point)
 
 data IsCoincidentWithPoint = IsCoincidentWithPoint deriving (Eq, Show)
 
 instance IsError IsCoincidentWithPoint where
-  errorMessage IsCoincidentWithPoint = "Curve is in fact a single point coincident with the given point"
+  errorMessage IsCoincidentWithPoint =
+    "Curve is in fact a single point coincident with the given point"
 
 passesThrough :: Tolerance units => Point2d (space @ units) -> Curve2d (space @ units) -> Bool
 passesThrough point curve =
   Range.any (nearby point curve) Range.unit |> Result.withDefault False
 
-nearby :: Tolerance units => Point2d (space @ units) -> Curve2d (space @ units) -> Range Unitless -> Result Indeterminate Bool
+nearby
+  :: Tolerance units
+  => Point2d (space @ units)
+  -> Curve2d (space @ units)
+  -> Range Unitless
+  -> Result Indeterminate Bool
 nearby point curve domain
   | Range.minValue distance > ?tolerance = Ok False
   | Range.maxValue distance <= ?tolerance = Ok True
@@ -200,7 +216,12 @@ overlappingSegments curve1 curve2 endpointIntersections =
           |> List.successive candidateDomain
    in List.filter (overlappingSegment curve1 curve2) candidateDomains
 
-overlappingSegment :: Tolerance units => Curve2d (space @ units) -> Curve2d (space @ units) -> (Range Unitless, Range Unitless) -> Bool
+overlappingSegment
+  :: Tolerance units
+  => Curve2d (space @ units)
+  -> Curve2d (space @ units)
+  -> (Range Unitless, Range Unitless)
+  -> Bool
 overlappingSegment curve1 curve2 (domain1, _) =
   let segmentStartPoint = evaluate curve1 (Range.minValue domain1)
       segmentTestPoints = samplingPoints curve1 domain1
@@ -282,7 +303,8 @@ samplingPoints curve domain =
 newtype AreOverlapping = AreOverlapping (List (Range Unitless, Range Unitless))
 
 instance IsError AreOverlapping where
-  errorMessage (AreOverlapping _) = "Curves are overlapping (so there are infinite intersection points)"
+  errorMessage (AreOverlapping _) =
+    "Curves are overlapping (so there are infinite intersection points)"
 
 intersections
   :: Tolerance units
@@ -299,17 +321,19 @@ intersections curve1 curve2 = do
           secondDerivative2 = VectorCurve2d.derivative firstDerivative2
           derivatives1 = Derivatives curve1 firstDerivative1 secondDerivative1
           derivatives2 = Derivatives curve2 firstDerivative2 secondDerivative2
-       in Ok (endpointIntersections ++ innerIntersections derivatives1 derivatives2 Range.unit Range.unit)
+          innerIntersections =
+            findInnerIntersections derivatives1 derivatives2 Range.unit Range.unit
+       in Ok (endpointIntersections ++ innerIntersections)
     segments -> Error (OverlappingSegments segments)
 
-innerIntersections
+findInnerIntersections
   :: Tolerance units
   => Derivatives (space @ units)
   -> Derivatives (space @ units)
   -> Range Unitless
   -> Range Unitless
   -> List Intersection
-innerIntersections derivatives1 derivatives2 u v =
+findInnerIntersections derivatives1 derivatives2 u v =
   let solutions = solve derivatives1 derivatives2 u v
    in List.combine (crossingIntersections derivatives1 derivatives2 solutions) solutions
         ++ List.collect tangentIntersection solutions
@@ -325,7 +349,12 @@ tangentIntersection :: Solution -> Maybe Intersection
 tangentIntersection (Solution0 _) = Nothing
 tangentIntersection (Solution1 _ _ maybeIntersection) = maybeIntersection
 
-crossingIntersections :: Derivatives (space @ units) -> Derivatives (space @ units) -> List Solution -> Solution -> List Intersection
+crossingIntersections
+  :: Derivatives (space @ units)
+  -> Derivatives (space @ units)
+  -> List Solution
+  -> Solution
+  -> List Intersection
 crossingIntersections _ _ _ (Solution0 intersection) = [intersection]
 crossingIntersections _ _ _ (Solution1 _ _ (Just _)) = []
 crossingIntersections derivatives1 derivatives2 solutions (Solution1 u v Nothing)
@@ -412,7 +441,11 @@ isCrossingIntersection
 isCrossingIntersection curve1 curve2 u v =
   BoundingBox2d.overlaps (segmentBounds curve1 u) (segmentBounds curve2 v)
 
-crossingIntersection :: VectorCurve2d (space @ units) -> VectorCurve2d (space @ units) -> (Float, Float) -> Intersection
+crossingIntersection
+  :: VectorCurve2d (space @ units)
+  -> VectorCurve2d (space @ units)
+  -> (Float, Float)
+  -> Intersection
 crossingIntersection firstDerivative1 firstDerivative2 (u, v) =
   let first1 = VectorCurve2d.evaluate firstDerivative1 u
       first2 = VectorCurve2d.evaluate firstDerivative2 v
