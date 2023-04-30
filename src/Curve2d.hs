@@ -1,7 +1,7 @@
 module Curve2d
   ( Curve2d (Curve2d, Line, Arc)
   , Intersection
-  , AreOverlapping
+  , IntersectionError (..)
   , IsCurve2d (..)
   , startPoint
   , endPoint
@@ -187,24 +187,74 @@ parameterValues point curve = do
           |> Result.mapError \Curve1d.IsZero -> Curve2d.IsCoincidentWithPoint
   Ok (List.map (Root.value >> snapToEndpoint curve) roots)
 
-overlappingSegments :: Tolerance units => Curve2d (space @ units) -> Curve2d (space @ units) -> List (Range Unitless, Range Unitless)
-overlappingSegments curve1 curve2 =
-  let endpointIntersections = List.sortAndDeduplicate (findEndpointIntersections curve1 curve2)
-      candidateDomains = List.successive candidateDomain endpointIntersections
+overlappingSegments
+  :: Tolerance units
+  => Curve2d (space @ units)
+  -> Curve2d (space @ units)
+  -> List Intersection
+  -> List (Range Unitless, Range Unitless)
+overlappingSegments curve1 curve2 endpointIntersections =
+  let candidateDomains =
+        endpointIntersections
+          |> List.sortAndDeduplicate
+          |> List.successive candidateDomain
    in List.filter (overlappingSegment curve1 curve2) candidateDomains
+
+overlappingSegment :: Tolerance units => Curve2d (space @ units) -> Curve2d (space @ units) -> (Range Unitless, Range Unitless) -> Bool
+overlappingSegment curve1 curve2 (domain1, _) =
+  let segmentStartPoint = evaluate curve1 (Range.minValue domain1)
+      segmentTestPoints = samplingPoints curve1 domain1
+      degenerateDomain = List.all (~= segmentStartPoint) segmentTestPoints
+   in not degenerateDomain && List.all (\p -> passesThrough p curve2) segmentTestPoints
+
+data IntersectionError
+  = BothAreDegenerateAndEqual
+  | FirstIsDegenerateOnSecond (List Float)
+  | SecondIsDegenerateOnFirst (List Float)
+  | OverlappingSegments (List (Range Unitless, Range Unitless))
+  | ZeroFirstDerivative
+
+instance IsError IntersectionError where
+  errorMessage BothAreDegenerateAndEqual =
+    "Both curves are a single point each and are are equal to each other"
+  errorMessage (FirstIsDegenerateOnSecond _) =
+    "First curve is a single point on the second curve"
+  errorMessage (SecondIsDegenerateOnFirst _) =
+    "Second curve is a single point on the first curve"
+  errorMessage (OverlappingSegments _) =
+    "Curves have overlapping segments"
+  errorMessage ZeroFirstDerivative =
+    "Curve first derivative is zero (so tangent direction cannot be easily determined)"
 
 findEndpointIntersections
   :: Tolerance units
   => Curve2d (space @ units)
   -> Curve2d (space @ units)
-  -> List Intersection
+  -> Result IntersectionError (List Intersection)
 findEndpointIntersections curve1 curve2 =
-  List.concat
-    [ [Intersection 0.0 v Nothing | v <- parameterValues (startPoint curve1) curve2 |> Result.withDefault []]
-    , [Intersection 1.0 v Nothing | v <- parameterValues (endPoint curve1) curve2 |> Result.withDefault []]
-    , [Intersection u 0.0 Nothing | u <- parameterValues (startPoint curve2) curve1 |> Result.withDefault []]
-    , [Intersection u 1.0 Nothing | u <- parameterValues (endPoint curve2) curve1 |> Result.withDefault []]
-    ]
+  let uValues = do
+        v0us <- curve1 |> parameterValues (startPoint curve2)
+        v1us <- curve1 |> parameterValues (endPoint curve2)
+        Ok (v0us, v1us)
+      vValues = do
+        u0vs <- curve2 |> parameterValues (startPoint curve1)
+        u1vs <- curve2 |> parameterValues (endPoint curve1)
+        Ok (u0vs, u1vs)
+   in case (uValues, vValues) of
+        (Ok (v0us, v1us), Ok (u0vs, u1vs)) ->
+          Ok $
+            List.concat
+              [ List.map (\u -> Intersection u 0.0 Nothing) v0us
+              , List.map (\u -> Intersection u 1.0 Nothing) v1us
+              , List.map (\v -> Intersection 0.0 v Nothing) u0vs
+              , List.map (\v -> Intersection 1.0 v Nothing) u1vs
+              ]
+        (Error Curve2d.IsCoincidentWithPoint, Ok (u0vs, _)) ->
+          Error (FirstIsDegenerateOnSecond u0vs)
+        (Ok (v0us, _), Error Curve2d.IsCoincidentWithPoint) ->
+          Error (SecondIsDegenerateOnFirst v0us)
+        (Error Curve2d.IsCoincidentWithPoint, Error Curve2d.IsCoincidentWithPoint) ->
+          Error BothAreDegenerateAndEqual
 
 snapToEndpoint
   :: Tolerance units
@@ -227,14 +277,7 @@ candidateDomain start end =
 
 samplingPoints :: Curve2d (space @ units) -> Range Unitless -> List (Point2d (space @ units))
 samplingPoints curve domain =
-  [evaluate curve (Range.interpolate domain t) | t <- Quadrature.parameterValues]
-
-overlappingSegment :: Tolerance units => Curve2d (space @ units) -> Curve2d (space @ units) -> (Range Unitless, Range Unitless) -> Bool
-overlappingSegment curve1 curve2 (domain1, _) =
-  let testPoints = samplingPoints curve1 domain1
-      midpoint = evaluate curve1 (Range.midpoint domain1)
-      degenerateDomain = List.all (~= midpoint) testPoints
-   in not degenerateDomain && List.all (`passesThrough` curve2) testPoints
+  List.map (Range.interpolate domain >> evaluate curve) Quadrature.parameterValues
 
 newtype AreOverlapping = AreOverlapping (List (Range Unitless, Range Unitless))
 
@@ -245,9 +288,10 @@ intersections
   :: Tolerance units
   => Curve2d (space @ units)
   -> Curve2d (space @ units)
-  -> Result AreOverlapping (List Intersection)
-intersections curve1 curve2 =
-  case overlappingSegments curve1 curve2 of
+  -> Result IntersectionError (List Intersection)
+intersections curve1 curve2 = do
+  endpointIntersections <- findEndpointIntersections curve1 curve2
+  case overlappingSegments curve1 curve2 endpointIntersections of
     [] ->
       let firstDerivative1 = derivative curve1
           firstDerivative2 = derivative curve2
@@ -255,23 +299,20 @@ intersections curve1 curve2 =
           secondDerivative2 = VectorCurve2d.derivative firstDerivative2
           derivatives1 = Derivatives curve1 firstDerivative1 secondDerivative1
           derivatives2 = Derivatives curve2 firstDerivative2 secondDerivative2
-       in Ok (findIntersections derivatives1 derivatives2 Range.unit Range.unit)
-    segments -> Error (AreOverlapping segments)
+       in Ok (endpointIntersections ++ innerIntersections derivatives1 derivatives2 Range.unit Range.unit)
+    segments -> Error (OverlappingSegments segments)
 
-findIntersections
+innerIntersections
   :: Tolerance units
   => Derivatives (space @ units)
   -> Derivatives (space @ units)
   -> Range Unitless
   -> Range Unitless
   -> List Intersection
-findIntersections derivatives1 derivatives2 u v =
+innerIntersections derivatives1 derivatives2 u v =
   let solutions = solve derivatives1 derivatives2 u v
-   in List.concat
-        [ List.collect tangentIntersection solutions
-        , List.combine (crossingIntersections derivatives1 derivatives2 solutions) solutions
-        , findEndpointIntersections derivatives1.curve derivatives2.curve
-        ]
+   in List.combine (crossingIntersections derivatives1 derivatives2 solutions) solutions
+        ++ List.collect tangentIntersection solutions
 
 resolved :: Range units -> Bool
 resolved range = Range.resolution range >= 0.5

@@ -5,6 +5,7 @@ import Arc2d qualified
 import Area qualified
 import Axis2d qualified
 import Curve1d qualified
+import Curve2d (Curve2d)
 import Curve2d qualified
 import Debug qualified
 import Direction2d qualified
@@ -18,13 +19,14 @@ import Point2d (Point2d)
 import Point2d qualified
 import Qty qualified
 import QuadraticSpline2d qualified
+import Range (Range)
 import Range qualified
 import Result qualified
 import Task qualified
 import Text qualified
 import Transform2d qualified
 import Try qualified
-import Units (Meters)
+import Units (Meters, Unitless)
 import Vector2d qualified
 import Vector3d qualified
 import Volume qualified
@@ -94,6 +96,17 @@ testArc2dFrom = Try.do
   log "arc4 point" (Curve2d.evaluate arc4 0.5)
   log "line point" (Curve2d.evaluate line 0.5)
 
+overlappingSegments
+  :: Tolerance units
+  => Curve2d (space @ units)
+  -> Curve2d (space @ units)
+  -> Result Text (List (Range Unitless, Range Unitless))
+overlappingSegments curve1 curve2 =
+  case Curve2d.intersections curve1 curve2 of
+    Ok _ -> Error "Intersection should have failed (and given overlapping segments)"
+    Error (Curve2d.OverlappingSegments segments) -> Ok segments
+    Error error -> Error (errorMessage error)
+
 testCurveOverlap1 :: Task Text ()
 testCurveOverlap1 = Try.do
   arc1 <-
@@ -108,7 +121,7 @@ testCurveOverlap1 = Try.do
       , Arc2d.EndPoint (Point2d.meters 0.0 1.0)
       , Arc2d.SweptAngle (Angle.degrees 180.0)
       ]
-  segment <- Curve2d.overlappingSegments arc1 arc2
+  segment <- overlappingSegments arc1 arc2
   log "Overlapping segment 1" segment
  where
   ?tolerance = Length.meters 1e-9
@@ -129,7 +142,7 @@ testCurveOverlap2 = Try.do
       , Arc2d.StartAngle (Angle.degrees -45.0)
       , Arc2d.EndAngle (Angle.degrees 225.0)
       ]
-  segment <- Curve2d.overlappingSegments arc1 arc2
+  segment <- overlappingSegments arc1 arc2
   log "Overlapping segment 2" segment
  where
   ?tolerance = Length.meters 1e-9
