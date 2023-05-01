@@ -314,7 +314,7 @@ solve curveDerivative derivativeOrder region
             -- are non-zero regions of the derivative curve.
             | otherwise =
                 let rootX = bisectMonotonic curveDerivative minX maxX minY maxY
-                 in if evaluate ?originalCurve rootX ~= Qty.zero
+                 in if derivativeOrder == 0 || evaluate ?originalCurve rootX ~= Qty.zero
                       then
                         let root = Root rootX derivativeOrder nextDerivativeSign
                             width = computeWidth (derivativeOrder + 1) (evaluate nextDerivative rootX)
