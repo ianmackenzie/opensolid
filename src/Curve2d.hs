@@ -199,7 +199,7 @@ parameterValues point curve = do
     let ?tolerance = Qty.squared (Units.generalize ?tolerance)
      in Curve1d.roots (VectorCurve2d.squaredMagnitude (Units.generalize (point - curve)))
           |> Result.mapError \Curve1d.IsZero -> Curve2d.IsCoincidentWithPoint
-  Ok (List.map (Root.value >> snapToEndpoint curve) roots)
+  Ok (List.map Root.value roots)
 
 overlappingSegments
   :: Tolerance units
@@ -275,21 +275,6 @@ findEndpointIntersections curve1 curve2 =
           Error (SecondIsDegenerateOnFirst v0us)
         (Error Curve2d.IsCoincidentWithPoint, Error Curve2d.IsCoincidentWithPoint) ->
           Error BothAreDegenerateAndEqual
-
-snapToEndpoint
-  :: Tolerance units
-  => Curve2d (space @ units)
-  -> Float
-  -> Float
-snapToEndpoint curve t
-  | t == 0.0 || t == 1.0 = t
-  | p ~= p0 = if List.all (~= p0) (samplingPoints curve (Range.from 0.0 t)) then 0.0 else t
-  | p ~= p1 = if List.all (~= p1) (samplingPoints curve (Range.from t 1.0)) then 1.0 else t
-  | otherwise = t
- where
-  p = evaluate curve t
-  p0 = startPoint curve
-  p1 = endPoint curve
 
 candidateDomain :: Intersection -> Intersection -> (Range Unitless, Range Unitless)
 candidateDomain start end =
