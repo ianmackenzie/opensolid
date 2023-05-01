@@ -258,19 +258,18 @@ data EqualEverywhere = EqualEverywhere deriving (Eq, Show)
 instance IsError EqualEverywhere where
   errorMessage EqualEverywhere = "Curve1d is equal to the given value everywhere"
 
-equals :: Tolerance units => Qty units -> Curve1d units -> Result EqualEverywhere (List Float)
+equals :: Tolerance units => Qty units -> Curve1d units -> Result EqualEverywhere (List Root)
 equals value curve =
-  roots (curve - value)
-    |> Result.mapError (\IsZero -> EqualEverywhere)
-    |> Result.map (List.map Root.value)
+  roots (curve - value) |> Result.mapError (\IsZero -> EqualEverywhere)
 
-equalsSquared :: (Tolerance units1, Squared units1 units2) => Qty units1 -> Curve1d units2 -> Result EqualEverywhere (List Float)
+equalsSquared
+  :: (Tolerance units1, Squared units1 units2)
+  => Qty units1
+  -> Curve1d units2
+  -> Result EqualEverywhere (List Root)
 equalsSquared value curve =
-  roots (curve - Qty.squared value)
-    |> Result.mapError (\IsZero -> EqualEverywhere)
-    |> Result.map (List.map Root.value)
- where
-  ?tolerance = 2.0 * value * ?tolerance
+  let ?tolerance = 2.0 * value * ?tolerance
+   in roots (curve - Qty.squared value) |> Result.mapError (\IsZero -> EqualEverywhere)
 
 roots :: Tolerance units => Curve1d units -> Result IsZero (List Root)
 roots Zero = Error IsZero
