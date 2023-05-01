@@ -13,6 +13,9 @@ module Curve1d
   , cos
   , IsZero (IsZero)
   , roots
+  , EqualEverywhere (EqualEverywhere)
+  , equals
+  , equalsSquared
   )
 where
 
@@ -29,7 +32,8 @@ import Qty qualified
 import Quadrature qualified
 import Range (Range (..))
 import Range qualified
-import Units (Radians, Unitless)
+import Result qualified
+import Units (Radians, Squared, Unitless)
 import Units qualified
 import Vector2d (Vector2d)
 import Vector3d (Vector3d)
@@ -248,6 +252,25 @@ data IsZero = IsZero deriving (Eq, Show)
 
 instance IsError IsZero where
   errorMessage IsZero = "Curve1d is zero everywhere"
+
+data EqualEverywhere = EqualEverywhere deriving (Eq, Show)
+
+instance IsError EqualEverywhere where
+  errorMessage EqualEverywhere = "Curve1d is equal to the given value everywhere"
+
+equals :: Tolerance units => Qty units -> Curve1d units -> Result EqualEverywhere (List Float)
+equals value curve =
+  roots (curve - value)
+    |> Result.mapError (\IsZero -> EqualEverywhere)
+    |> Result.map (List.map Root.value)
+
+equalsSquared :: (Tolerance units1, Squared units1 units2) => Qty units1 -> Curve1d units2 -> Result EqualEverywhere (List Float)
+equalsSquared value curve =
+  roots (curve - Qty.squared value)
+    |> Result.mapError (\IsZero -> EqualEverywhere)
+    |> Result.map (List.map Root.value)
+ where
+  ?tolerance = 2.0 * value * ?tolerance
 
 roots :: Tolerance units => Curve1d units -> Result IsZero (List Root)
 roots Zero = Error IsZero
