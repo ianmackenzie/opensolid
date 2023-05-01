@@ -29,6 +29,7 @@ import Try qualified
 import Units (Meters, Unitless)
 import Vector2d qualified
 import Vector3d qualified
+import VectorCurve2d qualified
 import Volume qualified
 
 log :: Show a => Text -> a -> Task Text ()
@@ -250,6 +251,20 @@ testCurve2dTangentIntersection = Try.do
  where
   ?tolerance = Length.meters 1e-9
 
+testCurve2dSolving :: Task Text ()
+testCurve2dSolving = Try.do
+  arc <-
+    Arc2d.with
+      [ Arc2d.StartPoint (Point2d.meters 0.0 1.0)
+      , Arc2d.EndPoint (Point2d.meters 1.0 0.0)
+      , Arc2d.SweptAngle (Angle.degrees 90.0)
+      ]
+  let squaredDistanceFromOrigin = VectorCurve2d.squaredMagnitude (arc - Point2d.origin)
+  roots <- squaredDistanceFromOrigin |> Curve1d.equalsSquared (Length.meters 0.5)
+  log "Curve2d solving roots" roots
+ where
+  ?tolerance = Length.meters 1e-18
+
 script :: Task Text ()
 script = do
   log "Integer product" (3 * 4)
@@ -322,6 +337,7 @@ script = do
   log "Offset point" (offsetPoint (Point2d.meters 1.0 0.0) (Point2d.meters 3.0 0.0) (Length.meters 1.0))
   testCurve2dIntersection
   testCurve2dTangentIntersection
+  testCurve2dSolving
 
 main :: IO ()
 main = Task.toIO script
