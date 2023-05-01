@@ -43,6 +43,7 @@ data BuildError
   = UnsupportedConstraints
   | EndpointsCoincident
   | EndpointsTooFarApart
+  deriving (Show)
 
 instance IsError BuildError where
   errorMessage UnsupportedConstraints = "Unsupported set of constraints for Arc2d construction"

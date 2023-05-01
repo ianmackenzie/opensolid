@@ -7,7 +7,7 @@ where
 
 import Basics
 
-class IsError error where
+class Show error => IsError error where
   errorMessage :: error -> Text
 
 instance IsError Text

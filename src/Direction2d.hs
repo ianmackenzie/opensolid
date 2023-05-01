@@ -93,7 +93,7 @@ x = positiveX
 y :: Direction2d space
 y = positiveY
 
-data PointsAreCoincident = PointsAreCoincident
+data PointsAreCoincident = PointsAreCoincident deriving (Show)
 
 instance IsError PointsAreCoincident where
   errorMessage PointsAreCoincident = "Given points are coincident"

@@ -232,6 +232,7 @@ data IntersectionError
   | SecondIsDegenerateOnFirst (List Float)
   | OverlappingSegments (List (Range Unitless, Range Unitless))
   | ZeroFirstDerivative
+  deriving (Show)
 
 instance IsError IntersectionError where
   errorMessage BothAreDegenerateAndEqual =
@@ -298,7 +299,7 @@ samplingPoints :: Curve2d (space @ units) -> Range Unitless -> List (Point2d (sp
 samplingPoints curve domain =
   List.map (Range.interpolate domain >> evaluate curve) Quadrature.parameterValues
 
-newtype AreOverlapping = AreOverlapping (List (Range Unitless, Range Unitless))
+newtype AreOverlapping = AreOverlapping (List (Range Unitless, Range Unitless)) deriving (Show)
 
 instance IsError AreOverlapping where
   errorMessage (AreOverlapping _) =

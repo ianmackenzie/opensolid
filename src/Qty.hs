@@ -145,7 +145,7 @@ interpolateFrom a b t =
 midpoint :: Qty units -> Qty units -> Qty units
 midpoint a b = 0.5 * (a + b)
 
-data IsZero = IsZero
+data IsZero = IsZero deriving (Show)
 
 instance IsError IsZero where
   errorMessage IsZero = "Value is zero"
@@ -153,7 +153,7 @@ instance IsError IsZero where
 nonZero :: Qty units -> Result IsZero (Qty units)
 nonZero value = if value /= zero then Ok value else Error IsZero
 
-data IsNegative = IsNegative
+data IsNegative = IsNegative deriving (Show)
 
 instance IsError IsNegative where
   errorMessage IsNegative = "Value is negative"

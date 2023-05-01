@@ -18,7 +18,7 @@ import System.IO.Error qualified
 import Text qualified
 import Prelude qualified
 
-class IsError error where
+class Show error => IsError error where
   errorMessage :: error -> Text
 
 instance IsError Text where

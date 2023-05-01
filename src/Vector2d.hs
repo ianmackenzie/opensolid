@@ -134,7 +134,7 @@ squaredMagnitude (Vector2d vx vy) = Qty.squared vx + Qty.squared vy
 angle :: Vector2d (space @ units) -> Angle
 angle (Vector2d vx vy) = Angle.atan2 vy vx
 
-data IsZero = IsZero
+data IsZero = IsZero deriving (Show)
 
 instance IsError IsZero where
   errorMessage IsZero = "Vector2d is zero"
