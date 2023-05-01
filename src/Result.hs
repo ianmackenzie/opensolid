@@ -1,6 +1,7 @@
 module Result
   ( Result (..)
   , IsError (..)
+  , Indeterminate (Indeterminate)
   , map
   , withDefault
   , mapError
@@ -66,6 +67,11 @@ instance Bind [] (Result x (List b)) where
 
 instance Fail (Result Text a) where
   fail = Error
+
+data Indeterminate = Indeterminate deriving (Show)
+
+instance IsError Indeterminate where
+  errorMessage Indeterminate = "Result is indeterminate"
 
 withDefault :: a -> Result x a -> a
 withDefault _ (Ok value) = value

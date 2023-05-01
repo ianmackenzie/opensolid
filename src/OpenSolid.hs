@@ -10,7 +10,6 @@ module OpenSolid
   , module Task
   , module DoNotation
   , module CoordinateSystem
-  , Indeterminate (Indeterminate)
   , Tolerance
   , ApproximateEquality ((~=))
   , print
@@ -26,16 +25,11 @@ import DoNotation
 import Float (Float, fromRational)
 import List (List)
 import Qty (Qty (..))
-import Result (IsError (errorMessage), Result (Error, Ok))
+import Result (Indeterminate (Indeterminate), IsError (errorMessage), Result (Error, Ok))
 import Sign (Sign (Negative, Positive))
 import Task (Task)
 import Task qualified
 import Prelude qualified
-
-data Indeterminate = Indeterminate
-
-instance IsError Indeterminate where
-  errorMessage Indeterminate = "Result is indeterminate"
 
 type Tolerance units = ?tolerance :: Qty units
 
