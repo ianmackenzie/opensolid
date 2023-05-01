@@ -25,11 +25,11 @@ import DoNotation
 import Float (Float, fromRational)
 import List (List)
 import Qty (Qty (..))
+import Qty qualified
 import Result (Indeterminate (Indeterminate), IsError (errorMessage), Result (Error, Ok))
 import Sign (Sign (Negative, Positive))
 import Task (Task)
 import Task qualified
-import Prelude qualified
 
 type Tolerance units = ?tolerance :: Qty units
 
@@ -39,7 +39,7 @@ class ApproximateEquality a b units | a -> units, b -> units where
 infix 4 ~=
 
 instance units ~ units' => ApproximateEquality (Qty units) (Qty units') units where
-  x ~= y = let (Qty delta) = x - y in Qty (Prelude.abs delta) <= ?tolerance
+  x ~= y = Qty.abs (x - y) <= ?tolerance
 
 print :: Text -> Task Text ()
 print text = Task.fromIO (Data.Text.IO.putStrLn text) |> Task.mapError errorMessage
