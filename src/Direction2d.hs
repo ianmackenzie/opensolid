@@ -48,22 +48,58 @@ instance
 instance Negation (Direction2d space) where
   negate (Direction2d dx dy) = unsafe (negate dx) (negate dy)
 
-instance space ~ space' => DotProduct (Direction2d space) (Direction2d space') Float where
+instance
+  space ~ space'
+  => DotProduct
+      (Direction2d space)
+      (Direction2d space')
+      Float
+  where
   Direction2d x1 y1 <> Direction2d x2 y2 = x1 * x2 + y1 * y2
 
-instance space ~ space' => DotProduct (Vector2d (space @ units)) (Direction2d space') (Qty units) where
+instance
+  space ~ space'
+  => DotProduct
+      (Vector2d (space @ units))
+      (Direction2d space')
+      (Qty units)
+  where
   Vector2d vx vy <> Direction2d dx dy = vx * dx + vy * dy
 
-instance space ~ space' => DotProduct (Direction2d space) (Vector2d (space' @ units)) (Qty units) where
+instance
+  space ~ space'
+  => DotProduct
+      (Direction2d space)
+      (Vector2d (space' @ units))
+      (Qty units)
+  where
   Direction2d dx dy <> Vector2d vx vy = dx * vx + dy * vy
 
-instance space ~ space' => CrossProduct (Direction2d space) (Direction2d space') Float where
+instance
+  space ~ space'
+  => CrossProduct
+      (Direction2d space)
+      (Direction2d space')
+      Float
+  where
   Direction2d x1 y1 >< Direction2d x2 y2 = x1 * y2 - y1 * x2
 
-instance space ~ space' => CrossProduct (Vector2d (space @ units)) (Direction2d space') (Qty units) where
+instance
+  space ~ space'
+  => CrossProduct
+      (Vector2d (space @ units))
+      (Direction2d space')
+      (Qty units)
+  where
   Vector2d vx vy >< Direction2d dx dy = vx * dy - vy * dx
 
-instance space ~ space' => CrossProduct (Direction2d space) (Vector2d (space' @ units)) (Qty units) where
+instance
+  space ~ space'
+  => CrossProduct
+      (Direction2d space)
+      (Vector2d (space' @ units))
+      (Qty units)
+  where
   Direction2d dx dy >< Vector2d vx vy = dx * vy - dy * vx
 
 instance Multiplication (Qty units) (Direction2d space) (Vector2d (space @ units)) where
@@ -98,7 +134,10 @@ data PointsAreCoincident = PointsAreCoincident deriving (Show)
 instance IsError PointsAreCoincident where
   errorMessage PointsAreCoincident = "Given points are coincident"
 
-from :: Point2d (space @ units) -> Point2d (space @ units) -> Result PointsAreCoincident (Direction2d space)
+from
+  :: Point2d (space @ units)
+  -> Point2d (space @ units)
+  -> Result PointsAreCoincident (Direction2d space)
 from p1 p2 =
   Vector2d.direction (p2 - p1)
     |> Result.mapError (\Vector2d.IsZero -> Direction2d.PointsAreCoincident)
