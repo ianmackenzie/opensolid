@@ -101,7 +101,7 @@ instance IsError PointsAreCoincident where
 from :: Point2d (space @ units) -> Point2d (space @ units) -> Result PointsAreCoincident (Direction2d space)
 from p1 p2 =
   Vector2d.direction (p2 - p1)
-    |> Result.mapError \Vector2d.IsZero -> Direction2d.PointsAreCoincident
+    |> Result.mapError (\Vector2d.IsZero -> Direction2d.PointsAreCoincident)
 
 fromAngle :: Angle -> Direction2d space
 fromAngle angle = unsafe (Angle.cos angle) (Angle.sin angle)
