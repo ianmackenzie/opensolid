@@ -130,7 +130,7 @@ zero :: VectorCurve2d (space @ units)
 zero = Zero
 
 constant :: Vector2d (space @ units) -> VectorCurve2d (space @ units)
-constant = Constant
+constant vector = if vector == Vector2d.zero then Zero else Constant vector
 
 xy :: Curve1d units -> Curve1d units -> VectorCurve2d (space @ units)
 xy = XY
