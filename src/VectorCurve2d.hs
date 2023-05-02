@@ -7,6 +7,9 @@ module VectorCurve2d
   , zero
   , constant
   , xy
+  , line
+  , quadraticSpline
+  , cubicSpline
   , squaredMagnitude
   , magnitude
   , normalize
@@ -17,10 +20,10 @@ import Curve1d (Curve1d (Curve1d), IsCurve1d)
 import Curve1d qualified
 import Generic qualified
 import OpenSolid
-import Range (Range)
+import Range (Range (Range))
 import Units (Unitless)
 import Units qualified
-import Vector2d (Vector2d)
+import Vector2d (Vector2d (Vector2d))
 import Vector2d qualified
 import VectorBox2d (VectorBox2d (VectorBox2d))
 import VectorBox2d qualified
@@ -41,6 +44,9 @@ data VectorCurve2d (coordinateSystem :: CoordinateSystem) where
   Product1d2d :: forall space units1 units2 units3. Units.Product units1 units2 units3 => Curve1d units1 -> VectorCurve2d (space @ units2) -> VectorCurve2d (space @ units3)
   Product2d1d :: forall space units1 units2 units3. Units.Product units1 units2 units3 => VectorCurve2d (space @ units1) -> Curve1d units2 -> VectorCurve2d (space @ units3)
   Quotient :: forall space units1 units2 units3. Units.Quotient units1 units2 units3 => VectorCurve2d (space @ units1) -> Curve1d units2 -> VectorCurve2d (space @ units3)
+  Line :: Vector2d (space @ units) -> Vector2d (space @ units) -> VectorCurve2d (space @ units)
+  QuadraticSpline :: Vector2d (space @ units) -> Vector2d (space @ units) -> Vector2d (space @ units) -> VectorCurve2d (space @ units)
+  CubicSpline :: Vector2d (space @ units) -> Vector2d (space @ units) -> Vector2d (space @ units) -> Vector2d (space @ units) -> VectorCurve2d (space @ units)
 
 instance
   (units1 ~ units1', units2 ~ units2', space ~ space')
@@ -135,6 +141,62 @@ constant vector = if vector == Vector2d.zero then Zero else Constant vector
 xy :: Curve1d units -> Curve1d units -> VectorCurve2d (space @ units)
 xy = XY
 
+line :: Vector2d (space @ units) -> Vector2d (space @ units) -> VectorCurve2d (space @ units)
+line v1 v2 = if v1 == v2 then Constant v1 else Line v1 v2
+
+quadraticSpline
+  :: Vector2d (space @ units)
+  -> Vector2d (space @ units)
+  -> Vector2d (space @ units)
+  -> VectorCurve2d (space @ units)
+quadraticSpline = QuadraticSpline
+
+cubicSpline
+  :: Vector2d (space @ units)
+  -> Vector2d (space @ units)
+  -> Vector2d (space @ units)
+  -> Vector2d (space @ units)
+  -> VectorCurve2d (space @ units)
+cubicSpline = CubicSpline
+
+quadraticBlossom
+  :: Vector2d (space @ units)
+  -> Vector2d (space @ units)
+  -> Vector2d (space @ units)
+  -> Float
+  -> Float
+  -> Vector2d (space @ units)
+quadraticBlossom (Vector2d x1 y1) (Vector2d x2 y2) (Vector2d x3 y3) t1 t2 =
+  let r1 = 1.0 - t1
+      r2 = 1.0 - t2
+      s1 = r1 * r2
+      s2 = r1 * t2 + t1 * r2
+      s3 = t1 * t2
+      x = s1 * x1 + s2 * x2 + s3 * x3
+      y = s1 * y1 + s2 * y2 + s3 * y3
+   in Vector2d x y
+
+cubicBlossom
+  :: Vector2d (space @ units)
+  -> Vector2d (space @ units)
+  -> Vector2d (space @ units)
+  -> Vector2d (space @ units)
+  -> Float
+  -> Float
+  -> Float
+  -> Vector2d (space @ units)
+cubicBlossom (Vector2d x1 y1) (Vector2d x2 y2) (Vector2d x3 y3) (Vector2d x4 y4) t1 t2 t3 =
+  let r1 = 1.0 - t1
+      r2 = 1.0 - t2
+      r3 = 1.0 - t3
+      s1 = r1 * r2 * r3
+      s2 = r1 * r2 * t3 + r1 * t2 * r3 + t1 * r2 * r3
+      s3 = t1 * t2 * r3 + t1 * r2 * t3 + r1 * t2 * t3
+      s4 = t1 * t2 * t3
+      x = s1 * x1 + s2 * x2 + s3 * x3 + s4 * x4
+      y = s1 * y1 + s2 * y2 + s3 * y3 + s4 * y4
+   in Vector2d x y
+
 evaluate :: VectorCurve2d (space @ units) -> Float -> Vector2d (space @ units)
 evaluate curve t =
   case curve of
@@ -148,9 +210,12 @@ evaluate curve t =
     Product1d2d c1 c2 -> Curve1d.evaluate c1 t * evaluate c2 t
     Product2d1d c1 c2 -> evaluate c1 t * Curve1d.evaluate c2 t
     Quotient c1 c2 -> evaluate c1 t / Curve1d.evaluate c2 t
+    Line v1 v2 -> Vector2d.interpolateFrom v1 v2 t
+    QuadraticSpline v1 v2 v3 -> quadraticBlossom v1 v2 v3 t t
+    CubicSpline v1 v2 v3 v4 -> cubicBlossom v1 v2 v3 v4 t t t
 
 segmentBounds :: VectorCurve2d (space @ units) -> Range Unitless -> VectorBox2d (space @ units)
-segmentBounds curve t =
+segmentBounds curve t@(Range tl th) =
   case curve of
     VectorCurve2d c -> segmentBoundsImpl c t
     Zero -> VectorBox2d.constant Vector2d.zero
@@ -162,6 +227,21 @@ segmentBounds curve t =
     Product1d2d c1 c2 -> Curve1d.segmentBounds c1 t * segmentBounds c2 t
     Product2d1d c1 c2 -> segmentBounds c1 t * Curve1d.segmentBounds c2 t
     Quotient c1 c2 -> segmentBounds c1 t / Curve1d.segmentBounds c2 t
+    Line v1 v2 ->
+      VectorBox2d.hull2
+        (Vector2d.interpolateFrom v1 v2 tl)
+        (Vector2d.interpolateFrom v1 v2 th)
+    QuadraticSpline v1 v2 v3 ->
+      VectorBox2d.hull3
+        (quadraticBlossom v1 v2 v3 tl tl)
+        (quadraticBlossom v1 v2 v3 tl th)
+        (quadraticBlossom v1 v2 v3 th th)
+    CubicSpline v1 v2 v3 v4 ->
+      VectorBox2d.hull4
+        (cubicBlossom v1 v2 v3 v4 tl tl tl)
+        (cubicBlossom v1 v2 v3 v4 tl tl th)
+        (cubicBlossom v1 v2 v3 v4 tl th th)
+        (cubicBlossom v1 v2 v3 v4 th th th)
 
 derivative :: VectorCurve2d (space @ units) -> VectorCurve2d (space @ units)
 derivative curve =
@@ -176,6 +256,9 @@ derivative curve =
     Product1d2d c1 c2 -> Curve1d.derivative c1 * c2 + c1 * derivative c2
     Product2d1d c1 c2 -> derivative c1 * c2 + c1 * Curve1d.derivative c2
     Quotient c1 c2 -> derivative c1 / c2 + curve * (Curve1d.derivative c2 / c2)
+    Line v1 v2 -> constant (v2 - v1)
+    QuadraticSpline v1 v2 v3 -> line (2.0 * (v2 - v1)) (2.0 * (v3 - v2))
+    CubicSpline v1 v2 v3 v4 -> quadraticSpline (3.0 * (v2 - v1)) (3.0 * (v3 - v2)) (3.0 * (v4 - v3))
 
 newtype MagnitudeOf (coordinateSystem :: CoordinateSystem) = MagnitudeOf (VectorCurve2d coordinateSystem)
 
