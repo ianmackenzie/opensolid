@@ -14,8 +14,8 @@ module Curve1d
   , IsZero (IsZero)
   , roots
   , EqualEverywhere (EqualEverywhere)
-  , equals
-  , equalsSquared
+  , equalTo
+  , equalToSquared
   )
 where
 
@@ -258,16 +258,16 @@ data EqualEverywhere = EqualEverywhere deriving (Eq, Show)
 instance IsError EqualEverywhere where
   errorMessage EqualEverywhere = "Curve1d is equal to the given value everywhere"
 
-equals :: Tolerance units => Qty units -> Curve1d units -> Result EqualEverywhere (List Root)
-equals value curve =
+equalTo :: Tolerance units => Qty units -> Curve1d units -> Result EqualEverywhere (List Root)
+equalTo value curve =
   roots (curve - value) |> Result.mapError (\IsZero -> EqualEverywhere)
 
-equalsSquared
+equalToSquared
   :: (Tolerance units1, Squared units1 units2)
   => Qty units1
   -> Curve1d units2
   -> Result EqualEverywhere (List Root)
-equalsSquared value curve =
+equalToSquared value curve =
   let ?tolerance = ?tolerance * ?tolerance + 2.0 * value * ?tolerance
    in roots (curve - Qty.squared value) |> Result.mapError (\IsZero -> EqualEverywhere)
 

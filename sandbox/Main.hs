@@ -255,7 +255,7 @@ testCurve2dSolving = Try.do
       , Arc2d.SweptAngle (Angle.degrees 90.0)
       ]
   let squaredDistanceFromOrigin = VectorCurve2d.squaredMagnitude (arc - Point2d.origin)
-  roots <- squaredDistanceFromOrigin |> Curve1d.equalsSquared (Length.meters 0.5)
+  roots <- squaredDistanceFromOrigin |> Curve1d.equalToSquared (Length.meters 0.5)
   log "Curve2d solving roots" roots
  where
   ?tolerance = Length.meters 1e-18
