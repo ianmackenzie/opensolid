@@ -21,7 +21,7 @@ import CoordinateSystem (CoordinateSystem, type (@))
 import DoNotation
 import Float (Float, fromRational)
 import List (List)
-import Qty (Qty (..))
+import Qty (Qty (Qty))
 import Result (Indeterminate (Indeterminate), IsError (errorMessage), Result (Error, Ok))
 import Sign (Sign (Negative, Positive))
 import Task (Task)
