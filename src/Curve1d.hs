@@ -280,7 +280,7 @@ roots curve = do
   let (root1, x1) = solveEndpoint curve 1.0
   resolvedRegions <- regions (Range.from x0 x1) curve
   let mergedRegions = List.collapse Region.merge resolvedRegions
-  let solutions = List.combine (solve curve 0) mergedRegions
+  let solutions = List.collect (solve curve 0) mergedRegions
   Ok (root0 ++ List.foldr prependRoot root1 solutions)
  where
   ?originalCurve = curve
@@ -339,7 +339,7 @@ solve curveDerivative derivativeOrder region
              in if width < currentWidth
                   then [Solution (Root rootX (derivativeOrder - 1) (Qty.sign rootY)) width]
                   else [Solution currentRoot currentWidth]
-       in List.combine lift higherOrderSolutions
+       in List.collect lift higherOrderSolutions
 
 bisectMonotonic :: Curve1d units -> Float -> Float -> Qty units -> Qty units -> Float
 bisectMonotonic curve lowX highX lowY highY =

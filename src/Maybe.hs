@@ -3,10 +3,13 @@ module Maybe
   , map
   , withDefault
   , orError
+  , collect
+  , values
   )
 where
 
 import Basics
+import Data.Maybe qualified
 import Result (IsError, Result (..))
 import Prelude qualified
 
@@ -20,3 +23,9 @@ withDefault value Nothing = value
 orError :: IsError x => x -> Maybe a -> Result x a
 orError _ (Just value) = Ok value
 orError error Nothing = Error error
+
+collect :: (a -> Maybe b) -> List a -> List b
+collect = Data.Maybe.mapMaybe
+
+values :: List (Maybe a) -> List a
+values = Data.Maybe.catMaybes

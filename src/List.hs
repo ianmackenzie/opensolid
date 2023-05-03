@@ -10,11 +10,8 @@ module List
   , zip3
   , zip4
   , filter
-  , compact
   , collect
-  , combine
   , concat
-  , collate
   , collapse
   , foldl
   , foldr
@@ -32,10 +29,8 @@ where
 import Arithmetic
 import Basics
 import Data.List qualified
-import Data.Maybe qualified
 import Generic qualified
-import {-# SOURCE #-} Result (IsError (..), Result (..))
-import {-# SOURCE #-} Result qualified
+import Result (IsError (..), Result (..))
 import Prelude qualified
 
 isEmpty :: List a -> Bool
@@ -74,22 +69,11 @@ map4 = Data.List.zipWith4
 filter :: (a -> Bool) -> List a -> List a
 filter = Data.List.filter
 
-compact :: List (Maybe a) -> List a
-compact = Data.Maybe.catMaybes
-
-collect :: (a -> Maybe b) -> List a -> List b
-collect = Data.Maybe.mapMaybe
-
-combine :: (a -> List b) -> List a -> List b
-combine function list = Prelude.concatMap function list
+collect :: (a -> List b) -> List a -> List b
+collect = Prelude.concatMap
 
 concat :: List (List a) -> List a
 concat = Data.List.concat
-
-collate :: List (Result x a) -> Result x (List a)
-collate [] = Ok []
-collate (Ok firstValue : remainingResults) = Result.map (firstValue :) (collate remainingResults)
-collate (Error error : _) = Error error
 
 collapse :: (a -> a -> Maybe a) -> List a -> List a
 collapse _ [] = []

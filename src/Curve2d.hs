@@ -27,6 +27,7 @@ import Curve2d.Derivatives (Derivatives (Derivatives))
 import Curve2d.Intersection (Intersection (Intersection))
 import Curve2d.Intersection qualified as Intersection
 import List qualified
+import Maybe qualified
 import OpenSolid
 import Point2d (Point2d)
 import Point2d qualified
@@ -319,8 +320,8 @@ findInnerIntersections
   -> List Intersection
 findInnerIntersections derivatives1 derivatives2 u v =
   let solutions = findSolutions derivatives1 derivatives2 u v
-   in List.combine (crossingIntersections derivatives1 derivatives2 solutions) solutions
-        ++ List.collect tangentIntersection solutions
+   in List.collect (crossingIntersections derivatives1 derivatives2 solutions) solutions
+        ++ Maybe.collect tangentIntersection solutions
 
 resolved :: Range units -> Bool
 resolved range = Range.resolution range >= 0.5

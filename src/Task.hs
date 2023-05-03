@@ -5,13 +5,13 @@ module Task
   , fail
   , map
   , mapError
-  , forEach
+  , each
   , fromIO
+  , collect
   )
 where
 
 import Basics
-import Concatenate
 import Control.Exception qualified
 import DoNotation
 import Result (IsError (errorMessage), Result (Error, Ok))
@@ -35,15 +35,6 @@ instance x ~ x' => Bind (Task x) (Task x' b) where
 instance x ~ x' => Bind (Result x) (Task x' b) where
   bind f (Ok value) = f value
   bind _ (Error err) = Done (Error err)
-
-instance Bind [] (Task x ()) where
-  bind _ [] = succeed ()
-  bind f (first : rest) = compose (f first) (bind f rest)
-
-instance Bind [] (Task x (List b)) where
-  bind _ [] = succeed []
-  bind f (first : rest) =
-    bind (\firstResults -> Task.map (firstResults ++) (bind f rest)) (f first)
 
 instance Prelude.Functor (Task x) where
   fmap f (Done result) = Done (Result.map f result)
@@ -88,5 +79,10 @@ succeed value = Done (Ok value)
 instance Fail (Task Text a) where
   fail message = Done (Error message)
 
-forEach :: (a -> Task x ()) -> List a -> Task x ()
-forEach function list = do item <- list; function item
+each :: (a -> Task x ()) -> List a -> Task x ()
+each _ [] = succeed ()
+each f (first : rest) = do f first; each f rest
+
+collect :: (a -> Task x b) -> List a -> Task x (List b)
+collect _ [] = succeed []
+collect f (a : as) = do b <- f a; bs <- collect f as; succeed (b : bs)

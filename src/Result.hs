@@ -8,12 +8,13 @@ module Result
   , onError
   , handleError
   , orNothing
+  , collect
+  , combine
   )
 where
 
 import Basics
 import DoNotation
-import List qualified
 import System.IO.Error qualified
 import Text qualified
 import Prelude qualified
@@ -59,12 +60,6 @@ instance x ~ x' => Bind (Result x) (Result x' b) where
   bind f (Ok value) = f value
   bind _ (Error error) = Error error
 
-instance Bind [] (Result x (List b)) where
-  bind f list =
-    List.map f list
-      |> List.collate
-      |> Result.map List.concat
-
 instance Fail (Result Text a) where
   fail = Error
 
@@ -96,3 +91,14 @@ handleError function (Error error) = function error
 orNothing :: Result x a -> Maybe a
 orNothing (Ok value) = Just value
 orNothing (Error _) = Nothing
+
+collect :: (a -> Result x b) -> List a -> Result x (List b)
+collect _ [] = Ok []
+collect f (a : as) = do b <- f a; bs <- collect f as; Ok (b : bs)
+
+combine :: List (Result x a) -> Result x (List a)
+combine [] = Ok []
+combine (firstResult : followingResults) = do
+  firstValue <- firstResult
+  followingValues <- combine followingResults
+  Ok (firstValue : followingValues)

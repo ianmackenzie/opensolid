@@ -189,8 +189,7 @@ testCurve1dApproximateEquality = do
 
 testTaskIteration :: Task Text ()
 testTaskIteration = do
-  number <- [1 .. 3]
-  log "Looping" number
+  Task.each (log "Looping") [1 .. 3]
 
 doublingTask :: Text -> Task Text Int
 doublingTask input = do
@@ -200,15 +199,12 @@ doublingTask input = do
 
 doubleManyTask :: Task Text (List Int)
 doubleManyTask = do
-  text <- ["1", "-2", "+3"]
-  doubled <- doublingTask text
-  Task.succeed [doubled]
+  Task.collect doublingTask ["1", "-2", "+3"]
 
 testTaskSequencing :: Task Text ()
 testTaskSequencing = do
   doubledValues <- doubleManyTask
-  doubledValue <- doubledValues
-  log "Doubled value" doubledValue
+  Task.each (log "Doubled value") doubledValues
 
 testCurve2dIntersection :: Task Text ()
 testCurve2dIntersection = Try.do
@@ -225,8 +221,7 @@ testCurve2dIntersection = Try.do
       , Arc2d.SweptAngle (Angle.degrees -180.0)
       ]
   intersections <- Curve2d.intersections arc1 arc2
-  intersection <- intersections
-  log "Intersection" intersection
+  Task.each (log "Intersection") intersections
  where
   ?tolerance = Length.meters 1e-9
 
@@ -247,8 +242,7 @@ testCurve2dTangentIntersection = Try.do
       , Arc2d.EndAngle Qty.zero
       ]
   intersections <- Curve2d.intersections arc1 arc2
-  intersection <- intersections
-  log "Tangent intersection" intersection
+  Task.each (log "Tangent intersection") intersections
  where
   ?tolerance = Length.meters 1e-9
 
