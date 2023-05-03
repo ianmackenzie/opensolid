@@ -5,9 +5,10 @@ import Debug qualified
 import OpenSolid
 import Task qualified
 import Try ((>>))
+import Console qualified
 
 log :: Show a => Text -> a -> Task Text ()
-log label value = print (label ++ ": " ++ Debug.show value)
+log label value = Console.print (label ++ ": " ++ Debug.show value)
 
 script :: Task Text ()
 script = Try.do

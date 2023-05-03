@@ -37,6 +37,7 @@ library
       BoundingBox3d
       Bounds
       Concatenate
+      Console
       CoordinateSystem
       CubicSpline2d
       Curve1d
@@ -68,6 +69,7 @@ library
       Sign
       Task
       Text
+      Tolerance
       Transform2d
       Try
       Units

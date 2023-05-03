@@ -4,6 +4,7 @@ import Angle qualified
 import Arc2d qualified
 import Area qualified
 import Axis2d qualified
+import Console qualified
 import Curve1d qualified
 import Curve2d (Curve2d)
 import Curve2d qualified
@@ -33,7 +34,7 @@ import VectorCurve2d qualified
 import Volume qualified
 
 log :: Show a => Text -> a -> Task Text ()
-log label value = print (label ++ ": " ++ Debug.show value)
+log label value = Console.print (label ++ ": " ++ Debug.show value)
 
 data WorldSpace
 
@@ -160,7 +161,7 @@ testTry :: Task Text ()
 testTry =
   case Try.withContext "In testTry:" getCrossProduct of
     Ok crossProduct -> log "Got cross product" crossProduct
-    Error message -> print message
+    Error message -> Console.print message
 
 patternMatchError :: Result Text Float
 patternMatchError = Try.do
@@ -310,7 +311,7 @@ script = do
   log "Roots" expressionRoots
   testCurveFind
   testListCollapse
-  print "Unicode output test: ✅❌🙂"
+  Console.print "Unicode output test: ✅❌🙂"
   testDirection2dAngleFrom
   testArc2dFrom
   testCurveOverlap1
