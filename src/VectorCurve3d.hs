@@ -7,6 +7,9 @@ module VectorCurve3d
   , zero
   , constant
   , xyz
+  , line
+  , quadraticSpline
+  , cubicSpline
   , squaredMagnitude
   , magnitude
   , normalize
@@ -18,7 +21,7 @@ import Curve1d (Curve1d (Curve1d), IsCurve1d)
 import Curve1d qualified
 import Generic qualified
 import OpenSolid
-import Range (Range)
+import Range (Range (Range))
 import Units (Unitless)
 import Units qualified
 import Vector3d (Vector3d (Vector3d))
@@ -33,6 +36,11 @@ class IsVectorCurve3d curve (coordinateSystem :: CoordinateSystem) | curve -> co
 
 data VectorCurve3d (coordinateSystem :: CoordinateSystem) where
   VectorCurve3d :: IsVectorCurve3d curve (space @ units) => curve -> VectorCurve3d (space @ units)
+  Zero :: VectorCurve3d (space @ units)
+  Constant :: Vector3d (space @ units) -> VectorCurve3d (space @ units)
+  Line :: Vector3d (space @ units) -> Vector3d (space @ units) -> VectorCurve3d (space @ units)
+  QuadraticSpline :: Vector3d (space @ units) -> Vector3d (space @ units) -> Vector3d (space @ units) -> VectorCurve3d (space @ units)
+  CubicSpline :: Vector3d (space @ units) -> Vector3d (space @ units) -> Vector3d (space @ units) -> Vector3d (space @ units) -> VectorCurve3d (space @ units)
 
 instance IsVectorCurve3d (VectorCurve3d (space @ units)) (space @ units) where
   evaluateImpl = evaluate
@@ -47,18 +55,11 @@ instance
       (VectorCurve3d (space @ units1'))
       (VectorCurve3d (space' @ units2'))
 
-newtype Constant (coordinateSystem :: CoordinateSystem) = Constant (Vector3d coordinateSystem)
-
-instance IsVectorCurve3d (Constant (space @ units)) (space @ units) where
-  evaluateImpl (Constant value) _ = value
-  segmentBoundsImpl (Constant value) _ = VectorBox3d.constant value
-  derivativeImpl (Constant _) = zero
-
 constant :: Vector3d (space @ units) -> VectorCurve3d (space @ units)
-constant vector = VectorCurve3d (Constant vector)
+constant vector = if vector == Vector3d.zero then Zero else Constant vector
 
 zero :: VectorCurve3d (space @ units)
-zero = constant Vector3d.zero
+zero = Zero
 
 instance Generic.Zero (VectorCurve3d (space @ units)) where
   zero = zero
@@ -362,14 +363,105 @@ instance Units.Squared units1 units2 => IsCurve1d (SquaredMagnitudeOf (space @ u
   derivativeImpl (SquaredMagnitudeOf expression) =
     2.0 * expression <> derivative expression
 
+line :: Vector3d (space @ units) -> Vector3d (space @ units) -> VectorCurve3d (space @ units)
+line v1 v2 = if v1 == v2 then Constant v1 else Line v1 v2
+
+quadraticSpline
+  :: Vector3d (space @ units)
+  -> Vector3d (space @ units)
+  -> Vector3d (space @ units)
+  -> VectorCurve3d (space @ units)
+quadraticSpline = QuadraticSpline
+
+cubicSpline
+  :: Vector3d (space @ units)
+  -> Vector3d (space @ units)
+  -> Vector3d (space @ units)
+  -> Vector3d (space @ units)
+  -> VectorCurve3d (space @ units)
+cubicSpline = CubicSpline
+
+quadraticBlossom
+  :: Vector3d (space @ units)
+  -> Vector3d (space @ units)
+  -> Vector3d (space @ units)
+  -> Float
+  -> Float
+  -> Vector3d (space @ units)
+quadraticBlossom (Vector3d x1 y1 z1) (Vector3d x2 y2 z2) (Vector3d x3 y3 z3) t1 t2 =
+  let r1 = 1.0 - t1
+      r2 = 1.0 - t2
+      s1 = r1 * r2
+      s2 = r1 * t2 + t1 * r2
+      s3 = t1 * t2
+      x = s1 * x1 + s2 * x2 + s3 * x3
+      y = s1 * y1 + s2 * y2 + s3 * y3
+      z = s1 * z1 + s2 * z2 + s3 * z3
+   in Vector3d x y z
+
+cubicBlossom
+  :: Vector3d (space @ units)
+  -> Vector3d (space @ units)
+  -> Vector3d (space @ units)
+  -> Vector3d (space @ units)
+  -> Float
+  -> Float
+  -> Float
+  -> Vector3d (space @ units)
+cubicBlossom (Vector3d x1 y1 z1) (Vector3d x2 y2 z2) (Vector3d x3 y3 z3) (Vector3d x4 y4 z4) t1 t2 t3 =
+  let r1 = 1.0 - t1
+      r2 = 1.0 - t2
+      r3 = 1.0 - t3
+      s1 = r1 * r2 * r3
+      s2 = r1 * r2 * t3 + r1 * t2 * r3 + t1 * r2 * r3
+      s3 = t1 * t2 * r3 + t1 * r2 * t3 + r1 * t2 * t3
+      s4 = t1 * t2 * t3
+      x = s1 * x1 + s2 * x2 + s3 * x3 + s4 * x4
+      y = s1 * y1 + s2 * y2 + s3 * y3 + s4 * y4
+      z = s1 * z1 + s2 * z2 + s3 * z3 + s4 * z4
+   in Vector3d x y z
+
 evaluate :: VectorCurve3d (space @ units) -> Float -> Vector3d (space @ units)
-evaluate (VectorCurve3d curve) t = evaluateImpl curve t
+evaluate curve t =
+  case curve of
+    VectorCurve3d c -> evaluateImpl c t
+    Zero -> Vector3d.zero
+    Constant v -> v
+    Line v1 v2 -> Vector3d.interpolateFrom v1 v2 t
+    QuadraticSpline v1 v2 v3 -> quadraticBlossom v1 v2 v3 t t
+    CubicSpline v1 v2 v3 v4 -> cubicBlossom v1 v2 v3 v4 t t t
 
 segmentBounds :: VectorCurve3d (space @ units) -> Range Unitless -> VectorBox3d (space @ units)
-segmentBounds (VectorCurve3d curve) t = segmentBoundsImpl curve t
+segmentBounds curve t@(Range tl th) =
+  case curve of
+    VectorCurve3d c -> segmentBoundsImpl c t
+    Zero -> VectorBox3d.constant Vector3d.zero
+    Constant value -> VectorBox3d.constant value
+    Line v1 v2 ->
+      VectorBox3d.hull2
+        (Vector3d.interpolateFrom v1 v2 tl)
+        (Vector3d.interpolateFrom v1 v2 th)
+    QuadraticSpline v1 v2 v3 ->
+      VectorBox3d.hull3
+        (quadraticBlossom v1 v2 v3 tl tl)
+        (quadraticBlossom v1 v2 v3 tl th)
+        (quadraticBlossom v1 v2 v3 th th)
+    CubicSpline v1 v2 v3 v4 ->
+      VectorBox3d.hull4
+        (cubicBlossom v1 v2 v3 v4 tl tl tl)
+        (cubicBlossom v1 v2 v3 v4 tl tl th)
+        (cubicBlossom v1 v2 v3 v4 tl th th)
+        (cubicBlossom v1 v2 v3 v4 th th th)
 
 derivative :: VectorCurve3d (space @ units) -> VectorCurve3d (space @ units)
-derivative (VectorCurve3d curve) = derivativeImpl curve
+derivative curve =
+  case curve of
+    VectorCurve3d c -> derivativeImpl c
+    Zero -> Zero
+    Constant _ -> Zero
+    Line v1 v2 -> constant (v2 - v1)
+    QuadraticSpline v1 v2 v3 -> line (2.0 * (v2 - v1)) (2.0 * (v3 - v2))
+    CubicSpline v1 v2 v3 v4 -> quadraticSpline (3.0 * (v2 - v1)) (3.0 * (v3 - v2)) (3.0 * (v4 - v3))
 
 squaredMagnitude :: Units.Squared units1 units2 => VectorCurve3d (space @ units1) -> Curve1d units2
 squaredMagnitude expression =
