@@ -27,10 +27,10 @@ instance MapError [] [] where
 instance MapError Maybe Maybe where
   mapError = identity
 
-(>>) :: (MapError p q, Compose (q a) b c) => p a -> b -> c
+(>>) :: (MapError p p', Compose (p' a) b c) => p a -> b -> c
 first >> second = mapError first OpenSolid.>> second
 
-(>>=) :: (MapError p q, Bind q b) => p a -> (a -> b) -> b
+(>>=) :: (MapError p p', Bind p' q) => p a -> (a -> q b) -> q b
 value >>= function = mapError value OpenSolid.>>= function
 
 withContext :: IsError x => Text -> Result x a -> Result Text a
