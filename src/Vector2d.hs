@@ -10,7 +10,6 @@ module Vector2d
   , polar
   , midpoint
   , interpolateFrom
-  , determinant
   , magnitude
   , squaredMagnitude
   , angle
@@ -117,13 +116,6 @@ interpolateFrom (Vector2d x1 y1) (Vector2d x2 y2) t =
 midpoint :: Vector2d (space @ units) -> Vector2d (space @ units) -> Vector2d (space @ units)
 midpoint (Vector2d x1 y1) (Vector2d x2 y2) =
   Vector2d (Qty.midpoint x1 x2) (Qty.midpoint y1 y2)
-
-determinant
-  :: Units.Product units1 units2 units3
-  => Vector2d (space @ units1)
-  -> Vector2d (space @ units2)
-  -> Qty units3
-determinant (Vector2d x1 y1) (Vector2d x2 y2) = x1 * y2 - y1 * x2
 
 magnitude :: Vector2d (space @ units) -> Qty units
 magnitude (Vector2d vx vy) = Qty.hypot2 vx vy
