@@ -17,6 +17,8 @@ module Vector2d
   , direction
   , magnitudeAndDirection
   , normalize
+  , placeIn
+  , relativeTo
   )
 where
 
@@ -24,8 +26,10 @@ import Angle (Angle)
 import Angle qualified
 import Area qualified
 import CoordinateSystem (Units)
-import {-# SOURCE #-} Direction2d (Direction2d)
-import {-# SOURCE #-} Direction2d qualified
+import Direction2d (Direction2d (Direction2d))
+import Direction2d qualified
+import {-# SOURCE #-} Frame2d (Frame2d)
+import {-# SOURCE #-} Frame2d qualified
 import Generic qualified
 import Length qualified
 import OpenSolid
@@ -54,32 +58,113 @@ instance
 instance Generic.Zero (Vector2d (space @ units)) where
   zero = zero
 
-instance (space ~ space', units ~ units') => ApproximateEquality (Vector2d (space @ units)) (Vector2d (space' @ units')) units where
+instance
+  (space ~ space', units ~ units')
+  => ApproximateEquality (Vector2d (space @ units)) (Vector2d (space' @ units')) units
+  where
   v1 ~= v2 = magnitude (v1 - v2) ~= Qty.zero
 
 instance Negation (Vector2d (space @ units)) where
   negate (Vector2d vx vy) = Vector2d (negate vx) (negate vy)
 
-instance (space ~ space', units ~ units') => Addition (Vector2d (space @ units)) (Vector2d (space' @ units')) (Vector2d (space @ units)) where
+instance
+  (space ~ space', units ~ units')
+  => Addition
+      (Vector2d (space @ units))
+      (Vector2d (space' @ units'))
+      (Vector2d (space @ units))
+  where
   Vector2d x1 y1 + Vector2d x2 y2 = Vector2d (x1 + x2) (y1 + y2)
 
-instance (space ~ space', units ~ units') => Subtraction (Vector2d (space @ units)) (Vector2d (space' @ units')) (Vector2d (space @ units)) where
+instance
+  (space ~ space', units ~ units')
+  => Subtraction
+      (Vector2d (space @ units))
+      (Vector2d (space' @ units'))
+      (Vector2d (space @ units))
+  where
   Vector2d x1 y1 - Vector2d x2 y2 = Vector2d (x1 - x2) (y1 - y2)
 
-instance Units.Product units1 units2 units3 => Multiplication (Qty units1) (Vector2d (space @ units2)) (Vector2d (space @ units3)) where
+instance
+  Units.Product units1 units2 units3
+  => Multiplication
+      (Qty units1)
+      (Vector2d (space @ units2))
+      (Vector2d (space @ units3))
+  where
   scale * Vector2d vx vy = Vector2d (scale * vx) (scale * vy)
 
-instance Units.Product units1 units2 units3 => Multiplication (Vector2d (space @ units1)) (Qty units2) (Vector2d (space @ units3)) where
+instance
+  Units.Product units1 units2 units3
+  => Multiplication
+      (Vector2d (space @ units1))
+      (Qty units2)
+      (Vector2d (space @ units3))
+  where
   Vector2d vx vy * scale = Vector2d (vx * scale) (vy * scale)
 
-instance Units.Quotient units1 units2 units3 => Division (Vector2d (space @ units1)) (Qty units2) (Vector2d (space @ units3)) where
+instance
+  Units.Quotient units1 units2 units3
+  => Division
+      (Vector2d (space @ units1))
+      (Qty units2)
+      (Vector2d (space @ units3))
+  where
   Vector2d vx vy / scale = Vector2d (vx / scale) (vy / scale)
 
-instance (Units.Product units1 units2 units3, space ~ space') => DotProduct (Vector2d (space @ units1)) (Vector2d (space' @ units2)) (Qty units3) where
+instance
+  (Units.Product units1 units2 units3, space ~ space')
+  => DotProduct
+      (Vector2d (space @ units1))
+      (Vector2d (space' @ units2))
+      (Qty units3)
+  where
   Vector2d x1 y1 <> Vector2d x2 y2 = x1 * x2 + y1 * y2
 
-instance (Units.Product units1 units2 units3, space ~ space') => CrossProduct (Vector2d (space @ units1)) (Vector2d (space' @ units2)) (Qty units3) where
+instance
+  space ~ space'
+  => DotProduct
+      (Vector2d (space @ units))
+      (Direction2d space')
+      (Qty units)
+  where
+  Vector2d vx vy <> Direction2d dx dy = vx * dx + vy * dy
+
+instance
+  space ~ space'
+  => DotProduct
+      (Direction2d space)
+      (Vector2d (space' @ units))
+      (Qty units)
+  where
+  Direction2d dx dy <> Vector2d vx vy = dx * vx + dy * vy
+
+instance
+  (Units.Product units1 units2 units3, space ~ space')
+  => CrossProduct
+      (Vector2d (space @ units1))
+      (Vector2d (space' @ units2))
+      (Qty units3)
+  where
   Vector2d x1 y1 >< Vector2d x2 y2 = x1 * y2 - y1 * x2
+
+instance
+  space ~ space'
+  => CrossProduct
+      (Vector2d (space @ units))
+      (Direction2d space')
+      (Qty units)
+  where
+  Vector2d vx vy >< Direction2d dx dy = vx * dy - vy * dx
+
+instance
+  space ~ space'
+  => CrossProduct
+      (Direction2d space)
+      (Vector2d (space' @ units))
+      (Qty units)
+  where
+  Direction2d dx dy >< Vector2d vx vy = dx * vy - dy * vx
 
 zero :: Vector2d (space @ units)
 zero = Vector2d Qty.zero Qty.zero
@@ -147,3 +232,21 @@ normalize :: Vector2d (space @ units) -> Vector2d (space @ Unitless)
 normalize vector =
   let Vector2d vx vy = vector; vm = magnitude vector
    in if vm == Qty.zero then zero else Vector2d (vx / vm) (vy / vm)
+
+placeIn
+  :: Frame2d (global @ units) (Defines (local @ units))
+  -> Vector2d (local @ units)
+  -> Vector2d (global @ units)
+placeIn frame (Vector2d vx vy) =
+  let (Direction2d ix iy) = Frame2d.xDirection frame
+      (Direction2d jx jy) = Frame2d.yDirection frame
+   in Vector2d (vx * ix + vy * jx) (vx * iy + vy * jy)
+
+relativeTo
+  :: Frame2d (global @ units) (Defines (local @ units))
+  -> Vector2d (global @ units)
+  -> Vector2d (local @ units)
+relativeTo frame (Vector2d vx vy) =
+  let (Direction2d ix iy) = Frame2d.xDirection frame
+      (Direction2d jx jy) = Frame2d.yDirection frame
+   in Vector2d (vx * ix + vy * iy) (vx * jx + vy * jy)

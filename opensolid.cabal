@@ -51,6 +51,7 @@ library
       Direction3d
       DoNotation
       Float
+      Frame2d
       Generic
       Length
       Line2d

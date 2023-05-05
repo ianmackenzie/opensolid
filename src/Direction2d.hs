@@ -17,18 +17,22 @@ module Direction2d
   , perpendicularTo
   , rotateLeft
   , rotateRight
+  , placeIn
+  , relativeTo
   )
 where
 
 import Angle (Angle)
 import Angle qualified
+import {-# SOURCE #-} Frame2d (Frame2d)
+import {-# SOURCE #-} Frame2d qualified
 import OpenSolid
 import {-# SOURCE #-} Point2d (Point2d)
 import Qty qualified
 import Result qualified
 import Units (Radians)
-import Vector2d (Vector2d (..))
-import Vector2d qualified
+import {-# SOURCE #-} Vector2d (Vector2d)
+import {-# SOURCE #-} Vector2d qualified
 
 type role Direction2d phantom
 
@@ -50,65 +54,17 @@ instance
 instance Negation (Direction2d space) where
   negate (Direction2d dx dy) = unsafe (negate dx) (negate dy)
 
-instance
-  space ~ space'
-  => DotProduct
-      (Direction2d space)
-      (Direction2d space')
-      Float
-  where
-  Direction2d x1 y1 <> Direction2d x2 y2 = x1 * x2 + y1 * y2
-
-instance
-  space ~ space'
-  => DotProduct
-      (Vector2d (space @ units))
-      (Direction2d space')
-      (Qty units)
-  where
-  Vector2d vx vy <> Direction2d dx dy = vx * dx + vy * dy
-
-instance
-  space ~ space'
-  => DotProduct
-      (Direction2d space)
-      (Vector2d (space' @ units))
-      (Qty units)
-  where
-  Direction2d dx dy <> Vector2d vx vy = dx * vx + dy * vy
-
-instance
-  space ~ space'
-  => CrossProduct
-      (Direction2d space)
-      (Direction2d space')
-      Float
-  where
-  Direction2d x1 y1 >< Direction2d x2 y2 = x1 * y2 - y1 * x2
-
-instance
-  space ~ space'
-  => CrossProduct
-      (Vector2d (space @ units))
-      (Direction2d space')
-      (Qty units)
-  where
-  Vector2d vx vy >< Direction2d dx dy = vx * dy - vy * dx
-
-instance
-  space ~ space'
-  => CrossProduct
-      (Direction2d space)
-      (Vector2d (space' @ units))
-      (Qty units)
-  where
-  Direction2d dx dy >< Vector2d vx vy = dx * vy - dy * vx
-
 instance Multiplication (Qty units) (Direction2d space) (Vector2d (space @ units)) where
-  scale * Direction2d dx dy = Vector2d (scale * dx) (scale * dy)
+  scale * Direction2d dx dy = Vector2d.xy (scale * dx) (scale * dy)
 
 instance Multiplication (Direction2d space) (Qty units) (Vector2d (space @ units)) where
-  Direction2d dx dy * scale = Vector2d (dx * scale) (dy * scale)
+  Direction2d dx dy * scale = Vector2d.xy (dx * scale) (dy * scale)
+
+instance space ~ space' => DotProduct (Direction2d space) (Direction2d space') Float where
+  Direction2d x1 y1 <> Direction2d x2 y2 = x1 * x2 + y1 * y2
+
+instance space ~ space' => CrossProduct (Direction2d space) (Direction2d space') Float where
+  Direction2d x1 y1 >< Direction2d x2 y2 = x1 * y2 - y1 * x2
 
 unsafe :: Float -> Float -> Direction2d space
 unsafe = Direction2d#
@@ -167,3 +123,21 @@ rotateLeft (Direction2d dx dy) = unsafe -dy dx
 
 rotateRight :: Direction2d space -> Direction2d space
 rotateRight (Direction2d dx dy) = unsafe dy -dx
+
+placeIn
+  :: Frame2d (global @ units) (Defines (local @ units))
+  -> Direction2d local
+  -> Direction2d global
+placeIn frame (Direction2d dx dy) =
+  let (Direction2d ix iy) = Frame2d.xDirection frame
+      (Direction2d jx jy) = Frame2d.yDirection frame
+   in unsafe (dx * ix + dy * jx) (dx * iy + dy * jy)
+
+relativeTo
+  :: Frame2d (global @ units) (Defines (local @ units))
+  -> Direction2d global
+  -> Direction2d local
+relativeTo frame (Direction2d dx dy) =
+  let (Direction2d ix iy) = Frame2d.xDirection frame
+      (Direction2d jx jy) = Frame2d.yDirection frame
+   in unsafe (dx * ix + dy * iy) (dx * jx + dy * jy)
