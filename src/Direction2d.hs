@@ -15,6 +15,8 @@ module Direction2d
   , radians
   , angleFrom
   , perpendicularTo
+  , rotateLeft
+  , rotateRight
   )
 where
 
@@ -158,4 +160,10 @@ angleFrom :: Direction2d space -> Direction2d space -> Angle
 angleFrom d1 d2 = Angle.atan2 (d1 >< d2) (d1 <> d2)
 
 perpendicularTo :: Direction2d space -> Direction2d space
-perpendicularTo (Direction2d dx dy) = unsafe -dy dx
+perpendicularTo = rotateLeft
+
+rotateLeft :: Direction2d space -> Direction2d space
+rotateLeft (Direction2d dx dy) = unsafe -dy dx
+
+rotateRight :: Direction2d space -> Direction2d space
+rotateRight (Direction2d dx dy) = unsafe dy -dx
