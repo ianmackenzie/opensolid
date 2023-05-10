@@ -194,12 +194,11 @@ parameterValues
   => Point2d (space @ units)
   -> Curve2d (space @ units)
   -> Result Curve2d.IsCoincidentWithPoint (List Float)
-parameterValues point curve = do
-  roots <-
-    let ?tolerance = Qty.squared (Units.generalize ?tolerance)
-     in Curve1d.roots (VectorCurve2d.squaredMagnitude (Units.generalize (point - curve)))
-          |> Result.mapError (\Curve1d.IsZero -> Curve2d.IsCoincidentWithPoint)
-  Ok (List.map Root.value roots)
+parameterValues point curve =
+  let ?tolerance = Qty.squared (Units.generalize ?tolerance)
+   in Curve1d.roots (VectorCurve2d.squaredMagnitude (Units.generalize (point - curve)))
+        |> Result.mapError (\Curve1d.IsZero -> Curve2d.IsCoincidentWithPoint)
+        |> Result.map (List.map Root.value)
 
 overlappingSegments
   :: Tolerance units
