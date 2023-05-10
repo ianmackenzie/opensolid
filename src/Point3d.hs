@@ -34,6 +34,14 @@ data Point3d (coordinateSystem :: CoordinateSystem) = Point3d
   deriving (Eq, Show)
 
 instance (space ~ space', units ~ units') => Addition (Point3d (space @ units)) (Vector3d (space' @ units')) (Point3d (space @ units)) where
+instance
+  (units1 ~ units1', units2 ~ units2', space ~ space')
+  => Units.Coercion
+      units1
+      units2
+      (Point3d (space @ units1'))
+      (Point3d (space' @ units2'))
+
   Point3d px py pz + Vector3d vx vy vz = Point3d (px + vx) (py + vy) (pz + vz)
 
 instance (space ~ space', units ~ units') => Subtraction (Point3d (space @ units)) (Vector3d (space' @ units')) (Point3d (space @ units)) where
