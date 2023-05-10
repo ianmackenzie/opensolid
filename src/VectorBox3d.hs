@@ -45,40 +45,112 @@ instance Generic.Zero (VectorBox3d (space @ units)) where
 instance Negation (VectorBox3d (space @ units)) where
   negate (VectorBox3d x y z) = VectorBox3d (negate x) (negate y) (negate z)
 
-instance (units ~ units', space ~ space') => Addition (VectorBox3d (space @ units)) (VectorBox3d (space' @ units')) (VectorBox3d (space @ units)) where
+instance
+  (units ~ units', space ~ space')
+  => Addition
+      (VectorBox3d (space @ units))
+      (VectorBox3d (space' @ units'))
+      (VectorBox3d (space @ units))
+  where
   VectorBox3d x1 y1 z1 + VectorBox3d x2 y2 z2 = VectorBox3d (x1 + x2) (y1 + y2) (z1 + z2)
 
-instance (units ~ units', space ~ space') => Addition (VectorBox3d (space @ units)) (Vector3d (space' @ units')) (VectorBox3d (space @ units)) where
+instance
+  (units ~ units', space ~ space')
+  => Addition
+      (VectorBox3d (space @ units))
+      (Vector3d (space' @ units'))
+      (VectorBox3d (space @ units))
+  where
   VectorBox3d x1 y1 z1 + Vector3d x2 y2 z2 = VectorBox3d (x1 + x2) (y1 + y2) (z1 + z2)
 
-instance (units ~ units', space ~ space') => Addition (Vector3d (space @ units)) (VectorBox3d (space' @ units')) (VectorBox3d (space @ units)) where
+instance
+  (units ~ units', space ~ space')
+  => Addition
+      (Vector3d (space @ units))
+      (VectorBox3d (space' @ units'))
+      (VectorBox3d (space @ units))
+  where
   Vector3d x1 y1 z1 + VectorBox3d x2 y2 z2 = VectorBox3d (x1 + x2) (y1 + y2) (z1 + z2)
 
-instance (units ~ units', space ~ space') => Subtraction (VectorBox3d (space @ units)) (VectorBox3d (space' @ units')) (VectorBox3d (space @ units)) where
+instance
+  (units ~ units', space ~ space')
+  => Subtraction
+      (VectorBox3d (space @ units))
+      (VectorBox3d (space' @ units'))
+      (VectorBox3d (space @ units))
+  where
   VectorBox3d x1 y1 z1 - VectorBox3d x2 y2 z2 = VectorBox3d (x1 - x2) (y1 - y2) (z1 - z2)
 
-instance (units ~ units', space ~ space') => Subtraction (VectorBox3d (space @ units)) (Vector3d (space' @ units')) (VectorBox3d (space @ units)) where
+instance
+  (units ~ units', space ~ space')
+  => Subtraction
+      (VectorBox3d (space @ units))
+      (Vector3d (space' @ units'))
+      (VectorBox3d (space @ units))
+  where
   VectorBox3d x1 y1 z1 - Vector3d x2 y2 z2 = VectorBox3d (x1 - x2) (y1 - y2) (z1 - z2)
 
-instance (units ~ units', space ~ space') => Subtraction (Vector3d (space @ units)) (VectorBox3d (space' @ units')) (VectorBox3d (space @ units)) where
+instance
+  (units ~ units', space ~ space')
+  => Subtraction
+      (Vector3d (space @ units))
+      (VectorBox3d (space' @ units'))
+      (VectorBox3d (space @ units))
+  where
   Vector3d x1 y1 z1 - VectorBox3d x2 y2 z2 = VectorBox3d (x1 - x2) (y1 - y2) (z1 - z2)
 
-instance Units.Product units1 units2 units3 => Multiplication (Qty units1) (VectorBox3d (space @ units2)) (VectorBox3d (space @ units3)) where
+instance
+  Units.Product units1 units2 units3
+  => Multiplication
+      (Qty units1)
+      (VectorBox3d (space @ units2))
+      (VectorBox3d (space @ units3))
+  where
   value * VectorBox3d x y z = VectorBox3d (value * x) (value * y) (value * z)
 
-instance Units.Product units1 units2 units3 => Multiplication (VectorBox3d (space @ units1)) (Qty units2) (VectorBox3d (space @ units3)) where
+instance
+  Units.Product units1 units2 units3
+  => Multiplication
+      (VectorBox3d (space @ units1))
+      (Qty units2)
+      (VectorBox3d (space @ units3))
+  where
   VectorBox3d x y z * value = VectorBox3d (x * value) (y * value) (z * value)
 
-instance Units.Product units1 units2 units3 => Multiplication (Range units1) (VectorBox3d (space @ units2)) (VectorBox3d (space @ units3)) where
+instance
+  Units.Product units1 units2 units3
+  => Multiplication
+      (Range units1)
+      (VectorBox3d (space @ units2))
+      (VectorBox3d (space @ units3))
+  where
   range * VectorBox3d x y z = VectorBox3d (range * x) (range * y) (range * z)
 
-instance Units.Product units1 units2 units3 => Multiplication (VectorBox3d (space @ units1)) (Range units2) (VectorBox3d (space @ units3)) where
+instance
+  Units.Product units1 units2 units3
+  => Multiplication
+      (VectorBox3d (space @ units1))
+      (Range units2)
+      (VectorBox3d (space @ units3))
+  where
   VectorBox3d x y z * range = VectorBox3d (x * range) (y * range) (z * range)
 
-instance Units.Quotient units1 units2 units3 => Division (VectorBox3d (space @ units1)) (Qty units2) (VectorBox3d (space @ units3)) where
+instance
+  Units.Quotient units1 units2 units3
+  => Division
+      (VectorBox3d (space @ units1))
+      (Qty units2)
+      (VectorBox3d (space @ units3))
+  where
   VectorBox3d x y z / value = VectorBox3d (x / value) (y / value) (z / value)
 
-instance Units.Quotient units1 units2 units3 => Division (VectorBox3d (space @ units1)) (Range units2) (VectorBox3d (space @ units3)) where
+instance
+  Units.Quotient units1 units2 units3
+  => Division
+      (VectorBox3d (space @ units1))
+      (Range units2)
+      (VectorBox3d (space @ units3))
+  where
   VectorBox3d x y z / range = VectorBox3d (x / range) (y / range) (z / range)
 
 instance
