@@ -10,6 +10,7 @@ module Range
   , width
   , squared
   , contains
+  , tolerant
   , bisect
   , isAtomic
   , abs
@@ -226,8 +227,11 @@ hypot3 (Range xMin xMax) (Range yMin yMax) (Range zMin zMax)
   zMagnitude = max (Qty.abs zMin) (Qty.abs zMax)
   maxMagnitude = Qty.hypot3 xMagnitude yMagnitude zMagnitude
 
-contains :: Tolerance units => Qty units -> Range units -> Bool
-contains value (Range low high) = low - ?tolerance <= value && value <= high + ?tolerance
+contains :: Qty units -> Range units -> Bool
+contains value (Range low high) = low <= value && value <= high
+
+tolerant :: Tolerance units => Range units -> Range units
+tolerant (Range low high) = unsafe (low - ?tolerance) (high + ?tolerance)
 
 bisect :: Range units -> (Range units, Range units)
 bisect (Range low high) =
