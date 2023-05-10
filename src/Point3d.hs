@@ -16,7 +16,7 @@ module Point3d
 where
 
 import Bounded (Bounded (..))
-import {-# SOURCE #-} BoundingBox3d (BoundingBox3d (..))
+import {-# SOURCE #-} BoundingBox3d (BoundingBox3d (BoundingBox3d))
 import CoordinateSystem (Units)
 import Length qualified
 import OpenSolid
