@@ -19,7 +19,7 @@ where
 import Angle (Angle)
 import {-# SOURCE #-} Axis2d (Axis2d)
 import {-# SOURCE #-} Axis2d qualified
-import {-# SOURCE #-} BoundingBox2d (BoundingBox2d (..))
+import {-# SOURCE #-} BoundingBox2d (BoundingBox2d (BoundingBox2d))
 import CoordinateSystem (Units)
 import Direction2d (Direction2d (Direction2d))
 import Direction2d qualified
@@ -30,9 +30,9 @@ import OpenSolid
 import Qty qualified
 import Units (Meters)
 import Units qualified
-import Vector2d (Vector2d (..))
+import Vector2d (Vector2d (Vector2d))
 import Vector2d qualified
-import VectorBox2d (VectorBox2d (..))
+import VectorBox2d (VectorBox2d (VectorBox2d))
 
 type role Point2d phantom
 
