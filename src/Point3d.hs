@@ -26,6 +26,7 @@ import Units (Meters)
 import Units qualified
 import Vector3d (Vector3d (Vector3d))
 import Vector3d qualified
+import VectorBox3d (VectorBox3d (VectorBox3d))
 
 data Point3d (coordinateSystem :: CoordinateSystem) = Point3d
   { xCoordinate :: Qty (Units coordinateSystem)
@@ -68,6 +69,24 @@ instance
       (Vector3d (space @ units))
   where
   Point3d x1 y1 z1 - Point3d x2 y2 z2 = Vector3d (x1 - x2) (y1 - y2) (z1 - z2)
+
+instance
+  (units ~ units', space ~ space')
+  => Addition
+      (Point3d (space @ units))
+      (VectorBox3d (space' @ units'))
+      (BoundingBox3d (space @ units))
+  where
+  Point3d px py pz + VectorBox3d vx vy vz = BoundingBox3d (px + vx) (py + vy) (pz + vz)
+
+instance
+  (units ~ units', space ~ space')
+  => Subtraction
+      (Point3d (space @ units))
+      (VectorBox3d (space' @ units'))
+      (BoundingBox3d (space @ units))
+  where
+  Point3d px py pz - VectorBox3d vx vy vz = BoundingBox3d (px - vx) (py - vy) (pz - vz)
 
 instance
   (space ~ space', units ~ units')
