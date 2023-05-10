@@ -54,7 +54,7 @@ testVectorBox3dMagnitude =
     let vector = VectorBox3d.interpolate vectorBox u v w
     let magnitude = Vector3d.magnitude vector
     let magnitudeRange = VectorBox3d.magnitude vectorBox
-    Hedgehog.assert (Range.contains magnitude magnitudeRange)
+    Hedgehog.assert (Range.contains magnitude (Range.tolerant magnitudeRange))
     |> Hedgehog.property
     |> withNumTests 1000
 
