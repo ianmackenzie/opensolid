@@ -345,10 +345,19 @@ searchImpl predicate range accumulated =
                 |> searchImpl predicate right
                 |> searchImpl predicate left
 
-search2 :: (Range units1 -> Range units2 -> Bool) -> Range units1 -> Range units2 -> List (Qty units1, Qty units2)
+search2
+  :: (Range units1 -> Range units2 -> Bool)
+  -> Range units1
+  -> Range units2
+  -> List (Qty units1, Qty units2)
 search2 predicate u v = search2Impl predicate u v []
 
-search2Impl :: (Range units1 -> Range units2 -> Bool) -> Range units1 -> Range units2 -> List (Qty units1, Qty units2) -> List (Qty units1, Qty units2)
+search2Impl
+  :: (Range units1 -> Range units2 -> Bool)
+  -> Range units1
+  -> Range units2
+  -> List (Qty units1, Qty units2)
+  -> List (Qty units1, Qty units2)
 search2Impl predicate u v accumulated =
   case predicate u v of
     False -> accumulated
