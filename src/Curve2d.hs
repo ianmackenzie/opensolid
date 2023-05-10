@@ -14,7 +14,6 @@ module Curve2d
   , passesThrough
   , intersections
   , parameterValues
-  , overlappingSegments
   )
 where
 
