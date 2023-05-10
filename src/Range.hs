@@ -28,6 +28,10 @@ module Range
   , any
   , all
   , resolution
+  , resolve
+  , resolve2
+  , recurse
+  , recurse2
   )
 where
 
@@ -381,3 +385,72 @@ search2Impl predicate u v accumulated =
                 |> search2Impl predicate rightU leftV
                 |> search2Impl predicate leftU rightV
                 |> search2Impl predicate leftU leftV
+
+resolve :: (Range units -> Result Indeterminate a) -> Range units -> Result Indeterminate (List a)
+resolve predicate range = resolveImpl predicate range []
+
+resolveImpl
+  :: (Range units -> Result Indeterminate a)
+  -> Range units
+  -> List a
+  -> Result Indeterminate (List a)
+resolveImpl predicate range accumulated =
+  case predicate range of
+    Ok resolved -> Ok (resolved : accumulated)
+    Error Indeterminate
+      | isAtomic range -> Error Indeterminate
+      | otherwise -> do
+          let (left, right) = bisect range
+          resultsR <- resolveImpl predicate right accumulated
+          resolveImpl predicate left resultsR
+
+resolve2
+  :: (Range units1 -> Range units2 -> Result Indeterminate a)
+  -> Range units1
+  -> Range units2
+  -> Result Indeterminate (List a)
+resolve2 predicate range1 range2 = resolve2Impl predicate range1 range2 []
+
+resolve2Impl
+  :: (Range units1 -> Range units2 -> Result Indeterminate a)
+  -> Range units1
+  -> Range units2
+  -> List a
+  -> Result Indeterminate (List a)
+resolve2Impl predicate range1 range2 accumulated =
+  case predicate range1 range2 of
+    Ok resolved -> Ok (resolved : accumulated)
+    Error Indeterminate
+      | isAtomic range1 && isAtomic range2 -> Error Indeterminate
+      | isAtomic range1 -> do
+          let (left, right) = bisect range2
+          resultsR <- resolve2Impl predicate range1 right accumulated
+          resolve2Impl predicate range1 left resultsR
+      | isAtomic range2 -> do
+          let (left, right) = bisect range1
+          resultsR <- resolve2Impl predicate right range2 accumulated
+          resolve2Impl predicate left range2 resultsR
+      | otherwise -> do
+          let (left1, right1) = bisect range1
+          let (left2, right2) = bisect range2
+          resultsRR <- resolve2Impl predicate right1 right2 accumulated
+          resultsRL <- resolve2Impl predicate right1 left2 resultsRR
+          resultsLR <- resolve2Impl predicate left1 right2 resultsRL
+          resolve2Impl predicate left1 left2 resultsLR
+
+recurse :: (Range units -> a -> a) -> Range units -> a -> a
+recurse callback range accumulated =
+  let (left, right) = bisect range
+   in accumulated
+        |> callback right
+        |> callback left
+
+recurse2 :: (Range units1 -> Range units2 -> a -> a) -> Range units1 -> Range units2 -> a -> a
+recurse2 callback range1 range2 accumulated =
+  let (left1, right1) = bisect range1
+      (left2, right2) = bisect range2
+   in accumulated
+        |> callback right1 right2
+        |> callback right1 left2
+        |> callback left1 right2
+        |> callback left1 left2
