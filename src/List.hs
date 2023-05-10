@@ -9,6 +9,9 @@ module List
   , zip2
   , zip3
   , zip4
+  , unzip2
+  , unzip3
+  , unzip4
   , filter
   , collect
   , concat
@@ -56,6 +59,15 @@ zip3 = Data.List.zip3
 
 zip4 :: List a -> List b -> List c -> List d -> List (a, b, c, d)
 zip4 = Data.List.zip4
+
+unzip2 :: List (a, b) -> (List a, List b)
+unzip2 = Data.List.unzip
+
+unzip3 :: List (a, b, c) -> (List a, List b, List c)
+unzip3 = Data.List.unzip3
+
+unzip4 :: List (a, b, c, d) -> (List a, List b, List c, List d)
+unzip4 = Data.List.unzip4
 
 map2 :: (a -> b -> c) -> List a -> List b -> List c
 map2 = Data.List.zipWith
