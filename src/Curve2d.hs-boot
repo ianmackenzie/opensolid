@@ -1,6 +1,8 @@
 module Curve2d
   ( Curve2d (Curve2d)
   , IsCurve2d
+  , derivative
+  , segmentBounds
   )
 where
 
@@ -28,3 +30,6 @@ data Curve2d (coordinateSystem :: CoordinateSystem) where
   Line :: Point2d (space @ units) -> Point2d (space @ units) -> Curve2d (space @ units)
   Arc :: Point2d (space @ units) -> Qty units -> Angle -> Angle -> Curve2d (space @ units)
   Curve2d :: IsCurve2d curve (space @ units) => curve -> Curve2d (space @ units)
+
+derivative :: Curve2d (space @ units) -> VectorCurve2d (space @ units)
+segmentBounds :: Curve2d (space @ units) -> Range Unitless -> BoundingBox2d (space @ units)
