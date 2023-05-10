@@ -68,6 +68,7 @@ default-extensions:
 - TypeOperators
 - OverloadedRecordDot
 - MagicHash
+- TupleSections
 
 library:
   source-dirs: src
