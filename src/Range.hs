@@ -295,7 +295,7 @@ interpolationParameter (Range low high) value
 resolution :: Range units -> Float
 resolution (Range low high)
   | low > Qty.zero = low / high
-  | high < Qty.zero = high / low
+  | high < Qty.zero = -high / low
   | otherwise = 0.0
 
 any :: (Range units -> Result Indeterminate Bool) -> Range units -> Result Indeterminate Bool
