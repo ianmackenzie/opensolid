@@ -374,7 +374,7 @@ resolve domain curve
   curveBounds = segmentBounds curve domain
 
 resolved :: Range units -> Bool
-resolved range = Range.resolution range >= 0.5
+resolved range = Qty.abs (Range.resolution range) >= 0.5
 
 resolveDerivative :: Range Unitless -> Curve1d units -> Int -> Result Indeterminate Region
 resolveDerivative domain curveDerivative derivativeOrder
