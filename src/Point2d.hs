@@ -50,19 +50,49 @@ instance
       (Point2d (space @ units1'))
       (Point2d (space' @ units2'))
 
-instance (units ~ units', space ~ space') => Addition (Point2d (space @ units)) (Vector2d (space' @ units')) (Point2d (space @ units)) where
+instance
+  (units ~ units', space ~ space')
+  => Addition
+      (Point2d (space @ units))
+      (Vector2d (space' @ units'))
+      (Point2d (space @ units))
+  where
   Point2d px py + Vector2d vx vy = Point2d (px + vx) (py + vy)
 
-instance (units ~ units', space ~ space') => Subtraction (Point2d (space @ units)) (Vector2d (space' @ units')) (Point2d (space @ units)) where
+instance
+  (units ~ units', space ~ space')
+  => Subtraction
+      (Point2d (space @ units))
+      (Vector2d (space' @ units'))
+      (Point2d (space @ units))
+  where
   Point2d px py - Vector2d vx vy = Point2d (px - vx) (py - vy)
 
-instance (units ~ units', space ~ space') => Subtraction (Point2d (space @ units)) (Point2d (space' @ units')) (Vector2d (space @ units)) where
+instance
+  (units ~ units', space ~ space')
+  => Subtraction
+      (Point2d (space @ units))
+      (Point2d (space' @ units'))
+      (Vector2d (space @ units))
+  where
   Point2d x1 y1 - Point2d x2 y2 = Vector2d (x1 - x2) (y1 - y2)
 
-instance (units ~ units', space ~ space') => Addition (Point2d (space @ units)) (VectorBox2d (space' @ units')) (BoundingBox2d (space @ units)) where
+instance
+  (units ~ units', space ~ space')
+  => Addition
+      (Point2d (space @ units))
+      (VectorBox2d (space' @ units'))
+      (BoundingBox2d (space @ units))
+  where
   Point2d px py + VectorBox2d vx vy = BoundingBox2d (px + vx) (py + vy)
 
-instance (units ~ units', space ~ space') => Subtraction (Point2d (space @ units)) (VectorBox2d (space' @ units')) (BoundingBox2d (space @ units)) where
+instance
+  (units ~ units', space ~ space')
+  => Subtraction
+      (Point2d (space @ units))
+      (VectorBox2d (space' @ units'))
+      (BoundingBox2d (space @ units))
+  where
   Point2d px py - VectorBox2d vx vy = BoundingBox2d (px - vx) (py - vy)
 
 instance
