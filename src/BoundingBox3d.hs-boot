@@ -1,8 +1,13 @@
-module BoundingBox3d (BoundingBox3d (..)) where
+module BoundingBox3d
+  ( BoundingBox3d (..)
+  , constant
+  )
+where
 
 import Bounds
 import CoordinateSystem (Units)
 import OpenSolid
+import {-# SOURCE #-} Point3d (Point3d)
 import Range (Range)
 
 type role BoundingBox3d phantom
@@ -14,3 +19,5 @@ data BoundingBox3d (coordinateSystem :: CoordinateSystem)
       (Range (Units coordinateSystem))
 
 instance Bounds (BoundingBox3d (space @ units))
+
+constant :: Point3d (space @ units) -> BoundingBox3d (space @ units)
