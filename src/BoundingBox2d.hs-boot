@@ -4,7 +4,7 @@ module BoundingBox2d
   )
 where
 
-import Bounds
+import Bounds (IsBounds)
 import CoordinateSystem (Units)
 import OpenSolid
 import {-# SOURCE #-} Point2d (Point2d)
@@ -17,6 +17,6 @@ data BoundingBox2d (coordinateSystem :: CoordinateSystem)
       (Range (Units coordinateSystem))
       (Range (Units coordinateSystem))
 
-instance Bounds (BoundingBox2d (space @ units))
+instance IsBounds (BoundingBox2d (space @ units))
 
 constant :: Point2d (space @ units) -> BoundingBox2d (space @ units)

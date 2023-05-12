@@ -15,13 +15,13 @@ module Point3d
   )
 where
 
-import Bounded (Bounded (..))
+import Bounded (IsBounded (..))
 import {-# SOURCE #-} BoundingBox3d (BoundingBox3d (BoundingBox3d))
+import {-# SOURCE #-} BoundingBox3d qualified
 import CoordinateSystem (Units)
 import Length qualified
 import OpenSolid
 import Qty qualified
-import Range qualified
 import Units (Meters)
 import Units qualified
 import Vector3d (Vector3d (Vector3d))
@@ -94,9 +94,8 @@ instance
   where
   p1 ~= p2 = distanceFrom p1 p2 ~= Qty.zero
 
-instance Bounded (Point3d (space @ units)) (BoundingBox3d (space @ units)) where
-  bounds (Point3d px py pz) =
-    BoundingBox3d (Range.constant px) (Range.constant py) (Range.constant pz)
+instance IsBounded (Point3d (space @ units)) (BoundingBox3d (space @ units)) where
+  boundsImpl = BoundingBox3d.constant
 
 origin :: Point3d (space @ units)
 origin = Point3d Qty.zero Qty.zero Qty.zero

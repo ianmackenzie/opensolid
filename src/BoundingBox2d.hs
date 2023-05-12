@@ -4,8 +4,9 @@ module BoundingBox2d
   , hull2
   , hull3
   , hull4
-  , aggregate
-  , overlaps
+  , aggregate2
+  , intersects
+  , intersection
   , interpolate
   )
 where
@@ -26,17 +27,10 @@ data BoundingBox2d (coordinateSystem :: CoordinateSystem)
       (Range (Units coordinateSystem))
   deriving (Show)
 
-instance Bounds (BoundingBox2d (space @ units)) where
-  aggregate (BoundingBox2d x1 y1) (BoundingBox2d x2 y2) =
-    BoundingBox2d (Range.aggregate x1 x2) (Range.aggregate y1 y2)
-
-  overlaps (BoundingBox2d x1 y1) (BoundingBox2d x2 y2) =
-    Range.overlaps x1 x2 && Range.overlaps y1 y2
-
-  intersection (BoundingBox2d x1 y1) (BoundingBox2d x2 y2) = do
-    x <- intersection x1 x2
-    y <- intersection y1 y2
-    Just (BoundingBox2d x y)
+instance IsBounds (BoundingBox2d (space @ units)) where
+  aggregate2Impl = aggregate2
+  intersectsImpl = intersects
+  intersectionImpl = intersection
 
 instance (units ~ units', space ~ space') => Subtraction (Point2d (space @ units)) (BoundingBox2d (space' @ units')) (VectorBox2d (space @ units)) where
   Point2d px py - BoundingBox2d bx by = VectorBox2d (px - bx) (py - by)
@@ -50,6 +44,20 @@ instance (units ~ units', space ~ space') => Subtraction (BoundingBox2d (space @
 constant :: Point2d (space @ units) -> BoundingBox2d (space @ units)
 constant (Point2d x y) =
   BoundingBox2d (Range.constant x) (Range.constant y)
+
+aggregate2 :: BoundingBox2d (space @ units) -> BoundingBox2d (space @ units) -> BoundingBox2d (space @ units)
+aggregate2 (BoundingBox2d x1 y1) (BoundingBox2d x2 y2) =
+  BoundingBox2d (Range.aggregate2 x1 x2) (Range.aggregate2 y1 y2)
+
+intersects :: BoundingBox2d (space @ units) -> BoundingBox2d (space @ units) -> Bool
+intersects (BoundingBox2d x1 y1) (BoundingBox2d x2 y2) =
+  Range.intersects x1 x2 && Range.intersects y1 y2
+
+intersection :: BoundingBox2d (space @ units) -> BoundingBox2d (space @ units) -> Maybe (BoundingBox2d (space @ units))
+intersection (BoundingBox2d x1 y1) (BoundingBox2d x2 y2) = do
+  x <- Range.intersection x1 x2
+  y <- Range.intersection y1 y2
+  Just (BoundingBox2d x y)
 
 hull2
   :: Point2d (space @ units)

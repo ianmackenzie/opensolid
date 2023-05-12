@@ -19,7 +19,9 @@ where
 import Angle (Angle)
 import {-# SOURCE #-} Axis2d (Axis2d)
 import {-# SOURCE #-} Axis2d qualified
+import Bounded (IsBounded (..))
 import {-# SOURCE #-} BoundingBox2d (BoundingBox2d (BoundingBox2d))
+import {-# SOURCE #-} BoundingBox2d qualified
 import CoordinateSystem (Units)
 import Direction2d (Direction2d (Direction2d))
 import Direction2d qualified
@@ -100,6 +102,9 @@ instance
   => ApproximateEquality (Point2d (space @ units)) (Point2d (space' @ units')) units
   where
   p1 ~= p2 = distanceFrom p1 p2 ~= Qty.zero
+
+instance IsBounded (Point2d (space @ units)) (BoundingBox2d (space @ units)) where
+  boundsImpl = BoundingBox2d.constant
 
 origin :: Point2d (space @ units)
 origin = Point2d Qty.zero Qty.zero

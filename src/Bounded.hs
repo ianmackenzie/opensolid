@@ -1,6 +1,6 @@
-module Bounded (Bounded (..)) where
+module Bounded (IsBounded (..)) where
 
 import Bounds
 
-class Bounds b => Bounded a b | a -> b where
-  bounds :: a -> b
+class IsBounds b => IsBounded a b | a -> b where
+  boundsImpl :: a -> b

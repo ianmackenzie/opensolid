@@ -1,8 +1,8 @@
-module Bounds (Bounds (..)) where
+module Bounds (IsBounds (..)) where
 
 import OpenSolid
 
-class Bounds b where
-  aggregate :: b -> b -> b
-  overlaps :: b -> b -> Bool
-  intersection :: b -> b -> Maybe b
+class IsBounds b where
+  aggregate2Impl :: b -> b -> b
+  intersectsImpl :: b -> b -> Bool
+  intersectionImpl :: b -> b -> Maybe b

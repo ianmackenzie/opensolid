@@ -4,8 +4,9 @@ module BoundingBox3d
   , hull2
   , hull3
   , hull4
-  , aggregate
-  , overlaps
+  , aggregate2
+  , intersects
+  , intersection
   , interpolate
   )
 where
@@ -27,18 +28,10 @@ data BoundingBox3d (coordinateSystem :: CoordinateSystem)
       (Range (Units coordinateSystem))
   deriving (Show)
 
-instance Bounds (BoundingBox3d (space @ units)) where
-  aggregate (BoundingBox3d x1 y1 z1) (BoundingBox3d x2 y2 z2) =
-    BoundingBox3d (Range.aggregate x1 x2) (Range.aggregate y1 y2) (Range.aggregate z1 z2)
-
-  overlaps (BoundingBox3d x1 y1 z1) (BoundingBox3d x2 y2 z2) =
-    Range.overlaps x1 x2 && Range.overlaps y1 y2 && Range.overlaps z1 z2
-
-  intersection (BoundingBox3d x1 y1 z1) (BoundingBox3d x2 y2 z2) = do
-    x <- intersection x1 x2
-    y <- intersection y1 y2
-    z <- intersection z1 z2
-    Just (BoundingBox3d x y z)
+instance IsBounds (BoundingBox3d (space @ units)) where
+  aggregate2Impl = aggregate2
+  intersectsImpl = intersects
+  intersectionImpl = intersection
 
 instance (units ~ units', space ~ space') => Subtraction (Point3d (space @ units)) (BoundingBox3d (space' @ units')) (VectorBox3d (space @ units)) where
   Point3d px py pz - BoundingBox3d bx by bz = VectorBox3d (px - bx) (py - by) (pz - bz)
@@ -52,6 +45,21 @@ instance (units ~ units', space ~ space') => Subtraction (BoundingBox3d (space @
 constant :: Point3d (space @ units) -> BoundingBox3d (space @ units)
 constant (Point3d x y z) =
   BoundingBox3d (Range.constant x) (Range.constant y) (Range.constant z)
+
+aggregate2 :: BoundingBox3d (space @ units) -> BoundingBox3d (space @ units) -> BoundingBox3d (space @ units)
+aggregate2 (BoundingBox3d x1 y1 z1) (BoundingBox3d x2 y2 z2) =
+  BoundingBox3d (Range.aggregate2 x1 x2) (Range.aggregate2 y1 y2) (Range.aggregate2 z1 z2)
+
+intersects :: BoundingBox3d (space @ units) -> BoundingBox3d (space @ units) -> Bool
+intersects (BoundingBox3d x1 y1 z1) (BoundingBox3d x2 y2 z2) =
+  Range.intersects x1 x2 && Range.intersects y1 y2 && Range.intersects z1 z2
+
+intersection :: BoundingBox3d (space @ units) -> BoundingBox3d (space @ units) -> Maybe (BoundingBox3d (space @ units))
+intersection (BoundingBox3d x1 y1 z1) (BoundingBox3d x2 y2 z2) = do
+  x <- Range.intersection x1 x2
+  y <- Range.intersection y1 y2
+  z <- Range.intersection z1 z2
+  Just (BoundingBox3d x y z)
 
 hull2
   :: Point3d (space @ units)

@@ -17,8 +17,7 @@ module Range
   , sqrt
   , hypot2
   , hypot3
-  , aggregate
-  , overlaps
+  , aggregate2
   , sin
   , cos
   , search
@@ -32,11 +31,13 @@ module Range
   , resolve2
   , recurse
   , recurse2
+  , intersects
+  , intersection
   )
 where
 
 import Angle qualified
-import Bounds (Bounds (..))
+import Bounds (IsBounds (..))
 import Float qualified
 import Generic qualified
 import OpenSolid
@@ -113,15 +114,10 @@ instance Units.Quotient units1 units2 units3 => Division (Range units1) (Range u
     | dh < Qty.zero = unsafe (nh / dh) (nl / dl)
     | otherwise = unsafe -Qty.infinity Qty.infinity
 
-instance Bounds (Range units) where
-  aggregate (Range low1 high1) (Range low2 high2) = unsafe (min low1 low2) (max high1 high2)
-
-  overlaps (Range low1 high1) (Range low2 high2) = low1 <= high2 && low2 <= high1
-
-  intersection (Range low1 high1) (Range low2 high2)
-    | high1 < low2 = Nothing
-    | low1 > high2 = Nothing
-    | otherwise = Just (unsafe (max low1 low2) (min high1 high2))
+instance IsBounds (Range units) where
+  aggregate2Impl = aggregate2
+  intersectsImpl = intersects
+  intersectionImpl = intersection
 
 {-# INLINE unsafe #-}
 unsafe :: Qty units -> Qty units -> Range units
@@ -136,6 +132,18 @@ from a b = if a <= b then unsafe a b else unsafe b a
 
 unit :: Range Unitless
 unit = unsafe 0.0 1.0
+
+aggregate2 :: Range units -> Range units -> Range units
+aggregate2 (Range low1 high1) (Range low2 high2) = unsafe (min low1 low2) (max high1 high2)
+
+intersects :: Range units -> Range units -> Bool
+intersects (Range low1 high1) (Range low2 high2) = low1 <= high2 && low2 <= high1
+
+intersection :: Range units -> Range units -> Maybe (Range units)
+intersection (Range low1 high1) (Range low2 high2)
+  | high1 < low2 = Nothing
+  | low1 > high2 = Nothing
+  | otherwise = Just (unsafe (max low1 low2) (min high1 high2))
 
 hull3 :: Qty units -> Qty units -> Qty units -> Range units
 hull3 a b c = unsafe (min a (min b c)) (max a (max b c))
