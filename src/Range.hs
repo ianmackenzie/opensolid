@@ -306,41 +306,41 @@ resolution (Range low high)
   | high < Qty.zero = -high / low
   | otherwise = 0.0
 
-any :: (Range units -> Result Indeterminate Bool) -> Range units -> Result Indeterminate Bool
+any :: (Range units -> Fuzzy Bool) -> Range units -> Fuzzy Bool
 any assess range =
   let assessment = assess range
    in case assessment of
-        Ok _ -> assessment
-        Error Indeterminate
-          | isAtomic range -> Error Indeterminate
+        Resolved _ -> assessment
+        Unresolved
+          | isAtomic range -> Unresolved
           | otherwise ->
               let (left, right) = Range.bisect range
                in case any assess left of
-                    Ok True -> Ok True
-                    Ok False -> any assess right
-                    Error Indeterminate ->
+                    Resolved True -> Resolved True
+                    Resolved False -> any assess right
+                    Unresolved ->
                       case any assess right of
-                        Ok True -> Ok True
-                        Ok False -> Error Indeterminate
-                        Error Indeterminate -> Error Indeterminate
+                        Resolved True -> Resolved True
+                        Resolved False -> Unresolved
+                        Unresolved -> Unresolved
 
-all :: (Range units -> Result Indeterminate Bool) -> Range units -> Result Indeterminate Bool
+all :: (Range units -> Fuzzy Bool) -> Range units -> Fuzzy Bool
 all assess range =
   let assessment = assess range
    in case assessment of
-        Ok _ -> assessment
-        Error Indeterminate
-          | isAtomic range -> Error Indeterminate
+        Resolved _ -> assessment
+        Unresolved
+          | isAtomic range -> Unresolved
           | otherwise ->
               let (left, right) = Range.bisect range
                in case all assess left of
-                    Ok True -> all assess right
-                    Ok False -> Ok False
-                    Error Indeterminate ->
+                    Resolved True -> all assess right
+                    Resolved False -> Resolved False
+                    Unresolved ->
                       case all assess right of
-                        Ok True -> Error Indeterminate
-                        Ok False -> Ok False
-                        Error Indeterminate -> Error Indeterminate
+                        Resolved True -> Unresolved
+                        Resolved False -> Resolved False
+                        Unresolved -> Unresolved
 
 search :: (Range units -> Bool) -> Range units -> List (Qty units)
 search predicate range = searchImpl predicate range []
@@ -394,42 +394,42 @@ search2Impl predicate u v accumulated =
                 |> search2Impl predicate leftU rightV
                 |> search2Impl predicate leftU leftV
 
-resolve :: (Range units -> Result Indeterminate a) -> Range units -> Result Indeterminate (List a)
+resolve :: (Range units -> Fuzzy a) -> Range units -> Fuzzy (List a)
 resolve predicate range = resolveImpl predicate range []
 
 resolveImpl
-  :: (Range units -> Result Indeterminate a)
+  :: (Range units -> Fuzzy a)
   -> Range units
   -> List a
-  -> Result Indeterminate (List a)
+  -> Fuzzy (List a)
 resolveImpl predicate range accumulated =
   case predicate range of
-    Ok resolved -> Ok (resolved : accumulated)
-    Error Indeterminate
-      | isAtomic range -> Error Indeterminate
+    Resolved resolved -> Resolved (resolved : accumulated)
+    Unresolved
+      | isAtomic range -> Unresolved
       | otherwise -> do
           let (left, right) = bisect range
           resultsR <- resolveImpl predicate right accumulated
           resolveImpl predicate left resultsR
 
 resolve2
-  :: (Range units1 -> Range units2 -> Result Indeterminate a)
+  :: (Range units1 -> Range units2 -> Fuzzy a)
   -> Range units1
   -> Range units2
-  -> Result Indeterminate (List a)
+  -> Fuzzy (List a)
 resolve2 predicate range1 range2 = resolve2Impl predicate range1 range2 []
 
 resolve2Impl
-  :: (Range units1 -> Range units2 -> Result Indeterminate a)
+  :: (Range units1 -> Range units2 -> Fuzzy a)
   -> Range units1
   -> Range units2
   -> List a
-  -> Result Indeterminate (List a)
+  -> Fuzzy (List a)
 resolve2Impl predicate range1 range2 accumulated =
   case predicate range1 range2 of
-    Ok resolved -> Ok (resolved : accumulated)
-    Error Indeterminate
-      | isAtomic range1 && isAtomic range2 -> Error Indeterminate
+    Resolved resolved -> Resolved (resolved : accumulated)
+    Unresolved
+      | isAtomic range1 && isAtomic range2 -> Unresolved
       | isAtomic range1 -> do
           let (left, right) = bisect range2
           resultsR <- resolve2Impl predicate range1 right accumulated

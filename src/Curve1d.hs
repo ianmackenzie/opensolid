@@ -355,8 +355,8 @@ bisectMonotonic curve lowX highX lowY highY =
 regions :: Tolerance units => Range Unitless -> Curve1d units -> Result IsZero (List Region)
 regions domain curve =
   case resolve domain curve of
-    Ok region -> Ok [region]
-    Error Indeterminate -> do
+    Resolved region -> Ok [region]
+    Unresolved -> do
       (leftDomain, rightDomain) <- bisect domain
       leftRegions <- regions leftDomain curve
       rightRegions <- regions rightDomain curve
@@ -365,10 +365,10 @@ regions domain curve =
 bisect :: Range Unitless -> Result IsZero (Range Unitless, Range Unitless)
 bisect domain = if domain.isAtomic then Error IsZero else Ok (Range.bisect domain)
 
-resolve :: Tolerance units => Range Unitless -> Curve1d units -> Result Indeterminate Region
+resolve :: Tolerance units => Range Unitless -> Curve1d units -> Fuzzy Region
 resolve domain curve
-  | curveBounds.minValue >= ?tolerance = Ok (Region domain 0 Positive)
-  | curveBounds.maxValue <= negate ?tolerance = Ok (Region domain 0 Negative)
+  | curveBounds.minValue >= ?tolerance = Resolved (Region domain 0 Positive)
+  | curveBounds.maxValue <= negate ?tolerance = Resolved (Region domain 0 Negative)
   | otherwise = resolveDerivative domain (derivative curve) 1
  where
   curveBounds = segmentBounds curve domain
@@ -376,13 +376,13 @@ resolve domain curve
 resolved :: Range units -> Bool
 resolved range = Qty.abs (Range.resolution range) >= 0.5
 
-resolveDerivative :: Range Unitless -> Curve1d units -> Int -> Result Indeterminate Region
+resolveDerivative :: Range Unitless -> Curve1d units -> Int -> Fuzzy Region
 resolveDerivative domain curveDerivative derivativeOrder
   | resolved derivativeBounds =
-      Ok (Region domain derivativeOrder (Qty.sign derivativeBounds.minValue))
+      Resolved (Region domain derivativeOrder (Qty.sign derivativeBounds.minValue))
   | derivativeOrder <= maxRootOrder =
       resolveDerivative domain (derivative curveDerivative) (derivativeOrder + 1)
-  | otherwise = Error Indeterminate
+  | otherwise = Unresolved
  where
   derivativeBounds = segmentBounds curveDerivative domain
 

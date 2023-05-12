@@ -11,6 +11,7 @@ module OpenSolid
   , module DoNotation
   , module CoordinateSystem
   , module Tolerance
+  , module Fuzzy
   )
 where
 
@@ -20,9 +21,10 @@ import Concatenate (Concatenate ((++)))
 import CoordinateSystem (CoordinateSystem, LocalCoordinateSystem (Defines), type (@))
 import DoNotation
 import Float (Float, fromRational)
+import Fuzzy (Fuzzy (Resolved, Unresolved))
 import List (List)
 import Qty (Qty (Qty))
-import Result (Indeterminate (Indeterminate), IsError (errorMessage), Result (Error, Ok))
+import Result (IsError (errorMessage), Result (Error, Ok))
 import Sign (Sign (Negative, Positive))
 import Task (Task)
 import Task qualified

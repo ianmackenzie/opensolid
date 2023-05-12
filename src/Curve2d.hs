@@ -163,18 +163,20 @@ instance IsError IsCoincidentWithPoint where
 
 passesThrough :: Tolerance units => Point2d (space @ units) -> Curve2d (space @ units) -> Bool
 passesThrough point curve =
-  Range.any (nearby point curve) Range.unit |> Result.withDefault False
+  case Range.any (nearby point curve) Range.unit of
+    Resolved resolved -> resolved
+    Unresolved -> False
 
 nearby
   :: Tolerance units
   => Point2d (space @ units)
   -> Curve2d (space @ units)
   -> Range Unitless
-  -> Result Indeterminate Bool
+  -> Fuzzy Bool
 nearby point curve domain
-  | Range.minValue distance > ?tolerance = Ok False
-  | Range.maxValue distance <= ?tolerance = Ok True
-  | otherwise = Error Indeterminate
+  | Range.minValue distance > ?tolerance = Resolved False
+  | Range.maxValue distance <= ?tolerance = Resolved True
+  | otherwise = Unresolved
  where
   distance = VectorBox2d.magnitude (point - segmentBounds curve domain)
 
@@ -339,13 +341,13 @@ findCrossingIntersections derivatives1 derivatives2 exclusionRegions u1 u2 accum
   let filteredRegions = List.filter (intersectingRegions (u1, u2)) exclusionRegions
       findInSubdomains = findCrossingIntersections derivatives1 derivatives2 filteredRegions
    in case Derivatives.intersectionKind derivatives1 derivatives2 u1 u2 of
-        Ok Nothing -> accumulated
-        Ok (Just (Intersection.Tangent _)) -> accumulated
-        Ok (Just (Intersection.Crossing sign)) ->
+        Resolved Nothing -> accumulated
+        Resolved (Just (Intersection.Tangent _)) -> accumulated
+        Resolved (Just (Intersection.Crossing sign)) ->
           case filteredRegions of
             [] -> findCrossingIntersection sign derivatives1 derivatives2 u1 u2 ++ accumulated
             _ -> Range.recurse2 findInSubdomains u1 u2 accumulated
-        Error Indeterminate -> Range.recurse2 findInSubdomains u1 u2 accumulated
+        Unresolved -> Range.recurse2 findInSubdomains u1 u2 accumulated
 
 findCrossingIntersection
   :: Sign
@@ -380,16 +382,16 @@ findTangentSolutions derivatives1 derivatives2 endpointRegions u1 u2 accumulated
   let filteredRegions = List.filter (intersectingRegions (u1, u2)) endpointRegions
       findInSubdomains = findTangentSolutions derivatives1 derivatives2 filteredRegions
    in case Derivatives.intersectionKind derivatives1 derivatives2 u1 u2 of
-        Ok Nothing -> accumulated
-        Ok (Just (Intersection.Crossing _)) -> accumulated
-        Ok (Just (Intersection.Tangent sign)) ->
+        Resolved Nothing -> accumulated
+        Resolved (Just (Intersection.Crossing _)) -> accumulated
+        Resolved (Just (Intersection.Tangent sign)) ->
           case filteredRegions of
             [] ->
               case findTangentIntersection sign derivatives1 derivatives2 u1 u2 of
                 Just intersection -> (intersection, (u1, u2)) : accumulated
                 Nothing -> accumulated
             _ -> Range.recurse2 findInSubdomains u1 u2 accumulated
-        Error Indeterminate -> Range.recurse2 findInSubdomains u1 u2 accumulated
+        Unresolved -> Range.recurse2 findInSubdomains u1 u2 accumulated
 
 findTangentIntersection
   :: Tolerance units
@@ -451,12 +453,12 @@ findEndpointRegions derivatives1 derivatives2 endpointIntersections u1 u2 accumu
           expanded2 = expand u2
           findInSubdomains = findEndpointRegions derivatives1 derivatives2 filteredIntersections
        in case Derivatives.intersectionKind derivatives1 derivatives2 expanded1 expanded2 of
-            Ok (Just regionKind) ->
+            Resolved (Just regionKind) ->
               if List.all (\intersection -> intersection.kind == regionKind) filteredIntersections
                 then (expanded1, expanded2) : accumulated
                 else Range.recurse2 findInSubdomains u1 u2 accumulated
-            Ok Nothing -> accumulated
-            Error Indeterminate -> Range.recurse2 findInSubdomains u1 u2 accumulated
+            Resolved Nothing -> accumulated
+            Unresolved -> Range.recurse2 findInSubdomains u1 u2 accumulated
 
 containsIntersection :: Range Unitless -> Range Unitless -> Intersection -> Bool
 containsIntersection u1 u2 intersection =

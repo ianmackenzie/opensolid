@@ -52,6 +52,7 @@ library
       DoNotation
       Float
       Frame2d
+      Fuzzy
       Generic
       Length
       Line2d

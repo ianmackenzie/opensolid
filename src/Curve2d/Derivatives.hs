@@ -15,7 +15,6 @@ import OpenSolid
 import Qty qualified
 import Range (Range)
 import Range qualified
-import Result qualified
 import Units (Unitless, (:/))
 import Units qualified
 import Vector2d qualified
@@ -59,19 +58,20 @@ simultaneouslyZero
   -> VectorCurve2d (space @ units)
   -> Bool
 simultaneouslyZero firstDerivative secondDerivative =
-  Range.any (areBothZero firstDerivative secondDerivative) Range.unit
-    |> Result.handleError (\Indeterminate -> True) -- TODO report as non-convergence error?
+  case Range.any (areBothZero firstDerivative secondDerivative) Range.unit of
+    Resolved resolved -> resolved
+    Unresolved -> True
 
 areBothZero
   :: Tolerance units
   => VectorCurve2d (space @ units)
   -> VectorCurve2d (space @ units)
   -> Range Unitless
-  -> Result Indeterminate Bool
+  -> Fuzzy Bool
 areBothZero firstDerivative secondDerivative domain
-  | firstMin > squaredTolerance || secondMin > 4.0 * squaredTolerance = Ok False
-  | firstMax < squaredTolerance && secondMax < 4.0 * squaredTolerance = Ok True
-  | otherwise = Error Indeterminate
+  | firstMin > squaredTolerance || secondMin > 4.0 * squaredTolerance = Resolved False
+  | firstMax < squaredTolerance && secondMax < 4.0 * squaredTolerance = Resolved True
+  | otherwise = Unresolved
  where
   firstBounds = VectorCurve2d.segmentBounds firstDerivative domain
   secondBounds = VectorCurve2d.segmentBounds secondDerivative domain
@@ -104,14 +104,14 @@ intersectionKind
   -> Derivatives (space @ units)
   -> Range Unitless
   -> Range Unitless
-  -> Result Indeterminate (Maybe Intersection.Kind)
+  -> Fuzzy (Maybe Intersection.Kind)
 intersectionKind derivatives1 derivatives2 u1 u2 =
   let curveBounds1 = Curve2d.segmentBounds derivatives1.curve u1
       curveBounds2 = Curve2d.segmentBounds derivatives2.curve u2
       difference = curveBounds1 - curveBounds2
       distance = VectorBox2d.magnitude difference
    in if Range.minValue distance > ?tolerance
-        then Ok Nothing
+        then Resolved Nothing
         else
           let firstBounds1 = VectorCurve2d.segmentBounds derivatives1.first u1
               firstBounds2 = VectorCurve2d.segmentBounds derivatives2.first u2
@@ -121,7 +121,7 @@ intersectionKind derivatives1 derivatives2 u1 u2 =
               tangentBounds2 = tangentBounds derivatives2 u2 firstBounds2 secondBounds2
               firstResolution = Range.resolution (tangentBounds1 >< tangentBounds2)
            in if Qty.abs firstResolution >= 0.5
-                then Ok (Just (Intersection.Crossing (Qty.sign firstResolution)))
+                then Resolved (Just (Intersection.Crossing (Qty.sign firstResolution)))
                 else
                   let dX1_dU1 = firstBounds1.xComponent
                       dY1_dU1 = firstBounds1.yComponent
@@ -156,8 +156,8 @@ intersectionKind derivatives1 derivatives2 u1 u2 =
                           then resolutionXY
                           else -resolutionYX
                    in if Qty.abs secondResolution >= 0.5
-                        then Ok (Just (Intersection.Tangent (Qty.sign secondResolution)))
-                        else Error Indeterminate
+                        then Resolved (Just (Intersection.Tangent (Qty.sign secondResolution)))
+                        else Unresolved
 
 secondResolution1d
   :: Range units
