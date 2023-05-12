@@ -122,16 +122,6 @@ boundingBox (Line p1 p2) = BoundingBox2d.hull2 p1 p2
 boundingBox arc@(Arc{}) = segmentBounds arc Range.unit
 boundingBox (Curve2d curve) = boundingBoxImpl curve
 
-instance IsCurve2d (Curve2d (space @ units)) (space @ units) where
-  startPointImpl = startPoint
-  endPointImpl = endPoint
-  evaluateImpl = evaluate
-  segmentBoundsImpl = segmentBounds
-  derivativeImpl = derivative
-  reverseImpl = reverse
-  bisectImpl = bisect
-  boundingBoxImpl = boundingBox
-
 data PointCurveDifference (coordinateSystem :: CoordinateSystem)
   = PointCurveDifference (Point2d coordinateSystem) (Curve2d coordinateSystem)
 
