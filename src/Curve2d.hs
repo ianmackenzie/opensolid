@@ -22,11 +22,11 @@ import BoundingBox2d (BoundingBox2d)
 import BoundingBox2d qualified
 import Curve1d qualified
 import Curve1d.Root qualified as Root
-import Curve2d.Derivatives (Derivatives (Derivatives))
+import Curve2d.Derivatives (Derivatives)
+import Curve2d.Derivatives qualified as Derivatives
 import Curve2d.Intersection (Intersection (Intersection))
 import Curve2d.Intersection qualified as Intersection
 import List qualified
-import Maybe qualified
 import OpenSolid
 import Point2d (Point2d)
 import Point2d qualified
@@ -38,7 +38,6 @@ import Result qualified
 import Units (Unitless)
 import Units qualified
 import Vector2d qualified
-import VectorBox2d (VectorBox2d)
 import VectorBox2d qualified
 import VectorCurve2d (IsVectorCurve2d, VectorCurve2d (VectorCurve2d))
 import VectorCurve2d qualified
@@ -194,33 +193,33 @@ overlappingSegments
   :: Tolerance units
   => Curve2d (space @ units)
   -> Curve2d (space @ units)
-  -> List Intersection
+  -> List (Float, Float)
   -> List (Range Unitless, Range Unitless)
-overlappingSegments curve1 curve2 endpointIntersections =
-  let candidateDomains =
-        endpointIntersections
-          |> List.sortAndDeduplicate
-          |> List.successive candidateDomain
-   in List.filter (overlappingSegment curve1 curve2) candidateDomains
+overlappingSegments curve1 curve2 endpointParameterValues =
+  endpointParameterValues
+    |> List.sortAndDeduplicate
+    |> List.successive (\(u1, v1) (u2, v2) -> (Range.from u1 u2, Range.from v1 v2))
+    |> List.filter (isOverlappingSegment curve1 curve2)
 
-overlappingSegment
+isOverlappingSegment
   :: Tolerance units
   => Curve2d (space @ units)
   -> Curve2d (space @ units)
   -> (Range Unitless, Range Unitless)
   -> Bool
-overlappingSegment curve1 curve2 (domain1, _) =
+isOverlappingSegment curve1 curve2 (domain1, _) =
   let segmentStartPoint = evaluate curve1 (Range.minValue domain1)
       segmentTestPoints = samplingPoints curve1 domain1
-      degenerateDomain = List.all (~= segmentStartPoint) segmentTestPoints
-   in not degenerateDomain && List.all (\p -> passesThrough p curve2) segmentTestPoints
+   in not (List.all (\p -> p ~= segmentStartPoint) segmentTestPoints)
+        && List.all (\p -> passesThrough p curve2) segmentTestPoints
 
 data IntersectionError
   = BothAreDegenerateAndEqual
   | FirstIsDegenerateOnSecond (List Float)
   | SecondIsDegenerateOnFirst (List Float)
   | OverlappingSegments (List (Range Unitless, Range Unitless))
-  | ZeroFirstDerivative
+  | ZeroDerivatives
+  | TangentIntersectionAtDegeneratePoint
   deriving (Show)
 
 instance IsError IntersectionError where
@@ -232,15 +231,17 @@ instance IsError IntersectionError where
     "Second curve is a single point on the first curve"
   errorMessage (OverlappingSegments _) =
     "Curves have overlapping segments"
-  errorMessage ZeroFirstDerivative =
-    "Curve first derivative is zero (so tangent direction cannot be easily determined)"
+  errorMessage ZeroDerivatives =
+    "Both first and second curve derivatives are zero"
+  errorMessage TangentIntersectionAtDegeneratePoint =
+    "Tangent intersection where a curve first derivative is zero"
 
-findEndpointIntersections
+findEndpointParameterValues
   :: Tolerance units
   => Curve2d (space @ units)
   -> Curve2d (space @ units)
-  -> Result IntersectionError (List Intersection)
-findEndpointIntersections curve1 curve2 =
+  -> Result IntersectionError (List (Float, Float))
+findEndpointParameterValues curve1 curve2 =
   let uValues = do
         v0us <- curve1 |> parameterValues (startPoint curve2)
         v1us <- curve1 |> parameterValues (endPoint curve2)
@@ -253,10 +254,10 @@ findEndpointIntersections curve1 curve2 =
         (Ok (v0us, v1us), Ok (u0vs, u1vs)) ->
           Ok $
             List.concat
-              [ List.map (\u -> Intersection u 0.0 Nothing) v0us
-              , List.map (\u -> Intersection u 1.0 Nothing) v1us
-              , List.map (\v -> Intersection 0.0 v Nothing) u0vs
-              , List.map (\v -> Intersection 1.0 v Nothing) u1vs
+              [ List.map (,0.0) v0us
+              , List.map (,1.0) v1us
+              , List.map (0.0,) u0vs
+              , List.map (1.0,) u1vs
               ]
         (Error Curve2d.IsCoincidentWithPoint, Ok (u0vs, _)) ->
           Error (FirstIsDegenerateOnSecond u0vs)
@@ -265,19 +266,16 @@ findEndpointIntersections curve1 curve2 =
         (Error Curve2d.IsCoincidentWithPoint, Error Curve2d.IsCoincidentWithPoint) ->
           Error BothAreDegenerateAndEqual
 
-candidateDomain :: Intersection -> Intersection -> (Range Unitless, Range Unitless)
-candidateDomain start end =
-  (Range.from start.u end.u, Range.from start.v end.v)
-
 samplingPoints :: Curve2d (space @ units) -> Range Unitless -> List (Point2d (space @ units))
 samplingPoints curve domain =
   List.map (Range.interpolate domain >> evaluate curve) Quadrature.parameterValues
 
-newtype AreOverlapping = AreOverlapping (List (Range Unitless, Range Unitless)) deriving (Show)
-
-instance IsError AreOverlapping where
-  errorMessage (AreOverlapping _) =
-    "Curves are overlapping (so there are infinite intersection points)"
+curveDerivatives
+  :: Tolerance units
+  => Curve2d (space @ units)
+  -> Result IntersectionError (Derivatives (space @ units))
+curveDerivatives curve =
+  Derivatives.ofCurve curve |> Result.mapError (\Derivatives.AreZero -> Curve2d.ZeroDerivatives)
 
 intersections
   :: Tolerance units
@@ -285,125 +283,80 @@ intersections
   -> Curve2d (space @ units)
   -> Result IntersectionError (List Intersection)
 intersections curve1 curve2 = do
-  endpointIntersections <- findEndpointIntersections curve1 curve2
-  case overlappingSegments curve1 curve2 endpointIntersections of
-    [] ->
-      let firstDerivative1 = derivative curve1
-          firstDerivative2 = derivative curve2
-          secondDerivative1 = VectorCurve2d.derivative firstDerivative1
-          secondDerivative2 = VectorCurve2d.derivative firstDerivative2
-          derivatives1 = Derivatives curve1 firstDerivative1 secondDerivative1
-          derivatives2 = Derivatives curve2 firstDerivative2 secondDerivative2
-          innerIntersections =
-            findInnerIntersections derivatives1 derivatives2 Range.unit Range.unit
-       in Ok (endpointIntersections ++ innerIntersections)
+  endpointParameterValues <- findEndpointParameterValues curve1 curve2
+  case overlappingSegments curve1 curve2 endpointParameterValues of
+    [] -> findIntersections curve1 curve2 endpointParameterValues
     segments -> Error (OverlappingSegments segments)
 
-findInnerIntersections
+endpointIntersection
   :: Tolerance units
   => Derivatives (space @ units)
   -> Derivatives (space @ units)
-  -> Range Unitless
-  -> Range Unitless
-  -> List Intersection
-findInnerIntersections derivatives1 derivatives2 u v =
-  let solutions = findSolutions derivatives1 derivatives2 u v
-   in List.collect (crossingIntersections derivatives1 derivatives2 solutions) solutions
-        ++ Maybe.collect tangentIntersection solutions
+  -> (Float, Float)
+  -> Result IntersectionError Intersection
+endpointIntersection derivatives1 derivatives2 (u1, u2) =
+  Derivatives.classify derivatives1 derivatives2 u1 u2
+    |> Result.map (Intersection u1 u2)
+    |> Result.mapError
+      (\Derivatives.DegenerateIntersection -> Curve2d.TangentIntersectionAtDegeneratePoint)
 
-resolved :: Range units -> Bool
-resolved range = Range.resolution range >= 0.5
-
-data Solution
-  = Solution0 Intersection
-  | Solution1 (Range Unitless) (Range Unitless) (Maybe Intersection)
-
-tangentIntersection :: Solution -> Maybe Intersection
-tangentIntersection (Solution0 _) = Nothing
-tangentIntersection (Solution1 _ _ maybeIntersection) = maybeIntersection
-
-crossingIntersections
-  :: Derivatives (space @ units)
-  -> Derivatives (space @ units)
-  -> List Solution
-  -> Solution
-  -> List Intersection
-crossingIntersections _ _ _ (Solution0 intersection) = [intersection]
-crossingIntersections _ _ _ (Solution1 _ _ (Just _)) = []
-crossingIntersections derivatives1 derivatives2 solutions (Solution1 u v Nothing)
-  | List.any (neighborToTangentIntersection u v) solutions = []
-  | otherwise = findCrossingIntersections derivatives1 derivatives2 u v
-
-neighborToTangentIntersection :: Range Unitless -> Range Unitless -> Solution -> Bool
-neighborToTangentIntersection _ _ (Solution0 _) = False
-neighborToTangentIntersection _ _ (Solution1 _ _ Nothing) = False
-neighborToTangentIntersection u1 v1 (Solution1 u2 v2 (Just _)) =
-  Range.overlaps u1 u2 && Range.overlaps v1 v2
-
-findSolutions
+findIntersections
   :: Tolerance units
-  => Derivatives (space @ units)
-  -> Derivatives (space @ units)
-  -> Range Unitless
-  -> Range Unitless
-  -> List Solution
-findSolutions derivatives1 derivatives2 u v =
-  let bounds1 = segmentBounds derivatives1.curve u
-      bounds2 = segmentBounds derivatives2.curve v
-      difference = bounds1 - bounds2
-      distance = VectorBox2d.magnitude difference
-   in if distance.minValue > ?tolerance
-        then [] -- No roots if bounding boxes are further apart than the given tolerance
-        else
-          let firstBounds1 = VectorCurve2d.segmentBounds derivatives1.first u
-              firstBounds2 = VectorCurve2d.segmentBounds derivatives1.first v
-           in if resolvedFirst firstBounds1 firstBounds2
-                then List.map Solution0 (findCrossingIntersections derivatives1 derivatives2 u v)
-                else
-                  let secondBounds1 = VectorCurve2d.segmentBounds derivatives1.second u
-                      secondBounds2 = VectorCurve2d.segmentBounds derivatives2.second v
-                   in if resolvedSecond firstBounds1 firstBounds2 secondBounds1 secondBounds2
-                        then [Solution1 u v (findTangentIntersection derivatives1 derivatives2 u v)]
-                        else solveRecursively derivatives1 derivatives2 u v
-
-findTangentIntersection
-  :: Tolerance units
-  => Derivatives (space @ units)
-  -> Derivatives (space @ units)
-  -> Range Unitless
-  -> Range Unitless
-  -> Maybe Intersection
-findTangentIntersection derivatives1 derivatives2 u v =
-  case Range.search2 (isTangentIntersection derivatives1 derivatives2) u v of
-    [] -> Nothing
-    (u0, v0) : _ -> Just (Intersection u0 v0 Nothing)
-
-solveRecursively
-  :: Tolerance units
-  => Derivatives (space @ units)
-  -> Derivatives (space @ units)
-  -> Range Unitless
-  -> Range Unitless
-  -> List Solution
-solveRecursively derivatives1 derivatives2 u v =
-  let (leftU, rightU) = Range.bisect u
-      (leftV, rightV) = Range.bisect v
-   in List.concat
-        [ findSolutions derivatives1 derivatives2 leftU leftV
-        , findSolutions derivatives1 derivatives2 leftU rightV
-        , findSolutions derivatives1 derivatives2 rightU leftV
-        , findSolutions derivatives1 derivatives2 rightU rightV
-        ]
+  => Curve2d (space @ units)
+  -> Curve2d (space @ units)
+  -> List (Float, Float)
+  -> Result IntersectionError (List Intersection)
+findIntersections curve1 curve2 endpointParameterValues = do
+  derivatives1 <- curveDerivatives curve1
+  derivatives2 <- curveDerivatives curve2
+  endpointIntersections <-
+    Result.collect (endpointIntersection derivatives1 derivatives2) endpointParameterValues
+  let endpointRegions =
+        findEndpointRegions derivatives1 derivatives2 endpointIntersections Range.unit Range.unit []
+  let (tangentIntersections, tangentRegions) =
+        List.unzip2 $
+          findTangentSolutions derivatives1 derivatives2 endpointRegions Range.unit Range.unit []
+  let crossingIntersections =
+        findCrossingIntersections
+          derivatives1
+          derivatives2
+          (endpointRegions ++ tangentRegions)
+          Range.unit
+          Range.unit
+          []
+  Ok (endpointIntersections ++ tangentIntersections ++ crossingIntersections)
 
 findCrossingIntersections
-  :: Derivatives (space @ units)
+  :: Tolerance units
+  => Derivatives (space @ units)
+  -> Derivatives (space @ units)
+  -> List (Range Unitless, Range Unitless)
+  -> Range Unitless
+  -> Range Unitless
+  -> List Intersection
+  -> List Intersection
+findCrossingIntersections derivatives1 derivatives2 exclusionRegions u1 u2 accumulated =
+  let filteredRegions = List.filter (intersectingRegions (u1, u2)) exclusionRegions
+      findInSubdomains = findCrossingIntersections derivatives1 derivatives2 filteredRegions
+   in case Derivatives.intersectionKind derivatives1 derivatives2 u1 u2 of
+        Ok Nothing -> accumulated
+        Ok (Just (Intersection.Tangent _)) -> accumulated
+        Ok (Just (Intersection.Crossing sign)) ->
+          case filteredRegions of
+            [] -> findCrossingIntersection sign derivatives1 derivatives2 u1 u2 ++ accumulated
+            _ -> Range.recurse2 findInSubdomains u1 u2 accumulated
+        Error Indeterminate -> Range.recurse2 findInSubdomains u1 u2 accumulated
+
+findCrossingIntersection
+  :: Sign
+  -> Derivatives (space @ units)
   -> Derivatives (space @ units)
   -> Range Unitless
   -> Range Unitless
   -> List Intersection
-findCrossingIntersections derivatives1 derivatives2 u v =
-  Range.search2 (isCrossingIntersection derivatives1.curve derivatives2.curve) u v
-    |> List.map (crossingIntersection derivatives1.first derivatives1.second)
+findCrossingIntersection sign derivatives1 derivatives2 u1 u2 =
+  Range.search2 (isCrossingIntersection derivatives1.curve derivatives2.curve) u1 u2
+    |> List.map (\(u1', u2') -> Intersection u1' u2' (Intersection.Crossing sign))
 
 isCrossingIntersection
   :: Curve2d (space @ units)
@@ -411,61 +364,45 @@ isCrossingIntersection
   -> Range Unitless
   -> Range Unitless
   -> Bool
-isCrossingIntersection curve1 curve2 u v =
-  BoundingBox2d.overlaps (segmentBounds curve1 u) (segmentBounds curve2 v)
+isCrossingIntersection curve1 curve2 u1 u2 =
+  BoundingBox2d.intersects (segmentBounds curve1 u1) (segmentBounds curve2 u2)
 
-crossingIntersection
-  :: VectorCurve2d (space @ units)
-  -> VectorCurve2d (space @ units)
-  -> (Float, Float)
-  -> Intersection
-crossingIntersection firstDerivative1 firstDerivative2 (u, v) =
-  let first1 = VectorCurve2d.evaluate firstDerivative1 u
-      first2 = VectorCurve2d.evaluate firstDerivative2 v
-      sign = Qty.sign (Units.generalize first1 >< Units.generalize first2)
-   in Intersection u v (Just sign)
+findTangentSolutions
+  :: Tolerance units
+  => Derivatives (space @ units)
+  -> Derivatives (space @ units)
+  -> List (Range Unitless, Range Unitless)
+  -> Range Unitless
+  -> Range Unitless
+  -> List (Intersection, (Range Unitless, Range Unitless))
+  -> List (Intersection, (Range Unitless, Range Unitless))
+findTangentSolutions derivatives1 derivatives2 endpointRegions u1 u2 accumulated =
+  let filteredRegions = List.filter (intersectingRegions (u1, u2)) endpointRegions
+      findInSubdomains = findTangentSolutions derivatives1 derivatives2 filteredRegions
+   in case Derivatives.intersectionKind derivatives1 derivatives2 u1 u2 of
+        Ok Nothing -> accumulated
+        Ok (Just (Intersection.Crossing _)) -> accumulated
+        Ok (Just (Intersection.Tangent sign)) ->
+          case filteredRegions of
+            [] ->
+              case findTangentIntersection sign derivatives1 derivatives2 u1 u2 of
+                Just intersection -> (intersection, (u1, u2)) : accumulated
+                Nothing -> accumulated
+            _ -> Range.recurse2 findInSubdomains u1 u2 accumulated
+        Error Indeterminate -> Range.recurse2 findInSubdomains u1 u2 accumulated
 
-resolvedFirst
-  :: VectorBox2d (space @ units)
-  -> VectorBox2d (space @ units)
-  -> Bool
-resolvedFirst firstBounds1 firstBounds2 =
-  resolved (Units.generalize firstBounds1 >< Units.generalize firstBounds2)
-
-resolvedSecond
-  :: VectorBox2d (space @ units)
-  -> VectorBox2d (space @ units)
-  -> VectorBox2d (space @ units)
-  -> VectorBox2d (space @ units)
-  -> Bool
-resolvedSecond firstBounds1 firstBounds2 secondBounds1 secondBounds2 =
-  let dU_X1 = firstBounds1.xComponent
-      dU_Y1 = firstBounds1.yComponent
-      dV_X2 = firstBounds2.xComponent
-      dV_Y2 = firstBounds2.yComponent
-      d2U_X1 = secondBounds1.xComponent
-      d2U_Y1 = secondBounds1.yComponent
-      d2V_X2 = secondBounds2.xComponent
-      d2V_Y2 = secondBounds2.yComponent
-   in resolvedSecond1d dU_X1 dU_Y1 dV_X2 dV_Y2 d2U_X1 d2U_Y1 d2V_X2 d2V_Y2
-        || resolvedSecond1d dU_Y1 dU_X1 dV_Y2 dV_X2 d2U_Y1 d2U_X1 d2V_Y2 d2V_X2
-
-resolvedSecond1d
-  :: Range units
-  -> Range units
-  -> Range units
-  -> Range units
-  -> Range units
-  -> Range units
-  -> Range units
-  -> Range units
-  -> Bool
-resolvedSecond1d dU_X1 dU_Y1 dV_X2 dV_Y2 d2U_X1 d2U_Y1 d2V_X2 d2V_Y2
-  | resolved dU_X1 && resolved dV_X2 =
-      let d2X_Y1 = (d2U_Y1 .* dU_X1 - dU_Y1 .* d2U_X1) ./ (dU_X1 .* dU_X1 .* dU_X1)
-          d2X_Y2 = (d2V_Y2 .* dV_X2 - dV_Y2 .* d2V_X2) ./ (dV_X2 .* dV_X2 .* dV_X2)
-       in resolved (d2X_Y1 - d2X_Y2)
-  | otherwise = False
+findTangentIntersection
+  :: Tolerance units
+  => Sign
+  -> Derivatives (space @ units)
+  -> Derivatives (space @ units)
+  -> Range Unitless
+  -> Range Unitless
+  -> Maybe Intersection
+findTangentIntersection sign derivatives1 derivatives2 u1 u2 =
+  case Range.search2 (isTangentIntersection derivatives1 derivatives2) u1 u2 of
+    [] -> Nothing
+    (u1', u2') : _ -> Just (Intersection u1' u2' (Intersection.Tangent sign))
 
 isTangentIntersection
   :: Tolerance units
@@ -474,18 +411,53 @@ isTangentIntersection
   -> Range Unitless
   -> Range Unitless
   -> Bool
-isTangentIntersection derivatives1 derivatives2 u v =
-  let bounds1 = segmentBounds derivatives1.curve u
-      bounds2 = segmentBounds derivatives2.curve v
+isTangentIntersection derivatives1 derivatives2 u1 u2 =
+  let bounds1 = segmentBounds derivatives1.curve u1
+      bounds2 = segmentBounds derivatives2.curve u2
       difference = bounds1 - bounds2
       distance = VectorBox2d.magnitude difference
    in Range.minValue distance <= ?tolerance
-        && let firstBounds1 = VectorCurve2d.segmentBounds derivatives1.first u
-               firstBounds2 = VectorCurve2d.segmentBounds derivatives2.first v
+        && let firstBounds1 = VectorCurve2d.segmentBounds derivatives1.first u1
+               firstBounds2 = VectorCurve2d.segmentBounds derivatives2.first u2
                crossProduct = Units.generalize firstBounds1 >< Units.generalize firstBounds2
                dotProduct1 = Units.generalize firstBounds1 <> Units.generalize difference
                dotProduct2 = Units.generalize firstBounds2 <> Units.generalize difference
-            in containsZero crossProduct && containsZero dotProduct1 && containsZero dotProduct2
+            in Range.contains Qty.zero crossProduct
+                && Range.contains Qty.zero dotProduct1
+                && Range.contains Qty.zero dotProduct2
 
-containsZero :: Range units -> Bool
-containsZero range = range.minValue <= Qty.zero && range.maxValue >= Qty.zero
+intersectingRegions :: (Range Unitless, Range Unitless) -> (Range Unitless, Range Unitless) -> Bool
+intersectingRegions (a1, a2) (b1, b2) = Range.intersects a1 b1 && Range.intersects a2 b2
+
+expand :: Range Unitless -> Range Unitless
+expand (Range low high) =
+  let expansion = 0.5 * (high - low)
+   in Range.unsafe (max 0.0 (low - expansion)) (min 1.0 (high + expansion))
+
+findEndpointRegions
+  :: Tolerance units
+  => Derivatives (space @ units)
+  -> Derivatives (space @ units)
+  -> List Intersection
+  -> Range Unitless
+  -> Range Unitless
+  -> List (Range Unitless, Range Unitless)
+  -> List (Range Unitless, Range Unitless)
+findEndpointRegions derivatives1 derivatives2 endpointIntersections u1 u2 accumulated =
+  case List.filter (containsIntersection u1 u2) endpointIntersections of
+    [] -> accumulated
+    filteredIntersections ->
+      let expanded1 = expand u1
+          expanded2 = expand u2
+          findInSubdomains = findEndpointRegions derivatives1 derivatives2 filteredIntersections
+       in case Derivatives.intersectionKind derivatives1 derivatives2 expanded1 expanded2 of
+            Ok (Just regionKind) ->
+              if List.all (\intersection -> intersection.kind == regionKind) filteredIntersections
+                then (expanded1, expanded2) : accumulated
+                else Range.recurse2 findInSubdomains u1 u2 accumulated
+            Ok Nothing -> accumulated
+            Error Indeterminate -> Range.recurse2 findInSubdomains u1 u2 accumulated
+
+containsIntersection :: Range Unitless -> Range Unitless -> Intersection -> Bool
+containsIntersection u1 u2 intersection =
+  Range.contains intersection.u1 u1 && Range.contains intersection.u2 u2
