@@ -275,15 +275,13 @@ roots :: Tolerance units => Curve1d units -> Result IsZero (List Root)
 roots Zero = Error IsZero
 roots (Constant value) = if value ~= Qty.zero then Error IsZero else Ok []
 roots curve | isZero curve = Error IsZero
-roots curve = do
+roots curve =
   let (root0, x0) = solveEndpoint curve 0.0
-  let (root1, x1) = solveEndpoint curve 1.0
-  resolvedRegions <- regions (Range.from x0 x1) curve
-  let mergedRegions = List.collapse Region.merge resolvedRegions
-  let solutions = List.collect (solve curve 0) mergedRegions
-  Ok (root0 ++ List.foldr prependRoot root1 solutions)
- where
-  ?originalCurve = curve
+      (root1, x1) = solveEndpoint curve 1.0
+      resolvedRegions = regions (Range.from x0 x1) curve
+      mergedRegions = List.collapse Region.merge resolvedRegions
+      solutions = List.collect (solve curve curve 0) mergedRegions
+   in Ok (root0 ++ List.foldr prependRoot root1 solutions)
 
 data Solution
   = Solution Root Float
@@ -294,12 +292,12 @@ prependRoot :: Solution -> List Root -> List Root
 prependRoot (Solution root _) acc = root : acc
 prependRoot (NonZero _ _) acc = acc
 
-solve :: (Tolerance units, ?originalCurve :: Curve1d units) => Curve1d units -> Int -> Region -> List Solution
-solve curveDerivative derivativeOrder region
+solve :: Tolerance units => Curve1d units -> Curve1d units -> Int -> Region -> List Solution
+solve originalCurve curveDerivative derivativeOrder region
   | derivativeOrder == region.nonZeroDerivativeOrder = [NonZero region.domain region.nonZeroDerivativeSign]
   | otherwise =
       let nextDerivative = derivative curveDerivative
-          higherOrderSolutions = solve nextDerivative (derivativeOrder + 1) region
+          higherOrderSolutions = solve originalCurve nextDerivative (derivativeOrder + 1) region
 
           -- Solve for a root of this derivative within a non-zero region of the next higher
           -- derivative
@@ -313,7 +311,7 @@ solve curveDerivative derivativeOrder region
             -- are non-zero regions of the derivative curve.
             | otherwise =
                 let rootX = bisectMonotonic curveDerivative minX maxX minY maxY
-                 in if derivativeOrder == 0 || evaluate ?originalCurve rootX ~= Qty.zero
+                 in if derivativeOrder == 0 || evaluate originalCurve rootX ~= Qty.zero
                       then
                         let root = Root rootX derivativeOrder nextDerivativeSign
                             width = computeWidth (derivativeOrder + 1) (evaluate nextDerivative rootX)
@@ -352,18 +350,13 @@ bisectMonotonic curve lowX highX lowY highY =
                 then bisectMonotonic curve lowX midX lowY midY
                 else bisectMonotonic curve midX highX midY highY
 
-regions :: Tolerance units => Range Unitless -> Curve1d units -> Result IsZero (List Region)
+regions :: Tolerance units => Range Unitless -> Curve1d units -> List Region
 regions domain curve =
   case resolve domain curve of
-    Resolved region -> Ok [region]
+    Resolved region -> [region]
     Unresolved -> do
-      (leftDomain, rightDomain) <- bisect domain
-      leftRegions <- regions leftDomain curve
-      rightRegions <- regions rightDomain curve
-      Ok (leftRegions ++ rightRegions)
-
-bisect :: Range Unitless -> Result IsZero (Range Unitless, Range Unitless)
-bisect domain = if domain.isAtomic then Error IsZero else Ok (Range.bisect domain)
+      let (leftDomain, rightDomain) = Range.bisect domain
+       in regions leftDomain curve ++ regions rightDomain curve
 
 resolve :: Tolerance units => Range Unitless -> Curve1d units -> Fuzzy Region
 resolve domain curve
