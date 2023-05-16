@@ -67,6 +67,7 @@ library
       Qty
       QuadraticSpline2d
       QuadraticSpline3d
+      Random
       Range
       Result
       Sign
@@ -127,6 +128,7 @@ library
       array
     , base >=4.7 && <5
     , hedgehog
+    , random
     , text
     , text-show
   default-language: Haskell2010
@@ -179,6 +181,7 @@ executable derivatives
     , base >=4.7 && <5
     , hedgehog
     , opensolid
+    , random
     , text
     , text-show
   default-language: Haskell2010
@@ -231,6 +234,7 @@ executable sandbox
     , base >=4.7 && <5
     , hedgehog
     , opensolid
+    , random
     , text
     , text-show
   default-language: Haskell2010
@@ -284,6 +288,7 @@ test-suite opensolid-test
     , base >=4.7 && <5
     , hedgehog
     , opensolid
+    , random
     , text
     , text-show
   default-language: Haskell2010
