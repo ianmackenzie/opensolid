@@ -62,6 +62,7 @@ library
       Maybe
       OpenSolid
       Pair
+      Parameter1d
       Point2d
       Point3d
       Qty
