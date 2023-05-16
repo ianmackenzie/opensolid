@@ -27,12 +27,12 @@ data Task x a
 instance x ~ x' => Compose (Task x ()) (Task x' a) (Task x a) where
   compose script1 script2 = bind (always script2) script1
 
-instance x ~ x' => Bind (Task x) (Task x') where
+instance (x ~ x', a ~ a') => Bind (Task x a) a' (Task x' b) where
   bind f (Done (Ok value)) = f value
   bind _ (Done (Error err)) = Done (Error err)
   bind f (Perform io) = Perform (Prelude.fmap (bind f) io)
 
-instance x ~ x' => Bind (Result x) (Task x') where
+instance (x ~ x', a ~ a') => Bind (Result x a) a' (Task x' b) where
   bind f (Ok value) = f value
   bind _ (Error err) = Done (Error err)
 

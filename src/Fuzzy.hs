@@ -25,7 +25,7 @@ instance Prelude.Monad Fuzzy where
   Resolved value >>= function = function value
   Unresolved >>= _ = Unresolved
 
-instance Bind Fuzzy Fuzzy where
+instance a ~ a' => Bind (Fuzzy a) a' (Fuzzy b) where
   bind f (Resolved value) = f value
   bind _ Unresolved = Unresolved
 

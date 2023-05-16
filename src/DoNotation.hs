@@ -16,10 +16,10 @@ class Compose a b c | a b -> c where
 instance b ~ b' => Compose (a -> b) (b' -> c) (a -> c) where
   compose f g = g Prelude.. f
 
-class Bind p q where
-  bind :: (a -> q b) -> p a -> q b
+class Bind a b c where
+  bind :: (b -> c) -> a -> c
 
-instance Bind Maybe Maybe where
+instance a ~ a' => Bind (Maybe a) a' (Maybe b) where
   bind f (Just value) = f value
   bind _ Nothing = Nothing
 
@@ -29,5 +29,5 @@ class Fail a where
 (>>) :: Compose a b c => a -> b -> c
 (>>) = compose
 
-(>>=) :: Bind p q => p a -> (a -> q b) -> q b
+(>>=) :: Bind a b c => a -> (b -> c) -> c
 a >>= f = bind f a

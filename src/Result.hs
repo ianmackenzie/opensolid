@@ -55,7 +55,7 @@ instance Prelude.Monad (Result x) where
 instance Prelude.MonadFail (Result (List Char)) where
   fail = Error
 
-instance x ~ x' => Bind (Result x) (Result x') where
+instance (x ~ x', a ~ a') => Bind (Result x a) a' (Result x' b) where
   bind f (Ok value) = f value
   bind _ (Error error) = Error error
 

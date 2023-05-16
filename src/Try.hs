@@ -12,25 +12,25 @@ import Result qualified
 import Task qualified
 import Text qualified
 
-class MapError p q | p -> q where
-  mapError :: p a -> q a
+class MapError a b | a -> b where
+  mapError :: a -> b
 
-instance IsError x => MapError (Result x) (Result Text) where
+instance (IsError x, a ~ a') => MapError (Result x a) (Result Text a') where
   mapError = Result.mapError errorMessage
 
-instance IsError x => MapError (Task x) (Task Text) where
+instance (IsError x, a ~ a') => MapError (Task x a) (Task Text a') where
   mapError = Task.mapError errorMessage
 
-instance MapError [] [] where
+instance a ~ a' => MapError (List a) (List a') where
   mapError = identity
 
-instance MapError Maybe Maybe where
+instance a ~ a' => MapError (Maybe a) (Maybe a') where
   mapError = identity
 
-(>>) :: (MapError p p', Compose (p' a) b c) => p a -> b -> c
+(>>) :: (MapError a a', Compose a' b c) => a -> b -> c
 first >> second = mapError first OpenSolid.>> second
 
-(>>=) :: (MapError p p', Bind p' q) => p a -> (a -> q b) -> q b
+(>>=) :: (MapError a a', Bind a' b c) => a -> (b -> c) -> c
 value >>= function = mapError value OpenSolid.>>= function
 
 withContext :: IsError x => Text -> Result x a -> Result Text a
