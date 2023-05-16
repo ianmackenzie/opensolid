@@ -33,6 +33,7 @@ module Range
   , recurse2
   , intersects
   , intersection
+  , generator
   )
 where
 
@@ -42,6 +43,7 @@ import Float qualified
 import Generic qualified
 import OpenSolid
 import Qty qualified
+import Random qualified
 import Units (Radians, Unitless)
 import Units qualified
 
@@ -462,3 +464,9 @@ recurse2 callback range1 range2 accumulated =
         |> callback right1 left2
         |> callback left1 right2
         |> callback left1 left2
+
+generator :: Random.Generator (Qty units) -> Random.Generator (Range units)
+generator qtyGenerator = do
+  a <- qtyGenerator
+  b <- qtyGenerator
+  Random.return (Range.from a b)
