@@ -1,6 +1,7 @@
 module List
   ( List
   , isEmpty
+  , length
   , head
   , map
   , map2
@@ -38,6 +39,9 @@ import Prelude qualified
 
 isEmpty :: List a -> Bool
 isEmpty = Prelude.null
+
+length :: List a -> Int
+length = Data.List.length
 
 data IsEmpty = IsEmpty deriving (Eq, Show)
 
