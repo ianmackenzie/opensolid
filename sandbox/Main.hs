@@ -16,10 +16,12 @@ import Length qualified
 import Line2d qualified
 import List qualified
 import OpenSolid
+import Parameter1d qualified
 import Point2d (Point2d)
 import Point2d qualified
 import Qty qualified
 import QuadraticSpline2d qualified
+import Random qualified
 import Range (Range)
 import Range qualified
 import Result qualified
@@ -260,6 +262,23 @@ testCurve2dSolving = Try.do
  where
   ?tolerance = Length.meters 1e-18
 
+testParameter1d :: Int -> Task Text ()
+testParameter1d n = Try.do
+  log ("Parameter1d.steps " ++ Text.fromInt n) (Parameter1d.steps n identity)
+  log ("Parameter1d.leading " ++ Text.fromInt n) (Parameter1d.leading n identity)
+  log ("Parameter1d.trailing " ++ Text.fromInt n) (Parameter1d.trailing n identity)
+  log ("Parameter1d.inBetween " ++ Text.fromInt n) (Parameter1d.inBetween n identity)
+  log ("Parameter1d.midpoints " ++ Text.fromInt n) (Parameter1d.midpoints n identity)
+
+testParameter1dGeneration :: Task Text ()
+testParameter1dGeneration = Try.do
+  t1 <- Random.generate Parameter1d.generator
+  t2 <- Random.generate Parameter1d.generator
+  t3 <- Random.generate Parameter1d.generator
+  log "Random parameter value 1" t1
+  log "Random parameter value 2" t2
+  log "Random parameter value 3" t3
+
 script :: Task Text ()
 script = do
   log "Integer product" (3 * 4)
@@ -333,6 +352,11 @@ script = do
   testCurve2dIntersection
   testCurve2dTangentIntersection
   testCurve2dSolving
+  testParameter1d 0
+  testParameter1d 1
+  testParameter1d 2
+  testParameter1d 5
+  testParameter1dGeneration
 
 main :: IO ()
 main = Task.toIO script
