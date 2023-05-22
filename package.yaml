@@ -19,7 +19,6 @@ dependencies:
 - text-show
 - random
 - array
-- hedgehog
 
 ghc-options:
 - -Wall
@@ -100,7 +99,7 @@ executables:
 
 tests:
   opensolid-test:
-    main:                Tests.hs
+    main:                Main.hs
     source-dirs:         test
     ghc-options:
     - -threaded

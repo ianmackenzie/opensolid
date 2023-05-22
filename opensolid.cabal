@@ -128,7 +128,6 @@ library
   build-depends:
       array
     , base >=4.7 && <5
-    , hedgehog
     , random
     , text
     , text-show
@@ -180,7 +179,6 @@ executable derivatives
   build-depends:
       array
     , base >=4.7 && <5
-    , hedgehog
     , opensolid
     , random
     , text
@@ -233,7 +231,6 @@ executable sandbox
   build-depends:
       array
     , base >=4.7 && <5
-    , hedgehog
     , opensolid
     , random
     , text
@@ -242,8 +239,9 @@ executable sandbox
 
 test-suite opensolid-test
   type: exitcode-stdio-1.0
-  main-is: Tests.hs
+  main-is: Main.hs
   other-modules:
+      Test
       Paths_opensolid
   autogen-modules:
       Paths_opensolid
@@ -287,7 +285,6 @@ test-suite opensolid-test
   build-depends:
       array
     , base >=4.7 && <5
-    , hedgehog
     , opensolid
     , random
     , text

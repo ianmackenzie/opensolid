@@ -61,10 +61,11 @@ step generator (Seed stdGen) =
   let (generatedValue, updatedStdGen) = run generator stdGen
    in (generatedValue, Seed updatedStdGen)
 
-generate :: Generator a -> Task IOError a
+generate :: Generator a -> Task Text a
 generate generator =
-  Task.fromIO $
-    System.Random.Stateful.applyAtomicGen (run generator) System.Random.Stateful.globalStdGen
+  Task.mapError errorMessage $
+    Task.fromIO $
+      System.Random.Stateful.applyAtomicGen (run generator) System.Random.Stateful.globalStdGen
 
 return :: a -> Generator a
 return givenValue = Generator (givenValue,)
