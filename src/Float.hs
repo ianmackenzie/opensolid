@@ -7,6 +7,13 @@ module Float
   , pi
   , tau
   , pow
+  , sin
+  , cos
+  , tan
+  , asin
+  , acos
+  , atan
+  , atan2
   )
 where
 
@@ -41,3 +48,24 @@ tau = 2.0 * pi
 
 pow :: Float -> Float -> Float
 pow = (Prelude.**)
+
+sin :: Float -> Float
+sin (Qty x) = Qty (Prelude.sin x)
+
+cos :: Float -> Float
+cos (Qty x) = Qty (Prelude.cos x)
+
+tan :: Float -> Float
+tan (Qty x) = Qty (Prelude.tan x)
+
+asin :: Float -> Float
+asin (Qty x) = Qty (Prelude.asin x)
+
+acos :: Float -> Float
+acos (Qty x) = Qty (Prelude.acos x)
+
+atan :: Float -> Float
+atan (Qty x) = Qty (Prelude.atan x)
+
+atan2 :: Qty units -> Qty units -> Float
+atan2 (Qty y) (Qty x) = Qty (Prelude.atan2 y x)
