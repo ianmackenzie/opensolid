@@ -39,7 +39,7 @@ approximatelyEqual expected actual =
 
 rangeApproximatelyContains :: Tolerance units => Qty units -> Range units -> Expectation
 rangeApproximatelyContains value range =
-  expect (Range.contains value (Range.tolerant range)) $
+  expect (Range.includes value (Range.tolerant range)) $
     "Given value is not contained in the given range"
 
 verify :: Expectation -> Test

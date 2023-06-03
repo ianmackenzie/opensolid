@@ -424,9 +424,9 @@ isTangentIntersection derivatives1 derivatives2 u1 u2 =
                crossProduct = Units.generalize firstBounds1 >< Units.generalize firstBounds2
                dotProduct1 = Units.generalize firstBounds1 <> Units.generalize difference
                dotProduct2 = Units.generalize firstBounds2 <> Units.generalize difference
-            in Range.contains Qty.zero crossProduct
-                && Range.contains Qty.zero dotProduct1
-                && Range.contains Qty.zero dotProduct2
+            in Range.includes Qty.zero crossProduct
+                && Range.includes Qty.zero dotProduct1
+                && Range.includes Qty.zero dotProduct2
 
 intersectingRegions :: (Range Unitless, Range Unitless) -> (Range Unitless, Range Unitless) -> Bool
 intersectingRegions (a1, a2) (b1, b2) = Range.intersects a1 b1 && Range.intersects a2 b2
@@ -462,4 +462,4 @@ findEndpointRegions derivatives1 derivatives2 endpointIntersections u1 u2 accumu
 
 containsIntersection :: Range Unitless -> Range Unitless -> Intersection -> Bool
 containsIntersection u1 u2 intersection =
-  Range.contains intersection.u1 u1 && Range.contains intersection.u2 u2
+  Range.includes intersection.u1 u1 && Range.includes intersection.u2 u2

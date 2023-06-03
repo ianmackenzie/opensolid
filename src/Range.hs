@@ -9,6 +9,7 @@ module Range
   , endpoints
   , width
   , squared
+  , includes
   , contains
   , tolerant
   , bisect
@@ -241,8 +242,11 @@ hypot3 (Range xMin xMax) (Range yMin yMax) (Range zMin zMax)
   zMagnitude = max (Qty.abs zMin) (Qty.abs zMax)
   maxMagnitude = Qty.hypot3 xMagnitude yMagnitude zMagnitude
 
-contains :: Qty units -> Range units -> Bool
-contains value (Range low high) = low <= value && value <= high
+includes :: Qty units -> Range units -> Bool
+includes value (Range low high) = low <= value && value <= high
+
+contains :: Range units -> Range units -> Bool
+contains (Range low2 high2) (Range low1 high1) = low1 <= low2 && high2 <= high1
 
 tolerant :: Tolerance units => Range units -> Range units
 tolerant (Range low high) = unsafe (low - ?tolerance) (high + ?tolerance)

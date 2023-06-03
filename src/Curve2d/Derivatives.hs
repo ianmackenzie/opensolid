@@ -94,8 +94,8 @@ tangentBounds
   -> VectorBox2d (space @ units)
   -> VectorBox2d (space @ Unitless)
 tangentBounds derivatives u firstBounds secondBounds
-  | Range.contains 0.0 u && derivatives.degenerateStart = VectorBox2d.normalize secondBounds
-  | Range.contains 1.0 u && derivatives.degenerateEnd = -(VectorBox2d.normalize secondBounds)
+  | Range.includes 0.0 u && derivatives.degenerateStart = VectorBox2d.normalize secondBounds
+  | Range.includes 1.0 u && derivatives.degenerateEnd = -(VectorBox2d.normalize secondBounds)
   | otherwise = VectorBox2d.normalize firstBounds
 
 intersectionKind
@@ -170,7 +170,7 @@ secondResolution1d
   -> Range units
   -> Float
 secondResolution1d dX1_dU1 dY1_dU1 dX2_dU2 dY2_dU2 d2X1_dU1dU1 d2Y1_dU1dU1 d2X2_dU2dU2 d2Y2_dU2dU2
-  | Range.contains Qty.zero dX1_dU1 || Range.contains Qty.zero dX2_dU2 = 0.0
+  | Range.includes Qty.zero dX1_dU1 || Range.includes Qty.zero dX2_dU2 = 0.0
   | otherwise =
       let d2Y1_dXdX = secondDerivativeBounds1d dX1_dU1 dY1_dU1 d2X1_dU1dU1 d2Y1_dU1dU1
           d2Y2_dXdX = secondDerivativeBounds1d dX2_dU2 dY2_dU2 d2X2_dU2dU2 d2Y2_dU2dU2
