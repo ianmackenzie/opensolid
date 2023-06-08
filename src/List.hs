@@ -20,6 +20,7 @@ module List
   , foldl
   , foldr
   , reverse
+  , take
   , drop
   , sum
   , sort
@@ -109,6 +110,9 @@ foldr = Data.List.foldr
 
 reverse :: List a -> List a
 reverse = Data.List.reverse
+
+take :: Int -> List a -> List a
+take = Prelude.take
 
 drop :: Int -> List a -> List a
 drop = Prelude.drop
