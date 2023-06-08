@@ -85,6 +85,8 @@ executables:
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
+    - -Wno-unused-top-binds
+    - -Wno-unused-imports
     dependencies:
     - opensolid
   derivatives:
