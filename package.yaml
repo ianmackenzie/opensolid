@@ -47,7 +47,7 @@ default-extensions:
 - MonoLocalBinds
 - KindSignatures
 - StandaloneDeriving
-- Strict
+- StrictData
 - FunctionalDependencies
 - GeneralizedNewtypeDeriving
 - DataKinds

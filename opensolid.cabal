@@ -101,7 +101,7 @@ library
       MonoLocalBinds
       KindSignatures
       StandaloneDeriving
-      Strict
+      StrictData
       FunctionalDependencies
       GeneralizedNewtypeDeriving
       DataKinds
@@ -152,7 +152,7 @@ executable derivatives
       MonoLocalBinds
       KindSignatures
       StandaloneDeriving
-      Strict
+      StrictData
       FunctionalDependencies
       GeneralizedNewtypeDeriving
       DataKinds
@@ -204,7 +204,7 @@ executable sandbox
       MonoLocalBinds
       KindSignatures
       StandaloneDeriving
-      Strict
+      StrictData
       FunctionalDependencies
       GeneralizedNewtypeDeriving
       DataKinds
@@ -258,7 +258,7 @@ test-suite opensolid-test
       MonoLocalBinds
       KindSignatures
       StandaloneDeriving
-      Strict
+      StrictData
       FunctionalDependencies
       GeneralizedNewtypeDeriving
       DataKinds
