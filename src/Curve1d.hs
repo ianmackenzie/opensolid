@@ -366,18 +366,22 @@ resolve domain curve
  where
   curveBounds = segmentBounds curve domain
 
-resolved :: Range units -> Bool
-resolved range = Qty.abs (Range.resolution range) >= 0.5
-
-resolveDerivative :: Range Unitless -> Curve1d units -> Int -> Fuzzy Region
-resolveDerivative domain curveDerivative derivativeOrder
-  | resolved derivativeBounds =
-      Resolved (Region domain derivativeOrder (Qty.sign derivativeBounds.minValue))
-  | derivativeOrder <= maxRootOrder =
-      resolveDerivative domain (derivative curveDerivative) (derivativeOrder + 1)
+resolveSign :: Range units -> Fuzzy Sign
+resolveSign range
+  | resolution >= 0.5 = Resolved Positive
+  | resolution <= -0.5 = Resolved Negative
   | otherwise = Unresolved
  where
-  derivativeBounds = segmentBounds curveDerivative domain
+  resolution = Range.resolution range
+
+resolveDerivative :: Range Unitless -> Curve1d units -> Int -> Fuzzy Region
+resolveDerivative domain curveDerivative derivativeOrder =
+  case resolveSign (segmentBounds curveDerivative domain) of
+    Resolved sign -> Resolved (Region domain derivativeOrder sign)
+    Unresolved ->
+      if derivativeOrder <= maxRootOrder
+        then resolveDerivative domain (derivative curveDerivative) (derivativeOrder + 1)
+        else Unresolved
 
 solveEndpoint :: Tolerance units => Curve1d units -> Float -> (List Root, Float)
 solveEndpoint curve endpointX
@@ -401,15 +405,13 @@ solveEndpoint curve endpointX
 
 resolveEndpoint :: Root -> Curve1d units -> Float -> Float -> (List Root, Float)
 resolveEndpoint root curveDerivative endpointX innerX =
-  let domain = Range.from endpointX innerX
-      derivativeBounds = segmentBounds curveDerivative domain
-   in if resolved derivativeBounds
-        then ([root], innerX)
-        else
-          let midX = Qty.midpoint endpointX innerX
-           in if midX == endpointX || midX == innerX
-                then ([], endpointX)
-                else resolveEndpoint root curveDerivative endpointX midX
+  case resolveSign (segmentBounds curveDerivative (Range.from endpointX innerX)) of
+    Resolved _ -> ([root], innerX)
+    Unresolved ->
+      let midX = Qty.midpoint endpointX innerX
+       in if midX == endpointX || midX == innerX
+            then ([], endpointX)
+            else resolveEndpoint root curveDerivative endpointX midX
 
 computeWidth :: Tolerance units => Int -> Qty units -> Float
 computeWidth 1 derivativeValue = ?tolerance / Qty.abs derivativeValue
