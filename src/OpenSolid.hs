@@ -28,4 +28,4 @@ import Result (IsError (errorMessage), Result (Error, Ok))
 import Sign (Sign (Negative, Positive))
 import Task (Task)
 import Task qualified
-import Tolerance (ApproximateEquality ((~=)), Tolerance)
+import Tolerance (ApproximateEquality ((~=)), Tolerance, (!=))

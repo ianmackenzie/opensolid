@@ -1,6 +1,7 @@
 module Tolerance
   ( Tolerance
   , ApproximateEquality ((~=))
+  , (!=)
   )
 where
 
@@ -18,3 +19,6 @@ infix 4 ~=
 
 instance units ~ units' => ApproximateEquality (Qty units) (Qty units') units where
   x ~= y = Qty.abs (x - y) <= ?tolerance
+
+(!=) :: (ApproximateEquality a b units, Tolerance units) => a -> b -> Bool
+(!=) first second = not (first ~= second)
