@@ -163,9 +163,7 @@ instance IsError IsCoincidentWithPoint where
 
 passesThrough :: Tolerance units => Point2d (space @ units) -> Curve2d (space @ units) -> Bool
 passesThrough point curve =
-  case Range.any (segmentIsCoincidentWithPoint point curve) Range.unit of
-    Resolved result -> result
-    Unresolved -> False
+  Range.any (segmentIsCoincidentWithPoint point curve) Range.unit
 
 segmentIsCoincidentWithPoint
   :: Tolerance units

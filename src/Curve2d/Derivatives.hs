@@ -58,9 +58,7 @@ simultaneouslyZero
   -> VectorCurve2d (space @ units)
   -> Bool
 simultaneouslyZero firstDerivative secondDerivative =
-  case Range.any (areBothZero firstDerivative secondDerivative) Range.unit of
-    Resolved resolved -> resolved
-    Unresolved -> True
+  Range.any (areBothZero firstDerivative secondDerivative) Range.unit
 
 areBothZero
   :: Tolerance units

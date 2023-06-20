@@ -317,41 +317,25 @@ resolution (Range low high)
   | high < Qty.zero = -high / low
   | otherwise = 0.0
 
-any :: (Range units -> Fuzzy Bool) -> Range units -> Fuzzy Bool
+any :: (Range units -> Fuzzy Bool) -> Range units -> Bool
 any assess range =
-  let assessment = assess range
-   in case assessment of
-        Resolved _ -> assessment
-        Unresolved
-          | isAtomic range -> Unresolved
-          | otherwise ->
-              let (left, right) = Range.bisect range
-               in case any assess left of
-                    Resolved True -> Resolved True
-                    Resolved False -> any assess right
-                    Unresolved ->
-                      case any assess right of
-                        Resolved True -> Resolved True
-                        Resolved False -> Unresolved
-                        Unresolved -> Unresolved
+  case assess range of
+    Resolved assessment -> assessment
+    Unresolved
+      | isAtomic range -> False
+      | otherwise ->
+          let (left, right) = Range.bisect range
+           in any assess left || any assess right
 
-all :: (Range units -> Fuzzy Bool) -> Range units -> Fuzzy Bool
+all :: (Range units -> Fuzzy Bool) -> Range units -> Bool
 all assess range =
-  let assessment = assess range
-   in case assessment of
-        Resolved _ -> assessment
-        Unresolved
-          | isAtomic range -> Unresolved
-          | otherwise ->
-              let (left, right) = Range.bisect range
-               in case all assess left of
-                    Resolved True -> all assess right
-                    Resolved False -> Resolved False
-                    Unresolved ->
-                      case all assess right of
-                        Resolved True -> Unresolved
-                        Resolved False -> Resolved False
-                        Unresolved -> Unresolved
+  case assess range of
+    Resolved assessment -> assessment
+    Unresolved
+      | isAtomic range -> True
+      | otherwise ->
+          let (left, right) = Range.bisect range
+           in all assess left && all assess right
 
 search :: (Range units -> Bool) -> Range units -> List (Qty units)
 search predicate range = searchImpl predicate range []
