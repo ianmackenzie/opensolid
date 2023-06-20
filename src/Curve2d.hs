@@ -211,9 +211,10 @@ isOverlappingSegment
   -> Bool
 isOverlappingSegment curve1 curve2 (domain1, _) =
   let segmentStartPoint = evaluate curve1 (Range.minValue domain1)
-      segmentTestPoints = samplingPoints curve1 domain1
-   in not (List.all (\p -> p ~= segmentStartPoint) segmentTestPoints)
-        && List.all (\p -> passesThrough p curve2) segmentTestPoints
+      curve1TestPoints = Quadrature.samples (evaluate curve1) domain1
+      segment1IsNondegenerate = List.any (!= segmentStartPoint) curve1TestPoints
+      segment1LiesOnSegment2 = List.all (\p1 -> passesThrough p1 curve2) curve1TestPoints
+   in segment1IsNondegenerate && segment1LiesOnSegment2
 
 data IntersectionError
   = BothAreDegenerateAndEqual
@@ -267,10 +268,6 @@ findEndpointParameterValues curve1 curve2 =
           Error (SecondIsDegenerateOnFirst v0us)
         (Error Curve2d.IsCoincidentWithPoint, Error Curve2d.IsCoincidentWithPoint) ->
           Error BothAreDegenerateAndEqual
-
-samplingPoints :: Curve2d (space @ units) -> Range Unitless -> List (Point2d (space @ units))
-samplingPoints curve domain =
-  List.map (Range.interpolate domain >> evaluate curve) Quadrature.parameterValues
 
 curveDerivatives
   :: Tolerance units

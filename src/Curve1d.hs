@@ -241,7 +241,7 @@ cos (Constant x) = constant (Angle.cos x)
 cos curve = Cos curve
 
 isZero :: Tolerance units => Curve1d units -> Bool
-isZero curve = List.all (\t -> evaluate curve t ~= Qty.zero) Quadrature.parameterValues
+isZero curve = List.all (~= Qty.zero) (Quadrature.samples (evaluate curve) Range.unit)
 
 maxRootOrder :: Int
 maxRootOrder = 4

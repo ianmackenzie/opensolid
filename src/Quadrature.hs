@@ -1,7 +1,9 @@
-module Quadrature (parameterValues) where
+module Quadrature (samples) where
 
+import List qualified
 import OpenSolid
 import Qty qualified
+import Range (Range)
 import Range qualified
 
 -- From https://en.wikipedia.org/wiki/Gaussian_quadrature#Gauss%E2%80%93Legendre_quadrature
@@ -15,3 +17,6 @@ parameterValues =
       , normalize x1
       , normalize x2
       ]
+
+samples :: (Qty units -> a) -> Range units -> List a
+samples function domain = List.map (Range.interpolate domain >> function) parameterValues
