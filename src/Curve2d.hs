@@ -245,12 +245,12 @@ findEndpointParameterValues
   -> Result IntersectionError (List (Float, Float))
 findEndpointParameterValues curve1 curve2 =
   let uValues = do
-        v0us <- curve1 |> parameterValues (startPoint curve2)
-        v1us <- curve1 |> parameterValues (endPoint curve2)
+        v0us <- parameterValues (startPoint curve2) curve1
+        v1us <- parameterValues (endPoint curve2) curve1
         Ok (v0us, v1us)
       vValues = do
-        u0vs <- curve2 |> parameterValues (startPoint curve1)
-        u1vs <- curve2 |> parameterValues (endPoint curve1)
+        u0vs <- parameterValues (startPoint curve1) curve2
+        u1vs <- parameterValues (endPoint curve1) curve2
         Ok (u0vs, u1vs)
    in case (uValues, vValues) of
         (Ok (v0us, v1us), Ok (u0vs, u1vs)) ->
