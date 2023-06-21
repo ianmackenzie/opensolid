@@ -58,8 +58,8 @@ import Prelude qualified
 type List a = [a]
 
 ifThenElse :: Bool -> a -> a -> a
-ifThenElse True ifBranch _ = ifBranch
-ifThenElse False _ elseBranch = elseBranch
+ifThenElse True ifBranch ~_ = ifBranch
+ifThenElse False ~_ elseBranch = elseBranch
 
 fromString :: Prelude.String -> Text
 fromString = Data.Text.pack
