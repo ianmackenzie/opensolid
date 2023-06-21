@@ -442,11 +442,11 @@ resolve2Impl predicate range1 range2 accumulated =
           resolve2Impl predicate left1 left2 resultsLR
 
 recurse :: (Range units -> a -> a) -> Range units -> a -> a
-recurse callback range accumulated =
-  let (left, right) = bisect range
+recurse callback (Range low high) accumulated =
+  let mid = Qty.midpoint low high
    in accumulated
-        |> callback right
-        |> callback left
+        |> callback (unsafe mid high)
+        |> callback (unsafe low mid)
 
 recurse2 :: (Range units1 -> Range units2 -> a -> a) -> Range units1 -> Range units2 -> a -> a
 recurse2 callback range1 range2 accumulated =
