@@ -279,6 +279,11 @@ testParameter1dGeneration = Try.do
   log "Random parameter value 2" t2
   log "Random parameter value 3" t3
 
+testRangeFind :: Task Text ()
+testRangeFind = do
+  let isRoot x = Range.includes 2.0 (x * x)
+  log "Found square root of 2" (Range.find isRoot (Range.from 1.0 2.0))
+
 script :: Task Text ()
 script = do
   log "Integer product" (3 * 4)
@@ -357,6 +362,7 @@ script = do
   testParameter1d 2
   testParameter1d 5
   testParameter1dGeneration
+  testRangeFind
 
 main :: IO ()
 main = Task.toIO script

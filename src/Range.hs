@@ -36,6 +36,7 @@ module Range
   , intersects
   , intersection
   , generator
+  , find
   )
 where
 
@@ -388,6 +389,19 @@ search2Impl predicate u v accumulated =
                 |> search2Impl predicate rightU leftV
                 |> search2Impl predicate leftU rightV
                 |> search2Impl predicate leftU leftV
+
+find :: (Range units -> Bool) -> Range units -> Maybe (Qty units)
+find isCandidate range =
+  case isCandidate range of
+    False -> Nothing
+    True
+      | isAtomic range -> Just (maxValue range)
+      | otherwise ->
+          let (left, right) = bisect range
+              leftResult = find isCandidate left
+           in case leftResult of
+                Just _ -> leftResult
+                Nothing -> find isCandidate right
 
 resolve :: (Range units -> Fuzzy a) -> Range units -> Fuzzy (List a)
 resolve predicate range = resolveImpl predicate range []
