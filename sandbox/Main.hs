@@ -260,7 +260,7 @@ testCurve2dSolving = Try.do
   roots <- squaredDistanceFromOrigin |> Curve1d.equalToSquared (Length.meters 0.5)
   log "Curve2d solving roots" roots
  where
-  ?tolerance = Length.meters 1e-18
+  ?tolerance = Length.meters 1e-9
 
 testParameter1d :: Int -> Task Text ()
 testParameter1d n = Try.do
