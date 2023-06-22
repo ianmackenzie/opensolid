@@ -50,6 +50,7 @@ library
       Debug
       Direction2d
       Direction3d
+      Domain
       DoNotation
       Float
       Frame2d
