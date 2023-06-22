@@ -33,6 +33,7 @@ library
       Array
       Axis2d
       Basics
+      Bisection
       Bounded
       BoundingBox2d
       BoundingBox3d
@@ -88,7 +89,6 @@ library
       VectorCurve3d
       Volume
   other-modules:
-      Curve1d.Region
       Quadrature
   hs-source-dirs:
       src
