@@ -320,13 +320,13 @@ script = do
   let x = 3.0 * t
   let y = (x - 1.0) * (x - 1.0) * (x - 1.0) - (x - 1.0)
   let roots = let ?tolerance = 1e-12 in Curve1d.roots y
-  log "Roots" roots
+  log "Roots of (x-1)^3 - (x-1), where x=3*t" roots
   log "sqrt 2.0" (Qty.sqrt 2.0)
   log "Equality test" (let ?tolerance = Length.centimeter in Length.meters 1.0 ~= Length.meters 1.005)
   let theta = Angle.fullTurn * t
   let expression = Curve1d.squared (Curve1d.sin theta)
   let expressionRoots = let ?tolerance = 1e-12 in Curve1d.roots expression
-  log "Roots" expressionRoots
+  log "Roots of sin^2(2*pi*t)" expressionRoots
   testCurveFind
   testListCollapse
   Console.print "Unicode output test: ✅❌🙂"
