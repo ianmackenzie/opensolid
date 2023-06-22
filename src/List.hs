@@ -24,6 +24,8 @@ module List
   , drop
   , sum
   , sort
+  , sortBy
+  , sortWith
   , sortAndDeduplicate
   , all
   , any
@@ -122,6 +124,12 @@ sum = foldl (+) Generic.zero
 
 sort :: Ord a => List a -> List a
 sort = Data.List.sort
+
+sortBy :: Ord b => (a -> b) -> List a -> List a
+sortBy = Data.List.sortOn
+
+sortWith :: (a -> a -> Ordering) -> List a -> List a
+sortWith = Data.List.sortBy
 
 sortAndDeduplicate :: Ord a => List a -> List a
 sortAndDeduplicate list = deduplicate (sort list)
