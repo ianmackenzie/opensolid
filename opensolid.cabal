@@ -132,7 +132,6 @@ library
     , base >=4.7 && <5
     , random
     , text
-    , text-show
   default-language: Haskell2010
 
 executable sandbox
@@ -184,7 +183,6 @@ executable sandbox
     , opensolid
     , random
     , text
-    , text-show
   default-language: Haskell2010
 
 test-suite opensolid-test
@@ -238,5 +236,4 @@ test-suite opensolid-test
     , opensolid
     , random
     , text
-    , text-show
   default-language: Haskell2010

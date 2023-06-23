@@ -21,7 +21,6 @@ import Float (Float)
 import Qty (Qty (Qty))
 import {-# SOURCE #-} Result (Result (..))
 import {-# SOURCE #-} Result qualified
-import TextShow qualified
 import Prelude qualified
 
 concat :: List Text -> Text
@@ -40,10 +39,10 @@ toString :: Data.String.IsString a => Text -> a
 toString text = Data.String.fromString (toChars text)
 
 fromInt :: Int -> Text
-fromInt = TextShow.showt
+fromInt n = Text.fromChars (Prelude.show n)
 
 fromFloat :: Float -> Text
-fromFloat (Qty x) = TextShow.showt x
+fromFloat (Qty x) = Text.fromChars (Prelude.show x)
 
 toNum :: Prelude.Num a => Reader a -> Text -> Result Text a
 toNum reader text =

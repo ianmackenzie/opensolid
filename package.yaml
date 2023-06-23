@@ -16,7 +16,6 @@ description: Please see the README on GitHub at <https://github.com/ianmackenzie
 dependencies:
 - base >= 4.7 && < 5
 - text
-- text-show
 - random
 - array
 
