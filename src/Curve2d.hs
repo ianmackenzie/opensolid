@@ -257,7 +257,7 @@ curveDerivatives
   => Curve2d (space @ units)
   -> Result IntersectionError (Derivatives (space @ units))
 curveDerivatives curve =
-  Derivatives.ofCurve curve |> Result.mapError (\Derivatives.AreZero -> Curve2d.CurveDerivativesAreZero)
+  Derivatives.ofCurve curve |> Result.mapError (\Derivatives.AreZero -> CurveDerivativesAreZero)
 
 intersections
   :: Tolerance units
@@ -279,8 +279,7 @@ endpointIntersection
 endpointIntersection derivatives1 derivatives2 (u1, u2) =
   Derivatives.classify derivatives1 derivatives2 u1 u2
     |> Result.map (\(kind, sign) -> Intersection u1 u2 kind sign)
-    |> Result.mapError
-      (\Derivatives.DegenerateIntersection -> Curve2d.TangentIntersectionAtDegeneratePoint)
+    |> Result.mapError (\Derivatives.DegenerateIntersection -> TangentIntersectionAtDegeneratePoint)
 
 findIntersections
   :: Tolerance units
