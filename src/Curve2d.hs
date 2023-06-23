@@ -339,10 +339,10 @@ findCrossingIntersections
 findCrossingIntersections derivatives1 derivatives2 exclusionRegions u1 u2 accumulated =
   let filteredRegions = List.filter (intersectingRegions (u1, u2)) exclusionRegions
       findInSubdomains = findCrossingIntersections derivatives1 derivatives2 filteredRegions
-   in case Derivatives.intersectionKind derivatives1 derivatives2 u1 u2 of
+   in case Derivatives.intersectionType derivatives1 derivatives2 u1 u2 of
         Resolved Nothing -> accumulated
-        Resolved (Just (Intersection.Tangent _)) -> accumulated
-        Resolved (Just (Intersection.Crossing sign)) ->
+        Resolved (Just (Intersection.Tangent, _)) -> accumulated
+        Resolved (Just (Intersection.Crossing, sign)) ->
           case filteredRegions of
             [] -> findCrossingIntersection sign derivatives1 derivatives2 u1 u2 ++ accumulated
             _ -> Range.recurse2 findInSubdomains u1 u2 accumulated
@@ -357,7 +357,7 @@ findCrossingIntersection
   -> List Intersection
 findCrossingIntersection sign derivatives1 derivatives2 u1 u2 =
   Range.search2 (isCrossingIntersection derivatives1.curve derivatives2.curve) u1 u2
-    |> List.map (\(u1', u2') -> Intersection u1' u2' (Intersection.Crossing sign))
+    |> List.map (\(u1', u2') -> Intersection u1' u2' Intersection.Crossing sign)
 
 isCrossingIntersection
   :: Curve2d (space @ units)
@@ -380,10 +380,10 @@ findTangentSolutions
 findTangentSolutions derivatives1 derivatives2 endpointRegions u1 u2 accumulated =
   let filteredRegions = List.filter (intersectingRegions (u1, u2)) endpointRegions
       findInSubdomains = findTangentSolutions derivatives1 derivatives2 filteredRegions
-   in case Derivatives.intersectionKind derivatives1 derivatives2 u1 u2 of
+   in case Derivatives.intersectionType derivatives1 derivatives2 u1 u2 of
         Resolved Nothing -> accumulated
-        Resolved (Just (Intersection.Crossing _)) -> accumulated
-        Resolved (Just (Intersection.Tangent sign)) ->
+        Resolved (Just (Intersection.Crossing, _)) -> accumulated
+        Resolved (Just (Intersection.Tangent, sign)) ->
           case filteredRegions of
             [] ->
               case findTangentIntersection sign derivatives1 derivatives2 u1 u2 of
@@ -403,7 +403,7 @@ findTangentIntersection
 findTangentIntersection sign derivatives1 derivatives2 u1 u2 =
   case Range.search2 (isTangentIntersection derivatives1 derivatives2) u1 u2 of
     [] -> Nothing
-    (u1', u2') : _ -> Just (Intersection u1' u2' (Intersection.Tangent sign))
+    (u1', u2') : _ -> Just (Intersection u1' u2' Intersection.Tangent sign)
 
 isTangentIntersection
   :: Tolerance units
@@ -446,9 +446,9 @@ findEndpointRegions derivatives1 derivatives2 endpointIntersections u1 u2 accumu
       let expanded1 = Domain.expand u1
           expanded2 = Domain.expand u2
           findInSubdomains = findEndpointRegions derivatives1 derivatives2 filteredIntersections
-       in case Derivatives.intersectionKind derivatives1 derivatives2 expanded1 expanded2 of
-            Resolved (Just regionKind) ->
-              if List.all (\intersection -> intersection.kind == regionKind) filteredIntersections
+       in case Derivatives.intersectionType derivatives1 derivatives2 expanded1 expanded2 of
+            Resolved (Just (regionKind, regionSign)) ->
+              if List.all (\intersection -> intersection.kind == regionKind && intersection.sign == regionSign) filteredIntersections
                 then (expanded1, expanded2) : accumulated
                 else Range.recurse2 findInSubdomains u1 u2 accumulated
             Resolved Nothing -> accumulated

@@ -1,7 +1,6 @@
 module Curve2d.Intersection
   ( Intersection (..)
   , Kind (..)
-  , sign
   )
 where
 
@@ -11,11 +10,8 @@ data Intersection = Intersection
   { u1 :: Float
   , u2 :: Float
   , kind :: Kind
+  , sign :: Sign
   }
   deriving (Eq, Ord, Show)
 
-data Kind = Crossing Sign | Tangent Sign deriving (Eq, Ord, Show)
-
-sign :: Intersection -> Sign
-sign (Intersection _ _ (Crossing s)) = s
-sign (Intersection _ _ (Tangent s)) = s
+data Kind = Crossing | Tangent deriving (Eq, Ord, Show)

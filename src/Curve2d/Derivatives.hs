@@ -2,7 +2,7 @@ module Curve2d.Derivatives
   ( Derivatives (..)
   , ofCurve
   , AreZero (AreZero)
-  , intersectionKind
+  , intersectionType
   , DegenerateIntersection (DegenerateIntersection)
   , classify
   )
@@ -98,14 +98,14 @@ tangentBounds derivatives u firstBounds secondBounds
   | Range.includes 1.0 u && derivatives.degenerateEnd = -(VectorBox2d.normalize secondBounds)
   | otherwise = VectorBox2d.normalize firstBounds
 
-intersectionKind
+intersectionType
   :: Tolerance units
   => Derivatives (space @ units)
   -> Derivatives (space @ units)
   -> Domain
   -> Domain
-  -> Fuzzy (Maybe Intersection.Kind)
-intersectionKind derivatives1 derivatives2 u1 u2 =
+  -> Fuzzy (Maybe (Intersection.Kind, Sign))
+intersectionType derivatives1 derivatives2 u1 u2 =
   let curveBounds1 = Curve2d.segmentBounds u1 derivatives1.curve
       curveBounds2 = Curve2d.segmentBounds u2 derivatives2.curve
       difference = curveBounds1 - curveBounds2
@@ -121,7 +121,7 @@ intersectionKind derivatives1 derivatives2 u1 u2 =
               tangentBounds2 = tangentBounds derivatives2 u2 firstBounds2 secondBounds2
               firstResolution = Range.resolution (tangentBounds1 >< tangentBounds2)
            in if Qty.abs firstResolution >= 0.5
-                then Resolved (Just (Intersection.Crossing (Qty.sign firstResolution)))
+                then Resolved (Just (Intersection.Crossing, Qty.sign firstResolution))
                 else
                   let dX1_dU1 = firstBounds1.xComponent
                       dY1_dU1 = firstBounds1.yComponent
@@ -156,7 +156,7 @@ intersectionKind derivatives1 derivatives2 u1 u2 =
                           then resolutionXY
                           else -resolutionYX
                    in if Qty.abs secondResolution >= 0.5
-                        then Resolved (Just (Intersection.Tangent (Qty.sign secondResolution)))
+                        then Resolved (Just (Intersection.Tangent, Qty.sign secondResolution))
                         else Unresolved
 
 secondResolution1d
@@ -201,7 +201,7 @@ classify
   -> Derivatives (space @ units)
   -> Float
   -> Float
-  -> Result DegenerateIntersection Intersection.Kind
+  -> Result DegenerateIntersection (Intersection.Kind, Sign)
 classify derivatives1 derivatives2 u1 u2 =
   let first1 = VectorCurve2d.evaluateAt u1 derivatives1.first
       first2 = VectorCurve2d.evaluateAt u2 derivatives2.first
@@ -224,10 +224,10 @@ classify derivatives1 derivatives2 u1 u2 =
               length2 = if first2Zero then 0.5 * second2Magnitude else first2Magnitude
            in if crossProductMagnitude * min length1 length2 < ?tolerance
                 then Error DegenerateIntersection
-                else Ok (Intersection.Crossing crossProductSign)
+                else Ok (Intersection.Crossing, crossProductSign)
         else
           if crossProductMagnitude > 0.5
-            then Ok (Intersection.Crossing crossProductSign)
+            then Ok (Intersection.Crossing, crossProductSign)
             else
               let width0 = Qty.abs (?tolerance / tangentCrossProduct)
                   dX1_dU1 = first1Magnitude
@@ -244,8 +244,8 @@ classify derivatives1 derivatives2 u1 u2 =
                   sign1 = Qty.sign d2Y_dXdX
                   width1 = Units.specialize (Qty.sqrt (2.0 * Units.generalize ?tolerance ./ d2Y_dXdX))
                in if width0 <= width1
-                    then Ok (Intersection.Crossing crossProductSign)
-                    else Ok (Intersection.Tangent sign1)
+                    then Ok (Intersection.Crossing, crossProductSign)
+                    else Ok (Intersection.Tangent, sign1)
 
 secondDerivative1d :: Qty units -> Qty units -> Qty units -> Qty units -> Qty (Unitless :/ units)
 secondDerivative1d dXdU dYdU d2XdU2 d2YdU2 =
