@@ -297,7 +297,7 @@ endpointIntersection
   -> Result IntersectionError Intersection
 endpointIntersection derivatives1 derivatives2 (u1, u2) =
   Derivatives.classify derivatives1 derivatives2 u1 u2
-    |> Result.map (Intersection u1 u2)
+    |> Result.map (\(kind, sign) -> Intersection u1 u2 kind sign)
     |> Result.mapError
       (\Derivatives.DegenerateIntersection -> Curve2d.TangentIntersectionAtDegeneratePoint)
 
