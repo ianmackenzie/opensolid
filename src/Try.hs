@@ -15,10 +15,10 @@ import Text qualified
 class MapError a b | a -> b where
   mapError :: a -> b
 
-instance (IsError x, a ~ a') => MapError (Result x a) (Result Text a') where
+instance (ErrorMessage x, a ~ a') => MapError (Result x a) (Result Text a') where
   mapError = Result.mapError errorMessage
 
-instance (IsError x, a ~ a') => MapError (Task x a) (Task Text a') where
+instance (ErrorMessage x, a ~ a') => MapError (Task x a) (Task Text a') where
   mapError = Task.mapError errorMessage
 
 instance a ~ a' => MapError (List a) (List a') where
@@ -33,7 +33,7 @@ first >> second = mapError first OpenSolid.>> second
 (>>=) :: (MapError a a', Bind a' b c) => a -> (b -> c) -> c
 value >>= function = mapError value OpenSolid.>>= function
 
-withContext :: IsError x => Text -> Result x a -> Result Text a
+withContext :: ErrorMessage x => Text -> Result x a -> Result Text a
 withContext context = Result.mapError (errorMessage OpenSolid.>> addContext context)
 
 addContext :: Text -> Text -> Text

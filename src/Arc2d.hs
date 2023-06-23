@@ -43,7 +43,7 @@ data BuildError
   = UnsupportedConstraints
   | EndpointsCoincident
   | EndpointsTooFarApart
-  deriving (Show, IsError)
+  deriving (Show, ErrorMessage)
 
 with :: List (Constraint (space @ units)) -> Result BuildError (Curve2d (space @ units))
 with constraints = case List.sort constraints of

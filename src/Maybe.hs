@@ -10,7 +10,7 @@ where
 
 import Basics
 import Data.Maybe qualified
-import Result (IsError, Result (..))
+import Result (ErrorMessage, Result (..))
 import Prelude qualified
 
 map :: (a -> b) -> Maybe a -> Maybe b
@@ -20,7 +20,7 @@ withDefault :: a -> Maybe a -> a
 withDefault _ (Just value) = value
 withDefault value Nothing = value
 
-orError :: IsError x => x -> Maybe a -> Result x a
+orError :: ErrorMessage x => x -> Maybe a -> Result x a
 orError _ (Just value) = Ok value
 orError error Nothing = Error error
 

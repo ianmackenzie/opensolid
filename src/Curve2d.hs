@@ -159,7 +159,7 @@ instance
   where
   curve - point = VectorCurve2d (CurvePointDifference curve point)
 
-data IsCoincidentWithPoint = IsCoincidentWithPoint deriving (Eq, Show, IsError)
+data IsCoincidentWithPoint = IsCoincidentWithPoint deriving (Eq, Show, ErrorMessage)
 
 passesThrough :: Tolerance units => Point2d (space @ units) -> Curve2d (space @ units) -> Bool
 passesThrough point curve =
@@ -221,7 +221,7 @@ data IntersectionError
   | OverlappingSegments (List (Domain, Domain))
   | ZeroDerivatives
   | TangentIntersectionAtDegeneratePoint
-  deriving (Show, IsError)
+  deriving (Show, ErrorMessage)
 
 findEndpointParameterValues
   :: Tolerance units

@@ -1,6 +1,6 @@
 module Result
   ( Result (..)
-  , IsError (..)
+  , ErrorMessage (..)
   , map
   , withDefault
   , mapError
@@ -18,22 +18,22 @@ import DoNotation
 import System.IO.Error qualified
 import Prelude qualified
 
-class Show error => IsError error where
+class Show error => ErrorMessage error where
   errorMessage :: error -> Text
   errorMessage error = Data.Text.pack (Prelude.show error)
 
-instance IsError Text where
+instance ErrorMessage Text where
   errorMessage text = text
 
-instance IsError (List Char) where
+instance ErrorMessage (List Char) where
   errorMessage = Data.Text.pack
 
-instance IsError IOError where
+instance ErrorMessage IOError where
   errorMessage ioError = Data.Text.pack (System.IO.Error.ioeGetErrorString ioError)
 
 data Result x a where
   Ok :: a -> Result x a
-  Error :: IsError x => x -> Result x a
+  Error :: ErrorMessage x => x -> Result x a
 
 deriving instance (Eq x, Eq a) => Eq (Result x a)
 
@@ -71,7 +71,7 @@ map :: (a -> value) -> Result x a -> Result x value
 map function (Ok value) = Ok (function value)
 map _ (Error err) = Error err
 
-mapError :: IsError y => (x -> y) -> Result x a -> Result y a
+mapError :: ErrorMessage y => (x -> y) -> Result x a -> Result y a
 mapError _ (Ok value) = Ok value
 mapError function (Error err) = Error (function err)
 

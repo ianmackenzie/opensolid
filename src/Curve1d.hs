@@ -255,9 +255,9 @@ maxRootOrder = 4
 
 ----- ROOT FINDING -----
 
-data IsZero = IsZero deriving (Eq, Show, IsError)
+data IsZero = IsZero deriving (Eq, Show, ErrorMessage)
 
-data EqualEverywhere = EqualEverywhere deriving (Eq, Show, IsError)
+data EqualEverywhere = EqualEverywhere deriving (Eq, Show, ErrorMessage)
 
 equalTo :: Tolerance units => Qty units -> Curve1d units -> Result EqualEverywhere (List Root)
 equalTo value curve =

@@ -24,7 +24,7 @@ import Float (Float, fromRational)
 import Fuzzy (Fuzzy (Resolved, Unresolved))
 import List (List)
 import Qty (Qty (Qty))
-import Result (IsError (errorMessage), Result (Error, Ok))
+import Result (ErrorMessage (errorMessage), Result (Error, Ok))
 import Sign (Sign (Negative, Positive))
 import Task (Task)
 import Task qualified

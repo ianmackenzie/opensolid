@@ -14,7 +14,7 @@ where
 import Basics
 import Control.Exception qualified
 import DoNotation
-import Result (IsError (errorMessage), Result (Error, Ok))
+import Result (ErrorMessage (errorMessage), Result (Error, Ok))
 import Result qualified
 import System.Exit qualified
 import Text qualified
@@ -58,7 +58,7 @@ map :: (a -> b) -> Task x a -> Task x b
 map function (Done result) = Done (Result.map function result)
 map function (Perform io) = Perform (Prelude.fmap (map function) io)
 
-mapError :: IsError y => (x -> y) -> Task x a -> Task y a
+mapError :: ErrorMessage y => (x -> y) -> Task x a -> Task y a
 mapError function (Done result) = Done (Result.mapError function result)
 mapError function (Perform io) = Perform (Prelude.fmap (mapError function) io)
 

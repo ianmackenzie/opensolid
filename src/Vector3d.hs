@@ -140,7 +140,7 @@ magnitude (Vector3d vx vy vz) = Qty.hypot3 vx vy vz
 squaredMagnitude :: Units.Squared units1 units2 => Vector3d (space @ units1) -> Qty units2
 squaredMagnitude (Vector3d vx vy vz) = Qty.squared vx + Qty.squared vy + Qty.squared vz
 
-data IsZero = IsZero deriving (Show, IsError)
+data IsZero = IsZero deriving (Show, ErrorMessage)
 
 direction :: Vector3d (space @ units) -> Result IsZero (Direction3d space)
 direction vector = do
