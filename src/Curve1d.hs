@@ -289,30 +289,41 @@ roots curve =
           )
       endpointRoots = root0 ++ root1
       endpointExclusions = [Range.from 0.0 x0, Range.from x1 1.0]
-      solveDerivativeOrder derivativeOrder =
-        Bisection.solve
-          (isCandidate derivativeOrder)
-          (resolveDerivativeSign (derivativeOrder + 1))
-          (findRoot curve derivativeOrder derivatives)
-          searchTree
       (allRoots, _) =
         (endpointRoots, endpointExclusions)
-          |> solveDerivativeOrder 3
-          |> solveDerivativeOrder 2
-          |> solveDerivativeOrder 1
-          |> solveDerivativeOrder 0
+          |> findRoots curve derivatives searchTree maxRootOrder
    in Ok (List.sortBy Root.value allRoots)
 
+findRoots
+  :: Tolerance units
+  => Curve1d units
+  -> Stream (Curve1d units)
+  -> Bisection.Tree (Stream (Range units))
+  -> Int
+  -> (List Root, List Domain)
+  -> (List Root, List Domain)
+findRoots curve derivatives searchTree rootOrder accumulated =
+  let updated =
+        Bisection.solve
+          (isCandidate rootOrder)
+          (resolveDerivativeSign (rootOrder + 1))
+          (findRoot curve rootOrder derivatives)
+          searchTree
+          accumulated
+   in if rootOrder == 0
+        then updated
+        else findRoots curve derivatives searchTree (rootOrder - 1) updated
+
 isCandidate :: Tolerance units => Int -> Domain -> Stream (Range units) -> Bool
-isCandidate derivativeOrder _ bounds =
+isCandidate rootOrder _ bounds =
   let curveBounds = Stream.head bounds
-      derivativeBounds = Stream.take derivativeOrder (Stream.tail bounds)
+      derivativeBounds = Stream.take rootOrder (Stream.tail bounds)
       curveContainsZero = Range.approximatelyIncludes Qty.zero curveBounds
       derivativesContainZero = List.all (Range.includes Qty.zero) derivativeBounds
    in curveContainsZero && derivativesContainZero
 
 resolveDerivativeSign :: Int -> Domain -> Stream (Range units) -> Fuzzy Sign
-resolveDerivativeSign n _ bounds = resolveSign (Stream.nth n bounds)
+resolveDerivativeSign derivativeOrder _ bounds = resolveSign (Stream.nth derivativeOrder bounds)
 
 findRoot
   :: Tolerance units
@@ -323,19 +334,19 @@ findRoot
   -> Stream (Range units)
   -> Sign
   -> Maybe Root
-findRoot originalCurve derivativeOrder derivatives domain _ nextDerivativeSign =
-  let curveDerivative = Stream.nth derivativeOrder derivatives
+findRoot originalCurve rootOrder derivatives domain _ nextDerivativeSign =
+  let curve = Stream.nth rootOrder derivatives
       Range x1 x2 = domain
       minX = if nextDerivativeSign == Positive then x1 else x2
       maxX = if nextDerivativeSign == Positive then x2 else x1
-      minY = evaluate curveDerivative minX
-      maxY = evaluate curveDerivative maxX
+      minY = evaluate curve minX
+      maxY = evaluate curve maxX
    in if minY > Qty.zero || maxY < Qty.zero
         then Nothing
         else
-          let rootX = bisectMonotonic curveDerivative minX maxX minY maxY
-           in if derivativeOrder == 0 || evaluate originalCurve rootX ~= Qty.zero
-                then Just (Root rootX derivativeOrder nextDerivativeSign)
+          let rootX = bisectMonotonic curve minX maxX minY maxY
+           in if rootOrder == 0 || evaluate originalCurve rootX ~= Qty.zero
+                then Just (Root rootX rootOrder nextDerivativeSign)
                 else Nothing
 
 bisectMonotonic :: Curve1d units -> Float -> Float -> Qty units -> Qty units -> Float
