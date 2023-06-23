@@ -88,15 +88,6 @@ executables:
     - -Wno-unused-imports
     dependencies:
     - opensolid
-  derivatives:
-    main:                Main.hs
-    source-dirs:         derivatives
-    ghc-options:
-    - -threaded
-    - -rtsopts
-    - -with-rtsopts=-N
-    dependencies:
-    - opensolid
 
 tests:
   opensolid-test:
