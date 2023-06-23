@@ -50,8 +50,8 @@ ofCurve givenCurve =
               { curve = givenCurve
               , first = firstDerivative
               , second = secondDerivative
-              , degenerateStart = isDegenerate firstDerivative 0.0
-              , degenerateEnd = isDegenerate firstDerivative 1.0
+              , degenerateStart = isDegenerateAt 0.0 firstDerivative
+              , degenerateEnd = isDegenerateAt 1.0 firstDerivative
               }
 
 simultaneouslyZero
@@ -73,8 +73,8 @@ areBothZero firstDerivative secondDerivative domain
   | firstMax < squaredTolerance && secondMax < 4.0 * squaredTolerance = Resolved True
   | otherwise = Unresolved
  where
-  firstBounds = VectorCurve2d.segmentBounds firstDerivative domain
-  secondBounds = VectorCurve2d.segmentBounds secondDerivative domain
+  firstBounds = VectorCurve2d.segmentBounds domain firstDerivative
+  secondBounds = VectorCurve2d.segmentBounds domain secondDerivative
   firstSquaredMagnitude = VectorBox2d.squaredMagnitude (Units.generalize firstBounds)
   secondSquaredMagnitude = VectorBox2d.squaredMagnitude (Units.generalize secondBounds)
   firstMin = Range.minValue firstSquaredMagnitude
@@ -83,9 +83,9 @@ areBothZero firstDerivative secondDerivative domain
   secondMax = Range.maxValue secondSquaredMagnitude
   squaredTolerance = Qty.squared (Units.generalize ?tolerance)
 
-isDegenerate :: Tolerance units => VectorCurve2d (space @ units) -> Float -> Bool
-isDegenerate firstDerivative u =
-  Vector2d.magnitude (VectorCurve2d.evaluate firstDerivative u) ~= Qty.zero
+isDegenerateAt :: Tolerance units => Float -> VectorCurve2d (space @ units) -> Bool
+isDegenerateAt u firstDerivative =
+  Vector2d.magnitude (VectorCurve2d.evaluateAt u firstDerivative) ~= Qty.zero
 
 tangentBounds
   :: Derivatives (space @ units)
@@ -106,17 +106,17 @@ intersectionKind
   -> Domain
   -> Fuzzy (Maybe Intersection.Kind)
 intersectionKind derivatives1 derivatives2 u1 u2 =
-  let curveBounds1 = Curve2d.segmentBounds derivatives1.curve u1
-      curveBounds2 = Curve2d.segmentBounds derivatives2.curve u2
+  let curveBounds1 = Curve2d.segmentBounds u1 derivatives1.curve
+      curveBounds2 = Curve2d.segmentBounds u2 derivatives2.curve
       difference = curveBounds1 - curveBounds2
       distance = VectorBox2d.magnitude difference
    in if Range.minValue distance > ?tolerance
         then Resolved Nothing
         else
-          let firstBounds1 = VectorCurve2d.segmentBounds derivatives1.first u1
-              firstBounds2 = VectorCurve2d.segmentBounds derivatives2.first u2
-              secondBounds1 = VectorCurve2d.segmentBounds derivatives1.second u1
-              secondBounds2 = VectorCurve2d.segmentBounds derivatives2.second u2
+          let firstBounds1 = VectorCurve2d.segmentBounds u1 derivatives1.first
+              firstBounds2 = VectorCurve2d.segmentBounds u2 derivatives2.first
+              secondBounds1 = VectorCurve2d.segmentBounds u1 derivatives1.second
+              secondBounds2 = VectorCurve2d.segmentBounds u2 derivatives2.second
               tangentBounds1 = tangentBounds derivatives1 u1 firstBounds1 secondBounds1
               tangentBounds2 = tangentBounds derivatives2 u2 firstBounds2 secondBounds2
               firstResolution = Range.resolution (tangentBounds1 >< tangentBounds2)
@@ -203,10 +203,10 @@ classify
   -> Float
   -> Result DegenerateIntersection Intersection.Kind
 classify derivatives1 derivatives2 u1 u2 =
-  let first1 = VectorCurve2d.evaluate derivatives1.first u1
-      first2 = VectorCurve2d.evaluate derivatives2.first u2
-      second1 = VectorCurve2d.evaluate derivatives1.second u1
-      second2 = VectorCurve2d.evaluate derivatives2.second u2
+  let first1 = VectorCurve2d.evaluateAt u1 derivatives1.first
+      first2 = VectorCurve2d.evaluateAt u2 derivatives2.first
+      second1 = VectorCurve2d.evaluateAt u1 derivatives1.second
+      second2 = VectorCurve2d.evaluateAt u2 derivatives2.second
       first1Magnitude = Vector2d.magnitude first1
       first2Magnitude = Vector2d.magnitude first2
       second1Magnitude = Vector2d.magnitude second1

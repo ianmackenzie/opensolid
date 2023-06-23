@@ -16,8 +16,8 @@ import VectorCurve2d (VectorCurve2d)
 class Show curve => IsCurve2d curve (coordinateSystem :: CoordinateSystem) | curve -> coordinateSystem where
   startPointImpl :: curve -> Point2d coordinateSystem
   endPointImpl :: curve -> Point2d coordinateSystem
-  evaluateImpl :: curve -> Float -> Point2d coordinateSystem
-  segmentBoundsImpl :: curve -> Domain -> BoundingBox2d coordinateSystem
+  evaluateAtImpl :: Float -> curve -> Point2d coordinateSystem
+  segmentBoundsImpl :: Domain -> curve -> BoundingBox2d coordinateSystem
   derivativeImpl :: curve -> VectorCurve2d coordinateSystem
   reverseImpl :: curve -> curve
   bisectImpl :: curve -> (curve, curve)
@@ -31,4 +31,4 @@ data Curve2d (coordinateSystem :: CoordinateSystem) where
   Curve2d :: IsCurve2d curve (space @ units) => curve -> Curve2d (space @ units)
 
 derivative :: Curve2d (space @ units) -> VectorCurve2d (space @ units)
-segmentBounds :: Curve2d (space @ units) -> Domain -> BoundingBox2d (space @ units)
+segmentBounds :: Domain -> Curve2d (space @ units) -> BoundingBox2d (space @ units)

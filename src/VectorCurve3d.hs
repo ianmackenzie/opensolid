@@ -1,7 +1,7 @@
 module VectorCurve3d
   ( VectorCurve3d
   , IsVectorCurve3d
-  , evaluate
+  , evaluateAt
   , segmentBounds
   , derivative
   , zero
@@ -31,8 +31,8 @@ import VectorBox3d (VectorBox3d (VectorBox3d))
 import VectorBox3d qualified
 
 class IsVectorCurve3d curve (coordinateSystem :: CoordinateSystem) | curve -> coordinateSystem where
-  evaluateImpl :: curve -> Float -> Vector3d coordinateSystem
-  segmentBoundsImpl :: curve -> Domain -> VectorBox3d coordinateSystem
+  evaluateAtImpl :: Float -> curve -> Vector3d coordinateSystem
+  segmentBoundsImpl :: Domain -> curve -> VectorBox3d coordinateSystem
   derivativeImpl :: curve -> VectorCurve3d coordinateSystem
 
 data VectorCurve3d (coordinateSystem :: CoordinateSystem) where
@@ -44,7 +44,7 @@ data VectorCurve3d (coordinateSystem :: CoordinateSystem) where
   CubicSpline :: Vector3d (space @ units) -> Vector3d (space @ units) -> Vector3d (space @ units) -> Vector3d (space @ units) -> VectorCurve3d (space @ units)
 
 instance IsVectorCurve3d (VectorCurve3d (space @ units)) (space @ units) where
-  evaluateImpl = evaluate
+  evaluateAtImpl = evaluateAt
   segmentBoundsImpl = segmentBounds
   derivativeImpl = derivative
 
@@ -72,11 +72,11 @@ data XYZ (coordinateSystem :: CoordinateSystem)
       (Curve1d (Units coordinateSystem))
 
 instance IsVectorCurve3d (XYZ (space @ units)) (space @ units) where
-  evaluateImpl (XYZ x y z) t =
-    Vector3d (Curve1d.evaluate x t) (Curve1d.evaluate y t) (Curve1d.evaluate z t)
+  evaluateAtImpl t (XYZ x y z) =
+    Vector3d (Curve1d.evaluateAt t x) (Curve1d.evaluateAt t y) (Curve1d.evaluateAt t z)
 
-  segmentBoundsImpl (XYZ x y z) t =
-    VectorBox3d (Curve1d.segmentBounds x t) (Curve1d.segmentBounds y t) (Curve1d.segmentBounds z t)
+  segmentBoundsImpl t (XYZ x y z) =
+    VectorBox3d (Curve1d.segmentBounds t x) (Curve1d.segmentBounds t y) (Curve1d.segmentBounds t z)
 
   derivativeImpl (XYZ x y z) =
     xyz (Curve1d.derivative x) (Curve1d.derivative y) (Curve1d.derivative z)
@@ -92,8 +92,8 @@ xyz x y z = let impl :: XYZ (space @ units) = XYZ x y z in VectorCurve3d impl
 newtype Negated (coordinateSystem :: CoordinateSystem) = Negated (VectorCurve3d coordinateSystem)
 
 instance IsVectorCurve3d (Negated (space @ units)) (space @ units) where
-  evaluateImpl (Negated curve) t = negate (evaluate curve t)
-  segmentBoundsImpl (Negated curve) t = negate (segmentBounds curve t)
+  evaluateAtImpl t (Negated curve) = negate (evaluateAt t curve)
+  segmentBoundsImpl t (Negated curve) = negate (segmentBounds t curve)
   derivativeImpl (Negated curve) = negate (derivative curve)
 
 instance Negation (VectorCurve3d (space @ units)) where
@@ -103,8 +103,8 @@ data Sum (coordinateSystem :: CoordinateSystem)
   = Sum (VectorCurve3d coordinateSystem) (VectorCurve3d coordinateSystem)
 
 instance IsVectorCurve3d (Sum (space @ units)) (space @ units) where
-  evaluateImpl (Sum curve1 curve2) t = evaluate curve1 t + evaluate curve2 t
-  segmentBoundsImpl (Sum curve1 curve2) t = segmentBounds curve1 t + segmentBounds curve2 t
+  evaluateAtImpl t (Sum curve1 curve2) = evaluateAt t curve1 + evaluateAt t curve2
+  segmentBoundsImpl t (Sum curve1 curve2) = segmentBounds t curve1 + segmentBounds t curve2
   derivativeImpl (Sum curve1 curve2) = derivative curve1 + derivative curve2
 
 instance
@@ -138,8 +138,8 @@ data Difference (coordinateSystem :: CoordinateSystem)
   = Difference (VectorCurve3d coordinateSystem) (VectorCurve3d coordinateSystem)
 
 instance IsVectorCurve3d (Difference (space @ units)) (space @ units) where
-  evaluateImpl (Difference curve1 curve2) t = evaluate curve1 t - evaluate curve2 t
-  segmentBoundsImpl (Difference curve1 curve2) t = segmentBounds curve1 t - segmentBounds curve2 t
+  evaluateAtImpl t (Difference curve1 curve2) = evaluateAt t curve1 - evaluateAt t curve2
+  segmentBoundsImpl t (Difference curve1 curve2) = segmentBounds t curve1 - segmentBounds t curve2
   derivativeImpl (Difference curve1 curve2) = derivative curve1 - derivative curve2
 
 instance
@@ -179,11 +179,11 @@ instance
   Units.Product units1 units2 units3
   => IsVectorCurve3d (Product3d1d space units1 units2) (space @ units3)
   where
-  evaluateImpl (Product3d1d vectorCurve3d curve1d) t =
-    evaluate vectorCurve3d t * Curve1d.evaluate curve1d t
+  evaluateAtImpl t (Product3d1d vectorCurve3d curve1d) =
+    evaluateAt t vectorCurve3d * Curve1d.evaluateAt t curve1d
 
-  segmentBoundsImpl (Product3d1d vectorCurve3d curve1d) t =
-    segmentBounds vectorCurve3d t * Curve1d.segmentBounds curve1d t
+  segmentBoundsImpl t (Product3d1d vectorCurve3d curve1d) =
+    segmentBounds t vectorCurve3d * Curve1d.segmentBounds t curve1d
 
   derivativeImpl (Product3d1d vectorCurve3d curve1d) =
     derivative vectorCurve3d * curve1d + vectorCurve3d * Curve1d.derivative curve1d
@@ -192,11 +192,11 @@ instance
   Units.Product units1 units2 units3
   => IsVectorCurve3d (Product1d3d space units1 units2) (space @ units3)
   where
-  evaluateImpl (Product1d3d curve1d vectorCurve3d) t =
-    Curve1d.evaluate curve1d t * evaluate vectorCurve3d t
+  evaluateAtImpl t (Product1d3d curve1d vectorCurve3d) =
+    Curve1d.evaluateAt t curve1d * evaluateAt t vectorCurve3d
 
-  segmentBoundsImpl (Product1d3d curve1d vectorCurve3d) t =
-    Curve1d.segmentBounds curve1d t * segmentBounds vectorCurve3d t
+  segmentBoundsImpl t (Product1d3d curve1d vectorCurve3d) =
+    Curve1d.segmentBounds t curve1d * segmentBounds t vectorCurve3d
 
   derivativeImpl (Product1d3d curve1d vectorCurve3d) =
     Curve1d.derivative curve1d * vectorCurve3d + curve1d * derivative vectorCurve3d
@@ -244,11 +244,11 @@ instance
   Units.Product units1 units2 units
   => IsCurve1d (DotProductOf space units1 units2) units
   where
-  evaluateImpl (DotProductOf curve1 curve2) t =
-    evaluate curve1 t <> evaluate curve2 t
+  evaluateAtImpl t (DotProductOf curve1 curve2) =
+    evaluateAt t curve1 <> evaluateAt t curve2
 
-  segmentBoundsImpl (DotProductOf curve1 curve2) t =
-    segmentBounds curve1 t <> segmentBounds curve2 t
+  segmentBoundsImpl t (DotProductOf curve1 curve2) =
+    segmentBounds t curve1 <> segmentBounds t curve2
 
   derivativeImpl (DotProductOf curve1 curve2) =
     derivative curve1 <> curve2 + curve1 <> derivative curve2
@@ -287,11 +287,11 @@ instance
   Units.Product units1 units2 units3
   => IsVectorCurve3d (CrossProductOf space units1 units2) (space @ units3)
   where
-  evaluateImpl (CrossProductOf curve1 curve2) t =
-    evaluate curve1 t >< evaluate curve2 t
+  evaluateAtImpl t (CrossProductOf curve1 curve2) =
+    evaluateAt t curve1 >< evaluateAt t curve2
 
-  segmentBoundsImpl (CrossProductOf curve1 curve2) t =
-    segmentBounds curve1 t >< segmentBounds curve2 t
+  segmentBoundsImpl t (CrossProductOf curve1 curve2) =
+    segmentBounds t curve1 >< segmentBounds t curve2
 
   derivativeImpl (CrossProductOf curve1 curve2) =
     derivative curve1 >< curve2 + curve1 >< derivative curve2
@@ -329,11 +329,11 @@ instance
   Units.Quotient units1 units2 units3
   => IsVectorCurve3d (Quotient space units1 units2) (space @ units3)
   where
-  evaluateImpl (Quotient vectorCurve3d curve1d) t =
-    evaluate vectorCurve3d t / Curve1d.evaluate curve1d t
+  evaluateAtImpl t (Quotient vectorCurve3d curve1d) =
+    evaluateAt t vectorCurve3d / Curve1d.evaluateAt t curve1d
 
-  segmentBoundsImpl (Quotient vectorCurve3d curve1d) t =
-    segmentBounds vectorCurve3d t / Curve1d.segmentBounds curve1d t
+  segmentBoundsImpl t (Quotient vectorCurve3d curve1d) =
+    segmentBounds t vectorCurve3d / Curve1d.segmentBounds t curve1d
 
   derivativeImpl (Quotient vectorCurve3d curve1d) =
     let p = Units.generalize vectorCurve3d
@@ -355,11 +355,11 @@ newtype SquaredMagnitudeOf (coordinateSystem :: CoordinateSystem)
   = SquaredMagnitudeOf (VectorCurve3d coordinateSystem)
 
 instance Units.Squared units1 units2 => IsCurve1d (SquaredMagnitudeOf (space @ units1)) units2 where
-  evaluateImpl (SquaredMagnitudeOf expression) t =
-    Vector3d.squaredMagnitude (evaluate expression t)
+  evaluateAtImpl t (SquaredMagnitudeOf expression) =
+    Vector3d.squaredMagnitude (evaluateAt t expression)
 
-  segmentBoundsImpl (SquaredMagnitudeOf expression) t =
-    VectorBox3d.squaredMagnitude (segmentBounds expression t)
+  segmentBoundsImpl t (SquaredMagnitudeOf expression) =
+    VectorBox3d.squaredMagnitude (segmentBounds t expression)
 
   derivativeImpl (SquaredMagnitudeOf expression) =
     2.0 * expression <> derivative expression
@@ -422,20 +422,20 @@ cubicBlossom (Vector3d x1 y1 z1) (Vector3d x2 y2 z2) (Vector3d x3 y3 z3) (Vector
       z = s1 * z1 + s2 * z2 + s3 * z3 + s4 * z4
    in Vector3d x y z
 
-evaluate :: VectorCurve3d (space @ units) -> Float -> Vector3d (space @ units)
-evaluate curve t =
+evaluateAt :: Float -> VectorCurve3d (space @ units) -> Vector3d (space @ units)
+evaluateAt t curve =
   case curve of
-    VectorCurve3d c -> evaluateImpl c t
+    VectorCurve3d c -> evaluateAtImpl t c
     Zero -> Vector3d.zero
     Constant v -> v
     Line v1 v2 -> Vector3d.interpolateFrom v1 v2 t
     QuadraticSpline v1 v2 v3 -> quadraticBlossom v1 v2 v3 t t
     CubicSpline v1 v2 v3 v4 -> cubicBlossom v1 v2 v3 v4 t t t
 
-segmentBounds :: VectorCurve3d (space @ units) -> Domain -> VectorBox3d (space @ units)
-segmentBounds curve t@(Range tl th) =
+segmentBounds :: Domain -> VectorCurve3d (space @ units) -> VectorBox3d (space @ units)
+segmentBounds t@(Range tl th) curve =
   case curve of
-    VectorCurve3d c -> segmentBoundsImpl c t
+    VectorCurve3d c -> segmentBoundsImpl t c
     Zero -> VectorBox3d.constant Vector3d.zero
     Constant value -> VectorBox3d.constant value
     Line v1 v2 ->

@@ -34,9 +34,9 @@ instance IsCurve2d (QuadraticSpline2d (space @ units)) (space @ units) where
 
   endPointImpl (QuadraticSpline2d _ _ p3) = p3
 
-  evaluateImpl spline t = blossom spline t t
+  evaluateAtImpl t spline = blossom spline t t
 
-  segmentBoundsImpl spline (Range tl th) =
+  segmentBoundsImpl (Range tl th) spline =
     BoundingBox2d.hull3
       (blossom spline tl tl)
       (blossom spline tl th)

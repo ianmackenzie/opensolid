@@ -95,11 +95,11 @@ testArc2dFrom = Try.do
   let arc3 = testArc (Angle.degrees 180.0)
   let arc4 = testArc (Angle.degrees -180.0)
   let line = testArc Qty.zero
-  log "arc1 point" (Curve2d.evaluate arc1 0.5)
-  log "arc2 point" (Curve2d.evaluate arc2 0.5)
-  log "arc3 point" (Curve2d.evaluate arc3 0.5)
-  log "arc4 point" (Curve2d.evaluate arc4 0.5)
-  log "line point" (Curve2d.evaluate line 0.5)
+  log "arc1 point" (Curve2d.evaluateAt 0.5 arc1)
+  log "arc2 point" (Curve2d.evaluateAt 0.5 arc2)
+  log "arc3 point" (Curve2d.evaluateAt 0.5 arc3)
+  log "arc4 point" (Curve2d.evaluateAt 0.5 arc4)
+  log "line point" (Curve2d.evaluateAt 0.5 line)
 
 overlappingSegments
   :: Tolerance units

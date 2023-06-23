@@ -1,7 +1,8 @@
 module Curve1d
   ( Curve1d (Curve1d)
   , IsCurve1d (..)
-  , evaluate
+  , evaluateAt
+  , pointOn
   , segmentBounds
   , derivative
   , zero
@@ -46,8 +47,8 @@ import {-# SOURCE #-} VectorCurve3d (VectorCurve3d)
 import {-# SOURCE #-} VectorCurve3d qualified
 
 class IsCurve1d curve units | curve -> units where
-  evaluateImpl :: curve -> Float -> Qty units
-  segmentBoundsImpl :: curve -> Domain -> Range units
+  evaluateAtImpl :: Float -> curve -> Qty units
+  segmentBoundsImpl :: Domain -> curve -> Range units
   derivativeImpl :: curve -> Curve1d units
 
 data Curve1d units where
@@ -74,7 +75,7 @@ instance units ~ units' => ApproximateEquality (Curve1d units) (Qty units') unit
   curve ~= value = isZero (curve - value)
 
 instance IsCurve1d (Curve1d units) units where
-  evaluateImpl = evaluate
+  evaluateAtImpl = evaluateAt
   segmentBoundsImpl = segmentBounds
   derivativeImpl = derivative
 
@@ -163,39 +164,42 @@ instance Units.Quotient units1 units2 units3 => Division (Curve1d units1) (Qty u
 instance Units.Quotient units1 units2 units3 => Division (Qty units1) (Curve1d units2) (Curve1d units3) where
   value / curve = constant value / curve
 
-evaluate :: Curve1d units -> Float -> Qty units
-evaluate curve t =
+evaluateAt :: Float -> Curve1d units -> Qty units
+evaluateAt t curve =
   case curve of
-    Curve1d c -> evaluateImpl c t
+    Curve1d c -> evaluateAtImpl t c
     Zero -> Qty.zero
     Constant x -> x
     Parameter -> t
-    Negated c -> negate (evaluate c t)
-    Sum c1 c2 -> evaluate c1 t + evaluate c2 t
-    Difference c1 c2 -> evaluate c1 t - evaluate c2 t
-    Product c1 c2 -> evaluate c1 t * evaluate c2 t
-    Quotient c1 c2 -> evaluate c1 t / evaluate c2 t
-    Squared c -> let x = evaluate c t in x * x
-    SquareRoot c -> Qty.sqrt (evaluate c t)
-    Sin c -> Angle.sin (evaluate c t)
-    Cos c -> Angle.cos (evaluate c t)
+    Negated c -> negate (evaluateAt t c)
+    Sum c1 c2 -> evaluateAt t c1 + evaluateAt t c2
+    Difference c1 c2 -> evaluateAt t c1 - evaluateAt t c2
+    Product c1 c2 -> evaluateAt t c1 * evaluateAt t c2
+    Quotient c1 c2 -> evaluateAt t c1 / evaluateAt t c2
+    Squared c -> let x = evaluateAt t c in x * x
+    SquareRoot c -> Qty.sqrt (evaluateAt t c)
+    Sin c -> Angle.sin (evaluateAt t c)
+    Cos c -> Angle.cos (evaluateAt t c)
 
-segmentBounds :: Curve1d units -> Domain -> Range units
-segmentBounds curve t =
+pointOn :: Curve1d units -> Float -> Qty units
+pointOn curve t = evaluateAt t curve
+
+segmentBounds :: Domain -> Curve1d units -> Range units
+segmentBounds t curve =
   case curve of
-    Curve1d c -> segmentBoundsImpl c t
+    Curve1d c -> segmentBoundsImpl t c
     Zero -> Range.constant Qty.zero
     Constant value -> Range.constant value
     Parameter -> t
-    Negated c -> negate (segmentBounds c t)
-    Sum c1 c2 -> segmentBounds c1 t + segmentBounds c2 t
-    Difference c1 c2 -> segmentBounds c1 t - segmentBounds c2 t
-    Product c1 c2 -> segmentBounds c1 t * segmentBounds c2 t
-    Quotient c1 c2 -> segmentBounds c1 t / segmentBounds c2 t
-    Squared c -> let x = segmentBounds c t in Range.squared x
-    SquareRoot c -> Range.sqrt (segmentBounds c t)
-    Sin c -> Range.sin (segmentBounds c t)
-    Cos c -> Range.cos (segmentBounds c t)
+    Negated c -> negate (segmentBounds t c)
+    Sum c1 c2 -> segmentBounds t c1 + segmentBounds t c2
+    Difference c1 c2 -> segmentBounds t c1 - segmentBounds t c2
+    Product c1 c2 -> segmentBounds t c1 * segmentBounds t c2
+    Quotient c1 c2 -> segmentBounds t c1 / segmentBounds t c2
+    Squared c -> let x = segmentBounds t c in Range.squared x
+    SquareRoot c -> Range.sqrt (segmentBounds t c)
+    Sin c -> Range.sin (segmentBounds t c)
+    Cos c -> Range.cos (segmentBounds t c)
 
 derivative :: Curve1d units -> Curve1d units
 derivative curve =
@@ -244,7 +248,7 @@ cos (Constant x) = constant (Angle.cos x)
 cos curve = Cos curve
 
 isZero :: Tolerance units => Curve1d units -> Bool
-isZero curve = List.all (~= Qty.zero) (Quadrature.samples (evaluate curve) Domain.unit)
+isZero curve = List.all (~= Qty.zero) (Quadrature.samples (pointOn curve) Domain.unit)
 
 maxRootOrder :: Int
 maxRootOrder = 4
@@ -282,11 +286,7 @@ roots curve =
   let (root0, x0) = solveEndpoint curve 0.0
       (root1, x1) = solveEndpoint curve 1.0
       derivatives = Stream.iterate curve derivative
-      searchTree =
-        Bisection.tree
-          ( \domain ->
-              Stream.map (\curveDerivative -> segmentBounds curveDerivative domain) derivatives
-          )
+      searchTree = Bisection.tree (\domain -> Stream.map (segmentBounds domain) derivatives)
       endpointRoots = root0 ++ root1
       endpointExclusions = [Range.from 0.0 x0, Range.from x1 1.0]
       (allRoots, _) =
@@ -339,13 +339,13 @@ findRoot originalCurve rootOrder derivatives domain _ nextDerivativeSign =
       Range x1 x2 = domain
       minX = if nextDerivativeSign == Positive then x1 else x2
       maxX = if nextDerivativeSign == Positive then x2 else x1
-      minY = evaluate curve minX
-      maxY = evaluate curve maxX
+      minY = evaluateAt minX curve
+      maxY = evaluateAt maxX curve
    in if minY > Qty.zero || maxY < Qty.zero
         then Nothing
         else
           let rootX = bisectMonotonic curve minX maxX minY maxY
-           in if rootOrder == 0 || evaluate originalCurve rootX ~= Qty.zero
+           in if rootOrder == 0 || evaluateAt rootX originalCurve ~= Qty.zero
                 then Just (Root rootX rootOrder nextDerivativeSign)
                 else Nothing
 
@@ -355,7 +355,7 @@ bisectMonotonic curve lowX highX lowY highY =
    in if midX == lowX || midX == highX
         then if -lowY <= highY then lowX else highX
         else
-          let midY = evaluate curve midX
+          let midY = evaluateAt midX curve
            in if midY >= Qty.zero
                 then bisectMonotonic curve lowX midX lowY midY
                 else bisectMonotonic curve midX highX midY highY
@@ -370,9 +370,9 @@ resolveSign range
 
 solveEndpoint :: Tolerance units => Curve1d units -> Float -> (List Root, Float)
 solveEndpoint curve endpointX
-  | evaluate curve endpointX ~= Qty.zero =
+  | evaluateAt endpointX curve ~= Qty.zero =
       let check curveDerivative derivativeOrder currentMinWidth currentBest =
-            let derivativeValue = evaluate curveDerivative endpointX
+            let derivativeValue = evaluateAt endpointX curveDerivative
                 rootWidth = computeWidth derivativeOrder derivativeValue
                 updatedMinWidth = min rootWidth currentMinWidth
                 rootOrder = derivativeOrder - 1
@@ -390,7 +390,7 @@ solveEndpoint curve endpointX
 
 resolveEndpoint :: Root -> Curve1d units -> Float -> Float -> (List Root, Float)
 resolveEndpoint root curveDerivative endpointX innerX =
-  case resolveSign (segmentBounds curveDerivative (Range.from endpointX innerX)) of
+  case resolveSign (segmentBounds (Range.from endpointX innerX) curveDerivative) of
     Resolved _ -> ([root], innerX)
     Unresolved ->
       let midX = Qty.midpoint endpointX innerX

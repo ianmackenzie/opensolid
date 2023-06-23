@@ -1,7 +1,7 @@
 module VectorCurve2d
   ( VectorCurve2d (VectorCurve2d)
   , IsVectorCurve2d (..)
-  , evaluate
+  , evaluateAt
   , segmentBounds
   , derivative
   , zero
@@ -30,8 +30,8 @@ import VectorBox2d (VectorBox2d (VectorBox2d))
 import VectorBox2d qualified
 
 class IsVectorCurve2d curve (coordinateSystem :: CoordinateSystem) | curve -> coordinateSystem where
-  evaluateImpl :: curve -> Float -> Vector2d coordinateSystem
-  segmentBoundsImpl :: curve -> Domain -> VectorBox2d coordinateSystem
+  evaluateAtImpl :: Float -> curve -> Vector2d coordinateSystem
+  segmentBoundsImpl :: Domain -> curve -> VectorBox2d coordinateSystem
   derivativeImpl :: curve -> VectorCurve2d coordinateSystem
 
 data VectorCurve2d (coordinateSystem :: CoordinateSystem) where
@@ -58,7 +58,7 @@ instance
       (VectorCurve2d (space' @ units2'))
 
 instance IsVectorCurve2d (VectorCurve2d (space @ units)) (space @ units) where
-  evaluateImpl = evaluate
+  evaluateAtImpl = evaluateAt
   segmentBoundsImpl = segmentBounds
   derivativeImpl = derivative
 
@@ -119,8 +119,8 @@ instance Units.Quotient units1 units2 units3 => Division (VectorCurve2d (space @
 data DotProductOf space units1 units2 = DotProductOf (VectorCurve2d (space @ units1)) (VectorCurve2d (space @ units2))
 
 instance Units.Product units1 units2 units3 => IsCurve1d (DotProductOf space units1 units2) units3 where
-  evaluateImpl (DotProductOf c1 c2) t = evaluate c1 t <> evaluate c2 t
-  segmentBoundsImpl (DotProductOf c1 c2) t = segmentBounds c1 t <> segmentBounds c2 t
+  evaluateAtImpl t (DotProductOf c1 c2) = evaluateAt t c1 <> evaluateAt t c2
+  segmentBoundsImpl t (DotProductOf c1 c2) = segmentBounds t c1 <> segmentBounds t c2
   derivativeImpl (DotProductOf c1 c2) = derivative c1 <> c2 + c1 <> derivative c2
 
 instance (Units.Product units1 units2 units3, space ~ space') => DotProduct (VectorCurve2d (space @ units1)) (VectorCurve2d (space' @ units2)) (Curve1d units3) where
@@ -198,36 +198,36 @@ cubicBlossom (Vector2d x1 y1) (Vector2d x2 y2) (Vector2d x3 y3) (Vector2d x4 y4)
       y = s1 * y1 + s2 * y2 + s3 * y3 + s4 * y4
    in Vector2d x y
 
-evaluate :: VectorCurve2d (space @ units) -> Float -> Vector2d (space @ units)
-evaluate curve t =
+evaluateAt :: Float -> VectorCurve2d (space @ units) -> Vector2d (space @ units)
+evaluateAt t curve =
   case curve of
-    VectorCurve2d c -> evaluateImpl c t
+    VectorCurve2d c -> evaluateAtImpl t c
     Zero -> Vector2d.zero
     Constant value -> value
-    XY x y -> Vector2d.xy (Curve1d.evaluate x t) (Curve1d.evaluate y t)
-    Negated c -> -(evaluate c t)
-    Sum c1 c2 -> evaluate c1 t + evaluate c2 t
-    Difference c1 c2 -> evaluate c1 t - evaluate c2 t
-    Product1d2d c1 c2 -> Curve1d.evaluate c1 t * evaluate c2 t
-    Product2d1d c1 c2 -> evaluate c1 t * Curve1d.evaluate c2 t
-    Quotient c1 c2 -> evaluate c1 t / Curve1d.evaluate c2 t
+    XY x y -> Vector2d.xy (Curve1d.evaluateAt t x) (Curve1d.evaluateAt t y)
+    Negated c -> -(evaluateAt t c)
+    Sum c1 c2 -> evaluateAt t c1 + evaluateAt t c2
+    Difference c1 c2 -> evaluateAt t c1 - evaluateAt t c2
+    Product1d2d c1 c2 -> Curve1d.evaluateAt t c1 * evaluateAt t c2
+    Product2d1d c1 c2 -> evaluateAt t c1 * Curve1d.evaluateAt t c2
+    Quotient c1 c2 -> evaluateAt t c1 / Curve1d.evaluateAt t c2
     Line v1 v2 -> Vector2d.interpolateFrom v1 v2 t
     QuadraticSpline v1 v2 v3 -> quadraticBlossom v1 v2 v3 t t
     CubicSpline v1 v2 v3 v4 -> cubicBlossom v1 v2 v3 v4 t t t
 
-segmentBounds :: VectorCurve2d (space @ units) -> Domain -> VectorBox2d (space @ units)
-segmentBounds curve t@(Range tl th) =
+segmentBounds :: Domain -> VectorCurve2d (space @ units) -> VectorBox2d (space @ units)
+segmentBounds t@(Range tl th) curve =
   case curve of
-    VectorCurve2d c -> segmentBoundsImpl c t
+    VectorCurve2d c -> segmentBoundsImpl t c
     Zero -> VectorBox2d.constant Vector2d.zero
     Constant value -> VectorBox2d.constant value
-    XY x y -> VectorBox2d (Curve1d.segmentBounds x t) (Curve1d.segmentBounds y t)
-    Negated c -> -(segmentBounds c t)
-    Sum c1 c2 -> segmentBounds c1 t + segmentBounds c2 t
-    Difference c1 c2 -> segmentBounds c1 t - segmentBounds c2 t
-    Product1d2d c1 c2 -> Curve1d.segmentBounds c1 t * segmentBounds c2 t
-    Product2d1d c1 c2 -> segmentBounds c1 t * Curve1d.segmentBounds c2 t
-    Quotient c1 c2 -> segmentBounds c1 t / Curve1d.segmentBounds c2 t
+    XY x y -> VectorBox2d (Curve1d.segmentBounds t x) (Curve1d.segmentBounds t y)
+    Negated c -> -(segmentBounds t c)
+    Sum c1 c2 -> segmentBounds t c1 + segmentBounds t c2
+    Difference c1 c2 -> segmentBounds t c1 - segmentBounds t c2
+    Product1d2d c1 c2 -> Curve1d.segmentBounds t c1 * segmentBounds t c2
+    Product2d1d c1 c2 -> segmentBounds t c1 * Curve1d.segmentBounds t c2
+    Quotient c1 c2 -> segmentBounds t c1 / Curve1d.segmentBounds t c2
     Line v1 v2 ->
       VectorBox2d.hull2
         (Vector2d.interpolateFrom v1 v2 tl)
@@ -264,15 +264,15 @@ derivative curve =
 newtype MagnitudeOf (coordinateSystem :: CoordinateSystem) = MagnitudeOf (VectorCurve2d coordinateSystem)
 
 instance IsCurve1d (MagnitudeOf (space @ units)) units where
-  evaluateImpl (MagnitudeOf curve) t = Vector2d.magnitude (evaluate curve t)
-  segmentBoundsImpl (MagnitudeOf curve) t = VectorBox2d.magnitude (segmentBounds curve t)
+  evaluateAtImpl t (MagnitudeOf curve) = Vector2d.magnitude (evaluateAt t curve)
+  segmentBoundsImpl t (MagnitudeOf curve) = VectorBox2d.magnitude (segmentBounds t curve)
   derivativeImpl (MagnitudeOf curve) = derivative curve <> normalize curve
 
 newtype SquaredMagnitudeOf (coordinateSystem :: CoordinateSystem) = SquaredMagnitudeOf (VectorCurve2d coordinateSystem)
 
 instance Units.Squared units1 units2 => IsCurve1d (SquaredMagnitudeOf (space @ units1)) units2 where
-  evaluateImpl (SquaredMagnitudeOf curve) t = Vector2d.squaredMagnitude (evaluate curve t)
-  segmentBoundsImpl (SquaredMagnitudeOf curve) t = VectorBox2d.squaredMagnitude (segmentBounds curve t)
+  evaluateAtImpl t (SquaredMagnitudeOf curve) = Vector2d.squaredMagnitude (evaluateAt t curve)
+  segmentBoundsImpl t (SquaredMagnitudeOf curve) = VectorBox2d.squaredMagnitude (segmentBounds t curve)
   derivativeImpl (SquaredMagnitudeOf curve) = 2.0 * curve <> derivative curve
 
 squaredMagnitude :: Units.Squared units1 units2 => VectorCurve2d (space @ units1) -> Curve1d units2

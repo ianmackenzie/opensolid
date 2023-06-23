@@ -5,7 +5,7 @@ module Curve2d
   , IsCurve2d (..)
   , startPoint
   , endPoint
-  , evaluate
+  , evaluateAt
   , segmentBounds
   , derivative
   , reverse
@@ -50,8 +50,8 @@ class
   where
   startPointImpl :: curve -> Point2d coordinateSystem
   endPointImpl :: curve -> Point2d coordinateSystem
-  evaluateImpl :: curve -> Float -> Point2d coordinateSystem
-  segmentBoundsImpl :: curve -> Domain -> BoundingBox2d coordinateSystem
+  evaluateAtImpl :: Float -> curve -> Point2d coordinateSystem
+  segmentBoundsImpl :: Domain -> curve -> BoundingBox2d coordinateSystem
   derivativeImpl :: curve -> VectorCurve2d coordinateSystem
   reverseImpl :: curve -> curve
   bisectImpl :: curve -> (curve, curve)
@@ -74,27 +74,30 @@ instance
 
 startPoint :: Curve2d (space @ units) -> Point2d (space @ units)
 startPoint (Line p1 _) = p1
-startPoint arc@(Arc{}) = evaluate arc 0.0
+startPoint arc@(Arc{}) = evaluateAt 0.0 arc
 startPoint (Curve2d curve) = startPointImpl curve
 
 endPoint :: Curve2d (space @ units) -> Point2d (space @ units)
 endPoint (Line _ p2) = p2
-endPoint arc@(Arc{}) = evaluate arc 1.0
+endPoint arc@(Arc{}) = evaluateAt 1.0 arc
 endPoint (Curve2d curve) = endPointImpl curve
 
-evaluate :: Curve2d (space @ units) -> Float -> Point2d (space @ units)
-evaluate (Line p1 p2) t = Point2d.interpolateFrom p1 p2 t
-evaluate (Arc p0 r a b) t = let theta = Qty.interpolateFrom a b t in p0 + Vector2d.polar r theta
-evaluate (Curve2d curve) t = evaluateImpl curve t
+evaluateAt :: Float -> Curve2d (space @ units) -> Point2d (space @ units)
+evaluateAt t (Line p1 p2) = Point2d.interpolateFrom p1 p2 t
+evaluateAt t (Arc p0 r a b) = let theta = Qty.interpolateFrom a b t in p0 + Vector2d.polar r theta
+evaluateAt t (Curve2d curve) = evaluateAtImpl t curve
 
-segmentBounds :: Curve2d (space @ units) -> Domain -> BoundingBox2d (space @ units)
-segmentBounds (Line p1 p2) t =
+pointOn :: Curve2d (space @ units) -> Float -> Point2d (space @ units)
+pointOn curve t = evaluateAt t curve
+
+segmentBounds :: Domain -> Curve2d (space @ units) -> BoundingBox2d (space @ units)
+segmentBounds t (Line p1 p2) =
   BoundingBox2d.hull2
     (Point2d.interpolateFrom p1 p2 t.minValue)
     (Point2d.interpolateFrom p1 p2 t.maxValue)
-segmentBounds (Arc p0 r a b) t =
+segmentBounds t (Arc p0 r a b) =
   let theta = a + t * (b - a) in p0 + VectorBox2d.polar (Range.constant r) theta
-segmentBounds (Curve2d curve) t = segmentBoundsImpl curve t
+segmentBounds t (Curve2d curve) = segmentBoundsImpl t curve
 
 derivative :: Curve2d (space @ units) -> VectorCurve2d (space @ units)
 derivative (Line p1 p2) = VectorCurve2d.constant (p2 - p1)
@@ -119,15 +122,15 @@ bisect (Curve2d curve) =
 
 boundingBox :: Curve2d (space @ units) -> BoundingBox2d (space @ units)
 boundingBox (Line p1 p2) = BoundingBox2d.hull2 p1 p2
-boundingBox arc@(Arc{}) = segmentBounds arc Domain.unit
+boundingBox arc@(Arc{}) = segmentBounds Domain.unit arc
 boundingBox (Curve2d curve) = boundingBoxImpl curve
 
 data PointCurveDifference (coordinateSystem :: CoordinateSystem)
   = PointCurveDifference (Point2d coordinateSystem) (Curve2d coordinateSystem)
 
 instance IsVectorCurve2d (PointCurveDifference (space @ units)) (space @ units) where
-  evaluateImpl (PointCurveDifference point curve) t = point - evaluate curve t
-  segmentBoundsImpl (PointCurveDifference point curve) t = point - segmentBounds curve t
+  evaluateAtImpl t (PointCurveDifference point curve) = point - evaluateAt t curve
+  segmentBoundsImpl t (PointCurveDifference point curve) = point - segmentBounds t curve
   derivativeImpl (PointCurveDifference _ curve) = -(derivative curve)
 
 instance
@@ -143,8 +146,8 @@ data CurvePointDifference (coordinateSystem :: CoordinateSystem)
   = CurvePointDifference (Curve2d coordinateSystem) (Point2d coordinateSystem)
 
 instance IsVectorCurve2d (CurvePointDifference (space @ units)) (space @ units) where
-  evaluateImpl (CurvePointDifference curve point) t = evaluate curve t - point
-  segmentBoundsImpl (CurvePointDifference curve point) t = segmentBounds curve t - point
+  evaluateAtImpl t (CurvePointDifference curve point) = evaluateAt t curve - point
+  segmentBoundsImpl t (CurvePointDifference curve point) = segmentBounds t curve - point
   derivativeImpl (CurvePointDifference curve _) = derivative curve
 
 instance
@@ -177,7 +180,7 @@ segmentIsCoincidentWithPoint point curve domain
   | Range.maxValue distance <= ?tolerance = Resolved True
   | otherwise = Unresolved
  where
-  distance = VectorBox2d.magnitude (point - segmentBounds curve domain)
+  distance = VectorBox2d.magnitude (point - segmentBounds domain curve)
 
 parameterValues
   :: Tolerance units
@@ -209,8 +212,8 @@ isOverlappingSegment
   -> (Domain, Domain)
   -> Bool
 isOverlappingSegment curve1 curve2 (domain1, _) =
-  let segmentStartPoint = evaluate curve1 (Range.minValue domain1)
-      curve1TestPoints = Quadrature.samples (evaluate curve1) domain1
+  let segmentStartPoint = evaluateAt (Range.minValue domain1) curve1
+      curve1TestPoints = Quadrature.samples (pointOn curve1) domain1
       segment1IsNondegenerate = List.any (!= segmentStartPoint) curve1TestPoints
       segment1LiesOnSegment2 = List.all (\p1 -> passesThrough p1 curve2) curve1TestPoints
    in segment1IsNondegenerate && segment1LiesOnSegment2
@@ -363,7 +366,7 @@ isCrossingIntersection
   -> Domain
   -> Bool
 isCrossingIntersection curve1 curve2 u1 u2 =
-  BoundingBox2d.intersects (segmentBounds curve1 u1) (segmentBounds curve2 u2)
+  BoundingBox2d.intersects (segmentBounds u1 curve1) (segmentBounds u2 curve2)
 
 findTangentSolutions
   :: Tolerance units
@@ -410,13 +413,13 @@ isTangentIntersection
   -> Domain
   -> Bool
 isTangentIntersection derivatives1 derivatives2 u1 u2 =
-  let bounds1 = segmentBounds derivatives1.curve u1
-      bounds2 = segmentBounds derivatives2.curve u2
+  let bounds1 = segmentBounds u1 derivatives1.curve
+      bounds2 = segmentBounds u2 derivatives2.curve
       difference = bounds1 - bounds2
       distance = VectorBox2d.magnitude difference
    in Range.minValue distance <= ?tolerance
-        && let firstBounds1 = VectorCurve2d.segmentBounds derivatives1.first u1
-               firstBounds2 = VectorCurve2d.segmentBounds derivatives2.first u2
+        && let firstBounds1 = VectorCurve2d.segmentBounds u1 derivatives1.first
+               firstBounds2 = VectorCurve2d.segmentBounds u2 derivatives2.first
                crossProduct = Units.generalize firstBounds1 >< Units.generalize firstBounds2
                dotProduct1 = Units.generalize firstBounds1 <> Units.generalize difference
                dotProduct2 = Units.generalize firstBounds2 <> Units.generalize difference
