@@ -11,6 +11,8 @@ where
 import {-# SOURCE #-} Curve2d (Curve2d)
 import {-# SOURCE #-} Curve2d qualified
 import Curve2d.Intersection qualified as Intersection
+import Domain (Domain)
+import Domain qualified
 import OpenSolid
 import Qty qualified
 import Range (Range)
@@ -58,13 +60,13 @@ simultaneouslyZero
   -> VectorCurve2d (space @ units)
   -> Bool
 simultaneouslyZero firstDerivative secondDerivative =
-  Range.any (areBothZero firstDerivative secondDerivative) Range.unit
+  Range.any (areBothZero firstDerivative secondDerivative) Domain.unit
 
 areBothZero
   :: Tolerance units
   => VectorCurve2d (space @ units)
   -> VectorCurve2d (space @ units)
-  -> Range Unitless
+  -> Domain
   -> Fuzzy Bool
 areBothZero firstDerivative secondDerivative domain
   | firstMin > squaredTolerance || secondMin > 4.0 * squaredTolerance = Resolved False
@@ -87,7 +89,7 @@ isDegenerate firstDerivative u =
 
 tangentBounds
   :: Derivatives (space @ units)
-  -> Range Unitless
+  -> Domain
   -> VectorBox2d (space @ units)
   -> VectorBox2d (space @ units)
   -> VectorBox2d (space @ Unitless)
@@ -100,8 +102,8 @@ intersectionKind
   :: Tolerance units
   => Derivatives (space @ units)
   -> Derivatives (space @ units)
-  -> Range Unitless
-  -> Range Unitless
+  -> Domain
+  -> Domain
   -> Fuzzy (Maybe Intersection.Kind)
 intersectionKind derivatives1 derivatives2 u1 u2 =
   let curveBounds1 = Curve2d.segmentBounds derivatives1.curve u1

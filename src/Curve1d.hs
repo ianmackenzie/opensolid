@@ -23,6 +23,8 @@ import Angle qualified
 import Bisection qualified
 import Curve1d.Root (Root (Root))
 import Curve1d.Root qualified as Root
+import Domain (Domain)
+import Domain qualified
 import Float qualified
 import Generic qualified
 import List qualified
@@ -45,7 +47,7 @@ import {-# SOURCE #-} VectorCurve3d qualified
 
 class IsCurve1d curve units | curve -> units where
   evaluateImpl :: curve -> Float -> Qty units
-  segmentBoundsImpl :: curve -> Range Unitless -> Range units
+  segmentBoundsImpl :: curve -> Domain -> Range units
   derivativeImpl :: curve -> Curve1d units
 
 data Curve1d units where
@@ -178,7 +180,7 @@ evaluate curve t =
     Sin c -> Angle.sin (evaluate c t)
     Cos c -> Angle.cos (evaluate c t)
 
-segmentBounds :: Curve1d units -> Range Unitless -> Range units
+segmentBounds :: Curve1d units -> Domain -> Range units
 segmentBounds curve t =
   case curve of
     Curve1d c -> segmentBoundsImpl c t
@@ -242,7 +244,7 @@ cos (Constant x) = constant (Angle.cos x)
 cos curve = Cos curve
 
 isZero :: Tolerance units => Curve1d units -> Bool
-isZero curve = List.all (~= Qty.zero) (Quadrature.samples (evaluate curve) Range.unit)
+isZero curve = List.all (~= Qty.zero) (Quadrature.samples (evaluate curve) Domain.unit)
 
 maxRootOrder :: Int
 maxRootOrder = 4
@@ -301,7 +303,7 @@ roots curve =
           |> solveDerivativeOrder 0
    in Ok (List.sortBy Root.value allRoots)
 
-isCandidate :: Tolerance units => Int -> Range Unitless -> Stream (Range units) -> Bool
+isCandidate :: Tolerance units => Int -> Domain -> Stream (Range units) -> Bool
 isCandidate derivativeOrder _ bounds =
   let curveBounds = Stream.head bounds
       derivativeBounds = Stream.take derivativeOrder (Stream.tail bounds)
@@ -309,7 +311,7 @@ isCandidate derivativeOrder _ bounds =
       derivativesContainZero = List.all (Range.includes Qty.zero) derivativeBounds
    in curveContainsZero && derivativesContainZero
 
-resolveDerivativeSign :: Int -> Range Unitless -> Stream (Range units) -> Fuzzy Sign
+resolveDerivativeSign :: Int -> Domain -> Stream (Range units) -> Fuzzy Sign
 resolveDerivativeSign n _ bounds = resolveSign (Stream.nth n bounds)
 
 findRoot
@@ -317,7 +319,7 @@ findRoot
   => Curve1d units
   -> Int
   -> Stream (Curve1d units)
-  -> Range Unitless
+  -> Domain
   -> Stream (Range units)
   -> Sign
   -> Maybe Root
@@ -339,7 +341,7 @@ findRoot originalCurve derivativeOrder derivatives domain _ nextDerivativeSign
 
 data Solution
   = Solution Root Float
-  | NonZero (Range Unitless) Sign
+  | NonZero Domain Sign
   deriving (Eq, Show)
 
 bisectMonotonic :: Curve1d units -> Float -> Float -> Qty units -> Qty units -> Float

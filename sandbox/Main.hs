@@ -11,6 +11,7 @@ import Curve2d qualified
 import Debug qualified
 import Direction2d qualified
 import Direction3d ()
+import Domain (Domain)
 import Float qualified
 import Length qualified
 import Line2d qualified
@@ -104,7 +105,7 @@ overlappingSegments
   :: Tolerance units
   => Curve2d (space @ units)
   -> Curve2d (space @ units)
-  -> Result Text (List (Range Unitless, Range Unitless))
+  -> Result Text (List (Domain, Domain))
 overlappingSegments curve1 curve2 =
   case Curve2d.intersections curve1 curve2 of
     Ok _ -> Error "Intersection should have failed (and given overlapping segments)"

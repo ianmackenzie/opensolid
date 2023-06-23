@@ -19,6 +19,7 @@ where
 import CoordinateSystem (Units)
 import Curve1d (Curve1d (Curve1d), IsCurve1d)
 import Curve1d qualified
+import Domain (Domain)
 import Generic qualified
 import OpenSolid
 import Range (Range (Range))
@@ -31,7 +32,7 @@ import VectorBox3d qualified
 
 class IsVectorCurve3d curve (coordinateSystem :: CoordinateSystem) | curve -> coordinateSystem where
   evaluateImpl :: curve -> Float -> Vector3d coordinateSystem
-  segmentBoundsImpl :: curve -> Range Unitless -> VectorBox3d coordinateSystem
+  segmentBoundsImpl :: curve -> Domain -> VectorBox3d coordinateSystem
   derivativeImpl :: curve -> VectorCurve3d coordinateSystem
 
 data VectorCurve3d (coordinateSystem :: CoordinateSystem) where
@@ -431,7 +432,7 @@ evaluate curve t =
     QuadraticSpline v1 v2 v3 -> quadraticBlossom v1 v2 v3 t t
     CubicSpline v1 v2 v3 v4 -> cubicBlossom v1 v2 v3 v4 t t t
 
-segmentBounds :: VectorCurve3d (space @ units) -> Range Unitless -> VectorBox3d (space @ units)
+segmentBounds :: VectorCurve3d (space @ units) -> Domain -> VectorBox3d (space @ units)
 segmentBounds curve t@(Range tl th) =
   case curve of
     VectorCurve3d c -> segmentBoundsImpl c t
