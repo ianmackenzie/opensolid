@@ -338,11 +338,6 @@ findRoot originalCurve derivativeOrder derivatives domain _ nextDerivativeSign =
                 then Just (Root rootX derivativeOrder nextDerivativeSign)
                 else Nothing
 
-data Solution
-  = Solution Root Float
-  | NonZero Domain Sign
-  deriving (Eq, Show)
-
 bisectMonotonic :: Curve1d units -> Float -> Float -> Qty units -> Qty units -> Float
 bisectMonotonic curve lowX highX lowY highY =
   let midX = Qty.midpoint lowX highX
