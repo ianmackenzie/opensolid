@@ -323,21 +323,20 @@ findRoot
   -> Stream (Range units)
   -> Sign
   -> Maybe Root
-findRoot originalCurve derivativeOrder derivatives domain _ nextDerivativeSign
-  | minY > Qty.zero = Nothing
-  | maxY < Qty.zero = Nothing
-  | otherwise =
-      let rootX = bisectMonotonic curveDerivative minX maxX minY maxY
-       in if derivativeOrder == 0 || evaluate originalCurve rootX ~= Qty.zero
-            then Just (Root rootX derivativeOrder nextDerivativeSign)
-            else Nothing
- where
-  curveDerivative = Stream.nth derivativeOrder derivatives
-  Range x1 x2 = domain
-  minX = if nextDerivativeSign == Positive then x1 else x2
-  maxX = if nextDerivativeSign == Positive then x2 else x1
-  minY = evaluate curveDerivative minX
-  maxY = evaluate curveDerivative maxX
+findRoot originalCurve derivativeOrder derivatives domain _ nextDerivativeSign =
+  let curveDerivative = Stream.nth derivativeOrder derivatives
+      Range x1 x2 = domain
+      minX = if nextDerivativeSign == Positive then x1 else x2
+      maxX = if nextDerivativeSign == Positive then x2 else x1
+      minY = evaluate curveDerivative minX
+      maxY = evaluate curveDerivative maxX
+   in if minY > Qty.zero || maxY < Qty.zero
+        then Nothing
+        else
+          let rootX = bisectMonotonic curveDerivative minX maxX minY maxY
+           in if derivativeOrder == 0 || evaluate originalCurve rootX ~= Qty.zero
+                then Just (Root rootX derivativeOrder nextDerivativeSign)
+                else Nothing
 
 data Solution
   = Solution Root Float
