@@ -12,7 +12,7 @@ module Curve1d
   , sqrt
   , sin
   , cos
-  , IsZero (IsZero)
+  , ZeroEverywhere (ZeroEverywhere)
   , roots
   , EqualEverywhere (EqualEverywhere)
   , equalTo
@@ -254,13 +254,13 @@ maxRootOrder = 4
 
 ----- ROOT FINDING -----
 
-data IsZero = IsZero deriving (Eq, Show, ErrorMessage)
+data ZeroEverywhere = ZeroEverywhere deriving (Eq, Show, ErrorMessage)
 
 data EqualEverywhere = EqualEverywhere deriving (Eq, Show, ErrorMessage)
 
 equalTo :: Tolerance units => Qty units -> Curve1d units -> Result EqualEverywhere (List Root)
 equalTo value curve =
-  roots (curve - value) |> Result.mapError (\IsZero -> EqualEverywhere)
+  roots (curve - value) |> Result.mapError (\ZeroEverywhere -> EqualEverywhere)
 
 equalToSquared
   :: (Tolerance units1, Squared units1 units2)
@@ -269,12 +269,12 @@ equalToSquared
   -> Result EqualEverywhere (List Root)
 equalToSquared value curve =
   let ?tolerance = ?tolerance * ?tolerance + 2.0 * value * ?tolerance
-   in roots (curve - Qty.squared value) |> Result.mapError (\IsZero -> EqualEverywhere)
+   in roots (curve - Qty.squared value) |> Result.mapError (\ZeroEverywhere -> EqualEverywhere)
 
-roots :: Tolerance units => Curve1d units -> Result IsZero (List Root)
-roots Zero = Error IsZero
-roots (Constant value) = if value ~= Qty.zero then Error IsZero else Ok []
-roots curve | isZero curve = Error IsZero
+roots :: Tolerance units => Curve1d units -> Result ZeroEverywhere (List Root)
+roots Zero = Error ZeroEverywhere
+roots (Constant value) = if value ~= Qty.zero then Error ZeroEverywhere else Ok []
+roots curve | isZero curve = Error ZeroEverywhere
 roots curve =
   let (root0, x0) = solveEndpoint curve 0.0
       (root1, x1) = solveEndpoint curve 1.0

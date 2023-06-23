@@ -108,7 +108,7 @@ overlappingSegments
 overlappingSegments curve1 curve2 =
   case Curve2d.intersections curve1 curve2 of
     Ok _ -> Error "Intersection should have failed (and given overlapping segments)"
-    Error (Curve2d.OverlappingSegments segments) -> Ok segments
+    Error (Curve2d.CurvesOverlap segments) -> Ok segments
     Error error -> Error (errorMessage error)
 
 testCurveOverlap1 :: Task Text ()

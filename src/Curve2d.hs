@@ -158,7 +158,7 @@ instance
   where
   curve - point = VectorCurve2d (CurvePointDifference curve point)
 
-data IsCoincidentWithPoint = IsCoincidentWithPoint deriving (Eq, Show, ErrorMessage)
+data CurveIsCoincidentWithPoint = CurveIsCoincidentWithPoint deriving (Eq, Show, ErrorMessage)
 
 passesThrough :: Tolerance units => Point2d (space @ units) -> Curve2d (space @ units) -> Bool
 passesThrough point curve =
@@ -181,11 +181,11 @@ parameterValues
   :: Tolerance units
   => Point2d (space @ units)
   -> Curve2d (space @ units)
-  -> Result Curve2d.IsCoincidentWithPoint (List Float)
+  -> Result Curve2d.CurveIsCoincidentWithPoint (List Float)
 parameterValues point curve =
   let ?tolerance = Qty.squared (Units.generalize ?tolerance)
    in Curve1d.roots (VectorCurve2d.squaredMagnitude (Units.generalize (point - curve)))
-        |> Result.mapError (\Curve1d.IsZero -> Curve2d.IsCoincidentWithPoint)
+        |> Result.mapError (\Curve1d.ZeroEverywhere -> Curve2d.CurveIsCoincidentWithPoint)
         |> Result.map (List.map Root.value)
 
 overlappingSegments
@@ -214,11 +214,11 @@ isOverlappingSegment curve1 curve2 (domain1, _) =
    in segment1IsNondegenerate && segment1LiesOnSegment2
 
 data IntersectionError
-  = BothAreDegenerateAndEqual
-  | FirstIsDegenerateOnSecond (List Float)
-  | SecondIsDegenerateOnFirst (List Float)
-  | OverlappingSegments (List (Domain, Domain))
-  | ZeroDerivatives
+  = CurvesAreDegenerateAndEqual
+  | FirstCurveIsDegenerateOnSecond (List Float)
+  | SecondCurveIsDegenerateOnFirst (List Float)
+  | CurvesOverlap (List (Domain, Domain))
+  | CurveDerivativesAreZero
   | TangentIntersectionAtDegeneratePoint
   deriving (Eq, Show, ErrorMessage)
 
@@ -245,19 +245,19 @@ findEndpointParameterValues curve1 curve2 =
               , List.map (0.0,) u0vs
               , List.map (1.0,) u1vs
               ]
-        (Error Curve2d.IsCoincidentWithPoint, Ok (u0vs, _)) ->
-          Error (FirstIsDegenerateOnSecond u0vs)
-        (Ok (v0us, _), Error Curve2d.IsCoincidentWithPoint) ->
-          Error (SecondIsDegenerateOnFirst v0us)
-        (Error Curve2d.IsCoincidentWithPoint, Error Curve2d.IsCoincidentWithPoint) ->
-          Error BothAreDegenerateAndEqual
+        (Error Curve2d.CurveIsCoincidentWithPoint, Ok (u0vs, _)) ->
+          Error (FirstCurveIsDegenerateOnSecond u0vs)
+        (Ok (v0us, _), Error Curve2d.CurveIsCoincidentWithPoint) ->
+          Error (SecondCurveIsDegenerateOnFirst v0us)
+        (Error Curve2d.CurveIsCoincidentWithPoint, Error Curve2d.CurveIsCoincidentWithPoint) ->
+          Error CurvesAreDegenerateAndEqual
 
 curveDerivatives
   :: Tolerance units
   => Curve2d (space @ units)
   -> Result IntersectionError (Derivatives (space @ units))
 curveDerivatives curve =
-  Derivatives.ofCurve curve |> Result.mapError (\Derivatives.AreZero -> Curve2d.ZeroDerivatives)
+  Derivatives.ofCurve curve |> Result.mapError (\Derivatives.AreZero -> Curve2d.CurveDerivativesAreZero)
 
 intersections
   :: Tolerance units
@@ -268,7 +268,7 @@ intersections curve1 curve2 = do
   endpointParameterValues <- findEndpointParameterValues curve1 curve2
   case overlappingSegments curve1 curve2 endpointParameterValues of
     [] -> findIntersections curve1 curve2 endpointParameterValues
-    segments -> Error (OverlappingSegments segments)
+    segments -> Error (CurvesOverlap segments)
 
 endpointIntersection
   :: Tolerance units
