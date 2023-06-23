@@ -33,7 +33,6 @@ import OpenSolid
 import Point2d (Point2d)
 import Point2d qualified
 import Qty qualified
-import Quadrature qualified
 import Range (Range (..))
 import Range qualified
 import Result qualified
@@ -209,7 +208,7 @@ isOverlappingSegment
   -> Bool
 isOverlappingSegment curve1 curve2 (domain1, _) =
   let segmentStartPoint = evaluateAt (Range.minValue domain1) curve1
-      curve1TestPoints = Quadrature.samples (pointOn curve1) domain1
+      curve1TestPoints = Domain.sample (pointOn curve1) domain1
       segment1IsNondegenerate = List.any (!= segmentStartPoint) curve1TestPoints
       segment1LiesOnSegment2 = List.all (\p1 -> passesThrough p1 curve2) curve1TestPoints
    in segment1IsNondegenerate && segment1LiesOnSegment2

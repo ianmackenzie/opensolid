@@ -31,7 +31,6 @@ import Generic qualified
 import List qualified
 import OpenSolid
 import Qty qualified
-import Quadrature qualified
 import Range (Range (..))
 import Range qualified
 import Result qualified
@@ -248,7 +247,7 @@ cos (Constant x) = constant (Angle.cos x)
 cos curve = Cos curve
 
 isZero :: Tolerance units => Curve1d units -> Bool
-isZero curve = List.all (~= Qty.zero) (Quadrature.samples (pointOn curve) Domain.unit)
+isZero curve = List.all (~= Qty.zero) (Domain.sample (pointOn curve) Domain.unit)
 
 maxRootOrder :: Int
 maxRootOrder = 4

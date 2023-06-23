@@ -89,7 +89,9 @@ library
       VectorCurve3d
       Volume
   other-modules:
-      Quadrature
+      Paths_opensolid
+  autogen-modules:
+      Paths_opensolid
   hs-source-dirs:
       src
   default-extensions:
