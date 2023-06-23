@@ -23,14 +23,13 @@ import Point2d qualified
 import Qty qualified
 import QuadraticSpline2d qualified
 import Random qualified
-import Range (Range)
 import Range qualified
 import Result qualified
 import Task qualified
 import Text qualified
 import Transform2d qualified
 import Try qualified
-import Units (Meters, Unitless)
+import Units (Meters)
 import Vector2d qualified
 import Vector3d qualified
 import VectorCurve2d qualified
