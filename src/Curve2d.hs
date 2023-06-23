@@ -159,11 +159,7 @@ instance
   where
   curve - point = VectorCurve2d (CurvePointDifference curve point)
 
-data IsCoincidentWithPoint = IsCoincidentWithPoint deriving (Eq, Show)
-
-instance IsError IsCoincidentWithPoint where
-  errorMessage IsCoincidentWithPoint =
-    "Curve is in fact a single point coincident with the given point"
+data IsCoincidentWithPoint = IsCoincidentWithPoint deriving (Eq, Show, IsError)
 
 passesThrough :: Tolerance units => Point2d (space @ units) -> Curve2d (space @ units) -> Bool
 passesThrough point curve =
@@ -225,21 +221,7 @@ data IntersectionError
   | OverlappingSegments (List (Domain, Domain))
   | ZeroDerivatives
   | TangentIntersectionAtDegeneratePoint
-  deriving (Show)
-
-instance IsError IntersectionError where
-  errorMessage BothAreDegenerateAndEqual =
-    "Both curves are a single point each and are are equal to each other"
-  errorMessage (FirstIsDegenerateOnSecond _) =
-    "First curve is a single point on the second curve"
-  errorMessage (SecondIsDegenerateOnFirst _) =
-    "Second curve is a single point on the first curve"
-  errorMessage (OverlappingSegments _) =
-    "Curves have overlapping segments"
-  errorMessage ZeroDerivatives =
-    "Both first and second curve derivatives are zero"
-  errorMessage TangentIntersectionAtDegeneratePoint =
-    "Tangent intersection where a curve first derivative is zero"
+  deriving (Show, IsError)
 
 findEndpointParameterValues
   :: Tolerance units

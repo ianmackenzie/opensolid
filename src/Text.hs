@@ -19,8 +19,8 @@ import Data.Text qualified
 import Data.Text.Read
 import Float (Float)
 import Qty (Qty (Qty))
-import {-# SOURCE #-} Result (Result (..))
-import {-# SOURCE #-} Result qualified
+import Result (Result (..))
+import Result qualified
 import Prelude qualified
 
 concat :: List Text -> Text

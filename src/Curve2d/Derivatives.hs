@@ -25,10 +25,7 @@ import VectorBox2d qualified
 import VectorCurve2d (VectorCurve2d)
 import VectorCurve2d qualified
 
-data AreZero = AreZero deriving (Show)
-
-instance IsError AreZero where
-  errorMessage AreZero = "First and second derivatives are simultaneously zero"
+data AreZero = AreZero deriving (Show, IsError)
 
 data Derivatives (coordinateSystem :: CoordinateSystem) = Derivatives
   { curve :: Curve2d coordinateSystem
@@ -189,11 +186,7 @@ secondDerivativeBounds1d dXdU dYdU d2XdU2 d2YdU2 =
       d2YdU2' = Units.generalize d2YdU2
    in Units.generalize ((d2YdU2' * dXdU' - dYdU' * d2XdU2') / (dXdU' * dXdU')) ./ dXdU'
 
-data DegenerateIntersection = DegenerateIntersection deriving (Show)
-
-instance IsError DegenerateIntersection where
-  errorMessage DegenerateIntersection =
-    "Tangent intersection where a curve first derivative is zero"
+data DegenerateIntersection = DegenerateIntersection deriving (Show, IsError)
 
 classify
   :: Tolerance units

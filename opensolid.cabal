@@ -126,6 +126,8 @@ library
       OverloadedRecordDot
       MagicHash
       TupleSections
+      DeriveAnyClass
+      DerivingStrategies
   ghc-options: -Wall -Werror -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-signatures -Wmissing-exported-signatures -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wsafe -dcore-lint
   build-depends:
       array
@@ -176,6 +178,8 @@ executable sandbox
       OverloadedRecordDot
       MagicHash
       TupleSections
+      DeriveAnyClass
+      DerivingStrategies
   ghc-options: -Wall -Werror -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-signatures -Wmissing-exported-signatures -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wsafe -dcore-lint -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       array
@@ -229,6 +233,8 @@ test-suite opensolid-test
       OverloadedRecordDot
       MagicHash
       TupleSections
+      DeriveAnyClass
+      DerivingStrategies
   ghc-options: -Wall -Werror -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-signatures -Wmissing-exported-signatures -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wsafe -dcore-lint -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       array

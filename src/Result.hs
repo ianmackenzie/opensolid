@@ -13,22 +13,23 @@ module Result
 where
 
 import Basics
+import Data.Text qualified
 import DoNotation
 import System.IO.Error qualified
-import Text qualified
 import Prelude qualified
 
 class Show error => IsError error where
   errorMessage :: error -> Text
+  errorMessage error = Data.Text.pack (Prelude.show error)
 
 instance IsError Text where
   errorMessage text = text
 
 instance IsError (List Char) where
-  errorMessage = Text.fromChars
+  errorMessage = Data.Text.pack
 
 instance IsError IOError where
-  errorMessage ioError = Text.fromChars (System.IO.Error.ioeGetErrorString ioError)
+  errorMessage ioError = Data.Text.pack (System.IO.Error.ioeGetErrorString ioError)
 
 data Result x a where
   Ok :: a -> Result x a

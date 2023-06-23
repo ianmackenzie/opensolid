@@ -68,6 +68,8 @@ default-extensions:
 - OverloadedRecordDot
 - MagicHash
 - TupleSections
+- DeriveAnyClass
+- DerivingStrategies
 
 library:
   source-dirs: src

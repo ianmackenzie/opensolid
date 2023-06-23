@@ -25,7 +25,7 @@ import Data.Coerce (coerce)
 import {-# SOURCE #-} Float (Float, fromRational)
 import {-# SOURCE #-} Float qualified
 import Generic qualified
-import {-# SOURCE #-} Result (IsError (errorMessage), Result (Error, Ok))
+import Result (IsError, Result (Error, Ok))
 import Sign (Sign (..))
 import Units (Unitless)
 import Units qualified
@@ -41,17 +41,17 @@ instance (units1 ~ units1', units2 ~ units2') => Units.Coercion units1 units2 (Q
 instance Generic.Zero (Qty units) where
   zero = coerce 0.0
 
-deriving instance Prelude.Num Float
+deriving newtype instance Prelude.Num Float
 
-deriving instance Prelude.Real Float
+deriving newtype instance Prelude.Real Float
 
-deriving instance Prelude.Fractional Float
+deriving newtype instance Prelude.Fractional Float
 
-deriving instance Prelude.RealFrac Float
+deriving newtype instance Prelude.RealFrac Float
 
-deriving instance Prelude.Floating Float
+deriving newtype instance Prelude.Floating Float
 
-deriving instance Prelude.RealFloat Float
+deriving newtype instance Prelude.RealFloat Float
 
 instance Negation (Qty units) where
   {-# INLINE negate #-}
@@ -145,18 +145,12 @@ interpolateFrom a b t =
 midpoint :: Qty units -> Qty units -> Qty units
 midpoint a b = 0.5 * (a + b)
 
-data IsZero = IsZero deriving (Show)
-
-instance IsError IsZero where
-  errorMessage IsZero = "Value is zero"
+data IsZero = IsZero deriving (Show, IsError)
 
 nonZero :: Qty units -> Result IsZero (Qty units)
 nonZero value = if value /= zero then Ok value else Error IsZero
 
-data IsNegative = IsNegative deriving (Show)
-
-instance IsError IsNegative where
-  errorMessage IsNegative = "Value is negative"
+data IsNegative = IsNegative deriving (Show, IsError)
 
 nonNegative :: Qty units -> Result IsNegative (Qty units)
 nonNegative value = if value >= zero then Ok value else Error IsNegative

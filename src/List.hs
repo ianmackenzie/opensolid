@@ -37,7 +37,7 @@ import Arithmetic
 import Basics
 import Data.List qualified
 import Generic qualified
-import Result (IsError (..), Result (..))
+import Result (IsError, Result (..))
 import Prelude qualified
 
 isEmpty :: List a -> Bool
@@ -46,10 +46,7 @@ isEmpty = Prelude.null
 length :: List a -> Int
 length = Data.List.length
 
-data IsEmpty = IsEmpty deriving (Eq, Show)
-
-instance IsError IsEmpty where
-  errorMessage IsEmpty = "List is empty"
+data IsEmpty = IsEmpty deriving (Eq, Show, IsError)
 
 head :: List a -> Result IsEmpty a
 head (first : _) = Ok first

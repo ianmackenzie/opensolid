@@ -43,12 +43,7 @@ data BuildError
   = UnsupportedConstraints
   | EndpointsCoincident
   | EndpointsTooFarApart
-  deriving (Show)
-
-instance IsError BuildError where
-  errorMessage UnsupportedConstraints = "Unsupported set of constraints for Arc2d construction"
-  errorMessage EndpointsCoincident = "Given Arc2d endpoints are coincident"
-  errorMessage EndpointsTooFarApart = "Given Arc2d endpoints are too far apart"
+  deriving (Show, IsError)
 
 with :: List (Constraint (space @ units)) -> Result BuildError (Curve2d (space @ units))
 with constraints = case List.sort constraints of
