@@ -221,7 +221,7 @@ data IntersectionError
   | OverlappingSegments (List (Domain, Domain))
   | ZeroDerivatives
   | TangentIntersectionAtDegeneratePoint
-  deriving (Show, ErrorMessage)
+  deriving (Eq, Show, ErrorMessage)
 
 findEndpointParameterValues
   :: Tolerance units

@@ -25,7 +25,7 @@ import VectorBox2d qualified
 import VectorCurve2d (VectorCurve2d)
 import VectorCurve2d qualified
 
-data AreZero = AreZero deriving (Show, ErrorMessage)
+data AreZero = AreZero deriving (Eq, Show, ErrorMessage)
 
 data Derivatives (coordinateSystem :: CoordinateSystem) = Derivatives
   { curve :: Curve2d coordinateSystem
@@ -186,7 +186,7 @@ secondDerivativeBounds1d dXdU dYdU d2XdU2 d2YdU2 =
       d2YdU2' = Units.generalize d2YdU2
    in Units.generalize ((d2YdU2' * dXdU' - dYdU' * d2XdU2') / (dXdU' * dXdU')) ./ dXdU'
 
-data DegenerateIntersection = DegenerateIntersection deriving (Show, ErrorMessage)
+data DegenerateIntersection = DegenerateIntersection deriving (Eq, Show, ErrorMessage)
 
 classify
   :: Tolerance units

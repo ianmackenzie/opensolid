@@ -18,7 +18,7 @@ import DoNotation
 import System.IO.Error qualified
 import Prelude qualified
 
-class Show error => ErrorMessage error where
+class (Eq error, Show error) => ErrorMessage error where
   errorMessage :: error -> Text
   errorMessage error = Data.Text.pack (Prelude.show error)
 

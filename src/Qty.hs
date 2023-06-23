@@ -145,12 +145,12 @@ interpolateFrom a b t =
 midpoint :: Qty units -> Qty units -> Qty units
 midpoint a b = 0.5 * (a + b)
 
-data IsZero = IsZero deriving (Show, ErrorMessage)
+data IsZero = IsZero deriving (Eq, Show, ErrorMessage)
 
 nonZero :: Qty units -> Result IsZero (Qty units)
 nonZero value = if value /= zero then Ok value else Error IsZero
 
-data IsNegative = IsNegative deriving (Show, ErrorMessage)
+data IsNegative = IsNegative deriving (Eq, Show, ErrorMessage)
 
 nonNegative :: Qty units -> Result IsNegative (Qty units)
 nonNegative value = if value >= zero then Ok value else Error IsNegative

@@ -87,7 +87,7 @@ x = positiveX
 y :: Direction2d space
 y = positiveY
 
-data PointsAreCoincident = PointsAreCoincident deriving (Show, ErrorMessage)
+data PointsAreCoincident = PointsAreCoincident deriving (Eq, Show, ErrorMessage)
 
 from
   :: Point2d (space @ units)
