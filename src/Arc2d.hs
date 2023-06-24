@@ -41,8 +41,8 @@ data Size = Large | Small deriving (Eq, Ord)
 
 data BuildError
   = UnsupportedConstraints
-  | EndpointsCoincident
-  | EndpointsTooFarApart
+  | EndpointsAreCoincident
+  | EndpointsAreTooFarApart
   deriving (Eq, Show, ErrorMessage)
 
 with :: List (Constraint (space @ units)) -> Result BuildError (Curve2d (space @ units))
@@ -77,12 +77,12 @@ fromStartPointEndPointRadiusDirectionSize
 fromStartPointEndPointRadiusDirectionSize givenStartPoint givenEndPoint givenRadius direction size = do
   chordDirection <-
     Direction2d.from givenStartPoint givenEndPoint
-      |> Result.mapError (\Direction2d.PointsAreCoincident -> Arc2d.EndpointsCoincident)
+      |> Result.mapError (\Direction2d.PointsAreCoincident -> Arc2d.EndpointsAreCoincident)
   let squaredRadius = Qty.squared (Units.generalize givenRadius)
   let squaredHalfLength = Qty.squared (Units.generalize (0.5 * Point2d.distanceFrom givenStartPoint givenEndPoint))
   squaredOffsetMagnitude <-
     Qty.nonNegative (squaredRadius - squaredHalfLength)
-      |> Result.mapError (\Qty.IsNegative -> Arc2d.EndpointsTooFarApart)
+      |> Result.mapError (\Qty.IsNegative -> Arc2d.EndpointsAreTooFarApart)
   let offsetMagnitude = Units.specialize (Qty.sqrt squaredOffsetMagnitude)
   let offsetDirection = Direction2d.perpendicularTo chordDirection
   let offsetDistance =
