@@ -30,6 +30,7 @@ module List
   , all
   , any
   , successive
+  , count
   )
 where
 
@@ -150,3 +151,7 @@ any = Prelude.any
 
 successive :: (a -> a -> b) -> List a -> List b
 successive function list = map2 function list (drop 1 list)
+
+count :: (a -> Bool) -> List a -> Int
+count _ [] = 0
+count predicate (first : rest) = (if predicate first then 1 else 0) + count predicate rest
