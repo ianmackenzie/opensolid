@@ -235,7 +235,9 @@ classify derivatives1 derivatives2 u1 u2 =
                   d2Y2_dXdX = secondDerivative1d dX2_dU2 dY2_dU2 d2X2_dU2dU2 d2Y2_dU2dU2
                   d2Y_dXdX = d2Y2_dXdX - d2Y1_dXdX
                   sign1 = Qty.sign d2Y_dXdX
-                  width1 = Units.specialize (Qty.sqrt (2.0 * Units.generalize ?tolerance ./ d2Y_dXdX))
+                  width1 =
+                    Units.specialize
+                      (Qty.sqrt (2.0 * Units.generalize ?tolerance ./ Qty.abs d2Y_dXdX))
                in if width0 <= width1
                     then Ok (Intersection.Crossing, crossProductSign)
                     else Ok (Intersection.Tangent, sign1)
