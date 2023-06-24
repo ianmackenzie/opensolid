@@ -36,6 +36,7 @@ module Range
   , intersection
   , generator
   , find
+  , find2
   )
 where
 
@@ -43,6 +44,7 @@ import Angle qualified
 import Bounds (IsBounds (..))
 import Float qualified
 import Generic qualified
+import Maybe qualified
 import OpenSolid
 import Qty qualified
 import Random qualified
@@ -398,6 +400,32 @@ find isCandidate range =
            in case leftResult of
                 Just _ -> leftResult
                 Nothing -> find isCandidate right
+
+find2
+  :: (Range units1 -> Range units2 -> Bool)
+  -> Range units1
+  -> Range units2
+  -> Maybe (Qty units1, Qty units2)
+find2 isCandidate u v =
+  case isCandidate u v of
+    False -> Nothing
+    True
+      | isAtomic u && isAtomic v -> Just (maxValue u, maxValue v)
+      | isAtomic u -> Maybe.map (maxValue u,) (find (isCandidate u) v)
+      | isAtomic v -> Maybe.map (,maxValue v) (find (\u' -> isCandidate u' v) u)
+      | otherwise ->
+          let (u1, u2) = bisect u
+              (v1, v2) = bisect v
+           in case find2 isCandidate u1 v1 of
+                result@(Just _) -> result
+                Nothing ->
+                  case find2 isCandidate u1 v2 of
+                    result@(Just _) -> result
+                    Nothing ->
+                      case find2 isCandidate u2 v1 of
+                        result@(Just _) -> result
+                        Nothing ->
+                          find2 isCandidate u2 v2
 
 resolve :: (Range units -> Fuzzy a) -> Range units -> Fuzzy (List a)
 resolve predicate range = resolveImpl predicate range []
