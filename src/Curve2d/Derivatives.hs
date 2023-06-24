@@ -209,21 +209,21 @@ classify derivatives1 derivatives2 u1 u2 =
       tangent1 = if first1Zero then second1 / second1Magnitude else first1 / first2Magnitude
       tangent2 = if first2Zero then second2 / second2Magnitude else first2 / first2Magnitude
       tangentCrossProduct = tangent1 >< tangent2
-      crossProductSign = Qty.sign tangentCrossProduct
       crossProductMagnitude = Qty.abs tangentCrossProduct
+      sign0 = Qty.sign tangentCrossProduct
+      width0 = ?tolerance / crossProductMagnitude
    in if first1Zero || first2Zero
         then
           let length1 = if first1Zero then 0.5 * second1Magnitude else first1Magnitude
               length2 = if first2Zero then 0.5 * second2Magnitude else first2Magnitude
            in if crossProductMagnitude * min length1 length2 < ?tolerance
                 then Error DegenerateIntersection
-                else Ok (Intersection.Crossing, crossProductSign)
+                else Ok (Intersection.Crossing, sign0)
         else
           if crossProductMagnitude > 0.5
-            then Ok (Intersection.Crossing, crossProductSign)
+            then Ok (Intersection.Crossing, sign0)
             else
-              let width0 = Qty.abs (?tolerance / tangentCrossProduct)
-                  dX1_dU1 = first1Magnitude
+              let dX1_dU1 = first1Magnitude
                   dY1_dU1 = Qty.zero
                   dX2_dU2 = tangent1 <> first2
                   dY2_dU2 = tangent1 >< first2
@@ -239,7 +239,7 @@ classify derivatives1 derivatives2 u1 u2 =
                     Units.specialize
                       (Qty.sqrt (2.0 * Units.generalize ?tolerance ./ Qty.abs d2Y_dXdX))
                in if width0 <= width1
-                    then Ok (Intersection.Crossing, crossProductSign)
+                    then Ok (Intersection.Crossing, sign0)
                     else Ok (Intersection.Tangent, sign1)
 
 secondDerivative1d :: Qty units -> Qty units -> Qty units -> Qty units -> Qty (Unitless :/ units)
