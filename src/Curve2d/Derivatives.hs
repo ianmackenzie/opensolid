@@ -234,8 +234,8 @@ classify derivatives1 derivatives2 u1 u2 =
                 then Error DegenerateIntersection
                 else Ok (Intersection.Crossing, sign0)
         else
-            then Ok (Intersection.Crossing, sign0)
           if crossProductMagnitude > 0.1
+            then Ok (Intersection.Crossing, sign0)
             else
               let dX1_dU1 = first1Magnitude
                   dY1_dU1 = Qty.zero
@@ -252,9 +252,9 @@ classify derivatives1 derivatives2 u1 u2 =
                   radius1 =
                     Units.specialize
                       (Qty.sqrt (2.0 * Units.generalize ?tolerance ./ Qty.abs d2Y_dXdX))
+               in if radius0 <= radius1
                     then Ok (Intersection.Crossing, sign0)
                     else Ok (Intersection.Tangent, sign1)
-               in if radius0 <= radius1
 
 secondDerivative1d :: Qty units -> Qty units -> Qty units -> Qty units -> Qty (Unitless :/ units)
 secondDerivative1d dXdU dYdU d2XdU2 d2YdU2 =
