@@ -27,13 +27,28 @@ import VectorCurve2d qualified
 
 data AreZero = AreZero deriving (Eq, Show, ErrorMessage)
 
-data Derivatives (coordinateSystem :: CoordinateSystem) = Derivatives
-  { curve :: Curve2d coordinateSystem
-  , first :: VectorCurve2d coordinateSystem
-  , second :: VectorCurve2d coordinateSystem
-  , degenerateStart :: Bool
-  , degenerateEnd :: Bool
-  }
+data Derivatives (coordinateSystem :: CoordinateSystem)
+  = Derivatives
+      (Curve2d coordinateSystem)
+      (VectorCurve2d coordinateSystem)
+      (VectorCurve2d coordinateSystem)
+      Bool
+      Bool
+
+instance HasField "curve" (Derivatives (space @ units)) (Curve2d (space @ units)) where
+  getField (Derivatives field _ _ _ _) = field
+
+instance HasField "first" (Derivatives (space @ units)) (VectorCurve2d (space @ units)) where
+  getField (Derivatives _ field _ _ _) = field
+
+instance HasField "second" (Derivatives (space @ units)) (VectorCurve2d (space @ units)) where
+  getField (Derivatives _ _ field _ _) = field
+
+instance HasField "degenerateStart" (Derivatives (space @ units)) Bool where
+  getField (Derivatives _ _ _ field _) = field
+
+instance HasField "degenerateEnd" (Derivatives (space @ units)) Bool where
+  getField (Derivatives _ _ _ _ field) = field
 
 ofCurve :: Tolerance units => Curve2d (space @ units) -> Result AreZero (Derivatives (space @ units))
 ofCurve givenCurve =
@@ -44,12 +59,11 @@ ofCurve givenCurve =
         else
           Ok $
             Derivatives
-              { curve = givenCurve
-              , first = firstDerivative
-              , second = secondDerivative
-              , degenerateStart = isDegenerateAt 0.0 firstDerivative
-              , degenerateEnd = isDegenerateAt 1.0 firstDerivative
-              }
+              givenCurve
+              firstDerivative
+              secondDerivative
+              (isDegenerateAt 0.0 firstDerivative)
+              (isDegenerateAt 1.0 firstDerivative)
 
 simultaneouslyZero
   :: Tolerance units
