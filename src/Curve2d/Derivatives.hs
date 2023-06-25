@@ -225,7 +225,7 @@ classify derivatives1 derivatives2 u1 u2 =
       tangentCrossProduct = tangent1 >< tangent2
       crossProductMagnitude = Qty.abs tangentCrossProduct
       sign0 = Qty.sign tangentCrossProduct
-      width0 = ?tolerance / crossProductMagnitude
+      radius0 = ?tolerance / crossProductMagnitude
    in if first1Zero || first2Zero
         then
           let length1 = if first1Zero then 0.5 * second1Magnitude else first1Magnitude
@@ -249,12 +249,12 @@ classify derivatives1 derivatives2 u1 u2 =
                   d2Y2_dXdX = secondDerivative1d dX2_dU2 dY2_dU2 d2X2_dU2dU2 d2Y2_dU2dU2
                   d2Y_dXdX = d2Y2_dXdX - d2Y1_dXdX
                   sign1 = Qty.sign d2Y_dXdX
-                  width1 =
+                  radius1 =
                     Units.specialize
                       (Qty.sqrt (2.0 * Units.generalize ?tolerance ./ Qty.abs d2Y_dXdX))
-               in if width0 <= width1
                     then Ok (Intersection.Crossing, sign0)
                     else Ok (Intersection.Tangent, sign1)
+               in if radius0 <= radius1
 
 secondDerivative1d :: Qty units -> Qty units -> Qty units -> Qty units -> Qty (Unitless :/ units)
 secondDerivative1d dXdU dYdU d2XdU2 d2YdU2 =
