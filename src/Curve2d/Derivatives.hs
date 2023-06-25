@@ -234,8 +234,8 @@ classify derivatives1 derivatives2 u1 u2 =
                 then Error DegenerateIntersection
                 else Ok (Intersection.Crossing, sign0)
         else
-          if crossProductMagnitude > 0.5
             then Ok (Intersection.Crossing, sign0)
+          if crossProductMagnitude > 0.1
             else
               let dX1_dU1 = first1Magnitude
                   dY1_dU1 = Qty.zero
