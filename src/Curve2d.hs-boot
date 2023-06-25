@@ -1,8 +1,11 @@
 module Curve2d
   ( Curve2d (Curve2d)
   , IsCurve2d
-  , derivative
+  , startPoint
+  , endPoint
+  , evaluateAt
   , segmentBounds
+  , derivative
   )
 where
 
@@ -30,5 +33,8 @@ data Curve2d (coordinateSystem :: CoordinateSystem) where
   Arc :: Point2d (space @ units) -> Qty units -> Angle -> Angle -> Curve2d (space @ units)
   Curve2d :: IsCurve2d curve (space @ units) => curve -> Curve2d (space @ units)
 
-derivative :: Curve2d (space @ units) -> VectorCurve2d (space @ units)
+startPoint :: Curve2d (space @ units) -> Point2d (space @ units)
+endPoint :: Curve2d (space @ units) -> Point2d (space @ units)
+evaluateAt :: Float -> Curve2d (space @ units) -> Point2d (space @ units)
 segmentBounds :: Domain -> Curve2d (space @ units) -> BoundingBox2d (space @ units)
+derivative :: Curve2d (space @ units) -> VectorCurve2d (space @ units)
