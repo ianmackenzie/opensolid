@@ -3,10 +3,16 @@ module Line2d
   )
 where
 
-import Curve2d (Curve2d)
+import Curve2d (Curve2d, DegenerateCurve (DegenerateCurve))
 import Curve2d qualified
 import OpenSolid
 import Point2d (Point2d)
 
-from :: Point2d (space @ units) -> Point2d (space @ units) -> Curve2d (space @ units)
-from = Curve2d.Line
+from
+  :: Tolerance units
+  => Point2d (space @ units)
+  -> Point2d (space @ units)
+  -> Result DegenerateCurve (Curve2d (space @ units))
+from p1 p2
+  | p1 ~= p2 = Error DegenerateCurve
+  | otherwise = Ok (Curve2d.unsafeLine p1 p2)

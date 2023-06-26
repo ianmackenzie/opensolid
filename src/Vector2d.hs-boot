@@ -17,4 +17,4 @@ xy :: Qty units -> Qty units -> Vector2d (space @ units)
 
 data IsZero = IsZero
 
-direction :: Vector2d (space @ units) -> Result IsZero (Direction2d space)
+direction :: Tolerance units => Vector2d (space @ units) -> Result IsZero (Direction2d space)

@@ -68,112 +68,75 @@ solve
   -> (List solution, List Domain)
   -> (List solution, List Domain)
 solve isCandidate resolveNeighborhood findSolution segmentTree accumulated =
-  case isExcludedBy exclusions domain of
-    Resolved True -> accumulated
-    Resolved False -> search isCandidate resolveNeighborhood findSolution segmentTree accumulated
-    Unresolved ->
-      if isCandidate domain segment
-        then
-          accumulated
-            |> solve isCandidate resolveNeighborhood findSolution rightChild
-            |> solve isCandidate resolveNeighborhood findSolution leftChild
-        else accumulated
- where
-  Tree cache _ leftChild rightChild = segmentTree
-  (Cache domain segment) = cache
-  (_, exclusions) = accumulated
-
-solve2
-  :: (Domain -> Domain -> segment -> Bool)
-  -> (Domain -> Domain -> segment -> Fuzzy resolution)
-  -> (Domain -> Domain -> segment -> resolution -> Maybe solution)
-  -> Quadtree segment
-  -> (List solution, List (Domain, Domain))
-  -> (List solution, List (Domain, Domain))
-solve2 isCandidate resolveNeighborhood findSolution segmentTree accumulated =
-  case isExcludedBy2 exclusions xDomain yDomain of
-    Resolved True -> accumulated
-    Resolved False -> search2 isCandidate resolveNeighborhood findSolution segmentTree accumulated
-    Unresolved ->
-      if isCandidate xDomain yDomain segment
-        then
-          accumulated
-            |> solve2 isCandidate resolveNeighborhood findSolution child4
-            |> solve2 isCandidate resolveNeighborhood findSolution child3
-            |> solve2 isCandidate resolveNeighborhood findSolution child2
-            |> solve2 isCandidate resolveNeighborhood findSolution child1
-        else accumulated
- where
-  Quadtree cache _ child1 child2 child3 child4 = segmentTree
-  (Cache2 xDomain yDomain segment) = cache
-  (_, exclusions) = accumulated
-
-isExcludedBy :: List Domain -> Domain -> Fuzzy Bool
-isExcludedBy [] _ = Resolved False
-isExcludedBy (first : rest) domain
-  | Range.intersects domain first =
-      if Range.contains domain first
-        then Resolved True
-        else Unresolved
-  | otherwise = isExcludedBy rest domain
-
-isExcludedBy2 :: List (Domain, Domain) -> Domain -> Domain -> Fuzzy Bool
-isExcludedBy2 [] _ _ = Resolved False
-isExcludedBy2 ((firstX, firstY) : rest) xDomain yDomain
-  | Range.intersects xDomain firstX && Range.intersects yDomain firstY =
-      if Range.contains xDomain firstX && Range.contains yDomain firstY
-        then Resolved True
-        else Unresolved
-  | otherwise = isExcludedBy2 rest xDomain yDomain
-
-search
-  :: (Domain -> segment -> Bool)
-  -> (Domain -> segment -> Fuzzy resolution)
-  -> (Domain -> segment -> resolution -> Maybe solution)
-  -> Tree segment
-  -> (List solution, List Domain)
-  -> (List solution, List Domain)
-search isCandidate resolveNeighborhood findSolution segmentTree accumulated =
-  if isCandidate domain segment
-    then case resolveNeighborhood expandedDomain neighborhood of
-      Resolved resolution ->
-        case findSolution domain segment resolution of
-          Just solution -> (solution : solutions, expandedDomain : exclusions)
-          Nothing -> accumulated
-      Unresolved ->
+  let allowed = isAllowed domain exclusions
+      candidate = isCandidate domain segment
+      resolved = resolveNeighborhood expandedDomain neighborhood
+      recurse =
         accumulated
-          |> search isCandidate resolveNeighborhood findSolution rightChild
-          |> search isCandidate resolveNeighborhood findSolution leftChild
-    else accumulated
+          |> solve isCandidate resolveNeighborhood findSolution rightChild
+          |> solve isCandidate resolveNeighborhood findSolution leftChild
+   in case (allowed, candidate, resolved) of
+        (Resolved False, _, _) -> accumulated
+        (_, False, _) -> accumulated
+        (Unresolved, True, _) -> recurse
+        (Resolved True, True, Unresolved) -> recurse
+        (Resolved True, True, Resolved resolution) ->
+          case findSolution domain segment resolution of
+            Just solution -> (solution : solutions, expandedDomain : exclusions)
+            Nothing -> accumulated
  where
   Tree cache neighborhoodCache leftChild rightChild = segmentTree
   (Cache domain segment) = cache
   (Cache expandedDomain neighborhood) = neighborhoodCache
   (solutions, exclusions) = accumulated
 
-search2
-  :: (Domain -> Domain -> segment -> Bool)
+isAllowed :: Domain -> List Domain -> Fuzzy Bool
+isAllowed _ [] = Resolved True
+isAllowed domain (first : rest)
+  | Range.intersects domain first =
+      if Range.contains domain first
+        then Resolved False
+        else Unresolved
+  | otherwise = isAllowed domain rest
+
+solve2
+  :: Show solution
+  => (Domain -> Domain -> segment -> Bool)
   -> (Domain -> Domain -> segment -> Fuzzy resolution)
   -> (Domain -> Domain -> segment -> resolution -> Maybe solution)
   -> Quadtree segment
   -> (List solution, List (Domain, Domain))
   -> (List solution, List (Domain, Domain))
-search2 isCandidate resolveNeighborhood findSolution segmentTree accumulated =
-  if isCandidate xDomain yDomain segment
-    then case resolveNeighborhood xNeighborhood yNeighborhood neighborhood of
-      Resolved resolution ->
-        case findSolution xDomain yDomain segment resolution of
-          Just solution -> (solution : solutions, (xNeighborhood, yNeighborhood) : exclusions)
-          Nothing -> accumulated
-      Unresolved ->
+solve2 isCandidate resolveNeighborhood findSolution segmentTree accumulated =
+  let allowed = isAllowed2 xDomain yDomain exclusions
+      candidate = isCandidate xDomain yDomain segment
+      resolved = resolveNeighborhood xNeighborhood yNeighborhood neighborhood
+      recurse =
         accumulated
-          |> search2 isCandidate resolveNeighborhood findSolution child4
-          |> search2 isCandidate resolveNeighborhood findSolution child3
-          |> search2 isCandidate resolveNeighborhood findSolution child2
-          |> search2 isCandidate resolveNeighborhood findSolution child1
-    else accumulated
+          |> solve2 isCandidate resolveNeighborhood findSolution child4
+          |> solve2 isCandidate resolveNeighborhood findSolution child3
+          |> solve2 isCandidate resolveNeighborhood findSolution child2
+          |> solve2 isCandidate resolveNeighborhood findSolution child1
+   in case (allowed, candidate, resolved) of
+        (Resolved False, _, _) -> accumulated
+        (_, False, _) -> accumulated
+        (Unresolved, True, _) -> recurse
+        (Resolved True, True, Unresolved) -> recurse
+        (Resolved True, True, Resolved resolution) ->
+          case findSolution xDomain yDomain segment resolution of
+            Just solution -> (solution : solutions, (xNeighborhood, yNeighborhood) : exclusions)
+            Nothing -> accumulated
  where
   Quadtree cache neighborhoodCache child1 child2 child3 child4 = segmentTree
   (Cache2 xDomain yDomain segment) = cache
   (Cache2 xNeighborhood yNeighborhood neighborhood) = neighborhoodCache
   (solutions, exclusions) = accumulated
+
+isAllowed2 :: Domain -> Domain -> List (Domain, Domain) -> Fuzzy Bool
+isAllowed2 _ _ [] = Resolved True
+isAllowed2 xDomain yDomain ((firstX, firstY) : rest)
+  | Range.intersects xDomain firstX && Range.intersects yDomain firstY =
+      if Range.contains xDomain firstX && Range.contains yDomain firstY
+        then Resolved False
+        else Unresolved
+  | otherwise = isAllowed2 xDomain yDomain rest

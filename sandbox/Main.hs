@@ -13,8 +13,8 @@ import Direction2d qualified
 import Direction3d ()
 import Domain (Domain)
 import Float qualified
+import Length (Length)
 import Length qualified
-import Line2d qualified
 import List qualified
 import OpenSolid
 import Parameter1d qualified
@@ -44,7 +44,15 @@ type WorldCoordinates = WorldSpace @ Meters
 
 data MyPoints = MyPoints (Point2d WorldCoordinates) (Point2d WorldCoordinates) deriving (Show)
 
-offsetPoint :: Point2d (space @ units) -> Point2d (space @ units) -> Qty units -> Point2d (space @ units)
+defaultTolerance :: Length
+defaultTolerance = Length.meters 1e-9
+
+offsetPoint
+  :: Tolerance units
+  => Point2d (space @ units)
+  -> Point2d (space @ units)
+  -> Qty units
+  -> Point2d (space @ units)
 offsetPoint startPoint endPoint distance = Result.withDefault startPoint do
   direction <- Direction2d.from startPoint endPoint
   Ok (Point2d.midpoint startPoint endPoint + distance * Direction2d.perpendicularTo direction)
@@ -64,17 +72,17 @@ testCurveFind = Try.do
   let p1 = Point2d.meters 0.0 0.0
   let p2 = Point2d.meters 1.0 2.0
   let p3 = Point2d.meters 2.0 0.0
-  let testSpline = QuadraticSpline2d.fromControlPoints p1 p2 p3
-  [startParameterValue] <- Curve2d.parameterValues Point2d.origin testSpline
-  [endParameterValue] <- Curve2d.parameterValues (Point2d.meters 2.0 0.0) testSpline
-  [midParameterValue] <- Curve2d.parameterValues (Point2d.meters 1.0 1.0) testSpline
-  offCurveParameterValues <- Curve2d.parameterValues (Point2d.meters 1.0 1.1) testSpline
-  log "Start parameter value" startParameterValue
-  log "End parameter value" endParameterValue
-  log "Mid parameter value" midParameterValue
+  testSpline <- QuadraticSpline2d.fromControlPoints p1 p2 p3
+  let startParameterValues = Curve2d.parameterValues Point2d.origin testSpline
+  let endParameterValues = Curve2d.parameterValues (Point2d.meters 2.0 0.0) testSpline
+  let midParameterValues = Curve2d.parameterValues (Point2d.meters 1.0 1.0) testSpline
+  let offCurveParameterValues = Curve2d.parameterValues (Point2d.meters 1.0 1.1) testSpline
+  log "Start parameter values" startParameterValues
+  log "End parameter values" endParameterValues
+  log "Mid parameter values" midParameterValues
   log "Off-curve parameter values" offCurveParameterValues
  where
-  ?tolerance = Length.meters 1e-9
+  ?tolerance = defaultTolerance
 
 testDirection2dAngleFrom :: Task Text ()
 testDirection2dAngleFrom = do
@@ -88,17 +96,24 @@ testDirection2dAngleFrom = do
 
 testArc2dFrom :: Task Text ()
 testArc2dFrom = Try.do
-  let testArc = Arc2d.from Point2d.origin (Point2d.meters 1.0 1.0)
-  let arc1 = testArc (Angle.degrees 90.0)
-  let arc2 = testArc (Angle.degrees -90.0)
-  let arc3 = testArc (Angle.degrees 180.0)
-  let arc4 = testArc (Angle.degrees -180.0)
-  let line = testArc Qty.zero
+  let testArc angle =
+        Arc2d.with
+          [ Arc2d.StartPoint Point2d.origin
+          , Arc2d.EndPoint (Point2d.meters 1.0 1.0)
+          , Arc2d.SweptAngle angle
+          ]
+  arc1 <- testArc (Angle.degrees 90.0)
+  arc2 <- testArc (Angle.degrees -90.0)
+  arc3 <- testArc (Angle.degrees 180.0)
+  arc4 <- testArc (Angle.degrees -180.0)
+  line <- testArc Qty.zero
   log "arc1 point" (Curve2d.evaluateAt 0.5 arc1)
   log "arc2 point" (Curve2d.evaluateAt 0.5 arc2)
   log "arc3 point" (Curve2d.evaluateAt 0.5 arc3)
   log "arc4 point" (Curve2d.evaluateAt 0.5 arc4)
   log "line point" (Curve2d.evaluateAt 0.5 line)
+ where
+  ?tolerance = defaultTolerance
 
 overlappingSegments
   :: Tolerance units
@@ -128,7 +143,7 @@ testCurveOverlap1 = Try.do
   segment <- overlappingSegments arc1 arc2
   log "Overlapping segment 1" segment
  where
-  ?tolerance = Length.meters 1e-9
+  ?tolerance = defaultTolerance
 
 testCurveOverlap2 :: Task Text ()
 testCurveOverlap2 = Try.do
@@ -149,7 +164,7 @@ testCurveOverlap2 = Try.do
   segment <- overlappingSegments arc1 arc2
   log "Overlapping segment 2" segment
  where
-  ?tolerance = Length.meters 1e-9
+  ?tolerance = defaultTolerance
 
 getCrossProduct :: Result Text Float
 getCrossProduct = Try.withContext "In getCrossProduct:" Try.do
@@ -158,24 +173,14 @@ getCrossProduct = Try.withContext "In getCrossProduct:" Try.do
     Try.withContext "When getting line direction:" $
       Direction2d.from Point2d.origin Point2d.origin
   Ok (vectorDirection >< lineDirection)
+ where
+  ?tolerance = defaultTolerance
 
 testTry :: Task Text ()
 testTry =
   case Try.withContext "In testTry:" getCrossProduct of
     Ok crossProduct -> log "Got cross product" crossProduct
     Error message -> Console.print message
-
-patternMatchError :: Result Text Float
-patternMatchError = Try.do
-  let line = Line2d.from Point2d.origin (Point2d.meters 3.0 0.0)
-  [t1, t2] <- Curve2d.parameterValues (Point2d.meters 1.0 0.0) line
-  Ok (t2 - t1)
- where
-  ?tolerance = Length.meters 1e-9
-
-testPatternMatchErrorInTryDo :: Task Text ()
-testPatternMatchErrorInTryDo =
-  log "Pattern match error (expected)" patternMatchError
 
 testCurve1dApproximateEquality :: Task Text ()
 testCurve1dApproximateEquality = do
@@ -225,7 +230,7 @@ testCurve2dIntersection = Try.do
   intersections <- Curve2d.intersections arc1 arc2
   Task.each (log "Intersection") intersections
  where
-  ?tolerance = Length.meters 1e-9
+  ?tolerance = defaultTolerance
 
 testCurve2dTangentIntersection :: Task Text ()
 testCurve2dTangentIntersection = Try.do
@@ -246,7 +251,7 @@ testCurve2dTangentIntersection = Try.do
   intersections <- Curve2d.intersections arc1 arc2
   Task.each (log "Tangent intersection") intersections
  where
-  ?tolerance = Length.meters 1e-9
+  ?tolerance = defaultTolerance
 
 testCurve2dSolving :: Task Text ()
 testCurve2dSolving = Try.do
@@ -260,7 +265,7 @@ testCurve2dSolving = Try.do
   roots <- squaredDistanceFromOrigin |> Curve1d.equalToSquared (Length.meters 0.5)
   log "Curve2d solving roots" roots
  where
-  ?tolerance = Length.meters 1e-9
+  ?tolerance = defaultTolerance
 
 testParameter1d :: Int -> Task Text ()
 testParameter1d n = Try.do
@@ -345,7 +350,6 @@ script = do
           |> Transform2d.rotateAroundOwn Axis2d.originPoint (Angle.degrees 90.0)
   log "Transformed axis" transformedAxis
   testTry
-  testPatternMatchErrorInTryDo
   testCurve1dApproximateEquality
   log "Axis2d.x.originPoint" Axis2d.x.originPoint
   testTaskIteration
@@ -363,6 +367,8 @@ script = do
   testParameter1d 5
   testParameter1dGeneration
   testRangeFind
+ where
+  ?tolerance = defaultTolerance
 
 main :: IO ()
 main = Task.toIO script

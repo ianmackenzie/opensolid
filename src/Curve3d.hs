@@ -1,6 +1,7 @@
 module Curve3d
   ( Curve3d (..)
   , IsCurve3d (..)
+  , DegenerateCurve (DegenerateCurve)
   )
 where
 
@@ -46,3 +47,5 @@ instance IsCurve3d (Curve3d (space @ units)) (space @ units) where
     let (curve1, curve2) = bisectImpl curve
      in (Curve3d curve1, Curve3d curve2)
   boundingBoxImpl (Curve3d curve) = boundingBoxImpl curve
+
+data DegenerateCurve = DegenerateCurve deriving (Eq, Show, ErrorMessage)

@@ -2,6 +2,7 @@ module Debug
   ( show
   , trace
   , log
+  , intercept
   )
 where
 
@@ -16,5 +17,8 @@ show value = Text.fromChars (Prelude.show value)
 trace :: Text -> a -> a
 trace message = Debug.Trace.trace (Text.toChars message)
 
-log :: Show a => Text -> a -> a
-log label value = trace (label ++ ": " ++ show value) value
+log :: Show a => Text -> a -> b -> b
+log label value = trace (label ++ ": " ++ show value)
+
+intercept :: Show a => Text -> a -> a
+intercept label value = log label value value

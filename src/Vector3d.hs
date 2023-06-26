@@ -29,7 +29,6 @@ import Generic qualified
 import Length qualified
 import OpenSolid
 import Qty qualified
-import Result qualified
 import Units (Meters, SquareMeters, Unitless)
 import Units qualified
 
@@ -142,19 +141,24 @@ squaredMagnitude (Vector3d vx vy vz) = Qty.squared vx + Qty.squared vy + Qty.squ
 
 data IsZero = IsZero deriving (Eq, Show, ErrorMessage)
 
-direction :: Vector3d (space @ units) -> Result IsZero (Direction3d space)
+direction :: Tolerance units => Vector3d (space @ units) -> Result IsZero (Direction3d space)
 direction vector = do
-  let Vector3d vx vy vz = vector
-  vm <- Qty.nonZero (magnitude vector) |> Result.mapError \Qty.IsZero -> Vector3d.IsZero
-  Ok (Direction3d.unsafe (vx / vm) (vy / vm) (vz / vm))
+  let Vector3d vx vy vz = vector; vm = magnitude vector
+   in if vm ~= Qty.zero
+        then Error Vector3d.IsZero
+        else Ok (Direction3d.unsafe (vx / vm) (vy / vm) (vz / vm))
 
-magnitudeAndDirection :: Vector3d (space @ units) -> Result IsZero (Qty units, Direction3d space)
+magnitudeAndDirection
+  :: Tolerance units
+  => Vector3d (space @ units)
+  -> Result IsZero (Qty units, Direction3d space)
 magnitudeAndDirection vector = do
-  let Vector3d vx vy vz = vector
-  vm <- Qty.nonZero (magnitude vector) |> Result.mapError \Qty.IsZero -> Vector3d.IsZero
-  Ok (vm, Direction3d.unsafe (vx / vm) (vy / vm) (vz / vm))
+  let Vector3d vx vy vz = vector; vm = magnitude vector
+   in if vm ~= Qty.zero
+        then Error Vector3d.IsZero
+        else Ok (vm, Direction3d.unsafe (vx / vm) (vy / vm) (vz / vm))
 
-normalize :: Vector3d (space @ units) -> Vector3d (space @ Unitless)
+normalize :: Tolerance units => Vector3d (space @ units) -> Vector3d (space @ Unitless)
 normalize vector =
   let Vector3d vx vy vz = vector; vm = magnitude vector
-   in if vm == Qty.zero then zero else Vector3d (vx / vm) (vy / vm) (vz / vm)
+   in if vm ~= Qty.zero then zero else Vector3d (vx / vm) (vy / vm) (vz / vm)

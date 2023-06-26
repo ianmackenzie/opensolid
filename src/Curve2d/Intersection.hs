@@ -1,6 +1,7 @@
 module Curve2d.Intersection
   ( Intersection (..)
   , Kind (..)
+  , TangentIntersectionAtDegeneratePoint (TangentIntersectionAtDegeneratePoint)
   )
 where
 
@@ -15,3 +16,7 @@ data Intersection = Intersection
   deriving (Eq, Ord, Show)
 
 data Kind = Crossing | Tangent deriving (Eq, Ord, Show)
+
+data TangentIntersectionAtDegeneratePoint
+  = TangentIntersectionAtDegeneratePoint
+  deriving (Eq, Show, ErrorMessage)

@@ -90,7 +90,8 @@ y = positiveY
 data PointsAreCoincident = PointsAreCoincident deriving (Eq, Show, ErrorMessage)
 
 from
-  :: Point2d (space @ units)
+  :: Tolerance units
+  => Point2d (space @ units)
   -> Point2d (space @ units)
   -> Result PointsAreCoincident (Direction2d space)
 from p1 p2 =

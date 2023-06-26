@@ -5,7 +5,8 @@ module QuadraticSpline2d
 where
 
 import BoundingBox2d qualified
-import Curve2d (Curve2d (Curve2d), IsCurve2d (..))
+import Curve2d (Curve2d, DegenerateCurve, IsCurve2d (..))
+import Curve2d qualified
 import OpenSolid
 import Point2d (Point2d (Point2d))
 import Range (Range (..))
@@ -58,8 +59,9 @@ instance IsCurve2d (QuadraticSpline2d (space @ units)) (space @ units) where
   boundingBoxImpl (QuadraticSpline2d p1 p2 p3) = BoundingBox2d.hull3 p1 p2 p3
 
 fromControlPoints
-  :: Point2d (space @ units)
+  :: Tolerance units
+  => Point2d (space @ units)
   -> Point2d (space @ units)
   -> Point2d (space @ units)
-  -> Curve2d (space @ units)
-fromControlPoints p1 p2 p3 = Curve2d (QuadraticSpline2d p1 p2 p3)
+  -> Result Curve2d.DegenerateCurve (Curve2d (space @ units))
+fromControlPoints p1 p2 p3 = Curve2d.from (QuadraticSpline2d p1 p2 p3)

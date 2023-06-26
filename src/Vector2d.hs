@@ -35,7 +35,6 @@ import Length qualified
 import OpenSolid
 import {-# SOURCE #-} Point2d (Point2d)
 import Qty qualified
-import Result qualified
 import Units (Meters, SquareMeters, Unitless)
 import Units qualified
 
@@ -213,22 +212,27 @@ angle (Vector2d vx vy) = Angle.atan2 vy vx
 
 data IsZero = IsZero deriving (Eq, Show, ErrorMessage)
 
-direction :: Vector2d (space @ units) -> Result IsZero (Direction2d space)
+direction :: Tolerance units => Vector2d (space @ units) -> Result IsZero (Direction2d space)
 direction vector = do
-  let Vector2d vx vy = vector
-  vm <- Qty.nonZero (magnitude vector) |> Result.mapError (\Qty.IsZero -> Vector2d.IsZero)
-  Ok (Direction2d.unsafe (vx / vm) (vy / vm))
+  let Vector2d vx vy = vector; vm = magnitude vector
+   in if vm ~= Qty.zero
+        then Error Vector2d.IsZero
+        else Ok (Direction2d.unsafe (vx / vm) (vy / vm))
 
-magnitudeAndDirection :: Vector2d (space @ units) -> Result IsZero (Qty units, Direction2d space)
+magnitudeAndDirection
+  :: Tolerance units
+  => Vector2d (space @ units)
+  -> Result IsZero (Qty units, Direction2d space)
 magnitudeAndDirection vector = do
-  let Vector2d vx vy = vector
-  vm <- Qty.nonZero (magnitude vector) |> Result.mapError (\Qty.IsZero -> Vector2d.IsZero)
-  Ok (vm, Direction2d.unsafe (vx / vm) (vy / vm))
+  let Vector2d vx vy = vector; vm = magnitude vector
+   in if vm ~= Qty.zero
+        then Error Vector2d.IsZero
+        else Ok (vm, Direction2d.unsafe (vx / vm) (vy / vm))
 
-normalize :: Vector2d (space @ units) -> Vector2d (space @ Unitless)
+normalize :: Tolerance units => Vector2d (space @ units) -> Vector2d (space @ Unitless)
 normalize vector =
   let Vector2d vx vy = vector; vm = magnitude vector
-   in if vm == Qty.zero then zero else Vector2d (vx / vm) (vy / vm)
+   in if vm ~= Qty.zero then zero else Vector2d (vx / vm) (vy / vm)
 
 placeIn
   :: Frame2d (global @ units) (Defines (local @ units))

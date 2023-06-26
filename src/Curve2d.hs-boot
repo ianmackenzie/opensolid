@@ -1,6 +1,8 @@
 module Curve2d
-  ( Curve2d (Curve2d)
+  ( Curve2d
   , IsCurve2d
+  , DegenerateCurve
+  , from
   , startPoint
   , endPoint
   , evaluateAt
@@ -9,7 +11,6 @@ module Curve2d
   )
 where
 
-import Angle (Angle)
 import BoundingBox2d (BoundingBox2d)
 import Domain (Domain)
 import OpenSolid
@@ -28,11 +29,14 @@ class Show curve => IsCurve2d curve (coordinateSystem :: CoordinateSystem) | cur
 
 type role Curve2d nominal
 
-data Curve2d (coordinateSystem :: CoordinateSystem) where
-  Line :: Point2d (space @ units) -> Point2d (space @ units) -> Curve2d (space @ units)
-  Arc :: Point2d (space @ units) -> Qty units -> Angle -> Angle -> Curve2d (space @ units)
-  Curve2d :: IsCurve2d curve (space @ units) => curve -> Curve2d (space @ units)
+data Curve2d (coordinateSystem :: CoordinateSystem)
 
+data DegenerateCurve
+
+from
+  :: (Tolerance units, IsCurve2d curve (space @ units))
+  => curve
+  -> Result DegenerateCurve (Curve2d (space @ units))
 startPoint :: Curve2d (space @ units) -> Point2d (space @ units)
 endPoint :: Curve2d (space @ units) -> Point2d (space @ units)
 evaluateAt :: Float -> Curve2d (space @ units) -> Point2d (space @ units)

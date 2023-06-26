@@ -17,4 +17,4 @@ xyz :: Qty units -> Qty units -> Qty units -> Vector3d (space @ units)
 
 data IsZero = IsZero
 
-direction :: Vector3d (space @ units) -> Result IsZero (Direction3d space)
+direction :: Tolerance units => Vector3d (space @ units) -> Result IsZero (Direction3d space)

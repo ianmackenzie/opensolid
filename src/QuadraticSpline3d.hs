@@ -5,7 +5,7 @@ module QuadraticSpline3d
 where
 
 import BoundingBox3d qualified
-import Curve3d (Curve3d (Curve3d), IsCurve3d (..))
+import Curve3d (Curve3d (Curve3d), DegenerateCurve (DegenerateCurve), IsCurve3d (..))
 import OpenSolid
 import Point3d (Point3d (Point3d))
 import Range (Range (..))
@@ -59,8 +59,11 @@ instance IsCurve3d (QuadraticSpline3d (space @ units)) (space @ units) where
   boundingBoxImpl (QuadraticSpline3d p1 p2 p3) = BoundingBox3d.hull3 p1 p2 p3
 
 fromControlPoints
-  :: Point3d (space @ units)
+  :: Tolerance units
+  => Point3d (space @ units)
   -> Point3d (space @ units)
   -> Point3d (space @ units)
-  -> Curve3d (space @ units)
-fromControlPoints p1 p2 p3 = Curve3d (QuadraticSpline3d p1 p2 p3)
+  -> Result Curve3d.DegenerateCurve (Curve3d (space @ units))
+fromControlPoints p1 p2 p3
+  | p1 ~= p2 && p2 ~= p3 = Error DegenerateCurve
+  | otherwise = Ok (Curve3d (QuadraticSpline3d p1 p2 p3))

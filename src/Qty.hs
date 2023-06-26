@@ -27,6 +27,7 @@ import {-# SOURCE #-} Float qualified
 import Generic qualified
 import Result (ErrorMessage, Result (Error, Ok))
 import Sign (Sign (..))
+import {-# SOURCE #-} Tolerance (Tolerance, (~=))
 import Units (Unitless)
 import Units qualified
 import Prelude qualified
@@ -147,8 +148,8 @@ midpoint a b = 0.5 * (a + b)
 
 data IsZero = IsZero deriving (Eq, Show, ErrorMessage)
 
-nonZero :: Qty units -> Result IsZero (Qty units)
-nonZero value = if value /= zero then Ok value else Error IsZero
+nonZero :: Tolerance units => Qty units -> Result IsZero (Qty units)
+nonZero value = if value ~= zero then Error IsZero else Ok value
 
 data IsNegative = IsNegative deriving (Eq, Show, ErrorMessage)
 
