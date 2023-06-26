@@ -37,4 +37,4 @@ withContext :: ErrorMessage x => Text -> Result x a -> Result Text a
 withContext context = Result.mapError (errorMessage OpenSolid.>> addContext context)
 
 addContext :: Text -> Text -> Text
-addContext context text = context ++ "\n  " ++ Text.replace "\n" "\n  " text
+addContext context text = context ++ ":\n" ++ Text.indent "  " text
