@@ -1,8 +1,8 @@
-module Console (print) where
+module Console (printLine) where
 
 import Data.Text.IO qualified
-import Task qualified
 import OpenSolid
+import Task qualified
 
-print :: Text -> Task Text ()
-print text = Task.fromIO (Data.Text.IO.putStrLn text) |> Task.mapError errorMessage
+printLine :: Text -> Task Text ()
+printLine text = Task.fromIO (Data.Text.IO.putStrLn text) |> Task.mapError errorMessage

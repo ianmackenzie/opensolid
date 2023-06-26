@@ -197,6 +197,8 @@ test-suite opensolid-test
   main-is: Main.hs
   other-modules:
       Test
+      Tests.Random
+      Tests.VectorBox3d
       Paths_opensolid
   autogen-modules:
       Paths_opensolid

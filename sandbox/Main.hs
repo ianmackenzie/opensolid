@@ -36,7 +36,7 @@ import VectorCurve2d qualified
 import Volume qualified
 
 log :: Show a => Text -> a -> Task Text ()
-log label value = Console.print (label ++ ": " ++ Debug.show value)
+log label value = Console.printLine (label ++ ": " ++ Debug.show value)
 
 data WorldSpace
 
@@ -180,7 +180,7 @@ testTry :: Task Text ()
 testTry =
   case Try.withContext "In testTry:" getCrossProduct of
     Ok crossProduct -> log "Got cross product" crossProduct
-    Error message -> Console.print message
+    Error message -> Console.printLine message
 
 testCurve1dApproximateEquality :: Task Text ()
 testCurve1dApproximateEquality = do
@@ -334,7 +334,7 @@ script = do
   log "Roots of sin^2(2*pi*t)" expressionRoots
   testCurveFind
   testListCollapse
-  Console.print "Unicode output test: ✅❌🙂"
+  Console.printLine "Unicode output test: ✅❌🙂"
   testDirection2dAngleFrom
   testArc2dFrom
   testCurveOverlap1
