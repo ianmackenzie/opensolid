@@ -14,6 +14,7 @@ module Text
 where
 
 import Basics
+import Concatenate
 import Data.String qualified
 import Data.Text qualified
 import Data.Text.Read
@@ -48,8 +49,10 @@ toNum :: Prelude.Num a => Reader a -> Text -> Result Text a
 toNum reader text =
   case Data.Text.Read.signed reader text of
     Prelude.Right (value, "") -> Ok value
-    Prelude.Right (_, suffix) -> Error ("Could not parse '" Prelude.<> text Prelude.<> "' as a number - has extra trailing text '" Prelude.<> suffix)
-    Prelude.Left message -> Error (fromChars message)
+    Prelude.Right (_, suffix) ->
+      Error ("Could not parse '" ++ text ++ "' as a number - has extra trailing text '" ++ suffix)
+    Prelude.Left message ->
+      Error (fromChars message)
 
 toInt :: Text -> Result Text Int
 toInt = toNum Data.Text.Read.decimal
