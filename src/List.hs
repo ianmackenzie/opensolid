@@ -31,6 +31,7 @@ module List
   , any
   , successive
   , count
+  , intersperse
   )
 where
 
@@ -155,3 +156,6 @@ successive function list = map2 function list (drop 1 list)
 count :: (a -> Bool) -> List a -> Int
 count _ [] = 0
 count predicate (first : rest) = (if predicate first then 1 else 0) + count predicate rest
+
+intersperse :: a -> List a -> List a
+intersperse = Data.List.intersperse
