@@ -10,6 +10,10 @@ module Text
   , replace
   , toInt
   , toFloat
+  , lines
+  , paragraph
+  , indent
+  , repeat
   )
 where
 
@@ -19,6 +23,7 @@ import Data.String qualified
 import Data.Text qualified
 import Data.Text.Read
 import Float (Float)
+import List qualified
 import Qty (Qty (Qty))
 import Result (Result (..))
 import Result qualified
@@ -62,3 +67,16 @@ toFloat text = Result.map Qty (toNum Data.Text.Read.double text)
 
 replace :: Text -> Text -> Text -> Text
 replace = Data.Text.replace
+
+lines :: Text -> List Text
+lines = Data.Text.lines
+
+paragraph :: List Text -> Text
+paragraph = Data.Text.unlines
+
+indent :: Text -> Text -> Text
+indent indentation text =
+  concat (indentation : (lines text |> List.intersperse ("\n" ++ indentation)))
+
+repeat :: Int -> Text -> Text
+repeat = Data.Text.replicate
