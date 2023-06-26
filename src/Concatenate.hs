@@ -1,8 +1,8 @@
 module Concatenate (Concatenate ((++))) where
 
+import Data.Text (Text)
 import List (List)
 import Maybe (Maybe (Just, Nothing))
-import Text (Text)
 import Prelude qualified
 
 class Concatenate a b c | a b -> c where
