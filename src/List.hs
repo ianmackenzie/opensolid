@@ -16,7 +16,6 @@ module List
   , filter
   , collect
   , concat
-  , collapse
   , foldl
   , foldr
   , reverse
@@ -92,16 +91,6 @@ collect = Prelude.concatMap
 
 concat :: List (List a) -> List a
 concat = Data.List.concat
-
-collapse :: (a -> a -> Maybe a) -> List a -> List a
-collapse _ [] = []
-collapse function (first : rest) = go first rest
- where
-  go current [] = [current]
-  go current (next : remaining) =
-    case function current next of
-      Just merged -> go merged remaining
-      Nothing -> current : go next remaining
 
 foldl :: (b -> a -> b) -> b -> List a -> b
 foldl = Data.List.foldl'

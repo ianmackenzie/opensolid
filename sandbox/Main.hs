@@ -52,16 +52,6 @@ offsetPoint startPoint endPoint distance = Result.withDefault startPoint do
   direction <- Direction2d.from startPoint endPoint
   Ok (Point2d.midpoint startPoint endPoint + distance * Direction2d.perpendicularTo direction)
 
-joinTextChunks :: Text -> Text -> Maybe Text
-joinTextChunks " " _ = Nothing
-joinTextChunks _ " " = Nothing
-joinTextChunks s1 s2 = Just (s1 ++ s2)
-
-testListCollapse :: Task Text ()
-testListCollapse =
-  let textChunks = ["T", "h", "is", " ", "i", "s", " ", "a", " ", "t", "es", "t"]
-   in log "Collapsed list" (List.collapse joinTextChunks textChunks |> List.filter (/= " "))
-
 testDirection2dAngleFrom :: Task Text ()
 testDirection2dAngleFrom = do
   let angle start end =
@@ -176,7 +166,6 @@ script = do
   log "Custom type" (MyPoints (Point2d.meters 1.0 2.0) (Point2d.meters 3.0 4.0))
   log "sqrt 2.0" (Qty.sqrt 2.0)
   log "Equality test" (let ?tolerance = Length.centimeter in Length.meters 1.0 ~= Length.meters 1.005)
-  testListCollapse
   Console.printLine "Unicode output test: ✅❌🙂"
   testDirection2dAngleFrom
   testArc2dFrom
