@@ -199,6 +199,7 @@ test-suite opensolid-test
       Expect
       Test
       Tests.Curve2d
+      Tests.Parameter1d
       Tests.Random
       Tests.VectorBox3d
       Paths_opensolid

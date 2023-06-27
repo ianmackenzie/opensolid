@@ -156,14 +156,6 @@ testCurve2dSolving = Try.do
  where
   ?tolerance = defaultTolerance
 
-testParameter1d :: Int -> Task Text ()
-testParameter1d n = Try.do
-  log ("Parameter1d.steps " ++ Text.fromInt n) (Parameter1d.steps n identity)
-  log ("Parameter1d.leading " ++ Text.fromInt n) (Parameter1d.leading n identity)
-  log ("Parameter1d.trailing " ++ Text.fromInt n) (Parameter1d.trailing n identity)
-  log ("Parameter1d.inBetween " ++ Text.fromInt n) (Parameter1d.inBetween n identity)
-  log ("Parameter1d.midpoints " ++ Text.fromInt n) (Parameter1d.midpoints n identity)
-
 testParameter1dGeneration :: Task Text ()
 testParameter1dGeneration = Try.do
   t1 <- Random.generate Parameter1d.generator
@@ -245,10 +237,6 @@ script = do
   log "Prepend Maybe to List" (Just 1 ++ [2, 3])
   log "Offset point" (offsetPoint (Point2d.meters 1.0 0.0) (Point2d.meters 3.0 0.0) (Length.meters 1.0))
   testCurve2dSolving
-  testParameter1d 0
-  testParameter1d 1
-  testParameter1d 2
-  testParameter1d 5
   testParameter1dGeneration
   testRangeFind
  where
