@@ -10,6 +10,7 @@ module Curve2d
   , startPoint
   , endPoint
   , evaluateAt
+  , pointOn
   , segmentBounds
   , derivative
   , reverse
