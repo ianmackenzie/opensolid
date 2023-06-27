@@ -5,7 +5,6 @@ import Arc2d qualified
 import Area qualified
 import Axis2d qualified
 import Console qualified
-import Curve1d qualified
 import Curve2d qualified
 import Debug qualified
 import Direction2d qualified
@@ -110,18 +109,6 @@ testTry =
     Ok crossProduct -> log "Got cross product" crossProduct
     Error message -> Console.printLine message
 
-testCurve1dApproximateEquality :: Task Text ()
-testCurve1dApproximateEquality = do
-  let t = Curve1d.parameter
-  let theta = Angle.radian * t
-  log "sin(x) = cos(x)" (Curve1d.sin theta ~= Curve1d.cos theta)
-  log "sin(x) = cos(pi/2 - x)" (Curve1d.sin theta ~= Curve1d.cos (Angle.degrees 90.0 - theta))
-  let sumOfSquares = Curve1d.squared (Curve1d.sin theta) + Curve1d.squared (Curve1d.cos theta)
-  log "sin^2(x) + cos^2(x) = 1" (sumOfSquares ~= 1.0)
-  log "sin^2(x) + cos^2(x) = 2" (sumOfSquares ~= 2.0)
- where
-  ?tolerance = 1e-9
-
 testTaskIteration :: Task Text ()
 testTaskIteration = do
   Task.each (log "Looping") [1 .. 3]
@@ -187,17 +174,8 @@ script = do
   log "Direction" Direction2d.x
   log "Tuple" (Point2d.meters 1.0 2.0, Point2d.meters 3.0 4.0)
   log "Custom type" (MyPoints (Point2d.meters 1.0 2.0) (Point2d.meters 3.0 4.0))
-  let t = Curve1d.parameter
-  let x = 3.0 * t
-  let y = (x - 1.0) * (x - 1.0) * (x - 1.0) - (x - 1.0)
-  let roots = let ?tolerance = 1e-12 in Curve1d.roots y
-  log "Roots of (x-1)^3 - (x-1), where x=3*t" roots
   log "sqrt 2.0" (Qty.sqrt 2.0)
   log "Equality test" (let ?tolerance = Length.centimeter in Length.meters 1.0 ~= Length.meters 1.005)
-  let theta = Angle.fullTurn * t
-  let expression = Curve1d.squared (Curve1d.sin theta)
-  let expressionRoots = let ?tolerance = 1e-12 in Curve1d.roots expression
-  log "Roots of sin^2(2*pi*t)" expressionRoots
   testListCollapse
   Console.printLine "Unicode output test: ✅❌🙂"
   testDirection2dAngleFrom
@@ -213,7 +191,6 @@ script = do
           |> Transform2d.rotateAroundOwn Axis2d.originPoint (Angle.degrees 90.0)
   log "Transformed axis" transformedAxis
   testTry
-  testCurve1dApproximateEquality
   log "Axis2d.x.originPoint" Axis2d.x.originPoint
   testTaskIteration
   testTaskSequencing
