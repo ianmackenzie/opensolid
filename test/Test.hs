@@ -4,43 +4,23 @@ module Test
   , verify
   , check
   , group
-  , expect
-  , approximatelyEqual
-  , rangeApproximatelyContains
   , run
   )
 where
 
 import Console qualified
+import Expect (Expectation (Failed, Passed))
 import List qualified
 import OpenSolid
 import Random (Generator)
 import Random qualified
-import Range (Range)
-import Range qualified
 import Task qualified
 import Text qualified
-
-data Expectation
-  = Passed
-  | Failed Text
 
 data Test
   = Verify Text Expectation
   | Check Int Text (Generator Expectation)
   | Group Text (List Test)
-
-expect :: Bool -> Text -> Expectation
-expect True _ = Passed
-expect False failureMessage = Failed failureMessage
-
-approximatelyEqual :: (Tolerance units, ApproximateEquality a b units) => a -> b -> Expectation
-approximatelyEqual expected actual =
-  expect (expected ~= actual) "Given values are not approximately equal"
-
-rangeApproximatelyContains :: Tolerance units => Qty units -> Range units -> Expectation
-rangeApproximatelyContains value range =
-  expect (Range.approximatelyIncludes value range) "Given value is not contained in the given range"
 
 verify :: Text -> Expectation -> Test
 verify = Verify
@@ -51,34 +31,46 @@ check = Check
 group :: Text -> List Test -> Test
 group = Group
 
+testCount :: Int -> Text -> Text
+testCount count description =
+  let pluralized = if count == 1 then "test" else "tests"
+   in Text.join " " [Text.fromInt count, pluralized, description]
+
 run :: List Test -> Task Text ()
 run tests = do
   Console.printLine ""
   Console.printLine "Running tests..."
   Console.printLine ""
   results <- Task.collect (runImpl []) tests
-  if List.all identity results
+  let (successes, failures) = sum results
+  if failures == 0
     then do
-      Console.printLine "✅ All tests passed"
+      Console.printLine ("✅ " ++ testCount successes "passed")
       Task.succeed ()
-    else Task.fail "Failure when running tests"
+    else Task.fail (testCount failures "failed")
 
-reportError :: List Text -> Text -> Task Text Bool
+reportError :: List Text -> Text -> Task Text (Int, Int)
 reportError context message = do
   Console.printLine ("❌ " ++ (Text.join " | " (List.reverse context) ++ ":"))
   Console.printLine ""
   Console.printLine (Text.indent "   " message)
   Console.printLine ""
-  Task.succeed False
+  Task.succeed (0, 1)
 
-runImpl :: List Text -> Test -> Task Text Bool
-runImpl _ (Verify _ Passed) = Task.succeed True
+runImpl :: List Text -> Test -> Task Text (Int, Int)
+runImpl _ (Verify _ Passed) = Task.succeed (1, 0)
 runImpl context (Verify label (Failed message)) = reportError (label : context) message
-runImpl context (Group label tests) = Task.collect (runImpl (label : context)) tests |> Task.map (List.all identity)
 runImpl context (Check count label generator) = fuzzImpl (label : context) count generator
+runImpl context (Group label tests) = Task.collect (runImpl (label : context)) tests |> Task.map sum
 
-fuzzImpl :: List Text -> Int -> Generator Expectation -> Task Text Bool
-fuzzImpl _ 0 _ = Task.succeed True
+sum :: List (Int, Int) -> (Int, Int)
+sum [] = (0, 0)
+sum ((successes, failures) : rest) =
+  let (restSuccesses, restFailures) = sum rest
+   in (successes + restSuccesses, failures + restFailures)
+
+fuzzImpl :: List Text -> Int -> Generator Expectation -> Task Text (Int, Int)
+fuzzImpl _ 0 _ = Task.succeed (1, 0)
 fuzzImpl context n generator = do
   expectation <- Random.generate generator
   case expectation of

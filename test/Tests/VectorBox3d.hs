@@ -1,5 +1,6 @@
 module Tests.VectorBox3d (tests) where
 
+import Expect qualified
 import OpenSolid
 import Parameter1d qualified
 import Random qualified
@@ -25,4 +26,4 @@ magnitude = Test.check 100 "magnitude" $ do
   let vector = VectorBox3d.interpolate vectorBox u v w
   let vectorMagnitude = Vector3d.magnitude vector
   let magnitudeRange = VectorBox3d.magnitude vectorBox
-  Random.return (Test.rangeApproximatelyContains vectorMagnitude magnitudeRange)
+  Random.return (Expect.rangeApproximatelyIncludes vectorMagnitude magnitudeRange)
