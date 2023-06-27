@@ -311,7 +311,7 @@ findIntersections curve1 curve2 endpointParameterValues = do
         endpointResults
           |> findTangentIntersections derivatives1 derivatives2 searchTree
           |> findCrossingIntersections derivatives1 derivatives2 searchTree
-  Ok allIntersections
+  Ok (List.sort allIntersections)
 
 findEndpointIntersections
   :: Tolerance units
