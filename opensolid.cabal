@@ -198,6 +198,7 @@ test-suite opensolid-test
   other-modules:
       Expect
       Test
+      Tests.Curve2d
       Tests.Random
       Tests.VectorBox3d
       Paths_opensolid

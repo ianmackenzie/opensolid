@@ -11,11 +11,10 @@ import Units (Meters)
 import Vector3d qualified
 import VectorBox3d qualified
 
-tests :: Tolerance Meters => Test
+tests :: Tolerance Meters => List Test
 tests =
-  Test.group "VectorBox3d" $
-    [ magnitude
-    ]
+  [ magnitude
+  ]
 
 magnitude :: Tolerance Meters => Test
 magnitude = Test.check 100 "magnitude" $ do

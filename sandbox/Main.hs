@@ -6,12 +6,10 @@ import Area qualified
 import Axis2d qualified
 import Console qualified
 import Curve1d qualified
-import Curve2d (Curve2d)
 import Curve2d qualified
 import Debug qualified
 import Direction2d qualified
 import Direction3d ()
-import Domain (Domain)
 import Float qualified
 import Length (Length)
 import Length qualified
@@ -21,7 +19,6 @@ import Parameter1d qualified
 import Point2d (Point2d)
 import Point2d qualified
 import Qty qualified
-import QuadraticSpline2d qualified
 import Random qualified
 import Range qualified
 import Result qualified
@@ -67,23 +64,6 @@ testListCollapse =
   let textChunks = ["T", "h", "is", " ", "i", "s", " ", "a", " ", "t", "es", "t"]
    in log "Collapsed list" (List.collapse joinTextChunks textChunks |> List.filter (/= " "))
 
-testCurveFind :: Task Text ()
-testCurveFind = Try.do
-  let p1 = Point2d.meters 0.0 0.0
-  let p2 = Point2d.meters 1.0 2.0
-  let p3 = Point2d.meters 2.0 0.0
-  testSpline <- QuadraticSpline2d.fromControlPoints p1 p2 p3
-  let startParameterValues = Curve2d.parameterValues Point2d.origin testSpline
-  let endParameterValues = Curve2d.parameterValues (Point2d.meters 2.0 0.0) testSpline
-  let midParameterValues = Curve2d.parameterValues (Point2d.meters 1.0 1.0) testSpline
-  let offCurveParameterValues = Curve2d.parameterValues (Point2d.meters 1.0 1.1) testSpline
-  log "Start parameter values" startParameterValues
-  log "End parameter values" endParameterValues
-  log "Mid parameter values" midParameterValues
-  log "Off-curve parameter values" offCurveParameterValues
- where
-  ?tolerance = defaultTolerance
-
 testDirection2dAngleFrom :: Task Text ()
 testDirection2dAngleFrom = do
   let angle start end =
@@ -112,57 +92,6 @@ testArc2dFrom = Try.do
   log "arc3 point" (Curve2d.evaluateAt 0.5 arc3)
   log "arc4 point" (Curve2d.evaluateAt 0.5 arc4)
   log "line point" (Curve2d.evaluateAt 0.5 line)
- where
-  ?tolerance = defaultTolerance
-
-overlappingSegments
-  :: Tolerance units
-  => Curve2d (space @ units)
-  -> Curve2d (space @ units)
-  -> Result Text (List (Domain, Domain))
-overlappingSegments curve1 curve2 =
-  case Curve2d.intersections curve1 curve2 of
-    Ok _ -> Error "Intersection should have failed (and given overlapping segments)"
-    Error (Curve2d.CurvesOverlap segments) -> Ok segments
-    Error error -> Error (errorMessage error)
-
-testCurveOverlap1 :: Task Text ()
-testCurveOverlap1 = Try.do
-  arc1 <-
-    Arc2d.with
-      [ Arc2d.StartPoint (Point2d.meters 1.0 0.0)
-      , Arc2d.EndPoint (Point2d.meters -1.0 0.0)
-      , Arc2d.SweptAngle (Angle.degrees 180.0)
-      ]
-  arc2 <-
-    Arc2d.with
-      [ Arc2d.StartPoint (Point2d.meters 0.0 -1.0)
-      , Arc2d.EndPoint (Point2d.meters 0.0 1.0)
-      , Arc2d.SweptAngle (Angle.degrees 180.0)
-      ]
-  segment <- overlappingSegments arc1 arc2
-  log "Overlapping segment 1" segment
- where
-  ?tolerance = defaultTolerance
-
-testCurveOverlap2 :: Task Text ()
-testCurveOverlap2 = Try.do
-  arc1 <-
-    Arc2d.with
-      [ Arc2d.CenterPoint Point2d.origin
-      , Arc2d.Radius (Length.meters 1.0)
-      , Arc2d.StartAngle (Angle.degrees 0.0)
-      , Arc2d.EndAngle (Angle.degrees -180.0)
-      ]
-  arc2 <-
-    Arc2d.with
-      [ Arc2d.CenterPoint Point2d.origin
-      , Arc2d.Radius (Length.meters 1.0)
-      , Arc2d.StartAngle (Angle.degrees -45.0)
-      , Arc2d.EndAngle (Angle.degrees 225.0)
-      ]
-  segment <- overlappingSegments arc1 arc2
-  log "Overlapping segment 2" segment
  where
   ?tolerance = defaultTolerance
 
@@ -212,46 +141,6 @@ testTaskSequencing :: Task Text ()
 testTaskSequencing = do
   doubledValues <- doubleManyTask
   Task.each (log "Doubled value") doubledValues
-
-testCurve2dIntersection :: Task Text ()
-testCurve2dIntersection = Try.do
-  arc1 <-
-    Arc2d.with
-      [ Arc2d.StartPoint Point2d.origin
-      , Arc2d.EndPoint (Point2d.meters 0.0 1.0)
-      , Arc2d.SweptAngle (Angle.degrees 180.0)
-      ]
-  arc2 <-
-    Arc2d.with
-      [ Arc2d.StartPoint Point2d.origin
-      , Arc2d.EndPoint (Point2d.meters 1.0 0.0)
-      , Arc2d.SweptAngle (Angle.degrees -180.0)
-      ]
-  intersections <- Curve2d.intersections arc1 arc2
-  Task.each (log "Intersection") intersections
- where
-  ?tolerance = defaultTolerance
-
-testCurve2dTangentIntersection :: Task Text ()
-testCurve2dTangentIntersection = Try.do
-  arc1 <-
-    Arc2d.with
-      [ Arc2d.CenterPoint Point2d.origin
-      , Arc2d.Radius Length.meter
-      , Arc2d.StartAngle Qty.zero
-      , Arc2d.EndAngle Angle.halfTurn
-      ]
-  arc2 <-
-    Arc2d.with
-      [ Arc2d.CenterPoint (Point2d.meters 0.0 1.5)
-      , Arc2d.Radius (Length.meters 0.5)
-      , Arc2d.StartAngle -Angle.halfTurn
-      , Arc2d.EndAngle Qty.zero
-      ]
-  intersections <- Curve2d.intersections arc1 arc2
-  Task.each (log "Tangent intersection") intersections
- where
-  ?tolerance = defaultTolerance
 
 testCurve2dSolving :: Task Text ()
 testCurve2dSolving = Try.do
@@ -332,13 +221,10 @@ script = do
   let expression = Curve1d.squared (Curve1d.sin theta)
   let expressionRoots = let ?tolerance = 1e-12 in Curve1d.roots expression
   log "Roots of sin^2(2*pi*t)" expressionRoots
-  testCurveFind
   testListCollapse
   Console.printLine "Unicode output test: ✅❌🙂"
   testDirection2dAngleFrom
   testArc2dFrom
-  testCurveOverlap1
-  testCurveOverlap2
   log "Rotated axis" (Axis2d.x |> Transform2d.rotateAround (Point2d.meters 1.0 0.0) (Angle.degrees 90.0))
   let originalPoints = [Point2d.meters 1.0 0.0, Point2d.meters 2.0 0.0, Point2d.meters 3.0 0.0]
   let rotationFunction = Transform2d.rotateAround Point2d.origin (Angle.degrees 90.0)
@@ -358,8 +244,6 @@ script = do
   log "Successive intervals" (List.successive Range.from [1.0, 2.0, 3.0, 4.0])
   log "Prepend Maybe to List" (Just 1 ++ [2, 3])
   log "Offset point" (offsetPoint (Point2d.meters 1.0 0.0) (Point2d.meters 3.0 0.0) (Length.meters 1.0))
-  testCurve2dIntersection
-  testCurve2dTangentIntersection
   testCurve2dSolving
   testParameter1d 0
   testParameter1d 1
