@@ -29,7 +29,6 @@ import Try qualified
 import Units (Meters)
 import Vector2d qualified
 import Vector3d qualified
-import VectorCurve2d qualified
 import Volume qualified
 
 log :: Show a => Text -> a -> Task Text ()
@@ -142,20 +141,6 @@ testTaskSequencing = do
   doubledValues <- doubleManyTask
   Task.each (log "Doubled value") doubledValues
 
-testCurve2dSolving :: Task Text ()
-testCurve2dSolving = Try.do
-  arc <-
-    Arc2d.with
-      [ Arc2d.StartPoint (Point2d.meters 0.0 1.0)
-      , Arc2d.EndPoint (Point2d.meters 1.0 0.0)
-      , Arc2d.SweptAngle (Angle.degrees 90.0)
-      ]
-  let squaredDistanceFromOrigin = VectorCurve2d.squaredMagnitude (arc - Point2d.origin)
-  roots <- squaredDistanceFromOrigin |> Curve1d.equalToSquared (Length.meters 0.5)
-  log "Curve2d solving roots" roots
- where
-  ?tolerance = defaultTolerance
-
 testParameter1dGeneration :: Task Text ()
 testParameter1dGeneration = Try.do
   t1 <- Random.generate Parameter1d.generator
@@ -236,7 +221,6 @@ script = do
   log "Successive intervals" (List.successive Range.from [1.0, 2.0, 3.0, 4.0])
   log "Prepend Maybe to List" (Just 1 ++ [2, 3])
   log "Offset point" (offsetPoint (Point2d.meters 1.0 0.0) (Point2d.meters 3.0 0.0) (Length.meters 1.0))
-  testCurve2dSolving
   testParameter1dGeneration
   testRangeFind
  where
