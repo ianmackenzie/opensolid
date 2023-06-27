@@ -7,3 +7,4 @@
 - ignore: {name: "Avoid lambda using `infix`"}
 - ignore: {name: "Use null"}
 - ignore: {name: "Use uncurry"}
+- ignore: {name: "Use foldr"}
