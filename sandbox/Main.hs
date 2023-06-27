@@ -84,10 +84,10 @@ testArc2dFrom = Try.do
   ?tolerance = defaultTolerance
 
 getCrossProduct :: Result Text Float
-getCrossProduct = Try.withContext "In getCrossProduct:" Try.do
+getCrossProduct = Try.withContext "In getCrossProduct" Try.do
   vectorDirection <- Vector2d.direction (Vector2d.meters 2.0 3.0)
   lineDirection <-
-    Try.withContext "When getting line direction:" $
+    Try.withContext "When getting line direction" $
       Direction2d.from Point2d.origin Point2d.origin
   Ok (vectorDirection >< lineDirection)
  where
@@ -95,7 +95,7 @@ getCrossProduct = Try.withContext "In getCrossProduct:" Try.do
 
 testTry :: Task Text ()
 testTry =
-  case Try.withContext "In testTry:" getCrossProduct of
+  case Try.withContext "In testTry" getCrossProduct of
     Ok crossProduct -> log "Got cross product" crossProduct
     Error message -> Console.printLine message
 
