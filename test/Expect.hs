@@ -39,9 +39,9 @@ exactly :: Eq a => a -> a -> Expectation
 exactly expected actual =
   expect (expected == actual) "Given values are not exactly equal"
 
-approximately :: (Tolerance units, ApproximateEquality a b units) => a -> b -> Expectation
+approximately :: (Tolerance units, ApproximateEquality a b units) => b -> a -> Expectation
 approximately expected actual =
-  expect (expected ~= actual) "Given values are not approximately equal"
+  expect (actual ~= expected) "Given values are not approximately equal"
 
 rangeApproximatelyIncludes :: Tolerance units => Qty units -> Range units -> Expectation
 rangeApproximatelyIncludes value givenRange =
