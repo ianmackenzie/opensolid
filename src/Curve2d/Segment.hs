@@ -1,6 +1,7 @@
-module Curve2d.SearchBox
-  ( SearchBox
+module Curve2d.Segment
+  ( Segment
   , init
+  , overlaps
   , isEndpointIntersectionCandidate
   , endpointIntersectionResolved
   , isTangentIntersectionCandidate
@@ -12,6 +13,7 @@ module Curve2d.SearchBox
   )
 where
 
+import BoundingBox2d (BoundingBox2d)
 import BoundingBox2d qualified
 import CoordinateSystem (Space)
 import {-# SOURCE #-} Curve2d (Curve2d)
@@ -30,46 +32,24 @@ import VectorBox2d (VectorBox2d)
 import VectorBox2d qualified
 import VectorCurve2d qualified
 
-data SearchBox (coordinateSystem :: CoordinateSystem)
-  = SearchBox
-      Bool
-      ~(VectorBox2d coordinateSystem)
-      ~(VectorBox2d coordinateSystem)
+data Segment (coordinateSystem :: CoordinateSystem)
+  = Segment
+      (BoundingBox2d coordinateSystem)
       ~(VectorBox2d coordinateSystem)
       ~(VectorBox2d coordinateSystem)
       ~(VectorBox2d (Space coordinateSystem @ Unitless))
-      ~(VectorBox2d (Space coordinateSystem @ Unitless))
-      Float
 
 init
   :: Tolerance units
   => Derivatives (space @ units)
-  -> Derivatives (space @ units)
   -> Domain
-  -> Domain
-  -> SearchBox (space @ units)
-init derivatives1 derivatives2 u v =
-  let curveBounds1 = Curve2d.segmentBounds u derivatives1.curve
-      curveBounds2 = Curve2d.segmentBounds v derivatives2.curve
-      difference = curveBounds1 - curveBounds2
-      isCandidate = Range.minValue (VectorBox2d.magnitude difference) <= ?tolerance
-      firstBounds1 = VectorCurve2d.segmentBounds u derivatives1.first
-      firstBounds2 = VectorCurve2d.segmentBounds v derivatives2.first
-      secondBounds1 = VectorCurve2d.segmentBounds u derivatives1.second
-      secondBounds2 = VectorCurve2d.segmentBounds v derivatives2.second
-      tangentBounds1 = computeTangentBounds derivatives1 u firstBounds1 secondBounds1
-      tangentBounds2 = computeTangentBounds derivatives2 u firstBounds2 secondBounds2
-      tangentCrossProduct = tangentBounds1 >< tangentBounds2
-      firstResolution = Range.resolution tangentCrossProduct
-   in SearchBox
-        isCandidate
-        firstBounds1
-        firstBounds2
-        secondBounds1
-        secondBounds2
-        tangentBounds1
-        tangentBounds2
-        firstResolution
+  -> Segment (space @ units)
+init derivatives domain =
+  let curveBounds = Curve2d.segmentBounds domain derivatives.curve
+      firstBounds = VectorCurve2d.segmentBounds domain derivatives.first
+      secondBounds = VectorCurve2d.segmentBounds domain derivatives.second
+      tangentBounds = computeTangentBounds derivatives domain firstBounds secondBounds
+   in Segment curveBounds firstBounds secondBounds tangentBounds
 
 computeTangentBounds
   :: Derivatives (space @ units)
@@ -82,28 +62,41 @@ computeTangentBounds derivatives u firstBounds secondBounds
   | Range.includes 1.0 u && derivatives.degenerateEnd = -(VectorBox2d.normalize secondBounds)
   | otherwise = VectorBox2d.normalize firstBounds
 
+overlaps :: Tolerance units => Segment (space @ units) -> Segment (space @ units) -> Bool
+overlaps (Segment firstBounds _ _ _) (Segment secondBounds _ _ _) =
+  Range.minValue (VectorBox2d.magnitude (firstBounds - secondBounds)) <= ?tolerance
+
+crossProductResolution :: Segment (space @ units) -> Segment (space @ units) -> Float
+crossProductResolution (Segment _ _ _ tangentBounds1) (Segment _ _ _ tangentBounds2) =
+  Range.resolution (tangentBounds1 >< tangentBounds2)
+
 isEndpointIntersectionCandidate
   :: (Float, Float)
   -> Domain
   -> Domain
-  -> SearchBox (space @ units)
+  -> Segment (space @ units)
+  -> Segment (space @ units)
   -> Bool
-isEndpointIntersectionCandidate (u0, v0) u v _ =
+isEndpointIntersectionCandidate (u0, v0) u v _ _ =
   Range.includes u0 u && Range.includes v0 v
 
 endpointIntersectionResolved
   :: (Intersection.Kind, Sign)
   -> Domain
   -> Domain
-  -> SearchBox (space @ units)
+  -> Segment (space @ units)
+  -> Segment (space @ units)
   -> Fuzzy Bool
-endpointIntersectionResolved intersectionType _ _ searchBox =
-  case computeIntersectionType searchBox of
+endpointIntersectionResolved intersectionType _ _ segment1 segment2 =
+  case computeIntersectionType segment1 segment2 of
     Resolved localIntersectionType -> Resolved (localIntersectionType == intersectionType)
     Unresolved -> Unresolved
 
-computeIntersectionType :: SearchBox (space @ units) -> Fuzzy (Intersection.Kind, Sign)
-computeIntersectionType searchBox =
+computeIntersectionType
+  :: Segment (space @ units)
+  -> Segment (space @ units)
+  -> Fuzzy (Intersection.Kind, Sign)
+computeIntersectionType segment1 segment2 =
   if Qty.abs firstResolution >= 0.5
     then Resolved (Intersection.Crossing, Qty.sign firstResolution)
     else
@@ -143,15 +136,30 @@ computeIntersectionType searchBox =
             then Resolved (Intersection.Tangent, Qty.sign secondResolution)
             else Unresolved
  where
-  (SearchBox _ firstBounds1 firstBounds2 secondBounds1 secondBounds2 _ _ firstResolution) = searchBox
+  (Segment _ firstBounds1 secondBounds1 _) = segment1
+  (Segment _ firstBounds2 secondBounds2 _) = segment2
+  firstResolution = crossProductResolution segment1 segment2
 
-isTangentIntersectionCandidate :: Domain -> Domain -> SearchBox (space @ units) -> Bool
-isTangentIntersectionCandidate _ _ (SearchBox isCandidate _ _ _ _ _ _ firstResolution) =
-  isCandidate && Qty.abs firstResolution < 0.5
+isTangentIntersectionCandidate
+  :: Tolerance units
+  => Domain
+  -> Domain
+  -> Segment (space @ units)
+  -> Segment (space @ units)
+  -> Bool
+isTangentIntersectionCandidate _ _ segment1 segment2 =
+  overlaps segment1 segment2 && Qty.abs (crossProductResolution segment1 segment2) < 0.1
 
-tangentIntersectionSign :: Domain -> Domain -> SearchBox (space @ units) -> Fuzzy Sign
-tangentIntersectionSign _ _ (SearchBox _ firstBounds1 firstBounds2 secondBounds1 secondBounds2 _ _ _) =
-  let dX1_dU1 = firstBounds1.xComponent
+tangentIntersectionSign
+  :: Domain
+  -> Domain
+  -> Segment (space @ units)
+  -> Segment (space @ units)
+  -> Fuzzy Sign
+tangentIntersectionSign _ _ segment1 segment2 =
+  let (Segment _ firstBounds1 secondBounds1 _) = segment1
+      (Segment _ firstBounds2 secondBounds2 _) = segment2
+      dX1_dU1 = firstBounds1.xComponent
       dY1_dU1 = firstBounds1.yComponent
       dX2_dU2 = firstBounds2.xComponent
       dY2_dU2 = firstBounds2.yComponent
@@ -223,10 +231,11 @@ findTangentIntersection
   -> Derivatives (space @ units)
   -> Domain
   -> Domain
-  -> SearchBox (sapce @ units)
+  -> Segment (space @ units)
+  -> Segment (space @ units)
   -> Sign
   -> Maybe Intersection
-findTangentIntersection derivatives1 derivatives2 u v _ sign = do
+findTangentIntersection derivatives1 derivatives2 u v _ _ sign = do
   (u0, v0) <- Range.find2 (isTangentIntersection derivatives1 derivatives2) u v
   Just (Intersection u0 v0 Intersection.Tangent sign)
 
@@ -252,13 +261,26 @@ isTangentIntersection derivatives1 derivatives2 u1 u2 =
                 && Range.includes Qty.zero dotProduct1
                 && Range.includes Qty.zero dotProduct2
 
-isCrossingIntersectionCandidate :: Domain -> Domain -> SearchBox (space @ units) -> Bool
-isCrossingIntersectionCandidate _ _ (SearchBox isCandidate _ _ _ _ _ _ _) = isCandidate
+isCrossingIntersectionCandidate
+  :: Tolerance units
+  => Domain
+  -> Domain
+  -> Segment (space @ units)
+  -> Segment (space @ units)
+  -> Bool
+isCrossingIntersectionCandidate _ _ segment1 segment2 = overlaps segment1 segment2
 
-crossingIntersectionSign :: Domain -> Domain -> SearchBox (space @ units) -> Fuzzy Sign
-crossingIntersectionSign _ _ (SearchBox _ _ _ _ _ _ _ firstResolution)
+crossingIntersectionSign
+  :: Domain
+  -> Domain
+  -> Segment (space @ units)
+  -> Segment (space @ units)
+  -> Fuzzy Sign
+crossingIntersectionSign _ _ segment1 segment2
   | Qty.abs firstResolution >= 0.5 = Resolved (Qty.sign firstResolution)
   | otherwise = Unresolved
+ where
+  firstResolution = crossProductResolution segment1 segment2
 
 findCrossingIntersection
   :: Tolerance units
@@ -266,10 +288,11 @@ findCrossingIntersection
   -> Derivatives (space @ units)
   -> Domain
   -> Domain
-  -> SearchBox (space @ units)
+  -> Segment (space @ units)
+  -> Segment (space @ units)
   -> Sign
   -> Maybe Intersection
-findCrossingIntersection derivatives1 derivatives2 u v _ sign = do
+findCrossingIntersection derivatives1 derivatives2 u v _ _ sign = do
   (u0, v0) <- Range.find2 (isCrossingIntersection derivatives1.curve derivatives2.curve) u v
   Just (Intersection u0 v0 Intersection.Crossing sign)
 

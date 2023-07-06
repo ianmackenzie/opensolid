@@ -47,7 +47,7 @@ library
       Curve2d
       Curve2d.Derivatives
       Curve2d.Intersection
-      Curve2d.SearchBox
+      Curve2d.Segment
       Curve3d
       Debug
       Direction2d

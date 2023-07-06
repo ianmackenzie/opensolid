@@ -1,9 +1,7 @@
 module Bisection
   ( Domain
   , Tree
-  , Quadtree
   , tree
-  , quadtree
   , solve
   , solve2
   )
@@ -16,19 +14,8 @@ import Range qualified
 
 data Cache segment = Cache Domain ~segment
 
-data Cache2 segment = Cache2 Domain Domain ~segment
-
 data Tree segment
   = Tree (Cache segment) (Cache segment) ~(Tree segment) ~(Tree segment)
-
-data Quadtree segment
-  = Quadtree
-      (Cache2 segment)
-      (Cache2 segment)
-      ~(Quadtree segment)
-      ~(Quadtree segment)
-      ~(Quadtree segment)
-      ~(Quadtree segment)
 
 tree :: (Domain -> segment) -> Tree segment
 tree compute = buildTree compute Domain.unit
@@ -40,25 +27,6 @@ buildTree compute domain =
       neighborhoodCache = Cache neighborhoodDomain (compute neighborhoodDomain)
       (left, right) = Range.bisect domain
    in Tree cache neighborhoodCache (buildTree compute left) (buildTree compute right)
-
-quadtree :: (Domain -> Domain -> segment) -> Quadtree segment
-quadtree compute = buildQuadtree compute Domain.unit Domain.unit
-
-buildQuadtree :: (Domain -> Domain -> segment) -> Domain -> Domain -> Quadtree segment
-buildQuadtree compute xDomain yDomain =
-  let cache = Cache2 xDomain yDomain (compute xDomain yDomain)
-      xNeighborhood = Domain.expand xDomain
-      yNeighborhood = Domain.expand yDomain
-      neighborhoodCache = Cache2 xNeighborhood yNeighborhood (compute xNeighborhood yNeighborhood)
-      (x1, x2) = Range.bisect xDomain
-      (y1, y2) = Range.bisect yDomain
-   in Quadtree
-        cache
-        neighborhoodCache
-        (buildQuadtree compute x1 y1)
-        (buildQuadtree compute x2 y1)
-        (buildQuadtree compute x1 y2)
-        (buildQuadtree compute x2 y2)
 
 solve
   :: (Domain -> segment -> Bool)
@@ -101,35 +69,39 @@ isAllowed domain (first : rest)
 
 solve2
   :: Show solution
-  => (Domain -> Domain -> segment -> Bool)
-  -> (Domain -> Domain -> segment -> Fuzzy resolution)
-  -> (Domain -> Domain -> segment -> resolution -> Maybe solution)
-  -> Quadtree segment
+  => (Domain -> Domain -> segment -> segment -> Bool)
+  -> (Domain -> Domain -> segment -> segment -> Fuzzy resolution)
+  -> (Domain -> Domain -> segment -> segment -> resolution -> Maybe solution)
+  -> Tree segment
+  -> Tree segment
   -> (List solution, List (Domain, Domain))
   -> (List solution, List (Domain, Domain))
-solve2 isCandidate resolveNeighborhood findSolution segmentTree accumulated =
-  let allowed = isAllowed2 xDomain yDomain exclusions
-      candidate = isCandidate xDomain yDomain segment
-      resolved = resolveNeighborhood xNeighborhood yNeighborhood neighborhood
+solve2 isCandidate resolveNeighborhood findSolution segmentTree1 segmentTree2 accumulated =
+  let allowed = isAllowed2 domain1 domain2 exclusions
+      candidate = isCandidate domain1 domain2 segment1 segment2
+      resolved = resolveNeighborhood expandedDomain1 expandedDomain2 neighborhood1 neighborhood2
       recurse =
         accumulated
-          |> solve2 isCandidate resolveNeighborhood findSolution child4
-          |> solve2 isCandidate resolveNeighborhood findSolution child3
-          |> solve2 isCandidate resolveNeighborhood findSolution child2
-          |> solve2 isCandidate resolveNeighborhood findSolution child1
+          |> solve2 isCandidate resolveNeighborhood findSolution rightChild1 rightChild2
+          |> solve2 isCandidate resolveNeighborhood findSolution rightChild1 leftChild2
+          |> solve2 isCandidate resolveNeighborhood findSolution leftChild1 rightChild2
+          |> solve2 isCandidate resolveNeighborhood findSolution leftChild1 leftChild2
    in case (allowed, candidate, resolved) of
         (Resolved False, _, _) -> accumulated
         (_, False, _) -> accumulated
         (Unresolved, True, _) -> recurse
         (Resolved True, True, Unresolved) -> recurse
         (Resolved True, True, Resolved resolution) ->
-          case findSolution xDomain yDomain segment resolution of
-            Just solution -> (solution : solutions, (xNeighborhood, yNeighborhood) : exclusions)
+          case findSolution domain1 domain2 segment1 segment2 resolution of
+            Just solution -> (solution : solutions, (expandedDomain1, expandedDomain2) : exclusions)
             Nothing -> accumulated
  where
-  Quadtree cache neighborhoodCache child1 child2 child3 child4 = segmentTree
-  (Cache2 xDomain yDomain segment) = cache
-  (Cache2 xNeighborhood yNeighborhood neighborhood) = neighborhoodCache
+  (Tree cache1 neighborhoodCache1 leftChild1 rightChild1) = segmentTree1
+  (Tree cache2 neighborhoodCache2 leftChild2 rightChild2) = segmentTree2
+  (Cache domain1 segment1) = cache1
+  (Cache domain2 segment2) = cache2
+  (Cache expandedDomain1 neighborhood1) = neighborhoodCache1
+  (Cache expandedDomain2 neighborhood2) = neighborhoodCache2
   (solutions, exclusions) = accumulated
 
 isAllowed2 :: Domain -> Domain -> List (Domain, Domain) -> Fuzzy Bool

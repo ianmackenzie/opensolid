@@ -32,8 +32,8 @@ import Curve2d.Derivatives (Derivatives)
 import Curve2d.Derivatives qualified as Derivatives
 import Curve2d.Intersection (Intersection (Intersection))
 import Curve2d.Intersection qualified as Intersection
-import Curve2d.SearchBox (SearchBox)
-import Curve2d.SearchBox qualified as SearchBox
+import Curve2d.Segment (Segment)
+import Curve2d.Segment qualified as Segment
 import Domain (Domain)
 import Domain qualified
 import List qualified
@@ -294,7 +294,7 @@ intersections curve1 curve2 = do
     segments -> Error (CurvesOverlap segments)
 
 type SearchTree (coordinateSystem :: CoordinateSystem) =
-  Bisection.Quadtree (SearchBox coordinateSystem)
+  Bisection.Tree (Segment coordinateSystem)
 
 findIntersections
   :: Tolerance units
@@ -305,13 +305,14 @@ findIntersections
 findIntersections curve1 curve2 endpointParameterValues = do
   let derivatives1 = Derivatives.ofCurve curve1
   let derivatives2 = Derivatives.ofCurve curve2
-  let searchTree = Bisection.quadtree (SearchBox.init derivatives1 derivatives2)
+  let searchTree1 = Bisection.tree (Segment.init derivatives1)
+  let searchTree2 = Bisection.tree (Segment.init derivatives2)
   endpointResults <-
-    findEndpointIntersections derivatives1 derivatives2 endpointParameterValues searchTree ([], [])
+    findEndpointIntersections derivatives1 derivatives2 endpointParameterValues searchTree1 searchTree2 ([], [])
   let (allIntersections, _) =
         endpointResults
-          |> findTangentIntersections derivatives1 derivatives2 searchTree
-          |> findCrossingIntersections derivatives1 derivatives2 searchTree
+          |> findTangentIntersections derivatives1 derivatives2 searchTree1 searchTree2
+          |> findCrossingIntersections derivatives1 derivatives2 searchTree1 searchTree2
   Ok (List.sort allIntersections)
 
 findEndpointIntersections
@@ -320,12 +321,13 @@ findEndpointIntersections
   -> Derivatives (space @ units)
   -> List (Float, Float)
   -> SearchTree (space @ units)
+  -> SearchTree (space @ units)
   -> (List Intersection, List (Domain, Domain))
   -> Result IntersectionError (List Intersection, List (Domain, Domain))
-findEndpointIntersections _ _ [] _ accumulated = Ok accumulated
-findEndpointIntersections derivatives1 derivatives2 (uv : rest) searchTree accumulated = do
-  updated <- findEndpointIntersection derivatives1 derivatives2 uv searchTree accumulated
-  findEndpointIntersections derivatives1 derivatives2 rest searchTree updated
+findEndpointIntersections _ _ [] _ _ accumulated = Ok accumulated
+findEndpointIntersections derivatives1 derivatives2 (uv : rest) searchTree1 searchTree2 accumulated = do
+  updated <- findEndpointIntersection derivatives1 derivatives2 uv searchTree1 searchTree2 accumulated
+  findEndpointIntersections derivatives1 derivatives2 rest searchTree1 searchTree2 updated
 
 findEndpointIntersection
   :: Tolerance units
@@ -333,9 +335,10 @@ findEndpointIntersection
   -> Derivatives (space @ units)
   -> (Float, Float)
   -> SearchTree (space @ units)
+  -> SearchTree (space @ units)
   -> (List Intersection, List (Domain, Domain))
   -> Result IntersectionError (List Intersection, List (Domain, Domain))
-findEndpointIntersection derivatives1 derivatives2 uv searchTree accumulated = do
+findEndpointIntersection derivatives1 derivatives2 uv searchTree1 searchTree2 accumulated = do
   intersectionType <-
     Derivatives.classify uv derivatives1 derivatives2
       |> Result.mapError (\Intersection.TangentIntersectionAtDegeneratePoint -> TangentIntersectionAtDegeneratePoint)
@@ -343,10 +346,11 @@ findEndpointIntersection derivatives1 derivatives2 uv searchTree accumulated = d
   let (u0, v0) = uv
   Ok $
     Bisection.solve2
-      (SearchBox.isEndpointIntersectionCandidate uv)
-      (SearchBox.endpointIntersectionResolved intersectionType)
-      (\_ _ _ _ -> Just (Intersection u0 v0 intersectionKind sign))
-      searchTree
+      (Segment.isEndpointIntersectionCandidate uv)
+      (Segment.endpointIntersectionResolved intersectionType)
+      (\_ _ _ _ _ -> Just (Intersection u0 v0 intersectionKind sign))
+      searchTree1
+      searchTree2
       accumulated
 
 findTangentIntersections
@@ -354,23 +358,25 @@ findTangentIntersections
   => Derivatives (space @ units)
   -> Derivatives (space @ units)
   -> SearchTree (space @ units)
+  -> SearchTree (space @ units)
   -> (List Intersection, List (Domain, Domain))
   -> (List Intersection, List (Domain, Domain))
 findTangentIntersections derivatives1 derivatives2 =
   Bisection.solve2
-    SearchBox.isTangentIntersectionCandidate
-    SearchBox.tangentIntersectionSign
-    (SearchBox.findTangentIntersection derivatives1 derivatives2)
+    Segment.isTangentIntersectionCandidate
+    Segment.tangentIntersectionSign
+    (Segment.findTangentIntersection derivatives1 derivatives2)
 
 findCrossingIntersections
   :: Tolerance units
   => Derivatives (space @ units)
   -> Derivatives (space @ units)
   -> SearchTree (space @ units)
+  -> SearchTree (space @ units)
   -> (List Intersection, List (Domain, Domain))
   -> (List Intersection, List (Domain, Domain))
 findCrossingIntersections derivatives1 derivatives2 =
   Bisection.solve2
-    SearchBox.isCrossingIntersectionCandidate
-    SearchBox.crossingIntersectionSign
-    (SearchBox.findCrossingIntersection derivatives1 derivatives2)
+    Segment.isCrossingIntersectionCandidate
+    Segment.crossingIntersectionSign
+    (Segment.findCrossingIntersection derivatives1 derivatives2)
