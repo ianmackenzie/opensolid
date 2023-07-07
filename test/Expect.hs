@@ -6,7 +6,7 @@ module Expect
   , all
   , list
   , pair
-  , exactly
+  , equal
   , approximately
   , rangeApproximatelyIncludes
   , range
@@ -35,9 +35,9 @@ expect :: Bool -> Text -> Expectation
 expect True _ = Passed
 expect False failureMessage = Failed failureMessage
 
-exactly :: Eq a => a -> a -> Expectation
-exactly expected actual =
-  expect (expected == actual) "Given values are not exactly equal"
+equal :: Eq a => a -> a -> Expectation
+equal expected actual =
+  expect (expected == actual) "Given values are not equal"
 
 approximately :: (Tolerance units, ApproximateEquality a b units) => b -> a -> Expectation
 approximately expected actual =
