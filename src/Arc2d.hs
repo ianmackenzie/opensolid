@@ -138,7 +138,7 @@ fromStartPointEndPointSweptAngle startPoint endPoint sweptAngle =
           halfDistance = 0.5 * distance
           linearDeviation = halfDistance * tanHalfAngle
        in if linearDeviation ~= Qty.zero
-            then Ok (Curve2d.Internal.Line startPoint endPoint)
+            then Ok (Curve2d.Internal.Line startPoint endPoint direction)
             else
               let offset = (halfDistance / tanHalfAngle) * Direction2d.rotateLeft direction
                   computedCenterPoint = Point2d.midpoint startPoint endPoint + offset

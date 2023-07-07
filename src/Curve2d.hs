@@ -36,6 +36,7 @@ import Curve2d.Intersection (Intersection (Intersection))
 import Curve2d.Intersection qualified as Intersection
 import Curve2d.Segment (Segment)
 import Curve2d.Segment qualified as Segment
+import Direction2d (Direction2d)
 import Domain (Domain)
 import Domain qualified
 import List qualified
@@ -53,8 +54,8 @@ import VectorCurve2d qualified
 
 type Curve2d (coordinateSystem :: CoordinateSystem) = Internal.Curve2d coordinateSystem
 
-pattern Line :: Point2d (space @ units) -> Point2d (space @ units) -> Curve2d (space @ units)
-pattern Line startPoint endPoint <- Internal.Line startPoint endPoint
+pattern Line :: Point2d (space @ units) -> Point2d (space @ units) -> Direction2d space -> Curve2d (space @ units)
+pattern Line startPoint endPoint direction <- Internal.Line startPoint endPoint direction
 
 pattern Arc :: Point2d (space @ units) -> Qty units -> Angle -> Angle -> Curve2d (space @ units)
 pattern Arc centerPoint radius startAngle endAngle <- Internal.Arc centerPoint radius startAngle endAngle
@@ -108,19 +109,29 @@ derivative :: Curve2d (space @ units) -> VectorCurve2d (space @ units)
 derivative = Internal.derivative
 
 reverse :: Curve2d (space @ units) -> Curve2d (space @ units)
-reverse (Internal.Line p1 p2) = Internal.Line p2 p1
+reverse (Internal.Line p1 p2 direction) = Internal.Line p2 p1 -direction
 reverse (Internal.Arc p0 r a b) = Internal.Arc p0 r b a
 reverse (Internal.Curve curve) = Internal.Curve (reverseImpl curve)
 
 bisect :: Curve2d (space @ units) -> (Curve2d (space @ units), Curve2d (space @ units))
-bisect (Internal.Line p1 p2) = let mid = Point2d.midpoint p1 p2 in (Internal.Line p1 mid, Internal.Line mid p2)
-bisect (Internal.Arc p0 r a b) = let mid = Qty.midpoint a b in (Internal.Arc p0 r a mid, Internal.Arc p0 r mid b)
+bisect (Internal.Line p1 p2 direction) =
+  let mid = Point2d.midpoint p1 p2
+   in ( Internal.Line p1 mid direction
+      , Internal.Line mid p2 direction
+      )
+bisect (Internal.Arc p0 r a b) =
+  let mid = Qty.midpoint a b
+   in ( Internal.Arc p0 r a mid
+      , Internal.Arc p0 r mid b
+      )
 bisect (Internal.Curve curve) =
   let (curve1, curve2) = bisectImpl curve
-   in (Internal.Curve curve1, Internal.Curve curve2)
+   in ( Internal.Curve curve1
+      , Internal.Curve curve2
+      )
 
 boundingBox :: Curve2d (space @ units) -> BoundingBox2d (space @ units)
-boundingBox (Internal.Line p1 p2) = BoundingBox2d.hull2 p1 p2
+boundingBox (Internal.Line p1 p2 _) = BoundingBox2d.hull2 p1 p2
 boundingBox arc@(Internal.Arc{}) = segmentBounds Domain.unit arc
 boundingBox (Internal.Curve curve) = boundingBoxImpl curve
 
@@ -302,3 +313,10 @@ findCrossingIntersections derivatives1 derivatives2 =
     Segment.isCrossingIntersectionCandidate
     Segment.crossingIntersectionSign
     (Segment.findCrossingIntersection derivatives1 derivatives2)
+
+-- classify
+--   :: Tolerance units
+--   => Point2d (space @ units)
+--   -> Curve2d (space @ units)
+--   -> Sign
+-- classify point curve =

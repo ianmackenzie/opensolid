@@ -13,6 +13,7 @@ import Angle (Angle)
 import BoundingBox2d (BoundingBox2d)
 import BoundingBox2d qualified
 import Curve1d qualified
+import Direction2d (Direction2d)
 import Domain (Domain)
 import OpenSolid
 import Point2d (Point2d)
@@ -26,7 +27,7 @@ import VectorCurve2d (IsVectorCurve2d (..), VectorCurve2d (VectorCurve2d))
 import VectorCurve2d qualified
 
 data Curve2d (coordinateSystem :: CoordinateSystem) where
-  Line :: Point2d (space @ units) -> Point2d (space @ units) -> Curve2d (space @ units)
+  Line :: Point2d (space @ units) -> Point2d (space @ units) -> Direction2d space -> Curve2d (space @ units)
   Arc :: Point2d (space @ units) -> Qty units -> Angle -> Angle -> Curve2d (space @ units)
   Curve :: IsCurve2d curve (space @ units) => curve -> Curve2d (space @ units)
 
@@ -55,22 +56,22 @@ class
   boundingBoxImpl :: curve -> BoundingBox2d coordinateSystem
 
 startPoint :: Curve2d (space @ units) -> Point2d (space @ units)
-startPoint (Line p1 _) = p1
+startPoint (Line p1 _ _) = p1
 startPoint arc@(Arc{}) = evaluateAt 0.0 arc
 startPoint (Curve curve) = startPointImpl curve
 
 endPoint :: Curve2d (space @ units) -> Point2d (space @ units)
-endPoint (Line _ p2) = p2
+endPoint (Line _ p2 _) = p2
 endPoint arc@(Arc{}) = evaluateAt 1.0 arc
 endPoint (Curve curve) = endPointImpl curve
 
 evaluateAt :: Float -> Curve2d (space @ units) -> Point2d (space @ units)
-evaluateAt t (Line p1 p2) = Point2d.interpolateFrom p1 p2 t
+evaluateAt t (Line p1 p2 _) = Point2d.interpolateFrom p1 p2 t
 evaluateAt t (Arc p0 r a b) = let theta = Qty.interpolateFrom a b t in p0 + Vector2d.polar r theta
 evaluateAt t (Curve curve) = Curve2d.Internal.evaluateAtImpl t curve
 
 segmentBounds :: Domain -> Curve2d (space @ units) -> BoundingBox2d (space @ units)
-segmentBounds t (Line p1 p2) =
+segmentBounds t (Line p1 p2 _) =
   BoundingBox2d.hull2
     (Point2d.interpolateFrom p1 p2 t.minValue)
     (Point2d.interpolateFrom p1 p2 t.maxValue)
@@ -79,7 +80,7 @@ segmentBounds t (Arc p0 r a b) =
 segmentBounds t (Curve curve) = Curve2d.Internal.segmentBoundsImpl t curve
 
 derivative :: Curve2d (space @ units) -> VectorCurve2d (space @ units)
-derivative (Line p1 p2) = VectorCurve2d.constant (p2 - p1)
+derivative (Line p1 p2 _) = VectorCurve2d.constant (p2 - p1)
 derivative (Arc _ r a b) =
   let theta = a + Curve1d.parameter * (b - a)
       x = r * Curve1d.cos theta
