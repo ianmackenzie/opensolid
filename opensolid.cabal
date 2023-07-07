@@ -45,9 +45,7 @@ library
       Curve1d
       Curve1d.Root
       Curve2d
-      Curve2d.Derivatives
       Curve2d.Intersection
-      Curve2d.Segment
       Curve3d
       Debug
       Direction2d
@@ -91,6 +89,8 @@ library
       Volume
   other-modules:
       Curve2d.Internal
+      Curve2d.Derivatives
+      Curve2d.Segment
   hs-source-dirs:
       src
   default-extensions:

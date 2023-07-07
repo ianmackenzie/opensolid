@@ -75,6 +75,8 @@ library:
   source-dirs: src
   other-modules:
   - Curve2d.Internal
+  - Curve2d.Derivatives
+  - Curve2d.Segment
 
 executables:
   sandbox:
