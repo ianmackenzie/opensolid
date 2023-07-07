@@ -1,8 +1,6 @@
 module Curve2d
   ( Curve2d
-  , IsCurve2d
   , DegenerateCurve
-  , from
   , startPoint
   , endPoint
   , evaluateAt
@@ -12,31 +10,16 @@ module Curve2d
 where
 
 import BoundingBox2d (BoundingBox2d)
+import Curve2d.Internal qualified as Internal
 import Domain (Domain)
 import OpenSolid
 import Point2d (Point2d)
 import VectorCurve2d (VectorCurve2d)
 
-class Show curve => IsCurve2d curve (coordinateSystem :: CoordinateSystem) | curve -> coordinateSystem where
-  startPointImpl :: curve -> Point2d coordinateSystem
-  endPointImpl :: curve -> Point2d coordinateSystem
-  evaluateAtImpl :: Float -> curve -> Point2d coordinateSystem
-  segmentBoundsImpl :: Domain -> curve -> BoundingBox2d coordinateSystem
-  derivativeImpl :: curve -> VectorCurve2d coordinateSystem
-  reverseImpl :: curve -> curve
-  bisectImpl :: curve -> (curve, curve)
-  boundingBoxImpl :: curve -> BoundingBox2d coordinateSystem
-
-type role Curve2d nominal
-
-data Curve2d (coordinateSystem :: CoordinateSystem)
+type Curve2d (coordinateSystem :: CoordinateSystem) = Internal.Curve2d coordinateSystem
 
 data DegenerateCurve
 
-from
-  :: (Tolerance units, IsCurve2d curve (space @ units))
-  => curve
-  -> Result DegenerateCurve (Curve2d (space @ units))
 startPoint :: Curve2d (space @ units) -> Point2d (space @ units)
 endPoint :: Curve2d (space @ units) -> Point2d (space @ units)
 evaluateAt :: Float -> Curve2d (space @ units) -> Point2d (space @ units)

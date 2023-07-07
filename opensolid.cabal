@@ -90,9 +90,7 @@ library
       VectorCurve3d
       Volume
   other-modules:
-      Paths_opensolid
-  autogen-modules:
-      Paths_opensolid
+      Curve2d.Internal
   hs-source-dirs:
       src
   default-extensions:

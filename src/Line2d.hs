@@ -4,7 +4,7 @@ module Line2d
 where
 
 import Curve2d (Curve2d, DegenerateCurve (DegenerateCurve))
-import Curve2d qualified
+import Curve2d.Internal qualified
 import OpenSolid
 import Point2d (Point2d)
 
@@ -15,4 +15,4 @@ from
   -> Result DegenerateCurve (Curve2d (space @ units))
 from p1 p2
   | p1 ~= p2 = Error DegenerateCurve
-  | otherwise = Ok (Curve2d.unsafeLine p1 p2)
+  | otherwise = Ok (Curve2d.Internal.Line p1 p2)

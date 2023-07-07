@@ -1,11 +1,11 @@
 module Curve2d
-  ( Curve2d (Line, Arc)
+  ( Curve2d
+  , pattern Line
+  , pattern Arc
   , DegenerateCurve (DegenerateCurve)
   , Intersection
   , IntersectionError (..)
   , IsCurve2d (..)
-  , unsafeLine
-  , unsafeArc
   , from
   , startPoint
   , endPoint
@@ -30,6 +30,8 @@ import Curve1d qualified
 import Curve1d.Root qualified as Root
 import Curve2d.Derivatives (Derivatives)
 import Curve2d.Derivatives qualified as Derivatives
+import Curve2d.Internal (IsCurve2d (..))
+import Curve2d.Internal qualified as Internal
 import Curve2d.Intersection (Intersection (Intersection))
 import Curve2d.Intersection qualified as Intersection
 import Curve2d.Segment (Segment)
@@ -45,53 +47,19 @@ import Range (Range (..))
 import Range qualified
 import Result qualified
 import Units qualified
-import Vector2d qualified
 import VectorBox2d qualified
-import VectorCurve2d (IsVectorCurve2d, VectorCurve2d (VectorCurve2d))
+import VectorCurve2d (VectorCurve2d)
 import VectorCurve2d qualified
 
-class
-  Show curve =>
-  IsCurve2d curve (coordinateSystem :: CoordinateSystem)
-    | curve -> coordinateSystem
-  where
-  startPointImpl :: curve -> Point2d coordinateSystem
-  endPointImpl :: curve -> Point2d coordinateSystem
-  evaluateAtImpl :: Float -> curve -> Point2d coordinateSystem
-  segmentBoundsImpl :: Domain -> curve -> BoundingBox2d coordinateSystem
-  derivativeImpl :: curve -> VectorCurve2d coordinateSystem
-  reverseImpl :: curve -> curve
-  bisectImpl :: curve -> (curve, curve)
-  boundingBoxImpl :: curve -> BoundingBox2d coordinateSystem
-
-data Curve2d (coordinateSystem :: CoordinateSystem) where
-  Line# :: Point2d (space @ units) -> Point2d (space @ units) -> Curve2d (space @ units)
-  Arc# :: Point2d (space @ units) -> Qty units -> Angle -> Angle -> Curve2d (space @ units)
-  Curve2d# :: IsCurve2d curve (space @ units) => curve -> Curve2d (space @ units)
+type Curve2d (coordinateSystem :: CoordinateSystem) = Internal.Curve2d coordinateSystem
 
 pattern Line :: Point2d (space @ units) -> Point2d (space @ units) -> Curve2d (space @ units)
-pattern Line startPoint endPoint <- Line# startPoint endPoint
+pattern Line startPoint endPoint <- Internal.Line startPoint endPoint
 
 pattern Arc :: Point2d (space @ units) -> Qty units -> Angle -> Angle -> Curve2d (space @ units)
-pattern Arc centerPoint radius startAngle endAngle <- Arc# centerPoint radius startAngle endAngle
-
-deriving instance Show (Curve2d coordinateSystem)
-
-instance
-  (units1 ~ units1', units2 ~ units2', space ~ space')
-  => Units.Coercion
-      units1
-      units2
-      (Curve2d (space @ units1'))
-      (Curve2d (space' @ units2'))
+pattern Arc centerPoint radius startAngle endAngle <- Internal.Arc centerPoint radius startAngle endAngle
 
 data DegenerateCurve = DegenerateCurve deriving (Eq, Show, ErrorMessage)
-
-unsafeLine :: Point2d (space @ units) -> Point2d (space @ units) -> Curve2d (space @ units)
-unsafeLine = Line#
-
-unsafeArc :: Point2d (space @ units) -> Qty units -> Angle -> Angle -> Curve2d (space @ units)
-unsafeArc = Arc#
 
 from
   :: Tolerance units
@@ -103,7 +71,7 @@ from curve =
       secondDerivative = VectorCurve2d.derivative firstDerivative
    in if Range.any (areBothZero firstDerivative secondDerivative) Domain.unit
         then Error DegenerateCurve
-        else Ok (Curve2d# curve)
+        else Ok (Internal.Curve curve)
 
 areBothZero
   :: Tolerance units
@@ -122,91 +90,39 @@ areBothZero firstDerivative secondDerivative domain
   (Range secondMin secondMax) = VectorBox2d.magnitude secondBounds
 
 startPoint :: Curve2d (space @ units) -> Point2d (space @ units)
-startPoint (Line# p1 _) = p1
-startPoint arc@(Arc#{}) = evaluateAt 0.0 arc
-startPoint (Curve2d# curve) = startPointImpl curve
+startPoint = Internal.startPoint
 
 endPoint :: Curve2d (space @ units) -> Point2d (space @ units)
-endPoint (Line# _ p2) = p2
-endPoint arc@(Arc#{}) = evaluateAt 1.0 arc
-endPoint (Curve2d# curve) = endPointImpl curve
+endPoint = Internal.endPoint
 
 evaluateAt :: Float -> Curve2d (space @ units) -> Point2d (space @ units)
-evaluateAt t (Line# p1 p2) = Point2d.interpolateFrom p1 p2 t
-evaluateAt t (Arc# p0 r a b) = let theta = Qty.interpolateFrom a b t in p0 + Vector2d.polar r theta
-evaluateAt t (Curve2d# curve) = evaluateAtImpl t curve
+evaluateAt = Internal.evaluateAt
 
 pointOn :: Curve2d (space @ units) -> Float -> Point2d (space @ units)
 pointOn curve t = evaluateAt t curve
 
 segmentBounds :: Domain -> Curve2d (space @ units) -> BoundingBox2d (space @ units)
-segmentBounds t (Line# p1 p2) =
-  BoundingBox2d.hull2
-    (Point2d.interpolateFrom p1 p2 t.minValue)
-    (Point2d.interpolateFrom p1 p2 t.maxValue)
-segmentBounds t (Arc# p0 r a b) =
-  let theta = a + t * (b - a) in p0 + VectorBox2d.polar (Range.constant r) theta
-segmentBounds t (Curve2d# curve) = segmentBoundsImpl t curve
+segmentBounds = Internal.segmentBounds
 
 derivative :: Curve2d (space @ units) -> VectorCurve2d (space @ units)
-derivative (Line# p1 p2) = VectorCurve2d.constant (p2 - p1)
-derivative (Arc# _ r a b) =
-  let theta = a + Curve1d.parameter * (b - a)
-      x = r * Curve1d.cos theta
-      y = r * Curve1d.sin theta
-   in VectorCurve2d.xy (Curve1d.derivative x) (Curve1d.derivative y)
-derivative (Curve2d# curve) = derivativeImpl curve
+derivative = Internal.derivative
 
 reverse :: Curve2d (space @ units) -> Curve2d (space @ units)
-reverse (Line# p1 p2) = unsafeLine p2 p1
-reverse (Arc# p0 r a b) = unsafeArc p0 r b a
-reverse (Curve2d# curve) = Curve2d# (reverseImpl curve)
+reverse (Internal.Line p1 p2) = Internal.Line p2 p1
+reverse (Internal.Arc p0 r a b) = Internal.Arc p0 r b a
+reverse (Internal.Curve curve) = Internal.Curve (reverseImpl curve)
 
 bisect :: Curve2d (space @ units) -> (Curve2d (space @ units), Curve2d (space @ units))
-bisect (Line# p1 p2) = let mid = Point2d.midpoint p1 p2 in (unsafeLine p1 mid, unsafeLine mid p2)
-bisect (Arc# p0 r a b) = let mid = Qty.midpoint a b in (unsafeArc p0 r a mid, unsafeArc p0 r mid b)
-bisect (Curve2d# curve) =
+bisect (Internal.Line p1 p2) = let mid = Point2d.midpoint p1 p2 in (Internal.Line p1 mid, Internal.Line mid p2)
+bisect (Internal.Arc p0 r a b) = let mid = Qty.midpoint a b in (Internal.Arc p0 r a mid, Internal.Arc p0 r mid b)
+bisect (Internal.Curve curve) =
   let (curve1, curve2) = bisectImpl curve
-   in (Curve2d# curve1, Curve2d# curve2)
+   in (Internal.Curve curve1, Internal.Curve curve2)
 
 boundingBox :: Curve2d (space @ units) -> BoundingBox2d (space @ units)
-boundingBox (Line# p1 p2) = BoundingBox2d.hull2 p1 p2
-boundingBox arc@(Arc#{}) = segmentBounds Domain.unit arc
-boundingBox (Curve2d# curve) = boundingBoxImpl curve
-
-data PointCurveDifference (coordinateSystem :: CoordinateSystem)
-  = PointCurveDifference (Point2d coordinateSystem) (Curve2d coordinateSystem)
-
-instance IsVectorCurve2d (PointCurveDifference (space @ units)) (space @ units) where
-  evaluateAtImpl t (PointCurveDifference point curve) = point - evaluateAt t curve
-  segmentBoundsImpl t (PointCurveDifference point curve) = point - segmentBounds t curve
-  derivativeImpl (PointCurveDifference _ curve) = -(derivative curve)
-
-instance
-  (units ~ units', space ~ space')
-  => Subtraction
-      (Point2d (space @ units))
-      (Curve2d (space' @ units'))
-      (VectorCurve2d (space @ units))
-  where
-  point - curve = VectorCurve2d (PointCurveDifference point curve)
-
-data CurvePointDifference (coordinateSystem :: CoordinateSystem)
-  = CurvePointDifference (Curve2d coordinateSystem) (Point2d coordinateSystem)
-
-instance IsVectorCurve2d (CurvePointDifference (space @ units)) (space @ units) where
-  evaluateAtImpl t (CurvePointDifference curve point) = evaluateAt t curve - point
-  segmentBoundsImpl t (CurvePointDifference curve point) = segmentBounds t curve - point
-  derivativeImpl (CurvePointDifference curve _) = derivative curve
-
-instance
-  (units ~ units', space ~ space')
-  => Subtraction
-      (Curve2d (space @ units))
-      (Point2d (space' @ units'))
-      (VectorCurve2d (space @ units))
-  where
-  curve - point = VectorCurve2d (CurvePointDifference curve point)
+boundingBox (Internal.Line p1 p2) = BoundingBox2d.hull2 p1 p2
+boundingBox arc@(Internal.Arc{}) = segmentBounds Domain.unit arc
+boundingBox (Internal.Curve curve) = boundingBoxImpl curve
 
 data CurveIsCoincidentWithPoint = CurveIsCoincidentWithPoint deriving (Eq, Show, ErrorMessage)
 

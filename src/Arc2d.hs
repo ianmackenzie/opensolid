@@ -11,7 +11,7 @@ import Angle (Angle)
 import Angle qualified
 import CoordinateSystem (Units)
 import Curve2d (Curve2d)
-import Curve2d qualified
+import Curve2d.Internal qualified
 import Direction2d qualified
 import List qualified
 import OpenSolid
@@ -70,7 +70,7 @@ fromCenterPointRadiusStartAngleEndAngle centerPoint radius startAngle endAngle
   | radius < Qty.zero = Error NegativeRadius
   | radius ~= Qty.zero = Error DegenerateArc
   | radius * Angle.inRadians (endAngle - startAngle) ~= Qty.zero = Error DegenerateArc
-  | otherwise = Ok (Curve2d.unsafeArc centerPoint radius startAngle endAngle)
+  | otherwise = Ok (Curve2d.Internal.Arc centerPoint radius startAngle endAngle)
 
 fromCenterPointStartPointSweptAngle
   :: Tolerance units
@@ -138,13 +138,13 @@ fromStartPointEndPointSweptAngle startPoint endPoint sweptAngle =
           halfDistance = 0.5 * distance
           linearDeviation = halfDistance * tanHalfAngle
        in if linearDeviation ~= Qty.zero
-            then Ok (Curve2d.unsafeLine startPoint endPoint)
+            then Ok (Curve2d.Internal.Line startPoint endPoint)
             else
               let offset = (halfDistance / tanHalfAngle) * Direction2d.rotateLeft direction
                   computedCenterPoint = Point2d.midpoint startPoint endPoint + offset
                   computedStartAngle = Point2d.angleFrom computedCenterPoint startPoint
                in Ok $
-                    Curve2d.unsafeArc
+                    Curve2d.Internal.Arc
                       computedCenterPoint
                       (Point2d.distanceFrom computedCenterPoint startPoint)
                       computedStartAngle
