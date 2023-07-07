@@ -60,16 +60,20 @@ overlappingSegments
   :: Tolerance units
   => Curve2d (space @ units)
   -> Curve2d (space @ units)
-  -> Result Text (List (Domain, Domain))
+  -> Result Text (List (Domain, Domain, Sign))
 overlappingSegments curve1 curve2 =
   case Curve2d.intersections curve1 curve2 of
     Ok _ -> Error "Intersection should have failed (and given overlapping segments)"
     Error (Curve2d.CurvesOverlap segments) -> Ok segments
     Error error -> Error (errorMessage error)
 
-expectSegments :: List (Domain, Domain) -> List (Domain, Domain) -> Expectation
-expectSegments expected actual =
-  Expect.list (Expect.pair Expect.range) expected actual
+expectSegment :: (Domain, Domain, Sign) -> (Domain, Domain, Sign) -> Expectation
+expectSegment (expectedU, expectedV, expectedSign) (actualU, actualV, actualSign) =
+  Expect.all
+    [ Expect.range expectedU actualU
+    , Expect.range expectedV actualV
+    , Expect.equal expectedSign actualSign
+    ]
  where
   ?tolerance = 1e-12
 
@@ -88,7 +92,7 @@ curveOverlap1 = Test.verify "Overlap detection 1" $ do
       , Arc2d.SweptAngle (Angle.degrees 180.0)
       ]
   segments <- overlappingSegments arc1 arc2
-  segments |> expectSegments [(Range.from 0.0 0.5, Range.from 0.5 1.0)]
+  segments |> Expect.list expectSegment [(Range.from 0.0 0.5, Range.from 0.5 1.0, Positive)]
 
 curveOverlap2 :: Tolerance Meters => Test
 curveOverlap2 = Test.verify "Overlap detection 2" $ do
@@ -108,9 +112,10 @@ curveOverlap2 = Test.verify "Overlap detection 2" $ do
       ]
   segments <- overlappingSegments arc1 arc2
   segments
-    |> expectSegments
-      [ (Range.from 0.0 (1 / 4), Range.from 0.0 (1 / 6))
-      , (Range.from (3 / 4) 1.0, Range.from (5 / 6) 1.0)
+    |> Expect.list
+      expectSegment
+      [ (Range.from 0.0 (1 / 4), Range.from 0.0 (1 / 6), Negative)
+      , (Range.from (3 / 4) 1.0, Range.from (5 / 6) 1.0, Negative)
       ]
 
 expectIntersection :: Intersection -> Intersection -> Expectation

@@ -244,19 +244,25 @@ overlappingSegments
   => Curve2d (space @ units)
   -> Curve2d (space @ units)
   -> List (Float, Float)
-  -> List (Domain, Domain)
+  -> List (Domain, Domain, Sign)
 overlappingSegments curve1 curve2 endpointParameterValues =
   endpointParameterValues
-    |> List.successive (\(u1, v1) (u2, v2) -> (Range.from u1 u2, Range.from v1 v2))
+    |> List.successive
+      ( \(u1, v1) (u2, v2) ->
+          ( Range.from u1 u2
+          , Range.from v1 v2
+          , if compare u1 u2 == compare v1 v2 then Positive else Negative
+          )
+      )
     |> List.filter (isOverlappingSegment curve1 curve2)
 
 isOverlappingSegment
   :: Tolerance units
   => Curve2d (space @ units)
   -> Curve2d (space @ units)
-  -> (Domain, Domain)
+  -> (Domain, Domain, Sign)
   -> Bool
-isOverlappingSegment curve1 curve2 (domain1, _) =
+isOverlappingSegment curve1 curve2 (domain1, _, _) =
   let segmentStartPoint = evaluateAt (Range.minValue domain1) curve1
       curve1TestPoints = Domain.sample (pointOn curve1) domain1
       segment1IsNondegenerate = List.any (!= segmentStartPoint) curve1TestPoints
@@ -264,7 +270,7 @@ isOverlappingSegment curve1 curve2 (domain1, _) =
    in segment1IsNondegenerate && segment1LiesOnSegment2
 
 data IntersectionError
-  = CurvesOverlap (List (Domain, Domain))
+  = CurvesOverlap (List (Domain, Domain, Sign))
   | TangentIntersectionAtDegeneratePoint
   deriving (Eq, Show, ErrorMessage)
 
