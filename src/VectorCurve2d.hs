@@ -8,6 +8,7 @@ module VectorCurve2d
   , constant
   , xy
   , line
+  , arc
   , quadraticSpline
   , cubicSpline
   , squaredMagnitude
@@ -16,12 +17,16 @@ module VectorCurve2d
   )
 where
 
+import Angle (Angle)
+import Angle qualified
 import Curve1d (Curve1d (Curve1d), IsCurve1d)
 import Curve1d qualified
 import Domain (Domain)
 import Generic qualified
 import OpenSolid
+import Qty qualified
 import Range (Range (Range))
+import Range qualified
 import Units (Unitless)
 import Units qualified
 import Vector2d (Vector2d (Vector2d))
@@ -46,6 +51,7 @@ data VectorCurve2d (coordinateSystem :: CoordinateSystem) where
   Product2d1d :: forall space units1 units2 units3. Units.Product units1 units2 units3 => VectorCurve2d (space @ units1) -> Curve1d units2 -> VectorCurve2d (space @ units3)
   Quotient :: forall space units1 units2 units3. Units.Quotient units1 units2 units3 => VectorCurve2d (space @ units1) -> Curve1d units2 -> VectorCurve2d (space @ units3)
   Line :: Vector2d (space @ units) -> Vector2d (space @ units) -> VectorCurve2d (space @ units)
+  Arc :: Qty units -> Angle -> Angle -> VectorCurve2d (space @ units)
   QuadraticSpline :: Vector2d (space @ units) -> Vector2d (space @ units) -> Vector2d (space @ units) -> VectorCurve2d (space @ units)
   CubicSpline :: Vector2d (space @ units) -> Vector2d (space @ units) -> Vector2d (space @ units) -> Vector2d (space @ units) -> VectorCurve2d (space @ units)
 
@@ -145,6 +151,12 @@ xy = XY
 line :: Vector2d (space @ units) -> Vector2d (space @ units) -> VectorCurve2d (space @ units)
 line v1 v2 = if v1 == v2 then Constant v1 else Line v1 v2
 
+arc :: Qty units -> Angle -> Angle -> VectorCurve2d (space @ units)
+arc r a b
+  | r == Qty.zero = Constant Vector2d.zero
+  | a == b = Constant (Vector2d.polar r a)
+  | otherwise = Arc r a b
+
 quadraticSpline
   :: Vector2d (space @ units)
   -> Vector2d (space @ units)
@@ -212,6 +224,7 @@ evaluateAt t curve =
     Product2d1d c1 c2 -> evaluateAt t c1 * Curve1d.evaluateAt t c2
     Quotient c1 c2 -> evaluateAt t c1 / Curve1d.evaluateAt t c2
     Line v1 v2 -> Vector2d.interpolateFrom v1 v2 t
+    Arc r a b -> Vector2d.polar r (Qty.interpolateFrom a b t)
     QuadraticSpline v1 v2 v3 -> quadraticBlossom v1 v2 v3 t t
     CubicSpline v1 v2 v3 v4 -> cubicBlossom v1 v2 v3 v4 t t t
 
@@ -232,6 +245,8 @@ segmentBounds t@(Range tl th) curve =
       VectorBox2d.hull2
         (Vector2d.interpolateFrom v1 v2 tl)
         (Vector2d.interpolateFrom v1 v2 th)
+    Arc r a b ->
+      VectorBox2d.polar (Range.constant r) (a + (b - a) * t)
     QuadraticSpline v1 v2 v3 ->
       VectorBox2d.hull3
         (quadraticBlossom v1 v2 v3 tl tl)
@@ -258,6 +273,7 @@ derivative curve =
     Product2d1d c1 c2 -> derivative c1 * c2 + c1 * Curve1d.derivative c2
     Quotient c1 c2 -> derivative c1 / c2 + curve * (Curve1d.derivative c2 / c2)
     Line v1 v2 -> constant (v2 - v1)
+    Arc r a b -> Arc (r * Angle.inRadians (b - a)) (a + Angle.quarterTurn) (b + Angle.quarterTurn)
     QuadraticSpline v1 v2 v3 -> line (2.0 * (v2 - v1)) (2.0 * (v3 - v2))
     CubicSpline v1 v2 v3 v4 -> quadraticSpline (3.0 * (v2 - v1)) (3.0 * (v3 - v2)) (3.0 * (v4 - v3))
 

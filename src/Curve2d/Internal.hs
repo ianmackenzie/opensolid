@@ -12,7 +12,6 @@ where
 import Angle (Angle)
 import BoundingBox2d (BoundingBox2d)
 import BoundingBox2d qualified
-import Curve1d qualified
 import Direction2d (Direction2d)
 import Domain (Domain)
 import OpenSolid
@@ -81,11 +80,7 @@ segmentBounds t (Curve curve) = Curve2d.Internal.segmentBoundsImpl t curve
 
 derivative :: Curve2d (space @ units) -> VectorCurve2d (space @ units)
 derivative (Line p1 p2 _) = VectorCurve2d.constant (p2 - p1)
-derivative (Arc _ r a b) =
-  let theta = a + Curve1d.parameter * (b - a)
-      x = r * Curve1d.cos theta
-      y = r * Curve1d.sin theta
-   in VectorCurve2d.xy (Curve1d.derivative x) (Curve1d.derivative y)
+derivative (Arc _ r a b) = VectorCurve2d.derivative (VectorCurve2d.arc r a b)
 derivative (Curve curve) = Curve2d.Internal.derivativeImpl curve
 
 data PointCurveDifference (coordinateSystem :: CoordinateSystem)
