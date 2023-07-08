@@ -18,6 +18,7 @@ import OpenSolid
 import Point2d (Point2d)
 import Point2d qualified
 import Qty qualified
+import Range (Range (Range))
 import Range qualified
 import Units qualified
 import Vector2d qualified
@@ -70,13 +71,12 @@ evaluateAt t (Arc p0 r a b) = let theta = Qty.interpolateFrom a b t in p0 + Vect
 evaluateAt t (Curve curve) = Curve2d.Internal.evaluateAtImpl t curve
 
 segmentBounds :: Domain -> Curve2d (space @ units) -> BoundingBox2d (space @ units)
-segmentBounds t (Line p1 p2 _) =
-  BoundingBox2d.hull2
-    (Point2d.interpolateFrom p1 p2 t.minValue)
-    (Point2d.interpolateFrom p1 p2 t.maxValue)
+segmentBounds (Range t1 t2) (Line p1 p2 _) =
+  BoundingBox2d.hull2 (Point2d.interpolateFrom p1 p2 t1) (Point2d.interpolateFrom p1 p2 t2)
 segmentBounds t (Arc p0 r a b) =
-  let theta = a + t * (b - a) in p0 + VectorBox2d.polar (Range.constant r) theta
-segmentBounds t (Curve curve) = Curve2d.Internal.segmentBoundsImpl t curve
+  p0 + VectorBox2d.polar (Range.constant r) (a + (b - a) * t)
+segmentBounds t (Curve curve) =
+  Curve2d.Internal.segmentBoundsImpl t curve
 
 derivative :: Curve2d (space @ units) -> VectorCurve2d (space @ units)
 derivative (Line p1 p2 _) = VectorCurve2d.constant (p2 - p1)
