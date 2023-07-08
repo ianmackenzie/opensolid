@@ -55,16 +55,6 @@ instance IsCurve2d (CubicSpline2d (space @ units)) (space @ units) where
 
   reverseImpl (CubicSpline2d p1 p2 p3 p4) = CubicSpline2d p4 p3 p2 p1
 
-  bisectImpl spline =
-    let l1 = startPointImpl spline
-        l2 = blossom spline 0.0 0.0 0.5
-        l3 = blossom spline 0.0 0.5 0.5
-        mid = blossom spline 0.5 0.5 0.5
-        r2 = blossom spline 0.5 0.5 1.0
-        r3 = blossom spline 0.5 1.0 1.0
-        r4 = endPointImpl spline
-     in (CubicSpline2d l1 l2 l3 mid, CubicSpline2d mid r2 r3 r4)
-
   boundingBoxImpl (CubicSpline2d p1 p2 p3 p4) = BoundingBox2d.hull4 p1 p2 p3 p4
 
 fromControlPoints

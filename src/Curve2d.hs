@@ -14,7 +14,6 @@ module Curve2d
   , segmentBounds
   , derivative
   , reverse
-  , bisect
   , boundingBox
   , passesThrough
   , intersections
@@ -42,7 +41,6 @@ import Domain qualified
 import List qualified
 import OpenSolid
 import Point2d (Point2d)
-import Point2d qualified
 import Qty qualified
 import Range (Range (..))
 import Range qualified
@@ -72,7 +70,7 @@ from curve =
       secondDerivative = VectorCurve2d.derivative firstDerivative
    in if Range.any (areBothZero firstDerivative secondDerivative) Domain.unit
         then Error DegenerateCurve
-        else Ok (Internal.Curve curve)
+        else Ok (Internal.Curve curve firstDerivative secondDerivative)
 
 areBothZero
   :: Tolerance units
@@ -109,31 +107,12 @@ derivative :: Curve2d (space @ units) -> VectorCurve2d (space @ units)
 derivative = Internal.derivative
 
 reverse :: Curve2d (space @ units) -> Curve2d (space @ units)
-reverse (Internal.Line p1 p2 direction) = Internal.Line p2 p1 -direction
-reverse (Internal.Arc p0 r a b) = Internal.Arc p0 r b a
-reverse (Internal.Curve curve) = Internal.Curve (reverseImpl curve)
-
-bisect :: Curve2d (space @ units) -> (Curve2d (space @ units), Curve2d (space @ units))
-bisect (Internal.Line p1 p2 direction) =
-  let mid = Point2d.midpoint p1 p2
-   in ( Internal.Line p1 mid direction
-      , Internal.Line mid p2 direction
-      )
-bisect (Internal.Arc p0 r a b) =
-  let mid = Qty.midpoint a b
-   in ( Internal.Arc p0 r a mid
-      , Internal.Arc p0 r mid b
-      )
-bisect (Internal.Curve curve) =
-  let (curve1, curve2) = bisectImpl curve
-   in ( Internal.Curve curve1
-      , Internal.Curve curve2
-      )
+reverse = Internal.reverse
 
 boundingBox :: Curve2d (space @ units) -> BoundingBox2d (space @ units)
 boundingBox (Internal.Line p1 p2 _) = BoundingBox2d.hull2 p1 p2
 boundingBox arc@(Internal.Arc{}) = segmentBounds Domain.unit arc
-boundingBox (Internal.Curve curve) = boundingBoxImpl curve
+boundingBox (Internal.Curve curve _ _) = boundingBoxImpl curve
 
 data CurveIsCoincidentWithPoint = CurveIsCoincidentWithPoint deriving (Eq, Show, ErrorMessage)
 

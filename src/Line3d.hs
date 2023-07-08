@@ -30,10 +30,6 @@ instance IsCurve3d (Line3d (space @ units)) (space @ units) where
 
   reverseImpl (Line3d p1 p2) = Line3d p2 p1
 
-  bisectImpl (Line3d p1 p2) =
-    let midpoint = Point3d.midpoint p1 p2
-     in (Line3d p1 midpoint, Line3d midpoint p2)
-
   boundingBoxImpl (Line3d p1 p2) = BoundingBox3d.hull2 p1 p2
 
 from :: Point3d (space @ units) -> Point3d (space @ units) -> Curve3d (space @ units)

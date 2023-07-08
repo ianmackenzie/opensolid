@@ -48,14 +48,6 @@ instance IsCurve3d (QuadraticSpline3d (space @ units)) (space @ units) where
 
   reverseImpl (QuadraticSpline3d p1 p2 p3) = QuadraticSpline3d p3 p2 p1
 
-  bisectImpl spline =
-    let l1 = startPointImpl spline
-        l2 = blossom spline 0.0 0.5
-        mid = blossom spline 0.5 0.5
-        r2 = blossom spline 0.5 1.0
-        r3 = endPointImpl spline
-     in (QuadraticSpline3d l1 l2 mid, QuadraticSpline3d mid r2 r3)
-
   boundingBoxImpl (QuadraticSpline3d p1 p2 p3) = BoundingBox3d.hull3 p1 p2 p3
 
 fromControlPoints

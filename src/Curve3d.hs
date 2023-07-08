@@ -20,7 +20,6 @@ class IsCurve3d curve (coordinateSystem :: CoordinateSystem) | curve -> coordina
   segmentBoundsImpl :: curve -> Domain -> BoundingBox3d coordinateSystem
   derivativeImpl :: curve -> VectorCurve3d coordinateSystem
   reverseImpl :: curve -> curve
-  bisectImpl :: curve -> (curve, curve)
   boundingBoxImpl :: curve -> BoundingBox3d coordinateSystem
 
 data Curve3d (coordinateSystem :: CoordinateSystem) where
@@ -33,7 +32,6 @@ instance IsCurve3d (Point3d (space @ units)) (space @ units) where
   segmentBoundsImpl point _ = BoundingBox3d.constant point
   derivativeImpl _ = VectorCurve3d.zero
   reverseImpl = identity
-  bisectImpl point = (point, point)
   boundingBoxImpl = BoundingBox3d.constant
 
 instance IsCurve3d (Curve3d (space @ units)) (space @ units) where
@@ -43,9 +41,6 @@ instance IsCurve3d (Curve3d (space @ units)) (space @ units) where
   segmentBoundsImpl (Curve3d curve) = segmentBoundsImpl curve
   derivativeImpl (Curve3d curve) = derivativeImpl curve
   reverseImpl (Curve3d curve) = Curve3d (reverseImpl curve)
-  bisectImpl (Curve3d curve) =
-    let (curve1, curve2) = bisectImpl curve
-     in (Curve3d curve1, Curve3d curve2)
   boundingBoxImpl (Curve3d curve) = boundingBoxImpl curve
 
 data DegenerateCurve = DegenerateCurve deriving (Eq, Show, ErrorMessage)

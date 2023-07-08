@@ -17,6 +17,7 @@ module Curve1d
   , EqualEverywhere (EqualEverywhere)
   , equalTo
   , equalToSquared
+  , reverse
   )
 where
 
@@ -45,7 +46,7 @@ import {-# SOURCE #-} VectorCurve2d qualified
 import {-# SOURCE #-} VectorCurve3d (VectorCurve3d)
 import {-# SOURCE #-} VectorCurve3d qualified
 
-class IsCurve1d curve units | curve -> units where
+class Show curve => IsCurve1d curve units | curve -> units where
   evaluateAtImpl :: Float -> curve -> Qty units
   segmentBoundsImpl :: Domain -> curve -> Range units
   derivativeImpl :: curve -> Curve1d units
@@ -64,6 +65,8 @@ data Curve1d units where
   SquareRoot :: forall units1 units2. Units.Squared units1 units2 => Curve1d units2 -> Curve1d units1
   Sin :: Curve1d Radians -> Curve1d Unitless
   Cos :: Curve1d Radians -> Curve1d Unitless
+
+deriving instance Show (Curve1d units)
 
 instance (units1 ~ units1', units2 ~ units2') => Units.Coercion units1 units2 (Curve1d units1') (Curve1d units2')
 
@@ -216,6 +219,20 @@ derivative curve =
     SquareRoot c -> derivative c / (2.0 * sqrt c)
     Sin c -> cos c * Units.drop (derivative c)
     Cos c -> negate (sin c) * Units.drop (derivative c)
+
+newtype Reversed units = Reversed (Curve1d units)
+
+deriving instance Show (Reversed units)
+
+instance IsCurve1d (Reversed units) units where
+  evaluateAtImpl t (Reversed curve) = evaluateAt (1.0 - t) curve
+  segmentBoundsImpl t (Reversed curve) = segmentBounds (1.0 - t) curve
+  derivativeImpl (Reversed curve) = -(reverse (derivative curve))
+
+reverse :: Curve1d units -> Curve1d units
+reverse Zero = Zero
+reverse curve@(Constant _) = curve
+reverse curve = Curve1d (Reversed curve)
 
 squared :: Units.Squared units1 units2 => Curve1d units1 -> Curve1d units2
 squared Zero = Zero

@@ -14,6 +14,7 @@ module VectorCurve2d
   , squaredMagnitude
   , magnitude
   , normalize
+  , reverse
   )
 where
 
@@ -34,10 +35,11 @@ import Vector2d qualified
 import VectorBox2d (VectorBox2d (VectorBox2d))
 import VectorBox2d qualified
 
-class IsVectorCurve2d curve (coordinateSystem :: CoordinateSystem) | curve -> coordinateSystem where
+class Show curve => IsVectorCurve2d curve (coordinateSystem :: CoordinateSystem) | curve -> coordinateSystem where
   evaluateAtImpl :: Float -> curve -> Vector2d coordinateSystem
   segmentBoundsImpl :: Domain -> curve -> VectorBox2d coordinateSystem
   derivativeImpl :: curve -> VectorCurve2d coordinateSystem
+  reverseImpl :: curve -> curve
 
 data VectorCurve2d (coordinateSystem :: CoordinateSystem) where
   VectorCurve2d :: forall curve coordinateSystem. IsVectorCurve2d curve coordinateSystem => curve -> VectorCurve2d coordinateSystem
@@ -55,6 +57,8 @@ data VectorCurve2d (coordinateSystem :: CoordinateSystem) where
   QuadraticSpline :: Vector2d (space @ units) -> Vector2d (space @ units) -> Vector2d (space @ units) -> VectorCurve2d (space @ units)
   CubicSpline :: Vector2d (space @ units) -> Vector2d (space @ units) -> Vector2d (space @ units) -> Vector2d (space @ units) -> VectorCurve2d (space @ units)
 
+deriving instance Show (VectorCurve2d coordinateSystem)
+
 instance
   (units1 ~ units1', units2 ~ units2', space ~ space')
   => Units.Coercion
@@ -67,6 +71,7 @@ instance IsVectorCurve2d (VectorCurve2d (space @ units)) (space @ units) where
   evaluateAtImpl = evaluateAt
   segmentBoundsImpl = segmentBounds
   derivativeImpl = derivative
+  reverseImpl = reverse
 
 instance Generic.Zero (VectorCurve2d (space @ units)) where
   zero = Zero
@@ -123,6 +128,8 @@ instance Units.Quotient units1 units2 units3 => Division (VectorCurve2d (space @
   curve / value = curve / Curve1d.constant value
 
 data DotProductOf space units1 units2 = DotProductOf (VectorCurve2d (space @ units1)) (VectorCurve2d (space @ units2))
+
+deriving instance Show (DotProductOf space units1 units2)
 
 instance Units.Product units1 units2 units3 => IsCurve1d (DotProductOf space units1 units2) units3 where
   evaluateAtImpl t (DotProductOf c1 c2) = evaluateAt t c1 <> evaluateAt t c2
@@ -277,7 +284,27 @@ derivative curve =
     QuadraticSpline v1 v2 v3 -> line (2.0 * (v2 - v1)) (2.0 * (v3 - v2))
     CubicSpline v1 v2 v3 v4 -> quadraticSpline (3.0 * (v2 - v1)) (3.0 * (v3 - v2)) (3.0 * (v4 - v3))
 
+reverse :: VectorCurve2d (space @ units) -> VectorCurve2d (space @ units)
+reverse curve =
+  case curve of
+    VectorCurve2d c -> VectorCurve2d (reverseImpl c)
+    Zero -> Zero
+    Constant _ -> curve
+    XY x y -> XY (Curve1d.reverse x) (Curve1d.reverse y)
+    Negated c -> Negated (reverse c)
+    Sum c1 c2 -> Sum (reverse c1) (reverse c2)
+    Difference c1 c2 -> Difference (reverse c1) (reverse c2)
+    Product1d2d c1 c2 -> Product1d2d (Curve1d.reverse c1) (reverse c2)
+    Product2d1d c1 c2 -> Product2d1d (reverse c1) (Curve1d.reverse c2)
+    Quotient c1 c2 -> Quotient (reverse c1) (Curve1d.reverse c2)
+    Line v1 v2 -> Line v2 v1
+    Arc r a b -> Arc r b a
+    QuadraticSpline v1 v2 v3 -> QuadraticSpline v3 v2 v1
+    CubicSpline v1 v2 v3 v4 -> CubicSpline v4 v3 v2 v1
+
 newtype MagnitudeOf (coordinateSystem :: CoordinateSystem) = MagnitudeOf (VectorCurve2d coordinateSystem)
+
+deriving instance Show (MagnitudeOf coordinateSystem)
 
 instance IsCurve1d (MagnitudeOf (space @ units)) units where
   evaluateAtImpl t (MagnitudeOf curve) = Vector2d.magnitude (evaluateAt t curve)
@@ -285,6 +312,8 @@ instance IsCurve1d (MagnitudeOf (space @ units)) units where
   derivativeImpl (MagnitudeOf curve) = derivative curve <> normalize curve
 
 newtype SquaredMagnitudeOf (coordinateSystem :: CoordinateSystem) = SquaredMagnitudeOf (VectorCurve2d coordinateSystem)
+
+deriving instance Show (SquaredMagnitudeOf coordinateSystem)
 
 instance Units.Squared units1 units2 => IsCurve1d (SquaredMagnitudeOf (space @ units1)) units2 where
   evaluateAtImpl t (SquaredMagnitudeOf curve) = Vector2d.squaredMagnitude (evaluateAt t curve)
