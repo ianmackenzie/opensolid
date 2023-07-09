@@ -122,14 +122,14 @@ instance space ~ space' => Transformable2d (Direction2d space) (space' @ units')
   transformBy (Transformation (Matrix m11 m12 m21 m22 _ _)) (Direction2d x y) =
     Direction2d.unsafe (m11 * x + m12 * y) (m21 * x + m22 * y)
 
-instance (space ~ space', units ~ units') => Transformable2d (Vector2d (space @ units)) (space' @ units') where
+instance space ~ space' => Transformable2d (Vector2d (space @ units)) (space' @ units') where
   transformBy (Transformation (Matrix m11 m12 m21 m22 _ _)) (Vector2d x y) =
     Vector2d (m11 * x + m12 * y) (m21 * x + m22 * y)
 
-instance (space ~ space', units ~ units') => Scalable2d (Vector2d (space @ units)) (space' @ units') where
+instance space ~ space' => Scalable2d (Vector2d (space @ units)) (space' @ units') where
   scaleBy (Scaling matrix) = transformBy (Transformation matrix)
 
-instance (space ~ space', units ~ units') => Deformable2d (Vector2d (space @ units)) (space' @ units') where
+instance space ~ space' => Deformable2d (Vector2d (space @ units)) (space' @ units') where
   deformBy (Deformation matrix) = transformBy (Transformation matrix)
 
 instance (space ~ space', units ~ units') => Transformable2d (Point2d (space @ units)) (space' @ units') where
