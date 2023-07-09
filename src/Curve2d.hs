@@ -52,11 +52,22 @@ import VectorCurve2d qualified
 
 type Curve2d (coordinateSystem :: CoordinateSystem) = Internal.Curve2d coordinateSystem
 
-pattern Line :: Point2d (space @ units) -> Point2d (space @ units) -> Direction2d space -> Curve2d (space @ units)
-pattern Line startPoint endPoint direction <- Internal.Line startPoint endPoint direction
+pattern Line
+  :: Point2d (space @ units)
+  -> Point2d (space @ units)
+  -> Direction2d space
+  -> Curve2d (space @ units)
+pattern Line startPoint endPoint direction <-
+  Internal.Line startPoint endPoint direction
 
-pattern Arc :: Point2d (space @ units) -> Qty units -> Angle -> Angle -> Curve2d (space @ units)
-pattern Arc centerPoint radius startAngle endAngle <- Internal.Arc centerPoint radius startAngle endAngle
+pattern Arc
+  :: Point2d (space @ units)
+  -> Qty units
+  -> Angle
+  -> Angle
+  -> Curve2d (space @ units)
+pattern Arc centerPoint radius startAngle endAngle <-
+  Internal.Arc centerPoint radius startAngle endAngle
 
 data DegenerateCurve = DegenerateCurve deriving (Eq, Show, ErrorMessage)
 
