@@ -12,8 +12,6 @@ module VectorCurve2d
   , quadraticSpline
   , cubicSpline
   , squaredMagnitude
-  , magnitude
-  , normalize
   , reverse
   )
 where
@@ -28,7 +26,6 @@ import OpenSolid
 import Qty qualified
 import Range (Range (Range))
 import Range qualified
-import Units (Unitless)
 import Units qualified
 import Vector2d (Vector2d (Vector2d))
 import Vector2d qualified
@@ -302,15 +299,6 @@ reverse curve =
     QuadraticSpline v1 v2 v3 -> QuadraticSpline v3 v2 v1
     CubicSpline v1 v2 v3 v4 -> CubicSpline v4 v3 v2 v1
 
-newtype MagnitudeOf (coordinateSystem :: CoordinateSystem) = MagnitudeOf (VectorCurve2d coordinateSystem)
-
-deriving instance Show (MagnitudeOf coordinateSystem)
-
-instance IsCurve1d (MagnitudeOf (space @ units)) units where
-  evaluateAtImpl t (MagnitudeOf curve) = Vector2d.magnitude (evaluateAt t curve)
-  segmentBoundsImpl t (MagnitudeOf curve) = VectorBox2d.magnitude (segmentBounds t curve)
-  derivativeImpl (MagnitudeOf curve) = derivative curve <> normalize curve
-
 newtype SquaredMagnitudeOf (coordinateSystem :: CoordinateSystem) = SquaredMagnitudeOf (VectorCurve2d coordinateSystem)
 
 deriving instance Show (SquaredMagnitudeOf coordinateSystem)
@@ -323,8 +311,4 @@ instance Units.Squared units1 units2 => IsCurve1d (SquaredMagnitudeOf (space @ u
 squaredMagnitude :: Units.Squared units1 units2 => VectorCurve2d (space @ units1) -> Curve1d units2
 squaredMagnitude curve = Curve1d (SquaredMagnitudeOf curve)
 
-magnitude :: VectorCurve2d (space @ units) -> Curve1d units
-magnitude curve = Curve1d (MagnitudeOf curve)
 
-normalize :: VectorCurve2d (space @ units) -> VectorCurve2d (space @ Unitless)
-normalize curve = curve / magnitude curve

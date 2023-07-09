@@ -11,8 +11,6 @@ module VectorCurve3d
   , quadraticSpline
   , cubicSpline
   , squaredMagnitude
-  , magnitude
-  , normalize
   )
 where
 
@@ -23,7 +21,6 @@ import Domain (Domain)
 import Generic qualified
 import OpenSolid
 import Range (Range (Range))
-import Units (Unitless)
 import Units qualified
 import Vector3d (Vector3d (Vector3d))
 import Vector3d qualified
@@ -489,11 +486,3 @@ derivative curve =
 squaredMagnitude :: Units.Squared units1 units2 => VectorCurve3d (space @ units1) -> Curve1d units2
 squaredMagnitude expression =
   Curve1d (SquaredMagnitudeOf expression)
-
-magnitude :: VectorCurve3d (space @ units) -> Curve1d units
-magnitude expression =
-  Units.specialize (Curve1d.sqrt (squaredMagnitude (Units.generalize expression)))
-
-normalize :: VectorCurve3d (space @ units) -> VectorCurve3d (space @ Unitless)
-normalize expression =
-  expression / magnitude expression
