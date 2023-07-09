@@ -100,14 +100,14 @@ computeIntersectionType segment1 segment2 =
   if Qty.abs firstResolution >= 0.5
     then Resolved (Intersection.Crossing, Qty.sign firstResolution)
     else
-      let dX1_dU1 = firstBounds1.xComponent
-          dY1_dU1 = firstBounds1.yComponent
-          dX2_dU2 = firstBounds2.xComponent
-          dY2_dU2 = firstBounds2.yComponent
-          d2X1_dU1dU1 = secondBounds1.xComponent
-          d2Y1_dU1dU1 = secondBounds1.yComponent
-          d2X2_dU2dU2 = secondBounds2.xComponent
-          d2Y2_dU2dU2 = secondBounds2.yComponent
+      let dX1_dU1 = VectorBox2d.xComponent firstBounds1
+          dY1_dU1 = VectorBox2d.yComponent firstBounds1
+          dX2_dU2 = VectorBox2d.xComponent firstBounds2
+          dY2_dU2 = VectorBox2d.yComponent firstBounds2
+          d2X1_dU1dU1 = VectorBox2d.xComponent secondBounds1
+          d2Y1_dU1dU1 = VectorBox2d.yComponent secondBounds1
+          d2X2_dU2dU2 = VectorBox2d.xComponent secondBounds2
+          d2Y2_dU2dU2 = VectorBox2d.yComponent secondBounds2
           resolutionXY =
             secondResolution1d
               dX1_dU1
@@ -159,14 +159,14 @@ tangentIntersectionSign
 tangentIntersectionSign _ _ segment1 segment2 =
   let (Segment _ firstBounds1 secondBounds1 _) = segment1
       (Segment _ firstBounds2 secondBounds2 _) = segment2
-      dX1_dU1 = firstBounds1.xComponent
-      dY1_dU1 = firstBounds1.yComponent
-      dX2_dU2 = firstBounds2.xComponent
-      dY2_dU2 = firstBounds2.yComponent
-      d2X1_dU1dU1 = secondBounds1.xComponent
-      d2Y1_dU1dU1 = secondBounds1.yComponent
-      d2X2_dU2dU2 = secondBounds2.xComponent
-      d2Y2_dU2dU2 = secondBounds2.yComponent
+      dX1_dU1 = VectorBox2d.xComponent firstBounds1
+      dY1_dU1 = VectorBox2d.yComponent firstBounds1
+      dX2_dU2 = VectorBox2d.xComponent firstBounds2
+      dY2_dU2 = VectorBox2d.yComponent firstBounds2
+      d2X1_dU1dU1 = VectorBox2d.xComponent secondBounds1
+      d2Y1_dU1dU1 = VectorBox2d.yComponent secondBounds1
+      d2X2_dU2dU2 = VectorBox2d.xComponent secondBounds2
+      d2Y2_dU2dU2 = VectorBox2d.yComponent secondBounds2
       resolutionXY =
         secondResolution1d
           dX1_dU1
