@@ -150,11 +150,8 @@ parameterValues
   -> Curve2d (space @ units)
   -> List Float
 parameterValues point curve =
-  case Curve1d.roots (VectorCurve2d.squaredMagnitude (Units.generalize (point - curve))) of
-    Ok roots -> List.map Root.value roots
-    Error Curve1d.ZeroEverywhere -> [] -- Shouldn't happen, since curves are enforced to be non-degenerate
- where
-  ?tolerance = Qty.squared (Units.generalize ?tolerance)
+  VectorCurve2d.roots (point - curve)
+    |> Result.withDefault [] -- Shouldn't happen, since curves are enforced to be non-degenerate
 
 overlappingSegments
   :: Tolerance units

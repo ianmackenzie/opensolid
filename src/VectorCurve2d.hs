@@ -13,6 +13,8 @@ module VectorCurve2d
   , cubicSpline
   , squaredMagnitude
   , reverse
+  , roots
+  , ZeroEverywhere (ZeroEverywhere)
   )
 where
 
@@ -20,8 +22,10 @@ import Angle (Angle)
 import Angle qualified
 import Curve1d (Curve1d (Curve1d), IsCurve1d)
 import Curve1d qualified
+import Curve1d.Root qualified as Root
 import Domain (Domain)
 import Generic qualified
+import List qualified
 import OpenSolid
 import Qty qualified
 import Range (Range (Range))
@@ -311,4 +315,12 @@ instance Units.Squared units1 units2 => IsCurve1d (SquaredMagnitudeOf (space @ u
 squaredMagnitude :: Units.Squared units1 units2 => VectorCurve2d (space @ units1) -> Curve1d units2
 squaredMagnitude curve = Curve1d (SquaredMagnitudeOf curve)
 
+data ZeroEverywhere = ZeroEverywhere deriving (Eq, Show, ErrorMessage)
 
+roots :: Tolerance units => VectorCurve2d (space @ units) -> Result ZeroEverywhere (List Float)
+roots curve =
+  case Curve1d.roots (squaredMagnitude (Units.generalize curve)) of
+    Ok roots1d -> Ok (List.map Root.value roots1d)
+    Error Curve1d.ZeroEverywhere -> Error VectorCurve2d.ZeroEverywhere
+ where
+  ?tolerance = Qty.squared (Units.generalize ?tolerance)
