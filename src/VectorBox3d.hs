@@ -45,6 +45,14 @@ instance Generic.Zero (VectorBox3d (space @ units)) where
 instance Negation (VectorBox3d (space @ units)) where
   negate (VectorBox3d x y z) = VectorBox3d (negate x) (negate y) (negate z)
 
+instance Multiplication Sign (VectorBox3d (space @ units)) (VectorBox3d (space @ units)) where
+  Positive * vectorBox = vectorBox
+  Negative * vectorBox = -vectorBox
+
+instance Multiplication (VectorBox3d (space @ units)) Sign (VectorBox3d (space @ units)) where
+  vectorBox * Positive = vectorBox
+  vectorBox * Negative = -vectorBox
+
 instance
   (units ~ units', space ~ space')
   => Addition

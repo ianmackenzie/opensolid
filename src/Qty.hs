@@ -58,6 +58,14 @@ instance Negation (Qty units) where
   {-# INLINE negate #-}
   negate (Qty x) = Qty (Prelude.negate x)
 
+instance Multiplication Sign (Qty units) (Qty units) where
+  Positive * value = value
+  Negative * value = -value
+
+instance Multiplication (Qty units) Sign (Qty units) where
+  value * Positive = value
+  value * Negative = -value
+
 instance units ~ units' => Addition (Qty units) (Qty units') (Qty units) where
   {-# INLINE (+) #-}
   Qty x + Qty y = Qty (x Prelude.+ y)

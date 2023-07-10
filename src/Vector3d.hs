@@ -59,6 +59,14 @@ instance
 instance Negation (Vector3d (space @ units)) where
   negate (Vector3d vx vy vz) = Vector3d (negate vx) (negate vy) (negate vz)
 
+instance Multiplication Sign (Vector3d (space @ units)) (Vector3d (space @ units)) where
+  Positive * vector = vector
+  Negative * vector = -vector
+
+instance Multiplication (Vector3d (space @ units)) Sign (Vector3d (space @ units)) where
+  vector * Positive = vector
+  vector * Negative = -vector
+
 instance (space ~ space', units ~ units') => Addition (Vector3d (space @ units)) (Vector3d (space' @ units')) (Vector3d (space @ units)) where
   Vector3d x1 y1 z1 + Vector3d x2 y2 z2 = Vector3d (x1 + x2) (y1 + y2) (z1 + z2)
 

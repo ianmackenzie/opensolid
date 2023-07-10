@@ -101,6 +101,14 @@ instance Negation (Curve1d units) where
   negate (Product c1 c2) = negate c1 * c2
   negate curve = Negated curve
 
+instance Multiplication Sign (Curve1d units) (Curve1d units) where
+  Positive * curve = curve
+  Negative * curve = -curve
+
+instance Multiplication  (Curve1d units)  Sign (Curve1d units) where
+  curve * Positive = curve
+  curve * Negative = -curve
+
 instance units ~ units' => Addition (Curve1d units) (Curve1d units') (Curve1d units) where
   Zero + curve = curve
   curve + Zero = curve

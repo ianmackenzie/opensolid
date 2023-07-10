@@ -42,6 +42,14 @@ instance
 instance Negation (Direction3d space) where
   negate (Direction3d dx dy dz) = unsafe (negate dx) (negate dy) (negate dz)
 
+instance Multiplication Sign (Direction3d space) (Direction3d space) where
+  Positive * direction = direction
+  Negative * direction = -direction
+
+instance Multiplication (Direction3d space) Sign (Direction3d space) where
+  direction * Positive = direction
+  direction * Negative = -direction
+
 instance space ~ space' => DotProduct (Direction3d space) (Direction3d space') Float where
   Direction3d x1 y1 z1 <> Direction3d x2 y2 z2 = x1 * x2 + y1 * y2 + z1 * z2
 

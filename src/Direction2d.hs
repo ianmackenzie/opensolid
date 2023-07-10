@@ -54,6 +54,14 @@ instance
 instance Negation (Direction2d space) where
   negate (Direction2d vector) = unsafe -vector
 
+instance Multiplication Sign (Direction2d space) (Direction2d space) where
+  Positive * direction = direction
+  Negative * direction = -direction
+
+instance Multiplication (Direction2d space) Sign (Direction2d space) where
+  direction * Positive = direction
+  direction * Negative = -direction
+
 instance Multiplication (Qty units) (Direction2d space) (Vector2d (space @ units)) where
   scale * Direction2d vector = scale * vector
 

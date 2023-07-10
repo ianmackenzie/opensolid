@@ -65,6 +65,14 @@ instance (units1 ~ units1', units2 ~ units2') => Units.Coercion units1 units2 (R
 instance Negation (Range units) where
   negate (Range low high) = unsafe (negate high) (negate low)
 
+instance Multiplication Sign (Range units) (Range units) where
+  Positive * range = range
+  Negative * range = -range
+
+instance Multiplication (Range units) Sign (Range units) where
+  range * Positive = range
+  range * Negative = -range
+
 instance Generic.Zero (Range units) where
   zero = constant Qty.zero
 

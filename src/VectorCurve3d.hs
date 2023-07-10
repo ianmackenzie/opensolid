@@ -102,6 +102,14 @@ instance IsVectorCurve3d (Negated (space @ units)) (space @ units) where
 instance Negation (VectorCurve3d (space @ units)) where
   negate curve = VectorCurve3d (Negated curve)
 
+instance Multiplication Sign (VectorCurve3d (space @ units)) (VectorCurve3d (space @ units)) where
+  Positive * curve = curve
+  Negative * curve = -curve
+
+instance Multiplication (VectorCurve3d (space @ units)) Sign (VectorCurve3d (space @ units)) where
+  curve * Positive = curve
+  curve * Negative = -curve
+
 data Sum (coordinateSystem :: CoordinateSystem)
   = Sum (VectorCurve3d coordinateSystem) (VectorCurve3d coordinateSystem)
 
