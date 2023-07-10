@@ -289,7 +289,10 @@ derivative curve =
     Product2d1d c1 c2 -> derivative c1 * c2 + c1 * Curve1d.derivative c2
     Quotient c1 c2 -> derivative c1 / c2 + curve * (Curve1d.derivative c2 / c2)
     Line v1 v2 -> constant (v2 - v1)
-    Arc r a b -> Arc (r * Angle.inRadians (b - a)) (a + Angle.quarterTurn) (b + Angle.quarterTurn)
+    Arc r a b ->
+      let sweptAngle = b - a
+          rotation = Angle.quarterTurn * Qty.sign sweptAngle
+       in Arc (r * Qty.abs (Angle.inRadians sweptAngle)) (a + rotation) (b + rotation)
     QuadraticSpline v1 v2 v3 -> line (2.0 * (v2 - v1)) (2.0 * (v3 - v2))
     CubicSpline v1 v2 v3 v4 -> quadraticSpline (3.0 * (v2 - v1)) (3.0 * (v3 - v2)) (3.0 * (v4 - v3))
 

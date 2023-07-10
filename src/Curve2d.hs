@@ -131,7 +131,7 @@ boundingBox (Internal.Curve curve _ _ _) = boundingBoxImpl curve
 tangentDirectionAt :: Float -> Curve2d (space @ units) -> Direction2d space
 tangentDirectionAt _ (Internal.Line _ _ direction) = direction
 tangentDirectionAt t (Internal.Arc _ _ a b) =
-  Direction2d.fromAngle (Qty.interpolateFrom a b t + Angle.quarterTurn)
+  Direction2d.fromAngle (Qty.interpolateFrom a b t + Angle.quarterTurn * Qty.sign (b - a))
 tangentDirectionAt t (Internal.Curve _ tolerance first second) =
   -- Find the tangent direction of a general curve, using the first derivative if possible
   -- and falling back to the second derivative at degenerate endpoints
