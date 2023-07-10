@@ -12,6 +12,7 @@ module Curve2d
   , evaluateAt
   , pointOn
   , tangentDirectionAt
+  , tangentDirectionBounds
   , segmentBounds
   , derivative
   , reverse
@@ -46,9 +47,11 @@ import Qty qualified
 import Range (Range (..))
 import Range qualified
 import Result qualified
+import Units (Unitless)
 import Units qualified
 import Vector2d (Vector2d)
 import Vector2d qualified
+import VectorBox2d (VectorBox2d)
 import VectorBox2d qualified
 import VectorCurve2d (VectorCurve2d)
 import VectorCurve2d qualified
@@ -154,6 +157,22 @@ tangentDirectionAt t (Internal.Curve _ tolerance first second) =
             sign = if t <= 0.5 then Positive else Negative
            in
             sign * Direction2d.unsafe (Vector2d.normalize (VectorCurve2d.evaluateAt t' second))
+
+tangentDirectionBounds :: Domain -> Curve2d (space @ units) -> VectorBox2d (space @ Unitless)
+tangentDirectionBounds _ (Internal.Line _ _ direction) = VectorBox2d.constant (Direction2d.unwrap direction)
+tangentDirectionBounds t (Internal.Arc _ _ a b) =
+  let rotation = Angle.quarterTurn * Qty.sign (b - a)
+      theta1 = Qty.interpolateFrom a b (Range.minValue t) + rotation
+      theta2 = Qty.interpolateFrom a b (Range.maxValue t) + rotation
+   in VectorBox2d.polar (Range.constant 1.0) (Range.from theta1 theta2)
+tangentDirectionBounds t (Internal.Curve _ tolerance first second)
+  | Range.includes 0.0 t && VectorCurve2d.evaluateAt 0.0 first ~= Vector2d.zero =
+      VectorBox2d.normalize (VectorCurve2d.segmentBounds t second)
+  | Range.includes 1.0 t && VectorCurve2d.evaluateAt 1.0 first ~= Vector2d.zero =
+      -(VectorBox2d.normalize (VectorCurve2d.segmentBounds t second))
+  | otherwise = VectorBox2d.normalize (VectorCurve2d.segmentBounds t first)
+ where
+  ?tolerance = tolerance
 
 data CurveIsCoincidentWithPoint = CurveIsCoincidentWithPoint deriving (Eq, Show, ErrorMessage)
 
