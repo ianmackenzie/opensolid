@@ -6,16 +6,17 @@ module Debug
   )
 where
 
+import Basics
+import Concatenate
+import Data.Text qualified
 import Debug.Trace qualified
-import OpenSolid
-import Text qualified
 import Prelude qualified
 
 show :: Show a => a -> Text
-show value = Text.fromChars (Prelude.show value)
+show value = Data.Text.pack (Prelude.show value)
 
 trace :: Text -> a -> a
-trace message = Debug.Trace.trace (Text.toChars message)
+trace message = Debug.Trace.trace (Data.Text.unpack message)
 
 log :: Show a => Text -> a -> b -> b
 log label value = trace (label ++ ": " ++ show value)
