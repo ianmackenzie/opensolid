@@ -11,9 +11,10 @@ module Curve2d
   , endPoint
   , evaluateAt
   , pointOn
-  , tangentDirectionAt
-  , tangentDirectionBounds
+  , tangentAt
+  , tangentTo
   , segmentBounds
+  , tangentBounds
   , derivative
   , reverse
   , boundingBox
@@ -131,11 +132,11 @@ boundingBox (Internal.Line p1 p2 _) = BoundingBox2d.hull2 p1 p2
 boundingBox arc@(Internal.Arc{}) = segmentBounds Domain.unit arc
 boundingBox (Internal.Curve curve _ _ _) = boundingBoxImpl curve
 
-tangentDirectionAt :: Float -> Curve2d (space @ units) -> Direction2d space
-tangentDirectionAt _ (Internal.Line _ _ direction) = direction
-tangentDirectionAt t (Internal.Arc _ _ a b) =
+tangentAt :: Float -> Curve2d (space @ units) -> Direction2d space
+tangentAt _ (Internal.Line _ _ direction) = direction
+tangentAt t (Internal.Arc _ _ a b) =
   Direction2d.fromAngle (Qty.interpolateFrom a b t + Angle.quarterTurn * Qty.sign (b - a))
-tangentDirectionAt t (Internal.Curve _ tolerance first second) =
+tangentAt t (Internal.Curve _ tolerance first second) =
   -- Find the tangent direction of a general curve, using the first derivative if possible
   -- and falling back to the second derivative at degenerate endpoints
   -- (endpoints where the first derivative is zero).
@@ -158,14 +159,17 @@ tangentDirectionAt t (Internal.Curve _ tolerance first second) =
            in
             sign * Direction2d.unsafe (Vector2d.normalize (VectorCurve2d.evaluateAt t' second))
 
-tangentDirectionBounds :: Domain -> Curve2d (space @ units) -> VectorBox2d (space @ Unitless)
-tangentDirectionBounds _ (Internal.Line _ _ direction) = VectorBox2d.constant (Direction2d.unwrap direction)
-tangentDirectionBounds t (Internal.Arc _ _ a b) =
+tangentTo :: Curve2d (space @ units) -> Float -> Direction2d space
+tangentTo curve t = tangentAt t curve
+
+tangentBounds :: Domain -> Curve2d (space @ units) -> VectorBox2d (space @ Unitless)
+tangentBounds _ (Internal.Line _ _ direction) = VectorBox2d.constant (Direction2d.unwrap direction)
+tangentBounds t (Internal.Arc _ _ a b) =
   let rotation = Angle.quarterTurn * Qty.sign (b - a)
       theta1 = Qty.interpolateFrom a b (Range.minValue t) + rotation
       theta2 = Qty.interpolateFrom a b (Range.maxValue t) + rotation
    in VectorBox2d.polar (Range.constant 1.0) (Range.from theta1 theta2)
-tangentDirectionBounds t (Internal.Curve _ tolerance first second)
+tangentBounds t (Internal.Curve _ tolerance first second)
   | Range.includes 0.0 t && VectorCurve2d.evaluateAt 0.0 first ~= Vector2d.zero =
       VectorBox2d.normalize (VectorCurve2d.segmentBounds t second)
   | Range.includes 1.0 t && VectorCurve2d.evaluateAt 1.0 first ~= Vector2d.zero =
