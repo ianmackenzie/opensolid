@@ -11,6 +11,7 @@ module Curve2d
   , endPoint
   , evaluateAt
   , pointOn
+  , tangentDirectionAt
   , segmentBounds
   , derivative
   , reverse
@@ -22,11 +23,10 @@ module Curve2d
 where
 
 import Angle (Angle)
+import Angle qualified
 import Bisection qualified
 import BoundingBox2d (BoundingBox2d)
 import BoundingBox2d qualified
-import Curve1d qualified
-import Curve1d.Root qualified as Root
 import Curve2d.Derivatives (Derivatives)
 import Curve2d.Derivatives qualified as Derivatives
 import Curve2d.Internal (IsCurve2d (..))
@@ -36,6 +36,7 @@ import Curve2d.Intersection qualified as Intersection
 import Curve2d.Segment (Segment)
 import Curve2d.Segment qualified as Segment
 import Direction2d (Direction2d)
+import Direction2d qualified
 import Domain (Domain)
 import Domain qualified
 import List qualified
@@ -46,6 +47,8 @@ import Range (Range (..))
 import Range qualified
 import Result qualified
 import Units qualified
+import Vector2d (Vector2d)
+import Vector2d qualified
 import VectorBox2d qualified
 import VectorCurve2d (VectorCurve2d)
 import VectorCurve2d qualified
@@ -79,25 +82,25 @@ from
 from curve =
   let firstDerivative = derivativeImpl curve
       secondDerivative = VectorCurve2d.derivative firstDerivative
-   in if Range.any (areBothZero firstDerivative secondDerivative) Domain.unit
-        then Error DegenerateCurve
-        else Ok (Internal.Curve curve firstDerivative secondDerivative)
+   in if isNondegenerate firstDerivative secondDerivative
+        then Ok (Internal.Curve curve ?tolerance firstDerivative secondDerivative)
+        else Error DegenerateCurve
 
-areBothZero
-  :: Tolerance units
-  => VectorCurve2d (space @ units)
-  -> VectorCurve2d (space @ units)
-  -> Domain
-  -> Fuzzy Bool
-areBothZero firstDerivative secondDerivative domain
-  | firstMin > ?tolerance || 0.5 * secondMin > ?tolerance = Resolved False
-  | firstMax <= ?tolerance && 0.5 * secondMax <= ?tolerance = Resolved True
-  | otherwise = Unresolved
+isNondegenerate :: Tolerance units => VectorCurve2d (space @ units) -> VectorCurve2d (space @ units) -> Bool
+isNondegenerate firstDerivative secondDerivative =
+  case VectorCurve2d.roots firstDerivative of
+    Error VectorCurve2d.ZeroEverywhere -> False
+    Ok roots -> List.all (isRemovableDegeneracy secondDerivative) roots
+
+isRemovableDegeneracy :: Tolerance units => VectorCurve2d (space @ units) -> Float -> Bool
+isRemovableDegeneracy secondDerivative t =
+  (t == 0.0 || t == 1.0) && secondDerivativeIsNonZero (VectorCurve2d.evaluateAt t secondDerivative)
+
+secondDerivativeIsNonZero :: Tolerance units => Vector2d (space @ units) -> Bool
+secondDerivativeIsNonZero secondDerivative =
+  2.0 * Vector2d.squaredMagnitude (Units.generalize secondDerivative) != Qty.zero
  where
-  firstBounds = VectorCurve2d.segmentBounds domain firstDerivative
-  secondBounds = VectorCurve2d.segmentBounds domain secondDerivative
-  (Range firstMin firstMax) = VectorBox2d.magnitude firstBounds
-  (Range secondMin secondMax) = VectorBox2d.magnitude secondBounds
+  ?tolerance = Qty.squared (Units.generalize ?tolerance)
 
 startPoint :: Curve2d (space @ units) -> Point2d (space @ units)
 startPoint = Internal.startPoint
@@ -123,7 +126,34 @@ reverse = Internal.reverse
 boundingBox :: Curve2d (space @ units) -> BoundingBox2d (space @ units)
 boundingBox (Internal.Line p1 p2 _) = BoundingBox2d.hull2 p1 p2
 boundingBox arc@(Internal.Arc{}) = segmentBounds Domain.unit arc
-boundingBox (Internal.Curve curve _ _) = boundingBoxImpl curve
+boundingBox (Internal.Curve curve _ _ _) = boundingBoxImpl curve
+
+tangentDirectionAt :: Float -> Curve2d (space @ units) -> Direction2d space
+tangentDirectionAt _ (Internal.Line _ _ direction) = direction
+tangentDirectionAt t (Internal.Arc _ _ a b) =
+  Direction2d.fromAngle (Qty.interpolateFrom a b t + Angle.quarterTurn)
+tangentDirectionAt t (Internal.Curve _ tolerance first second) =
+  -- Find the tangent direction of a general curve, using the first derivative if possible
+  -- and falling back to the second derivative at degenerate endpoints
+  -- (endpoints where the first derivative is zero).
+  -- For consistency, use the tolerance we used during curve construction to check for degeneracies
+  -- (and stored within the curve value for this purpose).
+  let ?tolerance = tolerance
+   in case Vector2d.direction (VectorCurve2d.evaluateAt t first) of
+        Ok direction -> direction -- First derivative was non-zero
+        Error Vector2d.IsZero ->
+          -- First derivative was (approximately) zero, so we must be near a degenerate endpoint.
+          -- In this case, estimate the tangent using the second derivative instead.
+          let
+            -- Estimate tangent direction using second derivative evaluated at a point t',
+            -- which is halfway between t and the nearby endpoint
+            t' = if t <= 0.5 then 0.5 * t else t + 0.5 * (1.0 - t)
+            -- Near the start point (assuming the start point is degenerate),
+            -- the tangent direction is in the same direction as the second derivative;
+            -- near the end point, it is in the *opposite* direction
+            sign = if t <= 0.5 then Positive else Negative
+           in
+            sign * Direction2d.unsafe (Vector2d.normalize (VectorCurve2d.evaluateAt t' second))
 
 data CurveIsCoincidentWithPoint = CurveIsCoincidentWithPoint deriving (Eq, Show, ErrorMessage)
 
