@@ -3,7 +3,7 @@ module CoordinateSystem
   , type (@)
   , Units
   , Space
-  , LocalCoordinateSystem
+  , LocalSpace
   , Defines
   )
 where
@@ -20,6 +20,6 @@ type family Space (coordinateSystem :: CoordinateSystem) where
 type family Units (coordinateSystem :: CoordinateSystem) where
   Units (space @ units) = units
 
-newtype LocalCoordinateSystem = LocalCoordinateSystem CoordinateSystem
+newtype LocalSpace = LocalSpace Type
 
-type Defines coordinateSystem = 'LocalCoordinateSystem coordinateSystem
+type Defines space = 'LocalSpace space

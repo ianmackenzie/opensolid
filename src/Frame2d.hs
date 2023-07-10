@@ -25,7 +25,7 @@ import Point2d qualified
 
 type role Frame2d phantom phantom
 
-type Frame2d :: CoordinateSystem -> LocalCoordinateSystem -> Type
+type Frame2d :: CoordinateSystem -> LocalSpace -> Type
 data Frame2d coordinateSystem defines
   = Frame2d
       (Point2d coordinateSystem)

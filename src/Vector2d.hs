@@ -1,5 +1,5 @@
 module Vector2d
-  ( Vector2d (Vector2d, xComponent, yComponent)
+  ( Vector2d (Vector2d)
   , zero
   , x
   , y
@@ -8,6 +8,8 @@ module Vector2d
   , meters
   , squareMeters
   , polar
+  , xComponent
+  , yComponent
   , midpoint
   , interpolateFrom
   , magnitude
@@ -17,6 +19,8 @@ module Vector2d
   , direction
   , magnitudeAndDirection
   , normalize
+  , rotateRight
+  , rotateLeft
   , placeIn
   , relativeTo
   )
@@ -26,8 +30,8 @@ import Angle (Angle)
 import Angle qualified
 import Area qualified
 import CoordinateSystem (Units)
-import Direction2d (Direction2d (Direction2d))
-import Direction2d qualified
+import {-# SOURCE #-} Direction2d (Direction2d)
+import {-# SOURCE #-} Direction2d qualified
 import {-# SOURCE #-} Frame2d (Frame2d)
 import {-# SOURCE #-} Frame2d qualified
 import Generic qualified
@@ -40,10 +44,10 @@ import Units qualified
 
 type role Vector2d phantom
 
-data Vector2d (coordinateSystem :: CoordinateSystem) = Vector2d
-  { xComponent :: Qty (Units coordinateSystem)
-  , yComponent :: Qty (Units coordinateSystem)
-  }
+data Vector2d (coordinateSystem :: CoordinateSystem)
+  = Vector2d
+      (Qty (Units coordinateSystem))
+      (Qty (Units coordinateSystem))
   deriving (Eq, Show)
 
 instance
@@ -127,7 +131,7 @@ instance
       (Direction2d space')
       (Qty units)
   where
-  Vector2d vx vy <> Direction2d dx dy = vx * dx + vy * dy
+  v <> d = v <> Direction2d.unwrap d
 
 instance
   space ~ space'
@@ -136,7 +140,7 @@ instance
       (Vector2d (space' @ units))
       (Qty units)
   where
-  Direction2d dx dy <> Vector2d vx vy = dx * vx + dy * vy
+  d <> v = Direction2d.unwrap d <> v
 
 instance
   (Units.Product units1 units2 units3, space ~ space')
@@ -154,7 +158,7 @@ instance
       (Direction2d space')
       (Qty units)
   where
-  Vector2d vx vy >< Direction2d dx dy = vx * dy - vy * dx
+  v >< d = v >< Direction2d.unwrap d
 
 instance
   space ~ space'
@@ -163,7 +167,7 @@ instance
       (Vector2d (space' @ units))
       (Qty units)
   where
-  Direction2d dx dy >< Vector2d vx vy = dx * vy - dy * vx
+  d >< v = Direction2d.unwrap d >< v
 
 zero :: Vector2d (space @ units)
 zero = Vector2d Qty.zero Qty.zero
@@ -189,6 +193,12 @@ squareMeters vx vy = Vector2d (Area.squareMeters vx) (Area.squareMeters vy)
 polar :: Qty units -> Angle -> Vector2d (space @ units)
 polar r theta = Vector2d (r * Angle.cos theta) (r * Angle.sin theta)
 
+xComponent :: Vector2d (space @ units) -> Qty units
+xComponent (Vector2d field _) = field
+
+yComponent :: Vector2d (space @ units) -> Qty units
+yComponent (Vector2d _ field) = field
+
 interpolateFrom
   :: Vector2d (space @ units)
   -> Vector2d (space @ units)
@@ -213,41 +223,43 @@ angle (Vector2d vx vy) = Angle.atan2 vy vx
 data IsZero = IsZero deriving (Eq, Show, ErrorMessage)
 
 direction :: Tolerance units => Vector2d (space @ units) -> Result IsZero (Direction2d space)
-direction vector = do
-  let Vector2d vx vy = vector; vm = magnitude vector
-   in if vm ~= Qty.zero
-        then Error Vector2d.IsZero
-        else Ok (Direction2d.unsafe (vx / vm) (vy / vm))
+direction vector =
+  let vm = magnitude vector
+   in if vm ~= Qty.zero then Error Vector2d.IsZero else Ok (Direction2d.unsafe (vector / vm))
 
 magnitudeAndDirection
   :: Tolerance units
   => Vector2d (space @ units)
   -> Result IsZero (Qty units, Direction2d space)
-magnitudeAndDirection vector = do
-  let Vector2d vx vy = vector; vm = magnitude vector
-   in if vm ~= Qty.zero
-        then Error Vector2d.IsZero
-        else Ok (vm, Direction2d.unsafe (vx / vm) (vy / vm))
+magnitudeAndDirection vector =
+  let vm = magnitude vector
+   in if vm ~= Qty.zero then Error Vector2d.IsZero else Ok (vm, Direction2d.unsafe (vector / vm))
 
 normalize :: Tolerance units => Vector2d (space @ units) -> Vector2d (space @ Unitless)
 normalize vector =
-  let Vector2d vx vy = vector; vm = magnitude vector
-   in if vm ~= Qty.zero then zero else Vector2d (vx / vm) (vy / vm)
+  let vm = magnitude vector
+   in if vm ~= Qty.zero then zero else vector / vm
+
+rotateLeft :: Vector2d (space @ units) -> Vector2d (space @ units)
+rotateLeft (Vector2d vx vy) = Vector2d -vy vx
+
+rotateRight :: Vector2d (space @ units) -> Vector2d (space @ units)
+rotateRight (Vector2d vx vy) = Vector2d vy -vx
 
 placeIn
-  :: Frame2d (global @ units) (Defines (local @ units))
+  :: Frame2d (global @ frameUnits) (Defines local)
   -> Vector2d (local @ units)
   -> Vector2d (global @ units)
 placeIn frame (Vector2d vx vy) =
-  let (Direction2d ix iy) = Frame2d.xDirection frame
-      (Direction2d jx jy) = Frame2d.yDirection frame
+  let (Vector2d ix iy) = Direction2d.unwrap (Frame2d.xDirection frame)
+      (Vector2d jx jy) = Direction2d.unwrap (Frame2d.yDirection frame)
    in Vector2d (vx * ix + vy * jx) (vx * iy + vy * jy)
 
 relativeTo
-  :: Frame2d (global @ units) (Defines (local @ units))
+  :: Frame2d (global @ frameUnits) (Defines local)
   -> Vector2d (global @ units)
   -> Vector2d (local @ units)
 relativeTo frame (Vector2d vx vy) =
-  let (Direction2d ix iy) = Frame2d.xDirection frame
-      (Direction2d jx jy) = Frame2d.yDirection frame
+  let (Vector2d ix iy) = Direction2d.unwrap (Frame2d.xDirection frame)
+      (Vector2d jx jy) = Direction2d.unwrap (Frame2d.yDirection frame)
    in Vector2d (vx * ix + vy * iy) (vx * jx + vy * jy)

@@ -18,7 +18,7 @@ where
 import Arithmetic
 import Basics
 import Concatenate (Concatenate ((++)))
-import CoordinateSystem (CoordinateSystem, Defines, LocalCoordinateSystem, type (@))
+import CoordinateSystem (CoordinateSystem, Defines, LocalSpace, type (@))
 import DoNotation
 import Float (Float, fromRational)
 import Fuzzy (Fuzzy (Resolved, Unresolved))
