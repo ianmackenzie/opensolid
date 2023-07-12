@@ -163,7 +163,8 @@ tangentTo :: Curve2d (space @ units) -> Float -> Direction2d space
 tangentTo curve t = tangentAt t curve
 
 tangentBounds :: Domain -> Curve2d (space @ units) -> VectorBox2d (space @ Unitless)
-tangentBounds _ (Internal.Line _ _ direction) = VectorBox2d.constant (Direction2d.unwrap direction)
+tangentBounds _ (Internal.Line _ _ direction) =
+  VectorBox2d.constant (Direction2d.unwrap direction)
 tangentBounds t (Internal.Arc _ _ a b) =
   let rotation = Angle.quarterTurn * Qty.sign (b - a)
       theta1 = Qty.interpolateFrom a b (Range.minValue t) + rotation
