@@ -48,19 +48,8 @@ init derivatives domain =
   let curveBounds = Curve2d.segmentBounds domain derivatives.curve
       firstBounds = VectorCurve2d.segmentBounds domain derivatives.first
       secondBounds = VectorCurve2d.segmentBounds domain derivatives.second
-      tangentBounds = computeTangentBounds derivatives domain firstBounds secondBounds
+      tangentBounds = Curve2d.tangentBounds domain derivatives.curve
    in Segment curveBounds firstBounds secondBounds tangentBounds
-
-computeTangentBounds
-  :: Derivatives (space @ units)
-  -> Domain
-  -> VectorBox2d (space @ units)
-  -> VectorBox2d (space @ units)
-  -> VectorBox2d (space @ Unitless)
-computeTangentBounds derivatives u firstBounds secondBounds
-  | Range.includes 0.0 u && derivatives.degenerateStart = VectorBox2d.normalize secondBounds
-  | Range.includes 1.0 u && derivatives.degenerateEnd = -(VectorBox2d.normalize secondBounds)
-  | otherwise = VectorBox2d.normalize firstBounds
 
 overlaps :: Tolerance units => Segment (space @ units) -> Segment (space @ units) -> Bool
 overlaps (Segment firstBounds _ _ _) (Segment secondBounds _ _ _) =

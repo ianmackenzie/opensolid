@@ -6,6 +6,7 @@ module Curve2d
   , evaluateAt
   , segmentBounds
   , derivative
+  , tangentBounds
   )
 where
 
@@ -14,6 +15,8 @@ import Curve2d.Internal qualified as Internal
 import Domain (Domain)
 import OpenSolid
 import Point2d (Point2d)
+import Units (Unitless)
+import VectorBox2d (VectorBox2d)
 import VectorCurve2d (VectorCurve2d)
 
 type Curve2d (coordinateSystem :: CoordinateSystem) = Internal.Curve2d coordinateSystem
@@ -25,3 +28,4 @@ endPoint :: Curve2d (space @ units) -> Point2d (space @ units)
 evaluateAt :: Float -> Curve2d (space @ units) -> Point2d (space @ units)
 segmentBounds :: Domain -> Curve2d (space @ units) -> BoundingBox2d (space @ units)
 derivative :: Curve2d (space @ units) -> VectorCurve2d (space @ units)
+tangentBounds :: Domain -> Curve2d (space @ units) -> VectorBox2d (space @ Unitless)
