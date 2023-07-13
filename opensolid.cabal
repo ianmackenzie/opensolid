@@ -61,6 +61,7 @@ library
       Line3d
       List
       Maybe
+      NonEmpty
       OpenSolid
       Pair
       Parameter1d
@@ -129,6 +130,7 @@ library
       TupleSections
       DeriveAnyClass
       DerivingStrategies
+      ViewPatterns
   ghc-options: -Wall -Werror -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-signatures -Wmissing-exported-signatures -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wsafe -dcore-lint
   build-depends:
       array
@@ -181,6 +183,7 @@ executable sandbox
       TupleSections
       DeriveAnyClass
       DerivingStrategies
+      ViewPatterns
   ghc-options: -Wall -Werror -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-signatures -Wmissing-exported-signatures -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wsafe -dcore-lint -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       array
@@ -242,6 +245,7 @@ test-suite opensolid-test
       TupleSections
       DeriveAnyClass
       DerivingStrategies
+      ViewPatterns
   ghc-options: -Wall -Werror -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-signatures -Wmissing-exported-signatures -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wsafe -dcore-lint -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       array

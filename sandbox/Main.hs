@@ -13,6 +13,7 @@ import Float qualified
 import Length (Length)
 import Length qualified
 import List qualified
+import NonEmpty qualified
 import OpenSolid
 import Parameter1d qualified
 import Point2d (Point2d)
@@ -132,6 +133,11 @@ testRangeFind = do
   let isRoot x = Range.includes 2.0 (x * x)
   log "Found square root of 2" (Range.find isRoot (Range.from 1.0 2.0))
 
+testNonEmpty :: (Ord a, Show a) => List a -> Task Text ()
+testNonEmpty [] = Console.printLine "List is empty"
+testNonEmpty (NonEmpty nonEmpty) =
+  Console.printLine ("List is non-empty, maximum is " ++ Debug.show (NonEmpty.maximum nonEmpty))
+
 script :: Task Text ()
 script = do
   log "Integer product" (3 * 4)
@@ -188,6 +194,8 @@ script = do
   log "Offset point" (offsetPoint (Point2d.meters 1.0 0.0) (Point2d.meters 3.0 0.0) (Length.meters 1.0))
   testParameter1dGeneration
   testRangeFind
+  testNonEmpty ([] :: List Int)
+  testNonEmpty [2, 3, 1]
  where
   ?tolerance = defaultTolerance
 

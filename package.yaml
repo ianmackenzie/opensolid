@@ -70,6 +70,7 @@ default-extensions:
 - TupleSections
 - DeriveAnyClass
 - DerivingStrategies
+- ViewPatterns
 
 library:
   source-dirs: src
