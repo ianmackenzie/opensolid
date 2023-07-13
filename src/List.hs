@@ -128,10 +128,9 @@ deduplicate (first : rest) = dedup first rest
 
 dedup :: Eq a => a -> List a -> List a
 dedup current [] = [current]
-dedup current (next : remaining) =
-  if current == next
-    then dedup current remaining
-    else current : dedup next remaining
+dedup current (next : remaining)
+  | current == next = dedup current remaining
+  | otherwise = current : dedup next remaining
 
 all :: (a -> Bool) -> List a -> Bool
 all = Prelude.all
