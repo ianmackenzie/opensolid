@@ -7,8 +7,14 @@ module NonEmpty
   , length
   , map
   , map2
+  , map3
+  , map4
   , zip2
+  , zip3
+  , zip4
   , unzip2
+  , unzip3
+  , unzip4
   , filter
   , reverse
   , sort
@@ -26,6 +32,7 @@ where
 import Basics
 import Data.List.NonEmpty (NonEmpty ((:|)))
 import Data.List.NonEmpty qualified
+import List qualified
 import Prelude qualified
 
 {-# COMPLETE [], NonEmpty #-}
@@ -51,11 +58,39 @@ map = Data.List.NonEmpty.map
 map2 :: (a -> b -> c) -> NonEmpty a -> NonEmpty b -> NonEmpty c
 map2 = Data.List.NonEmpty.zipWith
 
+map3 :: (a -> b -> c -> d) -> NonEmpty a -> NonEmpty b -> NonEmpty c -> NonEmpty d
+map3 function (a :| as) (b :| bs) (c :| cs) =
+  function a b c :| List.map3 function as bs cs
+
+map4 :: (a -> b -> c -> d -> e) -> NonEmpty a -> NonEmpty b -> NonEmpty c -> NonEmpty d -> NonEmpty e
+map4 function (a :| as) (b :| bs) (c :| cs) (d :| ds) =
+  function a b c d :| List.map4 function as bs cs ds
+
 zip2 :: NonEmpty a -> NonEmpty b -> NonEmpty (a, b)
 zip2 = Data.List.NonEmpty.zip
 
+zip3 :: NonEmpty a -> NonEmpty b -> NonEmpty c -> NonEmpty (a, b, c)
+zip3 (a :| as) (b :| bs) (c :| cs) =
+  (a, b, c) :| List.zip3 as bs cs
+
+zip4 :: NonEmpty a -> NonEmpty b -> NonEmpty c -> NonEmpty d -> NonEmpty (a, b, c, d)
+zip4 (a :| as) (b :| bs) (c :| cs) (d :| ds) =
+  (a, b, c, d) :| List.zip4 as bs cs ds
+
 unzip2 :: NonEmpty (a, b) -> (NonEmpty a, NonEmpty b)
 unzip2 = Data.List.NonEmpty.unzip
+
+unzip3 :: NonEmpty (a, b, c) -> (NonEmpty a, NonEmpty b, NonEmpty c)
+unzip3 nonEmpty =
+  let (a, b, c) = first nonEmpty
+      (as, bs, cs) = List.unzip3 (rest nonEmpty)
+   in (a :| as, b :| bs, c :| cs)
+
+unzip4 :: NonEmpty (a, b, c, d) -> (NonEmpty a, NonEmpty b, NonEmpty c, NonEmpty d)
+unzip4 nonEmpty =
+  let (a, b, c, d) = first nonEmpty
+      (as, bs, cs, ds) = List.unzip4 (rest nonEmpty)
+   in (a :| as, b :| bs, c :| cs, d :| ds)
 
 filter :: (a -> Bool) -> NonEmpty a -> List a
 filter = Data.List.NonEmpty.filter
