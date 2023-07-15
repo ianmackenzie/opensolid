@@ -16,6 +16,10 @@ module NonEmpty
   , unzip3
   , unzip4
   , filter
+  , foldLeft
+  , foldRight
+  , reduceLeft
+  , reduceRight
   , reverse
   , sort
   , sortBy
@@ -30,6 +34,7 @@ module NonEmpty
 where
 
 import Basics
+import Data.Foldable qualified
 import Data.List.NonEmpty (NonEmpty ((:|)))
 import Data.List.NonEmpty qualified
 import List qualified
@@ -94,6 +99,18 @@ unzip4 nonEmpty =
 
 filter :: (a -> Bool) -> NonEmpty a -> List a
 filter = Data.List.NonEmpty.filter
+
+foldLeft :: (b -> a -> b) -> b -> NonEmpty a -> b
+foldLeft = Data.Foldable.foldl'
+
+foldRight :: (a -> b -> b) -> b -> NonEmpty a -> b
+foldRight = Data.Foldable.foldr
+
+reduceLeft :: (a -> a -> a) -> NonEmpty a -> a
+reduceLeft function (x :| xs) = List.foldLeft function x xs
+
+reduceRight :: (a -> a -> a) -> NonEmpty a -> a
+reduceRight = Data.Foldable.foldr1
 
 reverse :: NonEmpty a -> NonEmpty a
 reverse = Data.List.NonEmpty.reverse
