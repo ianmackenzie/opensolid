@@ -1,8 +1,6 @@
 module NonEmpty
-  ( NonEmpty
+  ( NonEmpty ((:|))
   , pattern NonEmpty
-  , compose
-  , decompose
   , first
   , rest
   , prepend
@@ -34,12 +32,6 @@ import Prelude qualified
 
 pattern NonEmpty :: NonEmpty a -> List a
 pattern NonEmpty nonEmpty <- (Data.List.NonEmpty.nonEmpty -> Just nonEmpty)
-
-compose :: a -> List a -> NonEmpty a
-compose = (:|)
-
-decompose :: NonEmpty a -> (a, List a)
-decompose nonEmpty = (first nonEmpty, rest nonEmpty)
 
 first :: NonEmpty a -> a
 first = Data.List.NonEmpty.head

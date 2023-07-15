@@ -24,7 +24,7 @@ import DoNotation
 import Float (Float, fromRational)
 import Fuzzy (Fuzzy (Resolved, Unresolved))
 import List (List)
-import NonEmpty (NonEmpty, pattern NonEmpty)
+import NonEmpty (NonEmpty ((:|)), pattern NonEmpty)
 import Qty (Qty (Qty))
 import Result (ErrorMessage (errorMessage), Result (Error, Ok))
 import Sign (Sign (Negative, Positive))
