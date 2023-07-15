@@ -112,7 +112,7 @@ drop :: Int -> List a -> List a
 drop = Prelude.drop
 
 sum :: (Generic.Zero a, Addition a a a) => List a -> a
-sum = foldl (+) Generic.zero
+sum = foldLeft (+) Generic.zero
 
 sort :: Ord a => List a -> List a
 sort = Data.List.sort
