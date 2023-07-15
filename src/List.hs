@@ -16,8 +16,8 @@ module List
   , filter
   , collect
   , concat
-  , foldl
-  , foldr
+  , foldLeft
+  , foldRight
   , reverse
   , take
   , drop
@@ -96,11 +96,11 @@ collect = Prelude.concatMap
 concat :: List (List a) -> List a
 concat = Data.List.concat
 
-foldl :: (b -> a -> b) -> b -> List a -> b
-foldl = Data.List.foldl'
+foldLeft :: (b -> a -> b) -> b -> List a -> b
+foldLeft = Data.List.foldl'
 
-foldr :: (a -> b -> b) -> b -> List a -> b
-foldr = Data.List.foldr
+foldRight :: (a -> b -> b) -> b -> List a -> b
+foldRight = Data.List.foldr
 
 reverse :: List a -> List a
 reverse = Data.List.reverse
