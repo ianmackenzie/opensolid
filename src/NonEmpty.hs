@@ -1,8 +1,8 @@
 module NonEmpty
   ( NonEmpty
   , pattern NonEmpty
-  , head
-  , tail
+  , first
+  , rest
   , prepend
   , length
   , map
@@ -33,11 +33,11 @@ import Prelude qualified
 pattern NonEmpty :: NonEmpty a -> List a
 pattern NonEmpty nonEmpty <- (Data.List.NonEmpty.nonEmpty -> Just nonEmpty)
 
-head :: NonEmpty a -> a
-head = Data.List.NonEmpty.head
+first :: NonEmpty a -> a
+first = Data.List.NonEmpty.head
 
-tail :: NonEmpty a -> List a
-tail = Data.List.NonEmpty.tail
+rest :: NonEmpty a -> List a
+rest = Data.List.NonEmpty.tail
 
 prepend :: a -> NonEmpty a -> NonEmpty a
 prepend = Data.List.NonEmpty.cons
@@ -76,7 +76,7 @@ sortAndDeduplicate :: Ord a => NonEmpty a -> NonEmpty a
 sortAndDeduplicate nonEmpty = deduplicate (sort nonEmpty)
 
 deduplicate :: Eq a => NonEmpty a -> NonEmpty a
-deduplicate (first :| rest) = dedup first rest
+deduplicate nonEmpty = dedup (first nonEmpty) (rest nonEmpty)
 
 dedup :: Eq a => a -> List a -> NonEmpty a
 dedup current [] = current :| []
