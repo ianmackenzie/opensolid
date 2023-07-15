@@ -354,10 +354,3 @@ findCrossingIntersections derivatives1 derivatives2 =
     Segment.isCrossingIntersectionCandidate
     Segment.crossingIntersectionSign
     (Segment.findCrossingIntersection derivatives1 derivatives2)
-
--- classify
---   :: Tolerance units
---   => Point2d (space @ units)
---   -> Curve2d (space @ units)
---   -> Sign
--- classify point curve =
