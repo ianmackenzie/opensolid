@@ -2,7 +2,6 @@ module List
   ( List
   , isEmpty
   , length
-  , head
   , map
   , map2
   , map3
@@ -42,7 +41,6 @@ import Arithmetic
 import Basics
 import Data.List qualified
 import Generic qualified
-import Result (ErrorMessage, Result (..))
 import Prelude qualified
 
 isEmpty :: List a -> Bool
@@ -50,12 +48,6 @@ isEmpty = Prelude.null
 
 length :: List a -> Int
 length = Data.List.length
-
-data IsEmpty = IsEmpty deriving (Eq, Show, ErrorMessage)
-
-head :: List a -> Result IsEmpty a
-head (first : _) = Ok first
-head [] = Error IsEmpty
 
 map :: (a -> b) -> List a -> List b
 map = Data.List.map
