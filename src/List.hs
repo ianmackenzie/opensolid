@@ -31,6 +31,10 @@ module List
   , successive
   , count
   , intersperse
+  , minimum
+  , maximum
+  , minimumBy
+  , maximumBy
   )
 where
 
@@ -147,3 +151,29 @@ count predicate (first : rest) = (if predicate first then 1 else 0) + count pred
 
 intersperse :: a -> List a -> List a
 intersperse = Data.List.intersperse
+
+minimum :: Ord a => a -> List a -> a
+minimum first rest = Prelude.minimum (first : rest)
+
+maximum :: Ord a => a -> List a -> a
+maximum first rest = Prelude.maximum (first : rest)
+
+minimumBy :: Ord b => (a -> b) -> a -> List a -> a
+minimumBy property first rest = go first (property first) rest
+ where
+  go current _ [] = current
+  go current currentProperty (next : remaining) =
+    let nextProperty = property next
+     in if nextProperty < currentProperty
+          then go next nextProperty remaining
+          else go current currentProperty remaining
+
+maximumBy :: Ord b => (a -> b) -> a -> List a -> a
+maximumBy property first rest = go first (property first) rest
+ where
+  go current _ [] = current
+  go current currentProperty (next : remaining) =
+    let nextProperty = property next
+     in if nextProperty > currentProperty
+          then go next nextProperty remaining
+          else go current currentProperty remaining
