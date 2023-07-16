@@ -9,7 +9,7 @@ import Basics
 import DoNotation
 import Prelude qualified
 
-data Fuzzy a = Resolved a | Unresolved deriving (Show)
+data Fuzzy a = Resolved a | Unresolved deriving (Eq, Show)
 
 instance Prelude.Functor Fuzzy where
   fmap f (Resolved value) = Resolved (f value)
