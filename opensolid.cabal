@@ -73,6 +73,7 @@ library
       Random
       Range
       Result
+      Seq
       Sign
       Stream
       Task
@@ -135,6 +136,7 @@ library
   build-depends:
       array
     , base >=4.7 && <5
+    , containers
     , random
     , text
   default-language: Haskell2010
@@ -188,6 +190,7 @@ executable sandbox
   build-depends:
       array
     , base >=4.7 && <5
+    , containers
     , opensolid
     , random
     , text
@@ -250,6 +253,7 @@ test-suite opensolid-test
   build-depends:
       array
     , base >=4.7 && <5
+    , containers
     , opensolid
     , random
     , text

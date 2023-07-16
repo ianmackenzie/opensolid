@@ -18,6 +18,7 @@ dependencies:
 - text
 - random
 - array
+- containers
 
 ghc-options:
 - -Wall
