@@ -47,7 +47,7 @@ pattern Direction2d v <- Direction2d# v
 
 instance
   space ~ space' =>
-  ApproximateEquality (Direction2d space) (Direction2d space) Radians
+  ApproximateEquality (Direction2d space) (Direction2d space') Radians
   where
   d1 ~= d2 = angleFrom d1 d2 ~= Qty.zero
 
