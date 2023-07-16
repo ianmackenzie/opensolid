@@ -359,19 +359,19 @@ searchImpl predicate range accumulated =
                 |> searchImpl predicate right
                 |> searchImpl predicate left
 
-search2
-  :: (Range units1 -> Range units2 -> Bool)
-  -> Range units1
-  -> Range units2
-  -> List (Qty units1, Qty units2)
+search2 ::
+  (Range units1 -> Range units2 -> Bool) ->
+  Range units1 ->
+  Range units2 ->
+  List (Qty units1, Qty units2)
 search2 predicate u v = search2Impl predicate u v []
 
-search2Impl
-  :: (Range units1 -> Range units2 -> Bool)
-  -> Range units1
-  -> Range units2
-  -> List (Qty units1, Qty units2)
-  -> List (Qty units1, Qty units2)
+search2Impl ::
+  (Range units1 -> Range units2 -> Bool) ->
+  Range units1 ->
+  Range units2 ->
+  List (Qty units1, Qty units2) ->
+  List (Qty units1, Qty units2)
 search2Impl predicate u v accumulated =
   case predicate u v of
     False -> accumulated
@@ -409,11 +409,11 @@ find isCandidate range =
                 Just _ -> leftResult
                 Nothing -> find isCandidate right
 
-find2
-  :: (Range units1 -> Range units2 -> Bool)
-  -> Range units1
-  -> Range units2
-  -> Maybe (Qty units1, Qty units2)
+find2 ::
+  (Range units1 -> Range units2 -> Bool) ->
+  Range units1 ->
+  Range units2 ->
+  Maybe (Qty units1, Qty units2)
 find2 isCandidate u v =
   case isCandidate u v of
     False -> Nothing
@@ -438,11 +438,11 @@ find2 isCandidate u v =
 resolve :: (Range units -> Fuzzy a) -> Range units -> Fuzzy (List a)
 resolve predicate range = resolveImpl predicate range []
 
-resolveImpl
-  :: (Range units -> Fuzzy a)
-  -> Range units
-  -> List a
-  -> Fuzzy (List a)
+resolveImpl ::
+  (Range units -> Fuzzy a) ->
+  Range units ->
+  List a ->
+  Fuzzy (List a)
 resolveImpl predicate range accumulated =
   case predicate range of
     Resolved resolved -> Resolved (resolved : accumulated)
@@ -453,19 +453,19 @@ resolveImpl predicate range accumulated =
           resultsR <- resolveImpl predicate right accumulated
           resolveImpl predicate left resultsR
 
-resolve2
-  :: (Range units1 -> Range units2 -> Fuzzy a)
-  -> Range units1
-  -> Range units2
-  -> Fuzzy (List a)
+resolve2 ::
+  (Range units1 -> Range units2 -> Fuzzy a) ->
+  Range units1 ->
+  Range units2 ->
+  Fuzzy (List a)
 resolve2 predicate range1 range2 = resolve2Impl predicate range1 range2 []
 
-resolve2Impl
-  :: (Range units1 -> Range units2 -> Fuzzy a)
-  -> Range units1
-  -> Range units2
-  -> List a
-  -> Fuzzy (List a)
+resolve2Impl ::
+  (Range units1 -> Range units2 -> Fuzzy a) ->
+  Range units1 ->
+  Range units2 ->
+  List a ->
+  Fuzzy (List a)
 resolve2Impl predicate range1 range2 accumulated =
   case predicate range1 range2 of
     Resolved resolved -> Resolved (resolved : accumulated)

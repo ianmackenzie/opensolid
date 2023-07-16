@@ -61,12 +61,12 @@ data VectorCurve2d (coordinateSystem :: CoordinateSystem) where
 deriving instance Show (VectorCurve2d coordinateSystem)
 
 instance
-  (units1 ~ units1', units2 ~ units2', space ~ space')
-  => Units.Coercion
-      units1
-      units2
-      (VectorCurve2d (space @ units1'))
-      (VectorCurve2d (space' @ units2'))
+  (units1 ~ units1', units2 ~ units2', space ~ space') =>
+  Units.Coercion
+    units1
+    units2
+    (VectorCurve2d (space @ units1'))
+    (VectorCurve2d (space' @ units2'))
 
 instance IsVectorCurve2d (VectorCurve2d (space @ units)) (space @ units) where
   evaluateAtImpl = evaluateAt
@@ -173,28 +173,28 @@ arc r a b
   | a == b = Constant (Vector2d.polar r a)
   | otherwise = Arc r a b
 
-quadraticSpline
-  :: Vector2d (space @ units)
-  -> Vector2d (space @ units)
-  -> Vector2d (space @ units)
-  -> VectorCurve2d (space @ units)
+quadraticSpline ::
+  Vector2d (space @ units) ->
+  Vector2d (space @ units) ->
+  Vector2d (space @ units) ->
+  VectorCurve2d (space @ units)
 quadraticSpline = QuadraticSpline
 
-cubicSpline
-  :: Vector2d (space @ units)
-  -> Vector2d (space @ units)
-  -> Vector2d (space @ units)
-  -> Vector2d (space @ units)
-  -> VectorCurve2d (space @ units)
+cubicSpline ::
+  Vector2d (space @ units) ->
+  Vector2d (space @ units) ->
+  Vector2d (space @ units) ->
+  Vector2d (space @ units) ->
+  VectorCurve2d (space @ units)
 cubicSpline = CubicSpline
 
-quadraticBlossom
-  :: Vector2d (space @ units)
-  -> Vector2d (space @ units)
-  -> Vector2d (space @ units)
-  -> Float
-  -> Float
-  -> Vector2d (space @ units)
+quadraticBlossom ::
+  Vector2d (space @ units) ->
+  Vector2d (space @ units) ->
+  Vector2d (space @ units) ->
+  Float ->
+  Float ->
+  Vector2d (space @ units)
 quadraticBlossom (Vector2d x1 y1) (Vector2d x2 y2) (Vector2d x3 y3) t1 t2 =
   let r1 = 1.0 - t1
       r2 = 1.0 - t2
@@ -205,15 +205,15 @@ quadraticBlossom (Vector2d x1 y1) (Vector2d x2 y2) (Vector2d x3 y3) t1 t2 =
       y = s1 * y1 + s2 * y2 + s3 * y3
    in Vector2d x y
 
-cubicBlossom
-  :: Vector2d (space @ units)
-  -> Vector2d (space @ units)
-  -> Vector2d (space @ units)
-  -> Vector2d (space @ units)
-  -> Float
-  -> Float
-  -> Float
-  -> Vector2d (space @ units)
+cubicBlossom ::
+  Vector2d (space @ units) ->
+  Vector2d (space @ units) ->
+  Vector2d (space @ units) ->
+  Vector2d (space @ units) ->
+  Float ->
+  Float ->
+  Float ->
+  Vector2d (space @ units)
 cubicBlossom (Vector2d x1 y1) (Vector2d x2 y2) (Vector2d x3 y3) (Vector2d x4 y4) t1 t2 t3 =
   let r1 = 1.0 - t1
       r2 = 1.0 - t2

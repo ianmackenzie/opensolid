@@ -46,8 +46,8 @@ pattern Direction2d :: Vector2d (space @ Unitless) -> Direction2d space
 pattern Direction2d v <- Direction2d# v
 
 instance
-  space ~ space'
-  => ApproximateEquality (Direction2d space) (Direction2d space) Radians
+  space ~ space' =>
+  ApproximateEquality (Direction2d space) (Direction2d space) Radians
   where
   d1 ~= d2 = angleFrom d1 d2 ~= Qty.zero
 
@@ -102,11 +102,11 @@ y = positiveY
 
 data PointsAreCoincident = PointsAreCoincident deriving (Eq, Show, ErrorMessage)
 
-from
-  :: Tolerance units
-  => Point2d (space @ units)
-  -> Point2d (space @ units)
-  -> Result PointsAreCoincident (Direction2d space)
+from ::
+  Tolerance units =>
+  Point2d (space @ units) ->
+  Point2d (space @ units) ->
+  Result PointsAreCoincident (Direction2d space)
 from p1 p2 =
   Vector2d.direction (p2 - p1)
     |> Result.mapError (\Vector2d.IsZero -> Direction2d.PointsAreCoincident)

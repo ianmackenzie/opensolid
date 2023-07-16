@@ -55,12 +55,12 @@ isDegenerateAt :: Tolerance units => Float -> VectorCurve2d (space @ units) -> B
 isDegenerateAt u firstDerivative =
   Vector2d.magnitude (VectorCurve2d.evaluateAt u firstDerivative) ~= Qty.zero
 
-classify
-  :: Tolerance units
-  => (Float, Float)
-  -> Derivatives (space @ units)
-  -> Derivatives (space @ units)
-  -> Result TangentIntersectionAtDegeneratePoint (Intersection.Kind, Sign)
+classify ::
+  Tolerance units =>
+  (Float, Float) ->
+  Derivatives (space @ units) ->
+  Derivatives (space @ units) ->
+  Result TangentIntersectionAtDegeneratePoint (Intersection.Kind, Sign)
 classify (u, v) derivatives1 derivatives2 =
   let first1 = VectorCurve2d.evaluateAt u derivatives1.first
       first2 = VectorCurve2d.evaluateAt v derivatives2.first

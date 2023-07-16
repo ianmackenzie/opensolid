@@ -59,25 +59,25 @@ with constraints = case List.sort constraints of
     fromStartPointEndPointSweptAngle p1 p2 theta
   _ -> Error UnsupportedConstraints
 
-fromCenterPointRadiusStartAngleEndAngle
-  :: Tolerance units
-  => Point2d (space @ units)
-  -> Qty units
-  -> Angle
-  -> Angle
-  -> Result BuildError (Curve2d (space @ units))
+fromCenterPointRadiusStartAngleEndAngle ::
+  Tolerance units =>
+  Point2d (space @ units) ->
+  Qty units ->
+  Angle ->
+  Angle ->
+  Result BuildError (Curve2d (space @ units))
 fromCenterPointRadiusStartAngleEndAngle centerPoint radius startAngle endAngle
   | radius < Qty.zero = Error NegativeRadius
   | radius ~= Qty.zero = Error DegenerateArc
   | radius * Angle.inRadians (endAngle - startAngle) ~= Qty.zero = Error DegenerateArc
   | otherwise = Ok (Curve2d.Internal.Arc centerPoint radius startAngle endAngle)
 
-fromCenterPointStartPointSweptAngle
-  :: Tolerance units
-  => Point2d (space @ units)
-  -> Point2d (space @ units)
-  -> Angle
-  -> Result BuildError (Curve2d (space @ units))
+fromCenterPointStartPointSweptAngle ::
+  Tolerance units =>
+  Point2d (space @ units) ->
+  Point2d (space @ units) ->
+  Angle ->
+  Result BuildError (Curve2d (space @ units))
 fromCenterPointStartPointSweptAngle centerPoint startPoint sweptAngle =
   let computedStartAngle = Point2d.angleFrom centerPoint startPoint
    in fromCenterPointRadiusStartAngleEndAngle
@@ -86,14 +86,14 @@ fromCenterPointStartPointSweptAngle centerPoint startPoint sweptAngle =
         computedStartAngle
         (computedStartAngle + sweptAngle)
 
-fromStartPointEndPointRadiusDirectionSize
-  :: Tolerance units
-  => Point2d (space @ units)
-  -> Point2d (space @ units)
-  -> Qty units
-  -> Direction
-  -> Size
-  -> Result BuildError (Curve2d (space @ units))
+fromStartPointEndPointRadiusDirectionSize ::
+  Tolerance units =>
+  Point2d (space @ units) ->
+  Point2d (space @ units) ->
+  Qty units ->
+  Direction ->
+  Size ->
+  Result BuildError (Curve2d (space @ units))
 fromStartPointEndPointRadiusDirectionSize startPoint endPoint radius direction size = do
   chordDirection <-
     Direction2d.from startPoint endPoint
@@ -123,12 +123,12 @@ fromStartPointEndPointRadiusDirectionSize startPoint endPoint radius direction s
           (Counterclockwise, Large) -> Angle.fullTurn - shortAngle
   fromCenterPointStartPointSweptAngle computedCenterPoint startPoint computedSweptAngle
 
-fromStartPointEndPointSweptAngle
-  :: Tolerance units
-  => Point2d (space @ units)
-  -> Point2d (space @ units)
-  -> Angle
-  -> Result BuildError (Curve2d (space @ units))
+fromStartPointEndPointSweptAngle ::
+  Tolerance units =>
+  Point2d (space @ units) ->
+  Point2d (space @ units) ->
+  Angle ->
+  Result BuildError (Curve2d (space @ units))
 fromStartPointEndPointSweptAngle startPoint endPoint sweptAngle =
   case Vector2d.magnitudeAndDirection (endPoint - startPoint) of
     Error Vector2d.IsZero -> Error DegenerateArc

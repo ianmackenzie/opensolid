@@ -50,10 +50,10 @@ instance IsCurve2d (QuadraticSpline2d (space @ units)) (space @ units) where
 
   boundingBoxImpl (QuadraticSpline2d p1 p2 p3) = BoundingBox2d.hull3 p1 p2 p3
 
-fromControlPoints
-  :: Tolerance units
-  => Point2d (space @ units)
-  -> Point2d (space @ units)
-  -> Point2d (space @ units)
-  -> Result Curve2d.DegenerateCurve (Curve2d (space @ units))
+fromControlPoints ::
+  Tolerance units =>
+  Point2d (space @ units) ->
+  Point2d (space @ units) ->
+  Point2d (space @ units) ->
+  Result Curve2d.DegenerateCurve (Curve2d (space @ units))
 fromControlPoints p1 p2 p3 = Curve2d.from (QuadraticSpline2d p1 p2 p3)

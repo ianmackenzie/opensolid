@@ -59,30 +59,30 @@ import VectorCurve2d qualified
 
 type Curve2d (coordinateSystem :: CoordinateSystem) = Internal.Curve2d coordinateSystem
 
-pattern Line
-  :: Point2d (space @ units)
-  -> Point2d (space @ units)
-  -> Direction2d space
-  -> Curve2d (space @ units)
+pattern Line ::
+  Point2d (space @ units) ->
+  Point2d (space @ units) ->
+  Direction2d space ->
+  Curve2d (space @ units)
 pattern Line startPoint endPoint direction <-
   Internal.Line startPoint endPoint direction
 
-pattern Arc
-  :: Point2d (space @ units)
-  -> Qty units
-  -> Angle
-  -> Angle
-  -> Curve2d (space @ units)
+pattern Arc ::
+  Point2d (space @ units) ->
+  Qty units ->
+  Angle ->
+  Angle ->
+  Curve2d (space @ units)
 pattern Arc centerPoint radius startAngle endAngle <-
   Internal.Arc centerPoint radius startAngle endAngle
 
 data DegenerateCurve = DegenerateCurve deriving (Eq, Show, ErrorMessage)
 
-from
-  :: Tolerance units
-  => IsCurve2d curve (space @ units)
-  => curve
-  -> Result DegenerateCurve (Curve2d (space @ units))
+from ::
+  Tolerance units =>
+  IsCurve2d curve (space @ units) =>
+  curve ->
+  Result DegenerateCurve (Curve2d (space @ units))
 from curve =
   let firstDerivative = derivativeImpl curve
       secondDerivative = VectorCurve2d.derivative firstDerivative
@@ -185,12 +185,12 @@ passesThrough :: Tolerance units => Point2d (space @ units) -> Curve2d (space @ 
 passesThrough point curve =
   Range.any (segmentIsCoincidentWithPoint point curve) Domain.unit
 
-segmentIsCoincidentWithPoint
-  :: Tolerance units
-  => Point2d (space @ units)
-  -> Curve2d (space @ units)
-  -> Domain
-  -> Fuzzy Bool
+segmentIsCoincidentWithPoint ::
+  Tolerance units =>
+  Point2d (space @ units) ->
+  Curve2d (space @ units) ->
+  Domain ->
+  Fuzzy Bool
 segmentIsCoincidentWithPoint point curve domain
   | Range.minValue distance > ?tolerance = Resolved False
   | Range.maxValue distance <= ?tolerance = Resolved True
@@ -198,21 +198,21 @@ segmentIsCoincidentWithPoint point curve domain
  where
   distance = VectorBox2d.magnitude (point - segmentBounds domain curve)
 
-parameterValues
-  :: Tolerance units
-  => Point2d (space @ units)
-  -> Curve2d (space @ units)
-  -> List Float
+parameterValues ::
+  Tolerance units =>
+  Point2d (space @ units) ->
+  Curve2d (space @ units) ->
+  List Float
 parameterValues point curve =
   VectorCurve2d.roots (point - curve)
     |> Result.withDefault [] -- Shouldn't happen, since curves are enforced to be non-degenerate
 
-overlappingSegments
-  :: Tolerance units
-  => Curve2d (space @ units)
-  -> Curve2d (space @ units)
-  -> List (Float, Float)
-  -> List (Domain, Domain, Sign)
+overlappingSegments ::
+  Tolerance units =>
+  Curve2d (space @ units) ->
+  Curve2d (space @ units) ->
+  List (Float, Float) ->
+  List (Domain, Domain, Sign)
 overlappingSegments curve1 curve2 endpointParameterValues =
   endpointParameterValues
     |> List.successive
@@ -224,12 +224,12 @@ overlappingSegments curve1 curve2 endpointParameterValues =
       )
     |> List.filter (isOverlappingSegment curve1 curve2)
 
-isOverlappingSegment
-  :: Tolerance units
-  => Curve2d (space @ units)
-  -> Curve2d (space @ units)
-  -> (Domain, Domain, Sign)
-  -> Bool
+isOverlappingSegment ::
+  Tolerance units =>
+  Curve2d (space @ units) ->
+  Curve2d (space @ units) ->
+  (Domain, Domain, Sign) ->
+  Bool
 isOverlappingSegment curve1 curve2 (domain1, _, _) =
   let segmentStartPoint = evaluateAt (Range.minValue domain1) curve1
       curve1TestPoints = Domain.sample (pointOn curve1) domain1
@@ -242,11 +242,11 @@ data IntersectionError
   | TangentIntersectionAtDegeneratePoint
   deriving (Eq, Show, ErrorMessage)
 
-findEndpointParameterValues
-  :: Tolerance units
-  => Curve2d (space @ units)
-  -> Curve2d (space @ units)
-  -> List (Float, Float)
+findEndpointParameterValues ::
+  Tolerance units =>
+  Curve2d (space @ units) ->
+  Curve2d (space @ units) ->
+  List (Float, Float)
 findEndpointParameterValues curve1 curve2 =
   List.sortAndDeduplicate $
     List.concat
@@ -256,11 +256,11 @@ findEndpointParameterValues curve1 curve2 =
       , List.map (,1.0) (parameterValues (endPoint curve2) curve1)
       ]
 
-intersections
-  :: Tolerance units
-  => Curve2d (space @ units)
-  -> Curve2d (space @ units)
-  -> Result IntersectionError (List Intersection)
+intersections ::
+  Tolerance units =>
+  Curve2d (space @ units) ->
+  Curve2d (space @ units) ->
+  Result IntersectionError (List Intersection)
 intersections curve1 curve2 = do
   let endpointParameterValues = findEndpointParameterValues curve1 curve2
   case overlappingSegments curve1 curve2 endpointParameterValues of
@@ -270,12 +270,12 @@ intersections curve1 curve2 = do
 type SearchTree (coordinateSystem :: CoordinateSystem) =
   Bisection.Tree (Segment coordinateSystem)
 
-findIntersections
-  :: Tolerance units
-  => Curve2d (space @ units)
-  -> Curve2d (space @ units)
-  -> List (Float, Float)
-  -> Result IntersectionError (List Intersection)
+findIntersections ::
+  Tolerance units =>
+  Curve2d (space @ units) ->
+  Curve2d (space @ units) ->
+  List (Float, Float) ->
+  Result IntersectionError (List Intersection)
 findIntersections curve1 curve2 endpointParameterValues = do
   let derivatives1 = Derivatives.ofCurve curve1
   let derivatives2 = Derivatives.ofCurve curve2
@@ -289,29 +289,29 @@ findIntersections curve1 curve2 endpointParameterValues = do
           |> findCrossingIntersections derivatives1 derivatives2 searchTree1 searchTree2
   Ok (List.sort allIntersections)
 
-findEndpointIntersections
-  :: Tolerance units
-  => Derivatives (space @ units)
-  -> Derivatives (space @ units)
-  -> List (Float, Float)
-  -> SearchTree (space @ units)
-  -> SearchTree (space @ units)
-  -> (List Intersection, List (Domain, Domain))
-  -> Result IntersectionError (List Intersection, List (Domain, Domain))
+findEndpointIntersections ::
+  Tolerance units =>
+  Derivatives (space @ units) ->
+  Derivatives (space @ units) ->
+  List (Float, Float) ->
+  SearchTree (space @ units) ->
+  SearchTree (space @ units) ->
+  (List Intersection, List (Domain, Domain)) ->
+  Result IntersectionError (List Intersection, List (Domain, Domain))
 findEndpointIntersections _ _ [] _ _ accumulated = Ok accumulated
 findEndpointIntersections derivatives1 derivatives2 (uv : rest) searchTree1 searchTree2 accumulated = do
   updated <- findEndpointIntersection derivatives1 derivatives2 uv searchTree1 searchTree2 accumulated
   findEndpointIntersections derivatives1 derivatives2 rest searchTree1 searchTree2 updated
 
-findEndpointIntersection
-  :: Tolerance units
-  => Derivatives (space @ units)
-  -> Derivatives (space @ units)
-  -> (Float, Float)
-  -> SearchTree (space @ units)
-  -> SearchTree (space @ units)
-  -> (List Intersection, List (Domain, Domain))
-  -> Result IntersectionError (List Intersection, List (Domain, Domain))
+findEndpointIntersection ::
+  Tolerance units =>
+  Derivatives (space @ units) ->
+  Derivatives (space @ units) ->
+  (Float, Float) ->
+  SearchTree (space @ units) ->
+  SearchTree (space @ units) ->
+  (List Intersection, List (Domain, Domain)) ->
+  Result IntersectionError (List Intersection, List (Domain, Domain))
 findEndpointIntersection derivatives1 derivatives2 uv searchTree1 searchTree2 accumulated = do
   intersectionType <-
     Derivatives.classify uv derivatives1 derivatives2
@@ -327,28 +327,28 @@ findEndpointIntersection derivatives1 derivatives2 uv searchTree1 searchTree2 ac
       searchTree2
       accumulated
 
-findTangentIntersections
-  :: Tolerance units
-  => Derivatives (space @ units)
-  -> Derivatives (space @ units)
-  -> SearchTree (space @ units)
-  -> SearchTree (space @ units)
-  -> (List Intersection, List (Domain, Domain))
-  -> (List Intersection, List (Domain, Domain))
+findTangentIntersections ::
+  Tolerance units =>
+  Derivatives (space @ units) ->
+  Derivatives (space @ units) ->
+  SearchTree (space @ units) ->
+  SearchTree (space @ units) ->
+  (List Intersection, List (Domain, Domain)) ->
+  (List Intersection, List (Domain, Domain))
 findTangentIntersections derivatives1 derivatives2 =
   Bisection.solve2
     Segment.isTangentIntersectionCandidate
     Segment.tangentIntersectionSign
     (Segment.findTangentIntersection derivatives1 derivatives2)
 
-findCrossingIntersections
-  :: Tolerance units
-  => Derivatives (space @ units)
-  -> Derivatives (space @ units)
-  -> SearchTree (space @ units)
-  -> SearchTree (space @ units)
-  -> (List Intersection, List (Domain, Domain))
-  -> (List Intersection, List (Domain, Domain))
+findCrossingIntersections ::
+  Tolerance units =>
+  Derivatives (space @ units) ->
+  Derivatives (space @ units) ->
+  SearchTree (space @ units) ->
+  SearchTree (space @ units) ->
+  (List Intersection, List (Domain, Domain)) ->
+  (List Intersection, List (Domain, Domain))
 findCrossingIntersections derivatives1 derivatives2 =
   Bisection.solve2
     Segment.isCrossingIntersectionCandidate

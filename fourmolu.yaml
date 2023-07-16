@@ -1,5 +1,5 @@
 indentation: 2
-function-arrows: leading
+function-arrows: trailing
 comma-style: leading
 import-export-style: leading
 indent-wheres: false

@@ -40,19 +40,19 @@ data Vector3d (coordinateSystem :: CoordinateSystem) = Vector3d
   deriving (Eq, Show)
 
 instance
-  (units1 ~ units1', units2 ~ units2', space ~ space')
-  => Units.Coercion
-      units1
-      units2
-      (Vector3d (space @ units1'))
-      (Vector3d (space' @ units2'))
+  (units1 ~ units1', units2 ~ units2', space ~ space') =>
+  Units.Coercion
+    units1
+    units2
+    (Vector3d (space @ units1'))
+    (Vector3d (space' @ units2'))
 
 instance Generic.Zero (Vector3d (space @ units)) where
   zero = zero
 
 instance
-  (space ~ space', units ~ units')
-  => ApproximateEquality (Vector3d (space @ units)) (Vector3d (space' @ units')) units
+  (space ~ space', units ~ units') =>
+  ApproximateEquality (Vector3d (space @ units)) (Vector3d (space' @ units')) units
   where
   v1 ~= v2 = magnitude (v1 - v2) ~= Qty.zero
 
@@ -86,11 +86,11 @@ instance (Units.Product units1 units2 units3, space ~ space') => DotProduct (Vec
   Vector3d x1 y1 z1 <> Vector3d x2 y2 z2 = x1 * x2 + y1 * y2 + z1 * z2
 
 instance
-  (Units.Product units1 units2 units3, space ~ space')
-  => CrossProduct
-      (Vector3d (space @ units1))
-      (Vector3d (space' @ units2))
-      (Vector3d (space @ units3))
+  (Units.Product units1 units2 units3, space ~ space') =>
+  CrossProduct
+    (Vector3d (space @ units1))
+    (Vector3d (space' @ units2))
+    (Vector3d (space @ units3))
   where
   Vector3d x1 y1 z1 >< Vector3d x2 y2 z2 =
     Vector3d
@@ -129,11 +129,11 @@ squareMeters :: Float -> Float -> Float -> Vector3d (space @ SquareMeters)
 squareMeters vx vy vz =
   Vector3d (Area.squareMeters vx) (Area.squareMeters vy) (Area.squareMeters vz)
 
-interpolateFrom
-  :: Vector3d (space @ units)
-  -> Vector3d (space @ units)
-  -> Float
-  -> Vector3d (space @ units)
+interpolateFrom ::
+  Vector3d (space @ units) ->
+  Vector3d (space @ units) ->
+  Float ->
+  Vector3d (space @ units)
 interpolateFrom (Vector3d x1 y1 z1) (Vector3d x2 y2 z2) t =
   Vector3d (Qty.interpolateFrom x1 x2 t) (Qty.interpolateFrom y1 y2 t) (Qty.interpolateFrom z1 z2 t)
 
@@ -156,10 +156,10 @@ direction vector = do
         then Error Vector3d.IsZero
         else Ok (Direction3d.unsafe (vx / vm) (vy / vm) (vz / vm))
 
-magnitudeAndDirection
-  :: Tolerance units
-  => Vector3d (space @ units)
-  -> Result IsZero (Qty units, Direction3d space)
+magnitudeAndDirection ::
+  Tolerance units =>
+  Vector3d (space @ units) ->
+  Result IsZero (Qty units, Direction3d space)
 magnitudeAndDirection vector = do
   let Vector3d vx vy vz = vector; vm = magnitude vector
    in if vm ~= Qty.zero

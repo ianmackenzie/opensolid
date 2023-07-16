@@ -34,12 +34,12 @@ data VectorBox2d (coordinateSystem :: CoordinateSystem) = VectorBox2d
   deriving (Show)
 
 instance
-  (units1 ~ units1', units2 ~ units2', space ~ space')
-  => Units.Coercion
-      units1
-      units2
-      (VectorBox2d (space @ units1'))
-      (VectorBox2d (space' @ units2'))
+  (units1 ~ units1', units2 ~ units2', space ~ space') =>
+  Units.Coercion
+    units1
+    units2
+    (VectorBox2d (space @ units1'))
+    (VectorBox2d (space' @ units2'))
 
 instance Generic.Zero (VectorBox2d (space @ units)) where
   zero = constant Vector2d.zero
@@ -56,164 +56,164 @@ instance Multiplication (VectorBox2d (space @ units)) Sign (VectorBox2d (space @
   vectorBox * Negative = -vectorBox
 
 instance
-  (space ~ space', units ~ units')
-  => Addition
-      (VectorBox2d (space @ units))
-      (VectorBox2d (space' @ units'))
-      (VectorBox2d (space @ units))
+  (space ~ space', units ~ units') =>
+  Addition
+    (VectorBox2d (space @ units))
+    (VectorBox2d (space' @ units'))
+    (VectorBox2d (space @ units))
   where
   VectorBox2d x1 y1 + VectorBox2d x2 y2 = VectorBox2d (x1 + x2) (y1 + y2)
 
 instance
-  (space ~ space', units ~ units')
-  => Addition
-      (VectorBox2d (space @ units))
-      (Vector2d (space' @ units'))
-      (VectorBox2d (space @ units))
+  (space ~ space', units ~ units') =>
+  Addition
+    (VectorBox2d (space @ units))
+    (Vector2d (space' @ units'))
+    (VectorBox2d (space @ units))
   where
   VectorBox2d x1 y1 + Vector2d x2 y2 = VectorBox2d (x1 + x2) (y1 + y2)
 
 instance
-  (space ~ space', units ~ units')
-  => Addition
-      (Vector2d (space @ units))
-      (VectorBox2d (space' @ units'))
-      (VectorBox2d (space @ units))
+  (space ~ space', units ~ units') =>
+  Addition
+    (Vector2d (space @ units))
+    (VectorBox2d (space' @ units'))
+    (VectorBox2d (space @ units))
   where
   Vector2d x1 y1 + VectorBox2d x2 y2 = VectorBox2d (x1 + x2) (y1 + y2)
 
 instance
-  (space ~ space', units ~ units')
-  => Subtraction
-      (VectorBox2d (space @ units))
-      (VectorBox2d (space' @ units'))
-      (VectorBox2d (space @ units))
+  (space ~ space', units ~ units') =>
+  Subtraction
+    (VectorBox2d (space @ units))
+    (VectorBox2d (space' @ units'))
+    (VectorBox2d (space @ units))
   where
   VectorBox2d x1 y1 - VectorBox2d x2 y2 = VectorBox2d (x1 - x2) (y1 - y2)
 
 instance
-  (space ~ space', units ~ units')
-  => Subtraction
-      (VectorBox2d (space @ units))
-      (Vector2d (space' @ units'))
-      (VectorBox2d (space @ units))
+  (space ~ space', units ~ units') =>
+  Subtraction
+    (VectorBox2d (space @ units))
+    (Vector2d (space' @ units'))
+    (VectorBox2d (space @ units))
   where
   VectorBox2d x1 y1 - Vector2d x2 y2 = VectorBox2d (x1 - x2) (y1 - y2)
 
 instance
-  (space ~ space', units ~ units')
-  => Subtraction
-      (Vector2d (space @ units))
-      (VectorBox2d (space' @ units'))
-      (VectorBox2d (space @ units))
+  (space ~ space', units ~ units') =>
+  Subtraction
+    (Vector2d (space @ units))
+    (VectorBox2d (space' @ units'))
+    (VectorBox2d (space @ units))
   where
   Vector2d x1 y1 - VectorBox2d x2 y2 = VectorBox2d (x1 - x2) (y1 - y2)
 
 instance
-  Units.Product units1 units2 units3
-  => Multiplication
-      (Qty units1)
-      (VectorBox2d (space @ units2))
-      (VectorBox2d (space @ units3))
+  Units.Product units1 units2 units3 =>
+  Multiplication
+    (Qty units1)
+    (VectorBox2d (space @ units2))
+    (VectorBox2d (space @ units3))
   where
   value * VectorBox2d x y = VectorBox2d (value * x) (value * y)
 
 instance
-  Units.Product units1 units2 units3
-  => Multiplication
-      (VectorBox2d (space @ units1))
-      (Qty units2)
-      (VectorBox2d (space @ units3))
+  Units.Product units1 units2 units3 =>
+  Multiplication
+    (VectorBox2d (space @ units1))
+    (Qty units2)
+    (VectorBox2d (space @ units3))
   where
   VectorBox2d x y * value = VectorBox2d (x * value) (y * value)
 
 instance
-  Units.Product units1 units2 units3
-  => Multiplication
-      (Range units1)
-      (VectorBox2d (space @ units2))
-      (VectorBox2d (space @ units3))
+  Units.Product units1 units2 units3 =>
+  Multiplication
+    (Range units1)
+    (VectorBox2d (space @ units2))
+    (VectorBox2d (space @ units3))
   where
   range * VectorBox2d x y = VectorBox2d (range * x) (range * y)
 
 instance
-  Units.Product units1 units2 units3
-  => Multiplication
-      (VectorBox2d (space @ units1))
-      (Range units2)
-      (VectorBox2d (space @ units3))
+  Units.Product units1 units2 units3 =>
+  Multiplication
+    (VectorBox2d (space @ units1))
+    (Range units2)
+    (VectorBox2d (space @ units3))
   where
   VectorBox2d x y * range = VectorBox2d (x * range) (y * range)
 
 instance
-  Units.Quotient units1 units2 units3
-  => Division
-      (VectorBox2d (space @ units1))
-      (Qty units2)
-      (VectorBox2d (space @ units3))
+  Units.Quotient units1 units2 units3 =>
+  Division
+    (VectorBox2d (space @ units1))
+    (Qty units2)
+    (VectorBox2d (space @ units3))
   where
   VectorBox2d x y / value = VectorBox2d (x / value) (y / value)
 
 instance
-  Units.Quotient units1 units2 units3
-  => Division
-      (VectorBox2d (space @ units1))
-      (Range units2)
-      (VectorBox2d (space @ units3))
+  Units.Quotient units1 units2 units3 =>
+  Division
+    (VectorBox2d (space @ units1))
+    (Range units2)
+    (VectorBox2d (space @ units3))
   where
   VectorBox2d x y / range = VectorBox2d (x / range) (y / range)
 
 instance
-  (Units.Product units1 units2 units3, space ~ space')
-  => DotProduct
-      (Vector2d (space @ units1))
-      (VectorBox2d (space' @ units2))
-      (Range units3)
+  (Units.Product units1 units2 units3, space ~ space') =>
+  DotProduct
+    (Vector2d (space @ units1))
+    (VectorBox2d (space' @ units2))
+    (Range units3)
   where
   Vector2d x1 y1 <> VectorBox2d x2 y2 = x1 * x2 + y1 * y2
 
 instance
-  (Units.Product units1 units2 units3, space ~ space')
-  => DotProduct
-      (VectorBox2d (space @ units1))
-      (Vector2d (space' @ units2))
-      (Range units3)
+  (Units.Product units1 units2 units3, space ~ space') =>
+  DotProduct
+    (VectorBox2d (space @ units1))
+    (Vector2d (space' @ units2))
+    (Range units3)
   where
   VectorBox2d x1 y1 <> Vector2d x2 y2 = x1 * x2 + y1 * y2
 
 instance
-  (Units.Product units1 units2 units3, space ~ space')
-  => DotProduct
-      (VectorBox2d (space @ units1))
-      (VectorBox2d (space' @ units2))
-      (Range units3)
+  (Units.Product units1 units2 units3, space ~ space') =>
+  DotProduct
+    (VectorBox2d (space @ units1))
+    (VectorBox2d (space' @ units2))
+    (Range units3)
   where
   VectorBox2d x1 y1 <> VectorBox2d x2 y2 = x1 * x2 + y1 * y2
 
 instance
-  (Units.Product units1 units2 units3, space ~ space')
-  => CrossProduct
-      (Vector2d (space @ units1))
-      (VectorBox2d (space' @ units2))
-      (Range units3)
+  (Units.Product units1 units2 units3, space ~ space') =>
+  CrossProduct
+    (Vector2d (space @ units1))
+    (VectorBox2d (space' @ units2))
+    (Range units3)
   where
   Vector2d x1 y1 >< VectorBox2d x2 y2 = x1 * y2 - y1 * x2
 
 instance
-  (Units.Product units1 units2 units3, space ~ space')
-  => CrossProduct
-      (VectorBox2d (space @ units1))
-      (Vector2d (space' @ units2))
-      (Range units3)
+  (Units.Product units1 units2 units3, space ~ space') =>
+  CrossProduct
+    (VectorBox2d (space @ units1))
+    (Vector2d (space' @ units2))
+    (Range units3)
   where
   VectorBox2d x1 y1 >< Vector2d x2 y2 = x1 * y2 - y1 * x2
 
 instance
-  (Units.Product units1 units2 units3, space ~ space')
-  => CrossProduct
-      (VectorBox2d (space @ units1))
-      (VectorBox2d (space' @ units2))
-      (Range units3)
+  (Units.Product units1 units2 units3, space ~ space') =>
+  CrossProduct
+    (VectorBox2d (space @ units1))
+    (VectorBox2d (space' @ units2))
+    (Range units3)
   where
   VectorBox2d x1 y1 >< VectorBox2d x2 y2 = x1 * y2 - y1 * x2
 
@@ -223,11 +223,11 @@ constant (Vector2d x y) = VectorBox2d (Range.constant x) (Range.constant y)
 hull2 :: Vector2d (space @ units) -> Vector2d (space @ units) -> VectorBox2d (space @ units)
 hull2 (Vector2d x1 y1) (Vector2d x2 y2) = VectorBox2d (Range.from x1 x2) (Range.from y1 y2)
 
-hull3
-  :: Vector2d (space @ units)
-  -> Vector2d (space @ units)
-  -> Vector2d (space @ units)
-  -> VectorBox2d (space @ units)
+hull3 ::
+  Vector2d (space @ units) ->
+  Vector2d (space @ units) ->
+  Vector2d (space @ units) ->
+  VectorBox2d (space @ units)
 hull3 (Vector2d x1 y1) (Vector2d x2 y2) (Vector2d x3 y3) =
   let minX = min (min x1 x2) x3
       maxX = max (max x1 x2) x3
@@ -235,12 +235,12 @@ hull3 (Vector2d x1 y1) (Vector2d x2 y2) (Vector2d x3 y3) =
       maxY = max (max y1 y2) y3
    in VectorBox2d (Range.unsafe minX maxX) (Range.unsafe minY maxY)
 
-hull4
-  :: Vector2d (space @ units)
-  -> Vector2d (space @ units)
-  -> Vector2d (space @ units)
-  -> Vector2d (space @ units)
-  -> VectorBox2d (space @ units)
+hull4 ::
+  Vector2d (space @ units) ->
+  Vector2d (space @ units) ->
+  Vector2d (space @ units) ->
+  Vector2d (space @ units) ->
+  VectorBox2d (space @ units)
 hull4 (Vector2d x1 y1) (Vector2d x2 y2) (Vector2d x3 y3) (Vector2d x4 y4) =
   let minX = min (min (min x1 x2) x3) x4
       maxX = max (max (max x1 x2) x3) x4

@@ -34,8 +34,8 @@ pattern Direction3d :: Float -> Float -> Float -> Direction3d space
 pattern Direction3d x y z <- Direction3d# x y z
 
 instance
-  space ~ space'
-  => ApproximateEquality (Direction3d space) (Direction3d space) Radians
+  space ~ space' =>
+  ApproximateEquality (Direction3d space) (Direction3d space) Radians
   where
   d1 ~= d2 = angleFrom d1 d2 ~= Qty.zero
 

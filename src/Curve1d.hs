@@ -287,11 +287,11 @@ equalTo :: Tolerance units => Qty units -> Curve1d units -> Result EqualEverywhe
 equalTo value curve =
   roots (curve - value) |> Result.mapError (\ZeroEverywhere -> EqualEverywhere)
 
-equalToSquared
-  :: (Tolerance units1, Squared units1 units2)
-  => Qty units1
-  -> Curve1d units2
-  -> Result EqualEverywhere (List Root)
+equalToSquared ::
+  (Tolerance units1, Squared units1 units2) =>
+  Qty units1 ->
+  Curve1d units2 ->
+  Result EqualEverywhere (List Root)
 equalToSquared value curve =
   let ?tolerance = ?tolerance * ?tolerance + 2.0 * value * ?tolerance
    in roots (curve - Qty.squared value) |> Result.mapError (\ZeroEverywhere -> EqualEverywhere)
@@ -312,14 +312,14 @@ roots curve =
           |> findRoots curve derivatives searchTree maxRootOrder
    in Ok (List.sortBy Root.value allRoots)
 
-findRoots
-  :: Tolerance units
-  => Curve1d units
-  -> Stream (Curve1d units)
-  -> Bisection.Tree (Stream (Range units))
-  -> Int
-  -> (List Root, List Domain)
-  -> (List Root, List Domain)
+findRoots ::
+  Tolerance units =>
+  Curve1d units ->
+  Stream (Curve1d units) ->
+  Bisection.Tree (Stream (Range units)) ->
+  Int ->
+  (List Root, List Domain) ->
+  (List Root, List Domain)
 findRoots curve derivatives searchTree rootOrder accumulated =
   let updated =
         Bisection.solve
@@ -343,15 +343,15 @@ isCandidate rootOrder _ bounds =
 resolveDerivativeSign :: Int -> Domain -> Stream (Range units) -> Fuzzy Sign
 resolveDerivativeSign derivativeOrder _ bounds = resolveSign (Stream.nth derivativeOrder bounds)
 
-findRoot
-  :: Tolerance units
-  => Curve1d units
-  -> Int
-  -> Stream (Curve1d units)
-  -> Domain
-  -> Stream (Range units)
-  -> Sign
-  -> Maybe Root
+findRoot ::
+  Tolerance units =>
+  Curve1d units ->
+  Int ->
+  Stream (Curve1d units) ->
+  Domain ->
+  Stream (Range units) ->
+  Sign ->
+  Maybe Root
 findRoot originalCurve rootOrder derivatives domain _ nextDerivativeSign =
   let curve = Stream.nth rootOrder derivatives
       Range x1 x2 = domain

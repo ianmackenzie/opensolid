@@ -28,34 +28,34 @@ import VectorCurve2d (IsVectorCurve2d (..), VectorCurve2d (VectorCurve2d))
 import VectorCurve2d qualified
 
 data Curve2d (coordinateSystem :: CoordinateSystem) where
-  Line
-    :: Point2d (space @ units)
-    -> Point2d (space @ units)
-    -> Direction2d space
-    -> Curve2d (space @ units)
-  Arc
-    :: Point2d (space @ units)
-    -> Qty units
-    -> Angle
-    -> Angle
-    -> Curve2d (space @ units)
-  Curve
-    :: IsCurve2d curve (space @ units)
-    => curve
-    -> Qty units
-    -> VectorCurve2d (space @ units)
-    -> VectorCurve2d (space @ units)
-    -> Curve2d (space @ units)
+  Line ::
+    Point2d (space @ units) ->
+    Point2d (space @ units) ->
+    Direction2d space ->
+    Curve2d (space @ units)
+  Arc ::
+    Point2d (space @ units) ->
+    Qty units ->
+    Angle ->
+    Angle ->
+    Curve2d (space @ units)
+  Curve ::
+    IsCurve2d curve (space @ units) =>
+    curve ->
+    Qty units ->
+    VectorCurve2d (space @ units) ->
+    VectorCurve2d (space @ units) ->
+    Curve2d (space @ units)
 
 deriving instance Show (Curve2d coordinateSystem)
 
 instance
-  (units1 ~ units1', units2 ~ units2', space ~ space')
-  => Units.Coercion
-      units1
-      units2
-      (Curve2d (space @ units1'))
-      (Curve2d (space' @ units2'))
+  (units1 ~ units1', units2 ~ units2', space ~ space') =>
+  Units.Coercion
+    units1
+    units2
+    (Curve2d (space @ units1'))
+    (Curve2d (space' @ units2'))
 
 class
   Show curve =>
@@ -120,11 +120,11 @@ instance IsVectorCurve2d (PointCurveDifference (space @ units)) (space @ units) 
   reverseImpl (PointCurveDifference point curve) = PointCurveDifference point (reverse curve)
 
 instance
-  (units ~ units', space ~ space')
-  => Subtraction
-      (Point2d (space @ units))
-      (Curve2d (space' @ units'))
-      (VectorCurve2d (space @ units))
+  (units ~ units', space ~ space') =>
+  Subtraction
+    (Point2d (space @ units))
+    (Curve2d (space' @ units'))
+    (VectorCurve2d (space @ units))
   where
   point - curve = VectorCurve2d (PointCurveDifference point curve)
 
@@ -140,10 +140,10 @@ instance IsVectorCurve2d (CurvePointDifference (space @ units)) (space @ units) 
   reverseImpl (CurvePointDifference curve point) = CurvePointDifference (reverse curve) point
 
 instance
-  (units ~ units', space ~ space')
-  => Subtraction
-      (Curve2d (space @ units))
-      (Point2d (space' @ units'))
-      (VectorCurve2d (space @ units))
+  (units ~ units', space ~ space') =>
+  Subtraction
+    (Curve2d (space @ units))
+    (Point2d (space' @ units'))
+    (VectorCurve2d (space @ units))
   where
   curve - point = VectorCurve2d (CurvePointDifference curve point)

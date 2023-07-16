@@ -45,61 +45,61 @@ data Point2d (coordinateSystem :: CoordinateSystem) = Point2d
   deriving (Eq, Ord, Show)
 
 instance
-  (units1 ~ units1', units2 ~ units2', space ~ space')
-  => Units.Coercion
-      units1
-      units2
-      (Point2d (space @ units1'))
-      (Point2d (space' @ units2'))
+  (units1 ~ units1', units2 ~ units2', space ~ space') =>
+  Units.Coercion
+    units1
+    units2
+    (Point2d (space @ units1'))
+    (Point2d (space' @ units2'))
 
 instance
-  (units ~ units', space ~ space')
-  => Addition
-      (Point2d (space @ units))
-      (Vector2d (space' @ units'))
-      (Point2d (space @ units))
+  (units ~ units', space ~ space') =>
+  Addition
+    (Point2d (space @ units))
+    (Vector2d (space' @ units'))
+    (Point2d (space @ units))
   where
   Point2d px py + Vector2d vx vy = Point2d (px + vx) (py + vy)
 
 instance
-  (units ~ units', space ~ space')
-  => Subtraction
-      (Point2d (space @ units))
-      (Vector2d (space' @ units'))
-      (Point2d (space @ units))
+  (units ~ units', space ~ space') =>
+  Subtraction
+    (Point2d (space @ units))
+    (Vector2d (space' @ units'))
+    (Point2d (space @ units))
   where
   Point2d px py - Vector2d vx vy = Point2d (px - vx) (py - vy)
 
 instance
-  (units ~ units', space ~ space')
-  => Subtraction
-      (Point2d (space @ units))
-      (Point2d (space' @ units'))
-      (Vector2d (space @ units))
+  (units ~ units', space ~ space') =>
+  Subtraction
+    (Point2d (space @ units))
+    (Point2d (space' @ units'))
+    (Vector2d (space @ units))
   where
   Point2d x1 y1 - Point2d x2 y2 = Vector2d (x1 - x2) (y1 - y2)
 
 instance
-  (units ~ units', space ~ space')
-  => Addition
-      (Point2d (space @ units))
-      (VectorBox2d (space' @ units'))
-      (BoundingBox2d (space @ units))
+  (units ~ units', space ~ space') =>
+  Addition
+    (Point2d (space @ units))
+    (VectorBox2d (space' @ units'))
+    (BoundingBox2d (space @ units))
   where
   Point2d px py + VectorBox2d vx vy = BoundingBox2d (px + vx) (py + vy)
 
 instance
-  (units ~ units', space ~ space')
-  => Subtraction
-      (Point2d (space @ units))
-      (VectorBox2d (space' @ units'))
-      (BoundingBox2d (space @ units))
+  (units ~ units', space ~ space') =>
+  Subtraction
+    (Point2d (space @ units))
+    (VectorBox2d (space' @ units'))
+    (BoundingBox2d (space @ units))
   where
   Point2d px py - VectorBox2d vx vy = BoundingBox2d (px - vx) (py - vy)
 
 instance
-  (space ~ space', units ~ units')
-  => ApproximateEquality (Point2d (space @ units)) (Point2d (space' @ units')) units
+  (space ~ space', units ~ units') =>
+  ApproximateEquality (Point2d (space @ units)) (Point2d (space' @ units')) units
   where
   p1 ~= p2 = distanceFrom p1 p2 ~= Qty.zero
 
@@ -143,20 +143,20 @@ signedDistanceFrom :: Axis2d (space @ units) -> Point2d (space @ units) -> Qty u
 signedDistanceFrom axis point =
   (point - axis.originPoint) <> Direction2d.perpendicularTo axis.direction
 
-placeIn
-  :: Frame2d (global @ units) (Defines local)
-  -> Point2d (local @ units)
-  -> Point2d (global @ units)
+placeIn ::
+  Frame2d (global @ units) (Defines local) ->
+  Point2d (local @ units) ->
+  Point2d (global @ units)
 placeIn frame (Point2d px py) =
   let (Point2d x0 y0) = Frame2d.originPoint frame
       (Direction2d (Vector2d ix iy)) = Frame2d.xDirection frame
       (Direction2d (Vector2d jx jy)) = Frame2d.yDirection frame
    in Point2d (x0 + px * ix + py * jx) (y0 + px * iy + py * jy)
 
-relativeTo
-  :: Frame2d (global @ units) (Defines local)
-  -> Point2d (global @ units)
-  -> Point2d (local @ units)
+relativeTo ::
+  Frame2d (global @ units) (Defines local) ->
+  Point2d (global @ units) ->
+  Point2d (local @ units)
 relativeTo frame (Point2d px py) =
   let (Point2d x0 y0) = Frame2d.originPoint frame
       (Direction2d (Vector2d ix iy)) = Frame2d.xDirection frame

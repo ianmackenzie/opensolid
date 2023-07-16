@@ -61,18 +61,18 @@ intersection (BoundingBox3d x1 y1 z1) (BoundingBox3d x2 y2 z2) = do
   z <- Range.intersection z1 z2
   Just (BoundingBox3d x y z)
 
-hull2
-  :: Point3d (space @ units)
-  -> Point3d (space @ units)
-  -> BoundingBox3d (space @ units)
+hull2 ::
+  Point3d (space @ units) ->
+  Point3d (space @ units) ->
+  BoundingBox3d (space @ units)
 hull2 (Point3d x1 y1 z1) (Point3d x2 y2 z2) =
   BoundingBox3d (Range.from x1 x2) (Range.from y1 y2) (Range.from z1 z2)
 
-hull3
-  :: Point3d (space @ units)
-  -> Point3d (space @ units)
-  -> Point3d (space @ units)
-  -> BoundingBox3d (space @ units)
+hull3 ::
+  Point3d (space @ units) ->
+  Point3d (space @ units) ->
+  Point3d (space @ units) ->
+  BoundingBox3d (space @ units)
 hull3 (Point3d x1 y1 z1) (Point3d x2 y2 z2) (Point3d x3 y3 z3) =
   let minX = min (min x1 x2) x3
       maxX = max (max x1 x2) x3
@@ -82,12 +82,12 @@ hull3 (Point3d x1 y1 z1) (Point3d x2 y2 z2) (Point3d x3 y3 z3) =
       maxZ = max (max z1 z2) z3
    in BoundingBox3d (Range.unsafe minX maxX) (Range.unsafe minY maxY) (Range.unsafe minZ maxZ)
 
-hull4
-  :: Point3d (space @ units)
-  -> Point3d (space @ units)
-  -> Point3d (space @ units)
-  -> Point3d (space @ units)
-  -> BoundingBox3d (space @ units)
+hull4 ::
+  Point3d (space @ units) ->
+  Point3d (space @ units) ->
+  Point3d (space @ units) ->
+  Point3d (space @ units) ->
+  BoundingBox3d (space @ units)
 hull4 (Point3d x1 y1 z1) (Point3d x2 y2 z2) (Point3d x3 y3 z3) (Point3d x4 y4 z4) =
   let minX = min (min (min x1 x2) x3) x4
       maxX = max (max (max x1 x2) x3) x4

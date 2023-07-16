@@ -50,12 +50,12 @@ instance IsCurve3d (QuadraticSpline3d (space @ units)) (space @ units) where
 
   boundingBoxImpl (QuadraticSpline3d p1 p2 p3) = BoundingBox3d.hull3 p1 p2 p3
 
-fromControlPoints
-  :: Tolerance units
-  => Point3d (space @ units)
-  -> Point3d (space @ units)
-  -> Point3d (space @ units)
-  -> Result Curve3d.DegenerateCurve (Curve3d (space @ units))
+fromControlPoints ::
+  Tolerance units =>
+  Point3d (space @ units) ->
+  Point3d (space @ units) ->
+  Point3d (space @ units) ->
+  Result Curve3d.DegenerateCurve (Curve3d (space @ units))
 fromControlPoints p1 p2 p3
   | p1 ~= p2 && p2 ~= p3 = Error DegenerateCurve
   | otherwise = Ok (Curve3d (QuadraticSpline3d p1 p2 p3))

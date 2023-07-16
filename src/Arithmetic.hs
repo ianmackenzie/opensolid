@@ -66,50 +66,50 @@ infixl 6 +, -
 
 infixl 7 *, /, //
 
-(.*)
-  :: ( Units.Coercion unitsA Unitless a aUnitless
-     , Units.Coercion unitsB Unitless b bUnitless
-     , Units.Coercion Unitless unitsC cUnitless c
-     , Units.GenericProduct unitsA unitsB ~ unitsC
-     , Multiplication aUnitless bUnitless cUnitless
-     )
-  => a
-  -> b
-  -> c
+(.*) ::
+  ( Units.Coercion unitsA Unitless a aUnitless
+  , Units.Coercion unitsB Unitless b bUnitless
+  , Units.Coercion Unitless unitsC cUnitless c
+  , Units.GenericProduct unitsA unitsB ~ unitsC
+  , Multiplication aUnitless bUnitless cUnitless
+  ) =>
+  a ->
+  b ->
+  c
 (.*) lhs rhs = Units.add (Units.drop lhs * Units.drop rhs)
 
-(./)
-  :: ( Units.Coercion unitsA Unitless a aUnitless
-     , Units.Coercion unitsB Unitless b bUnitless
-     , Units.Coercion Unitless unitsC cUnitless c
-     , Units.GenericQuotient unitsA unitsB ~ unitsC
-     , Division aUnitless bUnitless cUnitless
-     )
-  => a
-  -> b
-  -> c
+(./) ::
+  ( Units.Coercion unitsA Unitless a aUnitless
+  , Units.Coercion unitsB Unitless b bUnitless
+  , Units.Coercion Unitless unitsC cUnitless c
+  , Units.GenericQuotient unitsA unitsB ~ unitsC
+  , Division aUnitless bUnitless cUnitless
+  ) =>
+  a ->
+  b ->
+  c
 (./) lhs rhs = Units.add (Units.drop lhs / Units.drop rhs)
 
-(.<>)
-  :: ( Units.Coercion unitsA Unitless a aUnitless
-     , Units.Coercion unitsB Unitless b bUnitless
-     , Units.Coercion Unitless unitsC cUnitless c
-     , Units.GenericProduct unitsA unitsB ~ unitsC
-     , DotProduct aUnitless bUnitless cUnitless
-     )
-  => a
-  -> b
-  -> c
+(.<>) ::
+  ( Units.Coercion unitsA Unitless a aUnitless
+  , Units.Coercion unitsB Unitless b bUnitless
+  , Units.Coercion Unitless unitsC cUnitless c
+  , Units.GenericProduct unitsA unitsB ~ unitsC
+  , DotProduct aUnitless bUnitless cUnitless
+  ) =>
+  a ->
+  b ->
+  c
 (.<>) lhs rhs = Units.add (Units.drop lhs <> Units.drop rhs)
 
-(.><)
-  :: ( Units.Coercion unitsA Unitless a aUnitless
-     , Units.Coercion unitsB Unitless b bUnitless
-     , Units.Coercion Unitless unitsC cUnitless c
-     , Units.GenericProduct unitsA unitsB ~ unitsC
-     , CrossProduct aUnitless bUnitless cUnitless
-     )
-  => a
-  -> b
-  -> c
+(.><) ::
+  ( Units.Coercion unitsA Unitless a aUnitless
+  , Units.Coercion unitsB Unitless b bUnitless
+  , Units.Coercion Unitless unitsC cUnitless c
+  , Units.GenericProduct unitsA unitsB ~ unitsC
+  , CrossProduct aUnitless bUnitless cUnitless
+  ) =>
+  a ->
+  b ->
+  c
 (.><) lhs rhs = Units.add (Units.drop lhs >< Units.drop rhs)

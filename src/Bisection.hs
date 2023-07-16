@@ -28,13 +28,13 @@ buildTree compute domain =
       (left, right) = Range.bisect domain
    in Tree cache neighborhoodCache (buildTree compute left) (buildTree compute right)
 
-solve
-  :: (Domain -> segment -> Bool)
-  -> (Domain -> segment -> Fuzzy resolution)
-  -> (Domain -> segment -> resolution -> Maybe solution)
-  -> Tree segment
-  -> (List solution, List Domain)
-  -> (List solution, List Domain)
+solve ::
+  (Domain -> segment -> Bool) ->
+  (Domain -> segment -> Fuzzy resolution) ->
+  (Domain -> segment -> resolution -> Maybe solution) ->
+  Tree segment ->
+  (List solution, List Domain) ->
+  (List solution, List Domain)
 solve isCandidate resolveNeighborhood findSolution segmentTree accumulated =
   let allowed = isAllowed domain exclusions
       candidate = isCandidate domain segment
@@ -67,15 +67,15 @@ isAllowed domain (first : rest)
         else Unresolved
   | otherwise = isAllowed domain rest
 
-solve2
-  :: Show solution
-  => (Domain -> Domain -> segment -> segment -> Bool)
-  -> (Domain -> Domain -> segment -> segment -> Fuzzy resolution)
-  -> (Domain -> Domain -> segment -> segment -> resolution -> Maybe solution)
-  -> Tree segment
-  -> Tree segment
-  -> (List solution, List (Domain, Domain))
-  -> (List solution, List (Domain, Domain))
+solve2 ::
+  Show solution =>
+  (Domain -> Domain -> segment -> segment -> Bool) ->
+  (Domain -> Domain -> segment -> segment -> Fuzzy resolution) ->
+  (Domain -> Domain -> segment -> segment -> resolution -> Maybe solution) ->
+  Tree segment ->
+  Tree segment ->
+  (List solution, List (Domain, Domain)) ->
+  (List solution, List (Domain, Domain))
 solve2 isCandidate resolveNeighborhood findSolution segmentTree1 segmentTree2 accumulated =
   let allowed = isAllowed2 domain1 domain2 exclusions
       candidate = isCandidate domain1 domain2 segment1 segment2

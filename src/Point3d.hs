@@ -36,61 +36,61 @@ data Point3d (coordinateSystem :: CoordinateSystem) = Point3d
   deriving (Eq, Show)
 
 instance
-  (units1 ~ units1', units2 ~ units2', space ~ space')
-  => Units.Coercion
-      units1
-      units2
-      (Point3d (space @ units1'))
-      (Point3d (space' @ units2'))
+  (units1 ~ units1', units2 ~ units2', space ~ space') =>
+  Units.Coercion
+    units1
+    units2
+    (Point3d (space @ units1'))
+    (Point3d (space' @ units2'))
 
 instance
-  (space ~ space', units ~ units')
-  => Addition
-      (Point3d (space @ units))
-      (Vector3d (space' @ units'))
-      (Point3d (space @ units))
+  (space ~ space', units ~ units') =>
+  Addition
+    (Point3d (space @ units))
+    (Vector3d (space' @ units'))
+    (Point3d (space @ units))
   where
   Point3d px py pz + Vector3d vx vy vz = Point3d (px + vx) (py + vy) (pz + vz)
 
 instance
-  (space ~ space', units ~ units')
-  => Subtraction
-      (Point3d (space @ units))
-      (Vector3d (space' @ units'))
-      (Point3d (space @ units))
+  (space ~ space', units ~ units') =>
+  Subtraction
+    (Point3d (space @ units))
+    (Vector3d (space' @ units'))
+    (Point3d (space @ units))
   where
   Point3d px py pz - Vector3d vx vy vz = Point3d (px - vx) (py - vy) (pz - vz)
 
 instance
-  (space ~ space', units ~ units')
-  => Subtraction
-      (Point3d (space @ units))
-      (Point3d (space' @ units'))
-      (Vector3d (space @ units))
+  (space ~ space', units ~ units') =>
+  Subtraction
+    (Point3d (space @ units))
+    (Point3d (space' @ units'))
+    (Vector3d (space @ units))
   where
   Point3d x1 y1 z1 - Point3d x2 y2 z2 = Vector3d (x1 - x2) (y1 - y2) (z1 - z2)
 
 instance
-  (units ~ units', space ~ space')
-  => Addition
-      (Point3d (space @ units))
-      (VectorBox3d (space' @ units'))
-      (BoundingBox3d (space @ units))
+  (units ~ units', space ~ space') =>
+  Addition
+    (Point3d (space @ units))
+    (VectorBox3d (space' @ units'))
+    (BoundingBox3d (space @ units))
   where
   Point3d px py pz + VectorBox3d vx vy vz = BoundingBox3d (px + vx) (py + vy) (pz + vz)
 
 instance
-  (units ~ units', space ~ space')
-  => Subtraction
-      (Point3d (space @ units))
-      (VectorBox3d (space' @ units'))
-      (BoundingBox3d (space @ units))
+  (units ~ units', space ~ space') =>
+  Subtraction
+    (Point3d (space @ units))
+    (VectorBox3d (space' @ units'))
+    (BoundingBox3d (space @ units))
   where
   Point3d px py pz - VectorBox3d vx vy vz = BoundingBox3d (px - vx) (py - vy) (pz - vz)
 
 instance
-  (space ~ space', units ~ units')
-  => ApproximateEquality (Point3d (space @ units)) (Point3d (space' @ units')) units
+  (space ~ space', units ~ units') =>
+  ApproximateEquality (Point3d (space @ units)) (Point3d (space' @ units')) units
   where
   p1 ~= p2 = distanceFrom p1 p2 ~= Qty.zero
 
