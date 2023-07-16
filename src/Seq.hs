@@ -1,23 +1,23 @@
 module Seq
-  ( Seq,
-    pattern Empty,
-    pattern (:<),
-    pattern (:>),
-    empty,
-    fromList,
-    toList,
-    isEmpty,
-    concat,
-    map,
-    filter,
-    foldLeft,
-    foldRight,
-    reverse,
-    sort,
-    sortBy,
-    sortWith,
-    all,
-    any,
+  ( Seq
+  , pattern Empty
+  , pattern (:<)
+  , pattern (:>)
+  , empty
+  , fromList
+  , toList
+  , isEmpty
+  , concat
+  , map
+  , filter
+  , foldLeft
+  , foldRight
+  , reverse
+  , sort
+  , sortBy
+  , sortWith
+  , all
+  , any
   )
 where
 

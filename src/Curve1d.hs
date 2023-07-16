@@ -105,7 +105,7 @@ instance Multiplication Sign (Curve1d units) (Curve1d units) where
   Positive * curve = curve
   Negative * curve = -curve
 
-instance Multiplication  (Curve1d units)  Sign (Curve1d units) where
+instance Multiplication (Curve1d units) Sign (Curve1d units) where
   curve * Positive = curve
   curve * Negative = -curve
 
