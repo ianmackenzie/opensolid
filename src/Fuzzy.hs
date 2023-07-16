@@ -2,6 +2,7 @@ module Fuzzy
   ( Fuzzy (Resolved, Unresolved)
   , and
   , or
+  , collect
   )
 where
 
@@ -42,3 +43,10 @@ or _ (Resolved True) = Resolved True
 or (Resolved False) other = other
 or other (Resolved False) = other
 or Unresolved Unresolved = Unresolved
+
+collect :: (a -> Fuzzy b) -> List a -> Fuzzy (List b)
+collect _ [] = Resolved []
+collect function (first : rest) = do
+  resolvedFirst <- function first
+  resolvedRest <- collect function rest
+  Resolved (resolvedFirst : resolvedRest)
