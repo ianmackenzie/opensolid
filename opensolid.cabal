@@ -73,6 +73,7 @@ library
       QuadraticSpline3d
       Random
       Range
+      Region2d
       Result
       Seq
       Sign
