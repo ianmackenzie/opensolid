@@ -34,6 +34,7 @@ module List
   , maximum
   , minimumBy
   , maximumBy
+  , partition
   )
 where
 
@@ -169,3 +170,6 @@ maximumBy property first rest = go first (property first) rest
      in if nextProperty > currentProperty
           then go next nextProperty remaining
           else go current currentProperty remaining
+
+partition :: (a -> Bool) -> List a -> (List a, List a)
+partition = Data.List.partition
