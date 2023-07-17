@@ -56,11 +56,11 @@ parameterValues = Test.verify "parameterValues" $ do
     , equalParameterValues offCurveParameterValues []
     ]
 
-overlappingSegments
-  :: Tolerance units
-  => Curve2d (space @ units)
-  -> Curve2d (space @ units)
-  -> Result Text (List (Domain, Domain, Sign))
+overlappingSegments ::
+  Tolerance units =>
+  Curve2d (space @ units) ->
+  Curve2d (space @ units) ->
+  Result Text (List (Domain, Domain, Sign))
 overlappingSegments curve1 curve2 =
   case Curve2d.intersections curve1 curve2 of
     Ok _ -> Error "Intersection should have failed (and given overlapping segments)"

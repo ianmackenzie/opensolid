@@ -46,12 +46,12 @@ data MyPoints = MyPoints (Point2d WorldCoordinates) (Point2d WorldCoordinates) d
 defaultTolerance :: Length
 defaultTolerance = Length.meters 1e-9
 
-offsetPoint
-  :: Tolerance units
-  => Point2d (space @ units)
-  -> Point2d (space @ units)
-  -> Qty units
-  -> Point2d (space @ units)
+offsetPoint ::
+  Tolerance units =>
+  Point2d (space @ units) ->
+  Point2d (space @ units) ->
+  Qty units ->
+  Point2d (space @ units)
 offsetPoint startPoint endPoint distance = Result.withDefault startPoint do
   direction <- Direction2d.from startPoint endPoint
   Ok (Point2d.midpoint startPoint endPoint + distance * Direction2d.perpendicularTo direction)
