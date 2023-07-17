@@ -4,7 +4,9 @@ import Angle qualified
 import Arc2d qualified
 import Area qualified
 import Axis2d qualified
+import BoundingBox2d (BoundingBox2d (BoundingBox2d))
 import Console qualified
+import Curve qualified
 import Curve2d qualified
 import Debug qualified
 import Direction2d qualified
@@ -12,6 +14,7 @@ import Direction3d ()
 import Float qualified
 import Length (Length)
 import Length qualified
+import Line2d qualified
 import List qualified
 import NonEmpty qualified
 import OpenSolid
@@ -138,6 +141,25 @@ testNonEmpty [] = Console.printLine "List is empty"
 testNonEmpty (NonEmpty nonEmpty) =
   Console.printLine ("List is non-empty, maximum is " ++ Debug.show (NonEmpty.maximum nonEmpty))
 
+testCurveApproximation :: Task Text ()
+testCurveApproximation = Try.do
+  line <- Line2d.from (Point2d.meters 0.0 1.0) (Point2d.meters 1.0 2.0)
+  let signedAreaBounds domain =
+        let (BoundingBox2d xInterval yInterval) = Curve2d.segmentBounds domain line
+         in Range.width xInterval * yInterval
+  let approximation1 = Curve.approximation (+) signedAreaBounds
+  log "Estimate 1" (Curve.estimate approximation1)
+  let approximation2 = Curve.refine approximation1
+  log "Estimate 2" (Curve.estimate approximation2)
+  let approximation3 = Curve.refine approximation2
+  log "Estimate 3" (Curve.estimate approximation3)
+  let approximation4 = Curve.refine approximation3
+  log "Estimate 4" (Curve.estimate approximation4)
+  let approximation5 = Curve.refine approximation4
+  log "Estimate 5" (Curve.estimate approximation5)
+ where
+  ?tolerance = defaultTolerance
+
 script :: Task Text ()
 script = do
   log "Integer product" (3 * 4)
@@ -196,6 +218,7 @@ script = do
   testRangeFind
   testNonEmpty ([] :: List Int)
   testNonEmpty [2, 3, 1]
+  testCurveApproximation
  where
   ?tolerance = defaultTolerance
 
