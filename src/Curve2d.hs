@@ -22,6 +22,8 @@ module Curve2d
   , intersections
   , parameterValues
   , signedDistanceAlong
+  , xCoordinate
+  , yCoordinate
   )
 where
 
@@ -188,6 +190,12 @@ data CurveIsCoincidentWithPoint = CurveIsCoincidentWithPoint deriving (Eq, Show,
 signedDistanceAlong :: Axis2d (space @ units) -> Curve2d (space @ units) -> Curve1d units
 signedDistanceAlong axis curve =
   (curve - Axis2d.originPoint axis) <> Axis2d.direction axis
+
+xCoordinate :: Curve2d (space @ units) -> Curve1d units
+xCoordinate = signedDistanceAlong Axis2d.x
+
+yCoordinate :: Curve2d (space @ units) -> Curve1d units
+yCoordinate = signedDistanceAlong Axis2d.y
 
 passesThrough :: Tolerance units => Point2d (space @ units) -> Curve2d (space @ units) -> Bool
 passesThrough point curve =
