@@ -42,8 +42,8 @@ library
       Console
       CoordinateSystem
       CubicSpline2d
-      Curve
       Curve1d
+      Curve1d.Integral
       Curve1d.Root
       Curve2d
       Curve2d.Intersection

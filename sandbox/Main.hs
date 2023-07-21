@@ -4,9 +4,9 @@ import Angle qualified
 import Arc2d qualified
 import Area qualified
 import Axis2d qualified
-import BoundingBox2d (BoundingBox2d (BoundingBox2d))
 import Console qualified
-import Curve qualified
+import Curve1d qualified
+import Curve1d.Integral qualified as Integral
 import Curve2d qualified
 import Debug qualified
 import Direction2d qualified
@@ -14,7 +14,6 @@ import Direction3d ()
 import Float qualified
 import Length (Length)
 import Length qualified
-import Line2d qualified
 import List qualified
 import NonEmpty qualified
 import OpenSolid
@@ -32,6 +31,7 @@ import Try qualified
 import Units (Meters)
 import Vector2d qualified
 import Vector3d qualified
+import VectorCurve2d qualified
 import Volume qualified
 
 log :: Show a => Text -> a -> Task Text ()
@@ -143,20 +143,25 @@ testNonEmpty (NonEmpty nonEmpty) =
 
 testCurveApproximation :: Task Text ()
 testCurveApproximation = Try.do
-  line <- Line2d.from (Point2d.meters 0.0 1.0) (Point2d.meters 1.0 2.0)
-  let signedAreaBounds domain =
-        let (BoundingBox2d xInterval yInterval) = Curve2d.segmentBounds domain line
-         in Range.width xInterval * yInterval
-  let approximation1 = Curve.approximation (+) signedAreaBounds
-  log "Estimate 1" (Curve.estimate approximation1)
-  let approximation2 = Curve.refine approximation1
-  log "Estimate 2" (Curve.estimate approximation2)
-  let approximation3 = Curve.refine approximation2
-  log "Estimate 3" (Curve.estimate approximation3)
-  let approximation4 = Curve.refine approximation3
-  log "Estimate 4" (Curve.estimate approximation4)
-  let approximation5 = Curve.refine approximation4
-  log "Estimate 5" (Curve.estimate approximation5)
+  curve <-
+    Arc2d.with
+      [ Arc2d.CenterPoint Point2d.origin
+      , Arc2d.StartAngle (Angle.degrees 180.0)
+      , Arc2d.SweptAngle (Angle.degrees -180.0)
+      , Arc2d.Radius (Length.meters 1.0)
+      ]
+  let integral1 = Curve1d.integral (Curve2d.yCoordinate curve * VectorCurve2d.xComponent (Curve2d.derivative curve))
+  log "Estimate 1" (Integral.estimate integral1)
+  let integral2 = Integral.refine integral1
+  log "Estimate 2" (Integral.estimate integral2)
+  let integral3 = Integral.refine integral2
+  log "Estimate 3" (Integral.estimate integral3)
+  let integral4 = Integral.refine integral3
+  log "Estimate 4" (Integral.estimate integral4)
+  let integral5 = Integral.refine integral4
+  log "Estimate 5" (Integral.estimate integral5)
+  let integral6 = Integral.refine integral5
+  log "Estimate 6" (Integral.estimate integral6)
  where
   ?tolerance = defaultTolerance
 
