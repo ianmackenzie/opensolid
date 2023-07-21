@@ -21,14 +21,18 @@ module Curve2d
   , passesThrough
   , intersections
   , parameterValues
+  , signedDistanceAlong
   )
 where
 
 import Angle (Angle)
 import Angle qualified
+import Axis2d (Axis2d)
+import Axis2d qualified
 import Bisection qualified
 import BoundingBox2d (BoundingBox2d)
 import BoundingBox2d qualified
+import Curve1d (Curve1d)
 import Curve2d.Derivatives (Derivatives)
 import Curve2d.Derivatives qualified as Derivatives
 import Curve2d.Internal (IsCurve2d (..))
@@ -180,6 +184,10 @@ tangentBounds t (Internal.Curve _ tolerance first second)
   ?tolerance = tolerance
 
 data CurveIsCoincidentWithPoint = CurveIsCoincidentWithPoint deriving (Eq, Show, ErrorMessage)
+
+signedDistanceAlong :: Axis2d (space @ units) -> Curve2d (space @ units) -> Curve1d units
+signedDistanceAlong axis curve =
+  (curve - Axis2d.originPoint axis) <> Axis2d.direction axis
 
 passesThrough :: Tolerance units => Point2d (space @ units) -> Curve2d (space @ units) -> Bool
 passesThrough point curve =
