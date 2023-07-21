@@ -23,6 +23,8 @@ import Angle qualified
 import Curve1d (Curve1d (Curve1d), IsCurve1d)
 import Curve1d qualified
 import Curve1d.Root qualified as Root
+import Direction2d (Direction2d)
+import Direction2d qualified
 import Domain (Domain)
 import Generic qualified
 import List qualified
@@ -154,6 +156,12 @@ instance (Units.Product units1 units2 units3, space ~ space') => DotProduct (Vec
 
 instance (Units.Product units1 units2 units3, space ~ space') => DotProduct (Vector2d (space @ units1)) (VectorCurve2d (space' @ units2)) (Curve1d units3) where
   vector <> curve = constant vector <> curve
+
+instance space ~ space' => DotProduct (VectorCurve2d (space @ units)) (Direction2d space') (Curve1d units) where
+  curve <> direction = curve <> Direction2d.unwrap direction
+
+instance space ~ space' => DotProduct (Direction2d space) (VectorCurve2d (space' @ units)) (Curve1d units) where
+  direction <> curve = Direction2d.unwrap direction <> curve
 
 zero :: VectorCurve2d (space @ units)
 zero = Zero
