@@ -15,6 +15,8 @@ module VectorCurve2d
   , reverse
   , roots
   , ZeroEverywhere (ZeroEverywhere)
+  , xComponent
+  , yComponent
   )
 where
 
@@ -343,3 +345,9 @@ roots curve =
     Error Curve1d.ZeroEverywhere -> Error VectorCurve2d.ZeroEverywhere
  where
   ?tolerance = Qty.squared (Units.generalize ?tolerance)
+
+xComponent :: VectorCurve2d (space @ units) -> Curve1d units
+xComponent curve = curve <> Direction2d.x
+
+yComponent :: VectorCurve2d (space @ units) -> Curve1d units
+yComponent curve = curve <> Direction2d.y
