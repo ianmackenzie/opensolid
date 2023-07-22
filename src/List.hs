@@ -21,6 +21,7 @@ module List
   , take
   , drop
   , sum
+  , sumOf
   , sort
   , sortBy
   , sortWith
@@ -106,6 +107,9 @@ drop = Prelude.drop
 
 sum :: (Generic.Zero a, Addition a a a) => List a -> a
 sum = foldLeft (+) Generic.zero
+
+sumOf :: (Generic.Zero b, Addition b b b) => (a -> b) -> List a -> b
+sumOf function = foldLeft (\acc item -> acc + function item) Generic.zero
 
 sort :: Ord a => List a -> List a
 sort = Data.List.sort
