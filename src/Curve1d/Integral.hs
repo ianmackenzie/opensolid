@@ -28,7 +28,7 @@ ofCurve curve =
    in Integral curve derivative (IntegrationLeaf Domain.unit) initialEstimate
 
 instance IsEstimate (Integral units) units where
-  boundsImpl (Integral _ _ _ range) = range
+  boundsImpl (Integral _ _ _ bounds) = bounds
 
   refineImpl (Integral curve derivative rootNode _) =
     let (updatedRootNode, updatedEstimate) = refineNode curve derivative rootNode
