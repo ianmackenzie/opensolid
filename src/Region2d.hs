@@ -73,8 +73,10 @@ checkCurvesForInnerIntersection ::
   Result BuildError ()
 checkCurvesForInnerIntersection curve1 curve2 =
   case Curve2d.intersections curve1 curve2 of
-    Error (Curve2d.CurvesOverlap _) -> Error RegionBoundaryIntersectsItself
-    Error Curve2d.TangentIntersectionAtDegeneratePoint -> Error TangentIntersectionAtDegeneratePoint
+    Error (Curve2d.CurvesOverlap _) ->
+      Error RegionBoundaryIntersectsItself
+    Error Curve2d.TangentIntersectionAtDegeneratePoint ->
+      Error TangentIntersectionAtDegeneratePoint
     Ok intersections
       | List.all isEndpointIntersection intersections -> Ok ()
       | otherwise -> Error RegionBoundaryIntersectsItself
@@ -224,4 +226,6 @@ bisectSegments ::
 bisectSegments _ [] = []
 bisectSegments point (CurveSegment curve domain _ : rest) =
   let (left, right) = Range.bisect domain
-   in classificationSegment point left curve : classificationSegment point right curve : bisectSegments point rest
+      leftSegment = classificationSegment point left curve
+      rightSegment = classificationSegment point right curve
+   in leftSegment : rightSegment : bisectSegments point rest
