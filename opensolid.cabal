@@ -43,7 +43,6 @@ library
       CoordinateSystem
       CubicSpline2d
       Curve1d
-      Curve1d.Integral
       Curve1d.Root
       Curve2d
       Curve2d.Intersection
@@ -53,6 +52,7 @@ library
       Direction3d
       Domain
       DoNotation
+      Estimate
       Float
       Frame2d
       Fuzzy
@@ -92,6 +92,7 @@ library
       VectorCurve3d
       Volume
   other-modules:
+      Curve1d.Integral
       Curve2d.Internal
       Curve2d.Derivatives
       Curve2d.Segment

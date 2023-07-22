@@ -24,12 +24,12 @@ where
 
 import Angle qualified
 import Bisection qualified
-import Curve1d.Integral (Integral)
 import Curve1d.Integral qualified as Integral
 import Curve1d.Root (Root (Root))
 import Curve1d.Root qualified as Root
 import Domain (Domain)
 import Domain qualified
+import Estimate (Estimate (Estimate))
 import Float qualified
 import Generic qualified
 import List qualified
@@ -430,5 +430,5 @@ computeWidth derivativeOrder derivativeValue =
 factorial :: Int -> Int
 factorial 0 = 1; factorial n = n * factorial (n - 1)
 
-integral :: Curve1d units -> Integral units
-integral = Integral.ofCurve
+integral :: Curve1d units -> Estimate units
+integral curve = Estimate (Integral.ofCurve curve)

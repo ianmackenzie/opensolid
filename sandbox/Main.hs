@@ -6,11 +6,11 @@ import Area qualified
 import Axis2d qualified
 import Console qualified
 import Curve1d qualified
-import Curve1d.Integral qualified as Integral
 import Curve2d qualified
 import Debug qualified
 import Direction2d qualified
 import Direction3d ()
+import Estimate qualified
 import Float qualified
 import Length (Length)
 import Length qualified
@@ -141,8 +141,8 @@ testNonEmpty [] = Console.printLine "List is empty"
 testNonEmpty (NonEmpty nonEmpty) =
   Console.printLine ("List is non-empty, maximum is " ++ Debug.show (NonEmpty.maximum nonEmpty))
 
-testCurveApproximation :: Task Text ()
-testCurveApproximation = Try.do
+testCurveIntegral :: Task Text ()
+testCurveIntegral = Try.do
   curve <-
     Arc2d.with
       [ Arc2d.CenterPoint Point2d.origin
@@ -150,18 +150,19 @@ testCurveApproximation = Try.do
       , Arc2d.SweptAngle (Angle.degrees -180.0)
       , Arc2d.Radius (Length.meters 1.0)
       ]
-  let integral1 = Curve1d.integral (Curve2d.yCoordinate curve * VectorCurve2d.xComponent (Curve2d.derivative curve))
-  log "Estimate 1" (Integral.estimate integral1)
-  let integral2 = Integral.refine integral1
-  log "Estimate 2" (Integral.estimate integral2)
-  let integral3 = Integral.refine integral2
-  log "Estimate 3" (Integral.estimate integral3)
-  let integral4 = Integral.refine integral3
-  log "Estimate 4" (Integral.estimate integral4)
-  let integral5 = Integral.refine integral4
-  log "Estimate 5" (Integral.estimate integral5)
-  let integral6 = Integral.refine integral5
-  log "Estimate 6" (Integral.estimate integral6)
+  let dAdt = Curve2d.yCoordinate curve * VectorCurve2d.xComponent (Curve2d.derivative curve)
+  let estimate1 = Curve1d.integral dAdt
+  log "Estimate 1" (Estimate.bounds estimate1)
+  let estimate2 = Estimate.refine estimate1
+  log "Estimate 2" (Estimate.bounds estimate2)
+  let estimate3 = Estimate.refine estimate2
+  log "Estimate 3" (Estimate.bounds estimate3)
+  let estimate4 = Estimate.refine estimate3
+  log "Estimate 4" (Estimate.bounds estimate4)
+  let estimate5 = Estimate.refine estimate4
+  log "Estimate 5" (Estimate.bounds estimate5)
+  let estimate6 = Estimate.refine estimate5
+  log "Estimate 6" (Estimate.bounds estimate6)
  where
   ?tolerance = defaultTolerance
 
@@ -223,7 +224,7 @@ script = do
   testRangeFind
   testNonEmpty ([] :: List Int)
   testNonEmpty [2, 3, 1]
-  testCurveApproximation
+  testCurveIntegral
  where
   ?tolerance = defaultTolerance
 

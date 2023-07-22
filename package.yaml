@@ -76,6 +76,7 @@ default-extensions:
 library:
   source-dirs: src
   other-modules:
+  - Curve1d.Integral
   - Curve2d.Internal
   - Curve2d.Derivatives
   - Curve2d.Segment

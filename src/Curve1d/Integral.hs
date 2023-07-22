@@ -1,8 +1,6 @@
 module Curve1d.Integral
   ( Integral
   , ofCurve
-  , estimate
-  , refine
   )
 where
 
@@ -10,6 +8,7 @@ import {-# SOURCE #-} Curve1d (Curve1d)
 import {-# SOURCE #-} Curve1d qualified
 import Domain (Domain)
 import Domain qualified
+import Estimate (IsEstimate (..))
 import OpenSolid
 import Qty qualified
 import Range (Range)
@@ -28,13 +27,12 @@ ofCurve curve =
       initialEstimate = differentialEstimate Domain.unit curve derivative
    in Integral curve derivative (IntegrationLeaf Domain.unit) initialEstimate
 
-estimate :: Integral units -> Range units
-estimate (Integral _ _ _ range) = range
+instance IsEstimate (Integral units) units where
+  boundsImpl (Integral _ _ _ range) = range
 
-refine :: Integral units -> Integral units
-refine (Integral curve derivative rootNode _) =
-  let (updatedRootNode, updatedEstimate) = refineNode curve derivative rootNode
-   in Integral curve derivative updatedRootNode updatedEstimate
+  refineImpl (Integral curve derivative rootNode _) =
+    let (updatedRootNode, updatedEstimate) = refineNode curve derivative rootNode
+     in Integral curve derivative updatedRootNode updatedEstimate
 
 differentialEstimate :: Domain -> Curve1d units -> Curve1d units -> Range units
 differentialEstimate domain curve derivative =
