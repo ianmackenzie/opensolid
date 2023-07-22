@@ -3,6 +3,8 @@ module Float
   , fromRational
   , fromInt
   , ceiling
+  , min
+  , max
   , floor
   , pi
   , tau
@@ -20,6 +22,7 @@ where
 import Arithmetic
 import Basics
 import Qty (Qty (..))
+import Qty qualified
 import Units (Unitless)
 import Prelude qualified
 
@@ -39,6 +42,12 @@ floor (Qty x) = Prelude.floor x
 {-# INLINE ceiling #-}
 ceiling :: Float -> Int
 ceiling (Qty x) = Prelude.ceiling x
+
+min :: Float -> Float -> Float
+min = Qty.min
+
+max :: Float -> Float -> Float
+max = Qty.max
 
 pi :: Float
 pi = Prelude.pi

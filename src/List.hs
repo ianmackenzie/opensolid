@@ -42,6 +42,7 @@ where
 import Arithmetic
 import Basics
 import Data.List qualified
+import Generic (Ordering)
 import Generic qualified
 import Prelude qualified
 

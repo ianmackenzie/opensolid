@@ -229,10 +229,10 @@ hull3 ::
   Vector2d (space @ units) ->
   VectorBox2d (space @ units)
 hull3 (Vector2d x1 y1) (Vector2d x2 y2) (Vector2d x3 y3) =
-  let minX = min (min x1 x2) x3
-      maxX = max (max x1 x2) x3
-      minY = min (min y1 y2) y3
-      maxY = max (max y1 y2) y3
+  let minX = Qty.min (Qty.min x1 x2) x3
+      maxX = Qty.max (Qty.max x1 x2) x3
+      minY = Qty.min (Qty.min y1 y2) y3
+      maxY = Qty.max (Qty.max y1 y2) y3
    in VectorBox2d (Range.unsafe minX maxX) (Range.unsafe minY maxY)
 
 hull4 ::
@@ -242,10 +242,10 @@ hull4 ::
   Vector2d (space @ units) ->
   VectorBox2d (space @ units)
 hull4 (Vector2d x1 y1) (Vector2d x2 y2) (Vector2d x3 y3) (Vector2d x4 y4) =
-  let minX = min (min (min x1 x2) x3) x4
-      maxX = max (max (max x1 x2) x3) x4
-      minY = min (min (min y1 y2) y3) y4
-      maxY = max (max (max y1 y2) y3) y4
+  let minX = Qty.min (Qty.min (Qty.min x1 x2) x3) x4
+      maxX = Qty.max (Qty.max (Qty.max x1 x2) x3) x4
+      minY = Qty.min (Qty.min (Qty.min y1 y2) y3) y4
+      maxY = Qty.max (Qty.max (Qty.max y1 y2) y3) y4
    in VectorBox2d (Range.unsafe minX maxX) (Range.unsafe minY maxY)
 
 polar :: Range units -> Range Radians -> VectorBox2d (space @ units)
@@ -259,14 +259,14 @@ magnitude (VectorBox2d x y) = Range.hypot2 x y
 
 maxMagnitude :: VectorBox2d (space @ units) -> Qty units
 maxMagnitude (VectorBox2d x y) =
-  let xMagnitude = max (Qty.abs x.minValue) (Qty.abs x.maxValue)
-      yMagnitude = max (Qty.abs y.minValue) (Qty.abs y.maxValue)
+  let xMagnitude = Qty.max (Qty.abs x.minValue) (Qty.abs x.maxValue)
+      yMagnitude = Qty.max (Qty.abs y.minValue) (Qty.abs y.maxValue)
    in Qty.hypot2 xMagnitude yMagnitude
 
 maxSquaredMagnitude :: Units.Squared units1 units2 => VectorBox2d (space @ units1) -> Qty units2
 maxSquaredMagnitude (VectorBox2d x y) =
-  let xMagnitude = max (Qty.abs x.minValue) (Qty.abs x.maxValue)
-      yMagnitude = max (Qty.abs y.minValue) (Qty.abs y.maxValue)
+  let xMagnitude = Qty.max (Qty.abs x.minValue) (Qty.abs x.maxValue)
+      yMagnitude = Qty.max (Qty.abs y.minValue) (Qty.abs y.maxValue)
    in Qty.squared xMagnitude + Qty.squared yMagnitude
 
 normalize :: VectorBox2d (space @ units) -> VectorBox2d (space @ Unitless)

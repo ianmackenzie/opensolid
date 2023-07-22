@@ -15,6 +15,7 @@ import Bounds
 import CoordinateSystem (Units)
 import OpenSolid
 import Point2d (Point2d (..))
+import Qty qualified
 import Range (Range)
 import Range qualified
 import VectorBox2d (VectorBox2d (VectorBox2d))
@@ -72,10 +73,10 @@ hull3 ::
   Point2d (space @ units) ->
   BoundingBox2d (space @ units)
 hull3 (Point2d x1 y1) (Point2d x2 y2) (Point2d x3 y3) =
-  let minX = min (min x1 x2) x3
-      maxX = max (max x1 x2) x3
-      minY = min (min y1 y2) y3
-      maxY = max (max y1 y2) y3
+  let minX = Qty.min (Qty.min x1 x2) x3
+      maxX = Qty.max (Qty.max x1 x2) x3
+      minY = Qty.min (Qty.min y1 y2) y3
+      maxY = Qty.max (Qty.max y1 y2) y3
    in BoundingBox2d (Range.unsafe minX maxX) (Range.unsafe minY maxY)
 
 hull4 ::
@@ -85,10 +86,10 @@ hull4 ::
   Point2d (space @ units) ->
   BoundingBox2d (space @ units)
 hull4 (Point2d x1 y1) (Point2d x2 y2) (Point2d x3 y3) (Point2d x4 y4) =
-  let minX = min (min (min x1 x2) x3) x4
-      maxX = max (max (max x1 x2) x3) x4
-      minY = min (min (min y1 y2) y3) y4
-      maxY = max (max (max y1 y2) y3) y4
+  let minX = Qty.min (Qty.min (Qty.min x1 x2) x3) x4
+      maxX = Qty.max (Qty.max (Qty.max x1 x2) x3) x4
+      minY = Qty.min (Qty.min (Qty.min y1 y2) y3) y4
+      maxY = Qty.max (Qty.max (Qty.max y1 y2) y3) y4
    in BoundingBox2d (Range.unsafe minX maxX) (Range.unsafe minY maxY)
 
 interpolate :: BoundingBox2d (space @ units) -> Float -> Float -> Point2d (space @ units)

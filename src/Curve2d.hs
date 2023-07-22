@@ -235,7 +235,7 @@ overlappingSegments curve1 curve2 endpointParameterValues =
       ( \(u1, v1) (u2, v2) ->
           ( Range.from u1 u2
           , Range.from v1 v2
-          , if compare u1 u2 == compare v1 v2 then Positive else Negative
+          , if (u1 < u2) == (v1 < v2) then Positive else Negative
           )
       )
     |> List.filter (isOverlappingSegment curve1 curve2)

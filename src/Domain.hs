@@ -6,6 +6,7 @@ module Domain
   )
 where
 
+import Float qualified
 import OpenSolid
 import Range (Range (Range))
 import Range qualified
@@ -19,7 +20,7 @@ unit = Range.from 0.0 1.0
 expand :: Domain -> Domain
 expand (Range low high) =
   let expansion = 0.5 * (high - low)
-   in Range.unsafe (max 0.0 (low - expansion)) (min 1.0 (high + expansion))
+   in Range.unsafe (Float.max 0.0 (low - expansion)) (Float.min 1.0 (high + expansion))
 
 {- | Sample a given function at five "random" points within a given domain.
 This can be useful for checking whether some property (likely) holds true everywhere within a domain,

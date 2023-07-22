@@ -23,6 +23,7 @@ where
 
 import Data.Foldable qualified
 import Data.Sequence qualified
+import Generic (Ordering)
 import OpenSolid
 import Prelude qualified
 

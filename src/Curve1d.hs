@@ -395,7 +395,7 @@ solveEndpoint curve endpointX
       let check curveDerivative derivativeOrder currentMinWidth currentBest =
             let derivativeValue = evaluateAt endpointX curveDerivative
                 rootWidth = computeWidth derivativeOrder derivativeValue
-                updatedMinWidth = min rootWidth currentMinWidth
+                updatedMinWidth = Float.min rootWidth currentMinWidth
                 rootOrder = derivativeOrder - 1
                 updatedBest =
                   if updatedMinWidth < currentMinWidth

@@ -11,6 +11,8 @@ module Qty
   , hypot2
   , hypot3
   , abs
+  , min
+  , max
   , clamp
   , IsZero (IsZero)
   , nonZero
@@ -143,6 +145,12 @@ clamp a b value
  where
   low = min a b
   high = max a b
+
+min :: Qty units -> Qty units -> Qty units
+min = Prelude.min
+
+max :: Qty units -> Qty units -> Qty units
+max = Prelude.min
 
 interpolateFrom :: Qty units -> Qty units -> Float -> Qty units
 interpolateFrom a b t =

@@ -82,7 +82,7 @@ classify (u, v) derivatives1 derivatives2 =
         then
           let length1 = if first1Zero then 0.5 * second1Magnitude else first1Magnitude
               length2 = if first2Zero then 0.5 * second2Magnitude else first2Magnitude
-           in if crossProductMagnitude * min length1 length2 < ?tolerance
+           in if crossProductMagnitude * Qty.min length1 length2 < ?tolerance
                 then Error TangentIntersectionAtDegeneratePoint
                 else Ok (Intersection.Crossing, sign0)
         else

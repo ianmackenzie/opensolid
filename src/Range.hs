@@ -106,8 +106,8 @@ instance Units.Product units1 units2 units3 => Multiplication (Range units1) (Ra
         lh = low1 * high2
         hl = high1 * low2
         hh = high1 * high2
-        low = min (min (min ll lh) hl) hh
-        high = max (max (max ll lh) hl) hh
+        low = Qty.min (Qty.min (Qty.min ll lh) hl) hh
+        high = Qty.max (Qty.max (Qty.max ll lh) hl) hh
      in unsafe low high
 
 instance Units.Quotient units1 units2 units3 => Division (Qty units1) (Range units2) (Range units3) where
@@ -145,7 +145,8 @@ from :: Qty units -> Qty units -> Range units
 from a b = if a <= b then unsafe a b else unsafe b a
 
 aggregate2 :: Range units -> Range units -> Range units
-aggregate2 (Range low1 high1) (Range low2 high2) = unsafe (min low1 low2) (max high1 high2)
+aggregate2 (Range low1 high1) (Range low2 high2) =
+  unsafe (Qty.min low1 low2) (Qty.max high1 high2)
 
 intersects :: Range units -> Range units -> Bool
 intersects (Range low1 high1) (Range low2 high2) = low1 <= high2 && low2 <= high1
@@ -154,10 +155,10 @@ intersection :: Range units -> Range units -> Maybe (Range units)
 intersection (Range low1 high1) (Range low2 high2)
   | high1 < low2 = Nothing
   | low1 > high2 = Nothing
-  | otherwise = Just (unsafe (max low1 low2) (min high1 high2))
+  | otherwise = Just (unsafe (Qty.max low1 low2) (Qty.min high1 high2))
 
 hull3 :: Qty units -> Qty units -> Qty units -> Range units
-hull3 a b c = unsafe (min a (min b c)) (max a (max b c))
+hull3 a b c = unsafe (Qty.min a (Qty.min b c)) (Qty.max a (Qty.max b c))
 
 {-# INLINE midpoint #-}
 midpoint :: Range units -> Qty units
@@ -180,7 +181,7 @@ squared :: Units.Squared units1 units2 => Range units1 -> Range units2
 squared (Range low high)
   | low >= Qty.zero = unsafe ll hh
   | high <= Qty.zero = unsafe hh ll
-  | otherwise = unsafe Qty.zero (max ll hh)
+  | otherwise = unsafe Qty.zero (Qty.max ll hh)
  where
   ll = low * low
   hh = high * high
@@ -188,8 +189,8 @@ squared (Range low high)
 sqrt :: Units.Squared units1 units2 => Range units2 -> Range units1
 sqrt (Range low high) =
   unsafe
-    (Qty.sqrt (max low Qty.zero))
-    (Qty.sqrt (max high Qty.zero))
+    (Qty.sqrt (Qty.max low Qty.zero))
+    (Qty.sqrt (Qty.max high Qty.zero))
 
 hypot2 :: Range units -> Range units -> Range units
 hypot2 (Range xMin xMax) (Range yMin yMax)
@@ -207,8 +208,8 @@ hypot2 (Range xMin xMax) (Range yMin yMax)
   negativeX = xMax <= Qty.zero
   positiveY = yMin >= Qty.zero
   negativeY = yMax <= Qty.zero
-  xMagnitude = max (Qty.abs xMin) (Qty.abs xMax)
-  yMagnitude = max (Qty.abs yMin) (Qty.abs yMax)
+  xMagnitude = Qty.max (Qty.abs xMin) (Qty.abs xMax)
+  yMagnitude = Qty.max (Qty.abs yMin) (Qty.abs yMax)
   maxMagnitude = Qty.hypot2 xMagnitude yMagnitude
 
 hypot3 :: Range units -> Range units -> Range units -> Range units
@@ -245,9 +246,9 @@ hypot3 (Range xMin xMax) (Range yMin yMax) (Range zMin zMax)
   negativeY = yMax <= Qty.zero
   positiveZ = zMin >= Qty.zero
   negativeZ = zMax <= Qty.zero
-  xMagnitude = max (Qty.abs xMin) (Qty.abs xMax)
-  yMagnitude = max (Qty.abs yMin) (Qty.abs yMax)
-  zMagnitude = max (Qty.abs zMin) (Qty.abs zMax)
+  xMagnitude = Qty.max (Qty.abs xMin) (Qty.abs xMax)
+  yMagnitude = Qty.max (Qty.abs yMin) (Qty.abs yMax)
+  zMagnitude = Qty.max (Qty.abs zMin) (Qty.abs zMax)
   maxMagnitude = Qty.hypot3 xMagnitude yMagnitude zMagnitude
 
 includes :: Qty units -> Range units -> Bool
@@ -280,20 +281,20 @@ abs :: Range units -> Range units
 abs range@(Range low high)
   | low >= Qty.zero = range
   | high <= Qty.zero = -range
-  | otherwise = unsafe Qty.zero (max high -low)
+  | otherwise = unsafe Qty.zero (Qty.max high -low)
 
 sin :: Range Radians -> Range Unitless
 sin range@(Range low high) =
   let (includesMin, includesMax) = sinIncludesMinMax range
-      newLow = if includesMin then -1.0 else min (Angle.sin low) (Angle.sin high)
-      newHigh = if includesMax then 1.0 else max (Angle.sin low) (Angle.sin high)
+      newLow = if includesMin then -1.0 else Qty.min (Angle.sin low) (Angle.sin high)
+      newHigh = if includesMax then 1.0 else Qty.max (Angle.sin low) (Angle.sin high)
    in unsafe newLow newHigh
 
 cos :: Range Radians -> Range Unitless
 cos range@(Range low high) =
   let (includesMin, includesMax) = cosIncludesMinMax range
-      newLow = if includesMin then -1.0 else min (Angle.cos low) (Angle.cos high)
-      newHigh = if includesMax then 1.0 else max (Angle.cos low) (Angle.cos high)
+      newLow = if includesMin then -1.0 else Qty.min (Angle.cos low) (Angle.cos high)
+      newHigh = if includesMax then 1.0 else Qty.max (Angle.cos low) (Angle.cos high)
    in unsafe newLow newHigh
 
 sinIncludesMinMax :: Range Radians -> (Bool, Bool)

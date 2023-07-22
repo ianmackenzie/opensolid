@@ -11,8 +11,7 @@ module Basics
   , otherwise
   , Int
   , Eq ((==), (/=))
-  , Ord ((<), (<=), (>=), (>), min, max, compare)
-  , Ordering (LT, EQ, GT)
+  , Ord ((<), (<=), (>=), (>))
   , Show
   , Bool (True, False)
   , Char
@@ -47,7 +46,6 @@ import Prelude
   , Int
   , Maybe (..)
   , Ord (..)
-  , Ordering (..)
   , Show
   , not
   , otherwise
