@@ -16,11 +16,11 @@ import Range qualified
 
 class IsEstimate a units | a -> units where
   boundsImpl :: a -> Range units
-  refineImpl :: a -> a
+  refineImpl :: a -> Estimate units
 
 instance IsEstimate (Qty units) units where
   boundsImpl = Range.constant
-  refineImpl = identity
+  refineImpl = exact
 
 data Estimate units where
   Estimate :: IsEstimate a units => a -> Estimate units
@@ -32,20 +32,20 @@ bounds :: Estimate units -> Range units
 bounds (Estimate estimate) = boundsImpl estimate
 
 refine :: Estimate units -> Estimate units
-refine (Estimate estimate) = Estimate (refineImpl estimate)
+refine (Estimate estimate) = refineImpl estimate
 
 data Sum units = Sum (NonEmpty (Estimate units)) (Qty units) (Range units)
 
 sum :: List (Estimate units) -> Estimate units
 sum [] = exact Qty.zero
-sum (NonEmpty estimates) = Estimate (sumOf estimates)
+sum (NonEmpty estimates) = sumOf estimates
 
-sumOf :: NonEmpty (Estimate units) -> Sum units
+sumOf :: NonEmpty (Estimate units) -> Estimate units
 sumOf estimates =
   let individualBounds = NonEmpty.map bounds estimates
       maxWidth = NonEmpty.maximum (NonEmpty.map Range.width individualBounds)
       boundsSum = NonEmpty.sum individualBounds
-   in Sum estimates maxWidth boundsSum
+   in Estimate (Sum estimates maxWidth boundsSum)
 
 instance IsEstimate (Sum units) units where
   boundsImpl (Sum _ _ boundsSum) = boundsSum

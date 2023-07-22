@@ -8,7 +8,7 @@ import {-# SOURCE #-} Curve1d (Curve1d)
 import {-# SOURCE #-} Curve1d qualified
 import Domain (Domain)
 import Domain qualified
-import Estimate (IsEstimate (..))
+import Estimate (Estimate (Estimate), IsEstimate (..))
 import OpenSolid
 import Qty qualified
 import Range (Range)
@@ -31,8 +31,8 @@ instance IsEstimate (Integral units) units where
   boundsImpl (Integral _ _ _ bounds) = bounds
 
   refineImpl (Integral curve derivative rootNode _) =
-    let (updatedRootNode, updatedEstimate) = refineNode curve derivative rootNode
-     in Integral curve derivative updatedRootNode updatedEstimate
+    let (updatedRootNode, updatedBounds) = refineNode curve derivative rootNode
+     in Estimate (Integral curve derivative updatedRootNode updatedBounds)
 
 differentialEstimate :: Domain -> Curve1d units -> Curve1d units -> Range units
 differentialEstimate domain curve derivative =
