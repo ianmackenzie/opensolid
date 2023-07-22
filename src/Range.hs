@@ -19,6 +19,8 @@ module Range
   , hypot2
   , hypot3
   , aggregate2
+  , min
+  , max
   , sin
   , cos
   , search
@@ -282,6 +284,14 @@ abs range@(Range low high)
   | low >= Qty.zero = range
   | high <= Qty.zero = -range
   | otherwise = unsafe Qty.zero (Qty.max high -low)
+
+min :: Range units -> Range units -> Range units
+min (Range low1 high1) (Range low2 high2) =
+  unsafe (Qty.min low1 low2) (Qty.min high1 high2)
+
+max :: Range units -> Range units -> Range units
+max (Range low1 high1) (Range low2 high2) =
+  unsafe (Qty.max low1 low2) (Qty.max high1 high2)
 
 sin :: Range Radians -> Range Unitless
 sin range@(Range low high) =
