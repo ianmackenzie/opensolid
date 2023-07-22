@@ -5,6 +5,8 @@ module Estimate
   , bounds
   , refine
   , sum
+  , min
+  , max
   )
 where
 
@@ -56,3 +58,33 @@ refineWiderThan :: Qty units -> Estimate units -> Estimate units
 refineWiderThan desiredWidth estimate
   | Range.width (bounds estimate) > desiredWidth = refine estimate
   | otherwise = estimate
+
+data Min units = Min (Estimate units) (Estimate units)
+
+instance IsEstimate (Min units) units where
+  boundsImpl (Min first second) = Range.min (bounds first) (bounds second)
+  refineImpl (Min first second)
+    | Range.maxValue firstBounds <= Range.minValue secondBounds = refine first
+    | Range.maxValue secondBounds <= Range.minValue firstBounds = refine second
+    | otherwise = min (refine first) (refine second)
+   where
+    firstBounds = bounds first
+    secondBounds = bounds second
+
+min :: Estimate units -> Estimate units -> Estimate units
+min first second = Estimate (Min first second)
+
+data Max units = Max (Estimate units) (Estimate units)
+
+instance IsEstimate (Max units) units where
+  boundsImpl (Max first second) = Range.max (bounds first) (bounds second)
+  refineImpl (Max first second)
+    | Range.minValue firstBounds >= Range.maxValue secondBounds = refine first
+    | Range.minValue secondBounds >= Range.maxValue firstBounds = refine second
+    | otherwise = max (refine first) (refine second)
+   where
+    firstBounds = bounds first
+    secondBounds = bounds second
+
+max :: Estimate units -> Estimate units -> Estimate units
+max first second = Estimate (Max first second)
