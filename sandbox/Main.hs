@@ -136,7 +136,7 @@ testRangeFind = do
   let isRoot x = Range.includes 2.0 (x * x)
   log "Found square root of 2" (Range.find isRoot (Range.from 1.0 2.0))
 
-testNonEmpty :: (Ord a, Show a) => List a -> Task Text ()
+testNonEmpty :: List Int -> Task Text ()
 testNonEmpty [] = Console.printLine "List is empty"
 testNonEmpty (NonEmpty nonEmpty) =
   Console.printLine ("List is non-empty, maximum is " ++ Debug.show (NonEmpty.maximum nonEmpty))
