@@ -22,6 +22,9 @@ module NonEmpty
   , reduceLeft
   , reduceRight
   , reverse
+  , take
+  , drop
+  , sum
   , sort
   , sortBy
   , sortWith
@@ -34,6 +37,7 @@ module NonEmpty
   )
 where
 
+import Arithmetic
 import Basics
 import Data.Foldable qualified
 import Data.List.NonEmpty (NonEmpty ((:|)))
@@ -118,6 +122,15 @@ reduceRight = Data.Foldable.foldr1
 
 reverse :: NonEmpty a -> NonEmpty a
 reverse = Data.List.NonEmpty.reverse
+
+take :: Int -> NonEmpty a -> List a
+take = Data.List.NonEmpty.take
+
+drop :: Int -> NonEmpty a -> List a
+drop = Data.List.NonEmpty.drop
+
+sum :: Addition a a a => NonEmpty a -> a
+sum = reduceLeft (+)
 
 sort :: Ord a => NonEmpty a -> NonEmpty a
 sort = Data.List.NonEmpty.sort
