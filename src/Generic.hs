@@ -1,5 +1,5 @@
 module Generic
-  ( Zero (..)
+  ( Zero (zero)
   )
 where
 
