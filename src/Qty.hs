@@ -150,7 +150,7 @@ min :: Qty units -> Qty units -> Qty units
 min = Prelude.min
 
 max :: Qty units -> Qty units -> Qty units
-max = Prelude.min
+max = Prelude.max
 
 interpolateFrom :: Qty units -> Qty units -> Float -> Qty units
 interpolateFrom a b t =
