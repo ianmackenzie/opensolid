@@ -21,6 +21,8 @@ module Range
   , aggregate2
   , min
   , max
+  , smallest
+  , largest
   , sin
   , cos
   , search
@@ -292,6 +294,31 @@ min (Range low1 high1) (Range low2 high2) =
 max :: Range units -> Range units -> Range units
 max (Range low1 high1) (Range low2 high2) =
   unsafe (Qty.max low1 low2) (Qty.max high1 high2)
+
+smallest :: Range units -> Range units -> Range units
+smallest first second
+  | high1 <= low2 = first
+  | high2 <= low1 = second
+  | otherwise =
+      let (Range aggregateMin aggregateMax) = aggregate2 first second
+          high = Qty.min high1 high2
+       in unsafe (Qty.max -high aggregateMin) (Qty.min aggregateMax high)
+ where
+  (Range low1 high1) = abs first
+  (Range low2 high2) = abs second
+
+largest :: Range units -> Range units -> Range units
+largest first second
+  | low1 >= high2 = first
+  | low2 >= high1 = second
+  | aggregateMin >= -low = unsafe (Qty.max aggregateMin low) aggregateMax
+  | aggregateMax <= low = unsafe aggregateMin (Qty.min aggregateMax -low)
+  | otherwise = aggregate
+ where
+  (Range low1 high1) = abs first
+  (Range low2 high2) = abs second
+  low = Qty.max low1 low2
+  aggregate@(Range aggregateMin aggregateMax) = aggregate2 first second
 
 sin :: Range Radians -> Range Unitless
 sin range@(Range low high) =
