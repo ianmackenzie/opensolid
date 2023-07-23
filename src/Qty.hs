@@ -13,6 +13,8 @@ module Qty
   , abs
   , min
   , max
+  , smallest
+  , largest
   , clamp
   , IsZero (IsZero)
   , nonZero
@@ -151,6 +153,12 @@ min = Prelude.min
 
 max :: Qty units -> Qty units -> Qty units
 max = Prelude.max
+
+smallest :: Qty units -> Qty units -> Qty units
+smallest x y = if abs x <= abs y then x else y
+
+largest :: Qty units -> Qty units -> Qty units
+largest x y = if abs x >= abs y then x else y
 
 interpolateFrom :: Qty units -> Qty units -> Float -> Qty units
 interpolateFrom a b t =
