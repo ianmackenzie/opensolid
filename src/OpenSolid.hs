@@ -29,5 +29,4 @@ import Qty (Qty (Qty))
 import Result (ErrorMessage (errorMessage), Result (Error, Ok))
 import Sign (Sign (Negative, Positive))
 import Task (Task)
-import Task qualified
 import Tolerance (ApproximateEquality ((~=)), Tolerance, (!=))
