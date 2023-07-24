@@ -1,6 +1,7 @@
 module Estimate
-  ( Estimate (Estimate)
+  ( Estimate
   , IsEstimate (..)
+  , wrap
   , exact
   , bounds
   , refine
@@ -27,16 +28,19 @@ instance IsEstimate (Qty units) units where
   refineImpl = exact
 
 data Estimate units where
-  Estimate :: IsEstimate a units => a -> Estimate units
+  Estimate :: IsEstimate a units => a -> Range units -> Estimate units
+
+wrap :: IsEstimate a units => a -> Estimate units
+wrap implementation = Estimate implementation (boundsImpl implementation)
 
 exact :: Qty units -> Estimate units
-exact value = Estimate value
+exact value = wrap value
 
 bounds :: Estimate units -> Range units
-bounds (Estimate estimate) = boundsImpl estimate
+bounds (Estimate _ range) = range
 
 refine :: Estimate units -> Estimate units
-refine (Estimate estimate) = refineImpl estimate
+refine (Estimate estimate _) = refineImpl estimate
 
 newtype Negate units = Negate (Estimate units)
 
@@ -45,7 +49,7 @@ instance IsEstimate (Negate units) units where
   refineImpl (Negate estimate) = negate (refine estimate)
 
 instance Negation (Estimate units) where
-  negate estimate = Estimate (Negate estimate)
+  negate estimate = wrap (Negate estimate)
 
 instance Multiplication Sign (Estimate units) (Estimate units) where
   Positive * estimate = estimate
@@ -68,7 +72,7 @@ instance IsEstimate (Add units) units where
     width2 = Range.width (bounds second)
 
 instance Addition (Estimate units) (Estimate units) (Estimate units) where
-  first + second = Estimate (Add first second)
+  first + second = wrap (Add first second)
 
 data Subtract units = Subtract (Estimate units) (Estimate units)
 
@@ -83,30 +87,26 @@ instance IsEstimate (Subtract units) units where
     width2 = Range.width (bounds second)
 
 instance Subtraction (Estimate units) (Estimate units) (Estimate units) where
-  first - second = Estimate (Subtract first second)
+  first - second = wrap (Subtract first second)
 
-data Sum units = Sum (NonEmpty (Estimate units)) (Qty units) (Range units)
+newtype Sum units = Sum (NonEmpty (Estimate units))
 
 instance IsEstimate (Sum units) units where
-  boundsImpl (Sum _ _ boundsSum) = boundsSum
-  refineImpl (Sum estimates maxWidth _) =
-    sumOf (NonEmpty.map (refineWiderThan (0.5 * maxWidth)) estimates)
-
-sum :: List (Estimate units) -> Estimate units
-sum [] = exact Qty.zero
-sum (NonEmpty estimates) = sumOf estimates
-
-sumOf :: NonEmpty (Estimate units) -> Estimate units
-sumOf estimates =
-  let individualBounds = NonEmpty.map bounds estimates
-      maxWidth = NonEmpty.maximum (NonEmpty.map Range.width individualBounds)
-      boundsSum = NonEmpty.sum individualBounds
-   in Estimate (Sum estimates maxWidth boundsSum)
+  boundsImpl (Sum estimates) = NonEmpty.sum (NonEmpty.map bounds estimates)
+  refineImpl (Sum estimates) =
+    let estimateWidths = NonEmpty.map (bounds >> Range.width) estimates
+        maxWidth = NonEmpty.maximum estimateWidths
+        refinedEstimates = NonEmpty.map (refineWiderThan (0.5 * maxWidth)) estimates
+     in wrap (Sum refinedEstimates)
 
 refineWiderThan :: Qty units -> Estimate units -> Estimate units
 refineWiderThan desiredWidth estimate
   | Range.width (bounds estimate) > desiredWidth = refine estimate
   | otherwise = estimate
+
+sum :: List (Estimate units) -> Estimate units
+sum [] = exact Qty.zero
+sum (NonEmpty estimates) = wrap (Sum estimates)
 
 data Min units = Min (Estimate units) (Estimate units)
 
@@ -121,7 +121,7 @@ instance IsEstimate (Min units) units where
     (Range min2 max2) = bounds second
 
 min :: Estimate units -> Estimate units -> Estimate units
-min first second = Estimate (Min first second)
+min first second = wrap (Min first second)
 
 data Max units = Max (Estimate units) (Estimate units)
 
@@ -136,7 +136,7 @@ instance IsEstimate (Max units) units where
     (Range min2 max2) = bounds second
 
 max :: Estimate units -> Estimate units -> Estimate units
-max first second = Estimate (Max first second)
+max first second = wrap (Max first second)
 
 data Smallest units = Smallest (Estimate units) (Estimate units)
 
@@ -151,7 +151,7 @@ instance IsEstimate (Smallest units) units where
     (Range low2 high2) = Range.abs (bounds second)
 
 smallest :: Estimate units -> Estimate units -> Estimate units
-smallest first second = Estimate (Smallest first second)
+smallest first second = wrap (Smallest first second)
 
 data Largest units = Largest (Estimate units) (Estimate units)
 
@@ -166,4 +166,4 @@ instance IsEstimate (Largest units) units where
     (Range low2 high2) = Range.abs (bounds second)
 
 largest :: Estimate units -> Estimate units -> Estimate units
-largest first second = Estimate (Largest first second)
+largest first second = wrap (Largest first second)
