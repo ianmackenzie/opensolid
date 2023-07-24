@@ -85,6 +85,11 @@ instance Subtraction (Estimate units) (Estimate units) (Estimate units) where
 
 data Sum units = Sum (NonEmpty (Estimate units)) (Qty units) (Range units)
 
+instance IsEstimate (Sum units) units where
+  boundsImpl (Sum _ _ boundsSum) = boundsSum
+  refineImpl (Sum estimates maxWidth _) =
+    sumOf (NonEmpty.map (refineWiderThan (0.5 * maxWidth)) estimates)
+
 sum :: List (Estimate units) -> Estimate units
 sum [] = exact Qty.zero
 sum (NonEmpty estimates) = sumOf estimates
@@ -95,11 +100,6 @@ sumOf estimates =
       maxWidth = NonEmpty.maximum (NonEmpty.map Range.width individualBounds)
       boundsSum = NonEmpty.sum individualBounds
    in Estimate (Sum estimates maxWidth boundsSum)
-
-instance IsEstimate (Sum units) units where
-  boundsImpl (Sum _ _ boundsSum) = boundsSum
-  refineImpl (Sum estimates maxWidth _) =
-    sumOf (NonEmpty.map (refineWiderThan (0.5 * maxWidth)) estimates)
 
 refineWiderThan :: Qty units -> Estimate units -> Estimate units
 refineWiderThan desiredWidth estimate
