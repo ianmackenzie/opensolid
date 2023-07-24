@@ -36,6 +36,53 @@ bounds (Estimate estimate) = boundsImpl estimate
 refine :: Estimate units -> Estimate units
 refine (Estimate estimate) = refineImpl estimate
 
+newtype Negate units = Negate (Estimate units)
+
+instance IsEstimate (Negate units) units where
+  boundsImpl (Negate estimate) = negate (bounds estimate)
+  refineImpl (Negate estimate) = negate (refine estimate)
+
+instance Negation (Estimate units) where
+  negate estimate = Estimate (Negate estimate)
+
+instance Multiplication Sign (Estimate units) (Estimate units) where
+  Positive * estimate = estimate
+  Negative * estimate = -estimate
+
+instance Multiplication (Estimate units) Sign (Estimate units) where
+  estimate * Positive = estimate
+  estimate * Negative = -estimate
+
+data Add units = Add (Estimate units) (Estimate units)
+
+instance IsEstimate (Add units) units where
+  boundsImpl (Add first second) = bounds first + bounds second
+  refineImpl (Add first second)
+    | width1 >= 2.0 * width2 = refine first + second
+    | width2 >= 2.0 * width1 = first + refine second
+    | otherwise = refine first + refine second
+   where
+    width1 = Range.width (bounds first)
+    width2 = Range.width (bounds second)
+
+instance Addition (Estimate units) (Estimate units) (Estimate units) where
+  first + second = Estimate (Add first second)
+
+data Subtract units = Subtract (Estimate units) (Estimate units)
+
+instance IsEstimate (Subtract units) units where
+  boundsImpl (Subtract first second) = bounds first - bounds second
+  refineImpl (Subtract first second)
+    | width1 >= 2.0 * width2 = refine first - second
+    | width2 >= 2.0 * width1 = first - refine second
+    | otherwise = refine first - refine second
+   where
+    width1 = Range.width (bounds first)
+    width2 = Range.width (bounds second)
+
+instance Subtraction (Estimate units) (Estimate units) (Estimate units) where
+  first - second = Estimate (Subtract first second)
+
 data Sum units = Sum (NonEmpty (Estimate units)) (Qty units) (Range units)
 
 sum :: List (Estimate units) -> Estimate units
