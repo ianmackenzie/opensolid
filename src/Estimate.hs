@@ -7,6 +7,8 @@ module Estimate
   , sum
   , min
   , max
+  , smallest
+  , largest
   )
 where
 
@@ -135,3 +137,33 @@ instance IsEstimate (Max units) units where
 
 max :: Estimate units -> Estimate units -> Estimate units
 max first second = Estimate (Max first second)
+
+data Smallest units = Smallest (Estimate units) (Estimate units)
+
+instance IsEstimate (Smallest units) units where
+  boundsImpl (Smallest first second) = Range.smallest (bounds first) (bounds second)
+  refineImpl (Smallest first second)
+    | high1 <= low2 = refine first
+    | high2 <= low1 = refine second
+    | otherwise = smallest (refine first) (refine second)
+   where
+    (Range low1 high1) = Range.abs (bounds first)
+    (Range low2 high2) = Range.abs (bounds second)
+
+smallest :: Estimate units -> Estimate units -> Estimate units
+smallest first second = Estimate (Smallest first second)
+
+data Largest units = Largest (Estimate units) (Estimate units)
+
+instance IsEstimate (Largest units) units where
+  boundsImpl (Largest first second) = Range.largest (bounds first) (bounds second)
+  refineImpl (Largest first second)
+    | low1 >= high2 = refine first
+    | low2 >= high1 = refine second
+    | otherwise = largest (refine first) (refine second)
+   where
+    (Range low1 high1) = Range.abs (bounds first)
+    (Range low2 high2) = Range.abs (bounds second)
+
+largest :: Estimate units -> Estimate units -> Estimate units
+largest first second = Estimate (Largest first second)
