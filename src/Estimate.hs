@@ -5,6 +5,7 @@ module Estimate
   , exact
   , bounds
   , refine
+  , satisfy
   , sum
   , min
   , max
@@ -41,6 +42,11 @@ bounds (Estimate _ range) = range
 
 refine :: Estimate units -> Estimate units
 refine (Estimate estimate _) = refineImpl estimate
+
+satisfy :: (Range units -> Bool) -> Estimate units -> Range units
+satisfy predicate estimate =
+  let current = bounds estimate
+   in if predicate current then current else satisfy predicate (refine estimate)
 
 newtype Negate units = Negate (Estimate units)
 
