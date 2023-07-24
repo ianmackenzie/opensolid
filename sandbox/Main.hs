@@ -178,12 +178,11 @@ fluxIntegral point curve =
       integrand = (firstDerivative >< displacement) / VectorCurve2d.squaredMagnitude displacement
    in Curve1d.integral integrand
 
-refineTo :: Qty units -> Estimate units -> Range units
-refineTo desiredAccuracy estimate
-  | Range.width current <= desiredAccuracy = current
-  | otherwise = refineTo desiredAccuracy (Estimate.refine estimate)
- where
-  current = Estimate.bounds estimate
+bothPossibleFluxValues :: Range Unitless
+bothPossibleFluxValues = Range.from 0.0 Float.tau
+
+containmentIsDeterminate :: Range Unitless -> Bool
+containmentIsDeterminate flux = not (Range.contains bothPossibleFluxValues flux)
 
 testPointContainment :: Task Text ()
 testPointContainment = Try.do
@@ -196,7 +195,9 @@ testPointContainment = Try.do
   line3 <- Line2d.from p3 p4
   line4 <- Line2d.from p4 p1
   let lines = [line1, line2, line3, line4]
-  let totalFlux testPoint = Estimate.sum (List.map (fluxIntegral testPoint) lines) |> refineTo 0.1
+  let totalFlux testPoint =
+        Estimate.sum (List.map (fluxIntegral testPoint) lines)
+          |> Estimate.satisfy containmentIsDeterminate
   let printTotalFlux testPoint = log ("Flux for " ++ Debug.show testPoint) (totalFlux testPoint)
   printTotalFlux (Point2d.meters 1.0 1.0)
   printTotalFlux (Point2d.meters 3.0 2.0)
