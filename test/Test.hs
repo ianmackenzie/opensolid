@@ -5,6 +5,8 @@ module Test
   , check
   , group
   , run
+  , assert
+  , expect
   )
 where
 
@@ -76,3 +78,10 @@ fuzzImpl context n generator = do
   case expectation of
     Passed -> fuzzImpl context (n - 1) generator
     Failed message -> reportError context message
+
+assert :: Bool -> List Text -> Expectation
+assert True _ = Passed
+assert False failureOutput = Failed (Text.paragraph failureOutput)
+
+expect :: Bool -> List Text -> Generator Expectation
+expect passed failureOutput = Random.return (assert passed failureOutput)
