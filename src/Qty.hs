@@ -17,6 +17,8 @@ module Qty
   , maxBy
   , smaller
   , larger
+  , smallerBy
+  , largerBy
   , clamp
   , IsZero (IsZero)
   , nonZero
@@ -167,6 +169,14 @@ smaller x y = if abs x <= abs y then x else y
 
 larger :: Qty units -> Qty units -> Qty units
 larger x y = if abs x >= abs y then x else y
+
+smallerBy :: (a -> Qty units) -> a -> a -> a
+smallerBy function first second =
+  if abs (function first) <= abs (function second) then first else second
+
+largerBy :: (a -> Qty units) -> a -> a -> a
+largerBy function first second =
+  if abs (function first) >= abs (function second) then first else second
 
 interpolateFrom :: Qty units -> Qty units -> Float -> Qty units
 interpolateFrom a b t =
