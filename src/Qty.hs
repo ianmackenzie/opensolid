@@ -149,10 +149,10 @@ clamp a b value
   high = max a b
 
 min :: Qty units -> Qty units -> Qty units
-min = Prelude.min
+min = Generic.min
 
 max :: Qty units -> Qty units -> Qty units
-max = Prelude.max
+max = Generic.max
 
 smaller :: Qty units -> Qty units -> Qty units
 smaller x y = if abs x <= abs y then x else y
