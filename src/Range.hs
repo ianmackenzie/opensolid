@@ -21,8 +21,8 @@ module Range
   , aggregate2
   , min
   , max
-  , smallest
-  , largest
+  , smaller
+  , larger
   , sin
   , cos
   , search
@@ -295,8 +295,8 @@ max :: Range units -> Range units -> Range units
 max (Range low1 high1) (Range low2 high2) =
   unsafe (Qty.max low1 low2) (Qty.max high1 high2)
 
-smallest :: Range units -> Range units -> Range units
-smallest first second
+smaller :: Range units -> Range units -> Range units
+smaller first second
   | high1 <= low2 = first
   | high2 <= low1 = second
   | otherwise =
@@ -307,8 +307,8 @@ smallest first second
   (Range low1 high1) = abs first
   (Range low2 high2) = abs second
 
-largest :: Range units -> Range units -> Range units
-largest first second
+larger :: Range units -> Range units -> Range units
+larger first second
   | low1 >= high2 = first
   | low2 >= high1 = second
   | aggregateMin >= -low = unsafe (Qty.max aggregateMin low) aggregateMax

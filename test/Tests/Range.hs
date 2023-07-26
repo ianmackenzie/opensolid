@@ -11,44 +11,44 @@ import Tests.Random qualified as Random
 
 tests :: List Test
 tests =
-  [ smallest
-  , largest
+  [ smaller
+  , larger
   ]
 
-smallest :: Test
-smallest = Test.check 100 "smallest" $ do
+smaller :: Test
+smaller = Test.check 100 "smaller" $ do
   a <- Range.generator Random.length
   b <- Range.generator Random.length
   u <- Parameter1d.generator
   v <- Parameter1d.generator
   let x = Range.interpolate a u
   let y = Range.interpolate b v
-  let smallestValue = Qty.smallest x y
-  let smallestRange = Range.smallest a b
-  Test.expect (Range.includes smallestValue smallestRange) $
+  let smallerValue = Qty.smaller x y
+  let smallerRange = Range.smaller a b
+  Test.expect (Range.includes smallerValue smallerRange) $
     [ "a: " ++ Debug.show a
     , "b: " ++ Debug.show b
     , "x: " ++ Debug.show x
     , "y: " ++ Debug.show y
-    , "smallestValue: " ++ Debug.show smallestValue
-    , "smallestRange: " ++ Debug.show smallestRange
+    , "smallerValue: " ++ Debug.show smallerValue
+    , "smallerRange: " ++ Debug.show smallerRange
     ]
 
-largest :: Test
-largest = Test.check 100 "largest" $ do
+larger :: Test
+larger = Test.check 100 "larger" $ do
   a <- Range.generator Random.length
   b <- Range.generator Random.length
   u <- Parameter1d.generator
   v <- Parameter1d.generator
   let x = Range.interpolate a u
   let y = Range.interpolate b v
-  let largestValue = Qty.largest x y
-  let largestRange = Range.largest a b
-  Test.expect (Range.includes largestValue largestRange) $
+  let largerValue = Qty.larger x y
+  let largerRange = Range.larger a b
+  Test.expect (Range.includes largerValue largerRange) $
     [ "a: " ++ Debug.show a
     , "b: " ++ Debug.show b
     , "x: " ++ Debug.show x
     , "y: " ++ Debug.show y
-    , "largestValue: " ++ Debug.show largestValue
-    , "largestRange: " ++ Debug.show largestRange
+    , "largerValue: " ++ Debug.show largerValue
+    , "largerRange: " ++ Debug.show largerRange
     ]

@@ -9,8 +9,8 @@ module Estimate
   , sum
   , min
   , max
-  , smallest
-  , largest
+  , smaller
+  , larger
   )
 where
 
@@ -144,32 +144,32 @@ instance IsEstimate (Max units) units where
 max :: Estimate units -> Estimate units -> Estimate units
 max first second = wrap (Max first second)
 
-data Smallest units = Smallest (Estimate units) (Estimate units)
+data Smaller units = Smaller (Estimate units) (Estimate units)
 
-instance IsEstimate (Smallest units) units where
-  boundsImpl (Smallest first second) = Range.smallest (bounds first) (bounds second)
-  refineImpl (Smallest first second)
+instance IsEstimate (Smaller units) units where
+  boundsImpl (Smaller first second) = Range.smaller (bounds first) (bounds second)
+  refineImpl (Smaller first second)
     | high1 <= low2 = refine first
     | high2 <= low1 = refine second
-    | otherwise = smallest (refine first) (refine second)
+    | otherwise = smaller (refine first) (refine second)
    where
     (Range low1 high1) = Range.abs (bounds first)
     (Range low2 high2) = Range.abs (bounds second)
 
-smallest :: Estimate units -> Estimate units -> Estimate units
-smallest first second = wrap (Smallest first second)
+smaller :: Estimate units -> Estimate units -> Estimate units
+smaller first second = wrap (Smaller first second)
 
-data Largest units = Largest (Estimate units) (Estimate units)
+data Larger units = Larger (Estimate units) (Estimate units)
 
-instance IsEstimate (Largest units) units where
-  boundsImpl (Largest first second) = Range.largest (bounds first) (bounds second)
-  refineImpl (Largest first second)
+instance IsEstimate (Larger units) units where
+  boundsImpl (Larger first second) = Range.larger (bounds first) (bounds second)
+  refineImpl (Larger first second)
     | low1 >= high2 = refine first
     | low2 >= high1 = refine second
-    | otherwise = largest (refine first) (refine second)
+    | otherwise = larger (refine first) (refine second)
    where
     (Range low1 high1) = Range.abs (bounds first)
     (Range low2 high2) = Range.abs (bounds second)
 
-largest :: Estimate units -> Estimate units -> Estimate units
-largest first second = wrap (Largest first second)
+larger :: Estimate units -> Estimate units -> Estimate units
+larger first second = wrap (Larger first second)
