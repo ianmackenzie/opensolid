@@ -27,8 +27,4 @@ point2d :: Generator (Point2d (space @ Meters))
 point2d = Random.map2 Point2d length length
 
 vectorBox3d :: Generator (VectorBox3d (space @ Meters))
-vectorBox3d = do
-  x <- Range.generator length
-  y <- Range.generator length
-  z <- Range.generator length
-  Random.return (VectorBox3d x y z)
+vectorBox3d = Random.map3 VectorBox3d lengthRange lengthRange lengthRange
