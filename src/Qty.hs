@@ -13,6 +13,8 @@ module Qty
   , abs
   , min
   , max
+  , minBy
+  , maxBy
   , smaller
   , larger
   , clamp
@@ -153,6 +155,12 @@ min = Generic.min
 
 max :: Qty units -> Qty units -> Qty units
 max = Generic.max
+
+minBy :: (a -> Qty units) -> a -> a -> a
+minBy = Generic.minBy
+
+maxBy :: (a -> Qty units) -> a -> a -> a
+maxBy = Generic.maxBy
 
 smaller :: Qty units -> Qty units -> Qty units
 smaller x y = if abs x <= abs y then x else y
