@@ -208,6 +208,7 @@ test-suite opensolid-test
       Tests.Curve1d
       Tests.Curve2d
       Tests.Parameter1d
+      Tests.Qty
       Tests.Random
       Tests.Range
       Tests.VectorBox3d

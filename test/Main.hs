@@ -8,12 +8,14 @@ import Test qualified
 import Tests.Curve1d qualified
 import Tests.Curve2d qualified
 import Tests.Parameter1d qualified
+import Tests.Qty qualified
 import Tests.Range qualified
 import Tests.VectorBox3d qualified
 
 tests :: List Test
 tests =
   [ Test.group "Parameter1d" Tests.Parameter1d.tests
+  , Test.group "Qty" Tests.Qty.tests
   , Test.group "Range" Tests.Range.tests
   , Test.group "VectorBox3d" Tests.VectorBox3d.tests
   , Test.group "Curve1d" Tests.Curve1d.tests
