@@ -110,7 +110,7 @@ qtyFrom :: Qty units -> Qty units -> Generator (Qty units)
 qtyFrom (Qty low) (Qty high) = map Qty (Generator (System.Random.uniformR (low, high)))
 
 list :: Int -> Generator a -> Generator (List a)
-list 0 _ = return []
+list n _ | n <= 0 = return []
 list n itemGenerator = do
   item <- itemGenerator
   rest <- list (n - 1) itemGenerator
