@@ -19,6 +19,10 @@ module Qty
   , larger
   , smallerBy
   , largerBy
+  , smallest
+  , largest
+  , smallestBy
+  , largestBy
   , clamp
   , IsZero (IsZero)
   , nonZero
@@ -30,6 +34,8 @@ where
 import Arithmetic
 import Basics
 import Data.Coerce (coerce)
+import Data.List qualified
+import Data.List.NonEmpty (NonEmpty ((:|)))
 import {-# SOURCE #-} Float (Float, fromRational)
 import {-# SOURCE #-} Float qualified
 import Generic qualified
@@ -177,6 +183,34 @@ smallerBy function first second =
 largerBy :: (a -> Qty units) -> a -> a -> a
 largerBy function first second =
   if abs (function first) >= abs (function second) then first else second
+
+smallest :: NonEmpty (Qty units) -> Qty units
+smallest (x :| xs) = Data.List.foldl' smaller x xs
+
+largest :: NonEmpty (Qty units) -> Qty units
+largest (x :| xs) = Data.List.foldl' larger x xs
+
+smallestBy :: (a -> Qty units) -> NonEmpty a -> a
+smallestBy _ (x :| []) = x
+smallestBy function (x :| xs) = go x (abs (function x)) xs
+ where
+  go current _ [] = current
+  go current currentAbsValue (next : remaining) =
+    let nextAbsValue = abs (function next)
+     in if nextAbsValue < currentAbsValue
+          then go next nextAbsValue remaining
+          else go current currentAbsValue remaining
+
+largestBy :: (a -> Qty units) -> NonEmpty a -> a
+largestBy _ (x :| []) = x
+largestBy function (x :| xs) = go x (abs (function x)) xs
+ where
+  go current _ [] = current
+  go current currentAbsValue (next : remaining) =
+    let nextAbsValue = abs (function next)
+     in if nextAbsValue > currentAbsValue
+          then go next nextAbsValue remaining
+          else go current currentAbsValue remaining
 
 interpolateFrom :: Qty units -> Qty units -> Float -> Qty units
 interpolateFrom a b t =
