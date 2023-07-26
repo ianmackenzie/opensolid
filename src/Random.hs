@@ -5,6 +5,9 @@ module Random
   , step
   , return
   , map
+  , map2
+  , map3
+  , map4
   , bool
   , intFrom
   , floatFrom
@@ -72,6 +75,27 @@ return givenValue = Generator (givenValue,)
 
 map :: (a -> b) -> Generator a -> Generator b
 map function generator = Generator (run generator >> Pair.mapFirst function)
+
+map2 :: (a -> b -> c) -> Generator a -> Generator b -> Generator c
+map2 function generatorA generatorB = do
+  valueA <- generatorA
+  valueB <- generatorB
+  return (function valueA valueB)
+
+map3 :: (a -> b -> c -> d) -> Generator a -> Generator b -> Generator c -> Generator d
+map3 function generatorA generatorB generatorC = do
+  valueA <- generatorA
+  valueB <- generatorB
+  valueC <- generatorC
+  return (function valueA valueB valueC)
+
+map4 :: (a -> b -> c -> d -> e) -> Generator a -> Generator b -> Generator c -> Generator d -> Generator e
+map4 function generatorA generatorB generatorC generatorD = do
+  valueA <- generatorA
+  valueB <- generatorB
+  valueC <- generatorC
+  valueD <- generatorD
+  return (function valueA valueB valueC valueD)
 
 bool :: Generator Bool
 bool = Generator (System.Random.uniformR (False, True))
