@@ -13,6 +13,7 @@ module Random
   , floatFrom
   , qtyFrom
   , list
+  , nonEmpty
   , seed
   , pair
   , maybe
@@ -115,6 +116,12 @@ list n itemGenerator = do
   item <- itemGenerator
   rest <- list (n - 1) itemGenerator
   return (item : rest)
+
+nonEmpty :: Int -> Generator a -> Generator (NonEmpty a)
+nonEmpty n itemGenerator = do
+  first <- itemGenerator
+  rest <- list (n - 1) itemGenerator
+  return (first :| rest)
 
 seed :: Generator Seed
 seed = Generator (System.Random.split >> Pair.mapFirst Seed)
