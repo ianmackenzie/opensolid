@@ -168,18 +168,12 @@ hull3 a b c = unsafe (Qty.min a (Qty.min b c)) (Qty.max a (Qty.max b c))
 midpoint :: Range units -> Qty units
 midpoint (Range low high) = Qty.midpoint low high
 
-instance HasField "midpoint" (Range units) (Qty units) where
-  getField = midpoint
-
 endpoints :: Range units -> (Qty units, Qty units)
 endpoints (Range low high) = (low, high)
 
 {-# INLINE width #-}
 width :: Range units -> Qty units
 width (Range low high) = high - low
-
-instance HasField "width" (Range units) (Qty units) where
-  getField = width
 
 squared :: Units.Squared units1 units2 => Range units1 -> Range units2
 squared (Range low high)
