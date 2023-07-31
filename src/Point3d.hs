@@ -124,9 +124,16 @@ xyz = Point3d
 meters :: Float -> Float -> Float -> Point3d (space @ Meters)
 meters px py pz = Point3d (Length.meters px) (Length.meters py) (Length.meters pz)
 
-interpolateFrom :: Point3d (space @ units) -> Point3d (space @ units) -> Float -> Point3d (space @ units)
+interpolateFrom ::
+  Point3d (space @ units) ->
+  Point3d (space @ units) ->
+  Float ->
+  Point3d (space @ units)
 interpolateFrom (Point3d x1 y1 z1) (Point3d x2 y2 z2) t =
-  Point3d (Qty.interpolateFrom x1 x2 t) (Qty.interpolateFrom y1 y2 t) (Qty.interpolateFrom z1 z2 t)
+  Point3d
+    (Qty.interpolateFrom x1 x2 t)
+    (Qty.interpolateFrom y1 y2 t)
+    (Qty.interpolateFrom z1 z2 t)
 
 midpoint :: Point3d (space @ units) -> Point3d (space @ units) -> Point3d (space @ units)
 midpoint (Point3d x1 y1 z1) (Point3d x2 y2 z2) =

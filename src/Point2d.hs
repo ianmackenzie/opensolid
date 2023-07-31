@@ -121,9 +121,15 @@ xy = Point2d
 meters :: Float -> Float -> Point2d (space @ Meters)
 meters px py = Point2d (Length.meters px) (Length.meters py)
 
-interpolateFrom :: Point2d (space @ units) -> Point2d (space @ units) -> Float -> Point2d (space @ units)
+interpolateFrom ::
+  Point2d (space @ units) ->
+  Point2d (space @ units) ->
+  Float ->
+  Point2d (space @ units)
 interpolateFrom (Point2d x1 y1) (Point2d x2 y2) t =
-  Point2d (Qty.interpolateFrom x1 x2 t) (Qty.interpolateFrom y1 y2 t)
+  Point2d
+    (Qty.interpolateFrom x1 x2 t)
+    (Qty.interpolateFrom y1 y2 t)
 
 midpoint :: Point2d (space @ units) -> Point2d (space @ units) -> Point2d (space @ units)
 midpoint (Point2d x1 y1) (Point2d x2 y2) =
