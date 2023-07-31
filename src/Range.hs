@@ -299,8 +299,8 @@ max (Range low1 high1) (Range low2 high2) =
 
 smaller :: Range units -> Range units -> Range units
 smaller first second
-  | high1 <= low2 = first
-  | high2 <= low1 = second
+  | high1 < low2 = first
+  | high2 < low1 = second
   | otherwise =
       let (Range aggregateMin aggregateMax) = aggregate2 first second
           high = Qty.min high1 high2
@@ -311,10 +311,10 @@ smaller first second
 
 larger :: Range units -> Range units -> Range units
 larger first second
-  | low1 >= high2 = first
-  | low2 >= high1 = second
-  | aggregateMin >= -low = unsafe (Qty.max aggregateMin low) aggregateMax
-  | aggregateMax <= low = unsafe aggregateMin (Qty.min aggregateMax -low)
+  | low1 > high2 = first
+  | low2 > high1 = second
+  | aggregateMin > -low = unsafe (Qty.max aggregateMin low) aggregateMax
+  | aggregateMax < low = unsafe aggregateMin (Qty.min aggregateMax -low)
   | otherwise = aggregate
  where
   (Range low1 high1) = abs first
