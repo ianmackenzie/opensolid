@@ -34,6 +34,8 @@ module NonEmpty
   , any
   , minimum
   , maximum
+  , minimumBy
+  , maximumBy
   )
 where
 
@@ -169,3 +171,19 @@ minimum = Prelude.minimum
 
 maximum :: Ord a => NonEmpty a -> a
 maximum = Prelude.maximum
+
+minimumBy :: Ord b => (a -> b) -> NonEmpty a -> a
+minimumBy property (x :| xs) =
+  extremum (<) property x (property x) xs
+
+maximumBy :: Ord b => (a -> b) -> NonEmpty a -> a
+maximumBy property (x :| xs) =
+  extremum (>) property x (property x) xs
+
+extremum :: (b -> b -> Bool) -> (a -> b) -> a -> b -> List a -> a
+extremum _ _ current _ [] = current
+extremum comparison property current currentProperty (next : remaining) =
+  let nextProperty = property next
+   in if comparison nextProperty currentProperty
+        then extremum comparison property next nextProperty remaining
+        else extremum comparison property current currentProperty remaining
