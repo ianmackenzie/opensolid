@@ -4,6 +4,7 @@ module NonEmpty
   , singleton
   , first
   , rest
+  , toList
   , prepend
   , length
   , map
@@ -62,6 +63,9 @@ first = Data.List.NonEmpty.head
 
 rest :: NonEmpty a -> List a
 rest = Data.List.NonEmpty.tail
+
+toList :: NonEmpty a -> List a
+toList (x :| xs) = x : xs
 
 prepend :: a -> NonEmpty a -> NonEmpty a
 prepend = Data.List.NonEmpty.cons
