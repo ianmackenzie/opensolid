@@ -23,6 +23,8 @@ module Range
   , aggregate2
   , min
   , max
+  , minimum
+  , maximum
   , smaller
   , larger
   , sin
@@ -49,6 +51,7 @@ import Bounds (IsBounds (..))
 import Float qualified
 import Generic qualified
 import Maybe qualified
+import NonEmpty qualified
 import OpenSolid
 import Qty qualified
 import Random qualified
@@ -318,6 +321,12 @@ larger first second
   (Range low2 high2) = abs second
   low = Qty.max low1 low2
   aggregate@(Range aggregateMin aggregateMax) = aggregate2 first second
+
+minimum :: NonEmpty (Range units) -> Range units
+minimum = NonEmpty.reduceLeft min
+
+maximum :: NonEmpty (Range units) -> Range units
+maximum = NonEmpty.reduceLeft max
 
 sin :: Range Radians -> Range Unitless
 sin range@(Range low high) =
