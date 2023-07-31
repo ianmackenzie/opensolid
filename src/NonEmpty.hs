@@ -35,6 +35,8 @@ module NonEmpty
   , any
   , minimum
   , maximum
+  , minimumOf
+  , maximumOf
   , minimumBy
   , maximumBy
   )
@@ -175,6 +177,12 @@ minimum = Prelude.minimum
 
 maximum :: Ord a => NonEmpty a -> a
 maximum = Prelude.maximum
+
+minimumOf :: Ord b => (a -> b) -> NonEmpty a -> b
+minimumOf property nonEmpty = minimum (map property nonEmpty)
+
+maximumOf :: Ord b => (a -> b) -> NonEmpty a -> b
+maximumOf property nonEmpty = maximum (map property nonEmpty)
 
 minimumBy :: Ord b => (a -> b) -> NonEmpty a -> a
 minimumBy property (x :| xs) =
