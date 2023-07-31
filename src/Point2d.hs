@@ -24,7 +24,6 @@ import {-# SOURCE #-} BoundingBox2d (BoundingBox2d (BoundingBox2d))
 import {-# SOURCE #-} BoundingBox2d qualified
 import CoordinateSystem (Units)
 import Direction2d (Direction2d (Direction2d))
-import Direction2d qualified
 import {-# SOURCE #-} Frame2d (Frame2d)
 import {-# SOURCE #-} Frame2d qualified
 import Length qualified
@@ -143,11 +142,11 @@ angleFrom p1 p2 = Vector2d.angle (p2 - p1)
 
 signedDistanceAlong :: Axis2d (space @ units) -> Point2d (space @ units) -> Qty units
 signedDistanceAlong axis point =
-  (point - axis.originPoint) <> axis.direction
+  Axis2d.direction axis <> (point - Axis2d.originPoint axis)
 
 signedDistanceFrom :: Axis2d (space @ units) -> Point2d (space @ units) -> Qty units
 signedDistanceFrom axis point =
-  (point - axis.originPoint) <> Direction2d.perpendicularTo axis.direction
+  Axis2d.direction axis >< (point - Axis2d.originPoint axis)
 
 placeIn ::
   Frame2d (global @ units) (Defines local) ->

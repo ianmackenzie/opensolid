@@ -1,5 +1,7 @@
 module Axis2d
-  ( Axis2d (originPoint, direction)
+  ( Axis2d (Axis2d)
+  , originPoint
+  , direction
   , x
   , y
   , through
@@ -16,10 +18,10 @@ import Transform2d (Transformable2d (..))
 
 type role Axis2d phantom
 
-data Axis2d (coordinateSystem :: CoordinateSystem) = Axis2d
-  { originPoint :: Point2d coordinateSystem
-  , direction :: Direction2d (Space coordinateSystem)
-  }
+data Axis2d (coordinateSystem :: CoordinateSystem)
+  = Axis2d
+      (Point2d coordinateSystem)
+      (Direction2d (Space coordinateSystem))
   deriving (Eq, Show)
 
 instance (space ~ space', units ~ units') => Transformable2d (Axis2d (space @ units)) (space' @ units') where
@@ -27,6 +29,14 @@ instance (space ~ space', units ~ units') => Transformable2d (Axis2d (space @ un
     Axis2d
       (transformBy transformation (originPoint axis))
       (transformBy transformation (direction axis))
+
+{-# INLINE originPoint #-}
+originPoint :: Axis2d (space @ units) -> Point2d (space @ units)
+originPoint (Axis2d p _) = p
+
+{-# INLINE direction #-}
+direction :: Axis2d (space @ units) -> Direction2d space
+direction (Axis2d _ d) = d
 
 x :: Axis2d (space @ units)
 x = Axis2d Point2d.origin Direction2d.x

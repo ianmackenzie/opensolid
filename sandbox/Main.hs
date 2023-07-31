@@ -253,7 +253,6 @@ script = do
           |> Transform2d.rotateAroundOwn Axis2d.originPoint (Angle.degrees 90.0)
   log "Transformed axis" transformedAxis
   testTry
-  log "Axis2d.x.originPoint" Axis2d.x.originPoint
   testTaskIteration
   testTaskSequencing
   log "Successive deltas" (List.successive subtract [0, 1, 4, 9, 16, 25])

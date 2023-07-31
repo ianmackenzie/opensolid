@@ -1,5 +1,7 @@
 module Axis2d
-  ( Axis2d (originPoint, direction)
+  ( Axis2d (Axis2d)
+  , originPoint
+  , direction
   )
 where
 
@@ -10,7 +12,10 @@ import {-# SOURCE #-} Point2d (Point2d)
 
 type role Axis2d phantom
 
-data Axis2d (coordinateSystem :: CoordinateSystem) = Axis2d
-  { originPoint :: Point2d coordinateSystem
-  , direction :: Direction2d (Space coordinateSystem)
-  }
+data Axis2d (coordinateSystem :: CoordinateSystem)
+  = Axis2d
+      (Point2d coordinateSystem)
+      (Direction2d (Space coordinateSystem))
+
+originPoint :: Axis2d (space @ units) -> Point2d (space @ units)
+direction :: Axis2d (space @ units) -> Direction2d space

@@ -64,8 +64,8 @@ newtype Deformation (coordinateSystem :: CoordinateSystem) = Deformation (Matrix
 
 scalingAlong :: Axis2d (space @ units) -> Float -> Deformation (space @ units)
 scalingAlong axis scale =
-  let Direction2d (Vector2d dx dy) = axis.direction
-      Point2d x0 y0 = axis.originPoint
+  let Direction2d (Vector2d dx dy) = Axis2d.direction axis
+      Point2d x0 y0 = Axis2d.originPoint axis
       dx2 = dx * dx
       dy2 = dy * dy
       m11 = scale * dx2 + dy2
