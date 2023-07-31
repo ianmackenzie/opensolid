@@ -258,15 +258,15 @@ magnitude :: VectorBox2d (space @ units) -> Range units
 magnitude (VectorBox2d x y) = Range.hypot2 x y
 
 maxMagnitude :: VectorBox2d (space @ units) -> Qty units
-maxMagnitude (VectorBox2d x y) =
-  let xMagnitude = Qty.max (Qty.abs x.minValue) (Qty.abs x.maxValue)
-      yMagnitude = Qty.max (Qty.abs y.minValue) (Qty.abs y.maxValue)
+maxMagnitude (VectorBox2d (Range minX maxX) (Range minY maxY)) =
+  let xMagnitude = Qty.max (Qty.abs minX) (Qty.abs maxX)
+      yMagnitude = Qty.max (Qty.abs minY) (Qty.abs maxY)
    in Qty.hypot2 xMagnitude yMagnitude
 
 maxSquaredMagnitude :: Units.Squared units1 units2 => VectorBox2d (space @ units1) -> Qty units2
-maxSquaredMagnitude (VectorBox2d x y) =
-  let xMagnitude = Qty.max (Qty.abs x.minValue) (Qty.abs x.maxValue)
-      yMagnitude = Qty.max (Qty.abs y.minValue) (Qty.abs y.maxValue)
+maxSquaredMagnitude (VectorBox2d (Range minX maxX) (Range minY maxY)) =
+  let xMagnitude = Qty.max (Qty.abs minX) (Qty.abs maxX)
+      yMagnitude = Qty.max (Qty.abs minY) (Qty.abs maxY)
    in Qty.squared xMagnitude + Qty.squared yMagnitude
 
 normalize :: VectorBox2d (space @ units) -> VectorBox2d (space @ Unitless)

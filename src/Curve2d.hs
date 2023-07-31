@@ -51,7 +51,6 @@ import List qualified
 import OpenSolid
 import Point2d (Point2d)
 import Qty qualified
-import Range (Range (..))
 import Range qualified
 import Result qualified
 import Units (Unitless)

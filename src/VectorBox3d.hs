@@ -270,17 +270,17 @@ magnitude :: VectorBox3d (space @ units) -> Range units
 magnitude (VectorBox3d x y z) = Range.hypot3 x y z
 
 maxMagnitude :: VectorBox3d (space @ units) -> Qty units
-maxMagnitude (VectorBox3d x y z) =
-  let xMagnitude = Qty.max (Qty.abs x.minValue) (Qty.abs x.maxValue)
-      yMagnitude = Qty.max (Qty.abs y.minValue) (Qty.abs y.maxValue)
-      zMagnitude = Qty.max (Qty.abs z.minValue) (Qty.abs z.maxValue)
+maxMagnitude (VectorBox3d (Range minX maxX) (Range minY maxY) (Range minZ maxZ)) =
+  let xMagnitude = Qty.max (Qty.abs minX) (Qty.abs maxX)
+      yMagnitude = Qty.max (Qty.abs minY) (Qty.abs maxY)
+      zMagnitude = Qty.max (Qty.abs minZ) (Qty.abs maxZ)
    in Qty.hypot3 xMagnitude yMagnitude zMagnitude
 
 maxSquaredMagnitude :: Units.Squared units1 units2 => VectorBox3d (space @ units1) -> Qty units2
-maxSquaredMagnitude (VectorBox3d x y z) =
-  let xMagnitude = Qty.max (Qty.abs x.minValue) (Qty.abs x.maxValue)
-      yMagnitude = Qty.max (Qty.abs y.minValue) (Qty.abs y.maxValue)
-      zMagnitude = Qty.max (Qty.abs z.minValue) (Qty.abs z.maxValue)
+maxSquaredMagnitude (VectorBox3d (Range minX maxX) (Range minY maxY) (Range minZ maxZ)) =
+  let xMagnitude = Qty.max (Qty.abs minX) (Qty.abs maxX)
+      yMagnitude = Qty.max (Qty.abs minY) (Qty.abs maxY)
+      zMagnitude = Qty.max (Qty.abs minZ) (Qty.abs maxZ)
    in Qty.squared xMagnitude + Qty.squared yMagnitude + Qty.squared zMagnitude
 
 normalize :: VectorBox3d (space @ units) -> VectorBox3d (space @ Unitless)

@@ -1,9 +1,11 @@
 module Range
-  ( Range (Range, minValue, maxValue)
+  ( Range (Range)
   , unsafe
   , constant
   , from
   , hull3
+  , minValue
+  , maxValue
   , midpoint
   , endpoints
   , width
@@ -53,7 +55,7 @@ import Random qualified
 import Units (Radians, Unitless)
 import Units qualified
 
-data Range units = Range# {minValue :: Qty units, maxValue :: Qty units}
+data Range units = Range# (Qty units) (Qty units)
   deriving (Eq, Show)
 
 {-# COMPLETE Range #-}
@@ -162,6 +164,14 @@ intersection (Range low1 high1) (Range low2 high2)
 hull3 :: Qty units -> Qty units -> Qty units -> Range units
 hull3 a b c = unsafe (Qty.min a (Qty.min b c)) (Qty.max a (Qty.max b c))
 
+{-# INLINE minValue #-}
+minValue :: Range units -> Qty units
+minValue (Range low _) = low
+
+{-# INLINE maxValue #-}
+maxValue :: Range units -> Qty units
+maxValue (Range _ high) = high
+
 {-# INLINE midpoint #-}
 midpoint :: Range units -> Qty units
 midpoint (Range low high) = Qty.midpoint low high
@@ -269,9 +279,6 @@ isAtomic :: Range units -> Bool
 isAtomic (Range low high) =
   let mid = Qty.midpoint low high
    in mid == low || mid == high
-
-instance HasField "isAtomic" (Range units) Bool where
-  getField = isAtomic
 
 abs :: Range units -> Range units
 abs range@(Range low high)
