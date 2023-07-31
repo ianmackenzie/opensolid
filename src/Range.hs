@@ -27,6 +27,8 @@ module Range
   , maximum
   , smaller
   , larger
+  , smallest
+  , largest
   , sin
   , cos
   , interpolate
@@ -186,6 +188,17 @@ endpoints (Range low high) = (low, high)
 width :: Range units -> Qty units
 width (Range low high) = high - low
 
+{-# INLINE maxAbs #-}
+maxAbs :: Range units -> Qty units
+maxAbs (Range low high) = Qty.max (Qty.abs low) (Qty.abs high)
+
+{-# INLINE minAbs #-}
+minAbs :: Range units -> Qty units
+minAbs (Range low high)
+  | low >= Qty.zero = low
+  | high <= Qty.zero = -high
+  | otherwise = Qty.zero
+
 squared :: Units.Squared units1 units2 => Range units1 -> Range units2
 squared (Range low high)
   | low >= Qty.zero = unsafe ll hh
@@ -327,6 +340,32 @@ minimum = NonEmpty.reduceLeft min
 
 maximum :: NonEmpty (Range units) -> Range units
 maximum = NonEmpty.reduceLeft max
+
+smallest :: NonEmpty (Range units) -> Range units
+smallest ranges =
+  let initial = NonEmpty.minimumBy maxAbs ranges
+      clipRadius = maxAbs initial
+      clipRange = unsafe -clipRadius clipRadius
+   in NonEmpty.foldLeft
+        ( \accumulated range ->
+            case intersection range clipRange of
+              Just clipped -> aggregate2 accumulated clipped
+              Nothing -> accumulated
+        )
+        initial
+        ranges
+
+largest :: NonEmpty (Range units) -> Range units
+largest ranges =
+  let initial = NonEmpty.maximumBy minAbs ranges
+      clipRadius = minAbs initial
+      conditionalAggregate accumulated (Range low high)
+        | low > clipRadius = accumulated
+        | high < -clipRadius = accumulated
+        | otherwise =
+            let clipped = unsafe (Qty.max -clipRadius low) (Qty.min high clipRadius)
+             in aggregate2 accumulated clipped
+   in NonEmpty.foldLeft conditionalAggregate initial ranges
 
 sin :: Range Radians -> Range Unitless
 sin range@(Range low high) =
