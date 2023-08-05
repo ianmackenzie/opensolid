@@ -345,15 +345,10 @@ smallest :: NonEmpty (Range units) -> Range units
 smallest ranges =
   let initial = NonEmpty.minimumBy maxAbs ranges
       clipRadius = maxAbs initial
-      clipRange = unsafe -clipRadius clipRadius
-   in NonEmpty.foldLeft
-        ( \accumulated range ->
-            case intersection range clipRange of
-              Just clipped -> aggregate2 accumulated clipped
-              Nothing -> accumulated
-        )
-        initial
-        ranges
+      conditionalAggregate accumulated (Range low high)
+        | low > clipRadius || high < -clipRadius = accumulated
+        | otherwise = aggregate2 accumulated (unsafe (Qty.max low -clipRadius) (Qty.min high clipRadius))
+   in NonEmpty.foldLeft conditionalAggregate initial ranges
 
 largest :: NonEmpty (Range units) -> Range units
 largest ranges =
