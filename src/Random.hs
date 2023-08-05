@@ -9,9 +9,9 @@ module Random
   , map3
   , map4
   , bool
-  , intFrom
-  , floatFrom
-  , qtyFrom
+  , int
+  , float
+  , qty
   , list
   , nonEmpty
   , seed
@@ -101,14 +101,14 @@ map4 function generatorA generatorB generatorC generatorD = do
 bool :: Generator Bool
 bool = Generator (System.Random.uniformR (False, True))
 
-intFrom :: Int -> Int -> Generator Int
-intFrom low high = Generator (System.Random.uniformR (low, high))
+int :: Int -> Int -> Generator Int
+int low high = Generator (System.Random.uniformR (low, high))
 
-floatFrom :: Float -> Float -> Generator Float
-floatFrom = qtyFrom
+float :: Float -> Float -> Generator Float
+float = qty
 
-qtyFrom :: Qty units -> Qty units -> Generator (Qty units)
-qtyFrom (Qty low) (Qty high) = map Qty (Generator (System.Random.uniformR (low, high)))
+qty :: Qty units -> Qty units -> Generator (Qty units)
+qty (Qty low) (Qty high) = map Qty (Generator (System.Random.uniformR (low, high)))
 
 list :: Int -> Generator a -> Generator (List a)
 list n _ | n <= 0 = return []
@@ -141,7 +141,7 @@ oneOf :: Generator a -> List (Generator a) -> Generator a
 oneOf firstGenerator remainingGenerators =
   let array = Array.fromList remainingGenerators
       n = Array.length array
-      indexGenerator = intFrom 0 n
+      indexGenerator = int 0 n
    in do
         index <- indexGenerator
         Array.get (index - 1) array |> Maybe.withDefault firstGenerator

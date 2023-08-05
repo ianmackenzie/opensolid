@@ -18,7 +18,7 @@ import Units (Meters)
 import VectorBox3d (VectorBox3d (VectorBox3d))
 
 length :: Generator Length
-length = Random.qtyFrom (Length.meters -10.0) (Length.meters 10.0)
+length = Random.qty (Length.meters -10.0) (Length.meters 10.0)
 
 lengthRange :: Generator (Range Meters)
 lengthRange = Range.generator length

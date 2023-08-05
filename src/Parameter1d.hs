@@ -52,4 +52,4 @@ midpointsImpl index divisor function accumulated
   updated = function (Float.fromInt index / divisor) : accumulated
 
 generator :: Random.Generator Float
-generator = Random.floatFrom 0.0 1.0
+generator = Random.float 0.0 1.0
