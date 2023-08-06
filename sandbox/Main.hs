@@ -146,31 +146,6 @@ testNonEmpty [] = Console.printLine "List is empty"
 testNonEmpty (NonEmpty nonEmpty) =
   Console.printLine ("List is non-empty, maximum is " ++ Debug.show (NonEmpty.maximum nonEmpty))
 
-testCurveIntegral :: Task Text ()
-testCurveIntegral = Try.do
-  curve <-
-    Arc2d.with
-      [ Arc2d.CenterPoint Point2d.origin
-      , Arc2d.StartAngle (Angle.degrees 180.0)
-      , Arc2d.SweptAngle (Angle.degrees -180.0)
-      , Arc2d.Radius (Length.meters 1.0)
-      ]
-  let dAdt = Curve2d.yCoordinate curve * VectorCurve2d.xComponent (Curve2d.derivative curve)
-  let estimate1 = Curve1d.integral dAdt
-  log "Estimate 1" (Estimate.bounds estimate1)
-  let estimate2 = Estimate.refine estimate1
-  log "Estimate 2" (Estimate.bounds estimate2)
-  let estimate3 = Estimate.refine estimate2
-  log "Estimate 3" (Estimate.bounds estimate3)
-  let estimate4 = Estimate.refine estimate3
-  log "Estimate 4" (Estimate.bounds estimate4)
-  let estimate5 = Estimate.refine estimate4
-  log "Estimate 5" (Estimate.bounds estimate5)
-  let estimate6 = Estimate.refine estimate5
-  log "Estimate 6" (Estimate.bounds estimate6)
- where
-  ?tolerance = defaultTolerance
-
 fluxIntegral :: Point2d (space @ units) -> Curve2d (space @ units) -> Estimate Unitless
 fluxIntegral point curve =
   let displacement = Units.generalize (point - curve)
@@ -263,7 +238,6 @@ script = do
   testRangeFind
   testNonEmpty ([] :: List Int)
   testNonEmpty [2, 3, 1]
-  testCurveIntegral
   testPointContainment
  where
   ?tolerance = defaultTolerance

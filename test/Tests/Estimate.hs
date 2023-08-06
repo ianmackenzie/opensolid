@@ -1,12 +1,19 @@
 module Tests.Estimate (tests) where
 
+import Angle qualified
+import Arc2d qualified
+import Area qualified
+import Curve1d qualified
+import Curve2d qualified
 import Estimate (Estimate, IsEstimate)
 import Estimate qualified
+import Float qualified
 import Length (Length)
 import Length qualified
 import NonEmpty qualified
 import OpenSolid
 import Parameter1d qualified
+import Point2d qualified
 import Qty qualified
 import Random (Generator)
 import Random qualified
@@ -16,11 +23,13 @@ import Test (Test)
 import Test qualified
 import Tests.Random qualified as Random
 import Units (Meters)
+import VectorCurve2d qualified
 
 tests :: List Test
 tests =
   [ smallest
   , largest
+  , area
   ]
 
 data DummyEstimate = DummyEstimate Length (Range Meters)
@@ -81,3 +90,33 @@ largest = Test.check 100 "largest" $ do
     ]
  where
   ?tolerance = Length.meters 1e-9
+
+resolvesTo :: Tolerance units => Qty units -> Estimate units -> Result Text Bool
+resolvesTo value estimate
+  | currentBounds ~= value = Ok True
+  | not (Range.approximatelyIncludes value currentBounds) = Ok False
+  | otherwise =
+      let refinedEstimate = Estimate.refine estimate
+          refinedBounds = Estimate.bounds refinedEstimate
+       in if Range.width refinedBounds < Range.width currentBounds
+            then resolvesTo value refinedEstimate
+            else Error "Refined bounds are not narrower than original bounds"
+ where
+  currentBounds = Estimate.bounds estimate
+
+area :: Test
+area = Test.verify "area" $ do
+  curve <-
+    let ?tolerance = Length.meters 1e-9
+     in Arc2d.with
+          [ Arc2d.CenterPoint Point2d.origin
+          , Arc2d.StartAngle (Angle.degrees 180.0)
+          , Arc2d.SweptAngle (Angle.degrees -180.0)
+          , Arc2d.Radius (Length.meters 1.0)
+          ]
+  let dAdt = Curve2d.yCoordinate curve * VectorCurve2d.xComponent (Curve2d.derivative curve)
+  let areaEstimate = Curve1d.integral dAdt
+  areaIsCorrect <-
+    let ?tolerance = Area.squareMeters 1e-6
+     in resolvesTo (Area.squareMeters (Float.pi / 2.0)) areaEstimate
+  Test.assert areaIsCorrect []
