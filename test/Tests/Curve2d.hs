@@ -42,7 +42,7 @@ parameterValues = Test.verify "parameterValues" $ do
   let midParameterValues = Curve2d.parameterValues (Point2d.meters 1.0 1.0) testSpline
   let offCurveParameterValues = Curve2d.parameterValues (Point2d.meters 1.0 1.1) testSpline
   let ?tolerance = 1e-12
-   in Test.assert
+   in Test.expect
         ( startParameterValues ~= [0.0]
             && endParameterValues ~= [1.0]
             && midParameterValues ~= [0.5]
@@ -77,7 +77,7 @@ curveOverlap1 = Test.verify "Overlap detection 1" $ do
       ]
   segments <- overlappingSegments arc1 arc2
   let ?tolerance = 1e-12
-   in Test.assert (segments ~= [(Range.from 0.0 0.5, Range.from 0.5 1.0, Positive)]) []
+   in Test.expect (segments ~= [(Range.from 0.0 0.5, Range.from 0.5 1.0, Positive)]) []
 
 curveOverlap2 :: Tolerance Meters => Test
 curveOverlap2 = Test.verify "Overlap detection 2" $ do
@@ -101,7 +101,7 @@ curveOverlap2 = Test.verify "Overlap detection 2" $ do
         , (Range.from (3 / 4) 1.0, Range.from (5 / 6) 1.0, Negative)
         ]
   let ?tolerance = 1e-12
-   in Test.assert (segments ~= expectedSegments) []
+   in Test.expect (segments ~= expectedSegments) []
 
 crossingIntersection :: Tolerance Meters => Test
 crossingIntersection = Test.verify "Crossing intersection" $ do
@@ -123,7 +123,7 @@ crossingIntersection = Test.verify "Crossing intersection" $ do
         , Intersection 0.5 0.5 Intersection.Crossing Negative
         ]
   let ?tolerance = 1e-12
-   in Test.assert (intersections ~= expectedIntersections) []
+   in Test.expect (intersections ~= expectedIntersections) []
 
 tangentIntersection :: Tolerance Meters => Test
 tangentIntersection = Test.verify "Tangent intersection" $ do
@@ -143,7 +143,7 @@ tangentIntersection = Test.verify "Tangent intersection" $ do
       ]
   intersections <- Curve2d.intersections arc1 arc2
   let ?tolerance = 1e-12
-   in Test.assert (intersections ~= [Intersection 0.5 0.5 Intersection.Tangent Positive]) []
+   in Test.expect (intersections ~= [Intersection 0.5 0.5 Intersection.Tangent Positive]) []
 
 solving :: Tolerance Meters => Test
 solving = Test.verify "Solving via Curve1d" $ do
@@ -161,4 +161,4 @@ solving = Test.verify "Solving via Curve1d" $ do
           |> List.map Curve1d.Root.value
           |> List.map (Curve2d.pointOn arc)
           |> List.map (Point2d.distanceFrom Point2d.origin)
-  Test.assert (distances ~= [desiredDistance, desiredDistance]) []
+  Test.expect (distances ~= [desiredDistance, desiredDistance]) []

@@ -5,7 +5,6 @@ module Test
   , check
   , group
   , run
-  , assert
   , expect
   , Test.show
   , lines
@@ -31,13 +30,16 @@ instance (ErrorMessage x, a ~ a') => Bind (Result x a) a' Expectation where
   bind f (Ok value) = f value
   bind _ (Error error) = Failed (errorMessage error)
 
+instance (ErrorMessage x, a ~ a') => Bind (Result x a) a' (Generator Expectation) where
+  bind f (Ok value) = f value
+  bind _ (Error error) = Random.return (Failed (errorMessage error))
+
 data Test
-  = Verify Text Expectation
-  | Check Int Text (Generator Expectation)
+  = Check Int Text (Generator Expectation)
   | Group Text (List Test)
 
-verify :: Text -> Expectation -> Test
-verify = Verify
+verify :: Text -> Generator Expectation -> Test
+verify = check 1
 
 check :: Int -> Text -> Generator Expectation -> Test
 check = Check
@@ -72,8 +74,6 @@ reportError context message = do
   Task.succeed (0, 1)
 
 runImpl :: List Text -> Test -> Task Text (Int, Int)
-runImpl _ (Verify _ Passed) = Task.succeed (1, 0)
-runImpl context (Verify label (Failed message)) = reportError (label : context) message
 runImpl context (Check count label generator) = fuzzImpl (label : context) count generator
 runImpl context (Group label tests) = Task.collect (runImpl (label : context)) tests |> Task.map sum
 
@@ -91,12 +91,9 @@ fuzzImpl context n generator = do
     Passed -> fuzzImpl context (n - 1) generator
     Failed message -> reportError context message
 
-assert :: Bool -> List Text -> Expectation
-assert True _ = Passed
-assert False failureOutput = Failed (Text.join "\n" failureOutput)
-
 expect :: Bool -> List Text -> Generator Expectation
-expect passed failureOutput = Random.return (assert passed failureOutput)
+expect True _ = Random.return Passed
+expect False failureOutput = Random.return (Failed (Text.join "\n" failureOutput))
 
 show :: Show a => Text -> a -> Text
 show label value = label ++ ": " ++ Debug.show value

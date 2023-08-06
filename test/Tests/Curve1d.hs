@@ -28,7 +28,7 @@ crossingRoots = Test.verify "Crossing roots" $ do
         , Root (1 / 3) 0 Negative
         , Root (2 / 3) 0 Positive
         ]
-  Test.assert (roots ~= expectedRoots) []
+  Test.expect (roots ~= expectedRoots) []
 
 tangentRoots :: Tolerance Unitless => Test
 tangentRoots = Test.verify "Tangent roots" $ do
@@ -41,7 +41,7 @@ tangentRoots = Test.verify "Tangent roots" $ do
         , Root 0.5 1 Positive
         , Root 1.0 1 Positive
         ]
-  Test.assert (roots ~= expectedRoots) []
+  Test.expect (roots ~= expectedRoots) []
 
 approximateEquality :: Tolerance Unitless => Test
 approximateEquality =
@@ -52,11 +52,11 @@ approximateEquality =
       sumOfSquares = Curve1d.squared sinTheta + Curve1d.squared cosTheta
    in Test.group "Approximate equality" $
         [ Test.verify "sin(x) != cos(x)" $
-            Test.assert (sinTheta != cosTheta) []
+            Test.expect (sinTheta != cosTheta) []
         , Test.verify "sin(x) ~= cos(pi/2 - x)" $
-            Test.assert (sinTheta ~= Curve1d.cos (Angle.degrees 90.0 - theta)) []
+            Test.expect (sinTheta ~= Curve1d.cos (Angle.degrees 90.0 - theta)) []
         , Test.verify "sin^2(x) + cos^2(x) ~= 1.0" $
-            Test.assert (sumOfSquares ~= 1.0) []
+            Test.expect (sumOfSquares ~= 1.0) []
         , Test.verify "sin^2(x) + cos^2(x) != 2.0" $
-            Test.assert (sumOfSquares != 2.0) []
+            Test.expect (sumOfSquares != 2.0) []
         ]

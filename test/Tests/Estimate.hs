@@ -119,4 +119,4 @@ area = Test.verify "area" $ do
   areaIsCorrect <-
     let ?tolerance = Area.squareMeters 1e-6
      in resolvesTo (Area.squareMeters (Float.pi / 2.0)) areaEstimate
-  Test.assert areaIsCorrect []
+  Test.expect areaIsCorrect []
