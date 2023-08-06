@@ -5,7 +5,6 @@ module OpenSolid
   , module Result
   , module Qty
   , module Float
-  , module List
   , module NonEmpty
   , module Sign
   , module Task
@@ -23,7 +22,6 @@ import CoordinateSystem (CoordinateSystem, Defines, LocalSpace, type (@))
 import DoNotation
 import Float (Float, fromRational)
 import Fuzzy (Fuzzy (Resolved, Unresolved))
-import List (List)
 import NonEmpty (NonEmpty ((:|)), pattern NonEmpty)
 import Qty (Qty (Qty))
 import Result (ErrorMessage (errorMessage), Result (Error, Ok))
