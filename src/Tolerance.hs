@@ -7,6 +7,7 @@ where
 
 import Arithmetic
 import Basics
+import NonEmpty (NonEmpty ((:|)))
 import Qty (Qty)
 import Qty qualified
 
@@ -25,6 +26,10 @@ instance ApproximateEquality a b units => ApproximateEquality (List a) (List b) 
   [] ~= [] = True
   (_ : _) ~= [] = False
   [] ~= (_ : _) = False
+
+instance ApproximateEquality a b units => ApproximateEquality (NonEmpty a) (NonEmpty b) units where
+  (x :| xs) ~= (y :| ys) =
+    x ~= y && xs ~= ys
 
 instance ApproximateEquality a b units => ApproximateEquality (Maybe a) (Maybe b) units where
   Just a ~= Just b = a ~= b
