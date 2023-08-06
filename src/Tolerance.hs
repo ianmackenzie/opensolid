@@ -12,7 +12,7 @@ import Qty qualified
 
 type Tolerance units = ?tolerance :: Qty units
 
-class ApproximateEquality a b units | a -> units, b -> units where
+class ApproximateEquality a b units where
   (~=) :: Tolerance units => a -> b -> Bool
 
 instance units ~ units' => ApproximateEquality (Qty units) (Qty units') units where
