@@ -32,14 +32,13 @@ smaller = Test.check 100 "smaller" $ do
   let y = Range.interpolate b v
   let smallerValue = Qty.smaller x y
   let smallerRange = Range.smaller a b
-  Test.expect (Range.includes smallerValue smallerRange) $
-    [ Test.show "a" a
-    , Test.show "b" b
-    , Test.show "x" x
-    , Test.show "y" y
-    , Test.show "smallerValue" smallerValue
-    , Test.show "smallerRange" smallerRange
-    ]
+  Test.expect (Range.includes smallerValue smallerRange)
+    |> Test.output "a" a
+    |> Test.output "b" b
+    |> Test.output "x" x
+    |> Test.output "y" y
+    |> Test.output "smallerValue" smallerValue
+    |> Test.output "smallerRange" smallerRange
 
 larger :: Test
 larger = Test.check 100 "larger" $ do
@@ -51,14 +50,13 @@ larger = Test.check 100 "larger" $ do
   let y = Range.interpolate b v
   let largerValue = Qty.larger x y
   let largerRange = Range.larger a b
-  Test.expect (Range.includes largerValue largerRange) $
-    [ Test.show "a" a
-    , Test.show "b" b
-    , Test.show "x" x
-    , Test.show "y" y
-    , Test.show "largerValue" largerValue
-    , Test.show "largerRange" largerRange
-    ]
+  Test.expect (Range.includes largerValue largerRange)
+    |> Test.output "a" a
+    |> Test.output "b" b
+    |> Test.output "x" x
+    |> Test.output "y" y
+    |> Test.output "largerValue" largerValue
+    |> Test.output "largerRange" largerRange
 
 valueInRange :: Generator (Length, Range Meters)
 valueInRange = do
@@ -73,7 +71,7 @@ smallest = Test.check 1000 "smallest" $ do
   let (values, ranges) = NonEmpty.unzip2 valuesAndRanges
   let smallestValue = Qty.smallest values
   let smallestRange = Range.smallest ranges
-  Test.expect (Range.includes smallestValue smallestRange) []
+  Test.expect (Range.includes smallestValue smallestRange)
 
 largest :: Test
 largest = Test.check 1000 "largest" $ do
@@ -81,9 +79,8 @@ largest = Test.check 1000 "largest" $ do
   let (values, ranges) = NonEmpty.unzip2 valuesAndRanges
   let largestValue = Qty.largest values
   let largestRange = Range.largest ranges
-  Test.expect (Range.includes largestValue largestRange) $
-    [ Test.show "values" (Test.lines values)
-    , Test.show "ranges" (Test.lines ranges)
-    , Test.show "largestValue" largestValue
-    , Test.show "largestRange" largestRange
-    ]
+  Test.expect (Range.includes largestValue largestRange)
+    |> Test.output "values" (Test.lines values)
+    |> Test.output "ranges" (Test.lines ranges)
+    |> Test.output "largestValue" largestValue
+    |> Test.output "largestRange" largestRange

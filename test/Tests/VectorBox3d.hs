@@ -24,4 +24,4 @@ magnitude = Test.check 100 "magnitude" $ do
   let vector = VectorBox3d.interpolate vectorBox u v w
   let vectorMagnitude = Vector3d.magnitude vector
   let magnitudeRange = VectorBox3d.magnitude vectorBox
-  Test.expect (Range.approximatelyIncludes vectorMagnitude magnitudeRange) []
+  Test.expect (Range.approximatelyIncludes vectorMagnitude magnitudeRange)

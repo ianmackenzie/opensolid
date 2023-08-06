@@ -6,7 +6,7 @@ module Test
   , group
   , run
   , expect
-  , Test.show
+  , output
   , lines
   )
 where
@@ -24,15 +24,15 @@ import Prelude (show)
 
 data Expectation
   = Passed
-  | Failed Text
+  | Failed (List Text)
 
 instance (ErrorMessage x, a ~ a') => Bind (Result x a) a' Expectation where
   bind f (Ok value) = f value
-  bind _ (Error error) = Failed (errorMessage error)
+  bind _ (Error error) = Failed [errorMessage error]
 
 instance (ErrorMessage x, a ~ a') => Bind (Result x a) a' (Generator Expectation) where
   bind f (Ok value) = f value
-  bind _ (Error error) = Random.return (Failed (errorMessage error))
+  bind _ (Error error) = Random.return (Failed [errorMessage error])
 
 data Test
   = Check Int Text (Generator Expectation)
@@ -65,11 +65,11 @@ run tests = do
       Task.succeed ()
     else Task.fail (testCount failures "failed")
 
-reportError :: List Text -> Text -> Task Text (Int, Int)
-reportError context message = do
+reportError :: List Text -> List Text -> Task Text (Int, Int)
+reportError context messages = do
   Console.printLine ("❌ " ++ (Text.join " | " (List.reverse context) ++ ":"))
   Console.printLine ""
-  Console.printLine (Text.indent "   " message)
+  Task.each (Console.printLine << Text.indent "   ") messages
   Console.printLine ""
   Task.succeed (0, 1)
 
@@ -89,14 +89,18 @@ fuzzImpl context n generator = do
   expectation <- Random.generate generator
   case expectation of
     Passed -> fuzzImpl context (n - 1) generator
-    Failed message -> reportError context message
+    Failed messages -> reportError context messages
 
-expect :: Bool -> List Text -> Generator Expectation
-expect True _ = Random.return Passed
-expect False failureOutput = Random.return (Failed (Text.join "\n" failureOutput))
+expect :: Bool -> Generator Expectation
+expect True = Random.return Passed
+expect False = Random.return (Failed [])
 
-show :: Show a => Text -> a -> Text
-show label value = label ++ ": " ++ Debug.show value
+output :: Show a => Text -> a -> Generator Expectation -> Generator Expectation
+output label value =
+  Random.map $
+    \case
+      Passed -> Passed
+      Failed messages -> Failed (messages ++ [label ++ ": " ++ Debug.show value])
 
 newtype Lines a = Lines (List a)
 

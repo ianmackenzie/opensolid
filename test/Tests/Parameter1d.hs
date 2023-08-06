@@ -18,7 +18,7 @@ tests =
 check :: (Int -> (Float -> Float) -> List Float) -> Int -> List Float -> Test
 check function n expected =
   Test.verify (Text.fromInt n) $
-    Test.expect (function n identity == expected) []
+    Test.expect (function n identity == expected)
 
 steps :: Test
 steps =

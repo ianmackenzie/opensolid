@@ -2,12 +2,15 @@ module Tests.Qty (tests) where
 
 import NonEmpty qualified
 import OpenSolid
+import Point2d (Point2d)
 import Point2d qualified
 import Qty qualified
+import Random (Generator)
 import Random qualified
 import Test (Test)
 import Test qualified
 import Tests.Random qualified as Random
+import Units (Meters)
 
 tests :: List Test
 tests =
@@ -15,16 +18,20 @@ tests =
   , largestBy
   ]
 
+pointListGenerator :: Generator (NonEmpty (Point2d (space @ Meters)))
+pointListGenerator = Random.nonEmpty 10 Random.point2d
+
+xMagnitude :: Point2d (space @ units) -> Qty units
+xMagnitude point = Qty.abs (Point2d.xCoordinate point)
+
 smallestBy :: Test
 smallestBy = Test.check 100 "smallestBy" $ do
-  points <- Random.nonEmpty 10 Random.point2d
+  points <- pointListGenerator
   let smallest = Qty.smallestBy Point2d.xCoordinate points
-  let xMagnitude point = Qty.abs (Point2d.xCoordinate point)
-  Test.expect (points |> NonEmpty.all (xMagnitude >> (>= xMagnitude smallest))) []
+  Test.expect (NonEmpty.all (xMagnitude >> (>= xMagnitude smallest)) points)
 
 largestBy :: Test
 largestBy = Test.check 100 "largestBy" $ do
-  points <- Random.nonEmpty 10 Random.point2d
+  points <- pointListGenerator
   let largest = Qty.largestBy Point2d.xCoordinate points
-  let xMagnitude point = Qty.abs (Point2d.xCoordinate point)
-  Test.expect (points |> NonEmpty.all (xMagnitude >> (<= xMagnitude largest))) []
+  Test.expect (NonEmpty.all (xMagnitude >> (<= xMagnitude largest)) points)

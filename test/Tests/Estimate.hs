@@ -65,12 +65,11 @@ smallest = Test.check 100 "smallest" $ do
   let smallestValue = Qty.smallest values
   let smallestEstimate = Estimate.smallest estimates
   let (valid, finalBounds) = check smallestEstimate smallestValue
-  Test.expect valid $
-    [ Test.show "values" (Test.lines values)
-    , Test.show "smallestValue" smallestValue
-    , Test.show "initial bounds list" (Test.lines bounds)
-    , Test.show "finalBounds" finalBounds
-    ]
+  Test.expect valid
+    |> Test.output "values" (Test.lines values)
+    |> Test.output "smallestValue" smallestValue
+    |> Test.output "initial bounds list" (Test.lines bounds)
+    |> Test.output "finalBounds" finalBounds
  where
   ?tolerance = Length.meters 1e-9
 
@@ -82,12 +81,11 @@ largest = Test.check 100 "largest" $ do
   let largestValue = Qty.largest values
   let largestEstimate = Estimate.largest estimates
   let (valid, finalBounds) = check largestEstimate largestValue
-  Test.expect valid $
-    [ Test.show "values" (Test.lines values)
-    , Test.show "largestValue" largestValue
-    , Test.show "initial bounds list" (Test.lines bounds)
-    , Test.show "finalBounds" finalBounds
-    ]
+  Test.expect valid
+    |> Test.output "values" (Test.lines values)
+    |> Test.output "largestValue" largestValue
+    |> Test.output "initial bounds list" (Test.lines bounds)
+    |> Test.output "finalBounds" finalBounds
  where
   ?tolerance = Length.meters 1e-9
 
@@ -119,4 +117,4 @@ area = Test.verify "area" $ do
   areaIsCorrect <-
     let ?tolerance = Area.squareMeters 1e-6
      in resolvesTo (Area.squareMeters (Float.pi / 2.0)) areaEstimate
-  Test.expect areaIsCorrect []
+  Test.expect areaIsCorrect

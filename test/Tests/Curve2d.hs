@@ -48,7 +48,6 @@ parameterValues = Test.verify "parameterValues" $ do
             && midParameterValues ~= [0.5]
             && offCurveParameterValues == []
         )
-        []
 
 overlappingSegments ::
   Tolerance units =>
@@ -76,8 +75,9 @@ curveOverlap1 = Test.verify "Overlap detection 1" $ do
       , Arc2d.SweptAngle (Angle.degrees 180.0)
       ]
   segments <- overlappingSegments arc1 arc2
+  let expectedSegments = [(Range.from 0.0 0.5, Range.from 0.5 1.0, Positive)]
   let ?tolerance = 1e-12
-   in Test.expect (segments ~= [(Range.from 0.0 0.5, Range.from 0.5 1.0, Positive)]) []
+   in Test.expect (segments ~= expectedSegments)
 
 curveOverlap2 :: Tolerance Meters => Test
 curveOverlap2 = Test.verify "Overlap detection 2" $ do
@@ -101,7 +101,7 @@ curveOverlap2 = Test.verify "Overlap detection 2" $ do
         , (Range.from (3 / 4) 1.0, Range.from (5 / 6) 1.0, Negative)
         ]
   let ?tolerance = 1e-12
-   in Test.expect (segments ~= expectedSegments) []
+   in Test.expect (segments ~= expectedSegments)
 
 crossingIntersection :: Tolerance Meters => Test
 crossingIntersection = Test.verify "Crossing intersection" $ do
@@ -123,7 +123,7 @@ crossingIntersection = Test.verify "Crossing intersection" $ do
         , Intersection 0.5 0.5 Intersection.Crossing Negative
         ]
   let ?tolerance = 1e-12
-   in Test.expect (intersections ~= expectedIntersections) []
+   in Test.expect (intersections ~= expectedIntersections)
 
 tangentIntersection :: Tolerance Meters => Test
 tangentIntersection = Test.verify "Tangent intersection" $ do
@@ -142,8 +142,9 @@ tangentIntersection = Test.verify "Tangent intersection" $ do
       , Arc2d.EndAngle Qty.zero
       ]
   intersections <- Curve2d.intersections arc1 arc2
+  let expectedIntersections = [Intersection 0.5 0.5 Intersection.Tangent Positive]
   let ?tolerance = 1e-12
-   in Test.expect (intersections ~= [Intersection 0.5 0.5 Intersection.Tangent Positive]) []
+   in Test.expect (intersections ~= expectedIntersections)
 
 solving :: Tolerance Meters => Test
 solving = Test.verify "Solving via Curve1d" $ do
@@ -161,4 +162,4 @@ solving = Test.verify "Solving via Curve1d" $ do
           |> List.map Curve1d.Root.value
           |> List.map (Curve2d.pointOn arc)
           |> List.map (Point2d.distanceFrom Point2d.origin)
-  Test.expect (distances ~= [desiredDistance, desiredDistance]) []
+  Test.expect (distances ~= [desiredDistance, desiredDistance])
