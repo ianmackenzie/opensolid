@@ -72,7 +72,7 @@ lines :: Text -> List Text
 lines = Data.Text.lines
 
 paragraph :: List Text -> Text
-paragraph = Data.Text.unlines
+paragraph givenLines = concat (List.intersperse "\n" givenLines)
 
 indent :: Text -> Text -> Text
 indent indentation text =
