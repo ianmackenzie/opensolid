@@ -11,7 +11,6 @@ module Text
   , toInt
   , toFloat
   , lines
-  , paragraph
   , indent
   , repeat
   )
@@ -70,9 +69,6 @@ replace = Data.Text.replace
 
 lines :: Text -> List Text
 lines = Data.Text.lines
-
-paragraph :: List Text -> Text
-paragraph = join "\n"
 
 indent :: Text -> Text -> Text
 indent indentation text =
