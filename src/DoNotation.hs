@@ -3,6 +3,7 @@ module DoNotation
   , Bind (bind)
   , Fail (fail)
   , (>>)
+  , (<<)
   , (>>=)
   )
 where
@@ -28,6 +29,9 @@ class Fail a where
 
 (>>) :: Compose a b c => a -> b -> c
 (>>) = compose
+
+(<<) :: Compose a b c => b -> a -> c
+(<<) = flip compose
 
 (>>=) :: Bind a b c => a -> (b -> c) -> c
 a >>= f = bind f a
