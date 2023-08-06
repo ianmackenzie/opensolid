@@ -81,7 +81,7 @@ fuzzImpl context n generator = do
 
 assert :: Bool -> List Text -> Expectation
 assert True _ = Passed
-assert False failureOutput = Failed (Text.paragraph failureOutput)
+assert False failureOutput = Failed (Text.join "\n" failureOutput)
 
 expect :: Bool -> List Text -> Generator Expectation
 expect passed failureOutput = Random.return (assert passed failureOutput)
