@@ -11,6 +11,8 @@ module Estimate
   , max
   , smaller
   , larger
+  , smallest
+  , largest
   )
 where
 
@@ -173,3 +175,41 @@ instance IsEstimate (Larger units) units where
 
 larger :: Estimate units -> Estimate units -> Estimate units
 larger first second = wrap (Larger first second)
+
+data Smallest units = Smallest (NonEmpty (Estimate units)) (Range units)
+
+instance IsEstimate (Smallest units) units where
+  boundsImpl (Smallest _ currentBounds) = currentBounds
+  refineImpl (Smallest estimates currentBounds) =
+    let filteredEstimates = NonEmpty.filter (bounds >> Range.intersects currentBounds) estimates
+     in case filteredEstimates of
+          [singleEstimate] -> refine singleEstimate
+          NonEmpty newEstimates ->
+            let estimateWidths = NonEmpty.map (bounds >> Range.width) newEstimates
+                maxWidth = NonEmpty.maximum estimateWidths
+                refinedEstimates = NonEmpty.map (refineWiderThan (0.5 * maxWidth)) newEstimates
+             in smallest refinedEstimates
+          [] -> smallest (NonEmpty.map refine estimates) -- Shouldn't happen
+
+smallest :: NonEmpty (Estimate units) -> Estimate units
+smallest estimates =
+  wrap (Smallest estimates (Range.smallest (NonEmpty.map bounds estimates)))
+
+data Largest units = Largest (NonEmpty (Estimate units)) (Range units)
+
+instance IsEstimate (Largest units) units where
+  boundsImpl (Largest _ currentBounds) = currentBounds
+  refineImpl (Largest estimates currentBounds) =
+    let filteredEstimates = NonEmpty.filter (bounds >> Range.intersects currentBounds) estimates
+     in case filteredEstimates of
+          [singleEstimate] -> refine singleEstimate
+          NonEmpty newEstimates ->
+            let estimateWidths = NonEmpty.map (bounds >> Range.width) newEstimates
+                maxWidth = NonEmpty.maximum estimateWidths
+                refinedEstimates = NonEmpty.map (refineWiderThan (0.5 * maxWidth)) newEstimates
+             in largest refinedEstimates
+          [] -> largest (NonEmpty.map refine estimates) -- Shouldn't happen
+
+largest :: NonEmpty (Estimate units) -> Estimate units
+largest estimates =
+  wrap (Largest estimates (Range.largest (NonEmpty.map bounds estimates)))
