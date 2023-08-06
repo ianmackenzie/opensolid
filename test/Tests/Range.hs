@@ -2,7 +2,6 @@ module Tests.Range (tests) where
 
 import Debug qualified
 import Length (Length)
-import List qualified
 import NonEmpty qualified
 import OpenSolid
 import Parameter1d qualified
@@ -14,7 +13,6 @@ import Range qualified
 import Test (Test)
 import Test qualified
 import Tests.Random qualified as Random
-import Text qualified
 import Units (Meters)
 
 tests :: List Test
@@ -85,21 +83,8 @@ largest = Test.check 1000 "largest" $ do
   let largestValue = Qty.largest values
   let largestRange = Range.largest ranges
   Test.expect (Range.includes largestValue largestRange) $
-    let
-      valueStrings =
-        values
-          |> NonEmpty.toList
-          |> List.map (Debug.show >> ("\n  " ++))
-          |> Text.concat
-
-      rangeStrings =
-        ranges
-          |> NonEmpty.toList
-          |> List.map (Debug.show >> ("\n  " ++))
-          |> Text.concat
-     in
-      [ "values:" ++ valueStrings
-      , "ranges:" ++ rangeStrings
-      , "largestValue: " ++ Debug.show largestValue
-      , "largestRange: " ++ Debug.show largestRange
-      ]
+    [ Test.show "values" (Test.lines values)
+    , Test.show "ranges" (Test.lines ranges)
+    , Test.show "largestValue" largestValue
+    , Test.show "largestRange" largestRange
+    ]
