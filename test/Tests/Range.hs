@@ -1,6 +1,5 @@
 module Tests.Range (tests) where
 
-import Debug qualified
 import Length (Length)
 import NonEmpty qualified
 import OpenSolid
@@ -34,12 +33,12 @@ smaller = Test.check 100 "smaller" $ do
   let smallerValue = Qty.smaller x y
   let smallerRange = Range.smaller a b
   Test.expect (Range.includes smallerValue smallerRange) $
-    [ "a: " ++ Debug.show a
-    , "b: " ++ Debug.show b
-    , "x: " ++ Debug.show x
-    , "y: " ++ Debug.show y
-    , "smallerValue: " ++ Debug.show smallerValue
-    , "smallerRange: " ++ Debug.show smallerRange
+    [ Test.show "a" a
+    , Test.show "b" b
+    , Test.show "x" x
+    , Test.show "y" y
+    , Test.show "smallerValue" smallerValue
+    , Test.show "smallerRange" smallerRange
     ]
 
 larger :: Test
@@ -53,12 +52,12 @@ larger = Test.check 100 "larger" $ do
   let largerValue = Qty.larger x y
   let largerRange = Range.larger a b
   Test.expect (Range.includes largerValue largerRange) $
-    [ "a: " ++ Debug.show a
-    , "b: " ++ Debug.show b
-    , "x: " ++ Debug.show x
-    , "y: " ++ Debug.show y
-    , "largerValue: " ++ Debug.show largerValue
-    , "largerRange: " ++ Debug.show largerRange
+    [ Test.show "a" a
+    , Test.show "b" b
+    , Test.show "x" x
+    , Test.show "y" y
+    , Test.show "largerValue" largerValue
+    , Test.show "largerRange" largerRange
     ]
 
 valueInRange :: Generator (Length, Range Meters)
