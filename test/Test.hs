@@ -7,10 +7,14 @@ module Test
   , run
   , assert
   , expect
+  , Test.show
+  , lines
   )
 where
 
 import Console qualified
+import Data.Foldable qualified
+import Debug qualified
 import Expect (Expectation (Failed, Passed))
 import List qualified
 import OpenSolid
@@ -18,6 +22,7 @@ import Random (Generator)
 import Random qualified
 import Task qualified
 import Text qualified
+import Prelude (show)
 
 data Test
   = Verify Text Expectation
@@ -85,3 +90,17 @@ assert False failureOutput = Failed (Text.join "\n" failureOutput)
 
 expect :: Bool -> List Text -> Generator Expectation
 expect passed failureOutput = Random.return (assert passed failureOutput)
+
+show :: Show a => Text -> a -> Text
+show label value = label ++ ": " ++ Debug.show value
+
+newtype Lines a = Lines (List a)
+
+instance Show a => Show (Lines a) where
+  show (Lines values) =
+    List.map (("\n  " ++) << Debug.show) values
+      |> Text.concat
+      |> Text.toChars
+
+lines :: (Data.Foldable.Foldable container, Show a) => container a -> Lines a
+lines container = Lines (Data.Foldable.toList container)
