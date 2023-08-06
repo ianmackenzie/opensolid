@@ -22,6 +22,7 @@ module Basics
   , Text
   , identity
   , always
+  , flip
   , internalError
   , notImplemented
   , (|>)
@@ -42,6 +43,7 @@ import Prelude
   , Maybe (..)
   , Ord (..)
   , Show
+  , flip
   , not
   , otherwise
   , ($)
