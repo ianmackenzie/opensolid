@@ -13,6 +13,7 @@ module Range
   , includes
   , approximatelyIncludes
   , contains
+  , isContainedIn
   , tolerant
   , bisect
   , isAtomic
@@ -282,6 +283,9 @@ approximatelyIncludes value (Range low high) =
 
 contains :: Range units -> Range units -> Bool
 contains (Range low2 high2) (Range low1 high1) = low1 <= low2 && high2 <= high1
+
+isContainedIn :: Range units -> Range units -> Bool
+isContainedIn = flip contains
 
 tolerant :: Tolerance units => Range units -> Range units
 tolerant (Range low high) = unsafe (low - ?tolerance) (high + ?tolerance)
