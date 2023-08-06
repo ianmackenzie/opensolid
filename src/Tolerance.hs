@@ -10,6 +10,7 @@ import Basics
 import NonEmpty (NonEmpty ((:|)))
 import Qty (Qty)
 import Qty qualified
+import Sign (Sign)
 
 type Tolerance units = ?tolerance :: Qty units
 
@@ -18,6 +19,16 @@ class ApproximateEquality a b units where
 
 instance units ~ units' => ApproximateEquality (Qty units) (Qty units') units where
   x ~= y = Qty.abs (x - y) <= ?tolerance
+
+instance ApproximateEquality Bool Bool units where (~=) = (==)
+
+instance ApproximateEquality Int Int units where (~=) = (==)
+
+instance ApproximateEquality Sign Sign units where (~=) = (==)
+
+instance ApproximateEquality Char Char units where (~=) = (==)
+
+instance ApproximateEquality Text Text units where (~=) = (==)
 
 instance ApproximateEquality a b units => ApproximateEquality (List a) (List b) units where
   (x : xs) ~= (y : ys)
