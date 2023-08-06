@@ -14,7 +14,7 @@ category: Geometry
 description: Please see the README on GitHub at <https://github.com/ianmackenzie/opensolid#readme>
 
 dependencies:
-- base >= 4.7 && < 5
+- base
 - text
 - random
 - array

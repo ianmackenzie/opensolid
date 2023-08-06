@@ -138,7 +138,7 @@ library
   ghc-options: -Wall -Werror -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-signatures -Wmissing-exported-signatures -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wsafe -dcore-lint
   build-depends:
       array
-    , base >=4.7 && <5
+    , base
     , containers
     , random
     , text
@@ -192,7 +192,7 @@ executable sandbox
   ghc-options: -Wall -Werror -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-signatures -Wmissing-exported-signatures -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wsafe -dcore-lint -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       array
-    , base >=4.7 && <5
+    , base
     , containers
     , opensolid
     , random
@@ -258,7 +258,7 @@ test-suite opensolid-test
   ghc-options: -Wall -Werror -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-signatures -Wmissing-exported-signatures -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wsafe -dcore-lint -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       array
-    , base >=4.7 && <5
+    , base
     , containers
     , opensolid
     , random
