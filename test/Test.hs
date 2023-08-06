@@ -15,7 +15,6 @@ where
 import Console qualified
 import Data.Foldable qualified
 import Debug qualified
-import Expect (Expectation (Failed, Passed))
 import List qualified
 import OpenSolid
 import Random (Generator)
@@ -23,6 +22,14 @@ import Random qualified
 import Task qualified
 import Text qualified
 import Prelude (show)
+
+data Expectation
+  = Passed
+  | Failed Text
+
+instance (ErrorMessage x, a ~ a') => Bind (Result x a) a' Expectation where
+  bind f (Ok value) = f value
+  bind _ (Error error) = Failed (errorMessage error)
 
 data Test
   = Verify Text Expectation

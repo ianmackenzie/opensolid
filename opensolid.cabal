@@ -203,7 +203,6 @@ test-suite opensolid-test
   type: exitcode-stdio-1.0
   main-is: Main.hs
   other-modules:
-      Expect
       Test
       Tests.Curve1d
       Tests.Curve2d
