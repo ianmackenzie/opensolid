@@ -51,7 +51,11 @@ type role Qty phantom
 type Qty :: Type -> Type
 newtype Qty units = Qty Prelude.Double deriving (Eq, Ord, Show)
 
-instance (units1 ~ units1', units2 ~ units2') => Units.Coercion units1 units2 (Qty units1') (Qty units2')
+instance
+  ( units1 ~ units1'
+  , units2 ~ units2'
+  ) =>
+  Units.Coercion units1 units2 (Qty units1') (Qty units2')
 
 instance Generic.Zero (Qty units) where
   zero = coerce 0.0
@@ -88,11 +92,17 @@ instance units ~ units' => Subtraction (Qty units) (Qty units') (Qty units) wher
   {-# INLINE (-) #-}
   Qty x - Qty y = Qty (x Prelude.- y)
 
-instance Units.Product units1 units2 units3 => Multiplication (Qty units1) (Qty units2) (Qty units3) where
+instance
+  Units.Product units1 units2 units3 =>
+  Multiplication (Qty units1) (Qty units2) (Qty units3)
+  where
   {-# INLINE (*) #-}
   (Qty x) * (Qty y) = Qty (x Prelude.* y)
 
-instance Units.Quotient units1 units2 units3 => Division (Qty units1) (Qty units2) (Qty units3) where
+instance
+  Units.Quotient units1 units2 units3 =>
+  Division (Qty units1) (Qty units2) (Qty units3)
+  where
   {-# INLINE (/) #-}
   (Qty x) / (Qty y) = Qty (x Prelude./ y)
 
@@ -108,7 +118,10 @@ instance Division (Qty units) Int (Qty units) where
   {-# INLINE (/) #-}
   x / n = x / Float.fromInt n
 
-instance Units.Quotient Unitless units1 units2 => Division Int (Qty units1) (Qty units2) where
+instance
+  Units.Quotient Unitless units1 units2 =>
+  Division Int (Qty units1) (Qty units2)
+  where
   {-# INLINE (/) #-}
   n / x = Float.fromInt n / x
 
