@@ -26,6 +26,7 @@ module NonEmpty
   , take
   , drop
   , sum
+  , sumOf
   , sort
   , sortBy
   , sortWith
@@ -141,6 +142,9 @@ drop = Data.List.NonEmpty.drop
 
 sum :: Addition a a a => NonEmpty a -> a
 sum = reduceLeft (+)
+
+sumOf :: Addition b b b => (a -> b) -> NonEmpty a -> b
+sumOf function nonEmpty = sum (map function nonEmpty)
 
 sort :: Ord a => NonEmpty a -> NonEmpty a
 sort = Data.List.NonEmpty.sort
