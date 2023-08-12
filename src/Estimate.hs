@@ -6,6 +6,7 @@ module Estimate
   , bounds
   , refine
   , satisfy
+  , abs
   , sum
   , min
   , max
@@ -108,6 +109,15 @@ instance IsEstimate (Sum units) units where
     let maxWidth = NonEmpty.maximumOf (bounds >> Range.width) estimates
         refinedEstimates = NonEmpty.map (refineWiderThan (0.5 * maxWidth)) estimates
      in wrap (Sum refinedEstimates)
+
+newtype Abs units = Abs (Estimate units)
+
+instance IsEstimate (Abs units) units where
+  boundsImpl (Abs estimate) = Range.abs (bounds estimate)
+  refineImpl (Abs estimate) = wrap (Abs (refine estimate))
+
+abs :: Estimate units -> Estimate units
+abs estimate = wrap (Abs estimate)
 
 refineWiderThan :: Qty units -> Estimate units -> Estimate units
 refineWiderThan desiredWidth estimate
