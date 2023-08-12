@@ -9,11 +9,15 @@ module Generic
   )
 where
 
-import Prelude (Ord, Ordering (EQ, GT, LT), otherwise)
+import Basics
+import Prelude (Ordering (EQ, GT, LT))
 import Prelude qualified
 
 class Zero a where
   zero :: a
+
+instance Zero Int where
+  zero = 0
 
 min :: Ord a => a -> a -> a
 min = Prelude.min
