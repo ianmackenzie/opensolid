@@ -102,11 +102,11 @@ take = Prelude.take
 drop :: Int -> List a -> List a
 drop = Prelude.drop
 
-sum :: (Generic.Zero a, Addition a a a) => List a -> a
+sum :: Addition a a a => List a -> a
 sum = foldLeft (+) Generic.zero
 
-sumOf :: (Generic.Zero b, Addition b b b) => (a -> b) -> List a -> b
-sumOf function = foldLeft (\acc item -> acc + function item) Generic.zero
+sumOf :: Addition b b b => (a -> b) -> List a -> b
+sumOf function list = sum (map function list)
 
 sort :: Ord a => List a -> List a
 sort = Data.List.sort
