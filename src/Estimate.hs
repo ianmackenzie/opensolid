@@ -16,6 +16,8 @@ module Estimate
   , largest
   , minimumBy
   , maximumBy
+  , smallestBy
+  , largestBy
   )
 where
 
@@ -268,3 +270,9 @@ maximumBy function items = go (NonEmpty.map (\item -> (item, function item)) ite
             | allResolved filteredPairs -> Pair.first (NonEmpty.first filteredPairs)
             | otherwise -> go (refinePairs filteredPairs)
           [] -> internalErrorFilteredListIsEmpty
+
+smallestBy :: Tolerance units => (a -> Estimate units) -> NonEmpty a -> a
+smallestBy function items = minimumBy (function >> abs) items
+
+largestBy :: Tolerance units => (a -> Estimate units) -> NonEmpty a -> a
+largestBy function items = maximumBy (function >> abs) items
