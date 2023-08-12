@@ -175,20 +175,22 @@ instance IsEstimate (Larger units) units where
 larger :: Estimate units -> Estimate units -> Estimate units
 larger first second = wrap (Larger first second)
 
+internalErrorFilteredListIsEmpty :: a
+internalErrorFilteredListIsEmpty =
+  internalError "Filtered list should be non-empty by construction"
+
 data Smallest units = Smallest (NonEmpty (Estimate units)) (Range units)
 
 instance IsEstimate (Smallest units) units where
   boundsImpl (Smallest _ currentBounds) = currentBounds
   refineImpl (Smallest estimates currentBounds) =
-    let filteredEstimates = NonEmpty.filter (bounds >> Range.intersects currentBounds) estimates
-     in case filteredEstimates of
+    case NonEmpty.filter (bounds >> Range.intersects currentBounds) estimates of
           [singleEstimate] -> refine singleEstimate
-          NonEmpty newEstimates ->
-            let estimateWidths = NonEmpty.map (bounds >> Range.width) newEstimates
-                maxWidth = NonEmpty.maximum estimateWidths
-                refinedEstimates = NonEmpty.map (refineWiderThan (0.5 * maxWidth)) newEstimates
+      NonEmpty filteredEstimates ->
+        let maxWidth = NonEmpty.maximumOf (bounds >> Range.width) filteredEstimates
+            refinedEstimates = NonEmpty.map (refineWiderThan (0.5 * maxWidth)) filteredEstimates
              in smallest refinedEstimates
-          [] -> smallest (NonEmpty.map refine estimates) -- Shouldn't happen
+      [] -> internalErrorFilteredListIsEmpty
 
 smallest :: NonEmpty (Estimate units) -> Estimate units
 smallest estimates =
@@ -199,15 +201,13 @@ data Largest units = Largest (NonEmpty (Estimate units)) (Range units)
 instance IsEstimate (Largest units) units where
   boundsImpl (Largest _ currentBounds) = currentBounds
   refineImpl (Largest estimates currentBounds) =
-    let filteredEstimates = NonEmpty.filter (bounds >> Range.intersects currentBounds) estimates
-     in case filteredEstimates of
+    case NonEmpty.filter (bounds >> Range.intersects currentBounds) estimates of
           [singleEstimate] -> refine singleEstimate
-          NonEmpty newEstimates ->
-            let estimateWidths = NonEmpty.map (bounds >> Range.width) newEstimates
-                maxWidth = NonEmpty.maximum estimateWidths
-                refinedEstimates = NonEmpty.map (refineWiderThan (0.5 * maxWidth)) newEstimates
+      NonEmpty filteredEstimates ->
+        let maxWidth = NonEmpty.maximumOf (bounds >> Range.width) filteredEstimates
+            refinedEstimates = NonEmpty.map (refineWiderThan (0.5 * maxWidth)) filteredEstimates
              in largest refinedEstimates
-          [] -> largest (NonEmpty.map refine estimates) -- Shouldn't happen
+      [] -> internalErrorFilteredListIsEmpty
 
 largest :: NonEmpty (Estimate units) -> Estimate units
 largest estimates =
