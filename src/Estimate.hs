@@ -13,11 +13,14 @@ module Estimate
   , larger
   , smallest
   , largest
+  , minimumBy
+  , maximumBy
   )
 where
 
 import NonEmpty qualified
 import OpenSolid
+import Pair qualified
 import Qty qualified
 import Range (Range (Range))
 import Range qualified
@@ -185,11 +188,11 @@ instance IsEstimate (Smallest units) units where
   boundsImpl (Smallest _ currentBounds) = currentBounds
   refineImpl (Smallest estimates currentBounds) =
     case NonEmpty.filter (bounds >> Range.intersects currentBounds) estimates of
-          [singleEstimate] -> refine singleEstimate
+      [singleEstimate] -> refine singleEstimate
       NonEmpty filteredEstimates ->
         let maxWidth = NonEmpty.maximumOf (bounds >> Range.width) filteredEstimates
             refinedEstimates = NonEmpty.map (refineWiderThan (0.5 * maxWidth)) filteredEstimates
-             in smallest refinedEstimates
+         in smallest refinedEstimates
       [] -> internalErrorFilteredListIsEmpty
 
 smallest :: NonEmpty (Estimate units) -> Estimate units
@@ -202,13 +205,56 @@ instance IsEstimate (Largest units) units where
   boundsImpl (Largest _ currentBounds) = currentBounds
   refineImpl (Largest estimates currentBounds) =
     case NonEmpty.filter (bounds >> Range.intersects currentBounds) estimates of
-          [singleEstimate] -> refine singleEstimate
+      [singleEstimate] -> refine singleEstimate
       NonEmpty filteredEstimates ->
         let maxWidth = NonEmpty.maximumOf (bounds >> Range.width) filteredEstimates
             refinedEstimates = NonEmpty.map (refineWiderThan (0.5 * maxWidth)) filteredEstimates
-             in largest refinedEstimates
+         in largest refinedEstimates
       [] -> internalErrorFilteredListIsEmpty
 
 largest :: NonEmpty (Estimate units) -> Estimate units
 largest estimates =
   wrap (Largest estimates (Range.largest (NonEmpty.map bounds estimates)))
+
+itemUpperBound :: (a, Estimate units) -> Qty units
+itemUpperBound (_, estimate) = Range.maxValue (bounds estimate)
+
+itemLowerBound :: (a, Estimate units) -> Qty units
+itemLowerBound (_, estimate) = Range.minValue (bounds estimate)
+
+itemBoundsWidth :: (a, Estimate units) -> Qty units
+itemBoundsWidth (_, estimate) = Range.width (bounds estimate)
+
+refinePairs :: NonEmpty (a, Estimate units) -> NonEmpty (a, Estimate units)
+refinePairs pairs =
+  let widthCutoff = 0.5 * NonEmpty.maximumOf itemBoundsWidth pairs
+   in NonEmpty.map (Pair.mapSecond (refineWiderThan widthCutoff)) pairs
+
+allResolved :: Tolerance units => NonEmpty (a, Estimate units) -> Bool
+allResolved pairs = NonEmpty.all (itemBoundsWidth >> (<= ?tolerance)) pairs
+
+minimumBy :: Tolerance units => (a -> Estimate units) -> NonEmpty a -> a
+minimumBy _ (item :| []) = item
+minimumBy function items = go (NonEmpty.map (\item -> (item, function item)) items)
+ where
+  go pairs =
+    let cutoff = NonEmpty.minimumOf itemUpperBound pairs
+     in case NonEmpty.filter (itemLowerBound >> (<= cutoff)) pairs of
+          [(item, _)] -> item
+          NonEmpty filteredPairs
+            | allResolved filteredPairs -> Pair.first (NonEmpty.first filteredPairs)
+            | otherwise -> go (refinePairs filteredPairs)
+          [] -> internalErrorFilteredListIsEmpty
+
+maximumBy :: Tolerance units => (a -> Estimate units) -> NonEmpty a -> a
+maximumBy _ (item :| []) = item
+maximumBy function items = go (NonEmpty.map (\item -> (item, function item)) items)
+ where
+  go pairs =
+    let cutoff = NonEmpty.maximumOf itemLowerBound pairs
+     in case NonEmpty.filter (itemUpperBound >> (>= cutoff)) pairs of
+          [(item, _)] -> item
+          NonEmpty filteredPairs
+            | allResolved filteredPairs -> Pair.first (NonEmpty.first filteredPairs)
+            | otherwise -> go (refinePairs filteredPairs)
+          [] -> internalErrorFilteredListIsEmpty

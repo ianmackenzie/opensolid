@@ -12,6 +12,7 @@ import Length (Length)
 import Length qualified
 import NonEmpty qualified
 import OpenSolid
+import Pair qualified
 import Parameter1d qualified
 import Point2d qualified
 import Qty qualified
@@ -30,6 +31,8 @@ tests =
   [ smallest
   , largest
   , area
+  , minimumBy
+  , maximumBy
   ]
 
 data DummyEstimate = DummyEstimate Length (Range Meters)
@@ -118,3 +121,33 @@ area = Test.verify "area" $ do
     let ?tolerance = Area.squareMeters 1e-6
      in resolvesTo (Area.squareMeters (Float.pi / 2.0)) areaEstimate
   Test.expect areaIsCorrect
+
+minimumBy :: Test
+minimumBy = Test.check 100 "minimumBy" $ do
+  valuesAndEstimates <- Random.nonEmpty 10 dummyEstimate
+  -- Duplicate every item in the list,
+  -- so that we make sure Estimate.minimumBy converges
+  -- even if there are duplicate entries
+  -- (instead of trying to refine infinitely)
+  let duplicatedValuesAndEstimates = valuesAndEstimates ++ valuesAndEstimates
+  let minimumValue = NonEmpty.minimumOf Pair.first valuesAndEstimates
+  let minimumValueFromEstimates =
+        Pair.first (Estimate.minimumBy Pair.second duplicatedValuesAndEstimates)
+  Test.expect (minimumValueFromEstimates == minimumValue)
+ where
+  ?tolerance = Length.meters 1e-9
+
+maximumBy :: Test
+maximumBy = Test.check 100 "maximumBy" $ do
+  valuesAndEstimates <- Random.nonEmpty 10 dummyEstimate
+  -- Duplicate every item in the list,
+  -- so that we make sure Estimate.maximumBy converges
+  -- even if there are duplicate entries
+  -- (instead of trying to refine infinitely)
+  let duplicatedValuesAndEstimates = valuesAndEstimates ++ valuesAndEstimates
+  let maximumValue = NonEmpty.maximumOf Pair.first valuesAndEstimates
+  let maximumValueFromEstimates =
+        Pair.first (Estimate.maximumBy Pair.second duplicatedValuesAndEstimates)
+  Test.expect (maximumValueFromEstimates == maximumValue)
+ where
+  ?tolerance = Length.meters 1e-9
