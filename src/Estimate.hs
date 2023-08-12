@@ -102,8 +102,7 @@ newtype Sum units = Sum (NonEmpty (Estimate units))
 instance IsEstimate (Sum units) units where
   boundsImpl (Sum estimates) = NonEmpty.sum (NonEmpty.map bounds estimates)
   refineImpl (Sum estimates) =
-    let estimateWidths = NonEmpty.map (bounds >> Range.width) estimates
-        maxWidth = NonEmpty.maximum estimateWidths
+    let maxWidth = NonEmpty.maximumOf (bounds >> Range.width) estimates
         refinedEstimates = NonEmpty.map (refineWiderThan (0.5 * maxWidth)) estimates
      in wrap (Sum refinedEstimates)
 
