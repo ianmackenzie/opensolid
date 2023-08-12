@@ -26,10 +26,6 @@ instance ApproximateEquality Int Int units where (~=) = (==)
 
 instance ApproximateEquality Sign Sign units where (~=) = (==)
 
-instance ApproximateEquality Char Char units where (~=) = (==)
-
-instance ApproximateEquality Text Text units where (~=) = (==)
-
 instance ApproximateEquality a b units => ApproximateEquality (List a) (List b) units where
   (x : xs) ~= (y : ys)
     | x ~= y = xs ~= ys
