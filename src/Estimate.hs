@@ -21,6 +21,7 @@ module Estimate
   )
 where
 
+import Generic qualified
 import NonEmpty qualified
 import OpenSolid
 import Pair qualified
@@ -55,6 +56,9 @@ satisfy :: (Range units -> Bool) -> Estimate units -> Range units
 satisfy predicate estimate =
   let current = bounds estimate
    in if predicate current then current else satisfy predicate (refine estimate)
+
+instance Generic.Zero (Estimate units) where
+  zero = exact Qty.zero
 
 newtype Negate units = Negate (Estimate units)
 
