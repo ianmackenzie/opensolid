@@ -32,6 +32,7 @@ module List
   , count
   , intersperse
   , partition
+  , repeat
   )
 where
 
@@ -148,3 +149,6 @@ intersperse = Data.List.intersperse
 
 partition :: (a -> Bool) -> List a -> (List a, List a)
 partition = Data.List.partition
+
+repeat :: Int -> a -> List a
+repeat = Data.List.replicate
