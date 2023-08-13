@@ -249,6 +249,9 @@ refinePairs pairs =
 allResolved :: Tolerance units => NonEmpty (a, Estimate units) -> Bool
 allResolved pairs = NonEmpty.all (itemBoundsWidth >> (<= ?tolerance)) pairs
 
+firstItem :: NonEmpty (a, Estimate units) -> a
+firstItem ((item, _) :| _) = item
+
 minimumBy :: Tolerance units => (a -> Estimate units) -> NonEmpty a -> a
 minimumBy _ (item :| []) = item
 minimumBy function items = go (NonEmpty.map (\item -> (item, function item)) items)
@@ -258,7 +261,7 @@ minimumBy function items = go (NonEmpty.map (\item -> (item, function item)) ite
      in case NonEmpty.filter (itemLowerBound >> (<= cutoff)) pairs of
           [(item, _)] -> item
           NonEmpty filteredPairs
-            | allResolved filteredPairs -> Pair.first (NonEmpty.first filteredPairs)
+            | allResolved filteredPairs -> firstItem filteredPairs
             | otherwise -> go (refinePairs filteredPairs)
           [] -> internalErrorFilteredListIsEmpty
 
@@ -271,7 +274,7 @@ maximumBy function items = go (NonEmpty.map (\item -> (item, function item)) ite
      in case NonEmpty.filter (itemUpperBound >> (>= cutoff)) pairs of
           [(item, _)] -> item
           NonEmpty filteredPairs
-            | allResolved filteredPairs -> Pair.first (NonEmpty.first filteredPairs)
+            | allResolved filteredPairs -> firstItem filteredPairs
             | otherwise -> go (refinePairs filteredPairs)
           [] -> internalErrorFilteredListIsEmpty
 
