@@ -10,12 +10,14 @@ import Estimate qualified
 import Float qualified
 import Length (Length)
 import Length qualified
+import List qualified
 import NonEmpty qualified
 import OpenSolid
 import Pair qualified
 import Parameter1d qualified
 import Point2d qualified
 import Qty qualified
+import Random.Shuffle qualified
 import Random (Generator)
 import Random qualified
 import Range (Range (Range))
@@ -52,6 +54,18 @@ dummyEstimate = do
   let value = Range.interpolate range t
   Random.return (value, Estimate.wrap (DummyEstimate value range))
 
+duplicatedDummyEstimates :: Generator (NonEmpty (Length, Estimate Meters))
+duplicatedDummyEstimates = do
+  pair <- dummyEstimate
+  numPairs <- Random.int 1 3
+  Random.return (pair :| List.repeat (numPairs - 1) pair)
+
+dummyEstimates :: Generator (NonEmpty (Length, Estimate Meters))
+dummyEstimates =
+  Random.nonEmpty 10 duplicatedDummyEstimates
+    |> Random.map NonEmpty.concat
+    |> Random.Shuffle.nonEmpty
+
 check :: Tolerance Meters => Estimate Meters -> Qty Meters -> (Bool, Range Meters)
 check estimate value
   | Range.includes value bounds =
@@ -64,7 +78,7 @@ check estimate value
 
 smallest :: Test
 smallest = Test.check 100 "smallest" $ do
-  valuesAndEstimates <- Random.nonEmpty 5 dummyEstimate
+  valuesAndEstimates <- dummyEstimates
   let (values, estimates) = NonEmpty.unzip2 valuesAndEstimates
   let bounds = NonEmpty.map Estimate.bounds estimates
   let smallestValue = Qty.smallest values
@@ -80,7 +94,7 @@ smallest = Test.check 100 "smallest" $ do
 
 largest :: Test
 largest = Test.check 100 "largest" $ do
-  valuesAndEstimates <- Random.nonEmpty 5 dummyEstimate
+  valuesAndEstimates <- dummyEstimates
   let (values, estimates) = NonEmpty.unzip2 valuesAndEstimates
   let bounds = NonEmpty.map Estimate.bounds estimates
   let largestValue = Qty.largest values
@@ -126,60 +140,36 @@ area = Test.verify "area" $ do
 
 minimumBy :: Test
 minimumBy = Test.check 100 "minimumBy" $ do
-  valuesAndEstimates <- Random.nonEmpty 10 dummyEstimate
-  -- Duplicate every item in the list,
-  -- so that we make sure Estimate.minimumBy converges
-  -- even if there are duplicate entries
-  -- (instead of trying to refine infinitely)
-  let duplicatedValuesAndEstimates = valuesAndEstimates ++ valuesAndEstimates
+  valuesAndEstimates <- dummyEstimates
   let minimumValue = NonEmpty.minimumOf Pair.first valuesAndEstimates
-  let minimumValueFromEstimates =
-        Pair.first (Estimate.minimumBy Pair.second duplicatedValuesAndEstimates)
+  let minimumValueFromEstimates = Pair.first (Estimate.minimumBy Pair.second valuesAndEstimates)
   Test.expect (minimumValueFromEstimates == minimumValue)
  where
   ?tolerance = Length.meters 1e-9
 
 maximumBy :: Test
 maximumBy = Test.check 100 "maximumBy" $ do
-  valuesAndEstimates <- Random.nonEmpty 10 dummyEstimate
-  -- Duplicate every item in the list,
-  -- so that we make sure Estimate.maximumBy converges
-  -- even if there are duplicate entries
-  -- (instead of trying to refine infinitely)
-  let duplicatedValuesAndEstimates = valuesAndEstimates ++ valuesAndEstimates
+  valuesAndEstimates <- dummyEstimates
   let maximumValue = NonEmpty.maximumOf Pair.first valuesAndEstimates
-  let maximumValueFromEstimates =
-        Pair.first (Estimate.maximumBy Pair.second duplicatedValuesAndEstimates)
+  let maximumValueFromEstimates = Pair.first (Estimate.maximumBy Pair.second valuesAndEstimates)
   Test.expect (maximumValueFromEstimates == maximumValue)
  where
   ?tolerance = Length.meters 1e-9
 
 smallestBy :: Test
 smallestBy = Test.check 100 "smallestBy" $ do
-  valuesAndEstimates <- Random.nonEmpty 10 dummyEstimate
-  -- Duplicate every item in the list,
-  -- so that we make sure Estimate.smallestBy converges
-  -- even if there are duplicate entries
-  -- (instead of trying to refine infinitely)
-  let duplicatedValuesAndEstimates = valuesAndEstimates ++ valuesAndEstimates
+  valuesAndEstimates <- dummyEstimates
   let smallestValue = Qty.smallest (NonEmpty.map Pair.first valuesAndEstimates)
-  let smallestValueFromEstimates =
-        Pair.first (Estimate.smallestBy Pair.second duplicatedValuesAndEstimates)
+  let smallestValueFromEstimates = Pair.first (Estimate.smallestBy Pair.second valuesAndEstimates)
   Test.expect (smallestValueFromEstimates == smallestValue)
  where
   ?tolerance = Length.meters 1e-9
 
 largestBy :: Test
 largestBy = Test.check 100 "largestBy" $ do
-  valuesAndEstimates <- Random.nonEmpty 10 dummyEstimate
-  -- Duplicate every item in the list,
-  -- so that we make sure Estimate.largestBy converges
-  -- even if there are duplicate entries
-  -- (instead of trying to refine infinitely)
-  let duplicatedValuesAndEstimates = valuesAndEstimates ++ valuesAndEstimates
+  valuesAndEstimates <- dummyEstimates
   let largestValue = Qty.largest (NonEmpty.map Pair.first valuesAndEstimates)
-  let largestValueFromEstimates =
-        Pair.first (Estimate.largestBy Pair.second duplicatedValuesAndEstimates)
+  let largestValueFromEstimates = Pair.first (Estimate.largestBy Pair.second valuesAndEstimates)
   Test.expect (largestValueFromEstimates == largestValue)
  where
   ?tolerance = Length.meters 1e-9
