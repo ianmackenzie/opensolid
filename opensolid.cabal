@@ -72,6 +72,7 @@ library
       QuadraticSpline2d
       QuadraticSpline3d
       Random
+      Random.Shuffle
       Range
       Region2d
       Result
