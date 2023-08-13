@@ -50,9 +50,9 @@ import Basics
 import Data.Foldable qualified
 import Data.List.NonEmpty (NonEmpty ((:|)))
 import Data.List.NonEmpty qualified
+import Data.Semigroup qualified
 import Generic (Ordering)
 import Generic qualified
-import Data.Semigroup qualified
 import List qualified
 import Prelude qualified
 
