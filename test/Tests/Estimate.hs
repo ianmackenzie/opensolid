@@ -37,6 +37,7 @@ tests =
   , maximumBy
   , smallestBy
   , largestBy
+  , takeMinimumBy
   ]
 
 data DummyEstimate = DummyEstimate Length (Range Meters)
@@ -171,5 +172,18 @@ largestBy = Test.check 100 "largestBy" $ do
   let largestValue = Qty.largest (NonEmpty.map Pair.first valuesAndEstimates)
   let largestValueFromEstimates = Pair.first (Estimate.largestBy Pair.second valuesAndEstimates)
   Test.expect (largestValueFromEstimates == largestValue)
+ where
+  ?tolerance = Length.meters 1e-9
+
+takeMinimumBy :: Test
+takeMinimumBy = Test.check 100 "takeMinimumBy" $ do
+  valuesAndEstimates <- dummyEstimates
+  let (minPair, remainingPairs) = Estimate.takeMinimumBy Pair.second valuesAndEstimates
+  let minValue = Pair.first minPair
+  let remainingValues = List.map Pair.first remainingPairs
+  let originalValues = NonEmpty.map Pair.first valuesAndEstimates
+  let minValueIsCorrect = List.all (>= minValue) remainingValues
+  let allValuesArePresent = NonEmpty.sort originalValues == NonEmpty.sort (minValue :| remainingValues)
+  Test.expect (minValueIsCorrect && allValuesArePresent)
  where
   ?tolerance = Length.meters 1e-9

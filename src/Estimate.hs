@@ -18,10 +18,12 @@ module Estimate
   , maximumBy
   , smallestBy
   , largestBy
+  , takeMinimumBy
   )
 where
 
 import Generic qualified
+import List qualified
 import NonEmpty qualified
 import OpenSolid
 import Pair qualified
@@ -246,6 +248,10 @@ refinePairs pairs =
   let widthCutoff = 0.5 * NonEmpty.maximumOf itemBoundsWidth pairs
    in NonEmpty.map (Pair.mapSecond (refineWiderThan widthCutoff)) pairs
 
+prependItems :: List (a, Estimate units) -> List a -> List a
+prependItems pairs items =
+  List.foldRight (\(item, _) acc -> item : acc) items pairs
+
 allResolved :: Tolerance units => NonEmpty (a, Estimate units) -> Bool
 allResolved pairs = NonEmpty.all (itemBoundsWidth >> (<= ?tolerance)) pairs
 
@@ -283,3 +289,21 @@ smallestBy function items = minimumBy (function >> abs) items
 
 largestBy :: Tolerance units => (a -> Estimate units) -> NonEmpty a -> a
 largestBy function items = maximumBy (function >> abs) items
+
+takeMinimumBy :: Tolerance units => (a -> Estimate units) -> NonEmpty a -> (a, List a)
+takeMinimumBy _ (item :| []) = (item, [])
+takeMinimumBy function items = go (NonEmpty.map (\item -> (item, function item)) items) []
+ where
+  go pairs accumulated =
+    let cutoff = NonEmpty.minimumOf itemUpperBound pairs
+     in case NonEmpty.partition (itemLowerBound >> (<= cutoff)) pairs of
+          ([(item, _)], rest) -> (item, prependItems rest accumulated)
+          (NonEmpty filteredPairs, rest)
+            | allResolved filteredPairs ->
+                ( firstItem filteredPairs
+                , accumulated
+                    |> prependItems rest
+                    |> prependItems (NonEmpty.rest filteredPairs)
+                )
+            | otherwise -> go (refinePairs filteredPairs) (prependItems rest accumulated)
+          ([], _) -> internalErrorFilteredListIsEmpty
