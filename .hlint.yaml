@@ -9,3 +9,4 @@
 - ignore: {name: "Use uncurry"}
 - ignore: {name: "Use foldr"}
 - ignore: {name: "Use intercalate"}
+- ignore: {name: "Use foldl"}
