@@ -17,9 +17,9 @@ import Pair qualified
 import Parameter1d qualified
 import Point2d qualified
 import Qty qualified
-import Random.Shuffle qualified
 import Random (Generator)
 import Random qualified
+import Random.Shuffle qualified
 import Range (Range (Range))
 import Range qualified
 import Test (Test)
