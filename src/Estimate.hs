@@ -263,26 +263,26 @@ minimumBy _ (item :| []) = item
 minimumBy function items = go (NonEmpty.map (\item -> (item, function item)) items)
  where
   go pairs =
-    let cutoff = NonEmpty.minimumOf itemUpperBound pairs
-     in case NonEmpty.filter (itemLowerBound >> (<= cutoff)) pairs of
-          [(item, _)] -> item
+    let (leader, followers) = NonEmpty.takeMinimumBy itemUpperBound pairs
+        cutoff = itemUpperBound leader
+     in case List.filter (itemLowerBound >> (<= cutoff)) followers of
+          [] -> Pair.first leader
           NonEmpty filteredPairs
-            | allResolved filteredPairs -> firstItem filteredPairs
-            | otherwise -> go (refinePairs filteredPairs)
-          [] -> internalErrorFilteredListIsEmpty
+            | allResolved filteredPairs -> Pair.first leader
+            | otherwise -> go (refinePairs (NonEmpty.prepend leader filteredPairs))
 
 maximumBy :: Tolerance units => (a -> Estimate units) -> NonEmpty a -> a
 maximumBy _ (item :| []) = item
 maximumBy function items = go (NonEmpty.map (\item -> (item, function item)) items)
  where
   go pairs =
-    let cutoff = NonEmpty.maximumOf itemLowerBound pairs
-     in case NonEmpty.filter (itemUpperBound >> (>= cutoff)) pairs of
-          [(item, _)] -> item
+    let (leader, followers) = NonEmpty.takeMaximumBy itemLowerBound pairs
+        cutoff = itemLowerBound leader
+     in case List.filter (itemUpperBound >> (>= cutoff)) followers of
+          [] -> Pair.first leader
           NonEmpty filteredPairs
-            | allResolved filteredPairs -> firstItem filteredPairs
-            | otherwise -> go (refinePairs filteredPairs)
-          [] -> internalErrorFilteredListIsEmpty
+            | allResolved filteredPairs -> Pair.first leader
+            | otherwise -> go (refinePairs (NonEmpty.prepend leader filteredPairs))
 
 smallestBy :: Tolerance units => (a -> Estimate units) -> NonEmpty a -> a
 smallestBy function items = minimumBy (function >> abs) items
