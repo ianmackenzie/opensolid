@@ -8,6 +8,7 @@ import Test qualified
 import Tests.Curve1d qualified
 import Tests.Curve2d qualified
 import Tests.Estimate qualified
+import Tests.NonEmpty qualified
 import Tests.Parameter1d qualified
 import Tests.Qty qualified
 import Tests.Range qualified
@@ -22,6 +23,7 @@ tests =
   , Test.group "Curve1d" Tests.Curve1d.tests
   , Test.group "Curve2d" Tests.Curve2d.tests
   , Test.group "Estimate" Tests.Estimate.tests
+  , Test.group "NonEmpty" Tests.NonEmpty.tests
   ]
  where
   ?tolerance = Length.meters 1e-9

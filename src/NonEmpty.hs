@@ -42,6 +42,10 @@ module NonEmpty
   , maximumOf
   , minimumBy
   , maximumBy
+  , takeMinimum
+  , takeMinimumBy
+  , takeMaximum
+  , takeMaximumBy
   )
 where
 
@@ -212,3 +216,32 @@ extremum comparison property current currentProperty (next : remaining) =
    in if comparison nextProperty currentProperty
         then extremum comparison property next nextProperty remaining
         else extremum comparison property current currentProperty remaining
+
+prependReversed :: List a -> List a -> List a
+prependReversed [] list = list
+prependReversed (x : xs) list = prependReversed xs (x : list)
+
+takeMinimum :: Ord a => NonEmpty a -> (a, List a)
+takeMinimum = takeMinimumBy identity
+
+takeMinimumBy :: Ord b => (a -> b) -> NonEmpty a -> (a, List a)
+takeMinimumBy property = takeExtremumBy property (<)
+
+takeMaximum :: Ord a => NonEmpty a -> (a, List a)
+takeMaximum = takeMaximumBy identity
+
+takeMaximumBy :: Ord b => (a -> b) -> NonEmpty a -> (a, List a)
+takeMaximumBy property = takeExtremumBy property (>)
+
+takeExtremumBy :: (a -> b) -> (b -> b -> Bool) -> NonEmpty a -> (a, List a)
+takeExtremumBy property better (x :| xs) = go [x] [] x (property x) xs xs
+ where
+  go previous currentPrevious currentItem currentProperty currentFollowing following =
+    case following of
+      [] -> (currentItem, prependReversed currentPrevious currentFollowing)
+      item : remaining ->
+        let itemProperty = property item
+            updatedPrevious = item : previous
+         in if better itemProperty currentProperty
+              then go updatedPrevious previous item itemProperty remaining remaining
+              else go updatedPrevious currentPrevious currentItem currentProperty currentFollowing remaining
