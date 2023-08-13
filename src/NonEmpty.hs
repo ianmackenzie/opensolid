@@ -32,6 +32,7 @@ module NonEmpty
   , sortWith
   , sortAndDeduplicate
   , intersperse
+  , partition
   , all
   , any
   , minimum
@@ -175,6 +176,9 @@ any = Prelude.any
 
 intersperse :: a -> NonEmpty a -> NonEmpty a
 intersperse = Data.List.NonEmpty.intersperse
+
+partition :: (a -> Bool) -> NonEmpty a -> (List a, List a)
+partition = Data.List.NonEmpty.partition
 
 minimum :: Ord a => NonEmpty a -> a
 minimum = Prelude.minimum
