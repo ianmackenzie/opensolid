@@ -18,6 +18,7 @@ module NonEmpty
   , unzip3
   , unzip4
   , filter
+  , concat
   , foldLeft
   , foldRight
   , reduceLeft
@@ -51,6 +52,7 @@ import Data.List.NonEmpty (NonEmpty ((:|)))
 import Data.List.NonEmpty qualified
 import Generic (Ordering)
 import Generic qualified
+import Data.Semigroup qualified
 import List qualified
 import Prelude qualified
 
@@ -119,6 +121,9 @@ unzip4 nonEmpty =
 
 filter :: (a -> Bool) -> NonEmpty a -> List a
 filter = Data.List.NonEmpty.filter
+
+concat :: NonEmpty (NonEmpty a) -> NonEmpty a
+concat = Data.Semigroup.sconcat
 
 foldLeft :: (b -> a -> b) -> b -> NonEmpty a -> b
 foldLeft = Data.Foldable.foldl'
