@@ -255,9 +255,6 @@ prependItems pairs items =
 allResolved :: Tolerance units => NonEmpty (a, Estimate units) -> Bool
 allResolved pairs = NonEmpty.all (itemBoundsWidth >> (<= ?tolerance)) pairs
 
-firstItem :: NonEmpty (a, Estimate units) -> a
-firstItem ((item, _) :| _) = item
-
 minimumBy :: Tolerance units => (a -> Estimate units) -> NonEmpty a -> a
 minimumBy _ (item :| []) = item
 minimumBy function items = go (NonEmpty.map (\item -> (item, function item)) items)
@@ -295,15 +292,15 @@ takeMinimumBy _ (item :| []) = (item, [])
 takeMinimumBy function items = go (NonEmpty.map (\item -> (item, function item)) items) []
  where
   go pairs accumulated =
-    let cutoff = NonEmpty.minimumOf itemUpperBound pairs
-     in case NonEmpty.partition (itemLowerBound >> (<= cutoff)) pairs of
-          ([(item, _)], rest) -> (item, prependItems rest accumulated)
+    let (leader, followers) = NonEmpty.takeMinimumBy itemUpperBound pairs
+        cutoff = itemUpperBound leader
+     in case List.partition (itemLowerBound >> (<= cutoff)) followers of
+          ([], rest) -> (Pair.first leader, prependItems rest accumulated)
           (NonEmpty filteredPairs, rest)
             | allResolved filteredPairs ->
-                ( firstItem filteredPairs
+                ( Pair.first leader
                 , accumulated
                     |> prependItems rest
-                    |> prependItems (NonEmpty.rest filteredPairs)
+                    |> prependItems (NonEmpty.toList filteredPairs)
                 )
-            | otherwise -> go (refinePairs filteredPairs) (prependItems rest accumulated)
-          ([], _) -> internalErrorFilteredListIsEmpty
+            | otherwise -> go (refinePairs (NonEmpty.prepend leader filteredPairs)) (prependItems rest accumulated)
