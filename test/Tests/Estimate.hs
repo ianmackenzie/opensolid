@@ -38,6 +38,7 @@ tests =
   , smallestBy
   , largestBy
   , takeMinimumBy
+  , takeMaximumBy
   ]
 
 data DummyEstimate = DummyEstimate Length (Range Meters)
@@ -185,5 +186,18 @@ takeMinimumBy = Test.check 100 "takeMinimumBy" $ do
   let minValueIsCorrect = List.all (>= minValue) remainingValues
   let allValuesArePresent = NonEmpty.sort originalValues == NonEmpty.sort (minValue :| remainingValues)
   Test.expect (minValueIsCorrect && allValuesArePresent)
+ where
+  ?tolerance = Length.meters 1e-9
+
+takeMaximumBy :: Test
+takeMaximumBy = Test.check 100 "takeMaximumBy" $ do
+  valuesAndEstimates <- dummyEstimates
+  let (maxPair, remainingPairs) = Estimate.takeMaximumBy Pair.second valuesAndEstimates
+  let maxValue = Pair.first maxPair
+  let remainingValues = List.map Pair.first remainingPairs
+  let originalValues = NonEmpty.map Pair.first valuesAndEstimates
+  let maxValueIsCorrect = List.all (<= maxValue) remainingValues
+  let allValuesArePresent = NonEmpty.sort originalValues == NonEmpty.sort (maxValue :| remainingValues)
+  Test.expect (maxValueIsCorrect && allValuesArePresent)
  where
   ?tolerance = Length.meters 1e-9

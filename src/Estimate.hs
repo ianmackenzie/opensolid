@@ -19,6 +19,7 @@ module Estimate
   , smallestBy
   , largestBy
   , takeMinimumBy
+  , takeMaximumBy
   )
 where
 
@@ -293,6 +294,19 @@ takeMinimumBy function items = go (NonEmpty.map (\item -> (item, function item))
     let (leader, followers) = NonEmpty.takeMinimumBy itemUpperBound pairs
         cutoff = itemUpperBound leader
         (filtered, discarded) = List.partition (itemLowerBound >> (<= cutoff)) followers
+        updated = prependItems discarded accumulated
+     in if allResolved filtered
+          then (Pair.first leader, prependItems filtered updated)
+          else go (refinePairs (leader :| filtered)) updated
+
+takeMaximumBy :: Tolerance units => (a -> Estimate units) -> NonEmpty a -> (a, List a)
+takeMaximumBy _ (item :| []) = (item, [])
+takeMaximumBy function items = go (NonEmpty.map (\item -> (item, function item)) items) []
+ where
+  go pairs accumulated =
+    let (leader, followers) = NonEmpty.takeMaximumBy itemLowerBound pairs
+        cutoff = itemLowerBound leader
+        (filtered, discarded) = List.partition (itemUpperBound >> (>= cutoff)) followers
         updated = prependItems discarded accumulated
      in if allResolved filtered
           then (Pair.first leader, prependItems filtered updated)
