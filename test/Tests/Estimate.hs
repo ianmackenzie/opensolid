@@ -39,6 +39,8 @@ tests =
   , largestBy
   , takeMinimumBy
   , takeMaximumBy
+  , takeSmallestBy
+  , takeLargestBy
   ]
 
 data DummyEstimate = DummyEstimate Length (Range Meters)
@@ -199,5 +201,31 @@ takeMaximumBy = Test.check 100 "takeMaximumBy" $ do
   let maxValueIsCorrect = List.all (<= maxValue) remainingValues
   let allValuesArePresent = NonEmpty.sort originalValues == NonEmpty.sort (maxValue :| remainingValues)
   Test.expect (maxValueIsCorrect && allValuesArePresent)
+ where
+  ?tolerance = Length.meters 1e-9
+
+takeSmallestBy :: Test
+takeSmallestBy = Test.check 100 "takeSmallestBy" $ do
+  valuesAndEstimates <- dummyEstimates
+  let (smallestPair, remainingPairs) = Estimate.takeSmallestBy Pair.second valuesAndEstimates
+  let smallestValue = Pair.first smallestPair
+  let remainingValues = List.map Pair.first remainingPairs
+  let originalValues = NonEmpty.map Pair.first valuesAndEstimates
+  let smallestValueIsCorrect = List.all (Qty.abs >> (>= Qty.abs smallestValue)) remainingValues
+  let allValuesArePresent = NonEmpty.sort originalValues == NonEmpty.sort (smallestValue :| remainingValues)
+  Test.expect (smallestValueIsCorrect && allValuesArePresent)
+ where
+  ?tolerance = Length.meters 1e-9
+
+takeLargestBy :: Test
+takeLargestBy = Test.check 100 "takeMaximumBy" $ do
+  valuesAndEstimates <- dummyEstimates
+  let (largestPair, remainingPairs) = Estimate.takeLargestBy Pair.second valuesAndEstimates
+  let largestValue = Pair.first largestPair
+  let remainingValues = List.map Pair.first remainingPairs
+  let originalValues = NonEmpty.map Pair.first valuesAndEstimates
+  let largestValueIsCorrect = List.all (Qty.abs >> (<= Qty.abs largestValue)) remainingValues
+  let allValuesArePresent = NonEmpty.sort originalValues == NonEmpty.sort (largestValue :| remainingValues)
+  Test.expect (largestValueIsCorrect && allValuesArePresent)
  where
   ?tolerance = Length.meters 1e-9

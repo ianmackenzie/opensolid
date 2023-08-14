@@ -20,6 +20,8 @@ module Estimate
   , largestBy
   , takeMinimumBy
   , takeMaximumBy
+  , takeSmallestBy
+  , takeLargestBy
   )
 where
 
@@ -307,3 +309,9 @@ takeMaximumBy function items = go (NonEmpty.map (\item -> (item, function item))
      in if allResolved filtered
           then (Pair.first leader, prependItems filtered updated)
           else go (refinePairs (leader :| filtered)) updated
+
+takeSmallestBy :: Tolerance units => (a -> Estimate units) -> NonEmpty a -> (a, List a)
+takeSmallestBy function items = takeMinimumBy (function >> abs) items
+
+takeLargestBy :: Tolerance units => (a -> Estimate units) -> NonEmpty a -> (a, List a)
+takeLargestBy function items = takeMaximumBy (function >> abs) items
