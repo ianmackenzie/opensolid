@@ -262,11 +262,10 @@ minimumBy function items = go (NonEmpty.map (\item -> (item, function item)) ite
   go pairs =
     let (leader, followers) = NonEmpty.takeMinimumBy itemUpperBound pairs
         cutoff = itemUpperBound leader
-     in case List.filter (itemLowerBound >> (<= cutoff)) followers of
-          [] -> Pair.first leader
-          filteredPairs
-            | allResolved filteredPairs -> Pair.first leader
-            | otherwise -> go (refinePairs (leader :| filteredPairs))
+        filtered = List.filter (itemLowerBound >> (<= cutoff)) followers
+     in if allResolved filtered
+          then Pair.first leader
+          else go (refinePairs (leader :| filtered))
 
 maximumBy :: Tolerance units => (a -> Estimate units) -> NonEmpty a -> a
 maximumBy _ (item :| []) = item
@@ -275,11 +274,10 @@ maximumBy function items = go (NonEmpty.map (\item -> (item, function item)) ite
   go pairs =
     let (leader, followers) = NonEmpty.takeMaximumBy itemLowerBound pairs
         cutoff = itemLowerBound leader
-     in case List.filter (itemUpperBound >> (>= cutoff)) followers of
-          [] -> Pair.first leader
-          filteredPairs
-            | allResolved filteredPairs -> Pair.first leader
-            | otherwise -> go (refinePairs (leader :| filteredPairs))
+        filtered = List.filter (itemUpperBound >> (>= cutoff)) followers
+     in if allResolved filtered
+          then Pair.first leader
+          else go (refinePairs (leader :| filtered))
 
 smallestBy :: Tolerance units => (a -> Estimate units) -> NonEmpty a -> a
 smallestBy function items = minimumBy (function >> abs) items
@@ -294,13 +292,8 @@ takeMinimumBy function items = go (NonEmpty.map (\item -> (item, function item))
   go pairs accumulated =
     let (leader, followers) = NonEmpty.takeMinimumBy itemUpperBound pairs
         cutoff = itemUpperBound leader
-     in case List.partition (itemLowerBound >> (<= cutoff)) followers of
-          ([], rest) -> (Pair.first leader, prependItems rest accumulated)
-          (filteredPairs, rest)
-            | allResolved filteredPairs ->
-                ( Pair.first leader
-                , accumulated
-                    |> prependItems rest
-                    |> prependItems filteredPairs
-                )
-            | otherwise -> go (refinePairs (leader :| filteredPairs)) (prependItems rest accumulated)
+        (filtered, discarded) = List.partition (itemLowerBound >> (<= cutoff)) followers
+        updated = prependItems discarded accumulated
+     in if allResolved filtered
+          then (Pair.first leader, prependItems filtered updated)
+          else go (refinePairs (leader :| filtered)) updated
