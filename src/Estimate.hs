@@ -252,8 +252,8 @@ prependItems :: List (a, Estimate units) -> List a -> List a
 prependItems pairs items =
   List.foldRight (\(item, _) acc -> item : acc) items pairs
 
-allResolved :: Tolerance units => NonEmpty (a, Estimate units) -> Bool
-allResolved pairs = NonEmpty.all (itemBoundsWidth >> (<= ?tolerance)) pairs
+allResolved :: Tolerance units => List (a, Estimate units) -> Bool
+allResolved pairs = List.all (itemBoundsWidth >> (<= ?tolerance)) pairs
 
 minimumBy :: Tolerance units => (a -> Estimate units) -> NonEmpty a -> a
 minimumBy _ (item :| []) = item
@@ -264,9 +264,9 @@ minimumBy function items = go (NonEmpty.map (\item -> (item, function item)) ite
         cutoff = itemUpperBound leader
      in case List.filter (itemLowerBound >> (<= cutoff)) followers of
           [] -> Pair.first leader
-          NonEmpty filteredPairs
+          filteredPairs
             | allResolved filteredPairs -> Pair.first leader
-            | otherwise -> go (refinePairs (NonEmpty.prepend leader filteredPairs))
+            | otherwise -> go (refinePairs (leader :| filteredPairs))
 
 maximumBy :: Tolerance units => (a -> Estimate units) -> NonEmpty a -> a
 maximumBy _ (item :| []) = item
@@ -277,9 +277,9 @@ maximumBy function items = go (NonEmpty.map (\item -> (item, function item)) ite
         cutoff = itemLowerBound leader
      in case List.filter (itemUpperBound >> (>= cutoff)) followers of
           [] -> Pair.first leader
-          NonEmpty filteredPairs
+          filteredPairs
             | allResolved filteredPairs -> Pair.first leader
-            | otherwise -> go (refinePairs (NonEmpty.prepend leader filteredPairs))
+            | otherwise -> go (refinePairs (leader :| filteredPairs))
 
 smallestBy :: Tolerance units => (a -> Estimate units) -> NonEmpty a -> a
 smallestBy function items = minimumBy (function >> abs) items
@@ -296,11 +296,11 @@ takeMinimumBy function items = go (NonEmpty.map (\item -> (item, function item))
         cutoff = itemUpperBound leader
      in case List.partition (itemLowerBound >> (<= cutoff)) followers of
           ([], rest) -> (Pair.first leader, prependItems rest accumulated)
-          (NonEmpty filteredPairs, rest)
+          (filteredPairs, rest)
             | allResolved filteredPairs ->
                 ( Pair.first leader
                 , accumulated
                     |> prependItems rest
-                    |> prependItems (NonEmpty.toList filteredPairs)
+                    |> prependItems filteredPairs
                 )
-            | otherwise -> go (refinePairs (NonEmpty.prepend leader filteredPairs)) (prependItems rest accumulated)
+            | otherwise -> go (refinePairs (leader :| filteredPairs)) (prependItems rest accumulated)
