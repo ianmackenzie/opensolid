@@ -257,7 +257,6 @@ allResolved :: Tolerance units => List (a, Estimate units) -> Bool
 allResolved pairs = List.all (itemBoundsWidth >> (<= ?tolerance)) pairs
 
 minimumBy :: Tolerance units => (a -> Estimate units) -> NonEmpty a -> a
-minimumBy _ (item :| []) = item
 minimumBy function items = go (NonEmpty.map (\item -> (item, function item)) items)
  where
   go pairs =
@@ -269,7 +268,6 @@ minimumBy function items = go (NonEmpty.map (\item -> (item, function item)) ite
           else go (refinePairs (leader :| filtered))
 
 maximumBy :: Tolerance units => (a -> Estimate units) -> NonEmpty a -> a
-maximumBy _ (item :| []) = item
 maximumBy function items = go (NonEmpty.map (\item -> (item, function item)) items)
  where
   go pairs =
@@ -287,7 +285,6 @@ largestBy :: Tolerance units => (a -> Estimate units) -> NonEmpty a -> a
 largestBy function items = maximumBy (function >> abs) items
 
 takeMinimumBy :: Tolerance units => (a -> Estimate units) -> NonEmpty a -> (a, List a)
-takeMinimumBy _ (item :| []) = (item, [])
 takeMinimumBy function items = go (NonEmpty.map (\item -> (item, function item)) items) []
  where
   go pairs accumulated =
@@ -300,7 +297,6 @@ takeMinimumBy function items = go (NonEmpty.map (\item -> (item, function item))
           else go (refinePairs (leader :| filtered)) updated
 
 takeMaximumBy :: Tolerance units => (a -> Estimate units) -> NonEmpty a -> (a, List a)
-takeMaximumBy _ (item :| []) = (item, [])
 takeMaximumBy function items = go (NonEmpty.map (\item -> (item, function item)) items) []
  where
   go pairs accumulated =
