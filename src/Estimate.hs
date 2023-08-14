@@ -18,10 +18,10 @@ module Estimate
   , maximumBy
   , smallestBy
   , largestBy
-  , takeMinimumBy
-  , takeMaximumBy
-  , takeSmallestBy
-  , takeLargestBy
+  , pickMinimumBy
+  , pickMaximumBy
+  , pickSmallestBy
+  , pickLargestBy
   )
 where
 
@@ -262,7 +262,7 @@ minimumBy :: Tolerance units => (a -> Estimate units) -> NonEmpty a -> a
 minimumBy function items = go (NonEmpty.map (\item -> (item, function item)) items)
  where
   go pairs =
-    let (leader, followers) = NonEmpty.takeMinimumBy itemUpperBound pairs
+    let (leader, followers) = NonEmpty.pickMinimumBy itemUpperBound pairs
         cutoff = itemUpperBound leader
         filtered = List.filter (itemLowerBound >> (<= cutoff)) followers
      in if allResolved filtered
@@ -273,7 +273,7 @@ maximumBy :: Tolerance units => (a -> Estimate units) -> NonEmpty a -> a
 maximumBy function items = go (NonEmpty.map (\item -> (item, function item)) items)
  where
   go pairs =
-    let (leader, followers) = NonEmpty.takeMaximumBy itemLowerBound pairs
+    let (leader, followers) = NonEmpty.pickMaximumBy itemLowerBound pairs
         cutoff = itemLowerBound leader
         filtered = List.filter (itemUpperBound >> (>= cutoff)) followers
      in if allResolved filtered
@@ -286,11 +286,11 @@ smallestBy function items = minimumBy (function >> abs) items
 largestBy :: Tolerance units => (a -> Estimate units) -> NonEmpty a -> a
 largestBy function items = maximumBy (function >> abs) items
 
-takeMinimumBy :: Tolerance units => (a -> Estimate units) -> NonEmpty a -> (a, List a)
-takeMinimumBy function items = go (NonEmpty.map (\item -> (item, function item)) items) []
+pickMinimumBy :: Tolerance units => (a -> Estimate units) -> NonEmpty a -> (a, List a)
+pickMinimumBy function items = go (NonEmpty.map (\item -> (item, function item)) items) []
  where
   go pairs accumulated =
-    let (leader, followers) = NonEmpty.takeMinimumBy itemUpperBound pairs
+    let (leader, followers) = NonEmpty.pickMinimumBy itemUpperBound pairs
         cutoff = itemUpperBound leader
         (filtered, discarded) = List.partition (itemLowerBound >> (<= cutoff)) followers
         updated = prependItems discarded accumulated
@@ -298,11 +298,11 @@ takeMinimumBy function items = go (NonEmpty.map (\item -> (item, function item))
           then (Pair.first leader, prependItems filtered updated)
           else go (refinePairs (leader :| filtered)) updated
 
-takeMaximumBy :: Tolerance units => (a -> Estimate units) -> NonEmpty a -> (a, List a)
-takeMaximumBy function items = go (NonEmpty.map (\item -> (item, function item)) items) []
+pickMaximumBy :: Tolerance units => (a -> Estimate units) -> NonEmpty a -> (a, List a)
+pickMaximumBy function items = go (NonEmpty.map (\item -> (item, function item)) items) []
  where
   go pairs accumulated =
-    let (leader, followers) = NonEmpty.takeMaximumBy itemLowerBound pairs
+    let (leader, followers) = NonEmpty.pickMaximumBy itemLowerBound pairs
         cutoff = itemLowerBound leader
         (filtered, discarded) = List.partition (itemUpperBound >> (>= cutoff)) followers
         updated = prependItems discarded accumulated
@@ -310,8 +310,8 @@ takeMaximumBy function items = go (NonEmpty.map (\item -> (item, function item))
           then (Pair.first leader, prependItems filtered updated)
           else go (refinePairs (leader :| filtered)) updated
 
-takeSmallestBy :: Tolerance units => (a -> Estimate units) -> NonEmpty a -> (a, List a)
-takeSmallestBy function items = takeMinimumBy (function >> abs) items
+pickSmallestBy :: Tolerance units => (a -> Estimate units) -> NonEmpty a -> (a, List a)
+pickSmallestBy function items = pickMinimumBy (function >> abs) items
 
-takeLargestBy :: Tolerance units => (a -> Estimate units) -> NonEmpty a -> (a, List a)
-takeLargestBy function items = takeMaximumBy (function >> abs) items
+pickLargestBy :: Tolerance units => (a -> Estimate units) -> NonEmpty a -> (a, List a)
+pickLargestBy function items = pickMaximumBy (function >> abs) items

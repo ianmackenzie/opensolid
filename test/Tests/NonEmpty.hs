@@ -10,14 +10,14 @@ import Test qualified
 
 tests :: List Test
 tests =
-  [ takeMinimum
+  [ pickMinimum
   ]
 
-takeMinimum :: Test
-takeMinimum =
-  Test.check 100 "takeMinimum" $ do
+pickMinimum :: Test
+pickMinimum =
+  Test.check 100 "pickMinimum" $ do
     values <- Random.nonEmpty 20 (Random.int 0 100)
-    let (minValue, remainingValues) = NonEmpty.takeMinimum values
+    let (minValue, remainingValues) = NonEmpty.pickMinimum values
     let minValueIsMin = List.all (>= minValue) remainingValues
     let orderIsUnchanged = remainingValues == Data.List.delete minValue (NonEmpty.toList values)
     Test.expect (minValueIsMin && orderIsUnchanged)

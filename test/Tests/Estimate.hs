@@ -37,10 +37,10 @@ tests =
   , maximumBy
   , smallestBy
   , largestBy
-  , takeMinimumBy
-  , takeMaximumBy
-  , takeSmallestBy
-  , takeLargestBy
+  , pickMinimumBy
+  , pickMaximumBy
+  , pickSmallestBy
+  , pickLargestBy
   ]
 
 data DummyEstimate = DummyEstimate Length (Range Meters)
@@ -178,10 +178,10 @@ largestBy = Test.check 100 "largestBy" $ do
  where
   ?tolerance = Length.meters 1e-9
 
-takeMinimumBy :: Test
-takeMinimumBy = Test.check 100 "takeMinimumBy" $ do
+pickMinimumBy :: Test
+pickMinimumBy = Test.check 100 "pickMinimumBy" $ do
   valuesAndEstimates <- dummyEstimates
-  let (minPair, remainingPairs) = Estimate.takeMinimumBy Pair.second valuesAndEstimates
+  let (minPair, remainingPairs) = Estimate.pickMinimumBy Pair.second valuesAndEstimates
   let minValue = Pair.first minPair
   let remainingValues = List.map Pair.first remainingPairs
   let originalValues = NonEmpty.map Pair.first valuesAndEstimates
@@ -191,10 +191,10 @@ takeMinimumBy = Test.check 100 "takeMinimumBy" $ do
  where
   ?tolerance = Length.meters 1e-9
 
-takeMaximumBy :: Test
-takeMaximumBy = Test.check 100 "takeMaximumBy" $ do
+pickMaximumBy :: Test
+pickMaximumBy = Test.check 100 "pickMaximumBy" $ do
   valuesAndEstimates <- dummyEstimates
-  let (maxPair, remainingPairs) = Estimate.takeMaximumBy Pair.second valuesAndEstimates
+  let (maxPair, remainingPairs) = Estimate.pickMaximumBy Pair.second valuesAndEstimates
   let maxValue = Pair.first maxPair
   let remainingValues = List.map Pair.first remainingPairs
   let originalValues = NonEmpty.map Pair.first valuesAndEstimates
@@ -204,10 +204,10 @@ takeMaximumBy = Test.check 100 "takeMaximumBy" $ do
  where
   ?tolerance = Length.meters 1e-9
 
-takeSmallestBy :: Test
-takeSmallestBy = Test.check 100 "takeSmallestBy" $ do
+pickSmallestBy :: Test
+pickSmallestBy = Test.check 100 "pickSmallestBy" $ do
   valuesAndEstimates <- dummyEstimates
-  let (smallestPair, remainingPairs) = Estimate.takeSmallestBy Pair.second valuesAndEstimates
+  let (smallestPair, remainingPairs) = Estimate.pickSmallestBy Pair.second valuesAndEstimates
   let smallestValue = Pair.first smallestPair
   let remainingValues = List.map Pair.first remainingPairs
   let originalValues = NonEmpty.map Pair.first valuesAndEstimates
@@ -217,10 +217,10 @@ takeSmallestBy = Test.check 100 "takeSmallestBy" $ do
  where
   ?tolerance = Length.meters 1e-9
 
-takeLargestBy :: Test
-takeLargestBy = Test.check 100 "takeMaximumBy" $ do
+pickLargestBy :: Test
+pickLargestBy = Test.check 100 "pickLargestBy" $ do
   valuesAndEstimates <- dummyEstimates
-  let (largestPair, remainingPairs) = Estimate.takeLargestBy Pair.second valuesAndEstimates
+  let (largestPair, remainingPairs) = Estimate.pickLargestBy Pair.second valuesAndEstimates
   let largestValue = Pair.first largestPair
   let remainingValues = List.map Pair.first remainingPairs
   let originalValues = NonEmpty.map Pair.first valuesAndEstimates
