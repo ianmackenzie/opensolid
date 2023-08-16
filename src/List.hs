@@ -3,6 +3,7 @@ module List
   , isEmpty
   , length
   , map
+  , reverseMap
   , map2
   , map3
   , map4
@@ -51,6 +52,9 @@ length = Data.List.length
 
 map :: (a -> b) -> List a -> List b
 map = Data.List.map
+
+reverseMap :: (a -> b) -> List a -> List b
+reverseMap function list = foldLeft (\acc item -> function item : acc) [] list
 
 zip2 :: List a -> List b -> List (a, b)
 zip2 = Data.List.zip

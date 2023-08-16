@@ -8,6 +8,7 @@ import Test qualified
 import Tests.Curve1d qualified
 import Tests.Curve2d qualified
 import Tests.Estimate qualified
+import Tests.List qualified
 import Tests.NonEmpty qualified
 import Tests.Parameter1d qualified
 import Tests.Qty qualified
@@ -23,6 +24,7 @@ tests =
   , Test.group "Curve1d" Tests.Curve1d.tests
   , Test.group "Curve2d" Tests.Curve2d.tests
   , Test.group "Estimate" Tests.Estimate.tests
+  , Test.group "List" Tests.List.tests
   , Test.group "NonEmpty" Tests.NonEmpty.tests
   ]
  where
