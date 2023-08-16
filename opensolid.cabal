@@ -216,6 +216,7 @@ test-suite opensolid-test
       Tests.Qty
       Tests.Random
       Tests.Range
+      Tests.Region2d
       Tests.VectorBox3d
       Paths_opensolid
   autogen-modules:

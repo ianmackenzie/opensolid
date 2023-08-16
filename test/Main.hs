@@ -13,6 +13,7 @@ import Tests.NonEmpty qualified
 import Tests.Parameter1d qualified
 import Tests.Qty qualified
 import Tests.Range qualified
+import Tests.Region2d qualified
 import Tests.VectorBox3d qualified
 
 tests :: List Test
@@ -26,6 +27,7 @@ tests =
   , Test.group "Estimate" Tests.Estimate.tests
   , Test.group "List" Tests.List.tests
   , Test.group "NonEmpty" Tests.NonEmpty.tests
+  , Test.group "Region2d" Tests.Region2d.tests
   ]
  where
   ?tolerance = Length.meters 1e-9
