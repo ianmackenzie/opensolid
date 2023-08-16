@@ -22,6 +22,7 @@ module Estimate
   , pickMaximumBy
   , pickSmallestBy
   , pickLargestBy
+  , sign
   )
 where
 
@@ -322,3 +323,10 @@ pickSmallestBy function items = pickMinimumBy (function >> abs) items
 
 pickLargestBy :: Tolerance units => (a -> Estimate units) -> NonEmpty a -> (a, List a)
 pickLargestBy function items = pickMaximumBy (function >> abs) items
+
+sign :: Tolerance units => Estimate units -> Sign
+sign estimate
+  | Range.minValue (bounds estimate) > ?tolerance = Positive
+  | Range.maxValue (bounds estimate) < negate ?tolerance = Negative
+  | Range.width (bounds estimate) <= ?tolerance = Positive
+  | otherwise = sign (refine estimate)
