@@ -4,11 +4,11 @@ import Angle qualified
 import Arc2d qualified
 import Area qualified
 import Float qualified
-import Generic (zero)
 import Length qualified
 import Line2d qualified
 import OpenSolid
 import Point2d qualified
+import Qty (zero)
 import Region2d qualified
 import Test (Test)
 import Test qualified
