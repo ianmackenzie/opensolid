@@ -45,6 +45,13 @@ instance IsEstimate (Qty units) units where
 data Estimate units where
   Estimate :: IsEstimate a units => a -> Range units -> Estimate units
 
+instance units ~ units' => ApproximateEquality (Estimate units) (Qty units') units where
+  estimate ~= value
+    | Range.minValue (bounds estimate) > value + ?tolerance = False
+    | Range.maxValue (bounds estimate) < value - ?tolerance = False
+    | Range.width (bounds estimate) <= ?tolerance = True
+    | otherwise = refine estimate ~= value
+
 wrap :: IsEstimate a units => a -> Estimate units
 wrap implementation = Estimate implementation (boundsImpl implementation)
 
