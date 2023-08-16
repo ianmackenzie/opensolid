@@ -11,6 +11,7 @@ import Test qualified
 tests :: List Test
 tests =
   [ pickMinimum
+  , reverseMap
   ]
 
 pickMinimum :: Test
@@ -26,3 +27,9 @@ pickMinimum =
       |> Test.output "values" values
       |> Test.output "minValue" minValue
       |> Test.output "remainingValues" remainingValues
+
+reverseMap :: Test
+reverseMap = Test.check 100 "reverseMap" $ do
+  ints <- Random.nonEmpty 10 (Random.int 1 10)
+  let twice n = 2 * n
+  Test.expect (NonEmpty.reverseMap twice ints == NonEmpty.reverse (NonEmpty.map twice ints))

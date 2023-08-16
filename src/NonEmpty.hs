@@ -8,6 +8,7 @@ module NonEmpty
   , prepend
   , length
   , map
+  , reverseMap
   , map2
   , map3
   , map4
@@ -85,6 +86,12 @@ length = Data.List.NonEmpty.length
 
 map :: (a -> b) -> NonEmpty a -> NonEmpty b
 map = Data.List.NonEmpty.map
+
+reverseMap :: (a -> b) -> NonEmpty a -> NonEmpty b
+reverseMap function (x :| xs) = go x xs []
+ where
+  go item [] acc = function item :| acc
+  go item (next : following) acc = go next following (function item : acc)
 
 map2 :: (a -> b -> c) -> NonEmpty a -> NonEmpty b -> NonEmpty c
 map2 = Data.List.NonEmpty.zipWith
