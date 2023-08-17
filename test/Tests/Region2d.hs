@@ -18,6 +18,9 @@ tests =
   [ square
   , quarterCircle
   , squareWithHole
+  , incompleteSquare
+  , squareWithTangentHole
+  , twoCircles
   ]
 
 square :: Test
@@ -74,5 +77,73 @@ squareWithHole = Test.check 1 "squareWithHole" $ do
   let area = Region2d.area region
   let expectedArea = width * width - Float.pi * holeRadius * holeRadius
   Test.expect (let ?tolerance = Area.squareMeters 1e-6 in area ~= expectedArea)
+ where
+  ?tolerance = Length.meters 1e-9
+
+incompleteSquare :: Test
+incompleteSquare = Test.check 1 "incompleteSquare" $ do
+  let width = Length.meters 2.0
+  let p1 = Point2d.origin
+  let p2 = Point2d.xy width zero
+  let p3 = Point2d.xy width width
+  let p4 = Point2d.xy zero width
+  line1 <- Line2d.from p1 p2
+  line2 <- Line2d.from p2 p3
+  line3 <- Line2d.from p4 p3
+  case Region2d.boundedBy [line1, line2, line3] of
+    Ok _ ->
+      Test.fail "Expected region construction to fail on incomplete boundary"
+    Error error ->
+      Test.expect (error == Region2d.RegionBoundaryHasGaps)
+        |> Test.output "error" error
+ where
+  ?tolerance = Length.meters 1e-9
+
+squareWithTangentHole :: Test
+squareWithTangentHole = Test.check 1 "squareWithTangentHole" $ do
+  let width = Length.meters 2.0
+  let p1 = Point2d.origin
+  let p2 = Point2d.xy width zero
+  let p3 = Point2d.xy width width
+  let p4 = Point2d.xy zero width
+  line1 <- Line2d.from p1 p2
+  line2 <- Line2d.from p2 p3
+  line3 <- Line2d.from p4 p3
+  line4 <- Line2d.from p4 p1
+  let centerPoint = Point2d.xy (width / 2.0) (width / 2.0)
+  let holeRadius = width / 2.0
+  arc <-
+    Arc2d.with
+      [ Arc2d.CenterPoint centerPoint
+      , Arc2d.Radius holeRadius
+      , Arc2d.StartAngle zero
+      , Arc2d.SweptAngle (Angle.degrees 360.0)
+      ]
+  case Region2d.boundedBy [line1, line2, line3, line4, arc] of
+    Ok _ ->
+      Test.fail "Expected non-manifold region construction to fail"
+    Error error ->
+      Test.expect (error == Region2d.RegionBoundaryIntersectsItself)
+        |> Test.output "error" error
+ where
+  ?tolerance = Length.meters 1e-9
+
+twoCircles :: Test
+twoCircles = Test.check 1 "twoCircles" $ do
+  let circle centerPoint radius =
+        Arc2d.with
+          [ Arc2d.CenterPoint centerPoint
+          , Arc2d.Radius radius
+          , Arc2d.StartAngle zero
+          , Arc2d.SweptAngle Angle.fullTurn
+          ]
+  circle1 <- circle (Point2d.meters -2.0 0.0) (Length.meters 1.0)
+  circle2 <- circle (Point2d.meters 1.0 0.0) (Length.meters 0.5)
+  case Region2d.boundedBy [circle1, circle2] of
+    Ok _ ->
+      Test.fail "Expected region construction to fail when given two disjoint circles"
+    Error error ->
+      Test.expect (error == Region2d.MultipleDisjointRegions)
+        |> Test.output "error" error
  where
   ?tolerance = Length.meters 1e-9
