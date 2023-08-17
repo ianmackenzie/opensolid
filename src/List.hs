@@ -28,7 +28,9 @@ module List
   , sortWith
   , sortAndDeduplicate
   , all
+  , allTrue
   , any
+  , anyTrue
   , successive
   , count
   , intersperse
@@ -138,8 +140,14 @@ dedup current (next : remaining)
 all :: (a -> Bool) -> List a -> Bool
 all = Prelude.all
 
+allTrue :: List Bool -> Bool
+allTrue = Prelude.and
+
 any :: (a -> Bool) -> List a -> Bool
 any = Prelude.any
+
+anyTrue :: List Bool -> Bool
+anyTrue = Prelude.or
 
 successive :: (a -> a -> b) -> List a -> List b
 successive function list = map2 function list (drop 1 list)

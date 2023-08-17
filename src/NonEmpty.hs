@@ -36,7 +36,9 @@ module NonEmpty
   , intersperse
   , partition
   , all
+  , allTrue
   , any
+  , anyTrue
   , minimum
   , maximum
   , minimumOf
@@ -187,8 +189,14 @@ dedup current (next : remaining)
 all :: (a -> Bool) -> NonEmpty a -> Bool
 all = Prelude.all
 
+allTrue :: NonEmpty Bool -> Bool
+allTrue = Prelude.and
+
 any :: (a -> Bool) -> NonEmpty a -> Bool
 any = Prelude.any
+
+anyTrue :: NonEmpty Bool -> Bool
+anyTrue = Prelude.or
 
 intersperse :: a -> NonEmpty a -> NonEmpty a
 intersperse = Data.List.NonEmpty.intersperse
