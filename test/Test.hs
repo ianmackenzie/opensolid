@@ -8,6 +8,8 @@ module Test
   , expect
   , output
   , lines
+  , pass
+  , fail
   )
 where
 
@@ -15,7 +17,7 @@ import Console qualified
 import Data.Foldable qualified
 import Debug qualified
 import List qualified
-import OpenSolid
+import OpenSolid hiding (fail)
 import Random (Generator)
 import Random qualified
 import Task qualified
@@ -90,6 +92,12 @@ fuzzImpl context n generator = do
   case expectation of
     Passed -> fuzzImpl context (n - 1) generator
     Failed messages -> reportError context messages
+
+pass :: Generator Expectation
+pass = Random.return Passed
+
+fail :: Text -> Generator Expectation
+fail message = Random.return (Failed [message])
 
 expect :: Bool -> Generator Expectation
 expect True = Random.return Passed
