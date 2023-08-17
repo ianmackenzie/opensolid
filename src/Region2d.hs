@@ -14,15 +14,13 @@ where
 
 import BoundingBox2d (BoundingBox2d)
 import BoundingBox2d qualified
-import CoordinateSystem (Units)
 import Curve1d qualified
 import Curve2d (Curve2d)
 import Curve2d qualified
 import Curve2d.Intersection (Intersection (Intersection))
-import Domain (Domain)
-import Domain qualified
 import Estimate (Estimate)
 import Estimate qualified
+import Float qualified
 import List qualified
 import NonEmpty qualified
 import OpenSolid
@@ -30,7 +28,7 @@ import Point2d (Point2d)
 import Qty qualified
 import Range (Range)
 import Range qualified
-import Units ((:*))
+import Units (Unitless, (:*))
 import Units qualified
 import VectorCurve2d qualified
 
@@ -175,64 +173,31 @@ classify point curves
   | NonEmpty.any (Curve2d.passesThrough point) curves = Nothing
   | otherwise = Just (classifyNonBoundary point curves)
 
-data ClassificationSegment (coordinateSystem :: CoordinateSystem)
-  = CurveSegment (Curve2d coordinateSystem) Domain (Range (Units coordinateSystem))
+fluxIntegral :: Point2d (space @ units) -> Curve2d (space @ units) -> Estimate Unitless
+fluxIntegral point curve =
+  let displacement = Units.generalize (point - curve)
+      firstDerivative = Units.generalize (Curve2d.derivative curve)
+      integrand = (firstDerivative >< displacement) / VectorCurve2d.squaredMagnitude displacement
+   in Curve1d.integral integrand
 
-classificationSegment ::
-  Point2d (space @ units) ->
-  Domain ->
-  Curve2d (space @ units) ->
-  ClassificationSegment (space @ units)
-classificationSegment point domain curve =
-  CurveSegment curve domain (computeSignedDistanceBounds point curve domain)
+totalFlux :: Point2d (space @ units) -> Loop (space @ units) -> Estimate Unitless
+totalFlux point loop =
+  Estimate.sum (List.map (fluxIntegral point) (NonEmpty.toList loop))
 
 classifyNonBoundary ::
   Tolerance units =>
   Point2d (space @ units) ->
   Loop (space @ units) ->
   Sign
-classifyNonBoundary point curves =
-  go (List.map (classificationSegment point Domain.unit) (NonEmpty.toList curves))
- where
-  segmentDistanceUpperBound (CurveSegment _ _ signedDistanceRange) =
-    Range.maxValue (Range.abs signedDistanceRange)
-  isCandidate distanceUpperBound (CurveSegment _ _ signedDistanceRange) =
-    Range.minValue (Range.abs signedDistanceRange) <= distanceUpperBound
-  go [] = internalError "Filtered list should always be non-empty by construction"
-  go (NonEmpty segments)
-    | List.all (== Resolved Positive) filteredSigns = Positive
-    | List.all (== Resolved Negative) filteredSigns = Negative
-    | otherwise = go (bisectSegments point filteredSegments)
-   where
-    distanceUpperBound = NonEmpty.minimum (NonEmpty.map segmentDistanceUpperBound segments)
-    filteredSegments = NonEmpty.filter (isCandidate distanceUpperBound) segments
-    filteredSigns = List.map resolvedSign filteredSegments
+classifyNonBoundary point loop =
+  let flux = Estimate.satisfy containmentIsDeterminate (totalFlux point loop)
+   in if Range.includes Qty.zero flux then Negative else Positive
 
-computeSignedDistanceBounds ::
-  Point2d (space @ units) ->
-  Curve2d (space @ units) ->
-  Domain ->
-  Range units
-computeSignedDistanceBounds point curve domain =
-  let tangentBounds = Curve2d.tangentBounds domain curve
-      displacementBounds = point - Curve2d.segmentBounds domain curve
-   in tangentBounds >< displacementBounds
+bothPossibleFluxValues :: Range Unitless
+bothPossibleFluxValues = Range.from 0.0 Float.tau
 
-resolvedSign :: ClassificationSegment (space @ units) -> Fuzzy Sign
-resolvedSign (CurveSegment _ _ signedDistanceBounds) =
-  let resolution = Range.resolution signedDistanceBounds
-   in if Qty.abs resolution >= 0.5 then Resolved (Qty.sign resolution) else Unresolved
-
-bisectSegments ::
-  Point2d (space @ units) ->
-  List (ClassificationSegment (space @ units)) ->
-  List (ClassificationSegment (space @ units))
-bisectSegments _ [] = []
-bisectSegments point (CurveSegment curve domain _ : rest) =
-  let (left, right) = Range.bisect domain
-      leftSegment = classificationSegment point left curve
-      rightSegment = classificationSegment point right curve
-   in leftSegment : rightSegment : bisectSegments point rest
+containmentIsDeterminate :: Range Unitless -> Bool
+containmentIsDeterminate flux = not (Range.contains bothPossibleFluxValues flux)
 
 classifyLoops ::
   Tolerance units =>
