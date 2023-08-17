@@ -1,5 +1,6 @@
 module Arc2d
   ( with
+  , from
   , Constraint (..)
   , BuildError
   , Direction (Clockwise, Counterclockwise)
@@ -56,7 +57,7 @@ with constraints = case List.sort constraints of
   [StartPoint p1, EndPoint p2, Radius r, Direction d, Size s] ->
     fromStartPointEndPointRadiusDirectionSize p1 p2 r d s
   [StartPoint p1, EndPoint p2, SweptAngle theta] ->
-    fromStartPointEndPointSweptAngle p1 p2 theta
+    from p1 p2 theta
   _ -> Error UnsupportedConstraints
 
 fromCenterPointRadiusStartAngleEndAngle ::
@@ -123,13 +124,13 @@ fromStartPointEndPointRadiusDirectionSize startPoint endPoint radius direction s
           (Counterclockwise, Large) -> Angle.fullTurn - shortAngle
   fromCenterPointStartPointSweptAngle computedCenterPoint startPoint computedSweptAngle
 
-fromStartPointEndPointSweptAngle ::
+from ::
   Tolerance units =>
   Point2d (space @ units) ->
   Point2d (space @ units) ->
   Angle ->
   Result BuildError (Curve2d (space @ units))
-fromStartPointEndPointSweptAngle startPoint endPoint sweptAngle =
+from startPoint endPoint sweptAngle =
   case Vector2d.magnitudeAndDirection (endPoint - startPoint) of
     Error Vector2d.IsZero -> Error DegenerateArc
     Ok (distance, direction) ->
