@@ -22,8 +22,10 @@ tests =
   , squareWithTangentHole
   , twoCircles
   ]
+ where
+  ?tolerance = Length.meters 1e-9
 
-square :: Test
+square :: Tolerance Meters => Test
 square = Test.check 1 "square" $ do
   let width = Length.meters 2.0
   let p1 = Point2d.origin
@@ -36,10 +38,8 @@ square = Test.check 1 "square" $ do
   line4 <- Line2d.from p4 p1
   region <- Region2d.boundedBy [line1, line3, line2, line4]
   Test.expect (let ?tolerance = Area.squareMeters 1e-6 in Region2d.area region ~= width * width)
- where
-  ?tolerance = Length.meters 1e-9
 
-quarterCircle :: Test
+quarterCircle :: Tolerance Meters => Test
 quarterCircle = Test.check 1 "quarterCircle" $ do
   let radius = Length.meters 1.0
   let p1 = Point2d.origin
@@ -50,10 +50,8 @@ quarterCircle = Test.check 1 "quarterCircle" $ do
   arc <- Arc2d.from p2 p3 Angle.quarterTurn
   region <- Region2d.boundedBy [line1, line2, arc]
   Test.expect (let ?tolerance = Area.squareMeters 1e-6 in Region2d.area region ~= 0.25 * Float.pi * radius * radius)
- where
-  ?tolerance = Length.meters 1e-9
 
-squareWithHole :: Test
+squareWithHole :: Tolerance Meters => Test
 squareWithHole = Test.check 1 "squareWithHole" $ do
   let width = Length.meters 2.0
   let p1 = Point2d.origin
@@ -77,10 +75,8 @@ squareWithHole = Test.check 1 "squareWithHole" $ do
   let area = Region2d.area region
   let expectedArea = width * width - Float.pi * holeRadius * holeRadius
   Test.expect (let ?tolerance = Area.squareMeters 1e-6 in area ~= expectedArea)
- where
-  ?tolerance = Length.meters 1e-9
 
-incompleteSquare :: Test
+incompleteSquare :: Tolerance Meters => Test
 incompleteSquare = Test.check 1 "incompleteSquare" $ do
   let width = Length.meters 2.0
   let p1 = Point2d.origin
@@ -92,13 +88,9 @@ incompleteSquare = Test.check 1 "incompleteSquare" $ do
   line3 <- Line2d.from p4 p3
   case Region2d.boundedBy [line1, line2, line3] of
     Ok _ -> Test.fail "Expected region construction to fail on incomplete boundary"
-    Error error ->
-      Test.expect (error == Region2d.RegionBoundaryHasGaps)
-        |> Test.output "error" error
- where
-  ?tolerance = Length.meters 1e-9
+    Error error -> Test.expect (error == Region2d.RegionBoundaryHasGaps)
 
-squareWithTangentHole :: Test
+squareWithTangentHole :: Tolerance Meters => Test
 squareWithTangentHole = Test.check 1 "squareWithTangentHole" $ do
   let width = Length.meters 2.0
   let p1 = Point2d.origin
@@ -120,13 +112,9 @@ squareWithTangentHole = Test.check 1 "squareWithTangentHole" $ do
       ]
   case Region2d.boundedBy [line1, line2, line3, line4, arc] of
     Ok _ -> Test.fail "Expected non-manifold region construction to fail"
-    Error error ->
-      Test.expect (error == Region2d.RegionBoundaryIntersectsItself)
-        |> Test.output "error" error
- where
-  ?tolerance = Length.meters 1e-9
+    Error error -> Test.expect (error == Region2d.RegionBoundaryIntersectsItself)
 
-twoCircles :: Test
+twoCircles :: Tolerance Meters => Test
 twoCircles = Test.check 1 "twoCircles" $ do
   let circle centerPoint radius =
         Arc2d.with
@@ -139,8 +127,4 @@ twoCircles = Test.check 1 "twoCircles" $ do
   circle2 <- circle (Point2d.meters 1.0 0.0) (Length.meters 0.5)
   case Region2d.boundedBy [circle1, circle2] of
     Ok _ -> Test.fail "Expected region construction to fail when given two disjoint circles"
-    Error error ->
-      Test.expect (error == Region2d.MultipleDisjointRegions)
-        |> Test.output "error" error
- where
-  ?tolerance = Length.meters 1e-9
+    Error error -> Test.expect (error == Region2d.MultipleDisjointRegions)
