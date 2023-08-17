@@ -91,8 +91,7 @@ incompleteSquare = Test.check 1 "incompleteSquare" $ do
   line2 <- Line2d.from p2 p3
   line3 <- Line2d.from p4 p3
   case Region2d.boundedBy [line1, line2, line3] of
-    Ok _ ->
-      Test.fail "Expected region construction to fail on incomplete boundary"
+    Ok _ -> Test.fail "Expected region construction to fail on incomplete boundary"
     Error error ->
       Test.expect (error == Region2d.RegionBoundaryHasGaps)
         |> Test.output "error" error
@@ -120,8 +119,7 @@ squareWithTangentHole = Test.check 1 "squareWithTangentHole" $ do
       , Arc2d.SweptAngle (Angle.degrees 360.0)
       ]
   case Region2d.boundedBy [line1, line2, line3, line4, arc] of
-    Ok _ ->
-      Test.fail "Expected non-manifold region construction to fail"
+    Ok _ -> Test.fail "Expected non-manifold region construction to fail"
     Error error ->
       Test.expect (error == Region2d.RegionBoundaryIntersectsItself)
         |> Test.output "error" error
@@ -140,8 +138,7 @@ twoCircles = Test.check 1 "twoCircles" $ do
   circle1 <- circle (Point2d.meters -2.0 0.0) (Length.meters 1.0)
   circle2 <- circle (Point2d.meters 1.0 0.0) (Length.meters 0.5)
   case Region2d.boundedBy [circle1, circle2] of
-    Ok _ ->
-      Test.fail "Expected region construction to fail when given two disjoint circles"
+    Ok _ -> Test.fail "Expected region construction to fail when given two disjoint circles"
     Error error ->
       Test.expect (error == Region2d.MultipleDisjointRegions)
         |> Test.output "error" error
