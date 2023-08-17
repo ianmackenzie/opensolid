@@ -13,7 +13,6 @@ import Length qualified
 import List qualified
 import OpenSolid
 import Point2d qualified
-import Qty qualified
 import QuadraticSpline2d qualified
 import Range qualified
 import Test (Test)
@@ -62,18 +61,8 @@ overlappingSegments curve1 curve2 =
 
 curveOverlap1 :: Tolerance Meters => Test
 curveOverlap1 = Test.verify "Overlap detection 1" $ do
-  arc1 <-
-    Arc2d.with
-      [ Arc2d.StartPoint (Point2d.meters 1.0 0.0)
-      , Arc2d.EndPoint (Point2d.meters -1.0 0.0)
-      , Arc2d.SweptAngle (Angle.degrees 180.0)
-      ]
-  arc2 <-
-    Arc2d.with
-      [ Arc2d.StartPoint (Point2d.meters 0.0 -1.0)
-      , Arc2d.EndPoint (Point2d.meters 0.0 1.0)
-      , Arc2d.SweptAngle (Angle.degrees 180.0)
-      ]
+  arc1 <- Arc2d.from (Point2d.meters 1.0 0.0) (Point2d.meters -1.0 0.0) Angle.halfTurn
+  arc2 <- Arc2d.from (Point2d.meters 0.0 -1.0) (Point2d.meters 0.0 1.0) Angle.halfTurn
   segments <- overlappingSegments arc1 arc2
   let expectedSegments = [(Range.from 0.0 0.5, Range.from 0.5 1.0, Positive)]
   let ?tolerance = 1e-12
@@ -105,18 +94,8 @@ curveOverlap2 = Test.verify "Overlap detection 2" $ do
 
 crossingIntersection :: Tolerance Meters => Test
 crossingIntersection = Test.verify "Crossing intersection" $ do
-  arc1 <-
-    Arc2d.with
-      [ Arc2d.StartPoint Point2d.origin
-      , Arc2d.EndPoint (Point2d.meters 0.0 1.0)
-      , Arc2d.SweptAngle (Angle.degrees 180.0)
-      ]
-  arc2 <-
-    Arc2d.with
-      [ Arc2d.StartPoint Point2d.origin
-      , Arc2d.EndPoint (Point2d.meters 1.0 0.0)
-      , Arc2d.SweptAngle (Angle.degrees -180.0)
-      ]
+  arc1 <- Arc2d.from Point2d.origin (Point2d.meters 0.0 1.0) Angle.halfTurn
+  arc2 <- Arc2d.from Point2d.origin (Point2d.meters 1.0 0.0) -Angle.halfTurn
   intersections <- Curve2d.intersections arc1 arc2
   let expectedIntersections =
         [ Intersection 0.0 0.0 Intersection.Crossing Positive
@@ -131,15 +110,15 @@ tangentIntersection = Test.verify "Tangent intersection" $ do
     Arc2d.with
       [ Arc2d.CenterPoint Point2d.origin
       , Arc2d.Radius Length.meter
-      , Arc2d.StartAngle Qty.zero
-      , Arc2d.EndAngle Angle.halfTurn
+      , Arc2d.StartAngle (Angle.degrees 0.0)
+      , Arc2d.EndAngle (Angle.degrees 180.0)
       ]
   arc2 <-
     Arc2d.with
       [ Arc2d.CenterPoint (Point2d.meters 0.0 1.5)
       , Arc2d.Radius (Length.meters 0.5)
-      , Arc2d.StartAngle -Angle.halfTurn
-      , Arc2d.EndAngle Qty.zero
+      , Arc2d.StartAngle (Angle.degrees -180.0)
+      , Arc2d.EndAngle (Angle.degrees 0.0)
       ]
   intersections <- Curve2d.intersections arc1 arc2
   let expectedIntersections = [Intersection 0.5 0.5 Intersection.Tangent Positive]
@@ -148,12 +127,7 @@ tangentIntersection = Test.verify "Tangent intersection" $ do
 
 solving :: Tolerance Meters => Test
 solving = Test.verify "Solving via Curve1d" $ do
-  arc <-
-    Arc2d.with
-      [ Arc2d.StartPoint (Point2d.meters 0.0 1.0)
-      , Arc2d.EndPoint (Point2d.meters 1.0 0.0)
-      , Arc2d.SweptAngle (Angle.degrees 90.0)
-      ]
+  arc <- Arc2d.from (Point2d.meters 0.0 1.0) (Point2d.meters 1.0 0.0) Angle.quarterTurn
   let squaredDistanceFromOrigin = VectorCurve2d.squaredMagnitude (arc - Point2d.origin)
   let desiredDistance = Length.meters 0.5
   roots <- squaredDistanceFromOrigin |> Curve1d.equalToSquared (Length.meters 0.5)

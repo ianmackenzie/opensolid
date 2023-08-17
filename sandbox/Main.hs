@@ -73,16 +73,11 @@ testDirection2dAngleFrom = do
 
 testArc2dFrom :: Task Text ()
 testArc2dFrom = Try.do
-  let testArc angle =
-        Arc2d.with
-          [ Arc2d.StartPoint Point2d.origin
-          , Arc2d.EndPoint (Point2d.meters 1.0 1.0)
-          , Arc2d.SweptAngle angle
-          ]
-  arc1 <- testArc (Angle.degrees 90.0)
-  arc2 <- testArc (Angle.degrees -90.0)
-  arc3 <- testArc (Angle.degrees 180.0)
-  arc4 <- testArc (Angle.degrees -180.0)
+  let testArc angle = Arc2d.from Point2d.origin (Point2d.meters 1.0 1.0) angle
+  arc1 <- testArc Angle.quarterTurn
+  arc2 <- testArc -Angle.quarterTurn
+  arc3 <- testArc Angle.halfTurn
+  arc4 <- testArc -Angle.halfTurn
   line <- testArc Qty.zero
   log "arc1 point" (Curve2d.evaluateAt 0.5 arc1)
   log "arc2 point" (Curve2d.evaluateAt 0.5 arc2)
@@ -217,15 +212,15 @@ script = do
   log "Equality test" (let ?tolerance = Length.centimeter in Length.meters 1.0 ~= Length.meters 1.005)
   testDirection2dAngleFrom
   testArc2dFrom
-  log "Rotated axis" (Axis2d.x |> Transform2d.rotateAround (Point2d.meters 1.0 0.0) (Angle.degrees 90.0))
+  log "Rotated axis" (Axis2d.x |> Transform2d.rotateAround (Point2d.meters 1.0 0.0) Angle.quarterTurn)
   let originalPoints = [Point2d.meters 1.0 0.0, Point2d.meters 2.0 0.0, Point2d.meters 3.0 0.0]
-  let rotationFunction = Transform2d.rotateAround Point2d.origin (Angle.degrees 90.0)
+  let rotationFunction = Transform2d.rotateAround Point2d.origin Angle.quarterTurn
   let rotatedPoints = List.map rotationFunction originalPoints
   log "Rotated points" rotatedPoints
   let transformedAxis =
         Axis2d.x
           |> Transform2d.translateInOwn Axis2d.direction (Length.meters 2.0)
-          |> Transform2d.rotateAroundOwn Axis2d.originPoint (Angle.degrees 90.0)
+          |> Transform2d.rotateAroundOwn Axis2d.originPoint Angle.quarterTurn
   log "Transformed axis" transformedAxis
   testTry
   testTaskIteration
