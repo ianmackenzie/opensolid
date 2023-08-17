@@ -6,6 +6,7 @@ module Test
   , group
   , run
   , expect
+  , expectAll
   , output
   , lines
   , pass
@@ -102,6 +103,9 @@ fail message = Random.return (Failed [message])
 expect :: Bool -> Generator Expectation
 expect True = Random.return Passed
 expect False = Random.return (Failed [])
+
+expectAll :: List Bool -> Generator Expectation
+expectAll checks = expect (List.allTrue checks)
 
 output :: Show a => Text -> a -> Generator Expectation -> Generator Expectation
 output label value =

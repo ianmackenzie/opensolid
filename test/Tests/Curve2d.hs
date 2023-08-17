@@ -41,12 +41,12 @@ parameterValues = Test.verify "parameterValues" $ do
   let midParameterValues = Curve2d.parameterValues (Point2d.meters 1.0 1.0) testSpline
   let offCurveParameterValues = Curve2d.parameterValues (Point2d.meters 1.0 1.1) testSpline
   let ?tolerance = 1e-12
-   in Test.expect
-        ( startParameterValues ~= [0.0]
-            && endParameterValues ~= [1.0]
-            && midParameterValues ~= [0.5]
-            && offCurveParameterValues == []
-        )
+   in Test.expectAll
+        [ startParameterValues ~= [0.0]
+        , endParameterValues ~= [1.0]
+        , midParameterValues ~= [0.5]
+        , offCurveParameterValues == []
+        ]
 
 overlappingSegments ::
   Tolerance units =>
