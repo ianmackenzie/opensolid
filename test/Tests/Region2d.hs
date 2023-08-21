@@ -12,6 +12,7 @@ import Qty (zero)
 import Region2d qualified
 import Test (Test)
 import Test qualified
+import Units (Meters)
 
 tests :: List Test
 tests =
