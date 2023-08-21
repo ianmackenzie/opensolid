@@ -59,34 +59,88 @@ instance
 instance Negation (Vector3d (space @ units)) where
   negate (Vector3d vx vy vz) = Vector3d (negate vx) (negate vy) (negate vz)
 
-instance Multiplication Sign (Vector3d (space @ units)) (Vector3d (space @ units)) where
+instance
+  Multiplication
+    Sign
+    (Vector3d (space @ units))
+    (Vector3d (space @ units))
+  where
   Positive * vector = vector
   Negative * vector = -vector
 
-instance Multiplication (Vector3d (space @ units)) Sign (Vector3d (space @ units)) where
+instance
+  Multiplication
+    (Vector3d (space @ units))
+    Sign
+    (Vector3d (space @ units))
+  where
   vector * Positive = vector
   vector * Negative = -vector
 
-instance (space ~ space', units ~ units') => Addition (Vector3d (space @ units)) (Vector3d (space' @ units')) (Vector3d (space @ units)) where
+instance
+  ( space ~ space'
+  , units ~ units'
+  ) =>
+  Addition
+    (Vector3d (space @ units))
+    (Vector3d (space' @ units'))
+    (Vector3d (space @ units))
+  where
   Vector3d x1 y1 z1 + Vector3d x2 y2 z2 = Vector3d (x1 + x2) (y1 + y2) (z1 + z2)
 
-instance (space ~ space', units ~ units') => Subtraction (Vector3d (space @ units)) (Vector3d (space' @ units')) (Vector3d (space @ units)) where
+instance
+  ( space ~ space'
+  , units ~ units'
+  ) =>
+  Subtraction
+    (Vector3d (space @ units))
+    (Vector3d (space' @ units'))
+    (Vector3d (space @ units))
+  where
   Vector3d x1 y1 z1 - Vector3d x2 y2 z2 = Vector3d (x1 - x2) (y1 - y2) (z1 - z2)
 
-instance Units.Product units1 units2 units3 => Multiplication (Qty units1) (Vector3d (space @ units2)) (Vector3d (space @ units3)) where
+instance
+  Units.Product units1 units2 units3 =>
+  Multiplication
+    (Qty units1)
+    (Vector3d (space @ units2))
+    (Vector3d (space @ units3))
+  where
   scale * Vector3d vx vy vz = Vector3d (scale * vx) (scale * vy) (scale * vz)
 
-instance Units.Product units1 units2 units3 => Multiplication (Vector3d (space @ units1)) (Qty units2) (Vector3d (space @ units3)) where
+instance
+  Units.Product units1 units2 units3 =>
+  Multiplication
+    (Vector3d (space @ units1))
+    (Qty units2)
+    (Vector3d (space @ units3))
+  where
   Vector3d vx vy vz * scale = Vector3d (vx * scale) (vy * scale) (vz * scale)
 
-instance Units.Quotient units1 units2 units3 => Division (Vector3d (space @ units1)) (Qty units2) (Vector3d (space @ units3)) where
+instance
+  Units.Quotient units1 units2 units3 =>
+  Division
+    (Vector3d (space @ units1))
+    (Qty units2)
+    (Vector3d (space @ units3))
+  where
   Vector3d vx vy vz / scale = Vector3d (vx / scale) (vy / scale) (vz / scale)
 
-instance (Units.Product units1 units2 units3, space ~ space') => DotProduct (Vector3d (space @ units1)) (Vector3d (space' @ units2)) (Qty units3) where
+instance
+  ( Units.Product units1 units2 units3
+  , space ~ space'
+  ) =>
+  DotProduct
+    (Vector3d (space @ units1))
+    (Vector3d (space' @ units2))
+    (Qty units3)
+  where
   Vector3d x1 y1 z1 <> Vector3d x2 y2 z2 = x1 * x2 + y1 * y2 + z1 * z2
 
 instance
-  (Units.Product units1 units2 units3, space ~ space') =>
+  ( Units.Product units1 units2 units3
+  , space ~ space'
+  ) =>
   CrossProduct
     (Vector3d (space @ units1))
     (Vector3d (space' @ units2))

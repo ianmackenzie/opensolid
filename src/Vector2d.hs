@@ -70,11 +70,21 @@ instance
 instance Negation (Vector2d (space @ units)) where
   negate (Vector2d vx vy) = Vector2d (negate vx) (negate vy)
 
-instance Multiplication Sign (Vector2d (space @ units)) (Vector2d (space @ units)) where
+instance
+  Multiplication
+    Sign
+    (Vector2d (space @ units))
+    (Vector2d (space @ units))
+  where
   Positive * vector = vector
   Negative * vector = -vector
 
-instance Multiplication (Vector2d (space @ units)) Sign (Vector2d (space @ units)) where
+instance
+  Multiplication
+    (Vector2d (space @ units))
+    Sign
+    (Vector2d (space @ units))
+  where
   vector * Positive = vector
   vector * Negative = -vector
 
