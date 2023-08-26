@@ -7,7 +7,7 @@ module Float
   , max
   , floor
   , pi
-  , tau
+  , twoPi
   , pow
   , sin
   , cos
@@ -52,8 +52,8 @@ max = Qty.max
 pi :: Float
 pi = Prelude.pi
 
-tau :: Float
-tau = 2.0 * pi
+twoPi :: Float
+twoPi = 2.0 * pi
 
 pow :: Float -> Float -> Float
 pow = (Prelude.**)

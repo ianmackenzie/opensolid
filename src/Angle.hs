@@ -68,7 +68,7 @@ inDegrees :: Angle -> Float
 inDegrees = (/ degree)
 
 fullTurn :: Angle
-fullTurn = radians Float.tau
+fullTurn = radians Float.twoPi
 
 halfTurn :: Angle
 halfTurn = turns 0.5
