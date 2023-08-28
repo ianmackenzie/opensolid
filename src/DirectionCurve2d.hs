@@ -11,7 +11,6 @@ import Curve1d (Curve1d)
 import Direction2d (Direction2d (Direction2d))
 import Direction2d qualified
 import OpenSolid
-import Units qualified
 import VectorCurve2d (VectorCurve2d)
 import VectorCurve2d qualified
 
@@ -82,21 +81,3 @@ instance
     (VectorCurve2d (space @ units))
   where
   DirectionCurve2d vectorCurve * scalarCurve = vectorCurve * scalarCurve
-
-instance
-  Units.Quotient Unitless units1 units2 =>
-  Division
-    (DirectionCurve2d space)
-    (Qty units1)
-    (VectorCurve2d (space @ units2))
-  where
-  DirectionCurve2d vectorCurve / value = vectorCurve / value
-
-instance
-  Units.Quotient Unitless units1 units2 =>
-  Division
-    (DirectionCurve2d space)
-    (Curve1d units1)
-    (VectorCurve2d (space @ units2))
-  where
-  DirectionCurve2d vectorCurve / scalarCurve = vectorCurve / scalarCurve
