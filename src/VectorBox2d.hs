@@ -17,6 +17,7 @@ module VectorBox2d
 where
 
 import CoordinateSystem (Units)
+import Direction2d (Direction2d (Direction2d))
 import Generic qualified
 import OpenSolid
 import Qty qualified
@@ -192,6 +193,24 @@ instance
   VectorBox2d x1 y1 <> Vector2d x2 y2 = x1 * x2 + y1 * y2
 
 instance
+  space ~ space' =>
+  DotProduct
+    (Direction2d space)
+    (VectorBox2d (space' @ units))
+    (Range units)
+  where
+  Direction2d vector <> vectorBox = vector <> vectorBox
+
+instance
+  space ~ space' =>
+  DotProduct
+    (VectorBox2d (space @ units))
+    (Direction2d space')
+    (Range units)
+  where
+  vectorBox <> Direction2d vector = vectorBox <> vector
+
+instance
   (Units.Product units1 units2 units3, space ~ space') =>
   DotProduct
     (VectorBox2d (space @ units1))
@@ -217,6 +236,24 @@ instance
     (Range units3)
   where
   VectorBox2d x1 y1 >< Vector2d x2 y2 = x1 * y2 - y1 * x2
+
+instance
+  space ~ space' =>
+  CrossProduct
+    (Direction2d space)
+    (VectorBox2d (space' @ units))
+    (Range units)
+  where
+  Direction2d vector >< vectorBox = vector >< vectorBox
+
+instance
+  space ~ space' =>
+  CrossProduct
+    (VectorBox2d (space @ units))
+    (Direction2d space')
+    (Range units)
+  where
+  vectorBox >< Direction2d vector = vectorBox >< vector
 
 instance
   (Units.Product units1 units2 units3, space ~ space') =>
