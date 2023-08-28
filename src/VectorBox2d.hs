@@ -20,7 +20,7 @@ import OpenSolid
 import Qty qualified
 import Range (Range (..))
 import Range qualified
-import Units (Radians, Unitless)
+import Units (Radians)
 import Units qualified
 import Vector2d (Vector2d (..))
 import Vector2d qualified

@@ -10,7 +10,6 @@ import Float qualified
 import OpenSolid
 import Range (Range (Range))
 import Range qualified
-import Units (Unitless)
 
 type Domain = Range Unitless
 

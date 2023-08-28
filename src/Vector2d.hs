@@ -39,7 +39,7 @@ import Length qualified
 import OpenSolid
 import {-# SOURCE #-} Point2d (Point2d)
 import Qty qualified
-import Units (Meters, SquareMeters, Unitless)
+import Units (Meters, SquareMeters)
 import Units qualified
 
 type role Vector2d phantom

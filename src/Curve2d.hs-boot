@@ -15,7 +15,6 @@ import Curve2d.Internal qualified as Internal
 import Domain (Domain)
 import OpenSolid
 import Point2d (Point2d)
-import Units (Unitless)
 import VectorBox2d (VectorBox2d)
 import VectorCurve2d (VectorCurve2d)
 

@@ -6,7 +6,6 @@ module Curve2d.Intersection
 where
 
 import OpenSolid
-import Units (Unitless)
 
 data Intersection = Intersection
   { u1 :: Float

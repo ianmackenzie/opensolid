@@ -28,7 +28,7 @@ import Point2d (Point2d)
 import Qty qualified
 import Range (Range)
 import Range qualified
-import Units (Unitless, (:*))
+import Units ((:*))
 import Units qualified
 import VectorCurve2d qualified
 

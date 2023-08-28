@@ -11,7 +11,7 @@ import Curve2d.Intersection (TangentIntersectionAtDegeneratePoint (TangentInters
 import Curve2d.Intersection qualified as Intersection
 import OpenSolid
 import Qty qualified
-import Units (Unitless, (:/))
+import Units ((:/))
 import Units qualified
 import Vector2d qualified
 import VectorCurve2d (VectorCurve2d)

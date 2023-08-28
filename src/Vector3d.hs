@@ -32,7 +32,7 @@ import Generic qualified
 import Length qualified
 import OpenSolid
 import Qty qualified
-import Units (Meters, SquareMeters, Unitless)
+import Units (Meters, SquareMeters)
 import Units qualified
 
 data Vector3d (coordinateSystem :: CoordinateSystem)

@@ -53,7 +53,6 @@ import Point2d (Point2d)
 import Qty qualified
 import Range qualified
 import Result qualified
-import Units (Unitless)
 import Units qualified
 import Vector2d (Vector2d)
 import Vector2d qualified

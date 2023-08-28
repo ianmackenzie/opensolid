@@ -6,7 +6,6 @@ module Direction2d
 where
 
 import OpenSolid
-import Units (Unitless)
 import {-# SOURCE #-} Vector2d (Vector2d)
 
 type role Direction2d phantom

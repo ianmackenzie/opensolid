@@ -19,7 +19,6 @@ import OpenSolid
 import Qty qualified
 import Range (Range (..))
 import Range qualified
-import Units (Unitless)
 import Units qualified
 import Vector3d (Vector3d (..))
 import Vector3d qualified

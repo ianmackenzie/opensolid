@@ -26,7 +26,7 @@ import OpenSolid
 import Qty qualified
 import Range (Range)
 import Range qualified
-import Units (Unitless, (:/))
+import Units ((:/))
 import Units qualified
 import VectorBox2d (VectorBox2d)
 import VectorBox2d qualified

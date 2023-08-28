@@ -1,7 +1,6 @@
 module Curve1d.Root (Root (..)) where
 
 import OpenSolid
-import Units (Unitless)
 
 data Root = Root
   { value :: Float

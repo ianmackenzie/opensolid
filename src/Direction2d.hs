@@ -30,7 +30,7 @@ import OpenSolid
 import {-# SOURCE #-} Point2d (Point2d)
 import Qty qualified
 import Result qualified
-import Units (Radians, Unitless)
+import Units (Radians)
 import Vector2d (Vector2d (Vector2d))
 import Vector2d qualified
 

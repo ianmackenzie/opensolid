@@ -7,7 +7,6 @@ import Curve1d.Root (Root (Root))
 import OpenSolid
 import Test (Test)
 import Test qualified
-import Units (Unitless)
 
 tests :: List Test
 tests =
