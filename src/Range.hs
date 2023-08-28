@@ -61,14 +61,14 @@ import Random qualified
 import Units (Radians, Unitless)
 import Units qualified
 
-data Range units = Range# (Qty units) (Qty units)
+data Range units = Range_ (Qty units) (Qty units)
   deriving (Eq, Show)
 
 {-# COMPLETE Range #-}
 
 {-# INLINE Range #-}
 pattern Range :: Qty units -> Qty units -> Range units
-pattern Range low high <- Range# low high
+pattern Range low high <- Range_ low high
 
 instance (units1 ~ units1', units2 ~ units2') => Units.Coercion units1 units2 (Range units1') (Range units2')
 
@@ -154,7 +154,7 @@ instance IsBounds (Range units) where
 
 {-# INLINE unsafe #-}
 unsafe :: Qty units -> Qty units -> Range units
-unsafe = Range#
+unsafe = Range_
 
 {-# INLINE constant #-}
 constant :: Qty units -> Range units

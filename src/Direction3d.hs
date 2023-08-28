@@ -24,14 +24,14 @@ import Vector3d qualified
 
 type role Direction3d phantom
 
-data Direction3d (space :: Type) = Direction3d# {xComponent :: Float, yComponent :: Float, zComponent :: Float}
+data Direction3d (space :: Type) = Direction3d_ {xComponent :: Float, yComponent :: Float, zComponent :: Float}
   deriving (Eq, Show)
 
 {-# COMPLETE Direction3d #-}
 
 {-# INLINE Direction3d #-}
 pattern Direction3d :: Float -> Float -> Float -> Direction3d space
-pattern Direction3d x y z <- Direction3d# x y z
+pattern Direction3d x y z <- Direction3d_ x y z
 
 instance
   space ~ space' =>
@@ -87,7 +87,7 @@ instance space ~ space' => CrossProduct (Direction3d space) (Direction3d space')
       (x1 * y2 - y1 * x2)
 
 unsafe :: Float -> Float -> Float -> Direction3d space
-unsafe = Direction3d#
+unsafe = Direction3d_
 
 positiveX :: Direction3d space
 positiveX = unsafe 1.0 0.0 0.0

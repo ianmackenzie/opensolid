@@ -36,14 +36,14 @@ import Vector2d qualified
 
 type role Direction2d phantom
 
-newtype Direction2d (space :: Type) = Direction2d# (Vector2d (space @ Unitless))
+newtype Direction2d (space :: Type) = Direction2d_ (Vector2d (space @ Unitless))
   deriving (Eq, Show)
 
 {-# COMPLETE Direction2d #-}
 
 {-# INLINE Direction2d #-}
 pattern Direction2d :: Vector2d (space @ Unitless) -> Direction2d space
-pattern Direction2d v <- Direction2d# v
+pattern Direction2d v <- Direction2d_ v
 
 instance
   space ~ space' =>
@@ -76,11 +76,11 @@ instance space ~ space' => CrossProduct (Direction2d space) (Direction2d space')
 
 {-# INLINE unsafe #-}
 unsafe :: Vector2d (space @ Unitless) -> Direction2d space
-unsafe = Direction2d#
+unsafe = Direction2d_
 
 {-# INLINE unwrap #-}
 unwrap :: Direction2d space -> Vector2d (space @ Unitless)
-unwrap (Direction2d# vector) = vector
+unwrap (Direction2d_ vector) = vector
 
 positiveX :: Direction2d space
 positiveX = unsafe (Vector2d 1.0 0.0)
