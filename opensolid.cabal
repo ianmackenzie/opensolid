@@ -50,6 +50,7 @@ library
       Debug
       Direction2d
       Direction3d
+      DirectionCurve2d
       Domain
       DoNotation
       Estimate
