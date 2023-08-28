@@ -12,6 +12,7 @@ import Curve1d (Curve1d)
 import Direction2d (Direction2d (Direction2d))
 import Direction2d qualified
 import OpenSolid
+import Vector2d (Vector2d)
 import VectorCurve2d (VectorCurve2d)
 import VectorCurve2d qualified
 
@@ -85,3 +86,129 @@ instance
     (VectorCurve2d (space @ units))
   where
   DirectionCurve2d vectorCurve * scalarCurve = vectorCurve * scalarCurve
+
+instance
+  space ~ space' =>
+  DotProduct
+    (DirectionCurve2d space)
+    (DirectionCurve2d space')
+    (Curve1d Unitless)
+  where
+  DirectionCurve2d curve1 <> DirectionCurve2d curve2 = curve1 <> curve2
+
+instance
+  space ~ space' =>
+  DotProduct
+    (DirectionCurve2d space)
+    (VectorCurve2d (space' @ units))
+    (Curve1d units)
+  where
+  DirectionCurve2d curve1 <> curve2 = curve1 <> curve2
+
+instance
+  space ~ space' =>
+  DotProduct
+    (VectorCurve2d (space @ units))
+    (DirectionCurve2d space')
+    (Curve1d units)
+  where
+  curve1 <> DirectionCurve2d curve2 = curve1 <> curve2
+
+instance
+  space ~ space' =>
+  DotProduct
+    (DirectionCurve2d space)
+    (Direction2d space')
+    (Curve1d Unitless)
+  where
+  DirectionCurve2d curve <> direction = curve <> direction
+
+instance
+  space ~ space' =>
+  DotProduct
+    (Direction2d space)
+    (DirectionCurve2d space')
+    (Curve1d Unitless)
+  where
+  direction <> DirectionCurve2d curve = direction <> curve
+
+instance
+  space ~ space' =>
+  DotProduct
+    (DirectionCurve2d space)
+    (Vector2d (space' @ units))
+    (Curve1d units)
+  where
+  DirectionCurve2d curve <> vector = curve <> vector
+
+instance
+  space ~ space' =>
+  DotProduct
+    (Vector2d (space @ units))
+    (DirectionCurve2d space')
+    (Curve1d units)
+  where
+  vector <> DirectionCurve2d curve = vector <> curve
+
+instance
+  space ~ space' =>
+  CrossProduct
+    (DirectionCurve2d space)
+    (DirectionCurve2d space')
+    (Curve1d Unitless)
+  where
+  DirectionCurve2d curve1 >< DirectionCurve2d curve2 = curve1 >< curve2
+
+instance
+  space ~ space' =>
+  CrossProduct
+    (DirectionCurve2d space)
+    (VectorCurve2d (space' @ units))
+    (Curve1d units)
+  where
+  DirectionCurve2d curve1 >< curve2 = curve1 >< curve2
+
+instance
+  space ~ space' =>
+  CrossProduct
+    (VectorCurve2d (space @ units))
+    (DirectionCurve2d space')
+    (Curve1d units)
+  where
+  curve1 >< DirectionCurve2d curve2 = curve1 >< curve2
+
+instance
+  space ~ space' =>
+  CrossProduct
+    (DirectionCurve2d space)
+    (Direction2d space')
+    (Curve1d Unitless)
+  where
+  DirectionCurve2d curve >< direction = curve >< direction
+
+instance
+  space ~ space' =>
+  CrossProduct
+    (Direction2d space)
+    (DirectionCurve2d space')
+    (Curve1d Unitless)
+  where
+  direction >< DirectionCurve2d curve = direction >< curve
+
+instance
+  space ~ space' =>
+  CrossProduct
+    (DirectionCurve2d space)
+    (Vector2d (space' @ units))
+    (Curve1d units)
+  where
+  DirectionCurve2d curve >< vector = curve >< vector
+
+instance
+  space ~ space' =>
+  CrossProduct
+    (Vector2d (space @ units))
+    (DirectionCurve2d space')
+    (Curve1d units)
+  where
+  vector >< DirectionCurve2d curve = vector >< curve
