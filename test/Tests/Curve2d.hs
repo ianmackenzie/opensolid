@@ -59,14 +59,22 @@ overlappingSegments curve1 curve2 =
     Error (Curve2d.CurvesOverlap segments) -> Ok segments
     Error error -> Error (errorMessage error)
 
+equalOverlapSegments :: (Domain, Domain, Sign) -> (Domain, Domain, Sign) -> Bool
+equalOverlapSegments (u1, v1, sign1) (u2, v2, sign2) =
+  let ?tolerance = 1e-12
+   in u1 ~= u2 && v1 ~= v2 && sign1 == sign2
+
+equalOverlapSegmentLists :: List (Domain, Domain, Sign) -> List (Domain, Domain, Sign) -> Bool
+equalOverlapSegmentLists segments1 segments2 =
+  List.allTrue (List.map2 equalOverlapSegments segments1 segments2)
+
 curveOverlap1 :: Tolerance Meters => Test
 curveOverlap1 = Test.verify "Overlap detection 1" $ do
   arc1 <- Arc2d.from (Point2d.meters 1.0 0.0) (Point2d.meters -1.0 0.0) Angle.halfTurn
   arc2 <- Arc2d.from (Point2d.meters 0.0 -1.0) (Point2d.meters 0.0 1.0) Angle.halfTurn
   segments <- overlappingSegments arc1 arc2
   let expectedSegments = [(Range.from 0.0 0.5, Range.from 0.5 1.0, Positive)]
-  let ?tolerance = 1e-12
-   in Test.expect (segments ~= expectedSegments)
+   in Test.expect (equalOverlapSegmentLists segments expectedSegments)
 
 curveOverlap2 :: Tolerance Meters => Test
 curveOverlap2 = Test.verify "Overlap detection 2" $ do
@@ -89,8 +97,7 @@ curveOverlap2 = Test.verify "Overlap detection 2" $ do
         [ (Range.from 0.0 (1 / 4), Range.from 0.0 (1 / 6), Negative)
         , (Range.from (3 / 4) 1.0, Range.from (5 / 6) 1.0, Negative)
         ]
-  let ?tolerance = 1e-12
-   in Test.expect (segments ~= expectedSegments)
+   in Test.expect (equalOverlapSegmentLists segments expectedSegments)
 
 crossingIntersection :: Tolerance Meters => Test
 crossingIntersection = Test.verify "Crossing intersection" $ do
