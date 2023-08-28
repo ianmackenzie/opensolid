@@ -1,5 +1,5 @@
 module Result
-  ( Result (..)
+  ( Result (Ok, Error)
   , ErrorMessage (..)
   , map
   , withDefault

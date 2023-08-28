@@ -1,5 +1,5 @@
 module Qty
-  ( Qty (..)
+  ( Qty (Qty)
   , zero
   , infinity
   , sign
@@ -40,7 +40,7 @@ import {-# SOURCE #-} Float (Float, fromRational)
 import {-# SOURCE #-} Float qualified
 import Generic qualified
 import Result (ErrorMessage, Result (Error, Ok))
-import Sign (Sign (..))
+import Sign (Sign (Negative, Positive))
 import {-# SOURCE #-} Tolerance (Tolerance, (~=))
 import Units (Unitless)
 import Units qualified

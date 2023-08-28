@@ -20,10 +20,10 @@ import CoordinateSystem (Units)
 import Generic qualified
 import OpenSolid
 import Qty qualified
-import Range (Range (..))
+import Range (Range (Range))
 import Range qualified
 import Units qualified
-import Vector3d (Vector3d (..))
+import Vector3d (Vector3d (Vector3d))
 import Vector3d qualified
 
 data VectorBox3d (coordinateSystem :: CoordinateSystem)

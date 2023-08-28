@@ -1,4 +1,4 @@
-module Sign (Sign (..)) where
+module Sign (Sign (Positive, Negative)) where
 
 import Arithmetic
 import Prelude (Eq, Ord, Show)

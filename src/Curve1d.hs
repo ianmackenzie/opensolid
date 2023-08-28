@@ -36,7 +36,7 @@ import Generic qualified
 import List qualified
 import OpenSolid
 import Qty qualified
-import Range (Range (..))
+import Range (Range (Range))
 import Range qualified
 import Result qualified
 import Stream (Stream)

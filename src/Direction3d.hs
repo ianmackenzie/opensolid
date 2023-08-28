@@ -19,7 +19,7 @@ import Angle qualified
 import OpenSolid
 import Qty qualified
 import Units (Radians)
-import Vector3d (Vector3d (..))
+import Vector3d (Vector3d (Vector3d))
 import Vector3d qualified
 
 type role Direction3d phantom

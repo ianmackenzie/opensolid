@@ -1,5 +1,5 @@
 module Maybe
-  ( Maybe (..)
+  ( Maybe (Just, Nothing)
   , map
   , withDefault
   , orError
@@ -10,7 +10,7 @@ where
 
 import Basics
 import Data.Maybe qualified
-import Result (ErrorMessage, Result (..))
+import Result (ErrorMessage, Result (Error, Ok))
 import Prelude qualified
 
 map :: (a -> b) -> Maybe a -> Maybe b

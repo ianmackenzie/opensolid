@@ -1,6 +1,6 @@
 module Curve2d.Intersection
   ( Intersection (..)
-  , Kind (..)
+  , Kind (Crossing, Tangent)
   , TangentIntersectionAtDegeneratePoint (TangentIntersectionAtDegeneratePoint)
   )
 where

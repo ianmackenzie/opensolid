@@ -22,7 +22,7 @@ where
 
 import Arithmetic
 import Basics
-import Qty (Qty (..))
+import Qty (Qty (Qty))
 import Qty qualified
 import Units (Unitless)
 import Prelude qualified

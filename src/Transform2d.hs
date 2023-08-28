@@ -24,11 +24,11 @@ import Angle qualified
 import {-# SOURCE #-} Axis2d (Axis2d)
 import {-# SOURCE #-} Axis2d qualified
 import CoordinateSystem (Units)
-import Direction2d (Direction2d (..))
+import Direction2d (Direction2d (Direction2d))
 import Direction2d qualified
 import OpenSolid
-import Point2d (Point2d (..))
-import Vector2d (Vector2d (..))
+import Point2d (Point2d (Point2d))
+import Vector2d (Vector2d (Vector2d))
 
 data Matrix units = Matrix Float Float Float Float (Qty units) (Qty units)
 

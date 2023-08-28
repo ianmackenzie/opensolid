@@ -9,7 +9,7 @@ import Curve2d (Curve2d, DegenerateCurve, IsCurve2d (..))
 import Curve2d qualified
 import OpenSolid
 import Point2d (Point2d (Point2d))
-import Range (Range (..))
+import Range (Range (Range))
 import VectorCurve2d qualified
 
 data QuadraticSpline2d (coordinateSystem :: CoordinateSystem)

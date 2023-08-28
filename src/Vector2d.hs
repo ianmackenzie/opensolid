@@ -15,7 +15,7 @@ module Vector2d
   , magnitude
   , squaredMagnitude
   , angle
-  , IsZero (..)
+  , IsZero (IsZero)
   , direction
   , magnitudeAndDirection
   , normalize

@@ -24,7 +24,7 @@ import Data.Text.Read
 import Float (Float)
 import List qualified
 import Qty (Qty (Qty))
-import Result (Result (..))
+import Result (Result (Error, Ok))
 import Result qualified
 import Prelude qualified
 

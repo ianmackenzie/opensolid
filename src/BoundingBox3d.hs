@@ -1,5 +1,5 @@
 module BoundingBox3d
-  ( BoundingBox3d (..)
+  ( BoundingBox3d (BoundingBox3d)
   , constant
   , hull2
   , hull3

@@ -1,5 +1,5 @@
 module BoundingBox2d
-  ( BoundingBox2d (..)
+  ( BoundingBox2d (BoundingBox2d)
   , constant
   , hull2
   , hull3
@@ -14,7 +14,7 @@ where
 import Bounds
 import CoordinateSystem (Units)
 import OpenSolid
-import Point2d (Point2d (..))
+import Point2d (Point2d (Point2d))
 import Qty qualified
 import Range (Range)
 import Range qualified

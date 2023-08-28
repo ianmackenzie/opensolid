@@ -34,14 +34,14 @@ import Data.Text (Text)
 import Data.Text qualified
 import GHC.Records (HasField (getField))
 import Prelude
-  ( Bool (..)
+  ( Bool (False, True)
   , Char
-  , Eq (..)
+  , Eq ((/=), (==))
   , IO
   , IOError
   , Int
-  , Maybe (..)
-  , Ord (..)
+  , Maybe (Just, Nothing)
+  , Ord ((<), (<=), (>), (>=))
   , Show
   , flip
   , not

@@ -1,5 +1,5 @@
 module BoundingBox2d
-  ( BoundingBox2d (..)
+  ( BoundingBox2d (BoundingBox2d)
   , constant
   )
 where

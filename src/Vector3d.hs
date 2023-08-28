@@ -17,7 +17,7 @@ module Vector3d
   , interpolateFrom
   , magnitude
   , squaredMagnitude
-  , IsZero (..)
+  , IsZero (IsZero)
   , direction
   , magnitudeAndDirection
   , normalize

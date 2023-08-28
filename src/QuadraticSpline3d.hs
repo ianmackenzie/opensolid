@@ -8,7 +8,7 @@ import BoundingBox3d qualified
 import Curve3d (Curve3d (Curve3d), DegenerateCurve (DegenerateCurve), IsCurve3d (..))
 import OpenSolid
 import Point3d (Point3d (Point3d))
-import Range (Range (..))
+import Range (Range (Range))
 import VectorCurve3d qualified
 
 data QuadraticSpline3d (coordinateSystem :: CoordinateSystem)
