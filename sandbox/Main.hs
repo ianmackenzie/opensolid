@@ -5,18 +5,13 @@ import Arc2d qualified
 import Area qualified
 import Axis2d qualified
 import Console qualified
-import Curve1d qualified
-import Curve2d (Curve2d)
 import Curve2d qualified
 import Debug qualified
 import Direction2d qualified
 import Direction3d ()
-import Estimate (Estimate)
-import Estimate qualified
 import Float qualified
 import Length (Length)
 import Length qualified
-import Line2d qualified
 import List qualified
 import NonEmpty qualified
 import OpenSolid
@@ -25,18 +20,15 @@ import Point2d (Point2d)
 import Point2d qualified
 import Qty qualified
 import Random qualified
-import Range (Range)
 import Range qualified
 import Result qualified
 import Task qualified
 import Text qualified
 import Transform2d qualified
 import Try qualified
-import Units (Meters, Unitless)
-import Units qualified
+import Units (Meters)
 import Vector2d qualified
 import Vector3d qualified
-import VectorCurve2d qualified
 import Volume qualified
 
 log :: Show a => Text -> a -> Task Text ()
@@ -141,41 +133,6 @@ testNonEmpty [] = Console.printLine "List is empty"
 testNonEmpty (NonEmpty nonEmpty) =
   Console.printLine ("List is non-empty, maximum is " ++ Debug.show (NonEmpty.maximum nonEmpty))
 
-fluxIntegral :: Point2d (space @ units) -> Curve2d (space @ units) -> Estimate Unitless
-fluxIntegral point curve =
-  let displacement = Units.generalize (point - curve)
-      firstDerivative = Units.generalize (Curve2d.derivative curve)
-      integrand = (firstDerivative >< displacement) / VectorCurve2d.squaredMagnitude displacement
-   in Curve1d.integral integrand
-
-bothPossibleFluxValues :: Range Unitless
-bothPossibleFluxValues = Range.from 0.0 Float.twoPi
-
-containmentIsDeterminate :: Range Unitless -> Bool
-containmentIsDeterminate flux = not (Range.contains bothPossibleFluxValues flux)
-
-testPointContainment :: Task Text ()
-testPointContainment = Try.do
-  let p1 = Point2d.origin
-  let p2 = Point2d.meters 4.0 0.0
-  let p3 = Point2d.meters 4.0 4.0
-  let p4 = Point2d.meters 0.0 4.0
-  line1 <- Line2d.from p1 p2
-  line2 <- Line2d.from p2 p3
-  line3 <- Line2d.from p3 p4
-  line4 <- Line2d.from p4 p1
-  let lines = [line1, line2, line3, line4]
-  let totalFlux testPoint =
-        Estimate.sum (List.map (fluxIntegral testPoint) lines)
-          |> Estimate.satisfy containmentIsDeterminate
-  let printTotalFlux testPoint = log ("Flux for " ++ Debug.show testPoint) (totalFlux testPoint)
-  printTotalFlux (Point2d.meters 1.0 1.0)
-  printTotalFlux (Point2d.meters 3.0 2.0)
-  printTotalFlux (Point2d.meters 5.0 3.0)
-  printTotalFlux (Point2d.meters -1.0 -1.0)
- where
-  ?tolerance = defaultTolerance
-
 script :: Task Text ()
 script = do
   log "Integer product" (3 * 4)
@@ -233,7 +190,6 @@ script = do
   testRangeFind
   testNonEmpty ([] :: List Int)
   testNonEmpty [2, 3, 1]
-  testPointContainment
  where
   ?tolerance = defaultTolerance
 
