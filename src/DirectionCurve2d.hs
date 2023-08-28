@@ -1,5 +1,6 @@
 module DirectionCurve2d
   ( DirectionCurve2d
+  , unwrap
   , evaluateAt
   , derivative
   , constant
@@ -15,6 +16,9 @@ import VectorCurve2d (VectorCurve2d)
 import VectorCurve2d qualified
 
 newtype DirectionCurve2d space = DirectionCurve2d (VectorCurve2d (space @ Unitless))
+
+unwrap :: DirectionCurve2d space -> VectorCurve2d (space @ Unitless)
+unwrap (DirectionCurve2d vectorCurve) = vectorCurve
 
 evaluateAt :: Float -> DirectionCurve2d space -> Direction2d space
 evaluateAt t (DirectionCurve2d vectorCurve) =
