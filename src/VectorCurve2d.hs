@@ -99,95 +99,247 @@ instance Multiplication (VectorCurve2d (space @ units)) Sign (VectorCurve2d (spa
   curve * Positive = curve
   curve * Negative = -curve
 
-instance space ~ space' => Addition (VectorCurve2d (space @ units)) (VectorCurve2d (space' @ units)) (VectorCurve2d (space @ units)) where
+instance
+  space ~ space' =>
+  Addition
+    (VectorCurve2d (space @ units))
+    (VectorCurve2d (space' @ units))
+    (VectorCurve2d (space @ units))
+  where
   -- TODO add special cases
   c1 + c2 = Sum c1 c2
 
-instance space ~ space' => Addition (VectorCurve2d (space @ units)) (Vector2d (space' @ units)) (VectorCurve2d (space @ units)) where
+instance
+  space ~ space' =>
+  Addition
+    (VectorCurve2d (space @ units))
+    (Vector2d (space' @ units))
+    (VectorCurve2d (space @ units))
+  where
   curve + vector = curve + constant vector
 
-instance space ~ space' => Addition (Vector2d (space @ units)) (VectorCurve2d (space' @ units)) (VectorCurve2d (space @ units)) where
+instance
+  space ~ space' =>
+  Addition
+    (Vector2d (space @ units))
+    (VectorCurve2d (space' @ units))
+    (VectorCurve2d (space @ units))
+  where
   vector + curve = constant vector + curve
 
-instance space ~ space' => Subtraction (VectorCurve2d (space @ units)) (VectorCurve2d (space' @ units)) (VectorCurve2d (space @ units)) where
+instance
+  space ~ space' =>
+  Subtraction
+    (VectorCurve2d (space @ units))
+    (VectorCurve2d (space' @ units))
+    (VectorCurve2d (space @ units))
+  where
   -- TODO add special cases
   c1 - c2 = Difference c1 c2
 
-instance space ~ space' => Subtraction (VectorCurve2d (space @ units)) (Vector2d (space' @ units)) (VectorCurve2d (space @ units)) where
+instance
+  space ~ space' =>
+  Subtraction
+    (VectorCurve2d (space @ units))
+    (Vector2d (space' @ units))
+    (VectorCurve2d (space @ units))
+  where
   curve - vector = curve - constant vector
 
-instance space ~ space' => Subtraction (Vector2d (space @ units)) (VectorCurve2d (space' @ units)) (VectorCurve2d (space @ units)) where
+instance
+  space ~ space' =>
+  Subtraction
+    (Vector2d (space @ units))
+    (VectorCurve2d (space' @ units))
+    (VectorCurve2d (space @ units))
+  where
   vector - curve = constant vector + curve
 
-instance Units.Product units1 units2 units3 => Multiplication (Curve1d units1) (VectorCurve2d (space @ units2)) (VectorCurve2d (space @ units3)) where
+instance
+  Units.Product units1 units2 units3 =>
+  Multiplication
+    (Curve1d units1)
+    (VectorCurve2d (space @ units2))
+    (VectorCurve2d (space @ units3))
+  where
   -- TODO add special cases
   c1 * c2 = Product1d2d c1 c2
 
-instance Units.Product units1 units2 units3 => Multiplication (Qty units1) (VectorCurve2d (space @ units2)) (VectorCurve2d (space @ units3)) where
+instance
+  Units.Product units1 units2 units3 =>
+  Multiplication
+    (Qty units1)
+    (VectorCurve2d (space @ units2))
+    (VectorCurve2d (space @ units3))
+  where
   c1 * c2 = Curve1d.constant c1 * c2
 
-instance Units.Product units1 units2 units3 => Multiplication (VectorCurve2d (space @ units1)) (Curve1d units2) (VectorCurve2d (space @ units3)) where
+instance
+  Units.Product units1 units2 units3 =>
+  Multiplication
+    (VectorCurve2d (space @ units1))
+    (Curve1d units2)
+    (VectorCurve2d (space @ units3))
+  where
   -- TODO add special cases
   c1 * c2 = Product2d1d c1 c2
 
-instance Units.Product units1 units2 units3 => Multiplication (VectorCurve2d (space @ units1)) (Qty units2) (VectorCurve2d (space @ units3)) where
+instance
+  Units.Product units1 units2 units3 =>
+  Multiplication
+    (VectorCurve2d (space @ units1))
+    (Qty units2)
+    (VectorCurve2d (space @ units3))
+  where
   curve * value = curve * Curve1d.constant value
 
-instance Units.Quotient units1 units2 units3 => Division (VectorCurve2d (space @ units1)) (Curve1d units2) (VectorCurve2d (space @ units3)) where
+instance
+  Units.Quotient units1 units2 units3 =>
+  Division
+    (VectorCurve2d (space @ units1))
+    (Curve1d units2)
+    (VectorCurve2d (space @ units3))
+  where
   -- TODO add special cases
   c1 / c2 = Quotient c1 c2
 
-instance Units.Quotient units1 units2 units3 => Division (VectorCurve2d (space @ units1)) (Qty units2) (VectorCurve2d (space @ units3)) where
+instance
+  Units.Quotient units1 units2 units3 =>
+  Division
+    (VectorCurve2d (space @ units1))
+    (Qty units2)
+    (VectorCurve2d (space @ units3))
+  where
   curve / value = curve / Curve1d.constant value
 
-data DotProductOf space units1 units2 = DotProductOf (VectorCurve2d (space @ units1)) (VectorCurve2d (space @ units2))
+data DotProductOf space units1 units2
+  = DotProductOf (VectorCurve2d (space @ units1)) (VectorCurve2d (space @ units2))
 
 deriving instance Show (DotProductOf space units1 units2)
 
-instance Units.Product units1 units2 units3 => IsCurve1d (DotProductOf space units1 units2) units3 where
+instance
+  Units.Product units1 units2 units3 =>
+  IsCurve1d (DotProductOf space units1 units2) units3
+  where
   evaluateAtImpl t (DotProductOf c1 c2) = evaluateAt t c1 <> evaluateAt t c2
   segmentBoundsImpl t (DotProductOf c1 c2) = segmentBounds t c1 <> segmentBounds t c2
   derivativeImpl (DotProductOf c1 c2) = derivative c1 <> c2 + c1 <> derivative c2
 
-instance (Units.Product units1 units2 units3, space ~ space') => DotProduct (VectorCurve2d (space @ units1)) (VectorCurve2d (space' @ units2)) (Curve1d units3) where
+instance
+  ( Units.Product units1 units2 units3
+  , space ~ space'
+  ) =>
+  DotProduct
+    (VectorCurve2d (space @ units1))
+    (VectorCurve2d (space' @ units2))
+    (Curve1d units3)
+  where
   -- TODO add special cases
   curve1 <> curve2 = Curve1d (DotProductOf curve1 curve2)
 
-instance (Units.Product units1 units2 units3, space ~ space') => DotProduct (VectorCurve2d (space @ units1)) (Vector2d (space' @ units2)) (Curve1d units3) where
+instance
+  ( Units.Product units1 units2 units3
+  , space ~ space'
+  ) =>
+  DotProduct
+    (VectorCurve2d (space @ units1))
+    (Vector2d (space' @ units2))
+    (Curve1d units3)
+  where
   curve <> vector = curve <> constant vector
 
-instance (Units.Product units1 units2 units3, space ~ space') => DotProduct (Vector2d (space @ units1)) (VectorCurve2d (space' @ units2)) (Curve1d units3) where
+instance
+  ( Units.Product units1 units2 units3
+  , space ~ space'
+  ) =>
+  DotProduct
+    (Vector2d (space @ units1))
+    (VectorCurve2d (space' @ units2))
+    (Curve1d units3)
+  where
   vector <> curve = constant vector <> curve
 
-instance space ~ space' => DotProduct (VectorCurve2d (space @ units)) (Direction2d space') (Curve1d units) where
+instance
+  space ~ space' =>
+  DotProduct
+    (VectorCurve2d (space @ units))
+    (Direction2d space')
+    (Curve1d units)
+  where
   curve <> direction = curve <> Direction2d.unwrap direction
 
-instance space ~ space' => DotProduct (Direction2d space) (VectorCurve2d (space' @ units)) (Curve1d units) where
+instance
+  space ~ space' =>
+  DotProduct
+    (Direction2d space)
+    (VectorCurve2d (space' @ units))
+    (Curve1d units)
+  where
   direction <> curve = Direction2d.unwrap direction <> curve
 
-data CrossProductOf space units1 units2 = CrossProductOf (VectorCurve2d (space @ units1)) (VectorCurve2d (space @ units2))
+data CrossProductOf space units1 units2
+  = CrossProductOf (VectorCurve2d (space @ units1)) (VectorCurve2d (space @ units2))
 
 deriving instance Show (CrossProductOf space units1 units2)
 
-instance Units.Product units1 units2 units3 => IsCurve1d (CrossProductOf space units1 units2) units3 where
+instance
+  Units.Product units1 units2 units3 =>
+  IsCurve1d (CrossProductOf space units1 units2) units3
+  where
   evaluateAtImpl t (CrossProductOf c1 c2) = evaluateAt t c1 >< evaluateAt t c2
   segmentBoundsImpl t (CrossProductOf c1 c2) = segmentBounds t c1 >< segmentBounds t c2
   derivativeImpl (CrossProductOf c1 c2) = derivative c1 >< c2 + c1 >< derivative c2
 
-instance (Units.Product units1 units2 units3, space ~ space') => CrossProduct (VectorCurve2d (space @ units1)) (VectorCurve2d (space' @ units2)) (Curve1d units3) where
+instance
+  ( Units.Product units1 units2 units3
+  , space ~ space'
+  ) =>
+  CrossProduct
+    (VectorCurve2d (space @ units1))
+    (VectorCurve2d (space' @ units2))
+    (Curve1d units3)
+  where
   -- TODO add special cases
   curve1 >< curve2 = Curve1d (CrossProductOf curve1 curve2)
 
-instance (Units.Product units1 units2 units3, space ~ space') => CrossProduct (VectorCurve2d (space @ units1)) (Vector2d (space' @ units2)) (Curve1d units3) where
+instance
+  ( Units.Product units1 units2 units3
+  , space ~ space'
+  ) =>
+  CrossProduct
+    (VectorCurve2d (space @ units1))
+    (Vector2d (space' @ units2))
+    (Curve1d units3)
+  where
   curve >< vector = curve >< constant vector
 
-instance (Units.Product units1 units2 units3, space ~ space') => CrossProduct (Vector2d (space @ units1)) (VectorCurve2d (space' @ units2)) (Curve1d units3) where
+instance
+  ( Units.Product units1 units2 units3
+  , space ~ space'
+  ) =>
+  CrossProduct
+    (Vector2d (space @ units1))
+    (VectorCurve2d (space' @ units2))
+    (Curve1d units3)
+  where
   vector >< curve = constant vector >< curve
 
-instance space ~ space' => CrossProduct (VectorCurve2d (space @ units)) (Direction2d space') (Curve1d units) where
+instance
+  space ~ space' =>
+  CrossProduct
+    (VectorCurve2d (space @ units))
+    (Direction2d space')
+    (Curve1d units)
+  where
   curve >< direction = curve >< Direction2d.unwrap direction
 
-instance space ~ space' => CrossProduct (Direction2d space) (VectorCurve2d (space' @ units)) (Curve1d units) where
+instance
+  space ~ space' =>
+  CrossProduct
+    (Direction2d space)
+    (VectorCurve2d (space' @ units))
+    (Curve1d units)
+  where
   direction >< curve = Direction2d.unwrap direction >< curve
 
 zero :: VectorCurve2d (space @ units)
