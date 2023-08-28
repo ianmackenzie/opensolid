@@ -5,6 +5,8 @@ module DirectionCurve2d
   , derivative
   , constant
   , reverse
+  , xComponent
+  , yComponent
   )
 where
 
@@ -212,3 +214,9 @@ instance
     (Curve1d units)
   where
   vector >< DirectionCurve2d curve = vector >< curve
+
+xComponent :: DirectionCurve2d space -> Curve1d Unitless
+xComponent curve = curve <> Direction2d.x
+
+yComponent :: DirectionCurve2d space -> Curve1d Unitless
+yComponent curve = curve <> Direction2d.y
