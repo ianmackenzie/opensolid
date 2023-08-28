@@ -9,7 +9,6 @@ import Curve2d qualified
 import Debug qualified
 import Direction2d qualified
 import Direction3d ()
-import Float qualified
 import Length (Length)
 import Length qualified
 import List qualified
@@ -52,16 +51,6 @@ offsetPoint ::
 offsetPoint startPoint endPoint distance = Result.withDefault startPoint do
   direction <- Direction2d.from startPoint endPoint
   Ok (Point2d.midpoint startPoint endPoint + distance * Direction2d.perpendicularTo direction)
-
-testDirection2dAngleFrom :: Task Text ()
-testDirection2dAngleFrom = do
-  let angle start end =
-        Direction2d.angleFrom
-          (Direction2d.degrees (Float.fromInt start))
-          (Direction2d.degrees (Float.fromInt end))
-          |> Angle.inDegrees
-  log "Direction2d.angleFrom (Direction2d.degrees 10) (Direction2d.degrees 30)" (angle 10 30)
-  log "Direction2d.angleFrom (Direction2d.degrees 10) (Direction2d.degrees 350)" (angle 10 350)
 
 testArc2dFrom :: Task Text ()
 testArc2dFrom = Try.do
@@ -167,7 +156,6 @@ script = do
   log "Custom type" (MyPoints (Point2d.meters 1.0 2.0) (Point2d.meters 3.0 4.0))
   log "sqrt 2.0" (Qty.sqrt 2.0)
   log "Equality test" (let ?tolerance = Length.centimeter in Length.meters 1.0 ~= Length.meters 1.005)
-  testDirection2dAngleFrom
   testArc2dFrom
   log "Rotated axis" (Axis2d.x |> Transform2d.rotateAround (Point2d.meters 1.0 0.0) Angle.quarterTurn)
   let originalPoints = [Point2d.meters 1.0 0.0, Point2d.meters 2.0 0.0, Point2d.meters 3.0 0.0]

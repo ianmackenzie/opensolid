@@ -209,6 +209,7 @@ test-suite opensolid-test
       Test
       Tests.Curve1d
       Tests.Curve2d
+      Tests.Direction2d
       Tests.Estimate
       Tests.List
       Tests.NonEmpty
