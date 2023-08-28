@@ -1,9 +1,12 @@
 module VectorBox3d
-  ( VectorBox3d (..)
+  ( VectorBox3d (VectorBox3d)
   , constant
   , hull2
   , hull3
   , hull4
+  , xComponent
+  , yComponent
+  , zComponent
   , squaredMagnitude
   , magnitude
   , maxMagnitude
@@ -23,11 +26,11 @@ import Units qualified
 import Vector3d (Vector3d (..))
 import Vector3d qualified
 
-data VectorBox3d (coordinateSystem :: CoordinateSystem) = VectorBox3d
-  { xComponent :: Range (Units coordinateSystem)
-  , yComponent :: Range (Units coordinateSystem)
-  , zComponent :: Range (Units coordinateSystem)
-  }
+data VectorBox3d (coordinateSystem :: CoordinateSystem)
+  = VectorBox3d
+      (Range (Units coordinateSystem))
+      (Range (Units coordinateSystem))
+      (Range (Units coordinateSystem))
   deriving (Show)
 
 instance
@@ -261,6 +264,15 @@ hull4 (Vector3d x1 y1 z1) (Vector3d x2 y2 z2) (Vector3d x3 y3 z3) (Vector3d x4 y
       minZ = Qty.min (Qty.min (Qty.min z1 z2) z3) z4
       maxZ = Qty.max (Qty.max (Qty.max z1 z2) z3) z4
    in VectorBox3d (Range.unsafe minX maxX) (Range.unsafe minY maxY) (Range.unsafe minZ maxZ)
+
+xComponent :: VectorBox3d (space @ units) -> Range units
+xComponent (VectorBox3d vx _ _) = vx
+
+yComponent :: VectorBox3d (space @ units) -> Range units
+yComponent (VectorBox3d _ vy _) = vy
+
+zComponent :: VectorBox3d (space @ units) -> Range units
+zComponent (VectorBox3d _ _ vz) = vz
 
 squaredMagnitude :: Units.Squared units1 units2 => VectorBox3d (space @ units1) -> Range units2
 squaredMagnitude (VectorBox3d x y z) = Range.squared x + Range.squared y + Range.squared z
