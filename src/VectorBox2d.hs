@@ -1,10 +1,12 @@
 module VectorBox2d
-  ( VectorBox2d (..)
+  ( VectorBox2d (VectorBox2d)
   , constant
   , hull2
   , hull3
   , hull4
   , polar
+  , xComponent
+  , yComponent
   , squaredMagnitude
   , magnitude
   , maxMagnitude
@@ -27,10 +29,8 @@ import Vector2d qualified
 
 type role VectorBox2d phantom
 
-data VectorBox2d (coordinateSystem :: CoordinateSystem) = VectorBox2d
-  { xComponent :: Range (Units coordinateSystem)
-  , yComponent :: Range (Units coordinateSystem)
-  }
+data VectorBox2d (coordinateSystem :: CoordinateSystem)
+  = VectorBox2d (Range (Units coordinateSystem)) (Range (Units coordinateSystem))
   deriving (Show)
 
 instance
@@ -250,6 +250,12 @@ hull4 (Vector2d x1 y1) (Vector2d x2 y2) (Vector2d x3 y3) (Vector2d x4 y4) =
 
 polar :: Range units -> Range Radians -> VectorBox2d (space @ units)
 polar r theta = VectorBox2d (r * Range.cos theta) (r * Range.sin theta)
+
+xComponent :: VectorBox2d (space @ units) -> Range units
+xComponent (VectorBox2d vx _) = vx
+
+yComponent :: VectorBox2d (space @ units) -> Range units
+yComponent (VectorBox2d _ vy) = vy
 
 squaredMagnitude :: Units.Squared units1 units2 => VectorBox2d (space @ units1) -> Range units2
 squaredMagnitude (VectorBox2d x y) = Range.squared x + Range.squared y
