@@ -1,5 +1,5 @@
 module Vector3d
-  ( Vector3d (Vector3d, xComponent, yComponent, zComponent)
+  ( Vector3d (Vector3d)
   , zero
   , x
   , y
@@ -10,6 +10,9 @@ module Vector3d
   , xyz
   , meters
   , squareMeters
+  , xComponent
+  , yComponent
+  , zComponent
   , midpoint
   , interpolateFrom
   , magnitude
@@ -32,11 +35,11 @@ import Qty qualified
 import Units (Meters, SquareMeters, Unitless)
 import Units qualified
 
-data Vector3d (coordinateSystem :: CoordinateSystem) = Vector3d
-  { xComponent :: Qty (Units coordinateSystem)
-  , yComponent :: Qty (Units coordinateSystem)
-  , zComponent :: Qty (Units coordinateSystem)
-  }
+data Vector3d (coordinateSystem :: CoordinateSystem)
+  = Vector3d
+      (Qty (Units coordinateSystem))
+      (Qty (Units coordinateSystem))
+      (Qty (Units coordinateSystem))
   deriving (Eq, Show)
 
 instance
@@ -182,6 +185,15 @@ meters vx vy vz = Vector3d (Length.meters vx) (Length.meters vy) (Length.meters 
 squareMeters :: Float -> Float -> Float -> Vector3d (space @ SquareMeters)
 squareMeters vx vy vz =
   Vector3d (Area.squareMeters vx) (Area.squareMeters vy) (Area.squareMeters vz)
+
+xComponent :: Vector3d (space @ units) -> Qty units
+xComponent (Vector3d vx _ _) = vx
+
+yComponent :: Vector3d (space @ units) -> Qty units
+yComponent (Vector3d _ vy _) = vy
+
+zComponent :: Vector3d (space @ units) -> Qty units
+zComponent (Vector3d _ _ vz) = vz
 
 interpolateFrom ::
   Vector3d (space @ units) ->

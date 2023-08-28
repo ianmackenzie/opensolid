@@ -1,10 +1,12 @@
 module Point2d
-  ( Point2d (Point2d, xCoordinate, yCoordinate)
+  ( Point2d (Point2d)
   , origin
   , x
   , y
   , xy
   , meters
+  , xCoordinate
+  , yCoordinate
   , midpoint
   , interpolateFrom
   , distanceFrom
@@ -37,10 +39,10 @@ import VectorBox2d (VectorBox2d (VectorBox2d))
 
 type role Point2d phantom
 
-data Point2d (coordinateSystem :: CoordinateSystem) = Point2d
-  { xCoordinate :: Qty (Units coordinateSystem)
-  , yCoordinate :: Qty (Units coordinateSystem)
-  }
+data Point2d (coordinateSystem :: CoordinateSystem)
+  = Point2d
+      (Qty (Units coordinateSystem))
+      (Qty (Units coordinateSystem))
   deriving (Eq, Ord, Show)
 
 instance
@@ -119,6 +121,12 @@ xy = Point2d
 
 meters :: Float -> Float -> Point2d (space @ Meters)
 meters px py = Point2d (Length.meters px) (Length.meters py)
+
+xCoordinate :: Point2d (space @ units) -> Qty units
+xCoordinate (Point2d px _) = px
+
+yCoordinate :: Point2d (space @ units) -> Qty units
+yCoordinate (Point2d _ py) = py
 
 interpolateFrom ::
   Point2d (space @ units) ->
