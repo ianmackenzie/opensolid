@@ -212,10 +212,10 @@ polar :: Qty units -> Angle -> Vector2d (space @ units)
 polar r theta = Vector2d (r * Angle.cos theta) (r * Angle.sin theta)
 
 xComponent :: Vector2d (space @ units) -> Qty units
-xComponent (Vector2d field _) = field
+xComponent (Vector2d vx _) = vx
 
 yComponent :: Vector2d (space @ units) -> Qty units
-yComponent (Vector2d _ field) = field
+yComponent (Vector2d _ vy) = vy
 
 interpolateFrom ::
   Vector2d (space @ units) ->
