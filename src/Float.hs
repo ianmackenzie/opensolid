@@ -8,6 +8,7 @@ module Float
   , floor
   , pi
   , twoPi
+  , sqrt
   , pow
   , sin
   , cos
@@ -54,6 +55,9 @@ pi = Prelude.pi
 
 twoPi :: Float
 twoPi = 2.0 * pi
+
+sqrt :: Float -> Float
+sqrt = Qty.sqrt
 
 pow :: Float -> Float -> Float
 pow = (Prelude.**)
