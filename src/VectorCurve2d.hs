@@ -144,11 +144,21 @@ instance Negation (VectorCurve2d (space @ units)) where
   negate (Product2d1d c1 c2) = Product2d1d c1 -c2
   negate curve = Negated curve
 
-instance Multiplication Sign (VectorCurve2d (space @ units)) (VectorCurve2d (space @ units)) where
+instance
+  Multiplication
+    Sign
+    (VectorCurve2d (space @ units))
+    (VectorCurve2d (space @ units))
+  where
   Positive * curve = curve
   Negative * curve = -curve
 
-instance Multiplication (VectorCurve2d (space @ units)) Sign (VectorCurve2d (space @ units)) where
+instance
+  Multiplication
+    (VectorCurve2d (space @ units))
+    Sign
+    (VectorCurve2d (space @ units))
+  where
   curve * Positive = curve
   curve * Negative = -curve
 
