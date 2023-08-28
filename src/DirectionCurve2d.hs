@@ -33,11 +33,21 @@ reverse (DirectionCurve2d vectorCurve) = DirectionCurve2d (VectorCurve2d.reverse
 instance Negation (DirectionCurve2d space) where
   negate (DirectionCurve2d vectorCurve) = DirectionCurve2d (negate vectorCurve)
 
-instance Multiplication Sign (DirectionCurve2d space) (DirectionCurve2d space) where
+instance
+  Multiplication
+    Sign
+    (DirectionCurve2d space)
+    (DirectionCurve2d space)
+  where
   Positive * curve = curve
   Negative * curve = -curve
 
-instance Multiplication (DirectionCurve2d space) Sign (DirectionCurve2d space) where
+instance
+  Multiplication
+    (DirectionCurve2d space)
+    Sign
+    (DirectionCurve2d space)
+  where
   curve * Positive = curve
   curve * Negative = -curve
 
