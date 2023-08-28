@@ -40,27 +40,80 @@ import Vector2d qualified
 import VectorBox2d (VectorBox2d (VectorBox2d))
 import VectorBox2d qualified
 
-class Show curve => IsVectorCurve2d curve (coordinateSystem :: CoordinateSystem) | curve -> coordinateSystem where
+class
+  Show curve =>
+  IsVectorCurve2d curve (coordinateSystem :: CoordinateSystem)
+    | curve -> coordinateSystem
+  where
   evaluateAtImpl :: Float -> curve -> Vector2d coordinateSystem
   segmentBoundsImpl :: Domain -> curve -> VectorBox2d coordinateSystem
   derivativeImpl :: curve -> VectorCurve2d coordinateSystem
   reverseImpl :: curve -> curve
 
 data VectorCurve2d (coordinateSystem :: CoordinateSystem) where
-  VectorCurve2d :: forall curve coordinateSystem. IsVectorCurve2d curve coordinateSystem => curve -> VectorCurve2d coordinateSystem
-  Zero :: VectorCurve2d (space @ units)
-  Constant :: Vector2d (space @ units) -> VectorCurve2d (space @ units)
-  XY :: Curve1d units -> Curve1d units -> VectorCurve2d (space @ units)
-  Negated :: VectorCurve2d (space @ units) -> VectorCurve2d (space @ units)
-  Sum :: VectorCurve2d (space @ units) -> VectorCurve2d (space @ units) -> VectorCurve2d (space @ units)
-  Difference :: VectorCurve2d (space @ units) -> VectorCurve2d (space @ units) -> VectorCurve2d (space @ units)
-  Product1d2d :: forall space units1 units2 units3. Units.Product units1 units2 units3 => Curve1d units1 -> VectorCurve2d (space @ units2) -> VectorCurve2d (space @ units3)
-  Product2d1d :: forall space units1 units2 units3. Units.Product units1 units2 units3 => VectorCurve2d (space @ units1) -> Curve1d units2 -> VectorCurve2d (space @ units3)
-  Quotient :: forall space units1 units2 units3. Units.Quotient units1 units2 units3 => VectorCurve2d (space @ units1) -> Curve1d units2 -> VectorCurve2d (space @ units3)
-  Line :: Vector2d (space @ units) -> Vector2d (space @ units) -> VectorCurve2d (space @ units)
-  Arc :: Qty units -> Angle -> Angle -> VectorCurve2d (space @ units)
-  QuadraticSpline :: Vector2d (space @ units) -> Vector2d (space @ units) -> Vector2d (space @ units) -> VectorCurve2d (space @ units)
-  CubicSpline :: Vector2d (space @ units) -> Vector2d (space @ units) -> Vector2d (space @ units) -> Vector2d (space @ units) -> VectorCurve2d (space @ units)
+  VectorCurve2d ::
+    forall curve coordinateSystem.
+    IsVectorCurve2d curve coordinateSystem =>
+    curve ->
+    VectorCurve2d coordinateSystem
+  Zero ::
+    VectorCurve2d (space @ units)
+  Constant ::
+    Vector2d (space @ units) ->
+    VectorCurve2d (space @ units)
+  XY ::
+    Curve1d units ->
+    Curve1d units ->
+    VectorCurve2d (space @ units)
+  Negated ::
+    VectorCurve2d (space @ units) ->
+    VectorCurve2d (space @ units)
+  Sum ::
+    VectorCurve2d (space @ units) ->
+    VectorCurve2d (space @ units) ->
+    VectorCurve2d (space @ units)
+  Difference ::
+    VectorCurve2d (space @ units) ->
+    VectorCurve2d (space @ units) ->
+    VectorCurve2d (space @ units)
+  Product1d2d ::
+    forall space units1 units2 units3.
+    Units.Product units1 units2 units3 =>
+    Curve1d units1 ->
+    VectorCurve2d (space @ units2) ->
+    VectorCurve2d (space @ units3)
+  Product2d1d ::
+    forall space units1 units2 units3.
+    Units.Product units1 units2 units3 =>
+    VectorCurve2d (space @ units1) ->
+    Curve1d units2 ->
+    VectorCurve2d (space @ units3)
+  Quotient ::
+    forall space units1 units2 units3.
+    Units.Quotient units1 units2 units3 =>
+    VectorCurve2d (space @ units1) ->
+    Curve1d units2 ->
+    VectorCurve2d (space @ units3)
+  Line ::
+    Vector2d (space @ units) ->
+    Vector2d (space @ units) ->
+    VectorCurve2d (space @ units)
+  Arc ::
+    Qty units ->
+    Angle ->
+    Angle ->
+    VectorCurve2d (space @ units)
+  QuadraticSpline ::
+    Vector2d (space @ units) ->
+    Vector2d (space @ units) ->
+    Vector2d (space @ units) ->
+    VectorCurve2d (space @ units)
+  CubicSpline ::
+    Vector2d (space @ units) ->
+    Vector2d (space @ units) ->
+    Vector2d (space @ units) ->
+    Vector2d (space @ units) ->
+    VectorCurve2d (space @ units)
 
 deriving instance Show (VectorCurve2d coordinateSystem)
 
