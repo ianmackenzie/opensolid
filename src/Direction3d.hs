@@ -1,6 +1,7 @@
 module Direction3d
-  ( Direction3d (Direction3d, xComponent, yComponent, zComponent)
+  ( Direction3d (Direction3d)
   , unsafe
+  , unwrap
   , x
   , y
   , z
@@ -24,14 +25,14 @@ import Vector3d qualified
 
 type role Direction3d phantom
 
-data Direction3d (space :: Type) = Direction3d_ {xComponent :: Float, yComponent :: Float, zComponent :: Float}
+newtype Direction3d (space :: Type) = Direction3d_ (Vector3d (space @ Unitless))
   deriving (Eq, Show)
 
 {-# COMPLETE Direction3d #-}
 
 {-# INLINE Direction3d #-}
-pattern Direction3d :: Float -> Float -> Float -> Direction3d space
-pattern Direction3d x y z <- Direction3d_ x y z
+pattern Direction3d :: Vector3d (space @ Unitless) -> Direction3d space
+pattern Direction3d v <- Direction3d_ v
 
 instance
   space ~ space' =>
@@ -40,7 +41,7 @@ instance
   d1 ~= d2 = angleFrom d1 d2 ~= Qty.zero
 
 instance Negation (Direction3d space) where
-  negate (Direction3d dx dy dz) = unsafe (negate dx) (negate dy) (negate dz)
+  negate (Direction3d vector) = unsafe (negate vector)
 
 instance Multiplication Sign (Direction3d space) (Direction3d space) where
   Positive * direction = direction
@@ -51,58 +52,49 @@ instance Multiplication (Direction3d space) Sign (Direction3d space) where
   direction * Negative = -direction
 
 instance space ~ space' => DotProduct (Direction3d space) (Direction3d space') Float where
-  Direction3d x1 y1 z1 <> Direction3d x2 y2 z2 = x1 * x2 + y1 * y2 + z1 * z2
+  Direction3d vector1 <> Direction3d vector2 = vector1 <> vector2
 
 instance space ~ space' => DotProduct (Vector3d (space @ units)) (Direction3d space') (Qty units) where
-  Vector3d vx vy vz <> Direction3d dx dy dz = vx * dx + vy * dy + vz * dz
+  vector1 <> Direction3d vector2 = vector1 <> vector2
 
 instance space ~ space' => DotProduct (Direction3d space) (Vector3d (space' @ units)) (Qty units) where
-  Direction3d dx dy dz <> Vector3d vx vy vz = dx * vx + dy * vy + dz * vz
+  Direction3d vector1 <> vector2 = vector1 <> vector2
 
 instance Multiplication (Qty units) (Direction3d space) (Vector3d (space @ units)) where
-  scale * Direction3d dx dy dz = Vector3d (scale * dx) (scale * dy) (scale * dz)
+  scale * Direction3d vector = scale * vector
 
 instance Multiplication (Direction3d space) (Qty units) (Vector3d (space @ units)) where
-  Direction3d dx dy dz * scale = Vector3d (dx * scale) (dy * scale) (dz * scale)
+  Direction3d vector * scale = vector * scale
 
 instance space ~ space' => CrossProduct (Vector3d (space @ units)) (Direction3d space') (Vector3d (space @ units)) where
-  Vector3d x1 y1 z1 >< Direction3d x2 y2 z2 =
-    Vector3d
-      (y1 * z2 - z1 * y2)
-      (z1 * x2 - x1 * z2)
-      (x1 * y2 - y1 * x2)
+  vector1 >< Direction3d vector2 = vector1 >< vector2
 
 instance space ~ space' => CrossProduct (Direction3d space) (Vector3d (space' @ units)) (Vector3d (space @ units)) where
-  Direction3d x1 y1 z1 >< Vector3d x2 y2 z2 =
-    Vector3d
-      (y1 * z2 - z1 * y2)
-      (z1 * x2 - x1 * z2)
-      (x1 * y2 - y1 * x2)
+  Direction3d vector1 >< vector2 = vector1 >< vector2
 
 instance space ~ space' => CrossProduct (Direction3d space) (Direction3d space') (Vector3d (space @ Unitless)) where
-  Direction3d x1 y1 z1 >< Direction3d x2 y2 z2 =
-    Vector3d
-      (y1 * z2 - z1 * y2)
-      (z1 * x2 - x1 * z2)
-      (x1 * y2 - y1 * x2)
+  Direction3d vector1 >< Direction3d vector2 = vector1 >< vector2
 
-unsafe :: Float -> Float -> Float -> Direction3d space
+unsafe :: Vector3d (space @ Unitless) -> Direction3d space
 unsafe = Direction3d_
 
+unwrap :: Direction3d space -> Vector3d (space @ Unitless)
+unwrap (Direction3d vector) = vector
+
 positiveX :: Direction3d space
-positiveX = unsafe 1.0 0.0 0.0
+positiveX = unsafe (Vector3d 1.0 0.0 0.0)
 
 negativeX :: Direction3d space
 negativeX = negate positiveX
 
 positiveY :: Direction3d space
-positiveY = unsafe 0.0 1.0 0.0
+positiveY = unsafe (Vector3d 0.0 1.0 0.0)
 
 negativeY :: Direction3d space
 negativeY = negate positiveY
 
 positiveZ :: Direction3d space
-positiveZ = unsafe 0.0 0.0 1.0
+positiveZ = unsafe (Vector3d 0.0 0.0 1.0)
 
 negativeZ :: Direction3d space
 negativeZ = negate positiveZ

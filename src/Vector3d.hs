@@ -217,22 +217,18 @@ data IsZero = IsZero deriving (Eq, Show, ErrorMessage)
 
 direction :: Tolerance units => Vector3d (space @ units) -> Result IsZero (Direction3d space)
 direction vector = do
-  let Vector3d vx vy vz = vector; vm = magnitude vector
-   in if vm ~= Qty.zero
-        then Error Vector3d.IsZero
-        else Ok (Direction3d.unsafe (vx / vm) (vy / vm) (vz / vm))
+  let vm = magnitude vector
+   in if vm ~= Qty.zero then Error Vector3d.IsZero else Ok (Direction3d.unsafe (vector / vm))
 
 magnitudeAndDirection ::
   Tolerance units =>
   Vector3d (space @ units) ->
   Result IsZero (Qty units, Direction3d space)
 magnitudeAndDirection vector = do
-  let Vector3d vx vy vz = vector; vm = magnitude vector
-   in if vm ~= Qty.zero
-        then Error Vector3d.IsZero
-        else Ok (vm, Direction3d.unsafe (vx / vm) (vy / vm) (vz / vm))
+  let vm = magnitude vector
+   in if vm ~= Qty.zero then Error Vector3d.IsZero else Ok (vm, Direction3d.unsafe (vector / vm))
 
 normalize :: Tolerance units => Vector3d (space @ units) -> Vector3d (space @ Unitless)
 normalize vector =
-  let Vector3d vx vy vz = vector; vm = magnitude vector
-   in if vm ~= Qty.zero then zero else Vector3d (vx / vm) (vy / vm) (vz / vm)
+  let vm = magnitude vector
+   in if vm ~= Qty.zero then zero else vector / vm

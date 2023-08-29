@@ -5,9 +5,10 @@ module Direction3d
 where
 
 import OpenSolid
+import {-# SOURCE #-} Vector3d (Vector3d)
 
 type role Direction3d phantom
 
 data Direction3d (space :: Type)
 
-unsafe :: Float -> Float -> Float -> Direction3d space
+unsafe :: Vector3d (space @ Unitless) -> Direction3d space
