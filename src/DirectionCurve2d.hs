@@ -1,5 +1,6 @@
 module DirectionCurve2d
   ( DirectionCurve2d
+  , unsafe
   , unwrap
   , evaluateAt
   , derivative
@@ -19,6 +20,9 @@ import VectorCurve2d (VectorCurve2d)
 import VectorCurve2d qualified
 
 newtype DirectionCurve2d space = DirectionCurve2d (VectorCurve2d (space @ Unitless))
+
+unsafe :: VectorCurve2d (space @ Unitless) -> DirectionCurve2d space
+unsafe = DirectionCurve2d
 
 unwrap :: DirectionCurve2d space -> VectorCurve2d (space @ Unitless)
 unwrap (DirectionCurve2d vectorCurve) = vectorCurve
