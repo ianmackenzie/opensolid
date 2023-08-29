@@ -17,6 +17,7 @@ module VectorBox3d
 where
 
 import CoordinateSystem (Units)
+import Direction3d (Direction3d (Direction3d))
 import Generic qualified
 import OpenSolid
 import Qty qualified
@@ -180,6 +181,24 @@ instance
     (Range units3)
   where
   VectorBox3d x1 y1 z1 <> Vector3d x2 y2 z2 = x1 * x2 + y1 * y2 + z1 * z2
+
+instance
+  space ~ space' =>
+  DotProduct
+    (Direction3d space)
+    (VectorBox3d (space' @ units))
+    (Range units)
+  where
+  Direction3d vector <> vectorBox = vector <> vectorBox
+
+instance
+  space ~ space' =>
+  DotProduct
+    (VectorBox3d (space @ units))
+    (Direction3d space')
+    (Range units)
+  where
+  vectorBox <> Direction3d vector = vectorBox <> vector
 
 instance
   (Units.Product units1 units2 units3, space ~ space') =>
