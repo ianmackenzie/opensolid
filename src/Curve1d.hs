@@ -94,8 +94,8 @@ constant value = if value == Qty.zero then Zero else Constant value
 parameter :: Curve1d Unitless
 parameter = Parameter
 
-instance Generic.Zero (Curve1d units) where
-  zero = Zero
+instance Generic.HasZero (Curve1d units) where
+  zeroImpl = zero
 
 instance Negation (Curve1d units) where
   negate Zero = Zero

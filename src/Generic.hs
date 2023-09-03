@@ -1,5 +1,6 @@
 module Generic
-  ( Zero (zero)
+  ( HasZero (zeroImpl)
+  , zero
   , min
   , max
   , minBy
@@ -13,11 +14,14 @@ import Basics
 import Prelude (Ordering (EQ, GT, LT))
 import Prelude qualified
 
-class Zero a where
-  zero :: a
+class HasZero a where
+  zeroImpl :: a
 
-instance Zero Int where
-  zero = 0
+instance HasZero Int where
+  zeroImpl = 0
+
+zero :: HasZero a => a
+zero = zeroImpl
 
 min :: Ord a => a -> a -> a
 min = Prelude.min

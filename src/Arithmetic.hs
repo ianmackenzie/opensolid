@@ -27,7 +27,7 @@ import Prelude qualified
 class (Multiplication Sign a a, Multiplication a Sign a) => Negation a where
   negate :: a -> a
 
-class Generic.Zero b => Addition a b c | a b -> c where
+class Generic.HasZero b => Addition a b c | a b -> c where
   (+) :: a -> b -> c
 
 class Subtraction a b c | a b -> c where

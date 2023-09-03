@@ -50,8 +50,8 @@ instance
     (Vector3d (space @ units1'))
     (Vector3d (space' @ units2'))
 
-instance Generic.Zero (Vector3d (space @ units)) where
-  zero = zero
+instance Generic.HasZero (Vector3d (space @ units)) where
+  zeroImpl = zero
 
 instance
   (space ~ space', units ~ units') =>

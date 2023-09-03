@@ -70,8 +70,8 @@ satisfy predicate estimate =
   let current = bounds estimate
    in if predicate current then current else satisfy predicate (refine estimate)
 
-instance Generic.Zero (Estimate units) where
-  zero = exact Qty.zero
+instance Generic.HasZero (Estimate units) where
+  zeroImpl = exact Qty.zero
 
 newtype Negate units = Negate (Estimate units)
 

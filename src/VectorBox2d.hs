@@ -42,8 +42,8 @@ instance
     (VectorBox2d (space @ units1'))
     (VectorBox2d (space' @ units2'))
 
-instance Generic.Zero (VectorBox2d (space @ units)) where
-  zero = constant Vector2d.zero
+instance Generic.HasZero (VectorBox2d (space @ units)) where
+  zeroImpl = constant Vector2d.zero
 
 instance Negation (VectorBox2d (space @ units)) where
   negate (VectorBox2d x y) = VectorBox2d (negate x) (negate y)

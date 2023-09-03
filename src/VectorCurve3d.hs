@@ -61,8 +61,8 @@ constant vector = if vector == Vector3d.zero then Zero else Constant vector
 zero :: VectorCurve3d (space @ units)
 zero = Zero
 
-instance Generic.Zero (VectorCurve3d (space @ units)) where
-  zero = zero
+instance Generic.HasZero (VectorCurve3d (space @ units)) where
+  zeroImpl = zero
 
 data XYZ (coordinateSystem :: CoordinateSystem)
   = XYZ

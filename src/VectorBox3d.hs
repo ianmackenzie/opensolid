@@ -42,8 +42,8 @@ instance
     (VectorBox3d (space @ units1'))
     (VectorBox3d (space' @ units2'))
 
-instance Generic.Zero (VectorBox3d (space @ units)) where
-  zero = constant Vector3d.zero
+instance Generic.HasZero (VectorBox3d (space @ units)) where
+  zeroImpl = constant Vector3d.zero
 
 instance Negation (VectorBox3d (space @ units)) where
   negate (VectorBox3d x y z) = VectorBox3d (negate x) (negate y) (negate z)

@@ -131,8 +131,8 @@ instance IsVectorCurve2d (VectorCurve2d (space @ units)) (space @ units) where
   derivativeImpl = derivative
   reverseImpl = reverse
 
-instance Generic.Zero (VectorCurve2d (space @ units)) where
-  zero = Zero
+instance Generic.HasZero (VectorCurve2d (space @ units)) where
+  zeroImpl = zero
 
 instance Negation (VectorCurve2d (space @ units)) where
   negate Zero = Zero
