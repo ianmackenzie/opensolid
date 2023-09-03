@@ -253,10 +253,10 @@ magnitudeAndDirection vector =
   let vm = magnitude vector
    in if vm ~= Qty.zero then Error Vector2d.IsZero else Ok (vm, Direction2d.unsafe (vector / vm))
 
-normalize :: Tolerance units => Vector2d (space @ units) -> Vector2d (space @ Unitless)
+normalize :: Vector2d (space @ units) -> Vector2d (space @ Unitless)
 normalize vector =
   let vm = magnitude vector
-   in if vm ~= Qty.zero then zero else vector / vm
+   in if vm == Qty.zero then zero else vector / vm
 
 rotateLeft :: Vector2d (space @ units) -> Vector2d (space @ units)
 rotateLeft (Vector2d vx vy) = Vector2d -vy vx

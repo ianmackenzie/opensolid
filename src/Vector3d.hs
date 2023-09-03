@@ -228,7 +228,7 @@ magnitudeAndDirection vector = do
   let vm = magnitude vector
    in if vm ~= Qty.zero then Error Vector3d.IsZero else Ok (vm, Direction3d.unsafe (vector / vm))
 
-normalize :: Tolerance units => Vector3d (space @ units) -> Vector3d (space @ Unitless)
+normalize :: Vector3d (space @ units) -> Vector3d (space @ Unitless)
 normalize vector =
   let vm = magnitude vector
-   in if vm ~= Qty.zero then zero else vector / vm
+   in if vm == Qty.zero then zero else vector / vm
