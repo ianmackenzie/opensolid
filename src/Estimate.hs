@@ -34,6 +34,7 @@ import Pair qualified
 import Qty qualified
 import Range (Range (Range))
 import Range qualified
+import Units qualified
 
 class IsEstimate a units | a -> units where
   boundsImpl :: a -> Range units
@@ -45,6 +46,12 @@ instance IsEstimate (Qty units) units where
 
 data Estimate units where
   Estimate :: IsEstimate a units => a -> Range units -> Estimate units
+
+instance
+  ( units1 ~ units1'
+  , units2 ~ units2'
+  ) =>
+  Units.Coercion units1 units2 (Estimate units1') (Estimate units2')
 
 instance units ~ units' => ApproximateEquality (Estimate units) (Qty units') units where
   estimate ~= value
