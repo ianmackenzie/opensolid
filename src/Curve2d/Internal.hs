@@ -117,7 +117,6 @@ instance IsVectorCurve2d (PointCurveDifference (space @ units)) (space @ units) 
   evaluateAtImpl t (PointCurveDifference point curve) = point - evaluateAt t curve
   segmentBoundsImpl t (PointCurveDifference point curve) = point - segmentBounds t curve
   derivativeImpl (PointCurveDifference _ curve) = -(derivative curve)
-  reverseImpl (PointCurveDifference point curve) = PointCurveDifference point (reverse curve)
 
 instance
   (units ~ units', space ~ space') =>
@@ -137,7 +136,6 @@ instance IsVectorCurve2d (CurvePointDifference (space @ units)) (space @ units) 
   evaluateAtImpl t (CurvePointDifference curve point) = evaluateAt t curve - point
   segmentBoundsImpl t (CurvePointDifference curve point) = segmentBounds t curve - point
   derivativeImpl (CurvePointDifference curve _) = derivative curve
-  reverseImpl (CurvePointDifference curve point) = CurvePointDifference (reverse curve) point
 
 instance
   (units ~ units', space ~ space') =>

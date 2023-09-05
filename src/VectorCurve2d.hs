@@ -48,7 +48,6 @@ class
   evaluateAtImpl :: Float -> curve -> Vector2d coordinateSystem
   segmentBoundsImpl :: Domain -> curve -> VectorBox2d coordinateSystem
   derivativeImpl :: curve -> VectorCurve2d coordinateSystem
-  reverseImpl :: curve -> curve
 
 data VectorCurve2d (coordinateSystem :: CoordinateSystem) where
   VectorCurve2d ::
@@ -60,6 +59,9 @@ data VectorCurve2d (coordinateSystem :: CoordinateSystem) where
     VectorCurve2d (space @ units)
   Constant ::
     Vector2d (space @ units) ->
+    VectorCurve2d (space @ units)
+  Reversed ::
+    VectorCurve2d (space @ units) ->
     VectorCurve2d (space @ units)
   XY ::
     Curve1d units ->
@@ -129,7 +131,6 @@ instance IsVectorCurve2d (VectorCurve2d (space @ units)) (space @ units) where
   evaluateAtImpl = evaluateAt
   segmentBoundsImpl = segmentBounds
   derivativeImpl = derivative
-  reverseImpl = reverse
 
 instance Generic.HasZero (VectorCurve2d (space @ units)) where
   zeroImpl = zero
@@ -482,6 +483,7 @@ evaluateAt t curve =
     VectorCurve2d c -> evaluateAtImpl t c
     Zero -> Vector2d.zero
     Constant value -> value
+    Reversed c -> evaluateAt (1.0 - t) c
     XY x y -> Vector2d.xy (Curve1d.evaluateAt t x) (Curve1d.evaluateAt t y)
     Negated c -> -(evaluateAt t c)
     Sum c1 c2 -> evaluateAt t c1 + evaluateAt t c2
@@ -500,6 +502,7 @@ segmentBounds t@(Range tl th) curve =
     VectorCurve2d c -> segmentBoundsImpl t c
     Zero -> VectorBox2d.constant Vector2d.zero
     Constant value -> VectorBox2d.constant value
+    Reversed c -> segmentBounds (1.0 - t) c
     XY x y -> VectorBox2d (Curve1d.segmentBounds t x) (Curve1d.segmentBounds t y)
     Negated c -> -(segmentBounds t c)
     Sum c1 c2 -> segmentBounds t c1 + segmentBounds t c2
@@ -531,6 +534,7 @@ derivative curve =
     VectorCurve2d c -> derivativeImpl c
     Zero -> Zero
     Constant _ -> Zero
+    Reversed c -> negate (reverse (derivative c))
     XY x y -> XY (Curve1d.derivative x) (Curve1d.derivative y)
     Negated c -> -(derivative c)
     Sum c1 c2 -> derivative c1 + derivative c2
@@ -549,9 +553,10 @@ derivative curve =
 reverse :: VectorCurve2d (space @ units) -> VectorCurve2d (space @ units)
 reverse curve =
   case curve of
-    VectorCurve2d c -> VectorCurve2d (reverseImpl c)
+    VectorCurve2d _ -> Reversed curve
     Zero -> Zero
     Constant _ -> curve
+    Reversed c -> c
     XY x y -> XY (Curve1d.reverse x) (Curve1d.reverse y)
     Negated c -> Negated (reverse c)
     Sum c1 c2 -> Sum (reverse c1) (reverse c2)
