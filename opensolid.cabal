@@ -46,6 +46,8 @@ library
       Curve1d.Root
       Curve2d
       Curve2d.Intersection
+      Curve2d.TangentDirection
+      Curve2d.TangentDirection.DegenerateEndpoint
       Curve3d
       Debug
       Direction2d
