@@ -92,6 +92,7 @@ library
       VectorBox2d
       VectorBox3d
       VectorCurve2d
+      VectorCurve2d.Magnitude
       VectorCurve3d
       Volume
   other-modules:
