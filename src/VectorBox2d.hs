@@ -1,6 +1,8 @@
 module VectorBox2d
   ( VectorBox2d (VectorBox2d)
   , constant
+  , aggregate2
+  , aggregate3
   , hull2
   , hull3
   , hull4
@@ -294,6 +296,21 @@ hull4 (Vector2d x1 y1) (Vector2d x2 y2) (Vector2d x3 y3) (Vector2d x4 y4) =
       minY = Qty.min (Qty.min (Qty.min y1 y2) y3) y4
       maxY = Qty.max (Qty.max (Qty.max y1 y2) y3) y4
    in VectorBox2d (Range.unsafe minX maxX) (Range.unsafe minY maxY)
+
+aggregate2 ::
+  VectorBox2d (space @ units) ->
+  VectorBox2d (space @ units) ->
+  VectorBox2d (space @ units)
+aggregate2 (VectorBox2d x1 y1) (VectorBox2d x2 y2) =
+  VectorBox2d (Range.aggregate2 x1 x2) (Range.aggregate2 y1 y2)
+
+aggregate3 ::
+  VectorBox2d (space @ units) ->
+  VectorBox2d (space @ units) ->
+  VectorBox2d (space @ units) ->
+  VectorBox2d (space @ units)
+aggregate3 (VectorBox2d x1 y1) (VectorBox2d x2 y2) (VectorBox2d x3 y3) =
+  VectorBox2d (Range.aggregate3 x1 x2 x3) (Range.aggregate3 y1 y2 y3)
 
 polar :: Range units -> Range Radians -> VectorBox2d (space @ units)
 polar r theta = VectorBox2d (r * Range.cos theta) (r * Range.sin theta)
