@@ -20,6 +20,7 @@ import VectorCurve2d (VectorCurve2d)
 import VectorCurve2d qualified
 
 newtype DirectionCurve2d space = DirectionCurve2d (VectorCurve2d (space @ Unitless))
+  deriving (Show)
 
 unsafe :: VectorCurve2d (space @ Unitless) -> DirectionCurve2d space
 unsafe = DirectionCurve2d
