@@ -22,6 +22,7 @@ module Range
   , hypot2
   , hypot3
   , aggregate2
+  , aggregate3
   , min
   , max
   , minimum
@@ -166,6 +167,10 @@ from a b = if a <= b then unsafe a b else unsafe b a
 aggregate2 :: Range units -> Range units -> Range units
 aggregate2 (Range low1 high1) (Range low2 high2) =
   unsafe (Qty.min low1 low2) (Qty.max high1 high2)
+
+aggregate3 :: Range units -> Range units -> Range units -> Range units
+aggregate3 (Range low1 high1) (Range low2 high2) (Range low3 high3) =
+  unsafe (Qty.min (Qty.min low1 low2) low3) (Qty.max (Qty.max high1 high2) high3)
 
 intersects :: Range units -> Range units -> Bool
 intersects (Range low1 high1) (Range low2 high2) = low1 <= high2 && low2 <= high1
