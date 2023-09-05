@@ -6,6 +6,7 @@ module DirectionCurve2d
   , segmentBounds
   , derivative
   , constant
+  , arc
   , reverse
   , xComponent
   , yComponent
@@ -45,6 +46,9 @@ derivative (DirectionCurve2d vectorCurve) = VectorCurve2d.derivative vectorCurve
 
 constant :: Direction2d space -> DirectionCurve2d space
 constant (Direction2d vector) = DirectionCurve2d (VectorCurve2d.constant vector)
+
+arc :: Angle -> Angle -> DirectionCurve2d space
+arc a b = DirectionCurve2d (VectorCurve2d.arc 1.0 a b)
 
 reverse :: DirectionCurve2d space -> DirectionCurve2d space
 reverse (DirectionCurve2d vectorCurve) = DirectionCurve2d (VectorCurve2d.reverse vectorCurve)
