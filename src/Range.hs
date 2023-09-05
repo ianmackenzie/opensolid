@@ -71,7 +71,11 @@ data Range units = Range_ (Qty units) (Qty units)
 pattern Range :: Qty units -> Qty units -> Range units
 pattern Range low high <- Range_ low high
 
-instance (units1 ~ units1', units2 ~ units2') => Units.Coercion units1 units2 (Range units1') (Range units2')
+instance
+  ( units1 ~ units1'
+  , units2 ~ units2'
+  ) =>
+  Units.Coercion units1 units2 (Range units1') (Range units2')
 
 instance units ~ units' => ApproximateEquality (Range units) (Range units') units where
   Range low1 high1 ~= Range low2 high2 = low1 ~= low2 && high1 ~= high2
