@@ -27,7 +27,6 @@ module Curve2d
   )
 where
 
-import Angle (Angle)
 import Angle qualified
 import Axis2d (Axis2d)
 import Axis2d qualified

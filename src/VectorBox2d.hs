@@ -25,7 +25,6 @@ import OpenSolid
 import Qty qualified
 import Range (Range (Range))
 import Range qualified
-import Units (Radians)
 import Units qualified
 import Vector2d (Vector2d (Vector2d))
 import Vector2d qualified

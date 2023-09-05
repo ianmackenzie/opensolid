@@ -8,7 +8,6 @@ module Arc2d
   )
 where
 
-import Angle (Angle)
 import Angle qualified
 import CoordinateSystem (Units)
 import Curve2d (Curve2d)

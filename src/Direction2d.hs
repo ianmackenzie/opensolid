@@ -23,14 +23,12 @@ module Direction2d
   )
 where
 
-import Angle (Angle)
 import Angle qualified
 import {-# SOURCE #-} Frame2d (Frame2d)
 import OpenSolid
 import {-# SOURCE #-} Point2d (Point2d)
 import Qty qualified
 import Result qualified
-import Units (Radians)
 import Vector2d (Vector2d (Vector2d))
 import Vector2d qualified
 

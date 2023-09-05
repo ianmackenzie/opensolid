@@ -13,9 +13,11 @@ module OpenSolid
   , module Tolerance
   , module Fuzzy
   , module Units
+  , module Angle
   )
 where
 
+import Angle (Angle)
 import Arithmetic
 import Basics
 import Concatenate (Concatenate ((++)))
@@ -29,4 +31,4 @@ import Result (ErrorMessage (errorMessage), Result (Error, Ok))
 import Sign (Sign (Negative, Positive))
 import Task (Task)
 import Tolerance (ApproximateEquality ((~=)), Tolerance, (!=))
-import Units (Unitless)
+import Units (Radians, Unitless)

@@ -18,7 +18,6 @@ module Point2d
   )
 where
 
-import Angle (Angle)
 import {-# SOURCE #-} Axis2d (Axis2d)
 import {-# SOURCE #-} Axis2d qualified
 import Bounded (IsBounded (..))

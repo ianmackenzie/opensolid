@@ -41,7 +41,7 @@ import Range qualified
 import Result qualified
 import Stream (Stream)
 import Stream qualified
-import Units (Radians, Squared)
+import Units (Squared)
 import Units qualified
 import Vector2d (Vector2d)
 import Vector3d (Vector3d)

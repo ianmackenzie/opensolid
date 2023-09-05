@@ -59,7 +59,6 @@ import NonEmpty qualified
 import OpenSolid
 import Qty qualified
 import Random qualified
-import Units (Radians)
 import Units qualified
 
 data Range units = Range_ (Qty units) (Qty units)

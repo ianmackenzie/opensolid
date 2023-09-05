@@ -20,7 +20,6 @@ module VectorCurve2d
   )
 where
 
-import Angle (Angle)
 import Angle qualified
 import Curve1d (Curve1d (Curve1d), IsCurve1d)
 import Curve1d qualified

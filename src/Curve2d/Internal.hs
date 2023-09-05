@@ -10,7 +10,6 @@ module Curve2d.Internal
   )
 where
 
-import Angle (Angle)
 import BoundingBox2d (BoundingBox2d)
 import BoundingBox2d qualified
 import Direction2d (Direction2d)
