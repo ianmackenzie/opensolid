@@ -30,7 +30,8 @@ at t0 secondDerivative =
   let r = computeRadius (VectorCurve2d.evaluateAt t0 secondDerivative)
       t1 = if t0 == 0.0 then r else 1.0 - r
       q = qCurve 0 t0 secondDerivative
-      curve = q / VectorCurve2d.Magnitude.unsafe q
+      sign = if t0 == 0.0 then Positive else Negative
+      curve = sign * q / VectorCurve2d.Magnitude.unsafe q
    in DegenerateEndpoint t0 t1 curve
 
 computeRadius :: Tolerance units => Vector2d (space @ units) -> Float
