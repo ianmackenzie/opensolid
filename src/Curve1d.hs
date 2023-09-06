@@ -226,7 +226,7 @@ derivative curve =
     Sum c1 c2 -> derivative c1 + derivative c2
     Difference c1 c2 -> derivative c1 - derivative c2
     Product c1 c2 -> derivative c1 * c2 + c1 * derivative c2
-    Quotient c1 c2 -> derivative c1 / c2 + curve * (derivative c2 / c2)
+    Quotient c1 c2 -> derivative c1 / c2 - curve * (derivative c2 / c2)
     Squared c -> 2.0 * c * derivative c
     SquareRoot c -> derivative c / (2.0 * sqrt c)
     Sin c -> cos c * Units.drop (derivative c)
