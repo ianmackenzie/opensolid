@@ -19,7 +19,7 @@ import Basics
 import {-# SOURCE #-} Float (Float)
 import Generic qualified
 import {-# SOURCE #-} Qty (Qty (Qty))
-import {-# SOURCE #-} Sign (Sign)
+import {-# SOURCE #-} Sign (Sign (Negative, Positive))
 import Units (Unitless)
 import Units qualified
 import Prelude qualified
@@ -50,6 +50,17 @@ class CrossProduct b a c => CrossProduct a b c | a b -> c where
 
 (//) :: Int -> Int -> Int
 (//) = Prelude.quot
+
+instance Negation Int where
+  negate = Prelude.negate
+
+instance Multiplication Sign Int Int where
+  Positive * n = n
+  Negative * n = -n
+
+instance Multiplication Int Sign Int where
+  n * Positive = n
+  n * Negative = -n
 
 instance Addition Int Int Int where
   (+) = (Prelude.+)

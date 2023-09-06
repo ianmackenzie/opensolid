@@ -1,3 +1,3 @@
-module Sign (Sign) where
+module Sign (Sign (Positive, Negative)) where
 
-data Sign
+data Sign = Negative | Positive
