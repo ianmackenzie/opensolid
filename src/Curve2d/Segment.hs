@@ -21,6 +21,8 @@ import {-# SOURCE #-} Curve2d qualified
 import Curve2d.Derivatives (Derivatives)
 import Curve2d.Intersection (Intersection (Intersection))
 import Curve2d.Intersection qualified as Intersection
+import DirectionBox2d (DirectionBox2d)
+import DirectionCurve2d qualified
 import Domain (Domain)
 import OpenSolid
 import Qty qualified
@@ -37,7 +39,7 @@ data Segment (coordinateSystem :: CoordinateSystem)
       (BoundingBox2d coordinateSystem)
       ~(VectorBox2d coordinateSystem)
       ~(VectorBox2d coordinateSystem)
-      ~(VectorBox2d (Space coordinateSystem @ Unitless))
+      ~(DirectionBox2d (Space coordinateSystem))
 
 init ::
   Tolerance units =>
@@ -48,7 +50,7 @@ init derivatives domain =
   let curveBounds = Curve2d.segmentBounds domain derivatives.curve
       firstBounds = VectorCurve2d.segmentBounds domain derivatives.first
       secondBounds = VectorCurve2d.segmentBounds domain derivatives.second
-      tangentBounds = Curve2d.tangentBounds domain derivatives.curve
+      tangentBounds = DirectionCurve2d.segmentBounds domain (Curve2d.tangentDirection derivatives.curve)
    in Segment curveBounds firstBounds secondBounds tangentBounds
 
 overlaps :: Tolerance units => Segment (space @ units) -> Segment (space @ units) -> Bool

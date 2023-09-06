@@ -11,11 +11,9 @@ module Curve2d
   , endPoint
   , evaluateAt
   , pointOn
-  , tangentAt
-  , tangentTo
   , segmentBounds
-  , tangentBounds
   , derivative
+  , tangentDirection
   , reverse
   , boundingBox
   , passesThrough
@@ -42,8 +40,10 @@ import Curve2d.Intersection (Intersection (Intersection))
 import Curve2d.Intersection qualified as Intersection
 import Curve2d.Segment (Segment)
 import Curve2d.Segment qualified as Segment
+import Curve2d.TangentDirection qualified as TangentDirection
 import Direction2d (Direction2d)
-import Direction2d qualified
+import DirectionCurve2d (DirectionCurve2d)
+import DirectionCurve2d qualified
 import Domain (Domain)
 import Domain qualified
 import List qualified
@@ -55,7 +55,6 @@ import Result qualified
 import Units qualified
 import Vector2d (Vector2d)
 import Vector2d qualified
-import VectorBox2d (VectorBox2d)
 import VectorBox2d qualified
 import VectorCurve2d (VectorCurve2d)
 import VectorCurve2d qualified
@@ -90,7 +89,7 @@ from curve =
   let firstDerivative = derivativeImpl curve
       secondDerivative = VectorCurve2d.derivative firstDerivative
    in if isNondegenerate firstDerivative secondDerivative
-        then Ok (Internal.Curve curve ?tolerance firstDerivative secondDerivative)
+        then Ok (Internal.Curve curve (TangentDirection.unsafe firstDerivative secondDerivative))
         else Error DegenerateCurve
 
 isNondegenerate :: Tolerance units => VectorCurve2d (space @ units) -> VectorCurve2d (space @ units) -> Bool
@@ -133,54 +132,13 @@ reverse = Internal.reverse
 boundingBox :: Curve2d (space @ units) -> BoundingBox2d (space @ units)
 boundingBox (Internal.Line p1 p2 _) = BoundingBox2d.hull2 p1 p2
 boundingBox arc@(Internal.Arc{}) = segmentBounds Domain.unit arc
-boundingBox (Internal.Curve curve _ _ _) = boundingBoxImpl curve
+boundingBox (Internal.Curve curve _) = boundingBoxImpl curve
 
-tangentAt :: Float -> Curve2d (space @ units) -> Direction2d space
-tangentAt _ (Internal.Line _ _ direction) = direction
-tangentAt t (Internal.Arc _ _ a b) =
-  Direction2d.fromAngle (Qty.interpolateFrom a b t + Angle.quarterTurn * Qty.sign (b - a))
-tangentAt t (Internal.Curve _ tolerance first second) =
-  -- Find the tangent direction of a general curve, using the first derivative if possible
-  -- and falling back to the second derivative at degenerate endpoints
-  -- (endpoints where the first derivative is zero).
-  -- For consistency, use the tolerance we used during curve construction to check for degeneracies
-  -- (and stored within the curve value for this purpose).
-  let ?tolerance = tolerance
-   in case Vector2d.direction (VectorCurve2d.evaluateAt t first) of
-        Ok direction -> direction -- First derivative was non-zero
-        Error Vector2d.IsZero ->
-          -- First derivative was (approximately) zero, so we must be near a degenerate endpoint.
-          -- In this case, estimate the tangent using the second derivative instead.
-          let
-            -- Estimate tangent direction using second derivative evaluated at a point t',
-            -- which is halfway between t and the nearby endpoint
-            t' = if t <= 0.5 then 0.5 * t else t + 0.5 * (1.0 - t)
-            -- Near the start point (assuming the start point is degenerate),
-            -- the tangent direction is in the same direction as the second derivative;
-            -- near the end point, it is in the *opposite* direction
-            sign = if t <= 0.5 then Positive else Negative
-           in
-            sign * Direction2d.unsafe (Vector2d.normalize (VectorCurve2d.evaluateAt t' second))
-
-tangentTo :: Curve2d (space @ units) -> Float -> Direction2d space
-tangentTo curve t = tangentAt t curve
-
-tangentBounds :: Domain -> Curve2d (space @ units) -> VectorBox2d (space @ Unitless)
-tangentBounds _ (Internal.Line _ _ direction) =
-  VectorBox2d.constant (Direction2d.unwrap direction)
-tangentBounds t (Internal.Arc _ _ a b) =
-  let rotation = Angle.quarterTurn * Qty.sign (b - a)
-      theta1 = Qty.interpolateFrom a b (Range.minValue t) + rotation
-      theta2 = Qty.interpolateFrom a b (Range.maxValue t) + rotation
-   in VectorBox2d.polar (Range.constant 1.0) (Range.from theta1 theta2)
-tangentBounds t (Internal.Curve _ tolerance first second)
-  | Range.includes 0.0 t && VectorCurve2d.evaluateAt 0.0 first ~= Vector2d.zero =
-      VectorBox2d.normalize (VectorCurve2d.segmentBounds t second)
-  | Range.includes 1.0 t && VectorCurve2d.evaluateAt 1.0 first ~= Vector2d.zero =
-      -(VectorBox2d.normalize (VectorCurve2d.segmentBounds t second))
-  | otherwise = VectorBox2d.normalize (VectorCurve2d.segmentBounds t first)
- where
-  ?tolerance = tolerance
+tangentDirection :: Curve2d (space @ units) -> DirectionCurve2d space
+tangentDirection (Internal.Line _ _ direction) = DirectionCurve2d.constant direction
+tangentDirection (Internal.Arc _ _ a b) =
+  Qty.sign (b - a) * DirectionCurve2d.arc (a + Angle.quarterTurn) (b + Angle.quarterTurn)
+tangentDirection (Internal.Curve _ tangent) = tangent
 
 data CurveIsCoincidentWithPoint = CurveIsCoincidentWithPoint deriving (Eq, Show, ErrorMessage)
 
