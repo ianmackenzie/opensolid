@@ -39,6 +39,8 @@ tests =
   , degenerateStartPointTangent
   , degenerateEndPointTangent
   , tangentDerivativeIsPerpendicularToTangent
+  , degenerateStartPointTangentDerivative
+  , degenerateEndPointTangentDerivative
   ]
 
 parameterValues :: Tolerance Meters => Test
@@ -210,3 +212,39 @@ tangentDerivativeIsPerpendicularToTangent =
       |> Test.output "tangent" tangent
       |> Test.output "derivative" derivative
       |> Test.output "dot product" (derivative <> tangent)
+
+degenerateStartPointTangentDerivative :: Tolerance Meters => Test
+degenerateStartPointTangentDerivative = Test.check 100 "Degenerate start point derivative" $ do
+  p0 <- Random.point2d
+  p1 <- Random.point2d
+  p2 <- Random.point2d
+  curve <- CubicSpline2d.fromControlPoints p0 p0 p1 p2
+  let decreasingParameterValues = List.map (\n -> Float.pow 2.0 (Float.fromInt -n)) [8 .. 16]
+  let tangentDirection = Curve2d.tangentDirection curve
+  let tangentDerivative = DirectionCurve2d.derivative tangentDirection
+  let startTangentDerivative = VectorCurve2d.evaluateAt 0.0 tangentDerivative
+  let otherTangentDerivatives =
+        List.map (\t -> VectorCurve2d.evaluateAt t tangentDerivative) decreasingParameterValues
+  let differences =
+        otherTangentDerivatives
+          |> List.map (- startTangentDerivative)
+          |> List.map Vector2d.magnitude
+  Test.expect (List.successive (-) differences |> List.all (> Qty.zero))
+
+degenerateEndPointTangentDerivative :: Tolerance Meters => Test
+degenerateEndPointTangentDerivative = Test.check 100 "Degenerate end point derivative" $ do
+  p0 <- Random.point2d
+  p1 <- Random.point2d
+  p2 <- Random.point2d
+  curve <- CubicSpline2d.fromControlPoints p0 p1 p2 p2
+  let increasingParameterValues = List.map (\n -> 1.0 - Float.pow 2.0 (Float.fromInt -n)) [8 .. 16]
+  let tangentDirection = Curve2d.tangentDirection curve
+  let tangentDerivative = DirectionCurve2d.derivative tangentDirection
+  let endTangentDerivative = VectorCurve2d.evaluateAt 1.0 tangentDerivative
+  let otherTangentDerivatives =
+        List.map (\t -> VectorCurve2d.evaluateAt t tangentDerivative) increasingParameterValues
+  let differences =
+        otherTangentDerivatives
+          |> List.map (- endTangentDerivative)
+          |> List.map Vector2d.magnitude
+  Test.expect (List.successive (-) differences |> List.all (> Qty.zero))
