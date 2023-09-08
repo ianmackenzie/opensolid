@@ -1,6 +1,7 @@
 module VectorCurve2d
   ( VectorCurve2d (VectorCurve2d)
   , IsVectorCurve2d (..)
+  , wrap
   , evaluateAt
   , segmentBounds
   , derivative
@@ -17,6 +18,8 @@ module VectorCurve2d
   , ZeroEverywhere (ZeroEverywhere)
   , xComponent
   , yComponent
+  , DegenerateCurve (DegenerateCurve)
+  , direction
   )
 where
 
@@ -24,8 +27,9 @@ import Angle qualified
 import Curve1d (Curve1d (Curve1d), IsCurve1d)
 import Curve1d qualified
 import Curve1d.Root qualified as Root
-import Direction2d (Direction2d)
+import Direction2d (Direction2d (Direction2d))
 import Direction2d qualified
+import {-# SOURCE #-} DirectionCurve2d (DirectionCurve2d)
 import Domain (Domain)
 import Generic qualified
 import List qualified
@@ -38,6 +42,7 @@ import Vector2d (Vector2d (Vector2d))
 import Vector2d qualified
 import VectorBox2d (VectorBox2d (VectorBox2d))
 import VectorBox2d qualified
+import VectorCurve2d.Direction qualified
 
 class
   Show curve =>
@@ -329,7 +334,7 @@ instance
     (Direction2d space')
     (Curve1d units)
   where
-  curve <> direction = curve <> Direction2d.unwrap direction
+  curve <> Direction2d vector = curve <> vector
 
 instance
   space ~ space' =>
@@ -338,7 +343,7 @@ instance
     (VectorCurve2d (space' @ units))
     (Curve1d units)
   where
-  direction <> curve = Direction2d.unwrap direction <> curve
+  Direction2d vector <> curve = vector <> curve
 
 data CrossProductOf space units1 units2
   = CrossProductOf (VectorCurve2d (space @ units1)) (VectorCurve2d (space @ units2))
@@ -394,7 +399,7 @@ instance
     (Direction2d space')
     (Curve1d units)
   where
-  curve >< direction = curve >< Direction2d.unwrap direction
+  curve >< Direction2d vector = curve >< vector
 
 instance
   space ~ space' =>
@@ -403,7 +408,10 @@ instance
     (VectorCurve2d (space' @ units))
     (Curve1d units)
   where
-  direction >< curve = Direction2d.unwrap direction >< curve
+  Direction2d vector >< curve = vector >< curve
+
+wrap :: IsVectorCurve2d curve (space @ units) => curve -> VectorCurve2d (space @ units)
+wrap = VectorCurve2d
 
 zero :: VectorCurve2d (space @ units)
 zero = Zero
@@ -599,3 +607,22 @@ xComponent curve = curve <> Direction2d.x
 
 yComponent :: VectorCurve2d (space @ units) -> Curve1d units
 yComponent curve = curve <> Direction2d.y
+
+data DegenerateCurve = DegenerateCurve deriving (Eq, Show, ErrorMessage)
+
+direction :: Tolerance units => VectorCurve2d (space @ units) -> Result DegenerateCurve (DirectionCurve2d space)
+direction curve =
+  let curveDerivative = derivative curve
+   in if isNondegenerate curve curveDerivative
+        then Ok (VectorCurve2d.Direction.unsafe curve curveDerivative)
+        else Error DegenerateCurve
+
+isNondegenerate :: Tolerance units => VectorCurve2d (space @ units) -> VectorCurve2d (space @ units) -> Bool
+isNondegenerate curve curveDerivative =
+  case roots curve of
+    Error VectorCurve2d.ZeroEverywhere -> False
+    Ok degeneracies -> List.all (isRemovableDegeneracy curveDerivative) degeneracies
+
+isRemovableDegeneracy :: Tolerance units => VectorCurve2d (space @ units) -> Float -> Bool
+isRemovableDegeneracy curveDerivative t =
+  (t == 0.0 || t == 1.0) && VectorCurve2d.evaluateAt t curveDerivative != Vector2d.zero

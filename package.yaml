@@ -81,6 +81,9 @@ library:
   - Curve2d.Internal
   - Curve2d.Derivatives
   - Curve2d.Segment
+  - VectorCurve2d.DegenerateEndpoint
+  - VectorCurve2d.Direction
+  - VectorCurve2d.Magnitude
 
 executables:
   sandbox:

@@ -1,4 +1,4 @@
-module Curve2d.TangentDirection.DegenerateEndpoint
+module VectorCurve2d.DegenerateEndpoint
   ( DegenerateEndpoint
   , at
   , derivative
@@ -17,8 +17,8 @@ import Vector2d (Vector2d)
 import Vector2d qualified
 import VectorBox2d (VectorBox2d)
 import VectorBox2d qualified
-import VectorCurve2d (IsVectorCurve2d (..), VectorCurve2d (VectorCurve2d))
-import VectorCurve2d qualified
+import {-# SOURCE #-} VectorCurve2d (IsVectorCurve2d (..), VectorCurve2d)
+import {-# SOURCE #-} VectorCurve2d qualified
 import VectorCurve2d.Magnitude qualified
 
 data DegenerateEndpoint space
@@ -56,7 +56,7 @@ instance IsVectorCurve2d (QCurve (space @ units)) (space @ units) where
 
 qCurve :: Int -> Float -> VectorCurve2d (space @ units) -> VectorCurve2d (space @ units)
 qCurve n t0 curveDerivative =
-  VectorCurve2d $
+  VectorCurve2d.wrap $
     QCurve n t0 curveDerivative $
       (VectorCurve2d.evaluateAt t0 curveDerivative / (Float.fromInt n + 1.0))
 

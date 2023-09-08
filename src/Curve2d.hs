@@ -40,7 +40,6 @@ import Curve2d.Intersection (Intersection (Intersection))
 import Curve2d.Intersection qualified as Intersection
 import Curve2d.Segment (Segment)
 import Curve2d.Segment qualified as Segment
-import Curve2d.TangentDirection qualified as TangentDirection
 import Direction2d (Direction2d)
 import DirectionCurve2d (DirectionCurve2d)
 import DirectionCurve2d qualified
@@ -52,9 +51,6 @@ import Point2d (Point2d)
 import Qty qualified
 import Range qualified
 import Result qualified
-import Units qualified
-import Vector2d (Vector2d)
-import Vector2d qualified
 import VectorBox2d qualified
 import VectorCurve2d (VectorCurve2d)
 import VectorCurve2d qualified
@@ -86,27 +82,9 @@ from ::
   curve ->
   Result DegenerateCurve (Curve2d (space @ units))
 from curve =
-  let firstDerivative = derivativeImpl curve
-      secondDerivative = VectorCurve2d.derivative firstDerivative
-   in if isNondegenerate firstDerivative secondDerivative
-        then Ok (Internal.Curve curve (TangentDirection.unsafe firstDerivative secondDerivative))
-        else Error DegenerateCurve
-
-isNondegenerate :: Tolerance units => VectorCurve2d (space @ units) -> VectorCurve2d (space @ units) -> Bool
-isNondegenerate firstDerivative secondDerivative =
-  case VectorCurve2d.roots firstDerivative of
-    Error VectorCurve2d.ZeroEverywhere -> False
-    Ok roots -> List.all (isRemovableDegeneracy secondDerivative) roots
-
-isRemovableDegeneracy :: Tolerance units => VectorCurve2d (space @ units) -> Float -> Bool
-isRemovableDegeneracy secondDerivative t =
-  (t == 0.0 || t == 1.0) && secondDerivativeIsNonZero (VectorCurve2d.evaluateAt t secondDerivative)
-
-secondDerivativeIsNonZero :: Tolerance units => Vector2d (space @ units) -> Bool
-secondDerivativeIsNonZero secondDerivative =
-  2.0 * Vector2d.squaredMagnitude (Units.generalize secondDerivative) != Qty.zero
- where
-  ?tolerance = Qty.squared (Units.generalize ?tolerance)
+  case VectorCurve2d.direction (derivativeImpl curve) of
+    Ok tangentCurve -> Ok (Internal.Curve curve tangentCurve)
+    Error VectorCurve2d.DegenerateCurve -> Error DegenerateCurve
 
 startPoint :: Curve2d (space @ units) -> Point2d (space @ units)
 startPoint = Internal.startPoint

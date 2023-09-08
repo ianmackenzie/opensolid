@@ -5,8 +5,8 @@ import OpenSolid
 import Units qualified
 import Vector2d qualified
 import VectorBox2d qualified
-import VectorCurve2d (VectorCurve2d)
-import VectorCurve2d qualified
+import {-# SOURCE #-} VectorCurve2d (VectorCurve2d)
+import {-# SOURCE #-} VectorCurve2d qualified
 
 newtype Magnitude (coordinateSystem :: CoordinateSystem)
   = Magnitude (VectorCurve2d coordinateSystem)

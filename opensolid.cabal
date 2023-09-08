@@ -46,8 +46,6 @@ library
       Curve1d.Root
       Curve2d
       Curve2d.Intersection
-      Curve2d.TangentDirection
-      Curve2d.TangentDirection.DegenerateEndpoint
       Curve3d
       Debug
       Direction2d
@@ -94,7 +92,6 @@ library
       VectorBox2d
       VectorBox3d
       VectorCurve2d
-      VectorCurve2d.Magnitude
       VectorCurve3d
       Volume
   other-modules:
@@ -102,6 +99,9 @@ library
       Curve2d.Internal
       Curve2d.Derivatives
       Curve2d.Segment
+      VectorCurve2d.DegenerateEndpoint
+      VectorCurve2d.Direction
+      VectorCurve2d.Magnitude
   hs-source-dirs:
       src
   default-extensions:

@@ -1,17 +1,17 @@
-module Curve2d.TangentDirection (unsafe) where
+module VectorCurve2d.Direction (unsafe) where
 
-import Curve2d.TangentDirection.DegenerateEndpoint (DegenerateEndpoint)
-import Curve2d.TangentDirection.DegenerateEndpoint qualified as DegenerateEndpoint
-import DirectionCurve2d (DirectionCurve2d)
-import DirectionCurve2d qualified
+import {-# SOURCE #-} DirectionCurve2d (DirectionCurve2d)
+import {-# SOURCE #-} DirectionCurve2d qualified
 import Maybe qualified
 import OpenSolid
 import Range (Range (Range))
 import Range qualified
 import Vector2d qualified
 import VectorBox2d qualified
-import VectorCurve2d (IsVectorCurve2d (..), VectorCurve2d (VectorCurve2d))
-import VectorCurve2d qualified
+import {-# SOURCE #-} VectorCurve2d (IsVectorCurve2d (..), VectorCurve2d)
+import {-# SOURCE #-} VectorCurve2d qualified
+import VectorCurve2d.DegenerateEndpoint (DegenerateEndpoint)
+import VectorCurve2d.DegenerateEndpoint qualified as DegenerateEndpoint
 import VectorCurve2d.Magnitude qualified
 
 data PiecewiseCurve space
@@ -77,7 +77,7 @@ instance IsVectorCurve2d (PiecewiseCurve space) (space @ Unitless) where
     tEnd = DegenerateEndpoint.cutoff degenerateEnd
 
   derivativeImpl (PiecewiseCurve start general end) =
-    VectorCurve2d $
+    VectorCurve2d.wrap $
       PiecewiseCurve
         (Maybe.map DegenerateEndpoint.derivative start)
         (VectorCurve2d.derivative general)
@@ -90,7 +90,7 @@ unsafe ::
   DirectionCurve2d space
 unsafe firstDerivative secondDerivative =
   DirectionCurve2d.unsafe $
-    VectorCurve2d $
+    VectorCurve2d.wrap $
       PiecewiseCurve
         (endpoint 0.0 firstDerivative secondDerivative)
         (firstDerivative / VectorCurve2d.Magnitude.unsafe firstDerivative)
