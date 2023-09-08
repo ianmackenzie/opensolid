@@ -56,23 +56,68 @@ class Show curve => IsCurve1d curve units | curve -> units where
   derivativeImpl :: curve -> Curve1d units
 
 data Curve1d units where
-  Curve1d :: forall curve units. IsCurve1d curve units => curve -> Curve1d units
-  Zero :: Curve1d units
-  Constant :: Qty units -> Curve1d units
-  Parameter :: Curve1d Unitless
-  Negated :: Curve1d units -> Curve1d units
-  Sum :: Curve1d units -> Curve1d units -> Curve1d units
-  Difference :: Curve1d units -> Curve1d units -> Curve1d units
-  Product :: forall units1 units2 units3. Units.Product units1 units2 units3 => Curve1d units1 -> Curve1d units2 -> Curve1d units3
-  Quotient :: forall units1 units2 units3. Units.Quotient units1 units2 units3 => Curve1d units1 -> Curve1d units2 -> Curve1d units3
-  Squared :: forall units1 units2. Units.Squared units1 units2 => Curve1d units1 -> Curve1d units2
-  SquareRoot :: forall units1 units2. Units.Squared units1 units2 => Curve1d units2 -> Curve1d units1
-  Sin :: Curve1d Radians -> Curve1d Unitless
-  Cos :: Curve1d Radians -> Curve1d Unitless
+  Curve1d ::
+    forall curve units.
+    IsCurve1d curve units =>
+    curve ->
+    Curve1d units
+  Zero ::
+    Curve1d units
+  Constant ::
+    Qty units -> Curve1d units
+  Parameter ::
+    Curve1d Unitless
+  Negated ::
+    Curve1d units ->
+    Curve1d units
+  Sum ::
+    Curve1d units ->
+    Curve1d units ->
+    Curve1d units
+  Difference ::
+    Curve1d units ->
+    Curve1d units ->
+    Curve1d units
+  Product ::
+    forall units1 units2 units3.
+    Units.Product units1 units2 units3 =>
+    Curve1d units1 ->
+    Curve1d units2 ->
+    Curve1d units3
+  Quotient ::
+    forall units1 units2 units3.
+    Units.Quotient units1 units2 units3 =>
+    Curve1d units1 ->
+    Curve1d units2 ->
+    Curve1d units3
+  Squared ::
+    forall units1 units2.
+    Units.Squared units1 units2 =>
+    Curve1d units1 ->
+    Curve1d units2
+  SquareRoot ::
+    forall units1 units2.
+    Units.Squared units1 units2 =>
+    Curve1d units2 ->
+    Curve1d units1
+  Sin ::
+    Curve1d Radians ->
+    Curve1d Unitless
+  Cos ::
+    Curve1d Radians ->
+    Curve1d Unitless
 
 deriving instance Show (Curve1d units)
 
-instance (units1 ~ units1', units2 ~ units2') => Units.Coercion units1 units2 (Curve1d units1') (Curve1d units2')
+instance
+  ( units1 ~ units1'
+  , units2 ~ units2'
+  ) =>
+  Units.Coercion
+    units1
+    units2
+    (Curve1d units1')
+    (Curve1d units2')
 
 instance units ~ units' => ApproximateEquality (Curve1d units) (Curve1d units') units where
   curve1 ~= curve2 = isZero (curve1 - curve2)
@@ -137,7 +182,13 @@ instance units ~ units' => Subtraction (Curve1d units) (Qty units') (Curve1d uni
 instance units ~ units' => Subtraction (Qty units) (Curve1d units') (Curve1d units) where
   value - curve = constant value - curve
 
-instance Units.Product units1 units2 units3 => Multiplication (Curve1d units1) (Curve1d units2) (Curve1d units3) where
+instance
+  Units.Product units1 units2 units3 =>
+  Multiplication
+    (Curve1d units1)
+    (Curve1d units2)
+    (Curve1d units3)
+  where
   Zero * _ = Zero
   _ * Zero = Zero
   Constant x * Constant y = Constant (x * y)
@@ -145,7 +196,8 @@ instance Units.Product units1 units2 units3 => Multiplication (Curve1d units1) (
   Constant x * curve | Units.drop x == -1.0 = Units.add (Units.drop (negate curve))
   Constant x * Negated c = negate x * c
   c1 * (Constant x) = Constant x * c1
-  Constant x * Product (Constant y) c = Units.add (Product (Constant (Units.drop x * Units.drop y)) (Units.drop c))
+  Constant x * Product (Constant y) c =
+    Units.add (Product (Constant (Units.drop x * Units.drop y)) (Units.drop c))
   curve1 * curve2 = Product curve1 curve2
 
 instance
@@ -462,9 +514,15 @@ solveEndpoint curve endpointX
                     then Just (Root endpointX rootOrder (Qty.sign derivativeValue), curveDerivative)
                     else currentBest
              in if rootOrder < maxRootOrder
-                  then check (derivative curveDerivative) (derivativeOrder + 1) updatedMinWidth updatedBest
+                  then
+                    check
+                      (derivative curveDerivative)
+                      (derivativeOrder + 1)
+                      updatedMinWidth
+                      updatedBest
                   else case updatedBest of
-                    Just (root, associatedDerivative) -> resolveEndpoint root associatedDerivative endpointX 0.5
+                    Just (root, associatedDerivative) ->
+                      resolveEndpoint root associatedDerivative endpointX 0.5
                     Nothing -> ([], endpointX)
        in check (derivative curve) 1 Qty.infinity Nothing
   | otherwise = ([], endpointX)
