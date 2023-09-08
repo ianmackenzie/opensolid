@@ -148,34 +148,90 @@ instance Units.Product units1 units2 units3 => Multiplication (Curve1d units1) (
   Constant x * Product (Constant y) c = Units.add (Product (Constant (Units.drop x * Units.drop y)) (Units.drop c))
   curve1 * curve2 = Product curve1 curve2
 
-instance Units.Product units1 units2 units3 => Multiplication (Curve1d units1) (Qty units2) (Curve1d units3) where
+instance
+  Units.Product units1 units2 units3 =>
+  Multiplication
+    (Curve1d units1)
+    (Qty units2)
+    (Curve1d units3)
+  where
   curve * value = curve * constant value
 
-instance Units.Product units1 units2 units3 => Multiplication (Qty units1) (Curve1d units2) (Curve1d units3) where
+instance
+  Units.Product units1 units2 units3 =>
+  Multiplication
+    (Qty units1)
+    (Curve1d units2)
+    (Curve1d units3)
+  where
   value * curve = constant value * curve
 
-instance Units.Product units1 units2 units3 => Multiplication (Curve1d units1) (Vector2d (space @ units2)) (VectorCurve2d (space @ units3)) where
+instance
+  Units.Product units1 units2 units3 =>
+  Multiplication
+    (Curve1d units1)
+    (Vector2d (space @ units2))
+    (VectorCurve2d (space @ units3))
+  where
   curve * vector = curve * VectorCurve2d.constant vector
 
-instance Units.Product units1 units2 units3 => Multiplication (Vector2d (space @ units1)) (Curve1d units2) (VectorCurve2d (space @ units3)) where
+instance
+  Units.Product units1 units2 units3 =>
+  Multiplication
+    (Vector2d (space @ units1))
+    (Curve1d units2)
+    (VectorCurve2d (space @ units3))
+  where
   vector * curve = VectorCurve2d.constant vector * curve
 
-instance Units.Product units1 units2 units3 => Multiplication (Curve1d units1) (Vector3d (space @ units2)) (VectorCurve3d (space @ units3)) where
+instance
+  Units.Product units1 units2 units3 =>
+  Multiplication
+    (Curve1d units1)
+    (Vector3d (space @ units2))
+    (VectorCurve3d (space @ units3))
+  where
   curve * vector = curve * VectorCurve3d.constant vector
 
-instance Units.Product units1 units2 units3 => Multiplication (Vector3d (space @ units1)) (Curve1d units2) (VectorCurve3d (space @ units3)) where
+instance
+  Units.Product units1 units2 units3 =>
+  Multiplication
+    (Vector3d (space @ units1))
+    (Curve1d units2)
+    (VectorCurve3d (space @ units3))
+  where
   vector * curve = VectorCurve3d.constant vector * curve
 
-instance Units.Quotient units1 units2 units3 => Division (Curve1d units1) (Curve1d units2) (Curve1d units3) where
+instance
+  Units.Quotient units1 units2 units3 =>
+  Division
+    (Curve1d units1)
+    (Curve1d units2)
+    (Curve1d units3)
+  where
   Zero / _ = Zero
   Constant x / Constant y = Constant (x / y)
-  curve / Constant x = Units.specialize ((Units.generalize 1.0 ./ Units.generalize x) .* Units.generalize curve)
+  curve / Constant x =
+    Units.specialize $
+      (Units.generalize 1.0 ./ Units.generalize x) .* Units.generalize curve
   curve1 / curve2 = Quotient curve1 curve2
 
-instance Units.Quotient units1 units2 units3 => Division (Curve1d units1) (Qty units2) (Curve1d units3) where
+instance
+  Units.Quotient units1 units2 units3 =>
+  Division
+    (Curve1d units1)
+    (Qty units2)
+    (Curve1d units3)
+  where
   curve / value = curve / constant value
 
-instance Units.Quotient units1 units2 units3 => Division (Qty units1) (Curve1d units2) (Curve1d units3) where
+instance
+  Units.Quotient units1 units2 units3 =>
+  Division
+    (Qty units1)
+    (Curve1d units2)
+    (Curve1d units3)
+  where
   value / curve = constant value / curve
 
 evaluateAt :: Float -> Curve1d units -> Qty units
