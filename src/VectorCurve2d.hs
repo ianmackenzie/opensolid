@@ -540,7 +540,11 @@ derivative curve =
     Difference c1 c2 -> derivative c1 - derivative c2
     Product1d2d c1 c2 -> Curve1d.derivative c1 * c2 + c1 * derivative c2
     Product2d1d c1 c2 -> derivative c1 * c2 + c1 * Curve1d.derivative c2
-    Quotient c1 c2 -> derivative c1 / c2 - curve * (Curve1d.derivative c2 / c2)
+    Quotient c1 c2 ->
+      let c1' = Units.generalize c1
+          c2' = Units.generalize c2
+       in Units.specialize $
+            (derivative c1' .* c2' - c1' .* Curve1d.derivative c2') ./ Curve1d.squared c2'
     Line v1 v2 -> constant (v2 - v1)
     Arc r a b ->
       let sweptAngle = b - a
