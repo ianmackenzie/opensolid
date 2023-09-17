@@ -26,12 +26,14 @@ module Basics
   , internalError
   , notImplemented
   , (|>)
+  , type (~)
   )
 where
 
 import Data.Kind (Type)
 import Data.Text (Text)
 import Data.Text qualified
+import Data.Type.Equality (type (~))
 import GHC.Records (HasField (getField))
 import Prelude
   ( Bool (False, True)

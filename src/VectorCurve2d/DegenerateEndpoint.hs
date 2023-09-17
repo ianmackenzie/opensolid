@@ -25,7 +25,7 @@ data DegenerateEndpoint space
   = DegenerateEndpoint Float Float (VectorCurve2d (space @ Unitless))
   deriving (Show)
 
-at :: Tolerance units => Float -> VectorCurve2d (space @ units) -> DegenerateEndpoint space
+at :: (Tolerance units) => Float -> VectorCurve2d (space @ units) -> DegenerateEndpoint space
 at t0 secondDerivative =
   let r = computeRadius (VectorCurve2d.evaluateAt t0 secondDerivative)
       t1 = if t0 == 0.0 then r else 1.0 - r
@@ -34,7 +34,7 @@ at t0 secondDerivative =
       curve = sign * q / VectorCurve2d.Magnitude.unsafe q
    in DegenerateEndpoint t0 t1 curve
 
-computeRadius :: Tolerance units => Vector2d (space @ units) -> Float
+computeRadius :: (Tolerance units) => Vector2d (space @ units) -> Float
 computeRadius secondDerivative = Qty.sqrt (2.0 * ?tolerance / Vector2d.magnitude secondDerivative)
 
 cutoff :: DegenerateEndpoint space -> Float

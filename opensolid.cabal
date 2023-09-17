@@ -1,9 +1,5 @@
 cabal-version: 2.2
 
--- This file has been generated from package.yaml by hpack version 0.35.1.
---
--- see: https://github.com/sol/hpack
-
 name:           opensolid
 version:        0.1.0.0
 synopsis:       Open-source geometric modelling framework

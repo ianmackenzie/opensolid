@@ -1,0 +1,5 @@
+packages:
+  ./opensolid.cabal
+
+package opensolid
+  ghc-options: -Wall -Werror -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-signatures -Wmissing-exported-signatures -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wsafe -dcore-lint
