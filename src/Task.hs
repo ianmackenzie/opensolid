@@ -24,7 +24,7 @@ data Task x a
   = Done (Result x a)
   | Perform (IO (Task x a))
 
-instance x ~ x' => Compose (Task x ()) (Task x' a) (Task x a) where
+instance (x ~ x') => Compose (Task x ()) (Task x' a) (Task x a) where
   compose script1 script2 = bind (always script2) script1
 
 instance (x ~ x', a ~ a') => Bind (Task x a) a' (Task x' b) where
@@ -58,7 +58,7 @@ map :: (a -> b) -> Task x a -> Task x b
 map function (Done result) = Done (Result.map function result)
 map function (Perform io) = Perform (Prelude.fmap (map function) io)
 
-mapError :: ErrorMessage y => (x -> y) -> Task x a -> Task y a
+mapError :: (ErrorMessage y) => (x -> y) -> Task x a -> Task y a
 mapError function (Done result) = Done (Result.mapError function result)
 mapError function (Perform io) = Perform (Prelude.fmap (mapError function) io)
 

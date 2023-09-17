@@ -50,7 +50,7 @@ import {-# SOURCE #-} VectorCurve2d qualified
 import {-# SOURCE #-} VectorCurve3d (VectorCurve3d)
 import {-# SOURCE #-} VectorCurve3d qualified
 
-class Show curve => IsCurve1d curve units | curve -> units where
+class (Show curve) => IsCurve1d curve units | curve -> units where
   evaluateAtImpl :: Float -> curve -> Qty units
   segmentBoundsImpl :: Domain -> curve -> Range units
   derivativeImpl :: curve -> Curve1d units
@@ -58,7 +58,7 @@ class Show curve => IsCurve1d curve units | curve -> units where
 data Curve1d units where
   Curve1d ::
     forall curve units.
-    IsCurve1d curve units =>
+    (IsCurve1d curve units) =>
     curve ->
     Curve1d units
   Zero ::
@@ -80,24 +80,24 @@ data Curve1d units where
     Curve1d units
   Product ::
     forall units1 units2 units3.
-    Units.Product units1 units2 units3 =>
+    (Units.Product units1 units2 units3) =>
     Curve1d units1 ->
     Curve1d units2 ->
     Curve1d units3
   Quotient ::
     forall units1 units2 units3.
-    Units.Quotient units1 units2 units3 =>
+    (Units.Quotient units1 units2 units3) =>
     Curve1d units1 ->
     Curve1d units2 ->
     Curve1d units3
   Squared ::
     forall units1 units2.
-    Units.Squared units1 units2 =>
+    (Units.Squared units1 units2) =>
     Curve1d units1 ->
     Curve1d units2
   SquareRoot ::
     forall units1 units2.
-    Units.Squared units1 units2 =>
+    (Units.Squared units1 units2) =>
     Curve1d units2 ->
     Curve1d units1
   Sin ::
@@ -119,10 +119,10 @@ instance
     (Curve1d units1')
     (Curve1d units2')
 
-instance units ~ units' => ApproximateEquality (Curve1d units) (Curve1d units') units where
+instance (units ~ units') => ApproximateEquality (Curve1d units) (Curve1d units') units where
   curve1 ~= curve2 = isZero (curve1 - curve2)
 
-instance units ~ units' => ApproximateEquality (Curve1d units) (Qty units') units where
+instance (units ~ units') => ApproximateEquality (Curve1d units) (Qty units') units where
   curve ~= value = isZero (curve - value)
 
 instance IsCurve1d (Curve1d units) units where
@@ -158,32 +158,32 @@ instance Multiplication (Curve1d units) Sign (Curve1d units) where
   curve * Positive = curve
   curve * Negative = -curve
 
-instance units ~ units' => Addition (Curve1d units) (Curve1d units') (Curve1d units) where
+instance (units ~ units') => Addition (Curve1d units) (Curve1d units') (Curve1d units) where
   Zero + curve = curve
   curve + Zero = curve
   Constant x + Constant y = constant (x + y)
   curve1 + curve2 = Sum curve1 curve2
 
-instance units ~ units' => Addition (Curve1d units) (Qty units') (Curve1d units) where
+instance (units ~ units') => Addition (Curve1d units) (Qty units') (Curve1d units) where
   curve + value = curve + constant value
 
-instance units ~ units' => Addition (Qty units) (Curve1d units') (Curve1d units) where
+instance (units ~ units') => Addition (Qty units) (Curve1d units') (Curve1d units) where
   value + curve = constant value + curve
 
-instance units ~ units' => Subtraction (Curve1d units) (Curve1d units') (Curve1d units) where
+instance (units ~ units') => Subtraction (Curve1d units) (Curve1d units') (Curve1d units) where
   Zero - curve = negate curve
   curve - Zero = curve
   Constant x - Constant y = constant (x - y)
   curve1 - curve2 = Difference curve1 curve2
 
-instance units ~ units' => Subtraction (Curve1d units) (Qty units') (Curve1d units) where
+instance (units ~ units') => Subtraction (Curve1d units) (Qty units') (Curve1d units) where
   curve - value = curve - constant value
 
-instance units ~ units' => Subtraction (Qty units) (Curve1d units') (Curve1d units) where
+instance (units ~ units') => Subtraction (Qty units) (Curve1d units') (Curve1d units) where
   value - curve = constant value - curve
 
 instance
-  Units.Product units1 units2 units3 =>
+  (Units.Product units1 units2 units3) =>
   Multiplication
     (Curve1d units1)
     (Curve1d units2)
@@ -201,7 +201,7 @@ instance
   curve1 * curve2 = Product curve1 curve2
 
 instance
-  Units.Product units1 units2 units3 =>
+  (Units.Product units1 units2 units3) =>
   Multiplication
     (Curve1d units1)
     (Qty units2)
@@ -210,7 +210,7 @@ instance
   curve * value = curve * constant value
 
 instance
-  Units.Product units1 units2 units3 =>
+  (Units.Product units1 units2 units3) =>
   Multiplication
     (Qty units1)
     (Curve1d units2)
@@ -219,7 +219,7 @@ instance
   value * curve = constant value * curve
 
 instance
-  Units.Product units1 units2 units3 =>
+  (Units.Product units1 units2 units3) =>
   Multiplication
     (Curve1d units1)
     (Vector2d (space @ units2))
@@ -228,7 +228,7 @@ instance
   curve * vector = curve * VectorCurve2d.constant vector
 
 instance
-  Units.Product units1 units2 units3 =>
+  (Units.Product units1 units2 units3) =>
   Multiplication
     (Vector2d (space @ units1))
     (Curve1d units2)
@@ -237,7 +237,7 @@ instance
   vector * curve = VectorCurve2d.constant vector * curve
 
 instance
-  Units.Product units1 units2 units3 =>
+  (Units.Product units1 units2 units3) =>
   Multiplication
     (Curve1d units1)
     (Vector3d (space @ units2))
@@ -246,7 +246,7 @@ instance
   curve * vector = curve * VectorCurve3d.constant vector
 
 instance
-  Units.Product units1 units2 units3 =>
+  (Units.Product units1 units2 units3) =>
   Multiplication
     (Vector3d (space @ units1))
     (Curve1d units2)
@@ -255,7 +255,7 @@ instance
   vector * curve = VectorCurve3d.constant vector * curve
 
 instance
-  Units.Quotient units1 units2 units3 =>
+  (Units.Quotient units1 units2 units3) =>
   Division
     (Curve1d units1)
     (Curve1d units2)
@@ -269,7 +269,7 @@ instance
   curve1 / curve2 = Quotient curve1 curve2
 
 instance
-  Units.Quotient units1 units2 units3 =>
+  (Units.Quotient units1 units2 units3) =>
   Division
     (Curve1d units1)
     (Qty units2)
@@ -278,7 +278,7 @@ instance
   curve / value = curve / constant value
 
 instance
-  Units.Quotient units1 units2 units3 =>
+  (Units.Quotient units1 units2 units3) =>
   Division
     (Qty units1)
     (Curve1d units2)
@@ -357,7 +357,7 @@ reverse Zero = Zero
 reverse curve@(Constant _) = curve
 reverse curve = Curve1d (Reversed curve)
 
-squared :: Units.Squared units1 units2 => Curve1d units1 -> Curve1d units2
+squared :: (Units.Squared units1 units2) => Curve1d units1 -> Curve1d units2
 squared Zero = Zero
 squared (Constant x) = Constant (x * x)
 squared (Negated c) = squared c
@@ -371,7 +371,7 @@ cosSquared c = 0.5 * cos (2.0 * c) + 0.5
 sinSquared :: Curve1d Radians -> Curve1d Unitless
 sinSquared c = 0.5 - 0.5 * cos (2.0 * c)
 
-sqrt :: Units.Squared units1 units2 => Curve1d units2 -> Curve1d units1
+sqrt :: (Units.Squared units1 units2) => Curve1d units2 -> Curve1d units1
 sqrt Zero = Zero
 sqrt (Constant x) = Constant (Qty.sqrt x)
 sqrt curve = SquareRoot curve
@@ -386,7 +386,7 @@ cos Zero = Constant 1.0
 cos (Constant x) = constant (Angle.cos x)
 cos curve = Cos curve
 
-isZero :: Tolerance units => Curve1d units -> Bool
+isZero :: (Tolerance units) => Curve1d units -> Bool
 isZero curve = List.all (~= Qty.zero) (Domain.sample (pointOn curve) Domain.unit)
 
 maxRootOrder :: Int
@@ -398,7 +398,7 @@ data ZeroEverywhere = ZeroEverywhere deriving (Eq, Show, ErrorMessage)
 
 data EqualEverywhere = EqualEverywhere deriving (Eq, Show, ErrorMessage)
 
-equalTo :: Tolerance units => Qty units -> Curve1d units -> Result EqualEverywhere (List Root)
+equalTo :: (Tolerance units) => Qty units -> Curve1d units -> Result EqualEverywhere (List Root)
 equalTo value curve =
   roots (curve - value) |> Result.mapError (\ZeroEverywhere -> EqualEverywhere)
 
@@ -411,7 +411,7 @@ equalToSquared value curve =
   let ?tolerance = ?tolerance * ?tolerance + 2.0 * value * ?tolerance
    in roots (curve - Qty.squared value) |> Result.mapError (\ZeroEverywhere -> EqualEverywhere)
 
-roots :: Tolerance units => Curve1d units -> Result ZeroEverywhere (List Root)
+roots :: (Tolerance units) => Curve1d units -> Result ZeroEverywhere (List Root)
 roots Zero = Error ZeroEverywhere
 roots (Constant value) = if value ~= Qty.zero then Error ZeroEverywhere else Ok []
 roots curve | isZero curve = Error ZeroEverywhere
@@ -428,7 +428,7 @@ roots curve =
    in Ok (List.sortBy Root.value allRoots)
 
 findRoots ::
-  Tolerance units =>
+  (Tolerance units) =>
   Curve1d units ->
   Stream (Curve1d units) ->
   Bisection.Tree (Stream (Range units)) ->
@@ -447,7 +447,7 @@ findRoots curve derivatives searchTree rootOrder accumulated =
         then updated
         else findRoots curve derivatives searchTree (rootOrder - 1) updated
 
-isCandidate :: Tolerance units => Int -> Domain -> Stream (Range units) -> Bool
+isCandidate :: (Tolerance units) => Int -> Domain -> Stream (Range units) -> Bool
 isCandidate rootOrder _ bounds =
   let curveBounds = Stream.head bounds
       derivativeBounds = Stream.take rootOrder (Stream.tail bounds)
@@ -459,7 +459,7 @@ resolveDerivativeSign :: Int -> Domain -> Stream (Range units) -> Fuzzy Sign
 resolveDerivativeSign derivativeOrder _ bounds = resolveSign (Stream.nth derivativeOrder bounds)
 
 findRoot ::
-  Tolerance units =>
+  (Tolerance units) =>
   Curve1d units ->
   Int ->
   Stream (Curve1d units) ->
@@ -501,7 +501,7 @@ resolveSign range
  where
   resolution = Range.resolution range
 
-solveEndpoint :: Tolerance units => Curve1d units -> Float -> (List Root, Float)
+solveEndpoint :: (Tolerance units) => Curve1d units -> Float -> (List Root, Float)
 solveEndpoint curve endpointX
   | evaluateAt endpointX curve ~= Qty.zero =
       let check curveDerivative derivativeOrder currentMinWidth currentBest =
@@ -537,7 +537,7 @@ resolveEndpoint root curveDerivative endpointX innerX =
             then ([], endpointX)
             else resolveEndpoint root curveDerivative endpointX midX
 
-computeWidth :: Tolerance units => Int -> Qty units -> Float
+computeWidth :: (Tolerance units) => Int -> Qty units -> Float
 computeWidth 1 derivativeValue = ?tolerance / Qty.abs derivativeValue
 computeWidth 2 derivativeValue = Qty.sqrt (2 * ?tolerance / Qty.abs derivativeValue)
 computeWidth derivativeOrder derivativeValue =

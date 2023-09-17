@@ -109,29 +109,29 @@ take = Prelude.take
 drop :: Int -> List a -> List a
 drop = Prelude.drop
 
-sum :: Addition a a a => List a -> a
+sum :: (Addition a a a) => List a -> a
 sum = foldLeft (+) Generic.zero
 
-sumOf :: Addition b b b => (a -> b) -> List a -> b
+sumOf :: (Addition b b b) => (a -> b) -> List a -> b
 sumOf function list = sum (map function list)
 
-sort :: Ord a => List a -> List a
+sort :: (Ord a) => List a -> List a
 sort = Data.List.sort
 
-sortBy :: Ord b => (a -> b) -> List a -> List a
+sortBy :: (Ord b) => (a -> b) -> List a -> List a
 sortBy = Data.List.sortOn
 
 sortWith :: (a -> a -> Ordering) -> List a -> List a
 sortWith = Data.List.sortBy
 
-sortAndDeduplicate :: Ord a => List a -> List a
+sortAndDeduplicate :: (Ord a) => List a -> List a
 sortAndDeduplicate list = deduplicate (sort list)
 
-deduplicate :: Eq a => List a -> List a
+deduplicate :: (Eq a) => List a -> List a
 deduplicate [] = []
 deduplicate (first : rest) = dedup first rest
 
-dedup :: Eq a => a -> List a -> List a
+dedup :: (Eq a) => a -> List a -> List a
 dedup current [] = [current]
 dedup current (next : remaining)
   | current == next = dedup current remaining

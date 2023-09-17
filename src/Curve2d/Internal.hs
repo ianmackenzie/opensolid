@@ -41,7 +41,7 @@ data Curve2d (coordinateSystem :: CoordinateSystem) where
     Angle ->
     Curve2d (space @ units)
   Curve ::
-    IsCurve2d curve (space @ units) =>
+    (IsCurve2d curve (space @ units)) =>
     curve ->
     DirectionCurve2d space ->
     Curve2d (space @ units)
@@ -57,7 +57,7 @@ instance
     (Curve2d (space' @ units2'))
 
 class
-  Show curve =>
+  (Show curve) =>
   IsCurve2d curve (coordinateSystem :: CoordinateSystem)
     | curve -> coordinateSystem
   where

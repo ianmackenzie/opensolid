@@ -31,9 +31,9 @@ import Unsafe.Coerce (unsafeCoerce)
 type Coercion :: Type -> Type -> Type -> Type -> Constraint
 class Coercion u1 u2 a b | a -> u1, b -> u2, a u2 -> b
 
-instance Coercion u1 u2 a b => Coercion u1 u2 (List a) (List b)
+instance (Coercion u1 u2 a b) => Coercion u1 u2 (List a) (List b)
 
-instance Coercion u1 u2 a b => Coercion u1 u2 (NonEmpty a) (NonEmpty b)
+instance (Coercion u1 u2 a b) => Coercion u1 u2 (NonEmpty a) (NonEmpty b)
 
 data Generic units
 
@@ -42,15 +42,15 @@ data units1 :* units2
 data units1 :/ units2
 
 {-# INLINE drop #-}
-drop :: Coercion units Unitless a b => a -> b
+drop :: (Coercion units Unitless a b) => a -> b
 drop = unsafeCoerce
 
 {-# INLINE add #-}
-add :: Coercion Unitless units a b => a -> b
+add :: (Coercion Unitless units a b) => a -> b
 add = unsafeCoerce
 
 {-# INLINE generalize #-}
-generalize :: Coercion units (Generic units) a b => a -> b
+generalize :: (Coercion units (Generic units) a b) => a -> b
 generalize = unsafeCoerce
 
 {-# INLINE specialize #-}
@@ -74,7 +74,7 @@ class
     | units1 units2 -> units3
 
 class
-  Product units units squaredUnits =>
+  (Product units units squaredUnits) =>
   Squared units squaredUnits
     | units -> squaredUnits
     , squaredUnits -> units
@@ -139,7 +139,7 @@ instance Squared Unitless Unitless
 
 instance Squared Meters SquareMeters
 
-instance units ~ units' => Product (Generic units) (Generic units') (units :* units)
+instance (units ~ units') => Product (Generic units) (Generic units') (units :* units)
 
 instance (units ~ units', units ~ units'') => Quotient (units :* units') (Generic units'') (Generic units)
 
@@ -175,6 +175,6 @@ class Specialize genericUnits specificUnits | genericUnits -> specificUnits
 
 instance Specialize (Generic units) units
 
-instance Product units1 units2 units3 => Specialize (units1 :* units2) units3
+instance (Product units1 units2 units3) => Specialize (units1 :* units2) units3
 
-instance Quotient units1 units2 units3 => Specialize (units1 :/ units2) units3
+instance (Quotient units1 units2 units3) => Specialize (units1 :/ units2) units3

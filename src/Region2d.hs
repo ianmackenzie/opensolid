@@ -47,7 +47,7 @@ data BuildError
   deriving (Eq, Show, ErrorMessage)
 
 boundedBy ::
-  Tolerance units =>
+  (Tolerance units) =>
   List (Curve2d (space @ units)) ->
   Result BuildError (Region2d (space @ units))
 boundedBy curves = do
@@ -56,7 +56,7 @@ boundedBy curves = do
   classifyLoops loops
 
 checkForInnerIntersection ::
-  Tolerance units =>
+  (Tolerance units) =>
   List (Curve2d (space @ units)) ->
   Result BuildError ()
 checkForInnerIntersection [] = Ok ()
@@ -65,7 +65,7 @@ checkForInnerIntersection (first : rest) = do
   checkForInnerIntersection rest
 
 checkCurveForInnerIntersection ::
-  Tolerance units =>
+  (Tolerance units) =>
   Curve2d (space @ units) ->
   List (Curve2d (space @ units)) ->
   Result BuildError ()
@@ -75,7 +75,7 @@ checkCurveForInnerIntersection curve (first : rest) = do
   checkCurveForInnerIntersection curve rest
 
 checkCurvesForInnerIntersection ::
-  Tolerance units =>
+  (Tolerance units) =>
   Curve2d (space @ units) ->
   Curve2d (space @ units) ->
   Result BuildError ()
@@ -96,7 +96,7 @@ isEndpoint :: Float -> Bool
 isEndpoint u = u == 0.0 || u == 1.0
 
 connect ::
-  Tolerance units =>
+  (Tolerance units) =>
   List (Curve2d (space @ units)) ->
   Result BuildError (List (Loop (space @ units)))
 connect [] = Ok []
@@ -112,7 +112,7 @@ data PartialLoop coordinateSystem
       (Point2d coordinateSystem)
 
 buildLoop ::
-  Tolerance units =>
+  (Tolerance units) =>
   PartialLoop (space @ units) ->
   List (Curve2d (space @ units)) ->
   Result BuildError (Loop (space @ units), List (Curve2d (space @ units)))
@@ -123,7 +123,7 @@ buildLoop partialLoop@(PartialLoop currentStart currentCurves loopEnd) remaining
       buildLoop updatedPartialLoop updatedRemainingCurves
 
 extendPartialLoop ::
-  Tolerance units =>
+  (Tolerance units) =>
   PartialLoop (space @ units) ->
   List (Curve2d (space @ units)) ->
   Result BuildError (PartialLoop (space @ units), List (Curve2d (space @ units)))
@@ -140,7 +140,7 @@ extendPartialLoop (PartialLoop currentStart currentCurves loopEnd) curves =
        in Ok (PartialLoop newStart updatedCurves loopEnd, remaining)
     (_ : _ : _, _) -> Error RegionBoundaryIntersectsItself
 
-hasEndpoint :: Tolerance units => Point2d (space @ units) -> Curve2d (space @ units) -> Bool
+hasEndpoint :: (Tolerance units) => Point2d (space @ units) -> Curve2d (space @ units) -> Bool
 hasEndpoint point curve =
   Curve2d.startPoint curve ~= point || Curve2d.endPoint curve ~= point
 
@@ -157,7 +157,7 @@ innerLoops (Region2d _ loops) = loops
 boundaryCurves :: Region2d (space @ units) -> NonEmpty (Curve2d (space @ units))
 boundaryCurves region = NonEmpty.concat (outerLoop region :| innerLoops region)
 
-contains :: Tolerance units => Point2d (space @ units) -> Region2d (space @ units) -> Bool
+contains :: (Tolerance units) => Point2d (space @ units) -> Region2d (space @ units) -> Bool
 contains point region =
   case classify point (boundaryCurves region) of
     Nothing -> True -- Point on boundary is considered contained
@@ -165,7 +165,7 @@ contains point region =
     Just Negative -> False
 
 classify ::
-  Tolerance units =>
+  (Tolerance units) =>
   Point2d (space @ units) ->
   NonEmpty (Curve2d (space @ units)) ->
   Maybe Sign
@@ -185,7 +185,7 @@ totalFlux point loop =
   Estimate.sum (List.map (fluxIntegral point) (NonEmpty.toList loop))
 
 classifyNonBoundary ::
-  Tolerance units =>
+  (Tolerance units) =>
   Point2d (space @ units) ->
   Loop (space @ units) ->
   Sign
@@ -200,7 +200,7 @@ containmentIsDeterminate :: Range Unitless -> Bool
 containmentIsDeterminate flux = not (Range.contains bothPossibleFluxValues flux)
 
 classifyLoops ::
-  Tolerance units =>
+  (Tolerance units) =>
   List (Loop (space @ units)) ->
   Result BuildError (Region2d (space @ units))
 classifyLoops [] = Error EmptyRegion
@@ -212,7 +212,7 @@ classifyLoops (NonEmpty loops) = do
     then Ok (Region2d outerLoop' innerLoops')
     else Error MultipleDisjointRegions
 
-fixSign :: Tolerance units => Sign -> Loop (space @ units) -> Loop (space @ units)
+fixSign :: (Tolerance units) => Sign -> Loop (space @ units) -> Loop (space @ units)
 fixSign desiredSign loop =
   let ?tolerance = Qty.squared (Units.generalize ?tolerance)
    in if Estimate.sign (loopSignedArea loop) == desiredSign then loop else reverseLoop loop
@@ -221,7 +221,7 @@ reverseLoop :: Loop (space @ units) -> Loop (space @ units)
 reverseLoop loop = NonEmpty.reverseMap Curve2d.reverse loop
 
 pickLargestLoop ::
-  Tolerance units =>
+  (Tolerance units) =>
   NonEmpty (Loop (space @ units)) ->
   (Loop (space @ units), List (Loop (space @ units)))
 pickLargestLoop loops =
@@ -236,7 +236,7 @@ loopSignedArea loop =
         |> Estimate.sum
 
 areaIntegral ::
-  Units.Squared units1 units2 =>
+  (Units.Squared units1 units2) =>
   Point2d (space @ units1) ->
   Curve2d (space @ units1) ->
   Estimate units2
@@ -246,7 +246,7 @@ areaIntegral referencePoint curve =
       dx = Curve1d.derivative (VectorCurve2d.xComponent displacement)
    in -(Curve1d.integral (y * dx))
 
-loopIsInside :: Tolerance units => Loop (space @ units) -> Loop (space @ units) -> Bool
+loopIsInside :: (Tolerance units) => Loop (space @ units) -> Loop (space @ units) -> Bool
 loopIsInside outer inner =
   let testPoint = Curve2d.startPoint (NonEmpty.first inner)
    in case classify testPoint outer of
@@ -259,7 +259,7 @@ boundingBox region =
   NonEmpty.reduceLeft BoundingBox2d.aggregate2 $
     NonEmpty.map Curve2d.boundingBox (outerLoop region)
 
-area :: Units.Squared units1 units2 => Region2d (space @ units1) -> Estimate units2
+area :: (Units.Squared units1 units2) => Region2d (space @ units1) -> Estimate units2
 area region =
   let referencePoint = Curve2d.startPoint (NonEmpty.first (outerLoop region))
    in Estimate.sum (List.map (areaIntegral referencePoint) (NonEmpty.toList (boundaryCurves region)))

@@ -106,7 +106,7 @@ instance
   Vector2d x1 y1 - Vector2d x2 y2 = Vector2d (x1 - x2) (y1 - y2)
 
 instance
-  Units.Product units1 units2 units3 =>
+  (Units.Product units1 units2 units3) =>
   Multiplication
     (Qty units1)
     (Vector2d (space @ units2))
@@ -115,7 +115,7 @@ instance
   scale * Vector2d vx vy = Vector2d (scale * vx) (scale * vy)
 
 instance
-  Units.Product units1 units2 units3 =>
+  (Units.Product units1 units2 units3) =>
   Multiplication
     (Vector2d (space @ units1))
     (Qty units2)
@@ -124,7 +124,7 @@ instance
   Vector2d vx vy * scale = Vector2d (vx * scale) (vy * scale)
 
 instance
-  Units.Quotient units1 units2 units3 =>
+  (Units.Quotient units1 units2 units3) =>
   Division
     (Vector2d (space @ units1))
     (Qty units2)
@@ -142,7 +142,7 @@ instance
   Vector2d x1 y1 <> Vector2d x2 y2 = x1 * x2 + y1 * y2
 
 instance
-  space ~ space' =>
+  (space ~ space') =>
   DotProduct
     (Vector2d (space @ units))
     (Direction2d space')
@@ -151,7 +151,7 @@ instance
   v <> d = v <> Direction2d.unwrap d
 
 instance
-  space ~ space' =>
+  (space ~ space') =>
   DotProduct
     (Direction2d space)
     (Vector2d (space' @ units))
@@ -169,7 +169,7 @@ instance
   Vector2d x1 y1 >< Vector2d x2 y2 = x1 * y2 - y1 * x2
 
 instance
-  space ~ space' =>
+  (space ~ space') =>
   CrossProduct
     (Vector2d (space @ units))
     (Direction2d space')
@@ -178,7 +178,7 @@ instance
   v >< d = v >< Direction2d.unwrap d
 
 instance
-  space ~ space' =>
+  (space ~ space') =>
   CrossProduct
     (Direction2d space)
     (Vector2d (space' @ units))
@@ -231,7 +231,7 @@ midpoint (Vector2d x1 y1) (Vector2d x2 y2) =
 magnitude :: Vector2d (space @ units) -> Qty units
 magnitude (Vector2d vx vy) = Qty.hypot2 vx vy
 
-squaredMagnitude :: Units.Squared units1 units2 => Vector2d (space @ units1) -> Qty units2
+squaredMagnitude :: (Units.Squared units1 units2) => Vector2d (space @ units1) -> Qty units2
 squaredMagnitude (Vector2d vx vy) = Qty.squared vx + Qty.squared vy
 
 angle :: Vector2d (space @ units) -> Angle
@@ -239,13 +239,13 @@ angle (Vector2d vx vy) = Angle.atan2 vy vx
 
 data IsZero = IsZero deriving (Eq, Show, ErrorMessage)
 
-direction :: Tolerance units => Vector2d (space @ units) -> Result IsZero (Direction2d space)
+direction :: (Tolerance units) => Vector2d (space @ units) -> Result IsZero (Direction2d space)
 direction vector =
   let vm = magnitude vector
    in if vm ~= Qty.zero then Error Vector2d.IsZero else Ok (Direction2d.unsafe (vector / vm))
 
 magnitudeAndDirection ::
-  Tolerance units =>
+  (Tolerance units) =>
   Vector2d (space @ units) ->
   Result IsZero (Qty units, Direction2d space)
 magnitudeAndDirection vector =

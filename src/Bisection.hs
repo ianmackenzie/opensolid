@@ -68,7 +68,7 @@ isAllowed domain (first : rest)
   | otherwise = isAllowed domain rest
 
 solve2 ::
-  Show solution =>
+  (Show solution) =>
   (Domain -> Domain -> segment -> segment -> Bool) ->
   (Domain -> Domain -> segment -> segment -> Fuzzy resolution) ->
   (Domain -> Domain -> segment -> segment -> resolution -> Maybe solution) ->

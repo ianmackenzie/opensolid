@@ -20,24 +20,24 @@ class HasZero a where
 instance HasZero Int where
   zeroImpl = 0
 
-zero :: HasZero a => a
+zero :: (HasZero a) => a
 zero = zeroImpl
 
-min :: Ord a => a -> a -> a
+min :: (Ord a) => a -> a -> a
 min = Prelude.min
 
-max :: Ord a => a -> a -> a
+max :: (Ord a) => a -> a -> a
 max = Prelude.max
 
-minBy :: Ord b => (a -> b) -> a -> a -> a
+minBy :: (Ord b) => (a -> b) -> a -> a -> a
 minBy function first second
   | function first Prelude.<= function second = first
   | otherwise = second
 
-maxBy :: Ord b => (a -> b) -> a -> a -> a
+maxBy :: (Ord b) => (a -> b) -> a -> a -> a
 maxBy function first second
   | function first Prelude.>= function second = first
   | otherwise = second
 
-compare :: Ord a => a -> a -> Ordering
+compare :: (Ord a) => a -> a -> Ordering
 compare = Prelude.compare

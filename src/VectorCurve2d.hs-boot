@@ -17,7 +17,7 @@ import Vector2d (Vector2d)
 import VectorBox2d (VectorBox2d)
 
 class
-  Show curve =>
+  (Show curve) =>
   IsVectorCurve2d curve (coordinateSystem :: CoordinateSystem)
     | curve -> coordinateSystem
   where
@@ -54,21 +54,21 @@ instance
     (VectorCurve2d (space' @ units2'))
 
 instance
-  Units.Product units1 units2 units3 =>
+  (Units.Product units1 units2 units3) =>
   Multiplication
     (Curve1d units1)
     (VectorCurve2d (space @ units2))
     (VectorCurve2d (space @ units3))
 
 instance
-  Units.Product units1 units2 units3 =>
+  (Units.Product units1 units2 units3) =>
   Multiplication
     (VectorCurve2d (space @ units1))
     (Curve1d units2)
     (VectorCurve2d (space @ units3))
 
 instance
-  Units.Quotient units1 units2 units3 =>
+  (Units.Quotient units1 units2 units3) =>
   Division
     (VectorCurve2d (space @ units1))
     (Curve1d units2)
@@ -84,7 +84,7 @@ instance
     (Curve1d units3)
 
 constant :: Vector2d (space @ units) -> VectorCurve2d (space @ units)
-wrap :: IsVectorCurve2d curve (space @ units) => curve -> VectorCurve2d (space @ units)
+wrap :: (IsVectorCurve2d curve (space @ units)) => curve -> VectorCurve2d (space @ units)
 evaluateAt :: Float -> VectorCurve2d (space @ units) -> Vector2d (space @ units)
 segmentBounds :: Domain -> VectorCurve2d (space @ units) -> VectorBox2d (space @ units)
 derivative :: VectorCurve2d (space @ units) -> VectorCurve2d (space @ units)

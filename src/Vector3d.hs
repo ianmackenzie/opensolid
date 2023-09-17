@@ -103,7 +103,7 @@ instance
   Vector3d x1 y1 z1 - Vector3d x2 y2 z2 = Vector3d (x1 - x2) (y1 - y2) (z1 - z2)
 
 instance
-  Units.Product units1 units2 units3 =>
+  (Units.Product units1 units2 units3) =>
   Multiplication
     (Qty units1)
     (Vector3d (space @ units2))
@@ -112,7 +112,7 @@ instance
   scale * Vector3d vx vy vz = Vector3d (scale * vx) (scale * vy) (scale * vz)
 
 instance
-  Units.Product units1 units2 units3 =>
+  (Units.Product units1 units2 units3) =>
   Multiplication
     (Vector3d (space @ units1))
     (Qty units2)
@@ -121,7 +121,7 @@ instance
   Vector3d vx vy vz * scale = Vector3d (vx * scale) (vy * scale) (vz * scale)
 
 instance
-  Units.Quotient units1 units2 units3 =>
+  (Units.Quotient units1 units2 units3) =>
   Division
     (Vector3d (space @ units1))
     (Qty units2)
@@ -210,18 +210,18 @@ midpoint (Vector3d x1 y1 z1) (Vector3d x2 y2 z2) =
 magnitude :: Vector3d (space @ units) -> Qty units
 magnitude (Vector3d vx vy vz) = Qty.hypot3 vx vy vz
 
-squaredMagnitude :: Units.Squared units1 units2 => Vector3d (space @ units1) -> Qty units2
+squaredMagnitude :: (Units.Squared units1 units2) => Vector3d (space @ units1) -> Qty units2
 squaredMagnitude (Vector3d vx vy vz) = Qty.squared vx + Qty.squared vy + Qty.squared vz
 
 data IsZero = IsZero deriving (Eq, Show, ErrorMessage)
 
-direction :: Tolerance units => Vector3d (space @ units) -> Result IsZero (Direction3d space)
+direction :: (Tolerance units) => Vector3d (space @ units) -> Result IsZero (Direction3d space)
 direction vector = do
   let vm = magnitude vector
    in if vm ~= Qty.zero then Error Vector3d.IsZero else Ok (Direction3d.unsafe (vector / vm))
 
 magnitudeAndDirection ::
-  Tolerance units =>
+  (Tolerance units) =>
   Vector3d (space @ units) ->
   Result IsZero (Qty units, Direction3d space)
 magnitudeAndDirection vector = do

@@ -44,7 +44,7 @@ pattern Direction2d :: Vector2d (space @ Unitless) -> Direction2d space
 pattern Direction2d v <- Direction2d_ v
 
 instance
-  space ~ space' =>
+  (space ~ space') =>
   ApproximateEquality (Direction2d space) (Direction2d space') Radians
   where
   d1 ~= d2 = angleFrom d1 d2 ~= Qty.zero
@@ -66,10 +66,10 @@ instance Multiplication (Qty units) (Direction2d space) (Vector2d (space @ units
 instance Multiplication (Direction2d space) (Qty units) (Vector2d (space @ units)) where
   Direction2d vector * scale = vector * scale
 
-instance space ~ space' => DotProduct (Direction2d space) (Direction2d space') Float where
+instance (space ~ space') => DotProduct (Direction2d space) (Direction2d space') Float where
   Direction2d v1 <> Direction2d v2 = v1 <> v2
 
-instance space ~ space' => CrossProduct (Direction2d space) (Direction2d space') Float where
+instance (space ~ space') => CrossProduct (Direction2d space) (Direction2d space') Float where
   Direction2d v1 >< Direction2d v2 = v1 >< v2
 
 {-# INLINE unsafe #-}
@@ -101,7 +101,7 @@ y = positiveY
 data PointsAreCoincident = PointsAreCoincident deriving (Eq, Show, ErrorMessage)
 
 from ::
-  Tolerance units =>
+  (Tolerance units) =>
   Point2d (space @ units) ->
   Point2d (space @ units) ->
   Result PointsAreCoincident (Direction2d space)

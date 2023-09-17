@@ -10,7 +10,7 @@ import OpenSolid
 import Point2d (Point2d)
 
 from ::
-  Tolerance units =>
+  (Tolerance units) =>
   Point2d (space @ units) ->
   Point2d (space @ units) ->
   Result DegenerateCurve (Curve2d (space @ units))

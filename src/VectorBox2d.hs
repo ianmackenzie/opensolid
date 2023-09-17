@@ -122,7 +122,7 @@ instance
   Vector2d x1 y1 - VectorBox2d x2 y2 = VectorBox2d (x1 - x2) (y1 - y2)
 
 instance
-  Units.Product units1 units2 units3 =>
+  (Units.Product units1 units2 units3) =>
   Multiplication
     (Qty units1)
     (VectorBox2d (space @ units2))
@@ -131,7 +131,7 @@ instance
   value * VectorBox2d x y = VectorBox2d (value * x) (value * y)
 
 instance
-  Units.Product units1 units2 units3 =>
+  (Units.Product units1 units2 units3) =>
   Multiplication
     (VectorBox2d (space @ units1))
     (Qty units2)
@@ -140,7 +140,7 @@ instance
   VectorBox2d x y * value = VectorBox2d (x * value) (y * value)
 
 instance
-  Units.Product units1 units2 units3 =>
+  (Units.Product units1 units2 units3) =>
   Multiplication
     (Range units1)
     (VectorBox2d (space @ units2))
@@ -149,7 +149,7 @@ instance
   range * VectorBox2d x y = VectorBox2d (range * x) (range * y)
 
 instance
-  Units.Product units1 units2 units3 =>
+  (Units.Product units1 units2 units3) =>
   Multiplication
     (VectorBox2d (space @ units1))
     (Range units2)
@@ -158,7 +158,7 @@ instance
   VectorBox2d x y * range = VectorBox2d (x * range) (y * range)
 
 instance
-  Units.Quotient units1 units2 units3 =>
+  (Units.Quotient units1 units2 units3) =>
   Division
     (VectorBox2d (space @ units1))
     (Qty units2)
@@ -167,7 +167,7 @@ instance
   VectorBox2d x y / value = VectorBox2d (x / value) (y / value)
 
 instance
-  Units.Quotient units1 units2 units3 =>
+  (Units.Quotient units1 units2 units3) =>
   Division
     (VectorBox2d (space @ units1))
     (Range units2)
@@ -194,7 +194,7 @@ instance
   VectorBox2d x1 y1 <> Vector2d x2 y2 = x1 * x2 + y1 * y2
 
 instance
-  space ~ space' =>
+  (space ~ space') =>
   DotProduct
     (Direction2d space)
     (VectorBox2d (space' @ units))
@@ -203,7 +203,7 @@ instance
   Direction2d vector <> vectorBox = vector <> vectorBox
 
 instance
-  space ~ space' =>
+  (space ~ space') =>
   DotProduct
     (VectorBox2d (space @ units))
     (Direction2d space')
@@ -239,7 +239,7 @@ instance
   VectorBox2d x1 y1 >< Vector2d x2 y2 = x1 * y2 - y1 * x2
 
 instance
-  space ~ space' =>
+  (space ~ space') =>
   CrossProduct
     (Direction2d space)
     (VectorBox2d (space' @ units))
@@ -248,7 +248,7 @@ instance
   Direction2d vector >< vectorBox = vector >< vectorBox
 
 instance
-  space ~ space' =>
+  (space ~ space') =>
   CrossProduct
     (VectorBox2d (space @ units))
     (Direction2d space')
@@ -320,7 +320,7 @@ xComponent (VectorBox2d vx _) = vx
 yComponent :: VectorBox2d (space @ units) -> Range units
 yComponent (VectorBox2d _ vy) = vy
 
-squaredMagnitude :: Units.Squared units1 units2 => VectorBox2d (space @ units1) -> Range units2
+squaredMagnitude :: (Units.Squared units1 units2) => VectorBox2d (space @ units1) -> Range units2
 squaredMagnitude (VectorBox2d x y) = Range.squared x + Range.squared y
 
 magnitude :: VectorBox2d (space @ units) -> Range units
@@ -332,7 +332,7 @@ maxMagnitude (VectorBox2d (Range minX maxX) (Range minY maxY)) =
       yMagnitude = Qty.max (Qty.abs minY) (Qty.abs maxY)
    in Qty.hypot2 xMagnitude yMagnitude
 
-maxSquaredMagnitude :: Units.Squared units1 units2 => VectorBox2d (space @ units1) -> Qty units2
+maxSquaredMagnitude :: (Units.Squared units1 units2) => VectorBox2d (space @ units1) -> Qty units2
 maxSquaredMagnitude (VectorBox2d (Range minX maxX) (Range minY maxY)) =
   let xMagnitude = Qty.max (Qty.abs minX) (Qty.abs maxX)
       yMagnitude = Qty.max (Qty.abs minY) (Qty.abs maxY)
