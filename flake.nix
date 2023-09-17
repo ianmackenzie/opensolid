@@ -16,29 +16,28 @@
         };
         myHaskellPackages = pkgs.haskellPackages.extend overlay;
       in
-      rec
       {
         apps = rec {
           sandbox = {
             type = "app";
-            program = "${myHaskellPackages.opensolid}/sandbox";
+            program = "${myHaskellPackages.opensolid}/bin/sandbox";
           };
+          default = sandbox;
         };
 
         packages = rec {
-          default = myHaskellPackages.opensolid;
+          opensolid = myHaskellPackages.opensolid;
+          default = opensolid;
         };
 
-        devShells = rec {
-          default = myHaskellPackages.shellFor {
-            packages = p: [
-              p.opensolid
-            ];
-            buildInputs = with myHaskellPackages; [
-              haskell-language-server
-              cabal-install
-            ];
-          };
+        devShells.default = myHaskellPackages.shellFor {
+          packages = p: [
+            p.opensolid
+          ];
+          buildInputs = with myHaskellPackages; [
+            haskell-language-server
+            cabal-install
+          ];
         };
       }
     );
