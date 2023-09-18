@@ -20,7 +20,74 @@ source-repository head
   type: git
   location: https://github.com/ianmackenzie/opensolid
 
+common config
+  default-language: Haskell2010
+  build-depends:
+      array
+    , base
+    , containers
+    , random
+    , text
+  ghc-options:
+      -Wall
+      -Werror
+      -Wcompat
+      -Widentities
+      -Wincomplete-record-updates
+      -Wincomplete-uni-patterns
+      -Wmissing-signatures
+      -Wmissing-exported-signatures
+      -Wmissing-export-lists
+      -Wmissing-home-modules
+      -Wpartial-fields
+      -Wsafe
+      -dcore-lint
+      -threaded
+  default-extensions:
+      NoImplicitPrelude
+      OverloadedStrings
+      MultiParamTypeClasses
+      FlexibleInstances
+      FlexibleContexts
+      UndecidableInstances
+      RebindableSyntax
+      MonoLocalBinds
+      KindSignatures
+      StandaloneDeriving
+      StrictData
+      FunctionalDependencies
+      GeneralizedNewtypeDeriving
+      DataKinds
+      ScopedTypeVariables
+      GADTs
+      RoleAnnotations
+      LexicalNegation
+      ImportQualifiedPost
+      StandaloneKindSignatures
+      UndecidableSuperClasses
+      ImplicitParams
+      ConstraintKinds
+      PatternSynonyms
+      BlockArguments
+      OverloadedLabels
+      RankNTypes
+      QualifiedDo
+      TypeFamilies
+      TypeOperators
+      OverloadedRecordDot
+      MagicHash
+      TupleSections
+      DeriveAnyClass
+      DerivingStrategies
+      ViewPatterns
+      LambdaCase
+
+common app
+  ghc-options: -rtsopts -with-rtsopts=-N
+  build-depends: opensolid
+
 library
+  import: config
   exposed-modules:
       Angle
       Arc2d
@@ -98,112 +165,17 @@ library
       VectorCurve2d.DegenerateEndpoint
       VectorCurve2d.Direction
       VectorCurve2d.Magnitude
-  hs-source-dirs:
-      src
-  default-extensions:
-      NoImplicitPrelude
-      OverloadedStrings
-      MultiParamTypeClasses
-      FlexibleInstances
-      FlexibleContexts
-      UndecidableInstances
-      RebindableSyntax
-      MonoLocalBinds
-      KindSignatures
-      StandaloneDeriving
-      StrictData
-      FunctionalDependencies
-      GeneralizedNewtypeDeriving
-      DataKinds
-      ScopedTypeVariables
-      GADTs
-      RoleAnnotations
-      LexicalNegation
-      ImportQualifiedPost
-      StandaloneKindSignatures
-      UndecidableSuperClasses
-      ImplicitParams
-      ConstraintKinds
-      PatternSynonyms
-      BlockArguments
-      OverloadedLabels
-      RankNTypes
-      QualifiedDo
-      TypeFamilies
-      TypeOperators
-      OverloadedRecordDot
-      MagicHash
-      TupleSections
-      DeriveAnyClass
-      DerivingStrategies
-      ViewPatterns
-      LambdaCase
-  ghc-options: -Wall -Werror -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-signatures -Wmissing-exported-signatures -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wsafe -dcore-lint
-  build-depends:
-      array
-    , base
-    , containers
-    , random
-    , text
-  default-language: Haskell2010
+  hs-source-dirs: src
 
 executable sandbox
+  import: config, app
   main-is: Main.hs
-  other-modules:
-      Paths_opensolid
-  autogen-modules:
-      Paths_opensolid
-  hs-source-dirs:
-      sandbox
-  default-extensions:
-      NoImplicitPrelude
-      OverloadedStrings
-      MultiParamTypeClasses
-      FlexibleInstances
-      FlexibleContexts
-      UndecidableInstances
-      RebindableSyntax
-      MonoLocalBinds
-      KindSignatures
-      StandaloneDeriving
-      StrictData
-      FunctionalDependencies
-      GeneralizedNewtypeDeriving
-      DataKinds
-      ScopedTypeVariables
-      GADTs
-      RoleAnnotations
-      LexicalNegation
-      ImportQualifiedPost
-      StandaloneKindSignatures
-      UndecidableSuperClasses
-      ImplicitParams
-      ConstraintKinds
-      PatternSynonyms
-      BlockArguments
-      OverloadedLabels
-      RankNTypes
-      QualifiedDo
-      TypeFamilies
-      TypeOperators
-      OverloadedRecordDot
-      MagicHash
-      TupleSections
-      DeriveAnyClass
-      DerivingStrategies
-      ViewPatterns
-      LambdaCase
-  ghc-options: -Wall -Werror -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-signatures -Wmissing-exported-signatures -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wsafe -dcore-lint -threaded -rtsopts -with-rtsopts=-N
-  build-depends:
-      array
-    , base
-    , containers
-    , opensolid
-    , random
-    , text
-  default-language: Haskell2010
+  other-modules: Paths_opensolid
+  autogen-modules: Paths_opensolid
+  hs-source-dirs: sandbox
 
 test-suite opensolid-test
+  import: config, app
   type: exitcode-stdio-1.0
   main-is: Main.hs
   other-modules:
@@ -221,54 +193,5 @@ test-suite opensolid-test
       Tests.Region2d
       Tests.VectorBox3d
       Paths_opensolid
-  autogen-modules:
-      Paths_opensolid
-  hs-source-dirs:
-      test
-  default-extensions:
-      NoImplicitPrelude
-      OverloadedStrings
-      MultiParamTypeClasses
-      FlexibleInstances
-      FlexibleContexts
-      UndecidableInstances
-      RebindableSyntax
-      MonoLocalBinds
-      KindSignatures
-      StandaloneDeriving
-      StrictData
-      FunctionalDependencies
-      GeneralizedNewtypeDeriving
-      DataKinds
-      ScopedTypeVariables
-      GADTs
-      RoleAnnotations
-      LexicalNegation
-      ImportQualifiedPost
-      StandaloneKindSignatures
-      UndecidableSuperClasses
-      ImplicitParams
-      ConstraintKinds
-      PatternSynonyms
-      BlockArguments
-      OverloadedLabels
-      RankNTypes
-      QualifiedDo
-      TypeFamilies
-      TypeOperators
-      OverloadedRecordDot
-      MagicHash
-      TupleSections
-      DeriveAnyClass
-      DerivingStrategies
-      ViewPatterns
-      LambdaCase
-  ghc-options: -Wall -Werror -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-signatures -Wmissing-exported-signatures -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wsafe -dcore-lint -threaded -rtsopts -with-rtsopts=-N
-  build-depends:
-      array
-    , base
-    , containers
-    , opensolid
-    , random
-    , text
-  default-language: Haskell2010
+  autogen-modules: Paths_opensolid
+  hs-source-dirs: test
