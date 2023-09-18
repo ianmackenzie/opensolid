@@ -1,4 +1,5 @@
 {
   "editor.formatOnSave": true,
   "haskell.formattingProvider": "fourmolu",
+  "nixEnvSelector.nixFile": "${workspaceRoot}/shell.nix",
 }
