@@ -49,7 +49,7 @@ instance Prelude.Applicative Generator where
 
 instance Prelude.Monad Generator where (>>=) = Prelude.flip bind
 
-instance a ~ a' => Bind (Generator a) a' (Generator b) where
+instance (a ~ a') => Bind (Generator a) a' (Generator b) where
   bind function generatorA =
     Generator $
       \stdGen ->

@@ -42,7 +42,7 @@ data Segment (coordinateSystem :: CoordinateSystem)
       ~(DirectionBox2d (Space coordinateSystem))
 
 init ::
-  Tolerance units =>
+  (Tolerance units) =>
   Derivatives (space @ units) ->
   Domain ->
   Segment (space @ units)
@@ -53,7 +53,7 @@ init derivatives domain =
       tangentBounds = DirectionCurve2d.segmentBounds domain (Curve2d.tangentDirection derivatives.curve)
    in Segment curveBounds firstBounds secondBounds tangentBounds
 
-overlaps :: Tolerance units => Segment (space @ units) -> Segment (space @ units) -> Bool
+overlaps :: (Tolerance units) => Segment (space @ units) -> Segment (space @ units) -> Bool
 overlaps (Segment firstBounds _ _ _) (Segment secondBounds _ _ _) =
   Range.minValue (VectorBox2d.magnitude (firstBounds - secondBounds)) <= ?tolerance
 
@@ -132,7 +132,7 @@ computeIntersectionType segment1 segment2 =
   firstResolution = crossProductResolution segment1 segment2
 
 isTangentIntersectionCandidate ::
-  Tolerance units =>
+  (Tolerance units) =>
   Domain ->
   Domain ->
   Segment (space @ units) ->
@@ -217,7 +217,7 @@ secondDerivativeBounds1d dXdU dYdU d2XdU2 d2YdU2 =
    in Units.generalize ((d2YdU2' * dXdU' - dYdU' * d2XdU2') / (dXdU' * dXdU')) ./ dXdU'
 
 findTangentIntersection ::
-  Tolerance units =>
+  (Tolerance units) =>
   Derivatives (space @ units) ->
   Derivatives (space @ units) ->
   Domain ->
@@ -231,7 +231,7 @@ findTangentIntersection derivatives1 derivatives2 u v _ _ sign = do
   Just (Intersection u0 v0 Intersection.Tangent sign)
 
 isTangentIntersection ::
-  Tolerance units =>
+  (Tolerance units) =>
   Derivatives (space @ units) ->
   Derivatives (space @ units) ->
   Domain ->
@@ -253,7 +253,7 @@ isTangentIntersection derivatives1 derivatives2 u1 u2 =
                 && Range.includes Qty.zero dotProduct2
 
 isCrossingIntersectionCandidate ::
-  Tolerance units =>
+  (Tolerance units) =>
   Domain ->
   Domain ->
   Segment (space @ units) ->
@@ -274,7 +274,7 @@ crossingIntersectionSign _ _ segment1 segment2
   firstResolution = crossProductResolution segment1 segment2
 
 findCrossingIntersection ::
-  Tolerance units =>
+  (Tolerance units) =>
   Derivatives (space @ units) ->
   Derivatives (space @ units) ->
   Domain ->

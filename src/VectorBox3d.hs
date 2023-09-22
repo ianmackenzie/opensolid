@@ -111,7 +111,7 @@ instance
   Vector3d x1 y1 z1 - VectorBox3d x2 y2 z2 = VectorBox3d (x1 - x2) (y1 - y2) (z1 - z2)
 
 instance
-  Units.Product units1 units2 units3 =>
+  (Units.Product units1 units2 units3) =>
   Multiplication
     (Qty units1)
     (VectorBox3d (space @ units2))
@@ -120,7 +120,7 @@ instance
   value * VectorBox3d x y z = VectorBox3d (value * x) (value * y) (value * z)
 
 instance
-  Units.Product units1 units2 units3 =>
+  (Units.Product units1 units2 units3) =>
   Multiplication
     (VectorBox3d (space @ units1))
     (Qty units2)
@@ -129,7 +129,7 @@ instance
   VectorBox3d x y z * value = VectorBox3d (x * value) (y * value) (z * value)
 
 instance
-  Units.Product units1 units2 units3 =>
+  (Units.Product units1 units2 units3) =>
   Multiplication
     (Range units1)
     (VectorBox3d (space @ units2))
@@ -138,7 +138,7 @@ instance
   range * VectorBox3d x y z = VectorBox3d (range * x) (range * y) (range * z)
 
 instance
-  Units.Product units1 units2 units3 =>
+  (Units.Product units1 units2 units3) =>
   Multiplication
     (VectorBox3d (space @ units1))
     (Range units2)
@@ -147,7 +147,7 @@ instance
   VectorBox3d x y z * range = VectorBox3d (x * range) (y * range) (z * range)
 
 instance
-  Units.Quotient units1 units2 units3 =>
+  (Units.Quotient units1 units2 units3) =>
   Division
     (VectorBox3d (space @ units1))
     (Qty units2)
@@ -156,7 +156,7 @@ instance
   VectorBox3d x y z / value = VectorBox3d (x / value) (y / value) (z / value)
 
 instance
-  Units.Quotient units1 units2 units3 =>
+  (Units.Quotient units1 units2 units3) =>
   Division
     (VectorBox3d (space @ units1))
     (Range units2)
@@ -183,7 +183,7 @@ instance
   VectorBox3d x1 y1 z1 <> Vector3d x2 y2 z2 = x1 * x2 + y1 * y2 + z1 * z2
 
 instance
-  space ~ space' =>
+  (space ~ space') =>
   DotProduct
     (Direction3d space)
     (VectorBox3d (space' @ units))
@@ -192,7 +192,7 @@ instance
   Direction3d vector <> vectorBox = vector <> vectorBox
 
 instance
-  space ~ space' =>
+  (space ~ space') =>
   DotProduct
     (VectorBox3d (space @ units))
     (Direction3d space')
@@ -293,7 +293,7 @@ yComponent (VectorBox3d _ vy _) = vy
 zComponent :: VectorBox3d (space @ units) -> Range units
 zComponent (VectorBox3d _ _ vz) = vz
 
-squaredMagnitude :: Units.Squared units1 units2 => VectorBox3d (space @ units1) -> Range units2
+squaredMagnitude :: (Units.Squared units1 units2) => VectorBox3d (space @ units1) -> Range units2
 squaredMagnitude (VectorBox3d x y z) = Range.squared x + Range.squared y + Range.squared z
 
 magnitude :: VectorBox3d (space @ units) -> Range units
@@ -306,7 +306,7 @@ maxMagnitude (VectorBox3d (Range minX maxX) (Range minY maxY) (Range minZ maxZ))
       zMagnitude = Qty.max (Qty.abs minZ) (Qty.abs maxZ)
    in Qty.hypot3 xMagnitude yMagnitude zMagnitude
 
-maxSquaredMagnitude :: Units.Squared units1 units2 => VectorBox3d (space @ units1) -> Qty units2
+maxSquaredMagnitude :: (Units.Squared units1 units2) => VectorBox3d (space @ units1) -> Qty units2
 maxSquaredMagnitude (VectorBox3d (Range minX maxX) (Range minY maxY) (Range minZ maxZ)) =
   let xMagnitude = Qty.max (Qty.abs minX) (Qty.abs maxX)
       yMagnitude = Qty.max (Qty.abs minY) (Qty.abs maxY)

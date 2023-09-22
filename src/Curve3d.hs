@@ -23,7 +23,7 @@ class IsCurve3d curve (coordinateSystem :: CoordinateSystem) | curve -> coordina
   boundingBoxImpl :: curve -> BoundingBox3d coordinateSystem
 
 data Curve3d (coordinateSystem :: CoordinateSystem) where
-  Curve3d :: IsCurve3d curve (space @ units) => curve -> Curve3d (space @ units)
+  Curve3d :: (IsCurve3d curve (space @ units)) => curve -> Curve3d (space @ units)
 
 instance IsCurve3d (Point3d (space @ units)) (space @ units) where
   startPointImpl = identity

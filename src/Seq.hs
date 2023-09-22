@@ -72,10 +72,10 @@ foldRight = Data.Foldable.foldr
 reverse :: Seq a -> Seq a
 reverse = Data.Sequence.reverse
 
-sort :: Ord a => Seq a -> Seq a
+sort :: (Ord a) => Seq a -> Seq a
 sort = Data.Sequence.sort
 
-sortBy :: Ord b => (a -> b) -> Seq a -> Seq a
+sortBy :: (Ord b) => (a -> b) -> Seq a -> Seq a
 sortBy = Data.Sequence.sortOn
 
 sortWith :: (a -> a -> Ordering) -> Seq a -> Seq a

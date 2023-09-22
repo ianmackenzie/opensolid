@@ -40,7 +40,7 @@ instance HasField "degenerateStart" (Derivatives (space @ units)) Bool where
 instance HasField "degenerateEnd" (Derivatives (space @ units)) Bool where
   getField (Derivatives _ _ _ _ field) = field
 
-ofCurve :: Tolerance units => Curve2d (space @ units) -> Derivatives (space @ units)
+ofCurve :: (Tolerance units) => Curve2d (space @ units) -> Derivatives (space @ units)
 ofCurve givenCurve =
   let firstDerivative = Curve2d.derivative givenCurve
       secondDerivative = VectorCurve2d.derivative firstDerivative
@@ -51,12 +51,12 @@ ofCurve givenCurve =
         (isDegenerateAt 0.0 firstDerivative)
         (isDegenerateAt 1.0 firstDerivative)
 
-isDegenerateAt :: Tolerance units => Float -> VectorCurve2d (space @ units) -> Bool
+isDegenerateAt :: (Tolerance units) => Float -> VectorCurve2d (space @ units) -> Bool
 isDegenerateAt u firstDerivative =
   Vector2d.magnitude (VectorCurve2d.evaluateAt u firstDerivative) ~= Qty.zero
 
 classify ::
-  Tolerance units =>
+  (Tolerance units) =>
   (Float, Float) ->
   Derivatives (space @ units) ->
   Derivatives (space @ units) ->

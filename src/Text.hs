@@ -40,7 +40,7 @@ fromChars = Data.Text.pack
 toChars :: Text -> List Char
 toChars = Data.Text.unpack
 
-toString :: Data.String.IsString a => Text -> a
+toString :: (Data.String.IsString a) => Text -> a
 toString text = Data.String.fromString (toChars text)
 
 fromInt :: Int -> Text
@@ -49,7 +49,7 @@ fromInt n = Text.fromChars (Prelude.show n)
 fromFloat :: Float -> Text
 fromFloat (Qty x) = Text.fromChars (Prelude.show x)
 
-toNum :: Prelude.Num a => Reader a -> Text -> Result Text a
+toNum :: (Prelude.Num a) => Reader a -> Text -> Result Text a
 toNum reader text =
   case Data.Text.Read.signed reader text of
     Prelude.Right (value, "") -> Ok value

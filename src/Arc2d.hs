@@ -45,7 +45,7 @@ data BuildError
   | DegenerateArc
   deriving (Eq, Show, ErrorMessage)
 
-with :: Tolerance units => List (Constraint (space @ units)) -> Result BuildError (Curve2d (space @ units))
+with :: (Tolerance units) => List (Constraint (space @ units)) -> Result BuildError (Curve2d (space @ units))
 with constraints = case List.sort constraints of
   [CenterPoint p0, Radius r, StartAngle theta1, EndAngle theta2] ->
     fromCenterPointRadiusStartAngleEndAngle p0 r theta1 theta2
@@ -60,7 +60,7 @@ with constraints = case List.sort constraints of
   _ -> Error UnsupportedConstraints
 
 fromCenterPointRadiusStartAngleEndAngle ::
-  Tolerance units =>
+  (Tolerance units) =>
   Point2d (space @ units) ->
   Qty units ->
   Angle ->
@@ -73,7 +73,7 @@ fromCenterPointRadiusStartAngleEndAngle centerPoint radius startAngle endAngle
   | otherwise = Ok (Curve2d.Internal.Arc centerPoint radius startAngle endAngle)
 
 fromCenterPointStartPointSweptAngle ::
-  Tolerance units =>
+  (Tolerance units) =>
   Point2d (space @ units) ->
   Point2d (space @ units) ->
   Angle ->
@@ -87,7 +87,7 @@ fromCenterPointStartPointSweptAngle centerPoint startPoint sweptAngle =
         (computedStartAngle + sweptAngle)
 
 fromStartPointEndPointRadiusDirectionSize ::
-  Tolerance units =>
+  (Tolerance units) =>
   Point2d (space @ units) ->
   Point2d (space @ units) ->
   Qty units ->
@@ -124,7 +124,7 @@ fromStartPointEndPointRadiusDirectionSize startPoint endPoint radius direction s
   fromCenterPointStartPointSweptAngle computedCenterPoint startPoint computedSweptAngle
 
 from ::
-  Tolerance units =>
+  (Tolerance units) =>
   Point2d (space @ units) ->
   Point2d (space @ units) ->
   Angle ->

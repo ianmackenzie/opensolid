@@ -84,7 +84,7 @@ instance IsVectorCurve2d (PiecewiseCurve space) (space @ Unitless) where
         (Maybe.map DegenerateEndpoint.derivative end)
 
 unsafe ::
-  Tolerance units =>
+  (Tolerance units) =>
   VectorCurve2d (space @ units) ->
   VectorCurve2d (space @ units) ->
   DirectionCurve2d space
@@ -97,7 +97,7 @@ unsafe firstDerivative secondDerivative =
         (endpoint 1.0 firstDerivative secondDerivative)
 
 endpoint ::
-  Tolerance units =>
+  (Tolerance units) =>
   Float ->
   VectorCurve2d (space @ units) ->
   VectorCurve2d (space @ units) ->

@@ -1,12 +1,12 @@
 module Random.Shuffle (list, nonEmpty) where
 
+import List qualified
+import NonEmpty qualified
+import OpenSolid
+import Pair qualified
 import Random (Generator)
 import Random qualified
-import OpenSolid
-import List qualified
-import Pair qualified
-import NonEmpty qualified
-    
+
 list :: Generator (List a) -> Generator (List a)
 list generator = do
   original <- generator

@@ -30,7 +30,7 @@ import Vector2d qualified
 import Vector3d qualified
 import Volume qualified
 
-log :: Show a => Text -> a -> Task Text ()
+log :: (Show a) => Text -> a -> Task Text ()
 log label value = Console.printLine (label ++ ": " ++ Debug.show value)
 
 data WorldSpace
@@ -43,7 +43,7 @@ defaultTolerance :: Length
 defaultTolerance = Length.meters 1e-9
 
 offsetPoint ::
-  Tolerance units =>
+  (Tolerance units) =>
   Point2d (space @ units) ->
   Point2d (space @ units) ->
   Qty units ->

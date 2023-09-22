@@ -8,8 +8,8 @@ type role Point2d phantom
 data Point2d (coordinateSystem :: CoordinateSystem)
 
 instance
-  (units ~ units', space ~ space')
-  => Subtraction
-      (Point2d (space @ units))
-      (Point2d (space' @ units'))
-      (Vector2d (space @ units))
+  (units ~ units', space ~ space') =>
+  Subtraction
+    (Point2d (space @ units))
+    (Point2d (space' @ units'))
+    (Vector2d (space @ units))

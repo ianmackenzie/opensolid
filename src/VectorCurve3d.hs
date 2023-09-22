@@ -27,13 +27,13 @@ import Vector3d qualified
 import VectorBox3d (VectorBox3d (VectorBox3d))
 import VectorBox3d qualified
 
-class Show curve => IsVectorCurve3d curve (coordinateSystem :: CoordinateSystem) | curve -> coordinateSystem where
+class (Show curve) => IsVectorCurve3d curve (coordinateSystem :: CoordinateSystem) | curve -> coordinateSystem where
   evaluateAtImpl :: Float -> curve -> Vector3d coordinateSystem
   segmentBoundsImpl :: Domain -> curve -> VectorBox3d coordinateSystem
   derivativeImpl :: curve -> VectorCurve3d coordinateSystem
 
 data VectorCurve3d (coordinateSystem :: CoordinateSystem) where
-  VectorCurve3d :: IsVectorCurve3d curve (space @ units) => curve -> VectorCurve3d (space @ units)
+  VectorCurve3d :: (IsVectorCurve3d curve (space @ units)) => curve -> VectorCurve3d (space @ units)
   Zero :: VectorCurve3d (space @ units)
   Constant :: Vector3d (space @ units) -> VectorCurve3d (space @ units)
   Line :: Vector3d (space @ units) -> Vector3d (space @ units) -> VectorCurve3d (space @ units)
@@ -121,7 +121,7 @@ instance IsVectorCurve3d (Sum (space @ units)) (space @ units) where
   derivativeImpl (Sum curve1 curve2) = derivative curve1 + derivative curve2
 
 instance
-  space ~ space' =>
+  (space ~ space') =>
   Addition
     (VectorCurve3d (space @ units))
     (VectorCurve3d (space' @ units))
@@ -130,7 +130,7 @@ instance
   curve1 + curve2 = VectorCurve3d (Sum curve1 curve2)
 
 instance
-  space ~ space' =>
+  (space ~ space') =>
   Addition
     (VectorCurve3d (space @ units))
     (Vector3d (space' @ units))
@@ -139,7 +139,7 @@ instance
   curve + vector = curve + constant vector
 
 instance
-  space ~ space' =>
+  (space ~ space') =>
   Addition
     (Vector3d (space @ units))
     (VectorCurve3d (space' @ units))
@@ -158,7 +158,7 @@ instance IsVectorCurve3d (Difference (space @ units)) (space @ units) where
   derivativeImpl (Difference curve1 curve2) = derivative curve1 - derivative curve2
 
 instance
-  space ~ space' =>
+  (space ~ space') =>
   Subtraction
     (VectorCurve3d (space @ units))
     (VectorCurve3d (space' @ units))
@@ -167,7 +167,7 @@ instance
   curve1 - curve2 = VectorCurve3d (Difference curve1 curve2)
 
 instance
-  space ~ space' =>
+  (space ~ space') =>
   Subtraction
     (VectorCurve3d (space @ units))
     (Vector3d (space' @ units))
@@ -176,7 +176,7 @@ instance
   curve - vector = curve - constant vector
 
 instance
-  space ~ space' =>
+  (space ~ space') =>
   Subtraction
     (Vector3d (space @ units))
     (VectorCurve3d (space' @ units))
@@ -195,7 +195,7 @@ data Product3d1d space units1 units2
 deriving instance Show (Product3d1d space units1 units2)
 
 instance
-  Units.Product units1 units2 units3 =>
+  (Units.Product units1 units2 units3) =>
   IsVectorCurve3d (Product3d1d space units1 units2) (space @ units3)
   where
   evaluateAtImpl t (Product3d1d vectorCurve3d curve1d) =
@@ -208,7 +208,7 @@ instance
     derivative vectorCurve3d * curve1d + vectorCurve3d * Curve1d.derivative curve1d
 
 instance
-  Units.Product units1 units2 units3 =>
+  (Units.Product units1 units2 units3) =>
   IsVectorCurve3d (Product1d3d space units1 units2) (space @ units3)
   where
   evaluateAtImpl t (Product1d3d curve1d vectorCurve3d) =
@@ -221,7 +221,7 @@ instance
     Curve1d.derivative curve1d * vectorCurve3d + curve1d * derivative vectorCurve3d
 
 instance
-  Units.Product units1 units2 units3 =>
+  (Units.Product units1 units2 units3) =>
   Multiplication
     (VectorCurve3d (space @ units1))
     (Curve1d units2)
@@ -230,7 +230,7 @@ instance
   vectorCurve3d * curve1d = VectorCurve3d (Product3d1d vectorCurve3d curve1d)
 
 instance
-  Units.Product units1 units2 units3 =>
+  (Units.Product units1 units2 units3) =>
   Multiplication
     (Curve1d units1)
     (VectorCurve3d (space @ units2))
@@ -239,7 +239,7 @@ instance
   curve1d * vectorCurve3d = VectorCurve3d (Product1d3d curve1d vectorCurve3d)
 
 instance
-  Units.Product units1 units2 units3 =>
+  (Units.Product units1 units2 units3) =>
   Multiplication
     (VectorCurve3d (space @ units1))
     (Qty units2)
@@ -248,7 +248,7 @@ instance
   curve * value = VectorCurve3d (Product3d1d curve (Curve1d.constant value))
 
 instance
-  Units.Product units1 units2 units3 =>
+  (Units.Product units1 units2 units3) =>
   Multiplication
     (Qty units1)
     (VectorCurve3d (space @ units2))
@@ -262,7 +262,7 @@ data DotProductOf space units1 units2
 deriving instance Show (DotProductOf space units1 units2)
 
 instance
-  Units.Product units1 units2 units =>
+  (Units.Product units1 units2 units) =>
   IsCurve1d (DotProductOf space units1 units2) units
   where
   evaluateAtImpl t (DotProductOf curve1 curve2) =
@@ -307,7 +307,7 @@ data CrossProductOf space units1 units2
 deriving instance Show (CrossProductOf space units1 units2)
 
 instance
-  Units.Product units1 units2 units3 =>
+  (Units.Product units1 units2 units3) =>
   IsVectorCurve3d (CrossProductOf space units1 units2) (space @ units3)
   where
   evaluateAtImpl t (CrossProductOf curve1 curve2) =
@@ -351,7 +351,7 @@ data Quotient space units1 units2 = Quotient (VectorCurve3d (space @ units1)) (C
 deriving instance Show (Quotient space units1 units2)
 
 instance
-  Units.Quotient units1 units2 units3 =>
+  (Units.Quotient units1 units2 units3) =>
   IsVectorCurve3d (Quotient space units1 units2) (space @ units3)
   where
   evaluateAtImpl t (Quotient vectorCurve3d curve1d) =
@@ -368,7 +368,7 @@ instance
      in Units.specialize ((p' .* q - p .* q') ./ Curve1d.squared q)
 
 instance
-  Units.Quotient units1 units2 units3 =>
+  (Units.Quotient units1 units2 units3) =>
   Division
     (VectorCurve3d (space @ units1))
     (Curve1d units2)
@@ -381,7 +381,7 @@ newtype SquaredMagnitudeOf (coordinateSystem :: CoordinateSystem)
 
 deriving instance Show (SquaredMagnitudeOf coordinateSystem)
 
-instance Units.Squared units1 units2 => IsCurve1d (SquaredMagnitudeOf (space @ units1)) units2 where
+instance (Units.Squared units1 units2) => IsCurve1d (SquaredMagnitudeOf (space @ units1)) units2 where
   evaluateAtImpl t (SquaredMagnitudeOf expression) =
     Vector3d.squaredMagnitude (evaluateAt t expression)
 
@@ -491,6 +491,6 @@ derivative curve =
     QuadraticSpline v1 v2 v3 -> line (2.0 * (v2 - v1)) (2.0 * (v3 - v2))
     CubicSpline v1 v2 v3 v4 -> quadraticSpline (3.0 * (v2 - v1)) (3.0 * (v3 - v2)) (3.0 * (v4 - v3))
 
-squaredMagnitude :: Units.Squared units1 units2 => VectorCurve3d (space @ units1) -> Curve1d units2
+squaredMagnitude :: (Units.Squared units1 units2) => VectorCurve3d (space @ units1) -> Curve1d units2
 squaredMagnitude expression =
   Curve1d (SquaredMagnitudeOf expression)

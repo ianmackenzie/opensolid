@@ -21,10 +21,10 @@ instance (ErrorMessage x, a ~ a') => MapError (Result x a) (Result Text a') wher
 instance (ErrorMessage x, a ~ a') => MapError (Task x a) (Task Text a') where
   mapError = Task.mapError errorMessage
 
-instance a ~ a' => MapError (List a) (List a') where
+instance (a ~ a') => MapError (List a) (List a') where
   mapError = identity
 
-instance a ~ a' => MapError (Maybe a) (Maybe a') where
+instance (a ~ a') => MapError (Maybe a) (Maybe a') where
   mapError = identity
 
 (>>) :: (MapError a a', Compose a' b c) => a -> b -> c
@@ -33,7 +33,7 @@ first >> second = mapError first OpenSolid.>> second
 (>>=) :: (MapError a a', Bind a' b c) => a -> (b -> c) -> c
 value >>= function = mapError value OpenSolid.>>= function
 
-withContext :: ErrorMessage x => Text -> Result x a -> Result Text a
+withContext :: (ErrorMessage x) => Text -> Result x a -> Result Text a
 withContext context = Result.mapError (errorMessage OpenSolid.>> addContext context)
 
 addContext :: Text -> Text -> Text

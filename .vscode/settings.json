@@ -1,0 +1,10 @@
+{
+  "editor.formatOnSave": true,
+  "files.insertFinalNewline": true,
+  "files.trimFinalNewlines": true,
+  "files.eol": "\n",
+  "haskell.toolchain": {},
+  "haskell.formattingProvider": "fourmolu",
+  "haskell.plugin.fourmolu.config.external": true,
+  "nixEnvSelector.nixFile": "${workspaceRoot}/shell.nix",
+}

@@ -1,13 +1,10 @@
 cradle:
-  stack:
-    - path: "./src"
-      component: "opensolid:lib"
-
-    - path: "./sandbox/Main.hs"
-      component: "opensolid:exe:sandbox"
-
-    - path: "./derivatives/Main.hs"
-      component: "opensolid:exe:derivatives"
-
-    - path: "./test"
-      component: "opensolid:test:opensolid-test"
+  multi:
+    - path: "./Setup.hs"
+      config:
+        cradle:
+          none:
+    - path: "./"
+      config:
+        cradle:
+          cabal:

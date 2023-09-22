@@ -66,7 +66,7 @@ instance
   DirectionBox2d vectorBox * range = vectorBox * range
 
 instance
-  space ~ space' =>
+  (space ~ space') =>
   DotProduct
     (DirectionBox2d space)
     (DirectionBox2d space')
@@ -75,7 +75,7 @@ instance
   DirectionBox2d vectorBox1 <> DirectionBox2d vectorBox2 = vectorBox1 <> vectorBox2
 
 instance
-  space ~ space' =>
+  (space ~ space') =>
   DotProduct
     (DirectionBox2d space)
     (VectorBox2d (space @ units))
@@ -84,7 +84,7 @@ instance
   DirectionBox2d vectorBox1 <> vectorBox2 = vectorBox1 <> vectorBox2
 
 instance
-  space ~ space' =>
+  (space ~ space') =>
   DotProduct
     (VectorBox2d (space @ units))
     (DirectionBox2d space)
@@ -93,7 +93,7 @@ instance
   vectorBox1 <> DirectionBox2d vectorBox2 = vectorBox1 <> vectorBox2
 
 instance
-  space ~ space' =>
+  (space ~ space') =>
   DotProduct
     (DirectionBox2d space)
     (Direction2d space')
@@ -102,7 +102,7 @@ instance
   DirectionBox2d vectorBox <> direction = vectorBox <> direction
 
 instance
-  space ~ space' =>
+  (space ~ space') =>
   DotProduct
     (Direction2d space)
     (DirectionBox2d space')
@@ -111,7 +111,7 @@ instance
   direction <> DirectionBox2d vectorBox = direction <> vectorBox
 
 instance
-  space ~ space' =>
+  (space ~ space') =>
   DotProduct
     (DirectionBox2d space)
     (Vector2d (space @ units))
@@ -120,7 +120,7 @@ instance
   DirectionBox2d vectorBox <> vector = vectorBox <> vector
 
 instance
-  space ~ space' =>
+  (space ~ space') =>
   DotProduct
     (Vector2d (space @ units))
     (DirectionBox2d space)
@@ -129,7 +129,7 @@ instance
   vector <> DirectionBox2d vectorBox = vector <> vectorBox
 
 instance
-  space ~ space' =>
+  (space ~ space') =>
   CrossProduct
     (DirectionBox2d space)
     (DirectionBox2d space')
@@ -138,7 +138,7 @@ instance
   DirectionBox2d vectorBox1 >< DirectionBox2d vectorBox2 = vectorBox1 >< vectorBox2
 
 instance
-  space ~ space' =>
+  (space ~ space') =>
   CrossProduct
     (DirectionBox2d space)
     (VectorBox2d (space @ units))
@@ -147,7 +147,7 @@ instance
   DirectionBox2d vectorBox1 >< vectorBox2 = vectorBox1 >< vectorBox2
 
 instance
-  space ~ space' =>
+  (space ~ space') =>
   CrossProduct
     (VectorBox2d (space @ units))
     (DirectionBox2d space)
@@ -156,7 +156,7 @@ instance
   vectorBox1 >< DirectionBox2d vectorBox2 = vectorBox1 >< vectorBox2
 
 instance
-  space ~ space' =>
+  (space ~ space') =>
   CrossProduct
     (DirectionBox2d space)
     (Direction2d space')
@@ -165,7 +165,7 @@ instance
   DirectionBox2d vectorBox >< direction = vectorBox >< direction
 
 instance
-  space ~ space' =>
+  (space ~ space') =>
   CrossProduct
     (Direction2d space)
     (DirectionBox2d space')
@@ -174,7 +174,7 @@ instance
   direction >< DirectionBox2d vectorBox = direction >< vectorBox
 
 instance
-  space ~ space' =>
+  (space ~ space') =>
   CrossProduct
     (DirectionBox2d space)
     (Vector2d (space @ units))
@@ -183,7 +183,7 @@ instance
   DirectionBox2d vectorBox >< vector = vectorBox >< vector
 
 instance
-  space ~ space' =>
+  (space ~ space') =>
   CrossProduct
     (Vector2d (space @ units))
     (DirectionBox2d space)
