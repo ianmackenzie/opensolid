@@ -40,6 +40,7 @@ testScalarArithmetic = Try.do
   let volume = area * length
   let volumeInCubicCentimeters = Volume.inCubicCentimeters volume
   log "Volume in cubic centimeters" volumeInCubicCentimeters
+  log "sqrt 2.0" (Qty.sqrt 2.0)
 
 testVectorArithmetic :: Task Text ()
 testVectorArithmetic = Try.do
@@ -130,7 +131,6 @@ script = do
   testRangeArithmetic
   log "Direction" Direction2d.x
   log "Tuple" (Point2d.meters 1.0 2.0, Point2d.meters 3.0 4.0)
-  log "sqrt 2.0" (Qty.sqrt 2.0)
   log "Equality test" (let ?tolerance = Length.centimeter in Length.meters 1.0 ~= Length.meters 1.005)
   log "Rotated axis" (Axis2d.x |> Transform2d.rotateAround (Point2d.meters 1.0 0.0) Angle.quarterTurn)
   let originalPoints = [Point2d.meters 1.0 0.0, Point2d.meters 2.0 0.0, Point2d.meters 3.0 0.0]
