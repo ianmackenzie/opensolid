@@ -67,6 +67,23 @@ testRangeArithmetic = Try.do
   let rangeProduct = Length.centimeters 20.0 * Range.from (Length.meters 2.0) (Length.meters 3.0)
   log "Range product" rangeProduct
 
+testEquality :: Task Text ()
+testEquality = Try.do
+  log "Equality test" (let ?tolerance = Length.centimeter in Length.meters 1.0 ~= Length.meters 1.005)
+
+testTransformation :: Task Text ()
+testTransformation = Try.do
+  log "Rotated axis" (Axis2d.x |> Transform2d.rotateAround (Point2d.meters 1.0 0.0) Angle.quarterTurn)
+  let originalPoints = [Point2d.meters 1.0 0.0, Point2d.meters 2.0 0.0, Point2d.meters 3.0 0.0]
+  let rotationFunction = Transform2d.rotateAround Point2d.origin Angle.quarterTurn
+  let rotatedPoints = List.map rotationFunction originalPoints
+  log "Rotated points" rotatedPoints
+  let transformedAxis =
+        Axis2d.x
+          |> Transform2d.translateInOwn Axis2d.direction (Length.meters 2.0)
+          |> Transform2d.rotateAroundOwn Axis2d.originPoint Angle.quarterTurn
+  log "Transformed axis" transformedAxis
+
 offsetPoint ::
   (Tolerance units) =>
   Point2d (space @ units) ->
@@ -76,6 +93,16 @@ offsetPoint ::
 offsetPoint startPoint endPoint distance = Result.withDefault startPoint do
   direction <- Direction2d.from startPoint endPoint
   Ok (Point2d.midpoint startPoint endPoint + distance * Direction2d.perpendicularTo direction)
+
+testCustomFunction :: (Tolerance Meters) => Task Text ()
+testCustomFunction = Try.do
+  log "Offset point" (offsetPoint (Point2d.meters 1.0 0.0) (Point2d.meters 3.0 0.0) (Length.meters 1.0))
+
+testListOperations :: Task Text ()
+testListOperations = Try.do
+  log "Successive deltas" (List.successive subtract [0, 1, 4, 9, 16, 25])
+  log "Successive intervals" (List.successive Range.from [1.0, 2.0, 3.0, 4.0])
+  log "Prepend Maybe to List" (Just 1 ++ [2, 3])
 
 getCrossProduct :: (Tolerance Meters) => Result Text Float
 getCrossProduct = Try.withContext "In getCrossProduct" Try.do
@@ -119,37 +146,30 @@ testParameter1dGeneration = Try.do
   log "Random parameter value 2" t2
   log "Random parameter value 3" t3
 
-testNonEmpty :: List Int -> Task Text ()
-testNonEmpty [] = Console.printLine "List is empty"
-testNonEmpty (NonEmpty nonEmpty) =
+testEmptyCheck :: List Int -> Task Text ()
+testEmptyCheck [] = Console.printLine "List is empty"
+testEmptyCheck (NonEmpty nonEmpty) =
   Console.printLine ("List is non-empty, maximum is " ++ Debug.show (NonEmpty.maximum nonEmpty))
+
+testNonEmpty :: Task Text ()
+testNonEmpty = Try.do
+  testEmptyCheck []
+  testEmptyCheck [2, 3, 1]
 
 script :: Task Text ()
 script = do
   testScalarArithmetic
   testVectorArithmetic
   testRangeArithmetic
-  log "Equality test" (let ?tolerance = Length.centimeter in Length.meters 1.0 ~= Length.meters 1.005)
-  log "Rotated axis" (Axis2d.x |> Transform2d.rotateAround (Point2d.meters 1.0 0.0) Angle.quarterTurn)
-  let originalPoints = [Point2d.meters 1.0 0.0, Point2d.meters 2.0 0.0, Point2d.meters 3.0 0.0]
-  let rotationFunction = Transform2d.rotateAround Point2d.origin Angle.quarterTurn
-  let rotatedPoints = List.map rotationFunction originalPoints
-  log "Rotated points" rotatedPoints
-  let transformedAxis =
-        Axis2d.x
-          |> Transform2d.translateInOwn Axis2d.direction (Length.meters 2.0)
-          |> Transform2d.rotateAroundOwn Axis2d.originPoint Angle.quarterTurn
-  log "Transformed axis" transformedAxis
+  testEquality
+  testTransformation
   testTry
   testTaskIteration
   testTaskSequencing
-  log "Successive deltas" (List.successive subtract [0, 1, 4, 9, 16, 25])
-  log "Successive intervals" (List.successive Range.from [1.0, 2.0, 3.0, 4.0])
-  log "Prepend Maybe to List" (Just 1 ++ [2, 3])
-  log "Offset point" (offsetPoint (Point2d.meters 1.0 0.0) (Point2d.meters 3.0 0.0) (Length.meters 1.0))
+  testCustomFunction
+  testListOperations
   testParameter1dGeneration
-  testNonEmpty ([] :: List Int)
-  testNonEmpty [2, 3, 1]
+  testNonEmpty
  where
   ?tolerance = Length.meters 1e-9
 
