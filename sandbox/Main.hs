@@ -30,6 +30,42 @@ import Volume qualified
 log :: (Show a) => Text -> a -> Task Text ()
 log label value = Console.printLine (label ++ ": " ++ Debug.show value)
 
+testScalarArithmetic :: Task Text ()
+testScalarArithmetic = Try.do
+  log "Integer product" (3 * 4)
+  log "Integer division" (10 // 4)
+  log "True division" (10 / 4)
+  let area = Area.squareMeters 3.0
+  let length = Length.centimeters 3.0
+  let volume = area * length
+  let volumeInCubicCentimeters = Volume.inCubicCentimeters volume
+  log "Volume in cubic centimeters" volumeInCubicCentimeters
+
+testVectorArithmetic :: Task Text ()
+testVectorArithmetic = Try.do
+  let v1 = Vector2d.meters 1.0 2.0
+  let v2 = 0.5 * Vector2d.meters 3.0 4.0
+  let dotProduct = v1 <> v2
+  log "Dot product" dotProduct
+  log "2D cross product" (v1 >< v2)
+  let squareRoot = Qty.sqrt dotProduct
+  log "Square root" squareRoot
+  let translatedPoint = Point2d.meters 2.0 3.0 |> Transform2d.translateBy (Vector2d.meters 4.0 5.0)
+  log "Translated point" translatedPoint
+  let vectorSum = Vector2d.meters 1.0 2.0 + Vector2d.meters 2.0 3.0
+  log "Vector sum" vectorSum
+  let crossProduct = Vector3d.meters 1.0 2.0 3.0 >< Vector3d.meters 4.0 5.0 6.0
+  log "Cross product" crossProduct
+  let scaledVector = Length.meters 2.0 * Vector2d.meters 3.0 4.0
+  log "Scaled vector" scaledVector
+
+testRangeArithmetic :: Task Text ()
+testRangeArithmetic = Try.do
+  let rangeDifference = Range.from (Length.meters 2.0) (Length.meters 3.0) - Length.centimeters 50.0
+  log "Range difference" rangeDifference
+  let rangeProduct = Length.centimeters 20.0 * Range.from (Length.meters 2.0) (Length.meters 3.0)
+  log "Range product" rangeProduct
+
 offsetPoint ::
   (Tolerance units) =>
   Point2d (space @ units) ->
@@ -89,33 +125,9 @@ testNonEmpty (NonEmpty nonEmpty) =
 
 script :: Task Text ()
 script = do
-  log "Integer product" (3 * 4)
-  log "Integer division" (10 // 4)
-  log "True division" (10 / 4)
-  let area = Area.squareMeters 3.0
-  let length = Length.centimeters 3.0
-  let volume = area * length
-  let volumeInCubicCentimeters = Volume.inCubicCentimeters volume
-  log "Volume in cubic centimeters" volumeInCubicCentimeters
-  let v1 = Vector2d.meters 1.0 2.0
-  let v2 = 0.5 * Vector2d.meters 3.0 4.0
-  let dotProduct = v1 <> v2
-  log "Dot product" dotProduct
-  log "2D cross product" (v1 >< v2)
-  let squareRoot = Qty.sqrt dotProduct
-  log "Square root" squareRoot
-  let translatedPoint = Point2d.meters 2.0 3.0 |> Transform2d.translateBy (Vector2d.meters 4.0 5.0)
-  log "Translated point" translatedPoint
-  let vectorSum = Vector2d.meters 1.0 2.0 + Vector2d.meters 2.0 3.0
-  log "Vector sum" vectorSum
-  let crossProduct = Vector3d.meters 1.0 2.0 3.0 >< Vector3d.meters 4.0 5.0 6.0
-  log "Cross product" crossProduct
-  let scaledVector = Length.meters 2.0 * Vector2d.meters 3.0 4.0
-  log "Scaled vector" scaledVector
-  let rangeDifference = Range.from (Length.meters 2.0) (Length.meters 3.0) - Length.centimeters 50.0
-  log "Range difference" rangeDifference
-  let rangeProduct = Length.centimeters 20.0 * Range.from (Length.meters 2.0) (Length.meters 3.0)
-  log "Range product" rangeProduct
+  testScalarArithmetic
+  testVectorArithmetic
+  testRangeArithmetic
   log "Direction" Direction2d.x
   log "Tuple" (Point2d.meters 1.0 2.0, Point2d.meters 3.0 4.0)
   log "sqrt 2.0" (Qty.sqrt 2.0)
