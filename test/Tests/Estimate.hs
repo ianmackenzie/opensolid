@@ -70,7 +70,7 @@ dummyEstimates =
     |> Random.map NonEmpty.concat
     |> Random.Shuffle.nonEmpty
 
-check :: Tolerance Meters => Estimate Meters -> Qty Meters -> (Bool, Range Meters)
+check :: (Tolerance Meters) => Estimate Meters -> Qty Meters -> (Bool, Range Meters)
 check estimate value
   | Range.includes value bounds =
       if Range.width bounds ~= Qty.zero
@@ -112,7 +112,7 @@ largest = Test.check 100 "largest" $ do
  where
   ?tolerance = Length.meters 1e-9
 
-resolvesTo :: Tolerance units => Qty units -> Estimate units -> Result Text Bool
+resolvesTo :: (Tolerance units) => Qty units -> Estimate units -> Result Text Bool
 resolvesTo value estimate
   | currentBounds ~= value = Ok True
   | not (Range.approximatelyIncludes value currentBounds) = Ok False

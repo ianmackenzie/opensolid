@@ -107,7 +107,7 @@ expect False = Random.return (Failed [])
 expectAll :: List Bool -> Generator Expectation
 expectAll checks = expect (List.allTrue checks)
 
-output :: Show a => Text -> a -> Generator Expectation -> Generator Expectation
+output :: (Show a) => Text -> a -> Generator Expectation -> Generator Expectation
 output label value =
   Random.map $
     \case
@@ -116,7 +116,7 @@ output label value =
 
 newtype Lines a = Lines (List a)
 
-instance Show a => Show (Lines a) where
+instance (Show a) => Show (Lines a) where
   show (Lines values) =
     List.map (("\n  " ++) << Debug.show) values
       |> Text.concat

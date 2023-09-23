@@ -10,12 +10,12 @@ import Units (Meters)
 import Vector3d qualified
 import VectorBox3d qualified
 
-tests :: Tolerance Meters => List Test
+tests :: (Tolerance Meters) => List Test
 tests =
   [ magnitude
   ]
 
-magnitude :: Tolerance Meters => Test
+magnitude :: (Tolerance Meters) => Test
 magnitude = Test.check 100 "magnitude" $ do
   vectorBox <- Tests.Random.vectorBox3d
   u <- Parameter1d.generator

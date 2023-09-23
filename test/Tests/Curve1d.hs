@@ -16,7 +16,7 @@ tests =
       , approximateEquality
       ]
 
-crossingRoots :: Tolerance Unitless => Test
+crossingRoots :: (Tolerance Unitless) => Test
 crossingRoots = Test.verify "Crossing roots" $ do
   let t = Curve1d.parameter
   let x = 3.0 * t
@@ -29,7 +29,7 @@ crossingRoots = Test.verify "Crossing roots" $ do
         ]
   Test.expect (roots ~= expectedRoots)
 
-tangentRoots :: Tolerance Unitless => Test
+tangentRoots :: (Tolerance Unitless) => Test
 tangentRoots = Test.verify "Tangent roots" $ do
   let t = Curve1d.parameter
   let theta = Angle.fullTurn * t
@@ -42,7 +42,7 @@ tangentRoots = Test.verify "Tangent roots" $ do
         ]
   Test.expect (roots ~= expectedRoots)
 
-approximateEquality :: Tolerance Unitless => Test
+approximateEquality :: (Tolerance Unitless) => Test
 approximateEquality =
   let t = Curve1d.parameter
       theta = Angle.radian * t
