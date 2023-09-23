@@ -7,7 +7,6 @@ import Console qualified
 import Debug qualified
 import Direction2d qualified
 import Direction3d ()
-import Length (Length)
 import Length qualified
 import List qualified
 import NonEmpty qualified
@@ -37,9 +36,6 @@ type WorldCoordinates = WorldSpace @ Meters
 
 data MyPoints = MyPoints (Point2d WorldCoordinates) (Point2d WorldCoordinates) deriving (Show)
 
-defaultTolerance :: Length
-defaultTolerance = Length.meters 1e-9
-
 offsetPoint ::
   (Tolerance units) =>
   Point2d (space @ units) ->
@@ -50,17 +46,15 @@ offsetPoint startPoint endPoint distance = Result.withDefault startPoint do
   direction <- Direction2d.from startPoint endPoint
   Ok (Point2d.midpoint startPoint endPoint + distance * Direction2d.perpendicularTo direction)
 
-getCrossProduct :: Result Text Float
+getCrossProduct :: (Tolerance Meters) => Result Text Float
 getCrossProduct = Try.withContext "In getCrossProduct" Try.do
   vectorDirection <- Vector2d.direction (Vector2d.meters 2.0 3.0)
   lineDirection <-
     Try.withContext "When getting line direction" $
       Direction2d.from Point2d.origin Point2d.origin
   Ok (vectorDirection >< lineDirection)
- where
-  ?tolerance = defaultTolerance
 
-testTry :: Task Text ()
+testTry :: (Tolerance Meters) => Task Text ()
 testTry =
   case Try.withContext "In testTry" getCrossProduct of
     Ok crossProduct -> log "Got cross product" crossProduct
@@ -154,7 +148,7 @@ script = do
   testNonEmpty ([] :: List Int)
   testNonEmpty [2, 3, 1]
  where
-  ?tolerance = defaultTolerance
+  ?tolerance = Length.meters 1e-9
 
 main :: IO ()
 main = Task.toIO script
