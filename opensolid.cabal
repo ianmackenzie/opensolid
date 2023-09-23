@@ -180,6 +180,7 @@ test-suite opensolid-test
   main-is: Main.hs
   other-modules:
       Test
+      Tests.Arc2d
       Tests.Curve1d
       Tests.Curve2d
       Tests.Direction2d

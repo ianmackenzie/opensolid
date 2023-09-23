@@ -5,6 +5,7 @@ import OpenSolid
 import Task qualified
 import Test (Test)
 import Test qualified
+import Tests.Arc2d qualified
 import Tests.Curve1d qualified
 import Tests.Curve2d qualified
 import Tests.Direction2d qualified
@@ -30,6 +31,7 @@ tests =
   , Test.group "NonEmpty" Tests.NonEmpty.tests
   , Test.group "Region2d" Tests.Region2d.tests
   , Test.group "Direction2d" Tests.Direction2d.tests
+  , Test.group "Arc2d" Tests.Arc2d.tests
   ]
  where
   ?tolerance = Length.meters 1e-9

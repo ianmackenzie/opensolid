@@ -1,11 +1,9 @@
 module Main (main) where
 
 import Angle qualified
-import Arc2d qualified
 import Area qualified
 import Axis2d qualified
 import Console qualified
-import Curve2d qualified
 import Debug qualified
 import Direction2d qualified
 import Direction3d ()
@@ -51,22 +49,6 @@ offsetPoint ::
 offsetPoint startPoint endPoint distance = Result.withDefault startPoint do
   direction <- Direction2d.from startPoint endPoint
   Ok (Point2d.midpoint startPoint endPoint + distance * Direction2d.perpendicularTo direction)
-
-testArc2dFrom :: Task Text ()
-testArc2dFrom = Try.do
-  let testArc angle = Arc2d.from Point2d.origin (Point2d.meters 1.0 1.0) angle
-  arc1 <- testArc Angle.quarterTurn
-  arc2 <- testArc -Angle.quarterTurn
-  arc3 <- testArc Angle.halfTurn
-  arc4 <- testArc -Angle.halfTurn
-  line <- testArc Qty.zero
-  log "arc1 point" (Curve2d.evaluateAt 0.5 arc1)
-  log "arc2 point" (Curve2d.evaluateAt 0.5 arc2)
-  log "arc3 point" (Curve2d.evaluateAt 0.5 arc3)
-  log "arc4 point" (Curve2d.evaluateAt 0.5 arc4)
-  log "line point" (Curve2d.evaluateAt 0.5 line)
- where
-  ?tolerance = defaultTolerance
 
 getCrossProduct :: Result Text Float
 getCrossProduct = Try.withContext "In getCrossProduct" Try.do
@@ -151,7 +133,6 @@ script = do
   log "Custom type" (MyPoints (Point2d.meters 1.0 2.0) (Point2d.meters 3.0 4.0))
   log "sqrt 2.0" (Qty.sqrt 2.0)
   log "Equality test" (let ?tolerance = Length.centimeter in Length.meters 1.0 ~= Length.meters 1.005)
-  testArc2dFrom
   log "Rotated axis" (Axis2d.x |> Transform2d.rotateAround (Point2d.meters 1.0 0.0) Angle.quarterTurn)
   let originalPoints = [Point2d.meters 1.0 0.0, Point2d.meters 2.0 0.0, Point2d.meters 3.0 0.0]
   let rotationFunction = Transform2d.rotateAround Point2d.origin Angle.quarterTurn
