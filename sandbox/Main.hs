@@ -30,12 +30,6 @@ import Volume qualified
 log :: (Show a) => Text -> a -> Task Text ()
 log label value = Console.printLine (label ++ ": " ++ Debug.show value)
 
-data WorldSpace
-
-type WorldCoordinates = WorldSpace @ Meters
-
-data MyPoints = MyPoints (Point2d WorldCoordinates) (Point2d WorldCoordinates) deriving (Show)
-
 offsetPoint ::
   (Tolerance units) =>
   Point2d (space @ units) ->
@@ -124,7 +118,6 @@ script = do
   log "Range product" rangeProduct
   log "Direction" Direction2d.x
   log "Tuple" (Point2d.meters 1.0 2.0, Point2d.meters 3.0 4.0)
-  log "Custom type" (MyPoints (Point2d.meters 1.0 2.0) (Point2d.meters 3.0 4.0))
   log "sqrt 2.0" (Qty.sqrt 2.0)
   log "Equality test" (let ?tolerance = Length.centimeter in Length.meters 1.0 ~= Length.meters 1.005)
   log "Rotated axis" (Axis2d.x |> Transform2d.rotateAround (Point2d.meters 1.0 0.0) Angle.quarterTurn)
