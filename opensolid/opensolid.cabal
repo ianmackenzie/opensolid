@@ -42,7 +42,6 @@ common config
       -Wpartial-fields
       -Wsafe
       -dcore-lint
-      -threaded
   default-extensions:
       NoImplicitPrelude
       OverloadedStrings
@@ -81,10 +80,6 @@ common config
       DerivingStrategies
       ViewPatterns
       LambdaCase
-
-common app
-  ghc-options: -rtsopts -with-rtsopts=-N
-  build-depends: opensolid
 
 library
   import: config
@@ -167,17 +162,12 @@ library
       VectorCurve2d.Magnitude
   hs-source-dirs: src
 
-executable sandbox
-  import: config, app
-  main-is: Main.hs
-  other-modules: Paths_opensolid
-  autogen-modules: Paths_opensolid
-  hs-source-dirs: sandbox
-
 test-suite opensolid-test
-  import: config, app
+  import: config
   type: exitcode-stdio-1.0
   main-is: Main.hs
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends: opensolid
   other-modules:
       Test
       Tests.Arc2d
