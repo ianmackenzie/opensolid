@@ -1,14 +1,14 @@
 #include <stdlib.h>
 #include "HsFFI.h"
 
-void
-example_init (void)
+__attribute__((constructor))
+void call_hs_init()
 {
-  hs_init (NULL, NULL);
+  hs_init(NULL, NULL);
 }
 
-void
-example_exit (void)
+__attribute__((destructor))
+void call_hs_exit()
 {
-  hs_exit ();
+  hs_exit();
 }
