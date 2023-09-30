@@ -1,6 +1,13 @@
 from ctypes import *
+import platform
 
-lib = cdll.LoadLibrary("libopensolid-ffi.so")
+match platform.system():
+    case "Darwin":
+        lib = cdll.LoadLibrary("libopensolid-ffi.dylib")
+    case "Linux":
+        lib = cdll.LoadLibrary("libopensolid-ffi.so")
+    case os:
+        raise Exception(f"System {os} is not supported")
 
 lib.xy.argtypes = (c_double, c_double)
 lib.xy.restype = c_void_p

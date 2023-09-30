@@ -3,3 +3,4 @@
 /dist-newstyle
 cabal.project.local
 result
+__pycache__
