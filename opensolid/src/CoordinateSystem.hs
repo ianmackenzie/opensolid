@@ -5,10 +5,13 @@ module CoordinateSystem
   , Space
   , LocalSpace
   , Defines
+  , UvSpace
+  , UvCoordinates
   )
 where
 
 import Basics
+import Units (Unitless)
 
 data CoordinateSystem = CoordinateSystem Type Type
 
@@ -23,3 +26,7 @@ type family Units (coordinateSystem :: CoordinateSystem) where
 newtype LocalSpace = LocalSpace Type
 
 type Defines space = 'LocalSpace space
+
+data UvSpace
+
+type UvCoordinates = UvSpace @ Unitless

@@ -139,6 +139,8 @@ library
       Seq
       Sign
       Stream
+      Surface1d
+      Surface1d.Function
       Task
       Text
       Tolerance
