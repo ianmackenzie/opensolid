@@ -1,5 +1,7 @@
 module BoundingBox2d
   ( BoundingBox2d (BoundingBox2d)
+  , xCoordinate
+  , yCoordinate
   , constant
   , hull2
   , hull3
@@ -41,6 +43,12 @@ instance (units ~ units', space ~ space') => Subtraction (BoundingBox2d (space @
 
 instance (units ~ units', space ~ space') => Subtraction (BoundingBox2d (space @ units)) (BoundingBox2d (space' @ units')) (VectorBox2d (space @ units)) where
   BoundingBox2d x1 y1 - BoundingBox2d x2 y2 = VectorBox2d (x1 - x2) (y1 - y2)
+
+xCoordinate :: BoundingBox2d (space @ units) -> Range units
+xCoordinate (BoundingBox2d x _) = x
+
+yCoordinate :: BoundingBox2d (space @ units) -> Range units
+yCoordinate (BoundingBox2d _ y) = y
 
 constant :: Point2d (space @ units) -> BoundingBox2d (space @ units)
 constant (Point2d x y) =
