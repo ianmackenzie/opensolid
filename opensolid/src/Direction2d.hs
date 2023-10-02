@@ -10,6 +10,8 @@ module Direction2d
   , y
   , positiveY
   , negativeY
+  , u
+  , v
   , PointsAreCoincident (PointsAreCoincident)
   , from
   , fromAngle
@@ -26,6 +28,7 @@ module Direction2d
 where
 
 import Angle qualified
+import CoordinateSystem (UvSpace)
 import {-# SOURCE #-} Frame2d (Frame2d)
 import OpenSolid
 import {-# SOURCE #-} Point2d (Point2d)
@@ -105,6 +108,12 @@ x = positiveX
 
 y :: Direction2d space
 y = positiveY
+
+u :: Direction2d UvSpace
+u = positiveX
+
+v :: Direction2d UvSpace
+v = positiveY
 
 data PointsAreCoincident = PointsAreCoincident deriving (Eq, Show, ErrorMessage)
 

@@ -4,6 +4,7 @@ module Point2d
   , x
   , y
   , xy
+  , uv
   , meters
   , xCoordinate
   , yCoordinate
@@ -23,7 +24,7 @@ import {-# SOURCE #-} Axis2d qualified
 import Bounded (IsBounded (..))
 import {-# SOURCE #-} BoundingBox2d (BoundingBox2d (BoundingBox2d))
 import {-# SOURCE #-} BoundingBox2d qualified
-import CoordinateSystem (Units)
+import CoordinateSystem (Units, UvCoordinates)
 import Direction2d (Direction2d (Direction2d))
 import {-# SOURCE #-} Frame2d (Frame2d)
 import {-# SOURCE #-} Frame2d qualified
@@ -117,6 +118,9 @@ y py = Point2d Qty.zero py
 
 xy :: Qty units -> Qty units -> Point2d (space @ units)
 xy = Point2d
+
+uv :: Float -> Float -> Point2d UvCoordinates
+uv = xy
 
 meters :: Float -> Float -> Point2d (space @ Meters)
 meters px py = Point2d (Length.meters px) (Length.meters py)
