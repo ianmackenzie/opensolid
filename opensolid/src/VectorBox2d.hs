@@ -29,7 +29,7 @@ import Units qualified
 import Vector2d (Vector2d (Vector2d))
 import Vector2d qualified
 
-type role VectorBox2d phantom
+type role VectorBox2d nominal
 
 data VectorBox2d (coordinateSystem :: CoordinateSystem)
   = VectorBox2d (Range (Units coordinateSystem)) (Range (Units coordinateSystem))

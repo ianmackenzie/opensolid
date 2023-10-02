@@ -37,7 +37,7 @@ import Result qualified
 import Vector2d (Vector2d (Vector2d))
 import Vector2d qualified
 
-type role Direction2d phantom
+type role Direction2d nominal
 
 newtype Direction2d (space :: Type) = Direction2d_ (Vector2d (space @ Unitless))
   deriving (Eq, Show)

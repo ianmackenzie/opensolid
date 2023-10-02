@@ -16,7 +16,7 @@ import Point2d (Point2d)
 import Point2d qualified
 import Transform2d (Transformable2d (..))
 
-type role Axis2d phantom
+type role Axis2d nominal
 
 data Axis2d (coordinateSystem :: CoordinateSystem)
   = Axis2d

@@ -3,7 +3,7 @@ module Point2d (Point2d) where
 import OpenSolid
 import {-# SOURCE #-} Vector2d (Vector2d)
 
-type role Point2d phantom
+type role Point2d nominal
 
 data Point2d (coordinateSystem :: CoordinateSystem)
 

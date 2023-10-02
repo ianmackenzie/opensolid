@@ -46,7 +46,7 @@ import Units (Unitless)
 import Units qualified
 import Prelude qualified
 
-type role Qty phantom
+type role Qty nominal
 
 type Qty :: Type -> Type
 newtype Qty units = Qty Prelude.Double deriving (Eq, Ord, Show)

@@ -8,7 +8,7 @@ where
 
 import OpenSolid
 
-type role Vector2d phantom
+type role Vector2d nominal
 
 data Vector2d (coordinateSystem :: CoordinateSystem)
 

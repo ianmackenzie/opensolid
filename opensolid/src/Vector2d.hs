@@ -41,7 +41,7 @@ import Qty qualified
 import Units (Meters, SquareMeters)
 import Units qualified
 
-type role Vector2d phantom
+type role Vector2d nominal
 
 data Vector2d (coordinateSystem :: CoordinateSystem)
   = Vector2d

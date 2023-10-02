@@ -22,7 +22,7 @@ import Range (Range)
 import Range qualified
 import VectorBox2d (VectorBox2d (VectorBox2d))
 
-type role BoundingBox2d phantom
+type role BoundingBox2d nominal
 
 data BoundingBox2d (coordinateSystem :: CoordinateSystem)
   = BoundingBox2d

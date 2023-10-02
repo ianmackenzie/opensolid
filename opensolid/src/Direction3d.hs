@@ -21,7 +21,7 @@ import Qty qualified
 import Vector3d (Vector3d (Vector3d))
 import Vector3d qualified
 
-type role Direction3d phantom
+type role Direction3d nominal
 
 newtype Direction3d (space :: Type) = Direction3d_ (Vector3d (space @ Unitless))
   deriving (Eq, Show)

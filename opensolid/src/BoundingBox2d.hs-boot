@@ -10,7 +10,7 @@ import OpenSolid
 import {-# SOURCE #-} Point2d (Point2d)
 import Range (Range)
 
-type role BoundingBox2d phantom
+type role BoundingBox2d nominal
 
 data BoundingBox2d (coordinateSystem :: CoordinateSystem)
   = BoundingBox2d

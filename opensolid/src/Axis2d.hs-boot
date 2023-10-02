@@ -10,7 +10,7 @@ import Direction2d (Direction2d)
 import OpenSolid
 import {-# SOURCE #-} Point2d (Point2d)
 
-type role Axis2d phantom
+type role Axis2d nominal
 
 data Axis2d (coordinateSystem :: CoordinateSystem)
   = Axis2d

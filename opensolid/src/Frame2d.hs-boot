@@ -11,7 +11,7 @@ import {-# SOURCE #-} Direction2d (Direction2d)
 import OpenSolid
 import {-# SOURCE #-} Point2d (Point2d)
 
-type role Frame2d phantom phantom
+type role Frame2d nominal nominal
 
 type Frame2d :: CoordinateSystem -> LocalSpace -> Type
 data Frame2d coordinateSystem defines

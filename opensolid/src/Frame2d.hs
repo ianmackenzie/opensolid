@@ -23,7 +23,7 @@ import OpenSolid
 import Point2d (Point2d)
 import Point2d qualified
 
-type role Frame2d phantom phantom
+type role Frame2d nominal nominal
 
 type Frame2d :: CoordinateSystem -> LocalSpace -> Type
 data Frame2d coordinateSystem defines
