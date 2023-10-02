@@ -1,5 +1,7 @@
 module Direction2d
   ( Direction2d (Direction2d)
+  , xComponent
+  , yComponent
   , unsafe
   , unwrap
   , x
@@ -71,6 +73,12 @@ instance (space ~ space') => DotProduct (Direction2d space) (Direction2d space')
 
 instance (space ~ space') => CrossProduct (Direction2d space) (Direction2d space') Float where
   Direction2d v1 >< Direction2d v2 = v1 >< v2
+
+xComponent :: Direction2d space -> Float
+xComponent (Direction2d_ (Vector2d dx _)) = dx
+
+yComponent :: Direction2d space -> Float
+yComponent (Direction2d_ (Vector2d _ dy)) = dy
 
 {-# INLINE unsafe #-}
 unsafe :: Vector2d (space @ Unitless) -> Direction2d space
