@@ -25,7 +25,8 @@ foreign-library opensolid-ffi
   hs-source-dirs: src
   c-sources: src/wrapper.c
   default-language: Haskell2010
-  options: standalone
+  install-includes: OpenSolidFFI_stub.h
+  include-dirs: opensolid-ffi-tmp
   build-depends:
       base
     , opensolid

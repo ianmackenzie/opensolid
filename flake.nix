@@ -11,7 +11,7 @@
   outputs = { flake-utils, nixpkgs, ... }:
     flake-utils.lib.eachDefaultSystem (system:
       let
-        ghcVer = "ghc946";
+        ghcVer = "9.4.6";
         pkgs = import nixpkgs { inherit system; };
         overlay = final: prev: {
           opensolid = final.callCabal2nix "opensolid" ./opensolid { };
@@ -24,13 +24,23 @@
               libraryHaskellDepends = [ final.base final.opensolid ];
               # cabal puts the `foreign-library` in `/lib/ghc-9.4.6`,
               # this script makes the library available in `/lib`
+              # and OpenSolidFFI_stub.h in `/include`
               postInstall = (drv.postInstall or "") + ''
-                ln -s $out/lib/ghc-*/* $out/lib
+                ln -s $out/lib/ghc-*/libopensolid-ffi.* $out/lib
+                ln -s $out/lib/ghc-*/*/*/include $out/include
               '';
             });
         };
-        myHaskellPackages = pkgs.haskell.packages.${ghcVer}.extend overlay;
-        libraryPath = pkgs.lib.makeLibraryPath [ myHaskellPackages.opensolid-ffi ];
+
+        ghcVerShort = builtins.replaceStrings ["."] [""] ghcVer; # "9.4.6" -> "946"
+        myHaskellPackages = pkgs.haskell.packages."ghc${ghcVerShort}".extend overlay;
+
+        # When developing locally, `cabal build opensolid-ffi:flib:opensolid-ffi` puts the
+        # foreign library in a deeply nested path. We need this path for
+        # `cdll.LoadLibrary` in python bindings.
+        ffiVer = myHaskellPackages.opensolid-ffi.version;
+        ghcSystem = builtins.replaceStrings ["darwin"] ["osx"] system; # fix for osx, x86_64-linux should be ok
+        localLibraryPath = "dist-newstyle/build/${ghcSystem}/ghc-${ghcVer}/opensolid-ffi-${ffiVer}/f/opensolid-ffi/build/opensolid-ffi";
       in
       {
         apps = rec {
@@ -48,8 +58,8 @@
           default = opensolid;
         };
 
-        devShells = rec {
-          haskell = myHaskellPackages.shellFor {
+        devShells = {
+          default = myHaskellPackages.shellFor {
             packages = p: [
               p.opensolid
               p.opensolid-sandbox
@@ -59,15 +69,14 @@
               haskell-language-server
               cabal-install
             ];
-          };
-          python = pkgs.mkShellNoCC {
             nativeBuildInputs = with pkgs; [ python3 ];
-            LD_LIBRARY_PATH = "${libraryPath}";
+
+            # Help python find the opensolid-ffi library
+            LD_LIBRARY_PATH = "${localLibraryPath}";
             shellHook = pkgs.lib.optionalString pkgs.stdenv.isDarwin ''
-              export DYLD_LIBRARY_PATH="${libraryPath}";
+              export DYLD_LIBRARY_PATH="${localLibraryPath}";
             '';
           };
-          default = haskell;
         };
       }
     );
