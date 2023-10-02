@@ -8,7 +8,6 @@ module Axis2d
   )
 where
 
-import CoordinateSystem (Space)
 import Direction2d (Direction2d)
 import Direction2d qualified
 import OpenSolid
@@ -18,11 +17,12 @@ import Transform2d (Transformable2d (..))
 
 type role Axis2d nominal
 
-data Axis2d (coordinateSystem :: CoordinateSystem)
-  = Axis2d
-      (Point2d coordinateSystem)
-      (Direction2d (Space coordinateSystem))
-  deriving (Eq, Show)
+data Axis2d (coordinateSystem :: CoordinateSystem) where
+  Axis2d :: Point2d (space @ units) -> Direction2d space -> Axis2d (space @ units)
+
+deriving instance Eq (Axis2d (space @ units))
+
+deriving instance Show (Axis2d (space @ units))
 
 instance (space ~ space', units ~ units') => Transformable2d (Axis2d (space @ units)) (space' @ units') where
   transformBy transformation axis =

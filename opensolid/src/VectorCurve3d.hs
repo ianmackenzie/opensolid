@@ -14,7 +14,6 @@ module VectorCurve3d
   )
 where
 
-import CoordinateSystem (Units)
 import Curve1d (Curve1d (Curve1d), IsCurve1d)
 import Curve1d qualified
 import Domain (Domain)
@@ -64,11 +63,8 @@ zero = Zero
 instance Generic.HasZero (VectorCurve3d (space @ units)) where
   zeroImpl = zero
 
-data XYZ (coordinateSystem :: CoordinateSystem)
-  = XYZ
-      (Curve1d (Units coordinateSystem))
-      (Curve1d (Units coordinateSystem))
-      (Curve1d (Units coordinateSystem))
+data XYZ (coordinateSystem :: CoordinateSystem) where
+  XYZ :: Curve1d units -> Curve1d units -> Curve1d units -> XYZ (space @ units)
 
 deriving instance Show (XYZ coordinateSystem)
 

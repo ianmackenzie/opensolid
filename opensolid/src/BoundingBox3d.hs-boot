@@ -5,18 +5,14 @@ module BoundingBox3d
 where
 
 import Bounds (IsBounds)
-import CoordinateSystem (Units)
 import OpenSolid
 import {-# SOURCE #-} Point3d (Point3d)
 import Range (Range)
 
 type role BoundingBox3d nominal
 
-data BoundingBox3d (coordinateSystem :: CoordinateSystem)
-  = BoundingBox3d
-      (Range (Units coordinateSystem))
-      (Range (Units coordinateSystem))
-      (Range (Units coordinateSystem))
+data BoundingBox3d (coordinateSystem :: CoordinateSystem) where
+  BoundingBox3d :: Range units -> Range units -> Range units -> BoundingBox3d (space @ units)
 
 instance IsBounds (BoundingBox3d (space @ units))
 

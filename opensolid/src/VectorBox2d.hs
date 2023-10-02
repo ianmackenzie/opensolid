@@ -18,7 +18,6 @@ module VectorBox2d
   )
 where
 
-import CoordinateSystem (Units)
 import Direction2d (Direction2d (Direction2d))
 import Generic qualified
 import OpenSolid
@@ -31,9 +30,10 @@ import Vector2d qualified
 
 type role VectorBox2d nominal
 
-data VectorBox2d (coordinateSystem :: CoordinateSystem)
-  = VectorBox2d (Range (Units coordinateSystem)) (Range (Units coordinateSystem))
-  deriving (Show)
+data VectorBox2d (coordinateSystem :: CoordinateSystem) where
+  VectorBox2d :: Range units -> Range units -> VectorBox2d (space @ units)
+
+deriving instance Show (VectorBox2d (space @ units))
 
 instance
   (units1 ~ units1', units2 ~ units2', space ~ space') =>

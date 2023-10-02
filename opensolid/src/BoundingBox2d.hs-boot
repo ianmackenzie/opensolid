@@ -5,17 +5,14 @@ module BoundingBox2d
 where
 
 import Bounds (IsBounds)
-import CoordinateSystem (Units)
 import OpenSolid
 import {-# SOURCE #-} Point2d (Point2d)
 import Range (Range)
 
 type role BoundingBox2d nominal
 
-data BoundingBox2d (coordinateSystem :: CoordinateSystem)
-  = BoundingBox2d
-      (Range (Units coordinateSystem))
-      (Range (Units coordinateSystem))
+data BoundingBox2d (coordinateSystem :: CoordinateSystem) where
+  BoundingBox2d :: Range units -> Range units -> BoundingBox2d (space @ units)
 
 instance IsBounds (BoundingBox2d (space @ units))
 

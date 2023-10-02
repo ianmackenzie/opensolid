@@ -12,9 +12,9 @@ type role Vector2d nominal
 
 data Vector2d (coordinateSystem :: CoordinateSystem)
 
-instance Eq (Vector2d coordinateSystem)
+instance Eq (Vector2d (space @ units))
 
-instance Show (Vector2d coordinateSystem)
+instance Show (Vector2d (space @ units))
 
 xy :: Qty units -> Qty units -> Vector2d (space @ units)
 xComponent :: Vector2d (space @ units) -> Qty units

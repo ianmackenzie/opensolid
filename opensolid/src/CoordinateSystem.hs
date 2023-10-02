@@ -1,8 +1,6 @@
 module CoordinateSystem
   ( CoordinateSystem
   , type (@)
-  , Units
-  , Space
   , LocalSpace
   , Defines
   , UvSpace
@@ -16,12 +14,6 @@ import Units (Unitless)
 data CoordinateSystem = CoordinateSystem Type Type
 
 type space @ units = 'CoordinateSystem space units
-
-type family Space (coordinateSystem :: CoordinateSystem) where
-  Space (space @ units) = space
-
-type family Units (coordinateSystem :: CoordinateSystem) where
-  Units (space @ units) = units
 
 newtype LocalSpace = LocalSpace Type
 

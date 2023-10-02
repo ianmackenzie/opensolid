@@ -9,7 +9,6 @@ module Arc2d
 where
 
 import Angle qualified
-import CoordinateSystem (Units)
 import Curve2d (Curve2d)
 import Curve2d.Internal qualified
 import Direction2d qualified
@@ -22,17 +21,20 @@ import Result qualified
 import Units qualified
 import Vector2d qualified
 
-data Constraint coordinateSystem
-  = CenterPoint (Point2d coordinateSystem)
-  | StartPoint (Point2d coordinateSystem)
-  | EndPoint (Point2d coordinateSystem)
-  | Radius (Qty (Units coordinateSystem))
-  | StartAngle Angle
-  | EndAngle Angle
-  | SweptAngle Angle
-  | Direction Direction
-  | Size Size
-  deriving (Eq, Ord)
+data Constraint coordinateSystem where
+  CenterPoint :: Point2d (space @ units) -> Constraint (space @ units)
+  StartPoint :: Point2d (space @ units) -> Constraint (space @ units)
+  EndPoint :: Point2d (space @ units) -> Constraint (space @ units)
+  Radius :: Qty units -> Constraint (space @ units)
+  StartAngle :: Angle -> Constraint (space @ units)
+  EndAngle :: Angle -> Constraint (space @ units)
+  SweptAngle :: Angle -> Constraint (space @ units)
+  Direction :: Direction -> Constraint (space @ units)
+  Size :: Size -> Constraint (space @ units)
+
+deriving instance Eq (Constraint (space @ units))
+
+deriving instance Ord (Constraint (space @ units))
 
 data Direction = Clockwise | Counterclockwise deriving (Eq, Ord)
 

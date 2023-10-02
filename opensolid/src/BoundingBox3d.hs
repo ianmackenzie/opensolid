@@ -12,7 +12,6 @@ module BoundingBox3d
 where
 
 import Bounds
-import CoordinateSystem (Units)
 import OpenSolid
 import Point3d (Point3d (Point3d))
 import Qty qualified
@@ -22,12 +21,10 @@ import VectorBox3d (VectorBox3d (VectorBox3d))
 
 type role BoundingBox3d nominal
 
-data BoundingBox3d (coordinateSystem :: CoordinateSystem)
-  = BoundingBox3d
-      (Range (Units coordinateSystem))
-      (Range (Units coordinateSystem))
-      (Range (Units coordinateSystem))
-  deriving (Show)
+data BoundingBox3d (coordinateSystem :: CoordinateSystem) where
+  BoundingBox3d :: Range units -> Range units -> Range units -> BoundingBox3d (space @ units)
+
+deriving instance Show (BoundingBox3d (space @ units))
 
 instance IsBounds (BoundingBox3d (space @ units)) where
   aggregate2Impl = aggregate2

@@ -15,7 +15,6 @@ where
 
 import BoundingBox2d (BoundingBox2d)
 import BoundingBox2d qualified
-import CoordinateSystem (Space)
 import {-# SOURCE #-} Curve2d (Curve2d)
 import {-# SOURCE #-} Curve2d qualified
 import Curve2d.Derivatives (Derivatives)
@@ -34,12 +33,13 @@ import VectorBox2d (VectorBox2d)
 import VectorBox2d qualified
 import VectorCurve2d qualified
 
-data Segment (coordinateSystem :: CoordinateSystem)
-  = Segment
-      (BoundingBox2d coordinateSystem)
-      ~(VectorBox2d coordinateSystem)
-      ~(VectorBox2d coordinateSystem)
-      ~(DirectionBox2d (Space coordinateSystem))
+data Segment (coordinateSystem :: CoordinateSystem) where
+  Segment ::
+    BoundingBox2d (space @ units) ->
+    ~(VectorBox2d (space @ units)) ->
+    ~(VectorBox2d (space @ units)) ->
+    ~(DirectionBox2d space) ->
+    Segment (space @ units)
 
 init ::
   (Tolerance units) =>

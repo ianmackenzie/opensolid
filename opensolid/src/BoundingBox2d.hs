@@ -14,7 +14,6 @@ module BoundingBox2d
 where
 
 import Bounds
-import CoordinateSystem (Units)
 import OpenSolid
 import Point2d (Point2d (Point2d))
 import Qty qualified
@@ -24,11 +23,10 @@ import VectorBox2d (VectorBox2d (VectorBox2d))
 
 type role BoundingBox2d nominal
 
-data BoundingBox2d (coordinateSystem :: CoordinateSystem)
-  = BoundingBox2d
-      (Range (Units coordinateSystem))
-      (Range (Units coordinateSystem))
-  deriving (Show)
+data BoundingBox2d (coordinateSystem :: CoordinateSystem) where
+  BoundingBox2d :: Range units -> Range units -> BoundingBox2d (space @ units)
+
+deriving instance Show (BoundingBox2d (space @ units))
 
 instance IsBounds (BoundingBox2d (space @ units)) where
   aggregate2Impl = aggregate2

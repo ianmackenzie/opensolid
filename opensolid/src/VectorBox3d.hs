@@ -16,7 +16,6 @@ module VectorBox3d
   )
 where
 
-import CoordinateSystem (Units)
 import Direction3d (Direction3d (Direction3d))
 import Generic qualified
 import OpenSolid
@@ -27,12 +26,10 @@ import Units qualified
 import Vector3d (Vector3d (Vector3d))
 import Vector3d qualified
 
-data VectorBox3d (coordinateSystem :: CoordinateSystem)
-  = VectorBox3d
-      (Range (Units coordinateSystem))
-      (Range (Units coordinateSystem))
-      (Range (Units coordinateSystem))
-  deriving (Show)
+data VectorBox3d (coordinateSystem :: CoordinateSystem) where
+  VectorBox3d :: Range units -> Range units -> Range units -> VectorBox3d (space @ units)
+
+deriving instance Show (VectorBox3d (space @ units))
 
 instance
   (units1 ~ units1', units2 ~ units2', space ~ space') =>

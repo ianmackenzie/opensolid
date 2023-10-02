@@ -16,7 +16,6 @@ where
 
 import Axis2d (Axis2d)
 import Axis2d qualified
-import CoordinateSystem (Space)
 import Direction2d (Direction2d)
 import Direction2d qualified
 import OpenSolid
@@ -26,11 +25,12 @@ import Point2d qualified
 type role Frame2d nominal nominal
 
 type Frame2d :: CoordinateSystem -> LocalSpace -> Type
-data Frame2d coordinateSystem defines
-  = Frame2d
-      (Point2d coordinateSystem)
-      (Direction2d (Space coordinateSystem))
-      (Direction2d (Space coordinateSystem))
+data Frame2d coordinateSystem defines where
+  Frame2d ::
+    Point2d (space @ units) ->
+    Direction2d space ->
+    Direction2d space ->
+    Frame2d (space @ units) defines
 
 atOrigin :: Frame2d (space @ units) defines
 atOrigin = atPoint Point2d.origin

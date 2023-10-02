@@ -11,12 +11,14 @@ import Point3d (Point3d (Point3d))
 import Range (Range (Range))
 import VectorCurve3d qualified
 
-data QuadraticSpline3d (coordinateSystem :: CoordinateSystem)
-  = QuadraticSpline3d
-      (Point3d coordinateSystem)
-      (Point3d coordinateSystem)
-      (Point3d coordinateSystem)
-  deriving (Show)
+data QuadraticSpline3d (coordinateSystem :: CoordinateSystem) where
+  QuadraticSpline3d ::
+    Point3d (space @ units) ->
+    Point3d (space @ units) ->
+    Point3d (space @ units) ->
+    QuadraticSpline3d (space @ units)
+
+deriving instance Show (QuadraticSpline3d (space @ units))
 
 blossom :: QuadraticSpline3d (space @ units) -> Float -> Float -> Point3d (space @ units)
 blossom (QuadraticSpline3d (Point3d x1 y1 z1) (Point3d x2 y2 z2) (Point3d x3 y3 z3)) t1 t2 =

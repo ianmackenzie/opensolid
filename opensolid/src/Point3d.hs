@@ -1,5 +1,8 @@
 module Point3d
-  ( Point3d (Point3d, xCoordinate, yCoordinate, zCoordinate)
+  ( Point3d (Point3d)
+  , xCoordinate
+  , yCoordinate
+  , zCoordinate
   , origin
   , x
   , y
@@ -18,7 +21,6 @@ where
 import Bounded (IsBounded (..))
 import {-# SOURCE #-} BoundingBox3d (BoundingBox3d (BoundingBox3d))
 import {-# SOURCE #-} BoundingBox3d qualified
-import CoordinateSystem (Units)
 import Length qualified
 import OpenSolid
 import Qty qualified
@@ -28,12 +30,12 @@ import Vector3d (Vector3d (Vector3d))
 import Vector3d qualified
 import VectorBox3d (VectorBox3d (VectorBox3d))
 
-data Point3d (coordinateSystem :: CoordinateSystem) = Point3d
-  { xCoordinate :: Qty (Units coordinateSystem)
-  , yCoordinate :: Qty (Units coordinateSystem)
-  , zCoordinate :: Qty (Units coordinateSystem)
-  }
-  deriving (Eq, Show)
+data Point3d (coordinateSystem :: CoordinateSystem) where
+  Point3d :: Qty units -> Qty units -> Qty units -> Point3d (space @ units)
+
+deriving instance Eq (Point3d (space @ units))
+
+deriving instance Show (Point3d (space @ units))
 
 instance
   (units1 ~ units1', units2 ~ units2', space ~ space') =>
@@ -96,6 +98,15 @@ instance
 
 instance IsBounded (Point3d (space @ units)) (BoundingBox3d (space @ units)) where
   boundsImpl = BoundingBox3d.constant
+
+xCoordinate :: Point3d (space @ units) -> Qty units
+xCoordinate (Point3d px _ _) = px
+
+yCoordinate :: Point3d (space @ units) -> Qty units
+yCoordinate (Point3d _ py _) = py
+
+zCoordinate :: Point3d (space @ units) -> Qty units
+zCoordinate (Point3d _ _ pz) = pz
 
 origin :: Point3d (space @ units)
 origin = Point3d Qty.zero Qty.zero Qty.zero

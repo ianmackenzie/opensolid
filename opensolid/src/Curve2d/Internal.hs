@@ -46,7 +46,7 @@ data Curve2d (coordinateSystem :: CoordinateSystem) where
     DirectionCurve2d space ->
     Curve2d (space @ units)
 
-deriving instance Show (Curve2d coordinateSystem)
+deriving instance Show (Curve2d (space @ units))
 
 instance
   (units1 ~ units1', units2 ~ units2', space ~ space') =>
@@ -106,7 +106,7 @@ reverse (Curve curve tangentDirection) =
 data PointCurveDifference (coordinateSystem :: CoordinateSystem)
   = PointCurveDifference (Point2d coordinateSystem) (Curve2d coordinateSystem)
 
-deriving instance Show (PointCurveDifference coordinateSystem)
+deriving instance Show (PointCurveDifference (space @ units))
 
 instance IsVectorCurve2d (PointCurveDifference (space @ units)) (space @ units) where
   evaluateAtImpl t (PointCurveDifference point curve) = point - evaluateAt t curve
@@ -125,7 +125,7 @@ instance
 data CurvePointDifference (coordinateSystem :: CoordinateSystem)
   = CurvePointDifference (Curve2d coordinateSystem) (Point2d coordinateSystem)
 
-deriving instance Show (CurvePointDifference coordinateSystem)
+deriving instance Show (CurvePointDifference (space @ units))
 
 instance IsVectorCurve2d (CurvePointDifference (space @ units)) (space @ units) where
   evaluateAtImpl t (CurvePointDifference curve point) = evaluateAt t curve - point

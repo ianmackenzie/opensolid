@@ -12,12 +12,14 @@ import Point2d (Point2d (Point2d))
 import Range (Range (Range))
 import VectorCurve2d qualified
 
-data QuadraticSpline2d (coordinateSystem :: CoordinateSystem)
-  = QuadraticSpline2d
-      (Point2d coordinateSystem)
-      (Point2d coordinateSystem)
-      (Point2d coordinateSystem)
-  deriving (Show)
+data QuadraticSpline2d (coordinateSystem :: CoordinateSystem) where
+  QuadraticSpline2d ::
+    Point2d (space @ units) ->
+    Point2d (space @ units) ->
+    Point2d (space @ units) ->
+    QuadraticSpline2d (space @ units)
+
+deriving instance Show (QuadraticSpline2d (space @ units))
 
 blossom :: QuadraticSpline2d (space @ units) -> Float -> Float -> Point2d (space @ units)
 blossom (QuadraticSpline2d (Point2d x1 y1) (Point2d x2 y2) (Point2d x3 y3)) t1 t2 =

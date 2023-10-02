@@ -44,9 +44,15 @@ derivative :: DegenerateEndpoint space -> DegenerateEndpoint space
 derivative (DegenerateEndpoint t0 t1 curve) =
   DegenerateEndpoint t0 t1 (VectorCurve2d.derivative curve)
 
-data QCurve coordinateSystem
-  = QCurve Int Float (VectorCurve2d coordinateSystem) (Vector2d coordinateSystem)
-  deriving (Show)
+data QCurve coordinateSystem where
+  QCurve ::
+    Int ->
+    Float ->
+    VectorCurve2d (space @ units) ->
+    Vector2d (space @ units) ->
+    QCurve (space @ units)
+
+deriving instance Show (QCurve (space @ units))
 
 instance IsVectorCurve2d (QCurve (space @ units)) (space @ units) where
   evaluateAtImpl _ (QCurve _ _ _ value) = value

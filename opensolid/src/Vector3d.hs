@@ -25,7 +25,6 @@ module Vector3d
 where
 
 import Area qualified
-import CoordinateSystem (Units)
 import {-# SOURCE #-} Direction3d (Direction3d)
 import {-# SOURCE #-} Direction3d qualified
 import Generic qualified
@@ -35,12 +34,12 @@ import Qty qualified
 import Units (Meters, SquareMeters)
 import Units qualified
 
-data Vector3d (coordinateSystem :: CoordinateSystem)
-  = Vector3d
-      (Qty (Units coordinateSystem))
-      (Qty (Units coordinateSystem))
-      (Qty (Units coordinateSystem))
-  deriving (Eq, Show)
+data Vector3d (coordinateSystem :: CoordinateSystem) where
+  Vector3d :: Qty units -> Qty units -> Qty units -> Vector3d (space @ units)
+
+deriving instance Eq (Vector3d (space @ units))
+
+deriving instance Show (Vector3d (space @ units))
 
 instance
   (units1 ~ units1', units2 ~ units2', space ~ space') =>

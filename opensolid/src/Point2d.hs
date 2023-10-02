@@ -24,7 +24,7 @@ import {-# SOURCE #-} Axis2d qualified
 import Bounded (IsBounded (..))
 import {-# SOURCE #-} BoundingBox2d (BoundingBox2d (BoundingBox2d))
 import {-# SOURCE #-} BoundingBox2d qualified
-import CoordinateSystem (Units, UvCoordinates)
+import CoordinateSystem (UvCoordinates)
 import Direction2d (Direction2d (Direction2d))
 import {-# SOURCE #-} Frame2d (Frame2d)
 import {-# SOURCE #-} Frame2d qualified
@@ -39,11 +39,14 @@ import VectorBox2d (VectorBox2d (VectorBox2d))
 
 type role Point2d nominal
 
-data Point2d (coordinateSystem :: CoordinateSystem)
-  = Point2d
-      (Qty (Units coordinateSystem))
-      (Qty (Units coordinateSystem))
-  deriving (Eq, Ord, Show)
+data Point2d (coordinateSystem :: CoordinateSystem) where
+  Point2d :: Qty units -> Qty units -> Point2d (space @ units)
+
+deriving instance Eq (Point2d (space @ units))
+
+deriving instance Ord (Point2d (space @ units))
+
+deriving instance Show (Point2d (space @ units))
 
 instance
   (units1 ~ units1', units2 ~ units2', space ~ space') =>

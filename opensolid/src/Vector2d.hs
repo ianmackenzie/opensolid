@@ -28,7 +28,6 @@ where
 
 import Angle qualified
 import Area qualified
-import CoordinateSystem (Units)
 import {-# SOURCE #-} Direction2d (Direction2d)
 import {-# SOURCE #-} Direction2d qualified
 import {-# SOURCE #-} Frame2d (Frame2d)
@@ -43,11 +42,12 @@ import Units qualified
 
 type role Vector2d nominal
 
-data Vector2d (coordinateSystem :: CoordinateSystem)
-  = Vector2d
-      (Qty (Units coordinateSystem))
-      (Qty (Units coordinateSystem))
-  deriving (Eq, Show)
+data Vector2d (coordinateSystem :: CoordinateSystem) where
+  Vector2d :: Qty units -> Qty units -> Vector2d (space @ units)
+
+deriving instance Eq (Vector2d (space @ units))
+
+deriving instance Show (Vector2d (space @ units))
 
 instance
   (units1 ~ units1', units2 ~ units2', space ~ space') =>

@@ -22,7 +22,6 @@ where
 import Angle qualified
 import {-# SOURCE #-} Axis2d (Axis2d)
 import {-# SOURCE #-} Axis2d qualified
-import CoordinateSystem (Units)
 import Direction2d (Direction2d (Direction2d))
 import Direction2d qualified
 import OpenSolid
@@ -51,7 +50,8 @@ rotationAround (Point2d cx cy) angle =
       ty = cy - (sin * cx + cos * cy)
    in Transformation (Matrix cos -sin sin cos tx ty)
 
-newtype Scaling (coordinateSystem :: CoordinateSystem) = Scaling (Matrix (Units coordinateSystem))
+data Scaling (coordinateSystem :: CoordinateSystem) where
+  Scaling :: Matrix units -> Scaling (space @ units)
 
 scalingAbout :: Point2d (space @ units) -> Float -> Scaling (space @ units)
 scalingAbout (Point2d cx cy) scale =
@@ -59,7 +59,8 @@ scalingAbout (Point2d cx cy) scale =
       ty = cy - scale * cy
    in Scaling (Matrix scale 0.0 0.0 scale tx ty)
 
-newtype Deformation (coordinateSystem :: CoordinateSystem) = Deformation (Matrix (Units coordinateSystem))
+data Deformation (coordinateSystem :: CoordinateSystem) where
+  Deformation :: Matrix units -> Deformation (space @ units)
 
 scalingAlong :: Axis2d (space @ units) -> Float -> Deformation (space @ units)
 scalingAlong axis scale =
