@@ -1,10 +1,12 @@
 {
   "editor.formatOnSave": true,
+  "editor.tabSize": 2,
+  "editor.indentSize": "tabSize",
   "files.insertFinalNewline": true,
   "files.trimFinalNewlines": true,
   "files.eol": "\n",
   "haskell.toolchain": {},
+  "haskell.manageHLS": "PATH",
   "haskell.formattingProvider": "fourmolu",
   "haskell.plugin.fourmolu.config.external": true,
-  "nixEnvSelector.nixFile": "${workspaceRoot}/shell.nix",
 }
