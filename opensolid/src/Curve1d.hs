@@ -298,7 +298,7 @@ evaluateAt t curve =
     Difference c1 c2 -> evaluateAt t c1 - evaluateAt t c2
     Product c1 c2 -> evaluateAt t c1 * evaluateAt t c2
     Quotient c1 c2 -> evaluateAt t c1 / evaluateAt t c2
-    Squared c -> let x = evaluateAt t c in x * x
+    Squared c -> Qty.squared (evaluateAt t c)
     SquareRoot c -> Qty.sqrt (evaluateAt t c)
     Sin c -> Angle.sin (evaluateAt t c)
     Cos c -> Angle.cos (evaluateAt t c)
@@ -318,7 +318,7 @@ segmentBounds t curve =
     Difference c1 c2 -> segmentBounds t c1 - segmentBounds t c2
     Product c1 c2 -> segmentBounds t c1 * segmentBounds t c2
     Quotient c1 c2 -> segmentBounds t c1 / segmentBounds t c2
-    Squared c -> let x = segmentBounds t c in Range.squared x
+    Squared c -> Range.squared (segmentBounds t c)
     SquareRoot c -> Range.sqrt (segmentBounds t c)
     Sin c -> Range.sin (segmentBounds t c)
     Cos c -> Range.cos (segmentBounds t c)
