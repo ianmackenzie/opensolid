@@ -44,7 +44,6 @@ foreign-library opensolid-ffi
       -Wpartial-fields
       -Wsafe
       -dcore-lint
-      -static
 
   default-extensions:
       NoImplicitPrelude
