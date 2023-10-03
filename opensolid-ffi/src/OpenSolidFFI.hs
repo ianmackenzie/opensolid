@@ -1,37 +1,58 @@
 module OpenSolidFFI () where
 
 import Foreign.StablePtr (StablePtr, deRefStablePtr, freeStablePtr, newStablePtr)
-import OpenSolid (Float, ($), type (@))
+import Language.Haskell.TH qualified as TH
+import OpenSolid hiding ((>>=))
 import Point2d (Point2d)
 import Point2d qualified
-import Qty (Qty (Qty))
-import Units (Unitless)
-import Prelude (IO, return, (>>=))
+import Text qualified
+import Prelude (return, (>>=))
 
-data Space
+data WorldSpace
 
-type CoordinateSystem = Space @ Unitless
+type WorldCoordinates = WorldSpace @ Unitless
 
-foreign export ccall xy :: Float -> Float -> IO (StablePtr (Point2d CoordinateSystem))
-
-xy :: Float -> Float -> IO (StablePtr (Point2d CoordinateSystem))
+xy :: Float -> Float -> IO (StablePtr (Point2d WorldCoordinates))
 xy x y = newStablePtr (Point2d.xy x y)
 
-foreign export ccall xCoordinate :: StablePtr (Point2d CoordinateSystem) -> IO Float
+-- Generate 'foreign export' declaration for 'xy' using Template Haskell
+$( let floatType = TH.ConT ''Float
+       ioType = TH.ConT ''IO
+       stablePtrType = TH.ConT ''StablePtr
+       point2dType = TH.ConT ''Point2d
+       worldCoordinatesType = TH.ConT ''WorldCoordinates
 
-xCoordinate :: StablePtr (Point2d CoordinateSystem) -> IO Float
+       functionType :: List TH.Type -> TH.Type -> TH.Type
+       functionType [] returnType = returnType
+       functionType (firstArgumentType : remainingArgumentTypes) returnType =
+        TH.AppT
+          (TH.AppT TH.ArrowT firstArgumentType)
+          (functionType remainingArgumentTypes returnType)
+
+       xyReturnType =
+        TH.AppT ioType $
+          TH.AppT stablePtrType $
+            TH.AppT point2dType worldCoordinatesType
+
+       xyFunctionType = functionType [floatType, floatType] xyReturnType
+    in return [TH.ForeignD (TH.ExportF TH.CCall (Text.toChars "xy") 'xy xyFunctionType)]
+ )
+
+foreign export ccall xCoordinate :: StablePtr (Point2d WorldCoordinates) -> IO Float
+
+xCoordinate :: StablePtr (Point2d WorldCoordinates) -> IO Float
 xCoordinate ptr = do
   point <- deRefStablePtr ptr
   return $ Point2d.xCoordinate point
 
-foreign export ccall yCoordinate :: StablePtr (Point2d CoordinateSystem) -> IO Float
+foreign export ccall yCoordinate :: StablePtr (Point2d WorldCoordinates) -> IO Float
 
-yCoordinate :: StablePtr (Point2d CoordinateSystem) -> IO Float
+yCoordinate :: StablePtr (Point2d WorldCoordinates) -> IO Float
 yCoordinate ptr = do
   point <- deRefStablePtr ptr
   return $ Point2d.yCoordinate point
 
-foreign export ccall freePoint :: StablePtr (Point2d CoordinateSystem) -> IO ()
+foreign export ccall freePoint :: StablePtr (Point2d WorldCoordinates) -> IO ()
 
-freePoint :: StablePtr (Point2d CoordinateSystem) -> IO ()
+freePoint :: StablePtr (Point2d WorldCoordinates) -> IO ()
 freePoint = freeStablePtr

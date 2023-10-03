@@ -29,6 +29,7 @@ foreign-library opensolid-ffi
   include-dirs: opensolid-ffi-tmp
   build-depends:
       base
+    , template-haskell
     , opensolid
   ghc-options:
       -Wall
@@ -84,3 +85,4 @@ foreign-library opensolid-ffi
       ViewPatterns
       LambdaCase
       ForeignFunctionInterface
+      TemplateHaskell
