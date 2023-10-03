@@ -38,6 +38,7 @@ import Data.List qualified
 import Data.List.NonEmpty (NonEmpty ((:|)))
 import {-# SOURCE #-} Float (Float, fromRational)
 import {-# SOURCE #-} Float qualified
+import Foreign.Storable (Storable)
 import Generic qualified
 import Result (ErrorMessage, Result (Error, Ok))
 import Sign (Sign (Negative, Positive))
@@ -71,6 +72,8 @@ deriving newtype instance Prelude.RealFrac Float
 deriving newtype instance Prelude.Floating Float
 
 deriving newtype instance Prelude.RealFloat Float
+
+deriving newtype instance Storable Float
 
 instance Negation (Qty units) where
   {-# INLINE negate #-}
