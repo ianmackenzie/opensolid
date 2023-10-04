@@ -21,7 +21,7 @@
             (drv: {
               # unfortunatelly callCabal2nix does not extract `build-depends`
               # from `foreign-library`, so they have to be specified here:
-              libraryHaskellDepends = [ final.base final.opensolid ];
+              libraryHaskellDepends = [ final.base final.opensolid final.template-haskell ];
               # cabal puts the `foreign-library` in `/lib/ghc-9.4.6`,
               # this script makes the library available in `/lib`
               # and OpenSolidFFI_stub.h in `/include`
