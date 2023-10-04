@@ -73,7 +73,7 @@ deriving newtype instance Prelude.Floating Float
 
 deriving newtype instance Prelude.RealFloat Float
 
-deriving newtype instance Storable Float
+deriving newtype instance Storable (Qty units)
 
 instance Negation (Qty units) where
   {-# INLINE negate #-}
