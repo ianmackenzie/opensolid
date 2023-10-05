@@ -20,7 +20,7 @@ source-repository head
 
 foreign-library opensolid-ffi
   type: native-shared
-  other-modules: OpenSolidFFI, Paths_opensolid_ffi
+  other-modules: OpenSolidFFI, Paths_opensolid_ffi, FFIWrapper
   autogen-modules: Paths_opensolid_ffi
   hs-source-dirs: src
   c-sources: src/wrapper.c
