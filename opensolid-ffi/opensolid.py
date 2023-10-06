@@ -33,9 +33,9 @@ class Point2d:
     def y_coordinate(self) -> float:
         return lib.opensolid_point2d_y_coordinate(self.ptr)
 
-    lib.opensolid_point2d_free.argtypes = [c_void_p]
+    lib.opensolid_free.argtypes = [c_void_p]
     def __del__(self):
-        lib.opensolid_point2d_free(self.ptr)
+        lib.opensolid_free(self.ptr)
 
     def __repr__(self):
         return f"Point2d({self.x_coordinate}, {self.y_coordinate})"
