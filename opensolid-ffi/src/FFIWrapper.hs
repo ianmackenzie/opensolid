@@ -1,6 +1,7 @@
 module FFIWrapper (wrapFunction) where
 
 import Control.Monad (replicateM, return, (>>=))
+import CoordinateSystem qualified
 import Data.Char (isUpper, toLower)
 import Data.String (String, fromString)
 import Foreign (StablePtr, deRefStablePtr, newStablePtr)
@@ -23,15 +24,27 @@ countArgs (TH.ForallT _ _ innerType) = countArgs innerType
 countArgs (TH.AppT (TH.AppT TH.ArrowT _) rest) = 1 + countArgs rest
 countArgs _ = 0
 
+-- Alias for coordinate system `@` type, since that seems to confuse Template Haskell (see below)
+type Coords space units = space @ units
+
+-- Template Haskell seems to get confused by type-level use of '@' operator,
+-- so replace any instance of `space @ units` with the equivalent `'Coords space units`
+fixupCoordinateSystem :: TH.Type -> TH.Type
+-- Replace `@` with `Coords`
+fixupCoordinateSystem (TH.ConT name) | name == ''(CoordinateSystem.@) = TH.ConT ''Coords
+-- In types with parameters, recursively fix up each parameter
+fixupCoordinateSystem (TH.AppT t a) = TH.AppT (fixupCoordinateSystem t) (fixupCoordinateSystem a)
+-- Otherwise, do nothing
+fixupCoordinateSystem typ = typ
+
 -- Modify types for FFI
 ffiType :: TH.Type -> TH.Type
-ffiType (TH.AppT typ t) =
-  -- We have to stringify, because we cannot import the Point2d module here
-  case TH.pprint typ of
-    "Point2d.Point2d" -> TH.AppT (TH.ConT ''StablePtr) (TH.AppT typ (TH.ConT $ TH.mkName "WorldCoordinates"))
-    "Qty.Qty" -> TH.ConT $ TH.mkName "Float"
-    _ -> TH.AppT typ t
-ffiType t = t
+-- Int and Bool can be passed directly
+ffiType typ@(TH.ConT name) | name == ''Int || name == ''Bool = typ
+-- Any Qty type can be passed directly
+ffiType typ@(TH.AppT (TH.ConT name) _) | name == ''Qty = typ
+-- All other types should be wrapped in a StablePtr
+ffiType typ = TH.AppT (TH.ConT ''StablePtr) (fixupCoordinateSystem typ)
 
 -- Is the type wrapped in a StablePtr?
 isPointer :: TH.Type -> Bool
