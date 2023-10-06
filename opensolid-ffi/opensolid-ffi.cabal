@@ -20,7 +20,11 @@ source-repository head
 
 foreign-library opensolid-ffi
   type: native-shared
-  other-modules: OpenSolidFFI, Paths_opensolid_ffi
+  other-modules:
+      FFIWrapper
+    , OpenSolidFFI
+    , OpenSolidFFI.Point2d
+    , Paths_opensolid_ffi
   autogen-modules: Paths_opensolid_ffi
   hs-source-dirs: src
   c-sources: src/wrapper.c
