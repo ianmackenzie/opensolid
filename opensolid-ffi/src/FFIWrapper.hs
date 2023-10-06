@@ -37,7 +37,7 @@ fixupCoordinateSystem typ = typ
 -- Modify types for FFI
 ffiType :: TH.Type -> TH.Type
 -- Int and Bool can be passed directly
-ffiType typ@(TH.ConT name) | name == ''Int || name == ''Bool = typ
+ffiType typ@(TH.ConT name) | name == ''Int || name == ''Bool || name == ''Float || name == ''Angle = typ
 -- Any Qty type can be passed directly
 ffiType typ@(TH.AppT (TH.ConT name) _) | name == ''Qty = typ
 -- All other types should be wrapped in a StablePtr
