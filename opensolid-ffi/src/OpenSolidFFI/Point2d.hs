@@ -2,45 +2,26 @@ module OpenSolidFFI.Point2d () where
 
 import FFIWrapper (wrapFunction)
 import OpenSolid hiding ((>>=))
-import Point2d
-  ( angleFrom
-  , distanceFrom
-  , interpolateFrom
-  , meters
-  , midpoint
-  , origin
-  , placeIn
-  , relativeTo
-  , signedDistanceAlong
-  , signedDistanceFrom
-  , uv
-  , x
-  , xCoordinate
-  , xy
-  , y
-  , yCoordinate
-  )
-import Prelude (concat, mapM, return, (>>=))
+import Point2d qualified
+import Prelude (concat, fmap, mapM, (>>=))
 
-$( do
-    results <-
-      mapM wrapFunction $
-        [ 'angleFrom
-        , 'distanceFrom
-        , 'interpolateFrom
-        , 'meters
-        , 'midpoint
-        , 'origin
-        , 'placeIn
-        , 'relativeTo
-        , 'signedDistanceAlong
-        , 'signedDistanceFrom
-        , 'uv
-        , 'x
-        , 'xCoordinate
-        , 'xy
-        , 'y
-        , 'yCoordinate
-        ]
-    return $ concat results
+$( fmap concat $
+    mapM wrapFunction $
+      [ 'Point2d.angleFrom
+      , 'Point2d.distanceFrom
+      , 'Point2d.interpolateFrom
+      , 'Point2d.meters
+      , 'Point2d.midpoint
+      , 'Point2d.origin
+      , 'Point2d.placeIn
+      , 'Point2d.relativeTo
+      , 'Point2d.signedDistanceAlong
+      , 'Point2d.signedDistanceFrom
+      , 'Point2d.uv
+      , 'Point2d.x
+      , 'Point2d.xCoordinate
+      , 'Point2d.xy
+      , 'Point2d.y
+      , 'Point2d.yCoordinate
+      ]
  )

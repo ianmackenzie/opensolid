@@ -7,7 +7,6 @@ import Data.Maybe (fromMaybe)
 import Data.String (String, fromString)
 import Data.Tuple (fst)
 import Foreign (StablePtr, deRefStablePtr, newStablePtr)
-import GHC.IO
 import Language.Haskell.TH qualified as TH
 import OpenSolid hiding (fail, fromString, (+), (++), (>>=))
 import Prelude (Traversable (..), concat, foldl, foldr, map, mapM, maybe, unzip, (.))
