@@ -5,8 +5,26 @@ import FFIWrapper (wrapFunction)
 import Foreign.StablePtr (StablePtr, freeStablePtr)
 import Language.Haskell.TH qualified as TH
 import OpenSolid hiding (fail, fromString, (++), (>>=))
-import Point2d (Point2d, xCoordinate, xy, yCoordinate)
-import Prelude (concat, return, sequence, (>>=))
+import Point2d
+  ( Point2d
+  , angleFrom
+  , distanceFrom
+  , interpolateFrom
+  , meters
+  , midpoint
+  , origin
+  , placeIn
+  , relativeTo
+  , signedDistanceAlong
+  , signedDistanceFrom
+  , uv
+  , x
+  , xCoordinate
+  , xy
+  , y
+  , yCoordinate
+  )
+import Prelude (concat, mapM, return, sequence, (>>=))
 
 data WorldSpace
 
@@ -27,10 +45,23 @@ $( do
 
 $( do
     results <-
-      sequence
-        [ wrapFunction "opensolid_point2d_" 'xCoordinate
-        , wrapFunction "opensolid_point2d_" 'yCoordinate
-        , wrapFunction "opensolid_point2d_" 'xy
+      mapM wrapFunction $
+        [ 'angleFrom
+        , 'distanceFrom
+        , 'interpolateFrom
+        , 'meters
+        , 'midpoint
+        , 'origin
+        , 'placeIn
+        , 'relativeTo
+        , 'signedDistanceAlong
+        , 'signedDistanceFrom
+        , 'uv
+        , 'x
+        , 'xCoordinate
+        , 'xy
+        , 'y
+        , 'yCoordinate
         ]
     return $ concat results
  )
