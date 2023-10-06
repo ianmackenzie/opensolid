@@ -7,18 +7,22 @@ import Data.Maybe (fromMaybe)
 import Data.String (String, fromString)
 import Data.Tuple (fst)
 import Foreign (StablePtr, deRefStablePtr, newStablePtr)
+import Foreign.Storable (Storable)
 import Language.Haskell.TH qualified as TH
 import OpenSolid hiding (fail, fromString, (+), (++), (>>=))
 import Prelude (Traversable (..), concat, foldl, foldr, map, mapM, maybe, unzip, (.))
 
 -- Generates wrapper function type from the original function
 -- Returns a list of argument types and return type
-ffiFunctionType :: TH.Type -> ([TH.Type], TH.Type)
+ffiFunctionType :: TH.Type -> TH.Q ([TH.Type], TH.Type)
 ffiFunctionType (TH.ForallT _ _ innerType) = ffiFunctionType innerType
-ffiFunctionType (TH.AppT (TH.AppT TH.ArrowT arg) rest) =
-  let (args, returnType) = ffiFunctionType rest
-   in (ffiType arg : args, returnType)
-ffiFunctionType returnType = ([], ffiType returnType)
+ffiFunctionType (TH.AppT (TH.AppT TH.ArrowT arg) rest) = do
+  (args, returnType) <- ffiFunctionType rest
+  typ <- ffiType arg
+  return (typ : args, returnType)
+ffiFunctionType returnType = do
+  typ <- ffiType returnType
+  return ([], typ)
 
 -- Alias for coordinate system `@` type, since that seems to confuse Template Haskell (see below)
 type Coords space units = space @ units
@@ -34,13 +38,14 @@ fixupCoordinateSystem (TH.AppT t a) = TH.AppT (fixupCoordinateSystem t) (fixupCo
 fixupCoordinateSystem typ = typ
 
 -- Modify types for FFI
-ffiType :: TH.Type -> TH.Type
--- Int and Bool can be passed directly
-ffiType typ@(TH.ConT name) | name == ''Int || name == ''Bool || name == ''Float || name == ''Angle = typ
--- Any Qty type can be passed directly
-ffiType typ@(TH.AppT (TH.ConT name) _) | name == ''Qty = typ
--- All other types should be wrapped in a StablePtr
-ffiType typ = TH.AppT (TH.ConT ''StablePtr) (fixupCoordinateSystem typ)
+-- We wrap a type in a StablePtr if it doesn't implement Storable
+ffiType :: TH.Type -> TH.Q TH.Type
+ffiType typ = do
+  let fixedTyp = fixupCoordinateSystem typ
+  instances <- TH.reifyInstances ''Storable [fixedTyp]
+  if instances == []
+    then return (TH.AppT (TH.ConT ''StablePtr) fixedTyp)
+    else return fixedTyp
 
 -- Is the type wrapped in a StablePtr?
 isPointer :: TH.Type -> Bool
@@ -96,7 +101,7 @@ ffiFunctionName fnName =
 wrapFunction :: TH.Name -> TH.Q [TH.Dec]
 wrapFunction fnName = do
   fnType <- TH.reifyType fnName
-  let (argTypes, returnType) = ffiFunctionType fnType
+  (argTypes, returnType) <- ffiFunctionType fnType
   argNames <- mapM makeArgNames argTypes
 
   let foreignName = ffiFunctionName fnName
