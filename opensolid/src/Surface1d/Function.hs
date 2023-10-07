@@ -39,7 +39,6 @@ class (Show function) => Operations function units | function -> units where
 
 data Function units where
   Function ::
-    forall function units.
     (Operations function units) =>
     function ->
     Function units
@@ -63,24 +62,20 @@ data Function units where
     Function units ->
     Function units
   Product ::
-    forall units1 units2 units3.
     (Units.Product units1 units2 units3) =>
     Function units1 ->
     Function units2 ->
     Function units3
   Quotient ::
-    forall units1 units2 units3.
     (Units.Quotient units1 units2 units3) =>
     Function units1 ->
     Function units2 ->
     Function units3
   Squared ::
-    forall units1 units2.
     (Units.Squared units1 units2) =>
     Function units1 ->
     Function units2
   SquareRoot ::
-    forall units1 units2.
     (Units.Squared units1 units2) =>
     Function units2 ->
     Function units1

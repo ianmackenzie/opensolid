@@ -55,7 +55,6 @@ class
 
 data VectorCurve2d (coordinateSystem :: CoordinateSystem) where
   VectorCurve2d ::
-    forall curve space units.
     (IsVectorCurve2d curve (space @ units)) =>
     curve ->
     VectorCurve2d (space @ units)
@@ -83,19 +82,16 @@ data VectorCurve2d (coordinateSystem :: CoordinateSystem) where
     VectorCurve2d (space @ units) ->
     VectorCurve2d (space @ units)
   Product1d2d ::
-    forall space units1 units2 units3.
     (Units.Product units1 units2 units3) =>
     Curve1d units1 ->
     VectorCurve2d (space @ units2) ->
     VectorCurve2d (space @ units3)
   Product2d1d ::
-    forall space units1 units2 units3.
     (Units.Product units1 units2 units3) =>
     VectorCurve2d (space @ units1) ->
     Curve1d units2 ->
     VectorCurve2d (space @ units3)
   Quotient ::
-    forall space units1 units2 units3.
     (Units.Quotient units1 units2 units3) =>
     VectorCurve2d (space @ units1) ->
     Curve1d units2 ->

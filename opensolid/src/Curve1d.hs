@@ -57,7 +57,6 @@ class (Show curve) => IsCurve1d curve units | curve -> units where
 
 data Curve1d units where
   Curve1d ::
-    forall curve units.
     (IsCurve1d curve units) =>
     curve ->
     Curve1d units
@@ -79,24 +78,20 @@ data Curve1d units where
     Curve1d units ->
     Curve1d units
   Product ::
-    forall units1 units2 units3.
     (Units.Product units1 units2 units3) =>
     Curve1d units1 ->
     Curve1d units2 ->
     Curve1d units3
   Quotient ::
-    forall units1 units2 units3.
     (Units.Quotient units1 units2 units3) =>
     Curve1d units1 ->
     Curve1d units2 ->
     Curve1d units3
   Squared ::
-    forall units1 units2.
     (Units.Squared units1 units2) =>
     Curve1d units1 ->
     Curve1d units2
   SquareRoot ::
-    forall units1 units2.
     (Units.Squared units1 units2) =>
     Curve1d units2 ->
     Curve1d units1
