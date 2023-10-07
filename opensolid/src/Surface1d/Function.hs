@@ -10,6 +10,10 @@ module Surface1d.Function
   , u
   , v
   , wrap
+  , squared
+  , sqrt
+  , sin
+  , cos
   )
 where
 
