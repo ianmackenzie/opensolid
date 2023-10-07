@@ -9,6 +9,7 @@ module Surface1d.Function
   , constant
   , u
   , v
+  , wrap
   )
 where
 
@@ -280,6 +281,9 @@ u = U
 
 v :: Function Unitless
 v = V
+
+wrap :: (Operations function units) => function -> Function units
+wrap = Function
 
 squared :: (Units.Squared units1 units2) => Function units1 -> Function units2
 squared Zero = Zero
