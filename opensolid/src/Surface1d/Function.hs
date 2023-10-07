@@ -1,6 +1,6 @@
 module Surface1d.Function
   ( Function
-  , Operations
+  , Operations (..)
   , evaluateAt
   , pointOn
   , segmentBounds
