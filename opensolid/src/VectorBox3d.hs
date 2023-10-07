@@ -1,6 +1,7 @@
 module VectorBox3d
   ( VectorBox3d (VectorBox3d)
   , constant
+  , xyz
   , hull2
   , hull3
   , hull4
@@ -247,6 +248,9 @@ instance
 
 constant :: Vector3d (space @ units) -> VectorBox3d (space @ units)
 constant (Vector3d x y z) = VectorBox3d (Range.constant x) (Range.constant y) (Range.constant z)
+
+xyz :: Range units -> Range units -> Range units -> VectorBox3d (space @ units)
+xyz = VectorBox3d
 
 hull2 :: Vector3d (space @ units) -> Vector3d (space @ units) -> VectorBox3d (space @ units)
 hull2 (Vector3d x1 y1 z1) (Vector3d x2 y2 z2) =
