@@ -55,10 +55,10 @@ class
 
 data VectorCurve2d (coordinateSystem :: CoordinateSystem) where
   VectorCurve2d ::
-    forall curve coordinateSystem.
-    (IsVectorCurve2d curve coordinateSystem) =>
+    forall curve space units.
+    (IsVectorCurve2d curve (space @ units)) =>
     curve ->
-    VectorCurve2d coordinateSystem
+    VectorCurve2d (space @ units)
   Zero ::
     VectorCurve2d (space @ units)
   Constant ::
@@ -121,7 +121,7 @@ data VectorCurve2d (coordinateSystem :: CoordinateSystem) where
     Vector2d (space @ units) ->
     VectorCurve2d (space @ units)
 
-deriving instance Show (VectorCurve2d coordinateSystem)
+deriving instance Show (VectorCurve2d (space @ units))
 
 instance
   (units1 ~ units1', units2 ~ units2', space ~ space') =>
@@ -582,7 +582,7 @@ reverse curve =
 
 newtype SquaredMagnitudeOf (coordinateSystem :: CoordinateSystem) = SquaredMagnitudeOf (VectorCurve2d coordinateSystem)
 
-deriving instance Show (SquaredMagnitudeOf coordinateSystem)
+deriving instance Show (SquaredMagnitudeOf (space @ units))
 
 instance (Units.Squared units1 units2) => IsCurve1d (SquaredMagnitudeOf (space @ units1)) units2 where
   evaluateAtImpl t (SquaredMagnitudeOf curve) = Vector2d.squaredMagnitude (evaluateAt t curve)

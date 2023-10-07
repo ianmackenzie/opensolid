@@ -10,7 +10,8 @@ import {-# SOURCE #-} VectorCurve2d qualified
 
 newtype Magnitude (coordinateSystem :: CoordinateSystem)
   = Magnitude (VectorCurve2d coordinateSystem)
-  deriving (Show)
+
+deriving instance Show (Magnitude (space @ units))
 
 instance IsCurve1d (Magnitude (space @ units)) units where
   evaluateAtImpl t (Magnitude curve) =
