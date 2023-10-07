@@ -1,6 +1,7 @@
 module VectorBox2d
   ( VectorBox2d (VectorBox2d)
   , constant
+  , xy
   , aggregate2
   , aggregate3
   , hull2
@@ -267,6 +268,9 @@ instance
 
 constant :: Vector2d (space @ units) -> VectorBox2d (space @ units)
 constant (Vector2d x y) = VectorBox2d (Range.constant x) (Range.constant y)
+
+xy :: Range units -> Range units -> VectorBox2d (space @ units)
+xy = VectorBox2d
 
 hull2 :: Vector2d (space @ units) -> Vector2d (space @ units) -> VectorBox2d (space @ units)
 hull2 (Vector2d x1 y1) (Vector2d x2 y2) = VectorBox2d (Range.from x1 x2) (Range.from y1 y2)
