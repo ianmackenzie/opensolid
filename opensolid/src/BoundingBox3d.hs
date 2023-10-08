@@ -1,5 +1,8 @@
 module BoundingBox3d
   ( BoundingBox3d (BoundingBox3d)
+  , xCoordinate
+  , yCoordinate
+  , zCoordinate
   , constant
   , hull2
   , hull3
@@ -39,6 +42,15 @@ instance (units ~ units', space ~ space') => Subtraction (BoundingBox3d (space @
 
 instance (units ~ units', space ~ space') => Subtraction (BoundingBox3d (space @ units)) (BoundingBox3d (space' @ units')) (VectorBox3d (space @ units)) where
   BoundingBox3d x1 y1 z1 - BoundingBox3d x2 y2 z2 = VectorBox3d (x1 - x2) (y1 - y2) (z1 - z2)
+
+xCoordinate :: BoundingBox3d (space @ units) -> Range units
+xCoordinate (BoundingBox3d x _ _) = x
+
+yCoordinate :: BoundingBox3d (space @ units) -> Range units
+yCoordinate (BoundingBox3d _ y _) = y
+
+zCoordinate :: BoundingBox3d (space @ units) -> Range units
+zCoordinate (BoundingBox3d _ _ z) = z
 
 constant :: Point3d (space @ units) -> BoundingBox3d (space @ units)
 constant (Point3d x y z) =
