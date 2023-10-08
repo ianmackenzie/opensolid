@@ -1,5 +1,8 @@
 module Direction3d
   ( Direction3d (Direction3d)
+  , xComponent
+  , yComponent
+  , zComponent
   , unsafe
   , unwrap
   , x
@@ -72,6 +75,15 @@ instance (space ~ space') => CrossProduct (Direction3d space) (Vector3d (space' 
 
 instance (space ~ space') => CrossProduct (Direction3d space) (Direction3d space') (Vector3d (space @ Unitless)) where
   Direction3d vector1 >< Direction3d vector2 = vector1 >< vector2
+
+xComponent :: Direction3d space -> Float
+xComponent (Direction3d_ vector) = Vector3d.xComponent vector
+
+yComponent :: Direction3d space -> Float
+yComponent (Direction3d_ vector) = Vector3d.yComponent vector
+
+zComponent :: Direction3d space -> Float
+zComponent (Direction3d_ vector) = Vector3d.zComponent vector
 
 unsafe :: Vector3d (space @ Unitless) -> Direction3d space
 unsafe = Direction3d_
