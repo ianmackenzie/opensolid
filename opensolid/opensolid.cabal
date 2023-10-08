@@ -154,6 +154,8 @@ library
       VectorCurve2d
       VectorCurve3d
       Volume
+      Volume1d
+      Volume1d.Function
   other-modules:
       Curve1d.Integral
       Curve2d.Internal
