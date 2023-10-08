@@ -78,10 +78,10 @@ instance (space ~ space') => CrossProduct (Direction2d space) (Direction2d space
   Direction2d v1 >< Direction2d v2 = v1 >< v2
 
 xComponent :: Direction2d space -> Float
-xComponent (Direction2d_ (Vector2d dx _)) = dx
+xComponent (Direction2d_ vector) = Vector2d.xComponent vector
 
 yComponent :: Direction2d space -> Float
-yComponent (Direction2d_ (Vector2d _ dy)) = dy
+yComponent (Direction2d_ vector) = Vector2d.yComponent vector
 
 {-# INLINE unsafe #-}
 unsafe :: Vector2d (space @ Unitless) -> Direction2d space
