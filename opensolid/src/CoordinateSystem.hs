@@ -5,6 +5,8 @@ module CoordinateSystem
   , Defines
   , UvSpace
   , UvCoordinates
+  , UvwSpace
+  , UvwCoordinates
   )
 where
 
@@ -22,3 +24,7 @@ type Defines space = 'LocalSpace space
 data UvSpace
 
 type UvCoordinates = UvSpace @ Unitless
+
+data UvwSpace
+
+type UvwCoordinates = UvwSpace @ Unitless
