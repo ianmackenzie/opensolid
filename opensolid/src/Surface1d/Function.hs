@@ -18,8 +18,8 @@ module Surface1d.Function
 where
 
 import Angle qualified
-import BoundingBox2d (BoundingBox2d)
-import BoundingBox2d qualified
+import Bounds2d (Bounds2d)
+import Bounds2d qualified
 import Direction2d (Direction2d)
 import Direction2d qualified
 import Generic qualified
@@ -34,7 +34,7 @@ import Uv qualified
 
 class (Show function) => Operations function units | function -> units where
   evaluateAtImpl :: Point2d Uv.Coordinates -> function -> Qty units
-  segmentBoundsImpl :: BoundingBox2d Uv.Coordinates -> function -> Range units
+  segmentBoundsImpl :: Bounds2d Uv.Coordinates -> function -> Range units
   derivativeImpl :: Direction2d Uv.Space -> function -> Function units
 
 data Function units where
@@ -230,14 +230,14 @@ evaluateAt uv function =
 pointOn :: Function units -> Point2d Uv.Coordinates -> Qty units
 pointOn function uv = evaluateAt uv function
 
-segmentBounds :: BoundingBox2d Uv.Coordinates -> Function units -> Range units
+segmentBounds :: Bounds2d Uv.Coordinates -> Function units -> Range units
 segmentBounds uv function =
   case function of
     Function f -> segmentBoundsImpl uv f
     Zero -> Range.constant Qty.zero
     Constant x -> Range.constant x
-    U -> BoundingBox2d.xCoordinate uv
-    V -> BoundingBox2d.yCoordinate uv
+    U -> Bounds2d.xCoordinate uv
+    V -> Bounds2d.yCoordinate uv
     Negated f -> negate (segmentBounds uv f)
     Sum f1 f2 -> segmentBounds uv f1 + segmentBounds uv f2
     Difference f1 f2 -> segmentBounds uv f1 - segmentBounds uv f2

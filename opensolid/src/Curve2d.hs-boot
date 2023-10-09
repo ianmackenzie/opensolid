@@ -10,7 +10,7 @@ module Curve2d
   )
 where
 
-import BoundingBox2d (BoundingBox2d)
+import Bounds2d (Bounds2d)
 import Curve2d.Internal qualified as Internal
 import DirectionCurve2d (DirectionCurve2d)
 import Domain (Domain)
@@ -25,6 +25,6 @@ data DegenerateCurve
 startPoint :: Curve2d (space @ units) -> Point2d (space @ units)
 endPoint :: Curve2d (space @ units) -> Point2d (space @ units)
 evaluateAt :: Float -> Curve2d (space @ units) -> Point2d (space @ units)
-segmentBounds :: Domain -> Curve2d (space @ units) -> BoundingBox2d (space @ units)
+segmentBounds :: Domain -> Curve2d (space @ units) -> Bounds2d (space @ units)
 derivative :: Curve2d (space @ units) -> VectorCurve2d (space @ units)
 tangentDirection :: Curve2d (space @ units) -> DirectionCurve2d space

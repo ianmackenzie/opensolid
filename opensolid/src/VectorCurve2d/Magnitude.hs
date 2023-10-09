@@ -4,7 +4,7 @@ import Curve1d (Curve1d (Curve1d), IsCurve1d (..))
 import OpenSolid
 import Units qualified
 import Vector2d qualified
-import VectorBox2d qualified
+import VectorBounds2d qualified
 import {-# SOURCE #-} VectorCurve2d (VectorCurve2d)
 import {-# SOURCE #-} VectorCurve2d qualified
 
@@ -18,7 +18,7 @@ instance IsCurve1d (Magnitude (space @ units)) units where
     Vector2d.magnitude (VectorCurve2d.evaluateAt t curve)
 
   segmentBoundsImpl t (Magnitude curve) =
-    VectorBox2d.magnitude (VectorCurve2d.segmentBounds t curve)
+    VectorBounds2d.magnitude (VectorCurve2d.segmentBounds t curve)
 
   derivativeImpl (Magnitude curve) =
     let curve' = Units.generalize curve

@@ -14,7 +14,7 @@ import Domain (Domain)
 import OpenSolid
 import Units qualified
 import Vector2d (Vector2d)
-import VectorBox2d (VectorBox2d)
+import VectorBounds2d (VectorBounds2d)
 
 class
   (Show curve) =>
@@ -22,7 +22,7 @@ class
     | curve -> coordinateSystem
   where
   evaluateAtImpl :: Float -> curve -> Vector2d coordinateSystem
-  segmentBoundsImpl :: Domain -> curve -> VectorBox2d coordinateSystem
+  segmentBoundsImpl :: Domain -> curve -> VectorBounds2d coordinateSystem
   derivativeImpl :: curve -> VectorCurve2d coordinateSystem
 
 type role VectorCurve2d nominal
@@ -86,5 +86,5 @@ instance
 constant :: Vector2d (space @ units) -> VectorCurve2d (space @ units)
 wrap :: (IsVectorCurve2d curve (space @ units)) => curve -> VectorCurve2d (space @ units)
 evaluateAt :: Float -> VectorCurve2d (space @ units) -> Vector2d (space @ units)
-segmentBounds :: Domain -> VectorCurve2d (space @ units) -> VectorBox2d (space @ units)
+segmentBounds :: Domain -> VectorCurve2d (space @ units) -> VectorBounds2d (space @ units)
 derivative :: VectorCurve2d (space @ units) -> VectorCurve2d (space @ units)

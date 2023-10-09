@@ -16,8 +16,8 @@ where
 import Curve1d (Curve1d)
 import Direction2d (Direction2d (Direction2d))
 import Direction2d qualified
-import DirectionBox2d (DirectionBox2d)
-import DirectionBox2d qualified
+import DirectionBounds2d (DirectionBounds2d)
+import DirectionBounds2d qualified
 import Domain (Domain)
 import OpenSolid
 import Vector2d (Vector2d)
@@ -37,9 +37,9 @@ evaluateAt :: Float -> DirectionCurve2d space -> Direction2d space
 evaluateAt t (DirectionCurve2d vectorCurve) =
   Direction2d.unsafe (VectorCurve2d.evaluateAt t vectorCurve)
 
-segmentBounds :: Domain -> DirectionCurve2d space -> DirectionBox2d space
+segmentBounds :: Domain -> DirectionCurve2d space -> DirectionBounds2d space
 segmentBounds t (DirectionCurve2d vectorCurve) =
-  DirectionBox2d.unsafe (VectorCurve2d.segmentBounds t vectorCurve)
+  DirectionBounds2d.unsafe (VectorCurve2d.segmentBounds t vectorCurve)
 
 derivative :: DirectionCurve2d space -> VectorCurve2d (space @ Unitless)
 derivative (DirectionCurve2d vectorCurve) = VectorCurve2d.derivative vectorCurve

@@ -13,14 +13,14 @@ module Curve2d.Segment
   )
 where
 
-import BoundingBox2d (BoundingBox2d)
-import BoundingBox2d qualified
+import Bounds2d (Bounds2d)
+import Bounds2d qualified
 import {-# SOURCE #-} Curve2d (Curve2d)
 import {-# SOURCE #-} Curve2d qualified
 import Curve2d.Derivatives (Derivatives)
 import Curve2d.Intersection (Intersection (Intersection))
 import Curve2d.Intersection qualified as Intersection
-import DirectionBox2d (DirectionBox2d)
+import DirectionBounds2d (DirectionBounds2d)
 import DirectionCurve2d qualified
 import Domain (Domain)
 import OpenSolid
@@ -29,16 +29,16 @@ import Range (Range)
 import Range qualified
 import Units ((:/))
 import Units qualified
-import VectorBox2d (VectorBox2d)
-import VectorBox2d qualified
+import VectorBounds2d (VectorBounds2d)
+import VectorBounds2d qualified
 import VectorCurve2d qualified
 
 data Segment (coordinateSystem :: CoordinateSystem) where
   Segment ::
-    BoundingBox2d (space @ units) ->
-    ~(VectorBox2d (space @ units)) ->
-    ~(VectorBox2d (space @ units)) ->
-    ~(DirectionBox2d space) ->
+    Bounds2d (space @ units) ->
+    ~(VectorBounds2d (space @ units)) ->
+    ~(VectorBounds2d (space @ units)) ->
+    ~(DirectionBounds2d space) ->
     Segment (space @ units)
 
 init ::
@@ -55,7 +55,7 @@ init derivatives domain =
 
 overlaps :: (Tolerance units) => Segment (space @ units) -> Segment (space @ units) -> Bool
 overlaps (Segment firstBounds _ _ _) (Segment secondBounds _ _ _) =
-  Range.minValue (VectorBox2d.magnitude (firstBounds - secondBounds)) <= ?tolerance
+  Range.minValue (VectorBounds2d.magnitude (firstBounds - secondBounds)) <= ?tolerance
 
 crossProductResolution :: Segment (space @ units) -> Segment (space @ units) -> Float
 crossProductResolution (Segment _ _ _ tangentBounds1) (Segment _ _ _ tangentBounds2) =
@@ -91,14 +91,14 @@ computeIntersectionType segment1 segment2 =
   if Qty.abs firstResolution >= 0.5
     then Resolved (Intersection.Crossing, Qty.sign firstResolution)
     else
-      let dX1_dU1 = VectorBox2d.xComponent firstBounds1
-          dY1_dU1 = VectorBox2d.yComponent firstBounds1
-          dX2_dU2 = VectorBox2d.xComponent firstBounds2
-          dY2_dU2 = VectorBox2d.yComponent firstBounds2
-          d2X1_dU1dU1 = VectorBox2d.xComponent secondBounds1
-          d2Y1_dU1dU1 = VectorBox2d.yComponent secondBounds1
-          d2X2_dU2dU2 = VectorBox2d.xComponent secondBounds2
-          d2Y2_dU2dU2 = VectorBox2d.yComponent secondBounds2
+      let dX1_dU1 = VectorBounds2d.xComponent firstBounds1
+          dY1_dU1 = VectorBounds2d.yComponent firstBounds1
+          dX2_dU2 = VectorBounds2d.xComponent firstBounds2
+          dY2_dU2 = VectorBounds2d.yComponent firstBounds2
+          d2X1_dU1dU1 = VectorBounds2d.xComponent secondBounds1
+          d2Y1_dU1dU1 = VectorBounds2d.yComponent secondBounds1
+          d2X2_dU2dU2 = VectorBounds2d.xComponent secondBounds2
+          d2Y2_dU2dU2 = VectorBounds2d.yComponent secondBounds2
           resolutionXY =
             secondResolution1d
               dX1_dU1
@@ -150,14 +150,14 @@ tangentIntersectionSign ::
 tangentIntersectionSign _ _ segment1 segment2 =
   let (Segment _ firstBounds1 secondBounds1 _) = segment1
       (Segment _ firstBounds2 secondBounds2 _) = segment2
-      dX1_dU1 = VectorBox2d.xComponent firstBounds1
-      dY1_dU1 = VectorBox2d.yComponent firstBounds1
-      dX2_dU2 = VectorBox2d.xComponent firstBounds2
-      dY2_dU2 = VectorBox2d.yComponent firstBounds2
-      d2X1_dU1dU1 = VectorBox2d.xComponent secondBounds1
-      d2Y1_dU1dU1 = VectorBox2d.yComponent secondBounds1
-      d2X2_dU2dU2 = VectorBox2d.xComponent secondBounds2
-      d2Y2_dU2dU2 = VectorBox2d.yComponent secondBounds2
+      dX1_dU1 = VectorBounds2d.xComponent firstBounds1
+      dY1_dU1 = VectorBounds2d.yComponent firstBounds1
+      dX2_dU2 = VectorBounds2d.xComponent firstBounds2
+      dY2_dU2 = VectorBounds2d.yComponent firstBounds2
+      d2X1_dU1dU1 = VectorBounds2d.xComponent secondBounds1
+      d2Y1_dU1dU1 = VectorBounds2d.yComponent secondBounds1
+      d2X2_dU2dU2 = VectorBounds2d.xComponent secondBounds2
+      d2Y2_dU2dU2 = VectorBounds2d.yComponent secondBounds2
       resolutionXY =
         secondResolution1d
           dX1_dU1
@@ -241,7 +241,7 @@ isTangentIntersection derivatives1 derivatives2 u1 u2 =
   let bounds1 = Curve2d.segmentBounds u1 derivatives1.curve
       bounds2 = Curve2d.segmentBounds u2 derivatives2.curve
       difference = bounds1 - bounds2
-      distance = VectorBox2d.magnitude difference
+      distance = VectorBounds2d.magnitude difference
    in Range.minValue distance <= ?tolerance
         && let firstBounds1 = VectorCurve2d.segmentBounds u1 derivatives1.first
                firstBounds2 = VectorCurve2d.segmentBounds u2 derivatives2.first
@@ -294,6 +294,6 @@ isCrossingIntersection ::
   Domain ->
   Bool
 isCrossingIntersection curve1 curve2 u v =
-  BoundingBox2d.intersects
+  Bounds2d.intersects
     (Curve2d.segmentBounds u curve1)
     (Curve2d.segmentBounds v curve2)

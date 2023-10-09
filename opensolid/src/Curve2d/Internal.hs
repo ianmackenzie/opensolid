@@ -10,8 +10,8 @@ module Curve2d.Internal
   )
 where
 
-import BoundingBox2d (BoundingBox2d)
-import BoundingBox2d qualified
+import Bounds2d (Bounds2d)
+import Bounds2d qualified
 import Direction2d (Direction2d)
 import DirectionCurve2d (DirectionCurve2d)
 import DirectionCurve2d qualified
@@ -24,7 +24,7 @@ import Range (Range (Range))
 import Range qualified
 import Units qualified
 import Vector2d qualified
-import VectorBox2d qualified
+import VectorBounds2d qualified
 import VectorCurve2d (IsVectorCurve2d (..), VectorCurve2d (VectorCurve2d))
 import VectorCurve2d qualified
 
@@ -64,10 +64,10 @@ class
   startPointImpl :: curve -> Point2d coordinateSystem
   endPointImpl :: curve -> Point2d coordinateSystem
   evaluateAtImpl :: Float -> curve -> Point2d coordinateSystem
-  segmentBoundsImpl :: Domain -> curve -> BoundingBox2d coordinateSystem
+  segmentBoundsImpl :: Domain -> curve -> Bounds2d coordinateSystem
   derivativeImpl :: curve -> VectorCurve2d coordinateSystem
   reverseImpl :: curve -> curve
-  boundingBoxImpl :: curve -> BoundingBox2d coordinateSystem
+  boundsImpl :: curve -> Bounds2d coordinateSystem
 
 startPoint :: Curve2d (space @ units) -> Point2d (space @ units)
 startPoint (Line p1 _ _) = p1
@@ -84,11 +84,11 @@ evaluateAt t (Line p1 p2 _) = Point2d.interpolateFrom p1 p2 t
 evaluateAt t (Arc p0 r a b) = let theta = Qty.interpolateFrom a b t in p0 + Vector2d.polar r theta
 evaluateAt t (Curve curve _) = Curve2d.Internal.evaluateAtImpl t curve
 
-segmentBounds :: Domain -> Curve2d (space @ units) -> BoundingBox2d (space @ units)
+segmentBounds :: Domain -> Curve2d (space @ units) -> Bounds2d (space @ units)
 segmentBounds (Range t1 t2) (Line p1 p2 _) =
-  BoundingBox2d.hull2 (Point2d.interpolateFrom p1 p2 t1) (Point2d.interpolateFrom p1 p2 t2)
+  Bounds2d.hull2 (Point2d.interpolateFrom p1 p2 t1) (Point2d.interpolateFrom p1 p2 t2)
 segmentBounds t (Arc p0 r a b) =
-  p0 + VectorBox2d.polar (Range.constant r) (a + (b - a) * t)
+  p0 + VectorBounds2d.polar (Range.constant r) (a + (b - a) * t)
 segmentBounds t (Curve curve _) =
   Curve2d.Internal.segmentBoundsImpl t curve
 

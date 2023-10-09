@@ -15,7 +15,7 @@ module Curve2d
   , derivative
   , tangentDirection
   , reverse
-  , boundingBox
+  , bounds
   , passesThrough
   , intersections
   , parameterValues
@@ -29,8 +29,8 @@ import Angle qualified
 import Axis2d (Axis2d)
 import Axis2d qualified
 import Bisection qualified
-import BoundingBox2d (BoundingBox2d)
-import BoundingBox2d qualified
+import Bounds2d (Bounds2d)
+import Bounds2d qualified
 import Curve1d (Curve1d)
 import Curve2d.Derivatives (Derivatives)
 import Curve2d.Derivatives qualified as Derivatives
@@ -51,7 +51,7 @@ import Point2d (Point2d)
 import Qty qualified
 import Range qualified
 import Result qualified
-import VectorBox2d qualified
+import VectorBounds2d qualified
 import VectorCurve2d (VectorCurve2d)
 import VectorCurve2d qualified
 
@@ -98,7 +98,7 @@ evaluateAt = Internal.evaluateAt
 pointOn :: Curve2d (space @ units) -> Float -> Point2d (space @ units)
 pointOn curve t = evaluateAt t curve
 
-segmentBounds :: Domain -> Curve2d (space @ units) -> BoundingBox2d (space @ units)
+segmentBounds :: Domain -> Curve2d (space @ units) -> Bounds2d (space @ units)
 segmentBounds = Internal.segmentBounds
 
 derivative :: Curve2d (space @ units) -> VectorCurve2d (space @ units)
@@ -107,10 +107,10 @@ derivative = Internal.derivative
 reverse :: Curve2d (space @ units) -> Curve2d (space @ units)
 reverse = Internal.reverse
 
-boundingBox :: Curve2d (space @ units) -> BoundingBox2d (space @ units)
-boundingBox (Internal.Line p1 p2 _) = BoundingBox2d.hull2 p1 p2
-boundingBox arc@(Internal.Arc{}) = segmentBounds Domain.unit arc
-boundingBox (Internal.Curve curve _) = boundingBoxImpl curve
+bounds :: Curve2d (space @ units) -> Bounds2d (space @ units)
+bounds (Internal.Line p1 p2 _) = Bounds2d.hull2 p1 p2
+bounds arc@(Internal.Arc{}) = segmentBounds Domain.unit arc
+bounds (Internal.Curve curve _) = boundsImpl curve
 
 tangentDirection :: Curve2d (space @ units) -> DirectionCurve2d space
 tangentDirection (Internal.Line _ _ direction) = DirectionCurve2d.constant direction
@@ -145,7 +145,7 @@ segmentIsCoincidentWithPoint point curve domain
   | Range.maxValue distance <= ?tolerance = Resolved True
   | otherwise = Unresolved
  where
-  distance = VectorBox2d.magnitude (point - segmentBounds domain curve)
+  distance = VectorBounds2d.magnitude (point - segmentBounds domain curve)
 
 parameterValues ::
   (Tolerance units) =>

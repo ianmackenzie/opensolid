@@ -7,7 +7,7 @@ import OpenSolid
 import Range (Range (Range))
 import Range qualified
 import Vector2d qualified
-import VectorBox2d qualified
+import VectorBounds2d qualified
 import {-# SOURCE #-} VectorCurve2d (IsVectorCurve2d (..), VectorCurve2d)
 import {-# SOURCE #-} VectorCurve2d qualified
 import VectorCurve2d.DegenerateEndpoint (DegenerateEndpoint)
@@ -41,7 +41,7 @@ instance IsVectorCurve2d (PiecewiseCurve space) (space @ Unitless) where
     | t1 >= tStart = VectorCurve2d.segmentBounds t inner
     | t2 <= tStart = DegenerateEndpoint.segmentBounds t degenerateStart inner
     | otherwise =
-        VectorBox2d.aggregate2
+        VectorBounds2d.aggregate2
           (DegenerateEndpoint.segmentBounds (Range.from t1 tStart) degenerateStart inner)
           (VectorCurve2d.segmentBounds (Range.from tStart t2) inner)
    where
@@ -50,7 +50,7 @@ instance IsVectorCurve2d (PiecewiseCurve space) (space @ Unitless) where
     | t2 <= tEnd = VectorCurve2d.segmentBounds t inner
     | t1 >= tEnd = DegenerateEndpoint.segmentBounds t degenerateEnd inner
     | otherwise =
-        VectorBox2d.aggregate2
+        VectorBounds2d.aggregate2
           (VectorCurve2d.segmentBounds (Range.from t1 tEnd) inner)
           (DegenerateEndpoint.segmentBounds (Range.from tEnd t2) degenerateEnd inner)
    where
@@ -60,15 +60,15 @@ instance IsVectorCurve2d (PiecewiseCurve space) (space @ Unitless) where
     | t2 <= tStart = DegenerateEndpoint.segmentBounds t degenerateStart inner
     | t1 >= tEnd = DegenerateEndpoint.segmentBounds t degenerateEnd inner
     | t1 >= tStart =
-        VectorBox2d.aggregate2
+        VectorBounds2d.aggregate2
           (VectorCurve2d.segmentBounds (Range.from t1 tEnd) inner)
           (DegenerateEndpoint.segmentBounds (Range.from tEnd t2) degenerateEnd inner)
     | t2 <= tEnd =
-        VectorBox2d.aggregate2
+        VectorBounds2d.aggregate2
           (DegenerateEndpoint.segmentBounds (Range.from t1 tStart) degenerateStart inner)
           (VectorCurve2d.segmentBounds (Range.from tStart t2) inner)
     | otherwise =
-        VectorBox2d.aggregate3
+        VectorBounds2d.aggregate3
           (DegenerateEndpoint.segmentBounds (Range.from t1 tStart) degenerateStart inner)
           (VectorCurve2d.segmentBounds (Range.from tStart tEnd) inner)
           (DegenerateEndpoint.segmentBounds (Range.from tEnd t2) degenerateEnd inner)

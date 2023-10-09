@@ -16,14 +16,14 @@ import Tests.Parameter1d qualified
 import Tests.Qty qualified
 import Tests.Range qualified
 import Tests.Region2d qualified
-import Tests.VectorBox3d qualified
+import Tests.VectorBounds3d qualified
 
 tests :: List Test
 tests =
   [ Test.group "Parameter1d" Tests.Parameter1d.tests
   , Test.group "Qty" Tests.Qty.tests
   , Test.group "Range" Tests.Range.tests
-  , Test.group "VectorBox3d" Tests.VectorBox3d.tests
+  , Test.group "VectorBounds3d" Tests.VectorBounds3d.tests
   , Test.group "Curve1d" Tests.Curve1d.tests
   , Test.group "Curve2d" Tests.Curve2d.tests
   , Test.group "Estimate" Tests.Estimate.tests

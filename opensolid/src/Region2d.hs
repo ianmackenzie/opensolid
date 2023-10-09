@@ -7,13 +7,13 @@ module Region2d
   , boundaryCurves
   , classify
   , contains
-  , boundingBox
+  , bounds
   , area
   )
 where
 
-import BoundingBox2d (BoundingBox2d)
-import BoundingBox2d qualified
+import Bounds2d (Bounds2d)
+import Bounds2d qualified
 import Curve1d qualified
 import Curve2d (Curve2d)
 import Curve2d qualified
@@ -254,10 +254,10 @@ loopIsInside outer inner =
         Just Positive -> True
         Just Negative -> False
 
-boundingBox :: Region2d (space @ units) -> BoundingBox2d (space @ units)
-boundingBox region =
-  NonEmpty.reduceLeft BoundingBox2d.aggregate2 $
-    NonEmpty.map Curve2d.boundingBox (outerLoop region)
+bounds :: Region2d (space @ units) -> Bounds2d (space @ units)
+bounds region =
+  NonEmpty.reduceLeft Bounds2d.aggregate2 $
+    NonEmpty.map Curve2d.bounds (outerLoop region)
 
 area :: (Units.Squared units1 units2) => Region2d (space @ units1) -> Estimate units2
 area region =

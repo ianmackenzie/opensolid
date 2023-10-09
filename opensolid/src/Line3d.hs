@@ -3,7 +3,7 @@ module Line3d
   )
 where
 
-import BoundingBox3d qualified
+import Bounds3d qualified
 import Curve3d (Curve3d (Curve3d), IsCurve3d (..))
 import OpenSolid
 import Point3d (Point3d)
@@ -22,7 +22,7 @@ instance IsCurve3d (Line3d (space @ units)) (space @ units) where
   evaluateImpl (Line3d p1 p2) t = Point3d.interpolateFrom p1 p2 t
 
   segmentBoundsImpl (Line3d p1 p2) (Range tl th) =
-    BoundingBox3d.hull2
+    Bounds3d.hull2
       (Point3d.interpolateFrom p1 p2 tl)
       (Point3d.interpolateFrom p1 p2 th)
 
@@ -30,7 +30,7 @@ instance IsCurve3d (Line3d (space @ units)) (space @ units) where
 
   reverseImpl (Line3d p1 p2) = Line3d p2 p1
 
-  boundingBoxImpl (Line3d p1 p2) = BoundingBox3d.hull2 p1 p2
+  boundsImpl (Line3d p1 p2) = Bounds3d.hull2 p1 p2
 
 from :: Point3d (space @ units) -> Point3d (space @ units) -> Curve3d (space @ units)
 from p1 p2 = Curve3d (Line3d p1 p2)

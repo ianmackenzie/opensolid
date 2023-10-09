@@ -12,7 +12,7 @@ module VectorVolume3d.Function
   )
 where
 
-import BoundingBox3d (BoundingBox3d)
+import Bounds3d (Bounds3d)
 import Direction3d (Direction3d)
 import Generic qualified
 import OpenSolid
@@ -21,8 +21,8 @@ import Units qualified
 import Uvw qualified
 import Vector3d (Vector3d)
 import Vector3d qualified
-import VectorBox3d (VectorBox3d)
-import VectorBox3d qualified
+import VectorBounds3d (VectorBounds3d)
+import VectorBounds3d qualified
 import Volume1d qualified
 import Volume1d.Function qualified
 
@@ -32,7 +32,7 @@ class
     | function -> coordinateSystem
   where
   evaluateAtImpl :: Point3d Uvw.Coordinates -> function -> Vector3d coordinateSystem
-  segmentBoundsImpl :: BoundingBox3d Uvw.Coordinates -> function -> VectorBox3d coordinateSystem
+  segmentBoundsImpl :: Bounds3d Uvw.Coordinates -> function -> VectorBounds3d coordinateSystem
   derivativeImpl :: Direction3d Uvw.Space -> function -> Function coordinateSystem
 
 data Function (coordinateSystem :: CoordinateSystem) where
@@ -256,16 +256,16 @@ pointOn :: Function (space @ units) -> Point3d Uvw.Coordinates -> Vector3d (spac
 pointOn function uv = evaluateAt uv function
 
 segmentBounds ::
-  BoundingBox3d Uvw.Coordinates ->
+  Bounds3d Uvw.Coordinates ->
   Function (space @ units) ->
-  VectorBox3d (space @ units)
+  VectorBounds3d (space @ units)
 segmentBounds uv function =
   case function of
     Function f -> segmentBoundsImpl uv f
-    Zero -> VectorBox3d.constant Vector3d.zero
-    Constant v -> VectorBox3d.constant v
+    Zero -> VectorBounds3d.constant Vector3d.zero
+    Constant v -> VectorBounds3d.constant v
     XYZ x y z ->
-      VectorBox3d.xyz
+      VectorBounds3d.xyz
         (Volume1d.Function.segmentBounds uv x)
         (Volume1d.Function.segmentBounds uv y)
         (Volume1d.Function.segmentBounds uv z)

@@ -4,7 +4,7 @@ module CubicSpline2d
   )
 where
 
-import BoundingBox2d qualified
+import Bounds2d qualified
 import Curve2d (Curve2d, DegenerateCurve, IsCurve2d (..))
 import Curve2d qualified
 import OpenSolid
@@ -43,7 +43,7 @@ instance IsCurve2d (CubicSpline2d (space @ units)) (space @ units) where
   evaluateAtImpl t spline = blossom spline t t t
 
   segmentBoundsImpl (Range tl th) spline =
-    BoundingBox2d.hull4
+    Bounds2d.hull4
       (blossom spline tl tl tl)
       (blossom spline tl tl th)
       (blossom spline tl th th)
@@ -57,7 +57,7 @@ instance IsCurve2d (CubicSpline2d (space @ units)) (space @ units) where
 
   reverseImpl (CubicSpline2d p1 p2 p3 p4) = CubicSpline2d p4 p3 p2 p1
 
-  boundingBoxImpl (CubicSpline2d p1 p2 p3 p4) = BoundingBox2d.hull4 p1 p2 p3 p4
+  boundsImpl (CubicSpline2d p1 p2 p3 p4) = Bounds2d.hull4 p1 p2 p3 p4
 
 fromControlPoints ::
   (Tolerance units) =>

@@ -93,8 +93,8 @@ library
       Basics
       Bisection
       Bounded
-      BoundingBox2d
-      BoundingBox3d
+      Bounds2d
+      Bounds3d
       Bounds
       Concatenate
       Console
@@ -108,7 +108,7 @@ library
       Debug
       Direction2d
       Direction3d
-      DirectionBox2d
+      DirectionBounds2d
       DirectionCurve2d
       Domain
       DoNotation
@@ -151,8 +151,8 @@ library
       Uvw
       Vector2d
       Vector3d
-      VectorBox2d
-      VectorBox3d
+      VectorBounds2d
+      VectorBounds3d
       VectorCurve2d
       VectorCurve3d
       VectorVolume3d.Function
@@ -189,7 +189,7 @@ test-suite opensolid-test
       Tests.Random
       Tests.Range
       Tests.Region2d
-      Tests.VectorBox3d
+      Tests.VectorBounds3d
       Paths_opensolid
   autogen-modules: Paths_opensolid
   hs-source-dirs: test

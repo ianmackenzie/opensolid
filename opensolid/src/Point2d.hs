@@ -22,8 +22,8 @@ where
 import {-# SOURCE #-} Axis2d (Axis2d)
 import {-# SOURCE #-} Axis2d qualified
 import Bounded (IsBounded (..))
-import {-# SOURCE #-} BoundingBox2d (BoundingBox2d (BoundingBox2d))
-import {-# SOURCE #-} BoundingBox2d qualified
+import {-# SOURCE #-} Bounds2d (Bounds2d (Bounds2d))
+import {-# SOURCE #-} Bounds2d qualified
 import Direction2d (Direction2d (Direction2d))
 import {-# SOURCE #-} Frame2d (Frame2d)
 import {-# SOURCE #-} Frame2d qualified
@@ -35,7 +35,7 @@ import Units qualified
 import Uv qualified
 import Vector2d (Vector2d (Vector2d))
 import Vector2d qualified
-import VectorBox2d (VectorBox2d (VectorBox2d))
+import VectorBounds2d (VectorBounds2d (VectorBounds2d))
 
 type role Point2d nominal
 
@@ -87,19 +87,19 @@ instance
   (units ~ units', space ~ space') =>
   Addition
     (Point2d (space @ units))
-    (VectorBox2d (space' @ units'))
-    (BoundingBox2d (space @ units))
+    (VectorBounds2d (space' @ units'))
+    (Bounds2d (space @ units))
   where
-  Point2d px py + VectorBox2d vx vy = BoundingBox2d (px + vx) (py + vy)
+  Point2d px py + VectorBounds2d vx vy = Bounds2d (px + vx) (py + vy)
 
 instance
   (units ~ units', space ~ space') =>
   Subtraction
     (Point2d (space @ units))
-    (VectorBox2d (space' @ units'))
-    (BoundingBox2d (space @ units))
+    (VectorBounds2d (space' @ units'))
+    (Bounds2d (space @ units))
   where
-  Point2d px py - VectorBox2d vx vy = BoundingBox2d (px - vx) (py - vy)
+  Point2d px py - VectorBounds2d vx vy = Bounds2d (px - vx) (py - vy)
 
 instance
   (space ~ space', units ~ units') =>
@@ -107,8 +107,8 @@ instance
   where
   p1 ~= p2 = distanceFrom p1 p2 ~= Qty.zero
 
-instance IsBounded (Point2d (space @ units)) (BoundingBox2d (space @ units)) where
-  boundsImpl = BoundingBox2d.constant
+instance IsBounded (Point2d (space @ units)) (Bounds2d (space @ units)) where
+  boundsImpl = Bounds2d.constant
 
 origin :: Point2d (space @ units)
 origin = Point2d Qty.zero Qty.zero

@@ -15,8 +15,8 @@ import Qty qualified
 import Range (Range (Range))
 import Vector2d (Vector2d)
 import Vector2d qualified
-import VectorBox2d (VectorBox2d)
-import VectorBox2d qualified
+import VectorBounds2d (VectorBounds2d)
+import VectorBounds2d qualified
 import {-# SOURCE #-} VectorCurve2d (IsVectorCurve2d (..), VectorCurve2d)
 import {-# SOURCE #-} VectorCurve2d qualified
 import VectorCurve2d.Magnitude qualified
@@ -56,7 +56,7 @@ deriving instance Show (QCurve (space @ units))
 
 instance IsVectorCurve2d (QCurve (space @ units)) (space @ units) where
   evaluateAtImpl _ (QCurve _ _ _ value) = value
-  segmentBoundsImpl _ (QCurve _ _ _ value) = VectorBox2d.constant value
+  segmentBoundsImpl _ (QCurve _ _ _ value) = VectorBounds2d.constant value
   derivativeImpl (QCurve n t0 curveDerivative _) =
     qCurve (n + 1) t0 (VectorCurve2d.derivative curveDerivative)
 
@@ -73,10 +73,10 @@ evaluateAt t (DegenerateEndpoint t0 t1 endpointCurve) innerCurve =
     (VectorCurve2d.evaluateAt t1 innerCurve)
     ((t - t0) / (t1 - t0))
 
-segmentBounds :: Domain -> DegenerateEndpoint space -> VectorCurve2d (space @ Unitless) -> VectorBox2d (space @ Unitless)
+segmentBounds :: Domain -> DegenerateEndpoint space -> VectorCurve2d (space @ Unitless) -> VectorBounds2d (space @ Unitless)
 segmentBounds (Range tLow tHigh) (DegenerateEndpoint t0 t1 endpointCurve) innerCurve =
   let v0 = VectorCurve2d.evaluateAt t0 endpointCurve
       v1 = VectorCurve2d.evaluateAt t1 innerCurve
-   in VectorBox2d.hull2
+   in VectorBounds2d.hull2
         (Vector2d.interpolateFrom v0 v1 ((tLow - t0) / (t1 - t0)))
         (Vector2d.interpolateFrom v0 v1 ((tHigh - t0) / (t1 - t0)))

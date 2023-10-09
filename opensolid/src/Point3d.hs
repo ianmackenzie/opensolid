@@ -19,8 +19,8 @@ module Point3d
 where
 
 import Bounded (IsBounded (..))
-import {-# SOURCE #-} BoundingBox3d (BoundingBox3d (BoundingBox3d))
-import {-# SOURCE #-} BoundingBox3d qualified
+import {-# SOURCE #-} Bounds3d (Bounds3d (Bounds3d))
+import {-# SOURCE #-} Bounds3d qualified
 import Length qualified
 import OpenSolid
 import Qty qualified
@@ -28,7 +28,7 @@ import Units (Meters)
 import Units qualified
 import Vector3d (Vector3d (Vector3d))
 import Vector3d qualified
-import VectorBox3d (VectorBox3d (VectorBox3d))
+import VectorBounds3d (VectorBounds3d (VectorBounds3d))
 
 data Point3d (coordinateSystem :: CoordinateSystem) where
   Point3d :: Qty units -> Qty units -> Qty units -> Point3d (space @ units)
@@ -76,19 +76,19 @@ instance
   (units ~ units', space ~ space') =>
   Addition
     (Point3d (space @ units))
-    (VectorBox3d (space' @ units'))
-    (BoundingBox3d (space @ units))
+    (VectorBounds3d (space' @ units'))
+    (Bounds3d (space @ units))
   where
-  Point3d px py pz + VectorBox3d vx vy vz = BoundingBox3d (px + vx) (py + vy) (pz + vz)
+  Point3d px py pz + VectorBounds3d vx vy vz = Bounds3d (px + vx) (py + vy) (pz + vz)
 
 instance
   (units ~ units', space ~ space') =>
   Subtraction
     (Point3d (space @ units))
-    (VectorBox3d (space' @ units'))
-    (BoundingBox3d (space @ units))
+    (VectorBounds3d (space' @ units'))
+    (Bounds3d (space @ units))
   where
-  Point3d px py pz - VectorBox3d vx vy vz = BoundingBox3d (px - vx) (py - vy) (pz - vz)
+  Point3d px py pz - VectorBounds3d vx vy vz = Bounds3d (px - vx) (py - vy) (pz - vz)
 
 instance
   (space ~ space', units ~ units') =>
@@ -96,8 +96,8 @@ instance
   where
   p1 ~= p2 = distanceFrom p1 p2 ~= Qty.zero
 
-instance IsBounded (Point3d (space @ units)) (BoundingBox3d (space @ units)) where
-  boundsImpl = BoundingBox3d.constant
+instance IsBounded (Point3d (space @ units)) (Bounds3d (space @ units)) where
+  boundsImpl = Bounds3d.constant
 
 xCoordinate :: Point3d (space @ units) -> Qty units
 xCoordinate (Point3d px _ _) = px

@@ -2,7 +2,7 @@ module Tests.Random
   ( length
   , lengthRange
   , point2d
-  , vectorBox3d
+  , vectorBounds3d
   )
 where
 
@@ -15,7 +15,7 @@ import Random qualified
 import Range (Range)
 import Range qualified
 import Units (Meters)
-import VectorBox3d (VectorBox3d (VectorBox3d))
+import VectorBounds3d (VectorBounds3d (VectorBounds3d))
 
 length :: Generator Length
 length = Random.qty (Length.meters -10.0) (Length.meters 10.0)
@@ -26,5 +26,5 @@ lengthRange = Range.generator length
 point2d :: Generator (Point2d (space @ Meters))
 point2d = Random.map2 Point2d length length
 
-vectorBox3d :: Generator (VectorBox3d (space @ Meters))
-vectorBox3d = Random.map3 VectorBox3d lengthRange lengthRange lengthRange
+vectorBounds3d :: Generator (VectorBounds3d (space @ Meters))
+vectorBounds3d = Random.map3 VectorBounds3d lengthRange lengthRange lengthRange

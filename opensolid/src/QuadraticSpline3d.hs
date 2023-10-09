@@ -4,7 +4,7 @@ module QuadraticSpline3d
   )
 where
 
-import BoundingBox3d qualified
+import Bounds3d qualified
 import Curve3d (Curve3d (Curve3d), DegenerateCurve (DegenerateCurve), IsCurve3d (..))
 import OpenSolid
 import Point3d (Point3d (Point3d))
@@ -40,7 +40,7 @@ instance IsCurve3d (QuadraticSpline3d (space @ units)) (space @ units) where
   evaluateImpl spline t = blossom spline t t
 
   segmentBoundsImpl spline (Range tl th) =
-    BoundingBox3d.hull3
+    Bounds3d.hull3
       (blossom spline tl tl)
       (blossom spline tl th)
       (blossom spline th th)
@@ -50,7 +50,7 @@ instance IsCurve3d (QuadraticSpline3d (space @ units)) (space @ units) where
 
   reverseImpl (QuadraticSpline3d p1 p2 p3) = QuadraticSpline3d p3 p2 p1
 
-  boundingBoxImpl (QuadraticSpline3d p1 p2 p3) = BoundingBox3d.hull3 p1 p2 p3
+  boundsImpl (QuadraticSpline3d p1 p2 p3) = Bounds3d.hull3 p1 p2 p3
 
 fromControlPoints ::
   (Tolerance units) =>

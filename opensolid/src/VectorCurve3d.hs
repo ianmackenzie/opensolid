@@ -23,12 +23,12 @@ import Range (Range (Range))
 import Units qualified
 import Vector3d (Vector3d (Vector3d))
 import Vector3d qualified
-import VectorBox3d (VectorBox3d (VectorBox3d))
-import VectorBox3d qualified
+import VectorBounds3d (VectorBounds3d (VectorBounds3d))
+import VectorBounds3d qualified
 
 class (Show curve) => IsVectorCurve3d curve (coordinateSystem :: CoordinateSystem) | curve -> coordinateSystem where
   evaluateAtImpl :: Float -> curve -> Vector3d coordinateSystem
-  segmentBoundsImpl :: Domain -> curve -> VectorBox3d coordinateSystem
+  segmentBoundsImpl :: Domain -> curve -> VectorBounds3d coordinateSystem
   derivativeImpl :: curve -> VectorCurve3d coordinateSystem
 
 data VectorCurve3d (coordinateSystem :: CoordinateSystem) where
@@ -73,7 +73,7 @@ instance IsVectorCurve3d (XYZ (space @ units)) (space @ units) where
     Vector3d (Curve1d.evaluateAt t x) (Curve1d.evaluateAt t y) (Curve1d.evaluateAt t z)
 
   segmentBoundsImpl t (XYZ x y z) =
-    VectorBox3d (Curve1d.segmentBounds t x) (Curve1d.segmentBounds t y) (Curve1d.segmentBounds t z)
+    VectorBounds3d (Curve1d.segmentBounds t x) (Curve1d.segmentBounds t y) (Curve1d.segmentBounds t z)
 
   derivativeImpl (XYZ x y z) =
     xyz (Curve1d.derivative x) (Curve1d.derivative y) (Curve1d.derivative z)
@@ -382,7 +382,7 @@ instance (Units.Squared units1 units2) => IsCurve1d (SquaredMagnitudeOf (space @
     Vector3d.squaredMagnitude (evaluateAt t expression)
 
   segmentBoundsImpl t (SquaredMagnitudeOf expression) =
-    VectorBox3d.squaredMagnitude (segmentBounds t expression)
+    VectorBounds3d.squaredMagnitude (segmentBounds t expression)
 
   derivativeImpl (SquaredMagnitudeOf expression) =
     2.0 * expression <> derivative expression
@@ -455,23 +455,23 @@ evaluateAt t curve =
     QuadraticSpline v1 v2 v3 -> quadraticBlossom v1 v2 v3 t t
     CubicSpline v1 v2 v3 v4 -> cubicBlossom v1 v2 v3 v4 t t t
 
-segmentBounds :: Domain -> VectorCurve3d (space @ units) -> VectorBox3d (space @ units)
+segmentBounds :: Domain -> VectorCurve3d (space @ units) -> VectorBounds3d (space @ units)
 segmentBounds t@(Range tl th) curve =
   case curve of
     VectorCurve3d c -> segmentBoundsImpl t c
-    Zero -> VectorBox3d.constant Vector3d.zero
-    Constant value -> VectorBox3d.constant value
+    Zero -> VectorBounds3d.constant Vector3d.zero
+    Constant value -> VectorBounds3d.constant value
     Line v1 v2 ->
-      VectorBox3d.hull2
+      VectorBounds3d.hull2
         (Vector3d.interpolateFrom v1 v2 tl)
         (Vector3d.interpolateFrom v1 v2 th)
     QuadraticSpline v1 v2 v3 ->
-      VectorBox3d.hull3
+      VectorBounds3d.hull3
         (quadraticBlossom v1 v2 v3 tl tl)
         (quadraticBlossom v1 v2 v3 tl th)
         (quadraticBlossom v1 v2 v3 th th)
     CubicSpline v1 v2 v3 v4 ->
-      VectorBox3d.hull4
+      VectorBounds3d.hull4
         (cubicBlossom v1 v2 v3 v4 tl tl tl)
         (cubicBlossom v1 v2 v3 v4 tl tl th)
         (cubicBlossom v1 v2 v3 v4 tl th th)

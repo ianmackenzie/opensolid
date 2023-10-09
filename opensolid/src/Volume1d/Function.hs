@@ -19,8 +19,8 @@ module Volume1d.Function
 where
 
 import Angle qualified
-import BoundingBox3d (BoundingBox3d)
-import BoundingBox3d qualified
+import Bounds3d (Bounds3d)
+import Bounds3d qualified
 import Direction3d (Direction3d)
 import Direction3d qualified
 import Generic qualified
@@ -35,7 +35,7 @@ import Uvw qualified
 
 class (Show function) => Operations function units | function -> units where
   evaluateAtImpl :: Point3d Uvw.Coordinates -> function -> Qty units
-  segmentBoundsImpl :: BoundingBox3d Uvw.Coordinates -> function -> Range units
+  segmentBoundsImpl :: Bounds3d Uvw.Coordinates -> function -> Range units
   derivativeImpl :: Direction3d Uvw.Space -> function -> Function units
 
 data Function units where
@@ -234,15 +234,15 @@ evaluateAt uvw function =
 pointOn :: Function units -> Point3d Uvw.Coordinates -> Qty units
 pointOn function uvw = evaluateAt uvw function
 
-segmentBounds :: BoundingBox3d Uvw.Coordinates -> Function units -> Range units
+segmentBounds :: Bounds3d Uvw.Coordinates -> Function units -> Range units
 segmentBounds uvw function =
   case function of
     Function f -> segmentBoundsImpl uvw f
     Zero -> Range.constant Qty.zero
     Constant x -> Range.constant x
-    U -> BoundingBox3d.xCoordinate uvw
-    V -> BoundingBox3d.yCoordinate uvw
-    W -> BoundingBox3d.zCoordinate uvw
+    U -> Bounds3d.xCoordinate uvw
+    V -> Bounds3d.yCoordinate uvw
+    W -> Bounds3d.zCoordinate uvw
     Negated f -> negate (segmentBounds uvw f)
     Sum f1 f2 -> segmentBounds uvw f1 + segmentBounds uvw f2
     Difference f1 f2 -> segmentBounds uvw f1 - segmentBounds uvw f2
