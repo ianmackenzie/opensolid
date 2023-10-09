@@ -255,7 +255,10 @@ evaluateAt uv function =
 pointOn :: Function (space @ units) -> Point3d UvwCoordinates -> Vector3d (space @ units)
 pointOn function uv = evaluateAt uv function
 
-segmentBounds :: BoundingBox3d UvwCoordinates -> Function (space @ units) -> VectorBox3d (space @ units)
+segmentBounds ::
+  BoundingBox3d UvwCoordinates ->
+  Function (space @ units) ->
+  VectorBox3d (space @ units)
 segmentBounds uv function =
   case function of
     Function f -> segmentBoundsImpl uv f
@@ -287,8 +290,10 @@ derivative direction function =
     Negated f -> negate (derivative direction f)
     Sum f1 f2 -> derivative direction f1 + derivative direction f2
     Difference f1 f2 -> derivative direction f1 - derivative direction f2
-    Product1d3d f1 f2 -> Volume1d.Function.derivative direction f1 * f2 + f1 * derivative direction f2
-    Product3d1d f1 f2 -> derivative direction f1 * f2 + f1 * Volume1d.Function.derivative direction f2
+    Product1d3d f1 f2 ->
+      Volume1d.Function.derivative direction f1 * f2 + f1 * derivative direction f2
+    Product3d1d f1 f2 ->
+      derivative direction f1 * f2 + f1 * Volume1d.Function.derivative direction f2
     Quotient f1 f2 ->
       let f1' = Units.generalize f1
           f2' = Units.generalize f2
@@ -305,5 +310,9 @@ constant vector = if vector == Vector3d.zero then Zero else Constant vector
 wrap :: (Operations function (space @ units)) => function -> Function (space @ units)
 wrap = Function
 
-xyz :: Volume1d.Function units -> Volume1d.Function units -> Volume1d.Function units -> Function (space @ units)
+xyz ::
+  Volume1d.Function units ->
+  Volume1d.Function units ->
+  Volume1d.Function units ->
+  Function (space @ units)
 xyz = XYZ
