@@ -153,6 +153,7 @@ library
       VectorBox3d
       VectorCurve2d
       VectorCurve3d
+      VectorVolume3d.Function
       Volume
       Volume1d
       Volume1d.Function
