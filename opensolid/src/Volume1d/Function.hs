@@ -1,5 +1,5 @@
 module Volume1d.Function
-  ( Function
+  ( Function (Zero, Constant)
   , Operations (..)
   , evaluateAt
   , pointOn
