@@ -13,12 +13,12 @@ module VectorVolume3d.Function
 where
 
 import BoundingBox3d (BoundingBox3d)
-import CoordinateSystem (UvwCoordinates, UvwSpace)
 import Direction3d (Direction3d)
 import Generic qualified
 import OpenSolid
 import Point3d (Point3d)
 import Units qualified
+import Uvw qualified
 import Vector3d (Vector3d)
 import Vector3d qualified
 import VectorBox3d (VectorBox3d)
@@ -31,9 +31,9 @@ class
   Operations function (coordinateSystem :: CoordinateSystem)
     | function -> coordinateSystem
   where
-  evaluateAtImpl :: Point3d UvwCoordinates -> function -> Vector3d coordinateSystem
-  segmentBoundsImpl :: BoundingBox3d UvwCoordinates -> function -> VectorBox3d coordinateSystem
-  derivativeImpl :: Direction3d UvwSpace -> function -> Function coordinateSystem
+  evaluateAtImpl :: Point3d Uvw.Coordinates -> function -> Vector3d coordinateSystem
+  segmentBoundsImpl :: BoundingBox3d Uvw.Coordinates -> function -> VectorBox3d coordinateSystem
+  derivativeImpl :: Direction3d Uvw.Space -> function -> Function coordinateSystem
 
 data Function (coordinateSystem :: CoordinateSystem) where
   Function ::
@@ -234,7 +234,7 @@ instance
   where
   function / value = function / Volume1d.Function.constant value
 
-evaluateAt :: Point3d UvwCoordinates -> Function (space @ units) -> Vector3d (space @ units)
+evaluateAt :: Point3d Uvw.Coordinates -> Function (space @ units) -> Vector3d (space @ units)
 evaluateAt uv function =
   case function of
     Function f -> evaluateAtImpl uv f
@@ -252,11 +252,11 @@ evaluateAt uv function =
     Product3d1d f1 f2 -> evaluateAt uv f1 * Volume1d.Function.evaluateAt uv f2
     Quotient f1 f2 -> evaluateAt uv f1 / Volume1d.Function.evaluateAt uv f2
 
-pointOn :: Function (space @ units) -> Point3d UvwCoordinates -> Vector3d (space @ units)
+pointOn :: Function (space @ units) -> Point3d Uvw.Coordinates -> Vector3d (space @ units)
 pointOn function uv = evaluateAt uv function
 
 segmentBounds ::
-  BoundingBox3d UvwCoordinates ->
+  BoundingBox3d Uvw.Coordinates ->
   Function (space @ units) ->
   VectorBox3d (space @ units)
 segmentBounds uv function =
@@ -276,7 +276,7 @@ segmentBounds uv function =
     Product3d1d f1 f2 -> segmentBounds uv f1 * Volume1d.Function.segmentBounds uv f2
     Quotient f1 f2 -> segmentBounds uv f1 / Volume1d.Function.segmentBounds uv f2
 
-derivative :: Direction3d UvwSpace -> Function units -> Function units
+derivative :: Direction3d Uvw.Space -> Function units -> Function units
 derivative direction function =
   case function of
     Function f -> derivativeImpl direction f

@@ -21,7 +21,6 @@ where
 import Angle qualified
 import BoundingBox3d (BoundingBox3d)
 import BoundingBox3d qualified
-import CoordinateSystem (UvwCoordinates, UvwSpace)
 import Direction3d (Direction3d)
 import Direction3d qualified
 import Generic qualified
@@ -32,11 +31,12 @@ import Qty qualified
 import Range (Range)
 import Range qualified
 import Units qualified
+import Uvw qualified
 
 class (Show function) => Operations function units | function -> units where
-  evaluateAtImpl :: Point3d UvwCoordinates -> function -> Qty units
-  segmentBoundsImpl :: BoundingBox3d UvwCoordinates -> function -> Range units
-  derivativeImpl :: Direction3d UvwSpace -> function -> Function units
+  evaluateAtImpl :: Point3d Uvw.Coordinates -> function -> Qty units
+  segmentBoundsImpl :: BoundingBox3d Uvw.Coordinates -> function -> Range units
+  derivativeImpl :: Direction3d Uvw.Space -> function -> Function units
 
 data Function units where
   Function ::
@@ -212,7 +212,7 @@ instance
   where
   value / function = constant value / function
 
-evaluateAt :: Point3d UvwCoordinates -> Function units -> Qty units
+evaluateAt :: Point3d Uvw.Coordinates -> Function units -> Qty units
 evaluateAt uvw function =
   case function of
     Function f -> evaluateAtImpl uvw f
@@ -231,10 +231,10 @@ evaluateAt uvw function =
     Sin f -> Angle.sin (evaluateAt uvw f)
     Cos f -> Angle.cos (evaluateAt uvw f)
 
-pointOn :: Function units -> Point3d UvwCoordinates -> Qty units
+pointOn :: Function units -> Point3d Uvw.Coordinates -> Qty units
 pointOn function uvw = evaluateAt uvw function
 
-segmentBounds :: BoundingBox3d UvwCoordinates -> Function units -> Range units
+segmentBounds :: BoundingBox3d Uvw.Coordinates -> Function units -> Range units
 segmentBounds uvw function =
   case function of
     Function f -> segmentBoundsImpl uvw f
@@ -253,7 +253,7 @@ segmentBounds uvw function =
     Sin f -> Range.sin (segmentBounds uvw f)
     Cos f -> Range.cos (segmentBounds uvw f)
 
-derivative :: Direction3d UvwSpace -> Function units -> Function units
+derivative :: Direction3d Uvw.Space -> Function units -> Function units
 derivative direction function =
   case function of
     Function f -> derivativeImpl direction f

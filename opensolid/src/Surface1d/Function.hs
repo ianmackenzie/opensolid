@@ -20,7 +20,6 @@ where
 import Angle qualified
 import BoundingBox2d (BoundingBox2d)
 import BoundingBox2d qualified
-import CoordinateSystem (UvCoordinates, UvSpace)
 import Direction2d (Direction2d)
 import Direction2d qualified
 import Generic qualified
@@ -31,11 +30,12 @@ import Qty qualified
 import Range (Range)
 import Range qualified
 import Units qualified
+import Uv qualified
 
 class (Show function) => Operations function units | function -> units where
-  evaluateAtImpl :: Point2d UvCoordinates -> function -> Qty units
-  segmentBoundsImpl :: BoundingBox2d UvCoordinates -> function -> Range units
-  derivativeImpl :: Direction2d UvSpace -> function -> Function units
+  evaluateAtImpl :: Point2d Uv.Coordinates -> function -> Qty units
+  segmentBoundsImpl :: BoundingBox2d Uv.Coordinates -> function -> Range units
+  derivativeImpl :: Direction2d Uv.Space -> function -> Function units
 
 data Function units where
   Function ::
@@ -209,7 +209,7 @@ instance
   where
   value / function = constant value / function
 
-evaluateAt :: Point2d UvCoordinates -> Function units -> Qty units
+evaluateAt :: Point2d Uv.Coordinates -> Function units -> Qty units
 evaluateAt uv function =
   case function of
     Function f -> evaluateAtImpl uv f
@@ -227,10 +227,10 @@ evaluateAt uv function =
     Sin f -> Angle.sin (evaluateAt uv f)
     Cos f -> Angle.cos (evaluateAt uv f)
 
-pointOn :: Function units -> Point2d UvCoordinates -> Qty units
+pointOn :: Function units -> Point2d Uv.Coordinates -> Qty units
 pointOn function uv = evaluateAt uv function
 
-segmentBounds :: BoundingBox2d UvCoordinates -> Function units -> Range units
+segmentBounds :: BoundingBox2d Uv.Coordinates -> Function units -> Range units
 segmentBounds uv function =
   case function of
     Function f -> segmentBoundsImpl uv f
@@ -248,7 +248,7 @@ segmentBounds uv function =
     Sin f -> Range.sin (segmentBounds uv f)
     Cos f -> Range.cos (segmentBounds uv f)
 
-derivative :: Direction2d UvSpace -> Function units -> Function units
+derivative :: Direction2d Uv.Space -> Function units -> Function units
 derivative direction function =
   case function of
     Function f -> derivativeImpl direction f
