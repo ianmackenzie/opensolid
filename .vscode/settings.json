@@ -9,4 +9,13 @@
   "haskell.manageHLS": "PATH",
   "haskell.formattingProvider": "fourmolu",
   "haskell.plugin.fourmolu.config.external": true,
+  "nix.serverSettings": {
+    "nil": {
+      "formatting": {
+        "command": [
+          "nixpkgs-fmt"
+        ]
+      }
+    }
+  }
 }
