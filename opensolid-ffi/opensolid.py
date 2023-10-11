@@ -8,6 +8,7 @@ elif system == "Linux":
     lib = cdll.LoadLibrary("libopensolid-ffi.so")
 else:
     raise Exception("System " + system + " is not supported")
+lib.opensolid_free.argtypes = [c_void_p]
 class Point2d:
     def __init__(self, ptr:c_void_p ):
         self.ptr = ptr
@@ -26,8 +27,7 @@ class Point2d:
     @property
     def y_coordinate(self) -> float:
         return lib.opensolid_point2d_y_coordinate(self.ptr)
-    lib.opensolid_free.argtypes = [c_void_p]
     def __del__(self):
         lib.opensolid_free(self.ptr)
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "Point2d(" + str(self.x_coordinate) + ", " + str(self.y_coordinate) + ")"

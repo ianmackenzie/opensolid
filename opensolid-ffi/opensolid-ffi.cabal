@@ -100,7 +100,7 @@ executable opensolid-python
   main-is: Main.hs
   build-depends:
       language-python
-  other-modules: Paths_opensolid_ffi
+  other-modules: PythonAST, Paths_opensolid_ffi
   autogen-modules: Paths_opensolid_ffi
   ghc-options:
       -threaded
