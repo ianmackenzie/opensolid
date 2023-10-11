@@ -21,7 +21,12 @@
             (drv: {
               # unfortunatelly callCabal2nix does not extract `build-depends`
               # from `foreign-library`, so they have to be specified here:
-              libraryHaskellDepends = [ final.base final.opensolid final.template-haskell ];
+              libraryHaskellDepends = [
+                final.base
+                final.opensolid
+                final.template-haskell
+                final.language-python
+              ];
               # cabal puts the `foreign-library` in `/lib/ghc-9.4.6`,
               # this script makes the library available in `/lib`
               # and OpenSolidFFI_stub.h in `/include`
@@ -32,14 +37,14 @@
             });
         };
 
-        ghcVerShort = builtins.replaceStrings ["."] [""] ghcVer; # "9.4.6" -> "946"
+        ghcVerShort = builtins.replaceStrings [ "." ] [ "" ] ghcVer; # "9.4.6" -> "946"
         myHaskellPackages = pkgs.haskell.packages."ghc${ghcVerShort}".extend overlay;
 
         # When developing locally, `cabal build opensolid-ffi:flib:opensolid-ffi` puts the
         # foreign library in a deeply nested path. We need this path for
         # `cdll.LoadLibrary` in python bindings.
         ffiVer = myHaskellPackages.opensolid-ffi.version;
-        ghcSystem = builtins.replaceStrings ["darwin"] ["osx"] system; # fix for osx, x86_64-linux should be ok
+        ghcSystem = builtins.replaceStrings [ "darwin" ] [ "osx" ] system; # fix for osx, x86_64-linux should be ok
         localLibraryPath = "dist-newstyle/build/${ghcSystem}/ghc-${ghcVer}/opensolid-ffi-${ffiVer}/f/opensolid-ffi/build/opensolid-ffi";
       in
       {
@@ -68,6 +73,8 @@
             buildInputs = with myHaskellPackages; [
               haskell-language-server
               cabal-install
+              pkgs.nil
+              pkgs.nixpkgs-fmt
             ];
             nativeBuildInputs = with pkgs; [ python3 ];
 
