@@ -1,16 +1,102 @@
-module FFIWrapper (wrapFunction) where
+module Internal
+  ( Class
+  , Function
+  , ffi
+  , api
+  , cls
+  , method
+  , static
+  )
+where
 
+import Api qualified
 import Control.Monad (return, (>>=))
 import CoordinateSystem qualified
 import Data.Char (isUpper, toLower, toUpper)
 import Data.Maybe (fromMaybe)
 import Data.String (String, fromString)
 import Data.Tuple (fst)
-import Foreign (StablePtr, deRefStablePtr, newStablePtr)
+import Foreign (StablePtr, deRefStablePtr, freeStablePtr, newStablePtr)
 import Foreign.Storable (Storable)
 import Language.Haskell.TH qualified as TH
+import List (map2)
 import OpenSolid hiding (fail, fromString, (+), (++), (>>=))
-import Prelude (Traversable (..), concat, foldl, foldr, map, mapM, maybe, unzip, (.))
+import Prelude (Traversable (..), concat, foldl, foldr, map, mapM, maybe, unzip, (.), (<$>))
+
+data Class = Class TH.Name [TH.Name] [Function]
+
+data Function = Function TH.Name TH.Name [String]
+
+cls :: TH.Name -> [TH.Name] -> [Function] -> Class
+cls = Class
+
+method :: TH.Name -> [String] -> Function
+method = Function 'Api.Method
+
+static :: TH.Name -> [String] -> Function
+static = Function 'Api.Static
+
+ffi :: [Class] -> TH.Q [TH.Dec]
+ffi classes = do
+  decl <- concat <$> mapM ffiMod classes
+  functionType <- TH.reifyType 'freeStablePtr
+  return $ TH.ForeignD (TH.ExportF TH.CCall "opensolid_free" 'freeStablePtr functionType) : decl
+ where
+  ffiMod (Class _ _ functions) =
+    concat <$> mapM ffiFunction functions
+
+api :: List Class -> TH.Q TH.Exp
+api classes = do
+  apiCls <- mapM apiClass classes
+  return $ TH.AppE (TH.ConE 'Api.Api) (TH.ListE apiCls)
+
+-- human readable name in the API
+apiName :: TH.Name -> TH.Exp
+apiName name =
+  TH.LitE (TH.StringL (camelToSnake (TH.nameBase name)))
+
+apiClass :: Class -> TH.Q TH.Exp
+apiClass (Class name representationProps functions) = do
+  apiFns <- mapM apiFunction functions
+  return $
+    TH.ConE 'Api.Class
+      `TH.AppE` TH.LitE (TH.StringL (TH.nameBase name))
+      `TH.AppE` TH.ListE (map apiName representationProps)
+      `TH.AppE` TH.ListE apiFns
+
+apiFunction :: Function -> TH.Q TH.Exp
+apiFunction (Function kind fnName argNames) = do
+  fnType <- TH.reifyType fnName
+  (argTypes, returnType) <- ffiFunctionType fnType
+  return $
+    TH.ConE 'Api.Function
+      `TH.AppE` TH.ConE kind
+      `TH.AppE` TH.LitE (TH.StringL (camelToSnake (ffiFunctionName fnName))) -- ffi name
+      `TH.AppE` apiName fnName
+      `TH.AppE` TH.ListE
+        ( map2
+            (\a t -> TH.TupE [Just (TH.LitE (TH.StringL a)), Just (apiType t)])
+            argNames
+            argTypes
+        )
+      `TH.AppE` apiType returnType
+
+apiType :: TH.Type -> TH.Exp
+apiType (TH.AppT (TH.ConT name) typ)
+  | name == ''StablePtr = TH.ConE 'Api.Pointer `TH.AppE` typeNameBase typ
+  | otherwise = apiType (TH.ConT name)
+apiType (TH.ConT name)
+  | name == ''Float = TH.ConE 'Api.Float
+  | name == ''Qty = TH.ConE 'Api.Float
+  | name == ''Angle = TH.ConE 'Api.Float
+apiType _ = TH.ConE 'NotImplemented -- this should break the TH generated code
+
+data NotImplemented = NotImplemented
+
+typeNameBase :: TH.Type -> TH.Exp
+typeNameBase (TH.AppT t _) = typeNameBase t
+typeNameBase (TH.ConT name) = TH.LitE (TH.StringL (TH.nameBase name))
+typeNameBase _ = TH.ConE 'NotImplemented -- this should break the TH generated code
 
 -- Generates wrapper function type from the original function
 -- Returns a list of argument types and return type
@@ -98,8 +184,8 @@ ffiFunctionName fnName =
     ]
 
 -- Wrap the function with an FFI
-wrapFunction :: TH.Name -> TH.Q [TH.Dec]
-wrapFunction fnName = do
+ffiFunction :: Function -> TH.Q [TH.Dec]
+ffiFunction (Function _ fnName _) = do
   fnType <- TH.reifyType fnName
   (argTypes, returnType) <- ffiFunctionType fnType
   argNames <- mapM makeArgNames argTypes

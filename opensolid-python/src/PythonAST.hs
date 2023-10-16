@@ -9,7 +9,7 @@ module PythonAST
   , constructor
   , cType
   , destructor
-  , property
+  , method
   , staticmethod
   )
 where
@@ -98,21 +98,18 @@ cls name representationProps members =
     )
     ()
 
--- A "getter" method that is decorated as a property
-property :: String -> Expr () -> Expr () -> [Statement ()]
-property name ret retType =
-  [ Decorated
-      [Decorator [Ident "property" ()] [] ()]
-      (fn name [("self", Nothing)] ret retType)
-      ()
+-- A method
+method :: String -> [(String, Maybe String)] -> Expr () -> String -> [Statement ()]
+method name params ret retType =
+  [ fn name params ret (var retType)
   ]
 
 -- A method that is attached to a class
-staticmethod :: String -> [(String, Maybe String)] -> Expr () -> Expr () -> [Statement ()]
+staticmethod :: String -> [(String, Maybe String)] -> Expr () -> String -> [Statement ()]
 staticmethod name params ret retType =
   [ Decorated
       [Decorator [Ident "staticmethod" ()] [] ()]
-      (fn name params ret retType)
+      (fn name params ret (var retType))
       ()
   ]
 
@@ -153,7 +150,7 @@ represenation name properties =
         (string (name <> "("))
         ( intersperse
             (string ", ")
-            (fmap (\prop -> call "str" [var ("self." <> prop)]) properties)
+            (fmap (\prop -> call "str" [call ("self." <> prop) []]) properties)
         )
         `plus` string ")"
     )

@@ -1,6 +1,6 @@
 cabal-version: 2.2
 
-name:           opensolid-ffi
+name:           opensolid-python
 version:        0.1.0.0
 synopsis:       Open-source geometric modelling framework
 description:    Please see the README on GitHub at <https://github.com/ianmackenzie/opensolid#readme>
@@ -18,22 +18,16 @@ source-repository head
   type: git
   location: https://github.com/ianmackenzie/opensolid
 
-foreign-library opensolid-ffi
+executable opensolid-python
   default-language: Haskell2010
-  build-depends:
-      base
-    , template-haskell
-    , opensolid
-    , opensolid-api
-  type: native-shared
   hs-source-dirs: src
-  other-modules:
-      OpenSolidFFI
-    , Paths_opensolid_ffi
-  autogen-modules: Paths_opensolid_ffi
-  c-sources: src/wrapper.c
-  install-includes: OpenSolidFFI_stub.h
-  include-dirs: opensolid-ffi-tmp
+  main-is: Main.hs
+  build-depends:
+      language-python
+    , base
+    , opensolid-api
+  other-modules: PythonAST, Paths_opensolid_python
+  autogen-modules: Paths_opensolid_python
   ghc-options:
       -Wall
       -Werror
@@ -48,6 +42,9 @@ foreign-library opensolid-ffi
       -Wpartial-fields
       -Wsafe
       -dcore-lint
+      -threaded
+      -rtsopts
+      -with-rtsopts=-N
   default-extensions:
       NoImplicitPrelude
       OverloadedStrings
@@ -86,5 +83,3 @@ foreign-library opensolid-ffi
       DerivingStrategies
       ViewPatterns
       LambdaCase
-      TemplateHaskell
-      ForeignFunctionInterface

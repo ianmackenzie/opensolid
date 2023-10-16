@@ -1,6 +1,6 @@
 cabal-version: 2.2
 
-name:           opensolid-ffi
+name:           opensolid-api
 version:        0.1.0.0
 synopsis:       Open-source geometric modelling framework
 description:    Please see the README on GitHub at <https://github.com/ianmackenzie/opensolid#readme>
@@ -18,36 +18,22 @@ source-repository head
   type: git
   location: https://github.com/ianmackenzie/opensolid
 
-foreign-library opensolid-ffi
+library
   default-language: Haskell2010
   build-depends:
       base
     , template-haskell
     , opensolid
-    , opensolid-api
-  type: native-shared
   hs-source-dirs: src
+  exposed-modules:
+      OpenSolidAPI
   other-modules:
-      OpenSolidFFI
-    , Paths_opensolid_ffi
-  autogen-modules: Paths_opensolid_ffi
-  c-sources: src/wrapper.c
-  install-includes: OpenSolidFFI_stub.h
-  include-dirs: opensolid-ffi-tmp
-  ghc-options:
-      -Wall
-      -Werror
-      -Wcompat
-      -Widentities
-      -Wincomplete-record-updates
-      -Wincomplete-uni-patterns
-      -Wmissing-signatures
-      -Wmissing-exported-signatures
-      -Wmissing-export-lists
-      -Wmissing-home-modules
-      -Wpartial-fields
-      -Wsafe
-      -dcore-lint
+      Internal
+    , Api
+    , All
+    , OpenSolidAPI.Point2d
+    , Paths_opensolid_api
+  autogen-modules: Paths_opensolid_api
   default-extensions:
       NoImplicitPrelude
       OverloadedStrings
@@ -87,4 +73,17 @@ foreign-library opensolid-ffi
       ViewPatterns
       LambdaCase
       TemplateHaskell
-      ForeignFunctionInterface
+  ghc-options:
+      -Wall
+      -Werror
+      -Wcompat
+      -Widentities
+      -Wincomplete-record-updates
+      -Wincomplete-uni-patterns
+      -Wmissing-signatures
+      -Wmissing-exported-signatures
+      -Wmissing-export-lists
+      -Wmissing-home-modules
+      -Wpartial-fields
+      -Wsafe
+      -dcore-lint
