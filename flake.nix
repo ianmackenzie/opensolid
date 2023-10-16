@@ -80,8 +80,9 @@
               pkgs.nil
               pkgs.nixpkgs-fmt
             ];
-            nativeBuildInputs = with pkgs; [ python3 ];
-
+            nativeBuildInputs = with pkgs; [
+              (python3.withPackages (ps: with ps; [ mypy ]))
+            ];
             # Help python find the opensolid-ffi library
             LD_LIBRARY_PATH = "${localLibraryPath}";
             shellHook = pkgs.lib.optionalString pkgs.stdenv.isDarwin ''

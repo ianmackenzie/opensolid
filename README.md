@@ -11,6 +11,7 @@ Then, run `nix develop` or `nix-shell`. This will give you development environme
 1. run `cabal build opensolid-ffi` to compile the foreign library
 2. run `cabal run opensolid-python -v0 > opensolid-python/opensolid.py` to generate the python bindings
 3. then you can run `python opensolid-python/test.py` to test the bindings
+4. run `mypy opensolid-python` to validate the typings
 
 `nix-shell` automatically sets `LD_LIBRARY_PATH`, so that python knows where to find the
 library during the local development.

@@ -4,6 +4,7 @@
 	"recommendations": [
 		"haskell.haskell",
 		"justusadam.language-haskell",
-		"jnoortheen.nix-ide"
+		"jnoortheen.nix-ide",
+		"ms-python.python"
 	]
 }
