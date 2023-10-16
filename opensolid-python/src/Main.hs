@@ -1,5 +1,6 @@
 module Main (main) where
 
+import Data.Bifunctor (first)
 import Data.String (String, fromString)
 import Language.Python.Common hiding (Class, Float, (<>))
 import OpenSolidAPI
@@ -17,10 +18,12 @@ import Prelude
   , concatMap
   , fromInteger
   , map
+  , otherwise
   , putStrLn
   , uncurry
   , (++)
   , (<>)
+  , (==)
   )
 
 -- Define the imports and load the ffi lib
@@ -75,22 +78,29 @@ apiClass (Class name representationProps functions) =
 apiFunction :: Function -> [Statement ()]
 apiFunction (Function kind ffiName name arguments retType) =
   let libName = "lib." <> ffiName
-   in ( PY.cType libName (map (\(_, typ) -> cType typ) arguments) (cType retType)
+      pyName = safeName name
+      pyArgs = map (first safeName) arguments
+   in ( PY.cType libName (map (\(_, typ) -> cType typ) pyArgs) (cType retType)
           ++ case kind of
             Static ->
               PY.staticmethod
-                name
-                (map (\(arg, typ) -> (arg, Just (pyType typ))) arguments)
-                (fromPtr retType (PY.call libName (map (uncurry toPtr) arguments)))
+                pyName
+                (map (\(arg, typ) -> (arg, Just (pyType typ))) pyArgs)
+                (fromPtr retType (PY.call libName (map (uncurry toPtr) pyArgs)))
                 (pyType retType)
             Method ->
-              let argsWithoutLast = removeLast arguments
+              let argsWithoutLast = removeLast pyArgs
                in PY.method
-                    name
+                    pyName
                     (("self", Nothing) : map (\(arg, typ) -> (arg, Just (pyType typ))) argsWithoutLast)
                     (fromPtr retType (PY.call libName (map (uncurry toPtr) argsWithoutLast ++ [PY.var "self.ptr"])))
                     (pyType retType)
       )
+
+safeName :: String -> String
+safeName name
+  | name == "from" = name <> "_"
+  | otherwise = name
 
 removeLast :: [a] -> [a]
 removeLast [] = []

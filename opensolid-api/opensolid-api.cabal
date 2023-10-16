@@ -31,7 +31,11 @@ library
       Internal
     , Api
     , All
+    , OpenSolidAPI.Axis2d
+    , OpenSolidAPI.Direction2d
+    , OpenSolidAPI.Frame2d
     , OpenSolidAPI.Point2d
+    , OpenSolidAPI.Vector2d
     , Paths_opensolid_api
   autogen-modules: Paths_opensolid_api
   default-extensions:
