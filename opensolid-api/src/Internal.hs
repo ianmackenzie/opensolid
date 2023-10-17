@@ -38,12 +38,17 @@ static = Function 'Api.Static
 
 ffi :: List Class -> TH.Q (List TH.Dec)
 ffi classes = do
-  decl <- concat <$> mapM ffiMod classes
-  functionType <- TH.reifyType 'freeStablePtr
-  return $ TH.ForeignD (TH.ExportF TH.CCall "opensolid_free" 'freeStablePtr functionType) : decl
+  functionDecls <- concat <$> mapM ffiClass classes
+  freeFunctionDecl <- freeFunctionFfi 'freeStablePtr
+  return $ freeFunctionDecl : functionDecls
  where
-  ffiMod (Class _ _ functions) =
+  ffiClass (Class _ _ functions) =
     concat <$> mapM ffiFunction functions
+
+freeFunctionFfi :: TH.Name -> TH.Q TH.Dec
+freeFunctionFfi name = do
+  freeFunctionType <- TH.reifyType name
+  return $ TH.ForeignD (TH.ExportF TH.CCall "opensolid_free" name freeFunctionType)
 
 api :: List Class -> TH.Q TH.Exp
 api classes = do
