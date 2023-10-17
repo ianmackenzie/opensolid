@@ -309,11 +309,6 @@ class Vector2d:
     @staticmethod
     def xy(vx:float , vy:float ) -> Vector2d:
         return Vector2d(lib.opensolid_vector2d_xy(vx, vy))
-    lib.opensolid_vector2d_from.argtypes = [c_void_p, c_void_p]
-    lib.opensolid_vector2d_from.restype = c_void_p
-    @staticmethod
-    def from_(p1:Point2d , p2:Point2d ) -> Vector2d:
-        return Vector2d(lib.opensolid_vector2d_from(p1.ptr, p2.ptr))
     lib.opensolid_vector2d_meters.argtypes = [c_double, c_double]
     lib.opensolid_vector2d_meters.restype = c_void_p
     @staticmethod

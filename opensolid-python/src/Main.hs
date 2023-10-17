@@ -1,6 +1,5 @@
 module Main (main) where
 
-import Data.Bifunctor (first)
 import Data.String (String, fromString)
 import Language.Python.Common hiding (Class, Float, (<>))
 import OpenSolid (List)
@@ -19,12 +18,10 @@ import Prelude
   , concatMap
   , fromInteger
   , map
-  , otherwise
   , putStrLn
   , uncurry
   , (++)
   , (<>)
-  , (==)
   )
 
 -- Define the imports and load the ffi lib
@@ -77,10 +74,8 @@ apiClass (Class name representationProps functions) =
   PY.cls name representationProps (concatMap apiFunction functions)
 
 apiFunction :: Function -> List (Statement ())
-apiFunction (Function kind ffiName name arguments retType) =
+apiFunction (Function kind ffiName pyName pyArgs retType) =
   let libName = "lib." <> ffiName
-      pyName = safeName name
-      pyArgs = map (first safeName) arguments
    in ( PY.cType libName (map (\(_, typ) -> cType typ) pyArgs) (cType retType)
           ++ case kind of
             Static ->
@@ -97,11 +92,6 @@ apiFunction (Function kind ffiName name arguments retType) =
                     (fromPtr retType (PY.call libName (map (uncurry toPtr) argsWithoutLast ++ [PY.var "self.ptr"])))
                     (pyType retType)
       )
-
-safeName :: String -> String
-safeName name
-  | name == "from" = name <> "_"
-  | otherwise = name
 
 removeLast :: List a -> List a
 removeLast [] = []

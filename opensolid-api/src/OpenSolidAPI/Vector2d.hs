@@ -13,8 +13,10 @@ vector2d =
     , static 'Vector2d.x ["vx"]
     , static 'Vector2d.y ["vy"]
     , static 'Vector2d.xy ["vx", "vy"]
-    , static 'Vector2d.from ["p1", "p2"]
-    , static 'Vector2d.meters ["vx", "vy"]
+    , -- TODO: p2 - p1, or p1.vector_to(p2)
+      -- from is a keyword in Python
+      -- , static 'Vector2d.from ["p1", "p2"]
+      static 'Vector2d.meters ["vx", "vy"]
     , static 'Vector2d.squareMeters ["vx", "vy"]
     , static 'Vector2d.polar ["r", "theta"]
     , method 'Vector2d.xComponent ["vector"]
