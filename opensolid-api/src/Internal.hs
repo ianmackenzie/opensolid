@@ -23,20 +23,20 @@ import List (map2)
 import OpenSolid hiding (fail, fromString, (+), (++), (>>=))
 import Prelude (Traversable (..), concat, foldl, foldr, map, mapM, maybe, unzip, (.), (<$>))
 
-data Class = Class TH.Name [TH.Name] [Function]
+data Class = Class TH.Name (List TH.Name) (List Function)
 
-data Function = Function TH.Name TH.Name [String]
+data Function = Function TH.Name TH.Name (List String)
 
-cls :: TH.Name -> [TH.Name] -> [Function] -> Class
+cls :: TH.Name -> List TH.Name -> List Function -> Class
 cls = Class
 
-method :: TH.Name -> [String] -> Function
+method :: TH.Name -> List String -> Function
 method = Function 'Api.Method
 
-static :: TH.Name -> [String] -> Function
+static :: TH.Name -> List String -> Function
 static = Function 'Api.Static
 
-ffi :: [Class] -> TH.Q [TH.Dec]
+ffi :: List Class -> TH.Q (List TH.Dec)
 ffi classes = do
   decl <- concat <$> mapM ffiMod classes
   functionType <- TH.reifyType 'freeStablePtr
@@ -100,7 +100,7 @@ typeNameBase _ = TH.ConE 'NotImplemented -- this should break the TH generated c
 
 -- Generates wrapper function type from the original function
 -- Returns a list of argument types and return type
-ffiFunctionType :: TH.Type -> TH.Q ([TH.Type], TH.Type)
+ffiFunctionType :: TH.Type -> TH.Q (List TH.Type, TH.Type)
 ffiFunctionType (TH.ForallT _ _ innerType) = ffiFunctionType innerType
 ffiFunctionType (TH.AppT (TH.AppT TH.ArrowT arg) rest) = do
   (args, returnType) <- ffiFunctionType rest
@@ -184,7 +184,7 @@ ffiFunctionName fnName =
     ]
 
 -- Wrap the function with an FFI
-ffiFunction :: Function -> TH.Q [TH.Dec]
+ffiFunction :: Function -> TH.Q (List TH.Dec)
 ffiFunction (Function _ fnName _) = do
   fnType <- TH.reifyType fnName
   (argTypes, returnType) <- ffiFunctionType fnType

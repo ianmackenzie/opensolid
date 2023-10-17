@@ -3,6 +3,7 @@ module Main (main) where
 import Data.Bifunctor (first)
 import Data.String (String, fromString)
 import Language.Python.Common hiding (Class, Float, (<>))
+import OpenSolid (List)
 import OpenSolidAPI
   ( Api (..)
   , Class (..)
@@ -27,7 +28,7 @@ import Prelude
   )
 
 -- Define the imports and load the ffi lib
-setup :: [Statement ()]
+setup :: List (Statement ())
 setup =
   [ FromImport
       (ImportRelative 0 (Just [Ident "__future__" ()]) ())
@@ -67,7 +68,7 @@ setup =
     PY.set "lib.opensolid_free.argtypes" (List [PY.var "c_void_p"] ())
   ]
 
-api :: Api -> [Statement ()]
+api :: Api -> List (Statement ())
 api (Api classes) =
   map apiClass classes
 
@@ -75,7 +76,7 @@ apiClass :: Class -> Statement ()
 apiClass (Class name representationProps functions) =
   PY.cls name representationProps (concatMap apiFunction functions)
 
-apiFunction :: Function -> [Statement ()]
+apiFunction :: Function -> List (Statement ())
 apiFunction (Function kind ffiName name arguments retType) =
   let libName = "lib." <> ffiName
       pyName = safeName name
@@ -102,7 +103,7 @@ safeName name
   | name == "from" = name <> "_"
   | otherwise = name
 
-removeLast :: [a] -> [a]
+removeLast :: List a -> List a
 removeLast [] = []
 removeLast [_] = []
 removeLast (h : t) = h : removeLast t

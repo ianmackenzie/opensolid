@@ -14,8 +14,9 @@ import Api
 import Data.String (fromString)
 import Internal qualified
 import Language.Haskell.TH qualified as TH
+import OpenSolid (List)
 
-genreateForeignFunctions :: TH.Q [TH.Dec]
+genreateForeignFunctions :: TH.Q (List TH.Dec)
 genreateForeignFunctions = Internal.ffi classes
 
 openSolidAPI :: Api

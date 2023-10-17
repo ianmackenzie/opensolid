@@ -1,17 +1,18 @@
 module Api (Api (..), Class (..), Function (..), FunctionKind (..), ValueType (..)) where
 
 import Data.String (String)
+import OpenSolid (List)
 
-newtype Api = Api [Class]
+newtype Api = Api (List Class)
 
-data Class = Class String [String] [Function]
+data Class = Class String (List String) (List Function)
 
 data Function
   = Function
       FunctionKind
       String -- ffi name
       String -- human readable name
-      [(String, ValueType)] -- list of arguments
+      (List (String, ValueType)) -- arguments
       ValueType -- return type
 
 data FunctionKind = Method | Static

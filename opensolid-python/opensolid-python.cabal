@@ -25,6 +25,7 @@ executable opensolid-python
   build-depends:
       language-python
     , base
+    , opensolid
     , opensolid-api
   other-modules: PythonAST, Paths_opensolid_python
   autogen-modules: Paths_opensolid_python
