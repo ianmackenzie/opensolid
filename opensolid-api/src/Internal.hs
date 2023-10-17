@@ -94,6 +94,7 @@ apiType (TH.ConT name)
   | name == ''Float = TH.ConE 'Api.Float
   | name == ''Qty = TH.ConE 'Api.Float
   | name == ''Angle = TH.ConE 'Api.Float
+  | name == ''Bool = TH.ConE 'Api.Boolean
 apiType _ = TH.ConE 'NotImplemented -- this should break the TH generated code
 
 data NotImplemented = NotImplemented

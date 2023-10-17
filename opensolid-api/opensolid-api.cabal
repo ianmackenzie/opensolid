@@ -32,9 +32,11 @@ library
     , Api
     , All
     , OpenSolidAPI.Axis2d
+    , OpenSolidAPI.Bounds2d
     , OpenSolidAPI.Direction2d
     , OpenSolidAPI.Frame2d
     , OpenSolidAPI.Point2d
+    , OpenSolidAPI.Range
     , OpenSolidAPI.Vector2d
     , Paths_opensolid_api
   autogen-modules: Paths_opensolid_api

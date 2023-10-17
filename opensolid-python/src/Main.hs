@@ -115,12 +115,14 @@ cType typ =
   case typ of
     Pointer _ -> "c_void_p"
     Float -> "c_double"
+    Boolean -> "c_bool"
 
 pyType :: ValueType -> String
 pyType typ =
   case typ of
     Pointer name -> name
     Float -> "float"
+    Boolean -> "bool"
 
 main :: IO ()
 main = do

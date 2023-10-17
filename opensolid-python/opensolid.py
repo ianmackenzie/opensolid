@@ -40,6 +40,55 @@ class Axis2d:
         lib.opensolid_free(self.ptr)
     def __repr__(self) -> str:
         return "Axis2d(" + str(self.origin_point()) + ", " + str(self.direction()) + ")"
+class Bounds2d:
+    def __init__(self, ptr:c_void_p ):
+        self.ptr = ptr
+    lib.opensolid_bounds2d_x_coordinate.argtypes = [c_void_p]
+    lib.opensolid_bounds2d_x_coordinate.restype = c_void_p
+    def x_coordinate(self) -> Range:
+        return Range(lib.opensolid_bounds2d_x_coordinate(self.ptr))
+    lib.opensolid_bounds2d_y_coordinate.argtypes = [c_void_p]
+    lib.opensolid_bounds2d_y_coordinate.restype = c_void_p
+    def y_coordinate(self) -> Range:
+        return Range(lib.opensolid_bounds2d_y_coordinate(self.ptr))
+    lib.opensolid_bounds2d_constant.argtypes = [c_void_p]
+    lib.opensolid_bounds2d_constant.restype = c_void_p
+    @staticmethod
+    def constant(point:Point2d ) -> Bounds2d:
+        return Bounds2d(lib.opensolid_bounds2d_constant(point.ptr))
+    lib.opensolid_bounds2d_hull2.argtypes = [c_void_p, c_void_p]
+    lib.opensolid_bounds2d_hull2.restype = c_void_p
+    @staticmethod
+    def hull2(p1:Point2d , p2:Point2d ) -> Bounds2d:
+        return Bounds2d(lib.opensolid_bounds2d_hull2(p1.ptr, p2.ptr))
+    lib.opensolid_bounds2d_hull3.argtypes = [c_void_p, c_void_p, c_void_p]
+    lib.opensolid_bounds2d_hull3.restype = c_void_p
+    @staticmethod
+    def hull3(p1:Point2d , p2:Point2d , p3:Point2d ) -> Bounds2d:
+        return Bounds2d(lib.opensolid_bounds2d_hull3(p1.ptr, p2.ptr, p3.ptr))
+    lib.opensolid_bounds2d_hull4.argtypes = [c_void_p, c_void_p, c_void_p, c_void_p]
+    lib.opensolid_bounds2d_hull4.restype = c_void_p
+    @staticmethod
+    def hull4(p1:Point2d , p2:Point2d , p3:Point2d , p4:Point2d ) -> Bounds2d:
+        return Bounds2d(lib.opensolid_bounds2d_hull4(p1.ptr, p2.ptr, p3.ptr, p4.ptr))
+    lib.opensolid_bounds2d_aggregate2.argtypes = [c_void_p, c_void_p]
+    lib.opensolid_bounds2d_aggregate2.restype = c_void_p
+    @staticmethod
+    def aggregate2(bounds1:Bounds2d , bounds2:Bounds2d ) -> Bounds2d:
+        return Bounds2d(lib.opensolid_bounds2d_aggregate2(bounds1.ptr, bounds2.ptr))
+    lib.opensolid_bounds2d_intersects.argtypes = [c_void_p, c_void_p]
+    lib.opensolid_bounds2d_intersects.restype = c_bool
+    def intersects(self, bounds1:Bounds2d ) -> bool:
+        return lib.opensolid_bounds2d_intersects(bounds1.ptr, self.ptr)
+    lib.opensolid_bounds2d_interpolate.argtypes = [c_void_p, c_double, c_double]
+    lib.opensolid_bounds2d_interpolate.restype = c_void_p
+    @staticmethod
+    def interpolate(bounds:Bounds2d , u:float , v:float ) -> Point2d:
+        return Point2d(lib.opensolid_bounds2d_interpolate(bounds.ptr, u, v))
+    def __del__(self):
+        lib.opensolid_free(self.ptr)
+    def __repr__(self) -> str:
+        return "Bounds2d(" + str(self.x_coordinate()) + ", " + str(self.y_coordinate()) + ")"
 class Direction2d:
     def __init__(self, ptr:c_void_p ):
         self.ptr = ptr
@@ -286,6 +335,130 @@ class Point2d:
         lib.opensolid_free(self.ptr)
     def __repr__(self) -> str:
         return "Point2d(" + str(self.x_coordinate()) + ", " + str(self.y_coordinate()) + ")"
+class Range:
+    def __init__(self, ptr:c_void_p ):
+        self.ptr = ptr
+    lib.opensolid_range_unsafe.argtypes = [c_double, c_double]
+    lib.opensolid_range_unsafe.restype = c_void_p
+    @staticmethod
+    def unsafe(min:float , max:float ) -> Range:
+        return Range(lib.opensolid_range_unsafe(min, max))
+    lib.opensolid_range_constant.argtypes = [c_double]
+    lib.opensolid_range_constant.restype = c_void_p
+    @staticmethod
+    def constant(value:float ) -> Range:
+        return Range(lib.opensolid_range_constant(value))
+    lib.opensolid_range_hull3.argtypes = [c_double, c_double, c_double]
+    lib.opensolid_range_hull3.restype = c_void_p
+    @staticmethod
+    def hull3(a:float , b:float , c:float ) -> Range:
+        return Range(lib.opensolid_range_hull3(a, b, c))
+    lib.opensolid_range_min_value.argtypes = [c_void_p]
+    lib.opensolid_range_min_value.restype = c_double
+    def min_value(self) -> float:
+        return lib.opensolid_range_min_value(self.ptr)
+    lib.opensolid_range_max_value.argtypes = [c_void_p]
+    lib.opensolid_range_max_value.restype = c_double
+    def max_value(self) -> float:
+        return lib.opensolid_range_max_value(self.ptr)
+    lib.opensolid_range_midpoint.argtypes = [c_void_p]
+    lib.opensolid_range_midpoint.restype = c_double
+    def midpoint(self) -> float:
+        return lib.opensolid_range_midpoint(self.ptr)
+    lib.opensolid_range_width.argtypes = [c_void_p]
+    lib.opensolid_range_width.restype = c_double
+    def width(self) -> float:
+        return lib.opensolid_range_width(self.ptr)
+    lib.opensolid_range_includes.argtypes = [c_double, c_void_p]
+    lib.opensolid_range_includes.restype = c_bool
+    def includes(self, value:float ) -> bool:
+        return lib.opensolid_range_includes(value, self.ptr)
+    lib.opensolid_range_contains.argtypes = [c_void_p, c_void_p]
+    lib.opensolid_range_contains.restype = c_bool
+    def contains(self, range2:Range ) -> bool:
+        return lib.opensolid_range_contains(range2.ptr, self.ptr)
+    lib.opensolid_range_is_contained_in.argtypes = [c_void_p, c_void_p]
+    lib.opensolid_range_is_contained_in.restype = c_bool
+    def is_contained_in(self, range1:Range ) -> bool:
+        return lib.opensolid_range_is_contained_in(range1.ptr, self.ptr)
+    lib.opensolid_range_is_atomic.argtypes = [c_void_p]
+    lib.opensolid_range_is_atomic.restype = c_bool
+    def is_atomic(self) -> bool:
+        return lib.opensolid_range_is_atomic(self.ptr)
+    lib.opensolid_range_abs.argtypes = [c_void_p]
+    lib.opensolid_range_abs.restype = c_void_p
+    def abs(self) -> Range:
+        return Range(lib.opensolid_range_abs(self.ptr))
+    lib.opensolid_range_hypot2.argtypes = [c_void_p, c_void_p]
+    lib.opensolid_range_hypot2.restype = c_void_p
+    @staticmethod
+    def hypot2(range1:Range , range2:Range ) -> Range:
+        return Range(lib.opensolid_range_hypot2(range1.ptr, range2.ptr))
+    lib.opensolid_range_hypot3.argtypes = [c_void_p, c_void_p, c_void_p]
+    lib.opensolid_range_hypot3.restype = c_void_p
+    @staticmethod
+    def hypot3(range1:Range , range2:Range , range3:Range ) -> Range:
+        return Range(lib.opensolid_range_hypot3(range1.ptr, range2.ptr, range3.ptr))
+    lib.opensolid_range_aggregate2.argtypes = [c_void_p, c_void_p]
+    lib.opensolid_range_aggregate2.restype = c_void_p
+    @staticmethod
+    def aggregate2(range1:Range , range2:Range ) -> Range:
+        return Range(lib.opensolid_range_aggregate2(range1.ptr, range2.ptr))
+    lib.opensolid_range_aggregate3.argtypes = [c_void_p, c_void_p, c_void_p]
+    lib.opensolid_range_aggregate3.restype = c_void_p
+    @staticmethod
+    def aggregate3(range1:Range , range2:Range , range3:Range ) -> Range:
+        return Range(lib.opensolid_range_aggregate3(range1.ptr, range2.ptr, range3.ptr))
+    lib.opensolid_range_min.argtypes = [c_void_p, c_void_p]
+    lib.opensolid_range_min.restype = c_void_p
+    @staticmethod
+    def min(range1:Range , range2:Range ) -> Range:
+        return Range(lib.opensolid_range_min(range1.ptr, range2.ptr))
+    lib.opensolid_range_max.argtypes = [c_void_p, c_void_p]
+    lib.opensolid_range_max.restype = c_void_p
+    @staticmethod
+    def max(range1:Range , range2:Range ) -> Range:
+        return Range(lib.opensolid_range_max(range1.ptr, range2.ptr))
+    lib.opensolid_range_smaller.argtypes = [c_void_p, c_void_p]
+    lib.opensolid_range_smaller.restype = c_void_p
+    @staticmethod
+    def smaller(first:Range , second:Range ) -> Range:
+        return Range(lib.opensolid_range_smaller(first.ptr, second.ptr))
+    lib.opensolid_range_larger.argtypes = [c_void_p, c_void_p]
+    lib.opensolid_range_larger.restype = c_void_p
+    @staticmethod
+    def larger(first:Range , second:Range ) -> Range:
+        return Range(lib.opensolid_range_larger(first.ptr, second.ptr))
+    lib.opensolid_range_sin.argtypes = [c_void_p]
+    lib.opensolid_range_sin.restype = c_void_p
+    def sin(self) -> Range:
+        return Range(lib.opensolid_range_sin(self.ptr))
+    lib.opensolid_range_cos.argtypes = [c_void_p]
+    lib.opensolid_range_cos.restype = c_void_p
+    def cos(self) -> Range:
+        return Range(lib.opensolid_range_cos(self.ptr))
+    lib.opensolid_range_interpolate.argtypes = [c_void_p, c_double]
+    lib.opensolid_range_interpolate.restype = c_double
+    @staticmethod
+    def interpolate(range:Range , t:float ) -> float:
+        return lib.opensolid_range_interpolate(range.ptr, t)
+    lib.opensolid_range_interpolation_parameter.argtypes = [c_void_p, c_double]
+    lib.opensolid_range_interpolation_parameter.restype = c_double
+    @staticmethod
+    def interpolation_parameter(range:Range , value:float ) -> float:
+        return lib.opensolid_range_interpolation_parameter(range.ptr, value)
+    lib.opensolid_range_resolution.argtypes = [c_void_p]
+    lib.opensolid_range_resolution.restype = c_double
+    def resolution(self) -> float:
+        return lib.opensolid_range_resolution(self.ptr)
+    lib.opensolid_range_intersects.argtypes = [c_void_p, c_void_p]
+    lib.opensolid_range_intersects.restype = c_bool
+    def intersects(self, range1:Range ) -> bool:
+        return lib.opensolid_range_intersects(range1.ptr, self.ptr)
+    def __del__(self):
+        lib.opensolid_free(self.ptr)
+    def __repr__(self) -> str:
+        return "Range(" + str(self.min_value()) + ", " + str(self.max_value()) + ")"
 class Vector2d:
     def __init__(self, ptr:c_void_p ):
         self.ptr = ptr
