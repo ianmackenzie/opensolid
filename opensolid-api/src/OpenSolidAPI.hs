@@ -5,7 +5,7 @@ module OpenSolidAPI
   , Class (..)
   , Function (..)
   , FunctionKind (..)
-  , Type (..)
+  , ValueType (..)
   )
 where
 

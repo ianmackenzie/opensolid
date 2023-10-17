@@ -8,7 +8,7 @@ import OpenSolidAPI
   , Class (..)
   , Function (..)
   , FunctionKind (..)
-  , Type (..)
+  , ValueType (..)
   , openSolidAPI
   )
 import PythonAST qualified as PY
@@ -107,25 +107,25 @@ removeLast [] = []
 removeLast [_] = []
 removeLast (h : t) = h : removeLast t
 
-fromPtr :: Type -> Expr () -> Expr ()
+fromPtr :: ValueType -> Expr () -> Expr ()
 fromPtr typ exp =
   case typ of
     Pointer p -> PY.call p [exp]
     _ -> exp
 
-toPtr :: String -> Type -> Expr ()
+toPtr :: String -> ValueType -> Expr ()
 toPtr var typ =
   case typ of
     Pointer _ -> Dot (PY.var var) (Ident "ptr" ()) ()
     _ -> PY.var var
 
-cType :: Type -> String
+cType :: ValueType -> String
 cType typ =
   case typ of
     Pointer _ -> "c_void_p"
     Float -> "c_double"
 
-pyType :: Type -> String
+pyType :: ValueType -> String
 pyType typ =
   case typ of
     Pointer name -> name

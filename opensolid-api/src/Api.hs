@@ -1,4 +1,4 @@
-module Api (Api (..), Class (..), Function (..), FunctionKind (..), Type (..)) where
+module Api (Api (..), Class (..), Function (..), FunctionKind (..), ValueType (..)) where
 
 import Data.String (String)
 
@@ -11,9 +11,9 @@ data Function
       FunctionKind
       String -- ffi name
       String -- human readable name
-      [(String, Type)] -- list of arguments
-      Type -- return type
+      [(String, ValueType)] -- list of arguments
+      ValueType -- return type
 
 data FunctionKind = Method | Static
 
-data Type = Pointer String | Float
+data ValueType = Pointer String | Float
