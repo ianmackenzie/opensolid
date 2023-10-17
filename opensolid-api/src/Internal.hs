@@ -90,6 +90,7 @@ apiFunction (Function kind fnName argNames) = do
 apiType :: TH.Type -> TH.Exp
 apiType (TH.AppT (TH.ConT name) typ)
   | name == ''StablePtr = TH.ConE 'Api.Pointer `TH.AppE` typeNameBase typ
+  | name == ''Maybe = TH.ConE 'Api.Maybe `TH.AppE` apiType typ
   | otherwise = apiType (TH.ConT name)
 apiType (TH.ConT name)
   | name == ''Float = TH.ConE 'Api.Float
@@ -143,6 +144,9 @@ fixupCoordinateSystem typ = typ
 -- Modify types for FFI
 -- We wrap a type in a StablePtr if it doesn't implement Storable
 ffiType :: TH.Type -> TH.Q TH.Type
+ffiType (TH.AppT (TH.ConT containerTyp) fixedTyp) | containerTyp == ''Maybe = do
+  typ <- ffiType fixedTyp
+  return $ TH.AppT (TH.ConT ''Maybe) typ
 ffiType typ = do
   let fixedTyp = typ |> fixupUnits |> fixupCoordinateSystem
   instances <- TH.reifyInstances ''Storable [fixedTyp]
@@ -165,9 +169,10 @@ fromStablePtr (argName, Nothing) = (TH.VarE argName, Nothing)
 
 -- Convert an expression to a StablePtr
 toStablePtrOrReturn :: TH.Type -> TH.Exp -> TH.Exp
-toStablePtrOrReturn argType expr
-  | isPointer argType = TH.AppE (TH.VarE 'newStablePtr) expr
-  | otherwise = TH.AppE (TH.VarE 'return) expr
+toStablePtrOrReturn (TH.AppT (TH.ConT name) (TH.AppT (TH.ConT name2) _))
+  | name == ''Maybe && name2 == ''StablePtr = \exp -> TH.VarE '(<$>) `TH.AppE` TH.VarE 'newStablePtr `TH.AppE` exp
+toStablePtrOrReturn (TH.AppT (TH.ConT name) _) | name == ''StablePtr = TH.AppE (TH.VarE 'newStablePtr)
+toStablePtrOrReturn _ = TH.AppE (TH.VarE 'return)
 
 camelToSnake :: String -> String
 camelToSnake [] = []

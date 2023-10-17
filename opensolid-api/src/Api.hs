@@ -17,4 +17,4 @@ data Function
 
 data FunctionKind = Method | Static
 
-data ValueType = Pointer String | Float | Boolean
+data ValueType = Pointer String | Float | Boolean | Maybe ValueType
