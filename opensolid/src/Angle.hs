@@ -76,7 +76,7 @@ halfTurn :: Angle
 halfTurn = radians Float.pi
 
 quarterTurn :: Angle
-quarterTurn = turns (0.5 * Float.pi)
+quarterTurn = radians (0.5 * Float.pi)
 
 turns :: Float -> Angle
 turns = (* fullTurn)
