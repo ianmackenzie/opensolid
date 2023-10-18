@@ -118,7 +118,7 @@ apiType (TH.AppT (TH.ConT containerTyp) nestedTyp) | containerTyp == ''Maybe = d
 apiType typ = do
   isPtr <- isPointer typ
   if isPtr
-    then return $ TH.ConE 'Api.Pointer `TH.AppE` typeNameBase typ
+    then TH.AppE (TH.ConE 'Api.Pointer) <$> typeNameBase typ
     else case typ of
       (TH.AppT (TH.ConT name) _)
         | name == ''Qty -> return $ TH.ConE 'Api.Float
@@ -126,14 +126,12 @@ apiType typ = do
         | name == ''Float -> return $ TH.ConE 'Api.Float
         | name == ''Angle -> return $ TH.ConE 'Api.Float
         | name == ''Bool -> return $ TH.ConE 'Api.Boolean
-      _ -> error ("Unknown type" <> show typ)
+      _ -> error ("Unknown type: " <> show typ)
 
-data NotImplemented
-
-typeNameBase :: TH.Type -> TH.Exp
+typeNameBase :: TH.Type -> TH.Q TH.Exp
 typeNameBase (TH.AppT t _) = typeNameBase t
-typeNameBase (TH.ConT name) = TH.LitE (TH.StringL (TH.nameBase name))
-typeNameBase _ = TH.ConE ''NotImplemented -- this should break the TH generated code
+typeNameBase (TH.ConT name) = return $ TH.LitE (TH.StringL (TH.nameBase name))
+typeNameBase typ = error ("Unknown type: " <> show typ)
 
 -- Generates wrapper function type from the original function
 -- Returns a list of argument info, return expression wrapper fn and return type
