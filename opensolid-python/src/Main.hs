@@ -105,7 +105,7 @@ fnBody typ exp =
           ( Just
               ( CondExpr
                   (PY.call p [PY.var "ret_val"]) -- true
-                  (PY.call "bool" [PY.var "ret_val"]) -- condition
+                  (PY.var "ret_val") -- condition
                   (PY.var "None") -- false
                   ()
               )

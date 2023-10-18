@@ -468,7 +468,7 @@ class Range:
     lib.opensolid_range_intersection.restype = c_void_p
     def intersection(self, range1:Range ) -> Optional[Range]:
         ret_val = lib.opensolid_range_intersection(range1.ptr, self.ptr)
-        return Range(ret_val) if bool(ret_val) else None
+        return Range(ret_val) if ret_val else None
     def __del__(self) -> None:
         lib.opensolid_free(self.ptr)
     def __repr__(self) -> str:
