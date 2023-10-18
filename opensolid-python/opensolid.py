@@ -81,6 +81,11 @@ class Bounds2d:
     lib.opensolid_bounds2d_intersects.restype = c_bool
     def intersects(self, bounds1:Bounds2d ) -> bool:
         return lib.opensolid_bounds2d_intersects(bounds1.ptr, self.ptr)
+    lib.opensolid_bounds2d_intersection.argtypes = [c_void_p, c_void_p]
+    lib.opensolid_bounds2d_intersection.restype = c_void_p
+    def intersection(self, bounds1:Bounds2d ) -> Optional[Bounds2d]:
+        ret_val = lib.opensolid_bounds2d_intersection(bounds1.ptr, self.ptr)
+        return Bounds2d(ret_val) if ret_val else None
     lib.opensolid_bounds2d_interpolate.argtypes = [c_void_p, c_double, c_double]
     lib.opensolid_bounds2d_interpolate.restype = c_void_p
     @staticmethod
