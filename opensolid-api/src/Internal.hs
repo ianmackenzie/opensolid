@@ -31,7 +31,7 @@ import Foreign.Storable (Storable)
 import Language.Haskell.TH qualified as TH
 import List (map2)
 import OpenSolid hiding (fail, fromString, (+), (++), (<>), (>>=))
-import Prelude (Show (show), Traversable (..), concat, error, foldl, foldr, map, mapM, maybe, (<$>), (<>))
+import Prelude (Show (show), Traversable (..), concat, error, map, mapM, maybe, reverse, (++), (<$>), (<>))
 
 data Class = Class TH.Name (List TH.Name) (List Function)
 
@@ -133,17 +133,28 @@ typeNameBase (TH.AppT t _) = typeNameBase t
 typeNameBase (TH.ConT name) = return $ TH.LitE (TH.StringL (TH.nameBase name))
 typeNameBase typ = error ("Unknown type: " <> show typ)
 
--- Generates wrapper function type from the original function
--- Returns a list of argument info, return expression wrapper fn and return type
-ffiFunctionInfo :: TH.Type -> TH.Q (List (TH.Pat, TH.Type, TH.Exp, Maybe TH.Stmt), TH.Exp -> TH.Exp, TH.Type)
-ffiFunctionInfo (TH.ForallT _ _ innerType) = ffiFunctionInfo innerType
-ffiFunctionInfo (TH.AppT (TH.AppT TH.ArrowT argTyp) rest) = do
-  (args, returnExp, returnType) <- ffiFunctionInfo rest
+-- Generates wrapper function type and clause from the original function
+ffiFunctionInfo :: TH.Type -> TH.Exp -> List TH.Pat -> List TH.Stmt -> TH.Q (TH.Type, TH.Clause)
+ffiFunctionInfo (TH.AppT (TH.AppT TH.ArrowT argTyp) remainingArgs) retExp arguments bindStmts = do
   arg <- ffiArgInfo argTyp
-  return (arg : args, returnExp, returnType)
-ffiFunctionInfo returnType = do
-  (exp, typ) <- ffiReturnInfo returnType
-  return ([], exp, typ)
+  let (argName, argFfiTyp, argExpr, bindStmt) = arg
+      newBindStmts = maybe bindStmts (\x -> x : bindStmts) bindStmt
+      newArguments = argName : arguments
+      newRetExpr = TH.AppE retExp argExpr
+  (returnType, returnClause) <- ffiFunctionInfo remainingArgs newRetExpr newArguments newBindStmts
+  return
+    ( TH.AppT (TH.AppT TH.ArrowT argFfiTyp) returnType
+    , returnClause
+    )
+ffiFunctionInfo returnType retExp argNames bindStmts = do
+  (newRetExp, typ) <- ffiReturnInfo retExp returnType
+  return
+    ( TH.AppT (TH.ConT ''IO) typ
+    , TH.Clause
+        (reverse argNames)
+        (TH.NormalB (TH.DoE Nothing $ bindStmts ++ [TH.NoBindS newRetExp]))
+        []
+    )
 
 fixupFunctionType :: TH.Type -> TH.Type
 fixupFunctionType (TH.ForallT _ _ innerType) = fixupFunctionType innerType
@@ -204,30 +215,30 @@ ffiArgInfo typ = do
         , Nothing
         )
 
-ffiReturnInfo :: TH.Type -> TH.Q (TH.Exp -> TH.Exp, TH.Type)
-ffiReturnInfo (TH.AppT (TH.ConT containerTyp) nestedTyp)
+ffiReturnInfo :: TH.Exp -> TH.Type -> TH.Q (TH.Exp, TH.Type)
+ffiReturnInfo expr (TH.AppT (TH.ConT containerTyp) nestedTyp)
   | containerTyp == ''Maybe = do
       isPtr <- isPointer nestedTyp
       return $
         if isPtr
           then
-            ( TH.AppE (TH.VarE 'newMaybePtr)
+            ( TH.AppE (TH.VarE 'newMaybePtr) expr
             , TH.AppT (TH.ConT ''Ptr) (TH.ConT ''())
             )
           else
-            ( TH.AppE (TH.VarE 'newMaybeStorablePtr)
+            ( TH.AppE (TH.VarE 'newMaybeStorablePtr) expr
             , TH.AppT (TH.ConT ''Ptr) (TH.ConT ''())
             )
-ffiReturnInfo typ = do
+ffiReturnInfo expr typ = do
   isPtr <- isPointer typ
   return $
     if isPtr
       then
-        ( TH.AppE (TH.VarE 'newPtr)
+        ( TH.AppE (TH.VarE 'newPtr) expr
         , TH.AppT (TH.ConT ''Ptr) (TH.ConT ''())
         )
       else
-        ( TH.AppE (TH.VarE 'return)
+        ( TH.AppE (TH.VarE 'return) expr
         , typ
         )
 
@@ -282,26 +293,14 @@ ffiFunction :: Function -> TH.Q (List TH.Dec)
 ffiFunction (Function _ fnName _) = do
   originalFnType <- TH.reifyType fnName
   let fixedFnType = fixupFunctionType originalFnType
-  (args, returnExp, returnType) <- ffiFunctionInfo fixedFnType
+      origFunc = TH.SigE (TH.VarE fnName) fixedFnType -- annotate with the fixed up signature
+  (returnType, wrapperClause) <- ffiFunctionInfo fixedFnType origFunc [] []
 
   let foreignName = ffiFunctionName fnName
       wrapperName = TH.mkName foreignName
-      argNames = map (\(name, _, _, _) -> name) args
-      argTypes = map (\(_, typ, _, _) -> typ) args
-      argExprs = map (\(_, _, expr, _) -> expr) args
-      optionalBindStatements = map (\(_, _, _, bindStmt) -> bindStmt) args
-      origFunc = TH.SigE (TH.VarE fnName) fixedFnType -- annotate with the fixed up signature
-      wrapperBody =
-        TH.DoE Nothing $
-          foldl
-            (\statements optStmt -> maybe statements (\x -> x : statements) optStmt)
-            [TH.NoBindS $ returnExp $ foldl TH.AppE origFunc argExprs]
-            optionalBindStatements
-      wrapperType = foldr (\a b -> TH.AppT (TH.AppT TH.ArrowT a) b) (TH.AppT (TH.ConT ''IO) returnType) argTypes
-      wrapperClause = TH.Clause argNames (TH.NormalB wrapperBody) []
 
   return
-    [ TH.ForeignD (TH.ExportF TH.CCall (camelToSnake foreignName) wrapperName wrapperType)
-    , TH.SigD wrapperName wrapperType
+    [ TH.ForeignD (TH.ExportF TH.CCall (camelToSnake foreignName) wrapperName returnType)
+    , TH.SigD wrapperName returnType
     , TH.FunD wrapperName [wrapperClause]
     ]
