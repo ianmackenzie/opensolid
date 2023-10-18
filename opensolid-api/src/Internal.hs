@@ -16,13 +16,22 @@ import Data.Char (isUpper, toLower, toUpper)
 import Data.List (isInfixOf)
 import Data.Maybe (fromMaybe)
 import Data.String (String, fromString)
-import Data.Tuple (fst)
-import Foreign (StablePtr, deRefStablePtr, freeStablePtr, newStablePtr)
+import Foreign
+  ( Ptr
+  , castPtrToStablePtr
+  , castStablePtrToPtr
+  , deRefStablePtr
+  , freeStablePtr
+  , malloc
+  , newStablePtr
+  , nullPtr
+  , poke
+  )
 import Foreign.Storable (Storable)
 import Language.Haskell.TH qualified as TH
 import List (map2)
-import OpenSolid hiding (fail, fromString, (+), (++), (>>=))
-import Prelude (Traversable (..), concat, foldl, foldr, map, mapM, maybe, unzip, (.), (<$>))
+import OpenSolid hiding (fail, fromString, (+), (++), (<>), (>>=))
+import Prelude (Show (show), Traversable (..), concat, error, map, mapM, maybe, reverse, (++), (<$>), (<>))
 
 data Class = Class TH.Name (List TH.Name) (List Function)
 
@@ -40,11 +49,16 @@ static = Function 'Api.Static
 ffi :: List Class -> TH.Q (List TH.Dec)
 ffi classes = do
   functionDecls <- concat <$> mapM ffiClass classes
-  freeFunctionDecl <- freeFunctionFfi 'freeStablePtr
+  freeFunctionDecl <- freeFunctionFfi 'freePtr
   return $ freeFunctionDecl : functionDecls
  where
   ffiClass (Class _ _ functions) =
     concat <$> mapM ffiFunction functions
+
+freePtr :: Ptr () -> IO ()
+freePtr ptr
+  | ptr == nullPtr = return ()
+  | otherwise = freeStablePtr (castPtrToStablePtr ptr)
 
 freeFunctionFfi :: TH.Name -> TH.Q TH.Dec
 freeFunctionFfi name = do
@@ -73,7 +87,7 @@ apiClass (Class name representationProps functions) = do
 apiFunction :: Function -> TH.Q TH.Exp
 apiFunction (Function kind fnName argNames) = do
   fnType <- TH.reifyType fnName
-  (argTypes, returnType) <- ffiFunctionType fnType
+  (argTypes, returnType) <- apiFunctionType fnType
   return $
     TH.ConE 'Api.Function
       `TH.AppE` TH.ConE kind
@@ -81,41 +95,75 @@ apiFunction (Function kind fnName argNames) = do
       `TH.AppE` apiName fnName
       `TH.AppE` TH.ListE
         ( map2
-            (\a t -> TH.TupE [Just (TH.LitE (TH.StringL a)), Just (apiType t)])
+            (\a t -> TH.TupE [Just (TH.LitE (TH.StringL a)), Just t])
             argNames
             argTypes
         )
-      `TH.AppE` apiType returnType
+      `TH.AppE` returnType
 
-apiType :: TH.Type -> TH.Exp
-apiType (TH.AppT (TH.ConT name) typ)
-  | name == ''StablePtr = TH.ConE 'Api.Pointer `TH.AppE` typeNameBase typ
-  | otherwise = apiType (TH.ConT name)
-apiType (TH.ConT name)
-  | name == ''Float = TH.ConE 'Api.Float
-  | name == ''Qty = TH.ConE 'Api.Float
-  | name == ''Angle = TH.ConE 'Api.Float
-  | name == ''Bool = TH.ConE 'Api.Boolean
-apiType _ = TH.ConE 'NotImplemented -- this should break the TH generated code
-
-data NotImplemented = NotImplemented
-
-typeNameBase :: TH.Type -> TH.Exp
-typeNameBase (TH.AppT t _) = typeNameBase t
-typeNameBase (TH.ConT name) = TH.LitE (TH.StringL (TH.nameBase name))
-typeNameBase _ = TH.ConE 'NotImplemented -- this should break the TH generated code
-
--- Generates wrapper function type from the original function
--- Returns a list of argument types and return type
-ffiFunctionType :: TH.Type -> TH.Q (List TH.Type, TH.Type)
-ffiFunctionType (TH.ForallT _ _ innerType) = ffiFunctionType innerType
-ffiFunctionType (TH.AppT (TH.AppT TH.ArrowT arg) rest) = do
-  (args, returnType) <- ffiFunctionType rest
-  typ <- ffiType arg
+apiFunctionType :: TH.Type -> TH.Q (List TH.Exp, TH.Exp)
+apiFunctionType (TH.ForallT _ _ innerType) = apiFunctionType innerType
+apiFunctionType (TH.AppT (TH.AppT TH.ArrowT arg) rest) = do
+  (args, returnType) <- apiFunctionType rest
+  typ <- apiType arg
   return (typ : args, returnType)
-ffiFunctionType returnType = do
-  typ <- ffiType returnType
+apiFunctionType returnType = do
+  typ <- apiType returnType
   return ([], typ)
+
+apiType :: TH.Type -> TH.Q TH.Exp
+apiType (TH.AppT (TH.ConT containerTyp) nestedTyp) | containerTyp == ''Maybe = do
+  typ <- apiType nestedTyp
+  return $ TH.ConE 'Api.Maybe `TH.AppE` typ
+apiType typ = do
+  isPtr <- isPointer typ
+  if isPtr
+    then TH.AppE (TH.ConE 'Api.Pointer) <$> typeNameBase typ
+    else case typ of
+      (TH.AppT (TH.ConT name) _)
+        | name == ''Qty -> return $ TH.ConE 'Api.Float
+      (TH.ConT name)
+        | name == ''Float -> return $ TH.ConE 'Api.Float
+        | name == ''Angle -> return $ TH.ConE 'Api.Float
+        | name == ''Bool -> return $ TH.ConE 'Api.Boolean
+      _ -> error ("Unknown type: " <> show typ)
+
+typeNameBase :: TH.Type -> TH.Q TH.Exp
+typeNameBase (TH.AppT t _) = typeNameBase t
+typeNameBase (TH.ConT name) = return $ TH.LitE (TH.StringL (TH.nameBase name))
+typeNameBase typ = error ("Unknown type: " <> show typ)
+
+-- Generates wrapper function type and clause from the original function
+ffiFunctionInfo :: TH.Type -> TH.Exp -> List TH.Pat -> List TH.Stmt -> TH.Q (TH.Type, TH.Clause)
+ffiFunctionInfo (TH.AppT (TH.AppT TH.ArrowT argTyp) remainingArgs) retExp arguments bindStmts = do
+  arg <- ffiArgInfo argTyp
+  let (argName, argFfiTyp, argExpr, bindStmt) = arg
+      newBindStmts = maybe bindStmts (\x -> x : bindStmts) bindStmt
+      newArguments = argName : arguments
+      newRetExpr = TH.AppE retExp argExpr
+  (returnType, returnClause) <- ffiFunctionInfo remainingArgs newRetExpr newArguments newBindStmts
+  return
+    ( TH.AppT (TH.AppT TH.ArrowT argFfiTyp) returnType
+    , returnClause
+    )
+ffiFunctionInfo returnType retExp argNames bindStmts = do
+  (finalRetExp, finalReturnType) <- ffiReturnInfo retExp returnType
+  return
+    ( TH.AppT (TH.ConT ''IO) finalReturnType
+    , TH.Clause
+        (reverse argNames)
+        (TH.NormalB (TH.DoE Nothing $ bindStmts ++ [TH.NoBindS finalRetExp]))
+        []
+    )
+
+fixupFunctionType :: TH.Type -> TH.Type
+fixupFunctionType (TH.ForallT _ _ innerType) = fixupFunctionType innerType
+fixupFunctionType (TH.AppT (TH.AppT TH.ArrowT arg) rest) =
+  TH.AppT (TH.AppT TH.ArrowT (fixupType arg)) (fixupFunctionType rest)
+fixupFunctionType typ = fixupType typ
+
+fixupType :: TH.Type -> TH.Type
+fixupType = fixupCoordinateSystem >> fixupUnits
 
 -- Hack: replace 'units', 'units1', 'units2', `frameUnits` etc. with 'Unitless' in all types
 -- since the FFI only deals with unitless values
@@ -141,33 +189,84 @@ fixupCoordinateSystem (TH.AppT t a) = TH.AppT (fixupCoordinateSystem t) (fixupCo
 fixupCoordinateSystem typ = typ
 
 -- Modify types for FFI
--- We wrap a type in a StablePtr if it doesn't implement Storable
-ffiType :: TH.Type -> TH.Q TH.Type
-ffiType typ = do
+-- We wrap a type in a Ptr if it doesn't implement Storable
+ffiArgInfo :: TH.Type -> TH.Q (TH.Pat, TH.Type, TH.Exp, Maybe TH.Stmt)
+ffiArgInfo typ = do
+  argName <- TH.newName "x"
+  isPtr <- isPointer typ
+  if isPtr
+    then do
+      unwrappedName <- TH.newName "y"
+      return
+        ( TH.VarP argName -- arg name
+        , TH.AppT (TH.ConT ''Ptr) (TH.ConT ''()) -- arg type
+        , TH.VarE unwrappedName -- unwrapped pointer value
+        , Just $
+            -- unwrappedName <- derefPtr argName
+            TH.BindS
+              (TH.VarP unwrappedName)
+              (TH.AppE (TH.VarE 'derefPtr) (TH.VarE argName))
+        )
+    else do
+      return
+        ( TH.VarP argName -- arg name
+        , typ -- original type
+        , TH.VarE argName -- original arg
+        , Nothing
+        )
+
+ffiReturnInfo :: TH.Exp -> TH.Type -> TH.Q (TH.Exp, TH.Type)
+ffiReturnInfo expr (TH.AppT (TH.ConT containerTyp) nestedTyp)
+  | containerTyp == ''Maybe = do
+      isPtr <- isPointer nestedTyp
+      return $
+        if isPtr
+          then
+            ( TH.AppE (TH.VarE 'newMaybePtr) expr
+            , TH.AppT (TH.ConT ''Ptr) (TH.ConT ''())
+            )
+          else
+            ( TH.AppE (TH.VarE 'newMaybeStorablePtr) expr
+            , TH.AppT (TH.ConT ''Ptr) (TH.ConT ''())
+            )
+ffiReturnInfo expr typ = do
+  isPtr <- isPointer typ
+  return $
+    if isPtr
+      then
+        ( TH.AppE (TH.VarE 'newPtr) expr
+        , TH.AppT (TH.ConT ''Ptr) (TH.ConT ''())
+        )
+      else
+        ( TH.AppE (TH.VarE 'return) expr
+        , typ
+        )
+
+isPointer :: TH.Type -> TH.Q Bool
+isPointer typ = do
   let fixedTyp = typ |> fixupUnits |> fixupCoordinateSystem
   instances <- TH.reifyInstances ''Storable [fixedTyp]
-  if instances == []
-    then return (TH.AppT (TH.ConT ''StablePtr) fixedTyp)
-    else return fixedTyp
+  return $ instances == []
 
--- Is the type wrapped in a StablePtr?
-isPointer :: TH.Type -> Bool
-isPointer (TH.AppT (TH.ConT name) _) = name == ''StablePtr
-isPointer _ = False
+newMaybePtr :: Maybe a -> IO (Ptr ())
+newMaybePtr (Just val) = newPtr val
+newMaybePtr Nothing = return nullPtr
 
--- Convert a StablePtr to an expression and an optional bind statement
-fromStablePtr :: (TH.Name, Maybe TH.Name) -> (TH.Exp, Maybe TH.Stmt)
-fromStablePtr (argName, Just newName) =
-  ( TH.VarE newName
-  , Just (TH.BindS (TH.VarP newName) (TH.AppE (TH.VarE 'deRefStablePtr) (TH.VarE argName)))
-  )
-fromStablePtr (argName, Nothing) = (TH.VarE argName, Nothing)
+newMaybeStorablePtr :: (Storable a) => Maybe a -> IO (Ptr a)
+newMaybeStorablePtr (Just val) = do
+  ptr <- malloc
+  _ <- poke ptr val
+  return ptr
+newMaybeStorablePtr Nothing = return nullPtr
 
--- Convert an expression to a StablePtr
-toStablePtrOrReturn :: TH.Type -> TH.Exp -> TH.Exp
-toStablePtrOrReturn argType expr
-  | isPointer argType = TH.AppE (TH.VarE 'newStablePtr) expr
-  | otherwise = TH.AppE (TH.VarE 'return) expr
+newPtr :: a -> IO (Ptr ())
+newPtr val = do
+  stablePtr <- newStablePtr val
+  return $ castStablePtrToPtr stablePtr
+
+derefPtr :: Ptr () -> IO a
+derefPtr ptr =
+  deRefStablePtr (castPtrToStablePtr ptr)
 
 camelToSnake :: String -> String
 camelToSnake [] = []
@@ -178,17 +277,6 @@ camelToSnake (x : xs)
 uppercaseFirstChar :: String -> String
 uppercaseFirstChar [] = []
 uppercaseFirstChar (x : xs) = toUpper x : xs
-
--- Generate the argument name, and a temporary name for unwrapping pointer inside do
-makeArgNames :: TH.Type -> TH.Q (TH.Name, Maybe TH.Name)
-makeArgNames argType
-  | isPointer argType = do
-      original <- TH.newName "x"
-      unwrapped <- TH.newName "y"
-      return (original, Just unwrapped)
-  | otherwise = do
-      original <- TH.newName "x"
-      return (original, Nothing)
 
 -- Generate a name for the FII wrapper function
 -- ''xCoordinate from the Point2d module becomes `opensolidPoint2dXCoordinate`
@@ -203,25 +291,16 @@ ffiFunctionName fnName =
 -- Wrap the function with an FFI
 ffiFunction :: Function -> TH.Q (List TH.Dec)
 ffiFunction (Function _ fnName _) = do
-  fnType <- TH.reifyType fnName
-  (argTypes, returnType) <- ffiFunctionType fnType
-  argNames <- mapM makeArgNames argTypes
+  originalFnType <- TH.reifyType fnName
+  let fixedFnType = fixupFunctionType originalFnType
+      origFunc = TH.SigE (TH.VarE fnName) fixedFnType -- annotate with the fixed up signature
+  (returnType, wrapperClause) <- ffiFunctionInfo fixedFnType origFunc [] []
 
   let foreignName = ffiFunctionName fnName
       wrapperName = TH.mkName foreignName
-      arguments = map (TH.VarP . fst) argNames
-      (argExprs, optionalBindStatements) = unzip $ map fromStablePtr argNames
-      wrapperBody =
-        TH.DoE Nothing $
-          foldl
-            (\statements optStmt -> maybe statements (\x -> x : statements) optStmt)
-            [TH.NoBindS $ toStablePtrOrReturn returnType $ foldl TH.AppE (TH.VarE fnName) argExprs]
-            optionalBindStatements
-      wrapperType = foldr (\a b -> TH.AppT (TH.AppT TH.ArrowT a) b) (TH.AppT (TH.ConT ''IO) returnType) argTypes
-      wrapperClause = TH.Clause arguments (TH.NormalB wrapperBody) []
 
   return
-    [ TH.ForeignD (TH.ExportF TH.CCall (camelToSnake foreignName) wrapperName wrapperType)
-    , TH.SigD wrapperName wrapperType
+    [ TH.ForeignD (TH.ExportF TH.CCall (camelToSnake foreignName) wrapperName returnType)
+    , TH.SigD wrapperName returnType
     , TH.FunD wrapperName [wrapperClause]
     ]

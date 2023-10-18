@@ -9,7 +9,7 @@ module PythonAST
   , constructor
   , cType
   , destructor
-  , method
+  , def
   , staticmethod
   )
 where
@@ -58,23 +58,18 @@ call name args =
     ()
 
 -- function parameter with an optional type declaration
-param :: String -> Maybe String -> Parameter ()
+param :: String -> Maybe (Expr ()) -> Parameter ()
 param name typ =
-  Param (Ident name ()) (fmap var typ) Nothing ()
+  Param (Ident name ()) typ Nothing ()
 
--- Python function with statements that doesn't return anything
-def :: String -> List (String, Maybe String) -> List (Statement ()) -> Statement ()
-def name params body =
-  Fun (Ident name ()) (fmap (uncurry param) params) Nothing body ()
-
--- Python function that returns an expression
-fn :: String -> List (String, Maybe String) -> Expr () -> Expr () -> Statement ()
-fn name params expression retType =
+-- Python function
+def :: String -> List (String, Maybe (Expr ())) -> Expr () -> List (Statement ()) -> Statement ()
+def name params retType body =
   Fun
     (Ident name ())
     (fmap (uncurry param) params)
     (Just retType)
-    [Return (Just expression) ()]
+    body
     ()
 
 -- Assignment statement `var = expr`
@@ -99,20 +94,10 @@ cls name representationProps members =
     )
     ()
 
--- A method
-method :: String -> List (String, Maybe String) -> Expr () -> String -> List (Statement ())
-method name params ret retType =
-  [ fn name params ret (var retType)
-  ]
-
--- A method that is attached to a class
-staticmethod :: String -> List (String, Maybe String) -> Expr () -> String -> List (Statement ())
-staticmethod name params ret retType =
-  [ Decorated
-      [Decorator [Ident "staticmethod" ()] [] ()]
-      (fn name params ret (var retType))
-      ()
-  ]
+-- A static method decorator
+staticmethod :: Statement () -> Statement ()
+staticmethod func =
+  Decorated [Decorator [Ident "staticmethod" ()] [] ()] func ()
 
 -- A plus operator `a + b`
 plus :: Expr () -> Expr () -> Expr ()
@@ -129,7 +114,8 @@ constructor :: Statement ()
 constructor =
   def
     "__init__"
-    [("self", Nothing), ("ptr", Just "c_void_p")]
+    [("self", Nothing), ("ptr", Just (var "c_void_p"))]
+    (var "None")
     [set "self.ptr" (var "ptr")]
 
 -- Destructor
@@ -138,21 +124,27 @@ destructor =
   def
     "__del__"
     [("self", Nothing)]
+    (var "None")
     [StmtExpr (call "lib.opensolid_free" [var "self.ptr"]) ()]
 
 -- Representation method, defined by class name and properties, that are stringified
 represenation :: String -> List String -> Statement ()
 represenation name properties =
-  fn
+  def
     "__repr__"
     [("self", Nothing)]
-    ( foldl
-        plus
-        (string (name <> "("))
-        ( intersperse
-            (string ", ")
-            (fmap (\prop -> call "str" [call ("self." <> prop) []]) properties)
-        )
-        `plus` string ")"
-    )
     (var "str")
+    [ Return
+        ( Just
+            ( foldl
+                plus
+                (string (name <> "("))
+                ( intersperse
+                    (string ", ")
+                    (fmap (\prop -> call "str" [call ("self." <> prop) []]) properties)
+                )
+                `plus` string ")"
+            )
+        )
+        ()
+    ]
