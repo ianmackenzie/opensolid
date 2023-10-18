@@ -3,12 +3,12 @@ import platform
 from ctypes import *
 global lib
 system = platform.system()
-if system == "Darwin":
-    lib = cdll.LoadLibrary("libopensolid-ffi.dylib")
-elif system == "Linux":
-    lib = cdll.LoadLibrary("libopensolid-ffi.so")
+if system == 'Darwin':
+    lib = cdll.LoadLibrary('libopensolid-ffi.dylib')
+elif system == 'Linux':
+    lib = cdll.LoadLibrary('libopensolid-ffi.so')
 else:
-    raise Exception("System " + system + " is not supported")
+    raise Exception('System ' + system + ' is not supported')
 lib.opensolid_free.argtypes = [c_void_p]
 class Axis2d:
     def __init__(self, ptr:c_void_p ):

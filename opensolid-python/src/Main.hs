@@ -1,7 +1,9 @@
 module Main (main) where
 
+import Control.Monad (void)
 import Data.String (String, fromString)
 import Language.Python.Common hiding (Class, Float, (<>))
+import Language.Python.Version3.Parser as Parser
 import OpenSolid (List)
 import OpenSolidAPI
   ( Api (..)
@@ -13,57 +15,49 @@ import OpenSolidAPI
   )
 import PythonAST qualified as PY
 import Prelude
-  ( IO
+  ( Either (..)
+  , IO
   , Maybe (..)
   , concatMap
-  , fromInteger
+  , error
+  , fmap
   , map
   , putStrLn
+  , show
   , uncurry
+  , unlines
   , (++)
   , (<>)
   )
 
+literalStatement :: String -> List (Statement ())
+literalStatement line =
+  case Parser.parseStmt line "<literal>" of
+    Left err -> error (show err)
+    Right (statements, _) -> fmap void statements
+
+literalStatements :: List String -> List (Statement ())
+literalStatements = concatMap literalStatement
+
 -- Define the imports and load the ffi lib
 setup :: List (Statement ())
 setup =
-  [ FromImport
-      (ImportRelative 0 (Just [Ident "__future__" ()]) ())
-      (FromItems [FromItem (Ident "annotations" ()) Nothing ()] ())
-      ()
-  , Import [ImportItem [Ident "platform" ()] Nothing ()] ()
-  , FromImport (ImportRelative 0 (Just [Ident "ctypes" ()]) ()) (ImportEverything ()) ()
-  , Global [Ident "lib" ()] ()
-  , PY.set "system" (PY.call "platform.system" [])
-  , Conditional
-      [
-        ( PY.eq (PY.var "system") (PY.string "Darwin")
-        , [PY.set "lib" (PY.call "cdll.LoadLibrary" [PY.string "libopensolid-ffi.dylib"])]
-        )
-      ,
-        ( PY.eq (PY.var "system") (PY.string "Linux")
-        , [PY.set "lib" (PY.call "cdll.LoadLibrary" [PY.string "libopensolid-ffi.so"])]
-        )
-      ]
-      [ Raise
-          ( RaiseV3
-              ( Just
-                  ( PY.call
-                      "Exception"
-                      [ PY.string "System "
-                          `PY.plus` PY.var "system"
-                          `PY.plus` PY.string " is not supported"
-                      ]
-                  , Nothing
-                  )
-              )
-          )
-          ()
-      ]
-      ()
-  , -- the destructor is used in all classes, we only need to declare it once
-    PY.set "lib.opensolid_free.argtypes" (List [PY.var "c_void_p"] ())
-  ]
+  literalStatements
+    [ "from __future__ import annotations"
+    , "import platform"
+    , "from ctypes import *"
+    , "global lib"
+    , "system = platform.system()"
+    , unlines
+        [ "if system == 'Darwin':"
+        , "    lib = cdll.LoadLibrary('libopensolid-ffi.dylib')"
+        , "elif system == 'Linux':"
+        , "    lib = cdll.LoadLibrary('libopensolid-ffi.so')"
+        , "else:"
+        , "    raise Exception('System ' + system + ' is not supported')"
+        ]
+    , "lib.opensolid_free.argtypes = [c_void_p]"
+    ]
 
 api :: Api -> List (Statement ())
 api (Api classes) =
