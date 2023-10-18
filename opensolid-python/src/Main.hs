@@ -134,8 +134,7 @@ pyType typ =
     Pointer name -> PY.var name
     Float -> PY.var "float"
     Boolean -> PY.var "bool"
-    Maybe (Pointer name) -> Subscript (PY.var "Optional") (PY.var name) ()
-    Maybe _ -> PY.var "unknown"
+    Maybe nestedTyp -> Subscript (PY.var "Optional") (pyType nestedTyp) ()
 
 main :: IO ()
 main = do
