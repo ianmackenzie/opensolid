@@ -1,4 +1,5 @@
 from __future__ import annotations
+from typing import Optional
 import platform
 from ctypes import *
 global lib
@@ -11,7 +12,7 @@ else:
     raise Exception('System ' + system + ' is not supported')
 lib.opensolid_free.argtypes = [c_void_p]
 class Axis2d:
-    def __init__(self, ptr:c_void_p ):
+    def __init__(self, ptr:c_void_p ) -> None:
         self.ptr = ptr
     lib.opensolid_axis2d_origin_point.argtypes = [c_void_p]
     lib.opensolid_axis2d_origin_point.restype = c_void_p
@@ -36,12 +37,12 @@ class Axis2d:
     @staticmethod
     def through(point:Point2d , direction:Direction2d ) -> Axis2d:
         return Axis2d(lib.opensolid_axis2d_through(point.ptr, direction.ptr))
-    def __del__(self):
+    def __del__(self) -> None:
         lib.opensolid_free(self.ptr)
     def __repr__(self) -> str:
         return "Axis2d(" + str(self.origin_point()) + ", " + str(self.direction()) + ")"
 class Bounds2d:
-    def __init__(self, ptr:c_void_p ):
+    def __init__(self, ptr:c_void_p ) -> None:
         self.ptr = ptr
     lib.opensolid_bounds2d_x_coordinate.argtypes = [c_void_p]
     lib.opensolid_bounds2d_x_coordinate.restype = c_void_p
@@ -85,12 +86,12 @@ class Bounds2d:
     @staticmethod
     def interpolate(bounds:Bounds2d , u:float , v:float ) -> Point2d:
         return Point2d(lib.opensolid_bounds2d_interpolate(bounds.ptr, u, v))
-    def __del__(self):
+    def __del__(self) -> None:
         lib.opensolid_free(self.ptr)
     def __repr__(self) -> str:
         return "Bounds2d(" + str(self.x_coordinate()) + ", " + str(self.y_coordinate()) + ")"
 class Direction2d:
-    def __init__(self, ptr:c_void_p ):
+    def __init__(self, ptr:c_void_p ) -> None:
         self.ptr = ptr
     lib.opensolid_direction2d_x_component.argtypes = [c_void_p]
     lib.opensolid_direction2d_x_component.restype = c_double
@@ -193,12 +194,12 @@ class Direction2d:
     lib.opensolid_direction2d_relative_to.restype = c_void_p
     def relative_to(self, frame:Frame2d ) -> Direction2d:
         return Direction2d(lib.opensolid_direction2d_relative_to(frame.ptr, self.ptr))
-    def __del__(self):
+    def __del__(self) -> None:
         lib.opensolid_free(self.ptr)
     def __repr__(self) -> str:
         return "Direction2d(" + str(self.x_component()) + ", " + str(self.y_component()) + ")"
 class Frame2d:
-    def __init__(self, ptr:c_void_p ):
+    def __init__(self, ptr:c_void_p ) -> None:
         self.ptr = ptr
     lib.opensolid_frame2d_at_origin.argtypes = []
     lib.opensolid_frame2d_at_origin.restype = c_void_p
@@ -250,12 +251,12 @@ class Frame2d:
     @staticmethod
     def from_y_axis(axis:Axis2d ) -> Frame2d:
         return Frame2d(lib.opensolid_frame2d_from_y_axis(axis.ptr))
-    def __del__(self):
+    def __del__(self) -> None:
         lib.opensolid_free(self.ptr)
     def __repr__(self) -> str:
         return "Frame2d(" + str(self.origin_point()) + ", " + str(self.x_direction()) + ", " + str(self.y_direction()) + ")"
 class Point2d:
-    def __init__(self, ptr:c_void_p ):
+    def __init__(self, ptr:c_void_p ) -> None:
         self.ptr = ptr
     lib.opensolid_point2d_x_coordinate.argtypes = [c_void_p]
     lib.opensolid_point2d_x_coordinate.restype = c_double
@@ -331,12 +332,12 @@ class Point2d:
     @staticmethod
     def y(py:float ) -> Point2d:
         return Point2d(lib.opensolid_point2d_y(py))
-    def __del__(self):
+    def __del__(self) -> None:
         lib.opensolid_free(self.ptr)
     def __repr__(self) -> str:
         return "Point2d(" + str(self.x_coordinate()) + ", " + str(self.y_coordinate()) + ")"
 class Range:
-    def __init__(self, ptr:c_void_p ):
+    def __init__(self, ptr:c_void_p ) -> None:
         self.ptr = ptr
     lib.opensolid_range_unsafe.argtypes = [c_double, c_double]
     lib.opensolid_range_unsafe.restype = c_void_p
@@ -463,12 +464,17 @@ class Range:
     lib.opensolid_range_intersects.restype = c_bool
     def intersects(self, range1:Range ) -> bool:
         return lib.opensolid_range_intersects(range1.ptr, self.ptr)
-    def __del__(self):
+    lib.opensolid_range_intersection.argtypes = [c_void_p, c_void_p]
+    lib.opensolid_range_intersection.restype = c_void_p
+    def intersection(self, range1:Range ) -> Optional[Range]:
+        ret_val = lib.opensolid_range_intersection(range1.ptr, self.ptr)
+        return Range(ret_val) if bool(ret_val) else None
+    def __del__(self) -> None:
         lib.opensolid_free(self.ptr)
     def __repr__(self) -> str:
         return "Range(" + str(self.min_value()) + ", " + str(self.max_value()) + ")"
 class Vector2d:
-    def __init__(self, ptr:c_void_p ):
+    def __init__(self, ptr:c_void_p ) -> None:
         self.ptr = ptr
     lib.opensolid_vector2d_zero.argtypes = []
     lib.opensolid_vector2d_zero.restype = c_void_p
@@ -555,7 +561,7 @@ class Vector2d:
     lib.opensolid_vector2d_relative_to.restype = c_void_p
     def relative_to(self, frame:Frame2d ) -> Vector2d:
         return Vector2d(lib.opensolid_vector2d_relative_to(frame.ptr, self.ptr))
-    def __del__(self):
+    def __del__(self) -> None:
         lib.opensolid_free(self.ptr)
     def __repr__(self) -> str:
         return "Vector2d(" + str(self.x_component()) + ", " + str(self.y_component()) + ")"

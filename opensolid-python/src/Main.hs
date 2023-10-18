@@ -44,6 +44,7 @@ setup :: List (Statement ())
 setup =
   literalStatements
     [ "from __future__ import annotations"
+    , "from typing import Optional"
     , "import platform"
     , "from ctypes import *"
     , "global lib"
@@ -70,36 +71,51 @@ apiClass (Class name representationProps functions) =
 apiFunction :: Function -> List (Statement ())
 apiFunction (Function kind ffiName pyName pyArgs retType) =
   let libName = "lib." <> ffiName
-   in ( PY.cType libName (map (\(_, typ) -> cType typ) pyArgs) (cType retType)
-          ++ case kind of
-            Static ->
-              PY.staticmethod
-                pyName
-                (map (\(arg, typ) -> (arg, Just (pyType typ))) pyArgs)
-                (fromPtr retType (PY.call libName (map (uncurry toPtr) pyArgs)))
-                (pyType retType)
-            Method ->
-              let argsWithoutLast = removeLast pyArgs
-               in PY.method
-                    pyName
-                    (("self", Nothing) : map (\(arg, typ) -> (arg, Just (pyType typ))) argsWithoutLast)
-                    (fromPtr retType (PY.call libName (map (uncurry toPtr) argsWithoutLast ++ [PY.var "self.ptr"])))
-                    (pyType retType)
-      )
+   in PY.cType libName (map (\(_, typ) -> cType typ) pyArgs) (cType retType)
+        ++ [ case kind of
+              Static ->
+                PY.staticmethod
+                  ( PY.def
+                      pyName
+                      (map (\(arg, typ) -> (arg, Just (pyType typ))) pyArgs)
+                      (pyType retType)
+                      (fnBody retType (PY.call libName (map (uncurry argExpr) pyArgs)))
+                  )
+              Method ->
+                let argsWithoutLast = removeLast pyArgs
+                 in PY.def
+                      pyName
+                      (("self", Nothing) : map (\(arg, typ) -> (arg, Just (pyType typ))) argsWithoutLast)
+                      (pyType retType)
+                      (fnBody retType (PY.call libName (map (uncurry argExpr) argsWithoutLast ++ [PY.var "self.ptr"])))
+           ]
 
 removeLast :: List a -> List a
 removeLast [] = []
 removeLast [_] = []
 removeLast (h : t) = h : removeLast t
 
-fromPtr :: ValueType -> Expr () -> Expr ()
-fromPtr typ exp =
+fnBody :: ValueType -> Expr () -> [Statement ()]
+fnBody typ exp =
   case typ of
-    Pointer p -> PY.call p [exp]
-    _ -> exp
+    Pointer p -> [Return (Just (PY.call p [exp])) ()]
+    Maybe (Pointer p) ->
+      [ PY.set "ret_val" exp
+      , Return
+          ( Just
+              ( CondExpr
+                  (PY.call p [PY.var "ret_val"]) -- true
+                  (PY.call "bool" [PY.var "ret_val"]) -- condition
+                  (PY.var "None") -- false
+                  ()
+              )
+          )
+          ()
+      ]
+    _ -> [Return (Just exp) ()]
 
-toPtr :: String -> ValueType -> Expr ()
-toPtr var typ =
+argExpr :: String -> ValueType -> Expr ()
+argExpr var typ =
   case typ of
     Pointer _ -> Dot (PY.var var) (Ident "ptr" ()) ()
     _ -> PY.var var
@@ -110,13 +126,16 @@ cType typ =
     Pointer _ -> "c_void_p"
     Float -> "c_double"
     Boolean -> "c_bool"
+    Maybe _ -> "c_void_p"
 
-pyType :: ValueType -> String
+pyType :: ValueType -> Expr ()
 pyType typ =
   case typ of
-    Pointer name -> name
-    Float -> "float"
-    Boolean -> "bool"
+    Pointer name -> PY.var name
+    Float -> PY.var "float"
+    Boolean -> PY.var "bool"
+    Maybe (Pointer name) -> Subscript (PY.var "Optional") (PY.var name) ()
+    Maybe _ -> PY.var "unknown"
 
 main :: IO ()
 main = do
