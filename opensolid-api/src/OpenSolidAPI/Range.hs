@@ -20,9 +20,8 @@ range =
     , -- TODO: support tuple
       -- , method 'Range.endpoints ["range"]
       method 'Range.width ["range"]
-    , -- TODO: support squared units
-      -- , method 'Range.squared ["range"]
-      method 'Range.includes ["value", "range"]
+    , method 'Range.squared ["range"]
+    , method 'Range.includes ["value", "range"]
     , -- TODO: support tolerance
       -- , method 'Range.approximatelyIncludes ["value", "range"]
       method 'Range.contains ["range2", "range1"]
@@ -33,9 +32,8 @@ range =
       -- , method 'Range.bisect ["range"]
       method 'Range.isAtomic ["range"]
     , method 'Range.abs ["range"]
-    , -- TODO: support squared units
-      -- , method 'Range.sqrt ["range"]
-      static 'Range.hypot2 ["range1", "range2"]
+    , method 'Range.sqrt ["range"]
+    , static 'Range.hypot2 ["range1", "range2"]
     , static 'Range.hypot3 ["range1", "range2", "range3"]
     , static 'Range.aggregate2 ["range1", "range2"]
     , static 'Range.aggregate3 ["range1", "range2", "range3"]

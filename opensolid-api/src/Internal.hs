@@ -13,6 +13,7 @@ import Api qualified
 import Control.Monad (return, (>>=))
 import CoordinateSystem qualified
 import Data.Char (isUpper, toLower, toUpper)
+import Data.List (isInfixOf)
 import Data.Maybe (fromMaybe)
 import Data.String (String, fromString)
 import Data.Tuple (fst)
@@ -116,6 +117,16 @@ ffiFunctionType returnType = do
   typ <- ffiType returnType
   return ([], typ)
 
+-- Hack: replace 'units', 'units1', 'units2', `frameUnits` etc. with 'Unitless' in all types
+-- since the FFI only deals with unitless values
+fixupUnits :: TH.Type -> TH.Type
+-- Replace any type variable whose name contains 'units' with 'Unitless'
+fixupUnits (TH.VarT name) | "units" `isInfixOf` map toLower (TH.nameBase name) = TH.ConT ''Unitless
+-- In types with parameters, recursively fix up each parameter
+fixupUnits (TH.AppT t a) = TH.AppT (fixupUnits t) (fixupUnits a)
+-- Otherwise, do nothing
+fixupUnits typ = typ
+
 -- Alias for coordinate system `@` type, since that seems to confuse Template Haskell (see below)
 type Coords space units = space @ units
 
@@ -133,7 +144,7 @@ fixupCoordinateSystem typ = typ
 -- We wrap a type in a StablePtr if it doesn't implement Storable
 ffiType :: TH.Type -> TH.Q TH.Type
 ffiType typ = do
-  let fixedTyp = fixupCoordinateSystem typ
+  let fixedTyp = typ |> fixupUnits |> fixupCoordinateSystem
   instances <- TH.reifyInstances ''Storable [fixedTyp]
   if instances == []
     then return (TH.AppT (TH.ConT ''StablePtr) fixedTyp)

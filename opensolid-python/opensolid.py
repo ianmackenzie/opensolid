@@ -369,6 +369,10 @@ class Range:
     lib.opensolid_range_width.restype = c_double
     def width(self) -> float:
         return lib.opensolid_range_width(self.ptr)
+    lib.opensolid_range_squared.argtypes = [c_void_p]
+    lib.opensolid_range_squared.restype = c_void_p
+    def squared(self) -> Range:
+        return Range(lib.opensolid_range_squared(self.ptr))
     lib.opensolid_range_includes.argtypes = [c_double, c_void_p]
     lib.opensolid_range_includes.restype = c_bool
     def includes(self, value:float ) -> bool:
@@ -389,6 +393,10 @@ class Range:
     lib.opensolid_range_abs.restype = c_void_p
     def abs(self) -> Range:
         return Range(lib.opensolid_range_abs(self.ptr))
+    lib.opensolid_range_sqrt.argtypes = [c_void_p]
+    lib.opensolid_range_sqrt.restype = c_void_p
+    def sqrt(self) -> Range:
+        return Range(lib.opensolid_range_sqrt(self.ptr))
     lib.opensolid_range_hypot2.argtypes = [c_void_p, c_void_p]
     lib.opensolid_range_hypot2.restype = c_void_p
     @staticmethod
@@ -519,6 +527,10 @@ class Vector2d:
     lib.opensolid_vector2d_magnitude.restype = c_double
     def magnitude(self) -> float:
         return lib.opensolid_vector2d_magnitude(self.ptr)
+    lib.opensolid_vector2d_squared_magnitude.argtypes = [c_void_p]
+    lib.opensolid_vector2d_squared_magnitude.restype = c_double
+    def squared_magnitude(self) -> float:
+        return lib.opensolid_vector2d_squared_magnitude(self.ptr)
     lib.opensolid_vector2d_angle.argtypes = [c_void_p]
     lib.opensolid_vector2d_angle.restype = c_double
     def angle(self) -> float:

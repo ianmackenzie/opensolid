@@ -24,9 +24,8 @@ vector2d =
     , static 'Vector2d.midpoint ["v1", "v2"]
     , static 'Vector2d.interpolateFrom ["v1", "v2", "t"]
     , method 'Vector2d.magnitude ["vector"]
-    , -- TODO: No instance for (Units.Squared units1 units2)
-      -- , method 'Vector2d.squaredMagnitude ["vector"]
-      method 'Vector2d.angle ["vector"]
+    , method 'Vector2d.squaredMagnitude ["vector"]
+    , method 'Vector2d.angle ["vector"]
     , -- TODO: Unbound implicit parameter (?tolerance::Qty units)
       -- , method 'Vector2d.direction ["vector"]
       -- , method 'Vector2d.magnitudeAndDirection ["vector"]
