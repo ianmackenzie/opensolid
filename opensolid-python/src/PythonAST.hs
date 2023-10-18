@@ -9,7 +9,7 @@ module PythonAST
   , constructor
   , cType
   , destructor
-  , property
+  , method
   , staticmethod
   )
 where
@@ -17,6 +17,7 @@ where
 import Data.List (intersperse)
 import Data.String (String, fromString)
 import Language.Python.Common hiding ((<>))
+import OpenSolid (List)
 import Prelude
   ( Foldable (foldl)
   , Functor (..)
@@ -30,7 +31,7 @@ import Prelude
 -- `cType "lib.opensolid_point2d_xy" ["c_double", "c_double"] "c_void_p"` becomes:
 --     lib.opensolid_point2d_xy.argtypes = [c_double, c_double]
 --     lib.opensolid_point2d_xy.restype = c_void_p
-cType :: String -> [String] -> String -> [Statement ()]
+cType :: String -> List String -> String -> List (Statement ())
 cType fname argTypes resType =
   [ set (fname <> ".argtypes") (List (fmap var argTypes) ())
   , set (fname <> ".restype") (var resType)
@@ -49,7 +50,7 @@ var name =
   Var (Ident name ()) ()
 
 -- function call, takes a function name and a list of arguments
-call :: String -> [Expr ()] -> Expr ()
+call :: String -> List (Expr ()) -> Expr ()
 call name args =
   Call
     (var name)
@@ -62,12 +63,12 @@ param name typ =
   Param (Ident name ()) (fmap var typ) Nothing ()
 
 -- Python function with statements that doesn't return anything
-def :: String -> [(String, Maybe String)] -> [Statement ()] -> Statement ()
+def :: String -> List (String, Maybe String) -> List (Statement ()) -> Statement ()
 def name params body =
   Fun (Ident name ()) (fmap (uncurry param) params) Nothing body ()
 
 -- Python function that returns an expression
-fn :: String -> [(String, Maybe String)] -> Expr () -> Expr () -> Statement ()
+fn :: String -> List (String, Maybe String) -> Expr () -> Expr () -> Statement ()
 fn name params expression retType =
   Fun
     (Ident name ())
@@ -82,7 +83,7 @@ set name expr =
   Assign [var name] expr ()
 
 -- Python class declaration
-cls :: String -> [String] -> Suite () -> Statement ()
+cls :: String -> List String -> Suite () -> Statement ()
 cls name representationProps members =
   Class
     (Ident name ())
@@ -98,21 +99,18 @@ cls name representationProps members =
     )
     ()
 
--- A "getter" method that is decorated as a property
-property :: String -> Expr () -> Expr () -> [Statement ()]
-property name ret retType =
-  [ Decorated
-      [Decorator [Ident "property" ()] [] ()]
-      (fn name [("self", Nothing)] ret retType)
-      ()
+-- A method
+method :: String -> List (String, Maybe String) -> Expr () -> String -> List (Statement ())
+method name params ret retType =
+  [ fn name params ret (var retType)
   ]
 
 -- A method that is attached to a class
-staticmethod :: String -> [(String, Maybe String)] -> Expr () -> Expr () -> [Statement ()]
+staticmethod :: String -> List (String, Maybe String) -> Expr () -> String -> List (Statement ())
 staticmethod name params ret retType =
   [ Decorated
       [Decorator [Ident "staticmethod" ()] [] ()]
-      (fn name params ret retType)
+      (fn name params ret (var retType))
       ()
   ]
 
@@ -143,7 +141,7 @@ destructor =
     [StmtExpr (call "lib.opensolid_free" [var "self.ptr"]) ()]
 
 -- Representation method, defined by class name and properties, that are stringified
-represenation :: String -> [String] -> Statement ()
+represenation :: String -> List String -> Statement ()
 represenation name properties =
   fn
     "__repr__"
@@ -153,7 +151,7 @@ represenation name properties =
         (string (name <> "("))
         ( intersperse
             (string ", ")
-            (fmap (\prop -> call "str" [var ("self." <> prop)]) properties)
+            (fmap (\prop -> call "str" [call ("self." <> prop) []]) properties)
         )
         `plus` string ")"
     )

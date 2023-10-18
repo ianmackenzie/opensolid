@@ -16,6 +16,8 @@
         overlay = final: prev: {
           opensolid = final.callCabal2nix "opensolid" ./opensolid { };
           opensolid-sandbox = final.callCabal2nix "sandbox" ./sandbox { };
+          opensolid-api = final.callCabal2nix "opensolid-api" ./opensolid-api { };
+          opensolid-python = final.callCabal2nix "opensolid-python" ./opensolid-python { };
           opensolid-ffi = pkgs.haskell.lib.overrideCabal
             (final.callCabal2nix "opensolid-ffi" ./opensolid-ffi { })
             (drv: {
@@ -24,8 +26,8 @@
               libraryHaskellDepends = [
                 final.base
                 final.opensolid
+                final.opensolid-api
                 final.template-haskell
-                final.language-python
               ];
               # cabal puts the `foreign-library` in `/lib/ghc-9.4.6`,
               # this script makes the library available in `/lib`
@@ -68,7 +70,9 @@
             packages = p: [
               p.opensolid
               p.opensolid-sandbox
+              p.opensolid-api
               p.opensolid-ffi
+              p.opensolid-python
             ];
             buildInputs = with myHaskellPackages; [
               haskell-language-server
@@ -76,8 +80,9 @@
               pkgs.nil
               pkgs.nixpkgs-fmt
             ];
-            nativeBuildInputs = with pkgs; [ python3 ];
-
+            nativeBuildInputs = with pkgs; [
+              (python3.withPackages (ps: with ps; [ mypy ]))
+            ];
             # Help python find the opensolid-ffi library
             LD_LIBRARY_PATH = "${localLibraryPath}";
             shellHook = pkgs.lib.optionalString pkgs.stdenv.isDarwin ''
