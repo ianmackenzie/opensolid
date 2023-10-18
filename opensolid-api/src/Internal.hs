@@ -147,12 +147,12 @@ ffiFunctionInfo (TH.AppT (TH.AppT TH.ArrowT argTyp) remainingArgs) retExp argume
     , returnClause
     )
 ffiFunctionInfo returnType retExp argNames bindStmts = do
-  (newRetExp, typ) <- ffiReturnInfo retExp returnType
+  (finalRetExp, finalReturnType) <- ffiReturnInfo retExp returnType
   return
-    ( TH.AppT (TH.ConT ''IO) typ
+    ( TH.AppT (TH.ConT ''IO) finalReturnType
     , TH.Clause
         (reverse argNames)
-        (TH.NormalB (TH.DoE Nothing $ bindStmts ++ [TH.NoBindS newRetExp]))
+        (TH.NormalB (TH.DoE Nothing $ bindStmts ++ [TH.NoBindS finalRetExp]))
         []
     )
 
