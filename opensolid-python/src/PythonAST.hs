@@ -4,8 +4,11 @@ module PythonAST
   , call
   , plus
   , eq
+  , is
   , set
   , cls
+  , and
+  , or
   , constructor
   , cType
   , destructor
@@ -23,7 +26,6 @@ import Prelude
   , Functor (..)
   , Maybe (..)
   , concat
-  , uncurry
   , (<>)
   )
 
@@ -58,16 +60,16 @@ call name args =
     ()
 
 -- function parameter with an optional type declaration
-param :: String -> Maybe (Expr ()) -> Parameter ()
-param name typ =
-  Param (Ident name ()) typ Nothing ()
+param :: String -> Maybe (Expr ()) -> Maybe (Expr ()) -> Parameter ()
+param name typ defalutValue =
+  Param (Ident name ()) typ defalutValue ()
 
 -- Python function
-def :: String -> List (String, Maybe (Expr ())) -> Expr () -> List (Statement ()) -> Statement ()
+def :: String -> List (String, Maybe (Expr ()), Maybe (Expr ())) -> Expr () -> List (Statement ()) -> Statement ()
 def name params retType body =
   Fun
     (Ident name ())
-    (fmap (uncurry param) params)
+    (fmap (\(n, t, v) -> param n t v) params)
     (Just retType)
     body
     ()
@@ -109,12 +111,27 @@ eq :: Expr () -> Expr () -> Expr ()
 eq a b =
   BinaryOp (Equality ()) a b ()
 
+-- An is operator `a is b`
+is :: Expr () -> Expr () -> Expr ()
+is a b =
+  BinaryOp (Is ()) a b ()
+
+-- An and operator `a and b`
+and :: Expr () -> Expr () -> Expr ()
+and a b =
+  BinaryOp (And ()) a b ()
+
+-- An or operator `a or b`
+or :: Expr () -> Expr () -> Expr ()
+or a b =
+  BinaryOp (Or ()) a b ()
+
 -- A constructor from pointer
 constructor :: Statement ()
 constructor =
   def
     "__init__"
-    [("self", Nothing), ("ptr", Just (var "c_void_p"))]
+    [("self", Nothing, Nothing), ("ptr", Just (var "c_void_p"), Nothing)]
     (var "None")
     [set "self.ptr" (var "ptr")]
 
@@ -123,7 +140,7 @@ destructor :: Statement ()
 destructor =
   def
     "__del__"
-    [("self", Nothing)]
+    [("self", Nothing, Nothing)]
     (var "None")
     [StmtExpr (call "lib.opensolid_free" [var "self.ptr"]) ()]
 
@@ -132,7 +149,7 @@ represenation :: String -> List String -> Statement ()
 represenation name properties =
   def
     "__repr__"
-    [("self", Nothing)]
+    [("self", Nothing, Nothing)]
     (var "str")
     [ Return
         ( Just

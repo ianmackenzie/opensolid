@@ -1,4 +1,4 @@
-from opensolid import Point2d, Frame2d, Axis2d, Direction2d, Range
+from opensolid import Point2d, Frame2d, Axis2d, Direction2d, Range, Tolerance
 from math import pi
 
 point = Point2d.xy(0, 1)
@@ -14,3 +14,14 @@ print(point.place_in(frame))
 rng = Range.unsafe(0, 5)
 print(rng.intersection(Range.unsafe(6, 7)))
 print(rng.intersection(Range.unsafe(3, 7)))
+
+with Tolerance(1):
+  print(rng.tolerant())
+  with Tolerance(2):
+    print(rng.tolerant())
+  print(rng.tolerant())
+
+try:
+  print(rng.tolerant())
+except Exception as err:
+  print(err)  # Tolerance is not set

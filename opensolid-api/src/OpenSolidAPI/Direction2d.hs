@@ -19,7 +19,7 @@ direction2d =
     , static 'Direction2d.negativeY []
     , static 'Direction2d.u []
     , static 'Direction2d.v []
-    , -- TODO: Unbound implicit parameter (?tolerance::Qty units)
+    , -- TODO: support Result
       -- , static 'Direction2d.from ["p1", "p2"]
       static 'Direction2d.fromAngle ["angle"]
     , static 'Direction2d.toAngle ["dir"]
