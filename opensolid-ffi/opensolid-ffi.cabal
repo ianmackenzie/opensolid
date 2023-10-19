@@ -20,33 +20,12 @@ source-repository head
 
 foreign-library opensolid-ffi
   default-language: Haskell2010
-  build-depends:
-      base
-    , template-haskell
-    , opensolid
-    , opensolid-api
+  build-depends: base, template-haskell, opensolid, opensolid-api
   type: native-shared
   hs-source-dirs: src
-  other-modules:
-      OpenSolidFFI
-    , Paths_opensolid_ffi
+  other-modules: OpenSolidFFI, Paths_opensolid_ffi
   autogen-modules: Paths_opensolid_ffi
   c-sources: src/wrapper.c
   install-includes: OpenSolidFFI_stub.h
-  include-dirs: opensolid-ffi-tmp
-  ghc-options:
-      -Wall
-      -Werror
-      -Wcompat
-      -Widentities
-      -Wincomplete-record-updates
-      -Wincomplete-uni-patterns
-      -Wmissing-signatures
-      -Wmissing-exported-signatures
-      -Wmissing-export-lists
-      -Wmissing-home-modules
-      -Wpartial-fields
-      -Wsafe
-      -dcore-lint
-  default-extensions:
-      TemplateHaskell
+  ghc-options: -Wall -Werror -Wcompat
+  default-extensions: TemplateHaskell
