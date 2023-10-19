@@ -10,3 +10,4 @@
 - ignore: { name: "Use foldr" }
 - ignore: { name: "Use intercalate" }
 - ignore: { name: "Use foldl" }
+- ignore: { name: "Use mapM" }
