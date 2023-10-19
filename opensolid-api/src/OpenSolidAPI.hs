@@ -1,5 +1,5 @@
 module OpenSolidAPI
-  ( genreateForeignFunctions
+  ( generateForeignFunctions
   , openSolidAPI
   , Api (..)
   , Class (..)
@@ -16,8 +16,8 @@ import Internal qualified
 import Language.Haskell.TH qualified as TH
 import OpenSolid (List)
 
-genreateForeignFunctions :: TH.Q (List TH.Dec)
-genreateForeignFunctions = Internal.ffi classes
+generateForeignFunctions :: TH.Q (List TH.Dec)
+generateForeignFunctions = Internal.ffi classes
 
 openSolidAPI :: Api
 openSolidAPI = $(Internal.api classes)

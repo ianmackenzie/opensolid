@@ -1,7 +1,7 @@
 module OpenSolidFFI () where
 
 import OpenSolid hiding ((>>=))
-import OpenSolidAPI (genreateForeignFunctions)
+import OpenSolidAPI (generateForeignFunctions)
 import Prelude ((>>=))
 
-$(genreateForeignFunctions)
+$(generateForeignFunctions)
