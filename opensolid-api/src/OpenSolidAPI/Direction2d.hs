@@ -1,14 +1,12 @@
 module OpenSolidAPI.Direction2d (direction2d) where
 
-import Data.String (fromString)
 import Direction2d qualified
 import Internal (Class, cls, method, static)
+import OpenSolid
 
 direction2d :: Class
 direction2d =
-  cls
-    ''Direction2d.Direction2d
-    ['Direction2d.xComponent, 'Direction2d.yComponent]
+  cls ''Direction2d.Direction2d ['Direction2d.xComponent, 'Direction2d.yComponent] $
     [ method 'Direction2d.xComponent ["dir"]
     , method 'Direction2d.yComponent ["dir"]
     , static 'Direction2d.unsafe ["v"]

@@ -1,14 +1,12 @@
 module OpenSolidAPI.Axis2d (axis2d) where
 
 import Axis2d qualified
-import Data.String (fromString)
 import Internal (Class, cls, method, static)
+import OpenSolid
 
 axis2d :: Class
 axis2d =
-  cls
-    ''Axis2d.Axis2d
-    ['Axis2d.originPoint, 'Axis2d.direction]
+  cls ''Axis2d.Axis2d ['Axis2d.originPoint, 'Axis2d.direction] $
     [ method 'Axis2d.originPoint ["axis"]
     , method 'Axis2d.direction ["axis"]
     , static 'Axis2d.x []

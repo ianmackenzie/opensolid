@@ -1,14 +1,12 @@
 module OpenSolidAPI.Point2d (point2d) where
 
-import Data.String (fromString)
 import Internal (Class, cls, method, static)
+import OpenSolid
 import Point2d qualified
 
 point2d :: Class
 point2d =
-  cls
-    ''Point2d.Point2d
-    ['Point2d.xCoordinate, 'Point2d.yCoordinate]
+  cls ''Point2d.Point2d ['Point2d.xCoordinate, 'Point2d.yCoordinate] $
     [ method 'Point2d.xCoordinate ["point"]
     , method 'Point2d.yCoordinate ["point"]
     , static 'Point2d.angleFrom ["p1", "p2"]

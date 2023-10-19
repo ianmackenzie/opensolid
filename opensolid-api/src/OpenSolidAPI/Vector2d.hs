@@ -1,14 +1,12 @@
 module OpenSolidAPI.Vector2d (vector2d) where
 
-import Data.String (fromString)
 import Internal (Class, cls, method, static)
+import OpenSolid
 import Vector2d qualified
 
 vector2d :: Class
 vector2d =
-  cls
-    ''Vector2d.Vector2d
-    ['Vector2d.xComponent, 'Vector2d.yComponent]
+  cls ''Vector2d.Vector2d ['Vector2d.xComponent, 'Vector2d.yComponent] $
     [ static 'Vector2d.zero []
     , static 'Vector2d.x ["vx"]
     , static 'Vector2d.y ["vy"]
