@@ -44,6 +44,7 @@ setup :: List (Statement ())
 setup =
   literalStatements
     [ "from __future__ import annotations"
+    , "from contextlib import contextmanager"
     , "from typing import Optional"
     , "import platform"
     , "from ctypes import *"
@@ -58,6 +59,17 @@ setup =
         , "    raise Exception('System ' + system + ' is not supported')"
         ]
     , "lib.opensolid_free.argtypes = [c_void_p]"
+    , "global_tolerance = None"
+    , unlines
+        [ "@contextmanager"
+        , "def Tolerance(new_tolerance: float):"
+        , "    global global_tolerance"
+        , "    (saved_tolerance, global_tolerance) = (global_tolerance, new_tolerance)"
+        , "    try:"
+        , "        yield"
+        , "    finally:"
+        , "        global_tolerance = saved_tolerance"
+        ]
     ]
 
 api :: Api -> List (Statement ())
@@ -72,28 +84,57 @@ apiFunction :: Function -> List (Statement ())
 apiFunction (Function kind ffiName pyName pyArgs retType) =
   let libName = "lib." <> ffiName
    in PY.cType libName (map (\(_, typ) -> cType typ) pyArgs) (cType retType)
-        ++ [ case kind of
-              Static ->
-                PY.staticmethod
-                  ( PY.def
-                      pyName
-                      (map (\(arg, typ) -> (arg, Just (pyType typ))) pyArgs)
-                      (pyType retType)
-                      (fnBody retType (PY.call libName (map (uncurry argExpr) pyArgs)))
-                  )
-              Method ->
-                let argsWithoutLast = removeLast pyArgs
-                 in PY.def
-                      pyName
-                      (("self", Nothing) : map (\(arg, typ) -> (arg, Just (pyType typ))) argsWithoutLast)
-                      (pyType retType)
-                      (fnBody retType (PY.call libName (map (uncurry argExpr) argsWithoutLast ++ [PY.var "self.ptr"])))
+        ++ [ let
+              (tolerance, restArgs) = splitTolerance pyArgs
+              -- add tolerance as the last argument of the python function
+              withTolArg (Just (arg, typ)) list = list ++ [(arg, Just (pyType typ), Just (PY.var "None"))]
+              withTolArg Nothing list = list
+
+              -- add tolerance as the first argument of the c function call
+              withTolExp (Just t) list = t : list
+              withTolExp Nothing list = list
+
+              -- check if the tolerance argument is passed or the global_tolerance is set
+              withTolBody (Just (arg, _)) stmts =
+                Conditional
+                  [
+                    ( PY.is (PY.var arg) (PY.var "None") `PY.and` PY.is (PY.var "global_tolerance") (PY.var "None")
+                    , literalStatement "raise Exception('Tolerance is not set')"
+                    )
+                  ]
+                  []
+                  ()
+                  : stmts
+              withTolBody Nothing stmts = stmts
+              in
+              case kind of
+                Static ->
+                  PY.staticmethod
+                    ( PY.def
+                        pyName
+                        (withTolArg tolerance (map (\(arg, typ) -> (arg, Just (pyType typ), Nothing)) restArgs))
+                        (pyType retType)
+                        (withTolBody tolerance (fnBody retType (PY.call libName (map (uncurry argExpr) (withTolExp tolerance restArgs)))))
+                    )
+                Method ->
+                  let argsWithoutLast = removeLast restArgs
+                   in PY.def
+                        pyName
+                        (withTolArg tolerance (("self", Nothing, Nothing) : map (\(arg, typ) -> (arg, Just (pyType typ), Nothing)) argsWithoutLast))
+                        (pyType retType)
+                        (withTolBody tolerance (fnBody retType (PY.call libName (map (uncurry argExpr) (withTolExp tolerance argsWithoutLast) ++ [PY.var "self.ptr"]))))
            ]
 
 removeLast :: List a -> List a
 removeLast [] = []
 removeLast [_] = []
 removeLast (h : t) = h : removeLast t
+
+-- split out the first argument if its tolerance
+splitTolerance :: List (String, ValueType) -> (Maybe (String, ValueType), List (String, ValueType))
+splitTolerance [] = (Nothing, [])
+splitTolerance ((tol, ImplicitTolerance) : rest) = (Just (tol, ImplicitTolerance), rest)
+splitTolerance rest = (Nothing, rest)
 
 fnBody :: ValueType -> Expr () -> [Statement ()]
 fnBody typ exp =
@@ -118,11 +159,13 @@ argExpr :: String -> ValueType -> Expr ()
 argExpr var typ =
   case typ of
     Pointer _ -> Dot (PY.var var) (Ident "ptr" ()) ()
+    ImplicitTolerance -> PY.var var `PY.or` PY.var "global_tolerance"
     _ -> PY.var var
 
 cType :: ValueType -> String
 cType typ =
   case typ of
+    ImplicitTolerance -> "c_double"
     Pointer _ -> "c_void_p"
     Float -> "c_double"
     Boolean -> "c_bool"
@@ -131,6 +174,7 @@ cType typ =
 pyType :: ValueType -> Expr ()
 pyType typ =
   case typ of
+    ImplicitTolerance -> Subscript (PY.var "Optional") (PY.var "float") ()
     Pointer name -> PY.var name
     Float -> PY.var "float"
     Boolean -> PY.var "bool"

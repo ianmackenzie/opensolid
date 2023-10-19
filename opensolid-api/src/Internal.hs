@@ -78,6 +78,11 @@ apiFunction :: Function -> Codegen TH.Exp
 apiFunction (Function kind fnName argNames) = do
   fnType <- Codegen.reifyType fnName
   (argTypes, returnType) <- apiFunctionType fnType
+  let (finalNames, finalTypes) =
+        if containsImplicitTolerance fnType
+          then -- prepend the tolerance argument and its type
+            ("tolerance" : argNames, TH.ConE 'Api.ImplicitTolerance : argTypes)
+          else (argNames, argTypes)
   Codegen.generate $
     TH.ConE 'Api.Function
       `TH.AppE` TH.ConE kind
@@ -86,8 +91,8 @@ apiFunction (Function kind fnName argNames) = do
       `TH.AppE` TH.ListE
         ( List.map2
             (\a t -> TH.TupE [Just (TH.LitE (TH.StringL (Text.toChars a))), Just t])
-            argNames
-            argTypes
+            finalNames
+            finalTypes
         )
       `TH.AppE` returnType
 
@@ -164,6 +169,14 @@ fixupType (TH.ConT name) | Codegen.nameBase name == "@" = TH.ConT ''Coords
 fixupType (TH.AppT t a) = TH.AppT (fixupType t) (fixupType a)
 -- Otherwise, do nothing and return the type as-is
 fixupType typ = typ
+
+-- Check if a given function has the implicit tolerance
+containsImplicitTolerance :: TH.Type -> Bool
+containsImplicitTolerance (TH.ForallT _ ctxt _) = List.any hasConstraint ctxt
+ where
+  hasConstraint (TH.AppT (TH.ConT className) _) = className == ''Tolerance
+  hasConstraint _ = False
+containsImplicitTolerance _ = False
 
 -- Modify types for FFI
 -- We wrap a type in a Ptr if it doesn't implement Storable
@@ -274,11 +287,25 @@ ffiFunction (Function _ fnName _) = do
   originalFnType <- Codegen.reifyType fnName
   let fixedFnType = fixupType originalFnType
   let origFunc = TH.SigE (TH.VarE fnName) fixedFnType -- annotate with the fixed up signature
-  (returnType, wrapperClause) <- ffiFunctionInfo fixedFnType origFunc [] []
+  let toleranceName = TH.mkName (Text.toChars "tolerance")
+  let needsTolerance = containsImplicitTolerance originalFnType
+  let (initialArgs, initialStmts) =
+        if needsTolerance
+          then
+            ( [TH.VarP toleranceName] -- prepend `tolerance` argument
+            , [TH.LetS [TH.ImplicitParamBindD (Text.toChars "tolerance") (TH.VarE toleranceName)]] -- `let ?tolerance = tolerance`
+            )
+          else ([], [])
+  (returnType, wrapperClause) <- ffiFunctionInfo fixedFnType origFunc initialArgs initialStmts
+
   let foreignName = ffiFunctionName fnName
   let wrapperName = TH.mkName (Text.toChars foreignName)
+  let wrapperType =
+        if needsTolerance
+          then TH.AppT (TH.AppT TH.ArrowT (TH.ConT ''Float)) returnType -- prepend tolerance argument type
+          else returnType
   Codegen.generate
-    [ TH.ForeignD (TH.ExportF TH.CCall (Text.toChars (camelToSnake foreignName)) wrapperName returnType)
-    , TH.SigD wrapperName returnType
+    [ TH.ForeignD (TH.ExportF TH.CCall (Text.toChars (camelToSnake foreignName)) wrapperName wrapperType)
+    , TH.SigD wrapperName wrapperType
     , TH.FunD wrapperName [wrapperClause]
     ]

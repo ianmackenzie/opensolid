@@ -1,4 +1,5 @@
 from __future__ import annotations
+from contextlib import contextmanager
 from typing import Optional
 import platform
 from ctypes import *
@@ -11,6 +12,15 @@ elif system == 'Linux':
 else:
     raise Exception('System ' + system + ' is not supported')
 lib.opensolid_free.argtypes = [c_void_p]
+global_tolerance = None
+@contextmanager
+def Tolerance(new_tolerance:float ):
+    global global_tolerance
+    (saved_tolerance, global_tolerance) = (global_tolerance, new_tolerance)
+    try:
+        yield
+    finally:
+        global_tolerance = saved_tolerance
 class Axis2d:
     def __init__(self, ptr:c_void_p ) -> None:
         self.ptr = ptr
@@ -383,6 +393,12 @@ class Range:
     lib.opensolid_range_includes.restype = c_bool
     def includes(self, value:float ) -> bool:
         return lib.opensolid_range_includes(value, self.ptr)
+    lib.opensolid_range_approximately_includes.argtypes = [c_double, c_double, c_void_p]
+    lib.opensolid_range_approximately_includes.restype = c_bool
+    def approximately_includes(self, value:float , tolerance:Optional[float] =None) -> bool:
+        if tolerance is None and global_tolerance is None:
+            raise Exception('Tolerance is not set')
+        return lib.opensolid_range_approximately_includes(tolerance or global_tolerance, value, self.ptr)
     lib.opensolid_range_contains.argtypes = [c_void_p, c_void_p]
     lib.opensolid_range_contains.restype = c_bool
     def contains(self, range2:Range ) -> bool:
@@ -391,6 +407,12 @@ class Range:
     lib.opensolid_range_is_contained_in.restype = c_bool
     def is_contained_in(self, range1:Range ) -> bool:
         return lib.opensolid_range_is_contained_in(range1.ptr, self.ptr)
+    lib.opensolid_range_tolerant.argtypes = [c_double, c_void_p]
+    lib.opensolid_range_tolerant.restype = c_void_p
+    def tolerant(self, tolerance:Optional[float] =None) -> Range:
+        if tolerance is None and global_tolerance is None:
+            raise Exception('Tolerance is not set')
+        return Range(lib.opensolid_range_tolerant(tolerance or global_tolerance, self.ptr))
     lib.opensolid_range_is_atomic.argtypes = [c_void_p]
     lib.opensolid_range_is_atomic.restype = c_bool
     def is_atomic(self) -> bool:

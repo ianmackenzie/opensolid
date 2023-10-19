@@ -1,7 +1,7 @@
 module Api (Api (..), Class (..), Function (..), FunctionKind (..), ValueType (..)) where
 
 import Data.String (String)
-import OpenSolid (List)
+import OpenSolid (Eq, List)
 
 newtype Api = Api (List Class)
 
@@ -17,4 +17,5 @@ data Function
 
 data FunctionKind = Method | Static
 
-data ValueType = Pointer String | Float | Boolean | Maybe ValueType
+data ValueType = Pointer String | Float | Boolean | Maybe ValueType | ImplicitTolerance
+  deriving (Eq)

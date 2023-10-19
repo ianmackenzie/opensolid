@@ -20,13 +20,11 @@ range =
       method 'Range.width ["range"]
     , method 'Range.squared ["range"]
     , method 'Range.includes ["value", "range"]
-    , -- TODO: support tolerance
-      -- , method 'Range.approximatelyIncludes ["value", "range"]
-      method 'Range.contains ["range2", "range1"]
+    , method 'Range.approximatelyIncludes ["value", "range"]
+    , method 'Range.contains ["range2", "range1"]
     , method 'Range.isContainedIn ["range1", "range2"]
-    , -- TODO: support tolerance
-      -- , method 'Range.tolerant ["range"]
-      -- TODO: support tuples
+    , method 'Range.tolerant ["range"]
+    , -- TODO: support tuples
       -- , method 'Range.bisect ["range"]
       method 'Range.isAtomic ["range"]
     , method 'Range.abs ["range"]
