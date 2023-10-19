@@ -1,8 +1,8 @@
 module OpenSolidAPI.Axis2d (axis2d) where
 
+import Axis2d qualified
 import Data.String (fromString)
 import Internal (Class, cls, method, static)
-import Axis2d qualified
 
 axis2d :: Class
 axis2d =
