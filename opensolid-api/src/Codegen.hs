@@ -1,6 +1,5 @@
 module Codegen
   ( Codegen
-  , wrap
   , execute
   , generate
   , fail
@@ -31,9 +30,6 @@ instance (a ~ a') => Bind (Codegen a) a' (Codegen b) where
 instance Fail (Codegen a) where
   fail message = Codegen (Prelude.fail (Text.toChars message))
 
-wrap :: TH.Q a -> Codegen a
-wrap = Codegen
-
 execute :: Codegen a -> TH.Q a
 execute (Codegen q) = q
 
@@ -41,13 +37,13 @@ generate :: a -> Codegen a
 generate value = Codegen (Prelude.return value)
 
 reifyType :: TH.Name -> Codegen TH.Type
-reifyType name = wrap (TH.reifyType name)
+reifyType name = Codegen (TH.reifyType name)
 
 reifyInstances :: TH.Name -> List TH.Type -> Codegen (List TH.InstanceDec)
-reifyInstances name types = wrap (TH.reifyInstances name types)
+reifyInstances name types = Codegen (TH.reifyInstances name types)
 
 newName :: Text -> Codegen TH.Name
-newName prefix = wrap (TH.newName (Text.toChars prefix))
+newName prefix = Codegen (TH.newName (Text.toChars prefix))
 
 map :: (a -> b) -> Codegen a -> Codegen b
 map function codegen = do
