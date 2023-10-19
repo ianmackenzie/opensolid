@@ -10,147 +10,138 @@ module Internal
 where
 
 import Api qualified
-import Control.Monad (return, (>>=))
-import Data.Char (isUpper, toLower, toUpper)
-import Data.List (isInfixOf)
-import Data.Maybe (fromMaybe)
-import Data.String (String, fromString)
-import Foreign
-  ( Ptr
-  , castPtrToStablePtr
-  , castStablePtrToPtr
-  , deRefStablePtr
-  , freeStablePtr
-  , malloc
-  , newStablePtr
-  , nullPtr
-  , poke
-  )
+import Codegen (Codegen)
+import Codegen qualified
+import Data.Char qualified as Char
+import Debug qualified
+import Foreign qualified
 import Foreign.Storable (Storable)
 import Language.Haskell.TH qualified as TH
-import List (map2)
-import OpenSolid hiding (fail, fromString, (+), (++), (<>), (>>=))
-import Prelude (Show (show), Traversable (..), concat, error, map, mapM, maybe, reverse, (++), (<$>), (<>))
+import List qualified
+import Maybe qualified
+import OpenSolid
+import Text qualified
+import Prelude qualified
 
 data Class = Class TH.Name (List TH.Name) (List Function)
 
-data Function = Function TH.Name TH.Name (List String)
+data Function = Function TH.Name TH.Name (List Text)
 
 cls :: TH.Name -> List TH.Name -> List Function -> Class
 cls = Class
 
-method :: TH.Name -> List String -> Function
+method :: TH.Name -> List Text -> Function
 method = Function 'Api.Method
 
-static :: TH.Name -> List String -> Function
+static :: TH.Name -> List Text -> Function
 static = Function 'Api.Static
 
-ffi :: List Class -> TH.Q (List TH.Dec)
+ffi :: List Class -> Codegen (List TH.Dec)
 ffi classes = do
-  functionDecls <- concat <$> mapM ffiClass classes
+  functionDecls <- Codegen.map List.concat (Codegen.collect ffiClass classes)
   freeFunctionDecl <- freeFunctionFfi 'freePtr
-  return $ freeFunctionDecl : functionDecls
+  Codegen.generate (freeFunctionDecl : functionDecls)
  where
   ffiClass (Class _ _ functions) =
-    concat <$> mapM ffiFunction functions
+    Codegen.map List.concat (Codegen.collect ffiFunction functions)
 
-freePtr :: Ptr () -> IO ()
+freePtr :: Foreign.Ptr () -> IO ()
 freePtr ptr
-  | ptr == nullPtr = return ()
-  | otherwise = freeStablePtr (castPtrToStablePtr ptr)
+  | ptr == Foreign.nullPtr = Prelude.return ()
+  | otherwise = Foreign.freeStablePtr (Foreign.castPtrToStablePtr ptr)
 
-freeFunctionFfi :: TH.Name -> TH.Q TH.Dec
+freeFunctionFfi :: TH.Name -> Codegen TH.Dec
 freeFunctionFfi name = do
-  freeFunctionType <- TH.reifyType name
-  return $ TH.ForeignD (TH.ExportF TH.CCall "opensolid_free" name freeFunctionType)
+  freeFunctionType <- Codegen.reifyType name
+  Codegen.generate (TH.ForeignD (TH.ExportF TH.CCall (Text.toChars "opensolid_free") name freeFunctionType))
 
-api :: List Class -> TH.Q TH.Exp
+api :: List Class -> Codegen TH.Exp
 api classes = do
-  apiCls <- mapM apiClass classes
-  return $ TH.AppE (TH.ConE 'Api.Api) (TH.ListE apiCls)
+  apiCls <- Codegen.collect apiClass classes
+  Codegen.generate (TH.AppE (TH.ConE 'Api.Api) (TH.ListE apiCls))
 
 -- human readable name in the API
 apiName :: TH.Name -> TH.Exp
 apiName name =
-  TH.LitE (TH.StringL (camelToSnake (TH.nameBase name)))
+  TH.LitE (TH.StringL (Text.toChars (camelToSnake (Codegen.nameBase name))))
 
-apiClass :: Class -> TH.Q TH.Exp
+apiClass :: Class -> Codegen TH.Exp
 apiClass (Class name representationProps functions) = do
-  apiFns <- mapM apiFunction functions
-  return $
+  apiFns <- Codegen.collect apiFunction functions
+  Codegen.generate $
     TH.ConE 'Api.Class
       `TH.AppE` TH.LitE (TH.StringL (TH.nameBase name))
-      `TH.AppE` TH.ListE (map apiName representationProps)
+      `TH.AppE` TH.ListE (List.map apiName representationProps)
       `TH.AppE` TH.ListE apiFns
 
-apiFunction :: Function -> TH.Q TH.Exp
+apiFunction :: Function -> Codegen TH.Exp
 apiFunction (Function kind fnName argNames) = do
-  fnType <- TH.reifyType fnName
+  fnType <- Codegen.reifyType fnName
   (argTypes, returnType) <- apiFunctionType fnType
-  return $
+  Codegen.generate $
     TH.ConE 'Api.Function
       `TH.AppE` TH.ConE kind
-      `TH.AppE` TH.LitE (TH.StringL (camelToSnake (ffiFunctionName fnName))) -- ffi name
+      `TH.AppE` TH.LitE (TH.StringL (Text.toChars (camelToSnake (ffiFunctionName fnName)))) -- ffi name
       `TH.AppE` apiName fnName
       `TH.AppE` TH.ListE
-        ( map2
-            (\a t -> TH.TupE [Just (TH.LitE (TH.StringL a)), Just t])
+        ( List.map2
+            (\a t -> TH.TupE [Just (TH.LitE (TH.StringL (Text.toChars a))), Just t])
             argNames
             argTypes
         )
       `TH.AppE` returnType
 
-apiFunctionType :: TH.Type -> TH.Q (List TH.Exp, TH.Exp)
+apiFunctionType :: TH.Type -> Codegen (List TH.Exp, TH.Exp)
 apiFunctionType (TH.ForallT _ _ innerType) = apiFunctionType innerType
 apiFunctionType (TH.AppT (TH.AppT TH.ArrowT arg) rest) = do
   (args, returnType) <- apiFunctionType rest
   typ <- apiType arg
-  return (typ : args, returnType)
+  Codegen.generate (typ : args, returnType)
 apiFunctionType returnType = do
   typ <- apiType returnType
-  return ([], typ)
+  Codegen.generate ([], typ)
 
-apiType :: TH.Type -> TH.Q TH.Exp
+apiType :: TH.Type -> Codegen TH.Exp
 apiType (TH.AppT (TH.ConT containerTyp) nestedTyp) | containerTyp == ''Maybe = do
   typ <- apiType nestedTyp
-  return $ TH.ConE 'Api.Maybe `TH.AppE` typ
+  Codegen.generate (TH.ConE 'Api.Maybe `TH.AppE` typ)
 apiType typ = do
   isPtr <- isPointer typ
   if isPtr
-    then TH.AppE (TH.ConE 'Api.Pointer) <$> typeNameBase typ
+    then Codegen.map (TH.AppE (TH.ConE 'Api.Pointer)) (typeNameBase typ)
     else case typ of
       (TH.AppT (TH.ConT name) _)
-        | name == ''Qty -> return $ TH.ConE 'Api.Float
+        | name == ''Qty -> Codegen.generate (TH.ConE 'Api.Float)
       (TH.ConT name)
-        | name == ''Float -> return $ TH.ConE 'Api.Float
-        | name == ''Angle -> return $ TH.ConE 'Api.Float
-        | name == ''Bool -> return $ TH.ConE 'Api.Boolean
-      _ -> error ("Unknown type: " <> show typ)
+        | name == ''Float -> Codegen.generate (TH.ConE 'Api.Float)
+        | name == ''Angle -> Codegen.generate (TH.ConE 'Api.Float)
+        | name == ''Bool -> Codegen.generate (TH.ConE 'Api.Boolean)
+      _ -> Codegen.fail ("Unknown type: " ++ Debug.show typ)
 
-typeNameBase :: TH.Type -> TH.Q TH.Exp
+typeNameBase :: TH.Type -> Codegen TH.Exp
 typeNameBase (TH.AppT t _) = typeNameBase t
-typeNameBase (TH.ConT name) = return $ TH.LitE (TH.StringL (TH.nameBase name))
-typeNameBase typ = error ("Unknown type: " <> show typ)
+typeNameBase (TH.ConT name) = Codegen.generate (TH.LitE (TH.StringL (TH.nameBase name)))
+typeNameBase typ = Codegen.fail ("Unknown type: " ++ Debug.show typ)
 
 -- Generates wrapper function type and clause from the original function
-ffiFunctionInfo :: TH.Type -> TH.Exp -> List TH.Pat -> List TH.Stmt -> TH.Q (TH.Type, TH.Clause)
+ffiFunctionInfo :: TH.Type -> TH.Exp -> List TH.Pat -> List TH.Stmt -> Codegen (TH.Type, TH.Clause)
 ffiFunctionInfo (TH.AppT (TH.AppT TH.ArrowT argTyp) remainingArgs) retExp arguments bindStmts = do
   arg <- ffiArgInfo argTyp
   let (argName, argFfiTyp, argExpr, bindStmt) = arg
-      newBindStmts = maybe bindStmts (\x -> x : bindStmts) bindStmt
+      newBindStmts = bindStmt ++ bindStmts
       newArguments = argName : arguments
       newRetExpr = TH.AppE retExp argExpr
   (returnType, returnClause) <- ffiFunctionInfo remainingArgs newRetExpr newArguments newBindStmts
-  return
+  Codegen.generate
     ( TH.AppT (TH.AppT TH.ArrowT argFfiTyp) returnType
     , returnClause
     )
 ffiFunctionInfo returnType retExp argNames bindStmts = do
   (finalRetExp, finalReturnType) <- ffiReturnInfo retExp returnType
-  return
+  Codegen.generate
     ( TH.AppT (TH.ConT ''IO) finalReturnType
     , TH.Clause
-        (reverse argNames)
+        (List.reverse argNames)
         (TH.NormalB (TH.DoE Nothing $ bindStmts ++ [TH.NoBindS finalRetExp]))
         []
     )
@@ -162,13 +153,13 @@ type Coords space units = space @ units
 fixupType :: TH.Type -> TH.Type
 -- Replace 'units', 'units1', 'units2', `frameUnits` etc. with 'Unitless' in all types
 -- since the FFI only deals with unitless values
-fixupType (TH.VarT name) | "units" `isInfixOf` map toLower (TH.nameBase name) = TH.ConT ''Unitless
+fixupType (TH.VarT name) | Text.contains "units" (Text.toLower (Codegen.nameBase name)) = TH.ConT ''Unitless
 -- Strip 'forall' from function types
 -- (shouldn't be needed since these are generally units-related...)
 fixupType (TH.ForallT _ _ functionType) = fixupType functionType
 -- Template Haskell seems to get confused by type-level use of '@' operator,
 -- so replace any instance of `space @ units` with the equivalent `'Coords space units`
-fixupType (TH.ConT name) | TH.nameBase name == "@" = TH.ConT ''Coords
+fixupType (TH.ConT name) | Codegen.nameBase name == "@" = TH.ConT ''Coords
 -- In types with parameters, recursively fix up each parameter
 fixupType (TH.AppT t a) = TH.AppT (fixupType t) (fixupType a)
 -- Otherwise, do nothing and return the type as-is
@@ -176,16 +167,16 @@ fixupType typ = typ
 
 -- Modify types for FFI
 -- We wrap a type in a Ptr if it doesn't implement Storable
-ffiArgInfo :: TH.Type -> TH.Q (TH.Pat, TH.Type, TH.Exp, Maybe TH.Stmt)
+ffiArgInfo :: TH.Type -> Codegen (TH.Pat, TH.Type, TH.Exp, Maybe TH.Stmt)
 ffiArgInfo typ = do
-  argName <- TH.newName "x"
+  argName <- Codegen.newName "x"
   isPtr <- isPointer typ
   if isPtr
     then do
-      unwrappedName <- TH.newName "y"
-      return
+      unwrappedName <- Codegen.newName "y"
+      Codegen.generate
         ( TH.VarP argName -- arg name
-        , TH.AppT (TH.ConT ''Ptr) (TH.ConT ''()) -- arg type
+        , TH.AppT (TH.ConT ''Foreign.Ptr) (TH.ConT ''()) -- arg type
         , TH.VarE unwrappedName -- unwrapped pointer value
         , Just $
             -- unwrappedName <- derefPtr argName
@@ -194,99 +185,100 @@ ffiArgInfo typ = do
               (TH.AppE (TH.VarE 'derefPtr) (TH.VarE argName))
         )
     else do
-      return
+      Codegen.generate
         ( TH.VarP argName -- arg name
         , typ -- original type
         , TH.VarE argName -- original arg
         , Nothing
         )
 
-ffiReturnInfo :: TH.Exp -> TH.Type -> TH.Q (TH.Exp, TH.Type)
+ffiReturnInfo :: TH.Exp -> TH.Type -> Codegen (TH.Exp, TH.Type)
 ffiReturnInfo expr (TH.AppT (TH.ConT containerTyp) nestedTyp)
   | containerTyp == ''Maybe = do
       isPtr <- isPointer nestedTyp
-      return $
+      Codegen.generate $
         if isPtr
           then
             ( TH.AppE (TH.VarE 'newMaybePtr) expr
-            , TH.AppT (TH.ConT ''Ptr) (TH.ConT ''())
+            , TH.AppT (TH.ConT ''Foreign.Ptr) (TH.ConT ''())
             )
           else
             ( TH.AppE (TH.VarE 'newMaybeStorablePtr) expr
-            , TH.AppT (TH.ConT ''Ptr) (TH.ConT ''())
+            , TH.AppT (TH.ConT ''Foreign.Ptr) (TH.ConT ''())
             )
 ffiReturnInfo expr typ = do
   isPtr <- isPointer typ
-  return $
+  Codegen.generate $
     if isPtr
       then
         ( TH.AppE (TH.VarE 'newPtr) expr
-        , TH.AppT (TH.ConT ''Ptr) (TH.ConT ''())
+        , TH.AppT (TH.ConT ''Foreign.Ptr) (TH.ConT ''())
         )
       else
-        ( TH.AppE (TH.VarE 'return) expr
+        ( TH.AppE (TH.VarE 'Prelude.return) expr
         , typ
         )
 
-isPointer :: TH.Type -> TH.Q Bool
+isPointer :: TH.Type -> Codegen Bool
 isPointer typ = do
   let fixedTyp = fixupType typ
-  instances <- TH.reifyInstances ''Storable [fixedTyp]
-  return $ instances == []
+  instances <- Codegen.reifyInstances ''Storable [fixedTyp]
+  Codegen.generate (List.isEmpty instances)
 
-newMaybePtr :: Maybe a -> IO (Ptr ())
+newMaybePtr :: Maybe a -> IO (Foreign.Ptr ())
 newMaybePtr (Just val) = newPtr val
-newMaybePtr Nothing = return nullPtr
+newMaybePtr Nothing = Prelude.return Foreign.nullPtr
 
-newMaybeStorablePtr :: (Storable a) => Maybe a -> IO (Ptr a)
-newMaybeStorablePtr (Just val) = do
-  ptr <- malloc
-  _ <- poke ptr val
-  return ptr
-newMaybeStorablePtr Nothing = return nullPtr
+newMaybeStorablePtr :: (Storable a) => Maybe a -> IO (Foreign.Ptr a)
+newMaybeStorablePtr Nothing = Prelude.return Foreign.nullPtr
+newMaybeStorablePtr (Just val) = Prelude.do
+  ptr <- Foreign.malloc
+  Foreign.poke ptr val
+  Prelude.return ptr
 
-newPtr :: a -> IO (Ptr ())
-newPtr val = do
-  stablePtr <- newStablePtr val
-  return $ castStablePtrToPtr stablePtr
+newPtr :: a -> IO (Foreign.Ptr ())
+newPtr val = Prelude.do
+  stablePtr <- Foreign.newStablePtr val
+  Prelude.return $ Foreign.castStablePtrToPtr stablePtr
 
-derefPtr :: Ptr () -> IO a
-derefPtr ptr =
-  deRefStablePtr (castPtrToStablePtr ptr)
+derefPtr :: Foreign.Ptr () -> IO a
+derefPtr = Foreign.castPtrToStablePtr >> Foreign.deRefStablePtr
 
-camelToSnake :: String -> String
-camelToSnake [] = []
-camelToSnake (x : xs)
-  | isUpper x = '_' : toLower x : camelToSnake xs
-  | otherwise = x : camelToSnake xs
+camelToSnake :: Text -> Text
+camelToSnake text = Text.fromChars (impl (Text.toChars text))
+ where
+  impl [] = []
+  impl (x : xs)
+    | Char.isUpper x = '_' : Char.toLower x : impl xs
+    | otherwise = x : impl xs
 
-uppercaseFirstChar :: String -> String
-uppercaseFirstChar [] = []
-uppercaseFirstChar (x : xs) = toUpper x : xs
+uppercaseFirstChar :: Text -> Text
+uppercaseFirstChar text = Text.fromChars (impl (Text.toChars text))
+ where
+  impl [] = []
+  impl (x : xs) = Char.toUpper x : xs
 
 -- Generate a name for the FII wrapper function
 -- ''xCoordinate from the Point2d module becomes `opensolidPoint2dXCoordinate`
-ffiFunctionName :: TH.Name -> String
+ffiFunctionName :: TH.Name -> Text
 ffiFunctionName fnName =
-  concat
+  Text.concat
     [ "opensolid"
-    , fromMaybe "" (TH.nameModule fnName)
-    , uppercaseFirstChar $ TH.nameBase fnName
+    , Maybe.withDefault "" (Codegen.nameModule fnName)
+    , uppercaseFirstChar (Codegen.nameBase fnName)
     ]
 
 -- Wrap the function with an FFI
-ffiFunction :: Function -> TH.Q (List TH.Dec)
+ffiFunction :: Function -> Codegen (List TH.Dec)
 ffiFunction (Function _ fnName _) = do
-  originalFnType <- TH.reifyType fnName
+  originalFnType <- Codegen.reifyType fnName
   let fixedFnType = fixupType originalFnType
-      origFunc = TH.SigE (TH.VarE fnName) fixedFnType -- annotate with the fixed up signature
+  let origFunc = TH.SigE (TH.VarE fnName) fixedFnType -- annotate with the fixed up signature
   (returnType, wrapperClause) <- ffiFunctionInfo fixedFnType origFunc [] []
-
   let foreignName = ffiFunctionName fnName
-      wrapperName = TH.mkName foreignName
-
-  return
-    [ TH.ForeignD (TH.ExportF TH.CCall (camelToSnake foreignName) wrapperName returnType)
+  let wrapperName = TH.mkName (Text.toChars foreignName)
+  Codegen.generate
+    [ TH.ForeignD (TH.ExportF TH.CCall (Text.toChars (camelToSnake foreignName)) wrapperName returnType)
     , TH.SigD wrapperName returnType
     , TH.FunD wrapperName [wrapperClause]
     ]
