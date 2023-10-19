@@ -61,8 +61,8 @@ call name args =
 
 -- function parameter with an optional type declaration
 param :: String -> Maybe (Expr ()) -> Maybe (Expr ()) -> Parameter ()
-param name typ defalutValue =
-  Param (Ident name ()) typ defalutValue ()
+param name typ defaultValue =
+  Param (Ident name ()) typ defaultValue ()
 
 -- Python function
 def :: String -> List (String, Maybe (Expr ()), Maybe (Expr ())) -> Expr () -> List (Statement ()) -> Statement ()
