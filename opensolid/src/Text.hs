@@ -13,6 +13,9 @@ module Text
   , lines
   , indent
   , repeat
+  , contains
+  , toLower
+  , toUpper
   )
 where
 
@@ -76,3 +79,12 @@ indent indentation text =
 
 repeat :: Int -> Text -> Text
 repeat = Data.Text.replicate
+
+contains :: Text -> Text -> Bool
+contains = Data.Text.isInfixOf
+
+toLower :: Text -> Text
+toLower = Data.Text.toLower
+
+toUpper :: Text -> Text
+toUpper = Data.Text.toUpper
