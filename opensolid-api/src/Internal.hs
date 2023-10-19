@@ -11,7 +11,6 @@ where
 
 import Api qualified
 import Control.Monad (return, (>>=))
-import CoordinateSystem qualified
 import Data.Char (isUpper, toLower, toUpper)
 import Data.List (isInfixOf)
 import Data.Maybe (fromMaybe)
@@ -156,37 +155,24 @@ ffiFunctionInfo returnType retExp argNames bindStmts = do
         []
     )
 
-fixupFunctionType :: TH.Type -> TH.Type
-fixupFunctionType (TH.ForallT _ _ innerType) = fixupFunctionType innerType
-fixupFunctionType (TH.AppT (TH.AppT TH.ArrowT arg) rest) =
-  TH.AppT (TH.AppT TH.ArrowT (fixupType arg)) (fixupFunctionType rest)
-fixupFunctionType typ = fixupType typ
-
-fixupType :: TH.Type -> TH.Type
-fixupType = fixupCoordinateSystem >> fixupUnits
-
--- Hack: replace 'units', 'units1', 'units2', `frameUnits` etc. with 'Unitless' in all types
--- since the FFI only deals with unitless values
-fixupUnits :: TH.Type -> TH.Type
--- Replace any type variable whose name contains 'units' with 'Unitless'
-fixupUnits (TH.VarT name) | "units" `isInfixOf` map toLower (TH.nameBase name) = TH.ConT ''Unitless
--- In types with parameters, recursively fix up each parameter
-fixupUnits (TH.AppT t a) = TH.AppT (fixupUnits t) (fixupUnits a)
--- Otherwise, do nothing
-fixupUnits typ = typ
-
 -- Alias for coordinate system `@` type, since that seems to confuse Template Haskell (see below)
 type Coords space units = space @ units
 
+-- Fix up function type signatures to play more nicely with Template Haskell
+fixupType :: TH.Type -> TH.Type
+-- Replace 'units', 'units1', 'units2', `frameUnits` etc. with 'Unitless' in all types
+-- since the FFI only deals with unitless values
+fixupType (TH.VarT name) | "units" `isInfixOf` map toLower (TH.nameBase name) = TH.ConT ''Unitless
+-- Strip 'forall' from function types
+-- (shouldn't be needed since these are generally units-related...)
+fixupType (TH.ForallT _ _ functionType) = fixupType functionType
 -- Template Haskell seems to get confused by type-level use of '@' operator,
 -- so replace any instance of `space @ units` with the equivalent `'Coords space units`
-fixupCoordinateSystem :: TH.Type -> TH.Type
--- Replace `@` with `Coords`
-fixupCoordinateSystem (TH.ConT name) | name == ''(CoordinateSystem.@) = TH.ConT ''Coords
+fixupType (TH.ConT name) | TH.nameBase name == "@" = TH.ConT ''Coords
 -- In types with parameters, recursively fix up each parameter
-fixupCoordinateSystem (TH.AppT t a) = TH.AppT (fixupCoordinateSystem t) (fixupCoordinateSystem a)
--- Otherwise, do nothing
-fixupCoordinateSystem typ = typ
+fixupType (TH.AppT t a) = TH.AppT (fixupType t) (fixupType a)
+-- Otherwise, do nothing and return the type as-is
+fixupType typ = typ
 
 -- Modify types for FFI
 -- We wrap a type in a Ptr if it doesn't implement Storable
@@ -244,7 +230,7 @@ ffiReturnInfo expr typ = do
 
 isPointer :: TH.Type -> TH.Q Bool
 isPointer typ = do
-  let fixedTyp = typ |> fixupUnits |> fixupCoordinateSystem
+  let fixedTyp = fixupType typ
   instances <- TH.reifyInstances ''Storable [fixedTyp]
   return $ instances == []
 
@@ -292,7 +278,7 @@ ffiFunctionName fnName =
 ffiFunction :: Function -> TH.Q (List TH.Dec)
 ffiFunction (Function _ fnName _) = do
   originalFnType <- TH.reifyType fnName
-  let fixedFnType = fixupFunctionType originalFnType
+  let fixedFnType = fixupType originalFnType
       origFunc = TH.SigE (TH.VarE fnName) fixedFnType -- annotate with the fixed up signature
   (returnType, wrapperClause) <- ffiFunctionInfo fixedFnType origFunc [] []
 
