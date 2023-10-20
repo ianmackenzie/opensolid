@@ -24,9 +24,8 @@ vector2d =
     , method 'Vector2d.magnitude ["vector"]
     , method 'Vector2d.squaredMagnitude ["vector"]
     , method 'Vector2d.angle ["vector"]
-    , -- TODO: Support Result
-      -- , method 'Vector2d.direction ["vector"]
-      -- TODO: Support Result of Tuple
+    , method 'Vector2d.direction ["vector"]
+    , -- TODO: Support Result of Tuple
       -- , method 'Vector2d.magnitudeAndDirection ["vector"]
       method 'Vector2d.normalize ["vector"]
     , method 'Vector2d.rotateRight ["vector"]

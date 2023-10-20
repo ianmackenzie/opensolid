@@ -21,6 +21,10 @@ def Tolerance(new_tolerance:float ):
         yield
     finally:
         global_tolerance = saved_tolerance
+class RESULT(Structure):
+    _fields_ = [('ptr', c_void_p), ('tag', c_int8)]
+class IsZero(Exception):
+    pass
 class Axis2d:
     def __init__(self, ptr:c_void_p ) -> None:
         self.ptr = ptr
@@ -568,6 +572,17 @@ class Vector2d:
     lib.opensolid_vector2d_angle.restype = c_double
     def angle(self) -> float:
         return lib.opensolid_vector2d_angle(self.ptr)
+    lib.opensolid_vector2d_direction.argtypes = [c_double, c_void_p]
+    lib.opensolid_vector2d_direction.restype = POINTER(RESULT)
+    def direction(self, tolerance:Optional[float] =None) -> Direction2d:
+        if tolerance is None and global_tolerance is None:
+            raise Exception('Tolerance is not set')
+        ret_val = lib.opensolid_vector2d_direction(tolerance or global_tolerance, self.ptr)
+        result = ret_val.contents
+        if result.tag == 0:
+            return Direction2d(result.ptr)
+        else:
+            raise IsZero()
     lib.opensolid_vector2d_normalize.argtypes = [c_void_p]
     lib.opensolid_vector2d_normalize.restype = c_void_p
     def normalize(self) -> Vector2d:

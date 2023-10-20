@@ -6,6 +6,7 @@ module PythonAST
   , eq
   , is
   , set
+  , int
   , cls
   , and
   , or
@@ -19,12 +20,14 @@ where
 
 import Data.List (intersperse)
 import Data.String (String, fromString)
-import Language.Python.Common hiding ((<>))
+import Language.Python.Common hiding (int, (<>))
 import OpenSolid (List)
 import Prelude
   ( Foldable (foldl)
   , Functor (..)
+  , Integer
   , Maybe (..)
+  , Show (..)
   , concat
   , (<>)
   )
@@ -33,10 +36,10 @@ import Prelude
 -- `cType "lib.opensolid_point2d_xy" ["c_double", "c_double"] "c_void_p"` becomes:
 --     lib.opensolid_point2d_xy.argtypes = [c_double, c_double]
 --     lib.opensolid_point2d_xy.restype = c_void_p
-cType :: String -> List String -> String -> List (Statement ())
+cType :: String -> List (Expr ()) -> Expr () -> List (Statement ())
 cType fname argTypes resType =
-  [ set (fname <> ".argtypes") (List (fmap var argTypes) ())
-  , set (fname <> ".restype") (var resType)
+  [ set (fname <> ".argtypes") (List argTypes ())
+  , set (fname <> ".restype") resType
   ]
 
 -- a string literal, surrounded in double quotes, because
@@ -45,6 +48,10 @@ cType fname argTypes resType =
 string :: String -> Expr ()
 string st =
   Strings ["\"" <> st <> "\""] ()
+
+int :: Integer -> Expr ()
+int val =
+  Int val (show val) ()
 
 -- variable
 var :: String -> Expr ()

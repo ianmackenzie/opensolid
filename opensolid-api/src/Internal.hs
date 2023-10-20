@@ -107,6 +107,10 @@ apiFunctionType returnType = do
   Codegen.generate ([], typ)
 
 apiType :: TH.Type -> Codegen TH.Exp
+apiType (TH.AppT (TH.AppT (TH.ConT containerTyp) errName) nestedTyp) | containerTyp == ''Result = do
+  typ <- apiType nestedTyp
+  err <- typeNameBase errName
+  Codegen.generate (TH.ConE 'Api.Result `TH.AppE` err `TH.AppE` typ)
 apiType (TH.AppT (TH.ConT containerTyp) nestedTyp) | containerTyp == ''Maybe = do
   typ <- apiType nestedTyp
   Codegen.generate (TH.ConE 'Api.Maybe `TH.AppE` typ)
@@ -206,6 +210,12 @@ ffiArgInfo typ = do
         )
 
 ffiReturnInfo :: TH.Exp -> TH.Type -> Codegen (TH.Exp, TH.Type)
+ffiReturnInfo expr (TH.AppT (TH.AppT (TH.ConT containerTyp) errName) nestedTyp)
+  | containerTyp == ''Result = do
+      Codegen.generate $
+        ( TH.AppE (TH.VarE 'newResultPtr) expr
+        , TH.AppT (TH.ConT ''Foreign.Ptr) (TH.AppT (TH.AppT (TH.ConT containerTyp) errName) nestedTyp)
+        )
 ffiReturnInfo expr (TH.AppT (TH.ConT containerTyp) nestedTyp)
   | containerTyp == ''Maybe = do
       isPtr <- isPointer nestedTyp
@@ -247,6 +257,12 @@ newMaybeStorablePtr Nothing = Prelude.return Foreign.nullPtr
 newMaybeStorablePtr (Just val) = Prelude.do
   ptr <- Foreign.malloc
   Foreign.poke ptr val
+  Prelude.return ptr
+
+newResultPtr :: (Storable (Result a b)) => Result a b -> IO (Foreign.Ptr (Result a b))
+newResultPtr result = Prelude.do
+  ptr <- Foreign.malloc
+  Foreign.poke ptr result
   Prelude.return ptr
 
 newPtr :: a -> IO (Foreign.Ptr ())
