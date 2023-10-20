@@ -578,9 +578,11 @@ class Vector2d:
         if tolerance is None and global_tolerance is None:
             raise Exception('Tolerance is not set')
         ret_val = lib.opensolid_vector2d_direction(tolerance or global_tolerance, self.ptr)
-        result = ret_val.contents
-        if result.tag == 0:
-            return Direction2d(result.ptr)
+        ret_tag = ret_val.contents.tag
+        ret_ptr = ret_val.contents.ptr
+        lib.free(ret_val)
+        if ret_tag == 0:
+            return Direction2d(ret_ptr)
         else:
             raise IsZero()
     lib.opensolid_vector2d_normalize.argtypes = [c_void_p]

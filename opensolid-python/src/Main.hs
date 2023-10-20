@@ -152,12 +152,13 @@ fnBody typ exp =
     Pointer p -> [Return (Just (PY.call p [exp])) ()]
     Result err (Pointer p) ->
       [ PY.set "ret_val" exp
-      , PY.set "result" (PY.var "ret_val.contents")
-      , -- TODO: free the memory
-        Conditional
+      , PY.set "ret_tag" (PY.var "ret_val.contents.tag")
+      , PY.set "ret_ptr" (PY.var "ret_val.contents.ptr")
+      , StmtExpr (PY.call "lib.free" [PY.var "ret_val"]) ()
+      , Conditional
           [
-            ( PY.var "result.tag" `PY.eq` PY.int 0
-            , [Return (Just (PY.call p [PY.var "result.ptr"])) ()]
+            ( PY.var "ret_tag" `PY.eq` PY.int 0
+            , [Return (Just (PY.call p [PY.var "ret_ptr"])) ()]
             )
           ]
           -- TODO: construct an error based on tag and throw it
