@@ -1,8 +1,20 @@
+{-# OPTIONS_GHC -Wno-orphans #-}
+
 module OpenSolidAPI.Vector2d (vector2d) where
 
-import Internal (Class, cls, method, static)
-import OpenSolid
+import Foreign qualified
+import Internal (Class, TaggedError (..), cls, method, static)
+import OpenSolid hiding (fromInteger)
+import Text qualified
 import Vector2d qualified
+import Prelude (fromInteger)
+import Prelude qualified
+
+-- TODO: codegen this
+instance TaggedError Vector2d.IsZero where
+  fromTaggedPtr (1 :: Foreign.Word8) _ = Prelude.return Vector2d.IsZero
+  fromTaggedPtr tag _ = Prelude.error (Text.toChars (Text.concat ["Unexpected tag ", Text.fromChars (Prelude.show tag)]))
+  toTaggedPtr Vector2d.IsZero = Prelude.return (1 :: Foreign.Word8, Foreign.nullPtr)
 
 vector2d :: Class
 vector2d =

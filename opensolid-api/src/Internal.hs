@@ -1,3 +1,5 @@
+{-# OPTIONS_GHC -Wno-orphans #-}
+
 module Internal
   ( Class
   , Function
@@ -5,6 +7,7 @@ module Internal
   , api
   , cls
   , method
+  , TaggedError (..)
   , static
   )
 where
@@ -19,8 +22,9 @@ import Foreign.Storable (Storable)
 import Language.Haskell.TH qualified as TH
 import List qualified
 import Maybe qualified
-import OpenSolid
+import OpenSolid hiding (fromInteger)
 import Text qualified
+import Prelude (fromInteger)
 import Prelude qualified
 
 data Class = Class TH.Name (List TH.Name) (List Function)
@@ -272,6 +276,29 @@ newPtr val = Prelude.do
 
 derefPtr :: Foreign.Ptr () -> IO a
 derefPtr = Foreign.castPtrToStablePtr >> Foreign.deRefStablePtr
+
+class (ErrorMessage error) => TaggedError error where
+  fromTaggedPtr :: Foreign.Word8 -> Foreign.Ptr () -> IO error
+  toTaggedPtr :: error -> IO (Foreign.Word8, Foreign.Ptr ())
+
+instance (TaggedError error) => Storable (Result error sucess) where
+  sizeOf _ = Foreign.sizeOf (Prelude.undefined :: Foreign.Ptr ()) + (1 :: Int) -- size of a pointer + 1 byte for the tag
+  alignment _ = Foreign.alignment (Prelude.undefined :: Foreign.Ptr ())
+  peek ptr = Prelude.do
+    voidPtr <- Foreign.peek (Foreign.castPtr ptr)
+    tag <- Foreign.peekByteOff ptr $ Foreign.sizeOf (Prelude.undefined :: Foreign.Ptr ())
+    case tag of
+      (0 :: Foreign.Word8) -> Ok Prelude.<$> Foreign.deRefStablePtr (Foreign.castPtrToStablePtr voidPtr)
+      _ -> Error Prelude.<$> fromTaggedPtr tag voidPtr
+  poke ptr (Error err) = Prelude.do
+    (tag, errPtr) <- toTaggedPtr err
+    Foreign.poke (Foreign.castPtr ptr) errPtr
+    Foreign.pokeByteOff ptr (Foreign.sizeOf (Prelude.undefined :: Foreign.Ptr ())) tag
+  poke ptr (Ok success) = Prelude.do
+    -- TODO: is this a good idea to allocate a stable ptr here?
+    successPtr <- Foreign.castStablePtrToPtr Prelude.<$> Foreign.newStablePtr success
+    Foreign.poke (Foreign.castPtr ptr) successPtr
+    Foreign.pokeByteOff ptr (Foreign.sizeOf (Prelude.undefined :: Foreign.Ptr ())) (0 :: Foreign.Word8)
 
 camelToSnake :: Text -> Text
 camelToSnake text = Text.fromChars (impl (Text.toChars text))
