@@ -281,24 +281,26 @@ class (ErrorMessage error) => TaggedError error where
   fromTaggedPtr :: Foreign.Word8 -> Foreign.Ptr () -> IO error
   toTaggedPtr :: error -> IO (Foreign.Word8, Foreign.Ptr ())
 
-instance (TaggedError error) => Storable (Result error success) where
-  sizeOf _ = Foreign.sizeOf (Prelude.undefined :: Foreign.Ptr ()) + (1 :: Int) -- size of a pointer + 1 byte for the tag
-  alignment _ = Foreign.alignment (Prelude.undefined :: Foreign.Ptr ())
+pointerSize :: Int
+pointerSize = Foreign.sizeOf Foreign.nullPtr
+
+instance (TaggedError error) => Storable (Result error sucess) where
+  sizeOf _ = pointerSize + (1 :: Int) -- size of a pointer + 1 byte for the tag
+  alignment _ = Foreign.alignment Foreign.nullPtr
   peek ptr = Prelude.do
     voidPtr <- Foreign.peek (Foreign.castPtr ptr)
-    tag <- Foreign.peekByteOff ptr $ Foreign.sizeOf (Prelude.undefined :: Foreign.Ptr ())
+    tag <- Foreign.peekByteOff ptr pointerSize
     case tag of
       (0 :: Foreign.Word8) -> Ok Prelude.<$> Foreign.deRefStablePtr (Foreign.castPtrToStablePtr voidPtr)
       _ -> Error Prelude.<$> fromTaggedPtr tag voidPtr
   poke ptr (Error err) = Prelude.do
     (tag, errPtr) <- toTaggedPtr err
     Foreign.poke (Foreign.castPtr ptr) errPtr
-    Foreign.pokeByteOff ptr (Foreign.sizeOf (Prelude.undefined :: Foreign.Ptr ())) tag
+    Foreign.pokeByteOff ptr pointerSize tag
   poke ptr (Ok success) = Prelude.do
-    -- TODO: is this a good idea to allocate a stable ptr here?
     successPtr <- Foreign.castStablePtrToPtr Prelude.<$> Foreign.newStablePtr success
     Foreign.poke (Foreign.castPtr ptr) successPtr
-    Foreign.pokeByteOff ptr (Foreign.sizeOf (Prelude.undefined :: Foreign.Ptr ())) (0 :: Foreign.Word8)
+    Foreign.pokeByteOff ptr pointerSize (0 :: Foreign.Word8)
 
 camelToSnake :: Text -> Text
 camelToSnake text = Text.fromChars (impl (Text.toChars text))
