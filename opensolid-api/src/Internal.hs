@@ -111,11 +111,11 @@ apiFunctionType returnType = do
   Codegen.generate ([], typ)
 
 apiType :: TH.Type -> Codegen TH.Exp
-apiType (TH.AppT (TH.AppT (TH.ConT containerTyp) errName) nestedTyp) | containerTyp == ''Result = do
+apiType (TH.AppT (TH.AppT (TH.ConT containerName) errTyp) nestedTyp) | containerName == ''Result = do
   typ <- apiType nestedTyp
-  err <- typeNameBase errName
+  err <- typeNameBase errTyp
   Codegen.generate (TH.ConE 'Api.Result `TH.AppE` err `TH.AppE` typ)
-apiType (TH.AppT (TH.ConT containerTyp) nestedTyp) | containerTyp == ''Maybe = do
+apiType (TH.AppT (TH.ConT containerName) nestedTyp) | containerName == ''Maybe = do
   typ <- apiType nestedTyp
   Codegen.generate (TH.ConE 'Api.Maybe `TH.AppE` typ)
 apiType typ = do
@@ -214,14 +214,14 @@ ffiArgInfo typ = do
         )
 
 ffiReturnInfo :: TH.Exp -> TH.Type -> Codegen (TH.Exp, TH.Type)
-ffiReturnInfo expr (TH.AppT (TH.AppT (TH.ConT containerTyp) errName) nestedTyp)
-  | containerTyp == ''Result = do
+ffiReturnInfo expr (TH.AppT (TH.AppT (TH.ConT containerName) errTyp) nestedTyp)
+  | containerName == ''Result = do
       Codegen.generate $
         ( TH.AppE (TH.VarE 'newResultPtr) expr
-        , TH.AppT (TH.ConT ''Foreign.Ptr) (TH.AppT (TH.AppT (TH.ConT containerTyp) errName) nestedTyp)
+        , TH.AppT (TH.ConT ''Foreign.Ptr) (TH.AppT (TH.AppT (TH.ConT containerName) errTyp) nestedTyp)
         )
-ffiReturnInfo expr (TH.AppT (TH.ConT containerTyp) nestedTyp)
-  | containerTyp == ''Maybe = do
+ffiReturnInfo expr (TH.AppT (TH.ConT containerName) nestedTyp)
+  | containerName == ''Maybe = do
       isPtr <- isPointer nestedTyp
       Codegen.generate $
         if isPtr
