@@ -281,7 +281,7 @@ class (ErrorMessage error) => TaggedError error where
   fromTaggedPtr :: Foreign.Word8 -> Foreign.Ptr () -> IO error
   toTaggedPtr :: error -> IO (Foreign.Word8, Foreign.Ptr ())
 
-instance (TaggedError error) => Storable (Result error sucess) where
+instance (TaggedError error) => Storable (Result error success) where
   sizeOf _ = Foreign.sizeOf (Prelude.undefined :: Foreign.Ptr ()) + (1 :: Int) -- size of a pointer + 1 byte for the tag
   alignment _ = Foreign.alignment (Prelude.undefined :: Foreign.Ptr ())
   peek ptr = Prelude.do
