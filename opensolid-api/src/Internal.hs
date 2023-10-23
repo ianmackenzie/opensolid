@@ -284,7 +284,7 @@ class (ErrorMessage error) => TaggedError error where
 pointerSize :: Int
 pointerSize = Foreign.sizeOf Foreign.nullPtr
 
-instance (TaggedError error) => Storable (Result error sucess) where
+instance (TaggedError error) => Storable (Result error success) where
   sizeOf _ = pointerSize + (1 :: Int) -- size of a pointer + 1 byte for the tag
   alignment _ = Foreign.alignment Foreign.nullPtr
   peek ptr = Prelude.do
