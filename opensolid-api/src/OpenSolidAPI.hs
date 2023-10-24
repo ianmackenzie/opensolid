@@ -6,16 +6,16 @@ module OpenSolidAPI
   , Function (..)
   , FunctionKind (..)
   , ValueType (..)
+  , ExceptionClass (..)
   )
 where
 
 import All (classes)
 import Api
 import Codegen qualified
-import Data.String (fromString)
 import Internal qualified
 import Language.Haskell.TH qualified as TH
-import OpenSolid (List)
+import OpenSolid
 
 generateForeignFunctions :: TH.Q (List TH.Dec)
 generateForeignFunctions = Codegen.execute (Internal.ffi classes)

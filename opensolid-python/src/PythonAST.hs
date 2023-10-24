@@ -5,6 +5,7 @@ module PythonAST
   , plus
   , eq
   , is
+  , dot
   , set
   , int
   , cls
@@ -15,6 +16,7 @@ module PythonAST
   , destructor
   , def
   , staticmethod
+  , Statement (..)
   )
 where
 
@@ -31,6 +33,10 @@ import Prelude
   , concat
   , (<>)
   )
+
+dot :: Expr () -> String -> Expr ()
+dot exp iden =
+  Dot exp (Ident iden ()) ()
 
 -- ctypes type definition for a function
 -- `cType "lib.opensolid_point2d_xy" ["c_double", "c_double"] "c_void_p"` becomes:
@@ -87,7 +93,7 @@ set name expr =
   Assign [var name] expr ()
 
 -- Python class declaration
-cls :: String -> List String -> Suite () -> Statement ()
+cls :: String -> List String -> List (Statement ()) -> Statement ()
 cls name representationProps members =
   Class
     (Ident name ())

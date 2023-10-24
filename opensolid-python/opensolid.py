@@ -56,9 +56,6 @@ def read_bool(ptr:c_void_p ) -> bool:
     val = bool(cast(ptr, POINTER(c_bool)).contents.value)
     lib.opensolid_free(ptr)
     return val
-class IsZero(Exception):
-    def __init__(self, tag:c_int8 , ptr:c_void_p ):
-        lib.opensolid_free(ptr)
 class Axis2d:
     def __init__(self, ptr:c_void_p ) -> None:
         self.ptr = ptr
@@ -617,13 +614,13 @@ class Vector2d:
     def direction(self, tolerance:Optional[float] =None) -> Direction2d:
         if tolerance is None and global_tolerance is None:
             raise Exception('Tolerance is not set')
-        return result_reader(IsZero, Direction2d)(lib.opensolid_vector2d_direction(tolerance or global_tolerance, self.ptr))
+        return result_reader(Vector2d.IsZero.from_tag, Direction2d)(lib.opensolid_vector2d_direction(tolerance or global_tolerance, self.ptr))
     lib.opensolid_vector2d_magnitude_and_direction.argtypes = [c_double, c_void_p]
     lib.opensolid_vector2d_magnitude_and_direction.restype = c_void_p
     def magnitude_and_direction(self, tolerance:Optional[float] =None) -> Tuple[float, Direction2d]:
         if tolerance is None and global_tolerance is None:
             raise Exception('Tolerance is not set')
-        return result_reader(IsZero, tuple2_reader(read_float, Direction2d))(lib.opensolid_vector2d_magnitude_and_direction(tolerance or global_tolerance, self.ptr))
+        return result_reader(Vector2d.IsZero.from_tag, tuple2_reader(read_float, Direction2d))(lib.opensolid_vector2d_magnitude_and_direction(tolerance or global_tolerance, self.ptr))
     lib.opensolid_vector2d_normalize.argtypes = [c_void_p]
     lib.opensolid_vector2d_normalize.restype = c_void_p
     def normalize(self) -> Vector2d:
@@ -644,6 +641,13 @@ class Vector2d:
     lib.opensolid_vector2d_relative_to.restype = c_void_p
     def relative_to(self, frame:Frame2d ) -> Vector2d:
         return Vector2d(lib.opensolid_vector2d_relative_to(frame.ptr, self.ptr))
+    class IsZero(Exception):
+        @staticmethod
+        def from_tag(tag:c_int8 , ptr:c_void_p ) -> Vector2d.IsZero:
+            if tag == 1:
+                return Vector2d.IsZero()
+            else:
+                raise ValueError('Unkown exception tag ' + str(tag))
     def __del__(self) -> None:
         lib.opensolid_free_stable(self.ptr)
     def __repr__(self) -> str:

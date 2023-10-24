@@ -1,4 +1,4 @@
-from opensolid import Point2d, Frame2d, Axis2d, Direction2d, Vector2d, Range, Tolerance, IsZero
+from opensolid import Point2d, Frame2d, Axis2d, Direction2d, Vector2d, Range, Tolerance
 from math import pi
 
 point = Point2d.xy(0, 1)
@@ -33,12 +33,12 @@ except Exception as err:
 print(Vector2d.x(5).magnitude_and_direction(tolerance=0.1))
 try:
   print(Vector2d.x(0).magnitude_and_direction(tolerance=0.1))
-except IsZero:
+except Vector2d.IsZero:
   print("Zero vector doesn't have direction")
 
 # Testing result
 print(Vector2d.x(5).direction(tolerance=0.1))
 try:
   print(Vector2d.x(0).direction(tolerance=0.1))
-except IsZero:
+except Vector2d.IsZero:
   print("Zero vector doesn't have direction")

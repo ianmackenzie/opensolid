@@ -3,6 +3,7 @@ module Codegen
   , execute
   , generate
   , fail
+  , reify
   , reifyType
   , reifyInstances
   , newName
@@ -35,6 +36,9 @@ execute (Codegen q) = q
 
 generate :: a -> Codegen a
 generate value = Codegen (Prelude.return value)
+
+reify :: TH.Name -> Codegen TH.Info
+reify name = Codegen (TH.reify name)
 
 reifyType :: TH.Name -> Codegen TH.Type
 reifyType name = Codegen (TH.reifyType name)

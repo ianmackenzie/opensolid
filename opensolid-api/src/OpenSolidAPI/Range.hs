@@ -6,7 +6,7 @@ import Range qualified
 
 range :: Class
 range =
-  cls ''Range.Range ['Range.minValue, 'Range.maxValue] $
+  cls ''Range.Range ['Range.minValue, 'Range.maxValue] [] $
     [ static 'Range.unsafe ["min", "max"]
     , static 'Range.constant ["value"]
     , -- TODO: from doesn't work in Python

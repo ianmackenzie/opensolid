@@ -4,6 +4,7 @@ module List
   , length
   , map
   , reverseMap
+  , indexedMap
   , map2
   , map3
   , map4
@@ -54,6 +55,9 @@ length = Data.List.length
 
 map :: (a -> b) -> List a -> List b
 map = Data.List.map
+
+indexedMap :: (Int -> a -> b) -> List a -> List b
+indexedMap fn = Data.List.zipWith fn [0 ..]
 
 reverseMap :: (a -> b) -> List a -> List b
 reverseMap function list = foldLeft (\acc item -> function item : acc) [] list
