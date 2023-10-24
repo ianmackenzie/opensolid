@@ -59,10 +59,10 @@ var name =
   Var (Ident name ()) ()
 
 -- function call, takes a function name and a list of arguments
-call :: String -> List (Expr ()) -> Expr ()
-call name args =
+call :: Expr () -> List (Expr ()) -> Expr ()
+call fnExpr args =
   Call
-    (var name)
+    fnExpr
     (fmap (\e -> ArgExpr e ()) args)
     ()
 
@@ -149,7 +149,7 @@ destructor =
     "__del__"
     [("self", Nothing, Nothing)]
     (var "None")
-    [StmtExpr (call "lib.opensolid_free" [var "self.ptr"]) ()]
+    [StmtExpr (call (var "lib.opensolid_free_stable") [var "self.ptr"]) ()]
 
 -- Representation method, defined by class name and properties, that are stringified
 represenation :: String -> List String -> Statement ()
@@ -165,7 +165,7 @@ represenation name properties =
                 (string (name <> "("))
                 ( intersperse
                     (string ", ")
-                    (fmap (\prop -> call "str" [call ("self." <> prop) []]) properties)
+                    (fmap (\prop -> call (var "str") [call (var ("self." <> prop)) []]) properties)
                 )
                 `plus` string ")"
             )

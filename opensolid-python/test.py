@@ -15,6 +15,9 @@ rng = Range.unsafe(0, 5)
 print(rng.intersection(Range.unsafe(6, 7)))
 print(rng.intersection(Range.unsafe(3, 7)))
 
+# Testing returning a tuple
+print(rng.bisect())
+
 # Testing tolerance
 with Tolerance(1):
   print(rng.tolerant())
@@ -25,6 +28,13 @@ try:
   print(rng.tolerant())
 except Exception as err:
   print(err)  # Tolerance is not set
+
+# Testing result of a tuple
+print(Vector2d.x(5).magnitude_and_direction(tolerance=0.1))
+try:
+  print(Vector2d.x(0).magnitude_and_direction(tolerance=0.1))
+except IsZero:
+  print("Zero vector doesn't have direction")
 
 # Testing result
 print(Vector2d.x(5).direction(tolerance=0.1))
