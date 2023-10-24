@@ -2,7 +2,7 @@ from __future__ import annotations
 from contextlib import contextmanager
 from typing import (Optional, Callable, TypeVar, Tuple)
 import platform
-from ctypes import *
+from ctypes import (c_bool, c_double, c_int8, c_void_p, cast, cdll, POINTER, Structure)
 global lib
 system = platform.system()
 if system == 'Darwin':
