@@ -18,11 +18,9 @@ import Prelude
   ( Either (..)
   , IO
   , Maybe (..)
-  , Num (fromInteger)
   , concatMap
   , error
   , fmap
-  , fromInteger
   , map
   , putStrLn
   , show
@@ -47,7 +45,7 @@ setup =
   literalStatements
     [ "from __future__ import annotations"
     , "from contextlib import contextmanager"
-    , "from typing import Optional"
+    , "from typing import Optional, Callable, TypeVar, Tuple"
     , "import platform"
     , "from ctypes import *"
     , "global lib"
@@ -61,6 +59,7 @@ setup =
         , "    raise Exception('System ' + system + ' is not supported')"
         ]
     , "lib.opensolid_free.argtypes = [c_void_p]"
+    , "lib.opensolid_free_stable.argtypes = [c_void_p]"
     , "global_tolerance = None"
     , unlines
         [ "@contextmanager"
@@ -72,13 +71,59 @@ setup =
         , "    finally:"
         , "        global_tolerance = saved_tolerance"
         ]
+    , "A = TypeVar('A')"
+    , "B = TypeVar('B')"
     , unlines
-        [ "class RESULT(Structure):"
+        [ "def maybe_reader(read_success: Callable[[c_void_p], A]) -> Callable[[c_void_p], Optional[A]]:"
+        , "    return lambda ptr: read_success(ptr) if ptr else None"
+        ]
+    , unlines
+        [ "class Tuple2Structure(Structure):"
+        , "    _fields_ = [('ptr1', c_void_p), ('ptr2', c_void_p)]"
+        ]
+    , unlines
+        [ "def tuple2_reader(read_a: Callable[[c_void_p], A], read_b: Callable[[c_void_p], B]) -> Callable[[c_void_p], Tuple[A, B]]:"
+        , "    def read(ptr: c_void_p) -> Tuple[A, B]:"
+        , "        tuple2_struct = cast(ptr, POINTER(Tuple2Structure)).contents"
+        , "        res = (read_a(tuple2_struct.ptr1), read_b(tuple2_struct.ptr2))"
+        , "        lib.opensolid_free(ptr)"
+        , "        return res"
+        , "    return read"
+        ]
+    , unlines
+        [ "class ResultStructure(Structure):"
         , "    _fields_ = [('ptr', c_void_p), ('tag', c_int8)]"
         ]
     , unlines
+        [ "def result_reader(read_error: Callable[[c_int8, c_void_p], Exception], read_success: Callable[[c_void_p], A]) -> Callable[[c_void_p], A]:"
+        , "    def read(ptr: c_void_p) -> A:"
+        , "        result_struct = cast(ptr, POINTER(ResultStructure)).contents"
+        , "        tag = result_struct.tag"
+        , "        ptr1 = result_struct.ptr"
+        , "        lib.opensolid_free(ptr)"
+        , "        if tag == 0:"
+        , "            return read_success(ptr1)"
+        , "        else:"
+        , "            raise read_error(tag, ptr1)"
+        , "    return read"
+        ]
+    , unlines
+        [ "def read_float(ptr: c_void_p) -> float:"
+        , "    val = float(cast(ptr, POINTER(c_double)).contents.value)"
+        , "    lib.opensolid_free(ptr)"
+        , "    return val"
+        ]
+    , unlines
+        [ "def read_bool(ptr: c_void_p) -> bool:"
+        , "    val = bool(cast(ptr, POINTER(c_bool)).contents.value)"
+        , "    lib.opensolid_free(ptr)"
+        , "    return val"
+        ]
+    , -- TODO: codegen this
+      unlines
         [ "class IsZero(Exception):"
-        , "    pass"
+        , "    def __init__(self, tag: c_int8, ptr: c_void_p):"
+        , "        lib.opensolid_free(ptr)"
         ]
     ]
 
@@ -124,7 +169,7 @@ apiFunction (Function kind ffiName pyName pyArgs retType) =
                         pyName
                         (withTolArg tolerance (map (\(arg, typ) -> (arg, Just (pyType typ), Nothing)) restArgs))
                         (pyType retType)
-                        (withTolBody tolerance (fnBody retType (PY.call libName (map (uncurry argExpr) (withTolExp tolerance restArgs)))))
+                        (withTolBody tolerance (fnBody retType (PY.call (PY.var libName) (map (uncurry argExpr) (withTolExp tolerance restArgs)))))
                     )
                 Method ->
                   let argsWithoutLast = removeLast restArgs
@@ -132,7 +177,7 @@ apiFunction (Function kind ffiName pyName pyArgs retType) =
                         pyName
                         (withTolArg tolerance (("self", Nothing, Nothing) : map (\(arg, typ) -> (arg, Just (pyType typ), Nothing)) argsWithoutLast))
                         (pyType retType)
-                        (withTolBody tolerance (fnBody retType (PY.call libName (map (uncurry argExpr) (withTolExp tolerance argsWithoutLast) ++ [PY.var "self.ptr"]))))
+                        (withTolBody tolerance (fnBody retType (PY.call (PY.var libName) (map (uncurry argExpr) (withTolExp tolerance argsWithoutLast) ++ [PY.var "self.ptr"]))))
            ]
 
 removeLast :: List a -> List a
@@ -146,39 +191,27 @@ splitTolerance [] = (Nothing, [])
 splitTolerance ((tol, ImplicitTolerance) : rest) = (Just (tol, ImplicitTolerance), rest)
 splitTolerance rest = (Nothing, rest)
 
+exprReader :: ValueType -> Expr ()
+exprReader typ =
+  case typ of
+    Pointer p -> PY.var p
+    Tuple2 a b -> PY.call (PY.var "tuple2_reader") [exprReader a, exprReader b]
+    Result err succ -> PY.call (PY.var "result_reader") [PY.var err, exprReader succ]
+    Maybe succ -> PY.call (PY.var "maybe_reader") [exprReader succ]
+    Float -> PY.var "read_float"
+    Boolean -> PY.var "read_bool"
+    ImplicitTolerance -> PY.var "read_float"
+
 fnBody :: ValueType -> Expr () -> [Statement ()]
 fnBody typ exp =
-  case typ of
-    Pointer p -> [Return (Just (PY.call p [exp])) ()]
-    Result err (Pointer p) ->
-      [ PY.set "ret_val" exp
-      , PY.set "ret_tag" (PY.var "ret_val.contents.tag")
-      , PY.set "ret_ptr" (PY.var "ret_val.contents.ptr")
-      , StmtExpr (PY.call "lib.free" [PY.var "ret_val"]) ()
-      , Conditional
-          [
-            ( PY.var "ret_tag" `PY.eq` PY.int 0
-            , [Return (Just (PY.call p [PY.var "ret_ptr"])) ()]
-            )
-          ]
-          -- TODO: construct an error based on tag and throw it
-          (literalStatement ("raise " <> err <> "()"))
-          ()
-      ]
-    Maybe (Pointer p) ->
-      [ PY.set "ret_val" exp
-      , Return
-          ( Just
-              ( CondExpr
-                  (PY.call p [PY.var "ret_val"]) -- true
-                  (PY.var "ret_val") -- condition
-                  (PY.var "None") -- false
-                  ()
-              )
-          )
-          ()
-      ]
-    _ -> [Return (Just exp) ()]
+  [Return (Just expression) ()]
+ where
+  expression = case typ of
+    Pointer _ -> PY.call (exprReader typ) [exp]
+    Tuple2 _ _ -> PY.call (exprReader typ) [exp]
+    Result _ _ -> PY.call (exprReader typ) [exp]
+    Maybe _ -> PY.call (exprReader typ) [exp]
+    _ -> exp
 
 argExpr :: String -> ValueType -> Expr ()
 argExpr var typ =
@@ -195,7 +228,8 @@ cType typ =
     Float -> PY.var "c_double"
     Boolean -> PY.var "c_bool"
     Maybe _ -> PY.var "c_void_p"
-    Result _ _ -> PY.call "POINTER" [PY.var "RESULT"]
+    Result _ _ -> PY.var "c_void_p"
+    Tuple2 _ _ -> PY.var "c_void_p"
 
 pyType :: ValueType -> Expr ()
 pyType typ =
@@ -206,6 +240,7 @@ pyType typ =
     Boolean -> PY.var "bool"
     Maybe nestedTyp -> Subscript (PY.var "Optional") (pyType nestedTyp) ()
     Result _ val -> pyType val -- we throw an exception in case of an err
+    Tuple2 val1 val2 -> Subscript (PY.var "Tuple") (Tuple [pyType val1, pyType val2] ()) ()
 
 main :: IO ()
 main = do

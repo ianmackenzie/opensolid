@@ -23,5 +23,6 @@ data ValueType
   | Boolean
   | Maybe ValueType
   | Result String ValueType
+  | Tuple2 ValueType ValueType
   | ImplicitTolerance
   deriving (Eq)

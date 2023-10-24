@@ -1,6 +1,6 @@
 from __future__ import annotations
 from contextlib import contextmanager
-from typing import Optional
+from typing import (Optional, Callable, TypeVar, Tuple)
 import platform
 from ctypes import *
 global lib
@@ -12,6 +12,7 @@ elif system == 'Linux':
 else:
     raise Exception('System ' + system + ' is not supported')
 lib.opensolid_free.argtypes = [c_void_p]
+lib.opensolid_free_stable.argtypes = [c_void_p]
 global_tolerance = None
 @contextmanager
 def Tolerance(new_tolerance:float ):
@@ -21,10 +22,43 @@ def Tolerance(new_tolerance:float ):
         yield
     finally:
         global_tolerance = saved_tolerance
-class RESULT(Structure):
+A = TypeVar('A')
+B = TypeVar('B')
+def maybe_reader(read_success:Callable[[c_void_p], A] ) -> Callable[[c_void_p], Optional[A]]:
+    return lambda ptr: read_success(ptr) if ptr else None
+class Tuple2Structure(Structure):
+    _fields_ = [('ptr1', c_void_p), ('ptr2', c_void_p)]
+def tuple2_reader(read_a:Callable[[c_void_p], A] , read_b:Callable[[c_void_p], B] ) -> Callable[[c_void_p], Tuple[A, B]]:
+    def read(ptr:c_void_p ) -> Tuple[A, B]:
+        tuple2_struct = cast(ptr, POINTER(Tuple2Structure)).contents
+        res = (read_a(tuple2_struct.ptr1), read_b(tuple2_struct.ptr2))
+        lib.opensolid_free(ptr)
+        return res
+    return read
+class ResultStructure(Structure):
     _fields_ = [('ptr', c_void_p), ('tag', c_int8)]
+def result_reader(read_error:Callable[[c_int8, c_void_p], Exception] , read_success:Callable[[c_void_p], A] ) -> Callable[[c_void_p], A]:
+    def read(ptr:c_void_p ) -> A:
+        result_struct = cast(ptr, POINTER(ResultStructure)).contents
+        tag = result_struct.tag
+        ptr1 = result_struct.ptr
+        lib.opensolid_free(ptr)
+        if tag == 0:
+            return read_success(ptr1)
+        else:
+            raise read_error(tag, ptr1)
+    return read
+def read_float(ptr:c_void_p ) -> float:
+    val = float(cast(ptr, POINTER(c_double)).contents.value)
+    lib.opensolid_free(ptr)
+    return val
+def read_bool(ptr:c_void_p ) -> bool:
+    val = bool(cast(ptr, POINTER(c_bool)).contents.value)
+    lib.opensolid_free(ptr)
+    return val
 class IsZero(Exception):
-    pass
+    def __init__(self, tag:c_int8 , ptr:c_void_p ):
+        lib.opensolid_free(ptr)
 class Axis2d:
     def __init__(self, ptr:c_void_p ) -> None:
         self.ptr = ptr
@@ -52,7 +86,7 @@ class Axis2d:
     def through(point:Point2d , direction:Direction2d ) -> Axis2d:
         return Axis2d(lib.opensolid_axis2d_through(point.ptr, direction.ptr))
     def __del__(self) -> None:
-        lib.opensolid_free(self.ptr)
+        lib.opensolid_free_stable(self.ptr)
     def __repr__(self) -> str:
         return "Axis2d(" + str(self.origin_point()) + ", " + str(self.direction()) + ")"
 class Bounds2d:
@@ -98,15 +132,14 @@ class Bounds2d:
     lib.opensolid_bounds2d_intersection.argtypes = [c_void_p, c_void_p]
     lib.opensolid_bounds2d_intersection.restype = c_void_p
     def intersection(self, bounds1:Bounds2d ) -> Optional[Bounds2d]:
-        ret_val = lib.opensolid_bounds2d_intersection(bounds1.ptr, self.ptr)
-        return Bounds2d(ret_val) if ret_val else None
+        return maybe_reader(Bounds2d)(lib.opensolid_bounds2d_intersection(bounds1.ptr, self.ptr))
     lib.opensolid_bounds2d_interpolate.argtypes = [c_void_p, c_double, c_double]
     lib.opensolid_bounds2d_interpolate.restype = c_void_p
     @staticmethod
     def interpolate(bounds:Bounds2d , u:float , v:float ) -> Point2d:
         return Point2d(lib.opensolid_bounds2d_interpolate(bounds.ptr, u, v))
     def __del__(self) -> None:
-        lib.opensolid_free(self.ptr)
+        lib.opensolid_free_stable(self.ptr)
     def __repr__(self) -> str:
         return "Bounds2d(" + str(self.x_coordinate()) + ", " + str(self.y_coordinate()) + ")"
 class Direction2d:
@@ -214,7 +247,7 @@ class Direction2d:
     def relative_to(self, frame:Frame2d ) -> Direction2d:
         return Direction2d(lib.opensolid_direction2d_relative_to(frame.ptr, self.ptr))
     def __del__(self) -> None:
-        lib.opensolid_free(self.ptr)
+        lib.opensolid_free_stable(self.ptr)
     def __repr__(self) -> str:
         return "Direction2d(" + str(self.x_component()) + ", " + str(self.y_component()) + ")"
 class Frame2d:
@@ -271,7 +304,7 @@ class Frame2d:
     def from_y_axis(axis:Axis2d ) -> Frame2d:
         return Frame2d(lib.opensolid_frame2d_from_y_axis(axis.ptr))
     def __del__(self) -> None:
-        lib.opensolid_free(self.ptr)
+        lib.opensolid_free_stable(self.ptr)
     def __repr__(self) -> str:
         return "Frame2d(" + str(self.origin_point()) + ", " + str(self.x_direction()) + ", " + str(self.y_direction()) + ")"
 class Point2d:
@@ -352,7 +385,7 @@ class Point2d:
     def y(py:float ) -> Point2d:
         return Point2d(lib.opensolid_point2d_y(py))
     def __del__(self) -> None:
-        lib.opensolid_free(self.ptr)
+        lib.opensolid_free_stable(self.ptr)
     def __repr__(self) -> str:
         return "Point2d(" + str(self.x_coordinate()) + ", " + str(self.y_coordinate()) + ")"
 class Range:
@@ -385,6 +418,10 @@ class Range:
     lib.opensolid_range_midpoint.restype = c_double
     def midpoint(self) -> float:
         return lib.opensolid_range_midpoint(self.ptr)
+    lib.opensolid_range_endpoints.argtypes = [c_void_p]
+    lib.opensolid_range_endpoints.restype = c_void_p
+    def endpoints(self) -> Tuple[float, float]:
+        return tuple2_reader(read_float, read_float)(lib.opensolid_range_endpoints(self.ptr))
     lib.opensolid_range_width.argtypes = [c_void_p]
     lib.opensolid_range_width.restype = c_double
     def width(self) -> float:
@@ -417,6 +454,10 @@ class Range:
         if tolerance is None and global_tolerance is None:
             raise Exception('Tolerance is not set')
         return Range(lib.opensolid_range_tolerant(tolerance or global_tolerance, self.ptr))
+    lib.opensolid_range_bisect.argtypes = [c_void_p]
+    lib.opensolid_range_bisect.restype = c_void_p
+    def bisect(self) -> Tuple[Range, Range]:
+        return tuple2_reader(Range, Range)(lib.opensolid_range_bisect(self.ptr))
     lib.opensolid_range_is_atomic.argtypes = [c_void_p]
     lib.opensolid_range_is_atomic.restype = c_bool
     def is_atomic(self) -> bool:
@@ -498,10 +539,9 @@ class Range:
     lib.opensolid_range_intersection.argtypes = [c_void_p, c_void_p]
     lib.opensolid_range_intersection.restype = c_void_p
     def intersection(self, range1:Range ) -> Optional[Range]:
-        ret_val = lib.opensolid_range_intersection(range1.ptr, self.ptr)
-        return Range(ret_val) if ret_val else None
+        return maybe_reader(Range)(lib.opensolid_range_intersection(range1.ptr, self.ptr))
     def __del__(self) -> None:
-        lib.opensolid_free(self.ptr)
+        lib.opensolid_free_stable(self.ptr)
     def __repr__(self) -> str:
         return "Range(" + str(self.min_value()) + ", " + str(self.max_value()) + ")"
 class Vector2d:
@@ -573,18 +613,17 @@ class Vector2d:
     def angle(self) -> float:
         return lib.opensolid_vector2d_angle(self.ptr)
     lib.opensolid_vector2d_direction.argtypes = [c_double, c_void_p]
-    lib.opensolid_vector2d_direction.restype = POINTER(RESULT)
+    lib.opensolid_vector2d_direction.restype = c_void_p
     def direction(self, tolerance:Optional[float] =None) -> Direction2d:
         if tolerance is None and global_tolerance is None:
             raise Exception('Tolerance is not set')
-        ret_val = lib.opensolid_vector2d_direction(tolerance or global_tolerance, self.ptr)
-        ret_tag = ret_val.contents.tag
-        ret_ptr = ret_val.contents.ptr
-        lib.free(ret_val)
-        if ret_tag == 0:
-            return Direction2d(ret_ptr)
-        else:
-            raise IsZero()
+        return result_reader(IsZero, Direction2d)(lib.opensolid_vector2d_direction(tolerance or global_tolerance, self.ptr))
+    lib.opensolid_vector2d_magnitude_and_direction.argtypes = [c_double, c_void_p]
+    lib.opensolid_vector2d_magnitude_and_direction.restype = c_void_p
+    def magnitude_and_direction(self, tolerance:Optional[float] =None) -> Tuple[float, Direction2d]:
+        if tolerance is None and global_tolerance is None:
+            raise Exception('Tolerance is not set')
+        return result_reader(IsZero, tuple2_reader(read_float, Direction2d))(lib.opensolid_vector2d_magnitude_and_direction(tolerance or global_tolerance, self.ptr))
     lib.opensolid_vector2d_normalize.argtypes = [c_void_p]
     lib.opensolid_vector2d_normalize.restype = c_void_p
     def normalize(self) -> Vector2d:
@@ -606,6 +645,6 @@ class Vector2d:
     def relative_to(self, frame:Frame2d ) -> Vector2d:
         return Vector2d(lib.opensolid_vector2d_relative_to(frame.ptr, self.ptr))
     def __del__(self) -> None:
-        lib.opensolid_free(self.ptr)
+        lib.opensolid_free_stable(self.ptr)
     def __repr__(self) -> str:
         return "Vector2d(" + str(self.x_component()) + ", " + str(self.y_component()) + ")"

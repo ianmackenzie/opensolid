@@ -1,20 +1,8 @@
-{-# OPTIONS_GHC -Wno-orphans #-}
-
 module OpenSolidAPI.Vector2d (vector2d) where
 
-import Foreign qualified
-import Internal (Class, TaggedError (..), cls, method, static)
+import Internal (Class, cls, method, static)
 import OpenSolid hiding (fromInteger)
-import Text qualified
 import Vector2d qualified
-import Prelude (fromInteger)
-import Prelude qualified
-
--- TODO: codegen this
-instance TaggedError Vector2d.IsZero where
-  fromTaggedPtr (1 :: Foreign.Word8) _ = Prelude.return Vector2d.IsZero
-  fromTaggedPtr tag _ = Prelude.error (Text.toChars (Text.concat ["Unexpected tag ", Text.fromChars (Prelude.show tag)]))
-  toTaggedPtr Vector2d.IsZero = Prelude.return (1 :: Foreign.Word8, Foreign.nullPtr)
 
 vector2d :: Class
 vector2d =
@@ -37,9 +25,8 @@ vector2d =
     , method 'Vector2d.squaredMagnitude ["vector"]
     , method 'Vector2d.angle ["vector"]
     , method 'Vector2d.direction ["vector"]
-    , -- TODO: Support Result of Tuple
-      -- , method 'Vector2d.magnitudeAndDirection ["vector"]
-      method 'Vector2d.normalize ["vector"]
+    , method 'Vector2d.magnitudeAndDirection ["vector"]
+    , method 'Vector2d.normalize ["vector"]
     , method 'Vector2d.rotateRight ["vector"]
     , method 'Vector2d.rotateLeft ["vector"]
     , method 'Vector2d.placeIn ["frame", "vector"]
