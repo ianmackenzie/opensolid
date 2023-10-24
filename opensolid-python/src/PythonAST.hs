@@ -9,172 +9,169 @@ module PythonAST
   , set
   , int
   , cls
+  , ident
+  , subscript
   , and
+  , return
+  , stmtExpr
+  , conditional
   , or
-  , constructor
-  , cType
-  , destructor
+  , cFunctionType
   , def
   , staticmethod
-  , Statement (..)
+  , literalStatement
+  , literalStatements
+  , Statement
+  , Expr
+  , prettyStatements
   )
 where
 
-import Data.List (intersperse)
-import Data.String (String, fromString)
-import Language.Python.Common hiding (int, (<>))
-import OpenSolid (List)
-import Prelude
-  ( Foldable (foldl)
-  , Functor (..)
-  , Integer
-  , Maybe (..)
-  , Show (..)
-  , concat
-  , (<>)
-  )
+import Control.Monad (void)
+import Debug qualified
+import Language.Python.Common qualified as P
+import Language.Python.Version3.Parser qualified as Parser
+import List qualified
+import OpenSolid
+import Text qualified
+import Prelude qualified
 
-dot :: Expr () -> String -> Expr ()
+type Statement = P.Statement ()
+
+type Expr = P.Expr ()
+
+type Ident = P.Ident ()
+
+type Parameter = P.Parameter ()
+
+prettyStatements :: List Statement -> Text
+prettyStatements stmts =
+  Text.fromChars (P.prettyText (P.Module stmts))
+
+return :: P.Expr () -> P.Statement ()
+return expr =
+  P.Return (Just expr) ()
+
+conditional :: List (Expr, List Statement) -> List Statement -> Statement
+conditional conditions elseStmt =
+  P.Conditional conditions elseStmt ()
+
+-- Expression as a statement
+stmtExpr :: Expr -> Statement
+stmtExpr expr = P.StmtExpr expr ()
+
+literalStatement :: Text -> List Statement
+literalStatement line =
+  case Parser.parseStmt (Text.toChars line) (Text.toChars "<literal>") of
+    Prelude.Left err -> Prelude.error (Text.toChars (Debug.show err))
+    Prelude.Right (statements, _) -> List.map void statements
+
+literalStatements :: List Text -> List Statement
+literalStatements lst = List.collect literalStatement lst
+
+dot :: Expr -> Text -> Expr
 dot exp iden =
-  Dot exp (Ident iden ()) ()
+  P.Dot exp (ident iden) ()
 
 -- ctypes type definition for a function
 -- `cType "lib.opensolid_point2d_xy" ["c_double", "c_double"] "c_void_p"` becomes:
 --     lib.opensolid_point2d_xy.argtypes = [c_double, c_double]
 --     lib.opensolid_point2d_xy.restype = c_void_p
-cType :: String -> List (Expr ()) -> Expr () -> List (Statement ())
-cType fname argTypes resType =
-  [ set (fname <> ".argtypes") (List argTypes ())
-  , set (fname <> ".restype") resType
+cFunctionType :: Expr -> List Expr -> Expr -> List Statement
+cFunctionType fname argTypes resType =
+  [ set (fname `dot` Text.toString "argtypes") (P.List argTypes ())
+  , set (fname `dot` "restype") resType
   ]
 
 -- a string literal, surrounded in double quotes, because
 -- language-python doesn't do that automatically
 -- TODO: should we protect against double quotes within a string?
-string :: String -> Expr ()
+string :: Text -> Expr
 string st =
-  Strings ["\"" <> st <> "\""] ()
+  P.Strings [Text.toChars (Text.concat ["\"", st, "\""])] ()
 
-int :: Integer -> Expr ()
+int :: Int -> Expr
 int val =
-  Int val (show val) ()
+  P.Int (Prelude.fromIntegral val) (Text.toChars (Debug.show val)) ()
+
+ident :: Text -> Ident
+ident name =
+  P.Ident (Text.toChars name) ()
 
 -- variable
-var :: String -> Expr ()
+var :: Text -> Expr
 var name =
-  Var (Ident name ()) ()
+  P.Var (ident name) ()
 
 -- function call, takes a function name and a list of arguments
-call :: Expr () -> List (Expr ()) -> Expr ()
+call :: Expr -> List Expr -> Expr
 call fnExpr args =
-  Call
+  P.Call
     fnExpr
-    (fmap (\e -> ArgExpr e ()) args)
+    (List.map (\e -> P.ArgExpr e ()) args)
     ()
 
 -- function parameter with an optional type declaration
-param :: String -> Maybe (Expr ()) -> Maybe (Expr ()) -> Parameter ()
+param :: Text -> Maybe Expr -> Maybe Expr -> Parameter
 param name typ defaultValue =
-  Param (Ident name ()) typ defaultValue ()
+  P.Param (ident name) typ defaultValue ()
 
 -- Python function
-def :: String -> List (String, Maybe (Expr ()), Maybe (Expr ())) -> Expr () -> List (Statement ()) -> Statement ()
+def :: Text -> List (Text, Maybe Expr, Maybe Expr) -> Expr -> List Statement -> Statement
 def name params retType body =
-  Fun
-    (Ident name ())
-    (fmap (\(n, t, v) -> param n t v) params)
+  P.Fun
+    (ident name)
+    (List.map (\(n, t, v) -> param n t v) params)
     (Just retType)
     body
     ()
 
 -- Assignment statement `var = expr`
-set :: String -> Expr () -> Statement ()
+set :: Expr -> Expr -> Statement
 set name expr =
-  Assign [var name] expr ()
+  P.Assign [name] expr ()
 
 -- Python class declaration
-cls :: String -> List String -> List (Statement ()) -> Statement ()
-cls name representationProps members =
-  Class
-    (Ident name ())
-    []
-    ( concat
-        [ [constructor]
-        , members
-        ,
-          [ destructor
-          , represenation name representationProps
-          ]
-        ]
-    )
+cls :: Text -> List Expr -> List Statement -> Statement
+cls name args members =
+  P.Class
+    (ident name)
+    (List.map (\a -> P.ArgExpr a ()) args)
+    members
     ()
 
 -- A static method decorator
-staticmethod :: Statement () -> Statement ()
+staticmethod :: Statement -> Statement
 staticmethod func =
-  Decorated [Decorator [Ident "staticmethod" ()] [] ()] func ()
+  P.Decorated [P.Decorator [ident "staticmethod"] [] ()] func ()
 
 -- A plus operator `a + b`
-plus :: Expr () -> Expr () -> Expr ()
+plus :: Expr -> Expr -> Expr
 plus a b =
-  BinaryOp (Plus ()) a b ()
+  P.BinaryOp (P.Plus ()) a b ()
 
 -- An equality operator `a == b`
-eq :: Expr () -> Expr () -> Expr ()
+eq :: Expr -> Expr -> Expr
 eq a b =
-  BinaryOp (Equality ()) a b ()
+  P.BinaryOp (P.Equality ()) a b ()
 
 -- An is operator `a is b`
-is :: Expr () -> Expr () -> Expr ()
+is :: Expr -> Expr -> Expr
 is a b =
-  BinaryOp (Is ()) a b ()
+  P.BinaryOp (P.Is ()) a b ()
 
 -- An and operator `a and b`
-and :: Expr () -> Expr () -> Expr ()
+and :: Expr -> Expr -> Expr
 and a b =
-  BinaryOp (And ()) a b ()
+  P.BinaryOp (P.And ()) a b ()
 
 -- An or operator `a or b`
-or :: Expr () -> Expr () -> Expr ()
+or :: Expr -> Expr -> Expr
 or a b =
-  BinaryOp (Or ()) a b ()
+  P.BinaryOp (P.Or ()) a b ()
 
--- A constructor from pointer
-constructor :: Statement ()
-constructor =
-  def
-    "__init__"
-    [("self", Nothing, Nothing), ("ptr", Just (var "c_void_p"), Nothing)]
-    (var "None")
-    [set "self.ptr" (var "ptr")]
-
--- Destructor
-destructor :: Statement ()
-destructor =
-  def
-    "__del__"
-    [("self", Nothing, Nothing)]
-    (var "None")
-    [StmtExpr (call (var "lib.opensolid_free_stable") [var "self.ptr"]) ()]
-
--- Representation method, defined by class name and properties, that are stringified
-represenation :: String -> List String -> Statement ()
-represenation name properties =
-  def
-    "__repr__"
-    [("self", Nothing, Nothing)]
-    (var "str")
-    [ Return
-        ( Just
-            ( foldl
-                plus
-                (string (name <> "("))
-                ( intersperse
-                    (string ", ")
-                    (fmap (\prop -> call (var "str") [call (var ("self." <> prop)) []]) properties)
-                )
-                `plus` string ")"
-            )
-        )
-        ()
-    ]
+subscript :: Expr -> List Expr -> Expr
+subscript var1 [var2] =
+  P.Subscript var1 var2 ()
+subscript var1 args =
+  P.Subscript var1 (P.Tuple args ()) ()

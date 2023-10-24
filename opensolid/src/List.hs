@@ -3,8 +3,8 @@ module List
   , isEmpty
   , length
   , map
-  , reverseMap
   , indexedMap
+  , reverseMap
   , map2
   , map3
   , map4
