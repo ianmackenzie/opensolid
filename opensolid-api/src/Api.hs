@@ -17,5 +17,11 @@ data Function
 
 data FunctionKind = Method | Static
 
-data ValueType = Pointer String | Float | Boolean | Maybe ValueType | ImplicitTolerance
+data ValueType
+  = Pointer String
+  | Float
+  | Boolean
+  | Maybe ValueType
+  | Result String ValueType
+  | ImplicitTolerance
   deriving (Eq)

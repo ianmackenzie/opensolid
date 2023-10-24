@@ -1,4 +1,4 @@
-from opensolid import Point2d, Frame2d, Axis2d, Direction2d, Range, Tolerance
+from opensolid import Point2d, Frame2d, Axis2d, Direction2d, Vector2d, Range, Tolerance, IsZero
 from math import pi
 
 point = Point2d.xy(0, 1)
@@ -15,13 +15,20 @@ rng = Range.unsafe(0, 5)
 print(rng.intersection(Range.unsafe(6, 7)))
 print(rng.intersection(Range.unsafe(3, 7)))
 
+# Testing tolerance
 with Tolerance(1):
   print(rng.tolerant())
   with Tolerance(2):
     print(rng.tolerant())
   print(rng.tolerant())
-
 try:
   print(rng.tolerant())
 except Exception as err:
   print(err)  # Tolerance is not set
+
+# Testing result
+print(Vector2d.x(5).direction(tolerance=0.1))
+try:
+  print(Vector2d.x(0).direction(tolerance=0.1))
+except IsZero:
+  print("Zero vector doesn't have direction")

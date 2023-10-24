@@ -1,3 +1,5 @@
+{-# OPTIONS_GHC -Wno-orphans #-}
+
 module Internal
   ( Class
   , Function
@@ -5,6 +7,7 @@ module Internal
   , api
   , cls
   , method
+  , TaggedError (..)
   , static
   )
 where
@@ -19,8 +22,9 @@ import Foreign.Storable (Storable)
 import Language.Haskell.TH qualified as TH
 import List qualified
 import Maybe qualified
-import OpenSolid
+import OpenSolid hiding (fromInteger)
 import Text qualified
+import Prelude (fromInteger)
 import Prelude qualified
 
 data Class = Class TH.Name (List TH.Name) (List Function)
@@ -107,7 +111,11 @@ apiFunctionType returnType = do
   Codegen.generate ([], typ)
 
 apiType :: TH.Type -> Codegen TH.Exp
-apiType (TH.AppT (TH.ConT containerTyp) nestedTyp) | containerTyp == ''Maybe = do
+apiType (TH.AppT (TH.AppT (TH.ConT containerName) errTyp) nestedTyp) | containerName == ''Result = do
+  typ <- apiType nestedTyp
+  err <- typeNameBase errTyp
+  Codegen.generate (TH.ConE 'Api.Result `TH.AppE` err `TH.AppE` typ)
+apiType (TH.AppT (TH.ConT containerName) nestedTyp) | containerName == ''Maybe = do
   typ <- apiType nestedTyp
   Codegen.generate (TH.ConE 'Api.Maybe `TH.AppE` typ)
 apiType typ = do
@@ -206,8 +214,14 @@ ffiArgInfo typ = do
         )
 
 ffiReturnInfo :: TH.Exp -> TH.Type -> Codegen (TH.Exp, TH.Type)
-ffiReturnInfo expr (TH.AppT (TH.ConT containerTyp) nestedTyp)
-  | containerTyp == ''Maybe = do
+ffiReturnInfo expr (TH.AppT (TH.AppT (TH.ConT containerName) errTyp) nestedTyp)
+  | containerName == ''Result = do
+      Codegen.generate $
+        ( TH.AppE (TH.VarE 'newResultPtr) expr
+        , TH.AppT (TH.ConT ''Foreign.Ptr) (TH.AppT (TH.AppT (TH.ConT containerName) errTyp) nestedTyp)
+        )
+ffiReturnInfo expr (TH.AppT (TH.ConT containerName) nestedTyp)
+  | containerName == ''Maybe = do
       isPtr <- isPointer nestedTyp
       Codegen.generate $
         if isPtr
@@ -249,6 +263,12 @@ newMaybeStorablePtr (Just val) = Prelude.do
   Foreign.poke ptr val
   Prelude.return ptr
 
+newResultPtr :: (Storable (Result a b)) => Result a b -> IO (Foreign.Ptr (Result a b))
+newResultPtr result = Prelude.do
+  ptr <- Foreign.malloc
+  Foreign.poke ptr result
+  Prelude.return ptr
+
 newPtr :: a -> IO (Foreign.Ptr ())
 newPtr val = Prelude.do
   stablePtr <- Foreign.newStablePtr val
@@ -256,6 +276,31 @@ newPtr val = Prelude.do
 
 derefPtr :: Foreign.Ptr () -> IO a
 derefPtr = Foreign.castPtrToStablePtr >> Foreign.deRefStablePtr
+
+class (ErrorMessage error) => TaggedError error where
+  fromTaggedPtr :: Foreign.Word8 -> Foreign.Ptr () -> IO error
+  toTaggedPtr :: error -> IO (Foreign.Word8, Foreign.Ptr ())
+
+pointerSize :: Int
+pointerSize = Foreign.sizeOf Foreign.nullPtr
+
+instance (TaggedError error) => Storable (Result error success) where
+  sizeOf _ = pointerSize + (1 :: Int) -- size of a pointer + 1 byte for the tag
+  alignment _ = Foreign.alignment Foreign.nullPtr
+  peek ptr = Prelude.do
+    voidPtr <- Foreign.peek (Foreign.castPtr ptr)
+    tag <- Foreign.peekByteOff ptr pointerSize
+    case tag of
+      (0 :: Foreign.Word8) -> Ok Prelude.<$> Foreign.deRefStablePtr (Foreign.castPtrToStablePtr voidPtr)
+      _ -> Error Prelude.<$> fromTaggedPtr tag voidPtr
+  poke ptr (Error err) = Prelude.do
+    (tag, errPtr) <- toTaggedPtr err
+    Foreign.poke (Foreign.castPtr ptr) errPtr
+    Foreign.pokeByteOff ptr pointerSize tag
+  poke ptr (Ok success) = Prelude.do
+    successPtr <- Foreign.castStablePtrToPtr Prelude.<$> Foreign.newStablePtr success
+    Foreign.poke (Foreign.castPtr ptr) successPtr
+    Foreign.pokeByteOff ptr pointerSize (0 :: Foreign.Word8)
 
 camelToSnake :: Text -> Text
 camelToSnake text = Text.fromChars (impl (Text.toChars text))

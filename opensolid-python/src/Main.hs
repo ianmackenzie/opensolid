@@ -18,9 +18,11 @@ import Prelude
   ( Either (..)
   , IO
   , Maybe (..)
+  , Num (fromInteger)
   , concatMap
   , error
   , fmap
+  , fromInteger
   , map
   , putStrLn
   , show
@@ -69,6 +71,14 @@ setup =
         , "        yield"
         , "    finally:"
         , "        global_tolerance = saved_tolerance"
+        ]
+    , unlines
+        [ "class RESULT(Structure):"
+        , "    _fields_ = [('ptr', c_void_p), ('tag', c_int8)]"
+        ]
+    , unlines
+        [ "class IsZero(Exception):"
+        , "    pass"
         ]
     ]
 
@@ -140,6 +150,21 @@ fnBody :: ValueType -> Expr () -> [Statement ()]
 fnBody typ exp =
   case typ of
     Pointer p -> [Return (Just (PY.call p [exp])) ()]
+    Result err (Pointer p) ->
+      [ PY.set "ret_val" exp
+      , PY.set "ret_tag" (PY.var "ret_val.contents.tag")
+      , PY.set "ret_ptr" (PY.var "ret_val.contents.ptr")
+      , StmtExpr (PY.call "lib.free" [PY.var "ret_val"]) ()
+      , Conditional
+          [
+            ( PY.var "ret_tag" `PY.eq` PY.int 0
+            , [Return (Just (PY.call p [PY.var "ret_ptr"])) ()]
+            )
+          ]
+          -- TODO: construct an error based on tag and throw it
+          (literalStatement ("raise " <> err <> "()"))
+          ()
+      ]
     Maybe (Pointer p) ->
       [ PY.set "ret_val" exp
       , Return
@@ -162,14 +187,15 @@ argExpr var typ =
     ImplicitTolerance -> PY.var var `PY.or` PY.var "global_tolerance"
     _ -> PY.var var
 
-cType :: ValueType -> String
+cType :: ValueType -> Expr ()
 cType typ =
   case typ of
-    ImplicitTolerance -> "c_double"
-    Pointer _ -> "c_void_p"
-    Float -> "c_double"
-    Boolean -> "c_bool"
-    Maybe _ -> "c_void_p"
+    ImplicitTolerance -> PY.var "c_double"
+    Pointer _ -> PY.var "c_void_p"
+    Float -> PY.var "c_double"
+    Boolean -> PY.var "c_bool"
+    Maybe _ -> PY.var "c_void_p"
+    Result _ _ -> PY.call "POINTER" [PY.var "RESULT"]
 
 pyType :: ValueType -> Expr ()
 pyType typ =
@@ -179,6 +205,7 @@ pyType typ =
     Float -> PY.var "float"
     Boolean -> PY.var "bool"
     Maybe nestedTyp -> Subscript (PY.var "Optional") (pyType nestedTyp) ()
+    Result _ val -> pyType val -- we throw an exception in case of an err
 
 main :: IO ()
 main = do
