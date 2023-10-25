@@ -200,8 +200,8 @@ destructor =
     [PY.stmtExpr (PY.call (PY.var "lib" `PY.dot` "opensolid_free_stable") [PY.var "self" `PY.dot` "ptr"])]
 
 -- Representation method, defined by class name and properties, that are stringified
-represenation :: Text -> List Text -> PY.Statement
-represenation name properties =
+representation :: Text -> List Text -> PY.Statement
+representation name properties =
   PY.def
     "__repr__"
     [("self", Nothing, Nothing)]
