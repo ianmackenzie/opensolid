@@ -27,6 +27,7 @@ executable opensolid-python
     , base
     , opensolid
     , opensolid-api
+    , process
   other-modules: PythonAST, Paths_opensolid_python
   autogen-modules: Paths_opensolid_python
   ghc-options:
