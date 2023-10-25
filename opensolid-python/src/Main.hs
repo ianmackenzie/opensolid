@@ -107,7 +107,7 @@ apiClass (Class name representationProps errorClasses functions) =
   PY.cls name [] $
     constructor
       : destructor
-      : represenation name representationProps
+      : representation name representationProps
       : List.collect apiFunction functions
       ++ List.collect (apiException name) errorClasses
 
