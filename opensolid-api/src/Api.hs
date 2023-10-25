@@ -32,4 +32,5 @@ data ValueType
   | Result Text Text ValueType -- Module name, Exception type, Successful type
   | Tuple2 ValueType ValueType
   | ImplicitTolerance
+  | Self
   deriving (Eq, Show)

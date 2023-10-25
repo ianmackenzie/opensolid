@@ -16,7 +16,7 @@ module PythonAST
   , stmtExpr
   , conditional
   , or
-  , cFunctionType
+  , list
   , def
   , staticmethod
   , literalStatement
@@ -41,8 +41,6 @@ type Statement = P.Statement ()
 type Expr = P.Expr ()
 
 type Ident = P.Ident ()
-
-type Parameter = P.Parameter ()
 
 prettyStatements :: List Statement -> Text
 prettyStatements stmts =
@@ -73,15 +71,9 @@ dot :: Expr -> Text -> Expr
 dot exp iden =
   P.Dot exp (ident iden) ()
 
--- ctypes type definition for a function
--- `cType "lib.opensolid_point2d_xy" ["c_double", "c_double"] "c_void_p"` becomes:
---     lib.opensolid_point2d_xy.argtypes = [c_double, c_double]
---     lib.opensolid_point2d_xy.restype = c_void_p
-cFunctionType :: Expr -> List Expr -> Expr -> List Statement
-cFunctionType fname argTypes resType =
-  [ set (fname `dot` Text.toString "argtypes") (P.List argTypes ())
-  , set (fname `dot` "restype") resType
-  ]
+list :: List Expr -> Expr
+list exprs =
+  P.List exprs ()
 
 -- a string literal, surrounded in double quotes, because
 -- language-python doesn't do that automatically
@@ -111,20 +103,14 @@ call fnExpr args =
     (List.map (\e -> P.ArgExpr e ()) args)
     ()
 
--- function parameter with an optional type declaration
-param :: Text -> Maybe Expr -> Maybe Expr -> Parameter
-param name typ defaultValue =
-  P.Param (ident name) typ defaultValue ()
-
 -- Python function
-def :: Text -> List (Text, Maybe Expr, Maybe Expr) -> Expr -> List Statement -> Statement
+def :: Text -> List (Text, Maybe Expr, Maybe Expr) -> Maybe Expr -> List Statement -> Statement
 def name params retType body =
-  P.Fun
-    (ident name)
-    (List.map (\(n, t, v) -> param n t v) params)
-    (Just retType)
-    body
-    ()
+  P.Fun (ident name) (List.map param params) retType body ()
+ where
+  -- function parameter with an optional type declaration
+  param (paramName, typ, defaultValue) =
+    P.Param (ident paramName) typ defaultValue ()
 
 -- Assignment statement `var = expr`
 set :: Expr -> Expr -> Statement

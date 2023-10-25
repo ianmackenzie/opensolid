@@ -56,10 +56,14 @@ def read_bool(ptr:c_void_p ) -> bool:
     val = bool(cast(ptr, POINTER(c_bool)).contents.value)
     lib.opensolid_free(ptr)
     return val
+def read_tolerance(tolerance:Optional[float] ) -> float:
+    if tolerance is None and global_tolerance is None:
+        raise Exception('Tolerance is not set')
+    return tolerance or global_tolerance
 class Axis2d:
-    def __init__(self, ptr:c_void_p ) -> None:
+    def __init__(self, ptr:c_void_p ):
         self.ptr = ptr
-    def __del__(self) -> None:
+    def __del__(self):
         lib.opensolid_free_stable(self.ptr)
     def __repr__(self) -> str:
         return "Axis2d(" + str(self.origin_point()) + ", " + str(self.direction()) + ")"
@@ -87,9 +91,9 @@ class Axis2d:
     def through(point:Point2d , direction:Direction2d ) -> Axis2d:
         return Axis2d(lib.opensolid_axis2d_through(point.ptr, direction.ptr))
 class Bounds2d:
-    def __init__(self, ptr:c_void_p ) -> None:
+    def __init__(self, ptr:c_void_p ):
         self.ptr = ptr
-    def __del__(self) -> None:
+    def __del__(self):
         lib.opensolid_free_stable(self.ptr)
     def __repr__(self) -> str:
         return "Bounds2d(" + str(self.x_coordinate()) + ", " + str(self.y_coordinate()) + ")"
@@ -140,9 +144,9 @@ class Bounds2d:
     def interpolate(bounds:Bounds2d , u:float , v:float ) -> Point2d:
         return Point2d(lib.opensolid_bounds2d_interpolate(bounds.ptr, u, v))
 class Direction2d:
-    def __init__(self, ptr:c_void_p ) -> None:
+    def __init__(self, ptr:c_void_p ):
         self.ptr = ptr
-    def __del__(self) -> None:
+    def __del__(self):
         lib.opensolid_free_stable(self.ptr)
     def __repr__(self) -> str:
         return "Direction2d(" + str(self.x_component()) + ", " + str(self.y_component()) + ")"
@@ -248,9 +252,9 @@ class Direction2d:
     def relative_to(self, frame:Frame2d ) -> Direction2d:
         return Direction2d(lib.opensolid_direction2d_relative_to(frame.ptr, self.ptr))
 class Frame2d:
-    def __init__(self, ptr:c_void_p ) -> None:
+    def __init__(self, ptr:c_void_p ):
         self.ptr = ptr
-    def __del__(self) -> None:
+    def __del__(self):
         lib.opensolid_free_stable(self.ptr)
     def __repr__(self) -> str:
         return "Frame2d(" + str(self.origin_point()) + ", " + str(self.x_direction()) + ", " + str(self.y_direction()) + ")"
@@ -264,15 +268,15 @@ class Frame2d:
     @staticmethod
     def at_point(point:Point2d ) -> Frame2d:
         return Frame2d(lib.opensolid_frame2d_at_point(point.ptr))
-    lib.opensolid_frame2d_origin_point.argtypes = []
+    lib.opensolid_frame2d_origin_point.argtypes = [c_void_p]
     lib.opensolid_frame2d_origin_point.restype = c_void_p
     def origin_point(self) -> Point2d:
         return Point2d(lib.opensolid_frame2d_origin_point(self.ptr))
-    lib.opensolid_frame2d_x_direction.argtypes = []
+    lib.opensolid_frame2d_x_direction.argtypes = [c_void_p]
     lib.opensolid_frame2d_x_direction.restype = c_void_p
     def x_direction(self) -> Direction2d:
         return Direction2d(lib.opensolid_frame2d_x_direction(self.ptr))
-    lib.opensolid_frame2d_y_direction.argtypes = []
+    lib.opensolid_frame2d_y_direction.argtypes = [c_void_p]
     lib.opensolid_frame2d_y_direction.restype = c_void_p
     def y_direction(self) -> Direction2d:
         return Direction2d(lib.opensolid_frame2d_y_direction(self.ptr))
@@ -305,9 +309,9 @@ class Frame2d:
     def from_y_axis(axis:Axis2d ) -> Frame2d:
         return Frame2d(lib.opensolid_frame2d_from_y_axis(axis.ptr))
 class Point2d:
-    def __init__(self, ptr:c_void_p ) -> None:
+    def __init__(self, ptr:c_void_p ):
         self.ptr = ptr
-    def __del__(self) -> None:
+    def __del__(self):
         lib.opensolid_free_stable(self.ptr)
     def __repr__(self) -> str:
         return "Point2d(" + str(self.x_coordinate()) + ", " + str(self.y_coordinate()) + ")"
@@ -386,9 +390,9 @@ class Point2d:
     def y(py:float ) -> Point2d:
         return Point2d(lib.opensolid_point2d_y(py))
 class Range:
-    def __init__(self, ptr:c_void_p ) -> None:
+    def __init__(self, ptr:c_void_p ):
         self.ptr = ptr
-    def __del__(self) -> None:
+    def __del__(self):
         lib.opensolid_free_stable(self.ptr)
     def __repr__(self) -> str:
         return "Range(" + str(self.min_value()) + ", " + str(self.max_value()) + ")"
@@ -438,9 +442,7 @@ class Range:
     lib.opensolid_range_approximately_includes.argtypes = [c_double, c_double, c_void_p]
     lib.opensolid_range_approximately_includes.restype = c_bool
     def approximately_includes(self, value:float , tolerance:Optional[float] =None) -> bool:
-        if tolerance is None and global_tolerance is None:
-            raise Exception('Tolerance is not set')
-        return lib.opensolid_range_approximately_includes(tolerance or global_tolerance, value, self.ptr)
+        return lib.opensolid_range_approximately_includes(read_tolerance(tolerance), value, self.ptr)
     lib.opensolid_range_contains.argtypes = [c_void_p, c_void_p]
     lib.opensolid_range_contains.restype = c_bool
     def contains(self, range2:Range ) -> bool:
@@ -452,9 +454,7 @@ class Range:
     lib.opensolid_range_tolerant.argtypes = [c_double, c_void_p]
     lib.opensolid_range_tolerant.restype = c_void_p
     def tolerant(self, tolerance:Optional[float] =None) -> Range:
-        if tolerance is None and global_tolerance is None:
-            raise Exception('Tolerance is not set')
-        return Range(lib.opensolid_range_tolerant(tolerance or global_tolerance, self.ptr))
+        return Range(lib.opensolid_range_tolerant(read_tolerance(tolerance), self.ptr))
     lib.opensolid_range_bisect.argtypes = [c_void_p]
     lib.opensolid_range_bisect.restype = c_void_p
     def bisect(self) -> Tuple[Range, Range]:
@@ -542,9 +542,9 @@ class Range:
     def intersection(self, range1:Range ) -> Optional[Range]:
         return maybe_reader(Range)(lib.opensolid_range_intersection(range1.ptr, self.ptr))
 class Vector2d:
-    def __init__(self, ptr:c_void_p ) -> None:
+    def __init__(self, ptr:c_void_p ):
         self.ptr = ptr
-    def __del__(self) -> None:
+    def __del__(self):
         lib.opensolid_free_stable(self.ptr)
     def __repr__(self) -> str:
         return "Vector2d(" + str(self.x_component()) + ", " + str(self.y_component()) + ")"
@@ -616,15 +616,11 @@ class Vector2d:
     lib.opensolid_vector2d_direction.argtypes = [c_double, c_void_p]
     lib.opensolid_vector2d_direction.restype = c_void_p
     def direction(self, tolerance:Optional[float] =None) -> Direction2d:
-        if tolerance is None and global_tolerance is None:
-            raise Exception('Tolerance is not set')
-        return result_reader(Vector2d.IsZero.from_tag, Direction2d)(lib.opensolid_vector2d_direction(tolerance or global_tolerance, self.ptr))
+        return result_reader(Vector2d.IsZero.from_tag, Direction2d)(lib.opensolid_vector2d_direction(read_tolerance(tolerance), self.ptr))
     lib.opensolid_vector2d_magnitude_and_direction.argtypes = [c_double, c_void_p]
     lib.opensolid_vector2d_magnitude_and_direction.restype = c_void_p
     def magnitude_and_direction(self, tolerance:Optional[float] =None) -> Tuple[float, Direction2d]:
-        if tolerance is None and global_tolerance is None:
-            raise Exception('Tolerance is not set')
-        return result_reader(Vector2d.IsZero.from_tag, tuple2_reader(read_float, Direction2d))(lib.opensolid_vector2d_magnitude_and_direction(tolerance or global_tolerance, self.ptr))
+        return result_reader(Vector2d.IsZero.from_tag, tuple2_reader(read_float, Direction2d))(lib.opensolid_vector2d_magnitude_and_direction(read_tolerance(tolerance), self.ptr))
     lib.opensolid_vector2d_normalize.argtypes = [c_void_p]
     lib.opensolid_vector2d_normalize.restype = c_void_p
     def normalize(self) -> Vector2d:

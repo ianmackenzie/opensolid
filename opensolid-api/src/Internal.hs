@@ -113,23 +113,53 @@ apiFunction :: Function -> Codegen TH.Exp
 apiFunction (Function kind fnName argNames) = do
   fnType <- Codegen.reifyType fnName
   (argTypes, returnType) <- apiFunctionType fnType
-  let (finalNames, finalTypes) =
-        if containsImplicitTolerance fnType
-          then -- prepend the tolerance argument and its type
-            ("tolerance" : argNames, TH.ConE 'Api.ImplicitTolerance : argTypes)
-          else (argNames, argTypes)
-  Codegen.generate $
-    TH.ConE 'Api.Function
-      `TH.AppE` TH.ConE kind
-      `TH.AppE` TH.LitE (TH.StringL (Text.toChars (camelToSnake (ffiFunctionName fnName)))) -- ffi name
-      `TH.AppE` apiName fnName
-      `TH.AppE` TH.ListE
-        ( List.map2
-            (\a t -> TH.TupE [Just (TH.LitE (TH.StringL (Text.toChars a))), Just t])
-            finalNames
-            finalTypes
+  let
+    replaceLast _ [] = []
+    replaceLast el [_] = [el]
+    replaceLast el (h : t) = h : replaceLast el t
+
+    (namesWithTolerance, typesWithTolerance) =
+      if containsImplicitTolerance fnType
+        then -- prepend the tolerance argument and its type
+          ("tolerance" : argNames, TH.ConE 'Api.ImplicitTolerance : argTypes)
+        else (argNames, argTypes)
+
+    (finalNames, finalTypes) =
+      if kind == 'Api.Method
+        then -- replace the type of the last argument with "Self"
+        -- TODO: validate that the type of the last argument is the same as Class?
+          (namesWithTolerance, replaceLast (TH.ConE 'Api.Self) typesWithTolerance)
+        else (namesWithTolerance, typesWithTolerance)
+  if List.length finalNames /= List.length finalTypes
+    then
+      Prelude.error
+        ( Text.toChars
+            ( Text.concat
+                [ "The length of arguments doesn't match the length of their types for "
+                , Maybe.withDefault "" (Codegen.nameModule fnName)
+                , "."
+                , Codegen.nameBase fnName
+                , "(names: "
+                , Debug.show finalNames
+                , ", types: "
+                , Debug.show finalTypes
+                , ")"
+                ]
+            )
         )
-      `TH.AppE` returnType
+    else
+      Codegen.generate $
+        TH.ConE 'Api.Function
+          `TH.AppE` TH.ConE kind
+          `TH.AppE` TH.LitE (TH.StringL (Text.toChars (camelToSnake (ffiFunctionName fnName)))) -- ffi name
+          `TH.AppE` apiName fnName
+          `TH.AppE` TH.ListE
+            ( List.map2
+                (\a t -> TH.TupE [Just (TH.LitE (TH.StringL (Text.toChars a))), Just t])
+                finalNames
+                finalTypes
+            )
+          `TH.AppE` returnType
 
 apiFunctionType :: TH.Type -> Codegen (List TH.Exp, TH.Exp)
 apiFunctionType (TH.ForallT _ _ innerType) = apiFunctionType innerType

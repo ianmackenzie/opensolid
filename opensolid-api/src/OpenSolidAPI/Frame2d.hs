@@ -9,9 +9,9 @@ frame2d =
   cls ''Frame2d.Frame2d ['Frame2d.originPoint, 'Frame2d.xDirection, 'Frame2d.yDirection] [] $
     [ static 'Frame2d.atOrigin []
     , static 'Frame2d.atPoint ["point"]
-    , method 'Frame2d.originPoint []
-    , method 'Frame2d.xDirection []
-    , method 'Frame2d.yDirection []
+    , method 'Frame2d.originPoint ["frame"]
+    , method 'Frame2d.xDirection ["frame"]
+    , method 'Frame2d.yDirection ["frame"]
     , method 'Frame2d.xAxis ["point"]
     , method 'Frame2d.yAxis ["point"]
     , static 'Frame2d.withXDirection ["direction", "point"]
