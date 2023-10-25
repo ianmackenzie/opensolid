@@ -98,9 +98,10 @@ setup =
         ]
     , Text.join "\n" $
         [ "def read_tolerance(tolerance: Optional[float]) -> float:"
-        , "    if tolerance is None and global_tolerance is None:"
+        , "    tolerance = tolerance or global_tolerance"
+        , "    if tolerance is None:"
         , "        raise Exception('Tolerance is not set')"
-        , "    return tolerance or global_tolerance"
+        , "    return tolerance"
         ]
     ]
 

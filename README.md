@@ -9,9 +9,10 @@ Then, run `nix develop` or `nix-shell`. This will give you development environme
 ## Developing python bindings
 
 1. run `cabal build opensolid-ffi` to compile the foreign library. If you need to print the generated code, call with `--ghc-options="-ddump-splices"` (you may need to delete `dist-newstyle`).
-2. run `cabal run opensolid-python -v0 > opensolid-python/opensolid.py` to generate the python bindings
+2. run `cabal run opensolid-python -v0 | ruff format --stdin-filename opensolid.py --quiet > opensolid-python/opensolid.py` to generate the python bindings formatted with `ruff`.
 3. then you can run `python opensolid-python/test.py` to test the bindings
 4. run `PYTHONPATH=./opensolid-python pyright --pythonversion 3.12` to validate the typings
+5. run `ruff opensolid-python/` to lint the python code with `ruff`
 
 `nix-shell` automatically sets `LD_LIBRARY_PATH`, so that python knows where to find the
 library during the local development.
