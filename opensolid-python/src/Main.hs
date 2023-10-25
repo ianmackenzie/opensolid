@@ -1,3 +1,5 @@
+{-# OPTIONS_GHC -Wno-orphans #-}
+
 module Main (main) where
 
 import Debug qualified
@@ -14,6 +16,8 @@ import OpenSolidAPI
   , openSolidAPI
   )
 import PythonAST qualified as PY
+import System.IO qualified as SIO
+import System.Process qualified as SP
 import Text qualified
 import Prelude qualified
 
@@ -285,7 +289,25 @@ apiException mod (ExceptionClass name [(tag, constructorName, Nothing)])
 -- TODO: support exceptions with mutiple cases and pointers
 apiException _ ex = Prelude.error (Text.toChars (Debug.show ex))
 
+instance Fail (IO a) where
+  fail txt = Prelude.fail (Text.toChars txt)
+
+instance (a ~ a') => Bind (IO a) a' (IO b) where
+  bind f q = q Prelude.>>= f
+
 main :: IO ()
-main = do
-  let pythonCode = PY.prettyStatements (setup ++ api openSolidAPI)
-  Prelude.putStrLn (Text.toChars pythonCode)
+main =
+  let pythonCode = Text.toChars (PY.prettyStatements (setup ++ api openSolidAPI))
+      ruffCmd =
+        ( SP.proc
+            (Text.toString "ruff")
+            (List.map Text.toString ["format", "--stdin-filename", "opensolid.py", "--quiet"])
+        )
+          { SP.std_in = SP.CreatePipe
+          }
+   in do
+        (Just stdinHandle, _, _, process) <- SP.createProcess ruffCmd
+        _ <- SIO.hPutStr stdinHandle pythonCode
+        _ <- SIO.hClose stdinHandle
+        _ <- SP.waitForProcess process
+        Prelude.return ()
