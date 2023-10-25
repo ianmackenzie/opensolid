@@ -18,7 +18,9 @@ import OpenSolidAPI
 import PythonAST qualified as PY
 import System.IO qualified as SIO
 import System.Process qualified as SP
+import Task qualified
 import Text qualified
+import Try qualified
 import Prelude qualified
 
 setup :: List PY.Statement
@@ -289,12 +291,6 @@ apiException mod (ExceptionClass name [(tag, constructorName, Nothing)])
 -- TODO: support exceptions with mutiple cases and pointers
 apiException _ ex = Prelude.error (Text.toChars (Debug.show ex))
 
-instance Fail (IO a) where
-  fail txt = Prelude.fail (Text.toChars txt)
-
-instance (a ~ a') => Bind (IO a) a' (IO b) where
-  bind f q = q Prelude.>>= f
-
 main :: IO ()
 main =
   let pythonCode = Text.toChars (PY.prettyStatements (setup ++ api openSolidAPI))
@@ -305,9 +301,9 @@ main =
         )
           { SP.std_in = SP.CreatePipe
           }
-   in do
-        (Just stdinHandle, _, _, process) <- SP.createProcess ruffCmd
-        _ <- SIO.hPutStr stdinHandle pythonCode
-        _ <- SIO.hClose stdinHandle
-        _ <- SP.waitForProcess process
-        Prelude.return ()
+   in Task.toIO $ Try.do
+        (Just stdinHandle, _, _, process) <- Task.fromIO (SP.createProcess ruffCmd)
+        Task.fromIO (SIO.hPutStr stdinHandle pythonCode)
+        Task.fromIO (SIO.hClose stdinHandle)
+        _ <- Task.fromIO (SP.waitForProcess process)
+        Task.succeed ()
