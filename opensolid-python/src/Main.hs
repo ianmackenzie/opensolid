@@ -1,5 +1,3 @@
-{-# OPTIONS_GHC -Wno-orphans #-}
-
 module Main (main) where
 
 import Debug qualified
