@@ -25,11 +25,11 @@ import Text qualified
 import Prelude (fromInteger)
 import Prelude qualified
 
-data Class = Class TH.Name (List TH.Name) (List Function)
+data Class = Class TH.Name (List TH.Name) (List TH.Name) (List Function)
 
 data Function = Function TH.Name TH.Name (List Text)
 
-cls :: TH.Name -> List TH.Name -> List Function -> Class
+cls :: TH.Name -> List TH.Name -> List TH.Name -> List Function -> Class
 cls = Class
 
 method :: TH.Name -> List Text -> Function
@@ -45,7 +45,7 @@ ffi classes = do
   freeStableFunctionDecl <- freeFunctionFfi "opensolid_free_stable" 'Pointers.freeStablePtr
   Codegen.generate (freeFunctionDecl : freeStableFunctionDecl : functionDecls)
  where
-  ffiClass (Class _ _ functions) =
+  ffiClass (Class _ _ _ functions) =
     Codegen.map List.concat (Codegen.collect ffiFunction functions)
 
 freeFunctionFfi :: Text -> TH.Name -> Codegen TH.Dec
@@ -64,35 +64,102 @@ apiName name =
   TH.LitE (TH.StringL (Text.toChars (camelToSnake (Codegen.nameBase name))))
 
 apiClass :: Class -> Codegen TH.Exp
-apiClass (Class name representationProps functions) = do
+apiClass (Class name representationProps errors functions) = do
   apiFns <- Codegen.collect apiFunction functions
+  apiExceptions <- Codegen.map List.concat (Codegen.collect apiException errors)
   Codegen.generate $
     TH.ConE 'Api.Class
       `TH.AppE` TH.LitE (TH.StringL (TH.nameBase name))
       `TH.AppE` TH.ListE (List.map apiName representationProps)
+      `TH.AppE` TH.ListE apiExceptions
       `TH.AppE` TH.ListE apiFns
+
+apiException :: TH.Name -> Codegen (List TH.Exp)
+apiException name = do
+  constructors <- apiExceptionConstructors name
+  Codegen.generate $
+    [ TH.ConE 'Api.ExceptionClass
+        `TH.AppE` TH.LitE (TH.StringL (TH.nameBase name))
+        `TH.AppE` TH.ListE constructors
+    ]
+
+apiExceptionConstructors :: TH.Name -> Codegen (List TH.Exp)
+apiExceptionConstructors typeName = do
+  info <- Codegen.reify typeName
+  case info of
+    TH.TyConI (TH.DataD _ _ _ _ cons _) -> Codegen.sequence (List.indexedMap apiExceptionConstructor cons)
+    _ -> Prelude.error (Text.toChars "Not a data type")
+
+apiExceptionConstructor :: Int -> TH.Con -> Codegen TH.Exp
+apiExceptionConstructor idx (TH.NormalC name []) = do
+  Codegen.generate $
+    TH.TupE
+      [ Just $ TH.LitE (TH.IntegerL (Prelude.fromIntegral (idx + (1 :: Int))))
+      , Just $ TH.LitE (TH.StringL (TH.nameBase name))
+      , Just $ TH.ConE 'Nothing
+      ]
+apiExceptionConstructor idx (TH.NormalC name [(_, typ)]) = do
+  apiTyp <- apiType typ
+  Codegen.generate $
+    TH.TupE
+      [ Just $ TH.LitE (TH.IntegerL (Prelude.fromIntegral (idx + (1 :: Int))))
+      , Just $ TH.LitE (TH.StringL (TH.nameBase name))
+      , Just $ TH.ConE 'Just `TH.AppE` apiTyp
+      ]
+apiExceptionConstructor _ _ =
+  Prelude.error (Text.toChars "Unrecognized constructor")
 
 apiFunction :: Function -> Codegen TH.Exp
 apiFunction (Function kind fnName argNames) = do
   fnType <- Codegen.reifyType fnName
   (argTypes, returnType) <- apiFunctionType fnType
-  let (finalNames, finalTypes) =
-        if containsImplicitTolerance fnType
-          then -- prepend the tolerance argument and its type
-            ("tolerance" : argNames, TH.ConE 'Api.ImplicitTolerance : argTypes)
-          else (argNames, argTypes)
-  Codegen.generate $
-    TH.ConE 'Api.Function
-      `TH.AppE` TH.ConE kind
-      `TH.AppE` TH.LitE (TH.StringL (Text.toChars (camelToSnake (ffiFunctionName fnName)))) -- ffi name
-      `TH.AppE` apiName fnName
-      `TH.AppE` TH.ListE
-        ( List.map2
-            (\a t -> TH.TupE [Just (TH.LitE (TH.StringL (Text.toChars a))), Just t])
-            finalNames
-            finalTypes
+  let
+    replaceLast _ [] = []
+    replaceLast el [_] = [el]
+    replaceLast el (h : t) = h : replaceLast el t
+
+    (namesWithTolerance, typesWithTolerance) =
+      if containsImplicitTolerance fnType
+        then -- prepend the tolerance argument and its type
+          ("tolerance" : argNames, TH.ConE 'Api.ImplicitTolerance : argTypes)
+        else (argNames, argTypes)
+
+    (finalNames, finalTypes) =
+      if kind == 'Api.Method
+        then -- replace the type of the last argument with "Self"
+        -- TODO: validate that the type of the last argument is the same as Class?
+          (namesWithTolerance, replaceLast (TH.ConE 'Api.Self) typesWithTolerance)
+        else (namesWithTolerance, typesWithTolerance)
+  if List.length finalNames /= List.length finalTypes
+    then
+      Prelude.error
+        ( Text.toChars
+            ( Text.concat
+                [ "The length of arguments doesn't match the length of their types for "
+                , Maybe.withDefault "" (Codegen.nameModule fnName)
+                , "."
+                , Codegen.nameBase fnName
+                , "(names: "
+                , Debug.show finalNames
+                , ", types: "
+                , Debug.show finalTypes
+                , ")"
+                ]
+            )
         )
-      `TH.AppE` returnType
+    else
+      Codegen.generate $
+        TH.ConE 'Api.Function
+          `TH.AppE` TH.ConE kind
+          `TH.AppE` TH.LitE (TH.StringL (Text.toChars (camelToSnake (ffiFunctionName fnName)))) -- ffi name
+          `TH.AppE` apiName fnName
+          `TH.AppE` TH.ListE
+            ( List.map2
+                (\a t -> TH.TupE [Just (TH.LitE (TH.StringL (Text.toChars a))), Just t])
+                finalNames
+                finalTypes
+            )
+          `TH.AppE` returnType
 
 apiFunctionType :: TH.Type -> Codegen (List TH.Exp, TH.Exp)
 apiFunctionType (TH.ForallT _ _ innerType) = apiFunctionType innerType
@@ -112,7 +179,8 @@ apiType (TH.AppT (TH.AppT (TH.TupleT 2) nestedTyp1) nestedTyp2) = do
 apiType (TH.AppT (TH.AppT (TH.ConT containerName) errTyp) nestedTyp) | containerName == ''Result = do
   typ <- apiType nestedTyp
   err <- typeNameBase errTyp
-  Codegen.generate (TH.ConE 'Api.Result `TH.AppE` err `TH.AppE` typ)
+  mod <- modNameBase errTyp
+  Codegen.generate (TH.ConE 'Api.Result `TH.AppE` mod `TH.AppE` err `TH.AppE` typ)
 apiType (TH.AppT (TH.ConT containerName) nestedTyp) | containerName == ''Maybe = do
   typ <- apiType nestedTyp
   Codegen.generate (TH.ConE 'Api.Maybe `TH.AppE` typ)
@@ -133,6 +201,14 @@ typeNameBase :: TH.Type -> Codegen TH.Exp
 typeNameBase (TH.AppT t _) = typeNameBase t
 typeNameBase (TH.ConT name) = Codegen.generate (TH.LitE (TH.StringL (TH.nameBase name)))
 typeNameBase typ = Codegen.fail ("Unknown type: " ++ Debug.show typ)
+
+modNameBase :: TH.Type -> Codegen TH.Exp
+modNameBase (TH.AppT t _) = modNameBase t
+modNameBase typ@(TH.ConT name) =
+  case TH.nameModule name of
+    Just mod -> Codegen.generate (TH.LitE (TH.StringL mod))
+    Nothing -> Codegen.fail ("Unknown module for type: " ++ Debug.show typ)
+modNameBase typ = Codegen.fail ("Unknown module for type: " ++ Debug.show typ)
 
 -- Generates wrapper function type and clause from the original function
 ffiFunctionInfo :: TH.Type -> TH.Exp -> List TH.Pat -> List TH.Stmt -> Codegen (TH.Type, TH.Clause)

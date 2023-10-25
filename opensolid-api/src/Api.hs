@@ -1,28 +1,36 @@
-module Api (Api (..), Class (..), Function (..), FunctionKind (..), ValueType (..)) where
+module Api (Api (..), Class (..), Function (..), FunctionKind (..), ValueType (..), ExceptionClass (..)) where
 
-import Data.String (String)
-import OpenSolid (Eq, List)
+import Maybe (Maybe)
+import OpenSolid (Eq, Int, List, Show)
+import Text (Text)
 
 newtype Api = Api (List Class)
 
-data Class = Class String (List String) (List Function)
+data Class = Class Text (List Text) (List ExceptionClass) (List Function)
+
+data ExceptionClass
+  = ExceptionClass
+      Text -- name
+      (List (Int, Text, Maybe ValueType)) -- constructors (tag, name, optional argument)
+  deriving (Show)
 
 data Function
   = Function
       FunctionKind
-      String -- ffi name
-      String -- human readable name
-      (List (String, ValueType)) -- arguments
+      Text -- ffi name
+      Text -- human readable name
+      (List (Text, ValueType)) -- arguments
       ValueType -- return type
 
 data FunctionKind = Method | Static
 
 data ValueType
-  = Pointer String
+  = Pointer Text
   | Float
   | Boolean
   | Maybe ValueType
-  | Result String ValueType
+  | Result Text Text ValueType -- Module name, Exception type, Successful type
   | Tuple2 ValueType ValueType
   | ImplicitTolerance
-  deriving (Eq)
+  | Self
+  deriving (Eq, Show)

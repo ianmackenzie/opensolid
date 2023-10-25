@@ -26,6 +26,5 @@ foreign-library opensolid-ffi
   other-modules: OpenSolidFFI, Paths_opensolid_ffi
   autogen-modules: Paths_opensolid_ffi
   c-sources: src/wrapper.c
-  install-includes: OpenSolidFFI_stub.h
   ghc-options: -Wall -Werror -Wcompat
   default-extensions: TemplateHaskell

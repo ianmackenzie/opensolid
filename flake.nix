@@ -1,7 +1,7 @@
 {
   inputs = {
-    # pinned revision from nixpkgs-unstable branch (2023-09-15)
-    nixpkgs.url = "github:NixOS/nixpkgs?rev=46688f8eb5cd6f1298d873d4d2b9cf245e09e88e";
+    # pinned revision from nixpkgs-unstable branch (2023-10-23)
+    nixpkgs.url = "github:NixOS/nixpkgs?rev=51d906d2341c9e866e48c2efcaac0f2d70bfd43e";
     flake-utils.url = "github:numtide/flake-utils";
     flake-compat = {
       url = "github:edolstra/flake-compat";
@@ -31,10 +31,8 @@
               ];
               # cabal puts the `foreign-library` in `/lib/ghc-9.4.6`,
               # this script makes the library available in `/lib`
-              # and OpenSolidFFI_stub.h in `/include`
               postInstall = (drv.postInstall or "") + ''
                 ln -s $out/lib/ghc-*/libopensolid-ffi.* $out/lib
-                ln -s $out/lib/ghc-*/*/*/include $out/include
               '';
             });
         };
@@ -81,7 +79,8 @@
               pkgs.nixpkgs-fmt
             ];
             nativeBuildInputs = with pkgs; [
-              (python3.withPackages (ps: with ps; [ mypy ]))
+              nodePackages.pyright
+              python312
             ];
             # Help python find the opensolid-ffi library
             LD_LIBRARY_PATH = "${localLibraryPath}";

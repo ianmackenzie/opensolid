@@ -1,56 +1,33 @@
 module Main (main) where
 
-import Control.Monad (void)
-import Data.String (String, fromString)
-import Language.Python.Common hiding (Class, Float, (<>))
-import Language.Python.Version3.Parser as Parser
-import OpenSolid (List)
+import Debug qualified
+import List qualified
+import Maybe qualified
+import OpenSolid
 import OpenSolidAPI
   ( Api (..)
   , Class (..)
+  , ExceptionClass (..)
   , Function (..)
   , FunctionKind (..)
   , ValueType (..)
   , openSolidAPI
   )
 import PythonAST qualified as PY
-import Prelude
-  ( Either (..)
-  , IO
-  , Maybe (..)
-  , concatMap
-  , error
-  , fmap
-  , map
-  , putStrLn
-  , show
-  , uncurry
-  , unlines
-  , (++)
-  , (<>)
-  )
+import Text qualified
+import Prelude qualified
 
-literalStatement :: String -> List (Statement ())
-literalStatement line =
-  case Parser.parseStmt line "<literal>" of
-    Left err -> error (show err)
-    Right (statements, _) -> fmap void statements
-
-literalStatements :: List String -> List (Statement ())
-literalStatements = concatMap literalStatement
-
--- Define the imports and load the ffi lib
-setup :: List (Statement ())
+setup :: List PY.Statement
 setup =
-  literalStatements
+  PY.literalStatements
     [ "from __future__ import annotations"
     , "from contextlib import contextmanager"
     , "from typing import Optional, Callable, TypeVar, Tuple"
     , "import platform"
-    , "from ctypes import *"
+    , "from ctypes import c_bool, c_double, c_int8, c_void_p, cast, cdll, POINTER, Structure"
     , "global lib"
     , "system = platform.system()"
-    , unlines
+    , Text.join "\n" $
         [ "if system == 'Darwin':"
         , "    lib = cdll.LoadLibrary('libopensolid-ffi.dylib')"
         , "elif system == 'Linux':"
@@ -61,7 +38,7 @@ setup =
     , "lib.opensolid_free.argtypes = [c_void_p]"
     , "lib.opensolid_free_stable.argtypes = [c_void_p]"
     , "global_tolerance = None"
-    , unlines
+    , Text.join "\n" $
         [ "@contextmanager"
         , "def Tolerance(new_tolerance: float):"
         , "    global global_tolerance"
@@ -73,15 +50,15 @@ setup =
         ]
     , "A = TypeVar('A')"
     , "B = TypeVar('B')"
-    , unlines
+    , Text.join "\n" $
         [ "def maybe_reader(read_success: Callable[[c_void_p], A]) -> Callable[[c_void_p], Optional[A]]:"
         , "    return lambda ptr: read_success(ptr) if ptr else None"
         ]
-    , unlines
+    , Text.join "\n" $
         [ "class Tuple2Structure(Structure):"
         , "    _fields_ = [('ptr1', c_void_p), ('ptr2', c_void_p)]"
         ]
-    , unlines
+    , Text.join "\n" $
         [ "def tuple2_reader(read_a: Callable[[c_void_p], A], read_b: Callable[[c_void_p], B]) -> Callable[[c_void_p], Tuple[A, B]]:"
         , "    def read(ptr: c_void_p) -> Tuple[A, B]:"
         , "        tuple2_struct = cast(ptr, POINTER(Tuple2Structure)).contents"
@@ -90,11 +67,11 @@ setup =
         , "        return res"
         , "    return read"
         ]
-    , unlines
+    , Text.join "\n" $
         [ "class ResultStructure(Structure):"
         , "    _fields_ = [('ptr', c_void_p), ('tag', c_int8)]"
         ]
-    , unlines
+    , Text.join "\n" $
         [ "def result_reader(read_error: Callable[[c_int8, c_void_p], Exception], read_success: Callable[[c_void_p], A]) -> Callable[[c_void_p], A]:"
         , "    def read(ptr: c_void_p) -> A:"
         , "        result_struct = cast(ptr, POINTER(ResultStructure)).contents"
@@ -107,120 +84,99 @@ setup =
         , "            raise read_error(tag, ptr1)"
         , "    return read"
         ]
-    , unlines
+    , Text.join "\n" $
         [ "def read_float(ptr: c_void_p) -> float:"
         , "    val = float(cast(ptr, POINTER(c_double)).contents.value)"
         , "    lib.opensolid_free(ptr)"
         , "    return val"
         ]
-    , unlines
+    , Text.join "\n" $
         [ "def read_bool(ptr: c_void_p) -> bool:"
         , "    val = bool(cast(ptr, POINTER(c_bool)).contents.value)"
         , "    lib.opensolid_free(ptr)"
         , "    return val"
         ]
-    , -- TODO: codegen this
-      unlines
-        [ "class IsZero(Exception):"
-        , "    def __init__(self, tag: c_int8, ptr: c_void_p):"
-        , "        lib.opensolid_free(ptr)"
+    , Text.join "\n" $
+        [ "def read_tolerance(tolerance: Optional[float]) -> float:"
+        , "    if tolerance is None and global_tolerance is None:"
+        , "        raise Exception('Tolerance is not set')"
+        , "    return tolerance or global_tolerance"
         ]
     ]
 
-api :: Api -> List (Statement ())
+api :: Api -> List PY.Statement
 api (Api classes) =
-  map apiClass classes
+  List.map apiClass classes
 
-apiClass :: Class -> Statement ()
-apiClass (Class name representationProps functions) =
-  PY.cls name representationProps (concatMap apiFunction functions)
-
-apiFunction :: Function -> List (Statement ())
-apiFunction (Function kind ffiName pyName pyArgs retType) =
-  let libName = "lib." <> ffiName
-   in PY.cType libName (map (\(_, typ) -> cType typ) pyArgs) (cType retType)
-        ++ [ let
-              (tolerance, restArgs) = splitTolerance pyArgs
-              -- add tolerance as the last argument of the python function
-              withTolArg (Just (arg, typ)) list = list ++ [(arg, Just (pyType typ), Just (PY.var "None"))]
-              withTolArg Nothing list = list
-
-              -- add tolerance as the first argument of the c function call
-              withTolExp (Just t) list = t : list
-              withTolExp Nothing list = list
-
-              -- check if the tolerance argument is passed or the global_tolerance is set
-              withTolBody (Just (arg, _)) stmts =
-                Conditional
-                  [
-                    ( PY.is (PY.var arg) (PY.var "None") `PY.and` PY.is (PY.var "global_tolerance") (PY.var "None")
-                    , literalStatement "raise Exception('Tolerance is not set')"
-                    )
-                  ]
-                  []
-                  ()
-                  : stmts
-              withTolBody Nothing stmts = stmts
-              in
-              case kind of
-                Static ->
-                  PY.staticmethod
-                    ( PY.def
-                        pyName
-                        (withTolArg tolerance (map (\(arg, typ) -> (arg, Just (pyType typ), Nothing)) restArgs))
-                        (pyType retType)
-                        (withTolBody tolerance (fnBody retType (PY.call (PY.var libName) (map (uncurry argExpr) (withTolExp tolerance restArgs)))))
-                    )
-                Method ->
-                  let argsWithoutLast = removeLast restArgs
-                   in PY.def
-                        pyName
-                        (withTolArg tolerance (("self", Nothing, Nothing) : map (\(arg, typ) -> (arg, Just (pyType typ), Nothing)) argsWithoutLast))
-                        (pyType retType)
-                        (withTolBody tolerance (fnBody retType (PY.call (PY.var libName) (map (uncurry argExpr) (withTolExp tolerance argsWithoutLast) ++ [PY.var "self.ptr"]))))
-           ]
-
-removeLast :: List a -> List a
-removeLast [] = []
-removeLast [_] = []
-removeLast (h : t) = h : removeLast t
-
--- split out the first argument if its tolerance
-splitTolerance :: List (String, ValueType) -> (Maybe (String, ValueType), List (String, ValueType))
-splitTolerance [] = (Nothing, [])
-splitTolerance ((tol, ImplicitTolerance) : rest) = (Just (tol, ImplicitTolerance), rest)
-splitTolerance rest = (Nothing, rest)
-
-exprReader :: ValueType -> Expr ()
-exprReader typ =
-  case typ of
-    Pointer p -> PY.var p
-    Tuple2 a b -> PY.call (PY.var "tuple2_reader") [exprReader a, exprReader b]
-    Result err succ -> PY.call (PY.var "result_reader") [PY.var err, exprReader succ]
-    Maybe succ -> PY.call (PY.var "maybe_reader") [exprReader succ]
-    Float -> PY.var "read_float"
-    Boolean -> PY.var "read_bool"
-    ImplicitTolerance -> PY.var "read_float"
-
-fnBody :: ValueType -> Expr () -> [Statement ()]
-fnBody typ exp =
-  [Return (Just expression) ()]
+apiClass :: Class -> PY.Statement
+apiClass (Class clsName representationProps errorClasses functions) =
+  PY.cls clsName [] $
+    List.concat
+      [ [constructor, destructor, representation]
+      , List.collect apiFunction functions
+      , List.collect (apiException clsName) errorClasses
+      ]
  where
-  expression = case typ of
-    Pointer _ -> PY.call (exprReader typ) [exp]
-    Tuple2 _ _ -> PY.call (exprReader typ) [exp]
-    Result _ _ -> PY.call (exprReader typ) [exp]
-    Maybe _ -> PY.call (exprReader typ) [exp]
-    _ -> exp
+  constructor =
+    PY.def "__init__" [selfPyArg, ("ptr", Just (PY.var "c_void_p"), Nothing)] Nothing $
+      [PY.set (PY.var "self" `PY.dot` "ptr") (PY.var "ptr")]
 
-argExpr :: String -> ValueType -> Expr ()
-argExpr var typ =
-  case typ of
-    Pointer _ -> Dot (PY.var var) (Ident "ptr" ()) ()
-    ImplicitTolerance -> PY.var var `PY.or` PY.var "global_tolerance"
-    _ -> PY.var var
+  destructor =
+    PY.def "__del__" [selfPyArg] Nothing $
+      [PY.stmtExpr (PY.call (PY.var "lib" `PY.dot` "opensolid_free_stable") [PY.var "self" `PY.dot` "ptr"])]
 
-cType :: ValueType -> Expr ()
+  representation =
+    PY.def "__repr__" [selfPyArg] (Just (PY.var "str")) $
+      [ PY.return
+          ( List.foldLeft
+              PY.plus
+              (PY.string (Text.concat [clsName, "("]))
+              ( List.intersperse
+                  (PY.string ", ")
+                  (List.map (\prop -> PY.call (PY.var "str") [PY.call (PY.var "self" `PY.dot` prop) []]) representationProps)
+              )
+              `PY.plus` PY.string ")"
+          )
+      ]
+
+apiFunction :: Function -> List PY.Statement
+apiFunction (Function kind ffiName pyName args retType) =
+  [ -- lib.opensolid_point2d_xy.argtypes = [c_double, c_double]
+    PY.set (libName `PY.dot` "argtypes") (PY.list (List.map (\(_, typ) -> cType typ) args))
+  , -- lib.opensolid_point2d_xy.restype = c_void_p
+    PY.set (libName `PY.dot` "restype") (cType retType)
+  , case kind of
+      Static ->
+        PY.staticmethod $
+          PY.def
+            pyName
+            -- "tolerance" is the last arg
+            (pyArgs (appendMaybe tolerance argsWithoutTolerance))
+            (pyType retType)
+            (fnBody retType libName (ffiArgExprs args))
+      Method ->
+        PY.def
+          pyName
+          -- "self" is the first, "tolerance" is the last arg
+          (selfPyArg : pyArgs (appendMaybe tolerance (removeLast argsWithoutTolerance)))
+          (pyType retType)
+          (fnBody retType libName (ffiArgExprs args))
+  ]
+ where
+  libName = PY.var "lib" `PY.dot` ffiName
+  (tolerance, argsWithoutTolerance) = takeTolerance args
+
+  appendMaybe (Just tol) list = list ++ [tol]
+  appendMaybe Nothing list = list
+
+  removeLast [] = []
+  removeLast [_] = []
+  removeLast (h : t) = h : removeLast t
+
+  takeTolerance ((tol, ImplicitTolerance) : rest) = (Just (tol, ImplicitTolerance), rest)
+  takeTolerance rest = (Nothing, rest)
+
+cType :: ValueType -> PY.Expr
 cType typ =
   case typ of
     ImplicitTolerance -> PY.var "c_double"
@@ -228,21 +184,107 @@ cType typ =
     Float -> PY.var "c_double"
     Boolean -> PY.var "c_bool"
     Maybe _ -> PY.var "c_void_p"
-    Result _ _ -> PY.var "c_void_p"
+    Result{} -> PY.var "c_void_p"
     Tuple2 _ _ -> PY.var "c_void_p"
+    Self -> PY.var "c_void_p"
 
-pyType :: ValueType -> Expr ()
+pyArgs :: List (Text, ValueType) -> List (Text, Maybe PY.Expr, Maybe PY.Expr)
+pyArgs = List.map pyArg
+ where
+  pyArg (name, typ) =
+    let
+      defaultValue = case typ of
+        ImplicitTolerance -> Just $ PY.var "None"
+        _ -> Nothing
+     in
+      (name, pyType typ, defaultValue)
+
+selfPyArg :: (Text, Maybe PY.Expr, Maybe PY.Expr)
+selfPyArg = ("self", Nothing, Nothing)
+
+pyType :: ValueType -> Maybe PY.Expr
 pyType typ =
   case typ of
-    ImplicitTolerance -> Subscript (PY.var "Optional") (PY.var "float") ()
-    Pointer name -> PY.var name
-    Float -> PY.var "float"
-    Boolean -> PY.var "bool"
-    Maybe nestedTyp -> Subscript (PY.var "Optional") (pyType nestedTyp) ()
-    Result _ val -> pyType val -- we throw an exception in case of an err
-    Tuple2 val1 val2 -> Subscript (PY.var "Tuple") (Tuple [pyType val1, pyType val2] ()) ()
+    ImplicitTolerance -> Just $ PY.subscript (PY.var "Optional") [PY.var "float"]
+    Pointer name -> Just $ PY.var name
+    Float -> Just $ PY.var "float"
+    Boolean -> Just $ PY.var "bool"
+    Maybe nestedTyp -> Just $ PY.subscript (PY.var "Optional") (Maybe.collect pyType [nestedTyp])
+    Result _ _ val -> pyType val -- we throw an exception in case of an err
+    Tuple2 val1 val2 -> Just $ PY.subscript (PY.var "Tuple") (Maybe.collect pyType [val1, val2])
+    Self -> Nothing
+
+fnBody :: ValueType -> PY.Expr -> List PY.Expr -> [PY.Statement]
+fnBody typ ffiFunc args =
+  [PY.return expression]
+ where
+  fnCall = PY.call ffiFunc args
+  expression = case typ of
+    Pointer _ -> PY.call (exprReader typ) [fnCall]
+    Tuple2 _ _ -> PY.call (exprReader typ) [fnCall]
+    Result{} -> PY.call (exprReader typ) [fnCall]
+    Maybe _ -> PY.call (exprReader typ) [fnCall]
+    Self -> PY.var "self" `PY.dot` "ptr"
+    _ -> fnCall
+
+-- Compose the readers that decode the result value of the c function
+-- stable pointers are wrapped in the python class
+-- tuples and results are transformed into python values and
+-- the c pointers are freed
+exprReader :: ValueType -> PY.Expr
+exprReader typ =
+  case typ of
+    Pointer p -> PY.var p
+    Tuple2 a b -> PY.call (PY.var "tuple2_reader") [exprReader a, exprReader b]
+    Result mod err succ ->
+      PY.call
+        (PY.var "result_reader")
+        [ PY.var mod `PY.dot` err `PY.dot` "from_tag"
+        , exprReader succ
+        ]
+    Maybe succ -> PY.call (PY.var "maybe_reader") [exprReader succ]
+    Float -> PY.var "read_float"
+    Boolean -> PY.var "read_bool"
+    ImplicitTolerance -> PY.var "read_float"
+    Self -> PY.var "self" `PY.dot` "ptr"
+
+ffiArgExprs :: List (Text, ValueType) -> List PY.Expr
+ffiArgExprs = List.map ffiArgExpr
+ where
+  ffiArgExpr (var, typ) =
+    case typ of
+      Self -> PY.var "self" `PY.dot` "ptr"
+      Pointer _ -> PY.var var `PY.dot` "ptr"
+      ImplicitTolerance -> PY.call (PY.var "read_tolerance") [PY.var var]
+      _ -> PY.var var
+
+apiException :: Text -> ExceptionClass -> List PY.Statement
+apiException mod (ExceptionClass name [(tag, constructorName, Nothing)])
+  | name == constructorName =
+      let retTyp = PY.var mod `PY.dot` name
+       in [ PY.cls name [PY.var "Exception"] $
+              [ PY.staticmethod
+                  ( PY.def
+                      "from_tag"
+                      [ ("tag", Just (PY.var "c_int8"), Nothing)
+                      , ("ptr", Just (PY.var "c_void_p"), Nothing)
+                      ]
+                      (Just retTyp)
+                      [ PY.conditional
+                          [
+                            ( PY.var "tag" `PY.eq` PY.int tag
+                            , [PY.return (PY.call retTyp [])]
+                            )
+                          ]
+                          (PY.literalStatement "raise ValueError('Unkown exception tag ' + str(tag))")
+                      ]
+                  )
+              ]
+          ]
+-- TODO: support exceptions with mutiple cases and pointers
+apiException _ ex = Prelude.error (Text.toChars (Debug.show ex))
 
 main :: IO ()
 main = do
-  let pythonCode = prettyText (Module (setup ++ api openSolidAPI))
-  putStrLn pythonCode
+  let pythonCode = PY.prettyStatements (setup ++ api openSolidAPI)
+  Prelude.putStrLn (Text.toChars pythonCode)
