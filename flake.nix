@@ -79,6 +79,7 @@
               pkgs.nixpkgs-fmt
             ];
             nativeBuildInputs = with pkgs; [
+              ruff
               nodePackages.pyright
               python312
             ];
