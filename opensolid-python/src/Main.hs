@@ -16,6 +16,7 @@ import OpenSolidAPI
   , openSolidAPI
   )
 import PythonAST qualified as PY
+import System.Exit qualified as SE
 import System.IO qualified as SIO
 import System.Process qualified as SP
 import Task qualified
@@ -305,5 +306,7 @@ main =
         (Just stdinHandle, _, _, process) <- Task.fromIO (SP.createProcess ruffCmd)
         Task.fromIO (SIO.hPutStr stdinHandle pythonCode)
         Task.fromIO (SIO.hClose stdinHandle)
-        _ <- Task.fromIO (SP.waitForProcess process)
-        Task.succeed ()
+        ruffExitCode <- Task.fromIO (SP.waitForProcess process)
+        if ruffExitCode == SE.ExitSuccess
+          then Task.succeed ()
+          else fail "Error when running Ruff"
