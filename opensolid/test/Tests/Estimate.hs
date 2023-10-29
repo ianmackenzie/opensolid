@@ -81,7 +81,7 @@ check estimate value
   bounds = Estimate.bounds estimate
 
 smallest :: Test
-smallest = Test.check 100 "smallest" $ do
+smallest = Test.check 100 "smallest" $ Test.do
   valuesAndEstimates <- dummyEstimates
   let (values, estimates) = NonEmpty.unzip2 valuesAndEstimates
   let bounds = NonEmpty.map Estimate.bounds estimates
@@ -97,7 +97,7 @@ smallest = Test.check 100 "smallest" $ do
   ?tolerance = Length.meters 1e-9
 
 largest :: Test
-largest = Test.check 100 "largest" $ do
+largest = Test.check 100 "largest" $ Test.do
   valuesAndEstimates <- dummyEstimates
   let (values, estimates) = NonEmpty.unzip2 valuesAndEstimates
   let bounds = NonEmpty.map Estimate.bounds estimates
@@ -112,7 +112,7 @@ largest = Test.check 100 "largest" $ do
  where
   ?tolerance = Length.meters 1e-9
 
-resolvesTo :: (Tolerance units) => Qty units -> Estimate units -> Result Text Bool
+resolvesTo :: (Tolerance units) => Qty units -> Estimate units -> Result String Bool
 resolvesTo value estimate
   | currentBounds ~= value = Ok True
   | not (Range.approximatelyIncludes value currentBounds) = Ok False
@@ -126,7 +126,7 @@ resolvesTo value estimate
   currentBounds = Estimate.bounds estimate
 
 area :: Test
-area = Test.verify "area" $ do
+area = Test.verify "area" $ Test.do
   curve <-
     let ?tolerance = Length.meters 1e-9
      in Arc2d.with
@@ -143,7 +143,7 @@ area = Test.verify "area" $ do
   Test.expect areaIsCorrect
 
 minimumBy :: Test
-minimumBy = Test.check 100 "minimumBy" $ do
+minimumBy = Test.check 100 "minimumBy" $ Test.do
   valuesAndEstimates <- dummyEstimates
   let minimumValue = NonEmpty.minimumOf Pair.first valuesAndEstimates
   let minimumValueFromEstimates = Pair.first (Estimate.minimumBy Pair.second valuesAndEstimates)
@@ -152,7 +152,7 @@ minimumBy = Test.check 100 "minimumBy" $ do
   ?tolerance = Length.meters 1e-9
 
 maximumBy :: Test
-maximumBy = Test.check 100 "maximumBy" $ do
+maximumBy = Test.check 100 "maximumBy" $ Test.do
   valuesAndEstimates <- dummyEstimates
   let maximumValue = NonEmpty.maximumOf Pair.first valuesAndEstimates
   let maximumValueFromEstimates = Pair.first (Estimate.maximumBy Pair.second valuesAndEstimates)
@@ -161,7 +161,7 @@ maximumBy = Test.check 100 "maximumBy" $ do
   ?tolerance = Length.meters 1e-9
 
 smallestBy :: Test
-smallestBy = Test.check 100 "smallestBy" $ do
+smallestBy = Test.check 100 "smallestBy" $ Test.do
   valuesAndEstimates <- dummyEstimates
   let smallestValue = Qty.smallest (NonEmpty.map Pair.first valuesAndEstimates)
   let smallestValueFromEstimates = Pair.first (Estimate.smallestBy Pair.second valuesAndEstimates)
@@ -170,7 +170,7 @@ smallestBy = Test.check 100 "smallestBy" $ do
   ?tolerance = Length.meters 1e-9
 
 largestBy :: Test
-largestBy = Test.check 100 "largestBy" $ do
+largestBy = Test.check 100 "largestBy" $ Test.do
   valuesAndEstimates <- dummyEstimates
   let largestValue = Qty.largest (NonEmpty.map Pair.first valuesAndEstimates)
   let largestValueFromEstimates = Pair.first (Estimate.largestBy Pair.second valuesAndEstimates)
@@ -179,7 +179,7 @@ largestBy = Test.check 100 "largestBy" $ do
   ?tolerance = Length.meters 1e-9
 
 pickMinimumBy :: Test
-pickMinimumBy = Test.check 100 "pickMinimumBy" $ do
+pickMinimumBy = Test.check 100 "pickMinimumBy" $ Test.do
   valuesAndEstimates <- dummyEstimates
   let (minPair, remainingPairs) = Estimate.pickMinimumBy Pair.second valuesAndEstimates
   let minValue = Pair.first minPair
@@ -192,7 +192,7 @@ pickMinimumBy = Test.check 100 "pickMinimumBy" $ do
   ?tolerance = Length.meters 1e-9
 
 pickMaximumBy :: Test
-pickMaximumBy = Test.check 100 "pickMaximumBy" $ do
+pickMaximumBy = Test.check 100 "pickMaximumBy" $ Test.do
   valuesAndEstimates <- dummyEstimates
   let (maxPair, remainingPairs) = Estimate.pickMaximumBy Pair.second valuesAndEstimates
   let maxValue = Pair.first maxPair
@@ -205,26 +205,30 @@ pickMaximumBy = Test.check 100 "pickMaximumBy" $ do
   ?tolerance = Length.meters 1e-9
 
 pickSmallestBy :: Test
-pickSmallestBy = Test.check 100 "pickSmallestBy" $ do
+pickSmallestBy = Test.check 100 "pickSmallestBy" $ Test.do
   valuesAndEstimates <- dummyEstimates
   let (smallestPair, remainingPairs) = Estimate.pickSmallestBy Pair.second valuesAndEstimates
   let smallestValue = Pair.first smallestPair
   let remainingValues = List.map Pair.first remainingPairs
   let originalValues = NonEmpty.map Pair.first valuesAndEstimates
-  let smallestValueIsCorrect = List.all (Qty.abs >> (>= Qty.abs smallestValue)) remainingValues
+  let smallestValueIsCorrect = List.all (\value -> Qty.abs value >= Qty.abs smallestValue) remainingValues
   let allValuesArePresent = NonEmpty.sort originalValues == NonEmpty.sort (smallestValue :| remainingValues)
   Test.expect (smallestValueIsCorrect && allValuesArePresent)
+    |> Test.output "smallestValueIsCorrect" smallestValueIsCorrect
+    |> Test.output "allValuesArePresent" allValuesArePresent
+    |> Test.output "smallestValue" smallestValue
+    |> Test.output "remainingValues" remainingValues
  where
   ?tolerance = Length.meters 1e-9
 
 pickLargestBy :: Test
-pickLargestBy = Test.check 100 "pickLargestBy" $ do
+pickLargestBy = Test.check 100 "pickLargestBy" $ Test.do
   valuesAndEstimates <- dummyEstimates
   let (largestPair, remainingPairs) = Estimate.pickLargestBy Pair.second valuesAndEstimates
   let largestValue = Pair.first largestPair
   let remainingValues = List.map Pair.first remainingPairs
   let originalValues = NonEmpty.map Pair.first valuesAndEstimates
-  let largestValueIsCorrect = List.all (Qty.abs >> (<= Qty.abs largestValue)) remainingValues
+  let largestValueIsCorrect = List.all (\value -> Qty.abs value <= Qty.abs largestValue) remainingValues
   let allValuesArePresent = NonEmpty.sort originalValues == NonEmpty.sort (largestValue :| remainingValues)
   Test.expect (largestValueIsCorrect && allValuesArePresent)
  where

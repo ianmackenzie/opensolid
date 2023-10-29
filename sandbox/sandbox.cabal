@@ -29,7 +29,6 @@ executable sandbox
     , base
     , containers
     , random
-    , text
     , opensolid
   ghc-options:
       -Wall

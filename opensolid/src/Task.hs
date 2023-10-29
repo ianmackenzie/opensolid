@@ -1,7 +1,7 @@
 module Task
   ( Task
+  , immediate
   , toIO
-  , succeed
   , fail
   , map
   , mapError
@@ -13,35 +13,21 @@ where
 
 import Basics
 import Control.Exception qualified
-import DoNotation
 import Result (ErrorMessage (errorMessage), Result (Error, Ok))
 import Result qualified
 import System.Exit qualified
-import Text qualified
 import Prelude qualified
 
 data Task x a
   = Done (Result x a)
   | Perform (IO (Task x a))
 
-instance (x ~ x') => Compose (Task x ()) (Task x' a) (Task x a) where
-  compose script1 script2 = bind (always script2) script1
-
-instance (x ~ x', a ~ a') => Bind (Task x a) a' (Task x' b) where
-  bind f (Done (Ok value)) = f value
-  bind _ (Done (Error err)) = Done (Error err)
-  bind f (Perform io) = Perform (Prelude.fmap (bind f) io)
-
-instance (x ~ x', a ~ a') => Bind (Result x a) a' (Task x' b) where
-  bind f (Ok value) = f value
-  bind _ (Error err) = Done (Error err)
-
 instance Prelude.Functor (Task x) where
   fmap f (Done result) = Done (Result.map f result)
   fmap f (Perform io) = Perform (Prelude.fmap (Task.map f) io)
 
 instance Prelude.Applicative (Task x) where
-  pure = Ok >> Done
+  pure = Done . Ok
   Done (Ok function) <*> task = Task.map function task
   Done (Error error) <*> _ = Done (Error error)
   Perform io <*> task = Perform (Prelude.fmap (Prelude.<*> task) io)
@@ -52,7 +38,10 @@ instance Prelude.Monad (Task x) where
   Perform io >>= function = Perform (Prelude.fmap (Prelude.>>= function) io)
 
 instance Prelude.MonadFail (Task (List Char)) where
-  fail = Error >> Done
+  fail = Done . Error
+
+immediate :: Result x a -> Task x a
+immediate = Done
 
 map :: (a -> b) -> Task x a -> Task x b
 map function (Done result) = Done (Result.map function result)
@@ -65,24 +54,18 @@ mapError function (Perform io) = Perform (Prelude.fmap (mapError function) io)
 fromIO :: IO a -> Task IOError a
 fromIO io =
   Perform $
-    Control.Exception.catch (Prelude.fmap succeed io) $
+    Control.Exception.catch (Prelude.fmap return io) $
       (\ioError -> Prelude.pure (Done (Error ioError)))
 
 toIO :: Task x () -> IO ()
 toIO (Done (Ok ())) = System.Exit.exitSuccess
-toIO (Done (Error error)) = System.Exit.die (Text.toChars (errorMessage error))
+toIO (Done (Error error)) = System.Exit.die (errorMessage error)
 toIO (Perform io) = io Prelude.>>= toIO
 
-succeed :: a -> Task x a
-succeed value = Done (Ok value)
-
-instance Fail (Task Text a) where
-  fail message = Done (Error message)
-
 each :: (a -> Task x ()) -> List a -> Task x ()
-each _ [] = succeed ()
+each _ [] = return ()
 each f (first : rest) = do f first; each f rest
 
 collect :: (a -> Task x b) -> List a -> Task x (List b)
-collect _ [] = succeed []
-collect f (a : as) = do b <- f a; bs <- collect f as; succeed (b : bs)
+collect _ [] = return []
+collect f (a : as) = do b <- f a; bs <- collect f as; return (b : bs)

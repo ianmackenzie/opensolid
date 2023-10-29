@@ -17,7 +17,7 @@ tests =
       ]
 
 crossingRoots :: (Tolerance Unitless) => Test
-crossingRoots = Test.verify "Crossing roots" $ do
+crossingRoots = Test.verify "Crossing roots" $ Test.do
   let t = Curve1d.parameter
   let x = 3.0 * t
   let y = (x - 1.0) * (x - 1.0) * (x - 1.0) - (x - 1.0)
@@ -30,7 +30,7 @@ crossingRoots = Test.verify "Crossing roots" $ do
   Test.expect (roots ~= expectedRoots)
 
 tangentRoots :: (Tolerance Unitless) => Test
-tangentRoots = Test.verify "Tangent roots" $ do
+tangentRoots = Test.verify "Tangent roots" $ Test.do
   let t = Curve1d.parameter
   let theta = Angle.fullTurn * t
   let expression = Curve1d.squared (Curve1d.sin theta)

@@ -36,14 +36,3 @@ instance (a ~ a') => Concatenate (Maybe a) (NonEmpty a') (NonEmpty a) where
 instance (a ~ a') => Concatenate (NonEmpty a) (Maybe a') (NonEmpty a) where
   nonEmpty ++ Nothing = nonEmpty
   nonEmpty ++ Just value = nonEmpty ++ [value]
-
-instance Concatenate Text Text Text where
-  (++) = Prelude.mappend
-
-instance Concatenate Text (Maybe Text) Text where
-  text ++ Just suffix = text ++ suffix
-  text ++ Nothing = text
-
-instance Concatenate (Maybe Text) Text Text where
-  Just prefix ++ text = prefix ++ text
-  Nothing ++ text = text

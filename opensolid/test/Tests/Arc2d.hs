@@ -18,8 +18,8 @@ tests =
 
 from :: (Tolerance Meters) => Test
 from =
-  let test :: Text -> Angle -> Point2d (space @ Meters) -> Test
-      test label angle expectedPoint = Test.verify label $ do
+  let test :: String -> Angle -> Point2d (space @ Meters) -> Test
+      test label angle expectedPoint = Test.verify label $ Test.do
         arc <- Arc2d.from Point2d.origin (Point2d.meters 1.0 1.0) angle
         Test.expect (Curve2d.evaluateAt 0.5 arc ~= expectedPoint)
       invSqrt2 = 1.0 / Float.sqrt 2.0

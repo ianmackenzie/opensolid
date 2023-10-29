@@ -13,23 +13,19 @@ module Result
 where
 
 import Basics
-import Data.Text qualified
-import DoNotation
+import Debug qualified
 import System.IO.Error qualified
 import Prelude qualified
 
 class (Eq error, Show error) => ErrorMessage error where
-  errorMessage :: error -> Text
-  errorMessage error = Data.Text.pack (Prelude.show error)
+  errorMessage :: error -> String
+  errorMessage = Debug.show
 
-instance ErrorMessage Text where
-  errorMessage text = text
-
-instance ErrorMessage (List Char) where
-  errorMessage = Data.Text.pack
+instance ErrorMessage String where
+  errorMessage = identity
 
 instance ErrorMessage IOError where
-  errorMessage ioError = Data.Text.pack (System.IO.Error.ioeGetErrorString ioError)
+  errorMessage ioError = System.IO.Error.ioeGetErrorString ioError
 
 data Result x a where
   Ok :: a -> Result x a
@@ -54,13 +50,6 @@ instance Prelude.Monad (Result x) where
   Error error >>= _ = Error error
 
 instance Prelude.MonadFail (Result (List Char)) where
-  fail = Error
-
-instance (x ~ x', a ~ a') => Bind (Result x a) a' (Result x' b) where
-  bind f (Ok value) = f value
-  bind _ (Error error) = Error error
-
-instance Fail (Result Text a) where
   fail = Error
 
 withDefault :: a -> Result x a -> a

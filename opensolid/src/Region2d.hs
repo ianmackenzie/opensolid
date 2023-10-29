@@ -231,8 +231,9 @@ pickLargestLoop loops =
 loopSignedArea :: Loop (space @ units) -> Estimate (units :* units)
 loopSignedArea loop =
   let referencePoint = Units.generalize (Curve2d.startPoint (NonEmpty.first loop))
-   in NonEmpty.toList loop
-        |> List.map (Units.generalize >> areaIntegral referencePoint)
+   in Units.generalize loop
+        |> NonEmpty.toList
+        |> List.map (areaIntegral referencePoint)
         |> Estimate.sum
 
 areaIntegral ::

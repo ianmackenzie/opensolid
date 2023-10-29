@@ -9,32 +9,32 @@ where
 import OpenSolid hiding ((>>), (>>=))
 import OpenSolid qualified
 import Result qualified
+import String qualified
 import Task qualified
-import Text qualified
 
-class MapError a b | a -> b where
-  mapError :: a -> b
+class (Monad m1, Monad m2) => MapError m1 m2 | m1 -> m2 where
+  mapError :: m1 a -> m2 a
 
-instance (ErrorMessage x, a ~ a') => MapError (Result x a) (Result Text a') where
+instance (ErrorMessage x) => MapError (Result x) (Result String) where
   mapError = Result.mapError errorMessage
 
-instance (ErrorMessage x, a ~ a') => MapError (Task x a) (Task Text a') where
+instance (ErrorMessage x, a ~ a') => MapError (Task x) (Task String) where
   mapError = Task.mapError errorMessage
 
-instance (a ~ a') => MapError (List a) (List a') where
+instance (a ~ a') => MapError [] [] where
   mapError = identity
 
-instance (a ~ a') => MapError (Maybe a) (Maybe a') where
+instance (a ~ a') => MapError Maybe Maybe where
   mapError = identity
 
-(>>) :: (MapError a a', Compose a' b c) => a -> b -> c
+(>>) :: (MapError m1 m2) => m1 a -> m2 b -> m2 b
 first >> second = mapError first OpenSolid.>> second
 
-(>>=) :: (MapError a a', Bind a' b c) => a -> (b -> c) -> c
+(>>=) :: (MapError m1 m2) => m1 a -> (a -> m2 b) -> m2 b
 value >>= function = mapError value OpenSolid.>>= function
 
-withContext :: (ErrorMessage x) => Text -> Result x a -> Result Text a
-withContext context = Result.mapError (errorMessage OpenSolid.>> addContext context)
+withContext :: (ErrorMessage x) => String -> Result x a -> Result String a
+withContext context = Result.mapError (addContext context . errorMessage)
 
-addContext :: Text -> Text -> Text
-addContext context text = context ++ ":\n" ++ Text.indent "  " text
+addContext :: String -> String -> String
+addContext context text = context ++ ":\n" ++ String.indent "  " text

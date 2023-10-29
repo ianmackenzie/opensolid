@@ -27,7 +27,6 @@ common config
     , base
     , containers
     , random
-    , text
   ghc-options:
       -Wall
       -Werror
@@ -111,7 +110,6 @@ library
       DirectionBounds2d
       DirectionCurve2d
       Domain
-      DoNotation
       Estimate
       Float
       Frame2d
@@ -139,10 +137,10 @@ library
       Seq
       Sign
       Stream
+      String
       Surface1d
       Surface1d.Function
       Task
-      Text
       Tolerance
       Transform2d
       Try

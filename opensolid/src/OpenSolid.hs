@@ -8,7 +8,6 @@ module OpenSolid
   , module NonEmpty
   , module Sign
   , module Task
-  , module DoNotation
   , module CoordinateSystem
   , module Tolerance
   , module Fuzzy
@@ -22,7 +21,6 @@ import Arithmetic
 import Basics
 import Concatenate (Concatenate ((++)))
 import CoordinateSystem (CoordinateSystem, Defines, LocalSpace, type (@))
-import DoNotation
 import Float (Float, fromRational)
 import Fuzzy (Fuzzy (Resolved, Unresolved))
 import NonEmpty (NonEmpty ((:|)), pattern NonEmpty)
