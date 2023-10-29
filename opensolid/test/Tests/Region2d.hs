@@ -27,7 +27,7 @@ tests =
   ?tolerance = Length.meters 1e-9
 
 square :: (Tolerance Meters) => Test
-square = Test.check 1 "square" $ do
+square = Test.check 1 "square" $ Test.do
   let width = Length.meters 2.0
   let p1 = Point2d.origin
   let p2 = Point2d.xy width zero
@@ -41,7 +41,7 @@ square = Test.check 1 "square" $ do
   Test.expect (let ?tolerance = Area.squareMeters 1e-6 in Region2d.area region ~= width * width)
 
 quarterCircle :: (Tolerance Meters) => Test
-quarterCircle = Test.check 1 "quarterCircle" $ do
+quarterCircle = Test.check 1 "quarterCircle" $ Test.do
   let radius = Length.meters 1.0
   let p1 = Point2d.origin
   let p2 = Point2d.xy radius zero
@@ -53,7 +53,7 @@ quarterCircle = Test.check 1 "quarterCircle" $ do
   Test.expect (let ?tolerance = Area.squareMeters 1e-6 in Region2d.area region ~= 0.25 * Float.pi * radius * radius)
 
 squareWithHole :: (Tolerance Meters) => Test
-squareWithHole = Test.check 1 "squareWithHole" $ do
+squareWithHole = Test.check 1 "squareWithHole" $ Test.do
   let width = Length.meters 2.0
   let p1 = Point2d.origin
   let p2 = Point2d.xy width zero
@@ -78,7 +78,7 @@ squareWithHole = Test.check 1 "squareWithHole" $ do
   Test.expect (let ?tolerance = Area.squareMeters 1e-6 in area ~= expectedArea)
 
 incompleteSquare :: (Tolerance Meters) => Test
-incompleteSquare = Test.check 1 "incompleteSquare" $ do
+incompleteSquare = Test.check 1 "incompleteSquare" $ Test.do
   let width = Length.meters 2.0
   let p1 = Point2d.origin
   let p2 = Point2d.xy width zero
@@ -92,7 +92,7 @@ incompleteSquare = Test.check 1 "incompleteSquare" $ do
     Error error -> Test.expect (error == Region2d.RegionBoundaryHasGaps)
 
 squareWithTangentHole :: (Tolerance Meters) => Test
-squareWithTangentHole = Test.check 1 "squareWithTangentHole" $ do
+squareWithTangentHole = Test.check 1 "squareWithTangentHole" $ Test.do
   let width = Length.meters 2.0
   let p1 = Point2d.origin
   let p2 = Point2d.xy width zero
@@ -116,7 +116,7 @@ squareWithTangentHole = Test.check 1 "squareWithTangentHole" $ do
     Error error -> Test.expect (error == Region2d.RegionBoundaryIntersectsItself)
 
 twoCircles :: (Tolerance Meters) => Test
-twoCircles = Test.check 1 "twoCircles" $ do
+twoCircles = Test.check 1 "twoCircles" $ Test.do
   let circle centerPoint radius =
         Arc2d.with
           [ Arc2d.CenterPoint centerPoint

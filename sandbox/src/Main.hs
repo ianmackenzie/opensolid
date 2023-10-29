@@ -18,8 +18,8 @@ import Qty qualified
 import Random qualified
 import Range qualified
 import Result qualified
+import String qualified
 import Task qualified
-import Text qualified
 import Transform2d qualified
 import Try qualified
 import Units (Meters)
@@ -27,10 +27,10 @@ import Vector2d qualified
 import Vector3d qualified
 import Volume qualified
 
-log :: (Show a) => Text -> a -> Task Text ()
+log :: (Show a) => String -> a -> Task String ()
 log label value = Console.printLine (label ++ ": " ++ Debug.show value)
 
-testScalarArithmetic :: Task Text ()
+testScalarArithmetic :: Task String ()
 testScalarArithmetic = Try.do
   log "Integer product" (3 * 4)
   log "Integer division" (10 // 4)
@@ -42,7 +42,7 @@ testScalarArithmetic = Try.do
   log "Volume in cubic centimeters" volumeInCubicCentimeters
   log "sqrt 2.0" (Qty.sqrt 2.0)
 
-testVectorArithmetic :: Task Text ()
+testVectorArithmetic :: Task String ()
 testVectorArithmetic = Try.do
   let v1 = Vector2d.meters 1.0 2.0
   let v2 = 0.5 * Vector2d.meters 3.0 4.0
@@ -60,18 +60,18 @@ testVectorArithmetic = Try.do
   let scaledVector = Length.meters 2.0 * Vector2d.meters 3.0 4.0
   log "Scaled vector" scaledVector
 
-testRangeArithmetic :: Task Text ()
+testRangeArithmetic :: Task String ()
 testRangeArithmetic = Try.do
   let rangeDifference = Range.from (Length.meters 2.0) (Length.meters 3.0) - Length.centimeters 50.0
   log "Range difference" rangeDifference
   let rangeProduct = Length.centimeters 20.0 * Range.from (Length.meters 2.0) (Length.meters 3.0)
   log "Range product" rangeProduct
 
-testEquality :: Task Text ()
+testEquality :: Task String ()
 testEquality = Try.do
   log "Equality test" (let ?tolerance = Length.centimeter in Length.meters 1.0 ~= Length.meters 1.005)
 
-testTransformation :: Task Text ()
+testTransformation :: Task String ()
 testTransformation = Try.do
   log "Rotated axis" (Axis2d.x |> Transform2d.rotateAround (Point2d.meters 1.0 0.0) Angle.quarterTurn)
   let originalPoints = [Point2d.meters 1.0 0.0, Point2d.meters 2.0 0.0, Point2d.meters 3.0 0.0]
@@ -94,17 +94,17 @@ offsetPoint startPoint endPoint distance = Result.withDefault startPoint do
   direction <- Direction2d.from startPoint endPoint
   Ok (Point2d.midpoint startPoint endPoint + distance * Direction2d.perpendicularTo direction)
 
-testCustomFunction :: (Tolerance Meters) => Task Text ()
+testCustomFunction :: (Tolerance Meters) => Task String ()
 testCustomFunction = Try.do
   log "Offset point" (offsetPoint (Point2d.meters 1.0 0.0) (Point2d.meters 3.0 0.0) (Length.meters 1.0))
 
-testListOperations :: Task Text ()
+testListOperations :: Task String ()
 testListOperations = Try.do
   log "Successive deltas" (List.successive subtract [0, 1, 4, 9, 16, 25])
   log "Successive intervals" (List.successive Range.from [1.0, 2.0, 3.0, 4.0])
   log "Prepend Maybe to List" (Just 1 ++ [2, 3])
 
-getCrossProduct :: (Tolerance Meters) => Result Text Float
+getCrossProduct :: (Tolerance Meters) => Result String Float
 getCrossProduct = Try.withContext "In getCrossProduct" Try.do
   vectorDirection <- Vector2d.direction (Vector2d.meters 2.0 3.0)
   lineDirection <-
@@ -112,32 +112,32 @@ getCrossProduct = Try.withContext "In getCrossProduct" Try.do
       Direction2d.from Point2d.origin Point2d.origin
   Ok (vectorDirection >< lineDirection)
 
-testTry :: (Tolerance Meters) => Task Text ()
+testTry :: (Tolerance Meters) => Task String ()
 testTry =
   case Try.withContext "In testTry" getCrossProduct of
     Ok crossProduct -> log "Got cross product" crossProduct
     Error message -> Console.printLine message
 
-testTaskIteration :: Task Text ()
+testTaskIteration :: Task String ()
 testTaskIteration = do
   Task.each (log "Looping") [1 .. 3]
 
-doublingTask :: Text -> Task Text Int
+doublingTask :: String -> Task String Int
 doublingTask input = do
-  value <- Text.toInt input
+  value <- Task.immediate (String.toInt input)
   let doubled = 2 * value
-  Task.succeed doubled
+  return doubled
 
-doubleManyTask :: Task Text (List Int)
+doubleManyTask :: Task String (List Int)
 doubleManyTask = do
-  Task.collect doublingTask ["1", "-2", "+3"]
+  Task.collect doublingTask ["1", "-2", "3"]
 
-testTaskSequencing :: Task Text ()
+testTaskSequencing :: Task String ()
 testTaskSequencing = do
   doubledValues <- doubleManyTask
   Task.each (log "Doubled value") doubledValues
 
-testParameter1dGeneration :: Task Text ()
+testParameter1dGeneration :: Task String ()
 testParameter1dGeneration = Try.do
   t1 <- Random.generate Parameter1d.generator
   t2 <- Random.generate Parameter1d.generator
@@ -146,17 +146,17 @@ testParameter1dGeneration = Try.do
   log "Random parameter value 2" t2
   log "Random parameter value 3" t3
 
-testEmptyCheck :: List Int -> Task Text ()
+testEmptyCheck :: List Int -> Task String ()
 testEmptyCheck [] = Console.printLine "List is empty"
 testEmptyCheck (NonEmpty nonEmpty) =
   Console.printLine ("List is non-empty, maximum is " ++ Debug.show (NonEmpty.maximum nonEmpty))
 
-testNonEmpty :: Task Text ()
+testNonEmpty :: Task String ()
 testNonEmpty = Try.do
   testEmptyCheck []
   testEmptyCheck [2, 3, 1]
 
-script :: Task Text ()
+script :: Task String ()
 script = do
   testScalarArithmetic
   testVectorArithmetic

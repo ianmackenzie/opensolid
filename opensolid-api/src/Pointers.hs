@@ -12,12 +12,12 @@ module Pointers
 where
 
 import Bounds2d qualified
+import Debug qualified
 import Direction2d qualified
 import Foreign qualified
 import Foreign.Storable (Storable)
 import OpenSolid hiding (fromInteger, (*), (+))
 import Range qualified
-import Text
 import Vector2d qualified
 import Prelude (fromInteger, (*), (+))
 import Prelude qualified
@@ -38,7 +38,7 @@ newStablePtr val = Prelude.do
   Prelude.return $ Foreign.castStablePtrToPtr stablePtr
 
 derefStablePtr :: Foreign.Ptr () -> IO a
-derefStablePtr = Foreign.castPtrToStablePtr >> Foreign.deRefStablePtr
+derefStablePtr = Foreign.deRefStablePtr . Foreign.castPtrToStablePtr
 
 freeStablePtr :: Foreign.Ptr () -> IO ()
 freeStablePtr ptr
@@ -120,6 +120,6 @@ instance (TaggedError error, VoidPtr success) => Storable (Result error success)
 
 -- TODO: codegen this
 instance TaggedError Vector2d.IsZero where
-  fromTaggedPtr (1 :: Foreign.Word8) _ = Prelude.return Vector2d.IsZero
-  fromTaggedPtr tag _ = Prelude.error (Text.toChars (Text.concat ["Unexpected tag ", Text.fromChars (Prelude.show tag)]))
-  toTaggedPtr Vector2d.IsZero = Prelude.return (1 :: Foreign.Word8, Foreign.nullPtr)
+  fromTaggedPtr (1 :: Foreign.Word8) _ = return Vector2d.IsZero
+  fromTaggedPtr tag _ = internalError ("Unexpected tag " ++ Debug.show tag)
+  toTaggedPtr Vector2d.IsZero = return (1 :: Foreign.Word8, Foreign.nullPtr)

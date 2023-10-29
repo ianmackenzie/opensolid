@@ -16,7 +16,7 @@ tests =
 
 pickMinimum :: Test
 pickMinimum =
-  Test.check 100 "pickMinimum" $ do
+  Test.check 100 "pickMinimum" $ Test.do
     values <- Random.nonEmpty 20 (Random.int 0 100)
     let (minValue, remainingValues) = NonEmpty.pickMinimum values
     let minValueIsMin = List.all (>= minValue) remainingValues
@@ -29,7 +29,7 @@ pickMinimum =
       |> Test.output "remainingValues" remainingValues
 
 reverseMap :: Test
-reverseMap = Test.check 100 "reverseMap" $ do
+reverseMap = Test.check 100 "reverseMap" $ Test.do
   ints <- Random.nonEmpty 10 (Random.int 1 10)
   let twice n = 2 * n
   Test.expect (NonEmpty.reverseMap twice ints == NonEmpty.reverse (NonEmpty.map twice ints))

@@ -25,7 +25,7 @@ tests =
   ]
 
 smaller :: Test
-smaller = Test.check 100 "smaller" $ do
+smaller = Test.check 100 "smaller" $ Test.do
   a <- Range.generator Random.length
   b <- Range.generator Random.length
   u <- Parameter1d.generator
@@ -43,7 +43,7 @@ smaller = Test.check 100 "smaller" $ do
     |> Test.output "smallerRange" smallerRange
 
 larger :: Test
-larger = Test.check 100 "larger" $ do
+larger = Test.check 100 "larger" $ Test.do
   a <- Range.generator Random.length
   b <- Range.generator Random.length
   u <- Parameter1d.generator
@@ -61,14 +61,14 @@ larger = Test.check 100 "larger" $ do
     |> Test.output "largerRange" largerRange
 
 valueInRange :: Generator (Length, Range Meters)
-valueInRange = do
+valueInRange = Test.do
   range <- Range.generator Random.length
   t <- Parameter1d.generator
   let value = Range.interpolate range t
   Random.return (value, range)
 
 smallest :: Test
-smallest = Test.check 1000 "smallest" $ do
+smallest = Test.check 1000 "smallest" $ Test.do
   valuesAndRanges <- Random.nonEmpty 5 valueInRange
   let (values, ranges) = NonEmpty.unzip2 valuesAndRanges
   let smallestValue = Qty.smallest values
@@ -76,7 +76,7 @@ smallest = Test.check 1000 "smallest" $ do
   Test.expect (Range.includes smallestValue smallestRange)
 
 largest :: Test
-largest = Test.check 1000 "largest" $ do
+largest = Test.check 1000 "largest" $ Test.do
   valuesAndRanges <- Random.nonEmpty 5 valueInRange
   let (values, ranges) = NonEmpty.unzip2 valuesAndRanges
   let largestValue = Qty.largest values

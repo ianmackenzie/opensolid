@@ -16,7 +16,7 @@ tests =
   ]
 
 magnitude :: (Tolerance Meters) => Test
-magnitude = Test.check 100 "magnitude" $ do
+magnitude = Test.check 100 "magnitude" $ Test.do
   vectorBounds <- Tests.Random.vectorBounds3d
   u <- Parameter1d.generator
   v <- Parameter1d.generator

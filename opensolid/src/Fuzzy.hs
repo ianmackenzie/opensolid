@@ -7,7 +7,6 @@ module Fuzzy
 where
 
 import Basics
-import DoNotation
 import Prelude qualified
 
 data Fuzzy a = Resolved a | Unresolved deriving (Eq, Show)
@@ -25,10 +24,6 @@ instance Prelude.Applicative Fuzzy where
 instance Prelude.Monad Fuzzy where
   Resolved value >>= function = function value
   Unresolved >>= _ = Unresolved
-
-instance (a ~ a') => Bind (Fuzzy a) a' (Fuzzy b) where
-  bind f (Resolved value) = f value
-  bind _ Unresolved = Unresolved
 
 and :: Fuzzy Bool -> Fuzzy Bool -> Fuzzy Bool
 and (Resolved False) _ = Resolved False

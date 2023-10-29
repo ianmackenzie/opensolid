@@ -14,13 +14,12 @@ import OpenSolidAPI
   , openSolidAPI
   )
 import PythonAST qualified as PY
+import String qualified
 import System.Exit qualified as SE
 import System.IO qualified as SIO
 import System.Process qualified as SP
 import Task qualified
-import Text qualified
 import Try qualified
-import Prelude qualified
 
 setup :: List PY.Statement
 setup =
@@ -32,7 +31,7 @@ setup =
     , "from ctypes import c_bool, c_double, c_int8, c_void_p, cast, cdll, POINTER, Structure"
     , "global lib"
     , "system = platform.system()"
-    , Text.join "\n" $
+    , String.join "\n" $
         [ "if system == 'Darwin':"
         , "    lib = cdll.LoadLibrary('libopensolid-ffi.dylib')"
         , "elif system == 'Linux':"
@@ -43,7 +42,7 @@ setup =
     , "lib.opensolid_free.argtypes = [c_void_p]"
     , "lib.opensolid_free_stable.argtypes = [c_void_p]"
     , "global_tolerance = None"
-    , Text.join "\n" $
+    , String.join "\n" $
         [ "@contextmanager"
         , "def Tolerance(new_tolerance: float):"
         , "    global global_tolerance"
@@ -55,15 +54,15 @@ setup =
         ]
     , "A = TypeVar('A')"
     , "B = TypeVar('B')"
-    , Text.join "\n" $
+    , String.join "\n" $
         [ "def maybe_reader(read_success: Callable[[c_void_p], A]) -> Callable[[c_void_p], Optional[A]]:"
         , "    return lambda ptr: read_success(ptr) if ptr else None"
         ]
-    , Text.join "\n" $
+    , String.join "\n" $
         [ "class Tuple2Structure(Structure):"
         , "    _fields_ = [('ptr1', c_void_p), ('ptr2', c_void_p)]"
         ]
-    , Text.join "\n" $
+    , String.join "\n" $
         [ "def tuple2_reader(read_a: Callable[[c_void_p], A], read_b: Callable[[c_void_p], B]) -> Callable[[c_void_p], Tuple[A, B]]:"
         , "    def read(ptr: c_void_p) -> Tuple[A, B]:"
         , "        tuple2_struct = cast(ptr, POINTER(Tuple2Structure)).contents"
@@ -72,11 +71,11 @@ setup =
         , "        return res"
         , "    return read"
         ]
-    , Text.join "\n" $
+    , String.join "\n" $
         [ "class ResultStructure(Structure):"
         , "    _fields_ = [('ptr', c_void_p), ('tag', c_int8)]"
         ]
-    , Text.join "\n" $
+    , String.join "\n" $
         [ "def result_reader(read_error: Callable[[c_int8, c_void_p], Exception], read_success: Callable[[c_void_p], A]) -> Callable[[c_void_p], A]:"
         , "    def read(ptr: c_void_p) -> A:"
         , "        result_struct = cast(ptr, POINTER(ResultStructure)).contents"
@@ -89,19 +88,19 @@ setup =
         , "            raise read_error(tag, ptr1)"
         , "    return read"
         ]
-    , Text.join "\n" $
+    , String.join "\n" $
         [ "def read_float(ptr: c_void_p) -> float:"
         , "    val = float(cast(ptr, POINTER(c_double)).contents.value)"
         , "    lib.opensolid_free(ptr)"
         , "    return val"
         ]
-    , Text.join "\n" $
+    , String.join "\n" $
         [ "def read_bool(ptr: c_void_p) -> bool:"
         , "    val = bool(cast(ptr, POINTER(c_bool)).contents.value)"
         , "    lib.opensolid_free(ptr)"
         , "    return val"
         ]
-    , Text.join "\n" $
+    , String.join "\n" $
         [ "def read_tolerance(tolerance: Optional[float]) -> float:"
         , "    tolerance = tolerance or global_tolerance"
         , "    if tolerance is None:"
@@ -133,10 +132,10 @@ apiClass (Class clsName representationProps errorClasses functions) =
 
   representation =
     PY.def "__repr__" [selfPyArg] (Just (PY.var "str")) $
-      [ PY.return
+      [ PY.returnStatement
           ( List.foldLeft
               PY.plus
-              (PY.string (Text.concat [clsName, "("]))
+              (PY.string (clsName ++ "("))
               ( List.intersperse
                   (PY.string ", ")
                   (List.map (\prop -> PY.call (PY.var "str") [PY.call (PY.var "self" `PY.dot` prop) []]) representationProps)
@@ -194,7 +193,7 @@ cType typ =
     Tuple2 _ _ -> PY.var "c_void_p"
     Self -> PY.var "c_void_p"
 
-pyArgs :: List (Text, ValueType) -> List (Text, Maybe PY.Expr, Maybe PY.Expr)
+pyArgs :: List (String, ValueType) -> List (String, Maybe PY.Expr, Maybe PY.Expr)
 pyArgs = List.map pyArg
  where
   pyArg (name, typ) =
@@ -205,7 +204,7 @@ pyArgs = List.map pyArg
      in
       (name, pyType typ, defaultValue)
 
-selfPyArg :: (Text, Maybe PY.Expr, Maybe PY.Expr)
+selfPyArg :: (String, Maybe PY.Expr, Maybe PY.Expr)
 selfPyArg = ("self", Nothing, Nothing)
 
 pyType :: ValueType -> Maybe PY.Expr
@@ -222,7 +221,7 @@ pyType typ =
 
 fnBody :: ValueType -> PY.Expr -> List PY.Expr -> [PY.Statement]
 fnBody typ ffiFunc args =
-  [PY.return expression]
+  [PY.returnStatement expression]
  where
   fnCall = PY.call ffiFunc args
   expression = case typ of
@@ -254,7 +253,7 @@ exprReader typ =
     ImplicitTolerance -> PY.var "read_float"
     Self -> PY.var "self" `PY.dot` "ptr"
 
-ffiArgExprs :: List (Text, ValueType) -> List PY.Expr
+ffiArgExprs :: List (String, ValueType) -> List PY.Expr
 ffiArgExprs = List.map ffiArgExpr
  where
   ffiArgExpr (var, typ) =
@@ -264,7 +263,7 @@ ffiArgExprs = List.map ffiArgExpr
       ImplicitTolerance -> PY.call (PY.var "read_tolerance") [PY.var var]
       _ -> PY.var var
 
-apiException :: Text -> ExceptionClass -> List PY.Statement
+apiException :: String -> ExceptionClass -> List PY.Statement
 apiException mod (ExceptionClass name [(tag, constructorName, Nothing)])
   | name == constructorName =
       let retTyp = PY.var mod `PY.dot` name
@@ -279,7 +278,7 @@ apiException mod (ExceptionClass name [(tag, constructorName, Nothing)])
                       [ PY.conditional
                           [
                             ( PY.var "tag" `PY.eq` PY.int tag
-                            , [PY.return (PY.call retTyp [])]
+                            , [PY.returnStatement (PY.call retTyp [])]
                             )
                           ]
                           (PY.literalStatement "raise ValueError('Unkown exception tag ' + str(tag))")
@@ -288,16 +287,13 @@ apiException mod (ExceptionClass name [(tag, constructorName, Nothing)])
               ]
           ]
 -- TODO: support exceptions with mutiple cases and pointers
-apiException _ ex = Prelude.error (Text.toChars (Debug.show ex))
+apiException _ ex = internalError (Debug.show ex)
 
 main :: IO ()
 main =
-  let pythonCode = Text.toChars (PY.prettyStatements (setup ++ api openSolidAPI))
+  let pythonCode = PY.prettyStatements (setup ++ api openSolidAPI)
       ruffCmd =
-        ( SP.proc
-            (Text.toString "ruff")
-            (List.map Text.toString ["format", "--stdin-filename", "opensolid.py", "--quiet"])
-        )
+        (SP.proc "ruff" ["format", "--stdin-filename", "opensolid.py", "--quiet"])
           { SP.std_in = SP.CreatePipe
           }
    in Task.toIO $ Try.do
@@ -306,5 +302,5 @@ main =
         Task.fromIO (SIO.hClose stdinHandle)
         ruffExitCode <- Task.fromIO (SP.waitForProcess process)
         if ruffExitCode == SE.ExitSuccess
-          then Task.succeed ()
+          then return ()
           else fail "Error when running Ruff"

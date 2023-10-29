@@ -41,16 +41,15 @@ run (Generator generator) stdgen = generator stdgen
 instance Prelude.Functor Generator where fmap = map
 
 instance Prelude.Applicative Generator where
-  pure = return
+  pure givenValue = Generator (givenValue,)
+
   functionGenerator <*> valueGenerator = do
     generatedFunction <- functionGenerator
     generatedValue <- valueGenerator
     return (generatedFunction generatedValue)
 
-instance Prelude.Monad Generator where (>>=) = Prelude.flip bind
-
-instance (a ~ a') => Bind (Generator a) a' (Generator b) where
-  bind function generatorA =
+instance Prelude.Monad Generator where
+  generatorA >>= function =
     Generator $
       \stdGen ->
         let (valueA, stdGenA) = run generatorA stdGen
@@ -65,17 +64,14 @@ step generator (Seed stdGen) =
   let (generatedValue, updatedStdGen) = run generator stdGen
    in (generatedValue, Seed updatedStdGen)
 
-generate :: Generator a -> Task Text a
+generate :: Generator a -> Task String a
 generate generator =
   Task.mapError errorMessage $
     Task.fromIO $
       System.Random.Stateful.applyAtomicGen (run generator) System.Random.Stateful.globalStdGen
 
-return :: a -> Generator a
-return givenValue = Generator (givenValue,)
-
 map :: (a -> b) -> Generator a -> Generator b
-map function generator = Generator (run generator >> Pair.mapFirst function)
+map function (Generator generator) = Generator (Pair.mapFirst function . generator)
 
 map2 :: (a -> b -> c) -> Generator a -> Generator b -> Generator c
 map2 function generatorA generatorB = do
@@ -124,7 +120,7 @@ nonEmpty n itemGenerator = do
   return (first :| rest)
 
 seed :: Generator Seed
-seed = Generator (System.Random.split >> Pair.mapFirst Seed)
+seed = Generator (Pair.mapFirst Seed . System.Random.split)
 
 pair :: Generator a -> Generator b -> Generator (a, b)
 pair generatorA generatorB = do

@@ -1,5 +1,6 @@
 module Basics
   ( List
+  , String
   , ifThenElse
   , fromString
   , fromInteger
@@ -19,7 +20,6 @@ module Basics
   , Maybe (Just, Nothing)
   , Type
   , HasField (getField)
-  , Text
   , identity
   , always
   , flip
@@ -27,12 +27,13 @@ module Basics
   , notImplemented
   , (|>)
   , type (~)
+  , Monad ((>>=), (>>), return)
+  , MonadFail (fail)
+  , (.)
   )
 where
 
 import Data.Kind (Type)
-import Data.Text (Text)
-import Data.Text qualified
 import Data.Type.Equality (type (~))
 import GHC.Records (HasField (getField))
 import Prelude
@@ -43,13 +44,17 @@ import Prelude
   , IOError
   , Int
   , Maybe (Just, Nothing)
+  , Monad (return, (>>), (>>=))
+  , MonadFail (fail)
   , Ord ((<), (<=), (>), (>=))
   , Show
+  , String
   , flip
   , not
   , otherwise
   , ($)
   , (&&)
+  , (.)
   , (||)
   )
 import Prelude qualified
@@ -60,8 +65,8 @@ ifThenElse :: Bool -> a -> a -> a
 ifThenElse True ifBranch _ = ifBranch
 ifThenElse False _ elseBranch = elseBranch
 
-fromString :: Prelude.String -> Text
-fromString = Data.Text.pack
+fromString :: String -> String
+fromString = identity
 
 {-# INLINE fromInteger #-}
 fromInteger :: Prelude.Integer -> Int
@@ -73,8 +78,8 @@ identity = Prelude.id
 always :: a -> b -> a
 always = Prelude.const
 
-internalError :: Text -> a
-internalError message = Prelude.error (Data.Text.unpack message)
+internalError :: String -> a
+internalError = Prelude.error
 
 notImplemented :: a
 notImplemented = internalError "Not implemented"
