@@ -8,6 +8,7 @@ where
 
 import Float qualified
 import OpenSolid
+import Quadrature qualified
 import Range (Range (Range))
 import Range qualified
 
@@ -34,12 +35,9 @@ but should be extremely unlikely.
 -}
 sample :: (Float -> a) -> Domain -> List a
 sample function domain =
-  -- Parameter values are Gaussian quadrature abscissae,
-  -- taken from https://pomax.github.io/bezierinfo/legendre-gauss.html#n5
-  -- and converted to [0, 1] to allow interpolation within arbitrary domains
-  [ function (Range.interpolate domain 0.04691007703066802)
-  , function (Range.interpolate domain 0.23076534494715845)
-  , function (Range.interpolate domain 0.5)
-  , function (Range.interpolate domain 0.7692346550528415)
-  , function (Range.interpolate domain 0.9530899229693319)
+  [ function (Range.interpolate domain Quadrature.t1)
+  , function (Range.interpolate domain Quadrature.t2)
+  , function (Range.interpolate domain Quadrature.t3)
+  , function (Range.interpolate domain Quadrature.t4)
+  , function (Range.interpolate domain Quadrature.t5)
   ]

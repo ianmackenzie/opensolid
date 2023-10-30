@@ -140,6 +140,7 @@ library
       String
       Surface1d
       Surface1d.Function
+      Surface1d.Solution
       Task
       Tolerance
       Transform2d
@@ -165,6 +166,7 @@ library
       VectorCurve2d.DegenerateEndpoint
       VectorCurve2d.Direction
       VectorCurve2d.Magnitude
+      Quadrature
   hs-source-dirs: src
 
 test-suite opensolid-test

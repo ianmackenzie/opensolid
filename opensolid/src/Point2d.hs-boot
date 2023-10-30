@@ -1,4 +1,4 @@
-module Point2d (Point2d) where
+module Point2d (Point2d, xy) where
 
 import OpenSolid
 import {-# SOURCE #-} Vector2d (Vector2d)
@@ -13,3 +13,5 @@ instance
     (Point2d (space @ units))
     (Point2d (space' @ units'))
     (Vector2d (space @ units))
+
+xy :: Qty units -> Qty units -> Point2d (space @ units)

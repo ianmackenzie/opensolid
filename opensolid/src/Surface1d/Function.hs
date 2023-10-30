@@ -1,6 +1,7 @@
 module Surface1d.Function
   ( Function
   , Operations (..)
+  , Solution
   , evaluateAt
   , pointOn
   , segmentBounds
@@ -8,12 +9,14 @@ module Surface1d.Function
   , zero
   , constant
   , u
+  , solve
   , v
   , wrap
   , squared
   , sqrt
   , sin
   , cos
+  , isZero
   )
 where
 
@@ -22,13 +25,16 @@ import Bounds2d (Bounds2d)
 import Bounds2d qualified
 import Direction2d (Direction2d)
 import Direction2d qualified
+import Domain qualified
 import Generic qualified
+import List qualified
 import OpenSolid
 import Point2d (Point2d)
 import Point2d qualified
 import Qty qualified
 import Range (Range)
 import Range qualified
+import Surface1d.Solution (Solution)
 import Units qualified
 import Uv qualified
 
@@ -312,3 +318,14 @@ cos :: Function Radians -> Function Unitless
 cos Zero = Constant 1.0
 cos (Constant x) = constant (Angle.cos x)
 cos function = Cos function
+
+isZero :: (Tolerance units) => Function units -> Bool
+isZero function = List.all (~= Qty.zero) (Uv.sample (pointOn function) Domain.unit Domain.unit)
+
+data ZeroEverywhere = ZeroEverywhere deriving (Eq, Show, ErrorMessage)
+
+solve :: (Tolerance units) => Function units -> Result ZeroEverywhere (List Solution)
+solve Zero = Error ZeroEverywhere
+solve (Constant value) = if value ~= Qty.zero then Error ZeroEverywhere else Ok []
+solve surface | isZero surface = Error ZeroEverywhere
+solve _ = notImplemented -- TODO
