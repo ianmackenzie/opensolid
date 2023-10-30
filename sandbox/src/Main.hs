@@ -4,7 +4,6 @@ import Angle qualified
 import Area qualified
 import Axis2d qualified
 import Console qualified
-import Debug qualified
 import Direction2d qualified
 import Direction3d ()
 import Length qualified
@@ -28,7 +27,7 @@ import Vector3d qualified
 import Volume qualified
 
 log :: (Show a) => String -> a -> Task String ()
-log label value = Console.printLine (label ++ ": " ++ Debug.show value)
+log label value = Console.printLine (label ++ ": " ++ show value)
 
 testScalarArithmetic :: Task String ()
 testScalarArithmetic = Try.do
@@ -149,7 +148,7 @@ testParameter1dGeneration = Try.do
 testEmptyCheck :: List Int -> Task String ()
 testEmptyCheck [] = Console.printLine "List is empty"
 testEmptyCheck (NonEmpty nonEmpty) =
-  Console.printLine ("List is non-empty, maximum is " ++ Debug.show (NonEmpty.maximum nonEmpty))
+  Console.printLine ("List is non-empty, maximum is " ++ show (NonEmpty.maximum nonEmpty))
 
 testNonEmpty :: Task String ()
 testNonEmpty = Try.do

@@ -10,19 +10,16 @@ module Internal
 where
 
 import Api qualified
-import Codegen qualified
 import Data.Char qualified as Char
-import Debug qualified
 import Foreign qualified
 import Foreign.Storable (Storable)
 import Language.Haskell.TH qualified as TH
 import List qualified
 import Maybe qualified
-import OpenSolid hiding (fromInteger)
+import OpenSolid
 import Pointers qualified
 import String qualified
-import Prelude (fromInteger)
-import Prelude qualified
+import Prelude (sequence, traverse)
 
 data Class = Class TH.Name (List TH.Name) (List TH.Name) (List Function)
 
@@ -39,13 +36,13 @@ static = Function 'Api.Static
 
 ffi :: List Class -> TH.Q (List TH.Dec)
 ffi classes = do
-  functionDecls <- Codegen.map List.concat (Codegen.collect ffiClass classes)
+  functionDecls <- fmap List.concat (traverse ffiClass classes)
   freeFunctionDecl <- freeFunctionFfi "opensolid_free" 'Pointers.freeStorablePtr
   freeStableFunctionDecl <- freeFunctionFfi "opensolid_free_stable" 'Pointers.freeStablePtr
   return (freeFunctionDecl : freeStableFunctionDecl : functionDecls)
  where
   ffiClass (Class _ _ _ functions) =
-    Codegen.map List.concat (Codegen.collect ffiFunction functions)
+    fmap List.concat (traverse ffiFunction functions)
 
 freeFunctionFfi :: String -> TH.Name -> TH.Q TH.Dec
 freeFunctionFfi ffiName name = do
@@ -54,7 +51,7 @@ freeFunctionFfi ffiName name = do
 
 api :: List Class -> TH.Q TH.Exp
 api classes = do
-  apiCls <- Codegen.collect apiClass classes
+  apiCls <- traverse apiClass classes
   return (TH.AppE (TH.ConE 'Api.Api) (TH.ListE apiCls))
 
 -- human readable name in the API
@@ -64,8 +61,8 @@ apiName name =
 
 apiClass :: Class -> TH.Q TH.Exp
 apiClass (Class name representationProps errors functions) = do
-  apiFns <- Codegen.collect apiFunction functions
-  apiExceptions <- Codegen.map List.concat (Codegen.collect apiException errors)
+  apiFns <- traverse apiFunction functions
+  apiExceptions <- fmap List.concat (traverse apiException errors)
   return $
     TH.ConE 'Api.Class
       `TH.AppE` TH.LitE (TH.StringL (TH.nameBase name))
@@ -86,14 +83,14 @@ apiExceptionConstructors :: TH.Name -> TH.Q (List TH.Exp)
 apiExceptionConstructors typeName = do
   info <- TH.reify typeName
   case info of
-    TH.TyConI (TH.DataD _ _ _ _ cons _) -> Codegen.sequence (List.indexedMap apiExceptionConstructor cons)
+    TH.TyConI (TH.DataD _ _ _ _ cons _) -> sequence (List.indexedMap apiExceptionConstructor cons)
     _ -> internalError "Not a data type"
 
 apiExceptionConstructor :: Int -> TH.Con -> TH.Q TH.Exp
 apiExceptionConstructor idx (TH.NormalC name []) = do
   return $
     TH.TupE
-      [ Just $ TH.LitE (TH.IntegerL (Prelude.fromIntegral (idx + (1 :: Int))))
+      [ Just $ TH.LitE (TH.IntegerL (fromIntegral (idx + 1)))
       , Just $ TH.LitE (TH.StringL (TH.nameBase name))
       , Just $ TH.ConE 'Nothing
       ]
@@ -101,7 +98,7 @@ apiExceptionConstructor idx (TH.NormalC name [(_, typ)]) = do
   apiTyp <- apiType typ
   return $
     TH.TupE
-      [ Just $ TH.LitE (TH.IntegerL (Prelude.fromIntegral (idx + (1 :: Int))))
+      [ Just $ TH.LitE (TH.IntegerL (fromIntegral (idx + 1)))
       , Just $ TH.LitE (TH.StringL (TH.nameBase name))
       , Just $ TH.ConE 'Just `TH.AppE` apiTyp
       ]
@@ -138,9 +135,9 @@ apiFunction (Function kind fnName argNames) = do
             , "."
             , TH.nameBase fnName
             , "(names: "
-            , Debug.show finalNames
+            , show finalNames
             , ", types: "
-            , Debug.show finalTypes
+            , show finalTypes
             , ")"
             ]
         )
@@ -184,7 +181,7 @@ apiType (TH.AppT (TH.ConT containerName) nestedTyp) | containerName == ''Maybe =
 apiType typ = do
   isPtr <- isPointer typ
   if isPtr
-    then Codegen.map (TH.AppE (TH.ConE 'Api.Pointer)) (typeNameBase typ)
+    then fmap (TH.AppE (TH.ConE 'Api.Pointer)) (typeNameBase typ)
     else case typ of
       (TH.AppT (TH.ConT name) _)
         | name == ''Qty -> return (TH.ConE 'Api.Float)
@@ -192,20 +189,20 @@ apiType typ = do
         | name == ''Float -> return (TH.ConE 'Api.Float)
         | name == ''Angle -> return (TH.ConE 'Api.Float)
         | name == ''Bool -> return (TH.ConE 'Api.Boolean)
-      _ -> fail ("Unknown type: " ++ Debug.show typ)
+      _ -> fail ("Unknown type: " ++ show typ)
 
 typeNameBase :: TH.Type -> TH.Q TH.Exp
 typeNameBase (TH.AppT t _) = typeNameBase t
 typeNameBase (TH.ConT name) = return (TH.LitE (TH.StringL (TH.nameBase name)))
-typeNameBase typ = fail ("Unknown type: " ++ Debug.show typ)
+typeNameBase typ = fail ("Unknown type: " ++ show typ)
 
 modNameBase :: TH.Type -> TH.Q TH.Exp
 modNameBase (TH.AppT t _) = modNameBase t
 modNameBase typ@(TH.ConT name) =
   case TH.nameModule name of
     Just mod -> return (TH.LitE (TH.StringL mod))
-    Nothing -> fail ("Unknown module for type: " ++ Debug.show typ)
-modNameBase typ = fail ("Unknown module for type: " ++ Debug.show typ)
+    Nothing -> fail ("Unknown module for type: " ++ show typ)
+modNameBase typ = fail ("Unknown module for type: " ++ show typ)
 
 -- Generates wrapper function type and clause from the original function
 ffiFunctionInfo :: TH.Type -> TH.Exp -> List TH.Pat -> List TH.Stmt -> TH.Q (TH.Type, TH.Clause)
@@ -311,7 +308,7 @@ ffiReturnInfo expr typ = do
         , TH.AppT (TH.ConT ''Foreign.Ptr) (TH.ConT ''())
         )
       else
-        ( TH.AppE (TH.VarE 'Prelude.return) expr
+        ( TH.AppE (TH.VarE 'return) expr
         , typ
         )
 

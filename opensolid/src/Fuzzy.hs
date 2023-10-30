@@ -7,21 +7,20 @@ module Fuzzy
 where
 
 import Basics
-import Prelude qualified
 
 data Fuzzy a = Resolved a | Unresolved deriving (Eq, Show)
 
-instance Prelude.Functor Fuzzy where
+instance Functor Fuzzy where
   fmap f (Resolved value) = Resolved (f value)
   fmap _ Unresolved = Unresolved
 
-instance Prelude.Applicative Fuzzy where
+instance Applicative Fuzzy where
   pure = Resolved
   Resolved function <*> Resolved value = Resolved (function value)
   Unresolved <*> _ = Unresolved
   Resolved _ <*> Unresolved = Unresolved
 
-instance Prelude.Monad Fuzzy where
+instance Monad Fuzzy where
   Resolved value >>= function = function value
   Unresolved >>= _ = Unresolved
 

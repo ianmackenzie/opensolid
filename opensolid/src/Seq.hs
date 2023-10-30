@@ -23,7 +23,6 @@ where
 
 import Data.Foldable qualified
 import Data.Sequence qualified
-import Generic (Ordering)
 import OpenSolid
 import Prelude qualified
 
@@ -58,7 +57,7 @@ concat :: Seq a -> Seq a -> Seq a
 concat = (Data.Sequence.><)
 
 map :: (a -> b) -> Seq a -> Seq b
-map = Prelude.fmap
+map = fmap
 
 filter :: (a -> Bool) -> Seq a -> Seq a
 filter = Data.Sequence.filter

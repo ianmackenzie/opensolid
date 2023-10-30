@@ -1,6 +1,5 @@
 module Main (main) where
 
-import Debug qualified
 import List qualified
 import Maybe qualified
 import OpenSolid
@@ -287,7 +286,7 @@ apiException mod (ExceptionClass name [(tag, constructorName, Nothing)])
               ]
           ]
 -- TODO: support exceptions with mutiple cases and pointers
-apiException _ ex = internalError (Debug.show ex)
+apiException _ ex = internalError (show ex)
 
 main :: IO ()
 main =

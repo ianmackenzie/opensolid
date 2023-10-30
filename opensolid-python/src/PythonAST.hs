@@ -28,12 +28,11 @@ module PythonAST
 where
 
 import Control.Monad (void)
-import Debug qualified
 import Language.Python.Common qualified as P
 import Language.Python.Version3.Parser qualified as Parser
 import List qualified
 import OpenSolid
-import Prelude qualified
+import Prelude (Either (Left, Right))
 
 type Statement = P.Statement ()
 
@@ -60,8 +59,8 @@ stmtExpr expr = P.StmtExpr expr ()
 literalStatement :: String -> List Statement
 literalStatement line =
   case Parser.parseStmt line "<literal>" of
-    Prelude.Left err -> internalError (Debug.show err)
-    Prelude.Right (statements, _) -> List.map void statements
+    Left err -> internalError (show err)
+    Right (statements, _) -> List.map void statements
 
 literalStatements :: List String -> List Statement
 literalStatements lst = List.collect literalStatement lst
@@ -83,7 +82,7 @@ string st =
 
 int :: Int -> Expr
 int val =
-  P.Int (Prelude.fromIntegral val) (Debug.show val) ()
+  P.Int (fromIntegral val) (show val) ()
 
 ident :: String -> Ident
 ident name =

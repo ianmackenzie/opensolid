@@ -34,7 +34,7 @@ fromRational :: Prelude.Rational -> Float
 fromRational = Prelude.fromRational
 
 fromInt :: Int -> Float
-fromInt = Prelude.fromIntegral
+fromInt = fromIntegral
 
 {-# INLINE floor #-}
 floor :: Float -> Int

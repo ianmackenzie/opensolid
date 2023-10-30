@@ -1,6 +1,5 @@
 module Debug
-  ( show
-  , trace
+  ( trace
   , log
   , intercept
   )
@@ -9,10 +8,6 @@ where
 import Basics
 import Concatenate
 import Debug.Trace qualified
-import Prelude qualified
-
-show :: (Show a) => a -> String
-show = Prelude.show
 
 trace :: String -> a -> a
 trace = Debug.Trace.trace

@@ -26,7 +26,6 @@ import Maybe qualified
 import Qty (Qty (Qty))
 import Result (Result)
 import Text.Read qualified
-import Prelude qualified
 
 concat :: List String -> String
 concat = Data.List.concat
@@ -35,10 +34,10 @@ join :: String -> List String -> String
 join = Data.List.intercalate
 
 fromInt :: Int -> String
-fromInt n = Prelude.show n
+fromInt = show
 
 fromFloat :: Float -> String
-fromFloat (Qty x) = Prelude.show x
+fromFloat (Qty x) = show x
 
 toInt :: String -> Result String Int
 toInt input =

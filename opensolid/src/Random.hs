@@ -29,7 +29,6 @@ import System.Random (StdGen)
 import System.Random qualified
 import System.Random.Stateful qualified
 import Task qualified
-import Prelude qualified
 
 newtype Generator a = Generator (StdGen -> (a, StdGen))
 
@@ -38,9 +37,9 @@ newtype Seed = Seed StdGen
 run :: Generator a -> StdGen -> (a, StdGen)
 run (Generator generator) stdgen = generator stdgen
 
-instance Prelude.Functor Generator where fmap = map
+instance Functor Generator where fmap = map
 
-instance Prelude.Applicative Generator where
+instance Applicative Generator where
   pure givenValue = Generator (givenValue,)
 
   functionGenerator <*> valueGenerator = do
@@ -48,7 +47,7 @@ instance Prelude.Applicative Generator where
     generatedValue <- valueGenerator
     return (generatedFunction generatedValue)
 
-instance Prelude.Monad Generator where
+instance Monad Generator where
   generatorA >>= function =
     Generator $
       \stdGen ->

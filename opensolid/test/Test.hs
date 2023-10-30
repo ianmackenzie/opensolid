@@ -17,7 +17,6 @@ where
 
 import Console qualified
 import Data.Foldable qualified
-import Debug qualified
 import List qualified
 import OpenSolid hiding (fail, (>>=))
 import OpenSolid qualified
@@ -25,7 +24,6 @@ import Random (Generator)
 import Random qualified
 import String qualified
 import Task qualified
-import Prelude (show)
 
 data Expectation
   = Passed
@@ -129,12 +127,12 @@ output label value =
   Random.map $
     \case
       Passed -> Passed
-      Failed messages -> Failed (messages ++ [label ++ ": " ++ Debug.show value])
+      Failed messages -> Failed (messages ++ [label ++ ": " ++ show value])
 
 newtype Lines a = Lines (List a)
 
 instance (Show a) => Show (Lines a) where
-  show (Lines values) = String.concat (List.map (("\n  " ++) . Debug.show) values)
+  show (Lines values) = String.concat (List.map (("\n  " ++) . show) values)
 
 lines :: (Data.Foldable.Foldable container, Show a) => container a -> Lines a
 lines container = Lines (Data.Foldable.toList container)

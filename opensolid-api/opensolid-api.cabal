@@ -31,7 +31,6 @@ library
       Internal
     , Api
     , All
-    , Codegen
     , Pointers
     , OpenSolidAPI.Axis2d
     , OpenSolidAPI.Bounds2d

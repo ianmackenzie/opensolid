@@ -1,7 +1,7 @@
 module OpenSolidAPI.Vector2d (vector2d) where
 
 import Internal (Class, cls, method, static)
-import OpenSolid hiding (fromInteger)
+import OpenSolid
 import Vector2d qualified
 
 vector2d :: Class

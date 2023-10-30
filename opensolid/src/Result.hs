@@ -13,16 +13,14 @@ module Result
 where
 
 import Basics
-import Debug qualified
 import System.IO.Error qualified
-import Prelude qualified
 
 class (Eq error, Show error) => ErrorMessage error where
   errorMessage :: error -> String
-  errorMessage = Debug.show
+  errorMessage = show
 
 instance ErrorMessage String where
-  errorMessage = identity
+  errorMessage = id
 
 instance ErrorMessage IOError where
   errorMessage ioError = System.IO.Error.ioeGetErrorString ioError
@@ -35,21 +33,21 @@ deriving instance (Eq x, Eq a) => Eq (Result x a)
 
 deriving instance (Show x, Show a) => Show (Result x a)
 
-instance Prelude.Functor (Result x) where
+instance Functor (Result x) where
   fmap f (Ok value) = Ok (f value)
   fmap _ (Error error) = Error error
 
-instance Prelude.Applicative (Result x) where
+instance Applicative (Result x) where
   pure = Ok
   Ok function <*> Ok value = Ok (function value)
   Error error <*> _ = Error error
   Ok _ <*> Error error = Error error
 
-instance Prelude.Monad (Result x) where
+instance Monad (Result x) where
   Ok value >>= function = function value
   Error error >>= _ = Error error
 
-instance Prelude.MonadFail (Result (List Char)) where
+instance MonadFail (Result (List Char)) where
   fail = Error
 
 withDefault :: a -> Result x a -> a

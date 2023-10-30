@@ -11,3 +11,4 @@
 - ignore: { name: "Use intercalate" }
 - ignore: { name: "Use foldl" }
 - ignore: { name: "Use mapM" }
+- ignore: { name: "Redundant fromIntegral" }

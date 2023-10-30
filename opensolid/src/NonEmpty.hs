@@ -58,8 +58,6 @@ import Data.Foldable qualified
 import Data.List.NonEmpty (NonEmpty ((:|)))
 import Data.List.NonEmpty qualified
 import Data.Semigroup qualified
-import Generic (Ordering)
-import Generic qualified
 import List qualified
 import Prelude qualified
 
@@ -169,7 +167,7 @@ sort :: (Ord a) => NonEmpty a -> NonEmpty a
 sort = Data.List.NonEmpty.sort
 
 sortBy :: (Ord b) => (a -> b) -> NonEmpty a -> NonEmpty a
-sortBy property = sortWith (\a b -> Generic.compare (property a) (property b))
+sortBy property = sortWith (\a b -> compare (property a) (property b))
 
 sortWith :: (a -> a -> Ordering) -> NonEmpty a -> NonEmpty a
 sortWith = Data.List.NonEmpty.sortBy

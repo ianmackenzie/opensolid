@@ -72,7 +72,7 @@ instance Multiplication Int Int Int where
   (*) = (Prelude.*)
 
 instance Division Int Int Float where
-  n / m = Qty (Prelude.fromIntegral n Prelude./ Prelude.fromIntegral m)
+  n / m = Qty (fromIntegral n Prelude./ fromIntegral m)
 
 infixl 6 +, -
 

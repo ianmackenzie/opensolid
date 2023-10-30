@@ -1,7 +1,7 @@
 module Sign (Sign (Positive, Negative)) where
 
 import Arithmetic
-import Prelude (Eq, Ord, Show)
+import Basics
 
 data Sign = Negative | Positive deriving (Eq, Ord, Show)
 
