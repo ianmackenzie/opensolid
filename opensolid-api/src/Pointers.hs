@@ -19,6 +19,15 @@ import OpenSolid
 import Range qualified
 import Vector2d qualified
 
+{- | Define a pattern that effectively lets us pretend that there's a Word8 constructor
+that takes an Int and returns a Word8; we can then use this to
+'construct' a Word8 from an Int or 'deconstruct' an Int from a Word8
+-}
+pattern Word8 :: Int -> Foreign.Word8
+pattern Word8 n <- (fromIntegral -> n)
+  where
+    Word8 = fromIntegral
+
 newMaybePtr :: (VoidPtr a) => Maybe a -> IO (Foreign.Ptr ())
 newMaybePtr (Just val) = toVoidPtr val
 newMaybePtr Nothing = return Foreign.nullPtr
@@ -103,8 +112,8 @@ instance (TaggedError error, VoidPtr success) => Storable (Result error success)
   peek ptr = do
     voidPtr <- Foreign.peek (Foreign.castPtr ptr)
     tag <- Foreign.peekByteOff ptr pointerSize
-    case fromIntegral tag of
-      0 -> fmap Ok $ fromVoidPtr voidPtr
+    case tag of
+      Word8 0 -> fmap Ok $ fromVoidPtr voidPtr
       _ -> fmap Error $ fromTaggedPtr tag voidPtr
   poke ptr (Error err) = do
     (tag, errPtr) <- toTaggedPtr err
@@ -117,6 +126,6 @@ instance (TaggedError error, VoidPtr success) => Storable (Result error success)
 
 -- TODO: codegen this
 instance TaggedError Vector2d.IsZero where
-  fromTaggedPtr (fromIntegral -> 1) _ = return Vector2d.IsZero
+  fromTaggedPtr (Word8 1) _ = return Vector2d.IsZero
   fromTaggedPtr tag _ = internalError ("Unexpected tag " ++ show tag)
-  toTaggedPtr Vector2d.IsZero = return (fromIntegral 1, Foreign.nullPtr)
+  toTaggedPtr Vector2d.IsZero = return (Word8 1, Foreign.nullPtr)
