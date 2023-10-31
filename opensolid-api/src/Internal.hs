@@ -281,23 +281,6 @@ ffiArgInfo typ = do
         )
 
 ffiReturnInfo :: TH.Exp -> TH.Type -> TH.Q (TH.Exp, TH.Type)
-ffiReturnInfo expr (TH.AppT (TH.AppT (TH.TupleT 2) _) _) =
-  return $
-    ( TH.AppE (TH.VarE 'Pointers.toVoidPtr) expr
-    , TH.AppT (TH.ConT ''Foreign.Ptr) (TH.ConT ''())
-    )
-ffiReturnInfo expr (TH.AppT (TH.AppT (TH.ConT containerName) _) _)
-  | containerName == ''Result = do
-      return $
-        ( TH.AppE (TH.VarE 'Pointers.toVoidPtr) expr
-        , TH.AppT (TH.ConT ''Foreign.Ptr) (TH.ConT ''())
-        )
-ffiReturnInfo expr (TH.AppT (TH.ConT containerName) _)
-  | containerName == ''Maybe = do
-      return $
-        ( TH.AppE (TH.VarE 'Pointers.toVoidPtr) expr
-        , TH.AppT (TH.ConT ''Foreign.Ptr) (TH.ConT ''())
-        )
 ffiReturnInfo expr typ = do
   isPtr <- isPointer typ
   return $
