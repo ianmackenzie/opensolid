@@ -37,9 +37,8 @@ static = Function 'Api.Static
 ffi :: List Class -> TH.Q (List TH.Dec)
 ffi classes = do
   functionDecls <- fmap List.concat (traverse ffiClass classes)
-  freeFunctionDecl <- freeFunctionFfi "opensolid_free" 'Pointers.freeStorablePtr
   freeStableFunctionDecl <- freeFunctionFfi "opensolid_free_stable" 'Pointers.freeStablePtr
-  return (freeFunctionDecl : freeStableFunctionDecl : functionDecls)
+  return (freeStableFunctionDecl : functionDecls)
  where
   ffiClass (Class _ _ _ functions) =
     fmap List.concat (traverse ffiFunction functions)
@@ -268,10 +267,10 @@ ffiArgInfo typ = do
         , TH.AppT (TH.ConT ''Foreign.Ptr) (TH.ConT ''()) -- arg type
         , TH.VarE unwrappedName -- unwrapped pointer value
         , Just $
-            -- unwrappedName <- derefStablePtr argName
+            -- unwrappedName <- fromVoidPtr argName
             TH.BindS
               (TH.VarP unwrappedName)
-              (TH.AppE (TH.VarE 'Pointers.derefStablePtr) (TH.VarE argName))
+              (TH.AppE (TH.VarE 'Pointers.fromVoidPtr) (TH.VarE argName))
         )
     else do
       return
@@ -282,21 +281,21 @@ ffiArgInfo typ = do
         )
 
 ffiReturnInfo :: TH.Exp -> TH.Type -> TH.Q (TH.Exp, TH.Type)
-ffiReturnInfo expr tuple@(TH.AppT (TH.AppT (TH.TupleT 2) _) _) =
+ffiReturnInfo expr (TH.AppT (TH.AppT (TH.TupleT 2) _) _) =
   return $
-    ( TH.AppE (TH.VarE 'Pointers.newStorablePtr) expr
-    , TH.AppT (TH.ConT ''Foreign.Ptr) tuple
+    ( TH.AppE (TH.VarE 'Pointers.toVoidPtr) expr
+    , TH.AppT (TH.ConT ''Foreign.Ptr) (TH.ConT ''())
     )
-ffiReturnInfo expr result@(TH.AppT (TH.AppT (TH.ConT containerName) _) _)
+ffiReturnInfo expr (TH.AppT (TH.AppT (TH.ConT containerName) _) _)
   | containerName == ''Result = do
       return $
-        ( TH.AppE (TH.VarE 'Pointers.newStorablePtr) expr
-        , TH.AppT (TH.ConT ''Foreign.Ptr) result
+        ( TH.AppE (TH.VarE 'Pointers.toVoidPtr) expr
+        , TH.AppT (TH.ConT ''Foreign.Ptr) (TH.ConT ''())
         )
 ffiReturnInfo expr (TH.AppT (TH.ConT containerName) _)
   | containerName == ''Maybe = do
       return $
-        ( TH.AppE (TH.VarE 'Pointers.newMaybePtr) expr
+        ( TH.AppE (TH.VarE 'Pointers.toVoidPtr) expr
         , TH.AppT (TH.ConT ''Foreign.Ptr) (TH.ConT ''())
         )
 ffiReturnInfo expr typ = do
@@ -304,7 +303,7 @@ ffiReturnInfo expr typ = do
   return $
     if isPtr
       then
-        ( TH.AppE (TH.VarE 'Pointers.newStablePtr) expr
+        ( TH.AppE (TH.VarE 'Pointers.toVoidPtr) expr
         , TH.AppT (TH.ConT ''Foreign.Ptr) (TH.ConT ''())
         )
       else
