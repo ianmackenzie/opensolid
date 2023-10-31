@@ -81,7 +81,7 @@ instance (VoidPtr (Axis2d.Axis2d a)) where
   fromVoidPtr = derefStablePtr
   toVoidPtr = newStablePtr
 
-instance (Storable (Qty u)) => VoidPtr (Qty u) where
+instance VoidPtr (Qty u) where
   fromVoidPtr ptr = Foreign.peek (Foreign.castPtr ptr)
   toVoidPtr a = fmap Foreign.castPtr (newStorablePtr a)
 
