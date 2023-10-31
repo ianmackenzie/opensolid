@@ -12,3 +12,8 @@ void call_hs_exit()
 {
   hs_exit();
 }
+
+void opensolid_free(void *ptr)
+{
+  free(ptr);
+}
