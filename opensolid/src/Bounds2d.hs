@@ -2,6 +2,7 @@ module Bounds2d
   ( Bounds2d (Bounds2d)
   , xCoordinate
   , yCoordinate
+  , xy
   , constant
   , hull2
   , hull3
@@ -47,6 +48,9 @@ xCoordinate (Bounds2d x _) = x
 
 yCoordinate :: Bounds2d (space @ units) -> Range units
 yCoordinate (Bounds2d _ y) = y
+
+xy :: Range units -> Range units -> Bounds2d (space @ units)
+xy = Bounds2d
 
 constant :: Point2d (space @ units) -> Bounds2d (space @ units)
 constant (Point2d x y) =
