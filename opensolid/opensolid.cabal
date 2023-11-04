@@ -114,7 +114,7 @@ library
       Frame2d
       Fuzzy
       Generic
-      Intersect
+      Intersects
       Length
       Line2d
       Line3d

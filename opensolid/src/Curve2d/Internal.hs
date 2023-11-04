@@ -58,13 +58,13 @@ instance
 
 instance
   (space ~ space', units ~ units') =>
-  Intersect (Curve2d (space @ units)) (Point2d (space' @ units')) units Bool
+  Intersects (Curve2d (space @ units)) (Point2d (space' @ units')) units
   where
   curve ^ point = Range.any (segmentIsCoincidentWithPoint point curve) U.domain
 
 instance
   (space ~ space', units ~ units') =>
-  Intersect (Point2d (space @ units)) (Curve2d (space' @ units')) units Bool
+  Intersects (Point2d (space @ units)) (Curve2d (space' @ units')) units
   where
   point ^ curve = curve ^ point
 
