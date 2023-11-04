@@ -78,9 +78,6 @@ instance
   ) =>
   Units.Coercion units1 units2 (Range units1') (Range units2')
 
-instance (units ~ units') => ApproximateEquality (Range units) (Range units') units where
-  Range low1 high1 ~= Range low2 high2 = low1 ~= low2 && high1 ~= high2
-
 instance (units ~ units') => ApproximateEquality (Range units) (Qty units') units where
   Range low high ~= value = low ~= value && high ~= value
 

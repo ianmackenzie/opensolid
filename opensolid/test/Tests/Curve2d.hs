@@ -72,10 +72,13 @@ overlappingSegments curve1 curve2 =
     Error (Curve2d.CurvesOverlap segments) -> Ok segments
     Error error -> Error (errorMessage error)
 
+equalUBounds :: U.Bounds -> U.Bounds -> Bool
+equalUBounds (Range u1 u2) (Range v1 v2) =
+  let ?tolerance = 1e-12 in u1 ~= v1 && u2 ~= v2
+
 equalOverlapSegments :: (U.Bounds, U.Bounds, Sign) -> (U.Bounds, U.Bounds, Sign) -> Bool
 equalOverlapSegments (u1, v1, sign1) (u2, v2, sign2) =
-  let ?tolerance = 1e-12
-   in u1 ~= u2 && v1 ~= v2 && sign1 == sign2
+  equalUBounds u1 u2 && equalUBounds v1 v2 && sign1 == sign2
 
 equalOverlapSegmentLists :: List (U.Bounds, U.Bounds, Sign) -> List (U.Bounds, U.Bounds, Sign) -> Bool
 equalOverlapSegmentLists segments1 segments2 =
