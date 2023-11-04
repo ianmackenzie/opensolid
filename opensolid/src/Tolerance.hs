@@ -7,7 +7,7 @@ where
 
 import Arithmetic
 import Basics
-import NonEmpty (NonEmpty ((:|)))
+import NonEmpty (NonEmpty ((:|)), pattern NonEmpty)
 import Qty (Qty)
 import Qty qualified
 
@@ -20,16 +20,13 @@ instance (units ~ units') => ApproximateEquality (Qty units) (Qty units') units 
   x ~= y = Qty.abs (x - y) <= ?tolerance
 
 instance (ApproximateEquality a b units) => ApproximateEquality (List a) (List b) units where
-  (x : xs) ~= (y : ys)
-    | x ~= y = xs ~= ys
-    | otherwise = False
+  x : xs ~= y : ys = x ~= y && xs ~= ys
   [] ~= [] = True
-  (_ : _) ~= [] = False
-  [] ~= (_ : _) = False
+  NonEmpty _ ~= [] = False
+  [] ~= NonEmpty _ = False
 
 instance (ApproximateEquality a b units) => ApproximateEquality (NonEmpty a) (NonEmpty b) units where
-  (x :| xs) ~= (y :| ys) =
-    x ~= y && xs ~= ys
+  x :| xs ~= y :| ys = x ~= y && xs ~= ys
 
 instance (ApproximateEquality a b units) => ApproximateEquality (Maybe a) (Maybe b) units where
   Just a ~= Just b = a ~= b
