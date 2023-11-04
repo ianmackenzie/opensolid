@@ -109,7 +109,6 @@ library
       Direction3d
       DirectionBounds2d
       DirectionCurve2d
-      Domain
       Estimate
       Float
       Frame2d
@@ -123,7 +122,6 @@ library
       NonEmpty
       OpenSolid
       Pair
-      Parameter1d
       Point2d
       Point3d
       Qty
@@ -145,6 +143,7 @@ library
       Tolerance
       Transform2d
       Try
+      U
       Units
       Uv
       Uvw
@@ -184,7 +183,7 @@ test-suite opensolid-test
       Tests.Estimate
       Tests.List
       Tests.NonEmpty
-      Tests.Parameter1d
+      Tests.U
       Tests.Qty
       Tests.Random
       Tests.Range

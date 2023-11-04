@@ -30,13 +30,13 @@ import Curve1d.Root qualified as Root
 import Direction2d (Direction2d (Direction2d))
 import Direction2d qualified
 import {-# SOURCE #-} DirectionCurve2d (DirectionCurve2d)
-import Domain (Domain)
 import Generic qualified
 import List qualified
 import OpenSolid
 import Qty qualified
 import Range (Range (Range))
 import Range qualified
+import U qualified
 import Units qualified
 import Vector2d (Vector2d (Vector2d))
 import Vector2d qualified
@@ -50,7 +50,7 @@ class
     | curve -> coordinateSystem
   where
   evaluateAtImpl :: Float -> curve -> Vector2d coordinateSystem
-  segmentBoundsImpl :: Domain -> curve -> VectorBounds2d coordinateSystem
+  segmentBoundsImpl :: U.Bounds -> curve -> VectorBounds2d coordinateSystem
   derivativeImpl :: curve -> VectorCurve2d coordinateSystem
 
 data VectorCurve2d (coordinateSystem :: CoordinateSystem) where
@@ -499,7 +499,7 @@ evaluateAt t curve =
     QuadraticSpline v1 v2 v3 -> quadraticBlossom v1 v2 v3 t t
     CubicSpline v1 v2 v3 v4 -> cubicBlossom v1 v2 v3 v4 t t t
 
-segmentBounds :: Domain -> VectorCurve2d (space @ units) -> VectorBounds2d (space @ units)
+segmentBounds :: U.Bounds -> VectorCurve2d (space @ units) -> VectorBounds2d (space @ units)
 segmentBounds t@(Range tl th) curve =
   case curve of
     VectorCurve2d c -> segmentBoundsImpl t c

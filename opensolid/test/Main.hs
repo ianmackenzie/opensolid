@@ -12,15 +12,15 @@ import Tests.Direction2d qualified
 import Tests.Estimate qualified
 import Tests.List qualified
 import Tests.NonEmpty qualified
-import Tests.Parameter1d qualified
 import Tests.Qty qualified
 import Tests.Range qualified
 import Tests.Region2d qualified
+import Tests.U qualified
 import Tests.VectorBounds3d qualified
 
 tests :: List Test
 tests =
-  [ Test.group "Parameter1d" Tests.Parameter1d.tests
+  [ Test.group "U" Tests.U.tests
   , Test.group "Qty" Tests.Qty.tests
   , Test.group "Range" Tests.Range.tests
   , Test.group "VectorBounds3d" Tests.VectorBounds3d.tests

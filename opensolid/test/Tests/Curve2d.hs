@@ -11,19 +11,19 @@ import Curve2d.Intersection (Intersection (Intersection))
 import Curve2d.Intersection qualified as Intersection
 import Direction2d qualified
 import DirectionCurve2d qualified
-import Domain (Domain)
 import Float qualified
 import Length qualified
 import List qualified
 import OpenSolid
-import Parameter1d qualified
 import Point2d qualified
 import Qty qualified
 import QuadraticSpline2d qualified
+import Range (Range (Range))
 import Range qualified
 import Test (Test)
 import Test qualified
 import Tests.Random qualified as Random
+import U qualified
 import Units (Meters)
 import Vector2d qualified
 import VectorCurve2d qualified
@@ -65,19 +65,19 @@ overlappingSegments ::
   (Tolerance units) =>
   Curve2d (space @ units) ->
   Curve2d (space @ units) ->
-  Result String (List (Domain, Domain, Sign))
+  Result String (List (U.Bounds, U.Bounds, Sign))
 overlappingSegments curve1 curve2 =
   case Curve2d.intersections curve1 curve2 of
     Ok _ -> Error "Intersection should have failed (and given overlapping segments)"
     Error (Curve2d.CurvesOverlap segments) -> Ok segments
     Error error -> Error (errorMessage error)
 
-equalOverlapSegments :: (Domain, Domain, Sign) -> (Domain, Domain, Sign) -> Bool
+equalOverlapSegments :: (U.Bounds, U.Bounds, Sign) -> (U.Bounds, U.Bounds, Sign) -> Bool
 equalOverlapSegments (u1, v1, sign1) (u2, v2, sign2) =
   let ?tolerance = 1e-12
    in u1 ~= u2 && v1 ~= v2 && sign1 == sign2
 
-equalOverlapSegmentLists :: List (Domain, Domain, Sign) -> List (Domain, Domain, Sign) -> Bool
+equalOverlapSegmentLists :: List (U.Bounds, U.Bounds, Sign) -> List (U.Bounds, U.Bounds, Sign) -> Bool
 equalOverlapSegmentLists segments1 segments2 =
   List.allTrue (List.map2 equalOverlapSegments segments1 segments2)
 
@@ -204,11 +204,11 @@ tangentDerivativeIsPerpendicularToTangent =
     curve <- CubicSpline2d.fromControlPoints p0 p1 p2 p3
     let tangentDirection = Curve2d.tangentDirection curve
     let tangentDerivative = DirectionCurve2d.derivative tangentDirection
-    parameterValue <- Parameter1d.generator
-    let tangent = DirectionCurve2d.evaluateAt parameterValue tangentDirection
-    let derivative = VectorCurve2d.evaluateAt parameterValue tangentDerivative
+    u <- U.generator
+    let tangent = DirectionCurve2d.evaluateAt u tangentDirection
+    let derivative = VectorCurve2d.evaluateAt u tangentDerivative
     Test.expect (let ?tolerance = 1e-9 in derivative <> tangent ~= Qty.zero)
-      |> Test.output "parameterValue" parameterValue
+      |> Test.output "u" u
       |> Test.output "tangent" tangent
       |> Test.output "derivative" derivative
       |> Test.output "dot product" (derivative <> tangent)

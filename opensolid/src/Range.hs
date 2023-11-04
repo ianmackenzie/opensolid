@@ -47,6 +47,7 @@ module Range
   , generator
   , find
   , find2
+  , sample
   )
 where
 
@@ -58,6 +59,7 @@ import Maybe qualified
 import NonEmpty qualified
 import OpenSolid
 import Qty qualified
+import Quadrature qualified
 import Random qualified
 import Units qualified
 
@@ -557,3 +559,23 @@ generator qtyGenerator = do
   a <- qtyGenerator
   b <- qtyGenerator
   Random.return (Range.from a b)
+
+{- | Sample a given function at five "random" points within a given range.
+This can be useful for checking whether some property (likely) holds true everywhere within a range,
+for example:
+
+- Is this function zero everywhere?
+- Do these two curves overlap? (Does every point on the first curve lie on the second curve?)
+
+The sampling points are based on Gaussian quadrature. It is of course possible that (for example)
+a function could be zero at the five sampling points but non-zero elsewhere,
+but should be extremely unlikely.
+-}
+sample :: (Qty units -> a) -> Range units -> List a
+sample function range =
+  [ function (Range.interpolate range Quadrature.t1)
+  , function (Range.interpolate range Quadrature.t2)
+  , function (Range.interpolate range Quadrature.t3)
+  , function (Range.interpolate range Quadrature.t4)
+  , function (Range.interpolate range Quadrature.t5)
+  ]

@@ -4,7 +4,6 @@ import Float qualified
 import Length (Length)
 import NonEmpty qualified
 import OpenSolid
-import Parameter1d qualified
 import Qty qualified
 import Random (Generator)
 import Random qualified
@@ -13,6 +12,7 @@ import Range qualified
 import Test (Test)
 import Test qualified
 import Tests.Random qualified as Random
+import U qualified
 import Units (Meters)
 
 tests :: List Test
@@ -26,45 +26,45 @@ tests =
 
 smaller :: Test
 smaller = Test.check 100 "smaller" $ Test.do
-  a <- Range.generator Random.length
-  b <- Range.generator Random.length
-  u <- Parameter1d.generator
-  v <- Parameter1d.generator
-  let x = Range.interpolate a u
-  let y = Range.interpolate b v
-  let smallerValue = Qty.smaller x y
-  let smallerRange = Range.smaller a b
+  range1 <- Range.generator Random.length
+  range2 <- Range.generator Random.length
+  u1 <- U.generator
+  u2 <- U.generator
+  let x1 = Range.interpolate range1 u1
+  let x2 = Range.interpolate range2 u2
+  let smallerValue = Qty.smaller x1 x2
+  let smallerRange = Range.smaller range1 range2
   Test.expect (Range.includes smallerValue smallerRange)
-    |> Test.output "a" a
-    |> Test.output "b" b
-    |> Test.output "x" x
-    |> Test.output "y" y
+    |> Test.output "range1" range1
+    |> Test.output "range2" range2
+    |> Test.output "x1" x1
+    |> Test.output "x2" x2
     |> Test.output "smallerValue" smallerValue
     |> Test.output "smallerRange" smallerRange
 
 larger :: Test
 larger = Test.check 100 "larger" $ Test.do
-  a <- Range.generator Random.length
-  b <- Range.generator Random.length
-  u <- Parameter1d.generator
-  v <- Parameter1d.generator
-  let x = Range.interpolate a u
-  let y = Range.interpolate b v
-  let largerValue = Qty.larger x y
-  let largerRange = Range.larger a b
+  range1 <- Range.generator Random.length
+  range2 <- Range.generator Random.length
+  u1 <- U.generator
+  u2 <- U.generator
+  let x1 = Range.interpolate range1 u1
+  let x2 = Range.interpolate range2 u2
+  let largerValue = Qty.larger x1 x2
+  let largerRange = Range.larger range1 range2
   Test.expect (Range.includes largerValue largerRange)
-    |> Test.output "a" a
-    |> Test.output "b" b
-    |> Test.output "x" x
-    |> Test.output "y" y
+    |> Test.output "range1" range1
+    |> Test.output "range2" range2
+    |> Test.output "x1" x1
+    |> Test.output "x2" x2
     |> Test.output "largerValue" largerValue
     |> Test.output "largerRange" largerRange
 
 valueInRange :: Generator (Length, Range Meters)
 valueInRange = Test.do
   range <- Range.generator Random.length
-  t <- Parameter1d.generator
-  let value = Range.interpolate range t
+  u <- U.generator
+  let value = Range.interpolate range u
   Random.return (value, range)
 
 smallest :: Test

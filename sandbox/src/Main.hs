@@ -10,7 +10,7 @@ import Length qualified
 import List qualified
 import NonEmpty qualified
 import OpenSolid
-import Parameter1d qualified
+import U qualified
 import Point2d (Point2d)
 import Point2d qualified
 import Qty qualified
@@ -138,12 +138,12 @@ testTaskSequencing = do
 
 testParameter1dGeneration :: Task String ()
 testParameter1dGeneration = Try.do
-  t1 <- Random.generate Parameter1d.generator
-  t2 <- Random.generate Parameter1d.generator
-  t3 <- Random.generate Parameter1d.generator
-  log "Random parameter value 1" t1
-  log "Random parameter value 2" t2
-  log "Random parameter value 3" t3
+  u1 <- Random.generate U.generator
+  u2 <- Random.generate U.generator
+  u3 <- Random.generate U.generator
+  log "Random parameter value 1" u1
+  log "Random parameter value 2" u2
+  log "Random parameter value 3" u3
 
 testEmptyCheck :: List Int -> Task String ()
 testEmptyCheck [] = Console.printLine "List is empty"

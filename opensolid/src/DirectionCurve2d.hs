@@ -18,8 +18,8 @@ import Direction2d (Direction2d (Direction2d))
 import Direction2d qualified
 import DirectionBounds2d (DirectionBounds2d)
 import DirectionBounds2d qualified
-import Domain (Domain)
 import OpenSolid
+import U qualified
 import Vector2d (Vector2d)
 import VectorCurve2d (VectorCurve2d)
 import VectorCurve2d qualified
@@ -37,7 +37,7 @@ evaluateAt :: Float -> DirectionCurve2d space -> Direction2d space
 evaluateAt t (DirectionCurve2d vectorCurve) =
   Direction2d.unsafe (VectorCurve2d.evaluateAt t vectorCurve)
 
-segmentBounds :: Domain -> DirectionCurve2d space -> DirectionBounds2d space
+segmentBounds :: U.Bounds -> DirectionCurve2d space -> DirectionBounds2d space
 segmentBounds t (DirectionCurve2d vectorCurve) =
   DirectionBounds2d.unsafe (VectorCurve2d.segmentBounds t vectorCurve)
 

@@ -14,7 +14,6 @@ import List qualified
 import NonEmpty qualified
 import OpenSolid
 import Pair qualified
-import Parameter1d qualified
 import Point2d qualified
 import Qty qualified
 import Random (Generator)
@@ -25,6 +24,7 @@ import Range qualified
 import Test (Test)
 import Test qualified
 import Tests.Random qualified as Random
+import U qualified
 import Units (Meters)
 import VectorCurve2d qualified
 
@@ -54,8 +54,8 @@ instance IsEstimate DummyEstimate Meters where
 dummyEstimate :: Generator (Length, Estimate Meters)
 dummyEstimate = do
   range <- Range.generator Random.length
-  t <- Parameter1d.generator
-  let value = Range.interpolate range t
+  u <- U.generator
+  let value = Range.interpolate range u
   Random.return (value, Estimate.wrap (DummyEstimate value range))
 
 duplicatedDummyEstimates :: Generator (NonEmpty (Length, Estimate Meters))

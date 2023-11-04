@@ -25,7 +25,6 @@ import Bounds2d (Bounds2d)
 import Bounds2d qualified
 import Direction2d (Direction2d)
 import Direction2d qualified
-import Domain qualified
 import Generic qualified
 import List qualified
 import OpenSolid
@@ -320,7 +319,7 @@ cos (Constant x) = constant (Angle.cos x)
 cos function = Cos function
 
 isZero :: (Tolerance units) => Function units -> Bool
-isZero function = List.all (~= Qty.zero) (Uv.sample (pointOn function) Domain.unit Domain.unit)
+isZero function = List.all (~= Qty.zero) (Bounds2d.sample (pointOn function) Uv.domain)
 
 data ZeroEverywhere = ZeroEverywhere deriving (Eq, Show, ErrorMessage)
 

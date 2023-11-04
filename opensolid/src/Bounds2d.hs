@@ -11,6 +11,7 @@ module Bounds2d
   , intersects
   , intersection
   , interpolate
+  , sample
   )
 where
 
@@ -18,6 +19,7 @@ import Bounds
 import OpenSolid
 import Point2d (Point2d (Point2d))
 import Qty qualified
+import Quadrature qualified
 import Range (Range)
 import Range qualified
 import VectorBounds2d (VectorBounds2d (VectorBounds2d))
@@ -105,3 +107,12 @@ hull4 (Point2d x1 y1) (Point2d x2 y2) (Point2d x3 y3) (Point2d x4 y4) =
 interpolate :: Bounds2d (space @ units) -> Float -> Float -> Point2d (space @ units)
 interpolate (Bounds2d x y) u v =
   Point2d (Range.interpolate x u) (Range.interpolate y v)
+
+sample :: (Point2d (space @ units) -> a) -> Bounds2d (space @ units) -> List a
+sample function (Bounds2d x y) =
+  [ function (Point2d (Range.interpolate x Quadrature.t1) (Range.interpolate y Quadrature.t1))
+  , function (Point2d (Range.interpolate x Quadrature.t2) (Range.interpolate y Quadrature.t5))
+  , function (Point2d (Range.interpolate x Quadrature.t3) (Range.interpolate y Quadrature.t3))
+  , function (Point2d (Range.interpolate x Quadrature.t4) (Range.interpolate y Quadrature.t4))
+  , function (Point2d (Range.interpolate x Quadrature.t5) (Range.interpolate y Quadrature.t2))
+  ]

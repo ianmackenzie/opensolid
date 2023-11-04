@@ -5,14 +5,14 @@ where
 
 import {-# SOURCE #-} Curve1d (Curve1d)
 import {-# SOURCE #-} Curve1d qualified
-import Domain (Domain)
 import Estimate (IsEstimate (..))
 import Estimate qualified
 import OpenSolid
 import Qty qualified
 import Range qualified
+import U qualified
 
-data Integral units = Integral (Curve1d units) (Curve1d units) Domain
+data Integral units = Integral (Curve1d units) (Curve1d units) U.Bounds
 
 instance IsEstimate (Integral units) units where
   boundsImpl (Integral curve derivative domain) =

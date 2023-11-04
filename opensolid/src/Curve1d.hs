@@ -27,8 +27,6 @@ import Bisection qualified
 import Curve1d.Integral (Integral (Integral))
 import Curve1d.Root (Root (Root))
 import Curve1d.Root qualified as Root
-import Domain (Domain)
-import Domain qualified
 import Estimate (Estimate)
 import Estimate qualified
 import Float qualified
@@ -41,6 +39,7 @@ import Range qualified
 import Result qualified
 import Stream (Stream)
 import Stream qualified
+import U qualified
 import Units (Squared)
 import Units qualified
 import Vector2d (Vector2d)
@@ -52,7 +51,7 @@ import {-# SOURCE #-} VectorCurve3d qualified
 
 class (Show curve) => IsCurve1d curve units | curve -> units where
   evaluateAtImpl :: Float -> curve -> Qty units
-  segmentBoundsImpl :: Domain -> curve -> Range units
+  segmentBoundsImpl :: U.Bounds -> curve -> Range units
   derivativeImpl :: curve -> Curve1d units
 
 data Curve1d units where
@@ -301,7 +300,7 @@ evaluateAt t curve =
 pointOn :: Curve1d units -> Float -> Qty units
 pointOn curve t = evaluateAt t curve
 
-segmentBounds :: Domain -> Curve1d units -> Range units
+segmentBounds :: U.Bounds -> Curve1d units -> Range units
 segmentBounds t curve =
   case curve of
     Curve1d c -> segmentBoundsImpl t c
@@ -382,7 +381,7 @@ cos (Constant x) = constant (Angle.cos x)
 cos curve = Cos curve
 
 isZero :: (Tolerance units) => Curve1d units -> Bool
-isZero curve = List.all (~= Qty.zero) (Domain.sample (pointOn curve) Domain.unit)
+isZero curve = List.all (~= Qty.zero) (Range.sample (pointOn curve) U.domain)
 
 maxRootOrder :: Int
 maxRootOrder = 4
@@ -428,8 +427,8 @@ findRoots ::
   Stream (Curve1d units) ->
   Bisection.Tree (Stream (Range units)) ->
   Int ->
-  (List Root, List Domain) ->
-  (List Root, List Domain)
+  (List Root, List U.Bounds) ->
+  (List Root, List U.Bounds)
 findRoots curve derivatives searchTree rootOrder accumulated =
   let updated =
         Bisection.solve
@@ -442,7 +441,7 @@ findRoots curve derivatives searchTree rootOrder accumulated =
         then updated
         else findRoots curve derivatives searchTree (rootOrder - 1) updated
 
-isCandidate :: (Tolerance units) => Int -> Domain -> Stream (Range units) -> Bool
+isCandidate :: (Tolerance units) => Int -> U.Bounds -> Stream (Range units) -> Bool
 isCandidate rootOrder _ bounds =
   let curveBounds = Stream.head bounds
       derivativeBounds = Stream.take rootOrder (Stream.tail bounds)
@@ -450,7 +449,7 @@ isCandidate rootOrder _ bounds =
       derivativesContainZero = List.all (Range.includes Qty.zero) derivativeBounds
    in curveContainsZero && derivativesContainZero
 
-resolveDerivativeSign :: Int -> Domain -> Stream (Range units) -> Fuzzy Sign
+resolveDerivativeSign :: Int -> U.Bounds -> Stream (Range units) -> Fuzzy Sign
 resolveDerivativeSign derivativeOrder _ bounds = resolveSign (Stream.nth derivativeOrder bounds)
 
 findRoot ::
@@ -458,7 +457,7 @@ findRoot ::
   Curve1d units ->
   Int ->
   Stream (Curve1d units) ->
-  Domain ->
+  U.Bounds ->
   Stream (Range units) ->
   Sign ->
   Maybe Root
@@ -544,4 +543,4 @@ factorial :: Int -> Int
 factorial 0 = 1; factorial n = n * factorial (n - 1)
 
 integral :: Curve1d units -> Estimate units
-integral curve = Estimate.wrap (Integral curve (derivative curve) Domain.unit)
+integral curve = Estimate.wrap (Integral curve (derivative curve) U.domain)

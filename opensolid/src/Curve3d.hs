@@ -7,9 +7,9 @@ where
 
 import Bounds3d (Bounds3d)
 import Bounds3d qualified
-import Domain (Domain)
 import OpenSolid
 import Point3d (Point3d)
+import U qualified
 import VectorCurve3d (VectorCurve3d)
 import VectorCurve3d qualified
 
@@ -17,7 +17,7 @@ class IsCurve3d curve (coordinateSystem :: CoordinateSystem) | curve -> coordina
   startPointImpl :: curve -> Point3d coordinateSystem
   endPointImpl :: curve -> Point3d coordinateSystem
   evaluateImpl :: curve -> Float -> Point3d coordinateSystem
-  segmentBoundsImpl :: curve -> Domain -> Bounds3d coordinateSystem
+  segmentBoundsImpl :: curve -> U.Bounds -> Bounds3d coordinateSystem
   derivativeImpl :: curve -> VectorCurve3d coordinateSystem
   reverseImpl :: curve -> curve
   boundsImpl :: curve -> Bounds3d coordinateSystem

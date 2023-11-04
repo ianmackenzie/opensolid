@@ -15,13 +15,13 @@ import Bounds2d qualified
 import Direction2d (Direction2d)
 import DirectionCurve2d (DirectionCurve2d)
 import DirectionCurve2d qualified
-import Domain (Domain)
 import OpenSolid
 import Point2d (Point2d)
 import Point2d qualified
 import Qty qualified
 import Range (Range (Range))
 import Range qualified
+import U qualified
 import Units qualified
 import Vector2d qualified
 import VectorBounds2d qualified
@@ -64,7 +64,7 @@ class
   startPointImpl :: curve -> Point2d coordinateSystem
   endPointImpl :: curve -> Point2d coordinateSystem
   evaluateAtImpl :: Float -> curve -> Point2d coordinateSystem
-  segmentBoundsImpl :: Domain -> curve -> Bounds2d coordinateSystem
+  segmentBoundsImpl :: U.Bounds -> curve -> Bounds2d coordinateSystem
   derivativeImpl :: curve -> VectorCurve2d coordinateSystem
   reverseImpl :: curve -> curve
   boundsImpl :: curve -> Bounds2d coordinateSystem
@@ -84,7 +84,7 @@ evaluateAt t (Line p1 p2 _) = Point2d.interpolateFrom p1 p2 t
 evaluateAt t (Arc p0 r a b) = let theta = Qty.interpolateFrom a b t in p0 + Vector2d.polar r theta
 evaluateAt t (Curve curve _) = Curve2d.Internal.evaluateAtImpl t curve
 
-segmentBounds :: Domain -> Curve2d (space @ units) -> Bounds2d (space @ units)
+segmentBounds :: U.Bounds -> Curve2d (space @ units) -> Bounds2d (space @ units)
 segmentBounds (Range t1 t2) (Line p1 p2 _) =
   Bounds2d.hull2 (Point2d.interpolateFrom p1 p2 t1) (Point2d.interpolateFrom p1 p2 t2)
 segmentBounds t (Arc p0 r a b) =
