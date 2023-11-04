@@ -55,9 +55,8 @@ instance
 
 instance (units ~ units') => ApproximateEquality (Estimate units) (Qty units') units where
   estimate ~= value
-    | Range.minValue (bounds estimate) > value + ?tolerance = False
-    | Range.maxValue (bounds estimate) < value - ?tolerance = False
-    | Range.width (bounds estimate) <= ?tolerance = True
+    | bounds estimate ~= value = True
+    | not (bounds estimate ^ value) = False
     | otherwise = refine estimate ~= value
 
 wrap :: (IsEstimate a units) => a -> Estimate units

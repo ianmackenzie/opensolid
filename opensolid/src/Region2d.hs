@@ -170,7 +170,7 @@ classify ::
   NonEmpty (Curve2d (space @ units)) ->
   Maybe Sign
 classify point curves
-  | NonEmpty.any (Curve2d.passesThrough point) curves = Nothing
+  | NonEmpty.any (^ point) curves = Nothing
   | otherwise = Just (classifyNonBoundary point curves)
 
 fluxIntegral :: Point2d (space @ units) -> Curve2d (space @ units) -> Estimate Unitless

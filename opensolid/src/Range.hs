@@ -85,7 +85,13 @@ instance (units ~ units') => ApproximateEquality (Range units) (Qty units') unit
   Range low high ~= value = low ~= value && high ~= value
 
 instance (units ~ units') => ApproximateEquality (Qty units) (Range units') units where
-  value ~= Range low high = value ~= low && value ~= high
+  value ~= range = range ~= value
+
+instance (units ~ units') => Intersect (Qty units) (Range units') units Bool where
+  value ^ (Range low high) = value >= low - ?tolerance && value <= high + ?tolerance
+
+instance (units ~ units') => Intersect (Range units) (Qty units') units Bool where
+  range ^ value = value ^ range
 
 instance Negation (Range units) where
   negate (Range low high) = unsafe (negate high) (negate low)

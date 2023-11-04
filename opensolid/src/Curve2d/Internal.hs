@@ -56,6 +56,31 @@ instance
     (Curve2d (space @ units1'))
     (Curve2d (space' @ units2'))
 
+instance
+  (space ~ space', units ~ units') =>
+  Intersect (Curve2d (space @ units)) (Point2d (space' @ units')) units Bool
+  where
+  curve ^ point = Range.any (segmentIsCoincidentWithPoint point curve) U.domain
+
+instance
+  (space ~ space', units ~ units') =>
+  Intersect (Point2d (space @ units)) (Curve2d (space' @ units')) units Bool
+  where
+  point ^ curve = curve ^ point
+
+segmentIsCoincidentWithPoint ::
+  (Tolerance units) =>
+  Point2d (space @ units) ->
+  Curve2d (space @ units) ->
+  U.Bounds ->
+  Fuzzy Bool
+segmentIsCoincidentWithPoint point curve domain
+  | distance ~= Qty.zero = Resolved True
+  | not (distance ^ Qty.zero) = Resolved False
+  | otherwise = Unresolved
+ where
+  distance = VectorBounds2d.magnitude (point - segmentBounds domain curve)
+
 class
   (Show curve) =>
   IsCurve2d curve (coordinateSystem :: CoordinateSystem)

@@ -13,6 +13,7 @@ module OpenSolid
   , module Fuzzy
   , module Units
   , module Angle
+  , module Intersect
   )
 where
 
@@ -23,6 +24,7 @@ import Concatenate (Concatenate ((++)))
 import CoordinateSystem (CoordinateSystem, Defines, LocalSpace, type (@))
 import Float (Float, fromRational)
 import Fuzzy (Fuzzy (Resolved, Unresolved))
+import Intersect (Intersect ((^)))
 import NonEmpty (NonEmpty ((:|)), pattern NonEmpty)
 import Qty (Qty (Qty))
 import Result (ErrorMessage (errorMessage), Result (Error, Ok))

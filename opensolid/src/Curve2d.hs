@@ -16,7 +16,6 @@ module Curve2d
   , tangentDirection
   , reverse
   , bounds
-  , passesThrough
   , intersections
   , parameterValues
   , signedDistanceAlong
@@ -128,23 +127,6 @@ xCoordinate = signedDistanceAlong Axis2d.x
 yCoordinate :: Curve2d (space @ units) -> Curve1d units
 yCoordinate = signedDistanceAlong Axis2d.y
 
-passesThrough :: (Tolerance units) => Point2d (space @ units) -> Curve2d (space @ units) -> Bool
-passesThrough point curve =
-  Range.any (segmentIsCoincidentWithPoint point curve) Domain.unit
-
-segmentIsCoincidentWithPoint ::
-  (Tolerance units) =>
-  Point2d (space @ units) ->
-  Curve2d (space @ units) ->
-  Domain ->
-  Fuzzy Bool
-segmentIsCoincidentWithPoint point curve domain
-  | Range.minValue distance > ?tolerance = Resolved False
-  | Range.maxValue distance <= ?tolerance = Resolved True
-  | otherwise = Unresolved
- where
-  distance = VectorBounds2d.magnitude (point - segmentBounds domain curve)
-
 parameterValues ::
   (Tolerance units) =>
   Point2d (space @ units) ->
@@ -181,7 +163,7 @@ isOverlappingSegment curve1 curve2 (domain1, _, _) =
   let segmentStartPoint = evaluateAt (Range.minValue domain1) curve1
       curve1TestPoints = Range.sample (pointOn curve1) domain1
       segment1IsNondegenerate = List.any (!= segmentStartPoint) curve1TestPoints
-      segment1LiesOnSegment2 = List.all (\p1 -> passesThrough p1 curve2) curve1TestPoints
+      segment1LiesOnSegment2 = List.all (^ curve2) curve1TestPoints
    in segment1IsNondegenerate && segment1LiesOnSegment2
 
 data IntersectionError
