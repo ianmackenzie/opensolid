@@ -45,6 +45,12 @@ instance (units ~ units', space ~ space') => Subtraction (Bounds2d (space @ unit
 instance (units ~ units', space ~ space') => Subtraction (Bounds2d (space @ units)) (Bounds2d (space' @ units')) (VectorBounds2d (space @ units)) where
   Bounds2d x1 y1 - Bounds2d x2 y2 = VectorBounds2d (x1 - x2) (y1 - y2)
 
+instance (space ~ space', units ~ units') => ApproximateEquality (Point2d (space @ units)) (Bounds2d (space' @ units')) units where
+  Point2d px py ~= Bounds2d bx by = px ~= bx && py ~= by
+
+instance (space ~ space', units ~ units') => ApproximateEquality (Bounds2d (space @ units)) (Point2d (space' @ units')) units where
+  bounds ~= point = point ~= bounds
+
 xCoordinate :: Bounds2d (space @ units) -> Range units
 xCoordinate (Bounds2d x _) = x
 
