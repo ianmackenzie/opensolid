@@ -90,6 +90,9 @@ instance (units ~ units') => Intersects (Qty units) (Range units') units where
 instance (units ~ units') => Intersects (Range units) (Qty units') units where
   range ^ value = value ^ range
 
+instance (units ~ units') => Intersects (Range units) (Range units') units where
+  Range low1 high1 ^ Range low2 high2 = low1 <= high2 + ?tolerance && high1 >= low2 - ?tolerance
+
 instance Negation (Range units) where
   negate (Range low high) = unsafe (negate high) (negate low)
 
