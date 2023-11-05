@@ -8,7 +8,6 @@ module Bounds3d
   , hull3
   , hull4
   , aggregate2
-  , intersects
   , intersection
   , interpolate
   )
@@ -31,7 +30,6 @@ deriving instance Show (Bounds3d (space @ units))
 
 instance IsBounds (Bounds3d (space @ units)) where
   aggregate2Impl = aggregate2
-  intersectsImpl = intersects
   intersectionImpl = intersection
 
 instance (units ~ units', space ~ space') => Subtraction (Point3d (space @ units)) (Bounds3d (space' @ units')) (VectorBounds3d (space @ units)) where
@@ -59,10 +57,6 @@ constant (Point3d x y z) =
 aggregate2 :: Bounds3d (space @ units) -> Bounds3d (space @ units) -> Bounds3d (space @ units)
 aggregate2 (Bounds3d x1 y1 z1) (Bounds3d x2 y2 z2) =
   Bounds3d (Range.aggregate2 x1 x2) (Range.aggregate2 y1 y2) (Range.aggregate2 z1 z2)
-
-intersects :: Bounds3d (space @ units) -> Bounds3d (space @ units) -> Bool
-intersects (Bounds3d x1 y1 z1) (Bounds3d x2 y2 z2) =
-  Range.intersects x1 x2 && Range.intersects y1 y2 && Range.intersects z1 z2
 
 intersection :: Bounds3d (space @ units) -> Bounds3d (space @ units) -> Maybe (Bounds3d (space @ units))
 intersection (Bounds3d x1 y1 z1) (Bounds3d x2 y2 z2) = do

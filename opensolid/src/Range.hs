@@ -40,7 +40,6 @@ module Range
   , resolve2
   , recurse
   , recurse2
-  , intersects
   , intersection
   , generator
   , find
@@ -159,7 +158,6 @@ instance (Units.Quotient units1 units2 units3) => Division (Range units1) (Range
 
 instance IsBounds (Range units) where
   aggregate2Impl = aggregate2
-  intersectsImpl = intersects
   intersectionImpl = intersection
 
 {-# INLINE unsafe #-}
@@ -180,9 +178,6 @@ aggregate2 (Range low1 high1) (Range low2 high2) =
 aggregate3 :: Range units -> Range units -> Range units -> Range units
 aggregate3 (Range low1 high1) (Range low2 high2) (Range low3 high3) =
   unsafe (Qty.min (Qty.min low1 low2) low3) (Qty.max (Qty.max high1 high2) high3)
-
-intersects :: Range units -> Range units -> Bool
-intersects (Range low1 high1) (Range low2 high2) = low1 <= high2 && low2 <= high1
 
 intersection :: Range units -> Range units -> Maybe (Range units)
 intersection (Range low1 high1) (Range low2 high2)

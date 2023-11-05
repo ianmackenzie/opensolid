@@ -66,7 +66,7 @@ solve isCandidate resolveNeighborhood findSolution segmentTree accumulated =
 isAllowed :: U.Bounds -> List U.Bounds -> Fuzzy Bool
 isAllowed _ [] = Resolved True
 isAllowed domain (first : rest)
-  | Range.intersects domain first =
+  | exactly (domain ^ first) =
       if Range.contains domain first
         then Resolved False
         else Unresolved
@@ -112,7 +112,7 @@ solve2 isCandidate resolveNeighborhood findSolution segmentTree1 segmentTree2 ac
 isAllowed2 :: U.Bounds -> U.Bounds -> List (U.Bounds, U.Bounds) -> Fuzzy Bool
 isAllowed2 _ _ [] = Resolved True
 isAllowed2 xDomain yDomain ((firstX, firstY) : rest)
-  | Range.intersects xDomain firstX && Range.intersects yDomain firstY =
+  | exactly (firstX ^ xDomain && firstY ^ yDomain) =
       if Range.contains xDomain firstX && Range.contains yDomain firstY
         then Resolved False
         else Unresolved

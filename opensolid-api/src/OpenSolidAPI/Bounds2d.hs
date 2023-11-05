@@ -14,7 +14,6 @@ bounds2d =
     , static 'Bounds2d.hull3 ["p1", "p2", "p3"]
     , static 'Bounds2d.hull4 ["p1", "p2", "p3", "p4"]
     , static 'Bounds2d.aggregate2 ["bounds1", "bounds2"]
-    , method 'Bounds2d.intersects ["bounds1", "bounds2"]
     , method 'Bounds2d.intersection ["bounds1", "bounds2"]
     , static 'Bounds2d.interpolate ["bounds", "u", "v"]
     ]

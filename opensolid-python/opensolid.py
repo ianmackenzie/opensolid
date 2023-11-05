@@ -200,12 +200,6 @@ class Bounds2d:
     def aggregate2(bounds1: Bounds2d, bounds2: Bounds2d) -> Bounds2d:
         return Bounds2d(lib.opensolid_bounds2d_aggregate2(bounds1.ptr, bounds2.ptr))
 
-    lib.opensolid_bounds2d_intersects.argtypes = [c_void_p, c_void_p]
-    lib.opensolid_bounds2d_intersects.restype = c_bool
-
-    def intersects(self, bounds1: Bounds2d) -> bool:
-        return lib.opensolid_bounds2d_intersects(bounds1.ptr, self.ptr)
-
     lib.opensolid_bounds2d_intersection.argtypes = [c_void_p, c_void_p]
     lib.opensolid_bounds2d_intersection.restype = c_void_p
 
@@ -796,12 +790,6 @@ class Range:
 
     def resolution(self) -> float:
         return lib.opensolid_range_resolution(self.ptr)
-
-    lib.opensolid_range_intersects.argtypes = [c_void_p, c_void_p]
-    lib.opensolid_range_intersects.restype = c_bool
-
-    def intersects(self, range1: Range) -> bool:
-        return lib.opensolid_range_intersects(range1.ptr, self.ptr)
 
     lib.opensolid_range_intersection.argtypes = [c_void_p, c_void_p]
     lib.opensolid_range_intersection.restype = c_void_p

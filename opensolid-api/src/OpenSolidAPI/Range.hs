@@ -52,7 +52,6 @@ range =
       -- , 'Range.recurse
       -- , 'Range.recurse2
       method 'Range.resolution ["range"]
-    , method 'Range.intersects ["range1", "range2"]
     , method 'Range.intersection ["range1", "range2"]
     -- TODO: support Random.Generator
     -- , 'Range.generator

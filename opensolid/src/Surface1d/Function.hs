@@ -321,10 +321,19 @@ cos function = Cos function
 isZero :: (Tolerance units) => Function units -> Bool
 isZero function = List.all (~= Qty.zero) (Bounds2d.sample (pointOn function) Uv.domain)
 
-data ZeroEverywhere = ZeroEverywhere deriving (Eq, Show, ErrorMessage)
+data SolveError
+  = ZeroEverywhere
+  | HigherOrderIntersection
+  deriving (Eq, Show, ErrorMessage)
 
-solve :: (Tolerance units) => Function units -> Result ZeroEverywhere (List Solution)
+solve :: (Tolerance units) => Function units -> Result SolveError (List Solution)
 solve Zero = Error ZeroEverywhere
 solve (Constant value) = if value ~= Qty.zero then Error ZeroEverywhere else Ok []
-solve surface | isZero surface = Error ZeroEverywhere
+solve function | isZero function = Error ZeroEverywhere
+solve function | hasHigherOrderIntersection Uv.domain function = Error HigherOrderIntersection
 solve _ = notImplemented -- TODO
+
+hasHigherOrderIntersection :: (Tolerance units) => Uv.Bounds -> Function units -> Bool
+hasHigherOrderIntersection uv function
+  | not (segmentBounds uv function ^ Qty.zero) = False
+  | otherwise = notImplemented

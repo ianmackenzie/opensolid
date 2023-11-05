@@ -217,9 +217,6 @@ internalErrorFilteredListIsEmpty :: a
 internalErrorFilteredListIsEmpty =
   internalError "Filtered list should be non-empty by construction"
 
-intersects :: Range units -> Estimate units -> Bool
-intersects givenBounds estimate = Range.intersects givenBounds (bounds estimate)
-
 boundsWidth :: Estimate units -> Qty units
 boundsWidth estimate = Range.width (bounds estimate)
 
@@ -228,7 +225,7 @@ data Smallest units = Smallest (NonEmpty (Estimate units)) (Range units)
 instance IsEstimate (Smallest units) units where
   boundsImpl (Smallest _ currentBounds) = currentBounds
   refineImpl (Smallest estimates currentBounds) =
-    case NonEmpty.filter (intersects currentBounds) estimates of
+    case NonEmpty.filter (exactly ((^ currentBounds) . bounds)) estimates of
       [singleEstimate] -> refine singleEstimate
       NonEmpty filteredEstimates ->
         let maxWidth = NonEmpty.maximumOf boundsWidth filteredEstimates
@@ -245,7 +242,7 @@ data Largest units = Largest (NonEmpty (Estimate units)) (Range units)
 instance IsEstimate (Largest units) units where
   boundsImpl (Largest _ currentBounds) = currentBounds
   refineImpl (Largest estimates currentBounds) =
-    case NonEmpty.filter (intersects currentBounds) estimates of
+    case NonEmpty.filter (exactly ((^ currentBounds) . bounds)) estimates of
       [singleEstimate] -> refine singleEstimate
       NonEmpty filteredEstimates ->
         let maxWidth = NonEmpty.maximumOf boundsWidth filteredEstimates
