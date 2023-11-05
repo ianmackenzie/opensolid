@@ -11,6 +11,8 @@ module Bounds2d
   , intersection
   , interpolate
   , sample
+  , any
+  , all
   )
 where
 
@@ -125,3 +127,31 @@ sample function (Bounds2d x y) =
   , function (Point2d (Range.interpolate x Quadrature.t4) (Range.interpolate y Quadrature.t4))
   , function (Point2d (Range.interpolate x Quadrature.t5) (Range.interpolate y Quadrature.t2))
   ]
+
+any :: (Bounds2d (space @ units) -> Fuzzy Bool) -> Bounds2d (space @ units) -> Bool
+any assess bounds@(Bounds2d x y) =
+  case assess bounds of
+    Resolved assessment -> assessment
+    Unresolved
+      | Range.isAtomic x && Range.isAtomic y -> False
+      | otherwise ->
+          let (x1, x2) = Range.bisect x
+              (y1, y2) = Range.bisect y
+           in any assess (Bounds2d x1 y1)
+                || any assess (Bounds2d x1 y2)
+                || any assess (Bounds2d x2 y1)
+                || any assess (Bounds2d x2 y2)
+
+all :: (Bounds2d (space @ units) -> Fuzzy Bool) -> Bounds2d (space @ units) -> Bool
+all assess bounds@(Bounds2d x y) =
+  case assess bounds of
+    Resolved assessment -> assessment
+    Unresolved
+      | Range.isAtomic x && Range.isAtomic y -> True
+      | otherwise ->
+          let (x1, x2) = Range.bisect x
+              (y1, y2) = Range.bisect y
+           in all assess (Bounds2d x1 y1)
+                && all assess (Bounds2d x1 y2)
+                && all assess (Bounds2d x2 y1)
+                && all assess (Bounds2d x2 y2)
