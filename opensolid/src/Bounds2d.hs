@@ -51,6 +51,15 @@ instance (space ~ space', units ~ units') => ApproximateEquality (Point2d (space
 instance (space ~ space', units ~ units') => ApproximateEquality (Bounds2d (space @ units)) (Point2d (space' @ units')) units where
   bounds ~= point = point ~= bounds
 
+instance (space ~ space', units ~ units') => Intersects (Point2d (space @ units)) (Bounds2d (space' @ units')) units where
+  Point2d px py ^ Bounds2d bx by = px ^ bx && py ^ by
+
+instance (space ~ space', units ~ units') => Intersects (Bounds2d (space @ units)) (Point2d (space' @ units')) units where
+  bounds ^ point = point ^ bounds
+
+instance (space ~ space', units ~ units') => Intersects (Bounds2d (space @ units)) (Bounds2d (space' @ units')) units where
+  Bounds2d x1 y1 ^ Bounds2d x2 y2 = x1 ^ x2 && y1 ^ y2
+
 xCoordinate :: Bounds2d (space @ units) -> Range units
 xCoordinate (Bounds2d x _) = x
 
