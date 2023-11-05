@@ -75,11 +75,11 @@ segmentIsCoincidentWithPoint ::
   U.Bounds ->
   Fuzzy Bool
 segmentIsCoincidentWithPoint point curve domain
-  | distance ~= Qty.zero = Resolved True
-  | not (distance ^ Qty.zero) = Resolved False
+  | not (point ^ bounds) = Resolved False
+  | bounds ~= point = Resolved True
   | otherwise = Unresolved
  where
-  distance = VectorBounds2d.magnitude (point - segmentBounds domain curve)
+  bounds = segmentBounds domain curve
 
 class
   (Show curve) =>
