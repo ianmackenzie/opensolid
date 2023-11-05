@@ -445,7 +445,7 @@ isCandidate :: (Tolerance units) => Int -> U.Bounds -> Stream (Range units) -> B
 isCandidate rootOrder _ bounds =
   let curveBounds = Stream.head bounds
       derivativeBounds = Stream.take rootOrder (Stream.tail bounds)
-      curveContainsZero = Range.approximatelyIncludes Qty.zero curveBounds
+      curveContainsZero = curveBounds ^ Qty.zero
       derivativesContainZero = List.all (Range.includes Qty.zero) derivativeBounds
    in curveContainsZero && derivativesContainZero
 

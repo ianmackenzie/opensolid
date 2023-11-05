@@ -114,8 +114,8 @@ largest = Test.check 100 "largest" $ Test.do
 
 resolvesTo :: (Tolerance units) => Qty units -> Estimate units -> Result String Bool
 resolvesTo value estimate
+  | not (value ^ currentBounds) = Ok False
   | currentBounds ~= value = Ok True
-  | not (Range.approximatelyIncludes value currentBounds) = Ok False
   | otherwise =
       let refinedEstimate = Estimate.refine estimate
           refinedBounds = Estimate.bounds refinedEstimate

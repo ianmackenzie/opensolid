@@ -673,16 +673,6 @@ class Range:
     def includes(self, value: float) -> bool:
         return lib.opensolid_range_includes(value, self.ptr)
 
-    lib.opensolid_range_approximately_includes.argtypes = [c_double, c_double, c_void_p]
-    lib.opensolid_range_approximately_includes.restype = c_bool
-
-    def approximately_includes(
-        self, value: float, tolerance: Optional[float] = None
-    ) -> bool:
-        return lib.opensolid_range_approximately_includes(
-            read_tolerance(tolerance), value, self.ptr
-        )
-
     lib.opensolid_range_contains.argtypes = [c_void_p, c_void_p]
     lib.opensolid_range_contains.restype = c_bool
 
@@ -694,12 +684,6 @@ class Range:
 
     def is_contained_in(self, range1: Range) -> bool:
         return lib.opensolid_range_is_contained_in(range1.ptr, self.ptr)
-
-    lib.opensolid_range_tolerant.argtypes = [c_double, c_void_p]
-    lib.opensolid_range_tolerant.restype = c_void_p
-
-    def tolerant(self, tolerance: Optional[float] = None) -> Range:
-        return Range(lib.opensolid_range_tolerant(read_tolerance(tolerance), self.ptr))
 
     lib.opensolid_range_bisect.argtypes = [c_void_p]
     lib.opensolid_range_bisect.restype = c_void_p

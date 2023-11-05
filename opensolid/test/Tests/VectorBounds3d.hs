@@ -1,7 +1,6 @@
 module Tests.VectorBounds3d (tests) where
 
 import OpenSolid
-import Range qualified
 import Test (Test)
 import Test qualified
 import Tests.Random qualified
@@ -24,4 +23,4 @@ magnitude = Test.check 100 "magnitude" $ Test.do
   let vector = VectorBounds3d.interpolate vectorBounds ux uy uz
   let vectorMagnitude = Vector3d.magnitude vector
   let magnitudeRange = VectorBounds3d.magnitude vectorBounds
-  Test.expect (Range.approximatelyIncludes vectorMagnitude magnitudeRange)
+  Test.expect (vectorMagnitude ^ magnitudeRange)

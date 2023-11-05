@@ -20,12 +20,15 @@ print(rng.bisect())
 
 # Testing tolerance
 with Tolerance(1):
-  print(rng.tolerant())
+  print(Vector2d.x(1.5).direction())
   with Tolerance(2):
-    print(rng.tolerant())
-  print(rng.tolerant())
+    try:
+      print(Vector2d.x(1.5).direction())
+    except Vector2d.IsZero:
+      print("Zero vector doesn't have direction")
+  print(Vector2d.x(1.5).direction())
 try:
-  print(rng.tolerant())
+  print(Vector2d.x(1.5).direction())
 except Exception as err:
   print(err)  # Tolerance is not set
 

@@ -11,10 +11,8 @@ module Range
   , width
   , squared
   , includes
-  , approximatelyIncludes
   , contains
   , isContainedIn
-  , tolerant
   , bisect
   , isAtomic
   , abs
@@ -302,18 +300,11 @@ hypot3 (Range xMin xMax) (Range yMin yMax) (Range zMin zMax)
 includes :: Qty units -> Range units -> Bool
 includes value (Range low high) = low <= value && value <= high
 
-approximatelyIncludes :: (Tolerance units) => Qty units -> Range units -> Bool
-approximatelyIncludes value (Range low high) =
-  low - ?tolerance <= value && value <= high + ?tolerance
-
 contains :: Range units -> Range units -> Bool
 contains (Range low2 high2) (Range low1 high1) = low1 <= low2 && high2 <= high1
 
 isContainedIn :: Range units -> Range units -> Bool
 isContainedIn = flip contains
-
-tolerant :: (Tolerance units) => Range units -> Range units
-tolerant (Range low high) = unsafe (low - ?tolerance) (high + ?tolerance)
 
 bisect :: Range units -> (Range units, Range units)
 bisect (Range low high) =
