@@ -2,6 +2,7 @@ module Tolerance
   ( Tolerance
   , ApproximateEquality ((~=))
   , (!=)
+  , exactly
   )
 where
 
@@ -69,5 +70,22 @@ instance
 
 (!=) :: (ApproximateEquality a b units, Tolerance units) => a -> b -> Bool
 (!=) first second = not (first ~= second)
+
+{- | Take an expression which would normally require a tolerance,
+and evaluate it using a tolerance of zero. For example, the expression
+
+  value ^ range
+
+would normally require an implicit tolerance to be present;
+
+  exactly (value ^ range)
+
+will evaluate that expression with a tolerance of zero,
+equivalent to
+
+  let ?tolerance = Qty.zero in value ^ range
+-}
+exactly :: ((Tolerance units) => a) -> a
+exactly expression = let ?tolerance = Qty.zero in expression
 
 infix 4 ~=, !=
