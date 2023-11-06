@@ -1,4 +1,4 @@
-module Quadrature (t1, t2, t3, t4, t5) where
+module Quadrature (t1, t2, t3, t4, t5, points) where
 
 import OpenSolid
 
@@ -20,3 +20,6 @@ t4 = 0.7692346550528415
 
 t5 :: Float
 t5 = 0.9530899229693319
+
+points :: List Float
+points = [t1, t2, t3, t4, t5]
