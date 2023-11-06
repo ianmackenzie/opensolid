@@ -38,7 +38,7 @@ module Range
   , resolution
   , intersection
   , generator
-  , find
+  , solve
   , find2
   , samples
   )
@@ -434,6 +434,33 @@ all assess range =
       | otherwise ->
           let (left, right) = Range.bisect range
            in all assess left && all assess right
+
+solve :: (Qty units1 -> Qty units2) -> Range units1 -> Maybe (Qty units1)
+solve f (Range x1 x2)
+  | y1 < Qty.zero && y2 > Qty.zero = Just (root f x1 x2 y1 y2)
+  | y2 < Qty.zero && y1 > Qty.zero = Just (root f x2 x1 y2 y1)
+  | y1 == Qty.zero = Just x1
+  | y2 == Qty.zero = Just x2
+  | otherwise = Nothing
+ where
+  y1 = f x1
+  y2 = f x2
+
+root ::
+  (Qty units1 -> Qty units2) ->
+  Qty units1 ->
+  Qty units1 ->
+  Qty units2 ->
+  Qty units2 ->
+  Qty units1
+root f nx px ny py
+  | x == nx || x == px = if -ny <= py then nx else px
+  | y > Qty.zero = root f nx x ny y
+  | y < Qty.zero = root f x px y py
+  | otherwise = x
+ where
+  x = Qty.midpoint nx px
+  y = f x
 
 find :: (Range units -> Bool) -> Range units -> Maybe (Qty units)
 find isCandidate range =

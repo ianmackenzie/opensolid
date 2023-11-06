@@ -34,7 +34,7 @@ import Generic qualified
 import List qualified
 import OpenSolid
 import Qty qualified
-import Range (Range (Range))
+import Range (Range)
 import Range qualified
 import Result qualified
 import Stream (Stream)
@@ -461,31 +461,12 @@ findRoot ::
   Stream (Range units) ->
   Sign ->
   Maybe Root
-findRoot originalCurve rootOrder derivatives domain _ nextDerivativeSign =
+findRoot originalCurve rootOrder derivatives domain _ nextDerivativeSign = do
   let curve = Stream.nth rootOrder derivatives
-      Range x1 x2 = domain
-      minX = if nextDerivativeSign == Positive then x1 else x2
-      maxX = if nextDerivativeSign == Positive then x2 else x1
-      minY = evaluateAt minX curve
-      maxY = evaluateAt maxX curve
-   in if minY > Qty.zero || maxY < Qty.zero
-        then Nothing
-        else
-          let rootX = bisectMonotonic curve minX maxX minY maxY
-           in if rootOrder == 0 || evaluateAt rootX originalCurve ~= Qty.zero
-                then Just (Root rootX rootOrder nextDerivativeSign)
-                else Nothing
-
-bisectMonotonic :: Curve1d units -> Float -> Float -> Qty units -> Qty units -> Float
-bisectMonotonic curve lowX highX lowY highY =
-  let midX = Qty.midpoint lowX highX
-   in if midX == lowX || midX == highX
-        then if -lowY <= highY then lowX else highX
-        else
-          let midY = evaluateAt midX curve
-           in if midY >= Qty.zero
-                then bisectMonotonic curve lowX midX lowY midY
-                else bisectMonotonic curve midX highX midY highY
+  rootX <- Range.solve (pointOn curve) domain
+  if rootOrder == 0 || evaluateAt rootX originalCurve ~= Qty.zero
+    then Just (Root rootX rootOrder nextDerivativeSign)
+    else Nothing
 
 resolveSign :: Range units -> Fuzzy Sign
 resolveSign range

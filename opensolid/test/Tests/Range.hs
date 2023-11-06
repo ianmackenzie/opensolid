@@ -90,7 +90,6 @@ largest = Test.check 1000 "largest" $ Test.do
 find :: Test
 find =
   Test.check 1 "find" $
-    let isRoot x = Range.includes 2.0 (x * x)
-     in case Range.find isRoot (Range.from 1.0 2.0) of
-          Nothing -> Test.fail "Should have found the square root of 2 between 1.0 and 2.0"
-          Just root -> Test.expect (root ~= Float.sqrt 2.0) where ?tolerance = 1e-12
+    case Range.solve (\x -> Qty.squared x - 2.0) (Range.from 1.0 2.0) of
+      Nothing -> Test.fail "Should have found the square root of 2 between 1.0 and 2.0"
+      Just root -> Test.expect (root ~= Float.sqrt 2.0) where ?tolerance = 1e-12
