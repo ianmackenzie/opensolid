@@ -161,7 +161,7 @@ isOverlappingSegment ::
   Bool
 isOverlappingSegment curve1 curve2 (domain1, _, _) =
   let segmentStartPoint = evaluateAt (Range.minValue domain1) curve1
-      curve1TestPoints = Range.sample (pointOn curve1) domain1
+      curve1TestPoints = List.map (pointOn curve1) (Range.samples domain1)
       segment1IsNondegenerate = List.any (!= segmentStartPoint) curve1TestPoints
       segment1LiesOnSegment2 = List.all (^ curve2) curve1TestPoints
    in segment1IsNondegenerate && segment1LiesOnSegment2
