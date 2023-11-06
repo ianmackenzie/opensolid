@@ -53,7 +53,11 @@ lines :: String -> List String
 lines = Data.String.lines
 
 indent :: String -> String -> String
-indent indentation = join "\n" . List.map (indentation ++) . lines
+indent indentation paragraph =
+  paragraph
+    |> lines
+    |> List.map (indentation ++)
+    |> join "\n"
 
 repeat :: Int -> String -> String
 repeat n string = concat (List.repeat n string)
