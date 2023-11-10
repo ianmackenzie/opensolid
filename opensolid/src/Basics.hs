@@ -59,7 +59,6 @@ import Prelude
   , String
   , const
   , flip
-  , fmap
   , fromIntegral
   , id
   , not
