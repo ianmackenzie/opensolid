@@ -24,7 +24,6 @@ module Basics
   , id
   , const
   , fromIntegral
-  , flip
   , internalError
   , notImplemented
   , (|>)
@@ -57,7 +56,6 @@ import Prelude
   , Show (show)
   , String
   , const
-  , flip
   , fromIntegral
   , id
   , not

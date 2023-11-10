@@ -296,7 +296,7 @@ contains :: Range units -> Range units -> Bool
 contains (Range low2 high2) (Range low1 high1) = low1 <= low2 && high2 <= high1
 
 isContainedIn :: Range units -> Range units -> Bool
-isContainedIn = flip contains
+isContainedIn range value = contains value range
 
 bisect :: Range units -> (Range units, Range units)
 bisect (Range low high) =
