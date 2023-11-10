@@ -88,7 +88,7 @@ instance VoidPtr (Qty u) where
 instance (VoidPtr a) => VoidPtr (Maybe a) where
   fromVoidPtr ptr
     | ptr == Foreign.nullPtr = return Nothing
-    | otherwise = Just <$> fromVoidPtr ptr
+    | otherwise = fmap Just (fromVoidPtr ptr)
   toVoidPtr (Just val) = toVoidPtr val
   toVoidPtr Nothing = return Foreign.nullPtr
 

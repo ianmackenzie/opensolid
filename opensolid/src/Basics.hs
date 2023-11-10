@@ -30,7 +30,6 @@ module Basics
   , (|>)
   , type (~)
   , Functor (fmap)
-  , (<$>)
   , Applicative (pure, (<*>))
   , Monad ((>>=), (>>), return)
   , MonadFail (fail)
@@ -66,7 +65,6 @@ import Prelude
   , ($)
   , (&&)
   , (.)
-  , (<$>)
   , (||)
   )
 import Prelude qualified
