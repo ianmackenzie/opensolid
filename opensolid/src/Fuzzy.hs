@@ -7,6 +7,7 @@ module Fuzzy
 where
 
 import Basics
+import Prelude qualified
 
 data Fuzzy a = Resolved a | Unresolved deriving (Eq, Show)
 
@@ -39,8 +40,4 @@ or other (Resolved False) = other
 or Unresolved Unresolved = Unresolved
 
 collect :: (a -> Fuzzy b) -> List a -> Fuzzy (List b)
-collect _ [] = Resolved []
-collect function (first : rest) = do
-  resolvedFirst <- function first
-  resolvedRest <- collect function rest
-  Resolved (resolvedFirst : resolvedRest)
+collect = Prelude.mapM

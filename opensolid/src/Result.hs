@@ -14,6 +14,7 @@ where
 
 import Basics
 import System.IO.Error qualified
+import Prelude qualified
 
 class (Eq error, Show error) => ErrorMessage error where
   errorMessage :: error -> String
@@ -55,8 +56,7 @@ withDefault _ (Ok value) = value
 withDefault fallback (Error _) = fallback
 
 map :: (a -> value) -> Result x a -> Result x value
-map function (Ok value) = Ok (function value)
-map _ (Error err) = Error err
+map = fmap
 
 mapError :: (ErrorMessage y) => (x -> y) -> Result x a -> Result y a
 mapError _ (Ok value) = Ok value
@@ -75,12 +75,7 @@ orNothing (Ok value) = Just value
 orNothing (Error _) = Nothing
 
 collect :: (a -> Result x b) -> List a -> Result x (List b)
-collect _ [] = Ok []
-collect f (a : as) = do b <- f a; bs <- collect f as; Ok (b : bs)
+collect = Prelude.mapM
 
 combine :: List (Result x a) -> Result x (List a)
-combine [] = Ok []
-combine (firstResult : followingResults) = do
-  firstValue <- firstResult
-  followingValues <- combine followingResults
-  Ok (firstValue : followingValues)
+combine = Prelude.sequence

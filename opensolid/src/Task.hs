@@ -16,6 +16,7 @@ import Control.Exception qualified
 import Result (ErrorMessage (errorMessage), Result (Error, Ok))
 import Result qualified
 import System.Exit qualified
+import Prelude qualified
 
 data Task x a
   = Done (Result x a)
@@ -43,8 +44,7 @@ immediate :: Result x a -> Task x a
 immediate = Done
 
 map :: (a -> b) -> Task x a -> Task x b
-map function (Done result) = Done (Result.map function result)
-map function (Perform io) = Perform (fmap (map function) io)
+map = fmap
 
 mapError :: (ErrorMessage y) => (x -> y) -> Task x a -> Task y a
 mapError function (Done result) = Done (Result.mapError function result)
@@ -59,9 +59,7 @@ toIO (Done (Error error)) = System.Exit.die (errorMessage error)
 toIO (Perform io) = io >>= toIO
 
 each :: (a -> Task x ()) -> List a -> Task x ()
-each _ [] = return ()
-each f (first : rest) = do f first; each f rest
+each = Prelude.mapM_
 
 collect :: (a -> Task x b) -> List a -> Task x (List b)
-collect _ [] = return []
-collect f (a : as) = do b <- f a; bs <- collect f as; return (b : bs)
+collect = Prelude.mapM
