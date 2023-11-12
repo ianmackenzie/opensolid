@@ -39,7 +39,7 @@ import Uv qualified
 
 class (Show function) => Operations function units | function -> units where
   evaluateAtImpl :: Point2d Uv.Coordinates -> function -> Qty units
-  segmentBoundsImpl :: Bounds2d Uv.Coordinates -> function -> Range units
+  segmentBoundsImpl :: Uv.Bounds -> function -> Range units
   derivativeImpl :: Direction2d Uv.Space -> function -> Function units
 
 data Function units where
@@ -235,7 +235,7 @@ evaluateAt uv function =
 pointOn :: Function units -> Point2d Uv.Coordinates -> Qty units
 pointOn function uv = evaluateAt uv function
 
-segmentBounds :: Bounds2d Uv.Coordinates -> Function units -> Range units
+segmentBounds :: Uv.Bounds -> Function units -> Range units
 segmentBounds uv function =
   case function of
     Function f -> segmentBoundsImpl uv f
