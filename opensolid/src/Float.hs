@@ -17,6 +17,14 @@ module Float
   , acos
   , atan
   , atan2
+  , infinity
+  , sign
+  , isNaN
+  , squared
+  , abs
+  , clamp
+  , interpolateFrom
+  , midpoint
   )
 where
 
@@ -24,6 +32,7 @@ import Arithmetic
 import Basics
 import Qty (Qty (Qty))
 import Qty qualified
+import Sign (Sign)
 import Units (Unitless)
 import Prelude qualified
 
@@ -43,6 +52,30 @@ floor (Qty x) = Prelude.floor x
 {-# INLINE ceiling #-}
 ceiling :: Float -> Int
 ceiling (Qty x) = Prelude.ceiling x
+
+infinity :: Float
+infinity = Qty.infinity
+
+sign :: Float -> Sign
+sign = Qty.sign
+
+isNaN :: Float -> Bool
+isNaN = Qty.isNaN
+
+squared :: Float -> Float
+squared = Qty.squared
+
+abs :: Float -> Float
+abs = Qty.abs
+
+clamp :: Float -> Float -> Float -> Float
+clamp = Qty.clamp
+
+interpolateFrom :: Float -> Float -> Float -> Float
+interpolateFrom = Qty.interpolateFrom
+
+midpoint :: Float -> Float -> Float
+midpoint = Qty.midpoint
 
 min :: Float -> Float -> Float
 min = Qty.min
