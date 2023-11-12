@@ -133,20 +133,20 @@ instance (Units.Product units1 units2 units3) => Multiplication (Range units1) (
 instance (Units.Quotient units1 units2 units3) => Division (Qty units1) (Range units2) (Range units3) where
   n / Range dl dh =
     if dl > Qty.zero || dh < Qty.zero
-      then unsafe (n / dh) (n / dl)
+      then from (n / dl) (n / dh)
       else unsafe -Qty.infinity Qty.infinity
 
 instance (Units.Quotient units1 units2 units3) => Division (Range units1) (Qty units2) (Range units3) where
-  Range nl nh / d
-    | d > Qty.zero = unsafe (nl / d) (nh / d)
-    | d < Qty.zero = unsafe (nh / d) (nl / d)
-    | otherwise = unsafe -Qty.infinity Qty.infinity
+  Range nl nh / d =
+    if d /= Qty.zero
+      then from (nl / d) (nh / d)
+      else unsafe -Qty.infinity Qty.infinity
 
 instance (Units.Quotient units1 units2 units3) => Division (Range units1) (Range units2) (Range units3) where
-  Range nl nh / Range dl dh
-    | dl > Qty.zero = unsafe (nl / dh) (nh / dl)
-    | dh < Qty.zero = unsafe (nh / dh) (nl / dl)
-    | otherwise = unsafe -Qty.infinity Qty.infinity
+  Range nl nh / Range dl dh =
+    if dl > Qty.zero || dh < Qty.zero
+      then hull4 (nl / dl) (nl / dh) (nh / dl) (nh / dh)
+      else unsafe -Qty.infinity Qty.infinity
 
 instance IsBounds (Range units) where
   aggregate2Impl = aggregate2

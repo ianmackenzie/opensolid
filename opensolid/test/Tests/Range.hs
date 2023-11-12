@@ -22,6 +22,9 @@ tests =
   , smallest
   , largest
   , find
+  , qtyRangeDivision
+  , rangeQtyDivision
+  , rangeRangeDivision
   ]
 
 smaller :: Test
@@ -93,3 +96,54 @@ find =
     case Range.solve (\x -> Qty.squared x - 2.0) (Range.from 1.0 2.0) of
       Nothing -> Test.fail "Should have found the square root of 2 between 1.0 and 2.0"
       Just root -> Test.expect (root ~= Float.sqrt 2.0) where ?tolerance = 1e-12
+
+qtyRangeDivision :: Test
+qtyRangeDivision = Test.check 1000 "qtyRangeDivision" $ Test.do
+  x <- Random.length
+  range <- Range.generator Random.length
+  u <- U.generator
+  let y = Range.interpolate range u
+  let quotient = x / y
+  let rangeQuotient = x / range
+  Test.expect (rangeQuotient |> Range.includes quotient)
+    |> Test.output "x" x
+    |> Test.output "range" range
+    |> Test.output "y" y
+    |> Test.output "quotient" quotient
+    |> Test.output "rangeQuotient" rangeQuotient
+
+rangeQtyDivision :: Test
+rangeQtyDivision = Test.check 1000 "rangeQtyDivision" $ Test.do
+  range <- Range.generator Random.length
+  u <- U.generator
+  let x = Range.interpolate range u
+  y <- Random.length
+  let quotient = x / y
+  let rangeQuotient = range / y
+  Test.expect (rangeQuotient |> Range.includes quotient)
+    |> Test.output "range" range
+    |> Test.output "x" x
+    |> Test.output "y" y
+    |> Test.output "quotient" quotient
+    |> Test.output "rangeQuotient" rangeQuotient
+
+{- | TODO: have test helper for generally testing compatibility of
+Range function with corresponding Qty function
+-}
+rangeRangeDivision :: Test
+rangeRangeDivision = Test.check 1000 "rangeRangeDivision" $ Test.do
+  range1 <- Range.generator Random.length
+  range2 <- Range.generator Random.length
+  u1 <- U.generator
+  u2 <- U.generator
+  let x1 = Range.interpolate range1 u1
+  let x2 = Range.interpolate range2 u2
+  let quotient = x1 / x2
+  let rangeQuotient = range1 / range2
+  Test.expect (rangeQuotient |> Range.includes quotient)
+    |> Test.output "range1" range1
+    |> Test.output "range2" range2
+    |> Test.output "x1" x1
+    |> Test.output "x2" x2
+    |> Test.output "quotient" quotient
+    |> Test.output "rangeQuotient" rangeQuotient
