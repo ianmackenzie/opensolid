@@ -5,6 +5,7 @@ module Surface1d.Function
   , evaluateAt
   , pointOn
   , segmentBounds
+  , boundsOn
   , derivative
   , zero
   , constant
@@ -252,6 +253,9 @@ segmentBounds uv function =
     SquareRoot f -> Range.sqrt (segmentBounds uv f)
     Sin f -> Range.sin (segmentBounds uv f)
     Cos f -> Range.cos (segmentBounds uv f)
+
+boundsOn :: Function units -> Uv.Bounds -> Range units
+boundsOn function uvBounds = segmentBounds uvBounds function
 
 derivative :: Direction2d Uv.Space -> Function units -> Function units
 derivative direction function =
