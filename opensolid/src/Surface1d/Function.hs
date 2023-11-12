@@ -17,6 +17,7 @@ module Surface1d.Function
   , sqrt
   , sin
   , cos
+  , curve
   , isZero
   )
 where
@@ -24,6 +25,8 @@ where
 import Angle qualified
 import Bounds2d (Bounds2d)
 import Bounds2d qualified
+import Curve2d (Curve2d, IsCurve2d)
+import Curve2d qualified
 import Direction2d (Direction2d)
 import Direction2d qualified
 import Generic qualified
@@ -37,6 +40,7 @@ import Range qualified
 import Surface1d.Solution (Solution)
 import Units qualified
 import Uv qualified
+import VectorCurve2d qualified
 
 class (Show function) => Operations function units | function -> units where
   evaluateAtImpl :: Point2d Uv.Coordinates -> function -> Qty units
@@ -321,6 +325,25 @@ cos :: Function Radians -> Function Unitless
 cos Zero = Constant 1.0
 cos (Constant x) = constant (Angle.cos x)
 cos function = Cos function
+
+data Curve units where
+  Curve :: (IsCurve2d curve Uv.Coordinates) => Function units -> curve -> Curve units
+
+deriving instance Show (Curve units)
+
+instance IsCurve1d (Curve units) units where
+  evaluateAtImpl t (Curve function uvCurve) = evaluateAt (Curve2d.evaluateAtImpl t uvCurve) function
+  segmentBoundsImpl t (Curve function uvCurve) = segmentBounds (Curve2d.segmentBoundsImpl t uvCurve) function
+  derivativeImpl (Curve function uvCurve) =
+    let fU = derivative Direction2d.u function
+        fV = derivative Direction2d.v function
+        uvT = Curve2d.derivativeImpl uvCurve
+        uT = VectorCurve2d.xComponent uvT
+        vT = VectorCurve2d.yComponent uvT
+     in Curve1d (Curve fU uvCurve) * uT + Curve1d (Curve fV uvCurve) * vT
+
+curve :: Function units -> Curve2d Uv.Coordinates -> Curve1d units
+curve function uvCurve = Curve1d (Curve function uvCurve)
 
 isZero :: (Tolerance units) => Function units -> Bool
 isZero function = List.all (~= Qty.zero) (Bounds2d.sample (pointOn function) Uv.domain)
