@@ -97,12 +97,12 @@ class
 
 startPoint :: Curve2d (space @ units) -> Point2d (space @ units)
 startPoint (Line p1 _ _) = p1
-startPoint arc@(Arc{}) = evaluateAt 0.0 arc
+startPoint arc@Arc{} = evaluateAt 0.0 arc
 startPoint (Curve curve _) = startPointImpl curve
 
 endPoint :: Curve2d (space @ units) -> Point2d (space @ units)
 endPoint (Line _ p2 _) = p2
-endPoint arc@(Arc{}) = evaluateAt 1.0 arc
+endPoint arc@Arc{} = evaluateAt 1.0 arc
 endPoint (Curve curve _) = endPointImpl curve
 
 evaluateAt :: Float -> Curve2d (space @ units) -> Point2d (space @ units)
