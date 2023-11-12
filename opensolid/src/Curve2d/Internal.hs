@@ -57,6 +57,15 @@ instance
     (Curve2d (space @ units1'))
     (Curve2d (space' @ units2'))
 
+instance IsCurve2d (Curve2d (space @ units)) (space @ units) where
+  startPointImpl = startPoint
+  endPointImpl = endPoint
+  evaluateAtImpl = evaluateAt
+  segmentBoundsImpl = segmentBounds
+  derivativeImpl = derivative
+  reverseImpl = reverse
+  boundsImpl = bounds
+
 instance
   (space ~ space', units ~ units') =>
   Intersects (Curve2d (space @ units)) (Point2d (space' @ units')) units
