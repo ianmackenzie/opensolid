@@ -1,6 +1,6 @@
 module Task
   ( Task
-  , immediate
+  , evaluate
   , toIO
   , fail
   , map
@@ -40,8 +40,8 @@ instance Monad (Task x) where
 instance MonadFail (Task String) where
   fail = Done . Error
 
-immediate :: Result x a -> Task x a
-immediate = Done
+evaluate :: Result x a -> Task x a
+evaluate = Done
 
 map :: (a -> b) -> Task x a -> Task x b
 map = fmap

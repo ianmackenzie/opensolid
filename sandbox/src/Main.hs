@@ -123,7 +123,7 @@ testTaskIteration = do
 
 doublingTask :: String -> Task String Int
 doublingTask input = do
-  value <- Task.immediate (String.toInt input)
+  value <- Task.evaluate (String.toInt input)
   let doubled = 2 * value
   return doubled
 
