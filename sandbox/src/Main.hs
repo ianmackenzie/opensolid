@@ -3,14 +3,15 @@ module Main (main) where
 import Angle qualified
 import Area qualified
 import Axis2d qualified
+import Bounds2d qualified
 import Console qualified
+import Curve2d qualified
 import Direction2d qualified
 import Direction3d ()
 import Length qualified
 import List qualified
 import NonEmpty qualified
 import OpenSolid
-import U qualified
 import Point2d (Point2d)
 import Point2d qualified
 import Qty qualified
@@ -18,12 +19,16 @@ import Random qualified
 import Range qualified
 import Result qualified
 import String qualified
+import Surface1d.Function qualified
+import Surface1d.Solution qualified
 import Task qualified
 import Transform2d qualified
 import Try qualified
+import U qualified
 import Units (Meters)
 import Vector2d qualified
 import Vector3d qualified
+import VectorCurve2d qualified
 import Volume qualified
 
 log :: (Show a) => String -> a -> Task String ()
@@ -155,6 +160,40 @@ testNonEmpty = Try.do
   testEmptyCheck []
   testEmptyCheck [2, 3, 1]
 
+testSurface1dIntersection :: Task String ()
+testSurface1dIntersection = Try.do
+  let u = Surface1d.Function.u
+  let v = Surface1d.Function.v
+  let f = Surface1d.Function.squared u + Surface1d.Function.squared v - 1.0
+  let fu = f |> Surface1d.Function.derivative Direction2d.u
+  let fv = f |> Surface1d.Function.derivative Direction2d.v
+  let fuu = fu |> Surface1d.Function.derivative Direction2d.u
+  let fvv = fv |> Surface1d.Function.derivative Direction2d.v
+  let fuv = fu |> Surface1d.Function.derivative Direction2d.v
+  let showSolution uRange vRange = Try.do
+        [solution] <- Task.evaluate (Surface1d.Function.findSolutions f fu fv fuu fvv fuv (Bounds2d.uv uRange vRange))
+        case solution of
+          Surface1d.Solution.CrossingCurve curve -> do
+            let derivative = Curve2d.derivative curve
+            log "Start point" (Curve2d.startPoint curve)
+            log "Start derivative" (VectorCurve2d.evaluateAt 0.0 derivative)
+            log "End point" (Curve2d.endPoint curve)
+            log "End derivative" (VectorCurve2d.evaluateAt 1.0 derivative)
+            log "Bounds" (Curve2d.bounds curve)
+          Surface1d.Solution.TangentCurve _ _ -> Console.printLine "Unexpected tangent curve"
+          Surface1d.Solution.TangentPoint _ _ -> Console.printLine "Unexpected tangent point"
+
+  let uLeftBiased = Range.from -0.3 0.1
+  let uRightBiased = Range.from -0.1 0.3
+  let vRangeUpper = Range.from 0.9 1.1
+  let vRangeLower = Range.from -1.1 -0.9
+  showSolution uLeftBiased vRangeUpper
+  showSolution uRightBiased vRangeUpper
+  showSolution uLeftBiased vRangeLower
+  showSolution uRightBiased vRangeLower
+ where
+  ?tolerance = 1e-9
+
 script :: Task String ()
 script = do
   testScalarArithmetic
@@ -169,6 +208,7 @@ script = do
   testListOperations
   testParameter1dGeneration
   testNonEmpty
+  testSurface1dIntersection
  where
   ?tolerance = Length.meters 1e-9
 
