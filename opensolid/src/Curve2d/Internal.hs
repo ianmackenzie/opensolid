@@ -7,6 +7,7 @@ module Curve2d.Internal
   , segmentBounds
   , derivative
   , reverse
+  , bounds
   )
 where
 
@@ -75,11 +76,11 @@ segmentIsCoincidentWithPoint ::
   U.Bounds ->
   Fuzzy Bool
 segmentIsCoincidentWithPoint point curve domain
-  | not (point ^ bounds) = Resolved False
-  | bounds ~= point = Resolved True
+  | not (point ^ candidateBounds) = Resolved False
+  | candidateBounds ~= point = Resolved True
   | otherwise = Unresolved
  where
-  bounds = segmentBounds domain curve
+  candidateBounds = segmentBounds domain curve
 
 class
   (Show curve) =>
@@ -126,6 +127,11 @@ reverse (Line p1 p2 direction) = Line p2 p1 -direction
 reverse (Arc p0 r a b) = Arc p0 r b a
 reverse (Curve curve tangentDirection) =
   Curve (reverseImpl curve) (DirectionCurve2d.reverse tangentDirection)
+
+bounds :: Curve2d (space @ units) -> Bounds2d (space @ units)
+bounds (Line p1 p2 _) = Bounds2d.hull2 p1 p2
+bounds arc@Arc{} = segmentBounds U.domain arc
+bounds (Curve curve _) = boundsImpl curve
 
 data PointCurveDifference (coordinateSystem :: CoordinateSystem)
   = PointCurveDifference (Point2d coordinateSystem) (Curve2d coordinateSystem)
