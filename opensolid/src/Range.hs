@@ -128,13 +128,7 @@ instance (Units.Product units1 units2 units3) => Multiplication (Range units1) (
 
 instance (Units.Product units1 units2 units3) => Multiplication (Range units1) (Range units2) (Range units3) where
   Range low1 high1 * Range low2 high2 =
-    let ll = low1 * low2
-        lh = low1 * high2
-        hl = high1 * low2
-        hh = high1 * high2
-        low = Qty.min (Qty.min (Qty.min ll lh) hl) hh
-        high = Qty.max (Qty.max (Qty.max ll lh) hl) hh
-     in unsafe low high
+    hull4 (low1 * low2) (low1 * high2) (high1 * low2) (high1 * high2)
 
 instance (Units.Quotient units1 units2 units3) => Division (Qty units1) (Range units2) (Range units3) where
   n / Range dl dh =
