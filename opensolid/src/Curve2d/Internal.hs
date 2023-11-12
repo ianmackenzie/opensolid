@@ -25,7 +25,7 @@ import U qualified
 import Units qualified
 import Vector2d qualified
 import VectorBounds2d qualified
-import VectorCurve2d (IsVectorCurve2d (..), VectorCurve2d (VectorCurve2d))
+import VectorCurve2d (IsVectorCurve2d, VectorCurve2d (VectorCurve2d))
 import VectorCurve2d qualified
 
 data Curve2d (coordinateSystem :: CoordinateSystem) where
@@ -107,26 +107,25 @@ endPoint (Curve curve _) = endPointImpl curve
 evaluateAt :: Float -> Curve2d (space @ units) -> Point2d (space @ units)
 evaluateAt t (Line p1 p2 _) = Point2d.interpolateFrom p1 p2 t
 evaluateAt t (Arc p0 r a b) = let theta = Qty.interpolateFrom a b t in p0 + Vector2d.polar r theta
-evaluateAt t (Curve curve _) = Curve2d.Internal.evaluateAtImpl t curve
+evaluateAt t (Curve curve _) = evaluateAtImpl t curve
 
 segmentBounds :: U.Bounds -> Curve2d (space @ units) -> Bounds2d (space @ units)
 segmentBounds (Range t1 t2) (Line p1 p2 _) =
   Bounds2d.hull2 (Point2d.interpolateFrom p1 p2 t1) (Point2d.interpolateFrom p1 p2 t2)
 segmentBounds t (Arc p0 r a b) =
   p0 + VectorBounds2d.polar (Range.constant r) (a + (b - a) * t)
-segmentBounds t (Curve curve _) =
-  Curve2d.Internal.segmentBoundsImpl t curve
+segmentBounds t (Curve curve _) = segmentBoundsImpl t curve
 
 derivative :: Curve2d (space @ units) -> VectorCurve2d (space @ units)
 derivative (Line p1 p2 _) = VectorCurve2d.constant (p2 - p1)
 derivative (Arc _ r a b) = VectorCurve2d.derivative (VectorCurve2d.arc r a b)
-derivative (Curve curve _) = Curve2d.Internal.derivativeImpl curve
+derivative (Curve curve _) = derivativeImpl curve
 
 reverse :: Curve2d (space @ units) -> Curve2d (space @ units)
 reverse (Line p1 p2 direction) = Line p2 p1 -direction
 reverse (Arc p0 r a b) = Arc p0 r b a
 reverse (Curve curve tangentDirection) =
-  Curve (Curve2d.Internal.reverseImpl curve) (DirectionCurve2d.reverse tangentDirection)
+  Curve (reverseImpl curve) (DirectionCurve2d.reverse tangentDirection)
 
 data PointCurveDifference (coordinateSystem :: CoordinateSystem)
   = PointCurveDifference (Point2d coordinateSystem) (Curve2d coordinateSystem)
