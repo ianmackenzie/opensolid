@@ -160,6 +160,7 @@ unsafe = Range_
 constant :: Qty units -> Range units
 constant value = unsafe value value
 
+{-# INLINE from #-}
 from :: Qty units -> Qty units -> Range units
 from a b = if a <= b then unsafe a b else unsafe b a
 
@@ -177,9 +178,11 @@ intersection (Range low1 high1) (Range low2 high2)
   | low1 > high2 = Nothing
   | otherwise = Just (unsafe (Qty.max low1 low2) (Qty.min high1 high2))
 
+{-# INLINE hull3 #-}
 hull3 :: Qty units -> Qty units -> Qty units -> Range units
 hull3 a b c = unsafe (Qty.min a (Qty.min b c)) (Qty.max a (Qty.max b c))
 
+{-# INLINE hull4 #-}
 hull4 :: Qty units -> Qty units -> Qty units -> Qty units -> Range units
 hull4 a b c d = unsafe (Qty.min a (Qty.min b (Qty.min c d))) (Qty.max a (Qty.max b (Qty.max c d)))
 
@@ -301,6 +304,7 @@ bisect (Range low high) =
   let mid = Qty.midpoint low high
    in (unsafe low mid, unsafe mid high)
 
+{-# INLINE isAtomic #-}
 isAtomic :: Range units -> Bool
 isAtomic (Range low high) =
   let mid = Qty.midpoint low high
