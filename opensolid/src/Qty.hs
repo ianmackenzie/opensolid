@@ -174,9 +174,11 @@ clamp a b value
   low = min a b
   high = max a b
 
+{-# INLINE min #-}
 min :: Qty units -> Qty units -> Qty units
 min = Generic.min
 
+{-# INLINE max #-}
 max :: Qty units -> Qty units -> Qty units
 max = Generic.max
 

@@ -20,9 +20,11 @@ instance HasZero Int where
 zero :: (HasZero a) => a
 zero = zeroImpl
 
+{-# INLINE min #-}
 min :: (Ord a) => a -> a -> a
 min = Prelude.min
 
+{-# INLINE max #-}
 max :: (Ord a) => a -> a -> a
 max = Prelude.max
 
