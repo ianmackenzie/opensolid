@@ -139,6 +139,12 @@ any assess bounds@(Bounds2d x y) =
     Resolved assessment -> assessment
     Unresolved
       | Range.isAtomic x && Range.isAtomic y -> False
+      | Range.isAtomic x ->
+          let (y1, y2) = Range.bisect y
+           in any assess (Bounds2d x y1) || any assess (Bounds2d x y2)
+      | Range.isAtomic y ->
+          let (x1, x2) = Range.bisect x
+           in any assess (Bounds2d x1 y) || any assess (Bounds2d x2 y)
       | otherwise ->
           let (x1, x2) = Range.bisect x
               (y1, y2) = Range.bisect y
@@ -153,6 +159,12 @@ all assess bounds@(Bounds2d x y) =
     Resolved assessment -> assessment
     Unresolved
       | Range.isAtomic x && Range.isAtomic y -> True
+      | Range.isAtomic x ->
+          let (y1, y2) = Range.bisect y
+           in all assess (Bounds2d x y1) && all assess (Bounds2d x y2)
+      | Range.isAtomic y ->
+          let (x1, x2) = Range.bisect x
+           in all assess (Bounds2d x1 y) && all assess (Bounds2d x2 y)
       | otherwise ->
           let (x1, x2) = Range.bisect x
               (y1, y2) = Range.bisect y
