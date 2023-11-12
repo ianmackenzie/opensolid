@@ -4,6 +4,7 @@ module Range
   , constant
   , from
   , hull3
+  , hull4
   , minValue
   , maxValue
   , midpoint
@@ -184,6 +185,9 @@ intersection (Range low1 high1) (Range low2 high2)
 
 hull3 :: Qty units -> Qty units -> Qty units -> Range units
 hull3 a b c = unsafe (Qty.min a (Qty.min b c)) (Qty.max a (Qty.max b c))
+
+hull4 :: Qty units -> Qty units -> Qty units -> Qty units -> Range units
+hull4 a b c d = unsafe (Qty.min a (Qty.min b (Qty.min c d))) (Qty.max a (Qty.max b (Qty.max c d)))
 
 {-# INLINE minValue #-}
 minValue :: Range units -> Qty units
