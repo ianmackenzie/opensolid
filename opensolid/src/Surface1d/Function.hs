@@ -19,7 +19,7 @@ module Surface1d.Function
   , sqrt
   , sin
   , cos
-  , curve
+  , curveOnSurface
   , isZero
   , findSolutions
   )
@@ -336,24 +336,28 @@ cos Zero = Constant 1.0
 cos (Constant x) = constant (Angle.cos x)
 cos function = Cos function
 
-data Curve units where
-  Curve :: (Curve2d.Interface curve Uv.Coordinates) => Function units -> curve -> Curve units
+data CurveOnSurface units where
+  CurveOnSurface ::
+    (Curve2d.Interface curve Uv.Coordinates) =>
+    curve ->
+    Function units ->
+    CurveOnSurface units
 
-deriving instance Show (Curve units)
+deriving instance Show (CurveOnSurface units)
 
-instance Curve1d.Interface (Curve units) units where
-  evaluateAtImpl t (Curve function uvCurve) = evaluateAt (Curve2d.evaluateAtImpl t uvCurve) function
-  segmentBoundsImpl t (Curve function uvCurve) = segmentBounds (Curve2d.segmentBoundsImpl t uvCurve) function
-  derivativeImpl (Curve function uvCurve) =
+instance Curve1d.Interface (CurveOnSurface units) units where
+  evaluateAtImpl t (CurveOnSurface uvCurve function) = evaluateAt (Curve2d.evaluateAtImpl t uvCurve) function
+  segmentBoundsImpl t (CurveOnSurface uvCurve function) = segmentBounds (Curve2d.segmentBoundsImpl t uvCurve) function
+  derivativeImpl (CurveOnSurface uvCurve function) =
     let fU = derivative U function
         fV = derivative V function
         uvT = Curve2d.derivativeImpl uvCurve
         uT = VectorCurve2d.xComponent uvT
         vT = VectorCurve2d.yComponent uvT
-     in Curve1d (Curve fU uvCurve) * uT + Curve1d (Curve fV uvCurve) * vT
+     in Curve1d (CurveOnSurface uvCurve fU) * uT + Curve1d (CurveOnSurface uvCurve fV) * vT
 
-curve :: Function units -> Curve2d Uv.Coordinates -> Curve1d units
-curve function uvCurve = Curve1d (Curve function uvCurve)
+curveOnSurface :: Curve2d Uv.Coordinates -> Function units -> Curve1d units
+curveOnSurface uvCurve function = Curve1d (CurveOnSurface uvCurve function)
 
 isZero :: (Tolerance units) => Function units -> Bool
 isZero function = List.all (~= Qty.zero) (Bounds2d.sample (pointOn function) Uv.domain)
@@ -439,7 +443,7 @@ findSolutions f fu fv fuu fvv fuv uvBounds
 
   crossingCurveByU :: Result Curve2d.DegenerateCurve (Curve2d Uv.Coordinates)
   crossingCurveByU =
-    exactly (Curve2d.from (CrossingCurveByU f fu fv minU maxU expandedVRange))
+    exactly (Curve2d.from (CrossingCurveByU f (-fu / fv) minU maxU expandedVRange))
 
 -- isTangentCurveByU
 --   | segmentBounds vBottomSlice fv ^ Qty.zero = False
@@ -490,8 +494,7 @@ isNegative function uvBounds = Bounds2d.all (isRangeNegative . boundsOn function
 data CrossingCurveByU units
   = CrossingCurveByU
       (Function units)
-      (Function units)
-      (Function units)
+      (Function Unitless)
       Float
       Float
       (Range Unitless)
@@ -501,30 +504,28 @@ instance Curve2d.Interface (CrossingCurveByU units) Uv.Coordinates where
   startPointImpl = Curve2d.evaluateAtImpl 0.0
   endPointImpl = Curve2d.evaluateAtImpl 1.0
 
-  evaluateAtImpl t (CrossingCurveByU f _ _ uStart uEnd vRange) =
+  evaluateAtImpl t (CrossingCurveByU f _ uStart uEnd vRange) =
     let u = Float.interpolateFrom uStart uEnd t
         v = evaluateCrossingCurveByU f vRange u
      in Point2d u v
 
-  segmentBoundsImpl (Range t1 t2) (CrossingCurveByU f fu fv uStart uEnd vSearchBounds) =
+  segmentBoundsImpl (Range t1 t2) (CrossingCurveByU f vu uStart uEnd vSearchBounds) =
     let u1 = Float.interpolateFrom uStart uEnd t1
         u2 = Float.interpolateFrom uStart uEnd t2
         v1 = evaluateCrossingCurveByU f vSearchBounds u1
         v2 = evaluateCrossingCurveByU f vSearchBounds u2
-        slopeBounds = segmentBounds (Bounds2d (Range.from u1 u2) vSearchBounds) (-fu / fv)
+        slopeBounds = segmentBounds (Bounds2d (Range.from u1 u2) vSearchBounds) vu
         vRange = parallelogramBounds u1 u2 v1 v2 slopeBounds
      in Bounds2d (Range.from u1 u2) vRange
 
-  derivativeImpl c@(CrossingCurveByU _ fu fv uStart uEnd _) =
+  derivativeImpl c@(CrossingCurveByU _ vu uStart uEnd _) =
     let deltaU = uEnd - uStart
-        fuCurve = Curve1d (Curve fu c)
-        fvCurve = Curve1d (Curve fv c)
         uT = Curve1d.constant deltaU
-        vT = -deltaU * fuCurve / fvCurve
+        vT = deltaU * Curve1d (CurveOnSurface c vu)
      in VectorCurve2d.xy uT vT
 
-  reverseImpl (CrossingCurveByU f fu fv uStart uEnd vRange) =
-    CrossingCurveByU f fu fv uEnd uStart vRange
+  reverseImpl (CrossingCurveByU f vu uStart uEnd vRange) =
+    CrossingCurveByU f vu uEnd uStart vRange
 
   boundsImpl c = Curve2d.segmentBoundsImpl U.domain c
 
