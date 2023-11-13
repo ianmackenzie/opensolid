@@ -271,24 +271,24 @@ boundsOn :: Function units -> Uv.Bounds -> Range units
 boundsOn function uvBounds = segmentBounds uvBounds function
 
 derivative :: Parameter -> Function units -> Function units
-derivative whichParameter function =
+derivative p function =
   case function of
-    Function f -> derivativeImpl whichParameter f
+    Function f -> derivativeImpl p f
     Zero -> zero
     Constant _ -> zero
-    Parameter p -> if p == whichParameter then constant 1.0 else zero
-    Negated f -> negate (derivative whichParameter f)
-    Sum f1 f2 -> derivative whichParameter f1 + derivative whichParameter f2
-    Difference f1 f2 -> derivative whichParameter f1 - derivative whichParameter f2
-    Product f1 f2 -> derivative whichParameter f1 * f2 + f1 * derivative whichParameter f2
+    Parameter p' -> if p == p' then constant 1.0 else zero
+    Negated f -> negate (derivative p f)
+    Sum f1 f2 -> derivative p f1 + derivative p f2
+    Difference f1 f2 -> derivative p f1 - derivative p f2
+    Product f1 f2 -> derivative p f1 * f2 + f1 * derivative p f2
     Quotient f1 f2 ->
       let f1' = Units.generalize f1
           f2' = Units.generalize f2
-       in Units.specialize ((derivative whichParameter f1' .* f2' - f1' .* derivative whichParameter f2') ./ squared f2')
-    Squared f -> 2.0 * f * derivative whichParameter f
-    SquareRoot f -> derivative whichParameter f / (2.0 * sqrt f)
-    Sin f -> cos f * Units.drop (derivative whichParameter f)
-    Cos f -> negate (sin f) * Units.drop (derivative whichParameter f)
+       in Units.specialize ((derivative p f1' .* f2' - f1' .* derivative p f2') ./ squared f2')
+    Squared f -> 2.0 * f * derivative p f
+    SquareRoot f -> derivative p f / (2.0 * sqrt f)
+    Sin f -> cos f * Units.drop (derivative p f)
+    Cos f -> negate (sin f) * Units.drop (derivative p f)
 
 derivativeIn :: Uv.Direction -> Function units -> Function units
 derivativeIn direction function =
