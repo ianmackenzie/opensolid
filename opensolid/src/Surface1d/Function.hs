@@ -403,10 +403,11 @@ findSolutions f fu fv fuu fvv fuv uvBounds
   | otherwise = do
       let (u1, u2) = Range.bisect uRange
       let (v1, v2) = Range.bisect vRange
-      solutions11 <- findSolutions f fu fv fuu fvv fuv (Bounds2d u1 v1)
-      solutions12 <- findSolutions f fu fv fuu fvv fuv (Bounds2d u1 v2)
-      solutions21 <- findSolutions f fu fv fuu fvv fuv (Bounds2d u2 v1)
-      solutions22 <- findSolutions f fu fv fuu fvv fuv (Bounds2d u2 v2)
+      let recurse = findSolutions f fu fv fuu fvv fuv
+      solutions11 <- recurse (Bounds2d u1 v1)
+      solutions12 <- recurse (Bounds2d u1 v2)
+      solutions21 <- recurse (Bounds2d u2 v1)
+      solutions22 <- recurse (Bounds2d u2 v2)
       return (solutions11 ++ solutions12 ++ solutions21 ++ solutions22)
  where
   (Bounds2d uRange vRange) = uvBounds
