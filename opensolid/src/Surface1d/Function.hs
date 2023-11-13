@@ -506,22 +506,14 @@ instance Curve2d.Interface (CrossingCurveByU units) Uv.Coordinates where
         v = evaluateCrossingCurveByU f vRange u
      in Point2d u v
 
-  segmentBoundsImpl (Range t1 t2) (CrossingCurveByU f fu fv uStart uEnd vRange) =
+  segmentBoundsImpl (Range t1 t2) (CrossingCurveByU f fu fv uStart uEnd vSearchBounds) =
     let u1 = Float.interpolateFrom uStart uEnd t1
         u2 = Float.interpolateFrom uStart uEnd t2
-        v1 = evaluateCrossingCurveByU f vRange u1
-        v2 = evaluateCrossingCurveByU f vRange u2
-        deltaU = u2 - u1
-        deltaV = v2 - v1
-        uvBounds = Bounds2d (Range.from u1 u2) vRange
-        fuBounds = segmentBounds uvBounds fu
-        fvBounds = segmentBounds uvBounds fv
-        (Range mLow mHigh) = segmentBounds uvBounds (-fu / fv)
-        deltaULow = (mHigh * deltaU - deltaV) / (mHigh - mLow) |> Qty.clamp 0.0 deltaU
-        deltaUHigh = (deltaV - mLow * deltaU) / (mHigh - mLow) |> Qty.clamp 0.0 deltaU
-        vLow = v1 + mLow * deltaULow
-        vHigh = v1 + mHigh * deltaUHigh
-     in Bounds2d (Range.from u1 u2) (Range.hull4 v1 v2 vLow vHigh)
+        v1 = evaluateCrossingCurveByU f vSearchBounds u1
+        v2 = evaluateCrossingCurveByU f vSearchBounds u2
+        slopeBounds = segmentBounds (Bounds2d (Range.from u1 u2) vSearchBounds) (-fu / fv)
+        vRange = parallelogramBounds u1 u2 v1 v2 slopeBounds
+     in Bounds2d (Range.from u1 u2) vRange
 
   derivativeImpl c@(CrossingCurveByU _ fu fv uStart uEnd _) =
     let deltaU = uEnd - uStart
@@ -541,3 +533,19 @@ evaluateCrossingCurveByU f vRange u =
   case Range.solve (\v -> evaluateAt (Point2d u v) f) vRange of
     Just v -> v
     Nothing -> internalError "Solution should always exist, by construction"
+
+parallelogramBounds ::
+  Float ->
+  Float ->
+  Float ->
+  Float ->
+  Range Unitless ->
+  Range Unitless
+parallelogramBounds x1 x2 y1 y2 (Range minSlope maxSlope) =
+  let deltaX = x2 - x1
+      deltaY = y2 - y1
+      deltaXLow = (maxSlope * deltaX - deltaY) / (maxSlope - minSlope) |> Qty.clamp 0.0 deltaX
+      deltaXHigh = (deltaY - minSlope * deltaX) / (maxSlope - minSlope) |> Qty.clamp 0.0 deltaX
+      yLow = y1 + minSlope * deltaXLow
+      yHigh = y1 + maxSlope * deltaXHigh
+   in Range.hull4 y1 y2 yLow yHigh
