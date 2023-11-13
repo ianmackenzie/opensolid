@@ -9,6 +9,7 @@ module Surface1d.Function
   , segmentBounds
   , boundsOn
   , derivative
+  , derivativeIn
   , zero
   , constant
   , parameter
@@ -31,6 +32,7 @@ import Curve1d (Curve1d (Curve1d))
 import Curve1d qualified
 import Curve2d (Curve2d)
 import Curve2d qualified
+import Direction2d qualified
 import Float qualified
 import Generic qualified
 import List qualified
@@ -287,6 +289,11 @@ derivative whichParameter function =
     SquareRoot f -> derivative whichParameter f / (2.0 * sqrt f)
     Sin f -> cos f * Units.drop (derivative whichParameter f)
     Cos f -> negate (sin f) * Units.drop (derivative whichParameter f)
+
+derivativeIn :: Uv.Direction -> Function units -> Function units
+derivativeIn direction function =
+  Direction2d.xComponent direction * derivative U function
+    + Direction2d.yComponent direction * derivative V function
 
 zero :: Function units
 zero = Zero
