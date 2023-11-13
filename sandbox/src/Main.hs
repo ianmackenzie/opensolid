@@ -74,11 +74,13 @@ testRangeArithmetic = Try.do
 
 testEquality :: Task String ()
 testEquality = Try.do
-  log "Equality test" (let ?tolerance = Length.centimeter in Length.meters 1.0 ~= Length.meters 1.005)
+  log "Equality test" $
+    let ?tolerance = Length.centimeter in Length.meters 1.0 ~= Length.meters 1.005
 
 testTransformation :: Task String ()
 testTransformation = Try.do
-  log "Rotated axis" (Axis2d.x |> Transform2d.rotateAround (Point2d.meters 1.0 0.0) Angle.quarterTurn)
+  log "Rotated axis" $
+    (Axis2d.x |> Transform2d.rotateAround (Point2d.meters 1.0 0.0) Angle.quarterTurn)
   let originalPoints = [Point2d.meters 1.0 0.0, Point2d.meters 2.0 0.0, Point2d.meters 3.0 0.0]
   let rotationFunction = Transform2d.rotateAround Point2d.origin Angle.quarterTurn
   let rotatedPoints = List.map rotationFunction originalPoints
@@ -101,7 +103,8 @@ offsetPoint startPoint endPoint distance = Result.withDefault startPoint do
 
 testCustomFunction :: (Tolerance Meters) => Task String ()
 testCustomFunction = Try.do
-  log "Offset point" (offsetPoint (Point2d.meters 1.0 0.0) (Point2d.meters 3.0 0.0) (Length.meters 1.0))
+  log "Offset point" $
+    offsetPoint (Point2d.meters 1.0 0.0) (Point2d.meters 3.0 0.0) (Length.meters 1.0)
 
 testListOperations :: Task String ()
 testListOperations = Try.do
@@ -172,7 +175,8 @@ testSurface1dIntersection = Try.do
   let fvv = fv |> Surface1d.Function.derivative V
   let fuv = fu |> Surface1d.Function.derivative V
   let showSolution uRange vRange = Try.do
-        [solution] <- Task.evaluate (Surface1d.Function.findSolutions f fu fv fuu fvv fuv (Bounds2d uRange vRange))
+        let uvBounds = Bounds2d uRange vRange
+        [solution] <- Task.evaluate (Surface1d.Function.findSolutions f fu fv fuu fvv fuv uvBounds)
         case solution of
           Surface1d.Solution.CrossingCurve curve -> do
             let derivative = Curve2d.derivative curve
