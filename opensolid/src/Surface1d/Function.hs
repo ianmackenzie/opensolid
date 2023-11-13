@@ -348,8 +348,10 @@ deriving instance Show (CurveOnSurface units)
 instance Curve1d.Interface (CurveOnSurface units) units where
   evaluateAtImpl t (CurveOnSurface uvCurve function) =
     evaluateAt (Curve2d.evaluateAtImpl t uvCurve) function
+
   segmentBoundsImpl t (CurveOnSurface uvCurve function) =
     segmentBounds (Curve2d.segmentBoundsImpl t uvCurve) function
+
   derivativeImpl (CurveOnSurface uvCurve function) =
     let fU = derivative U function
         fV = derivative V function
