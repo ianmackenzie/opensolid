@@ -522,10 +522,10 @@ instance Curve2d.Interface (CrossingCurveByU units) Uv.Coordinates where
         vRange = parallelogramBounds u1 u2 v1 v2 slopeBounds
      in Bounds2d (Range.from u1 u2) vRange
 
-  derivativeImpl c@(CrossingCurveByU _ vu uStart uEnd _) =
+  derivativeImpl crossingCurve@(CrossingCurveByU _ vu uStart uEnd _) =
     let deltaU = uEnd - uStart
         uT = Curve1d.constant deltaU
-        vT = deltaU * Curve1d (CurveOnSurface c vu)
+        vT = deltaU * Curve1d (CurveOnSurface crossingCurve vu)
      in VectorCurve2d.xy uT vT
 
   reverseImpl (CrossingCurveByU f vu uStart uEnd vRange) =
