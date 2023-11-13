@@ -1,10 +1,19 @@
-module Uv (Space, Coordinates, Point, Bounds, domain) where
+module Uv
+  ( Parameter (U, V)
+  , Space
+  , Coordinates
+  , Point
+  , Bounds
+  , domain
+  )
+where
 
-import {-# SOURCE #-} Bounds2d (Bounds2d)
-import {-# SOURCE #-} Bounds2d qualified
+import Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid
-import {-# SOURCE #-} Point2d (Point2d)
+import Point2d (Point2d)
 import Range qualified
+
+data Parameter = U | V deriving (Eq, Show, Ord)
 
 data Space
 
@@ -15,4 +24,4 @@ type Point = Point2d Coordinates
 type Bounds = Bounds2d Coordinates
 
 domain :: Bounds
-domain = Bounds2d.xy (Range.from 0.0 1.0) (Range.from 0.0 1.0)
+domain = Bounds2d (Range.from 0.0 1.0) (Range.from 0.0 1.0)

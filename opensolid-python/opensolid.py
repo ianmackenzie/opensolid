@@ -299,20 +299,6 @@ class Direction2d:
     def negative_y() -> Direction2d:
         return Direction2d(lib.opensolid_direction2d_negative_y())
 
-    lib.opensolid_direction2d_u.argtypes = []
-    lib.opensolid_direction2d_u.restype = c_void_p
-
-    @staticmethod
-    def u() -> Direction2d:
-        return Direction2d(lib.opensolid_direction2d_u())
-
-    lib.opensolid_direction2d_v.argtypes = []
-    lib.opensolid_direction2d_v.restype = c_void_p
-
-    @staticmethod
-    def v() -> Direction2d:
-        return Direction2d(lib.opensolid_direction2d_v())
-
     lib.opensolid_direction2d_from_angle.argtypes = [c_double]
     lib.opensolid_direction2d_from_angle.restype = c_void_p
 
@@ -562,13 +548,6 @@ class Point2d:
 
     def signed_distance_from(self, axis: Axis2d) -> float:
         return lib.opensolid_point2d_signed_distance_from(axis.ptr, self.ptr)
-
-    lib.opensolid_point2d_uv.argtypes = [c_double, c_double]
-    lib.opensolid_point2d_uv.restype = c_void_p
-
-    @staticmethod
-    def uv(u: float, v: float) -> Point2d:
-        return Point2d(lib.opensolid_point2d_uv(u, v))
 
     lib.opensolid_point2d_x.argtypes = [c_double]
     lib.opensolid_point2d_x.restype = c_void_p

@@ -3,7 +3,6 @@ module Bounds2d
   , xCoordinate
   , yCoordinate
   , xy
-  , uv
   , constant
   , hull2
   , hull3
@@ -24,7 +23,6 @@ import Qty qualified
 import Quadrature qualified
 import Range (Range)
 import Range qualified
-import {-# SOURCE #-} Uv qualified
 import VectorBounds2d (VectorBounds2d (VectorBounds2d))
 
 type role Bounds2d nominal
@@ -70,9 +68,6 @@ yCoordinate (Bounds2d _ y) = y
 
 xy :: Range units -> Range units -> Bounds2d (space @ units)
 xy = Bounds2d
-
-uv :: Range Unitless -> Range Unitless -> Uv.Bounds
-uv = Bounds2d
 
 constant :: Point2d (space @ units) -> Bounds2d (space @ units)
 constant (Point2d x y) =

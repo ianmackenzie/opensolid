@@ -19,7 +19,6 @@ point2d =
     , method 'Point2d.relativeTo ["frame", "point"]
     , method 'Point2d.signedDistanceAlong ["axis", "point"]
     , method 'Point2d.signedDistanceFrom ["axis", "point"]
-    , static 'Point2d.uv ["u", "v"]
     , static 'Point2d.x ["px"]
     , static 'Point2d.xy ["x", "y"]
     , static 'Point2d.y ["py"]

@@ -3,7 +3,7 @@ module Main (main) where
 import Angle qualified
 import Area qualified
 import Axis2d qualified
-import Bounds2d qualified
+import Bounds2d (Bounds2d (Bounds2d))
 import Console qualified
 import Curve2d qualified
 import Direction2d qualified
@@ -26,6 +26,7 @@ import Transform2d qualified
 import Try qualified
 import U qualified
 import Units (Meters)
+import Uv (Parameter (U, V))
 import Vector2d qualified
 import Vector3d qualified
 import VectorCurve2d qualified
@@ -162,16 +163,16 @@ testNonEmpty = Try.do
 
 testSurface1dIntersection :: Task String ()
 testSurface1dIntersection = Try.do
-  let u = Surface1d.Function.u
-  let v = Surface1d.Function.v
+  let u = Surface1d.Function.parameter U
+  let v = Surface1d.Function.parameter V
   let f = Surface1d.Function.squared u + Surface1d.Function.squared v - 1.0
-  let fu = f |> Surface1d.Function.derivative Direction2d.u
-  let fv = f |> Surface1d.Function.derivative Direction2d.v
-  let fuu = fu |> Surface1d.Function.derivative Direction2d.u
-  let fvv = fv |> Surface1d.Function.derivative Direction2d.v
-  let fuv = fu |> Surface1d.Function.derivative Direction2d.v
+  let fu = f |> Surface1d.Function.derivative U
+  let fv = f |> Surface1d.Function.derivative V
+  let fuu = fu |> Surface1d.Function.derivative U
+  let fvv = fv |> Surface1d.Function.derivative V
+  let fuv = fu |> Surface1d.Function.derivative V
   let showSolution uRange vRange = Try.do
-        [solution] <- Task.evaluate (Surface1d.Function.findSolutions f fu fv fuu fvv fuv (Bounds2d.uv uRange vRange))
+        [solution] <- Task.evaluate (Surface1d.Function.findSolutions f fu fv fuu fvv fuv (Bounds2d uRange vRange))
         case solution of
           Surface1d.Solution.CrossingCurve curve -> do
             let derivative = Curve2d.derivative curve

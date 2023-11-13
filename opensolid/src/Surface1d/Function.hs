@@ -11,9 +11,8 @@ module Surface1d.Function
   , derivative
   , zero
   , constant
-  , u
+  , parameter
   , solve
-  , v
   , wrap
   , squared
   , sqrt
@@ -32,13 +31,11 @@ import Curve1d (Curve1d (Curve1d), IsCurve1d)
 import Curve1d qualified
 import Curve2d (Curve2d, IsCurve2d)
 import Curve2d qualified
-import Direction2d (Direction2d)
-import Direction2d qualified
 import Float qualified
 import Generic qualified
 import List qualified
 import OpenSolid
-import Point2d (Point2d)
+import Point2d (Point2d (Point2d))
 import Point2d qualified
 import Qty qualified
 import Range (Range (Range))
@@ -48,13 +45,14 @@ import Surface1d.Solution (Solution)
 import Surface1d.Solution qualified as Solution
 import U qualified
 import Units qualified
+import Uv (Parameter (U, V))
 import Uv qualified
 import VectorCurve2d qualified
 
 class (Show function) => Operations function units | function -> units where
-  evaluateAtImpl :: Point2d Uv.Coordinates -> function -> Qty units
+  evaluateAtImpl :: Uv.Point -> function -> Qty units
   segmentBoundsImpl :: Uv.Bounds -> function -> Range units
-  derivativeImpl :: Direction2d Uv.Space -> function -> Function units
+  derivativeImpl :: Parameter -> function -> Function units
 
 data Function units where
   Function ::
@@ -64,10 +62,10 @@ data Function units where
   Zero ::
     Function units
   Constant ::
-    Qty units -> Function units
-  U ::
-    Function Unitless
-  V ::
+    Qty units ->
+    Function units
+  Parameter ::
+    Parameter ->
     Function Unitless
   Negated ::
     Function units ->
@@ -228,14 +226,14 @@ instance
   where
   value / function = constant value / function
 
-evaluateAt :: Point2d Uv.Coordinates -> Function units -> Qty units
+evaluateAt :: Uv.Point -> Function units -> Qty units
 evaluateAt uv function =
   case function of
     Function f -> evaluateAtImpl uv f
     Zero -> Qty.zero
     Constant x -> x
-    U -> Point2d.xCoordinate uv
-    V -> Point2d.yCoordinate uv
+    Parameter U -> Point2d.xCoordinate uv
+    Parameter V -> Point2d.yCoordinate uv
     Negated f -> negate (evaluateAt uv f)
     Sum f1 f2 -> evaluateAt uv f1 + evaluateAt uv f2
     Difference f1 f2 -> evaluateAt uv f1 - evaluateAt uv f2
@@ -246,7 +244,7 @@ evaluateAt uv function =
     Sin f -> Angle.sin (evaluateAt uv f)
     Cos f -> Angle.cos (evaluateAt uv f)
 
-pointOn :: Function units -> Point2d Uv.Coordinates -> Qty units
+pointOn :: Function units -> Uv.Point -> Qty units
 pointOn function uv = evaluateAt uv function
 
 segmentBounds :: Uv.Bounds -> Function units -> Range units
@@ -255,8 +253,8 @@ segmentBounds uv function =
     Function f -> segmentBoundsImpl uv f
     Zero -> Range.constant Qty.zero
     Constant x -> Range.constant x
-    U -> Bounds2d.xCoordinate uv
-    V -> Bounds2d.yCoordinate uv
+    Parameter U -> Bounds2d.xCoordinate uv
+    Parameter V -> Bounds2d.yCoordinate uv
     Negated f -> negate (segmentBounds uv f)
     Sum f1 f2 -> segmentBounds uv f1 + segmentBounds uv f2
     Difference f1 f2 -> segmentBounds uv f1 - segmentBounds uv f2
@@ -270,26 +268,25 @@ segmentBounds uv function =
 boundsOn :: Function units -> Uv.Bounds -> Range units
 boundsOn function uvBounds = segmentBounds uvBounds function
 
-derivative :: Direction2d Uv.Space -> Function units -> Function units
-derivative direction function =
+derivative :: Parameter -> Function units -> Function units
+derivative whichParameter function =
   case function of
-    Function f -> derivativeImpl direction f
+    Function f -> derivativeImpl whichParameter f
     Zero -> zero
     Constant _ -> zero
-    U -> constant (Direction2d.xComponent direction)
-    V -> constant (Direction2d.yComponent direction)
-    Negated f -> negate (derivative direction f)
-    Sum f1 f2 -> derivative direction f1 + derivative direction f2
-    Difference f1 f2 -> derivative direction f1 - derivative direction f2
-    Product f1 f2 -> derivative direction f1 * f2 + f1 * derivative direction f2
+    Parameter p -> if p == whichParameter then constant 1.0 else zero
+    Negated f -> negate (derivative whichParameter f)
+    Sum f1 f2 -> derivative whichParameter f1 + derivative whichParameter f2
+    Difference f1 f2 -> derivative whichParameter f1 - derivative whichParameter f2
+    Product f1 f2 -> derivative whichParameter f1 * f2 + f1 * derivative whichParameter f2
     Quotient f1 f2 ->
       let f1' = Units.generalize f1
           f2' = Units.generalize f2
-       in Units.specialize ((derivative direction f1' .* f2' - f1' .* derivative direction f2') ./ squared f2')
-    Squared f -> 2.0 * f * derivative direction f
-    SquareRoot f -> derivative direction f / (2.0 * sqrt f)
-    Sin f -> cos f * Units.drop (derivative direction f)
-    Cos f -> negate (sin f) * Units.drop (derivative direction f)
+       in Units.specialize ((derivative whichParameter f1' .* f2' - f1' .* derivative whichParameter f2') ./ squared f2')
+    Squared f -> 2.0 * f * derivative whichParameter f
+    SquareRoot f -> derivative whichParameter f / (2.0 * sqrt f)
+    Sin f -> cos f * Units.drop (derivative whichParameter f)
+    Cos f -> negate (sin f) * Units.drop (derivative whichParameter f)
 
 zero :: Function units
 zero = Zero
@@ -297,11 +294,8 @@ zero = Zero
 constant :: Qty units -> Function units
 constant value = if value == Qty.zero then Zero else Constant value
 
-u :: Function Unitless
-u = U
-
-v :: Function Unitless
-v = V
+parameter :: Parameter -> Function Unitless
+parameter = Parameter
 
 wrap :: (Operations function units) => function -> Function units
 wrap = Function
@@ -344,8 +338,8 @@ instance IsCurve1d (Curve units) units where
   evaluateAtImpl t (Curve function uvCurve) = evaluateAt (Curve2d.evaluateAtImpl t uvCurve) function
   segmentBoundsImpl t (Curve function uvCurve) = segmentBounds (Curve2d.segmentBoundsImpl t uvCurve) function
   derivativeImpl (Curve function uvCurve) =
-    let fU = derivative Direction2d.u function
-        fV = derivative Direction2d.v function
+    let fU = derivative U function
+        fV = derivative V function
         uvT = Curve2d.derivativeImpl uvCurve
         uT = VectorCurve2d.xComponent uvT
         vT = VectorCurve2d.yComponent uvT
@@ -369,11 +363,11 @@ solve (Constant value) = if value ~= Qty.zero then Error ZeroEverywhere else Ok 
 solve f | isZero f = Error ZeroEverywhere
 solve f = findSolutions f fu fv fuu fvv fuv Uv.domain
  where
-  fu = f |> derivative Direction2d.u
-  fv = f |> derivative Direction2d.v
-  fuu = fu |> derivative Direction2d.u
-  fvv = fv |> derivative Direction2d.v
-  fuv = fu |> derivative Direction2d.v
+  fu = derivative U f
+  fv = derivative V f
+  fuu = derivative U fu
+  fvv = derivative V fv
+  fuv = derivative V fu
 
 findSolutions ::
   (Tolerance units) =>
@@ -446,11 +440,11 @@ findSolutions f fu fv fuu fvv fuv uvBounds
 --   | Qty.abs (Range.resolution (segmentBounds expandedVBounds fvv)) < 0.5 = False
 --   | otherwise =
 --       let isTangentIntersectionPoint uValue =
---             let fvvalue vValue = evaluateAt (Point2d.uv uValue vValue) fv
+--             let fvvalue vValue = evaluateAt (Point2d uValue vValue) fv
 --              in case Range.solve fvvalue expandedVRange of
 --                   Nothing -> False
 --                   Just vValue ->
---                     let uvValue = Point2d.uv uValue vValue
+--                     let uvValue = Point2d uValue vValue
 --                      in evaluateAt uvValue f ~= Qty.zero && evaluateAt uvValue fu ~= Qty.zero
 --        in List.all isTangentIntersectionPoint (Range.samples uRange)
 
@@ -460,11 +454,11 @@ findSolutions f fu fv fuu fvv fuv uvBounds
 --   | Qty.abs (Range.resolution (segmentBounds expandedUBounds fuu)) < 0.5 = False
 --   | otherwise =
 --       let isTangentIntersectionPoint vValue =
---             let fuValue uValue = evaluateAt (Point2d.uv uValue vValue) fu
+--             let fuValue uValue = evaluateAt (Point2d uValue vValue) fu
 --              in case Range.solve fuValue expandedURange of
 --                   Nothing -> False
 --                   Just uValue ->
---                     let uvValue = Point2d.uv uValue vValue
+--                     let uvValue = Point2d uValue vValue
 --                      in evaluateAt uvValue f ~= Qty.zero && evaluateAt uvValue fv ~= Qty.zero
 --        in List.all isTangentIntersectionPoint (Range.samples vRange)
 
@@ -501,9 +495,9 @@ instance IsCurve2d (CrossingCurveByU units) Uv.Coordinates where
   endPointImpl = Curve2d.evaluateAtImpl 1.0
 
   evaluateAtImpl t (CrossingCurveByU f _ _ uStart uEnd vRange) =
-    let uValue = Float.interpolateFrom uStart uEnd t
-        vValue = evaluateCrossingCurveByU f vRange uValue
-     in Point2d.uv uValue vValue
+    let u = Float.interpolateFrom uStart uEnd t
+        v = evaluateCrossingCurveByU f vRange u
+     in Point2d u v
 
   segmentBoundsImpl (Range t1 t2) (CrossingCurveByU f fu fv uStart uEnd vRange) =
     let u1 = Float.interpolateFrom uStart uEnd t1
@@ -536,7 +530,7 @@ instance IsCurve2d (CrossingCurveByU units) Uv.Coordinates where
   boundsImpl c = Curve2d.segmentBoundsImpl U.domain c
 
 evaluateCrossingCurveByU :: Function units -> Range Unitless -> Float -> Float
-evaluateCrossingCurveByU f vRange uValue =
-  case Range.solve (\vValue -> evaluateAt (Point2d.uv uValue vValue) f) vRange of
-    Just vValue -> vValue
+evaluateCrossingCurveByU f vRange u =
+  case Range.solve (\v -> evaluateAt (Point2d u v) f) vRange of
+    Just v -> v
     Nothing -> internalError "Solution should always exist, by construction"

@@ -4,7 +4,6 @@ module Point2d
   , x
   , y
   , xy
-  , uv
   , meters
   , xCoordinate
   , yCoordinate
@@ -32,7 +31,6 @@ import OpenSolid
 import Qty qualified
 import Units (Meters)
 import Units qualified
-import Uv qualified
 import Vector2d (Vector2d (Vector2d))
 import Vector2d qualified
 import VectorBounds2d (VectorBounds2d (VectorBounds2d))
@@ -121,9 +119,6 @@ y py = Point2d Qty.zero py
 
 xy :: Qty units -> Qty units -> Point2d (space @ units)
 xy = Point2d
-
-uv :: Float -> Float -> Point2d Uv.Coordinates
-uv = xy
 
 meters :: Float -> Float -> Point2d (space @ Meters)
 meters px py = Point2d (Length.meters px) (Length.meters py)

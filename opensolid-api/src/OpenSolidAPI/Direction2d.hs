@@ -17,8 +17,6 @@ direction2d =
     , static 'Direction2d.y []
     , static 'Direction2d.positiveY []
     , static 'Direction2d.negativeY []
-    , static 'Direction2d.u []
-    , static 'Direction2d.v []
     , -- TODO: from doesn't work in Python
       -- , static 'Direction2d.from ["p1", "p2"]
       static 'Direction2d.fromAngle ["angle"]
