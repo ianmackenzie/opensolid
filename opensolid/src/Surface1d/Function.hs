@@ -396,7 +396,7 @@ findSolutions ::
   Result SolveError (List Solution)
 findSolutions f fu fv fuu fvv fuv uvBounds
   | not (fBounds ^ Qty.zero) = Ok []
-  | Just (Ok c) <- maybeCrossingCurveByU = Ok [Solution.CrossingCurve c]
+  | Just (Ok curve) <- maybeCrossingCurveByU = Ok [Solution.CrossingCurve curve]
   | Just (Error Curve2d.DegenerateCurve) <- maybeCrossingCurveByU = Error DegenerateCurve
   -- TODO: other solution types
   | everythingZero = Error HigherOrderIntersection
@@ -532,7 +532,7 @@ instance Curve2d.Interface (CrossingCurveByU units) Uv.Coordinates where
   reverseImpl (CrossingCurveByU f vu uStart uEnd vRange) =
     CrossingCurveByU f vu uEnd uStart vRange
 
-  boundsImpl c = Curve2d.segmentBoundsImpl U.domain c
+  boundsImpl crossingCurve = Curve2d.segmentBoundsImpl U.domain crossingCurve
 
 evaluateCrossingCurveByU :: Function units -> Range Unitless -> Float -> Float
 evaluateCrossingCurveByU f vRange u =
