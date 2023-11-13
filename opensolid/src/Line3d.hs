@@ -4,7 +4,8 @@ module Line3d
 where
 
 import Bounds3d qualified
-import Curve3d (Curve3d (Curve3d), IsCurve3d (..))
+import Curve3d (Curve3d (Curve3d))
+import Curve3d qualified
 import OpenSolid
 import Point3d (Point3d)
 import Point3d qualified
@@ -14,7 +15,7 @@ import VectorCurve3d qualified
 data Line3d (coordinateSystem :: CoordinateSystem)
   = Line3d (Point3d coordinateSystem) (Point3d coordinateSystem)
 
-instance IsCurve3d (Line3d (space @ units)) (space @ units) where
+instance Curve3d.Interface (Line3d (space @ units)) (space @ units) where
   startPointImpl (Line3d p1 _) = p1
 
   endPointImpl (Line3d _ p2) = p2

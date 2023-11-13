@@ -1,5 +1,5 @@
 module VectorCurve2d
-  ( IsVectorCurve2d (..)
+  ( Interface (..)
   , VectorCurve2d
   , constant
   , wrap
@@ -18,7 +18,7 @@ import VectorBounds2d (VectorBounds2d)
 
 class
   (Show curve) =>
-  IsVectorCurve2d curve (coordinateSystem :: CoordinateSystem)
+  Interface curve (coordinateSystem :: CoordinateSystem)
     | curve -> coordinateSystem
   where
   evaluateAtImpl :: Float -> curve -> Vector2d coordinateSystem
@@ -84,7 +84,7 @@ instance
     (Curve1d units3)
 
 constant :: Vector2d (space @ units) -> VectorCurve2d (space @ units)
-wrap :: (IsVectorCurve2d curve (space @ units)) => curve -> VectorCurve2d (space @ units)
+wrap :: (Interface curve (space @ units)) => curve -> VectorCurve2d (space @ units)
 evaluateAt :: Float -> VectorCurve2d (space @ units) -> Vector2d (space @ units)
 segmentBounds :: U.Bounds -> VectorCurve2d (space @ units) -> VectorBounds2d (space @ units)
 derivative :: VectorCurve2d (space @ units) -> VectorCurve2d (space @ units)

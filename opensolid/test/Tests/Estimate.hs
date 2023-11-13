@@ -5,7 +5,7 @@ import Arc2d qualified
 import Area qualified
 import Curve1d qualified
 import Curve2d qualified
-import Estimate (Estimate, IsEstimate)
+import Estimate (Estimate)
 import Estimate qualified
 import Float qualified
 import Length (Length)
@@ -45,7 +45,7 @@ tests =
 
 data DummyEstimate = DummyEstimate Length (Range Meters)
 
-instance IsEstimate DummyEstimate Meters where
+instance Estimate.Interface DummyEstimate Meters where
   boundsImpl (DummyEstimate _ range) = range
   refineImpl (DummyEstimate value (Range low high)) =
     let refinedRange = Range.from (Qty.midpoint low value) (Qty.midpoint value high)

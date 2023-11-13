@@ -18,7 +18,7 @@ module Point3d
   )
 where
 
-import Bounded (IsBounded (..))
+import Bounded qualified
 import {-# SOURCE #-} Bounds3d (Bounds3d (Bounds3d))
 import {-# SOURCE #-} Bounds3d qualified
 import Length qualified
@@ -96,7 +96,7 @@ instance
   where
   p1 ~= p2 = distanceFrom p1 p2 ~= Qty.zero
 
-instance IsBounded (Point3d (space @ units)) (Bounds3d (space @ units)) where
+instance Bounded.Interface (Point3d (space @ units)) (Bounds3d (space @ units)) where
   boundsImpl = Bounds3d.constant
 
 xCoordinate :: Point3d (space @ units) -> Qty units

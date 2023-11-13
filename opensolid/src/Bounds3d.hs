@@ -13,7 +13,7 @@ module Bounds3d
   )
 where
 
-import Bounds
+import Bounds qualified
 import OpenSolid
 import Point3d (Point3d (Point3d))
 import Qty qualified
@@ -28,7 +28,7 @@ data Bounds3d (coordinateSystem :: CoordinateSystem) where
 
 deriving instance Show (Bounds3d (space @ units))
 
-instance IsBounds (Bounds3d (space @ units)) where
+instance Bounds.Interface (Bounds3d (space @ units)) where
   aggregate2Impl = aggregate2
   intersectionImpl = intersection
 

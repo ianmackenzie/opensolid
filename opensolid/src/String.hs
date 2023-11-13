@@ -16,7 +16,7 @@ module String
 where
 
 import Basics
-import Concatenate
+import Concatenation
 import Data.Char qualified
 import Data.List qualified
 import Data.String qualified

@@ -5,7 +5,7 @@ module Curve2d
   , DegenerateCurve (DegenerateCurve)
   , Intersection
   , IntersectionError (..)
-  , IsCurve2d (..)
+  , Interface (..)
   , from
   , startPoint
   , endPoint
@@ -33,7 +33,7 @@ import Bounds2d qualified
 import Curve1d (Curve1d)
 import Curve2d.Derivatives (Derivatives)
 import Curve2d.Derivatives qualified as Derivatives
-import Curve2d.Internal (IsCurve2d (..))
+import Curve2d.Internal (Interface (..))
 import Curve2d.Internal qualified as Internal
 import Curve2d.Intersection (Intersection (Intersection))
 import Curve2d.Intersection qualified as Intersection
@@ -75,7 +75,7 @@ data DegenerateCurve = DegenerateCurve deriving (Eq, Show, ErrorMessage)
 
 from ::
   (Tolerance units) =>
-  (IsCurve2d curve (space @ units)) =>
+  (Interface curve (space @ units)) =>
   curve ->
   Result DegenerateCurve (Curve2d (space @ units))
 from curve =

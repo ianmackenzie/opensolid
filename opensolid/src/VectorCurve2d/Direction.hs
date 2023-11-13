@@ -8,7 +8,7 @@ import Range (Range (Range))
 import Range qualified
 import Vector2d qualified
 import VectorBounds2d qualified
-import {-# SOURCE #-} VectorCurve2d (IsVectorCurve2d (..), VectorCurve2d)
+import {-# SOURCE #-} VectorCurve2d (VectorCurve2d)
 import {-# SOURCE #-} VectorCurve2d qualified
 import VectorCurve2d.DegenerateEndpoint (DegenerateEndpoint)
 import VectorCurve2d.DegenerateEndpoint qualified as DegenerateEndpoint
@@ -21,7 +21,7 @@ data PiecewiseCurve space
       (Maybe (DegenerateEndpoint space))
   deriving (Show)
 
-instance IsVectorCurve2d (PiecewiseCurve space) (space @ Unitless) where
+instance VectorCurve2d.Interface (PiecewiseCurve space) (space @ Unitless) where
   evaluateAtImpl t (PiecewiseCurve Nothing inner Nothing) = VectorCurve2d.evaluateAt t inner
   evaluateAtImpl t (PiecewiseCurve (Just degenerateStart) inner Nothing)
     | t >= DegenerateEndpoint.cutoff degenerateStart = VectorCurve2d.evaluateAt t inner

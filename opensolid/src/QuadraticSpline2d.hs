@@ -5,7 +5,7 @@ module QuadraticSpline2d
 where
 
 import Bounds2d qualified
-import Curve2d (Curve2d, DegenerateCurve, IsCurve2d (..))
+import Curve2d (Curve2d)
 import Curve2d qualified
 import OpenSolid
 import Point2d (Point2d (Point2d))
@@ -32,7 +32,7 @@ blossom (QuadraticSpline2d (Point2d x1 y1) (Point2d x2 y2) (Point2d x3 y3)) t1 t
       y = s1 * y1 + s2 * y2 + s3 * y3
    in Point2d x y
 
-instance IsCurve2d (QuadraticSpline2d (space @ units)) (space @ units) where
+instance Curve2d.Interface (QuadraticSpline2d (space @ units)) (space @ units) where
   startPointImpl (QuadraticSpline2d p1 _ _) = p1
 
   endPointImpl (QuadraticSpline2d _ _ p3) = p3

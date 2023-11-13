@@ -1,6 +1,6 @@
 module OpenSolid
   ( module Basics
-  , module Concatenate
+  , module Concatenation
   , module Arithmetic
   , module Result
   , module Qty
@@ -20,7 +20,7 @@ where
 import Angle (Angle)
 import Arithmetic
 import Basics
-import Concatenate (Concatenate ((++)))
+import Concatenation (Concatenation ((++)))
 import CoordinateSystem (CoordinateSystem, Defines, LocalSpace, type (@))
 import Float (Float, fromRational)
 import Fuzzy (Fuzzy (Resolved, Unresolved))

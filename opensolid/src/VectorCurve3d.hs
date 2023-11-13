@@ -1,6 +1,6 @@
 module VectorCurve3d
   ( VectorCurve3d
-  , IsVectorCurve3d
+  , Interface
   , evaluateAt
   , segmentBounds
   , derivative
@@ -14,7 +14,7 @@ module VectorCurve3d
   )
 where
 
-import Curve1d (Curve1d (Curve1d), IsCurve1d)
+import Curve1d (Curve1d (Curve1d))
 import Curve1d qualified
 import Generic qualified
 import OpenSolid
@@ -26,13 +26,13 @@ import Vector3d qualified
 import VectorBounds3d (VectorBounds3d (VectorBounds3d))
 import VectorBounds3d qualified
 
-class (Show curve) => IsVectorCurve3d curve (coordinateSystem :: CoordinateSystem) | curve -> coordinateSystem where
+class (Show curve) => Interface curve (coordinateSystem :: CoordinateSystem) | curve -> coordinateSystem where
   evaluateAtImpl :: Float -> curve -> Vector3d coordinateSystem
   segmentBoundsImpl :: U.Bounds -> curve -> VectorBounds3d coordinateSystem
   derivativeImpl :: curve -> VectorCurve3d coordinateSystem
 
 data VectorCurve3d (coordinateSystem :: CoordinateSystem) where
-  VectorCurve3d :: (IsVectorCurve3d curve (space @ units)) => curve -> VectorCurve3d (space @ units)
+  VectorCurve3d :: (Interface curve (space @ units)) => curve -> VectorCurve3d (space @ units)
   Zero :: VectorCurve3d (space @ units)
   Constant :: Vector3d (space @ units) -> VectorCurve3d (space @ units)
   Line :: Vector3d (space @ units) -> Vector3d (space @ units) -> VectorCurve3d (space @ units)
@@ -41,7 +41,7 @@ data VectorCurve3d (coordinateSystem :: CoordinateSystem) where
 
 deriving instance Show (VectorCurve3d coordinateSystem)
 
-instance IsVectorCurve3d (VectorCurve3d (space @ units)) (space @ units) where
+instance Interface (VectorCurve3d (space @ units)) (space @ units) where
   evaluateAtImpl = evaluateAt
   segmentBoundsImpl = segmentBounds
   derivativeImpl = derivative
@@ -68,7 +68,7 @@ data XYZ (coordinateSystem :: CoordinateSystem) where
 
 deriving instance Show (XYZ coordinateSystem)
 
-instance IsVectorCurve3d (XYZ (space @ units)) (space @ units) where
+instance Interface (XYZ (space @ units)) (space @ units) where
   evaluateAtImpl t (XYZ x y z) =
     Vector3d (Curve1d.evaluateAt t x) (Curve1d.evaluateAt t y) (Curve1d.evaluateAt t z)
 
@@ -90,7 +90,7 @@ newtype Negated (coordinateSystem :: CoordinateSystem) = Negated (VectorCurve3d 
 
 deriving instance Show (Negated coordinateSystem)
 
-instance IsVectorCurve3d (Negated (space @ units)) (space @ units) where
+instance Interface (Negated (space @ units)) (space @ units) where
   evaluateAtImpl t (Negated curve) = negate (evaluateAt t curve)
   segmentBoundsImpl t (Negated curve) = negate (segmentBounds t curve)
   derivativeImpl (Negated curve) = negate (derivative curve)
@@ -111,7 +111,7 @@ data Sum (coordinateSystem :: CoordinateSystem)
 
 deriving instance Show (Sum coordinateSystem)
 
-instance IsVectorCurve3d (Sum (space @ units)) (space @ units) where
+instance Interface (Sum (space @ units)) (space @ units) where
   evaluateAtImpl t (Sum curve1 curve2) = evaluateAt t curve1 + evaluateAt t curve2
   segmentBoundsImpl t (Sum curve1 curve2) = segmentBounds t curve1 + segmentBounds t curve2
   derivativeImpl (Sum curve1 curve2) = derivative curve1 + derivative curve2
@@ -148,7 +148,7 @@ data Difference (coordinateSystem :: CoordinateSystem)
 
 deriving instance Show (Difference coordinateSystem)
 
-instance IsVectorCurve3d (Difference (space @ units)) (space @ units) where
+instance Interface (Difference (space @ units)) (space @ units) where
   evaluateAtImpl t (Difference curve1 curve2) = evaluateAt t curve1 - evaluateAt t curve2
   segmentBoundsImpl t (Difference curve1 curve2) = segmentBounds t curve1 - segmentBounds t curve2
   derivativeImpl (Difference curve1 curve2) = derivative curve1 - derivative curve2
@@ -192,7 +192,7 @@ deriving instance Show (Product3d1d space units1 units2)
 
 instance
   (Units.Product units1 units2 units3) =>
-  IsVectorCurve3d (Product3d1d space units1 units2) (space @ units3)
+  Interface (Product3d1d space units1 units2) (space @ units3)
   where
   evaluateAtImpl t (Product3d1d vectorCurve3d curve1d) =
     evaluateAt t vectorCurve3d * Curve1d.evaluateAt t curve1d
@@ -205,7 +205,7 @@ instance
 
 instance
   (Units.Product units1 units2 units3) =>
-  IsVectorCurve3d (Product1d3d space units1 units2) (space @ units3)
+  Interface (Product1d3d space units1 units2) (space @ units3)
   where
   evaluateAtImpl t (Product1d3d curve1d vectorCurve3d) =
     Curve1d.evaluateAt t curve1d * evaluateAt t vectorCurve3d
@@ -259,7 +259,7 @@ deriving instance Show (DotProductOf space units1 units2)
 
 instance
   (Units.Product units1 units2 units) =>
-  IsCurve1d (DotProductOf space units1 units2) units
+  Curve1d.Interface (DotProductOf space units1 units2) units
   where
   evaluateAtImpl t (DotProductOf curve1 curve2) =
     evaluateAt t curve1 <> evaluateAt t curve2
@@ -304,7 +304,7 @@ deriving instance Show (CrossProductOf space units1 units2)
 
 instance
   (Units.Product units1 units2 units3) =>
-  IsVectorCurve3d (CrossProductOf space units1 units2) (space @ units3)
+  Interface (CrossProductOf space units1 units2) (space @ units3)
   where
   evaluateAtImpl t (CrossProductOf curve1 curve2) =
     evaluateAt t curve1 >< evaluateAt t curve2
@@ -348,7 +348,7 @@ deriving instance Show (Quotient space units1 units2)
 
 instance
   (Units.Quotient units1 units2 units3) =>
-  IsVectorCurve3d (Quotient space units1 units2) (space @ units3)
+  Interface (Quotient space units1 units2) (space @ units3)
   where
   evaluateAtImpl t (Quotient vectorCurve3d curve1d) =
     evaluateAt t vectorCurve3d / Curve1d.evaluateAt t curve1d
@@ -377,7 +377,10 @@ newtype SquaredMagnitudeOf (coordinateSystem :: CoordinateSystem)
 
 deriving instance Show (SquaredMagnitudeOf coordinateSystem)
 
-instance (Units.Squared units1 units2) => IsCurve1d (SquaredMagnitudeOf (space @ units1)) units2 where
+instance
+  (Units.Squared units1 units2) =>
+  Curve1d.Interface (SquaredMagnitudeOf (space @ units1)) units2
+  where
   evaluateAtImpl t (SquaredMagnitudeOf expression) =
     Vector3d.squaredMagnitude (evaluateAt t expression)
 

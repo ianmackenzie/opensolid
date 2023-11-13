@@ -1,6 +1,6 @@
-module Bounded (IsBounded (..)) where
+module Bounded (Interface (..)) where
 
-import Bounds
+import Bounds qualified
 
-class (IsBounds b) => IsBounded a b | a -> b where
+class (Bounds.Interface b) => Interface a b | a -> b where
   boundsImpl :: a -> b

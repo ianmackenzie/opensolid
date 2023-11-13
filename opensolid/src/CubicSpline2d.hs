@@ -5,7 +5,7 @@ module CubicSpline2d
 where
 
 import Bounds2d qualified
-import Curve2d (Curve2d, DegenerateCurve, IsCurve2d (..))
+import Curve2d (Curve2d)
 import Curve2d qualified
 import OpenSolid
 import Point2d (Point2d (Point2d))
@@ -35,7 +35,7 @@ blossom (CubicSpline2d (Point2d x1 y1) (Point2d x2 y2) (Point2d x3 y3) (Point2d 
       y = s1 * y1 + s2 * y2 + s3 * y3 + s4 * y4
    in Point2d x y
 
-instance IsCurve2d (CubicSpline2d (space @ units)) (space @ units) where
+instance Curve2d.Interface (CubicSpline2d (space @ units)) (space @ units) where
   startPointImpl (CubicSpline2d p1 _ _ _) = p1
 
   endPointImpl (CubicSpline2d _ _ _ p4) = p4
@@ -65,5 +65,5 @@ fromControlPoints ::
   Point2d (space @ units) ->
   Point2d (space @ units) ->
   Point2d (space @ units) ->
-  Result DegenerateCurve (Curve2d (space @ units))
+  Result Curve2d.DegenerateCurve (Curve2d (space @ units))
 fromControlPoints p1 p2 p3 p4 = Curve2d.from (CubicSpline2d p1 p2 p3 p4)

@@ -1,6 +1,6 @@
 module Estimate
   ( Estimate
-  , IsEstimate (..)
+  , Interface (..)
   , wrap
   , exact
   , bounds
@@ -36,16 +36,16 @@ import Range (Range (Range))
 import Range qualified
 import Units qualified
 
-class IsEstimate a units | a -> units where
+class Interface a units | a -> units where
   boundsImpl :: a -> Range units
   refineImpl :: a -> Estimate units
 
-instance IsEstimate (Qty units) units where
+instance Interface (Qty units) units where
   boundsImpl = Range.constant
   refineImpl = exact
 
 data Estimate units where
-  Estimate :: (IsEstimate a units) => a -> Range units -> Estimate units
+  Estimate :: (Interface a units) => a -> Range units -> Estimate units
 
 instance
   ( units1 ~ units1'
@@ -59,7 +59,7 @@ instance (units ~ units') => ApproximateEquality (Estimate units) (Qty units') u
     | not (bounds estimate ^ value) = False
     | otherwise = refine estimate ~= value
 
-wrap :: (IsEstimate a units) => a -> Estimate units
+wrap :: (Interface a units) => a -> Estimate units
 wrap implementation = Estimate implementation (boundsImpl implementation)
 
 exact :: Qty units -> Estimate units
@@ -81,7 +81,7 @@ instance Generic.HasZero (Estimate units) where
 
 newtype Negate units = Negate (Estimate units)
 
-instance IsEstimate (Negate units) units where
+instance Interface (Negate units) units where
   boundsImpl (Negate estimate) = negate (bounds estimate)
   refineImpl (Negate estimate) = negate (refine estimate)
 
@@ -98,7 +98,7 @@ instance Multiplication (Estimate units) Sign (Estimate units) where
 
 data Add units = Add (Estimate units) (Estimate units)
 
-instance IsEstimate (Add units) units where
+instance Interface (Add units) units where
   boundsImpl (Add first second) = bounds first + bounds second
   refineImpl (Add first second)
     | width1 >= 2.0 * width2 = refine first + second
@@ -113,7 +113,7 @@ instance Addition (Estimate units) (Estimate units) (Estimate units) where
 
 data Subtract units = Subtract (Estimate units) (Estimate units)
 
-instance IsEstimate (Subtract units) units where
+instance Interface (Subtract units) units where
   boundsImpl (Subtract first second) = bounds first - bounds second
   refineImpl (Subtract first second)
     | width1 >= 2.0 * width2 = refine first - second
@@ -128,7 +128,7 @@ instance Subtraction (Estimate units) (Estimate units) (Estimate units) where
 
 newtype Sum units = Sum (NonEmpty (Estimate units))
 
-instance IsEstimate (Sum units) units where
+instance Interface (Sum units) units where
   boundsImpl (Sum estimates) = NonEmpty.sum (NonEmpty.map bounds estimates)
   refineImpl (Sum estimates) =
     let maxWidth = NonEmpty.maximumOf boundsWidth estimates
@@ -137,7 +137,7 @@ instance IsEstimate (Sum units) units where
 
 newtype Abs units = Abs (Estimate units)
 
-instance IsEstimate (Abs units) units where
+instance Interface (Abs units) units where
   boundsImpl (Abs estimate) = Range.abs (bounds estimate)
   refineImpl (Abs estimate) = wrap (Abs (refine estimate))
 
@@ -155,7 +155,7 @@ sum (NonEmpty estimates) = wrap (Sum estimates)
 
 data Min units = Min (Estimate units) (Estimate units)
 
-instance IsEstimate (Min units) units where
+instance Interface (Min units) units where
   boundsImpl (Min first second) = Range.min (bounds first) (bounds second)
   refineImpl (Min first second)
     | max1 <= min2 = refine first
@@ -170,7 +170,7 @@ min first second = wrap (Min first second)
 
 data Max units = Max (Estimate units) (Estimate units)
 
-instance IsEstimate (Max units) units where
+instance Interface (Max units) units where
   boundsImpl (Max first second) = Range.max (bounds first) (bounds second)
   refineImpl (Max first second)
     | min1 >= max2 = refine first
@@ -185,7 +185,7 @@ max first second = wrap (Max first second)
 
 data Smaller units = Smaller (Estimate units) (Estimate units)
 
-instance IsEstimate (Smaller units) units where
+instance Interface (Smaller units) units where
   boundsImpl (Smaller first second) = Range.smaller (bounds first) (bounds second)
   refineImpl (Smaller first second)
     | high1 <= low2 = refine first
@@ -200,7 +200,7 @@ smaller first second = wrap (Smaller first second)
 
 data Larger units = Larger (Estimate units) (Estimate units)
 
-instance IsEstimate (Larger units) units where
+instance Interface (Larger units) units where
   boundsImpl (Larger first second) = Range.larger (bounds first) (bounds second)
   refineImpl (Larger first second)
     | low1 >= high2 = refine first
@@ -222,7 +222,7 @@ boundsWidth estimate = Range.width (bounds estimate)
 
 data Smallest units = Smallest (NonEmpty (Estimate units)) (Range units)
 
-instance IsEstimate (Smallest units) units where
+instance Interface (Smallest units) units where
   boundsImpl (Smallest _ currentBounds) = currentBounds
   refineImpl (Smallest estimates currentBounds) =
     case NonEmpty.filter (exactly ((^ currentBounds) . bounds)) estimates of
@@ -239,7 +239,7 @@ smallest estimates =
 
 data Largest units = Largest (NonEmpty (Estimate units)) (Range units)
 
-instance IsEstimate (Largest units) units where
+instance Interface (Largest units) units where
   boundsImpl (Largest _ currentBounds) = currentBounds
   refineImpl (Largest estimates currentBounds) =
     case NonEmpty.filter (exactly ((^ currentBounds) . bounds)) estimates of

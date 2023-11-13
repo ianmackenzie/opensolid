@@ -1,6 +1,6 @@
 module Volume1d.Function
   ( Function (Zero, Constant)
-  , Operations (..)
+  , Interface (..)
   , evaluateAt
   , pointOn
   , segmentBounds
@@ -33,14 +33,14 @@ import Range qualified
 import Units qualified
 import Uvw qualified
 
-class (Show function) => Operations function units | function -> units where
+class (Show function) => Interface function units | function -> units where
   evaluateAtImpl :: Point3d Uvw.Coordinates -> function -> Qty units
   segmentBoundsImpl :: Bounds3d Uvw.Coordinates -> function -> Range units
   derivativeImpl :: Direction3d Uvw.Space -> function -> Function units
 
 data Function units where
   Function ::
-    (Operations function units) =>
+    (Interface function units) =>
     function ->
     Function units
   Zero ::
@@ -291,7 +291,7 @@ v = V
 w :: Function Unitless
 w = W
 
-wrap :: (Operations function units) => function -> Function units
+wrap :: (Interface function units) => function -> Function units
 wrap = Function
 
 squared :: (Units.Squared units1 units2) => Function units1 -> Function units2

@@ -1,6 +1,7 @@
 module VectorCurve2d.Magnitude (unsafe) where
 
-import Curve1d (Curve1d (Curve1d), IsCurve1d (..))
+import Curve1d (Curve1d (Curve1d))
+import Curve1d qualified
 import OpenSolid
 import Units qualified
 import Vector2d qualified
@@ -13,7 +14,7 @@ newtype Magnitude (coordinateSystem :: CoordinateSystem)
 
 deriving instance Show (Magnitude (space @ units))
 
-instance IsCurve1d (Magnitude (space @ units)) units where
+instance Curve1d.Interface (Magnitude (space @ units)) units where
   evaluateAtImpl t (Magnitude curve) =
     Vector2d.magnitude (VectorCurve2d.evaluateAt t curve)
 

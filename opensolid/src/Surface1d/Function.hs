@@ -2,7 +2,7 @@
 
 module Surface1d.Function
   ( Function
-  , Operations (..)
+  , Interface (..)
   , Solution
   , evaluateAt
   , pointOn
@@ -27,9 +27,9 @@ where
 import Angle qualified
 import Bounds2d (Bounds2d (Bounds2d))
 import Bounds2d qualified
-import Curve1d (Curve1d (Curve1d), IsCurve1d)
+import Curve1d (Curve1d (Curve1d))
 import Curve1d qualified
-import Curve2d (Curve2d, IsCurve2d)
+import Curve2d (Curve2d)
 import Curve2d qualified
 import Float qualified
 import Generic qualified
@@ -49,14 +49,14 @@ import Uv (Parameter (U, V))
 import Uv qualified
 import VectorCurve2d qualified
 
-class (Show function) => Operations function units | function -> units where
+class (Show function) => Interface function units | function -> units where
   evaluateAtImpl :: Uv.Point -> function -> Qty units
   segmentBoundsImpl :: Uv.Bounds -> function -> Range units
   derivativeImpl :: Parameter -> function -> Function units
 
 data Function units where
   Function ::
-    (Operations function units) =>
+    (Interface function units) =>
     function ->
     Function units
   Zero ::
@@ -297,7 +297,7 @@ constant value = if value == Qty.zero then Zero else Constant value
 parameter :: Parameter -> Function Unitless
 parameter = Parameter
 
-wrap :: (Operations function units) => function -> Function units
+wrap :: (Interface function units) => function -> Function units
 wrap = Function
 
 squared :: (Units.Squared units1 units2) => Function units1 -> Function units2
@@ -330,11 +330,11 @@ cos (Constant x) = constant (Angle.cos x)
 cos function = Cos function
 
 data Curve units where
-  Curve :: (IsCurve2d curve Uv.Coordinates) => Function units -> curve -> Curve units
+  Curve :: (Curve2d.Interface curve Uv.Coordinates) => Function units -> curve -> Curve units
 
 deriving instance Show (Curve units)
 
-instance IsCurve1d (Curve units) units where
+instance Curve1d.Interface (Curve units) units where
   evaluateAtImpl t (Curve function uvCurve) = evaluateAt (Curve2d.evaluateAtImpl t uvCurve) function
   segmentBoundsImpl t (Curve function uvCurve) = segmentBounds (Curve2d.segmentBoundsImpl t uvCurve) function
   derivativeImpl (Curve function uvCurve) =
@@ -490,7 +490,7 @@ data CrossingCurveByU units
       (Range Unitless)
   deriving (Show)
 
-instance IsCurve2d (CrossingCurveByU units) Uv.Coordinates where
+instance Curve2d.Interface (CrossingCurveByU units) Uv.Coordinates where
   startPointImpl = Curve2d.evaluateAtImpl 0.0
   endPointImpl = Curve2d.evaluateAtImpl 1.0
 

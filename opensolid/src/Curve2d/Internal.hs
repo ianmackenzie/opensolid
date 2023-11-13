@@ -1,6 +1,6 @@
 module Curve2d.Internal
   ( Curve2d (..)
-  , IsCurve2d (..)
+  , Interface (..)
   , startPoint
   , endPoint
   , evaluateAt
@@ -26,7 +26,7 @@ import U qualified
 import Units qualified
 import Vector2d qualified
 import VectorBounds2d qualified
-import VectorCurve2d (IsVectorCurve2d, VectorCurve2d (VectorCurve2d))
+import VectorCurve2d (VectorCurve2d (VectorCurve2d))
 import VectorCurve2d qualified
 
 data Curve2d (coordinateSystem :: CoordinateSystem) where
@@ -42,7 +42,7 @@ data Curve2d (coordinateSystem :: CoordinateSystem) where
     Angle ->
     Curve2d (space @ units)
   Curve ::
-    (IsCurve2d curve (space @ units)) =>
+    (Interface curve (space @ units)) =>
     curve ->
     DirectionCurve2d space ->
     Curve2d (space @ units)
@@ -57,7 +57,7 @@ instance
     (Curve2d (space @ units1'))
     (Curve2d (space' @ units2'))
 
-instance IsCurve2d (Curve2d (space @ units)) (space @ units) where
+instance Interface (Curve2d (space @ units)) (space @ units) where
   startPointImpl = startPoint
   endPointImpl = endPoint
   evaluateAtImpl = evaluateAt
@@ -93,7 +93,7 @@ segmentIsCoincidentWithPoint point curve domain
 
 class
   (Show curve) =>
-  IsCurve2d curve (coordinateSystem :: CoordinateSystem)
+  Interface curve (coordinateSystem :: CoordinateSystem)
     | curve -> coordinateSystem
   where
   startPointImpl :: curve -> Point2d coordinateSystem
@@ -147,7 +147,7 @@ data PointCurveDifference (coordinateSystem :: CoordinateSystem)
 
 deriving instance Show (PointCurveDifference (space @ units))
 
-instance IsVectorCurve2d (PointCurveDifference (space @ units)) (space @ units) where
+instance VectorCurve2d.Interface (PointCurveDifference (space @ units)) (space @ units) where
   evaluateAtImpl t (PointCurveDifference point curve) = point - evaluateAt t curve
   segmentBoundsImpl t (PointCurveDifference point curve) = point - segmentBounds t curve
   derivativeImpl (PointCurveDifference _ curve) = -(derivative curve)
@@ -166,7 +166,7 @@ data CurvePointDifference (coordinateSystem :: CoordinateSystem)
 
 deriving instance Show (CurvePointDifference (space @ units))
 
-instance IsVectorCurve2d (CurvePointDifference (space @ units)) (space @ units) where
+instance VectorCurve2d.Interface (CurvePointDifference (space @ units)) (space @ units) where
   evaluateAtImpl t (CurvePointDifference curve point) = evaluateAt t curve - point
   segmentBoundsImpl t (CurvePointDifference curve point) = segmentBounds t curve - point
   derivativeImpl (CurvePointDifference curve _) = derivative curve

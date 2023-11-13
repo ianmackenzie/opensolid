@@ -46,7 +46,7 @@ module Range
 where
 
 import Angle qualified
-import Bounds (IsBounds (..))
+import Bounds qualified
 import Float qualified
 import Generic qualified
 import List qualified
@@ -148,7 +148,7 @@ instance (Units.Quotient units1 units2 units3) => Division (Range units1) (Range
       then hull4 (nl / dl) (nl / dh) (nh / dl) (nh / dh)
       else unsafe -Qty.infinity Qty.infinity
 
-instance IsBounds (Range units) where
+instance Bounds.Interface (Range units) where
   aggregate2Impl = aggregate2
   intersectionImpl = intersection
 

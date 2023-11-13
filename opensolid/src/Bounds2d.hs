@@ -16,7 +16,7 @@ module Bounds2d
   )
 where
 
-import Bounds
+import Bounds qualified
 import OpenSolid
 import Point2d (Point2d (Point2d))
 import Qty qualified
@@ -32,7 +32,7 @@ data Bounds2d (coordinateSystem :: CoordinateSystem) where
 
 deriving instance Show (Bounds2d (space @ units))
 
-instance IsBounds (Bounds2d (space @ units)) where
+instance Bounds.Interface (Bounds2d (space @ units)) where
   aggregate2Impl = aggregate2
   intersectionImpl = intersection
 

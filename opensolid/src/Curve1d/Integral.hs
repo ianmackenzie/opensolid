@@ -5,7 +5,6 @@ where
 
 import {-# SOURCE #-} Curve1d (Curve1d)
 import {-# SOURCE #-} Curve1d qualified
-import Estimate (IsEstimate (..))
 import Estimate qualified
 import OpenSolid
 import Qty qualified
@@ -14,7 +13,7 @@ import U qualified
 
 data Integral units = Integral (Curve1d units) (Curve1d units) U.Bounds
 
-instance IsEstimate (Integral units) units where
+instance Estimate.Interface (Integral units) units where
   boundsImpl (Integral curve derivative domain) =
     let dx = Range.width domain
         derivativeBounds = Curve1d.segmentBounds domain derivative

@@ -1,6 +1,6 @@
 module Curve3d
   ( Curve3d (..)
-  , IsCurve3d (..)
+  , Interface (..)
   , DegenerateCurve (DegenerateCurve)
   )
 where
@@ -13,7 +13,7 @@ import U qualified
 import VectorCurve3d (VectorCurve3d)
 import VectorCurve3d qualified
 
-class IsCurve3d curve (coordinateSystem :: CoordinateSystem) | curve -> coordinateSystem where
+class Interface curve (coordinateSystem :: CoordinateSystem) | curve -> coordinateSystem where
   startPointImpl :: curve -> Point3d coordinateSystem
   endPointImpl :: curve -> Point3d coordinateSystem
   evaluateImpl :: curve -> Float -> Point3d coordinateSystem
@@ -23,9 +23,9 @@ class IsCurve3d curve (coordinateSystem :: CoordinateSystem) | curve -> coordina
   boundsImpl :: curve -> Bounds3d coordinateSystem
 
 data Curve3d (coordinateSystem :: CoordinateSystem) where
-  Curve3d :: (IsCurve3d curve (space @ units)) => curve -> Curve3d (space @ units)
+  Curve3d :: (Interface curve (space @ units)) => curve -> Curve3d (space @ units)
 
-instance IsCurve3d (Point3d (space @ units)) (space @ units) where
+instance Interface (Point3d (space @ units)) (space @ units) where
   startPointImpl = id
   endPointImpl = id
   evaluateImpl point _ = point
@@ -34,7 +34,7 @@ instance IsCurve3d (Point3d (space @ units)) (space @ units) where
   reverseImpl = id
   boundsImpl = Bounds3d.constant
 
-instance IsCurve3d (Curve3d (space @ units)) (space @ units) where
+instance Interface (Curve3d (space @ units)) (space @ units) where
   startPointImpl (Curve3d curve) = startPointImpl curve
   endPointImpl (Curve3d curve) = endPointImpl curve
   evaluateImpl (Curve3d curve) = evaluateImpl curve

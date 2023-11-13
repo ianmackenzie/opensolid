@@ -95,7 +95,7 @@ library
       Bounds2d
       Bounds3d
       Bounds
-      Concatenate
+      Concatenation
       Console
       CoordinateSystem
       CubicSpline2d

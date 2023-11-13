@@ -1,6 +1,6 @@
 module Curve1d
   ( Curve1d (Curve1d)
-  , IsCurve1d (..)
+  , Interface (..)
   , evaluateAt
   , pointOn
   , segmentBounds
@@ -49,14 +49,14 @@ import {-# SOURCE #-} VectorCurve2d qualified
 import {-# SOURCE #-} VectorCurve3d (VectorCurve3d)
 import {-# SOURCE #-} VectorCurve3d qualified
 
-class (Show curve) => IsCurve1d curve units | curve -> units where
+class (Show curve) => Interface curve units | curve -> units where
   evaluateAtImpl :: Float -> curve -> Qty units
   segmentBoundsImpl :: U.Bounds -> curve -> Range units
   derivativeImpl :: curve -> Curve1d units
 
 data Curve1d units where
   Curve1d ::
-    (IsCurve1d curve units) =>
+    (Interface curve units) =>
     curve ->
     Curve1d units
   Zero ::
@@ -119,7 +119,7 @@ instance (units ~ units') => ApproximateEquality (Curve1d units) (Curve1d units'
 instance (units ~ units') => ApproximateEquality (Curve1d units) (Qty units') units where
   curve ~= value = isZero (curve - value)
 
-instance IsCurve1d (Curve1d units) units where
+instance Interface (Curve1d units) units where
   evaluateAtImpl = evaluateAt
   segmentBoundsImpl = segmentBounds
   derivativeImpl = derivative
@@ -341,7 +341,7 @@ newtype Reversed units = Reversed (Curve1d units)
 
 deriving instance Show (Reversed units)
 
-instance IsCurve1d (Reversed units) units where
+instance Interface (Reversed units) units where
   evaluateAtImpl t (Reversed curve) = evaluateAt (1.0 - t) curve
   segmentBoundsImpl t (Reversed curve) = segmentBounds (1.0 - t) curve
   derivativeImpl (Reversed curve) = -(reverse (derivative curve))

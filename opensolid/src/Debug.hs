@@ -6,7 +6,7 @@ module Debug
 where
 
 import Basics
-import Concatenate
+import Concatenation
 import Debug.Trace qualified
 
 trace :: String -> a -> a

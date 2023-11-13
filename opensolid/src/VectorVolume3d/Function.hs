@@ -1,6 +1,6 @@
 module VectorVolume3d.Function
   ( Function
-  , Operations (..)
+  , Interface (..)
   , evaluateAt
   , pointOn
   , segmentBounds
@@ -28,7 +28,7 @@ import Volume1d.Function qualified
 
 class
   (Show function) =>
-  Operations function (coordinateSystem :: CoordinateSystem)
+  Interface function (coordinateSystem :: CoordinateSystem)
     | function -> coordinateSystem
   where
   evaluateAtImpl :: Point3d Uvw.Coordinates -> function -> Vector3d coordinateSystem
@@ -37,7 +37,7 @@ class
 
 data Function (coordinateSystem :: CoordinateSystem) where
   Function ::
-    (Operations function (space @ units)) =>
+    (Interface function (space @ units)) =>
     function ->
     Function (space @ units)
   Zero ::
@@ -307,7 +307,7 @@ zero = Zero
 constant :: Vector3d (space @ units) -> Function (space @ units)
 constant vector = if vector == Vector3d.zero then Zero else Constant vector
 
-wrap :: (Operations function (space @ units)) => function -> Function (space @ units)
+wrap :: (Interface function (space @ units)) => function -> Function (space @ units)
 wrap = Function
 
 xyz ::

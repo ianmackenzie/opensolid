@@ -17,7 +17,7 @@ import Vector2d (Vector2d)
 import Vector2d qualified
 import VectorBounds2d (VectorBounds2d)
 import VectorBounds2d qualified
-import {-# SOURCE #-} VectorCurve2d (IsVectorCurve2d (..), VectorCurve2d)
+import {-# SOURCE #-} VectorCurve2d (VectorCurve2d)
 import {-# SOURCE #-} VectorCurve2d qualified
 import VectorCurve2d.Magnitude qualified
 
@@ -54,7 +54,7 @@ data QCurve coordinateSystem where
 
 deriving instance Show (QCurve (space @ units))
 
-instance IsVectorCurve2d (QCurve (space @ units)) (space @ units) where
+instance VectorCurve2d.Interface (QCurve (space @ units)) (space @ units) where
   evaluateAtImpl _ (QCurve _ _ _ value) = value
   segmentBoundsImpl _ (QCurve _ _ _ value) = VectorBounds2d.constant value
   derivativeImpl (QCurve n t0 curveDerivative _) =

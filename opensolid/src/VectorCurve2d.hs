@@ -1,6 +1,6 @@
 module VectorCurve2d
   ( VectorCurve2d (VectorCurve2d)
-  , IsVectorCurve2d (..)
+  , Interface (..)
   , wrap
   , evaluateAt
   , segmentBounds
@@ -24,7 +24,7 @@ module VectorCurve2d
 where
 
 import Angle qualified
-import Curve1d (Curve1d (Curve1d), IsCurve1d)
+import Curve1d (Curve1d (Curve1d))
 import Curve1d qualified
 import Curve1d.Root qualified as Root
 import Direction2d (Direction2d (Direction2d))
@@ -46,7 +46,7 @@ import VectorCurve2d.Direction qualified
 
 class
   (Show curve) =>
-  IsVectorCurve2d curve (coordinateSystem :: CoordinateSystem)
+  Interface curve (coordinateSystem :: CoordinateSystem)
     | curve -> coordinateSystem
   where
   evaluateAtImpl :: Float -> curve -> Vector2d coordinateSystem
@@ -55,7 +55,7 @@ class
 
 data VectorCurve2d (coordinateSystem :: CoordinateSystem) where
   VectorCurve2d ::
-    (IsVectorCurve2d curve (space @ units)) =>
+    (Interface curve (space @ units)) =>
     curve ->
     VectorCurve2d (space @ units)
   Zero ::
@@ -127,7 +127,7 @@ instance
     (VectorCurve2d (space @ units1'))
     (VectorCurve2d (space' @ units2'))
 
-instance IsVectorCurve2d (VectorCurve2d (space @ units)) (space @ units) where
+instance Interface (VectorCurve2d (space @ units)) (space @ units) where
   evaluateAtImpl = evaluateAt
   segmentBoundsImpl = segmentBounds
   derivativeImpl = derivative
@@ -283,7 +283,7 @@ deriving instance Show (DotProductOf space units1 units2)
 
 instance
   (Units.Product units1 units2 units3) =>
-  IsCurve1d (DotProductOf space units1 units2) units3
+  Curve1d.Interface (DotProductOf space units1 units2) units3
   where
   evaluateAtImpl t (DotProductOf c1 c2) = evaluateAt t c1 <> evaluateAt t c2
   segmentBoundsImpl t (DotProductOf c1 c2) = segmentBounds t c1 <> segmentBounds t c2
@@ -348,7 +348,7 @@ deriving instance Show (CrossProductOf space units1 units2)
 
 instance
   (Units.Product units1 units2 units3) =>
-  IsCurve1d (CrossProductOf space units1 units2) units3
+  Curve1d.Interface (CrossProductOf space units1 units2) units3
   where
   evaluateAtImpl t (CrossProductOf c1 c2) = evaluateAt t c1 >< evaluateAt t c2
   segmentBoundsImpl t (CrossProductOf c1 c2) = segmentBounds t c1 >< segmentBounds t c2
@@ -406,7 +406,7 @@ instance
   where
   Direction2d vector >< curve = vector >< curve
 
-wrap :: (IsVectorCurve2d curve (space @ units)) => curve -> VectorCurve2d (space @ units)
+wrap :: (Interface curve (space @ units)) => curve -> VectorCurve2d (space @ units)
 wrap = VectorCurve2d
 
 zero :: VectorCurve2d (space @ units)
@@ -580,7 +580,10 @@ newtype SquaredMagnitudeOf (coordinateSystem :: CoordinateSystem) = SquaredMagni
 
 deriving instance Show (SquaredMagnitudeOf (space @ units))
 
-instance (Units.Squared units1 units2) => IsCurve1d (SquaredMagnitudeOf (space @ units1)) units2 where
+instance
+  (Units.Squared units1 units2) =>
+  Curve1d.Interface (SquaredMagnitudeOf (space @ units1)) units2
+  where
   evaluateAtImpl t (SquaredMagnitudeOf curve) = Vector2d.squaredMagnitude (evaluateAt t curve)
   segmentBoundsImpl t (SquaredMagnitudeOf curve) = VectorBounds2d.squaredMagnitude (segmentBounds t curve)
   derivativeImpl (SquaredMagnitudeOf curve) = 2.0 * curve <> derivative curve

@@ -20,7 +20,7 @@ where
 
 import {-# SOURCE #-} Axis2d (Axis2d)
 import {-# SOURCE #-} Axis2d qualified
-import Bounded (IsBounded (..))
+import Bounded qualified
 import {-# SOURCE #-} Bounds2d (Bounds2d (Bounds2d))
 import {-# SOURCE #-} Bounds2d qualified
 import Direction2d (Direction2d (Direction2d))
@@ -105,7 +105,7 @@ instance
   where
   p1 ~= p2 = distanceFrom p1 p2 ~= Qty.zero
 
-instance IsBounded (Point2d (space @ units)) (Bounds2d (space @ units)) where
+instance Bounded.Interface (Point2d (space @ units)) (Bounds2d (space @ units)) where
   boundsImpl = Bounds2d.constant
 
 origin :: Point2d (space @ units)
