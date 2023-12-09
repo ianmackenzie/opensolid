@@ -134,6 +134,7 @@ library
       Region2d
       Result
       Seq
+      SetDifference
       Sign
       Stream
       String
