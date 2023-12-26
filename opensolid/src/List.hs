@@ -1,5 +1,6 @@
 module List
   ( List
+  , singleton
   , isEmpty
   , length
   , map
@@ -45,6 +46,9 @@ import Basics
 import Data.List qualified
 import Generic qualified
 import Prelude qualified
+
+singleton :: a -> List a
+singleton = Data.List.singleton
 
 isEmpty :: List a -> Bool
 isEmpty = Prelude.null
