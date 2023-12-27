@@ -72,13 +72,14 @@ common config
       QualifiedDo
       TypeFamilies
       TypeOperators
-      OverloadedRecordDot
       MagicHash
       TupleSections
       DeriveAnyClass
       DerivingStrategies
       ViewPatterns
       LambdaCase
+      DisambiguateRecordFields
+      NamedFieldPuns
 
 library
   import: config

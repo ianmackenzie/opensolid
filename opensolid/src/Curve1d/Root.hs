@@ -1,4 +1,4 @@
-module Curve1d.Root (Root (..)) where
+module Curve1d.Root (Root (Root, value, order, sign)) where
 
 import OpenSolid
 
@@ -11,6 +11,6 @@ data Root = Root
 
 instance ApproximateEquality Root Root Unitless where
   root1 ~= root2 =
-    root1.value ~= root2.value
-      && root1.order == root2.order
-      && root1.sign == root2.sign
+    value root1 ~= value root2
+      && order root1 == order root2
+      && sign root1 == sign root2

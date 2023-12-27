@@ -178,15 +178,15 @@ testSurface1dIntersection = Try.do
         let uvBounds = Bounds2d uRange vRange
         [solution] <- Task.evaluate (Surface1d.Function.findSolutions f fu fv fuu fvv fuv uvBounds)
         case solution of
-          Surface1d.Solution.CrossingCurve curve -> do
+          Surface1d.Solution.CrossingCurve {curve} -> do
             let derivative = Curve2d.derivative curve
             log "Start point" (Curve2d.startPoint curve)
             log "Start derivative" (VectorCurve2d.evaluateAt 0.0 derivative)
             log "End point" (Curve2d.endPoint curve)
             log "End derivative" (VectorCurve2d.evaluateAt 1.0 derivative)
             log "Bounds" (Curve2d.bounds curve)
-          Surface1d.Solution.TangentCurve _ _ -> Console.printLine "Unexpected tangent curve"
-          Surface1d.Solution.TangentPoint _ _ -> Console.printLine "Unexpected tangent point"
+          Surface1d.Solution.TangentCurve {} -> Console.printLine "Unexpected tangent curve"
+          Surface1d.Solution.TangentPoint {} -> Console.printLine "Unexpected tangent point"
 
   let uLeftBiased = Range.from -0.3 0.1
   let uRightBiased = Range.from -0.1 0.3
@@ -200,7 +200,7 @@ testSurface1dIntersection = Try.do
   ?tolerance = 1e-9
 
 script :: Task String ()
-script = do
+script = Try.do
   testScalarArithmetic
   testVectorArithmetic
   testRangeArithmetic

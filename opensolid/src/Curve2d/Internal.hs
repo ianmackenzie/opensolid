@@ -106,12 +106,12 @@ class
 
 startPoint :: Curve2d (space @ units) -> Point2d (space @ units)
 startPoint (Line p1 _ _) = p1
-startPoint arc@Arc{} = evaluateAt 0.0 arc
+startPoint arc@(Arc {}) = evaluateAt 0.0 arc
 startPoint (Curve curve _) = startPointImpl curve
 
 endPoint :: Curve2d (space @ units) -> Point2d (space @ units)
 endPoint (Line _ p2 _) = p2
-endPoint arc@Arc{} = evaluateAt 1.0 arc
+endPoint arc@(Arc {}) = evaluateAt 1.0 arc
 endPoint (Curve curve _) = endPointImpl curve
 
 evaluateAt :: Float -> Curve2d (space @ units) -> Point2d (space @ units)
@@ -139,7 +139,7 @@ reverse (Curve curve tangentDirection) =
 
 bounds :: Curve2d (space @ units) -> Bounds2d (space @ units)
 bounds (Line p1 p2 _) = Bounds2d.hull2 p1 p2
-bounds arc@Arc{} = segmentBounds U.domain arc
+bounds arc@(Arc {}) = segmentBounds U.domain arc
 bounds (Curve curve _) = boundsImpl curve
 
 data PointCurveDifference (coordinateSystem :: CoordinateSystem)

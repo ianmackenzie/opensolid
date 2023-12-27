@@ -1,5 +1,5 @@
 module Curve2d.Derivatives
-  ( Derivatives (..)
+  ( Derivatives (curve, first, second)
   , ofCurve
   , classify
   )
@@ -17,43 +17,21 @@ import Vector2d qualified
 import VectorCurve2d (VectorCurve2d)
 import VectorCurve2d qualified
 
-data Derivatives (coordinateSystem :: CoordinateSystem)
-  = Derivatives
-      (Curve2d coordinateSystem)
-      (VectorCurve2d coordinateSystem)
-      (VectorCurve2d coordinateSystem)
-      Bool
-      Bool
-
-instance HasField "curve" (Derivatives (space @ units)) (Curve2d (space @ units)) where
-  getField (Derivatives field _ _ _ _) = field
-
-instance HasField "first" (Derivatives (space @ units)) (VectorCurve2d (space @ units)) where
-  getField (Derivatives _ field _ _ _) = field
-
-instance HasField "second" (Derivatives (space @ units)) (VectorCurve2d (space @ units)) where
-  getField (Derivatives _ _ field _ _) = field
-
-instance HasField "degenerateStart" (Derivatives (space @ units)) Bool where
-  getField (Derivatives _ _ _ field _) = field
-
-instance HasField "degenerateEnd" (Derivatives (space @ units)) Bool where
-  getField (Derivatives _ _ _ _ field) = field
+data Derivatives (coordinateSystem :: CoordinateSystem) = Derivatives
+  { curve :: Curve2d coordinateSystem
+  , first :: VectorCurve2d coordinateSystem
+  , second :: VectorCurve2d coordinateSystem
+  }
 
 ofCurve :: (Tolerance units) => Curve2d (space @ units) -> Derivatives (space @ units)
 ofCurve givenCurve =
   let firstDerivative = Curve2d.derivative givenCurve
       secondDerivative = VectorCurve2d.derivative firstDerivative
    in Derivatives
-        givenCurve
-        firstDerivative
-        secondDerivative
-        (isDegenerateAt 0.0 firstDerivative)
-        (isDegenerateAt 1.0 firstDerivative)
-
-isDegenerateAt :: (Tolerance units) => Float -> VectorCurve2d (space @ units) -> Bool
-isDegenerateAt u firstDerivative =
-  Vector2d.magnitude (VectorCurve2d.evaluateAt u firstDerivative) ~= Qty.zero
+        { curve = givenCurve
+        , first = firstDerivative
+        , second = secondDerivative
+        }
 
 classify ::
   (Tolerance units) =>
@@ -62,10 +40,10 @@ classify ::
   Derivatives (space @ units) ->
   Result TangentIntersectionAtDegeneratePoint (Intersection.Kind, Sign)
 classify (u, v) derivatives1 derivatives2 =
-  let first1 = VectorCurve2d.evaluateAt u derivatives1.first
-      first2 = VectorCurve2d.evaluateAt v derivatives2.first
-      second1 = VectorCurve2d.evaluateAt u derivatives1.second
-      second2 = VectorCurve2d.evaluateAt v derivatives2.second
+  let first1 = VectorCurve2d.evaluateAt u (first derivatives1)
+      first2 = VectorCurve2d.evaluateAt v (first derivatives2)
+      second1 = VectorCurve2d.evaluateAt u (second derivatives1)
+      second2 = VectorCurve2d.evaluateAt v (second derivatives2)
       first1Magnitude = Vector2d.magnitude first1
       first2Magnitude = Vector2d.magnitude first2
       second1Magnitude = Vector2d.magnitude second1

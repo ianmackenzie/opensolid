@@ -85,3 +85,5 @@ executable sandbox
       DerivingStrategies
       ViewPatterns
       LambdaCase
+      NamedFieldPuns
+      DisambiguateRecordFields

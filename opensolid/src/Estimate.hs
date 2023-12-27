@@ -45,7 +45,12 @@ instance Interface (Qty units) units where
   refineImpl = exact
 
 data Estimate units where
-  Estimate :: (Interface a units) => a -> Range units -> Estimate units
+  Estimate ::
+    (Interface a units) =>
+    { implementation :: a
+    , bounds :: Range units
+    } ->
+    Estimate units
 
 instance
   ( units1 ~ units1'
@@ -60,16 +65,13 @@ instance (units ~ units') => ApproximateEquality (Estimate units) (Qty units') u
     | otherwise = refine estimate ~= value
 
 wrap :: (Interface a units) => a -> Estimate units
-wrap implementation = Estimate implementation (boundsImpl implementation)
+wrap implementation = Estimate {implementation, bounds = boundsImpl implementation}
 
 exact :: Qty units -> Estimate units
 exact value = wrap value
 
-bounds :: Estimate units -> Range units
-bounds (Estimate _ range) = range
-
 refine :: Estimate units -> Estimate units
-refine (Estimate estimate _) = refineImpl estimate
+refine (Estimate {implementation}) = refineImpl implementation
 
 satisfy :: (Range units -> Bool) -> Estimate units -> Range units
 satisfy predicate estimate =

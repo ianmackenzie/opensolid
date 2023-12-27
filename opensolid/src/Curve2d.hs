@@ -106,7 +106,7 @@ reverse = Internal.reverse
 
 bounds :: Curve2d (space @ units) -> Bounds2d (space @ units)
 bounds (Internal.Line p1 p2 _) = Bounds2d.hull2 p1 p2
-bounds arc@(Internal.Arc{}) = segmentBounds U.domain arc
+bounds arc@(Internal.Arc {}) = segmentBounds U.domain arc
 bounds (Internal.Curve curve _) = boundsImpl curve
 
 tangentDirection :: Curve2d (space @ units) -> DirectionCurve2d space
@@ -241,17 +241,17 @@ findEndpointIntersection ::
   SearchTree (space @ units) ->
   (List Intersection, List (U.Bounds, U.Bounds)) ->
   Result IntersectionError (List Intersection, List (U.Bounds, U.Bounds))
-findEndpointIntersection derivatives1 derivatives2 uv searchTree1 searchTree2 accumulated = do
+findEndpointIntersection derivatives1 derivatives2 u1u2 searchTree1 searchTree2 accumulated = do
   intersectionType <-
-    Derivatives.classify uv derivatives1 derivatives2
+    Derivatives.classify u1u2 derivatives1 derivatives2
       |> Result.mapError (\Intersection.TangentIntersectionAtDegeneratePoint -> TangentIntersectionAtDegeneratePoint)
-  let (intersectionKind, sign) = intersectionType
-  let (u0, v0) = uv
+  let (kind, sign) = intersectionType
+  let (u1, u2) = u1u2
   Ok $
     Bisection.solve2
-      (Segment.isEndpointIntersectionCandidate uv)
+      (Segment.isEndpointIntersectionCandidate u1u2)
       (Segment.endpointIntersectionResolved intersectionType)
-      (\_ _ _ _ _ -> Just (Intersection u0 v0 intersectionKind sign))
+      (\_ _ _ _ _ -> Just (Intersection {u1, u2, kind, sign}))
       searchTree1
       searchTree2
       accumulated
