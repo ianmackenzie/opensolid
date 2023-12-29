@@ -82,7 +82,7 @@ apiExceptionConstructors :: TH.Name -> TH.Q (List TH.Exp)
 apiExceptionConstructors typeName = do
   info <- TH.reify typeName
   case info of
-    TH.TyConI (TH.DataD _ _ _ _ cons _) -> sequence (List.indexedMap apiExceptionConstructor cons)
+    TH.TyConI (TH.DataD _ _ _ _ cons _) -> sequence (List.mapWithIndex apiExceptionConstructor cons)
     _ -> internalError "Not a data type"
 
 apiExceptionConstructor :: Int -> TH.Con -> TH.Q TH.Exp
