@@ -8,6 +8,8 @@ module Bounds2d
   , hull3
   , hull4
   , aggregate2
+  , overlap
+  , separation
   , intersection
   , interpolate
   , sample
@@ -76,6 +78,21 @@ constant (Point2d x y) =
 aggregate2 :: Bounds2d (space @ units) -> Bounds2d (space @ units) -> Bounds2d (space @ units)
 aggregate2 (Bounds2d x1 y1) (Bounds2d x2 y2) =
   Bounds2d (Range.aggregate2 x1 x2) (Range.aggregate2 y1 y2)
+
+separation :: Bounds2d (space @ units) -> Bounds2d (space @ units) -> Qty units
+separation (Bounds2d x1 y1) (Bounds2d x2 y2)
+  | px && py = Qty.hypot2 dx dy
+  | px = dx
+  | py = dy
+  | otherwise = Qty.max dx dy
+ where
+  dx = Range.separation x1 x2
+  dy = Range.separation y1 y2
+  px = dx >= Qty.zero
+  py = dy >= Qty.zero
+
+overlap :: Bounds2d (space @ units) -> Bounds2d (space @ units) -> Qty units
+overlap first second = -(separation first second)
 
 intersection :: Bounds2d (space @ units) -> Bounds2d (space @ units) -> Maybe (Bounds2d (space @ units))
 intersection (Bounds2d x1 y1) (Bounds2d x2 y2) = do

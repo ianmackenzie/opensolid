@@ -14,6 +14,8 @@ module Range
   , includes
   , contains
   , signedDistance
+  , overlap
+  , separation
   , isContainedIn
   , bisect
   , isAtomic
@@ -87,7 +89,7 @@ instance (units ~ units') => Intersects (Range units) (Qty units') units where
   range ^ value = value ^ range
 
 instance (units ~ units') => Intersects (Range units) (Range units') units where
-  Range low1 high1 ^ Range low2 high2 = low1 <= high2 + ?tolerance && high1 >= low2 - ?tolerance
+  first ^ second = separation first second <= ?tolerance
 
 instance Negation (Range units) where
   negate (Range low high) = unsafe (negate high) (negate low)
@@ -310,6 +312,12 @@ isContainedIn range value = contains value range
 
 signedDistance :: Qty units -> Range units -> Qty units
 signedDistance value (Range low high) = Qty.max (low - value) (value - high)
+
+separation :: Range units -> Range units -> Qty units
+separation (Range low1 high1) (Range low2 high2) = Qty.max (low1 - high2) (low2 - high1)
+
+overlap :: Range units -> Range units -> Qty units
+overlap first second = -(separation first second)
 
 bisect :: Range units -> (Range units, Range units)
 bisect (Range low high) =
