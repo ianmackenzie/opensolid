@@ -222,12 +222,15 @@ internalErrorFilteredListIsEmpty =
 boundsWidth :: Estimate units -> Qty units
 boundsWidth estimate = Range.width (bounds estimate)
 
+overlaps :: Range units -> Estimate units -> Bool
+overlaps range estimate = Range.overlap range (bounds estimate) > Qty.zero
+
 data Smallest units = Smallest (NonEmpty (Estimate units)) (Range units)
 
 instance Interface (Smallest units) units where
   boundsImpl (Smallest _ currentBounds) = currentBounds
   refineImpl (Smallest estimates currentBounds) =
-    case NonEmpty.filter (exactly ((^ currentBounds) . bounds)) estimates of
+    case NonEmpty.filter (overlaps currentBounds) estimates of
       [singleEstimate] -> refine singleEstimate
       NonEmpty filteredEstimates ->
         let maxWidth = NonEmpty.maximumOf boundsWidth filteredEstimates
@@ -244,7 +247,7 @@ data Largest units = Largest (NonEmpty (Estimate units)) (Range units)
 instance Interface (Largest units) units where
   boundsImpl (Largest _ currentBounds) = currentBounds
   refineImpl (Largest estimates currentBounds) =
-    case NonEmpty.filter (exactly ((^ currentBounds) . bounds)) estimates of
+    case NonEmpty.filter (overlaps currentBounds) estimates of
       [singleEstimate] -> refine singleEstimate
       NonEmpty filteredEstimates ->
         let maxWidth = NonEmpty.maximumOf boundsWidth filteredEstimates

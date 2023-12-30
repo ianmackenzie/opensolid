@@ -13,6 +13,7 @@ module Curve2d.Segment
 where
 
 import Bounds2d (Bounds2d)
+import Bounds2d qualified
 import {-# SOURCE #-} Curve2d (Curve2d)
 import {-# SOURCE #-} Curve2d qualified
 import Curve2d.Derivatives (Derivatives)
@@ -298,4 +299,4 @@ isCrossingIntersection ::
   U.Bounds ->
   Bool
 isCrossingIntersection curve1 curve2 u1 u2 =
-  exactly (Curve2d.segmentBounds u1 curve1 ^ Curve2d.segmentBounds u2 curve2)
+  Bounds2d.overlap (Curve2d.segmentBounds u1 curve1) (Curve2d.segmentBounds u2 curve2) >= Qty.zero

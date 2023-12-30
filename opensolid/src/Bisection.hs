@@ -8,6 +8,7 @@ where
 
 import Float qualified
 import OpenSolid
+import Qty qualified
 import Range (Range (Range))
 import Range qualified
 import U qualified
@@ -66,7 +67,7 @@ solve isCandidate resolveNeighborhood findSolution segmentTree accumulated =
 isAllowed :: U.Bounds -> List U.Bounds -> Fuzzy Bool
 isAllowed _ [] = Resolved True
 isAllowed domain (first : rest)
-  | exactly (domain ^ first) =
+  | Range.overlap domain first > Qty.zero =
       if Range.contains domain first
         then Resolved False
         else Unresolved
@@ -112,7 +113,7 @@ solve2 isCandidate resolveNeighborhood findSolution segmentTree1 segmentTree2 ac
 isAllowed2 :: U.Bounds -> U.Bounds -> List (U.Bounds, U.Bounds) -> Fuzzy Bool
 isAllowed2 _ _ [] = Resolved True
 isAllowed2 xDomain yDomain ((firstX, firstY) : rest)
-  | exactly (firstX ^ xDomain && firstY ^ yDomain) =
+  | Range.overlap firstX xDomain > Qty.zero && Range.overlap firstY yDomain > Qty.zero =
       if Range.contains xDomain firstX && Range.contains yDomain firstY
         then Resolved False
         else Unresolved
