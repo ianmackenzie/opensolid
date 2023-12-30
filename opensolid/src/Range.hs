@@ -367,7 +367,7 @@ smallest :: NonEmpty (Range units) -> Range units
 smallest ranges =
   let initial = NonEmpty.minimumBy maxAbs ranges
       clipRadius = maxAbs initial
-      conditionalAggregate accumulated (Range low high)
+      conditionalAggregate (Range low high) accumulated
         | low > clipRadius || high < -clipRadius = accumulated
         | otherwise = aggregate2 accumulated (unsafe (Qty.max low -clipRadius) (Qty.min high clipRadius))
    in NonEmpty.foldLeft conditionalAggregate initial ranges
@@ -376,7 +376,7 @@ largest :: NonEmpty (Range units) -> Range units
 largest ranges =
   let initial = NonEmpty.maximumBy minAbs ranges
       clipRadius = minAbs initial
-      conditionalAggregate accumulated range@(Range low high)
+      conditionalAggregate range@(Range low high) accumulated
         | low > -clipRadius && high < clipRadius = accumulated
         | low > -clipRadius = aggregate2 accumulated (unsafe clipRadius high)
         | high < clipRadius = aggregate2 accumulated (unsafe low -clipRadius)

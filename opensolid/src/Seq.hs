@@ -62,8 +62,8 @@ map = fmap
 filter :: (a -> Bool) -> Seq a -> Seq a
 filter = Data.Sequence.filter
 
-foldLeft :: (b -> a -> b) -> b -> Seq a -> b
-foldLeft = Data.Foldable.foldl'
+foldLeft :: (a -> b -> b) -> b -> Seq a -> b
+foldLeft function = Data.Foldable.foldl' (\acc item -> function item acc)
 
 foldRight :: (a -> b -> b) -> b -> Seq a -> b
 foldRight = Data.Foldable.foldr

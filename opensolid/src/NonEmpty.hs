@@ -136,8 +136,8 @@ filter = Data.List.NonEmpty.filter
 concat :: NonEmpty (NonEmpty a) -> NonEmpty a
 concat = Data.Semigroup.sconcat
 
-foldLeft :: (b -> a -> b) -> b -> NonEmpty a -> b
-foldLeft = Data.Foldable.foldl'
+foldLeft :: (a -> b -> b) -> b -> NonEmpty a -> b
+foldLeft function = Data.Foldable.foldl' (\acc item -> function item acc)
 
 foldRight :: (a -> b -> b) -> b -> NonEmpty a -> b
 foldRight = Data.Foldable.foldr
