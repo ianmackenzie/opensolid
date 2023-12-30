@@ -63,7 +63,10 @@ mapWithIndex :: (Int -> a -> b) -> List a -> List b
 mapWithIndex fn = map2 fn [0 ..]
 
 reverseMap :: (a -> b) -> List a -> List b
-reverseMap function list = foldLeft (\acc item -> function item : acc) [] list
+reverseMap function list = go list []
+ where
+  go (first : rest) acc = go rest (function first : acc)
+  go [] acc = acc
 
 zip2 :: List a -> List b -> List (a, b)
 zip2 = Data.List.zip
