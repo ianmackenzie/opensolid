@@ -13,6 +13,7 @@ module Range
   , squared
   , includes
   , contains
+  , signedDistance
   , isContainedIn
   , bisect
   , isAtomic
@@ -80,7 +81,7 @@ instance (units ~ units') => ApproximateEquality (Qty units) (Range units') unit
   value ~= range = range ~= value
 
 instance (units ~ units') => Intersects (Qty units) (Range units') units where
-  value ^ (Range low high) = value >= low - ?tolerance && value <= high + ?tolerance
+  value ^ range = signedDistance value range <= ?tolerance
 
 instance (units ~ units') => Intersects (Range units) (Qty units') units where
   range ^ value = value ^ range
@@ -306,6 +307,9 @@ contains (Range low2 high2) (Range low1 high1) = low1 <= low2 && high2 <= high1
 
 isContainedIn :: Range units -> Range units -> Bool
 isContainedIn range value = contains value range
+
+signedDistance :: Qty units -> Range units -> Qty units
+signedDistance value (Range low high) = Qty.max (low - value) (value - high)
 
 bisect :: Range units -> (Range units, Range units)
 bisect (Range low high) =
