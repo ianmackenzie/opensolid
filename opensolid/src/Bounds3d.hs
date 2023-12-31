@@ -8,6 +8,8 @@ module Bounds3d
   , hull3
   , hull4
   , aggregate2
+  , exclusion
+  , inclusion
   , separation
   , overlap
   , intersection
@@ -59,6 +61,27 @@ constant (Point3d x y z) =
 aggregate2 :: Bounds3d (space @ units) -> Bounds3d (space @ units) -> Bounds3d (space @ units)
 aggregate2 (Bounds3d x1 y1 z1) (Bounds3d x2 y2 z2) =
   Bounds3d (Range.aggregate2 x1 x2) (Range.aggregate2 y1 y2) (Range.aggregate2 z1 z2)
+
+exclusion :: Point3d (space @ units) -> Bounds3d (space @ units) -> Qty units
+exclusion (Point3d x y z) (Bounds3d bx by bz)
+  | px && py && pz = Qty.hypot3 dx dy dz
+  | px && py = Qty.hypot2 dx dy
+  | px && pz = Qty.hypot2 dx dz
+  | py && pz = Qty.hypot2 dy dz
+  | px = dx
+  | py = dy
+  | pz = dz
+  | otherwise = Qty.max (Qty.max dx dy) dz
+ where
+  dx = Range.exclusion x bx
+  dy = Range.exclusion y by
+  dz = Range.exclusion z bz
+  px = dx >= Qty.zero
+  py = dy >= Qty.zero
+  pz = dz >= Qty.zero
+
+inclusion :: Point3d (space @ units) -> Bounds3d (space @ units) -> Qty units
+inclusion point bounds = -(exclusion point bounds)
 
 separation :: Bounds3d (space @ units) -> Bounds3d (space @ units) -> Qty units
 separation (Bounds3d x1 y1 z1) (Bounds3d x2 y2 z2)

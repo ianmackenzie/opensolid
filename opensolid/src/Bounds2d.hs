@@ -8,6 +8,8 @@ module Bounds2d
   , hull3
   , hull4
   , aggregate2
+  , exclusion
+  , inclusion
   , overlap
   , separation
   , intersection
@@ -78,6 +80,21 @@ constant (Point2d x y) =
 aggregate2 :: Bounds2d (space @ units) -> Bounds2d (space @ units) -> Bounds2d (space @ units)
 aggregate2 (Bounds2d x1 y1) (Bounds2d x2 y2) =
   Bounds2d (Range.aggregate2 x1 x2) (Range.aggregate2 y1 y2)
+
+exclusion :: Point2d (space @ units) -> Bounds2d (space @ units) -> Qty units
+exclusion (Point2d x y) (Bounds2d bx by)
+  | px && py = Qty.hypot2 dx dy
+  | px = dx
+  | py = dy
+  | otherwise = Qty.max dx dy
+ where
+  dx = Range.exclusion x bx
+  dy = Range.exclusion y by
+  px = dx >= Qty.zero
+  py = dy >= Qty.zero
+
+inclusion :: Point2d (space @ units) -> Bounds2d (space @ units) -> Qty units
+inclusion point bounds = -(exclusion point bounds)
 
 separation :: Bounds2d (space @ units) -> Bounds2d (space @ units) -> Qty units
 separation (Bounds2d x1 y1) (Bounds2d x2 y2)
