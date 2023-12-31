@@ -40,6 +40,7 @@ module Range
   , interpolationParameter
   , any
   , all
+  , resolve
   , resolution
   , intersection
   , generator
@@ -460,6 +461,18 @@ all assess range =
       | otherwise ->
           let (left, right) = bisect range
            in all assess left && all assess right
+
+resolve :: (Eq a) => (Range units -> Fuzzy a) -> Range units -> Fuzzy a
+resolve assess range =
+  case assess range of
+    Resolved value -> Resolved value
+    Unresolved
+      | isAtomic range -> Unresolved
+      | otherwise -> do
+          let (left, right) = bisect range
+          leftValue <- resolve assess left
+          rightValue <- resolve assess right
+          if leftValue == rightValue then Resolved leftValue else Unresolved
 
 solve :: (Qty units1 -> Qty units2) -> Range units1 -> Maybe (Qty units1)
 solve f (Range x1 x2)
