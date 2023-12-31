@@ -448,7 +448,7 @@ any assess range =
     Unresolved
       | isAtomic range -> False
       | otherwise ->
-          let (left, right) = Range.bisect range
+          let (left, right) = bisect range
            in any assess left || any assess right
 
 all :: (Range units -> Fuzzy Bool) -> Range units -> Bool
@@ -458,7 +458,7 @@ all assess range =
     Unresolved
       | isAtomic range -> True
       | otherwise ->
-          let (left, right) = Range.bisect range
+          let (left, right) = bisect range
            in all assess left && all assess right
 
 solve :: (Qty units1 -> Qty units2) -> Range units1 -> Maybe (Qty units1)
@@ -531,7 +531,7 @@ generator :: Random.Generator (Qty units) -> Random.Generator (Range units)
 generator qtyGenerator = do
   a <- qtyGenerator
   b <- qtyGenerator
-  Random.return (Range.from a b)
+  Random.return (from a b)
 
 samples :: Range units -> List (Qty units)
 samples range = List.map (interpolate range) Quadrature.points
