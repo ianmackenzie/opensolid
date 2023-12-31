@@ -12,8 +12,9 @@ module Range
   , width
   , squared
   , includes
+  , inclusion
+  , exclusion
   , contains
-  , signedDistance
   , overlap
   , separation
   , isContainedIn
@@ -83,7 +84,7 @@ instance (units ~ units') => ApproximateEquality (Qty units) (Range units') unit
   value ~= range = range ~= value
 
 instance (units ~ units') => Intersects (Qty units) (Range units') units where
-  value ^ range = signedDistance value range <= ?tolerance
+  value ^ range = exclusion value range <= ?tolerance
 
 instance (units ~ units') => Intersects (Range units) (Qty units') units where
   range ^ value = value ^ range
@@ -304,14 +305,17 @@ hypot3 (Range xMin xMax) (Range yMin yMax) (Range zMin zMax)
 includes :: Qty units -> Range units -> Bool
 includes value (Range low high) = low <= value && value <= high
 
+exclusion :: Qty units -> Range units -> Qty units
+exclusion value (Range low high) = Qty.max (low - value) (value - high)
+
+inclusion :: Qty units -> Range units -> Qty units
+inclusion value range = -(exclusion value range)
+
 contains :: Range units -> Range units -> Bool
 contains (Range low2 high2) (Range low1 high1) = low1 <= low2 && high2 <= high1
 
 isContainedIn :: Range units -> Range units -> Bool
 isContainedIn range value = contains value range
-
-signedDistance :: Qty units -> Range units -> Qty units
-signedDistance value (Range low high) = Qty.max (low - value) (value - high)
 
 separation :: Range units -> Range units -> Qty units
 separation (Range low1 high1) (Range low2 high2) = Qty.max (low1 - high2) (low2 - high1)
