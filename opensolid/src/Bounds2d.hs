@@ -17,6 +17,7 @@ module Bounds2d
   , sample
   , any
   , all
+  , resolve
   )
 where
 
@@ -201,3 +202,30 @@ all assess bounds@(Bounds2d x y) =
                 && all assess (Bounds2d x1 y2)
                 && all assess (Bounds2d x2 y1)
                 && all assess (Bounds2d x2 y2)
+
+resolve :: (Eq a) => (Bounds2d (space @ units) -> Fuzzy a) -> Bounds2d (space @ units) -> Fuzzy a
+resolve assess bounds@(Bounds2d x y) =
+  case assess bounds of
+    Resolved value -> Resolved value
+    Unresolved
+      | Range.isAtomic x && Range.isAtomic y -> Unresolved
+      | Range.isAtomic x -> do
+          let (y1, y2) = Range.bisect y
+          value1 <- resolve assess (Bounds2d x y1)
+          value2 <- resolve assess (Bounds2d x y2)
+          if value1 == value2 then Resolved value1 else Unresolved
+      | Range.isAtomic y -> do
+          let (x1, x2) = Range.bisect x
+          value1 <- resolve assess (Bounds2d x1 y)
+          value2 <- resolve assess (Bounds2d x2 y)
+          if value1 == value2 then Resolved value1 else Unresolved
+      | otherwise -> do
+          let (x1, x2) = Range.bisect x
+          let (y1, y2) = Range.bisect y
+          value11 <- resolve assess (Bounds2d x1 y1)
+          value12 <- resolve assess (Bounds2d x1 y2)
+          value21 <- resolve assess (Bounds2d x2 y1)
+          value22 <- resolve assess (Bounds2d x2 y2)
+          if value11 == value12 && value11 == value21 && value11 == value22
+            then Resolved value11
+            else Unresolved
