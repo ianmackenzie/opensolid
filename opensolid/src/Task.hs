@@ -7,6 +7,7 @@ module Task
   , mapError
   , forEach
   , fromIO
+  , toIO
   , collect
   )
 where
@@ -52,6 +53,11 @@ mapError function (Perform io) = Perform (fmap (mapError function) io)
 
 fromIO :: IO a -> Task IOError a
 fromIO io = Perform (Control.Exception.catch (fmap return io) (return . Done . Error))
+
+toIO :: Task x a -> IO a
+toIO (Done (Ok value)) = return value
+toIO (Done (Error error)) = fail (errorMessage error)
+toIO (Perform io) = io >>= toIO
 
 main :: Task x () -> IO ()
 main (Done (Ok ())) = System.Exit.exitSuccess
