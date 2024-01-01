@@ -178,9 +178,16 @@ testSurface1dIntersection = Try.do
   log "Number of solutions" (List.length solutions)
   let showSolution solution =
         case solution of
-          Surface1d.Solution.CrossingCurve {segments} -> do
-            let Point2d x y = Curve2d.startPoint (NonEmpty.first segments)
-            Console.printLine (String.fromFloat x ++ "," ++ String.fromFloat y)
+          Surface1d.Solution.CrossingLoop {segments} -> do
+            log "Crossing loop with size" (NonEmpty.length segments)
+            NonEmpty.toList segments
+              |> Task.each
+                ( \curve -> do
+                    let Point2d x y = Curve2d.startPoint curve
+                    Console.printLine (String.fromFloat x ++ "," ++ String.fromFloat y)
+                )
+          Surface1d.Solution.CrossingCurve {segments} ->
+            log "Extra crossing curve with size" (NonEmpty.length segments)
           _ -> log "  Unexpected solution" solution
   solutions |> Task.each showSolution
  where
