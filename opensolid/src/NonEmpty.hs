@@ -4,6 +4,7 @@ module NonEmpty
   , singleton
   , first
   , rest
+  , last
   , toList
   , prepend
   , length
@@ -74,6 +75,9 @@ first = Data.List.NonEmpty.head
 
 rest :: NonEmpty a -> List a
 rest = Data.List.NonEmpty.tail
+
+last :: NonEmpty a -> a
+last = Data.List.NonEmpty.last
 
 toList :: NonEmpty a -> List a
 toList (x :| xs) = x : xs
