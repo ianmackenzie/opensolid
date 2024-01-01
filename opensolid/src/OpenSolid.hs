@@ -14,7 +14,6 @@ module OpenSolid
   , module Units
   , module Angle
   , module Intersects
-  , module SetDifference
   )
 where
 
@@ -29,7 +28,6 @@ import Intersects (Intersects ((^)))
 import NonEmpty (NonEmpty ((:|)), pattern NonEmpty)
 import Qty (Qty (Qty))
 import Result (ErrorMessage (errorMessage), Result (Error, Ok))
-import SetDifference (SetDifference ((\\)))
 import Sign (Sign (Negative, Positive))
 import Task (Task)
 import Tolerance (ApproximateEquality ((~=)), Tolerance, exactly, (!=))

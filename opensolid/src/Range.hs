@@ -153,14 +153,6 @@ instance (Units.Quotient units1 units2 units3) => Division (Range units1) (Range
       then hull4 (nl / dl) (nl / dh) (nh / dl) (nh / dh)
       else unsafe -Qty.infinity Qty.infinity
 
-instance SetDifference (Range units) (Range units) (List (Range units)) where
-  range1@(Range low1 high1) \\ Range low2 high2
-    | low2 >= high1 || high2 <= low1 = [range1]
-    | low2 > low1 && high2 >= high1 = [unsafe low1 low2]
-    | low2 <= low1 && high2 < high1 = [unsafe high2 high1]
-    | low2 > low1 && high2 < high1 = [unsafe low1 low2, unsafe high2 high1]
-    | otherwise = []
-
 instance Bounds.Interface (Range units) where
   aggregate2Impl = aggregate2
   intersectionImpl = intersection
