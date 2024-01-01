@@ -378,7 +378,7 @@ solve :: (Tolerance units) => Function units -> Result SolveError (List Solution
 solve Zero = Error ZeroEverywhere
 solve (Constant value) = if value ~= Qty.zero then Error ZeroEverywhere else Ok []
 solve f | isZero f = Error ZeroEverywhere
-solve f = findSolutions f fu fv fuu fvv fuv Uv.domain [] |> Result.map Pair.first
+solve f = findSolutions f fu fv fuu fvv fuv Uv.domain U [] |> Result.map Pair.first
  where
   fu = derivative U f
   fv = derivative V f
@@ -395,9 +395,10 @@ findSolutions ::
   Function units ->
   Function units ->
   Uv.Bounds ->
+  Uv.Parameter ->
   List Uv.Bounds ->
   Result SolveError (List Solution, List Uv.Bounds)
-findSolutions f fu fv fuu fvv fuv uvBounds exclusions
+findSolutions f fu fv fuu fvv fuv uvBounds bisectionParameter exclusions
   | Range.exclusion Qty.zero fBounds > ?tolerance = Ok ([], []) -- no solutions
   | Just result <- generalSolution f fu fv uvBounds = result
   | Just result <- horizontalSolution f fu fv uvBounds = result
@@ -406,15 +407,11 @@ findSolutions f fu fv fuu fvv fuv uvBounds exclusions
   | fBounds ~= Qty.zero && allDerivativesZero uvBounds fu fv fuu fvv fuv =
       Error HigherOrderIntersection
   | otherwise = do
-      let (Bounds2d u v) = uvBounds
-      let (u1, u2) = Range.bisect u
-      let (v1, v2) = Range.bisect v
-      let recurse = findSolutions f fu fv fuu fvv fuv
-      (solutions11, exclusions11) <- recurse (Bounds2d u1 v1) exclusions
-      (solutions12, exclusions12) <- recurse (Bounds2d u1 v2) exclusions11
-      (solutions21, exclusions21) <- recurse (Bounds2d u2 v1) exclusions12
-      (solutions22, exclusions22) <- recurse (Bounds2d u2 v2) exclusions21
-      return (solutions11 ++ solutions12 ++ solutions21 ++ solutions22, exclusions22)
+      let (bounds1, bounds2) = Uv.bisect bisectionParameter uvBounds
+      let nextBisectionParameter = Uv.cycle bisectionParameter
+      (solutions1, exclusions1) <- findSolutions f fu fv fuu fvv fuv bounds1 nextBisectionParameter exclusions
+      (solutions2, exclusions2) <- findSolutions f fu fv fuu fvv fu bounds2 nextBisectionParameter exclusions1
+      return (Solution.merge solutions1 solutions2, exclusions2)
  where
   fBounds = segmentBounds uvBounds f
 

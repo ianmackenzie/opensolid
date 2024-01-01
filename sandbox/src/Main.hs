@@ -174,7 +174,7 @@ testSurface1dIntersection = Try.do
   let fvv = fv |> Surface1d.Function.derivative V
   let fuv = fu |> Surface1d.Function.derivative V
   let uvBounds = Bounds2d (Range.from -2.0 2.0) (Range.from -2.0 2.0)
-  (solutions, _) <- Task.evaluate (Surface1d.Function.findSolutions f fu fv fuu fvv fuv uvBounds [])
+  (solutions, _) <- Task.evaluate (Surface1d.Function.findSolutions f fu fv fuu fvv fuv uvBounds U [])
   log "Number of solutions" (List.length solutions)
   let showSolution solution =
         case solution of
