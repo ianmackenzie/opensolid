@@ -295,7 +295,7 @@ main =
         (SP.proc "ruff" ["format", "--stdin-filename", "opensolid.py", "--quiet"])
           { SP.std_in = SP.CreatePipe
           }
-   in Task.toIO $ Try.do
+   in Task.main $ Try.do
         (Just stdinHandle, _, _, process) <- Task.fromIO (SP.createProcess ruffCmd)
         Task.fromIO (SIO.hPutStr stdinHandle pythonCode)
         Task.fromIO (SIO.hClose stdinHandle)

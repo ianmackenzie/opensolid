@@ -208,4 +208,4 @@ script = Try.do
   ?tolerance = Length.meters 1e-9
 
 main :: IO ()
-main = Task.toIO script
+main = Task.main script

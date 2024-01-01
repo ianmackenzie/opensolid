@@ -1,7 +1,7 @@
 module Task
   ( Task
   , evaluate
-  , toIO
+  , main
   , fail
   , map
   , mapError
@@ -53,10 +53,10 @@ mapError function (Perform io) = Perform (fmap (mapError function) io)
 fromIO :: IO a -> Task IOError a
 fromIO io = Perform (Control.Exception.catch (fmap return io) (return . Done . Error))
 
-toIO :: Task x () -> IO ()
-toIO (Done (Ok ())) = System.Exit.exitSuccess
-toIO (Done (Error error)) = System.Exit.die (errorMessage error)
-toIO (Perform io) = io >>= toIO
+main :: Task x () -> IO ()
+main (Done (Ok ())) = System.Exit.exitSuccess
+main (Done (Error error)) = System.Exit.die (errorMessage error)
+main (Perform io) = io >>= main
 
 forEach :: List a -> (a -> Task x ()) -> Task x ()
 forEach values function = Prelude.mapM_ function values
