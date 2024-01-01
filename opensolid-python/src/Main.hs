@@ -188,7 +188,7 @@ cType typ =
     Float -> PY.var "c_double"
     Boolean -> PY.var "c_bool"
     Maybe _ -> PY.var "c_void_p"
-    Result{} -> PY.var "c_void_p"
+    Result {} -> PY.var "c_void_p"
     Tuple2 _ _ -> PY.var "c_void_p"
     Self -> PY.var "c_void_p"
 
@@ -226,7 +226,7 @@ fnBody typ ffiFunc args =
   expression = case typ of
     Pointer _ -> PY.call (exprReader typ) [fnCall]
     Tuple2 _ _ -> PY.call (exprReader typ) [fnCall]
-    Result{} -> PY.call (exprReader typ) [fnCall]
+    Result {} -> PY.call (exprReader typ) [fnCall]
     Maybe _ -> PY.call (exprReader typ) [fnCall]
     Self -> PY.var "self" `PY.dot` "ptr"
     _ -> fnCall
