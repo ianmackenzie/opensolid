@@ -1,5 +1,3 @@
-{-# OPTIONS_GHC -Wno-unused-local-binds #-}
-
 module Surface1d.Function
   ( Function
   , Interface (..)
@@ -36,7 +34,9 @@ import Direction2d qualified
 import Float qualified
 import Generic qualified
 import List qualified
+import NonEmpty qualified
 import OpenSolid
+import Pair qualified
 import Point2d (Point2d (Point2d))
 import Point2d qualified
 import Qty qualified
@@ -45,6 +45,8 @@ import Range qualified
 import Result qualified
 import Surface1d.Solution (Solution)
 import Surface1d.Solution qualified as Solution
+import Surface1d.Solution.Boundary (Boundary)
+import Surface1d.Solution.Boundary qualified as Boundary
 import U qualified
 import Units qualified
 import Uv (Parameter (U, V))
@@ -376,7 +378,7 @@ solve :: (Tolerance units) => Function units -> Result SolveError (List Solution
 solve Zero = Error ZeroEverywhere
 solve (Constant value) = if value ~= Qty.zero then Error ZeroEverywhere else Ok []
 solve f | isZero f = Error ZeroEverywhere
-solve f = findSolutions f fu fv fuu fvv fuv Uv.domain
+solve f = findSolutions f fu fv fuu fvv fuv Uv.domain [] |> Result.map Pair.first
  where
   fu = derivative U f
   fv = derivative V f
@@ -393,62 +395,262 @@ findSolutions ::
   Function units ->
   Function units ->
   Uv.Bounds ->
-  Result SolveError (List Solution)
-findSolutions f fu fv fuu fvv fuv uvBounds
-  | not (fBounds ^ Qty.zero) = Ok []
-  | Just (Ok curve) <- maybeCrossingCurveByU = Ok [Solution.CrossingCurve curve]
-  | Just (Error Curve2d.DegenerateCurve) <- maybeCrossingCurveByU = Error DegenerateCurve
-  -- TODO: other solution types
-  | everythingZero = Error HigherOrderIntersection
+  List Uv.Bounds ->
+  Result SolveError (List Solution, List Uv.Bounds)
+findSolutions f fu fv fuu fvv fuv uvBounds exclusions
+  | Range.exclusion Qty.zero fBounds > ?tolerance = Ok ([], []) -- no solutions
+  | Just result <- generalSolution f fu fv uvBounds = result
+  | Just result <- horizontalSolution f fu fv uvBounds = result
+  | Just result <- verticalSolution f fu fv uvBounds = result
+  -- TODO: tangent solutions
+  | fBounds ~= Qty.zero && allDerivativesZero uvBounds fu fv fuu fvv fuv =
+      Error HigherOrderIntersection
   | otherwise = do
-      let (u1, u2) = Range.bisect uRange
-      let (v1, v2) = Range.bisect vRange
+      let (Bounds2d u v) = uvBounds
+      let (u1, u2) = Range.bisect u
+      let (v1, v2) = Range.bisect v
       let recurse = findSolutions f fu fv fuu fvv fuv
-      solutions11 <- recurse (Bounds2d u1 v1)
-      solutions12 <- recurse (Bounds2d u1 v2)
-      solutions21 <- recurse (Bounds2d u2 v1)
-      solutions22 <- recurse (Bounds2d u2 v2)
-      return (solutions11 ++ solutions12 ++ solutions21 ++ solutions22)
+      (solutions11, exclusions11) <- recurse (Bounds2d u1 v1) exclusions
+      (solutions12, exclusions12) <- recurse (Bounds2d u1 v2) exclusions11
+      (solutions21, exclusions21) <- recurse (Bounds2d u2 v1) exclusions12
+      (solutions22, exclusions22) <- recurse (Bounds2d u2 v2) exclusions21
+      return (solutions11 ++ solutions12 ++ solutions21 ++ solutions22, exclusions22)
  where
-  (Bounds2d uRange vRange) = uvBounds
-  (Range minU maxU) = uRange
-  (Range minV maxV) = vRange
-  uWidth = Range.width uRange
-  vWidth = Range.width vRange
-  uLeft = minU - uWidth
-  uRight = maxU + uWidth
-  vBottom = minV - vWidth
-  vTop = maxV + vWidth
-  expandedURange = Range.from uLeft uRight
-  expandedVRange = Range.from vBottom vTop
-  expandedUBounds = Bounds2d expandedURange vRange
-  expandedVBounds = Bounds2d uRange expandedVRange
-  uLeftSlice = Bounds2d (Range.constant uLeft) vRange
-  uRightSlice = Bounds2d (Range.constant uRight) vRange
-  vBottomSlice = Bounds2d uRange (Range.constant vBottom)
-  vTopSlice = Bounds2d uRange (Range.constant vTop)
   fBounds = segmentBounds uvBounds f
 
-  everythingZero =
-    fBounds ~= Qty.zero
-      && segmentBounds uvBounds fu ~= Qty.zero
-      && segmentBounds uvBounds fv ~= Qty.zero
-      && segmentBounds uvBounds fuu ~= Qty.zero
-      && segmentBounds uvBounds fvv ~= Qty.zero
-      && segmentBounds uvBounds fuv ~= Qty.zero
+generalSolution ::
+  (Tolerance units) =>
+  Function units ->
+  Function units ->
+  Function units ->
+  Uv.Bounds ->
+  Maybe (Result SolveError (List Solution, List Uv.Bounds))
+generalSolution f fu fv uvBounds@(Bounds2d (Range minU maxU) (Range minV maxV))
+  | resolved fuBounds && resolved fvBounds =
+      let signAt u v = Qty.sign (evaluateAt (Point2d u v) f)
+       in Just $ Result.map (,[]) $ case (signAt minU minV, signAt maxU minV, signAt minU maxV, signAt maxU maxV) of
+            (Positive, Positive, Positive, Positive) -> Ok []
+            (Negative, Negative, Negative, Negative) -> Ok []
+            (Positive, Positive, Negative, Negative) -> rightwardsSolution f fu fv uvBounds
+            (Negative, Negative, Positive, Positive) -> leftwardsSolution f fu fv uvBounds
+            (Positive, Negative, Positive, Negative) -> downwardsSolution f fu fv uvBounds
+            (Negative, Positive, Negative, Positive) -> upwardsSolution f fu fv uvBounds
+            -- One positive corner
+            (Positive, Negative, Negative, Negative) ->
+              -- Bottom left positive
+              let startV = solveVertically f minU maxV minV
+                  endU = solveHorizontally f maxU minU minV
+                  curveBounds = Bounds2d (Range.from minU endU) (Range.from minV startV)
+                  startBoundary = Boundary.left curveBounds
+                  endBoundary = Boundary.bottom curveBounds
+               in if endU - minU >= startV - minV
+                    then crossingSolution startBoundary endBoundary (horizontalCurve f fu fv minU endU startV minV)
+                    else crossingSolution startBoundary endBoundary (verticalCurve f fu fv endU minU startV minV)
+            (Negative, Positive, Negative, Negative) ->
+              -- Bottom right positive
+              let startU = solveHorizontally f minU maxU minV
+                  endV = solveVertically f maxU maxV minV
+                  curveBounds = Bounds2d (Range.from startU maxU) (Range.from minV endV)
+                  startBoundary = Boundary.bottom curveBounds
+                  endBoundary = Boundary.right curveBounds
+               in if maxU - startU >= endV - minV
+                    then crossingSolution startBoundary endBoundary (horizontalCurve f fu fv startU maxU endV minV)
+                    else crossingSolution startBoundary endBoundary (verticalCurve f fu fv startU maxU minV endV)
+            (Negative, Negative, Positive, Negative) ->
+              -- Top left positive
+              let startU = solveHorizontally f maxU minU maxV
+                  endV = solveVertically f minU minV maxV
+                  curveBounds = Bounds2d (Range.from minU startU) (Range.from endV maxV)
+                  startBoundary = Boundary.top curveBounds
+                  endBoundary = Boundary.left curveBounds
+               in if startU - minU >= maxV - endV
+                    then crossingSolution startBoundary endBoundary (horizontalCurve f fu fv startU minU endV maxV)
+                    else crossingSolution startBoundary endBoundary (verticalCurve f fu fv startU minU maxV endV)
+            (Negative, Negative, Negative, Positive) ->
+              -- Top right positive
+              let startV = solveVertically f maxU minV maxV
+                  endU = solveHorizontally f minU maxU maxV
+                  curveBounds = Bounds2d (Range.from endU maxU) (Range.from startV maxV)
+                  startBoundary = Boundary.right curveBounds
+                  endBoundary = Boundary.top curveBounds
+               in if maxU - endU >= maxV - startV
+                    then crossingSolution startBoundary endBoundary (horizontalCurve f fu fv maxU endU startV maxV)
+                    else crossingSolution startBoundary endBoundary (verticalCurve f fu fv endU maxU startV maxV)
+            -- One negative corner
+            (Negative, Positive, Positive, Positive) ->
+              -- Bottom left negative
+              let endV = solveVertically f minU minV maxV
+                  startU = solveHorizontally f minU maxU minV
+                  curveBounds = Bounds2d (Range.from minU startU) (Range.from minV endV)
+                  startBoundary = Boundary.bottom curveBounds
+                  endBoundary = Boundary.left curveBounds
+               in if startU - minU >= endV - minV
+                    then crossingSolution startBoundary endBoundary (horizontalCurve f fu fv startU minU minV endV)
+                    else crossingSolution startBoundary endBoundary (verticalCurve f fu fv minU startU minV endV)
+            (Positive, Negative, Positive, Positive) ->
+              -- Bottom right negative
+              let startV = solveVertically f maxU minV maxV
+                  endU = solveHorizontally f maxU minU minV
+                  curveBounds = Bounds2d (Range.from endU maxU) (Range.from minV startV)
+                  startBoundary = Boundary.right curveBounds
+                  endBoundary = Boundary.bottom curveBounds
+               in if maxU - endU >= startV - minV
+                    then crossingSolution startBoundary endBoundary (horizontalCurve f fu fv maxU endU minV startV)
+                    else crossingSolution startBoundary endBoundary (verticalCurve f fu fv maxU endU startV minV)
+            (Positive, Positive, Negative, Positive) ->
+              -- Top left negative
+              let startV = solveVertically f minU maxV minV
+                  endU = solveHorizontally f minU maxU maxV
+                  curveBounds = Bounds2d (Range.from minU endU) (Range.from startV maxV)
+                  startBoundary = Boundary.left curveBounds
+                  endBoundary = Boundary.top curveBounds
+               in if endU - minU >= maxV - startV
+                    then crossingSolution startBoundary endBoundary (horizontalCurve f fu fv minU endU maxV startV)
+                    else crossingSolution startBoundary endBoundary (verticalCurve f fu fv minU endU startV maxV)
+            (Positive, Positive, Positive, Negative) ->
+              -- Top right negative
+              let startU = solveHorizontally f maxU minU maxV
+                  endV = solveVertically f maxU maxV minV
+                  curveBounds = Bounds2d (Range.from startU maxU) (Range.from endV maxV)
+                  startBoundary = Boundary.top curveBounds
+                  endBoundary = Boundary.right curveBounds
+               in if maxU - startU >= maxV - endV
+                    then crossingSolution startBoundary endBoundary (horizontalCurve f fu fv startU maxU maxV endV)
+                    else crossingSolution startBoundary endBoundary (verticalCurve f fu fv maxU startU maxV endV)
+            -- Shouldn't happen
+            (Negative, Positive, Positive, Negative) -> internalError "Inconsistent derivatives"
+            (Positive, Negative, Negative, Positive) -> internalError "Inconsistent derivatives"
+  | otherwise = Nothing
+ where
+  fuBounds = segmentBounds uvBounds fu
+  fvBounds = segmentBounds uvBounds fv
 
-  maybeCrossingCurveByU
-    | fvResolution >= 0.5 && isNegative f vBottomSlice && isPositive f vTopSlice =
-        Just (Result.map Curve2d.reverse crossingCurveByU)
-    | fvResolution <= -0.5 && isPositive f vBottomSlice && isNegative f vTopSlice =
-        Just crossingCurveByU
-    | otherwise = Nothing
-   where
-    fvResolution = Range.resolution (segmentBounds expandedVBounds fv)
+resolved :: Range units -> Bool
+resolved range = Qty.abs (Range.resolution range) >= 0.5
 
-  crossingCurveByU :: Result Curve2d.DegenerateCurve (Curve2d Uv.Coordinates)
-  crossingCurveByU =
-    exactly (Curve2d.from (CrossingCurveByU f (-fu / fv) minU maxU expandedVRange))
+horizontalSolution ::
+  (Tolerance units) =>
+  Function units ->
+  Function units ->
+  Function units ->
+  Uv.Bounds ->
+  Maybe (Result SolveError (List Solution, List Uv.Bounds))
+horizontalSolution f fu fv (Bounds2d uRange vRange@(Range minV maxV))
+  | fvResolution >= 0.5 && bottomSign == Resolved Negative && topSign == Resolved Positive =
+      Just (Result.map (,exclusions) (leftwardsSolution f fu fv expandedBounds))
+  | fvResolution <= -0.5 && bottomSign == Resolved Positive && topSign == Resolved Negative =
+      Just (Result.map (,exclusions) (rightwardsSolution f fu fv expandedBounds))
+  | otherwise = Nothing
+ where
+  vHalfWidth = 0.5 * Range.width vRange
+  vBottom = minV - vHalfWidth
+  vTop = maxV + vHalfWidth
+  expandedVRange = Range.from vBottom vTop
+  expandedBounds = Bounds2d uRange expandedVRange
+  fvResolution = Range.resolution (segmentBounds expandedBounds fv)
+  sliceSign v uSubRange = sign (boundsOn f (Bounds2d uSubRange (Range.constant v)))
+  bottomSign = Range.resolve (sliceSign vBottom) uRange
+  topSign = Range.resolve (sliceSign vTop) uRange
+  exclusions = [Bounds2d uRange (Range.from vBottom minV), Bounds2d uRange (Range.from maxV vTop)]
+
+verticalSolution ::
+  (Tolerance units) =>
+  Function units ->
+  Function units ->
+  Function units ->
+  Uv.Bounds ->
+  Maybe (Result SolveError (List Solution, List Uv.Bounds))
+verticalSolution f fu fv (Bounds2d uRange@(Range minU maxU) vRange)
+  | fuResolution >= 0.5 && leftSign == Resolved Negative && rightSign == Resolved Positive =
+      Just (Result.map (,exclusions) (upwardsSolution f fu fv expandedBounds))
+  | fuResolution <= -0.5 && leftSign == Resolved Positive && rightSign == Resolved Negative =
+      Just (Result.map (,exclusions) (downwardsSolution f fu fv expandedBounds))
+  | otherwise = Nothing
+ where
+  uHalfWidth = 0.5 * Range.width uRange
+  uLeft = minU - uHalfWidth
+  uRight = maxU + uHalfWidth
+  expandedURange = Range.from uLeft uRight
+  expandedBounds = Bounds2d expandedURange vRange
+  fuResolution = Range.resolution (segmentBounds expandedBounds fu)
+  sliceSign u vSubRange = sign (boundsOn f (Bounds2d (Range.constant u) vSubRange))
+  leftSign = Range.resolve (sliceSign uLeft) vRange
+  rightSign = Range.resolve (sliceSign uRight) vRange
+  exclusions = [Bounds2d (Range.from uLeft minU) vRange, Bounds2d (Range.from maxU uRight) vRange]
+
+rightwardsSolution ::
+  Function units ->
+  Function units ->
+  Function units ->
+  Uv.Bounds ->
+  Result SolveError (List Solution)
+rightwardsSolution f fu fv (Bounds2d (Range minU maxU) vRange@(Range minV maxV)) =
+  crossingSolution (Boundary.Left minU vRange) (Boundary.Right maxU vRange) $
+    horizontalCurve f fu fv minU maxU maxV minV
+
+leftwardsSolution ::
+  Function units ->
+  Function units ->
+  Function units ->
+  Uv.Bounds ->
+  Result SolveError (List Solution)
+leftwardsSolution f fu fv (Bounds2d (Range minU maxU) vRange@(Range minV maxV)) =
+  crossingSolution (Boundary.Right maxU vRange) (Boundary.Left minU vRange) $
+    horizontalCurve f fu fv maxU minU minV maxV
+
+upwardsSolution ::
+  Function units ->
+  Function units ->
+  Function units ->
+  Uv.Bounds ->
+  Result SolveError (List Solution)
+upwardsSolution f fu fv (Bounds2d uRange@(Range minU maxU) (Range minV maxV)) =
+  crossingSolution (Boundary.Bottom uRange minV) (Boundary.Top uRange maxV) $
+    verticalCurve f fu fv minU maxU minV maxV
+
+downwardsSolution ::
+  Function units ->
+  Function units ->
+  Function units ->
+  Uv.Bounds ->
+  Result SolveError (List Solution)
+downwardsSolution f fu fv (Bounds2d uRange@(Range minU maxU) (Range minV maxV)) =
+  crossingSolution (Boundary.Top uRange maxV) (Boundary.Bottom uRange minV) $
+    verticalCurve f fu fv maxU minU maxV minV
+
+crossingSolution ::
+  Boundary ->
+  Boundary ->
+  Result SolveError (Curve2d Uv.Coordinates) ->
+  Result SolveError (List Solution)
+crossingSolution start end =
+  Result.map (\curve -> [Solution.CrossingCurve {start, end, segments = NonEmpty.singleton curve}])
+
+horizontalCurve ::
+  Function units ->
+  Function units ->
+  Function units ->
+  Float ->
+  Float ->
+  Float ->
+  Float ->
+  Result SolveError (Curve2d Uv.Coordinates)
+horizontalCurve f fu fv uStart uEnd vLow vHigh =
+  exactly (Curve2d.from (HorizontalCurve f (-fu / fv) uStart uEnd vLow vHigh))
+    |> Result.mapError (\Curve2d.DegenerateCurve -> DegenerateCurve)
+
+verticalCurve ::
+  Function units ->
+  Function units ->
+  Function units ->
+  Float ->
+  Float ->
+  Float ->
+  Float ->
+  Result SolveError (Curve2d Uv.Coordinates)
+verticalCurve f fu fv uLow uHigh vStart vEnd =
+  exactly (Curve2d.from (VerticalCurve f (-fv / fu) uLow uHigh vStart vEnd))
+    |> Result.mapError (\Curve2d.DegenerateCurve -> DegenerateCurve)
 
 -- isTangentCurveByU
 --   | segmentBounds vBottomSlice fv ^ Qty.zero = False
@@ -478,67 +680,140 @@ findSolutions f fu fv fuu fvv fuv uvBounds
 --                      in evaluateAt uvValue f ~= Qty.zero && evaluateAt uvValue fv ~= Qty.zero
 --        in List.all isTangentIntersectionPoint (Range.samples vRange)
 
-isRangePositive :: (Tolerance units) => Range units -> Fuzzy Bool
-isRangePositive range
-  | Range.minValue range > ?tolerance = Resolved True
-  | Range.maxValue range < ?tolerance = Resolved False
+allDerivativesZero ::
+  (Tolerance units) =>
+  Uv.Bounds ->
+  Function units ->
+  Function units ->
+  Function units ->
+  Function units ->
+  Function units ->
+  Bool
+allDerivativesZero uvBounds fu fv fuu fvv fuv =
+  segmentBounds uvBounds fu ~= Qty.zero
+    && segmentBounds uvBounds fv ~= Qty.zero
+    && segmentBounds uvBounds fuu ~= Qty.zero
+    && segmentBounds uvBounds fvv ~= Qty.zero
+    && segmentBounds uvBounds fuv ~= Qty.zero
+
+-- TODO: have the tolerance here be much larger
+-- (based on the derivative resolution)
+-- to avoid expensive bisection near zeros
+sign :: (Tolerance units) => Range units -> Fuzzy Sign
+sign range
+  | Range.minValue range > ?tolerance = Resolved Positive
+  | Range.maxValue range < negate ?tolerance = Resolved Negative
   | otherwise = Unresolved
 
-isRangeNegative :: (Tolerance units) => Range units -> Fuzzy Bool
-isRangeNegative range
-  | Range.maxValue range < negate ?tolerance = Resolved True
-  | Range.minValue range > negate ?tolerance = Resolved False
-  | otherwise = Unresolved
-
-isPositive :: (Tolerance units) => Function units -> Uv.Bounds -> Bool
-isPositive function uvBounds = Bounds2d.all (isRangePositive . boundsOn function) uvBounds
-
-isNegative :: (Tolerance units) => Function units -> Uv.Bounds -> Bool
-isNegative function uvBounds = Bounds2d.all (isRangeNegative . boundsOn function) uvBounds
-
-data CrossingCurveByU units
-  = CrossingCurveByU
-      (Function units)
-      (Function Unitless)
-      Float
-      Float
-      (Range Unitless)
+data HorizontalCurve units
+  = HorizontalCurve
+      (Function units) -- f
+      (Function Unitless) -- dv/du
+      Float -- uStart
+      Float -- uEnd
+      Float -- vLow
+      Float -- vHigh
   deriving (Show)
 
-instance Curve2d.Interface (CrossingCurveByU units) Uv.Coordinates where
+instance Curve2d.Interface (HorizontalCurve units) Uv.Coordinates where
   startPointImpl = Curve2d.evaluateAtImpl 0.0
   endPointImpl = Curve2d.evaluateAtImpl 1.0
 
-  evaluateAtImpl t (CrossingCurveByU f _ uStart uEnd vRange) =
+  evaluateAtImpl t (HorizontalCurve f _ uStart uEnd vLow vHigh) =
     let u = Float.interpolateFrom uStart uEnd t
-        v = evaluateCrossingCurveByU f vRange u
+        v = solveVertically f u vLow vHigh
      in Point2d u v
 
-  segmentBoundsImpl (Range t1 t2) (CrossingCurveByU f vu uStart uEnd vSearchBounds) =
+  segmentBoundsImpl (Range t1 t2) (HorizontalCurve f vu uStart uEnd vLow vHigh) =
     let u1 = Float.interpolateFrom uStart uEnd t1
         u2 = Float.interpolateFrom uStart uEnd t2
-        v1 = evaluateCrossingCurveByU f vSearchBounds u1
-        v2 = evaluateCrossingCurveByU f vSearchBounds u2
-        slopeBounds = segmentBounds (Bounds2d (Range.from u1 u2) vSearchBounds) vu
+        v1 = solveVertically f u1 vLow vHigh
+        v2 = solveVertically f u2 vLow vHigh
+        slopeBounds = segmentBounds (Bounds2d (Range.from u1 u2) (Range.from vLow vHigh)) vu
         vRange = parallelogramBounds u1 u2 v1 v2 slopeBounds
      in Bounds2d (Range.from u1 u2) vRange
 
-  derivativeImpl crossingCurve@(CrossingCurveByU _ vu uStart uEnd _) =
+  derivativeImpl crossingCurve@(HorizontalCurve _ vu uStart uEnd _ _) =
     let deltaU = uEnd - uStart
         uT = Curve1d.constant deltaU
         vT = deltaU * Curve1d (CurveOnSurface crossingCurve vu)
      in VectorCurve2d.xy uT vT
 
-  reverseImpl (CrossingCurveByU f vu uStart uEnd vRange) =
-    CrossingCurveByU f vu uEnd uStart vRange
+  reverseImpl (HorizontalCurve f vu uStart uEnd vLow vHigh) =
+    HorizontalCurve f vu uEnd uStart vLow vHigh
 
   boundsImpl crossingCurve = Curve2d.segmentBoundsImpl U.domain crossingCurve
 
-evaluateCrossingCurveByU :: Function units -> Range Unitless -> Float -> Float
-evaluateCrossingCurveByU f vRange u =
-  case Range.solve (\v -> evaluateAt (Point2d u v) f) vRange of
-    Just v -> v
-    Nothing -> internalError "Solution should always exist, by construction"
+data VerticalCurve units
+  = VerticalCurve
+      (Function units) -- f
+      (Function Unitless) -- du/dv
+      Float -- uLow
+      Float -- uHigh
+      Float -- vStart
+      Float -- vEnd
+  deriving (Show)
+
+instance Curve2d.Interface (VerticalCurve units) Uv.Coordinates where
+  startPointImpl = Curve2d.evaluateAtImpl 0.0
+  endPointImpl = Curve2d.evaluateAtImpl 1.0
+
+  evaluateAtImpl t (VerticalCurve f _ uLow uHigh vStart vEnd) =
+    let v = Float.interpolateFrom vStart vEnd t
+        u = solveHorizontally f uLow uHigh v
+     in Point2d u v
+
+  segmentBoundsImpl (Range t1 t2) (VerticalCurve f uv uLow uHigh vStart vEnd) =
+    let v1 = Float.interpolateFrom vStart vEnd t1
+        v2 = Float.interpolateFrom vStart vEnd t2
+        u1 = solveHorizontally f uLow uHigh v1
+        u2 = solveHorizontally f uLow uHigh v2
+        slopeBounds = segmentBounds (Bounds2d (Range.from uLow uHigh) (Range.from v1 v2)) uv
+        uRange = parallelogramBounds v1 v2 u1 u2 slopeBounds
+     in Bounds2d uRange (Range.from v1 v2)
+
+  derivativeImpl crossingCurve@(VerticalCurve _ uv _ _ vStart vEnd) =
+    let deltaV = vEnd - vStart
+        vT = Curve1d.constant deltaV
+        uT = deltaV * Curve1d (CurveOnSurface crossingCurve uv)
+     in VectorCurve2d.xy uT vT
+
+  reverseImpl (VerticalCurve f uv uLow uHigh vStart vEnd) =
+    VerticalCurve f uv uLow uHigh vEnd vStart
+
+  boundsImpl crossingCurve = Curve2d.segmentBoundsImpl U.domain crossingCurve
+
+solveVertically :: Function units -> Float -> Float -> Float -> Float
+solveVertically f u v1 v2
+  | valueAt v1 >= Qty.zero = v1
+  | valueAt v2 <= Qty.zero = v2
+  | otherwise = bisect v1 v2
+ where
+  valueAt v = evaluateAt (Point2d u v) f
+  bisect vLow vHigh
+    | vMid == vLow || vMid == vHigh = vMid
+    | fMid < Qty.zero = bisect vMid vHigh
+    | fMid > Qty.zero = bisect vLow vMid
+    | otherwise = vMid
+   where
+    vMid = Qty.midpoint vLow vHigh
+    fMid = valueAt vMid
+
+solveHorizontally :: Function units -> Float -> Float -> Float -> Float
+solveHorizontally f u1 u2 v
+  | valueAt u1 >= Qty.zero = u1
+  | valueAt u2 <= Qty.zero = u2
+  | otherwise = bisect u1 u2
+ where
+  valueAt u = evaluateAt (Point2d u v) f
+  bisect uLow uHigh
+    | uMid == uLow || uMid == uHigh = uMid
+    | fMid < Qty.zero = bisect uMid uHigh
+    | fMid > Qty.zero = bisect uLow uMid
+    | otherwise = uMid
+   where
+    uMid = Qty.midpoint uLow uHigh
+    fMid = valueAt uMid
 
 parallelogramBounds ::
   Float ->

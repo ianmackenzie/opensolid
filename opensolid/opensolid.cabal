@@ -143,6 +143,7 @@ library
       Surface1d
       Surface1d.Function
       Surface1d.Solution
+      Surface1d.Solution.Boundary
       Task
       Tolerance
       Transform2d
