@@ -17,7 +17,7 @@ module Curve2d
   , reverse
   , bounds
   , intersections
-  , parameterValues
+  , find
   , signedDistanceAlong
   , xCoordinate
   , yCoordinate
@@ -127,12 +127,12 @@ xCoordinate = signedDistanceAlong Axis2d.x
 yCoordinate :: Curve2d (space @ units) -> Curve1d units
 yCoordinate = signedDistanceAlong Axis2d.y
 
-parameterValues ::
+find ::
   (Tolerance units) =>
   Point2d (space @ units) ->
   Curve2d (space @ units) ->
   List Float
-parameterValues point curve =
+find point curve =
   VectorCurve2d.roots (point - curve)
     |> Result.withDefault [] -- Shouldn't happen, since curves are enforced to be non-degenerate
 
@@ -179,10 +179,10 @@ findEndpointParameterValues ::
 findEndpointParameterValues curve1 curve2 =
   List.sortAndDeduplicate $
     List.concat
-      [ List.map (0.0,) (parameterValues (startPoint curve1) curve2)
-      , List.map (1.0,) (parameterValues (endPoint curve1) curve2)
-      , List.map (,0.0) (parameterValues (startPoint curve2) curve1)
-      , List.map (,1.0) (parameterValues (endPoint curve2) curve1)
+      [ List.map (0.0,) (find (startPoint curve1) curve2)
+      , List.map (1.0,) (find (endPoint curve1) curve2)
+      , List.map (,0.0) (find (startPoint curve2) curve1)
+      , List.map (,1.0) (find (endPoint curve2) curve1)
       ]
 
 intersections ::

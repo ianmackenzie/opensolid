@@ -30,7 +30,7 @@ import VectorCurve2d qualified
 
 tests :: (Tolerance Meters) => List Test
 tests =
-  [ parameterValues
+  [ find
   , curveOverlap1
   , curveOverlap2
   , crossingIntersection
@@ -43,16 +43,16 @@ tests =
   , degenerateEndPointTangentDerivative
   ]
 
-parameterValues :: (Tolerance Meters) => Test
-parameterValues = Test.verify "parameterValues" $ Test.do
+find :: (Tolerance Meters) => Test
+find = Test.verify "find" $ Test.do
   let p1 = Point2d.meters 0.0 0.0
   let p2 = Point2d.meters 1.0 2.0
   let p3 = Point2d.meters 2.0 0.0
   testSpline <- QuadraticSpline2d.fromControlPoints p1 p2 p3
-  let startParameterValues = Curve2d.parameterValues Point2d.origin testSpline
-  let endParameterValues = Curve2d.parameterValues (Point2d.meters 2.0 0.0) testSpline
-  let midParameterValues = Curve2d.parameterValues (Point2d.meters 1.0 1.0) testSpline
-  let offCurveParameterValues = Curve2d.parameterValues (Point2d.meters 1.0 1.1) testSpline
+  let startParameterValues = Curve2d.find Point2d.origin testSpline
+  let endParameterValues = Curve2d.find (Point2d.meters 2.0 0.0) testSpline
+  let midParameterValues = Curve2d.find (Point2d.meters 1.0 1.0) testSpline
+  let offCurveParameterValues = Curve2d.find (Point2d.meters 1.0 1.1) testSpline
   let ?tolerance = 1e-12
    in Test.expectAll
         [ startParameterValues ~= [0.0]
