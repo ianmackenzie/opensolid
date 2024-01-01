@@ -127,7 +127,7 @@ testTry =
 
 testTaskIteration :: Task String ()
 testTaskIteration = do
-  Task.each (log "Looping") [1 .. 3]
+  Task.forEach [1 .. 3] (log "Looping")
 
 doublingTask :: String -> Task String Int
 doublingTask input = do
@@ -142,7 +142,7 @@ doubleManyTask = do
 testTaskSequencing :: Task String ()
 testTaskSequencing = do
   doubledValues <- doubleManyTask
-  Task.each (log "Doubled value") doubledValues
+  Task.forEach doubledValues (log "Doubled value")
 
 testParameter1dGeneration :: Task String ()
 testParameter1dGeneration = Try.do
@@ -176,20 +176,16 @@ testSurface1dIntersection = Try.do
   let uvBounds = Bounds2d (Range.from -2.0 2.0) (Range.from -2.0 2.0)
   (solutions, _) <- Task.evaluate (Surface1d.Function.findSolutions f fu fv fuu fvv fuv uvBounds U [])
   log "Number of solutions" (List.length solutions)
-  let showSolution solution =
-        case solution of
-          Surface1d.Solution.CrossingLoop {segments} -> do
-            log "Crossing loop with size" (NonEmpty.length segments)
-            NonEmpty.toList segments
-              |> Task.each
-                ( \curve -> do
-                    let Point2d x y = Curve2d.startPoint curve
-                    Console.printLine (String.fromFloat x ++ "," ++ String.fromFloat y)
-                )
-          Surface1d.Solution.CrossingCurve {segments} ->
-            log "Extra crossing curve with size" (NonEmpty.length segments)
-          _ -> log "  Unexpected solution" solution
-  solutions |> Task.each showSolution
+  Task.forEach solutions $ \solution ->
+    case solution of
+      Surface1d.Solution.CrossingLoop {segments} -> do
+        log "Crossing loop with size" (NonEmpty.length segments)
+        Task.forEach (NonEmpty.toList segments) $ \curve -> do
+          let Point2d x y = Curve2d.startPoint curve
+          Console.printLine (String.fromFloat x ++ "," ++ String.fromFloat y)
+      Surface1d.Solution.CrossingCurve {segments} ->
+        log "Extra crossing curve with size" (NonEmpty.length segments)
+      _ -> log "  Unexpected solution" solution
  where
   ?tolerance = 1e-9
 

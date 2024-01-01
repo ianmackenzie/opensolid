@@ -5,7 +5,7 @@ module Task
   , fail
   , map
   , mapError
-  , each
+  , forEach
   , fromIO
   , collect
   )
@@ -58,8 +58,8 @@ toIO (Done (Ok ())) = System.Exit.exitSuccess
 toIO (Done (Error error)) = System.Exit.die (errorMessage error)
 toIO (Perform io) = io >>= toIO
 
-each :: (a -> Task x ()) -> List a -> Task x ()
-each = Prelude.mapM_
+forEach :: List a -> (a -> Task x ()) -> Task x ()
+forEach values function = Prelude.mapM_ function values
 
 collect :: (a -> Task x b) -> List a -> Task x (List b)
 collect = Prelude.mapM

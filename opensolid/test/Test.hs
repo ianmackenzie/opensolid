@@ -87,7 +87,7 @@ reportError :: List String -> List String -> Task String (Int, Int)
 reportError context messages = do
   Console.printLine ("❌ " ++ (String.join " | " (List.reverse context) ++ ":"))
   Console.printLine ""
-  Task.each (Console.printLine . String.indent "   ") messages
+  Task.forEach messages (Console.printLine . String.indent "   ")
   Console.printLine ""
   return (0, 1)
 
