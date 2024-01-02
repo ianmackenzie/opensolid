@@ -21,12 +21,6 @@ instance (ErrorMessage x) => MapError (Result x) (Result String) where
 instance (ErrorMessage x, a ~ a') => MapError (Task x) (Task String) where
   mapError = Task.mapError errorMessage
 
-instance (a ~ a') => MapError [] [] where
-  mapError = id
-
-instance (a ~ a') => MapError Maybe Maybe where
-  mapError = id
-
 (>>) :: (MapError m1 m2) => m1 a -> m2 b -> m2 b
 first >> second = mapError first OpenSolid.>> second
 
