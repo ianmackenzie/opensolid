@@ -109,15 +109,14 @@ takeMax dict
   | isEmpty dict = (Nothing, dict)
   | otherwise = Pair.mapFirst Just (Data.Map.deleteFindMax dict)
 
+foldRight :: (v -> a -> a) -> a -> Dict k v -> a
+foldRight = Data.Map.foldr
+
 foldRightWithKey :: (k -> v -> a -> a) -> a -> Dict k v -> a
 foldRightWithKey = Data.Map.foldrWithKey
 
-foldRight :: (v -> a -> a) -> a -> Dict k v -> a
-foldRight function = foldRightWithKey (const function)
+foldLeft :: (a -> v -> a) -> a -> Dict k v -> a
+foldLeft = Data.Map.foldl'
 
-foldLeftWithKey :: (k -> v -> a -> a) -> a -> Dict k v -> a
-foldLeftWithKey function init dict =
-  Data.Map.foldlWithKey (\acc key value -> function key value acc) init dict
-
-foldLeft :: (v -> a -> a) -> a -> Dict k v -> a
-foldLeft function = foldLeftWithKey (const function)
+foldLeftWithKey :: (a -> k -> v -> a) -> a -> Dict k v -> a
+foldLeftWithKey = Data.Map.foldlWithKey

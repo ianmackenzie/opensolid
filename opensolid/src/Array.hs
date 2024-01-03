@@ -45,8 +45,8 @@ get index (Array array) =
 map :: (a -> b) -> Array a -> Array b
 map function (Array array) = Array (fmap function array)
 
-foldLeft :: (a -> b -> b) -> b -> Array a -> b
-foldLeft function init (Array array) = Data.Foldable.foldl' (\acc item -> function item acc) init array
+foldLeft :: (b -> a -> b) -> b -> Array a -> b
+foldLeft function init (Array array) = Data.Foldable.foldl' function init array
 
 foldRight :: (a -> b -> b) -> b -> Array a -> b
 foldRight function init (Array array) = Data.Foldable.foldr function init array

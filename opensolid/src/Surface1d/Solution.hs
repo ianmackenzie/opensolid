@@ -24,7 +24,7 @@ data Solution
   deriving (Show)
 
 merge :: List Solution -> List Solution -> List Solution
-merge left right = List.foldLeft add left right
+merge left right = List.foldRight add right left
 
 add :: Solution -> List Solution -> List Solution
 add solution [] = [solution]

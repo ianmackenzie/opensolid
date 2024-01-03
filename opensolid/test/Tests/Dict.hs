@@ -18,14 +18,14 @@ simpleDict = Dict.fromList [(1, "a"), (2, "b"), (3, "c")]
 
 foldLeft :: Test
 foldLeft = Test.verify "foldLeft" $ Test.do
-  let actual = Dict.foldLeft (\s acc -> acc ++ s) "" simpleDict
+  let actual = Dict.foldLeft (++) "" simpleDict
       expected = "abc"
    in Test.expect (actual == expected)
 
 foldRight :: Test
 foldRight = Test.verify "foldRight" $ Test.do
-  let actual = Dict.foldRight (\s acc -> acc ++ s) "" simpleDict
-      expected = "cba"
+  let actual = Dict.foldRight (++) "" simpleDict
+      expected = "abc"
    in Test.expect (actual == expected)
 
 take :: Test

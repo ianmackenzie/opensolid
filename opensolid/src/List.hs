@@ -104,8 +104,8 @@ collect = Prelude.concatMap
 concat :: List (List a) -> List a
 concat = Data.List.concat
 
-foldLeft :: (a -> b -> b) -> b -> List a -> b
-foldLeft function = Data.List.foldl' (\acc item -> function item acc)
+foldLeft :: (b -> a -> b) -> b -> List a -> b
+foldLeft = Data.List.foldl'
 
 foldRight :: (a -> b -> b) -> b -> List a -> b
 foldRight = Data.List.foldr
