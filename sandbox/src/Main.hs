@@ -4,10 +4,12 @@ import Angle qualified
 import Area qualified
 import Axis2d qualified
 import Bounds2d (Bounds2d (Bounds2d))
+import Bounds2d qualified
 import Console qualified
 import Curve2d qualified
 import Direction2d qualified
 import Direction3d ()
+import Drawing2d qualified
 import Length qualified
 import List qualified
 import NonEmpty qualified
@@ -188,6 +190,10 @@ testSurface1dIntersection = Try.do
  where
   ?tolerance = 1e-9
 
+testSvgOutput :: Task String ()
+testSvgOutput =
+  Console.printLine (Drawing2d.toSvg (Bounds2d.hull2 Point2d.origin (Point2d.meters 0.3 0.2)) [])
+
 script :: Task String ()
 script = Try.do
   testScalarArithmetic
@@ -203,6 +209,7 @@ script = Try.do
   testParameter1dGeneration
   testNonEmpty
   testSurface1dIntersection
+  testSvgOutput
  where
   ?tolerance = Length.meters 1e-9
 
