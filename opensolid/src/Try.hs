@@ -12,19 +12,19 @@ import Result qualified
 import String qualified
 import Task qualified
 
-class (Monad m1, Monad m2) => MapError m1 m2 | m1 -> m2 where
-  mapError :: m1 a -> m2 a
+class (Monad (m String)) => MapError m where
+  mapError :: (ErrorMessage x) => m x a -> m String a
 
-instance (ErrorMessage x) => MapError (Result x) (Result String) where
+instance MapError Result where
   mapError = Result.mapError errorMessage
 
-instance (ErrorMessage x, a ~ a') => MapError (Task x) (Task String) where
+instance MapError Task where
   mapError = Task.mapError errorMessage
 
-(>>) :: (MapError m1 m2) => m1 a -> m2 b -> m2 b
+(>>) :: (MapError m, ErrorMessage x) => m x a -> m String b -> m String b
 first >> second = mapError first OpenSolid.>> second
 
-(>>=) :: (MapError m1 m2) => m1 a -> (a -> m2 b) -> m2 b
+(>>=) :: (MapError m, ErrorMessage x) => m x a -> (a -> m String b) -> m String b
 value >>= function = mapError value OpenSolid.>>= function
 
 withContext :: (ErrorMessage x) => String -> Result x a -> Result String a
