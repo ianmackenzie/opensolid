@@ -3,10 +3,12 @@ module Drawing2d
   , Attribute
   , Resolution
   , toSvg
+  , writeTo
   )
 where
 
 import Bounds2d (Bounds2d (Bounds2d))
+import File qualified
 import Length (Length)
 import Length qualified
 import List qualified
@@ -58,3 +60,6 @@ toSvg (Bounds2d (Range x1 x2) (Range y1 y2)) entities =
         [ "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"
         , entityString "" (Node "svg" attributes entities)
         ]
+
+writeTo :: String -> Bounds2d (space @ Meters) -> List (Entity space) -> Task String ()
+writeTo path viewBox entities = File.writeTo path (toSvg viewBox entities)

@@ -11,7 +11,6 @@ import Direction2d qualified
 import Direction3d ()
 import Drawing2d qualified
 import Length qualified
-import File qualified
 import List qualified
 import NonEmpty qualified
 import OpenSolid
@@ -193,7 +192,7 @@ testSurface1dIntersection = Try.do
 
 testSvgOutput :: Task String ()
 testSvgOutput = Try.do
-  File.writeTo "test.svg" (Drawing2d.toSvg (Bounds2d.hull2 Point2d.origin (Point2d.meters 0.3 0.2)) [])
+  Drawing2d.writeTo "test.svg"  (Bounds2d.hull2 Point2d.origin (Point2d.meters 0.3 0.2)) []
 
 script :: Task String ()
 script = Try.do
