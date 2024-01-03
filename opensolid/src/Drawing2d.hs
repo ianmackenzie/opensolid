@@ -26,7 +26,7 @@ entityString indent (Node name attributes children) =
   let openingLine = indent ++ "<" ++ name
       attributeLines = List.map (attributeString (indent ++ "   ")) attributes
       childLines = String.join "\n" (List.map (entityString (indent ++ "  ")) children)
-      closingLine = "</" ++ name ++ ">"
+      closingLine = "</" ++ name ++ ">\n"
    in String.join "\n" $
         [ openingLine
         , String.join "\n" attributeLines ++ ">"
