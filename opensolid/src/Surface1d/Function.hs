@@ -400,20 +400,43 @@ findSolutions ::
   Result SolveError (List Solution, List Uv.Bounds)
 findSolutions f fu fv fuu fvv fuv uvBounds bisectionParameter exclusions
   | Range.exclusion Qty.zero fBounds > ?tolerance = Ok ([], []) -- no solutions
-  | Just result <- generalSolution f fu fv uvBounds = result
-  | Just result <- horizontalSolution f fu fv uvBounds = result
-  | Just result <- verticalSolution f fu fv uvBounds = result
+  | List.any (Bounds2d.contains uvBounds) exclusions = Ok ([], []) -- no solutions
+  | Just result <- generalSolution f fu fv uvBounds exclusions = result
+  | Just result <- horizontalSolution f fu fv uvBounds exclusions = result
+  | Just result <- verticalSolution f fu fv uvBounds exclusions = result
   -- TODO: tangent solutions
   | fBounds ~= Qty.zero && allDerivativesZero uvBounds fu fv fuu fvv fuv =
       Error HigherOrderIntersection
   | otherwise = do
       let (bounds1, bounds2) = Uv.bisect bisectionParameter uvBounds
       let nextBisectionParameter = Uv.cycle bisectionParameter
-      (solutions1, exclusions1) <- findSolutions f fu fv fuu fvv fuv bounds1 nextBisectionParameter exclusions
-      (solutions2, exclusions2) <- findSolutions f fu fv fuu fvv fu bounds2 nextBisectionParameter exclusions1
-      return (Solution.merge solutions1 solutions2, exclusions2)
+      (solutions1, exclusions1) <-
+        findSolutions f fu fv fuu fvv fuv bounds1 nextBisectionParameter $
+          List.filter (affects bounds1) exclusions
+      (solutions2, exclusions2) <-
+        findSolutions f fu fv fuu fvv fu bounds2 nextBisectionParameter $
+          List.filter (affects bounds2) (exclusions1 ++ exclusions)
+      return (Solution.merge solutions1 solutions2, exclusions1 ++ exclusions2)
  where
   fBounds = segmentBounds uvBounds f
+
+affects :: Uv.Bounds -> Uv.Bounds -> Bool
+affects uvBounds exclusion =
+  overlaps exclusion (expandU uvBounds) || overlaps exclusion (expandV uvBounds)
+
+overlaps :: Uv.Bounds -> Uv.Bounds -> Bool
+overlaps bounds1 bounds2 = Bounds2d.overlap bounds1 bounds2 > Qty.zero
+
+expand :: Range Unitless -> Range Unitless
+expand (Range low high) =
+  let halfWidth = 0.5 * (high - low)
+   in Range.from (low - halfWidth) (high + halfWidth)
+
+expandU :: Uv.Bounds -> Uv.Bounds
+expandU (Bounds2d u v) = Bounds2d (expand u) v
+
+expandV :: Uv.Bounds -> Uv.Bounds
+expandV (Bounds2d u v) = Bounds2d u (expand v)
 
 generalSolution ::
   (Tolerance units) =>
@@ -421,8 +444,10 @@ generalSolution ::
   Function units ->
   Function units ->
   Uv.Bounds ->
+  List Uv.Bounds ->
   Maybe (Result SolveError (List Solution, List Uv.Bounds))
-generalSolution f fu fv uvBounds@(Bounds2d (Range minU maxU) (Range minV maxV))
+generalSolution f fu fv uvBounds@(Bounds2d (Range minU maxU) (Range minV maxV)) exclusions
+  | List.any (overlaps uvBounds) exclusions = Nothing
   | resolved fuBounds && resolved fvBounds =
       let signAt u v = Qty.sign (evaluateAt (Point2d u v) f)
        in Just $ Result.map (,[]) $ case (signAt minU minV, signAt maxU minV, signAt minU maxV, signAt maxU maxV) of
@@ -531,12 +556,14 @@ horizontalSolution ::
   Function units ->
   Function units ->
   Uv.Bounds ->
+  List Uv.Bounds ->
   Maybe (Result SolveError (List Solution, List Uv.Bounds))
-horizontalSolution f fu fv (Bounds2d uRange vRange@(Range minV maxV))
+horizontalSolution f fu fv (Bounds2d uRange vRange@(Range minV maxV)) exclusions
+  | List.any (overlaps expandedBounds) exclusions = Nothing
   | fvResolution >= 0.5 && bottomSign == Resolved Negative && topSign == Resolved Positive =
-      Just (Result.map (,exclusions) (leftwardsSolution f fu fv expandedBounds))
+      Just (Result.map (,newExclusions) (leftwardsSolution f fu fv expandedBounds))
   | fvResolution <= -0.5 && bottomSign == Resolved Positive && topSign == Resolved Negative =
-      Just (Result.map (,exclusions) (rightwardsSolution f fu fv expandedBounds))
+      Just (Result.map (,newExclusions) (rightwardsSolution f fu fv expandedBounds))
   | otherwise = Nothing
  where
   vHalfWidth = 0.5 * Range.width vRange
@@ -548,7 +575,7 @@ horizontalSolution f fu fv (Bounds2d uRange vRange@(Range minV maxV))
   sliceSign v uSubRange = sign (boundsOn f (Bounds2d uSubRange (Range.constant v)))
   bottomSign = Range.resolve (sliceSign vBottom) uRange
   topSign = Range.resolve (sliceSign vTop) uRange
-  exclusions = [Bounds2d uRange (Range.from vBottom minV), Bounds2d uRange (Range.from maxV vTop)]
+  newExclusions = [Bounds2d uRange (Range.from vBottom minV), Bounds2d uRange (Range.from maxV vTop)]
 
 verticalSolution ::
   (Tolerance units) =>
@@ -556,12 +583,14 @@ verticalSolution ::
   Function units ->
   Function units ->
   Uv.Bounds ->
+  List Uv.Bounds ->
   Maybe (Result SolveError (List Solution, List Uv.Bounds))
-verticalSolution f fu fv (Bounds2d uRange@(Range minU maxU) vRange)
+verticalSolution f fu fv (Bounds2d uRange@(Range minU maxU) vRange) exclusions
+  | List.any (overlaps expandedBounds) exclusions = Nothing
   | fuResolution >= 0.5 && leftSign == Resolved Negative && rightSign == Resolved Positive =
-      Just (Result.map (,exclusions) (upwardsSolution f fu fv expandedBounds))
+      Just (Result.map (,newExclusions) (upwardsSolution f fu fv expandedBounds))
   | fuResolution <= -0.5 && leftSign == Resolved Positive && rightSign == Resolved Negative =
-      Just (Result.map (,exclusions) (downwardsSolution f fu fv expandedBounds))
+      Just (Result.map (,newExclusions) (downwardsSolution f fu fv expandedBounds))
   | otherwise = Nothing
  where
   uHalfWidth = 0.5 * Range.width uRange
@@ -573,7 +602,7 @@ verticalSolution f fu fv (Bounds2d uRange@(Range minU maxU) vRange)
   sliceSign u vSubRange = sign (boundsOn f (Bounds2d (Range.constant u) vSubRange))
   leftSign = Range.resolve (sliceSign uLeft) vRange
   rightSign = Range.resolve (sliceSign uRight) vRange
-  exclusions = [Bounds2d (Range.from uLeft minU) vRange, Bounds2d (Range.from maxU uRight) vRange]
+  newExclusions = [Bounds2d (Range.from uLeft minU) vRange, Bounds2d (Range.from maxU uRight) vRange]
 
 rightwardsSolution ::
   Function units ->
