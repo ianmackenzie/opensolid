@@ -10,6 +10,8 @@ module Bounds2d
   , aggregate2
   , exclusion
   , inclusion
+  , contains
+  , isContainedIn
   , overlap
   , separation
   , intersection
@@ -96,6 +98,13 @@ exclusion (Point2d x y) (Bounds2d bx by)
 
 inclusion :: Point2d (space @ units) -> Bounds2d (space @ units) -> Qty units
 inclusion point bounds = -(exclusion point bounds)
+
+contains :: Bounds2d (space @ units) -> Bounds2d (space @ units) -> Bool
+contains (Bounds2d x2 y2) (Bounds2d x1 y1) =
+  Range.contains x2 x1 && Range.contains y2 y1
+
+isContainedIn :: Bounds2d (space @ units) -> Bounds2d (space @ units) -> Bool
+isContainedIn bounds1 bounds2 = contains bounds2 bounds1
 
 separation :: Bounds2d (space @ units) -> Bounds2d (space @ units) -> Qty units
 separation (Bounds2d x1 y1) (Bounds2d x2 y2)

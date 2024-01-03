@@ -10,6 +10,8 @@ module Bounds3d
   , aggregate2
   , exclusion
   , inclusion
+  , contains
+  , isContainedIn
   , separation
   , overlap
   , intersection
@@ -82,6 +84,13 @@ exclusion (Point3d x y z) (Bounds3d bx by bz)
 
 inclusion :: Point3d (space @ units) -> Bounds3d (space @ units) -> Qty units
 inclusion point bounds = -(exclusion point bounds)
+
+contains :: Bounds3d (space @ units) -> Bounds3d (space @ units) -> Bool
+contains (Bounds3d x2 y2 z2) (Bounds3d x1 y1 z1) =
+  Range.contains x2 x1 && Range.contains y2 y1 && Range.contains z2 z1
+
+isContainedIn :: Bounds3d (space @ units) -> Bounds3d (space @ units) -> Bool
+isContainedIn bounds1 bounds2 = contains bounds2 bounds1
 
 separation :: Bounds3d (space @ units) -> Bounds3d (space @ units) -> Qty units
 separation (Bounds3d x1 y1 z1) (Bounds3d x2 y2 z2)
