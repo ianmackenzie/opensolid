@@ -1,9 +1,12 @@
 module Length
   ( Length
   , meter
+  , millimeter
   , centimeter
   , meters
   , inMeters
+  , millimeters
+  , inMillimeters
   , centimeters
   , inCentimeters
   )
@@ -22,6 +25,15 @@ meters (Qty x) = Qty x
 
 inMeters :: Length -> Float
 inMeters (Qty x) = Qty x
+
+millimeter :: Length
+millimeter = meters 0.001
+
+millimeters :: Float -> Length
+millimeters = (* millimeter)
+
+inMillimeters :: Length -> Float
+inMillimeters = (/ millimeter)
 
 centimeter :: Length
 centimeter = meters 0.01
