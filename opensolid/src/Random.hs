@@ -65,9 +65,8 @@ step generator (Seed stdGen) =
 
 generate :: Generator a -> Task String a
 generate generator =
-  Task.mapError errorMessage $
-    Task.fromIO $
-      System.Random.Stateful.applyAtomicGen (run generator) System.Random.Stateful.globalStdGen
+  Task.fromIO $
+    System.Random.Stateful.applyAtomicGen (run generator) System.Random.Stateful.globalStdGen
 
 map :: (a -> b) -> Generator a -> Generator b
 map function (Generator generator) = Generator (Pair.mapFirst function . generator)

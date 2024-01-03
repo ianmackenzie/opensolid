@@ -5,4 +5,4 @@ import Task qualified
 import Prelude qualified
 
 printLine :: String -> Task String ()
-printLine string = Task.fromIO (Prelude.putStrLn string) |> Task.mapError errorMessage
+printLine string = Task.fromIO (Prelude.putStrLn string)

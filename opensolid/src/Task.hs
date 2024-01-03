@@ -6,6 +6,7 @@ module Task
   , map
   , mapError
   , forEach
+  , liftIO
   , fromIO
   , toIO
   , collect
@@ -14,6 +15,8 @@ where
 
 import Basics
 import Control.Exception qualified
+import Control.Monad.IO.Class (MonadIO)
+import Control.Monad.IO.Class qualified
 import Result (ErrorMessage (errorMessage), Result (Error, Ok))
 import Result qualified
 import System.Exit qualified
@@ -41,6 +44,9 @@ instance Monad (Task x) where
 instance MonadFail (Task String) where
   fail = Done . Error
 
+instance MonadIO (Task IOError) where
+  liftIO = liftIO
+
 evaluate :: Result x a -> Task x a
 evaluate = Done
 
@@ -51,8 +57,11 @@ mapError :: (ErrorMessage y) => (x -> y) -> Task x a -> Task y a
 mapError function (Done result) = Done (Result.mapError function result)
 mapError function (Perform io) = Perform (fmap (mapError function) io)
 
-fromIO :: IO a -> Task IOError a
-fromIO io = Perform (Control.Exception.catch (fmap return io) (return . Done . Error))
+liftIO :: IO a -> Task IOError a
+liftIO io = Perform (Control.Exception.catch (fmap return io) (return . Done . Error))
+
+fromIO :: IO a -> Task String a
+fromIO = mapError errorMessage . liftIO
 
 toIO :: Task x a -> IO a
 toIO (Done (Ok value)) = return value
