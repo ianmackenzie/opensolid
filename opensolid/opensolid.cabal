@@ -113,6 +113,7 @@ library
       DirectionCurve2d
       Drawing2d
       Estimate
+      File
       Float
       Frame2d
       Fuzzy
