@@ -111,6 +111,7 @@ library
       Direction3d
       DirectionBounds2d
       DirectionCurve2d
+      Drawing2d
       Estimate
       Float
       Frame2d
