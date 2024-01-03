@@ -181,11 +181,10 @@ testSurface1dIntersection = Try.do
       Surface1d.Solution.CrossingLoop {segments} -> do
         log "Crossing loop with size" (NonEmpty.length segments)
         Task.forEach (NonEmpty.toList segments) $ \curve -> do
-          let Point2d x y = Curve2d.startPoint curve
-          Console.printLine (String.fromFloat x ++ "," ++ String.fromFloat y)
-      Surface1d.Solution.CrossingCurve {segments} ->
-        log "Extra crossing curve with size" (NonEmpty.length segments)
-      _ -> log "  Unexpected solution" solution
+          Task.forEach (U.steps 10) $ \uValue -> do
+            let Point2d x y = Curve2d.pointOn curve uValue
+            Console.printLine (String.fromFloat x ++ "," ++ String.fromFloat y)
+      _ -> log "Unexpected solution" solution
  where
   ?tolerance = 1e-9
 
