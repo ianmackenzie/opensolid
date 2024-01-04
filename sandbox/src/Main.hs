@@ -6,7 +6,6 @@ import Axis2d qualified
 import Bounds2d (Bounds2d (Bounds2d))
 import Bounds2d qualified
 import Console qualified
-import Curve2d qualified
 import Direction2d qualified
 import Direction3d ()
 import Drawing2d qualified
@@ -14,7 +13,7 @@ import Length qualified
 import List qualified
 import NonEmpty qualified
 import OpenSolid
-import Point2d (Point2d (Point2d))
+import Point2d (Point2d)
 import Point2d qualified
 import Qty qualified
 import Random qualified
@@ -186,7 +185,16 @@ testSurface1dIntersection = Try.do
 
 testSvgOutput :: Task String ()
 testSvgOutput = Try.do
-  Drawing2d.writeTo "test.svg"  (Bounds2d.hull2 Point2d.origin (Point2d.meters 0.3 0.2)) []
+  Drawing2d.writeTo "test.svg" (Bounds2d.hull2 Point2d.origin (Point2d.centimeters 30.0 30.0)) $
+    [ Drawing2d.group [] []
+    , Drawing2d.group [] $
+        [ Drawing2d.polygon [] $
+            [ Point2d.centimeters 10.0 10.0
+            , Point2d.centimeters 20.0 10.0
+            , Point2d.centimeters 15.0 20.0
+            ]
+        ]
+    ]
 
 script :: Task String ()
 script = Try.do
