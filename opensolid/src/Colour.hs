@@ -58,97 +58,97 @@ toHexString :: Colour -> String
 toHexString = Data.Colour.SRGB.sRGB24show
 
 lightRed :: Colour
-lightRed = rgb (239.0 / 255.0) (41.0 / 255.0) (41.0 / 255.0)
+lightRed = rgb255 239 41 41
 
 red :: Colour
-red = rgb (204.0 / 255.0) (0.0 / 255.0) (0.0 / 255.0)
+red = rgb255 204 0 0
 
 darkRed :: Colour
-darkRed = rgb (164.0 / 255.0) (0.0 / 255.0) (0.0 / 255.0)
+darkRed = rgb255 164 0 0
 
 lightOrange :: Colour
-lightOrange = rgb (252.0 / 255.0) (175.0 / 255.0) (62.0 / 255.0)
+lightOrange = rgb255 252 175 62
 
 orange :: Colour
-orange = rgb (245.0 / 255.0) (121.0 / 255.0) (0.0 / 255.0)
+orange = rgb255 245 121 0
 
 darkOrange :: Colour
-darkOrange = rgb (206.0 / 255.0) (92.0 / 255.0) (0.0 / 255.0)
+darkOrange = rgb255 206 92 0
 
 lightYellow :: Colour
-lightYellow = rgb (255.0 / 255.0) (233.0 / 255.0) (79.0 / 255.0)
+lightYellow = rgb255 255 233 79
 
 yellow :: Colour
-yellow = rgb (237.0 / 255.0) (212.0 / 255.0) (0.0 / 255.0)
+yellow = rgb255 237 212 0
 
 darkYellow :: Colour
-darkYellow = rgb (196.0 / 255.0) (160.0 / 255.0) (0.0 / 255.0)
+darkYellow = rgb255 196 160 0
 
 lightGreen :: Colour
-lightGreen = rgb (138.0 / 255.0) (226.0 / 255.0) (52.0 / 255.0)
+lightGreen = rgb255 138 226 52
 
 green :: Colour
-green = rgb (115.0 / 255.0) (210.0 / 255.0) (22.0 / 255.0)
+green = rgb255 115 210 22
 
 darkGreen :: Colour
-darkGreen = rgb (78.0 / 255.0) (154.0 / 255.0) (6.0 / 255.0)
+darkGreen = rgb255 78 154 6
 
 lightBlue :: Colour
-lightBlue = rgb (114.0 / 255.0) (159.0 / 255.0) (207.0 / 255.0)
+lightBlue = rgb255 114 159 207
 
 blue :: Colour
-blue = rgb (52.0 / 255.0) (101.0 / 255.0) (164.0 / 255.0)
+blue = rgb255 52 101 164
 
 darkBlue :: Colour
-darkBlue = rgb (32.0 / 255.0) (74.0 / 255.0) (135.0 / 255.0)
+darkBlue = rgb255 32 74 135
 
 lightPurple :: Colour
-lightPurple = rgb (173.0 / 255.0) (127.0 / 255.0) (168.0 / 255.0)
+lightPurple = rgb255 173 127 168
 
 purple :: Colour
-purple = rgb (117.0 / 255.0) (80.0 / 255.0) (123.0 / 255.0)
+purple = rgb255 117 80 123
 
 darkPurple :: Colour
-darkPurple = rgb (92.0 / 255.0) (53.0 / 255.0) (102.0 / 255.0)
+darkPurple = rgb255 92 53 102
 
 lightBrown :: Colour
-lightBrown = rgb (233.0 / 255.0) (185.0 / 255.0) (110.0 / 255.0)
+lightBrown = rgb255 233 185 110
 
 brown :: Colour
-brown = rgb (193.0 / 255.0) (125.0 / 255.0) (17.0 / 255.0)
+brown = rgb255 193 125 17
 
 darkBrown :: Colour
-darkBrown = rgb (143.0 / 255.0) (89.0 / 255.0) (2.0 / 255.0)
+darkBrown = rgb255 143 89 2
 
 black :: Colour
-black = rgb (0.0 / 255.0) (0.0 / 255.0) (0.0 / 255.0)
+black = rgb255 0 0 0
 
 white :: Colour
-white = rgb (255.0 / 255.0) (255.0 / 255.0) (255.0 / 255.0)
+white = rgb255 255 255 255
 
 lightGrey :: Colour
-lightGrey = rgb (238.0 / 255.0) (238.0 / 255.0) (236.0 / 255.0)
+lightGrey = rgb255 238 238 236
 
 grey :: Colour
-grey = rgb (211.0 / 255.0) (215.0 / 255.0) (207.0 / 255.0)
+grey = rgb255 211 215 207
 
 darkGrey :: Colour
-darkGrey = rgb (186.0 / 255.0) (189.0 / 255.0) (182.0 / 255.0)
+darkGrey = rgb255 186 189 182
 
 lightGray :: Colour
-lightGray = rgb (238.0 / 255.0) (238.0 / 255.0) (236.0 / 255.0)
+lightGray = rgb255 238 238 236
 
 gray :: Colour
-gray = rgb (211.0 / 255.0) (215.0 / 255.0) (207.0 / 255.0)
+gray = rgb255 211 215 207
 
 darkGray :: Colour
-darkGray = rgb (186.0 / 255.0) (189.0 / 255.0) (182.0 / 255.0)
+darkGray = rgb255 186 189 182
 
 lightCharcoal :: Colour
-lightCharcoal = rgb (136.0 / 255.0) (138.0 / 255.0) (133.0 / 255.0)
+lightCharcoal = rgb255 136 138 133
 
 charcoal :: Colour
-charcoal = rgb (85.0 / 255.0) (87.0 / 255.0) (83.0 / 255.0)
+charcoal = rgb255 85 87 83
 
 darkCharcoal :: Colour
-darkCharcoal = rgb (46.0 / 255.0) (52.0 / 255.0) (54.0 / 255.0)
+darkCharcoal = rgb255 46 52 54
