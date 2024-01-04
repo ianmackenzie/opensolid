@@ -27,6 +27,7 @@ common config
     , base
     , containers
     , random
+    , colour
   ghc-options:
       -Wall
       -Werror
@@ -96,6 +97,7 @@ library
       Bounds2d
       Bounds3d
       Bounds
+      Colour
       Concatenation
       Console
       CoordinateSystem
