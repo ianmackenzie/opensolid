@@ -12,6 +12,9 @@ module Point3d
   , yz
   , xyz
   , meters
+  , centimeters
+  , millimeters
+  , inches
   , midpoint
   , interpolateFrom
   , distanceFrom
@@ -132,8 +135,20 @@ yz py pz = Point3d Qty.zero py pz
 xyz :: Qty units -> Qty units -> Qty units -> Point3d (space @ units)
 xyz = Point3d
 
+apply :: (Float -> Qty units) -> Float -> Float -> Float -> Point3d (space @ units)
+apply units px py pz = Point3d (units px) (units py) (units pz)
+
 meters :: Float -> Float -> Float -> Point3d (space @ Meters)
-meters px py pz = Point3d (Length.meters px) (Length.meters py) (Length.meters pz)
+meters = apply Length.meters
+
+centimeters :: Float -> Float -> Float -> Point3d (space @ Meters)
+centimeters = apply Length.centimeters
+
+millimeters :: Float -> Float -> Float -> Point3d (space @ Meters)
+millimeters = apply Length.millimeters
+
+inches :: Float -> Float -> Float -> Point3d (space @ Meters)
+inches = apply Length.inches
 
 interpolateFrom ::
   Point3d (space @ units) ->

@@ -9,6 +9,9 @@ module Vector3d
   , yz
   , xyz
   , meters
+  , centimeters
+  , millimeters
+  , inches
   , squareMeters
   , xComponent
   , yComponent
@@ -178,8 +181,20 @@ yz vy vz = Vector3d Qty.zero vy vz
 xyz :: Qty units -> Qty units -> Qty units -> Vector3d (space @ units)
 xyz = Vector3d
 
+apply :: (Float -> Qty units) -> Float -> Float -> Float -> Vector3d (space @ units)
+apply units px py pz = Vector3d (units px) (units py) (units pz)
+
 meters :: Float -> Float -> Float -> Vector3d (space @ Meters)
-meters vx vy vz = Vector3d (Length.meters vx) (Length.meters vy) (Length.meters vz)
+meters = apply Length.meters
+
+centimeters :: Float -> Float -> Float -> Vector3d (space @ Meters)
+centimeters = apply Length.centimeters
+
+millimeters :: Float -> Float -> Float -> Vector3d (space @ Meters)
+millimeters = apply Length.millimeters
+
+inches :: Float -> Float -> Float -> Vector3d (space @ Meters)
+inches = apply Length.inches
 
 squareMeters :: Float -> Float -> Float -> Vector3d (space @ SquareMeters)
 squareMeters vx vy vz =

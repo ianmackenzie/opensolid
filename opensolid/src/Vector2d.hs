@@ -6,6 +6,9 @@ module Vector2d
   , xy
   , from
   , meters
+  , centimeters
+  , millimeters
+  , inches
   , squareMeters
   , polar
   , xComponent
@@ -201,8 +204,20 @@ xy = Vector2d
 from :: Point2d (space @ units) -> Point2d (space @ units) -> Vector2d (space @ units)
 from p1 p2 = p2 - p1
 
+apply :: (Float -> Qty units) -> Float -> Float -> Vector2d (space @ units)
+apply units px py = Vector2d (units px) (units py)
+
 meters :: Float -> Float -> Vector2d (space @ Meters)
-meters vx vy = Vector2d (Length.meters vx) (Length.meters vy)
+meters = apply Length.meters
+
+centimeters :: Float -> Float -> Vector2d (space @ Meters)
+centimeters = apply Length.centimeters
+
+millimeters :: Float -> Float -> Vector2d (space @ Meters)
+millimeters = apply Length.millimeters
+
+inches :: Float -> Float -> Vector2d (space @ Meters)
+inches = apply Length.inches
 
 squareMeters :: Float -> Float -> Vector2d (space @ SquareMeters)
 squareMeters vx vy = Vector2d (Area.squareMeters vx) (Area.squareMeters vy)
