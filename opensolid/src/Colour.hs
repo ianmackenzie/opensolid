@@ -3,158 +3,42 @@ module Colour
   , rgb
   , fromHexString
   , toHexString
-  , black
-  , aliceblue
-  , antiquewhite
-  , aqua
-  , aquamarine
-  , azure
-  , beige
-  , bisque
-  , blanchedalmond
-  , blue
-  , blueviolet
-  , brown
-  , burlywood
-  , cadetblue
-  , chartreuse
-  , chocolate
-  , coral
-  , cornflowerblue
-  , cornsilk
-  , crimson
-  , cyan
-  , darkblue
-  , darkcyan
-  , darkgoldenrod
-  , darkgray
-  , darkgreen
-  , darkgrey
-  , darkkhaki
-  , darkmagenta
-  , darkolivegreen
-  , darkorange
-  , darkorchid
-  , darkred
-  , darksalmon
-  , darkseagreen
-  , darkslateblue
-  , darkslategray
-  , darkslategrey
-  , darkturquoise
-  , darkviolet
-  , deeppink
-  , deepskyblue
-  , dimgray
-  , dimgrey
-  , dodgerblue
-  , firebrick
-  , floralwhite
-  , forestgreen
-  , fuchsia
-  , gainsboro
-  , ghostwhite
-  , gold
-  , goldenrod
-  , gray
-  , grey
-  , green
-  , greenyellow
-  , honeydew
-  , hotpink
-  , indianred
-  , indigo
-  , ivory
-  , khaki
-  , lavender
-  , lavenderblush
-  , lawngreen
-  , lemonchiffon
-  , lightblue
-  , lightcoral
-  , lightcyan
-  , lightgoldenrodyellow
-  , lightgray
-  , lightgreen
-  , lightgrey
-  , lightpink
-  , lightsalmon
-  , lightseagreen
-  , lightskyblue
-  , lightslategray
-  , lightslategrey
-  , lightsteelblue
-  , lightyellow
-  , lime
-  , limegreen
-  , linen
-  , magenta
-  , maroon
-  , mediumaquamarine
-  , mediumblue
-  , mediumorchid
-  , mediumpurple
-  , mediumseagreen
-  , mediumslateblue
-  , mediumspringgreen
-  , mediumturquoise
-  , mediumvioletred
-  , midnightblue
-  , mintcream
-  , mistyrose
-  , moccasin
-  , navajowhite
-  , navy
-  , oldlace
-  , olive
-  , olivedrab
-  , orange
-  , orangered
-  , orchid
-  , palegoldenrod
-  , palegreen
-  , paleturquoise
-  , palevioletred
-  , papayawhip
-  , peachpuff
-  , peru
-  , pink
-  , plum
-  , powderblue
-  , purple
+  , lightRed
   , red
-  , rosybrown
-  , royalblue
-  , saddlebrown
-  , salmon
-  , sandybrown
-  , seagreen
-  , seashell
-  , sienna
-  , silver
-  , skyblue
-  , slateblue
-  , slategray
-  , slategrey
-  , snow
-  , springgreen
-  , steelblue
-  , tan
-  , teal
-  , thistle
-  , tomato
-  , turquoise
-  , violet
-  , wheat
-  , white
-  , whitesmoke
+  , darkRed
+  , lightOrange
+  , orange
+  , darkOrange
+  , lightYellow
   , yellow
-  , yellowgreen
+  , darkYellow
+  , lightGreen
+  , green
+  , darkGreen
+  , lightBlue
+  , blue
+  , darkBlue
+  , lightPurple
+  , purple
+  , darkPurple
+  , lightBrown
+  , brown
+  , darkBrown
+  , black
+  , white
+  , lightGrey
+  , grey
+  , darkGrey
+  , lightGray
+  , gray
+  , darkGray
+  , lightCharcoal
+  , charcoal
+  , darkCharcoal
   )
 where
 
 import Data.Colour qualified
-import Data.Colour.Names qualified
 import Data.Colour.SRGB qualified
 import OpenSolid
 
@@ -169,443 +53,98 @@ fromHexString = Data.Colour.SRGB.sRGB24read
 toHexString :: Colour -> String
 toHexString = Data.Colour.SRGB.sRGB24show
 
-black :: Colour
-black = Data.Colour.Names.black
-
-aliceblue :: Colour
-aliceblue = Data.Colour.Names.aliceblue
-
-antiquewhite :: Colour
-antiquewhite = Data.Colour.Names.antiquewhite
-
-aqua :: Colour
-aqua = Data.Colour.Names.aqua
-
-aquamarine :: Colour
-aquamarine = Data.Colour.Names.aquamarine
-
-azure :: Colour
-azure = Data.Colour.Names.azure
-
-beige :: Colour
-beige = Data.Colour.Names.beige
-
-bisque :: Colour
-bisque = Data.Colour.Names.bisque
-
-blanchedalmond :: Colour
-blanchedalmond = Data.Colour.Names.blanchedalmond
-
-blue :: Colour
-blue = Data.Colour.Names.blue
-
-blueviolet :: Colour
-blueviolet = Data.Colour.Names.blueviolet
-
-brown :: Colour
-brown = Data.Colour.Names.brown
-
-burlywood :: Colour
-burlywood = Data.Colour.Names.burlywood
-
-cadetblue :: Colour
-cadetblue = Data.Colour.Names.cadetblue
-
-chartreuse :: Colour
-chartreuse = Data.Colour.Names.chartreuse
-
-chocolate :: Colour
-chocolate = Data.Colour.Names.chocolate
-
-coral :: Colour
-coral = Data.Colour.Names.coral
-
-cornflowerblue :: Colour
-cornflowerblue = Data.Colour.Names.cornflowerblue
-
-cornsilk :: Colour
-cornsilk = Data.Colour.Names.cornsilk
-
-crimson :: Colour
-crimson = Data.Colour.Names.crimson
-
-cyan :: Colour
-cyan = Data.Colour.Names.cyan
-
-darkblue :: Colour
-darkblue = Data.Colour.Names.darkblue
-
-darkcyan :: Colour
-darkcyan = Data.Colour.Names.darkcyan
-
-darkgoldenrod :: Colour
-darkgoldenrod = Data.Colour.Names.darkgoldenrod
-
-darkgray :: Colour
-darkgray = Data.Colour.Names.darkgray
-
-darkgreen :: Colour
-darkgreen = Data.Colour.Names.darkgreen
-
-darkgrey :: Colour
-darkgrey = Data.Colour.Names.darkgrey
-
-darkkhaki :: Colour
-darkkhaki = Data.Colour.Names.darkkhaki
-
-darkmagenta :: Colour
-darkmagenta = Data.Colour.Names.darkmagenta
-
-darkolivegreen :: Colour
-darkolivegreen = Data.Colour.Names.darkolivegreen
-
-darkorange :: Colour
-darkorange = Data.Colour.Names.darkorange
-
-darkorchid :: Colour
-darkorchid = Data.Colour.Names.darkorchid
-
-darkred :: Colour
-darkred = Data.Colour.Names.darkred
-
-darksalmon :: Colour
-darksalmon = Data.Colour.Names.darksalmon
-
-darkseagreen :: Colour
-darkseagreen = Data.Colour.Names.darkseagreen
-
-darkslateblue :: Colour
-darkslateblue = Data.Colour.Names.darkslateblue
-
-darkslategray :: Colour
-darkslategray = Data.Colour.Names.darkslategray
-
-darkslategrey :: Colour
-darkslategrey = Data.Colour.Names.darkslategrey
-
-darkturquoise :: Colour
-darkturquoise = Data.Colour.Names.darkturquoise
-
-darkviolet :: Colour
-darkviolet = Data.Colour.Names.darkviolet
-
-deeppink :: Colour
-deeppink = Data.Colour.Names.deeppink
-
-deepskyblue :: Colour
-deepskyblue = Data.Colour.Names.deepskyblue
-
-dimgray :: Colour
-dimgray = Data.Colour.Names.dimgray
-
-dimgrey :: Colour
-dimgrey = Data.Colour.Names.dimgrey
-
-dodgerblue :: Colour
-dodgerblue = Data.Colour.Names.dodgerblue
-
-firebrick :: Colour
-firebrick = Data.Colour.Names.firebrick
-
-floralwhite :: Colour
-floralwhite = Data.Colour.Names.floralwhite
-
-forestgreen :: Colour
-forestgreen = Data.Colour.Names.forestgreen
-
-fuchsia :: Colour
-fuchsia = Data.Colour.Names.fuchsia
-
-gainsboro :: Colour
-gainsboro = Data.Colour.Names.gainsboro
-
-ghostwhite :: Colour
-ghostwhite = Data.Colour.Names.ghostwhite
-
-gold :: Colour
-gold = Data.Colour.Names.gold
-
-goldenrod :: Colour
-goldenrod = Data.Colour.Names.goldenrod
-
-gray :: Colour
-gray = Data.Colour.Names.gray
-
-grey :: Colour
-grey = Data.Colour.Names.grey
-
-green :: Colour
-green = Data.Colour.Names.green
-
-greenyellow :: Colour
-greenyellow = Data.Colour.Names.greenyellow
-
-honeydew :: Colour
-honeydew = Data.Colour.Names.honeydew
-
-hotpink :: Colour
-hotpink = Data.Colour.Names.hotpink
-
-indianred :: Colour
-indianred = Data.Colour.Names.indianred
-
-indigo :: Colour
-indigo = Data.Colour.Names.indigo
-
-ivory :: Colour
-ivory = Data.Colour.Names.ivory
-
-khaki :: Colour
-khaki = Data.Colour.Names.khaki
-
-lavender :: Colour
-lavender = Data.Colour.Names.lavender
-
-lavenderblush :: Colour
-lavenderblush = Data.Colour.Names.lavenderblush
-
-lawngreen :: Colour
-lawngreen = Data.Colour.Names.lawngreen
-
-lemonchiffon :: Colour
-lemonchiffon = Data.Colour.Names.lemonchiffon
-
-lightblue :: Colour
-lightblue = Data.Colour.Names.lightblue
-
-lightcoral :: Colour
-lightcoral = Data.Colour.Names.lightcoral
-
-lightcyan :: Colour
-lightcyan = Data.Colour.Names.lightcyan
-
-lightgoldenrodyellow :: Colour
-lightgoldenrodyellow = Data.Colour.Names.lightgoldenrodyellow
-
-lightgray :: Colour
-lightgray = Data.Colour.Names.lightgray
-
-lightgreen :: Colour
-lightgreen = Data.Colour.Names.lightgreen
-
-lightgrey :: Colour
-lightgrey = Data.Colour.Names.lightgrey
-
-lightpink :: Colour
-lightpink = Data.Colour.Names.lightpink
-
-lightsalmon :: Colour
-lightsalmon = Data.Colour.Names.lightsalmon
-
-lightseagreen :: Colour
-lightseagreen = Data.Colour.Names.lightseagreen
-
-lightskyblue :: Colour
-lightskyblue = Data.Colour.Names.lightskyblue
-
-lightslategray :: Colour
-lightslategray = Data.Colour.Names.lightslategray
-
-lightslategrey :: Colour
-lightslategrey = Data.Colour.Names.lightslategrey
-
-lightsteelblue :: Colour
-lightsteelblue = Data.Colour.Names.lightsteelblue
-
-lightyellow :: Colour
-lightyellow = Data.Colour.Names.lightyellow
-
-lime :: Colour
-lime = Data.Colour.Names.lime
-
-limegreen :: Colour
-limegreen = Data.Colour.Names.limegreen
-
-linen :: Colour
-linen = Data.Colour.Names.linen
-
-magenta :: Colour
-magenta = Data.Colour.Names.magenta
-
-maroon :: Colour
-maroon = Data.Colour.Names.maroon
-
-mediumaquamarine :: Colour
-mediumaquamarine = Data.Colour.Names.mediumaquamarine
-
-mediumblue :: Colour
-mediumblue = Data.Colour.Names.mediumblue
-
-mediumorchid :: Colour
-mediumorchid = Data.Colour.Names.mediumorchid
-
-mediumpurple :: Colour
-mediumpurple = Data.Colour.Names.mediumpurple
-
-mediumseagreen :: Colour
-mediumseagreen = Data.Colour.Names.mediumseagreen
-
-mediumslateblue :: Colour
-mediumslateblue = Data.Colour.Names.mediumslateblue
-
-mediumspringgreen :: Colour
-mediumspringgreen = Data.Colour.Names.mediumspringgreen
-
-mediumturquoise :: Colour
-mediumturquoise = Data.Colour.Names.mediumturquoise
-
-mediumvioletred :: Colour
-mediumvioletred = Data.Colour.Names.mediumvioletred
-
-midnightblue :: Colour
-midnightblue = Data.Colour.Names.midnightblue
-
-mintcream :: Colour
-mintcream = Data.Colour.Names.mintcream
-
-mistyrose :: Colour
-mistyrose = Data.Colour.Names.mistyrose
-
-moccasin :: Colour
-moccasin = Data.Colour.Names.moccasin
-
-navajowhite :: Colour
-navajowhite = Data.Colour.Names.navajowhite
-
-navy :: Colour
-navy = Data.Colour.Names.navy
-
-oldlace :: Colour
-oldlace = Data.Colour.Names.oldlace
-
-olive :: Colour
-olive = Data.Colour.Names.olive
-
-olivedrab :: Colour
-olivedrab = Data.Colour.Names.olivedrab
-
-orange :: Colour
-orange = Data.Colour.Names.orange
-
-orangered :: Colour
-orangered = Data.Colour.Names.orangered
-
-orchid :: Colour
-orchid = Data.Colour.Names.orchid
-
-palegoldenrod :: Colour
-palegoldenrod = Data.Colour.Names.palegoldenrod
-
-palegreen :: Colour
-palegreen = Data.Colour.Names.palegreen
-
-paleturquoise :: Colour
-paleturquoise = Data.Colour.Names.paleturquoise
-
-palevioletred :: Colour
-palevioletred = Data.Colour.Names.palevioletred
-
-papayawhip :: Colour
-papayawhip = Data.Colour.Names.papayawhip
-
-peachpuff :: Colour
-peachpuff = Data.Colour.Names.peachpuff
-
-peru :: Colour
-peru = Data.Colour.Names.peru
-
-pink :: Colour
-pink = Data.Colour.Names.pink
-
-plum :: Colour
-plum = Data.Colour.Names.plum
-
-powderblue :: Colour
-powderblue = Data.Colour.Names.powderblue
-
-purple :: Colour
-purple = Data.Colour.Names.purple
+lightRed :: Colour
+lightRed = rgb (239.0 / 255.0) (41.0 / 255.0) (41.0 / 255.0)
 
 red :: Colour
-red = Data.Colour.Names.red
+red = rgb (204.0 / 255.0) (0.0 / 255.0) (0.0 / 255.0)
 
-rosybrown :: Colour
-rosybrown = Data.Colour.Names.rosybrown
+darkRed :: Colour
+darkRed = rgb (164.0 / 255.0) (0.0 / 255.0) (0.0 / 255.0)
 
-royalblue :: Colour
-royalblue = Data.Colour.Names.royalblue
+lightOrange :: Colour
+lightOrange = rgb (252.0 / 255.0) (175.0 / 255.0) (62.0 / 255.0)
 
-saddlebrown :: Colour
-saddlebrown = Data.Colour.Names.saddlebrown
+orange :: Colour
+orange = rgb (245.0 / 255.0) (121.0 / 255.0) (0.0 / 255.0)
 
-salmon :: Colour
-salmon = Data.Colour.Names.salmon
+darkOrange :: Colour
+darkOrange = rgb (206.0 / 255.0) (92.0 / 255.0) (0.0 / 255.0)
 
-sandybrown :: Colour
-sandybrown = Data.Colour.Names.sandybrown
-
-seagreen :: Colour
-seagreen = Data.Colour.Names.seagreen
-
-seashell :: Colour
-seashell = Data.Colour.Names.seashell
-
-sienna :: Colour
-sienna = Data.Colour.Names.sienna
-
-silver :: Colour
-silver = Data.Colour.Names.silver
-
-skyblue :: Colour
-skyblue = Data.Colour.Names.skyblue
-
-slateblue :: Colour
-slateblue = Data.Colour.Names.slateblue
-
-slategray :: Colour
-slategray = Data.Colour.Names.slategray
-
-slategrey :: Colour
-slategrey = Data.Colour.Names.slategrey
-
-snow :: Colour
-snow = Data.Colour.Names.snow
-
-springgreen :: Colour
-springgreen = Data.Colour.Names.springgreen
-
-steelblue :: Colour
-steelblue = Data.Colour.Names.steelblue
-
-tan :: Colour
-tan = Data.Colour.Names.tan
-
-teal :: Colour
-teal = Data.Colour.Names.teal
-
-thistle :: Colour
-thistle = Data.Colour.Names.thistle
-
-tomato :: Colour
-tomato = Data.Colour.Names.tomato
-
-turquoise :: Colour
-turquoise = Data.Colour.Names.turquoise
-
-violet :: Colour
-violet = Data.Colour.Names.violet
-
-wheat :: Colour
-wheat = Data.Colour.Names.wheat
-
-white :: Colour
-white = Data.Colour.Names.white
-
-whitesmoke :: Colour
-whitesmoke = Data.Colour.Names.whitesmoke
+lightYellow :: Colour
+lightYellow = rgb (255.0 / 255.0) (233.0 / 255.0) (79.0 / 255.0)
 
 yellow :: Colour
-yellow = Data.Colour.Names.yellow
+yellow = rgb (237.0 / 255.0) (212.0 / 255.0) (0.0 / 255.0)
 
-yellowgreen :: Colour
-yellowgreen = Data.Colour.Names.yellowgreen
+darkYellow :: Colour
+darkYellow = rgb (196.0 / 255.0) (160.0 / 255.0) (0.0 / 255.0)
+
+lightGreen :: Colour
+lightGreen = rgb (138.0 / 255.0) (226.0 / 255.0) (52.0 / 255.0)
+
+green :: Colour
+green = rgb (115.0 / 255.0) (210.0 / 255.0) (22.0 / 255.0)
+
+darkGreen :: Colour
+darkGreen = rgb (78.0 / 255.0) (154.0 / 255.0) (6.0 / 255.0)
+
+lightBlue :: Colour
+lightBlue = rgb (114.0 / 255.0) (159.0 / 255.0) (207.0 / 255.0)
+
+blue :: Colour
+blue = rgb (52.0 / 255.0) (101.0 / 255.0) (164.0 / 255.0)
+
+darkBlue :: Colour
+darkBlue = rgb (32.0 / 255.0) (74.0 / 255.0) (135.0 / 255.0)
+
+lightPurple :: Colour
+lightPurple = rgb (173.0 / 255.0) (127.0 / 255.0) (168.0 / 255.0)
+
+purple :: Colour
+purple = rgb (117.0 / 255.0) (80.0 / 255.0) (123.0 / 255.0)
+
+darkPurple :: Colour
+darkPurple = rgb (92.0 / 255.0) (53.0 / 255.0) (102.0 / 255.0)
+
+lightBrown :: Colour
+lightBrown = rgb (233.0 / 255.0) (185.0 / 255.0) (110.0 / 255.0)
+
+brown :: Colour
+brown = rgb (193.0 / 255.0) (125.0 / 255.0) (17.0 / 255.0)
+
+darkBrown :: Colour
+darkBrown = rgb (143.0 / 255.0) (89.0 / 255.0) (2.0 / 255.0)
+
+black :: Colour
+black = rgb (0.0 / 255.0) (0.0 / 255.0) (0.0 / 255.0)
+
+white :: Colour
+white = rgb (255.0 / 255.0) (255.0 / 255.0) (255.0 / 255.0)
+
+lightGrey :: Colour
+lightGrey = rgb (238.0 / 255.0) (238.0 / 255.0) (236.0 / 255.0)
+
+grey :: Colour
+grey = rgb (211.0 / 255.0) (215.0 / 255.0) (207.0 / 255.0)
+
+darkGrey :: Colour
+darkGrey = rgb (186.0 / 255.0) (189.0 / 255.0) (182.0 / 255.0)
+
+lightGray :: Colour
+lightGray = rgb (238.0 / 255.0) (238.0 / 255.0) (236.0 / 255.0)
+
+gray :: Colour
+gray = rgb (211.0 / 255.0) (215.0 / 255.0) (207.0 / 255.0)
+
+darkGray :: Colour
+darkGray = rgb (186.0 / 255.0) (189.0 / 255.0) (182.0 / 255.0)
+
+lightCharcoal :: Colour
+lightCharcoal = rgb (136.0 / 255.0) (138.0 / 255.0) (133.0 / 255.0)
+
+charcoal :: Colour
+charcoal = rgb (85.0 / 255.0) (87.0 / 255.0) (83.0 / 255.0)
+
+darkCharcoal :: Colour
+darkCharcoal = rgb (46.0 / 255.0) (52.0 / 255.0) (54.0 / 255.0)
