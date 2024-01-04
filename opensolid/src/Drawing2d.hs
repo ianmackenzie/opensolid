@@ -25,16 +25,11 @@ type Resolution = ?resolution :: Length
 
 entityString :: String -> Entity space -> String
 entityString indent (Node name attributes children) =
-  let openingLine = indent ++ "<" ++ name
-      attributeLines = List.map (attributeString (indent ++ "   ")) attributes
-      childLines = String.join "\n" (List.map (entityString (indent ++ "  ")) children)
-      closingLine = "</" ++ name ++ ">\n"
-   in String.join "\n" $
-        [ openingLine
-        , String.join "\n" attributeLines ++ ">"
-        , childLines
-        , closingLine
-        ]
+  let openingTag = indent ++ "<" ++ name ++ String.concat attributeLines ++ ">"
+      attributeLines = List.map (attributeString ("\n" ++ indent ++ "   ")) attributes
+      childLines = List.map (entityString (indent ++ "  ")) children
+      closingTag = indent ++ "</" ++ name ++ ">"
+   in String.join "\n" (openingTag : childLines) ++ "\n" ++ closingTag
 
 attributeString :: String -> Attribute -> String
 attributeString indent (Attribute name value) = String.concat [indent, name, "=\"", value, "\""]
