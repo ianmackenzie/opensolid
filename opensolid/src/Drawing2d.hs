@@ -11,10 +11,13 @@ module Drawing2d
   , blackStroke
   , strokeWidth
   , noFill
+  , fillColour
   )
 where
 
 import Bounds2d (Bounds2d (Bounds2d))
+import Colour (Colour)
+import Colour qualified
 import File qualified
 import Length (Length)
 import Length qualified
@@ -101,3 +104,6 @@ strokeWidth givenWidth = Attribute "strokeWidth" (lengthString givenWidth)
 
 noFill :: Attribute space
 noFill = Attribute "fill" "none"
+
+fillColour :: Colour -> Attribute space
+fillColour colour = Attribute "fill" (Colour.toHexString colour)

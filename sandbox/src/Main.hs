@@ -5,6 +5,7 @@ import Area qualified
 import Axis2d qualified
 import Bounds2d (Bounds2d (Bounds2d))
 import Bounds2d qualified
+import Colour qualified
 import Console qualified
 import Direction2d qualified
 import Direction3d ()
@@ -188,7 +189,7 @@ testSvgOutput = Try.do
   Drawing2d.writeTo "test.svg" (Bounds2d.hull2 Point2d.origin (Point2d.centimeters 30.0 30.0)) $
     [ Drawing2d.group [] []
     , Drawing2d.group [] $
-        [ Drawing2d.polygon [] $
+        [ Drawing2d.polygon [Drawing2d.fillColour Colour.cornflowerblue] $
             [ Point2d.centimeters 10.0 10.0
             , Point2d.centimeters 20.0 10.0
             , Point2d.centimeters 15.0 20.0
