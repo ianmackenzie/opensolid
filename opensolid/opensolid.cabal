@@ -160,6 +160,7 @@ library
       VectorCurve2d
       VectorCurve3d
       VectorVolume3d.Function
+      Vertex2d
       Volume
       Volume1d
       Volume1d.Function
