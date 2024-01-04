@@ -2,7 +2,6 @@ module Basics
   ( List
   , String
   , ifThenElse
-  , fromString
   , fromInteger
   , otherwise
   , Int
@@ -73,10 +72,6 @@ type List a = [a]
 ifThenElse :: Bool -> a -> a -> a
 ifThenElse True ifBranch _ = ifBranch
 ifThenElse False _ elseBranch = elseBranch
-
-{-# INLINE fromString #-}
-fromString :: String -> String
-fromString = id
 
 {-# INLINE fromInteger #-}
 fromInteger :: Prelude.Integer -> Int

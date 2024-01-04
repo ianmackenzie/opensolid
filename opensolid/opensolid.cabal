@@ -44,7 +44,6 @@ common config
       -dcore-lint
   default-extensions:
       NoImplicitPrelude
-      OverloadedStrings
       MultiParamTypeClasses
       FlexibleInstances
       FlexibleContexts

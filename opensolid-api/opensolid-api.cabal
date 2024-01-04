@@ -43,7 +43,6 @@ library
   autogen-modules: Paths_opensolid_api
   default-extensions:
       NoImplicitPrelude
-      OverloadedStrings
       MultiParamTypeClasses
       FlexibleInstances
       FlexibleContexts

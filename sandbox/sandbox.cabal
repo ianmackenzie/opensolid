@@ -49,7 +49,6 @@ executable sandbox
       -with-rtsopts=-N
   default-extensions:
       NoImplicitPrelude
-      OverloadedStrings
       MultiParamTypeClasses
       FlexibleInstances
       FlexibleContexts
