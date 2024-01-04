@@ -1,6 +1,7 @@
 module Colour
   ( Colour
   , rgb
+  , rgb255
   , fromHexString
   , toHexString
   , lightRed
@@ -46,6 +47,9 @@ type Colour = Data.Colour.Colour Float
 
 rgb :: Float -> Float -> Float -> Colour
 rgb = Data.Colour.SRGB.sRGB
+
+rgb255 :: Int -> Int -> Int -> Colour
+rgb255 r g b = rgb (r / 255) (g / 255) (b / 255)
 
 fromHexString :: String -> Colour
 fromHexString = Data.Colour.SRGB.sRGB24read
