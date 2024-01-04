@@ -9,6 +9,12 @@ module Length
   , inMillimeters
   , centimeters
   , inCentimeters
+  , inch
+  , inches
+  , inInches
+  , pixel
+  , pixels
+  , inPixels
   )
 where
 
@@ -43,3 +49,21 @@ centimeters = (* centimeter)
 
 inCentimeters :: Length -> Float
 inCentimeters = (/ centimeter)
+
+inch :: Length
+inch = millimeters 25.4
+
+inches :: Float -> Length
+inches = (* inch)
+
+inInches :: Length -> Float
+inInches = (/ inch)
+
+pixel :: Length
+pixel = inch / 96.0
+
+pixels :: Float -> Length
+pixels = (* pixel)
+
+inPixels :: Length -> Float
+inPixels = (/ pixel)
