@@ -178,15 +178,9 @@ testSurface1dIntersection = Try.do
   let uvBounds = Bounds2d (Range.from -2.0 2.0) (Range.from -2.0 2.0)
   (solutions, _) <- Task.evaluate (Surface1d.Function.findSolutions f fu fv fuu fvv fuv uvBounds U [])
   log "Number of solutions" (List.length solutions)
-  Task.forEach solutions $ \solution ->
-    case solution of
-      Surface1d.Solution.CrossingLoop {segments} -> do
-        log "Crossing loop with size" (NonEmpty.length segments)
-        Task.forEach (NonEmpty.toList segments) $ \curve -> do
-          Task.forEach (U.steps 10) $ \uValue -> do
-            let Point2d x y = Curve2d.pointOn curve uValue
-            Console.printLine (String.fromFloat x ++ "," ++ String.fromFloat y)
-      _ -> log "Unexpected solution" solution
+  Task.forEach solutions $ \case
+    Surface1d.Solution.CrossingLoop {segments} -> log "Loop with size" (NonEmpty.length segments)
+    solution -> log "Unexpected solution" solution
  where
   ?tolerance = 1e-9
 
