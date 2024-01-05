@@ -210,7 +210,7 @@ tangentDerivativeIsPerpendicularToTangent =
     u <- U.generator
     let tangent = DirectionCurve2d.evaluateAt u tangentDirection
     let derivative = VectorCurve2d.evaluateAt u tangentDerivative
-    Test.expect (let ?tolerance = 1e-9 in derivative <> tangent ~= Qty.zero)
+    Test.expect (let ?tolerance = 1e-12 in derivative <> tangent ~= Qty.zero)
       |> Test.output "u" u
       |> Test.output "tangent" tangent
       |> Test.output "derivative" derivative
