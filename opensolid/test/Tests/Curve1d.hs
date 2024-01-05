@@ -10,11 +10,12 @@ import Test qualified
 
 tests :: List Test
 tests =
-  let ?tolerance = 1e-12
-   in [ crossingRoots
-      , tangentRoots
-      , approximateEquality
-      ]
+  [ crossingRoots
+  , tangentRoots
+  , approximateEquality
+  ]
+ where
+  ?tolerance = 1e-12
 
 crossingRoots :: (Tolerance Unitless) => Test
 crossingRoots = Test.verify "Crossing roots" $ Test.do
