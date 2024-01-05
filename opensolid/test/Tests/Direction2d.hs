@@ -22,7 +22,7 @@ angleFrom =
             expectedAngle = Angle.degrees expectedDegrees
          in Test.expect (computedAngle ~= expectedAngle)
      where
-      ?tolerance = Angle.radians 1e-9
+      ?tolerance = Angle.radians 1e-12
    in
     Test.group "angleFrom" $
       [ testCase 10.0 30.0 20.0
