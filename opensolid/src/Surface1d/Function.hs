@@ -120,7 +120,7 @@ instance
     (Function units2')
 
 instance Generic.HasZero (Function units) where
-  zeroImpl = zero
+  zero = zero
 
 instance Negation (Function units) where
   negate Zero = Zero

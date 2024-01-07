@@ -45,7 +45,7 @@ instance
     (VectorBounds2d (space' @ units2'))
 
 instance Generic.HasZero (VectorBounds2d (space @ units)) where
-  zeroImpl = constant Vector2d.zero
+  zero = constant Vector2d.zero
 
 instance Negation (VectorBounds2d (space @ units)) where
   negate (VectorBounds2d x y) = VectorBounds2d (negate x) (negate y)

@@ -61,7 +61,7 @@ instance
     (Vector2d (space' @ units2'))
 
 instance Generic.HasZero (Vector2d (space @ units)) where
-  zeroImpl = zero
+  zero = zero
 
 instance
   (space ~ space', units ~ units') =>

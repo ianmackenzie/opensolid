@@ -35,8 +35,8 @@ data Bounds3d (coordinateSystem :: CoordinateSystem) where
 deriving instance Show (Bounds3d (space @ units))
 
 instance Bounds.Interface (Bounds3d (space @ units)) where
-  aggregate2Impl = aggregate2
-  intersectionImpl = intersection
+  aggregate2 = aggregate2
+  intersection = intersection
 
 instance (units ~ units', space ~ space') => Subtraction (Point3d (space @ units)) (Bounds3d (space' @ units')) (VectorBounds3d (space @ units)) where
   Point3d px py pz - Bounds3d bx by bz = VectorBounds3d (px - bx) (py - by) (pz - bz)

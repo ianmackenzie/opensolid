@@ -41,7 +41,7 @@ instance
     (VectorBounds3d (space' @ units2'))
 
 instance Generic.HasZero (VectorBounds3d (space @ units)) where
-  zeroImpl = constant Vector3d.zero
+  zero = constant Vector3d.zero
 
 instance Negation (VectorBounds3d (space @ units)) where
   negate (VectorBounds3d x y z) = VectorBounds3d (negate x) (negate y) (negate z)

@@ -61,7 +61,7 @@ zero :: VectorCurve3d (space @ units)
 zero = Zero
 
 instance Generic.HasZero (VectorCurve3d (space @ units)) where
-  zeroImpl = zero
+  zero = zero
 
 data XYZ (coordinateSystem :: CoordinateSystem) where
   XYZ :: Curve1d units -> Curve1d units -> Curve1d units -> XYZ (space @ units)

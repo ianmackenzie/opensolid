@@ -90,7 +90,7 @@ instance
     (Function (space' @ units2'))
 
 instance Generic.HasZero (Function (space @ units)) where
-  zeroImpl = zero
+  zero = zero
 
 instance Negation (Function (space @ units)) where
   negate Zero = Zero

@@ -40,8 +40,8 @@ data Bounds2d (coordinateSystem :: CoordinateSystem) where
 deriving instance Show (Bounds2d (space @ units))
 
 instance Bounds.Interface (Bounds2d (space @ units)) where
-  aggregate2Impl = aggregate2
-  intersectionImpl = intersection
+  aggregate2 = aggregate2
+  intersection = intersection
 
 instance (units ~ units', space ~ space') => Subtraction (Point2d (space @ units)) (Bounds2d (space' @ units')) (VectorBounds2d (space @ units)) where
   Point2d px py - Bounds2d bx by = VectorBounds2d (px - bx) (py - by)

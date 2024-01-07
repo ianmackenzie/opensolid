@@ -105,7 +105,7 @@ instance Multiplication (Range units) Sign (Range units) where
   range * Negative = -range
 
 instance Generic.HasZero (Range units) where
-  zeroImpl = constant Qty.zero
+  zero = constant Qty.zero
 
 instance (units ~ units') => Addition (Range units) (Range units') (Range units) where
   Range low1 high1 + Range low2 high2 = unsafe (low1 + low2) (high1 + high2)
@@ -154,8 +154,8 @@ instance (Units.Quotient units1 units2 units3) => Division (Range units1) (Range
       else unsafe -Qty.infinity Qty.infinity
 
 instance Bounds.Interface (Range units) where
-  aggregate2Impl = aggregate2
-  intersectionImpl = intersection
+  aggregate2 = aggregate2
+  intersection = intersection
 
 {-# INLINE unsafe #-}
 unsafe :: Qty units -> Qty units -> Range units

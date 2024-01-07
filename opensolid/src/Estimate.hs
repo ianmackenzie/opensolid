@@ -79,7 +79,7 @@ satisfy predicate estimate =
    in if predicate current then current else satisfy predicate (refine estimate)
 
 instance Generic.HasZero (Estimate units) where
-  zeroImpl = exact Qty.zero
+  zero = exact Qty.zero
 
 newtype Negate units = Negate (Estimate units)
 

@@ -53,7 +53,7 @@ instance
     (Vector3d (space' @ units2'))
 
 instance Generic.HasZero (Vector3d (space @ units)) where
-  zeroImpl = zero
+  zero = zero
 
 instance
   (space ~ space', units ~ units') =>

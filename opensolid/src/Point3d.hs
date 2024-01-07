@@ -100,7 +100,7 @@ instance
   p1 ~= p2 = distanceFrom p1 p2 ~= Qty.zero
 
 instance Bounded.Interface (Point3d (space @ units)) (Bounds3d (space @ units)) where
-  boundsImpl = Bounds3d.constant
+  bounds = Bounds3d.constant
 
 xCoordinate :: Point3d (space @ units) -> Qty units
 xCoordinate (Point3d px _ _) = px

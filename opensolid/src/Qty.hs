@@ -59,7 +59,7 @@ instance
   Units.Coercion units1 units2 (Qty units1') (Qty units2')
 
 instance Generic.HasZero (Qty units) where
-  zeroImpl = zero
+  zero = zero
 
 deriving newtype instance Prelude.Num Float
 

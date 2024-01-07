@@ -1,6 +1,5 @@
 module Generic
-  ( HasZero (zeroImpl)
-  , zero
+  ( HasZero (zero)
   , min
   , max
   , minBy
@@ -12,13 +11,10 @@ import Basics
 import Prelude qualified
 
 class HasZero a where
-  zeroImpl :: a
+  zero :: a
 
 instance HasZero Int where
-  zeroImpl = 0
-
-zero :: (HasZero a) => a
-zero = zeroImpl
+  zero = 0
 
 {-# INLINE min #-}
 min :: (Ord a) => a -> a -> a

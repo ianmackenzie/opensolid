@@ -134,7 +134,7 @@ parameter :: Curve1d Unitless
 parameter = Parameter
 
 instance Generic.HasZero (Curve1d units) where
-  zeroImpl = zero
+  zero = zero
 
 instance Negation (Curve1d units) where
   negate Zero = Zero

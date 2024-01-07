@@ -133,7 +133,7 @@ instance Interface (VectorCurve2d (space @ units)) (space @ units) where
   derivativeImpl = derivative
 
 instance Generic.HasZero (VectorCurve2d (space @ units)) where
-  zeroImpl = zero
+  zero = zero
 
 instance Negation (VectorCurve2d (space @ units)) where
   negate Zero = Zero

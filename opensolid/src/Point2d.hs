@@ -109,7 +109,7 @@ instance
   p1 ~= p2 = distanceFrom p1 p2 ~= Qty.zero
 
 instance Bounded.Interface (Point2d (space @ units)) (Bounds2d (space @ units)) where
-  boundsImpl = Bounds2d.constant
+  bounds = Bounds2d.constant
 
 origin :: Point2d (space @ units)
 origin = Point2d Qty.zero Qty.zero
