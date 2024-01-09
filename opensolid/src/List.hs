@@ -1,6 +1,8 @@
 module List
   ( List
   , singleton
+  , fromMaybe
+  , toMaybe
   , isEmpty
   , length
   , map
@@ -45,6 +47,7 @@ import Arithmetic
 import Basics
 import Data.List qualified
 import Generic qualified
+import Result (ErrorMessage, Result (Error, Ok))
 import Prelude qualified
 
 singleton :: a -> List a
@@ -55,6 +58,17 @@ isEmpty = Prelude.null
 
 length :: List a -> Int
 length = Data.List.length
+
+fromMaybe :: Maybe a -> List a
+fromMaybe Nothing = []
+fromMaybe (Just item) = [item]
+
+data MultipleItems = MultipleItems deriving (Eq, Show, ErrorMessage)
+
+toMaybe :: List a -> Result MultipleItems (Maybe a)
+toMaybe [] = Ok Nothing
+toMaybe [item] = Ok (Just item)
+toMaybe _ = Error MultipleItems
 
 map :: (a -> b) -> List a -> List b
 map = Data.List.map
