@@ -1,11 +1,10 @@
 module Curve2d
   ( Curve2d
-  , pattern Line
-  , pattern Arc
   , DegenerateCurve (DegenerateCurve)
   , Intersection
   , IntersectionError (..)
   , Interface (..)
+  , module Curve2d.Patterns
   , from
   , startPoint
   , endPoint
@@ -37,9 +36,9 @@ import Curve2d.Internal (Interface (..))
 import Curve2d.Internal qualified as Internal
 import Curve2d.Intersection (Intersection (Intersection))
 import Curve2d.Intersection qualified as Intersection
+import Curve2d.Patterns
 import Curve2d.Segment (Segment)
 import Curve2d.Segment qualified as Segment
-import Direction2d (Direction2d)
 import DirectionCurve2d (DirectionCurve2d)
 import DirectionCurve2d qualified
 import List qualified
@@ -53,23 +52,6 @@ import VectorCurve2d (VectorCurve2d)
 import VectorCurve2d qualified
 
 type Curve2d (coordinateSystem :: CoordinateSystem) = Internal.Curve2d coordinateSystem
-
-pattern Line ::
-  Point2d (space @ units) ->
-  Point2d (space @ units) ->
-  Direction2d space ->
-  Curve2d (space @ units)
-pattern Line startPoint endPoint direction <-
-  Internal.Line startPoint endPoint direction
-
-pattern Arc ::
-  Point2d (space @ units) ->
-  Qty units ->
-  Angle ->
-  Angle ->
-  Curve2d (space @ units)
-pattern Arc centerPoint radius startAngle endAngle <-
-  Internal.Arc centerPoint radius startAngle endAngle
 
 data DegenerateCurve = DegenerateCurve deriving (Eq, Show, ErrorMessage)
 
@@ -105,14 +87,16 @@ reverse :: Curve2d (space @ units) -> Curve2d (space @ units)
 reverse = Internal.reverse
 
 bounds :: Curve2d (space @ units) -> Bounds2d (space @ units)
-bounds (Internal.Line p1 p2 _) = Bounds2d.hull2 p1 p2
+bounds (Internal.Line {startPoint = p1, endPoint = p2}) = Bounds2d.hull2 p1 p2
 bounds arc@(Internal.Arc {}) = segmentBounds U.domain arc
 bounds (Internal.Curve curve _) = boundsImpl curve
 
 tangentDirection :: Curve2d (space @ units) -> DirectionCurve2d space
-tangentDirection (Internal.Line _ _ direction) = DirectionCurve2d.constant direction
-tangentDirection (Internal.Arc _ _ a b) =
-  Qty.sign (b - a) * DirectionCurve2d.arc (a + Angle.quarterTurn) (b + Angle.quarterTurn)
+tangentDirection (Internal.Line {direction}) = DirectionCurve2d.constant direction
+tangentDirection (Internal.Arc {startAngle, endAngle}) =
+  let tangentStartAngle = startAngle + Angle.quarterTurn
+      tangentEndAngle = endAngle + Angle.quarterTurn
+   in Qty.sign (endAngle - startAngle) * DirectionCurve2d.arc tangentStartAngle tangentEndAngle
 tangentDirection (Internal.Curve _ tangent) = tangent
 
 data CurveIsCoincidentWithPoint = CurveIsCoincidentWithPoint deriving (Eq, Show, ErrorMessage)

@@ -7,10 +7,12 @@ import Bounds2d (Bounds2d (Bounds2d))
 import Bounds2d qualified
 import Colour qualified
 import Console qualified
+import Curve2d qualified
 import Direction2d qualified
 import Direction3d ()
 import Drawing2d qualified
 import Length qualified
+import Line2d qualified
 import List qualified
 import NonEmpty qualified
 import OpenSolid
@@ -197,6 +199,31 @@ testSvgOutput = Try.do
         ]
     ]
 
+testLineFromEndpoints :: (Tolerance Meters) => Task String ()
+testLineFromEndpoints = Try.do
+  line1 <-
+    Task.evaluate $
+      Line2d.with
+        ( Line2d.startPoint Point2d.origin
+        , Line2d.endPoint (Point2d.centimeters 40.0 30.0)
+        )
+  case line1 of
+    Curve2d.Line {length} ->
+      log "Line length in centimeters" (Length.inCentimeters length)
+    _ -> log "Unexpected curve" line1
+
+testDirectedLine :: (Tolerance Meters) => Task String ()
+testDirectedLine = Try.do
+  let line1 =
+        Line2d.with
+          ( Line2d.startPoint Point2d.origin
+          , Line2d.direction (Direction2d.degrees 45.0)
+          , Line2d.length (Length.centimeters 200.0)
+          )
+  case line1 of
+    Curve2d.Line {endPoint} -> log "Line end point" endPoint
+    _ -> log "Unexpected curve" line1
+
 script :: Task String ()
 script = Try.do
   testScalarArithmetic
@@ -213,6 +240,8 @@ script = Try.do
   testNonEmpty
   testSurface1dIntersection
   testSvgOutput
+  testLineFromEndpoints
+  testDirectedLine
  where
   ?tolerance = Length.meters 1e-9
 

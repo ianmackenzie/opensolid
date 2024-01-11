@@ -140,14 +140,23 @@ from startPoint endPoint sweptAngle =
           halfDistance = 0.5 * distance
           linearDeviation = halfDistance * tanHalfAngle
        in if linearDeviation ~= Qty.zero
-            then Ok (Curve2d.Internal.Line startPoint endPoint direction)
+            then
+              Ok $
+                -- Arc is actually just a straight line
+                Curve2d.Internal.Line
+                  { startPoint
+                  , endPoint
+                  , direction
+                  , length = Point2d.distanceFrom startPoint endPoint
+                  }
             else
               let offset = (halfDistance / tanHalfAngle) * Direction2d.rotateLeft direction
                   computedCenterPoint = Point2d.midpoint startPoint endPoint + offset
                   computedStartAngle = Point2d.angleFrom computedCenterPoint startPoint
                in Ok $
                     Curve2d.Internal.Arc
-                      computedCenterPoint
-                      (Point2d.distanceFrom computedCenterPoint startPoint)
-                      computedStartAngle
-                      (computedStartAngle + sweptAngle)
+                      { centerPoint = computedCenterPoint
+                      , radius = Point2d.distanceFrom computedCenterPoint startPoint
+                      , startAngle = computedStartAngle
+                      , endAngle = computedStartAngle + sweptAngle
+                      }

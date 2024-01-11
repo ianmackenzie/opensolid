@@ -28,6 +28,7 @@ common config
     , containers
     , random
     , colour
+    , type-errors
   ghc-options:
       -Wall
       -Werror
@@ -168,6 +169,7 @@ library
   other-modules:
       Curve1d.Integral
       Curve2d.Internal
+      Curve2d.Patterns
       Curve2d.Derivatives
       Curve2d.Segment
       VectorCurve2d.DegenerateEndpoint
