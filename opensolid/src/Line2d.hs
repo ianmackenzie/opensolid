@@ -6,7 +6,6 @@ module Line2d
   , length
   , direction
   , with
-  , Properties
   )
 where
 
