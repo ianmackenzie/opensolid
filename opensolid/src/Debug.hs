@@ -2,11 +2,13 @@ module Debug
   ( trace
   , log
   , intercept
+  , assert
   )
 where
 
 import Basics
 import Concatenation
+import Control.Exception (assert)
 import Debug.Trace qualified
 
 trace :: String -> a -> a
