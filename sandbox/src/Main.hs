@@ -3,7 +3,6 @@ module Main (main) where
 import Angle qualified
 import Area qualified
 import Axis2d qualified
-import Bounds2d (Bounds2d (Bounds2d))
 import Bounds2d qualified
 import Colour qualified
 import Console qualified
@@ -11,12 +10,13 @@ import Curve2d qualified
 import Direction2d qualified
 import Direction3d ()
 import Drawing2d qualified
+import File qualified
 import Length qualified
 import Line2d qualified
 import List qualified
 import NonEmpty qualified
 import OpenSolid
-import Point2d (Point2d)
+import Point2d (Point2d (Point2d))
 import Point2d qualified
 import Qty qualified
 import Random qualified
@@ -167,22 +167,28 @@ testNonEmpty = Try.do
   testEmptyCheck []
   testEmptyCheck [2, 3, 1]
 
+outputLine :: Point2d (space @ Unitless) -> String
+outputLine (Point2d px py) = String.fromFloat px ++ "," ++ String.fromFloat py
+
 testSurface1dIntersection :: Task String ()
 testSurface1dIntersection = Try.do
   let u = Surface1d.Function.parameter U
   let v = Surface1d.Function.parameter V
-  let f = Surface1d.Function.squared u + Surface1d.Function.squared v - 1.0
-  let fu = f |> Surface1d.Function.derivative U
-  let fv = f |> Surface1d.Function.derivative V
-  let fuu = fu |> Surface1d.Function.derivative U
-  let fvv = fv |> Surface1d.Function.derivative V
-  let fuv = fu |> Surface1d.Function.derivative V
-  let uvBounds = Bounds2d (Range.from -2.0 2.0) (Range.from -2.0 2.0)
-  (solutions, _) <- Task.evaluate (Surface1d.Function.findSolutions f fu fv fuu fvv fuv uvBounds U [])
+  let x = -0.97 + 1.94 * u
+  let y = -0.97 + 1.94 * v
+  let f = Surface1d.Function.squared x + Surface1d.Function.squared y - 1.0
+  solutions <- Task.evaluate (Surface1d.Function.solve f)
   log "Number of solutions" (List.length solutions)
-  Task.forEach solutions $ \case
-    Surface1d.Solution.CrossingLoop {segments} -> log "Loop with size" (NonEmpty.length segments)
-    solution -> log "Unexpected solution" solution
+  let segmentPoints segment = [Curve2d.pointOn segment uValue | uValue <- U.steps 10]
+  let curvePoints segments = List.collect segmentPoints (NonEmpty.toList segments)
+  let solutionPoints = \case
+        Surface1d.Solution.CrossingCurve {segments} -> Ok (curvePoints segments)
+        Surface1d.Solution.CrossingLoop {segments} -> Ok (curvePoints segments)
+        solution -> Error ("Unexpected solution: " ++ show solution)
+  solutionPointLists <- Task.evaluate (Result.collect solutionPoints solutions)
+  let allSolutionPoints = List.concat solutionPointLists
+  let outputLines = List.map outputLine allSolutionPoints
+  File.writeTo "solution-points.txt" (String.join "\n" outputLines)
  where
   ?tolerance = 1e-9
 

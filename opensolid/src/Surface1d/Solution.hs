@@ -16,7 +16,9 @@ import Surface1d.Solution.Boundary qualified as Boundary
 import Uv qualified
 
 data Solution
-  = CrossingCurve {start :: Boundary, end :: Boundary, segments :: NonEmpty (Curve2d Uv.Coordinates)}
+  = BoundaryEdge (Curve2d Uv.Coordinates)
+  | BoundaryPoint Uv.Point
+  | CrossingCurve {start :: Boundary, end :: Boundary, segments :: NonEmpty (Curve2d Uv.Coordinates)}
   | CrossingLoop {segments :: NonEmpty (Curve2d Uv.Coordinates)}
   | TangentCurve {start :: Boundary, end :: Boundary, segments :: NonEmpty (Curve2d Uv.Coordinates), sign :: Sign}
   | TangentLoop {segments :: NonEmpty (Curve2d Uv.Coordinates), sign :: Sign}

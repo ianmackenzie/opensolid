@@ -28,12 +28,15 @@ import Bounds2d (Bounds2d (Bounds2d))
 import Bounds2d qualified
 import Curve1d (Curve1d (Curve1d))
 import Curve1d qualified
+import Curve1d.Root qualified
 import Curve2d (Curve2d)
 import Curve2d qualified
 import Debug qualified
 import Direction2d qualified
 import Float qualified
 import Generic qualified
+import Int qualified
+import Line2d qualified
 import List qualified
 import NonEmpty qualified
 import OpenSolid
@@ -379,47 +382,119 @@ solve :: (Tolerance units) => Function units -> Result SolveError (List Solution
 solve Zero = Error ZeroEverywhere
 solve (Constant value) = if value ~= Qty.zero then Error ZeroEverywhere else Ok []
 solve f | isZero f = Error ZeroEverywhere
-solve f = findSolutions f fu fv fuu fvv fuv Uv.domain U [] |> Result.map Pair.first
+solve f =
+  Result.map Pair.first $
+    findSolutions derivatives boundaryEdges boundaryPoints Uv.domain U []
  where
   fu = derivative U f
   fv = derivative V f
   fuu = derivative U fu
   fvv = derivative V fv
   fuv = derivative V fu
+  derivatives = Derivatives {f, fu, fv, fuu, fvv, fuv}
+  (boundaryEdges, boundaryPoints) = findBoundarySolutions f
+
+data Derivatives units = Derivatives
+  { f :: Function units
+  , fu :: Function units
+  , fv :: Function units
+  , fuu :: Function units
+  , fvv :: Function units
+  , fuv :: Function units
+  }
 
 findSolutions ::
   (Tolerance units) =>
-  Function units ->
-  Function units ->
-  Function units ->
-  Function units ->
-  Function units ->
-  Function units ->
+  Derivatives units ->
+  BoundaryEdges ->
+  List BoundaryPoint ->
   Uv.Bounds ->
   Uv.Parameter ->
   List Uv.Bounds ->
   Result SolveError (List Solution, List Uv.Bounds)
-findSolutions f fu fv fuu fvv fuv uvBounds bisectionParameter exclusions
+findSolutions derivatives boundaryEdges boundaryPoints uvBounds bisectionParameter exclusions
   | Range.exclusion Qty.zero fBounds > ?tolerance = Ok ([], []) -- no solutions
   | List.any (Bounds2d.contains uvBounds) exclusions = Ok ([], []) -- no solutions
-  | Just result <- generalSolution f fu fv uvBounds exclusions = result
-  | Just result <- horizontalSolution f fu fv uvBounds exclusions = result
-  | Just result <- verticalSolution f fu fv uvBounds exclusions = result
+  | Just result <- generalSolution derivatives uvBounds exclusions = result
+  | Just result <- horizontalSolution derivatives boundaryEdges boundaryPoints uvBounds exclusions = result
+  | Just result <- verticalSolution derivatives boundaryEdges boundaryPoints uvBounds exclusions = result
   -- TODO: tangent solutions
-  | fBounds ~= Qty.zero && allDerivativesZero uvBounds fu fv fuu fvv fuv =
+  | fBounds ~= Qty.zero && allDerivativesZero uvBounds derivatives =
       Error HigherOrderIntersection
   | otherwise = do
       let (bounds1, bounds2) = Uv.bisect bisectionParameter uvBounds
       let nextBisectionParameter = Uv.cycle bisectionParameter
       (solutions1, exclusions1) <-
-        findSolutions f fu fv fuu fvv fuv bounds1 nextBisectionParameter $
+        findSolutions derivatives boundaryEdges boundaryPoints bounds1 nextBisectionParameter $
           List.filter (affects bounds1) exclusions
       (solutions2, exclusions2) <-
-        findSolutions f fu fv fuu fvv fu bounds2 nextBisectionParameter $
+        findSolutions derivatives boundaryEdges boundaryPoints bounds2 nextBisectionParameter $
           List.filter (affects bounds2) (exclusions1 ++ exclusions)
       return (Solution.merge solutions1 solutions2, exclusions1 ++ exclusions2)
  where
+  Derivatives {f} = derivatives
   fBounds = segmentBounds uvBounds f
+
+data BoundaryEdges = BoundaryEdges
+  { leftEdgeIsSolution :: Bool
+  , rightEdgeIsSolution :: Bool
+  , bottomEdgeIsSolution :: Bool
+  , topEdgeIsSolution :: Bool
+  }
+  deriving (Show)
+
+data BoundaryPoint = BoundaryPoint
+  { point :: Uv.Point
+  , edgeSign :: Sign
+  , rootOrder :: Int
+  , rootSign :: Sign
+  }
+  deriving (Show)
+
+boundaryEdge :: Uv.Point -> Uv.Direction -> Curve2d Uv.Coordinates
+boundaryEdge startPoint direction =
+  Line2d.with
+    ( Line2d.startPoint startPoint
+    , Line2d.direction direction
+    , Line2d.length 1.0
+    )
+
+findBoundarySolutions :: (Tolerance units) => Function units -> (BoundaryEdges, List BoundaryPoint)
+findBoundarySolutions f =
+  let p00 = Point2d 0.0 0.0
+      p01 = Point2d 0.0 1.0
+      p10 = Point2d 1.0 0.0
+      leftEdge = boundaryEdge p00 Direction2d.y
+      rightEdge = boundaryEdge p10 Direction2d.y
+      bottomEdge = boundaryEdge p00 Direction2d.x
+      topEdge = boundaryEdge p01 Direction2d.x
+      (leftEdgeIsSolution, leftPoints) = edgeSolutions f leftEdge Negative
+      (rightEdgeIsSolution, rightPoints) = edgeSolutions f rightEdge Positive
+      (bottomEdgeIsSolution, bottomPoints) = edgeSolutions f bottomEdge Negative
+      (topEdgeIsSolution, topPoints) = edgeSolutions f topEdge Positive
+      boundaryEdges =
+        BoundaryEdges
+          { leftEdgeIsSolution
+          , rightEdgeIsSolution
+          , bottomEdgeIsSolution
+          , topEdgeIsSolution
+          }
+      boundaryPoints = List.concat [leftPoints, rightPoints, bottomPoints, topPoints]
+   in (boundaryEdges, boundaryPoints)
+
+edgeSolutions :: (Tolerance units) => Function units -> Curve2d Uv.Coordinates -> Sign -> (Bool, List BoundaryPoint)
+edgeSolutions f edgeCurve edgeSign =
+  case Curve1d.roots (Curve1d (CurveOnSurface edgeCurve f)) of
+    Error Curve1d.ZeroEverywhere -> (True, [])
+    Ok roots ->
+      let toBoundaryPoint root =
+            BoundaryPoint
+              { point = Curve2d.pointOn edgeCurve (Curve1d.Root.value root)
+              , edgeSign
+              , rootOrder = Curve1d.Root.order root
+              , rootSign = Curve1d.Root.sign root
+              }
+       in (False, List.map toBoundaryPoint roots)
 
 affects :: Uv.Bounds -> Uv.Bounds -> Bool
 affects uvBounds exclusion =
@@ -441,13 +516,11 @@ expandV (Bounds2d u v) = Bounds2d u (expand v)
 
 generalSolution ::
   (Tolerance units) =>
-  Function units ->
-  Function units ->
-  Function units ->
+  Derivatives units ->
   Uv.Bounds ->
   List Uv.Bounds ->
   Maybe (Result SolveError (List Solution, List Uv.Bounds))
-generalSolution f fu fv uvBounds@(Bounds2d (Range minU maxU) (Range minV maxV)) exclusions
+generalSolution derivatives uvBounds@(Bounds2d (Range minU maxU) (Range minV maxV)) exclusions
   | List.any (overlaps uvBounds) exclusions = Nothing
   | resolved fuBounds && resolved fvBounds =
       let signAt u v = Qty.sign (evaluateAt (Point2d u v) f)
@@ -545,65 +618,135 @@ generalSolution f fu fv uvBounds@(Bounds2d (Range minU maxU) (Range minV maxV)) 
             (Positive, Negative, Negative, Positive) -> internalError "Inconsistent derivatives"
   | otherwise = Nothing
  where
+  Derivatives {f, fu, fv} = derivatives
   fuBounds = segmentBounds uvBounds fu
   fvBounds = segmentBounds uvBounds fv
 
 resolved :: Range units -> Bool
 resolved range = Qty.abs (Range.resolution range) >= 0.5
 
+isStrictlyInside :: Uv.Bounds -> BoundaryPoint -> Bool
+isStrictlyInside bounds (BoundaryPoint {point}) = Bounds2d.inclusion point bounds > 0.0
+
 horizontalSolution ::
   (Tolerance units) =>
-  Function units ->
-  Function units ->
-  Function units ->
+  Derivatives units ->
+  BoundaryEdges ->
+  List BoundaryPoint ->
   Uv.Bounds ->
   List Uv.Bounds ->
   Maybe (Result SolveError (List Solution, List Uv.Bounds))
-horizontalSolution f fu fv (Bounds2d uRange vRange@(Range minV maxV)) exclusions
-  | List.any (overlaps expandedBounds) exclusions = Nothing
-  | fvResolution >= 0.5 && bottomSign == Resolved Negative && topSign == Resolved Positive =
-      Just (Result.map (,newExclusions) (leftwardsSolution f fu fv expandedBounds))
-  | fvResolution <= -0.5 && bottomSign == Resolved Positive && topSign == Resolved Negative =
-      Just (Result.map (,newExclusions) (rightwardsSolution f fu fv expandedBounds))
-  | otherwise = Nothing
+horizontalSolution derivatives boundaryEdges boundaryPoints uvBounds exclusions
+  | List.any (overlaps expandedBounds) exclusions =
+      Nothing
+  | Qty.abs fvResolution >= 0.5
+  , (bottomEdgeIsSolution && minV == 0.0) || (topEdgeIsSolution && maxV == 1.0) =
+      Just (Ok ([], []))
+  | fvResolution >= 0.5
+  , bottomSign == Resolved Negative
+  , topSign == Resolved Positive
+  , Just solutionBounds <- trimmedBounds =
+      Just (Result.map (,newExclusions) (leftwardsSolution f fu fv solutionBounds))
+  | fvResolution <= -0.5
+  , bottomSign == Resolved Positive
+  , topSign == Resolved Negative
+  , Just solutionBounds <- trimmedBounds =
+      Just (Result.map (,newExclusions) (rightwardsSolution f fu fv solutionBounds))
+  | otherwise =
+      Nothing
  where
+  Bounds2d uRange vRange = uvBounds
+  Range minU maxU = uRange
+  Range minV maxV = vRange
+  Derivatives {f, fu, fv} = derivatives
+  BoundaryEdges {bottomEdgeIsSolution, topEdgeIsSolution} = boundaryEdges
+
   vHalfWidth = 0.5 * Range.width vRange
   vBottom = minV - vHalfWidth
   vTop = maxV + vHalfWidth
   expandedVRange = Range.from vBottom vTop
   expandedBounds = Bounds2d uRange expandedVRange
+
   fvResolution = Range.resolution (segmentBounds expandedBounds fv)
   sliceSign v uSubRange = sign (boundsOn f (Bounds2d uSubRange (Range.constant v)))
   bottomSign = Range.resolve (sliceSign vBottom) uRange
   topSign = Range.resolve (sliceSign vTop) uRange
+
   newExclusions = [Bounds2d uRange (Range.from vBottom minV), Bounds2d uRange (Range.from maxV vTop)]
+  trimmedBounds =
+    case List.filter (isStrictlyInside expandedBounds) boundaryPoints of
+      [] -> Just expandedBounds
+      List.One (BoundaryPoint {point = Point2d u0 _, edgeSign, rootOrder, rootSign}) ->
+        case (rootOrder, edgeSign, rootSign * Qty.sign fvResolution) of
+          (Int.Even, Negative, Negative) -> Just (Bounds2d (Range.from u0 maxU) (Range.from minV vTop))
+          (Int.Even, Negative, Positive) -> Just (Bounds2d (Range.from minU u0) (Range.from minV vTop))
+          (Int.Even, Positive, Negative) -> Just (Bounds2d (Range.from minU u0) (Range.from vBottom maxV))
+          (Int.Even, Positive, Positive) -> Just (Bounds2d (Range.from u0 maxU) (Range.from vBottom maxV))
+          (Int.Odd, Negative, Negative) -> Just (Bounds2d (Range.from minU maxU) (Range.from minV vTop))
+          (Int.Odd, Negative, Positive) -> Nothing
+          (Int.Odd, Positive, Negative) -> Nothing
+          (Int.Odd, Positive, Positive) -> Just (Bounds2d (Range.from minU maxU) (Range.from vBottom maxV))
+      List.TwoOrMore -> Nothing
 
 verticalSolution ::
   (Tolerance units) =>
-  Function units ->
-  Function units ->
-  Function units ->
+  Derivatives units ->
+  BoundaryEdges ->
+  List BoundaryPoint ->
   Uv.Bounds ->
   List Uv.Bounds ->
   Maybe (Result SolveError (List Solution, List Uv.Bounds))
-verticalSolution f fu fv (Bounds2d uRange@(Range minU maxU) vRange) exclusions
-  | List.any (overlaps expandedBounds) exclusions = Nothing
-  | fuResolution >= 0.5 && leftSign == Resolved Negative && rightSign == Resolved Positive =
-      Just (Result.map (,newExclusions) (upwardsSolution f fu fv expandedBounds))
-  | fuResolution <= -0.5 && leftSign == Resolved Positive && rightSign == Resolved Negative =
-      Just (Result.map (,newExclusions) (downwardsSolution f fu fv expandedBounds))
-  | otherwise = Nothing
+verticalSolution derivatives boundaryEdges boundaryPoints uvBounds exclusions
+  | List.any (overlaps expandedBounds) exclusions =
+      Nothing
+  | Qty.abs fuResolution >= 0.5
+  , (leftEdgeIsSolution && minU == 0.0) || (rightEdgeIsSolution && maxU == 1.0) =
+      Just (Ok ([], []))
+  | fuResolution >= 0.5
+  , leftSign == Resolved Negative
+  , rightSign == Resolved Positive
+  , Just solutionBounds <- trimmedBounds =
+      Just (Result.map (,newExclusions) (upwardsSolution f fu fv solutionBounds))
+  | fuResolution <= -0.5
+  , leftSign == Resolved Positive
+  , rightSign == Resolved Negative
+  , Just solutionBounds <- trimmedBounds =
+      Just (Result.map (,newExclusions) (downwardsSolution f fu fv solutionBounds))
+  | otherwise =
+      Nothing
  where
+  Bounds2d uRange vRange = uvBounds
+  Range minU maxU = uRange
+  Range minV maxV = vRange
+  Derivatives {f, fu, fv} = derivatives
+  BoundaryEdges {leftEdgeIsSolution, rightEdgeIsSolution} = boundaryEdges
+
   uHalfWidth = 0.5 * Range.width uRange
   uLeft = minU - uHalfWidth
   uRight = maxU + uHalfWidth
   expandedURange = Range.from uLeft uRight
   expandedBounds = Bounds2d expandedURange vRange
+
   fuResolution = Range.resolution (segmentBounds expandedBounds fu)
   sliceSign u vSubRange = sign (boundsOn f (Bounds2d (Range.constant u) vSubRange))
   leftSign = Range.resolve (sliceSign uLeft) vRange
   rightSign = Range.resolve (sliceSign uRight) vRange
+
   newExclusions = [Bounds2d (Range.from uLeft minU) vRange, Bounds2d (Range.from maxU uRight) vRange]
+  trimmedBounds =
+    case List.filter (isStrictlyInside expandedBounds) boundaryPoints of
+      [] -> Just expandedBounds
+      List.One (BoundaryPoint {point = Point2d _ v0, edgeSign, rootOrder, rootSign}) ->
+        case (rootOrder, edgeSign, rootSign * Qty.sign fuResolution) of
+          (Int.Even, Negative, Negative) -> Just (Bounds2d (Range.from minU uRight) (Range.from v0 maxV))
+          (Int.Even, Negative, Positive) -> Just (Bounds2d (Range.from minU uRight) (Range.from minV v0))
+          (Int.Even, Positive, Negative) -> Just (Bounds2d (Range.from uLeft maxU) (Range.from minV v0))
+          (Int.Even, Positive, Positive) -> Just (Bounds2d (Range.from uLeft maxU) (Range.from v0 maxV))
+          (Int.Odd, Negative, Negative) -> Just (Bounds2d (Range.from minU uRight) (Range.from minV maxV))
+          (Int.Odd, Negative, Positive) -> Nothing
+          (Int.Odd, Positive, Negative) -> Nothing
+          (Int.Odd, Positive, Positive) -> Just (Bounds2d (Range.from uLeft maxU) (Range.from minV maxV))
+      List.TwoOrMore -> Nothing
 
 rightwardsSolution ::
   Function units ->
@@ -720,13 +863,9 @@ verticalCurve f fu fv uLow uHigh vStart vEnd =
 allDerivativesZero ::
   (Tolerance units) =>
   Uv.Bounds ->
-  Function units ->
-  Function units ->
-  Function units ->
-  Function units ->
-  Function units ->
+  Derivatives units ->
   Bool
-allDerivativesZero uvBounds fu fv fuu fvv fuv =
+allDerivativesZero uvBounds (Derivatives {fu, fv, fuu, fvv, fuv}) =
   segmentBounds uvBounds fu ~= Qty.zero
     && segmentBounds uvBounds fv ~= Qty.zero
     && segmentBounds uvBounds fuu ~= Qty.zero
