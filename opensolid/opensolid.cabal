@@ -146,7 +146,6 @@ library
       Surface1d
       Surface1d.Function
       Surface1d.Solution
-      Surface1d.Solution.Boundary
       Task
       Tolerance
       Transform2d
@@ -175,6 +174,7 @@ library
       VectorCurve2d.Direction
       VectorCurve2d.Magnitude
       Quadrature
+      Surface1d.Solution.Boundary
   hs-source-dirs: src
 
 test-suite opensolid-test
