@@ -1,7 +1,9 @@
 {-# LANGUAGE NoFieldSelectors #-}
 
 module Line2d
-  ( startPoint
+  ( from
+  , directed
+  , startPoint
   , endPoint
   , length
   , direction
@@ -9,7 +11,8 @@ module Line2d
   )
 where
 
-import Curve2d (Curve2d, DegenerateCurve (DegenerateCurve))
+import Curve2d (Curve2d)
+import Curve2d qualified
 import Curve2d.Internal qualified
 import Data.Kind (Constraint)
 import Direction2d (Direction2d)
@@ -19,6 +22,28 @@ import Point2d (Point2d)
 import Point2d qualified
 import Qty qualified
 import Type.Errors (ErrorMessage (Text), TypeError)
+
+from :: (Tolerance units) => Point2d (space @ units) -> Point2d (space @ units) -> Result Curve2d.DegenerateCurve (Curve2d (space @ units))
+from givenStartPoint givenEndPoint =
+  case Direction2d.from givenStartPoint givenEndPoint of
+    Error Direction2d.PointsAreCoincident -> Error Curve2d.DegenerateCurve
+    Ok directionBetweenPoints ->
+      Ok $
+        Curve2d.Internal.Line
+          { startPoint = givenStartPoint
+          , endPoint = givenEndPoint
+          , direction = directionBetweenPoints
+          , length = Point2d.distanceFrom givenStartPoint givenEndPoint
+          }
+
+directed :: Point2d (space @ units) -> Direction2d space -> Qty units -> Curve2d (space @ units)
+directed givenStartPoint givenDirection givenLength =
+  Curve2d.Internal.Line
+    { startPoint = givenStartPoint
+    , endPoint = givenStartPoint + givenDirection * givenLength
+    , direction = givenDirection * Qty.sign givenLength
+    , length = Qty.abs givenLength
+    }
 
 data Properties startPoint endPoint direction length = Properties
   { startPoint :: startPoint
@@ -120,17 +145,7 @@ instance
         , direction = UnspecifiedDirection
         , length = UnspecifiedLength
         }
-      ) =
-      case Direction2d.from givenStartPoint givenEndPoint of
-        Error Direction2d.PointsAreCoincident -> Error DegenerateCurve
-        Ok directionBetweenPoints ->
-          Ok $
-            Curve2d.Internal.Line
-              { startPoint = givenStartPoint
-              , endPoint = givenEndPoint
-              , direction = directionBetweenPoints
-              , length = Point2d.distanceFrom givenStartPoint givenEndPoint
-              }
+      ) = from givenStartPoint givenEndPoint
 
 instance
   ( space ~ space'
@@ -153,13 +168,7 @@ instance
         , length = givenLength
         , direction = givenDirection
         }
-      ) =
-      Curve2d.Internal.Line
-        { startPoint = givenStartPoint
-        , endPoint = givenStartPoint + givenDirection * givenLength
-        , direction = givenDirection * Qty.sign givenLength
-        , length = Qty.abs givenLength
-        }
+      ) = directed givenStartPoint givenDirection givenLength
 
 instance
   ( space ~ space'

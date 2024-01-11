@@ -452,12 +452,7 @@ data BoundaryPoint = BoundaryPoint
   deriving (Show)
 
 boundaryEdge :: Uv.Point -> Uv.Direction -> Curve2d Uv.Coordinates
-boundaryEdge startPoint direction =
-  Line2d.with
-    ( Line2d.startPoint startPoint
-    , Line2d.direction direction
-    , Line2d.length 1.0
-    )
+boundaryEdge startPoint direction = Line2d.directed startPoint direction 1.0
 
 findBoundarySolutions :: (Tolerance units) => Function units -> (BoundaryEdges, List BoundaryPoint)
 findBoundarySolutions f =
