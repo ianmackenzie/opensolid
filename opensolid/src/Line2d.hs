@@ -41,13 +41,6 @@ type EmptyProperties = Properties UnspecifiedStartPoint UnspecifiedEndPoint Unsp
 emptyProperties :: EmptyProperties
 emptyProperties = Properties UnspecifiedStartPoint UnspecifiedEndPoint UnspecifiedDirection UnspecifiedLength
 
--- TODO try out the OverloadedRecordUpdate extension to see if these types can be simplified,
--- e.g. to something like
---
--- startPoint :: Point2d (space @ units) -> Argument "startPoint" (Point2d (space @ units))
---
--- and then use some HasField magic to synthesize the Properties -> Properties function type...
-
 startPoint ::
   Point2d (space @ units) ->
   Properties UnspecifiedStartPoint endPoint direction length ->
