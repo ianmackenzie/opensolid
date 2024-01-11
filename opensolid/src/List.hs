@@ -1,8 +1,12 @@
 module List
   ( List
+  , pattern One
+  , pattern Two
+  , pattern Three
+  , pattern TwoOrMore
+  , pattern ThreeOrMore
+  , pattern FourOrMore
   , singleton
-  , fromMaybe
-  , toMaybe
   , isEmpty
   , length
   , map
@@ -47,7 +51,6 @@ import Arithmetic
 import Basics
 import Data.List qualified
 import Generic qualified
-import Result (ErrorMessage, Result (Error, Ok))
 import Prelude qualified
 
 singleton :: a -> List a
@@ -59,16 +62,29 @@ isEmpty = Prelude.null
 length :: List a -> Int
 length = Data.List.length
 
-fromMaybe :: Maybe a -> List a
-fromMaybe Nothing = []
-fromMaybe (Just item) = [item]
+{-# COMPLETE [], One, TwoOrMore #-}
 
-data MultipleItems = MultipleItems deriving (Eq, Show, ErrorMessage)
+{-# COMPLETE [], One, Two, ThreeOrMore #-}
 
-toMaybe :: List a -> Result MultipleItems (Maybe a)
-toMaybe [] = Ok Nothing
-toMaybe [item] = Ok (Just item)
-toMaybe _ = Error MultipleItems
+{-# COMPLETE [], One, Two, Three, FourOrMore #-}
+
+pattern One :: a -> List a
+pattern One item = [item]
+
+pattern Two :: a -> a -> List a
+pattern Two first second = [first, second]
+
+pattern Three :: a -> a -> a -> List a
+pattern Three first second third = [first, second, third]
+
+pattern TwoOrMore :: List a
+pattern TwoOrMore <- _ : _ : _
+
+pattern ThreeOrMore :: List a
+pattern ThreeOrMore <- _ : _ : _ : _
+
+pattern FourOrMore :: List a
+pattern FourOrMore <- _ : _ : _ : _ : _
 
 map :: (a -> b) -> List a -> List b
 map = Data.List.map

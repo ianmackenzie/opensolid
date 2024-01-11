@@ -130,7 +130,7 @@ extendPartialLoop ::
 extendPartialLoop (PartialLoop currentStart currentCurves loopEnd) curves =
   case List.partition (hasEndpoint currentStart) curves of
     ([], _) -> Error RegionBoundaryHasGaps
-    ([curve], remaining) ->
+    (List.One curve, remaining) ->
       let newCurve =
             if Curve2d.endPoint curve ~= currentStart
               then curve
@@ -138,7 +138,7 @@ extendPartialLoop (PartialLoop currentStart currentCurves loopEnd) curves =
           newStart = Curve2d.startPoint newCurve
           updatedCurves = NonEmpty.prepend newCurve currentCurves
        in Ok (PartialLoop newStart updatedCurves loopEnd, remaining)
-    (_ : _ : _, _) -> Error RegionBoundaryIntersectsItself
+    (List.TwoOrMore, _) -> Error RegionBoundaryIntersectsItself
 
 hasEndpoint :: (Tolerance units) => Point2d (space @ units) -> Curve2d (space @ units) -> Bool
 hasEndpoint point curve =
