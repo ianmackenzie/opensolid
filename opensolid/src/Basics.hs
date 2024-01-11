@@ -32,7 +32,6 @@ module Basics
   , Monad ((>>=), (>>), return)
   , MonadFail (fail)
   , (.)
-  , Unspecified (Unspecified)
   )
 where
 
@@ -89,5 +88,3 @@ notImplemented = internalError "Not implemented"
 (|>) value function = function value
 
 infixl 0 |>
-
-data Unspecified = Unspecified

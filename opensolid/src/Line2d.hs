@@ -29,10 +29,18 @@ data Properties startPoint endPoint direction length = Properties
   }
   deriving (Show)
 
-type EmptyProperties = Properties Unspecified Unspecified Unspecified Unspecified
+data UnspecifiedStartPoint = UnspecifiedStartPoint
+
+data UnspecifiedEndPoint = UnspecifiedEndPoint
+
+data UnspecifiedDirection = UnspecifiedDirection
+
+data UnspecifiedLength = UnspecifiedLength
+
+type EmptyProperties = Properties UnspecifiedStartPoint UnspecifiedEndPoint UnspecifiedDirection UnspecifiedLength
 
 emptyProperties :: EmptyProperties
-emptyProperties = Properties Unspecified Unspecified Unspecified Unspecified
+emptyProperties = Properties UnspecifiedStartPoint UnspecifiedEndPoint UnspecifiedDirection UnspecifiedLength
 
 -- TODO try out the OverloadedRecordUpdate extension to see if these types can be simplified,
 -- e.g. to something like
@@ -43,25 +51,25 @@ emptyProperties = Properties Unspecified Unspecified Unspecified Unspecified
 
 startPoint ::
   Point2d (space @ units) ->
-  Properties Unspecified endPoint direction length ->
+  Properties UnspecifiedStartPoint endPoint direction length ->
   Properties (Point2d (space @ units)) endPoint direction length
 startPoint p1 properties = properties {startPoint = p1}
 
 endPoint ::
   Point2d (space @ units) ->
-  Properties startPoint Unspecified direction length ->
+  Properties startPoint UnspecifiedEndPoint direction length ->
   Properties startPoint (Point2d (space @ units)) direction length
 endPoint p1 properties = properties {endPoint = p1}
 
 direction ::
   Direction2d space ->
-  Properties startPoint endPoint Unspecified length ->
+  Properties startPoint endPoint UnspecifiedDirection length ->
   Properties startPoint endPoint (Direction2d space) length
 direction d properties = properties {direction = d}
 
 length ::
   Qty units ->
-  Properties startPoint endPoint direction Unspecified ->
+  Properties startPoint endPoint direction UnspecifiedLength ->
   Properties startPoint endPoint direction (Qty units)
 length l properties = properties {length = l}
 
@@ -107,8 +115,8 @@ instance
     ( Properties
         (Point2d (space @ units))
         (Point2d (space' @ units'))
-        Unspecified
-        Unspecified
+        UnspecifiedDirection
+        UnspecifiedLength
     )
     (Tolerance units)
     (Result Curve2d.DegenerateCurve (Curve2d (space @ units)))
@@ -117,8 +125,8 @@ instance
     ( Properties
         { startPoint = givenStartPoint
         , endPoint = givenEndPoint
-        , length = Unspecified
-        , direction = Unspecified
+        , direction = UnspecifiedDirection
+        , length = UnspecifiedLength
         }
       ) =
       case Direction2d.from givenStartPoint givenEndPoint of
@@ -139,7 +147,7 @@ instance
   Arguments
     ( Properties
         (Point2d (space @ units))
-        Unspecified
+        UnspecifiedEndPoint
         (Direction2d space')
         (Qty units')
     )
@@ -149,7 +157,7 @@ instance
   with
     ( Properties
         { startPoint = givenStartPoint
-        , endPoint = Unspecified
+        , endPoint = UnspecifiedEndPoint
         , length = givenLength
         , direction = givenDirection
         }
@@ -166,13 +174,13 @@ instance
   , units ~ units'
   ) =>
   Arguments
-    (Properties Unspecified (Point2d (space @ units)) (Direction2d space') (Qty units'))
+    (Properties UnspecifiedStartPoint (Point2d (space @ units)) (Direction2d space') (Qty units'))
     ()
     (Curve2d (space @ units))
   where
   with
     ( Properties
-        { startPoint = Unspecified
+        { startPoint = UnspecifiedStartPoint
         , endPoint = givenEndPoint
         , length = givenLength
         , direction = givenDirection
@@ -190,9 +198,9 @@ instance
   Arguments
     ( Properties
         (Point2d (space @ units))
-        Unspecified
+        UnspecifiedEndPoint
         (Direction2d space')
-        Unspecified
+        UnspecifiedLength
     )
     ()
     (Curve2d (space @ units))
@@ -204,8 +212,8 @@ instance
   Arguments
     ( Properties
         (Point2d (space @ units))
-        Unspecified
-        Unspecified
+        UnspecifiedEndPoint
+        UnspecifiedDirection
         (Qty units')
     )
     ()
@@ -217,8 +225,8 @@ instance
   (TypeError (Text "Missing Line2d.startPoint or Line2d.endPoint argument")) =>
   Arguments
     ( Properties
-        Unspecified
-        Unspecified
+        UnspecifiedStartPoint
+        UnspecifiedEndPoint
         (Direction2d space)
         (Qty units)
     )
@@ -233,7 +241,7 @@ instance
     ( Properties
         (Point2d (space @ units))
         (Point2d (space' @ units'))
-        Unspecified
+        UnspecifiedDirection
         (Qty units'')
     )
     (Tolerance units)
