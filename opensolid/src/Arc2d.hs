@@ -76,7 +76,7 @@ swept givenSweptAngle givenStartPoint givenEndPoint =
       computedStartAngle = Point2d.angleFrom computedCenterPoint givenStartPoint
 
 data
-  Properties
+  Arguments
     centerPoint
     startPoint
     endPoint
@@ -85,7 +85,7 @@ data
     endAngle
     sweptAngle
     direction
-    size = Properties
+    size = Arguments
   { centerPoint :: centerPoint
   , startPoint :: startPoint
   , endPoint :: endPoint
@@ -115,113 +115,113 @@ data Direction = Clockwise | Counterclockwise deriving (Eq, Ord)
 
 data Size = Large | Small deriving (Eq, Ord)
 
-type EmptyProperties = Properties () () () () () () () () ()
+type NoArguments = Arguments () () () () () () () () ()
 
-emptyProperties :: EmptyProperties
-emptyProperties = Properties () () () () () () () () ()
+noArguments :: NoArguments
+noArguments = Arguments () () () () () () () () ()
 
 centerPoint ::
   Point2d (space @ units) ->
-  Properties () startPoint endPoint radius startAngle endAngle sweptAngle direction size ->
-  Properties (CenterPoint (space @ units)) startPoint endPoint radius startAngle endAngle sweptAngle direction size
-centerPoint givenCenterPoint properties = properties {centerPoint = CenterPoint givenCenterPoint}
+  Arguments () startPoint endPoint radius startAngle endAngle sweptAngle direction size ->
+  Arguments (CenterPoint (space @ units)) startPoint endPoint radius startAngle endAngle sweptAngle direction size
+centerPoint givenCenterPoint arguments = arguments {centerPoint = CenterPoint givenCenterPoint}
 
 startPoint ::
   Point2d (space @ units) ->
-  Properties centerPoint () endPoint radius startAngle endAngle sweptAngle direction size ->
-  Properties centerPoint (StartPoint (space @ units)) endPoint radius startAngle endAngle sweptAngle direction size
-startPoint givenStartPoint properties = properties {startPoint = StartPoint givenStartPoint}
+  Arguments centerPoint () endPoint radius startAngle endAngle sweptAngle direction size ->
+  Arguments centerPoint (StartPoint (space @ units)) endPoint radius startAngle endAngle sweptAngle direction size
+startPoint givenStartPoint arguments = arguments {startPoint = StartPoint givenStartPoint}
 
 endPoint ::
   Point2d (space @ units) ->
-  Properties centerPoint startPoint () radius startAngle endAngle sweptAngle direction size ->
-  Properties centerPoint startPoint (EndPoint (space @ units)) radius startAngle endAngle sweptAngle direction size
-endPoint givenEndPoint properties = properties {endPoint = EndPoint givenEndPoint}
+  Arguments centerPoint startPoint () radius startAngle endAngle sweptAngle direction size ->
+  Arguments centerPoint startPoint (EndPoint (space @ units)) radius startAngle endAngle sweptAngle direction size
+endPoint givenEndPoint arguments = arguments {endPoint = EndPoint givenEndPoint}
 
 radius ::
   Qty units ->
-  Properties centerPoint startPoint endPoint () startAngle endAngle sweptAngle direction size ->
-  Properties centerPoint startPoint endPoint (Radius units) startAngle endAngle sweptAngle direction size
-radius givenRadius properties = properties {radius = Radius givenRadius}
+  Arguments centerPoint startPoint endPoint () startAngle endAngle sweptAngle direction size ->
+  Arguments centerPoint startPoint endPoint (Radius units) startAngle endAngle sweptAngle direction size
+radius givenRadius arguments = arguments {radius = Radius givenRadius}
 
 startAngle ::
   Angle ->
-  Properties centerPoint startPoint endPoint radius () endAngle sweptAngle direction size ->
-  Properties centerPoint startPoint endPoint radius StartAngle endAngle sweptAngle direction size
-startAngle givenStartAngle properties = properties {startAngle = StartAngle givenStartAngle}
+  Arguments centerPoint startPoint endPoint radius () endAngle sweptAngle direction size ->
+  Arguments centerPoint startPoint endPoint radius StartAngle endAngle sweptAngle direction size
+startAngle givenStartAngle arguments = arguments {startAngle = StartAngle givenStartAngle}
 
 endAngle ::
   Angle ->
-  Properties centerPoint startPoint endPoint radius startAngle () sweptAngle direction size ->
-  Properties centerPoint startPoint endPoint radius startAngle EndAngle sweptAngle direction size
-endAngle givenEndAngle properties = properties {endAngle = EndAngle givenEndAngle}
+  Arguments centerPoint startPoint endPoint radius startAngle () sweptAngle direction size ->
+  Arguments centerPoint startPoint endPoint radius startAngle EndAngle sweptAngle direction size
+endAngle givenEndAngle arguments = arguments {endAngle = EndAngle givenEndAngle}
 
 sweptAngle ::
   Angle ->
-  Properties centerPoint startPoint endPoint radius startAngle endAngle () direction size ->
-  Properties centerPoint startPoint endPoint radius startAngle endAngle SweptAngle direction size
-sweptAngle givenSweptAngle properties = properties {sweptAngle = SweptAngle givenSweptAngle}
+  Arguments centerPoint startPoint endPoint radius startAngle endAngle () direction size ->
+  Arguments centerPoint startPoint endPoint radius startAngle endAngle SweptAngle direction size
+sweptAngle givenSweptAngle arguments = arguments {sweptAngle = SweptAngle givenSweptAngle}
 
 direction ::
   Direction ->
-  Properties centerPoint startPoint endPoint radius startAngle endAngle sweptAngle () size ->
-  Properties centerPoint startPoint endPoint radius startAngle endAngle sweptAngle Direction size
-direction givenDirection properties = properties {direction = givenDirection}
+  Arguments centerPoint startPoint endPoint radius startAngle endAngle sweptAngle () size ->
+  Arguments centerPoint startPoint endPoint radius startAngle endAngle sweptAngle Direction size
+direction givenDirection arguments = arguments {direction = givenDirection}
 
 size ::
   Size ->
-  Properties centerPoint startPoint endPoint radius startAngle endAngle sweptAngle direction () ->
-  Properties centerPoint startPoint endPoint radius startAngle endAngle sweptAngle direction Size
-size givenSize properties = properties {size = givenSize}
+  Arguments centerPoint startPoint endPoint radius startAngle endAngle sweptAngle direction () ->
+  Arguments centerPoint startPoint endPoint radius startAngle endAngle sweptAngle direction Size
+size givenSize arguments = arguments {size = givenSize}
 
 class
-  Arguments arguments (constraint :: Constraint) result
+  Build arguments (constraint :: Constraint) result
     | arguments -> constraint
     , arguments -> result
   where
   with :: (constraint) => arguments -> result
 
 instance
-  ( p0 ~ EmptyProperties
-  , p1 ~ p1'
-  , Arguments p2 constraint result
+  ( a0 ~ NoArguments
+  , a1 ~ a1'
+  , Build a2 constraint result
   ) =>
-  Arguments (p0 -> p1, p1' -> p2) constraint result
+  Build (a0 -> a1, a1' -> a2) constraint result
   where
-  with (f1, f2) = with (emptyProperties |> f1 |> f2)
+  with (a1, a2) = with (noArguments |> a1 |> a2)
 
 instance
-  ( p0 ~ EmptyProperties
-  , p1 ~ p1'
-  , p2 ~ p2'
-  , Arguments p3 constraint result
+  ( a0 ~ NoArguments
+  , a1 ~ a1'
+  , a2 ~ a2'
+  , Build a3 constraint result
   ) =>
-  Arguments (p0 -> p1, p1' -> p2, p2' -> p3) constraint result
+  Build (a0 -> a1, a1' -> a2, a2' -> a3) constraint result
   where
-  with (f1, f2, f3) = with (emptyProperties |> f1 |> f2 |> f3)
+  with (a1, a2, a3) = with (noArguments |> a1 |> a2 |> a3)
 
 instance
-  ( p0 ~ EmptyProperties
-  , p1 ~ p1'
-  , p2 ~ p2'
-  , p3 ~ p3'
-  , Arguments p4 constraint result
+  ( a0 ~ NoArguments
+  , a1 ~ a1'
+  , a2 ~ a2'
+  , a3 ~ a3'
+  , Build a4 constraint result
   ) =>
-  Arguments (p0 -> p1, p1' -> p2, p2' -> p3, p3' -> p4) constraint result
+  Build (a0 -> a1, a1' -> a2, a2' -> a3, a3' -> a4) constraint result
   where
-  with (f1, f2, f3, f4) = with (emptyProperties |> f1 |> f2 |> f3 |> f4)
+  with (a1, a2, a3, a4) = with (noArguments |> a1 |> a2 |> a3 |> a4)
 
 instance
-  ( p0 ~ EmptyProperties
-  , p1 ~ p1'
-  , p2 ~ p2'
-  , p3 ~ p3'
-  , p4 ~ p4'
-  , Arguments p5 constraint result
+  ( a0 ~ NoArguments
+  , a1 ~ a1'
+  , a2 ~ a2'
+  , a3 ~ a3'
+  , a4 ~ a4'
+  , Build a5 constraint result
   ) =>
-  Arguments (p0 -> p1, p1' -> p2, p2' -> p3, p3' -> p4, p4' -> p5) constraint result
+  Build (a0 -> a1, a1' -> a2, a2' -> a3, a3' -> a4, a4' -> a5) constraint result
   where
-  with (f1, f2, f3, f4, f5) = with (emptyProperties |> f1 |> f2 |> f3 |> f4 |> f5)
+  with (a1, a2, a3, a4, a5) = with (noArguments |> a1 |> a2 |> a3 |> a4 |> a5)
 
 data BuildError
   = DegenerateArc
@@ -233,47 +233,47 @@ instance
   ( space ~ space'
   , units ~ units'
   ) =>
-  Arguments
-    (Properties () (StartPoint (space @ units)) (EndPoint (space' @ units')) () () () SweptAngle () ())
+  Build
+    (Arguments () (StartPoint (space @ units)) (EndPoint (space' @ units')) () () () SweptAngle () ())
     (Tolerance units)
     (Result Curve2d.DegenerateCurve (Curve2d (space @ units)))
   where
-  with properties = swept givenSweptAngle givenStartPoint givenEndPoint
+  with arguments = swept givenSweptAngle givenStartPoint givenEndPoint
    where
-    Properties
+    Arguments
       { startPoint = StartPoint givenStartPoint
       , endPoint = EndPoint givenEndPoint
       , sweptAngle = SweptAngle givenSweptAngle
-      } = properties
+      } = arguments
 
 instance
   (units ~ units') =>
-  Arguments
-    (Properties (CenterPoint (space @ units)) () () (Radius units') StartAngle EndAngle () () ())
+  Build
+    (Arguments (CenterPoint (space @ units)) () () (Radius units') StartAngle EndAngle () () ())
     (Tolerance units)
     (Result BuildError (Curve2d (space @ units)))
   where
-  with properties
+  with arguments
     | givenRadius < Qty.zero = Error NegativeRadius
     | givenRadius ~= Qty.zero = Error DegenerateArc
     | givenRadius * Angle.inRadians (givenEndAngle - givenStartAngle) ~= Qty.zero = Error DegenerateArc
     | otherwise = Ok (Curve2d.Internal.Arc givenCenterPoint givenRadius givenStartAngle givenEndAngle)
    where
-    Properties
+    Arguments
       { centerPoint = CenterPoint givenCenterPoint
       , radius = Radius givenRadius
       , startAngle = StartAngle givenStartAngle
       , endAngle = EndAngle givenEndAngle
-      } = properties
+      } = arguments
 
 instance
   (units ~ units') =>
-  Arguments
-    (Properties (CenterPoint (space @ units)) () () (Radius units') StartAngle () SweptAngle () ())
+  Build
+    (Arguments (CenterPoint (space @ units)) () () (Radius units') StartAngle () SweptAngle () ())
     (Tolerance units)
     (Result BuildError (Curve2d (space @ units)))
   where
-  with properties =
+  with arguments =
     with
       ( centerPoint givenCenterPoint
       , radius givenRadius
@@ -281,23 +281,23 @@ instance
       , endAngle (givenStartAngle + givenSweptAngle)
       )
    where
-    Properties
+    Arguments
       { centerPoint = CenterPoint givenCenterPoint
       , radius = Radius givenRadius
       , startAngle = StartAngle givenStartAngle
       , sweptAngle = SweptAngle givenSweptAngle
-      } = properties
+      } = arguments
 
 instance
   ( space ~ space'
   , units ~ units'
   ) =>
-  Arguments
-    (Properties (CenterPoint (space @ units)) (StartPoint (space' @ units')) () () () () SweptAngle () ())
+  Build
+    (Arguments (CenterPoint (space @ units)) (StartPoint (space' @ units')) () () () () SweptAngle () ())
     (Tolerance units)
     (Result BuildError (Curve2d (space @ units)))
   where
-  with properties =
+  with arguments =
     let computedStartAngle = Point2d.angleFrom givenCenterPoint givenStartPoint
      in with
           ( centerPoint givenCenterPoint
@@ -306,23 +306,23 @@ instance
           , endAngle (computedStartAngle + givenSweptAngle)
           )
    where
-    Properties
+    Arguments
       { centerPoint = CenterPoint givenCenterPoint
       , startPoint = StartPoint givenStartPoint
       , sweptAngle = SweptAngle givenSweptAngle
-      } = properties
+      } = arguments
 
 instance
   ( space ~ space'
   , units ~ units'
   , units ~ units''
   ) =>
-  Arguments
-    (Properties () (StartPoint (space @ units)) (EndPoint (space' @ units')) (Radius units'') () () () Direction Size)
+  Build
+    (Arguments () (StartPoint (space @ units)) (EndPoint (space' @ units')) (Radius units'') () () () Direction Size)
     (Tolerance units)
     (Result BuildError (Curve2d (space @ units)))
   where
-  with properties = do
+  with arguments = do
     chordDirection <-
       Direction2d.from givenStartPoint givenEndPoint
         |> Result.mapError (\Direction2d.PointsAreCoincident -> DegenerateArc)
@@ -355,18 +355,18 @@ instance
       , sweptAngle computedSweptAngle
       )
    where
-    Properties
+    Arguments
       { startPoint = StartPoint givenStartPoint
       , endPoint = EndPoint givenEndPoint
       , radius = Radius givenRadius
       , direction = givenDirection
       , size = givenSize
-      } = properties
+      } = arguments
 
 instance
   (TypeError (Type.Errors.Text "Missing Arc2d.sweptAngle argument")) =>
-  Arguments
-    (Properties () (StartPoint (space @ units)) (EndPoint (space' @ units')) () () () () () ())
+  Build
+    (Arguments () (StartPoint (space @ units)) (EndPoint (space' @ units')) () () () () () ())
     (Tolerance units)
     (Result BuildError (Curve2d (space @ units)))
   where

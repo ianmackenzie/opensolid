@@ -8,6 +8,9 @@ module Line2d
   , length
   , direction
   , with
+  , StartPoint
+  , EndPoint
+  , Direction
   )
 where
 
@@ -45,7 +48,7 @@ directed givenStartPoint givenDirection givenLength =
     , length = Qty.abs givenLength
     }
 
-data Properties startPoint endPoint direction length = Properties
+data Arguments startPoint endPoint direction length = Arguments
   { startPoint :: startPoint
   , endPoint :: endPoint
   , direction :: direction
@@ -53,159 +56,129 @@ data Properties startPoint endPoint direction length = Properties
   }
   deriving (Show)
 
-data UnspecifiedStartPoint = UnspecifiedStartPoint
+newtype StartPoint coordinateSystem = StartPoint (Point2d coordinateSystem)
 
-data UnspecifiedEndPoint = UnspecifiedEndPoint
+newtype EndPoint coordinateSystem = EndPoint (Point2d coordinateSystem)
 
-data UnspecifiedDirection = UnspecifiedDirection
+newtype Direction space = Direction (Direction2d space)
 
-data UnspecifiedLength = UnspecifiedLength
+newtype Length units = Length (Qty units)
 
-type EmptyProperties =
-  Properties
-    UnspecifiedStartPoint
-    UnspecifiedEndPoint
-    UnspecifiedDirection
-    UnspecifiedLength
+type NoArguments = Arguments () () () ()
 
-emptyProperties :: EmptyProperties
-emptyProperties =
-  Properties
-    { startPoint = UnspecifiedStartPoint
-    , endPoint = UnspecifiedEndPoint
-    , direction = UnspecifiedDirection
-    , length = UnspecifiedLength
-    }
+noArguments :: NoArguments
+noArguments = Arguments () () () ()
 
 startPoint ::
   Point2d (space @ units) ->
-  Properties UnspecifiedStartPoint endPoint direction length ->
-  Properties (Point2d (space @ units)) endPoint direction length
-startPoint p1 properties = properties {startPoint = p1}
+  Arguments () endPoint direction length ->
+  Arguments (StartPoint (space @ units)) endPoint direction length
+startPoint givenStartPoint arguments = arguments {startPoint = StartPoint givenStartPoint}
 
 endPoint ::
   Point2d (space @ units) ->
-  Properties startPoint UnspecifiedEndPoint direction length ->
-  Properties startPoint (Point2d (space @ units)) direction length
-endPoint p1 properties = properties {endPoint = p1}
+  Arguments startPoint () direction length ->
+  Arguments startPoint (EndPoint (space @ units)) direction length
+endPoint givenEndPoint arguments = arguments {endPoint = EndPoint givenEndPoint}
 
 direction ::
   Direction2d space ->
-  Properties startPoint endPoint UnspecifiedDirection length ->
-  Properties startPoint endPoint (Direction2d space) length
-direction d properties = properties {direction = d}
+  Arguments startPoint endPoint () length ->
+  Arguments startPoint endPoint (Direction space) length
+direction givenDirection arguments = arguments {direction = Direction givenDirection}
 
 length ::
   Qty units ->
-  Properties startPoint endPoint direction UnspecifiedLength ->
-  Properties startPoint endPoint direction (Qty units)
-length l properties = properties {length = l}
+  Arguments startPoint endPoint direction () ->
+  Arguments startPoint endPoint direction (Length units)
+length givenLength arguments = arguments {length = Length givenLength}
 
 class
-  Arguments arguments (constraint :: Constraint) result
+  Build arguments (constraint :: Constraint) result
     | arguments -> constraint
     , arguments -> result
   where
   with :: (constraint) => arguments -> result
 
 instance
-  ( p0 ~ EmptyProperties
-  , p1 ~ p1'
-  , Arguments p2 constraint result
+  ( a0 ~ NoArguments
+  , a1 ~ a1'
+  , Build a2 constraint result
   ) =>
-  Arguments (p0 -> p1, p1' -> p2) constraint result
+  Build (a0 -> a1, a1' -> a2) constraint result
   where
-  with (f1, f2) = with (emptyProperties |> f1 |> f2)
+  with (a1, a2) = with (noArguments |> a1 |> a2)
 
 instance
-  ( p0 ~ EmptyProperties
-  , p1 ~ p1'
-  , p2 ~ p2'
-  , Arguments p3 constraint result
+  ( a0 ~ NoArguments
+  , a1 ~ a1'
+  , a2 ~ a2'
+  , Build a3 constraint result
   ) =>
-  Arguments (p0 -> p1, p1' -> p2, p2' -> p3) constraint result
+  Build (a0 -> a1, a1' -> a2, a2' -> a3) constraint result
   where
-  with (f1, f2, f3) = with (emptyProperties |> f1 |> f2 |> f3)
+  with (a1, a2, a3) = with (noArguments |> a1 |> a2 |> a3)
 
 instance
   ( space ~ space'
   , units ~ units'
   ) =>
-  Arguments
-    ( Properties
-        (Point2d (space @ units))
-        (Point2d (space' @ units'))
-        UnspecifiedDirection
-        UnspecifiedLength
-    )
+  Build
+    (Arguments (StartPoint (space @ units)) (EndPoint (space' @ units')) () ())
     (Tolerance units)
     (Result Curve2d.DegenerateCurve (Curve2d (space @ units)))
   where
-  with
-    ( Properties
-        { startPoint = givenStartPoint
-        , endPoint = givenEndPoint
-        , direction = UnspecifiedDirection
-        , length = UnspecifiedLength
-        }
-      ) = from givenStartPoint givenEndPoint
+  with arguments = from givenStartPoint givenEndPoint
+   where
+    Arguments
+      { startPoint = StartPoint givenStartPoint
+      , endPoint = EndPoint givenEndPoint
+      } = arguments
 
 instance
   ( space ~ space'
   , units ~ units'
   ) =>
-  Arguments
-    ( Properties
-        (Point2d (space @ units))
-        UnspecifiedEndPoint
-        (Direction2d space')
-        (Qty units')
-    )
+  Build
+    (Arguments (StartPoint (space @ units)) () (Direction space') (Length units'))
     ()
     (Curve2d (space @ units))
   where
-  with
-    ( Properties
-        { startPoint = givenStartPoint
-        , endPoint = UnspecifiedEndPoint
-        , length = givenLength
-        , direction = givenDirection
-        }
-      ) = directed givenStartPoint givenDirection givenLength
+  with arguments = directed givenStartPoint givenDirection givenLength
+   where
+    Arguments
+      { startPoint = StartPoint givenStartPoint
+      , length = Length givenLength
+      , direction = Direction givenDirection
+      } = arguments
 
 instance
   ( space ~ space'
   , units ~ units'
   ) =>
-  Arguments
-    (Properties UnspecifiedStartPoint (Point2d (space @ units)) (Direction2d space') (Qty units'))
+  Build
+    (Arguments () (EndPoint (space @ units)) (Direction space') (Length units'))
     ()
     (Curve2d (space @ units))
   where
-  with
-    ( Properties
-        { startPoint = UnspecifiedStartPoint
-        , endPoint = givenEndPoint
-        , length = givenLength
-        , direction = givenDirection
-        }
-      ) =
-      Curve2d.Internal.Line
-        { startPoint = givenEndPoint - givenDirection * givenLength
-        , endPoint = givenEndPoint
-        , direction = givenDirection * Qty.sign givenLength
-        , length = Qty.abs givenLength
-        }
+  with arguments =
+    Curve2d.Internal.Line
+      { startPoint = givenEndPoint - givenDirection * givenLength
+      , endPoint = givenEndPoint
+      , direction = givenDirection * Qty.sign givenLength
+      , length = Qty.abs givenLength
+      }
+   where
+    Arguments
+      { endPoint = EndPoint givenEndPoint
+      , length = Length givenLength
+      , direction = Direction givenDirection
+      } = arguments
 
 instance
   (TypeError (Text "Missing Line2d.length argument")) =>
-  Arguments
-    ( Properties
-        (Point2d (space @ units))
-        UnspecifiedEndPoint
-        (Direction2d space')
-        UnspecifiedLength
-    )
+  Build
+    (Arguments (StartPoint (space @ units)) () (Direction space') ())
     ()
     (Curve2d (space @ units))
   where
@@ -213,13 +186,8 @@ instance
 
 instance
   (TypeError (Text "Missing Line2d.direction argument")) =>
-  Arguments
-    ( Properties
-        (Point2d (space @ units))
-        UnspecifiedEndPoint
-        UnspecifiedDirection
-        (Qty units')
-    )
+  Build
+    (Arguments (StartPoint (space @ units)) () () (Length units'))
     ()
     (Curve2d (space @ units))
   where
@@ -227,13 +195,8 @@ instance
 
 instance
   (TypeError (Text "Missing Line2d.startPoint or Line2d.endPoint argument")) =>
-  Arguments
-    ( Properties
-        UnspecifiedStartPoint
-        UnspecifiedEndPoint
-        (Direction2d space)
-        (Qty units)
-    )
+  Build
+    (Arguments () () (Direction space) (Length units))
     ()
     (Curve2d (space @ units))
   where
@@ -241,13 +204,8 @@ instance
 
 instance
   (TypeError (Text "Too many constraints")) =>
-  Arguments
-    ( Properties
-        (Point2d (space @ units))
-        (Point2d (space' @ units'))
-        UnspecifiedDirection
-        (Qty units'')
-    )
+  Build
+    (Arguments (StartPoint (space @ units)) (EndPoint (space' @ units')) () (Length units''))
     (Tolerance units)
     (Result Curve2d.DegenerateCurve (Curve2d (space @ units)))
   where
