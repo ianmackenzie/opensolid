@@ -188,7 +188,9 @@ testSurface1dIntersection = Try.do
   solutionPointLists <- Task.evaluate (Result.collect solutionPoints solutions)
   let allSolutionPoints = List.concat solutionPointLists
   let outputLines = List.map outputLine allSolutionPoints
-  File.writeTo "solution-points.txt" (String.join "\n" outputLines)
+  let fileName = "solution-points.txt"
+  File.writeTo fileName (String.join "\n" outputLines)
+  File.delete fileName -- Uncomment to actually get the data!
  where
   ?tolerance = 1e-9
 
