@@ -36,6 +36,8 @@ import Point2d (Point2d)
 import Point2d qualified
 import Qty qualified
 import Result qualified
+import Type.Errors (TypeError)
+import Type.Errors qualified
 import Units qualified
 import Vector2d qualified
 
@@ -360,3 +362,12 @@ instance
       , direction = givenDirection
       , size = givenSize
       } = properties
+
+instance
+  (TypeError (Type.Errors.Text "Missing Arc2d.sweptAngle argument")) =>
+  Arguments
+    (Properties () (StartPoint (space @ units)) (EndPoint (space' @ units')) () () () () () ())
+    (Tolerance units)
+    (Result BuildError (Curve2d (space @ units)))
+  where
+  with = notImplemented
