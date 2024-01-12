@@ -1,6 +1,7 @@
 module Main (main) where
 
 import Angle qualified
+import Arc2d qualified
 import Area qualified
 import Axis2d qualified
 import Bounds2d qualified
@@ -232,6 +233,20 @@ testDirectedLine = Try.do
     Curve2d.Line {endPoint} -> log "Line end point" endPoint
     _ -> log "Unexpected curve" line1
 
+testArcFromEndpoints :: (Tolerance Meters) => Task String ()
+testArcFromEndpoints = Try.do
+  arc <-
+    Task.evaluate $
+      Arc2d.with
+        ( Arc2d.startPoint Point2d.origin
+        , Arc2d.endPoint (Point2d.centimeters 50.0 50.0)
+        , Arc2d.sweptAngle Angle.quarterTurn
+        )
+  case arc of
+    Curve2d.Arc {centerPoint} ->
+      log "Arc center point" centerPoint
+    _ -> log "Unexpected curve" arc
+
 script :: Task String ()
 script = Try.do
   testScalarArithmetic
@@ -250,6 +265,7 @@ script = Try.do
   testSvgOutput
   testLineFromEndpoints
   testDirectedLine
+  testArcFromEndpoints
  where
   ?tolerance = Length.meters 1e-9
 
