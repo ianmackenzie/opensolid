@@ -110,14 +110,6 @@ class
 
 instance
   ( p0 ~ EmptyProperties
-  , Arguments p1 constraint result
-  ) =>
-  Arguments (p0 -> p1) constraint result
-  where
-  with f1 = with (emptyProperties |> f1)
-
-instance
-  ( p0 ~ EmptyProperties
   , p1 ~ p1'
   , Arguments p2 constraint result
   ) =>
