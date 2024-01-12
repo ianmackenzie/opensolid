@@ -48,7 +48,7 @@ quarterCircle = Test.check 1 "quarterCircle" $ Test.do
   let p3 = Point2d.xy zero radius
   line1 <- Line2d.from p1 p2
   line2 <- Line2d.from p1 p3
-  arc <- Arc2d.from p2 p3 Angle.quarterTurn
+  arc <- Arc2d.swept Angle.quarterTurn p2 p3
   region <- Region2d.boundedBy [line1, line2, arc]
   Test.expect (let ?tolerance = Area.squareMeters 1e-6 in Region2d.area region ~= 0.25 * Float.pi * radius * radius)
 
@@ -67,11 +67,11 @@ squareWithHole = Test.check 1 "squareWithHole" $ Test.do
   let holeRadius = width / 4.0
   arc <-
     Arc2d.with
-      [ Arc2d.CenterPoint centerPoint
-      , Arc2d.Radius holeRadius
-      , Arc2d.StartAngle zero
-      , Arc2d.SweptAngle (Angle.degrees 360.0)
-      ]
+      ( Arc2d.centerPoint centerPoint
+      , Arc2d.radius holeRadius
+      , Arc2d.startAngle zero
+      , Arc2d.sweptAngle (Angle.degrees 360.0)
+      )
   region <- Region2d.boundedBy [line1, line3, line2, line4, arc]
   let area = Region2d.area region
   let expectedArea = width * width - Float.pi * holeRadius * holeRadius
@@ -106,11 +106,11 @@ squareWithTangentHole = Test.check 1 "squareWithTangentHole" $ Test.do
   let holeRadius = width / 2.0
   arc <-
     Arc2d.with
-      [ Arc2d.CenterPoint centerPoint
-      , Arc2d.Radius holeRadius
-      , Arc2d.StartAngle zero
-      , Arc2d.SweptAngle (Angle.degrees 360.0)
-      ]
+      ( Arc2d.centerPoint centerPoint
+      , Arc2d.radius holeRadius
+      , Arc2d.startAngle zero
+      , Arc2d.sweptAngle (Angle.degrees 360.0)
+      )
   case Region2d.boundedBy [line1, line2, line3, line4, arc] of
     Ok _ -> Test.fail "Expected non-manifold region construction to fail"
     Error error -> Test.expect (error == Region2d.RegionBoundaryIntersectsItself)
@@ -119,11 +119,11 @@ twoCircles :: (Tolerance Meters) => Test
 twoCircles = Test.check 1 "twoCircles" $ Test.do
   let circle centerPoint radius =
         Arc2d.with
-          [ Arc2d.CenterPoint centerPoint
-          , Arc2d.Radius radius
-          , Arc2d.StartAngle zero
-          , Arc2d.SweptAngle Angle.fullTurn
-          ]
+          ( Arc2d.centerPoint centerPoint
+          , Arc2d.radius radius
+          , Arc2d.startAngle zero
+          , Arc2d.sweptAngle Angle.fullTurn
+          )
   circle1 <- circle (Point2d.meters -2.0 0.0) (Length.meters 1.0)
   circle2 <- circle (Point2d.meters 1.0 0.0) (Length.meters 0.5)
   case Region2d.boundedBy [circle1, circle2] of

@@ -130,11 +130,11 @@ area = Test.verify "area" $ Test.do
   curve <-
     let ?tolerance = Length.meters 1e-9
      in Arc2d.with
-          [ Arc2d.CenterPoint Point2d.origin
-          , Arc2d.StartAngle (Angle.degrees 180.0)
-          , Arc2d.SweptAngle (Angle.degrees -180.0)
-          , Arc2d.Radius (Length.meters 1.0)
-          ]
+          ( Arc2d.centerPoint Point2d.origin
+          , Arc2d.startAngle (Angle.degrees 180.0)
+          , Arc2d.sweptAngle (Angle.degrees -180.0)
+          , Arc2d.radius (Length.meters 1.0)
+          )
   let dAdt = Curve2d.yCoordinate curve * VectorCurve2d.xComponent (Curve2d.derivative curve)
   let areaEstimate = Curve1d.integral dAdt
   areaIsCorrect <-

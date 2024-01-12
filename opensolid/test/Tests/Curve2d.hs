@@ -86,8 +86,8 @@ equalOverlapSegmentLists segments1 segments2 =
 
 curveOverlap1 :: (Tolerance Meters) => Test
 curveOverlap1 = Test.verify "Overlap detection 1" $ Test.do
-  arc1 <- Arc2d.from (Point2d.meters 1.0 0.0) (Point2d.meters -1.0 0.0) Angle.halfTurn
-  arc2 <- Arc2d.from (Point2d.meters 0.0 -1.0) (Point2d.meters 0.0 1.0) Angle.halfTurn
+  arc1 <- Arc2d.swept Angle.halfTurn (Point2d.meters 1.0 0.0) (Point2d.meters -1.0 0.0)
+  arc2 <- Arc2d.swept Angle.halfTurn (Point2d.meters 0.0 -1.0) (Point2d.meters 0.0 1.0)
   segments <- overlappingSegments arc1 arc2
   let expectedSegments = [(Range.from 0.0 0.5, Range.from 0.5 1.0, Positive)]
    in Test.expect (equalOverlapSegmentLists segments expectedSegments)
@@ -96,18 +96,18 @@ curveOverlap2 :: (Tolerance Meters) => Test
 curveOverlap2 = Test.verify "Overlap detection 2" $ Test.do
   arc1 <-
     Arc2d.with
-      [ Arc2d.CenterPoint Point2d.origin
-      , Arc2d.Radius (Length.meters 1.0)
-      , Arc2d.StartAngle (Angle.degrees 0.0)
-      , Arc2d.EndAngle (Angle.degrees -180.0)
-      ]
+      ( Arc2d.centerPoint Point2d.origin
+      , Arc2d.radius (Length.meters 1.0)
+      , Arc2d.startAngle (Angle.degrees 0.0)
+      , Arc2d.endAngle (Angle.degrees -180.0)
+      )
   arc2 <-
     Arc2d.with
-      [ Arc2d.CenterPoint Point2d.origin
-      , Arc2d.Radius (Length.meters 1.0)
-      , Arc2d.StartAngle (Angle.degrees -45.0)
-      , Arc2d.EndAngle (Angle.degrees 225.0)
-      ]
+      ( Arc2d.centerPoint Point2d.origin
+      , Arc2d.radius (Length.meters 1.0)
+      , Arc2d.startAngle (Angle.degrees -45.0)
+      , Arc2d.endAngle (Angle.degrees 225.0)
+      )
   segments <- overlappingSegments arc1 arc2
   let expectedSegments =
         [ (Range.from 0.0 (1 / 4), Range.from 0.0 (1 / 6), Negative)
@@ -117,8 +117,8 @@ curveOverlap2 = Test.verify "Overlap detection 2" $ Test.do
 
 crossingIntersection :: (Tolerance Meters) => Test
 crossingIntersection = Test.verify "Crossing intersection" $ Test.do
-  arc1 <- Arc2d.from Point2d.origin (Point2d.meters 0.0 1.0) Angle.halfTurn
-  arc2 <- Arc2d.from Point2d.origin (Point2d.meters 1.0 0.0) -Angle.halfTurn
+  arc1 <- Arc2d.swept Angle.halfTurn Point2d.origin (Point2d.meters 0.0 1.0)
+  arc2 <- Arc2d.swept -Angle.halfTurn Point2d.origin (Point2d.meters 1.0 0.0)
   intersections <- Curve2d.intersections arc1 arc2
   let expectedIntersections =
         [ Intersection 0.0 0.0 Intersection.Crossing Positive
@@ -131,18 +131,18 @@ tangentIntersection :: (Tolerance Meters) => Test
 tangentIntersection = Test.verify "Tangent intersection" $ Test.do
   arc1 <-
     Arc2d.with
-      [ Arc2d.CenterPoint Point2d.origin
-      , Arc2d.Radius Length.meter
-      , Arc2d.StartAngle (Angle.degrees 0.0)
-      , Arc2d.EndAngle (Angle.degrees 180.0)
-      ]
+      ( Arc2d.centerPoint Point2d.origin
+      , Arc2d.radius Length.meter
+      , Arc2d.startAngle (Angle.degrees 0.0)
+      , Arc2d.endAngle (Angle.degrees 180.0)
+      )
   arc2 <-
     Arc2d.with
-      [ Arc2d.CenterPoint (Point2d.meters 0.0 1.5)
-      , Arc2d.Radius (Length.meters 0.5)
-      , Arc2d.StartAngle (Angle.degrees -180.0)
-      , Arc2d.EndAngle (Angle.degrees 0.0)
-      ]
+      ( Arc2d.centerPoint (Point2d.meters 0.0 1.5)
+      , Arc2d.radius (Length.meters 0.5)
+      , Arc2d.startAngle (Angle.degrees -180.0)
+      , Arc2d.endAngle (Angle.degrees 0.0)
+      )
   intersections <- Curve2d.intersections arc1 arc2
   let expectedIntersections = [Intersection 0.5 0.5 Intersection.Tangent Positive]
   let ?tolerance = 1e-12
@@ -150,7 +150,7 @@ tangentIntersection = Test.verify "Tangent intersection" $ Test.do
 
 solving :: (Tolerance Meters) => Test
 solving = Test.verify "Solving via Curve1d" $ Test.do
-  arc <- Arc2d.from (Point2d.meters 0.0 1.0) (Point2d.meters 1.0 0.0) Angle.quarterTurn
+  arc <- Arc2d.swept Angle.quarterTurn (Point2d.meters 0.0 1.0) (Point2d.meters 1.0 0.0)
   let squaredDistanceFromOrigin = VectorCurve2d.squaredMagnitude (arc - Point2d.origin)
   let desiredDistance = Length.meters 0.5
   roots <- squaredDistanceFromOrigin |> Curve1d.equalToSquared (Length.meters 0.5)
