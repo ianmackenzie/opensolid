@@ -29,6 +29,7 @@ common config
     , random
     , colour
     , type-errors
+    , directory
   ghc-options:
       -Wall
       -Werror
