@@ -10,6 +10,8 @@ module Angle
   , radians
   , inRadians
   , radian
+  , pi
+  , twoPi
   , degrees
   , inDegrees
   , degree
@@ -59,6 +61,12 @@ radians (Qty x) = Qty x
 
 inRadians :: Angle -> Float
 inRadians (Qty x) = Qty x
+
+pi :: Angle
+pi = radians Float.pi
+
+twoPi :: Angle
+twoPi = radians Float.twoPi
 
 degree :: Angle
 degree = fullTurn / 360.0
