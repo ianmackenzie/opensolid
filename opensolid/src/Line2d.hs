@@ -61,10 +61,21 @@ data UnspecifiedDirection = UnspecifiedDirection
 
 data UnspecifiedLength = UnspecifiedLength
 
-type EmptyProperties = Properties UnspecifiedStartPoint UnspecifiedEndPoint UnspecifiedDirection UnspecifiedLength
+type EmptyProperties =
+  Properties
+    UnspecifiedStartPoint
+    UnspecifiedEndPoint
+    UnspecifiedDirection
+    UnspecifiedLength
 
 emptyProperties :: EmptyProperties
-emptyProperties = Properties UnspecifiedStartPoint UnspecifiedEndPoint UnspecifiedDirection UnspecifiedLength
+emptyProperties =
+  Properties
+    { startPoint = UnspecifiedStartPoint
+    , endPoint = UnspecifiedEndPoint
+    , direction = UnspecifiedDirection
+    , length = UnspecifiedLength
+    }
 
 startPoint ::
   Point2d (space @ units) ->
