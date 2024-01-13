@@ -1,5 +1,6 @@
 module Area
   ( Area
+  , zero
   , squareMeters
   , inSquareMeters
   , squareMeter
@@ -7,9 +8,13 @@ module Area
 where
 
 import OpenSolid
+import Qty qualified
 import Units (SquareMeters)
 
 type Area = Qty SquareMeters
+
+zero :: Area
+zero = Qty.zero
 
 squareMeter :: Area
 squareMeter = squareMeters 1.0

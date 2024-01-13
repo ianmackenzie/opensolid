@@ -1,5 +1,6 @@
 module Length
   ( Length
+  , zero
   , meter
   , millimeter
   , centimeter
@@ -19,9 +20,13 @@ module Length
 where
 
 import OpenSolid
+import Qty qualified
 import Units (Meters)
 
 type Length = Qty Meters
+
+zero :: Length
+zero = Qty.zero
 
 meter :: Length
 meter = meters 1.0

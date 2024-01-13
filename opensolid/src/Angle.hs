@@ -1,5 +1,6 @@
 module Angle
   ( Angle
+  , zero
   , sin
   , cos
   , tan
@@ -27,10 +28,14 @@ import Arithmetic
 import Float (Float, fromRational)
 import Float qualified
 import Qty (Qty (Qty))
+import Qty qualified
 import Units (Radians)
 import Prelude qualified
 
 type Angle = Qty Radians
+
+zero :: Angle
+zero = Qty.zero
 
 sin :: Angle -> Float
 sin (Qty x) = Qty (Prelude.sin x)
