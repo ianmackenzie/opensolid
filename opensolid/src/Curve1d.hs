@@ -381,7 +381,7 @@ cos (Constant x) = constant (Angle.cos x)
 cos curve = Cos curve
 
 isZero :: (Tolerance units) => Curve1d units -> Bool
-isZero curve = List.all (\tValue -> pointOn curve tValue ~= Qty.zero) T.samples
+isZero curve = List.all (\tValue -> pointOn curve tValue ~= Qty.zero) (Range.samples T.domain)
 
 maxRootOrder :: Int
 maxRootOrder = 4
