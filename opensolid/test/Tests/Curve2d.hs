@@ -16,7 +16,6 @@ import Length qualified
 import List qualified
 import OpenSolid
 import Point2d qualified
-import Qty qualified
 import QuadraticSpline2d qualified
 import Range (Range (Range))
 import Range qualified
@@ -177,7 +176,7 @@ degenerateStartPointTangent = Test.check 100 "Degenerate start point" $ Test.do
           |> List.map Direction2d.unwrap
           |> List.map (- Direction2d.unwrap startTangent)
           |> List.map Vector2d.magnitude
-  Test.expect (List.successive (-) differences |> List.all (> Qty.zero))
+  Test.expect (List.successive (-) differences |> List.all (> 0.0))
 
 degenerateEndPointTangent :: (Tolerance Meters) => Test
 degenerateEndPointTangent = Test.check 100 "Degenerate end point" $ Test.do
@@ -195,7 +194,7 @@ degenerateEndPointTangent = Test.check 100 "Degenerate end point" $ Test.do
           |> List.map Direction2d.unwrap
           |> List.map (- Direction2d.unwrap endTangent)
           |> List.map Vector2d.magnitude
-  Test.expect (List.successive (-) differences |> List.all (> Qty.zero))
+  Test.expect (List.successive (-) differences |> List.all (> 0.0))
 
 tangentDerivativeIsPerpendicularToTangent :: (Tolerance Meters) => Test
 tangentDerivativeIsPerpendicularToTangent =
@@ -210,7 +209,7 @@ tangentDerivativeIsPerpendicularToTangent =
     u <- U.generator
     let tangent = DirectionCurve2d.evaluateAt u tangentDirection
     let derivative = VectorCurve2d.evaluateAt u tangentDerivative
-    Test.expect (let ?tolerance = 1e-12 in derivative <> tangent ~= Qty.zero)
+    Test.expect (let ?tolerance = 1e-12 in derivative <> tangent ~= 0.0)
       |> Test.output "u" u
       |> Test.output "tangent" tangent
       |> Test.output "derivative" derivative
@@ -232,7 +231,7 @@ degenerateStartPointTangentDerivative = Test.check 100 "Degenerate start point d
         otherTangentDerivatives
           |> List.map (- startTangentDerivative)
           |> List.map Vector2d.magnitude
-  Test.expect (List.successive (-) differences |> List.all (> Qty.zero))
+  Test.expect (List.successive (-) differences |> List.all (> 0.0))
 
 degenerateEndPointTangentDerivative :: (Tolerance Meters) => Test
 degenerateEndPointTangentDerivative = Test.check 100 "Degenerate end point derivative" $ Test.do
@@ -250,4 +249,4 @@ degenerateEndPointTangentDerivative = Test.check 100 "Degenerate end point deriv
         otherTangentDerivatives
           |> List.map (- endTangentDerivative)
           |> List.map Vector2d.magnitude
-  Test.expect (List.successive (-) differences |> List.all (> Qty.zero))
+  Test.expect (List.successive (-) differences |> List.all (> 0.0))

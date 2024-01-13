@@ -20,7 +20,6 @@ where
 
 import Angle qualified
 import OpenSolid
-import Qty qualified
 import Vector3d (Vector3d (Vector3d))
 import Vector3d qualified
 
@@ -39,7 +38,7 @@ instance
   (space ~ space') =>
   ApproximateEquality (Direction3d space) (Direction3d space') Radians
   where
-  d1 ~= d2 = angleFrom d1 d2 ~= Qty.zero
+  d1 ~= d2 = angleFrom d1 d2 ~= Angle.zero
 
 instance Negation (Direction3d space) where
   negate (Direction3d vector) = unsafe (negate vector)

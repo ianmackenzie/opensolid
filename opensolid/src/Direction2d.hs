@@ -29,7 +29,6 @@ import Angle qualified
 import {-# SOURCE #-} Frame2d (Frame2d)
 import OpenSolid
 import {-# SOURCE #-} Point2d (Point2d)
-import Qty qualified
 import Result qualified
 import Vector2d (Vector2d (Vector2d))
 import Vector2d qualified
@@ -49,7 +48,7 @@ instance
   (space ~ space') =>
   ApproximateEquality (Direction2d space) (Direction2d space') Radians
   where
-  d1 ~= d2 = angleFrom d1 d2 ~= Qty.zero
+  d1 ~= d2 = angleFrom d1 d2 ~= Angle.zero
 
 instance Negation (Direction2d space) where
   negate (Direction2d vector) = unsafe -vector
