@@ -36,7 +36,7 @@ import OpenSolid
 import Qty qualified
 import Range (Range (Range))
 import Range qualified
-import U qualified
+import T qualified
 import Units qualified
 import Vector2d (Vector2d (Vector2d))
 import Vector2d qualified
@@ -50,7 +50,7 @@ class
     | curve -> coordinateSystem
   where
   evaluateAtImpl :: Float -> curve -> Vector2d coordinateSystem
-  segmentBoundsImpl :: U.Bounds -> curve -> VectorBounds2d coordinateSystem
+  segmentBoundsImpl :: T.Bounds -> curve -> VectorBounds2d coordinateSystem
   derivativeImpl :: curve -> VectorCurve2d coordinateSystem
 
 data VectorCurve2d (coordinateSystem :: CoordinateSystem) where
@@ -499,7 +499,7 @@ evaluateAt t curve =
     QuadraticSpline v1 v2 v3 -> quadraticBlossom v1 v2 v3 t t
     CubicSpline v1 v2 v3 v4 -> cubicBlossom v1 v2 v3 v4 t t t
 
-segmentBounds :: U.Bounds -> VectorCurve2d (space @ units) -> VectorBounds2d (space @ units)
+segmentBounds :: T.Bounds -> VectorCurve2d (space @ units) -> VectorBounds2d (space @ units)
 segmentBounds t@(Range tl th) curve =
   case curve of
     VectorCurve2d c -> segmentBoundsImpl t c

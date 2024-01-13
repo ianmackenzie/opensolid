@@ -148,11 +148,11 @@ library
       Surface1d
       Surface1d.Function
       Surface1d.Solution
+      T
       Task
       Tolerance
       Transform2d
       Try
-      U
       Units
       Uv
       Uvw
@@ -196,7 +196,7 @@ test-suite opensolid-test
       Tests.Estimate
       Tests.List
       Tests.NonEmpty
-      Tests.U
+      Tests.T
       Tests.Qty
       Tests.Random
       Tests.Range

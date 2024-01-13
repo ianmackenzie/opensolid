@@ -26,7 +26,7 @@ import OpenSolid
 import Qty qualified
 import Range (Range)
 import Range qualified
-import U qualified
+import T qualified
 import Units ((:/))
 import Units qualified
 import VectorBounds2d (VectorBounds2d)
@@ -45,7 +45,7 @@ data Segment (coordinateSystem :: CoordinateSystem) where
 init ::
   (Tolerance units) =>
   Derivatives (space @ units) ->
-  U.Bounds ->
+  T.Bounds ->
   Segment (space @ units)
 init derivatives domain =
   Segment
@@ -61,18 +61,18 @@ crossProductResolution segment1 segment2 =
 
 isEndpointIntersectionCandidate ::
   (Float, Float) ->
-  U.Bounds ->
-  U.Bounds ->
+  T.Bounds ->
+  T.Bounds ->
   Segment (space @ units) ->
   Segment (space @ units) ->
   Bool
-isEndpointIntersectionCandidate (u0, v0) u v _ _ =
-  Range.includes u0 u && Range.includes v0 v
+isEndpointIntersectionCandidate (tValue1, tValue2) tBounds1 tBounds2 _ _ =
+  Range.includes tValue1 tBounds1 && Range.includes tValue2 tBounds2
 
 endpointIntersectionResolved ::
   (Intersection.Kind, Sign) ->
-  U.Bounds ->
-  U.Bounds ->
+  T.Bounds ->
+  T.Bounds ->
   Segment (space @ units) ->
   Segment (space @ units) ->
   Fuzzy Bool
@@ -132,8 +132,8 @@ computeIntersectionType segment1 segment2 =
 
 isTangentIntersectionCandidate ::
   (Tolerance units) =>
-  U.Bounds ->
-  U.Bounds ->
+  T.Bounds ->
+  T.Bounds ->
   Segment (space @ units) ->
   Segment (space @ units) ->
   Bool
@@ -142,8 +142,8 @@ isTangentIntersectionCandidate _ _ segment1 segment2 =
     && Qty.abs (crossProductResolution segment1 segment2) < 0.1
 
 tangentIntersectionSign ::
-  U.Bounds ->
-  U.Bounds ->
+  T.Bounds ->
+  T.Bounds ->
   Segment (space @ units) ->
   Segment (space @ units) ->
   Fuzzy Sign
@@ -222,31 +222,31 @@ findTangentIntersection ::
   (Tolerance units) =>
   Derivatives (space @ units) ->
   Derivatives (space @ units) ->
-  U.Bounds ->
-  U.Bounds ->
+  T.Bounds ->
+  T.Bounds ->
   Segment (space @ units) ->
   Segment (space @ units) ->
   Sign ->
   Maybe Intersection
-findTangentIntersection derivatives1 derivatives2 uBounds1 uBounds2 _ _ sign = do
-  (u1, u2) <- Range.find2 (isTangentIntersection derivatives1 derivatives2) uBounds1 uBounds2
-  Just (Intersection.tangent u1 u2 sign)
+findTangentIntersection derivatives1 derivatives2 tBounds1 tBounds2 _ _ sign = do
+  (t1, t2) <- Range.find2 (isTangentIntersection derivatives1 derivatives2) tBounds1 tBounds2
+  Just (Intersection.tangent t1 t2 sign)
 
 isTangentIntersection ::
   (Tolerance units) =>
   Derivatives (space @ units) ->
   Derivatives (space @ units) ->
-  U.Bounds ->
-  U.Bounds ->
+  T.Bounds ->
+  T.Bounds ->
   Bool
-isTangentIntersection derivatives1 derivatives2 u1 u2 =
-  let bounds1 = Curve2d.segmentBounds u1 (Derivatives.curve derivatives1)
-      bounds2 = Curve2d.segmentBounds u2 (Derivatives.curve derivatives2)
+isTangentIntersection derivatives1 derivatives2 tBounds1 tBounds2 =
+  let bounds1 = Curve2d.segmentBounds tBounds1 (Derivatives.curve derivatives1)
+      bounds2 = Curve2d.segmentBounds tBounds2 (Derivatives.curve derivatives2)
       difference = bounds1 - bounds2
       distance = VectorBounds2d.magnitude difference
    in Range.minValue distance <= ?tolerance
-        && let firstBounds1 = VectorCurve2d.segmentBounds u1 (Derivatives.first derivatives1)
-               firstBounds2 = VectorCurve2d.segmentBounds u2 (Derivatives.first derivatives2)
+        && let firstBounds1 = VectorCurve2d.segmentBounds tBounds1 (Derivatives.first derivatives1)
+               firstBounds2 = VectorCurve2d.segmentBounds tBounds2 (Derivatives.first derivatives2)
                crossProduct = Units.generalize firstBounds1 >< Units.generalize firstBounds2
                dotProduct1 = Units.generalize firstBounds1 <> Units.generalize difference
                dotProduct2 = Units.generalize firstBounds2 <> Units.generalize difference
@@ -256,8 +256,8 @@ isTangentIntersection derivatives1 derivatives2 u1 u2 =
 
 isCrossingIntersectionCandidate ::
   (Tolerance units) =>
-  U.Bounds ->
-  U.Bounds ->
+  T.Bounds ->
+  T.Bounds ->
   Segment (space @ units) ->
   Segment (space @ units) ->
   Bool
@@ -265,8 +265,8 @@ isCrossingIntersectionCandidate _ _ segment1 segment2 =
   curveBounds segment1 ^ curveBounds segment2
 
 crossingIntersectionSign ::
-  U.Bounds ->
-  U.Bounds ->
+  T.Bounds ->
+  T.Bounds ->
   Segment (space @ units) ->
   Segment (space @ units) ->
   Fuzzy Sign
@@ -280,23 +280,25 @@ findCrossingIntersection ::
   (Tolerance units) =>
   Derivatives (space @ units) ->
   Derivatives (space @ units) ->
-  U.Bounds ->
-  U.Bounds ->
+  T.Bounds ->
+  T.Bounds ->
   Segment (space @ units) ->
   Segment (space @ units) ->
   Sign ->
   Maybe Intersection
-findCrossingIntersection derivatives1 derivatives2 uBounds1 uBounds2 _ _ sign = do
+findCrossingIntersection derivatives1 derivatives2 tBounds1 tBounds2 _ _ sign = do
   let curve1 = Derivatives.curve derivatives1
   let curve2 = Derivatives.curve derivatives2
-  (u1, u2) <- Range.find2 (isCrossingIntersection curve1 curve2) uBounds1 uBounds2
-  Just (Intersection.crossing u1 u2 sign)
+  (t1, t2) <- Range.find2 (isCrossingIntersection curve1 curve2) tBounds1 tBounds2
+  Just (Intersection.crossing t1 t2 sign)
 
 isCrossingIntersection ::
   Curve2d (space @ units) ->
   Curve2d (space @ units) ->
-  U.Bounds ->
-  U.Bounds ->
+  T.Bounds ->
+  T.Bounds ->
   Bool
-isCrossingIntersection curve1 curve2 u1 u2 =
-  Bounds2d.overlap (Curve2d.segmentBounds u1 curve1) (Curve2d.segmentBounds u2 curve2) >= Qty.zero
+isCrossingIntersection curve1 curve2 tBounds1 tBounds2 =
+  let curveBounds1 = Curve2d.segmentBounds tBounds1 curve1
+      curveBounds2 = Curve2d.segmentBounds tBounds2 curve2
+   in Bounds2d.overlap curveBounds1 curveBounds2 >= Qty.zero

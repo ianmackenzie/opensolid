@@ -12,7 +12,7 @@ import Float qualified
 import OpenSolid
 import Qty qualified
 import Range (Range (Range))
-import U qualified
+import T qualified
 import Vector2d (Vector2d)
 import Vector2d qualified
 import VectorBounds2d (VectorBounds2d)
@@ -73,7 +73,7 @@ evaluateAt t (DegenerateEndpoint t0 t1 endpointCurve) innerCurve =
     (VectorCurve2d.evaluateAt t1 innerCurve)
     ((t - t0) / (t1 - t0))
 
-segmentBounds :: U.Bounds -> DegenerateEndpoint space -> VectorCurve2d (space @ Unitless) -> VectorBounds2d (space @ Unitless)
+segmentBounds :: T.Bounds -> DegenerateEndpoint space -> VectorCurve2d (space @ Unitless) -> VectorBounds2d (space @ Unitless)
 segmentBounds (Range tLow tHigh) (DegenerateEndpoint t0 t1 endpointCurve) innerCurve =
   let v0 = VectorCurve2d.evaluateAt t0 endpointCurve
       v1 = VectorCurve2d.evaluateAt t1 innerCurve

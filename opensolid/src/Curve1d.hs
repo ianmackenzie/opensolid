@@ -7,7 +7,7 @@ module Curve1d
   , derivative
   , zero
   , constant
-  , parameter
+  , t
   , squared
   , sqrt
   , sin
@@ -39,7 +39,7 @@ import Range qualified
 import Result qualified
 import Stream (Stream)
 import Stream qualified
-import U qualified
+import T qualified
 import Units (Squared)
 import Units qualified
 import Vector2d (Vector2d)
@@ -51,7 +51,7 @@ import {-# SOURCE #-} VectorCurve3d qualified
 
 class (Show curve) => Interface curve units | curve -> units where
   evaluateAtImpl :: Float -> curve -> Qty units
-  segmentBoundsImpl :: U.Bounds -> curve -> Range units
+  segmentBoundsImpl :: T.Bounds -> curve -> Range units
   derivativeImpl :: curve -> Curve1d units
 
 data Curve1d units where
@@ -130,8 +130,8 @@ zero = Zero
 constant :: Qty units -> Curve1d units
 constant value = if value == Qty.zero then Zero else Constant value
 
-parameter :: Curve1d Unitless
-parameter = Parameter
+t :: Curve1d Unitless
+t = Parameter
 
 instance Generic.HasZero (Curve1d units) where
   zero = zero
@@ -281,41 +281,41 @@ instance
   value / curve = constant value / curve
 
 evaluateAt :: Float -> Curve1d units -> Qty units
-evaluateAt t curve =
+evaluateAt tValue curve =
   case curve of
-    Curve1d c -> evaluateAtImpl t c
+    Curve1d c -> evaluateAtImpl tValue c
     Zero -> Qty.zero
     Constant x -> x
-    Parameter -> t
-    Negated c -> negate (evaluateAt t c)
-    Sum c1 c2 -> evaluateAt t c1 + evaluateAt t c2
-    Difference c1 c2 -> evaluateAt t c1 - evaluateAt t c2
-    Product c1 c2 -> evaluateAt t c1 * evaluateAt t c2
-    Quotient c1 c2 -> evaluateAt t c1 / evaluateAt t c2
-    Squared c -> Qty.squared (evaluateAt t c)
-    SquareRoot c -> Qty.sqrt (evaluateAt t c)
-    Sin c -> Angle.sin (evaluateAt t c)
-    Cos c -> Angle.cos (evaluateAt t c)
+    Parameter -> tValue
+    Negated c -> negate (evaluateAt tValue c)
+    Sum c1 c2 -> evaluateAt tValue c1 + evaluateAt tValue c2
+    Difference c1 c2 -> evaluateAt tValue c1 - evaluateAt tValue c2
+    Product c1 c2 -> evaluateAt tValue c1 * evaluateAt tValue c2
+    Quotient c1 c2 -> evaluateAt tValue c1 / evaluateAt tValue c2
+    Squared c -> Qty.squared (evaluateAt tValue c)
+    SquareRoot c -> Qty.sqrt (evaluateAt tValue c)
+    Sin c -> Angle.sin (evaluateAt tValue c)
+    Cos c -> Angle.cos (evaluateAt tValue c)
 
 pointOn :: Curve1d units -> Float -> Qty units
-pointOn curve t = evaluateAt t curve
+pointOn curve tValue = evaluateAt tValue curve
 
-segmentBounds :: U.Bounds -> Curve1d units -> Range units
-segmentBounds t curve =
+segmentBounds :: T.Bounds -> Curve1d units -> Range units
+segmentBounds tBounds curve =
   case curve of
-    Curve1d c -> segmentBoundsImpl t c
+    Curve1d c -> segmentBoundsImpl tBounds c
     Zero -> Range.constant Qty.zero
     Constant value -> Range.constant value
-    Parameter -> t
-    Negated c -> negate (segmentBounds t c)
-    Sum c1 c2 -> segmentBounds t c1 + segmentBounds t c2
-    Difference c1 c2 -> segmentBounds t c1 - segmentBounds t c2
-    Product c1 c2 -> segmentBounds t c1 * segmentBounds t c2
-    Quotient c1 c2 -> segmentBounds t c1 / segmentBounds t c2
-    Squared c -> Range.squared (segmentBounds t c)
-    SquareRoot c -> Range.sqrt (segmentBounds t c)
-    Sin c -> Range.sin (segmentBounds t c)
-    Cos c -> Range.cos (segmentBounds t c)
+    Parameter -> tBounds
+    Negated c -> negate (segmentBounds tBounds c)
+    Sum c1 c2 -> segmentBounds tBounds c1 + segmentBounds tBounds c2
+    Difference c1 c2 -> segmentBounds tBounds c1 - segmentBounds tBounds c2
+    Product c1 c2 -> segmentBounds tBounds c1 * segmentBounds tBounds c2
+    Quotient c1 c2 -> segmentBounds tBounds c1 / segmentBounds tBounds c2
+    Squared c -> Range.squared (segmentBounds tBounds c)
+    SquareRoot c -> Range.sqrt (segmentBounds tBounds c)
+    Sin c -> Range.sin (segmentBounds tBounds c)
+    Cos c -> Range.cos (segmentBounds tBounds c)
 
 derivative :: Curve1d units -> Curve1d units
 derivative curve =
@@ -342,8 +342,8 @@ newtype Reversed units = Reversed (Curve1d units)
 deriving instance Show (Reversed units)
 
 instance Interface (Reversed units) units where
-  evaluateAtImpl t (Reversed curve) = evaluateAt (1.0 - t) curve
-  segmentBoundsImpl t (Reversed curve) = segmentBounds (1.0 - t) curve
+  evaluateAtImpl tValue (Reversed curve) = evaluateAt (1.0 - tValue) curve
+  segmentBoundsImpl tBounds (Reversed curve) = segmentBounds (1.0 - tBounds) curve
   derivativeImpl (Reversed curve) = -(reverse (derivative curve))
 
 reverse :: Curve1d units -> Curve1d units
@@ -381,7 +381,7 @@ cos (Constant x) = constant (Angle.cos x)
 cos curve = Cos curve
 
 isZero :: (Tolerance units) => Curve1d units -> Bool
-isZero curve = List.all (\u -> pointOn curve u ~= Qty.zero) U.samples
+isZero curve = List.all (\tValue -> pointOn curve tValue ~= Qty.zero) T.samples
 
 maxRootOrder :: Int
 maxRootOrder = 4
@@ -427,8 +427,8 @@ findRoots ::
   Stream (Curve1d units) ->
   Bisection.Tree (Stream (Range units)) ->
   Int ->
-  (List Root, List U.Bounds) ->
-  (List Root, List U.Bounds)
+  (List Root, List T.Bounds) ->
+  (List Root, List T.Bounds)
 findRoots curve derivatives searchTree rootOrder accumulated =
   let updated =
         Bisection.solve
@@ -441,7 +441,7 @@ findRoots curve derivatives searchTree rootOrder accumulated =
         then updated
         else findRoots curve derivatives searchTree (rootOrder - 1) updated
 
-isCandidate :: (Tolerance units) => Int -> U.Bounds -> Stream (Range units) -> Bool
+isCandidate :: (Tolerance units) => Int -> T.Bounds -> Stream (Range units) -> Bool
 isCandidate rootOrder _ bounds =
   let curveBounds = Stream.head bounds
       derivativeBounds = Stream.take rootOrder (Stream.tail bounds)
@@ -449,7 +449,7 @@ isCandidate rootOrder _ bounds =
       derivativesContainZero = List.all (Range.includes Qty.zero) derivativeBounds
    in curveContainsZero && derivativesContainZero
 
-resolveDerivativeSign :: Int -> U.Bounds -> Stream (Range units) -> Fuzzy Sign
+resolveDerivativeSign :: Int -> T.Bounds -> Stream (Range units) -> Fuzzy Sign
 resolveDerivativeSign derivativeOrder _ bounds = resolveSign (Stream.nth derivativeOrder bounds)
 
 findRoot ::
@@ -457,7 +457,7 @@ findRoot ::
   Curve1d units ->
   Int ->
   Stream (Curve1d units) ->
-  U.Bounds ->
+  T.Bounds ->
   Stream (Range units) ->
   Sign ->
   Maybe Root
@@ -528,4 +528,4 @@ factorial :: Int -> Int
 factorial 0 = 1; factorial n = n * factorial (n - 1)
 
 integral :: Curve1d units -> Estimate units
-integral curve = Estimate.wrap (Integral curve (derivative curve) U.domain)
+integral curve = Estimate.wrap (Integral curve (derivative curve) T.domain)

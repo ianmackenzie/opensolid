@@ -47,7 +47,7 @@ import Point2d (Point2d)
 import Qty qualified
 import Range qualified
 import Result qualified
-import U qualified
+import T qualified
 import VectorCurve2d (VectorCurve2d)
 import VectorCurve2d qualified
 
@@ -77,7 +77,7 @@ evaluateAt = Internal.evaluateAt
 pointOn :: Curve2d (space @ units) -> Float -> Point2d (space @ units)
 pointOn curve t = evaluateAt t curve
 
-segmentBounds :: U.Bounds -> Curve2d (space @ units) -> Bounds2d (space @ units)
+segmentBounds :: T.Bounds -> Curve2d (space @ units) -> Bounds2d (space @ units)
 segmentBounds = Internal.segmentBounds
 
 derivative :: Curve2d (space @ units) -> VectorCurve2d (space @ units)
@@ -88,7 +88,7 @@ reverse = Internal.reverse
 
 bounds :: Curve2d (space @ units) -> Bounds2d (space @ units)
 bounds (Internal.Line {startPoint = p1, endPoint = p2}) = Bounds2d.hull2 p1 p2
-bounds arc@(Internal.Arc {}) = segmentBounds U.domain arc
+bounds arc@(Internal.Arc {}) = segmentBounds T.domain arc
 bounds (Internal.Curve curve _) = boundsImpl curve
 
 tangentDirection :: Curve2d (space @ units) -> DirectionCurve2d space
@@ -125,14 +125,14 @@ overlappingSegments ::
   Curve2d (space @ units) ->
   Curve2d (space @ units) ->
   List (Float, Float) ->
-  List (U.Bounds, U.Bounds, Sign)
+  List (T.Bounds, T.Bounds, Sign)
 overlappingSegments curve1 curve2 endpointParameterValues =
   endpointParameterValues
     |> List.successive
-      ( \(u1, v1) (u2, v2) ->
-          ( Range.from u1 u2
-          , Range.from v1 v2
-          , if (u1 < u2) == (v1 < v2) then Positive else Negative
+      ( \(t1Start, t2Start) (t1End, t2End) ->
+          ( Range.from t1Start t1End
+          , Range.from t2Start t2End
+          , if (t1Start < t1End) == (t2Start < t2End) then Positive else Negative
           )
       )
     |> List.filter (isOverlappingSegment curve1 curve2)
@@ -141,7 +141,7 @@ isOverlappingSegment ::
   (Tolerance units) =>
   Curve2d (space @ units) ->
   Curve2d (space @ units) ->
-  (U.Bounds, U.Bounds, Sign) ->
+  (T.Bounds, T.Bounds, Sign) ->
   Bool
 isOverlappingSegment curve1 curve2 (domain1, _, _) =
   let segmentStartPoint = evaluateAt (Range.minValue domain1) curve1
@@ -151,7 +151,7 @@ isOverlappingSegment curve1 curve2 (domain1, _, _) =
    in segment1IsNondegenerate && segment1LiesOnSegment2
 
 data IntersectionError
-  = CurvesOverlap (List (U.Bounds, U.Bounds, Sign))
+  = CurvesOverlap (List (T.Bounds, T.Bounds, Sign))
   | TangentIntersectionAtDegeneratePoint
   deriving (Eq, Show, ErrorMessage)
 
@@ -209,8 +209,8 @@ findEndpointIntersections ::
   List (Float, Float) ->
   SearchTree (space @ units) ->
   SearchTree (space @ units) ->
-  (List Intersection, List (U.Bounds, U.Bounds)) ->
-  Result IntersectionError (List Intersection, List (U.Bounds, U.Bounds))
+  (List Intersection, List (T.Bounds, T.Bounds)) ->
+  Result IntersectionError (List Intersection, List (T.Bounds, T.Bounds))
 findEndpointIntersections _ _ [] _ _ accumulated = Ok accumulated
 findEndpointIntersections derivatives1 derivatives2 (uv : rest) searchTree1 searchTree2 accumulated = do
   updated <- findEndpointIntersection derivatives1 derivatives2 uv searchTree1 searchTree2 accumulated
@@ -223,19 +223,19 @@ findEndpointIntersection ::
   (Float, Float) ->
   SearchTree (space @ units) ->
   SearchTree (space @ units) ->
-  (List Intersection, List (U.Bounds, U.Bounds)) ->
-  Result IntersectionError (List Intersection, List (U.Bounds, U.Bounds))
-findEndpointIntersection derivatives1 derivatives2 u1u2 searchTree1 searchTree2 accumulated = do
+  (List Intersection, List (T.Bounds, T.Bounds)) ->
+  Result IntersectionError (List Intersection, List (T.Bounds, T.Bounds))
+findEndpointIntersection derivatives1 derivatives2 t1t2 searchTree1 searchTree2 accumulated = do
   intersectionType <-
-    Derivatives.classify u1u2 derivatives1 derivatives2
+    Derivatives.classify t1t2 derivatives1 derivatives2
       |> Result.mapError (\Intersection.TangentIntersectionAtDegeneratePoint -> TangentIntersectionAtDegeneratePoint)
   let (kind, sign) = intersectionType
-  let (u1, u2) = u1u2
+  let (t1, t2) = t1t2
   Ok $
     Bisection.solve2
-      (Segment.isEndpointIntersectionCandidate u1u2)
+      (Segment.isEndpointIntersectionCandidate t1t2)
       (Segment.endpointIntersectionResolved intersectionType)
-      (\_ _ _ _ _ -> Just (Intersection {u1, u2, kind, sign}))
+      (\_ _ _ _ _ -> Just (Intersection {t1, t2, kind, sign}))
       searchTree1
       searchTree2
       accumulated
@@ -246,8 +246,8 @@ findTangentIntersections ::
   Derivatives (space @ units) ->
   SearchTree (space @ units) ->
   SearchTree (space @ units) ->
-  (List Intersection, List (U.Bounds, U.Bounds)) ->
-  (List Intersection, List (U.Bounds, U.Bounds))
+  (List Intersection, List (T.Bounds, T.Bounds)) ->
+  (List Intersection, List (T.Bounds, T.Bounds))
 findTangentIntersections derivatives1 derivatives2 =
   Bisection.solve2
     Segment.isTangentIntersectionCandidate
@@ -260,8 +260,8 @@ findCrossingIntersections ::
   Derivatives (space @ units) ->
   SearchTree (space @ units) ->
   SearchTree (space @ units) ->
-  (List Intersection, List (U.Bounds, U.Bounds)) ->
-  (List Intersection, List (U.Bounds, U.Bounds))
+  (List Intersection, List (T.Bounds, T.Bounds)) ->
+  (List Intersection, List (T.Bounds, T.Bounds))
 findCrossingIntersections derivatives1 derivatives2 =
   Bisection.solve2
     Segment.isCrossingIntersectionCandidate

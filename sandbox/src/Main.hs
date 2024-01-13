@@ -26,10 +26,10 @@ import Result qualified
 import String qualified
 import Surface1d.Function qualified
 import Surface1d.Solution qualified
+import T qualified
 import Task qualified
 import Transform2d qualified
 import Try qualified
-import U qualified
 import Units (Meters)
 import Uv (Parameter (U, V))
 import Vector2d qualified
@@ -151,12 +151,12 @@ testTaskSequencing = do
 
 testParameter1dGeneration :: Task String ()
 testParameter1dGeneration = Try.do
-  u1 <- Random.generate U.generator
-  u2 <- Random.generate U.generator
-  u3 <- Random.generate U.generator
-  log "Random parameter value 1" u1
-  log "Random parameter value 2" u2
-  log "Random parameter value 3" u3
+  t1 <- Random.generate T.generator
+  t2 <- Random.generate T.generator
+  t3 <- Random.generate T.generator
+  log "Random parameter value 1" t1
+  log "Random parameter value 2" t2
+  log "Random parameter value 3" t3
 
 testEmptyCheck :: List Int -> Task String ()
 testEmptyCheck [] = Console.printLine "List is empty"
@@ -180,7 +180,7 @@ testSurface1dIntersection = Try.do
   let f = Surface1d.Function.squared x + Surface1d.Function.squared y - 1.0
   solutions <- Task.evaluate (Surface1d.Function.solve f)
   log "Number of solutions" (List.length solutions)
-  let segmentPoints segment = [Curve2d.pointOn segment uValue | uValue <- U.steps 10]
+  let segmentPoints segment = [Curve2d.pointOn segment uValue | uValue <- T.steps 10]
   let curvePoints segments = List.collect segmentPoints (NonEmpty.toList segments)
   let solutionPoints = \case
         Surface1d.Solution.CrossingCurve {segments} -> Ok (curvePoints segments)

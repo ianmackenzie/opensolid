@@ -19,10 +19,10 @@ import Point2d qualified
 import QuadraticSpline2d qualified
 import Range (Range (Range))
 import Range qualified
+import T qualified
 import Test (Test)
 import Test qualified
 import Tests.Random qualified as Random
-import U qualified
 import Units (Meters)
 import Vector2d qualified
 import VectorCurve2d qualified
@@ -64,22 +64,22 @@ overlappingSegments ::
   (Tolerance units) =>
   Curve2d (space @ units) ->
   Curve2d (space @ units) ->
-  Result String (List (U.Bounds, U.Bounds, Sign))
+  Result String (List (T.Bounds, T.Bounds, Sign))
 overlappingSegments curve1 curve2 =
   case Curve2d.intersections curve1 curve2 of
     Ok _ -> Error "Intersection should have failed (and given overlapping segments)"
     Error (Curve2d.CurvesOverlap segments) -> Ok segments
     Error error -> Error (errorMessage error)
 
-equalUBounds :: U.Bounds -> U.Bounds -> Bool
-equalUBounds (Range u1 u2) (Range v1 v2) =
-  let ?tolerance = 1e-12 in u1 ~= v1 && u2 ~= v2
+equalUBounds :: T.Bounds -> T.Bounds -> Bool
+equalUBounds (Range low1 high1) (Range low2 high2) =
+  let ?tolerance = 1e-12 in low1 ~= low2 && high1 ~= high2
 
-equalOverlapSegments :: (U.Bounds, U.Bounds, Sign) -> (U.Bounds, U.Bounds, Sign) -> Bool
-equalOverlapSegments (u1, v1, sign1) (u2, v2, sign2) =
-  equalUBounds u1 u2 && equalUBounds v1 v2 && sign1 == sign2
+equalOverlapSegments :: (T.Bounds, T.Bounds, Sign) -> (T.Bounds, T.Bounds, Sign) -> Bool
+equalOverlapSegments (t1, t2, sign) (t1', t2', sign') =
+  equalUBounds t1 t1' && equalUBounds t2 t2' && sign == sign'
 
-equalOverlapSegmentLists :: List (U.Bounds, U.Bounds, Sign) -> List (U.Bounds, U.Bounds, Sign) -> Bool
+equalOverlapSegmentLists :: List (T.Bounds, T.Bounds, Sign) -> List (T.Bounds, T.Bounds, Sign) -> Bool
 equalOverlapSegmentLists segments1 segments2 =
   List.allTrue (List.map2 equalOverlapSegments segments1 segments2)
 
@@ -206,11 +206,11 @@ tangentDerivativeIsPerpendicularToTangent =
     curve <- CubicSpline2d.fromControlPoints p0 p1 p2 p3
     let tangentDirection = Curve2d.tangentDirection curve
     let tangentDerivative = DirectionCurve2d.derivative tangentDirection
-    u <- U.generator
-    let tangent = DirectionCurve2d.evaluateAt u tangentDirection
-    let derivative = VectorCurve2d.evaluateAt u tangentDerivative
+    t <- T.generator
+    let tangent = DirectionCurve2d.evaluateAt t tangentDirection
+    let derivative = VectorCurve2d.evaluateAt t tangentDerivative
     Test.expect (let ?tolerance = 1e-12 in derivative <> tangent ~= 0.0)
-      |> Test.output "u" u
+      |> Test.output "t" t
       |> Test.output "tangent" tangent
       |> Test.output "derivative" derivative
       |> Test.output "dot product" (derivative <> tangent)

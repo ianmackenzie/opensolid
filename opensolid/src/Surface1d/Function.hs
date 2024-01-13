@@ -51,7 +51,7 @@ import Surface1d.Solution (Solution)
 import Surface1d.Solution qualified as Solution
 import Surface1d.Solution.Boundary (Boundary)
 import Surface1d.Solution.Boundary qualified as Boundary
-import U qualified
+import T qualified
 import Units qualified
 import Uv (Parameter (U, V))
 import Uv qualified
@@ -913,7 +913,7 @@ instance Curve2d.Interface (HorizontalCurve units) Uv.Coordinates where
   reverseImpl (HorizontalCurve f vu uStart uEnd vLow vHigh) =
     HorizontalCurve f vu uEnd uStart vLow vHigh
 
-  boundsImpl crossingCurve = Curve2d.segmentBoundsImpl U.domain crossingCurve
+  boundsImpl crossingCurve = Curve2d.segmentBoundsImpl T.domain crossingCurve
 
 data VerticalCurve units
   = VerticalCurve
@@ -952,7 +952,7 @@ instance Curve2d.Interface (VerticalCurve units) Uv.Coordinates where
   reverseImpl (VerticalCurve f uv uLow uHigh vStart vEnd) =
     VerticalCurve f uv uLow uHigh vEnd vStart
 
-  boundsImpl crossingCurve = Curve2d.segmentBoundsImpl U.domain crossingCurve
+  boundsImpl crossingCurve = Curve2d.segmentBoundsImpl T.domain crossingCurve
 
 solveVertically :: Function units -> Float -> Float -> Float -> Float
 solveVertically f u v1 v2

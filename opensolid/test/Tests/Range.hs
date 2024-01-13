@@ -9,10 +9,10 @@ import Random (Generator)
 import Random qualified
 import Range (Range)
 import Range qualified
+import T qualified
 import Test (Test)
 import Test qualified
 import Tests.Random qualified as Random
-import U qualified
 import Units (Meters)
 
 tests :: List Test
@@ -31,10 +31,10 @@ smaller :: Test
 smaller = Test.check 100 "smaller" $ Test.do
   range1 <- Range.generator Random.length
   range2 <- Range.generator Random.length
-  u1 <- U.generator
-  u2 <- U.generator
-  let x1 = Range.interpolate range1 u1
-  let x2 = Range.interpolate range2 u2
+  t1 <- T.generator
+  t2 <- T.generator
+  let x1 = Range.interpolate range1 t1
+  let x2 = Range.interpolate range2 t2
   let smallerValue = Qty.smaller x1 x2
   let smallerRange = Range.smaller range1 range2
   Test.expect (Range.includes smallerValue smallerRange)
@@ -49,10 +49,10 @@ larger :: Test
 larger = Test.check 100 "larger" $ Test.do
   range1 <- Range.generator Random.length
   range2 <- Range.generator Random.length
-  u1 <- U.generator
-  u2 <- U.generator
-  let x1 = Range.interpolate range1 u1
-  let x2 = Range.interpolate range2 u2
+  t1 <- T.generator
+  t2 <- T.generator
+  let x1 = Range.interpolate range1 t1
+  let x2 = Range.interpolate range2 t2
   let largerValue = Qty.larger x1 x2
   let largerRange = Range.larger range1 range2
   Test.expect (Range.includes largerValue largerRange)
@@ -66,8 +66,8 @@ larger = Test.check 100 "larger" $ Test.do
 valueInRange :: Generator (Length, Range Meters)
 valueInRange = Test.do
   range <- Range.generator Random.length
-  u <- U.generator
-  let value = Range.interpolate range u
+  t <- T.generator
+  let value = Range.interpolate range t
   Random.return (value, range)
 
 smallest :: Test
@@ -101,8 +101,8 @@ qtyRangeDivision :: Test
 qtyRangeDivision = Test.check 1000 "qtyRangeDivision" $ Test.do
   x <- Random.length
   range <- Range.generator Random.length
-  u <- U.generator
-  let y = Range.interpolate range u
+  t <- T.generator
+  let y = Range.interpolate range t
   let quotient = x / y
   let rangeQuotient = x / range
   Test.expect (rangeQuotient |> Range.includes quotient)
@@ -115,8 +115,8 @@ qtyRangeDivision = Test.check 1000 "qtyRangeDivision" $ Test.do
 rangeQtyDivision :: Test
 rangeQtyDivision = Test.check 1000 "rangeQtyDivision" $ Test.do
   range <- Range.generator Random.length
-  u <- U.generator
-  let x = Range.interpolate range u
+  t <- T.generator
+  let x = Range.interpolate range t
   y <- Random.length
   let quotient = x / y
   let rangeQuotient = range / y
@@ -134,10 +134,10 @@ rangeRangeDivision :: Test
 rangeRangeDivision = Test.check 1000 "rangeRangeDivision" $ Test.do
   range1 <- Range.generator Random.length
   range2 <- Range.generator Random.length
-  u1 <- U.generator
-  u2 <- U.generator
-  let x1 = Range.interpolate range1 u1
-  let x2 = Range.interpolate range2 u2
+  t1 <- T.generator
+  t2 <- T.generator
+  let x1 = Range.interpolate range1 t1
+  let x2 = Range.interpolate range2 t2
   let quotient = x1 / x2
   let rangeQuotient = range1 / range2
   Test.expect (rangeQuotient |> Range.includes quotient)

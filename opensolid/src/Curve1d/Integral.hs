@@ -9,9 +9,9 @@ import Estimate qualified
 import OpenSolid
 import Qty qualified
 import Range qualified
-import U qualified
+import T qualified
 
-data Integral units = Integral (Curve1d units) (Curve1d units) U.Bounds
+data Integral units = Integral (Curve1d units) (Curve1d units) T.Bounds
 
 instance Estimate.Interface (Integral units) units where
   boundsImpl (Integral curve derivative domain) =

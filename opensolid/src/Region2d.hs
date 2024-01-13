@@ -18,6 +18,7 @@ import Curve1d qualified
 import Curve2d (Curve2d)
 import Curve2d qualified
 import Curve2d.Intersection (Intersection (Intersection))
+import Curve2d.Intersection qualified
 import Estimate (Estimate)
 import Estimate qualified
 import Float qualified
@@ -90,10 +91,10 @@ checkCurvesForInnerIntersection curve1 curve2 =
       | otherwise -> Error RegionBoundaryIntersectsItself
 
 isEndpointIntersection :: Intersection -> Bool
-isEndpointIntersection (Intersection u1 u2 _ _) = isEndpoint u1 && isEndpoint u2
+isEndpointIntersection (Intersection {t1, t2}) = isEndpoint t1 && isEndpoint t2
 
 isEndpoint :: Float -> Bool
-isEndpoint u = u == 0.0 || u == 1.0
+isEndpoint t = t == 0.0 || t == 1.0
 
 connect ::
   (Tolerance units) =>

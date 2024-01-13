@@ -1,4 +1,4 @@
-module U
+module T
   ( Bounds
   , domain
   , steps

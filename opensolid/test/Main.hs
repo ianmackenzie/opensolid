@@ -16,12 +16,12 @@ import Tests.NonEmpty qualified
 import Tests.Qty qualified
 import Tests.Range qualified
 import Tests.Region2d qualified
-import Tests.U qualified
+import Tests.T qualified
 import Tests.VectorBounds3d qualified
 
 tests :: List Test
 tests =
-  [ Test.group "U" Tests.U.tests
+  [ Test.group "T" Tests.T.tests
   , Test.group "Qty" Tests.Qty.tests
   , Test.group "Range" Tests.Range.tests
   , Test.group "VectorBounds3d" Tests.VectorBounds3d.tests
