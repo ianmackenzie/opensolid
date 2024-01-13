@@ -70,7 +70,7 @@ dummyEstimates =
     |> Random.map NonEmpty.concat
     |> Random.Shuffle.nonEmpty
 
-check :: (Tolerance Meters) => Estimate Meters -> Qty Meters -> (Bool, Range Meters)
+check :: (Tolerance units) => Estimate units -> Qty units -> (Bool, Range units)
 check estimate value
   | Range.includes value bounds =
       if Range.width bounds ~= Qty.zero
