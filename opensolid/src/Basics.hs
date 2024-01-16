@@ -78,10 +78,10 @@ fromInteger :: Prelude.Integer -> Int
 fromInteger = Prelude.fromInteger
 
 internalError :: String -> a
-internalError = Prelude.error
+internalError message = Prelude.error ("Internal error: " Prelude.++ message)
 
 notImplemented :: a
-notImplemented = internalError "Not implemented"
+notImplemented = Prelude.error "Not implemented"
 
 {-# INLINE (|>) #-}
 (|>) :: a -> (a -> b) -> b
