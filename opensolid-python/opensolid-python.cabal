@@ -19,7 +19,7 @@ source-repository head
   location: https://github.com/ianmackenzie/opensolid
 
 executable opensolid-python
-  default-language: Haskell2010
+  default-language: GHC2021
   hs-source-dirs: src
   main-is: Main.hs
   build-depends:
@@ -49,38 +49,5 @@ executable opensolid-python
       -with-rtsopts=-N
   default-extensions:
       NoImplicitPrelude
-      MultiParamTypeClasses
-      FlexibleInstances
-      FlexibleContexts
-      UndecidableInstances
       RebindableSyntax
-      MonoLocalBinds
-      KindSignatures
-      StandaloneDeriving
-      StrictData
-      FunctionalDependencies
-      GeneralizedNewtypeDeriving
-      DataKinds
-      ScopedTypeVariables
-      GADTs
-      RoleAnnotations
-      LexicalNegation
-      ImportQualifiedPost
-      StandaloneKindSignatures
-      UndecidableSuperClasses
-      ImplicitParams
-      ConstraintKinds
-      PatternSynonyms
-      BlockArguments
-      OverloadedLabels
-      RankNTypes
       QualifiedDo
-      TypeFamilies
-      TypeOperators
-      OverloadedRecordDot
-      MagicHash
-      TupleSections
-      DeriveAnyClass
-      DerivingStrategies
-      ViewPatterns
-      LambdaCase

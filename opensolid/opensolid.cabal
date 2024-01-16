@@ -21,7 +21,7 @@ source-repository head
   location: https://github.com/ianmackenzie/opensolid
 
 common config
-  default-language: Haskell2010
+  default-language: GHC2021
   build-depends:
       array
     , base
@@ -46,42 +46,27 @@ common config
       -dcore-lint
   default-extensions:
       NoImplicitPrelude
-      MultiParamTypeClasses
-      FlexibleInstances
-      FlexibleContexts
       UndecidableInstances
       RebindableSyntax
       MonoLocalBinds
-      KindSignatures
-      StandaloneDeriving
       StrictData
       FunctionalDependencies
-      GeneralizedNewtypeDeriving
       DataKinds
-      ScopedTypeVariables
       GADTs
       RoleAnnotations
       LexicalNegation
-      ImportQualifiedPost
-      StandaloneKindSignatures
       UndecidableSuperClasses
       ImplicitParams
-      ConstraintKinds
       PatternSynonyms
       BlockArguments
-      OverloadedLabels
-      RankNTypes
       QualifiedDo
       TypeFamilies
-      TypeOperators
-      MagicHash
-      TupleSections
+      ExplicitNamespaces
       DeriveAnyClass
       DerivingStrategies
       ViewPatterns
       LambdaCase
       DisambiguateRecordFields
-      NamedFieldPuns
 
 library
   import: config
