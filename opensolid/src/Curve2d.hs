@@ -117,8 +117,11 @@ find ::
   Curve2d (space @ units) ->
   List Float
 find point curve =
-  VectorCurve2d.roots (point - curve)
-    |> Result.withDefault [] -- Shouldn't happen, since curves are enforced to be non-degenerate
+  case VectorCurve2d.roots (point - curve) of
+    Ok roots -> roots
+    Error VectorCurve2d.ZeroEverywhere ->
+      -- Shouldn't happen, since curves are enforced to be non-degenerate
+      []
 
 overlappingSegments ::
   (Tolerance units) =>
