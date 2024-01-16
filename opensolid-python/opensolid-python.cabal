@@ -48,6 +48,5 @@ executable opensolid-python
       -rtsopts
       -with-rtsopts=-N
   default-extensions:
-      NoImplicitPrelude
       RebindableSyntax
       QualifiedDo

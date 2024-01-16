@@ -45,9 +45,8 @@ common config
       -Wsafe
       -dcore-lint
   default-extensions:
-      NoImplicitPrelude
-      UndecidableInstances
       RebindableSyntax
+      UndecidableInstances
       StrictData
       FunctionalDependencies
       DataKinds

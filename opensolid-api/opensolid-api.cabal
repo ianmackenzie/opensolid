@@ -42,7 +42,6 @@ library
     , Paths_opensolid_api
   autogen-modules: Paths_opensolid_api
   default-extensions:
-      NoImplicitPrelude
       RebindableSyntax
       GADTs
       LexicalNegation
