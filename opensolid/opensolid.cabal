@@ -48,7 +48,6 @@ common config
       NoImplicitPrelude
       UndecidableInstances
       RebindableSyntax
-      MonoLocalBinds
       StrictData
       FunctionalDependencies
       DataKinds

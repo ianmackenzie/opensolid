@@ -44,7 +44,6 @@ library
   default-extensions:
       NoImplicitPrelude
       RebindableSyntax
-      MonoLocalBinds
       GADTs
       LexicalNegation
       ImplicitParams
