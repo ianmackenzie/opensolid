@@ -22,6 +22,7 @@ module List
   , unzip3
   , unzip4
   , filter
+  , find
   , collect
   , concat
   , foldLeft
@@ -127,6 +128,9 @@ map4 = Data.List.zipWith4
 
 filter :: (a -> Bool) -> List a -> List a
 filter = Data.List.filter
+
+find :: (a -> Bool) -> List a -> Maybe a
+find = Data.List.find
 
 collect :: (a -> List b) -> List a -> List b
 collect = Prelude.concatMap

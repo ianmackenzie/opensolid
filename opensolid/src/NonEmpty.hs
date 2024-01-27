@@ -20,6 +20,7 @@ module NonEmpty
   , unzip3
   , unzip4
   , filter
+  , find
   , concat
   , foldLeft
   , foldRight
@@ -136,6 +137,9 @@ unzip4 nonEmpty =
 
 filter :: (a -> Bool) -> NonEmpty a -> List a
 filter = Data.List.NonEmpty.filter
+
+find :: (a -> Bool) -> NonEmpty a -> Maybe a
+find = Data.Foldable.find
 
 concat :: NonEmpty (NonEmpty a) -> NonEmpty a
 concat = Data.Semigroup.sconcat
