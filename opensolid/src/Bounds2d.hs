@@ -10,6 +10,7 @@ module Bounds2d
   , aggregate2
   , exclusion
   , inclusion
+  , includes
   , contains
   , isContainedIn
   , overlap
@@ -98,6 +99,9 @@ exclusion (Point2d x y) (Bounds2d bx by)
 
 inclusion :: Point2d (space @ units) -> Bounds2d (space @ units) -> Qty units
 inclusion point bounds = -(exclusion point bounds)
+
+includes :: Point2d (space @ units) -> Bounds2d (space @ units) -> Bool
+includes (Point2d px py) (Bounds2d x y) = Range.includes px x && Range.includes py y
 
 contains :: Bounds2d (space @ units) -> Bounds2d (space @ units) -> Bool
 contains (Bounds2d x2 y2) (Bounds2d x1 y1) =
