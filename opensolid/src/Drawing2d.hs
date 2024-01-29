@@ -7,8 +7,10 @@ module Drawing2d
   , writeTo
   , nothing
   , group
+  , line
   , polyline
   , polygon
+  , circle
   , blackStroke
   , strokeWidth
   , noFill
@@ -84,6 +86,14 @@ nothing = Empty
 group :: List (Attribute space) -> List (Entity space) -> Entity space
 group attributes children = Node "g" attributes children
 
+line :: List (Attribute space) -> Point space -> Point space -> Entity space
+line attributes (Point2d x1 y1) (Point2d x2 y2) =
+  let x1Attribute = Attribute "x1" (lengthString x1)
+      y1Attribute = Attribute "y1" (lengthString -y1)
+      x2Attribute = Attribute "x2" (lengthString x2)
+      y2Attribute = Attribute "y2" (lengthString -y2)
+   in Node "line" (x1Attribute : y1Attribute : x2Attribute : y2Attribute : attributes) []
+
 polyline :: List (Attribute space) -> List (Point space) -> Entity space
 polyline attributes vertices =
   Node "polyline" (noFill : pointsAttribute vertices : attributes) []
@@ -91,6 +101,13 @@ polyline attributes vertices =
 polygon :: List (Attribute space) -> List (Point space) -> Entity space
 polygon attributes vertices =
   Node "polygon" (pointsAttribute vertices : attributes) []
+
+circle :: List (Attribute space) -> Point space -> Length -> Entity space
+circle attributes (Point2d cx cy) r =
+  let cxAttribute = Attribute "cx" (lengthString cx)
+      cyAttribute = Attribute "cy" (lengthString -cy)
+      rAttribute = Attribute "r" (lengthString r)
+   in Node "circle" (cxAttribute : cyAttribute : rAttribute : attributes) []
 
 pointsAttribute :: List (Point space) -> Attribute space
 pointsAttribute givenPoints =
