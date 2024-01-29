@@ -176,6 +176,7 @@ test-suite opensolid-test
       Tests.Curve2d
       Tests.Dict
       Tests.Direction2d
+      Tests.DivMod
       Tests.Estimate
       Tests.List
       Tests.NonEmpty
