@@ -2,6 +2,7 @@ module Colour
   ( Colour
   , rgb
   , rgb255
+  , hsl
   , fromHexString
   , toHexString
   , lightRed
@@ -39,7 +40,10 @@ module Colour
   )
 where
 
+import Angle qualified
 import Data.Colour qualified
+import Data.Colour.RGBSpace qualified
+import Data.Colour.RGBSpace.HSL qualified
 import Data.Colour.SRGB qualified
 import OpenSolid
 
@@ -50,6 +54,11 @@ rgb = Data.Colour.SRGB.sRGB
 
 rgb255 :: Int -> Int -> Int -> Colour
 rgb255 r g b = rgb (r / 255) (g / 255) (b / 255)
+
+hsl :: Angle -> Float -> Float -> Colour
+hsl hue saturation lightness =
+  Data.Colour.RGBSpace.HSL.hsl (Angle.inDegrees hue) saturation lightness
+    |> Data.Colour.RGBSpace.uncurryRGB rgb
 
 fromHexString :: String -> Colour
 fromHexString = Data.Colour.SRGB.sRGB24read
