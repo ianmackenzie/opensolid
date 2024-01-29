@@ -5,6 +5,7 @@ module Drawing2d
   , Point
   , toSvg
   , writeTo
+  , nothing
   , group
   , polyline
   , polygon
@@ -22,13 +23,14 @@ import File qualified
 import Length (Length)
 import Length qualified
 import List qualified
+import Maybe qualified
 import OpenSolid
 import Point2d (Point2d (Point2d))
 import Range (Range (Range))
 import String qualified
 import Units (Meters)
 
-data Entity space = Node String (List (Attribute space)) (List (Entity space))
+data Entity space = Empty | Node String (List (Attribute space)) (List (Entity space))
 
 data Attribute space = Attribute String String
 
@@ -36,13 +38,14 @@ type Resolution = ?resolution :: Length
 
 type Point space = Point2d (space @ Meters)
 
-entityString :: String -> Entity space -> String
+entityString :: String -> Entity space -> Maybe String
+entityString _ Empty = Nothing
 entityString indent (Node name attributes children) =
   let openingTag = indent ++ "<" ++ name ++ String.concat attributeLines ++ ">"
       attributeLines = List.map (attributeString ("\n" ++ indent ++ "   ")) attributes
-      childLines = List.map (entityString (indent ++ "  ")) children
+      childLines = Maybe.collect (entityString (indent ++ "  ")) children
       closingTag = indent ++ "</" ++ name ++ ">"
-   in String.join "\n" (openingTag : childLines) ++ "\n" ++ closingTag
+   in Just (String.join "\n" (openingTag : childLines) ++ "\n" ++ closingTag)
 
 attributeString :: String -> Attribute space -> String
 attributeString indent (Attribute name value) = String.concat [indent, name, "=\"", value, "\""]
@@ -69,11 +72,14 @@ toSvg (Bounds2d (Range x1 x2) (Range y1 y2)) entities =
         ]
    in String.join "\n" $
         [ "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"
-        , entityString "" (Node "svg" attributes entities) ++ "\n"
+        , Maybe.withDefault "" (entityString "" (Node "svg" attributes entities)) ++ "\n"
         ]
 
 writeTo :: String -> Bounds2d (space @ Meters) -> List (Entity space) -> Task String ()
 writeTo path viewBox entities = File.writeTo path (toSvg viewBox entities)
+
+nothing :: Entity space
+nothing = Empty
 
 group :: List (Attribute space) -> List (Entity space) -> Entity space
 group attributes children = Node "g" attributes children
