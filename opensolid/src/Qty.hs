@@ -128,6 +128,10 @@ instance
   {-# INLINE (/) #-}
   n / x = Float.fromInt n / x
 
+instance DivMod (Qty units) where
+  x // y = Prelude.floor (x / y)
+  x % y = x - y * (x // y)
+
 zero :: Qty units
 zero = coerce 0.0
 

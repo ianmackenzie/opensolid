@@ -5,7 +5,7 @@ module Arithmetic
   , subtract
   , Multiplication ((*))
   , Division ((/))
-  , (//)
+  , DivMod ((//), (%))
   , DotProduct ((<>))
   , CrossProduct ((><))
   , (.*)
@@ -48,8 +48,13 @@ class (DotProduct b a c) => DotProduct a b c | a b -> c where
 class (CrossProduct b a c) => CrossProduct a b c | a b -> c where
   (><) :: a -> b -> c
 
-(//) :: Int -> Int -> Int
-(//) = Prelude.quot
+class DivMod a where
+  (//) :: a -> a -> Int
+  (%) :: a -> a -> a
+
+instance DivMod Int where
+  (//) = Prelude.div
+  (%) = Prelude.mod
 
 instance Negation Int where
   negate = Prelude.negate

@@ -10,6 +10,7 @@ import Tests.Curve1d qualified
 import Tests.Curve2d qualified
 import Tests.Dict qualified
 import Tests.Direction2d qualified
+import Tests.DivMod qualified
 import Tests.Estimate qualified
 import Tests.List qualified
 import Tests.NonEmpty qualified
@@ -34,6 +35,7 @@ tests =
   , Test.group "Direction2d" Tests.Direction2d.tests
   , Test.group "Arc2d" Tests.Arc2d.tests
   , Test.group "Dict" Tests.Dict.tests
+  , Test.group "DivMod" Tests.DivMod.tests
   ]
  where
   ?tolerance = Length.meters 1e-9
