@@ -1,6 +1,7 @@
 module Angle
   ( Angle
   , zero
+  , goldenAngle
   , sin
   , cos
   , tan
@@ -36,6 +37,9 @@ type Angle = Qty Radians
 
 zero :: Angle
 zero = Qty.zero
+
+goldenAngle :: Angle
+goldenAngle = radians (Float.pi * (3.0 - Float.sqrt 5.0))
 
 sin :: Angle -> Float
 sin (Qty x) = Qty (Prelude.sin x)
