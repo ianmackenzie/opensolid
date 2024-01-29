@@ -12,9 +12,11 @@ module Drawing2d
   , polygon
   , circle
   , blackStroke
+  , strokeColour
   , strokeWidth
   , noFill
   , fillColour
+  , opacity
   )
 where
 
@@ -122,6 +124,9 @@ lengthString givenLength = String.fromFloat (Length.inMillimeters givenLength)
 blackStroke :: Attribute space
 blackStroke = Attribute "stroke" "black"
 
+strokeColour :: Colour -> Attribute space
+strokeColour colour = Attribute "stroke" (Colour.toHexString colour)
+
 strokeWidth :: Length -> Attribute space
 strokeWidth givenWidth = Attribute "stroke-width" (lengthString givenWidth)
 
@@ -130,3 +135,6 @@ noFill = Attribute "fill" "none"
 
 fillColour :: Colour -> Attribute space
 fillColour colour = Attribute "fill" (Colour.toHexString colour)
+
+opacity :: Float -> Attribute space
+opacity value = Attribute "opacity" (String.fromFloat value)
