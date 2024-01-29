@@ -100,7 +100,7 @@ blackStroke :: Attribute space
 blackStroke = Attribute "stroke" "black"
 
 strokeWidth :: Length -> Attribute space
-strokeWidth givenWidth = Attribute "strokeWidth" (lengthString givenWidth)
+strokeWidth givenWidth = Attribute "stroke-width" (lengthString givenWidth)
 
 noFill :: Attribute space
 noFill = Attribute "fill" "none"
