@@ -18,6 +18,8 @@ module Point2d
   , signedDistanceFrom
   , placeIn
   , relativeTo
+  , convert
+  , unconvert
   )
 where
 
@@ -193,3 +195,9 @@ relativeTo frame (Point2d px py) =
       dx = px - x0
       dy = py - y0
    in Point2d (dx * ix + dy * iy) (dx * jx + dy * jy)
+
+convert :: Qty.Conversion units1 units2 -> Point2d (space @ units1) -> Point2d (space @ units2)
+convert conversion (Point2d px py) = Point2d (Qty.convert conversion px) (Qty.convert conversion py)
+
+unconvert :: Qty.Conversion units1 units2 -> Point2d (space @ units2) -> Point2d (space @ units1)
+unconvert conversion (Point2d px py) = Point2d (Qty.unconvert conversion px) (Qty.unconvert conversion py)
