@@ -131,6 +131,9 @@ library
       Surface1d
       Surface1d.Function
       Surface1d.Solution
+      -- TODO move Surface1.Solution.Boundary back to other-modules
+      -- once we're no longer visualizing them in the sandbox
+      Surface1d.Solution.Boundary
       T
       Task
       Tolerance
@@ -160,7 +163,6 @@ library
       VectorCurve2d.Direction
       VectorCurve2d.Magnitude
       Quadrature
-      Surface1d.Solution.Boundary
   hs-source-dirs: src
 
 test-suite opensolid-test

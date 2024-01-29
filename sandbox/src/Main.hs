@@ -4,14 +4,19 @@ import Angle qualified
 import Arc2d qualified
 import Area qualified
 import Axis2d qualified
+import Bounds2d (Bounds2d (Bounds2d))
 import Bounds2d qualified
+import Colour (Colour)
 import Colour qualified
 import Console qualified
+import Curve2d (Curve2d)
 import Curve2d qualified
 import Direction2d qualified
 import Direction3d ()
 import Drawing2d qualified
 import File qualified
+import Float qualified
+import Length (Length)
 import Length qualified
 import Line2d qualified
 import List qualified
@@ -21,17 +26,20 @@ import Point2d (Point2d (Point2d))
 import Point2d qualified
 import Qty qualified
 import Random qualified
+import Range (Range (Range))
 import Range qualified
 import Result qualified
 import String qualified
 import Surface1d.Function qualified
 import Surface1d.Solution qualified
+import Surface1d.Solution.Boundary qualified
 import T qualified
 import Task qualified
 import Transform2d qualified
 import Try qualified
 import Units (Meters)
 import Uv (Parameter (U, V))
+import Uv qualified
 import Vector2d qualified
 import Vector3d qualified
 import Volume qualified
@@ -185,6 +193,7 @@ testSurface1dIntersection = Try.do
   let solutionPoints = \case
         Surface1d.Solution.CrossingCurve {segments} -> Ok (curvePoints segments)
         Surface1d.Solution.CrossingLoop {segments} -> Ok (curvePoints segments)
+        Surface1d.Solution.BoundaryPoint {} -> Ok []
         solution -> Error ("Unexpected solution: " ++ show solution)
   solutionPointLists <- Task.evaluate (Result.collect solutionPoints solutions)
   let allSolutionPoints = List.concat solutionPointLists
@@ -247,6 +256,113 @@ testArcFromEndpoints = Try.do
       log "Arc center point" centerPoint
     _ -> log "Unexpected curve" arc
 
+testPlaneTorusIntersection :: (Tolerance Meters) => Task String ()
+testPlaneTorusIntersection = Try.do
+  let theta = Angle.twoPi * Surface1d.Function.parameter U
+  let phi = Angle.twoPi * Surface1d.Function.parameter V
+  let minorRadius = Length.centimeters 1.0
+  let majorRadius = Length.centimeters 2.0
+  let r = majorRadius + minorRadius * Surface1d.Function.cos phi
+  let x = r * Surface1d.Function.cos theta
+  let y = r * Surface1d.Function.sin theta
+  let z = minorRadius * Surface1d.Function.sin phi
+  let alpha = Angle.asin (minorRadius / majorRadius)
+  let nx = -(Angle.sin alpha)
+  let ny = 0.0
+  let nz = Angle.cos alpha
+  -- let nx = 1.0 / Float.sqrt 2.0
+  -- let ny = 1.0 / Float.sqrt 2.0
+  -- let nz = 0.0
+  -- let nx = 0.0
+  -- let ny = 0.0
+  -- let nz = 1.0
+  let f = x * nx + y * ny + z * nz
+  solutions <- Task.evaluate $ Surface1d.Function.solve f
+  drawSolutions "solutions.svg" solutions
+  Console.printLine ""
+  Console.printLine "Plane torus intersection solutions:"
+  Task.forEach solutions $ \case
+    Surface1d.Solution.CrossingCurve {} -> Console.printLine "Crossing curve"
+    Surface1d.Solution.BoundaryEdge curve -> log "Boundary edge" curve
+    Surface1d.Solution.BoundaryPoint point -> log "Boundary point" point
+    Surface1d.Solution.SaddlePoint {point} -> log "Saddle point" point
+    Surface1d.Solution.DegenerateCrossingCurve {start, end} -> log "Degenerate crossing curve" (start, end)
+    solution -> log "Unexpected solution" solution
+  return ()
+
+strokeWidth :: Length
+strokeWidth = Length.millimeters 0.25
+
+drawSolutions :: String -> List Surface1d.Solution.Solution -> Task String ()
+drawSolutions path solutions = do
+  let solutionEntities = List.mapWithIndex drawSolution solutions
+  let uvRange = Range.convert toDrawing (Range.from -0.05 1.05)
+  let viewBox = Bounds2d uvRange uvRange
+  Drawing2d.writeTo path viewBox $
+    [ Drawing2d.group [Drawing2d.strokeWidth strokeWidth] $
+        (drawBounds [] Uv.domain : solutionEntities)
+    ]
+
+drawBounds :: List (Drawing2d.Attribute Uv.Space) -> Uv.Bounds -> Drawing2d.Entity Uv.Space
+drawBounds attributes bounds =
+  let point x y = Point2d.convert toDrawing (Bounds2d.interpolate bounds x y)
+   in Drawing2d.polygon attributes $
+        [ point 0.0 0.0
+        , point 1.0 0.0
+        , point 1.0 1.0
+        , point 0.0 1.0
+        ]
+
+drawSolution :: Int -> Surface1d.Solution.Solution -> Drawing2d.Entity Uv.Space
+drawSolution index solution =
+  let hue = (Float.fromInt index * Angle.goldenAngle) % Angle.twoPi
+      colour = Colour.hsl hue 0.5 0.5
+   in case solution of
+        Surface1d.Solution.CrossingCurve {segments, start, end} ->
+          Drawing2d.group [Drawing2d.strokeColour colour, Drawing2d.opacity 0.3] $
+            [ Drawing2d.group [] $
+                NonEmpty.toList (NonEmpty.map drawCurve segments)
+            , drawBoundary start
+            , drawBoundary end
+            ]
+        Surface1d.Solution.DegenerateCrossingCurve {start, end} ->
+          Drawing2d.group [] [drawBoundary start, drawBoundary end]
+        Surface1d.Solution.SaddlePoint {point, region} ->
+          Drawing2d.group [] $
+            [ drawDot Colour.orange point
+            , drawBounds [Drawing2d.noFill, Drawing2d.strokeColour Colour.lightGrey] region
+            ]
+        _ -> Drawing2d.nothing
+
+toDrawing :: Qty.Conversion Unitless Meters
+toDrawing = Qty.conversion 1.0 (Length.centimeters 10.0)
+
+drawCurve :: Curve2d Uv.Coordinates -> Drawing2d.Entity Uv.Space
+drawCurve curve =
+  let sampledPoints = List.map (Point2d.convert toDrawing . Curve2d.pointOn curve) (T.steps 20)
+   in Drawing2d.polyline [] sampledPoints
+
+drawBoundary :: Surface1d.Solution.Boundary.Boundary -> Drawing2d.Entity Uv.Space
+drawBoundary boundary =
+  let offset = Qty.unconvert toDrawing (0.5 * strokeWidth)
+   in case boundary of
+        Surface1d.Solution.Boundary.Left u (Range v1 v2) ->
+          drawLine [] (Point2d (u + offset) v1) (Point2d (u + offset) v2)
+        Surface1d.Solution.Boundary.Right u (Range v1 v2) ->
+          drawLine [] (Point2d (u - offset) v1) (Point2d (u - offset) v2)
+        Surface1d.Solution.Boundary.Bottom (Range u1 u2) v ->
+          drawLine [] (Point2d u1 (v + offset)) (Point2d u2 (v + offset))
+        Surface1d.Solution.Boundary.Top (Range u1 u2) v ->
+          drawLine [] (Point2d u1 (v - offset)) (Point2d u2 (v - offset))
+
+drawLine :: List (Drawing2d.Attribute Uv.Space) -> Uv.Point -> Uv.Point -> Drawing2d.Entity Uv.Space
+drawLine attributes p1 p2 =
+  Drawing2d.line attributes (Point2d.convert toDrawing p1) (Point2d.convert toDrawing p2)
+
+drawDot :: Colour -> Uv.Point -> Drawing2d.Entity Uv.Space
+drawDot colour point =
+  Drawing2d.circle [Drawing2d.fillColour colour] (Point2d.convert toDrawing point) (Length.millimeters 0.5)
+
 script :: Task String ()
 script = Try.do
   testScalarArithmetic
@@ -266,6 +382,7 @@ script = Try.do
   testLineFromEndpoints
   testDirectedLine
   testArcFromEndpoints
+  testPlaneTorusIntersection
  where
   ?tolerance = Length.meters 1e-9
 
