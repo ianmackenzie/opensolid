@@ -12,6 +12,7 @@ import Tests.Dict qualified
 import Tests.Direction2d qualified
 import Tests.DivMod qualified
 import Tests.Estimate qualified
+import Tests.Float qualified
 import Tests.List qualified
 import Tests.NonEmpty qualified
 import Tests.Qty qualified
@@ -36,6 +37,7 @@ tests =
   , Test.group "Arc2d" Tests.Arc2d.tests
   , Test.group "Dict" Tests.Dict.tests
   , Test.group "DivMod" Tests.DivMod.tests
+  , Test.group "Float" Tests.Float.tests
   ]
  where
   ?tolerance = Length.meters 1e-9

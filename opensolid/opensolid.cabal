@@ -180,6 +180,7 @@ test-suite opensolid-test
       Tests.Direction2d
       Tests.DivMod
       Tests.Estimate
+      Tests.Float
       Tests.List
       Tests.NonEmpty
       Tests.T

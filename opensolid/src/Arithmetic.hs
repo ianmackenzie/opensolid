@@ -8,6 +8,7 @@ module Arithmetic
   , DivMod ((//), (%))
   , DotProduct ((<>))
   , CrossProduct ((><))
+  , Exponentiation ((**))
   , (.*)
   , (./)
   , (.<>)
@@ -82,6 +83,15 @@ instance Division Int Int Float where
 infixl 6 +, -
 
 infixl 7 *, /, //
+
+class Exponentiation a b c | a b -> c where
+  (**) :: a -> b -> c
+
+instance Exponentiation Int Int Int where
+  (**) = (Prelude.^)
+
+instance Exponentiation Float Float Float where
+  (**) = (Prelude.**)
 
 (.*) ::
   ( Units.Coercion unitsA Unitless a aUnitless
