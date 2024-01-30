@@ -38,6 +38,7 @@ import Task qualified
 import Transform2d qualified
 import Try qualified
 import Units (Meters)
+import Units qualified
 import Uv (Parameter (U, V))
 import Uv qualified
 import Vector2d qualified
@@ -334,8 +335,8 @@ drawSolution index solution =
             ]
         _ -> Drawing2d.nothing
 
-toDrawing :: Qty.Conversion Unitless Meters
-toDrawing = Qty.conversion 1.0 (Length.centimeters 10.0)
+toDrawing :: Units.Conversion Unitless Meters
+toDrawing = Units.conversion 1.0 (Length.centimeters 10.0)
 
 drawCurve :: Curve2d Uv.Coordinates -> Drawing2d.Entity Uv.Space
 drawCurve curve =

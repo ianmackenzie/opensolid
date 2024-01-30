@@ -1,5 +1,9 @@
 module Units
-  ( Coercion
+  ( Conversion
+  , conversion
+  , convert
+  , unconvert
+  , Coercion
   , Generic
   , (:*)
   , (:/)
@@ -26,7 +30,20 @@ where
 import Basics
 import Data.Kind (Constraint)
 import Data.List.NonEmpty (NonEmpty)
+import {-# SOURCE #-} Qty (Qty (Qty))
 import Unsafe.Coerce (unsafeCoerce)
+import Prelude qualified
+
+newtype Conversion units1 units2 = Conversion Prelude.Double
+
+conversion :: Qty units1 -> Qty units2 -> Conversion units1 units2
+conversion (Qty a) (Qty b) = Conversion (b Prelude./ a)
+
+convert :: Conversion units1 units2 -> Qty units1 -> Qty units2
+convert (Conversion factor) (Qty value) = Qty (value Prelude.* factor)
+
+unconvert :: Conversion units1 units2 -> Qty units2 -> Qty units1
+unconvert (Conversion factor) (Qty value) = Qty (value Prelude./ factor)
 
 type Coercion :: Type -> Type -> Type -> Type -> Constraint
 class Coercion u1 u2 a b | a -> u1, b -> u2, a u2 -> b

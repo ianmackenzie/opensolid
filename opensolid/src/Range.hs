@@ -543,8 +543,8 @@ generator qtyGenerator = do
 samples :: Range units -> List (Qty units)
 samples range = List.map (interpolate range) Quadrature.points
 
-convert :: Qty.Conversion units1 units2 -> Range units1 -> Range units2
+convert :: Units.Conversion units1 units2 -> Range units1 -> Range units2
 convert conversion (Range low high) = from (Qty.convert conversion low) (Qty.convert conversion high)
 
-unconvert :: Qty.Conversion units1 units2 -> Range units2 -> Range units1
+unconvert :: Units.Conversion units1 units2 -> Range units2 -> Range units1
 unconvert conversion (Range low high) = from (Qty.unconvert conversion low) (Qty.unconvert conversion high)

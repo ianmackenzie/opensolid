@@ -28,8 +28,6 @@ module Qty
   , nonZero
   , IsNegative (IsNegative)
   , nonNegative
-  , Conversion
-  , conversion
   , convert
   , unconvert
   )
@@ -47,7 +45,7 @@ import Generic qualified
 import Result (ErrorMessage, Result (Error, Ok))
 import Sign (Sign (Negative, Positive))
 import {-# SOURCE #-} Tolerance (Tolerance, (~=))
-import Units (Unitless)
+import Units (Unitless, convert, unconvert)
 import Units qualified
 import Prelude qualified
 
@@ -257,14 +255,3 @@ data IsNegative = IsNegative deriving (Eq, Show, ErrorMessage)
 
 nonNegative :: Qty units -> Result IsNegative (Qty units)
 nonNegative value = if value >= zero then Ok value else Error IsNegative
-
-newtype Conversion units1 units2 = Conversion Prelude.Double
-
-conversion :: Qty units1 -> Qty units2 -> Conversion units1 units2
-conversion (Qty a) (Qty b) = Conversion (b Prelude./ a)
-
-convert :: Conversion units1 units2 -> Qty units1 -> Qty units2
-convert (Conversion factor) (Qty value) = Qty (value Prelude.* factor)
-
-unconvert :: Conversion units1 units2 -> Qty units2 -> Qty units1
-unconvert (Conversion factor) (Qty value) = Qty (value Prelude./ factor)
