@@ -3,7 +3,9 @@ module Point2d
   , origin
   , x
   , y
+  , along
   , xy
+  , xyIn
   , meters
   , centimeters
   , millimeters
@@ -122,8 +124,15 @@ x px = Point2d px Qty.zero
 y :: Qty units -> Point2d (space @ units)
 y py = Point2d Qty.zero py
 
+along :: Axis2d (space @ units) -> Qty units -> Point2d (space @ units)
+along axis distance = Axis2d.originPoint axis + distance * Axis2d.direction axis
+
 xy :: Qty units -> Qty units -> Point2d (space @ units)
 xy = Point2d
+
+xyIn :: Frame2d (space @ units) defines -> Qty units -> Qty units -> Point2d (space @ units)
+xyIn frame px py =
+  Frame2d.originPoint frame + px * Frame2d.xDirection frame + py * Frame2d.yDirection frame
 
 apply :: (Float -> Qty units) -> Float -> Float -> Point2d (space @ units)
 apply units px py = Point2d (units px) (units py)
@@ -178,11 +187,7 @@ placeIn ::
   Frame2d (global @ units) (Defines local) ->
   Point2d (local @ units) ->
   Point2d (global @ units)
-placeIn frame (Point2d px py) =
-  let (Point2d x0 y0) = Frame2d.originPoint frame
-      (Direction2d (Vector2d ix iy)) = Frame2d.xDirection frame
-      (Direction2d (Vector2d jx jy)) = Frame2d.yDirection frame
-   in Point2d (x0 + px * ix + py * jx) (y0 + px * iy + py * jy)
+placeIn frame (Point2d px py) = xyIn frame px py
 
 relativeTo ::
   Frame2d (global @ units) (Defines local) ->
