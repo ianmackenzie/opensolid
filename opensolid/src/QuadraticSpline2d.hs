@@ -53,7 +53,7 @@ instance Curve2d.Interface (QuadraticSpline2d (space @ units)) (space @ units) w
   boundsImpl (QuadraticSpline2d p1 p2 p3) = Bounds2d.hull3 p1 p2 p3
 
 fromControlPoints ::
-  (Tolerance units) =>
+  Tolerance units =>
   Point2d (space @ units) ->
   Point2d (space @ units) ->
   Point2d (space @ units) ->

@@ -242,7 +242,7 @@ all assess bounds@(Bounds2d x y) =
                 && all assess (Bounds2d x2 y1)
                 && all assess (Bounds2d x2 y2)
 
-resolve :: (Eq a) => (Bounds2d (space @ units) -> Fuzzy a) -> Bounds2d (space @ units) -> Fuzzy a
+resolve :: Eq a => (Bounds2d (space @ units) -> Fuzzy a) -> Bounds2d (space @ units) -> Fuzzy a
 resolve assess bounds@(Bounds2d x y) =
   case assess bounds of
     Resolved value -> Resolved value

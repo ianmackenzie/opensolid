@@ -79,57 +79,57 @@ scalingAlong axis scale =
 class Transformable2d a (coordinateSystem :: CoordinateSystem) where
   transformBy :: Transformation coordinateSystem -> a -> a
 
-translateBy :: (Transformable2d a (space @ units)) => Vector2d (space @ units) -> a -> a
+translateBy :: Transformable2d a (space @ units) => Vector2d (space @ units) -> a -> a
 translateBy vector = transformBy (translationBy vector)
 
-translateIn :: (Transformable2d a (space @ units)) => Direction2d space -> Qty units -> a -> a
+translateIn :: Transformable2d a (space @ units) => Direction2d space -> Qty units -> a -> a
 translateIn direction distance = transformBy (translationIn direction distance)
 
-translateInOwn :: (Transformable2d a (space @ units)) => (a -> Direction2d space) -> Qty units -> a -> a
+translateInOwn :: Transformable2d a (space @ units) => (a -> Direction2d space) -> Qty units -> a -> a
 translateInOwn direction distance value = translateIn (direction value) distance value
 
-translateAlong :: (Transformable2d a (space @ units)) => Axis2d (space @ units) -> Qty units -> a -> a
+translateAlong :: Transformable2d a (space @ units) => Axis2d (space @ units) -> Qty units -> a -> a
 translateAlong axis distance = transformBy (translationAlong axis distance)
 
-translateAlongOwn :: (Transformable2d a (space @ units)) => (a -> Axis2d (space @ units)) -> Qty units -> a -> a
+translateAlongOwn :: Transformable2d a (space @ units) => (a -> Axis2d (space @ units)) -> Qty units -> a -> a
 translateAlongOwn axis distance value = translateAlong (axis value) distance value
 
-rotateAround :: (Transformable2d a (space @ units)) => Point2d (space @ units) -> Angle -> a -> a
+rotateAround :: Transformable2d a (space @ units) => Point2d (space @ units) -> Angle -> a -> a
 rotateAround centerPoint angle = transformBy (rotationAround centerPoint angle)
 
-rotateAroundOwn :: (Transformable2d a (space @ units)) => (a -> Point2d (space @ units)) -> Angle -> a -> a
+rotateAroundOwn :: Transformable2d a (space @ units) => (a -> Point2d (space @ units)) -> Angle -> a -> a
 rotateAroundOwn centerPoint angle value = rotateAround (centerPoint value) angle value
 
-class (Transformable2d a coordinateSystem) => Scalable2d a coordinateSystem where
+class Transformable2d a coordinateSystem => Scalable2d a coordinateSystem where
   scaleBy :: Scaling coordinateSystem -> a -> a
 
-scaleAbout :: (Scalable2d a (space @ units)) => Point2d (space @ units) -> Float -> a -> a
+scaleAbout :: Scalable2d a (space @ units) => Point2d (space @ units) -> Float -> a -> a
 scaleAbout centerPoint scale = scaleBy (scalingAbout centerPoint scale)
 
-scaleAboutOwn :: (Scalable2d a (space @ units)) => (a -> Point2d (space @ units)) -> Float -> a -> a
+scaleAboutOwn :: Scalable2d a (space @ units) => (a -> Point2d (space @ units)) -> Float -> a -> a
 scaleAboutOwn centerPoint scale value = scaleAbout (centerPoint value) scale value
 
-class (Scalable2d a coordinateSystem) => Deformable2d a coordinateSystem where
+class Scalable2d a coordinateSystem => Deformable2d a coordinateSystem where
   deformBy :: Deformation coordinateSystem -> a -> a
 
-scaleAlong :: (Deformable2d a (space @ units)) => Axis2d (space @ units) -> Float -> a -> a
+scaleAlong :: Deformable2d a (space @ units) => Axis2d (space @ units) -> Float -> a -> a
 scaleAlong axis scale = deformBy (scalingAlong axis scale)
 
-scaleAlongOwn :: (Deformable2d a (space @ units)) => (a -> Axis2d (space @ units)) -> Float -> a -> a
+scaleAlongOwn :: Deformable2d a (space @ units) => (a -> Axis2d (space @ units)) -> Float -> a -> a
 scaleAlongOwn axis scale value = scaleAlong (axis value) scale value
 
-instance (space ~ space') => Transformable2d (Direction2d space) (space' @ units') where
+instance space ~ space' => Transformable2d (Direction2d space) (space' @ units') where
   transformBy transformation (Direction2d vector) =
     Direction2d.unsafe (transformBy transformation vector)
 
-instance (space ~ space') => Transformable2d (Vector2d (space @ units)) (space' @ units') where
+instance space ~ space' => Transformable2d (Vector2d (space @ units)) (space' @ units') where
   transformBy (Transformation (Matrix m11 m12 m21 m22 _ _)) (Vector2d x y) =
     Vector2d (m11 * x + m12 * y) (m21 * x + m22 * y)
 
-instance (space ~ space') => Scalable2d (Vector2d (space @ units)) (space' @ units') where
+instance space ~ space' => Scalable2d (Vector2d (space @ units)) (space' @ units') where
   scaleBy (Scaling matrix) = transformBy (Transformation matrix)
 
-instance (space ~ space') => Deformable2d (Vector2d (space @ units)) (space' @ units') where
+instance space ~ space' => Deformable2d (Vector2d (space @ units)) (space' @ units') where
   deformBy (Deformation matrix) = transformBy (Transformation matrix)
 
 instance (space ~ space', units ~ units') => Transformable2d (Point2d (space @ units)) (space' @ units') where

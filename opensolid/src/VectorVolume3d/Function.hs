@@ -27,7 +27,7 @@ import Volume1d qualified
 import Volume1d.Function qualified
 
 class
-  (Show function) =>
+  Show function =>
   Interface function (coordinateSystem :: CoordinateSystem)
     | function -> coordinateSystem
   where
@@ -37,7 +37,7 @@ class
 
 data Function (coordinateSystem :: CoordinateSystem) where
   Function ::
-    (Interface function (space @ units)) =>
+    Interface function (space @ units) =>
     function ->
     Function (space @ units)
   Zero ::
@@ -61,17 +61,17 @@ data Function (coordinateSystem :: CoordinateSystem) where
     Function (space @ units) ->
     Function (space @ units)
   Product1d3d ::
-    (Units.Product units1 units2 units3) =>
+    Units.Product units1 units2 units3 =>
     Volume1d.Function units1 ->
     Function (space @ units2) ->
     Function (space @ units3)
   Product3d1d ::
-    (Units.Product units1 units2 units3) =>
+    Units.Product units1 units2 units3 =>
     Function (space @ units1) ->
     Volume1d.Function units2 ->
     Function (space @ units3)
   Quotient ::
-    (Units.Quotient units1 units2 units3) =>
+    Units.Quotient units1 units2 units3 =>
     Function (space @ units1) ->
     Volume1d.Function units2 ->
     Function (space @ units3)
@@ -170,7 +170,7 @@ instance
   vector - function = constant vector - function
 
 instance
-  (Units.Product units1 units2 units3) =>
+  Units.Product units1 units2 units3 =>
   Multiplication
     (Volume1d.Function units1)
     (Function (space @ units2))
@@ -182,7 +182,7 @@ instance
   f1 * f2 = Product1d3d f1 f2
 
 instance
-  (Units.Product units1 units2 units3) =>
+  Units.Product units1 units2 units3 =>
   Multiplication
     (Function (space @ units1))
     (Volume1d.Function units2)
@@ -194,7 +194,7 @@ instance
   f1 * f2 = Product3d1d f1 f2
 
 instance
-  (Units.Product units1 units2 units3) =>
+  Units.Product units1 units2 units3 =>
   Multiplication
     (Function (space @ units1))
     (Qty units2)
@@ -203,7 +203,7 @@ instance
   function * value = function * Volume1d.Function.constant value
 
 instance
-  (Units.Product units1 units2 units3) =>
+  Units.Product units1 units2 units3 =>
   Multiplication
     (Qty units1)
     (Function (space @ units2))
@@ -212,7 +212,7 @@ instance
   value * function = Volume1d.Function.constant value * function
 
 instance
-  (Units.Quotient units1 units2 units3) =>
+  Units.Quotient units1 units2 units3 =>
   Division
     (Function (space @ units1))
     (Volume1d.Function units2)
@@ -226,7 +226,7 @@ instance
   function1 / function2 = Quotient function1 function2
 
 instance
-  (Units.Quotient units1 units2 units3) =>
+  Units.Quotient units1 units2 units3 =>
   Division
     (Function (space @ units1))
     (Qty units2)
@@ -307,7 +307,7 @@ zero = Zero
 constant :: Vector3d (space @ units) -> Function (space @ units)
 constant vector = if vector == Vector3d.zero then Zero else Constant vector
 
-wrap :: (Interface function (space @ units)) => function -> Function (space @ units)
+wrap :: Interface function (space @ units) => function -> Function (space @ units)
 wrap = Function
 
 xyz ::

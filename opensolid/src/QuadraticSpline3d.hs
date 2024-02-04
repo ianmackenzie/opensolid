@@ -54,7 +54,7 @@ instance Curve3d.Interface (QuadraticSpline3d (space @ units)) (space @ units) w
   boundsImpl (QuadraticSpline3d p1 p2 p3) = Bounds3d.hull3 p1 p2 p3
 
 fromControlPoints ::
-  (Tolerance units) =>
+  Tolerance units =>
   Point3d (space @ units) ->
   Point3d (space @ units) ->
   Point3d (space @ units) ->

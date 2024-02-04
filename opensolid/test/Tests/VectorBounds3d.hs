@@ -9,12 +9,12 @@ import Units (Meters)
 import Vector3d qualified
 import VectorBounds3d qualified
 
-tests :: (Tolerance Meters) => List Test
+tests :: Tolerance Meters => List Test
 tests =
   [ magnitude
   ]
 
-magnitude :: (Tolerance Meters) => Test
+magnitude :: Tolerance Meters => Test
 magnitude = Test.check 100 "magnitude" $ Test.do
   vectorBounds <- Tests.Random.vectorBounds3d
   tx <- T.generator

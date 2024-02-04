@@ -74,7 +74,7 @@ isAllowed domain (first : rest)
   | otherwise = isAllowed domain rest
 
 solve2 ::
-  (Show solution) =>
+  Show solution =>
   (T.Bounds -> T.Bounds -> segment -> segment -> Bool) ->
   (T.Bounds -> T.Bounds -> segment -> segment -> Fuzzy resolution) ->
   (T.Bounds -> T.Bounds -> segment -> segment -> resolution -> Maybe solution) ->

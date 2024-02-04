@@ -53,7 +53,7 @@ evaluate = Done
 map :: (a -> b) -> Task x a -> Task x b
 map = fmap
 
-mapError :: (ErrorMessage y) => (x -> y) -> Task x a -> Task y a
+mapError :: ErrorMessage y => (x -> y) -> Task x a -> Task y a
 mapError function (Done result) = Done (Result.mapError function result)
 mapError function (Perform io) = Perform (fmap (mapError function) io)
 

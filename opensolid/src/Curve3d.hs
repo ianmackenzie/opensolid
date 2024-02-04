@@ -23,7 +23,7 @@ class Interface curve (coordinateSystem :: CoordinateSystem) | curve -> coordina
   boundsImpl :: curve -> Bounds3d coordinateSystem
 
 data Curve3d (coordinateSystem :: CoordinateSystem) where
-  Curve3d :: (Interface curve (space @ units)) => curve -> Curve3d (space @ units)
+  Curve3d :: Interface curve (space @ units) => curve -> Curve3d (space @ units)
 
 instance Interface (Point3d (space @ units)) (space @ units) where
   startPointImpl = id

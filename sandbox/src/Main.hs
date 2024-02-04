@@ -47,7 +47,7 @@ import Vector2d qualified
 import Vector3d qualified
 import Volume qualified
 
-log :: (Show a) => String -> a -> Task String ()
+log :: Show a => String -> a -> Task String ()
 log label value = Console.printLine (label ++ ": " ++ show value)
 
 testScalarArithmetic :: Task String ()
@@ -107,7 +107,7 @@ testTransformation = Try.do
   log "Transformed axis" transformedAxis
 
 offsetPoint ::
-  (Tolerance units) =>
+  Tolerance units =>
   Point2d (space @ units) ->
   Point2d (space @ units) ->
   Qty units ->
@@ -116,7 +116,7 @@ offsetPoint startPoint endPoint distance = Result.withDefault startPoint do
   direction <- Direction2d.from startPoint endPoint
   Ok (Point2d.midpoint startPoint endPoint + distance * Direction2d.perpendicularTo direction)
 
-testCustomFunction :: (Tolerance Meters) => Task String ()
+testCustomFunction :: Tolerance Meters => Task String ()
 testCustomFunction = Try.do
   log "Offset point" $
     offsetPoint (Point2d.meters 1.0 0.0) (Point2d.meters 3.0 0.0) (Length.meters 1.0)
@@ -127,7 +127,7 @@ testListOperations = Try.do
   log "Successive intervals" (List.successive Range.from [1.0, 2.0, 3.0, 4.0])
   log "Prepend Maybe to List" (Just 1 ++ [2, 3])
 
-getCrossProduct :: (Tolerance Meters) => Result String Float
+getCrossProduct :: Tolerance Meters => Result String Float
 getCrossProduct = Try.withContext "In getCrossProduct" Try.do
   vectorDirection <- Vector2d.direction (Vector2d.meters 2.0 3.0)
   lineDirection <-
@@ -135,7 +135,7 @@ getCrossProduct = Try.withContext "In getCrossProduct" Try.do
       Direction2d.from Point2d.origin Point2d.origin
   Ok (vectorDirection >< lineDirection)
 
-testTry :: (Tolerance Meters) => Task String ()
+testTry :: Tolerance Meters => Task String ()
 testTry =
   case Try.withContext "In testTry" getCrossProduct of
     Ok crossProduct -> log "Got cross product" crossProduct
@@ -220,7 +220,7 @@ testSvgOutput = Try.do
         ]
     ]
 
-testLineFromEndpoints :: (Tolerance Meters) => Task String ()
+testLineFromEndpoints :: Tolerance Meters => Task String ()
 testLineFromEndpoints = Try.do
   line1 <-
     Task.evaluate $
@@ -233,7 +233,7 @@ testLineFromEndpoints = Try.do
       log "Line length in centimeters" (Length.inCentimeters length)
     _ -> log "Unexpected curve" line1
 
-testDirectedLine :: (Tolerance Meters) => Task String ()
+testDirectedLine :: Tolerance Meters => Task String ()
 testDirectedLine = Try.do
   let line1 =
         Line2d.with
@@ -245,7 +245,7 @@ testDirectedLine = Try.do
     Curve2d.Line {endPoint} -> log "Line end point" endPoint
     _ -> log "Unexpected curve" line1
 
-testArcFromEndpoints :: (Tolerance Meters) => Task String ()
+testArcFromEndpoints :: Tolerance Meters => Task String ()
 testArcFromEndpoints = Try.do
   arc <-
     Task.evaluate $
@@ -259,7 +259,7 @@ testArcFromEndpoints = Try.do
       log "Arc center point" centerPoint
     _ -> log "Unexpected curve" arc
 
-testPlaneTorusIntersection :: (Tolerance Meters) => Task String ()
+testPlaneTorusIntersection :: Tolerance Meters => Task String ()
 testPlaneTorusIntersection = Try.do
   let theta = Angle.twoPi * Surface1d.Function.parameter U
   let phi = Angle.twoPi * Surface1d.Function.parameter V

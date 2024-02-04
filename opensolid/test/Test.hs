@@ -32,23 +32,23 @@ data Expectation
 class Bind a b c where
   bind :: (b -> c) -> a -> c
 
-(>>=) :: (Bind a b c) => a -> (b -> c) -> c
+(>>=) :: Bind a b c => a -> (b -> c) -> c
 a >>= f = bind f a
 
-instance (a ~ a') => Bind (Generator a) a' (Generator b) where
+instance a ~ a' => Bind (Generator a) a' (Generator b) where
   bind function generator = generator OpenSolid.>>= function
 
-instance (a ~ a') => Bind (Result x a) a' (Result x b) where
+instance a ~ a' => Bind (Result x a) a' (Result x b) where
   bind function result = result OpenSolid.>>= function
 
-instance (a ~ a') => Bind (Task x a) a' (Task x b) where
+instance a ~ a' => Bind (Task x a) a' (Task x b) where
   bind function task = task OpenSolid.>>= function
 
-instance (a ~ a') => Bind (Result x a) a' Expectation where
+instance a ~ a' => Bind (Result x a) a' Expectation where
   bind f (Ok value) = f value
   bind _ (Error error) = Failed [errorMessage error]
 
-instance (a ~ a') => Bind (Result x a) a' (Generator Expectation) where
+instance a ~ a' => Bind (Result x a) a' (Generator Expectation) where
   bind f (Ok value) = f value
   bind _ (Error error) = Random.return (Failed [errorMessage error])
 
@@ -122,7 +122,7 @@ expect False = Random.return (Failed [])
 expectAll :: List Bool -> Generator Expectation
 expectAll checks = expect (List.allTrue checks)
 
-output :: (Show a) => String -> a -> Generator Expectation -> Generator Expectation
+output :: Show a => String -> a -> Generator Expectation -> Generator Expectation
 output label value =
   Random.map $
     \case
@@ -131,7 +131,7 @@ output label value =
 
 newtype Lines a = Lines (List a)
 
-instance (Show a) => Show (Lines a) where
+instance Show a => Show (Lines a) where
   show (Lines values) = String.concat (List.map (("\n  " ++) . show) values)
 
 lines :: (Data.Foldable.Foldable container, Show a) => container a -> Lines a

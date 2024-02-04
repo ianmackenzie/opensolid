@@ -22,3 +22,4 @@ fixities:
   - infixl 0 |>
   - infixr 0 $
 let-style: inline
+single-constraint-parens: never

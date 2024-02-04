@@ -28,7 +28,7 @@ instance ErrorMessage IOError where
 
 data Result x a where
   Ok :: a -> Result x a
-  Error :: (ErrorMessage x) => x -> Result x a
+  Error :: ErrorMessage x => x -> Result x a
 
 deriving instance (Eq x, Eq a) => Eq (Result x a)
 
@@ -58,7 +58,7 @@ withDefault fallback (Error _) = fallback
 map :: (a -> value) -> Result x a -> Result x value
 map = fmap
 
-mapError :: (ErrorMessage y) => (x -> y) -> Result x a -> Result y a
+mapError :: ErrorMessage y => (x -> y) -> Result x a -> Result y a
 mapError _ (Ok value) = Ok value
 mapError function (Error err) = Error (function err)
 

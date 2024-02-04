@@ -33,14 +33,14 @@ import Range qualified
 import Units qualified
 import Uvw qualified
 
-class (Show function) => Interface function units | function -> units where
+class Show function => Interface function units | function -> units where
   evaluateAtImpl :: Point3d Uvw.Coordinates -> function -> Qty units
   segmentBoundsImpl :: Bounds3d Uvw.Coordinates -> function -> Range units
   derivativeImpl :: Direction3d Uvw.Space -> function -> Function units
 
 data Function units where
   Function ::
-    (Interface function units) =>
+    Interface function units =>
     function ->
     Function units
   Zero ::
@@ -65,21 +65,21 @@ data Function units where
     Function units ->
     Function units
   Product ::
-    (Units.Product units1 units2 units3) =>
+    Units.Product units1 units2 units3 =>
     Function units1 ->
     Function units2 ->
     Function units3
   Quotient ::
-    (Units.Quotient units1 units2 units3) =>
+    Units.Quotient units1 units2 units3 =>
     Function units1 ->
     Function units2 ->
     Function units3
   Squared ::
-    (Units.Squared units1 units2) =>
+    Units.Squared units1 units2 =>
     Function units1 ->
     Function units2
   SquareRoot ::
-    (Units.Squared units1 units2) =>
+    Units.Squared units1 units2 =>
     Function units2 ->
     Function units1
   Sin ::
@@ -120,32 +120,32 @@ instance Multiplication (Function units) Sign (Function units) where
   function * Positive = function
   function * Negative = -function
 
-instance (units ~ units') => Addition (Function units) (Function units') (Function units) where
+instance units ~ units' => Addition (Function units) (Function units') (Function units) where
   Zero + function = function
   function + Zero = function
   Constant x + Constant y = constant (x + y)
   function1 + function2 = Sum function1 function2
 
-instance (units ~ units') => Addition (Function units) (Qty units') (Function units) where
+instance units ~ units' => Addition (Function units) (Qty units') (Function units) where
   function + value = function + constant value
 
-instance (units ~ units') => Addition (Qty units) (Function units') (Function units) where
+instance units ~ units' => Addition (Qty units) (Function units') (Function units) where
   value + function = constant value + function
 
-instance (units ~ units') => Subtraction (Function units) (Function units') (Function units) where
+instance units ~ units' => Subtraction (Function units) (Function units') (Function units) where
   Zero - function = negate function
   function - Zero = function
   Constant x - Constant y = constant (x - y)
   function1 - function2 = Difference function1 function2
 
-instance (units ~ units') => Subtraction (Function units) (Qty units') (Function units) where
+instance units ~ units' => Subtraction (Function units) (Qty units') (Function units) where
   function - value = function - constant value
 
-instance (units ~ units') => Subtraction (Qty units) (Function units') (Function units) where
+instance units ~ units' => Subtraction (Qty units) (Function units') (Function units) where
   value - function = constant value - function
 
 instance
-  (Units.Product units1 units2 units3) =>
+  Units.Product units1 units2 units3 =>
   Multiplication
     (Function units1)
     (Function units2)
@@ -163,7 +163,7 @@ instance
   function1 * function2 = Product function1 function2
 
 instance
-  (Units.Product units1 units2 units3) =>
+  Units.Product units1 units2 units3 =>
   Multiplication
     (Function units1)
     (Qty units2)
@@ -172,7 +172,7 @@ instance
   function * value = function * constant value
 
 instance
-  (Units.Product units1 units2 units3) =>
+  Units.Product units1 units2 units3 =>
   Multiplication
     (Qty units1)
     (Function units2)
@@ -181,7 +181,7 @@ instance
   value * function = constant value * function
 
 instance
-  (Units.Quotient units1 units2 units3) =>
+  Units.Quotient units1 units2 units3 =>
   Division
     (Function units1)
     (Function units2)
@@ -195,7 +195,7 @@ instance
   function1 / function2 = Quotient function1 function2
 
 instance
-  (Units.Quotient units1 units2 units3) =>
+  Units.Quotient units1 units2 units3 =>
   Division
     (Function units1)
     (Qty units2)
@@ -204,7 +204,7 @@ instance
   function / value = function / constant value
 
 instance
-  (Units.Quotient units1 units2 units3) =>
+  Units.Quotient units1 units2 units3 =>
   Division
     (Qty units1)
     (Function units2)
@@ -291,10 +291,10 @@ v = V
 w :: Function Unitless
 w = W
 
-wrap :: (Interface function units) => function -> Function units
+wrap :: Interface function units => function -> Function units
 wrap = Function
 
-squared :: (Units.Squared units1 units2) => Function units1 -> Function units2
+squared :: Units.Squared units1 units2 => Function units1 -> Function units2
 squared Zero = Zero
 squared (Constant x) = Constant (x * x)
 squared (Negated f) = squared f
@@ -308,7 +308,7 @@ cosSquared f = 0.5 * cos (2.0 * f) + 0.5
 sinSquared :: Function Radians -> Function Unitless
 sinSquared f = 0.5 - 0.5 * cos (2.0 * f)
 
-sqrt :: (Units.Squared units1 units2) => Function units2 -> Function units1
+sqrt :: Units.Squared units1 units2 => Function units2 -> Function units1
 sqrt Zero = Zero
 sqrt (Constant x) = Constant (Qty.sqrt x)
 sqrt function = SquareRoot function

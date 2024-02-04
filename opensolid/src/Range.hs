@@ -81,19 +81,19 @@ instance
   ) =>
   Units.Coercion units1 units2 (Range units1') (Range units2')
 
-instance (units ~ units') => ApproximateEquality (Range units) (Qty units') units where
+instance units ~ units' => ApproximateEquality (Range units) (Qty units') units where
   Range low high ~= value = low >= value - ?tolerance && high <= value + ?tolerance
 
-instance (units ~ units') => ApproximateEquality (Qty units) (Range units') units where
+instance units ~ units' => ApproximateEquality (Qty units) (Range units') units where
   value ~= range = range ~= value
 
-instance (units ~ units') => Intersects (Qty units) (Range units') units where
+instance units ~ units' => Intersects (Qty units) (Range units') units where
   value ^ range = exclusion value range <= ?tolerance
 
-instance (units ~ units') => Intersects (Range units) (Qty units') units where
+instance units ~ units' => Intersects (Range units) (Qty units') units where
   range ^ value = value ^ range
 
-instance (units ~ units') => Intersects (Range units) (Range units') units where
+instance units ~ units' => Intersects (Range units) (Range units') units where
   first ^ second = separation first second <= ?tolerance
 
 instance Negation (Range units) where
@@ -110,47 +110,47 @@ instance Multiplication (Range units) Sign (Range units) where
 instance Generic.HasZero (Range units) where
   zero = constant Qty.zero
 
-instance (units ~ units') => Addition (Range units) (Range units') (Range units) where
+instance units ~ units' => Addition (Range units) (Range units') (Range units) where
   Range low1 high1 + Range low2 high2 = unsafe (low1 + low2) (high1 + high2)
 
-instance (units ~ units') => Addition (Range units) (Qty units') (Range units) where
+instance units ~ units' => Addition (Range units) (Qty units') (Range units) where
   Range low high + value = unsafe (low + value) (high + value)
 
-instance (units ~ units') => Addition (Qty units) (Range units') (Range units) where
+instance units ~ units' => Addition (Qty units) (Range units') (Range units) where
   value + Range low high = unsafe (value + low) (value + high)
 
-instance (units ~ units') => Subtraction (Range units) (Range units') (Range units) where
+instance units ~ units' => Subtraction (Range units) (Range units') (Range units) where
   Range low1 high1 - Range low2 high2 = unsafe (low1 - high2) (high1 - low2)
 
-instance (units ~ units') => Subtraction (Range units) (Qty units') (Range units) where
+instance units ~ units' => Subtraction (Range units) (Qty units') (Range units) where
   Range low high - value = unsafe (low - value) (high - value)
 
-instance (units ~ units') => Subtraction (Qty units) (Range units') (Range units) where
+instance units ~ units' => Subtraction (Qty units) (Range units') (Range units) where
   value - Range low high = unsafe (value - high) (value - low)
 
-instance (Units.Product units1 units2 units3) => Multiplication (Qty units1) (Range units2) (Range units3) where
+instance Units.Product units1 units2 units3 => Multiplication (Qty units1) (Range units2) (Range units3) where
   value * Range low high = from (value * low) (value * high)
 
-instance (Units.Product units1 units2 units3) => Multiplication (Range units1) (Qty units2) (Range units3) where
+instance Units.Product units1 units2 units3 => Multiplication (Range units1) (Qty units2) (Range units3) where
   Range low high * value = from (low * value) (high * value)
 
-instance (Units.Product units1 units2 units3) => Multiplication (Range units1) (Range units2) (Range units3) where
+instance Units.Product units1 units2 units3 => Multiplication (Range units1) (Range units2) (Range units3) where
   Range low1 high1 * Range low2 high2 =
     hull4 (low1 * low2) (low1 * high2) (high1 * low2) (high1 * high2)
 
-instance (Units.Quotient units1 units2 units3) => Division (Qty units1) (Range units2) (Range units3) where
+instance Units.Quotient units1 units2 units3 => Division (Qty units1) (Range units2) (Range units3) where
   n / Range dl dh =
     if dl > Qty.zero || dh < Qty.zero
       then from (n / dl) (n / dh)
       else unsafe -Qty.infinity Qty.infinity
 
-instance (Units.Quotient units1 units2 units3) => Division (Range units1) (Qty units2) (Range units3) where
+instance Units.Quotient units1 units2 units3 => Division (Range units1) (Qty units2) (Range units3) where
   Range nl nh / d =
     if d /= Qty.zero
       then from (nl / d) (nh / d)
       else unsafe -Qty.infinity Qty.infinity
 
-instance (Units.Quotient units1 units2 units3) => Division (Range units1) (Range units2) (Range units3) where
+instance Units.Quotient units1 units2 units3 => Division (Range units1) (Range units2) (Range units3) where
   Range nl nh / Range dl dh =
     if dl > Qty.zero || dh < Qty.zero
       then hull4 (nl / dl) (nl / dh) (nh / dl) (nh / dh)
@@ -224,7 +224,7 @@ minAbs (Range low high)
   | high <= Qty.zero = -high
   | otherwise = Qty.zero
 
-squared :: (Units.Squared units1 units2) => Range units1 -> Range units2
+squared :: Units.Squared units1 units2 => Range units1 -> Range units2
 squared (Range low high)
   | low >= Qty.zero = unsafe ll hh
   | high <= Qty.zero = unsafe hh ll
@@ -233,7 +233,7 @@ squared (Range low high)
   ll = low * low
   hh = high * high
 
-sqrt :: (Units.Squared units1 units2) => Range units2 -> Range units1
+sqrt :: Units.Squared units1 units2 => Range units2 -> Range units1
 sqrt (Range low high) =
   unsafe
     (Qty.sqrt (Qty.max low Qty.zero))
@@ -459,7 +459,7 @@ all assess range =
           let (left, right) = bisect range
            in all assess left && all assess right
 
-resolve :: (Eq a) => (Range units -> Fuzzy a) -> Range units -> Fuzzy a
+resolve :: Eq a => (Range units -> Fuzzy a) -> Range units -> Fuzzy a
 resolve assess range =
   case assess range of
     Resolved value -> Resolved value

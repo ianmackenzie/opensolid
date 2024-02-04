@@ -123,7 +123,7 @@ instance
   Vector2d x1 y1 - VectorBounds2d x2 y2 = VectorBounds2d (x1 - x2) (y1 - y2)
 
 instance
-  (Units.Product units1 units2 units3) =>
+  Units.Product units1 units2 units3 =>
   Multiplication
     (Qty units1)
     (VectorBounds2d (space @ units2))
@@ -132,7 +132,7 @@ instance
   value * VectorBounds2d x y = VectorBounds2d (value * x) (value * y)
 
 instance
-  (Units.Product units1 units2 units3) =>
+  Units.Product units1 units2 units3 =>
   Multiplication
     (VectorBounds2d (space @ units1))
     (Qty units2)
@@ -141,7 +141,7 @@ instance
   VectorBounds2d x y * value = VectorBounds2d (x * value) (y * value)
 
 instance
-  (Units.Product units1 units2 units3) =>
+  Units.Product units1 units2 units3 =>
   Multiplication
     (Range units1)
     (VectorBounds2d (space @ units2))
@@ -150,7 +150,7 @@ instance
   range * VectorBounds2d x y = VectorBounds2d (range * x) (range * y)
 
 instance
-  (Units.Product units1 units2 units3) =>
+  Units.Product units1 units2 units3 =>
   Multiplication
     (VectorBounds2d (space @ units1))
     (Range units2)
@@ -159,7 +159,7 @@ instance
   VectorBounds2d x y * range = VectorBounds2d (x * range) (y * range)
 
 instance
-  (Units.Quotient units1 units2 units3) =>
+  Units.Quotient units1 units2 units3 =>
   Division
     (VectorBounds2d (space @ units1))
     (Qty units2)
@@ -168,7 +168,7 @@ instance
   VectorBounds2d x y / value = VectorBounds2d (x / value) (y / value)
 
 instance
-  (Units.Quotient units1 units2 units3) =>
+  Units.Quotient units1 units2 units3 =>
   Division
     (VectorBounds2d (space @ units1))
     (Range units2)
@@ -195,7 +195,7 @@ instance
   VectorBounds2d x1 y1 <> Vector2d x2 y2 = x1 * x2 + y1 * y2
 
 instance
-  (space ~ space') =>
+  space ~ space' =>
   DotProduct
     (Direction2d space)
     (VectorBounds2d (space' @ units))
@@ -204,7 +204,7 @@ instance
   Direction2d vector <> vectorBounds = vector <> vectorBounds
 
 instance
-  (space ~ space') =>
+  space ~ space' =>
   DotProduct
     (VectorBounds2d (space @ units))
     (Direction2d space')
@@ -240,7 +240,7 @@ instance
   VectorBounds2d x1 y1 >< Vector2d x2 y2 = x1 * y2 - y1 * x2
 
 instance
-  (space ~ space') =>
+  space ~ space' =>
   CrossProduct
     (Direction2d space)
     (VectorBounds2d (space' @ units))
@@ -249,7 +249,7 @@ instance
   Direction2d vector >< vectorBounds = vector >< vectorBounds
 
 instance
-  (space ~ space') =>
+  space ~ space' =>
   CrossProduct
     (VectorBounds2d (space @ units))
     (Direction2d space')
@@ -324,7 +324,7 @@ xComponent (VectorBounds2d vx _) = vx
 yComponent :: VectorBounds2d (space @ units) -> Range units
 yComponent (VectorBounds2d _ vy) = vy
 
-squaredMagnitude :: (Units.Squared units1 units2) => VectorBounds2d (space @ units1) -> Range units2
+squaredMagnitude :: Units.Squared units1 units2 => VectorBounds2d (space @ units1) -> Range units2
 squaredMagnitude (VectorBounds2d x y) = Range.squared x + Range.squared y
 
 magnitude :: VectorBounds2d (space @ units) -> Range units
@@ -336,7 +336,7 @@ maxMagnitude (VectorBounds2d (Range minX maxX) (Range minY maxY)) =
       yMagnitude = Qty.max (Qty.abs minY) (Qty.abs maxY)
    in Qty.hypot2 xMagnitude yMagnitude
 
-maxSquaredMagnitude :: (Units.Squared units1 units2) => VectorBounds2d (space @ units1) -> Qty units2
+maxSquaredMagnitude :: Units.Squared units1 units2 => VectorBounds2d (space @ units1) -> Qty units2
 maxSquaredMagnitude (VectorBounds2d (Range minX maxX) (Range minY maxY)) =
   let xMagnitude = Qty.max (Qty.abs minX) (Qty.abs maxX)
       yMagnitude = Qty.max (Qty.abs minY) (Qty.abs maxY)

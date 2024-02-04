@@ -56,8 +56,9 @@ type Curve2d (coordinateSystem :: CoordinateSystem) = Internal.Curve2d coordinat
 data DegenerateCurve = DegenerateCurve deriving (Eq, Show, ErrorMessage)
 
 from ::
-  (Tolerance units) =>
-  (Interface curve (space @ units)) =>
+  ( Tolerance units
+  , Interface curve (space @ units)
+  ) =>
   curve ->
   Result DegenerateCurve (Curve2d (space @ units))
 from curve =
@@ -112,7 +113,7 @@ yCoordinate :: Curve2d (space @ units) -> Curve1d units
 yCoordinate = signedDistanceAlong Axis2d.y
 
 find ::
-  (Tolerance units) =>
+  Tolerance units =>
   Point2d (space @ units) ->
   Curve2d (space @ units) ->
   List Float
@@ -124,7 +125,7 @@ find point curve =
       []
 
 overlappingSegments ::
-  (Tolerance units) =>
+  Tolerance units =>
   Curve2d (space @ units) ->
   Curve2d (space @ units) ->
   List (Float, Float) ->
@@ -141,7 +142,7 @@ overlappingSegments curve1 curve2 endpointParameterValues =
     |> List.filter (isOverlappingSegment curve1 curve2)
 
 isOverlappingSegment ::
-  (Tolerance units) =>
+  Tolerance units =>
   Curve2d (space @ units) ->
   Curve2d (space @ units) ->
   (T.Bounds, T.Bounds, Sign) ->
@@ -159,7 +160,7 @@ data IntersectionError
   deriving (Eq, Show, ErrorMessage)
 
 findEndpointParameterValues ::
-  (Tolerance units) =>
+  Tolerance units =>
   Curve2d (space @ units) ->
   Curve2d (space @ units) ->
   List (Float, Float)
@@ -173,7 +174,7 @@ findEndpointParameterValues curve1 curve2 =
       ]
 
 intersections ::
-  (Tolerance units) =>
+  Tolerance units =>
   Curve2d (space @ units) ->
   Curve2d (space @ units) ->
   Result IntersectionError (List Intersection)
@@ -187,7 +188,7 @@ type SearchTree (coordinateSystem :: CoordinateSystem) =
   Bisection.Tree (Segment coordinateSystem)
 
 findIntersections ::
-  (Tolerance units) =>
+  Tolerance units =>
   Curve2d (space @ units) ->
   Curve2d (space @ units) ->
   List (Float, Float) ->
@@ -206,7 +207,7 @@ findIntersections curve1 curve2 endpointParameterValues = do
   Ok (List.sort allIntersections)
 
 findEndpointIntersections ::
-  (Tolerance units) =>
+  Tolerance units =>
   Derivatives (space @ units) ->
   Derivatives (space @ units) ->
   List (Float, Float) ->
@@ -220,7 +221,7 @@ findEndpointIntersections derivatives1 derivatives2 (uv : rest) searchTree1 sear
   findEndpointIntersections derivatives1 derivatives2 rest searchTree1 searchTree2 updated
 
 findEndpointIntersection ::
-  (Tolerance units) =>
+  Tolerance units =>
   Derivatives (space @ units) ->
   Derivatives (space @ units) ->
   (Float, Float) ->
@@ -244,7 +245,7 @@ findEndpointIntersection derivatives1 derivatives2 t1t2 searchTree1 searchTree2 
       accumulated
 
 findTangentIntersections ::
-  (Tolerance units) =>
+  Tolerance units =>
   Derivatives (space @ units) ->
   Derivatives (space @ units) ->
   SearchTree (space @ units) ->
@@ -258,7 +259,7 @@ findTangentIntersections derivatives1 derivatives2 =
     (Segment.findTangentIntersection derivatives1 derivatives2)
 
 findCrossingIntersections ::
-  (Tolerance units) =>
+  Tolerance units =>
   Derivatives (space @ units) ->
   Derivatives (space @ units) ->
   SearchTree (space @ units) ->

@@ -26,7 +26,7 @@ pattern Word8 n <- (fromIntegral -> n)
   where
     Word8 = fromIntegral
 
-newStorablePtr :: (Storable a) => a -> IO (Foreign.Ptr a)
+newStorablePtr :: Storable a => a -> IO (Foreign.Ptr a)
 newStorablePtr result = do
   ptr <- Foreign.malloc
   Foreign.poke ptr result
@@ -85,7 +85,7 @@ instance VoidPtr (Qty u) where
   fromVoidPtr ptr = Foreign.peek (Foreign.castPtr ptr)
   toVoidPtr a = fmap Foreign.castPtr (newStorablePtr a)
 
-instance (VoidPtr a) => VoidPtr (Maybe a) where
+instance VoidPtr a => VoidPtr (Maybe a) where
   fromVoidPtr ptr
     | ptr == Foreign.nullPtr = return Nothing
     | otherwise = fmap Just (fromVoidPtr ptr)
@@ -110,7 +110,7 @@ instance (VoidPtr a, VoidPtr b) => VoidPtr (a, b) where
 pointerSize :: Int
 pointerSize = Foreign.sizeOf Foreign.nullPtr
 
-class (ErrorMessage error) => TaggedError error where
+class ErrorMessage error => TaggedError error where
   fromTaggedPtr :: Foreign.Word8 -> Foreign.Ptr () -> IO error
   toTaggedPtr :: error -> IO (Foreign.Word8, Foreign.Ptr ())
 

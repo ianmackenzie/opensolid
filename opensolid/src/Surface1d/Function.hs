@@ -64,14 +64,14 @@ import Vector2d (Vector2d (Vector2d))
 import Vector2d qualified
 import VectorCurve2d qualified
 
-class (Show function) => Interface function units | function -> units where
+class Show function => Interface function units | function -> units where
   evaluateAtImpl :: Uv.Point -> function -> Qty units
   segmentBoundsImpl :: Uv.Bounds -> function -> Range units
   derivativeImpl :: Parameter -> function -> Function units
 
 data Function units where
   Function ::
-    (Interface function units) =>
+    Interface function units =>
     function ->
     Function units
   Zero ::
@@ -94,21 +94,21 @@ data Function units where
     Function units ->
     Function units
   Product ::
-    (Units.Product units1 units2 units3) =>
+    Units.Product units1 units2 units3 =>
     Function units1 ->
     Function units2 ->
     Function units3
   Quotient ::
-    (Units.Quotient units1 units2 units3) =>
+    Units.Quotient units1 units2 units3 =>
     Function units1 ->
     Function units2 ->
     Function units3
   Squared ::
-    (Units.Squared units1 units2) =>
+    Units.Squared units1 units2 =>
     Function units1 ->
     Function units2
   SquareRoot ::
-    (Units.Squared units1 units2) =>
+    Units.Squared units1 units2 =>
     Function units2 ->
     Function units1
   Sin ::
@@ -149,32 +149,32 @@ instance Multiplication (Function units) Sign (Function units) where
   function * Positive = function
   function * Negative = -function
 
-instance (units ~ units') => Addition (Function units) (Function units') (Function units) where
+instance units ~ units' => Addition (Function units) (Function units') (Function units) where
   Zero + function = function
   function + Zero = function
   Constant x + Constant y = constant (x + y)
   function1 + function2 = Sum function1 function2
 
-instance (units ~ units') => Addition (Function units) (Qty units') (Function units) where
+instance units ~ units' => Addition (Function units) (Qty units') (Function units) where
   function + value = function + constant value
 
-instance (units ~ units') => Addition (Qty units) (Function units') (Function units) where
+instance units ~ units' => Addition (Qty units) (Function units') (Function units) where
   value + function = constant value + function
 
-instance (units ~ units') => Subtraction (Function units) (Function units') (Function units) where
+instance units ~ units' => Subtraction (Function units) (Function units') (Function units) where
   Zero - function = negate function
   function - Zero = function
   Constant x - Constant y = constant (x - y)
   function1 - function2 = Difference function1 function2
 
-instance (units ~ units') => Subtraction (Function units) (Qty units') (Function units) where
+instance units ~ units' => Subtraction (Function units) (Qty units') (Function units) where
   function - value = function - constant value
 
-instance (units ~ units') => Subtraction (Qty units) (Function units') (Function units) where
+instance units ~ units' => Subtraction (Qty units) (Function units') (Function units) where
   value - function = constant value - function
 
 instance
-  (Units.Product units1 units2 units3) =>
+  Units.Product units1 units2 units3 =>
   Multiplication
     (Function units1)
     (Function units2)
@@ -192,7 +192,7 @@ instance
   function1 * function2 = Product function1 function2
 
 instance
-  (Units.Product units1 units2 units3) =>
+  Units.Product units1 units2 units3 =>
   Multiplication
     (Function units1)
     (Qty units2)
@@ -201,7 +201,7 @@ instance
   function * value = function * constant value
 
 instance
-  (Units.Product units1 units2 units3) =>
+  Units.Product units1 units2 units3 =>
   Multiplication
     (Qty units1)
     (Function units2)
@@ -210,7 +210,7 @@ instance
   value * function = constant value * function
 
 instance
-  (Units.Quotient units1 units2 units3) =>
+  Units.Quotient units1 units2 units3 =>
   Division
     (Function units1)
     (Function units2)
@@ -224,7 +224,7 @@ instance
   function1 / function2 = Quotient function1 function2
 
 instance
-  (Units.Quotient units1 units2 units3) =>
+  Units.Quotient units1 units2 units3 =>
   Division
     (Function units1)
     (Qty units2)
@@ -233,7 +233,7 @@ instance
   function / value = function / constant value
 
 instance
-  (Units.Quotient units1 units2 units3) =>
+  Units.Quotient units1 units2 units3 =>
   Division
     (Qty units1)
     (Function units2)
@@ -317,10 +317,10 @@ constant value = if value == Qty.zero then Zero else Constant value
 parameter :: Parameter -> Function Unitless
 parameter = Parameter
 
-wrap :: (Interface function units) => function -> Function units
+wrap :: Interface function units => function -> Function units
 wrap = Function
 
-squared :: (Units.Squared units1 units2) => Function units1 -> Function units2
+squared :: Units.Squared units1 units2 => Function units1 -> Function units2
 squared Zero = Zero
 squared (Constant x) = Constant (x * x)
 squared (Negated f) = squared f
@@ -334,7 +334,7 @@ cosSquared f = 0.5 * cos (2.0 * f) + 0.5
 sinSquared :: Function Radians -> Function Unitless
 sinSquared f = 0.5 - 0.5 * cos (2.0 * f)
 
-sqrt :: (Units.Squared units1 units2) => Function units2 -> Function units1
+sqrt :: Units.Squared units1 units2 => Function units2 -> Function units1
 sqrt Zero = Zero
 sqrt (Constant x) = Constant (Qty.sqrt x)
 sqrt function = SquareRoot function
@@ -351,7 +351,7 @@ cos function = Cos function
 
 data CurveOnSurface units where
   CurveOnSurface ::
-    (Curve2d.Interface curve Uv.Coordinates) =>
+    Curve2d.Interface curve Uv.Coordinates =>
     curve ->
     Function units ->
     CurveOnSurface units
@@ -376,7 +376,7 @@ instance Curve1d.Interface (CurveOnSurface units) units where
 curveOnSurface :: Curve2d Uv.Coordinates -> Function units -> Curve1d units
 curveOnSurface uvCurve function = Curve1d (CurveOnSurface uvCurve function)
 
-isZero :: (Tolerance units) => Function units -> Bool
+isZero :: Tolerance units => Function units -> Bool
 isZero function = List.all (~= Qty.zero) (Bounds2d.sample (pointOn function) Uv.domain)
 
 data SolveError
@@ -385,7 +385,7 @@ data SolveError
   | DegenerateCurve
   deriving (Eq, Show, ErrorMessage)
 
-solve :: (Tolerance units) => Function units -> Result SolveError (List Solution)
+solve :: Tolerance units => Function units -> Result SolveError (List Solution)
 solve Zero = Error ZeroEverywhere
 solve (Constant value) = if value ~= Qty.zero then Error ZeroEverywhere else Ok []
 solve f | isZero f = Error ZeroEverywhere
@@ -422,7 +422,7 @@ data Derivatives units = Derivatives
   }
 
 findTangentSolutions ::
-  (Tolerance units) =>
+  Tolerance units =>
   Derivatives units ->
   BoundaryEdges ->
   List BoundaryPoint ->
@@ -478,7 +478,7 @@ findTangentSolutions derivatives boundaryEdges boundaryPoints uvBounds bisection
   fvBounds = segmentBounds uvBounds fv
 
 findCrossingSolutions ::
-  (Tolerance units) =>
+  Tolerance units =>
   Derivatives units ->
   BoundaryEdges ->
   List BoundaryPoint ->
@@ -565,7 +565,7 @@ bottomEdge = boundaryEdge (Point2d 0.0 0.0) Direction2d.x
 topEdge :: Curve2d Uv.Coordinates
 topEdge = boundaryEdge (Point2d 0.0 1.0) Direction2d.x
 
-findBoundarySolutions :: (Tolerance units) => Function units -> (BoundaryEdges, List BoundaryPoint)
+findBoundarySolutions :: Tolerance units => Function units -> (BoundaryEdges, List BoundaryPoint)
 findBoundarySolutions f =
   let (leftEdgeIsSolution, leftPoints) = edgeSolutions f leftEdge Negative
       (rightEdgeIsSolution, rightPoints) = edgeSolutions f rightEdge Positive
@@ -581,7 +581,7 @@ findBoundarySolutions f =
       boundaryPoints = List.concat [leftPoints, rightPoints, bottomPoints, topPoints]
    in (boundaryEdges, boundaryPoints)
 
-edgeSolutions :: (Tolerance units) => Function units -> Curve2d Uv.Coordinates -> Sign -> (Bool, List BoundaryPoint)
+edgeSolutions :: Tolerance units => Function units -> Curve2d Uv.Coordinates -> Sign -> (Bool, List BoundaryPoint)
 edgeSolutions f edgeCurve edgeSign =
   case Curve1d.roots (Curve1d (CurveOnSurface edgeCurve f)) of
     Error Curve1d.ZeroEverywhere -> (True, [])
@@ -618,7 +618,7 @@ expandBounds :: Uv.Bounds -> Uv.Bounds
 expandBounds = expandBoundsBy 0.5
 
 generalSolution ::
-  (Tolerance units) =>
+  Tolerance units =>
   Derivatives units ->
   Uv.Bounds ->
   List Uv.Bounds ->
@@ -730,7 +730,7 @@ isStrictlyInside :: Uv.Bounds -> BoundaryPoint -> Bool
 isStrictlyInside bounds (BoundaryPoint {point}) = Bounds2d.inclusion point bounds > 0.0
 
 horizontalSolution ::
-  (Tolerance units) =>
+  Tolerance units =>
   Derivatives units ->
   BoundaryEdges ->
   List BoundaryPoint ->
@@ -785,7 +785,7 @@ horizontalSolution derivatives boundaryEdges boundaryPoints uvBounds exclusions
       List.TwoOrMore -> Nothing
 
 verticalSolution ::
-  (Tolerance units) =>
+  Tolerance units =>
   Derivatives units ->
   BoundaryEdges ->
   List BoundaryPoint ->
@@ -931,7 +931,7 @@ hasZero :: Uv.Bounds -> Function units -> Bool
 hasZero uvBounds function = Range.includes Qty.zero (segmentBounds uvBounds function)
 
 tangentPointSolution ::
-  (Tolerance units) =>
+  Tolerance units =>
   Derivatives units ->
   List BoundaryPoint ->
   Uv.Bounds ->
@@ -1058,7 +1058,7 @@ saddlePointSolution derivatives point expandedBounds =
 --        in List.all isTangentIntersectionPoint (Range.samples vRange)
 
 allDerivativesZero ::
-  (Tolerance units) =>
+  Tolerance units =>
   Uv.Bounds ->
   Derivatives units ->
   Bool
@@ -1072,7 +1072,7 @@ allDerivativesZero uvBounds (Derivatives {fu, fv, fuu, fvv, fuv}) =
 -- TODO: have the tolerance here be much larger
 -- (based on the derivative resolution)
 -- to avoid expensive bisection near zeros
-rangeSign :: (Tolerance units) => Range units -> Fuzzy Sign
+rangeSign :: Tolerance units => Range units -> Fuzzy Sign
 rangeSign range
   | Range.minValue range > ?tolerance = Resolved Positive
   | Range.maxValue range < negate ?tolerance = Resolved Negative

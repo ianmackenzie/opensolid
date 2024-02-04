@@ -109,7 +109,7 @@ instance
   Vector3d x1 y1 z1 - VectorBounds3d x2 y2 z2 = VectorBounds3d (x1 - x2) (y1 - y2) (z1 - z2)
 
 instance
-  (Units.Product units1 units2 units3) =>
+  Units.Product units1 units2 units3 =>
   Multiplication
     (Qty units1)
     (VectorBounds3d (space @ units2))
@@ -118,7 +118,7 @@ instance
   value * VectorBounds3d x y z = VectorBounds3d (value * x) (value * y) (value * z)
 
 instance
-  (Units.Product units1 units2 units3) =>
+  Units.Product units1 units2 units3 =>
   Multiplication
     (VectorBounds3d (space @ units1))
     (Qty units2)
@@ -127,7 +127,7 @@ instance
   VectorBounds3d x y z * value = VectorBounds3d (x * value) (y * value) (z * value)
 
 instance
-  (Units.Product units1 units2 units3) =>
+  Units.Product units1 units2 units3 =>
   Multiplication
     (Range units1)
     (VectorBounds3d (space @ units2))
@@ -136,7 +136,7 @@ instance
   range * VectorBounds3d x y z = VectorBounds3d (range * x) (range * y) (range * z)
 
 instance
-  (Units.Product units1 units2 units3) =>
+  Units.Product units1 units2 units3 =>
   Multiplication
     (VectorBounds3d (space @ units1))
     (Range units2)
@@ -145,7 +145,7 @@ instance
   VectorBounds3d x y z * range = VectorBounds3d (x * range) (y * range) (z * range)
 
 instance
-  (Units.Quotient units1 units2 units3) =>
+  Units.Quotient units1 units2 units3 =>
   Division
     (VectorBounds3d (space @ units1))
     (Qty units2)
@@ -154,7 +154,7 @@ instance
   VectorBounds3d x y z / value = VectorBounds3d (x / value) (y / value) (z / value)
 
 instance
-  (Units.Quotient units1 units2 units3) =>
+  Units.Quotient units1 units2 units3 =>
   Division
     (VectorBounds3d (space @ units1))
     (Range units2)
@@ -181,7 +181,7 @@ instance
   VectorBounds3d x1 y1 z1 <> Vector3d x2 y2 z2 = x1 * x2 + y1 * y2 + z1 * z2
 
 instance
-  (space ~ space') =>
+  space ~ space' =>
   DotProduct
     (Direction3d space)
     (VectorBounds3d (space' @ units))
@@ -190,7 +190,7 @@ instance
   Direction3d vector <> vectorBounds = vector <> vectorBounds
 
 instance
-  (space ~ space') =>
+  space ~ space' =>
   DotProduct
     (VectorBounds3d (space @ units))
     (Direction3d space')
@@ -294,7 +294,7 @@ yComponent (VectorBounds3d _ vy _) = vy
 zComponent :: VectorBounds3d (space @ units) -> Range units
 zComponent (VectorBounds3d _ _ vz) = vz
 
-squaredMagnitude :: (Units.Squared units1 units2) => VectorBounds3d (space @ units1) -> Range units2
+squaredMagnitude :: Units.Squared units1 units2 => VectorBounds3d (space @ units1) -> Range units2
 squaredMagnitude (VectorBounds3d x y z) = Range.squared x + Range.squared y + Range.squared z
 
 magnitude :: VectorBounds3d (space @ units) -> Range units
@@ -307,7 +307,7 @@ maxMagnitude (VectorBounds3d (Range minX maxX) (Range minY maxY) (Range minZ max
       zMagnitude = Qty.max (Qty.abs minZ) (Qty.abs maxZ)
    in Qty.hypot3 xMagnitude yMagnitude zMagnitude
 
-maxSquaredMagnitude :: (Units.Squared units1 units2) => VectorBounds3d (space @ units1) -> Qty units2
+maxSquaredMagnitude :: Units.Squared units1 units2 => VectorBounds3d (space @ units1) -> Qty units2
 maxSquaredMagnitude (VectorBounds3d (Range minX maxX) (Range minY maxY) (Range minZ maxZ)) =
   let xMagnitude = Qty.max (Qty.abs minX) (Qty.abs maxX)
       yMagnitude = Qty.max (Qty.abs minY) (Qty.abs maxY)

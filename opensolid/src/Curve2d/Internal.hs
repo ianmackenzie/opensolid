@@ -48,7 +48,7 @@ data Curve2d (coordinateSystem :: CoordinateSystem) where
     } ->
     Curve2d (space @ units)
   Curve ::
-    (Interface curve (space @ units)) =>
+    Interface curve (space @ units) =>
     curve ->
     DirectionCurve2d space ->
     Curve2d (space @ units)
@@ -85,7 +85,7 @@ instance
   point ^ curve = curve ^ point
 
 segmentIsCoincidentWithPoint ::
-  (Tolerance units) =>
+  Tolerance units =>
   Point2d (space @ units) ->
   Curve2d (space @ units) ->
   T.Bounds ->
@@ -98,7 +98,7 @@ segmentIsCoincidentWithPoint point curve domain
   candidateBounds = segmentBounds domain curve
 
 class
-  (Show curve) =>
+  Show curve =>
   Interface curve (coordinateSystem :: CoordinateSystem)
     | curve -> coordinateSystem
   where

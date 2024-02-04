@@ -28,25 +28,25 @@ import Prelude qualified
 class (Multiplication Sign a a, Multiplication a Sign a) => Negation a where
   negate :: a -> a
 
-class (Generic.HasZero b) => Addition a b c | a b -> c where
+class Generic.HasZero b => Addition a b c | a b -> c where
   (+) :: a -> b -> c
 
 class Subtraction a b c | a b -> c where
   (-) :: a -> b -> c
 
-subtract :: (Subtraction a b c) => b -> a -> c
+subtract :: Subtraction a b c => b -> a -> c
 subtract b a = a - b
 
-class (Multiplication b a c) => Multiplication a b c | a b -> c where
+class Multiplication b a c => Multiplication a b c | a b -> c where
   (*) :: a -> b -> c
 
 class Division a b c | a b -> c where
   (/) :: a -> b -> c
 
-class (DotProduct b a c) => DotProduct a b c | a b -> c where
+class DotProduct b a c => DotProduct a b c | a b -> c where
   (<>) :: a -> b -> c
 
-class (CrossProduct b a c) => CrossProduct a b c | a b -> c where
+class CrossProduct b a c => CrossProduct a b c | a b -> c where
   (><) :: a -> b -> c
 
 class DivMod a where

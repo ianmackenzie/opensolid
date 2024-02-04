@@ -27,7 +27,7 @@ import Units (Meters)
 import Vector2d qualified
 import VectorCurve2d qualified
 
-tests :: (Tolerance Meters) => List Test
+tests :: Tolerance Meters => List Test
 tests =
   [ find
   , curveOverlap1
@@ -42,7 +42,7 @@ tests =
   , degenerateEndPointTangentDerivative
   ]
 
-find :: (Tolerance Meters) => Test
+find :: Tolerance Meters => Test
 find = Test.verify "find" $ Test.do
   let p1 = Point2d.meters 0.0 0.0
   let p2 = Point2d.meters 1.0 2.0
@@ -61,7 +61,7 @@ find = Test.verify "find" $ Test.do
         ]
 
 overlappingSegments ::
-  (Tolerance units) =>
+  Tolerance units =>
   Curve2d (space @ units) ->
   Curve2d (space @ units) ->
   Result String (List (T.Bounds, T.Bounds, Sign))
@@ -83,7 +83,7 @@ equalOverlapSegmentLists :: List (T.Bounds, T.Bounds, Sign) -> List (T.Bounds, T
 equalOverlapSegmentLists segments1 segments2 =
   List.allTrue (List.map2 equalOverlapSegments segments1 segments2)
 
-curveOverlap1 :: (Tolerance Meters) => Test
+curveOverlap1 :: Tolerance Meters => Test
 curveOverlap1 = Test.verify "Overlap detection 1" $ Test.do
   arc1 <- Arc2d.swept Angle.halfTurn (Point2d.meters 1.0 0.0) (Point2d.meters -1.0 0.0)
   arc2 <- Arc2d.swept Angle.halfTurn (Point2d.meters 0.0 -1.0) (Point2d.meters 0.0 1.0)
@@ -91,7 +91,7 @@ curveOverlap1 = Test.verify "Overlap detection 1" $ Test.do
   let expectedSegments = [(Range.from 0.0 0.5, Range.from 0.5 1.0, Positive)]
    in Test.expect (equalOverlapSegmentLists segments expectedSegments)
 
-curveOverlap2 :: (Tolerance Meters) => Test
+curveOverlap2 :: Tolerance Meters => Test
 curveOverlap2 = Test.verify "Overlap detection 2" $ Test.do
   arc1 <-
     Arc2d.with
@@ -114,7 +114,7 @@ curveOverlap2 = Test.verify "Overlap detection 2" $ Test.do
         ]
    in Test.expect (equalOverlapSegmentLists segments expectedSegments)
 
-crossingIntersection :: (Tolerance Meters) => Test
+crossingIntersection :: Tolerance Meters => Test
 crossingIntersection = Test.verify "Crossing intersection" $ Test.do
   arc1 <- Arc2d.swept Angle.halfTurn Point2d.origin (Point2d.meters 0.0 1.0)
   arc2 <- Arc2d.swept -Angle.halfTurn Point2d.origin (Point2d.meters 1.0 0.0)
@@ -126,7 +126,7 @@ crossingIntersection = Test.verify "Crossing intersection" $ Test.do
   let ?tolerance = 1e-12
    in Test.expect (intersections ~= expectedIntersections)
 
-tangentIntersection :: (Tolerance Meters) => Test
+tangentIntersection :: Tolerance Meters => Test
 tangentIntersection = Test.verify "Tangent intersection" $ Test.do
   arc1 <-
     Arc2d.with
@@ -147,7 +147,7 @@ tangentIntersection = Test.verify "Tangent intersection" $ Test.do
   let ?tolerance = 1e-12
    in Test.expect (intersections ~= expectedIntersections)
 
-solving :: (Tolerance Meters) => Test
+solving :: Tolerance Meters => Test
 solving = Test.verify "Solving via Curve1d" $ Test.do
   arc <- Arc2d.swept Angle.quarterTurn (Point2d.meters 0.0 1.0) (Point2d.meters 1.0 0.0)
   let squaredDistanceFromOrigin = VectorCurve2d.squaredMagnitude (arc - Point2d.origin)
@@ -160,7 +160,7 @@ solving = Test.verify "Solving via Curve1d" $ Test.do
           |> List.map (Point2d.distanceFrom Point2d.origin)
   Test.expect (distances ~= [desiredDistance, desiredDistance])
 
-degenerateStartPointTangent :: (Tolerance Meters) => Test
+degenerateStartPointTangent :: Tolerance Meters => Test
 degenerateStartPointTangent = Test.check 100 "Degenerate start point" $ Test.do
   p0 <- Random.point2d
   p1 <- Random.point2d
@@ -178,7 +178,7 @@ degenerateStartPointTangent = Test.check 100 "Degenerate start point" $ Test.do
           |> List.map Vector2d.magnitude
   Test.expect (List.successive (-) differences |> List.all (> 0.0))
 
-degenerateEndPointTangent :: (Tolerance Meters) => Test
+degenerateEndPointTangent :: Tolerance Meters => Test
 degenerateEndPointTangent = Test.check 100 "Degenerate end point" $ Test.do
   p0 <- Random.point2d
   p1 <- Random.point2d
@@ -196,7 +196,7 @@ degenerateEndPointTangent = Test.check 100 "Degenerate end point" $ Test.do
           |> List.map Vector2d.magnitude
   Test.expect (List.successive (-) differences |> List.all (> 0.0))
 
-tangentDerivativeIsPerpendicularToTangent :: (Tolerance Meters) => Test
+tangentDerivativeIsPerpendicularToTangent :: Tolerance Meters => Test
 tangentDerivativeIsPerpendicularToTangent =
   Test.check 100 "Tangent derivative is perpendicular to tangent" $ Test.do
     p0 <- Random.point2d
@@ -215,7 +215,7 @@ tangentDerivativeIsPerpendicularToTangent =
       |> Test.output "derivative" derivative
       |> Test.output "dot product" (derivative <> tangent)
 
-degenerateStartPointTangentDerivative :: (Tolerance Meters) => Test
+degenerateStartPointTangentDerivative :: Tolerance Meters => Test
 degenerateStartPointTangentDerivative = Test.check 100 "Degenerate start point derivative" $ Test.do
   p0 <- Random.point2d
   p1 <- Random.point2d
@@ -233,7 +233,7 @@ degenerateStartPointTangentDerivative = Test.check 100 "Degenerate start point d
           |> List.map Vector2d.magnitude
   Test.expect (List.successive (-) differences |> List.all (> 0.0))
 
-degenerateEndPointTangentDerivative :: (Tolerance Meters) => Test
+degenerateEndPointTangentDerivative :: Tolerance Meters => Test
 degenerateEndPointTangentDerivative = Test.check 100 "Degenerate end point derivative" $ Test.do
   p0 <- Random.point2d
   p1 <- Random.point2d

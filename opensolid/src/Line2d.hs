@@ -26,7 +26,7 @@ import Point2d qualified
 import Qty qualified
 import Type.Errors (ErrorMessage (Text), TypeError)
 
-from :: (Tolerance units) => Point2d (space @ units) -> Point2d (space @ units) -> Result Curve2d.DegenerateCurve (Curve2d (space @ units))
+from :: Tolerance units => Point2d (space @ units) -> Point2d (space @ units) -> Result Curve2d.DegenerateCurve (Curve2d (space @ units))
 from givenStartPoint givenEndPoint =
   case Direction2d.from givenStartPoint givenEndPoint of
     Error Direction2d.PointsAreCoincident -> Error Curve2d.DegenerateCurve
@@ -98,7 +98,7 @@ class
     | arguments -> constraint
     , arguments -> result
   where
-  with :: (constraint) => arguments -> result
+  with :: constraint => arguments -> result
 
 instance
   ( a0 ~ NoArguments
@@ -176,7 +176,7 @@ instance
       } = arguments
 
 instance
-  (TypeError (Text "Missing Line2d.length argument")) =>
+  TypeError (Text "Missing Line2d.length argument") =>
   Build
     (Arguments (StartPoint (space @ units)) () (Direction space') ())
     ()
@@ -185,7 +185,7 @@ instance
   with = notImplemented
 
 instance
-  (TypeError (Text "Missing Line2d.direction argument")) =>
+  TypeError (Text "Missing Line2d.direction argument") =>
   Build
     (Arguments (StartPoint (space @ units)) () () (Length units'))
     ()
@@ -194,7 +194,7 @@ instance
   with = notImplemented
 
 instance
-  (TypeError (Text "Missing Line2d.startPoint or Line2d.endPoint argument")) =>
+  TypeError (Text "Missing Line2d.startPoint or Line2d.endPoint argument") =>
   Build
     (Arguments () () (Direction space) (Length units))
     ()
@@ -203,7 +203,7 @@ instance
   with = notImplemented
 
 instance
-  (TypeError (Text "Too many constraints")) =>
+  TypeError (Text "Too many constraints") =>
   Build
     (Arguments (StartPoint (space @ units)) (EndPoint (space' @ units')) () (Length units''))
     (Tolerance units)

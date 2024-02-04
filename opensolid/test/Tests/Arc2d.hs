@@ -11,12 +11,12 @@ import Test (Test)
 import Test qualified
 import Units (Meters)
 
-tests :: (Tolerance Meters) => List Test
+tests :: Tolerance Meters => List Test
 tests =
   [ from
   ]
 
-from :: (Tolerance Meters) => Test
+from :: Tolerance Meters => Test
 from =
   let test :: String -> Angle -> Point2d (space @ Meters) -> Test
       test label angle expectedPoint = Test.verify label $ Test.do

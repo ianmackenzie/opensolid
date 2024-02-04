@@ -42,7 +42,7 @@ import Units qualified
 import Vector2d qualified
 
 swept ::
-  (Tolerance units) =>
+  Tolerance units =>
   Angle ->
   Point2d (space @ units) ->
   Point2d (space @ units) ->
@@ -179,7 +179,7 @@ class
     | arguments -> constraint
     , arguments -> result
   where
-  with :: (constraint) => arguments -> result
+  with :: constraint => arguments -> result
 
 instance
   ( a0 ~ NoArguments
@@ -247,7 +247,7 @@ instance
       } = arguments
 
 instance
-  (units ~ units') =>
+  units ~ units' =>
   Build
     (Arguments (CenterPoint (space @ units)) () () (Radius units') StartAngle EndAngle () () ())
     (Tolerance units)
@@ -267,7 +267,7 @@ instance
       } = arguments
 
 instance
-  (units ~ units') =>
+  units ~ units' =>
   Build
     (Arguments (CenterPoint (space @ units)) () () (Radius units') StartAngle () SweptAngle () ())
     (Tolerance units)
@@ -364,7 +364,7 @@ instance
       } = arguments
 
 instance
-  (TypeError (Type.Errors.Text "Missing Arc2d.sweptAngle argument")) =>
+  TypeError (Type.Errors.Text "Missing Arc2d.sweptAngle argument") =>
   Build
     (Arguments () (StartPoint (space @ units)) (EndPoint (space' @ units')) () () () () () ())
     (Tolerance units)

@@ -165,28 +165,28 @@ take = Data.List.NonEmpty.take
 drop :: Int -> NonEmpty a -> List a
 drop = Data.List.NonEmpty.drop
 
-sum :: (Addition a a a) => NonEmpty a -> a
+sum :: Addition a a a => NonEmpty a -> a
 sum = reduceLeft (+)
 
-sumOf :: (Addition b b b) => (a -> b) -> NonEmpty a -> b
+sumOf :: Addition b b b => (a -> b) -> NonEmpty a -> b
 sumOf function nonEmpty = sum (map function nonEmpty)
 
-sort :: (Ord a) => NonEmpty a -> NonEmpty a
+sort :: Ord a => NonEmpty a -> NonEmpty a
 sort = Data.List.NonEmpty.sort
 
-sortBy :: (Ord b) => (a -> b) -> NonEmpty a -> NonEmpty a
+sortBy :: Ord b => (a -> b) -> NonEmpty a -> NonEmpty a
 sortBy property = sortWith (\a b -> compare (property a) (property b))
 
 sortWith :: (a -> a -> Ordering) -> NonEmpty a -> NonEmpty a
 sortWith = Data.List.NonEmpty.sortBy
 
-sortAndDeduplicate :: (Ord a) => NonEmpty a -> NonEmpty a
+sortAndDeduplicate :: Ord a => NonEmpty a -> NonEmpty a
 sortAndDeduplicate nonEmpty = deduplicate (sort nonEmpty)
 
-deduplicate :: (Eq a) => NonEmpty a -> NonEmpty a
+deduplicate :: Eq a => NonEmpty a -> NonEmpty a
 deduplicate nonEmpty = dedup (first nonEmpty) (rest nonEmpty)
 
-dedup :: (Eq a) => a -> List a -> NonEmpty a
+dedup :: Eq a => a -> List a -> NonEmpty a
 dedup current [] = current :| []
 dedup current (next : remaining)
   | current == next = dedup current remaining
@@ -210,23 +210,23 @@ intersperse = Data.List.NonEmpty.intersperse
 partition :: (a -> Bool) -> NonEmpty a -> (List a, List a)
 partition = Data.List.NonEmpty.partition
 
-minimum :: (Ord a) => NonEmpty a -> a
+minimum :: Ord a => NonEmpty a -> a
 minimum = Prelude.minimum
 
-maximum :: (Ord a) => NonEmpty a -> a
+maximum :: Ord a => NonEmpty a -> a
 maximum = Prelude.maximum
 
-minimumOf :: (Ord b) => (a -> b) -> NonEmpty a -> b
+minimumOf :: Ord b => (a -> b) -> NonEmpty a -> b
 minimumOf property nonEmpty = minimum (map property nonEmpty)
 
-maximumOf :: (Ord b) => (a -> b) -> NonEmpty a -> b
+maximumOf :: Ord b => (a -> b) -> NonEmpty a -> b
 maximumOf property nonEmpty = maximum (map property nonEmpty)
 
-minimumBy :: (Ord b) => (a -> b) -> NonEmpty a -> a
+minimumBy :: Ord b => (a -> b) -> NonEmpty a -> a
 minimumBy property (x :| xs) =
   extremum (<) property x (property x) xs
 
-maximumBy :: (Ord b) => (a -> b) -> NonEmpty a -> a
+maximumBy :: Ord b => (a -> b) -> NonEmpty a -> a
 maximumBy property (x :| xs) =
   extremum (>) property x (property x) xs
 
@@ -242,16 +242,16 @@ prependReversed :: List a -> List a -> List a
 prependReversed [] list = list
 prependReversed (x : xs) list = prependReversed xs (x : list)
 
-pickMinimum :: (Ord a) => NonEmpty a -> (a, List a)
+pickMinimum :: Ord a => NonEmpty a -> (a, List a)
 pickMinimum = pick (<)
 
-pickMinimumBy :: (Ord b) => (a -> b) -> NonEmpty a -> (a, List a)
+pickMinimumBy :: Ord b => (a -> b) -> NonEmpty a -> (a, List a)
 pickMinimumBy property = pick (\item1 item2 -> property item1 < property item2)
 
-pickMaximum :: (Ord a) => NonEmpty a -> (a, List a)
+pickMaximum :: Ord a => NonEmpty a -> (a, List a)
 pickMaximum = pick (>)
 
-pickMaximumBy :: (Ord b) => (a -> b) -> NonEmpty a -> (a, List a)
+pickMaximumBy :: Ord b => (a -> b) -> NonEmpty a -> (a, List a)
 pickMaximumBy property = pick (\item1 item2 -> property item1 > property item2)
 
 pick :: (a -> a -> Bool) -> NonEmpty a -> (a, List a)

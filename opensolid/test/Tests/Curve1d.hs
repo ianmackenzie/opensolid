@@ -17,7 +17,7 @@ tests =
  where
   ?tolerance = 1e-12
 
-crossingRoots :: (Tolerance Unitless) => Test
+crossingRoots :: Tolerance Unitless => Test
 crossingRoots = Test.verify "Crossing roots" $ Test.do
   let x = 3.0 * Curve1d.t
   let y = (x - 1.0) * (x - 1.0) * (x - 1.0) - (x - 1.0)
@@ -29,7 +29,7 @@ crossingRoots = Test.verify "Crossing roots" $ Test.do
         ]
   Test.expect (roots ~= expectedRoots)
 
-tangentRoots :: (Tolerance Unitless) => Test
+tangentRoots :: Tolerance Unitless => Test
 tangentRoots = Test.verify "Tangent roots" $ Test.do
   let theta = Angle.twoPi * Curve1d.t
   let expression = Curve1d.squared (Curve1d.sin theta)
@@ -41,7 +41,7 @@ tangentRoots = Test.verify "Tangent roots" $ Test.do
         ]
   Test.expect (roots ~= expectedRoots)
 
-approximateEquality :: (Tolerance Unitless) => Test
+approximateEquality :: Tolerance Unitless => Test
 approximateEquality =
   let theta = Angle.twoPi * Curve1d.t
       sinTheta = Curve1d.sin theta

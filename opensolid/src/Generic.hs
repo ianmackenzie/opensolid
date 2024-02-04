@@ -17,19 +17,19 @@ instance HasZero Int where
   zero = 0
 
 {-# INLINE min #-}
-min :: (Ord a) => a -> a -> a
+min :: Ord a => a -> a -> a
 min = Prelude.min
 
 {-# INLINE max #-}
-max :: (Ord a) => a -> a -> a
+max :: Ord a => a -> a -> a
 max = Prelude.max
 
-minBy :: (Ord b) => (a -> b) -> a -> a -> a
+minBy :: Ord b => (a -> b) -> a -> a -> a
 minBy function first second
   | function first <= function second = first
   | otherwise = second
 
-maxBy :: (Ord b) => (a -> b) -> a -> a -> a
+maxBy :: Ord b => (a -> b) -> a -> a -> a
 maxBy function first second
   | function first >= function second = first
   | otherwise = second

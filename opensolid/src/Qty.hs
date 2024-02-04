@@ -89,23 +89,23 @@ instance Multiplication (Qty units) Sign (Qty units) where
   value * Positive = value
   value * Negative = -value
 
-instance (units ~ units') => Addition (Qty units) (Qty units') (Qty units) where
+instance units ~ units' => Addition (Qty units) (Qty units') (Qty units) where
   {-# INLINE (+) #-}
   Qty x + Qty y = Qty (x Prelude.+ y)
 
-instance (units ~ units') => Subtraction (Qty units) (Qty units') (Qty units) where
+instance units ~ units' => Subtraction (Qty units) (Qty units') (Qty units) where
   {-# INLINE (-) #-}
   Qty x - Qty y = Qty (x Prelude.- y)
 
 instance
-  (Units.Product units1 units2 units3) =>
+  Units.Product units1 units2 units3 =>
   Multiplication (Qty units1) (Qty units2) (Qty units3)
   where
   {-# INLINE (*) #-}
   (Qty x) * (Qty y) = Qty (x Prelude.* y)
 
 instance
-  (Units.Quotient units1 units2 units3) =>
+  Units.Quotient units1 units2 units3 =>
   Division (Qty units1) (Qty units2) (Qty units3)
   where
   {-# INLINE (/) #-}
@@ -124,7 +124,7 @@ instance Division (Qty units) Int (Qty units) where
   x / n = x / Float.fromInt n
 
 instance
-  (Units.Quotient Unitless units1 units2) =>
+  Units.Quotient Unitless units1 units2 =>
   Division Int (Qty units1) (Qty units2)
   where
   {-# INLINE (/) #-}
@@ -147,10 +147,10 @@ isNaN :: Qty units -> Bool
 isNaN (Qty x) = Prelude.isNaN x
 
 {-# INLINE squared #-}
-squared :: (Units.Squared units1 units2) => Qty units1 -> Qty units2
+squared :: Units.Squared units1 units2 => Qty units1 -> Qty units2
 squared x = x * x
 
-sqrt :: (Units.Squared units1 units2) => Qty units2 -> Qty units1
+sqrt :: Units.Squared units1 units2 => Qty units2 -> Qty units1
 sqrt x | x <= Qty.zero = Qty.zero
 sqrt (Qty x) = Qty (Prelude.sqrt x)
 
@@ -248,7 +248,7 @@ midpoint a b = 0.5 * (a + b)
 
 data IsZero = IsZero deriving (Eq, Show, ErrorMessage)
 
-nonZero :: (Tolerance units) => Qty units -> Result IsZero (Qty units)
+nonZero :: Tolerance units => Qty units -> Result IsZero (Qty units)
 nonZero value = if value ~= zero then Error IsZero else Ok value
 
 data IsNegative = IsNegative deriving (Eq, Show, ErrorMessage)

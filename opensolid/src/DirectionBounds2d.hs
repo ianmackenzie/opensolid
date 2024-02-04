@@ -66,7 +66,7 @@ instance
   DirectionBounds2d vectorBounds * range = vectorBounds * range
 
 instance
-  (space ~ space') =>
+  space ~ space' =>
   DotProduct
     (DirectionBounds2d space)
     (DirectionBounds2d space')
@@ -75,7 +75,7 @@ instance
   DirectionBounds2d vectorBounds1 <> DirectionBounds2d vectorBounds2 = vectorBounds1 <> vectorBounds2
 
 instance
-  (space ~ space') =>
+  space ~ space' =>
   DotProduct
     (DirectionBounds2d space)
     (VectorBounds2d (space @ units))
@@ -84,7 +84,7 @@ instance
   DirectionBounds2d vectorBounds1 <> vectorBounds2 = vectorBounds1 <> vectorBounds2
 
 instance
-  (space ~ space') =>
+  space ~ space' =>
   DotProduct
     (VectorBounds2d (space @ units))
     (DirectionBounds2d space)
@@ -93,7 +93,7 @@ instance
   vectorBounds1 <> DirectionBounds2d vectorBounds2 = vectorBounds1 <> vectorBounds2
 
 instance
-  (space ~ space') =>
+  space ~ space' =>
   DotProduct
     (DirectionBounds2d space)
     (Direction2d space')
@@ -102,7 +102,7 @@ instance
   DirectionBounds2d vectorBounds <> direction = vectorBounds <> direction
 
 instance
-  (space ~ space') =>
+  space ~ space' =>
   DotProduct
     (Direction2d space)
     (DirectionBounds2d space')
@@ -111,7 +111,7 @@ instance
   direction <> DirectionBounds2d vectorBounds = direction <> vectorBounds
 
 instance
-  (space ~ space') =>
+  space ~ space' =>
   DotProduct
     (DirectionBounds2d space)
     (Vector2d (space @ units))
@@ -120,7 +120,7 @@ instance
   DirectionBounds2d vectorBounds <> vector = vectorBounds <> vector
 
 instance
-  (space ~ space') =>
+  space ~ space' =>
   DotProduct
     (Vector2d (space @ units))
     (DirectionBounds2d space)
@@ -129,7 +129,7 @@ instance
   vector <> DirectionBounds2d vectorBounds = vector <> vectorBounds
 
 instance
-  (space ~ space') =>
+  space ~ space' =>
   CrossProduct
     (DirectionBounds2d space)
     (DirectionBounds2d space')
@@ -138,7 +138,7 @@ instance
   DirectionBounds2d vectorBounds1 >< DirectionBounds2d vectorBounds2 = vectorBounds1 >< vectorBounds2
 
 instance
-  (space ~ space') =>
+  space ~ space' =>
   CrossProduct
     (DirectionBounds2d space)
     (VectorBounds2d (space @ units))
@@ -147,7 +147,7 @@ instance
   DirectionBounds2d vectorBounds1 >< vectorBounds2 = vectorBounds1 >< vectorBounds2
 
 instance
-  (space ~ space') =>
+  space ~ space' =>
   CrossProduct
     (VectorBounds2d (space @ units))
     (DirectionBounds2d space)
@@ -156,7 +156,7 @@ instance
   vectorBounds1 >< DirectionBounds2d vectorBounds2 = vectorBounds1 >< vectorBounds2
 
 instance
-  (space ~ space') =>
+  space ~ space' =>
   CrossProduct
     (DirectionBounds2d space)
     (Direction2d space')
@@ -165,7 +165,7 @@ instance
   DirectionBounds2d vectorBounds >< direction = vectorBounds >< direction
 
 instance
-  (space ~ space') =>
+  space ~ space' =>
   CrossProduct
     (Direction2d space)
     (DirectionBounds2d space')
@@ -174,7 +174,7 @@ instance
   direction >< DirectionBounds2d vectorBounds = direction >< vectorBounds
 
 instance
-  (space ~ space') =>
+  space ~ space' =>
   CrossProduct
     (DirectionBounds2d space)
     (Vector2d (space @ units))
@@ -183,7 +183,7 @@ instance
   DirectionBounds2d vectorBounds >< vector = vectorBounds >< vector
 
 instance
-  (space ~ space') =>
+  space ~ space' =>
   CrossProduct
     (Vector2d (space @ units))
     (DirectionBounds2d space)

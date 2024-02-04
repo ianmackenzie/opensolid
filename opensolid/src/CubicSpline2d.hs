@@ -60,7 +60,7 @@ instance Curve2d.Interface (CubicSpline2d (space @ units)) (space @ units) where
   boundsImpl (CubicSpline2d p1 p2 p3 p4) = Bounds2d.hull4 p1 p2 p3 p4
 
 fromControlPoints ::
-  (Tolerance units) =>
+  Tolerance units =>
   Point2d (space @ units) ->
   Point2d (space @ units) ->
   Point2d (space @ units) ->

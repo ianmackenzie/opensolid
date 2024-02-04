@@ -107,7 +107,7 @@ instance
   DirectionCurve2d vectorCurve * scalarCurve = vectorCurve * scalarCurve
 
 instance
-  (space ~ space') =>
+  space ~ space' =>
   DotProduct
     (DirectionCurve2d space)
     (DirectionCurve2d space')
@@ -116,7 +116,7 @@ instance
   DirectionCurve2d curve1 <> DirectionCurve2d curve2 = curve1 <> curve2
 
 instance
-  (space ~ space') =>
+  space ~ space' =>
   DotProduct
     (DirectionCurve2d space)
     (VectorCurve2d (space' @ units))
@@ -125,7 +125,7 @@ instance
   DirectionCurve2d curve1 <> curve2 = curve1 <> curve2
 
 instance
-  (space ~ space') =>
+  space ~ space' =>
   DotProduct
     (VectorCurve2d (space @ units))
     (DirectionCurve2d space')
@@ -134,7 +134,7 @@ instance
   curve1 <> DirectionCurve2d curve2 = curve1 <> curve2
 
 instance
-  (space ~ space') =>
+  space ~ space' =>
   DotProduct
     (DirectionCurve2d space)
     (Direction2d space')
@@ -143,7 +143,7 @@ instance
   DirectionCurve2d curve <> direction = curve <> direction
 
 instance
-  (space ~ space') =>
+  space ~ space' =>
   DotProduct
     (Direction2d space)
     (DirectionCurve2d space')
@@ -152,7 +152,7 @@ instance
   direction <> DirectionCurve2d curve = direction <> curve
 
 instance
-  (space ~ space') =>
+  space ~ space' =>
   DotProduct
     (DirectionCurve2d space)
     (Vector2d (space' @ units))
@@ -161,7 +161,7 @@ instance
   DirectionCurve2d curve <> vector = curve <> vector
 
 instance
-  (space ~ space') =>
+  space ~ space' =>
   DotProduct
     (Vector2d (space @ units))
     (DirectionCurve2d space')
@@ -170,7 +170,7 @@ instance
   vector <> DirectionCurve2d curve = vector <> curve
 
 instance
-  (space ~ space') =>
+  space ~ space' =>
   CrossProduct
     (DirectionCurve2d space)
     (DirectionCurve2d space')
@@ -179,7 +179,7 @@ instance
   DirectionCurve2d curve1 >< DirectionCurve2d curve2 = curve1 >< curve2
 
 instance
-  (space ~ space') =>
+  space ~ space' =>
   CrossProduct
     (DirectionCurve2d space)
     (VectorCurve2d (space' @ units))
@@ -188,7 +188,7 @@ instance
   DirectionCurve2d curve1 >< curve2 = curve1 >< curve2
 
 instance
-  (space ~ space') =>
+  space ~ space' =>
   CrossProduct
     (VectorCurve2d (space @ units))
     (DirectionCurve2d space')
@@ -197,7 +197,7 @@ instance
   curve1 >< DirectionCurve2d curve2 = curve1 >< curve2
 
 instance
-  (space ~ space') =>
+  space ~ space' =>
   CrossProduct
     (DirectionCurve2d space)
     (Direction2d space')
@@ -206,7 +206,7 @@ instance
   DirectionCurve2d curve >< direction = curve >< direction
 
 instance
-  (space ~ space') =>
+  space ~ space' =>
   CrossProduct
     (Direction2d space)
     (DirectionCurve2d space')
@@ -215,7 +215,7 @@ instance
   direction >< DirectionCurve2d curve = direction >< curve
 
 instance
-  (space ~ space') =>
+  space ~ space' =>
   CrossProduct
     (DirectionCurve2d space)
     (Vector2d (space' @ units))
@@ -224,7 +224,7 @@ instance
   DirectionCurve2d curve >< vector = curve >< vector
 
 instance
-  (space ~ space') =>
+  space ~ space' =>
   CrossProduct
     (Vector2d (space @ units))
     (DirectionCurve2d space')

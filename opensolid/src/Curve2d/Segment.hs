@@ -43,7 +43,7 @@ data Segment (coordinateSystem :: CoordinateSystem) where
     Segment (space @ units)
 
 init ::
-  (Tolerance units) =>
+  Tolerance units =>
   Derivatives (space @ units) ->
   T.Bounds ->
   Segment (space @ units)
@@ -131,7 +131,7 @@ computeIntersectionType segment1 segment2 =
                 else Unresolved
 
 isTangentIntersectionCandidate ::
-  (Tolerance units) =>
+  Tolerance units =>
   T.Bounds ->
   T.Bounds ->
   Segment (space @ units) ->
@@ -219,7 +219,7 @@ secondDerivativeBounds1d dXdU dYdU d2XdU2 d2YdU2 =
    in Units.generalize ((d2YdU2' * dXdU' - dYdU' * d2XdU2') / (dXdU' * dXdU')) ./ dXdU'
 
 findTangentIntersection ::
-  (Tolerance units) =>
+  Tolerance units =>
   Derivatives (space @ units) ->
   Derivatives (space @ units) ->
   T.Bounds ->
@@ -233,7 +233,7 @@ findTangentIntersection derivatives1 derivatives2 tBounds1 tBounds2 _ _ sign = d
   Just (Intersection.tangent t1 t2 sign)
 
 isTangentIntersection ::
-  (Tolerance units) =>
+  Tolerance units =>
   Derivatives (space @ units) ->
   Derivatives (space @ units) ->
   T.Bounds ->
@@ -255,7 +255,7 @@ isTangentIntersection derivatives1 derivatives2 tBounds1 tBounds2 =
                 && Range.includes Qty.zero dotProduct2
 
 isCrossingIntersectionCandidate ::
-  (Tolerance units) =>
+  Tolerance units =>
   T.Bounds ->
   T.Bounds ->
   Segment (space @ units) ->
@@ -277,7 +277,7 @@ crossingIntersectionSign _ _ segment1 segment2
   firstResolution = crossProductResolution segment1 segment2
 
 findCrossingIntersection ::
-  (Tolerance units) =>
+  Tolerance units =>
   Derivatives (space @ units) ->
   Derivatives (space @ units) ->
   T.Bounds ->
