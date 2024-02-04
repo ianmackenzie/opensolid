@@ -30,7 +30,6 @@ import {-# SOURCE #-} Axis2d qualified
 import Bounded qualified
 import {-# SOURCE #-} Bounds2d (Bounds2d (Bounds2d))
 import {-# SOURCE #-} Bounds2d qualified
-import Direction2d (Direction2d (Direction2d))
 import {-# SOURCE #-} Frame2d (Frame2d)
 import {-# SOURCE #-} Frame2d qualified
 import Length qualified
@@ -193,13 +192,11 @@ relativeTo ::
   Frame2d (global @ units) (Defines local) ->
   Point2d (global @ units) ->
   Point2d (local @ units)
-relativeTo frame (Point2d px py) =
-  let (Point2d x0 y0) = Frame2d.originPoint frame
-      (Direction2d (Vector2d ix iy)) = Frame2d.xDirection frame
-      (Direction2d (Vector2d jx jy)) = Frame2d.yDirection frame
-      dx = px - x0
-      dy = py - y0
-   in Point2d (dx * ix + dy * iy) (dx * jx + dy * jy)
+relativeTo frame point =
+  let displacement = point - Frame2d.originPoint frame
+   in Point2d
+        (displacement <> Frame2d.xDirection frame)
+        (displacement <> Frame2d.yDirection frame)
 
 convert :: Units.Conversion units1 units2 -> Point2d (space @ units1) -> Point2d (space @ units2)
 convert conversion (Point2d px py) = Point2d (Qty.convert conversion px) (Qty.convert conversion py)

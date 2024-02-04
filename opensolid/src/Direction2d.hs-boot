@@ -14,3 +14,7 @@ newtype Direction2d (space :: Type) = Direction2d_ (Vector2d (space @ Unitless))
 
 unsafe :: Vector2d (space @ Unitless) -> Direction2d space
 unwrap :: Direction2d space -> Vector2d (space @ Unitless)
+
+instance Multiplication (Qty units) (Direction2d space) (Vector2d (space @ units))
+
+instance Multiplication (Direction2d space) (Qty units) (Vector2d (space @ units))

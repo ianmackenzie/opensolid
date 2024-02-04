@@ -283,15 +283,13 @@ placeIn ::
   Vector2d (local @ units) ->
   Vector2d (global @ units)
 placeIn frame (Vector2d vx vy) =
-  let (Vector2d ix iy) = Direction2d.unwrap (Frame2d.xDirection frame)
-      (Vector2d jx jy) = Direction2d.unwrap (Frame2d.yDirection frame)
-   in Vector2d (vx * ix + vy * jx) (vx * iy + vy * jy)
+  vx * Frame2d.xDirection frame + vy * Frame2d.yDirection frame
 
 relativeTo ::
   Frame2d (global @ frameUnits) (Defines local) ->
   Vector2d (global @ units) ->
   Vector2d (local @ units)
-relativeTo frame (Vector2d vx vy) =
-  let (Vector2d ix iy) = Direction2d.unwrap (Frame2d.xDirection frame)
-      (Vector2d jx jy) = Direction2d.unwrap (Frame2d.yDirection frame)
-   in Vector2d (vx * ix + vy * iy) (vx * jx + vy * jy)
+relativeTo frame vector =
+  Vector2d
+    (vector <> Frame2d.xDirection frame)
+    (vector <> Frame2d.yDirection frame)
