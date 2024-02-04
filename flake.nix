@@ -1,7 +1,6 @@
 {
   inputs = {
-    # pinned revision from nixpkgs-unstable branch (2023-10-23)
-    nixpkgs.url = "github:NixOS/nixpkgs?rev=51d906d2341c9e866e48c2efcaac0f2d70bfd43e";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.11";
     flake-utils.url = "github:numtide/flake-utils";
     flake-compat = {
       url = "github:edolstra/flake-compat";
