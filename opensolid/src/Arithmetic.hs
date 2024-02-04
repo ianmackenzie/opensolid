@@ -82,7 +82,7 @@ instance Division Int Int Float where
 
 infixl 6 +, -
 
-infixl 7 *, /, //
+infixl 7 *, /, <>, ><, //, %
 
 class Exponentiation a b c | a b -> c where
   (**) :: a -> b -> c
@@ -140,3 +140,5 @@ instance Exponentiation Float Float Float where
   b ->
   c
 (.><) lhs rhs = Units.add (Units.drop lhs >< Units.drop rhs)
+
+infixl 7 .*, ./, .<>, .><

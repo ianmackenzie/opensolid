@@ -108,23 +108,20 @@ apiFunction :: Function -> TH.Q TH.Exp
 apiFunction (Function kind fnName argNames) = do
   fnType <- TH.reifyType fnName
   (argTypes, returnType) <- apiFunctionType fnType
-  let
-    replaceLast _ [] = []
-    replaceLast el [_] = [el]
-    replaceLast el (h : t) = h : replaceLast el t
-
-    (namesWithTolerance, typesWithTolerance) =
-      if containsImplicitTolerance fnType
-        then -- prepend the tolerance argument and its type
-          ("tolerance" : argNames, TH.ConE 'Api.ImplicitTolerance : argTypes)
-        else (argNames, argTypes)
-
-    (finalNames, finalTypes) =
-      if kind == 'Api.Method
-        then -- replace the type of the last argument with "Self"
-        -- TODO: validate that the type of the last argument is the same as Class?
-          (namesWithTolerance, replaceLast (TH.ConE 'Api.Self) typesWithTolerance)
-        else (namesWithTolerance, typesWithTolerance)
+  let replaceLast _ [] = []
+      replaceLast el [_] = [el]
+      replaceLast el (h : t) = h : replaceLast el t
+  let (namesWithTolerance, typesWithTolerance) =
+        if containsImplicitTolerance fnType
+          then -- prepend the tolerance argument and its type
+            ("tolerance" : argNames, TH.ConE 'Api.ImplicitTolerance : argTypes)
+          else (argNames, argTypes)
+  let (finalNames, finalTypes) =
+        if kind == 'Api.Method
+          then -- replace the type of the last argument with "Self"
+          -- TODO: validate that the type of the last argument is the same as Class?
+            (namesWithTolerance, replaceLast (TH.ConE 'Api.Self) typesWithTolerance)
+          else (namesWithTolerance, typesWithTolerance)
   if List.length finalNames /= List.length finalTypes
     then
       internalError
