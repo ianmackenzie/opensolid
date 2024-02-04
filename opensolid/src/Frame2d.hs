@@ -33,6 +33,8 @@ data Frame2d coordinateSystem defines where
     } ->
     Frame2d (space @ units) defines
 
+deriving instance Show (Frame2d coordinateSystem defines)
+
 atOrigin :: Frame2d (space @ units) defines
 atOrigin = atPoint Point2d.origin
 
