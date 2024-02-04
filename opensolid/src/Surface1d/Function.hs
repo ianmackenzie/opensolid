@@ -1,3 +1,7 @@
+{-# LANGUAGE DuplicateRecordFields #-}
+{-# LANGUAGE NoFieldSelectors #-}
+{-# OPTIONS_GHC -Wno-partial-fields #-}
+
 module Surface1d.Function
   ( Function
   , Interface (..)
@@ -1074,26 +1078,26 @@ rangeSign range
   | Range.maxValue range < negate ?tolerance = Resolved Negative
   | otherwise = Unresolved
 
-data HorizontalCurve units
-  = HorizontalCurve
-      (Function units) -- f
-      (Function Unitless) -- dv/du
-      Float -- uStart
-      Float -- uEnd
-      Float -- vLow
-      Float -- vHigh
+data HorizontalCurve units = HorizontalCurve
+  { f :: Function units
+  , vu :: Function Unitless
+  , uStart :: Float
+  , uEnd :: Float
+  , vLow :: Float
+  , vHigh :: Float
+  }
   deriving (Show)
 
 instance Curve2d.Interface (HorizontalCurve units) Uv.Coordinates where
   startPointImpl = Curve2d.evaluateAtImpl 0.0
   endPointImpl = Curve2d.evaluateAtImpl 1.0
 
-  evaluateAtImpl t (HorizontalCurve f _ uStart uEnd vLow vHigh) =
+  evaluateAtImpl t (HorizontalCurve {f, uStart, uEnd, vLow, vHigh}) =
     let u = Float.interpolateFrom uStart uEnd t
         v = solveVertically f u vLow vHigh
      in Point2d u v
 
-  segmentBoundsImpl (Range t1 t2) (HorizontalCurve f vu uStart uEnd vLow vHigh) =
+  segmentBoundsImpl (Range t1 t2) (HorizontalCurve {f, vu, uStart, uEnd, vLow, vHigh}) =
     let u1 = Float.interpolateFrom uStart uEnd t1
         u2 = Float.interpolateFrom uStart uEnd t2
         v1 = solveVertically f u1 vLow vHigh
@@ -1102,37 +1106,37 @@ instance Curve2d.Interface (HorizontalCurve units) Uv.Coordinates where
         vRange = parallelogramBounds u1 u2 v1 v2 slopeBounds
      in Bounds2d (Range.from u1 u2) vRange
 
-  derivativeImpl crossingCurve@(HorizontalCurve _ vu uStart uEnd _ _) =
+  derivativeImpl crossingCurve@(HorizontalCurve {vu, uStart, uEnd}) =
     let deltaU = uEnd - uStart
         uT = Curve1d.constant deltaU
         vT = deltaU * Curve1d (CurveOnSurface crossingCurve vu)
      in VectorCurve2d.xy uT vT
 
-  reverseImpl (HorizontalCurve f vu uStart uEnd vLow vHigh) =
+  reverseImpl (HorizontalCurve {f, vu, uStart, uEnd, vLow, vHigh}) =
     HorizontalCurve f vu uEnd uStart vLow vHigh
 
   boundsImpl crossingCurve = Curve2d.segmentBoundsImpl T.domain crossingCurve
 
-data VerticalCurve units
-  = VerticalCurve
-      (Function units) -- f
-      (Function Unitless) -- du/dv
-      Float -- uLow
-      Float -- uHigh
-      Float -- vStart
-      Float -- vEnd
+data VerticalCurve units = VerticalCurve
+  { f :: Function units
+  , uv :: Function Unitless
+  , uLow :: Float
+  , uHigh :: Float
+  , vStart :: Float
+  , vEnd :: Float
+  }
   deriving (Show)
 
 instance Curve2d.Interface (VerticalCurve units) Uv.Coordinates where
   startPointImpl = Curve2d.evaluateAtImpl 0.0
   endPointImpl = Curve2d.evaluateAtImpl 1.0
 
-  evaluateAtImpl t (VerticalCurve f _ uLow uHigh vStart vEnd) =
+  evaluateAtImpl t (VerticalCurve {f, uLow, uHigh, vStart, vEnd}) =
     let v = Float.interpolateFrom vStart vEnd t
         u = solveHorizontally f uLow uHigh v
      in Point2d u v
 
-  segmentBoundsImpl (Range t1 t2) (VerticalCurve f uv uLow uHigh vStart vEnd) =
+  segmentBoundsImpl (Range t1 t2) (VerticalCurve {f, uv, uLow, uHigh, vStart, vEnd}) =
     let v1 = Float.interpolateFrom vStart vEnd t1
         v2 = Float.interpolateFrom vStart vEnd t2
         u1 = solveHorizontally f uLow uHigh v1
@@ -1141,13 +1145,13 @@ instance Curve2d.Interface (VerticalCurve units) Uv.Coordinates where
         uRange = parallelogramBounds v1 v2 u1 u2 slopeBounds
      in Bounds2d uRange (Range.from v1 v2)
 
-  derivativeImpl crossingCurve@(VerticalCurve _ uv _ _ vStart vEnd) =
+  derivativeImpl crossingCurve@(VerticalCurve {uv, vStart, vEnd}) =
     let deltaV = vEnd - vStart
         vT = Curve1d.constant deltaV
         uT = deltaV * Curve1d (CurveOnSurface crossingCurve uv)
      in VectorCurve2d.xy uT vT
 
-  reverseImpl (VerticalCurve f uv uLow uHigh vStart vEnd) =
+  reverseImpl (VerticalCurve {f, uv, uLow, uHigh, vStart, vEnd}) =
     VerticalCurve f uv uLow uHigh vEnd vStart
 
   boundsImpl crossingCurve = Curve2d.segmentBoundsImpl T.domain crossingCurve
