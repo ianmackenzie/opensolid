@@ -54,6 +54,7 @@ where
 
 import Angle qualified
 import Bounds qualified
+import Debug qualified
 import Float qualified
 import Generic qualified
 import List qualified
@@ -322,6 +323,8 @@ bisect :: Range units -> (Range units, Range units)
 bisect (Range low high) =
   let mid = Qty.midpoint low high
    in (unsafe low mid, unsafe mid high)
+        |> Debug.assert (low < mid)
+        |> Debug.assert (mid < high)
 
 {-# INLINE isAtomic #-}
 isAtomic :: Range units -> Bool
