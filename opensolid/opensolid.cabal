@@ -131,9 +131,10 @@ library
       Surface1d
       Surface1d.Function
       Surface1d.Solution
-      -- TODO move Surface1.Solution.Boundary back to other-modules
+      -- TODO move Surface1.Solution.Boundary and Surface1d.SaddleRegion to other-modules
       -- once we're no longer visualizing them in the sandbox
       Surface1d.Solution.Boundary
+      Surface1d.SaddleRegion
       T
       Task
       Tolerance
