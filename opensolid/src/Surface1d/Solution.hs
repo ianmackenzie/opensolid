@@ -10,6 +10,7 @@ where
 import Curve2d (Curve2d)
 import List qualified
 import OpenSolid
+import Surface1d.SaddleRegion (SaddleRegion)
 import Surface1d.Solution.Boundary (Boundary)
 import Surface1d.Solution.Boundary qualified as Boundary
 import Uv qualified
@@ -23,7 +24,7 @@ data Solution
   | TangentCurve {start :: Boundary, end :: Boundary, segments :: NonEmpty (Curve2d Uv.Coordinates), sign :: Sign}
   | TangentLoop {segments :: NonEmpty (Curve2d Uv.Coordinates), sign :: Sign}
   | TangentPoint {point :: Uv.Point, sign :: Sign}
-  | SaddlePoint {point :: Uv.Point, region :: Uv.Bounds}
+  | SaddlePoint {point :: Uv.Point, region :: SaddleRegion}
   deriving (Show)
 
 merge :: List Solution -> List Solution -> List Solution

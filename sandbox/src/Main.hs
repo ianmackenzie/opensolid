@@ -31,6 +31,8 @@ import Range qualified
 import Result qualified
 import String qualified
 import Surface1d.Function qualified
+import Surface1d.SaddleRegion (SaddleRegion)
+import Surface1d.SaddleRegion qualified as SaddleRegion
 import Surface1d.Solution qualified
 import Surface1d.Solution.Boundary qualified
 import T qualified
@@ -314,6 +316,11 @@ drawBounds attributes bounds =
         , point 0.0 1.0
         ]
 
+drawSaddleRegion :: List (Drawing2d.Attribute Uv.Space) -> SaddleRegion -> Drawing2d.Entity Uv.Space
+drawSaddleRegion attributes saddleRegion =
+  Drawing2d.polygon attributes $
+    List.map (Point2d.convert toDrawing) (SaddleRegion.corners saddleRegion)
+
 drawSolution :: Int -> Surface1d.Solution.Solution -> Drawing2d.Entity Uv.Space
 drawSolution index solution =
   let hue = (Float.fromInt index * Angle.goldenAngle) % Angle.twoPi
@@ -331,7 +338,7 @@ drawSolution index solution =
         Surface1d.Solution.SaddlePoint {point, region} ->
           Drawing2d.group [] $
             [ drawDot Colour.orange point
-            , drawBounds [Drawing2d.noFill, Drawing2d.strokeColour Colour.lightGrey] region
+            , drawSaddleRegion [Drawing2d.noFill, Drawing2d.strokeColour Colour.lightGrey] region
             ]
         _ -> Drawing2d.nothing
 

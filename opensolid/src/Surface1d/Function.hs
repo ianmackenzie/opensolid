@@ -33,6 +33,7 @@ import Curve2d qualified
 import Debug qualified
 import Direction2d qualified
 import Float qualified
+import Frame2d qualified
 import Generic qualified
 import Int qualified
 import Line2d qualified
@@ -45,6 +46,8 @@ import Qty qualified
 import Range (Range (Range))
 import Range qualified
 import Result qualified
+import Surface1d.SaddleRegion (SaddleRegion (SaddleRegion))
+import Surface1d.SaddleRegion qualified as SaddleRegion
 import Surface1d.Solution (Solution)
 import Surface1d.Solution qualified as Solution
 import Surface1d.Solution.Boundary (Boundary)
@@ -53,6 +56,8 @@ import T qualified
 import Units qualified
 import Uv (Parameter (U, V))
 import Uv qualified
+import Vector2d (Vector2d (Vector2d))
+import Vector2d qualified
 import VectorCurve2d qualified
 
 class (Show function) => Interface function units | function -> units where
@@ -382,7 +387,7 @@ solve (Constant value) = if value ~= Qty.zero then Error ZeroEverywhere else Ok 
 solve f | isZero f = Error ZeroEverywhere
 solve f = do
   (tangentSolutions, tangentExclusions, saddleRegions) <- findTangentSolutions derivatives boundaryEdges boundaryPoints Uv.domain U [] []
-  (crossingSolutions, _, _) <- findCrossingSolutions derivatives boundaryEdges boundaryPoints Uv.domain U tangentExclusions saddleRegions
+  (crossingSolutions, _) <- findCrossingSolutions derivatives boundaryEdges boundaryPoints Uv.domain U tangentExclusions saddleRegions
   let BoundaryEdges {leftEdgeIsSolution, rightEdgeIsSolution, bottomEdgeIsSolution, topEdgeIsSolution} = boundaryEdges
   let boundaryEdgeSolutions =
         List.concat
@@ -420,8 +425,8 @@ findTangentSolutions ::
   Uv.Bounds ->
   Uv.Parameter ->
   List Uv.Bounds ->
-  List Uv.Bounds ->
-  Result SolveError (List Solution, List Uv.Bounds, List Uv.Bounds)
+  List SaddleRegion ->
+  Result SolveError (List Solution, List Uv.Bounds, List SaddleRegion)
 findTangentSolutions derivatives boundaryEdges boundaryPoints uvBounds bisectionParameter exclusions saddleRegions
   -- The function is non-zero for this subdomain, so no solutions
   | Range.exclusion Qty.zero fBounds > ?tolerance = Ok ([], [], [])
@@ -432,7 +437,7 @@ findTangentSolutions derivatives boundaryEdges boundaryPoints uvBounds bisection
   -- We're within an existing exclusion region from a previous solution, so no additional solutions
   | List.any (Bounds2d.contains uvBounds) exclusions = Ok ([], [], [])
   -- We're within an existing saddle region from a previous solution, so no additional solutions
-  | List.any (Bounds2d.contains uvBounds) saddleRegions = Ok ([], [], [])
+  | List.any (SaddleRegion.contains uvBounds) saddleRegions = Ok ([], [], [])
   -- Try to find a tangent point (saddle or otherwise)
   | Just result <- tangentPointSolution derivatives boundaryPoints uvBounds exclusions saddleRegions = result
   -- TODO tangent curve solutions
@@ -447,7 +452,7 @@ findTangentSolutions derivatives boundaryEdges boundaryPoints uvBounds bisection
           bounds1
           nextBisectionParameter
           (List.filter (affects bounds1) exclusions)
-          (List.filter (affects bounds1) saddleRegions)
+          (List.filter (affects bounds1 . SaddleRegion.bounds) saddleRegions)
       (solutions2, exclusions2, saddleRegions2) <-
         findTangentSolutions
           derivatives
@@ -456,7 +461,7 @@ findTangentSolutions derivatives boundaryEdges boundaryPoints uvBounds bisection
           bounds2
           nextBisectionParameter
           (List.filter (affects bounds2) (exclusions1 ++ exclusions))
-          (List.filter (affects bounds2) (saddleRegions1 ++ saddleRegions))
+          (List.filter (affects bounds2 . SaddleRegion.bounds) (saddleRegions1 ++ saddleRegions))
       return
         ( Solution.merge solutions1 solutions2
         , exclusions1 ++ exclusions2
@@ -476,15 +481,15 @@ findCrossingSolutions ::
   Uv.Bounds ->
   Uv.Parameter ->
   List Uv.Bounds ->
-  List Uv.Bounds ->
-  Result SolveError (List Solution, List Uv.Bounds, List Uv.Bounds)
+  List SaddleRegion ->
+  Result SolveError (List Solution, List Uv.Bounds)
 findCrossingSolutions derivatives boundaryEdges boundaryPoints uvBounds bisectionParameter exclusions saddleRegions
   -- The function is non-zero for this subdomain, so no solutions
-  | Range.exclusion Qty.zero fBounds > ?tolerance = Ok ([], [], [])
+  | Range.exclusion Qty.zero fBounds > ?tolerance = Ok ([], [])
   -- We're within an existing exclusion region from a previous solution, so no additional solutions
-  | List.any (Bounds2d.contains uvBounds) exclusions = Ok ([], [], [])
+  | List.any (Bounds2d.contains uvBounds) exclusions = Ok ([], [])
   -- We're within an existing saddle region from a previous solution, so no additional solutions
-  | List.any (Bounds2d.contains uvBounds) saddleRegions = Ok ([], [], [])
+  | List.any (SaddleRegion.contains uvBounds) saddleRegions = Ok ([], [])
   -- Try to find a general crossing curve solution and report it if it exists
   | Just result <- generalSolution derivatives uvBounds exclusions = result
   -- Try to find a horizontal crossing curve solution and report it if it exists
@@ -499,7 +504,7 @@ findCrossingSolutions derivatives boundaryEdges boundaryPoints uvBounds bisectio
   | otherwise = do
       let (bounds1, bounds2) = Uv.bisect bisectionParameter uvBounds
       let nextBisectionParameter = Uv.cycle bisectionParameter
-      (solutions1, exclusions1, saddleRegions1) <-
+      (solutions1, exclusions1) <-
         findCrossingSolutions
           derivatives
           boundaryEdges
@@ -507,8 +512,8 @@ findCrossingSolutions derivatives boundaryEdges boundaryPoints uvBounds bisectio
           bounds1
           nextBisectionParameter
           (List.filter (affects bounds1) exclusions)
-          (List.filter (affects bounds1) saddleRegions)
-      (solutions2, exclusions2, saddleRegions2) <-
+          (List.filter (affects bounds1 . SaddleRegion.bounds) saddleRegions)
+      (solutions2, exclusions2) <-
         findCrossingSolutions
           derivatives
           boundaryEdges
@@ -516,11 +521,10 @@ findCrossingSolutions derivatives boundaryEdges boundaryPoints uvBounds bisectio
           bounds2
           nextBisectionParameter
           (List.filter (affects bounds2) (exclusions1 ++ exclusions))
-          (List.filter (affects bounds2) (saddleRegions1 ++ saddleRegions))
+          (List.filter (affects bounds2 . SaddleRegion.bounds) saddleRegions)
       return
         ( Solution.merge solutions1 solutions2
         , exclusions1 ++ exclusions2
-        , saddleRegions1 ++ saddleRegions2
         )
  where
   Derivatives {f} = derivatives
@@ -593,27 +597,33 @@ affects bounds exclusion = overlaps exclusion (expandBounds bounds)
 overlaps :: Uv.Bounds -> Uv.Bounds -> Bool
 overlaps bounds1 bounds2 = Bounds2d.overlap bounds1 bounds2 > Qty.zero
 
-expandRange :: Range Unitless -> Range Unitless
-expandRange (Range low high) =
-  let halfWidth = 0.5 * (high - low)
+expandRangeBy :: Float -> Range Unitless -> Range Unitless
+expandRangeBy factor (Range low high) =
+  let halfWidth = factor * (high - low)
       expandedLow = Float.max (low - halfWidth) 0.0
       expandedHigh = Float.min (high + halfWidth) 1.0
    in Range.from expandedLow expandedHigh
 
+expandBoundsBy :: Float -> Uv.Bounds -> Uv.Bounds
+expandBoundsBy factor (Bounds2d u v) = Bounds2d (expandRangeBy factor u) (expandRangeBy factor v)
+
+expandRange :: Range Unitless -> Range Unitless
+expandRange = expandRangeBy 0.5
+
 expandBounds :: Uv.Bounds -> Uv.Bounds
-expandBounds (Bounds2d u v) = Bounds2d (expandRange u) (expandRange v)
+expandBounds = expandBoundsBy 0.5
 
 generalSolution ::
   (Tolerance units) =>
   Derivatives units ->
   Uv.Bounds ->
   List Uv.Bounds ->
-  Maybe (Result SolveError (List Solution, List Uv.Bounds, List Uv.Bounds))
+  Maybe (Result SolveError (List Solution, List Uv.Bounds))
 generalSolution derivatives uvBounds@(Bounds2d (Range minU maxU) (Range minV maxV)) exclusions
   | List.any (overlaps uvBounds) exclusions = Nothing
   | resolved fuBounds && resolved fvBounds =
       let signAt u v = Qty.sign (evaluateAt (Point2d u v) f)
-       in Just $ Result.map (,[uvBounds],[]) $ case (signAt minU minV, signAt maxU minV, signAt minU maxV, signAt maxU maxV) of
+       in Just $ Result.map (,[uvBounds]) $ case (signAt minU minV, signAt maxU minV, signAt minU maxV, signAt maxU maxV) of
             (Positive, Positive, Positive, Positive) -> Ok []
             (Negative, Negative, Negative, Negative) -> Ok []
             (Positive, Positive, Negative, Negative) -> rightwardsSolution f fu fv uvBounds
@@ -722,22 +732,22 @@ horizontalSolution ::
   List BoundaryPoint ->
   Uv.Bounds ->
   List Uv.Bounds ->
-  Maybe (Result SolveError (List Solution, List Uv.Bounds, List Uv.Bounds))
+  Maybe (Result SolveError (List Solution, List Uv.Bounds))
 horizontalSolution derivatives boundaryEdges boundaryPoints uvBounds exclusions
   | List.any (overlaps expandedBounds) exclusions = Nothing
   | Qty.abs fvResolution >= 0.5
   , (bottomEdgeIsSolution && minV == 0.0) || (topEdgeIsSolution && maxV == 1.0) =
-      Just (Ok ([], [], []))
+      Just (Ok ([], []))
   | fvResolution >= 0.5
   , bottomSign == Resolved Negative
   , topSign == Resolved Positive
   , Just solutionBounds <- trimmedBounds =
-      Just (Result.map (,[expandedBounds],[]) (leftwardsSolution f fu fv solutionBounds))
+      Just (Result.map (,[expandedBounds]) (leftwardsSolution f fu fv solutionBounds))
   | fvResolution <= -0.5
   , bottomSign == Resolved Positive
   , topSign == Resolved Negative
   , Just solutionBounds <- trimmedBounds =
-      Just (Result.map (,[expandedBounds],[]) (rightwardsSolution f fu fv solutionBounds))
+      Just (Result.map (,[expandedBounds]) (rightwardsSolution f fu fv solutionBounds))
   | otherwise = Nothing
  where
   Bounds2d uRange vRange = uvBounds
@@ -777,22 +787,22 @@ verticalSolution ::
   List BoundaryPoint ->
   Uv.Bounds ->
   List Uv.Bounds ->
-  Maybe (Result SolveError (List Solution, List Uv.Bounds, List Uv.Bounds))
+  Maybe (Result SolveError (List Solution, List Uv.Bounds))
 verticalSolution derivatives boundaryEdges boundaryPoints uvBounds exclusions
   | List.any (overlaps expandedBounds) exclusions = Nothing
   | Qty.abs fuResolution >= 0.5
   , (leftEdgeIsSolution && minU == 0.0) || (rightEdgeIsSolution && maxU == 1.0) =
-      Just (Ok ([], [], []))
+      Just (Ok ([], []))
   | fuResolution >= 0.5
   , leftSign == Resolved Negative
   , rightSign == Resolved Positive
   , Just solutionBounds <- trimmedBounds =
-      Just (Result.map (,[expandedBounds],[]) (upwardsSolution f fu fv solutionBounds))
+      Just (Result.map (,[expandedBounds]) (upwardsSolution f fu fv solutionBounds))
   | fuResolution <= -0.5
   , leftSign == Resolved Positive
   , rightSign == Resolved Negative
   , Just solutionBounds <- trimmedBounds =
-      Just (Result.map (,[expandedBounds],[]) (downwardsSolution f fu fv solutionBounds))
+      Just (Result.map (,[expandedBounds]) (downwardsSolution f fu fv solutionBounds))
   | otherwise = Nothing
  where
   Bounds2d uRange vRange = uvBounds
@@ -922,11 +932,11 @@ tangentPointSolution ::
   List BoundaryPoint ->
   Uv.Bounds ->
   List Uv.Bounds ->
-  List Uv.Bounds ->
-  Maybe (Result SolveError (List Solution, List Uv.Bounds, List Uv.Bounds))
+  List SaddleRegion ->
+  Maybe (Result SolveError (List Solution, List Uv.Bounds, List SaddleRegion))
 tangentPointSolution derivatives boundaryPoints uvBounds exclusions saddleRegions
   | List.any (overlaps expandedBounds) exclusions = Nothing
-  | List.any (overlaps expandedBounds) saddleRegions = Nothing
+  | List.any (overlaps expandedBounds . SaddleRegion.bounds) saddleRegions = Nothing
   -- If second derivatives determinant is not definitely non-zero, then abort
   | Qty.abs determinantResolution < 0.5 = Nothing
   -- Otherwise, we know there can be only one tangent point
@@ -942,8 +952,8 @@ tangentPointSolution derivatives boundaryPoints uvBounds exclusions saddleRegion
         -- so report the existing boundary tangent point as
         -- an saddle point with the current expanded bounds
         -- as its associated region
-        Negative -> Just (Ok ([Solution.SaddlePoint point expandedBounds], [], [expandedBounds]))
-  | Just point <- Bounds2d.find isSolution expandedBounds
+        Negative -> Just (Ok (saddlePointSolution derivatives point expandedBounds))
+  | Just point <- Bounds2d.find isSolution searchBounds
   , evaluateAt point f ~= Qty.zero =
       -- We've found a tangent point! Now to check if it's a saddle point
       case Qty.sign determinantResolution of
@@ -956,21 +966,64 @@ tangentPointSolution derivatives boundaryPoints uvBounds exclusions saddleRegion
            in Just (Ok ([Solution.TangentPoint point sign], [expandedBounds], []))
         Negative ->
           -- Saddle point
-          Just (Ok ([Solution.SaddlePoint point expandedBounds], [], [expandedBounds]))
+          Just (Ok (saddlePointSolution derivatives point expandedBounds))
   | otherwise = Nothing
  where
   Derivatives {f, fu, fv, fuu, fvv, fuv} = derivatives
   expandedBounds = expandBounds uvBounds
+  searchBounds = expandBoundsBy 0.05 uvBounds
+
   fuuBounds = segmentBounds expandedBounds fuu
   fvvBounds = segmentBounds expandedBounds fvv
   fuvBounds = segmentBounds expandedBounds fuv
   determinantResolution = Range.resolution (fuuBounds .* fvvBounds - fuvBounds .* fuvBounds)
   isIncludedTangentPoint (BoundaryPoint {point}) =
-    Bounds2d.includes point expandedBounds
+    Bounds2d.includes point searchBounds
       && evaluateAt point fu ~= Qty.zero
       && evaluateAt point fv ~= Qty.zero
   includedTangentBoundaryPoint = List.find isIncludedTangentPoint boundaryPoints
   isSolution uv = hasZero uv fu && hasZero uv fv
+
+maxRadiusForComponent :: Float -> Float -> Range Unitless -> Float
+maxRadiusForComponent value origin (Range low high)
+  | value < 0.0 = if low == 0.0 then Float.infinity else (low - origin) / value
+  | value > 0.0 = if high == 1.0 then Float.infinity else (high - origin) / value
+  | otherwise = Float.infinity
+
+saddlePointSolution :: Derivatives units -> Uv.Point -> Uv.Bounds -> (List Solution, List Uv.Bounds, List SaddleRegion)
+saddlePointSolution derivatives point expandedBounds =
+  let Derivatives {fuu = fuuFunction, fuv = fuvFunction, fvv = fvvFunction} = derivatives
+      fuu = evaluateAt point fuuFunction
+      fuv = evaluateAt point fuvFunction
+      fvv = evaluateAt point fvvFunction
+      Point2d u0 v0 = point
+      Bounds2d uRange vRange = expandedBounds
+      sqrtD = Units.specialize (Qty.sqrt (Units.generalize fuv * Units.generalize fuv - Units.generalize fuu * Units.generalize fvv))
+      (d1, d2) =
+        if Qty.abs fuu >= Qty.abs fuv
+          then
+            ( Vector2d.normalize (Vector2d (-fuv + sqrtD) fuu)
+            , Vector2d.normalize (Vector2d (-fuv - sqrtD) fuu)
+            )
+          else
+            ( Vector2d.normalize (Vector2d fvv (-fuv + sqrtD))
+            , Vector2d.normalize (Vector2d fvv (-fuv - sqrtD))
+            )
+
+      maxRadiusForVector :: Vector2d Uv.Coordinates -> Float
+      maxRadiusForVector (Vector2d u v) =
+        Float.min
+          (maxRadiusForComponent u u0 uRange)
+          (maxRadiusForComponent v v0 vRange)
+
+      xDirection = Direction2d.unsafe (Vector2d.normalize (d1 + d2))
+      frame = Frame2d.withXDirection xDirection point
+      radius = Float.min (maxRadiusForVector d1) (maxRadiusForVector d2)
+      Vector2d u1 v1 = Vector2d.relativeTo frame d1
+      halfWidth = Float.abs (radius * u1)
+      halfHeight = Float.abs (radius * v1)
+      saddleRegion = SaddleRegion {frame, halfWidth, halfHeight}
+   in ([Solution.SaddlePoint point saddleRegion], [], [saddleRegion])
 
 -- isTangentCurveByU
 --   | segmentBounds vBottomSlice fv ^ Qty.zero = False
