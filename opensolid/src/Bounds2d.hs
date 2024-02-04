@@ -16,6 +16,11 @@ module Bounds2d
   , overlap
   , separation
   , intersection
+  , lowerLeftCorner
+  , lowerRightCorner
+  , upperLeftCorner
+  , upperRightCorner
+  , corners
   , interpolate
   , sample
   , any
@@ -163,6 +168,26 @@ hull4 (Point2d x1 y1) (Point2d x2 y2) (Point2d x3 y3) (Point2d x4 y4) =
       minY = Qty.min (Qty.min (Qty.min y1 y2) y3) y4
       maxY = Qty.max (Qty.max (Qty.max y1 y2) y3) y4
    in Bounds2d (Range.unsafe minX maxX) (Range.unsafe minY maxY)
+
+lowerLeftCorner :: Bounds2d (space @ units) -> Point2d (space @ units)
+lowerLeftCorner (Bounds2d x y) = Point2d (Range.minValue x) (Range.minValue y)
+
+lowerRightCorner :: Bounds2d (space @ units) -> Point2d (space @ units)
+lowerRightCorner (Bounds2d x y) = Point2d (Range.maxValue x) (Range.minValue y)
+
+upperLeftCorner :: Bounds2d (space @ units) -> Point2d (space @ units)
+upperLeftCorner (Bounds2d x y) = Point2d (Range.minValue x) (Range.maxValue y)
+
+upperRightCorner :: Bounds2d (space @ units) -> Point2d (space @ units)
+upperRightCorner (Bounds2d x y) = Point2d (Range.maxValue x) (Range.maxValue y)
+
+corners :: Bounds2d (space @ units) -> List (Point2d (space @ units))
+corners bounds =
+  [ lowerLeftCorner bounds
+  , lowerRightCorner bounds
+  , upperRightCorner bounds
+  , upperLeftCorner bounds
+  ]
 
 interpolate :: Bounds2d (space @ units) -> Float -> Float -> Point2d (space @ units)
 interpolate (Bounds2d x y) u v =
