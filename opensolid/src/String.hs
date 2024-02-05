@@ -47,7 +47,7 @@ toInt input =
 toFloat :: String -> Result String Float
 toFloat input =
   Maybe.orError ("Couldn't parse input as float: " ++ input) <|
-    Maybe.map Qty (Text.Read.readMaybe input)
+    Text.Read.readMaybe input
 
 lines :: String -> List String
 lines string =
