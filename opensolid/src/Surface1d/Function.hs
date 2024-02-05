@@ -219,7 +219,7 @@ instance
   Zero / _ = Zero
   Constant x / Constant y = Constant (x / y)
   function / Constant x =
-    Units.specialize $
+    Units.specialize <|
       (Units.generalize 1.0 ./ Units.generalize x) .* Units.generalize function
   function1 / function2 = Quotient function1 function2
 
@@ -402,7 +402,7 @@ solve f = do
           ]
   let toBoundaryPointSolution (BoundaryPoint {point}) = Solution.BoundaryPoint point
   let boundaryPointSolutions = List.map toBoundaryPointSolution boundaryPoints
-  return $ List.concat [boundaryEdgeSolutions, boundaryPointSolutions, tangentSolutions ++ crossingSolutions]
+  return (List.concat [boundaryEdgeSolutions, boundaryPointSolutions, tangentSolutions ++ crossingSolutions])
  where
   fu = derivative U f
   fv = derivative V f
@@ -627,7 +627,7 @@ generalSolution derivatives uvBounds@(Bounds2d (Range minU maxU) (Range minV max
   | List.any (overlaps uvBounds) exclusions = Nothing
   | resolved fuBounds && resolved fvBounds =
       let signAt u v = Qty.sign (evaluateAt (Point2d u v) f)
-       in Just $ Result.map (,[uvBounds]) $ case (signAt minU minV, signAt maxU minV, signAt minU maxV, signAt maxU maxV) of
+       in Just <| Result.map (,[uvBounds]) <| case (signAt minU minV, signAt maxU minV, signAt minU maxV, signAt maxU maxV) of
             (Positive, Positive, Positive, Positive) -> Ok []
             (Negative, Negative, Negative, Negative) -> Ok []
             (Positive, Positive, Negative, Negative) -> rightwardsSolution f fu fv uvBounds
@@ -846,7 +846,7 @@ rightwardsSolution ::
   Uv.Bounds ->
   Result SolveError (List Solution)
 rightwardsSolution f fu fv (Bounds2d (Range minU maxU) vRange@(Range minV maxV)) =
-  crossingSolution (minU == maxU) (Boundary.Left minU vRange) (Boundary.Right maxU vRange) $
+  crossingSolution (minU == maxU) (Boundary.Left minU vRange) (Boundary.Right maxU vRange) <|
     horizontalCurve f fu fv minU maxU maxV minV
 
 leftwardsSolution ::
@@ -856,7 +856,7 @@ leftwardsSolution ::
   Uv.Bounds ->
   Result SolveError (List Solution)
 leftwardsSolution f fu fv (Bounds2d (Range minU maxU) vRange@(Range minV maxV)) =
-  crossingSolution (minU == maxU) (Boundary.Right maxU vRange) (Boundary.Left minU vRange) $
+  crossingSolution (minU == maxU) (Boundary.Right maxU vRange) (Boundary.Left minU vRange) <|
     horizontalCurve f fu fv maxU minU minV maxV
 
 upwardsSolution ::
@@ -866,7 +866,7 @@ upwardsSolution ::
   Uv.Bounds ->
   Result SolveError (List Solution)
 upwardsSolution f fu fv (Bounds2d uRange@(Range minU maxU) (Range minV maxV)) =
-  crossingSolution (minV == maxV) (Boundary.Bottom uRange minV) (Boundary.Top uRange maxV) $
+  crossingSolution (minV == maxV) (Boundary.Bottom uRange minV) (Boundary.Top uRange maxV) <|
     verticalCurve f fu fv minU maxU minV maxV
 
 downwardsSolution ::
@@ -876,7 +876,7 @@ downwardsSolution ::
   Uv.Bounds ->
   Result SolveError (List Solution)
 downwardsSolution f fu fv (Bounds2d uRange@(Range minU maxU) (Range minV maxV)) =
-  crossingSolution (minV == maxV) (Boundary.Top uRange maxV) (Boundary.Bottom uRange minV) $
+  crossingSolution (minV == maxV) (Boundary.Top uRange maxV) (Boundary.Bottom uRange minV) <|
     verticalCurve f fu fv maxU minU maxV minV
 
 crossingSolution ::

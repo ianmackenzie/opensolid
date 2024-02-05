@@ -17,14 +17,14 @@ tests =
 
 check :: (Int -> List Float) -> Int -> List Float -> Test
 check function n expected =
-  Test.verify (String.fromInt n) $ Test.do
+  Test.verify (String.fromInt n) <| Test.do
     Test.expect (function n == expected)
       |> Test.output "expected" expected
       |> Test.output "actual" (function n)
 
 steps :: Test
 steps =
-  Test.group "steps" $
+  Test.group "steps" <|
     [ check T.steps 0 []
     , check T.steps 1 [0.0, 1.0]
     , check T.steps 2 [0.0, 0.5, 1.0]
@@ -33,7 +33,7 @@ steps =
 
 leading :: Test
 leading =
-  Test.group "leading" $
+  Test.group "leading" <|
     [ check T.leading 0 []
     , check T.leading 1 [0.0]
     , check T.leading 2 [0.0, 0.5]
@@ -42,7 +42,7 @@ leading =
 
 trailing :: Test
 trailing =
-  Test.group "trailing" $
+  Test.group "trailing" <|
     [ check T.trailing 0 []
     , check T.trailing 1 [1.0]
     , check T.trailing 2 [0.5, 1.0]
@@ -51,7 +51,7 @@ trailing =
 
 inBetween :: Test
 inBetween =
-  Test.group "inBetween" $
+  Test.group "inBetween" <|
     [ check T.inBetween 0 []
     , check T.inBetween 1 []
     , check T.inBetween 2 [0.5]
@@ -60,7 +60,7 @@ inBetween =
 
 midpoints :: Test
 midpoints =
-  Test.group "midpoints" $
+  Test.group "midpoints" <|
     [ check T.midpoints 0 []
     , check T.midpoints 1 [0.5]
     , check T.midpoints 2 [0.25, 0.75]

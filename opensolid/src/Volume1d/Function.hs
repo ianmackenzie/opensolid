@@ -190,7 +190,7 @@ instance
   Zero / _ = Zero
   Constant x / Constant y = Constant (x / y)
   function / Constant x =
-    Units.specialize $
+    Units.specialize <|
       (Units.generalize 1.0 ./ Units.generalize x) .* Units.generalize function
   function1 / function2 = Quotient function1 function2
 
@@ -269,7 +269,7 @@ derivative direction function =
     Quotient f1 f2 ->
       let f1' = Units.generalize f1
           f2' = Units.generalize f2
-       in Units.specialize $
+       in Units.specialize <|
             (derivative direction f1' .* f2' - f1' .* derivative direction f2') ./ squared f2'
     Squared f -> 2.0 * f * derivative direction f
     SquareRoot f -> derivative direction f / (2.0 * sqrt f)

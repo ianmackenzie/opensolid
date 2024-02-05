@@ -124,7 +124,7 @@ expectAll checks = expect (List.allTrue checks)
 
 output :: Show a => String -> a -> Generator Expectation -> Generator Expectation
 output label value =
-  Random.map $
+  Random.map <|
     \case
       Passed -> Passed
       Failed messages -> Failed (messages ++ [label ++ ": " ++ show value])

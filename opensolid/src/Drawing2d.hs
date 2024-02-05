@@ -7,6 +7,7 @@ module Drawing2d
   , writeTo
   , nothing
   , group
+  , with
   , line
   , polyline
   , polygon
@@ -49,7 +50,7 @@ entityString indent (Node name attributes children) =
       attributeLines = List.map (attributeString ("\n" ++ indent ++ "   ")) attributes
       childLines = Maybe.collect (entityString (indent ++ "  ")) children
       closingTag = indent ++ "</" ++ name ++ ">"
-   in Just (String.join "\n" (openingTag : childLines) ++ "\n" ++ closingTag)
+   in Just (String.multiline (openingTag : childLines) ++ "\n" ++ closingTag)
 
 attributeString :: String -> Attribute space -> String
 attributeString indent (Attribute name value) = String.concat [indent, name, "=\"", value, "\""]
@@ -63,8 +64,8 @@ toSvg (Bounds2d (Range x1 x2) (Range y1 y2)) entities =
         , Attribute "version" "1.1"
         , Attribute "width" (lengthString width ++ "mm")
         , Attribute "height" (lengthString height ++ "mm")
-        , Attribute "viewBox" $
-            String.join " " $
+        , Attribute "viewBox" <|
+            String.join " " <|
               [ lengthString x1
               , lengthString -y2
               , lengthString width
@@ -74,7 +75,7 @@ toSvg (Bounds2d (Range x1 x2) (Range y1 y2)) entities =
         , strokeWidth (Length.pixels 1.0)
         , noFill
         ]
-   in String.join "\n" $
+   in String.multiline
         [ "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"
         , Maybe.withDefault "" (entityString "" (Node "svg" attributes entities)) ++ "\n"
         ]
@@ -85,8 +86,11 @@ writeTo path viewBox entities = File.writeTo path (toSvg viewBox entities)
 nothing :: Entity space
 nothing = Empty
 
-group :: List (Attribute space) -> List (Entity space) -> Entity space
-group attributes children = Node "g" attributes children
+with :: List (Attribute space) -> List (Entity space) -> Entity space
+with attributes children = Node "g" attributes children
+
+group :: List (Entity space) -> Entity space
+group = with []
 
 line :: List (Attribute space) -> Point space -> Point space -> Entity space
 line attributes (Point2d x1 y1) (Point2d x2 y2) =

@@ -89,12 +89,12 @@ testRangeArithmetic = Try.do
 
 testEquality :: Task String ()
 testEquality = Try.do
-  log "Equality test" $
+  log "Equality test" <|
     let ?tolerance = Length.centimeter in Length.meters 1.0 ~= Length.meters 1.005
 
 testTransformation :: Task String ()
 testTransformation = Try.do
-  log "Rotated axis" $
+  log "Rotated axis" <|
     (Axis2d.x |> Transform2d.rotateAround (Point2d.meters 1.0 0.0) Angle.quarterTurn)
   let originalPoints = [Point2d.meters 1.0 0.0, Point2d.meters 2.0 0.0, Point2d.meters 3.0 0.0]
   let rotationFunction = Transform2d.rotateAround Point2d.origin Angle.quarterTurn
@@ -118,7 +118,7 @@ offsetPoint startPoint endPoint distance = Result.withDefault startPoint do
 
 testCustomFunction :: Tolerance Meters => Task String ()
 testCustomFunction = Try.do
-  log "Offset point" $
+  log "Offset point" <|
     offsetPoint (Point2d.meters 1.0 0.0) (Point2d.meters 3.0 0.0) (Length.meters 1.0)
 
 testListOperations :: Task String ()
@@ -131,7 +131,7 @@ getCrossProduct :: Tolerance Meters => Result String Float
 getCrossProduct = Try.withContext "In getCrossProduct" Try.do
   vectorDirection <- Vector2d.direction (Vector2d.meters 2.0 3.0)
   lineDirection <-
-    Try.withContext "When getting line direction" $
+    Try.withContext "When getting line direction" <|
       Direction2d.from Point2d.origin Point2d.origin
   Ok (vectorDirection >< lineDirection)
 
@@ -202,17 +202,17 @@ testSurface1dIntersection = Try.do
   let allSolutionPoints = List.concat solutionPointLists
   let outputLines = List.map outputLine allSolutionPoints
   let fileName = "solution-points.txt"
-  File.writeTo fileName (String.join "\n" outputLines)
+  File.writeTo fileName (String.multiline outputLines ++ "\n")
   File.delete fileName -- Uncomment to actually get the data!
  where
   ?tolerance = 1e-9
 
 testSvgOutput :: Task String ()
 testSvgOutput = Try.do
-  Drawing2d.writeTo "test.svg" (Bounds2d.hull2 Point2d.origin (Point2d.centimeters 30.0 30.0)) $
-    [ Drawing2d.group [] []
-    , Drawing2d.group [] $
-        [ Drawing2d.polygon [Drawing2d.fillColour Colour.blue] $
+  Drawing2d.writeTo "test.svg" (Bounds2d.hull2 Point2d.origin (Point2d.centimeters 30.0 30.0)) <|
+    [ Drawing2d.nothing
+    , Drawing2d.group
+        [ Drawing2d.polygon [Drawing2d.fillColour Colour.blue] <|
             [ Point2d.centimeters 10.0 10.0
             , Point2d.centimeters 20.0 10.0
             , Point2d.centimeters 15.0 20.0
@@ -223,7 +223,7 @@ testSvgOutput = Try.do
 testLineFromEndpoints :: Tolerance Meters => Task String ()
 testLineFromEndpoints = Try.do
   line1 <-
-    Task.evaluate $
+    Task.evaluate <|
       Line2d.with
         ( Line2d.startPoint Point2d.origin
         , Line2d.endPoint (Point2d.centimeters 40.0 30.0)
@@ -248,7 +248,7 @@ testDirectedLine = Try.do
 testArcFromEndpoints :: Tolerance Meters => Task String ()
 testArcFromEndpoints = Try.do
   arc <-
-    Task.evaluate $
+    Task.evaluate <|
       Arc2d.with
         ( Arc2d.startPoint Point2d.origin
         , Arc2d.endPoint (Point2d.centimeters 50.0 50.0)
@@ -280,11 +280,11 @@ testPlaneTorusIntersection = Try.do
   -- let ny = 0.0
   -- let nz = 1.0
   let f = x * nx + y * ny + z * nz
-  solutions <- Task.evaluate $ Surface1d.Function.solve f
+  solutions <- Task.evaluate (Surface1d.Function.solve f)
   drawSolutions "solutions.svg" solutions
   Console.printLine ""
   Console.printLine "Plane torus intersection solutions:"
-  Task.forEach solutions $ \case
+  Task.forEach solutions \case
     Surface1d.Solution.CrossingCurve {} -> Console.printLine "Crossing curve"
     Surface1d.Solution.BoundaryEdge curve -> log "Boundary edge" curve
     Surface1d.Solution.BoundaryPoint point -> log "Boundary point" point
@@ -301,15 +301,15 @@ drawSolutions path solutions = do
   let solutionEntities = List.mapWithIndex drawSolution solutions
   let uvRange = Range.convert toDrawing (Range.from -0.05 1.05)
   let viewBox = Bounds2d uvRange uvRange
-  Drawing2d.writeTo path viewBox $
-    [ Drawing2d.group [Drawing2d.strokeWidth strokeWidth] $
-        (drawBounds [] Uv.domain : solutionEntities)
+  Drawing2d.writeTo path viewBox <|
+    [ Drawing2d.with [Drawing2d.strokeWidth strokeWidth] <|
+        drawBounds [] Uv.domain : solutionEntities
     ]
 
 drawBounds :: List (Drawing2d.Attribute Uv.Space) -> Uv.Bounds -> Drawing2d.Entity Uv.Space
 drawBounds attributes bounds =
   let point x y = Point2d.convert toDrawing (Bounds2d.interpolate bounds x y)
-   in Drawing2d.polygon attributes $
+   in Drawing2d.polygon attributes <|
         [ point 0.0 0.0
         , point 1.0 0.0
         , point 1.0 1.0
@@ -318,7 +318,7 @@ drawBounds attributes bounds =
 
 drawSaddleRegion :: List (Drawing2d.Attribute Uv.Space) -> SaddleRegion -> Drawing2d.Entity Uv.Space
 drawSaddleRegion attributes saddleRegion =
-  Drawing2d.polygon attributes $
+  Drawing2d.polygon attributes <|
     List.map (Point2d.convert toDrawing) (SaddleRegion.corners saddleRegion)
 
 drawSolution :: Int -> Surface1d.Solution.Solution -> Drawing2d.Entity Uv.Space
@@ -327,16 +327,18 @@ drawSolution index solution =
       colour = Colour.hsl hue 0.5 0.5
    in case solution of
         Surface1d.Solution.CrossingCurve {segments, start, end} ->
-          Drawing2d.group [Drawing2d.strokeColour colour, Drawing2d.opacity 0.3] $
-            [ Drawing2d.group [] $
-                NonEmpty.toList (NonEmpty.map drawCurve segments)
+          Drawing2d.with
+            [ Drawing2d.strokeColour colour
+            , Drawing2d.opacity 0.3
+            ]
+            [ Drawing2d.group (List.map drawCurve (NonEmpty.toList segments))
             , drawBoundary start
             , drawBoundary end
             ]
         Surface1d.Solution.DegenerateCrossingCurve {start, end} ->
-          Drawing2d.group [] [drawBoundary start, drawBoundary end]
+          Drawing2d.group [drawBoundary start, drawBoundary end]
         Surface1d.Solution.SaddlePoint {point, region} ->
-          Drawing2d.group [] $
+          Drawing2d.group
             [ drawDot Colour.orange point
             , drawSaddleRegion [Drawing2d.noFill, Drawing2d.strokeColour Colour.lightGrey] region
             ]

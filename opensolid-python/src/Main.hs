@@ -30,7 +30,7 @@ setup =
     , "from ctypes import c_bool, c_double, c_int8, c_void_p, cast, cdll, POINTER, Structure"
     , "global lib"
     , "system = platform.system()"
-    , String.join "\n" $
+    , String.multiline
         [ "if system == 'Darwin':"
         , "    lib = cdll.LoadLibrary('libopensolid-ffi.dylib')"
         , "elif system == 'Linux':"
@@ -41,7 +41,7 @@ setup =
     , "lib.opensolid_free.argtypes = [c_void_p]"
     , "lib.opensolid_free_stable.argtypes = [c_void_p]"
     , "global_tolerance = None"
-    , String.join "\n" $
+    , String.multiline
         [ "@contextmanager"
         , "def Tolerance(new_tolerance: float):"
         , "    global global_tolerance"
@@ -53,15 +53,15 @@ setup =
         ]
     , "A = TypeVar('A')"
     , "B = TypeVar('B')"
-    , String.join "\n" $
+    , String.multiline
         [ "def maybe_reader(read_success: Callable[[c_void_p], A]) -> Callable[[c_void_p], Optional[A]]:"
         , "    return lambda ptr: read_success(ptr) if ptr else None"
         ]
-    , String.join "\n" $
+    , String.multiline
         [ "class Tuple2Structure(Structure):"
         , "    _fields_ = [('ptr1', c_void_p), ('ptr2', c_void_p)]"
         ]
-    , String.join "\n" $
+    , String.multiline
         [ "def tuple2_reader(read_a: Callable[[c_void_p], A], read_b: Callable[[c_void_p], B]) -> Callable[[c_void_p], Tuple[A, B]]:"
         , "    def read(ptr: c_void_p) -> Tuple[A, B]:"
         , "        tuple2_struct = cast(ptr, POINTER(Tuple2Structure)).contents"
@@ -70,11 +70,11 @@ setup =
         , "        return res"
         , "    return read"
         ]
-    , String.join "\n" $
+    , String.multiline
         [ "class ResultStructure(Structure):"
         , "    _fields_ = [('ptr', c_void_p), ('tag', c_int8)]"
         ]
-    , String.join "\n" $
+    , String.multiline
         [ "def result_reader(read_error: Callable[[c_int8, c_void_p], Exception], read_success: Callable[[c_void_p], A]) -> Callable[[c_void_p], A]:"
         , "    def read(ptr: c_void_p) -> A:"
         , "        result_struct = cast(ptr, POINTER(ResultStructure)).contents"
@@ -87,19 +87,19 @@ setup =
         , "            raise read_error(tag, ptr1)"
         , "    return read"
         ]
-    , String.join "\n" $
+    , String.multiline
         [ "def read_float(ptr: c_void_p) -> float:"
         , "    val = float(cast(ptr, POINTER(c_double)).contents.value)"
         , "    lib.opensolid_free(ptr)"
         , "    return val"
         ]
-    , String.join "\n" $
+    , String.multiline
         [ "def read_bool(ptr: c_void_p) -> bool:"
         , "    val = bool(cast(ptr, POINTER(c_bool)).contents.value)"
         , "    lib.opensolid_free(ptr)"
         , "    return val"
         ]
-    , String.join "\n" $
+    , String.multiline
         [ "def read_tolerance(tolerance: Optional[float]) -> float:"
         , "    tolerance = tolerance or global_tolerance"
         , "    if tolerance is None:"
@@ -114,7 +114,7 @@ api (Api classes) =
 
 apiClass :: Class -> PY.Statement
 apiClass (Class clsName representationProps errorClasses functions) =
-  PY.cls clsName [] $
+  PY.cls clsName [] <|
     List.concat
       [ [constructor, destructor, representation]
       , List.collect apiFunction functions
@@ -122,15 +122,15 @@ apiClass (Class clsName representationProps errorClasses functions) =
       ]
  where
   constructor =
-    PY.def "__init__" [selfPyArg, ("ptr", Just (PY.var "c_void_p"), Nothing)] Nothing $
+    PY.def "__init__" [selfPyArg, ("ptr", Just (PY.var "c_void_p"), Nothing)] Nothing <|
       [PY.set (PY.var "self" `PY.dot` "ptr") (PY.var "ptr")]
 
   destructor =
-    PY.def "__del__" [selfPyArg] Nothing $
+    PY.def "__del__" [selfPyArg] Nothing <|
       [PY.stmtExpr (PY.call (PY.var "lib" `PY.dot` "opensolid_free_stable") [PY.var "self" `PY.dot` "ptr"])]
 
   representation =
-    PY.def "__repr__" [selfPyArg] (Just (PY.var "str")) $
+    PY.def "__repr__" [selfPyArg] (Just (PY.var "str")) <|
       [ PY.returnStatement
           ( List.foldLeft
               PY.plus
@@ -151,7 +151,7 @@ apiFunction (Function kind ffiName pyName args retType) =
     PY.set (libName `PY.dot` "restype") (cType retType)
   , case kind of
       Static ->
-        PY.staticmethod $
+        PY.staticmethod <|
           PY.def
             pyName
             -- "tolerance" is the last arg
@@ -197,7 +197,7 @@ pyArgs = List.map pyArg
  where
   pyArg (name, typ) =
     let defaultValue = case typ of
-          ImplicitTolerance -> Just $ PY.var "None"
+          ImplicitTolerance -> Just (PY.var "None")
           _ -> Nothing
      in (name, pyType typ, defaultValue)
 
@@ -207,13 +207,13 @@ selfPyArg = ("self", Nothing, Nothing)
 pyType :: ValueType -> Maybe PY.Expr
 pyType typ =
   case typ of
-    ImplicitTolerance -> Just $ PY.subscript (PY.var "Optional") [PY.var "float"]
-    Pointer name -> Just $ PY.var name
-    Float -> Just $ PY.var "float"
-    Boolean -> Just $ PY.var "bool"
-    Maybe nestedTyp -> Just $ PY.subscript (PY.var "Optional") (Maybe.collect pyType [nestedTyp])
+    ImplicitTolerance -> Just (PY.subscript (PY.var "Optional") [PY.var "float"])
+    Pointer name -> Just (PY.var name)
+    Float -> Just (PY.var "float")
+    Boolean -> Just (PY.var "bool")
+    Maybe nestedTyp -> Just (PY.subscript (PY.var "Optional") (Maybe.collect pyType [nestedTyp]))
     Result _ _ val -> pyType val -- we throw an exception in case of an err
-    Tuple2 val1 val2 -> Just $ PY.subscript (PY.var "Tuple") (Maybe.collect pyType [val1, val2])
+    Tuple2 val1 val2 -> Just (PY.subscript (PY.var "Tuple") (Maybe.collect pyType [val1, val2]))
     Self -> Nothing
 
 fnBody :: ValueType -> PY.Expr -> List PY.Expr -> [PY.Statement]
@@ -264,7 +264,7 @@ apiException :: String -> ExceptionClass -> List PY.Statement
 apiException mod (ExceptionClass name [(tag, constructorName, Nothing)])
   | name == constructorName =
       let retTyp = PY.var mod `PY.dot` name
-       in [ PY.cls name [PY.var "Exception"] $
+       in [ PY.cls name [PY.var "Exception"] <|
               [ PY.staticmethod
                   ( PY.def
                       "from_tag"
@@ -293,7 +293,7 @@ main =
         (SP.proc "ruff" ["format", "--stdin-filename", "opensolid.py", "--quiet"])
           { SP.std_in = SP.CreatePipe
           }
-   in Task.main $ Try.do
+   in Task.main <| Try.do
         (Just stdinHandle, _, _, process) <- Task.fromIO (SP.createProcess ruffCmd)
         Task.fromIO (SIO.hPutStr stdinHandle pythonCode)
         Task.fromIO (SIO.hClose stdinHandle)

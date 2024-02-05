@@ -6,7 +6,7 @@ import OpenSolid
 
 axis2d :: Class
 axis2d =
-  cls ''Axis2d.Axis2d ['Axis2d.originPoint, 'Axis2d.direction] [] $
+  cls ''Axis2d.Axis2d ['Axis2d.originPoint, 'Axis2d.direction] [] <|
     [ method 'Axis2d.originPoint ["axis"]
     , method 'Axis2d.direction ["axis"]
     , static 'Axis2d.x []

@@ -62,7 +62,7 @@ apiClass :: Class -> TH.Q TH.Exp
 apiClass (Class name representationProps errors functions) = do
   apiFns <- traverse apiFunction functions
   apiExceptions <- fmap List.concat (traverse apiException errors)
-  return $
+  return <|
     TH.ConE 'Api.Class
       `TH.AppE` TH.LitE (TH.StringL (TH.nameBase name))
       `TH.AppE` TH.ListE (List.map apiName representationProps)
@@ -72,7 +72,7 @@ apiClass (Class name representationProps errors functions) = do
 apiException :: TH.Name -> TH.Q (List TH.Exp)
 apiException name = do
   constructors <- apiExceptionConstructors name
-  return $
+  return
     [ TH.ConE 'Api.ExceptionClass
         `TH.AppE` TH.LitE (TH.StringL (TH.nameBase name))
         `TH.AppE` TH.ListE constructors
@@ -87,19 +87,19 @@ apiExceptionConstructors typeName = do
 
 apiExceptionConstructor :: Int -> TH.Con -> TH.Q TH.Exp
 apiExceptionConstructor idx (TH.NormalC name []) = do
-  return $
+  return <|
     TH.TupE
-      [ Just $ TH.LitE (TH.IntegerL (fromIntegral (idx + 1)))
-      , Just $ TH.LitE (TH.StringL (TH.nameBase name))
-      , Just $ TH.ConE 'Nothing
+      [ Just (TH.LitE (TH.IntegerL (fromIntegral (idx + 1))))
+      , Just (TH.LitE (TH.StringL (TH.nameBase name)))
+      , Just (TH.ConE 'Nothing)
       ]
 apiExceptionConstructor idx (TH.NormalC name [(_, typ)]) = do
   apiTyp <- apiType typ
-  return $
+  return <|
     TH.TupE
-      [ Just $ TH.LitE (TH.IntegerL (fromIntegral (idx + 1)))
-      , Just $ TH.LitE (TH.StringL (TH.nameBase name))
-      , Just $ TH.ConE 'Just `TH.AppE` apiTyp
+      [ Just (TH.LitE (TH.IntegerL (fromIntegral (idx + 1))))
+      , Just (TH.LitE (TH.StringL (TH.nameBase name)))
+      , Just (TH.ConE 'Just `TH.AppE` apiTyp)
       ]
 apiExceptionConstructor _ _ =
   internalError "Unrecognized constructor"
@@ -138,7 +138,7 @@ apiFunction (Function kind fnName argNames) = do
             ]
         )
     else
-      return $
+      return <|
         TH.ConE 'Api.Function
           `TH.AppE` TH.ConE kind
           `TH.AppE` TH.LitE (TH.StringL (camelToSnake (ffiFunctionName fnName))) -- ffi name
@@ -219,7 +219,7 @@ ffiFunctionInfo returnType retExp argNames bindStmts = do
     ( TH.AppT (TH.ConT ''IO) finalReturnType
     , TH.Clause
         (List.reverse argNames)
-        (TH.NormalB (TH.DoE Nothing $ bindStmts ++ [TH.NoBindS finalRetExp]))
+        (TH.NormalB (TH.DoE Nothing (bindStmts ++ [TH.NoBindS finalRetExp])))
         []
     )
 
@@ -263,7 +263,7 @@ ffiArgInfo typ = do
         ( TH.VarP argName -- arg name
         , TH.AppT (TH.ConT ''Foreign.Ptr) (TH.ConT ''()) -- arg type
         , TH.VarE unwrappedName -- unwrapped pointer value
-        , Just $
+        , Just <|
             -- unwrappedName <- fromVoidPtr argName
             TH.BindS
               (TH.VarP unwrappedName)
@@ -280,7 +280,7 @@ ffiArgInfo typ = do
 ffiReturnInfo :: TH.Exp -> TH.Type -> TH.Q (TH.Exp, TH.Type)
 ffiReturnInfo expr typ = do
   isPtr <- isPointer typ
-  return $
+  return
     if isPtr
       then
         ( TH.AppE (TH.VarE 'Pointers.toVoidPtr) expr

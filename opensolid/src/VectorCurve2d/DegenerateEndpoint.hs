@@ -62,8 +62,8 @@ instance VectorCurve2d.Interface (QCurve (space @ units)) (space @ units) where
 
 qCurve :: Int -> Float -> VectorCurve2d (space @ units) -> VectorCurve2d (space @ units)
 qCurve n t0 curveDerivative =
-  VectorCurve2d.wrap $
-    QCurve n t0 curveDerivative $
+  VectorCurve2d.wrap <|
+    QCurve n t0 curveDerivative <|
       (VectorCurve2d.evaluateAt t0 curveDerivative / (Float.fromInt n + 1.0))
 
 evaluateAt :: Float -> DegenerateEndpoint space -> VectorCurve2d (space @ Unitless) -> Vector2d (space @ Unitless)

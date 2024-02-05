@@ -35,7 +35,7 @@ newStorablePtr result = do
 newStablePtr :: a -> IO (Foreign.Ptr ())
 newStablePtr val = do
   stablePtr <- Foreign.newStablePtr val
-  return $ Foreign.castStablePtrToPtr stablePtr
+  return (Foreign.castStablePtrToPtr stablePtr)
 
 derefStablePtr :: Foreign.Ptr () -> IO a
 derefStablePtr = Foreign.deRefStablePtr . Foreign.castPtrToStablePtr
@@ -119,8 +119,8 @@ instance (TaggedError error, VoidPtr success) => VoidPtr (Result error success) 
     voidPtr <- Foreign.peek (Foreign.castPtr ptr)
     tag <- Foreign.peekByteOff ptr pointerSize
     case tag of
-      Word8 0 -> fmap Ok $ fromVoidPtr voidPtr
-      _ -> fmap Error $ fromTaggedPtr tag voidPtr
+      Word8 0 -> fmap Ok (fromVoidPtr voidPtr)
+      _ -> fmap Error (fromTaggedPtr tag voidPtr)
   toVoidPtr res = do
     ptr <- Foreign.mallocBytes (pointerSize + (1 :: Int))
     (tag, nestedPtr) <- case res of

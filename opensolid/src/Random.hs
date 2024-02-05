@@ -49,7 +49,7 @@ instance Applicative Generator where
 
 instance Monad Generator where
   generatorA >>= function =
-    Generator $
+    Generator <|
       \stdGen ->
         let (valueA, stdGenA) = run generatorA stdGen
             generatorB = function valueA
@@ -65,7 +65,7 @@ step generator (Seed stdGen) =
 
 generate :: Generator a -> Task String a
 generate generator =
-  Task.fromIO $
+  Task.fromIO <|
     System.Random.Stateful.applyAtomicGen (run generator) System.Random.Stateful.globalStdGen
 
 map :: (a -> b) -> Generator a -> Generator b

@@ -20,6 +20,7 @@ import Tests.Range qualified
 import Tests.Region2d qualified
 import Tests.T qualified
 import Tests.VectorBounds3d qualified
+import Tests.String qualified
 
 tests :: List Test
 tests =
@@ -38,6 +39,7 @@ tests =
   , Test.group "Dict" Tests.Dict.tests
   , Test.group "DivMod" Tests.DivMod.tests
   , Test.group "Float" Tests.Float.tests
+  , Test.group "String" Tests.String.tests
   ]
  where
   ?tolerance = Length.meters 1e-9

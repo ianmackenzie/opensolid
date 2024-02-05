@@ -6,7 +6,7 @@ import OpenSolid
 
 bounds2d :: Class
 bounds2d =
-  cls ''Bounds2d.Bounds2d ['Bounds2d.xCoordinate, 'Bounds2d.yCoordinate] [] $
+  cls ''Bounds2d.Bounds2d ['Bounds2d.xCoordinate, 'Bounds2d.yCoordinate] [] <|
     [ method 'Bounds2d.xCoordinate ["bounds"]
     , method 'Bounds2d.yCoordinate ["bounds"]
     , static 'Bounds2d.constant ["point"]

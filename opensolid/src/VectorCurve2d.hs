@@ -547,7 +547,7 @@ derivative curve =
     Quotient c1 c2 ->
       let c1' = Units.generalize c1
           c2' = Units.generalize c2
-       in Units.specialize $
+       in Units.specialize <|
             (derivative c1' .* c2' - c1' .* Curve1d.derivative c2') ./ Curve1d.squared c2'
     Line v1 v2 -> constant (v2 - v1)
     Arc r a b ->

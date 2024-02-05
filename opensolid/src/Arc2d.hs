@@ -52,7 +52,7 @@ swept givenSweptAngle givenStartPoint givenEndPoint =
     Error Vector2d.IsZero -> Error Curve2d.DegenerateCurve
     Ok (distanceBetweenPoints, directionBetweenPoints)
       | linearDeviation ~= Qty.zero ->
-          Ok $
+          Ok <|
             Curve2d.Internal.Line
               { startPoint = givenStartPoint
               , endPoint = givenEndPoint
@@ -60,7 +60,7 @@ swept givenSweptAngle givenStartPoint givenEndPoint =
               , length = Point2d.distanceFrom givenStartPoint givenEndPoint
               }
       | otherwise ->
-          Ok $
+          Ok <|
             Curve2d.Internal.Arc
               { centerPoint = computedCenterPoint
               , radius = Point2d.distanceFrom computedCenterPoint givenStartPoint

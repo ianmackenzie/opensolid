@@ -184,6 +184,7 @@ test-suite opensolid-test
       Tests.Float
       Tests.List
       Tests.NonEmpty
+      Tests.String
       Tests.T
       Tests.Qty
       Tests.Random

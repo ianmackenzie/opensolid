@@ -12,7 +12,6 @@ module Basics
   , Bool (True, False)
   , Char
   , not
-  , ($)
   , (&&)
   , (||)
   , IO
@@ -26,6 +25,7 @@ module Basics
   , internalError
   , notImplemented
   , (|>)
+  , (<|)
   , type (~)
   , Functor (fmap)
   , Applicative (pure, (<*>))
@@ -59,7 +59,6 @@ import Prelude
   , id
   , not
   , otherwise
-  , ($)
   , (&&)
   , (.)
   , (||)
@@ -88,3 +87,9 @@ notImplemented = Prelude.error "Not implemented"
 (|>) value function = function value
 
 infixl 0 |>
+
+{-# INLINE (<|) #-}
+(<|) :: (a -> b) -> a -> b
+(<|) = (Prelude.$)
+
+infixr 0 <|

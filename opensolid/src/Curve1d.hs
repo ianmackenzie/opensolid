@@ -258,7 +258,7 @@ instance
   Zero / _ = Zero
   Constant x / Constant y = Constant (x / y)
   curve / Constant x =
-    Units.specialize $
+    Units.specialize <|
       (Units.generalize 1.0 ./ Units.generalize x) .* Units.generalize curve
   curve1 / curve2 = Quotient curve1 curve2
 
