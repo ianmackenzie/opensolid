@@ -2,6 +2,7 @@ module Result
   ( Result (Ok, Error)
   , ErrorMessage (..)
   , map
+  , map2
   , withDefault
   , mapError
   , onError
@@ -58,6 +59,12 @@ withDefault fallback (Error _) = fallback
 
 map :: (a -> value) -> Result x a -> Result x value
 map = Prelude.fmap
+
+map2 :: (a -> b -> value) -> Result x a -> Result x b -> Result x value
+map2 function result1 result2 = do
+  value1 <- result1
+  value2 <- result2
+  return (function value1 value2)
 
 mapError :: ErrorMessage y => (x -> y) -> Result x a -> Result y a
 mapError _ (Ok value) = Ok value
