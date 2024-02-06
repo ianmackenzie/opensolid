@@ -63,7 +63,11 @@ mapError function (Done result) = Done (Result.mapError function result)
 mapError function (Perform io) = Perform (Prelude.fmap (mapError function) io)
 
 liftIO :: IO a -> Task IOError a
-liftIO io = Perform (Control.Exception.catch (Prelude.fmap return io) (Error >> Done >> return))
+liftIO io =
+  Perform <|
+    Control.Exception.catch
+      (Prelude.fmap (Ok >> Done) io)
+      (Error >> Done >> return)
 
 fromIO :: IO a -> Task String a
 fromIO = liftIO >> mapError errorMessage
