@@ -14,12 +14,14 @@ module OpenSolid
   , module Units
   , module Angle
   , module Intersects
+  , module Composition
   )
 where
 
 import Angle (Angle)
 import Arithmetic
 import Basics
+import Composition (Composition ((>>)), (<<))
 import Concatenation (Concatenation ((++)))
 import CoordinateSystem (CoordinateSystem, Defines, LocalSpace, type (@))
 import Float (Float, fromRational)

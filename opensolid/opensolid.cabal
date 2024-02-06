@@ -82,6 +82,7 @@ library
       Bounds3d
       Bounds
       Colour
+      Composition
       Concatenation
       Console
       CoordinateSystem

@@ -57,7 +57,7 @@ concat :: Seq a -> Seq a -> Seq a
 concat = (Data.Sequence.><)
 
 map :: (a -> b) -> Seq a -> Seq b
-map = fmap
+map = Prelude.fmap
 
 filter :: (a -> Bool) -> Seq a -> Seq a
 filter = Data.Sequence.filter

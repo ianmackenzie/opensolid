@@ -456,7 +456,7 @@ findTangentSolutions derivatives boundaryEdges boundaryPoints uvBounds bisection
           bounds1
           nextBisectionParameter
           (List.filter (affects bounds1) exclusions)
-          (List.filter (affects bounds1 . SaddleRegion.bounds) saddleRegions)
+          (List.filter (SaddleRegion.bounds >> affects bounds1) saddleRegions)
       (solutions2, exclusions2, saddleRegions2) <-
         findTangentSolutions
           derivatives
@@ -465,7 +465,7 @@ findTangentSolutions derivatives boundaryEdges boundaryPoints uvBounds bisection
           bounds2
           nextBisectionParameter
           (List.filter (affects bounds2) (exclusions1 ++ exclusions))
-          (List.filter (affects bounds2 . SaddleRegion.bounds) (saddleRegions1 ++ saddleRegions))
+          (List.filter (SaddleRegion.bounds >> affects bounds2) (saddleRegions1 ++ saddleRegions))
       return
         ( Solution.merge solutions1 solutions2
         , exclusions1 ++ exclusions2
@@ -516,7 +516,7 @@ findCrossingSolutions derivatives boundaryEdges boundaryPoints uvBounds bisectio
           bounds1
           nextBisectionParameter
           (List.filter (affects bounds1) exclusions)
-          (List.filter (affects bounds1 . SaddleRegion.bounds) saddleRegions)
+          (List.filter (SaddleRegion.bounds >> affects bounds1) saddleRegions)
       (solutions2, exclusions2) <-
         findCrossingSolutions
           derivatives
@@ -525,7 +525,7 @@ findCrossingSolutions derivatives boundaryEdges boundaryPoints uvBounds bisectio
           bounds2
           nextBisectionParameter
           (List.filter (affects bounds2) (exclusions1 ++ exclusions))
-          (List.filter (affects bounds2 . SaddleRegion.bounds) saddleRegions)
+          (List.filter (SaddleRegion.bounds >> affects bounds2) saddleRegions)
       return
         ( Solution.merge solutions1 solutions2
         , exclusions1 ++ exclusions2
@@ -940,7 +940,7 @@ tangentPointSolution ::
   Maybe (Result SolveError (List Solution, List Uv.Bounds, List SaddleRegion))
 tangentPointSolution derivatives boundaryPoints uvBounds exclusions saddleRegions
   | List.any (overlaps expandedBounds) exclusions = Nothing
-  | List.any (overlaps expandedBounds . SaddleRegion.bounds) saddleRegions = Nothing
+  | List.any (SaddleRegion.bounds >> overlaps expandedBounds) saddleRegions = Nothing
   -- If second derivatives determinant is not definitely non-zero, then abort
   | Qty.abs determinantResolution < 0.5 = Nothing
   -- Otherwise, we know there can be only one tangent point

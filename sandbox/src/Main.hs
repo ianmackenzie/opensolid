@@ -349,7 +349,7 @@ toDrawing = Units.conversion 1.0 (Length.centimeters 10.0)
 
 drawCurve :: Curve2d Uv.Coordinates -> Drawing2d.Entity Uv.Space
 drawCurve curve =
-  let sampledPoints = List.map (Point2d.convert toDrawing . Curve2d.pointOn curve) (T.steps 20)
+  let sampledPoints = List.map (Curve2d.pointOn curve >> Point2d.convert toDrawing) (T.steps 20)
    in Drawing2d.polyline [] sampledPoints
 
 drawBoundary :: Surface1d.Solution.Boundary.Boundary -> Drawing2d.Entity Uv.Space

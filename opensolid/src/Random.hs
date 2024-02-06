@@ -29,6 +29,8 @@ import System.Random (StdGen)
 import System.Random qualified
 import System.Random.Stateful qualified
 import Task qualified
+import Prelude (Applicative, Functor, Monad)
+import Prelude qualified
 
 newtype Generator a = Generator (StdGen -> (a, StdGen))
 
@@ -69,7 +71,7 @@ generate generator =
     System.Random.Stateful.applyAtomicGen (run generator) System.Random.Stateful.globalStdGen
 
 map :: (a -> b) -> Generator a -> Generator b
-map function (Generator generator) = Generator (Pair.mapFirst function . generator)
+map function (Generator generator) = Generator (generator >> Pair.mapFirst function)
 
 map2 :: (a -> b -> c) -> Generator a -> Generator b -> Generator c
 map2 function generatorA generatorB = do
@@ -118,7 +120,7 @@ nonEmpty n itemGenerator = do
   return (first :| rest)
 
 seed :: Generator Seed
-seed = Generator (Pair.mapFirst Seed . System.Random.split)
+seed = Generator (System.Random.split >> Pair.mapFirst Seed)
 
 pair :: Generator a -> Generator b -> Generator (a, b)
 pair generatorA generatorB = do

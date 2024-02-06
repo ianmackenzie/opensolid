@@ -7,4 +7,4 @@ class Vertex2d vertex (coordinateSystem :: CoordinateSystem) | vertex -> coordin
   position :: vertex -> Point2d coordinateSystem
 
 instance Vertex2d (Point2d (space @ units)) (space @ units) where
-  position = id
+  position = identity

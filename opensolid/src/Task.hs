@@ -14,12 +14,14 @@ module Task
 where
 
 import Basics
+import Composition (Composition ((>>)))
 import Control.Exception qualified
 import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.IO.Class qualified
 import Result (ErrorMessage (errorMessage), Result (Error, Ok))
 import Result qualified
 import System.Exit qualified
+import Prelude (Applicative, Functor, Monad, MonadFail)
 import Prelude qualified
 
 data Task x a
@@ -28,40 +30,43 @@ data Task x a
 
 instance Functor (Task x) where
   fmap f (Done result) = Done (Result.map f result)
-  fmap f (Perform io) = Perform (fmap (Task.map f) io)
+  fmap f (Perform io) = Perform (Prelude.fmap (Task.map f) io)
 
 instance Applicative (Task x) where
-  pure = Done . Ok
+  pure = Ok >> Done
   Done (Ok function) <*> task = Task.map function task
   Done (Error error) <*> _ = Done (Error error)
-  Perform io <*> task = Perform (fmap (<*> task) io)
+  Perform io <*> task = Perform (Prelude.fmap (Prelude.<*> task) io)
 
 instance Monad (Task x) where
   Done (Ok value) >>= function = function value
   Done (Error error) >>= _ = Done (Error error)
-  Perform io >>= function = Perform (fmap (>>= function) io)
+  Perform io >>= function = Perform (Prelude.fmap (>>= function) io)
 
 instance MonadFail (Task String) where
-  fail = Done . Error
+  fail = Error >> Done
 
 instance MonadIO (Task IOError) where
   liftIO = liftIO
+
+instance m ~ Task x => Composition (Task x a) (m b) (m b) where
+  (>>) = (Prelude.>>)
 
 evaluate :: Result x a -> Task x a
 evaluate = Done
 
 map :: (a -> b) -> Task x a -> Task x b
-map = fmap
+map = Prelude.fmap
 
 mapError :: ErrorMessage y => (x -> y) -> Task x a -> Task y a
 mapError function (Done result) = Done (Result.mapError function result)
-mapError function (Perform io) = Perform (fmap (mapError function) io)
+mapError function (Perform io) = Perform (Prelude.fmap (mapError function) io)
 
 liftIO :: IO a -> Task IOError a
-liftIO io = Perform (Control.Exception.catch (fmap return io) (return . Done . Error))
+liftIO io = Perform (Control.Exception.catch (Prelude.fmap return io) (Error >> Done >> return))
 
 fromIO :: IO a -> Task String a
-fromIO = mapError errorMessage . liftIO
+fromIO = liftIO >> mapError errorMessage
 
 toIO :: Task x a -> IO a
 toIO (Done (Ok value)) = return value

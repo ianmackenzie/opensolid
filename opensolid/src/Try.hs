@@ -11,24 +11,32 @@ import OpenSolid qualified
 import Result qualified
 import String qualified
 import Task qualified
+import Prelude (Monad)
 
-class Monad (m String) => MapError m where
-  mapError :: ErrorMessage x => m x a -> m String a
+class MapError m where
+  mapError :: (x -> String) -> m x a -> m String a
 
 instance MapError Result where
-  mapError = Result.mapError errorMessage
+  mapError = Result.mapError
 
 instance MapError Task where
-  mapError = Task.mapError errorMessage
+  mapError = Task.mapError
 
-(>>) :: (MapError m, ErrorMessage x) => m x a -> m String b -> m String b
-first >> second = mapError first OpenSolid.>> second
+(>>) ::
+  ( MapError m
+  , ErrorMessage x
+  , Composition (m String a) (m String b) (m String b)
+  ) =>
+  m x a ->
+  m String b ->
+  m String b
+monad1 >> monad2 = mapError errorMessage monad1 OpenSolid.>> monad2
 
-(>>=) :: (MapError m, ErrorMessage x) => m x a -> (a -> m String b) -> m String b
-value >>= function = mapError value OpenSolid.>>= function
+(>>=) :: (Monad (m String), MapError m, ErrorMessage x) => m x a -> (a -> m String b) -> m String b
+monad >>= function = mapError errorMessage monad OpenSolid.>>= function
 
-withContext :: ErrorMessage x => String -> Result x a -> Result String a
-withContext context = Result.mapError (addContext context . errorMessage)
+withContext :: (MapError m, ErrorMessage x) => String -> m x a -> m String a
+withContext context = mapError (\error -> errorMessage error |> addContext context)
 
 addContext :: String -> String -> String
 addContext context text = context ++ ":\n" ++ String.indent "  " text

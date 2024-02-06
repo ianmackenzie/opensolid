@@ -26,12 +26,12 @@ data Curve3d (coordinateSystem :: CoordinateSystem) where
   Curve3d :: Interface curve (space @ units) => curve -> Curve3d (space @ units)
 
 instance Interface (Point3d (space @ units)) (space @ units) where
-  startPointImpl = id
-  endPointImpl = id
+  startPointImpl = identity
+  endPointImpl = identity
   evaluateImpl point _ = point
   segmentBoundsImpl point _ = Bounds3d.constant point
   derivativeImpl _ = VectorCurve3d.zero
-  reverseImpl = id
+  reverseImpl = identity
   boundsImpl = Bounds3d.constant
 
 instance Interface (Curve3d (space @ units)) (space @ units) where

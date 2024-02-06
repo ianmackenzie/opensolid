@@ -14,6 +14,7 @@ where
 
 import Basics
 import System.IO.Error qualified
+import Prelude (Applicative, Functor, Monad, MonadFail)
 import Prelude qualified
 
 class (Eq error, Show error) => ErrorMessage error where
@@ -21,7 +22,7 @@ class (Eq error, Show error) => ErrorMessage error where
   errorMessage = show
 
 instance ErrorMessage String where
-  errorMessage = id
+  errorMessage = identity
 
 instance ErrorMessage IOError where
   errorMessage ioError = System.IO.Error.ioeGetErrorString ioError
@@ -56,7 +57,7 @@ withDefault _ (Ok value) = value
 withDefault fallback (Error _) = fallback
 
 map :: (a -> value) -> Result x a -> Result x value
-map = fmap
+map = Prelude.fmap
 
 mapError :: ErrorMessage y => (x -> y) -> Result x a -> Result y a
 mapError _ (Ok value) = Ok value

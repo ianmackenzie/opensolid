@@ -287,7 +287,7 @@ isResolved :: Tolerance units => Estimate units -> Bool
 isResolved estimate = boundsWidth estimate <= ?tolerance
 
 allResolved :: Tolerance units => List (a, Estimate units) -> Bool
-allResolved pairs = List.all (isResolved . Pair.second) pairs
+allResolved pairs = List.all (Pair.second >> isResolved) pairs
 
 minimumBy :: Tolerance units => (a -> Estimate units) -> NonEmpty a -> a
 minimumBy function items = go (NonEmpty.map (Pair.decorate function) items)
@@ -312,10 +312,10 @@ maximumBy function items = go (NonEmpty.map (Pair.decorate function) items)
           else go (refinePairs (leader :| filtered))
 
 smallestBy :: Tolerance units => (a -> Estimate units) -> NonEmpty a -> a
-smallestBy function items = minimumBy (abs . function) items
+smallestBy function items = minimumBy (abs << function) items
 
 largestBy :: Tolerance units => (a -> Estimate units) -> NonEmpty a -> a
-largestBy function items = maximumBy (abs . function) items
+largestBy function items = maximumBy (abs << function) items
 
 pickMinimumBy :: Tolerance units => (a -> Estimate units) -> NonEmpty a -> (a, List a)
 pickMinimumBy function items = go (NonEmpty.map (Pair.decorate function) items) []
@@ -342,10 +342,10 @@ pickMaximumBy function items = go (NonEmpty.map (Pair.decorate function) items) 
           else go (refinePairs (leader :| filtered)) updated
 
 pickSmallestBy :: Tolerance units => (a -> Estimate units) -> NonEmpty a -> (a, List a)
-pickSmallestBy function items = pickMinimumBy (abs . function) items
+pickSmallestBy function items = pickMinimumBy (abs << function) items
 
 pickLargestBy :: Tolerance units => (a -> Estimate units) -> NonEmpty a -> (a, List a)
-pickLargestBy function items = pickMaximumBy (abs . function) items
+pickLargestBy function items = pickMaximumBy (abs << function) items
 
 sign :: Tolerance units => Estimate units -> Sign
 sign estimate

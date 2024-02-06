@@ -87,7 +87,7 @@ reportError :: List String -> List String -> Task String (Int, Int)
 reportError context messages = do
   Console.printLine ("❌ " ++ (String.join " | " (List.reverse context) ++ ":"))
   Console.printLine ""
-  Task.forEach messages (Console.printLine . String.indent "   ")
+  Task.forEach messages (String.indent "   " >> Console.printLine)
   Console.printLine ""
   return (0, 1)
 
@@ -132,7 +132,7 @@ output label value =
 newtype Lines a = Lines (List a)
 
 instance Show a => Show (Lines a) where
-  show (Lines values) = String.concat (List.map (("\n  " ++) . show) values)
+  show (Lines values) = String.concat (List.map (\value -> "\n  " ++ show value) values)
 
 lines :: (Data.Foldable.Foldable container, Show a) => container a -> Lines a
 lines container = Lines (Data.Foldable.toList container)

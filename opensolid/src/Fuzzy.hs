@@ -7,6 +7,7 @@ module Fuzzy
 where
 
 import Basics
+import Prelude (Applicative, Functor, Monad)
 import Prelude qualified
 
 data Fuzzy a = Resolved a | Unresolved deriving (Eq, Show)

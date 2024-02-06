@@ -18,49 +18,40 @@ module Basics
   , IOError
   , Maybe (Just, Nothing)
   , Type
-  , HasField (getField)
-  , id
-  , const
+  , identity
+  , always
   , fromIntegral
   , internalError
   , notImplemented
   , (|>)
   , (<|)
   , type (~)
-  , Functor (fmap)
-  , Applicative (pure, (<*>))
-  , Monad ((>>=), (>>), return)
-  , MonadFail (fail)
-  , (.)
+  , (>>=)
+  , return
+  , fail
   )
 where
 
 import Data.Kind (Type)
 import Data.Type.Equality (type (~))
-import GHC.Records (HasField (getField))
 import Prelude
-  ( Applicative (pure, (<*>))
-  , Bool (False, True)
+  ( Bool (False, True)
   , Char
   , Eq ((/=), (==))
-  , Functor (fmap)
   , IO
   , IOError
   , Int
   , Maybe (Just, Nothing)
-  , Monad (return, (>>), (>>=))
+  , Monad (return, (>>=))
   , MonadFail (fail)
   , Ord (compare, (<), (<=), (>), (>=))
   , Ordering (EQ, GT, LT)
   , Show (show)
   , String
-  , const
   , fromIntegral
-  , id
   , not
   , otherwise
   , (&&)
-  , (.)
   , (||)
   )
 import Prelude qualified
@@ -93,3 +84,11 @@ infixl 0 |>
 (<|) = (Prelude.$)
 
 infixr 0 <|
+
+{-# INLINE identity #-}
+identity :: a -> a
+identity value = value
+
+{-# INLINE always #-}
+always :: a -> b -> a
+always value _ = value

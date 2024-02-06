@@ -19,7 +19,7 @@ import Maybe qualified
 import OpenSolid
 import Pointers qualified
 import String qualified
-import Prelude (sequence, traverse)
+import Prelude qualified
 
 data Class = Class TH.Name (List TH.Name) (List TH.Name) (List Function)
 
@@ -36,12 +36,12 @@ static = Function 'Api.Static
 
 ffi :: List Class -> TH.Q (List TH.Dec)
 ffi classes = do
-  functionDecls <- fmap List.concat (traverse ffiClass classes)
+  functionDecls <- Prelude.fmap List.concat (Prelude.traverse ffiClass classes)
   freeStableFunctionDecl <- freeFunctionFfi "opensolid_free_stable" 'Pointers.freeStablePtr
   return (freeStableFunctionDecl : functionDecls)
  where
   ffiClass (Class _ _ _ functions) =
-    fmap List.concat (traverse ffiFunction functions)
+    Prelude.fmap List.concat (Prelude.traverse ffiFunction functions)
 
 freeFunctionFfi :: String -> TH.Name -> TH.Q TH.Dec
 freeFunctionFfi ffiName name = do
@@ -50,7 +50,7 @@ freeFunctionFfi ffiName name = do
 
 api :: List Class -> TH.Q TH.Exp
 api classes = do
-  apiCls <- traverse apiClass classes
+  apiCls <- Prelude.traverse apiClass classes
   return (TH.AppE (TH.ConE 'Api.Api) (TH.ListE apiCls))
 
 -- human readable name in the API
@@ -60,8 +60,8 @@ apiName name =
 
 apiClass :: Class -> TH.Q TH.Exp
 apiClass (Class name representationProps errors functions) = do
-  apiFns <- traverse apiFunction functions
-  apiExceptions <- fmap List.concat (traverse apiException errors)
+  apiFns <- Prelude.traverse apiFunction functions
+  apiExceptions <- Prelude.fmap List.concat (Prelude.traverse apiException errors)
   return <|
     TH.ConE 'Api.Class
       `TH.AppE` TH.LitE (TH.StringL (TH.nameBase name))
@@ -82,7 +82,8 @@ apiExceptionConstructors :: TH.Name -> TH.Q (List TH.Exp)
 apiExceptionConstructors typeName = do
   info <- TH.reify typeName
   case info of
-    TH.TyConI (TH.DataD _ _ _ _ cons _) -> sequence (List.mapWithIndex apiExceptionConstructor cons)
+    TH.TyConI (TH.DataD _ _ _ _ cons _) ->
+      Prelude.sequence (List.mapWithIndex apiExceptionConstructor cons)
     _ -> internalError "Not a data type"
 
 apiExceptionConstructor :: Int -> TH.Con -> TH.Q TH.Exp
@@ -177,7 +178,7 @@ apiType (TH.AppT (TH.ConT containerName) nestedTyp) | containerName == ''Maybe =
 apiType typ = do
   isPtr <- isPointer typ
   if isPtr
-    then fmap (TH.AppE (TH.ConE 'Api.Pointer)) (typeNameBase typ)
+    then Prelude.fmap (TH.AppE (TH.ConE 'Api.Pointer)) (typeNameBase typ)
     else case typ of
       (TH.AppT (TH.ConT name) _)
         | name == ''Qty -> return (TH.ConE 'Api.Float)
