@@ -18,9 +18,9 @@ import Tests.NonEmpty qualified
 import Tests.Qty qualified
 import Tests.Range qualified
 import Tests.Region2d qualified
+import Tests.String qualified
 import Tests.T qualified
 import Tests.VectorBounds3d qualified
-import Tests.String qualified
 
 tests :: List Test
 tests =
