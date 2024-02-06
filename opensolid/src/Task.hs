@@ -72,9 +72,8 @@ liftIO io =
 fromIO :: IO a -> Task String a
 fromIO = liftIO >> mapError errorMessage
 
-toIO :: Task x a -> IO a
-toIO (Done (Ok value)) = return value
-toIO (Done (Error error)) = fail (errorMessage error)
+toIO :: Task x a -> IO (Result x a)
+toIO (Done result) = return result
 toIO (Perform io) = io >>= toIO
 
 main :: Task x () -> IO ()
