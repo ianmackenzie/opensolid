@@ -3,6 +3,7 @@ module Float
   , fromRational
   , fromInt
   , ceiling
+  , round
   , min
   , max
   , floor
@@ -53,6 +54,10 @@ floor (Qty x) = Prelude.floor x
 {-# INLINE ceiling #-}
 ceiling :: Float -> Int
 ceiling (Qty x) = Prelude.ceiling x
+
+{-# INLINE round #-}
+round :: Float -> Int
+round (Qty x) = Prelude.round x
 
 infinity :: Float
 infinity = Qty.infinity
