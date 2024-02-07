@@ -99,6 +99,7 @@ library
       DirectionBounds2d
       DirectionCurve2d
       Drawing2d
+      Duration
       Estimate
       File
       Float
