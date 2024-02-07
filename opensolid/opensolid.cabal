@@ -30,6 +30,7 @@ common config
     , colour
     , type-errors
     , directory
+    , async
   ghc-options:
       -Wall
       -Werror

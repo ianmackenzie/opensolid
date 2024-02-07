@@ -14,6 +14,7 @@ import Curve2d qualified
 import Direction2d qualified
 import Direction3d ()
 import Drawing2d qualified
+import Duration qualified
 import File qualified
 import Float qualified
 import Length (Length)
@@ -373,6 +374,27 @@ drawDot :: Colour -> Uv.Point -> Drawing2d.Entity Uv.Space
 drawDot colour point =
   Drawing2d.circle [Drawing2d.fillColour colour] (Point2d.convert toDrawing point) (Length.millimeters 0.5)
 
+delayedPrint :: Int -> Task String ()
+delayedPrint numSeconds = do
+  Task.sleep (Duration.seconds (Float.fromInt numSeconds))
+  Console.printLine (String.fromInt numSeconds)
+
+testConcurrency :: Task String ()
+testConcurrency = Try.do
+  Console.printLine "Starting concurrency test..."
+  Console.printLine "0"
+  print5 <- Task.spawn (delayedPrint 5)
+  print2 <- Task.spawn (delayedPrint 2)
+  print3 <- Task.spawn (delayedPrint 3)
+  print4 <- Task.spawn (delayedPrint 4)
+  print1 <- Task.spawn (delayedPrint 1)
+  Task.await print4
+  Task.await print2
+  Task.await print3
+  Task.await print5
+  Task.await print1
+  Console.printLine "Concurrency test complete!"
+
 script :: Task String ()
 script = Try.do
   testScalarArithmetic
@@ -393,6 +415,7 @@ script = Try.do
   testDirectedLine
   testArcFromEndpoints
   testPlaneTorusIntersection
+  testConcurrency
  where
   ?tolerance = Length.meters 1e-9
 
