@@ -30,27 +30,24 @@ data Expectation
   | Failed (List String)
 
 class Bind a b c where
-  bind :: (b -> c) -> a -> c
-
-(>>=) :: Bind a b c => a -> (b -> c) -> c
-a >>= f = bind f a
+  (>>=) :: a -> (b -> c) -> c
 
 instance a ~ a' => Bind (Generator a) a' (Generator b) where
-  bind function generator = generator OpenSolid.>>= function
+  (>>=) = (OpenSolid.>>=)
 
 instance a ~ a' => Bind (Result x a) a' (Result x b) where
-  bind function result = result OpenSolid.>>= function
+  (>>=) = (OpenSolid.>>=)
 
 instance a ~ a' => Bind (Task x a) a' (Task x b) where
-  bind function task = task OpenSolid.>>= function
+  (>>=) = (OpenSolid.>>=)
 
 instance a ~ a' => Bind (Result x a) a' Expectation where
-  bind f (Ok value) = f value
-  bind _ (Error error) = Failed [errorMessage error]
+  Ok value >>= f = f value
+  Error error >>= _ = Failed [errorMessage error]
 
 instance a ~ a' => Bind (Result x a) a' (Generator Expectation) where
-  bind f (Ok value) = f value
-  bind _ (Error error) = Random.return (Failed [errorMessage error])
+  Ok value >>= f = f value
+  Error error >>= _ = Random.return (Failed [errorMessage error])
 
 data Test
   = Check Int String (Generator Expectation)

@@ -9,7 +9,7 @@ where
 
 import Curve2d (Curve2d)
 import List qualified
-import OpenSolid
+import OpenSolid hiding (join)
 import Surface1d.SaddleRegion (SaddleRegion)
 import Surface1d.Solution.Boundary (Boundary)
 import Surface1d.Solution.Boundary qualified as Boundary

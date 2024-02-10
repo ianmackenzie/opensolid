@@ -33,7 +33,6 @@ where
 import Data.Map qualified
 import OpenSolid
 import Pair qualified
-import Prelude qualified
 
 type Dict k v = Data.Map.Map k v
 
@@ -83,7 +82,7 @@ filterWithKey :: (k -> v -> Bool) -> Data.Map.Map k v -> Data.Map.Map k v
 filterWithKey = Data.Map.filterWithKey
 
 map :: (v -> w) -> Dict k v -> Dict k w
-map = Prelude.fmap
+map = fmap
 
 mapWithKey :: (k -> v -> w) -> Dict k v -> Dict k w
 mapWithKey = Data.Map.mapWithKey

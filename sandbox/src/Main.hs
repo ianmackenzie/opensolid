@@ -23,6 +23,7 @@ import Line2d qualified
 import List qualified
 import NonEmpty qualified
 import OpenSolid
+import Parallel qualified
 import Point2d (Point2d (Point2d))
 import Point2d qualified
 import Qty qualified
@@ -395,6 +396,42 @@ testConcurrency = Try.do
   Task.await print1
   Console.printLine "Concurrency test complete!"
 
+computeSquareRoot :: Float -> Task String Float
+computeSquareRoot value = do
+  Task.sleep Duration.second
+  return (Float.sqrt value)
+
+testConcurrentCollect :: Task String ()
+testConcurrentCollect = Try.do
+  Console.printLine "Computing square roots with spawn and await"
+  let values = List.map Float.fromInt [1 .. 16]
+  asyncTasks <- Task.collect (Task.spawn << computeSquareRoot) values
+  squareRoots <- Task.collect Task.await asyncTasks
+  log "Square roots" squareRoots
+
+testTaskParallel :: Task String ()
+testTaskParallel = Try.do
+  Console.printLine "Computing square roots with Task.parallel"
+  let values = List.map Float.fromInt [1 .. 16]
+  squareRoots <- Task.parallel computeSquareRoot values
+  log "Square roots" squareRoots
+
+testParallelDo :: Task String ()
+testParallelDo = do
+  Console.printLine "Testing Parallel.do"
+  Parallel.do
+    sqrt1 <- computeSquareRoot 1.0
+    sqrt4 <- computeSquareRoot 4.0
+    sqrt9 <- computeSquareRoot 9.0
+    sqrt16 <- computeSquareRoot 16.0
+    sqrt25 <- computeSquareRoot 25.0
+    do
+      log "sqrt1" sqrt1
+      log "sqrt4" sqrt4
+      log "sqrt9" sqrt9
+      log "sqrt16" sqrt16
+      log "sqrt25" sqrt25
+
 script :: Task String ()
 script = Try.do
   testScalarArithmetic
@@ -416,6 +453,9 @@ script = Try.do
   testArcFromEndpoints
   testPlaneTorusIntersection
   testConcurrency
+  testConcurrentCollect
+  testTaskParallel
+  testParallelDo
  where
   ?tolerance = Length.meters 1e-9
 

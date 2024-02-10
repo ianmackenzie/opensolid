@@ -11,10 +11,9 @@ where
 import Basics
 import Data.Maybe qualified
 import Result (ErrorMessage, Result (Error, Ok))
-import Prelude qualified
 
 map :: (a -> b) -> Maybe a -> Maybe b
-map = Prelude.fmap
+map = fmap
 
 withDefault :: a -> Maybe a -> a
 withDefault _ (Just value) = value

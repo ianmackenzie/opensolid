@@ -11,9 +11,11 @@ module Task
   , fromIO
   , toIO
   , collect
+  , parallel
   , spawn
   , await
   , sleep
+  , unsafe
   )
 where
 
@@ -72,13 +74,16 @@ evaluate :: Result x a -> Task x a
 evaluate result = Task (return result)
 
 map :: (a -> b) -> Task x a -> Task x b
-map function (Task io) = Task (Prelude.fmap (Result.map function) io)
+map function (Task io) = Task (fmap (Result.map function) io)
 
 mapError :: ErrorMessage y => (x -> y) -> Task x a -> Task y a
-mapError function (Task io) = Task (Prelude.fmap (Result.mapError function) io)
+mapError function (Task io) = Task (fmap (Result.mapError function) io)
+
+unsafe :: IO (Result x a) -> Task x a
+unsafe = Task
 
 liftIO :: IO a -> Task IOError a
-liftIO io = Task (Control.Exception.catch (Prelude.fmap Ok io) (Error >> return))
+liftIO io = Task (Control.Exception.catch (fmap Ok io) (Error >> return))
 
 fromIO :: IO a -> Task String a
 fromIO = liftIO >> mapError errorMessage
@@ -99,8 +104,12 @@ forEach values function = Prelude.mapM_ function values
 collect :: (a -> Task x b) -> List a -> Task x (List b)
 collect = Prelude.mapM
 
+parallel :: (a -> Task x b) -> List a -> Task x (List b)
+parallel function values =
+  Task (fmap Result.combine (Async.mapConcurrently (function >> toIO) values))
+
 spawn :: Task x a -> Task String (Async x a)
-spawn (Task io) = fromIO (Prelude.fmap Async (Async.async io))
+spawn (Task io) = fromIO (fmap Async (Async.async io))
 
 await :: Async x a -> Task x a
 await (Async async) = Task (Async.wait async)

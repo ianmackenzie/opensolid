@@ -37,8 +37,7 @@ deriving instance (Eq x, Eq a) => Eq (Result x a)
 deriving instance (Show x, Show a) => Show (Result x a)
 
 instance Functor (Result x) where
-  fmap f (Ok value) = Ok (f value)
-  fmap _ (Error error) = Error error
+  fmap = map
 
 instance Applicative (Result x) where
   pure = Ok
@@ -58,7 +57,8 @@ withDefault _ (Ok value) = value
 withDefault fallback (Error _) = fallback
 
 map :: (a -> value) -> Result x a -> Result x value
-map = Prelude.fmap
+map f (Ok value) = Ok (f value)
+map _ (Error error) = Error error
 
 map2 :: (a -> b -> value) -> Result x a -> Result x b -> Result x value
 map2 function result1 result2 = do

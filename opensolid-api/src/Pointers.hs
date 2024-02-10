@@ -16,7 +16,6 @@ import OpenSolid
 import Point2d qualified
 import Range qualified
 import Vector2d qualified
-import Prelude qualified
 
 {- | Define a pattern that effectively lets us pretend that there's a Word8 constructor
 that takes an Int and returns a Word8; we can then use this to
@@ -84,12 +83,12 @@ instance (VoidPtr (Axis2d.Axis2d a)) where
 
 instance VoidPtr (Qty u) where
   fromVoidPtr ptr = Foreign.peek (Foreign.castPtr ptr)
-  toVoidPtr a = Prelude.fmap Foreign.castPtr (newStorablePtr a)
+  toVoidPtr a = fmap Foreign.castPtr (newStorablePtr a)
 
 instance VoidPtr a => VoidPtr (Maybe a) where
   fromVoidPtr ptr
     | ptr == Foreign.nullPtr = return Nothing
-    | otherwise = Prelude.fmap Just (fromVoidPtr ptr)
+    | otherwise = fmap Just (fromVoidPtr ptr)
   toVoidPtr (Just val) = toVoidPtr val
   toVoidPtr Nothing = return Foreign.nullPtr
 
@@ -120,8 +119,8 @@ instance (TaggedError error, VoidPtr success) => VoidPtr (Result error success) 
     voidPtr <- Foreign.peek (Foreign.castPtr ptr)
     tag <- Foreign.peekByteOff ptr pointerSize
     case tag of
-      Word8 0 -> Prelude.fmap Ok (fromVoidPtr voidPtr)
-      _ -> Prelude.fmap Error (fromTaggedPtr tag voidPtr)
+      Word8 0 -> fmap Ok (fromVoidPtr voidPtr)
+      _ -> fmap Error (fromTaggedPtr tag voidPtr)
   toVoidPtr res = do
     ptr <- Foreign.mallocBytes (pointerSize + (1 :: Int))
     (tag, nestedPtr) <- case res of

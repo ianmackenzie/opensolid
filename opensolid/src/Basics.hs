@@ -26,12 +26,17 @@ module Basics
   , (|>)
   , (<|)
   , type (~)
+  , fmap
+  , (<*>)
   , (>>=)
+  , join
+  , pure
   , return
   , fail
   )
 where
 
+import Control.Monad (join)
 import Data.Kind (Type)
 import Data.Type.Equality (type (~))
 import Prelude
@@ -48,10 +53,13 @@ import Prelude
   , Ordering (EQ, GT, LT)
   , Show (show)
   , String
+  , fmap
   , fromIntegral
   , not
   , otherwise
+  , pure
   , (&&)
+  , (<*>)
   , (||)
   )
 import Prelude qualified

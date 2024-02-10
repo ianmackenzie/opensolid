@@ -17,7 +17,6 @@ import Data.Array qualified
 import Data.Foldable qualified
 import List qualified
 import OpenSolid
-import Prelude qualified
 
 newtype Array a = Array (Data.Array.Array Int a)
 
@@ -44,7 +43,7 @@ get index (Array array) =
         else Nothing
 
 map :: (a -> b) -> Array a -> Array b
-map function (Array array) = Array (Prelude.fmap function array)
+map function (Array array) = Array (fmap function array)
 
 foldLeft :: (b -> a -> b) -> b -> Array a -> b
 foldLeft function init (Array array) = Data.Foldable.foldl' function init array

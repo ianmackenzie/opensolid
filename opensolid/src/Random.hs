@@ -30,7 +30,6 @@ import System.Random qualified
 import System.Random.Stateful qualified
 import Task qualified
 import Prelude (Applicative, Functor, Monad)
-import Prelude qualified
 
 newtype Generator a = Generator (StdGen -> (a, StdGen))
 

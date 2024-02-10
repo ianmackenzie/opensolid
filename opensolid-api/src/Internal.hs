@@ -36,12 +36,12 @@ static = Function 'Api.Static
 
 ffi :: List Class -> TH.Q (List TH.Dec)
 ffi classes = do
-  functionDecls <- Prelude.fmap List.concat (Prelude.traverse ffiClass classes)
+  functionDecls <- fmap List.concat (Prelude.traverse ffiClass classes)
   freeStableFunctionDecl <- freeFunctionFfi "opensolid_free_stable" 'Pointers.freeStablePtr
   return (freeStableFunctionDecl : functionDecls)
  where
   ffiClass (Class _ _ _ functions) =
-    Prelude.fmap List.concat (Prelude.traverse ffiFunction functions)
+    fmap List.concat (Prelude.traverse ffiFunction functions)
 
 freeFunctionFfi :: String -> TH.Name -> TH.Q TH.Dec
 freeFunctionFfi ffiName name = do
@@ -61,7 +61,7 @@ apiName name =
 apiClass :: Class -> TH.Q TH.Exp
 apiClass (Class name representationProps errors functions) = do
   apiFns <- Prelude.traverse apiFunction functions
-  apiExceptions <- Prelude.fmap List.concat (Prelude.traverse apiException errors)
+  apiExceptions <- fmap List.concat (Prelude.traverse apiException errors)
   return <|
     TH.ConE 'Api.Class
       `TH.AppE` TH.LitE (TH.StringL (TH.nameBase name))
@@ -178,7 +178,7 @@ apiType (TH.AppT (TH.ConT containerName) nestedTyp) | containerName == ''Maybe =
 apiType typ = do
   isPtr <- isPointer typ
   if isPtr
-    then Prelude.fmap (TH.AppE (TH.ConE 'Api.Pointer)) (typeNameBase typ)
+    then fmap (TH.AppE (TH.ConE 'Api.Pointer)) (typeNameBase typ)
     else case typ of
       (TH.AppT (TH.ConT name) _)
         | name == ''Qty -> return (TH.ConE 'Api.Float)
