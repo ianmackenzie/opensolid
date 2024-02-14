@@ -329,9 +329,8 @@ instance
     let squaredRadius = Qty.squared (Units.generalize givenRadius)
     let squaredHalfLength =
           Qty.squared (Units.generalize (0.5 * Point2d.distanceFrom givenStartPoint givenEndPoint))
-    squaredOffsetMagnitude <-
-      Qty.nonNegative (squaredRadius - squaredHalfLength)
-        |> Result.mapError (\Qty.IsNegative -> Arc2d.EndpointsAreTooFarApart)
+    let squaredOffsetMagnitude = squaredRadius - squaredHalfLength
+    Result.check (squaredOffsetMagnitude >= Qty.zero) Arc2d.EndpointsAreTooFarApart
     let offsetMagnitude = Units.specialize (Qty.sqrt squaredOffsetMagnitude)
     let offsetDirection = Direction2d.rotateLeft chordDirection
     let offsetDistance =
