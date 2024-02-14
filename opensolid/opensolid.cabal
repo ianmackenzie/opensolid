@@ -43,7 +43,6 @@ common config
       -Wmissing-export-lists
       -Wmissing-home-modules
       -Wpartial-fields
-      -Wredundant-constraints
       -Wsafe
       -dcore-lint
   default-extensions:
