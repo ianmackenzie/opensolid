@@ -2,6 +2,7 @@ module Task
   ( Task
   , Async
   , evaluate
+  , check
   , main
   , fail
   , map
@@ -72,6 +73,9 @@ fail error = Task (return (Error error))
 
 evaluate :: Result x a -> Task x a
 evaluate result = Task (return result)
+
+check :: ErrorMessage x => Bool -> x -> Task x ()
+check condition message = if condition then return () else fail message
 
 map :: (a -> b) -> Task x a -> Task x b
 map function (Task io) = Task (fmap (Result.map function) io)

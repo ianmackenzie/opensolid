@@ -4,6 +4,7 @@ module Result
   , map
   , map2
   , withDefault
+  , check
   , mapError
   , onError
   , handleError
@@ -14,6 +15,7 @@ module Result
 where
 
 import Basics
+import Composition (Composition ((>>)))
 import System.IO.Error qualified
 import Prelude (Applicative, Functor, Monad, MonadFail)
 import Prelude qualified
@@ -52,6 +54,11 @@ instance Monad (Result x) where
 instance MonadFail (Result (List Char)) where
   fail = Error
 
+instance m ~ Result x => Composition (Result x a) (m b) (m b) where
+  Ok _ >> Ok second = Ok second
+  Error error >> _ = Error error
+  Ok _ >> Error error = Error error
+
 withDefault :: a -> Result x a -> a
 withDefault _ (Ok value) = value
 withDefault fallback (Error _) = fallback
@@ -65,6 +72,9 @@ map2 function result1 result2 = do
   value1 <- result1
   value2 <- result2
   return (function value1 value2)
+
+check :: ErrorMessage x => Bool -> x -> Result x ()
+check condition error = if condition then Ok () else Error error
 
 mapError :: ErrorMessage y => (x -> y) -> Result x a -> Result y a
 mapError _ (Ok value) = Ok value
