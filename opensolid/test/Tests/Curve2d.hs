@@ -16,6 +16,7 @@ import Length qualified
 import List qualified
 import OpenSolid
 import Point2d qualified
+import Qty qualified
 import QuadraticSpline2d qualified
 import Range (Range (Range))
 import Range qualified
@@ -23,6 +24,7 @@ import T qualified
 import Test (Test)
 import Test qualified
 import Tests.Random qualified as Random
+import Tolerance qualified
 import Units (Meters)
 import Vector2d qualified
 import VectorCurve2d qualified
@@ -158,7 +160,9 @@ solving =
     arc <- Arc2d.swept Angle.quarterTurn (Point2d.meters 0.0 1.0) (Point2d.meters 1.0 0.0)
     let squaredDistanceFromOrigin = VectorCurve2d.squaredMagnitude (arc - Point2d.origin)
     let desiredDistance = Length.meters 0.5
-    roots <- squaredDistanceFromOrigin |> Curve1d.equalToSquared (Length.meters 0.5)
+    roots <-
+      let ?tolerance = Tolerance.ofSquared desiredDistance
+       in Curve1d.roots (squaredDistanceFromOrigin - Qty.squared desiredDistance)
     let distances =
           roots
             |> List.map Curve1d.Root.value
