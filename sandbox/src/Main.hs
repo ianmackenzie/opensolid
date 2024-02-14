@@ -237,15 +237,8 @@ testLineFromEndpoints = Try.do
 
 testDirectedLine :: Tolerance Meters => Task String ()
 testDirectedLine = Try.do
-  let line1 =
-        Line2d.with
-          ( Line2d.startPoint Point2d.origin
-          , Line2d.direction (Direction2d.degrees 45.0)
-          , Line2d.length (Length.centimeters 200.0)
-          )
-  case line1 of
-    Curve2d.Line {endPoint} -> log "Line end point" endPoint
-    _ -> log "Unexpected curve" line1
+  let line = Line2d.directed Point2d.origin (Direction2d.degrees 45.0) (Length.meters 2.0)
+  log "Line end point" (Curve2d.endPoint line)
 
 testArcFromEndpoints :: Tolerance Meters => Task String ()
 testArcFromEndpoints = Try.do
