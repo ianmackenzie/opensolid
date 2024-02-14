@@ -120,7 +120,7 @@ find ::
 find point curve =
   case VectorCurve2d.roots (point - curve) of
     Ok roots -> roots
-      -- Shouldn't happen, since curves are enforced to be non-degenerate
+    -- Shouldn't happen, since curves are enforced to be non-degenerate
     Error VectorCurve2d.ZeroEverywhere -> []
 
 overlappingSegments ::
