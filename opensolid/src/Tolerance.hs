@@ -3,14 +3,17 @@ module Tolerance
   , ApproximateEquality ((~=))
   , (!=)
   , exactly
+  , ofSquared
   )
 where
 
 import Arithmetic
 import Basics
+import Float (fromRational)
 import NonEmpty (NonEmpty ((:|)), pattern NonEmpty)
 import Qty (Qty)
 import Qty qualified
+import Units qualified
 
 type Tolerance units = ?tolerance :: Qty units
 
@@ -89,3 +92,6 @@ exactly :: (Tolerance units => a) -> a
 exactly expression = let ?tolerance = Qty.zero in expression
 
 infix 4 ~=, !=
+
+ofSquared :: (Tolerance units, Units.Product units units squaredUnits) => Qty units -> Qty squaredUnits
+ofSquared value = ?tolerance * ?tolerance + 2.0 * Qty.abs value * ?tolerance
