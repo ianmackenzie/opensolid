@@ -14,9 +14,6 @@ module Curve1d
   , cos
   , ZeroEverywhere (ZeroEverywhere)
   , roots
-  , EqualEverywhere (EqualEverywhere)
-  , equalTo
-  , equalToSquared
   , reverse
   , integral
   )
@@ -36,7 +33,6 @@ import OpenSolid
 import Qty qualified
 import Range (Range)
 import Range qualified
-import Result qualified
 import Stream (Stream)
 import Stream qualified
 import T qualified
@@ -390,21 +386,6 @@ maxRootOrder = 4
 ----- ROOT FINDING -----
 
 data ZeroEverywhere = ZeroEverywhere deriving (Eq, Show, ErrorMessage)
-
-data EqualEverywhere = EqualEverywhere deriving (Eq, Show, ErrorMessage)
-
-equalTo :: Tolerance units => Qty units -> Curve1d units -> Result EqualEverywhere (List Root)
-equalTo value curve =
-  roots (curve - value) |> Result.mapError (\ZeroEverywhere -> EqualEverywhere)
-
-equalToSquared ::
-  (Tolerance units1, Squared units1 units2) =>
-  Qty units1 ->
-  Curve1d units2 ->
-  Result EqualEverywhere (List Root)
-equalToSquared value curve =
-  let ?tolerance = ?tolerance * ?tolerance + 2.0 * value * ?tolerance
-   in roots (curve - Qty.squared value) |> Result.mapError (\ZeroEverywhere -> EqualEverywhere)
 
 roots :: Tolerance units => Curve1d units -> Result ZeroEverywhere (List Root)
 roots Zero = Error ZeroEverywhere
