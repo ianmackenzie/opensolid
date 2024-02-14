@@ -383,6 +383,7 @@ cos curve = Cos curve
 isZero :: Tolerance units => Curve1d units -> Bool
 isZero curve = List.all (\tValue -> pointOn curve tValue ~= Qty.zero) (Range.samples T.domain)
 
+-- TODO report an error if higher-order root detected
 maxRootOrder :: Int
 maxRootOrder = 4
 
