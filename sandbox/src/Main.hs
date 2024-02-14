@@ -226,7 +226,7 @@ testLineFromEndpoints :: Tolerance Meters => Task String ()
 testLineFromEndpoints = Try.do
   line1 <-
     Task.evaluate <|
-      Line2d.with
+      Line2d.build
         ( Line2d.startPoint Point2d.origin
         , Line2d.endPoint (Point2d.centimeters 40.0 30.0)
         )
