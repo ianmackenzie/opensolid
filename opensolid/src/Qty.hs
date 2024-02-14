@@ -24,10 +24,6 @@ module Qty
   , smallestBy
   , largestBy
   , clamp
-  , IsZero (IsZero)
-  , nonZero
-  , IsNegative (IsNegative)
-  , nonNegative
   , convert
   , unconvert
   )
@@ -42,9 +38,7 @@ import {-# SOURCE #-} Float (Float, fromRational)
 import {-# SOURCE #-} Float qualified
 import Foreign.Storable (Storable)
 import Generic qualified
-import Result (ErrorMessage, Result (Error, Ok))
 import Sign (Sign (Negative, Positive))
-import {-# SOURCE #-} Tolerance (Tolerance, (~=))
 import Units (Unitless, convert, unconvert)
 import Units qualified
 import Prelude qualified
@@ -247,13 +241,3 @@ interpolateFrom a b t =
 {-# INLINE midpoint #-}
 midpoint :: Qty units -> Qty units -> Qty units
 midpoint a b = 0.5 * (a + b)
-
-data IsZero = IsZero deriving (Eq, Show, ErrorMessage)
-
-nonZero :: Tolerance units => Qty units -> Result IsZero (Qty units)
-nonZero value = if value ~= zero then Error IsZero else Ok value
-
-data IsNegative = IsNegative deriving (Eq, Show, ErrorMessage)
-
-nonNegative :: Qty units -> Result IsNegative (Qty units)
-nonNegative value = if value >= zero then Ok value else Error IsNegative
