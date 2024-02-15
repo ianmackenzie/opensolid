@@ -144,7 +144,6 @@ library
       Task
       Tolerance
       Transform2d
-      Try
       Units
       Uv
       Uvw
