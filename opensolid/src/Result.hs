@@ -16,12 +16,16 @@ where
 import Basics
 import Composition (Composition ((>>)))
 import Error (Error)
+import Error qualified
 import Prelude (Applicative, Functor, Monad, MonadFail)
 import Prelude qualified
 
 data Result x a where
   Ok :: a -> Result x a
   Error :: Error x => x -> Result x a
+
+instance (Error x, Error y, a ~ a') => Error.Map x y (Result x a) (Result y a') where
+  map = mapError
 
 deriving instance (Eq x, Eq a) => Eq (Result x a)
 
