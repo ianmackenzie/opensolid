@@ -227,7 +227,7 @@ data BuildError
   = DegenerateArc
   | EndpointsAreTooFarApart
   | NegativeRadius
-  deriving (Eq, Show, ErrorMessage)
+  deriving (Eq, Show, Error)
 
 instance
   ( space ~ space'

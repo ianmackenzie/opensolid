@@ -110,7 +110,7 @@ instance (VoidPtr a, VoidPtr b) => VoidPtr (a, b) where
 pointerSize :: Int
 pointerSize = Foreign.sizeOf Foreign.nullPtr
 
-class ErrorMessage error => TaggedError error where
+class Error error => TaggedError error where
   fromTaggedPtr :: Foreign.Word8 -> Foreign.Ptr () -> IO error
   toTaggedPtr :: error -> IO (Foreign.Word8, Foreign.Ptr ())
 

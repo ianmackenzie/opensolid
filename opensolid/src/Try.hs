@@ -11,6 +11,7 @@ module Try
   )
 where
 
+import Error qualified
 import OpenSolid hiding ((<*>), (>>), (>>=))
 import OpenSolid qualified
 import Result qualified
@@ -29,24 +30,24 @@ instance MapError Task where
 
 (>>) ::
   ( MapError m
-  , ErrorMessage x
+  , Error x
   , Composition (m String a) (m String b) (m String b)
   ) =>
   m x a ->
   m String b ->
   m String b
-monad1 >> monad2 = mapError errorMessage monad1 OpenSolid.>> monad2
+monad1 >> monad2 = mapError Error.message monad1 OpenSolid.>> monad2
 
-(<*>) :: (Applicative (m String), MapError m, ErrorMessage x) => m x (a -> b) -> m String a -> m String b
+(<*>) :: (Applicative (m String), MapError m, Error x) => m x (a -> b) -> m String a -> m String b
 functionApplicative <*> valueApplicative =
-  mapError errorMessage functionApplicative OpenSolid.<*> valueApplicative
+  mapError Error.message functionApplicative OpenSolid.<*> valueApplicative
 
-(>>=) :: (Monad (m String), MapError m, ErrorMessage x) => m x a -> (a -> m String b) -> m String b
+(>>=) :: (Monad (m String), MapError m, Error x) => m x a -> (a -> m String b) -> m String b
 monad >>= function =
-  mapError errorMessage monad OpenSolid.>>= function
+  mapError Error.message monad OpenSolid.>>= function
 
-withContext :: (MapError m, ErrorMessage x) => String -> m x a -> m String a
-withContext context = mapError (\error -> errorMessage error |> addContext context)
+withContext :: (MapError m, Error x) => String -> m x a -> m String a
+withContext context = mapError (\error -> Error.message error |> addContext context)
 
 addContext :: String -> String -> String
 addContext context text = context ++ ":\n" ++ String.indent "  " text

@@ -22,6 +22,7 @@ import OpenSolid hiding (fail, (>>=))
 import OpenSolid qualified
 import Random (Generator)
 import Random qualified
+import Error qualified
 import String qualified
 import Task qualified
 
@@ -43,11 +44,11 @@ instance a ~ a' => Bind (Task x a) a' (Task x b) where
 
 instance a ~ a' => Bind (Result x a) a' Expectation where
   Ok value >>= f = f value
-  Error error >>= _ = Failed [errorMessage error]
+  Error error >>= _ = Failed [Error.message error]
 
 instance a ~ a' => Bind (Result x a) a' (Generator Expectation) where
   Ok value >>= f = f value
-  Error error >>= _ = Random.return (Failed [errorMessage error])
+  Error error >>= _ = Random.return (Failed [Error.message error])
 
 data Test
   = Check Int String (Generator Expectation)

@@ -591,7 +591,7 @@ instance
 squaredMagnitude :: Units.Squared units1 units2 => VectorCurve2d (space @ units1) -> Curve1d units2
 squaredMagnitude curve = Curve1d (SquaredMagnitudeOf curve)
 
-data ZeroEverywhere = ZeroEverywhere deriving (Eq, Show, ErrorMessage)
+data ZeroEverywhere = ZeroEverywhere deriving (Eq, Show, Error)
 
 roots :: Tolerance units => VectorCurve2d (space @ units) -> Result ZeroEverywhere (List Float)
 roots curve =
@@ -607,7 +607,7 @@ xComponent curve = curve <> Direction2d.x
 yComponent :: VectorCurve2d (space @ units) -> Curve1d units
 yComponent curve = curve <> Direction2d.y
 
-data DegenerateCurve = DegenerateCurve deriving (Eq, Show, ErrorMessage)
+data DegenerateCurve = DegenerateCurve deriving (Eq, Show, Error)
 
 direction :: Tolerance units => VectorCurve2d (space @ units) -> Result DegenerateCurve (DirectionCurve2d space)
 direction curve =

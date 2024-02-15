@@ -1,6 +1,5 @@
 module Result
   ( Result (Ok, Error)
-  , ErrorMessage (..)
   , map
   , map2
   , withDefault
@@ -16,23 +15,13 @@ where
 
 import Basics
 import Composition (Composition ((>>)))
-import System.IO.Error qualified
+import Error (Error)
 import Prelude (Applicative, Functor, Monad, MonadFail)
 import Prelude qualified
 
-class (Eq error, Show error) => ErrorMessage error where
-  errorMessage :: error -> String
-  errorMessage = show
-
-instance ErrorMessage String where
-  errorMessage = identity
-
-instance ErrorMessage IOError where
-  errorMessage ioError = System.IO.Error.ioeGetErrorString ioError
-
 data Result x a where
   Ok :: a -> Result x a
-  Error :: ErrorMessage x => x -> Result x a
+  Error :: Error x => x -> Result x a
 
 deriving instance (Eq x, Eq a) => Eq (Result x a)
 
@@ -51,7 +40,7 @@ instance Monad (Result x) where
   Ok value >>= function = function value
   Error error >>= _ = Error error
 
-instance MonadFail (Result (List Char)) where
+instance MonadFail (Result String) where
   fail = Error
 
 instance m ~ Result x => Composition (Result x a) (m b) (m b) where
@@ -73,10 +62,10 @@ map2 function result1 result2 = do
   value2 <- result2
   return (function value1 value2)
 
-check :: ErrorMessage x => Bool -> x -> Result x ()
+check :: Error x => Bool -> x -> Result x ()
 check condition error = if condition then Ok () else Error error
 
-mapError :: ErrorMessage y => (x -> y) -> Result x a -> Result y a
+mapError :: Error y => (x -> y) -> Result x a -> Result y a
 mapError _ (Ok value) = Ok value
 mapError function (Error err) = Error (function err)
 

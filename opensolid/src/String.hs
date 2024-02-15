@@ -22,9 +22,8 @@ import Data.Char qualified
 import Data.List qualified
 import Float (Float)
 import List qualified
-import Maybe qualified
 import Qty (Qty (Qty))
-import Result (Result)
+import {-# SOURCE #-} Result (Result (Error, Ok))
 import Text.Read qualified
 
 concat :: List String -> String
@@ -41,13 +40,15 @@ fromFloat (Qty x) = show x
 
 toInt :: String -> Result String Int
 toInt input =
-  Maybe.orError ("Couldn't parse input as integer: " ++ input) <|
-    Text.Read.readMaybe input
+  case Text.Read.readMaybe input of
+    Just value -> Ok value
+    Nothing -> Error ("Couldn't parse input as integer: " ++ input)
 
 toFloat :: String -> Result String Float
 toFloat input =
-  Maybe.orError ("Couldn't parse input as float: " ++ input) <|
-    Text.Read.readMaybe input
+  case Text.Read.readMaybe input of
+    Just value -> Ok value
+    Nothing -> Error ("Couldn't parse input as float: " ++ input)
 
 lines :: String -> List String
 lines string =

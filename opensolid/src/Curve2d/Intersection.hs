@@ -21,7 +21,7 @@ data Kind = Crossing | Tangent deriving (Eq, Ord, Show)
 
 data TangentIntersectionAtDegeneratePoint
   = TangentIntersectionAtDegeneratePoint
-  deriving (Eq, Show, ErrorMessage)
+  deriving (Eq, Show, Error)
 
 instance ApproximateEquality Intersection Intersection Unitless where
   intersection1 ~= intersection2 =

@@ -101,6 +101,7 @@ library
       DirectionCurve2d
       Drawing2d
       Duration
+      Error
       Estimate
       File
       Float

@@ -29,8 +29,10 @@ import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.IO.Class qualified
 import {-# SOURCE #-} Duration (Duration)
 import {-# SOURCE #-} Duration qualified
+import Error (Error)
+import Error qualified
 import Float qualified
-import Result (ErrorMessage (errorMessage), Result (Error, Ok))
+import Result (Result (Error, Ok))
 import Result qualified
 import System.Exit qualified
 import Prelude (Applicative, Functor, Monad, MonadFail)
@@ -68,19 +70,19 @@ instance MonadIO (Task IOError) where
 instance m ~ Task x => Composition (Task x a) (m b) (m b) where
   (>>) = (Prelude.>>)
 
-fail :: ErrorMessage x => x -> Task x a
+fail :: Error x => x -> Task x a
 fail error = Task (return (Error error))
 
 evaluate :: Result x a -> Task x a
 evaluate result = Task (return result)
 
-check :: ErrorMessage x => Bool -> x -> Task x ()
+check :: Error x => Bool -> x -> Task x ()
 check condition message = if condition then return () else fail message
 
 map :: (a -> b) -> Task x a -> Task x b
 map function (Task io) = Task (fmap (Result.map function) io)
 
-mapError :: ErrorMessage y => (x -> y) -> Task x a -> Task y a
+mapError :: Error y => (x -> y) -> Task x a -> Task y a
 mapError function (Task io) = Task (fmap (Result.mapError function) io)
 
 unsafe :: IO (Result x a) -> Task x a
@@ -90,7 +92,7 @@ liftIO :: IO a -> Task IOError a
 liftIO io = Task (Control.Exception.catch (fmap Ok io) (Error >> return))
 
 fromIO :: IO a -> Task String a
-fromIO = liftIO >> mapError errorMessage
+fromIO = liftIO >> mapError Error.message
 
 toIO :: Task x a -> IO (Result x a)
 toIO (Task io) = io
@@ -100,7 +102,7 @@ main (Task io) = do
   result <- io
   case result of
     Ok () -> System.Exit.exitSuccess
-    Error error -> System.Exit.die (errorMessage error)
+    Error error -> System.Exit.die (Error.message error)
 
 forEach :: List a -> (a -> Task x ()) -> Task x ()
 forEach values function = Prelude.mapM_ function values

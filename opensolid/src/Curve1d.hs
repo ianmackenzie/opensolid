@@ -385,7 +385,7 @@ maxRootOrder = 4
 
 ----- ROOT FINDING -----
 
-data ZeroEverywhere = ZeroEverywhere deriving (Eq, Show, ErrorMessage)
+data ZeroEverywhere = ZeroEverywhere deriving (Eq, Show, Error)
 
 roots :: Tolerance units => Curve1d units -> Result ZeroEverywhere (List Root)
 roots Zero = Error ZeroEverywhere

@@ -11,6 +11,7 @@ import Curve2d.Intersection (Intersection (Intersection))
 import Curve2d.Intersection qualified as Intersection
 import Direction2d qualified
 import DirectionCurve2d qualified
+import Error qualified
 import Float qualified
 import Length qualified
 import List qualified
@@ -72,7 +73,7 @@ overlappingSegments curve1 curve2 =
   case Curve2d.intersections curve1 curve2 of
     Ok _ -> Error "Intersection should have failed (and given overlapping segments)"
     Error (Curve2d.CurvesOverlap segments) -> Ok segments
-    Error error -> Error (errorMessage error)
+    Error error -> Error (Error.message error)
 
 equalUBounds :: T.Bounds -> T.Bounds -> Bool
 equalUBounds (Range low1 high1) (Range low2 high2) =

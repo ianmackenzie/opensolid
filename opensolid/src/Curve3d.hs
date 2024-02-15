@@ -43,4 +43,4 @@ instance Interface (Curve3d (space @ units)) (space @ units) where
   reverseImpl (Curve3d curve) = Curve3d (reverseImpl curve)
   boundsImpl (Curve3d curve) = boundsImpl curve
 
-data DegenerateCurve = DegenerateCurve deriving (Eq, Show, ErrorMessage)
+data DegenerateCurve = DegenerateCurve deriving (Eq, Show, Error)

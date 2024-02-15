@@ -45,7 +45,7 @@ data BuildError
   | RegionBoundaryIntersectsItself
   | MultipleDisjointRegions
   | TangentIntersectionAtDegeneratePoint
-  deriving (Eq, Show, ErrorMessage)
+  deriving (Eq, Show, Error)
 
 boundedBy ::
   Tolerance units =>

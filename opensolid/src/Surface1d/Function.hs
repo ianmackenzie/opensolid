@@ -383,7 +383,7 @@ data SolveError
   = ZeroEverywhere
   | HigherOrderIntersection
   | DegenerateCurve
-  deriving (Eq, Show, ErrorMessage)
+  deriving (Eq, Show, Error)
 
 solve :: Tolerance units => Function units -> Result SolveError (List Solution)
 solve Zero = Error ZeroEverywhere

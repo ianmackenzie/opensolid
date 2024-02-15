@@ -53,7 +53,7 @@ import VectorCurve2d qualified
 
 type Curve2d (coordinateSystem :: CoordinateSystem) = Internal.Curve2d coordinateSystem
 
-data DegenerateCurve = DegenerateCurve deriving (Eq, Show, ErrorMessage)
+data DegenerateCurve = DegenerateCurve deriving (Eq, Show, Error)
 
 from ::
   ( Tolerance units
@@ -100,7 +100,7 @@ tangentDirection (Internal.Arc {startAngle, endAngle}) =
    in Qty.sign (endAngle - startAngle) * DirectionCurve2d.arc tangentStartAngle tangentEndAngle
 tangentDirection (Internal.Curve _ tangent) = tangent
 
-data CurveIsCoincidentWithPoint = CurveIsCoincidentWithPoint deriving (Eq, Show, ErrorMessage)
+data CurveIsCoincidentWithPoint = CurveIsCoincidentWithPoint deriving (Eq, Show, Error)
 
 signedDistanceAlong :: Axis2d (space @ units) -> Curve2d (space @ units) -> Curve1d units
 signedDistanceAlong axis curve =
@@ -156,7 +156,7 @@ isOverlappingSegment curve1 curve2 (domain1, _, _) =
 data IntersectionError
   = CurvesOverlap (List (T.Bounds, T.Bounds, Sign))
   | TangentIntersectionAtDegeneratePoint
-  deriving (Eq, Show, ErrorMessage)
+  deriving (Eq, Show, Error)
 
 findEndpointParameterValues ::
   Tolerance units =>
