@@ -270,7 +270,7 @@ ffiArgInfo typ = Prelude.do
               (TH.VarP unwrappedName)
               (TH.AppE (TH.VarE 'Pointers.fromVoidPtr) (TH.VarE argName))
         )
-    else 
+    else
       return
         ( TH.VarP argName -- arg name
         , typ -- original type
