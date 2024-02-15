@@ -15,8 +15,8 @@ import Frame2d qualified
 import OpenSolid
 import Point2d qualified
 import Range qualified
-import Prelude qualified
 import Vector2d qualified
+import Prelude qualified
 
 {- | Define a pattern that effectively lets us pretend that there's a Word8 constructor
 that takes an Int and returns a Word8; we can then use this to
