@@ -145,8 +145,8 @@ testTaskIteration :: Task ()
 testTaskIteration = Task.forEach [1 .. 3] (log "Looping")
 
 doublingTask :: String -> Task Int
-doublingTask input = do
-  value <- Task.evaluate (String.toInt input)
+doublingTask input = Task.do
+  value <- String.toInt input
   let doubled = 2 * value
   return doubled
 
@@ -181,13 +181,13 @@ outputLine :: Point2d (space @ Unitless) -> String
 outputLine (Point2d px py) = String.fromFloat px ++ "," ++ String.fromFloat py
 
 testSurface1dIntersection :: Task ()
-testSurface1dIntersection = do
+testSurface1dIntersection = Task.do
   let u = Surface1d.Function.parameter U
   let v = Surface1d.Function.parameter V
   let x = -0.97 + 1.94 * u
   let y = -0.97 + 1.94 * v
   let f = Surface1d.Function.squared x + Surface1d.Function.squared y - 1.0
-  solutions <- Task.evaluate (Surface1d.Function.solve f)
+  solutions <- Surface1d.Function.solve f
   log "Number of solutions" (List.length solutions)
   let segmentPoints segment = [Curve2d.pointOn segment uValue | uValue <- T.steps 10]
   let curvePoints segments = List.collect segmentPoints (NonEmpty.toList segments)
@@ -196,7 +196,7 @@ testSurface1dIntersection = do
         Surface1d.Solution.CrossingLoop {segments} -> Ok (curvePoints segments)
         Surface1d.Solution.BoundaryPoint {} -> Ok []
         solution -> Error ("Unexpected solution: " ++ show solution)
-  solutionPointLists <- Task.evaluate (Result.collect solutionPoints solutions)
+  solutionPointLists <- Result.collect solutionPoints solutions
   let allSolutionPoints = List.concat solutionPointLists
   let outputLines = List.map outputLine allSolutionPoints
   let fileName = "solution-points.txt"
@@ -219,13 +219,12 @@ testSvgOutput =
     ]
 
 testLineFromEndpoints :: Tolerance Meters => Task ()
-testLineFromEndpoints = do
+testLineFromEndpoints = Task.do
   line1 <-
-    Task.evaluate <|
-      Line2d.build
-        ( Line2d.startPoint Point2d.origin
-        , Line2d.endPoint (Point2d.centimeters 40.0 30.0)
-        )
+    Line2d.build
+      ( Line2d.startPoint Point2d.origin
+      , Line2d.endPoint (Point2d.centimeters 40.0 30.0)
+      )
   case line1 of
     Curve2d.Line {length} ->
       log "Line length in centimeters" (Length.inCentimeters length)
@@ -237,21 +236,19 @@ testDirectedLine = do
   log "Line end point" (Curve2d.endPoint line)
 
 testArcFromEndpoints :: Tolerance Meters => Task ()
-testArcFromEndpoints = do
+testArcFromEndpoints = Task.do
   arc <-
-    Task.evaluate <|
-      Arc2d.with
-        ( Arc2d.startPoint Point2d.origin
-        , Arc2d.endPoint (Point2d.centimeters 50.0 50.0)
-        , Arc2d.sweptAngle Angle.quarterTurn
-        )
+    Arc2d.with
+      ( Arc2d.startPoint Point2d.origin
+      , Arc2d.endPoint (Point2d.centimeters 50.0 50.0)
+      , Arc2d.sweptAngle Angle.quarterTurn
+      )
   case arc of
-    Curve2d.Arc {centerPoint} ->
-      log "Arc center point" centerPoint
+    Curve2d.Arc {centerPoint} -> log "Arc center point" centerPoint
     _ -> log "Unexpected curve" arc
 
 testPlaneTorusIntersection :: Tolerance Meters => Task ()
-testPlaneTorusIntersection = do
+testPlaneTorusIntersection = Task.do
   let theta = Angle.twoPi * Surface1d.Function.parameter U
   let phi = Angle.twoPi * Surface1d.Function.parameter V
   let minorRadius = Length.centimeters 1.0
@@ -271,7 +268,7 @@ testPlaneTorusIntersection = do
   -- let ny = 0.0
   -- let nz = 1.0
   let f = x * nx + y * ny + z * nz
-  solutions <- Task.evaluate (Surface1d.Function.solve f)
+  solutions <- Surface1d.Function.solve f
   drawSolutions "solutions.svg" solutions
   Console.printLine ""
   Console.printLine "Plane torus intersection solutions:"
