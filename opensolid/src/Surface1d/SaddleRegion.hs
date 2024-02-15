@@ -30,12 +30,12 @@ data SaddleRegion = SaddleRegion
   deriving (Show)
 
 isInsideRegion :: SaddleRegion -> Uv.Point -> Bool
-isInsideRegion (SaddleRegion {frame, halfWidth, halfHeight}) point =
+isInsideRegion (SaddleRegion{frame, halfWidth, halfHeight}) point =
   let Point2d localX localY = Point2d.relativeTo frame point
    in Float.abs localX < halfWidth && Float.abs localY < halfHeight
 
 corners :: SaddleRegion -> List Uv.Point
-corners (SaddleRegion {frame, halfWidth, halfHeight}) =
+corners (SaddleRegion{frame, halfWidth, halfHeight}) =
   [ Point2d.xyIn frame -halfWidth -halfHeight
   , Point2d.xyIn frame halfWidth -halfHeight
   , Point2d.xyIn frame halfWidth halfHeight
@@ -43,7 +43,7 @@ corners (SaddleRegion {frame, halfWidth, halfHeight}) =
   ]
 
 bounds :: SaddleRegion -> Uv.Bounds
-bounds (SaddleRegion {frame, halfWidth, halfHeight}) =
+bounds (SaddleRegion{frame, halfWidth, halfHeight}) =
   let Point2d x0 y0 = Frame2d.originPoint frame
       Direction2d (Vector2d ix iy) = Frame2d.xDirection frame
       Direction2d (Vector2d jx jy) = Frame2d.yDirection frame

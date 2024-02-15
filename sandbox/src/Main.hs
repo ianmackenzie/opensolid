@@ -192,9 +192,9 @@ testSurface1dIntersection = Task.do
   let segmentPoints segment = [Curve2d.pointOn segment uValue | uValue <- T.steps 10]
   let curvePoints segments = List.collect segmentPoints (NonEmpty.toList segments)
   let solutionPoints = \case
-        Surface1d.Solution.CrossingCurve {segments} -> Ok (curvePoints segments)
-        Surface1d.Solution.CrossingLoop {segments} -> Ok (curvePoints segments)
-        Surface1d.Solution.BoundaryPoint {} -> Ok []
+        Surface1d.Solution.CrossingCurve{segments} -> Ok (curvePoints segments)
+        Surface1d.Solution.CrossingLoop{segments} -> Ok (curvePoints segments)
+        Surface1d.Solution.BoundaryPoint{} -> Ok []
         solution -> Error ("Unexpected solution: " ++ show solution)
   solutionPointLists <- Result.collect solutionPoints solutions
   let allSolutionPoints = List.concat solutionPointLists
@@ -226,7 +226,7 @@ testLineFromEndpoints = Task.do
       , Line2d.endPoint (Point2d.centimeters 40.0 30.0)
       )
   case line1 of
-    Curve2d.Line {length} ->
+    Curve2d.Line{length} ->
       log "Line length in centimeters" (Length.inCentimeters length)
     _ -> log "Unexpected curve" line1
 
@@ -244,7 +244,7 @@ testArcFromEndpoints = Task.do
       , Arc2d.sweptAngle Angle.quarterTurn
       )
   case arc of
-    Curve2d.Arc {centerPoint} -> log "Arc center point" centerPoint
+    Curve2d.Arc{centerPoint} -> log "Arc center point" centerPoint
     _ -> log "Unexpected curve" arc
 
 testPlaneTorusIntersection :: Tolerance Meters => Task ()
@@ -273,11 +273,11 @@ testPlaneTorusIntersection = Task.do
   Console.printLine ""
   Console.printLine "Plane torus intersection solutions:"
   Task.forEach solutions \case
-    Surface1d.Solution.CrossingCurve {} -> Console.printLine "Crossing curve"
+    Surface1d.Solution.CrossingCurve{} -> Console.printLine "Crossing curve"
     Surface1d.Solution.BoundaryEdge curve -> log "Boundary edge" curve
     Surface1d.Solution.BoundaryPoint point -> log "Boundary point" point
-    Surface1d.Solution.SaddlePoint {point} -> log "Saddle point" point
-    Surface1d.Solution.DegenerateCrossingCurve {start, end} -> log "Degenerate crossing curve" (start, end)
+    Surface1d.Solution.SaddlePoint{point} -> log "Saddle point" point
+    Surface1d.Solution.DegenerateCrossingCurve{start, end} -> log "Degenerate crossing curve" (start, end)
     solution -> log "Unexpected solution" solution
   return ()
 
@@ -314,7 +314,7 @@ drawSolution index solution =
   let hue = (Float.fromInt index * Angle.goldenAngle) % Angle.twoPi
       colour = Colour.hsl hue 0.5 0.5
    in case solution of
-        Surface1d.Solution.CrossingCurve {segments, start, end} ->
+        Surface1d.Solution.CrossingCurve{segments, start, end} ->
           Drawing2d.with
             [ Drawing2d.strokeColour colour
             , Drawing2d.opacity 0.3
@@ -323,9 +323,9 @@ drawSolution index solution =
             , drawBoundary start
             , drawBoundary end
             ]
-        Surface1d.Solution.DegenerateCrossingCurve {start, end} ->
+        Surface1d.Solution.DegenerateCrossingCurve{start, end} ->
           Drawing2d.group [drawBoundary start, drawBoundary end]
-        Surface1d.Solution.SaddlePoint {point, region} ->
+        Surface1d.Solution.SaddlePoint{point, region} ->
           Drawing2d.group
             [ drawDot Colour.orange point
             , drawSaddleRegion [Drawing2d.noFill, Drawing2d.strokeColour Colour.lightGrey] region

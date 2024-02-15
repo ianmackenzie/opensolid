@@ -34,10 +34,10 @@ instance (space ~ space', units ~ units') => Transformable2d (Axis2d (space @ un
       }
 
 x :: Axis2d (space @ units)
-x = Axis2d {originPoint = Point2d.origin, direction = Direction2d.x}
+x = Axis2d{originPoint = Point2d.origin, direction = Direction2d.x}
 
 y :: Axis2d (space @ units)
-y = Axis2d {originPoint = Point2d.origin, direction = Direction2d.y}
+y = Axis2d{originPoint = Point2d.origin, direction = Direction2d.y}
 
 through :: Point2d (space @ units) -> Direction2d space -> Axis2d (space @ units)
 through = Axis2d

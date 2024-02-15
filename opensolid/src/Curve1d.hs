@@ -448,7 +448,7 @@ findRoot originalCurve rootOrder derivatives domain _ nextDerivativeSign = Maybe
   let curve = Stream.nth rootOrder derivatives
   rootX <- Range.solve (pointOn curve) domain
   if rootOrder == 0 || evaluateAt rootX originalCurve ~= Qty.zero
-    then Just (Root {value = rootX, order = rootOrder, sign = nextDerivativeSign})
+    then Just (Root{value = rootX, order = rootOrder, sign = nextDerivativeSign})
     else Nothing
 
 resolveSign :: Range units -> Fuzzy Sign
@@ -471,7 +471,7 @@ solveEndpoint curve endpointX
                   if updatedMinWidth < currentMinWidth
                     then
                       Just
-                        ( Root {value = endpointX, order = rootOrder, sign = Qty.sign derivativeValue}
+                        ( Root{value = endpointX, order = rootOrder, sign = Qty.sign derivativeValue}
                         , curveDerivative
                         )
                     else currentBest

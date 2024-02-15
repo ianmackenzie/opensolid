@@ -124,55 +124,55 @@ centerPoint ::
   Point2d (space @ units) ->
   Arguments () startPoint endPoint radius startAngle endAngle sweptAngle direction size ->
   Arguments (CenterPoint (space @ units)) startPoint endPoint radius startAngle endAngle sweptAngle direction size
-centerPoint givenCenterPoint arguments = arguments {centerPoint = CenterPoint givenCenterPoint}
+centerPoint givenCenterPoint arguments = arguments{centerPoint = CenterPoint givenCenterPoint}
 
 startPoint ::
   Point2d (space @ units) ->
   Arguments centerPoint () endPoint radius startAngle endAngle sweptAngle direction size ->
   Arguments centerPoint (StartPoint (space @ units)) endPoint radius startAngle endAngle sweptAngle direction size
-startPoint givenStartPoint arguments = arguments {startPoint = StartPoint givenStartPoint}
+startPoint givenStartPoint arguments = arguments{startPoint = StartPoint givenStartPoint}
 
 endPoint ::
   Point2d (space @ units) ->
   Arguments centerPoint startPoint () radius startAngle endAngle sweptAngle direction size ->
   Arguments centerPoint startPoint (EndPoint (space @ units)) radius startAngle endAngle sweptAngle direction size
-endPoint givenEndPoint arguments = arguments {endPoint = EndPoint givenEndPoint}
+endPoint givenEndPoint arguments = arguments{endPoint = EndPoint givenEndPoint}
 
 radius ::
   Qty units ->
   Arguments centerPoint startPoint endPoint () startAngle endAngle sweptAngle direction size ->
   Arguments centerPoint startPoint endPoint (Radius units) startAngle endAngle sweptAngle direction size
-radius givenRadius arguments = arguments {radius = Radius givenRadius}
+radius givenRadius arguments = arguments{radius = Radius givenRadius}
 
 startAngle ::
   Angle ->
   Arguments centerPoint startPoint endPoint radius () endAngle sweptAngle direction size ->
   Arguments centerPoint startPoint endPoint radius StartAngle endAngle sweptAngle direction size
-startAngle givenStartAngle arguments = arguments {startAngle = StartAngle givenStartAngle}
+startAngle givenStartAngle arguments = arguments{startAngle = StartAngle givenStartAngle}
 
 endAngle ::
   Angle ->
   Arguments centerPoint startPoint endPoint radius startAngle () sweptAngle direction size ->
   Arguments centerPoint startPoint endPoint radius startAngle EndAngle sweptAngle direction size
-endAngle givenEndAngle arguments = arguments {endAngle = EndAngle givenEndAngle}
+endAngle givenEndAngle arguments = arguments{endAngle = EndAngle givenEndAngle}
 
 sweptAngle ::
   Angle ->
   Arguments centerPoint startPoint endPoint radius startAngle endAngle () direction size ->
   Arguments centerPoint startPoint endPoint radius startAngle endAngle SweptAngle direction size
-sweptAngle givenSweptAngle arguments = arguments {sweptAngle = SweptAngle givenSweptAngle}
+sweptAngle givenSweptAngle arguments = arguments{sweptAngle = SweptAngle givenSweptAngle}
 
 direction ::
   Direction ->
   Arguments centerPoint startPoint endPoint radius startAngle endAngle sweptAngle () size ->
   Arguments centerPoint startPoint endPoint radius startAngle endAngle sweptAngle Direction size
-direction givenDirection arguments = arguments {direction = givenDirection}
+direction givenDirection arguments = arguments{direction = givenDirection}
 
 size ::
   Size ->
   Arguments centerPoint startPoint endPoint radius startAngle endAngle sweptAngle direction () ->
   Arguments centerPoint startPoint endPoint radius startAngle endAngle sweptAngle direction Size
-size givenSize arguments = arguments {size = givenSize}
+size givenSize arguments = arguments{size = givenSize}
 
 class
   Build arguments (constraint :: Constraint) result

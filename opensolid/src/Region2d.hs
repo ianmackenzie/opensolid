@@ -92,7 +92,7 @@ checkCurvesForInnerIntersection curve1 curve2 =
       | otherwise -> Error RegionBoundaryIntersectsItself
 
 isEndpointIntersection :: Intersection -> Bool
-isEndpointIntersection (Intersection {t1, t2}) = isEndpoint t1 && isEndpoint t2
+isEndpointIntersection (Intersection{t1, t2}) = isEndpoint t1 && isEndpoint t2
 
 isEndpoint :: Float -> Bool
 isEndpoint t = t == 0.0 || t == 1.0

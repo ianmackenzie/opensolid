@@ -392,7 +392,7 @@ solve f | isZero f = Error ZeroEverywhere
 solve f = Result.do
   (tangentSolutions, tangentExclusions, saddleRegions) <- findTangentSolutions derivatives boundaryEdges boundaryPoints Uv.domain U [] []
   (crossingSolutions, _) <- findCrossingSolutions derivatives boundaryEdges boundaryPoints Uv.domain U tangentExclusions saddleRegions
-  let BoundaryEdges {leftEdgeIsSolution, rightEdgeIsSolution, bottomEdgeIsSolution, topEdgeIsSolution} = boundaryEdges
+  let BoundaryEdges{leftEdgeIsSolution, rightEdgeIsSolution, bottomEdgeIsSolution, topEdgeIsSolution} = boundaryEdges
   let boundaryEdgeSolutions =
         List.concat
           [ [Solution.BoundaryEdge leftEdge | leftEdgeIsSolution]
@@ -400,7 +400,7 @@ solve f = Result.do
           , [Solution.BoundaryEdge bottomEdge | bottomEdgeIsSolution]
           , [Solution.BoundaryEdge topEdge | topEdgeIsSolution]
           ]
-  let toBoundaryPointSolution (BoundaryPoint {point}) = Solution.BoundaryPoint point
+  let toBoundaryPointSolution (BoundaryPoint{point}) = Solution.BoundaryPoint point
   let boundaryPointSolutions = List.map toBoundaryPointSolution boundaryPoints
   return (List.concat [boundaryEdgeSolutions, boundaryPointSolutions, tangentSolutions ++ crossingSolutions])
  where
@@ -409,7 +409,7 @@ solve f = Result.do
   fuu = derivative U fu
   fvv = derivative V fv
   fuv = derivative V fu
-  derivatives = Derivatives {f, fu, fv, fuu, fvv, fuv}
+  derivatives = Derivatives{f, fu, fv, fuu, fvv, fuv}
   (boundaryEdges, boundaryPoints) = findBoundarySolutions f
 
 data Derivatives units = Derivatives
@@ -472,7 +472,7 @@ findTangentSolutions derivatives boundaryEdges boundaryPoints uvBounds bisection
         , saddleRegions1 ++ saddleRegions2
         )
  where
-  Derivatives {f, fu, fv} = derivatives
+  Derivatives{f, fu, fv} = derivatives
   fBounds = segmentBounds uvBounds f
   fuBounds = segmentBounds uvBounds fu
   fvBounds = segmentBounds uvBounds fv
@@ -531,7 +531,7 @@ findCrossingSolutions derivatives boundaryEdges boundaryPoints uvBounds bisectio
         , exclusions1 ++ exclusions2
         )
  where
-  Derivatives {f} = derivatives
+  Derivatives{f} = derivatives
   fBounds = segmentBounds uvBounds f
 
 data BoundaryEdges = BoundaryEdges
@@ -719,7 +719,7 @@ generalSolution derivatives uvBounds@(Bounds2d (Range minU maxU) (Range minV max
             (Positive, Negative, Negative, Positive) -> internalError "Inconsistent derivatives"
   | otherwise = Nothing
  where
-  Derivatives {f, fu, fv} = derivatives
+  Derivatives{f, fu, fv} = derivatives
   fuBounds = segmentBounds uvBounds fu
   fvBounds = segmentBounds uvBounds fv
 
@@ -727,7 +727,7 @@ resolved :: Range units -> Bool
 resolved range = Qty.abs (Range.resolution range) >= 0.5
 
 isStrictlyInside :: Uv.Bounds -> BoundaryPoint -> Bool
-isStrictlyInside bounds (BoundaryPoint {point}) = Bounds2d.inclusion point bounds > 0.0
+isStrictlyInside bounds (BoundaryPoint{point}) = Bounds2d.inclusion point bounds > 0.0
 
 horizontalSolution ::
   Tolerance units =>
@@ -757,8 +757,8 @@ horizontalSolution derivatives boundaryEdges boundaryPoints uvBounds exclusions
   Bounds2d uRange vRange = uvBounds
   Range minU maxU = uRange
   Range minV maxV = vRange
-  Derivatives {f, fu, fv} = derivatives
-  BoundaryEdges {bottomEdgeIsSolution, topEdgeIsSolution} = boundaryEdges
+  Derivatives{f, fu, fv} = derivatives
+  BoundaryEdges{bottomEdgeIsSolution, topEdgeIsSolution} = boundaryEdges
 
   expandedVRange = expandRange vRange
   Range vBottom vTop = expandedVRange
@@ -772,7 +772,7 @@ horizontalSolution derivatives boundaryEdges boundaryPoints uvBounds exclusions
   trimmedBounds =
     case List.filter (isStrictlyInside expandedBounds) boundaryPoints of
       [] -> Just expandedBounds
-      List.One (BoundaryPoint {point = Point2d u0 _, edgeSign, rootOrder, rootSign}) ->
+      List.One (BoundaryPoint{point = Point2d u0 _, edgeSign, rootOrder, rootSign}) ->
         case (rootOrder, edgeSign, rootSign * Qty.sign fvResolution) of
           (Int.Even, Negative, Negative) -> Just (Bounds2d (Range.from u0 maxU) (Range.from minV vTop))
           (Int.Even, Negative, Positive) -> Just (Bounds2d (Range.from minU u0) (Range.from minV vTop))
@@ -812,8 +812,8 @@ verticalSolution derivatives boundaryEdges boundaryPoints uvBounds exclusions
   Bounds2d uRange vRange = uvBounds
   Range minU maxU = uRange
   Range minV maxV = vRange
-  Derivatives {f, fu, fv} = derivatives
-  BoundaryEdges {leftEdgeIsSolution, rightEdgeIsSolution} = boundaryEdges
+  Derivatives{f, fu, fv} = derivatives
+  BoundaryEdges{leftEdgeIsSolution, rightEdgeIsSolution} = boundaryEdges
 
   expandedURange = expandRange uRange
   Range uLeft uRight = expandedURange
@@ -827,7 +827,7 @@ verticalSolution derivatives boundaryEdges boundaryPoints uvBounds exclusions
   trimmedBounds =
     case List.filter (isStrictlyInside expandedBounds) boundaryPoints of
       [] -> Just expandedBounds
-      List.One (BoundaryPoint {point = Point2d _ v0, edgeSign, rootOrder, rootSign}) ->
+      List.One (BoundaryPoint{point = Point2d _ v0, edgeSign, rootOrder, rootSign}) ->
         case (rootOrder, edgeSign, rootSign * Qty.sign fuResolution) of
           (Int.Even, Negative, Negative) -> Just (Bounds2d (Range.from minU uRight) (Range.from v0 maxV))
           (Int.Even, Negative, Positive) -> Just (Bounds2d (Range.from minU uRight) (Range.from minV v0))
@@ -886,10 +886,10 @@ crossingSolution ::
   Result SolveError (Curve2d Uv.Coordinates) ->
   Result SolveError (List Solution)
 crossingSolution isDegenerate start end curveResult
-  | isDegenerate = Ok [Solution.DegenerateCrossingCurve {start, end}]
+  | isDegenerate = Ok [Solution.DegenerateCrossingCurve{start, end}]
   | otherwise = Result.do
       curve <- curveResult
-      return [Solution.CrossingCurve {start, end, segments = NonEmpty.singleton curve}]
+      return [Solution.CrossingCurve{start, end, segments = NonEmpty.singleton curve}]
 
 horizontalCurve ::
   Function units ->
@@ -944,7 +944,7 @@ tangentPointSolution derivatives boundaryPoints uvBounds exclusions saddleRegion
   -- If second derivatives determinant is not definitely non-zero, then abort
   | Qty.abs determinantResolution < 0.5 = Nothing
   -- Otherwise, we know there can be only one tangent point
-  | Just (BoundaryPoint {point}) <- includedTangentBoundaryPoint =
+  | Just (BoundaryPoint{point}) <- includedTangentBoundaryPoint =
       -- The tangent boundary point included in the expanded bounds
       -- must be the tangent point, so we shouldn't report it again as a solution
       -- but we _can_ now report an exclusion region or saddle point
@@ -973,7 +973,7 @@ tangentPointSolution derivatives boundaryPoints uvBounds exclusions saddleRegion
           Just (Ok (saddlePointSolution derivatives point expandedBounds))
   | otherwise = Nothing
  where
-  Derivatives {f, fu, fv, fuu, fvv, fuv} = derivatives
+  Derivatives{f, fu, fv, fuu, fvv, fuv} = derivatives
   expandedBounds = expandBounds uvBounds
   searchBounds = expandBoundsBy 0.05 uvBounds
 
@@ -981,7 +981,7 @@ tangentPointSolution derivatives boundaryPoints uvBounds exclusions saddleRegion
   fvvBounds = segmentBounds expandedBounds fvv
   fuvBounds = segmentBounds expandedBounds fuv
   determinantResolution = Range.resolution (fuuBounds .* fvvBounds - fuvBounds .* fuvBounds)
-  isIncludedTangentPoint (BoundaryPoint {point}) =
+  isIncludedTangentPoint (BoundaryPoint{point}) =
     Bounds2d.includes point searchBounds
       && evaluateAt point fu ~= Qty.zero
       && evaluateAt point fv ~= Qty.zero
@@ -996,7 +996,7 @@ maxRadiusForComponent value origin (Range low high)
 
 saddlePointSolution :: Derivatives units -> Uv.Point -> Uv.Bounds -> (List Solution, List Uv.Bounds, List SaddleRegion)
 saddlePointSolution derivatives point expandedBounds =
-  let Derivatives {fuu = fuuFunction, fuv = fuvFunction, fvv = fvvFunction} = derivatives
+  let Derivatives{fuu = fuuFunction, fuv = fuvFunction, fvv = fvvFunction} = derivatives
       fuu = evaluateAt point fuuFunction
       fuv = evaluateAt point fuvFunction
       fvv = evaluateAt point fvvFunction
@@ -1026,7 +1026,7 @@ saddlePointSolution derivatives point expandedBounds =
       Vector2d u1 v1 = Vector2d.relativeTo frame d1
       halfWidth = Float.abs (radius * u1)
       halfHeight = Float.abs (radius * v1)
-      saddleRegion = SaddleRegion {frame, halfWidth, halfHeight}
+      saddleRegion = SaddleRegion{frame, halfWidth, halfHeight}
    in ([Solution.SaddlePoint point saddleRegion], [], [saddleRegion])
 
 -- isTangentCurveByU
@@ -1062,7 +1062,7 @@ allDerivativesZero ::
   Uv.Bounds ->
   Derivatives units ->
   Bool
-allDerivativesZero uvBounds (Derivatives {fu, fv, fuu, fvv, fuv}) =
+allDerivativesZero uvBounds (Derivatives{fu, fv, fuu, fvv, fuv}) =
   segmentBounds uvBounds fu ~= Qty.zero
     && segmentBounds uvBounds fv ~= Qty.zero
     && segmentBounds uvBounds fuu ~= Qty.zero
@@ -1092,12 +1092,12 @@ instance Curve2d.Interface (HorizontalCurve units) Uv.Coordinates where
   startPointImpl = Curve2d.evaluateAtImpl 0.0
   endPointImpl = Curve2d.evaluateAtImpl 1.0
 
-  evaluateAtImpl t (HorizontalCurve {f, uStart, uEnd, vLow, vHigh}) =
+  evaluateAtImpl t (HorizontalCurve{f, uStart, uEnd, vLow, vHigh}) =
     let u = Float.interpolateFrom uStart uEnd t
         v = solveVertically f u vLow vHigh
      in Point2d u v
 
-  segmentBoundsImpl (Range t1 t2) (HorizontalCurve {f, vu, uStart, uEnd, vLow, vHigh}) =
+  segmentBoundsImpl (Range t1 t2) (HorizontalCurve{f, vu, uStart, uEnd, vLow, vHigh}) =
     let u1 = Float.interpolateFrom uStart uEnd t1
         u2 = Float.interpolateFrom uStart uEnd t2
         v1 = solveVertically f u1 vLow vHigh
@@ -1106,13 +1106,13 @@ instance Curve2d.Interface (HorizontalCurve units) Uv.Coordinates where
         vRange = parallelogramBounds u1 u2 v1 v2 slopeBounds
      in Bounds2d (Range.from u1 u2) vRange
 
-  derivativeImpl crossingCurve@(HorizontalCurve {vu, uStart, uEnd}) =
+  derivativeImpl crossingCurve@(HorizontalCurve{vu, uStart, uEnd}) =
     let deltaU = uEnd - uStart
         uT = Curve1d.constant deltaU
         vT = deltaU * Curve1d (CurveOnSurface crossingCurve vu)
      in VectorCurve2d.xy uT vT
 
-  reverseImpl (HorizontalCurve {f, vu, uStart, uEnd, vLow, vHigh}) =
+  reverseImpl (HorizontalCurve{f, vu, uStart, uEnd, vLow, vHigh}) =
     HorizontalCurve f vu uEnd uStart vLow vHigh
 
   boundsImpl crossingCurve = Curve2d.segmentBoundsImpl T.domain crossingCurve
@@ -1131,12 +1131,12 @@ instance Curve2d.Interface (VerticalCurve units) Uv.Coordinates where
   startPointImpl = Curve2d.evaluateAtImpl 0.0
   endPointImpl = Curve2d.evaluateAtImpl 1.0
 
-  evaluateAtImpl t (VerticalCurve {f, uLow, uHigh, vStart, vEnd}) =
+  evaluateAtImpl t (VerticalCurve{f, uLow, uHigh, vStart, vEnd}) =
     let v = Float.interpolateFrom vStart vEnd t
         u = solveHorizontally f uLow uHigh v
      in Point2d u v
 
-  segmentBoundsImpl (Range t1 t2) (VerticalCurve {f, uv, uLow, uHigh, vStart, vEnd}) =
+  segmentBoundsImpl (Range t1 t2) (VerticalCurve{f, uv, uLow, uHigh, vStart, vEnd}) =
     let v1 = Float.interpolateFrom vStart vEnd t1
         v2 = Float.interpolateFrom vStart vEnd t2
         u1 = solveHorizontally f uLow uHigh v1
@@ -1145,13 +1145,13 @@ instance Curve2d.Interface (VerticalCurve units) Uv.Coordinates where
         uRange = parallelogramBounds v1 v2 u1 u2 slopeBounds
      in Bounds2d uRange (Range.from v1 v2)
 
-  derivativeImpl crossingCurve@(VerticalCurve {uv, vStart, vEnd}) =
+  derivativeImpl crossingCurve@(VerticalCurve{uv, vStart, vEnd}) =
     let deltaV = vEnd - vStart
         vT = Curve1d.constant deltaV
         uT = deltaV * Curve1d (CurveOnSurface crossingCurve uv)
      in VectorCurve2d.xy uT vT
 
-  reverseImpl (VerticalCurve {f, uv, uLow, uHigh, vStart, vEnd}) =
+  reverseImpl (VerticalCurve{f, uv, uLow, uHigh, vStart, vEnd}) =
     VerticalCurve f uv uLow uHigh vEnd vStart
 
   boundsImpl crossingCurve = Curve2d.segmentBoundsImpl T.domain crossingCurve

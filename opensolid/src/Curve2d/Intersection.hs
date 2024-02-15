@@ -31,7 +31,7 @@ instance ApproximateEquality Intersection Intersection Unitless where
       && sign intersection1 == sign intersection2
 
 crossing :: Float -> Float -> Sign -> Intersection
-crossing t1 t2 sign = Intersection {t1, t2, sign, kind = Crossing}
+crossing t1 t2 sign = Intersection{t1, t2, sign, kind = Crossing}
 
 tangent :: Float -> Float -> Sign -> Intersection
-tangent t1 t2 sign = Intersection {t1, t2, sign, kind = Tangent}
+tangent t1 t2 sign = Intersection{t1, t2, sign, kind = Tangent}

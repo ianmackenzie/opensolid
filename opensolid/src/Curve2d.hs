@@ -88,13 +88,13 @@ reverse :: Curve2d (space @ units) -> Curve2d (space @ units)
 reverse = Internal.reverse
 
 bounds :: Curve2d (space @ units) -> Bounds2d (space @ units)
-bounds (Internal.Line {startPoint = p1, endPoint = p2}) = Bounds2d.hull2 p1 p2
-bounds arc@(Internal.Arc {}) = segmentBounds T.domain arc
+bounds (Internal.Line{startPoint = p1, endPoint = p2}) = Bounds2d.hull2 p1 p2
+bounds arc@(Internal.Arc{}) = segmentBounds T.domain arc
 bounds (Internal.Curve curve _) = boundsImpl curve
 
 tangentDirection :: Curve2d (space @ units) -> DirectionCurve2d space
-tangentDirection (Internal.Line {direction}) = DirectionCurve2d.constant direction
-tangentDirection (Internal.Arc {startAngle, endAngle}) =
+tangentDirection (Internal.Line{direction}) = DirectionCurve2d.constant direction
+tangentDirection (Internal.Arc{startAngle, endAngle}) =
   let tangentStartAngle = startAngle + Angle.quarterTurn
       tangentEndAngle = endAngle + Angle.quarterTurn
    in Qty.sign (endAngle - startAngle) * DirectionCurve2d.arc tangentStartAngle tangentEndAngle
@@ -238,7 +238,7 @@ findEndpointIntersection derivatives1 derivatives2 t1t2 searchTree1 searchTree2 
     Bisection.solve2
       (Segment.isEndpointIntersectionCandidate t1t2)
       (Segment.endpointIntersectionResolved intersectionType)
-      (\_ _ _ _ _ -> Just (Intersection {t1, t2, kind, sign}))
+      (\_ _ _ _ _ -> Just (Intersection{t1, t2, kind, sign}))
       searchTree1
       searchTree2
       accumulated

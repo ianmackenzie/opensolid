@@ -187,7 +187,7 @@ cType typ =
     Float -> PY.var "c_double"
     Boolean -> PY.var "c_bool"
     Maybe _ -> PY.var "c_void_p"
-    Result {} -> PY.var "c_void_p"
+    Result{} -> PY.var "c_void_p"
     Tuple2 _ _ -> PY.var "c_void_p"
     Self -> PY.var "c_void_p"
 
@@ -223,7 +223,7 @@ fnBody typ ffiFunc args =
   expression = case typ of
     Pointer _ -> PY.call (exprReader typ) [fnCall]
     Tuple2 _ _ -> PY.call (exprReader typ) [fnCall]
-    Result {} -> PY.call (exprReader typ) [fnCall]
+    Result{} -> PY.call (exprReader typ) [fnCall]
     Maybe _ -> PY.call (exprReader typ) [fnCall]
     Self -> PY.var "self" `PY.dot` "ptr"
     _ -> fnCall
@@ -290,7 +290,7 @@ main =
   Task.toIO <| Task.do
     let pythonCode = PY.prettyStatements (setup ++ api openSolidAPI)
     let ruffCmd = SP.proc "ruff" ["format", "--stdin-filename", "opensolid.py", "--quiet"]
-    (Just stdinHandle, _, _, process) <- Task.fromIO (SP.createProcess ruffCmd {SP.std_in = SP.CreatePipe})
+    (Just stdinHandle, _, _, process) <- Task.fromIO (SP.createProcess ruffCmd{SP.std_in = SP.CreatePipe})
     Task.fromIO (SIO.hPutStr stdinHandle pythonCode)
     Task.fromIO (SIO.hClose stdinHandle)
     ruffExitCode <- Task.fromIO (SP.waitForProcess process)
