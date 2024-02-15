@@ -114,10 +114,9 @@ offsetPoint ::
   Point2d (space @ units) ->
   Qty units ->
   Point2d (space @ units)
-offsetPoint startPoint endPoint distance =  Result.do
+offsetPoint startPoint endPoint distance = Result.withDefault startPoint Result.do
   direction <- Direction2d.from startPoint endPoint
-  Ok (Point2d.midpoint startPoint endPoint + distance * Direction2d.perpendicularTo direction)
-  |> Result.withDefault startPoint
+  return (Point2d.midpoint startPoint endPoint + distance * Direction2d.perpendicularTo direction)
 
 testCustomFunction :: Tolerance Meters => Task ()
 testCustomFunction =
