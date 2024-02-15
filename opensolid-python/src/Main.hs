@@ -287,16 +287,13 @@ apiException _ ex = internalError (show ex)
 
 main :: IO ()
 main =
-  let pythonCode = PY.prettyStatements (setup ++ api openSolidAPI)
-      ruffCmd =
-        (SP.proc "ruff" ["format", "--stdin-filename", "opensolid.py", "--quiet"])
-          { SP.std_in = SP.CreatePipe
-          }
-   in Task.main do
-        (Just stdinHandle, _, _, process) <- Task.fromIO (SP.createProcess ruffCmd)
-        Task.fromIO (SIO.hPutStr stdinHandle pythonCode)
-        Task.fromIO (SIO.hClose stdinHandle)
-        ruffExitCode <- Task.fromIO (SP.waitForProcess process)
-        if ruffExitCode == SE.ExitSuccess
-          then return ()
-          else fail "Error when running Ruff"
+  Task.toIO <| Task.do
+    let pythonCode = PY.prettyStatements (setup ++ api openSolidAPI)
+    let ruffCmd = SP.proc "ruff" ["format", "--stdin-filename", "opensolid.py", "--quiet"]
+    (Just stdinHandle, _, _, process) <- Task.fromIO (SP.createProcess ruffCmd {SP.std_in = SP.CreatePipe})
+    Task.fromIO (SIO.hPutStr stdinHandle pythonCode)
+    Task.fromIO (SIO.hClose stdinHandle)
+    ruffExitCode <- Task.fromIO (SP.waitForProcess process)
+    if ruffExitCode == SE.ExitSuccess
+      then return ()
+      else fail "Error when running Ruff"

@@ -177,7 +177,7 @@ intersections ::
   Curve2d (space @ units) ->
   Curve2d (space @ units) ->
   Result IntersectionError (List Intersection)
-intersections curve1 curve2 = do
+intersections curve1 curve2 = Result.do
   let endpointParameterValues = findEndpointParameterValues curve1 curve2
   case overlappingSegments curve1 curve2 endpointParameterValues of
     [] -> findIntersections curve1 curve2 endpointParameterValues
@@ -192,7 +192,7 @@ findIntersections ::
   Curve2d (space @ units) ->
   List (Float, Float) ->
   Result IntersectionError (List Intersection)
-findIntersections curve1 curve2 endpointParameterValues = do
+findIntersections curve1 curve2 endpointParameterValues = Result.do
   let derivatives1 = Derivatives.ofCurve curve1
   let derivatives2 = Derivatives.ofCurve curve2
   let searchTree1 = Bisection.tree (Segment.init derivatives1)
@@ -203,7 +203,7 @@ findIntersections curve1 curve2 endpointParameterValues = do
         endpointResults
           |> findTangentIntersections derivatives1 derivatives2 searchTree1 searchTree2
           |> findCrossingIntersections derivatives1 derivatives2 searchTree1 searchTree2
-  Ok (List.sort allIntersections)
+  return (List.sort allIntersections)
 
 findEndpointIntersections ::
   Tolerance units =>
@@ -215,7 +215,7 @@ findEndpointIntersections ::
   (List Intersection, List (T.Bounds, T.Bounds)) ->
   Result IntersectionError (List Intersection, List (T.Bounds, T.Bounds))
 findEndpointIntersections _ _ [] _ _ accumulated = Ok accumulated
-findEndpointIntersections derivatives1 derivatives2 (uv : rest) searchTree1 searchTree2 accumulated = do
+findEndpointIntersections derivatives1 derivatives2 (uv : rest) searchTree1 searchTree2 accumulated = Result.do
   updated <- findEndpointIntersection derivatives1 derivatives2 uv searchTree1 searchTree2 accumulated
   findEndpointIntersections derivatives1 derivatives2 rest searchTree1 searchTree2 updated
 
@@ -228,13 +228,13 @@ findEndpointIntersection ::
   SearchTree (space @ units) ->
   (List Intersection, List (T.Bounds, T.Bounds)) ->
   Result IntersectionError (List Intersection, List (T.Bounds, T.Bounds))
-findEndpointIntersection derivatives1 derivatives2 t1t2 searchTree1 searchTree2 accumulated = do
+findEndpointIntersection derivatives1 derivatives2 t1t2 searchTree1 searchTree2 accumulated = Result.do
   intersectionType <-
     Derivatives.classify t1t2 derivatives1 derivatives2
       |> Result.mapError (\Intersection.TangentIntersectionAtDegeneratePoint -> TangentIntersectionAtDegeneratePoint)
   let (kind, sign) = intersectionType
   let (t1, t2) = t1t2
-  Ok <|
+  return <|
     Bisection.solve2
       (Segment.isEndpointIntersectionCandidate t1t2)
       (Segment.endpointIntersectionResolved intersectionType)

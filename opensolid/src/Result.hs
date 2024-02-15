@@ -10,11 +10,18 @@ module Result
   , orNothing
   , collect
   , combine
+  , (>>=)
+  , (<*>)
+  , (>>)
+  , fmap
+  , join
+  , pure
+  , return
+  , fail
   )
 where
 
-import Basics
-import Composition (Composition ((>>)))
+import Basics hiding (fail, (>>))
 import Error (Error)
 import Error qualified
 import Prelude (Applicative, Functor, Monad, MonadFail)
@@ -32,25 +39,39 @@ deriving instance (Eq x, Eq a) => Eq (Result x a)
 deriving instance (Show x, Show a) => Show (Result x a)
 
 instance Functor (Result x) where
-  fmap = map
+  fmap = fmap
 
 instance Applicative (Result x) where
-  pure = Ok
-  Ok function <*> Ok value = Ok (function value)
-  Error error <*> _ = Error error
-  Ok _ <*> Error error = Error error
+  pure = pure
+  (<*>) = (<*>)
 
 instance Monad (Result x) where
-  Ok value >>= function = function value
-  Error error >>= _ = Error error
+  (>>=) = (>>=)
 
 instance MonadFail (Result String) where
-  fail = Error
+  fail = fail
 
-instance m ~ Result x => Composition (Result x a) (m b) (m b) where
-  Ok _ >> Ok second = Ok second
-  Error error >> _ = Error error
-  Ok _ >> Error error = Error error
+pure :: a -> Result x a
+pure = Ok
+
+fmap :: (a -> b) -> Result x a -> Result x b
+fmap = map
+
+(<*>) :: Result x (a -> b) -> Result x a -> Result x b
+Ok function <*> Ok value = Ok (function value)
+Error error <*> _ = Error error
+Ok _ <*> Error error = Error error
+
+(>>=) :: Result x a -> (a -> Result x b) -> Result x b
+Ok value >>= function = function value
+Error error >>= _ = Error error
+
+(>>) :: Result x () -> Result x a -> Result x a
+Ok _ >> result = result
+Error error >> _ = Error error
+
+fail :: Error x => x -> Result x a
+fail = Error
 
 withDefault :: a -> Result x a -> a
 withDefault _ (Ok value) = value
@@ -61,7 +82,7 @@ map f (Ok value) = Ok (f value)
 map _ (Error error) = Error error
 
 map2 :: (a -> b -> value) -> Result x a -> Result x b -> Result x value
-map2 function result1 result2 = do
+map2 function result1 result2 = Prelude.do
   value1 <- result1
   value2 <- result2
   return (function value1 value2)

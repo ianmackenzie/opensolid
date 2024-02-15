@@ -56,6 +56,7 @@ import Angle qualified
 import Bounds qualified
 import Debug qualified
 import Float qualified
+import Fuzzy qualified
 import Generic qualified
 import List qualified
 import Maybe qualified
@@ -465,7 +466,7 @@ resolve assess range =
     Resolved value -> Resolved value
     Unresolved
       | isAtomic range -> Unresolved
-      | otherwise -> do
+      | otherwise -> Fuzzy.do
           let (left, right) = bisect range
           leftValue <- resolve assess left
           rightValue <- resolve assess right
@@ -538,10 +539,10 @@ find2 isCandidate u v =
                           find2 isCandidate u2 v2
 
 generator :: Random.Generator (Qty units) -> Random.Generator (Range units)
-generator qtyGenerator = do
+generator qtyGenerator = Random.do
   a <- qtyGenerator
   b <- qtyGenerator
-  Random.return (from a b)
+  return (from a b)
 
 samples :: Range units -> List (Qty units)
 samples range = List.map (interpolate range) Quadrature.points

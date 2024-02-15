@@ -52,17 +52,17 @@ instance Estimate.Interface DummyEstimate Meters where
      in Estimate.wrap (DummyEstimate value refinedRange)
 
 dummyEstimate :: Generator (Length, Estimate Meters)
-dummyEstimate = do
+dummyEstimate = Random.do
   range <- Range.generator Random.length
   t <- T.generator
   let value = Range.interpolate range t
-  Random.return (value, Estimate.wrap (DummyEstimate value range))
+  return (value, Estimate.wrap (DummyEstimate value range))
 
 duplicatedDummyEstimates :: Generator (NonEmpty (Length, Estimate Meters))
-duplicatedDummyEstimates = do
+duplicatedDummyEstimates = Random.do
   pair <- dummyEstimate
   numPairs <- Random.int 1 3
-  Random.return (pair :| List.repeat (numPairs - 1) pair)
+  return (pair :| List.repeat (numPairs - 1) pair)
 
 dummyEstimates :: Generator (NonEmpty (Length, Estimate Meters))
 dummyEstimates =

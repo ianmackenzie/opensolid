@@ -45,4 +45,4 @@ tests =
   ?tolerance = Length.meters 1e-9
 
 main :: IO ()
-main = Task.main (Test.run tests)
+main = Task.toIO (Test.run tests)

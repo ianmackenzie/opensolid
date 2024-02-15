@@ -322,7 +322,7 @@ instance
     (Tolerance units)
     (Result BuildError (Curve2d (space @ units)))
   where
-  with arguments = do
+  with arguments = Result.do
     chordDirection <-
       Direction2d.from givenStartPoint givenEndPoint
         |> Result.mapError (\Direction2d.PointsAreCoincident -> DegenerateArc)

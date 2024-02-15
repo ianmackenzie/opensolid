@@ -29,6 +29,7 @@ import Estimate qualified
 import Float qualified
 import Generic qualified
 import List qualified
+import Maybe qualified
 import OpenSolid
 import Qty qualified
 import Range (Range)
@@ -443,7 +444,7 @@ findRoot ::
   Stream (Range units) ->
   Sign ->
   Maybe Root
-findRoot originalCurve rootOrder derivatives domain _ nextDerivativeSign = do
+findRoot originalCurve rootOrder derivatives domain _ nextDerivativeSign = Maybe.do
   let curve = Stream.nth rootOrder derivatives
   rootX <- Range.solve (pointOn curve) domain
   if rootOrder == 0 || evaluateAt rootX originalCurve ~= Qty.zero

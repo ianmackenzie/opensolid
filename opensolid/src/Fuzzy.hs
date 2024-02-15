@@ -3,6 +3,12 @@ module Fuzzy
   , and
   , or
   , collect
+  , (>>=)
+  , (<*>)
+  , fmap
+  , join
+  , pure
+  , return
   )
 where
 
@@ -13,18 +19,30 @@ import Prelude qualified
 data Fuzzy a = Resolved a | Unresolved deriving (Eq, Show)
 
 instance Functor Fuzzy where
-  fmap f (Resolved value) = Resolved (f value)
-  fmap _ Unresolved = Unresolved
+  fmap = fmap
 
 instance Applicative Fuzzy where
-  pure = Resolved
-  Resolved function <*> Resolved value = Resolved (function value)
-  Unresolved <*> _ = Unresolved
-  Resolved _ <*> Unresolved = Unresolved
+  pure = pure
+  (<*>) = (<*>)
 
 instance Monad Fuzzy where
-  Resolved value >>= function = function value
-  Unresolved >>= _ = Unresolved
+  (>>=) = (>>=)
+
+(>>=) :: Fuzzy a -> (a -> Fuzzy b) -> Fuzzy b
+Resolved value >>= function = function value
+Unresolved >>= _ = Unresolved
+
+(<*>) :: Fuzzy (a -> b) -> Fuzzy a -> Fuzzy b
+Resolved function <*> Resolved value = Resolved (function value)
+Unresolved <*> _ = Unresolved
+Resolved _ <*> Unresolved = Unresolved
+
+pure :: a -> Fuzzy a
+pure = Resolved
+
+fmap :: (a -> b) -> Fuzzy a -> Fuzzy b
+fmap f (Resolved value) = Resolved (f value)
+fmap _ Unresolved = Unresolved
 
 and :: Fuzzy Bool -> Fuzzy Bool -> Fuzzy Bool
 and (Resolved False) _ = Resolved False

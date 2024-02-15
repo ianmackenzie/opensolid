@@ -46,7 +46,6 @@ library
       GADTs
       LexicalNegation
       ImplicitParams
-      BlockArguments
       QualifiedDo
       LambdaCase
       DisambiguateRecordFields

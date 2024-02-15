@@ -230,7 +230,7 @@ squaredMagnitude (Vector3d vx vy vz) = Qty.squared vx + Qty.squared vy + Qty.squ
 data IsZero = IsZero deriving (Eq, Show, Error)
 
 direction :: Tolerance units => Vector3d (space @ units) -> Result IsZero (Direction3d space)
-direction vector = do
+direction vector =
   let vm = magnitude vector
    in if vm ~= Qty.zero then Error Vector3d.IsZero else Ok (Direction3d.unsafe (vector / vm))
 
@@ -238,7 +238,7 @@ magnitudeAndDirection ::
   Tolerance units =>
   Vector3d (space @ units) ->
   Result IsZero (Qty units, Direction3d space)
-magnitudeAndDirection vector = do
+magnitudeAndDirection vector =
   let vm = magnitude vector
    in if vm ~= Qty.zero then Error Vector3d.IsZero else Ok (vm, Direction3d.unsafe (vector / vm))
 

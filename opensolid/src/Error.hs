@@ -7,7 +7,6 @@ module Error
 where
 
 import Basics
-import Composition
 import Concatenation
 import String qualified
 

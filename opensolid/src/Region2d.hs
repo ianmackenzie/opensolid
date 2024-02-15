@@ -29,6 +29,7 @@ import Point2d (Point2d)
 import Qty qualified
 import Range (Range)
 import Range qualified
+import Result qualified
 import Units ((:*))
 import Units qualified
 import VectorCurve2d qualified
@@ -51,8 +52,8 @@ boundedBy ::
   Tolerance units =>
   List (Curve2d (space @ units)) ->
   Result BuildError (Region2d (space @ units))
-boundedBy curves = do
-  () <- checkForInnerIntersection curves
+boundedBy curves = Result.do
+  checkForInnerIntersection curves
   loops <- connect curves
   classifyLoops loops
 
@@ -61,8 +62,8 @@ checkForInnerIntersection ::
   List (Curve2d (space @ units)) ->
   Result BuildError ()
 checkForInnerIntersection [] = Ok ()
-checkForInnerIntersection (first : rest) = do
-  () <- checkCurveForInnerIntersection first rest
+checkForInnerIntersection (first : rest) = Result.do
+  checkCurveForInnerIntersection first rest
   checkForInnerIntersection rest
 
 checkCurveForInnerIntersection ::
@@ -71,8 +72,8 @@ checkCurveForInnerIntersection ::
   List (Curve2d (space @ units)) ->
   Result BuildError ()
 checkCurveForInnerIntersection _ [] = Ok ()
-checkCurveForInnerIntersection curve (first : rest) = do
-  () <- checkCurvesForInnerIntersection curve first
+checkCurveForInnerIntersection curve (first : rest) = Result.do
+  checkCurvesForInnerIntersection curve first
   checkCurveForInnerIntersection curve rest
 
 checkCurvesForInnerIntersection ::
@@ -101,10 +102,10 @@ connect ::
   List (Curve2d (space @ units)) ->
   Result BuildError (List (Loop (space @ units)))
 connect [] = Ok []
-connect (first : rest) = do
+connect (first : rest) = Result.do
   (loop, remainingCurves) <- buildLoop (startLoop first) rest
   remainingLoops <- connect remainingCurves
-  Ok (loop : remainingLoops)
+  return (loop : remainingLoops)
 
 data PartialLoop coordinateSystem
   = PartialLoop
@@ -119,7 +120,7 @@ buildLoop ::
   Result BuildError (Loop (space @ units), List (Curve2d (space @ units)))
 buildLoop partialLoop@(PartialLoop currentStart currentCurves loopEnd) remainingCurves
   | currentStart ~= loopEnd = Ok (currentCurves, remainingCurves)
-  | otherwise = do
+  | otherwise = Result.do
       (updatedPartialLoop, updatedRemainingCurves) <- extendPartialLoop partialLoop remainingCurves
       buildLoop updatedPartialLoop updatedRemainingCurves
 
@@ -205,7 +206,7 @@ classifyLoops ::
   List (Loop (space @ units)) ->
   Result BuildError (Region2d (space @ units))
 classifyLoops [] = Error EmptyRegion
-classifyLoops (NonEmpty loops) = do
+classifyLoops (NonEmpty loops) = Result.do
   let (largestLoop, smallerLoops) = pickLargestLoop loops
   let outerLoop' = fixSign Positive largestLoop
   let innerLoops' = List.map (fixSign Negative) smallerLoops

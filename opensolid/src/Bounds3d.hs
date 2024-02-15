@@ -20,6 +20,7 @@ module Bounds3d
 where
 
 import Bounds qualified
+import Maybe qualified
 import OpenSolid
 import Point3d (Point3d (Point3d))
 import Qty qualified
@@ -114,11 +115,11 @@ overlap :: Bounds3d (space @ units) -> Bounds3d (space @ units) -> Qty units
 overlap first second = -(separation first second)
 
 intersection :: Bounds3d (space @ units) -> Bounds3d (space @ units) -> Maybe (Bounds3d (space @ units))
-intersection (Bounds3d x1 y1 z1) (Bounds3d x2 y2 z2) = do
+intersection (Bounds3d x1 y1 z1) (Bounds3d x2 y2 z2) = Maybe.do
   x <- Range.intersection x1 x2
   y <- Range.intersection y1 y2
   z <- Range.intersection z1 z2
-  Just (Bounds3d x y z)
+  return (Bounds3d x y z)
 
 hull2 ::
   Point3d (space @ units) ->

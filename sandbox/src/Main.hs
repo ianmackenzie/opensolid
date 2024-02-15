@@ -53,7 +53,7 @@ log :: Show a => String -> a -> Task ()
 log label value = Console.printLine (label ++ ": " ++ show value)
 
 testScalarArithmetic :: Task ()
-testScalarArithmetic = do
+testScalarArithmetic = Task.do
   log "Integer product" (3 * 4)
   log "Integer division" (10 // 4)
   log "True division" (10 / 4)
@@ -65,7 +65,7 @@ testScalarArithmetic = do
   log "sqrt 2.0" (Qty.sqrt 2.0)
 
 testVectorArithmetic :: Task ()
-testVectorArithmetic = do
+testVectorArithmetic = Task.do
   let v1 = Vector2d.meters 1.0 2.0
   let v2 = 0.5 * Vector2d.meters 3.0 4.0
   let dotProduct = v1 <> v2
@@ -83,7 +83,7 @@ testVectorArithmetic = do
   log "Scaled vector" scaledVector
 
 testRangeArithmetic :: Task ()
-testRangeArithmetic = do
+testRangeArithmetic = Task.do
   let rangeDifference = Range.from (Length.meters 2.0) (Length.meters 3.0) - Length.centimeters 50.0
   log "Range difference" rangeDifference
   let rangeProduct = Length.centimeters 20.0 * Range.from (Length.meters 2.0) (Length.meters 3.0)
@@ -95,7 +95,7 @@ testEquality =
     let ?tolerance = Length.centimeter in Length.meters 1.0 ~= Length.meters 1.005
 
 testTransformation :: Task ()
-testTransformation = do
+testTransformation = Task.do
   log "Rotated axis" <|
     (Axis2d.x |> Transform2d.rotateAround (Point2d.meters 1.0 0.0) Angle.quarterTurn)
   let originalPoints = [Point2d.meters 1.0 0.0, Point2d.meters 2.0 0.0, Point2d.meters 3.0 0.0]
@@ -114,9 +114,10 @@ offsetPoint ::
   Point2d (space @ units) ->
   Qty units ->
   Point2d (space @ units)
-offsetPoint startPoint endPoint distance = Result.withDefault startPoint do
+offsetPoint startPoint endPoint distance =  Result.do
   direction <- Direction2d.from startPoint endPoint
   Ok (Point2d.midpoint startPoint endPoint + distance * Direction2d.perpendicularTo direction)
+  |> Result.withDefault startPoint
 
 testCustomFunction :: Tolerance Meters => Task ()
 testCustomFunction =
@@ -124,16 +125,16 @@ testCustomFunction =
     offsetPoint (Point2d.meters 1.0 0.0) (Point2d.meters 3.0 0.0) (Length.meters 1.0)
 
 testListOperations :: Task ()
-testListOperations = do
+testListOperations = Task.do
   log "Successive deltas" (List.successive subtract [0, 1, 4, 9, 16, 25])
   log "Successive intervals" (List.successive Range.from [1.0, 2.0, 3.0, 4.0])
   log "Prepend Maybe to List" (Just 1 ++ [2, 3])
 
 getCrossProduct :: Tolerance Meters => Result String Float
-getCrossProduct = Error.context "In getCrossProduct" do
+getCrossProduct = Error.context "In getCrossProduct" Result.do
   vectorDirection <- Vector2d.direction (Vector2d.meters 2.0 3.0) |> Error.toString
   lineDirection <- Direction2d.from Point2d.origin Point2d.origin |> Error.context "When getting line direction"
-  Ok (vectorDirection >< lineDirection)
+  return (vectorDirection >< lineDirection)
 
 testTry :: Tolerance Meters => Task ()
 testTry =
@@ -154,12 +155,12 @@ doubleManyTask :: Task (List Int)
 doubleManyTask = Task.collect doublingTask ["1", "-2", "3"]
 
 testTaskSequencing :: Task ()
-testTaskSequencing = do
+testTaskSequencing = Task.do
   doubledValues <- doubleManyTask
   Task.forEach doubledValues (log "Doubled value")
 
 testParameter1dGeneration :: Task ()
-testParameter1dGeneration = do
+testParameter1dGeneration = Task.do
   t1 <- Random.generate T.generator
   t2 <- Random.generate T.generator
   t3 <- Random.generate T.generator
@@ -173,7 +174,7 @@ testEmptyCheck (NonEmpty nonEmpty) =
   Console.printLine ("List is non-empty, maximum is " ++ show (NonEmpty.maximum nonEmpty))
 
 testNonEmpty :: Task ()
-testNonEmpty = do
+testNonEmpty = Task.do
   testEmptyCheck []
   testEmptyCheck [2, 3, 1]
 
@@ -231,7 +232,7 @@ testLineFromEndpoints = Task.do
     _ -> log "Unexpected curve" line1
 
 testDirectedLine :: Tolerance Meters => Task ()
-testDirectedLine = do
+testDirectedLine = Task.do
   let line = Line2d.directed Point2d.origin (Direction2d.degrees 45.0) (Length.meters 2.0)
   log "Line end point" (Curve2d.endPoint line)
 
@@ -285,7 +286,7 @@ strokeWidth :: Length
 strokeWidth = Length.millimeters 0.25
 
 drawSolutions :: String -> List Surface1d.Solution.Solution -> Task ()
-drawSolutions path solutions = do
+drawSolutions path solutions = Task.do
   let solutionEntities = List.mapWithIndex drawSolution solutions
   let uvRange = Range.convert toDrawing (Range.from -0.05 1.05)
   let viewBox = Bounds2d uvRange uvRange
@@ -362,12 +363,12 @@ drawDot colour point =
   Drawing2d.circle [Drawing2d.fillColour colour] (Point2d.convert toDrawing point) (Length.millimeters 0.5)
 
 delayedPrint :: Int -> Task ()
-delayedPrint numSeconds = do
+delayedPrint numSeconds = Task.do
   Task.sleep (Duration.seconds (Float.fromInt numSeconds))
   Console.printLine (String.fromInt numSeconds)
 
 testConcurrency :: Task ()
-testConcurrency = do
+testConcurrency = Task.do
   Console.printLine "Starting concurrency test..."
   Console.printLine "0"
   print5 <- Task.spawn (delayedPrint 5)
@@ -383,12 +384,12 @@ testConcurrency = do
   Console.printLine "Concurrency test complete!"
 
 computeSquareRoot :: Float -> Task Float
-computeSquareRoot value = do
+computeSquareRoot value = Task.do
   Task.sleep Duration.second
   return (Float.sqrt value)
 
 testConcurrentCollect :: Task ()
-testConcurrentCollect = do
+testConcurrentCollect = Task.do
   Console.printLine "Computing square roots with spawn and await"
   let values = List.map Float.fromInt [1 .. 16]
   asyncTasks <- Task.collect (Task.spawn << computeSquareRoot) values
@@ -396,14 +397,14 @@ testConcurrentCollect = do
   log "Square roots" squareRoots
 
 testTaskParallel :: Task ()
-testTaskParallel = do
+testTaskParallel = Task.do
   Console.printLine "Computing square roots with Task.parallel"
   let values = List.map Float.fromInt [1 .. 16]
   squareRoots <- Task.parallel computeSquareRoot values
   log "Square roots" squareRoots
 
 testParallelDo :: Task ()
-testParallelDo = do
+testParallelDo = Task.do
   Console.printLine "Testing Parallel.do"
   Parallel.do
     sqrt1 <- computeSquareRoot 1.0
@@ -411,7 +412,7 @@ testParallelDo = do
     sqrt9 <- computeSquareRoot 9.0
     sqrt16 <- computeSquareRoot 16.0
     sqrt25 <- computeSquareRoot 25.0
-    do
+    Task.do
       log "sqrt1" sqrt1
       log "sqrt4" sqrt4
       log "sqrt9" sqrt9
@@ -419,7 +420,7 @@ testParallelDo = do
       log "sqrt25" sqrt25
 
 script :: Task ()
-script = do
+script = Task.do
   testScalarArithmetic
   testVectorArithmetic
   testRangeArithmetic
@@ -446,4 +447,4 @@ script = do
   ?tolerance = Length.meters 1e-9
 
 main :: IO ()
-main = Task.main script
+main = Task.toIO script

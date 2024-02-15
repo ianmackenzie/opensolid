@@ -15,7 +15,6 @@ module Basics
   , (&&)
   , (||)
   , IO
-  , IOError
   , Maybe (Just, Nothing)
   , Type
   , identity
@@ -25,12 +24,10 @@ module Basics
   , notImplemented
   , (|>)
   , (<|)
+  , (<<)
+  , (>>)
   , type (~)
-  , fmap
-  , (<*>)
-  , (>>=)
   , join
-  , pure
   , return
   , fail
   )
@@ -44,22 +41,18 @@ import Prelude
   , Char
   , Eq ((/=), (==))
   , IO
-  , IOError
   , Int
   , Maybe (Just, Nothing)
-  , Monad (return, (>>=))
+  , Monad (return)
   , MonadFail (fail)
   , Ord (compare, (<), (<=), (>), (>=))
   , Ordering (EQ, GT, LT)
   , Show (show)
   , String
-  , fmap
   , fromIntegral
   , not
   , otherwise
-  , pure
   , (&&)
-  , (<*>)
   , (||)
   )
 import Prelude qualified
@@ -92,6 +85,14 @@ infixl 0 |>
 (<|) = (Prelude.$)
 
 infixr 0 <|
+
+{-# INLINE (>>) #-}
+(>>) :: (a -> b) -> (b -> c) -> a -> c
+f >> g = g << f
+
+{-# INLINE (<<) #-}
+(<<) :: (b -> c) -> (a -> b) -> a -> c
+(<<) = (Prelude..)
 
 {-# INLINE identity #-}
 identity :: a -> a

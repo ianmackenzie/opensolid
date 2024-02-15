@@ -5,6 +5,12 @@ module Maybe
   , orError
   , collect
   , values
+  , (>>=)
+  , (<*>)
+  , fmap
+  , join
+  , pure
+  , return
   )
 where
 
@@ -13,8 +19,24 @@ import Data.Maybe qualified
 import Error (Error)
 import Result (Result (Error, Ok))
 
+fmap :: (a -> b) -> Maybe a -> Maybe b
+fmap = map
+
 map :: (a -> b) -> Maybe a -> Maybe b
-map = fmap
+map function (Just value) = Just (function value)
+map _ Nothing = Nothing
+
+pure :: a -> Maybe a
+pure = Just
+
+(>>=) :: Maybe a -> (a -> Maybe b) -> Maybe b
+Just value >>= function = function value
+Nothing >>= _ = Nothing
+
+(<*>) :: Maybe (a -> b) -> Maybe a -> Maybe b
+Just function <*> Just value = Just (function value)
+Nothing <*> _ = Nothing
+_ <*> Nothing = Nothing
 
 withDefault :: a -> Maybe a -> a
 withDefault _ (Just value) = value

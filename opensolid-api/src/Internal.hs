@@ -35,21 +35,21 @@ static :: TH.Name -> List String -> Function
 static = Function 'Api.Static
 
 ffi :: List Class -> TH.Q (List TH.Dec)
-ffi classes = do
-  functionDecls <- fmap List.concat (Prelude.traverse ffiClass classes)
+ffi classes = Prelude.do
+  functionDecls <- Prelude.fmap List.concat (Prelude.traverse ffiClass classes)
   freeStableFunctionDecl <- freeFunctionFfi "opensolid_free_stable" 'Pointers.freeStablePtr
   return (freeStableFunctionDecl : functionDecls)
  where
   ffiClass (Class _ _ _ functions) =
-    fmap List.concat (Prelude.traverse ffiFunction functions)
+    Prelude.fmap List.concat (Prelude.traverse ffiFunction functions)
 
 freeFunctionFfi :: String -> TH.Name -> TH.Q TH.Dec
-freeFunctionFfi ffiName name = do
+freeFunctionFfi ffiName name = Prelude.do
   freeFunctionType <- TH.reifyType name
   return (TH.ForeignD (TH.ExportF TH.CCall ffiName name freeFunctionType))
 
 api :: List Class -> TH.Q TH.Exp
-api classes = do
+api classes = Prelude.do
   apiCls <- Prelude.traverse apiClass classes
   return (TH.AppE (TH.ConE 'Api.Api) (TH.ListE apiCls))
 
@@ -59,9 +59,9 @@ apiName name =
   TH.LitE (TH.StringL (camelToSnake (TH.nameBase name)))
 
 apiClass :: Class -> TH.Q TH.Exp
-apiClass (Class name representationProps errors functions) = do
+apiClass (Class name representationProps errors functions) = Prelude.do
   apiFns <- Prelude.traverse apiFunction functions
-  apiExceptions <- fmap List.concat (Prelude.traverse apiException errors)
+  apiExceptions <- Prelude.fmap List.concat (Prelude.traverse apiException errors)
   return <|
     TH.ConE 'Api.Class
       `TH.AppE` TH.LitE (TH.StringL (TH.nameBase name))
@@ -70,7 +70,7 @@ apiClass (Class name representationProps errors functions) = do
       `TH.AppE` TH.ListE apiFns
 
 apiException :: TH.Name -> TH.Q (List TH.Exp)
-apiException name = do
+apiException name = Prelude.do
   constructors <- apiExceptionConstructors name
   return
     [ TH.ConE 'Api.ExceptionClass
@@ -79,7 +79,7 @@ apiException name = do
     ]
 
 apiExceptionConstructors :: TH.Name -> TH.Q (List TH.Exp)
-apiExceptionConstructors typeName = do
+apiExceptionConstructors typeName = Prelude.do
   info <- TH.reify typeName
   case info of
     TH.TyConI (TH.DataD _ _ _ _ cons _) ->
@@ -87,14 +87,14 @@ apiExceptionConstructors typeName = do
     _ -> internalError "Not a data type"
 
 apiExceptionConstructor :: Int -> TH.Con -> TH.Q TH.Exp
-apiExceptionConstructor idx (TH.NormalC name []) = do
+apiExceptionConstructor idx (TH.NormalC name []) = Prelude.do
   return <|
     TH.TupE
       [ Just (TH.LitE (TH.IntegerL (fromIntegral (idx + 1))))
       , Just (TH.LitE (TH.StringL (TH.nameBase name)))
       , Just (TH.ConE 'Nothing)
       ]
-apiExceptionConstructor idx (TH.NormalC name [(_, typ)]) = do
+apiExceptionConstructor idx (TH.NormalC name [(_, typ)]) = Prelude.do
   apiTyp <- apiType typ
   return <|
     TH.TupE
@@ -106,7 +106,7 @@ apiExceptionConstructor _ _ =
   internalError "Unrecognized constructor"
 
 apiFunction :: Function -> TH.Q TH.Exp
-apiFunction (Function kind fnName argNames) = do
+apiFunction (Function kind fnName argNames) = Prelude.do
   fnType <- TH.reifyType fnName
   (argTypes, returnType) <- apiFunctionType fnType
   let replaceLast _ [] = []
@@ -154,31 +154,31 @@ apiFunction (Function kind fnName argNames) = do
 
 apiFunctionType :: TH.Type -> TH.Q (List TH.Exp, TH.Exp)
 apiFunctionType (TH.ForallT _ _ innerType) = apiFunctionType innerType
-apiFunctionType (TH.AppT (TH.AppT TH.ArrowT arg) rest) = do
+apiFunctionType (TH.AppT (TH.AppT TH.ArrowT arg) rest) = Prelude.do
   (args, returnType) <- apiFunctionType rest
   typ <- apiType arg
   return (typ : args, returnType)
-apiFunctionType returnType = do
+apiFunctionType returnType = Prelude.do
   typ <- apiType returnType
   return ([], typ)
 
 apiType :: TH.Type -> TH.Q TH.Exp
-apiType (TH.AppT (TH.AppT (TH.TupleT 2) nestedTyp1) nestedTyp2) = do
+apiType (TH.AppT (TH.AppT (TH.TupleT 2) nestedTyp1) nestedTyp2) = Prelude.do
   typ1 <- apiType nestedTyp1
   typ2 <- apiType nestedTyp2
   return (TH.ConE 'Api.Tuple2 `TH.AppE` typ1 `TH.AppE` typ2)
-apiType (TH.AppT (TH.AppT (TH.ConT containerName) errTyp) nestedTyp) | containerName == ''Result = do
+apiType (TH.AppT (TH.AppT (TH.ConT containerName) errTyp) nestedTyp) | containerName == ''Result = Prelude.do
   typ <- apiType nestedTyp
   err <- typeNameBase errTyp
   mod <- modNameBase errTyp
   return (TH.ConE 'Api.Result `TH.AppE` mod `TH.AppE` err `TH.AppE` typ)
-apiType (TH.AppT (TH.ConT containerName) nestedTyp) | containerName == ''Maybe = do
+apiType (TH.AppT (TH.ConT containerName) nestedTyp) | containerName == ''Maybe = Prelude.do
   typ <- apiType nestedTyp
   return (TH.ConE 'Api.Maybe `TH.AppE` typ)
-apiType typ = do
+apiType typ = Prelude.do
   isPtr <- isPointer typ
   if isPtr
-    then fmap (TH.AppE (TH.ConE 'Api.Pointer)) (typeNameBase typ)
+    then Prelude.fmap (TH.AppE (TH.ConE 'Api.Pointer)) (typeNameBase typ)
     else case typ of
       (TH.AppT (TH.ConT name) _)
         | name == ''Qty -> return (TH.ConE 'Api.Float)
@@ -203,7 +203,7 @@ modNameBase typ = fail ("Unknown module for type: " ++ show typ)
 
 -- Generates wrapper function type and clause from the original function
 ffiFunctionInfo :: TH.Type -> TH.Exp -> List TH.Pat -> List TH.Stmt -> TH.Q (TH.Type, TH.Clause)
-ffiFunctionInfo (TH.AppT (TH.AppT TH.ArrowT argTyp) remainingArgs) retExp arguments bindStmts = do
+ffiFunctionInfo (TH.AppT (TH.AppT TH.ArrowT argTyp) remainingArgs) retExp arguments bindStmts = Prelude.do
   arg <- ffiArgInfo argTyp
   let (argName, argFfiTyp, argExpr, bindStmt) = arg
       newBindStmts = bindStmt ++ bindStmts
@@ -214,7 +214,7 @@ ffiFunctionInfo (TH.AppT (TH.AppT TH.ArrowT argTyp) remainingArgs) retExp argume
     ( TH.AppT (TH.AppT TH.ArrowT argFfiTyp) returnType
     , returnClause
     )
-ffiFunctionInfo returnType retExp argNames bindStmts = do
+ffiFunctionInfo returnType retExp argNames bindStmts = Prelude.do
   (finalRetExp, finalReturnType) <- ffiReturnInfo retExp returnType
   return
     ( TH.AppT (TH.ConT ''IO) finalReturnType
@@ -254,11 +254,11 @@ containsImplicitTolerance _ = False
 -- Modify types for FFI
 -- We wrap a type in a Ptr if it doesn't implement Storable
 ffiArgInfo :: TH.Type -> TH.Q (TH.Pat, TH.Type, TH.Exp, Maybe TH.Stmt)
-ffiArgInfo typ = do
+ffiArgInfo typ = Prelude.do
   argName <- TH.newName "x"
   isPtr <- isPointer typ
   if isPtr
-    then do
+    then Prelude.do
       unwrappedName <- TH.newName "y"
       return
         ( TH.VarP argName -- arg name
@@ -270,7 +270,7 @@ ffiArgInfo typ = do
               (TH.VarP unwrappedName)
               (TH.AppE (TH.VarE 'Pointers.fromVoidPtr) (TH.VarE argName))
         )
-    else do
+    else 
       return
         ( TH.VarP argName -- arg name
         , typ -- original type
@@ -279,9 +279,9 @@ ffiArgInfo typ = do
         )
 
 ffiReturnInfo :: TH.Exp -> TH.Type -> TH.Q (TH.Exp, TH.Type)
-ffiReturnInfo expr typ = do
+ffiReturnInfo expr typ = Prelude.do
   isPtr <- isPointer typ
-  return
+  return <|
     if isPtr
       then
         ( TH.AppE (TH.VarE 'Pointers.toVoidPtr) expr
@@ -293,7 +293,7 @@ ffiReturnInfo expr typ = do
         )
 
 isPointer :: TH.Type -> TH.Q Bool
-isPointer typ = do
+isPointer typ = Prelude.do
   let fixedTyp = fixupType typ
   instances <- TH.reifyInstances ''Storable [fixedTyp]
   return (List.isEmpty instances)
@@ -320,7 +320,7 @@ ffiFunctionName fnName =
 
 -- Wrap the function with an FFI
 ffiFunction :: Function -> TH.Q (List TH.Dec)
-ffiFunction (Function _ fnName _) = do
+ffiFunction (Function _ fnName _) = Prelude.do
   originalFnType <- TH.reifyType fnName
   let fixedFnType = fixupType originalFnType
   let origFunc = TH.SigE (TH.VarE fnName) fixedFnType -- annotate with the fixed up signature

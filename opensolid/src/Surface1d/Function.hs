@@ -389,7 +389,7 @@ solve :: Tolerance units => Function units -> Result SolveError (List Solution)
 solve Zero = Error ZeroEverywhere
 solve (Constant value) = if value ~= Qty.zero then Error ZeroEverywhere else Ok []
 solve f | isZero f = Error ZeroEverywhere
-solve f = do
+solve f = Result.do
   (tangentSolutions, tangentExclusions, saddleRegions) <- findTangentSolutions derivatives boundaryEdges boundaryPoints Uv.domain U [] []
   (crossingSolutions, _) <- findCrossingSolutions derivatives boundaryEdges boundaryPoints Uv.domain U tangentExclusions saddleRegions
   let BoundaryEdges {leftEdgeIsSolution, rightEdgeIsSolution, bottomEdgeIsSolution, topEdgeIsSolution} = boundaryEdges
@@ -445,7 +445,7 @@ findTangentSolutions derivatives boundaryEdges boundaryPoints uvBounds bisection
   -- Try to find a tangent point (saddle or otherwise)
   | Just result <- tangentPointSolution derivatives boundaryPoints uvBounds exclusions saddleRegions = result
   -- TODO tangent curve solutions
-  | otherwise = do
+  | otherwise = Result.do
       let (bounds1, bounds2) = Uv.bisect bisectionParameter uvBounds
       let nextBisectionParameter = Uv.cycle bisectionParameter
       (solutions1, exclusions1, saddleRegions1) <-
@@ -505,7 +505,7 @@ findCrossingSolutions derivatives boundaryEdges boundaryPoints uvBounds bisectio
   | fBounds ~= Qty.zero && allDerivativesZero uvBounds derivatives = Error HigherOrderIntersection
   -- If we haven't been able to identify a specific form of solution within this subdomain,
   -- then we need to recurse into subdomains
-  | otherwise = do
+  | otherwise = Result.do
       let (bounds1, bounds2) = Uv.bisect bisectionParameter uvBounds
       let nextBisectionParameter = Uv.cycle bisectionParameter
       (solutions1, exclusions1) <-
@@ -887,7 +887,7 @@ crossingSolution ::
   Result SolveError (List Solution)
 crossingSolution isDegenerate start end curveResult
   | isDegenerate = Ok [Solution.DegenerateCrossingCurve {start, end}]
-  | otherwise = do
+  | otherwise = Result.do
       curve <- curveResult
       return [Solution.CrossingCurve {start, end, segments = NonEmpty.singleton curve}]
 

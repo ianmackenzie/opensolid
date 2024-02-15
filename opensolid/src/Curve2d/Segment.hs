@@ -22,6 +22,7 @@ import Curve2d.Intersection (Intersection)
 import Curve2d.Intersection qualified as Intersection
 import DirectionBounds2d (DirectionBounds2d)
 import DirectionCurve2d qualified
+import Maybe qualified
 import OpenSolid
 import Qty qualified
 import Range (Range)
@@ -228,9 +229,9 @@ findTangentIntersection ::
   Segment (space @ units) ->
   Sign ->
   Maybe Intersection
-findTangentIntersection derivatives1 derivatives2 tBounds1 tBounds2 _ _ sign = do
+findTangentIntersection derivatives1 derivatives2 tBounds1 tBounds2 _ _ sign = Maybe.do
   (t1, t2) <- Range.find2 (isTangentIntersection derivatives1 derivatives2) tBounds1 tBounds2
-  Just (Intersection.tangent t1 t2 sign)
+  return (Intersection.tangent t1 t2 sign)
 
 isTangentIntersection ::
   Tolerance units =>
@@ -286,11 +287,11 @@ findCrossingIntersection ::
   Segment (space @ units) ->
   Sign ->
   Maybe Intersection
-findCrossingIntersection derivatives1 derivatives2 tBounds1 tBounds2 _ _ sign = do
+findCrossingIntersection derivatives1 derivatives2 tBounds1 tBounds2 _ _ sign = Maybe.do
   let curve1 = Derivatives.curve derivatives1
   let curve2 = Derivatives.curve derivatives2
   (t1, t2) <- Range.find2 (isCrossingIntersection curve1 curve2) tBounds1 tBounds2
-  Just (Intersection.crossing t1 t2 sign)
+  return (Intersection.crossing t1 t2 sign)
 
 isCrossingIntersection ::
   Curve2d (space @ units) ->

@@ -83,7 +83,6 @@ library
       Bounds3d
       Bounds
       Colour
-      Composition
       Concatenation
       Console
       CoordinateSystem
@@ -129,7 +128,6 @@ library
       Range
       Region2d
       Result
-      Seq
       Sign
       Stream
       String

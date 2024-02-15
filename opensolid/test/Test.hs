@@ -19,9 +19,9 @@ import Console qualified
 import Data.Foldable qualified
 import Error qualified
 import List qualified
-import OpenSolid hiding (fail, (>>=))
-import OpenSolid qualified
+import OpenSolid hiding (fail)
 import Random (Generator)
+import Result qualified
 import Random qualified
 import String qualified
 import Task qualified
@@ -34,13 +34,13 @@ class Bind a b c where
   (>>=) :: a -> (b -> c) -> c
 
 instance a ~ a' => Bind (Generator a) a' (Generator b) where
-  (>>=) = (OpenSolid.>>=)
+  (>>=) = (Random.>>=)
 
 instance a ~ a' => Bind (Result x a) a' (Result x b) where
-  (>>=) = (OpenSolid.>>=)
+  (>>=) = (Result.>>=)
 
 instance a ~ a' => Bind (Task a) a' (Task b) where
-  (>>=) = (OpenSolid.>>=)
+  (>>=) = (Task.>>=)
 
 instance a ~ a' => Bind (Result x a) a' Expectation where
   Ok value >>= f = f value
@@ -69,20 +69,18 @@ testCount count description =
    in String.join " " [String.fromInt count, pluralized, description]
 
 run :: List Test -> Task ()
-run tests = do
+run tests = Task.do
   Console.printLine ""
   Console.printLine "Running tests..."
   Console.printLine ""
   results <- Task.collect (runImpl []) tests
   let (successes, failures) = sum results
   if failures == 0
-    then do
-      Console.printLine ("✅ " ++ testCount successes "passed")
-      return ()
+    then Console.printLine ("✅ " ++ testCount successes "passed")
     else Task.fail (testCount failures "failed")
 
 reportError :: List String -> List String -> Task (Int, Int)
-reportError context messages = do
+reportError context messages = Task.do
   Console.printLine ("❌ " ++ (String.join " | " (List.reverse context) ++ ":"))
   Console.printLine ""
   Task.forEach messages (String.indent "   " >> Console.printLine)
@@ -101,7 +99,7 @@ sum ((successes, failures) : rest) =
 
 fuzzImpl :: List String -> Int -> Generator Expectation -> Task (Int, Int)
 fuzzImpl _ 0 _ = return (1, 0)
-fuzzImpl context n generator = do
+fuzzImpl context n generator = Task.do
   expectation <- Random.generate generator
   case expectation of
     Passed -> fuzzImpl context (n - 1) generator
