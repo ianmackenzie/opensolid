@@ -8,7 +8,6 @@ module Task
   , map
   , mapError
   , forEach
-  , liftIO
   , fromIO
   , toIO
   , collect
@@ -35,17 +34,18 @@ import Float qualified
 import Result (Result (Error, Ok))
 import Result qualified
 import System.Exit qualified
+import System.IO.Error qualified
 import Prelude (Applicative, Functor, Monad, MonadFail)
 import Prelude qualified
 
-newtype Task x a = Task (IO (Result x a))
+newtype Task a = Task (IO (Result String a))
 
-newtype Async x a = Async (Async.Async (Result x a))
+newtype Async a = Async (Async.Async (Result String a))
 
-instance Functor (Task x) where
+instance Functor Task where
   fmap = map
 
-instance Applicative (Task x) where
+instance Applicative Task where
   pure value = Task (return (Ok value))
   Task functionIO <*> Task valueIO =
     Task <| do
@@ -53,7 +53,7 @@ instance Applicative (Task x) where
       valueResult <- valueIO
       return (Result.map2 (<|) functionResult valueResult)
 
-instance Monad (Task x) where
+instance Monad Task where
   Task io >>= function =
     Task <| do
       result <- io
@@ -61,66 +61,67 @@ instance Monad (Task x) where
         Ok value -> toIO (function value)
         Error error -> return (Error error)
 
-instance MonadFail (Task String) where
-  fail error = Task (return (Error error))
+instance MonadFail Task where
+  fail = fail
 
-instance MonadIO (Task IOError) where
-  liftIO = liftIO
+instance MonadIO Task where
+  liftIO = fromIO
 
-instance m ~ Task x => Composition (Task x a) (m b) (m b) where
+instance Composition (Task a) (Task b) (Task b) where
   (>>) = (Prelude.>>)
 
-fail :: Error x => x -> Task x a
-fail error = Task (return (Error error))
+instance Error.Map String String (Task a) (Task a) where
+  map = mapError
 
-evaluate :: Result x a -> Task x a
-evaluate result = Task (return result)
+fail :: String -> Task a
+fail message = Task (return (Error message))
 
-check :: Error x => Bool -> x -> Task x ()
+evaluate :: Error x => Result x a -> Task a
+evaluate result = Task (return (Result.mapError Error.message result))
+
+check :: Bool -> String -> Task ()
 check condition message = if condition then return () else fail message
 
-map :: (a -> b) -> Task x a -> Task x b
+map :: (a -> b) -> Task a -> Task b
 map function (Task io) = Task (fmap (Result.map function) io)
 
-mapError :: Error y => (x -> y) -> Task x a -> Task y a
+mapError :: (String -> String) -> Task a -> Task a
 mapError function (Task io) = Task (fmap (Result.mapError function) io)
 
-unsafe :: IO (Result x a) -> Task x a
+unsafe :: IO (Result String a) -> Task a
 unsafe = Task
 
-liftIO :: IO a -> Task IOError a
-liftIO io = Task (Control.Exception.catch (fmap Ok io) (Error >> return))
+fromIO :: IO a -> Task a
+fromIO io =
+  Task (Control.Exception.catch (fmap Ok io) (System.IO.Error.ioeGetErrorString >> Error >> return))
 
-fromIO :: IO a -> Task String a
-fromIO = liftIO >> mapError Error.message
-
-toIO :: Task x a -> IO (Result x a)
+toIO :: Task a -> IO (Result String a)
 toIO (Task io) = io
 
-main :: Task x () -> IO ()
+main :: Task () -> IO ()
 main (Task io) = do
   result <- io
   case result of
     Ok () -> System.Exit.exitSuccess
-    Error error -> System.Exit.die (Error.message error)
+    Error message -> System.Exit.die message
 
-forEach :: List a -> (a -> Task x ()) -> Task x ()
+forEach :: List a -> (a -> Task ()) -> Task ()
 forEach values function = Prelude.mapM_ function values
 
-collect :: (a -> Task x b) -> List a -> Task x (List b)
+collect :: (a -> Task b) -> List a -> Task (List b)
 collect = Prelude.mapM
 
-parallel :: (a -> Task x b) -> List a -> Task x (List b)
+parallel :: (a -> Task b) -> List a -> Task (List b)
 parallel function values =
   Task (fmap Result.combine (Async.mapConcurrently (function >> toIO) values))
 
-spawn :: Task x a -> Task String (Async x a)
+spawn :: Task a -> Task (Async a)
 spawn (Task io) = fromIO (fmap Async (Async.async io))
 
-await :: Async x a -> Task x a
+await :: Async a -> Task a
 await (Async async) = Task (Async.wait async)
 
-sleep :: Duration -> Task String ()
+sleep :: Duration -> Task ()
 sleep duration =
   let microseconds = Float.round (Duration.inMicroseconds duration)
    in fromIO (Control.Concurrent.threadDelay microseconds)

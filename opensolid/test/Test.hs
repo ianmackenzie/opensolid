@@ -17,12 +17,12 @@ where
 
 import Console qualified
 import Data.Foldable qualified
+import Error qualified
 import List qualified
 import OpenSolid hiding (fail, (>>=))
 import OpenSolid qualified
 import Random (Generator)
 import Random qualified
-import Error qualified
 import String qualified
 import Task qualified
 
@@ -39,7 +39,7 @@ instance a ~ a' => Bind (Generator a) a' (Generator b) where
 instance a ~ a' => Bind (Result x a) a' (Result x b) where
   (>>=) = (OpenSolid.>>=)
 
-instance a ~ a' => Bind (Task x a) a' (Task x b) where
+instance a ~ a' => Bind (Task a) a' (Task b) where
   (>>=) = (OpenSolid.>>=)
 
 instance a ~ a' => Bind (Result x a) a' Expectation where
@@ -68,7 +68,7 @@ testCount count description =
   let pluralized = if count == 1 then "test" else "tests"
    in String.join " " [String.fromInt count, pluralized, description]
 
-run :: List Test -> Task String ()
+run :: List Test -> Task ()
 run tests = do
   Console.printLine ""
   Console.printLine "Running tests..."
@@ -81,7 +81,7 @@ run tests = do
       return ()
     else Task.fail (testCount failures "failed")
 
-reportError :: List String -> List String -> Task String (Int, Int)
+reportError :: List String -> List String -> Task (Int, Int)
 reportError context messages = do
   Console.printLine ("❌ " ++ (String.join " | " (List.reverse context) ++ ":"))
   Console.printLine ""
@@ -89,7 +89,7 @@ reportError context messages = do
   Console.printLine ""
   return (0, 1)
 
-runImpl :: List String -> Test -> Task String (Int, Int)
+runImpl :: List String -> Test -> Task (Int, Int)
 runImpl context (Check count label generator) = fuzzImpl (label : context) count generator
 runImpl context (Group label tests) = Task.collect (runImpl (label : context)) tests |> Task.map sum
 
@@ -99,7 +99,7 @@ sum ((successes, failures) : rest) =
   let (restSuccesses, restFailures) = sum rest
    in (successes + restSuccesses, failures + restFailures)
 
-fuzzImpl :: List String -> Int -> Generator Expectation -> Task String (Int, Int)
+fuzzImpl :: List String -> Int -> Generator Expectation -> Task (Int, Int)
 fuzzImpl _ 0 _ = return (1, 0)
 fuzzImpl context n generator = do
   expectation <- Random.generate generator

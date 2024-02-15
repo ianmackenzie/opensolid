@@ -18,7 +18,6 @@ import System.Exit qualified as SE
 import System.IO qualified as SIO
 import System.Process qualified as SP
 import Task qualified
-import Try qualified
 
 setup :: List PY.Statement
 setup =
@@ -293,7 +292,7 @@ main =
         (SP.proc "ruff" ["format", "--stdin-filename", "opensolid.py", "--quiet"])
           { SP.std_in = SP.CreatePipe
           }
-   in Task.main <| Try.do
+   in Task.main do
         (Just stdinHandle, _, _, process) <- Task.fromIO (SP.createProcess ruffCmd)
         Task.fromIO (SIO.hPutStr stdinHandle pythonCode)
         Task.fromIO (SIO.hClose stdinHandle)

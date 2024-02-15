@@ -16,7 +16,6 @@ import OpenSolid hiding ((<*>), (>>), (>>=))
 import OpenSolid qualified
 import Result qualified
 import String qualified
-import Task qualified
 import Prelude (Applicative, Monad)
 
 class MapError m where
@@ -24,9 +23,6 @@ class MapError m where
 
 instance MapError Result where
   mapError = Result.mapError
-
-instance MapError Task where
-  mapError = Task.mapError
 
 (>>) ::
   ( MapError m

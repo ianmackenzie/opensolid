@@ -64,7 +64,7 @@ step generator (Seed stdGen) =
   let (generatedValue, updatedStdGen) = run generator stdGen
    in (generatedValue, Seed updatedStdGen)
 
-generate :: Generator a -> Task String a
+generate :: Generator a -> Task a
 generate generator =
   Task.fromIO <|
     System.Random.Stateful.applyAtomicGen (run generator) System.Random.Stateful.globalStdGen

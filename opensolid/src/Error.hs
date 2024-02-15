@@ -10,7 +10,6 @@ import Basics
 import Composition
 import Concatenation
 import String qualified
-import System.IO.Error qualified
 
 class (Eq error, Show error) => Error error where
   message :: error -> String
@@ -18,9 +17,6 @@ class (Eq error, Show error) => Error error where
 
 instance Error String where
   message = identity
-
-instance Error IOError where
-  message ioError = System.IO.Error.ioeGetErrorString ioError
 
 class (Error x, Error y) => Map x y a b | a -> x, b -> y where
   map :: (x -> y) -> a -> b

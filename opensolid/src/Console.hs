@@ -4,5 +4,5 @@ import OpenSolid
 import Task qualified
 import Prelude qualified
 
-printLine :: String -> Task String ()
+printLine :: String -> Task ()
 printLine string = Task.fromIO (Prelude.putStrLn string)

@@ -16,7 +16,7 @@ import OpenSolid qualified
 import Pair qualified
 import Task qualified
 
-(>>) :: Task x a -> Task x b -> Task x b
+(>>) :: Task a -> Task b -> Task b
 task1 >> task2 =
   Task.unsafe <|
     fmap Pair.second <|
@@ -26,7 +26,7 @@ apply :: (Result x (a -> b), Result x a) -> Result x b
 apply (functionResult, valueResult) =
   functionResult OpenSolid.<*> valueResult
 
-(<*>) :: Task x (a -> b) -> Task x a -> Task x b
+(<*>) :: Task (a -> b) -> Task a -> Task b
 functionTask <*> valueTask =
   Task.unsafe <|
     fmap apply <|

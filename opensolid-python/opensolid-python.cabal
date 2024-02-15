@@ -50,3 +50,4 @@ executable opensolid-python
   default-extensions:
       RebindableSyntax
       QualifiedDo
+      BlockArguments

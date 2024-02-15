@@ -80,7 +80,7 @@ toSvg (Bounds2d (Range x1 x2) (Range y1 y2)) entities =
         , Maybe.withDefault "" (entityString "" (Node "svg" attributes entities)) ++ "\n"
         ]
 
-writeTo :: String -> Bounds2d (space @ Meters) -> List (Entity space) -> Task String ()
+writeTo :: String -> Bounds2d (space @ Meters) -> List (Entity space) -> Task ()
 writeTo path viewBox entities = File.writeTo path (toSvg viewBox entities)
 
 nothing :: Entity space
