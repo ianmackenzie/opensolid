@@ -21,8 +21,8 @@ import Error qualified
 import List qualified
 import OpenSolid hiding (fail)
 import Random (Generator)
-import Result qualified
 import Random qualified
+import Result qualified
 import String qualified
 import Task qualified
 
