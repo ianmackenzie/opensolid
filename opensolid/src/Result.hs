@@ -31,7 +31,7 @@ data Result x a where
   Ok :: a -> Result x a
   Error :: Error x => x -> Result x a
 
-instance (Error x, Error y, a ~ a') => Error.Map x y (Result x a) (Result y a') where
+instance (Error x, Error y) => Error.Map x y (Result x) (Result y) where
   map _ (Ok value) = Ok value
   map function (Error error) = Error (function error)
 

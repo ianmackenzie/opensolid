@@ -70,7 +70,7 @@ fail message = Task (Prelude.fail message)
 instance MonadIO Task where
   liftIO = fromIO
 
-instance a ~ a' => Error.Map String String (Task a) (Task a') where
+instance Error.Map String String Task Task where
   map function = onError (\error -> fail (function error))
 
 class Bind m where

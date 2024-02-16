@@ -17,13 +17,13 @@ class (Eq error, Show error) => Error error where
 instance Error String where
   message = identity
 
-class (Error x, Error y) => Map x y a b | a -> x, b -> y where
-  map :: (x -> y) -> a -> b
+class (Error x, Error y) => Map x y m n | m -> x, n -> y, m y -> n where
+  map :: (x -> y) -> m a -> n a
 
-toString :: Map x String a b => a -> b
+toString :: Map x String m n => m a -> n a
 toString = map message
 
-context :: Map x String a b => String -> a -> b
+context :: Map x String m n => String -> m a -> n a
 context string = map (message >> addContext string)
 
 addContext :: String -> String -> String
