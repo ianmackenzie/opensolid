@@ -15,13 +15,10 @@ import Control.Monad (join)
 import OpenSolid hiding ((>>))
 import Pair qualified
 import Task qualified
-import Prelude qualified
+import Prelude (fmap)
 
 pure :: a -> Task a
 pure = Task.pure
-
-fmap :: (a -> b) -> Task a -> Task b
-fmap = Task.fmap
 
 fail :: String -> Task a
 fail = Task.fail

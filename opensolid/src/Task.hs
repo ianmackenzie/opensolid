@@ -38,7 +38,7 @@ import Error qualified
 import Float qualified
 import Result (Result (Error, Ok))
 import System.IO.Error qualified
-import Prelude (Applicative, Functor, Monad, MonadFail)
+import Prelude (Applicative, Functor, Monad, MonadFail, fmap)
 import Prelude qualified
 
 newtype Task a = Task (IO a)
@@ -46,10 +46,7 @@ newtype Task a = Task (IO a)
 newtype Async a = Async (Async.Async a)
 
 instance Functor Task where
-  fmap = fmap
-
-fmap :: (a -> b) -> Task a -> Task b
-fmap = map
+  fmap = map
 
 instance Applicative Task where
   pure = pure
@@ -84,15 +81,20 @@ instance Bind (Result x) where
   Ok value >>= function = function value
   Error error >>= _ = fail (Error.message error)
 
-class Apply m where
-  (<*>) :: m (a -> b) -> Task a -> Task b
+class Apply m n where
+  (<*>) :: m (a -> b) -> n a -> Task b
 
-instance Apply Task where
+instance Apply Task Task where
   Task functionIO <*> Task valueIO = Task (functionIO Prelude.<*> valueIO)
 
-instance Apply (Result x) where
-  Ok function <*> task = map function task
-  Error error <*> _ = fail (Error.message error)
+instance Error x => Apply (Result x) Task where
+  result <*> task = evaluate result <*> task
+
+instance Error x => Apply Task (Result x) where
+  task <*> result = task <*> evaluate result
+
+instance (Error x, Error y) => Apply (Result x) (Result y) where
+  result1 <*> result2 = evaluate result1 <*> evaluate result2
 
 class Sequence m where
   (>>) :: m () -> Task b -> Task b
