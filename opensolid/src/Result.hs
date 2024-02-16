@@ -33,7 +33,7 @@ data Result x a where
 
 instance (Error x, Error y, a ~ a') => Error.Map x y (Result x a) (Result y a') where
   map _ (Ok value) = Ok value
-  map function (Error err) = Error (function err)
+  map function (Error error) = Error (function error)
 
 deriving instance (Eq x, Eq a) => Eq (Result x a)
 
