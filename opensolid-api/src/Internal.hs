@@ -186,20 +186,20 @@ apiType typ = Prelude.do
         | name == ''Float -> return (TH.ConE 'Api.Float)
         | name == ''Angle -> return (TH.ConE 'Api.Float)
         | name == ''Bool -> return (TH.ConE 'Api.Boolean)
-      _ -> fail ("Unknown type: " ++ show typ)
+      _ -> Prelude.fail ("Unknown type: " ++ show typ)
 
 typeNameBase :: TH.Type -> TH.Q TH.Exp
 typeNameBase (TH.AppT t _) = typeNameBase t
 typeNameBase (TH.ConT name) = return (TH.LitE (TH.StringL (TH.nameBase name)))
-typeNameBase typ = fail ("Unknown type: " ++ show typ)
+typeNameBase typ = Prelude.fail ("Unknown type: " ++ show typ)
 
 modNameBase :: TH.Type -> TH.Q TH.Exp
 modNameBase (TH.AppT t _) = modNameBase t
 modNameBase typ@(TH.ConT name) =
   case TH.nameModule name of
     Just mod -> return (TH.LitE (TH.StringL mod))
-    Nothing -> fail ("Unknown module for type: " ++ show typ)
-modNameBase typ = fail ("Unknown module for type: " ++ show typ)
+    Nothing -> Prelude.fail ("Unknown module for type: " ++ show typ)
+modNameBase typ = Prelude.fail ("Unknown module for type: " ++ show typ)
 
 -- Generates wrapper function type and clause from the original function
 ffiFunctionInfo :: TH.Type -> TH.Exp -> List TH.Pat -> List TH.Stmt -> TH.Q (TH.Type, TH.Clause)

@@ -15,6 +15,7 @@ module Maybe
 where
 
 import Basics
+import Control.Monad (join)
 import Data.Maybe qualified
 import Error (Error)
 import Result (Result (Error, Ok))

@@ -16,7 +16,7 @@ module String
   )
 where
 
-import Basics hiding (join)
+import Basics
 import Concatenation
 import Data.Char qualified
 import Data.List qualified

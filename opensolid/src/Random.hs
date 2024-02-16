@@ -29,6 +29,7 @@ where
 
 import Array qualified
 import Basics
+import Control.Monad (join)
 import Maybe qualified
 import OpenSolid
 import Pair qualified

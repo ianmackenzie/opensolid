@@ -11,6 +11,7 @@ module Parallel
 where
 
 import Control.Concurrent.Async qualified as Async
+import Control.Monad (join)
 import OpenSolid hiding ((>>))
 import Pair qualified
 import Task qualified
@@ -21,6 +22,9 @@ pure = Task.pure
 
 fmap :: (a -> b) -> Task a -> Task b
 fmap = Task.fmap
+
+fail :: String -> Task a
+fail = Task.fail
 
 (>>=) :: Task.Bind m => m a -> (a -> Task b) -> Task b
 (>>=) = (Task.>>=)

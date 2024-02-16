@@ -27,13 +27,10 @@ module Basics
   , (<<)
   , (>>)
   , type (~)
-  , join
   , return
-  , fail
   )
 where
 
-import Control.Monad (join)
 import Data.Kind (Type)
 import Data.Type.Equality (type (~))
 import Prelude
@@ -44,7 +41,6 @@ import Prelude
   , Int
   , Maybe (Just, Nothing)
   , Monad (return)
-  , MonadFail (fail)
   , Ord (compare, (<), (<=), (>), (>=))
   , Ordering (EQ, GT, LT)
   , Show (show)

@@ -19,7 +19,7 @@ import Console qualified
 import Data.Foldable qualified
 import Error qualified
 import List qualified
-import OpenSolid hiding (fail)
+import OpenSolid
 import Random (Generator)
 import Random qualified
 import Result qualified

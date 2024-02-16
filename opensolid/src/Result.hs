@@ -21,7 +21,8 @@ module Result
   )
 where
 
-import Basics hiding (fail, (>>))
+import Basics hiding ((>>))
+import Control.Monad (join)
 import Error (Error)
 import Error qualified
 import Prelude (Applicative, Functor, Monad, MonadFail)

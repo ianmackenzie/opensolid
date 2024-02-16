@@ -296,4 +296,4 @@ main =
     ruffExitCode <- Task.fromIO (SP.waitForProcess process)
     if ruffExitCode == SE.ExitSuccess
       then return ()
-      else fail "Error when running Ruff"
+      else Task.fail "Error when running Ruff"

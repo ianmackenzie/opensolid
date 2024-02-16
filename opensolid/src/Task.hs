@@ -27,6 +27,7 @@ where
 import Basics
 import Control.Concurrent
 import Control.Concurrent.Async qualified as Async
+import Control.Monad (join)
 import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.IO.Class qualified
 import {-# SOURCE #-} Duration (Duration)
@@ -61,7 +62,10 @@ instance Monad Task where
     Task (io Prelude.>>= (\value -> toIO (function value)))
 
 instance MonadFail Task where
-  fail message = Task (Prelude.fail message)
+  fail = fail
+
+fail :: String -> Task a
+fail message = Task (Prelude.fail message)
 
 instance MonadIO Task where
   liftIO = fromIO
