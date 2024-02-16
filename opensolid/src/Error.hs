@@ -3,12 +3,15 @@ module Error
   , Map (map)
   , toString
   , context
+  , debug
   )
 where
 
 import Basics
 import Concatenation
+import Debug qualified
 import String qualified
+import {-# SOURCE #-} Task (Task)
 
 class (Eq error, Show error) => Error error where
   message :: error -> String
@@ -28,3 +31,6 @@ context string = map (message >> addContext string)
 
 addContext :: String -> String -> String
 addContext string text = string ++ ":\n" ++ String.indent "  " text
+
+debug :: Map x x m m => (x -> Task ()) -> m a -> m a
+debug callback = map (\error -> Debug.task (callback error) error)

@@ -21,7 +21,6 @@ module Task
   , pure
   , return
   , onError
-  , debug
   )
 where
 
@@ -155,12 +154,3 @@ onError callback (Task io) =
   Task <|
     System.IO.Error.catchIOError io <|
       \ioError -> toIO (callback (System.IO.Error.ioeGetErrorString ioError))
-
-class Debug m where
-  debug :: Task () -> m a -> Task a
-
-instance Debug Task where
-  debug debugTask = onError (\error -> Task.do debugTask; fail error)
-
-instance Error x => Debug (Result x) where
-  debug debugTask result = debug debugTask (evaluate result)

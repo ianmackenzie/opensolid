@@ -129,10 +129,16 @@ testListOperations = Task.do
   log "Successive intervals" (List.successive Range.from [1.0, 2.0, 3.0, 4.0])
   log "Prepend Maybe to List" (Just 1 ++ [2, 3])
 
-getCrossProduct :: Tolerance Meters => Task Float
-getCrossProduct = Error.context "In getCrossProduct" Task.do
-  vectorDirection <- Vector2d.direction (Vector2d.meters 2.0 3.0)
-  lineDirection <- Direction2d.from Point2d.origin Point2d.origin |> Error.context "When getting line direction"
+getCrossProduct :: Tolerance Meters => Result String Float
+getCrossProduct = Error.context "In getCrossProduct" Result.do
+  vectorDirection <-
+    Vector2d.direction (Vector2d.meters 2.0 3.0)
+      |> Error.debug (\_ -> Console.printLine "Couldn't get vector direction!")
+      |> Error.context "When getting vector direction"
+  lineDirection <-
+    Direction2d.from Point2d.origin Point2d.origin
+      |> Error.debug (\_ -> Console.printLine "Couldn't get line direction!")
+      |> Error.context "When getting line direction"
   return (vectorDirection >< lineDirection)
 
 testTry :: Tolerance Meters => Task ()
