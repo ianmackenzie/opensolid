@@ -26,10 +26,10 @@ module Direction2d
 where
 
 import Angle qualified
+import Error qualified
 import {-# SOURCE #-} Frame2d (Frame2d)
 import OpenSolid
 import {-# SOURCE #-} Point2d (Point2d)
-import Result qualified
 import Vector2d (Vector2d (Vector2d))
 import Vector2d qualified
 
@@ -114,7 +114,7 @@ from ::
   Result PointsAreCoincident (Direction2d space)
 from p1 p2 =
   Vector2d.direction (p2 - p1)
-    |> Result.mapError (\Vector2d.IsZero -> Direction2d.PointsAreCoincident)
+    |> Error.map (\Vector2d.IsZero -> PointsAreCoincident)
 
 fromAngle :: Angle -> Direction2d space
 fromAngle angle = unsafe (Vector2d.polar 1.0 angle)

@@ -31,6 +31,7 @@ import Curve2d qualified
 import Curve2d.Internal qualified
 import Data.Kind (Constraint)
 import Direction2d qualified
+import Error qualified
 import OpenSolid
 import Point2d (Point2d)
 import Point2d qualified
@@ -325,7 +326,7 @@ instance
   with arguments = Result.do
     chordDirection <-
       Direction2d.from givenStartPoint givenEndPoint
-        |> Result.mapError (\Direction2d.PointsAreCoincident -> DegenerateArc)
+        |> Error.map (\Direction2d.PointsAreCoincident -> DegenerateArc)
     let squaredRadius = Qty.squared (Units.generalize givenRadius)
     let squaredHalfLength =
           Qty.squared (Units.generalize (0.5 * Point2d.distanceFrom givenStartPoint givenEndPoint))

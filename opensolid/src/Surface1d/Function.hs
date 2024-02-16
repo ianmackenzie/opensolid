@@ -36,6 +36,7 @@ import Curve2d (Curve2d)
 import Curve2d qualified
 import Debug qualified
 import Direction2d qualified
+import Error qualified
 import Float qualified
 import Frame2d qualified
 import Generic qualified
@@ -902,7 +903,7 @@ horizontalCurve ::
   Result SolveError (Curve2d Uv.Coordinates)
 horizontalCurve f fu fv uStart uEnd vLow vHigh =
   exactly (Curve2d.from (HorizontalCurve f (-fu / fv) uStart uEnd vLow vHigh))
-    |> Result.mapError (\Curve2d.DegenerateCurve -> DegenerateCurve)
+    |> Error.map (\Curve2d.DegenerateCurve -> DegenerateCurve)
     -- Sanity check that we don't attempt to evaluate outside the overall UV domain
     |> Debug.assert (uStart >= 0.0)
     |> Debug.assert (uEnd <= 1.0)
@@ -920,7 +921,7 @@ verticalCurve ::
   Result SolveError (Curve2d Uv.Coordinates)
 verticalCurve f fu fv uLow uHigh vStart vEnd =
   exactly (Curve2d.from (VerticalCurve f (-fv / fu) uLow uHigh vStart vEnd))
-    |> Result.mapError (\Curve2d.DegenerateCurve -> DegenerateCurve)
+    |> Error.map (\Curve2d.DegenerateCurve -> DegenerateCurve)
     -- Sanity check that we don't attempt to evaluate outside the overall UV domain
     |> Debug.assert (uLow >= 0.0)
     |> Debug.assert (uHigh <= 1.0)

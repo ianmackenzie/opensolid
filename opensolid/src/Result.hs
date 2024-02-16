@@ -4,7 +4,6 @@ module Result
   , map2
   , withDefault
   , check
-  , mapError
   , onError
   , handleError
   , orNothing
@@ -33,7 +32,8 @@ data Result x a where
   Error :: Error x => x -> Result x a
 
 instance (Error x, Error y, a ~ a') => Error.Map x y (Result x a) (Result y a') where
-  map = mapError
+  map _ (Ok value) = Ok value
+  map function (Error err) = Error (function err)
 
 deriving instance (Eq x, Eq a) => Eq (Result x a)
 
@@ -90,10 +90,6 @@ map2 function result1 result2 = Prelude.do
 
 check :: Error x => Bool -> x -> Result x ()
 check condition error = if condition then Ok () else Error error
-
-mapError :: Error y => (x -> y) -> Result x a -> Result y a
-mapError _ (Ok value) = Ok value
-mapError function (Error err) = Error (function err)
 
 onError :: (x -> Result y a) -> Result x a -> Result y a
 onError _ (Ok value) = Ok value

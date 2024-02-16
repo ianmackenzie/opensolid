@@ -5,7 +5,6 @@ module Task
   , check
   , fail
   , map
-  , mapError
   , forEach
   , fromIO
   , toIO
@@ -69,8 +68,11 @@ fail message = Task (Prelude.fail message)
 instance MonadIO Task where
   liftIO = fromIO
 
-instance Error.Map String String (Task a) (Task a) where
-  map = mapError
+instance a ~ a' => Error.Map String String (Task a) (Task a') where
+  map function (Task io) =
+    Task <|
+      System.IO.Error.catchIOError io <|
+        \ioError -> Prelude.fail (function (System.IO.Error.ioeGetErrorString ioError))
 
 class Bind m where
   (>>=) :: m a -> (a -> Task b) -> Task b
@@ -112,12 +114,6 @@ check condition message = if condition then return () else fail message
 
 map :: (a -> b) -> Task a -> Task b
 map function (Task io) = Task (Prelude.fmap function io)
-
-mapError :: (String -> String) -> Task a -> Task a
-mapError function (Task io) =
-  Task <|
-    System.IO.Error.catchIOError io <|
-      \ioError -> Prelude.fail (function (System.IO.Error.ioeGetErrorString ioError))
 
 fromIO :: IO a -> Task a
 fromIO = Task
