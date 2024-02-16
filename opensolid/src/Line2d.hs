@@ -20,7 +20,7 @@ import Curve2d qualified
 import Curve2d.Internal qualified
 import Direction2d (Direction2d)
 import Direction2d qualified
-import OpenSolid hiding ((>>))
+import OpenSolid
 import Point2d (Point2d)
 import Point2d qualified
 import Qty qualified
