@@ -20,6 +20,8 @@ module Task
   , join
   , pure
   , return
+  , onError
+  , debug
   )
 where
 
@@ -69,10 +71,7 @@ instance MonadIO Task where
   liftIO = fromIO
 
 instance a ~ a' => Error.Map String String (Task a) (Task a') where
-  map function (Task io) =
-    Task <|
-      System.IO.Error.catchIOError io <|
-        \ioError -> Prelude.fail (function (System.IO.Error.ioeGetErrorString ioError))
+  map function = onError (\error -> fail (function error))
 
 class Bind m where
   (>>=) :: m a -> (a -> Task b) -> Task b
@@ -148,3 +147,18 @@ sleep :: Duration -> Task ()
 sleep duration =
   let microseconds = Float.round (Duration.inMicroseconds duration)
    in Task (Control.Concurrent.threadDelay microseconds)
+
+onError :: (String -> Task a) -> Task a -> Task a
+onError callback (Task io) =
+  Task <|
+    System.IO.Error.catchIOError io <|
+      \ioError -> toIO (callback (System.IO.Error.ioeGetErrorString ioError))
+
+class Debug m where
+  debug :: Task () -> m a -> Task a
+
+instance Debug Task where
+  debug debugTask = onError (\error -> Task.do debugTask; fail error)
+
+instance Error x => Debug (Result x) where
+  debug debugTask result = debug debugTask (evaluate result)
