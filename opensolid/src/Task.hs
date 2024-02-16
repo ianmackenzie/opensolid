@@ -126,10 +126,17 @@ toIO :: Task a -> IO a
 toIO (Task io) = io
 
 forEach :: List a -> (a -> Task ()) -> Task ()
-forEach values function = Prelude.mapM_ function values
+forEach [] _ = return ()
+forEach (first : rest) function = Task.do
+  function first
+  forEach rest function
 
 collect :: (a -> Task b) -> List a -> Task (List b)
-collect = Prelude.mapM
+collect _ [] = return []
+collect function (first : rest) = Task.do
+  firstValue <- function first
+  restValues <- collect function rest
+  return (firstValue : restValues)
 
 parallel :: (a -> Task b) -> List a -> Task (List b)
 parallel function values =
