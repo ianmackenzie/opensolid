@@ -9,6 +9,7 @@
   "haskell.manageHLS": "PATH",
   "haskell.formattingProvider": "fourmolu",
   "haskell.plugin.fourmolu.config.external": true,
+  "python.analysis.extraPaths": ["opensolid-python"],
   "nix.serverSettings": {
     "nil": {
       "formatting": {
