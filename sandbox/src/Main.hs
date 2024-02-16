@@ -269,7 +269,7 @@ testPlaneTorusIntersection = Task.do
   -- let nz = 1.0
   let f = x * nx + y * ny + z * nz
   solutions <- Surface1d.Function.solve f
-  drawSolutions "solutions.svg" solutions
+  drawSolutions "test.svg" solutions
   Console.printLine ""
   Console.printLine "Plane torus intersection solutions:"
   Task.forEach solutions \case
