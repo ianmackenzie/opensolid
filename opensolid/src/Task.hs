@@ -55,7 +55,7 @@ instance Applicative Task where
   (<*>) = (<*>)
 
 pure :: a -> Task a
-pure value = Task (Prelude.return value)
+pure value = Task (return value)
 
 instance Monad Task where
   Task io >>= function =
@@ -104,7 +104,7 @@ instance Sequence (Result x) where
   Error error >> _ = fail (Error.message error)
 
 evaluate :: Error x => Result x a -> Task a
-evaluate (Ok value) = Task (Prelude.return value)
+evaluate (Ok value) = Task (return value)
 evaluate (Error error) = Task (Prelude.fail (Error.message error))
 
 check :: Bool -> String -> Task ()
