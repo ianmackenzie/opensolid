@@ -58,8 +58,7 @@ pure :: a -> Task a
 pure value = Task (return value)
 
 instance Monad Task where
-  Task io >>= function =
-    Task (io Prelude.>>= (\value -> toIO (function value)))
+  (>>=) = (>>=)
 
 instance MonadFail Task where
   fail = fail
@@ -77,7 +76,8 @@ class Bind m where
   (>>=) :: m a -> (a -> Task b) -> Task b
 
 instance Bind Task where
-  (>>=) = (Prelude.>>=)
+  Task io >>= function =
+    Task (io Prelude.>>= (\value -> toIO (function value)))
 
 instance Bind (Result x) where
   Ok value >>= function = function value
