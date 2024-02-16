@@ -129,17 +129,18 @@ testListOperations = Task.do
   log "Successive intervals" (List.successive Range.from [1.0, 2.0, 3.0, 4.0])
   log "Prepend Maybe to List" (Just 1 ++ [2, 3])
 
-getCrossProduct :: Tolerance Meters => Result String Float
-getCrossProduct = Error.context "In getCrossProduct" Result.do
-  vectorDirection <- Vector2d.direction (Vector2d.meters 2.0 3.0) |> Error.toString
+getCrossProduct :: Tolerance Meters => Task Float
+getCrossProduct = Error.context "In getCrossProduct" Task.do
+  vectorDirection <- Vector2d.direction (Vector2d.meters 2.0 3.0)
   lineDirection <- Direction2d.from Point2d.origin Point2d.origin |> Error.context "When getting line direction"
   return (vectorDirection >< lineDirection)
 
 testTry :: Tolerance Meters => Task ()
 testTry =
-  case Error.context "In testTry" getCrossProduct of
-    Ok crossProduct -> log "Got cross product" crossProduct
-    Error message -> Console.printLine message
+  Task.onError Console.printLine <|
+    Error.context "In testTry" Task.do
+      crossProduct <- getCrossProduct
+      log "Got cross product" crossProduct
 
 testTaskIteration :: Task ()
 testTaskIteration = Task.forEach [1 .. 3] (log "Looping")
