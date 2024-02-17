@@ -1,5 +1,6 @@
 module Surface1d.SaddleRegion
   ( SaddleRegion (..)
+  , point
   , contains
   , corners
   , bounds
@@ -29,9 +30,12 @@ data SaddleRegion = SaddleRegion
   }
   deriving (Show)
 
+point :: SaddleRegion -> Uv.Point
+point (SaddleRegion{frame}) = Frame2d.originPoint frame
+
 isInsideRegion :: SaddleRegion -> Uv.Point -> Bool
-isInsideRegion (SaddleRegion{frame, halfWidth, halfHeight}) point =
-  let Point2d localX localY = Point2d.relativeTo frame point
+isInsideRegion (SaddleRegion{frame, halfWidth, halfHeight}) givenPoint =
+  let Point2d localX localY = Point2d.relativeTo frame givenPoint
    in Float.abs localX < halfWidth && Float.abs localY < halfHeight
 
 corners :: SaddleRegion -> List Uv.Point

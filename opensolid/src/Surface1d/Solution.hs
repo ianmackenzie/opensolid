@@ -24,7 +24,7 @@ data Solution
   | TangentCurve {start :: Boundary, end :: Boundary, segments :: NonEmpty (Curve2d Uv.Coordinates), sign :: Sign}
   | TangentLoop {segments :: NonEmpty (Curve2d Uv.Coordinates), sign :: Sign}
   | TangentPoint {point :: Uv.Point, sign :: Sign}
-  | SaddlePoint {point :: Uv.Point, region :: SaddleRegion}
+  | SaddleRegion SaddleRegion
   deriving (Show)
 
 merge :: List Solution -> List Solution -> List Solution

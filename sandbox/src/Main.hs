@@ -283,7 +283,7 @@ testPlaneTorusIntersection = Task.do
     Surface1d.Solution.CrossingCurve{} -> Console.printLine "Crossing curve"
     Surface1d.Solution.BoundaryEdge curve -> log "Boundary edge" curve
     Surface1d.Solution.BoundaryPoint point -> log "Boundary point" point
-    Surface1d.Solution.SaddlePoint{point} -> log "Saddle point" point
+    Surface1d.Solution.SaddleRegion region -> log "Saddle point" (SaddleRegion.point region)
     Surface1d.Solution.DegenerateCrossingCurve{start, end} -> log "Degenerate crossing curve" (start, end)
     solution -> log "Unexpected solution" solution
   return ()
@@ -332,9 +332,9 @@ drawSolution index solution =
             ]
         Surface1d.Solution.DegenerateCrossingCurve{start, end} ->
           Drawing2d.group [drawBoundary start, drawBoundary end]
-        Surface1d.Solution.SaddlePoint{point, region} ->
+        Surface1d.Solution.SaddleRegion region ->
           Drawing2d.group
-            [ drawDot Colour.orange point
+            [ drawDot Colour.orange (SaddleRegion.point region)
             , drawSaddleRegion [Drawing2d.noFill, Drawing2d.strokeColour Colour.lightGrey] region
             ]
         _ -> Drawing2d.nothing

@@ -1028,7 +1028,7 @@ saddlePointSolution derivatives point expandedBounds =
       halfWidth = Float.abs (radius * u1)
       halfHeight = Float.abs (radius * v1)
       saddleRegion = SaddleRegion{frame, halfWidth, halfHeight}
-   in ([Solution.SaddlePoint point saddleRegion], [], [saddleRegion])
+   in ([Solution.SaddleRegion saddleRegion], [], [saddleRegion])
 
 -- isTangentCurveByU
 --   | segmentBounds vBottomSlice fv ^ Qty.zero = False
