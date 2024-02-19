@@ -22,6 +22,7 @@ module Direction2d
   , rotateRight
   , placeIn
   , relativeTo
+  , generator
   )
 where
 
@@ -30,6 +31,7 @@ import Error qualified
 import {-# SOURCE #-} Frame2d (Frame2d)
 import OpenSolid
 import {-# SOURCE #-} Point2d (Point2d)
+import Random qualified
 import Vector2d (Vector2d (Vector2d))
 import Vector2d qualified
 
@@ -145,3 +147,6 @@ placeIn frame (Direction2d vector) = unsafe (Vector2d.placeIn frame vector)
 
 relativeTo :: Frame2d (global @ units) (Defines local) -> Direction2d global -> Direction2d local
 relativeTo frame (Direction2d vector) = unsafe (Vector2d.relativeTo frame vector)
+
+generator :: Random.Generator (Direction2d space)
+generator = Random.map fromAngle (Random.qty Angle.zero Angle.twoPi)
