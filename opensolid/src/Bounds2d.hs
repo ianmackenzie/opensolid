@@ -27,18 +27,26 @@ module Bounds2d
   , all
   , resolve
   , find
+  , placeIn
+  , relativeTo
   )
 where
 
 import Bounds qualified
+import Direction2d (Direction2d (Direction2d))
+import Float qualified
+import Frame2d (Frame2d)
+import Frame2d qualified
 import Fuzzy qualified
 import Maybe qualified
 import OpenSolid
 import Point2d (Point2d (Point2d))
+import Point2d qualified
 import Qty qualified
 import Quadrature qualified
 import Range (Range)
 import Range qualified
+import Vector2d (Vector2d (Vector2d))
 import VectorBounds2d (VectorBounds2d (VectorBounds2d))
 
 type role Bounds2d nominal
@@ -275,3 +283,35 @@ find :: (Bounds2d (space @ units) -> Bool) -> Bounds2d (space @ units) -> Maybe 
 find isCandidate (Bounds2d xRange yRange) = Maybe.do
   (x0, y0) <- Range.find2 (\x y -> isCandidate (Bounds2d x y)) xRange yRange
   return (Point2d x0 y0)
+
+placeIn ::
+  Frame2d (global @ units) (Defines local) ->
+  Bounds2d (local @ units) ->
+  Bounds2d (global @ units)
+placeIn frame (Bounds2d x y) =
+  let xMid = Range.midpoint x
+      yMid = Range.midpoint y
+      xWidth = Range.width x
+      yWidth = Range.width y
+      Point2d x0 y0 = Point2d.xyIn frame xMid yMid
+      Direction2d (Vector2d ix iy) = Frame2d.xDirection frame
+      Direction2d (Vector2d jx jy) = Frame2d.yDirection frame
+      rx = 0.5 * xWidth * Float.abs ix + 0.5 * yWidth * Float.abs jx
+      ry = 0.5 * xWidth * Float.abs iy + 0.5 * yWidth * Float.abs jy
+   in Bounds2d (Range.from (x0 - rx) (x0 + rx)) (Range.from (y0 - ry) (y0 + ry))
+
+relativeTo ::
+  Frame2d (global @ units) (Defines local) ->
+  Bounds2d (global @ units) ->
+  Bounds2d (local @ units)
+relativeTo frame (Bounds2d x y) =
+  let xMid = Range.midpoint x
+      yMid = Range.midpoint y
+      xWidth = Range.width x
+      yWidth = Range.width y
+      Point2d x0 y0 = Point2d.relativeTo frame (Point2d xMid yMid)
+      Direction2d (Vector2d ix iy) = Frame2d.xDirection frame
+      Direction2d (Vector2d jx jy) = Frame2d.yDirection frame
+      rx = 0.5 * xWidth * Float.abs ix + 0.5 * yWidth * Float.abs iy
+      ry = 0.5 * xWidth * Float.abs jx + 0.5 * yWidth * Float.abs jy
+   in Bounds2d (Range.from (x0 - rx) (x0 + rx)) (Range.from (y0 - ry) (y0 + ry))
