@@ -6,6 +6,7 @@ import Task qualified
 import Test (Test)
 import Test qualified
 import Tests.Arc2d qualified
+import Tests.Bounds2d qualified
 import Tests.Curve1d qualified
 import Tests.Curve2d qualified
 import Tests.Dict qualified
@@ -40,6 +41,7 @@ tests =
   , Test.group "DivMod" Tests.DivMod.tests
   , Test.group "Float" Tests.Float.tests
   , Test.group "String" Tests.String.tests
+  , Test.group "Bounds2d" Tests.Bounds2d.tests
   ]
  where
   ?tolerance = Length.meters 1e-9
