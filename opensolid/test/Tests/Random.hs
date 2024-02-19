@@ -3,11 +3,15 @@ module Tests.Random
   , lengthRange
   , point2d
   , vectorBounds3d
+  , frame2d
   , bounds2d
   )
 where
 
 import Bounds2d (Bounds2d (Bounds2d))
+import Direction2d qualified
+import Frame2d (Frame2d)
+import Frame2d qualified
 import Length (Length)
 import Length qualified
 import OpenSolid
@@ -30,6 +34,12 @@ point2d = Random.map2 Point2d length length
 
 vectorBounds3d :: Generator (VectorBounds3d (space @ Meters))
 vectorBounds3d = Random.map3 VectorBounds3d lengthRange lengthRange lengthRange
+
+frame2d :: Generator (Frame2d (global @ Meters) (Defines local))
+frame2d = Random.do
+  originPoint <- point2d
+  direction <- Direction2d.generator
+  return (Frame2d.withXDirection direction originPoint)
 
 bounds2d :: Generator (Bounds2d (space @ Meters))
 bounds2d = Random.map2 Bounds2d lengthRange lengthRange
