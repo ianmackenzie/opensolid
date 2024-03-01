@@ -5,10 +5,12 @@ module Tests.Random
   , vectorBounds3d
   , frame2d
   , bounds2d
+  , vectorBounds2d
   )
 where
 
 import Bounds2d (Bounds2d (Bounds2d))
+import VectorBounds2d (VectorBounds2d (VectorBounds2d))
 import Direction2d qualified
 import Frame2d (Frame2d)
 import Frame2d qualified
@@ -43,3 +45,6 @@ frame2d = Random.do
 
 bounds2d :: Generator (Bounds2d (space @ Meters))
 bounds2d = Random.map2 Bounds2d lengthRange lengthRange
+
+vectorBounds2d :: Generator (VectorBounds2d (space @ Meters))
+vectorBounds2d = Random.map2 VectorBounds2d lengthRange lengthRange
