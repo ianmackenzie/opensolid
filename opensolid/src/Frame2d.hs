@@ -14,6 +14,7 @@ module Frame2d
   , fromYAxis
   , placeIn
   , relativeTo
+  , inverse
   )
 where
 
@@ -87,3 +88,6 @@ relativeTo globalFrame frame =
     { originPoint = Point2d.relativeTo globalFrame (originPoint frame)
     , basis = Basis2d.relativeTo globalFrame (basis frame)
     }
+
+inverse :: Frame2d (global @ units) (Defines local) -> Frame2d (local @ units) (Defines global)
+inverse frame = xy |> relativeTo frame
