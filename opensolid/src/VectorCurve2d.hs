@@ -20,16 +20,24 @@ module VectorCurve2d
   , yComponent
   , DegenerateCurve (DegenerateCurve)
   , direction
+  , placeIn
+  , relativeTo
+  , placeInBasis
+  , relativeToBasis
   )
 where
 
 import Angle qualified
+import Basis2d (Basis2d)
+import Basis2d qualified
 import Curve1d (Curve1d (Curve1d))
 import Curve1d qualified
 import Curve1d.Root qualified as Root
 import Direction2d (Direction2d (Direction2d))
 import Direction2d qualified
 import {-# SOURCE #-} DirectionCurve2d (DirectionCurve2d)
+import Frame2d (Frame2d)
+import Frame2d qualified
 import Generic qualified
 import List qualified
 import OpenSolid
@@ -96,6 +104,10 @@ data VectorCurve2d (coordinateSystem :: CoordinateSystem) where
     VectorCurve2d (space @ units1) ->
     Curve1d units2 ->
     VectorCurve2d (space @ units3)
+  PlaceInBasis ::
+    Basis2d global (Defines local) ->
+    VectorCurve2d (local @ units) ->
+    VectorCurve2d (global @ units)
   Line ::
     Vector2d (space @ units) ->
     Vector2d (space @ units) ->
@@ -494,6 +506,7 @@ evaluateAt t curve =
     Product1d2d c1 c2 -> Curve1d.evaluateAt t c1 * evaluateAt t c2
     Product2d1d c1 c2 -> evaluateAt t c1 * Curve1d.evaluateAt t c2
     Quotient c1 c2 -> evaluateAt t c1 / Curve1d.evaluateAt t c2
+    PlaceInBasis basis c -> Vector2d.placeInBasis basis (evaluateAt t c)
     Line v1 v2 -> Vector2d.interpolateFrom v1 v2 t
     Arc r a b -> Vector2d.polar r (Qty.interpolateFrom a b t)
     QuadraticSpline v1 v2 v3 -> quadraticBlossom v1 v2 v3 t t
@@ -513,6 +526,7 @@ segmentBounds t@(Range tl th) curve =
     Product1d2d c1 c2 -> Curve1d.segmentBounds t c1 * segmentBounds t c2
     Product2d1d c1 c2 -> segmentBounds t c1 * Curve1d.segmentBounds t c2
     Quotient c1 c2 -> segmentBounds t c1 / Curve1d.segmentBounds t c2
+    PlaceInBasis basis c -> VectorBounds2d.placeInBasis basis (segmentBounds t c)
     Line v1 v2 ->
       VectorBounds2d.hull2
         (Vector2d.interpolateFrom v1 v2 tl)
@@ -549,6 +563,7 @@ derivative curve =
           c2' = Units.generalize c2
        in Units.specialize <|
             (derivative c1' .* c2' - c1' .* Curve1d.derivative c2') ./ Curve1d.squared c2'
+    PlaceInBasis basis c -> PlaceInBasis basis (derivative c)
     Line v1 v2 -> constant (v2 - v1)
     Arc r a b ->
       let sweptAngle = b - a
@@ -571,6 +586,7 @@ reverse curve =
     Product1d2d c1 c2 -> Product1d2d (Curve1d.reverse c1) (reverse c2)
     Product2d1d c1 c2 -> Product2d1d (reverse c1) (Curve1d.reverse c2)
     Quotient c1 c2 -> Quotient (reverse c1) (Curve1d.reverse c2)
+    PlaceInBasis basis c -> PlaceInBasis basis (reverse c)
     Line v1 v2 -> Line v2 v1
     Arc r a b -> Arc r b a
     QuadraticSpline v1 v2 v3 -> QuadraticSpline v3 v2 v1
@@ -625,3 +641,16 @@ isNondegenerate curve curveDerivative =
 isRemovableDegeneracy :: Tolerance units => VectorCurve2d (space @ units) -> Float -> Bool
 isRemovableDegeneracy curveDerivative t =
   (t == 0.0 || t == 1.0) && VectorCurve2d.evaluateAt t curveDerivative != Vector2d.zero
+
+placeIn :: Frame2d (global @ frameUnits) (Defines local) -> VectorCurve2d (local @ units) -> VectorCurve2d (global @ units)
+placeIn globalFrame = placeInBasis (Frame2d.basis globalFrame)
+
+relativeTo :: Frame2d (global @ frameUnits) (Defines local) -> VectorCurve2d (global @ units) -> VectorCurve2d (local @ units)
+relativeTo globalFrame = relativeToBasis (Frame2d.basis globalFrame)
+
+placeInBasis :: Basis2d global (Defines local) -> VectorCurve2d (local @ units) -> VectorCurve2d (global @ units)
+placeInBasis globalBasis (PlaceInBasis basis curve) = PlaceInBasis (Basis2d.placeInBasis globalBasis basis) curve
+placeInBasis globalBasis curve = PlaceInBasis globalBasis curve
+
+relativeToBasis :: Basis2d global (Defines local) -> VectorCurve2d (global @ units) -> VectorCurve2d (local @ units)
+relativeToBasis basis = placeInBasis (Basis2d.inverse basis)
