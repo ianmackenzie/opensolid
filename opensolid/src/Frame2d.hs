@@ -1,7 +1,7 @@
 module Frame2d
   ( Frame2d
-  , atOrigin
-  , atPoint
+  , xy
+  , withOriginPoint
   , originPoint
   , basis
   , xDirection
@@ -44,11 +44,11 @@ xDirection frame = Basis2d.xDirection (basis frame)
 yDirection :: Frame2d (space @ units) defines -> Direction2d space
 yDirection frame = Basis2d.yDirection (basis frame)
 
-atOrigin :: Frame2d (space @ units) defines
-atOrigin = atPoint Point2d.origin
+xy :: Frame2d (space @ units) defines
+xy = Frame2d Point2d.origin Basis2d.xy
 
-atPoint :: Point2d (space @ units) -> Frame2d (space @ units) defines
-atPoint point = Frame2d{originPoint = point, basis = Basis2d.xy}
+withOriginPoint :: Point2d (space @ units) -> Frame2d (space @ units) defines
+withOriginPoint point = Frame2d point Basis2d.xy
 
 withXDirection :: Direction2d space -> Point2d (space @ units) -> Frame2d (space @ units) defines
 withXDirection dx p0 = Frame2d{originPoint = p0, basis = Basis2d.fromXDirection dx}
