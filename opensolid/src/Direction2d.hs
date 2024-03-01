@@ -2,6 +2,7 @@ module Direction2d
   ( Direction2d (Direction2d)
   , xComponent
   , yComponent
+  , components
   , unsafe
   , unwrap
   , x
@@ -80,6 +81,10 @@ xComponent (Direction2d vector) = Vector2d.xComponent vector
 
 yComponent :: Direction2d space -> Float
 yComponent (Direction2d vector) = Vector2d.yComponent vector
+
+{-# INLINE components #-}
+components :: Direction2d space -> (Float, Float)
+components (Direction2d vector) = Vector2d.components vector
 
 {-# INLINE unsafe #-}
 unsafe :: Vector2d (space @ Unitless) -> Direction2d space
