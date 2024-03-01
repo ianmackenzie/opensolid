@@ -12,6 +12,8 @@ module Frame2d
   , withYDirection
   , fromXAxis
   , fromYAxis
+  , placeIn
+  , relativeTo
   )
 where
 
@@ -65,3 +67,23 @@ xAxis frame = Axis2d.through (originPoint frame) (xDirection frame)
 
 yAxis :: Frame2d (space @ units) defines -> Axis2d (space @ units)
 yAxis frame = Axis2d.through (originPoint frame) (yDirection frame)
+
+placeIn ::
+  Frame2d (global @ units) (Defines space) ->
+  Frame2d (space @ units) (Defines local) ->
+  Frame2d (global @ units) (Defines local)
+placeIn globalFrame frame =
+  Frame2d
+    { originPoint = Point2d.placeIn globalFrame (originPoint frame)
+    , basis = Basis2d.placeIn globalFrame (basis frame)
+    }
+
+relativeTo ::
+  Frame2d (global @ units) (Defines space) ->
+  Frame2d (global @ units) (Defines local) ->
+  Frame2d (space @ units) (Defines local)
+relativeTo globalFrame frame =
+  Frame2d
+    { originPoint = Point2d.relativeTo globalFrame (originPoint frame)
+    , basis = Basis2d.relativeTo globalFrame (basis frame)
+    }
