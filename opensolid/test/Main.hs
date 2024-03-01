@@ -21,6 +21,7 @@ import Tests.Range qualified
 import Tests.Region2d qualified
 import Tests.String qualified
 import Tests.T qualified
+import Tests.VectorBounds2d qualified
 import Tests.VectorBounds3d qualified
 
 tests :: List Test
@@ -42,6 +43,7 @@ tests =
   , Test.group "Float" Tests.Float.tests
   , Test.group "String" Tests.String.tests
   , Test.group "Bounds2d" Tests.Bounds2d.tests
+  , Test.group "VectorBounds2d" Tests.VectorBounds2d.tests
   ]
  where
   ?tolerance = Length.meters 1e-9
