@@ -9,6 +9,7 @@ module Basis2d
   , relativeTo
   , placeInBasis
   , relativeToBasis
+  , inverse
   )
 where
 
@@ -70,3 +71,6 @@ relativeToBasis globalBasis basis =
     { xDirection = Direction2d.relativeToBasis globalBasis (xDirection basis)
     , yDirection = Direction2d.relativeToBasis globalBasis (yDirection basis)
     }
+
+inverse :: Basis2d global (Defines local) -> Basis2d local (Defines global)
+inverse basis = xy |> relativeToBasis basis
