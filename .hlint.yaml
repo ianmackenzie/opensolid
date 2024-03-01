@@ -12,3 +12,4 @@
 - ignore: { name: "Use foldl" }
 - ignore: { name: "Use mapM" }
 - ignore: { name: "Redundant fromIntegral" }
+- ignore: { name: "Use :" }
