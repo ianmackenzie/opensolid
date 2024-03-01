@@ -51,10 +51,10 @@ withOriginPoint :: Point2d (space @ units) -> Frame2d (space @ units) defines
 withOriginPoint point = Frame2d point Basis2d.xy
 
 withXDirection :: Direction2d space -> Point2d (space @ units) -> Frame2d (space @ units) defines
-withXDirection dx p0 = Frame2d{originPoint = p0, basis = Basis2d.fromXDirection dx}
+withXDirection dx p0 = Frame2d p0 (Basis2d.fromXDirection dx)
 
 withYDirection :: Direction2d space -> Point2d (space @ units) -> Frame2d (space @ units) defines
-withYDirection dy p0 = Frame2d{originPoint = p0, basis = Basis2d.fromYDirection dy}
+withYDirection dy p0 = Frame2d p0 (Basis2d.fromYDirection dy)
 
 fromXAxis :: Axis2d (space @ units) -> Frame2d (space @ units) defines
 fromXAxis axis = withXDirection (Axis2d.direction axis) (Axis2d.originPoint axis)
