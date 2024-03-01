@@ -19,6 +19,7 @@ import Bounds2d qualified
 import Direction2d (Direction2d)
 import DirectionCurve2d (DirectionCurve2d)
 import DirectionCurve2d qualified
+import Frame2d (Frame2d)
 import OpenSolid
 import Point2d (Point2d)
 import Point2d qualified
@@ -52,6 +53,10 @@ data Curve2d (coordinateSystem :: CoordinateSystem) where
     curve ->
     DirectionCurve2d space ->
     Curve2d (space @ units)
+  PlaceIn ::
+    Frame2d (global @ units) (Defines local) ->
+    Curve2d (local @ units) ->
+    Curve2d (global @ units)
 
 deriving instance Show (Curve2d (space @ units))
 
@@ -114,16 +119,19 @@ startPoint :: Curve2d (space @ units) -> Point2d (space @ units)
 startPoint (Line{startPoint = p1}) = p1
 startPoint arc@(Arc{}) = evaluateAt 0.0 arc
 startPoint (Curve curve _) = startPointImpl curve
+startPoint (PlaceIn frame curve) = Point2d.placeIn frame (startPoint curve)
 
 endPoint :: Curve2d (space @ units) -> Point2d (space @ units)
 endPoint (Line{endPoint = p2}) = p2
 endPoint arc@(Arc{}) = evaluateAt 1.0 arc
 endPoint (Curve curve _) = endPointImpl curve
+endPoint (PlaceIn frame curve) = Point2d.placeIn frame (endPoint curve)
 
 evaluateAt :: Float -> Curve2d (space @ units) -> Point2d (space @ units)
 evaluateAt t (Line{startPoint = p1, endPoint = p2}) = Point2d.interpolateFrom p1 p2 t
 evaluateAt t (Arc p0 r a b) = let theta = Qty.interpolateFrom a b t in p0 + Vector2d.polar r theta
 evaluateAt t (Curve curve _) = evaluateAtImpl t curve
+evaluateAt t (PlaceIn frame curve) = Point2d.placeIn frame (evaluateAt t curve)
 
 segmentBounds :: T.Bounds -> Curve2d (space @ units) -> Bounds2d (space @ units)
 segmentBounds (Range t1 t2) (Line{startPoint = p1, endPoint = p2}) =
@@ -131,11 +139,13 @@ segmentBounds (Range t1 t2) (Line{startPoint = p1, endPoint = p2}) =
 segmentBounds t (Arc p0 r a b) =
   p0 + VectorBounds2d.polar (Range.constant r) (a + (b - a) * t)
 segmentBounds t (Curve curve _) = segmentBoundsImpl t curve
+segmentBounds t (PlaceIn frame curve) = Bounds2d.placeIn frame (segmentBounds t curve)
 
 derivative :: Curve2d (space @ units) -> VectorCurve2d (space @ units)
 derivative (Line{startPoint = p1, endPoint = p2}) = VectorCurve2d.constant (p2 - p1)
 derivative (Arc _ r a b) = VectorCurve2d.derivative (VectorCurve2d.arc r a b)
 derivative (Curve curve _) = derivativeImpl curve
+derivative (PlaceIn frame curve) = VectorCurve2d.placeIn frame (derivative curve)
 
 reverse :: Curve2d (space @ units) -> Curve2d (space @ units)
 reverse (Line{startPoint = p1, endPoint = p2, direction, length}) =
@@ -144,11 +154,13 @@ reverse (Arc{centerPoint, radius, startAngle, endAngle}) =
   Arc{centerPoint, radius, startAngle = endAngle, endAngle = startAngle}
 reverse (Curve curve tangentDirection) =
   Curve (reverseImpl curve) (DirectionCurve2d.reverse tangentDirection)
+reverse (PlaceIn frame curve) = PlaceIn frame (reverse curve)
 
 bounds :: Curve2d (space @ units) -> Bounds2d (space @ units)
 bounds (Line{startPoint = p1, endPoint = p2}) = Bounds2d.hull2 p1 p2
 bounds arc@(Arc{}) = segmentBounds T.domain arc
 bounds (Curve curve _) = boundsImpl curve
+bounds (PlaceIn frame curve) = Bounds2d.placeIn frame (bounds curve)
 
 data PointCurveDifference (coordinateSystem :: CoordinateSystem)
   = PointCurveDifference (Point2d coordinateSystem) (Curve2d coordinateSystem)

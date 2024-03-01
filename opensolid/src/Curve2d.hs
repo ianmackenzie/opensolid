@@ -20,6 +20,8 @@ module Curve2d
   , signedDistanceAlong
   , xCoordinate
   , yCoordinate
+  , placeIn
+  , relativeTo
   )
 where
 
@@ -41,6 +43,8 @@ import Curve2d.Segment qualified as Segment
 import DirectionCurve2d (DirectionCurve2d)
 import DirectionCurve2d qualified
 import Error qualified
+import Frame2d (Frame2d)
+import Frame2d qualified
 import List qualified
 import OpenSolid
 import Point2d (Point2d)
@@ -97,6 +101,7 @@ tangentDirection (Internal.Arc{startAngle, endAngle}) =
       tangentEndAngle = endAngle + Angle.quarterTurn
    in Qty.sign (endAngle - startAngle) * DirectionCurve2d.arc tangentStartAngle tangentEndAngle
 tangentDirection (Internal.Curve _ tangent) = tangent
+tangentDirection (Internal.PlaceIn frame curve) = DirectionCurve2d.placeIn frame (tangentDirection curve)
 
 data CurveIsCoincidentWithPoint = CurveIsCoincidentWithPoint deriving (Eq, Show, Error)
 
@@ -268,3 +273,16 @@ findCrossingIntersections derivatives1 derivatives2 =
     Segment.isCrossingIntersectionCandidate
     Segment.crossingIntersectionSign
     (Segment.findCrossingIntersection derivatives1 derivatives2)
+
+placeIn ::
+  Frame2d (global @ units) (Defines local) ->
+  Curve2d (local @ units) ->
+  Curve2d (global @ units)
+placeIn globalFrame (Internal.PlaceIn frame curve) = Internal.PlaceIn (Frame2d.placeIn globalFrame frame) curve
+placeIn globalFrame curve = Internal.PlaceIn globalFrame curve
+
+relativeTo ::
+  Frame2d (global @ units) (Defines local) ->
+  Curve2d (global @ units) ->
+  Curve2d (local @ units)
+relativeTo frame = placeIn (Frame2d.inverse frame)
