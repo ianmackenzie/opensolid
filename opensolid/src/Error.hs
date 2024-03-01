@@ -4,6 +4,8 @@ module Error
   , toString
   , context
   , debug
+  , trace
+  , log
   )
 where
 
@@ -34,3 +36,9 @@ addContext string text = string ++ ":\n" ++ String.indent "  " text
 
 debug :: Map x x m m => (x -> Task ()) -> m a -> m a
 debug callback = map (\error -> Debug.task (callback error) error)
+
+trace :: Map x x m m => String -> m a -> m a
+trace output = map (Debug.trace output)
+
+log :: (Map x x m m, Show b) => String -> b -> m a -> m a
+log label value = map (Debug.log label value)
