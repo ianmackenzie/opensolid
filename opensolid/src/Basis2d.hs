@@ -1,5 +1,5 @@
 module Basis2d
-  ( Basis2d (Basis2d)
+  ( Basis2d
   , xy
   , fromXDirection
   , fromYDirection
