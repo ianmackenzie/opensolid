@@ -28,7 +28,6 @@ import Axis2d (Axis2d)
 import Axis2d qualified
 import Bisection qualified
 import Bounds2d (Bounds2d)
-import Bounds2d qualified
 import Curve1d (Curve1d)
 import Curve2d.Derivatives (Derivatives)
 import Curve2d.Derivatives qualified as Derivatives
@@ -89,9 +88,7 @@ reverse :: Curve2d (space @ units) -> Curve2d (space @ units)
 reverse = Internal.reverse
 
 bounds :: Curve2d (space @ units) -> Bounds2d (space @ units)
-bounds (Internal.Line{startPoint = p1, endPoint = p2}) = Bounds2d.hull2 p1 p2
-bounds arc@(Internal.Arc{}) = segmentBounds T.domain arc
-bounds (Internal.Curve curve _) = boundsImpl curve
+bounds = Internal.bounds
 
 tangentDirection :: Curve2d (space @ units) -> DirectionCurve2d space
 tangentDirection (Internal.Line{direction}) = DirectionCurve2d.constant direction
