@@ -31,13 +31,13 @@ data Basis2d space defines where
 deriving instance Show (Basis2d space defines)
 
 xy :: Basis2d space defines
-xy = Basis2d{xDirection = Direction2d.x, yDirection = Direction2d.y}
+xy = Basis2d Direction2d.x Direction2d.y
 
 fromXDirection :: Direction2d space -> Basis2d space defines
-fromXDirection dx = Basis2d{xDirection = dx, yDirection = Direction2d.rotateLeft dx}
+fromXDirection dx = Basis2d dx (Direction2d.rotateLeft dx)
 
 fromYDirection :: Direction2d space -> Basis2d space defines
-fromYDirection dy = Basis2d{xDirection = Direction2d.rotateRight dy, yDirection = dy}
+fromYDirection dy = Basis2d (Direction2d.rotateRight dy) dy
 
 placeIn ::
   Frame2d (global @ units) (Defines space) ->
