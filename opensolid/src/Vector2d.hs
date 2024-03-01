@@ -13,6 +13,7 @@ module Vector2d
   , polar
   , xComponent
   , yComponent
+  , components
   , midpoint
   , interpolateFrom
   , magnitude
@@ -230,6 +231,10 @@ xComponent (Vector2d vx _) = vx
 
 yComponent :: Vector2d (space @ units) -> Qty units
 yComponent (Vector2d _ vy) = vy
+
+{-# INLINE components #-}
+components :: Vector2d (space @ units) -> (Qty units, Qty units)
+components (Vector2d vx vy) = (vx, vy)
 
 interpolateFrom ::
   Vector2d (space @ units) ->
