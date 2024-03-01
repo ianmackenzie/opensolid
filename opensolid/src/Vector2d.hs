@@ -4,6 +4,8 @@ module Vector2d
   , x
   , y
   , xy
+  , xyIn
+  , xyInBasis
   , from
   , meters
   , centimeters
@@ -27,11 +29,15 @@ module Vector2d
   , rotateLeft
   , placeIn
   , relativeTo
+  , placeInBasis
+  , relativeToBasis
   )
 where
 
 import Angle qualified
 import Area qualified
+import {-# SOURCE #-} Basis2d (Basis2d)
+import {-# SOURCE #-} Basis2d qualified
 import {-# SOURCE #-} Direction2d (Direction2d)
 import {-# SOURCE #-} Direction2d qualified
 import {-# SOURCE #-} Frame2d (Frame2d)
@@ -202,6 +208,12 @@ y vy = Vector2d Qty.zero vy
 xy :: Qty units -> Qty units -> Vector2d (space @ units)
 xy = Vector2d
 
+xyIn :: Frame2d (space @ frameUnits) defines -> Qty units -> Qty units -> Vector2d (space @ units)
+xyIn frame = xyInBasis (Frame2d.basis frame)
+
+xyInBasis :: Basis2d space defines -> Qty units -> Qty units -> Vector2d (space @ units)
+xyInBasis basis vx vy = vx * Basis2d.xDirection basis + vy * Basis2d.yDirection basis
+
 from :: Point2d (space @ units) -> Point2d (space @ units) -> Vector2d (space @ units)
 from p1 p2 = p2 - p1
 
@@ -287,14 +299,26 @@ placeIn ::
   Frame2d (global @ frameUnits) (Defines local) ->
   Vector2d (local @ units) ->
   Vector2d (global @ units)
-placeIn frame (Vector2d vx vy) =
-  vx * Frame2d.xDirection frame + vy * Frame2d.yDirection frame
+placeIn frame = placeInBasis (Frame2d.basis frame)
 
 relativeTo ::
   Frame2d (global @ frameUnits) (Defines local) ->
   Vector2d (global @ units) ->
   Vector2d (local @ units)
-relativeTo frame vector =
+relativeTo frame = relativeToBasis (Frame2d.basis frame)
+
+placeInBasis ::
+  Basis2d global (Defines local) ->
+  Vector2d (local @ units) ->
+  Vector2d (global @ units)
+placeInBasis basis (Vector2d vx vy) =
+  vx * Basis2d.xDirection basis + vy * Basis2d.yDirection basis
+
+relativeToBasis ::
+  Basis2d global (Defines local) ->
+  Vector2d (global @ units) ->
+  Vector2d (local @ units)
+relativeToBasis basis vector =
   Vector2d
-    (vector <> Frame2d.xDirection frame)
-    (vector <> Frame2d.yDirection frame)
+    (vector <> Basis2d.xDirection basis)
+    (vector <> Basis2d.yDirection basis)

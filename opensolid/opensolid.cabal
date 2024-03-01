@@ -77,6 +77,7 @@ library
       Array
       Axis2d
       Basics
+      Basis2d
       Bisection
       Bounded
       Bounds2d
