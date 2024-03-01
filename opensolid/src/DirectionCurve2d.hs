@@ -10,14 +10,22 @@ module DirectionCurve2d
   , reverse
   , xComponent
   , yComponent
+  , placeIn
+  , placeInBasis
+  , relativeTo
+  , relativeToBasis
   )
 where
 
+import Basis2d (Basis2d)
+import Basis2d qualified
 import Curve1d (Curve1d)
 import Direction2d (Direction2d (Direction2d))
 import Direction2d qualified
 import DirectionBounds2d (DirectionBounds2d)
 import DirectionBounds2d qualified
+import Frame2d (Frame2d)
+import Frame2d qualified
 import OpenSolid
 import T qualified
 import Vector2d (Vector2d)
@@ -237,3 +245,15 @@ xComponent curve = curve <> Direction2d.x
 
 yComponent :: DirectionCurve2d space -> Curve1d Unitless
 yComponent curve = curve <> Direction2d.y
+
+placeIn :: Frame2d (global @ units) (Defines local) -> DirectionCurve2d local -> DirectionCurve2d global
+placeIn frame = placeInBasis (Frame2d.basis frame)
+
+relativeTo :: Frame2d (global @ units) (Defines local) -> DirectionCurve2d global -> DirectionCurve2d local
+relativeTo frame = relativeToBasis (Frame2d.basis frame)
+
+placeInBasis :: Basis2d global (Defines local) -> DirectionCurve2d local -> DirectionCurve2d global
+placeInBasis basis (DirectionCurve2d curve) = DirectionCurve2d (VectorCurve2d.placeInBasis basis curve)
+
+relativeToBasis :: Basis2d global (Defines local) -> DirectionCurve2d global -> DirectionCurve2d local
+relativeToBasis basis = placeInBasis (Basis2d.inverse basis)
