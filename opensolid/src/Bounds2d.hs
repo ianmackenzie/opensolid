@@ -29,9 +29,12 @@ module Bounds2d
   , find
   , placeIn
   , relativeTo
+  , signedDistanceAlong
   )
 where
 
+import Axis2d (Axis2d)
+import Axis2d qualified
 import Bounds qualified
 import Direction2d (Direction2d (Direction2d))
 import Float qualified
@@ -315,3 +318,14 @@ relativeTo frame (Bounds2d x y) =
       rx = 0.5 * xWidth * Float.abs ix + 0.5 * yWidth * Float.abs iy
       ry = 0.5 * xWidth * Float.abs jx + 0.5 * yWidth * Float.abs jy
    in Bounds2d (Range.from (x0 - rx) (x0 + rx)) (Range.from (y0 - ry) (y0 + ry))
+
+signedDistanceAlong :: Axis2d (space @ units) -> Bounds2d (space @ units) -> Range units
+signedDistanceAlong axis (Bounds2d x y) =
+  let xMid = Range.midpoint x
+      yMid = Range.midpoint y
+      xWidth = Range.width x
+      yWidth = Range.width y
+      d0 = Point2d.signedDistanceAlong axis (Point2d xMid yMid)
+      Direction2d (Vector2d ax ay) = Axis2d.direction axis
+      r = 0.5 * xWidth * Float.abs ax + 0.5 * yWidth * Float.abs ay
+   in Range.from (d0 - r) (d0 + r)
