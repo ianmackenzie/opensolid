@@ -15,6 +15,9 @@ module VectorBounds2d
   , maxMagnitude
   , maxSquaredMagnitude
   , normalize
+  , includes
+  , contains
+  , isContainedIn
   , interpolate
   )
 where
@@ -354,6 +357,16 @@ clampNormalized (Range low high) =
   Range.unsafe
     (Qty.clamp -1.0 1.0 low)
     (Qty.clamp -1.0 1.0 high)
+
+includes :: Vector2d (space @ units) -> VectorBounds2d (space @ units) -> Bool
+includes (Vector2d vx vy) (VectorBounds2d x y) = Range.includes vx x && Range.includes vy y
+
+contains :: VectorBounds2d (space @ units) -> VectorBounds2d (space @ units) -> Bool
+contains (VectorBounds2d x2 y2) (VectorBounds2d x1 y1) =
+  Range.contains x2 x1 && Range.contains y2 y1
+
+isContainedIn :: VectorBounds2d (space @ units) -> VectorBounds2d (space @ units) -> Bool
+isContainedIn bounds1 bounds2 = contains bounds2 bounds1
 
 interpolate :: VectorBounds2d (space @ units) -> Float -> Float -> Vector2d (space @ units)
 interpolate (VectorBounds2d x y) u v =
