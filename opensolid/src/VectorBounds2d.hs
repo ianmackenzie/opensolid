@@ -19,10 +19,19 @@ module VectorBounds2d
   , contains
   , isContainedIn
   , interpolate
+  , relativeTo
+  , placeIn
+  , placeInBasis
+  , relativeToBasis
   )
 where
 
+import Basis2d (Basis2d)
+import Basis2d qualified
 import Direction2d (Direction2d (Direction2d))
+import Float qualified
+import {-# SOURCE #-} Frame2d (Frame2d)
+import {-# SOURCE #-} Frame2d qualified
 import Generic qualified
 import OpenSolid
 import Qty qualified
@@ -371,3 +380,47 @@ isContainedIn bounds1 bounds2 = contains bounds2 bounds1
 interpolate :: VectorBounds2d (space @ units) -> Float -> Float -> Vector2d (space @ units)
 interpolate (VectorBounds2d x y) u v =
   Vector2d (Range.interpolate x u) (Range.interpolate y v)
+
+placeIn ::
+  Frame2d (global @ frameUnits) (Defines local) ->
+  VectorBounds2d (local @ units) ->
+  VectorBounds2d (global @ units)
+placeIn frame = placeInBasis (Frame2d.basis frame)
+
+relativeTo ::
+  Frame2d (global @ units) (Defines local) ->
+  VectorBounds2d (global @ units) ->
+  VectorBounds2d (local @ units)
+relativeTo frame = relativeToBasis (Frame2d.basis frame)
+
+placeInBasis ::
+  Basis2d global (Defines local) ->
+  VectorBounds2d (local @ units) ->
+  VectorBounds2d (global @ units)
+placeInBasis basis (VectorBounds2d x y) =
+  let xMid = Range.midpoint x
+      yMid = Range.midpoint y
+      xWidth = Range.width x
+      yWidth = Range.width y
+      Vector2d x0 y0 = Vector2d.xyInBasis basis xMid yMid
+      Direction2d (Vector2d ix iy) = Basis2d.xDirection basis
+      Direction2d (Vector2d jx jy) = Basis2d.yDirection basis
+      rx = 0.5 * xWidth * Float.abs ix + 0.5 * yWidth * Float.abs jx
+      ry = 0.5 * xWidth * Float.abs iy + 0.5 * yWidth * Float.abs jy
+   in VectorBounds2d (Range.from (x0 - rx) (x0 + rx)) (Range.from (y0 - ry) (y0 + ry))
+
+relativeToBasis ::
+  Basis2d global (Defines local) ->
+  VectorBounds2d (global @ units) ->
+  VectorBounds2d (local @ units)
+relativeToBasis basis (VectorBounds2d x y) =
+  let xMid = Range.midpoint x
+      yMid = Range.midpoint y
+      xWidth = Range.width x
+      yWidth = Range.width y
+      Vector2d x0 y0 = Vector2d.relativeToBasis basis (Vector2d xMid yMid)
+      Direction2d (Vector2d ix iy) = Basis2d.xDirection basis
+      Direction2d (Vector2d jx jy) = Basis2d.yDirection basis
+      rx = 0.5 * xWidth * Float.abs ix + 0.5 * yWidth * Float.abs iy
+      ry = 0.5 * xWidth * Float.abs jx + 0.5 * yWidth * Float.abs jy
+   in VectorBounds2d (Range.from (x0 - rx) (x0 + rx)) (Range.from (y0 - ry) (y0 + ry))
