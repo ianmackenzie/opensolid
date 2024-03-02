@@ -4,6 +4,13 @@ module NonEmpty
   , (|:)
   , singleton
   , range
+  , of2
+  , of3
+  , of4
+  , of5
+  , of6
+  , of7
+  , of8
   , first
   , rest
   , last
@@ -82,6 +89,27 @@ range a b
   | a < b = a :| List.range (a + 1) b
   | b < a = a :| List.range (a - 1) b
   | otherwise = a :| []
+
+of2 :: a -> a -> NonEmpty a
+of2 a1 a2 = a1 :| [a2]
+
+of3 :: a -> a -> a -> NonEmpty a
+of3 a1 a2 a3 = a1 :| [a2, a3]
+
+of4 :: a -> a -> a -> a -> NonEmpty a
+of4 a1 a2 a3 a4 = a1 :| [a2, a3, a4]
+
+of5 :: a -> a -> a -> a -> a -> NonEmpty a
+of5 a1 a2 a3 a4 a5 = a1 :| [a2, a3, a4, a5]
+
+of6 :: a -> a -> a -> a -> a -> a -> NonEmpty a
+of6 a1 a2 a3 a4 a5 a6 = a1 :| [a2, a3, a4, a5, a6]
+
+of7 :: a -> a -> a -> a -> a -> a -> a -> NonEmpty a
+of7 a1 a2 a3 a4 a5 a6 a7 = a1 :| [a2, a3, a4, a5, a6, a7]
+
+of8 :: a -> a -> a -> a -> a -> a -> a -> a -> NonEmpty a
+of8 a1 a2 a3 a4 a5 a6 a7 a8 = a1 :| [a2, a3, a4, a5, a6, a7, a8]
 
 first :: NonEmpty a -> a
 first = Data.List.NonEmpty.head
