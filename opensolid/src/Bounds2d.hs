@@ -31,6 +31,8 @@ module Bounds2d
   , placeIn
   , relativeTo
   , signedDistanceAlong
+  , convert
+  , unconvert
   )
 where
 
@@ -50,6 +52,7 @@ import Qty qualified
 import Quadrature qualified
 import Range (Range)
 import Range qualified
+import Units qualified
 import Vector2d (Vector2d (Vector2d))
 import VectorBounds2d (VectorBounds2d (VectorBounds2d))
 
@@ -338,3 +341,11 @@ signedDistanceAlong axis (Bounds2d x y) =
       Direction2d (Vector2d ax ay) = Axis2d.direction axis
       r = 0.5 * xWidth * Float.abs ax + 0.5 * yWidth * Float.abs ay
    in Range.from (d0 - r) (d0 + r)
+
+convert :: Units.Conversion units1 units2 -> Bounds2d (space @ units1) -> Bounds2d (space @ units2)
+convert conversion (Bounds2d x y) =
+  Bounds2d (Range.convert conversion x) (Range.convert conversion y)
+
+unconvert :: Units.Conversion units1 units2 -> Bounds2d (space @ units2) -> Bounds2d (space @ units1)
+unconvert conversion (Bounds2d x y) =
+  Bounds2d (Range.unconvert conversion x) (Range.unconvert conversion y)
