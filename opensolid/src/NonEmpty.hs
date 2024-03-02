@@ -1,6 +1,7 @@
 module NonEmpty
   ( NonEmpty ((:|))
   , pattern NonEmpty
+  , (|:)
   , singleton
   , first
   , rest
@@ -67,6 +68,10 @@ import Prelude qualified
 
 pattern NonEmpty :: NonEmpty a -> List a
 pattern NonEmpty nonEmpty <- (Data.List.NonEmpty.nonEmpty -> Just nonEmpty)
+
+(|:) :: List a -> a -> NonEmpty a
+[] |: item = singleton item
+(x : xs) |: item = x :| Prelude.mappend xs [item]
 
 singleton :: a -> NonEmpty a
 singleton value = value :| []
