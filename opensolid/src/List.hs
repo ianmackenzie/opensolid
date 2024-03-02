@@ -7,6 +7,7 @@ module List
   , pattern ThreeOrMore
   , pattern FourOrMore
   , singleton
+  , range
   , isEmpty
   , length
   , map
@@ -56,6 +57,11 @@ import Prelude qualified
 
 singleton :: a -> List a
 singleton = Data.List.singleton
+
+range :: Int -> Int -> List Int
+range a b
+  | b >= a = [a .. b]
+  | otherwise = [a, a - 1 .. b]
 
 isEmpty :: List a -> Bool
 isEmpty = Prelude.null
