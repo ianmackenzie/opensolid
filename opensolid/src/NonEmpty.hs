@@ -3,6 +3,7 @@ module NonEmpty
   , pattern NonEmpty
   , (|:)
   , singleton
+  , range
   , first
   , rest
   , last
@@ -75,6 +76,12 @@ pattern NonEmpty nonEmpty <- (Data.List.NonEmpty.nonEmpty -> Just nonEmpty)
 
 singleton :: a -> NonEmpty a
 singleton value = value :| []
+
+range :: Int -> Int -> NonEmpty Int
+range a b
+  | a < b = a :| List.range (a + 1) b
+  | b < a = a :| List.range (a - 1) b
+  | otherwise = a :| []
 
 first :: NonEmpty a -> a
 first = Data.List.NonEmpty.head
