@@ -1,8 +1,4 @@
-module CubicSpline2d
-  ( CubicSpline2d
-  , fromControlPoints
-  )
-where
+module CubicSpline2d (fromControlPoints) where
 
 import Bounds2d qualified
 import Curve2d (Curve2d)
