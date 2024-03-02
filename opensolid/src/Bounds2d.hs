@@ -7,6 +7,7 @@ module Bounds2d
   , hull2
   , hull3
   , hull4
+  , hullN
   , aggregate2
   , exclusion
   , inclusion
@@ -181,6 +182,14 @@ hull4 (Point2d x1 y1) (Point2d x2 y2) (Point2d x3 y3) (Point2d x4 y4) =
       minY = Qty.min (Qty.min (Qty.min y1 y2) y3) y4
       maxY = Qty.max (Qty.max (Qty.max y1 y2) y3) y4
    in Bounds2d (Range.unsafe minX maxX) (Range.unsafe minY maxY)
+
+hullN :: NonEmpty (Point2d (space @ units)) -> Bounds2d (space @ units)
+hullN (Point2d x0 y0 :| rest) = go x0 x0 y0 y0 rest
+ where
+  go :: Qty units -> Qty units -> Qty units -> Qty units -> List (Point2d (space @ units)) -> Bounds2d (space @ units)
+  go xLow xHigh yLow yHigh [] = Bounds2d (Range.unsafe xLow xHigh) (Range.unsafe yLow yHigh)
+  go xLow xHigh yLow yHigh (Point2d x y : remaining) =
+    go (Qty.min xLow x) (Qty.max xHigh x) (Qty.min yLow y) (Qty.max yHigh y) remaining
 
 lowerLeftCorner :: Bounds2d (space @ units) -> Point2d (space @ units)
 lowerLeftCorner (Bounds2d x y) = Point2d (Range.minValue x) (Range.minValue y)
