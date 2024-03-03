@@ -33,6 +33,7 @@ where
 
 import Data.Kind (Type)
 import Data.Type.Equality (type (~))
+import GHC.Stack (HasCallStack, withFrozenCallStack)
 import Prelude
   ( Bool (False, True)
   , Char
@@ -64,11 +65,11 @@ ifThenElse False _ elseBranch = elseBranch
 fromInteger :: Prelude.Integer -> Int
 fromInteger = Prelude.fromInteger
 
-internalError :: String -> a
-internalError message = Prelude.error ("Internal error: " Prelude.++ message)
+internalError :: HasCallStack => String -> a
+internalError message = withFrozenCallStack (Prelude.error ("Internal error: " Prelude.++ message))
 
-notImplemented :: a
-notImplemented = Prelude.error "Not implemented"
+notImplemented :: HasCallStack => a
+notImplemented = withFrozenCallStack (Prelude.error "Not implemented")
 
 {-# INLINE (|>) #-}
 (|>) :: a -> (a -> b) -> b
