@@ -18,6 +18,7 @@ module NonEmpty
   , prepend
   , length
   , map
+  , mapWithIndex
   , reverseMap
   , map2
   , map3
@@ -131,6 +132,9 @@ length = Data.List.NonEmpty.length
 
 map :: (a -> b) -> NonEmpty a -> NonEmpty b
 map = Data.List.NonEmpty.map
+
+mapWithIndex :: (Int -> a -> b) -> NonEmpty a -> NonEmpty b
+mapWithIndex function (x :| xs) = function 0 x :| List.map2 function [1 ..] xs
 
 reverseMap :: (a -> b) -> NonEmpty a -> NonEmpty b
 reverseMap function (x :| xs) = go x xs []
