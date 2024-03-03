@@ -28,10 +28,9 @@ module Random
 where
 
 import Array qualified
-import Basics
 import Control.Monad (join)
 import Maybe qualified
-import OpenSolid
+import OpenSolid hiding (pure)
 import Pair qualified
 import System.Random (StdGen)
 import System.Random qualified

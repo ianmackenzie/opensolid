@@ -14,7 +14,7 @@ module Maybe
   )
 where
 
-import Basics
+import Basics hiding (pure)
 import Control.Monad (join)
 import Data.Maybe qualified
 import Error (Error)

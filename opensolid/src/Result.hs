@@ -20,7 +20,7 @@ module Result
   )
 where
 
-import Basics hiding ((>>))
+import Basics hiding (pure, (>>))
 import Control.Monad (join)
 import Error (Error)
 import Error qualified

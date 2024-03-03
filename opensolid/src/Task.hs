@@ -24,7 +24,7 @@ module Task
   )
 where
 
-import Basics
+import Basics hiding (pure)
 import Control.Concurrent
 import Control.Concurrent.Async qualified as Async
 import Control.Monad (join)

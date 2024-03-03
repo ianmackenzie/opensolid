@@ -12,7 +12,7 @@ module Fuzzy
   )
 where
 
-import Basics
+import Basics hiding (pure)
 import Control.Monad (join)
 import Prelude (Applicative, Functor, Monad)
 import Prelude qualified

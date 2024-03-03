@@ -28,6 +28,7 @@ module Basics
   , (>>)
   , type (~)
   , return
+  , pure
   )
 where
 
@@ -98,3 +99,7 @@ identity value = value
 {-# INLINE always #-}
 always :: a -> b -> a
 always value _ = value
+
+{-# INLINE pure #-}
+pure :: a -> a
+pure = identity

@@ -12,7 +12,7 @@ where
 
 import Control.Concurrent.Async qualified as Async
 import Control.Monad (join)
-import OpenSolid hiding ((>>))
+import OpenSolid hiding (pure, (>>))
 import Pair qualified
 import Task qualified
 import Prelude (fmap)
