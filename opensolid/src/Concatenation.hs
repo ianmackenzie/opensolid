@@ -30,7 +30,7 @@ instance a ~ a' => Concatenation (List a) (Maybe a') (List a) where
   list ++ Just value = list ++ [value]
 
 instance a ~ a' => Concatenation (Maybe a) (NonEmpty a') (NonEmpty a) where
-  Just a ++ (b :| bs) = a :| (b : bs)
+  Just a ++ (b :| bs) = a :| b : bs
   Nothing ++ nonEmpty = nonEmpty
 
 instance a ~ a' => Concatenation (NonEmpty a) (Maybe a') (NonEmpty a) where
