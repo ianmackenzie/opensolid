@@ -35,6 +35,7 @@ import Range (Range (Range))
 import String qualified
 import Units (Meters)
 
+type Entity :: Type -> Type
 data Entity space = Empty | Node String (List (Attribute space)) (List (Entity space))
 
 data Attribute space = Attribute String String
