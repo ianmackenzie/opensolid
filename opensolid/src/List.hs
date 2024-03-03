@@ -97,7 +97,7 @@ map :: (a -> b) -> List a -> List b
 map = Data.List.map
 
 mapWithIndex :: (Int -> a -> b) -> List a -> List b
-mapWithIndex fn = map2 fn [0 ..]
+mapWithIndex function list = map2 function [0 ..] list
 
 reverseMap :: (a -> b) -> List a -> List b
 reverseMap function list = go list []
