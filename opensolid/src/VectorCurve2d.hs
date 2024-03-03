@@ -12,6 +12,7 @@ module VectorCurve2d
   , arc
   , quadraticSpline
   , cubicSpline
+  , bezierCurve
   , squaredMagnitude
   , reverse
   , roots
@@ -36,10 +37,12 @@ import Curve1d.Root qualified as Root
 import Direction2d (Direction2d (Direction2d))
 import Direction2d qualified
 import {-# SOURCE #-} DirectionCurve2d (DirectionCurve2d)
+import Float qualified
 import Frame2d (Frame2d)
 import Frame2d qualified
 import Generic qualified
 import List qualified
+import NonEmpty qualified
 import OpenSolid
 import Qty qualified
 import Range (Range (Range))
@@ -127,6 +130,9 @@ data VectorCurve2d (coordinateSystem :: CoordinateSystem) where
     Vector2d (space @ units) ->
     Vector2d (space @ units) ->
     Vector2d (space @ units) ->
+    VectorCurve2d (space @ units)
+  BezierCurve ::
+    NonEmpty (Vector2d (space @ units)) ->
     VectorCurve2d (space @ units)
 
 deriving instance Show (VectorCurve2d (space @ units))
@@ -454,6 +460,9 @@ cubicSpline ::
   VectorCurve2d (space @ units)
 cubicSpline = CubicSpline
 
+bezierCurve :: NonEmpty (Vector2d (space @ units)) -> VectorCurve2d (space @ units)
+bezierCurve = BezierCurve
+
 quadraticBlossom ::
   Vector2d (space @ units) ->
   Vector2d (space @ units) ->
@@ -492,6 +501,55 @@ cubicBlossom (Vector2d x1 y1) (Vector2d x2 y2) (Vector2d x3 y3) (Vector2d x4 y4)
       y = s1 * y1 + s2 * y2 + s3 * y3 + s4 * y4
    in Vector2d x y
 
+deCasteljau :: Float -> NonEmpty (Vector2d (space @ units)) -> Vector2d (space @ units)
+deCasteljau _ (vector :| []) = vector
+deCasteljau t (v1 :| v2 : rest) = deCasteljau t (deCasteljauStep t v1 v2 rest)
+
+deCasteljauStep ::
+  Float ->
+  Vector2d (space @ units) ->
+  Vector2d (space @ units) ->
+  List (Vector2d (space @ units)) ->
+  NonEmpty (Vector2d (space @ units))
+deCasteljauStep t v1 v2 rest = do
+  let vector = Vector2d.interpolateFrom v1 v2 t
+  case rest of
+    [] -> NonEmpty.singleton vector
+    v3 : remaining -> NonEmpty.prepend vector (deCasteljauStep t v2 v3 remaining)
+
+segmentControlVectors ::
+  Float ->
+  Float ->
+  NonEmpty (Vector2d (space @ units)) ->
+  NonEmpty (Vector2d (space @ units))
+segmentControlVectors a b controlVectors =
+  NonEmpty.map (segmentControlVector a b controlVectors) <|
+    NonEmpty.range 0 (NonEmpty.length controlVectors - 1)
+
+segmentControlVector ::
+  Float ->
+  Float ->
+  NonEmpty (Vector2d (space @ units)) ->
+  Int ->
+  Vector2d (space @ units)
+segmentControlVector _ _ (vector :| []) _ = vector
+segmentControlVector a b (p1 :| p2 : ps) n = do
+  let t = if n > 0 then b else a
+  let reduced = deCasteljauStep t p1 p2 ps
+  segmentControlVector a b reduced (n - 1)
+
+controlVectorDifferences ::
+  Float ->
+  Vector2d (space @ units) ->
+  Vector2d (space @ units) ->
+  List (Vector2d (space @ units)) ->
+  NonEmpty (Vector2d (space @ units))
+controlVectorDifferences scale v1 v2 rest = do
+  let difference = scale * (v2 - v1)
+  case rest of
+    [] -> NonEmpty.singleton difference
+    v3 : remaining -> NonEmpty.prepend difference (controlVectorDifferences scale v2 v3 remaining)
+
 evaluateAt :: Float -> VectorCurve2d (space @ units) -> Vector2d (space @ units)
 evaluateAt t curve =
   case curve of
@@ -511,6 +569,7 @@ evaluateAt t curve =
     Arc r a b -> Vector2d.polar r (Qty.interpolateFrom a b t)
     QuadraticSpline v1 v2 v3 -> quadraticBlossom v1 v2 v3 t t
     CubicSpline v1 v2 v3 v4 -> cubicBlossom v1 v2 v3 v4 t t t
+    BezierCurve controlVectors -> deCasteljau t controlVectors
 
 segmentBounds :: T.Bounds -> VectorCurve2d (space @ units) -> VectorBounds2d (space @ units)
 segmentBounds t@(Range tl th) curve =
@@ -544,6 +603,8 @@ segmentBounds t@(Range tl th) curve =
         (cubicBlossom v1 v2 v3 v4 tl tl th)
         (cubicBlossom v1 v2 v3 v4 tl th th)
         (cubicBlossom v1 v2 v3 v4 th th th)
+    BezierCurve controlVectors ->
+      VectorBounds2d.hullN (segmentControlVectors tl th controlVectors)
 
 derivative :: VectorCurve2d (space @ units) -> VectorCurve2d (space @ units)
 derivative curve =
@@ -571,6 +632,10 @@ derivative curve =
        in Arc (r * Qty.abs (Angle.inRadians sweptAngle)) (a + rotation) (b + rotation)
     QuadraticSpline v1 v2 v3 -> line (2.0 * (v2 - v1)) (2.0 * (v3 - v2))
     CubicSpline v1 v2 v3 v4 -> quadraticSpline (3.0 * (v2 - v1)) (3.0 * (v3 - v2)) (3.0 * (v4 - v3))
+    BezierCurve (_ :| []) -> Zero
+    BezierCurve (v1 :| v2 : rest) -> do
+      let degree = 1 + List.length rest
+      BezierCurve (controlVectorDifferences (Float.fromInt degree) v1 v2 rest)
 
 reverse :: VectorCurve2d (space @ units) -> VectorCurve2d (space @ units)
 reverse curve =
@@ -591,6 +656,7 @@ reverse curve =
     Arc r a b -> Arc r b a
     QuadraticSpline v1 v2 v3 -> QuadraticSpline v3 v2 v1
     CubicSpline v1 v2 v3 v4 -> CubicSpline v4 v3 v2 v1
+    BezierCurve controlVectors -> BezierCurve (NonEmpty.reverse controlVectors)
 
 newtype SquaredMagnitudeOf (coordinateSystem :: CoordinateSystem) = SquaredMagnitudeOf (VectorCurve2d coordinateSystem)
 
