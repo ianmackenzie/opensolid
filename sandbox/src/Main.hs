@@ -366,7 +366,10 @@ drawLine attributes p1 p2 =
 
 drawDot :: Colour -> Uv.Point -> Drawing2d.Entity Uv.Space
 drawDot colour point =
-  Drawing2d.circle [Drawing2d.fillColour colour] (Point2d.convert toDrawing point) (Length.millimeters 0.5)
+  Drawing2d.circle
+    [Drawing2d.fillColour colour]
+    (Point2d.convert toDrawing point)
+    (Length.millimeters 0.5)
 
 delayedPrint :: Int -> Task ()
 delayedPrint numSeconds = Task.do
