@@ -39,7 +39,6 @@ import Direction2d qualified
 import Error qualified
 import Float qualified
 import Frame2d qualified
-import Generic qualified
 import Int qualified
 import Line2d qualified
 import List qualified
@@ -130,9 +129,6 @@ instance
     units2
     (Function units1')
     (Function units2')
-
-instance Generic.HasZero (Function units) where
-  zero = zero
 
 instance Negation (Function units) where
   negate Zero = Zero

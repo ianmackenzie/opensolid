@@ -40,7 +40,6 @@ import {-# SOURCE #-} DirectionCurve2d (DirectionCurve2d)
 import Float qualified
 import Frame2d (Frame2d)
 import Frame2d qualified
-import Generic qualified
 import List qualified
 import NonEmpty qualified
 import OpenSolid
@@ -149,9 +148,6 @@ instance Interface (VectorCurve2d (space @ units)) (space @ units) where
   evaluateAtImpl = evaluateAt
   segmentBoundsImpl = segmentBounds
   derivativeImpl = derivative
-
-instance Generic.HasZero (VectorCurve2d (space @ units)) where
-  zero = zero
 
 instance Negation (VectorCurve2d (space @ units)) where
   negate Zero = Zero

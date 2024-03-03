@@ -33,7 +33,6 @@ import Direction2d (Direction2d (Direction2d))
 import Float qualified
 import {-# SOURCE #-} Frame2d (Frame2d)
 import {-# SOURCE #-} Frame2d qualified
-import Generic qualified
 import OpenSolid
 import Qty qualified
 import Range (Range (Range))
@@ -56,9 +55,6 @@ instance
     units2
     (VectorBounds2d (space @ units1'))
     (VectorBounds2d (space' @ units2'))
-
-instance Generic.HasZero (VectorBounds2d (space @ units)) where
-  zero = constant Vector2d.zero
 
 instance Negation (VectorBounds2d (space @ units)) where
   negate (VectorBounds2d x y) = VectorBounds2d (negate x) (negate y)

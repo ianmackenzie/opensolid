@@ -14,7 +14,6 @@ where
 
 import Bounds3d (Bounds3d)
 import Direction3d (Direction3d)
-import Generic qualified
 import OpenSolid
 import Point3d (Point3d)
 import Units qualified
@@ -88,9 +87,6 @@ instance
     units2
     (Function (space @ units1'))
     (Function (space' @ units2'))
-
-instance Generic.HasZero (Function (space @ units)) where
-  zero = zero
 
 instance Negation (Function (space @ units)) where
   negate Zero = Zero

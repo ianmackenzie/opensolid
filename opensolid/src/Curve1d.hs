@@ -27,7 +27,6 @@ import Curve1d.Root qualified as Root
 import Estimate (Estimate)
 import Estimate qualified
 import Float qualified
-import Generic qualified
 import List qualified
 import Maybe qualified
 import OpenSolid
@@ -129,9 +128,6 @@ constant value = if value == Qty.zero then Zero else Constant value
 
 t :: Curve1d Unitless
 t = Parameter
-
-instance Generic.HasZero (Curve1d units) where
-  zero = zero
 
 instance Negation (Curve1d units) where
   negate Zero = Zero

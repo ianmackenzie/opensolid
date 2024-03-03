@@ -52,7 +52,8 @@ where
 import Arithmetic
 import Basics
 import Data.List qualified
-import Generic qualified
+import Qty (Qty)
+import Qty qualified
 import Prelude qualified
 
 singleton :: a -> List a
@@ -159,10 +160,10 @@ take = Prelude.take
 drop :: Int -> List a -> List a
 drop = Prelude.drop
 
-sum :: Addition a a a => List a -> a
-sum = foldLeft (+) Generic.zero
+sum :: List (Qty units) -> Qty units
+sum = foldLeft (+) Qty.zero
 
-sumOf :: Addition b b b => (a -> b) -> List a -> b
+sumOf :: (a -> Qty units) -> List a -> Qty units
 sumOf function list = sum (map function list)
 
 sort :: Ord a => List a -> List a

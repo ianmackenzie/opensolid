@@ -30,7 +30,6 @@ where
 import Area qualified
 import {-# SOURCE #-} Direction3d (Direction3d)
 import {-# SOURCE #-} Direction3d qualified
-import Generic qualified
 import Length qualified
 import OpenSolid
 import Qty qualified
@@ -51,9 +50,6 @@ instance
     units2
     (Vector3d (space @ units1'))
     (Vector3d (space' @ units2'))
-
-instance Generic.HasZero (Vector3d (space @ units)) where
-  zero = zero
 
 instance
   (space ~ space', units ~ units') =>

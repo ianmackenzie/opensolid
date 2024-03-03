@@ -16,7 +16,6 @@ where
 
 import Curve1d (Curve1d (Curve1d))
 import Curve1d qualified
-import Generic qualified
 import OpenSolid
 import Range (Range (Range))
 import T qualified
@@ -59,9 +58,6 @@ constant vector = if vector == Vector3d.zero then Zero else Constant vector
 
 zero :: VectorCurve3d (space @ units)
 zero = Zero
-
-instance Generic.HasZero (VectorCurve3d (space @ units)) where
-  zero = zero
 
 data XYZ (coordinateSystem :: CoordinateSystem) where
   XYZ :: Curve1d units -> Curve1d units -> Curve1d units -> XYZ (space @ units)

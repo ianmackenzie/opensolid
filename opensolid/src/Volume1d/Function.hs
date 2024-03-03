@@ -23,7 +23,6 @@ import Bounds3d (Bounds3d)
 import Bounds3d qualified
 import Direction3d (Direction3d)
 import Direction3d qualified
-import Generic qualified
 import OpenSolid
 import Point3d (Point3d)
 import Point3d qualified
@@ -100,9 +99,6 @@ instance
     units2
     (Function units1')
     (Function units2')
-
-instance Generic.HasZero (Function units) where
-  zero = zero
 
 instance Negation (Function units) where
   negate Zero = Zero

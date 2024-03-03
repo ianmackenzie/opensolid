@@ -13,8 +13,6 @@ module Qty
   , abs
   , min
   , max
-  , minBy
-  , maxBy
   , smaller
   , larger
   , smallerBy
@@ -37,7 +35,6 @@ import Data.List.NonEmpty (NonEmpty ((:|)))
 import {-# SOURCE #-} Float (Float, fromRational)
 import {-# SOURCE #-} Float qualified
 import Foreign.Storable (Storable)
-import Generic qualified
 import Sign (Sign (Negative, Positive))
 import Units (Unitless, convert, unconvert)
 import Units qualified
@@ -53,9 +50,6 @@ instance
   , units2 ~ units2'
   ) =>
   Units.Coercion units1 units2 (Qty units1') (Qty units2')
-
-instance Generic.HasZero (Qty units) where
-  zero = zero
 
 deriving newtype instance Prelude.Num Float
 
@@ -178,17 +172,11 @@ clamp a b value
 
 {-# INLINE min #-}
 min :: Qty units -> Qty units -> Qty units
-min = Generic.min
+min = Prelude.min
 
 {-# INLINE max #-}
 max :: Qty units -> Qty units -> Qty units
-max = Generic.max
-
-minBy :: (a -> Qty units) -> a -> a -> a
-minBy = Generic.minBy
-
-maxBy :: (a -> Qty units) -> a -> a -> a
-maxBy = Generic.maxBy
+max = Prelude.max
 
 smaller :: Qty units -> Qty units -> Qty units
 smaller x y = if abs x <= abs y then x else y

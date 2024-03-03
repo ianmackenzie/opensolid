@@ -42,7 +42,6 @@ import {-# SOURCE #-} Direction2d (Direction2d)
 import {-# SOURCE #-} Direction2d qualified
 import {-# SOURCE #-} Frame2d (Frame2d)
 import {-# SOURCE #-} Frame2d qualified
-import Generic qualified
 import Length qualified
 import OpenSolid
 import {-# SOURCE #-} Point2d (Point2d)
@@ -66,9 +65,6 @@ instance
     units2
     (Vector2d (space @ units1'))
     (Vector2d (space' @ units2'))
-
-instance Generic.HasZero (Vector2d (space @ units)) where
-  zero = zero
 
 instance
   (space ~ space', units ~ units') =>

@@ -18,14 +18,12 @@ module VectorBounds3d
 where
 
 import Direction3d (Direction3d (Direction3d))
-import Generic qualified
 import OpenSolid
 import Qty qualified
 import Range (Range (Range))
 import Range qualified
 import Units qualified
 import Vector3d (Vector3d (Vector3d))
-import Vector3d qualified
 
 data VectorBounds3d (coordinateSystem :: CoordinateSystem) where
   VectorBounds3d :: Range units -> Range units -> Range units -> VectorBounds3d (space @ units)
@@ -39,9 +37,6 @@ instance
     units2
     (VectorBounds3d (space @ units1'))
     (VectorBounds3d (space' @ units2'))
-
-instance Generic.HasZero (VectorBounds3d (space @ units)) where
-  zero = constant Vector3d.zero
 
 instance Negation (VectorBounds3d (space @ units)) where
   negate (VectorBounds3d x y z) = VectorBounds3d (negate x) (negate y) (negate z)

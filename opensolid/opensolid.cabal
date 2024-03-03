@@ -108,7 +108,6 @@ library
       Float
       Frame2d
       Fuzzy
-      Generic
       Int
       Intersects
       Length

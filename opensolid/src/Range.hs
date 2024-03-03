@@ -57,7 +57,6 @@ import Bounds qualified
 import Debug qualified
 import Float qualified
 import Fuzzy qualified
-import Generic qualified
 import List qualified
 import Maybe qualified
 import NonEmpty qualified
@@ -107,9 +106,6 @@ instance Multiplication Sign (Range units) (Range units) where
 instance Multiplication (Range units) Sign (Range units) where
   range * Positive = range
   range * Negative = -range
-
-instance Generic.HasZero (Range units) where
-  zero = constant Qty.zero
 
 instance units ~ units' => Addition (Range units) (Range units') (Range units) where
   Range low1 high1 + Range low2 high2 = unsafe (low1 + low2) (high1 + high2)
