@@ -78,6 +78,7 @@ library
       Axis2d
       Basics
       Basis2d
+      BezierCurve2d
       Bisection
       Bounded
       Bounds2d
