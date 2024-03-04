@@ -27,11 +27,13 @@ module Float
   , interpolateFrom
   , midpoint
   , goldenRatio
+  , sum
   )
 where
 
 import Arithmetic
 import Basics
+import List qualified
 import Qty (Qty (Qty))
 import Qty qualified
 import Sign (Sign)
@@ -124,3 +126,6 @@ atan (Qty x) = Qty (Prelude.atan x)
 
 atan2 :: Qty units -> Qty units -> Float
 atan2 (Qty y) (Qty x) = Qty (Prelude.atan2 y x)
+
+sum :: List Float -> Float
+sum = Qty.sum

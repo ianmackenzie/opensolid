@@ -31,8 +31,6 @@ module List
   , reverse
   , take
   , drop
-  , sum
-  , sumOf
   , sort
   , sortBy
   , sortWith
@@ -52,8 +50,6 @@ where
 import Arithmetic
 import Basics
 import Data.List qualified
-import Qty (Qty)
-import Qty qualified
 import Prelude qualified
 
 singleton :: a -> List a
@@ -159,12 +155,6 @@ take = Prelude.take
 
 drop :: Int -> List a -> List a
 drop = Prelude.drop
-
-sum :: List (Qty units) -> Qty units
-sum = foldLeft (+) Qty.zero
-
-sumOf :: (a -> Qty units) -> List a -> Qty units
-sumOf function list = sum (map function list)
 
 sort :: Ord a => List a -> List a
 sort = Data.List.sort

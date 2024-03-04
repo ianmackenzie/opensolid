@@ -24,17 +24,18 @@ module Qty
   , clamp
   , convert
   , unconvert
+  , sum
   )
 where
 
 import Arithmetic
 import Basics
 import Data.Coerce (coerce)
-import Data.List qualified
 import Data.List.NonEmpty (NonEmpty ((:|)))
 import {-# SOURCE #-} Float (Float, fromRational)
 import {-# SOURCE #-} Float qualified
 import Foreign.Storable (Storable)
+import List qualified
 import Sign (Sign (Negative, Positive))
 import Units (Unitless, convert, unconvert)
 import Units qualified
@@ -193,10 +194,10 @@ largerBy function first second =
   if abs (function first) >= abs (function second) then first else second
 
 smallest :: NonEmpty (Qty units) -> Qty units
-smallest (x :| xs) = Data.List.foldl' smaller x xs
+smallest (x :| xs) = List.foldLeft smaller x xs
 
 largest :: NonEmpty (Qty units) -> Qty units
-largest (x :| xs) = Data.List.foldl' larger x xs
+largest (x :| xs) = List.foldLeft larger x xs
 
 smallestBy :: (a -> Qty units) -> NonEmpty a -> a
 smallestBy _ (x :| []) = x
@@ -229,3 +230,6 @@ interpolateFrom a b t =
 {-# INLINE midpoint #-}
 midpoint :: Qty units -> Qty units -> Qty units
 midpoint a b = 0.5 * (a + b)
+
+sum :: List (Qty units) -> Qty units
+sum = List.foldLeft (+) zero
