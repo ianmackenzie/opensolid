@@ -8,9 +8,13 @@ module Int
   , min
   , max
   , choose
+  , sum
+  , product
   )
 where
 
+import List qualified
+import NonEmpty qualified
 import OpenSolid
 import Prelude qualified
 
@@ -54,3 +58,9 @@ choose n k
     | a < b = prod (acc * a) (a + 1) b
     | a == b = acc * a
     | otherwise = acc
+
+sum :: List Int -> Int
+sum = List.foldLeft (+) 0
+
+product :: NonEmpty Int -> Int
+product = NonEmpty.reduceLeft (*)
