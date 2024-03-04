@@ -23,10 +23,10 @@ module Dict
   , takeMin
   , getMax
   , takeMax
-  , foldLeft
-  , foldLeftWithKey
-  , foldRight
-  , foldRightWithKey
+  , foldl
+  , foldlWithKey
+  , foldr
+  , foldrWithKey
   )
 where
 
@@ -110,14 +110,14 @@ takeMax dict
   | isEmpty dict = (Nothing, dict)
   | otherwise = Pair.mapFirst Just (Data.Map.deleteFindMax dict)
 
-foldRight :: (v -> a -> a) -> a -> Dict k v -> a
-foldRight = Data.Map.foldr
+foldr :: (v -> a -> a) -> a -> Dict k v -> a
+foldr = Data.Map.foldr
 
-foldRightWithKey :: (k -> v -> a -> a) -> a -> Dict k v -> a
-foldRightWithKey = Data.Map.foldrWithKey
+foldrWithKey :: (k -> v -> a -> a) -> a -> Dict k v -> a
+foldrWithKey = Data.Map.foldrWithKey
 
-foldLeft :: (a -> v -> a) -> a -> Dict k v -> a
-foldLeft = Data.Map.foldl'
+foldl :: (a -> v -> a) -> a -> Dict k v -> a
+foldl = Data.Map.foldl'
 
-foldLeftWithKey :: (a -> k -> v -> a) -> a -> Dict k v -> a
-foldLeftWithKey = Data.Map.foldlWithKey
+foldlWithKey :: (a -> k -> v -> a) -> a -> Dict k v -> a
+foldlWithKey = Data.Map.foldlWithKey

@@ -52,7 +52,7 @@ toFloat input =
 
 lines :: String -> List String
 lines string =
-  let (first, rest) = List.foldRight fold ("", []) string
+  let (first, rest) = List.foldr fold ("", []) string
    in first : rest
  where
   fold character (current, accumulated)

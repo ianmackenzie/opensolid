@@ -8,25 +8,25 @@ import Test qualified
 
 tests :: List Test
 tests =
-  [ foldLeft
-  , foldRight
+  [ foldl
+  , foldr
   , take
   ]
 
 simpleDict :: Dict Int String
 simpleDict = Dict.fromList [(1, "a"), (2, "b"), (3, "c")]
 
-foldLeft :: Test
-foldLeft =
-  Test.verify "foldLeft" <| Test.do
-    let actual = Dict.foldLeft (++) "" simpleDict
+foldl :: Test
+foldl =
+  Test.verify "foldl" <| Test.do
+    let actual = Dict.foldl (++) "" simpleDict
         expected = "abc"
      in Test.expect (actual == expected)
 
-foldRight :: Test
-foldRight =
-  Test.verify "foldRight" <| Test.do
-    let actual = Dict.foldRight (++) "" simpleDict
+foldr :: Test
+foldr =
+  Test.verify "foldr" <| Test.do
+    let actual = Dict.foldr (++) "" simpleDict
         expected = "abc"
      in Test.expect (actual == expected)
 

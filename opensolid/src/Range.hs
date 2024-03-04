@@ -369,10 +369,10 @@ larger first second
   aggregate@(Range aggregateMin aggregateMax) = aggregate2 first second
 
 minimum :: NonEmpty (Range units) -> Range units
-minimum = NonEmpty.reduceLeft min
+minimum = NonEmpty.reduce min
 
 maximum :: NonEmpty (Range units) -> Range units
-maximum = NonEmpty.reduceLeft max
+maximum = NonEmpty.reduce max
 
 smallest :: NonEmpty (Range units) -> Range units
 smallest ranges =
@@ -381,7 +381,7 @@ smallest ranges =
       conditionalAggregate current (Range low high)
         | low > clipRadius || high < -clipRadius = current
         | otherwise = aggregate2 current (unsafe (Qty.max low -clipRadius) (Qty.min high clipRadius))
-   in NonEmpty.foldLeft conditionalAggregate initial ranges
+   in NonEmpty.foldl conditionalAggregate initial ranges
 
 largest :: NonEmpty (Range units) -> Range units
 largest ranges =
@@ -392,7 +392,7 @@ largest ranges =
         | low > -clipRadius = aggregate2 current (unsafe clipRadius high)
         | high < clipRadius = aggregate2 current (unsafe low -clipRadius)
         | otherwise = aggregate2 current range
-   in NonEmpty.foldLeft conditionalAggregate initial ranges
+   in NonEmpty.foldl conditionalAggregate initial ranges
 
 sin :: Range Radians -> Range Unitless
 sin range@(Range low high) =

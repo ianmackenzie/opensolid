@@ -133,4 +133,4 @@ sum :: List Float -> Float
 sum = Qty.sum
 
 product :: NonEmpty Float -> Float
-product = NonEmpty.reduceLeft (*)
+product = NonEmpty.reduce (*)

@@ -277,7 +277,7 @@ refinePairs pairs =
 
 prependItems :: List (a, Estimate units) -> List a -> List a
 prependItems pairs items =
-  List.foldRight (\(item, _) acc -> item : acc) items pairs
+  List.foldr (\(item, _) acc -> item : acc) items pairs
 
 isResolved :: Tolerance units => Estimate units -> Bool
 isResolved estimate = boundsWidth estimate <= ?tolerance

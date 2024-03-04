@@ -194,10 +194,10 @@ largerBy function first second =
   if abs (function first) >= abs (function second) then first else second
 
 smallest :: NonEmpty (Qty units) -> Qty units
-smallest (x :| xs) = List.foldLeft smaller x xs
+smallest (x :| xs) = List.foldl smaller x xs
 
 largest :: NonEmpty (Qty units) -> Qty units
-largest (x :| xs) = List.foldLeft larger x xs
+largest (x :| xs) = List.foldl larger x xs
 
 smallestBy :: (a -> Qty units) -> NonEmpty a -> a
 smallestBy _ (x :| []) = x
@@ -232,4 +232,4 @@ midpoint :: Qty units -> Qty units -> Qty units
 midpoint a b = 0.5 * (a + b)
 
 sum :: List (Qty units) -> Qty units
-sum = List.foldLeft (+) zero
+sum = List.foldl (+) zero

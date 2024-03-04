@@ -131,7 +131,7 @@ apiClass (Class clsName representationProps errorClasses functions) =
   representation =
     PY.def "__repr__" [selfPyArg] (Just (PY.var "str")) <|
       [ PY.returnStatement
-          ( List.foldLeft
+          ( List.foldl
               PY.plus
               (PY.string (clsName ++ "("))
               ( List.intersperse

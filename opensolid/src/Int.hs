@@ -60,7 +60,7 @@ choose n k
     | otherwise = acc
 
 sum :: List Int -> Int
-sum = List.foldLeft (+) 0
+sum = List.foldl (+) 0
 
 product :: NonEmpty Int -> Int
-product = NonEmpty.reduceLeft (*)
+product = NonEmpty.reduce (*)

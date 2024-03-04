@@ -32,10 +32,9 @@ module NonEmpty
   , filter
   , find
   , concat
-  , foldLeft
-  , foldRight
-  , reduceLeft
-  , reduceRight
+  , foldl
+  , foldr
+  , reduce
   , reverse
   , take
   , drop
@@ -188,17 +187,14 @@ find = Data.Foldable.find
 concat :: NonEmpty (NonEmpty a) -> NonEmpty a
 concat = Data.Semigroup.sconcat
 
-foldLeft :: (b -> a -> b) -> b -> NonEmpty a -> b
-foldLeft = Data.Foldable.foldl'
+foldl :: (b -> a -> b) -> b -> NonEmpty a -> b
+foldl = Data.Foldable.foldl'
 
-foldRight :: (a -> b -> b) -> b -> NonEmpty a -> b
-foldRight = Data.Foldable.foldr
+foldr :: (a -> b -> b) -> b -> NonEmpty a -> b
+foldr = Data.Foldable.foldr
 
-reduceLeft :: (a -> a -> a) -> NonEmpty a -> a
-reduceLeft function (x :| xs) = List.foldLeft function x xs
-
-reduceRight :: (a -> a -> a) -> NonEmpty a -> a
-reduceRight = Data.Foldable.foldr1
+reduce :: (a -> a -> a) -> NonEmpty a -> a
+reduce function (x :| xs) = List.foldl function x xs
 
 reverse :: NonEmpty a -> NonEmpty a
 reverse = Data.List.NonEmpty.reverse
@@ -210,7 +206,7 @@ drop :: Int -> NonEmpty a -> List a
 drop = Data.List.NonEmpty.drop
 
 sum :: Addition a a a => NonEmpty a -> a
-sum = reduceLeft (+)
+sum = reduce (+)
 
 sumOf :: Addition b b b => (a -> b) -> NonEmpty a -> b
 sumOf function nonEmpty = sum (map function nonEmpty)

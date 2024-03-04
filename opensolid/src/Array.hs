@@ -7,8 +7,8 @@ module Array
   , toList
   , get
   , map
-  , foldLeft
-  , foldRight
+  , foldl
+  , foldr
   )
 where
 
@@ -46,8 +46,8 @@ get index (Array array) =
 map :: (a -> b) -> Array a -> Array b
 map function (Array array) = Array (Prelude.fmap function array)
 
-foldLeft :: (b -> a -> b) -> b -> Array a -> b
-foldLeft function init (Array array) = Data.Foldable.foldl' function init array
+foldl :: (b -> a -> b) -> b -> Array a -> b
+foldl function init (Array array) = Data.Foldable.foldl' function init array
 
-foldRight :: (a -> b -> b) -> b -> Array a -> b
-foldRight function init (Array array) = Data.Foldable.foldr function init array
+foldr :: (a -> b -> b) -> b -> Array a -> b
+foldr function init (Array array) = Data.Foldable.foldr function init array
