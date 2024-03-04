@@ -40,7 +40,6 @@ common config
       -Wincomplete-uni-patterns
       -Wmissing-signatures
       -Wmissing-exported-signatures
-      -Wmissing-export-lists
       -Wmissing-home-modules
       -Wpartial-fields
       -Wsafe
