@@ -7,6 +7,7 @@ module Int
   , abs
   , min
   , max
+  , choose
   )
 where
 
@@ -38,3 +39,18 @@ min = Prelude.min
 
 max :: Int -> Int -> Int
 max = Prelude.max
+
+choose :: Int -> Int -> Int
+choose n k
+  | n < 0 = 0
+  | k < 0 = 0
+  | k > n = 0
+  | d == 0 = 1
+  | d == 1 = n
+  | otherwise = prod (n - d + 1) (n - d + 2) n // prod 2 3 d
+ where
+  d = min k (n - k)
+  prod !acc a b
+    | a < b = prod (acc * a) (a + 1) b
+    | a == b = acc * a
+    | otherwise = acc
