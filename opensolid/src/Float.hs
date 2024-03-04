@@ -28,12 +28,14 @@ module Float
   , midpoint
   , goldenRatio
   , sum
+  , product
   )
 where
 
 import Arithmetic
 import Basics
-import List qualified
+import NonEmpty (NonEmpty)
+import NonEmpty qualified
 import Qty (Qty (Qty))
 import Qty qualified
 import Sign (Sign)
@@ -129,3 +131,6 @@ atan2 (Qty y) (Qty x) = Qty (Prelude.atan2 y x)
 
 sum :: List Float -> Float
 sum = Qty.sum
+
+product :: NonEmpty Float -> Float
+product = NonEmpty.reduceLeft (*)
