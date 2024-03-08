@@ -31,6 +31,7 @@ module Vector2d
   , relativeTo
   , placeInBasis
   , relativeToBasis
+  , sum
   )
 where
 
@@ -43,6 +44,7 @@ import {-# SOURCE #-} Direction2d qualified
 import {-# SOURCE #-} Frame2d (Frame2d)
 import {-# SOURCE #-} Frame2d qualified
 import Length qualified
+import List qualified
 import OpenSolid
 import {-# SOURCE #-} Point2d (Point2d)
 import Qty qualified
@@ -318,3 +320,6 @@ relativeToBasis basis vector =
   Vector2d
     (vector <> Basis2d.xDirection basis)
     (vector <> Basis2d.yDirection basis)
+
+sum :: List (Vector2d (space @ units)) -> Vector2d (space @ units)
+sum = List.foldl (+) zero
