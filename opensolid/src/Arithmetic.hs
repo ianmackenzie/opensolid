@@ -89,6 +89,9 @@ class Exponentiation a b c | a b -> c where
 instance Exponentiation Int Int Int where
   (**) = (Prelude.^)
 
+instance Exponentiation Float Int Float where
+  (**) = (Prelude.^)
+
 instance Exponentiation Float Float Float where
   (**) = (Prelude.**)
 
