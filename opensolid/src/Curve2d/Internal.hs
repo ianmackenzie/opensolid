@@ -153,7 +153,7 @@ reverse (Line{startPoint = p1, endPoint = p2, direction, length}) =
 reverse (Arc{centerPoint, radius, startAngle, endAngle}) =
   Arc{centerPoint, radius, startAngle = endAngle, endAngle = startAngle}
 reverse (Curve curve tangentDirection) =
-  Curve (reverseImpl curve) (DirectionCurve2d.reverse tangentDirection)
+  Curve (reverseImpl curve) (-(DirectionCurve2d.reverse tangentDirection))
 reverse (PlaceIn frame curve) = PlaceIn frame (reverse curve)
 
 bounds :: Curve2d (space @ units) -> Bounds2d (space @ units)
