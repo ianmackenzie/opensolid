@@ -1,6 +1,6 @@
 module BezierCurve2d
   ( fromControlPoints
-  , extrapolant
+  , hermite
   )
 where
 
@@ -98,56 +98,58 @@ fromControlPoints ::
   Result Curve2d.DegenerateCurve (Curve2d (space @ units))
 fromControlPoints controlPoints = Curve2d.from (BezierCurve2d controlPoints)
 
-{- | Construct a Bezier curve with the given start point, start derivatives and end point.
-For example,
+{- | Construct a Bezier curve with the given start point, start derivatives, end point and end
+derivatives. For example,
 
-> BezierCurve2d.extrapolant p1 [] p2
+> BezierCurve2d.hermite (p1, [v1]) (p2, [])
 
-will result in a straight line (a linear spline) from @p1@ to @p2@, while
+will result in a quadratic spline from @p1@ to @p2@ with first derivative at @p1@ equal to @v1@,
+while
 
-> BezierCurve2d.extrapolant p1 [ v1, v2 ] p2
+> BezierCurve2d.hermite (p1, [v1]) (p2, [v2])
 
-will result in a cubic spline with:
+will result in a cubic spline from @p1@ to @p2@ with first derivative equal to @v1@ at @p1@ and
+first derivative equal to @v2@ at @p2@.
 
-  * Start point @p1@
-  * First derivative at @p1@ equal to @v1@
-  * Second derivative at @p1@ equal to @v2@
-  * End point @p2@
+In general, the degree of the resulting spline will be equal to 1 plus the total number of
+derivatives given.
 -}
-extrapolant ::
+hermite ::
   Tolerance units =>
-  Point2d (space @ units) ->
-  List (Vector2d (space @ units)) ->
-  Point2d (space @ units) ->
+  (Point2d (space @ units), List (Vector2d (space @ units))) ->
+  (Point2d (space @ units), List (Vector2d (space @ units))) ->
   Result Curve2d.DegenerateCurve (Curve2d (space @ units))
-extrapolant startPoint startDerivatives endPoint = do
-  let n = 1 + List.length startDerivatives
-  let qs = scaledDerivatives 1.0 (Float.fromInt n) startDerivatives
-  let controlPoints = startPoint :| followingControlPoints startPoint 1 n qs endPoint
-  fromControlPoints controlPoints
+hermite (startPoint, startDerivatives) (endPoint, endDerivatives) = do
+  let numStartDerivatives = List.length startDerivatives
+  let numEndDerivatives = List.length endDerivatives
+  let curveDegree = 1 + numStartDerivatives + numEndDerivatives
+  let scaledStartDerivatives = scaleDerivatives Positive 1.0 (Float.fromInt curveDegree) startDerivatives
+  let scaledEndDerivatives = scaleDerivatives Negative 1.0 (Float.fromInt curveDegree) endDerivatives
+  let startControlPoints = innerControlPoints startPoint 1 (numStartDerivatives + 1) scaledStartDerivatives
+  let endControlPoints = List.reverse (innerControlPoints endPoint 1 (numEndDerivatives + 1) scaledEndDerivatives)
+  fromControlPoints (startPoint :| List.concat [startControlPoints, endControlPoints, [endPoint]])
 
-scaledDerivatives :: Float -> Float -> List (Vector2d (space @ units)) -> List (Vector2d (space @ units))
-scaledDerivatives _ _ [] = []
-scaledDerivatives s n (first : rest) = do
-  let s' = s / n
+scaleDerivatives :: Sign -> Float -> Float -> List (Vector2d (space @ units)) -> List (Vector2d (space @ units))
+scaleDerivatives _ _ _ [] = []
+scaleDerivatives sign scale n (first : rest) = do
+  let scale' = sign * scale / n
   let n' = n - 1.0
-  s' * first : scaledDerivatives s' n' rest
+  scale' * first : scaleDerivatives sign scale' n' rest
 
 offset :: Int -> List (Vector2d (space @ units)) -> Vector2d (space @ units)
-offset i qs =
-  List.take i qs
+offset i scaledDerivatives =
+  List.take i scaledDerivatives
     |> List.mapWithIndex (\j q -> Float.fromInt (Int.choose (i - 1) j) * q)
     |> Vector2d.sum
 
-followingControlPoints ::
+innerControlPoints ::
   Point2d (space @ units) ->
   Int ->
   Int ->
   List (Vector2d (space @ units)) ->
-  Point2d (space @ units) ->
   List (Point2d (space @ units))
-followingControlPoints previousPoint i n qs endPoint
+innerControlPoints previousPoint i n qs
   | i < n = do
       let newPoint = previousPoint + offset i qs
-      newPoint : followingControlPoints newPoint (i + 1) n qs endPoint
-  | otherwise = [endPoint]
+      newPoint : innerControlPoints newPoint (i + 1) n qs
+  | otherwise = []
