@@ -11,6 +11,7 @@ module VectorBounds2d
   , polar
   , xComponent
   , yComponent
+  , components
   , squaredMagnitude
   , magnitude
   , maxMagnitude
@@ -340,6 +341,9 @@ xComponent (VectorBounds2d vx _) = vx
 
 yComponent :: VectorBounds2d (space @ units) -> Range units
 yComponent (VectorBounds2d _ vy) = vy
+
+components :: VectorBounds2d (space @ units) -> (Range units, Range units)
+components (VectorBounds2d vx vy) = (vx, vy)
 
 squaredMagnitude :: Units.Squared units1 units2 => VectorBounds2d (space @ units1) -> Range units2
 squaredMagnitude (VectorBounds2d x y) = Range.squared x + Range.squared y
