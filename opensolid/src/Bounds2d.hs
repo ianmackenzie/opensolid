@@ -22,6 +22,7 @@ module Bounds2d
   , upperLeftCorner
   , upperRightCorner
   , corners
+  , diameter
   , interpolate
   , sample
   , any
@@ -213,6 +214,9 @@ corners bounds =
   , upperRightCorner bounds
   , upperLeftCorner bounds
   ]
+
+diameter :: Bounds2d (space @ units) -> Qty units
+diameter (Bounds2d x y) = Qty.hypot2 (Range.width x) (Range.width y)
 
 interpolate :: Bounds2d (space @ units) -> Float -> Float -> Point2d (space @ units)
 interpolate (Bounds2d x y) u v =
