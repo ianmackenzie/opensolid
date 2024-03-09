@@ -92,11 +92,21 @@ instance Curve2d.Interface (BezierCurve2d (space @ units)) (space @ units) where
 
   reverseImpl (BezierCurve2d controlPoints) = BezierCurve2d (NonEmpty.reverse controlPoints)
 
+{- | Construct a Bezier curve from its start point (first control point), inner control points and
+end point (last control point). For example,
+
+> BezierCurve2d.fromControlPoints p1 [ p2, p3 ] p4
+
+will return a cubic spline with the given four control points.
+-}
 fromControlPoints ::
   Tolerance units =>
-  NonEmpty (Point2d (space @ units)) ->
+  Point2d (space @ units) ->
+  List (Point2d (space @ units)) ->
+  Point2d (space @ units) ->
   Result Curve2d.DegenerateCurve (Curve2d (space @ units))
-fromControlPoints controlPoints = Curve2d.from (BezierCurve2d controlPoints)
+fromControlPoints startPoint innerControlPoints endPoint =
+  Curve2d.from (BezierCurve2d (startPoint :| (innerControlPoints ++ [endPoint])))
 
 {- | Construct a Bezier curve with the given start point, start derivatives, end point and end
 derivatives. For example,
@@ -126,9 +136,9 @@ hermite (startPoint, startDerivatives) (endPoint, endDerivatives) = do
   let curveDegree = 1 + numStartDerivatives + numEndDerivatives
   let scaledStartDerivatives = scaleDerivatives Positive 1.0 (Float.fromInt curveDegree) startDerivatives
   let scaledEndDerivatives = scaleDerivatives Negative 1.0 (Float.fromInt curveDegree) endDerivatives
-  let startControlPoints = innerControlPoints startPoint 1 (numStartDerivatives + 1) scaledStartDerivatives
-  let endControlPoints = List.reverse (innerControlPoints endPoint 1 (numEndDerivatives + 1) scaledEndDerivatives)
-  fromControlPoints (startPoint :| List.concat [startControlPoints, endControlPoints, [endPoint]])
+  let startControlPoints = derivedControlPoints startPoint 1 (numStartDerivatives + 1) scaledStartDerivatives
+  let endControlPoints = List.reverse (derivedControlPoints endPoint 1 (numEndDerivatives + 1) scaledEndDerivatives)
+  fromControlPoints startPoint (startControlPoints ++ endControlPoints) endPoint
 
 scaleDerivatives :: Sign -> Float -> Float -> List (Vector2d (space @ units)) -> List (Vector2d (space @ units))
 scaleDerivatives _ _ _ [] = []
@@ -143,14 +153,14 @@ offset i scaledDerivatives =
     |> List.mapWithIndex (\j q -> Float.fromInt (Int.choose (i - 1) j) * q)
     |> Vector2d.sum
 
-innerControlPoints ::
+derivedControlPoints ::
   Point2d (space @ units) ->
   Int ->
   Int ->
   List (Vector2d (space @ units)) ->
   List (Point2d (space @ units))
-innerControlPoints previousPoint i n qs
+derivedControlPoints previousPoint i n qs
   | i < n = do
       let newPoint = previousPoint + offset i qs
-      newPoint : innerControlPoints newPoint (i + 1) n qs
+      newPoint : derivedControlPoints newPoint (i + 1) n qs
   | otherwise = []
