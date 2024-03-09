@@ -101,15 +101,16 @@ fromControlPoints controlPoints = Curve2d.from (BezierCurve2d controlPoints)
 {- | Construct a Bezier curve with the given start point, start derivatives, end point and end
 derivatives. For example,
 
-> BezierCurve2d.hermite (p1, [v1]) (p2, [])
-
-will result in a quadratic spline from @p1@ to @p2@ with first derivative at @p1@ equal to @v1@,
-while
-
 > BezierCurve2d.hermite (p1, [v1]) (p2, [v2])
 
 will result in a cubic spline from @p1@ to @p2@ with first derivative equal to @v1@ at @p1@ and
 first derivative equal to @v2@ at @p2@.
+
+The numbers of derivatives at each endpoint do not have to be equal; for example,
+
+> BezierCurve2d.hermite (p1, [v1]) (p2, [])
+
+will result in a quadratic spline from @p1@ to @p2@ with first derivative at @p1@ equal to @v1@.
 
 In general, the degree of the resulting spline will be equal to 1 plus the total number of
 derivatives given.
