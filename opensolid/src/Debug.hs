@@ -4,6 +4,7 @@ module Debug
   , intercept
   , assert
   , task
+  , sequence
   )
 where
 
@@ -30,3 +31,7 @@ task debugTask value =
   System.IO.Unsafe.unsafePerformIO Prelude.do
     Task.toIO debugTask
     return value
+
+sequence :: List (a -> a) -> a -> a
+sequence [] = identity
+sequence (first : rest) = first << sequence rest
