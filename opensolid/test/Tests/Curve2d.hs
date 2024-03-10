@@ -163,7 +163,7 @@ solving =
     let desiredDistance = Length.meters 0.5
     roots <-
       let ?tolerance = Tolerance.ofSquared desiredDistance
-       in Curve1d.roots (squaredDistanceFromOrigin - Qty.squared desiredDistance)
+       in Curve1d.zeros (squaredDistanceFromOrigin - Qty.squared desiredDistance)
     let distances =
           roots
             |> List.map Curve1d.Root.value

@@ -22,7 +22,7 @@ crossingRoots =
   Test.verify "Crossing roots" <| Test.do
     let x = 3.0 * Curve1d.t
     let y = (x - 1.0) * (x - 1.0) * (x - 1.0) - (x - 1.0)
-    roots <- Curve1d.roots y
+    roots <- Curve1d.zeros y
     let expectedRoots =
           [ Root 0.0 0 Positive
           , Root (1 / 3) 0 Negative
@@ -35,7 +35,7 @@ tangentRoots =
   Test.verify "Tangent roots" <| Test.do
     let theta = Angle.twoPi * Curve1d.t
     let expression = Curve1d.squared (Curve1d.sin theta)
-    roots <- Curve1d.roots expression
+    roots <- Curve1d.zeros expression
     let expectedRoots =
           [ Root 0.0 1 Positive
           , Root 0.5 1 Positive
