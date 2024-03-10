@@ -576,7 +576,7 @@ findBoundarySolutions f =
 
 edgeSolutions :: Tolerance units => Function units -> Curve2d Uv.Coordinates -> Sign -> (Bool, List BoundaryPoint)
 edgeSolutions f edgeCurve edgeSign =
-  case Curve1d.roots (Curve1d (CurveOnSurface edgeCurve f)) of
+  case Curve1d.zeros (Curve1d (CurveOnSurface edgeCurve f)) of
     Error Curve1d.ZeroEverywhere -> (True, [])
     Ok roots ->
       let toBoundaryPoint root =

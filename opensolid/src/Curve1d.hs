@@ -13,7 +13,7 @@ module Curve1d
   , sin
   , cos
   , ZeroEverywhere (ZeroEverywhere)
-  , roots
+  , zeros
   , reverse
   , integral
   )
@@ -373,10 +373,10 @@ maxRootOrder = 4
 
 data ZeroEverywhere = ZeroEverywhere deriving (Eq, Show, Error)
 
-roots :: Tolerance units => Curve1d units -> Result ZeroEverywhere (List Root)
-roots (Constant value) = if value ~= Qty.zero then Error ZeroEverywhere else Ok []
-roots curve | isZero curve = Error ZeroEverywhere
-roots curve =
+zeros :: Tolerance units => Curve1d units -> Result ZeroEverywhere (List Root)
+zeros (Constant value) = if value ~= Qty.zero then Error ZeroEverywhere else Ok []
+zeros curve | isZero curve = Error ZeroEverywhere
+zeros curve =
   let (root0, x0) = solveEndpoint curve 0.0
       (root1, x1) = solveEndpoint curve 1.0
       derivatives = Stream.iterate curve derivative

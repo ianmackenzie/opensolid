@@ -673,7 +673,7 @@ data ZeroEverywhere = ZeroEverywhere deriving (Eq, Show, Error)
 
 roots :: Tolerance units => VectorCurve2d (space @ units) -> Result ZeroEverywhere (List Float)
 roots curve =
-  case Curve1d.roots (squaredMagnitude (Units.generalize curve)) of
+  case Curve1d.zeros (squaredMagnitude (Units.generalize curve)) of
     Ok roots1d -> Ok (List.map Curve1d.Root.value roots1d)
     Error Curve1d.ZeroEverywhere -> Error VectorCurve2d.ZeroEverywhere
  where
