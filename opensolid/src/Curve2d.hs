@@ -22,6 +22,7 @@ module Curve2d
   , yCoordinate
   , placeIn
   , relativeTo
+  , curvature
   )
 where
 
@@ -52,6 +53,7 @@ import Qty qualified
 import Range qualified
 import Result qualified
 import T qualified
+import Units qualified
 import VectorCurve2d (VectorCurve2d)
 import VectorCurve2d qualified
 
@@ -286,3 +288,10 @@ relativeTo ::
   Curve2d (global @ units) ->
   Curve2d (local @ units)
 relativeTo frame = placeIn (Frame2d.inverse frame)
+
+curvature :: Qty units -> Curve2d (space @ units) -> Curve1d Unitless
+curvature referenceRadius curve = do
+  let firstDerivative = Units.generalize (derivative curve)
+  let tangent = tangentDirection curve
+  let secondDerivative = VectorCurve2d.derivative firstDerivative
+  (tangent >< secondDerivative .* Units.generalize referenceRadius) / (firstDerivative .<> firstDerivative)
