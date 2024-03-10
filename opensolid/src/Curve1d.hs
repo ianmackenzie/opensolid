@@ -55,8 +55,6 @@ data Curve1d units where
     Interface curve units =>
     curve ->
     Curve1d units
-  Zero ::
-    Curve1d units
   Constant ::
     Qty units -> Curve1d units
   Parameter ::
@@ -121,16 +119,15 @@ instance Interface (Curve1d units) units where
   derivativeImpl = derivative
 
 zero :: Curve1d units
-zero = Zero
+zero = constant Qty.zero
 
 constant :: Qty units -> Curve1d units
-constant value = if value == Qty.zero then Zero else Constant value
+constant = Constant
 
 t :: Curve1d Unitless
 t = Parameter
 
 instance Negation (Curve1d units) where
-  negate Zero = Zero
   negate (Constant x) = Constant (negate x)
   negate (Negated curve) = curve
   negate (Difference c1 c2) = Difference c2 c1
@@ -146,8 +143,8 @@ instance Multiplication (Curve1d units) Sign (Curve1d units) where
   curve * Negative = -curve
 
 instance units ~ units' => Addition (Curve1d units) (Curve1d units') (Curve1d units) where
-  Zero + curve = curve
-  curve + Zero = curve
+  curve + Constant value | value == Qty.zero = curve
+  Constant value + curve | value == Qty.zero = curve
   Constant x + Constant y = constant (x + y)
   curve1 + curve2 = Sum curve1 curve2
 
@@ -158,8 +155,8 @@ instance units ~ units' => Addition (Qty units) (Curve1d units') (Curve1d units)
   value + curve = constant value + curve
 
 instance units ~ units' => Subtraction (Curve1d units) (Curve1d units') (Curve1d units) where
-  Zero - curve = negate curve
-  curve - Zero = curve
+  curve - Constant value | value == Qty.zero = curve
+  Constant value - curve | value == Qty.zero = negate curve
   Constant x - Constant y = constant (x - y)
   curve1 - curve2 = Difference curve1 curve2
 
@@ -176,8 +173,8 @@ instance
     (Curve1d units2)
     (Curve1d units3)
   where
-  Zero * _ = Zero
-  _ * Zero = Zero
+  Constant value * _ | value == Qty.zero = zero
+  _ * Constant value | value == Qty.zero = zero
   Constant x * Constant y = Constant (x * y)
   Constant x * curve | Units.drop x == 1.0 = Units.add (Units.drop curve)
   Constant x * curve | Units.drop x == -1.0 = Units.add (Units.drop (negate curve))
@@ -248,7 +245,7 @@ instance
     (Curve1d units2)
     (Curve1d units3)
   where
-  Zero / _ = Zero
+  Constant value / _ | value == Qty.zero = zero
   Constant x / Constant y = Constant (x / y)
   curve / Constant x =
     Units.specialize <|
@@ -277,7 +274,6 @@ evaluateAt :: Float -> Curve1d units -> Qty units
 evaluateAt tValue curve =
   case curve of
     Curve1d c -> evaluateAtImpl tValue c
-    Zero -> Qty.zero
     Constant x -> x
     Parameter -> tValue
     Negated c -> negate (evaluateAt tValue c)
@@ -297,7 +293,6 @@ segmentBounds :: T.Bounds -> Curve1d units -> Range units
 segmentBounds tBounds curve =
   case curve of
     Curve1d c -> segmentBoundsImpl tBounds c
-    Zero -> Range.constant Qty.zero
     Constant value -> Range.constant value
     Parameter -> tBounds
     Negated c -> negate (segmentBounds tBounds c)
@@ -314,7 +309,6 @@ derivative :: Curve1d units -> Curve1d units
 derivative curve =
   case curve of
     Curve1d c -> derivativeImpl c
-    Zero -> zero
     Constant _ -> zero
     Parameter -> constant 1.0
     Negated c -> negate (derivative c)
@@ -340,12 +334,10 @@ instance Interface (Reversed units) units where
   derivativeImpl (Reversed curve) = -(reverse (derivative curve))
 
 reverse :: Curve1d units -> Curve1d units
-reverse Zero = Zero
 reverse curve@(Constant _) = curve
 reverse curve = Curve1d (Reversed curve)
 
 squared :: Units.Squared units1 units2 => Curve1d units1 -> Curve1d units2
-squared Zero = Zero
 squared (Constant x) = Constant (x * x)
 squared (Negated c) = squared c
 squared (Cos c) = Units.add (cosSquared c)
@@ -359,17 +351,14 @@ sinSquared :: Curve1d Radians -> Curve1d Unitless
 sinSquared c = 0.5 - 0.5 * cos (2.0 * c)
 
 sqrt :: Units.Squared units1 units2 => Curve1d units2 -> Curve1d units1
-sqrt Zero = Zero
 sqrt (Constant x) = Constant (Qty.sqrt x)
 sqrt curve = SquareRoot curve
 
 sin :: Curve1d Radians -> Curve1d Unitless
-sin Zero = Zero
 sin (Constant x) = constant (Angle.sin x)
 sin curve = Sin curve
 
 cos :: Curve1d Radians -> Curve1d Unitless
-cos Zero = Constant 1.0
 cos (Constant x) = constant (Angle.cos x)
 cos curve = Cos curve
 
@@ -385,7 +374,6 @@ maxRootOrder = 4
 data ZeroEverywhere = ZeroEverywhere deriving (Eq, Show, Error)
 
 roots :: Tolerance units => Curve1d units -> Result ZeroEverywhere (List Root)
-roots Zero = Error ZeroEverywhere
 roots (Constant value) = if value ~= Qty.zero then Error ZeroEverywhere else Ok []
 roots curve | isZero curve = Error ZeroEverywhere
 roots curve =
