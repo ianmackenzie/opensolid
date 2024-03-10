@@ -150,7 +150,6 @@ sleep duration =
    in Task (Control.Concurrent.threadDelay microseconds)
 
 onError :: (String -> Task a) -> Task a -> Task a
-onError callback (Task io) =
-  Task <|
-    System.IO.Error.catchIOError io <|
-      \ioError -> toIO (callback (System.IO.Error.ioeGetErrorString ioError))
+onError callback (Task io) = do
+  let errorHandler ioError = toIO (callback (System.IO.Error.ioeGetErrorString ioError))
+  Task (System.IO.Error.catchIOError io errorHandler)
