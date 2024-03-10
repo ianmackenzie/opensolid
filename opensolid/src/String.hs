@@ -4,8 +4,6 @@ module String
   , join
   , fromInt
   , fromFloat
-  , toInt
-  , toFloat
   , lines
   , multiline
   , indent
@@ -20,11 +18,9 @@ import Basics
 import Concatenation
 import Data.Char qualified
 import Data.List qualified
-import Float (Float)
+import {-# SOURCE #-} Float (Float)
 import List qualified
 import Qty (Qty (Qty))
-import {-# SOURCE #-} Result (Result (Error, Ok))
-import Text.Read qualified
 
 concat :: List String -> String
 concat = Data.List.concat
@@ -37,18 +33,6 @@ fromInt = show
 
 fromFloat :: Float -> String
 fromFloat (Qty x) = show x
-
-toInt :: String -> Result String Int
-toInt input =
-  case Text.Read.readMaybe input of
-    Just value -> Ok value
-    Nothing -> Error ("Couldn't parse input as integer: " ++ input)
-
-toFloat :: String -> Result String Float
-toFloat input =
-  case Text.Read.readMaybe input of
-    Just value -> Ok value
-    Nothing -> Error ("Couldn't parse input as float: " ++ input)
 
 lines :: String -> List String
 lines string =

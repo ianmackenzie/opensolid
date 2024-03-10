@@ -18,6 +18,7 @@ import Drawing2d qualified
 import Duration qualified
 import Error qualified
 import Float qualified
+import Int qualified
 import Length (Length)
 import Length qualified
 import Line2d qualified
@@ -150,7 +151,7 @@ testTaskIteration = Task.forEach [1 .. 3] (log "Looping")
 
 doublingTask :: String -> Task Int
 doublingTask input = Task.do
-  value <- String.toInt input
+  value <- Int.parse input
   let doubled = 2 * value
   return doubled
 

@@ -1,5 +1,6 @@
 module Int
-  ( pattern Even
+  ( parse
+  , pattern Even
   , pattern Odd
   , isEven
   , isOdd
@@ -14,9 +15,16 @@ module Int
 where
 
 import List qualified
+import Maybe qualified
 import NonEmpty qualified
 import OpenSolid
+import Text.Read qualified
 import Prelude qualified
+
+parse :: String -> Result String Int
+parse input =
+  Text.Read.readMaybe input
+    |> Maybe.orError ("Couldn't parse input as an integer: " ++ input)
 
 {-# COMPLETE Even, Odd #-}
 

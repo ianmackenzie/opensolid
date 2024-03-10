@@ -2,6 +2,7 @@ module Float
   ( Float
   , fromRational
   , fromInt
+  , parse
   , ceiling
   , round
   , min
@@ -34,11 +35,15 @@ where
 
 import Arithmetic
 import Basics
+import Concatenation
+import {-# SOURCE #-} Maybe qualified
 import NonEmpty (NonEmpty)
 import NonEmpty qualified
 import Qty (Qty (Qty))
 import Qty qualified
+import {-# SOURCE #-} Result (Result)
 import Sign (Sign)
+import Text.Read qualified
 import Units (Unitless)
 import Prelude qualified
 
@@ -50,6 +55,11 @@ fromRational = Prelude.fromRational
 
 fromInt :: Int -> Float
 fromInt = fromIntegral
+
+parse :: String -> Result String Float
+parse input =
+  Text.Read.readMaybe input
+    |> Maybe.orError ("Couldn't parse input as a float: " ++ input)
 
 {-# INLINE floor #-}
 floor :: Float -> Int
