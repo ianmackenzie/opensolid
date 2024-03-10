@@ -33,7 +33,7 @@ import Basis2d (Basis2d)
 import Basis2d qualified
 import Curve1d (Curve1d (Curve1d))
 import Curve1d qualified
-import Curve1d.Root qualified as Root
+import Curve1d.Root qualified
 import Direction2d (Direction2d (Direction2d))
 import Direction2d qualified
 import {-# SOURCE #-} DirectionCurve2d (DirectionCurve2d)
@@ -674,7 +674,7 @@ data ZeroEverywhere = ZeroEverywhere deriving (Eq, Show, Error)
 roots :: Tolerance units => VectorCurve2d (space @ units) -> Result ZeroEverywhere (List Float)
 roots curve =
   case Curve1d.roots (squaredMagnitude (Units.generalize curve)) of
-    Ok roots1d -> Ok (List.map Root.value roots1d)
+    Ok roots1d -> Ok (List.map Curve1d.Root.value roots1d)
     Error Curve1d.ZeroEverywhere -> Error VectorCurve2d.ZeroEverywhere
  where
   ?tolerance = Qty.squared (Units.generalize ?tolerance)
