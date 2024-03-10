@@ -12,6 +12,7 @@ module Point2d
   , inches
   , xCoordinate
   , yCoordinate
+  , coordinates
   , midpoint
   , interpolateFrom
   , distanceFrom
@@ -153,6 +154,9 @@ xCoordinate (Point2d px _) = px
 
 yCoordinate :: Point2d (space @ units) -> Qty units
 yCoordinate (Point2d _ py) = py
+
+coordinates :: Point2d (space @ units) -> (Qty units, Qty units)
+coordinates (Point2d px py) = (px, py)
 
 interpolateFrom ::
   Point2d (space @ units) ->
