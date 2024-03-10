@@ -892,7 +892,7 @@ horizontalCurve ::
   Float ->
   Result ZerosError (Curve2d Uv.Coordinates)
 horizontalCurve f fu fv uStart uEnd vLow vHigh =
-  exactly (Curve2d.from (HorizontalCurve{f, dvdu = -fu / fv, uStart, uEnd, vLow, vHigh}))
+  exactly (Curve2d.wrap (HorizontalCurve{f, dvdu = -fu / fv, uStart, uEnd, vLow, vHigh}))
     |> Error.map (\Curve2d.DegenerateCurve -> DegenerateCurve)
     -- Sanity check that we don't attempt to evaluate outside the overall UV domain
     |> Debug.assert (uStart >= 0.0)
@@ -910,7 +910,7 @@ verticalCurve ::
   Float ->
   Result ZerosError (Curve2d Uv.Coordinates)
 verticalCurve f fu fv uLow uHigh vStart vEnd =
-  exactly (Curve2d.from (VerticalCurve{f, dudv = -fv / fu, uLow, uHigh, vStart, vEnd}))
+  exactly (Curve2d.wrap (VerticalCurve{f, dudv = -fv / fu, uLow, uHigh, vStart, vEnd}))
     |> Error.map (\Curve2d.DegenerateCurve -> DegenerateCurve)
     -- Sanity check that we don't attempt to evaluate outside the overall UV domain
     |> Debug.assert (uLow >= 0.0)

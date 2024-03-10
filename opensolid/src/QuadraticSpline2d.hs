@@ -58,4 +58,4 @@ fromControlPoints ::
   Point2d (space @ units) ->
   Point2d (space @ units) ->
   Result Curve2d.DegenerateCurve (Curve2d (space @ units))
-fromControlPoints p1 p2 p3 = Curve2d.from (QuadraticSpline2d p1 p2 p3)
+fromControlPoints p1 p2 p3 = Curve2d.wrap (QuadraticSpline2d p1 p2 p3)

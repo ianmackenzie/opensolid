@@ -5,7 +5,7 @@ module Curve2d
   , IntersectionError (..)
   , Interface (..)
   , module Curve2d.Patterns
-  , from
+  , wrap
   , startPoint
   , endPoint
   , evaluateAt
@@ -61,13 +61,13 @@ type Curve2d (coordinateSystem :: CoordinateSystem) = Internal.Curve2d coordinat
 
 data DegenerateCurve = DegenerateCurve deriving (Eq, Show, Error)
 
-from ::
+wrap ::
   ( Tolerance units
   , Interface curve (space @ units)
   ) =>
   curve ->
   Result DegenerateCurve (Curve2d (space @ units))
-from curve =
+wrap curve =
   case VectorCurve2d.direction (derivativeImpl curve) of
     Ok tangentCurve -> Ok (Internal.Curve curve tangentCurve)
     Error VectorCurve2d.DegenerateCurve -> Error DegenerateCurve
