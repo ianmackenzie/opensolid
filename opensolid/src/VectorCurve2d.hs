@@ -15,7 +15,7 @@ module VectorCurve2d
   , bezierCurve
   , squaredMagnitude
   , reverse
-  , roots
+  , zeros
   , ZeroEverywhere (ZeroEverywhere)
   , xComponent
   , yComponent
@@ -671,8 +671,8 @@ squaredMagnitude curve = Curve1d (SquaredMagnitudeOf curve)
 
 data ZeroEverywhere = ZeroEverywhere deriving (Eq, Show, Error)
 
-roots :: Tolerance units => VectorCurve2d (space @ units) -> Result ZeroEverywhere (List Float)
-roots curve =
+zeros :: Tolerance units => VectorCurve2d (space @ units) -> Result ZeroEverywhere (List Float)
+zeros curve =
   case Curve1d.zeros (squaredMagnitude (Units.generalize curve)) of
     Ok roots1d -> Ok (List.map Curve1d.Root.value roots1d)
     Error Curve1d.ZeroEverywhere -> Error VectorCurve2d.ZeroEverywhere
@@ -696,7 +696,7 @@ direction curve =
 
 isNondegenerate :: Tolerance units => VectorCurve2d (space @ units) -> VectorCurve2d (space @ units) -> Bool
 isNondegenerate curve curveDerivative =
-  case roots curve of
+  case zeros curve of
     Error VectorCurve2d.ZeroEverywhere -> False
     Ok degeneracies -> List.all (isRemovableDegeneracy curveDerivative) degeneracies
 

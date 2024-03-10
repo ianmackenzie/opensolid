@@ -123,8 +123,8 @@ find ::
   Curve2d (space @ units) ->
   List Float
 find point curve =
-  case VectorCurve2d.roots (point - curve) of
-    Ok roots -> roots
+  case VectorCurve2d.zeros (point - curve) of
+    Ok parameterValues -> parameterValues
     -- Shouldn't happen, since curves are enforced to be non-degenerate
     Error VectorCurve2d.ZeroEverywhere -> []
 
