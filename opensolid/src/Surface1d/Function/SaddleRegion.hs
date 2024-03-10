@@ -1,6 +1,9 @@
-module Surface1d.SaddleRegion
+module Surface1d.Function.SaddleRegion
   ( SaddleRegion (..)
+  , Solution (..)
+  , Frame
   , point
+  , includes
   , contains
   , corners
   , bounds
@@ -21,12 +24,20 @@ import Range qualified
 import Uv qualified
 import Vector2d (Vector2d (Vector2d))
 
-data Space deriving (Show)
+type Frame = Frame2d Uv.Coordinates (Defines Uv.Space)
 
 data SaddleRegion = SaddleRegion
-  { frame :: Frame2d Uv.Coordinates (Defines Space)
+  { frame :: Frame
   , halfWidth :: Float
   , halfHeight :: Float
+  , positiveSolution :: Solution
+  , negativeSolution :: Solution
+  }
+  deriving (Show)
+
+data Solution = Solution
+  { dydx :: Float
+  , d2ydx2 :: Float
   }
   deriving (Show)
 
@@ -54,6 +65,9 @@ bounds (SaddleRegion{frame, halfWidth, halfHeight}) =
       dx = Float.abs ix * halfWidth + Float.abs jx * halfHeight
       dy = Float.abs iy * halfWidth + Float.abs jy * halfHeight
    in Bounds2d (Range.from (x0 - dx) (x0 + dx)) (Range.from (y0 - dy) (y0 + dy))
+
+includes :: Uv.Point -> SaddleRegion -> Bool
+includes givenPoint region = isInsideRegion region givenPoint
 
 contains :: Uv.Bounds -> SaddleRegion -> Bool
 contains givenBounds region =

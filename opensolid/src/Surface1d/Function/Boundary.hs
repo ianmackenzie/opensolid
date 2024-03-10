@@ -1,4 +1,4 @@
-module Surface1d.Solution.Boundary
+module Surface1d.Function.Boundary
   ( Boundary (..)
   , left
   , right

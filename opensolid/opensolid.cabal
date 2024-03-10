@@ -133,11 +133,7 @@ library
       String
       Surface1d
       Surface1d.Function
-      Surface1d.Solution
-      -- TODO move Surface1.Solution.Boundary and Surface1d.SaddleRegion to other-modules
-      -- once we're no longer visualizing them in the sandbox
-      Surface1d.Solution.Boundary
-      Surface1d.SaddleRegion
+      Surface1d.Function.Zeros
       T
       Task
       Tolerance
@@ -162,6 +158,9 @@ library
       Curve2d.Patterns
       Curve2d.Derivatives
       Curve2d.Segment
+      Surface1d.Function.Boundary
+      Surface1d.Function.PartialZeros
+      Surface1d.Function.SaddleRegion
       VectorCurve2d.DegenerateEndpoint
       VectorCurve2d.Direction
       VectorCurve2d.Magnitude

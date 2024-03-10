@@ -4,6 +4,7 @@ import Angle qualified
 import Arc2d qualified
 import Area qualified
 import Axis2d qualified
+import BezierCurve2d qualified
 import Bounds2d (Bounds2d (Bounds2d))
 import Bounds2d qualified
 import Colour (Colour)
@@ -16,7 +17,6 @@ import Direction3d ()
 import Drawing2d qualified
 import Duration qualified
 import Error qualified
-import File qualified
 import Float qualified
 import Length (Length)
 import Length qualified
@@ -25,19 +25,15 @@ import List qualified
 import NonEmpty qualified
 import OpenSolid
 import Parallel qualified
-import Point2d (Point2d (Point2d))
+import Point2d (Point2d)
 import Point2d qualified
 import Qty qualified
 import Random qualified
-import Range (Range (Range))
 import Range qualified
 import Result qualified
 import String qualified
 import Surface1d.Function qualified
-import Surface1d.SaddleRegion (SaddleRegion)
-import Surface1d.SaddleRegion qualified as SaddleRegion
-import Surface1d.Solution qualified
-import Surface1d.Solution.Boundary qualified
+import Surface1d.Function.Zeros qualified
 import T qualified
 import Task qualified
 import Transform2d qualified
@@ -47,6 +43,7 @@ import Uv (Parameter (U, V))
 import Uv qualified
 import Vector2d qualified
 import Vector3d qualified
+import VectorCurve2d qualified
 import Volume qualified
 
 log :: Show a => String -> a -> Task ()
@@ -184,47 +181,6 @@ testNonEmpty = Task.do
   testEmptyCheck []
   testEmptyCheck [2, 3, 1]
 
-outputLine :: Point2d (space @ Unitless) -> String
-outputLine (Point2d px py) = String.fromFloat px ++ "," ++ String.fromFloat py
-
-testSurface1dIntersection :: Task ()
-testSurface1dIntersection = Task.do
-  let u = Surface1d.Function.parameter U
-  let v = Surface1d.Function.parameter V
-  let x = -0.97 + 1.94 * u
-  let y = -0.97 + 1.94 * v
-  let f = Surface1d.Function.squared x + Surface1d.Function.squared y - 1.0
-  solutions <- Surface1d.Function.solve f
-  log "Number of solutions" (List.length solutions)
-  let segmentPoints segment = [Curve2d.pointOn segment uValue | uValue <- T.steps 10]
-  let curvePoints segments = List.collect segmentPoints (NonEmpty.toList segments)
-  let solutionPoints = \case
-        Surface1d.Solution.CrossingCurve{segments} -> Ok (curvePoints segments)
-        Surface1d.Solution.CrossingLoop{segments} -> Ok (curvePoints segments)
-        Surface1d.Solution.BoundaryPoint{} -> Ok []
-        solution -> Error ("Unexpected solution: " ++ show solution)
-  solutionPointLists <- Result.collect solutionPoints solutions
-  let allSolutionPoints = List.concat solutionPointLists
-  let outputLines = List.map outputLine allSolutionPoints
-  let fileName = "solution-points.txt"
-  File.writeTo fileName (String.multiline outputLines ++ "\n")
-  File.delete fileName -- Uncomment to actually get the data!
- where
-  ?tolerance = 1e-9
-
-testSvgOutput :: Task ()
-testSvgOutput =
-  Drawing2d.writeTo "test.svg" (Bounds2d.hull2 Point2d.origin (Point2d.centimeters 30.0 30.0)) <|
-    [ Drawing2d.nothing
-    , Drawing2d.group
-        [ Drawing2d.polygon [Drawing2d.fillColour Colour.blue] <|
-            [ Point2d.centimeters 10.0 10.0
-            , Point2d.centimeters 20.0 10.0
-            , Point2d.centimeters 15.0 20.0
-            ]
-        ]
-    ]
-
 testLineFromEndpoints :: Tolerance Meters => Task ()
 testLineFromEndpoints = Task.do
   line1 <-
@@ -275,30 +231,26 @@ testPlaneTorusIntersection = Task.do
   -- let ny = 0.0
   -- let nz = 1.0
   let f = x * nx + y * ny + z * nz
-  solutions <- Surface1d.Function.solve f
-  drawSolutions "test.svg" solutions
+  zeros <- Surface1d.Function.zeros f
+  drawZeros "test-plane-torus-intersection.svg" zeros
   Console.printLine ""
   Console.printLine "Plane torus intersection solutions:"
-  Task.forEach solutions \case
-    Surface1d.Solution.CrossingCurve{} -> Console.printLine "Crossing curve"
-    Surface1d.Solution.BoundaryEdge curve -> log "Boundary edge" curve
-    Surface1d.Solution.BoundaryPoint point -> log "Boundary point" point
-    Surface1d.Solution.SaddleRegion region -> log "Saddle point" (SaddleRegion.point region)
-    Surface1d.Solution.DegenerateCrossingCurve{start, end} -> log "Degenerate crossing curve" (start, end)
-    solution -> log "Unexpected solution" solution
-  return ()
+  log "  Crossing curves" (List.length (Surface1d.Function.Zeros.crossingCurves zeros))
+  log "  Saddle points" (List.length (Surface1d.Function.Zeros.saddlePoints zeros))
 
 strokeWidth :: Length
-strokeWidth = Length.millimeters 0.25
+strokeWidth = Length.millimeters 0.1
 
-drawSolutions :: String -> List Surface1d.Solution.Solution -> Task ()
-drawSolutions path solutions = Task.do
-  let solutionEntities = List.mapWithIndex drawSolution solutions
+drawZeros :: String -> Surface1d.Function.Zeros.Zeros -> Task ()
+drawZeros path zeros = Task.do
   let uvRange = Range.convert toDrawing (Range.from -0.05 1.05)
   let viewBox = Bounds2d uvRange uvRange
   Drawing2d.writeTo path viewBox <|
     [ Drawing2d.with [Drawing2d.strokeWidth strokeWidth] <|
-        drawBounds [] Uv.domain : solutionEntities
+        [ drawBounds [] Uv.domain
+        , Drawing2d.group (List.mapWithIndex drawCrossingCurve (Surface1d.Function.Zeros.crossingCurves zeros))
+        , Drawing2d.group (List.map drawSaddlePoint (Surface1d.Function.Zeros.saddlePoints zeros))
+        ]
     ]
 
 drawBounds :: List (Drawing2d.Attribute Uv.Space) -> Uv.Bounds -> Drawing2d.Entity Uv.Space
@@ -311,33 +263,15 @@ drawBounds attributes bounds =
         , point 0.0 1.0
         ]
 
-drawSaddleRegion :: List (Drawing2d.Attribute Uv.Space) -> SaddleRegion -> Drawing2d.Entity Uv.Space
-drawSaddleRegion attributes saddleRegion =
-  Drawing2d.polygon attributes <|
-    List.map (Point2d.convert toDrawing) (SaddleRegion.corners saddleRegion)
-
-drawSolution :: Int -> Surface1d.Solution.Solution -> Drawing2d.Entity Uv.Space
-drawSolution index solution =
+drawCrossingCurve :: Int -> NonEmpty (Curve2d Uv.Coordinates) -> Drawing2d.Entity Uv.Space
+drawCrossingCurve index segments =
   let hue = (Float.fromInt index * Angle.goldenAngle) % Angle.twoPi
       colour = Colour.hsl hue 0.5 0.5
-   in case solution of
-        Surface1d.Solution.CrossingCurve{segments, start, end} ->
-          Drawing2d.with
-            [ Drawing2d.strokeColour colour
-            , Drawing2d.opacity 0.3
-            ]
-            [ Drawing2d.group (List.map drawCurve (NonEmpty.toList segments))
-            , drawBoundary start
-            , drawBoundary end
-            ]
-        Surface1d.Solution.DegenerateCrossingCurve{start, end} ->
-          Drawing2d.group [drawBoundary start, drawBoundary end]
-        Surface1d.Solution.SaddleRegion region ->
-          Drawing2d.group
-            [ drawDot Colour.orange (SaddleRegion.point region)
-            , drawSaddleRegion [Drawing2d.noFill, Drawing2d.strokeColour Colour.lightGrey] region
-            ]
-        _ -> Drawing2d.nothing
+   in Drawing2d.with [Drawing2d.strokeColour colour, Drawing2d.opacity 0.3] <|
+        List.map drawCurve (NonEmpty.toList segments)
+
+drawSaddlePoint :: Uv.Point -> Drawing2d.Entity Uv.Space
+drawSaddlePoint point = drawDot Colour.orange point
 
 toDrawing :: Units.Conversion Unitless Meters
 toDrawing = Units.conversion 1.0 (Length.centimeters 10.0)
@@ -346,23 +280,6 @@ drawCurve :: Curve2d Uv.Coordinates -> Drawing2d.Entity Uv.Space
 drawCurve curve =
   let sampledPoints = List.map (Curve2d.pointOn curve >> Point2d.convert toDrawing) (T.steps 20)
    in Drawing2d.polyline [] sampledPoints
-
-drawBoundary :: Surface1d.Solution.Boundary.Boundary -> Drawing2d.Entity Uv.Space
-drawBoundary boundary =
-  let offset = Qty.unconvert toDrawing (0.5 * strokeWidth)
-   in case boundary of
-        Surface1d.Solution.Boundary.Left u (Range v1 v2) ->
-          drawLine [] (Point2d (u + offset) v1) (Point2d (u + offset) v2)
-        Surface1d.Solution.Boundary.Right u (Range v1 v2) ->
-          drawLine [] (Point2d (u - offset) v1) (Point2d (u - offset) v2)
-        Surface1d.Solution.Boundary.Bottom (Range u1 u2) v ->
-          drawLine [] (Point2d u1 (v + offset)) (Point2d u2 (v + offset))
-        Surface1d.Solution.Boundary.Top (Range u1 u2) v ->
-          drawLine [] (Point2d u1 (v - offset)) (Point2d u2 (v - offset))
-
-drawLine :: List (Drawing2d.Attribute Uv.Space) -> Uv.Point -> Uv.Point -> Drawing2d.Entity Uv.Space
-drawLine attributes p1 p2 =
-  Drawing2d.line attributes (Point2d.convert toDrawing p1) (Point2d.convert toDrawing p2)
 
 drawDot :: Colour -> Uv.Point -> Drawing2d.Entity Uv.Space
 drawDot colour point =
@@ -428,6 +345,78 @@ testParallelDo = Task.do
       log "sqrt16" sqrt16
       log "sqrt25" sqrt25
 
+drawBezier ::
+  Tolerance Meters =>
+  Colour ->
+  Point2d (space @ Unitless) ->
+  List (Point2d (space @ Unitless)) ->
+  Point2d (space @ Unitless) ->
+  Result Curve2d.DegenerateCurve (Drawing2d.Entity space)
+drawBezier colour startPoint innerControlPoints endPoint = Result.do
+  let drawingStartPoint = Point2d.convert toDrawing startPoint
+  let drawingEndPoint = Point2d.convert toDrawing endPoint
+  let drawingInnerControlPoints = List.map (Point2d.convert toDrawing) innerControlPoints
+  let drawingControlPoints = List.concat [[drawingStartPoint], drawingInnerControlPoints, [drawingEndPoint]]
+  curve <- BezierCurve2d.fromControlPoints drawingStartPoint drawingInnerControlPoints drawingEndPoint
+
+  return <|
+    Drawing2d.with
+      [Drawing2d.strokeColour colour, Drawing2d.strokeWidth (Length.millimeters 1.0)]
+      [ Drawing2d.with [Drawing2d.opacity 0.3] <|
+          [ Drawing2d.polyline [] drawingControlPoints
+          , Drawing2d.with [Drawing2d.fillColour colour] <|
+              [ Drawing2d.circle [] point (Length.millimeters 5.0)
+              | point <- drawingControlPoints
+              ]
+          ]
+      , Drawing2d.polyline [] <|
+          [ Curve2d.evaluateAt t curve
+          | t <- T.steps 100
+          ]
+      ]
+
+testBezierSegment :: Tolerance Meters => Task ()
+testBezierSegment = Task.do
+  let p1 = Point2d.xy 0.0 0.0
+  let p2 = Point2d.xy 0.0 5.0
+  let p3 = Point2d.xy 2.5 10.0
+  let p4 = Point2d.xy 5.0 0.0
+  let p5 = Point2d.xy 10.0 5.0
+  let p6 = Point2d.xy 10.0 10.0
+  let drawingBounds = Bounds2d.convert toDrawing (Bounds2d (Range.from -1.0 11.0) (Range.from -1.0 11.0))
+  curveEntity <- drawBezier Colour.blue p1 [p2, p3, p4, p5] p6
+  Drawing2d.writeTo "test-bezier-segment.svg" drawingBounds [curveEntity]
+
+testHermiteBezier :: Tolerance Meters => Task ()
+testHermiteBezier = Task.do
+  let startPoint = Point2d.origin
+  let startDerivatives = [Vector2d.meters 10.0 10.0]
+  let endDerivatives = [Vector2d.meters 0.0 -10.0, Vector2d.zero]
+  let endPoint = Point2d.meters 10.0 0.0
+  curve <-
+    BezierCurve2d.hermite
+      (startPoint, startDerivatives)
+      (endPoint, endDerivatives)
+  let curveFirstDerivative = Curve2d.derivative curve
+  let curveSecondDerivative = VectorCurve2d.derivative curveFirstDerivative
+  let curveThirdDerivative = VectorCurve2d.derivative curveSecondDerivative
+  log "Start first derivative" (VectorCurve2d.evaluateAt 0.0 curveFirstDerivative)
+  log "Start second derivative" (VectorCurve2d.evaluateAt 0.0 curveSecondDerivative)
+  log "Start third derivative" (VectorCurve2d.evaluateAt 0.0 curveThirdDerivative)
+  log "End first derivative" (VectorCurve2d.evaluateAt 1.0 curveFirstDerivative)
+  log "End second derivative" (VectorCurve2d.evaluateAt 1.0 curveSecondDerivative)
+  log "End third derivative" (VectorCurve2d.evaluateAt 1.0 curveThirdDerivative)
+  let sampledPoints = [Curve2d.evaluateAt t curve | t <- T.steps 100]
+  let curveEntity =
+        Drawing2d.polyline
+          [ Drawing2d.strokeColour Colour.blue
+          , Drawing2d.strokeWidth (Length.centimeters 3.0)
+          ]
+          sampledPoints
+  let coordinateRange = Range.from (Length.meters -1.0) (Length.meters 11.0)
+  let drawingBounds = Bounds2d coordinateRange coordinateRange
+  Drawing2d.writeTo "test-hermite-bezier.svg" drawingBounds [curveEntity]
+
 script :: Task ()
 script = Task.do
   testScalarArithmetic
@@ -442,11 +431,12 @@ script = Task.do
   testListOperations
   testParameter1dGeneration
   testNonEmpty
-  testSurface1dIntersection
-  testSvgOutput
   testLineFromEndpoints
   testDirectedLine
   testArcFromEndpoints
+  testPlaneTorusIntersection
+  testBezierSegment
+  testHermiteBezier
   testPlaneTorusIntersection
   testConcurrency
   testConcurrentCollect
