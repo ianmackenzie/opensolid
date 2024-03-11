@@ -21,10 +21,9 @@ instance Curve1d.Interface (Magnitude (space @ units)) units where
   segmentBoundsImpl t (Magnitude curve) =
     VectorBounds2d.magnitude (VectorCurve2d.segmentBounds t curve)
 
-  derivativeImpl (Magnitude curve) =
+  derivativeImpl (Magnitude curve) = Units.specialize do
     let curve' = Units.generalize curve
-        derivative' = (VectorCurve2d.derivative curve' <> curve') / Curve1d (Magnitude curve')
-     in Units.specialize derivative'
+    (VectorCurve2d.derivative curve' <> curve') / Curve1d (Magnitude curve')
 
 unsafe :: VectorCurve2d (space @ units) -> Curve1d units
 unsafe curve = Curve1d (Magnitude curve)

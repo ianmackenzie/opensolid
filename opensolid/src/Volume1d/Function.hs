@@ -185,9 +185,8 @@ instance
   where
   Zero / _ = Zero
   Constant x / Constant y = Constant (x / y)
-  function / Constant x =
-    Units.specialize <|
-      (Units.generalize 1.0 ./ Units.generalize x) .* Units.generalize function
+  function / Constant x = Units.specialize do
+    (Units.generalize 1.0 ./ Units.generalize x) .* Units.generalize function
   function1 / function2 = Quotient function1 function2
 
 instance
@@ -262,11 +261,10 @@ derivative direction function =
     Sum f1 f2 -> derivative direction f1 + derivative direction f2
     Difference f1 f2 -> derivative direction f1 - derivative direction f2
     Product f1 f2 -> derivative direction f1 * f2 + f1 * derivative direction f2
-    Quotient f1 f2 ->
+    Quotient f1 f2 -> Units.specialize do
       let f1' = Units.generalize f1
-          f2' = Units.generalize f2
-       in Units.specialize <|
-            (derivative direction f1' .* f2' - f1' .* derivative direction f2') ./ squared f2'
+      let f2' = Units.generalize f2
+      (derivative direction f1' .* f2' - f1' .* derivative direction f2') ./ squared f2'
     Squared f -> 2.0 * f * derivative direction f
     SquareRoot f -> derivative direction f / (2.0 * sqrt f)
     Sin f -> cos f * Units.drop (derivative direction f)

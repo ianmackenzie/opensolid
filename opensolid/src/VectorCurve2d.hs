@@ -615,17 +615,16 @@ derivative curve =
     Difference c1 c2 -> derivative c1 - derivative c2
     Product1d2d c1 c2 -> Curve1d.derivative c1 * c2 + c1 * derivative c2
     Product2d1d c1 c2 -> derivative c1 * c2 + c1 * Curve1d.derivative c2
-    Quotient c1 c2 ->
+    Quotient c1 c2 -> Units.specialize do
       let c1' = Units.generalize c1
-          c2' = Units.generalize c2
-       in Units.specialize <|
-            (derivative c1' .* c2' - c1' .* Curve1d.derivative c2') ./ Curve1d.squared c2'
+      let c2' = Units.generalize c2
+      (derivative c1' .* c2' - c1' .* Curve1d.derivative c2') ./ Curve1d.squared c2'
     PlaceInBasis basis c -> PlaceInBasis basis (derivative c)
     Line v1 v2 -> constant (v2 - v1)
-    Arc r a b ->
+    Arc r a b -> do
       let sweptAngle = b - a
-          rotation = Angle.quarterTurn * Qty.sign sweptAngle
-       in Arc (r * Qty.abs (Angle.inRadians sweptAngle)) (a + rotation) (b + rotation)
+      let rotation = Angle.quarterTurn * Qty.sign sweptAngle
+      Arc (r * Qty.abs (Angle.inRadians sweptAngle)) (a + rotation) (b + rotation)
     QuadraticSpline v1 v2 v3 -> line (2.0 * (v2 - v1)) (2.0 * (v3 - v2))
     CubicSpline v1 v2 v3 v4 -> quadraticSpline (3.0 * (v2 - v1)) (3.0 * (v3 - v2)) (3.0 * (v4 - v3))
     BezierCurve (_ :| []) -> Zero

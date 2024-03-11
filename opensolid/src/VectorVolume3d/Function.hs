@@ -216,9 +216,9 @@ instance
   where
   Zero / _ = Zero
   Constant a / Volume1d.Function.Constant b = Constant (a / b)
-  function / Volume1d.Function.Constant x =
-    Units.specialize <|
-      (Units.generalize 1.0 ./ Units.generalize x) .* Units.generalize function
+  function / Volume1d.Function.Constant x = Units.specialize do
+    let scalingFactor = Units.generalize 1.0 ./ Units.generalize x
+    scalingFactor .* Units.generalize function
   function1 / function2 = Quotient function1 function2
 
 instance
@@ -290,12 +290,11 @@ derivative direction function =
       Volume1d.Function.derivative direction f1 * f2 + f1 * derivative direction f2
     Product3d1d f1 f2 ->
       derivative direction f1 * f2 + f1 * Volume1d.Function.derivative direction f2
-    Quotient f1 f2 ->
+    Quotient f1 f2 -> Units.specialize do
       let f1' = Units.generalize f1
-          f2' = Units.generalize f2
-       in Units.specialize <|
-            (derivative direction f1' .* f2' - f1' .* Volume1d.Function.derivative direction f2')
-              ./ Volume1d.Function.squared f2'
+      let f2' = Units.generalize f2
+      (derivative direction f1' .* f2' - f1' .* Volume1d.Function.derivative direction f2')
+        ./ Volume1d.Function.squared f2'
 
 zero :: Function (space @ units)
 zero = Zero

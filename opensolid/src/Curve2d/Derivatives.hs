@@ -79,9 +79,8 @@ classify (u, v) derivatives1 derivatives2 =
                   d2Y2_dXdX = secondDerivative1d dX2_dU2 dY2_dU2 d2X2_dU2dU2 d2Y2_dU2dU2
                   d2Y_dXdX = d2Y2_dXdX - d2Y1_dXdX
                   sign1 = Qty.sign d2Y_dXdX
-                  radius1 =
-                    Units.specialize
-                      (Qty.sqrt (2.0 * Units.generalize ?tolerance ./ Qty.abs d2Y_dXdX))
+                  radius1 = Units.specialize do
+                    Qty.sqrt (2.0 * Units.generalize ?tolerance ./ Qty.abs d2Y_dXdX)
                in if radius0 <= radius1
                     then Ok (Intersection.Crossing, sign0)
                     else Ok (Intersection.Tangent, sign1)

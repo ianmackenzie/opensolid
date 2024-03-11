@@ -247,9 +247,9 @@ instance
   where
   Constant value / _ | value == Qty.zero = zero
   Constant x / Constant y = Constant (x / y)
-  curve / Constant x =
-    Units.specialize <|
-      (Units.generalize 1.0 ./ Units.generalize x) .* Units.generalize curve
+  curve / Constant x = Units.specialize do
+    let scalingFactor = Units.generalize 1.0 ./ Units.generalize x
+    scalingFactor .* Units.generalize curve
   curve1 / curve2 = Quotient curve1 curve2
 
 instance
@@ -315,10 +315,10 @@ derivative curve =
     Sum c1 c2 -> derivative c1 + derivative c2
     Difference c1 c2 -> derivative c1 - derivative c2
     Product c1 c2 -> derivative c1 * c2 + c1 * derivative c2
-    Quotient c1 c2 ->
+    Quotient c1 c2 -> Units.specialize do
       let c1' = Units.generalize c1
-          c2' = Units.generalize c2
-       in Units.specialize ((derivative c1' .* c2' - c1' .* derivative c2') ./ squared c2')
+      let c2' = Units.generalize c2
+      (derivative c1' .* c2' - c1' .* derivative c2') ./ squared c2'
     Squared c -> 2.0 * c * derivative c
     SquareRoot c -> derivative c / (2.0 * sqrt c)
     Sin c -> cos c * Units.drop (derivative c)

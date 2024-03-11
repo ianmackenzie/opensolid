@@ -146,17 +146,17 @@ sqrt x | x <= Qty.zero = Qty.zero
 sqrt (Qty x) = Qty (Prelude.sqrt x)
 
 hypot2 :: Qty units -> Qty units -> Qty units
-hypot2 x y =
-  let xSquared = Qty.squared (Units.generalize x)
-      ySquared = Qty.squared (Units.generalize y)
-   in Units.specialize (sqrt (xSquared + ySquared))
+hypot2 x y = Units.specialize do
+  let xSquared = squared (Units.generalize x)
+  let ySquared = squared (Units.generalize y)
+  sqrt (xSquared + ySquared)
 
 hypot3 :: Qty units -> Qty units -> Qty units -> Qty units
-hypot3 x y z =
-  let xSquared = Qty.squared (Units.generalize x)
-      ySquared = Qty.squared (Units.generalize y)
-      zSquared = Qty.squared (Units.generalize z)
-   in Units.specialize (sqrt (xSquared + ySquared + zSquared))
+hypot3 x y z = Units.specialize do
+  let xSquared = squared (Units.generalize x)
+  let ySquared = squared (Units.generalize y)
+  let zSquared = squared (Units.generalize z)
+  sqrt (xSquared + ySquared + zSquared)
 
 {-# INLINE abs #-}
 abs :: Qty units -> Qty units
