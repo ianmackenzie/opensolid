@@ -2,7 +2,7 @@ module Float (Float, fromRational, fromInt) where
 
 import Basics
 import {-# SOURCE #-} Qty (Qty)
-import Units (Unitless)
+import {-# SOURCE #-} Units (Unitless)
 import Prelude qualified
 
 type Float = Qty Unitless

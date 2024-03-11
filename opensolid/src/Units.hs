@@ -13,6 +13,10 @@ module Units
   , add
   , generalize
   , specialize
+  , (.*)
+  , (./)
+  , (.<>)
+  , (.><)
   , Product
   , Squared
   , Quotient
@@ -27,6 +31,7 @@ module Units
   )
 where
 
+import Arithmetic
 import Basics
 import Data.Kind (Constraint)
 import Data.List.NonEmpty (NonEmpty)
@@ -73,6 +78,56 @@ generalize = unsafeCoerce
 {-# INLINE specialize #-}
 specialize :: (Coercion genericUnits specificUnits a b, Specialize genericUnits specificUnits) => a -> b
 specialize = unsafeCoerce
+
+(.*) ::
+  ( Coercion unitsA Unitless a aUnitless
+  , Coercion unitsB Unitless b bUnitless
+  , Coercion Unitless unitsC cUnitless c
+  , unitsA :* unitsB ~ unitsC
+  , Multiplication aUnitless bUnitless cUnitless
+  ) =>
+  a ->
+  b ->
+  c
+(.*) lhs rhs = add (drop lhs * drop rhs)
+
+(./) ::
+  ( Coercion unitsA Unitless a aUnitless
+  , Coercion unitsB Unitless b bUnitless
+  , Coercion Unitless unitsC cUnitless c
+  , unitsA :/ unitsB ~ unitsC
+  , Division aUnitless bUnitless cUnitless
+  ) =>
+  a ->
+  b ->
+  c
+(./) lhs rhs = add (drop lhs / drop rhs)
+
+(.<>) ::
+  ( Coercion unitsA Unitless a aUnitless
+  , Coercion unitsB Unitless b bUnitless
+  , Coercion Unitless unitsC cUnitless c
+  , unitsA :* unitsB ~ unitsC
+  , DotProduct aUnitless bUnitless cUnitless
+  ) =>
+  a ->
+  b ->
+  c
+(.<>) lhs rhs = add (drop lhs <> drop rhs)
+
+(.><) ::
+  ( Coercion unitsA Unitless a aUnitless
+  , Coercion unitsB Unitless b bUnitless
+  , Coercion Unitless unitsC cUnitless c
+  , unitsA :* unitsB ~ unitsC
+  , CrossProduct aUnitless bUnitless cUnitless
+  ) =>
+  a ->
+  b ->
+  c
+(.><) lhs rhs = add (drop lhs >< drop rhs)
+
+infixl 7 .*, ./, .<>, .><
 
 class
   ( Product units2 units1 units3

@@ -9,10 +9,6 @@ module Arithmetic
   , DotProduct ((<>))
   , CrossProduct ((><))
   , Exponentiation ((**))
-  , (.*)
-  , (./)
-  , (.<>)
-  , (.><)
   )
 where
 
@@ -20,8 +16,6 @@ import Basics
 import {-# SOURCE #-} Float (Float)
 import {-# SOURCE #-} Qty (Qty (Qty))
 import {-# SOURCE #-} Sign (Sign (Negative, Positive))
-import Units (Unitless, (:*), (:/))
-import Units qualified
 import Prelude qualified
 
 class (Multiplication Sign a a, Multiplication a Sign a) => Negation a where
@@ -94,53 +88,3 @@ instance Exponentiation Float Int Float where
 
 instance Exponentiation Float Float Float where
   (**) = (Prelude.**)
-
-(.*) ::
-  ( Units.Coercion unitsA Unitless a aUnitless
-  , Units.Coercion unitsB Unitless b bUnitless
-  , Units.Coercion Unitless unitsC cUnitless c
-  , unitsA :* unitsB ~ unitsC
-  , Multiplication aUnitless bUnitless cUnitless
-  ) =>
-  a ->
-  b ->
-  c
-(.*) lhs rhs = Units.add (Units.drop lhs * Units.drop rhs)
-
-(./) ::
-  ( Units.Coercion unitsA Unitless a aUnitless
-  , Units.Coercion unitsB Unitless b bUnitless
-  , Units.Coercion Unitless unitsC cUnitless c
-  , unitsA :/ unitsB ~ unitsC
-  , Division aUnitless bUnitless cUnitless
-  ) =>
-  a ->
-  b ->
-  c
-(./) lhs rhs = Units.add (Units.drop lhs / Units.drop rhs)
-
-(.<>) ::
-  ( Units.Coercion unitsA Unitless a aUnitless
-  , Units.Coercion unitsB Unitless b bUnitless
-  , Units.Coercion Unitless unitsC cUnitless c
-  , unitsA :* unitsB ~ unitsC
-  , DotProduct aUnitless bUnitless cUnitless
-  ) =>
-  a ->
-  b ->
-  c
-(.<>) lhs rhs = Units.add (Units.drop lhs <> Units.drop rhs)
-
-(.><) ::
-  ( Units.Coercion unitsA Unitless a aUnitless
-  , Units.Coercion unitsB Unitless b bUnitless
-  , Units.Coercion Unitless unitsC cUnitless c
-  , unitsA :* unitsB ~ unitsC
-  , CrossProduct aUnitless bUnitless cUnitless
-  ) =>
-  a ->
-  b ->
-  c
-(.><) lhs rhs = Units.add (Units.drop lhs >< Units.drop rhs)
-
-infixl 7 .*, ./, .<>, .><
