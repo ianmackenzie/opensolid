@@ -28,7 +28,6 @@ import Qty qualified
 import Range (Range)
 import Range qualified
 import T qualified
-import Units ((:/))
 import Units qualified
 import VectorBounds2d (VectorBounds2d)
 import VectorBounds2d qualified
@@ -211,7 +210,7 @@ secondDerivativeBounds1d ::
   Range units ->
   Range units ->
   Range units ->
-  Range (Unitless :/ units)
+  Range (Units.GenericQuotient Unitless units)
 secondDerivativeBounds1d dXdU dYdU d2XdU2 d2YdU2 =
   let dXdU' = Units.generalize dXdU
       dYdU' = Units.generalize dYdU

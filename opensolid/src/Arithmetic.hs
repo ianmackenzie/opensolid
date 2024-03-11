@@ -20,7 +20,7 @@ import Basics
 import {-# SOURCE #-} Float (Float)
 import {-# SOURCE #-} Qty (Qty (Qty))
 import {-# SOURCE #-} Sign (Sign (Negative, Positive))
-import Units (Unitless)
+import Units (Unitless, (:*), (:/))
 import Units qualified
 import Prelude qualified
 
@@ -99,7 +99,7 @@ instance Exponentiation Float Float Float where
   ( Units.Coercion unitsA Unitless a aUnitless
   , Units.Coercion unitsB Unitless b bUnitless
   , Units.Coercion Unitless unitsC cUnitless c
-  , Units.GenericProduct unitsA unitsB ~ unitsC
+  , unitsA :* unitsB ~ unitsC
   , Multiplication aUnitless bUnitless cUnitless
   ) =>
   a ->
@@ -111,7 +111,7 @@ instance Exponentiation Float Float Float where
   ( Units.Coercion unitsA Unitless a aUnitless
   , Units.Coercion unitsB Unitless b bUnitless
   , Units.Coercion Unitless unitsC cUnitless c
-  , Units.GenericQuotient unitsA unitsB ~ unitsC
+  , unitsA :/ unitsB ~ unitsC
   , Division aUnitless bUnitless cUnitless
   ) =>
   a ->
@@ -123,7 +123,7 @@ instance Exponentiation Float Float Float where
   ( Units.Coercion unitsA Unitless a aUnitless
   , Units.Coercion unitsB Unitless b bUnitless
   , Units.Coercion Unitless unitsC cUnitless c
-  , Units.GenericProduct unitsA unitsB ~ unitsC
+  , unitsA :* unitsB ~ unitsC
   , DotProduct aUnitless bUnitless cUnitless
   ) =>
   a ->
@@ -135,7 +135,7 @@ instance Exponentiation Float Float Float where
   ( Units.Coercion unitsA Unitless a aUnitless
   , Units.Coercion unitsB Unitless b bUnitless
   , Units.Coercion Unitless unitsC cUnitless c
-  , Units.GenericProduct unitsA unitsB ~ unitsC
+  , unitsA :* unitsB ~ unitsC
   , CrossProduct aUnitless bUnitless cUnitless
   ) =>
   a ->

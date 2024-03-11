@@ -5,10 +5,10 @@ module Units
   , unconvert
   , Coercion
   , Generic
-  , (:*)
-  , (:/)
   , GenericProduct
   , GenericQuotient
+  , (:/)
+  , (:*)
   , drop
   , add
   , generalize
@@ -54,9 +54,9 @@ instance Coercion u1 u2 a b => Coercion u1 u2 (NonEmpty a) (NonEmpty b)
 
 data Generic units
 
-data units1 :* units2
+data GenericProduct units1 units2
 
-data units1 :/ units2
+data GenericQuotient units1 units2
 
 {-# INLINE drop #-}
 drop :: Coercion units Unitless a b => a -> b
@@ -156,42 +156,42 @@ instance Squared Unitless Unitless
 
 instance Squared Meters SquareMeters
 
-instance units ~ units' => Product (Generic units) (Generic units') (units :* units)
+instance units ~ units' => Product (Generic units) (Generic units') (GenericProduct units units)
 
-instance (units ~ units', units ~ units'') => Quotient (units :* units') (Generic units'') (Generic units)
+instance (units ~ units', units ~ units'') => Quotient (GenericProduct units units') (Generic units'') (Generic units)
 
-type family GenericProduct units1 units2 where
-  GenericProduct (Generic units1) (Generic units2) = units1 :* units2
-  GenericProduct (Unitless :/ units2) (Generic units1) = units1 :/ units2
-  GenericProduct (Generic units1) (Unitless :/ units2) = units1 :/ units2
-  GenericProduct (units1 :/ units2) (Generic units2) = Generic units1
-  GenericProduct (units1 :/ units2) (units2 :/ units1) = Unitless
-  GenericProduct (units1 :* units2) (Generic units3) = (units1 :* units2) :* units3
-  GenericProduct (Generic units1) (units2 :* units3) = units1 :* (units2 :* units3)
+type family units1 :* units2 where
+  Generic units1 :* Generic units2 = GenericProduct units1 units2
+  GenericQuotient Unitless units2 :* Generic units1 = GenericQuotient units1 units2
+  Generic units1 :* GenericQuotient Unitless units2 = GenericQuotient units1 units2
+  GenericQuotient units1 units2 :* Generic units2 = Generic units1
+  GenericQuotient units1 units2 :* GenericQuotient units2 units1 = Unitless
+  GenericProduct units1 units2 :* Generic units3 = GenericProduct (GenericProduct units1 units2) units3
+  Generic units1 :* (GenericProduct units2 units3) = GenericProduct units1 (GenericProduct units2 units3)
 
-type family GenericQuotient units1 units2 where
-  GenericQuotient (Generic units1) (Generic units2) = units1 :/ units2
-  GenericQuotient (units :* units) (Generic units) = Generic units
-  GenericQuotient (units1 :* units2) (Generic units1) = Generic units2
-  GenericQuotient (units1 :* units2) (Generic units2) = Generic units1
-  GenericQuotient Unitless (Unitless :/ units2) = Generic units2
-  GenericQuotient (Generic units1) (Unitless :/ units2) = units1 :* units2
-  GenericQuotient (Generic units1) (units1 :/ units2) = Generic units2
-  GenericQuotient (units1 :* units2) (units2 :* units2) = units1 :/ units2
-  GenericQuotient (units2 :* units1) (units2 :* units2) = units1 :/ units2
-  GenericQuotient (units1 :* units1) (units1 :* units2) = units1 :/ units2
-  GenericQuotient (units1 :* units1) (units2 :* units1) = units1 :/ units2
-  GenericQuotient (units1 :* units3) (units2 :* units3) = units1 :/ units2
-  GenericQuotient (units3 :* units1) (units3 :* units2) = units1 :/ units2
-  GenericQuotient (units3 :* units1) (units2 :* units3) = units1 :/ units2
-  GenericQuotient (units1 :* units3) (units3 :* units2) = units1 :/ units2
+type family units1 :/ units2 where
+  Generic units1 :/ Generic units2 = GenericQuotient units1 units2
+  GenericProduct units units :/ Generic units = Generic units
+  GenericProduct units1 units2 :/ Generic units1 = Generic units2
+  GenericProduct units1 units2 :/ Generic units2 = Generic units1
+  Unitless :/ GenericQuotient Unitless units2 = Generic units2
+  Generic units1 :/ GenericQuotient Unitless units2 = GenericProduct units1 units2
+  Generic units1 :/ GenericQuotient units1 units2 = Generic units2
+  GenericProduct units1 units2 :/ GenericProduct units2 units2 = GenericQuotient units1 units2
+  GenericProduct units2 units1 :/ GenericProduct units2 units2 = GenericQuotient units1 units2
+  GenericProduct units1 units1 :/ GenericProduct units1 units2 = GenericQuotient units1 units2
+  GenericProduct units1 units1 :/ GenericProduct units2 units1 = GenericQuotient units1 units2
+  GenericProduct units1 units3 :/ GenericProduct units2 units3 = GenericQuotient units1 units2
+  GenericProduct units3 units1 :/ GenericProduct units3 units2 = GenericQuotient units1 units2
+  GenericProduct units3 units1 :/ GenericProduct units2 units3 = GenericQuotient units1 units2
+  GenericProduct units1 units3 :/ GenericProduct units3 units2 = GenericQuotient units1 units2
 
-instance Squared (Generic units) (units :* units)
+instance Squared (Generic units) (GenericProduct units units)
 
 class Specialize genericUnits specificUnits | genericUnits -> specificUnits
 
 instance Specialize (Generic units) units
 
-instance Product units1 units2 units3 => Specialize (units1 :* units2) units3
+instance Product units1 units2 units3 => Specialize (GenericProduct units1 units2) units3
 
-instance Quotient units1 units2 units3 => Specialize (units1 :/ units2) units3
+instance Quotient units1 units2 units3 => Specialize (GenericQuotient units1 units2) units3

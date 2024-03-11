@@ -30,7 +30,6 @@ import Qty qualified
 import Range (Range)
 import Range qualified
 import Result qualified
-import Units ((:*))
 import Units qualified
 import VectorCurve2d qualified
 
@@ -230,7 +229,7 @@ pickLargestLoop loops =
   let ?tolerance = Qty.squared (Units.generalize ?tolerance)
    in Estimate.pickLargestBy loopSignedArea loops
 
-loopSignedArea :: Loop (space @ units) -> Estimate (units :* units)
+loopSignedArea :: Loop (space @ units) -> Estimate (Units.GenericProduct units units)
 loopSignedArea loop =
   let referencePoint = Units.generalize (Curve2d.startPoint (NonEmpty.first loop))
    in Units.generalize loop
