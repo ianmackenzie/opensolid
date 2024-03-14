@@ -289,3 +289,5 @@ class Specialize genericUnits specificUnits | genericUnits -> specificUnits
 instance Product units1 units2 units3 => Specialize (units1 :*: units2) units3
 
 instance Quotient units1 units2 units3 => Specialize (units1 :/: units2) units3
+
+instance Specialize Unitless Unitless
