@@ -8,6 +8,7 @@ module Units
   , (:/:)
   , drop
   , add
+  , Specialize
   , specialize
   , unspecialize
   , (.*.)
