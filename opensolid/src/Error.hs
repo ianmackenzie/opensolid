@@ -1,6 +1,7 @@
 module Error
   ( Error (message)
   , Map (map)
+  , (??)
   , toString
   , context
   , debug
@@ -24,6 +25,11 @@ instance Error String where
 
 class (Error x, Error y) => Map x y m n | m -> x, n -> y, m y -> n where
   map :: (x -> y) -> m a -> n a
+
+(??) :: Map x y m n => m a -> y -> n a
+(??) fallible newError = map (always newError) fallible
+
+infixr 2 ??
 
 toString :: Map x String m n => m a -> n a
 toString = map message
