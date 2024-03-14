@@ -83,9 +83,9 @@ data Curve1d units where
     Curve1d units3
   Squared_ ::
     Curve1d units ->
-    Curve1d (Units.GenericProduct units units)
+    Curve1d (units :*: units)
   SquareRoot_ ::
-    Curve1d (Units.GenericProduct units units) ->
+    Curve1d (units :*: units) ->
     Curve1d units
   Sin ::
     Curve1d Radians ->
@@ -335,7 +335,7 @@ reverse curve = Curve1d (Reversed curve)
 squared :: Units.Squared units1 units2 => Curve1d units1 -> Curve1d units2
 squared curve = Units.specialize (squared_ curve)
 
-squared_ :: Curve1d units -> Curve1d (Units.GenericProduct units units)
+squared_ :: Curve1d units -> Curve1d (units :*: units)
 squared_ (Constant x) = Constant (x .*. x)
 squared_ (Negated c) = squared_ c
 squared_ (Cos c) = Units.unspecialize (cosSquared c)
@@ -351,7 +351,7 @@ sinSquared c = 0.5 - 0.5 * cos (2.0 * c)
 sqrt :: Units.Squared units1 units2 => Curve1d units2 -> Curve1d units1
 sqrt curve = sqrt_ (Units.unspecialize curve)
 
-sqrt_ :: Curve1d (Units.GenericProduct units units) -> Curve1d units
+sqrt_ :: Curve1d (units :*: units) -> Curve1d units
 sqrt_ (Constant x) = Constant (Qty.sqrt_ x)
 sqrt_ curve = SquareRoot_ curve
 

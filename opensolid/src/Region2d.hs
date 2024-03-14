@@ -229,7 +229,7 @@ pickLargestLoop loops = do
   let ?tolerance = Qty.squared_ ?tolerance
   Estimate.pickLargestBy loopSignedArea loops
 
-loopSignedArea :: Loop (space @ units) -> Estimate (Units.GenericProduct units units)
+loopSignedArea :: Loop (space @ units) -> Estimate (units :*: units)
 loopSignedArea loop = do
   let referencePoint = Curve2d.startPoint (NonEmpty.first loop)
   NonEmpty.toList loop
@@ -244,10 +244,7 @@ areaIntegral ::
 areaIntegral referencePoint curve =
   Units.specialize (areaIntegral_ referencePoint curve)
 
-areaIntegral_ ::
-  Point2d (space @ units) ->
-  Curve2d (space @ units) ->
-  Estimate (Units.GenericProduct units units)
+areaIntegral_ :: Point2d (space @ units) -> Curve2d (space @ units) -> Estimate (units :*: units)
 areaIntegral_ referencePoint curve = do
   let displacement = curve - referencePoint
   let y = VectorCurve2d.yComponent displacement

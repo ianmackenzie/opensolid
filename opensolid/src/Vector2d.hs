@@ -265,7 +265,7 @@ magnitude (Vector2d vx vy) = Qty.hypot2 vx vy
 squaredMagnitude :: Units.Squared units1 units2 => Vector2d (space @ units1) -> Qty units2
 squaredMagnitude = Units.specialize << squaredMagnitude_
 
-squaredMagnitude_ :: Vector2d (space @ units) -> Qty (Units.GenericProduct units units)
+squaredMagnitude_ :: Vector2d (space @ units) -> Qty (units :*: units)
 squaredMagnitude_ (Vector2d vx vy) = Qty.squared_ vx + Qty.squared_ vy
 
 angle :: Vector2d (space @ units) -> Angle

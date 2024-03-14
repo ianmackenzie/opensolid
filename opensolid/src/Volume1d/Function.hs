@@ -76,7 +76,7 @@ data Function units where
     Function units3
   Squared_ ::
     Function units ->
-    Function (Units.GenericProduct units units)
+    Function (units :*: units)
   SquareRoot ::
     Units.Squared units1 units2 =>
     Function units2 ->
@@ -288,7 +288,7 @@ wrap = Function
 squared :: Units.Squared units1 units2 => Function units1 -> Function units2
 squared = Units.specialize << squared_
 
-squared_ :: Function units -> Function (Units.GenericProduct units units)
+squared_ :: Function units -> Function (units :*: units)
 squared_ Zero = Zero
 squared_ (Constant x) = Constant (x .*. x)
 squared_ (Negated f) = squared_ f

@@ -657,7 +657,7 @@ newtype SquaredMagnitudeOf_ (coordinateSystem :: CoordinateSystem) = SquaredMagn
 
 deriving instance Show (SquaredMagnitudeOf_ (space @ units))
 
-instance Curve1d.Interface (SquaredMagnitudeOf_ (space @ units)) (Units.GenericProduct units units) where
+instance Curve1d.Interface (SquaredMagnitudeOf_ (space @ units)) (units :*: units) where
   evaluateAtImpl t (SquaredMagnitudeOf_ curve) = Vector2d.squaredMagnitude_ (evaluateAt t curve)
   segmentBoundsImpl t (SquaredMagnitudeOf_ curve) = VectorBounds2d.squaredMagnitude_ (segmentBounds t curve)
   derivativeImpl (SquaredMagnitudeOf_ curve) = 2.0 * curve .<>. derivative curve
@@ -665,7 +665,7 @@ instance Curve1d.Interface (SquaredMagnitudeOf_ (space @ units)) (Units.GenericP
 squaredMagnitude :: Units.Squared units1 units2 => VectorCurve2d (space @ units1) -> Curve1d units2
 squaredMagnitude curve = Units.specialize (squaredMagnitude_ curve)
 
-squaredMagnitude_ :: VectorCurve2d (space @ units) -> Curve1d (Units.GenericProduct units units)
+squaredMagnitude_ :: VectorCurve2d (space @ units) -> Curve1d (units :*: units)
 squaredMagnitude_ curve = Curve1d (SquaredMagnitudeOf_ curve)
 
 data ZeroEverywhere = ZeroEverywhere deriving (Eq, Show, Error)

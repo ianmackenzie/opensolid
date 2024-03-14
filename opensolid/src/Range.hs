@@ -226,7 +226,7 @@ minAbs (Range low high)
 squared :: Units.Squared units1 units2 => Range units1 -> Range units2
 squared range = Units.specialize (squared_ range)
 
-squared_ :: Range units -> Range (Units.GenericProduct units units)
+squared_ :: Range units -> Range (units :*: units)
 squared_ (Range low high)
   | low >= Qty.zero = unsafe ll hh
   | high <= Qty.zero = unsafe hh ll
@@ -235,7 +235,7 @@ squared_ (Range low high)
   ll = low .*. low
   hh = high .*. high
 
-sqrt_ :: Range (Units.GenericProduct units units) -> Range units
+sqrt_ :: Range (units :*: units) -> Range units
 sqrt_ (Range low high) =
   unsafe
     (Qty.sqrt_ (Qty.max low Qty.zero))

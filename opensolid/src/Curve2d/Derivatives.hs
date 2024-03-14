@@ -11,7 +11,6 @@ import Curve2d.Intersection (TangentIntersectionAtDegeneratePoint (TangentInters
 import Curve2d.Intersection qualified as Intersection
 import OpenSolid
 import Qty qualified
-import Units qualified
 import Vector2d qualified
 import VectorCurve2d (VectorCurve2d)
 import VectorCurve2d qualified
@@ -83,6 +82,6 @@ classify (u, v) derivatives1 derivatives2 = do
             then Ok (Intersection.Crossing, sign0)
             else Ok (Intersection.Tangent, sign1)
 
-secondDerivative1d :: Qty units -> Qty units -> Qty units -> Qty units -> Qty (Units.GenericQuotient Unitless units)
+secondDerivative1d :: Qty units -> Qty units -> Qty units -> Qty units -> Qty (Unitless :/: units)
 secondDerivative1d dXdU dYdU d2XdU2 d2YdU2 =
   (d2YdU2 .*. dXdU - dYdU .*. d2XdU2) !?/.!? (dXdU .*. dXdU .*. dXdU)

@@ -39,7 +39,7 @@ import {-# SOURCE #-} Float qualified
 import Foreign.Storable (Storable)
 import List qualified
 import Sign (Sign (Negative, Positive))
-import Units (Unitless, convert, unconvert, (.*.))
+import Units (Unitless, convert, unconvert, (.*.), (:*:))
 import Units qualified
 import Prelude qualified
 
@@ -143,14 +143,14 @@ isNaN (Qty x) = Prelude.isNaN x
 squared :: Units.Squared units1 units2 => Qty units1 -> Qty units2
 squared x = x * x
 
-squared_ :: Qty units -> Qty (Units.GenericProduct units units)
+squared_ :: Qty units -> Qty (units :*: units)
 squared_ x = x .*. x
 
 sqrt :: Units.Squared units1 units2 => Qty units2 -> Qty units1
 sqrt x | x <= Qty.zero = Qty.zero
 sqrt (Qty x) = Qty (Prelude.sqrt x)
 
-sqrt_ :: Qty (Units.GenericProduct units units) -> Qty units
+sqrt_ :: Qty (units :*: units) -> Qty units
 sqrt_ x | x <= Qty.zero = Qty.zero
 sqrt_ (Qty x) = Qty (Prelude.sqrt x)
 
