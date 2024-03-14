@@ -222,14 +222,17 @@ data CubicMeters
 type Prod :: Type -> Type -> Type
 type family Prod units1 units2
 
+type Quot :: Type -> Type -> Type
+type family Quot units1 units2
+
+type Sqr :: Type -> Type
+type family Sqr units = squaredUnits | squaredUnits -> units
+
 type instance Prod Unitless Unitless = Unitless
 
 type instance Prod Unitless units = units
 
 type instance Prod units Unitless = units
-
-type Quot :: Type -> Type -> Type
-type family Quot units1 units2
 
 type instance Quot Unitless Unitless = Unitless
 
@@ -264,9 +267,6 @@ type instance Quot Meters MetersPerSecond = Seconds
 type instance Quot MetersPerSecond Seconds = MetersPerSecondSquared
 
 type instance Quot MetersPerSecond MetersPerSecondSquared = Seconds
-
-type Sqr :: Type -> Type
-type family Sqr units = squaredUnits | squaredUnits -> units
 
 type instance Sqr Unitless = Unitless
 
