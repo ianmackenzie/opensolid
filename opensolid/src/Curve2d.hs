@@ -23,6 +23,7 @@ module Curve2d
   , placeIn
   , relativeTo
   , curvature
+  , curvature_
   )
 where
 
@@ -52,6 +53,7 @@ import Qty qualified
 import Range qualified
 import Result qualified
 import T qualified
+import Units qualified
 import VectorCurve2d (VectorCurve2d)
 import VectorCurve2d qualified
 
@@ -285,8 +287,11 @@ relativeTo ::
   Curve2d (local @ units)
 relativeTo frame = placeIn (Frame2d.inverse frame)
 
-curvature :: Qty units -> Curve2d (space @ units) -> Curve1d Unitless
-curvature referenceRadius curve = do
+curvature_ :: Curve2d (space @ units) -> Curve1d (Unitless :/: units)
+curvature_ curve = do
   let firstDerivative = derivative curve
   let secondDerivative = VectorCurve2d.derivative firstDerivative
-  (tangentDirection curve >< secondDerivative .*. referenceRadius) / (firstDerivative .<>. firstDerivative)
+  (tangentDirection curve >< secondDerivative) !/!. (firstDerivative .<>. firstDerivative)
+
+curvature :: Units.Quotient Unitless units1 units2 => Curve2d (space @ units1) -> Curve1d units2
+curvature = Units.specialize << curvature_

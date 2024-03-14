@@ -18,6 +18,8 @@ module Units
   , (.*^)
   , (.!/!)
   , (!./!)
+  , (!/!.)
+  , (!/.!)
   , (.!/.!)
   , (./^)
   , (!?/.!?)
@@ -160,6 +162,20 @@ type SimplifyQuotient unitsA unitsB unitsC aUnitless bUnitless cUnitless a b c =
   b ->
   c
 (!./!) lhs rhs = add (drop lhs / drop rhs)
+
+(!/!.) ::
+  SimplifyQuotient units1 (units1 :*: units2) (Unitless :/: units2) aUnitless bUnitless cUnitless a b c =>
+  a ->
+  b ->
+  c
+(!/!.) lhs rhs = add (drop lhs / drop rhs)
+
+(!/.!) ::
+  SimplifyQuotient units2 (units1 :*: units2) (Unitless :/: units1) aUnitless bUnitless cUnitless a b c =>
+  a ->
+  b ->
+  c
+(!/.!) lhs rhs = add (drop lhs / drop rhs)
 
 (.!/.!) ::
   SimplifyQuotient (units1 :*: units2) (units2 :*: units2) (units1 :/: units2) aUnitless bUnitless cUnitless a b c =>
