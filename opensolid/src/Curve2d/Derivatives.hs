@@ -23,14 +23,14 @@ data Derivatives (coordinateSystem :: CoordinateSystem) = Derivatives
   }
 
 ofCurve :: Tolerance units => Curve2d (space @ units) -> Derivatives (space @ units)
-ofCurve givenCurve =
+ofCurve givenCurve = do
   let firstDerivative = Curve2d.derivative givenCurve
-      secondDerivative = VectorCurve2d.derivative firstDerivative
-   in Derivatives
-        { curve = givenCurve
-        , first = firstDerivative
-        , second = secondDerivative
-        }
+  let secondDerivative = VectorCurve2d.derivative firstDerivative
+  Derivatives
+    { curve = givenCurve
+    , first = firstDerivative
+    , second = secondDerivative
+    }
 
 classify ::
   Tolerance units =>
