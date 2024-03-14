@@ -36,7 +36,6 @@ import Curve2d (Curve2d)
 import Curve2d qualified
 import Debug qualified
 import Direction2d qualified
-import Error qualified
 import Float qualified
 import Frame2d (Frame2d)
 import Frame2d qualified
@@ -891,9 +890,8 @@ horizontalCurve ::
   Float ->
   Float ->
   Result ZerosError (Curve2d Uv.Coordinates)
-horizontalCurve f fu fv uStart uEnd vLow vHigh =
-  exactly (Curve2d.wrap (HorizontalCurve{f, dvdu = -fu / fv, uStart, uEnd, vLow, vHigh}))
-    |> Error.map (\Curve2d.DegenerateCurve -> DegenerateCurve)
+horizontalCurve f fu fv uStart uEnd vLow vHigh = exactly do
+  Curve2d.wrap (HorizontalCurve{f, dvdu = -fu / fv, uStart, uEnd, vLow, vHigh}) ?? DegenerateCurve
     -- Sanity check that we don't attempt to evaluate outside the overall UV domain
     |> Debug.assert (uStart >= 0.0)
     |> Debug.assert (uEnd <= 1.0)
@@ -909,9 +907,8 @@ verticalCurve ::
   Float ->
   Float ->
   Result ZerosError (Curve2d Uv.Coordinates)
-verticalCurve f fu fv uLow uHigh vStart vEnd =
-  exactly (Curve2d.wrap (VerticalCurve{f, dudv = -fv / fu, uLow, uHigh, vStart, vEnd}))
-    |> Error.map (\Curve2d.DegenerateCurve -> DegenerateCurve)
+verticalCurve f fu fv uLow uHigh vStart vEnd = exactly do
+  Curve2d.wrap (VerticalCurve{f, dudv = -fv / fu, uLow, uHigh, vStart, vEnd}) ?? DegenerateCurve
     -- Sanity check that we don't attempt to evaluate outside the overall UV domain
     |> Debug.assert (uLow >= 0.0)
     |> Debug.assert (uHigh <= 1.0)
@@ -1334,7 +1331,7 @@ connectingCurve saddleRegion curve = Result.do
     BezierCurve2d.hermite
       (localStartPoint, [localStartFirstDerivative, localStartSecondDerivative])
       (localEndPoint, [localEndFirstDerivative, localEndSecondDerivative])
-      |> Error.map (\Curve2d.DegenerateCurve -> DegenerateCurve)
+      ?? DegenerateCurve
   Ok (Curve2d.placeIn frame localExtension)
  where
   ?tolerance = 1e-9

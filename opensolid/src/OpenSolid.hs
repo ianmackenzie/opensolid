@@ -23,7 +23,7 @@ import Arithmetic
 import Basics
 import Concatenation (Concatenation ((++)))
 import CoordinateSystem (CoordinateSystem, Defines, LocalSpace, type (@))
-import Error (Error)
+import Error (Error, (??))
 import Float (Float, fromRational)
 import Fuzzy (Fuzzy (Resolved, Unresolved))
 import Intersects (Intersects ((^)))

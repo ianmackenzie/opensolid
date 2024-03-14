@@ -43,7 +43,6 @@ import Curve2d.Segment (Segment)
 import Curve2d.Segment qualified as Segment
 import DirectionCurve2d (DirectionCurve2d)
 import DirectionCurve2d qualified
-import Error qualified
 import Frame2d (Frame2d)
 import Frame2d qualified
 import List qualified
@@ -234,9 +233,7 @@ findEndpointIntersection ::
   (List Intersection, List (T.Bounds, T.Bounds)) ->
   Result IntersectionError (List Intersection, List (T.Bounds, T.Bounds))
 findEndpointIntersection derivatives1 derivatives2 t1t2 searchTree1 searchTree2 accumulated = Result.do
-  intersectionType <-
-    Derivatives.classify t1t2 derivatives1 derivatives2
-      |> Error.map (\Intersection.TangentIntersectionAtDegeneratePoint -> TangentIntersectionAtDegeneratePoint)
+  intersectionType <- Derivatives.classify t1t2 derivatives1 derivatives2 ?? TangentIntersectionAtDegeneratePoint
   let (kind, sign) = intersectionType
   let (t1, t2) = t1t2
   return <|
