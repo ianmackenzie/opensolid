@@ -65,6 +65,7 @@ common config
       ViewPatterns
       LambdaCase
       DisambiguateRecordFields
+      TypeFamilyDependencies
 
 library
   import: config

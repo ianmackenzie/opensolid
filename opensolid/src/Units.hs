@@ -203,28 +203,6 @@ infixl 7 .*., ./., .<>., .><.
 
 infixl 7 ^*., .*^, .!/!, !./!, .!/.!, ./^, !?/.!?
 
-class
-  ( Product units2 units1 units3
-  , Quotient units3 units1 units2
-  , Quotient units3 units2 units1
-  ) =>
-  Product units1 units2 units3
-    | units1 units2 -> units3
-
-class
-  ( Product units3 units2 units1
-  , Product units2 units3 units1
-  , Quotient units1 units3 units2
-  ) =>
-  Quotient units1 units2 units3
-    | units1 units2 -> units3
-
-class
-  Product units units squaredUnits =>
-  Squared units squaredUnits
-    | units -> squaredUnits
-    , squaredUnits -> units
-
 data Unitless
 
 data Radians
@@ -241,49 +219,75 @@ data SquareMeters
 
 data CubicMeters
 
-instance {-# INCOHERENT #-} Product Unitless Unitless Unitless
+type Prod :: Type -> Type -> Type
+type family Prod units1 units2
 
-instance {-# INCOHERENT #-} Product Unitless units units
+type instance Prod Unitless Unitless = Unitless
 
-instance {-# INCOHERENT #-} Product units Unitless units
+type instance Prod Unitless units = units
 
-instance {-# INCOHERENT #-} Quotient Unitless Unitless Unitless
+type instance Prod units Unitless = units
 
-instance {-# INCOHERENT #-} Quotient units Unitless units
+type Quot :: Type -> Type -> Type
+type family Quot units1 units2
 
-instance {-# INCOHERENT #-} Quotient units units Unitless
+type instance Quot Unitless Unitless = Unitless
 
-instance Product Meters Meters SquareMeters
+type instance Quot units Unitless = units
 
-instance Product Meters SquareMeters CubicMeters
+type instance Quot units units = Unitless
 
-instance Product SquareMeters Meters CubicMeters
+type instance Prod Meters Meters = SquareMeters
 
-instance Product Seconds MetersPerSecond Meters
+type instance Prod Meters SquareMeters = CubicMeters
 
-instance Product MetersPerSecond Seconds Meters
+type instance Prod SquareMeters Meters = CubicMeters
 
-instance Product Seconds MetersPerSecondSquared MetersPerSecond
+type instance Prod Seconds MetersPerSecond = Meters
 
-instance Product MetersPerSecondSquared Seconds MetersPerSecond
+type instance Prod MetersPerSecond Seconds = Meters
 
-instance Quotient SquareMeters Meters Meters
+type instance Prod Seconds MetersPerSecondSquared = MetersPerSecond
 
-instance Quotient CubicMeters Meters SquareMeters
+type instance Prod MetersPerSecondSquared Seconds = MetersPerSecond
 
-instance Quotient CubicMeters SquareMeters Meters
+type instance Quot SquareMeters Meters = Meters
 
-instance Quotient Meters Seconds MetersPerSecond
+type instance Quot CubicMeters Meters = SquareMeters
 
-instance Quotient Meters MetersPerSecond Seconds
+type instance Quot CubicMeters SquareMeters = Meters
 
-instance Quotient MetersPerSecond Seconds MetersPerSecondSquared
+type instance Quot Meters Seconds = MetersPerSecond
 
-instance Quotient MetersPerSecond MetersPerSecondSquared Seconds
+type instance Quot Meters MetersPerSecond = Seconds
 
-instance Squared Unitless Unitless
+type instance Quot MetersPerSecond Seconds = MetersPerSecondSquared
 
-instance Squared Meters SquareMeters
+type instance Quot MetersPerSecond MetersPerSecondSquared = Seconds
+
+type Sqr :: Type -> Type
+type family Sqr units = squaredUnits | squaredUnits -> units
+
+type instance Sqr Unitless = Unitless
+
+type instance Sqr Meters = SquareMeters
+
+type Product units1 units2 units3 =
+  ( Prod units1 units2 ~ units3
+  , Prod units2 units1 ~ units3
+  , Quot units3 units1 ~ units2
+  , Quot units3 units2 ~ units1
+  )
+
+type Quotient units1 units2 units3 =
+  ( Quot units1 units2 ~ units3
+  , Product units2 units3 units1
+  )
+
+type Squared units1 units2 =
+  ( Sqr units1 ~ units2
+  , Product units1 units1 units2
+  )
 
 class Specialize genericUnits specificUnits | genericUnits -> specificUnits
 

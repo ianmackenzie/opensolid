@@ -1,39 +1,31 @@
 module Units (Unitless, Product, Quotient, Squared) where
 
+import Basics
+
 data Unitless
 
-class
-  ( Product units2 units1 units3
-  , Quotient units3 units1 units2
-  , Quotient units3 units2 units1
-  ) =>
-  Product units1 units2 units3
-    | units1 units2 -> units3
+type Prod :: Type -> Type -> Type
+type family Prod units1 units2
 
-class
-  ( Product units3 units2 units1
+type Quot :: Type -> Type -> Type
+type family Quot units1 units2
+
+type Sqr :: Type -> Type
+type family Sqr units = squaredUnits | squaredUnits -> units
+
+type Product units1 units2 units3 =
+  ( Prod units1 units2 ~ units3
+  , Prod units2 units1 ~ units3
+  , Quot units3 units1 ~ units2
+  , Quot units3 units2 ~ units1
+  )
+
+type Quotient units1 units2 units3 =
+  ( Quot units1 units2 ~ units3
   , Product units2 units3 units1
-  , Quotient units1 units3 units2
-  ) =>
-  Quotient units1 units2 units3
-    | units1 units2 -> units3
+  )
 
-class
-  Product units units squaredUnits =>
-  Squared units squaredUnits
-    | units -> squaredUnits
-    , squaredUnits -> units
-
-instance {-# INCOHERENT #-} Product Unitless Unitless Unitless
-
-instance {-# INCOHERENT #-} Product Unitless units units
-
-instance {-# INCOHERENT #-} Product units Unitless units
-
-instance {-# INCOHERENT #-} Quotient Unitless Unitless Unitless
-
-instance {-# INCOHERENT #-} Quotient units Unitless units
-
-instance {-# INCOHERENT #-} Quotient units units Unitless
-
-instance Squared Unitless Unitless
+type Squared units1 units2 =
+  ( Sqr units1 ~ units2
+  , Product units1 units1 units2
+  )

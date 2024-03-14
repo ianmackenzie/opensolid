@@ -44,7 +44,7 @@ import Qty qualified
 import {-# SOURCE #-} Result (Result)
 import Sign (Sign)
 import Text.Read qualified
-import {-# SOURCE #-} Units (Unitless)
+import Units (Unitless)
 import Prelude qualified
 
 type Float = Qty Unitless
