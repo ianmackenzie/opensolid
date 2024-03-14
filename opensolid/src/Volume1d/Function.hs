@@ -292,8 +292,8 @@ squared_ :: Function units -> Function (units :*: units)
 squared_ Zero = Zero
 squared_ (Constant x) = Constant (x .*. x)
 squared_ (Negated f) = squared_ f
-squared_ (Cos f) = Units.add (cosSquared f)
-squared_ (Sin f) = Units.add (sinSquared f)
+squared_ (Cos f) = Units.unspecialize (cosSquared f)
+squared_ (Sin f) = Units.unspecialize (sinSquared f)
 squared_ function = Squared_ function
 
 cosSquared :: Function Radians -> Function Unitless
