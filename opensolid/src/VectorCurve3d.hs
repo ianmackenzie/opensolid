@@ -353,11 +353,11 @@ instance
     segmentBounds t vectorCurve3d / Curve1d.segmentBounds t curve1d
 
   derivativeImpl (Quotient vectorCurve3d curve1d) = Units.specialize do
-    let p = Units.generalize vectorCurve3d
-    let q = Units.generalize curve1d
+    let p = vectorCurve3d
+    let q = curve1d
     let p' = derivative p
     let q' = Curve1d.derivative q
-    (p' .* q - p .* q') ./ Curve1d.squared q
+    (p' .*. q - p .*. q') .!/.! Curve1d.squared_ q
 
 instance
   Units.Quotient units1 units2 units3 =>

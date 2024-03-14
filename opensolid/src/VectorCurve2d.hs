@@ -14,6 +14,7 @@ module VectorCurve2d
   , cubicSpline
   , bezierCurve
   , squaredMagnitude
+  , squaredMagnitude_
   , reverse
   , zeros
   , ZeroEverywhere (ZeroEverywhere)
@@ -46,6 +47,7 @@ import OpenSolid
 import Qty qualified
 import Range (Range (Range))
 import Range qualified
+import Result qualified
 import T qualified
 import Units qualified
 import Vector2d (Vector2d (Vector2d))
@@ -616,9 +618,7 @@ derivative curve =
     Product1d2d c1 c2 -> Curve1d.derivative c1 * c2 + c1 * derivative c2
     Product2d1d c1 c2 -> derivative c1 * c2 + c1 * Curve1d.derivative c2
     Quotient c1 c2 -> Units.specialize do
-      let c1' = Units.generalize c1
-      let c2' = Units.generalize c2
-      (derivative c1' .* c2' - c1' .* Curve1d.derivative c2') ./ Curve1d.squared c2'
+      (derivative c1 .*. c2 - c1 .*. Curve1d.derivative c2) .!/.! Curve1d.squared_ c2
     PlaceInBasis basis c -> PlaceInBasis basis (derivative c)
     Line v1 v2 -> constant (v2 - v1)
     Arc r a b -> do
@@ -653,30 +653,29 @@ reverse curve =
     CubicSpline v1 v2 v3 v4 -> CubicSpline v4 v3 v2 v1
     BezierCurve controlVectors -> BezierCurve (NonEmpty.reverse controlVectors)
 
-newtype SquaredMagnitudeOf (coordinateSystem :: CoordinateSystem) = SquaredMagnitudeOf (VectorCurve2d coordinateSystem)
+newtype SquaredMagnitudeOf_ (coordinateSystem :: CoordinateSystem) = SquaredMagnitudeOf_ (VectorCurve2d coordinateSystem)
 
-deriving instance Show (SquaredMagnitudeOf (space @ units))
+deriving instance Show (SquaredMagnitudeOf_ (space @ units))
 
-instance
-  Units.Squared units1 units2 =>
-  Curve1d.Interface (SquaredMagnitudeOf (space @ units1)) units2
-  where
-  evaluateAtImpl t (SquaredMagnitudeOf curve) = Vector2d.squaredMagnitude (evaluateAt t curve)
-  segmentBoundsImpl t (SquaredMagnitudeOf curve) = VectorBounds2d.squaredMagnitude (segmentBounds t curve)
-  derivativeImpl (SquaredMagnitudeOf curve) = 2.0 * curve <> derivative curve
+instance Curve1d.Interface (SquaredMagnitudeOf_ (space @ units)) (Units.GenericProduct units units) where
+  evaluateAtImpl t (SquaredMagnitudeOf_ curve) = Vector2d.squaredMagnitude_ (evaluateAt t curve)
+  segmentBoundsImpl t (SquaredMagnitudeOf_ curve) = VectorBounds2d.squaredMagnitude_ (segmentBounds t curve)
+  derivativeImpl (SquaredMagnitudeOf_ curve) = 2.0 * curve .<>. derivative curve
 
 squaredMagnitude :: Units.Squared units1 units2 => VectorCurve2d (space @ units1) -> Curve1d units2
-squaredMagnitude curve = Curve1d (SquaredMagnitudeOf curve)
+squaredMagnitude curve = Units.specialize (squaredMagnitude_ curve)
+
+squaredMagnitude_ :: VectorCurve2d (space @ units) -> Curve1d (Units.GenericProduct units units)
+squaredMagnitude_ curve = Curve1d (SquaredMagnitudeOf_ curve)
 
 data ZeroEverywhere = ZeroEverywhere deriving (Eq, Show, Error)
 
 zeros :: Tolerance units => VectorCurve2d (space @ units) -> Result ZeroEverywhere (List Float)
-zeros curve =
-  case Curve1d.zeros (squaredMagnitude (Units.generalize curve)) of
-    Ok roots1d -> Ok (List.map Curve1d.Root.value roots1d)
-    Error Curve1d.ZeroEverywhere -> Error VectorCurve2d.ZeroEverywhere
+zeros curve = Result.do
+  roots1d <- Curve1d.zeros (squaredMagnitude_ curve) ?? ZeroEverywhere
+  Ok (List.map Curve1d.Root.value roots1d)
  where
-  ?tolerance = Qty.squared (Units.generalize ?tolerance)
+  ?tolerance = Qty.squared_ ?tolerance
 
 xComponent :: VectorCurve2d (space @ units) -> Curve1d units
 xComponent curve = curve <> Direction2d.x

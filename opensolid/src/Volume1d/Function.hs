@@ -12,6 +12,7 @@ module Volume1d.Function
   , w
   , wrap
   , squared
+  , squared_
   , sqrt
   , sin
   , cos
@@ -73,10 +74,9 @@ data Function units where
     Function units1 ->
     Function units2 ->
     Function units3
-  Squared ::
-    Units.Squared units1 units2 =>
-    Function units1 ->
-    Function units2
+  Squared_ ::
+    Function units ->
+    Function (Units.GenericProduct units units)
   SquareRoot ::
     Units.Squared units1 units2 =>
     Function units2 ->
@@ -185,8 +185,7 @@ instance
   where
   Zero / _ = Zero
   Constant x / Constant y = Constant (x / y)
-  function / Constant x = Units.specialize do
-    (Units.generalize 1.0 ./ Units.generalize x) .* Units.generalize function
+  function / Constant x = Units.specialize ((1.0 ./. x) .*^ function)
   function1 / function2 = Quotient function1 function2
 
 instance
@@ -221,7 +220,7 @@ evaluateAt uvw function =
     Difference f1 f2 -> evaluateAt uvw f1 - evaluateAt uvw f2
     Product f1 f2 -> evaluateAt uvw f1 * evaluateAt uvw f2
     Quotient f1 f2 -> evaluateAt uvw f1 / evaluateAt uvw f2
-    Squared f -> Qty.squared (evaluateAt uvw f)
+    Squared_ f -> Qty.squared_ (evaluateAt uvw f)
     SquareRoot f -> Qty.sqrt (evaluateAt uvw f)
     Sin f -> Angle.sin (evaluateAt uvw f)
     Cos f -> Angle.cos (evaluateAt uvw f)
@@ -243,7 +242,7 @@ segmentBounds uvw function =
     Difference f1 f2 -> segmentBounds uvw f1 - segmentBounds uvw f2
     Product f1 f2 -> segmentBounds uvw f1 * segmentBounds uvw f2
     Quotient f1 f2 -> segmentBounds uvw f1 / segmentBounds uvw f2
-    Squared f -> Range.squared (segmentBounds uvw f)
+    Squared_ f -> Range.squared_ (segmentBounds uvw f)
     SquareRoot f -> Range.sqrt (segmentBounds uvw f)
     Sin f -> Range.sin (segmentBounds uvw f)
     Cos f -> Range.cos (segmentBounds uvw f)
@@ -262,10 +261,8 @@ derivative direction function =
     Difference f1 f2 -> derivative direction f1 - derivative direction f2
     Product f1 f2 -> derivative direction f1 * f2 + f1 * derivative direction f2
     Quotient f1 f2 -> Units.specialize do
-      let f1' = Units.generalize f1
-      let f2' = Units.generalize f2
-      (derivative direction f1' .* f2' - f1' .* derivative direction f2') ./ squared f2'
-    Squared f -> 2.0 * f * derivative direction f
+      (derivative direction f1 .*. f2 - f1 .*. derivative direction f2) .!/.! squared_ f2
+    Squared_ f -> 2.0 * f .*. derivative direction f
     SquareRoot f -> derivative direction f / (2.0 * sqrt f)
     Sin f -> cos f * Units.drop (derivative direction f)
     Cos f -> negate (sin f) * Units.drop (derivative direction f)
@@ -289,12 +286,15 @@ wrap :: Interface function units => function -> Function units
 wrap = Function
 
 squared :: Units.Squared units1 units2 => Function units1 -> Function units2
-squared Zero = Zero
-squared (Constant x) = Constant (x * x)
-squared (Negated f) = squared f
-squared (Cos f) = Units.add (cosSquared f)
-squared (Sin f) = Units.add (sinSquared f)
-squared function = Squared function
+squared = Units.specialize << squared_
+
+squared_ :: Function units -> Function (Units.GenericProduct units units)
+squared_ Zero = Zero
+squared_ (Constant x) = Constant (x .*. x)
+squared_ (Negated f) = squared_ f
+squared_ (Cos f) = Units.add (cosSquared f)
+squared_ (Sin f) = Units.add (sinSquared f)
+squared_ function = Squared_ function
 
 cosSquared :: Function Radians -> Function Unitless
 cosSquared f = 0.5 * cos (2.0 * f) + 0.5

@@ -106,10 +106,9 @@ data Function units where
     Function units1 ->
     Function units2 ->
     Function units3
-  Squared ::
-    Units.Squared units1 units2 =>
-    Function units1 ->
-    Function units2
+  Squared_ ::
+    Function units ->
+    Function (Units.GenericProduct units units)
   SquareRoot ::
     Units.Squared units1 units2 =>
     Function units2 ->
@@ -218,9 +217,7 @@ instance
   where
   Zero / _ = Zero
   Constant x / Constant y = Constant (x / y)
-  function / Constant x = Units.specialize do
-    let scalingFactor = Units.generalize 1.0 ./ Units.generalize x
-    scalingFactor .* Units.generalize function
+  function / Constant x = Units.specialize ((1.0 ./. x) .*^ function)
   function1 / function2 = Quotient function1 function2
 
 instance
@@ -254,7 +251,7 @@ evaluateAt uv function =
     Difference f1 f2 -> evaluateAt uv f1 - evaluateAt uv f2
     Product f1 f2 -> evaluateAt uv f1 * evaluateAt uv f2
     Quotient f1 f2 -> evaluateAt uv f1 / evaluateAt uv f2
-    Squared f -> Qty.squared (evaluateAt uv f)
+    Squared_ f -> Qty.squared_ (evaluateAt uv f)
     SquareRoot f -> Qty.sqrt (evaluateAt uv f)
     Sin f -> Angle.sin (evaluateAt uv f)
     Cos f -> Angle.cos (evaluateAt uv f)
@@ -275,7 +272,7 @@ segmentBounds uv function =
     Difference f1 f2 -> segmentBounds uv f1 - segmentBounds uv f2
     Product f1 f2 -> segmentBounds uv f1 * segmentBounds uv f2
     Quotient f1 f2 -> segmentBounds uv f1 / segmentBounds uv f2
-    Squared f -> Range.squared (segmentBounds uv f)
+    Squared_ f -> Range.squared_ (segmentBounds uv f)
     SquareRoot f -> Range.sqrt (segmentBounds uv f)
     Sin f -> Range.sin (segmentBounds uv f)
     Cos f -> Range.cos (segmentBounds uv f)
@@ -295,10 +292,8 @@ derivative p function =
     Difference f1 f2 -> derivative p f1 - derivative p f2
     Product f1 f2 -> derivative p f1 * f2 + f1 * derivative p f2
     Quotient f1 f2 -> Units.specialize do
-      let f1' = Units.generalize f1
-      let f2' = Units.generalize f2
-      (derivative p f1' .* f2' - f1' .* derivative p f2') ./ squared f2'
-    Squared f -> 2.0 * f * derivative p f
+      (derivative p f1 .*. f2 - f1 .*. derivative p f2) .!/.! squared_ f2
+    Squared_ f -> 2.0 * f .*. derivative p f
     SquareRoot f -> derivative p f / (2.0 * sqrt f)
     Sin f -> cos f * Units.drop (derivative p f)
     Cos f -> negate (sin f) * Units.drop (derivative p f)
@@ -321,12 +316,15 @@ wrap :: Interface function units => function -> Function units
 wrap = Function
 
 squared :: Units.Squared units1 units2 => Function units1 -> Function units2
-squared Zero = Zero
-squared (Constant x) = Constant (x * x)
-squared (Negated f) = squared f
-squared (Cos f) = Units.add (cosSquared f)
-squared (Sin f) = Units.add (sinSquared f)
-squared function = Squared function
+squared function = Units.specialize (squared_ function)
+
+squared_ :: Function units -> Function (Units.GenericProduct units units)
+squared_ Zero = Zero
+squared_ (Constant x) = Constant (x .*. x)
+squared_ (Negated f) = squared_ f
+squared_ (Cos f) = Units.add (cosSquared f)
+squared_ (Sin f) = Units.add (sinSquared f)
+squared_ function = Squared_ function
 
 cosSquared :: Function Radians -> Function Unitless
 cosSquared f = 0.5 * cos (2.0 * f) + 0.5
@@ -968,7 +966,7 @@ tangentPointSolution derivatives boundaryPoints uvBounds exclusions saddleRegion
   fuuBounds = segmentBounds expandedBounds fuu
   fvvBounds = segmentBounds expandedBounds fvv
   fuvBounds = segmentBounds expandedBounds fuv
-  determinantResolution = Range.resolution (fuuBounds .* fvvBounds - fuvBounds .* fuvBounds)
+  determinantResolution = Range.resolution (fuuBounds .*. fvvBounds - fuvBounds .*. fuvBounds)
   isIncludedTangentPoint (BoundaryPoint{point}) =
     Bounds2d.includes point searchBounds
       && evaluateAt point fu ~= Qty.zero
@@ -990,8 +988,7 @@ saddlePointSolution derivatives point expandedBounds =
       fvvValue = evaluateAt point fvv
       Point2d u0 v0 = point
       Bounds2d uRange vRange = expandedBounds
-      sqrtD = Units.specialize do
-        Qty.sqrt (Units.generalize fuvValue * Units.generalize fuvValue - Units.generalize fuuValue * Units.generalize fvvValue)
+      sqrtD = Qty.sqrt_ (fuvValue .*. fuvValue - fuuValue .*. fvvValue)
       (d1, d2) =
         if Qty.abs fuuValue >= Qty.abs fvvValue
           then
@@ -1031,7 +1028,7 @@ saddlePointSolution derivatives point expandedBounds =
       fxxyValue = evaluateAt Point2d.origin fxxy
       fxyyValue = evaluateAt Point2d.origin fxyy
       fyyyValue = evaluateAt Point2d.origin fyyy
-      positiveA = Units.specialize (Qty.sqrt (-(Units.generalize fxxValue * Units.generalize fyyValue))) / Qty.abs fyyValue
+      positiveA = Qty.sqrt_ (-fxxValue .*. fyyValue) / Qty.abs fyyValue
       negativeA = -positiveA
       b a = -(fyyyValue * a ** 3 + 3 * fxyyValue * a ** 2 + 3 * fxxyValue * a + fxxxValue) / (3 * a * fyyValue)
       positiveSolution = SaddleRegion.Solution{dydx = positiveA, d2ydx2 = b positiveA}

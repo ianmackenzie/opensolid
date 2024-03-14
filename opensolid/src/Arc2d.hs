@@ -31,7 +31,6 @@ import Curve2d qualified
 import Curve2d.Internal qualified
 import Data.Kind (Constraint)
 import Direction2d qualified
-import Error qualified
 import OpenSolid
 import Point2d (Point2d)
 import Point2d qualified
@@ -39,7 +38,6 @@ import Qty qualified
 import Result qualified
 import Type.Errors (TypeError)
 import Type.Errors qualified
-import Units qualified
 import Vector2d qualified
 
 swept ::
@@ -324,15 +322,12 @@ instance
     (Result BuildError (Curve2d (space @ units)))
   where
   with arguments = Result.do
-    chordDirection <-
-      Direction2d.from givenStartPoint givenEndPoint
-        |> Error.map (\Direction2d.PointsAreCoincident -> DegenerateArc)
-    let squaredRadius = Qty.squared (Units.generalize givenRadius)
-    let squaredHalfLength =
-          Qty.squared (Units.generalize (0.5 * Point2d.distanceFrom givenStartPoint givenEndPoint))
-    let squaredOffsetMagnitude = squaredRadius - squaredHalfLength
-    Result.check (squaredOffsetMagnitude >= Qty.zero) Arc2d.EndpointsAreTooFarApart
-    let offsetMagnitude = Units.specialize (Qty.sqrt squaredOffsetMagnitude)
+    chordDirection <- Direction2d.from givenStartPoint givenEndPoint ?? DegenerateArc
+    let squaredRadius_ = Qty.squared_ givenRadius
+    let squaredHalfLength_ = Qty.squared_ (0.5 * Point2d.distanceFrom givenStartPoint givenEndPoint)
+    let squaredOffsetMagnitude_ = squaredRadius_ - squaredHalfLength_
+    Result.check (squaredOffsetMagnitude_ >= Qty.zero) Arc2d.EndpointsAreTooFarApart
+    let offsetMagnitude = Qty.sqrt_ squaredOffsetMagnitude_
     let offsetDirection = Direction2d.rotateLeft chordDirection
     let offsetDistance =
           case (givenDirection, givenSize) of
@@ -341,7 +336,7 @@ instance
             (Clockwise, Large) -> offsetMagnitude
             (Counterclockwise, Large) -> -offsetMagnitude
     let computedCenterPoint = Point2d.midpoint givenStartPoint givenEndPoint + offsetDirection * offsetDistance
-    let halfLength = Units.specialize (Qty.sqrt squaredHalfLength)
+    let halfLength = Qty.sqrt_ squaredHalfLength_
     let shortAngle = 2.0 * Angle.asin (halfLength / givenRadius)
     let computedSweptAngle =
           case (givenDirection, givenSize) of

@@ -212,11 +212,7 @@ secondDerivativeBounds1d ::
   Range units ->
   Range (Units.GenericQuotient Unitless units)
 secondDerivativeBounds1d dXdU dYdU d2XdU2 d2YdU2 =
-  let dXdU' = Units.generalize dXdU
-      dYdU' = Units.generalize dYdU
-      d2XdU2' = Units.generalize d2XdU2
-      d2YdU2' = Units.generalize d2YdU2
-   in Units.generalize ((d2YdU2' * dXdU' - dYdU' * d2XdU2') / (dXdU' * dXdU')) ./ dXdU'
+  (d2YdU2 .*. dXdU - dYdU .*. d2XdU2) !?/.!? (dXdU .*. dXdU .*. dXdU)
 
 findTangentIntersection ::
   Tolerance units =>
@@ -239,20 +235,20 @@ isTangentIntersection ::
   T.Bounds ->
   T.Bounds ->
   Bool
-isTangentIntersection derivatives1 derivatives2 tBounds1 tBounds2 =
+isTangentIntersection derivatives1 derivatives2 tBounds1 tBounds2 = do
   let bounds1 = Curve2d.segmentBounds tBounds1 (Derivatives.curve derivatives1)
-      bounds2 = Curve2d.segmentBounds tBounds2 (Derivatives.curve derivatives2)
-      difference = bounds1 - bounds2
-      distance = VectorBounds2d.magnitude difference
-   in Range.minValue distance <= ?tolerance
-        && let firstBounds1 = VectorCurve2d.segmentBounds tBounds1 (Derivatives.first derivatives1)
-               firstBounds2 = VectorCurve2d.segmentBounds tBounds2 (Derivatives.first derivatives2)
-               crossProduct = Units.generalize firstBounds1 >< Units.generalize firstBounds2
-               dotProduct1 = Units.generalize firstBounds1 <> Units.generalize difference
-               dotProduct2 = Units.generalize firstBounds2 <> Units.generalize difference
-            in Range.includes Qty.zero crossProduct
-                && Range.includes Qty.zero dotProduct1
-                && Range.includes Qty.zero dotProduct2
+  let bounds2 = Curve2d.segmentBounds tBounds2 (Derivatives.curve derivatives2)
+  let difference = bounds1 - bounds2
+  let distance = VectorBounds2d.magnitude difference
+  let firstBounds1 = VectorCurve2d.segmentBounds tBounds1 (Derivatives.first derivatives1)
+  let firstBounds2 = VectorCurve2d.segmentBounds tBounds2 (Derivatives.first derivatives2)
+  let crossProduct = firstBounds1 .><. firstBounds2
+  let dotProduct1 = firstBounds1 .<>. difference
+  let dotProduct2 = firstBounds2 .<>. difference
+  Range.minValue distance <= ?tolerance
+    && Range.includes Qty.zero crossProduct
+    && Range.includes Qty.zero dotProduct1
+    && Range.includes Qty.zero dotProduct2
 
 isCrossingIntersectionCandidate ::
   Tolerance units =>

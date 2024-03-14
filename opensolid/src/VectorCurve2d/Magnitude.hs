@@ -3,7 +3,6 @@ module VectorCurve2d.Magnitude (unsafe) where
 import Curve1d (Curve1d (Curve1d))
 import Curve1d qualified
 import OpenSolid
-import Units qualified
 import Vector2d qualified
 import VectorBounds2d qualified
 import {-# SOURCE #-} VectorCurve2d (VectorCurve2d)
@@ -21,9 +20,8 @@ instance Curve1d.Interface (Magnitude (space @ units)) units where
   segmentBoundsImpl t (Magnitude curve) =
     VectorBounds2d.magnitude (VectorCurve2d.segmentBounds t curve)
 
-  derivativeImpl (Magnitude curve) = Units.specialize do
-    let curve' = Units.generalize curve
-    (VectorCurve2d.derivative curve' <> curve') / Curve1d (Magnitude curve')
+  derivativeImpl (Magnitude curve) =
+    (VectorCurve2d.derivative curve .<>. curve) .!/! Curve1d (Magnitude curve)
 
 unsafe :: VectorCurve2d (space @ units) -> Curve1d units
 unsafe curve = Curve1d (Magnitude curve)

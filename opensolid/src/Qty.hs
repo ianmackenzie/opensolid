@@ -7,7 +7,9 @@ module Qty
   , interpolateFrom
   , midpoint
   , squared
+  , squared_
   , sqrt
+  , sqrt_
   , hypot2
   , hypot3
   , abs
@@ -37,7 +39,7 @@ import {-# SOURCE #-} Float qualified
 import Foreign.Storable (Storable)
 import List qualified
 import Sign (Sign (Negative, Positive))
-import Units (Unitless, convert, unconvert)
+import Units (Unitless, convert, unconvert, (.*.))
 import Units qualified
 import Prelude qualified
 
@@ -141,22 +143,22 @@ isNaN (Qty x) = Prelude.isNaN x
 squared :: Units.Squared units1 units2 => Qty units1 -> Qty units2
 squared x = x * x
 
+squared_ :: Qty units -> Qty (Units.GenericProduct units units)
+squared_ x = x .*. x
+
 sqrt :: Units.Squared units1 units2 => Qty units2 -> Qty units1
 sqrt x | x <= Qty.zero = Qty.zero
 sqrt (Qty x) = Qty (Prelude.sqrt x)
 
+sqrt_ :: Qty (Units.GenericProduct units units) -> Qty units
+sqrt_ x | x <= Qty.zero = Qty.zero
+sqrt_ (Qty x) = Qty (Prelude.sqrt x)
+
 hypot2 :: Qty units -> Qty units -> Qty units
-hypot2 x y = Units.specialize do
-  let xSquared = squared (Units.generalize x)
-  let ySquared = squared (Units.generalize y)
-  sqrt (xSquared + ySquared)
+hypot2 x y = sqrt_ (squared_ x + squared_ y)
 
 hypot3 :: Qty units -> Qty units -> Qty units -> Qty units
-hypot3 x y z = Units.specialize do
-  let xSquared = squared (Units.generalize x)
-  let ySquared = squared (Units.generalize y)
-  let zSquared = squared (Units.generalize z)
-  sqrt (xSquared + ySquared + zSquared)
+hypot3 x y z = sqrt_ (squared_ x + squared_ y + squared_ z)
 
 {-# INLINE abs #-}
 abs :: Qty units -> Qty units

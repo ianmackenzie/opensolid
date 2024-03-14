@@ -11,6 +11,7 @@ module Range
   , endpoints
   , width
   , squared
+  , squared_
   , includes
   , inclusion
   , exclusion
@@ -22,6 +23,7 @@ module Range
   , isAtomic
   , abs
   , sqrt
+  , sqrt_
   , hypot2
   , hypot3
   , aggregate2
@@ -222,19 +224,25 @@ minAbs (Range low high)
   | otherwise = Qty.zero
 
 squared :: Units.Squared units1 units2 => Range units1 -> Range units2
-squared (Range low high)
+squared range = Units.specialize (squared_ range)
+
+squared_ :: Range units -> Range (Units.GenericProduct units units)
+squared_ (Range low high)
   | low >= Qty.zero = unsafe ll hh
   | high <= Qty.zero = unsafe hh ll
   | otherwise = unsafe Qty.zero (Qty.max ll hh)
  where
-  ll = low * low
-  hh = high * high
+  ll = low .*. low
+  hh = high .*. high
+
+sqrt_ :: Range (Units.GenericProduct units units) -> Range units
+sqrt_ (Range low high) =
+  unsafe
+    (Qty.sqrt_ (Qty.max low Qty.zero))
+    (Qty.sqrt_ (Qty.max high Qty.zero))
 
 sqrt :: Units.Squared units1 units2 => Range units2 -> Range units1
-sqrt (Range low high) =
-  unsafe
-    (Qty.sqrt (Qty.max low Qty.zero))
-    (Qty.sqrt (Qty.max high Qty.zero))
+sqrt range = sqrt_ (Units.unspecialize range)
 
 hypot2 :: Range units -> Range units -> Range units
 hypot2 (Range xMin xMax) (Range yMin yMax)

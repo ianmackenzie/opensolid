@@ -9,7 +9,9 @@ module Curve1d
   , constant
   , t
   , squared
+  , squared_
   , sqrt
+  , sqrt_
   , sin
   , cos
   , ZeroEverywhere (ZeroEverywhere)
@@ -36,7 +38,6 @@ import Range qualified
 import Stream (Stream)
 import Stream qualified
 import T qualified
-import Units (Squared)
 import Units qualified
 import Vector2d (Vector2d)
 import Vector3d (Vector3d)
@@ -80,14 +81,12 @@ data Curve1d units where
     Curve1d units1 ->
     Curve1d units2 ->
     Curve1d units3
-  Squared ::
-    Units.Squared units1 units2 =>
-    Curve1d units1 ->
-    Curve1d units2
-  SquareRoot ::
-    Units.Squared units1 units2 =>
-    Curve1d units2 ->
-    Curve1d units1
+  Squared_ ::
+    Curve1d units ->
+    Curve1d (Units.GenericProduct units units)
+  SquareRoot_ ::
+    Curve1d (Units.GenericProduct units units) ->
+    Curve1d units
   Sin ::
     Curve1d Radians ->
     Curve1d Unitless
@@ -247,9 +246,7 @@ instance
   where
   Constant value / _ | value == Qty.zero = zero
   Constant x / Constant y = Constant (x / y)
-  curve / Constant x = Units.specialize do
-    let scalingFactor = Units.generalize 1.0 ./ Units.generalize x
-    scalingFactor .* Units.generalize curve
+  curve / Constant x = Units.specialize ((1.0 ./. x) .*^ curve)
   curve1 / curve2 = Quotient curve1 curve2
 
 instance
@@ -281,8 +278,8 @@ evaluateAt tValue curve =
     Difference c1 c2 -> evaluateAt tValue c1 - evaluateAt tValue c2
     Product c1 c2 -> evaluateAt tValue c1 * evaluateAt tValue c2
     Quotient c1 c2 -> evaluateAt tValue c1 / evaluateAt tValue c2
-    Squared c -> Qty.squared (evaluateAt tValue c)
-    SquareRoot c -> Qty.sqrt (evaluateAt tValue c)
+    Squared_ c -> Qty.squared_ (evaluateAt tValue c)
+    SquareRoot_ c_ -> Qty.sqrt_ (evaluateAt tValue c_)
     Sin c -> Angle.sin (evaluateAt tValue c)
     Cos c -> Angle.cos (evaluateAt tValue c)
 
@@ -300,8 +297,8 @@ segmentBounds tBounds curve =
     Difference c1 c2 -> segmentBounds tBounds c1 - segmentBounds tBounds c2
     Product c1 c2 -> segmentBounds tBounds c1 * segmentBounds tBounds c2
     Quotient c1 c2 -> segmentBounds tBounds c1 / segmentBounds tBounds c2
-    Squared c -> Range.squared (segmentBounds tBounds c)
-    SquareRoot c -> Range.sqrt (segmentBounds tBounds c)
+    Squared_ c -> Range.squared_ (segmentBounds tBounds c)
+    SquareRoot_ c_ -> Range.sqrt_ (segmentBounds tBounds c_)
     Sin c -> Range.sin (segmentBounds tBounds c)
     Cos c -> Range.cos (segmentBounds tBounds c)
 
@@ -316,11 +313,9 @@ derivative curve =
     Difference c1 c2 -> derivative c1 - derivative c2
     Product c1 c2 -> derivative c1 * c2 + c1 * derivative c2
     Quotient c1 c2 -> Units.specialize do
-      let c1' = Units.generalize c1
-      let c2' = Units.generalize c2
-      (derivative c1' .* c2' - c1' .* derivative c2') ./ squared c2'
-    Squared c -> 2.0 * c * derivative c
-    SquareRoot c -> derivative c / (2.0 * sqrt c)
+      (derivative c1 .*. c2 - c1 .*. derivative c2) .!/.! squared_ c2
+    Squared_ c -> 2.0 * c .*. derivative c
+    SquareRoot_ c_ -> derivative c_ .!/! (2.0 * sqrt_ c_)
     Sin c -> cos c * Units.drop (derivative c)
     Cos c -> negate (sin c) * Units.drop (derivative c)
 
@@ -338,11 +333,14 @@ reverse curve@(Constant _) = curve
 reverse curve = Curve1d (Reversed curve)
 
 squared :: Units.Squared units1 units2 => Curve1d units1 -> Curve1d units2
-squared (Constant x) = Constant (x * x)
-squared (Negated c) = squared c
-squared (Cos c) = Units.add (cosSquared c)
-squared (Sin c) = Units.add (sinSquared c)
-squared curve = Squared curve
+squared curve = Units.specialize (squared_ curve)
+
+squared_ :: Curve1d units -> Curve1d (Units.GenericProduct units units)
+squared_ (Constant x) = Constant (x .*. x)
+squared_ (Negated c) = squared_ c
+squared_ (Cos c) = Units.unspecialize (cosSquared c)
+squared_ (Sin c) = Units.unspecialize (sinSquared c)
+squared_ curve = Squared_ curve
 
 cosSquared :: Curve1d Radians -> Curve1d Unitless
 cosSquared c = 0.5 * cos (2.0 * c) + 0.5
@@ -351,8 +349,11 @@ sinSquared :: Curve1d Radians -> Curve1d Unitless
 sinSquared c = 0.5 - 0.5 * cos (2.0 * c)
 
 sqrt :: Units.Squared units1 units2 => Curve1d units2 -> Curve1d units1
-sqrt (Constant x) = Constant (Qty.sqrt x)
-sqrt curve = SquareRoot curve
+sqrt curve = sqrt_ (Units.unspecialize curve)
+
+sqrt_ :: Curve1d (Units.GenericProduct units units) -> Curve1d units
+sqrt_ (Constant x) = Constant (Qty.sqrt_ x)
+sqrt_ curve = SquareRoot_ curve
 
 sin :: Curve1d Radians -> Curve1d Unitless
 sin (Constant x) = constant (Angle.sin x)

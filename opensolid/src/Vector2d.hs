@@ -20,6 +20,7 @@ module Vector2d
   , interpolateFrom
   , magnitude
   , squaredMagnitude
+  , squaredMagnitude_
   , angle
   , IsZero (IsZero)
   , direction
@@ -262,7 +263,10 @@ magnitude :: Vector2d (space @ units) -> Qty units
 magnitude (Vector2d vx vy) = Qty.hypot2 vx vy
 
 squaredMagnitude :: Units.Squared units1 units2 => Vector2d (space @ units1) -> Qty units2
-squaredMagnitude (Vector2d vx vy) = Qty.squared vx + Qty.squared vy
+squaredMagnitude = Units.specialize << squaredMagnitude_
+
+squaredMagnitude_ :: Vector2d (space @ units) -> Qty (Units.GenericProduct units units)
+squaredMagnitude_ (Vector2d vx vy) = Qty.squared_ vx + Qty.squared_ vy
 
 angle :: Vector2d (space @ units) -> Angle
 angle (Vector2d vx vy) = Angle.atan2 vy vx

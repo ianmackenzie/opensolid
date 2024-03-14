@@ -176,9 +176,9 @@ classify point curves
 
 fluxIntegral :: Point2d (space @ units) -> Curve2d (space @ units) -> Estimate Unitless
 fluxIntegral point curve =
-  let displacement = Units.generalize (point - curve)
-      firstDerivative = Units.generalize (Curve2d.derivative curve)
-      integrand = (firstDerivative >< displacement) / VectorCurve2d.squaredMagnitude displacement
+  let displacement = point - curve
+      firstDerivative = Curve2d.derivative curve
+      integrand = (firstDerivative .><. displacement) / VectorCurve2d.squaredMagnitude_ displacement
    in Curve1d.integral integrand
 
 totalFlux :: Point2d (space @ units) -> Loop (space @ units) -> Estimate Unitless
@@ -214,9 +214,9 @@ classifyLoops (NonEmpty loops) = Result.do
     else Error MultipleDisjointRegions
 
 fixSign :: Tolerance units => Sign -> Loop (space @ units) -> Loop (space @ units)
-fixSign desiredSign loop =
-  let ?tolerance = Qty.squared (Units.generalize ?tolerance)
-   in if Estimate.sign (loopSignedArea loop) == desiredSign then loop else reverseLoop loop
+fixSign desiredSign loop = do
+  let ?tolerance = Qty.squared_ ?tolerance
+  if Estimate.sign (loopSignedArea loop) == desiredSign then loop else reverseLoop loop
 
 reverseLoop :: Loop (space @ units) -> Loop (space @ units)
 reverseLoop loop = NonEmpty.reverseMap Curve2d.reverse loop
@@ -225,17 +225,16 @@ pickLargestLoop ::
   Tolerance units =>
   NonEmpty (Loop (space @ units)) ->
   (Loop (space @ units), List (Loop (space @ units)))
-pickLargestLoop loops =
-  let ?tolerance = Qty.squared (Units.generalize ?tolerance)
-   in Estimate.pickLargestBy loopSignedArea loops
+pickLargestLoop loops = do
+  let ?tolerance = Qty.squared_ ?tolerance
+  Estimate.pickLargestBy loopSignedArea loops
 
 loopSignedArea :: Loop (space @ units) -> Estimate (Units.GenericProduct units units)
-loopSignedArea loop =
-  let referencePoint = Units.generalize (Curve2d.startPoint (NonEmpty.first loop))
-   in Units.generalize loop
-        |> NonEmpty.toList
-        |> List.map (areaIntegral referencePoint)
-        |> Estimate.sum
+loopSignedArea loop = do
+  let referencePoint = Curve2d.startPoint (NonEmpty.first loop)
+  NonEmpty.toList loop
+    |> List.map (areaIntegral_ referencePoint)
+    |> Estimate.sum
 
 areaIntegral ::
   Units.Squared units1 units2 =>
@@ -243,18 +242,25 @@ areaIntegral ::
   Curve2d (space @ units1) ->
   Estimate units2
 areaIntegral referencePoint curve =
+  Units.specialize (areaIntegral_ referencePoint curve)
+
+areaIntegral_ ::
+  Point2d (space @ units) ->
+  Curve2d (space @ units) ->
+  Estimate (Units.GenericProduct units units)
+areaIntegral_ referencePoint curve = do
   let displacement = curve - referencePoint
-      y = VectorCurve2d.yComponent displacement
-      dx = Curve1d.derivative (VectorCurve2d.xComponent displacement)
-   in -(Curve1d.integral (y * dx))
+  let y = VectorCurve2d.yComponent displacement
+  let dx = Curve1d.derivative (VectorCurve2d.xComponent displacement)
+  -(Curve1d.integral (y .*. dx))
 
 loopIsInside :: Tolerance units => Loop (space @ units) -> Loop (space @ units) -> Bool
-loopIsInside outer inner =
+loopIsInside outer inner = do
   let testPoint = Curve2d.startPoint (NonEmpty.first inner)
-   in case classify testPoint outer of
-        Nothing -> True -- Shouldn't happen, loops should be guaranteed not to be touching by this point
-        Just Positive -> True
-        Just Negative -> False
+  case classify testPoint outer of
+    Nothing -> True -- Shouldn't happen, loops should be guaranteed not to be touching by this point
+    Just Positive -> True
+    Just Negative -> False
 
 bounds :: Region2d (space @ units) -> Bounds2d (space @ units)
 bounds region =
@@ -262,6 +268,6 @@ bounds region =
     NonEmpty.map Curve2d.bounds (outerLoop region)
 
 area :: Units.Squared units1 units2 => Region2d (space @ units1) -> Estimate units2
-area region =
+area region = do
   let referencePoint = Curve2d.startPoint (NonEmpty.first (outerLoop region))
-   in Estimate.sum (List.map (areaIntegral referencePoint) (NonEmpty.toList (boundaryCurves region)))
+  Estimate.sum (List.map (areaIntegral referencePoint) (NonEmpty.toList (boundaryCurves region)))

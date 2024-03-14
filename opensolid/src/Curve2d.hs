@@ -52,7 +52,6 @@ import Qty qualified
 import Range qualified
 import Result qualified
 import T qualified
-import Units qualified
 import VectorCurve2d (VectorCurve2d)
 import VectorCurve2d qualified
 
@@ -288,7 +287,6 @@ relativeTo frame = placeIn (Frame2d.inverse frame)
 
 curvature :: Qty units -> Curve2d (space @ units) -> Curve1d Unitless
 curvature referenceRadius curve = do
-  let firstDerivative = Units.generalize (derivative curve)
-  let tangent = tangentDirection curve
+  let firstDerivative = derivative curve
   let secondDerivative = VectorCurve2d.derivative firstDerivative
-  (tangent >< secondDerivative .* Units.generalize referenceRadius) / (firstDerivative .<> firstDerivative)
+  (tangentDirection curve >< secondDerivative .*. referenceRadius) / (firstDerivative .<>. firstDerivative)

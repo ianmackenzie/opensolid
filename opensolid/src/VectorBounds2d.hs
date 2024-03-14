@@ -13,9 +13,11 @@ module VectorBounds2d
   , yComponent
   , components
   , squaredMagnitude
+  , squaredMagnitude_
   , magnitude
   , maxMagnitude
   , maxSquaredMagnitude
+  , maxSquaredMagnitude_
   , normalize
   , includes
   , contains
@@ -346,7 +348,10 @@ components :: VectorBounds2d (space @ units) -> (Range units, Range units)
 components (VectorBounds2d vx vy) = (vx, vy)
 
 squaredMagnitude :: Units.Squared units1 units2 => VectorBounds2d (space @ units1) -> Range units2
-squaredMagnitude (VectorBounds2d x y) = Range.squared x + Range.squared y
+squaredMagnitude = Units.specialize << squaredMagnitude_
+
+squaredMagnitude_ :: VectorBounds2d (space @ units) -> Range (Units.GenericProduct units units)
+squaredMagnitude_ (VectorBounds2d x y) = Range.squared_ x + Range.squared_ y
 
 magnitude :: VectorBounds2d (space @ units) -> Range units
 magnitude (VectorBounds2d x y) = Range.hypot2 x y
@@ -358,10 +363,13 @@ maxMagnitude (VectorBounds2d (Range minX maxX) (Range minY maxY)) =
    in Qty.hypot2 xMagnitude yMagnitude
 
 maxSquaredMagnitude :: Units.Squared units1 units2 => VectorBounds2d (space @ units1) -> Qty units2
-maxSquaredMagnitude (VectorBounds2d (Range minX maxX) (Range minY maxY)) =
+maxSquaredMagnitude = Units.specialize << maxSquaredMagnitude_
+
+maxSquaredMagnitude_ :: VectorBounds2d (space @ units) -> Qty (Units.GenericProduct units units)
+maxSquaredMagnitude_ (VectorBounds2d (Range minX maxX) (Range minY maxY)) =
   let xMagnitude = Qty.max (Qty.abs minX) (Qty.abs maxX)
       yMagnitude = Qty.max (Qty.abs minY) (Qty.abs maxY)
-   in Qty.squared xMagnitude + Qty.squared yMagnitude
+   in Qty.squared_ xMagnitude + Qty.squared_ yMagnitude
 
 normalize :: VectorBounds2d (space @ units) -> VectorBounds2d (space @ Unitless)
 normalize vectorBounds =

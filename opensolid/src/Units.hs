@@ -4,19 +4,23 @@ module Units
   , convert
   , unconvert
   , Coercion
-  , Generic
   , GenericProduct
   , GenericQuotient
-  , (:/)
-  , (:*)
   , drop
   , add
-  , generalize
   , specialize
-  , (.*)
-  , (./)
-  , (.<>)
-  , (.><)
+  , unspecialize
+  , (.*.)
+  , (./.)
+  , (.<>.)
+  , (.><.)
+  , (^*.)
+  , (.*^)
+  , (.!/!)
+  , (!./!)
+  , (.!/.!)
+  , (./^)
+  , (!?/.!?)
   , Product
   , Squared
   , Quotient
@@ -57,8 +61,6 @@ instance Coercion u1 u2 a b => Coercion u1 u2 (List a) (List b)
 
 instance Coercion u1 u2 a b => Coercion u1 u2 (NonEmpty a) (NonEmpty b)
 
-data Generic units
-
 data GenericProduct units1 units2
 
 data GenericQuotient units1 units2
@@ -71,63 +73,116 @@ drop = unsafeCoerce
 add :: Coercion Unitless units a b => a -> b
 add = unsafeCoerce
 
-{-# INLINE generalize #-}
-generalize :: Coercion units (Generic units) a b => a -> b
-generalize = unsafeCoerce
-
 {-# INLINE specialize #-}
 specialize :: (Coercion genericUnits specificUnits a b, Specialize genericUnits specificUnits) => a -> b
 specialize = unsafeCoerce
 
-(.*) ::
+{-# INLINE unspecialize #-}
+unspecialize :: (Coercion genericUnits specificUnits a b, Specialize genericUnits specificUnits) => b -> a
+unspecialize = unsafeCoerce
+
+type SimplifyProduct unitsA unitsB unitsC aUnitless bUnitless cUnitless a b c =
   ( Coercion unitsA Unitless a aUnitless
   , Coercion unitsB Unitless b bUnitless
   , Coercion Unitless unitsC cUnitless c
-  , unitsA :* unitsB ~ unitsC
   , Multiplication aUnitless bUnitless cUnitless
-  ) =>
-  a ->
-  b ->
-  c
-(.*) lhs rhs = add (drop lhs * drop rhs)
+  )
 
-(./) ::
+type SimplifyQuotient unitsA unitsB unitsC aUnitless bUnitless cUnitless a b c =
   ( Coercion unitsA Unitless a aUnitless
   , Coercion unitsB Unitless b bUnitless
   , Coercion Unitless unitsC cUnitless c
-  , unitsA :/ unitsB ~ unitsC
   , Division aUnitless bUnitless cUnitless
-  ) =>
+  )
+
+(.*.) ::
+  SimplifyProduct units1 units2 (GenericProduct units1 units2) aUnitless bUnitless cUnitless a b c =>
   a ->
   b ->
   c
-(./) lhs rhs = add (drop lhs / drop rhs)
+(.*.) lhs rhs = add (drop lhs * drop rhs)
 
-(.<>) ::
+(.<>.) ::
   ( Coercion unitsA Unitless a aUnitless
   , Coercion unitsB Unitless b bUnitless
-  , Coercion Unitless unitsC cUnitless c
-  , unitsA :* unitsB ~ unitsC
+  , Coercion Unitless (GenericProduct unitsA unitsB) cUnitless c
   , DotProduct aUnitless bUnitless cUnitless
   ) =>
   a ->
   b ->
   c
-(.<>) lhs rhs = add (drop lhs <> drop rhs)
+(.<>.) lhs rhs = add (drop lhs <> drop rhs)
 
-(.><) ::
+(.><.) ::
   ( Coercion unitsA Unitless a aUnitless
   , Coercion unitsB Unitless b bUnitless
-  , Coercion Unitless unitsC cUnitless c
-  , unitsA :* unitsB ~ unitsC
+  , Coercion Unitless (GenericProduct unitsA unitsB) cUnitless c
   , CrossProduct aUnitless bUnitless cUnitless
   ) =>
   a ->
   b ->
   c
-(.><) lhs rhs = add (drop lhs >< drop rhs)
+(.><.) lhs rhs = add (drop lhs >< drop rhs)
 
-infixl 7 .*, ./, .<>, .><
+(./.) ::
+  SimplifyQuotient units1 units2 (GenericQuotient units1 units2) aUnitless bUnitless cUnitless a b c =>
+  a ->
+  b ->
+  c
+(./.) lhs rhs = add (drop lhs / drop rhs)
+
+(^*.) ::
+  SimplifyProduct units1 (GenericQuotient Unitless units2) (GenericQuotient units1 units2) aUnitless bUnitless cUnitless a b c =>
+  a ->
+  b ->
+  c
+(^*.) lhs rhs = add (drop lhs * drop rhs)
+
+(.*^) ::
+  SimplifyProduct (GenericQuotient Unitless units2) units1 (GenericQuotient units1 units2) aUnitless bUnitless cUnitless a b c =>
+  a ->
+  b ->
+  c
+(.*^) lhs rhs = add (drop lhs * drop rhs)
+
+(.!/!) ::
+  SimplifyQuotient (GenericProduct units1 units2) units2 units1 aUnitless bUnitless cUnitless a b c =>
+  a ->
+  b ->
+  c
+(.!/!) lhs rhs = add (drop lhs / drop rhs)
+
+(!./!) ::
+  SimplifyQuotient (GenericProduct units1 units2) units1 units2 aUnitless bUnitless cUnitless a b c =>
+  a ->
+  b ->
+  c
+(!./!) lhs rhs = add (drop lhs / drop rhs)
+
+(.!/.!) ::
+  SimplifyQuotient (GenericProduct units1 units2) (GenericProduct units2 units2) (GenericQuotient units1 units2) aUnitless bUnitless cUnitless a b c =>
+  a ->
+  b ->
+  c
+(.!/.!) lhs rhs = add (drop lhs / drop rhs)
+
+(./^) ::
+  SimplifyQuotient units1 (GenericQuotient Unitless units2) (GenericProduct units1 units2) aUnitless bUnitless cUnitless a b c =>
+  a ->
+  b ->
+  c
+(./^) lhs rhs = add (drop lhs / drop rhs)
+
+(!?/.!?) ::
+  SimplifyQuotient (GenericProduct units1 units2) (GenericProduct (GenericProduct units1 units2) units3) (GenericQuotient Unitless units3) aUnitless bUnitless cUnitless a b c =>
+  a ->
+  b ->
+  c
+(!?/.!?) lhs rhs = add (drop lhs / drop rhs)
+
+infixl 7 .*., ./., .<>., .><.
+
+infixl 7 ^*., .*^, .!/!, !./!, .!/.!, ./^, !?/.!?
 
 class
   ( Product units2 units1 units3
@@ -211,41 +266,7 @@ instance Squared Unitless Unitless
 
 instance Squared Meters SquareMeters
 
-instance units ~ units' => Product (Generic units) (Generic units') (GenericProduct units units)
-
-instance (units ~ units', units ~ units'') => Quotient (GenericProduct units units') (Generic units'') (Generic units)
-
-type family units1 :* units2 where
-  Generic units1 :* Generic units2 = GenericProduct units1 units2
-  GenericQuotient Unitless units2 :* Generic units1 = GenericQuotient units1 units2
-  Generic units1 :* GenericQuotient Unitless units2 = GenericQuotient units1 units2
-  GenericQuotient units1 units2 :* Generic units2 = Generic units1
-  GenericQuotient units1 units2 :* GenericQuotient units2 units1 = Unitless
-  GenericProduct units1 units2 :* Generic units3 = GenericProduct (GenericProduct units1 units2) units3
-  Generic units1 :* (GenericProduct units2 units3) = GenericProduct units1 (GenericProduct units2 units3)
-
-type family units1 :/ units2 where
-  Generic units1 :/ Generic units2 = GenericQuotient units1 units2
-  GenericProduct units units :/ Generic units = Generic units
-  GenericProduct units1 units2 :/ Generic units1 = Generic units2
-  GenericProduct units1 units2 :/ Generic units2 = Generic units1
-  Unitless :/ GenericQuotient Unitless units2 = Generic units2
-  Generic units1 :/ GenericQuotient Unitless units2 = GenericProduct units1 units2
-  Generic units1 :/ GenericQuotient units1 units2 = Generic units2
-  GenericProduct units1 units2 :/ GenericProduct units2 units2 = GenericQuotient units1 units2
-  GenericProduct units2 units1 :/ GenericProduct units2 units2 = GenericQuotient units1 units2
-  GenericProduct units1 units1 :/ GenericProduct units1 units2 = GenericQuotient units1 units2
-  GenericProduct units1 units1 :/ GenericProduct units2 units1 = GenericQuotient units1 units2
-  GenericProduct units1 units3 :/ GenericProduct units2 units3 = GenericQuotient units1 units2
-  GenericProduct units3 units1 :/ GenericProduct units3 units2 = GenericQuotient units1 units2
-  GenericProduct units3 units1 :/ GenericProduct units2 units3 = GenericQuotient units1 units2
-  GenericProduct units1 units3 :/ GenericProduct units3 units2 = GenericQuotient units1 units2
-
-instance Squared (Generic units) (GenericProduct units units)
-
 class Specialize genericUnits specificUnits | genericUnits -> specificUnits
-
-instance Specialize (Generic units) units
 
 instance Product units1 units2 units3 => Specialize (GenericProduct units1 units2) units3
 
