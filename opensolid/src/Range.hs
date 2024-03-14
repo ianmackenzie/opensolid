@@ -68,6 +68,8 @@ import Quadrature qualified
 import Random qualified
 import Units qualified
 
+type role Range phantom
+
 data Range units = Range_ (Qty units) (Qty units)
   deriving (Eq, Show)
 

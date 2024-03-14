@@ -31,6 +31,7 @@ import {-# SOURCE #-} Axis2d qualified
 import Bounded qualified
 import {-# SOURCE #-} Bounds2d (Bounds2d (Bounds2d))
 import {-# SOURCE #-} Bounds2d qualified
+import CoordinateSystem qualified
 import {-# SOURCE #-} Frame2d (Frame2d)
 import {-# SOURCE #-} Frame2d qualified
 import Length qualified
@@ -42,10 +43,13 @@ import Vector2d (Vector2d (Vector2d))
 import Vector2d qualified
 import VectorBounds2d (VectorBounds2d (VectorBounds2d))
 
-type role Point2d nominal
+type role Point2d phantom
 
 data Point2d (coordinateSystem :: CoordinateSystem) where
-  Point2d :: Qty units -> Qty units -> Point2d (space @ units)
+  Point2d ::
+    Qty (CoordinateSystem.Units coordinateSystem) ->
+    Qty (CoordinateSystem.Units coordinateSystem) ->
+    Point2d coordinateSystem
 
 deriving instance Eq (Point2d (space @ units))
 

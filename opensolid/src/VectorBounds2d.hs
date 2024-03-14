@@ -32,6 +32,7 @@ where
 
 import Basis2d (Basis2d)
 import Basis2d qualified
+import CoordinateSystem qualified
 import Direction2d (Direction2d (Direction2d))
 import Float qualified
 import {-# SOURCE #-} Frame2d (Frame2d)
@@ -44,10 +45,13 @@ import Units qualified
 import Vector2d (Vector2d (Vector2d))
 import Vector2d qualified
 
-type role VectorBounds2d nominal
+type role VectorBounds2d phantom
 
 data VectorBounds2d (coordinateSystem :: CoordinateSystem) where
-  VectorBounds2d :: Range units -> Range units -> VectorBounds2d (space @ units)
+  VectorBounds2d ::
+    Range (CoordinateSystem.Units coordinateSystem) ->
+    Range (CoordinateSystem.Units coordinateSystem) ->
+    VectorBounds2d coordinateSystem
 
 deriving instance Show (VectorBounds2d (space @ units))
 
