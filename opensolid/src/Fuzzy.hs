@@ -12,7 +12,7 @@ module Fuzzy
   )
 where
 
-import Basics hiding (pure)
+import Basics hiding (pure, return)
 import Control.Monad (join)
 import Prelude (Applicative, Functor, Monad)
 import Prelude qualified
@@ -40,6 +40,9 @@ Resolved _ <*> Unresolved = Unresolved
 
 pure :: a -> Fuzzy a
 pure = Resolved
+
+return :: a -> Fuzzy a
+return = Resolved
 
 fmap :: (a -> b) -> Fuzzy a -> Fuzzy b
 fmap f (Resolved value) = Resolved (f value)

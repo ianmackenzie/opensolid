@@ -30,7 +30,7 @@ where
 import Array qualified
 import Control.Monad (join)
 import Maybe qualified
-import OpenSolid hiding (pure)
+import OpenSolid hiding (pure, return)
 import Pair qualified
 import System.Random (StdGen)
 import System.Random qualified
@@ -47,7 +47,10 @@ fmap :: (a -> b) -> Generator a -> Generator b
 fmap = map
 
 pure :: a -> Generator a
-pure value = Generator (value,)
+pure = return
+
+return :: a -> Generator a
+return value = Generator (value,)
 
 (>>=) :: Generator a -> (a -> Generator b) -> Generator b
 valueGenerator >>= function =

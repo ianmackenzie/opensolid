@@ -168,7 +168,7 @@ intersection :: Bounds2d (space @ units) -> Bounds2d (space @ units) -> Maybe (B
 intersection (Bounds2d x1 y1) (Bounds2d x2 y2) = Maybe.do
   x <- Range.intersection x1 x2
   y <- Range.intersection y1 y2
-  return (Bounds2d x y)
+  Just (Bounds2d x y)
 
 hull2 ::
   Point2d (space @ units) ->
@@ -316,7 +316,7 @@ resolve assess bounds@(Bounds2d x y) =
 find :: (Bounds2d (space @ units) -> Bool) -> Bounds2d (space @ units) -> Maybe (Point2d (space @ units))
 find isCandidate (Bounds2d xRange yRange) = Maybe.do
   (x0, y0) <- Range.find2 (\x y -> isCandidate (Bounds2d x y)) xRange yRange
-  return (Point2d x0 y0)
+  Just (Point2d x0 y0)
 
 placeIn ::
   Frame2d (global @ units) (Defines local) ->

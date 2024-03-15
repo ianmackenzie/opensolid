@@ -119,7 +119,7 @@ intersection (Bounds3d x1 y1 z1) (Bounds3d x2 y2 z2) = Maybe.do
   x <- Range.intersection x1 x2
   y <- Range.intersection y1 y2
   z <- Range.intersection z1 z2
-  return (Bounds3d x y z)
+  Just (Bounds3d x y z)
 
 hull2 ::
   Point3d (space @ units) ->

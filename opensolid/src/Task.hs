@@ -1,6 +1,7 @@
 module Task
   ( Task
   , Async
+  , succeed
   , evaluate
   , check
   , fail
@@ -24,7 +25,7 @@ module Task
   )
 where
 
-import Basics hiding (pure)
+import Basics hiding (pure, return)
 import Control.Concurrent
 import Control.Concurrent.Async qualified as Async
 import Control.Monad (join)
@@ -52,7 +53,13 @@ instance Applicative Task where
   (<*>) = (<*>)
 
 pure :: a -> Task a
-pure value = Task (return value)
+pure = succeed
+
+return :: a -> Task a
+return = succeed
+
+succeed :: a -> Task a
+succeed value = Task (Prelude.return value)
 
 instance Monad Task where
   (>>=) = (>>=)
@@ -106,8 +113,8 @@ instance Sequence (Result x) where
   Error error >> _ = fail (Error.message error)
 
 evaluate :: Error x => Result x a -> Task a
-evaluate (Ok value) = Task (return value)
-evaluate (Error error) = Task (Prelude.fail (Error.message error))
+evaluate (Ok value) = succeed value
+evaluate (Error error) = fail (Error.message error)
 
 check :: Bool -> String -> Task ()
 check condition message = if condition then return () else fail message

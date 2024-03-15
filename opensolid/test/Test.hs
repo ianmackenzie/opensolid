@@ -85,7 +85,7 @@ reportError context messages = Task.do
   Console.printLine ""
   Task.forEach messages (String.indent "   " >> Console.printLine)
   Console.printLine ""
-  return (0, 1)
+  Task.succeed (0, 1)
 
 runImpl :: List String -> Test -> Task (Int, Int)
 runImpl context (Check count label generator) = fuzzImpl (label : context) count generator
@@ -98,7 +98,7 @@ sum ((successes, failures) : rest) =
    in (successes + restSuccesses, failures + restFailures)
 
 fuzzImpl :: List String -> Int -> Generator Expectation -> Task (Int, Int)
-fuzzImpl _ 0 _ = return (1, 0)
+fuzzImpl _ 0 _ = Task.succeed (1, 0)
 fuzzImpl context n generator = Task.do
   expectation <- Random.generate generator
   case expectation of

@@ -465,7 +465,7 @@ findTangentSolutions derivatives boundaryEdges boundaryPoints uvBounds bisection
           nextBisectionParameter
           (List.filter (affects bounds2) (exclusions1 ++ exclusions))
           (List.filter (SaddleRegion.bounds >> affects bounds2) (saddleRegions1 ++ saddleRegions))
-      return
+      Ok
         ( PartialZeros.merge solutions1 solutions2
         , exclusions1 ++ exclusions2
         , saddleRegions1 ++ saddleRegions2
@@ -525,7 +525,7 @@ findCrossingSolutions derivatives boundaryEdges boundaryPoints uvBounds bisectio
           nextBisectionParameter
           (List.filter (affects bounds2) (exclusions1 ++ exclusions))
           (List.filter (SaddleRegion.bounds >> affects bounds2) saddleRegions)
-      return
+      Ok
         ( PartialZeros.merge solutions1 solutions2
         , exclusions1 ++ exclusions2
         )

@@ -14,7 +14,7 @@ module Maybe
   )
 where
 
-import Basics hiding (pure)
+import Basics hiding (pure, return)
 import Control.Monad (join)
 import Data.Maybe qualified
 import Error (Error)
@@ -29,6 +29,9 @@ map _ Nothing = Nothing
 
 pure :: a -> Maybe a
 pure = Just
+
+return :: a -> Maybe a
+return = Just
 
 (>>=) :: Maybe a -> (a -> Maybe b) -> Maybe b
 Just value >>= function = function value

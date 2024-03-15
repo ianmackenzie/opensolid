@@ -12,13 +12,16 @@ where
 
 import Control.Concurrent.Async qualified as Async
 import Control.Monad (join)
-import OpenSolid hiding (pure, (>>))
+import OpenSolid hiding (pure, return, (>>))
 import Pair qualified
 import Task qualified
 import Prelude (fmap)
 
 pure :: a -> Task a
 pure = Task.pure
+
+return :: a -> Task a
+return = Task.return
 
 fail :: String -> Task a
 fail = Task.fail

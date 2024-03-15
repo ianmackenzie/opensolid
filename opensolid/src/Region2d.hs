@@ -104,7 +104,7 @@ connect [] = Ok []
 connect (first : rest) = Result.do
   (loop, remainingCurves) <- buildLoop (startLoop first) rest
   remainingLoops <- connect remainingCurves
-  return (loop : remainingLoops)
+  Ok (loop : remainingLoops)
 
 data PartialLoop coordinateSystem
   = PartialLoop

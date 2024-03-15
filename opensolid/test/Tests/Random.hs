@@ -41,7 +41,7 @@ frame2d :: Generator (Frame2d (global @ Meters) (Defines local))
 frame2d = Random.do
   originPoint <- point2d
   direction <- Direction2d.generator
-  return (Frame2d.withXDirection direction originPoint)
+  Random.return (Frame2d.withXDirection direction originPoint)
 
 bounds2d :: Generator (Bounds2d (space @ Meters))
 bounds2d = Random.map2 Bounds2d lengthRange lengthRange

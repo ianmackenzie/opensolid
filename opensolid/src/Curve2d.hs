@@ -209,7 +209,7 @@ findIntersections curve1 curve2 endpointParameterValues = Result.do
         endpointResults
           |> findTangentIntersections derivatives1 derivatives2 searchTree1 searchTree2
           |> findCrossingIntersections derivatives1 derivatives2 searchTree1 searchTree2
-  return (List.sort allIntersections)
+  Ok (List.sort allIntersections)
 
 findEndpointIntersections ::
   Tolerance units =>
@@ -238,7 +238,7 @@ findEndpointIntersection derivatives1 derivatives2 t1t2 searchTree1 searchTree2 
   intersectionType <- Derivatives.classify t1t2 derivatives1 derivatives2 ?? TangentIntersectionAtDegeneratePoint
   let (kind, sign) = intersectionType
   let (t1, t2) = t1t2
-  return <|
+  Ok <|
     Bisection.solve2
       (Segment.isEndpointIntersectionCandidate t1t2)
       (Segment.endpointIntersectionResolved intersectionType)

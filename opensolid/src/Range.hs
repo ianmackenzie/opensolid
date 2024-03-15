@@ -551,7 +551,7 @@ generator :: Random.Generator (Qty units) -> Random.Generator (Range units)
 generator qtyGenerator = Random.do
   a <- qtyGenerator
   b <- qtyGenerator
-  return (from a b)
+  Random.return (from a b)
 
 samples :: Range units -> List (Qty units)
 samples range = List.map (interpolate range) Quadrature.points

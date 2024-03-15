@@ -295,5 +295,5 @@ main =
     Task.fromIO (SIO.hClose stdinHandle)
     ruffExitCode <- Task.fromIO (SP.waitForProcess process)
     if ruffExitCode == SE.ExitSuccess
-      then return ()
+      then Task.succeed ()
       else Task.fail "Error when running Ruff"

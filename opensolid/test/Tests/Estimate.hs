@@ -56,13 +56,13 @@ dummyEstimate = Random.do
   range <- Range.generator Random.length
   t <- T.generator
   let value = Range.interpolate range t
-  return (value, Estimate.wrap (DummyEstimate value range))
+  Random.return (value, Estimate.wrap (DummyEstimate value range))
 
 duplicatedDummyEstimates :: Generator (NonEmpty (Length, Estimate Meters))
 duplicatedDummyEstimates = Random.do
   pair <- dummyEstimate
   numPairs <- Random.int 1 3
-  return (pair :| List.repeat (numPairs - 1) pair)
+  Random.return (pair :| List.repeat (numPairs - 1) pair)
 
 dummyEstimates :: Generator (NonEmpty (Length, Estimate Meters))
 dummyEstimates =

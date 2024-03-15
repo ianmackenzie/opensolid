@@ -42,7 +42,6 @@ import Prelude
   , IO
   , Int
   , Maybe (Just, Nothing)
-  , Monad (return)
   , Ord (compare, (<), (<=), (>), (>=))
   , Ordering (EQ, GT, LT)
   , Show (show)
@@ -103,3 +102,7 @@ always value _ = value
 {-# INLINE pure #-}
 pure :: a -> a
 pure = identity
+
+{-# INLINE return #-}
+return :: a -> a
+return = identity

@@ -31,19 +31,19 @@ newStorablePtr :: Storable a => a -> IO (Foreign.Ptr a)
 newStorablePtr result = Prelude.do
   ptr <- Foreign.malloc
   Foreign.poke ptr result
-  return ptr
+  Prelude.return ptr
 
 newStablePtr :: a -> IO (Foreign.Ptr ())
 newStablePtr val = Prelude.do
   stablePtr <- Foreign.newStablePtr val
-  return (Foreign.castStablePtrToPtr stablePtr)
+  Prelude.return (Foreign.castStablePtrToPtr stablePtr)
 
 derefStablePtr :: Foreign.Ptr () -> IO a
 derefStablePtr = Foreign.castPtrToStablePtr >> Foreign.deRefStablePtr
 
 freeStablePtr :: Foreign.Ptr () -> IO ()
 freeStablePtr ptr
-  | ptr == Foreign.nullPtr = return ()
+  | ptr == Foreign.nullPtr = Prelude.return ()
   | otherwise = Foreign.freeStablePtr (Foreign.castPtrToStablePtr ptr)
 
 -- A typeclass that knows how to convert types to and from `Ptr ()`
@@ -88,10 +88,10 @@ instance VoidPtr (Qty u) where
 
 instance VoidPtr a => VoidPtr (Maybe a) where
   fromVoidPtr ptr
-    | ptr == Foreign.nullPtr = return Nothing
+    | ptr == Foreign.nullPtr = Prelude.return Nothing
     | otherwise = Prelude.fmap Just (fromVoidPtr ptr)
   toVoidPtr (Just val) = toVoidPtr val
-  toVoidPtr Nothing = return Foreign.nullPtr
+  toVoidPtr Nothing = Prelude.return Foreign.nullPtr
 
 instance (VoidPtr a, VoidPtr b) => VoidPtr (a, b) where
   fromVoidPtr ptr = Prelude.do
@@ -99,14 +99,14 @@ instance (VoidPtr a, VoidPtr b) => VoidPtr (a, b) where
     bPtr <- Foreign.peekElemOff (Foreign.castPtr ptr) 1
     a <- fromVoidPtr aPtr
     b <- fromVoidPtr bPtr
-    return (a, b)
+    Prelude.return (a, b)
   toVoidPtr (a, b) = Prelude.do
     ptr <- Foreign.mallocBytes (pointerSize * (2 :: Int))
     aPtr <- toVoidPtr a
     bPtr <- toVoidPtr b
     Foreign.poke ptr aPtr
     Foreign.pokeElemOff ptr 1 bPtr
-    return (Foreign.castPtr ptr)
+    Prelude.return (Foreign.castPtr ptr)
 
 pointerSize :: Int
 pointerSize = Foreign.sizeOf Foreign.nullPtr
@@ -128,13 +128,13 @@ instance (TaggedError error, VoidPtr success) => VoidPtr (Result error success) 
       Error err -> toTaggedPtr err
       Ok success -> Prelude.do
         succPtr <- toVoidPtr success
-        return (Word8 0, succPtr)
+        Prelude.return (Word8 0, succPtr)
     Foreign.poke ptr nestedPtr
     Foreign.pokeByteOff ptr pointerSize tag
-    return (Foreign.castPtr ptr)
+    Prelude.return (Foreign.castPtr ptr)
 
 -- TODO: codegen this
 instance TaggedError Vector2d.IsZero where
-  fromTaggedPtr (Word8 1) _ = return Vector2d.IsZero
+  fromTaggedPtr (Word8 1) _ = Prelude.return Vector2d.IsZero
   fromTaggedPtr tag _ = internalError ("Unexpected tag " ++ show tag)
-  toTaggedPtr Vector2d.IsZero = return (Word8 1, Foreign.nullPtr)
+  toTaggedPtr Vector2d.IsZero = Prelude.return (Word8 1, Foreign.nullPtr)

@@ -38,7 +38,7 @@ ffi :: List Class -> TH.Q (List TH.Dec)
 ffi classes = Prelude.do
   functionDecls <- Prelude.fmap List.concat (Prelude.traverse ffiClass classes)
   freeStableFunctionDecl <- freeFunctionFfi "opensolid_free_stable" 'Pointers.freeStablePtr
-  return (freeStableFunctionDecl : functionDecls)
+  Prelude.return (freeStableFunctionDecl : functionDecls)
  where
   ffiClass (Class _ _ _ functions) =
     Prelude.fmap List.concat (Prelude.traverse ffiFunction functions)
@@ -46,12 +46,12 @@ ffi classes = Prelude.do
 freeFunctionFfi :: String -> TH.Name -> TH.Q TH.Dec
 freeFunctionFfi ffiName name = Prelude.do
   freeFunctionType <- TH.reifyType name
-  return (TH.ForeignD (TH.ExportF TH.CCall ffiName name freeFunctionType))
+  Prelude.return (TH.ForeignD (TH.ExportF TH.CCall ffiName name freeFunctionType))
 
 api :: List Class -> TH.Q TH.Exp
 api classes = Prelude.do
   apiCls <- Prelude.traverse apiClass classes
-  return (TH.AppE (TH.ConE 'Api.Api) (TH.ListE apiCls))
+  Prelude.return (TH.AppE (TH.ConE 'Api.Api) (TH.ListE apiCls))
 
 -- human readable name in the API
 apiName :: TH.Name -> TH.Exp
@@ -62,7 +62,7 @@ apiClass :: Class -> TH.Q TH.Exp
 apiClass (Class name representationProps errors functions) = Prelude.do
   apiFns <- Prelude.traverse apiFunction functions
   apiExceptions <- Prelude.fmap List.concat (Prelude.traverse apiException errors)
-  return <|
+  Prelude.return <|
     TH.ConE 'Api.Class
       `TH.AppE` TH.LitE (TH.StringL (TH.nameBase name))
       `TH.AppE` TH.ListE (List.map apiName representationProps)
@@ -72,7 +72,7 @@ apiClass (Class name representationProps errors functions) = Prelude.do
 apiException :: TH.Name -> TH.Q (List TH.Exp)
 apiException name = Prelude.do
   constructors <- apiExceptionConstructors name
-  return
+  Prelude.return
     [ TH.ConE 'Api.ExceptionClass
         `TH.AppE` TH.LitE (TH.StringL (TH.nameBase name))
         `TH.AppE` TH.ListE constructors
@@ -88,7 +88,7 @@ apiExceptionConstructors typeName = Prelude.do
 
 apiExceptionConstructor :: Int -> TH.Con -> TH.Q TH.Exp
 apiExceptionConstructor idx (TH.NormalC name []) = Prelude.do
-  return <|
+  Prelude.return <|
     TH.TupE
       [ Just (TH.LitE (TH.IntegerL (fromIntegral (idx + 1))))
       , Just (TH.LitE (TH.StringL (TH.nameBase name)))
@@ -96,7 +96,7 @@ apiExceptionConstructor idx (TH.NormalC name []) = Prelude.do
       ]
 apiExceptionConstructor idx (TH.NormalC name [(_, typ)]) = Prelude.do
   apiTyp <- apiType typ
-  return <|
+  Prelude.return <|
     TH.TupE
       [ Just (TH.LitE (TH.IntegerL (fromIntegral (idx + 1))))
       , Just (TH.LitE (TH.StringL (TH.nameBase name)))
@@ -139,7 +139,7 @@ apiFunction (Function kind fnName argNames) = Prelude.do
             ]
         )
     else
-      return <|
+      Prelude.return <|
         TH.ConE 'Api.Function
           `TH.AppE` TH.ConE kind
           `TH.AppE` TH.LitE (TH.StringL (camelToSnake (ffiFunctionName fnName))) -- ffi name
@@ -157,47 +157,47 @@ apiFunctionType (TH.ForallT _ _ innerType) = apiFunctionType innerType
 apiFunctionType (TH.AppT (TH.AppT TH.ArrowT arg) rest) = Prelude.do
   (args, returnType) <- apiFunctionType rest
   typ <- apiType arg
-  return (typ : args, returnType)
+  Prelude.return (typ : args, returnType)
 apiFunctionType returnType = Prelude.do
   typ <- apiType returnType
-  return ([], typ)
+  Prelude.return ([], typ)
 
 apiType :: TH.Type -> TH.Q TH.Exp
 apiType (TH.AppT (TH.AppT (TH.TupleT 2) nestedTyp1) nestedTyp2) = Prelude.do
   typ1 <- apiType nestedTyp1
   typ2 <- apiType nestedTyp2
-  return (TH.ConE 'Api.Tuple2 `TH.AppE` typ1 `TH.AppE` typ2)
+  Prelude.return (TH.ConE 'Api.Tuple2 `TH.AppE` typ1 `TH.AppE` typ2)
 apiType (TH.AppT (TH.AppT (TH.ConT containerName) errTyp) nestedTyp) | containerName == ''Result = Prelude.do
   typ <- apiType nestedTyp
   err <- typeNameBase errTyp
   mod <- modNameBase errTyp
-  return (TH.ConE 'Api.Result `TH.AppE` mod `TH.AppE` err `TH.AppE` typ)
+  Prelude.return (TH.ConE 'Api.Result `TH.AppE` mod `TH.AppE` err `TH.AppE` typ)
 apiType (TH.AppT (TH.ConT containerName) nestedTyp) | containerName == ''Maybe = Prelude.do
   typ <- apiType nestedTyp
-  return (TH.ConE 'Api.Maybe `TH.AppE` typ)
+  Prelude.return (TH.ConE 'Api.Maybe `TH.AppE` typ)
 apiType typ = Prelude.do
   isPtr <- isPointer typ
   if isPtr
     then Prelude.fmap (TH.AppE (TH.ConE 'Api.Pointer)) (typeNameBase typ)
     else case typ of
       (TH.AppT (TH.ConT name) _)
-        | name == ''Qty -> return (TH.ConE 'Api.Float)
+        | name == ''Qty -> Prelude.return (TH.ConE 'Api.Float)
       (TH.ConT name)
-        | name == ''Float -> return (TH.ConE 'Api.Float)
-        | name == ''Angle -> return (TH.ConE 'Api.Float)
-        | name == ''Bool -> return (TH.ConE 'Api.Boolean)
+        | name == ''Float -> Prelude.return (TH.ConE 'Api.Float)
+        | name == ''Angle -> Prelude.return (TH.ConE 'Api.Float)
+        | name == ''Bool -> Prelude.return (TH.ConE 'Api.Boolean)
       _ -> Prelude.fail ("Unknown type: " ++ show typ)
 
 typeNameBase :: TH.Type -> TH.Q TH.Exp
 typeNameBase (TH.AppT t _) = typeNameBase t
-typeNameBase (TH.ConT name) = return (TH.LitE (TH.StringL (TH.nameBase name)))
+typeNameBase (TH.ConT name) = Prelude.return (TH.LitE (TH.StringL (TH.nameBase name)))
 typeNameBase typ = Prelude.fail ("Unknown type: " ++ show typ)
 
 modNameBase :: TH.Type -> TH.Q TH.Exp
 modNameBase (TH.AppT t _) = modNameBase t
 modNameBase typ@(TH.ConT name) =
   case TH.nameModule name of
-    Just mod -> return (TH.LitE (TH.StringL mod))
+    Just mod -> Prelude.return (TH.LitE (TH.StringL mod))
     Nothing -> Prelude.fail ("Unknown module for type: " ++ show typ)
 modNameBase typ = Prelude.fail ("Unknown module for type: " ++ show typ)
 
@@ -210,13 +210,13 @@ ffiFunctionInfo (TH.AppT (TH.AppT TH.ArrowT argTyp) remainingArgs) retExp argume
       newArguments = argName : arguments
       newRetExpr = TH.AppE retExp argExpr
   (returnType, returnClause) <- ffiFunctionInfo remainingArgs newRetExpr newArguments newBindStmts
-  return
+  Prelude.return
     ( TH.AppT (TH.AppT TH.ArrowT argFfiTyp) returnType
     , returnClause
     )
 ffiFunctionInfo returnType retExp argNames bindStmts = Prelude.do
   (finalRetExp, finalReturnType) <- ffiReturnInfo retExp returnType
-  return
+  Prelude.return
     ( TH.AppT (TH.ConT ''IO) finalReturnType
     , TH.Clause
         (List.reverse argNames)
@@ -260,7 +260,7 @@ ffiArgInfo typ = Prelude.do
   if isPtr
     then Prelude.do
       unwrappedName <- TH.newName "y"
-      return
+      Prelude.return
         ( TH.VarP argName -- arg name
         , TH.AppT (TH.ConT ''Foreign.Ptr) (TH.ConT ''()) -- arg type
         , TH.VarE unwrappedName -- unwrapped pointer value
@@ -271,7 +271,7 @@ ffiArgInfo typ = Prelude.do
               (TH.AppE (TH.VarE 'Pointers.fromVoidPtr) (TH.VarE argName))
         )
     else
-      return
+      Prelude.return
         ( TH.VarP argName -- arg name
         , typ -- original type
         , TH.VarE argName -- original arg
@@ -281,14 +281,14 @@ ffiArgInfo typ = Prelude.do
 ffiReturnInfo :: TH.Exp -> TH.Type -> TH.Q (TH.Exp, TH.Type)
 ffiReturnInfo expr typ = Prelude.do
   isPtr <- isPointer typ
-  return <|
+  Prelude.return <|
     if isPtr
       then
         ( TH.AppE (TH.VarE 'Pointers.toVoidPtr) expr
         , TH.AppT (TH.ConT ''Foreign.Ptr) (TH.ConT ''())
         )
       else
-        ( TH.AppE (TH.VarE 'return) expr
+        ( TH.AppE (TH.VarE 'Prelude.return) expr
         , typ
         )
 
@@ -296,7 +296,7 @@ isPointer :: TH.Type -> TH.Q Bool
 isPointer typ = Prelude.do
   let fixedTyp = fixupType typ
   instances <- TH.reifyInstances ''Storable [fixedTyp]
-  return (List.isEmpty instances)
+  Prelude.return (List.isEmpty instances)
 
 camelToSnake :: String -> String
 camelToSnake [] = []
@@ -341,7 +341,7 @@ ffiFunction (Function _ fnName _) = Prelude.do
         if needsTolerance
           then TH.AppT (TH.AppT TH.ArrowT (TH.ConT ''Float)) returnType -- prepend tolerance argument type
           else returnType
-  return
+  Prelude.return
     [ TH.ForeignD (TH.ExportF TH.CCall (camelToSnake foreignName) wrapperName wrapperType)
     , TH.SigD wrapperName wrapperType
     , TH.FunD wrapperName [wrapperClause]

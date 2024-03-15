@@ -30,7 +30,7 @@ task :: Task () -> a -> a
 task debugTask value =
   System.IO.Unsafe.unsafePerformIO Prelude.do
     Task.toIO debugTask
-    return value
+    Prelude.return value
 
 sequence :: List (a -> a) -> a -> a
 sequence [] = identity

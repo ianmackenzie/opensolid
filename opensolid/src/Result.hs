@@ -20,7 +20,7 @@ module Result
   )
 where
 
-import Basics hiding (pure, (>>))
+import Basics hiding (pure, return, (>>))
 import Control.Monad (join)
 import Error (Error)
 import Error qualified
@@ -54,6 +54,9 @@ instance MonadFail (Result String) where
 
 pure :: a -> Result x a
 pure = Ok
+
+return :: a -> Result x a
+return = Ok
 
 fmap :: (a -> b) -> Result x a -> Result x b
 fmap = map

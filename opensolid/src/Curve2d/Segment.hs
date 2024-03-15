@@ -225,7 +225,7 @@ findTangentIntersection ::
   Maybe Intersection
 findTangentIntersection derivatives1 derivatives2 tBounds1 tBounds2 _ _ sign = Maybe.do
   (t1, t2) <- Range.find2 (isTangentIntersection derivatives1 derivatives2) tBounds1 tBounds2
-  return (Intersection.tangent t1 t2 sign)
+  Just (Intersection.tangent t1 t2 sign)
 
 isTangentIntersection ::
   Tolerance units =>
@@ -285,7 +285,7 @@ findCrossingIntersection derivatives1 derivatives2 tBounds1 tBounds2 _ _ sign = 
   let curve1 = Derivatives.curve derivatives1
   let curve2 = Derivatives.curve derivatives2
   (t1, t2) <- Range.find2 (isCrossingIntersection curve1 curve2) tBounds1 tBounds2
-  return (Intersection.crossing t1 t2 sign)
+  Just (Intersection.crossing t1 t2 sign)
 
 isCrossingIntersection ::
   Curve2d (space @ units) ->

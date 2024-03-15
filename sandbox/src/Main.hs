@@ -114,7 +114,7 @@ offsetPoint ::
   Point2d (space @ units)
 offsetPoint startPoint endPoint distance = Result.withDefault startPoint Result.do
   direction <- Direction2d.from startPoint endPoint
-  return (Point2d.midpoint startPoint endPoint + distance * Direction2d.perpendicularTo direction)
+  Ok (Point2d.midpoint startPoint endPoint + distance * Direction2d.perpendicularTo direction)
 
 testCustomFunction :: Tolerance Meters => Task ()
 testCustomFunction =
@@ -137,7 +137,7 @@ getCrossProduct = Error.context "In getCrossProduct" Result.do
     Direction2d.from Point2d.origin Point2d.origin
       |> Error.debug (\_ -> Console.printLine "Couldn't get line direction!")
       |> Error.context "When getting line direction"
-  return (vectorDirection >< lineDirection)
+  Ok (vectorDirection >< lineDirection)
 
 testTry :: Tolerance Meters => Task ()
 testTry =
@@ -153,7 +153,7 @@ doublingTask :: String -> Task Int
 doublingTask input = Task.do
   value <- Int.parse input
   let doubled = 2 * value
-  return doubled
+  Task.succeed doubled
 
 doubleManyTask :: Task (List Int)
 doubleManyTask = Task.collect doublingTask ["1", "-2", "3"]
@@ -313,7 +313,7 @@ testConcurrency = Task.do
 computeSquareRoot :: Float -> Task Float
 computeSquareRoot value = Task.do
   Task.sleep Duration.second
-  return (Float.sqrt value)
+  Task.succeed (Float.sqrt value)
 
 testConcurrentCollect :: Task ()
 testConcurrentCollect = Task.do
@@ -359,8 +359,7 @@ drawBezier colour startPoint innerControlPoints endPoint = Result.do
   let drawingInnerControlPoints = List.map (Point2d.convert toDrawing) innerControlPoints
   let drawingControlPoints = List.concat [[drawingStartPoint], drawingInnerControlPoints, [drawingEndPoint]]
   curve <- BezierCurve2d.fromControlPoints drawingStartPoint drawingInnerControlPoints drawingEndPoint
-
-  return <|
+  Ok <|
     Drawing2d.with
       [Drawing2d.strokeColour colour, Drawing2d.strokeWidth (Length.millimeters 1.0)]
       [ Drawing2d.with [Drawing2d.opacity 0.3] <|
