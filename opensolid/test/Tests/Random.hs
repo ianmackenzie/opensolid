@@ -10,7 +10,6 @@ module Tests.Random
 where
 
 import Bounds2d (Bounds2d (Bounds2d))
-import VectorBounds2d (VectorBounds2d (VectorBounds2d))
 import Direction2d qualified
 import Frame2d (Frame2d)
 import Frame2d qualified
@@ -23,6 +22,7 @@ import Random qualified
 import Range (Range)
 import Range qualified
 import Units (Meters)
+import VectorBounds2d (VectorBounds2d (VectorBounds2d))
 import VectorBounds3d (VectorBounds3d (VectorBounds3d))
 
 length :: Generator Length
