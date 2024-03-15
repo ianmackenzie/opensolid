@@ -6,7 +6,6 @@ module Bounds2d
 where
 
 import Bounds qualified
-import CoordinateSystem qualified
 import OpenSolid
 import {-# SOURCE #-} Point2d (Point2d)
 import Range (Range)
@@ -15,8 +14,8 @@ type role Bounds2d phantom
 
 data Bounds2d (coordinateSystem :: CoordinateSystem) where
   Bounds2d ::
-    Range (CoordinateSystem.Units coordinateSystem) ->
-    Range (CoordinateSystem.Units coordinateSystem) ->
+    Range (Units coordinateSystem) ->
+    Range (Units coordinateSystem) ->
     Bounds2d coordinateSystem
 
 instance Bounds.Interface (Bounds2d (space @ units))

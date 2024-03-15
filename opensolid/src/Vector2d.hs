@@ -40,7 +40,6 @@ import Angle qualified
 import Area qualified
 import {-# SOURCE #-} Basis2d (Basis2d)
 import {-# SOURCE #-} Basis2d qualified
-import CoordinateSystem qualified
 import Data.Coerce qualified
 import {-# SOURCE #-} Direction2d (Direction2d)
 import {-# SOURCE #-} Direction2d qualified
@@ -58,8 +57,8 @@ type role Vector2d phantom
 
 data Vector2d (coordinateSystem :: CoordinateSystem) where
   Vector2d ::
-    Qty (CoordinateSystem.Units coordinateSystem) ->
-    Qty (CoordinateSystem.Units coordinateSystem) ->
+    Qty (Units coordinateSystem) ->
+    Qty (Units coordinateSystem) ->
     Vector2d coordinateSystem
 
 deriving instance Eq (Vector2d (space @ units))

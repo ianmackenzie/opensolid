@@ -40,7 +40,6 @@ where
 import Axis2d (Axis2d)
 import Axis2d qualified
 import Bounds qualified
-import CoordinateSystem qualified
 import Data.Coerce qualified
 import Direction2d (Direction2d (Direction2d))
 import Float qualified
@@ -63,8 +62,8 @@ type role Bounds2d phantom
 
 data Bounds2d (coordinateSystem :: CoordinateSystem) where
   Bounds2d ::
-    Range (CoordinateSystem.Units coordinateSystem) ->
-    Range (CoordinateSystem.Units coordinateSystem) ->
+    Range (Units coordinateSystem) ->
+    Range (Units coordinateSystem) ->
     Bounds2d coordinateSystem
 
 deriving instance Show (Bounds2d (space @ units))

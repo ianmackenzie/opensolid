@@ -28,7 +28,6 @@ module Vector3d
 where
 
 import Area qualified
-import CoordinateSystem qualified
 import Data.Coerce qualified
 import {-# SOURCE #-} Direction3d (Direction3d)
 import {-# SOURCE #-} Direction3d qualified
@@ -42,9 +41,9 @@ type role Vector3d phantom
 
 data Vector3d (coordinateSystem :: CoordinateSystem) where
   Vector3d ::
-    Qty (CoordinateSystem.Units coordinateSystem) ->
-    Qty (CoordinateSystem.Units coordinateSystem) ->
-    Qty (CoordinateSystem.Units coordinateSystem) ->
+    Qty (Units coordinateSystem) ->
+    Qty (Units coordinateSystem) ->
+    Qty (Units coordinateSystem) ->
     Vector3d coordinateSystem
 
 deriving instance Eq (Vector3d (space @ units))

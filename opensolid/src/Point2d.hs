@@ -31,7 +31,6 @@ import {-# SOURCE #-} Axis2d qualified
 import Bounded qualified
 import {-# SOURCE #-} Bounds2d (Bounds2d (Bounds2d))
 import {-# SOURCE #-} Bounds2d qualified
-import CoordinateSystem qualified
 import Data.Coerce qualified
 import {-# SOURCE #-} Frame2d (Frame2d)
 import {-# SOURCE #-} Frame2d qualified
@@ -48,8 +47,8 @@ type role Point2d phantom
 
 data Point2d (coordinateSystem :: CoordinateSystem) where
   Point2d ::
-    Qty (CoordinateSystem.Units coordinateSystem) ->
-    Qty (CoordinateSystem.Units coordinateSystem) ->
+    Qty (Units coordinateSystem) ->
+    Qty (Units coordinateSystem) ->
     Point2d coordinateSystem
 
 deriving instance Eq (Point2d (space @ units))

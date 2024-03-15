@@ -17,7 +17,6 @@ module VectorBounds3d
   )
 where
 
-import CoordinateSystem qualified
 import Data.Coerce qualified
 import Direction3d (Direction3d (Direction3d))
 import OpenSolid
@@ -29,9 +28,9 @@ import Vector3d (Vector3d (Vector3d))
 
 data VectorBounds3d (coordinateSystem :: CoordinateSystem) where
   VectorBounds3d ::
-    Range (CoordinateSystem.Units coordinateSystem) ->
-    Range (CoordinateSystem.Units coordinateSystem) ->
-    Range (CoordinateSystem.Units coordinateSystem) ->
+    Range (Units coordinateSystem) ->
+    Range (Units coordinateSystem) ->
+    Range (Units coordinateSystem) ->
     VectorBounds3d coordinateSystem
 
 deriving instance Show (VectorBounds3d (space @ units))

@@ -1,5 +1,6 @@
 module Units
-  ( Conversion
+  ( Units
+  , Conversion
   , conversion
   , convert
   , unconvert
@@ -47,6 +48,9 @@ import Data.Kind (Constraint)
 import Data.List.NonEmpty (NonEmpty)
 import {-# SOURCE #-} Qty (Qty (Qty))
 import Prelude qualified
+
+type Units :: k -> Type
+type family Units a
 
 newtype Conversion units1 units2 = Conversion Prelude.Double
 

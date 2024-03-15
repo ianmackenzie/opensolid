@@ -3,12 +3,12 @@ module CoordinateSystem
   , type (@)
   , LocalSpace
   , Defines
-  , Units
   , Space
   )
 where
 
 import Basics
+import Units (Units)
 
 data CoordinateSystem = CoordinateSystem Type Type
 
@@ -18,9 +18,7 @@ newtype LocalSpace = LocalSpace Type
 
 type Defines space = 'LocalSpace space
 
-type Units :: CoordinateSystem -> Type
-type family Units coordinateSystem where
-  Units ('CoordinateSystem space units) = units
+type instance Units (space @ units) = units
 
 type Space :: CoordinateSystem -> Type
 type family Space coordinateSystem where

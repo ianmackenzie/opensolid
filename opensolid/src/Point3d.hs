@@ -24,7 +24,6 @@ where
 import Bounded qualified
 import {-# SOURCE #-} Bounds3d (Bounds3d (Bounds3d))
 import {-# SOURCE #-} Bounds3d qualified
-import CoordinateSystem qualified
 import Data.Coerce qualified
 import Length qualified
 import OpenSolid
@@ -39,9 +38,9 @@ type role Point3d phantom
 
 data Point3d (coordinateSystem :: CoordinateSystem) where
   Point3d ::
-    Qty (CoordinateSystem.Units coordinateSystem) ->
-    Qty (CoordinateSystem.Units coordinateSystem) ->
-    Qty (CoordinateSystem.Units coordinateSystem) ->
+    Qty (Units coordinateSystem) ->
+    Qty (Units coordinateSystem) ->
+    Qty (Units coordinateSystem) ->
     Point3d coordinateSystem
 
 deriving instance Eq (Point3d (space @ units))

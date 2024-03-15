@@ -36,6 +36,7 @@ import Tolerance (ApproximateEquality ((~=)), Tolerance, exactly, (!=))
 import Units
   ( Radians
   , Unitless
+  , Units
   , (!./!)
   , (!/!.)
   , (!/.!)
