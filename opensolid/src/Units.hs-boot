@@ -22,10 +22,13 @@ type Product units1 units2 units3 =
 
 type Quotient units1 units2 units3 =
   ( Quot units1 units2 ~ units3
-  , Product units2 units3 units1
+  , Prod units2 units3 ~ units1
+  , Prod units3 units2 ~ units1
+  , Quot units1 units3 ~ units2
   )
 
 type Squared units1 units2 =
   ( Sqr units1 ~ units2
-  , Product units1 units1 units2
+  , Prod units1 units1 ~ units2
+  , Quot units2 units1 ~ units1
   )
