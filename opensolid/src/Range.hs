@@ -56,6 +56,7 @@ where
 
 import Angle qualified
 import Bounds qualified
+import Data.Coerce qualified
 import Debug qualified
 import Float qualified
 import Fuzzy qualified
@@ -84,6 +85,8 @@ instance
   , units2 ~ units2'
   ) =>
   Units.Coercion units1 units2 (Range units1') (Range units2')
+  where
+  coerce = Data.Coerce.coerce
 
 instance units ~ units' => ApproximateEquality (Range units) (Qty units') units where
   Range low high ~= value = low >= value - ?tolerance && high <= value + ?tolerance

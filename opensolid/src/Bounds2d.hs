@@ -41,6 +41,7 @@ import Axis2d (Axis2d)
 import Axis2d qualified
 import Bounds qualified
 import CoordinateSystem qualified
+import Data.Coerce qualified
 import Direction2d (Direction2d (Direction2d))
 import Float qualified
 import Frame2d (Frame2d)
@@ -67,6 +68,16 @@ data Bounds2d (coordinateSystem :: CoordinateSystem) where
     Bounds2d coordinateSystem
 
 deriving instance Show (Bounds2d (space @ units))
+
+instance
+  (units1 ~ units1', units2 ~ units2', space ~ space') =>
+  Units.Coercion
+    units1
+    units2
+    (Bounds2d (space @ units1'))
+    (Bounds2d (space' @ units2'))
+  where
+  coerce = Data.Coerce.coerce
 
 instance Bounds.Interface (Bounds2d (space @ units)) where
   aggregate2 = aggregate2

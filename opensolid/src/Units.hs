@@ -3,7 +3,7 @@ module Units
   , conversion
   , convert
   , unconvert
-  , Coercion
+  , Coercion (coerce)
   , (:*:)
   , (:/:)
   , drop
@@ -42,10 +42,10 @@ where
 
 import Arithmetic
 import Basics
+import Data.Coerce qualified
 import Data.Kind (Constraint)
 import Data.List.NonEmpty (NonEmpty)
 import {-# SOURCE #-} Qty (Qty (Qty))
-import Unsafe.Coerce (unsafeCoerce)
 import Prelude qualified
 
 newtype Conversion units1 units2 = Conversion Prelude.Double
@@ -60,11 +60,14 @@ unconvert :: Conversion units1 units2 -> Qty units2 -> Qty units1
 unconvert (Conversion factor) (Qty value) = Qty (value Prelude./ factor)
 
 type Coercion :: Type -> Type -> Type -> Type -> Constraint
-class Coercion u1 u2 a b | a -> u1, b -> u2, a u2 -> b
+class Coercion u2 u1 b a => Coercion u1 u2 a b | a -> u1, b -> u2, a u2 -> b where
+  coerce :: a -> b
 
-instance Coercion u1 u2 a b => Coercion u1 u2 (List a) (List b)
+instance (Coercion u1 u2 a b, Data.Coerce.Coercible a b) => Coercion u1 u2 (List a) (List b) where
+  coerce = Data.Coerce.coerce
 
-instance Coercion u1 u2 a b => Coercion u1 u2 (NonEmpty a) (NonEmpty b)
+instance (Coercion u1 u2 a b, Data.Coerce.Coercible a b) => Coercion u1 u2 (NonEmpty a) (NonEmpty b) where
+  coerce = Data.Coerce.coerce
 
 data units1 :*: units2
 
@@ -74,19 +77,19 @@ infixl 7 :*:, :/:
 
 {-# INLINE drop #-}
 drop :: Coercion units Unitless a b => a -> b
-drop = unsafeCoerce
+drop = coerce
 
 {-# INLINE add #-}
 add :: Coercion Unitless units a b => a -> b
-add = unsafeCoerce
+add = coerce
 
 {-# INLINE specialize #-}
 specialize :: (Coercion genericUnits specificUnits a b, Specialize genericUnits specificUnits) => a -> b
-specialize = unsafeCoerce
+specialize = coerce
 
 {-# INLINE unspecialize #-}
 unspecialize :: (Coercion genericUnits specificUnits a b, Specialize genericUnits specificUnits) => b -> a
-unspecialize = unsafeCoerce
+unspecialize = coerce
 
 type SimplifyProduct unitsA unitsB unitsC aUnitless bUnitless cUnitless a b c =
   ( Coercion unitsA Unitless a aUnitless
@@ -206,10 +209,10 @@ infixl 7 .*., ./., .<>., .><.
 infixl 7 ^*., .*^, .!/!, !./!, .!/.!, ./^, !?/.!?
 
 leftAssociate :: Coercion (units1 :*: (units2 :*: units3)) ((units1 :*: units2) :*: units3) a b => a -> b
-leftAssociate = unsafeCoerce
+leftAssociate = coerce
 
 rightAssociate :: Coercion ((units1 :*: units2) :*: units3) (units1 :*: (units2 :*: units3)) a b => a -> b
-rightAssociate = unsafeCoerce
+rightAssociate = coerce
 
 data Unitless
 

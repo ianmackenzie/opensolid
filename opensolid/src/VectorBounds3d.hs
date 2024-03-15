@@ -17,6 +17,8 @@ module VectorBounds3d
   )
 where
 
+import CoordinateSystem qualified
+import Data.Coerce qualified
 import Direction3d (Direction3d (Direction3d))
 import OpenSolid
 import Qty qualified
@@ -26,7 +28,11 @@ import Units qualified
 import Vector3d (Vector3d (Vector3d))
 
 data VectorBounds3d (coordinateSystem :: CoordinateSystem) where
-  VectorBounds3d :: Range units -> Range units -> Range units -> VectorBounds3d (space @ units)
+  VectorBounds3d ::
+    Range (CoordinateSystem.Units coordinateSystem) ->
+    Range (CoordinateSystem.Units coordinateSystem) ->
+    Range (CoordinateSystem.Units coordinateSystem) ->
+    VectorBounds3d coordinateSystem
 
 deriving instance Show (VectorBounds3d (space @ units))
 
@@ -37,6 +43,8 @@ instance
     units2
     (VectorBounds3d (space @ units1'))
     (VectorBounds3d (space' @ units2'))
+  where
+  coerce = Data.Coerce.coerce
 
 instance Negation (VectorBounds3d (space @ units)) where
   negate (VectorBounds3d x y z) = VectorBounds3d (negate x) (negate y) (negate z)

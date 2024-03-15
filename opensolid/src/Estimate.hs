@@ -1,3 +1,6 @@
+{-# LANGUAGE NoFieldSelectors #-}
+{-# OPTIONS_GHC -Wno-partial-fields #-}
+
 module Estimate
   ( Estimate
   , Interface (..)
@@ -47,15 +50,21 @@ data Estimate units where
   Estimate ::
     Interface a units =>
     { implementation :: a
-    , bounds :: Range units
+    , cachedBounds :: Range units
     } ->
     Estimate units
+  Coerce ::
+    Estimate units1 ->
+    Estimate units2
 
 instance
   ( units1 ~ units1'
   , units2 ~ units2'
   ) =>
   Units.Coercion units1 units2 (Estimate units1') (Estimate units2')
+  where
+  coerce (Coerce estimate) = Coerce estimate
+  coerce estimate = Coerce estimate
 
 instance units ~ units' => ApproximateEquality (Estimate units) (Qty units') units where
   estimate ~= value
@@ -64,13 +73,18 @@ instance units ~ units' => ApproximateEquality (Estimate units) (Qty units') uni
     | otherwise = refine estimate ~= value
 
 wrap :: Interface a units => a -> Estimate units
-wrap implementation = Estimate{implementation, bounds = boundsImpl implementation}
+wrap implementation = Estimate{implementation, cachedBounds = boundsImpl implementation}
 
 exact :: Qty units -> Estimate units
 exact value = wrap value
 
+bounds :: Estimate units -> Range units
+bounds (Estimate{cachedBounds}) = cachedBounds
+bounds (Coerce estimate) = Units.coerce (bounds estimate)
+
 refine :: Estimate units -> Estimate units
 refine (Estimate{implementation}) = refineImpl implementation
+refine (Coerce estimate) = Coerce (refine estimate)
 
 satisfy :: (Range units -> Bool) -> Estimate units -> Range units
 satisfy predicate estimate =

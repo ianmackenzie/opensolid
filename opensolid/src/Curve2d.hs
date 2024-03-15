@@ -103,6 +103,7 @@ tangentDirection (Internal.Arc{startAngle, endAngle}) =
       tangentEndAngle = endAngle + Angle.quarterTurn
    in Qty.sign (endAngle - startAngle) * DirectionCurve2d.arc tangentStartAngle tangentEndAngle
 tangentDirection (Internal.Curve _ tangent) = tangent
+tangentDirection (Internal.Coerce curve) = tangentDirection curve
 tangentDirection (Internal.PlaceIn frame curve) = DirectionCurve2d.placeIn frame (tangentDirection curve)
 
 data CurveIsCoincidentWithPoint = CurveIsCoincidentWithPoint deriving (Eq, Show, Error)

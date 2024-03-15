@@ -34,6 +34,7 @@ data VectorCurve3d (coordinateSystem :: CoordinateSystem) where
   VectorCurve3d :: Interface curve (space @ units) => curve -> VectorCurve3d (space @ units)
   Zero :: VectorCurve3d (space @ units)
   Constant :: Vector3d (space @ units) -> VectorCurve3d (space @ units)
+  Coerce :: VectorCurve3d (space @ units1) -> VectorCurve3d (space @ units2)
   Line :: Vector3d (space @ units) -> Vector3d (space @ units) -> VectorCurve3d (space @ units)
   QuadraticSpline :: Vector3d (space @ units) -> Vector3d (space @ units) -> Vector3d (space @ units) -> VectorCurve3d (space @ units)
   CubicSpline :: Vector3d (space @ units) -> Vector3d (space @ units) -> Vector3d (space @ units) -> Vector3d (space @ units) -> VectorCurve3d (space @ units)
@@ -52,6 +53,11 @@ instance
     units2
     (VectorCurve3d (space @ units1'))
     (VectorCurve3d (space' @ units2'))
+  where
+  coerce Zero = Zero
+  coerce (Constant value) = Constant (Units.coerce value)
+  coerce (Coerce curve) = Coerce curve
+  coerce curve = Coerce curve
 
 constant :: Vector3d (space @ units) -> VectorCurve3d (space @ units)
 constant vector = if vector == Vector3d.zero then Zero else Constant vector
@@ -450,6 +456,7 @@ evaluateAt t curve =
     VectorCurve3d c -> evaluateAtImpl t c
     Zero -> Vector3d.zero
     Constant v -> v
+    Coerce c -> Units.coerce (evaluateAt t c)
     Line v1 v2 -> Vector3d.interpolateFrom v1 v2 t
     QuadraticSpline v1 v2 v3 -> quadraticBlossom v1 v2 v3 t t
     CubicSpline v1 v2 v3 v4 -> cubicBlossom v1 v2 v3 v4 t t t
@@ -460,6 +467,7 @@ segmentBounds t@(Range tl th) curve =
     VectorCurve3d c -> segmentBoundsImpl t c
     Zero -> VectorBounds3d.constant Vector3d.zero
     Constant value -> VectorBounds3d.constant value
+    Coerce c -> Units.coerce (segmentBounds t c)
     Line v1 v2 ->
       VectorBounds3d.hull2
         (Vector3d.interpolateFrom v1 v2 tl)
@@ -482,6 +490,7 @@ derivative curve =
     VectorCurve3d c -> derivativeImpl c
     Zero -> Zero
     Constant _ -> Zero
+    Coerce c -> Units.coerce (derivative c)
     Line v1 v2 -> constant (v2 - v1)
     QuadraticSpline v1 v2 v3 -> line (2.0 * (v2 - v1)) (2.0 * (v3 - v2))
     CubicSpline v1 v2 v3 v4 -> quadraticSpline (3.0 * (v2 - v1)) (3.0 * (v3 - v2)) (3.0 * (v4 - v3))

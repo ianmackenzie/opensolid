@@ -47,6 +47,9 @@ data Function units where
     Function units
   Constant ::
     Qty units -> Function units
+  Coerce ::
+    Function units1 ->
+    Function units2
   U ::
     Function Unitless
   V ::
@@ -97,6 +100,11 @@ instance
     units2
     (Function units1')
     (Function units2')
+  where
+  coerce Zero = Zero
+  coerce (Constant value) = Constant (Units.coerce value)
+  coerce (Coerce function) = Coerce function
+  coerce function = Coerce function
 
 instance Negation (Function units) where
   negate Zero = Zero
@@ -210,6 +218,7 @@ evaluateAt uvw function =
     Function f -> evaluateAtImpl uvw f
     Zero -> Qty.zero
     Constant x -> x
+    Coerce f -> Units.coerce (evaluateAt uvw f)
     U -> Point3d.xCoordinate uvw
     V -> Point3d.yCoordinate uvw
     W -> Point3d.zCoordinate uvw
@@ -232,6 +241,7 @@ segmentBounds uvw function =
     Function f -> segmentBoundsImpl uvw f
     Zero -> Range.constant Qty.zero
     Constant x -> Range.constant x
+    Coerce f -> Units.coerce (segmentBounds uvw f)
     U -> Bounds3d.xCoordinate uvw
     V -> Bounds3d.yCoordinate uvw
     W -> Bounds3d.zCoordinate uvw
@@ -251,6 +261,7 @@ derivative direction function =
     Function f -> derivativeImpl direction f
     Zero -> zero
     Constant _ -> zero
+    Coerce f -> Units.coerce (derivative direction f)
     U -> constant (Direction3d.xComponent direction)
     V -> constant (Direction3d.yComponent direction)
     W -> constant (Direction3d.zComponent direction)

@@ -117,6 +117,9 @@ data Function units where
   Cos ::
     Function Radians ->
     Function Unitless
+  Coerce ::
+    Function units1 ->
+    Function units2
 
 deriving instance Show (Function units)
 
@@ -129,10 +132,16 @@ instance
     units2
     (Function units1')
     (Function units2')
+  where
+  coerce Zero = Zero
+  coerce (Constant value) = Constant (Units.coerce value)
+  coerce (Coerce function) = Coerce function
+  coerce function = Coerce function
 
 instance Negation (Function units) where
   negate Zero = Zero
   negate (Constant x) = Constant (negate x)
+  negate (Coerce function) = Coerce (negate function)
   negate (Negated function) = function
   negate (Difference f1 f2) = Difference f2 f1
   negate (Product_ f1 f2) = negate f1 .*. f2
@@ -242,6 +251,7 @@ evaluateAt uv function =
     Function f -> evaluateAtImpl uv f
     Zero -> Qty.zero
     Constant x -> x
+    Coerce f -> Units.coerce (evaluateAt uv f)
     Parameter U -> Point2d.xCoordinate uv
     Parameter V -> Point2d.yCoordinate uv
     Negated f -> negate (evaluateAt uv f)
@@ -263,6 +273,7 @@ segmentBounds uv function =
     Function f -> segmentBoundsImpl uv f
     Zero -> Range.constant Qty.zero
     Constant x -> Range.constant x
+    Coerce f -> Units.coerce (segmentBounds uv f)
     Parameter U -> Bounds2d.xCoordinate uv
     Parameter V -> Bounds2d.yCoordinate uv
     Negated f -> negate (segmentBounds uv f)
@@ -284,6 +295,7 @@ derivative p function =
     Function f -> derivativeImpl p f
     Zero -> zero
     Constant _ -> zero
+    Coerce f -> Units.coerce (derivative p f)
     Parameter p' -> if p == p' then constant 1.0 else zero
     Negated f -> negate (derivative p f)
     Sum f1 f2 -> derivative p f1 + derivative p f2

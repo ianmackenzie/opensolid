@@ -6,7 +6,7 @@ where
 
 import OpenSolid
 
-type role Vector3d nominal
+type role Vector3d phantom
 
 data Vector3d (coordinateSystem :: CoordinateSystem)
 

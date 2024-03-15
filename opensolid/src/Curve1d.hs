@@ -91,6 +91,9 @@ data Curve1d units where
   Cos ::
     Curve1d Radians ->
     Curve1d Unitless
+  Coerce ::
+    Curve1d units1 ->
+    Curve1d units2
 
 deriving instance Show (Curve1d units)
 
@@ -103,6 +106,10 @@ instance
     units2
     (Curve1d units1')
     (Curve1d units2')
+  where
+  coerce (Constant value) = Constant (Units.coerce value)
+  coerce (Coerce curve) = Coerce curve
+  coerce curve = Coerce curve
 
 instance units ~ units' => ApproximateEquality (Curve1d units) (Curve1d units') units where
   curve1 ~= curve2 = isZero (curve1 - curve2)
@@ -279,6 +286,7 @@ evaluateAt tValue curve =
     SquareRoot_ c_ -> Qty.sqrt_ (evaluateAt tValue c_)
     Sin c -> Angle.sin (evaluateAt tValue c)
     Cos c -> Angle.cos (evaluateAt tValue c)
+    Coerce c -> Units.coerce (evaluateAt tValue c)
 
 pointOn :: Curve1d units -> Float -> Qty units
 pointOn curve tValue = evaluateAt tValue curve
@@ -298,6 +306,7 @@ segmentBounds tBounds curve =
     SquareRoot_ c_ -> Range.sqrt_ (segmentBounds tBounds c_)
     Sin c -> Range.sin (segmentBounds tBounds c)
     Cos c -> Range.cos (segmentBounds tBounds c)
+    Coerce c -> Units.coerce (segmentBounds tBounds c)
 
 derivative :: Curve1d units -> Curve1d units
 derivative curve =
@@ -314,6 +323,7 @@ derivative curve =
     SquareRoot_ c_ -> derivative c_ .!/! (2.0 * sqrt_ c_)
     Sin c -> cos c * Units.drop (derivative c)
     Cos c -> negate (sin c) * Units.drop (derivative c)
+    Coerce c -> Units.coerce (derivative c)
 
 newtype Reversed units = Reversed (Curve1d units)
 

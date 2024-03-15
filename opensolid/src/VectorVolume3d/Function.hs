@@ -43,6 +43,9 @@ data Function (coordinateSystem :: CoordinateSystem) where
     Function (space @ units)
   Constant ::
     Vector3d (space @ units) -> Function (space @ units)
+  Coerce ::
+    Function (space @ units1) ->
+    Function (space @ units2)
   XYZ ::
     Volume1d.Function units ->
     Volume1d.Function units ->
@@ -87,6 +90,11 @@ instance
     units2
     (Function (space @ units1'))
     (Function (space' @ units2'))
+  where
+  coerce Zero = Zero
+  coerce (Constant value) = Constant (Units.coerce value)
+  coerce (Coerce function) = Coerce function
+  coerce function = Coerce function
 
 instance Negation (Function (space @ units)) where
   negate Zero = Zero
@@ -234,6 +242,7 @@ evaluateAt uv function =
     Function f -> evaluateAtImpl uv f
     Zero -> Vector3d.zero
     Constant v -> v
+    Coerce f -> Units.coerce (evaluateAt uv f)
     XYZ x y z ->
       Vector3d.xyz
         (Volume1d.Function.evaluateAt uv x)
@@ -258,6 +267,7 @@ segmentBounds uv function =
     Function f -> segmentBoundsImpl uv f
     Zero -> VectorBounds3d.constant Vector3d.zero
     Constant v -> VectorBounds3d.constant v
+    Coerce f -> Units.coerce (segmentBounds uv f)
     XYZ x y z ->
       VectorBounds3d.xyz
         (Volume1d.Function.segmentBounds uv x)
@@ -276,6 +286,7 @@ derivative direction function =
     Function f -> derivativeImpl direction f
     Zero -> zero
     Constant _ -> zero
+    Coerce f -> Units.coerce (derivative direction f)
     XYZ x y z ->
       XYZ
         (Volume1d.Function.derivative direction x)

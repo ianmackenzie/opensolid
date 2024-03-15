@@ -32,6 +32,7 @@ import Bounded qualified
 import {-# SOURCE #-} Bounds2d (Bounds2d (Bounds2d))
 import {-# SOURCE #-} Bounds2d qualified
 import CoordinateSystem qualified
+import Data.Coerce qualified
 import {-# SOURCE #-} Frame2d (Frame2d)
 import {-# SOURCE #-} Frame2d qualified
 import Length qualified
@@ -64,6 +65,8 @@ instance
     units2
     (Point2d (space @ units1'))
     (Point2d (space' @ units2'))
+  where
+  coerce = Data.Coerce.coerce
 
 instance
   (units ~ units', space ~ space') =>

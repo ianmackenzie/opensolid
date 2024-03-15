@@ -75,6 +75,9 @@ data VectorCurve2d (coordinateSystem :: CoordinateSystem) where
   Constant ::
     Vector2d (space @ units) ->
     VectorCurve2d (space @ units)
+  Coerce ::
+    VectorCurve2d (space @ units1) ->
+    VectorCurve2d (space @ units2)
   Reversed ::
     VectorCurve2d (space @ units) ->
     VectorCurve2d (space @ units)
@@ -145,6 +148,11 @@ instance
     units2
     (VectorCurve2d (space @ units1'))
     (VectorCurve2d (space' @ units2'))
+  where
+  coerce Zero = Zero
+  coerce (Constant value) = Constant (Units.coerce value)
+  coerce (Coerce curve) = Coerce curve
+  coerce curve = Coerce curve
 
 instance Interface (VectorCurve2d (space @ units)) (space @ units) where
   evaluateAtImpl = evaluateAt
@@ -554,6 +562,7 @@ evaluateAt t curve =
     VectorCurve2d c -> evaluateAtImpl t c
     Zero -> Vector2d.zero
     Constant value -> value
+    Coerce c -> Units.coerce (evaluateAt t c)
     Reversed c -> evaluateAt (1.0 - t) c
     XY x y -> Vector2d.xy (Curve1d.evaluateAt t x) (Curve1d.evaluateAt t y)
     Negated c -> -(evaluateAt t c)
@@ -575,6 +584,7 @@ segmentBounds t@(Range tl th) curve =
     VectorCurve2d c -> segmentBoundsImpl t c
     Zero -> VectorBounds2d.constant Vector2d.zero
     Constant value -> VectorBounds2d.constant value
+    Coerce c -> Units.coerce (segmentBounds t c)
     Reversed c -> segmentBounds (1.0 - t) c
     XY x y -> VectorBounds2d (Curve1d.segmentBounds t x) (Curve1d.segmentBounds t y)
     Negated c -> -(segmentBounds t c)
@@ -610,6 +620,7 @@ derivative curve =
     VectorCurve2d c -> derivativeImpl c
     Zero -> Zero
     Constant _ -> Zero
+    Coerce c -> Units.coerce (derivative c)
     Reversed c -> negate (reverse (derivative c))
     XY x y -> XY (Curve1d.derivative x) (Curve1d.derivative y)
     Negated c -> -(derivative c)
@@ -638,6 +649,7 @@ reverse curve =
     VectorCurve2d _ -> Reversed curve
     Zero -> Zero
     Constant _ -> curve
+    Coerce c -> Units.coerce (reverse c)
     Reversed c -> c
     XY x y -> XY (Curve1d.reverse x) (Curve1d.reverse y)
     Negated c -> Negated (reverse c)

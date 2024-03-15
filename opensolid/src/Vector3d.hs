@@ -28,6 +28,8 @@ module Vector3d
 where
 
 import Area qualified
+import CoordinateSystem qualified
+import Data.Coerce qualified
 import {-# SOURCE #-} Direction3d (Direction3d)
 import {-# SOURCE #-} Direction3d qualified
 import Length qualified
@@ -36,8 +38,14 @@ import Qty qualified
 import Units (Meters, SquareMeters)
 import Units qualified
 
+type role Vector3d phantom
+
 data Vector3d (coordinateSystem :: CoordinateSystem) where
-  Vector3d :: Qty units -> Qty units -> Qty units -> Vector3d (space @ units)
+  Vector3d ::
+    Qty (CoordinateSystem.Units coordinateSystem) ->
+    Qty (CoordinateSystem.Units coordinateSystem) ->
+    Qty (CoordinateSystem.Units coordinateSystem) ->
+    Vector3d coordinateSystem
 
 deriving instance Eq (Vector3d (space @ units))
 
@@ -50,6 +58,8 @@ instance
     units2
     (Vector3d (space @ units1'))
     (Vector3d (space' @ units2'))
+  where
+  coerce = Data.Coerce.coerce
 
 instance
   (space ~ space', units ~ units') =>

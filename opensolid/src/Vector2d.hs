@@ -41,6 +41,7 @@ import Area qualified
 import {-# SOURCE #-} Basis2d (Basis2d)
 import {-# SOURCE #-} Basis2d qualified
 import CoordinateSystem qualified
+import Data.Coerce qualified
 import {-# SOURCE #-} Direction2d (Direction2d)
 import {-# SOURCE #-} Direction2d qualified
 import {-# SOURCE #-} Frame2d (Frame2d)
@@ -72,6 +73,8 @@ instance
     units2
     (Vector2d (space @ units1'))
     (Vector2d (space' @ units2'))
+  where
+  coerce = Data.Coerce.coerce
 
 instance
   (space ~ space', units ~ units') =>

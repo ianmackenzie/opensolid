@@ -53,6 +53,9 @@ data Curve2d (coordinateSystem :: CoordinateSystem) where
     curve ->
     DirectionCurve2d space ->
     Curve2d (space @ units)
+  Coerce ::
+    Curve2d (space @ units1) ->
+    Curve2d (space @ units2)
   PlaceIn ::
     Frame2d (global @ units) (Defines local) ->
     Curve2d (local @ units) ->
@@ -67,6 +70,23 @@ instance
     units2
     (Curve2d (space @ units1'))
     (Curve2d (space' @ units2'))
+  where
+  coerce (Line{startPoint = p1, endPoint = p2, direction, length}) =
+    Line
+      { startPoint = Units.coerce p1
+      , endPoint = Units.coerce p2
+      , direction = direction
+      , length = Units.coerce length
+      }
+  coerce (Arc{centerPoint, radius, startAngle, endAngle}) =
+    Arc
+      { centerPoint = Units.coerce centerPoint
+      , radius = Units.coerce radius
+      , startAngle = startAngle
+      , endAngle = endAngle
+      }
+  coerce (Coerce c) = Coerce c
+  coerce c = Coerce c
 
 instance Interface (Curve2d (space @ units)) (space @ units) where
   startPointImpl = startPoint
@@ -119,18 +139,21 @@ startPoint :: Curve2d (space @ units) -> Point2d (space @ units)
 startPoint (Line{startPoint = p1}) = p1
 startPoint arc@(Arc{}) = evaluateAt 0.0 arc
 startPoint (Curve curve _) = startPointImpl curve
+startPoint (Coerce curve) = Units.coerce (startPoint curve)
 startPoint (PlaceIn frame curve) = Point2d.placeIn frame (startPoint curve)
 
 endPoint :: Curve2d (space @ units) -> Point2d (space @ units)
 endPoint (Line{endPoint = p2}) = p2
 endPoint arc@(Arc{}) = evaluateAt 1.0 arc
 endPoint (Curve curve _) = endPointImpl curve
+endPoint (Coerce curve) = Units.coerce (endPoint curve)
 endPoint (PlaceIn frame curve) = Point2d.placeIn frame (endPoint curve)
 
 evaluateAt :: Float -> Curve2d (space @ units) -> Point2d (space @ units)
 evaluateAt t (Line{startPoint = p1, endPoint = p2}) = Point2d.interpolateFrom p1 p2 t
 evaluateAt t (Arc p0 r a b) = let theta = Qty.interpolateFrom a b t in p0 + Vector2d.polar r theta
 evaluateAt t (Curve curve _) = evaluateAtImpl t curve
+evaluateAt t (Coerce curve) = Units.coerce (evaluateAt t curve)
 evaluateAt t (PlaceIn frame curve) = Point2d.placeIn frame (evaluateAt t curve)
 
 segmentBounds :: T.Bounds -> Curve2d (space @ units) -> Bounds2d (space @ units)
@@ -139,12 +162,14 @@ segmentBounds (Range t1 t2) (Line{startPoint = p1, endPoint = p2}) =
 segmentBounds t (Arc p0 r a b) =
   p0 + VectorBounds2d.polar (Range.constant r) (a + (b - a) * t)
 segmentBounds t (Curve curve _) = segmentBoundsImpl t curve
+segmentBounds t (Coerce curve) = Units.coerce (segmentBounds t curve)
 segmentBounds t (PlaceIn frame curve) = Bounds2d.placeIn frame (segmentBounds t curve)
 
 derivative :: Curve2d (space @ units) -> VectorCurve2d (space @ units)
 derivative (Line{startPoint = p1, endPoint = p2}) = VectorCurve2d.constant (p2 - p1)
 derivative (Arc _ r a b) = VectorCurve2d.derivative (VectorCurve2d.arc r a b)
 derivative (Curve curve _) = derivativeImpl curve
+derivative (Coerce curve) = Units.coerce (derivative curve)
 derivative (PlaceIn frame curve) = VectorCurve2d.placeIn frame (derivative curve)
 
 reverse :: Curve2d (space @ units) -> Curve2d (space @ units)
@@ -154,12 +179,14 @@ reverse (Arc{centerPoint, radius, startAngle, endAngle}) =
   Arc{centerPoint, radius, startAngle = endAngle, endAngle = startAngle}
 reverse (Curve curve tangentDirection) =
   Curve (reverseImpl curve) (-(DirectionCurve2d.reverse tangentDirection))
+reverse (Coerce curve) = Units.coerce (reverse curve)
 reverse (PlaceIn frame curve) = PlaceIn frame (reverse curve)
 
 bounds :: Curve2d (space @ units) -> Bounds2d (space @ units)
 bounds (Line{startPoint = p1, endPoint = p2}) = Bounds2d.hull2 p1 p2
 bounds arc@(Arc{}) = segmentBounds T.domain arc
 bounds (Curve curve _) = boundsImpl curve
+bounds (Coerce curve) = Units.coerce (bounds curve)
 bounds (PlaceIn frame curve) = Bounds2d.placeIn frame (bounds curve)
 
 data PointCurveDifference (coordinateSystem :: CoordinateSystem)

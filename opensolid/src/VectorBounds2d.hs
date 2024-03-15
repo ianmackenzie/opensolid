@@ -33,6 +33,7 @@ where
 import Basis2d (Basis2d)
 import Basis2d qualified
 import CoordinateSystem qualified
+import Data.Coerce qualified
 import Direction2d (Direction2d (Direction2d))
 import Float qualified
 import {-# SOURCE #-} Frame2d (Frame2d)
@@ -62,6 +63,8 @@ instance
     units2
     (VectorBounds2d (space @ units1'))
     (VectorBounds2d (space' @ units2'))
+  where
+  coerce = Data.Coerce.coerce
 
 instance Negation (VectorBounds2d (space @ units)) where
   negate (VectorBounds2d x y) = VectorBounds2d (negate x) (negate y)
