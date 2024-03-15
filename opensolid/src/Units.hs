@@ -24,6 +24,8 @@ module Units
   , (.!/.!)
   , (./^)
   , (!?/.!?)
+  , leftAssociate
+  , rightAssociate
   , Product
   , Squared
   , Quotient
@@ -202,6 +204,12 @@ type SimplifyQuotient unitsA unitsB unitsC aUnitless bUnitless cUnitless a b c =
 infixl 7 .*., ./., .<>., .><.
 
 infixl 7 ^*., .*^, .!/!, !./!, .!/.!, ./^, !?/.!?
+
+leftAssociate :: Coercion (units1 :*: (units2 :*: units3)) ((units1 :*: units2) :*: units3) a b => a -> b
+leftAssociate = unsafeCoerce
+
+rightAssociate :: Coercion ((units1 :*: units2) :*: units3) (units1 :*: (units2 :*: units3)) a b => a -> b
+rightAssociate = unsafeCoerce
 
 data Unitless
 

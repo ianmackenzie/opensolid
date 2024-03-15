@@ -71,16 +71,14 @@ data Curve1d units where
     Curve1d units ->
     Curve1d units ->
     Curve1d units
-  Product ::
-    Units.Product units1 units2 units3 =>
+  Product_ ::
     Curve1d units1 ->
     Curve1d units2 ->
-    Curve1d units3
-  Quotient ::
-    Units.Quotient units1 units2 units3 =>
+    Curve1d (units1 :*: units2)
+  Quotient_ ::
     Curve1d units1 ->
     Curve1d units2 ->
-    Curve1d units3
+    Curve1d (units1 :/: units2)
   Squared_ ::
     Curve1d units ->
     Curve1d (units :*: units)
@@ -130,7 +128,7 @@ instance Negation (Curve1d units) where
   negate (Constant x) = Constant (negate x)
   negate (Negated curve) = curve
   negate (Difference c1 c2) = Difference c2 c1
-  negate (Product c1 c2) = negate c1 * c2
+  negate (Product_ c1 c2) = negate c1 .*. c2
   negate curve = Negated curve
 
 instance Multiplication Sign (Curve1d units) (Curve1d units) where
@@ -179,9 +177,8 @@ instance
   Constant x * curve | Units.drop x == -1.0 = Units.add (Units.drop (negate curve))
   Constant x * Negated c = negate x * c
   c1 * (Constant x) = Constant x * c1
-  Constant x * Product (Constant y) c =
-    Units.add (Product (Constant (Units.drop x * Units.drop y)) (Units.drop c))
-  curve1 * curve2 = Product curve1 curve2
+  Constant x * Product_ (Constant y) c = Units.specialize (Units.rightAssociate ((x .*. y) .*. c))
+  curve1 * curve2 = Units.specialize (Product_ curve1 curve2)
 
 instance
   Units.Product units1 units2 units3 =>
@@ -247,7 +244,7 @@ instance
   Constant value / _ | value == Qty.zero = zero
   Constant x / Constant y = Constant (x / y)
   curve / Constant x = Units.specialize ((1.0 ./. x) .*^ curve)
-  curve1 / curve2 = Quotient curve1 curve2
+  curve1 / curve2 = Units.specialize (Quotient_ curve1 curve2)
 
 instance
   Units.Quotient units1 units2 units3 =>
@@ -276,8 +273,8 @@ evaluateAt tValue curve =
     Negated c -> negate (evaluateAt tValue c)
     Sum c1 c2 -> evaluateAt tValue c1 + evaluateAt tValue c2
     Difference c1 c2 -> evaluateAt tValue c1 - evaluateAt tValue c2
-    Product c1 c2 -> evaluateAt tValue c1 * evaluateAt tValue c2
-    Quotient c1 c2 -> evaluateAt tValue c1 / evaluateAt tValue c2
+    Product_ c1 c2 -> evaluateAt tValue c1 .*. evaluateAt tValue c2
+    Quotient_ c1 c2 -> evaluateAt tValue c1 ./. evaluateAt tValue c2
     Squared_ c -> Qty.squared_ (evaluateAt tValue c)
     SquareRoot_ c_ -> Qty.sqrt_ (evaluateAt tValue c_)
     Sin c -> Angle.sin (evaluateAt tValue c)
@@ -295,8 +292,8 @@ segmentBounds tBounds curve =
     Negated c -> negate (segmentBounds tBounds c)
     Sum c1 c2 -> segmentBounds tBounds c1 + segmentBounds tBounds c2
     Difference c1 c2 -> segmentBounds tBounds c1 - segmentBounds tBounds c2
-    Product c1 c2 -> segmentBounds tBounds c1 * segmentBounds tBounds c2
-    Quotient c1 c2 -> segmentBounds tBounds c1 / segmentBounds tBounds c2
+    Product_ c1 c2 -> segmentBounds tBounds c1 .*. segmentBounds tBounds c2
+    Quotient_ c1 c2 -> segmentBounds tBounds c1 ./. segmentBounds tBounds c2
     Squared_ c -> Range.squared_ (segmentBounds tBounds c)
     SquareRoot_ c_ -> Range.sqrt_ (segmentBounds tBounds c_)
     Sin c -> Range.sin (segmentBounds tBounds c)
@@ -311,9 +308,8 @@ derivative curve =
     Negated c -> negate (derivative c)
     Sum c1 c2 -> derivative c1 + derivative c2
     Difference c1 c2 -> derivative c1 - derivative c2
-    Product c1 c2 -> derivative c1 * c2 + c1 * derivative c2
-    Quotient c1 c2 -> Units.specialize do
-      (derivative c1 .*. c2 - c1 .*. derivative c2) .!/.! squared_ c2
+    Product_ c1 c2 -> derivative c1 .*. c2 + c1 .*. derivative c2
+    Quotient_ c1 c2 -> (derivative c1 .*. c2 - c1 .*. derivative c2) .!/.! squared_ c2
     Squared_ c -> 2.0 * c .*. derivative c
     SquareRoot_ c_ -> derivative c_ .!/! (2.0 * sqrt_ c_)
     Sin c -> cos c * Units.drop (derivative c)
