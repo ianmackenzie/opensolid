@@ -86,6 +86,7 @@
             LD_LIBRARY_PATH = "${localLibraryPath}";
             shellHook = pkgs.lib.optionalString pkgs.stdenv.isDarwin ''
               export DYLD_LIBRARY_PATH="${localLibraryPath}";
+              alias run="echo -e :main | cabal repl --verbose=0 $1"
             '';
           };
         };
