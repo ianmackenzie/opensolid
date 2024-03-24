@@ -235,9 +235,7 @@ findEndpointIntersection ::
   (List Intersection, List (T.Bounds, T.Bounds)) ->
   Result IntersectionError (List Intersection, List (T.Bounds, T.Bounds))
 findEndpointIntersection derivatives1 derivatives2 t1t2 searchTree1 searchTree2 accumulated = Result.do
-  intersectionType <-
-    Derivatives.classify t1t2 derivatives1 derivatives2
-      ?? Error TangentIntersectionAtDegeneratePoint
+  let intersectionType = Derivatives.classify t1t2 derivatives1 derivatives2
   let (kind, sign) = intersectionType
   let (t1, t2) = t1t2
   Ok <|
