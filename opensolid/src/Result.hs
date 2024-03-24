@@ -21,6 +21,7 @@ module Result
 where
 
 import Basics hiding (pure, return, (>>))
+import Coalesce (Coalesce ((??)))
 import Control.Monad (join)
 import Error (Error)
 import Error qualified
@@ -51,6 +52,10 @@ instance Monad (Result x) where
 
 instance MonadFail (Result String) where
   fail = fail
+
+instance a ~ a' => Coalesce (Result x a) (Result y a') (Result y a) where
+  Ok value ?? _ = Ok value
+  Error _ ?? fallback = fallback
 
 pure :: a -> Result x a
 pure = Ok

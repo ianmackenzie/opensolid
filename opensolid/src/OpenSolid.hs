@@ -1,5 +1,6 @@
 module OpenSolid
   ( module Basics
+  , module Coalesce
   , module Concatenation
   , module Arithmetic
   , module Result
@@ -21,9 +22,10 @@ where
 import Angle (Angle)
 import Arithmetic
 import Basics
+import Coalesce (Coalesce ((??)))
 import Concatenation (Concatenation ((++)))
 import CoordinateSystem (CoordinateSystem, Defines, LocalSpace, type (@))
-import Error (Error, (??))
+import Error (Error)
 import Float (Float, fromRational)
 import Fuzzy (Fuzzy (Resolved, Unresolved))
 import Intersects (Intersects ((^)))

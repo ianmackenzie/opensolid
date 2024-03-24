@@ -322,7 +322,7 @@ instance
     (Result BuildError (Curve2d (space @ units)))
   where
   with arguments = Result.do
-    chordDirection <- Direction2d.from givenStartPoint givenEndPoint ?? DegenerateArc
+    chordDirection <- Direction2d.from givenStartPoint givenEndPoint ?? Error DegenerateArc
     let squaredRadius_ = Qty.squared_ givenRadius
     let squaredHalfLength_ = Qty.squared_ (0.5 * Point2d.distanceFrom givenStartPoint givenEndPoint)
     let squaredOffsetMagnitude_ = squaredRadius_ - squaredHalfLength_

@@ -708,7 +708,7 @@ data ZeroEverywhere = ZeroEverywhere deriving (Eq, Show, Error)
 
 zeros :: Tolerance units => VectorCurve2d (space @ units) -> Result ZeroEverywhere (List Float)
 zeros curve = Result.do
-  roots1d <- Curve1d.zeros (squaredMagnitude_ curve) ?? ZeroEverywhere
+  roots1d <- Curve1d.zeros (squaredMagnitude_ curve) ?? Error ZeroEverywhere
   Ok (List.map Curve1d.Root.value roots1d)
  where
   ?tolerance = Qty.squared_ ?tolerance

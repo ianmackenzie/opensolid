@@ -148,7 +148,7 @@ from ::
   Point2d (space @ units) ->
   Point2d (space @ units) ->
   Result PointsAreCoincident (Direction2d space)
-from p1 p2 = Vector2d.direction (p2 - p1) ?? PointsAreCoincident
+from p1 p2 = Vector2d.direction (p2 - p1) ?? Error PointsAreCoincident
 
 fromAngle :: Angle -> Direction2d space
 fromAngle angle = unsafe (Vector2d.polar 1.0 angle)

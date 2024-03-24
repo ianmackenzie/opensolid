@@ -898,7 +898,8 @@ horizontalCurve ::
   Float ->
   Result ZerosError (Curve2d Uv.Coordinates)
 horizontalCurve f fu fv uStart uEnd vLow vHigh = exactly do
-  Curve2d.wrap (HorizontalCurve{f, dvdu = -fu / fv, uStart, uEnd, vLow, vHigh}) ?? DegenerateCurve
+  Curve2d.wrap (HorizontalCurve{f, dvdu = -fu / fv, uStart, uEnd, vLow, vHigh})
+    ?? Error DegenerateCurve
     -- Sanity check that we don't attempt to evaluate outside the overall UV domain
     |> Debug.assert (uStart >= 0.0)
     |> Debug.assert (uEnd <= 1.0)
@@ -915,7 +916,8 @@ verticalCurve ::
   Float ->
   Result ZerosError (Curve2d Uv.Coordinates)
 verticalCurve f fu fv uLow uHigh vStart vEnd = exactly do
-  Curve2d.wrap (VerticalCurve{f, dudv = -fv / fu, uLow, uHigh, vStart, vEnd}) ?? DegenerateCurve
+  Curve2d.wrap (VerticalCurve{f, dudv = -fv / fu, uLow, uHigh, vStart, vEnd})
+    ?? Error DegenerateCurve
     -- Sanity check that we don't attempt to evaluate outside the overall UV domain
     |> Debug.assert (uLow >= 0.0)
     |> Debug.assert (uHigh <= 1.0)
@@ -1337,7 +1339,7 @@ connectingCurve saddleRegion curve = Result.do
     BezierCurve2d.hermite
       (localStartPoint, [localStartFirstDerivative, localStartSecondDerivative])
       (localEndPoint, [localEndFirstDerivative, localEndSecondDerivative])
-      ?? DegenerateCurve
+      ?? Error DegenerateCurve
   Ok (Curve2d.placeIn frame localExtension)
  where
   ?tolerance = 1e-9
