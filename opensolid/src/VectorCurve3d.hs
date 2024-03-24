@@ -1,3 +1,11 @@
+-- Needed for 'Curve1d * Vector3d = VectorCurve3d'
+-- and 'Vector3d * Curve1d = VectorCurve3d' instances,
+-- which lead to unresolvable circular dependencies
+-- if they're defined in the Curve1d or Vector3d modules
+-- and really conceptually make more sense
+-- to define in this module anyways
+{-# OPTIONS_GHC -Wno-orphans #-}
+
 module VectorCurve3d
   ( VectorCurve3d
   , Interface
@@ -249,6 +257,22 @@ instance
 instance Multiplication (Qty units1) (VectorCurve3d (space @ units2)) where
   type Qty units1 .*. VectorCurve3d (space @ units2) = VectorCurve3d (space @ (units1 :*: units2))
   value .*. curve = VectorCurve3d (Product1d3d (Curve1d.constant value) curve)
+
+instance
+  Units.Product units1 units2 units3 =>
+  Product (Curve1d units1) (Vector3d (space @ units2)) (VectorCurve3d (space @ units3))
+
+instance Multiplication (Curve1d units1) (Vector3d (space @ units2)) where
+  type Curve1d units1 .*. Vector3d (space @ units2) = VectorCurve3d (space @ (units1 :*: units2))
+  curve .*. vector = curve .*. constant vector
+
+instance
+  Units.Product units1 units2 units3 =>
+  Product (Vector3d (space @ units1)) (Curve1d units2) (VectorCurve3d (space @ units3))
+
+instance Multiplication (Vector3d (space @ units1)) (Curve1d units2) where
+  type Vector3d (space @ units1) .*. Curve1d units2 = VectorCurve3d (space @ (units1 :*: units2))
+  vector .*. curve = constant vector .*. curve
 
 data DotProductOf space units1 units2
   = DotProductOf (VectorCurve3d (space @ units1)) (VectorCurve3d (space @ units2))
