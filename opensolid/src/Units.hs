@@ -1,9 +1,5 @@
 module Units
   ( Units
-  , Conversion
-  , conversion
-  , convert
-  , unconvert
   , Coercion (coerce)
   , type (:*:)
   , type (:/:)
@@ -34,7 +30,6 @@ import Data.List.NonEmpty (NonEmpty)
 import {-# SOURCE #-} Qty (Qty (Qty_))
 import {-# SOURCE #-} Result (Result (Error, Ok))
 import {-# SOURCE #-} Sign (Sign)
-import Prelude qualified
 
 type Units :: k -> Type
 type family Units a
@@ -52,17 +47,6 @@ type instance Units (Result x a) = Units a
 type instance Units (List a) = Units a
 
 type instance Units (NonEmpty a) = Units a
-
-newtype Conversion units1 units2 = Conversion Prelude.Double
-
-conversion :: Qty units1 -> Qty units2 -> Conversion units1 units2
-conversion (Qty_ a) (Qty_ b) = Conversion (b Prelude./ a)
-
-convert :: Conversion units1 units2 -> Qty units1 -> Qty units2
-convert (Conversion factor) (Qty_ value) = Qty_ (value Prelude.* factor)
-
-unconvert :: Conversion units1 units2 -> Qty units2 -> Qty units1
-unconvert (Conversion factor) (Qty_ value) = Qty_ (value Prelude./ factor)
 
 type Coercion :: Type -> Type -> Constraint
 class Coercion b a => Coercion a b where

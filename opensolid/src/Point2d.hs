@@ -203,8 +203,8 @@ relativeTo frame point =
         (displacement <> Frame2d.xDirection frame)
         (displacement <> Frame2d.yDirection frame)
 
-convert :: Units.Conversion units1 units2 -> Point2d (space @ units1) -> Point2d (space @ units2)
+convert :: Qty (units2 :/: units1) -> Point2d (space @ units1) -> Point2d (space @ units2)
 convert conversion (Point2d px py) = Point2d (Qty.convert conversion px) (Qty.convert conversion py)
 
-unconvert :: Units.Conversion units1 units2 -> Point2d (space @ units2) -> Point2d (space @ units1)
+unconvert :: Qty (units2 :/: units1) -> Point2d (space @ units2) -> Point2d (space @ units1)
 unconvert conversion (Point2d px py) = Point2d (Qty.unconvert conversion px) (Qty.unconvert conversion py)

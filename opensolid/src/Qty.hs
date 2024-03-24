@@ -39,7 +39,7 @@ import {-# SOURCE #-} Float qualified
 import Foreign.Storable (Storable)
 import List qualified
 import Sign (Sign (Negative, Positive))
-import Units (Unitless, convert, unconvert, (:*:), (:/:))
+import Units (Unitless, (:*:), (:/:))
 import Units qualified
 import Prelude qualified
 
@@ -251,3 +251,9 @@ midpoint a b = 0.5 * (a + b)
 
 sum :: List (Qty units) -> Qty units
 sum = List.foldl (+) zero
+
+convert :: Qty (units2 :/: units1) -> Qty units1 -> Qty units2
+convert factor value = value !* factor
+
+unconvert :: Qty (units2 :/: units1) -> Qty units2 -> Qty units1
+unconvert factor value = value !/ factor

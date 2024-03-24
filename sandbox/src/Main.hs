@@ -39,7 +39,6 @@ import T qualified
 import Task qualified
 import Transform2d qualified
 import Units (Meters)
-import Units qualified
 import Uv (Parameter (U, V))
 import Uv qualified
 import Vector2d qualified
@@ -274,8 +273,8 @@ drawCrossingCurve index segments =
 drawSaddlePoint :: Uv.Point -> Drawing2d.Entity Uv.Space
 drawSaddlePoint point = drawDot Colour.orange point
 
-toDrawing :: Units.Conversion Unitless Meters
-toDrawing = Units.conversion 1.0 (Length.centimeters 10.0)
+toDrawing :: Qty (Meters :/: Unitless)
+toDrawing = Length.centimeters 10.0 ./. 1.0
 
 drawCurve :: Curve2d Uv.Coordinates -> Drawing2d.Entity Uv.Space
 drawCurve curve =

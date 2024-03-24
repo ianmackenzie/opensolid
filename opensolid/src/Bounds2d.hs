@@ -355,10 +355,10 @@ signedDistanceAlong axis (Bounds2d x y) =
       r = 0.5 * xWidth * Float.abs ax + 0.5 * yWidth * Float.abs ay
    in Range.from (d0 - r) (d0 + r)
 
-convert :: Units.Conversion units1 units2 -> Bounds2d (space @ units1) -> Bounds2d (space @ units2)
+convert :: Qty (units2 :/: units1) -> Bounds2d (space @ units1) -> Bounds2d (space @ units2)
 convert conversion (Bounds2d x y) =
   Bounds2d (Range.convert conversion x) (Range.convert conversion y)
 
-unconvert :: Units.Conversion units1 units2 -> Bounds2d (space @ units2) -> Bounds2d (space @ units1)
+unconvert :: Qty (units2 :/: units1) -> Bounds2d (space @ units2) -> Bounds2d (space @ units1)
 unconvert conversion (Bounds2d x y) =
   Bounds2d (Range.unconvert conversion x) (Range.unconvert conversion y)
