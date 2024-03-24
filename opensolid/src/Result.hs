@@ -96,8 +96,10 @@ map2 function result1 result2 = Prelude.do
   value2 <- result2
   return (function value1 value2)
 
-check :: Error x => Bool -> x -> Result x ()
-check condition error = if condition then Ok () else Error error
+data CheckFailed = CheckFailed deriving (Eq, Show, Error)
+
+check :: Bool -> Result CheckFailed ()
+check condition = if condition then Ok () else Error CheckFailed
 
 onError :: (x -> Result y a) -> Result x a -> Result y a
 onError _ (Ok value) = Ok value
