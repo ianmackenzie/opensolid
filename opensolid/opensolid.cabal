@@ -162,9 +162,6 @@ library
       Surface1d.Function.Boundary
       Surface1d.Function.PartialZeros
       Surface1d.Function.SaddleRegion
-      VectorCurve2d.DegenerateEndpoint
-      VectorCurve2d.Direction
-      VectorCurve2d.Magnitude
       Quadrature
   hs-source-dirs: src
 

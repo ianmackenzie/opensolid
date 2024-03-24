@@ -24,10 +24,10 @@ cubicMeter :: Volume
 cubicMeter = cubicMeters 1.0
 
 cubicMeters :: Float -> Volume
-cubicMeters (Qty x) = Qty x
+cubicMeters = Qty
 
 inCubicMeters :: Volume -> Float
-inCubicMeters (Qty x) = Qty x
+inCubicMeters (Qty x) = x
 
 cubicCentimeter :: Volume
 cubicCentimeter = Length.centimeter * Length.centimeter * Length.centimeter

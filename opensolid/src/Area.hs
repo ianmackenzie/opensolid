@@ -20,7 +20,7 @@ squareMeter :: Area
 squareMeter = squareMeters 1.0
 
 squareMeters :: Float -> Area
-squareMeters (Qty x) = Qty x
+squareMeters = Qty
 
 inSquareMeters :: Area -> Float
-inSquareMeters (Qty x) = Qty x
+inSquareMeters (Qty x) = x

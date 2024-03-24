@@ -36,6 +36,7 @@ import {-# SOURCE #-} Frame2d qualified
 import OpenSolid
 import {-# SOURCE #-} Point2d (Point2d)
 import Random qualified
+import Units qualified
 import Vector2d (Vector2d (Vector2d))
 import Vector2d qualified
 
@@ -50,6 +51,11 @@ newtype Direction2d (space :: Type) = Direction2d_ (Vector2d (space @ Unitless))
 pattern Direction2d :: Vector2d (space @ Unitless) -> Direction2d space
 pattern Direction2d v <- Direction2d_ v
 
+type instance Units (Direction2d space) = Unitless
+
+instance space ~ space' => Units.Coercion (Direction2d space) (Direction2d space') where
+  coerce = identity
+
 instance
   space ~ space' =>
   ApproximateEquality (Direction2d space) (Direction2d space') Radians
@@ -59,25 +65,43 @@ instance
 instance Negation (Direction2d space) where
   negate (Direction2d vector) = unsafe -vector
 
-instance Multiplication Sign (Direction2d space) (Direction2d space) where
-  Positive * direction = direction
-  Negative * direction = -direction
+instance Multiplication Sign (Direction2d space) where
+  type Sign .*. Direction2d space = Direction2d space
+  Positive .*. direction = direction
+  Negative .*. direction = -direction
 
-instance Multiplication (Direction2d space) Sign (Direction2d space) where
-  direction * Positive = direction
-  direction * Negative = -direction
+instance Product Sign (Direction2d space) (Direction2d space)
 
-instance Multiplication (Qty units) (Direction2d space) (Vector2d (space @ units)) where
-  scale * Direction2d vector = scale * vector
+instance Multiplication (Direction2d space) Sign where
+  type Direction2d space .*. Sign = Direction2d space
+  direction .*. Positive = direction
+  direction .*. Negative = -direction
 
-instance Multiplication (Direction2d space) (Qty units) (Vector2d (space @ units)) where
-  Direction2d vector * scale = vector * scale
+instance Product (Direction2d space) Sign (Direction2d space)
 
-instance space ~ space' => DotProduct (Direction2d space) (Direction2d space') Float where
-  Direction2d v1 <> Direction2d v2 = v1 <> v2
+instance Multiplication (Qty units) (Direction2d space) where
+  type Qty units .*. Direction2d space = Vector2d (space @ (units :*: Unitless))
+  scale .*. Direction2d vector = scale .*. vector
 
-instance space ~ space' => CrossProduct (Direction2d space) (Direction2d space') Float where
-  Direction2d v1 >< Direction2d v2 = v1 >< v2
+instance Product (Qty units) (Direction2d space) (Vector2d (space @ units))
+
+instance Multiplication (Direction2d space) (Qty units) where
+  type Direction2d space .*. Qty units = Vector2d (space @ (Unitless :*: units))
+  Direction2d vector .*. scale = vector .*. scale
+
+instance Product (Direction2d space) (Qty units) (Vector2d (space @ units))
+
+instance space ~ space' => DotMultiplication (Direction2d space) (Direction2d space') where
+  type Direction2d space .<>. Direction2d space' = Float
+  Direction2d v1 .<>. Direction2d v2 = v1 <> v2
+
+instance space ~ space' => DotProduct (Direction2d space) (Direction2d space') Float
+
+instance space ~ space' => CrossMultiplication (Direction2d space) (Direction2d space') where
+  type Direction2d space .><. Direction2d space' = Float
+  Direction2d v1 .><. Direction2d v2 = v1 >< v2
+
+instance space ~ space' => CrossProduct (Direction2d space) (Direction2d space') Float
 
 xComponent :: Direction2d space -> Float
 xComponent (Direction2d vector) = Vector2d.xComponent vector

@@ -32,10 +32,10 @@ meter :: Length
 meter = meters 1.0
 
 meters :: Float -> Length
-meters (Qty x) = Qty x
+meters = Qty
 
 inMeters :: Length -> Float
-inMeters (Qty x) = Qty x
+inMeters (Qty x) = x
 
 millimeter :: Length
 millimeter = meters 0.001

@@ -20,6 +20,7 @@ where
 
 import Angle qualified
 import OpenSolid
+import Units qualified
 import Vector3d (Vector3d (Vector3d))
 import Vector3d qualified
 
@@ -34,6 +35,11 @@ newtype Direction3d (space :: Type) = Direction3d_ (Vector3d (space @ Unitless))
 pattern Direction3d :: Vector3d (space @ Unitless) -> Direction3d space
 pattern Direction3d v <- Direction3d_ v
 
+type instance Units (Direction3d space) = Unitless
+
+instance space ~ space' => Units.Coercion (Direction3d space) (Direction3d space') where
+  coerce = identity
+
 instance
   space ~ space' =>
   ApproximateEquality (Direction3d space) (Direction3d space') Radians
@@ -43,37 +49,73 @@ instance
 instance Negation (Direction3d space) where
   negate (Direction3d vector) = unsafe (negate vector)
 
-instance Multiplication Sign (Direction3d space) (Direction3d space) where
-  Positive * direction = direction
-  Negative * direction = -direction
+instance Product Sign (Direction3d space) (Direction3d space)
 
-instance Multiplication (Direction3d space) Sign (Direction3d space) where
-  direction * Positive = direction
-  direction * Negative = -direction
+instance Multiplication Sign (Direction3d space) where
+  type Sign .*. Direction3d space = Direction3d space
+  Positive .*. direction = direction
+  Negative .*. direction = -direction
 
-instance space ~ space' => DotProduct (Direction3d space) (Direction3d space') Float where
-  Direction3d vector1 <> Direction3d vector2 = vector1 <> vector2
+instance Product (Direction3d space) Sign (Direction3d space)
 
-instance space ~ space' => DotProduct (Vector3d (space @ units)) (Direction3d space') (Qty units) where
-  vector1 <> Direction3d vector2 = vector1 <> vector2
+instance Multiplication (Direction3d space) Sign where
+  type Direction3d space .*. Sign = Direction3d space
+  direction .*. Positive = direction
+  direction .*. Negative = -direction
 
-instance space ~ space' => DotProduct (Direction3d space) (Vector3d (space' @ units)) (Qty units) where
-  Direction3d vector1 <> vector2 = vector1 <> vector2
+instance space ~ space' => DotProduct (Direction3d space) (Direction3d space') Float
 
-instance Multiplication (Qty units) (Direction3d space) (Vector3d (space @ units)) where
-  scale * Direction3d vector = scale * vector
+instance space ~ space' => DotMultiplication (Direction3d space) (Direction3d space') where
+  type Direction3d space .<>. Direction3d space' = Qty (Unitless :*: Unitless)
+  Direction3d vector1 .<>. Direction3d vector2 = vector1 .<>. vector2
 
-instance Multiplication (Direction3d space) (Qty units) (Vector3d (space @ units)) where
-  Direction3d vector * scale = vector * scale
+instance space ~ space' => DotProduct (Vector3d (space @ units)) (Direction3d space') (Qty units)
 
-instance space ~ space' => CrossProduct (Vector3d (space @ units)) (Direction3d space') (Vector3d (space @ units)) where
-  vector1 >< Direction3d vector2 = vector1 >< vector2
+instance space ~ space' => DotMultiplication (Vector3d (space @ units)) (Direction3d space') where
+  type Vector3d (space @ units) .<>. Direction3d space' = Qty (units :*: Unitless)
+  vector1 .<>. Direction3d vector2 = vector1 .<>. vector2
 
-instance space ~ space' => CrossProduct (Direction3d space) (Vector3d (space' @ units)) (Vector3d (space @ units)) where
-  Direction3d vector1 >< vector2 = vector1 >< vector2
+instance space ~ space' => DotProduct (Direction3d space) (Vector3d (space' @ units)) (Qty units)
 
-instance space ~ space' => CrossProduct (Direction3d space) (Direction3d space') (Vector3d (space @ Unitless)) where
-  Direction3d vector1 >< Direction3d vector2 = vector1 >< vector2
+instance space ~ space' => DotMultiplication (Direction3d space) (Vector3d (space' @ units)) where
+  type Direction3d space .<>. Vector3d (space' @ units) = Qty (Unitless :*: units)
+  Direction3d vector1 .<>. vector2 = vector1 .<>. vector2
+
+instance Product (Qty units) (Direction3d space) (Vector3d (space @ units))
+
+instance Multiplication (Qty units) (Direction3d space) where
+  type Qty units .*. Direction3d space = Vector3d (space @ (units :*: Unitless))
+  scale .*. Direction3d vector = scale .*. vector
+
+instance Product (Direction3d space) (Qty units) (Vector3d (space @ units))
+
+instance Multiplication (Direction3d space) (Qty units) where
+  type Direction3d space .*. Qty units = Vector3d (space @ (Unitless :*: units))
+  Direction3d vector .*. scale = vector .*. scale
+
+instance
+  space ~ space' =>
+  CrossProduct (Vector3d (space @ units)) (Direction3d space') (Vector3d (space @ units))
+
+instance space ~ space' => CrossMultiplication (Vector3d (space @ units)) (Direction3d space') where
+  type Vector3d (space @ units) .><. Direction3d space' = Vector3d (space @ (units :*: Unitless))
+  vector1 .><. Direction3d vector2 = vector1 .><. vector2
+
+instance
+  space ~ space' =>
+  CrossProduct (Direction3d space) (Vector3d (space' @ units)) (Vector3d (space @ units))
+
+instance space ~ space' => CrossMultiplication (Direction3d space) (Vector3d (space' @ units)) where
+  type Direction3d space .><. Vector3d (space' @ units) = Vector3d (space @ (Unitless :*: units))
+  Direction3d vector1 .><. vector2 = vector1 .><. vector2
+
+instance
+  space ~ space' =>
+  CrossProduct (Direction3d space) (Direction3d space') (Vector3d (space @ Unitless))
+
+instance space ~ space' => CrossMultiplication (Direction3d space) (Direction3d space') where
+  type Direction3d space .><. Direction3d space' = Vector3d (space @ (Unitless :*: Unitless))
+  Direction3d vector1 .><. Direction3d vector2 = vector1 .><. vector2
 
 xComponent :: Direction3d space -> Float
 xComponent (Direction3d_ vector) = Vector3d.xComponent vector

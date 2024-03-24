@@ -9,6 +9,9 @@ instance Negation Sign where
   negate Positive = Negative
   negate Negative = Positive
 
-instance Multiplication Sign Sign Sign where
-  Positive * sign = sign
-  Negative * sign = -sign
+instance Multiplication Sign Sign where
+  type Sign .*. Sign = Sign
+  Positive .*. sign = sign
+  Negative .*. sign = -sign
+
+instance Product Sign Sign Sign

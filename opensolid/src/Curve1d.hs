@@ -39,12 +39,6 @@ import Stream (Stream)
 import Stream qualified
 import T qualified
 import Units qualified
-import Vector2d (Vector2d)
-import Vector3d (Vector3d)
-import {-# SOURCE #-} VectorCurve2d (VectorCurve2d)
-import {-# SOURCE #-} VectorCurve2d qualified
-import {-# SOURCE #-} VectorCurve3d (VectorCurve3d)
-import {-# SOURCE #-} VectorCurve3d qualified
 
 class Show curve => Interface curve units | curve -> units where
   evaluateAtImpl :: Float -> curve -> Qty units
@@ -97,16 +91,9 @@ data Curve1d units where
 
 deriving instance Show (Curve1d units)
 
-instance
-  ( units1 ~ units1'
-  , units2 ~ units2'
-  ) =>
-  Units.Coercion
-    units1
-    units2
-    (Curve1d units1')
-    (Curve1d units2')
-  where
+type instance Units (Curve1d units) = units
+
+instance Units.Coercion (Curve1d units1) (Curve1d units2) where
   coerce (Constant value) = Constant (Units.coerce value)
   coerce (Coerce curve) = Coerce curve
   coerce curve = Coerce curve
@@ -138,17 +125,23 @@ instance Negation (Curve1d units) where
   negate (Product_ c1 c2) = negate c1 .*. c2
   negate curve = Negated curve
 
-instance Multiplication Sign (Curve1d units) (Curve1d units) where
-  Positive * curve = curve
-  Negative * curve = -curve
+instance Product Sign (Curve1d units) (Curve1d units)
 
-instance Multiplication (Curve1d units) Sign (Curve1d units) where
-  curve * Positive = curve
-  curve * Negative = -curve
+instance Multiplication Sign (Curve1d units) where
+  type Sign .*. Curve1d units = Curve1d (Unitless :*: units)
+  Positive .*. curve = Units.coerce curve
+  Negative .*. curve = Units.coerce -curve
+
+instance Product (Curve1d units) Sign (Curve1d units)
+
+instance Multiplication (Curve1d units) Sign where
+  type Curve1d units .*. Sign = Curve1d (units :*: Unitless)
+  curve .*. Positive = Units.coerce curve
+  curve .*. Negative = Units.coerce -curve
 
 instance units ~ units' => Addition (Curve1d units) (Curve1d units') (Curve1d units) where
-  curve + Constant value | value == Qty.zero = curve
-  Constant value + curve | value == Qty.zero = curve
+  curve + Constant (Qty 0.0) = curve
+  Constant (Qty 0.0) + curve = curve
   Constant x + Constant y = constant (x + y)
   curve1 + curve2 = Sum curve1 curve2
 
@@ -159,8 +152,8 @@ instance units ~ units' => Addition (Qty units) (Curve1d units') (Curve1d units)
   value + curve = constant value + curve
 
 instance units ~ units' => Subtraction (Curve1d units) (Curve1d units') (Curve1d units) where
-  curve - Constant value | value == Qty.zero = curve
-  Constant value - curve | value == Qty.zero = negate curve
+  curve - Constant (Qty 0.0) = curve
+  Constant (Qty 0.0) - curve = negate curve
   Constant x - Constant y = constant (x - y)
   curve1 - curve2 = Difference curve1 curve2
 
@@ -172,104 +165,62 @@ instance units ~ units' => Subtraction (Qty units) (Curve1d units') (Curve1d uni
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication
-    (Curve1d units1)
-    (Curve1d units2)
-    (Curve1d units3)
-  where
-  Constant value * _ | value == Qty.zero = zero
-  _ * Constant value | value == Qty.zero = zero
-  Constant x * Constant y = Constant (x * y)
-  Constant x * curve | Units.drop x == 1.0 = Units.add (Units.drop curve)
-  Constant x * curve | Units.drop x == -1.0 = Units.add (Units.drop (negate curve))
-  Constant x * Negated c = negate x * c
-  c1 * (Constant x) = Constant x * c1
-  Constant x * Product_ (Constant y) c = Units.specialize (Units.rightAssociate ((x .*. y) .*. c))
-  curve1 * curve2 = Units.specialize (Product_ curve1 curve2)
+  Product (Curve1d units1) (Curve1d units2) (Curve1d units3)
+
+instance Multiplication (Curve1d units1) (Curve1d units2) where
+  type Curve1d units1 .*. Curve1d units2 = Curve1d (units1 :*: units2)
+  Constant (Qty 0.0) .*. _ = zero
+  _ .*. Constant (Qty 0.0) = zero
+  Constant x .*. Constant y = Constant (x .*. y)
+  Constant (Qty 1.0) .*. curve = Units.coerce curve
+  Constant (Qty -1.0) .*. curve = Units.coerce (negate curve)
+  Constant x .*. Negated c = negate x .*. c
+  c1 .*. (Constant x) = Units.commute (Constant x .*. c1)
+  Constant x .*. Product_ (Constant y) c = Units.rightAssociate ((x .*. y) .*. c)
+  curve1 .*. curve2 = Product_ curve1 curve2
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication
-    (Curve1d units1)
-    (Qty units2)
-    (Curve1d units3)
-  where
-  curve * value = curve * constant value
+  Product (Curve1d units1) (Qty units2) (Curve1d units3)
+
+instance Multiplication (Curve1d units1) (Qty units2) where
+  type Curve1d units1 .*. Qty units2 = Curve1d (units1 :*: units2)
+  curve .*. value = curve .*. constant value
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication
-    (Qty units1)
-    (Curve1d units2)
-    (Curve1d units3)
-  where
-  value * curve = constant value * curve
+  Product (Qty units1) (Curve1d units2) (Curve1d units3)
 
-instance
-  Units.Product units1 units2 units3 =>
-  Multiplication
-    (Curve1d units1)
-    (Vector2d (space @ units2))
-    (VectorCurve2d (space @ units3))
-  where
-  curve * vector = curve * VectorCurve2d.constant vector
-
-instance
-  Units.Product units1 units2 units3 =>
-  Multiplication
-    (Vector2d (space @ units1))
-    (Curve1d units2)
-    (VectorCurve2d (space @ units3))
-  where
-  vector * curve = VectorCurve2d.constant vector * curve
-
-instance
-  Units.Product units1 units2 units3 =>
-  Multiplication
-    (Curve1d units1)
-    (Vector3d (space @ units2))
-    (VectorCurve3d (space @ units3))
-  where
-  curve * vector = curve * VectorCurve3d.constant vector
-
-instance
-  Units.Product units1 units2 units3 =>
-  Multiplication
-    (Vector3d (space @ units1))
-    (Curve1d units2)
-    (VectorCurve3d (space @ units3))
-  where
-  vector * curve = VectorCurve3d.constant vector * curve
+instance Multiplication (Qty units1) (Curve1d units2) where
+  type Qty units1 .*. Curve1d units2 = Curve1d (units1 :*: units2)
+  value .*. curve = constant value .*. curve
 
 instance
   Units.Quotient units1 units2 units3 =>
-  Division
-    (Curve1d units1)
-    (Curve1d units2)
-    (Curve1d units3)
-  where
-  Constant value / _ | value == Qty.zero = zero
-  Constant x / Constant y = Constant (x / y)
-  curve / Constant x = Units.specialize ((1.0 ./. x) .*^ curve)
-  curve1 / curve2 = Units.specialize (Quotient_ curve1 curve2)
+  Quotient (Curve1d units1) (Curve1d units2) (Curve1d units3)
+
+instance Division (Curve1d units1) (Curve1d units2) where
+  type Curve1d units1 ./. Curve1d units2 = Curve1d (units1 :/: units2)
+  Constant (Qty 0.0) ./. _ = zero
+  Constant x ./. Constant y = Constant (x ./. y)
+  curve ./. Constant x = (1.0 ./. x) .*^ curve
+  curve1 ./. curve2 = Quotient_ curve1 curve2
 
 instance
   Units.Quotient units1 units2 units3 =>
-  Division
-    (Curve1d units1)
-    (Qty units2)
-    (Curve1d units3)
-  where
-  curve / value = curve / constant value
+  Quotient (Curve1d units1) (Qty units2) (Curve1d units3)
+
+instance Division (Curve1d units1) (Qty units2) where
+  type Curve1d units1 ./. Qty units2 = Curve1d (units1 :/: units2)
+  curve ./. value = curve ./. constant value
 
 instance
   Units.Quotient units1 units2 units3 =>
-  Division
-    (Qty units1)
-    (Curve1d units2)
-    (Curve1d units3)
-  where
-  value / curve = constant value / curve
+  Quotient (Qty units1) (Curve1d units2) (Curve1d units3)
+
+instance Division (Qty units1) (Curve1d units2) where
+  type Qty units1 ./. Curve1d units2 = Curve1d (units1 :/: units2)
+  value ./. curve = constant value ./. curve
 
 evaluateAt :: Float -> Curve1d units -> Qty units
 evaluateAt tValue curve =
@@ -321,8 +272,8 @@ derivative curve =
     Quotient_ c1 c2 -> (derivative c1 .*. c2 - c1 .*. derivative c2) .!/.! squared_ c2
     Squared_ c -> 2.0 * c .*. derivative c
     SquareRoot_ c_ -> derivative c_ .!/! (2.0 * sqrt_ c_)
-    Sin c -> cos c * Units.drop (derivative c)
-    Cos c -> negate (sin c) * Units.drop (derivative c)
+    Sin c -> cos c * (Angle.unitless (derivative c) :: Curve1d Unitless)
+    Cos c -> negate (sin c) * (Angle.unitless (derivative c) :: Curve1d Unitless)
     Coerce c -> Units.coerce (derivative c)
 
 newtype Reversed units = Reversed (Curve1d units)

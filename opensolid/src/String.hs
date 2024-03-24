@@ -20,7 +20,7 @@ import Data.Char qualified
 import Data.List qualified
 import {-# SOURCE #-} Float (Float)
 import List qualified
-import Qty (Qty (Qty))
+import Qty (Qty (Qty_))
 
 concat :: List String -> String
 concat = Data.List.concat
@@ -32,7 +32,7 @@ fromInt :: Int -> String
 fromInt = show
 
 fromFloat :: Float -> String
-fromFloat (Qty x) = show x
+fromFloat (Qty_ x) = show x
 
 lines :: String -> List String
 lines string =

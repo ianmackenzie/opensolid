@@ -3,22 +3,37 @@ module Arithmetic
   , Addition ((+))
   , Subtraction ((-))
   , subtract
-  , Multiplication ((*))
-  , Division ((/))
+  , Multiplication (type (.*.), (.*.))
+  , Product ((*))
+  , Division (type (./.), (./.))
+  , Quotient ((/))
   , DivMod ((//), (%))
+  , DotMultiplication (type (.<>.), (.<>.))
   , DotProduct ((<>))
+  , CrossMultiplication (type (.><.), (.><.))
   , CrossProduct ((><))
   , Exponentiation ((**))
+  , (^*.)
+  , (.*^)
+  , (.!/!)
+  , (!./!)
+  , (!/!.)
+  , (!/.!)
+  , (.!/.!)
+  , (./^)
+  , (!?/.!?)
   )
 where
 
 import Basics
 import {-# SOURCE #-} Float (Float)
-import {-# SOURCE #-} Qty (Qty (Qty))
+import {-# SOURCE #-} Qty (Qty (Qty_))
 import {-# SOURCE #-} Sign (Sign (Negative, Positive))
+import Units (Unitless, Units, (:*:), (:/:))
+import Units qualified
 import Prelude qualified
 
-class (Multiplication Sign a a, Multiplication a Sign a) => Negation a where
+class (Product Sign a a, Product a Sign a) => Negation a where
   negate :: a -> a
 
 class Addition a b c | a b -> c where
@@ -30,17 +45,68 @@ class Subtraction a b c | a b -> c where
 subtract :: Subtraction a b c => b -> a -> c
 subtract b a = a - b
 
-class Multiplication b a c => Multiplication a b c | a b -> c where
+class Multiplication b a => Multiplication a b where
+  type a .*. b
+  (.*.) :: a -> b -> a .*. b
+
+class
+  ( Multiplication a b
+  , Units.Coercion (a .*. b) c
+  , Units.Specialize (Units (a .*. b)) (Units c)
+  , Product b a c
+  ) =>
+  Product a b c
+    | a b -> c
+  where
   (*) :: a -> b -> c
+  a * b = Units.specialize (a .*. b)
 
-class Division a b c | a b -> c where
+class Division a b where
+  type a ./. b
+  (./.) :: a -> b -> a ./. b
+
+class
+  ( Division a b
+  , Units.Coercion (a ./. b) c
+  , Units.Specialize (Units (a ./. b)) (Units c)
+  ) =>
+  Quotient a b c
+    | a b -> c
+  where
   (/) :: a -> b -> c
+  a / b = Units.specialize (a ./. b)
 
-class DotProduct b a c => DotProduct a b c | a b -> c where
+class DotMultiplication a b where
+  type a .<>. b
+  (.<>.) :: a -> b -> a .<>. b
+
+class
+  ( DotMultiplication a b
+  , Units.Coercion (a .<>. b) c
+  , Units.Specialize (Units (a .<>. b)) (Units c)
+  , DotProduct b a c
+  ) =>
+  DotProduct a b c
+    | a b -> c
+  where
   (<>) :: a -> b -> c
+  a <> b = Units.specialize (a .<>. b)
 
-class CrossProduct b a c => CrossProduct a b c | a b -> c where
+class CrossMultiplication a b where
+  type a .><. b
+  (.><.) :: a -> b -> a .><. b
+
+class
+  ( CrossMultiplication a b
+  , Units.Coercion (a .><. b) c
+  , Units.Specialize (Units (a .><. b)) (Units c)
+  , CrossProduct b a c
+  ) =>
+  CrossProduct a b c
+    | a b -> c
+  where
   (><) :: a -> b -> c
+  a >< b = Units.specialize (a .><. b)
 
 class DivMod a where
   (//) :: a -> a -> Int
@@ -53,13 +119,19 @@ instance DivMod Int where
 instance Negation Int where
   negate = Prelude.negate
 
-instance Multiplication Sign Int Int where
-  Positive * n = n
-  Negative * n = -n
+instance Multiplication Sign Int where
+  type Sign .*. Int = Int
+  Positive .*. n = n
+  Negative .*. n = -n
 
-instance Multiplication Int Sign Int where
-  n * Positive = n
-  n * Negative = -n
+instance Product Sign Int Int
+
+instance Multiplication Int Sign where
+  type Int .*. Sign = Int
+  n .*. Positive = n
+  n .*. Negative = -n
+
+instance Product Int Sign Int
 
 instance Addition Int Int Int where
   (+) = (Prelude.+)
@@ -67,24 +139,147 @@ instance Addition Int Int Int where
 instance Subtraction Int Int Int where
   (-) = (Prelude.-)
 
-instance Multiplication Int Int Int where
-  (*) = (Prelude.*)
+instance Multiplication Int Int where
+  type Int .*. Int = Int
+  (.*.) = (Prelude.*)
 
-instance Division Int Int Float where
-  n / m = Qty (fromIntegral n Prelude./ fromIntegral m)
+instance Product Int Int Int
+
+instance Division Int Int where
+  type Int ./. Int = Float
+  n ./. m = Qty_ (fromIntegral n Prelude./ fromIntegral m)
+
+instance Quotient Int Int Float
 
 infixl 6 +, -
 
-infixl 7 *, /, <>, ><, //, %
+infixl 7 *, /, <>, ><, //, %, .*., ./., .<>., .><.
 
-class Exponentiation a b c | a b -> c where
-  (**) :: a -> b -> c
+class Exponentiation a b where
+  (**) :: a -> b -> a
 
-instance Exponentiation Int Int Int where
+infixr 8 **
+
+instance Exponentiation Int Int where
   (**) = (Prelude.^)
 
-instance Exponentiation Float Int Float where
+instance units ~ Unitless => Exponentiation (Qty units) Int where
   (**) = (Prelude.^)
 
-instance Exponentiation Float Float Float where
+instance
+  (baseUnits ~ Unitless, exponentUnits ~ Unitless) =>
+  Exponentiation (Qty baseUnits) (Qty exponentUnits)
+  where
   (**) = (Prelude.**)
+
+-- GENERIC UNITS MANIPULATION
+
+(^*.) ::
+  ( Multiplication a b
+  , Units.Coercion (a .*. b) c
+  , Units a ~ units1
+  , Units b ~ Unitless :/: units2
+  , Units c ~ units1 :/: units2
+  ) =>
+  a ->
+  b ->
+  c
+a ^*. b = Units.coerce (a .*. b)
+
+(.*^) ::
+  ( Multiplication a b
+  , Units.Coercion (a .*. b) c
+  , Units a ~ Unitless :/: units2
+  , Units b ~ units1
+  , Units c ~ units1 :/: units2
+  ) =>
+  a ->
+  b ->
+  c
+a .*^ b = Units.coerce (a .*. b)
+
+(.!/!) ::
+  ( Division a b
+  , Units.Coercion (a ./. b) c
+  , Units a ~ units1 :*: units2
+  , Units b ~ units2
+  , Units c ~ units1
+  ) =>
+  a ->
+  b ->
+  c
+a .!/! b = Units.coerce (a ./. b)
+
+(!./!) ::
+  ( Division a b
+  , Units.Coercion (a ./. b) c
+  , Units a ~ units1 :*: units2
+  , Units b ~ units1
+  , Units c ~ units2
+  ) =>
+  a ->
+  b ->
+  c
+a !./! b = Units.coerce (a ./. b)
+
+(!/!.) ::
+  ( Division a b
+  , Units.Coercion (a ./. b) c
+  , Units a ~ units1
+  , Units b ~ units1 :*: units2
+  , Units c ~ Unitless :/: units2
+  ) =>
+  a ->
+  b ->
+  c
+a !/!. b = Units.coerce (a ./. b)
+
+(!/.!) ::
+  ( Division a b
+  , Units.Coercion (a ./. b) c
+  , Units a ~ units2
+  , Units b ~ units1 :*: units2
+  , Units c ~ Unitless :/: units1
+  ) =>
+  a ->
+  b ->
+  c
+a !/.! b = Units.coerce (a ./. b)
+
+(.!/.!) ::
+  ( Division a b
+  , Units.Coercion (a ./. b) c
+  , Units a ~ units1 :*: units3
+  , Units b ~ units2 :*: units3
+  , Units c ~ units1 :/: units2
+  ) =>
+  a ->
+  b ->
+  c
+a .!/.! b = Units.coerce (a ./. b)
+
+(./^) ::
+  ( Division a b
+  , Units.Coercion (a ./. b) c
+  , Units a ~ units1
+  , Units b ~ Unitless :/: units2
+  , Units c ~ units1 :*: units2
+  ) =>
+  a ->
+  b ->
+  c
+a ./^ b = Units.coerce (a ./. b)
+
+(!?/.!?) ::
+  ( Division a b
+  , Units.Coercion (a ./. b) c
+  , Units a ~ units1 :*: units2
+  , Units b ~ units1 :*: units2 :*: units3
+  , Units c ~ Unitless :/: units3
+  ) =>
+  a ->
+  b ->
+  c
+a !?/.!? b = Units.coerce (a ./. b)
+
+infixl 7 ^*., .*^, .!/!, !./!, !/!., !/.!, .!/.!, ./^, !?/.!?

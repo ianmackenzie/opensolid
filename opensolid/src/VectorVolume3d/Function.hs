@@ -63,33 +63,25 @@ data Function (coordinateSystem :: CoordinateSystem) where
     Function (space @ units) ->
     Function (space @ units)
   Product1d3d ::
-    Units.Product units1 units2 units3 =>
     Volume1d.Function units1 ->
     Function (space @ units2) ->
-    Function (space @ units3)
+    Function (space @ (units1 :*: units2))
   Product3d1d ::
-    Units.Product units1 units2 units3 =>
     Function (space @ units1) ->
     Volume1d.Function units2 ->
-    Function (space @ units3)
+    Function (space @ (units1 :*: units2))
   Quotient ::
-    Units.Quotient units1 units2 units3 =>
     Function (space @ units1) ->
     Volume1d.Function units2 ->
-    Function (space @ units3)
+    Function (space @ (units1 :/: units2))
 
 deriving instance Show (Function (space @ units))
 
+type instance Units (Function (space @ units)) = units
+
 instance
-  ( space ~ space'
-  , units1 ~ units1'
-  , units2 ~ units2'
-  ) =>
-  Units.Coercion
-    units1
-    units2
-    (Function (space @ units1'))
-    (Function (space' @ units2'))
+  space ~ space' =>
+  Units.Coercion (Function (space @ units1)) (Function (space' @ units2))
   where
   coerce Zero = Zero
   coerce (Constant value) = Constant (Units.coerce value)
@@ -101,17 +93,23 @@ instance Negation (Function (space @ units)) where
   negate (Constant x) = Constant (negate x)
   negate (Negated function) = function
   negate (Difference f1 f2) = Difference f2 f1
-  negate (Product1d3d f1 f2) = negate f1 * f2
-  negate (Product3d1d f1 f2) = f1 * negate f2
+  negate (Product1d3d f1 f2) = negate f1 .*. f2
+  negate (Product3d1d f1 f2) = f1 .*. negate f2
   negate function = Negated function
 
-instance Multiplication Sign (Function (space @ units)) (Function (space @ units)) where
-  Positive * function = function
-  Negative * function = -function
+instance Product Sign (Function (space @ units)) (Function (space @ units))
 
-instance Multiplication (Function (space @ units)) Sign (Function (space @ units)) where
-  function * Positive = function
-  function * Negative = -function
+instance Multiplication Sign (Function (space @ units)) where
+  type Sign .*. Function (space @ units) = Function (space @ (Unitless :*: units))
+  Positive .*. function = Units.coerce function
+  Negative .*. function = Units.coerce -function
+
+instance Product (Function (space @ units)) Sign (Function (space @ units))
+
+instance Multiplication (Function (space @ units)) Sign where
+  type Function (space @ units) .*. Sign = Function (space @ (units :*: Unitless))
+  function .*. Positive = Units.coerce function
+  function .*. Negative = Units.coerce -function
 
 instance
   (space ~ space', units ~ units') =>
@@ -175,66 +173,60 @@ instance
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication
-    (Volume1d.Function units1)
-    (Function (space @ units2))
-    (Function (space @ units3))
-  where
-  Volume1d.Function.Zero * _ = Zero
-  _ * Zero = Zero
-  Volume1d.Function.Constant a * Constant b = Constant (a * b)
-  f1 * f2 = Product1d3d f1 f2
+  Product (Volume1d.Function units1) (Function (space @ units2)) (Function (space @ units3))
+
+instance Multiplication (Volume1d.Function units1) (Function (space @ units2)) where
+  type Volume1d.Function units1 .*. Function (space @ units2) = Function (space @ (units1 :*: units2))
+  Volume1d.Function.Zero .*. _ = Zero
+  _ .*. Zero = Zero
+  Volume1d.Function.Constant a .*. Constant b = Constant (a .*. b)
+  f1 .*. f2 = Product1d3d f1 f2
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication
-    (Function (space @ units1))
-    (Volume1d.Function units2)
-    (Function (space @ units3))
-  where
-  Zero * _ = Zero
-  _ * Volume1d.Function.Zero = Zero
-  Constant a * Volume1d.Function.Constant b = Constant (a * b)
-  f1 * f2 = Product3d1d f1 f2
+  Product (Function (space @ units1)) (Volume1d.Function units2) (Function (space @ units3))
+
+instance Multiplication (Function (space @ units1)) (Volume1d.Function units2) where
+  type Function (space @ units1) .*. Volume1d.Function units2 = Function (space @ (units1 :*: units2))
+  Zero .*. _ = Zero
+  _ .*. Volume1d.Function.Zero = Zero
+  Constant a .*. Volume1d.Function.Constant b = Constant (a .*. b)
+  f1 .*. f2 = Product3d1d f1 f2
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication
-    (Function (space @ units1))
-    (Qty units2)
-    (Function (space @ units3))
-  where
-  function * value = function * Volume1d.Function.constant value
+  Product (Function (space @ units1)) (Qty units2) (Function (space @ units3))
+
+instance Multiplication (Function (space @ units1)) (Qty units2) where
+  type Function (space @ units1) .*. Qty units2 = Function (space @ (units1 :*: units2))
+  function .*. value = function .*. Volume1d.Function.constant value
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication
-    (Qty units1)
-    (Function (space @ units2))
-    (Function (space @ units3))
-  where
-  value * function = Volume1d.Function.constant value * function
+  Product (Qty units1) (Function (space @ units2)) (Function (space @ units3))
+
+instance Multiplication (Qty units1) (Function (space @ units2)) where
+  type Qty units1 .*. Function (space @ units2) = Function (space @ (units1 :*: units2))
+  value .*. function = Volume1d.Function.constant value .*. function
 
 instance
   Units.Quotient units1 units2 units3 =>
-  Division
-    (Function (space @ units1))
-    (Volume1d.Function units2)
-    (Function (space @ units3))
-  where
-  Zero / _ = Zero
-  Constant a / Volume1d.Function.Constant b = Constant (a / b)
-  function / Volume1d.Function.Constant x = Units.specialize ((1.0 ./. x) .*^ function)
-  function1 / function2 = Quotient function1 function2
+  Quotient (Function (space @ units1)) (Volume1d.Function units2) (Function (space @ units3))
+
+instance Division (Function (space @ units1)) (Volume1d.Function units2) where
+  type Function (space @ units1) ./. Volume1d.Function units2 = Function (space @ (units1 :/: units2))
+  Zero ./. _ = Zero
+  Constant a ./. Volume1d.Function.Constant b = Constant (a ./. b)
+  function ./. Volume1d.Function.Constant x = (1.0 ./. x) .*^ function
+  function1 ./. function2 = Quotient function1 function2
 
 instance
   Units.Quotient units1 units2 units3 =>
-  Division
-    (Function (space @ units1))
-    (Qty units2)
-    (Function (space @ units3))
-  where
-  function / value = function / Volume1d.Function.constant value
+  Quotient (Function (space @ units1)) (Qty units2) (Function (space @ units3))
+
+instance Division (Function (space @ units1)) (Qty units2) where
+  type Function (space @ units1) ./. Qty units2 = Function (space @ (units1 :/: units2))
+  function ./. value = function ./. Volume1d.Function.constant value
 
 evaluateAt :: Point3d Uvw.Coordinates -> Function (space @ units) -> Vector3d (space @ units)
 evaluateAt uv function =
@@ -251,9 +243,9 @@ evaluateAt uv function =
     Negated f -> negate (evaluateAt uv f)
     Sum f1 f2 -> evaluateAt uv f1 + evaluateAt uv f2
     Difference f1 f2 -> evaluateAt uv f1 - evaluateAt uv f2
-    Product1d3d f1 f2 -> Volume1d.Function.evaluateAt uv f1 * evaluateAt uv f2
-    Product3d1d f1 f2 -> evaluateAt uv f1 * Volume1d.Function.evaluateAt uv f2
-    Quotient f1 f2 -> evaluateAt uv f1 / Volume1d.Function.evaluateAt uv f2
+    Product1d3d f1 f2 -> Volume1d.Function.evaluateAt uv f1 .*. evaluateAt uv f2
+    Product3d1d f1 f2 -> evaluateAt uv f1 .*. Volume1d.Function.evaluateAt uv f2
+    Quotient f1 f2 -> evaluateAt uv f1 ./. Volume1d.Function.evaluateAt uv f2
 
 pointOn :: Function (space @ units) -> Point3d Uvw.Coordinates -> Vector3d (space @ units)
 pointOn function uv = evaluateAt uv function
@@ -276,9 +268,9 @@ segmentBounds uv function =
     Negated f -> negate (segmentBounds uv f)
     Sum f1 f2 -> segmentBounds uv f1 + segmentBounds uv f2
     Difference f1 f2 -> segmentBounds uv f1 - segmentBounds uv f2
-    Product1d3d f1 f2 -> Volume1d.Function.segmentBounds uv f1 * segmentBounds uv f2
-    Product3d1d f1 f2 -> segmentBounds uv f1 * Volume1d.Function.segmentBounds uv f2
-    Quotient f1 f2 -> segmentBounds uv f1 / Volume1d.Function.segmentBounds uv f2
+    Product1d3d f1 f2 -> Volume1d.Function.segmentBounds uv f1 .*. segmentBounds uv f2
+    Product3d1d f1 f2 -> segmentBounds uv f1 .*. Volume1d.Function.segmentBounds uv f2
+    Quotient f1 f2 -> segmentBounds uv f1 ./. Volume1d.Function.segmentBounds uv f2
 
 derivative :: Direction3d Uvw.Space -> Function units -> Function units
 derivative direction function =
@@ -296,10 +288,10 @@ derivative direction function =
     Sum f1 f2 -> derivative direction f1 + derivative direction f2
     Difference f1 f2 -> derivative direction f1 - derivative direction f2
     Product1d3d f1 f2 ->
-      Volume1d.Function.derivative direction f1 * f2 + f1 * derivative direction f2
+      Volume1d.Function.derivative direction f1 .*. f2 + f1 .*. derivative direction f2
     Product3d1d f1 f2 ->
-      derivative direction f1 * f2 + f1 * Volume1d.Function.derivative direction f2
-    Quotient f1 f2 -> Units.specialize do
+      derivative direction f1 .*. f2 + f1 .*. Volume1d.Function.derivative direction f2
+    Quotient f1 f2 ->
       (derivative direction f1 .*. f2 - f1 .*. Volume1d.Function.derivative direction f2)
         .!/.! Volume1d.Function.squared_ f2
 

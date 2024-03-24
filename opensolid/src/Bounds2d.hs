@@ -68,14 +68,9 @@ data Bounds2d (coordinateSystem :: CoordinateSystem) where
 
 deriving instance Show (Bounds2d (space @ units))
 
-instance
-  (units1 ~ units1', units2 ~ units2', space ~ space') =>
-  Units.Coercion
-    units1
-    units2
-    (Bounds2d (space @ units1'))
-    (Bounds2d (space' @ units2'))
-  where
+type instance Units (Bounds2d (space @ units)) = units
+
+instance space ~ space' => Units.Coercion (Bounds2d (space @ units1)) (Bounds2d (space' @ units2)) where
   coerce = Data.Coerce.coerce
 
 instance Bounds.Interface (Bounds2d (space @ units)) where

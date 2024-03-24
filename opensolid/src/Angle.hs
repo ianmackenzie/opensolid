@@ -22,15 +22,18 @@ module Angle
   , quarterTurn
   , turns
   , inTurns
+  , unitless
   )
 where
 
 import Arithmetic
+import Basics
 import Float (Float, fromRational)
 import Float qualified
-import Qty (Qty (Qty))
+import Qty (Qty (Qty, Qty_))
 import Qty qualified
-import Units (Radians)
+import Units (Radians, Unitless, Units)
+import Units qualified
 import Prelude qualified
 
 type Angle = Qty Radians
@@ -42,34 +45,37 @@ goldenAngle :: Angle
 goldenAngle = radians (Float.pi * (3.0 - Float.sqrt 5.0))
 
 sin :: Angle -> Float
-sin (Qty x) = Qty (Prelude.sin x)
+sin (Qty_ x) = Qty_ (Prelude.sin x)
 
 cos :: Angle -> Float
-cos (Qty x) = Qty (Prelude.cos x)
+cos (Qty_ x) = Qty_ (Prelude.cos x)
 
 tan :: Angle -> Float
-tan (Qty x) = Qty (Prelude.tan x)
+tan (Qty_ x) = Qty_ (Prelude.tan x)
 
 asin :: Float -> Angle
-asin (Qty x) = Qty (Prelude.asin x)
+asin (Qty_ x) = Qty_ (Prelude.asin x)
 
 acos :: Float -> Angle
-acos (Qty x) = Qty (Prelude.acos x)
+acos (Qty_ x) = Qty_ (Prelude.acos x)
 
 atan :: Float -> Angle
-atan (Qty x) = Qty (Prelude.atan x)
+atan (Qty_ x) = Qty_ (Prelude.atan x)
 
 atan2 :: Qty units -> Qty units -> Angle
-atan2 (Qty y) (Qty x) = Qty (Prelude.atan2 y x)
+atan2 (Qty_ y) (Qty_ x) = Qty_ (Prelude.atan2 y x)
 
 radian :: Angle
 radian = radians 1.0
 
 radians :: Float -> Angle
-radians (Qty x) = Qty x
+radians = Qty
+
+unitless :: (Units.Coercion a b, Units a ~ Radians, Units b ~ Unitless) => a -> b
+unitless = Units.coerce
 
 inRadians :: Angle -> Float
-inRadians (Qty x) = Qty x
+inRadians (Qty x) = x
 
 pi :: Angle
 pi = radians Float.pi

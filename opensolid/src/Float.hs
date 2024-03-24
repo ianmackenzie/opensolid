@@ -39,7 +39,7 @@ import Concatenation
 import {-# SOURCE #-} Maybe qualified
 import NonEmpty (NonEmpty)
 import NonEmpty qualified
-import Qty (Qty (Qty))
+import Qty (Qty (Qty_))
 import Qty qualified
 import {-# SOURCE #-} Result (Result)
 import Sign (Sign)
@@ -63,15 +63,15 @@ parse input =
 
 {-# INLINE floor #-}
 floor :: Float -> Int
-floor (Qty x) = Prelude.floor x
+floor (Qty_ x) = Prelude.floor x
 
 {-# INLINE ceiling #-}
 ceiling :: Float -> Int
-ceiling (Qty x) = Prelude.ceiling x
+ceiling (Qty_ x) = Prelude.ceiling x
 
 {-# INLINE round #-}
 round :: Float -> Int
-round (Qty x) = Prelude.round x
+round (Qty_ x) = Prelude.round x
 
 infinity :: Float
 infinity = Qty.infinity
@@ -119,25 +119,25 @@ pow :: Float -> Float -> Float
 pow = (Prelude.**)
 
 sin :: Float -> Float
-sin (Qty x) = Qty (Prelude.sin x)
+sin (Qty_ x) = Qty_ (Prelude.sin x)
 
 cos :: Float -> Float
-cos (Qty x) = Qty (Prelude.cos x)
+cos (Qty_ x) = Qty_ (Prelude.cos x)
 
 tan :: Float -> Float
-tan (Qty x) = Qty (Prelude.tan x)
+tan (Qty_ x) = Qty_ (Prelude.tan x)
 
 asin :: Float -> Float
-asin (Qty x) = Qty (Prelude.asin x)
+asin (Qty_ x) = Qty_ (Prelude.asin x)
 
 acos :: Float -> Float
-acos (Qty x) = Qty (Prelude.acos x)
+acos (Qty_ x) = Qty_ (Prelude.acos x)
 
 atan :: Float -> Float
-atan (Qty x) = Qty (Prelude.atan x)
+atan (Qty_ x) = Qty_ (Prelude.atan x)
 
 atan2 :: Qty units -> Qty units -> Float
-atan2 (Qty y) (Qty x) = Qty (Prelude.atan2 y x)
+atan2 (Qty_ y) (Qty_ x) = Qty_ (Prelude.atan2 y x)
 
 sum :: List Float -> Float
 sum = Qty.sum

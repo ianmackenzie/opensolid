@@ -91,16 +91,9 @@ data Function units where
 
 deriving instance Show (Function units)
 
-instance
-  ( units1 ~ units1'
-  , units2 ~ units2'
-  ) =>
-  Units.Coercion
-    units1
-    units2
-    (Function units1')
-    (Function units2')
-  where
+type instance Units (Function units) = units
+
+instance Units.Coercion (Function units1) (Function units2) where
   coerce Zero = Zero
   coerce (Constant value) = Constant (Units.coerce value)
   coerce (Coerce function) = Coerce function
@@ -115,13 +108,19 @@ instance Negation (Function units) where
   negate (Quotient_ f1 f2) = negate f1 ./. f2
   negate function = Negated function
 
-instance Multiplication Sign (Function units) (Function units) where
-  Positive * function = function
-  Negative * function = -function
+instance Product Sign (Function units) (Function units)
 
-instance Multiplication (Function units) Sign (Function units) where
-  function * Positive = function
-  function * Negative = -function
+instance Multiplication Sign (Function units) where
+  type Sign .*. Function units = Function (Unitless :*: units)
+  Positive .*. function = Units.coerce function
+  Negative .*. function = Units.coerce -function
+
+instance Product (Function units) Sign (Function units)
+
+instance Multiplication (Function units) Sign where
+  type Function units .*. Sign = Function (units :*: Unitless)
+  function .*. Positive = Units.coerce function
+  function .*. Negative = Units.coerce -function
 
 instance units ~ units' => Addition (Function units) (Function units') (Function units) where
   Zero + function = function
@@ -149,68 +148,62 @@ instance units ~ units' => Subtraction (Qty units) (Function units') (Function u
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication
-    (Function units1)
-    (Function units2)
-    (Function units3)
-  where
-  Zero * _ = Zero
-  _ * Zero = Zero
-  Constant x * Constant y = Constant (x * y)
-  Constant x * function | Units.drop x == 1.0 = Units.add (Units.drop function)
-  Constant x * function | Units.drop x == -1.0 = Units.add (Units.drop (negate function))
-  Constant x * Negated c = negate x * c
-  f1 * (Constant x) = Constant x * f1
-  Constant x * Product_ (Constant y) c = Units.specialize (Units.rightAssociate ((x .*. y) .*. c))
-  function1 * function2 = Units.specialize (Product_ function1 function2)
+  Product (Function units1) (Function units2) (Function units3)
+
+instance Multiplication (Function units1) (Function units2) where
+  type Function units1 .*. Function units2 = Function (units1 :*: units2)
+  Zero .*. _ = Zero
+  _ .*. Zero = Zero
+  Constant x .*. Constant y = Constant (x .*. y)
+  Constant (Qty 1.0) .*. function = Units.coerce function
+  Constant (Qty -1.0) .*. function = Units.coerce -function
+  Constant x .*. Negated c = negate x .*. c
+  f1 .*. (Constant x) = Units.commute (Constant x .*. f1)
+  Constant x .*. Product_ (Constant y) c = Units.rightAssociate ((x .*. y) .*. c)
+  function1 .*. function2 = Product_ function1 function2
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication
-    (Function units1)
-    (Qty units2)
-    (Function units3)
-  where
-  function * value = function * constant value
+  Product (Function units1) (Qty units2) (Function units3)
+
+instance Multiplication (Function units1) (Qty units2) where
+  type Function units1 .*. Qty units2 = Function (units1 :*: units2)
+  function .*. value = function .*. constant value
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication
-    (Qty units1)
-    (Function units2)
-    (Function units3)
-  where
-  value * function = constant value * function
+  Product (Qty units1) (Function units2) (Function units3)
+
+instance Multiplication (Qty units1) (Function units2) where
+  type Qty units1 .*. Function units2 = Function (units1 :*: units2)
+  value .*. function = constant value .*. function
 
 instance
   Units.Quotient units1 units2 units3 =>
-  Division
-    (Function units1)
-    (Function units2)
-    (Function units3)
-  where
-  Zero / _ = Zero
-  Constant x / Constant y = Constant (x / y)
-  function / Constant x = Units.specialize ((1.0 ./. x) .*^ function)
-  function1 / function2 = Units.specialize (Quotient_ function1 function2)
+  Quotient (Function units1) (Function units2) (Function units3)
+
+instance Division (Function units1) (Function units2) where
+  type Function units1 ./. Function units2 = Function (units1 :/: units2)
+  Zero ./. _ = Zero
+  Constant x ./. Constant y = Constant (x ./. y)
+  function ./. Constant x = (1.0 ./. x) .*^ function
+  function1 ./. function2 = Quotient_ function1 function2
 
 instance
   Units.Quotient units1 units2 units3 =>
-  Division
-    (Function units1)
-    (Qty units2)
-    (Function units3)
-  where
-  function / value = function / constant value
+  Quotient (Function units1) (Qty units2) (Function units3)
+
+instance Division (Function units1) (Qty units2) where
+  type Function units1 ./. Qty units2 = Function (units1 :/: units2)
+  function ./. value = function ./. constant value
 
 instance
   Units.Quotient units1 units2 units3 =>
-  Division
-    (Qty units1)
-    (Function units2)
-    (Function units3)
-  where
-  value / function = constant value / function
+  Quotient (Qty units1) (Function units2) (Function units3)
+
+instance Division (Qty units1) (Function units2) where
+  type Qty units1 ./. Function units2 = Function (units1 :/: units2)
+  value ./. function = constant value ./. function
 
 evaluateAt :: Point3d Uvw.Coordinates -> Function units -> Qty units
 evaluateAt uvw function =
@@ -272,8 +265,8 @@ derivative direction function =
     Quotient_ f1 f2 -> (derivative direction f1 .*. f2 - f1 .*. derivative direction f2) .!/.! squared_ f2
     Squared_ f -> 2.0 * f .*. derivative direction f
     SquareRoot f -> derivative direction f / (2.0 * sqrt f)
-    Sin f -> cos f * Units.drop (derivative direction f)
-    Cos f -> negate (sin f) * Units.drop (derivative direction f)
+    Sin f -> cos f * (Angle.unitless (derivative direction f) :: Function Unitless)
+    Cos f -> negate (sin f) * (Angle.unitless (derivative direction f) :: Function Unitless)
 
 zero :: Function units
 zero = Zero

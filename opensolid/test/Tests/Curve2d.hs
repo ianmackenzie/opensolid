@@ -9,10 +9,8 @@ import Curve2d (Curve2d)
 import Curve2d qualified
 import Curve2d.Intersection (Intersection (Intersection))
 import Curve2d.Intersection qualified as Intersection
-import Direction2d qualified
 import DirectionCurve2d qualified
 import Error qualified
-import Float qualified
 import Length qualified
 import List qualified
 import OpenSolid
@@ -27,7 +25,6 @@ import Test qualified
 import Tests.Random qualified as Random
 import Tolerance qualified
 import Units (Meters)
-import Vector2d qualified
 import VectorCurve2d qualified
 
 tests :: Tolerance Meters => List Test
@@ -38,11 +35,7 @@ tests =
   , crossingIntersection
   , tangentIntersection
   , solving
-  , degenerateStartPointTangent
-  , degenerateEndPointTangent
   , tangentDerivativeIsPerpendicularToTangent
-  , degenerateStartPointTangentDerivative
-  , degenerateEndPointTangentDerivative
   ]
 
 find :: Tolerance Meters => Test
@@ -171,44 +164,6 @@ solving =
             |> List.map (Point2d.distanceFrom Point2d.origin)
     Test.expect (distances ~= [desiredDistance, desiredDistance])
 
-degenerateStartPointTangent :: Tolerance Meters => Test
-degenerateStartPointTangent =
-  Test.check 100 "Degenerate start point" <| Test.do
-    p0 <- Random.point2d
-    p1 <- Random.point2d
-    p2 <- Random.point2d
-    curve <- CubicSpline2d.fromControlPoints p0 p0 p1 p2
-    let decreasingParameterValues = List.map (\n -> Float.pow 2.0 (Float.fromInt -n)) [8 .. 16]
-    let tangentDirection = Curve2d.tangentDirection curve
-    let startTangent = DirectionCurve2d.evaluateAt 0.0 tangentDirection
-    let otherTangents =
-          List.map (\t -> DirectionCurve2d.evaluateAt t tangentDirection) decreasingParameterValues
-    let differences =
-          otherTangents
-            |> List.map Direction2d.unwrap
-            |> List.map (- Direction2d.unwrap startTangent)
-            |> List.map Vector2d.magnitude
-    Test.expect (List.successive (-) differences |> List.all (> 0.0))
-
-degenerateEndPointTangent :: Tolerance Meters => Test
-degenerateEndPointTangent =
-  Test.check 100 "Degenerate end point" <| Test.do
-    p0 <- Random.point2d
-    p1 <- Random.point2d
-    p2 <- Random.point2d
-    curve <- CubicSpline2d.fromControlPoints p0 p1 p2 p2
-    let increasingParameterValues = List.map (\n -> 1.0 - Float.pow 2.0 (Float.fromInt -n)) [8 .. 16]
-    let tangentDirection = Curve2d.tangentDirection curve
-    let endTangent = DirectionCurve2d.evaluateAt 1.0 tangentDirection
-    let otherTangents =
-          List.map (\t -> DirectionCurve2d.evaluateAt t tangentDirection) increasingParameterValues
-    let differences =
-          otherTangents
-            |> List.map Direction2d.unwrap
-            |> List.map (- Direction2d.unwrap endTangent)
-            |> List.map Vector2d.magnitude
-    Test.expect (List.successive (-) differences |> List.all (> 0.0))
-
 tangentDerivativeIsPerpendicularToTangent :: Tolerance Meters => Test
 tangentDerivativeIsPerpendicularToTangent =
   Test.check 100 "Tangent derivative is perpendicular to tangent" <| Test.do
@@ -227,41 +182,3 @@ tangentDerivativeIsPerpendicularToTangent =
       |> Test.output "tangent" tangent
       |> Test.output "derivative" derivative
       |> Test.output "dot product" (derivative <> tangent)
-
-degenerateStartPointTangentDerivative :: Tolerance Meters => Test
-degenerateStartPointTangentDerivative =
-  Test.check 100 "Degenerate start point derivative" <| Test.do
-    p0 <- Random.point2d
-    p1 <- Random.point2d
-    p2 <- Random.point2d
-    curve <- CubicSpline2d.fromControlPoints p0 p0 p1 p2
-    let decreasingParameterValues = List.map (\n -> Float.pow 2.0 (Float.fromInt -n)) [8 .. 16]
-    let tangentDirection = Curve2d.tangentDirection curve
-    let tangentDerivative = DirectionCurve2d.derivative tangentDirection
-    let startTangentDerivative = VectorCurve2d.evaluateAt 0.0 tangentDerivative
-    let otherTangentDerivatives =
-          List.map (\t -> VectorCurve2d.evaluateAt t tangentDerivative) decreasingParameterValues
-    let differences =
-          otherTangentDerivatives
-            |> List.map (- startTangentDerivative)
-            |> List.map Vector2d.magnitude
-    Test.expect (List.successive (-) differences |> List.all (> 0.0))
-
-degenerateEndPointTangentDerivative :: Tolerance Meters => Test
-degenerateEndPointTangentDerivative =
-  Test.check 100 "Degenerate end point derivative" <| Test.do
-    p0 <- Random.point2d
-    p1 <- Random.point2d
-    p2 <- Random.point2d
-    curve <- CubicSpline2d.fromControlPoints p0 p1 p2 p2
-    let increasingParameterValues = List.map (\n -> 1.0 - Float.pow 2.0 (Float.fromInt -n)) [8 .. 16]
-    let tangentDirection = Curve2d.tangentDirection curve
-    let tangentDerivative = DirectionCurve2d.derivative tangentDirection
-    let endTangentDerivative = VectorCurve2d.evaluateAt 1.0 tangentDerivative
-    let otherTangentDerivatives =
-          List.map (\t -> VectorCurve2d.evaluateAt t tangentDerivative) increasingParameterValues
-    let differences =
-          otherTangentDerivatives
-            |> List.map (- endTangentDerivative)
-            |> List.map Vector2d.magnitude
-    Test.expect (List.successive (-) differences |> List.all (> 0.0))

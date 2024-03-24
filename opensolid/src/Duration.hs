@@ -32,10 +32,10 @@ second :: Duration
 second = seconds 1.0
 
 seconds :: Float -> Duration
-seconds (Qty x) = Qty x
+seconds = Qty
 
 inSeconds :: Duration -> Float
-inSeconds (Qty x) = Qty x
+inSeconds (Qty x) = x
 
 microsecond :: Duration
 microsecond = seconds 1e-6

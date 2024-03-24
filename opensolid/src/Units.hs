@@ -5,26 +5,12 @@ module Units
   , convert
   , unconvert
   , Coercion (coerce)
-  , (:*:)
-  , (:/:)
-  , drop
-  , add
+  , type (:*:)
+  , type (:/:)
   , Specialize
   , specialize
   , unspecialize
-  , (.*.)
-  , (./.)
-  , (.<>.)
-  , (.><.)
-  , (^*.)
-  , (.*^)
-  , (.!/!)
-  , (!./!)
-  , (!/!.)
-  , (!/.!)
-  , (.!/.!)
-  , (./^)
-  , (!?/.!?)
+  , commute
   , leftAssociate
   , rightAssociate
   , Product
@@ -41,181 +27,113 @@ module Units
   )
 where
 
-import Arithmetic
 import Basics
 import Data.Coerce qualified
 import Data.Kind (Constraint)
 import Data.List.NonEmpty (NonEmpty)
-import {-# SOURCE #-} Qty (Qty (Qty))
+import {-# SOURCE #-} Qty (Qty (Qty_))
+import {-# SOURCE #-} Result (Result (Error, Ok))
+import {-# SOURCE #-} Sign (Sign)
 import Prelude qualified
 
 type Units :: k -> Type
 type family Units a
 
+type instance Units Int = Unitless
+
+type instance Units (Qty units) = units
+
+type instance Units Sign = Unitless
+
+type instance Units (Maybe a) = Units a
+
+type instance Units (Result x a) = Units a
+
+type instance Units (List a) = Units a
+
+type instance Units (NonEmpty a) = Units a
+
 newtype Conversion units1 units2 = Conversion Prelude.Double
 
 conversion :: Qty units1 -> Qty units2 -> Conversion units1 units2
-conversion (Qty a) (Qty b) = Conversion (b Prelude./ a)
+conversion (Qty_ a) (Qty_ b) = Conversion (b Prelude./ a)
 
 convert :: Conversion units1 units2 -> Qty units1 -> Qty units2
-convert (Conversion factor) (Qty value) = Qty (value Prelude.* factor)
+convert (Conversion factor) (Qty_ value) = Qty_ (value Prelude.* factor)
 
 unconvert :: Conversion units1 units2 -> Qty units2 -> Qty units1
-unconvert (Conversion factor) (Qty value) = Qty (value Prelude./ factor)
+unconvert (Conversion factor) (Qty_ value) = Qty_ (value Prelude./ factor)
 
-type Coercion :: Type -> Type -> Type -> Type -> Constraint
-class Coercion u2 u1 b a => Coercion u1 u2 a b | a -> u1, b -> u2, a u2 -> b where
+type Coercion :: Type -> Type -> Constraint
+class Coercion b a => Coercion a b where
   coerce :: a -> b
 
-instance (Coercion u1 u2 a b, Data.Coerce.Coercible a b) => Coercion u1 u2 (List a) (List b) where
+instance Coercion Int Int where
+  coerce = identity
+
+instance Coercion (Qty units1) (Qty units2) where
   coerce = Data.Coerce.coerce
 
-instance (Coercion u1 u2 a b, Data.Coerce.Coercible a b) => Coercion u1 u2 (NonEmpty a) (NonEmpty b) where
+instance Coercion Sign Sign where
+  coerce = identity
+
+instance Coercion a b => Coercion (Maybe a) (Maybe b) where
+  coerce (Just value) = Just (coerce value)
+  coerce Nothing = Nothing
+
+instance Coercion a b => Coercion (Result x a) (Result x b) where
+  coerce (Ok value) = Ok (coerce value)
+  coerce (Error error) = Error error
+
+instance (Coercion a b, Data.Coerce.Coercible a b) => Coercion (List a) (List b) where
   coerce = Data.Coerce.coerce
+
+instance (Coercion a b, Data.Coerce.Coercible a b) => Coercion (NonEmpty a) (NonEmpty b) where
+  coerce = Data.Coerce.coerce
+
+type role (:*:) phantom phantom
 
 data units1 :*: units2
+
+type role (:/:) phantom phantom
 
 data units1 :/: units2
 
 infixl 7 :*:, :/:
 
-{-# INLINE drop #-}
-drop :: Coercion units Unitless a b => a -> b
-drop = coerce
-
-{-# INLINE add #-}
-add :: Coercion Unitless units a b => a -> b
-add = coerce
-
 {-# INLINE specialize #-}
-specialize :: (Coercion genericUnits specificUnits a b, Specialize genericUnits specificUnits) => a -> b
+specialize :: (Coercion a b, Specialize (Units a) (Units b)) => a -> b
 specialize = coerce
 
 {-# INLINE unspecialize #-}
-unspecialize :: (Coercion genericUnits specificUnits a b, Specialize genericUnits specificUnits) => b -> a
+unspecialize :: (Coercion a b, Specialize (Units a) (Units b)) => b -> a
 unspecialize = coerce
 
-type SimplifyProduct unitsA unitsB unitsC aUnitless bUnitless cUnitless a b c =
-  ( Coercion unitsA Unitless a aUnitless
-  , Coercion unitsB Unitless b bUnitless
-  , Coercion Unitless unitsC cUnitless c
-  , Multiplication aUnitless bUnitless cUnitless
-  )
-
-type SimplifyQuotient unitsA unitsB unitsC aUnitless bUnitless cUnitless a b c =
-  ( Coercion unitsA Unitless a aUnitless
-  , Coercion unitsB Unitless b bUnitless
-  , Coercion Unitless unitsC cUnitless c
-  , Division aUnitless bUnitless cUnitless
-  )
-
-(.*.) ::
-  SimplifyProduct units1 units2 (units1 :*: units2) aUnitless bUnitless cUnitless a b c =>
-  a ->
-  b ->
-  c
-(.*.) lhs rhs = add (drop lhs * drop rhs)
-
-(.<>.) ::
-  ( Coercion unitsA Unitless a aUnitless
-  , Coercion unitsB Unitless b bUnitless
-  , Coercion Unitless (unitsA :*: unitsB) cUnitless c
-  , DotProduct aUnitless bUnitless cUnitless
+commute ::
+  ( Coercion a b
+  , Units a ~ units1 :*: units2
+  , Units b ~ units2 :*: units1
   ) =>
   a ->
-  b ->
-  c
-(.<>.) lhs rhs = add (drop lhs <> drop rhs)
+  b
+commute = coerce
 
-(.><.) ::
-  ( Coercion unitsA Unitless a aUnitless
-  , Coercion unitsB Unitless b bUnitless
-  , Coercion Unitless (unitsA :*: unitsB) cUnitless c
-  , CrossProduct aUnitless bUnitless cUnitless
+leftAssociate ::
+  ( Coercion a b
+  , Units a ~ units1 :*: (units2 :*: units3)
+  , Units b ~ (units1 :*: units2) :*: units3
   ) =>
   a ->
-  b ->
-  c
-(.><.) lhs rhs = add (drop lhs >< drop rhs)
-
-(./.) ::
-  SimplifyQuotient units1 units2 (units1 :/: units2) aUnitless bUnitless cUnitless a b c =>
-  a ->
-  b ->
-  c
-(./.) lhs rhs = add (drop lhs / drop rhs)
-
-(^*.) ::
-  SimplifyProduct units1 (Unitless :/: units2) (units1 :/: units2) aUnitless bUnitless cUnitless a b c =>
-  a ->
-  b ->
-  c
-(^*.) lhs rhs = add (drop lhs * drop rhs)
-
-(.*^) ::
-  SimplifyProduct (Unitless :/: units2) units1 (units1 :/: units2) aUnitless bUnitless cUnitless a b c =>
-  a ->
-  b ->
-  c
-(.*^) lhs rhs = add (drop lhs * drop rhs)
-
-(.!/!) ::
-  SimplifyQuotient (units1 :*: units2) units2 units1 aUnitless bUnitless cUnitless a b c =>
-  a ->
-  b ->
-  c
-(.!/!) lhs rhs = add (drop lhs / drop rhs)
-
-(!./!) ::
-  SimplifyQuotient (units1 :*: units2) units1 units2 aUnitless bUnitless cUnitless a b c =>
-  a ->
-  b ->
-  c
-(!./!) lhs rhs = add (drop lhs / drop rhs)
-
-(!/!.) ::
-  SimplifyQuotient units1 (units1 :*: units2) (Unitless :/: units2) aUnitless bUnitless cUnitless a b c =>
-  a ->
-  b ->
-  c
-(!/!.) lhs rhs = add (drop lhs / drop rhs)
-
-(!/.!) ::
-  SimplifyQuotient units2 (units1 :*: units2) (Unitless :/: units1) aUnitless bUnitless cUnitless a b c =>
-  a ->
-  b ->
-  c
-(!/.!) lhs rhs = add (drop lhs / drop rhs)
-
-(.!/.!) ::
-  SimplifyQuotient (units1 :*: units2) (units2 :*: units2) (units1 :/: units2) aUnitless bUnitless cUnitless a b c =>
-  a ->
-  b ->
-  c
-(.!/.!) lhs rhs = add (drop lhs / drop rhs)
-
-(./^) ::
-  SimplifyQuotient units1 (Unitless :/: units2) (units1 :*: units2) aUnitless bUnitless cUnitless a b c =>
-  a ->
-  b ->
-  c
-(./^) lhs rhs = add (drop lhs / drop rhs)
-
-(!?/.!?) ::
-  SimplifyQuotient (units1 :*: units2) (units1 :*: units2 :*: units3) (Unitless :/: units3) aUnitless bUnitless cUnitless a b c =>
-  a ->
-  b ->
-  c
-(!?/.!?) lhs rhs = add (drop lhs / drop rhs)
-
-infixl 7 .*., ./., .<>., .><.
-
-infixl 7 ^*., .*^, .!/!, !./!, .!/.!, ./^, !?/.!?
-
-leftAssociate :: Coercion (units1 :*: (units2 :*: units3)) ((units1 :*: units2) :*: units3) a b => a -> b
+  b
 leftAssociate = coerce
 
-rightAssociate :: Coercion ((units1 :*: units2) :*: units3) (units1 :*: (units2 :*: units3)) a b => a -> b
+rightAssociate ::
+  ( Coercion a b
+  , Units a ~ (units1 :*: units2) :*: units3
+  , Units b ~ units1 :*: (units2 :*: units3)
+  ) =>
+  a ->
+  b
 rightAssociate = coerce
 
 data Unitless
@@ -234,77 +152,55 @@ data SquareMeters
 
 data CubicMeters
 
-type Prod :: Type -> Type -> Type
-type family Prod units1 units2
+type family a .*. b where
+  Unitless .*. Unitless = Unitless
+  Unitless .*. units = units
+  units .*. Unitless = units
+  Meters .*. Meters = SquareMeters
+  Meters .*. SquareMeters = CubicMeters
+  SquareMeters .*. Meters = CubicMeters
+  Seconds .*. MetersPerSecond = Meters
+  MetersPerSecond .*. Seconds = Meters
+  Seconds .*. MetersPerSecondSquared = MetersPerSecond
+  MetersPerSecondSquared .*. Seconds = MetersPerSecond
 
-type Quot :: Type -> Type -> Type
-type family Quot units1 units2
+infixl 7 .*.
 
-type Sqr :: Type -> Type
-type family Sqr units = squaredUnits | squaredUnits -> units
+type family a ./. b where
+  Unitless ./. Unitless = Unitless
+  units ./. Unitless = units
+  units ./. units = Unitless
+  SquareMeters ./. Meters = Meters
+  CubicMeters ./. Meters = SquareMeters
+  CubicMeters ./. SquareMeters = Meters
+  Meters ./. Seconds = MetersPerSecond
+  Meters ./. MetersPerSecond = Seconds
+  MetersPerSecond ./. Seconds = MetersPerSecondSquared
+  MetersPerSecond ./. MetersPerSecondSquared = Seconds
 
-type instance Prod Unitless Unitless = Unitless
+infixl 7 ./.
 
-type instance Prod Unitless units = units
-
-type instance Prod units Unitless = units
-
-type instance Quot Unitless Unitless = Unitless
-
-type instance Quot units Unitless = units
-
-type instance Quot units units = Unitless
-
-type instance Prod Meters Meters = SquareMeters
-
-type instance Prod Meters SquareMeters = CubicMeters
-
-type instance Prod SquareMeters Meters = CubicMeters
-
-type instance Prod Seconds MetersPerSecond = Meters
-
-type instance Prod MetersPerSecond Seconds = Meters
-
-type instance Prod Seconds MetersPerSecondSquared = MetersPerSecond
-
-type instance Prod MetersPerSecondSquared Seconds = MetersPerSecond
-
-type instance Quot SquareMeters Meters = Meters
-
-type instance Quot CubicMeters Meters = SquareMeters
-
-type instance Quot CubicMeters SquareMeters = Meters
-
-type instance Quot Meters Seconds = MetersPerSecond
-
-type instance Quot Meters MetersPerSecond = Seconds
-
-type instance Quot MetersPerSecond Seconds = MetersPerSecondSquared
-
-type instance Quot MetersPerSecond MetersPerSecondSquared = Seconds
-
-type instance Sqr Unitless = Unitless
-
-type instance Sqr Meters = SquareMeters
+type family Sqr units = squaredUnits | squaredUnits -> units where
+  Sqr Unitless = Unitless
+  Sqr Meters = SquareMeters
 
 type Product units1 units2 units3 =
-  ( Prod units1 units2 ~ units3
-  , Prod units2 units1 ~ units3
-  , Quot units3 units1 ~ units2
-  , Quot units3 units2 ~ units1
+  ( units1 .*. units2 ~ units3
+  , units2 .*. units1 ~ units3
+  , units3 ./. units1 ~ units2
+  , units3 ./. units2 ~ units1
   )
 
 type Quotient units1 units2 units3 =
-  ( Quot units1 units2 ~ units3
-  , Prod units2 units3 ~ units1
-  , Prod units3 units2 ~ units1
-  , Quot units1 units3 ~ units2
+  ( units1 ./. units2 ~ units3
+  , units2 .*. units3 ~ units1
+  , units3 .*. units2 ~ units1
+  , units1 ./. units3 ~ units2
   )
 
 type Squared units1 units2 =
   ( Sqr units1 ~ units2
-  , Prod units1 units1 ~ units2
-  , Quot units2 units1 ~ units1
+  , Product units1 units1 units2
   )
 
 class Specialize genericUnits specificUnits | genericUnits -> specificUnits

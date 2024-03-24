@@ -32,6 +32,7 @@ import Control.Monad (join)
 import Maybe qualified
 import OpenSolid hiding (pure, return)
 import Pair qualified
+import Qty (Qty (Qty_))
 import System.Random (StdGen)
 import System.Random qualified
 import System.Random.Stateful qualified
@@ -128,7 +129,7 @@ float :: Float -> Float -> Generator Float
 float = qty
 
 qty :: Qty units -> Qty units -> Generator (Qty units)
-qty (Qty low) (Qty high) = map Qty (Generator (System.Random.uniformR (low, high)))
+qty (Qty_ low) (Qty_ high) = map Qty_ (Generator (System.Random.uniformR (low, high)))
 
 list :: Int -> Generator a -> Generator (List a)
 list n _ | n <= 0 = return []

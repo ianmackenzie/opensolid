@@ -57,12 +57,9 @@ data Estimate units where
     Estimate units1 ->
     Estimate units2
 
-instance
-  ( units1 ~ units1'
-  , units2 ~ units2'
-  ) =>
-  Units.Coercion units1 units2 (Estimate units1') (Estimate units2')
-  where
+type instance Units (Estimate units) = units
+
+instance Units.Coercion (Estimate units1) (Estimate units2) where
   coerce (Coerce estimate) = Coerce estimate
   coerce estimate = Coerce estimate
 
@@ -100,13 +97,19 @@ instance Interface (Negate units) units where
 instance Negation (Estimate units) where
   negate estimate = wrap (Negate estimate)
 
-instance Multiplication Sign (Estimate units) (Estimate units) where
-  Positive * estimate = estimate
-  Negative * estimate = -estimate
+instance Multiplication Sign (Estimate units) where
+  type Sign .*. Estimate units = Estimate (Unitless :*: units)
+  Positive .*. estimate = Units.coerce estimate
+  Negative .*. estimate = Units.coerce -estimate
 
-instance Multiplication (Estimate units) Sign (Estimate units) where
-  estimate * Positive = estimate
-  estimate * Negative = -estimate
+instance Product Sign (Estimate units) (Estimate units)
+
+instance Multiplication (Estimate units) Sign where
+  type Estimate units .*. Sign = Estimate (units :*: Unitless)
+  estimate .*. Positive = Units.coerce estimate
+  estimate .*. Negative = Units.coerce -estimate
+
+instance Product (Estimate units) Sign (Estimate units)
 
 data Add units = Add (Estimate units) (Estimate units)
 

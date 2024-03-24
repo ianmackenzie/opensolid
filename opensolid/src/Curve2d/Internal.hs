@@ -63,13 +63,11 @@ data Curve2d (coordinateSystem :: CoordinateSystem) where
 
 deriving instance Show (Curve2d (space @ units))
 
+type instance Units (Curve2d (space @ units)) = units
+
 instance
-  (units1 ~ units1', units2 ~ units2', space ~ space') =>
-  Units.Coercion
-    units1
-    units2
-    (Curve2d (space @ units1'))
-    (Curve2d (space' @ units2'))
+  space ~ space' =>
+  Units.Coercion (Curve2d (space @ units1)) (Curve2d (space' @ units2))
   where
   coerce (Line{startPoint = p1, endPoint = p2, direction, length}) =
     Line

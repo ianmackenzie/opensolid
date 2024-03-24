@@ -70,7 +70,7 @@ wrap ::
 wrap curve =
   case VectorCurve2d.direction (derivativeImpl curve) of
     Ok tangentCurve -> Ok (Internal.Curve curve tangentCurve)
-    Error VectorCurve2d.DegenerateCurve -> Error DegenerateCurve
+    Error VectorCurve2d.DerivativeHasZero -> Error DegenerateCurve
 
 startPoint :: Curve2d (space @ units) -> Point2d (space @ units)
 startPoint = Internal.startPoint
