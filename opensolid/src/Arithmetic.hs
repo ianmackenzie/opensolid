@@ -13,8 +13,12 @@ module Arithmetic
   , CrossMultiplication (type (.><.), (.><.))
   , CrossProduct ((><))
   , Exponentiation ((**))
+  , (*!)
+  , (!*)
   , (^*.)
   , (.*^)
+  , (!/%)
+  , (/%)
   , (.!/!)
   , (!./!)
   , (!/!.)
@@ -174,6 +178,30 @@ instance
 
 -- GENERIC UNITS MANIPULATION
 
+(*!) ::
+  ( Multiplication a b
+  , Units.Coercion (a .*. b) c
+  , Units a ~ units1 :/: units2
+  , Units b ~ units2
+  , Units c ~ units1
+  ) =>
+  a ->
+  b ->
+  c
+a *! b = Units.coerce (a .*. b)
+
+(!*) ::
+  ( Multiplication a b
+  , Units.Coercion (a .*. b) c
+  , Units a ~ units2
+  , Units b ~ units1 :/: units2
+  , Units c ~ units1
+  ) =>
+  a ->
+  b ->
+  c
+a !* b = Units.coerce (a .*. b)
+
 (^*.) ::
   ( Multiplication a b
   , Units.Coercion (a .*. b) c
@@ -197,6 +225,30 @@ a ^*. b = Units.coerce (a .*. b)
   b ->
   c
 a .*^ b = Units.coerce (a .*. b)
+
+(/%) ::
+  ( Division a b
+  , Units.Coercion (a ./. b) c
+  , Units a ~ Unitless
+  , Units b ~ units1 :/: units2
+  , Units c ~ units2 :/: units1
+  ) =>
+  a ->
+  b ->
+  c
+a /% b = Units.coerce (a ./. b)
+
+(!/%) ::
+  ( Division a b
+  , Units.Coercion (a ./. b) c
+  , Units a ~ units1
+  , Units b ~ units1 :/: units2
+  , Units c ~ units2
+  ) =>
+  a ->
+  b ->
+  c
+a !/% b = Units.coerce (a ./. b)
 
 (.!/!) ::
   ( Division a b
