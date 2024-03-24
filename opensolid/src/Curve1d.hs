@@ -91,7 +91,9 @@ data Curve1d units where
 
 deriving instance Show (Curve1d units)
 
-type instance Units (Curve1d units) = units
+instance HasUnits (Curve1d units) where
+  type Units (Curve1d units) = units
+  type Erase (Curve1d units) = Curve1d Unitless
 
 instance Units.Coercion (Curve1d units1) (Curve1d units2) where
   coerce (Constant value) = Constant (Units.coerce value)
@@ -272,8 +274,8 @@ derivative curve =
     Quotient_ c1 c2 -> (derivative c1 .*. c2 - c1 .*. derivative c2) .!/.! squared_ c2
     Squared_ c -> 2.0 * c .*. derivative c
     SquareRoot_ c_ -> derivative c_ .!/! (2.0 * sqrt_ c_)
-    Sin c -> cos c * (Angle.unitless (derivative c) :: Curve1d Unitless)
-    Cos c -> negate (sin c) * (Angle.unitless (derivative c) :: Curve1d Unitless)
+    Sin c -> cos c * Angle.unitless (derivative c)
+    Cos c -> negate (sin c) * Angle.unitless (derivative c)
     Coerce c -> Units.coerce (derivative c)
 
 newtype Reversed units = Reversed (Curve1d units)

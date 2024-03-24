@@ -46,7 +46,9 @@ instance Interface (VectorCurve3d (space @ units)) (space @ units) where
   segmentBoundsImpl = segmentBounds
   derivativeImpl = derivative
 
-type instance Units (VectorCurve3d (space @ units)) = units
+instance HasUnits (VectorCurve3d (space @ units)) where
+  type Units (VectorCurve3d (space @ units)) = units
+  type Erase (VectorCurve3d (space @ units)) = VectorCurve3d (space @ Unitless)
 
 instance
   space ~ space' =>

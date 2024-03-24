@@ -35,7 +35,9 @@ newtype Direction3d (space :: Type) = Direction3d_ (Vector3d (space @ Unitless))
 pattern Direction3d :: Vector3d (space @ Unitless) -> Direction3d space
 pattern Direction3d v <- Direction3d_ v
 
-type instance Units (Direction3d space) = Unitless
+instance HasUnits (Direction3d space) where
+  type Units (Direction3d space) = Unitless
+  type Erase (Direction3d space) = Direction3d space
 
 instance space ~ space' => Units.Coercion (Direction3d space) (Direction3d space') where
   coerce = identity

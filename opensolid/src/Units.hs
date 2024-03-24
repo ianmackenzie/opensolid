@@ -1,6 +1,7 @@
 module Units
-  ( Units
+  ( HasUnits (..)
   , Coercion (coerce)
+  , erase
   , type (:*:)
   , type (:/:)
   , Specialize
@@ -31,22 +32,37 @@ import {-# SOURCE #-} Qty (Qty (Qty_))
 import {-# SOURCE #-} Result (Result (Error, Ok))
 import {-# SOURCE #-} Sign (Sign)
 
-type Units :: k -> Type
-type family Units a
+class Units (Erase a) ~ Unitless => HasUnits (a :: k) where
+  type Units a
+  type Erase a :: k
 
-type instance Units Int = Unitless
+instance HasUnits Int where
+  type Units Int = Unitless
+  type Erase Int = Int
 
-type instance Units (Qty units) = units
+instance HasUnits (Qty units) where
+  type Units (Qty units) = units
+  type Erase (Qty units) = Qty Unitless
 
-type instance Units Sign = Unitless
+instance HasUnits Sign where
+  type Units Sign = Unitless
+  type Erase Sign = Sign
 
-type instance Units (Maybe a) = Units a
+instance HasUnits a => HasUnits (Maybe a) where
+  type Units (Maybe a) = Units a
+  type Erase (Maybe a) = Maybe (Erase a)
 
-type instance Units (Result x a) = Units a
+instance HasUnits a => HasUnits (Result x a) where
+  type Units (Result x a) = Units a
+  type Erase (Result x a) = Result x (Erase a)
 
-type instance Units (List a) = Units a
+instance HasUnits a => HasUnits (List a) where
+  type Units (List a) = Units a
+  type Erase (List a) = List (Erase a)
 
-type instance Units (NonEmpty a) = Units a
+instance HasUnits a => HasUnits (NonEmpty a) where
+  type Units (NonEmpty a) = Units a
+  type Erase (NonEmpty a) = NonEmpty (Erase a)
 
 type Coercion :: Type -> Type -> Constraint
 class Coercion b a => Coercion a b where
@@ -84,6 +100,10 @@ type role (:/:) phantom phantom
 data units1 :/: units2
 
 infixl 7 :*:, :/:
+
+{-# INLINE erase #-}
+erase :: Coercion a (Erase a) => a -> Erase a
+erase = coerce
 
 {-# INLINE specialize #-}
 specialize :: (Coercion a b, Specialize (Units a) (Units b)) => a -> b

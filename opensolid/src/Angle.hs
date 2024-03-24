@@ -32,7 +32,7 @@ import Float (Float, fromRational)
 import Float qualified
 import Qty (Qty (Qty, Qty_))
 import Qty qualified
-import Units (Radians, Unitless, Units)
+import Units (HasUnits (Units), Radians)
 import Units qualified
 import Prelude qualified
 
@@ -71,8 +71,13 @@ radian = radians 1.0
 radians :: Float -> Angle
 radians = Qty
 
-unitless :: (Units.Coercion a b, Units a ~ Radians, Units b ~ Unitless) => a -> b
-unitless = Units.coerce
+unitless ::
+  ( Units a ~ Radians
+  , Units.Coercion a (Units.Erase a)
+  ) =>
+  a ->
+  Units.Erase a
+unitless = Units.erase
 
 inRadians :: Angle -> Float
 inRadians (Qty x) = x

@@ -36,7 +36,9 @@ import VectorCurve2d qualified
 newtype DirectionCurve2d space = DirectionCurve2d (VectorCurve2d (space @ Unitless))
   deriving (Show)
 
-type instance Units (DirectionCurve2d space) = Unitless
+instance HasUnits (DirectionCurve2d space) where
+  type Units (DirectionCurve2d space) = Unitless
+  type Erase (DirectionCurve2d space) = DirectionCurve2d space
 
 instance space ~ space' => Units.Coercion (DirectionCurve2d space) (DirectionCurve2d space') where
   coerce = identity

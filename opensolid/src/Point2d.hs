@@ -57,7 +57,9 @@ deriving instance Ord (Point2d (space @ units))
 
 deriving instance Show (Point2d (space @ units))
 
-type instance Units (Point2d (space @ units)) = units
+instance HasUnits (Point2d (space @ units)) where
+  type Units (Point2d (space @ units)) = units
+  type Erase (Point2d (space @ units)) = Point2d (space @ Unitless)
 
 instance space ~ space' => Units.Coercion (Point2d (space @ units1)) (Point2d (space' @ units2)) where
   coerce = Data.Coerce.coerce

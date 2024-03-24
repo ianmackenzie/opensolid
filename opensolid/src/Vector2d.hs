@@ -65,7 +65,9 @@ deriving instance Eq (Vector2d (space @ units))
 
 deriving instance Show (Vector2d (space @ units))
 
-type instance Units (Vector2d (space @ units)) = units
+instance HasUnits (Vector2d (space @ units)) where
+  type Units (Vector2d (space @ units)) = units
+  type Erase (Vector2d (space @ units)) = Vector2d (space @ Unitless)
 
 instance space ~ space' => Units.Coercion (Vector2d (space @ units1)) (Vector2d (space' @ units2)) where
   coerce = Data.Coerce.coerce

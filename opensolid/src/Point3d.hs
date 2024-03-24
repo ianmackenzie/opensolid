@@ -47,7 +47,9 @@ deriving instance Eq (Point3d (space @ units))
 
 deriving instance Show (Point3d (space @ units))
 
-type instance Units (Point3d (space @ units)) = units
+instance HasUnits (Point3d (space @ units)) where
+  type Units (Point3d (space @ units)) = units
+  type Erase (Point3d (space @ units)) = Point3d (space @ Unitless)
 
 instance space ~ space' => Units.Coercion (Point3d (space @ units1)) (Point3d (space' @ units2)) where
   coerce = Data.Coerce.coerce

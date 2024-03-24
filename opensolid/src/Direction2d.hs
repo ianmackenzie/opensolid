@@ -51,7 +51,9 @@ newtype Direction2d (space :: Type) = Direction2d_ (Vector2d (space @ Unitless))
 pattern Direction2d :: Vector2d (space @ Unitless) -> Direction2d space
 pattern Direction2d v <- Direction2d_ v
 
-type instance Units (Direction2d space) = Unitless
+instance HasUnits (Direction2d space) where
+  type Units (Direction2d space) = Unitless
+  type Erase (Direction2d space) = Direction2d space
 
 instance space ~ space' => Units.Coercion (Direction2d space) (Direction2d space') where
   coerce = identity

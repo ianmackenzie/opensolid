@@ -63,7 +63,9 @@ data Curve2d (coordinateSystem :: CoordinateSystem) where
 
 deriving instance Show (Curve2d (space @ units))
 
-type instance Units (Curve2d (space @ units)) = units
+instance HasUnits (Curve2d (space @ units)) where
+  type Units (Curve2d (space @ units)) = units
+  type Erase (Curve2d (space @ units)) = Curve2d (space @ Unitless)
 
 instance
   space ~ space' =>

@@ -80,10 +80,12 @@ data Range units = Range_ (Qty units) (Qty units)
 pattern Range :: Qty units -> Qty units -> Range units
 pattern Range low high <- Range_ low high
 
+instance HasUnits (Range units) where
+  type Units (Range units) = units
+  type Erase (Range units) = Range Unitless
+
 instance Units.Coercion (Range units1) (Range units2) where
   coerce = Data.Coerce.coerce
-
-type instance Units (Range units) = units
 
 instance units ~ units' => ApproximateEquality (Range units) (Qty units') units where
   Range low high ~= value = low >= value - ?tolerance && high <= value + ?tolerance

@@ -23,7 +23,9 @@ newtype DirectionBounds2d space
   = DirectionBounds2d (VectorBounds2d (space @ Unitless))
   deriving (Show)
 
-type instance Units (DirectionBounds2d space) = Unitless
+instance HasUnits (DirectionBounds2d space) where
+  type Units (DirectionBounds2d space) = Unitless
+  type Erase (DirectionBounds2d space) = DirectionBounds2d space
 
 instance space ~ space' => Units.Coercion (DirectionBounds2d space) (DirectionBounds2d space') where
   coerce = identity

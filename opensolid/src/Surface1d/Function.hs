@@ -123,7 +123,9 @@ data Function units where
 
 deriving instance Show (Function units)
 
-type instance Units (Function units) = units
+instance HasUnits (Function units) where
+  type Units (Function units) = units
+  type Erase (Function units) = Function Unitless
 
 instance Units.Coercion (Function units1) (Function units2) where
   coerce Zero = Zero
@@ -297,8 +299,8 @@ derivative p function =
     Quotient_ f1 f2 -> (derivative p f1 .*. f2 - f1 .*. derivative p f2) .!/.! squared_ f2
     Squared_ f -> 2.0 * f .*. derivative p f
     SquareRoot f -> derivative p f / (2.0 * sqrt f)
-    Sin f -> cos f * (Angle.unitless (derivative p f) :: Function Unitless)
-    Cos f -> negate (sin f) * (Angle.unitless (derivative p f) :: Function Unitless)
+    Sin f -> cos f * Angle.unitless (derivative p f)
+    Cos f -> negate (sin f) * Angle.unitless (derivative p f)
 
 derivativeIn :: Uv.Direction -> Function units -> Function units
 derivativeIn direction function =
