@@ -17,7 +17,7 @@ module Arithmetic
   , (!*)
   , (^*.)
   , (.*^)
-  , (!/%)
+  , (!/)
   , (/%)
   , (.!/!)
   , (!./!)
@@ -238,7 +238,7 @@ a .*^ b = Units.coerce (a .*. b)
   c
 a /% b = Units.coerce (a ./. b)
 
-(!/%) ::
+(!/) ::
   ( Division a b
   , Units.Coercion (a ./. b) c
   , Units a ~ units1
@@ -248,7 +248,7 @@ a /% b = Units.coerce (a ./. b)
   a ->
   b ->
   c
-a !/% b = Units.coerce (a ./. b)
+a !/ b = Units.coerce (a ./. b)
 
 (.!/!) ::
   ( Division a b
