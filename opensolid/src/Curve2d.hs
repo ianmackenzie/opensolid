@@ -48,11 +48,11 @@ import Frame2d (Frame2d)
 import Frame2d qualified
 import List qualified
 import OpenSolid
+import Parameter qualified
 import Point2d (Point2d)
 import Qty qualified
 import Range qualified
 import Result qualified
-import T qualified
 import Units qualified
 import VectorCurve2d (VectorCurve2d)
 import VectorCurve2d qualified
@@ -84,7 +84,7 @@ evaluateAt = Internal.evaluateAt
 pointOn :: Curve2d (space @ units) -> Float -> Point2d (space @ units)
 pointOn curve t = evaluateAt t curve
 
-segmentBounds :: T.Bounds -> Curve2d (space @ units) -> Bounds2d (space @ units)
+segmentBounds :: Parameter.Bounds -> Curve2d (space @ units) -> Bounds2d (space @ units)
 segmentBounds = Internal.segmentBounds
 
 derivative :: Curve2d (space @ units) -> VectorCurve2d (space @ units)
@@ -134,7 +134,7 @@ overlappingSegments ::
   Curve2d (space @ units) ->
   Curve2d (space @ units) ->
   List (Float, Float) ->
-  List (T.Bounds, T.Bounds, Sign)
+  List (Parameter.Bounds, Parameter.Bounds, Sign)
 overlappingSegments curve1 curve2 endpointParameterValues =
   endpointParameterValues
     |> List.successive
@@ -150,7 +150,7 @@ isOverlappingSegment ::
   Tolerance units =>
   Curve2d (space @ units) ->
   Curve2d (space @ units) ->
-  (T.Bounds, T.Bounds, Sign) ->
+  (Parameter.Bounds, Parameter.Bounds, Sign) ->
   Bool
 isOverlappingSegment curve1 curve2 (domain1, _, _) =
   let segmentStartPoint = evaluateAt (Range.minValue domain1) curve1
@@ -160,7 +160,7 @@ isOverlappingSegment curve1 curve2 (domain1, _, _) =
    in segment1IsNondegenerate && segment1LiesOnSegment2
 
 data IntersectionError
-  = CurvesOverlap (List (T.Bounds, T.Bounds, Sign))
+  = CurvesOverlap (List (Parameter.Bounds, Parameter.Bounds, Sign))
   | TangentIntersectionAtDegeneratePoint
   deriving (Eq, Show, Error)
 
@@ -218,8 +218,8 @@ findEndpointIntersections ::
   List (Float, Float) ->
   SearchTree (space @ units) ->
   SearchTree (space @ units) ->
-  (List Intersection, List (T.Bounds, T.Bounds)) ->
-  Result IntersectionError (List Intersection, List (T.Bounds, T.Bounds))
+  (List Intersection, List (Parameter.Bounds, Parameter.Bounds)) ->
+  Result IntersectionError (List Intersection, List (Parameter.Bounds, Parameter.Bounds))
 findEndpointIntersections _ _ [] _ _ accumulated = Ok accumulated
 findEndpointIntersections derivatives1 derivatives2 (uv : rest) searchTree1 searchTree2 accumulated = Result.do
   updated <- findEndpointIntersection derivatives1 derivatives2 uv searchTree1 searchTree2 accumulated
@@ -232,8 +232,8 @@ findEndpointIntersection ::
   (Float, Float) ->
   SearchTree (space @ units) ->
   SearchTree (space @ units) ->
-  (List Intersection, List (T.Bounds, T.Bounds)) ->
-  Result IntersectionError (List Intersection, List (T.Bounds, T.Bounds))
+  (List Intersection, List (Parameter.Bounds, Parameter.Bounds)) ->
+  Result IntersectionError (List Intersection, List (Parameter.Bounds, Parameter.Bounds))
 findEndpointIntersection derivatives1 derivatives2 t1t2 searchTree1 searchTree2 accumulated = Result.do
   let intersectionType = Derivatives.classify t1t2 derivatives1 derivatives2
   let (kind, sign) = intersectionType
@@ -253,8 +253,8 @@ findTangentIntersections ::
   Derivatives (space @ units) ->
   SearchTree (space @ units) ->
   SearchTree (space @ units) ->
-  (List Intersection, List (T.Bounds, T.Bounds)) ->
-  (List Intersection, List (T.Bounds, T.Bounds))
+  (List Intersection, List (Parameter.Bounds, Parameter.Bounds)) ->
+  (List Intersection, List (Parameter.Bounds, Parameter.Bounds))
 findTangentIntersections derivatives1 derivatives2 =
   Bisection.solve2
     Segment.isTangentIntersectionCandidate
@@ -267,8 +267,8 @@ findCrossingIntersections ::
   Derivatives (space @ units) ->
   SearchTree (space @ units) ->
   SearchTree (space @ units) ->
-  (List Intersection, List (T.Bounds, T.Bounds)) ->
-  (List Intersection, List (T.Bounds, T.Bounds))
+  (List Intersection, List (Parameter.Bounds, Parameter.Bounds)) ->
+  (List Intersection, List (Parameter.Bounds, Parameter.Bounds))
 findCrossingIntersections derivatives1 derivatives2 =
   Bisection.solve2
     Segment.isCrossingIntersectionCandidate

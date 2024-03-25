@@ -32,17 +32,17 @@ import Float qualified
 import List qualified
 import Maybe qualified
 import OpenSolid
+import Parameter qualified
 import Qty qualified
 import Range (Range)
 import Range qualified
 import Stream (Stream)
 import Stream qualified
-import T qualified
 import Units qualified
 
 class Show curve => Interface curve units | curve -> units where
   evaluateAtImpl :: Float -> curve -> Qty units
-  segmentBoundsImpl :: T.Bounds -> curve -> Range units
+  segmentBoundsImpl :: Parameter.Bounds -> curve -> Range units
   derivativeImpl :: curve -> Curve1d units
 
 data Curve1d units where
@@ -244,7 +244,7 @@ evaluateAt tValue curve =
 pointOn :: Curve1d units -> Float -> Qty units
 pointOn curve tValue = evaluateAt tValue curve
 
-segmentBounds :: T.Bounds -> Curve1d units -> Range units
+segmentBounds :: Parameter.Bounds -> Curve1d units -> Range units
 segmentBounds tBounds curve =
   case curve of
     Curve1d c -> segmentBoundsImpl tBounds c
@@ -323,7 +323,10 @@ cos (Constant x) = constant (Angle.cos x)
 cos curve = Cos curve
 
 isZero :: Tolerance units => Curve1d units -> Bool
-isZero curve = List.all (\tValue -> pointOn curve tValue ~= Qty.zero) (Range.samples T.domain)
+isZero curve =
+  List.all
+    (\tValue -> pointOn curve tValue ~= Qty.zero)
+    (Range.samples Parameter.domain)
 
 -- TODO report an error if higher-order root detected
 maxRootOrder :: Int
@@ -352,8 +355,8 @@ findRoots ::
   Stream (Curve1d units) ->
   Bisection.Tree (Stream (Range units)) ->
   Int ->
-  (List Root, List T.Bounds) ->
-  (List Root, List T.Bounds)
+  (List Root, List Parameter.Bounds) ->
+  (List Root, List Parameter.Bounds)
 findRoots curve derivatives searchTree rootOrder accumulated =
   let updated =
         Bisection.solve
@@ -366,7 +369,7 @@ findRoots curve derivatives searchTree rootOrder accumulated =
         then updated
         else findRoots curve derivatives searchTree (rootOrder - 1) updated
 
-isCandidate :: Tolerance units => Int -> T.Bounds -> Stream (Range units) -> Bool
+isCandidate :: Tolerance units => Int -> Parameter.Bounds -> Stream (Range units) -> Bool
 isCandidate rootOrder _ bounds =
   let curveBounds = Stream.head bounds
       derivativeBounds = Stream.take rootOrder (Stream.tail bounds)
@@ -374,7 +377,7 @@ isCandidate rootOrder _ bounds =
       derivativesContainZero = List.all (Range.includes Qty.zero) derivativeBounds
    in curveContainsZero && derivativesContainZero
 
-resolveDerivativeSign :: Int -> T.Bounds -> Stream (Range units) -> Fuzzy Sign
+resolveDerivativeSign :: Int -> Parameter.Bounds -> Stream (Range units) -> Fuzzy Sign
 resolveDerivativeSign derivativeOrder _ bounds = resolveSign (Stream.nth derivativeOrder bounds)
 
 findRoot ::
@@ -382,7 +385,7 @@ findRoot ::
   Curve1d units ->
   Int ->
   Stream (Curve1d units) ->
-  T.Bounds ->
+  Parameter.Bounds ->
   Stream (Range units) ->
   Sign ->
   Maybe Root
@@ -453,4 +456,4 @@ factorial :: Int -> Int
 factorial 0 = 1; factorial n = n * factorial (n - 1)
 
 integral :: Curve1d units -> Estimate units
-integral curve = Estimate.wrap (Integral curve (derivative curve) T.domain)
+integral curve = Estimate.wrap (Integral curve (derivative curve) Parameter.domain)

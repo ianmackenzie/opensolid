@@ -11,7 +11,7 @@ where
 
 import {-# SOURCE #-} Curve1d (Curve1d)
 import OpenSolid
-import T qualified
+import Parameter qualified
 import Units qualified
 import Vector2d (Vector2d)
 import VectorBounds2d (VectorBounds2d)
@@ -22,7 +22,7 @@ class
     | curve -> coordinateSystem
   where
   evaluateAtImpl :: Float -> curve -> Vector2d coordinateSystem
-  segmentBoundsImpl :: T.Bounds -> curve -> VectorBounds2d coordinateSystem
+  segmentBoundsImpl :: Parameter.Bounds -> curve -> VectorBounds2d coordinateSystem
   derivativeImpl :: curve -> VectorCurve2d coordinateSystem
 
 type role VectorCurve2d nominal
@@ -76,5 +76,5 @@ instance
 constant :: Vector2d (space @ units) -> VectorCurve2d (space @ units)
 wrap :: Interface curve (space @ units) => curve -> VectorCurve2d (space @ units)
 evaluateAt :: Float -> VectorCurve2d (space @ units) -> Vector2d (space @ units)
-segmentBounds :: T.Bounds -> VectorCurve2d (space @ units) -> VectorBounds2d (space @ units)
+segmentBounds :: Parameter.Bounds -> VectorCurve2d (space @ units) -> VectorBounds2d (space @ units)
 derivative :: VectorCurve2d (space @ units) -> VectorCurve2d (space @ units)

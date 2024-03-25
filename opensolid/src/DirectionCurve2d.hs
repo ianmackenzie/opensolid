@@ -27,7 +27,7 @@ import DirectionBounds2d qualified
 import Frame2d (Frame2d)
 import Frame2d qualified
 import OpenSolid
-import T qualified
+import Parameter qualified
 import Units qualified
 import Vector2d (Vector2d)
 import VectorCurve2d (VectorCurve2d)
@@ -53,7 +53,7 @@ evaluateAt :: Float -> DirectionCurve2d space -> Direction2d space
 evaluateAt t (DirectionCurve2d vectorCurve) =
   Direction2d.unsafe (VectorCurve2d.evaluateAt t vectorCurve)
 
-segmentBounds :: T.Bounds -> DirectionCurve2d space -> DirectionBounds2d space
+segmentBounds :: Parameter.Bounds -> DirectionCurve2d space -> DirectionBounds2d space
 segmentBounds t (DirectionCurve2d vectorCurve) =
   DirectionBounds2d.unsafe (VectorCurve2d.segmentBounds t vectorCurve)
 

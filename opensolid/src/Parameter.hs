@@ -1,4 +1,4 @@
-module T
+module Parameter
   ( Bounds
   , domain
   , steps

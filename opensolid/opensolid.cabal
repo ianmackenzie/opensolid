@@ -119,6 +119,7 @@ library
       NonEmpty
       OpenSolid
       Parallel
+      Parameter
       Pair
       Point2d
       Point3d
@@ -136,7 +137,6 @@ library
       Surface1d
       Surface1d.Function
       Surface1d.Function.Zeros
-      T
       Task
       Tolerance
       Transform2d
@@ -186,7 +186,7 @@ test-suite opensolid-test
       Tests.List
       Tests.NonEmpty
       Tests.String
-      Tests.T
+      Tests.Parameter
       Tests.Qty
       Tests.Random
       Tests.Range

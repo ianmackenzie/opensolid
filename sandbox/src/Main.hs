@@ -26,6 +26,7 @@ import List qualified
 import NonEmpty qualified
 import OpenSolid
 import Parallel qualified
+import Parameter qualified
 import Point2d (Point2d)
 import Point2d qualified
 import Qty qualified
@@ -35,7 +36,6 @@ import Result qualified
 import String qualified
 import Surface1d.Function qualified
 import Surface1d.Function.Zeros qualified
-import T qualified
 import Task qualified
 import Transform2d qualified
 import Units (Meters)
@@ -164,9 +164,9 @@ testTaskSequencing = Task.do
 
 testParameter1dGeneration :: Task ()
 testParameter1dGeneration = Task.do
-  t1 <- Random.generate T.generator
-  t2 <- Random.generate T.generator
-  t3 <- Random.generate T.generator
+  t1 <- Random.generate Parameter.generator
+  t2 <- Random.generate Parameter.generator
+  t3 <- Random.generate Parameter.generator
   log "Random parameter value 1" t1
   log "Random parameter value 2" t2
   log "Random parameter value 3" t3
@@ -278,7 +278,10 @@ toDrawing = Length.centimeters 10.0 ./. 1.0
 
 drawCurve :: Curve2d Uv.Coordinates -> Drawing2d.Entity Uv.Space
 drawCurve curve =
-  let sampledPoints = List.map (Curve2d.pointOn curve >> Point2d.convert toDrawing) (T.steps 20)
+  let sampledPoints =
+        List.map
+          (Curve2d.pointOn curve >> Point2d.convert toDrawing)
+          (Parameter.steps 20)
    in Drawing2d.polyline [] sampledPoints
 
 drawDot :: Colour -> Uv.Point -> Drawing2d.Entity Uv.Space
@@ -370,7 +373,7 @@ drawBezier colour startPoint innerControlPoints endPoint = Result.do
           ]
       , Drawing2d.polyline [] <|
           [ Curve2d.evaluateAt t curve
-          | t <- T.steps 100
+          | t <- Parameter.steps 100
           ]
       ]
 
@@ -405,7 +408,7 @@ testHermiteBezier = Task.do
   log "End first derivative" (VectorCurve2d.evaluateAt 1.0 curveFirstDerivative)
   log "End second derivative" (VectorCurve2d.evaluateAt 1.0 curveSecondDerivative)
   log "End third derivative" (VectorCurve2d.evaluateAt 1.0 curveThirdDerivative)
-  let sampledPoints = [Curve2d.evaluateAt t curve | t <- T.steps 100]
+  let sampledPoints = [Curve2d.evaluateAt t curve | t <- Parameter.steps 100]
   let curveEntity =
         Drawing2d.polyline
           [ Drawing2d.strokeColour Colour.blue

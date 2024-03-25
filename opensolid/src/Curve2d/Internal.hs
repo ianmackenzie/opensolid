@@ -21,12 +21,12 @@ import DirectionCurve2d (DirectionCurve2d)
 import DirectionCurve2d qualified
 import Frame2d (Frame2d)
 import OpenSolid
+import Parameter qualified
 import Point2d (Point2d)
 import Point2d qualified
 import Qty qualified
 import Range (Range (Range))
 import Range qualified
-import T qualified
 import Units qualified
 import Vector2d qualified
 import VectorBounds2d qualified
@@ -101,7 +101,7 @@ instance
   (space ~ space', units ~ units') =>
   Intersects (Curve2d (space @ units)) (Point2d (space' @ units')) units
   where
-  curve ^ point = Range.any (segmentIsCoincidentWithPoint point curve) T.domain
+  curve ^ point = Range.any (segmentIsCoincidentWithPoint point curve) Parameter.domain
 
 instance
   (space ~ space', units ~ units') =>
@@ -113,7 +113,7 @@ segmentIsCoincidentWithPoint ::
   Tolerance units =>
   Point2d (space @ units) ->
   Curve2d (space @ units) ->
-  T.Bounds ->
+  Parameter.Bounds ->
   Fuzzy Bool
 segmentIsCoincidentWithPoint point curve domain
   | not (point ^ candidateBounds) = Resolved False
@@ -130,7 +130,7 @@ class
   startPointImpl :: curve -> Point2d coordinateSystem
   endPointImpl :: curve -> Point2d coordinateSystem
   evaluateAtImpl :: Float -> curve -> Point2d coordinateSystem
-  segmentBoundsImpl :: T.Bounds -> curve -> Bounds2d coordinateSystem
+  segmentBoundsImpl :: Parameter.Bounds -> curve -> Bounds2d coordinateSystem
   derivativeImpl :: curve -> VectorCurve2d coordinateSystem
   reverseImpl :: curve -> curve
   boundsImpl :: curve -> Bounds2d coordinateSystem
@@ -156,7 +156,7 @@ evaluateAt t (Curve curve _) = evaluateAtImpl t curve
 evaluateAt t (Coerce curve) = Units.coerce (evaluateAt t curve)
 evaluateAt t (PlaceIn frame curve) = Point2d.placeIn frame (evaluateAt t curve)
 
-segmentBounds :: T.Bounds -> Curve2d (space @ units) -> Bounds2d (space @ units)
+segmentBounds :: Parameter.Bounds -> Curve2d (space @ units) -> Bounds2d (space @ units)
 segmentBounds (Range t1 t2) (Line{startPoint = p1, endPoint = p2}) =
   Bounds2d.hull2 (Point2d.interpolateFrom p1 p2 t1) (Point2d.interpolateFrom p1 p2 t2)
 segmentBounds t (Arc p0 r a b) =
@@ -184,7 +184,7 @@ reverse (PlaceIn frame curve) = PlaceIn frame (reverse curve)
 
 bounds :: Curve2d (space @ units) -> Bounds2d (space @ units)
 bounds (Line{startPoint = p1, endPoint = p2}) = Bounds2d.hull2 p1 p2
-bounds arc@(Arc{}) = segmentBounds T.domain arc
+bounds arc@(Arc{}) = segmentBounds Parameter.domain arc
 bounds (Curve curve _) = boundsImpl curve
 bounds (Coerce curve) = Units.coerce (bounds curve)
 bounds (PlaceIn frame curve) = Bounds2d.placeIn frame (bounds curve)

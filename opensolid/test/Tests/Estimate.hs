@@ -21,7 +21,7 @@ import Random qualified
 import Random.Shuffle qualified
 import Range (Range (Range))
 import Range qualified
-import T qualified
+import Parameter qualified
 import Test (Test)
 import Test qualified
 import Tests.Random qualified as Random
@@ -54,7 +54,7 @@ instance Estimate.Interface DummyEstimate Meters where
 dummyEstimate :: Generator (Length, Estimate Meters)
 dummyEstimate = Random.do
   range <- Range.generator Random.length
-  t <- T.generator
+  t <- Parameter.generator
   let value = Range.interpolate range t
   Random.return (value, Estimate.wrap (DummyEstimate value range))
 

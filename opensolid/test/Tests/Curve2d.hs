@@ -14,12 +14,12 @@ import Error qualified
 import Length qualified
 import List qualified
 import OpenSolid
+import Parameter qualified
 import Point2d qualified
 import Qty qualified
 import QuadraticSpline2d qualified
 import Range (Range (Range))
 import Range qualified
-import T qualified
 import Test (Test)
 import Test qualified
 import Tests.Random qualified as Random
@@ -61,22 +61,22 @@ overlappingSegments ::
   Tolerance units =>
   Curve2d (space @ units) ->
   Curve2d (space @ units) ->
-  Result String (List (T.Bounds, T.Bounds, Sign))
+  Result String (List (Parameter.Bounds, Parameter.Bounds, Sign))
 overlappingSegments curve1 curve2 =
   case Curve2d.intersections curve1 curve2 of
     Ok _ -> Error "Intersection should have failed (and given overlapping segments)"
     Error (Curve2d.CurvesOverlap segments) -> Ok segments
     Error error -> Error (Error.message error)
 
-equalUBounds :: T.Bounds -> T.Bounds -> Bool
+equalUBounds :: Parameter.Bounds -> Parameter.Bounds -> Bool
 equalUBounds (Range low1 high1) (Range low2 high2) =
   let ?tolerance = 1e-12 in low1 ~= low2 && high1 ~= high2
 
-equalOverlapSegments :: (T.Bounds, T.Bounds, Sign) -> (T.Bounds, T.Bounds, Sign) -> Bool
+equalOverlapSegments :: (Parameter.Bounds, Parameter.Bounds, Sign) -> (Parameter.Bounds, Parameter.Bounds, Sign) -> Bool
 equalOverlapSegments (t1, t2, sign) (t1', t2', sign') =
   equalUBounds t1 t1' && equalUBounds t2 t2' && sign == sign'
 
-equalOverlapSegmentLists :: List (T.Bounds, T.Bounds, Sign) -> List (T.Bounds, T.Bounds, Sign) -> Bool
+equalOverlapSegmentLists :: List (Parameter.Bounds, Parameter.Bounds, Sign) -> List (Parameter.Bounds, Parameter.Bounds, Sign) -> Bool
 equalOverlapSegmentLists segments1 segments2 =
   List.allTrue (List.map2 equalOverlapSegments segments1 segments2)
 
@@ -174,7 +174,7 @@ tangentDerivativeIsPerpendicularToTangent =
     curve <- CubicSpline2d.fromControlPoints p0 p1 p2 p3
     let tangentDirection = Curve2d.tangentDirection curve
     let tangentDerivative = DirectionCurve2d.derivative tangentDirection
-    t <- T.generator
+    t <- Parameter.generator
     let tangent = DirectionCurve2d.evaluateAt t tangentDirection
     let derivative = VectorCurve2d.evaluateAt t tangentDerivative
     Test.expect (let ?tolerance = 1e-12 in derivative <> tangent ~= 0.0)

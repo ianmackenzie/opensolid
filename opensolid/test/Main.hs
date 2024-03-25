@@ -16,17 +16,17 @@ import Tests.Estimate qualified
 import Tests.Float qualified
 import Tests.List qualified
 import Tests.NonEmpty qualified
+import Tests.Parameter qualified
 import Tests.Qty qualified
 import Tests.Range qualified
 import Tests.Region2d qualified
 import Tests.String qualified
-import Tests.T qualified
 import Tests.VectorBounds2d qualified
 import Tests.VectorBounds3d qualified
 
 tests :: List Test
 tests =
-  [ Test.group "T" Tests.T.tests
+  [ Test.group "Parameter" Tests.Parameter.tests
   , Test.group "Qty" Tests.Qty.tests
   , Test.group "Range" Tests.Range.tests
   , Test.group "VectorBounds3d" Tests.VectorBounds3d.tests

@@ -45,6 +45,7 @@ import List qualified
 import Maybe qualified
 import NonEmpty qualified
 import OpenSolid
+import Parameter qualified
 import Point2d qualified
 import Qty qualified
 import Range (Range (Range))
@@ -58,7 +59,6 @@ import Surface1d.Function.SaddleRegion (SaddleRegion (SaddleRegion))
 import Surface1d.Function.SaddleRegion qualified as SaddleRegion
 import Surface1d.Function.Zeros (Zeros (Zeros))
 import Surface1d.Function.Zeros qualified as Zeros
-import T qualified
 import Units qualified
 import Uv (Parameter (U, V))
 import Uv qualified
@@ -1160,7 +1160,7 @@ instance Curve2d.Interface (HorizontalCurve units) Uv.Coordinates where
   reverseImpl (HorizontalCurve{f, dvdu, uStart, uEnd, vLow, vHigh}) =
     HorizontalCurve{f, dvdu, uStart = uEnd, uEnd = uStart, vLow, vHigh}
 
-  boundsImpl crossingCurve = Curve2d.segmentBoundsImpl T.domain crossingCurve
+  boundsImpl crossingCurve = Curve2d.segmentBoundsImpl Parameter.domain crossingCurve
 
 data VerticalCurve units = VerticalCurve
   { f :: Function units
@@ -1199,7 +1199,7 @@ instance Curve2d.Interface (VerticalCurve units) Uv.Coordinates where
   reverseImpl (VerticalCurve{f, dudv, uLow, uHigh, vStart, vEnd}) =
     VerticalCurve f dudv uLow uHigh vEnd vStart
 
-  boundsImpl crossingCurve = Curve2d.segmentBoundsImpl T.domain crossingCurve
+  boundsImpl crossingCurve = Curve2d.segmentBoundsImpl Parameter.domain crossingCurve
 
 solveVertically :: Function units -> Float -> Float -> Float -> Float
 solveVertically f u v1 v2

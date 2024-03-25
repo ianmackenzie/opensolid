@@ -1,7 +1,7 @@
 module Tests.VectorBounds2d (tests) where
 
 import OpenSolid
-import T qualified
+import Parameter qualified
 import Test (Test)
 import Test qualified
 import Tests.Random qualified as Random
@@ -18,8 +18,8 @@ placeIn :: Test
 placeIn =
   Test.check 100 "placeIn" <| Test.do
     localBounds <- Random.vectorBounds2d
-    u <- T.generator
-    v <- T.generator
+    u <- Parameter.generator
+    v <- Parameter.generator
     let localVector = VectorBounds2d.interpolate localBounds u v
     frame <- Random.frame2d
     let globalBounds = VectorBounds2d.placeIn frame localBounds
@@ -30,8 +30,8 @@ relativeTo :: Test
 relativeTo =
   Test.check 100 "relativeTo" <| Test.do
     globalBounds <- Random.vectorBounds2d
-    u <- T.generator
-    v <- T.generator
+    u <- Parameter.generator
+    v <- Parameter.generator
     let globalVector = VectorBounds2d.interpolate globalBounds u v
     frame <- Random.frame2d
     let localBounds = VectorBounds2d.relativeTo frame globalBounds

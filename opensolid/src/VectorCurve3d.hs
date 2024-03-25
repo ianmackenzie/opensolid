@@ -25,8 +25,8 @@ where
 import Curve1d (Curve1d (Curve1d))
 import Curve1d qualified
 import OpenSolid
+import Parameter qualified
 import Range (Range (Range))
-import T qualified
 import Units qualified
 import Vector3d (Vector3d (Vector3d))
 import Vector3d qualified
@@ -35,7 +35,7 @@ import VectorBounds3d qualified
 
 class Show curve => Interface curve (coordinateSystem :: CoordinateSystem) | curve -> coordinateSystem where
   evaluateAtImpl :: Float -> curve -> Vector3d coordinateSystem
-  segmentBoundsImpl :: T.Bounds -> curve -> VectorBounds3d coordinateSystem
+  segmentBoundsImpl :: Parameter.Bounds -> curve -> VectorBounds3d coordinateSystem
   derivativeImpl :: curve -> VectorCurve3d coordinateSystem
 
 data VectorCurve3d (coordinateSystem :: CoordinateSystem) where
@@ -486,7 +486,7 @@ evaluateAt t curve =
     QuadraticSpline v1 v2 v3 -> quadraticBlossom v1 v2 v3 t t
     CubicSpline v1 v2 v3 v4 -> cubicBlossom v1 v2 v3 v4 t t t
 
-segmentBounds :: T.Bounds -> VectorCurve3d (space @ units) -> VectorBounds3d (space @ units)
+segmentBounds :: Parameter.Bounds -> VectorCurve3d (space @ units) -> VectorBounds3d (space @ units)
 segmentBounds t@(Range tl th) curve =
   case curve of
     VectorCurve3d c -> segmentBoundsImpl t c
