@@ -20,7 +20,7 @@ where
 import Basis2d (Basis2d)
 import Basis2d qualified
 import Curve1d (Curve1d)
-import Direction2d (Direction2d (Direction2d))
+import Direction2d (Direction2d)
 import Direction2d qualified
 import DirectionBounds2d (DirectionBounds2d)
 import DirectionBounds2d qualified
@@ -61,7 +61,7 @@ derivative :: DirectionCurve2d space -> VectorCurve2d (space @ Unitless)
 derivative (DirectionCurve2d vectorCurve) = VectorCurve2d.derivative vectorCurve
 
 constant :: Direction2d space -> DirectionCurve2d space
-constant (Direction2d vector) = DirectionCurve2d (VectorCurve2d.constant vector)
+constant direction = DirectionCurve2d (VectorCurve2d.constant (Direction2d.unitVector direction))
 
 arc :: Angle -> Angle -> DirectionCurve2d space
 arc a b = DirectionCurve2d (VectorCurve2d.arc 1.0 a b)

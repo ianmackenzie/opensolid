@@ -1,5 +1,6 @@
 module Direction2d
-  ( Direction2d (Direction2d)
+  ( Direction2d
+  , unitVector
   , xComponent
   , yComponent
   , components
@@ -42,14 +43,8 @@ import Vector2d qualified
 
 type role Direction2d nominal
 
-newtype Direction2d (space :: Type) = Direction2d_ (Vector2d (space @ Unitless))
+newtype Direction2d (space :: Type) = Direction2d (Vector2d (space @ Unitless))
   deriving (Eq, Show)
-
-{-# COMPLETE Direction2d #-}
-
-{-# INLINE Direction2d #-}
-pattern Direction2d :: Vector2d (space @ Unitless) -> Direction2d space
-pattern Direction2d v <- Direction2d_ v
 
 instance HasUnits (Direction2d space) where
   type Units (Direction2d space) = Unitless
@@ -105,6 +100,10 @@ instance space ~ space' => CrossMultiplication (Direction2d space) (Direction2d 
 
 instance space ~ space' => CrossProduct (Direction2d space) (Direction2d space') Float
 
+{-# INLINE unitVector #-}
+unitVector :: Direction2d space -> Vector2d (space @ Unitless)
+unitVector (Direction2d vector) = vector
+
 xComponent :: Direction2d space -> Float
 xComponent (Direction2d vector) = Vector2d.xComponent vector
 
@@ -117,7 +116,7 @@ components (Direction2d vector) = Vector2d.components vector
 
 {-# INLINE unsafe #-}
 unsafe :: Vector2d (space @ Unitless) -> Direction2d space
-unsafe = Direction2d_
+unsafe = Direction2d
 
 {-# INLINE unwrap #-}
 unwrap :: Direction2d space -> Vector2d (space @ Unitless)

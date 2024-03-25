@@ -42,7 +42,7 @@ import Axis2d (Axis2d)
 import Axis2d qualified
 import Bounds qualified
 import Data.Coerce qualified
-import Direction2d (Direction2d (Direction2d))
+import Direction2d qualified
 import Float qualified
 import Frame2d (Frame2d)
 import Frame2d qualified
@@ -56,7 +56,6 @@ import Quadrature qualified
 import Range (Range)
 import Range qualified
 import Units qualified
-import Vector2d (Vector2d (Vector2d))
 import VectorBounds2d (VectorBounds2d)
 import VectorBounds2d qualified
 
@@ -380,8 +379,8 @@ placeIn frame (Bounds2d x y) =
       xWidth = Range.width x
       yWidth = Range.width y
       (x0, y0) = Point2d.coordinates (Point2d.xyIn frame xMid yMid)
-      Direction2d (Vector2d ix iy) = Frame2d.xDirection frame
-      Direction2d (Vector2d jx jy) = Frame2d.yDirection frame
+      (ix, iy) = Direction2d.components (Frame2d.xDirection frame)
+      (jx, jy) = Direction2d.components (Frame2d.yDirection frame)
       rx = 0.5 * xWidth * Float.abs ix + 0.5 * yWidth * Float.abs jx
       ry = 0.5 * xWidth * Float.abs iy + 0.5 * yWidth * Float.abs jy
    in Bounds2d (Range.from (x0 - rx) (x0 + rx)) (Range.from (y0 - ry) (y0 + ry))
@@ -396,8 +395,8 @@ relativeTo frame (Bounds2d x y) =
       xWidth = Range.width x
       yWidth = Range.width y
       (x0, y0) = Point2d.coordinates (Point2d.relativeTo frame (Point2d.xy xMid yMid))
-      Direction2d (Vector2d ix iy) = Frame2d.xDirection frame
-      Direction2d (Vector2d jx jy) = Frame2d.yDirection frame
+      (ix, iy) = Direction2d.components (Frame2d.xDirection frame)
+      (jx, jy) = Direction2d.components (Frame2d.yDirection frame)
       rx = 0.5 * xWidth * Float.abs ix + 0.5 * yWidth * Float.abs iy
       ry = 0.5 * xWidth * Float.abs jx + 0.5 * yWidth * Float.abs jy
    in Bounds2d (Range.from (x0 - rx) (x0 + rx)) (Range.from (y0 - ry) (y0 + ry))
@@ -409,7 +408,7 @@ signedDistanceAlong axis (Bounds2d x y) =
       xWidth = Range.width x
       yWidth = Range.width y
       d0 = Point2d.signedDistanceAlong axis (Point2d.xy xMid yMid)
-      Direction2d (Vector2d ax ay) = Axis2d.direction axis
+      (ax, ay) = Direction2d.components (Axis2d.direction axis)
       r = 0.5 * xWidth * Float.abs ax + 0.5 * yWidth * Float.abs ay
    in Range.from (d0 - r) (d0 + r)
 

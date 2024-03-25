@@ -22,7 +22,7 @@ where
 import Angle qualified
 import {-# SOURCE #-} Axis2d (Axis2d)
 import {-# SOURCE #-} Axis2d qualified
-import Direction2d (Direction2d (Direction2d))
+import Direction2d (Direction2d)
 import Direction2d qualified
 import OpenSolid
 import Point2d (Point2d)
@@ -125,8 +125,8 @@ scaleAlongOwn :: Deformable2d a (space @ units) => (a -> Axis2d (space @ units))
 scaleAlongOwn axis scale value = scaleAlong (axis value) scale value
 
 instance space ~ space' => Transformable2d (Direction2d space) (space' @ units') where
-  transformBy transformation (Direction2d vector) =
-    Direction2d.unsafe (transformBy transformation vector)
+  transformBy transformation direction =
+    Direction2d.unsafe (transformBy transformation (Direction2d.unitVector direction))
 
 instance space ~ space' => Transformable2d (Vector2d (space @ units)) (space' @ units') where
   transformBy (Transformation (Matrix m11 m12 m21 m22 _ _)) (Vector2d x y) =

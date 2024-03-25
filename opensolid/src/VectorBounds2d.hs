@@ -33,7 +33,8 @@ where
 import Basis2d (Basis2d)
 import Basis2d qualified
 import Data.Coerce qualified
-import Direction2d (Direction2d (Direction2d))
+import Direction2d (Direction2d)
+import Direction2d qualified
 import Float qualified
 import {-# SOURCE #-} Frame2d (Frame2d)
 import {-# SOURCE #-} Frame2d qualified
@@ -215,7 +216,7 @@ instance
   DotMultiplication (Direction2d space) (VectorBounds2d (space' @ units))
   where
   type Direction2d space .<>. VectorBounds2d (space' @ units) = Range (Unitless :*: units)
-  Direction2d vector .<>. vectorBounds = vector .<>. vectorBounds
+  direction .<>. vectorBounds = Direction2d.unitVector direction .<>. vectorBounds
 
 instance
   space ~ space' =>
@@ -226,7 +227,7 @@ instance
   DotMultiplication (VectorBounds2d (space @ units)) (Direction2d space')
   where
   type VectorBounds2d (space @ units) .<>. Direction2d space' = Range (units :*: Unitless)
-  vectorBounds .<>. Direction2d vector = vectorBounds .<>. vector
+  vectorBounds .<>. direction = vectorBounds .<>. Direction2d.unitVector direction
 
 instance
   (Units.Product units1 units2 units3, space ~ space') =>
@@ -268,7 +269,7 @@ instance
   CrossMultiplication (Direction2d space) (VectorBounds2d (space' @ units))
   where
   type Direction2d space .><. VectorBounds2d (space' @ units) = Range (Unitless :*: units)
-  Direction2d vector .><. vectorBounds = vector .><. vectorBounds
+  direction .><. vectorBounds = Direction2d.unitVector direction .><. vectorBounds
 
 instance space ~ space' => CrossProduct (VectorBounds2d (space @ units)) (Direction2d space') (Range units)
 
@@ -277,7 +278,7 @@ instance
   CrossMultiplication (VectorBounds2d (space @ units)) (Direction2d space')
   where
   type VectorBounds2d (space @ units) .><. Direction2d space' = Range (units :*: Unitless)
-  vectorBounds .><. Direction2d vector = vectorBounds .><. vector
+  vectorBounds .><. direction = vectorBounds .><. Direction2d.unitVector direction
 
 instance
   (Units.Product units1 units2 units3, space ~ space') =>
@@ -432,8 +433,8 @@ placeInBasis basis (VectorBounds2d x y) =
       xWidth = Range.width x
       yWidth = Range.width y
       Vector2d x0 y0 = Vector2d.xyInBasis basis xMid yMid
-      Direction2d (Vector2d ix iy) = Basis2d.xDirection basis
-      Direction2d (Vector2d jx jy) = Basis2d.yDirection basis
+      (ix, iy) = Direction2d.components (Basis2d.xDirection basis)
+      (jx, jy) = Direction2d.components (Basis2d.yDirection basis)
       rx = 0.5 * xWidth * Float.abs ix + 0.5 * yWidth * Float.abs jx
       ry = 0.5 * xWidth * Float.abs iy + 0.5 * yWidth * Float.abs jy
    in VectorBounds2d (Range.from (x0 - rx) (x0 + rx)) (Range.from (y0 - ry) (y0 + ry))
@@ -448,8 +449,8 @@ relativeToBasis basis (VectorBounds2d x y) =
       xWidth = Range.width x
       yWidth = Range.width y
       Vector2d x0 y0 = Vector2d.relativeToBasis basis (Vector2d xMid yMid)
-      Direction2d (Vector2d ix iy) = Basis2d.xDirection basis
-      Direction2d (Vector2d jx jy) = Basis2d.yDirection basis
+      (ix, iy) = Direction2d.components (Basis2d.xDirection basis)
+      (jx, jy) = Direction2d.components (Basis2d.yDirection basis)
       rx = 0.5 * xWidth * Float.abs ix + 0.5 * yWidth * Float.abs iy
       ry = 0.5 * xWidth * Float.abs jx + 0.5 * yWidth * Float.abs jy
    in VectorBounds2d (Range.from (x0 - rx) (x0 + rx)) (Range.from (y0 - ry) (y0 + ry))

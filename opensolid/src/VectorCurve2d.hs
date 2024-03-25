@@ -44,7 +44,7 @@ import Basis2d qualified
 import Curve1d (Curve1d (Curve1d))
 import Curve1d qualified
 import Curve1d.Root qualified
-import Direction2d (Direction2d (Direction2d))
+import Direction2d (Direction2d)
 import Direction2d qualified
 import {-# SOURCE #-} DirectionCurve2d (DirectionCurve2d)
 import {-# SOURCE #-} DirectionCurve2d qualified
@@ -360,7 +360,7 @@ instance
   DotMultiplication (VectorCurve2d (space @ units)) (Direction2d space')
   where
   type VectorCurve2d (space @ units) .<>. Direction2d space' = Curve1d (units :*: Unitless)
-  curve .<>. Direction2d vector = curve .<>. vector
+  curve .<>. direction2d = curve .<>. Direction2d.unitVector direction2d
 
 instance
   space ~ space' =>
@@ -371,7 +371,7 @@ instance
   DotMultiplication (Direction2d space) (VectorCurve2d (space' @ units))
   where
   type Direction2d space .<>. VectorCurve2d (space' @ units) = Curve1d (Unitless :*: units)
-  Direction2d vector .<>. curve = vector .<>. curve
+  direction2d .<>. curve = Direction2d.unitVector direction2d .<>. curve
 
 data CrossProductOf space units1 units2
   = CrossProductOf (VectorCurve2d (space @ units1)) (VectorCurve2d (space @ units2))
@@ -428,7 +428,7 @@ instance
   CrossMultiplication (VectorCurve2d (space @ units)) (Direction2d space')
   where
   type VectorCurve2d (space @ units) .><. Direction2d space' = Curve1d (units :*: Unitless)
-  curve .><. Direction2d vector = curve .><. vector
+  curve .><. direction2d = curve .><. Direction2d.unitVector direction2d
 
 instance
   space ~ space' =>
@@ -436,7 +436,7 @@ instance
 
 instance space ~ space' => CrossMultiplication (Direction2d space) (VectorCurve2d (space' @ units)) where
   type Direction2d space .><. VectorCurve2d (space' @ units) = Curve1d (Unitless :*: units)
-  Direction2d vector .><. curve = vector .><. curve
+  direction2d .><. curve = Direction2d.unitVector direction2d .><. curve
 
 wrap :: Interface curve (space @ units) => curve -> VectorCurve2d (space @ units)
 wrap = VectorCurve2d

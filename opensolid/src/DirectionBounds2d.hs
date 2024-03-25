@@ -11,7 +11,8 @@ module DirectionBounds2d
   )
 where
 
-import Direction2d (Direction2d (Direction2d))
+import Direction2d (Direction2d)
+import Direction2d qualified
 import OpenSolid
 import Range (Range)
 import Units qualified
@@ -235,22 +236,29 @@ unwrap :: DirectionBounds2d space -> VectorBounds2d (space @ Unitless)
 unwrap (DirectionBounds2d vectorBounds) = vectorBounds
 
 constant :: Direction2d space -> DirectionBounds2d space
-constant (Direction2d vector) = DirectionBounds2d (VectorBounds2d.constant vector)
+constant direction = DirectionBounds2d (VectorBounds2d.constant (Direction2d.unitVector direction))
 
 hull2 ::
   Direction2d space ->
   Direction2d space ->
   DirectionBounds2d space
-hull2 (Direction2d vector1) (Direction2d vector2) =
-  DirectionBounds2d (VectorBounds2d.hull2 vector1 vector2)
+hull2 direction1 direction2 =
+  DirectionBounds2d <|
+    VectorBounds2d.hull2
+      (Direction2d.unitVector direction1)
+      (Direction2d.unitVector direction2)
 
 hull3 ::
   Direction2d space ->
   Direction2d space ->
   Direction2d space ->
   DirectionBounds2d space
-hull3 (Direction2d vector1) (Direction2d vector2) (Direction2d vector3) =
-  DirectionBounds2d (VectorBounds2d.hull3 vector1 vector2 vector3)
+hull3 direction1 direction2 direction3 =
+  DirectionBounds2d <|
+    VectorBounds2d.hull3
+      (Direction2d.unitVector direction1)
+      (Direction2d.unitVector direction2)
+      (Direction2d.unitVector direction3)
 
 hull4 ::
   Direction2d space ->
@@ -258,8 +266,13 @@ hull4 ::
   Direction2d space ->
   Direction2d space ->
   DirectionBounds2d space
-hull4 (Direction2d vector1) (Direction2d vector2) (Direction2d vector3) (Direction2d vector4) =
-  DirectionBounds2d (VectorBounds2d.hull4 vector1 vector2 vector3 vector4)
+hull4 direction1 direction2 direction3 direction4 =
+  DirectionBounds2d <|
+    VectorBounds2d.hull4
+      (Direction2d.unitVector direction1)
+      (Direction2d.unitVector direction2)
+      (Direction2d.unitVector direction3)
+      (Direction2d.unitVector direction4)
 
 xComponent :: DirectionBounds2d space -> Range Unitless
 xComponent (DirectionBounds2d vectorBounds) = VectorBounds2d.xComponent vectorBounds
