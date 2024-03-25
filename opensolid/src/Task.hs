@@ -2,7 +2,6 @@ module Task
   ( Task
   , Async
   , succeed
-  , evaluate
   , check
   , fail
   , map
