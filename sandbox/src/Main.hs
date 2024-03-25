@@ -9,7 +9,6 @@ import Bounds2d (Bounds2d (Bounds2d))
 import Bounds2d qualified
 import Colour (Colour)
 import Colour qualified
-import Console qualified
 import Curve2d (Curve2d)
 import Curve2d qualified
 import Direction2d qualified
@@ -47,7 +46,7 @@ import VectorCurve2d qualified
 import Volume qualified
 
 log :: Show a => String -> a -> IO ()
-log label value = Console.printLine (label ++ ": " ++ show value)
+log label value = IO.printLine (label ++ ": " ++ show value)
 
 testScalarArithmetic :: IO ()
 testScalarArithmetic = IO.do
@@ -130,17 +129,17 @@ getCrossProduct :: Tolerance Meters => Result String Float
 getCrossProduct = Error.context "In getCrossProduct" Result.do
   vectorDirection <-
     Vector2d.direction (Vector2d.meters 2.0 3.0)
-      |> Error.debug (\_ -> Console.printLine "Couldn't get vector direction!")
+      |> Error.debug (\_ -> IO.printLine "Couldn't get vector direction!")
       |> Error.context "When getting vector direction"
   lineDirection <-
     Direction2d.from Point2d.origin Point2d.origin
-      |> Error.debug (\_ -> Console.printLine "Couldn't get line direction!")
+      |> Error.debug (\_ -> IO.printLine "Couldn't get line direction!")
       |> Error.context "When getting line direction"
   Ok (vectorDirection >< lineDirection)
 
 testTry :: Tolerance Meters => IO ()
 testTry =
-  IO.onError Console.printLine <|
+  IO.onError IO.printLine <|
     Error.context "In testTry" IO.do
       crossProduct <- getCrossProduct
       log "Got cross product" crossProduct
@@ -172,9 +171,9 @@ testParameter1dGeneration = IO.do
   log "Random parameter value 3" t3
 
 testEmptyCheck :: List Int -> IO ()
-testEmptyCheck [] = Console.printLine "List is empty"
+testEmptyCheck [] = IO.printLine "List is empty"
 testEmptyCheck (NonEmpty nonEmpty) =
-  Console.printLine ("List is non-empty, maximum is " ++ show (NonEmpty.maximum nonEmpty))
+  IO.printLine ("List is non-empty, maximum is " ++ show (NonEmpty.maximum nonEmpty))
 
 testNonEmpty :: IO ()
 testNonEmpty = IO.do
@@ -233,8 +232,8 @@ testPlaneTorusIntersection = IO.do
   let f = x * nx + y * ny + z * nz
   zeros <- Surface1d.Function.zeros f
   drawZeros "test-plane-torus-intersection.svg" zeros
-  Console.printLine ""
-  Console.printLine "Plane torus intersection solutions:"
+  IO.printLine ""
+  IO.printLine "Plane torus intersection solutions:"
   log "  Crossing curves" (List.length (Surface1d.Function.Zeros.crossingCurves zeros))
   log "  Saddle points" (List.length (Surface1d.Function.Zeros.saddlePoints zeros))
 
@@ -294,12 +293,12 @@ drawDot colour point =
 delayedPrint :: Int -> IO ()
 delayedPrint numSeconds = IO.do
   IO.sleep (Duration.seconds (Float.fromInt numSeconds))
-  Console.printLine (String.fromInt numSeconds)
+  IO.printLine (String.fromInt numSeconds)
 
 testConcurrency :: IO ()
 testConcurrency = IO.do
-  Console.printLine "Starting concurrency test..."
-  Console.printLine "0"
+  IO.printLine "Starting concurrency test..."
+  IO.printLine "0"
   print5 <- IO.spawn (delayedPrint 5)
   print2 <- IO.spawn (delayedPrint 2)
   print3 <- IO.spawn (delayedPrint 3)
@@ -310,7 +309,7 @@ testConcurrency = IO.do
   IO.await print3
   IO.await print5
   IO.await print1
-  Console.printLine "Concurrency test complete!"
+  IO.printLine "Concurrency test complete!"
 
 computeSquareRoot :: Float -> IO Float
 computeSquareRoot value = IO.do
@@ -319,7 +318,7 @@ computeSquareRoot value = IO.do
 
 testConcurrentCollect :: IO ()
 testConcurrentCollect = IO.do
-  Console.printLine "Computing square roots with spawn and await"
+  IO.printLine "Computing square roots with spawn and await"
   let values = List.map Float.fromInt [1 .. 16]
   asyncIOs <- IO.collect (IO.spawn << computeSquareRoot) values
   squareRoots <- IO.collect IO.await asyncIOs
@@ -327,14 +326,14 @@ testConcurrentCollect = IO.do
 
 testIOParallel :: IO ()
 testIOParallel = IO.do
-  Console.printLine "Computing square roots with IO.parallel"
+  IO.printLine "Computing square roots with IO.parallel"
   let values = List.map Float.fromInt [1 .. 16]
   squareRoots <- IO.parallel computeSquareRoot values
   log "Square roots" squareRoots
 
 testParallelDo :: IO ()
 testParallelDo = IO.do
-  Console.printLine "Testing Parallel.do"
+  IO.printLine "Testing Parallel.do"
   Parallel.do
     sqrt1 <- computeSquareRoot 1.0
     sqrt4 <- computeSquareRoot 4.0

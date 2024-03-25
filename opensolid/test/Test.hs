@@ -15,16 +15,15 @@ module Test
   )
 where
 
-import Console qualified
 import Data.Foldable qualified
 import Error qualified
+import IO qualified
 import List qualified
 import OpenSolid
 import Random (Generator)
 import Random qualified
 import Result qualified
 import String qualified
-import IO  qualified
 
 data Expectation
   = Passed
@@ -70,21 +69,21 @@ testCount count description =
 
 run :: List Test -> IO ()
 run tests = IO.do
-  Console.printLine ""
-  Console.printLine "Running tests..."
-  Console.printLine ""
+  IO.printLine ""
+  IO.printLine "Running tests..."
+  IO.printLine ""
   results <- IO.collect (runImpl []) tests
   let (successes, failures) = sum results
   if failures == 0
-    then Console.printLine ("✅ " ++ testCount successes "passed")
+    then IO.printLine ("✅ " ++ testCount successes "passed")
     else IO.fail (testCount failures "failed")
 
 reportError :: List String -> List String -> IO (Int, Int)
 reportError context messages = IO.do
-  Console.printLine ("❌ " ++ (String.join " | " (List.reverse context) ++ ":"))
-  Console.printLine ""
-  IO.forEach messages (String.indent "   " >> Console.printLine)
-  Console.printLine ""
+  IO.printLine ("❌ " ++ (String.join " | " (List.reverse context) ++ ":"))
+  IO.printLine ""
+  IO.forEach messages (String.indent "   " >> IO.printLine)
+  IO.printLine ""
   IO.return (0, 1)
 
 runImpl :: List String -> Test -> IO (Int, Int)

@@ -87,7 +87,6 @@ library
       Coalesce
       Colour
       Concatenation
-      Console
       CoordinateSystem
       CubicSpline2d
       Curve1d

@@ -15,6 +15,7 @@ module IO
   , pure
   , return
   , onError
+  , printLine
   )
 where
 
@@ -102,3 +103,6 @@ sleep duration = Control.Concurrent.threadDelay (Float.round (Duration.inMicrose
 onError :: (String -> IO a) -> IO a -> IO a
 onError callback io =
   System.IO.Error.catchIOError io (\ioError -> callback (System.IO.Error.ioeGetErrorString ioError))
+
+printLine :: String -> IO ()
+printLine = Prelude.putStrLn
