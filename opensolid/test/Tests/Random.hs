@@ -16,7 +16,8 @@ import Frame2d qualified
 import Length (Length)
 import Length qualified
 import OpenSolid
-import Point2d (Point2d (Point2d))
+import Point2d qualified
+import Point2d (Point2d)
 import Random (Generator)
 import Random qualified
 import Range (Range)
@@ -32,7 +33,7 @@ lengthRange :: Generator (Range Meters)
 lengthRange = Range.generator length
 
 point2d :: Generator (Point2d (space @ Meters))
-point2d = Random.map2 Point2d length length
+point2d = Random.map2 Point2d.xy length length
 
 vectorBounds3d :: Generator (VectorBounds3d (space @ Meters))
 vectorBounds3d = Random.map3 VectorBounds3d lengthRange lengthRange lengthRange

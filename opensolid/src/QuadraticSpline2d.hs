@@ -8,7 +8,8 @@ import Bounds2d qualified
 import Curve2d (Curve2d)
 import Curve2d qualified
 import OpenSolid
-import Point2d (Point2d (Point2d))
+import Point2d (Point2d)
+import Point2d qualified
 import Range (Range (Range))
 import VectorCurve2d qualified
 
@@ -22,15 +23,18 @@ data QuadraticSpline2d (coordinateSystem :: CoordinateSystem) where
 deriving instance Show (QuadraticSpline2d (space @ units))
 
 blossom :: QuadraticSpline2d (space @ units) -> Float -> Float -> Point2d (space @ units)
-blossom (QuadraticSpline2d (Point2d x1 y1) (Point2d x2 y2) (Point2d x3 y3)) t1 t2 =
+blossom (QuadraticSpline2d p1 p2 p3) t1 t2 = do
+  let (x1, y1) = Point2d.coordinates p1
+  let (x2, y2) = Point2d.coordinates p2
+  let (x3, y3) = Point2d.coordinates p3
   let r1 = 1.0 - t1
-      r2 = 1.0 - t2
-      s1 = r1 * r2
-      s2 = r1 * t2 + t1 * r2
-      s3 = t1 * t2
-      x = s1 * x1 + s2 * x2 + s3 * x3
-      y = s1 * y1 + s2 * y2 + s3 * y3
-   in Point2d x y
+  let r2 = 1.0 - t2
+  let s1 = r1 * r2
+  let s2 = r1 * t2 + t1 * r2
+  let s3 = t1 * t2
+  let x = s1 * x1 + s2 * x2 + s3 * x3
+  let y = s1 * y1 + s2 * y2 + s3 * y3
+  Point2d.xy x y
 
 instance Curve2d.Interface (QuadraticSpline2d (space @ units)) (space @ units) where
   startPointImpl (QuadraticSpline2d p1 _ _) = p1

@@ -45,7 +45,6 @@ import List qualified
 import Maybe qualified
 import NonEmpty qualified
 import OpenSolid
-import Point2d (Point2d (Point2d))
 import Point2d qualified
 import Qty qualified
 import Range (Range (Range))
@@ -548,16 +547,16 @@ boundaryEdge :: Uv.Point -> Uv.Direction -> Curve2d Uv.Coordinates
 boundaryEdge startPoint direction = Line2d.directed startPoint direction 1.0
 
 leftEdge :: Curve2d Uv.Coordinates
-leftEdge = boundaryEdge (Point2d 0.0 0.0) Direction2d.y
+leftEdge = boundaryEdge (Point2d.xy 0.0 0.0) Direction2d.y
 
 rightEdge :: Curve2d Uv.Coordinates
-rightEdge = boundaryEdge (Point2d 1.0 0.0) Direction2d.y
+rightEdge = boundaryEdge (Point2d.xy 1.0 0.0) Direction2d.y
 
 bottomEdge :: Curve2d Uv.Coordinates
-bottomEdge = boundaryEdge (Point2d 0.0 0.0) Direction2d.x
+bottomEdge = boundaryEdge (Point2d.xy 0.0 0.0) Direction2d.x
 
 topEdge :: Curve2d Uv.Coordinates
-topEdge = boundaryEdge (Point2d 0.0 1.0) Direction2d.x
+topEdge = boundaryEdge (Point2d.xy 0.0 1.0) Direction2d.x
 
 findBoundarySolutions :: Tolerance units => Function units -> (BoundaryEdges, List BoundaryPoint)
 findBoundarySolutions f =
@@ -625,7 +624,7 @@ generalSolution ::
 generalSolution derivatives uvBounds@(Bounds2d (Range minU maxU) (Range minV maxV)) exclusions
   | List.any (overlaps uvBounds) exclusions = Nothing
   | resolved fuBounds && resolved fvBounds =
-      let signAt u v = Qty.sign (evaluateAt (Point2d u v) f)
+      let signAt u v = Qty.sign (evaluateAt (Point2d.xy u v) f)
        in Just <| Result.map (,[uvBounds]) <| case (signAt minU minV, signAt maxU minV, signAt minU maxV, signAt maxU maxV) of
             (Positive, Positive, Positive, Positive) -> Ok PartialZeros.empty
             (Negative, Negative, Negative, Negative) -> Ok PartialZeros.empty
@@ -771,7 +770,8 @@ horizontalSolution derivatives boundaryEdges boundaryPoints uvBounds exclusions
   trimmedBounds =
     case List.filter (isStrictlyInside expandedBounds) boundaryPoints of
       [] -> Just expandedBounds
-      List.One (BoundaryPoint{point = Point2d u0 _, edgeSign, rootOrder, rootSign}) ->
+      List.One (BoundaryPoint{point, edgeSign, rootOrder, rootSign}) -> do
+        let u0 = Point2d.xCoordinate point
         case (rootOrder, edgeSign, rootSign * Qty.sign fvResolution) of
           (Int.Even, Negative, Negative) -> Just (Bounds2d (Range.from u0 maxU) (Range.from minV vTop))
           (Int.Even, Negative, Positive) -> Just (Bounds2d (Range.from minU u0) (Range.from minV vTop))
@@ -826,7 +826,8 @@ verticalSolution derivatives boundaryEdges boundaryPoints uvBounds exclusions
   trimmedBounds =
     case List.filter (isStrictlyInside expandedBounds) boundaryPoints of
       [] -> Just expandedBounds
-      List.One (BoundaryPoint{point = Point2d _ v0, edgeSign, rootOrder, rootSign}) ->
+      List.One (BoundaryPoint{point, edgeSign, rootOrder, rootSign}) -> do
+        let v0 = Point2d.yCoordinate point
         case (rootOrder, edgeSign, rootSign * Qty.sign fuResolution) of
           (Int.Even, Negative, Negative) -> Just (Bounds2d (Range.from minU uRight) (Range.from v0 maxV))
           (Int.Even, Negative, Positive) -> Just (Bounds2d (Range.from minU uRight) (Range.from minV v0))
@@ -997,7 +998,7 @@ saddlePointSolution derivatives point expandedBounds =
       fuuValue = evaluateAt point fuu
       fuvValue = evaluateAt point fuv
       fvvValue = evaluateAt point fvv
-      Point2d u0 v0 = point
+      (u0, v0) = Point2d.coordinates point
       Bounds2d uRange vRange = expandedBounds
       sqrtD = Qty.sqrt_ (fuvValue .*. fuvValue - fuuValue .*. fvvValue)
       (d1, d2) =
@@ -1136,10 +1137,10 @@ instance Curve2d.Interface (HorizontalCurve units) Uv.Coordinates where
   startPointImpl = Curve2d.evaluateAtImpl 0.0
   endPointImpl = Curve2d.evaluateAtImpl 1.0
 
-  evaluateAtImpl t (HorizontalCurve{f, uStart, uEnd, vLow, vHigh}) =
+  evaluateAtImpl t (HorizontalCurve{f, uStart, uEnd, vLow, vHigh}) = do
     let u = Float.interpolateFrom uStart uEnd t
-        v = solveVertically f u vLow vHigh
-     in Point2d u v
+    let v = solveVertically f u vLow vHigh
+    Point2d.xy u v
 
   segmentBoundsImpl (Range t1 t2) (HorizontalCurve{f, dvdu, uStart, uEnd, vLow, vHigh}) =
     let u1 = Float.interpolateFrom uStart uEnd t1
@@ -1175,10 +1176,10 @@ instance Curve2d.Interface (VerticalCurve units) Uv.Coordinates where
   startPointImpl = Curve2d.evaluateAtImpl 0.0
   endPointImpl = Curve2d.evaluateAtImpl 1.0
 
-  evaluateAtImpl t (VerticalCurve{f, uLow, uHigh, vStart, vEnd}) =
+  evaluateAtImpl t (VerticalCurve{f, uLow, uHigh, vStart, vEnd}) = do
     let v = Float.interpolateFrom vStart vEnd t
-        u = solveHorizontally f uLow uHigh v
-     in Point2d u v
+    let u = solveHorizontally f uLow uHigh v
+    Point2d.xy u v
 
   segmentBoundsImpl (Range t1 t2) (VerticalCurve{f, dudv, uLow, uHigh, vStart, vEnd}) =
     let v1 = Float.interpolateFrom vStart vEnd t1
@@ -1206,7 +1207,7 @@ solveVertically f u v1 v2
   | valueAt v2 <= Qty.zero = v2
   | otherwise = bisect v1 v2
  where
-  valueAt v = evaluateAt (Point2d u v) f
+  valueAt v = evaluateAt (Point2d.xy u v) f
   bisect vLow vHigh
     | vMid == vLow || vMid == vHigh = vMid
     | fMid < Qty.zero = bisect vMid vHigh
@@ -1222,7 +1223,7 @@ solveHorizontally f u1 u2 v
   | valueAt u2 <= Qty.zero = u2
   | otherwise = bisect u1 u2
  where
-  valueAt u = evaluateAt (Point2d u v) f
+  valueAt u = evaluateAt (Point2d.xy u v) f
   bisect uLow uHigh
     | uMid == uLow || uMid == uHigh = uMid
     | fMid < Qty.zero = bisect uMid uHigh

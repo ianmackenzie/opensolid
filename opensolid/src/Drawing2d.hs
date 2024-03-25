@@ -30,7 +30,8 @@ import Length qualified
 import List qualified
 import Maybe qualified
 import OpenSolid
-import Point2d (Point2d (Point2d))
+import Point2d (Point2d)
+import Point2d qualified
 import Range (Range (Range))
 import String qualified
 import Units (Meters)
@@ -94,12 +95,14 @@ group :: List (Entity space) -> Entity space
 group = with []
 
 line :: List (Attribute space) -> Point space -> Point space -> Entity space
-line attributes (Point2d x1 y1) (Point2d x2 y2) =
+line attributes p1 p2 = do
+  let (x1, y1) = Point2d.coordinates p1
+  let (x2, y2) = Point2d.coordinates p2
   let x1Attribute = Attribute "x1" (lengthString x1)
-      y1Attribute = Attribute "y1" (lengthString -y1)
-      x2Attribute = Attribute "x2" (lengthString x2)
-      y2Attribute = Attribute "y2" (lengthString -y2)
-   in Node "line" (x1Attribute : y1Attribute : x2Attribute : y2Attribute : attributes) []
+  let y1Attribute = Attribute "y1" (lengthString -y1)
+  let x2Attribute = Attribute "x2" (lengthString x2)
+  let y2Attribute = Attribute "y2" (lengthString -y2)
+  Node "line" (x1Attribute : y1Attribute : x2Attribute : y2Attribute : attributes) []
 
 polyline :: List (Attribute space) -> List (Point space) -> Entity space
 polyline attributes vertices =
@@ -110,18 +113,21 @@ polygon attributes vertices =
   Node "polygon" (pointsAttribute vertices : attributes) []
 
 circle :: List (Attribute space) -> Point space -> Length -> Entity space
-circle attributes (Point2d cx cy) r =
+circle attributes centerPoint radius = do
+  let (cx, cy) = Point2d.coordinates centerPoint
   let cxAttribute = Attribute "cx" (lengthString cx)
-      cyAttribute = Attribute "cy" (lengthString -cy)
-      rAttribute = Attribute "r" (lengthString r)
-   in Node "circle" (cxAttribute : cyAttribute : rAttribute : attributes) []
+  let cyAttribute = Attribute "cy" (lengthString -cy)
+  let rAttribute = Attribute "r" (lengthString radius)
+  Node "circle" (cxAttribute : cyAttribute : rAttribute : attributes) []
 
 pointsAttribute :: List (Point space) -> Attribute space
 pointsAttribute givenPoints =
   Attribute "points" (String.join " " (List.map coordinatesString givenPoints))
 
 coordinatesString :: Point space -> String
-coordinatesString (Point2d x y) = lengthString x ++ "," ++ lengthString -y
+coordinatesString point = do
+  let (x, y) = Point2d.coordinates point
+  lengthString x ++ "," ++ lengthString -y
 
 lengthString :: Length -> String
 lengthString givenLength = String.fromFloat (Length.inMillimeters givenLength)

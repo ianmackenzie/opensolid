@@ -12,17 +12,15 @@ where
 
 import Bounds2d (Bounds2d (Bounds2d))
 import Bounds2d qualified
-import Direction2d (Direction2d (Direction2d))
+import Direction2d qualified
 import Float qualified
 import Frame2d (Frame2d)
 import Frame2d qualified
 import List qualified
 import OpenSolid
-import Point2d (Point2d (Point2d))
 import Point2d qualified
 import Range qualified
 import Uv qualified
-import Vector2d (Vector2d (Vector2d))
 
 type Frame = Frame2d Uv.Coordinates (Defines Uv.Space)
 
@@ -45,9 +43,9 @@ point :: SaddleRegion -> Uv.Point
 point (SaddleRegion{frame}) = Frame2d.originPoint frame
 
 isInsideRegion :: SaddleRegion -> Uv.Point -> Bool
-isInsideRegion (SaddleRegion{frame, halfWidth, halfHeight}) givenPoint =
-  let Point2d localX localY = Point2d.relativeTo frame givenPoint
-   in Float.abs localX < halfWidth && Float.abs localY < halfHeight
+isInsideRegion (SaddleRegion{frame, halfWidth, halfHeight}) givenPoint = do
+  let (localX, localY) = Point2d.coordinates (Point2d.relativeTo frame givenPoint)
+  Float.abs localX < halfWidth && Float.abs localY < halfHeight
 
 corners :: SaddleRegion -> List Uv.Point
 corners (SaddleRegion{frame, halfWidth, halfHeight}) =
@@ -58,13 +56,13 @@ corners (SaddleRegion{frame, halfWidth, halfHeight}) =
   ]
 
 bounds :: SaddleRegion -> Uv.Bounds
-bounds (SaddleRegion{frame, halfWidth, halfHeight}) =
-  let Point2d x0 y0 = Frame2d.originPoint frame
-      Direction2d (Vector2d ix iy) = Frame2d.xDirection frame
-      Direction2d (Vector2d jx jy) = Frame2d.yDirection frame
-      dx = Float.abs ix * halfWidth + Float.abs jx * halfHeight
-      dy = Float.abs iy * halfWidth + Float.abs jy * halfHeight
-   in Bounds2d (Range.from (x0 - dx) (x0 + dx)) (Range.from (y0 - dy) (y0 + dy))
+bounds (SaddleRegion{frame, halfWidth, halfHeight}) = do
+  let (x0, y0) = Point2d.coordinates (Frame2d.originPoint frame)
+  let (ix, iy) = Direction2d.components (Frame2d.xDirection frame)
+  let (jx, jy) = Direction2d.components (Frame2d.yDirection frame)
+  let dx = Float.abs ix * halfWidth + Float.abs jx * halfHeight
+  let dy = Float.abs iy * halfWidth + Float.abs jy * halfHeight
+  Bounds2d (Range.from (x0 - dx) (x0 + dx)) (Range.from (y0 - dy) (y0 + dy))
 
 includes :: Uv.Point -> SaddleRegion -> Bool
 includes givenPoint region = isInsideRegion region givenPoint

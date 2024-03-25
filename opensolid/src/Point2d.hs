@@ -1,5 +1,5 @@
 module Point2d
-  ( Point2d (Point2d)
+  ( Point2d
   , origin
   , x
   , y
@@ -158,6 +158,7 @@ xCoordinate (Point2d px _) = px
 yCoordinate :: Point2d (space @ units) -> Qty units
 yCoordinate (Point2d _ py) = py
 
+{-# INLINE coordinates #-}
 coordinates :: Point2d (space @ units) -> (Qty units, Qty units)
 coordinates (Point2d px py) = (px, py)
 
