@@ -61,22 +61,22 @@ overlappingSegments ::
   Tolerance units =>
   Curve2d (space @ units) ->
   Curve2d (space @ units) ->
-  Result String (List (Parameter.Bounds, Parameter.Bounds, Sign))
+  Result String (List (Range Unitless, Range Unitless, Sign))
 overlappingSegments curve1 curve2 =
   case Curve2d.intersections curve1 curve2 of
     Ok _ -> Error "Intersection should have failed (and given overlapping segments)"
     Error (Curve2d.CurvesOverlap segments) -> Ok segments
     Error error -> Error (Error.message error)
 
-equalUBounds :: Parameter.Bounds -> Parameter.Bounds -> Bool
+equalUBounds :: Range Unitless -> Range Unitless -> Bool
 equalUBounds (Range low1 high1) (Range low2 high2) =
   let ?tolerance = 1e-12 in low1 ~= low2 && high1 ~= high2
 
-equalOverlapSegments :: (Parameter.Bounds, Parameter.Bounds, Sign) -> (Parameter.Bounds, Parameter.Bounds, Sign) -> Bool
+equalOverlapSegments :: (Range Unitless, Range Unitless, Sign) -> (Range Unitless, Range Unitless, Sign) -> Bool
 equalOverlapSegments (t1, t2, sign) (t1', t2', sign') =
   equalUBounds t1 t1' && equalUBounds t2 t2' && sign == sign'
 
-equalOverlapSegmentLists :: List (Parameter.Bounds, Parameter.Bounds, Sign) -> List (Parameter.Bounds, Parameter.Bounds, Sign) -> Bool
+equalOverlapSegmentLists :: List (Range Unitless, Range Unitless, Sign) -> List (Range Unitless, Range Unitless, Sign) -> Bool
 equalOverlapSegmentLists segments1 segments2 =
   List.allTrue (List.map2 equalOverlapSegments segments1 segments2)
 

@@ -42,7 +42,7 @@ import Units qualified
 
 class Show curve => Interface curve units | curve -> units where
   evaluateAtImpl :: Float -> curve -> Qty units
-  segmentBoundsImpl :: Parameter.Bounds -> curve -> Range units
+  segmentBoundsImpl :: Range Unitless -> curve -> Range units
   derivativeImpl :: curve -> Curve1d units
 
 data Curve1d units where
@@ -244,7 +244,7 @@ evaluateAt tValue curve =
 pointOn :: Curve1d units -> Float -> Qty units
 pointOn curve tValue = evaluateAt tValue curve
 
-segmentBounds :: Parameter.Bounds -> Curve1d units -> Range units
+segmentBounds :: Range Unitless -> Curve1d units -> Range units
 segmentBounds tBounds curve =
   case curve of
     Curve1d c -> segmentBoundsImpl tBounds c
@@ -355,8 +355,8 @@ findRoots ::
   Stream (Curve1d units) ->
   Bisection.Tree (Stream (Range units)) ->
   Int ->
-  (List Root, List Parameter.Bounds) ->
-  (List Root, List Parameter.Bounds)
+  (List Root, List (Range Unitless)) ->
+  (List Root, List (Range Unitless))
 findRoots curve derivatives searchTree rootOrder accumulated =
   let updated =
         Bisection.solve
@@ -369,7 +369,7 @@ findRoots curve derivatives searchTree rootOrder accumulated =
         then updated
         else findRoots curve derivatives searchTree (rootOrder - 1) updated
 
-isCandidate :: Tolerance units => Int -> Parameter.Bounds -> Stream (Range units) -> Bool
+isCandidate :: Tolerance units => Int -> Range Unitless -> Stream (Range units) -> Bool
 isCandidate rootOrder _ bounds =
   let curveBounds = Stream.head bounds
       derivativeBounds = Stream.take rootOrder (Stream.tail bounds)
@@ -377,7 +377,7 @@ isCandidate rootOrder _ bounds =
       derivativesContainZero = List.all (Range.includes Qty.zero) derivativeBounds
    in curveContainsZero && derivativesContainZero
 
-resolveDerivativeSign :: Int -> Parameter.Bounds -> Stream (Range units) -> Fuzzy Sign
+resolveDerivativeSign :: Int -> Range Unitless -> Stream (Range units) -> Fuzzy Sign
 resolveDerivativeSign derivativeOrder _ bounds = resolveSign (Stream.nth derivativeOrder bounds)
 
 findRoot ::
@@ -385,7 +385,7 @@ findRoot ::
   Curve1d units ->
   Int ->
   Stream (Curve1d units) ->
-  Parameter.Bounds ->
+  Range Unitless ->
   Stream (Range units) ->
   Sign ->
   Maybe Root

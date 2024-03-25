@@ -7,7 +7,6 @@ module Curve1d
 where
 
 import OpenSolid
-import Parameter qualified
 import Range (Range)
 
 type role Curve1d nominal
@@ -16,5 +15,5 @@ type Curve1d :: Type -> Type
 data Curve1d units
 
 evaluateAt :: Float -> Curve1d units -> Qty units
-segmentBounds :: Parameter.Bounds -> Curve1d units -> Range units
+segmentBounds :: Range Unitless -> Curve1d units -> Range units
 derivative :: Curve1d units -> Curve1d units

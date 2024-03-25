@@ -113,7 +113,7 @@ segmentIsCoincidentWithPoint ::
   Tolerance units =>
   Point2d (space @ units) ->
   Curve2d (space @ units) ->
-  Parameter.Bounds ->
+  Range Unitless ->
   Fuzzy Bool
 segmentIsCoincidentWithPoint point curve domain
   | not (point ^ candidateBounds) = Resolved False
@@ -130,7 +130,7 @@ class
   startPointImpl :: curve -> Point2d coordinateSystem
   endPointImpl :: curve -> Point2d coordinateSystem
   evaluateAtImpl :: Float -> curve -> Point2d coordinateSystem
-  segmentBoundsImpl :: Parameter.Bounds -> curve -> Bounds2d coordinateSystem
+  segmentBoundsImpl :: Range Unitless -> curve -> Bounds2d coordinateSystem
   derivativeImpl :: curve -> VectorCurve2d coordinateSystem
   reverseImpl :: curve -> curve
   boundsImpl :: curve -> Bounds2d coordinateSystem
@@ -156,7 +156,7 @@ evaluateAt t (Curve curve _) = evaluateAtImpl t curve
 evaluateAt t (Coerce curve) = Units.coerce (evaluateAt t curve)
 evaluateAt t (PlaceIn frame curve) = Point2d.placeIn frame (evaluateAt t curve)
 
-segmentBounds :: Parameter.Bounds -> Curve2d (space @ units) -> Bounds2d (space @ units)
+segmentBounds :: Range Unitless -> Curve2d (space @ units) -> Bounds2d (space @ units)
 segmentBounds (Range t1 t2) (Line{startPoint = p1, endPoint = p2}) =
   Bounds2d.hull2 (Point2d.interpolateFrom p1 p2 t1) (Point2d.interpolateFrom p1 p2 t2)
 segmentBounds t (Arc p0 r a b) =

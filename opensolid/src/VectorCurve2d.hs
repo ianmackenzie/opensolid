@@ -54,7 +54,6 @@ import Frame2d qualified
 import List qualified
 import NonEmpty qualified
 import OpenSolid
-import Parameter qualified
 import Qty qualified
 import Range (Range (Range))
 import Range qualified
@@ -71,7 +70,7 @@ class
     | curve -> coordinateSystem
   where
   evaluateAtImpl :: Float -> curve -> Vector2d coordinateSystem
-  segmentBoundsImpl :: Parameter.Bounds -> curve -> VectorBounds2d coordinateSystem
+  segmentBoundsImpl :: Range Unitless -> curve -> VectorBounds2d coordinateSystem
   derivativeImpl :: curve -> VectorCurve2d coordinateSystem
 
 data VectorCurve2d (coordinateSystem :: CoordinateSystem) where
@@ -586,7 +585,7 @@ evaluateAt t curve =
     CubicSpline v1 v2 v3 v4 -> cubicBlossom v1 v2 v3 v4 t t t
     BezierCurve controlVectors -> deCasteljau t controlVectors
 
-segmentBounds :: Parameter.Bounds -> VectorCurve2d (space @ units) -> VectorBounds2d (space @ units)
+segmentBounds :: Range Unitless -> VectorCurve2d (space @ units) -> VectorBounds2d (space @ units)
 segmentBounds t@(Range tl th) curve =
   case curve of
     VectorCurve2d c -> segmentBoundsImpl t c

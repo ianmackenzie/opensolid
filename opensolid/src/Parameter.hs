@@ -1,6 +1,5 @@
 module Parameter
-  ( Bounds
-  , domain
+  ( domain
   , steps
   , generator
   , leading
@@ -16,9 +15,7 @@ import Random qualified
 import Range (Range)
 import Range qualified
 
-type Bounds = Range Unitless
-
-domain :: Bounds
+domain :: Range Unitless
 domain = Range.from 0.0 1.0
 
 steps :: Int -> List Float

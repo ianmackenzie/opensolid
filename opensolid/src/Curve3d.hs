@@ -8,8 +8,8 @@ where
 import Bounds3d (Bounds3d)
 import Bounds3d qualified
 import OpenSolid
-import Parameter qualified
 import Point3d (Point3d)
+import Range (Range)
 import VectorCurve3d (VectorCurve3d)
 import VectorCurve3d qualified
 
@@ -17,7 +17,7 @@ class Interface curve (coordinateSystem :: CoordinateSystem) | curve -> coordina
   startPointImpl :: curve -> Point3d coordinateSystem
   endPointImpl :: curve -> Point3d coordinateSystem
   evaluateImpl :: curve -> Float -> Point3d coordinateSystem
-  segmentBoundsImpl :: curve -> Parameter.Bounds -> Bounds3d coordinateSystem
+  segmentBoundsImpl :: curve -> Range Unitless -> Bounds3d coordinateSystem
   derivativeImpl :: curve -> VectorCurve3d coordinateSystem
   reverseImpl :: curve -> curve
   boundsImpl :: curve -> Bounds3d coordinateSystem

@@ -7,11 +7,11 @@ import {-# SOURCE #-} Curve1d (Curve1d)
 import {-# SOURCE #-} Curve1d qualified
 import Estimate qualified
 import OpenSolid
-import Parameter qualified
 import Qty qualified
+import Range (Range)
 import Range qualified
 
-data Integral units = Integral (Curve1d units) (Curve1d units) Parameter.Bounds
+data Integral units = Integral (Curve1d units) (Curve1d units) (Range Unitless)
 
 instance Estimate.Interface (Integral units) units where
   boundsImpl (Integral curve derivative domain) =
