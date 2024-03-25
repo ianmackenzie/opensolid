@@ -9,7 +9,6 @@ module OpenSolid
   , module Float
   , module NonEmpty
   , module Sign
-  , module Task
   , module CoordinateSystem
   , module Tolerance
   , module Fuzzy
@@ -33,6 +32,5 @@ import NonEmpty (NonEmpty ((:|)), (|:), pattern NonEmpty)
 import Qty (Qty (Qty))
 import Result (Result (Error, Ok))
 import Sign (Sign (Negative, Positive))
-import Task (Task)
 import Tolerance (ApproximateEquality ((~=)), Tolerance, exactly, (!=))
 import Units (HasUnits (Units), Radians, Unitless, (:*:), (:/:))

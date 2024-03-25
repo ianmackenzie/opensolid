@@ -29,6 +29,7 @@ where
 
 import Array qualified
 import Control.Monad (join)
+import IO qualified
 import Maybe qualified
 import OpenSolid hiding (pure, return)
 import Pair qualified
@@ -36,7 +37,6 @@ import Qty (Qty (Qty_))
 import System.Random (StdGen)
 import System.Random qualified
 import System.Random.Stateful qualified
-import Task qualified
 import Prelude (Applicative, Functor, Monad)
 import Prelude qualified
 
@@ -90,10 +90,9 @@ step generator (Seed stdGen) =
   let (generatedValue, updatedStdGen) = run generator stdGen
    in (generatedValue, Seed updatedStdGen)
 
-generate :: Generator a -> Task a
+generate :: Generator a -> IO a
 generate generator =
-  Task.fromIO <|
-    System.Random.Stateful.applyAtomicGen (run generator) System.Random.Stateful.globalStdGen
+  System.Random.Stateful.applyAtomicGen (run generator) System.Random.Stateful.globalStdGen
 
 map :: (a -> b) -> Generator a -> Generator b
 map function (Generator generator) = Generator (generator >> Pair.mapFirst function)

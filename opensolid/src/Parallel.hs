@@ -12,31 +12,26 @@ where
 
 import Control.Concurrent.Async qualified as Async
 import Control.Monad (join)
+import IO qualified
 import OpenSolid hiding (pure, return, (>>))
 import Pair qualified
-import Task qualified
 import Prelude (fmap)
 
-pure :: a -> Task a
-pure = Task.pure
+pure :: a -> IO a
+pure = IO.pure
 
-return :: a -> Task a
-return = Task.return
+return :: a -> IO a
+return = IO.return
 
-fail :: String -> Task a
-fail = Task.fail
+fail :: String -> IO a
+fail = IO.fail
 
-(>>=) :: Task.Bind m => m a -> (a -> Task b) -> Task b
-(>>=) = (Task.>>=)
+(>>=) :: IO.Bind m => m a -> (a -> IO b) -> IO b
+(>>=) = (IO.>>=)
 
-(>>) :: Task a -> Task b -> Task b
-task1 >> task2 =
-  Task.fromIO <|
-    Prelude.fmap Pair.second <|
-      Async.concurrently (Task.toIO task1) (Task.toIO task2)
+(>>) :: IO a -> IO b -> IO b
+io1 >> io2 = Prelude.fmap Pair.second (Async.concurrently io1 io2)
 
-(<*>) :: Task (a -> b) -> Task a -> Task b
-functionTask <*> valueTask =
-  Task.fromIO <|
-    Prelude.fmap (\(function, value) -> function value) <|
-      Async.concurrently (Task.toIO functionTask) (Task.toIO valueTask)
+(<*>) :: IO (a -> b) -> IO a -> IO b
+functionIO <*> valueIO =
+  Prelude.fmap (\(function, value) -> function value) (Async.concurrently functionIO valueIO)

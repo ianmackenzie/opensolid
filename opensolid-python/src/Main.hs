@@ -1,5 +1,6 @@
 module Main (main) where
 
+import IO qualified
 import List qualified
 import Maybe qualified
 import OpenSolid
@@ -17,7 +18,6 @@ import String qualified
 import System.Exit qualified as SE
 import System.IO qualified as SIO
 import System.Process qualified as SP
-import Task qualified
 
 setup :: List PY.Statement
 setup =
@@ -286,14 +286,13 @@ apiException mod (ExceptionClass name [(tag, constructorName, Nothing)])
 apiException _ ex = internalError (show ex)
 
 main :: IO ()
-main =
-  Task.toIO <| Task.do
-    let pythonCode = PY.prettyStatements (setup ++ api openSolidAPI)
-    let ruffCmd = SP.proc "ruff" ["format", "--stdin-filename", "opensolid.py", "--quiet"]
-    (Just stdinHandle, _, _, process) <- Task.fromIO (SP.createProcess ruffCmd{SP.std_in = SP.CreatePipe})
-    Task.fromIO (SIO.hPutStr stdinHandle pythonCode)
-    Task.fromIO (SIO.hClose stdinHandle)
-    ruffExitCode <- Task.fromIO (SP.waitForProcess process)
-    if ruffExitCode == SE.ExitSuccess
-      then Task.succeed ()
-      else Task.fail "Error when running Ruff"
+main = IO.do
+  let pythonCode = PY.prettyStatements (setup ++ api openSolidAPI)
+  let ruffCmd = SP.proc "ruff" ["format", "--stdin-filename", "opensolid.py", "--quiet"]
+  (Just stdinHandle, _, _, process) <- SP.createProcess ruffCmd{SP.std_in = SP.CreatePipe}
+  SIO.hPutStr stdinHandle pythonCode
+  SIO.hClose stdinHandle
+  ruffExitCode <- SP.waitForProcess process
+  if ruffExitCode == SE.ExitSuccess
+    then IO.return ()
+    else IO.fail "Error when running Ruff"

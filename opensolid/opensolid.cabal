@@ -111,6 +111,7 @@ library
       Fuzzy
       Int
       Intersects
+      IO
       Length
       Line2d
       Line3d
@@ -137,7 +138,6 @@ library
       Surface1d
       Surface1d.Function
       Surface1d.Function.Zeros
-      Task
       Tolerance
       Transform2d
       Units

@@ -3,7 +3,7 @@ module Debug
   , log
   , intercept
   , assert
-  , task
+  , io
   , sequence
   )
 where
@@ -13,8 +13,6 @@ import Concatenation
 import Control.Exception (assert)
 import Debug.Trace qualified
 import System.IO.Unsafe qualified
-import {-# SOURCE #-} Task (Task)
-import {-# SOURCE #-} Task qualified
 import Prelude qualified
 
 trace :: String -> a -> a
@@ -26,10 +24,10 @@ log label value = trace (label ++ ": " ++ show value)
 intercept :: Show a => String -> a -> a
 intercept label value = log label value value
 
-task :: Task () -> a -> a
-task debugTask value =
+io :: IO () -> a -> a
+io debugIO value =
   System.IO.Unsafe.unsafePerformIO Prelude.do
-    Task.toIO debugTask
+    debugIO
     Prelude.return value
 
 sequence :: List (a -> a) -> a -> a

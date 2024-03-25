@@ -2,7 +2,6 @@ module Main (main) where
 
 import Length qualified
 import OpenSolid
-import Task qualified
 import Test (Test)
 import Test qualified
 import Tests.Arc2d qualified
@@ -49,4 +48,4 @@ tests =
   ?tolerance = Length.meters 1e-9
 
 main :: IO ()
-main = Task.toIO (Test.run tests)
+main = Test.run tests

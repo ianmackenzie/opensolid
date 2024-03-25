@@ -24,7 +24,7 @@ import Random (Generator)
 import Random qualified
 import Result qualified
 import String qualified
-import Task qualified
+import IO  qualified
 
 data Expectation
   = Passed
@@ -39,8 +39,8 @@ instance a ~ a' => Bind (Generator a) a' (Generator b) where
 instance a ~ a' => Bind (Result x a) a' (Result x b) where
   (>>=) = (Result.>>=)
 
-instance a ~ a' => Bind (Task a) a' (Task b) where
-  (>>=) = (Task.>>=)
+instance a ~ a' => Bind (IO a) a' (IO b) where
+  (>>=) = (IO.>>=)
 
 instance a ~ a' => Bind (Result x a) a' Expectation where
   Ok value >>= f = f value
@@ -68,28 +68,28 @@ testCount count description =
   let pluralized = if count == 1 then "test" else "tests"
    in String.join " " [String.fromInt count, pluralized, description]
 
-run :: List Test -> Task ()
-run tests = Task.do
+run :: List Test -> IO ()
+run tests = IO.do
   Console.printLine ""
   Console.printLine "Running tests..."
   Console.printLine ""
-  results <- Task.collect (runImpl []) tests
+  results <- IO.collect (runImpl []) tests
   let (successes, failures) = sum results
   if failures == 0
     then Console.printLine ("✅ " ++ testCount successes "passed")
-    else Task.fail (testCount failures "failed")
+    else IO.fail (testCount failures "failed")
 
-reportError :: List String -> List String -> Task (Int, Int)
-reportError context messages = Task.do
+reportError :: List String -> List String -> IO (Int, Int)
+reportError context messages = IO.do
   Console.printLine ("❌ " ++ (String.join " | " (List.reverse context) ++ ":"))
   Console.printLine ""
-  Task.forEach messages (String.indent "   " >> Console.printLine)
+  IO.forEach messages (String.indent "   " >> Console.printLine)
   Console.printLine ""
-  Task.succeed (0, 1)
+  IO.return (0, 1)
 
-runImpl :: List String -> Test -> Task (Int, Int)
+runImpl :: List String -> Test -> IO (Int, Int)
 runImpl context (Check count label generator) = fuzzImpl (label : context) count generator
-runImpl context (Group label tests) = Task.collect (runImpl (label : context)) tests |> Task.map sum
+runImpl context (Group label tests) = IO.collect (runImpl (label : context)) tests |> IO.map sum
 
 sum :: List (Int, Int) -> (Int, Int)
 sum [] = (0, 0)
@@ -97,9 +97,9 @@ sum ((successes, failures) : rest) =
   let (restSuccesses, restFailures) = sum rest
    in (successes + restSuccesses, failures + restFailures)
 
-fuzzImpl :: List String -> Int -> Generator Expectation -> Task (Int, Int)
-fuzzImpl _ 0 _ = Task.succeed (1, 0)
-fuzzImpl context n generator = Task.do
+fuzzImpl :: List String -> Int -> Generator Expectation -> IO (Int, Int)
+fuzzImpl _ 0 _ = IO.return (1, 0)
+fuzzImpl context n generator = IO.do
   expectation <- Random.generate generator
   case expectation of
     Passed -> fuzzImpl context (n - 1) generator

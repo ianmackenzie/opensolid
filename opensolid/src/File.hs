@@ -7,14 +7,13 @@ where
 
 import OpenSolid
 import System.Directory
-import Task qualified
 import Prelude qualified
 
-readFrom :: String -> Task String
-readFrom path = Task.fromIO (Prelude.readFile path)
+readFrom :: String -> IO String
+readFrom = Prelude.readFile
 
-writeTo :: String -> String -> Task ()
-writeTo path string = Task.fromIO (Prelude.writeFile path string)
+writeTo :: String -> String -> IO ()
+writeTo = Prelude.writeFile
 
-delete :: String -> Task ()
-delete path = Task.fromIO (System.Directory.removeFile path)
+delete :: String -> IO ()
+delete = System.Directory.removeFile

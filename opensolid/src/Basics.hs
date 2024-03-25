@@ -15,6 +15,7 @@ module Basics
   , (&&)
   , (||)
   , IO
+  , Async
   , Maybe (Just, Nothing)
   , Type
   , identity
@@ -32,6 +33,7 @@ module Basics
   )
 where
 
+import Control.Concurrent.Async (Async)
 import Data.Kind (Type)
 import Data.Type.Equality (type (~))
 import GHC.Stack (HasCallStack, withFrozenCallStack)
