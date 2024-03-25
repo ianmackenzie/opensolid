@@ -336,17 +336,15 @@ data ZeroEverywhere = ZeroEverywhere deriving (Eq, Show, Error)
 zeros :: Tolerance units => Curve1d units -> Result ZeroEverywhere (List Root)
 zeros (Constant value) = if value ~= Qty.zero then Error ZeroEverywhere else Ok []
 zeros curve | isZero curve = Error ZeroEverywhere
-zeros curve =
+zeros curve = do
   let (root0, x0) = solveEndpoint curve 0.0
-      (root1, x1) = solveEndpoint curve 1.0
-      derivatives = Stream.iterate curve derivative
-      searchTree = Bisection.tree (\domain -> Stream.map (segmentBounds domain) derivatives)
-      endpointRoots = root0 ++ root1
-      endpointExclusions = [Range.from 0.0 x0, Range.from x1 1.0]
-      (allRoots, _) =
-        (endpointRoots, endpointExclusions)
-          |> findRoots curve derivatives searchTree maxRootOrder
-   in Ok (List.sortBy Root.value allRoots)
+  let (root1, x1) = solveEndpoint curve 1.0
+  let derivatives = Stream.iterate curve derivative
+  let searchTree = Bisection.tree (\domain -> Stream.map (segmentBounds domain) derivatives)
+  let endpointRoots = root0 ++ root1
+  let endpointExclusions = [Range.from 0.0 x0, Range.from x1 1.0]
+  let (allRoots, _) = findRoots curve derivatives searchTree maxRootOrder (endpointRoots, endpointExclusions)
+  Ok (List.sortBy Root.value allRoots)
 
 findRoots ::
   Tolerance units =>
