@@ -66,7 +66,7 @@ larger =
       |> Test.output "largerRange" largerRange
 
 valueInRange :: Generator (Length, Range Meters)
-valueInRange = Test.do
+valueInRange = Random.do
   range <- Range.generator Random.length
   t <- Parameter.generator
   let value = Range.interpolate range t
