@@ -22,30 +22,19 @@ import List qualified
 import OpenSolid
 import Random (Generator)
 import Random qualified
-import Result qualified
 import String qualified
 
 data Expectation
   = Passed
   | Failed (List String)
 
-class Bind a b c where
-  (>>=) :: a -> (b -> c) -> c
+class Bind m where
+  (>>=) :: m a -> (a -> Generator Expectation) -> Generator Expectation
 
-instance a ~ a' => Bind (Generator a) a' (Generator b) where
+instance Bind Generator where
   (>>=) = (Random.>>=)
 
-instance a ~ a' => Bind (Result x a) a' (Result x b) where
-  (>>=) = (Result.>>=)
-
-instance a ~ a' => Bind (IO a) a' (IO b) where
-  (>>=) = (IO.>>=)
-
-instance a ~ a' => Bind (Result x a) a' Expectation where
-  Ok value >>= f = f value
-  Error error >>= _ = Failed [Error.message error]
-
-instance a ~ a' => Bind (Result x a) a' (Generator Expectation) where
+instance Bind (Result x) where
   Ok value >>= f = f value
   Error error >>= _ = Random.return (Failed [Error.message error])
 
