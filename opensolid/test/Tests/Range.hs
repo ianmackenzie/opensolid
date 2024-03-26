@@ -4,12 +4,12 @@ import Float qualified
 import Length (Length)
 import NonEmpty qualified
 import OpenSolid
+import Parameter qualified
 import Qty qualified
 import Random (Generator)
 import Random qualified
 import Range (Range)
 import Range qualified
-import Parameter qualified
 import Test (Test)
 import Test qualified
 import Tests.Random qualified as Random
