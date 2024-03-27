@@ -434,7 +434,6 @@ main = IO.do
   testLineFromEndpoints
   testDirectedLine
   testArcFromEndpoints
-  testPlaneTorusIntersection
   testBezierSegment
   testHermiteBezier
   testPlaneTorusIntersection
