@@ -19,7 +19,7 @@ angleFrom =
     ]
  where
   testCase startDegrees endDegrees expectedDegrees =
-    Test.check 1 "angleFrom" do
+    Test.verify "angleFrom" do
       let startDirection = Direction2d.degrees startDegrees
       let endDirection = Direction2d.degrees endDegrees
       let computedAngle = Direction2d.angleFrom startDirection endDirection

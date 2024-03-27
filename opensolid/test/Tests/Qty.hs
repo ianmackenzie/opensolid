@@ -25,15 +25,13 @@ xMagnitude :: Point2d (space @ units) -> Qty units
 xMagnitude point = Qty.abs (Point2d.xCoordinate point)
 
 smallestBy :: Test
-smallestBy =
-  Test.check 100 "smallestBy" <| Test.do
-    points <- pointListGenerator
-    let smallest = Qty.smallestBy Point2d.xCoordinate points
-    Test.expect (NonEmpty.all (\point -> xMagnitude point >= xMagnitude smallest) points)
+smallestBy = Test.check 100 "smallestBy" Test.do
+  points <- pointListGenerator
+  let smallest = Qty.smallestBy Point2d.xCoordinate points
+  Test.expect (NonEmpty.all (\point -> xMagnitude point >= xMagnitude smallest) points)
 
 largestBy :: Test
-largestBy =
-  Test.check 100 "largestBy" <| Test.do
-    points <- pointListGenerator
-    let largest = Qty.largestBy Point2d.xCoordinate points
-    Test.expect (NonEmpty.all (\point -> xMagnitude point <= xMagnitude largest) points)
+largestBy = Test.check 100 "largestBy" Test.do
+  points <- pointListGenerator
+  let largest = Qty.largestBy Point2d.xCoordinate points
+  Test.expect (NonEmpty.all (\point -> xMagnitude point <= xMagnitude largest) points)

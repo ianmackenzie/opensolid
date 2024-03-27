@@ -1,8 +1,8 @@
 module Tests.Parameter (tests) where
 
 import OpenSolid
-import String qualified
 import Parameter qualified
+import String qualified
 import Test (Test)
 import Test qualified
 
@@ -17,7 +17,7 @@ tests =
 
 check :: (Int -> List Float) -> Int -> List Float -> Test
 check function n expected =
-  Test.verify (String.fromInt n) <| Test.do
+  Test.verify (String.fromInt n) Test.do
     Test.expect (function n == expected)
       |> Test.output "expected" expected
       |> Test.output "actual" (function n)
