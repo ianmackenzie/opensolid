@@ -385,10 +385,7 @@ testHermiteBezier = IO.do
   let startDerivatives = [Vector2d.meters 10.0 10.0]
   let endDerivatives = [Vector2d.meters 0.0 -10.0, Vector2d.zero]
   let endPoint = Point2d.meters 10.0 0.0
-  curve <-
-    BezierCurve2d.hermite
-      (startPoint, startDerivatives)
-      (endPoint, endDerivatives)
+  curve <- BezierCurve2d.hermite (startPoint, startDerivatives) (endPoint, endDerivatives)
   let curveFirstDerivative = Curve2d.derivative curve
   let curveSecondDerivative = VectorCurve2d.derivative curveFirstDerivative
   let curveThirdDerivative = VectorCurve2d.derivative curveSecondDerivative
@@ -399,12 +396,11 @@ testHermiteBezier = IO.do
   log "End second derivative" (VectorCurve2d.evaluateAt 1.0 curveSecondDerivative)
   log "End third derivative" (VectorCurve2d.evaluateAt 1.0 curveThirdDerivative)
   let sampledPoints = [Curve2d.evaluateAt t curve | t <- Parameter.steps 100]
-  let curveEntity =
-        Drawing2d.polyline
-          [ Drawing2d.strokeColour Colour.blue
-          , Drawing2d.strokeWidth (Length.centimeters 3.0)
-          ]
-          sampledPoints
+  let curveAttributes =
+        [ Drawing2d.strokeColour Colour.blue
+        , Drawing2d.strokeWidth (Length.centimeters 3.0)
+        ]
+  let curveEntity = Drawing2d.polyline curveAttributes sampledPoints
   let coordinateRange = Range.from (Length.meters -1.0) (Length.meters 11.0)
   let drawingBounds = Bounds2d coordinateRange coordinateRange
   Drawing2d.writeTo "test-hermite-bezier.svg" drawingBounds [curveEntity]
