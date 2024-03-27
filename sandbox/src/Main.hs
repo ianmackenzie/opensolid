@@ -232,7 +232,6 @@ testPlaneTorusIntersection = IO.do
   let f = x * nx + y * ny + z * nz
   zeros <- Surface1d.Function.zeros f
   drawZeros "test-plane-torus-intersection.svg" zeros
-  IO.printLine ""
   IO.printLine "Plane torus intersection solutions:"
   log "  Crossing curves" (List.length (Surface1d.Function.Zeros.crossingCurves zeros))
   log "  Saddle points" (List.length (Surface1d.Function.Zeros.saddlePoints zeros))
