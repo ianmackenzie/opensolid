@@ -66,8 +66,8 @@ toSvg (Bounds2d (Range x1 x2) (Range y1 y2)) entities =
         , Attribute "version" "1.1"
         , Attribute "width" (lengthString width ++ "mm")
         , Attribute "height" (lengthString height ++ "mm")
-        , Attribute "viewBox" <|
-            String.join " " <|
+        , Attribute "viewBox" $
+            String.join " " $
               [ lengthString x1
               , lengthString -y2
               , lengthString width

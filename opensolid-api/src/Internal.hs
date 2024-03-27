@@ -62,7 +62,7 @@ apiClass :: Class -> TH.Q TH.Exp
 apiClass (Class name representationProps errors functions) = Prelude.do
   apiFns <- Prelude.traverse apiFunction functions
   apiExceptions <- Prelude.fmap List.concat (Prelude.traverse apiException errors)
-  Prelude.return <|
+  Prelude.return $
     TH.ConE 'Api.Class
       `TH.AppE` TH.LitE (TH.StringL (TH.nameBase name))
       `TH.AppE` TH.ListE (List.map apiName representationProps)
@@ -88,7 +88,7 @@ apiExceptionConstructors typeName = Prelude.do
 
 apiExceptionConstructor :: Int -> TH.Con -> TH.Q TH.Exp
 apiExceptionConstructor idx (TH.NormalC name []) = Prelude.do
-  Prelude.return <|
+  Prelude.return $
     TH.TupE
       [ Just (TH.LitE (TH.IntegerL (fromIntegral (idx + 1))))
       , Just (TH.LitE (TH.StringL (TH.nameBase name)))
@@ -96,7 +96,7 @@ apiExceptionConstructor idx (TH.NormalC name []) = Prelude.do
       ]
 apiExceptionConstructor idx (TH.NormalC name [(_, typ)]) = Prelude.do
   apiTyp <- apiType typ
-  Prelude.return <|
+  Prelude.return $
     TH.TupE
       [ Just (TH.LitE (TH.IntegerL (fromIntegral (idx + 1))))
       , Just (TH.LitE (TH.StringL (TH.nameBase name)))
@@ -139,7 +139,7 @@ apiFunction (Function kind fnName argNames) = Prelude.do
             ]
         )
     else
-      Prelude.return <|
+      Prelude.return $
         TH.ConE 'Api.Function
           `TH.AppE` TH.ConE kind
           `TH.AppE` TH.LitE (TH.StringL (camelToSnake (ffiFunctionName fnName))) -- ffi name
@@ -264,7 +264,7 @@ ffiArgInfo typ = Prelude.do
         ( TH.VarP argName -- arg name
         , TH.AppT (TH.ConT ''Foreign.Ptr) (TH.ConT ''()) -- arg type
         , TH.VarE unwrappedName -- unwrapped pointer value
-        , Just <|
+        , Just $
             -- unwrappedName <- fromVoidPtr argName
             TH.BindS
               (TH.VarP unwrappedName)
@@ -281,7 +281,7 @@ ffiArgInfo typ = Prelude.do
 ffiReturnInfo :: TH.Exp -> TH.Type -> TH.Q (TH.Exp, TH.Type)
 ffiReturnInfo expr typ = Prelude.do
   isPtr <- isPointer typ
-  Prelude.return <|
+  Prelude.return $
     if isPtr
       then
         ( TH.AppE (TH.VarE 'Pointers.toVoidPtr) expr

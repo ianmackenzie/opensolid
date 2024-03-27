@@ -289,7 +289,7 @@ wrap :: Interface function units => function -> Function units
 wrap = Function
 
 squared :: Units.Squared units1 units2 => Function units1 -> Function units2
-squared = Units.specialize << squared_
+squared = Units.specialize . squared_
 
 squared_ :: Function units -> Function (units :*: units)
 squared_ Zero = Zero

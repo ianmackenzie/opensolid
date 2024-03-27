@@ -13,7 +13,7 @@ tests =
 
 angleFrom :: Test
 angleFrom =
-  Test.group "angleFrom" <|
+  Test.group "angleFrom" $
     [ testCase 10.0 30.0 20.0
     , testCase 10.0 350.0 -20.0
     ]

@@ -14,28 +14,28 @@ tests =
 
 intDiv :: Test
 intDiv =
-  Test.group "Int //" <|
+  Test.group "Int //" $
     [ Test.verify "10 // 3" (Test.expect (10 // 3 == 3))
     , Test.verify "-10 // 3" (Test.expect (-10 // 3 == -4))
     ]
 
 intMod :: Test
 intMod =
-  Test.group "Int %" <|
+  Test.group "Int %" $
     [ Test.verify "10 % 3" (Test.expect (10 % 3 == 1))
     , Test.verify "-10 % 3" (Test.expect (-10 % 3 == 2))
     ]
 
 floatDiv :: Test
 floatDiv =
-  Test.group "Float //" <|
+  Test.group "Float //" $
     [ Test.verify "1.7 // 0.5" (Test.expect (1.7 // 0.5 == 3))
     , Test.verify "-1.7 // 0.5" (Test.expect (-1.7 // 0.5 == -4))
     ]
 
 floatMod :: Test
 floatMod =
-  Test.group "Float %" <|
+  Test.group "Float %" $
     [ Test.verify "1.7 % 0.5" (Test.expect (1.7 % 0.5 ~= 0.2))
     , Test.verify "-1.7 % 0.5" (Test.expect (-1.7 % 0.5 ~= 0.3))
     ]

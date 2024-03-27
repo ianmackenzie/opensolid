@@ -361,7 +361,7 @@ components :: VectorBounds2d (space @ units) -> (Range units, Range units)
 components (VectorBounds2d vx vy) = (vx, vy)
 
 squaredMagnitude :: Units.Squared units1 units2 => VectorBounds2d (space @ units1) -> Range units2
-squaredMagnitude = Units.specialize << squaredMagnitude_
+squaredMagnitude = Units.specialize . squaredMagnitude_
 
 squaredMagnitude_ :: VectorBounds2d (space @ units) -> Range (units :*: units)
 squaredMagnitude_ (VectorBounds2d x y) = Range.squared_ x + Range.squared_ y
@@ -376,7 +376,7 @@ maxMagnitude (VectorBounds2d (Range minX maxX) (Range minY maxY)) =
    in Qty.hypot2 xMagnitude yMagnitude
 
 maxSquaredMagnitude :: Units.Squared units1 units2 => VectorBounds2d (space @ units1) -> Qty units2
-maxSquaredMagnitude = Units.specialize << maxSquaredMagnitude_
+maxSquaredMagnitude = Units.specialize . maxSquaredMagnitude_
 
 maxSquaredMagnitude_ :: VectorBounds2d (space @ units) -> Qty (units :*: units)
 maxSquaredMagnitude_ (VectorBounds2d (Range minX maxX) (Range minY maxY)) =

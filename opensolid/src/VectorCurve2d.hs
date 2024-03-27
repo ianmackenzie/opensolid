@@ -536,7 +536,7 @@ segmentControlVectors ::
   NonEmpty (Vector2d (space @ units)) ->
   NonEmpty (Vector2d (space @ units))
 segmentControlVectors a b controlVectors =
-  NonEmpty.map (segmentControlVector a b controlVectors) <|
+  NonEmpty.map (segmentControlVector a b controlVectors) $
     NonEmpty.range 0 (NonEmpty.length controlVectors - 1)
 
 segmentControlVector ::

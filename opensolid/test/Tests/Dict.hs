@@ -30,7 +30,7 @@ foldr = Test.verify "foldr" Test.do
 
 take :: Test
 take =
-  Test.group "take" <|
+  Test.group "take" $
     [ Test.verify "exists" Test.do
         let actual = Dict.take 2 simpleDict
         let expected = (Just "b", Dict.fromList [(1, "a"), (3, "c")])

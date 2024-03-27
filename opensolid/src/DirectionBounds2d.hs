@@ -243,7 +243,7 @@ hull2 ::
   Direction2d space ->
   DirectionBounds2d space
 hull2 direction1 direction2 =
-  DirectionBounds2d <|
+  DirectionBounds2d $
     VectorBounds2d.hull2
       (Direction2d.unitVector direction1)
       (Direction2d.unitVector direction2)
@@ -254,7 +254,7 @@ hull3 ::
   Direction2d space ->
   DirectionBounds2d space
 hull3 direction1 direction2 direction3 =
-  DirectionBounds2d <|
+  DirectionBounds2d $
     VectorBounds2d.hull3
       (Direction2d.unitVector direction1)
       (Direction2d.unitVector direction2)
@@ -267,7 +267,7 @@ hull4 ::
   Direction2d space ->
   DirectionBounds2d space
 hull4 direction1 direction2 direction3 direction4 =
-  DirectionBounds2d <|
+  DirectionBounds2d $
     VectorBounds2d.hull4
       (Direction2d.unitVector direction1)
       (Direction2d.unitVector direction2)

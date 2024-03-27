@@ -24,13 +24,13 @@ from = do
           arc <- Arc2d.swept angle Point2d.origin (Point2d.meters 1.0 1.0)
           Test.expect (Curve2d.evaluateAt 0.5 arc ~= expectedPoint)
       invSqrt2 = 1.0 / Float.sqrt 2.0
-  Test.group "from" <|
-    [ test "90 degrees CCW" Angle.quarterTurn <|
+  Test.group "from" $
+    [ test "90 degrees CCW" Angle.quarterTurn $
         Point2d.meters invSqrt2 (1.0 - invSqrt2)
-    , test "90 degrees CW" -Angle.quarterTurn <|
+    , test "90 degrees CW" -Angle.quarterTurn $
         Point2d.meters (1.0 - invSqrt2) invSqrt2
-    , test "180 degrees CCW" Angle.halfTurn <|
+    , test "180 degrees CCW" Angle.halfTurn $
         Point2d.meters 1.0 0.0
-    , test "180 degrees CW" -Angle.halfTurn <|
+    , test "180 degrees CW" -Angle.halfTurn $
         Point2d.meters 0.0 1.0
     ]

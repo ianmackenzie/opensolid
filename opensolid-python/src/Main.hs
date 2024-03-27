@@ -113,7 +113,7 @@ api (Api classes) =
 
 apiClass :: Class -> PY.Statement
 apiClass (Class clsName representationProps errorClasses functions) =
-  PY.cls clsName [] <|
+  PY.cls clsName [] $
     List.concat
       [ [constructor, destructor, representation]
       , List.collect apiFunction functions
@@ -121,15 +121,15 @@ apiClass (Class clsName representationProps errorClasses functions) =
       ]
  where
   constructor =
-    PY.def "__init__" [selfPyArg, ("ptr", Just (PY.var "c_void_p"), Nothing)] Nothing <|
+    PY.def "__init__" [selfPyArg, ("ptr", Just (PY.var "c_void_p"), Nothing)] Nothing $
       [PY.set (PY.var "self" `PY.dot` "ptr") (PY.var "ptr")]
 
   destructor =
-    PY.def "__del__" [selfPyArg] Nothing <|
+    PY.def "__del__" [selfPyArg] Nothing $
       [PY.stmtExpr (PY.call (PY.var "lib" `PY.dot` "opensolid_free_stable") [PY.var "self" `PY.dot` "ptr"])]
 
   representation =
-    PY.def "__repr__" [selfPyArg] (Just (PY.var "str")) <|
+    PY.def "__repr__" [selfPyArg] (Just (PY.var "str")) $
       [ PY.returnStatement
           ( List.foldl
               PY.plus
@@ -150,7 +150,7 @@ apiFunction (Function kind ffiName pyName args retType) =
     PY.set (libName `PY.dot` "restype") (cType retType)
   , case kind of
       Static ->
-        PY.staticmethod <|
+        PY.staticmethod $
           PY.def
             pyName
             -- "tolerance" is the last arg
@@ -263,7 +263,7 @@ apiException :: String -> ExceptionClass -> List PY.Statement
 apiException mod (ExceptionClass name [(tag, constructorName, Nothing)])
   | name == constructorName =
       let retTyp = PY.var mod `PY.dot` name
-       in [ PY.cls name [PY.var "Exception"] <|
+       in [ PY.cls name [PY.var "Exception"] $
               [ PY.staticmethod
                   ( PY.def
                       "from_tag"

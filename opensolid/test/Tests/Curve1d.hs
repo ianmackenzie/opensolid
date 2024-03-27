@@ -47,13 +47,13 @@ approximateEquality = do
   let sinTheta = Curve1d.sin theta
   let cosTheta = Curve1d.cos theta
   let sumOfSquares = Curve1d.squared sinTheta + Curve1d.squared cosTheta
-  Test.group "Approximate equality" <|
-    [ Test.verify "sin(x) != cos(x)" <|
+  Test.group "Approximate equality" $
+    [ Test.verify "sin(x) != cos(x)" $
         Test.expect (sinTheta != cosTheta)
-    , Test.verify "sin(x) ~= cos(pi/2 - x)" <|
+    , Test.verify "sin(x) ~= cos(pi/2 - x)" $
         Test.expect (sinTheta ~= Curve1d.cos (Angle.degrees 90.0 - theta))
-    , Test.verify "sin^2(x) + cos^2(x) ~= 1.0" <|
+    , Test.verify "sin^2(x) + cos^2(x) ~= 1.0" $
         Test.expect (sumOfSquares ~= 1.0)
-    , Test.verify "sin^2(x) + cos^2(x) != 2.0" <|
+    , Test.verify "sin^2(x) + cos^2(x) != 2.0" $
         Test.expect (sumOfSquares != 2.0)
     ]

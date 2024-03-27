@@ -23,7 +23,7 @@ import Angle (Angle)
 import Arithmetic
 import Basics
 import Coalesce (Coalesce ((??)))
-import Composition (Composition ((>>)), (<<))
+import Composition (Composition ((>>)))
 import Concatenation (Concatenation ((++)))
 import CoordinateSystem (CoordinateSystem, Defines, LocalSpace, type (@))
 import Error (Error)

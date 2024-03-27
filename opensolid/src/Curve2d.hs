@@ -170,7 +170,7 @@ findEndpointParameterValues ::
   Curve2d (space @ units) ->
   List (Float, Float)
 findEndpointParameterValues curve1 curve2 =
-  List.sortAndDeduplicate <|
+  List.sortAndDeduplicate $
     List.concat
       [ List.map (0.0,) (find (startPoint curve1) curve2)
       , List.map (1.0,) (find (endPoint curve1) curve2)
@@ -238,7 +238,7 @@ findEndpointIntersection derivatives1 derivatives2 t1t2 searchTree1 searchTree2 
   let intersectionType = Derivatives.classify t1t2 derivatives1 derivatives2
   let (kind, sign) = intersectionType
   let (t1, t2) = t1t2
-  Ok <|
+  Ok $
     Bisection.solve2
       (Segment.isEndpointIntersectionCandidate t1t2)
       (Segment.endpointIntersectionResolved intersectionType)
@@ -295,4 +295,4 @@ curvature_ curve = do
   (tangentDirection curve >< secondDerivative) !/!. (firstDerivative .<>. firstDerivative)
 
 curvature :: Units.Quotient Unitless units1 units2 => Curve2d (space @ units1) -> Curve1d units2
-curvature = Units.specialize << curvature_
+curvature = Units.specialize . curvature_

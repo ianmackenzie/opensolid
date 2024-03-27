@@ -46,7 +46,7 @@ segmentControlPoints ::
   NonEmpty (Point2d (space @ units)) ->
   NonEmpty (Point2d (space @ units))
 segmentControlPoints a b controlPoints =
-  NonEmpty.map (segmentControlPoint a b controlPoints) <|
+  NonEmpty.map (segmentControlPoint a b controlPoints) $
     NonEmpty.range 0 (NonEmpty.length controlPoints - 1)
 
 segmentControlPoint ::

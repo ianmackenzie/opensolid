@@ -30,7 +30,7 @@ from givenStartPoint givenEndPoint =
   case Direction2d.from givenStartPoint givenEndPoint of
     Error Direction2d.PointsAreCoincident -> Error Curve2d.DegenerateCurve
     Ok directionBetweenPoints ->
-      Ok <|
+      Ok $
         Curve2d.Internal.Line
           { startPoint = givenStartPoint
           , endPoint = givenEndPoint

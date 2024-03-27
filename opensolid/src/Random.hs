@@ -43,7 +43,7 @@ return value = Generator (value,)
 
 (>>=) :: Generator a -> (a -> Generator b) -> Generator b
 valueGenerator >>= function =
-  Generator <|
+  Generator $
     \stdGen1 -> do
       let (value, stdGen2) = run valueGenerator stdGen1
       let newGenerator = function value
@@ -59,7 +59,7 @@ instance Applicative Generator where
   pure = return
 
   functionGenerator <*> valueGenerator =
-    Generator <|
+    Generator $
       \stdGen1 -> do
         let (function, stdGen2) = run functionGenerator stdGen1
         let (value, stdGen3) = run valueGenerator stdGen2

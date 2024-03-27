@@ -8,7 +8,7 @@ newlines-between-decls: 1
 haddock-style: multi-line
 respectful: false
 fixities:
-  - infixr 9 <<
+  - infixr 9 .
   - infixl 9 >>
   - infixl 6 +, -
   - infixl 7 *, /, <>, ><, //, %
@@ -21,6 +21,6 @@ fixities:
   - infixr 2 ||
   - infixl 1 >>=
   - infixl 0 |>
-  - infixr 0 <|
+  - infixr 0 $
 let-style: inline
 single-constraint-parens: never

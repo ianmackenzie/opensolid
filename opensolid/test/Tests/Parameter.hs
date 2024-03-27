@@ -24,7 +24,7 @@ check function n expected =
 
 steps :: Test
 steps =
-  Test.group "steps" <|
+  Test.group "steps" $
     [ check Parameter.steps 0 []
     , check Parameter.steps 1 [0.0, 1.0]
     , check Parameter.steps 2 [0.0, 0.5, 1.0]
@@ -33,7 +33,7 @@ steps =
 
 leading :: Test
 leading =
-  Test.group "leading" <|
+  Test.group "leading" $
     [ check Parameter.leading 0 []
     , check Parameter.leading 1 [0.0]
     , check Parameter.leading 2 [0.0, 0.5]
@@ -42,7 +42,7 @@ leading =
 
 trailing :: Test
 trailing =
-  Test.group "trailing" <|
+  Test.group "trailing" $
     [ check Parameter.trailing 0 []
     , check Parameter.trailing 1 [1.0]
     , check Parameter.trailing 2 [0.5, 1.0]
@@ -51,7 +51,7 @@ trailing =
 
 inBetween :: Test
 inBetween =
-  Test.group "inBetween" <|
+  Test.group "inBetween" $
     [ check Parameter.inBetween 0 []
     , check Parameter.inBetween 1 []
     , check Parameter.inBetween 2 [0.5]
@@ -60,7 +60,7 @@ inBetween =
 
 midpoints :: Test
 midpoints =
-  Test.group "midpoints" <|
+  Test.group "midpoints" $
     [ check Parameter.midpoints 0 []
     , check Parameter.midpoints 1 [0.5]
     , check Parameter.midpoints 2 [0.25, 0.75]

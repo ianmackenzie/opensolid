@@ -258,7 +258,7 @@ loopIsInside outer inner = do
 
 bounds :: Region2d (space @ units) -> Bounds2d (space @ units)
 bounds region =
-  NonEmpty.reduce Bounds2d.aggregate2 <|
+  NonEmpty.reduce Bounds2d.aggregate2 $
     NonEmpty.map Curve2d.bounds (outerLoop region)
 
 area :: Units.Squared units1 units2 => Region2d (space @ units1) -> Estimate units2

@@ -24,7 +24,8 @@ module Basics
   , internalError
   , notImplemented
   , (|>)
-  , (<|)
+  , ($)
+  , (.)
   , type (~)
   )
 where
@@ -47,7 +48,9 @@ import Prelude
   , fromIntegral
   , not
   , otherwise
+  , ($)
   , (&&)
+  , (.)
   , (||)
   )
 import Prelude qualified
@@ -74,12 +77,6 @@ notImplemented = withFrozenCallStack (Prelude.error "Not implemented")
 (|>) value function = function value
 
 infixl 0 |>
-
-{-# INLINE (<|) #-}
-(<|) :: (a -> b) -> a -> b
-(<|) = (Prelude.$)
-
-infixr 0 <|
 
 {-# INLINE identity #-}
 identity :: a -> a

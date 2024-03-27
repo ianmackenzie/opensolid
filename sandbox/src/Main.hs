@@ -87,12 +87,12 @@ testRangeArithmetic = IO.do
 
 testEquality :: IO ()
 testEquality =
-  log "Equality test" <|
+  log "Equality test" $
     let ?tolerance = Length.centimeter in Length.meters 1.0 ~= Length.meters 1.005
 
 testTransformation :: IO ()
 testTransformation = IO.do
-  log "Rotated axis" <|
+  log "Rotated axis" $
     (Axis2d.x |> Transform2d.rotateAround (Point2d.meters 1.0 0.0) Angle.quarterTurn)
   let originalPoints = [Point2d.meters 1.0 0.0, Point2d.meters 2.0 0.0, Point2d.meters 3.0 0.0]
   let rotationFunction = Transform2d.rotateAround Point2d.origin Angle.quarterTurn
@@ -116,7 +116,7 @@ offsetPoint startPoint endPoint distance = Result.withDefault startPoint Result.
 
 testCustomFunction :: Tolerance Meters => IO ()
 testCustomFunction =
-  log "Offset point" <|
+  log "Offset point" $
     offsetPoint (Point2d.meters 1.0 0.0) (Point2d.meters 3.0 0.0) (Length.meters 1.0)
 
 testListOperations :: IO ()
@@ -139,7 +139,7 @@ getCrossProduct = Error.context "In getCrossProduct" Result.do
 
 testTry :: Tolerance Meters => IO ()
 testTry =
-  IO.onError IO.printLine <|
+  IO.onError IO.printLine $
     Error.context "In testTry" IO.do
       crossProduct <- getCrossProduct
       log "Got cross product" crossProduct
@@ -243,8 +243,8 @@ drawZeros :: String -> Surface1d.Function.Zeros.Zeros -> IO ()
 drawZeros path zeros = IO.do
   let uvRange = Range.convert toDrawing (Range.from -0.05 1.05)
   let viewBox = Bounds2d uvRange uvRange
-  Drawing2d.writeTo path viewBox <|
-    [ Drawing2d.with [Drawing2d.strokeWidth strokeWidth] <|
+  Drawing2d.writeTo path viewBox $
+    [ Drawing2d.with [Drawing2d.strokeWidth strokeWidth] $
         [ drawBounds [] Uv.domain
         , Drawing2d.group (List.mapWithIndex drawCrossingCurve (Surface1d.Function.Zeros.crossingCurves zeros))
         , Drawing2d.group (List.map drawSaddlePoint (Surface1d.Function.Zeros.saddlePoints zeros))
@@ -254,7 +254,7 @@ drawZeros path zeros = IO.do
 drawBounds :: List (Drawing2d.Attribute Uv.Space) -> Uv.Bounds -> Drawing2d.Entity Uv.Space
 drawBounds attributes bounds = do
   let point x y = Point2d.convert toDrawing (Bounds2d.interpolate bounds x y)
-  Drawing2d.polygon attributes <|
+  Drawing2d.polygon attributes $
     [ point 0.0 0.0
     , point 1.0 0.0
     , point 1.0 1.0
@@ -265,7 +265,7 @@ drawCrossingCurve :: Int -> NonEmpty (Curve2d Uv.Coordinates) -> Drawing2d.Entit
 drawCrossingCurve index segments = do
   let hue = (Float.fromInt index * Angle.goldenAngle) % Angle.twoPi
   let colour = Colour.hsl hue 0.5 0.5
-  Drawing2d.with [Drawing2d.strokeColour colour, Drawing2d.opacity 0.3] <|
+  Drawing2d.with [Drawing2d.strokeColour colour, Drawing2d.opacity 0.3] $
     List.map drawCurve (NonEmpty.toList segments)
 
 drawSaddlePoint :: Uv.Point -> Drawing2d.Entity Uv.Space
@@ -351,17 +351,17 @@ drawBezier colour startPoint innerControlPoints endPoint = Result.do
   let drawingInnerControlPoints = List.map (Point2d.convert toDrawing) innerControlPoints
   let drawingControlPoints = List.concat [[drawingStartPoint], drawingInnerControlPoints, [drawingEndPoint]]
   curve <- BezierCurve2d.fromControlPoints drawingStartPoint drawingInnerControlPoints drawingEndPoint
-  Ok <|
+  Ok $
     Drawing2d.with
       [Drawing2d.strokeColour colour, Drawing2d.strokeWidth (Length.millimeters 1.0)]
-      [ Drawing2d.with [Drawing2d.opacity 0.3] <|
+      [ Drawing2d.with [Drawing2d.opacity 0.3] $
           [ Drawing2d.polyline [] drawingControlPoints
-          , Drawing2d.with [Drawing2d.fillColour colour] <|
+          , Drawing2d.with [Drawing2d.fillColour colour] $
               [ Drawing2d.circle [] point (Length.millimeters 5.0)
               | point <- drawingControlPoints
               ]
           ]
-      , Drawing2d.polyline [] <|
+      , Drawing2d.polyline [] $
           [ Curve2d.evaluateAt t curve
           | t <- Parameter.steps 100
           ]
