@@ -25,11 +25,7 @@ module Basics
   , notImplemented
   , (|>)
   , (<|)
-  , (<<)
-  , (>>)
   , type (~)
-  , return
-  , pure
   )
 where
 
@@ -85,14 +81,6 @@ infixl 0 |>
 
 infixr 0 <|
 
-{-# INLINE (>>) #-}
-(>>) :: (a -> b) -> (b -> c) -> a -> c
-f >> g = g << f
-
-{-# INLINE (<<) #-}
-(<<) :: (b -> c) -> (a -> b) -> a -> c
-(<<) = (Prelude..)
-
 {-# INLINE identity #-}
 identity :: a -> a
 identity value = value
@@ -100,11 +88,3 @@ identity value = value
 {-# INLINE always #-}
 always :: a -> b -> a
 always value _ = value
-
-{-# INLINE pure #-}
-pure :: a -> a
-pure = identity
-
-{-# INLINE return #-}
-return :: a -> a
-return = identity

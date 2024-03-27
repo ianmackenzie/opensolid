@@ -1,35 +1,44 @@
 module Debug
-  ( trace
+  ( Debug
+  , print
   , log
-  , intercept
   , assert
   , io
-  , sequence
+  , trace
+  , intercept
   )
 where
 
 import Basics
+import Composition
 import Concatenation
-import Control.Exception (assert)
+import Control.Exception qualified
 import Debug.Trace qualified
 import System.IO.Unsafe qualified
 import Prelude qualified
 
+newtype Debug = Debug (() -> ())
+
+instance Composition Debug a a where
+  Debug action >> value = Prelude.seq (action ()) value
+
+labelled :: Show a => String -> a -> String
+labelled label value = label ++ ": " ++ show value
+
+print :: String -> Debug
+print message = Debug (trace message)
+
+log :: Show a => String -> a -> Debug
+log label value = print (labelled label value)
+
+assert :: Bool -> Debug
+assert condition = Debug (Control.Exception.assert condition)
+
+io :: IO () -> Debug
+io debugIO = Debug (Prelude.seq (System.IO.Unsafe.unsafePerformIO debugIO))
+
 trace :: String -> a -> a
 trace = Debug.Trace.trace
 
-log :: Show a => String -> a -> b -> b
-log label value = trace (label ++ ": " ++ show value)
-
 intercept :: Show a => String -> a -> a
-intercept label value = log label value value
-
-io :: IO () -> a -> a
-io debugIO value =
-  System.IO.Unsafe.unsafePerformIO Prelude.do
-    debugIO
-    Prelude.return value
-
-sequence :: List (a -> a) -> a -> a
-sequence [] = identity
-sequence (first : rest) = first << sequence rest
+intercept label value = trace (labelled label value) value

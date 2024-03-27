@@ -18,20 +18,14 @@ module Random
   , maybe
   , oneOf
   , (>>=)
-  , (<*>)
   , (>>)
-  , fmap
-  , join
-  , pure
   , return
   )
 where
 
 import Array qualified
-import Control.Monad (join)
-import IO qualified
 import Maybe qualified
-import OpenSolid hiding (pure, return)
+import OpenSolid
 import Pair qualified
 import Qty (Qty (Qty_))
 import System.Random (StdGen)
@@ -44,12 +38,6 @@ newtype Generator a = Generator (StdGen -> (a, StdGen))
 
 newtype Seed = Seed StdGen
 
-fmap :: (a -> b) -> Generator a -> Generator b
-fmap = map
-
-pure :: a -> Generator a
-pure = return
-
 return :: a -> Generator a
 return value = Generator (value,)
 
@@ -61,23 +49,21 @@ valueGenerator >>= function =
           newGenerator = function value
        in run newGenerator stdGen2
 
-(<*>) :: Generator (a -> b) -> Generator a -> Generator b
-functionGenerator <*> valueGenerator =
-  Generator <|
-    \stdGen1 ->
-      let (function, stdGen2) = run functionGenerator stdGen1
-          (value, stdGen3) = run valueGenerator stdGen2
-       in (function value, stdGen3)
-
 run :: Generator a -> StdGen -> (a, StdGen)
 run (Generator generator) stdgen = generator stdgen
 
 instance Functor Generator where
-  fmap = fmap
+  fmap = map
 
 instance Applicative Generator where
-  pure = pure
-  (<*>) = (<*>)
+  pure = return
+
+  functionGenerator <*> valueGenerator =
+    Generator <|
+      \stdGen1 -> do
+        let (function, stdGen2) = run functionGenerator stdGen1
+        let (value, stdGen3) = run valueGenerator stdGen2
+        (function value, stdGen3)
 
 instance Monad Generator where
   (>>=) = (>>=)
@@ -98,20 +84,20 @@ map :: (a -> b) -> Generator a -> Generator b
 map function (Generator generator) = Generator (generator >> Pair.mapFirst function)
 
 map2 :: (a -> b -> c) -> Generator a -> Generator b -> Generator c
-map2 function generatorA generatorB = Prelude.do
+map2 function generatorA generatorB = Random.do
   valueA <- generatorA
   valueB <- generatorB
   return (function valueA valueB)
 
 map3 :: (a -> b -> c -> d) -> Generator a -> Generator b -> Generator c -> Generator d
-map3 function generatorA generatorB generatorC = Prelude.do
+map3 function generatorA generatorB generatorC = Random.do
   valueA <- generatorA
   valueB <- generatorB
   valueC <- generatorC
   return (function valueA valueB valueC)
 
 map4 :: (a -> b -> c -> d -> e) -> Generator a -> Generator b -> Generator c -> Generator d -> Generator e
-map4 function generatorA generatorB generatorC generatorD = Prelude.do
+map4 function generatorA generatorB generatorC generatorD = Random.do
   valueA <- generatorA
   valueB <- generatorB
   valueC <- generatorC
@@ -132,13 +118,13 @@ qty (Qty_ low) (Qty_ high) = map Qty_ (Generator (System.Random.uniformR (low, h
 
 list :: Int -> Generator a -> Generator (List a)
 list n _ | n <= 0 = return []
-list n itemGenerator = Prelude.do
+list n itemGenerator = Random.do
   item <- itemGenerator
   rest <- list (n - 1) itemGenerator
   return (item : rest)
 
 nonEmpty :: Int -> Generator a -> Generator (NonEmpty a)
-nonEmpty n itemGenerator = Prelude.do
+nonEmpty n itemGenerator = Random.do
   first <- itemGenerator
   rest <- list (n - 1) itemGenerator
   return (first :| rest)
@@ -147,13 +133,13 @@ seed :: Generator Seed
 seed = Generator (System.Random.split >> Pair.mapFirst Seed)
 
 pair :: Generator a -> Generator b -> Generator (a, b)
-pair generatorA generatorB = Prelude.do
+pair generatorA generatorB = Random.do
   valueA <- generatorA
   valueB <- generatorB
   return (valueA, valueB)
 
 maybe :: Generator a -> Generator (Maybe a)
-maybe generator = Prelude.do
+maybe generator = Random.do
   generateJust <- bool
   if generateJust then map Just generator else return Nothing
 
@@ -162,6 +148,6 @@ oneOf firstGenerator remainingGenerators =
   let array = Array.fromList remainingGenerators
       n = Array.length array
       indexGenerator = int 0 n
-   in Prelude.do
+   in Random.do
         index <- indexGenerator
         Array.get (index - 1) array |> Maybe.withDefault firstGenerator

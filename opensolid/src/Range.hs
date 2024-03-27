@@ -353,11 +353,11 @@ overlap :: Range units -> Range units -> Qty units
 overlap first second = -(separation first second)
 
 bisect :: Range units -> (Range units, Range units)
-bisect (Range low high) =
+bisect (Range low high) = do
   let mid = Qty.midpoint low high
-   in (unsafe low mid, unsafe mid high)
-        |> Debug.assert (low < mid)
-        |> Debug.assert (mid < high)
+  Debug.assert (low < mid)
+  Debug.assert (mid < high)
+  (unsafe low mid, unsafe mid high)
 
 {-# INLINE isAtomic #-}
 isAtomic :: Range units -> Bool

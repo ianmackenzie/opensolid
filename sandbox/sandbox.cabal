@@ -56,4 +56,3 @@ executable sandbox
       QualifiedDo
       LambdaCase
       DisambiguateRecordFields
-      ApplicativeDo

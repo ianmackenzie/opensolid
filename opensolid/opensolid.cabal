@@ -86,6 +86,7 @@ library
       Bounds
       Coalesce
       Colour
+      Composition
       Concatenation
       CoordinateSystem
       CubicSpline2d
@@ -118,7 +119,6 @@ library
       Maybe
       NonEmpty
       OpenSolid
-      Parallel
       Parameter
       Pair
       Point2d

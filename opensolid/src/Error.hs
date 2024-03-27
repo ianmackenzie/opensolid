@@ -3,13 +3,14 @@ module Error
   , Map (map)
   , toString
   , context
-  , debug
-  , trace
+  , print
   , log
+  , debug
   )
 where
 
 import Basics
+import Composition
 import Concatenation
 import Debug qualified
 import {-# SOURCE #-} IO qualified
@@ -38,11 +39,11 @@ context string = map (message >> addContext string)
 addContext :: String -> String -> String
 addContext string text = string ++ ":\n" ++ String.indent "  " text
 
-debug :: Map x x m m => (x -> IO ()) -> m a -> m a
-debug callback = map (\error -> Debug.io (callback error) error)
-
-trace :: Map x x m m => String -> m a -> m a
-trace output = map (Debug.trace output)
+print :: Map x x m m => String -> m a -> m a
+print output = map (\error -> do Debug.print output; error)
 
 log :: (Map x x m m, Show b) => String -> b -> m a -> m a
-log label value = map (Debug.log label value)
+log label value = map (\error -> do Debug.log label value; error)
+
+debug :: Map x x m m => (x -> IO ()) -> m a -> m a
+debug callback = map (\error -> do Debug.io (callback error); error)

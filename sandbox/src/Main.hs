@@ -11,6 +11,7 @@ import Colour (Colour)
 import Colour qualified
 import Curve2d (Curve2d)
 import Curve2d qualified
+import Debug qualified
 import Direction2d qualified
 import Direction3d ()
 import Drawing2d qualified
@@ -25,7 +26,6 @@ import Line2d qualified
 import List qualified
 import NonEmpty qualified
 import OpenSolid
-import Parallel qualified
 import Parameter qualified
 import Point2d (Point2d)
 import Point2d qualified
@@ -298,11 +298,11 @@ testConcurrency :: IO ()
 testConcurrency = IO.do
   IO.printLine "Starting concurrency test..."
   IO.printLine "0"
-  print5 <- IO.spawn (delayedPrint 5)
-  print2 <- IO.spawn (delayedPrint 2)
-  print3 <- IO.spawn (delayedPrint 3)
-  print4 <- IO.spawn (delayedPrint 4)
-  print1 <- IO.spawn (delayedPrint 1)
+  print5 <- IO.async (delayedPrint 5)
+  print2 <- IO.async (delayedPrint 2)
+  print3 <- IO.async (delayedPrint 3)
+  print4 <- IO.async (delayedPrint 4)
+  print1 <- IO.async (delayedPrint 1)
   IO.await print4
   IO.await print2
   IO.await print3
@@ -315,14 +315,6 @@ computeSquareRoot value = IO.do
   IO.sleep Duration.second
   IO.return (Float.sqrt value)
 
-testConcurrentCollect :: IO ()
-testConcurrentCollect = IO.do
-  IO.printLine "Computing square roots with spawn and await"
-  let values = List.map Float.fromInt [1 .. 16]
-  asyncIOs <- IO.collect (IO.spawn << computeSquareRoot) values
-  squareRoots <- IO.collect IO.await asyncIOs
-  log "Square roots" squareRoots
-
 testIOParallel :: IO ()
 testIOParallel = IO.do
   IO.printLine "Computing square roots with IO.parallel"
@@ -330,21 +322,23 @@ testIOParallel = IO.do
   squareRoots <- IO.parallel computeSquareRoot values
   log "Square roots" squareRoots
 
-testParallelDo :: IO ()
-testParallelDo = IO.do
-  IO.printLine "Testing Parallel.do"
-  Parallel.do
-    sqrt1 <- computeSquareRoot 1.0
-    sqrt4 <- computeSquareRoot 4.0
-    sqrt9 <- computeSquareRoot 9.0
-    sqrt16 <- computeSquareRoot 16.0
-    sqrt25 <- computeSquareRoot 25.0
-    IO.do
-      log "sqrt1" sqrt1
-      log "sqrt4" sqrt4
-      log "sqrt9" sqrt9
-      log "sqrt16" sqrt16
-      log "sqrt25" sqrt25
+testParallelComputation :: IO ()
+testParallelComputation = IO.do
+  computeSqrt1 <- IO.async (computeSquareRoot 1.0)
+  computeSqrt4 <- IO.async (computeSquareRoot 4.0)
+  computeSqrt9 <- IO.async (computeSquareRoot 9.0)
+  computeSqrt16 <- IO.async (computeSquareRoot 16.0)
+  computeSqrt25 <- IO.async (computeSquareRoot 25.0)
+  sqrt1 <- IO.await computeSqrt1
+  sqrt4 <- IO.await computeSqrt4
+  sqrt9 <- IO.await computeSqrt9
+  sqrt16 <- IO.await computeSqrt16
+  sqrt25 <- IO.await computeSqrt25
+  log "sqrt1" sqrt1
+  log "sqrt4" sqrt4
+  log "sqrt9" sqrt9
+  log "sqrt16" sqrt16
+  log "sqrt25" sqrt25
 
 drawBezier ::
   Tolerance Meters =>
@@ -417,6 +411,31 @@ testHermiteBezier = IO.do
   let drawingBounds = Bounds2d coordinateRange coordinateRange
   Drawing2d.writeTo "test-hermite-bezier.svg" drawingBounds [curveEntity]
 
+testDebugPrint :: IO ()
+testDebugPrint = do
+  let xs = String.repeat 2 "x"
+  Debug.log "xs" xs
+  let ys = String.repeat 3 "y"
+  Debug.log "ys" ys
+  IO.printLine (xs ++ ys)
+
+stringSum :: String -> String -> Result String Int
+stringSum s1 s2 = Result.do
+  n1 <- Int.parse s1
+  Debug.log "n1" n1
+  n2 <- Int.parse s2
+  Debug.log "n2" n2
+  Ok (n1 + n2)
+
+testStringSum :: IO ()
+testStringSum = IO.do
+  IO.onError IO.printLine IO.do
+    sum <- stringSum "5" "abc"
+    log "sum" sum
+  IO.onError IO.printLine IO.do
+    sum <- stringSum "2" "3"
+    log "sum" sum
+
 main :: IO ()
 main = IO.do
   testScalarArithmetic
@@ -438,8 +457,9 @@ main = IO.do
   testHermiteBezier
   testPlaneTorusIntersection
   testConcurrency
-  testConcurrentCollect
   testIOParallel
-  testParallelDo
+  testParallelComputation
+  testDebugPrint
+  testStringSum
  where
   ?tolerance = Length.meters 1e-9

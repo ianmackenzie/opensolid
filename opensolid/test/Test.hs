@@ -12,6 +12,7 @@ module Test
   , pass
   , fail
   , (>>=)
+  , (>>)
   )
 where
 

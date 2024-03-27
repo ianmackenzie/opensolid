@@ -899,13 +899,13 @@ horizontalCurve ::
   Float ->
   Result ZerosError (Curve2d Uv.Coordinates)
 horizontalCurve f fu fv uStart uEnd vLow vHigh = exactly do
+  -- Sanity check that we don't attempt to evaluate outside the overall UV domain
+  Debug.assert (uStart >= 0.0)
+  Debug.assert (uEnd <= 1.0)
+  Debug.assert (vLow >= 0.0)
+  Debug.assert (vHigh <= 1.0)
   Curve2d.wrap (HorizontalCurve{f, dvdu = -fu / fv, uStart, uEnd, vLow, vHigh})
     ?? Error DegenerateCurve
-    -- Sanity check that we don't attempt to evaluate outside the overall UV domain
-    |> Debug.assert (uStart >= 0.0)
-    |> Debug.assert (uEnd <= 1.0)
-    |> Debug.assert (vLow >= 0.0)
-    |> Debug.assert (vHigh <= 1.0)
 
 verticalCurve ::
   Function units ->
@@ -917,13 +917,13 @@ verticalCurve ::
   Float ->
   Result ZerosError (Curve2d Uv.Coordinates)
 verticalCurve f fu fv uLow uHigh vStart vEnd = exactly do
+  -- Sanity check that we don't attempt to evaluate outside the overall UV domain
+  Debug.assert (uLow >= 0.0)
+  Debug.assert (uHigh <= 1.0)
+  Debug.assert (vStart >= 0.0)
+  Debug.assert (vEnd <= 1.0)
   Curve2d.wrap (VerticalCurve{f, dudv = -fv / fu, uLow, uHigh, vStart, vEnd})
     ?? Error DegenerateCurve
-    -- Sanity check that we don't attempt to evaluate outside the overall UV domain
-    |> Debug.assert (uLow >= 0.0)
-    |> Debug.assert (uHigh <= 1.0)
-    |> Debug.assert (vStart >= 0.0)
-    |> Debug.assert (vEnd <= 1.0)
 
 hasZero :: Uv.Bounds -> Function units -> Bool
 hasZero uvBounds function = Range.includes Qty.zero (segmentBounds uvBounds function)
@@ -1251,24 +1251,21 @@ parallelogramBounds x1 x2 y1 y2 (Range minSlope maxSlope) =
 
 finalizeZeros :: PartialZeros -> Result ZerosError Zeros
 finalizeZeros partialZeros = Result.do
-  finalizedCrossingCurves <-
-    crossingCurves
-      |> Maybe.collect (finalizeCrossingCurve saddleRegions)
-      |> Result.combine
-  let result =
-        Zeros
-          { crossingCurves = finalizedCrossingCurves
-          , crossingLoops
-          , tangentCurves = Maybe.collect finalizeTangentCurve tangentCurves
-          , tangentLoops = List.map finalizeTangentLoop tangentLoops
-          , tangentPoints = List.map finalizeTangentPoint tangentPoints
-          , saddlePoints = List.map SaddleRegion.point saddleRegions
-          , -- TODO report crossing point solutions at domain corners
-            crossingPoints = []
-          }
-          -- Check that there were no degenerate curve segments left
-          |> Debug.assert (List.length finalizedCrossingCurves == List.length crossingCurves)
-  Ok result
+  finalizedCrossingCurves <- Result.combine do
+    Maybe.collect (finalizeCrossingCurve saddleRegions) crossingCurves
+  -- Check that there were no degenerate curve segments left
+  Debug.assert (List.length finalizedCrossingCurves == List.length crossingCurves)
+  Ok
+    Zeros
+      { crossingCurves = finalizedCrossingCurves
+      , crossingLoops
+      , tangentCurves = Maybe.collect finalizeTangentCurve tangentCurves
+      , tangentLoops = List.map finalizeTangentLoop tangentLoops
+      , tangentPoints = List.map finalizeTangentPoint tangentPoints
+      , saddlePoints = List.map SaddleRegion.point saddleRegions
+      , -- TODO report crossing point solutions at domain corners
+        crossingPoints = []
+      }
  where
   PartialZeros
     { crossingCurves
