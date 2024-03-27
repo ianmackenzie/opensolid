@@ -44,10 +44,10 @@ return value = Generator (value,)
 (>>=) :: Generator a -> (a -> Generator b) -> Generator b
 valueGenerator >>= function =
   Generator <|
-    \stdGen1 ->
+    \stdGen1 -> do
       let (value, stdGen2) = run valueGenerator stdGen1
-          newGenerator = function value
-       in run newGenerator stdGen2
+      let newGenerator = function value
+      run newGenerator stdGen2
 
 run :: Generator a -> StdGen -> (a, StdGen)
 run (Generator generator) stdgen = generator stdgen
@@ -72,9 +72,7 @@ init :: Int -> Seed
 init givenSeed = Seed (System.Random.mkStdGen givenSeed)
 
 step :: Generator a -> Seed -> (a, Seed)
-step generator (Seed stdGen) =
-  let (generatedValue, updatedStdGen) = run generator stdGen
-   in (generatedValue, Seed updatedStdGen)
+step generator (Seed stdGen) = Pair.mapSecond Seed (run generator stdGen)
 
 generate :: Generator a -> IO a
 generate generator =
@@ -144,10 +142,10 @@ maybe generator = Random.do
   if generateJust then map Just generator else return Nothing
 
 oneOf :: Generator a -> List (Generator a) -> Generator a
-oneOf firstGenerator remainingGenerators =
+oneOf firstGenerator remainingGenerators = do
   let array = Array.fromList remainingGenerators
-      n = Array.length array
-      indexGenerator = int 0 n
-   in Random.do
-        index <- indexGenerator
-        Array.get (index - 1) array |> Maybe.withDefault firstGenerator
+  let n = Array.length array
+  let indexGenerator = int 0 n
+  Random.do
+    index <- indexGenerator
+    Array.get (index - 1) array |> Maybe.withDefault firstGenerator
