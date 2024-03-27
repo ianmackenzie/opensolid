@@ -103,7 +103,7 @@ instance units ~ units' => Intersects (Range units) (Range units') units where
   first ^ second = separation first second <= ?tolerance
 
 instance Negation (Range units) where
-  negate (Range low high) = unsafe (negate high) (negate low)
+  negate (Range low high) = Range_ (negate high) (negate low)
 
 instance Multiplication Sign (Range units) where
   type Sign .*. Range units = Range (Unitless :*: units)
@@ -120,22 +120,22 @@ instance Multiplication (Range units) Sign where
 instance Product (Range units) Sign (Range units)
 
 instance units ~ units' => Addition (Range units) (Range units') (Range units) where
-  Range low1 high1 + Range low2 high2 = unsafe (low1 + low2) (high1 + high2)
+  Range low1 high1 + Range low2 high2 = Range_ (low1 + low2) (high1 + high2)
 
 instance units ~ units' => Addition (Range units) (Qty units') (Range units) where
-  Range low high + value = unsafe (low + value) (high + value)
+  Range low high + value = Range_ (low + value) (high + value)
 
 instance units ~ units' => Addition (Qty units) (Range units') (Range units) where
-  value + Range low high = unsafe (value + low) (value + high)
+  value + Range low high = Range_ (value + low) (value + high)
 
 instance units ~ units' => Subtraction (Range units) (Range units') (Range units) where
-  Range low1 high1 - Range low2 high2 = unsafe (low1 - high2) (high1 - low2)
+  Range low1 high1 - Range low2 high2 = Range_ (low1 - high2) (high1 - low2)
 
 instance units ~ units' => Subtraction (Range units) (Qty units') (Range units) where
-  Range low high - value = unsafe (low - value) (high - value)
+  Range low high - value = Range_ (low - value) (high - value)
 
 instance units ~ units' => Subtraction (Qty units) (Range units') (Range units) where
-  value - Range low high = unsafe (value - high) (value - low)
+  value - Range low high = Range_ (value - high) (value - low)
 
 instance Multiplication (Qty units1) (Range units2) where
   type Qty units1 .*. Range units2 = Range (units1 :*: units2)
@@ -161,7 +161,7 @@ instance Division (Qty units1) (Range units2) where
   n ./. Range dl dh =
     if dl > Qty.zero || dh < Qty.zero
       then from (n ./. dl) (n ./. dh)
-      else unsafe -Qty.infinity Qty.infinity
+      else Range_ -Qty.infinity Qty.infinity
 
 instance Units.Quotient units1 units2 units3 => Quotient (Qty units1) (Range units2) (Range units3)
 
@@ -170,7 +170,7 @@ instance Division (Range units1) (Qty units2) where
   Range nl nh ./. d =
     if d /= Qty.zero
       then from (nl ./. d) (nh ./. d)
-      else unsafe -Qty.infinity Qty.infinity
+      else Range_ -Qty.infinity Qty.infinity
 
 instance Units.Quotient units1 units2 units3 => Quotient (Range units1) (Qty units2) (Range units3)
 
@@ -179,7 +179,7 @@ instance Division (Range units1) (Range units2) where
   Range nl nh ./. Range dl dh =
     if dl > Qty.zero || dh < Qty.zero
       then hull4 (nl ./. dl) (nl ./. dh) (nh ./. dl) (nh ./. dh)
-      else unsafe -Qty.infinity Qty.infinity
+      else Range_ -Qty.infinity Qty.infinity
 
 instance Units.Quotient units1 units2 units3 => Quotient (Range units1) (Range units2) (Range units3)
 
@@ -193,33 +193,33 @@ unsafe = Range_
 
 {-# INLINE constant #-}
 constant :: Qty units -> Range units
-constant value = unsafe value value
+constant value = Range_ value value
 
 {-# INLINE from #-}
 from :: Qty units -> Qty units -> Range units
-from a b = if a <= b then unsafe a b else unsafe b a
+from a b = if a <= b then Range_ a b else Range_ b a
 
 aggregate2 :: Range units -> Range units -> Range units
 aggregate2 (Range low1 high1) (Range low2 high2) =
-  unsafe (Qty.min low1 low2) (Qty.max high1 high2)
+  Range_ (Qty.min low1 low2) (Qty.max high1 high2)
 
 aggregate3 :: Range units -> Range units -> Range units -> Range units
 aggregate3 (Range low1 high1) (Range low2 high2) (Range low3 high3) =
-  unsafe (Qty.min (Qty.min low1 low2) low3) (Qty.max (Qty.max high1 high2) high3)
+  Range_ (Qty.min (Qty.min low1 low2) low3) (Qty.max (Qty.max high1 high2) high3)
 
 intersection :: Range units -> Range units -> Maybe (Range units)
 intersection (Range low1 high1) (Range low2 high2)
   | high1 < low2 = Nothing
   | low1 > high2 = Nothing
-  | otherwise = Just (unsafe (Qty.max low1 low2) (Qty.min high1 high2))
+  | otherwise = Just (Range_ (Qty.max low1 low2) (Qty.min high1 high2))
 
 {-# INLINE hull3 #-}
 hull3 :: Qty units -> Qty units -> Qty units -> Range units
-hull3 a b c = unsafe (Qty.min a (Qty.min b c)) (Qty.max a (Qty.max b c))
+hull3 a b c = Range_ (Qty.min a (Qty.min b c)) (Qty.max a (Qty.max b c))
 
 {-# INLINE hull4 #-}
 hull4 :: Qty units -> Qty units -> Qty units -> Qty units -> Range units
-hull4 a b c d = unsafe (Qty.min a (Qty.min b (Qty.min c d))) (Qty.max a (Qty.max b (Qty.max c d)))
+hull4 a b c d = Range_ (Qty.min a (Qty.min b (Qty.min c d))) (Qty.max a (Qty.max b (Qty.max c d)))
 
 {-# INLINE minValue #-}
 minValue :: Range units -> Qty units
@@ -256,16 +256,16 @@ squared range = Units.specialize (squared_ range)
 
 squared_ :: Range units -> Range (units :*: units)
 squared_ (Range low high)
-  | low >= Qty.zero = unsafe ll hh
-  | high <= Qty.zero = unsafe hh ll
-  | otherwise = unsafe Qty.zero (Qty.max ll hh)
+  | low >= Qty.zero = Range_ ll hh
+  | high <= Qty.zero = Range_ hh ll
+  | otherwise = Range_ Qty.zero (Qty.max ll hh)
  where
   ll = low .*. low
   hh = high .*. high
 
 sqrt_ :: Range (units :*: units) -> Range units
 sqrt_ (Range low high) =
-  unsafe
+  Range_
     (Qty.sqrt_ (Qty.max low Qty.zero))
     (Qty.sqrt_ (Qty.max high Qty.zero))
 
@@ -274,15 +274,15 @@ sqrt range = sqrt_ (Units.unspecialize range)
 
 hypot2 :: Range units -> Range units -> Range units
 hypot2 (Range xMin xMax) (Range yMin yMax)
-  | positiveX && positiveY = unsafe (Qty.hypot2 xMin yMin) maxMagnitude
-  | positiveX && negativeY = unsafe (Qty.hypot2 xMin yMax) maxMagnitude
-  | negativeX && positiveY = unsafe (Qty.hypot2 xMax yMin) maxMagnitude
-  | negativeX && negativeY = unsafe (Qty.hypot2 xMax yMax) maxMagnitude
-  | positiveX = unsafe xMin maxMagnitude
-  | negativeX = unsafe -xMax maxMagnitude
-  | positiveY = unsafe yMin maxMagnitude
-  | negativeY = unsafe -yMax maxMagnitude
-  | otherwise = unsafe Qty.zero maxMagnitude
+  | positiveX && positiveY = Range_ (Qty.hypot2 xMin yMin) maxMagnitude
+  | positiveX && negativeY = Range_ (Qty.hypot2 xMin yMax) maxMagnitude
+  | negativeX && positiveY = Range_ (Qty.hypot2 xMax yMin) maxMagnitude
+  | negativeX && negativeY = Range_ (Qty.hypot2 xMax yMax) maxMagnitude
+  | positiveX = Range_ xMin maxMagnitude
+  | negativeX = Range_ -xMax maxMagnitude
+  | positiveY = Range_ yMin maxMagnitude
+  | negativeY = Range_ -yMax maxMagnitude
+  | otherwise = Range_ Qty.zero maxMagnitude
  where
   positiveX = xMin >= Qty.zero
   negativeX = xMax <= Qty.zero
@@ -294,31 +294,31 @@ hypot2 (Range xMin xMax) (Range yMin yMax)
 
 hypot3 :: Range units -> Range units -> Range units -> Range units
 hypot3 (Range xMin xMax) (Range yMin yMax) (Range zMin zMax)
-  | positiveX && positiveY && positiveZ = unsafe (Qty.hypot3 xMin yMin zMin) maxMagnitude
-  | positiveX && positiveY && negativeZ = unsafe (Qty.hypot3 xMin yMin zMax) maxMagnitude
-  | positiveX && negativeY && positiveZ = unsafe (Qty.hypot3 xMin yMax zMin) maxMagnitude
-  | positiveX && negativeY && negativeZ = unsafe (Qty.hypot3 xMin yMax zMax) maxMagnitude
-  | negativeX && positiveY && positiveZ = unsafe (Qty.hypot3 xMax yMin zMin) maxMagnitude
-  | negativeX && positiveY && negativeZ = unsafe (Qty.hypot3 xMax yMin zMax) maxMagnitude
-  | negativeX && negativeY && positiveZ = unsafe (Qty.hypot3 xMax yMax zMin) maxMagnitude
-  | negativeX && negativeY && negativeZ = unsafe (Qty.hypot3 xMax yMax zMax) maxMagnitude
-  | positiveY && positiveZ = unsafe (Qty.hypot2 yMin zMin) maxMagnitude
-  | positiveY && negativeZ = unsafe (Qty.hypot2 yMin zMax) maxMagnitude
-  | negativeY && positiveZ = unsafe (Qty.hypot2 yMax zMin) maxMagnitude
-  | negativeY && negativeZ = unsafe (Qty.hypot2 yMax zMax) maxMagnitude
-  | positiveX && positiveZ = unsafe (Qty.hypot2 xMin zMin) maxMagnitude
-  | positiveX && negativeZ = unsafe (Qty.hypot2 xMin zMax) maxMagnitude
-  | negativeX && positiveZ = unsafe (Qty.hypot2 xMax zMin) maxMagnitude
-  | negativeX && negativeZ = unsafe (Qty.hypot2 xMax zMax) maxMagnitude
-  | positiveX && positiveY = unsafe (Qty.hypot2 xMin yMin) maxMagnitude
-  | positiveX && negativeY = unsafe (Qty.hypot2 xMin yMax) maxMagnitude
-  | negativeX && positiveY = unsafe (Qty.hypot2 xMax yMin) maxMagnitude
-  | negativeX && negativeY = unsafe (Qty.hypot2 xMax yMax) maxMagnitude
-  | positiveX = unsafe xMin maxMagnitude
-  | negativeX = unsafe -xMax maxMagnitude
-  | positiveY = unsafe yMin maxMagnitude
-  | negativeY = unsafe -yMax maxMagnitude
-  | otherwise = unsafe Qty.zero maxMagnitude
+  | positiveX && positiveY && positiveZ = Range_ (Qty.hypot3 xMin yMin zMin) maxMagnitude
+  | positiveX && positiveY && negativeZ = Range_ (Qty.hypot3 xMin yMin zMax) maxMagnitude
+  | positiveX && negativeY && positiveZ = Range_ (Qty.hypot3 xMin yMax zMin) maxMagnitude
+  | positiveX && negativeY && negativeZ = Range_ (Qty.hypot3 xMin yMax zMax) maxMagnitude
+  | negativeX && positiveY && positiveZ = Range_ (Qty.hypot3 xMax yMin zMin) maxMagnitude
+  | negativeX && positiveY && negativeZ = Range_ (Qty.hypot3 xMax yMin zMax) maxMagnitude
+  | negativeX && negativeY && positiveZ = Range_ (Qty.hypot3 xMax yMax zMin) maxMagnitude
+  | negativeX && negativeY && negativeZ = Range_ (Qty.hypot3 xMax yMax zMax) maxMagnitude
+  | positiveY && positiveZ = Range_ (Qty.hypot2 yMin zMin) maxMagnitude
+  | positiveY && negativeZ = Range_ (Qty.hypot2 yMin zMax) maxMagnitude
+  | negativeY && positiveZ = Range_ (Qty.hypot2 yMax zMin) maxMagnitude
+  | negativeY && negativeZ = Range_ (Qty.hypot2 yMax zMax) maxMagnitude
+  | positiveX && positiveZ = Range_ (Qty.hypot2 xMin zMin) maxMagnitude
+  | positiveX && negativeZ = Range_ (Qty.hypot2 xMin zMax) maxMagnitude
+  | negativeX && positiveZ = Range_ (Qty.hypot2 xMax zMin) maxMagnitude
+  | negativeX && negativeZ = Range_ (Qty.hypot2 xMax zMax) maxMagnitude
+  | positiveX && positiveY = Range_ (Qty.hypot2 xMin yMin) maxMagnitude
+  | positiveX && negativeY = Range_ (Qty.hypot2 xMin yMax) maxMagnitude
+  | negativeX && positiveY = Range_ (Qty.hypot2 xMax yMin) maxMagnitude
+  | negativeX && negativeY = Range_ (Qty.hypot2 xMax yMax) maxMagnitude
+  | positiveX = Range_ xMin maxMagnitude
+  | negativeX = Range_ -xMax maxMagnitude
+  | positiveY = Range_ yMin maxMagnitude
+  | negativeY = Range_ -yMax maxMagnitude
+  | otherwise = Range_ Qty.zero maxMagnitude
  where
   positiveX = xMin >= Qty.zero
   negativeX = xMax <= Qty.zero
@@ -357,36 +357,36 @@ bisect (Range low high) = do
   let mid = Qty.midpoint low high
   Debug.assert (low < mid)
   Debug.assert (mid < high)
-  (unsafe low mid, unsafe mid high)
+  (Range_ low mid, Range_ mid high)
 
 {-# INLINE isAtomic #-}
 isAtomic :: Range units -> Bool
-isAtomic (Range low high) =
+isAtomic (Range low high) = do
   let mid = Qty.midpoint low high
-   in mid == low || mid == high
+  mid == low || mid == high
 
 abs :: Range units -> Range units
 abs range@(Range low high)
   | low >= Qty.zero = range
   | high <= Qty.zero = -range
-  | otherwise = unsafe Qty.zero (Qty.max high -low)
+  | otherwise = Range_ Qty.zero (Qty.max high -low)
 
 min :: Range units -> Range units -> Range units
 min (Range low1 high1) (Range low2 high2) =
-  unsafe (Qty.min low1 low2) (Qty.min high1 high2)
+  Range_ (Qty.min low1 low2) (Qty.min high1 high2)
 
 max :: Range units -> Range units -> Range units
 max (Range low1 high1) (Range low2 high2) =
-  unsafe (Qty.max low1 low2) (Qty.max high1 high2)
+  Range_ (Qty.max low1 low2) (Qty.max high1 high2)
 
 smaller :: Range units -> Range units -> Range units
 smaller first second
   | high1 < low2 = first
   | high2 < low1 = second
-  | otherwise =
+  | otherwise = do
       let (Range aggregateMin aggregateMax) = aggregate2 first second
-          high = Qty.min high1 high2
-       in unsafe (Qty.max -high aggregateMin) (Qty.min aggregateMax high)
+      let high = Qty.min high1 high2
+      Range_ (Qty.max -high aggregateMin) (Qty.min aggregateMax high)
  where
   (Range low1 high1) = abs first
   (Range low2 high2) = abs second
@@ -395,8 +395,8 @@ larger :: Range units -> Range units -> Range units
 larger first second
   | low1 > high2 = first
   | low2 > high1 = second
-  | aggregateMin > -low = unsafe (Qty.max aggregateMin low) aggregateMax
-  | aggregateMax < low = unsafe aggregateMin (Qty.min aggregateMax -low)
+  | aggregateMin > -low = Range_ (Qty.max aggregateMin low) aggregateMax
+  | aggregateMax < low = Range_ aggregateMin (Qty.min aggregateMax -low)
   | otherwise = aggregate
  where
   (Range low1 high1) = abs first
@@ -411,38 +411,38 @@ maximum :: NonEmpty (Range units) -> Range units
 maximum = NonEmpty.reduce max
 
 smallest :: NonEmpty (Range units) -> Range units
-smallest ranges =
+smallest ranges = do
   let initial = NonEmpty.minimumBy maxAbs ranges
-      clipRadius = maxAbs initial
-      conditionalAggregate current (Range low high)
+  let clipRadius = maxAbs initial
+  let conditionalAggregate current (Range low high)
         | low > clipRadius || high < -clipRadius = current
-        | otherwise = aggregate2 current (unsafe (Qty.max low -clipRadius) (Qty.min high clipRadius))
-   in NonEmpty.foldl conditionalAggregate initial ranges
+        | otherwise = aggregate2 current (Range_ (Qty.max low -clipRadius) (Qty.min high clipRadius))
+  NonEmpty.foldl conditionalAggregate initial ranges
 
 largest :: NonEmpty (Range units) -> Range units
-largest ranges =
+largest ranges = do
   let initial = NonEmpty.maximumBy minAbs ranges
-      clipRadius = minAbs initial
-      conditionalAggregate current range@(Range low high)
+  let clipRadius = minAbs initial
+  let conditionalAggregate current range@(Range low high)
         | low > -clipRadius && high < clipRadius = current
-        | low > -clipRadius = aggregate2 current (unsafe clipRadius high)
-        | high < clipRadius = aggregate2 current (unsafe low -clipRadius)
+        | low > -clipRadius = aggregate2 current (Range_ clipRadius high)
+        | high < clipRadius = aggregate2 current (Range_ low -clipRadius)
         | otherwise = aggregate2 current range
-   in NonEmpty.foldl conditionalAggregate initial ranges
+  NonEmpty.foldl conditionalAggregate initial ranges
 
 sin :: Range Radians -> Range Unitless
-sin range@(Range low high) =
+sin range@(Range low high) = do
   let (includesMin, includesMax) = sinIncludesMinMax range
-      newLow = if includesMin then -1.0 else Qty.min (Angle.sin low) (Angle.sin high)
-      newHigh = if includesMax then 1.0 else Qty.max (Angle.sin low) (Angle.sin high)
-   in unsafe newLow newHigh
+  let newLow = if includesMin then -1.0 else Qty.min (Angle.sin low) (Angle.sin high)
+  let newHigh = if includesMax then 1.0 else Qty.max (Angle.sin low) (Angle.sin high)
+  Range_ newLow newHigh
 
 cos :: Range Radians -> Range Unitless
-cos range@(Range low high) =
+cos range@(Range low high) = do
   let (includesMin, includesMax) = cosIncludesMinMax range
-      newLow = if includesMin then -1.0 else Qty.min (Angle.cos low) (Angle.cos high)
-      newHigh = if includesMax then 1.0 else Qty.max (Angle.cos low) (Angle.cos high)
-   in unsafe newLow newHigh
+  let newLow = if includesMin then -1.0 else Qty.min (Angle.cos low) (Angle.cos high)
+  let newHigh = if includesMax then 1.0 else Qty.max (Angle.cos low) (Angle.cos high)
+  Range_ newLow newHigh
 
 sinIncludesMinMax :: Range Radians -> (Bool, Bool)
 sinIncludesMinMax range = cosIncludesMinMax (range - Angle.quarterTurn)
@@ -478,9 +478,9 @@ any assess range =
     Resolved assessment -> assessment
     Unresolved
       | isAtomic range -> False
-      | otherwise ->
+      | otherwise -> do
           let (left, right) = bisect range
-           in any assess left || any assess right
+          any assess left || any assess right
 
 all :: (Range units -> Fuzzy Bool) -> Range units -> Bool
 all assess range =
@@ -488,9 +488,9 @@ all assess range =
     Resolved assessment -> assessment
     Unresolved
       | isAtomic range -> True
-      | otherwise ->
+      | otherwise -> do
           let (left, right) = bisect range
-           in all assess left && all assess right
+          all assess left && all assess right
 
 resolve :: Eq a => (Range units -> Fuzzy a) -> Range units -> Fuzzy a
 resolve assess range =
@@ -537,12 +537,12 @@ find isCandidate range =
     False -> Nothing
     True
       | isAtomic range -> Just (maxValue range)
-      | otherwise ->
+      | otherwise -> do
           let (left, right) = bisect range
-              leftResult = find isCandidate left
-           in case leftResult of
-                Just _ -> leftResult
-                Nothing -> find isCandidate right
+          let leftResult = find isCandidate left
+          case leftResult of
+            Just _ -> leftResult
+            Nothing -> find isCandidate right
 
 find2 ::
   (Range units1 -> Range units2 -> Bool) ->
@@ -556,19 +556,19 @@ find2 isCandidate u v =
       | isAtomic u && isAtomic v -> Just (maxValue u, maxValue v)
       | isAtomic u -> Maybe.map (maxValue u,) (find (isCandidate u) v)
       | isAtomic v -> Maybe.map (,maxValue v) (find (\u' -> isCandidate u' v) u)
-      | otherwise ->
+      | otherwise -> do
           let (u1, u2) = bisect u
-              (v1, v2) = bisect v
-           in case find2 isCandidate u1 v1 of
+          let (v1, v2) = bisect v
+          case find2 isCandidate u1 v1 of
+            result@(Just _) -> result
+            Nothing ->
+              case find2 isCandidate u1 v2 of
                 result@(Just _) -> result
                 Nothing ->
-                  case find2 isCandidate u1 v2 of
+                  case find2 isCandidate u2 v1 of
                     result@(Just _) -> result
                     Nothing ->
-                      case find2 isCandidate u2 v1 of
-                        result@(Just _) -> result
-                        Nothing ->
-                          find2 isCandidate u2 v2
+                      find2 isCandidate u2 v2
 
 generator :: Random.Generator (Qty units) -> Random.Generator (Range units)
 generator qtyGenerator = Random.do
