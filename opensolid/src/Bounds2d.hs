@@ -303,19 +303,19 @@ any assess bounds@(Bounds2d x y) =
     Resolved assessment -> assessment
     Unresolved
       | Range.isAtomic x && Range.isAtomic y -> False
-      | Range.isAtomic x ->
+      | Range.isAtomic x -> do
           let (y1, y2) = Range.bisect y
-           in any assess (Bounds2d x y1) || any assess (Bounds2d x y2)
-      | Range.isAtomic y ->
+          any assess (Bounds2d x y1) || any assess (Bounds2d x y2)
+      | Range.isAtomic y -> do
           let (x1, x2) = Range.bisect x
-           in any assess (Bounds2d x1 y) || any assess (Bounds2d x2 y)
-      | otherwise ->
+          any assess (Bounds2d x1 y) || any assess (Bounds2d x2 y)
+      | otherwise -> do
           let (x1, x2) = Range.bisect x
-              (y1, y2) = Range.bisect y
-           in any assess (Bounds2d x1 y1)
-                || any assess (Bounds2d x1 y2)
-                || any assess (Bounds2d x2 y1)
-                || any assess (Bounds2d x2 y2)
+          let (y1, y2) = Range.bisect y
+          any assess (Bounds2d x1 y1)
+            || any assess (Bounds2d x1 y2)
+            || any assess (Bounds2d x2 y1)
+            || any assess (Bounds2d x2 y2)
 
 all :: (Bounds2d (space @ units) -> Fuzzy Bool) -> Bounds2d (space @ units) -> Bool
 all assess bounds@(Bounds2d x y) =
@@ -323,19 +323,19 @@ all assess bounds@(Bounds2d x y) =
     Resolved assessment -> assessment
     Unresolved
       | Range.isAtomic x && Range.isAtomic y -> True
-      | Range.isAtomic x ->
+      | Range.isAtomic x -> do
           let (y1, y2) = Range.bisect y
-           in all assess (Bounds2d x y1) && all assess (Bounds2d x y2)
-      | Range.isAtomic y ->
+          all assess (Bounds2d x y1) && all assess (Bounds2d x y2)
+      | Range.isAtomic y -> do
           let (x1, x2) = Range.bisect x
-           in all assess (Bounds2d x1 y) && all assess (Bounds2d x2 y)
-      | otherwise ->
+          all assess (Bounds2d x1 y) && all assess (Bounds2d x2 y)
+      | otherwise -> do
           let (x1, x2) = Range.bisect x
-              (y1, y2) = Range.bisect y
-           in all assess (Bounds2d x1 y1)
-                && all assess (Bounds2d x1 y2)
-                && all assess (Bounds2d x2 y1)
-                && all assess (Bounds2d x2 y2)
+          let (y1, y2) = Range.bisect y
+          all assess (Bounds2d x1 y1)
+            && all assess (Bounds2d x1 y2)
+            && all assess (Bounds2d x2 y1)
+            && all assess (Bounds2d x2 y2)
 
 resolve :: Eq a => (Bounds2d (space @ units) -> Fuzzy a) -> Bounds2d (space @ units) -> Fuzzy a
 resolve assess bounds@(Bounds2d x y) =
@@ -373,44 +373,44 @@ placeIn ::
   Frame2d (global @ units) (Defines local) ->
   Bounds2d (local @ units) ->
   Bounds2d (global @ units)
-placeIn frame (Bounds2d x y) =
+placeIn frame (Bounds2d x y) = do
   let xMid = Range.midpoint x
-      yMid = Range.midpoint y
-      xWidth = Range.width x
-      yWidth = Range.width y
-      (x0, y0) = Point2d.coordinates (Point2d.xyIn frame xMid yMid)
-      (ix, iy) = Direction2d.components (Frame2d.xDirection frame)
-      (jx, jy) = Direction2d.components (Frame2d.yDirection frame)
-      rx = 0.5 * xWidth * Float.abs ix + 0.5 * yWidth * Float.abs jx
-      ry = 0.5 * xWidth * Float.abs iy + 0.5 * yWidth * Float.abs jy
-   in Bounds2d (Range.from (x0 - rx) (x0 + rx)) (Range.from (y0 - ry) (y0 + ry))
+  let yMid = Range.midpoint y
+  let xWidth = Range.width x
+  let yWidth = Range.width y
+  let (x0, y0) = Point2d.coordinates (Point2d.xyIn frame xMid yMid)
+  let (ix, iy) = Direction2d.components (Frame2d.xDirection frame)
+  let (jx, jy) = Direction2d.components (Frame2d.yDirection frame)
+  let rx = 0.5 * xWidth * Float.abs ix + 0.5 * yWidth * Float.abs jx
+  let ry = 0.5 * xWidth * Float.abs iy + 0.5 * yWidth * Float.abs jy
+  Bounds2d (Range.from (x0 - rx) (x0 + rx)) (Range.from (y0 - ry) (y0 + ry))
 
 relativeTo ::
   Frame2d (global @ units) (Defines local) ->
   Bounds2d (global @ units) ->
   Bounds2d (local @ units)
-relativeTo frame (Bounds2d x y) =
+relativeTo frame (Bounds2d x y) = do
   let xMid = Range.midpoint x
-      yMid = Range.midpoint y
-      xWidth = Range.width x
-      yWidth = Range.width y
-      (x0, y0) = Point2d.coordinates (Point2d.relativeTo frame (Point2d.xy xMid yMid))
-      (ix, iy) = Direction2d.components (Frame2d.xDirection frame)
-      (jx, jy) = Direction2d.components (Frame2d.yDirection frame)
-      rx = 0.5 * xWidth * Float.abs ix + 0.5 * yWidth * Float.abs iy
-      ry = 0.5 * xWidth * Float.abs jx + 0.5 * yWidth * Float.abs jy
-   in Bounds2d (Range.from (x0 - rx) (x0 + rx)) (Range.from (y0 - ry) (y0 + ry))
+  let yMid = Range.midpoint y
+  let xWidth = Range.width x
+  let yWidth = Range.width y
+  let (x0, y0) = Point2d.coordinates (Point2d.relativeTo frame (Point2d.xy xMid yMid))
+  let (ix, iy) = Direction2d.components (Frame2d.xDirection frame)
+  let (jx, jy) = Direction2d.components (Frame2d.yDirection frame)
+  let rx = 0.5 * xWidth * Float.abs ix + 0.5 * yWidth * Float.abs iy
+  let ry = 0.5 * xWidth * Float.abs jx + 0.5 * yWidth * Float.abs jy
+  Bounds2d (Range.from (x0 - rx) (x0 + rx)) (Range.from (y0 - ry) (y0 + ry))
 
 signedDistanceAlong :: Axis2d (space @ units) -> Bounds2d (space @ units) -> Range units
-signedDistanceAlong axis (Bounds2d x y) =
+signedDistanceAlong axis (Bounds2d x y) = do
   let xMid = Range.midpoint x
-      yMid = Range.midpoint y
-      xWidth = Range.width x
-      yWidth = Range.width y
-      d0 = Point2d.signedDistanceAlong axis (Point2d.xy xMid yMid)
-      (ax, ay) = Direction2d.components (Axis2d.direction axis)
-      r = 0.5 * xWidth * Float.abs ax + 0.5 * yWidth * Float.abs ay
-   in Range.from (d0 - r) (d0 + r)
+  let yMid = Range.midpoint y
+  let xWidth = Range.width x
+  let yWidth = Range.width y
+  let d0 = Point2d.signedDistanceAlong axis (Point2d.xy xMid yMid)
+  let (ax, ay) = Direction2d.components (Axis2d.direction axis)
+  let r = 0.5 * xWidth * Float.abs ax + 0.5 * yWidth * Float.abs ay
+  Range.from (d0 - r) (d0 + r)
 
 convert :: Qty (units2 :/: units1) -> Bounds2d (space @ units1) -> Bounds2d (space @ units2)
 convert conversion (Bounds2d x y) =

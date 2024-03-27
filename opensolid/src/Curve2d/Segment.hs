@@ -83,50 +83,50 @@ computeIntersectionType ::
   Segment (space @ units) ->
   Segment (space @ units) ->
   Fuzzy (Intersection.Kind, Sign)
-computeIntersectionType segment1 segment2 =
+computeIntersectionType segment1 segment2 = do
   let firstResolution = crossProductResolution segment1 segment2
-   in if Qty.abs firstResolution >= 0.5
-        then Resolved (Intersection.Crossing, Qty.sign firstResolution)
-        else
-          let firstBounds1 = firstBounds segment1
-              firstBounds2 = firstBounds segment2
-              dX1_dU1 = VectorBounds2d.xComponent firstBounds1
-              dY1_dU1 = VectorBounds2d.yComponent firstBounds1
-              dX2_dU2 = VectorBounds2d.xComponent firstBounds2
-              dY2_dU2 = VectorBounds2d.yComponent firstBounds2
-              secondBounds1 = secondBounds segment1
-              secondBounds2 = secondBounds segment2
-              d2X1_dU1dU1 = VectorBounds2d.xComponent secondBounds1
-              d2Y1_dU1dU1 = VectorBounds2d.yComponent secondBounds1
-              d2X2_dU2dU2 = VectorBounds2d.xComponent secondBounds2
-              d2Y2_dU2dU2 = VectorBounds2d.yComponent secondBounds2
-              resolutionXY =
-                secondResolution1d
-                  dX1_dU1
-                  dY1_dU1
-                  dX2_dU2
-                  dY2_dU2
-                  d2X1_dU1dU1
-                  d2Y1_dU1dU1
-                  d2X2_dU2dU2
-                  d2Y2_dU2dU2
-              resolutionYX =
-                secondResolution1d
-                  dY1_dU1
-                  dX1_dU1
-                  dY2_dU2
-                  dX2_dU2
-                  d2Y1_dU1dU1
-                  d2X1_dU1dU1
-                  d2Y2_dU2dU2
-                  d2X2_dU2dU2
-              secondResolution =
-                if Qty.abs resolutionXY >= Qty.abs resolutionYX
-                  then resolutionXY
-                  else -resolutionYX
-           in if Qty.abs secondResolution >= 0.5
-                then Resolved (Intersection.Tangent, Qty.sign secondResolution)
-                else Unresolved
+  if Qty.abs firstResolution >= 0.5
+    then Resolved (Intersection.Crossing, Qty.sign firstResolution)
+    else do
+      let firstBounds1 = firstBounds segment1
+      let firstBounds2 = firstBounds segment2
+      let dX1_dU1 = VectorBounds2d.xComponent firstBounds1
+      let dY1_dU1 = VectorBounds2d.yComponent firstBounds1
+      let dX2_dU2 = VectorBounds2d.xComponent firstBounds2
+      let dY2_dU2 = VectorBounds2d.yComponent firstBounds2
+      let secondBounds1 = secondBounds segment1
+      let secondBounds2 = secondBounds segment2
+      let d2X1_dU1dU1 = VectorBounds2d.xComponent secondBounds1
+      let d2Y1_dU1dU1 = VectorBounds2d.yComponent secondBounds1
+      let d2X2_dU2dU2 = VectorBounds2d.xComponent secondBounds2
+      let d2Y2_dU2dU2 = VectorBounds2d.yComponent secondBounds2
+      let resolutionXY =
+            secondResolution1d
+              dX1_dU1
+              dY1_dU1
+              dX2_dU2
+              dY2_dU2
+              d2X1_dU1dU1
+              d2Y1_dU1dU1
+              d2X2_dU2dU2
+              d2Y2_dU2dU2
+      let resolutionYX =
+            secondResolution1d
+              dY1_dU1
+              dX1_dU1
+              dY2_dU2
+              dX2_dU2
+              d2Y1_dU1dU1
+              d2X1_dU1dU1
+              d2Y2_dU2dU2
+              d2X2_dU2dU2
+      let secondResolution =
+            if Qty.abs resolutionXY >= Qty.abs resolutionYX
+              then resolutionXY
+              else -resolutionYX
+      if Qty.abs secondResolution >= 0.5
+        then Resolved (Intersection.Tangent, Qty.sign secondResolution)
+        else Unresolved
 
 isTangentIntersectionCandidate ::
   Tolerance units =>
@@ -145,20 +145,20 @@ tangentIntersectionSign ::
   Segment (space @ units) ->
   Segment (space @ units) ->
   Fuzzy Sign
-tangentIntersectionSign _ _ segment1 segment2 =
+tangentIntersectionSign _ _ segment1 segment2 = do
   let firstBounds1 = firstBounds segment1
-      firstBounds2 = firstBounds segment2
-      dX1_dU1 = VectorBounds2d.xComponent firstBounds1
-      dY1_dU1 = VectorBounds2d.yComponent firstBounds1
-      dX2_dU2 = VectorBounds2d.xComponent firstBounds2
-      dY2_dU2 = VectorBounds2d.yComponent firstBounds2
-      secondBounds1 = secondBounds segment1
-      secondBounds2 = secondBounds segment2
-      d2X1_dU1dU1 = VectorBounds2d.xComponent secondBounds1
-      d2Y1_dU1dU1 = VectorBounds2d.yComponent secondBounds1
-      d2X2_dU2dU2 = VectorBounds2d.xComponent secondBounds2
-      d2Y2_dU2dU2 = VectorBounds2d.yComponent secondBounds2
-      resolutionXY =
+  let firstBounds2 = firstBounds segment2
+  let dX1_dU1 = VectorBounds2d.xComponent firstBounds1
+  let dY1_dU1 = VectorBounds2d.yComponent firstBounds1
+  let dX2_dU2 = VectorBounds2d.xComponent firstBounds2
+  let dY2_dU2 = VectorBounds2d.yComponent firstBounds2
+  let secondBounds1 = secondBounds segment1
+  let secondBounds2 = secondBounds segment2
+  let d2X1_dU1dU1 = VectorBounds2d.xComponent secondBounds1
+  let d2Y1_dU1dU1 = VectorBounds2d.yComponent secondBounds1
+  let d2X2_dU2dU2 = VectorBounds2d.xComponent secondBounds2
+  let d2Y2_dU2dU2 = VectorBounds2d.yComponent secondBounds2
+  let resolutionXY =
         secondResolution1d
           dX1_dU1
           dY1_dU1
@@ -168,7 +168,7 @@ tangentIntersectionSign _ _ segment1 segment2 =
           d2Y1_dU1dU1
           d2X2_dU2dU2
           d2Y2_dU2dU2
-      resolutionYX =
+  let resolutionYX =
         secondResolution1d
           dY1_dU1
           dX1_dU1
@@ -178,13 +178,13 @@ tangentIntersectionSign _ _ segment1 segment2 =
           d2X1_dU1dU1
           d2Y2_dU2dU2
           d2X2_dU2dU2
-      secondResolution =
+  let secondResolution =
         if Qty.abs resolutionXY >= Qty.abs resolutionYX
           then resolutionXY
           else -resolutionYX
-   in if Qty.abs secondResolution >= 0.5
-        then Resolved (Qty.sign secondResolution)
-        else Unresolved
+  if Qty.abs secondResolution >= 0.5
+    then Resolved (Qty.sign secondResolution)
+    else Unresolved
 
 secondResolution1d ::
   Range units ->
@@ -198,10 +198,10 @@ secondResolution1d ::
   Float
 secondResolution1d dX1_dU1 dY1_dU1 dX2_dU2 dY2_dU2 d2X1_dU1dU1 d2Y1_dU1dU1 d2X2_dU2dU2 d2Y2_dU2dU2
   | Range.includes Qty.zero dX1_dU1 || Range.includes Qty.zero dX2_dU2 = 0.0
-  | otherwise =
+  | otherwise = do
       let d2Y1_dXdX = secondDerivativeBounds1d dX1_dU1 dY1_dU1 d2X1_dU1dU1 d2Y1_dU1dU1
-          d2Y2_dXdX = secondDerivativeBounds1d dX2_dU2 dY2_dU2 d2X2_dU2dU2 d2Y2_dU2dU2
-       in Range.resolution (d2Y2_dXdX - d2Y1_dXdX)
+      let d2Y2_dXdX = secondDerivativeBounds1d dX2_dU2 dY2_dU2 d2X2_dU2dU2 d2Y2_dU2dU2
+      Range.resolution (d2Y2_dXdX - d2Y1_dXdX)
 
 secondDerivativeBounds1d ::
   Range units ->
@@ -292,7 +292,7 @@ isCrossingIntersection ::
   Range Unitless ->
   Range Unitless ->
   Bool
-isCrossingIntersection curve1 curve2 tBounds1 tBounds2 =
+isCrossingIntersection curve1 curve2 tBounds1 tBounds2 = do
   let curveBounds1 = Curve2d.segmentBounds tBounds1 curve1
-      curveBounds2 = Curve2d.segmentBounds tBounds2 curve2
-   in Bounds2d.overlap curveBounds1 curveBounds2 >= Qty.zero
+  let curveBounds2 = Curve2d.segmentBounds tBounds2 curve2
+  Bounds2d.overlap curveBounds1 curveBounds2 >= Qty.zero

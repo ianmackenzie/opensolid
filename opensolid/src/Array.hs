@@ -22,7 +22,9 @@ import Prelude qualified
 newtype Array a = Array (Data.Array.Array Int a)
 
 length :: Array a -> Int
-length (Array array) = let (_, i) = Data.Array.bounds array in i + 1
+length (Array array) = do
+  let (_, i) = Data.Array.bounds array
+  i + 1
 
 empty :: Array a
 empty = Array (Data.Array.array (0, -1) [])
@@ -37,11 +39,11 @@ toList :: Array a -> List a
 toList (Array array) = Data.Array.elems array
 
 get :: Int -> Array a -> Maybe a
-get index (Array array) =
+get index (Array array) = do
   let (_, i) = Data.Array.bounds array
-   in if index >= 0 && index <= i
-        then Just (array ! index)
-        else Nothing
+  if index >= 0 && index <= i
+    then Just (array ! index)
+    else Nothing
 
 map :: (a -> b) -> Array a -> Array b
 map function (Array array) = Array (Prelude.fmap function array)

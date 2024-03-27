@@ -35,9 +35,9 @@ fromFloat :: Float -> String
 fromFloat (Qty_ x) = show x
 
 lines :: String -> List String
-lines string =
+lines string = do
   let (first, rest) = List.foldr fold ("", []) string
-   in first : rest
+  first : rest
  where
   fold character (current, accumulated)
     | character == '\n' = ("", current : accumulated)

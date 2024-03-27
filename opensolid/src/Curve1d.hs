@@ -357,7 +357,7 @@ findRoots ::
   Int ->
   (List Root, List (Range Unitless)) ->
   (List Root, List (Range Unitless))
-findRoots curve derivatives searchTree rootOrder accumulated =
+findRoots curve derivatives searchTree rootOrder accumulated = do
   let updated =
         Bisection.solve
           (isCandidate rootOrder)
@@ -365,17 +365,17 @@ findRoots curve derivatives searchTree rootOrder accumulated =
           (findRoot curve rootOrder derivatives)
           searchTree
           accumulated
-   in if rootOrder == 0
-        then updated
-        else findRoots curve derivatives searchTree (rootOrder - 1) updated
+  if rootOrder == 0
+    then updated
+    else findRoots curve derivatives searchTree (rootOrder - 1) updated
 
 isCandidate :: Tolerance units => Int -> Range Unitless -> Stream (Range units) -> Bool
-isCandidate rootOrder _ bounds =
+isCandidate rootOrder _ bounds = do
   let curveBounds = Stream.head bounds
-      derivativeBounds = Stream.take rootOrder (Stream.tail bounds)
-      curveContainsZero = curveBounds ^ Qty.zero
-      derivativesContainZero = List.all (Range.includes Qty.zero) derivativeBounds
-   in curveContainsZero && derivativesContainZero
+  let derivativeBounds = Stream.take rootOrder (Stream.tail bounds)
+  let curveContainsZero = curveBounds ^ Qty.zero
+  let derivativesContainZero = List.all (Range.includes Qty.zero) derivativeBounds
+  curveContainsZero && derivativesContainZero
 
 resolveDerivativeSign :: Int -> Range Unitless -> Stream (Range units) -> Fuzzy Sign
 resolveDerivativeSign derivativeOrder _ bounds = resolveSign (Stream.nth derivativeOrder bounds)
@@ -406,13 +406,13 @@ resolveSign range
 
 solveEndpoint :: Tolerance units => Curve1d units -> Float -> (List Root, Float)
 solveEndpoint curve endpointX
-  | evaluateAt endpointX curve ~= Qty.zero =
-      let check curveDerivative derivativeOrder currentMinWidth currentBest =
+  | evaluateAt endpointX curve ~= Qty.zero = do
+      let check curveDerivative derivativeOrder currentMinWidth currentBest = do
             let derivativeValue = evaluateAt endpointX curveDerivative
-                rootWidth = computeWidth derivativeOrder derivativeValue
-                updatedMinWidth = Float.min rootWidth currentMinWidth
-                rootOrder = derivativeOrder - 1
-                updatedBest =
+            let rootWidth = computeWidth derivativeOrder derivativeValue
+            let updatedMinWidth = Float.min rootWidth currentMinWidth
+            let rootOrder = derivativeOrder - 1
+            let updatedBest =
                   if updatedMinWidth < currentMinWidth
                     then
                       Just
@@ -420,29 +420,29 @@ solveEndpoint curve endpointX
                         , curveDerivative
                         )
                     else currentBest
-             in if rootOrder < maxRootOrder
-                  then
-                    check
-                      (derivative curveDerivative)
-                      (derivativeOrder + 1)
-                      updatedMinWidth
-                      updatedBest
-                  else case updatedBest of
-                    Just (root, associatedDerivative) ->
-                      resolveEndpoint root associatedDerivative endpointX 0.5
-                    Nothing -> ([], endpointX)
-       in check (derivative curve) 1 Qty.infinity Nothing
+            if rootOrder < maxRootOrder
+              then
+                check
+                  (derivative curveDerivative)
+                  (derivativeOrder + 1)
+                  updatedMinWidth
+                  updatedBest
+              else case updatedBest of
+                Just (root, associatedDerivative) ->
+                  resolveEndpoint root associatedDerivative endpointX 0.5
+                Nothing -> ([], endpointX)
+      check (derivative curve) 1 Qty.infinity Nothing
   | otherwise = ([], endpointX)
 
 resolveEndpoint :: Root -> Curve1d units -> Float -> Float -> (List Root, Float)
 resolveEndpoint root curveDerivative endpointX innerX =
   case resolveSign (segmentBounds (Range.from endpointX innerX) curveDerivative) of
     Resolved _ -> ([root], innerX)
-    Unresolved ->
+    Unresolved -> do
       let midX = Qty.midpoint endpointX innerX
-       in if midX == endpointX || midX == innerX
-            then ([], endpointX)
-            else resolveEndpoint root curveDerivative endpointX midX
+      if midX == endpointX || midX == innerX
+        then ([], endpointX)
+        else resolveEndpoint root curveDerivative endpointX midX
 
 computeWidth :: Tolerance units => Int -> Qty units -> Float
 computeWidth 1 derivativeValue = ?tolerance / Qty.abs derivativeValue

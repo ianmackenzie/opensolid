@@ -167,16 +167,16 @@ unzip2 :: NonEmpty (a, b) -> (NonEmpty a, NonEmpty b)
 unzip2 = Data.List.NonEmpty.unzip
 
 unzip3 :: NonEmpty (a, b, c) -> (NonEmpty a, NonEmpty b, NonEmpty c)
-unzip3 nonEmpty =
+unzip3 nonEmpty = do
   let (a, b, c) = first nonEmpty
-      (as, bs, cs) = List.unzip3 (rest nonEmpty)
-   in (a :| as, b :| bs, c :| cs)
+  let (as, bs, cs) = List.unzip3 (rest nonEmpty)
+  (a :| as, b :| bs, c :| cs)
 
 unzip4 :: NonEmpty (a, b, c, d) -> (NonEmpty a, NonEmpty b, NonEmpty c, NonEmpty d)
-unzip4 nonEmpty =
+unzip4 nonEmpty = do
   let (a, b, c, d) = first nonEmpty
-      (as, bs, cs, ds) = List.unzip4 (rest nonEmpty)
-   in (a :| as, b :| bs, c :| cs, d :| ds)
+  let (as, bs, cs, ds) = List.unzip4 (rest nonEmpty)
+  (a :| as, b :| bs, c :| cs, d :| ds)
 
 filter :: (a -> Bool) -> NonEmpty a -> List a
 filter = Data.List.NonEmpty.filter
@@ -272,11 +272,11 @@ maximumBy property (x :| xs) =
 
 extremum :: (b -> b -> Bool) -> (a -> b) -> a -> b -> List a -> a
 extremum _ _ current _ [] = current
-extremum comparison property current currentProperty (next : remaining) =
+extremum comparison property current currentProperty (next : remaining) = do
   let nextProperty = property next
-   in if comparison nextProperty currentProperty
-        then extremum comparison property next nextProperty remaining
-        else extremum comparison property current currentProperty remaining
+  if comparison nextProperty currentProperty
+    then extremum comparison property next nextProperty remaining
+    else extremum comparison property current currentProperty remaining
 
 prependReversed :: List a -> List a -> List a
 prependReversed [] list = list
@@ -300,8 +300,8 @@ pick better (x :| xs) = go [x] [] x xs xs
   go previous currentPrevious currentItem currentFollowing following =
     case following of
       [] -> (currentItem, prependReversed currentPrevious currentFollowing)
-      item : remaining ->
+      item : remaining -> do
         let updatedPrevious = item : previous
-         in if better item currentItem
-              then go updatedPrevious previous item remaining remaining
-              else go updatedPrevious currentPrevious currentItem currentFollowing remaining
+        if better item currentItem
+          then go updatedPrevious previous item remaining remaining
+          else go updatedPrevious currentPrevious currentItem currentFollowing remaining

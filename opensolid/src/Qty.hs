@@ -222,22 +222,22 @@ smallestBy _ (x :| []) = x
 smallestBy function (x :| xs) = go x (abs (function x)) xs
  where
   go current _ [] = current
-  go current currentAbsValue (next : remaining) =
+  go current currentAbsValue (next : remaining) = do
     let nextAbsValue = abs (function next)
-     in if nextAbsValue < currentAbsValue
-          then go next nextAbsValue remaining
-          else go current currentAbsValue remaining
+    if nextAbsValue < currentAbsValue
+      then go next nextAbsValue remaining
+      else go current currentAbsValue remaining
 
 largestBy :: (a -> Qty units) -> NonEmpty a -> a
 largestBy _ (x :| []) = x
 largestBy function (x :| xs) = go x (abs (function x)) xs
  where
   go current _ [] = current
-  go current currentAbsValue (next : remaining) =
+  go current currentAbsValue (next : remaining) = do
     let nextAbsValue = abs (function next)
-     in if nextAbsValue > currentAbsValue
-          then go next nextAbsValue remaining
-          else go current currentAbsValue remaining
+    if nextAbsValue > currentAbsValue
+      then go next nextAbsValue remaining
+      else go current currentAbsValue remaining
 
 interpolateFrom :: Qty units -> Qty units -> Float -> Qty units
 interpolateFrom a b t =

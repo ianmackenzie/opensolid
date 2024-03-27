@@ -131,14 +131,11 @@ extendPartialLoop ::
 extendPartialLoop (PartialLoop currentStart currentCurves loopEnd) curves =
   case List.partition (hasEndpoint currentStart) curves of
     ([], _) -> Error RegionBoundaryHasGaps
-    (List.One curve, remaining) ->
-      let newCurve =
-            if Curve2d.endPoint curve ~= currentStart
-              then curve
-              else Curve2d.reverse curve
-          newStart = Curve2d.startPoint newCurve
-          updatedCurves = NonEmpty.prepend newCurve currentCurves
-       in Ok (PartialLoop newStart updatedCurves loopEnd, remaining)
+    (List.One curve, remaining) -> do
+      let newCurve = if Curve2d.endPoint curve ~= currentStart then curve else Curve2d.reverse curve
+      let newStart = Curve2d.startPoint newCurve
+      let updatedCurves = NonEmpty.prepend newCurve currentCurves
+      Ok (PartialLoop newStart updatedCurves loopEnd, remaining)
     (List.TwoOrMore, _) -> Error RegionBoundaryIntersectsItself
 
 hasEndpoint :: Tolerance units => Point2d (space @ units) -> Curve2d (space @ units) -> Bool
@@ -175,11 +172,11 @@ classify point curves
   | otherwise = Just (classifyNonBoundary point curves)
 
 fluxIntegral :: Point2d (space @ units) -> Curve2d (space @ units) -> Estimate Unitless
-fluxIntegral point curve =
+fluxIntegral point curve = do
   let displacement = point - curve
-      firstDerivative = Curve2d.derivative curve
-      integrand = (firstDerivative .><. displacement) / VectorCurve2d.squaredMagnitude_ displacement
-   in Curve1d.integral integrand
+  let firstDerivative = Curve2d.derivative curve
+  let integrand = (firstDerivative .><. displacement) / VectorCurve2d.squaredMagnitude_ displacement
+  Curve1d.integral integrand
 
 totalFlux :: Point2d (space @ units) -> Loop (space @ units) -> Estimate Unitless
 totalFlux point loop =
@@ -190,9 +187,9 @@ classifyNonBoundary ::
   Point2d (space @ units) ->
   Loop (space @ units) ->
   Sign
-classifyNonBoundary point loop =
+classifyNonBoundary point loop = do
   let flux = Estimate.satisfy containmentIsDeterminate (totalFlux point loop)
-   in if Range.includes Qty.zero flux then Negative else Positive
+  if Range.includes Qty.zero flux then Negative else Positive
 
 bothPossibleFluxValues :: Range Unitless
 bothPossibleFluxValues = Range.from 0.0 Float.twoPi

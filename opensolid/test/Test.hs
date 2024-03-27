@@ -53,9 +53,9 @@ group :: String -> List Test -> Test
 group = Group
 
 testCount :: Int -> String -> String
-testCount count description =
+testCount count description = do
   let pluralized = if count == 1 then "test" else "tests"
-   in String.join " " [String.fromInt count, pluralized, description]
+  String.join " " [String.fromInt count, pluralized, description]
 
 run :: List Test -> IO ()
 run tests = IO.do
@@ -82,9 +82,9 @@ runImpl context (Group label tests) = IO.collect (runImpl (label : context)) tes
 
 sum :: List (Int, Int) -> (Int, Int)
 sum [] = (0, 0)
-sum ((successes, failures) : rest) =
+sum ((successes, failures) : rest) = do
   let (restSuccesses, restFailures) = sum rest
-   in (successes + restSuccesses, failures + restFailures)
+  (successes + restSuccesses, failures + restFailures)
 
 fuzzImpl :: List String -> Int -> Generator Expectation -> IO (Int, Int)
 fuzzImpl _ 0 _ = IO.return (1, 0)

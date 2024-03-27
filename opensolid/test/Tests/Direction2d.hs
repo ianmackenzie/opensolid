@@ -19,9 +19,9 @@ angleFrom =
     ]
  where
   testCase startDegrees endDegrees expectedDegrees =
-    Test.check 1 "angleFrom" <|
+    Test.check 1 "angleFrom" do
       let startDirection = Direction2d.degrees startDegrees
-          endDirection = Direction2d.degrees endDegrees
-          computedAngle = Direction2d.angleFrom startDirection endDirection
-          expectedAngle = Angle.degrees expectedDegrees
-       in Test.expect (let ?tolerance = Angle.radians 1e-12 in computedAngle ~= expectedAngle)
+      let endDirection = Direction2d.degrees endDegrees
+      let computedAngle = Direction2d.angleFrom startDirection endDirection
+      let expectedAngle = Angle.degrees expectedDegrees
+      Test.expect (let ?tolerance = Angle.radians 1e-12 in computedAngle ~= expectedAngle)

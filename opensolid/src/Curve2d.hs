@@ -98,10 +98,10 @@ bounds = Internal.bounds
 
 tangentDirection :: Curve2d (space @ units) -> DirectionCurve2d space
 tangentDirection (Internal.Line{direction}) = DirectionCurve2d.constant direction
-tangentDirection (Internal.Arc{startAngle, endAngle}) =
+tangentDirection (Internal.Arc{startAngle, endAngle}) = do
   let tangentStartAngle = startAngle + Angle.quarterTurn
-      tangentEndAngle = endAngle + Angle.quarterTurn
-   in Qty.sign (endAngle - startAngle) * DirectionCurve2d.arc tangentStartAngle tangentEndAngle
+  let tangentEndAngle = endAngle + Angle.quarterTurn
+  Qty.sign (endAngle - startAngle) * DirectionCurve2d.arc tangentStartAngle tangentEndAngle
 tangentDirection (Internal.Curve _ tangent) = tangent
 tangentDirection (Internal.Coerce curve) = tangentDirection curve
 tangentDirection (Internal.PlaceIn frame curve) = DirectionCurve2d.placeIn frame (tangentDirection curve)
@@ -152,12 +152,12 @@ isOverlappingSegment ::
   Curve2d (space @ units) ->
   (Range Unitless, Range Unitless, Sign) ->
   Bool
-isOverlappingSegment curve1 curve2 (domain1, _, _) =
+isOverlappingSegment curve1 curve2 (domain1, _, _) = do
   let segmentStartPoint = evaluateAt (Range.minValue domain1) curve1
-      curve1TestPoints = List.map (pointOn curve1) (Range.samples domain1)
-      segment1IsNondegenerate = List.any (!= segmentStartPoint) curve1TestPoints
-      segment1LiesOnSegment2 = List.all (^ curve2) curve1TestPoints
-   in segment1IsNondegenerate && segment1LiesOnSegment2
+  let curve1TestPoints = List.map (pointOn curve1) (Range.samples domain1)
+  let segment1IsNondegenerate = List.any (!= segmentStartPoint) curve1TestPoints
+  let segment1LiesOnSegment2 = List.all (^ curve2) curve1TestPoints
+  segment1IsNondegenerate && segment1LiesOnSegment2
 
 data IntersectionError
   = CurvesOverlap (List (Range Unitless, Range Unitless, Sign))

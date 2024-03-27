@@ -200,11 +200,11 @@ relativeTo ::
   Frame2d (global @ units) (Defines local) ->
   Point2d (global @ units) ->
   Point2d (local @ units)
-relativeTo frame point =
+relativeTo frame point = do
   let displacement = point - Frame2d.originPoint frame
-   in Point2d
-        (displacement <> Frame2d.xDirection frame)
-        (displacement <> Frame2d.yDirection frame)
+  Point2d
+    (displacement <> Frame2d.xDirection frame)
+    (displacement <> Frame2d.yDirection frame)
 
 convert :: Qty (units2 :/: units1) -> Point2d (space @ units1) -> Point2d (space @ units2)
 convert conversion (Point2d px py) = Point2d (Qty.convert conversion px) (Qty.convert conversion py)

@@ -133,14 +133,14 @@ hull3 ::
   Point3d (space @ units) ->
   Point3d (space @ units) ->
   Bounds3d (space @ units)
-hull3 (Point3d x1 y1 z1) (Point3d x2 y2 z2) (Point3d x3 y3 z3) =
+hull3 (Point3d x1 y1 z1) (Point3d x2 y2 z2) (Point3d x3 y3 z3) = do
   let minX = Qty.min (Qty.min x1 x2) x3
-      maxX = Qty.max (Qty.max x1 x2) x3
-      minY = Qty.min (Qty.min y1 y2) y3
-      maxY = Qty.max (Qty.max y1 y2) y3
-      minZ = Qty.min (Qty.min z1 z2) z3
-      maxZ = Qty.max (Qty.max z1 z2) z3
-   in Bounds3d (Range.unsafe minX maxX) (Range.unsafe minY maxY) (Range.unsafe minZ maxZ)
+  let maxX = Qty.max (Qty.max x1 x2) x3
+  let minY = Qty.min (Qty.min y1 y2) y3
+  let maxY = Qty.max (Qty.max y1 y2) y3
+  let minZ = Qty.min (Qty.min z1 z2) z3
+  let maxZ = Qty.max (Qty.max z1 z2) z3
+  Bounds3d (Range.unsafe minX maxX) (Range.unsafe minY maxY) (Range.unsafe minZ maxZ)
 
 hull4 ::
   Point3d (space @ units) ->
@@ -148,14 +148,14 @@ hull4 ::
   Point3d (space @ units) ->
   Point3d (space @ units) ->
   Bounds3d (space @ units)
-hull4 (Point3d x1 y1 z1) (Point3d x2 y2 z2) (Point3d x3 y3 z3) (Point3d x4 y4 z4) =
+hull4 (Point3d x1 y1 z1) (Point3d x2 y2 z2) (Point3d x3 y3 z3) (Point3d x4 y4 z4) = do
   let minX = Qty.min (Qty.min (Qty.min x1 x2) x3) x4
-      maxX = Qty.max (Qty.max (Qty.max x1 x2) x3) x4
-      minY = Qty.min (Qty.min (Qty.min y1 y2) y3) y4
-      maxY = Qty.max (Qty.max (Qty.max y1 y2) y3) y4
-      minZ = Qty.min (Qty.min (Qty.min z1 z2) z3) z4
-      maxZ = Qty.max (Qty.max (Qty.max z1 z2) z3) z4
-   in Bounds3d (Range.unsafe minX maxX) (Range.unsafe minY maxY) (Range.unsafe minZ maxZ)
+  let maxX = Qty.max (Qty.max (Qty.max x1 x2) x3) x4
+  let minY = Qty.min (Qty.min (Qty.min y1 y2) y3) y4
+  let maxY = Qty.max (Qty.max (Qty.max y1 y2) y3) y4
+  let minZ = Qty.min (Qty.min (Qty.min z1 z2) z3) z4
+  let maxZ = Qty.max (Qty.max (Qty.max z1 z2) z3) z4
+  Bounds3d (Range.unsafe minX maxX) (Range.unsafe minY maxY) (Range.unsafe minZ maxZ)
 
 interpolate :: Bounds3d (space @ units) -> Float -> Float -> Float -> Point3d (space @ units)
 interpolate (Bounds3d x y z) u v w =

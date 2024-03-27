@@ -17,28 +17,26 @@ simpleDict :: Dict Int String
 simpleDict = Dict.fromList [(1, "a"), (2, "b"), (3, "c")]
 
 foldl :: Test
-foldl =
-  Test.verify "foldl" <| Test.do
-    let actual = Dict.foldl (++) "" simpleDict
-        expected = "abc"
-     in Test.expect (actual == expected)
+foldl = Test.verify "foldl" Test.do
+  let actual = Dict.foldl (++) "" simpleDict
+  let expected = "abc"
+  Test.expect (actual == expected)
 
 foldr :: Test
-foldr =
-  Test.verify "foldr" <| Test.do
-    let actual = Dict.foldr (++) "" simpleDict
-        expected = "abc"
-     in Test.expect (actual == expected)
+foldr = Test.verify "foldr" Test.do
+  let actual = Dict.foldr (++) "" simpleDict
+  let expected = "abc"
+  Test.expect (actual == expected)
 
 take :: Test
 take =
   Test.group "take" <|
-    [ Test.verify "exists" <| Test.do
+    [ Test.verify "exists" Test.do
         let actual = Dict.take 2 simpleDict
-            expected = (Just "b", Dict.fromList [(1, "a"), (3, "c")])
-         in Test.expect (actual == expected)
-    , Test.verify "does not exist" <| Test.do
+        let expected = (Just "b", Dict.fromList [(1, "a"), (3, "c")])
+        Test.expect (actual == expected)
+    , Test.verify "does not exist" Test.do
         let actual = Dict.take 4 simpleDict
-            expected = (Nothing, simpleDict)
-         in Test.expect (actual == expected)
+        let expected = (Nothing, simpleDict)
+        Test.expect (actual == expected)
     ]

@@ -296,14 +296,14 @@ instance
     (Tolerance units)
     (Result BuildError (Curve2d (space @ units)))
   where
-  with arguments =
+  with arguments = do
     let computedStartAngle = Point2d.angleFrom givenCenterPoint givenStartPoint
-     in with
-          ( centerPoint givenCenterPoint
-          , radius (Point2d.distanceFrom givenCenterPoint givenStartPoint)
-          , startAngle computedStartAngle
-          , endAngle (computedStartAngle + givenSweptAngle)
-          )
+    with
+      ( centerPoint givenCenterPoint
+      , radius (Point2d.distanceFrom givenCenterPoint givenStartPoint)
+      , startAngle computedStartAngle
+      , endAngle (computedStartAngle + givenSweptAngle)
+      )
    where
     Arguments
       { centerPoint = CenterPoint givenCenterPoint

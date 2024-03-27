@@ -252,21 +252,21 @@ drawZeros path zeros = IO.do
     ]
 
 drawBounds :: List (Drawing2d.Attribute Uv.Space) -> Uv.Bounds -> Drawing2d.Entity Uv.Space
-drawBounds attributes bounds =
+drawBounds attributes bounds = do
   let point x y = Point2d.convert toDrawing (Bounds2d.interpolate bounds x y)
-   in Drawing2d.polygon attributes <|
-        [ point 0.0 0.0
-        , point 1.0 0.0
-        , point 1.0 1.0
-        , point 0.0 1.0
-        ]
+  Drawing2d.polygon attributes <|
+    [ point 0.0 0.0
+    , point 1.0 0.0
+    , point 1.0 1.0
+    , point 0.0 1.0
+    ]
 
 drawCrossingCurve :: Int -> NonEmpty (Curve2d Uv.Coordinates) -> Drawing2d.Entity Uv.Space
-drawCrossingCurve index segments =
+drawCrossingCurve index segments = do
   let hue = (Float.fromInt index * Angle.goldenAngle) % Angle.twoPi
-      colour = Colour.hsl hue 0.5 0.5
-   in Drawing2d.with [Drawing2d.strokeColour colour, Drawing2d.opacity 0.3] <|
-        List.map drawCurve (NonEmpty.toList segments)
+  let colour = Colour.hsl hue 0.5 0.5
+  Drawing2d.with [Drawing2d.strokeColour colour, Drawing2d.opacity 0.3] <|
+    List.map drawCurve (NonEmpty.toList segments)
 
 drawSaddlePoint :: Uv.Point -> Drawing2d.Entity Uv.Space
 drawSaddlePoint point = drawDot Colour.orange point
@@ -275,12 +275,10 @@ toDrawing :: Qty (Meters :/: Unitless)
 toDrawing = Length.centimeters 10.0 ./. 1.0
 
 drawCurve :: Curve2d Uv.Coordinates -> Drawing2d.Entity Uv.Space
-drawCurve curve =
-  let sampledPoints =
-        List.map
-          (Curve2d.pointOn curve >> Point2d.convert toDrawing)
-          (Parameter.steps 20)
-   in Drawing2d.polyline [] sampledPoints
+drawCurve curve = do
+  let pointOnCurve t = Point2d.convert toDrawing (Curve2d.pointOn curve t)
+  let sampledPoints = List.map pointOnCurve (Parameter.steps 20)
+  Drawing2d.polyline [] sampledPoints
 
 drawDot :: Colour -> Uv.Point -> Drawing2d.Entity Uv.Space
 drawDot colour point =
