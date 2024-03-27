@@ -326,7 +326,7 @@ testConcurrentCollect = IO.do
 testIOParallel :: IO ()
 testIOParallel = IO.do
   IO.printLine "Computing square roots with IO.parallel"
-  let values = List.map Float.fromInt [1 .. 16]
+  let values = List.map Float.fromInt [0 .. 9]
   squareRoots <- IO.parallel computeSquareRoot values
   log "Square roots" squareRoots
 
