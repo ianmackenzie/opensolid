@@ -409,12 +409,12 @@ findRoot originalCurve rootOrder derivatives domain _ nextDerivativeSign = Maybe
     else Nothing
 
 resolveSign :: Range units -> Fuzzy Sign
-resolveSign range
-  | resolution >= 0.5 = Resolved Positive
-  | resolution <= -0.5 = Resolved Negative
-  | otherwise = Unresolved
- where
-  resolution = Range.resolution range
+resolveSign range = do
+  let resolution = Range.resolution range
+  if
+    | resolution >= 0.5 -> Resolved Positive
+    | resolution <= -0.5 -> Resolved Negative
+    | otherwise -> Unresolved
 
 solveEndpoint :: Tolerance units => Curve1d units -> Float -> (List Root, Float)
 solveEndpoint curve endpointX
