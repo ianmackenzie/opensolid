@@ -505,15 +505,15 @@ resolve assess range =
           if leftValue == rightValue then Resolved leftValue else Unresolved
 
 solve :: (Qty units1 -> Qty units2) -> Range units1 -> Maybe (Qty units1)
-solve f (Range x1 x2)
-  | y1 < Qty.zero && y2 > Qty.zero = Just (root f x1 x2 y1 y2)
-  | y2 < Qty.zero && y1 > Qty.zero = Just (root f x2 x1 y2 y1)
-  | y1 == Qty.zero = Just x1
-  | y2 == Qty.zero = Just x2
-  | otherwise = Nothing
- where
-  y1 = f x1
-  y2 = f x2
+solve f (Range x1 x2) = do
+  let y1 = f x1
+  let y2 = f x2
+  if
+    | y1 < Qty.zero && y2 > Qty.zero -> Just (root f x1 x2 y1 y2)
+    | y2 < Qty.zero && y1 > Qty.zero -> Just (root f x2 x1 y2 y1)
+    | y1 == Qty.zero -> Just x1
+    | y2 == Qty.zero -> Just x2
+    | otherwise -> Nothing
 
 root ::
   (Qty units1 -> Qty units2) ->
@@ -522,53 +522,52 @@ root ::
   Qty units2 ->
   Qty units2 ->
   Qty units1
-root f nx px ny py
-  | x == nx || x == px = if -ny <= py then nx else px
-  | y > Qty.zero = root f nx x ny y
-  | y < Qty.zero = root f x px y py
-  | otherwise = x
- where
-  x = Qty.midpoint nx px
-  y = f x
+root f nx px ny py = do
+  let x = Qty.midpoint nx px
+  let y = f x
+  if
+    | x == nx || x == px -> if -ny <= py then nx else px
+    | y > Qty.zero -> root f nx x ny y
+    | y < Qty.zero -> root f x px y py
+    | otherwise -> x
 
 find :: (Range units -> Bool) -> Range units -> Maybe (Qty units)
-find isCandidate range =
-  case isCandidate range of
-    False -> Nothing
-    True
-      | isAtomic range -> Just (maxValue range)
-      | otherwise -> do
-          let (left, right) = bisect range
-          let leftResult = find isCandidate left
-          case leftResult of
-            Just _ -> leftResult
-            Nothing -> find isCandidate right
+find isCandidate t
+  | not (isCandidate t) = Nothing
+  | isAtomic t = Just (maxValue t)
+  | otherwise = do
+      let (t1, t2) = bisect t
+      let result1 = find isCandidate t1
+      case result1 of
+        Just _ -> result1
+        Nothing -> find isCandidate t2
 
 find2 ::
   (Range units1 -> Range units2 -> Bool) ->
   Range units1 ->
   Range units2 ->
   Maybe (Qty units1, Qty units2)
-find2 isCandidate u v =
-  case isCandidate u v of
-    False -> Nothing
-    True
-      | isAtomic u && isAtomic v -> Just (maxValue u, maxValue v)
-      | isAtomic u -> Maybe.map (maxValue u,) (find (isCandidate u) v)
-      | isAtomic v -> Maybe.map (,maxValue v) (find (\u' -> isCandidate u' v) u)
-      | otherwise -> do
-          let (u1, u2) = bisect u
-          let (v1, v2) = bisect v
-          case find2 isCandidate u1 v1 of
-            result@(Just _) -> result
-            Nothing ->
-              case find2 isCandidate u1 v2 of
-                result@(Just _) -> result
+find2 isCandidate u v
+  | not (isCandidate u v) = Nothing
+  | isAtomic u && isAtomic v = Just (maxValue u, maxValue v)
+  | isAtomic u = Maybe.map (maxValue u,) (find (\v' -> isCandidate u v') v)
+  | isAtomic v = Maybe.map (,maxValue v) (find (\u' -> isCandidate u' v) u)
+  | otherwise = do
+      let (u1, u2) = bisect u
+      let (v1, v2) = bisect v
+      let result11 = find2 isCandidate u1 v1
+      case result11 of
+        Just _ -> result11
+        Nothing -> do
+          let result12 = find2 isCandidate u1 v2
+          case result12 of
+            Just _ -> result12
+            Nothing -> do
+              let result21 = find2 isCandidate u2 v1
+              case result21 of
+                Just _ -> result21
                 Nothing ->
-                  case find2 isCandidate u2 v1 of
-                    result@(Just _) -> result
-                    Nothing ->
-                      find2 isCandidate u2 v2
+                  find2 isCandidate u2 v2
 
 generator :: Random.Generator (Qty units) -> Random.Generator (Range units)
 generator qtyGenerator = Random.do
