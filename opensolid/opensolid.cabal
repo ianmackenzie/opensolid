@@ -66,6 +66,7 @@ common config
       LambdaCase
       DisambiguateRecordFields
       TypeFamilyDependencies
+      MultiWayIf
 
 library
   import: config

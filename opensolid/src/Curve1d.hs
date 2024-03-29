@@ -14,6 +14,7 @@ module Curve1d
   , sqrt_
   , sin
   , cos
+  , hasInternalZero
   , ZeroEverywhere (ZeroEverywhere)
   , zeros
   , reverse
@@ -331,6 +332,19 @@ maxRootOrder :: Int
 maxRootOrder = 4
 
 ----- ROOT FINDING -----
+
+hasInternalZero :: Tolerance units => Curve1d units -> Bool
+hasInternalZero curve = isZero curve || findInternalZero curve Parameter.domain
+
+findInternalZero :: Tolerance units => Curve1d units -> Range Unitless -> Bool
+findInternalZero curve domain = do
+  let curveBounds = segmentBounds domain curve
+  if
+    | not (curveBounds ^ Qty.zero) -> False
+    | curveBounds ~= Qty.zero -> not (Range.includes 0.0 domain || Range.includes 1.0 domain)
+    | otherwise -> do
+        let (left, right) = Range.bisect domain
+        findInternalZero curve left || findInternalZero curve right
 
 data ZeroEverywhere = ZeroEverywhere deriving (Eq, Show, Error)
 
