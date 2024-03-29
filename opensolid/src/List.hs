@@ -3,6 +3,7 @@ module List
   , pattern One
   , pattern Two
   , pattern Three
+  , pattern OneOrMore
   , pattern TwoOrMore
   , pattern ThreeOrMore
   , pattern FourOrMore
@@ -66,6 +67,8 @@ isEmpty = Prelude.null
 length :: List a -> Int
 length = Data.List.length
 
+{-# COMPLETE [], OneOrMore #-}
+
 {-# COMPLETE [], One, TwoOrMore #-}
 
 {-# COMPLETE [], One, Two, ThreeOrMore #-}
@@ -80,6 +83,9 @@ pattern Two first second = [first, second]
 
 pattern Three :: a -> a -> a -> List a
 pattern Three first second third = [first, second, third]
+
+pattern OneOrMore :: List a
+pattern OneOrMore <- _ : _
 
 pattern TwoOrMore :: List a
 pattern TwoOrMore <- _ : _ : _
