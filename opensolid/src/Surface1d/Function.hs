@@ -482,7 +482,7 @@ findCrossingSolutions ::
   Result ZerosError (PartialZeros, List Uv.Bounds)
 findCrossingSolutions derivatives boundaryEdges boundaryPoints uvBounds bisectionParameter exclusions saddleRegions
   -- The function is non-zero for this subdomain, so no solutions
-  | Range.exclusion Qty.zero fBounds > ?tolerance = Ok (PartialZeros.empty, [])
+  | not (fBounds ^ Qty.zero) = Ok (PartialZeros.empty, [])
   -- We're within an existing exclusion region from a previous solution, so no additional solutions
   | List.any (Bounds2d.contains uvBounds) exclusions = Ok (PartialZeros.empty, [])
   -- We're within an existing saddle region from a previous solution, so no additional solutions
