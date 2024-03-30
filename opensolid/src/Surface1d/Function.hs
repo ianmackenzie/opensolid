@@ -396,7 +396,7 @@ zeros f = Result.do
   (crossingSolutions, _) <- findCrossingSolutions derivatives boundaryEdges boundaryPoints Uv.domain U tangentExclusions saddleRegions
   -- TODO report tangent/crossing curves at domain edges when recognized
   -- TODO rename 'solutions' to 'zeros'
-  finalizeZeros (PartialZeros.merge tangentSolutions crossingSolutions)
+  finalizeZeros f (PartialZeros.merge tangentSolutions crossingSolutions)
  where
   fu = derivative U f
   fv = derivative V f
@@ -1249,10 +1249,10 @@ parallelogramBounds x1 x2 y1 y2 (Range minSlope maxSlope) =
       yHigh = y1 + maxSlope * deltaXHigh
    in Range.hull4 y1 y2 yLow yHigh
 
-finalizeZeros :: PartialZeros -> Result ZerosError Zeros
-finalizeZeros partialZeros = Result.do
+finalizeZeros :: Function units -> PartialZeros -> Result ZerosError Zeros
+finalizeZeros f partialZeros = Result.do
   finalizedCrossingCurves <- Result.combine do
-    Maybe.collect (finalizeCrossingCurve saddleRegions) crossingCurves
+    Maybe.collect (finalizeCrossingCurve f saddleRegions) crossingCurves
   -- Check that there were no degenerate curve segments left
   Debug.assert (List.length finalizedCrossingCurves == List.length crossingCurves)
   Ok
@@ -1277,11 +1277,12 @@ finalizeZeros partialZeros = Result.do
     } = partialZeros
 
 finalizeCrossingCurve ::
+  Function units ->
   List SaddleRegion ->
   PartialZeros.CrossingCurve ->
   Maybe (Result ZerosError (NonEmpty (Curve2d Uv.Coordinates)))
-finalizeCrossingCurve _ (PartialZeros.DegenerateCrossingCurve{}) = Nothing
-finalizeCrossingCurve saddleRegions (PartialZeros.CrossingCurve{segments}) =
+finalizeCrossingCurve _ _ (PartialZeros.DegenerateCrossingCurve{}) = Nothing
+finalizeCrossingCurve f saddleRegions (PartialZeros.CrossingCurve{segments}) =
   let firstCurve = NonEmpty.first segments
       lastCurve = NonEmpty.last segments
       startPoint = Curve2d.startPoint firstCurve
@@ -1291,16 +1292,16 @@ finalizeCrossingCurve saddleRegions (PartialZeros.CrossingCurve{segments}) =
         (Nothing, Nothing) -> Just (Ok segments)
         (Just startRegion, Nothing) ->
           Just Result.do
-            extension <- connectingCurve startRegion firstCurve
+            extension <- connectingCurve f startRegion firstCurve
             Ok ([extension] ++ segments)
         (Nothing, Just endRegion) ->
           Just Result.do
-            extension <- connectingCurve endRegion (Curve2d.reverse lastCurve)
+            extension <- connectingCurve f endRegion (Curve2d.reverse lastCurve)
             Ok (segments ++ [extension])
         (Just startRegion, Just endRegion) ->
           Just Result.do
-            startExtension <- connectingCurve startRegion firstCurve
-            endExtension <- connectingCurve endRegion (Curve2d.reverse lastCurve)
+            startExtension <- connectingCurve f startRegion firstCurve
+            endExtension <- connectingCurve f endRegion (Curve2d.reverse lastCurve)
             Ok ([startExtension] ++ segments ++ [endExtension])
 
 finalizeTangentCurve :: PartialZeros.TangentCurve -> Maybe (NonEmpty (Curve2d Uv.Coordinates), Sign)
@@ -1313,8 +1314,8 @@ finalizeTangentLoop (PartialZeros.TangentLoop{segments, sign}) = (segments, sign
 finalizeTangentPoint :: PartialZeros.TangentPoint -> (Uv.Point, Sign)
 finalizeTangentPoint (PartialZeros.TangentPoint{point, sign}) = (point, sign)
 
-connectingCurve :: SaddleRegion -> Curve2d Uv.Coordinates -> Result ZerosError (Curve2d Uv.Coordinates)
-connectingCurve saddleRegion curve = Result.do
+connectingCurve :: Function units -> SaddleRegion -> Curve2d Uv.Coordinates -> Result ZerosError (Curve2d Uv.Coordinates)
+connectingCurve _ saddleRegion curve = Result.do
   let frame = SaddleRegion.frame saddleRegion
   let localCurve = Curve2d.relativeTo frame curve
   let localCurveFirstDerivative = Curve2d.derivative localCurve
@@ -1338,6 +1339,25 @@ connectingCurve saddleRegion curve = Result.do
       (localStartPoint, [localStartFirstDerivative, localStartSecondDerivative])
       (localEndPoint, [localEndFirstDerivative, localEndSecondDerivative])
       ?? Error DegenerateCurve
-  Ok (Curve2d.placeIn frame localExtension)
+  let extension = Curve2d.placeIn frame localExtension
+  -- let curveCurvature = Curve2d.curvature_ curve
+  -- let extensionCurvature = Curve2d.curvature_ extension
+  -- Debug.log "Extension distance                " (Point2d.distanceFrom localStartPoint localEndPoint)
+  -- Debug.log "Error 0.0                         " (evaluateAt (Curve2d.evaluateAt 0.0 extension) f)
+  -- Debug.log "Error 0.5                         " (evaluateAt (Curve2d.evaluateAt 0.5 extension) f)
+  -- Debug.log "Error 1.0                         " (evaluateAt (Curve2d.evaluateAt 1.0 extension) f)
+  -- Debug.log "Extension curvature 0.0           " (Curve1d.evaluateAt 0.0 extensionCurvature)
+  -- Debug.log "Extension curvature 0.5           " (Curve1d.evaluateAt 0.5 extensionCurvature)
+  -- Debug.log "Extension curvature 1.0           " (Curve1d.evaluateAt 1.0 extensionCurvature)
+  -- Debug.log "Curve curvature 0.0               " (Curve1d.evaluateAt 0.0 curveCurvature)
+  -- Debug.log "Curve curvature 0.5               " (Curve1d.evaluateAt 0.5 curveCurvature)
+  -- Debug.log "Curve curvature 1.0               " (Curve1d.evaluateAt 1.0 curveCurvature)
+  -- Debug.log "Extension start derivative        " (VectorCurve2d.evaluateAt 0.0 (Curve2d.derivative extension))
+  -- Debug.log "Extension end derivative          " (VectorCurve2d.evaluateAt 1.0 (Curve2d.derivative extension))
+  -- Debug.log "Curve start derivative            " (VectorCurve2d.evaluateAt 0.0 (Curve2d.derivative curve) * k)
+  -- Debug.log "Extension start second derivative " (VectorCurve2d.evaluateAt 0.0 (VectorCurve2d.derivative (Curve2d.derivative extension)))
+  -- Debug.log "Extension end second derivative   " (VectorCurve2d.evaluateAt 1.0 (VectorCurve2d.derivative (Curve2d.derivative extension)))
+  -- Debug.log "Curve start second derivative     " (VectorCurve2d.evaluateAt 0.0 (VectorCurve2d.derivative (Curve2d.derivative curve)) * k * k)
+  Ok extension
  where
   ?tolerance = 1e-9
