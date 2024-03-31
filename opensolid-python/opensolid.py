@@ -251,11 +251,11 @@ class Direction2d:
     def unsafe(v: Vector2d) -> Direction2d:
         return Direction2d(lib.opensolid_direction2d_unsafe(v.ptr))
 
-    lib.opensolid_direction2d_unwrap.argtypes = [c_void_p]
-    lib.opensolid_direction2d_unwrap.restype = c_void_p
+    lib.opensolid_direction2d_vector.argtypes = [c_void_p]
+    lib.opensolid_direction2d_vector.restype = c_void_p
 
-    def unwrap(self) -> Vector2d:
-        return Vector2d(lib.opensolid_direction2d_unwrap(self.ptr))
+    def vector(self) -> Vector2d:
+        return Vector2d(lib.opensolid_direction2d_vector(self.ptr))
 
     lib.opensolid_direction2d_x.argtypes = []
     lib.opensolid_direction2d_x.restype = c_void_p
@@ -382,19 +382,19 @@ class Frame2d:
             + ")"
         )
 
-    lib.opensolid_frame2d_at_origin.argtypes = []
-    lib.opensolid_frame2d_at_origin.restype = c_void_p
+    lib.opensolid_frame2d_xy.argtypes = []
+    lib.opensolid_frame2d_xy.restype = c_void_p
 
     @staticmethod
-    def at_origin() -> Frame2d:
-        return Frame2d(lib.opensolid_frame2d_at_origin())
+    def xy() -> Frame2d:
+        return Frame2d(lib.opensolid_frame2d_xy())
 
-    lib.opensolid_frame2d_at_point.argtypes = [c_void_p]
-    lib.opensolid_frame2d_at_point.restype = c_void_p
+    lib.opensolid_frame2d_with_origin_point.argtypes = [c_void_p]
+    lib.opensolid_frame2d_with_origin_point.restype = c_void_p
 
     @staticmethod
-    def at_point(point: Point2d) -> Frame2d:
-        return Frame2d(lib.opensolid_frame2d_at_point(point.ptr))
+    def with_origin_point(point: Point2d) -> Frame2d:
+        return Frame2d(lib.opensolid_frame2d_with_origin_point(point.ptr))
 
     lib.opensolid_frame2d_origin_point.argtypes = [c_void_p]
     lib.opensolid_frame2d_origin_point.restype = c_void_p
