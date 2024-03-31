@@ -4,6 +4,7 @@ module Tolerance
   , (!=)
   , exactly
   , ofSquared
+  , ofSquared_
   )
 where
 
@@ -13,6 +14,7 @@ import Float (fromRational)
 import NonEmpty (NonEmpty ((:|)), pattern NonEmpty)
 import Qty (Qty)
 import Qty qualified
+import Units ((:*:))
 import Units qualified
 
 type Tolerance units = ?tolerance :: Qty units
@@ -93,5 +95,8 @@ exactly expression = let ?tolerance = Qty.zero in expression
 
 infix 4 ~=, !=
 
+ofSquared_ :: Tolerance units => Qty units -> Qty (units :*: units)
+ofSquared_ value = ?tolerance .*. ?tolerance + 2.0 * Qty.abs value .*. ?tolerance
+
 ofSquared :: (Tolerance units, Units.Product units units squaredUnits) => Qty units -> Qty squaredUnits
-ofSquared value = ?tolerance * ?tolerance + 2.0 * Qty.abs value * ?tolerance
+ofSquared = Units.specialize . ofSquared_
