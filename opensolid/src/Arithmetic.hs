@@ -168,7 +168,7 @@ instance Exponentiation Int Int where
   (**) = (Prelude.^)
 
 instance units ~ Unitless => Exponentiation (Qty units) Int where
-  (**) = (Prelude.^)
+  x ** n = x ** (fromIntegral n :: Qty Unitless)
 
 instance
   (baseUnits ~ Unitless, exponentUnits ~ Unitless) =>
