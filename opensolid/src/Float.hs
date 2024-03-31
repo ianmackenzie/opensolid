@@ -34,12 +34,12 @@ where
 
 import Arithmetic
 import Basics
-import {-# SOURCE #-} Maybe qualified
+import Coalesce
 import NonEmpty (NonEmpty)
 import NonEmpty qualified
 import Qty (Qty (Qty_))
 import Qty qualified
-import {-# SOURCE #-} Result (Result)
+import {-# SOURCE #-} Result (Result (Error))
 import Sign (Sign)
 import Text.Read qualified
 import Units (Unitless)
@@ -55,9 +55,7 @@ fromInt :: Int -> Float
 fromInt = fromIntegral
 
 parse :: String -> Result String Float
-parse input =
-  Text.Read.readMaybe input
-    |> Maybe.orError ("Couldn't parse input as a float: " + input)
+parse input = Text.Read.readMaybe input ?? Error ("Couldn't parse input as a float: " + input)
 
 {-# INLINE floor #-}
 floor :: Float -> Int

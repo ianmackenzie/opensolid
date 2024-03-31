@@ -61,6 +61,26 @@ instance a ~ a' => Coalesce (Result x a) (Result y a') (Result y a) where
   Ok value ?? _ = Ok value
   Error _ ?? fallback = fallback
 
+instance a ~ a' => Coalesce (Result x a) (Maybe a') (Maybe a) where
+  Ok value ?? _ = Just value
+  Error _ ?? fallback = fallback
+
+instance a ~ a' => Coalesce (Maybe a) (Result x a') (Result x a) where
+  Just value ?? _ = Ok value
+  Nothing ?? fallback = fallback
+
+instance a ~ a' => Coalesce (Result x a) (IO a') (IO a) where
+  Ok value ?? _ = IO.return value
+  Error _ ?? fallback = fallback
+
+instance a ~ a' => Coalesce (IO a) (Result x a') (IO a) where
+  io ?? fallback =
+    io |> IO.onError do
+      \_ ->
+        case fallback of
+          Ok value -> IO.return value
+          Error error -> IO.fail (Error.message error)
+
 return :: a -> Result x a
 return = Ok
 
