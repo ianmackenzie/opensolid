@@ -54,13 +54,13 @@ find = Test.verify "find" Test.do
   let endParameterValues = Curve2d.find (Point2d.meters 2.0 0.0) testSpline
   let midParameterValues = Curve2d.find (Point2d.meters 1.0 1.0) testSpline
   let offCurveParameterValues = Curve2d.find (Point2d.meters 1.0 1.1) testSpline
-  let ?tolerance = 1e-12
-   in Test.expectAll
-        [ startParameterValues ~= [0.0]
-        , endParameterValues ~= [1.0]
-        , midParameterValues ~= [0.5]
-        , offCurveParameterValues == []
-        ]
+  Tolerance.using 1e-12 $
+    Test.expectAll
+      [ startParameterValues ~= [0.0]
+      , endParameterValues ~= [1.0]
+      , midParameterValues ~= [0.5]
+      , offCurveParameterValues == []
+      ]
 
 overlappingSegments ::
   Tolerance units =>
@@ -75,7 +75,7 @@ overlappingSegments curve1 curve2 =
 
 equalUBounds :: Range Unitless -> Range Unitless -> Bool
 equalUBounds (Range low1 high1) (Range low2 high2) =
-  let ?tolerance = 1e-12 in low1 ~= low2 && high1 ~= high2
+  Tolerance.using 1e-12 (low1 ~= low2 && high1 ~= high2)
 
 equalOverlapSegments :: (Range Unitless, Range Unitless, Sign) -> (Range Unitless, Range Unitless, Sign) -> Bool
 equalOverlapSegments (t1, t2, sign) (t1', t2', sign') =
@@ -125,8 +125,7 @@ crossingIntersection = Test.verify "Crossing intersection" Test.do
         [ Intersection 0.0 0.0 Intersection.Crossing Positive
         , Intersection 0.5 0.5 Intersection.Crossing Negative
         ]
-  let ?tolerance = 1e-12
-   in Test.expect (intersections ~= expectedIntersections)
+  Tolerance.using 1e-12 (Test.expect (intersections ~= expectedIntersections))
 
 tangentIntersection :: Tolerance Meters => Test
 tangentIntersection = Test.verify "Tangent intersection" Test.do
@@ -146,8 +145,7 @@ tangentIntersection = Test.verify "Tangent intersection" Test.do
       )
   intersections <- Curve2d.intersections arc1 arc2
   let expectedIntersections = [Intersection 0.5 0.5 Intersection.Tangent Positive]
-  let ?tolerance = 1e-12
-   in Test.expect (intersections ~= expectedIntersections)
+  Tolerance.using 1e-12 (Test.expect (intersections ~= expectedIntersections))
 
 solving :: Tolerance Meters => Test
 solving = Test.verify "Solving via Curve1d" Test.do
@@ -155,10 +153,10 @@ solving = Test.verify "Solving via Curve1d" Test.do
   let squaredDistanceFromOrigin = VectorCurve2d.squaredMagnitude (arc - Point2d.origin)
   let desiredDistance = Length.meters 0.5
   roots <-
-    let ?tolerance = Tolerance.ofSquared desiredDistance
-     in case Curve1d.zeros (squaredDistanceFromOrigin - Qty.squared desiredDistance) of
-          Curve1d.ZeroEverywhere -> Error "Internal error in test, curve should not be zero everywhere"
-          Curve1d.Zeros roots -> Ok roots
+    Tolerance.using (Tolerance.ofSquared desiredDistance) $
+      case Curve1d.zeros (squaredDistanceFromOrigin - Qty.squared desiredDistance) of
+        Curve1d.ZeroEverywhere -> Error "Internal error in test, curve should not be zero everywhere"
+        Curve1d.Zeros roots -> Ok roots
   let distances =
         roots
           |> List.map Curve1d.Root.value
@@ -207,7 +205,7 @@ tangentDerivativeIsPerpendicularToTangent =
     t <- Parameter.generator
     let tangent = DirectionCurve2d.evaluateAt t tangentDirection
     let derivative = VectorCurve2d.evaluateAt t tangentDerivative
-    Test.expect (let ?tolerance = 1e-12 in derivative <> tangent ~= 0.0)
+    Test.expect (Tolerance.using 1e-12 (derivative <> tangent ~= 0.0))
       |> Test.output "t" t
       |> Test.output "tangent" tangent
       |> Test.output "derivative" derivative

@@ -3,6 +3,7 @@ module Tests.DivMod (tests) where
 import OpenSolid
 import Test (Test)
 import Test qualified
+import Tolerance qualified
 
 tests :: List Test
 tests =
@@ -35,9 +36,8 @@ floatDiv =
 
 floatMod :: Test
 floatMod =
-  Test.group "Float %" $
-    [ Test.verify "1.7 % 0.5" (Test.expect (1.7 % 0.5 ~= 0.2))
-    , Test.verify "-1.7 % 0.5" (Test.expect (-1.7 % 0.5 ~= 0.3))
-    ]
- where
-  ?tolerance = 1e-12
+  Tolerance.using 1e-12 $
+    Test.group "Float %" $
+      [ Test.verify "1.7 % 0.5" (Test.expect (1.7 % 0.5 ~= 0.2))
+      , Test.verify "-1.7 % 0.5" (Test.expect (-1.7 % 0.5 ~= 0.3))
+      ]

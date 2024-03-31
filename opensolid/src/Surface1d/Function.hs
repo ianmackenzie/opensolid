@@ -59,6 +59,7 @@ import Surface1d.Function.SaddleRegion (SaddleRegion (SaddleRegion))
 import Surface1d.Function.SaddleRegion qualified as SaddleRegion
 import Surface1d.Function.Zeros (Zeros (Zeros))
 import Surface1d.Function.Zeros qualified as Zeros
+import Tolerance qualified
 import Units qualified
 import Uv (Parameter (U, V))
 import Uv qualified
@@ -1335,10 +1336,11 @@ connectingCurve _ saddleRegion curve = Result.do
   let localStartFirstDerivative = Vector2d.xy x0 (x0 * dydx)
   let localStartSecondDerivative = Vector2d.xy 0.0 (x0 * x0 * d2ydx2)
   localExtension <-
-    BezierCurve2d.hermite
-      (localStartPoint, [localStartFirstDerivative, localStartSecondDerivative])
-      (localEndPoint, [localEndFirstDerivative, localEndSecondDerivative])
-      ?? Error DegenerateCurve
+    Tolerance.using 1e-9 $
+      BezierCurve2d.hermite
+        (localStartPoint, [localStartFirstDerivative, localStartSecondDerivative])
+        (localEndPoint, [localEndFirstDerivative, localEndSecondDerivative])
+        ?? Error DegenerateCurve
   let extension = Curve2d.placeIn frame localExtension
   -- let curveCurvature = Curve2d.curvature_ curve
   -- let extensionCurvature = Curve2d.curvature_ extension
@@ -1359,5 +1361,3 @@ connectingCurve _ saddleRegion curve = Result.do
   -- Debug.log "Extension end second derivative   " (VectorCurve2d.evaluateAt 1.0 (VectorCurve2d.derivative (Curve2d.derivative extension)))
   -- Debug.log "Curve start second derivative     " (VectorCurve2d.evaluateAt 0.0 (VectorCurve2d.derivative (Curve2d.derivative curve)) * k * k)
   Ok extension
- where
-  ?tolerance = 1e-9

@@ -5,6 +5,7 @@ import Direction2d qualified
 import OpenSolid
 import Test (Test)
 import Test qualified
+import Tolerance qualified
 
 tests :: List Test
 tests =
@@ -24,4 +25,4 @@ angleFrom =
       let endDirection = Direction2d.degrees endDegrees
       let computedAngle = Direction2d.angleFrom startDirection endDirection
       let expectedAngle = Angle.degrees expectedDegrees
-      Test.expect (let ?tolerance = Angle.radians 1e-12 in computedAngle ~= expectedAngle)
+      Test.expect (Tolerance.using (Angle.radians 1e-12) (computedAngle ~= expectedAngle))

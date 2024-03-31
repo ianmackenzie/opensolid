@@ -25,10 +25,11 @@ import Range qualified
 import Test (Test)
 import Test qualified
 import Tests.Random qualified as Random
+import Tolerance qualified
 import Units (Meters)
 import VectorCurve2d qualified
 
-tests :: List Test
+tests :: Tolerance Meters => List Test
 tests =
   [ smallest
   , largest
@@ -42,8 +43,6 @@ tests =
   , pickSmallestBy
   , pickLargestBy
   ]
- where
-  ?tolerance = Length.meters 1e-9
 
 data DummyEstimate = DummyEstimate Length (Range Meters)
 
@@ -131,9 +130,8 @@ area = Test.verify "area" Test.do
       )
   let dAdt = Curve2d.yCoordinate curve * VectorCurve2d.xComponent (Curve2d.derivative curve)
   let areaEstimate = Curve1d.integral dAdt
-  areaIsCorrect <-
-    let ?tolerance = Area.squareMeters 1e-6
-     in resolvesTo (Area.squareMeters (Float.pi / 2.0)) areaEstimate
+  let expectedArea = Area.squareMeters (Float.pi / 2.0)
+  areaIsCorrect <- Tolerance.using (Area.squareMeters 1e-6) (resolvesTo expectedArea areaEstimate)
   Test.expect areaIsCorrect
 
 minimumBy :: Tolerance Meters => Test

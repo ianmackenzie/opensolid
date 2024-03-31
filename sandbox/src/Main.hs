@@ -36,6 +36,7 @@ import Result qualified
 import String qualified
 import Surface1d.Function qualified
 import Surface1d.Function.Zeros qualified
+import Tolerance qualified
 import Transform2d qualified
 import Units (Meters)
 import Uv (Parameter (U, V))
@@ -87,8 +88,7 @@ testRangeArithmetic = IO.do
 
 testEquality :: IO ()
 testEquality =
-  log "Equality test" $
-    let ?tolerance = Length.centimeter in Length.meters 1.0 ~= Length.meters 1.005
+  log "Equality test" (Tolerance.using Length.centimeter (Length.meters 1.0 ~= Length.meters 1.005))
 
 testTransformation :: IO ()
 testTransformation = IO.do

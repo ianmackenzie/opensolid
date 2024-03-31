@@ -30,6 +30,7 @@ import Qty qualified
 import Range (Range)
 import Range qualified
 import Result qualified
+import Tolerance qualified
 import Units qualified
 import VectorCurve2d qualified
 
@@ -211,9 +212,9 @@ classifyLoops (NonEmpty loops) = Result.do
     else Error MultipleDisjointRegions
 
 fixSign :: Tolerance units => Sign -> Loop (space @ units) -> Loop (space @ units)
-fixSign desiredSign loop = do
-  let ?tolerance = Qty.squared_ ?tolerance
-  if Estimate.sign (loopSignedArea loop) == desiredSign then loop else reverseLoop loop
+fixSign desiredSign loop =
+  Tolerance.using (Qty.squared_ ?tolerance) $
+    if Estimate.sign (loopSignedArea_ loop) == desiredSign then loop else reverseLoop loop
 
 reverseLoop :: Loop (space @ units) -> Loop (space @ units)
 reverseLoop loop = NonEmpty.reverseMap Curve2d.reverse loop
@@ -222,12 +223,12 @@ pickLargestLoop ::
   Tolerance units =>
   NonEmpty (Loop (space @ units)) ->
   (Loop (space @ units), List (Loop (space @ units)))
-pickLargestLoop loops = do
-  let ?tolerance = Qty.squared_ ?tolerance
-  Estimate.pickLargestBy loopSignedArea loops
+pickLargestLoop loops =
+  Tolerance.using (Qty.squared_ ?tolerance) $
+    Estimate.pickLargestBy loopSignedArea_ loops
 
-loopSignedArea :: Loop (space @ units) -> Estimate (units :*: units)
-loopSignedArea loop = do
+loopSignedArea_ :: Loop (space @ units) -> Estimate (units :*: units)
+loopSignedArea_ loop = do
   let referencePoint = Curve2d.startPoint (NonEmpty.first loop)
   NonEmpty.toList loop
     |> List.map (areaIntegral_ referencePoint)

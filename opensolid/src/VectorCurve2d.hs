@@ -57,6 +57,7 @@ import OpenSolid
 import Qty qualified
 import Range (Range (Range))
 import Range qualified
+import Tolerance qualified
 import Units qualified
 import Vector2d (Vector2d (Vector2d))
 import Vector2d qualified
@@ -712,11 +713,10 @@ data Zeros = ZeroEverywhere | Zeros (List Float) deriving (Eq, Show)
 
 zeros :: Tolerance units => VectorCurve2d (space @ units) -> Zeros
 zeros curve =
-  case Curve1d.zeros (squaredMagnitude_ curve) of
-    Curve1d.ZeroEverywhere -> ZeroEverywhere
-    Curve1d.Zeros roots -> Zeros (List.map Curve1d.Root.value roots)
- where
-  ?tolerance = Qty.squared_ ?tolerance
+  Tolerance.using (Qty.squared_ ?tolerance) $
+    case Curve1d.zeros (squaredMagnitude_ curve) of
+      Curve1d.ZeroEverywhere -> ZeroEverywhere
+      Curve1d.Zeros roots -> Zeros (List.map Curve1d.Root.value roots)
 
 xComponent :: VectorCurve2d (space @ units) -> Curve1d units
 xComponent curve = curve <> Direction2d.x

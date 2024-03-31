@@ -13,6 +13,7 @@ import Range qualified
 import Test (Test)
 import Test qualified
 import Tests.Random qualified as Random
+import Tolerance qualified
 import Units (Meters)
 
 tests :: List Test
@@ -94,7 +95,7 @@ find :: Test
 find = Test.verify "find" do
   case Range.solve (\x -> Qty.squared x - 2.0) (Range.from 1.0 2.0) of
     Nothing -> Test.fail "Should have found the square root of 2 between 1.0 and 2.0"
-    Just root -> Test.expect (root ~= Float.sqrt 2.0) where ?tolerance = 1e-12
+    Just root -> Test.expect (Tolerance.using 1e-12 (root ~= Float.sqrt 2.0))
 
 qtyRangeDivision :: Test
 qtyRangeDivision = Test.check 1000 "qtyRangeDivision" Test.do

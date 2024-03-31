@@ -2,6 +2,7 @@ module Tolerance
   ( Tolerance
   , ApproximateEquality ((~=))
   , (!=)
+  , using
   , exactly
   , ofSquared
   , ofSquared_
@@ -91,7 +92,10 @@ equivalent to
   let ?tolerance = Qty.zero in value ^ range
 -}
 exactly :: (Tolerance units => a) -> a
-exactly expression = let ?tolerance = Qty.zero in expression
+exactly expression = using Qty.zero expression
+
+using :: Qty units -> (Tolerance units => a) -> a
+using tolerance expression = let ?tolerance = tolerance in expression
 
 infix 4 ~=, !=
 

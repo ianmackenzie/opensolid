@@ -12,9 +12,10 @@ import Qty (zero)
 import Region2d qualified
 import Test (Test)
 import Test qualified
+import Tolerance qualified
 import Units (Meters)
 
-tests :: List Test
+tests :: Tolerance Meters => List Test
 tests =
   [ square
   , quarterCircle
@@ -23,8 +24,6 @@ tests =
   , squareWithTangentHole
   , twoCircles
   ]
- where
-  ?tolerance = Length.meters 1e-9
 
 square :: Tolerance Meters => Test
 square = Test.verify "square" Test.do
@@ -38,7 +37,7 @@ square = Test.verify "square" Test.do
   line3 <- Line2d.from p4 p3
   line4 <- Line2d.from p4 p1
   region <- Region2d.boundedBy [line1, line3, line2, line4]
-  Test.expect (let ?tolerance = Area.squareMeters 1e-6 in Region2d.area region ~= width * width)
+  Test.expect (Tolerance.using (Area.squareMeters 1e-6) (Region2d.area region ~= width * width))
 
 quarterCircle :: Tolerance Meters => Test
 quarterCircle = Test.verify "quarterCircle" Test.do
@@ -50,7 +49,7 @@ quarterCircle = Test.verify "quarterCircle" Test.do
   line2 <- Line2d.from p1 p3
   arc <- Arc2d.swept Angle.quarterTurn p2 p3
   region <- Region2d.boundedBy [line1, line2, arc]
-  Test.expect (let ?tolerance = Area.squareMeters 1e-6 in Region2d.area region ~= 0.25 * Float.pi * radius * radius)
+  Test.expect (Tolerance.using (Area.squareMeters 1e-6) (Region2d.area region ~= 0.25 * Float.pi * radius * radius))
 
 squareWithHole :: Tolerance Meters => Test
 squareWithHole = Test.verify "squareWithHole" Test.do
@@ -75,7 +74,7 @@ squareWithHole = Test.verify "squareWithHole" Test.do
   region <- Region2d.boundedBy [line1, line3, line2, line4, arc]
   let area = Region2d.area region
   let expectedArea = width * width - Float.pi * holeRadius * holeRadius
-  Test.expect (let ?tolerance = Area.squareMeters 1e-6 in area ~= expectedArea)
+  Test.expect (Tolerance.using (Area.squareMeters 1e-6) (area ~= expectedArea))
 
 incompleteSquare :: Tolerance Meters => Test
 incompleteSquare = Test.verify "incompleteSquare" Test.do
