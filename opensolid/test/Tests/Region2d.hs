@@ -65,7 +65,7 @@ squareWithHole = Test.verify "squareWithHole" Test.do
   let centerPoint = Point2d.xy (width / 2.0) (width / 2.0)
   let holeRadius = width / 4.0
   arc <-
-    Arc2d.with
+    Arc2d.build
       ( Arc2d.centerPoint centerPoint
       , Arc2d.radius holeRadius
       , Arc2d.startAngle zero
@@ -104,7 +104,7 @@ squareWithTangentHole = Test.verify "squareWithTangentHole" Test.do
   let centerPoint = Point2d.xy (width / 2.0) (width / 2.0)
   let holeRadius = width / 2.0
   arc <-
-    Arc2d.with
+    Arc2d.build
       ( Arc2d.centerPoint centerPoint
       , Arc2d.radius holeRadius
       , Arc2d.startAngle zero
@@ -117,7 +117,7 @@ squareWithTangentHole = Test.verify "squareWithTangentHole" Test.do
 twoCircles :: Tolerance Meters => Test
 twoCircles = Test.verify "twoCircles" Test.do
   let circle centerPoint radius =
-        Arc2d.with
+        Arc2d.build
           ( Arc2d.centerPoint centerPoint
           , Arc2d.radius radius
           , Arc2d.startAngle zero

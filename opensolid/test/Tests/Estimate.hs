@@ -122,7 +122,7 @@ resolvesTo value estimate
 area :: Tolerance Meters => Test
 area = Test.verify "area" Test.do
   curve <-
-    Arc2d.with
+    Arc2d.build
       ( Arc2d.centerPoint Point2d.origin
       , Arc2d.startAngle (Angle.degrees 180.0)
       , Arc2d.sweptAngle (Angle.degrees -180.0)

@@ -96,14 +96,14 @@ curveOverlap1 = Test.verify "Overlap detection 1" Test.do
 curveOverlap2 :: Tolerance Meters => Test
 curveOverlap2 = Test.verify "Overlap detection 2" Test.do
   arc1 <-
-    Arc2d.with
+    Arc2d.build
       ( Arc2d.centerPoint Point2d.origin
       , Arc2d.radius (Length.meters 1.0)
       , Arc2d.startAngle (Angle.degrees 0.0)
       , Arc2d.endAngle (Angle.degrees -180.0)
       )
   arc2 <-
-    Arc2d.with
+    Arc2d.build
       ( Arc2d.centerPoint Point2d.origin
       , Arc2d.radius (Length.meters 1.0)
       , Arc2d.startAngle (Angle.degrees -45.0)
@@ -130,14 +130,14 @@ crossingIntersection = Test.verify "Crossing intersection" Test.do
 tangentIntersection :: Tolerance Meters => Test
 tangentIntersection = Test.verify "Tangent intersection" Test.do
   arc1 <-
-    Arc2d.with
+    Arc2d.build
       ( Arc2d.centerPoint Point2d.origin
       , Arc2d.radius Length.meter
       , Arc2d.startAngle (Angle.degrees 0.0)
       , Arc2d.endAngle (Angle.degrees 180.0)
       )
   arc2 <-
-    Arc2d.with
+    Arc2d.build
       ( Arc2d.centerPoint (Point2d.meters 0.0 1.5)
       , Arc2d.radius (Length.meters 0.5)
       , Arc2d.startAngle (Angle.degrees -180.0)

@@ -200,7 +200,7 @@ testDirectedLine = IO.do
 testArcFromEndpoints :: Tolerance Meters => IO ()
 testArcFromEndpoints = IO.do
   arc <-
-    Arc2d.with
+    Arc2d.build
       ( Arc2d.startPoint Point2d.origin
       , Arc2d.endPoint (Point2d.centimeters 50.0 50.0)
       , Arc2d.sweptAngle Angle.quarterTurn
