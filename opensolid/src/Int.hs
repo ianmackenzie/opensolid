@@ -8,6 +8,7 @@ module Int
   , abs
   , min
   , max
+  , factorial
   , choose
   , sum
   , product
@@ -52,6 +53,9 @@ min = Prelude.min
 max :: Int -> Int -> Int
 max = Prelude.max
 
+factorial :: Int -> Int
+factorial n = prod 1 2 n
+
 choose :: Int -> Int -> Int
 choose n k
   | n < 0 = 0
@@ -62,10 +66,12 @@ choose n k
   | otherwise = prod (n - d + 1) (n - d + 2) n // prod 2 3 d
  where
   d = min k (n - k)
-  prod !acc a b
-    | a < b = prod (acc * a) (a + 1) b
-    | a == b = acc * a
-    | otherwise = acc
+
+prod :: Int -> Int -> Int -> Int
+prod !acc a b
+  | a < b = prod (acc * a) (a + 1) b
+  | a == b = acc * a
+  | otherwise = acc
 
 sum :: List Int -> Int
 sum = List.foldl (+) 0
