@@ -426,11 +426,11 @@ findTangentSolutions ::
   Result ZerosError (PartialZeros, List Uv.Bounds, List SaddleRegion)
 findTangentSolutions derivatives boundaryEdges boundaryPoints uvBounds bisectionParameter exclusions saddleRegions
   -- The function is non-zero for this subdomain, so no solutions
-  | Range.exclusion Qty.zero fBounds > ?tolerance = Ok (PartialZeros.empty, [], [])
+  | not (fBounds ^ Qty.zero) = Ok (PartialZeros.empty, [], [])
   -- Derivative with respect to U is non-zero for this subdomain, so no tangent solutions
-  | Range.exclusion Qty.zero fuBounds > ?tolerance = Ok (PartialZeros.empty, [], [])
+  | not (fuBounds ^ Qty.zero) = Ok (PartialZeros.empty, [], [])
   -- Derivative with respect to V is non-zero for this subdomain, so no tangent solutions
-  | Range.exclusion Qty.zero fvBounds > ?tolerance = Ok (PartialZeros.empty, [], [])
+  | not (fvBounds ^ Qty.zero) = Ok (PartialZeros.empty, [], [])
   -- We're within an existing exclusion region from a previous solution, so no additional solutions
   | List.any (Bounds2d.contains uvBounds) exclusions = Ok (PartialZeros.empty, [], [])
   -- We're within an existing saddle region from a previous solution, so no additional solutions
