@@ -173,7 +173,7 @@ testParameter1dGeneration = IO.do
 testEmptyCheck :: List Int -> IO ()
 testEmptyCheck [] = IO.printLine "List is empty"
 testEmptyCheck (NonEmpty nonEmpty) =
-  IO.printLine ("List is non-empty, maximum is " + show (NonEmpty.maximum nonEmpty))
+  IO.printLine ("List is non-empty, maximum is " + String.fromInt (NonEmpty.maximum nonEmpty))
 
 testNonEmpty :: IO ()
 testNonEmpty = IO.do
