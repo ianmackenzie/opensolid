@@ -25,7 +25,11 @@ import Point2d (Point2d)
 import Point2d qualified
 import Qty qualified
 
-from :: Tolerance units => Point2d (space @ units) -> Point2d (space @ units) -> Result Curve2d.DegenerateCurve (Curve2d (space @ units))
+from ::
+  Tolerance units =>
+  Point2d (space @ units) ->
+  Point2d (space @ units) ->
+  Result Curve2d.DegenerateCurve (Curve2d (space @ units))
 from givenStartPoint givenEndPoint =
   case Direction2d.from givenStartPoint givenEndPoint of
     Error Direction2d.PointsAreCoincident -> Error Curve2d.DegenerateCurve
