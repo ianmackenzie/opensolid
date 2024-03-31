@@ -1,11 +1,10 @@
 module Direction2d
   ( Direction2d
-  , unitVector
+  , vector
   , xComponent
   , yComponent
   , components
   , unsafe
-  , unwrap
   , x
   , positiveX
   , negativeX
@@ -60,7 +59,7 @@ instance
   d1 ~= d2 = angleFrom d1 d2 ~= Angle.zero
 
 instance Negation (Direction2d space) where
-  negate (Direction2d vector) = unsafe -vector
+  negate direction = Direction2d -(vector direction)
 
 instance Multiplication Sign (Direction2d space) where
   type Sign .*. Direction2d space = Direction2d space
@@ -78,13 +77,13 @@ instance Product (Direction2d space) Sign (Direction2d space)
 
 instance Multiplication (Qty units) (Direction2d space) where
   type Qty units .*. Direction2d space = Vector2d (space @ (units :*: Unitless))
-  scale .*. Direction2d vector = scale .*. vector
+  scale .*. direction = scale .*. vector direction
 
 instance Product (Qty units) (Direction2d space) (Vector2d (space @ units))
 
 instance Multiplication (Direction2d space) (Qty units) where
   type Direction2d space .*. Qty units = Vector2d (space @ (Unitless :*: units))
-  Direction2d vector .*. scale = vector .*. scale
+  direction .*. scale = vector direction .*. scale
 
 instance Product (Direction2d space) (Qty units) (Vector2d (space @ units))
 
@@ -100,27 +99,23 @@ instance space ~ space' => CrossMultiplication (Direction2d space) (Direction2d 
 
 instance space ~ space' => CrossProduct (Direction2d space) (Direction2d space') Float
 
-{-# INLINE unitVector #-}
-unitVector :: Direction2d space -> Vector2d (space @ Unitless)
-unitVector (Direction2d vector) = vector
+{-# INLINE vector #-}
+vector :: Direction2d space -> Vector2d (space @ Unitless)
+vector (Direction2d v) = v
 
 xComponent :: Direction2d space -> Float
-xComponent (Direction2d vector) = Vector2d.xComponent vector
+xComponent direction = Vector2d.xComponent (vector direction)
 
 yComponent :: Direction2d space -> Float
-yComponent (Direction2d vector) = Vector2d.yComponent vector
+yComponent direction = Vector2d.yComponent (vector direction)
 
 {-# INLINE components #-}
 components :: Direction2d space -> (Float, Float)
-components (Direction2d vector) = Vector2d.components vector
+components direction = Vector2d.components (vector direction)
 
 {-# INLINE unsafe #-}
 unsafe :: Vector2d (space @ Unitless) -> Direction2d space
 unsafe = Direction2d
-
-{-# INLINE unwrap #-}
-unwrap :: Direction2d space -> Vector2d (space @ Unitless)
-unwrap (Direction2d vector) = vector
 
 positiveX :: Direction2d space
 positiveX = unsafe (Vector2d 1.0 0.0)
@@ -168,10 +163,10 @@ perpendicularTo :: Direction2d space -> Direction2d space
 perpendicularTo = rotateLeft
 
 rotateLeft :: Direction2d space -> Direction2d space
-rotateLeft (Direction2d vector) = unsafe (Vector2d.rotateLeft vector)
+rotateLeft direction = Direction2d (Vector2d.rotateLeft (vector direction))
 
 rotateRight :: Direction2d space -> Direction2d space
-rotateRight (Direction2d vector) = unsafe (Vector2d.rotateRight vector)
+rotateRight direction = Direction2d (Vector2d.rotateRight (vector direction))
 
 placeIn :: Frame2d (global @ units) (Defines local) -> Direction2d local -> Direction2d global
 placeIn frame = placeInBasis (Frame2d.basis frame)
@@ -180,10 +175,10 @@ relativeTo :: Frame2d (global @ units) (Defines local) -> Direction2d global -> 
 relativeTo frame = relativeToBasis (Frame2d.basis frame)
 
 placeInBasis :: Basis2d global (Defines local) -> Direction2d local -> Direction2d global
-placeInBasis basis (Direction2d vector) = unsafe (Vector2d.placeInBasis basis vector)
+placeInBasis basis direction = unsafe (Vector2d.placeInBasis basis (vector direction))
 
 relativeToBasis :: Basis2d global (Defines local) -> Direction2d global -> Direction2d local
-relativeToBasis basis (Direction2d vector) = unsafe (Vector2d.relativeToBasis basis vector)
+relativeToBasis basis direction = Direction2d (Vector2d.relativeToBasis basis (vector direction))
 
 generator :: Random.Generator (Direction2d space)
 generator = Random.map fromAngle (Random.qty Angle.zero Angle.twoPi)

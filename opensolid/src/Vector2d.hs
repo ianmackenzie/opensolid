@@ -150,13 +150,13 @@ instance
 
 instance space ~ space' => DotMultiplication (Vector2d (space @ units)) (Direction2d space') where
   type Vector2d (space @ units) .<>. Direction2d space' = Qty (units :*: Unitless)
-  v .<>. d = v .<>. Direction2d.unwrap d
+  v .<>. d = v .<>. Direction2d.vector d
 
 instance space ~ space' => DotProduct (Vector2d (space @ units)) (Direction2d space') (Qty units)
 
 instance space ~ space' => DotMultiplication (Direction2d space) (Vector2d (space' @ units)) where
   type Direction2d space .<>. Vector2d (space' @ units) = Qty (Unitless :*: units)
-  d .<>. v = Direction2d.unwrap d .<>. v
+  d .<>. v = Direction2d.vector d .<>. v
 
 instance space ~ space' => DotProduct (Direction2d space) (Vector2d (space' @ units)) (Qty units)
 
@@ -173,13 +173,13 @@ instance
 
 instance space ~ space' => CrossMultiplication (Vector2d (space @ units)) (Direction2d space') where
   type Vector2d (space @ units) .><. Direction2d space' = Qty (units :*: Unitless)
-  v .><. d = v .><. Direction2d.unwrap d
+  v .><. d = v .><. Direction2d.vector d
 
 instance space ~ space' => CrossProduct (Vector2d (space @ units)) (Direction2d space') (Qty units)
 
 instance space ~ space' => CrossMultiplication (Direction2d space) (Vector2d (space' @ units)) where
   type Direction2d space .><. Vector2d (space' @ units) = Qty (Unitless :*: units)
-  d .><. v = Direction2d.unwrap d .><. v
+  d .><. v = Direction2d.vector d .><. v
 
 instance space ~ space' => CrossProduct (Direction2d space) (Vector2d (space' @ units)) (Qty units)
 

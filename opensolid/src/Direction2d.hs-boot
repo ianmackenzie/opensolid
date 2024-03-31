@@ -1,7 +1,7 @@
 module Direction2d
   ( Direction2d
   , unsafe
-  , unwrap
+  , vector
   )
 where
 
@@ -13,7 +13,7 @@ type role Direction2d nominal
 newtype Direction2d (space :: Type) = Direction2d (Vector2d (space @ Unitless))
 
 unsafe :: Vector2d (space @ Unitless) -> Direction2d space
-unwrap :: Direction2d space -> Vector2d (space @ Unitless)
+vector :: Direction2d space -> Vector2d (space @ Unitless)
 
 instance Multiplication (Qty units) (Direction2d space)
 

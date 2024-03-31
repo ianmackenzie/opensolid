@@ -61,7 +61,7 @@ derivative :: DirectionCurve2d space -> VectorCurve2d (space @ Unitless)
 derivative (DirectionCurve2d vectorCurve) = VectorCurve2d.derivative vectorCurve
 
 constant :: Direction2d space -> DirectionCurve2d space
-constant direction = DirectionCurve2d (VectorCurve2d.constant (Direction2d.unitVector direction))
+constant direction = DirectionCurve2d (VectorCurve2d.constant (Direction2d.vector direction))
 
 arc :: Angle -> Angle -> DirectionCurve2d space
 arc a b = DirectionCurve2d (VectorCurve2d.arc 1.0 a b)

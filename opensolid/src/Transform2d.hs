@@ -126,7 +126,7 @@ scaleAlongOwn axis scale value = scaleAlong (axis value) scale value
 
 instance space ~ space' => Transformable2d (Direction2d space) (space' @ units') where
   transformBy transformation direction =
-    Direction2d.unsafe (transformBy transformation (Direction2d.unitVector direction))
+    Direction2d.unsafe (transformBy transformation (Direction2d.vector direction))
 
 instance space ~ space' => Transformable2d (Vector2d (space @ units)) (space' @ units') where
   transformBy (Transformation (Matrix m11 m12 m21 m22 _ _)) (Vector2d x y) =
