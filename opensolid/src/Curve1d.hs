@@ -30,6 +30,7 @@ import Curve1d.Root qualified as Root
 import Estimate (Estimate)
 import Estimate qualified
 import Float qualified
+import Int qualified
 import List qualified
 import Maybe qualified
 import OpenSolid
