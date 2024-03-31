@@ -15,7 +15,7 @@ module Curve1d
   , sin
   , cos
   , hasInternalZero
-  , ZeroEverywhere (ZeroEverywhere)
+  , Zeros (..)
   , zeros
   , reverse
   , integral
@@ -347,11 +347,11 @@ findInternalZero curve domain = do
         let (left, right) = Range.bisect domain
         findInternalZero curve left || findInternalZero curve right
 
-data ZeroEverywhere = ZeroEverywhere deriving (Eq, Show, Error)
+data Zeros = ZeroEverywhere | Zeros (List Root)
 
-zeros :: Tolerance units => Curve1d units -> Result ZeroEverywhere (List Root)
-zeros (Constant value) = if value ~= Qty.zero then Error ZeroEverywhere else Ok []
-zeros curve | isZero curve = Error ZeroEverywhere
+zeros :: Tolerance units => Curve1d units -> Zeros
+zeros (Constant value) = if value ~= Qty.zero then ZeroEverywhere else Zeros []
+zeros curve | isZero curve = ZeroEverywhere
 zeros curve = do
   let (root0, x0) = solveEndpoint curve 0.0
   let (root1, x1) = solveEndpoint curve 1.0
@@ -360,7 +360,7 @@ zeros curve = do
   let endpointRoots = root0 ++ root1
   let endpointExclusions = [Range.from 0.0 x0, Range.from x1 1.0]
   let (allRoots, _) = findRoots curve derivatives searchTree maxRootOrder (endpointRoots, endpointExclusions)
-  Ok (List.sortBy Root.value allRoots)
+  Zeros (List.sortBy Root.value allRoots)
 
 findRoots ::
   Tolerance units =>

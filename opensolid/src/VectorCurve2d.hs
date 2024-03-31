@@ -21,15 +21,16 @@ module VectorCurve2d
   , quadraticSpline
   , cubicSpline
   , bezierCurve
+  , magnitude
+  , unsafeMagnitude
   , squaredMagnitude
   , squaredMagnitude_
   , reverse
   , zeros
-  , ZeroEverywhere (ZeroEverywhere)
-  , HasZero (HasZero)
+  , Zeros (ZeroEverywhere, Zeros)
+  , HasZeros (HasZeros)
   , xComponent
   , yComponent
-  , DerivativeHasZero (DerivativeHasZero)
   , direction
   , placeIn
   , relativeTo
@@ -47,7 +48,6 @@ import Curve1d.Root qualified
 import Direction2d (Direction2d)
 import Direction2d qualified
 import {-# SOURCE #-} DirectionCurve2d (DirectionCurve2d)
-import {-# SOURCE #-} DirectionCurve2d qualified
 import Float qualified
 import Frame2d (Frame2d)
 import Frame2d qualified
@@ -57,12 +57,12 @@ import OpenSolid
 import Qty qualified
 import Range (Range (Range))
 import Range qualified
-import Result qualified
 import Units qualified
 import Vector2d (Vector2d (Vector2d))
 import Vector2d qualified
 import VectorBounds2d (VectorBounds2d (VectorBounds2d))
 import VectorBounds2d qualified
+import VectorCurve2d.Direction qualified
 
 class
   Show curve =>
@@ -695,20 +695,26 @@ instance Curve1d.Interface (Magnitude (space @ units)) units where
   segmentBoundsImpl t (Magnitude curve) = VectorBounds2d.magnitude (VectorCurve2d.segmentBounds t curve)
   derivativeImpl (Magnitude curve) = (VectorCurve2d.derivative curve .<>. curve) .!/! Curve1d (Magnitude curve)
 
-data HasZero = HasZero deriving (Eq, Show, Error)
+unsafeMagnitude :: VectorCurve2d (space @ units) -> Curve1d units
+unsafeMagnitude curve = Curve1d (Magnitude curve)
 
-magnitude :: Tolerance units => VectorCurve2d (space @ units) -> Result HasZero (Curve1d units)
+newtype HasZeros = HasZeros Zeros deriving (Eq, Show)
+
+deriving anyclass instance Error HasZeros
+
+magnitude :: Tolerance units => VectorCurve2d (space @ units) -> Result HasZeros (Curve1d units)
 magnitude curve = case zeros curve of
-  Error ZeroEverywhere -> Error HasZero
-  Ok (NonEmpty _) -> Error HasZero
-  Ok [] -> Ok (Curve1d (Magnitude curve))
+  Zeros [] -> Ok (unsafeMagnitude curve)
+  Zeros someZeros -> Error (HasZeros (Zeros someZeros))
+  ZeroEverywhere -> Error (HasZeros ZeroEverywhere)
 
-data ZeroEverywhere = ZeroEverywhere deriving (Eq, Show, Error)
+data Zeros = ZeroEverywhere | Zeros (List Float) deriving (Eq, Show)
 
-zeros :: Tolerance units => VectorCurve2d (space @ units) -> Result ZeroEverywhere (List Float)
-zeros curve = Result.do
-  roots1d <- Curve1d.zeros (squaredMagnitude_ curve) ?? Error ZeroEverywhere
-  Ok (List.map Curve1d.Root.value roots1d)
+zeros :: Tolerance units => VectorCurve2d (space @ units) -> Zeros
+zeros curve =
+  case Curve1d.zeros (squaredMagnitude_ curve) of
+    Curve1d.ZeroEverywhere -> ZeroEverywhere
+    Curve1d.Zeros roots -> Zeros (List.map Curve1d.Root.value roots)
  where
   ?tolerance = Qty.squared_ ?tolerance
 
@@ -718,12 +724,33 @@ xComponent curve = curve <> Direction2d.x
 yComponent :: VectorCurve2d (space @ units) -> Curve1d units
 yComponent curve = curve <> Direction2d.y
 
-data DerivativeHasZero = DerivativeHasZero deriving (Eq, Show, Error)
+direction :: Tolerance units => VectorCurve2d (space @ units) -> Result HasZeros (DirectionCurve2d space)
+direction curve = case zeros curve of
+  -- Definitely can't get the direction of a vector curve
+  -- if that vector curve is zero everywhere!
+  ZeroEverywhere -> Error (HasZeros ZeroEverywhere)
+  -- If the vector curve is not zero anywhere,
+  -- then we can safely compute its direction
+  Zeros [] -> Ok (VectorCurve2d.Direction.unsafe curve (derivative curve))
+  -- Otherwise, check where the vector curve is zero:
+  -- if it's only zero at one or both endpoints,
+  -- and the curve's *derivative* is non-zero at those endpoints,
+  -- then it's still possible to uniquely determine a tangent direction everywhere
+  Zeros parameterValues -> do
+    let curveDerivative = derivative curve
+    case List.filter (not . isRemovableDegeneracy curveDerivative) parameterValues of
+      -- All degeneracies were removable, so we're good
+      [] -> Ok (VectorCurve2d.Direction.unsafe curve curveDerivative)
+      -- There were some non-removable degeneracies (interior cusps) left,
+      -- so report them as an error
+      interiorCusps -> Error (HasZeros (Zeros interiorCusps))
 
-direction :: Tolerance units => VectorCurve2d (space @ units) -> Result DerivativeHasZero (DirectionCurve2d space)
-direction curve = case magnitude curve of
-  Ok m -> Ok (DirectionCurve2d.unsafe (curve / m))
-  Error HasZero -> Error DerivativeHasZero
+isRemovableDegeneracy :: Tolerance units => VectorCurve2d (space @ units) -> Float -> Bool
+isRemovableDegeneracy curveDerivative t =
+  -- A degeneracy (zero value of a vector curve) when computing the direction of that vector curve
+  -- is removable at an endpoint if the curve derivative at that endpoint is non-zero,
+  -- since in that case we can substitute the curve derivative value for the curve value itself
+  (t == 0.0 || t == 1.0) && evaluateAt t curveDerivative != Vector2d.zero
 
 placeIn :: Frame2d (global @ frameUnits) (Defines local) -> VectorCurve2d (local @ units) -> VectorCurve2d (global @ units)
 placeIn globalFrame = placeInBasis (Frame2d.basis globalFrame)

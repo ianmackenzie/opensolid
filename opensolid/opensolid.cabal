@@ -148,6 +148,8 @@ library
       VectorBounds2d
       VectorBounds3d
       VectorCurve2d
+      VectorCurve2d.DegenerateEndpoint
+      VectorCurve2d.Direction
       VectorCurve3d
       VectorVolume3d.Function
       Vertex2d

@@ -6,6 +6,7 @@ module VectorCurve2d
   , evaluateAt
   , segmentBounds
   , derivative
+  , unsafeMagnitude
   )
 where
 
@@ -78,3 +79,4 @@ wrap :: Interface curve (space @ units) => curve -> VectorCurve2d (space @ units
 evaluateAt :: Float -> VectorCurve2d (space @ units) -> Vector2d (space @ units)
 segmentBounds :: Range Unitless -> VectorCurve2d (space @ units) -> VectorBounds2d (space @ units)
 derivative :: VectorCurve2d (space @ units) -> VectorCurve2d (space @ units)
+unsafeMagnitude :: VectorCurve2d (space @ units) -> Curve1d units

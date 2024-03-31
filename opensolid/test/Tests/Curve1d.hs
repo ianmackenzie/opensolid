@@ -21,25 +21,19 @@ crossingRoots :: Tolerance Unitless => Test
 crossingRoots = Test.verify "Crossing roots" Test.do
   let x = 3.0 * Curve1d.t
   let y = (x - 1.0) * (x - 1.0) * (x - 1.0) - (x - 1.0)
-  roots <- Curve1d.zeros y
-  let expectedRoots =
-        [ Root 0.0 0 Positive
-        , Root (1 / 3) 0 Negative
-        , Root (2 / 3) 0 Positive
-        ]
-  Test.expect (roots ~= expectedRoots)
+  let expectedRoots = [Root 0.0 0 Positive, Root (1 / 3) 0 Negative, Root (2 / 3) 0 Positive]
+  case Curve1d.zeros y of
+    Curve1d.ZeroEverywhere -> Test.fail "Curve incorrectly reported as identically zero"
+    Curve1d.Zeros roots -> Test.expect (roots ~= expectedRoots)
 
 tangentRoots :: Tolerance Unitless => Test
 tangentRoots = Test.verify "Tangent roots" Test.do
   let theta = Angle.twoPi * Curve1d.t
   let expression = Curve1d.squared (Curve1d.sin theta)
-  roots <- Curve1d.zeros expression
-  let expectedRoots =
-        [ Root 0.0 1 Positive
-        , Root 0.5 1 Positive
-        , Root 1.0 1 Positive
-        ]
-  Test.expect (roots ~= expectedRoots)
+  let expectedRoots = [Root t 1 Positive | t <- [0.0, 0.5, 1.0]]
+  case Curve1d.zeros expression of
+    Curve1d.ZeroEverywhere -> Test.fail "Curve incorrectly reported as identically zero"
+    Curve1d.Zeros roots -> Test.expect (roots ~= expectedRoots)
 
 approximateEquality :: Tolerance Unitless => Test
 approximateEquality = do

@@ -70,7 +70,7 @@ wrap ::
 wrap curve =
   case VectorCurve2d.direction (derivativeImpl curve) of
     Ok tangentCurve -> Ok (Internal.Curve curve tangentCurve)
-    Error VectorCurve2d.DerivativeHasZero -> Error DegenerateCurve
+    Error (VectorCurve2d.HasZeros _) -> Error DegenerateCurve
 
 startPoint :: Curve2d (space @ units) -> Point2d (space @ units)
 startPoint = Internal.startPoint
@@ -125,9 +125,9 @@ find ::
   List Float
 find point curve =
   case VectorCurve2d.zeros (point - curve) of
-    Ok parameterValues -> parameterValues
+    VectorCurve2d.Zeros parameterValues -> parameterValues
     -- Shouldn't happen, since curves are enforced to be non-degenerate
-    Error VectorCurve2d.ZeroEverywhere -> []
+    VectorCurve2d.ZeroEverywhere -> []
 
 overlappingSegments ::
   Tolerance units =>

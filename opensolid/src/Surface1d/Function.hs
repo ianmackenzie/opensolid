@@ -582,8 +582,8 @@ edgeSolutions f edgeCurve edgeSign =
     --   - If zero everywhere, then tangent curve
     --   - If no roots, then crossing curve
     --   - If there *are* roots, then those are tangent/saddle points of some sort
-    Error Curve1d.ZeroEverywhere -> (True, [])
-    Ok roots ->
+    Curve1d.ZeroEverywhere -> (True, [])
+    Curve1d.Zeros roots ->
       let toBoundaryPoint root =
             BoundaryPoint
               { point = Curve2d.pointOn edgeCurve (Curve1d.Root.value root)
