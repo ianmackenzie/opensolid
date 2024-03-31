@@ -29,7 +29,7 @@ import Angle qualified
 import BezierCurve2d qualified
 import Bounds2d (Bounds2d (Bounds2d))
 import Bounds2d qualified
-import Curve1d (Curve1d (Curve1d))
+import Curve1d (Curve1d)
 import Curve1d qualified
 import Curve1d.Root qualified
 import Curve2d (Curve2d)
@@ -367,16 +367,16 @@ instance Curve1d.Interface (CurveOnSurface units) units where
   segmentBoundsImpl t (CurveOnSurface uvCurve function) =
     segmentBounds (Curve2d.segmentBoundsImpl t uvCurve) function
 
-  derivativeImpl (CurveOnSurface uvCurve function) =
+  derivativeImpl (CurveOnSurface uvCurve function) = do
     let fU = derivative U function
-        fV = derivative V function
-        uvT = Curve2d.derivativeImpl uvCurve
-        uT = VectorCurve2d.xComponent uvT
-        vT = VectorCurve2d.yComponent uvT
-     in Curve1d (CurveOnSurface uvCurve fU) * uT + Curve1d (CurveOnSurface uvCurve fV) * vT
+    let fV = derivative V function
+    let uvT = Curve2d.derivativeImpl uvCurve
+    let uT = VectorCurve2d.xComponent uvT
+    let vT = VectorCurve2d.yComponent uvT
+    Curve1d.wrap (CurveOnSurface uvCurve fU) * uT + Curve1d.wrap (CurveOnSurface uvCurve fV) * vT
 
 curveOnSurface :: Curve2d Uv.Coordinates -> Function units -> Curve1d units
-curveOnSurface uvCurve function = Curve1d (CurveOnSurface uvCurve function)
+curveOnSurface uvCurve function = Curve1d.wrap (CurveOnSurface uvCurve function)
 
 isZero :: Tolerance units => Function units -> Bool
 isZero function = List.all (~= Qty.zero) (Bounds2d.sample (pointOn function) Uv.domain)
@@ -577,7 +577,7 @@ findBoundarySolutions f =
 
 edgeSolutions :: Tolerance units => Function units -> Curve2d Uv.Coordinates -> Sign -> (Bool, List BoundaryPoint)
 edgeSolutions f edgeCurve edgeSign =
-  case Curve1d.zeros (Curve1d (CurveOnSurface edgeCurve f)) of
+  case Curve1d.zeros (Curve1d.wrap (CurveOnSurface edgeCurve f)) of
     -- TODO classify edge curve as crossing or tangent:
     --   - Find zeros of partial derivative of f perpendicular to curve
     --   - If zero everywhere, then tangent curve
@@ -1155,7 +1155,7 @@ instance Curve2d.Interface (HorizontalCurve units) Uv.Coordinates where
   derivativeImpl crossingCurve@(HorizontalCurve{dvdu, uStart, uEnd}) =
     let deltaU = uEnd - uStart
         dudt = Curve1d.constant deltaU
-        dvdt = deltaU * Curve1d (CurveOnSurface crossingCurve dvdu)
+        dvdt = deltaU * Curve1d.wrap (CurveOnSurface crossingCurve dvdu)
      in VectorCurve2d.xy dudt dvdt
 
   reverseImpl (HorizontalCurve{f, dvdu, uStart, uEnd, vLow, vHigh}) =
@@ -1194,7 +1194,7 @@ instance Curve2d.Interface (VerticalCurve units) Uv.Coordinates where
   derivativeImpl crossingCurve@(VerticalCurve{dudv, vStart, vEnd}) =
     let deltaV = vEnd - vStart
         dvdt = Curve1d.constant deltaV
-        dudt = deltaV * Curve1d (CurveOnSurface crossingCurve dudv)
+        dudt = deltaV * Curve1d.wrap (CurveOnSurface crossingCurve dudv)
      in VectorCurve2d.xy dudt dvdt
 
   reverseImpl (VerticalCurve{f, dudv, uLow, uHigh, vStart, vEnd}) =

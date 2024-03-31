@@ -42,7 +42,7 @@ where
 import Angle qualified
 import Basis2d (Basis2d)
 import Basis2d qualified
-import Curve1d (Curve1d (Curve1d))
+import Curve1d (Curve1d)
 import Curve1d qualified
 import Curve1d.Root qualified
 import Direction2d (Direction2d)
@@ -327,7 +327,7 @@ instance
   DotMultiplication (VectorCurve2d (space @ units1)) (VectorCurve2d (space' @ units2))
   where
   type VectorCurve2d (space @ units1) .<>. VectorCurve2d (space' @ units2) = Curve1d (units1 :*: units2)
-  curve1 .<>. curve2 = Curve1d (DotProductOf curve1 curve2) -- TODO add special cases
+  curve1 .<>. curve2 = Curve1d.wrap (DotProductOf curve1 curve2) -- TODO add special cases
 
 instance
   (Units.Product units1 units2 units3, space ~ space') =>
@@ -392,7 +392,7 @@ instance
   CrossMultiplication (VectorCurve2d (space @ units1)) (VectorCurve2d (space' @ units2))
   where
   type VectorCurve2d (space @ units1) .><. VectorCurve2d (space' @ units2) = Curve1d (units1 :*: units2)
-  curve1 .><. curve2 = Curve1d (CrossProductOf curve1 curve2) -- TODO add special cases
+  curve1 .><. curve2 = Curve1d.wrap (CrossProductOf curve1 curve2) -- TODO add special cases
 
 instance
   (Units.Product units1 units2 units3, space ~ space') =>
@@ -685,19 +685,23 @@ squaredMagnitude :: Units.Squared units1 units2 => VectorCurve2d (space @ units1
 squaredMagnitude curve = Units.specialize (squaredMagnitude_ curve)
 
 squaredMagnitude_ :: VectorCurve2d (space @ units) -> Curve1d (units :*: units)
-squaredMagnitude_ curve = Curve1d (SquaredMagnitude curve)
+squaredMagnitude_ curve = Curve1d.wrap (SquaredMagnitude curve)
 
-newtype Magnitude (coordinateSystem :: CoordinateSystem) = Magnitude (VectorCurve2d coordinateSystem)
+newtype NonZeroMagnitude (coordinateSystem :: CoordinateSystem)
+  = NonZeroMagnitude (VectorCurve2d coordinateSystem)
 
-deriving instance Show (Magnitude (space @ units))
+deriving instance Show (NonZeroMagnitude (space @ units))
 
-instance Curve1d.Interface (Magnitude (space @ units)) units where
-  evaluateAtImpl t (Magnitude curve) = Vector2d.magnitude (VectorCurve2d.evaluateAt t curve)
-  segmentBoundsImpl t (Magnitude curve) = VectorBounds2d.magnitude (VectorCurve2d.segmentBounds t curve)
-  derivativeImpl (Magnitude curve) = (VectorCurve2d.derivative curve .<>. curve) .!/! Curve1d (Magnitude curve)
+instance Curve1d.Interface (NonZeroMagnitude (space @ units)) units where
+  evaluateAtImpl t (NonZeroMagnitude curve) =
+    Vector2d.magnitude (VectorCurve2d.evaluateAt t curve)
+  segmentBoundsImpl t (NonZeroMagnitude curve) =
+    VectorBounds2d.magnitude (VectorCurve2d.segmentBounds t curve)
+  derivativeImpl (NonZeroMagnitude curve) =
+    (VectorCurve2d.derivative curve .<>. curve) .!/! Curve1d.wrap (NonZeroMagnitude curve)
 
 unsafeMagnitude :: VectorCurve2d (space @ units) -> Curve1d units
-unsafeMagnitude curve = Curve1d (Magnitude curve)
+unsafeMagnitude curve = Curve1d.wrap (NonZeroMagnitude curve)
 
 newtype HasZeros = HasZeros Zeros deriving (Eq, Show)
 
@@ -705,7 +709,7 @@ deriving anyclass instance Error HasZeros
 
 magnitude :: Tolerance units => VectorCurve2d (space @ units) -> Result HasZeros (Curve1d units)
 magnitude curve = case zeros curve of
-  Zeros [] -> Ok (unsafeMagnitude curve)
+  Zeros [] -> Ok (Curve1d.wrap (NonZeroMagnitude curve))
   Zeros someZeros -> Error (HasZeros (Zeros someZeros))
   ZeroEverywhere -> Error (HasZeros ZeroEverywhere)
 

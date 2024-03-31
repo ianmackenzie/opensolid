@@ -1,10 +1,11 @@
 module Curve1d
-  ( Curve1d (Curve1d)
+  ( Curve1d
   , Interface (..)
   , evaluateAt
   , pointOn
   , segmentBounds
   , derivative
+  , wrap
   , zero
   , constant
   , t
@@ -112,6 +113,9 @@ instance Interface (Curve1d units) units where
   evaluateAtImpl = evaluateAt
   segmentBoundsImpl = segmentBounds
   derivativeImpl = derivative
+
+wrap :: Interface curve units => curve -> Curve1d units
+wrap = Curve1d
 
 zero :: Curve1d units
 zero = constant Qty.zero
