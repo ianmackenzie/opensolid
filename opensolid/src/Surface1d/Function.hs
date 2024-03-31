@@ -898,13 +898,13 @@ horizontalCurve ::
   Float ->
   Float ->
   Result ZerosError (Curve2d Uv.Coordinates)
-horizontalCurve f fu fv uStart uEnd vLow vHigh = exactly do
+horizontalCurve f fu fv uStart uEnd vLow vHigh = do
   -- Sanity check that we don't attempt to evaluate outside the overall UV domain
   Debug.assert (uStart >= 0.0)
   Debug.assert (uEnd <= 1.0)
   Debug.assert (vLow >= 0.0)
   Debug.assert (vHigh <= 1.0)
-  Curve2d.wrap (HorizontalCurve{f, dvdu = -fu / fv, uStart, uEnd, vLow, vHigh})
+  Tolerance.exactly (Curve2d.wrap (HorizontalCurve{f, dvdu = -fu / fv, uStart, uEnd, vLow, vHigh}))
     ?? Error DegenerateCurve
 
 verticalCurve ::
@@ -916,13 +916,13 @@ verticalCurve ::
   Float ->
   Float ->
   Result ZerosError (Curve2d Uv.Coordinates)
-verticalCurve f fu fv uLow uHigh vStart vEnd = exactly do
+verticalCurve f fu fv uLow uHigh vStart vEnd = do
   -- Sanity check that we don't attempt to evaluate outside the overall UV domain
   Debug.assert (uLow >= 0.0)
   Debug.assert (uHigh <= 1.0)
   Debug.assert (vStart >= 0.0)
   Debug.assert (vEnd <= 1.0)
-  Curve2d.wrap (VerticalCurve{f, dudv = -fv / fu, uLow, uHigh, vStart, vEnd})
+  Tolerance.exactly (Curve2d.wrap (VerticalCurve{f, dudv = -fv / fu, uLow, uHigh, vStart, vEnd}))
     ?? Error DegenerateCurve
 
 hasZero :: Uv.Bounds -> Function units -> Bool
