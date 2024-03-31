@@ -188,8 +188,7 @@ testLineFromEndpoints = IO.do
       , Line2d.endPoint (Point2d.centimeters 40.0 30.0)
       )
   case line1 of
-    Curve2d.Line{length} ->
-      log "Line length in centimeters" (Length.inCentimeters length)
+    Curve2d.Line{length} -> log "Line length in centimeters" (Length.inCentimeters length)
     _ -> log "Unexpected curve" line1
 
 testDirectedLine :: Tolerance Meters => IO ()
