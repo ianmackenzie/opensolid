@@ -87,8 +87,8 @@ equalOverlapSegmentLists segments1 segments2 =
 
 curveOverlap1 :: Tolerance Meters => Test
 curveOverlap1 = Test.verify "Overlap detection 1" Test.do
-  arc1 <- Arc2d.swept Angle.halfTurn (Point2d.meters 1.0 0.0) (Point2d.meters -1.0 0.0)
-  arc2 <- Arc2d.swept Angle.halfTurn (Point2d.meters 0.0 -1.0) (Point2d.meters 0.0 1.0)
+  arc1 <- Arc2d.from (Point2d.meters 1.0 0.0) (Point2d.meters -1.0 0.0) Angle.halfTurn
+  arc2 <- Arc2d.from (Point2d.meters 0.0 -1.0) (Point2d.meters 0.0 1.0) Angle.halfTurn
   segments <- overlappingSegments arc1 arc2
   let expectedSegments = [(Range.from 0.0 0.5, Range.from 0.5 1.0, Positive)]
   Test.expect (equalOverlapSegmentLists segments expectedSegments)
@@ -118,8 +118,8 @@ curveOverlap2 = Test.verify "Overlap detection 2" Test.do
 
 crossingIntersection :: Tolerance Meters => Test
 crossingIntersection = Test.verify "Crossing intersection" Test.do
-  arc1 <- Arc2d.swept Angle.halfTurn Point2d.origin (Point2d.meters 0.0 1.0)
-  arc2 <- Arc2d.swept -Angle.halfTurn Point2d.origin (Point2d.meters 1.0 0.0)
+  arc1 <- Arc2d.from Point2d.origin (Point2d.meters 0.0 1.0) Angle.halfTurn
+  arc2 <- Arc2d.from Point2d.origin (Point2d.meters 1.0 0.0) -Angle.halfTurn
   intersections <- Curve2d.intersections arc1 arc2
   let expectedIntersections =
         [ Intersection 0.0 0.0 Intersection.Crossing Positive
@@ -149,7 +149,7 @@ tangentIntersection = Test.verify "Tangent intersection" Test.do
 
 solving :: Tolerance Meters => Test
 solving = Test.verify "Solving via Curve1d" Test.do
-  arc <- Arc2d.swept Angle.quarterTurn (Point2d.meters 0.0 1.0) (Point2d.meters 1.0 0.0)
+  arc <- Arc2d.from (Point2d.meters 0.0 1.0) (Point2d.meters 1.0 0.0) Angle.quarterTurn
   let squaredDistanceFromOrigin = VectorCurve2d.squaredMagnitude (arc - Point2d.origin)
   let desiredDistance = Length.meters 0.5
   roots <-

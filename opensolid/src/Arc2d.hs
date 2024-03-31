@@ -1,7 +1,7 @@
 {-# LANGUAGE NoFieldSelectors #-}
 
 module Arc2d
-  ( swept
+  ( from
   , with
   , centerPoint
   , startPoint
@@ -40,13 +40,13 @@ import Type.Errors (TypeError)
 import Type.Errors qualified
 import Vector2d qualified
 
-swept ::
+from ::
   Tolerance units =>
+  Point2d (space @ units) ->
+  Point2d (space @ units) ->
   Angle ->
-  Point2d (space @ units) ->
-  Point2d (space @ units) ->
   Result Curve2d.DegenerateCurve (Curve2d (space @ units))
-swept givenSweptAngle givenStartPoint givenEndPoint =
+from givenStartPoint givenEndPoint givenSweptAngle =
   case Vector2d.magnitudeAndDirection (givenEndPoint - givenStartPoint) of
     Error Vector2d.IsZero -> Error Curve2d.DegenerateCurve
     Ok (distanceBetweenPoints, directionBetweenPoints)
@@ -237,7 +237,7 @@ instance
     (Tolerance units)
     (Result Curve2d.DegenerateCurve (Curve2d (space @ units)))
   where
-  with arguments = swept givenSweptAngle givenStartPoint givenEndPoint
+  with arguments = from givenStartPoint givenEndPoint givenSweptAngle
    where
     Arguments
       { startPoint = StartPoint givenStartPoint

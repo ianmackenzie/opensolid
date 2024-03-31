@@ -47,7 +47,7 @@ quarterCircle = Test.verify "quarterCircle" Test.do
   let p3 = Point2d.xy zero radius
   line1 <- Line2d.from p1 p2
   line2 <- Line2d.from p1 p3
-  arc <- Arc2d.swept Angle.quarterTurn p2 p3
+  arc <- Arc2d.from p2 p3 Angle.quarterTurn
   region <- Region2d.boundedBy [line1, line2, arc]
   Test.expect (Tolerance.using (Area.squareMeters 1e-6) (Region2d.area region ~= 0.25 * Float.pi * radius * radius))
 
