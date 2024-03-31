@@ -47,21 +47,21 @@ type Point space = Point2d (space @ Meters)
 
 entityString :: String -> Entity space -> Maybe String
 entityString _ Empty = Nothing
-entityString indent (Node name attributes children) =
+entityString indent (Node name attributes children) = do
+  let attributeLines = List.map (attributeString ("\n" + indent + "   ")) attributes
   let openingTag = indent + "<" + name + String.concat attributeLines + ">"
-      attributeLines = List.map (attributeString ("\n" + indent + "   ")) attributes
-      childLines = Maybe.collect (entityString (indent + "  ")) children
-      closingTag = indent + "</" + name + ">"
-   in Just (String.multiline (openingTag : childLines) + "\n" + closingTag)
+  let childLines = Maybe.collect (entityString (indent + "  ")) children
+  let closingTag = indent + "</" + name + ">"
+  Just (String.multiline (openingTag : childLines) + "\n" + closingTag)
 
 attributeString :: String -> Attribute space -> String
 attributeString indent (Attribute name value) = String.concat [indent, name, "=\"", value, "\""]
 
 toSvg :: Bounds2d (space @ Meters) -> List (Entity space) -> String
-toSvg (Bounds2d (Range x1 x2) (Range y1 y2)) entities =
+toSvg (Bounds2d (Range x1 x2) (Range y1 y2)) entities = do
   let width = x2 - x1
-      height = y2 - y1
-      attributes =
+  let height = y2 - y1
+  let attributes =
         [ Attribute "xmlns" "http://www.w3.org/2000/svg"
         , Attribute "version" "1.1"
         , Attribute "width" (lengthString width + "mm")
@@ -77,10 +77,10 @@ toSvg (Bounds2d (Range x1 x2) (Range y1 y2)) entities =
         , strokeWidth (Length.pixels 1.0)
         , noFill
         ]
-   in String.multiline
-        [ "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"
-        , Maybe.withDefault "" (entityString "" (Node "svg" attributes entities)) + "\n"
-        ]
+  String.multiline
+    [ "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"
+    , Maybe.withDefault "" (entityString "" (Node "svg" attributes entities)) + "\n"
+    ]
 
 writeTo :: String -> Bounds2d (space @ Meters) -> List (Entity space) -> IO ()
 writeTo path viewBox entities = File.writeTo path (toSvg viewBox entities)
