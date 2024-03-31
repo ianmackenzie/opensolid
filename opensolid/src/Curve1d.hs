@@ -457,15 +457,12 @@ resolveEndpoint root curveDerivative endpointX innerX =
         else resolveEndpoint root curveDerivative endpointX midX
 
 computeWidth :: Tolerance units => Int -> Qty units -> Float
-computeWidth 1 derivativeValue = ?tolerance / Qty.abs derivativeValue
-computeWidth 2 derivativeValue = Qty.sqrt (2 * ?tolerance / Qty.abs derivativeValue)
-computeWidth derivativeOrder derivativeValue =
-  Float.pow
-    (factorial derivativeOrder * ?tolerance / Qty.abs derivativeValue)
-    (1.0 / Float.fromInt derivativeOrder)
-
-factorial :: Int -> Int
-factorial 0 = 1; factorial n = n * factorial (n - 1)
+computeWidth derivativeOrder derivativeValue = do
+  let ratio = Qty.abs (?tolerance / derivativeValue)
+  case derivativeOrder of
+    1 -> ratio
+    2 -> Qty.sqrt (2 * ratio)
+    n -> (Int.factorial n * ratio) ** (1 / n)
 
 integral :: Curve1d units -> Estimate units
 integral curve = Estimate.wrap (Integral curve (derivative curve) Parameter.domain)
