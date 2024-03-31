@@ -36,6 +36,11 @@ module List
   , sortBy
   , sortWith
   , sortAndDeduplicate
+  , isOrdered
+  , isNonDescending
+  , isAscending
+  , isNonAscending
+  , isDescending
   , all
   , allTrue
   , any
@@ -183,6 +188,26 @@ dedup current [] = [current]
 dedup current (next : remaining)
   | current == next = dedup current remaining
   | otherwise = current : dedup next remaining
+
+isOrdered :: (a -> a -> Bool) -> List a -> Bool
+isOrdered _ [] = True
+isOrdered cmp (first : rest) = checkOrder cmp first rest
+
+checkOrder :: (a -> a -> Bool) -> a -> List a -> Bool
+checkOrder _ _ [] = True
+checkOrder cmp current (next : remaining) = cmp current next && checkOrder cmp next remaining
+
+isNonDescending :: Ord a => List a -> Bool
+isNonDescending = isOrdered (<=)
+
+isAscending :: Ord a => List a -> Bool
+isAscending = isOrdered (<)
+
+isNonAscending :: Ord a => List a -> Bool
+isNonAscending = isOrdered (>=)
+
+isDescending :: Ord a => List a -> Bool
+isDescending = isOrdered (>)
 
 all :: (a -> Bool) -> List a -> Bool
 all = Prelude.all
