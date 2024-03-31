@@ -357,7 +357,7 @@ zeros curve = do
   let (root1, x1) = solveEndpoint curve 1.0
   let derivatives = Stream.iterate curve derivative
   let searchTree = Bisection.tree (\domain -> Stream.map (segmentBounds domain) derivatives)
-  let endpointRoots = root0 ++ root1
+  let endpointRoots = root0 + root1
   let endpointExclusions = [Range.from 0.0 x0, Range.from x1 1.0]
   let (allRoots, _) = findRoots curve derivatives searchTree maxRootOrder (endpointRoots, endpointExclusions)
   Zeros (List.sortBy Root.value allRoots)
@@ -417,7 +417,7 @@ resolveSign range = do
     | resolution <= -0.5 -> Resolved Negative
     | otherwise -> Unresolved
 
-solveEndpoint :: Tolerance units => Curve1d units -> Float -> (List Root, Float)
+solveEndpoint :: Tolerance units => Curve1d units -> Float -> (Maybe Root, Float)
 solveEndpoint curve endpointX
   | evaluateAt endpointX curve ~= Qty.zero = do
       let check curveDerivative derivativeOrder currentMinWidth currentBest = do
@@ -443,18 +443,18 @@ solveEndpoint curve endpointX
               else case updatedBest of
                 Just (root, associatedDerivative) ->
                   resolveEndpoint root associatedDerivative endpointX 0.5
-                Nothing -> ([], endpointX)
+                Nothing -> (Nothing, endpointX)
       check (derivative curve) 1 Qty.infinity Nothing
-  | otherwise = ([], endpointX)
+  | otherwise = (Nothing, endpointX)
 
-resolveEndpoint :: Root -> Curve1d units -> Float -> Float -> (List Root, Float)
+resolveEndpoint :: Root -> Curve1d units -> Float -> Float -> (Maybe Root, Float)
 resolveEndpoint root curveDerivative endpointX innerX =
   case resolveSign (segmentBounds (Range.from endpointX innerX) curveDerivative) of
-    Resolved _ -> ([root], innerX)
+    Resolved _ -> (Just root, innerX)
     Unresolved -> do
       let midX = Qty.midpoint endpointX innerX
       if midX == endpointX || midX == innerX
-        then ([], endpointX)
+        then (Nothing, endpointX)
         else resolveEndpoint root curveDerivative endpointX midX
 
 computeWidth :: Tolerance units => Int -> Qty units -> Float

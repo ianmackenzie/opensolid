@@ -458,12 +458,12 @@ findTangentSolutions derivatives boundaryEdges boundaryPoints uvBounds bisection
           boundaryPoints
           bounds2
           nextBisectionParameter
-          (List.filter (affects bounds2) (exclusions1 ++ exclusions))
-          (List.filter (SaddleRegion.bounds >> affects bounds2) (saddleRegions1 ++ saddleRegions))
+          (List.filter (affects bounds2) (exclusions1 + exclusions))
+          (List.filter (SaddleRegion.bounds >> affects bounds2) (saddleRegions1 + saddleRegions))
       Ok
         ( PartialZeros.merge solutions1 solutions2
-        , exclusions1 ++ exclusions2
-        , saddleRegions1 ++ saddleRegions2
+        , exclusions1 + exclusions2
+        , saddleRegions1 + saddleRegions2
         )
  where
   Derivatives{f, fu, fv} = derivatives
@@ -518,11 +518,11 @@ findCrossingSolutions derivatives boundaryEdges boundaryPoints uvBounds bisectio
           boundaryPoints
           bounds2
           nextBisectionParameter
-          (List.filter (affects bounds2) (exclusions1 ++ exclusions))
+          (List.filter (affects bounds2) (exclusions1 + exclusions))
           (List.filter (SaddleRegion.bounds >> affects bounds2) saddleRegions)
       Ok
         ( PartialZeros.merge solutions1 solutions2
-        , exclusions1 ++ exclusions2
+        , exclusions1 + exclusions2
         )
  where
   Derivatives{f} = derivatives
@@ -1294,16 +1294,16 @@ finalizeCrossingCurve f saddleRegions (PartialZeros.CrossingCurve{segments}) =
         (Just startRegion, Nothing) ->
           Just Result.do
             extension <- connectingCurve f startRegion firstCurve
-            Ok ([extension] ++ segments)
+            Ok ([extension] + segments)
         (Nothing, Just endRegion) ->
           Just Result.do
             extension <- connectingCurve f endRegion (Curve2d.reverse lastCurve)
-            Ok (segments ++ [extension])
+            Ok (segments + [extension])
         (Just startRegion, Just endRegion) ->
           Just Result.do
             startExtension <- connectingCurve f startRegion firstCurve
             endExtension <- connectingCurve f endRegion (Curve2d.reverse lastCurve)
-            Ok ([startExtension] ++ segments ++ [endExtension])
+            Ok ([startExtension] + segments + [endExtension])
 
 finalizeTangentCurve :: PartialZeros.TangentCurve -> Maybe (NonEmpty (Curve2d Uv.Coordinates), Sign)
 finalizeTangentCurve (PartialZeros.DegenerateTangentCurve{}) = Nothing

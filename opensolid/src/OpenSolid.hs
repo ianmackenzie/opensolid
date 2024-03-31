@@ -2,7 +2,6 @@ module OpenSolid
   ( module Basics
   , module Coalesce
   , module Composition
-  , module Concatenation
   , module Arithmetic
   , module Result
   , module Error
@@ -24,7 +23,6 @@ import Arithmetic
 import Basics
 import Coalesce (Coalesce ((??)))
 import Composition (Composition ((>>)))
-import Concatenation (Concatenation ((++)))
 import CoordinateSystem (CoordinateSystem, Defines, LocalSpace, type (@))
 import Error (Error)
 import Float (Float, fromRational)

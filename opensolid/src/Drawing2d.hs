@@ -48,11 +48,11 @@ type Point space = Point2d (space @ Meters)
 entityString :: String -> Entity space -> Maybe String
 entityString _ Empty = Nothing
 entityString indent (Node name attributes children) =
-  let openingTag = indent ++ "<" ++ name ++ String.concat attributeLines ++ ">"
-      attributeLines = List.map (attributeString ("\n" ++ indent ++ "   ")) attributes
-      childLines = Maybe.collect (entityString (indent ++ "  ")) children
-      closingTag = indent ++ "</" ++ name ++ ">"
-   in Just (String.multiline (openingTag : childLines) ++ "\n" ++ closingTag)
+  let openingTag = indent + "<" + name + String.concat attributeLines + ">"
+      attributeLines = List.map (attributeString ("\n" + indent + "   ")) attributes
+      childLines = Maybe.collect (entityString (indent + "  ")) children
+      closingTag = indent + "</" + name + ">"
+   in Just (String.multiline (openingTag : childLines) + "\n" + closingTag)
 
 attributeString :: String -> Attribute space -> String
 attributeString indent (Attribute name value) = String.concat [indent, name, "=\"", value, "\""]
@@ -64,8 +64,8 @@ toSvg (Bounds2d (Range x1 x2) (Range y1 y2)) entities =
       attributes =
         [ Attribute "xmlns" "http://www.w3.org/2000/svg"
         , Attribute "version" "1.1"
-        , Attribute "width" (lengthString width ++ "mm")
-        , Attribute "height" (lengthString height ++ "mm")
+        , Attribute "width" (lengthString width + "mm")
+        , Attribute "height" (lengthString height + "mm")
         , Attribute "viewBox" $
             String.join " " $
               [ lengthString x1
@@ -79,7 +79,7 @@ toSvg (Bounds2d (Range x1 x2) (Range y1 y2)) entities =
         ]
    in String.multiline
         [ "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"
-        , Maybe.withDefault "" (entityString "" (Node "svg" attributes entities)) ++ "\n"
+        , Maybe.withDefault "" (entityString "" (Node "svg" attributes entities)) + "\n"
         ]
 
 writeTo :: String -> Bounds2d (space @ Meters) -> List (Entity space) -> IO ()
@@ -127,7 +127,7 @@ pointsAttribute givenPoints =
 coordinatesString :: Point space -> String
 coordinatesString point = do
   let (x, y) = Point2d.coordinates point
-  lengthString x ++ "," ++ lengthString -y
+  lengthString x + "," + lengthString -y
 
 lengthString :: Length -> String
 lengthString givenLength = String.fromFloat (Length.inMillimeters givenLength)

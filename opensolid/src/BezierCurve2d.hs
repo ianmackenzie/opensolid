@@ -106,7 +106,7 @@ fromControlPoints ::
   Point2d (space @ units) ->
   Result Curve2d.DegenerateCurve (Curve2d (space @ units))
 fromControlPoints startPoint innerControlPoints endPoint =
-  Curve2d.wrap (BezierCurve2d (startPoint :| (innerControlPoints ++ [endPoint])))
+  Curve2d.wrap (BezierCurve2d (startPoint :| (innerControlPoints + [endPoint])))
 
 {- | Construct a Bezier curve with the given start point, start derivatives, end point and end
 derivatives. For example,
@@ -138,7 +138,7 @@ hermite (startPoint, startDerivatives) (endPoint, endDerivatives) = do
   let scaledEndDerivatives = scaleDerivatives Negative 1.0 (Float.fromInt curveDegree) endDerivatives
   let startControlPoints = derivedControlPoints startPoint 1 (numStartDerivatives + 1) scaledStartDerivatives
   let endControlPoints = List.reverse (derivedControlPoints endPoint 1 (numEndDerivatives + 1) scaledEndDerivatives)
-  fromControlPoints startPoint (startControlPoints ++ endControlPoints) endPoint
+  fromControlPoints startPoint (startControlPoints + endControlPoints) endPoint
 
 scaleDerivatives :: Sign -> Float -> Float -> List (Vector2d (space @ units)) -> List (Vector2d (space @ units))
 scaleDerivatives _ _ _ [] = []

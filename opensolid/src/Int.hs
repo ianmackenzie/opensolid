@@ -25,7 +25,7 @@ import Prelude qualified
 parse :: String -> Result String Int
 parse input =
   Text.Read.readMaybe input
-    |> Maybe.orError ("Couldn't parse input as an integer: " ++ input)
+    |> Maybe.orError ("Couldn't parse input as an integer: " + input)
 
 {-# COMPLETE Even, Odd #-}
 

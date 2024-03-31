@@ -30,6 +30,7 @@ module Arithmetic
 where
 
 import Basics
+import Data.List.NonEmpty (NonEmpty ((:|)))
 import {-# SOURCE #-} Float (Float)
 import {-# SOURCE #-} Qty (Qty (Qty_))
 import {-# SOURCE #-} Sign (Sign (Negative, Positive))
@@ -139,6 +140,42 @@ instance Product Int Sign Int
 
 instance Addition Int Int Int where
   (+) = (Prelude.+)
+
+instance a ~ a' => Addition (List a) (List a') (List a) where
+  (+) = Prelude.mappend
+
+instance a ~ a' => Addition (NonEmpty a) (NonEmpty a') (NonEmpty a) where
+  (a :| as) + (b :| bs) = a :| (as + (b : bs))
+
+instance a ~ a' => Addition (NonEmpty a) (List a') (NonEmpty a) where
+  nonEmpty + [] = nonEmpty
+  (a :| as) + bs = a :| (as + bs)
+
+instance a ~ a' => Addition (List a) (NonEmpty a') (NonEmpty a) where
+  [] + nonEmpty = nonEmpty
+  (a : as) + (b :| bs) = a :| (as + (b : bs))
+
+instance a ~ a' => Addition (Maybe a) (Maybe a') (List a) where
+  Just first + Just second = [first, second]
+  Just first + Nothing = [first]
+  Nothing + Just second = [second]
+  Nothing + Nothing = []
+
+instance a ~ a' => Addition (Maybe a) (List a') (List a) where
+  Just value + list = value : list
+  Nothing + list = list
+
+instance a ~ a' => Addition (List a) (Maybe a') (List a) where
+  list + Nothing = list
+  list + Just value = list + [value]
+
+instance a ~ a' => Addition (Maybe a) (NonEmpty a') (NonEmpty a) where
+  Just a + (b :| bs) = a :| b : bs
+  Nothing + nonEmpty = nonEmpty
+
+instance a ~ a' => Addition (NonEmpty a) (Maybe a') (NonEmpty a) where
+  nonEmpty + Nothing = nonEmpty
+  nonEmpty + Just value = nonEmpty + [value]
 
 instance Subtraction Int Int Int where
   (-) = (Prelude.-)

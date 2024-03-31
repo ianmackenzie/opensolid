@@ -65,12 +65,12 @@ run tests = IO.do
   results <- IO.collect (runImpl []) tests
   let (successes, failures) = sum results
   if failures == 0
-    then IO.printLine ("✅ " ++ testCount successes "passed")
+    then IO.printLine ("✅ " + testCount successes "passed")
     else IO.fail (testCount failures "failed")
 
 reportError :: List String -> List String -> IO (Int, Int)
 reportError context messages = IO.do
-  IO.printLine ("❌ " ++ (String.join " | " (List.reverse context) ++ ":"))
+  IO.printLine ("❌ " + (String.join " | " (List.reverse context) + ":"))
   IO.printLine ""
   IO.forEach messages (String.indent "   " >> IO.printLine)
   IO.printLine ""
@@ -112,12 +112,12 @@ output label value =
   Random.map $
     \case
       Passed -> Passed
-      Failed messages -> Failed (messages ++ [label ++ ": " ++ show value])
+      Failed messages -> Failed (messages + [label + ": " + show value])
 
 newtype Lines a = Lines (List a)
 
 instance Show a => Show (Lines a) where
-  show (Lines values) = String.concat (List.map (\value -> "\n  " ++ show value) values)
+  show (Lines values) = String.concat (List.map (\value -> "\n  " + show value) values)
 
 lines :: (Data.Foldable.Foldable container, Show a) => container a -> Lines a
 lines container = Lines (Data.Foldable.toList container)

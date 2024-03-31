@@ -18,13 +18,13 @@ simpleDict = Dict.fromList [(1, "a"), (2, "b"), (3, "c")]
 
 foldl :: Test
 foldl = Test.verify "foldl" Test.do
-  let actual = Dict.foldl (++) "" simpleDict
+  let actual = Dict.foldl (+) "" simpleDict
   let expected = "abc"
   Test.expect (actual == expected)
 
 foldr :: Test
 foldr = Test.verify "foldr" Test.do
-  let actual = Dict.foldr (++) "" simpleDict
+  let actual = Dict.foldr (+) "" simpleDict
   let expected = "abc"
   Test.expect (actual == expected)
 

@@ -9,9 +9,9 @@ module Debug
   )
 where
 
+import Arithmetic
 import Basics
 import Composition
-import Concatenation
 import Control.Exception qualified
 import Debug.Trace qualified
 import System.IO.Unsafe qualified
@@ -23,7 +23,7 @@ instance Composition Debug a a where
   Debug action >> value = Prelude.seq (action ()) value
 
 labelled :: Show a => String -> a -> String
-labelled label value = label ++ ": " ++ show value
+labelled label value = label + ": " + show value
 
 print :: String -> Debug
 print message = Debug (trace message)

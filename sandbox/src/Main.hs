@@ -47,7 +47,7 @@ import VectorCurve2d qualified
 import Volume qualified
 
 log :: Show a => String -> a -> IO ()
-log label value = IO.printLine (label ++ ": " ++ show value)
+log label value = IO.printLine (label + ": " + show value)
 
 testScalarArithmetic :: IO ()
 testScalarArithmetic = IO.do
@@ -123,7 +123,7 @@ testListOperations :: IO ()
 testListOperations = IO.do
   log "Successive deltas" (List.successive subtract [0, 1, 4, 9, 16, 25])
   log "Successive intervals" (List.successive Range.from [1.0, 2.0, 3.0, 4.0])
-  log "Prepend Maybe to List" (Just 1 ++ [2, 3])
+  log "Prepend Maybe to List" (Just 1 + [2, 3])
 
 getCrossProduct :: Tolerance Meters => Result String Float
 getCrossProduct = Error.context "In getCrossProduct" Result.do
@@ -173,7 +173,7 @@ testParameter1dGeneration = IO.do
 testEmptyCheck :: List Int -> IO ()
 testEmptyCheck [] = IO.printLine "List is empty"
 testEmptyCheck (NonEmpty nonEmpty) =
-  IO.printLine ("List is non-empty, maximum is " ++ show (NonEmpty.maximum nonEmpty))
+  IO.printLine ("List is non-empty, maximum is " + show (NonEmpty.maximum nonEmpty))
 
 testNonEmpty :: IO ()
 testNonEmpty = IO.do
@@ -411,7 +411,7 @@ testDebugPrint = do
   Debug.log "xs" xs
   let ys = String.repeat 3 "y"
   Debug.log "ys" ys
-  IO.printLine (xs ++ ys)
+  IO.printLine (xs + ys)
 
 stringSum :: String -> String -> Result String Int
 stringSum s1 s2 = Result.do

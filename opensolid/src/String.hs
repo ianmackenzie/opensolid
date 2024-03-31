@@ -14,8 +14,8 @@ module String
   )
 where
 
+import Arithmetic
 import Basics
-import Concatenation
 import Data.Char qualified
 import Data.List qualified
 import {-# SOURCE #-} Float (Float)
@@ -50,7 +50,7 @@ indent :: String -> String -> String
 indent indentation paragraph =
   paragraph
     |> lines
-    |> List.map (indentation ++)
+    |> List.map (indentation +)
     |> multiline
 
 repeat :: Int -> String -> String

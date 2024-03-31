@@ -78,7 +78,7 @@ list exprs =
 -- TODO: should we protect against double quotes within a string?
 string :: String -> Expr
 string st =
-  P.Strings ["\"" ++ st ++ "\""] ()
+  P.Strings ["\"" + st + "\""] ()
 
 int :: Int -> Expr
 int val =

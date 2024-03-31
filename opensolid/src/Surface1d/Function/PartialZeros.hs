@@ -93,8 +93,8 @@ merge left right =
         , crossingLoops = List.concat [newCrossingLoops, leftCrossingLoops, rightCrossingLoops]
         , tangentCurves = mergedTangentCurves
         , tangentLoops = List.concat [newTangentLoops, leftTangentLoops, rightTangentLoops]
-        , tangentPoints = leftTangentPoints ++ rightTangentPoints
-        , saddleRegions = leftSaddleRegions ++ rightSaddleRegions
+        , tangentPoints = leftTangentPoints + rightTangentPoints
+        , saddleRegions = leftSaddleRegions + rightSaddleRegions
         }
  where
   PartialZeros
@@ -132,11 +132,11 @@ addCrossingCurve givenCrossingCurve (first : rest, loops) =
 joinCrossingCurves :: CrossingCurve -> CrossingCurve -> Maybe JoinCrossingCurveResult
 joinCrossingCurves (CrossingCurve start1 end1 segments1) (CrossingCurve start2 end2 segments2)
   | Boundary.adjacent end1 start2 && Boundary.adjacent end2 start1 =
-      Just (NewCrossingLoop (segments1 ++ segments2))
+      Just (NewCrossingLoop (segments1 + segments2))
   | Boundary.adjacent end1 start2 =
-      Just (JoinedCrossingCurve (CrossingCurve start1 end2 (segments1 ++ segments2)))
+      Just (JoinedCrossingCurve (CrossingCurve start1 end2 (segments1 + segments2)))
   | Boundary.adjacent end2 start1 =
-      Just (JoinedCrossingCurve (CrossingCurve start2 end1 (segments2 ++ segments1)))
+      Just (JoinedCrossingCurve (CrossingCurve start2 end1 (segments2 + segments1)))
   | otherwise = Nothing
 joinCrossingCurves (CrossingCurve start1 end1 segments) (DegenerateCrossingCurve start2 end2)
   | Boundary.adjacent end1 start2 && Boundary.adjacent end2 start1 =
@@ -175,11 +175,11 @@ joinTangentCurves :: TangentCurve -> TangentCurve -> Maybe JoinTangentCurveResul
 joinTangentCurves (TangentCurve start1 end1 segments1 sign1) (TangentCurve start2 end2 segments2 sign2)
   | sign1 /= sign2 = Nothing
   | Boundary.adjacent end1 start2 && Boundary.adjacent end2 start1 =
-      Just (NewTangentLoop (TangentLoop (segments1 ++ segments2) sign1))
+      Just (NewTangentLoop (TangentLoop (segments1 + segments2) sign1))
   | Boundary.adjacent end1 start2 =
-      Just (JoinedTangentCurve (TangentCurve start1 end2 (segments1 ++ segments2) sign1))
+      Just (JoinedTangentCurve (TangentCurve start1 end2 (segments1 + segments2) sign1))
   | Boundary.adjacent end2 start1 =
-      Just (JoinedTangentCurve (TangentCurve start2 end1 (segments2 ++ segments1) sign1))
+      Just (JoinedTangentCurve (TangentCurve start2 end1 (segments2 + segments1) sign1))
   | otherwise = Nothing
 joinTangentCurves (TangentCurve start1 end1 segments1 sign1) (DegenerateTangentCurve start2 end2 sign2)
   | sign1 /= sign2 = Nothing

@@ -9,9 +9,9 @@ module Error
   )
 where
 
+import Arithmetic
 import Basics
 import Composition
-import Concatenation
 import Debug qualified
 import {-# SOURCE #-} IO qualified
 import String qualified
@@ -37,7 +37,7 @@ context :: Map x String m n => String -> m a -> n a
 context string = map (message >> addContext string)
 
 addContext :: String -> String -> String
-addContext string text = string ++ ":\n" ++ String.indent "  " text
+addContext string text = string + ":\n" + String.indent "  " text
 
 print :: Map x x m m => String -> m a -> m a
 print output = map (\error -> do Debug.print output; error)

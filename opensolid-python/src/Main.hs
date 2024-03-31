@@ -133,7 +133,7 @@ apiClass (Class clsName representationProps errorClasses functions) =
       [ PY.returnStatement
           ( List.foldl
               PY.plus
-              (PY.string (clsName ++ "("))
+              (PY.string (clsName + "("))
               ( List.intersperse
                   (PY.string ", ")
                   (List.map (\prop -> PY.call (PY.var "str") [PY.call (PY.var "self" `PY.dot` prop) []]) representationProps)
@@ -154,23 +154,20 @@ apiFunction (Function kind ffiName pyName args retType) =
           PY.def
             pyName
             -- "tolerance" is the last arg
-            (pyArgs (appendMaybe tolerance argsWithoutTolerance))
+            (pyArgs (argsWithoutTolerance + maybeTolerance))
             (pyType retType)
             (fnBody retType libName (ffiArgExprs args))
       Method ->
         PY.def
           pyName
           -- "self" is the first, "tolerance" is the last arg
-          (selfPyArg : pyArgs (appendMaybe tolerance (removeLast argsWithoutTolerance)))
+          (selfPyArg : pyArgs (removeLast argsWithoutTolerance + maybeTolerance))
           (pyType retType)
           (fnBody retType libName (ffiArgExprs args))
   ]
  where
   libName = PY.var "lib" `PY.dot` ffiName
-  (tolerance, argsWithoutTolerance) = takeTolerance args
-
-  appendMaybe (Just tol) list = list ++ [tol]
-  appendMaybe Nothing list = list
+  (maybeTolerance, argsWithoutTolerance) = takeTolerance args
 
   removeLast [] = []
   removeLast [_] = []
@@ -287,7 +284,7 @@ apiException _ ex = internalError (show ex)
 
 main :: IO ()
 main = IO.do
-  let pythonCode = PY.prettyStatements (setup ++ api openSolidAPI)
+  let pythonCode = PY.prettyStatements (setup + api openSolidAPI)
   let ruffCmd = SP.proc "ruff" ["format", "--stdin-filename", "opensolid.py", "--quiet"]
   (Just stdinHandle, _, _, process) <- SP.createProcess ruffCmd{SP.std_in = SP.CreatePipe}
   SIO.hPutStr stdinHandle pythonCode

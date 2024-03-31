@@ -186,27 +186,27 @@ apiType typ = Prelude.do
         | name == ''Float -> Prelude.return (TH.ConE 'Api.Float)
         | name == ''Angle -> Prelude.return (TH.ConE 'Api.Float)
         | name == ''Bool -> Prelude.return (TH.ConE 'Api.Boolean)
-      _ -> Prelude.fail ("Unknown type: " ++ show typ)
+      _ -> Prelude.fail ("Unknown type: " + show typ)
 
 typeNameBase :: TH.Type -> TH.Q TH.Exp
 typeNameBase (TH.AppT t _) = typeNameBase t
 typeNameBase (TH.ConT name) = Prelude.return (TH.LitE (TH.StringL (TH.nameBase name)))
-typeNameBase typ = Prelude.fail ("Unknown type: " ++ show typ)
+typeNameBase typ = Prelude.fail ("Unknown type: " + show typ)
 
 modNameBase :: TH.Type -> TH.Q TH.Exp
 modNameBase (TH.AppT t _) = modNameBase t
 modNameBase typ@(TH.ConT name) =
   case TH.nameModule name of
     Just mod -> Prelude.return (TH.LitE (TH.StringL mod))
-    Nothing -> Prelude.fail ("Unknown module for type: " ++ show typ)
-modNameBase typ = Prelude.fail ("Unknown module for type: " ++ show typ)
+    Nothing -> Prelude.fail ("Unknown module for type: " + show typ)
+modNameBase typ = Prelude.fail ("Unknown module for type: " + show typ)
 
 -- Generates wrapper function type and clause from the original function
 ffiFunctionInfo :: TH.Type -> TH.Exp -> List TH.Pat -> List TH.Stmt -> TH.Q (TH.Type, TH.Clause)
 ffiFunctionInfo (TH.AppT (TH.AppT TH.ArrowT argTyp) remainingArgs) retExp arguments bindStmts = Prelude.do
   arg <- ffiArgInfo argTyp
   let (argName, argFfiTyp, argExpr, bindStmt) = arg
-      newBindStmts = bindStmt ++ bindStmts
+      newBindStmts = bindStmt + bindStmts
       newArguments = argName : arguments
       newRetExpr = TH.AppE retExp argExpr
   (returnType, returnClause) <- ffiFunctionInfo remainingArgs newRetExpr newArguments newBindStmts
@@ -220,7 +220,7 @@ ffiFunctionInfo returnType retExp argNames bindStmts = Prelude.do
     ( TH.AppT (TH.ConT ''IO) finalReturnType
     , TH.Clause
         (List.reverse argNames)
-        (TH.NormalB (TH.DoE Nothing (bindStmts ++ [TH.NoBindS finalRetExp])))
+        (TH.NormalB (TH.DoE Nothing (bindStmts + [TH.NoBindS finalRetExp])))
         []
     )
 
