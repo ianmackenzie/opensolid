@@ -430,7 +430,7 @@ testStringSum = IO.do
     log "sum" sum
 
 main :: IO ()
-main = IO.do
+main = Tolerance.using (Length.meters 1e-9) IO.do
   testScalarArithmetic
   testVectorArithmetic
   testRangeArithmetic
@@ -454,5 +454,3 @@ main = IO.do
   testParallelComputation
   testDebugPrint
   testStringSum
- where
-  ?tolerance = Length.meters 1e-9

@@ -51,7 +51,6 @@ executable sandbox
       RebindableSyntax
       GADTs
       LexicalNegation
-      ImplicitParams
       BlockArguments
       QualifiedDo
       LambdaCase
