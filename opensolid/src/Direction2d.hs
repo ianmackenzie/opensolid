@@ -40,7 +40,7 @@ import Units qualified
 import Vector2d (Vector2d (Vector2d))
 import Vector2d qualified
 
-type role Direction2d nominal
+type role Direction2d phantom
 
 newtype Direction2d (space :: Type) = Direction2d (Vector2d (space @ Unitless))
   deriving (Eq, Show)

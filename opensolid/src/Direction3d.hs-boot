@@ -7,7 +7,7 @@ where
 import OpenSolid
 import {-# SOURCE #-} Vector3d (Vector3d)
 
-type role Direction3d nominal
+type role Direction3d phantom
 
 data Direction3d (space :: Type)
 

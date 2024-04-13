@@ -8,7 +8,7 @@ where
 import OpenSolid
 import {-# SOURCE #-} Vector2d (Vector2d)
 
-type role Direction2d nominal
+type role Direction2d phantom
 
 newtype Direction2d (space :: Type) = Direction2d (Vector2d (space @ Unitless))
 
