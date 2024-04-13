@@ -9,6 +9,7 @@ module Tests.Random
   )
 where
 
+import Axis2d qualified
 import Bounds2d (Bounds2d (Bounds2d))
 import Direction2d qualified
 import Frame2d (Frame2d)
@@ -16,8 +17,8 @@ import Frame2d qualified
 import Length (Length)
 import Length qualified
 import OpenSolid
-import Point2d qualified
 import Point2d (Point2d)
+import Point2d qualified
 import Random (Generator)
 import Random qualified
 import Range (Range)
@@ -41,8 +42,9 @@ vectorBounds3d = Random.map3 VectorBounds3d lengthRange lengthRange lengthRange
 frame2d :: Generator (Frame2d (global @ Meters) (Defines local))
 frame2d = Random.do
   originPoint <- point2d
-  direction <- Direction2d.generator
-  Random.return (Frame2d.withXDirection direction originPoint)
+  xDirection <- Direction2d.generator
+  let xAxis = Axis2d.through originPoint xDirection
+  Random.return (Frame2d.fromXAxis xAxis)
 
 bounds2d :: Generator (Bounds2d (space @ Meters))
 bounds2d = Random.map2 Bounds2d lengthRange lengthRange

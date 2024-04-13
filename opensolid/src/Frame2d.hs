@@ -8,8 +8,6 @@ module Frame2d
   , yDirection
   , xAxis
   , yAxis
-  , withXDirection
-  , withYDirection
   , fromXAxis
   , fromYAxis
   , placeIn
@@ -51,17 +49,11 @@ xy = Frame2d Point2d.origin Basis2d.xy
 at :: Point2d (space @ units) -> Frame2d (space @ units) defines
 at point = Frame2d point Basis2d.xy
 
-withXDirection :: Direction2d space -> Point2d (space @ units) -> Frame2d (space @ units) defines
-withXDirection dx p0 = Frame2d p0 (Basis2d.fromXDirection dx)
-
-withYDirection :: Direction2d space -> Point2d (space @ units) -> Frame2d (space @ units) defines
-withYDirection dy p0 = Frame2d p0 (Basis2d.fromYDirection dy)
-
 fromXAxis :: Axis2d (space @ units) -> Frame2d (space @ units) defines
-fromXAxis axis = withXDirection (Axis2d.direction axis) (Axis2d.originPoint axis)
+fromXAxis axis = Frame2d (Axis2d.originPoint axis) (Basis2d.fromXDirection (Axis2d.direction axis))
 
 fromYAxis :: Axis2d (space @ units) -> Frame2d (space @ units) defines
-fromYAxis axis = withYDirection (Axis2d.direction axis) (Axis2d.originPoint axis)
+fromYAxis axis = Frame2d (Axis2d.originPoint axis) (Basis2d.fromYDirection (Axis2d.direction axis))
 
 xAxis :: Frame2d (space @ units) defines -> Axis2d (space @ units)
 xAxis frame = Axis2d.through (originPoint frame) (xDirection frame)

@@ -26,6 +26,7 @@ module Surface1d.Function
 where
 
 import Angle qualified
+import Axis2d qualified
 import BezierCurve2d qualified
 import Bounds2d (Bounds2d (Bounds2d))
 import Bounds2d qualified
@@ -1020,7 +1021,8 @@ saddlePointSolution derivatives point expandedBounds =
           (maxRadiusForComponent v v0 vRange)
 
       xDirection = Direction2d.unsafe (Vector2d.normalize (d1 + d2))
-      frame = Frame2d.withXDirection xDirection point
+      xAxis = Axis2d.through point xDirection
+      frame = Frame2d.fromXAxis xAxis
       radius = Float.min (maxRadiusForVector d1) (maxRadiusForVector d2)
       Vector2d u1 v1 = Vector2d.relativeTo frame d1
       halfWidth = Float.abs (radius * u1)

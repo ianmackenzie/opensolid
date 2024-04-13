@@ -14,8 +14,6 @@ frame2d =
     , method 'Frame2d.yDirection ["frame"]
     , method 'Frame2d.xAxis ["point"]
     , method 'Frame2d.yAxis ["point"]
-    , static 'Frame2d.withXDirection ["direction", "point"]
-    , static 'Frame2d.withYDirection ["direction", "point"]
     , static 'Frame2d.fromXAxis ["axis"]
     , static 'Frame2d.fromYAxis ["axis"]
     ]
