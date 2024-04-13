@@ -8,7 +8,6 @@ where
 
 import Float qualified
 import OpenSolid
-import Parameter qualified
 import Qty qualified
 import Range (Range (Range))
 import Range qualified
@@ -19,7 +18,7 @@ data Tree segment
   = Tree (Cache segment) (Cache segment) ~(Tree segment) ~(Tree segment)
 
 tree :: (Range Unitless -> segment) -> Tree segment
-tree compute = buildTree compute Parameter.domain
+tree compute = buildTree compute Range.unit
 
 expand :: Range Unitless -> Range Unitless
 expand (Range low high) =

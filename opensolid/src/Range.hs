@@ -2,6 +2,7 @@ module Range
   ( Range (Range)
   , unsafe
   , constant
+  , unit
   , from
   , hull3
   , hull4
@@ -194,6 +195,9 @@ unsafe = Range_
 {-# INLINE constant #-}
 constant :: Qty units -> Range units
 constant value = Range_ value value
+
+unit :: Range Unitless
+unit = Range_ 0.0 1.0
 
 {-# INLINE from #-}
 from :: Qty units -> Qty units -> Range units

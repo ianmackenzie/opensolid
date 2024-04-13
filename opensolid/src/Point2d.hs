@@ -29,7 +29,7 @@ where
 import {-# SOURCE #-} Axis2d (Axis2d)
 import {-# SOURCE #-} Axis2d qualified
 import Bounded qualified
-import {-# SOURCE #-} Bounds2d (Bounds2d (Bounds2d))
+import {-# SOURCE #-} Bounds2d (Bounds2d)
 import {-# SOURCE #-} Bounds2d qualified
 import Data.Coerce qualified
 import {-# SOURCE #-} Frame2d (Frame2d)
@@ -98,7 +98,7 @@ instance
     (VectorBounds2d (space' @ units'))
     (Bounds2d (space @ units))
   where
-  Point2d px py + VectorBounds2d vx vy = Bounds2d (px + vx) (py + vy)
+  Point2d px py + VectorBounds2d vx vy = Bounds2d.xy (px + vx) (py + vy)
 
 instance
   (units ~ units', space ~ space') =>
@@ -107,7 +107,7 @@ instance
     (VectorBounds2d (space' @ units'))
     (Bounds2d (space @ units))
   where
-  Point2d px py - VectorBounds2d vx vy = Bounds2d (px - vx) (py - vy)
+  Point2d px py - VectorBounds2d vx vy = Bounds2d.xy (px - vx) (py - vy)
 
 instance
   (space ~ space', units ~ units') =>

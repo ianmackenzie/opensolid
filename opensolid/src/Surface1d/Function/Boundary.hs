@@ -8,7 +8,7 @@ module Surface1d.Function.Boundary
   )
 where
 
-import Bounds2d (Bounds2d (Bounds2d))
+import Bounds2d qualified
 import OpenSolid
 import Qty qualified
 import Range (Range)
@@ -23,16 +23,24 @@ data Boundary
   deriving (Show)
 
 left :: Uv.Bounds -> Boundary
-left (Bounds2d u v) = Left (Range.minValue u) v
+left uvBounds = do
+  let (uRange, vRange) = Bounds2d.xyRanges uvBounds
+  Left (Range.minValue uRange) vRange
 
 right :: Uv.Bounds -> Boundary
-right (Bounds2d u v) = Right (Range.maxValue u) v
+right uvBounds = do
+  let (uRange, vRange) = Bounds2d.xyRanges uvBounds
+  Right (Range.maxValue uRange) vRange
 
 bottom :: Uv.Bounds -> Boundary
-bottom (Bounds2d u v) = Bottom u (Range.minValue v)
+bottom uvBounds = do
+  let (uRange, vRange) = Bounds2d.xyRanges uvBounds
+  Bottom uRange (Range.minValue vRange)
 
 top :: Uv.Bounds -> Boundary
-top (Bounds2d u v) = Top u (Range.maxValue v)
+top uvBounds = do
+  let (uRange, vRange) = Bounds2d.xyRanges uvBounds
+  Top uRange (Range.maxValue vRange)
 
 adjacent :: Boundary -> Boundary -> Bool
 adjacent (Left u1 v1) (Right u2 v2) = u1 == u2 && Range.overlap v1 v2 > Qty.zero

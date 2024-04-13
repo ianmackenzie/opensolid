@@ -21,7 +21,6 @@ import DirectionCurve2d (DirectionCurve2d)
 import DirectionCurve2d qualified
 import Frame2d (Frame2d)
 import OpenSolid
-import Parameter qualified
 import Point2d (Point2d)
 import Point2d qualified
 import Qty qualified
@@ -101,7 +100,7 @@ instance
   (space ~ space', units ~ units') =>
   Intersects (Curve2d (space @ units)) (Point2d (space' @ units')) units
   where
-  curve ^ point = Range.any (segmentIsCoincidentWithPoint point curve) Parameter.domain
+  curve ^ point = Range.any (segmentIsCoincidentWithPoint point curve) Range.unit
 
 instance
   (space ~ space', units ~ units') =>
@@ -184,7 +183,7 @@ reverse (PlaceIn frame curve) = PlaceIn frame (reverse curve)
 
 bounds :: Curve2d (space @ units) -> Bounds2d (space @ units)
 bounds (Line{startPoint = p1, endPoint = p2}) = Bounds2d.hull2 p1 p2
-bounds arc@(Arc{}) = segmentBounds Parameter.domain arc
+bounds arc@(Arc{}) = segmentBounds Range.unit arc
 bounds (Curve curve _) = boundsImpl curve
 bounds (Coerce curve) = Units.coerce (bounds curve)
 bounds (PlaceIn frame curve) = Bounds2d.placeIn frame (bounds curve)

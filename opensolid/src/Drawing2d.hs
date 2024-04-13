@@ -21,7 +21,8 @@ module Drawing2d
   )
 where
 
-import Bounds2d (Bounds2d (Bounds2d))
+import Bounds2d (Bounds2d)
+import Bounds2d qualified
 import Colour (Colour)
 import Colour qualified
 import File qualified
@@ -32,7 +33,7 @@ import Maybe qualified
 import OpenSolid
 import Point2d (Point2d)
 import Point2d qualified
-import Range (Range (Range))
+import Range qualified
 import String qualified
 import Units (Meters)
 
@@ -58,7 +59,10 @@ attributeString :: String -> Attribute space -> String
 attributeString indent (Attribute name value) = String.concat [indent, name, "=\"", value, "\""]
 
 toSvg :: Bounds2d (space @ Meters) -> List (Entity space) -> String
-toSvg (Bounds2d (Range x1 x2) (Range y1 y2)) entities = do
+toSvg viewBox entities = do
+  let (xRange, yRange) = Bounds2d.xyRanges viewBox
+  let (x1, x2) = Range.endpoints xRange
+  let (y1, y2) = Range.endpoints yRange
   let width = x2 - x1
   let height = y2 - y1
   let attributes =

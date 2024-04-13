@@ -6,9 +6,9 @@ import OpenSolid
 
 bounds2d :: Class
 bounds2d =
-  cls ''Bounds2d.Bounds2d ['Bounds2d.xCoordinate, 'Bounds2d.yCoordinate] [] $
-    [ method 'Bounds2d.xCoordinate ["bounds"]
-    , method 'Bounds2d.yCoordinate ["bounds"]
+  cls ''Bounds2d.Bounds2d ['Bounds2d.xRange, 'Bounds2d.yRange] [] $
+    [ method 'Bounds2d.xRange ["bounds"]
+    , method 'Bounds2d.yRange ["bounds"]
     , static 'Bounds2d.constant ["point"]
     , static 'Bounds2d.hull2 ["p1", "p2"]
     , static 'Bounds2d.hull3 ["p1", "p2", "p3"]

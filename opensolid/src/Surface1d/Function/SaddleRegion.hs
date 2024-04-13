@@ -10,7 +10,6 @@ module Surface1d.Function.SaddleRegion
   )
 where
 
-import Bounds2d (Bounds2d (Bounds2d))
 import Bounds2d qualified
 import Direction2d qualified
 import Float qualified
@@ -62,7 +61,7 @@ bounds (SaddleRegion{frame, halfWidth, halfHeight}) = do
   let (jx, jy) = Direction2d.components (Frame2d.yDirection frame)
   let dx = Float.abs ix * halfWidth + Float.abs jx * halfHeight
   let dy = Float.abs iy * halfWidth + Float.abs jy * halfHeight
-  Bounds2d (Range.from (x0 - dx) (x0 + dx)) (Range.from (y0 - dy) (y0 + dy))
+  Bounds2d.xy (Range.from (x0 - dx) (x0 + dx)) (Range.from (y0 - dy) (y0 + dy))
 
 includes :: Uv.Point -> SaddleRegion -> Bool
 includes givenPoint region = isInsideRegion region givenPoint

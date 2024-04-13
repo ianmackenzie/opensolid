@@ -10,7 +10,8 @@ module Tests.Random
 where
 
 import Axis2d qualified
-import Bounds2d (Bounds2d (Bounds2d))
+import Bounds2d (Bounds2d)
+import Bounds2d qualified
 import Direction2d qualified
 import Frame2d (Frame2d)
 import Frame2d qualified
@@ -47,7 +48,7 @@ frame2d = Random.do
   Random.return (Frame2d.fromXAxis xAxis)
 
 bounds2d :: Generator (Bounds2d (space @ Meters))
-bounds2d = Random.map2 Bounds2d lengthRange lengthRange
+bounds2d = Random.map2 Bounds2d.xy lengthRange lengthRange
 
 vectorBounds2d :: Generator (VectorBounds2d (space @ Meters))
 vectorBounds2d = Random.map2 VectorBounds2d lengthRange lengthRange

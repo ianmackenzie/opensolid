@@ -35,7 +35,6 @@ import Int qualified
 import List qualified
 import Maybe qualified
 import OpenSolid
-import Parameter qualified
 import Qty qualified
 import Range (Range)
 import Range qualified
@@ -330,7 +329,7 @@ cos curve = Cos curve
 
 isZero :: Tolerance units => Curve1d units -> Bool
 isZero (Constant value) = value ~= Qty.zero
-isZero curve = List.all (pointOn curve >> (~= Qty.zero)) (Range.samples Parameter.domain)
+isZero curve = List.all (pointOn curve >> (~= Qty.zero)) (Range.samples Range.unit)
 
 -- TODO report an error if higher-order root detected
 maxRootOrder :: Int
@@ -339,7 +338,7 @@ maxRootOrder = 4
 ----- ROOT FINDING -----
 
 hasInternalZero :: Tolerance units => Curve1d units -> Bool
-hasInternalZero curve = isZero curve || findInternalZero curve Parameter.domain
+hasInternalZero curve = isZero curve || findInternalZero curve Range.unit
 
 findInternalZero :: Tolerance units => Curve1d units -> Range Unitless -> Bool
 findInternalZero curve domain = do
@@ -470,4 +469,4 @@ computeWidth derivativeOrder derivativeValue = do
     n -> (Int.factorial n * ratio) ** (1 / n)
 
 integral :: Curve1d units -> Estimate units
-integral curve = Estimate.wrap (Integral curve (derivative curve) Parameter.domain)
+integral curve = Estimate.wrap (Integral curve (derivative curve) Range.unit)

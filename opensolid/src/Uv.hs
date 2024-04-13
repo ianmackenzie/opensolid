@@ -11,7 +11,8 @@ module Uv
   )
 where
 
-import Bounds2d (Bounds2d (Bounds2d))
+import Bounds2d (Bounds2d)
+import Bounds2d qualified
 import Direction2d (Direction2d)
 import OpenSolid
 import Point2d (Point2d)
@@ -30,11 +31,17 @@ type Bounds = Bounds2d Coordinates
 type Direction = Direction2d Space
 
 domain :: Bounds
-domain = Bounds2d (Range.from 0.0 1.0) (Range.from 0.0 1.0)
+domain = Bounds2d.xy Range.unit Range.unit
 
 bisect :: Parameter -> Bounds -> (Bounds, Bounds)
-bisect U (Bounds2d u v) = let (u1, u2) = Range.bisect u in (Bounds2d u1 v, Bounds2d u2 v)
-bisect V (Bounds2d u v) = let (v1, v2) = Range.bisect v in (Bounds2d u v1, Bounds2d u v2)
+bisect U bounds = do
+  let (uRange, vRange) = Bounds2d.xyRanges bounds
+  let (u1, u2) = Range.bisect uRange
+  (Bounds2d.xy u1 vRange, Bounds2d.xy u2 vRange)
+bisect V bounds = do
+  let (uRange, vRange) = Bounds2d.xyRanges bounds
+  let (v1, v2) = Range.bisect vRange
+  (Bounds2d.xy uRange v1, Bounds2d.xy uRange v2)
 
 cycle :: Parameter -> Parameter
 cycle U = V

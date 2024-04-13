@@ -1,6 +1,5 @@
 module Parameter
-  ( domain
-  , steps
+  ( steps
   , generator
   , leading
   , trailing
@@ -12,11 +11,6 @@ where
 import List qualified
 import OpenSolid
 import Random qualified
-import Range (Range)
-import Range qualified
-
-domain :: Range Unitless
-domain = Range.from 0.0 1.0
 
 steps :: Int -> List Float
 steps n = if n > 0 then List.map (/ n) [0 .. n] else []

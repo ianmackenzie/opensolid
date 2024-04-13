@@ -1,8 +1,8 @@
 module Bounds2d
-  ( Bounds2d (Bounds2d)
-  , xCoordinate
-  , yCoordinate
-  , coordinates
+  ( Bounds2d
+  , xRange
+  , yRange
+  , xyRanges
   , xy
   , constant
   , hull2
@@ -89,7 +89,7 @@ instance
   where
   point - bounds = do
     let (px, py) = Point2d.coordinates point
-    let (bx, by) = coordinates bounds
+    let (bx, by) = xyRanges bounds
     VectorBounds2d.xy (px - bx) (py - by)
 
 instance
@@ -100,7 +100,7 @@ instance
     (VectorBounds2d (space @ units))
   where
   bounds - point = do
-    let (bx, by) = coordinates bounds
+    let (bx, by) = xyRanges bounds
     let (px, py) = Point2d.coordinates point
     VectorBounds2d.xy (bx - px) (by - py)
 
@@ -112,14 +112,14 @@ instance
     (VectorBounds2d (space @ units))
   where
   bounds1 - bounds2 = do
-    let (x1, y1) = coordinates bounds1
-    let (x2, y2) = coordinates bounds2
+    let (x1, y1) = xyRanges bounds1
+    let (x2, y2) = xyRanges bounds2
     VectorBounds2d.xy (x1 - x2) (y1 - y2)
 
 instance (space ~ space', units ~ units') => ApproximateEquality (Point2d (space @ units)) (Bounds2d (space' @ units')) units where
   point ~= bounds = do
     let (px, py) = Point2d.coordinates point
-    let (bx, by) = coordinates bounds
+    let (bx, by) = xyRanges bounds
     px ~= bx && py ~= by
 
 instance (space ~ space', units ~ units') => ApproximateEquality (Bounds2d (space @ units)) (Point2d (space' @ units')) units where
@@ -128,7 +128,7 @@ instance (space ~ space', units ~ units') => ApproximateEquality (Bounds2d (spac
 instance (space ~ space', units ~ units') => Intersects (Point2d (space @ units)) (Bounds2d (space' @ units')) units where
   point ^ bounds = do
     let (px, py) = Point2d.coordinates point
-    let (bx, by) = coordinates bounds
+    let (bx, by) = xyRanges bounds
     px ^ bx && py ^ by
 
 instance (space ~ space', units ~ units') => Intersects (Bounds2d (space @ units)) (Point2d (space' @ units')) units where
@@ -137,15 +137,15 @@ instance (space ~ space', units ~ units') => Intersects (Bounds2d (space @ units
 instance (space ~ space', units ~ units') => Intersects (Bounds2d (space @ units)) (Bounds2d (space' @ units')) units where
   Bounds2d x1 y1 ^ Bounds2d x2 y2 = x1 ^ x2 && y1 ^ y2
 
-xCoordinate :: Bounds2d (space @ units) -> Range units
-xCoordinate (Bounds2d x _) = x
+xRange :: Bounds2d (space @ units) -> Range units
+xRange (Bounds2d x _) = x
 
-yCoordinate :: Bounds2d (space @ units) -> Range units
-yCoordinate (Bounds2d _ y) = y
+yRange :: Bounds2d (space @ units) -> Range units
+yRange (Bounds2d _ y) = y
 
-{-# INLINE coordinates #-}
-coordinates :: Bounds2d (space @ units) -> (Range units, Range units)
-coordinates (Bounds2d x y) = (x, y)
+{-# INLINE xyRanges #-}
+xyRanges :: Bounds2d (space @ units) -> (Range units, Range units)
+xyRanges (Bounds2d x y) = (x, y)
 
 xy :: Range units -> Range units -> Bounds2d (space @ units)
 xy = Bounds2d
@@ -167,7 +167,7 @@ exclusion point bounds
   | otherwise = Qty.max dx dy
  where
   (x, y) = Point2d.coordinates point
-  (bx, by) = coordinates bounds
+  (bx, by) = xyRanges bounds
   dx = Range.exclusion x bx
   dy = Range.exclusion y by
   px = dx >= Qty.zero
@@ -179,7 +179,7 @@ inclusion point bounds = -(exclusion point bounds)
 includes :: Point2d (space @ units) -> Bounds2d (space @ units) -> Bool
 includes point bounds = do
   let (px, py) = Point2d.coordinates point
-  let (bx, by) = coordinates bounds
+  let (bx, by) = xyRanges bounds
   Range.includes px bx && Range.includes py by
 
 contains :: Bounds2d (space @ units) -> Bounds2d (space @ units) -> Bool
@@ -365,8 +365,8 @@ resolve assess bounds@(Bounds2d x y) =
             else Unresolved
 
 find :: (Bounds2d (space @ units) -> Bool) -> Bounds2d (space @ units) -> Maybe (Point2d (space @ units))
-find isCandidate (Bounds2d xRange yRange) = Maybe.do
-  (x0, y0) <- Range.find2 (\x y -> isCandidate (Bounds2d x y)) xRange yRange
+find isCandidate bounds = Maybe.do
+  (x0, y0) <- Range.find2 (\x y -> isCandidate (Bounds2d x y)) (xRange bounds) (yRange bounds)
   Just (Point2d.xy x0 y0)
 
 placeIn ::
