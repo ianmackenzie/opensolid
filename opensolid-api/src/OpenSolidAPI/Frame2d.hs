@@ -8,7 +8,7 @@ frame2d :: Class
 frame2d =
   cls ''Frame2d.Frame2d ['Frame2d.originPoint, 'Frame2d.xDirection, 'Frame2d.yDirection] [] $
     [ static 'Frame2d.xy []
-    , static 'Frame2d.withOriginPoint ["point"]
+    , static 'Frame2d.at ["point"]
     , method 'Frame2d.originPoint ["frame"]
     , method 'Frame2d.xDirection ["frame"]
     , method 'Frame2d.yDirection ["frame"]
