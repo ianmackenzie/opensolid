@@ -102,5 +102,5 @@ infix 4 ~=, !=
 ofSquared_ :: Tolerance units => Qty units -> Qty (units :*: units)
 ofSquared_ value = ?tolerance .*. ?tolerance + 2.0 * Qty.abs value .*. ?tolerance
 
-ofSquared :: (Tolerance units, Units.Product units units squaredUnits) => Qty units -> Qty squaredUnits
+ofSquared :: (Tolerance units, Units.Squared units squaredUnits) => Qty units -> Qty squaredUnits
 ofSquared = Units.specialize . ofSquared_
