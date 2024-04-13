@@ -237,9 +237,9 @@ segmentBounds uvw function =
     Zero -> Range.constant Qty.zero
     Constant x -> Range.constant x
     Coerce f -> Units.coerce (segmentBounds uvw f)
-    U -> Bounds3d.xCoordinate uvw
-    V -> Bounds3d.yCoordinate uvw
-    W -> Bounds3d.zCoordinate uvw
+    U -> Bounds3d.xRange uvw
+    V -> Bounds3d.yRange uvw
+    W -> Bounds3d.zRange uvw
     Negated f -> negate (segmentBounds uvw f)
     Sum f1 f2 -> segmentBounds uvw f1 + segmentBounds uvw f2
     Difference f1 f2 -> segmentBounds uvw f1 - segmentBounds uvw f2

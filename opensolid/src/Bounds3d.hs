@@ -1,8 +1,10 @@
 module Bounds3d
-  ( Bounds3d (Bounds3d)
-  , xCoordinate
-  , yCoordinate
-  , zCoordinate
+  ( Bounds3d
+  , xRange
+  , yRange
+  , zRange
+  , xyzRanges
+  , xyz
   , constant
   , hull2
   , hull3
@@ -28,10 +30,14 @@ import Range (Range)
 import Range qualified
 import VectorBounds3d (VectorBounds3d (VectorBounds3d))
 
-type role Bounds3d nominal
+type role Bounds3d phantom
 
 data Bounds3d (coordinateSystem :: CoordinateSystem) where
-  Bounds3d :: Range units -> Range units -> Range units -> Bounds3d (space @ units)
+  Bounds3d ::
+    Range (Units coordinateSystem) ->
+    Range (Units coordinateSystem) ->
+    Range (Units coordinateSystem) ->
+    Bounds3d coordinateSystem
 
 deriving instance Show (Bounds3d (space @ units))
 
@@ -48,14 +54,21 @@ instance (units ~ units', space ~ space') => Subtraction (Bounds3d (space @ unit
 instance (units ~ units', space ~ space') => Subtraction (Bounds3d (space @ units)) (Bounds3d (space' @ units')) (VectorBounds3d (space @ units)) where
   Bounds3d x1 y1 z1 - Bounds3d x2 y2 z2 = VectorBounds3d (x1 - x2) (y1 - y2) (z1 - z2)
 
-xCoordinate :: Bounds3d (space @ units) -> Range units
-xCoordinate (Bounds3d x _ _) = x
+xRange :: Bounds3d (space @ units) -> Range units
+xRange (Bounds3d x _ _) = x
 
-yCoordinate :: Bounds3d (space @ units) -> Range units
-yCoordinate (Bounds3d _ y _) = y
+yRange :: Bounds3d (space @ units) -> Range units
+yRange (Bounds3d _ y _) = y
 
-zCoordinate :: Bounds3d (space @ units) -> Range units
-zCoordinate (Bounds3d _ _ z) = z
+zRange :: Bounds3d (space @ units) -> Range units
+zRange (Bounds3d _ _ z) = z
+
+{-# INLINE xyzRanges #-}
+xyzRanges :: Bounds3d (space @ units) -> (Range units, Range units, Range units)
+xyzRanges (Bounds3d x y z) = (x, y, z)
+
+xyz :: Range units -> Range units -> Range units -> Bounds3d (space @ units)
+xyz = Bounds3d
 
 constant :: Point3d (space @ units) -> Bounds3d (space @ units)
 constant (Point3d x y z) =

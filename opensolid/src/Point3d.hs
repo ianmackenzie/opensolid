@@ -22,7 +22,7 @@ module Point3d
 where
 
 import Bounded qualified
-import {-# SOURCE #-} Bounds3d (Bounds3d (Bounds3d))
+import {-# SOURCE #-} Bounds3d (Bounds3d)
 import {-# SOURCE #-} Bounds3d qualified
 import Data.Coerce qualified
 import Length qualified
@@ -88,7 +88,7 @@ instance
     (VectorBounds3d (space' @ units'))
     (Bounds3d (space @ units))
   where
-  Point3d px py pz + VectorBounds3d vx vy vz = Bounds3d (px + vx) (py + vy) (pz + vz)
+  Point3d px py pz + VectorBounds3d vx vy vz = Bounds3d.xyz (px + vx) (py + vy) (pz + vz)
 
 instance
   (units ~ units', space ~ space') =>
@@ -97,7 +97,7 @@ instance
     (VectorBounds3d (space' @ units'))
     (Bounds3d (space @ units))
   where
-  Point3d px py pz - VectorBounds3d vx vy vz = Bounds3d (px - vx) (py - vy) (pz - vz)
+  Point3d px py pz - VectorBounds3d vx vy vz = Bounds3d.xyz (px - vx) (py - vy) (pz - vz)
 
 instance
   (space ~ space', units ~ units') =>
