@@ -141,8 +141,8 @@ maybe generator = Random.do
   generateJust <- bool
   if generateJust then map Just generator else return Nothing
 
-oneOf :: Generator a -> List (Generator a) -> Generator a
-oneOf firstGenerator remainingGenerators = do
+oneOf :: NonEmpty (Generator a) -> Generator a
+oneOf (firstGenerator :| remainingGenerators) = do
   let array = Array.fromList remainingGenerators
   let n = Array.length array
   let indexGenerator = int 0 n
