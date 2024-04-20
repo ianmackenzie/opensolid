@@ -6,20 +6,30 @@ module Tests.Random
   , frame2d
   , bounds2d
   , vectorBounds2d
+  , line2d
+  , arc2d
+  , quadraticSpline2d
+  , cubicSpline2d
   )
 where
 
+import Angle qualified
+import Arc2d qualified
 import Axis2d qualified
 import Bounds2d (Bounds2d)
 import Bounds2d qualified
+import CubicSpline2d qualified
+import Curve2d (Curve2d)
 import Direction2d qualified
 import Frame2d (Frame2d)
 import Frame2d qualified
 import Length (Length)
 import Length qualified
+import Line2d qualified
 import OpenSolid
 import Point2d (Point2d)
 import Point2d qualified
+import QuadraticSpline2d qualified
 import Random (Generator)
 import Random qualified
 import Range (Range)
@@ -52,3 +62,38 @@ bounds2d = Random.map2 Bounds2d.xy lengthRange lengthRange
 
 vectorBounds2d :: Generator (VectorBounds2d (space @ Meters))
 vectorBounds2d = Random.map2 VectorBounds2d lengthRange lengthRange
+
+retry :: Generator (Result x a) -> Generator a
+retry fallibleGenerator = Random.do
+  result <- fallibleGenerator
+  case result of
+    Ok value -> Random.return value
+    Error _ -> retry fallibleGenerator
+
+line2d :: Tolerance Meters => Generator (Curve2d (space @ Meters))
+line2d = retry Random.do
+  startPoint <- point2d
+  endPoint <- point2d
+  Random.return (Line2d.from startPoint endPoint)
+
+arc2d :: Tolerance Meters => Generator (Curve2d (space @ Meters))
+arc2d = retry Random.do
+  startPoint <- point2d
+  endPoint <- point2d
+  sweptAngle <- Random.qty (Angle.degrees -315.0) (Angle.degrees 315.0)
+  Random.return (Arc2d.from startPoint endPoint sweptAngle)
+
+quadraticSpline2d :: Tolerance Meters => Generator (Curve2d (space @ Meters))
+quadraticSpline2d = retry Random.do
+  p1 <- point2d
+  p2 <- point2d
+  p3 <- point2d
+  Random.return (QuadraticSpline2d.fromControlPoints p1 p2 p3)
+
+cubicSpline2d :: Tolerance Meters => Generator (Curve2d (space @ Meters))
+cubicSpline2d = retry Random.do
+  p1 <- point2d
+  p2 <- point2d
+  p3 <- point2d
+  p4 <- point2d
+  Random.return (CubicSpline2d.fromControlPoints p1 p2 p3 p4)
