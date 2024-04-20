@@ -14,6 +14,7 @@ module List
   , map
   , mapWithIndex
   , reverseMap
+  , forEach
   , map2
   , map3
   , map4
@@ -112,6 +113,9 @@ reverseMap function list = go list []
  where
   go (first : rest) acc = go rest (function first : acc)
   go [] acc = acc
+
+forEach :: List a -> (a -> b) -> List b
+forEach list function = map function list
 
 zip2 :: List a -> List b -> List (a, b)
 zip2 = Data.List.zip
