@@ -5,3 +5,4 @@ cabal.project.local
 result
 __pycache__
 test*.svg
+TODO.txt
