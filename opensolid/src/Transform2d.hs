@@ -131,19 +131,19 @@ unitX = Vector2d.xy 1.0 0.0
 unitY :: Vector2d (space @ Unitless)
 unitY = Vector2d.xy 0.0 1.0
 
-identity :: Transform2d RigidTag (space @ units)
+identity :: Rigid (space @ units)
 identity = Transform2d_ Point2d.origin unitX unitY
 
-translateBy :: Vector2d (space @ units) -> Transform2d RigidTag (space @ units)
+translateBy :: Vector2d (space @ units) -> Rigid (space @ units)
 translateBy vector = Transform2d_ (Point2d.origin + vector) unitX unitY
 
-translateIn :: Direction2d space -> Qty units -> Transform2d RigidTag (space @ units)
+translateIn :: Direction2d space -> Qty units -> Rigid (space @ units)
 translateIn direction distance = translateBy (direction * distance)
 
-translateAlong :: Axis2d (space @ units) -> Qty units -> Transform2d RigidTag (space @ units)
+translateAlong :: Axis2d (space @ units) -> Qty units -> Rigid (space @ units)
 translateAlong axis distance = translateIn (Axis2d.direction axis) distance
 
-rotateAround :: Point2d (space @ units) -> Angle -> Transform2d RigidTag (space @ units)
+rotateAround :: Point2d (space @ units) -> Angle -> Rigid (space @ units)
 rotateAround point angle = do
   let (cx, cy) = Point2d.coordinates point
   let cos = Angle.cos angle
@@ -153,7 +153,7 @@ rotateAround point angle = do
   let p0 = point - cx * vx - cy * vy
   Transform2d_ p0 vx vy
 
-scaleAbout :: Point2d (space @ units) -> Float -> Transform2d UniformTag (space @ units)
+scaleAbout :: Point2d (space @ units) -> Float -> Uniform (space @ units)
 scaleAbout point scale = do
   let (cx, cy) = Point2d.coordinates point
   let vx = Vector2d.xy scale 0.0
@@ -161,7 +161,7 @@ scaleAbout point scale = do
   let p0 = point - cx * vx - cy * vy
   Transform2d_ p0 vx vy
 
-scaleAlong :: Axis2d (space @ units) -> Float -> Transform2d AffineTag (space @ units)
+scaleAlong :: Axis2d (space @ units) -> Float -> Affine (space @ units)
 scaleAlong axis scale = do
   let axisOrigin = Axis2d.originPoint axis
   let (x0, y0) = Point2d.coordinates axisOrigin
@@ -188,10 +188,10 @@ relativeTo frame transform = do
   let vy = unitY |> Vector2d.placeIn frame |> Vector2d.transformBy transform |> Vector2d.relativeTo frame
   Transform2d_ p0 vx vy
 
-fromRigid :: Transform2d RigidTag (space @ units) -> Transform2d a (space @ units)
+fromRigid :: Rigid (space @ units) -> Transform2d a (space @ units)
 fromRigid = Data.Coerce.coerce
 
-toAffine :: Transform2d a (space @ units) -> Transform2d AffineTag (space @ units)
+toAffine :: Transform2d a (space @ units) -> Affine (space @ units)
 toAffine = Data.Coerce.coerce
 
 -- translateBy :: Transformable2d a space units => Vector2d (space @ units) -> a -> a
