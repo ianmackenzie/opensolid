@@ -86,8 +86,6 @@ saddleRegion region =
 
 merge :: PartialZeros -> PartialZeros -> PartialZeros
 merge left right = do
-  let (mergedCrossingCurves, newCrossingLoops) = mergeCrossingCurves leftCrossingCurves rightCrossingCurves
-  let (mergedTangentCurves, newTangentLoops) = mergeTangentCurves leftTangentCurves rightTangentCurves
   let PartialZeros
         { crossingCurves = leftCrossingCurves
         , crossingLoops = leftCrossingLoops
@@ -104,6 +102,8 @@ merge left right = do
         , tangentPoints = rightTangentPoints
         , saddleRegions = rightSaddleRegions
         } = right
+  let (mergedCrossingCurves, newCrossingLoops) = mergeCrossingCurves leftCrossingCurves rightCrossingCurves
+  let (mergedTangentCurves, newTangentLoops) = mergeTangentCurves leftTangentCurves rightTangentCurves
   PartialZeros
     { crossingCurves = mergedCrossingCurves
     , crossingLoops = List.concat [newCrossingLoops, leftCrossingLoops, rightCrossingLoops]
