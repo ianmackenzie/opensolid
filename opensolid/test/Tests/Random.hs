@@ -4,6 +4,7 @@ module Tests.Random
   , point2d
   , vector2d
   , vectorBounds3d
+  , axis2d
   , frame2d
   , bounds2d
   , vectorBounds2d
@@ -16,6 +17,7 @@ where
 
 import Angle qualified
 import Arc2d qualified
+import Axis2d (Axis2d)
 import Axis2d qualified
 import Bounds2d (Bounds2d)
 import Bounds2d qualified
@@ -56,12 +58,11 @@ vector2d = Random.map2 Vector2d.xy length length
 vectorBounds3d :: Generator (VectorBounds3d (space @ Meters))
 vectorBounds3d = Random.map3 VectorBounds3d lengthRange lengthRange lengthRange
 
+axis2d :: Generator (Axis2d (space @ Meters))
+axis2d = Random.map2 Axis2d.through point2d Direction2d.generator
+
 frame2d :: Generator (Frame2d (global @ Meters) (Defines local))
-frame2d = Random.do
-  originPoint <- point2d
-  xDirection <- Direction2d.generator
-  let xAxis = Axis2d.through originPoint xDirection
-  Random.return (Frame2d.fromXAxis xAxis)
+frame2d = Random.map Frame2d.fromXAxis axis2d
 
 bounds2d :: Generator (Bounds2d (space @ Meters))
 bounds2d = Random.map2 Bounds2d.xy lengthRange lengthRange
