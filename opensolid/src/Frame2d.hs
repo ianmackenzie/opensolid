@@ -46,8 +46,8 @@ yDirection frame = Basis2d.yDirection (basis frame)
 xy :: Frame2d (space @ units) defines
 xy = Frame2d Point2d.origin Basis2d.xy
 
-at :: Point2d (space @ units) -> Frame2d (space @ units) defines
-at point = Frame2d point Basis2d.xy
+at :: Point2d (space @ units) -> Basis2d space defines -> Frame2d (space @ units) defines
+at point basis = Frame2d point basis
 
 fromXAxis :: Axis2d (space @ units) -> Frame2d (space @ units) defines
 fromXAxis axis = Frame2d (Axis2d.originPoint axis) (Basis2d.fromXDirection (Axis2d.direction axis))
