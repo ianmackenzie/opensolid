@@ -194,14 +194,6 @@ fromRigid = Data.Coerce.coerce
 toAffine :: Transform2d a (space @ units) -> Transform2d AffineTag (space @ units)
 toAffine = Data.Coerce.coerce
 
--- placeIn :: Frame2d (global @ units) (Defines local) -> Transform2d a (local @ units) -> Transform2d a (global @ units)
--- placeIn frame transform = do
---   let (x0, y0) = Point2d.coordinates (Frame2d.originPoint frame)
---   let (ix, iy) = Direction2d.components (Frame2d.xDirection frame)
---   let (jx, jy) = Direction2d.components (Frame2d.yDirection frame)
---   let (Transform2d m11 m12 m21 m22 tx ty) = transform
---   ()
-
 -- translateBy :: Transformable2d a space units => Vector2d (space @ units) -> a -> a
 -- translateBy vector = transformBy (translateBy vector)
 
@@ -234,32 +226,3 @@ toAffine = Data.Coerce.coerce
 
 -- scaleAlongOwn :: Deformable2d a space units => (a -> Axis2d (space @ units)) -> Float -> a -> Deformed2d a
 -- scaleAlongOwn axis scale value = scaleAlong (axis value) scale value
-
--- instance space ~ space' => Transformable2d (Direction2d space) space' units where
---   transformBy transformation direction =
---     Direction2d.unsafe (transformBy transformation (Direction2d.vector direction))
-
--- instance space ~ space' => Transformable2d (Vector2d (space @ units)) space' units' where
---   transformBy (Transformation (Matrix{m11, m12, m21, m22})) (Vector2d x y) =
---     Vector2d (m11 * x + m12 * y) (m21 * x + m22 * y)
-
--- instance space ~ space' => Scalable2d (Vector2d (space @ units)) space' units' where
---   type Scaled2d (Vector2d (space @ units)) = Vector2d (space @ units)
---   scaleBy (Scaling2d matrix) = transformBy (Transformation matrix)
-
--- instance space ~ space' => Deformable2d (Vector2d (space @ units)) space' units' where
---   type Deformed2d (Vector2d (space @ units)) = Vector2d (space @ units)
---   deformBy (Deformation2d matrix) = transformBy (Transformation matrix)
-
--- instance (space ~ space', units ~ units') => Transformable2d (Point2d (space @ units)) space' units' where
---   transformBy (Transformation (Matrix{m11, m12, m21, m22, tx, ty})) point = do
---     let (x, y) = Point2d.coordinates point
---     Point2d.xy (m11 * x + m12 * y + tx) (m21 * x + m22 * y + ty)
-
--- instance (space ~ space', units ~ units') => Scalable2d (Point2d (space @ units)) space' units' where
---   type Scaled2d (Point2d (space @ units)) = Point2d (space @ units)
---   scaleBy (Scaling2d matrix) = transformBy (Transformation matrix)
-
--- instance (space ~ space', units ~ units') => Deformable2d (Point2d (space @ units)) space' units' where
---   type Deformed2d (Point2d (space @ units)) = Point2d (space @ units)
---   deformBy (Deformation2d matrix) = transformBy (Transformation matrix)
