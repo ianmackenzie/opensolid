@@ -991,9 +991,9 @@ tangentPointSolution derivatives boundaryPoints uvBounds exclusions saddleRegion
     | otherwise -> Nothing
 
 maxRadiusForComponent :: Float -> Float -> Range Unitless -> Float
-maxRadiusForComponent value origin (Range low high)
-  | value < 0.0 = if low == 0.0 then Float.infinity else (low - origin) / value
-  | value > 0.0 = if high == 1.0 then Float.infinity else (high - origin) / value
+maxRadiusForComponent component origin (Range low high)
+  | component < 0.0 = if low == 0.0 then Float.infinity else (low - origin) / component
+  | component > 0.0 = if high == 1.0 then Float.infinity else (high - origin) / component
   | otherwise = Float.infinity
 
 saddlePointSolution :: Derivatives units -> Uv.Point -> Uv.Bounds -> (PartialZeros, List Uv.Bounds, List SaddleRegion)
