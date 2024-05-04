@@ -2,6 +2,7 @@ module Axis2d
   ( Axis2d
   , originPoint
   , direction
+  , normalDirection
   , x
   , y
   , through
@@ -39,6 +40,9 @@ originPoint (Axis2d p0 _) = p0
 
 direction :: Axis2d (space @ units) -> Direction2d space
 direction (Axis2d _ d) = d
+
+normalDirection :: Axis2d (space @ units) -> Direction2d space
+normalDirection axis = Direction2d.perpendicularTo (direction axis)
 
 x :: Axis2d (space @ units)
 x = Axis2d Point2d.origin Direction2d.x
