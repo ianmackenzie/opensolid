@@ -173,10 +173,10 @@ rotateLeft direction = Direction2d (Vector2d.rotateLeft (vector direction))
 rotateRight :: Direction2d space -> Direction2d space
 rotateRight direction = Direction2d (Vector2d.rotateRight (vector direction))
 
-placeIn :: Frame2d (global @ units) (Defines local) -> Direction2d local -> Direction2d global
+placeIn :: Frame2d (global @ originUnits) (Defines local) -> Direction2d local -> Direction2d global
 placeIn frame = placeInBasis (Frame2d.basis frame)
 
-relativeTo :: Frame2d (global @ units) (Defines local) -> Direction2d global -> Direction2d local
+relativeTo :: Frame2d (global @ originUnits) (Defines local) -> Direction2d global -> Direction2d local
 relativeTo frame = relativeToBasis (Frame2d.basis frame)
 
 placeInBasis :: Basis2d global (Defines local) -> Direction2d local -> Direction2d global

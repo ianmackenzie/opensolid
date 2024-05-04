@@ -440,7 +440,7 @@ placeIn ::
 placeIn frame = placeInBasis (Frame2d.basis frame)
 
 relativeTo ::
-  Frame2d (global @ units) (Defines local) ->
+  Frame2d (global @ originUnits) (Defines local) ->
   VectorBounds2d (global @ units) ->
   VectorBounds2d (local @ units)
 relativeTo frame = relativeToBasis (Frame2d.basis frame)
