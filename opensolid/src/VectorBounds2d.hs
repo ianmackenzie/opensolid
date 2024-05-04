@@ -1,3 +1,7 @@
+-- Needed for 'Range * Vector2d = VectorBounds2d'
+-- and 'Vector2d * Range = VectorBounds2d' instances
+{-# OPTIONS_GHC -Wno-orphans #-}
+
 module VectorBounds2d
   ( VectorBounds2d (VectorBounds2d)
   , constant
@@ -152,6 +156,22 @@ instance Multiplication (VectorBounds2d (space @ units1)) (Qty units2) where
 instance
   Units.Product units1 units2 units3 =>
   Product (VectorBounds2d (space @ units1)) (Qty units2) (VectorBounds2d (space @ units3))
+
+instance Multiplication (Range units1) (Vector2d (space @ units2)) where
+  type Range units1 .*. Vector2d (space @ units2) = VectorBounds2d (space @ (units1 :*: units2))
+  range .*. Vector2d x y = VectorBounds2d (range .*. x) (range .*. y)
+
+instance
+  Units.Product units1 units2 units3 =>
+  Product (Range units1) (Vector2d (space @ units2)) (VectorBounds2d (space @ units3))
+
+instance Multiplication (Vector2d (space @ units1)) (Range units2) where
+  type Vector2d (space @ units1) .*. Range units2 = VectorBounds2d (space @ (units1 :*: units2))
+  Vector2d x y .*. range = VectorBounds2d (x .*. range) (y .*. range)
+
+instance
+  Units.Product units1 units2 units3 =>
+  Product (Vector2d (space @ units1)) (Range units2) (VectorBounds2d (space @ units3))
 
 instance Multiplication (Range units1) (VectorBounds2d (space @ units2)) where
   type Range units1 .*. VectorBounds2d (space @ units2) = VectorBounds2d (space @ (units1 :*: units2))
