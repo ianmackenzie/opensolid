@@ -36,44 +36,47 @@ instance VectorCurve2d.Interface (PiecewiseCurve space) (space @ Unitless) where
     | otherwise = VectorCurve2d.evaluateAt t inner
 
   segmentBoundsImpl t (PiecewiseCurve Nothing inner Nothing) = VectorCurve2d.segmentBounds t inner
-  segmentBoundsImpl t@(Range t1 t2) (PiecewiseCurve (Just degenerateStart) inner Nothing)
-    | t1 >= tStart = VectorCurve2d.segmentBounds t inner
-    | t2 <= tStart = DegenerateEndpoint.segmentBounds t degenerateStart inner
-    | otherwise =
-        VectorBounds2d.aggregate2
-          (DegenerateEndpoint.segmentBounds (Range.from t1 tStart) degenerateStart inner)
-          (VectorCurve2d.segmentBounds (Range.from tStart t2) inner)
-   where
-    tStart = DegenerateEndpoint.cutoff degenerateStart
-  segmentBoundsImpl t@(Range t1 t2) (PiecewiseCurve Nothing inner (Just degenerateEnd))
-    | t2 <= tEnd = VectorCurve2d.segmentBounds t inner
-    | t1 >= tEnd = DegenerateEndpoint.segmentBounds t degenerateEnd inner
-    | otherwise =
-        VectorBounds2d.aggregate2
-          (VectorCurve2d.segmentBounds (Range.from t1 tEnd) inner)
-          (DegenerateEndpoint.segmentBounds (Range.from tEnd t2) degenerateEnd inner)
-   where
-    tEnd = DegenerateEndpoint.cutoff degenerateEnd
-  segmentBoundsImpl t@(Range t1 t2) (PiecewiseCurve (Just degenerateStart) inner (Just degenerateEnd))
-    | t1 >= tStart && t2 <= tEnd = VectorCurve2d.segmentBounds t inner
-    | t2 <= tStart = DegenerateEndpoint.segmentBounds t degenerateStart inner
-    | t1 >= tEnd = DegenerateEndpoint.segmentBounds t degenerateEnd inner
-    | t1 >= tStart =
-        VectorBounds2d.aggregate2
-          (VectorCurve2d.segmentBounds (Range.from t1 tEnd) inner)
-          (DegenerateEndpoint.segmentBounds (Range.from tEnd t2) degenerateEnd inner)
-    | t2 <= tEnd =
-        VectorBounds2d.aggregate2
-          (DegenerateEndpoint.segmentBounds (Range.from t1 tStart) degenerateStart inner)
-          (VectorCurve2d.segmentBounds (Range.from tStart t2) inner)
-    | otherwise =
-        VectorBounds2d.aggregate3
-          (DegenerateEndpoint.segmentBounds (Range.from t1 tStart) degenerateStart inner)
-          (VectorCurve2d.segmentBounds (Range.from tStart tEnd) inner)
-          (DegenerateEndpoint.segmentBounds (Range.from tEnd t2) degenerateEnd inner)
-   where
-    tStart = DegenerateEndpoint.cutoff degenerateStart
-    tEnd = DegenerateEndpoint.cutoff degenerateEnd
+  segmentBoundsImpl t (PiecewiseCurve (Just degenerateStart) inner Nothing) = do
+    let (Range t1 t2) = t
+    let tStart = DegenerateEndpoint.cutoff degenerateStart
+    if
+      | t1 >= tStart -> VectorCurve2d.segmentBounds t inner
+      | t2 <= tStart -> DegenerateEndpoint.segmentBounds t degenerateStart inner
+      | otherwise ->
+          VectorBounds2d.aggregate2
+            (DegenerateEndpoint.segmentBounds (Range.from t1 tStart) degenerateStart inner)
+            (VectorCurve2d.segmentBounds (Range.from tStart t2) inner)
+  segmentBoundsImpl t (PiecewiseCurve Nothing inner (Just degenerateEnd)) = do
+    let (Range t1 t2) = t
+    let tEnd = DegenerateEndpoint.cutoff degenerateEnd
+    if
+      | t2 <= tEnd -> VectorCurve2d.segmentBounds t inner
+      | t1 >= tEnd -> DegenerateEndpoint.segmentBounds t degenerateEnd inner
+      | otherwise ->
+          VectorBounds2d.aggregate2
+            (VectorCurve2d.segmentBounds (Range.from t1 tEnd) inner)
+            (DegenerateEndpoint.segmentBounds (Range.from tEnd t2) degenerateEnd inner)
+  segmentBoundsImpl t (PiecewiseCurve (Just degenerateStart) inner (Just degenerateEnd)) = do
+    let (Range t1 t2) = t
+    let tStart = DegenerateEndpoint.cutoff degenerateStart
+    let tEnd = DegenerateEndpoint.cutoff degenerateEnd
+    if
+      | t1 >= tStart && t2 <= tEnd -> VectorCurve2d.segmentBounds t inner
+      | t2 <= tStart -> DegenerateEndpoint.segmentBounds t degenerateStart inner
+      | t1 >= tEnd -> DegenerateEndpoint.segmentBounds t degenerateEnd inner
+      | t1 >= tStart ->
+          VectorBounds2d.aggregate2
+            (VectorCurve2d.segmentBounds (Range.from t1 tEnd) inner)
+            (DegenerateEndpoint.segmentBounds (Range.from tEnd t2) degenerateEnd inner)
+      | t2 <= tEnd ->
+          VectorBounds2d.aggregate2
+            (DegenerateEndpoint.segmentBounds (Range.from t1 tStart) degenerateStart inner)
+            (VectorCurve2d.segmentBounds (Range.from tStart t2) inner)
+      | otherwise ->
+          VectorBounds2d.aggregate3
+            (DegenerateEndpoint.segmentBounds (Range.from t1 tStart) degenerateStart inner)
+            (VectorCurve2d.segmentBounds (Range.from tStart tEnd) inner)
+            (DegenerateEndpoint.segmentBounds (Range.from tEnd t2) degenerateEnd inner)
 
   derivativeImpl (PiecewiseCurve start general end) =
     VectorCurve2d.wrap $

@@ -187,18 +187,18 @@ aggregate2 (Bounds2d x1 y1) (Bounds2d x2 y2) =
   Bounds2d (Range.aggregate2 x1 x2) (Range.aggregate2 y1 y2)
 
 exclusion :: Point2d (space @ units) -> Bounds2d (space @ units) -> Qty units
-exclusion point bounds
-  | px && py = Qty.hypot2 dx dy
-  | px = dx
-  | py = dy
-  | otherwise = Qty.max dx dy
- where
-  (x, y) = Point2d.coordinates point
-  (bx, by) = xyRanges bounds
-  dx = Range.exclusion x bx
-  dy = Range.exclusion y by
-  px = dx >= Qty.zero
-  py = dy >= Qty.zero
+exclusion point bounds = do
+  let (x, y) = Point2d.coordinates point
+  let (bx, by) = xyRanges bounds
+  let dx = Range.exclusion x bx
+  let dy = Range.exclusion y by
+  let px = dx >= Qty.zero
+  let py = dy >= Qty.zero
+  if
+    | px && py -> Qty.hypot2 dx dy
+    | px -> dx
+    | py -> dy
+    | otherwise -> Qty.max dx dy
 
 inclusion :: Point2d (space @ units) -> Bounds2d (space @ units) -> Qty units
 inclusion point bounds = -(exclusion point bounds)
@@ -217,16 +217,16 @@ isContainedIn :: Bounds2d (space @ units) -> Bounds2d (space @ units) -> Bool
 isContainedIn bounds1 bounds2 = contains bounds2 bounds1
 
 separation :: Bounds2d (space @ units) -> Bounds2d (space @ units) -> Qty units
-separation (Bounds2d x1 y1) (Bounds2d x2 y2)
-  | px && py = Qty.hypot2 dx dy
-  | px = dx
-  | py = dy
-  | otherwise = Qty.max dx dy
- where
-  dx = Range.separation x1 x2
-  dy = Range.separation y1 y2
-  px = dx >= Qty.zero
-  py = dy >= Qty.zero
+separation (Bounds2d x1 y1) (Bounds2d x2 y2) = do
+  let dx = Range.separation x1 x2
+  let dy = Range.separation y1 y2
+  let px = dx >= Qty.zero
+  let py = dy >= Qty.zero
+  if
+    | px && py -> Qty.hypot2 dx dy
+    | px -> dx
+    | py -> dy
+    | otherwise -> Qty.max dx dy
 
 overlap :: Bounds2d (space @ units) -> Bounds2d (space @ units) -> Qty units
 overlap first second = -(separation first second)
@@ -279,14 +279,14 @@ hull4 p1 p2 p3 p4 = do
   Bounds2d (Range.unsafe minX maxX) (Range.unsafe minY maxY)
 
 hullN :: NonEmpty (Point2d (space @ units)) -> Bounds2d (space @ units)
-hullN (p0 :| rest) = go x0 x0 y0 y0 rest
- where
-  (x0, y0) = Point2d.coordinates p0
-  go :: Qty units -> Qty units -> Qty units -> Qty units -> List (Point2d (space @ units)) -> Bounds2d (space @ units)
-  go xLow xHigh yLow yHigh [] = Bounds2d (Range.unsafe xLow xHigh) (Range.unsafe yLow yHigh)
-  go xLow xHigh yLow yHigh (point : remaining) = do
-    let (x, y) = Point2d.coordinates point
-    go (Qty.min xLow x) (Qty.max xHigh x) (Qty.min yLow y) (Qty.max yHigh y) remaining
+hullN (p0 :| rest) = do
+  let (x0, y0) = Point2d.coordinates p0
+  let go :: Qty units -> Qty units -> Qty units -> Qty units -> List (Point2d (space @ units)) -> Bounds2d (space @ units)
+      go xLow xHigh yLow yHigh [] = Bounds2d (Range.unsafe xLow xHigh) (Range.unsafe yLow yHigh)
+      go xLow xHigh yLow yHigh (point : remaining) = do
+        let (x, y) = Point2d.coordinates point
+        go (Qty.min xLow x) (Qty.max xHigh x) (Qty.min yLow y) (Qty.max yHigh y) remaining
+  go x0 x0 y0 y0 rest
 
 lowerLeftCorner :: Bounds2d (space @ units) -> Point2d (space @ units)
 lowerLeftCorner (Bounds2d x y) = Point2d.xy (Range.minValue x) (Range.minValue y)

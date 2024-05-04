@@ -389,19 +389,18 @@ zeros Zero = Error ZeroEverywhere
 zeros (Constant value) = if value ~= Qty.zero then Error ZeroEverywhere else Ok Zeros.empty
 zeros f | isZero f = Error ZeroEverywhere
 zeros f = Result.do
+  let fu = derivative U f
+  let fv = derivative V f
+  let fuu = derivative U fu
+  let fvv = derivative V fv
+  let fuv = derivative V fu
+  let derivatives = Derivatives{f, fu, fv, fuu, fvv, fuv}
   let (boundaryEdges, boundaryPoints) = findBoundarySolutions f
   (tangentSolutions, tangentExclusions, saddleRegions) <- findTangentSolutions derivatives boundaryEdges boundaryPoints Uv.domain U [] []
   (crossingSolutions, _) <- findCrossingSolutions derivatives boundaryEdges boundaryPoints Uv.domain U tangentExclusions saddleRegions
   -- TODO report tangent/crossing curves at domain edges when recognized
   -- TODO rename 'solutions' to 'zeros'
   finalizeZeros f (PartialZeros.merge tangentSolutions crossingSolutions)
- where
-  fu = derivative U f
-  fv = derivative V f
-  fuu = derivative U fu
-  fvv = derivative V fv
-  fuv = derivative V fu
-  derivatives = Derivatives{f, fu, fv, fuu, fvv, fuv}
 
 data Derivatives units = Derivatives
   { f :: Function units
@@ -422,51 +421,51 @@ findTangentSolutions ::
   List Uv.Bounds ->
   List SaddleRegion ->
   Result ZerosError (PartialZeros, List Uv.Bounds, List SaddleRegion)
-findTangentSolutions derivatives boundaryEdges boundaryPoints uvBounds bisectionParameter exclusions saddleRegions
-  -- The function is non-zero for this subdomain, so no solutions
-  | not (fBounds ^ Qty.zero) = Ok (PartialZeros.empty, [], [])
-  -- Derivative with respect to U is non-zero for this subdomain, so no tangent solutions
-  | not (fuBounds ^ Qty.zero) = Ok (PartialZeros.empty, [], [])
-  -- Derivative with respect to V is non-zero for this subdomain, so no tangent solutions
-  | not (fvBounds ^ Qty.zero) = Ok (PartialZeros.empty, [], [])
-  -- We're within an existing exclusion region from a previous solution, so no additional solutions
-  | List.any (Bounds2d.contains uvBounds) exclusions = Ok (PartialZeros.empty, [], [])
-  -- We're within an existing saddle region from a previous solution, so no additional solutions
-  | List.any (SaddleRegion.contains uvBounds) saddleRegions = Ok (PartialZeros.empty, [], [])
-  -- Try to find a tangent point (saddle or otherwise)
-  | Just result <- tangentPointSolution derivatives boundaryPoints uvBounds exclusions saddleRegions = result
-  -- TODO tangent curve solutions
-  | otherwise = Result.do
-      let (bounds1, bounds2) = Uv.bisect bisectionParameter uvBounds
-      let nextBisectionParameter = Uv.cycle bisectionParameter
-      (solutions1, exclusions1, saddleRegions1) <-
-        findTangentSolutions
-          derivatives
-          boundaryEdges
-          boundaryPoints
-          bounds1
-          nextBisectionParameter
-          (List.filter (affects bounds1) exclusions)
-          (List.filter (SaddleRegion.bounds >> affects bounds1) saddleRegions)
-      (solutions2, exclusions2, saddleRegions2) <-
-        findTangentSolutions
-          derivatives
-          boundaryEdges
-          boundaryPoints
-          bounds2
-          nextBisectionParameter
-          (List.filter (affects bounds2) (exclusions1 + exclusions))
-          (List.filter (SaddleRegion.bounds >> affects bounds2) (saddleRegions1 + saddleRegions))
-      Ok
-        ( PartialZeros.merge solutions1 solutions2
-        , exclusions1 + exclusions2
-        , saddleRegions1 + saddleRegions2
-        )
- where
-  Derivatives{f, fu, fv} = derivatives
-  fBounds = segmentBounds uvBounds f
-  fuBounds = segmentBounds uvBounds fu
-  fvBounds = segmentBounds uvBounds fv
+findTangentSolutions derivatives boundaryEdges boundaryPoints uvBounds bisectionParameter exclusions saddleRegions = do
+  let Derivatives{f, fu, fv} = derivatives
+  let fBounds = segmentBounds uvBounds f
+  let fuBounds = segmentBounds uvBounds fu
+  let fvBounds = segmentBounds uvBounds fv
+  if
+    -- The function is non-zero for this subdomain, so no solutions
+    | not (fBounds ^ Qty.zero) -> Ok (PartialZeros.empty, [], [])
+    -- Derivative with respect to U is non-zero for this subdomain, so no tangent solutions
+    | not (fuBounds ^ Qty.zero) -> Ok (PartialZeros.empty, [], [])
+    -- Derivative with respect to V is non-zero for this subdomain, so no tangent solutions
+    | not (fvBounds ^ Qty.zero) -> Ok (PartialZeros.empty, [], [])
+    -- We're within an existing exclusion region from a previous solution, so no additional solutions
+    | List.any (Bounds2d.contains uvBounds) exclusions -> Ok (PartialZeros.empty, [], [])
+    -- We're within an existing saddle region from a previous solution, so no additional solutions
+    | List.any (SaddleRegion.contains uvBounds) saddleRegions -> Ok (PartialZeros.empty, [], [])
+    -- Try to find a tangent point (saddle or otherwise)
+    | Just result <- tangentPointSolution derivatives boundaryPoints uvBounds exclusions saddleRegions -> result
+    -- TODO tangent curve solutions
+    | otherwise -> Result.do
+        let (bounds1, bounds2) = Uv.bisect bisectionParameter uvBounds
+        let nextBisectionParameter = Uv.cycle bisectionParameter
+        (solutions1, exclusions1, saddleRegions1) <-
+          findTangentSolutions
+            derivatives
+            boundaryEdges
+            boundaryPoints
+            bounds1
+            nextBisectionParameter
+            (List.filter (affects bounds1) exclusions)
+            (List.filter (SaddleRegion.bounds >> affects bounds1) saddleRegions)
+        (solutions2, exclusions2, saddleRegions2) <-
+          findTangentSolutions
+            derivatives
+            boundaryEdges
+            boundaryPoints
+            bounds2
+            nextBisectionParameter
+            (List.filter (affects bounds2) (exclusions1 + exclusions))
+            (List.filter (SaddleRegion.bounds >> affects bounds2) (saddleRegions1 + saddleRegions))
+        Ok
+          ( PartialZeros.merge solutions1 solutions2
+          , exclusions1 + exclusions2
+          , saddleRegions1 + saddleRegions2
+          )
 
 findCrossingSolutions ::
   Tolerance units =>
@@ -478,52 +477,53 @@ findCrossingSolutions ::
   List Uv.Bounds ->
   List SaddleRegion ->
   Result ZerosError (PartialZeros, List Uv.Bounds)
-findCrossingSolutions derivatives boundaryEdges boundaryPoints uvBounds bisectionParameter exclusions saddleRegions
-  -- The function is non-zero for this subdomain, so no solutions
-  | not (fBounds ^ Qty.zero) = Ok (PartialZeros.empty, [])
-  -- We're within an existing exclusion region from a previous solution, so no additional solutions
-  | List.any (Bounds2d.contains uvBounds) exclusions = Ok (PartialZeros.empty, [])
-  -- We're within an existing saddle region from a previous solution, so no additional solutions
-  | List.any (SaddleRegion.contains uvBounds) saddleRegions = Ok (PartialZeros.empty, [])
-  -- Try to find a general crossing curve solution and report it if it exists
-  | Just solution <- generalSolution derivatives uvBounds exclusions = Ok solution
-  -- Try to find a horizontal crossing curve solution and report it if it exists
-  | Just solution <- horizontalSolution derivatives boundaryEdges boundaryPoints uvBounds exclusions = Ok solution
-  -- Try to find a vertical crossing curve solution and report it if it exists
-  | Just solution <- verticalSolution derivatives boundaryEdges boundaryPoints uvBounds exclusions = Ok solution
-  -- Check if we've found a point where all derivatives are zero,
-  -- indicating that there's a higher-order solution that we can't solve for
-  | fBounds ~= Qty.zero && allDerivativesZero uvBounds derivatives = Error HigherOrderIntersection
-  -- If we haven't been able to identify a specific form of solution within this subdomain,
-  -- then we need to recurse into subdomains
-  | otherwise = Result.do
-      let (bounds1, bounds2) = Uv.bisect bisectionParameter uvBounds
-      let nextBisectionParameter = Uv.cycle bisectionParameter
-      (solutions1, exclusions1) <-
-        findCrossingSolutions
-          derivatives
-          boundaryEdges
-          boundaryPoints
-          bounds1
-          nextBisectionParameter
-          (List.filter (affects bounds1) exclusions)
-          (List.filter (SaddleRegion.bounds >> affects bounds1) saddleRegions)
-      (solutions2, exclusions2) <-
-        findCrossingSolutions
-          derivatives
-          boundaryEdges
-          boundaryPoints
-          bounds2
-          nextBisectionParameter
-          (List.filter (affects bounds2) (exclusions1 + exclusions))
-          (List.filter (SaddleRegion.bounds >> affects bounds2) saddleRegions)
-      Ok
-        ( PartialZeros.merge solutions1 solutions2
-        , exclusions1 + exclusions2
-        )
- where
-  Derivatives{f} = derivatives
-  fBounds = segmentBounds uvBounds f
+findCrossingSolutions derivatives boundaryEdges boundaryPoints uvBounds bisectionParameter exclusions saddleRegions = do
+  let Derivatives{f} = derivatives
+  let fBounds = segmentBounds uvBounds f
+  if
+    -- The function is non-zero for this subdomain, so no solutions
+    | not (fBounds ^ Qty.zero) -> Ok (PartialZeros.empty, [])
+    -- We're within an existing exclusion region from a previous solution, so no additional solutions
+    | List.any (Bounds2d.contains uvBounds) exclusions -> Ok (PartialZeros.empty, [])
+    -- We're within an existing saddle region from a previous solution, so no additional solutions
+    | List.any (SaddleRegion.contains uvBounds) saddleRegions -> Ok (PartialZeros.empty, [])
+    -- Try to find a general crossing curve solution and report it if it exists
+    | Just solution <- generalSolution derivatives uvBounds exclusions -> Ok solution
+    -- Try to find a horizontal crossing curve solution and report it if it exists
+    | Just solution <- horizontalSolution derivatives boundaryEdges boundaryPoints uvBounds exclusions -> Ok solution
+    -- Try to find a vertical crossing curve solution and report it if it exists
+    | Just solution <- verticalSolution derivatives boundaryEdges boundaryPoints uvBounds exclusions -> Ok solution
+    -- Check if we've found a point where all derivatives are zero,
+    -- indicating that there's a higher-order solution that we can't solve for
+    | fBounds ~= Qty.zero && allDerivativesZero uvBounds derivatives -> Error HigherOrderIntersection
+    -- If we haven't been able to identify a specific form of solution within this subdomain,
+    -- then we need to recurse into subdomains
+    | otherwise -> Result.do
+        let (bounds1, bounds2) = Uv.bisect bisectionParameter uvBounds
+        let nextBisectionParameter = Uv.cycle bisectionParameter
+        (solutions1, exclusions1) <-
+          findCrossingSolutions
+            derivatives
+            boundaryEdges
+            boundaryPoints
+            bounds1
+            nextBisectionParameter
+            (List.filter (affects bounds1) exclusions)
+            (List.filter (SaddleRegion.bounds >> affects bounds1) saddleRegions)
+        (solutions2, exclusions2) <-
+          findCrossingSolutions
+            derivatives
+            boundaryEdges
+            boundaryPoints
+            bounds2
+            nextBisectionParameter
+            (List.filter (affects bounds2) (exclusions1 + exclusions))
+            (List.filter (SaddleRegion.bounds >> affects bounds2) saddleRegions)
+        Ok
+          ( PartialZeros.merge solutions1 solutions2
+          , exclusions1 + exclusions2
+          )
+ 
 
 data BoundaryEdges = BoundaryEdges
   { leftEdgeIsSolution :: Bool

@@ -259,13 +259,13 @@ squared :: Units.Squared units1 units2 => Range units1 -> Range units2
 squared range = Units.specialize (squared_ range)
 
 squared_ :: Range units -> Range (units :*: units)
-squared_ (Range low high)
-  | low >= Qty.zero = Range_ ll hh
-  | high <= Qty.zero = Range_ hh ll
-  | otherwise = Range_ Qty.zero (Qty.max ll hh)
- where
-  ll = low .*. low
-  hh = high .*. high
+squared_ (Range low high) = do
+  let ll = low .*. low
+  let hh = high .*. high
+  if
+    | low >= Qty.zero -> Range_ ll hh
+    | high <= Qty.zero -> Range_ hh ll
+    | otherwise -> Range_ Qty.zero (Qty.max ll hh)
 
 sqrt_ :: Range (units :*: units) -> Range units
 sqrt_ (Range low high) =
@@ -277,63 +277,63 @@ sqrt :: Units.Squared units1 units2 => Range units2 -> Range units1
 sqrt range = sqrt_ (Units.unspecialize range)
 
 hypot2 :: Range units -> Range units -> Range units
-hypot2 (Range xMin xMax) (Range yMin yMax)
-  | positiveX && positiveY = Range_ (Qty.hypot2 xMin yMin) maxMagnitude
-  | positiveX && negativeY = Range_ (Qty.hypot2 xMin yMax) maxMagnitude
-  | negativeX && positiveY = Range_ (Qty.hypot2 xMax yMin) maxMagnitude
-  | negativeX && negativeY = Range_ (Qty.hypot2 xMax yMax) maxMagnitude
-  | positiveX = Range_ xMin maxMagnitude
-  | negativeX = Range_ -xMax maxMagnitude
-  | positiveY = Range_ yMin maxMagnitude
-  | negativeY = Range_ -yMax maxMagnitude
-  | otherwise = Range_ Qty.zero maxMagnitude
- where
-  positiveX = xMin >= Qty.zero
-  negativeX = xMax <= Qty.zero
-  positiveY = yMin >= Qty.zero
-  negativeY = yMax <= Qty.zero
-  xMagnitude = Qty.max (Qty.abs xMin) (Qty.abs xMax)
-  yMagnitude = Qty.max (Qty.abs yMin) (Qty.abs yMax)
-  maxMagnitude = Qty.hypot2 xMagnitude yMagnitude
+hypot2 (Range xMin xMax) (Range yMin yMax) = do
+  let positiveX = xMin >= Qty.zero
+  let negativeX = xMax <= Qty.zero
+  let positiveY = yMin >= Qty.zero
+  let negativeY = yMax <= Qty.zero
+  let xMagnitude = Qty.max (Qty.abs xMin) (Qty.abs xMax)
+  let yMagnitude = Qty.max (Qty.abs yMin) (Qty.abs yMax)
+  let maxMagnitude = Qty.hypot2 xMagnitude yMagnitude
+  if
+    | positiveX && positiveY -> Range_ (Qty.hypot2 xMin yMin) maxMagnitude
+    | positiveX && negativeY -> Range_ (Qty.hypot2 xMin yMax) maxMagnitude
+    | negativeX && positiveY -> Range_ (Qty.hypot2 xMax yMin) maxMagnitude
+    | negativeX && negativeY -> Range_ (Qty.hypot2 xMax yMax) maxMagnitude
+    | positiveX -> Range_ xMin maxMagnitude
+    | negativeX -> Range_ -xMax maxMagnitude
+    | positiveY -> Range_ yMin maxMagnitude
+    | negativeY -> Range_ -yMax maxMagnitude
+    | otherwise -> Range_ Qty.zero maxMagnitude
 
 hypot3 :: Range units -> Range units -> Range units -> Range units
-hypot3 (Range xMin xMax) (Range yMin yMax) (Range zMin zMax)
-  | positiveX && positiveY && positiveZ = Range_ (Qty.hypot3 xMin yMin zMin) maxMagnitude
-  | positiveX && positiveY && negativeZ = Range_ (Qty.hypot3 xMin yMin zMax) maxMagnitude
-  | positiveX && negativeY && positiveZ = Range_ (Qty.hypot3 xMin yMax zMin) maxMagnitude
-  | positiveX && negativeY && negativeZ = Range_ (Qty.hypot3 xMin yMax zMax) maxMagnitude
-  | negativeX && positiveY && positiveZ = Range_ (Qty.hypot3 xMax yMin zMin) maxMagnitude
-  | negativeX && positiveY && negativeZ = Range_ (Qty.hypot3 xMax yMin zMax) maxMagnitude
-  | negativeX && negativeY && positiveZ = Range_ (Qty.hypot3 xMax yMax zMin) maxMagnitude
-  | negativeX && negativeY && negativeZ = Range_ (Qty.hypot3 xMax yMax zMax) maxMagnitude
-  | positiveY && positiveZ = Range_ (Qty.hypot2 yMin zMin) maxMagnitude
-  | positiveY && negativeZ = Range_ (Qty.hypot2 yMin zMax) maxMagnitude
-  | negativeY && positiveZ = Range_ (Qty.hypot2 yMax zMin) maxMagnitude
-  | negativeY && negativeZ = Range_ (Qty.hypot2 yMax zMax) maxMagnitude
-  | positiveX && positiveZ = Range_ (Qty.hypot2 xMin zMin) maxMagnitude
-  | positiveX && negativeZ = Range_ (Qty.hypot2 xMin zMax) maxMagnitude
-  | negativeX && positiveZ = Range_ (Qty.hypot2 xMax zMin) maxMagnitude
-  | negativeX && negativeZ = Range_ (Qty.hypot2 xMax zMax) maxMagnitude
-  | positiveX && positiveY = Range_ (Qty.hypot2 xMin yMin) maxMagnitude
-  | positiveX && negativeY = Range_ (Qty.hypot2 xMin yMax) maxMagnitude
-  | negativeX && positiveY = Range_ (Qty.hypot2 xMax yMin) maxMagnitude
-  | negativeX && negativeY = Range_ (Qty.hypot2 xMax yMax) maxMagnitude
-  | positiveX = Range_ xMin maxMagnitude
-  | negativeX = Range_ -xMax maxMagnitude
-  | positiveY = Range_ yMin maxMagnitude
-  | negativeY = Range_ -yMax maxMagnitude
-  | otherwise = Range_ Qty.zero maxMagnitude
- where
-  positiveX = xMin >= Qty.zero
-  negativeX = xMax <= Qty.zero
-  positiveY = yMin >= Qty.zero
-  negativeY = yMax <= Qty.zero
-  positiveZ = zMin >= Qty.zero
-  negativeZ = zMax <= Qty.zero
-  xMagnitude = Qty.max (Qty.abs xMin) (Qty.abs xMax)
-  yMagnitude = Qty.max (Qty.abs yMin) (Qty.abs yMax)
-  zMagnitude = Qty.max (Qty.abs zMin) (Qty.abs zMax)
-  maxMagnitude = Qty.hypot3 xMagnitude yMagnitude zMagnitude
+hypot3 (Range xMin xMax) (Range yMin yMax) (Range zMin zMax) = do
+  let positiveX = xMin >= Qty.zero
+  let negativeX = xMax <= Qty.zero
+  let positiveY = yMin >= Qty.zero
+  let negativeY = yMax <= Qty.zero
+  let positiveZ = zMin >= Qty.zero
+  let negativeZ = zMax <= Qty.zero
+  let xMagnitude = Qty.max (Qty.abs xMin) (Qty.abs xMax)
+  let yMagnitude = Qty.max (Qty.abs yMin) (Qty.abs yMax)
+  let zMagnitude = Qty.max (Qty.abs zMin) (Qty.abs zMax)
+  let maxMagnitude = Qty.hypot3 xMagnitude yMagnitude zMagnitude
+  if
+    | positiveX && positiveY && positiveZ -> Range_ (Qty.hypot3 xMin yMin zMin) maxMagnitude
+    | positiveX && positiveY && negativeZ -> Range_ (Qty.hypot3 xMin yMin zMax) maxMagnitude
+    | positiveX && negativeY && positiveZ -> Range_ (Qty.hypot3 xMin yMax zMin) maxMagnitude
+    | positiveX && negativeY && negativeZ -> Range_ (Qty.hypot3 xMin yMax zMax) maxMagnitude
+    | negativeX && positiveY && positiveZ -> Range_ (Qty.hypot3 xMax yMin zMin) maxMagnitude
+    | negativeX && positiveY && negativeZ -> Range_ (Qty.hypot3 xMax yMin zMax) maxMagnitude
+    | negativeX && negativeY && positiveZ -> Range_ (Qty.hypot3 xMax yMax zMin) maxMagnitude
+    | negativeX && negativeY && negativeZ -> Range_ (Qty.hypot3 xMax yMax zMax) maxMagnitude
+    | positiveY && positiveZ -> Range_ (Qty.hypot2 yMin zMin) maxMagnitude
+    | positiveY && negativeZ -> Range_ (Qty.hypot2 yMin zMax) maxMagnitude
+    | negativeY && positiveZ -> Range_ (Qty.hypot2 yMax zMin) maxMagnitude
+    | negativeY && negativeZ -> Range_ (Qty.hypot2 yMax zMax) maxMagnitude
+    | positiveX && positiveZ -> Range_ (Qty.hypot2 xMin zMin) maxMagnitude
+    | positiveX && negativeZ -> Range_ (Qty.hypot2 xMin zMax) maxMagnitude
+    | negativeX && positiveZ -> Range_ (Qty.hypot2 xMax zMin) maxMagnitude
+    | negativeX && negativeZ -> Range_ (Qty.hypot2 xMax zMax) maxMagnitude
+    | positiveX && positiveY -> Range_ (Qty.hypot2 xMin yMin) maxMagnitude
+    | positiveX && negativeY -> Range_ (Qty.hypot2 xMin yMax) maxMagnitude
+    | negativeX && positiveY -> Range_ (Qty.hypot2 xMax yMin) maxMagnitude
+    | negativeX && negativeY -> Range_ (Qty.hypot2 xMax yMax) maxMagnitude
+    | positiveX -> Range_ xMin maxMagnitude
+    | negativeX -> Range_ -xMax maxMagnitude
+    | positiveY -> Range_ yMin maxMagnitude
+    | negativeY -> Range_ -yMax maxMagnitude
+    | otherwise -> Range_ Qty.zero maxMagnitude
 
 includes :: Qty units -> Range units -> Bool
 includes value (Range low high) = low <= value && value <= high
@@ -384,29 +384,29 @@ max (Range low1 high1) (Range low2 high2) =
   Range_ (Qty.max low1 low2) (Qty.max high1 high2)
 
 smaller :: Range units -> Range units -> Range units
-smaller first second
-  | high1 < low2 = first
-  | high2 < low1 = second
-  | otherwise = do
-      let (Range aggregateMin aggregateMax) = aggregate2 first second
-      let high = Qty.min high1 high2
-      Range_ (Qty.max -high aggregateMin) (Qty.min aggregateMax high)
- where
-  (Range low1 high1) = abs first
-  (Range low2 high2) = abs second
+smaller first second = do
+  let (Range low1 high1) = abs first
+  let (Range low2 high2) = abs second
+  if
+    | high1 < low2 -> first
+    | high2 < low1 -> second
+    | otherwise -> do
+        let (Range aggregateMin aggregateMax) = aggregate2 first second
+        let high = Qty.min high1 high2
+        Range_ (Qty.max -high aggregateMin) (Qty.min aggregateMax high)
 
 larger :: Range units -> Range units -> Range units
-larger first second
-  | low1 > high2 = first
-  | low2 > high1 = second
-  | aggregateMin > -low = Range_ (Qty.max aggregateMin low) aggregateMax
-  | aggregateMax < low = Range_ aggregateMin (Qty.min aggregateMax -low)
-  | otherwise = aggregate
- where
-  (Range low1 high1) = abs first
-  (Range low2 high2) = abs second
-  low = Qty.max low1 low2
-  aggregate@(Range aggregateMin aggregateMax) = aggregate2 first second
+larger first second = do
+  let (Range low1 high1) = abs first
+  let (Range low2 high2) = abs second
+  let low = Qty.max low1 low2
+  let aggregate@(Range aggregateMin aggregateMax) = aggregate2 first second
+  if
+    | low1 > high2 -> first
+    | low2 > high1 -> second
+    | aggregateMin > -low -> Range_ (Qty.max aggregateMin low) aggregateMax
+    | aggregateMax < low -> Range_ aggregateMin (Qty.min aggregateMax -low)
+    | otherwise -> aggregate
 
 minimum :: NonEmpty (Range units) -> Range units
 minimum = NonEmpty.reduce min

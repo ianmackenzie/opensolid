@@ -72,14 +72,12 @@ dummyEstimates =
     |> Random.Shuffle.nonEmpty
 
 check :: Tolerance units => Estimate units -> Qty units -> (Bool, Range units)
-check estimate value
-  | Range.includes value bounds =
-      if Range.width bounds ~= Qty.zero
-        then (True, bounds)
-        else check (Estimate.refine estimate) value
-  | otherwise = (False, bounds)
- where
-  bounds = Estimate.bounds estimate
+check estimate value = do
+  let bounds = Estimate.bounds estimate
+  if
+    | not (Range.includes value bounds) -> (False, bounds)
+    | Range.width bounds ~= Qty.zero -> (True, bounds)
+    | otherwise -> check (Estimate.refine estimate) value
 
 smallest :: Tolerance Meters => Test
 smallest = Test.check 100 "smallest" Test.do

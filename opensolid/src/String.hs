@@ -36,12 +36,12 @@ fromFloat (Qty_ x) = show x
 
 lines :: String -> List String
 lines string = do
+  let fold character (current, accumulated) =
+        if character == '\n'
+          then ("", current : accumulated)
+          else (character : current, accumulated)
   let (first, rest) = List.foldr fold ("", []) string
   first : rest
- where
-  fold character (current, accumulated)
-    | character == '\n' = ("", current : accumulated)
-    | otherwise = (character : current, accumulated)
 
 multiline :: List String -> String
 multiline = join "\n"

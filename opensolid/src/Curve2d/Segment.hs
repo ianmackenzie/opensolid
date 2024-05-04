@@ -260,11 +260,11 @@ crossingIntersectionSign ::
   Segment (space @ units) ->
   Segment (space @ units) ->
   Fuzzy Sign
-crossingIntersectionSign _ _ segment1 segment2
-  | Qty.abs firstResolution >= 0.5 = Resolved (Qty.sign firstResolution)
-  | otherwise = Unresolved
- where
-  firstResolution = crossProductResolution segment1 segment2
+crossingIntersectionSign _ _ segment1 segment2 = do
+  let firstResolution = crossProductResolution segment1 segment2
+  if Qty.abs firstResolution >= 0.5
+    then Resolved (Qty.sign firstResolution)
+    else Unresolved
 
 findCrossingIntersection ::
   Tolerance units =>

@@ -116,12 +116,12 @@ segmentIsCoincidentWithPoint ::
   Curve2d (space @ units) ->
   Range Unitless ->
   Fuzzy Bool
-segmentIsCoincidentWithPoint point curve domain
-  | not (point ^ candidateBounds) = Resolved False
-  | candidateBounds ~= point = Resolved True
-  | otherwise = Unresolved
- where
-  candidateBounds = segmentBounds domain curve
+segmentIsCoincidentWithPoint point curve domain = do
+  let candidateBounds = segmentBounds domain curve
+  if
+    | not (point ^ candidateBounds) -> Resolved False
+    | candidateBounds ~= point -> Resolved True
+    | otherwise -> Unresolved
 
 class
   Show curve =>

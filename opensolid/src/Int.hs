@@ -54,15 +54,15 @@ factorial :: Int -> Int
 factorial n = prod 1 2 n
 
 choose :: Int -> Int -> Int
-choose n k
-  | n < 0 = 0
-  | k < 0 = 0
-  | k > n = 0
-  | d == 0 = 1
-  | d == 1 = n
-  | otherwise = prod (n - d + 1) (n - d + 2) n // prod 2 3 d
- where
-  d = min k (n - k)
+choose n k = do
+  let d = min k (n - k)
+  if
+    | n < 0 -> 0
+    | k < 0 -> 0
+    | k > n -> 0
+    | d == 0 -> 1
+    | d == 1 -> n
+    | otherwise -> prod (n - d + 1) (n - d + 2) n // prod 2 3 d
 
 prod :: Int -> Int -> Int -> Int
 prod !acc a b

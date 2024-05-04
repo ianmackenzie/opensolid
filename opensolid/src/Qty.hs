@@ -181,13 +181,13 @@ abs :: Qty units -> Qty units
 abs (Qty_ x) = Qty_ (Prelude.abs x)
 
 clamp :: Qty units -> Qty units -> Qty units -> Qty units
-clamp a b value
-  | value < low = low
-  | value > high = high
-  | otherwise = value
- where
-  low = min a b
-  high = max a b
+clamp a b value = do
+  let low = min a b
+  let high = max a b
+  if
+    | value < low -> low
+    | value > high -> high
+    | otherwise -> value
 
 {-# INLINE min #-}
 min :: Qty units -> Qty units -> Qty units

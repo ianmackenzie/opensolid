@@ -117,13 +117,13 @@ data Add units = Add (Estimate units) (Estimate units)
 
 instance Interface (Add units) units where
   boundsImpl (Add first second) = bounds first + bounds second
-  refineImpl (Add first second)
-    | width1 >= 2.0 * width2 = refine first + second
-    | width2 >= 2.0 * width1 = first + refine second
-    | otherwise = refine first + refine second
-   where
-    width1 = Range.width (bounds first)
-    width2 = Range.width (bounds second)
+  refineImpl (Add first second) = do
+    let width1 = Range.width (bounds first)
+    let width2 = Range.width (bounds second)
+    if
+      | width1 >= 2.0 * width2 -> refine first + second
+      | width2 >= 2.0 * width1 -> first + refine second
+      | otherwise -> refine first + refine second
 
 instance Addition (Estimate units) (Estimate units) (Estimate units) where
   first + second = wrap (Add first second)
@@ -132,13 +132,13 @@ data Subtract units = Subtract (Estimate units) (Estimate units)
 
 instance Interface (Subtract units) units where
   boundsImpl (Subtract first second) = bounds first - bounds second
-  refineImpl (Subtract first second)
-    | width1 >= 2.0 * width2 = refine first - second
-    | width2 >= 2.0 * width1 = first - refine second
-    | otherwise = refine first - refine second
-   where
-    width1 = Range.width (bounds first)
-    width2 = Range.width (bounds second)
+  refineImpl (Subtract first second) = do
+    let width1 = Range.width (bounds first)
+    let width2 = Range.width (bounds second)
+    if
+      | width1 >= 2.0 * width2 -> refine first - second
+      | width2 >= 2.0 * width1 -> first - refine second
+      | otherwise -> refine first - refine second
 
 instance Subtraction (Estimate units) (Estimate units) (Estimate units) where
   first - second = wrap (Subtract first second)
@@ -174,13 +174,13 @@ data Min units = Min (Estimate units) (Estimate units)
 
 instance Interface (Min units) units where
   boundsImpl (Min first second) = Range.min (bounds first) (bounds second)
-  refineImpl (Min first second)
-    | max1 <= min2 = refine first
-    | max2 <= min1 = refine second
-    | otherwise = min (refine first) (refine second)
-   where
-    (Range min1 max1) = bounds first
-    (Range min2 max2) = bounds second
+  refineImpl (Min first second) = do
+    let (Range min1 max1) = bounds first
+    let (Range min2 max2) = bounds second
+    if
+      | max1 <= min2 -> refine first
+      | max2 <= min1 -> refine second
+      | otherwise -> min (refine first) (refine second)
 
 min :: Estimate units -> Estimate units -> Estimate units
 min first second = wrap (Min first second)
@@ -189,13 +189,13 @@ data Max units = Max (Estimate units) (Estimate units)
 
 instance Interface (Max units) units where
   boundsImpl (Max first second) = Range.max (bounds first) (bounds second)
-  refineImpl (Max first second)
-    | min1 >= max2 = refine first
-    | min2 >= max1 = refine second
-    | otherwise = max (refine first) (refine second)
-   where
-    (Range min1 max1) = bounds first
-    (Range min2 max2) = bounds second
+  refineImpl (Max first second) = do
+    let (Range min1 max1) = bounds first
+    let (Range min2 max2) = bounds second
+    if
+      | min1 >= max2 -> refine first
+      | min2 >= max1 -> refine second
+      | otherwise -> max (refine first) (refine second)
 
 max :: Estimate units -> Estimate units -> Estimate units
 max first second = wrap (Max first second)
@@ -204,13 +204,13 @@ data Smaller units = Smaller (Estimate units) (Estimate units)
 
 instance Interface (Smaller units) units where
   boundsImpl (Smaller first second) = Range.smaller (bounds first) (bounds second)
-  refineImpl (Smaller first second)
-    | high1 <= low2 = refine first
-    | high2 <= low1 = refine second
-    | otherwise = smaller (refine first) (refine second)
-   where
-    (Range low1 high1) = Range.abs (bounds first)
-    (Range low2 high2) = Range.abs (bounds second)
+  refineImpl (Smaller first second) = do
+    let (Range low1 high1) = Range.abs (bounds first)
+    let (Range low2 high2) = Range.abs (bounds second)
+    if
+      | high1 <= low2 -> refine first
+      | high2 <= low1 -> refine second
+      | otherwise -> smaller (refine first) (refine second)
 
 smaller :: Estimate units -> Estimate units -> Estimate units
 smaller first second = wrap (Smaller first second)
@@ -219,13 +219,13 @@ data Larger units = Larger (Estimate units) (Estimate units)
 
 instance Interface (Larger units) units where
   boundsImpl (Larger first second) = Range.larger (bounds first) (bounds second)
-  refineImpl (Larger first second)
-    | low1 >= high2 = refine first
-    | low2 >= high1 = refine second
-    | otherwise = larger (refine first) (refine second)
-   where
-    (Range low1 high1) = Range.abs (bounds first)
-    (Range low2 high2) = Range.abs (bounds second)
+  refineImpl (Larger first second) = do
+    let (Range low1 high1) = Range.abs (bounds first)
+    let (Range low2 high2) = Range.abs (bounds second)
+    if
+      | low1 >= high2 -> refine first
+      | low2 >= high1 -> refine second
+      | otherwise -> larger (refine first) (refine second)
 
 larger :: Estimate units -> Estimate units -> Estimate units
 larger first second = wrap (Larger first second)
