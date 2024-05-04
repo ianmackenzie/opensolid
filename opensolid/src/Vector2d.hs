@@ -38,12 +38,14 @@ module Vector2d
   , transformBy
   , rotateBy
   , mirrorIn
+  , mirrorAcross
   , scaleIn
   )
 where
 
 import Angle qualified
 import Area qualified
+import {-# SOURCE #-} Axis2d (Axis2d)
 import {-# SOURCE #-} Axis2d qualified
 import {-# SOURCE #-} Basis2d (Basis2d)
 import {-# SOURCE #-} Basis2d qualified
@@ -343,6 +345,9 @@ rotateBy theta = transformBy (Transform2d.rotateAround Point2d.origin theta)
 
 mirrorIn :: Direction2d space -> Vector2d (space @ units) -> Vector2d (space @ units)
 mirrorIn mirrorDirection vector = vector - 2.0 * projectionIn mirrorDirection vector
+
+mirrorAcross :: Axis2d (space @ originUnits) -> Vector2d (space @ units) -> Vector2d (space @ units)
+mirrorAcross axis = mirrorIn (Axis2d.normalDirection axis)
 
 scaleIn :: Direction2d space -> Float -> Vector2d (space @ units) -> Vector2d (space @ units)
 scaleIn scaleDirection scale =

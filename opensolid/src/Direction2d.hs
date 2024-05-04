@@ -29,10 +29,12 @@ module Direction2d
   , transformBy
   , rotateBy
   , mirrorIn
+  , mirrorAcross
   )
 where
 
 import Angle qualified
+import {-# SOURCE #-} Axis2d (Axis2d)
 import {-# SOURCE #-} Basis2d (Basis2d)
 import {-# SOURCE #-} Frame2d (Frame2d)
 import OpenSolid
@@ -203,3 +205,6 @@ rotateBy theta = lift (Vector2d.rotateBy theta)
 
 mirrorIn :: Direction2d space -> Direction2d space -> Direction2d space
 mirrorIn mirrorDirection = lift (Vector2d.mirrorIn mirrorDirection)
+
+mirrorAcross :: Axis2d (space @ originUnits) -> Direction2d space -> Direction2d space
+mirrorAcross axis = lift (Vector2d.mirrorAcross axis)

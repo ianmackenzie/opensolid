@@ -28,6 +28,7 @@ module Point2d
   , translateIn
   , translateAlong
   , rotateAround
+  , mirrorAcross
   , scaleAbout
   , scaleAlong
   )
@@ -236,6 +237,9 @@ translateAlong axis distance = translateIn (Axis2d.direction axis) distance
 
 rotateAround :: Point2d (space @ units) -> Angle -> Point2d (space @ units) -> Point2d (space @ units)
 rotateAround centerPoint angle = transformBy (Transform2d.rotateAround centerPoint angle)
+
+mirrorAcross :: Axis2d (space @ units) -> Point2d (space @ units) -> Point2d (space @ units)
+mirrorAcross axis = transformBy (Transform2d.mirrorAcross axis)
 
 scaleAbout :: Point2d (space @ units) -> Float -> Point2d (space @ units) -> Point2d (space @ units)
 scaleAbout centerPoint scale = transformBy (Transform2d.scaleAbout centerPoint scale)

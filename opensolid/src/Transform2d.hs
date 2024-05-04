@@ -10,6 +10,7 @@ module Transform2d
   , translateIn
   , translateAlong
   , rotateAround
+  , mirrorAcross
   , scaleAbout
   , scaleAlong
   , placeIn
@@ -155,6 +156,13 @@ rotateAround centerPoint angle = do
   let vx = Vector2d.xy cos sin
   let vy = Vector2d.xy -sin cos
   withFixedPoint centerPoint vx vy
+
+mirrorAcross :: Axis2d (space @ units) -> Rigid (space @ units)
+mirrorAcross axis = do
+  let (dx, dy) = Direction2d.components (Axis2d.direction axis)
+  let vx = Vector2d.xy (1.0 - 2.0 * dy * dy) (2 * dx * dy)
+  let vy = Vector2d.xy (2 * dx * dy) (1.0 - 2.0 * dx * dx)
+  withFixedPoint (Axis2d.originPoint axis) vx vy
 
 scaleAbout :: Point2d (space @ units) -> Float -> Uniform (space @ units)
 scaleAbout point scale = do
