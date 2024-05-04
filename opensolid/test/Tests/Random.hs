@@ -71,10 +71,7 @@ vectorBounds2d :: Generator (VectorBounds2d (space @ Meters))
 vectorBounds2d = Random.map2 VectorBounds2d lengthRange lengthRange
 
 line2d :: Tolerance Meters => Generator (Curve2d (space @ Meters))
-line2d = Random.do
-  startPoint <- point2d
-  endPoint <- point2d
-  Random.return (Line2d.from startPoint endPoint)
+line2d = Random.map2 Line2d.from point2d point2d
 
 arc2d :: Tolerance Meters => Generator (Curve2d (space @ Meters))
 arc2d = Random.do
@@ -84,16 +81,7 @@ arc2d = Random.do
   Random.return (Arc2d.from startPoint endPoint sweptAngle)
 
 quadraticSpline2d :: Tolerance Meters => Generator (Curve2d (space @ Meters))
-quadraticSpline2d = Random.do
-  p1 <- point2d
-  p2 <- point2d
-  p3 <- point2d
-  Random.return (QuadraticSpline2d.fromControlPoints p1 p2 p3)
+quadraticSpline2d = Random.map3 QuadraticSpline2d.fromControlPoints point2d point2d point2d
 
 cubicSpline2d :: Tolerance Meters => Generator (Curve2d (space @ Meters))
-cubicSpline2d = Random.do
-  p1 <- point2d
-  p2 <- point2d
-  p3 <- point2d
-  p4 <- point2d
-  Random.return (CubicSpline2d.fromControlPoints p1 p2 p3 p4)
+cubicSpline2d = Random.map4 CubicSpline2d.fromControlPoints point2d point2d point2d point2d
