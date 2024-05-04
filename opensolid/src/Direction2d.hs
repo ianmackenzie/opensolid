@@ -190,7 +190,11 @@ relativeToBasis basis = lift (Vector2d.relativeToBasis basis)
 generator :: Random.Generator (Direction2d space)
 generator = Random.map fromAngle (Random.qty Angle.zero Angle.twoPi)
 
-transformBy :: Transform2d.IsRigid a => Transform2d a (space @ units) -> Direction2d space -> Direction2d space
+transformBy ::
+  Transform2d.IsRigid a =>
+  Transform2d a (space @ translationUnits) ->
+  Direction2d space ->
+  Direction2d space
 transformBy transform = lift (Vector2d.transformBy transform)
 
 rotateBy :: Angle -> Direction2d space -> Direction2d space
