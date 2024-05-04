@@ -2,6 +2,7 @@ module Tests.Random
   ( length
   , lengthRange
   , point2d
+  , vector2d
   , vectorBounds3d
   , frame2d
   , bounds2d
@@ -35,6 +36,8 @@ import Random qualified
 import Range (Range)
 import Range qualified
 import Units (Meters)
+import Vector2d (Vector2d)
+import Vector2d qualified
 import VectorBounds2d (VectorBounds2d (VectorBounds2d))
 import VectorBounds3d (VectorBounds3d (VectorBounds3d))
 
@@ -46,6 +49,9 @@ lengthRange = Range.generator length
 
 point2d :: Generator (Point2d (space @ Meters))
 point2d = Random.map2 Point2d.xy length length
+
+vector2d :: Generator (Vector2d (space @ Meters))
+vector2d = Random.map2 Vector2d.xy length length
 
 vectorBounds3d :: Generator (VectorBounds3d (space @ Meters))
 vectorBounds3d = Random.map3 VectorBounds3d lengthRange lengthRange lengthRange
