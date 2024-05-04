@@ -16,13 +16,13 @@ import {-# SOURCE #-} Vector2d (Vector2d)
 import {-# SOURCE #-} Vector2d qualified
 
 placeIn ::
-  Frame2d (global @ frameUnits) (Defines local) ->
+  Frame2d (global @ originUnits) (Defines local) ->
   Vector2d (local @ units) ->
   Vector2d (global @ units)
 placeIn frame = placeInBasis (Frame2d.basis frame)
 
 relativeTo ::
-  Frame2d (global @ frameUnits) (Defines local) ->
+  Frame2d (global @ originUnits) (Defines local) ->
   Vector2d (global @ units) ->
   Vector2d (local @ units)
 relativeTo frame = relativeToBasis (Frame2d.basis frame)

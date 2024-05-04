@@ -303,13 +303,13 @@ rotateRight :: Vector2d (space @ units) -> Vector2d (space @ units)
 rotateRight (Vector2d vx vy) = Vector2d vy -vx
 
 placeIn ::
-  Frame2d (global @ units) (Defines local) ->
+  Frame2d (global @ originUnits) (Defines local) ->
   Vector2d (local @ units) ->
   Vector2d (global @ units)
 placeIn = Vector2d.CoordinateTransformation.placeIn
 
 relativeTo ::
-  Frame2d (global @ units) (Defines local) ->
+  Frame2d (global @ originUnits) (Defines local) ->
   Vector2d (global @ units) ->
   Vector2d (local @ units)
 relativeTo = Vector2d.CoordinateTransformation.relativeTo
