@@ -329,7 +329,10 @@ relativeToBasis = Vector2d.CoordinateTransformation.relativeToBasis
 sum :: List (Vector2d (space @ units)) -> Vector2d (space @ units)
 sum = List.foldl (+) zero
 
-transformBy :: Transform2d a (space @ units1) -> Vector2d (space @ units2) -> Vector2d (space @ units2)
+transformBy ::
+  Transform2d a (space @ translationUnits) ->
+  Vector2d (space @ units) ->
+  Vector2d (space @ units)
 transformBy transform vector = do
   let (Transform2d _ i j) = transform
   let (vx, vy) = components vector
