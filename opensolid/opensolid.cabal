@@ -96,7 +96,7 @@ library
       Curve2d.Intersection
       Curve3d
       Debug
-      Dict
+      Map
       Direction2d
       Direction3d
       DirectionBounds2d
@@ -181,12 +181,12 @@ test-suite opensolid-test
       Tests.Bounds2d
       Tests.Curve1d
       Tests.Curve2d
-      Tests.Dict
       Tests.Direction2d
       Tests.DivMod
       Tests.Estimate
       Tests.Float
       Tests.List
+      Tests.Map
       Tests.NonEmpty
       Tests.String
       Tests.Parameter

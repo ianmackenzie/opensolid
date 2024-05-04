@@ -8,12 +8,12 @@ import Tests.Arc2d qualified
 import Tests.Bounds2d qualified
 import Tests.Curve1d qualified
 import Tests.Curve2d qualified
-import Tests.Dict qualified
 import Tests.Direction2d qualified
 import Tests.DivMod qualified
 import Tests.Estimate qualified
 import Tests.Float qualified
 import Tests.List qualified
+import Tests.Map qualified
 import Tests.NonEmpty qualified
 import Tests.Parameter qualified
 import Tests.Qty qualified
@@ -37,7 +37,7 @@ tests =
   , Test.group "Region2d" Tests.Region2d.tests
   , Test.group "Direction2d" Tests.Direction2d.tests
   , Test.group "Arc2d" Tests.Arc2d.tests
-  , Test.group "Dict" Tests.Dict.tests
+  , Test.group "Map" Tests.Map.tests
   , Test.group "DivMod" Tests.DivMod.tests
   , Test.group "Float" Tests.Float.tests
   , Test.group "String" Tests.String.tests
