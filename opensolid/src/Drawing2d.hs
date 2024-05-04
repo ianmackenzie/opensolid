@@ -60,7 +60,7 @@ attributeString indent (Attribute name value) = String.concat [indent, name, "=\
 
 toSvg :: Bounds2d (space @ Meters) -> List (Entity space) -> String
 toSvg viewBox entities = do
-  let (xRange, yRange) = Bounds2d.xyRanges viewBox
+  let (xRange, yRange) = Bounds2d.coordinates viewBox
   let (x1, x2) = Range.endpoints xRange
   let (y1, y2) = Range.endpoints yRange
   let width = x2 - x1

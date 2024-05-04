@@ -24,22 +24,22 @@ data Boundary
 
 left :: Uv.Bounds -> Boundary
 left uvBounds = do
-  let (uRange, vRange) = Bounds2d.xyRanges uvBounds
+  let (uRange, vRange) = Bounds2d.coordinates uvBounds
   Left (Range.minValue uRange) vRange
 
 right :: Uv.Bounds -> Boundary
 right uvBounds = do
-  let (uRange, vRange) = Bounds2d.xyRanges uvBounds
+  let (uRange, vRange) = Bounds2d.coordinates uvBounds
   Right (Range.maxValue uRange) vRange
 
 bottom :: Uv.Bounds -> Boundary
 bottom uvBounds = do
-  let (uRange, vRange) = Bounds2d.xyRanges uvBounds
+  let (uRange, vRange) = Bounds2d.coordinates uvBounds
   Bottom uRange (Range.minValue vRange)
 
 top :: Uv.Bounds -> Boundary
 top uvBounds = do
-  let (uRange, vRange) = Bounds2d.xyRanges uvBounds
+  let (uRange, vRange) = Bounds2d.coordinates uvBounds
   Top uRange (Range.maxValue vRange)
 
 adjacent :: Boundary -> Boundary -> Bool

@@ -35,11 +35,11 @@ domain = Bounds2d.xy Range.unit Range.unit
 
 bisect :: Parameter -> Bounds -> (Bounds, Bounds)
 bisect U bounds = do
-  let (uRange, vRange) = Bounds2d.xyRanges bounds
+  let (uRange, vRange) = Bounds2d.coordinates bounds
   let (u1, u2) = Range.bisect uRange
   (Bounds2d.xy u1 vRange, Bounds2d.xy u2 vRange)
 bisect V bounds = do
-  let (uRange, vRange) = Bounds2d.xyRanges bounds
+  let (uRange, vRange) = Bounds2d.coordinates bounds
   let (v1, v2) = Range.bisect vRange
   (Bounds2d.xy uRange v1, Bounds2d.xy uRange v2)
 

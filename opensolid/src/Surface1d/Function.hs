@@ -267,8 +267,8 @@ segmentBounds uv function =
     Zero -> Range.constant Qty.zero
     Constant x -> Range.constant x
     Coerce f -> Units.coerce (segmentBounds uv f)
-    Parameter U -> Bounds2d.xRange uv
-    Parameter V -> Bounds2d.yRange uv
+    Parameter U -> Bounds2d.xCoordinate uv
+    Parameter V -> Bounds2d.yCoordinate uv
     Negated f -> negate (segmentBounds uv f)
     Sum f1 f2 -> segmentBounds uv f1 + segmentBounds uv f2
     Difference f1 f2 -> segmentBounds uv f1 - segmentBounds uv f2
@@ -523,7 +523,6 @@ findCrossingSolutions derivatives boundaryEdges boundaryPoints uvBounds bisectio
           ( PartialZeros.merge solutions1 solutions2
           , exclusions1 + exclusions2
           )
- 
 
 data BoundaryEdges = BoundaryEdges
   { leftEdgeIsSolution :: Bool
@@ -606,7 +605,7 @@ expandRangeBy factor (Range low high) = do
 
 expandBoundsBy :: Float -> Uv.Bounds -> Uv.Bounds
 expandBoundsBy factor uvBounds = do
-  let (uRange, vRange) = Bounds2d.xyRanges uvBounds
+  let (uRange, vRange) = Bounds2d.coordinates uvBounds
   Bounds2d.xy (expandRangeBy factor uRange) (expandRangeBy factor vRange)
 
 expandRange :: Range Unitless -> Range Unitless
@@ -625,7 +624,7 @@ generalSolution derivatives uvBounds exclusions = do
   let Derivatives{f, fu, fv} = derivatives
   let fuBounds = segmentBounds uvBounds fu
   let fvBounds = segmentBounds uvBounds fv
-  let (uRange, vRange) = Bounds2d.xyRanges uvBounds
+  let (uRange, vRange) = Bounds2d.coordinates uvBounds
   let (minU, maxU) = Range.endpoints uRange
   let (minV, maxV) = Range.endpoints vRange
   if
@@ -735,7 +734,7 @@ horizontalSolution ::
   List Uv.Bounds ->
   Maybe (PartialZeros, List Uv.Bounds)
 horizontalSolution derivatives boundaryEdges boundaryPoints uvBounds exclusions = do
-  let (uRange, vRange) = Bounds2d.xyRanges uvBounds
+  let (uRange, vRange) = Bounds2d.coordinates uvBounds
   let (minU, maxU) = Range.endpoints uRange
   let (minV, maxV) = Range.endpoints vRange
   let Derivatives{f, fu, fv} = derivatives
@@ -788,7 +787,7 @@ verticalSolution ::
   List Uv.Bounds ->
   Maybe (PartialZeros, List Uv.Bounds)
 verticalSolution derivatives boundaryEdges boundaryPoints uvBounds exclusions = do
-  let (uRange, vRange) = Bounds2d.xyRanges uvBounds
+  let (uRange, vRange) = Bounds2d.coordinates uvBounds
   let (minU, maxU) = Range.endpoints uRange
   let (minV, maxV) = Range.endpoints vRange
   let Derivatives{f, fu, fv} = derivatives
@@ -839,7 +838,7 @@ rightwardsSolution ::
   Uv.Bounds ->
   PartialZeros
 rightwardsSolution f fu fv uvBounds = do
-  let (uRange, vRange) = Bounds2d.xyRanges uvBounds
+  let (uRange, vRange) = Bounds2d.coordinates uvBounds
   let (minU, maxU) = Range.endpoints uRange
   let (minV, maxV) = Range.endpoints vRange
   crossingSolution (minU == maxU) (Boundary.Left minU vRange) (Boundary.Right maxU vRange) $
@@ -852,7 +851,7 @@ leftwardsSolution ::
   Uv.Bounds ->
   PartialZeros
 leftwardsSolution f fu fv uvBounds = do
-  let (uRange, vRange) = Bounds2d.xyRanges uvBounds
+  let (uRange, vRange) = Bounds2d.coordinates uvBounds
   let (minU, maxU) = Range.endpoints uRange
   let (minV, maxV) = Range.endpoints vRange
   crossingSolution (minU == maxU) (Boundary.Right maxU vRange) (Boundary.Left minU vRange) $
@@ -865,7 +864,7 @@ upwardsSolution ::
   Uv.Bounds ->
   PartialZeros
 upwardsSolution f fu fv uvBounds = do
-  let (uRange, vRange) = Bounds2d.xyRanges uvBounds
+  let (uRange, vRange) = Bounds2d.coordinates uvBounds
   let (minU, maxU) = Range.endpoints uRange
   let (minV, maxV) = Range.endpoints vRange
   crossingSolution (minV == maxV) (Boundary.Bottom uRange minV) (Boundary.Top uRange maxV) $
@@ -878,7 +877,7 @@ downwardsSolution ::
   Uv.Bounds ->
   PartialZeros
 downwardsSolution f fu fv uvBounds = do
-  let (uRange, vRange) = Bounds2d.xyRanges uvBounds
+  let (uRange, vRange) = Bounds2d.coordinates uvBounds
   let (minU, maxU) = Range.endpoints uRange
   let (minV, maxV) = Range.endpoints vRange
   crossingSolution (minV == maxV) (Boundary.Top uRange maxV) (Boundary.Bottom uRange minV) $
@@ -996,7 +995,7 @@ saddlePointRegion derivatives point expandedBounds = do
   let fuvValue = evaluateAt point fuv
   let fvvValue = evaluateAt point fvv
   let (u0, v0) = Point2d.coordinates point
-  let (uRange, vRange) = Bounds2d.xyRanges expandedBounds
+  let (uRange, vRange) = Bounds2d.coordinates expandedBounds
   let sqrtD = Qty.sqrt_ (fuvValue .*. fuvValue - fuuValue .*. fvvValue)
   let (d1, d2) =
         if Qty.abs fuuValue >= Qty.abs fvvValue
