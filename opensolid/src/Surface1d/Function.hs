@@ -1015,14 +1015,13 @@ saddlePointSolution derivatives point expandedBounds = do
             ( Vector2d.normalize (Vector2d fvvValue (-fuvValue + sqrtD))
             , Vector2d.normalize (Vector2d fvvValue (-fuvValue - sqrtD))
             )
-  let maxRadiusForVector :: Vector2d Uv.Coordinates -> Float
-      maxRadiusForVector (Vector2d u v) =
-        Float.min
-          (maxRadiusForComponent u u0 uRange)
-          (maxRadiusForComponent v v0 vRange)
   let xDirection = Direction2d.unsafe (Vector2d.normalize (d1 + d2))
   let xAxis = Axis2d.through point xDirection
   let frame = Frame2d.fromXAxis xAxis
+  let maxRadiusForVector (Vector2d u v) =
+        Float.min
+          (maxRadiusForComponent u u0 uRange)
+          (maxRadiusForComponent v v0 vRange)
   let radius = Float.min (maxRadiusForVector d1) (maxRadiusForVector d2)
   let Vector2d u1 v1 = Vector2d.relativeTo frame d1
   let halfWidth = Float.abs (radius * u1)
