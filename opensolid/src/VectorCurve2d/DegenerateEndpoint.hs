@@ -59,9 +59,10 @@ instance VectorCurve2d.Interface (QCurve (space @ units)) (space @ units) where
   segmentBoundsImpl _ (QCurve _ _ _ value) = VectorBounds2d.constant value
   derivativeImpl (QCurve n t0 curveDerivative _) =
     qCurve (n + 1) t0 (VectorCurve2d.derivative curveDerivative)
-  transformByImpl transform (QCurve n t0 curveDerivative value) =
-    VectorCurve2d.wrap $
-      QCurve n t0 (VectorCurve2d.transformBy transform curveDerivative) (Vector2d.transformBy transform value)
+  transformByImpl transform (QCurve n t0 curveDerivative value) = do
+    let transformedCurveDerivative = VectorCurve2d.transformBy transform curveDerivative
+    let transformedValue = Vector2d.transformBy transform value
+    VectorCurve2d.wrap (QCurve n t0 transformedCurveDerivative transformedValue)
 
 qCurve :: Int -> Float -> VectorCurve2d (space @ units) -> VectorCurve2d (space @ units)
 qCurve n t0 curveDerivative =
