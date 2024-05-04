@@ -28,6 +28,7 @@ module Direction2d
   , generator
   , transformBy
   , rotateBy
+  , mirrorIn
   )
 where
 
@@ -199,3 +200,6 @@ transformBy transform = lift (Vector2d.transformBy transform)
 
 rotateBy :: Angle -> Direction2d space -> Direction2d space
 rotateBy theta = lift (Vector2d.rotateBy theta)
+
+mirrorIn :: Direction2d space -> Direction2d space -> Direction2d space
+mirrorIn mirrorDirection = lift (Vector2d.mirrorIn mirrorDirection)
