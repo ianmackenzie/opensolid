@@ -990,14 +990,19 @@ tangentPointSolution derivatives boundaryPoints uvBounds exclusions saddleRegion
             Just (Ok (saddlePointSolution derivatives point expandedBounds))
     | otherwise -> Nothing
 
+saddlePointSolution :: Derivatives units -> Uv.Point -> Uv.Bounds -> (PartialZeros, List Uv.Bounds, List SaddleRegion)
+saddlePointSolution derivatives point expandedBounds = do
+  let saddleRegion = saddlePointRegion derivatives point expandedBounds
+  (PartialZeros.saddleRegion saddleRegion, [], [saddleRegion])
+
 maxRadiusForComponent :: Float -> Float -> Range Unitless -> Float
 maxRadiusForComponent component origin (Range low high)
   | component < 0.0 = if low == 0.0 then Float.infinity else (low - origin) / component
   | component > 0.0 = if high == 1.0 then Float.infinity else (high - origin) / component
   | otherwise = Float.infinity
 
-saddlePointSolution :: Derivatives units -> Uv.Point -> Uv.Bounds -> (PartialZeros, List Uv.Bounds, List SaddleRegion)
-saddlePointSolution derivatives point expandedBounds = do
+saddlePointRegion :: Derivatives units -> Uv.Point -> Uv.Bounds -> SaddleRegion
+saddlePointRegion derivatives point expandedBounds = do
   let Derivatives{f, fuu, fuv, fvv} = derivatives
   let fuuValue = evaluateAt point fuu
   let fuvValue = evaluateAt point fuv
@@ -1047,8 +1052,7 @@ saddlePointSolution derivatives point expandedBounds = do
   let b a = -(fyyyValue * a ** 3 + 3 * fxyyValue * a ** 2 + 3 * fxxyValue * a + fxxxValue) / (3 * a * fyyValue)
   let positiveSolution = SaddleRegion.Solution{dydx = positiveA, d2ydx2 = b positiveA}
   let negativeSolution = SaddleRegion.Solution{dydx = negativeA, d2ydx2 = b negativeA}
-  let saddleRegion = SaddleRegion{frame, halfWidth, halfHeight, positiveSolution, negativeSolution}
-  (PartialZeros.saddleRegion saddleRegion, [], [saddleRegion])
+  SaddleRegion{frame, halfWidth, halfHeight, positiveSolution, negativeSolution}
 
 reparameterize ::
   Frame2d Uv.Coordinates (Defines Uv.Space) ->
