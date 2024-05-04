@@ -12,6 +12,7 @@ module Tests.Random
   , arc2d
   , quadraticSpline2d
   , cubicSpline2d
+  , rigidTransform2d
   )
 where
 
@@ -29,6 +30,7 @@ import Frame2d qualified
 import Length (Length)
 import Length qualified
 import Line2d qualified
+import NonEmpty qualified
 import OpenSolid
 import Point2d (Point2d)
 import Point2d qualified
@@ -37,6 +39,7 @@ import Random (Generator)
 import Random qualified
 import Range (Range)
 import Range qualified
+import Transform2d qualified
 import Units (Meters)
 import Vector2d (Vector2d)
 import Vector2d qualified
@@ -85,3 +88,18 @@ quadraticSpline2d = Random.map3 QuadraticSpline2d.fromControlPoints point2d poin
 
 cubicSpline2d :: Tolerance Meters => Generator (Curve2d (space @ Meters))
 cubicSpline2d = Random.map4 CubicSpline2d.fromControlPoints point2d point2d point2d point2d
+
+translation2d :: Generator (Transform2d.Rigid (space @ Meters))
+translation2d = Random.map Transform2d.translateBy vector2d
+
+rotation2d :: Generator (Transform2d.Rigid (space @ Meters))
+rotation2d = Random.do
+  centerPoint <- point2d
+  angle <- Random.qty (Angle.degrees -360.0) (Angle.degrees 360.0)
+  Random.return (Transform2d.rotateAround centerPoint angle)
+
+mirror2d :: Generator (Transform2d.Rigid (space @ Meters))
+mirror2d = Random.map Transform2d.mirrorAcross axis2d
+
+rigidTransform2d :: Generator (Transform2d.Rigid (space @ Meters))
+rigidTransform2d = Random.oneOf (NonEmpty.of3 translation2d rotation2d mirror2d)
