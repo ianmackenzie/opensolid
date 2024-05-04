@@ -33,6 +33,7 @@ library
     , All
     , Pointers
     , OpenSolidAPI.Axis2d
+    , OpenSolidAPI.Basis2d
     , OpenSolidAPI.Bounds2d
     , OpenSolidAPI.Direction2d
     , OpenSolidAPI.Frame2d

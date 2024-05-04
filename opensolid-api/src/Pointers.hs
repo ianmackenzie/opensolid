@@ -8,6 +8,7 @@ where
 
 import Axis2d qualified
 import Bounds2d qualified
+import Basis2d qualified
 import Direction2d qualified
 import Foreign qualified
 import Foreign.Storable (Storable)
@@ -67,6 +68,10 @@ instance (VoidPtr (Direction2d.Direction2d a)) where
   toVoidPtr = newStablePtr
 
 instance (VoidPtr (Vector2d.Vector2d a)) where
+  fromVoidPtr = derefStablePtr
+  toVoidPtr = newStablePtr
+
+instance (VoidPtr (Basis2d.Basis2d a b)) where
   fromVoidPtr = derefStablePtr
   toVoidPtr = newStablePtr
 
