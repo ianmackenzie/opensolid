@@ -229,7 +229,7 @@ type Coords space units = space @ units
 
 -- Fix up function type signatures to play more nicely with Template Haskell
 fixupType :: TH.Type -> TH.Type
--- Replace 'units', 'units1', 'units2', `frameUnits` etc. with 'Unitless' in all types
+-- Replace 'units', 'units1', 'units2', `originUnits` etc. with 'Unitless' in all types
 -- since the FFI only deals with unitless values
 fixupType (TH.VarT name) | String.contains "units" (String.toLower (TH.nameBase name)) = TH.ConT ''Unitless
 -- Strip 'forall' from function types

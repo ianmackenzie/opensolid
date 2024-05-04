@@ -206,7 +206,7 @@ y vy = Vector2d Qty.zero vy
 xy :: Qty units -> Qty units -> Vector2d (space @ units)
 xy = Vector2d
 
-xyIn :: Frame2d (space @ frameUnits) defines -> Qty units -> Qty units -> Vector2d (space @ units)
+xyIn :: Frame2d (space @ originUnits) defines -> Qty units -> Qty units -> Vector2d (space @ units)
 xyIn frame = xyInBasis (Frame2d.basis frame)
 
 xyInBasis :: Basis2d space defines -> Qty units -> Qty units -> Vector2d (space @ units)

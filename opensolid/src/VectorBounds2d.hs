@@ -434,7 +434,7 @@ interpolate (VectorBounds2d x y) u v =
   Vector2d (Range.interpolate x u) (Range.interpolate y v)
 
 placeIn ::
-  Frame2d (global @ frameUnits) (Defines local) ->
+  Frame2d (global @ originUnits) (Defines local) ->
   VectorBounds2d (local @ units) ->
   VectorBounds2d (global @ units)
 placeIn frame = placeInBasis (Frame2d.basis frame)
