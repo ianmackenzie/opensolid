@@ -17,6 +17,7 @@ module Random
   , pair
   , maybe
   , oneOf
+  , retry
   , (>>=)
   , (>>)
   , return
@@ -149,3 +150,10 @@ oneOf (firstGenerator :| remainingGenerators) = do
   Random.do
     index <- indexGenerator
     Array.get (index - 1) array |> Maybe.withDefault firstGenerator
+
+retry :: Generator (Result x a) -> Generator a
+retry fallibleGenerator = Random.do
+  result <- fallibleGenerator
+  case result of
+    Ok value -> Random.return value
+    Error _ -> retry fallibleGenerator
