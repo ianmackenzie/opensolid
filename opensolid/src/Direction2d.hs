@@ -34,10 +34,8 @@ where
 import Angle qualified
 import {-# SOURCE #-} Basis2d (Basis2d)
 import {-# SOURCE #-} Frame2d (Frame2d)
-import {-# SOURCE #-} Frame2d qualified
 import OpenSolid
 import {-# SOURCE #-} Point2d (Point2d)
-import {-# SOURCE #-} Point2d qualified
 import Random qualified
 import Transform2d (Transform2d)
 import Transform2d qualified
@@ -122,6 +120,10 @@ components direction = Vector2d.components (vector direction)
 unsafe :: Vector2d (space @ Unitless) -> Direction2d space
 unsafe = Direction2d
 
+{-# INLINE lift #-}
+lift :: (Vector2d (space1 @ Unitless) -> Vector2d (space2 @ Unitless)) -> Direction2d space1 -> Direction2d space2
+lift vectorFunction direction = Direction2d (vectorFunction (vector direction))
+
 positiveX :: Direction2d space
 positiveX = unsafe (Vector2d 1.0 0.0)
 
@@ -168,28 +170,28 @@ perpendicularTo :: Direction2d space -> Direction2d space
 perpendicularTo = rotateLeft
 
 rotateLeft :: Direction2d space -> Direction2d space
-rotateLeft direction = Direction2d (Vector2d.rotateLeft (vector direction))
+rotateLeft = lift Vector2d.rotateLeft
 
 rotateRight :: Direction2d space -> Direction2d space
-rotateRight direction = Direction2d (Vector2d.rotateRight (vector direction))
+rotateRight = lift Vector2d.rotateRight
 
 placeIn :: Frame2d (global @ originUnits) (Defines local) -> Direction2d local -> Direction2d global
-placeIn frame = placeInBasis (Frame2d.basis frame)
+placeIn frame = lift (Vector2d.placeIn frame)
 
 relativeTo :: Frame2d (global @ originUnits) (Defines local) -> Direction2d global -> Direction2d local
-relativeTo frame = relativeToBasis (Frame2d.basis frame)
+relativeTo frame = lift (Vector2d.relativeTo frame)
 
 placeInBasis :: Basis2d global (Defines local) -> Direction2d local -> Direction2d global
-placeInBasis basis direction = unsafe (Vector2d.placeInBasis basis (vector direction))
+placeInBasis basis = lift (Vector2d.placeInBasis basis)
 
 relativeToBasis :: Basis2d global (Defines local) -> Direction2d global -> Direction2d local
-relativeToBasis basis direction = Direction2d (Vector2d.relativeToBasis basis (vector direction))
+relativeToBasis basis = lift (Vector2d.relativeToBasis basis)
 
 generator :: Random.Generator (Direction2d space)
 generator = Random.map fromAngle (Random.qty Angle.zero Angle.twoPi)
 
 transformBy :: Transform2d.IsRigid a => Transform2d a (space @ units) -> Direction2d space -> Direction2d space
-transformBy transform direction = Direction2d (Vector2d.transformBy transform (vector direction))
+transformBy transform = lift (Vector2d.transformBy transform)
 
 rotateBy :: Angle -> Direction2d space -> Direction2d space
-rotateBy theta = transformBy (Transform2d.rotateAround Point2d.origin theta)
+rotateBy theta = lift (Vector2d.rotateBy theta)
