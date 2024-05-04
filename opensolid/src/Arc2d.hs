@@ -29,7 +29,6 @@ where
 
 import Angle qualified
 import Curve2d (Curve2d)
-import Curve2d qualified
 import Curve2d.Internal qualified
 import Direction2d qualified
 import OpenSolid
@@ -44,34 +43,32 @@ from ::
   Point2d (space @ units) ->
   Point2d (space @ units) ->
   Angle ->
-  Result Curve2d.DegenerateCurve (Curve2d (space @ units))
+  Curve2d (space @ units)
 from givenStartPoint givenEndPoint givenSweptAngle =
   case Vector2d.magnitudeAndDirection (givenEndPoint - givenStartPoint) of
-    Error Vector2d.IsZero -> Error Curve2d.DegenerateCurve
-    Ok (distanceBetweenPoints, directionBetweenPoints)
-      | linearDeviation ~= Qty.zero ->
-          Ok $
-            Curve2d.Internal.Line
-              { startPoint = givenStartPoint
-              , endPoint = givenEndPoint
-              , direction = directionBetweenPoints
-              , length = Point2d.distanceFrom givenStartPoint givenEndPoint
-              }
-      | otherwise ->
-          Ok $
-            Curve2d.Internal.Arc
-              { centerPoint = computedCenterPoint
-              , radius = Point2d.distanceFrom computedCenterPoint givenStartPoint
-              , startAngle = computedStartAngle
-              , endAngle = computedStartAngle + givenSweptAngle
-              }
-     where
-      tanHalfAngle = Angle.tan (0.5 * givenSweptAngle)
-      halfDistance = 0.5 * distanceBetweenPoints
-      linearDeviation = halfDistance * tanHalfAngle
-      offset = (halfDistance / tanHalfAngle) * Direction2d.rotateLeft directionBetweenPoints
-      computedCenterPoint = Point2d.midpoint givenStartPoint givenEndPoint + offset
-      computedStartAngle = Point2d.angleFrom computedCenterPoint givenStartPoint
+    Error Vector2d.IsZero -> Curve2d.Internal.Line givenStartPoint givenEndPoint
+    Ok (distanceBetweenPoints, directionBetweenPoints) -> do
+      let halfDistance = 0.5 * distanceBetweenPoints
+      let tanHalfAngle = Angle.tan (0.5 * givenSweptAngle)
+      let linearDeviation = halfDistance * tanHalfAngle
+      if linearDeviation ~= Qty.zero
+        then
+          Curve2d.Internal.Line
+            { startPoint = givenStartPoint
+            , endPoint = givenEndPoint
+            }
+        else do
+          let offset = (halfDistance / tanHalfAngle) * Direction2d.rotateLeft directionBetweenPoints
+          let computedCenterPoint = Point2d.midpoint givenStartPoint givenEndPoint + offset
+          let computedStartAngle = Point2d.angleFrom computedCenterPoint givenStartPoint
+          let r = Point2d.distanceFrom computedCenterPoint givenStartPoint
+          Curve2d.Internal.Arc
+            { centerPoint = computedCenterPoint
+            , xVector = Vector2d.x r
+            , yVector = Vector2d.y r
+            , startAngle = computedStartAngle
+            , endAngle = computedStartAngle + givenSweptAngle
+            }
 
 newtype CenterPoint coordinateSystem = CenterPoint (Point2d coordinateSystem)
 
@@ -124,7 +121,7 @@ small = Small
 large :: Size
 large = Large
 
-class Arguments arguments space units | arguments -> space, arguments -> units where
+class Build arguments space units | arguments -> space, arguments -> units where
   build :: Tolerance units => arguments -> Result BuildError (Curve2d (space @ units))
 
 data BuildError
@@ -135,14 +132,14 @@ data BuildError
 
 instance
   (space ~ space', units ~ units') =>
-  Arguments (StartPoint (space @ units), EndPoint (space' @ units'), SweptAngle) space units
+  Build (StartPoint (space @ units), EndPoint (space' @ units'), SweptAngle) space units
   where
   build (StartPoint givenStartPoint, EndPoint givenEndPoint, SweptAngle givenSweptAngle) =
-    from givenStartPoint givenEndPoint givenSweptAngle ?? Error DegenerateArc
+    Ok (from givenStartPoint givenEndPoint givenSweptAngle)
 
 instance
   units ~ units' =>
-  Arguments
+  Build
     ( CenterPoint (space @ units)
     , Radius units'
     , StartAngle
@@ -155,11 +152,19 @@ instance
     | givenRadius < Qty.zero = Error NegativeRadius
     | givenRadius ~= Qty.zero = Error DegenerateArc
     | givenRadius * Angle.inRadians (givenEndAngle - givenStartAngle) ~= Qty.zero = Error DegenerateArc
-    | otherwise = Ok (Curve2d.Internal.Arc givenCenterPoint givenRadius givenStartAngle givenEndAngle)
+    | otherwise =
+        Ok $
+          Curve2d.Internal.Arc
+            { centerPoint = givenCenterPoint
+            , xVector = Vector2d.x givenRadius
+            , yVector = Vector2d.y givenRadius
+            , startAngle = givenStartAngle
+            , endAngle = givenEndAngle
+            }
 
 instance
   units ~ units' =>
-  Arguments
+  Build
     ( CenterPoint (space @ units)
     , StartAngle
     , EndAngle
@@ -173,7 +178,7 @@ instance
 
 instance
   units ~ units' =>
-  Arguments
+  Build
     ( CenterPoint (space @ units)
     , Radius units'
     , StartAngle
@@ -192,7 +197,7 @@ instance
 
 instance
   units ~ units' =>
-  Arguments
+  Build
     ( CenterPoint (space @ units)
     , StartAngle
     , SweptAngle
@@ -208,7 +213,7 @@ instance
   ( space ~ space'
   , units ~ units'
   ) =>
-  Arguments (CenterPoint (space @ units), StartPoint (space' @ units'), SweptAngle) space units
+  Build (CenterPoint (space @ units), StartPoint (space' @ units'), SweptAngle) space units
   where
   build (CenterPoint givenCenterPoint, StartPoint givenStartPoint, givenSweptAngle) =
     build
@@ -223,7 +228,7 @@ instance
   , units ~ units'
   , units ~ units''
   ) =>
-  Arguments
+  Build
     ( StartPoint (space @ units)
     , EndPoint (space' @ units')
     , Radius units''

@@ -36,7 +36,6 @@ import String qualified
 import Surface1d.Function qualified
 import Surface1d.Function.Zeros qualified
 import Tolerance qualified
-import Transform2d qualified
 import Units (Meters)
 import Uv (Parameter (U, V))
 import Uv qualified
@@ -69,7 +68,7 @@ testVectorArithmetic = IO.do
   log "2D cross product" (v1 >< v2)
   let squareRoot = Qty.sqrt dotProduct
   log "Square root" squareRoot
-  let translatedPoint = Point2d.meters 2.0 3.0 |> Transform2d.translateBy (Vector2d.meters 4.0 5.0)
+  let translatedPoint = Point2d.meters 2.0 3.0 |> Point2d.translateBy (Vector2d.meters 4.0 5.0)
   log "Translated point" translatedPoint
   let vectorSum = Vector2d.meters 1.0 2.0 + Vector2d.meters 2.0 3.0
   log "Vector sum" vectorSum
@@ -92,15 +91,15 @@ testEquality =
 testTransformation :: IO ()
 testTransformation = IO.do
   log "Rotated axis" $
-    (Axis2d.x |> Transform2d.rotateAround (Point2d.meters 1.0 0.0) Angle.quarterTurn)
+    (Axis2d.x |> Axis2d.rotateAround (Point2d.meters 1.0 0.0) Angle.quarterTurn)
   let originalPoints = [Point2d.meters 1.0 0.0, Point2d.meters 2.0 0.0, Point2d.meters 3.0 0.0]
-  let rotationFunction = Transform2d.rotateAround Point2d.origin Angle.quarterTurn
+  let rotationFunction = Point2d.rotateAround Point2d.origin Angle.quarterTurn
   let rotatedPoints = List.map rotationFunction originalPoints
   log "Rotated points" rotatedPoints
   let transformedAxis =
         Axis2d.x
-          |> Transform2d.translateInOwn Axis2d.direction (Length.meters 2.0)
-          |> Transform2d.rotateAroundOwn Axis2d.originPoint Angle.quarterTurn
+          |> Axis2d.translateInOwn Axis2d.direction (Length.meters 2.0)
+          |> Axis2d.rotateAroundOwn Axis2d.originPoint Angle.quarterTurn
   log "Transformed axis" transformedAxis
 
 offsetPoint ::
@@ -181,14 +180,11 @@ testNonEmpty = IO.do
 
 testLineFromEndpoints :: Tolerance Meters => IO ()
 testLineFromEndpoints = IO.do
-  line1 <-
-    Line2d.build
-      ( Line2d.startPoint Point2d.origin
-      , Line2d.endPoint (Point2d.centimeters 40.0 30.0)
-      )
-  case line1 of
-    Curve2d.Line{length} -> log "Line length in centimeters" (Length.inCentimeters length)
-    _ -> log "Unexpected curve" line1
+  case Line2d.from Point2d.origin (Point2d.centimeters 40.0 30.0) of
+    Curve2d.Line{startPoint, endPoint} -> do
+      let length = Point2d.distanceFrom startPoint endPoint
+      log "Line length in centimeters" (Length.inCentimeters length)
+    curve -> log "Unexpected curve" curve
 
 testDirectedLine :: Tolerance Meters => IO ()
 testDirectedLine = IO.do
@@ -342,28 +338,27 @@ drawBezier ::
   Point2d (space @ Unitless) ->
   List (Point2d (space @ Unitless)) ->
   Point2d (space @ Unitless) ->
-  Result Curve2d.DegenerateCurve (Drawing2d.Entity space)
-drawBezier colour startPoint innerControlPoints endPoint = Result.do
+  Drawing2d.Entity space
+drawBezier colour startPoint innerControlPoints endPoint = do
   let drawingStartPoint = Point2d.convert toDrawing startPoint
   let drawingEndPoint = Point2d.convert toDrawing endPoint
   let drawingInnerControlPoints = List.map (Point2d.convert toDrawing) innerControlPoints
   let drawingControlPoints = List.concat [[drawingStartPoint], drawingInnerControlPoints, [drawingEndPoint]]
-  curve <- BezierCurve2d.fromControlPoints drawingStartPoint drawingInnerControlPoints drawingEndPoint
-  Ok $
-    Drawing2d.with
-      [Drawing2d.strokeColour colour, Drawing2d.strokeWidth (Length.millimeters 1.0)]
-      [ Drawing2d.with [Drawing2d.opacity 0.3] $
-          [ Drawing2d.polyline [] drawingControlPoints
-          , Drawing2d.with [Drawing2d.fillColour colour] $
-              [ Drawing2d.circle [] point (Length.millimeters 5.0)
-              | point <- drawingControlPoints
-              ]
-          ]
-      , Drawing2d.polyline [] $
-          [ Curve2d.evaluateAt t curve
-          | t <- Parameter.steps 100
-          ]
-      ]
+  let curve = BezierCurve2d.fromControlPoints drawingStartPoint drawingInnerControlPoints drawingEndPoint
+  Drawing2d.with
+    [Drawing2d.strokeColour colour, Drawing2d.strokeWidth (Length.millimeters 1.0)]
+    [ Drawing2d.with [Drawing2d.opacity 0.3] $
+        [ Drawing2d.polyline [] drawingControlPoints
+        , Drawing2d.with [Drawing2d.fillColour colour] $
+            [ Drawing2d.circle [] point (Length.millimeters 5.0)
+            | point <- drawingControlPoints
+            ]
+        ]
+    , Drawing2d.polyline [] $
+        [ Curve2d.evaluateAt t curve
+        | t <- Parameter.steps 100
+        ]
+    ]
 
 testBezierSegment :: Tolerance Meters => IO ()
 testBezierSegment = IO.do
@@ -375,7 +370,7 @@ testBezierSegment = IO.do
   let p6 = Point2d.xy 10.0 10.0
   let coordinateRange = Range.convert toDrawing (Range.from -1.0 11.0)
   let drawingBounds = Bounds2d.xy coordinateRange coordinateRange
-  curveEntity <- drawBezier Colour.blue p1 [p2, p3, p4, p5] p6
+  let curveEntity = drawBezier Colour.blue p1 [p2, p3, p4, p5] p6
   Drawing2d.writeTo "test-bezier-segment.svg" drawingBounds [curveEntity]
 
 testHermiteBezier :: Tolerance Meters => IO ()
@@ -384,7 +379,7 @@ testHermiteBezier = IO.do
   let startDerivatives = [Vector2d.meters 10.0 10.0]
   let endDerivatives = [Vector2d.meters 0.0 -10.0, Vector2d.zero]
   let endPoint = Point2d.meters 10.0 0.0
-  curve <- BezierCurve2d.hermite (startPoint, startDerivatives) (endPoint, endDerivatives)
+  let curve = BezierCurve2d.hermite (startPoint, startDerivatives) (endPoint, endDerivatives)
   let curveFirstDerivative = Curve2d.derivative curve
   let curveSecondDerivative = VectorCurve2d.derivative curveFirstDerivative
   let curveThirdDerivative = VectorCurve2d.derivative curveSecondDerivative

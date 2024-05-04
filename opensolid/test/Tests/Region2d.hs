@@ -32,10 +32,10 @@ square = Test.verify "square" Test.do
   let p2 = Point2d.xy width zero
   let p3 = Point2d.xy width width
   let p4 = Point2d.xy zero width
-  line1 <- Line2d.from p1 p2
-  line2 <- Line2d.from p2 p3
-  line3 <- Line2d.from p4 p3
-  line4 <- Line2d.from p4 p1
+  let line1 = Line2d.from p1 p2
+  let line2 = Line2d.from p2 p3
+  let line3 = Line2d.from p4 p3
+  let line4 = Line2d.from p4 p1
   region <- Region2d.boundedBy [line1, line3, line2, line4]
   Test.expect (Tolerance.using (Area.squareMeters 1e-6) (Region2d.area region ~= width * width))
 
@@ -45,9 +45,9 @@ quarterCircle = Test.verify "quarterCircle" Test.do
   let p1 = Point2d.origin
   let p2 = Point2d.xy radius zero
   let p3 = Point2d.xy zero radius
-  line1 <- Line2d.from p1 p2
-  line2 <- Line2d.from p1 p3
-  arc <- Arc2d.from p2 p3 Angle.quarterTurn
+  let line1 = Line2d.from p1 p2
+  let line2 = Line2d.from p1 p3
+  let arc = Arc2d.from p2 p3 Angle.quarterTurn
   region <- Region2d.boundedBy [line1, line2, arc]
   Test.expect (Tolerance.using (Area.squareMeters 1e-6) (Region2d.area region ~= 0.25 * Float.pi * radius * radius))
 
@@ -58,10 +58,10 @@ squareWithHole = Test.verify "squareWithHole" Test.do
   let p2 = Point2d.xy width zero
   let p3 = Point2d.xy width width
   let p4 = Point2d.xy zero width
-  line1 <- Line2d.from p1 p2
-  line2 <- Line2d.from p2 p3
-  line3 <- Line2d.from p4 p3
-  line4 <- Line2d.from p4 p1
+  let line1 = Line2d.from p1 p2
+  let line2 = Line2d.from p2 p3
+  let line3 = Line2d.from p4 p3
+  let line4 = Line2d.from p4 p1
   let centerPoint = Point2d.xy (width / 2.0) (width / 2.0)
   let holeRadius = width / 4.0
   arc <-
@@ -83,9 +83,9 @@ incompleteSquare = Test.verify "incompleteSquare" Test.do
   let p2 = Point2d.xy width zero
   let p3 = Point2d.xy width width
   let p4 = Point2d.xy zero width
-  line1 <- Line2d.from p1 p2
-  line2 <- Line2d.from p2 p3
-  line3 <- Line2d.from p4 p3
+  let line1 = Line2d.from p1 p2
+  let line2 = Line2d.from p2 p3
+  let line3 = Line2d.from p4 p3
   case Region2d.boundedBy [line1, line2, line3] of
     Ok _ -> Test.fail "Expected region construction to fail on incomplete boundary"
     Error error -> Test.expect (error == Region2d.RegionBoundaryHasGaps)
@@ -97,10 +97,10 @@ squareWithTangentHole = Test.verify "squareWithTangentHole" Test.do
   let p2 = Point2d.xy width zero
   let p3 = Point2d.xy width width
   let p4 = Point2d.xy zero width
-  line1 <- Line2d.from p1 p2
-  line2 <- Line2d.from p2 p3
-  line3 <- Line2d.from p4 p3
-  line4 <- Line2d.from p4 p1
+  let line1 = Line2d.from p1 p2
+  let line2 = Line2d.from p2 p3
+  let line3 = Line2d.from p4 p3
+  let line4 = Line2d.from p4 p1
   let centerPoint = Point2d.xy (width / 2.0) (width / 2.0)
   let holeRadius = width / 2.0
   arc <-

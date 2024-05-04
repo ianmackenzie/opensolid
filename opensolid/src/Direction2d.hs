@@ -26,6 +26,8 @@ module Direction2d
   , placeInBasis
   , relativeToBasis
   , generator
+  , transformBy
+  , rotateBy
   )
 where
 
@@ -35,7 +37,10 @@ import {-# SOURCE #-} Frame2d (Frame2d)
 import {-# SOURCE #-} Frame2d qualified
 import OpenSolid
 import {-# SOURCE #-} Point2d (Point2d)
+import {-# SOURCE #-} Point2d qualified
 import Random qualified
+import Transform2d (Transform2d)
+import Transform2d qualified
 import Units qualified
 import Vector2d (Vector2d (Vector2d))
 import Vector2d qualified
@@ -182,3 +187,9 @@ relativeToBasis basis direction = Direction2d (Vector2d.relativeToBasis basis (v
 
 generator :: Random.Generator (Direction2d space)
 generator = Random.map fromAngle (Random.qty Angle.zero Angle.twoPi)
+
+transformBy :: Transform2d.IsRigid a => Transform2d a (space @ units) -> Direction2d space -> Direction2d space
+transformBy transform direction = Direction2d (Vector2d.transformBy transform (vector direction))
+
+rotateBy :: Angle -> Direction2d space -> Direction2d space
+rotateBy theta = transformBy (Transform2d.rotateAround Point2d.origin theta)

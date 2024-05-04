@@ -5,6 +5,7 @@ module VectorCurve2d.DegenerateEndpoint
   , cutoff
   , evaluateAt
   , segmentBounds
+  , transformBy
   )
 where
 
@@ -12,6 +13,7 @@ import Float qualified
 import OpenSolid
 import Qty qualified
 import Range (Range (Range))
+import Transform2d (Transform2d)
 import Vector2d (Vector2d)
 import Vector2d qualified
 import VectorBounds2d (VectorBounds2d)
@@ -57,6 +59,9 @@ instance VectorCurve2d.Interface (QCurve (space @ units)) (space @ units) where
   segmentBoundsImpl _ (QCurve _ _ _ value) = VectorBounds2d.constant value
   derivativeImpl (QCurve n t0 curveDerivative _) =
     qCurve (n + 1) t0 (VectorCurve2d.derivative curveDerivative)
+  transformByImpl transform (QCurve n t0 curveDerivative value) =
+    VectorCurve2d.wrap $
+      QCurve n t0 (VectorCurve2d.transformBy transform curveDerivative) (Vector2d.transformBy transform value)
 
 qCurve :: Int -> Float -> VectorCurve2d (space @ units) -> VectorCurve2d (space @ units)
 qCurve n t0 curveDerivative =
@@ -78,3 +83,7 @@ segmentBounds (Range tLow tHigh) (DegenerateEndpoint t0 t1 endpointCurve) innerC
    in VectorBounds2d.hull2
         (Vector2d.interpolateFrom v0 v1 ((tLow - t0) / (t1 - t0)))
         (Vector2d.interpolateFrom v0 v1 ((tHigh - t0) / (t1 - t0)))
+
+transformBy :: Transform2d a (space @ units) -> DegenerateEndpoint space -> DegenerateEndpoint space
+transformBy transform (DegenerateEndpoint t0 t1 endpointCurve) =
+  DegenerateEndpoint t0 t1 (VectorCurve2d.transformBy transform endpointCurve)

@@ -56,10 +56,17 @@ instance Curve2d.Interface (QuadraticSpline2d (space @ units)) (space @ units) w
 
   boundsImpl (QuadraticSpline2d p1 p2 p3) = Bounds2d.hull3 p1 p2 p3
 
+  transformByImpl transform (QuadraticSpline2d p1 p2 p3) =
+    Curve2d.wrap $
+      QuadraticSpline2d
+        (Point2d.transformBy transform p1)
+        (Point2d.transformBy transform p2)
+        (Point2d.transformBy transform p3)
+
 fromControlPoints ::
   Tolerance units =>
   Point2d (space @ units) ->
   Point2d (space @ units) ->
   Point2d (space @ units) ->
-  Result Curve2d.DegenerateCurve (Curve2d (space @ units))
+  Curve2d (space @ units)
 fromControlPoints p1 p2 p3 = Curve2d.wrap (QuadraticSpline2d p1 p2 p3)

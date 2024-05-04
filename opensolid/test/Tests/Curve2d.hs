@@ -60,7 +60,7 @@ find = Test.verify "find" Test.do
   let p1 = Point2d.meters 0.0 0.0
   let p2 = Point2d.meters 1.0 2.0
   let p3 = Point2d.meters 2.0 0.0
-  testSpline <- QuadraticSpline2d.fromControlPoints p1 p2 p3
+  let testSpline = QuadraticSpline2d.fromControlPoints p1 p2 p3
   let startParameterValues = Curve2d.find Point2d.origin testSpline
   let endParameterValues = Curve2d.find (Point2d.meters 2.0 0.0) testSpline
   let midParameterValues = Curve2d.find (Point2d.meters 1.0 1.0) testSpline
@@ -98,8 +98,8 @@ equalOverlapSegmentLists segments1 segments2 =
 
 curveOverlap1 :: Tolerance Meters => Test
 curveOverlap1 = Test.verify "Overlap detection 1" Test.do
-  arc1 <- Arc2d.from (Point2d.meters 1.0 0.0) (Point2d.meters -1.0 0.0) Angle.halfTurn
-  arc2 <- Arc2d.from (Point2d.meters 0.0 -1.0) (Point2d.meters 0.0 1.0) Angle.halfTurn
+  let arc1 = Arc2d.from (Point2d.meters 1.0 0.0) (Point2d.meters -1.0 0.0) Angle.halfTurn
+  let arc2 = Arc2d.from (Point2d.meters 0.0 -1.0) (Point2d.meters 0.0 1.0) Angle.halfTurn
   segments <- overlappingSegments arc1 arc2
   let expectedSegments = [(Range.from 0.0 0.5, Range.from 0.5 1.0, Positive)]
   Test.expect (equalOverlapSegmentLists segments expectedSegments)
@@ -129,8 +129,8 @@ curveOverlap2 = Test.verify "Overlap detection 2" Test.do
 
 crossingIntersection :: Tolerance Meters => Test
 crossingIntersection = Test.verify "Crossing intersection" Test.do
-  arc1 <- Arc2d.from Point2d.origin (Point2d.meters 0.0 1.0) Angle.halfTurn
-  arc2 <- Arc2d.from Point2d.origin (Point2d.meters 1.0 0.0) -Angle.halfTurn
+  let arc1 = Arc2d.from Point2d.origin (Point2d.meters 0.0 1.0) Angle.halfTurn
+  let arc2 = Arc2d.from Point2d.origin (Point2d.meters 1.0 0.0) -Angle.halfTurn
   intersections <- Curve2d.intersections arc1 arc2
   let expectedIntersections =
         [ Intersection 0.0 0.0 Intersection.Crossing Positive
@@ -160,7 +160,7 @@ tangentIntersection = Test.verify "Tangent intersection" Test.do
 
 solving :: Tolerance Meters => Test
 solving = Test.verify "Solving via Curve1d" Test.do
-  arc <- Arc2d.from (Point2d.meters 0.0 1.0) (Point2d.meters 1.0 0.0) Angle.quarterTurn
+  let arc = Arc2d.from (Point2d.meters 0.0 1.0) (Point2d.meters 1.0 0.0) Angle.quarterTurn
   let squaredDistanceFromOrigin = VectorCurve2d.squaredMagnitude (arc - Point2d.origin)
   let desiredDistance = Length.meters 0.5
   roots <-
@@ -180,9 +180,9 @@ degenerateStartPointTangent = Test.check 100 "Degenerate start point" Test.do
   p0 <- Random.point2d
   p1 <- Random.point2d
   p2 <- Random.point2d
-  curve <- CubicSpline2d.fromControlPoints p0 p0 p1 p2
+  let curve = CubicSpline2d.fromControlPoints p0 p0 p1 p2
   let decreasingTValues = [2.0 ** -n | n <- [8 .. 16]]
-  let tangentDirection = Curve2d.tangentDirection curve
+  tangentDirection <- Curve2d.tangentDirection curve
   let startTangent = DirectionCurve2d.evaluateAt 0.0 tangentDirection
   let otherTangents = [DirectionCurve2d.evaluateAt t tangentDirection | t <- decreasingTValues]
   let angleDifference otherTangent = Qty.abs (Direction2d.angleFrom startTangent otherTangent)
@@ -194,9 +194,9 @@ degenerateEndPointTangent = Test.check 100 "Degenerate end point" Test.do
   p0 <- Random.point2d
   p1 <- Random.point2d
   p2 <- Random.point2d
-  curve <- CubicSpline2d.fromControlPoints p0 p1 p2 p2
+  let curve = CubicSpline2d.fromControlPoints p0 p1 p2 p2
   let increasingTValues = [1.0 - 2.0 ** -n | n <- [8 .. 16]]
-  let tangentDirection = Curve2d.tangentDirection curve
+  tangentDirection <- Curve2d.tangentDirection curve
   let endTangent = DirectionCurve2d.evaluateAt 1.0 tangentDirection
   let otherTangents = [DirectionCurve2d.evaluateAt t tangentDirection | t <- increasingTValues]
   let angleDifference otherTangent = Qty.abs (Direction2d.angleFrom endTangent otherTangent)
@@ -210,8 +210,8 @@ tangentDerivativeIsPerpendicularToTangent =
     p1 <- Random.point2d
     p2 <- Random.point2d
     p3 <- Random.point2d
-    curve <- CubicSpline2d.fromControlPoints p0 p1 p2 p3
-    let tangentDirection = Curve2d.tangentDirection curve
+    let curve = CubicSpline2d.fromControlPoints p0 p1 p2 p3
+    tangentDirection <- Curve2d.tangentDirection curve
     let tangentDerivative = DirectionCurve2d.derivative tangentDirection
     t <- Parameter.generator
     let tangent = DirectionCurve2d.evaluateAt t tangentDirection
@@ -228,9 +228,9 @@ degenerateStartPointTangentDerivative =
     p0 <- Random.point2d
     p1 <- Random.point2d
     p2 <- Random.point2d
-    curve <- CubicSpline2d.fromControlPoints p0 p0 p1 p2
+    let curve = CubicSpline2d.fromControlPoints p0 p0 p1 p2
     let decreasingTValues = [2.0 ** -n | n <- [8 .. 16]]
-    let tangentDirection = Curve2d.tangentDirection curve
+    tangentDirection <- Curve2d.tangentDirection curve
     let tangentDerivative = DirectionCurve2d.derivative tangentDirection
     let startTangentDerivative = VectorCurve2d.evaluateAt 0.0 tangentDerivative
     let otherTangentDerivatives =
@@ -247,9 +247,9 @@ degenerateEndPointTangentDerivative =
     p0 <- Random.point2d
     p1 <- Random.point2d
     p2 <- Random.point2d
-    curve <- CubicSpline2d.fromControlPoints p0 p1 p2 p2
+    let curve = CubicSpline2d.fromControlPoints p0 p1 p2 p2
     let increasingTValues = [1.0 - 2.0 ** -n | n <- [8 .. 16]]
-    let tangentDirection = Curve2d.tangentDirection curve
+    tangentDirection <- Curve2d.tangentDirection curve
     let tangentDerivative = DirectionCurve2d.derivative tangentDirection
     let endTangentDerivative = VectorCurve2d.evaluateAt 1.0 tangentDerivative
     let otherTangentDerivatives =

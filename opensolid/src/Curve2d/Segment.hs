@@ -20,8 +20,6 @@ import Curve2d.Derivatives (Derivatives)
 import Curve2d.Derivatives qualified as Derivatives
 import Curve2d.Intersection (Intersection)
 import Curve2d.Intersection qualified as Intersection
-import DirectionBounds2d (DirectionBounds2d)
-import DirectionCurve2d qualified
 import Maybe qualified
 import OpenSolid
 import Qty qualified
@@ -36,7 +34,6 @@ data Segment (coordinateSystem :: CoordinateSystem) where
     { curveBounds :: Bounds2d (space @ units)
     , firstBounds :: ~(VectorBounds2d (space @ units))
     , secondBounds :: ~(VectorBounds2d (space @ units))
-    , tangentBounds :: ~(DirectionBounds2d space)
     } ->
     Segment (space @ units)
 
@@ -50,12 +47,11 @@ init derivatives domain =
     { curveBounds = Curve2d.segmentBounds domain (Derivatives.curve derivatives)
     , firstBounds = VectorCurve2d.segmentBounds domain (Derivatives.first derivatives)
     , secondBounds = VectorCurve2d.segmentBounds domain (Derivatives.second derivatives)
-    , tangentBounds = DirectionCurve2d.segmentBounds domain (Curve2d.tangentDirection (Derivatives.curve derivatives))
     }
 
 crossProductResolution :: Segment (space @ units) -> Segment (space @ units) -> Float
 crossProductResolution segment1 segment2 =
-  Range.resolution (tangentBounds segment1 >< tangentBounds segment2)
+  Range.resolution (firstBounds segment1 .><. firstBounds segment2)
 
 isEndpointIntersectionCandidate ::
   (Float, Float) ->

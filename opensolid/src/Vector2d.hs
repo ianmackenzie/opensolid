@@ -33,11 +33,15 @@ module Vector2d
   , placeInBasis
   , relativeToBasis
   , sum
+  , transformBy
+  , rotateBy
+  , scaleIn
   )
 where
 
 import Angle qualified
 import Area qualified
+import {-# SOURCE #-} Axis2d qualified
 import {-# SOURCE #-} Basis2d (Basis2d)
 import {-# SOURCE #-} Basis2d qualified
 import Data.Coerce qualified
@@ -49,9 +53,13 @@ import Length qualified
 import List qualified
 import OpenSolid
 import {-# SOURCE #-} Point2d (Point2d)
+import {-# SOURCE #-} Point2d qualified
 import Qty qualified
+import Transform2d (Transform2d (Transform2d))
+import Transform2d qualified
 import Units (Meters, SquareMeters)
 import Units qualified
+import Vector2d.CoordinateTransformation qualified
 
 type role Vector2d phantom
 
@@ -286,32 +294,41 @@ rotateRight :: Vector2d (space @ units) -> Vector2d (space @ units)
 rotateRight (Vector2d vx vy) = Vector2d vy -vx
 
 placeIn ::
-  Frame2d (global @ frameUnits) (Defines local) ->
+  Frame2d (global @ units) (Defines local) ->
   Vector2d (local @ units) ->
   Vector2d (global @ units)
-placeIn frame = placeInBasis (Frame2d.basis frame)
+placeIn = Vector2d.CoordinateTransformation.placeIn
 
 relativeTo ::
-  Frame2d (global @ frameUnits) (Defines local) ->
+  Frame2d (global @ units) (Defines local) ->
   Vector2d (global @ units) ->
   Vector2d (local @ units)
-relativeTo frame = relativeToBasis (Frame2d.basis frame)
+relativeTo = Vector2d.CoordinateTransformation.relativeTo
 
 placeInBasis ::
   Basis2d global (Defines local) ->
   Vector2d (local @ units) ->
   Vector2d (global @ units)
-placeInBasis basis (Vector2d vx vy) =
-  vx * Basis2d.xDirection basis + vy * Basis2d.yDirection basis
+placeInBasis = Vector2d.CoordinateTransformation.placeInBasis
 
 relativeToBasis ::
   Basis2d global (Defines local) ->
   Vector2d (global @ units) ->
   Vector2d (local @ units)
-relativeToBasis basis vector =
-  Vector2d
-    (vector <> Basis2d.xDirection basis)
-    (vector <> Basis2d.yDirection basis)
+relativeToBasis = Vector2d.CoordinateTransformation.relativeToBasis
 
 sum :: List (Vector2d (space @ units)) -> Vector2d (space @ units)
 sum = List.foldl (+) zero
+
+transformBy :: Transform2d a (space @ units1) -> Vector2d (space @ units2) -> Vector2d (space @ units2)
+transformBy transform vector = do
+  let (Transform2d _ i j) = transform
+  let (vx, vy) = components vector
+  vx * i + vy * j
+
+rotateBy :: Angle -> Vector2d (space @ units) -> Vector2d (space @ units)
+rotateBy theta = transformBy (Transform2d.rotateAround Point2d.origin theta)
+
+scaleIn :: Direction2d space -> Float -> Vector2d (space @ units) -> Vector2d (space @ units)
+scaleIn scaleDirection scale =
+  transformBy (Transform2d.scaleAlong (Axis2d.through Point2d.origin scaleDirection) scale)

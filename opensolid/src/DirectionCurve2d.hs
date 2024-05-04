@@ -30,6 +30,7 @@ import OpenSolid
 import Range (Range)
 import Units qualified
 import Vector2d (Vector2d)
+import Vector2d qualified
 import VectorCurve2d (VectorCurve2d)
 import VectorCurve2d qualified
 
@@ -64,7 +65,7 @@ constant :: Direction2d space -> DirectionCurve2d space
 constant direction = DirectionCurve2d (VectorCurve2d.constant (Direction2d.vector direction))
 
 arc :: Angle -> Angle -> DirectionCurve2d space
-arc a b = DirectionCurve2d (VectorCurve2d.arc 1.0 a b)
+arc a b = DirectionCurve2d (VectorCurve2d.arc (Vector2d.xy 1.0 0.0) (Vector2d.xy 0.0 1.0) a b)
 
 reverse :: DirectionCurve2d space -> DirectionCurve2d space
 reverse (DirectionCurve2d vectorCurve) = DirectionCurve2d (VectorCurve2d.reverse vectorCurve)

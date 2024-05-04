@@ -23,6 +23,13 @@ module Point2d
   , relativeTo
   , convert
   , unconvert
+  , transformBy
+  , translateBy
+  , translateIn
+  , translateAlong
+  , rotateAround
+  , scaleAbout
+  , scaleAlong
   )
 where
 
@@ -32,11 +39,15 @@ import Bounded qualified
 import {-# SOURCE #-} Bounds2d (Bounds2d)
 import {-# SOURCE #-} Bounds2d qualified
 import Data.Coerce qualified
+import Direction2d (Direction2d)
 import {-# SOURCE #-} Frame2d (Frame2d)
 import {-# SOURCE #-} Frame2d qualified
 import Length qualified
 import OpenSolid
+import Point2d.CoordinateTransformation qualified
 import Qty qualified
+import Transform2d (Transform2d (Transform2d))
+import Transform2d qualified
 import Units (Meters)
 import Units qualified
 import Vector2d (Vector2d (Vector2d))
@@ -194,20 +205,40 @@ placeIn ::
   Frame2d (global @ units) (Defines local) ->
   Point2d (local @ units) ->
   Point2d (global @ units)
-placeIn frame (Point2d px py) = xyIn frame px py
+placeIn = Point2d.CoordinateTransformation.placeIn
 
 relativeTo ::
   Frame2d (global @ units) (Defines local) ->
   Point2d (global @ units) ->
   Point2d (local @ units)
-relativeTo frame point = do
-  let displacement = point - Frame2d.originPoint frame
-  Point2d
-    (displacement <> Frame2d.xDirection frame)
-    (displacement <> Frame2d.yDirection frame)
+relativeTo = Point2d.CoordinateTransformation.relativeTo
 
 convert :: Qty (units2 :/: units1) -> Point2d (space @ units1) -> Point2d (space @ units2)
 convert conversion (Point2d px py) = Point2d (Qty.convert conversion px) (Qty.convert conversion py)
 
 unconvert :: Qty (units2 :/: units1) -> Point2d (space @ units2) -> Point2d (space @ units1)
 unconvert conversion (Point2d px py) = Point2d (Qty.unconvert conversion px) (Qty.unconvert conversion py)
+
+transformBy :: Transform2d a (space @ units) -> Point2d (space @ units) -> Point2d (space @ units)
+transformBy transform point = do
+  let (Transform2d p0 vx vy) = transform
+  let (px, py) = coordinates point
+  p0 + px * vx + py * vy
+
+translateBy :: Vector2d (space @ units) -> Point2d (space @ units) -> Point2d (space @ units)
+translateBy vector = (+ vector)
+
+translateIn :: Direction2d space -> Qty units -> Point2d (space @ units) -> Point2d (space @ units)
+translateIn direction distance = translateBy (direction * distance)
+
+translateAlong :: Axis2d (space @ units) -> Qty units -> Point2d (space @ units) -> Point2d (space @ units)
+translateAlong axis distance = translateIn (Axis2d.direction axis) distance
+
+rotateAround :: Point2d (space @ units) -> Angle -> Point2d (space @ units) -> Point2d (space @ units)
+rotateAround centerPoint angle = transformBy (Transform2d.rotateAround centerPoint angle)
+
+scaleAbout :: Point2d (space @ units) -> Float -> Point2d (space @ units) -> Point2d (space @ units)
+scaleAbout centerPoint scale = transformBy (Transform2d.scaleAbout centerPoint scale)
+
+scaleAlong :: Axis2d (space @ units) -> Float -> Point2d (space @ units) -> Point2d (space @ units)
+scaleAlong axis scale = transformBy (Transform2d.scaleAlong axis scale)

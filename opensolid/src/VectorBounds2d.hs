@@ -31,6 +31,7 @@ module VectorBounds2d
   , placeIn
   , placeInBasis
   , relativeToBasis
+  , transformBy
   )
 where
 
@@ -46,6 +47,7 @@ import OpenSolid
 import Qty qualified
 import Range (Range (Range))
 import Range qualified
+import Transform2d (Transform2d (Transform2d))
 import Units qualified
 import Vector2d (Vector2d (Vector2d))
 import Vector2d qualified
@@ -474,3 +476,17 @@ relativeToBasis basis (VectorBounds2d x y) =
       rx = 0.5 * xWidth * Float.abs ix + 0.5 * yWidth * Float.abs iy
       ry = 0.5 * xWidth * Float.abs jx + 0.5 * yWidth * Float.abs jy
    in VectorBounds2d (Range.from (x0 - rx) (x0 + rx)) (Range.from (y0 - ry) (y0 + ry))
+
+transformBy :: Transform2d a (space @ units1) -> VectorBounds2d (space @ units2) -> VectorBounds2d (space @ units2)
+transformBy transform (VectorBounds2d x y) = do
+  let xMid = Range.midpoint x
+  let yMid = Range.midpoint y
+  let xWidth = Range.width x
+  let yWidth = Range.width y
+  let (x0, y0) = Vector2d.components (Vector2d.transformBy transform (Vector2d.xy xMid yMid))
+  let (Transform2d _ i j) = transform
+  let (ix, iy) = Vector2d.components i
+  let (jx, jy) = Vector2d.components j
+  let rx = 0.5 * Float.abs ix * xWidth + 0.5 * Float.abs jx * yWidth
+  let ry = 0.5 * Float.abs iy * xWidth + 0.5 * Float.abs jy * yWidth
+  VectorBounds2d (Range.from (x0 - rx) (x0 + rx)) (Range.from (y0 - ry) (y0 + ry))

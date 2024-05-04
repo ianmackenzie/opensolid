@@ -5,6 +5,7 @@ module Curve2d
   , IntersectionError (..)
   , Interface (..)
   , module Curve2d.Patterns
+  , TransformBy (TransformBy)
   , wrap
   , startPoint
   , endPoint
@@ -22,20 +23,21 @@ module Curve2d
   , yCoordinate
   , placeIn
   , relativeTo
+  , transformBy
   , curvature
   , curvature_
   )
 where
 
-import Angle qualified
 import Axis2d (Axis2d)
 import Axis2d qualified
 import Bisection qualified
 import Bounds2d (Bounds2d)
+import Bounds2d qualified
 import Curve1d (Curve1d)
 import Curve2d.Derivatives (Derivatives)
 import Curve2d.Derivatives qualified as Derivatives
-import Curve2d.Internal (Interface (..))
+import Curve2d.Internal (DegenerateCurve (DegenerateCurve), Interface (..))
 import Curve2d.Internal qualified as Internal
 import Curve2d.Intersection (Intersection (Intersection))
 import Curve2d.Intersection qualified as Intersection
@@ -43,34 +45,25 @@ import Curve2d.Patterns
 import Curve2d.Segment (Segment)
 import Curve2d.Segment qualified as Segment
 import DirectionCurve2d (DirectionCurve2d)
-import DirectionCurve2d qualified
 import Frame2d (Frame2d)
 import Frame2d qualified
 import List qualified
 import OpenSolid
 import Point2d (Point2d)
-import Qty qualified
+import Point2d qualified
 import Range (Range)
 import Range qualified
 import Result qualified
+import Transform2d (Transform2d)
+import Transform2d qualified
 import Units qualified
 import VectorCurve2d (VectorCurve2d)
 import VectorCurve2d qualified
 
 type Curve2d (coordinateSystem :: CoordinateSystem) = Internal.Curve2d coordinateSystem
 
-data DegenerateCurve = DegenerateCurve deriving (Eq, Show, Error)
-
-wrap ::
-  ( Tolerance units
-  , Interface curve (space @ units)
-  ) =>
-  curve ->
-  Result DegenerateCurve (Curve2d (space @ units))
-wrap curve =
-  case VectorCurve2d.direction (derivativeImpl curve) of
-    Ok tangentCurve -> Ok (Internal.Curve curve tangentCurve)
-    Error (VectorCurve2d.HasZeros _) -> Error DegenerateCurve
+wrap :: Interface curve (space @ units) => curve -> Curve2d (space @ units)
+wrap = Internal.Curve
 
 startPoint :: Curve2d (space @ units) -> Point2d (space @ units)
 startPoint = Internal.startPoint
@@ -96,15 +89,12 @@ reverse = Internal.reverse
 bounds :: Curve2d (space @ units) -> Bounds2d (space @ units)
 bounds = Internal.bounds
 
-tangentDirection :: Curve2d (space @ units) -> DirectionCurve2d space
-tangentDirection (Internal.Line{direction}) = DirectionCurve2d.constant direction
-tangentDirection (Internal.Arc{startAngle, endAngle}) = do
-  let tangentStartAngle = startAngle + Angle.quarterTurn
-  let tangentEndAngle = endAngle + Angle.quarterTurn
-  Qty.sign (endAngle - startAngle) * DirectionCurve2d.arc tangentStartAngle tangentEndAngle
-tangentDirection (Internal.Curve _ tangent) = tangent
-tangentDirection (Internal.Coerce curve) = tangentDirection curve
-tangentDirection (Internal.PlaceIn frame curve) = DirectionCurve2d.placeIn frame (tangentDirection curve)
+tangentDirection ::
+  Tolerance units =>
+  Curve2d (space @ units) ->
+  Result DegenerateCurve (DirectionCurve2d space)
+tangentDirection curve =
+  VectorCurve2d.direction (derivative curve) ?? Error DegenerateCurve
 
 data CurveIsCoincidentWithPoint = CurveIsCoincidentWithPoint deriving (Eq, Show, Error)
 
@@ -288,11 +278,42 @@ relativeTo ::
   Curve2d (local @ units)
 relativeTo frame = placeIn (Frame2d.inverse frame)
 
-curvature_ :: Curve2d (space @ units) -> Curve1d (Unitless :/: units)
-curvature_ curve = do
+transformBy ::
+  Transform2d a (space @ units) ->
+  Curve2d (space @ units) ->
+  Curve2d (space @ units)
+transformBy = Internal.transformBy
+
+curvature_ :: Tolerance units => Curve2d (space @ units) -> Result DegenerateCurve (Curve1d (Unitless :/: units))
+curvature_ curve = Result.do
   let firstDerivative = derivative curve
   let secondDerivative = VectorCurve2d.derivative firstDerivative
-  (tangentDirection curve >< secondDerivative) !/!. (firstDerivative .<>. firstDerivative)
+  tangent <- tangentDirection curve
+  Ok ((tangent >< secondDerivative) !/!. (firstDerivative .<>. firstDerivative))
 
-curvature :: Units.Quotient Unitless units1 units2 => Curve2d (space @ units1) -> Curve1d units2
-curvature = Units.specialize . curvature_
+curvature ::
+  (Tolerance units1, Units.Quotient Unitless units1 units2) =>
+  Curve2d (space @ units1) ->
+  Result DegenerateCurve (Curve1d units2)
+curvature curve = Result.map Units.specialize (curvature_ curve)
+
+data TransformBy curve coordinateSystem where
+  TransformBy ::
+    Interface curve (space @ units) =>
+    Transform2d a (space @ units) ->
+    curve ->
+    TransformBy curve (space @ units)
+
+deriving instance Show (TransformBy curve coordinateSystem)
+
+instance Interface (TransformBy curve (space @ units)) (space @ units) where
+  startPointImpl (TransformBy transform curve) = Point2d.transformBy transform (startPointImpl curve)
+  endPointImpl (TransformBy transform curve) = Point2d.transformBy transform (endPointImpl curve)
+  evaluateAtImpl t (TransformBy transform curve) = Point2d.transformBy transform (evaluateAtImpl t curve)
+  segmentBoundsImpl t (TransformBy transform curve) = Bounds2d.transformBy transform (segmentBoundsImpl t curve)
+  derivativeImpl (TransformBy transform curve) = VectorCurve2d.transformBy transform (derivativeImpl curve)
+  reverseImpl (TransformBy transform curve) = TransformBy transform (reverseImpl curve)
+  boundsImpl (TransformBy transform curve) = Bounds2d.transformBy transform (boundsImpl curve)
+  transformByImpl transform (TransformBy existing curve) =
+    Curve2d.wrap $
+      TransformBy (Transform2d.toAffine existing >> Transform2d.toAffine transform) curve

@@ -161,10 +161,12 @@ library
       Curve2d.Patterns
       Curve2d.Derivatives
       Curve2d.Segment
+      Point2d.CoordinateTransformation
+      Quadrature
       Surface1d.Function.Boundary
       Surface1d.Function.PartialZeros
       Surface1d.Function.SaddleRegion
-      Quadrature
+      Vector2d.CoordinateTransformation
   hs-source-dirs: src
 
 test-suite opensolid-test

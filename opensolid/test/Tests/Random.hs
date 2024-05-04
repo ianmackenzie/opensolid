@@ -63,35 +63,28 @@ bounds2d = Random.map2 Bounds2d.xy lengthRange lengthRange
 vectorBounds2d :: Generator (VectorBounds2d (space @ Meters))
 vectorBounds2d = Random.map2 VectorBounds2d lengthRange lengthRange
 
-retry :: Generator (Result x a) -> Generator a
-retry fallibleGenerator = Random.do
-  result <- fallibleGenerator
-  case result of
-    Ok value -> Random.return value
-    Error _ -> retry fallibleGenerator
-
 line2d :: Tolerance Meters => Generator (Curve2d (space @ Meters))
-line2d = retry Random.do
+line2d = Random.do
   startPoint <- point2d
   endPoint <- point2d
   Random.return (Line2d.from startPoint endPoint)
 
 arc2d :: Tolerance Meters => Generator (Curve2d (space @ Meters))
-arc2d = retry Random.do
+arc2d = Random.do
   startPoint <- point2d
   endPoint <- point2d
   sweptAngle <- Random.qty (Angle.degrees -315.0) (Angle.degrees 315.0)
   Random.return (Arc2d.from startPoint endPoint sweptAngle)
 
 quadraticSpline2d :: Tolerance Meters => Generator (Curve2d (space @ Meters))
-quadraticSpline2d = retry Random.do
+quadraticSpline2d = Random.do
   p1 <- point2d
   p2 <- point2d
   p3 <- point2d
   Random.return (QuadraticSpline2d.fromControlPoints p1 p2 p3)
 
 cubicSpline2d :: Tolerance Meters => Generator (Curve2d (space @ Meters))
-cubicSpline2d = retry Random.do
+cubicSpline2d = Random.do
   p1 <- point2d
   p2 <- point2d
   p3 <- point2d

@@ -7,12 +7,15 @@ module VectorCurve2d
   , segmentBounds
   , derivative
   , unsafeMagnitude
+  , transformBy
   )
 where
 
+import CoordinateSystem (Space)
 import {-# SOURCE #-} Curve1d (Curve1d)
 import OpenSolid
 import Range (Range)
+import Transform2d (Transform2d)
 import Units qualified
 import Vector2d (Vector2d)
 import VectorBounds2d (VectorBounds2d)
@@ -25,6 +28,7 @@ class
   evaluateAtImpl :: Float -> curve -> Vector2d coordinateSystem
   segmentBoundsImpl :: Range Unitless -> curve -> VectorBounds2d coordinateSystem
   derivativeImpl :: curve -> VectorCurve2d coordinateSystem
+  transformByImpl :: Transform2d a (Space coordinateSystem @ transformUnits) -> curve -> VectorCurve2d coordinateSystem
 
 type role VectorCurve2d nominal
 
@@ -80,3 +84,4 @@ evaluateAt :: Float -> VectorCurve2d (space @ units) -> Vector2d (space @ units)
 segmentBounds :: Range Unitless -> VectorCurve2d (space @ units) -> VectorBounds2d (space @ units)
 derivative :: VectorCurve2d (space @ units) -> VectorCurve2d (space @ units)
 unsafeMagnitude :: VectorCurve2d (space @ units) -> Curve1d units
+transformBy :: Transform2d a (space @ units1) -> VectorCurve2d (space @ units2) -> VectorCurve2d (space @ units2)

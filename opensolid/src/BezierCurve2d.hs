@@ -15,6 +15,7 @@ import OpenSolid
 import Point2d (Point2d)
 import Point2d qualified
 import Range (Range (Range))
+import Transform2d (Transform2d)
 import Vector2d (Vector2d)
 import Vector2d qualified
 import VectorCurve2d qualified
@@ -73,6 +74,10 @@ controlPointDifferences scale p1 p2 rest = do
     [] -> NonEmpty.singleton v1
     p3 : remaining -> NonEmpty.prepend v1 (controlPointDifferences scale p2 p3 remaining)
 
+transformBy :: Transform2d a (space @ units) -> BezierCurve2d (space @ units) -> BezierCurve2d (space @ units)
+transformBy transform (BezierCurve2d controlPoints) =
+  BezierCurve2d (NonEmpty.map (Point2d.transformBy transform) controlPoints)
+
 instance Curve2d.Interface (BezierCurve2d (space @ units)) (space @ units) where
   startPointImpl (BezierCurve2d controlPoints) = NonEmpty.first controlPoints
 
@@ -92,6 +97,8 @@ instance Curve2d.Interface (BezierCurve2d (space @ units)) (space @ units) where
 
   reverseImpl (BezierCurve2d controlPoints) = BezierCurve2d (NonEmpty.reverse controlPoints)
 
+  transformByImpl transform bezierCurve = Curve2d.wrap (transformBy transform bezierCurve)
+
 {- | Construct a Bezier curve from its start point (first control point), inner control points and
 end point (last control point). For example,
 
@@ -104,7 +111,7 @@ fromControlPoints ::
   Point2d (space @ units) ->
   List (Point2d (space @ units)) ->
   Point2d (space @ units) ->
-  Result Curve2d.DegenerateCurve (Curve2d (space @ units))
+  Curve2d (space @ units)
 fromControlPoints startPoint innerControlPoints endPoint =
   Curve2d.wrap (BezierCurve2d (startPoint :| (innerControlPoints + [endPoint])))
 
@@ -126,11 +133,16 @@ In general, the degree of the resulting spline will be equal to 1 plus the total
 derivatives given.
 -}
 hermite ::
-  Tolerance units =>
   (Point2d (space @ units), List (Vector2d (space @ units))) ->
   (Point2d (space @ units), List (Vector2d (space @ units))) ->
-  Result Curve2d.DegenerateCurve (Curve2d (space @ units))
-hermite (startPoint, startDerivatives) (endPoint, endDerivatives) = do
+  Curve2d (space @ units)
+hermite startCondition endCondition = Curve2d.wrap (hermiteBezier startCondition endCondition)
+
+hermiteBezier ::
+  (Point2d (space @ units), List (Vector2d (space @ units))) ->
+  (Point2d (space @ units), List (Vector2d (space @ units))) ->
+  BezierCurve2d (space @ units)
+hermiteBezier (startPoint, startDerivatives) (endPoint, endDerivatives) = do
   let numStartDerivatives = List.length startDerivatives
   let numEndDerivatives = List.length endDerivatives
   let curveDegree = 1 + numStartDerivatives + numEndDerivatives
@@ -138,7 +150,8 @@ hermite (startPoint, startDerivatives) (endPoint, endDerivatives) = do
   let scaledEndDerivatives = scaleDerivatives Negative 1.0 (Float.fromInt curveDegree) endDerivatives
   let startControlPoints = derivedControlPoints startPoint 1 (numStartDerivatives + 1) scaledStartDerivatives
   let endControlPoints = List.reverse (derivedControlPoints endPoint 1 (numEndDerivatives + 1) scaledEndDerivatives)
-  fromControlPoints startPoint (startControlPoints + endControlPoints) endPoint
+  let controlPoints = startPoint :| (startControlPoints + endControlPoints + [endPoint])
+  BezierCurve2d controlPoints
 
 scaleDerivatives :: Sign -> Float -> Float -> List (Vector2d (space @ units)) -> List (Vector2d (space @ units))
 scaleDerivatives _ _ _ [] = []

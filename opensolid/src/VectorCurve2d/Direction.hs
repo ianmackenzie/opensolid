@@ -82,6 +82,13 @@ instance VectorCurve2d.Interface (PiecewiseCurve space) (space @ Unitless) where
         (VectorCurve2d.derivative general)
         (Maybe.map DegenerateEndpoint.derivative end)
 
+  transformByImpl transform (PiecewiseCurve start general end) =
+    VectorCurve2d.wrap $
+      PiecewiseCurve
+        (Maybe.map (DegenerateEndpoint.transformBy transform) start)
+        (VectorCurve2d.transformBy transform general)
+        (Maybe.map (DegenerateEndpoint.transformBy transform) end)
+
 unsafe ::
   Tolerance units =>
   VectorCurve2d (space @ units) ->

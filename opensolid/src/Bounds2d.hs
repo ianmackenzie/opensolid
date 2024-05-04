@@ -32,6 +32,7 @@ module Bounds2d
   , find
   , placeIn
   , relativeTo
+  , transformBy
   , signedDistanceAlong
   , convert
   , unconvert
@@ -55,7 +56,9 @@ import Qty qualified
 import Quadrature qualified
 import Range (Range)
 import Range qualified
+import Transform2d (Transform2d (Transform2d))
 import Units qualified
+import Vector2d qualified
 import VectorBounds2d (VectorBounds2d)
 import VectorBounds2d qualified
 
@@ -423,6 +426,23 @@ relativeTo frame (Bounds2d x y) = do
   let (jx, jy) = Direction2d.components (Frame2d.yDirection frame)
   let rx = 0.5 * xWidth * Float.abs ix + 0.5 * yWidth * Float.abs iy
   let ry = 0.5 * xWidth * Float.abs jx + 0.5 * yWidth * Float.abs jy
+  Bounds2d (Range.from (x0 - rx) (x0 + rx)) (Range.from (y0 - ry) (y0 + ry))
+
+transformBy ::
+  Transform2d a (space @ units) ->
+  Bounds2d (space @ units) ->
+  Bounds2d (space @ units)
+transformBy transform (Bounds2d x y) = do
+  let xMid = Range.midpoint x
+  let yMid = Range.midpoint y
+  let xWidth = Range.width x
+  let yWidth = Range.width y
+  let (x0, y0) = Point2d.coordinates (Point2d.transformBy transform (Point2d.xy xMid yMid))
+  let (Transform2d _ i j) = transform
+  let (ix, iy) = Vector2d.components i
+  let (jx, jy) = Vector2d.components j
+  let rx = 0.5 * xWidth * Float.abs ix + 0.5 * yWidth * Float.abs jx
+  let ry = 0.5 * xWidth * Float.abs iy + 0.5 * yWidth * Float.abs jy
   Bounds2d (Range.from (x0 - rx) (x0 + rx)) (Range.from (y0 - ry) (y0 + ry))
 
 signedDistanceAlong :: Axis2d (space @ units) -> Bounds2d (space @ units) -> Range units
