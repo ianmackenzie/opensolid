@@ -134,6 +134,11 @@ unitY = Vector2d.xy 0.0 1.0
 identity :: Rigid (space @ units)
 identity = Transform2d_ Point2d.origin unitX unitY
 
+withFixedPoint :: Point2d (space @ units) -> Vector2d (space @ Unitless) -> Vector2d (space @ Unitless) -> Transform2d a (space @ units)
+withFixedPoint fixedPoint vx vy = do
+  let (fixedX, fixedY) = Point2d.coordinates fixedPoint
+  Transform2d_ (fixedPoint - fixedX * vx - fixedY * vy) vx vy
+
 translateBy :: Vector2d (space @ units) -> Rigid (space @ units)
 translateBy vector = Transform2d_ (Point2d.origin + vector) unitX unitY
 
@@ -144,35 +149,28 @@ translateAlong :: Axis2d (space @ units) -> Qty units -> Rigid (space @ units)
 translateAlong axis distance = translateIn (Axis2d.direction axis) distance
 
 rotateAround :: Point2d (space @ units) -> Angle -> Rigid (space @ units)
-rotateAround point angle = do
-  let (cx, cy) = Point2d.coordinates point
+rotateAround centerPoint angle = do
   let cos = Angle.cos angle
   let sin = Angle.sin angle
   let vx = Vector2d.xy cos sin
   let vy = Vector2d.xy -sin cos
-  let p0 = point - cx * vx - cy * vy
-  Transform2d_ p0 vx vy
+  withFixedPoint centerPoint vx vy
 
 scaleAbout :: Point2d (space @ units) -> Float -> Uniform (space @ units)
 scaleAbout point scale = do
-  let (cx, cy) = Point2d.coordinates point
   let vx = Vector2d.xy scale 0.0
   let vy = Vector2d.xy 0.0 scale
-  let p0 = point - cx * vx - cy * vy
-  Transform2d_ p0 vx vy
+  withFixedPoint point vx vy
 
 scaleAlong :: Axis2d (space @ units) -> Float -> Affine (space @ units)
 scaleAlong axis scale = do
-  let axisOrigin = Axis2d.originPoint axis
-  let (x0, y0) = Point2d.coordinates axisOrigin
   let (dx, dy) = Direction2d.components (Axis2d.direction axis)
   let dx2 = dx * dx
   let dy2 = dy * dy
   let xy = (scale - 1.0) * dx * dy
   let vx = Vector2d.xy (scale * dx2 + dy2) xy
   let vy = Vector2d.xy xy (scale * dy2 + dx2)
-  let p0 = axisOrigin - vx * x0 - vy * y0
-  Transform2d_ p0 vx vy
+  withFixedPoint (Axis2d.originPoint axis) vx vy
 
 placeIn :: Frame2d (global @ units) (Defines local) -> Transform2d a (local @ units) -> Transform2d a (global @ units)
 placeIn frame transform = do
