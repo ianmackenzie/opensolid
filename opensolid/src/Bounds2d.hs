@@ -116,6 +116,30 @@ instance
     let (x2, y2) = xyRanges bounds2
     VectorBounds2d.xy (x1 - x2) (y1 - y2)
 
+instance
+  (units ~ units', space ~ space') =>
+  Addition
+    (Bounds2d (space @ units))
+    (VectorBounds2d (space @ units))
+    (Bounds2d (space' @ units'))
+  where
+  bounds + vectorBounds = do
+    let (x1, y1) = xyRanges bounds
+    let (x2, y2) = VectorBounds2d.components vectorBounds
+    Bounds2d (x1 + x2) (y1 + y2)
+
+instance
+  (units ~ units', space ~ space') =>
+  Subtraction
+    (Bounds2d (space @ units))
+    (VectorBounds2d (space @ units))
+    (Bounds2d (space' @ units'))
+  where
+  bounds - vectorBounds = do
+    let (x1, y1) = xyRanges bounds
+    let (x2, y2) = VectorBounds2d.components vectorBounds
+    Bounds2d (x1 - x2) (y1 - y2)
+
 instance (space ~ space', units ~ units') => ApproximateEquality (Point2d (space @ units)) (Bounds2d (space' @ units')) units where
   point ~= bounds = do
     let (px, py) = Point2d.coordinates point
