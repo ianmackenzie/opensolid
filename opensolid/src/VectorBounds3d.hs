@@ -288,14 +288,14 @@ hull3 ::
   Vector3d (space @ units) ->
   Vector3d (space @ units) ->
   VectorBounds3d (space @ units)
-hull3 (Vector3d x1 y1 z1) (Vector3d x2 y2 z2) (Vector3d x3 y3 z3) =
+hull3 (Vector3d x1 y1 z1) (Vector3d x2 y2 z2) (Vector3d x3 y3 z3) = do
   let minX = Qty.min (Qty.min x1 x2) x3
-      maxX = Qty.max (Qty.max x1 x2) x3
-      minY = Qty.min (Qty.min y1 y2) y3
-      maxY = Qty.max (Qty.max y1 y2) y3
-      minZ = Qty.min (Qty.min z1 z2) z3
-      maxZ = Qty.max (Qty.max z1 z2) z3
-   in VectorBounds3d (Range.unsafe minX maxX) (Range.unsafe minY maxY) (Range.unsafe minZ maxZ)
+  let maxX = Qty.max (Qty.max x1 x2) x3
+  let minY = Qty.min (Qty.min y1 y2) y3
+  let maxY = Qty.max (Qty.max y1 y2) y3
+  let minZ = Qty.min (Qty.min z1 z2) z3
+  let maxZ = Qty.max (Qty.max z1 z2) z3
+  VectorBounds3d (Range.unsafe minX maxX) (Range.unsafe minY maxY) (Range.unsafe minZ maxZ)
 
 hull4 ::
   Vector3d (space @ units) ->
@@ -303,14 +303,14 @@ hull4 ::
   Vector3d (space @ units) ->
   Vector3d (space @ units) ->
   VectorBounds3d (space @ units)
-hull4 (Vector3d x1 y1 z1) (Vector3d x2 y2 z2) (Vector3d x3 y3 z3) (Vector3d x4 y4 z4) =
+hull4 (Vector3d x1 y1 z1) (Vector3d x2 y2 z2) (Vector3d x3 y3 z3) (Vector3d x4 y4 z4) = do
   let minX = Qty.min (Qty.min (Qty.min x1 x2) x3) x4
-      maxX = Qty.max (Qty.max (Qty.max x1 x2) x3) x4
-      minY = Qty.min (Qty.min (Qty.min y1 y2) y3) y4
-      maxY = Qty.max (Qty.max (Qty.max y1 y2) y3) y4
-      minZ = Qty.min (Qty.min (Qty.min z1 z2) z3) z4
-      maxZ = Qty.max (Qty.max (Qty.max z1 z2) z3) z4
-   in VectorBounds3d (Range.unsafe minX maxX) (Range.unsafe minY maxY) (Range.unsafe minZ maxZ)
+  let maxX = Qty.max (Qty.max (Qty.max x1 x2) x3) x4
+  let minY = Qty.min (Qty.min (Qty.min y1 y2) y3) y4
+  let maxY = Qty.max (Qty.max (Qty.max y1 y2) y3) y4
+  let minZ = Qty.min (Qty.min (Qty.min z1 z2) z3) z4
+  let maxZ = Qty.max (Qty.max (Qty.max z1 z2) z3) z4
+  VectorBounds3d (Range.unsafe minX maxX) (Range.unsafe minY maxY) (Range.unsafe minZ maxZ)
 
 xComponent :: VectorBounds3d (space @ units) -> Range units
 xComponent (VectorBounds3d vx _ _) = vx
@@ -328,26 +328,26 @@ magnitude :: VectorBounds3d (space @ units) -> Range units
 magnitude (VectorBounds3d x y z) = Range.hypot3 x y z
 
 maxMagnitude :: VectorBounds3d (space @ units) -> Qty units
-maxMagnitude (VectorBounds3d (Range minX maxX) (Range minY maxY) (Range minZ maxZ)) =
+maxMagnitude (VectorBounds3d (Range minX maxX) (Range minY maxY) (Range minZ maxZ)) = do
   let xMagnitude = Qty.max (Qty.abs minX) (Qty.abs maxX)
-      yMagnitude = Qty.max (Qty.abs minY) (Qty.abs maxY)
-      zMagnitude = Qty.max (Qty.abs minZ) (Qty.abs maxZ)
-   in Qty.hypot3 xMagnitude yMagnitude zMagnitude
+  let yMagnitude = Qty.max (Qty.abs minY) (Qty.abs maxY)
+  let zMagnitude = Qty.max (Qty.abs minZ) (Qty.abs maxZ)
+  Qty.hypot3 xMagnitude yMagnitude zMagnitude
 
 maxSquaredMagnitude :: Units.Squared units1 units2 => VectorBounds3d (space @ units1) -> Qty units2
-maxSquaredMagnitude (VectorBounds3d (Range minX maxX) (Range minY maxY) (Range minZ maxZ)) =
+maxSquaredMagnitude (VectorBounds3d (Range minX maxX) (Range minY maxY) (Range minZ maxZ)) = do
   let xMagnitude = Qty.max (Qty.abs minX) (Qty.abs maxX)
-      yMagnitude = Qty.max (Qty.abs minY) (Qty.abs maxY)
-      zMagnitude = Qty.max (Qty.abs minZ) (Qty.abs maxZ)
-   in Qty.squared xMagnitude + Qty.squared yMagnitude + Qty.squared zMagnitude
+  let yMagnitude = Qty.max (Qty.abs minY) (Qty.abs maxY)
+  let zMagnitude = Qty.max (Qty.abs minZ) (Qty.abs maxZ)
+  Qty.squared xMagnitude + Qty.squared yMagnitude + Qty.squared zMagnitude
 
 normalize :: VectorBounds3d (space @ units) -> VectorBounds3d (space @ Unitless)
-normalize vectorBounds =
+normalize vectorBounds = do
   let (VectorBounds3d x y z) = vectorBounds / magnitude vectorBounds
-      nx = clampNormalized x
-      ny = clampNormalized y
-      nz = clampNormalized z
-   in VectorBounds3d nx ny nz
+  let nx = clampNormalized x
+  let ny = clampNormalized y
+  let nz = clampNormalized z
+  VectorBounds3d nx ny nz
 
 clampNormalized :: Range Unitless -> Range Unitless
 clampNormalized (Range low high) =

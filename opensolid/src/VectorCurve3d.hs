@@ -441,16 +441,16 @@ quadraticBlossom ::
   Float ->
   Float ->
   Vector3d (space @ units)
-quadraticBlossom (Vector3d x1 y1 z1) (Vector3d x2 y2 z2) (Vector3d x3 y3 z3) t1 t2 =
+quadraticBlossom (Vector3d x1 y1 z1) (Vector3d x2 y2 z2) (Vector3d x3 y3 z3) t1 t2 = do
   let r1 = 1.0 - t1
-      r2 = 1.0 - t2
-      s1 = r1 * r2
-      s2 = r1 * t2 + t1 * r2
-      s3 = t1 * t2
-      x = s1 * x1 + s2 * x2 + s3 * x3
-      y = s1 * y1 + s2 * y2 + s3 * y3
-      z = s1 * z1 + s2 * z2 + s3 * z3
-   in Vector3d x y z
+  let r2 = 1.0 - t2
+  let s1 = r1 * r2
+  let s2 = r1 * t2 + t1 * r2
+  let s3 = t1 * t2
+  let x = s1 * x1 + s2 * x2 + s3 * x3
+  let y = s1 * y1 + s2 * y2 + s3 * y3
+  let z = s1 * z1 + s2 * z2 + s3 * z3
+  Vector3d x y z
 
 cubicBlossom ::
   Vector3d (space @ units) ->
@@ -461,18 +461,18 @@ cubicBlossom ::
   Float ->
   Float ->
   Vector3d (space @ units)
-cubicBlossom (Vector3d x1 y1 z1) (Vector3d x2 y2 z2) (Vector3d x3 y3 z3) (Vector3d x4 y4 z4) t1 t2 t3 =
+cubicBlossom (Vector3d x1 y1 z1) (Vector3d x2 y2 z2) (Vector3d x3 y3 z3) (Vector3d x4 y4 z4) t1 t2 t3 = do
   let r1 = 1.0 - t1
-      r2 = 1.0 - t2
-      r3 = 1.0 - t3
-      s1 = r1 * r2 * r3
-      s2 = r1 * r2 * t3 + r1 * t2 * r3 + t1 * r2 * r3
-      s3 = t1 * t2 * r3 + t1 * r2 * t3 + r1 * t2 * t3
-      s4 = t1 * t2 * t3
-      x = s1 * x1 + s2 * x2 + s3 * x3 + s4 * x4
-      y = s1 * y1 + s2 * y2 + s3 * y3 + s4 * y4
-      z = s1 * z1 + s2 * z2 + s3 * z3 + s4 * z4
-   in Vector3d x y z
+  let r2 = 1.0 - t2
+  let r3 = 1.0 - t3
+  let s1 = r1 * r2 * r3
+  let s2 = r1 * r2 * t3 + r1 * t2 * r3 + t1 * r2 * r3
+  let s3 = t1 * t2 * r3 + t1 * r2 * t3 + r1 * t2 * t3
+  let s4 = t1 * t2 * t3
+  let x = s1 * x1 + s2 * x2 + s3 * x3 + s4 * x4
+  let y = s1 * y1 + s2 * y2 + s3 * y3 + s4 * y4
+  let z = s1 * z1 + s2 * z2 + s3 * z3 + s4 * z4
+  Vector3d x y z
 
 evaluateAt :: Float -> VectorCurve3d (space @ units) -> Vector3d (space @ units)
 evaluateAt t curve =

@@ -26,13 +26,13 @@ data DegenerateEndpoint space
   deriving (Show)
 
 at :: Tolerance units => Float -> VectorCurve2d (space @ units) -> DegenerateEndpoint space
-at t0 secondDerivative =
+at t0 secondDerivative = do
   let r = computeRadius (VectorCurve2d.evaluateAt t0 secondDerivative)
-      t1 = if t0 == 0.0 then r else 1.0 - r
-      q = qCurve 0 t0 secondDerivative
-      sign = if t0 == 0.0 then Positive else Negative
-      curve = sign * q / VectorCurve2d.unsafeMagnitude q
-   in DegenerateEndpoint t0 t1 curve
+  let t1 = if t0 == 0.0 then r else 1.0 - r
+  let q = qCurve 0 t0 secondDerivative
+  let sign = if t0 == 0.0 then Positive else Negative
+  let curve = sign * q / VectorCurve2d.unsafeMagnitude q
+  DegenerateEndpoint t0 t1 curve
 
 computeRadius :: Tolerance units => Vector2d (space @ units) -> Float
 computeRadius secondDerivative = Qty.sqrt (2.0 * ?tolerance / Vector2d.magnitude secondDerivative)
@@ -77,12 +77,12 @@ evaluateAt t (DegenerateEndpoint t0 t1 endpointCurve) innerCurve =
     ((t - t0) / (t1 - t0))
 
 segmentBounds :: Range Unitless -> DegenerateEndpoint space -> VectorCurve2d (space @ Unitless) -> VectorBounds2d (space @ Unitless)
-segmentBounds (Range tLow tHigh) (DegenerateEndpoint t0 t1 endpointCurve) innerCurve =
+segmentBounds (Range tLow tHigh) (DegenerateEndpoint t0 t1 endpointCurve) innerCurve = do
   let v0 = VectorCurve2d.evaluateAt t0 endpointCurve
-      v1 = VectorCurve2d.evaluateAt t1 innerCurve
-   in VectorBounds2d.hull2
-        (Vector2d.interpolateFrom v0 v1 ((tLow - t0) / (t1 - t0)))
-        (Vector2d.interpolateFrom v0 v1 ((tHigh - t0) / (t1 - t0)))
+  let v1 = VectorCurve2d.evaluateAt t1 innerCurve
+  VectorBounds2d.hull2
+    (Vector2d.interpolateFrom v0 v1 ((tLow - t0) / (t1 - t0)))
+    (Vector2d.interpolateFrom v0 v1 ((tHigh - t0) / (t1 - t0)))
 
 transformBy :: Transform2d a (space @ units) -> DegenerateEndpoint space -> DegenerateEndpoint space
 transformBy transform (DegenerateEndpoint t0 t1 endpointCurve) =

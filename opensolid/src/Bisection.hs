@@ -21,17 +21,17 @@ tree :: (Range Unitless -> segment) -> Tree segment
 tree compute = buildTree compute Range.unit
 
 expand :: Range Unitless -> Range Unitless
-expand (Range low high) =
+expand (Range low high) = do
   let expansion = 0.5 * (high - low)
-   in Range.unsafe (Float.max 0.0 (low - expansion)) (Float.min 1.0 (high + expansion))
+  Range.unsafe (Float.max 0.0 (low - expansion)) (Float.min 1.0 (high + expansion))
 
 buildTree :: (Range Unitless -> segment) -> Range Unitless -> Tree segment
-buildTree compute domain =
+buildTree compute domain = do
   let cache = Cache domain (compute domain)
-      neighborhoodDomain = expand domain
-      neighborhoodCache = Cache neighborhoodDomain (compute neighborhoodDomain)
-      (left, right) = Range.bisect domain
-   in Tree cache neighborhoodCache (buildTree compute left) (buildTree compute right)
+  let neighborhoodDomain = expand domain
+  let neighborhoodCache = Cache neighborhoodDomain (compute neighborhoodDomain)
+  let (left, right) = Range.bisect domain
+  Tree cache neighborhoodCache (buildTree compute left) (buildTree compute right)
 
 solve ::
   (Range Unitless -> segment -> Bool) ->
@@ -40,28 +40,27 @@ solve ::
   Tree segment ->
   (List solution, List (Range Unitless)) ->
   (List solution, List (Range Unitless))
-solve isCandidate resolveNeighborhood findSolution segmentTree accumulated =
+solve isCandidate resolveNeighborhood findSolution segmentTree accumulated = do
+  let Tree cache neighborhoodCache leftChild rightChild = segmentTree
+  let (Cache domain segment) = cache
+  let (Cache expandedDomain neighborhood) = neighborhoodCache
+  let (solutions, exclusions) = accumulated
   let allowed = isAllowed domain exclusions
-      candidate = isCandidate domain segment
-      resolved = resolveNeighborhood expandedDomain neighborhood
-      recurse =
+  let candidate = isCandidate domain segment
+  let resolved = resolveNeighborhood expandedDomain neighborhood
+  let recurse =
         accumulated
           |> solve isCandidate resolveNeighborhood findSolution rightChild
           |> solve isCandidate resolveNeighborhood findSolution leftChild
-   in case (allowed, candidate, resolved) of
-        (Resolved False, _, _) -> accumulated
-        (_, False, _) -> accumulated
-        (Unresolved, True, _) -> recurse
-        (Resolved True, True, Unresolved) -> recurse
-        (Resolved True, True, Resolved resolution) ->
-          case findSolution domain segment resolution of
-            Just solution -> (solution : solutions, expandedDomain : exclusions)
-            Nothing -> accumulated
- where
-  Tree cache neighborhoodCache leftChild rightChild = segmentTree
-  (Cache domain segment) = cache
-  (Cache expandedDomain neighborhood) = neighborhoodCache
-  (solutions, exclusions) = accumulated
+  case (allowed, candidate, resolved) of
+    (Resolved False, _, _) -> accumulated
+    (_, False, _) -> accumulated
+    (Unresolved, True, _) -> recurse
+    (Resolved True, True, Unresolved) -> recurse
+    (Resolved True, True, Resolved resolution) ->
+      case findSolution domain segment resolution of
+        Just solution -> (solution : solutions, expandedDomain : exclusions)
+        Nothing -> accumulated
 
 isAllowed :: Range Unitless -> List (Range Unitless) -> Fuzzy Bool
 isAllowed _ [] = Resolved True
@@ -81,33 +80,32 @@ solve2 ::
   Tree segment ->
   (List solution, List (Range Unitless, Range Unitless)) ->
   (List solution, List (Range Unitless, Range Unitless))
-solve2 isCandidate resolveNeighborhood findSolution segmentTree1 segmentTree2 accumulated =
+solve2 isCandidate resolveNeighborhood findSolution segmentTree1 segmentTree2 accumulated = do
+  let (Tree cache1 neighborhoodCache1 leftChild1 rightChild1) = segmentTree1
+  let (Tree cache2 neighborhoodCache2 leftChild2 rightChild2) = segmentTree2
+  let (Cache domain1 segment1) = cache1
+  let (Cache domain2 segment2) = cache2
+  let (Cache expandedDomain1 neighborhood1) = neighborhoodCache1
+  let (Cache expandedDomain2 neighborhood2) = neighborhoodCache2
+  let (solutions, exclusions) = accumulated
   let allowed = isAllowed2 domain1 domain2 exclusions
-      candidate = isCandidate domain1 domain2 segment1 segment2
-      resolved = resolveNeighborhood expandedDomain1 expandedDomain2 neighborhood1 neighborhood2
-      recurse =
+  let candidate = isCandidate domain1 domain2 segment1 segment2
+  let resolved = resolveNeighborhood expandedDomain1 expandedDomain2 neighborhood1 neighborhood2
+  let recurse =
         accumulated
           |> solve2 isCandidate resolveNeighborhood findSolution rightChild1 rightChild2
           |> solve2 isCandidate resolveNeighborhood findSolution rightChild1 leftChild2
           |> solve2 isCandidate resolveNeighborhood findSolution leftChild1 rightChild2
           |> solve2 isCandidate resolveNeighborhood findSolution leftChild1 leftChild2
-   in case (allowed, candidate, resolved) of
-        (Resolved False, _, _) -> accumulated
-        (_, False, _) -> accumulated
-        (Unresolved, True, _) -> recurse
-        (Resolved True, True, Unresolved) -> recurse
-        (Resolved True, True, Resolved resolution) ->
-          case findSolution domain1 domain2 segment1 segment2 resolution of
-            Just solution -> (solution : solutions, (expandedDomain1, expandedDomain2) : exclusions)
-            Nothing -> accumulated
- where
-  (Tree cache1 neighborhoodCache1 leftChild1 rightChild1) = segmentTree1
-  (Tree cache2 neighborhoodCache2 leftChild2 rightChild2) = segmentTree2
-  (Cache domain1 segment1) = cache1
-  (Cache domain2 segment2) = cache2
-  (Cache expandedDomain1 neighborhood1) = neighborhoodCache1
-  (Cache expandedDomain2 neighborhood2) = neighborhoodCache2
-  (solutions, exclusions) = accumulated
+  case (allowed, candidate, resolved) of
+    (Resolved False, _, _) -> accumulated
+    (_, False, _) -> accumulated
+    (Unresolved, True, _) -> recurse
+    (Resolved True, True, Unresolved) -> recurse
+    (Resolved True, True, Resolved resolution) ->
+      case findSolution domain1 domain2 segment1 segment2 resolution of
+        Just solution -> (solution : solutions, (expandedDomain1, expandedDomain2) : exclusions)
+        Nothing -> accumulated
 
 isAllowed2 :: Range Unitless -> Range Unitless -> List (Range Unitless, Range Unitless) -> Fuzzy Bool
 isAllowed2 _ _ [] = Resolved True

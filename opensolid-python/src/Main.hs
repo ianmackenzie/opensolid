@@ -191,11 +191,11 @@ cType typ =
 pyArgs :: List (String, ValueType) -> List (String, Maybe PY.Expr, Maybe PY.Expr)
 pyArgs = List.map pyArg
  where
-  pyArg (name, typ) =
+  pyArg (name, typ) = do
     let defaultValue = case typ of
           ImplicitTolerance -> Just (PY.var "None")
           _ -> Nothing
-     in (name, pyType typ, defaultValue)
+    (name, pyType typ, defaultValue)
 
 selfPyArg :: (String, Maybe PY.Expr, Maybe PY.Expr)
 selfPyArg = ("self", Nothing, Nothing)

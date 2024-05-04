@@ -85,34 +85,33 @@ saddleRegion region =
   empty{saddleRegions = [region]}
 
 merge :: PartialZeros -> PartialZeros -> PartialZeros
-merge left right =
+merge left right = do
   let (mergedCrossingCurves, newCrossingLoops) = mergeCrossingCurves leftCrossingCurves rightCrossingCurves
-      (mergedTangentCurves, newTangentLoops) = mergeTangentCurves leftTangentCurves rightTangentCurves
-   in PartialZeros
-        { crossingCurves = mergedCrossingCurves
-        , crossingLoops = List.concat [newCrossingLoops, leftCrossingLoops, rightCrossingLoops]
-        , tangentCurves = mergedTangentCurves
-        , tangentLoops = List.concat [newTangentLoops, leftTangentLoops, rightTangentLoops]
-        , tangentPoints = leftTangentPoints + rightTangentPoints
-        , saddleRegions = leftSaddleRegions + rightSaddleRegions
-        }
- where
+  let (mergedTangentCurves, newTangentLoops) = mergeTangentCurves leftTangentCurves rightTangentCurves
+  let PartialZeros
+        { crossingCurves = leftCrossingCurves
+        , crossingLoops = leftCrossingLoops
+        , tangentCurves = leftTangentCurves
+        , tangentLoops = leftTangentLoops
+        , tangentPoints = leftTangentPoints
+        , saddleRegions = leftSaddleRegions
+        } = left
+  let PartialZeros
+        { crossingCurves = rightCrossingCurves
+        , crossingLoops = rightCrossingLoops
+        , tangentCurves = rightTangentCurves
+        , tangentLoops = rightTangentLoops
+        , tangentPoints = rightTangentPoints
+        , saddleRegions = rightSaddleRegions
+        } = right
   PartialZeros
-    { crossingCurves = leftCrossingCurves
-    , crossingLoops = leftCrossingLoops
-    , tangentCurves = leftTangentCurves
-    , tangentLoops = leftTangentLoops
-    , tangentPoints = leftTangentPoints
-    , saddleRegions = leftSaddleRegions
-    } = left
-  PartialZeros
-    { crossingCurves = rightCrossingCurves
-    , crossingLoops = rightCrossingLoops
-    , tangentCurves = rightTangentCurves
-    , tangentLoops = rightTangentLoops
-    , tangentPoints = rightTangentPoints
-    , saddleRegions = rightSaddleRegions
-    } = right
+    { crossingCurves = mergedCrossingCurves
+    , crossingLoops = List.concat [newCrossingLoops, leftCrossingLoops, rightCrossingLoops]
+    , tangentCurves = mergedTangentCurves
+    , tangentLoops = List.concat [newTangentLoops, leftTangentLoops, rightTangentLoops]
+    , tangentPoints = leftTangentPoints + rightTangentPoints
+    , saddleRegions = leftSaddleRegions + rightSaddleRegions
+    }
 
 mergeCrossingCurves :: List CrossingCurve -> List CrossingCurve -> (List CrossingCurve, List CrossingLoop)
 mergeCrossingCurves left right = List.foldr addCrossingCurve (right, []) left

@@ -86,9 +86,9 @@ refine (Estimate{implementation}) = refineImpl implementation
 refine (Coerce estimate) = Coerce (refine estimate)
 
 satisfy :: (Range units -> Bool) -> Estimate units -> Range units
-satisfy predicate estimate =
+satisfy predicate estimate = do
   let current = bounds estimate
-   in if predicate current then current else satisfy predicate (refine estimate)
+  if predicate current then current else satisfy predicate (refine estimate)
 
 newtype Negate units = Negate (Estimate units)
 
@@ -147,10 +147,10 @@ newtype Sum units = Sum (NonEmpty (Estimate units))
 
 instance Interface (Sum units) units where
   boundsImpl (Sum estimates) = NonEmpty.sum (NonEmpty.map bounds estimates)
-  refineImpl (Sum estimates) =
+  refineImpl (Sum estimates) = do
     let maxWidth = NonEmpty.maximumOf boundsWidth estimates
-        refinedEstimates = NonEmpty.map (refineWiderThan (0.5 * maxWidth)) estimates
-     in wrap (Sum refinedEstimates)
+    let refinedEstimates = NonEmpty.map (refineWiderThan (0.5 * maxWidth)) estimates
+    wrap (Sum refinedEstimates)
 
 newtype Abs units = Abs (Estimate units)
 
@@ -247,10 +247,10 @@ instance Interface (Smallest units) units where
   refineImpl (Smallest estimates currentBounds) =
     case NonEmpty.filter (overlaps currentBounds) estimates of
       [singleEstimate] -> refine singleEstimate
-      NonEmpty filteredEstimates ->
+      NonEmpty filteredEstimates -> do
         let maxWidth = NonEmpty.maximumOf boundsWidth filteredEstimates
-            refinedEstimates = NonEmpty.map (refineWiderThan (0.5 * maxWidth)) filteredEstimates
-         in smallest refinedEstimates
+        let refinedEstimates = NonEmpty.map (refineWiderThan (0.5 * maxWidth)) filteredEstimates
+        smallest refinedEstimates
       [] -> internalErrorFilteredListIsEmpty
 
 smallest :: NonEmpty (Estimate units) -> Estimate units
@@ -264,10 +264,10 @@ instance Interface (Largest units) units where
   refineImpl (Largest estimates currentBounds) =
     case NonEmpty.filter (overlaps currentBounds) estimates of
       [singleEstimate] -> refine singleEstimate
-      NonEmpty filteredEstimates ->
+      NonEmpty filteredEstimates -> do
         let maxWidth = NonEmpty.maximumOf boundsWidth filteredEstimates
-            refinedEstimates = NonEmpty.map (refineWiderThan (0.5 * maxWidth)) filteredEstimates
-         in largest refinedEstimates
+        let refinedEstimates = NonEmpty.map (refineWiderThan (0.5 * maxWidth)) filteredEstimates
+        largest refinedEstimates
       [] -> internalErrorFilteredListIsEmpty
 
 largest :: NonEmpty (Estimate units) -> Estimate units
@@ -290,9 +290,9 @@ itemBoundsWidth :: (a, Estimate units) -> Qty units
 itemBoundsWidth (_, estimate) = Range.width (bounds estimate)
 
 refinePairs :: NonEmpty (a, Estimate units) -> NonEmpty (a, Estimate units)
-refinePairs pairs =
+refinePairs pairs = do
   let widthCutoff = 0.5 * NonEmpty.maximumOf itemBoundsWidth pairs
-   in NonEmpty.map (Pair.mapSecond (refineWiderThan widthCutoff)) pairs
+  NonEmpty.map (Pair.mapSecond (refineWiderThan widthCutoff)) pairs
 
 prependItems :: List (a, Estimate units) -> List a -> List a
 prependItems pairs items =
@@ -307,24 +307,24 @@ allResolved pairs = List.all (Pair.second >> isResolved) pairs
 minimumBy :: Tolerance units => (a -> Estimate units) -> NonEmpty a -> a
 minimumBy function items = go (NonEmpty.map (Pair.decorate function) items)
  where
-  go pairs =
+  go pairs = do
     let (leader, followers) = NonEmpty.pickMinimumBy estimateUpperBound pairs
-        cutoff = estimateUpperBound leader
-        filtered = List.filter (estimateLowerBoundAtMost cutoff) followers
-     in if allResolved filtered
-          then Pair.first leader
-          else go (refinePairs (leader :| filtered))
+    let cutoff = estimateUpperBound leader
+    let filtered = List.filter (estimateLowerBoundAtMost cutoff) followers
+    if allResolved filtered
+      then Pair.first leader
+      else go (refinePairs (leader :| filtered))
 
 maximumBy :: Tolerance units => (a -> Estimate units) -> NonEmpty a -> a
 maximumBy function items = go (NonEmpty.map (Pair.decorate function) items)
  where
-  go pairs =
+  go pairs = do
     let (leader, followers) = NonEmpty.pickMaximumBy estimateLowerBound pairs
-        cutoff = estimateLowerBound leader
-        filtered = List.filter (estimateUpperBoundAtLeast cutoff) followers
-     in if allResolved filtered
-          then Pair.first leader
-          else go (refinePairs (leader :| filtered))
+    let cutoff = estimateLowerBound leader
+    let filtered = List.filter (estimateUpperBoundAtLeast cutoff) followers
+    if allResolved filtered
+      then Pair.first leader
+      else go (refinePairs (leader :| filtered))
 
 smallestBy :: Tolerance units => (a -> Estimate units) -> NonEmpty a -> a
 smallestBy function items = minimumBy (abs . function) items
@@ -335,26 +335,26 @@ largestBy function items = maximumBy (abs . function) items
 pickMinimumBy :: Tolerance units => (a -> Estimate units) -> NonEmpty a -> (a, List a)
 pickMinimumBy function items = go (NonEmpty.map (Pair.decorate function) items) []
  where
-  go pairs accumulated =
+  go pairs accumulated = do
     let (leader, followers) = NonEmpty.pickMinimumBy estimateUpperBound pairs
-        cutoff = estimateUpperBound leader
-        (filtered, discarded) = List.partition (estimateLowerBoundAtMost cutoff) followers
-        updated = prependItems discarded accumulated
-     in if allResolved filtered
-          then (Pair.first leader, prependItems filtered updated)
-          else go (refinePairs (leader :| filtered)) updated
+    let cutoff = estimateUpperBound leader
+    let (filtered, discarded) = List.partition (estimateLowerBoundAtMost cutoff) followers
+    let updated = prependItems discarded accumulated
+    if allResolved filtered
+      then (Pair.first leader, prependItems filtered updated)
+      else go (refinePairs (leader :| filtered)) updated
 
 pickMaximumBy :: Tolerance units => (a -> Estimate units) -> NonEmpty a -> (a, List a)
 pickMaximumBy function items = go (NonEmpty.map (Pair.decorate function) items) []
  where
-  go pairs accumulated =
+  go pairs accumulated = do
     let (leader, followers) = NonEmpty.pickMaximumBy estimateLowerBound pairs
-        cutoff = estimateLowerBound leader
-        (filtered, discarded) = List.partition (estimateUpperBoundAtLeast cutoff) followers
-        updated = prependItems discarded accumulated
-     in if allResolved filtered
-          then (Pair.first leader, prependItems filtered updated)
-          else go (refinePairs (leader :| filtered)) updated
+    let cutoff = estimateLowerBound leader
+    let (filtered, discarded) = List.partition (estimateUpperBoundAtLeast cutoff) followers
+    let updated = prependItems discarded accumulated
+    if allResolved filtered
+      then (Pair.first leader, prependItems filtered updated)
+      else go (refinePairs (leader :| filtered)) updated
 
 pickSmallestBy :: Tolerance units => (a -> Estimate units) -> NonEmpty a -> (a, List a)
 pickSmallestBy function items = pickMinimumBy (abs . function) items

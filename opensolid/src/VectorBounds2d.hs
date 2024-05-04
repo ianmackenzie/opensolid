@@ -327,12 +327,12 @@ hull3 ::
   Vector2d (space @ units) ->
   Vector2d (space @ units) ->
   VectorBounds2d (space @ units)
-hull3 (Vector2d x1 y1) (Vector2d x2 y2) (Vector2d x3 y3) =
+hull3 (Vector2d x1 y1) (Vector2d x2 y2) (Vector2d x3 y3) = do
   let minX = Qty.min (Qty.min x1 x2) x3
-      maxX = Qty.max (Qty.max x1 x2) x3
-      minY = Qty.min (Qty.min y1 y2) y3
-      maxY = Qty.max (Qty.max y1 y2) y3
-   in VectorBounds2d (Range.unsafe minX maxX) (Range.unsafe minY maxY)
+  let maxX = Qty.max (Qty.max x1 x2) x3
+  let minY = Qty.min (Qty.min y1 y2) y3
+  let maxY = Qty.max (Qty.max y1 y2) y3
+  VectorBounds2d (Range.unsafe minX maxX) (Range.unsafe minY maxY)
 
 hull4 ::
   Vector2d (space @ units) ->
@@ -340,12 +340,12 @@ hull4 ::
   Vector2d (space @ units) ->
   Vector2d (space @ units) ->
   VectorBounds2d (space @ units)
-hull4 (Vector2d x1 y1) (Vector2d x2 y2) (Vector2d x3 y3) (Vector2d x4 y4) =
+hull4 (Vector2d x1 y1) (Vector2d x2 y2) (Vector2d x3 y3) (Vector2d x4 y4) = do
   let minX = Qty.min (Qty.min (Qty.min x1 x2) x3) x4
-      maxX = Qty.max (Qty.max (Qty.max x1 x2) x3) x4
-      minY = Qty.min (Qty.min (Qty.min y1 y2) y3) y4
-      maxY = Qty.max (Qty.max (Qty.max y1 y2) y3) y4
-   in VectorBounds2d (Range.unsafe minX maxX) (Range.unsafe minY maxY)
+  let maxX = Qty.max (Qty.max (Qty.max x1 x2) x3) x4
+  let minY = Qty.min (Qty.min (Qty.min y1 y2) y3) y4
+  let maxY = Qty.max (Qty.max (Qty.max y1 y2) y3) y4
+  VectorBounds2d (Range.unsafe minX maxX) (Range.unsafe minY maxY)
 
 hullN :: NonEmpty (Vector2d (space @ units)) -> VectorBounds2d (space @ units)
 hullN (Vector2d x0 y0 :| rest) = go x0 x0 y0 y0 rest
@@ -392,26 +392,26 @@ magnitude :: VectorBounds2d (space @ units) -> Range units
 magnitude (VectorBounds2d x y) = Range.hypot2 x y
 
 maxMagnitude :: VectorBounds2d (space @ units) -> Qty units
-maxMagnitude (VectorBounds2d (Range minX maxX) (Range minY maxY)) =
+maxMagnitude (VectorBounds2d (Range minX maxX) (Range minY maxY)) = do
   let xMagnitude = Qty.max (Qty.abs minX) (Qty.abs maxX)
-      yMagnitude = Qty.max (Qty.abs minY) (Qty.abs maxY)
-   in Qty.hypot2 xMagnitude yMagnitude
+  let yMagnitude = Qty.max (Qty.abs minY) (Qty.abs maxY)
+  Qty.hypot2 xMagnitude yMagnitude
 
 maxSquaredMagnitude :: Units.Squared units1 units2 => VectorBounds2d (space @ units1) -> Qty units2
 maxSquaredMagnitude = Units.specialize . maxSquaredMagnitude_
 
 maxSquaredMagnitude_ :: VectorBounds2d (space @ units) -> Qty (units :*: units)
-maxSquaredMagnitude_ (VectorBounds2d (Range minX maxX) (Range minY maxY)) =
+maxSquaredMagnitude_ (VectorBounds2d (Range minX maxX) (Range minY maxY)) = do
   let xMagnitude = Qty.max (Qty.abs minX) (Qty.abs maxX)
-      yMagnitude = Qty.max (Qty.abs minY) (Qty.abs maxY)
-   in Qty.squared_ xMagnitude + Qty.squared_ yMagnitude
+  let yMagnitude = Qty.max (Qty.abs minY) (Qty.abs maxY)
+  Qty.squared_ xMagnitude + Qty.squared_ yMagnitude
 
 normalize :: VectorBounds2d (space @ units) -> VectorBounds2d (space @ Unitless)
-normalize vectorBounds =
+normalize vectorBounds = do
   let (VectorBounds2d x y) = vectorBounds / magnitude vectorBounds
-      nx = clampNormalized x
-      ny = clampNormalized y
-   in VectorBounds2d nx ny
+  let nx = clampNormalized x
+  let ny = clampNormalized y
+  VectorBounds2d nx ny
 
 clampNormalized :: Range Unitless -> Range Unitless
 clampNormalized (Range low high) =
@@ -449,33 +449,33 @@ placeInBasis ::
   Basis2d global (Defines local) ->
   VectorBounds2d (local @ units) ->
   VectorBounds2d (global @ units)
-placeInBasis basis (VectorBounds2d x y) =
+placeInBasis basis (VectorBounds2d x y) = do
   let xMid = Range.midpoint x
-      yMid = Range.midpoint y
-      xWidth = Range.width x
-      yWidth = Range.width y
-      Vector2d x0 y0 = Vector2d.xyInBasis basis xMid yMid
-      (ix, iy) = Direction2d.components (Basis2d.xDirection basis)
-      (jx, jy) = Direction2d.components (Basis2d.yDirection basis)
-      rx = 0.5 * xWidth * Float.abs ix + 0.5 * yWidth * Float.abs jx
-      ry = 0.5 * xWidth * Float.abs iy + 0.5 * yWidth * Float.abs jy
-   in VectorBounds2d (Range.from (x0 - rx) (x0 + rx)) (Range.from (y0 - ry) (y0 + ry))
+  let yMid = Range.midpoint y
+  let xWidth = Range.width x
+  let yWidth = Range.width y
+  let Vector2d x0 y0 = Vector2d.xyInBasis basis xMid yMid
+  let (ix, iy) = Direction2d.components (Basis2d.xDirection basis)
+  let (jx, jy) = Direction2d.components (Basis2d.yDirection basis)
+  let rx = 0.5 * xWidth * Float.abs ix + 0.5 * yWidth * Float.abs jx
+  let ry = 0.5 * xWidth * Float.abs iy + 0.5 * yWidth * Float.abs jy
+  VectorBounds2d (Range.from (x0 - rx) (x0 + rx)) (Range.from (y0 - ry) (y0 + ry))
 
 relativeToBasis ::
   Basis2d global (Defines local) ->
   VectorBounds2d (global @ units) ->
   VectorBounds2d (local @ units)
-relativeToBasis basis (VectorBounds2d x y) =
+relativeToBasis basis (VectorBounds2d x y) = do
   let xMid = Range.midpoint x
-      yMid = Range.midpoint y
-      xWidth = Range.width x
-      yWidth = Range.width y
-      Vector2d x0 y0 = Vector2d.relativeToBasis basis (Vector2d xMid yMid)
-      (ix, iy) = Direction2d.components (Basis2d.xDirection basis)
-      (jx, jy) = Direction2d.components (Basis2d.yDirection basis)
-      rx = 0.5 * xWidth * Float.abs ix + 0.5 * yWidth * Float.abs iy
-      ry = 0.5 * xWidth * Float.abs jx + 0.5 * yWidth * Float.abs jy
-   in VectorBounds2d (Range.from (x0 - rx) (x0 + rx)) (Range.from (y0 - ry) (y0 + ry))
+  let yMid = Range.midpoint y
+  let xWidth = Range.width x
+  let yWidth = Range.width y
+  let Vector2d x0 y0 = Vector2d.relativeToBasis basis (Vector2d xMid yMid)
+  let (ix, iy) = Direction2d.components (Basis2d.xDirection basis)
+  let (jx, jy) = Direction2d.components (Basis2d.yDirection basis)
+  let rx = 0.5 * xWidth * Float.abs ix + 0.5 * yWidth * Float.abs iy
+  let ry = 0.5 * xWidth * Float.abs jx + 0.5 * yWidth * Float.abs jy
+  VectorBounds2d (Range.from (x0 - rx) (x0 + rx)) (Range.from (y0 - ry) (y0 + ry))
 
 transformBy :: Transform2d a (space @ units1) -> VectorBounds2d (space @ units2) -> VectorBounds2d (space @ units2)
 transformBy transform (VectorBounds2d x y) = do
