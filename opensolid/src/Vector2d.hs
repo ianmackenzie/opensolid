@@ -15,6 +15,8 @@ module Vector2d
   , polar
   , xComponent
   , yComponent
+  , componentIn
+  , projectionIn
   , components
   , midpoint
   , interpolateFrom
@@ -35,6 +37,7 @@ module Vector2d
   , sum
   , transformBy
   , rotateBy
+  , mirrorIn
   , scaleIn
   )
 where
@@ -239,6 +242,12 @@ xComponent (Vector2d vx _) = vx
 yComponent :: Vector2d (space @ units) -> Qty units
 yComponent (Vector2d _ vy) = vy
 
+componentIn :: Direction2d space -> Vector2d (space @ units) -> Qty units
+componentIn = (<>)
+
+projectionIn :: Direction2d space -> Vector2d (space @ units) -> Vector2d (space @ units)
+projectionIn givenDirection vector = givenDirection * componentIn givenDirection vector
+
 {-# INLINE components #-}
 components :: Vector2d (space @ units) -> (Qty units, Qty units)
 components (Vector2d vx vy) = (vx, vy)
@@ -328,6 +337,9 @@ transformBy transform vector = do
 
 rotateBy :: Angle -> Vector2d (space @ units) -> Vector2d (space @ units)
 rotateBy theta = transformBy (Transform2d.rotateAround Point2d.origin theta)
+
+mirrorIn :: Direction2d space -> Vector2d (space @ units) -> Vector2d (space @ units)
+mirrorIn mirrorDirection vector = vector - 2.0 * projectionIn mirrorDirection vector
 
 scaleIn :: Direction2d space -> Float -> Vector2d (space @ units) -> Vector2d (space @ units)
 scaleIn scaleDirection scale =
