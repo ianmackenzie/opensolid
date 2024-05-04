@@ -801,10 +801,10 @@ isRemovableDegeneracy curveDerivative t =
   -- since in that case we can substitute the curve derivative value for the curve value itself
   (t == 0.0 || t == 1.0) && evaluateAt t curveDerivative != Vector2d.zero
 
-placeIn :: Frame2d (global @ frameUnits) (Defines local) -> VectorCurve2d (local @ units) -> VectorCurve2d (global @ units)
+placeIn :: Frame2d (global @ originUnits) (Defines local) -> VectorCurve2d (local @ units) -> VectorCurve2d (global @ units)
 placeIn globalFrame = placeInBasis (Frame2d.basis globalFrame)
 
-relativeTo :: Frame2d (global @ frameUnits) (Defines local) -> VectorCurve2d (global @ units) -> VectorCurve2d (local @ units)
+relativeTo :: Frame2d (global @ originUnits) (Defines local) -> VectorCurve2d (global @ units) -> VectorCurve2d (local @ units)
 relativeTo globalFrame = relativeToBasis (Frame2d.basis globalFrame)
 
 placeInBasis :: Basis2d global (Defines local) -> VectorCurve2d (local @ units) -> VectorCurve2d (global @ units)
