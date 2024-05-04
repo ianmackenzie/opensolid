@@ -6,6 +6,7 @@ module Axis2d
   , x
   , y
   , through
+  , moveTo
   )
 where
 
@@ -52,3 +53,6 @@ y = Axis2d Point2d.origin Direction2d.y
 
 through :: Point2d (space @ units) -> Direction2d space -> Axis2d (space @ units)
 through = Axis2d
+
+moveTo :: Point2d (space @ units) -> Axis2d (space @ units) -> Axis2d (space @ units)
+moveTo newOriginPoint axis = Axis2d newOriginPoint (direction axis)
