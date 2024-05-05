@@ -13,6 +13,7 @@ module Tests.Random
   , quadraticSpline2d
   , cubicSpline2d
   , rigidTransform2d
+  , affineTransform2d
   )
 where
 
@@ -103,3 +104,22 @@ mirror2d = Random.map Transform2d.mirrorAcross axis2d
 
 rigidTransform2d :: Generator (Transform2d.Rigid (space @ Meters))
 rigidTransform2d = Random.oneOf (NonEmpty.of3 translation2d rotation2d mirror2d)
+
+scalingFactor :: Generator Float
+scalingFactor = Random.float 0.5 2.0
+
+uniformScaling2d :: Generator (Transform2d.Uniform (space @ Meters))
+uniformScaling2d = Random.map2 Transform2d.scaleAbout point2d scalingFactor
+
+nonUniformScaling2d :: Generator (Transform2d.Affine (space @ Meters))
+nonUniformScaling2d = Random.map2 Transform2d.scaleAlong axis2d scalingFactor
+
+affineTransform2d :: Generator (Transform2d.Affine (space @ Meters))
+affineTransform2d =
+  Random.oneOf $
+    NonEmpty.of5
+      (Random.map Transform2d.toAffine translation2d)
+      (Random.map Transform2d.toAffine rotation2d)
+      (Random.map Transform2d.toAffine mirror2d)
+      (Random.map Transform2d.toAffine uniformScaling2d)
+      nonUniformScaling2d
