@@ -48,8 +48,8 @@ direction = Direction
 length :: Qty units -> Length units
 length = Length
 
-class Build arguments space units | arguments -> space, arguments -> units where
-  build :: Tolerance units => arguments -> Curve2d (space @ units)
+class Build arguments (coordinateSystem :: CoordinateSystem) | arguments -> coordinateSystem where
+  build :: Tolerance (Units coordinateSystem) => arguments -> Curve2d coordinateSystem
 
 instance
   (space ~ space', units ~ units') =>
@@ -57,8 +57,7 @@ instance
     ( StartPoint (space @ units)
     , EndPoint (space' @ units')
     )
-    space
-    units
+    (space @ units)
   where
   build (StartPoint givenStartPoint, EndPoint givenEndPoint) =
     from givenStartPoint givenEndPoint
@@ -70,8 +69,7 @@ instance
     , Direction space'
     , Length units'
     )
-    space
-    units
+    (space @ units)
   where
   build (StartPoint givenStartPoint, Direction givenDirection, Length givenLength) =
     directed givenStartPoint givenDirection givenLength

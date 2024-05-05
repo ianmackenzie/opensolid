@@ -121,8 +121,11 @@ small = Small
 large :: Size
 large = Large
 
-class Build arguments space units | arguments -> space, arguments -> units where
-  build :: Tolerance units => arguments -> Result BuildError (Curve2d (space @ units))
+class Build arguments (coordinateSystem :: CoordinateSystem) | arguments -> coordinateSystem where
+  build ::
+    Tolerance (Units coordinateSystem) =>
+    arguments ->
+    Result BuildError (Curve2d coordinateSystem)
 
 data BuildError
   = DegenerateArc
@@ -132,7 +135,7 @@ data BuildError
 
 instance
   (space ~ space', units ~ units') =>
-  Build (StartPoint (space @ units), EndPoint (space' @ units'), SweptAngle) space units
+  Build (StartPoint (space @ units), EndPoint (space' @ units'), SweptAngle) (space @ units)
   where
   build (StartPoint givenStartPoint, EndPoint givenEndPoint, SweptAngle givenSweptAngle) =
     Ok (from givenStartPoint givenEndPoint givenSweptAngle)
@@ -145,8 +148,7 @@ instance
     , StartAngle
     , EndAngle
     )
-    space
-    units
+    (space @ units)
   where
   build (CenterPoint givenCenterPoint, Radius givenRadius, StartAngle givenStartAngle, EndAngle givenEndAngle)
     | givenRadius < Qty.zero = Error NegativeRadius
@@ -170,8 +172,7 @@ instance
     , EndAngle
     , Radius units'
     )
-    space
-    units
+    (space @ units)
   where
   build (givenCenterPoint, givenStartAngle, givenEndAngle, givenRadius) =
     build (givenCenterPoint, givenRadius, givenStartAngle, givenEndAngle)
@@ -184,8 +185,7 @@ instance
     , StartAngle
     , SweptAngle
     )
-    space
-    units
+    (space @ units)
   where
   build (givenCenterPoint, givenRadius, StartAngle givenStartAngle, SweptAngle givenSweptAngle) =
     build
@@ -203,8 +203,7 @@ instance
     , SweptAngle
     , Radius units'
     )
-    space
-    units
+    (space @ units)
   where
   build (givenCenterPoint, givenStartAngle, givenSweptAngle, givenRadius) =
     build (givenCenterPoint, givenRadius, givenStartAngle, givenSweptAngle)
@@ -213,7 +212,7 @@ instance
   ( space ~ space'
   , units ~ units'
   ) =>
-  Build (CenterPoint (space @ units), StartPoint (space' @ units'), SweptAngle) space units
+  Build (CenterPoint (space @ units), StartPoint (space' @ units'), SweptAngle) (space @ units)
   where
   build (CenterPoint givenCenterPoint, StartPoint givenStartPoint, givenSweptAngle) =
     build
@@ -235,8 +234,7 @@ instance
     , Direction
     , Size
     )
-    space
-    units
+    (space @ units)
   where
   build (StartPoint givenStartPoint, EndPoint givenEndPoint, Radius givenRadius, givenDirection, givenSize) = Result.do
     chordDirection <- Direction2d.from givenStartPoint givenEndPoint ?? Error DegenerateArc
