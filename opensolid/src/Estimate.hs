@@ -99,19 +99,19 @@ instance Interface (Negate units) units where
 instance Negation (Estimate units) where
   negate estimate = wrap (Negate estimate)
 
-instance Multiplication Sign (Estimate units) where
+instance Multiplication' Sign (Estimate units) where
   type Sign .*. Estimate units = Estimate (Unitless :*: units)
   Positive .*. estimate = Units.coerce estimate
   Negative .*. estimate = Units.coerce -estimate
 
-instance Product Sign (Estimate units) (Estimate units)
+instance Multiplication Sign (Estimate units) (Estimate units)
 
-instance Multiplication (Estimate units) Sign where
+instance Multiplication' (Estimate units) Sign where
   type Estimate units .*. Sign = Estimate (units :*: Unitless)
   estimate .*. Positive = Units.coerce estimate
   estimate .*. Negative = Units.coerce -estimate
 
-instance Product (Estimate units) Sign (Estimate units)
+instance Multiplication (Estimate units) Sign (Estimate units)
 
 data Add units = Add (Estimate units) (Estimate units)
 

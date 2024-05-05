@@ -132,16 +132,16 @@ instance Negation (Curve1d units) where
   negate (Product' c1 c2) = negate c1 .*. c2
   negate curve = Negated curve
 
-instance Product Sign (Curve1d units) (Curve1d units)
+instance Multiplication Sign (Curve1d units) (Curve1d units)
 
-instance Multiplication Sign (Curve1d units) where
+instance Multiplication' Sign (Curve1d units) where
   type Sign .*. Curve1d units = Curve1d (Unitless :*: units)
   Positive .*. curve = Units.coerce curve
   Negative .*. curve = Units.coerce -curve
 
-instance Product (Curve1d units) Sign (Curve1d units)
+instance Multiplication (Curve1d units) Sign (Curve1d units)
 
-instance Multiplication (Curve1d units) Sign where
+instance Multiplication' (Curve1d units) Sign where
   type Curve1d units .*. Sign = Curve1d (units :*: Unitless)
   curve .*. Positive = Units.coerce curve
   curve .*. Negative = Units.coerce -curve
@@ -172,9 +172,9 @@ instance units ~ units_ => Subtraction (Qty units) (Curve1d units_) (Curve1d uni
 
 instance
   Units.Product units1 units2 units3 =>
-  Product (Curve1d units1) (Curve1d units2) (Curve1d units3)
+  Multiplication (Curve1d units1) (Curve1d units2) (Curve1d units3)
 
-instance Multiplication (Curve1d units1) (Curve1d units2) where
+instance Multiplication' (Curve1d units1) (Curve1d units2) where
   type Curve1d units1 .*. Curve1d units2 = Curve1d (units1 :*: units2)
   Constant (Qty 0.0) .*. _ = zero
   _ .*. Constant (Qty 0.0) = zero
@@ -188,25 +188,25 @@ instance Multiplication (Curve1d units1) (Curve1d units2) where
 
 instance
   Units.Product units1 units2 units3 =>
-  Product (Curve1d units1) (Qty units2) (Curve1d units3)
+  Multiplication (Curve1d units1) (Qty units2) (Curve1d units3)
 
-instance Multiplication (Curve1d units1) (Qty units2) where
+instance Multiplication' (Curve1d units1) (Qty units2) where
   type Curve1d units1 .*. Qty units2 = Curve1d (units1 :*: units2)
   curve .*. value = curve .*. constant value
 
 instance
   Units.Product units1 units2 units3 =>
-  Product (Qty units1) (Curve1d units2) (Curve1d units3)
+  Multiplication (Qty units1) (Curve1d units2) (Curve1d units3)
 
-instance Multiplication (Qty units1) (Curve1d units2) where
+instance Multiplication' (Qty units1) (Curve1d units2) where
   type Qty units1 .*. Curve1d units2 = Curve1d (units1 :*: units2)
   value .*. curve = constant value .*. curve
 
 instance
   Units.Quotient units1 units2 units3 =>
-  Quotient (Curve1d units1) (Curve1d units2) (Curve1d units3)
+  Division (Curve1d units1) (Curve1d units2) (Curve1d units3)
 
-instance Division (Curve1d units1) (Curve1d units2) where
+instance Division' (Curve1d units1) (Curve1d units2) where
   type Curve1d units1 ./. Curve1d units2 = Curve1d (units1 :/: units2)
   Constant (Qty 0.0) ./. _ = zero
   Constant x ./. Constant y = Constant (x ./. y)
@@ -215,17 +215,17 @@ instance Division (Curve1d units1) (Curve1d units2) where
 
 instance
   Units.Quotient units1 units2 units3 =>
-  Quotient (Curve1d units1) (Qty units2) (Curve1d units3)
+  Division (Curve1d units1) (Qty units2) (Curve1d units3)
 
-instance Division (Curve1d units1) (Qty units2) where
+instance Division' (Curve1d units1) (Qty units2) where
   type Curve1d units1 ./. Qty units2 = Curve1d (units1 :/: units2)
   curve ./. value = curve ./. constant value
 
 instance
   Units.Quotient units1 units2 units3 =>
-  Quotient (Qty units1) (Curve1d units2) (Curve1d units3)
+  Division (Qty units1) (Curve1d units2) (Curve1d units3)
 
-instance Division (Qty units1) (Curve1d units2) where
+instance Division' (Qty units1) (Curve1d units2) where
   type Qty units1 ./. Curve1d units2 = Curve1d (units1 :/: units2)
   value ./. curve = constant value ./. curve
 

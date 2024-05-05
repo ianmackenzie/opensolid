@@ -186,16 +186,16 @@ instance Negation (VectorCurve2d (space @ units)) where
   negate (Product2d1d' c1 c2) = Product2d1d' c1 -c2
   negate curve = Negated curve
 
-instance Product Sign (VectorCurve2d (space @ units)) (VectorCurve2d (space @ units))
+instance Multiplication Sign (VectorCurve2d (space @ units)) (VectorCurve2d (space @ units))
 
-instance Multiplication Sign (VectorCurve2d (space @ units)) where
+instance Multiplication' Sign (VectorCurve2d (space @ units)) where
   type Sign .*. VectorCurve2d (space @ units) = VectorCurve2d (space @ (Unitless :*: units))
   Positive .*. curve = Units.coerce curve
   Negative .*. curve = Units.coerce -curve
 
-instance Product (VectorCurve2d (space @ units)) Sign (VectorCurve2d (space @ units))
+instance Multiplication (VectorCurve2d (space @ units)) Sign (VectorCurve2d (space @ units))
 
-instance Multiplication (VectorCurve2d (space @ units)) Sign where
+instance Multiplication' (VectorCurve2d (space @ units)) Sign where
   type VectorCurve2d (space @ units) .*. Sign = VectorCurve2d (space @ (units :*: Unitless))
   curve .*. Positive = Units.coerce curve
   curve .*. Negative = Units.coerce -curve
@@ -270,9 +270,9 @@ instance
 
 instance
   Units.Product units1 units2 units3 =>
-  Product (Curve1d units1) (VectorCurve2d (space @ units2)) (VectorCurve2d (space @ units3))
+  Multiplication (Curve1d units1) (VectorCurve2d (space @ units2)) (VectorCurve2d (space @ units3))
 
-instance Multiplication (Curve1d units1) (VectorCurve2d (space @ units2)) where
+instance Multiplication' (Curve1d units1) (VectorCurve2d (space @ units2)) where
   type
     Curve1d units1 .*. VectorCurve2d (space @ units2) =
       VectorCurve2d (space @ (units1 :*: units2))
@@ -280,9 +280,9 @@ instance Multiplication (Curve1d units1) (VectorCurve2d (space @ units2)) where
 
 instance
   Units.Product units1 units2 units3 =>
-  Product (Qty units1) (VectorCurve2d (space @ units2)) (VectorCurve2d (space @ units3))
+  Multiplication (Qty units1) (VectorCurve2d (space @ units2)) (VectorCurve2d (space @ units3))
 
-instance Multiplication (Qty units1) (VectorCurve2d (space @ units2)) where
+instance Multiplication' (Qty units1) (VectorCurve2d (space @ units2)) where
   type
     Qty units1 .*. VectorCurve2d (space @ units2) =
       VectorCurve2d (space @ (units1 :*: units2))
@@ -290,9 +290,9 @@ instance Multiplication (Qty units1) (VectorCurve2d (space @ units2)) where
 
 instance
   Units.Product units1 units2 units3 =>
-  Product (Curve1d units1) (Vector2d (space @ units2)) (VectorCurve2d (space @ units3))
+  Multiplication (Curve1d units1) (Vector2d (space @ units2)) (VectorCurve2d (space @ units3))
 
-instance Multiplication (Curve1d units1) (Vector2d (space @ units2)) where
+instance Multiplication' (Curve1d units1) (Vector2d (space @ units2)) where
   type
     Curve1d units1 .*. Vector2d (space @ units2) =
       VectorCurve2d (space @ (units1 :*: units2))
@@ -300,9 +300,9 @@ instance Multiplication (Curve1d units1) (Vector2d (space @ units2)) where
 
 instance
   Units.Product units1 units2 units3 =>
-  Product (VectorCurve2d (space @ units1)) (Curve1d units2) (VectorCurve2d (space @ units3))
+  Multiplication (VectorCurve2d (space @ units1)) (Curve1d units2) (VectorCurve2d (space @ units3))
 
-instance Multiplication (VectorCurve2d (space @ units1)) (Curve1d units2) where
+instance Multiplication' (VectorCurve2d (space @ units1)) (Curve1d units2) where
   type
     VectorCurve2d (space @ units1) .*. Curve1d units2 =
       VectorCurve2d (space @ (units1 :*: units2))
@@ -310,9 +310,9 @@ instance Multiplication (VectorCurve2d (space @ units1)) (Curve1d units2) where
 
 instance
   Units.Product units1 units2 units3 =>
-  Product (VectorCurve2d (space @ units1)) (Qty units2) (VectorCurve2d (space @ units3))
+  Multiplication (VectorCurve2d (space @ units1)) (Qty units2) (VectorCurve2d (space @ units3))
 
-instance Multiplication (VectorCurve2d (space @ units1)) (Qty units2) where
+instance Multiplication' (VectorCurve2d (space @ units1)) (Qty units2) where
   type
     VectorCurve2d (space @ units1) .*. Qty units2 =
       VectorCurve2d (space @ (units1 :*: units2))
@@ -320,9 +320,9 @@ instance Multiplication (VectorCurve2d (space @ units1)) (Qty units2) where
 
 instance
   Units.Product units1 units2 units3 =>
-  Product (Vector2d (space @ units1)) (Curve1d units2) (VectorCurve2d (space @ units3))
+  Multiplication (Vector2d (space @ units1)) (Curve1d units2) (VectorCurve2d (space @ units3))
 
-instance Multiplication (Vector2d (space @ units1)) (Curve1d units2) where
+instance Multiplication' (Vector2d (space @ units1)) (Curve1d units2) where
   type
     Vector2d (space @ units1) .*. Curve1d units2 =
       VectorCurve2d (space @ (units1 :*: units2))
@@ -330,9 +330,9 @@ instance Multiplication (Vector2d (space @ units1)) (Curve1d units2) where
 
 instance
   Units.Quotient units1 units2 units3 =>
-  Quotient (VectorCurve2d (space @ units1)) (Curve1d units2) (VectorCurve2d (space @ units3))
+  Division (VectorCurve2d (space @ units1)) (Curve1d units2) (VectorCurve2d (space @ units3))
 
-instance Division (VectorCurve2d (space @ units1)) (Curve1d units2) where
+instance Division' (VectorCurve2d (space @ units1)) (Curve1d units2) where
   type
     VectorCurve2d (space @ units1) ./. Curve1d units2 =
       VectorCurve2d (space @ (units1 :/: units2))
@@ -340,9 +340,9 @@ instance Division (VectorCurve2d (space @ units1)) (Curve1d units2) where
 
 instance
   Units.Quotient units1 units2 units3 =>
-  Quotient (VectorCurve2d (space @ units1)) (Qty units2) (VectorCurve2d (space @ units3))
+  Division (VectorCurve2d (space @ units1)) (Qty units2) (VectorCurve2d (space @ units3))
 
-instance Division (VectorCurve2d (space @ units1)) (Qty units2) where
+instance Division' (VectorCurve2d (space @ units1)) (Qty units2) where
   type
     VectorCurve2d (space @ units1) ./. Qty units2 =
       VectorCurve2d (space @ (units1 :/: units2))
@@ -360,11 +360,11 @@ instance Curve1d.Interface (DotProductOf space units1 units2) (units1 :*: units2
 
 instance
   (Units.Product units1 units2 units3, space ~ space_) =>
-  DotProduct (VectorCurve2d (space @ units1)) (VectorCurve2d (space_ @ units2)) (Curve1d units3)
+  DotMultiplication (VectorCurve2d (space @ units1)) (VectorCurve2d (space_ @ units2)) (Curve1d units3)
 
 instance
   space ~ space_ =>
-  DotMultiplication (VectorCurve2d (space @ units1)) (VectorCurve2d (space_ @ units2))
+  DotMultiplication' (VectorCurve2d (space @ units1)) (VectorCurve2d (space_ @ units2))
   where
   type
     VectorCurve2d (space @ units1) .<>. VectorCurve2d (space_ @ units2) =
@@ -373,11 +373,11 @@ instance
 
 instance
   (Units.Product units1 units2 units3, space ~ space_) =>
-  DotProduct (VectorCurve2d (space @ units1)) (Vector2d (space_ @ units2)) (Curve1d units3)
+  DotMultiplication (VectorCurve2d (space @ units1)) (Vector2d (space_ @ units2)) (Curve1d units3)
 
 instance
   space ~ space_ =>
-  DotMultiplication (VectorCurve2d (space @ units1)) (Vector2d (space_ @ units2))
+  DotMultiplication' (VectorCurve2d (space @ units1)) (Vector2d (space_ @ units2))
   where
   type
     VectorCurve2d (space @ units1) .<>. Vector2d (space_ @ units2) =
@@ -386,11 +386,11 @@ instance
 
 instance
   (Units.Product units1 units2 units3, space ~ space_) =>
-  DotProduct (Vector2d (space @ units1)) (VectorCurve2d (space_ @ units2)) (Curve1d units3)
+  DotMultiplication (Vector2d (space @ units1)) (VectorCurve2d (space_ @ units2)) (Curve1d units3)
 
 instance
   space ~ space_ =>
-  DotMultiplication (Vector2d (space @ units1)) (VectorCurve2d (space_ @ units2))
+  DotMultiplication' (Vector2d (space @ units1)) (VectorCurve2d (space_ @ units2))
   where
   type
     Vector2d (space @ units1) .<>. VectorCurve2d (space_ @ units2) =
@@ -399,22 +399,22 @@ instance
 
 instance
   space ~ space_ =>
-  DotProduct (VectorCurve2d (space @ units)) (Direction2d space_) (Curve1d units)
+  DotMultiplication (VectorCurve2d (space @ units)) (Direction2d space_) (Curve1d units)
 
 instance
   space ~ space_ =>
-  DotMultiplication (VectorCurve2d (space @ units)) (Direction2d space_)
+  DotMultiplication' (VectorCurve2d (space @ units)) (Direction2d space_)
   where
   type VectorCurve2d (space @ units) .<>. Direction2d space_ = Curve1d (units :*: Unitless)
   curve .<>. direction2d = curve .<>. Direction2d.vector direction2d
 
 instance
   space ~ space_ =>
-  DotProduct (Direction2d space) (VectorCurve2d (space_ @ units)) (Curve1d units)
+  DotMultiplication (Direction2d space) (VectorCurve2d (space_ @ units)) (Curve1d units)
 
 instance
   space ~ space_ =>
-  DotMultiplication (Direction2d space) (VectorCurve2d (space_ @ units))
+  DotMultiplication' (Direction2d space) (VectorCurve2d (space_ @ units))
   where
   type Direction2d space .<>. VectorCurve2d (space_ @ units) = Curve1d (Unitless :*: units)
   direction2d .<>. curve = Direction2d.vector direction2d .<>. curve
@@ -431,11 +431,11 @@ instance Curve1d.Interface (CrossProductOf space units1 units2) (units1 :*: unit
 
 instance
   (Units.Product units1 units2 units3, space ~ space_) =>
-  CrossProduct (VectorCurve2d (space @ units1)) (VectorCurve2d (space_ @ units2)) (Curve1d units3)
+  CrossMultiplication (VectorCurve2d (space @ units1)) (VectorCurve2d (space_ @ units2)) (Curve1d units3)
 
 instance
   space ~ space_ =>
-  CrossMultiplication (VectorCurve2d (space @ units1)) (VectorCurve2d (space_ @ units2))
+  CrossMultiplication' (VectorCurve2d (space @ units1)) (VectorCurve2d (space_ @ units2))
   where
   type
     VectorCurve2d (space @ units1) .><. VectorCurve2d (space_ @ units2) =
@@ -444,11 +444,11 @@ instance
 
 instance
   (Units.Product units1 units2 units3, space ~ space_) =>
-  CrossProduct (VectorCurve2d (space @ units1)) (Vector2d (space_ @ units2)) (Curve1d units3)
+  CrossMultiplication (VectorCurve2d (space @ units1)) (Vector2d (space_ @ units2)) (Curve1d units3)
 
 instance
   space ~ space_ =>
-  CrossMultiplication (VectorCurve2d (space @ units1)) (Vector2d (space_ @ units2))
+  CrossMultiplication' (VectorCurve2d (space @ units1)) (Vector2d (space_ @ units2))
   where
   type
     VectorCurve2d (space @ units1) .><. Vector2d (space_ @ units2) =
@@ -457,11 +457,11 @@ instance
 
 instance
   (Units.Product units1 units2 units3, space ~ space_) =>
-  CrossProduct (Vector2d (space @ units1)) (VectorCurve2d (space_ @ units2)) (Curve1d units3)
+  CrossMultiplication (Vector2d (space @ units1)) (VectorCurve2d (space_ @ units2)) (Curve1d units3)
 
 instance
   space ~ space_ =>
-  CrossMultiplication (Vector2d (space @ units1)) (VectorCurve2d (space_ @ units2))
+  CrossMultiplication' (Vector2d (space @ units1)) (VectorCurve2d (space_ @ units2))
   where
   type
     Vector2d (space @ units1) .><. VectorCurve2d (space_ @ units2) =
@@ -470,25 +470,25 @@ instance
 
 instance
   space ~ space_ =>
-  CrossProduct
+  CrossMultiplication
     (VectorCurve2d (space @ units))
     (Direction2d space_)
     (Curve1d units)
 
 instance
   space ~ space_ =>
-  CrossMultiplication (VectorCurve2d (space @ units)) (Direction2d space_)
+  CrossMultiplication' (VectorCurve2d (space @ units)) (Direction2d space_)
   where
   type VectorCurve2d (space @ units) .><. Direction2d space_ = Curve1d (units :*: Unitless)
   curve .><. direction2d = curve .><. Direction2d.vector direction2d
 
 instance
   space ~ space_ =>
-  CrossProduct (Direction2d space) (VectorCurve2d (space_ @ units)) (Curve1d units)
+  CrossMultiplication (Direction2d space) (VectorCurve2d (space_ @ units)) (Curve1d units)
 
 instance
   space ~ space_ =>
-  CrossMultiplication (Direction2d space) (VectorCurve2d (space_ @ units))
+  CrossMultiplication' (Direction2d space) (VectorCurve2d (space_ @ units))
   where
   type Direction2d space .><. VectorCurve2d (space_ @ units) = Curve1d (Unitless :*: units)
   direction2d .><. curve = Direction2d.vector direction2d .><. curve

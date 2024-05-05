@@ -68,19 +68,19 @@ instance
 instance Negation (Vector3d (space @ units)) where
   negate (Vector3d vx vy vz) = Vector3d (negate vx) (negate vy) (negate vz)
 
-instance Multiplication Sign (Vector3d (space @ units)) where
+instance Multiplication' Sign (Vector3d (space @ units)) where
   type Sign .*. Vector3d (space @ units) = Vector3d (space @ (Unitless :*: units))
   Positive .*. vector = Units.coerce vector
   Negative .*. vector = Units.coerce -vector
 
-instance Product Sign (Vector3d (space @ units)) (Vector3d (space @ units))
+instance Multiplication Sign (Vector3d (space @ units)) (Vector3d (space @ units))
 
-instance Multiplication (Vector3d (space @ units)) Sign where
+instance Multiplication' (Vector3d (space @ units)) Sign where
   type Vector3d (space @ units) .*. Sign = Vector3d (space @ (units :*: Unitless))
   vector .*. Positive = Units.coerce vector
   vector .*. Negative = Units.coerce -vector
 
-instance Product (Vector3d (space @ units)) Sign (Vector3d (space @ units))
+instance Multiplication (Vector3d (space @ units)) Sign (Vector3d (space @ units))
 
 instance
   ( space ~ space_
@@ -104,44 +104,44 @@ instance
   where
   Vector3d x1 y1 z1 - Vector3d x2 y2 z2 = Vector3d (x1 - x2) (y1 - y2) (z1 - z2)
 
-instance Multiplication (Qty units1) (Vector3d (space @ units2)) where
+instance Multiplication' (Qty units1) (Vector3d (space @ units2)) where
   type Qty units1 .*. Vector3d (space @ units2) = Vector3d (space @ (units1 :*: units2))
   scale .*. Vector3d vx vy vz = Vector3d (scale .*. vx) (scale .*. vy) (scale .*. vz)
 
 instance
   Units.Product units1 units2 units3 =>
-  Product (Qty units1) (Vector3d (space @ units2)) (Vector3d (space @ units3))
+  Multiplication (Qty units1) (Vector3d (space @ units2)) (Vector3d (space @ units3))
 
-instance Multiplication (Vector3d (space @ units1)) (Qty units2) where
+instance Multiplication' (Vector3d (space @ units1)) (Qty units2) where
   type Vector3d (space @ units1) .*. Qty units2 = Vector3d (space @ (units1 :*: units2))
   Vector3d vx vy vz .*. scale = Vector3d (vx .*. scale) (vy .*. scale) (vz .*. scale)
 
 instance
   Units.Product units1 units2 units3 =>
-  Product (Vector3d (space @ units1)) (Qty units2) (Vector3d (space @ units3))
+  Multiplication (Vector3d (space @ units1)) (Qty units2) (Vector3d (space @ units3))
 
-instance Division (Vector3d (space @ units1)) (Qty units2) where
+instance Division' (Vector3d (space @ units1)) (Qty units2) where
   type Vector3d (space @ units1) ./. Qty units2 = Vector3d (space @ (units1 :/: units2))
   Vector3d vx vy vz ./. scale = Vector3d (vx ./. scale) (vy ./. scale) (vz ./. scale)
 
 instance
   Units.Quotient units1 units2 units3 =>
-  Quotient (Vector3d (space @ units1)) (Qty units2) (Vector3d (space @ units3))
+  Division (Vector3d (space @ units1)) (Qty units2) (Vector3d (space @ units3))
 
 instance
   space ~ space_ =>
-  DotMultiplication (Vector3d (space @ units1)) (Vector3d (space_ @ units2))
+  DotMultiplication' (Vector3d (space @ units1)) (Vector3d (space_ @ units2))
   where
   type Vector3d (space @ units1) .<>. Vector3d (space_ @ units2) = Qty (units1 :*: units2)
   Vector3d x1 y1 z1 .<>. Vector3d x2 y2 z2 = x1 .*. x2 + y1 .*. y2 + z1 .*. z2
 
 instance
   (Units.Product units1 units2 units3, space ~ space_) =>
-  DotProduct (Vector3d (space @ units1)) (Vector3d (space_ @ units2)) (Qty units3)
+  DotMultiplication (Vector3d (space @ units1)) (Vector3d (space_ @ units2)) (Qty units3)
 
 instance
   space ~ space_ =>
-  CrossMultiplication (Vector3d (space @ units1)) (Vector3d (space_ @ units2))
+  CrossMultiplication' (Vector3d (space @ units1)) (Vector3d (space_ @ units2))
   where
   type Vector3d (space @ units1) .><. Vector3d (space_ @ units2) = Vector3d (space @ (units1 :*: units2))
   Vector3d x1 y1 z1 .><. Vector3d x2 y2 z2 =
@@ -152,7 +152,7 @@ instance
 
 instance
   (Units.Product units1 units2 units3, space ~ space_) =>
-  CrossProduct (Vector3d (space @ units1)) (Vector3d (space_ @ units2)) (Vector3d (space @ units3))
+  CrossMultiplication (Vector3d (space @ units1)) (Vector3d (space_ @ units2)) (Vector3d (space @ units3))
 
 zero :: Vector3d (space @ units)
 zero = Vector3d Qty.zero Qty.zero Qty.zero

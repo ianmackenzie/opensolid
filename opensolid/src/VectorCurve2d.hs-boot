@@ -38,45 +38,48 @@ instance Show (VectorCurve2d (space @ units))
 
 instance Negation (VectorCurve2d (space @ units))
 
-instance Multiplication Sign (VectorCurve2d (space @ units))
+instance Multiplication' Sign (VectorCurve2d (space @ units))
 
-instance Product Sign (VectorCurve2d (space @ units)) (VectorCurve2d (space @ units))
+instance Multiplication Sign (VectorCurve2d (space @ units)) (VectorCurve2d (space @ units))
 
-instance Multiplication (VectorCurve2d (space @ units)) Sign
+instance Multiplication' (VectorCurve2d (space @ units)) Sign
 
-instance Product (VectorCurve2d (space @ units)) Sign (VectorCurve2d (space @ units))
+instance Multiplication (VectorCurve2d (space @ units)) Sign (VectorCurve2d (space @ units))
 
 instance
   space ~ space_ =>
   Units.Coercion (VectorCurve2d (space @ units1)) (VectorCurve2d (space_ @ units2))
 
-instance Multiplication (Curve1d units1) (VectorCurve2d (space @ units2))
+instance Multiplication' (Curve1d units1) (VectorCurve2d (space @ units2))
 
 instance
   Units.Product units1 units2 units3 =>
-  Product (Curve1d units1) (VectorCurve2d (space @ units2)) (VectorCurve2d (space @ units3))
+  Multiplication (Curve1d units1) (VectorCurve2d (space @ units2)) (VectorCurve2d (space @ units3))
 
-instance Multiplication (VectorCurve2d (space @ units1)) (Curve1d units2)
+instance Multiplication' (VectorCurve2d (space @ units1)) (Curve1d units2)
 
 instance
   Units.Product units1 units2 units3 =>
-  Product (VectorCurve2d (space @ units1)) (Curve1d units2) (VectorCurve2d (space @ units3))
+  Multiplication (VectorCurve2d (space @ units1)) (Curve1d units2) (VectorCurve2d (space @ units3))
 
-instance Division (VectorCurve2d (space @ units1)) (Curve1d units2)
+instance Division' (VectorCurve2d (space @ units1)) (Curve1d units2)
 
 instance
   Units.Quotient units1 units2 units3 =>
-  Quotient (VectorCurve2d (space @ units1)) (Curve1d units2) (VectorCurve2d (space @ units3))
+  Division (VectorCurve2d (space @ units1)) (Curve1d units2) (VectorCurve2d (space @ units3))
 
 instance
   space ~ space_ =>
-  DotMultiplication
+  DotMultiplication'
     (VectorCurve2d (space @ units1))
     (VectorCurve2d (space_ @ units2))
 
 instance
   (Units.Product units1 units2 units3, space ~ space_) =>
-  DotProduct (VectorCurve2d (space @ units1)) (VectorCurve2d (space_ @ units2)) (Curve1d units3)
+  DotMultiplication
+    (VectorCurve2d (space @ units1))
+    (VectorCurve2d (space_ @ units2))
+    (Curve1d units3)
 
 constant :: Vector2d (space @ units) -> VectorCurve2d (space @ units)
 wrap :: Interface curve (space @ units) => curve -> VectorCurve2d (space @ units)

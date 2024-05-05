@@ -34,197 +34,194 @@ instance space ~ space_ => Units.Coercion (DirectionBounds2d space) (DirectionBo
 instance Negation (DirectionBounds2d space) where
   negate (DirectionBounds2d vectorBounds) = DirectionBounds2d (negate vectorBounds)
 
-instance Product Sign (DirectionBounds2d space) (DirectionBounds2d space)
+instance Multiplication Sign (DirectionBounds2d space) (DirectionBounds2d space)
 
-instance Multiplication Sign (DirectionBounds2d space) where
+instance Multiplication' Sign (DirectionBounds2d space) where
   type Sign .*. DirectionBounds2d space = DirectionBounds2d space
   Positive .*. directionBounds = directionBounds
   Negative .*. directionBounds = -directionBounds
 
-instance Product (DirectionBounds2d space) Sign (DirectionBounds2d space)
+instance Multiplication (DirectionBounds2d space) Sign (DirectionBounds2d space)
 
-instance Multiplication (DirectionBounds2d space) Sign where
+instance Multiplication' (DirectionBounds2d space) Sign where
   type DirectionBounds2d space .*. Sign = DirectionBounds2d space
   directionBounds .*. Positive = directionBounds
   directionBounds .*. Negative = -directionBounds
 
-instance Product (Qty units) (DirectionBounds2d space) (VectorBounds2d (space @ units))
+instance Multiplication (Qty units) (DirectionBounds2d space) (VectorBounds2d (space @ units))
 
-instance Multiplication (Qty units) (DirectionBounds2d space) where
+instance Multiplication' (Qty units) (DirectionBounds2d space) where
   type Qty units .*. DirectionBounds2d space = VectorBounds2d (space @ (units :*: Unitless))
   value .*. DirectionBounds2d vectorBounds = value .*. vectorBounds
 
-instance Product (DirectionBounds2d space) (Qty units) (VectorBounds2d (space @ units))
+instance Multiplication (DirectionBounds2d space) (Qty units) (VectorBounds2d (space @ units))
 
-instance Multiplication (DirectionBounds2d space) (Qty units) where
+instance Multiplication' (DirectionBounds2d space) (Qty units) where
   type DirectionBounds2d space .*. Qty units = VectorBounds2d (space @ (Unitless :*: units))
   DirectionBounds2d vectorBounds .*. value = vectorBounds .*. value
 
-instance Product (Range units) (DirectionBounds2d space) (VectorBounds2d (space @ units))
+instance Multiplication (Range units) (DirectionBounds2d space) (VectorBounds2d (space @ units))
 
-instance Multiplication (Range units) (DirectionBounds2d space) where
+instance Multiplication' (Range units) (DirectionBounds2d space) where
   type Range units .*. DirectionBounds2d space = VectorBounds2d (space @ (units :*: Unitless))
   range .*. DirectionBounds2d vectorBounds = range .*. vectorBounds
 
-instance Product (DirectionBounds2d space) (Range units) (VectorBounds2d (space @ units))
+instance Multiplication (DirectionBounds2d space) (Range units) (VectorBounds2d (space @ units))
 
-instance Multiplication (DirectionBounds2d space) (Range units) where
+instance Multiplication' (DirectionBounds2d space) (Range units) where
   type DirectionBounds2d space .*. Range units = VectorBounds2d (space @ (Unitless :*: units))
   DirectionBounds2d vectorBounds .*. range = vectorBounds .*. range
 
 instance
   space ~ space_ =>
-  DotProduct (DirectionBounds2d space) (DirectionBounds2d space_) (Range Unitless)
+  DotMultiplication (DirectionBounds2d space) (DirectionBounds2d space_) (Range Unitless)
 
 instance
   space ~ space_ =>
-  DotMultiplication (DirectionBounds2d space) (DirectionBounds2d space_)
+  DotMultiplication' (DirectionBounds2d space) (DirectionBounds2d space_)
   where
   type DirectionBounds2d space .<>. DirectionBounds2d space_ = Range (Unitless :*: Unitless)
   DirectionBounds2d vectorBounds1 .<>. DirectionBounds2d vectorBounds2 = vectorBounds1 .<>. vectorBounds2
 
 instance
   space ~ space_ =>
-  DotProduct (DirectionBounds2d space) (VectorBounds2d (space_ @ units)) (Range units)
+  DotMultiplication (DirectionBounds2d space) (VectorBounds2d (space_ @ units)) (Range units)
 
 instance
   space ~ space_ =>
-  DotMultiplication (DirectionBounds2d space) (VectorBounds2d (space_ @ units))
+  DotMultiplication' (DirectionBounds2d space) (VectorBounds2d (space_ @ units))
   where
   type DirectionBounds2d space .<>. VectorBounds2d (space_ @ units) = Range (Unitless :*: units)
   DirectionBounds2d vectorBounds1 .<>. vectorBounds2 = vectorBounds1 .<>. vectorBounds2
 
 instance
   space ~ space_ =>
-  DotProduct (VectorBounds2d (space @ units)) (DirectionBounds2d space_) (Range units)
+  DotMultiplication (VectorBounds2d (space @ units)) (DirectionBounds2d space_) (Range units)
 
 instance
   space ~ space_ =>
-  DotMultiplication (VectorBounds2d (space @ units)) (DirectionBounds2d space_)
+  DotMultiplication' (VectorBounds2d (space @ units)) (DirectionBounds2d space_)
   where
   type VectorBounds2d (space @ units) .<>. DirectionBounds2d space_ = Range (units :*: Unitless)
-
   vectorBounds1 .<>. DirectionBounds2d vectorBounds2 = vectorBounds1 .<>. vectorBounds2
 
 instance
   space ~ space_ =>
-  DotProduct (DirectionBounds2d space) (Direction2d space_) (Range Unitless)
+  DotMultiplication (DirectionBounds2d space) (Direction2d space_) (Range Unitless)
 
 instance
   space ~ space_ =>
-  DotMultiplication (DirectionBounds2d space) (Direction2d space_)
+  DotMultiplication' (DirectionBounds2d space) (Direction2d space_)
   where
   type DirectionBounds2d space .<>. Direction2d space_ = Range (Unitless :*: Unitless)
   DirectionBounds2d vectorBounds .<>. direction = vectorBounds .<>. direction
 
 instance
   space ~ space_ =>
-  DotProduct (Direction2d space) (DirectionBounds2d space_) (Range Unitless)
+  DotMultiplication (Direction2d space) (DirectionBounds2d space_) (Range Unitless)
 
 instance
   space ~ space_ =>
-  DotMultiplication (Direction2d space) (DirectionBounds2d space_)
+  DotMultiplication' (Direction2d space) (DirectionBounds2d space_)
   where
   type Direction2d space .<>. DirectionBounds2d space_ = Range (Unitless :*: Unitless)
   direction .<>. DirectionBounds2d vectorBounds = direction .<>. vectorBounds
 
 instance
   space ~ space_ =>
-  DotProduct (DirectionBounds2d space) (Vector2d (space_ @ units)) (Range units)
+  DotMultiplication (DirectionBounds2d space) (Vector2d (space_ @ units)) (Range units)
 
 instance
   space ~ space_ =>
-  DotMultiplication (DirectionBounds2d space) (Vector2d (space_ @ units))
+  DotMultiplication' (DirectionBounds2d space) (Vector2d (space_ @ units))
   where
   type DirectionBounds2d space .<>. Vector2d (space_ @ units) = Range (Unitless :*: units)
   DirectionBounds2d vectorBounds .<>. vector = vectorBounds .<>. vector
 
 instance
   space ~ space_ =>
-  DotProduct (Vector2d (space @ units)) (DirectionBounds2d space_) (Range units)
+  DotMultiplication (Vector2d (space @ units)) (DirectionBounds2d space_) (Range units)
 
 instance
   space ~ space_ =>
-  DotMultiplication (Vector2d (space @ units)) (DirectionBounds2d space_)
+  DotMultiplication' (Vector2d (space @ units)) (DirectionBounds2d space_)
   where
   type Vector2d (space @ units) .<>. DirectionBounds2d space_ = Range (units :*: Unitless)
   vector .<>. DirectionBounds2d vectorBounds = vector .<>. vectorBounds
 
 instance
   space ~ space_ =>
-  CrossProduct (DirectionBounds2d space) (DirectionBounds2d space_) (Range Unitless)
+  CrossMultiplication (DirectionBounds2d space) (DirectionBounds2d space_) (Range Unitless)
 
 instance
   space ~ space_ =>
-  CrossMultiplication (DirectionBounds2d space) (DirectionBounds2d space_)
+  CrossMultiplication' (DirectionBounds2d space) (DirectionBounds2d space_)
   where
   type DirectionBounds2d space .><. DirectionBounds2d space_ = Range (Unitless :*: Unitless)
   DirectionBounds2d vectorBounds1 .><. DirectionBounds2d vectorBounds2 = vectorBounds1 .><. vectorBounds2
 
 instance
   space ~ space_ =>
-  CrossProduct (DirectionBounds2d space) (VectorBounds2d (space_ @ units)) (Range units)
+  CrossMultiplication (DirectionBounds2d space) (VectorBounds2d (space_ @ units)) (Range units)
 
 instance
   space ~ space_ =>
-  CrossMultiplication (DirectionBounds2d space) (VectorBounds2d (space_ @ units))
+  CrossMultiplication' (DirectionBounds2d space) (VectorBounds2d (space_ @ units))
   where
   type DirectionBounds2d space .><. VectorBounds2d (space_ @ units) = Range (Unitless :*: units)
-
   DirectionBounds2d vectorBounds1 .><. vectorBounds2 = vectorBounds1 .><. vectorBounds2
 
 instance
   space ~ space_ =>
-  CrossProduct (VectorBounds2d (space @ units)) (DirectionBounds2d space_) (Range units)
+  CrossMultiplication (VectorBounds2d (space @ units)) (DirectionBounds2d space_) (Range units)
 
 instance
   space ~ space_ =>
-  CrossMultiplication (VectorBounds2d (space @ units)) (DirectionBounds2d space_)
+  CrossMultiplication' (VectorBounds2d (space @ units)) (DirectionBounds2d space_)
   where
   type VectorBounds2d (space @ units) .><. DirectionBounds2d space_ = Range (units :*: Unitless)
-
   vectorBounds1 .><. DirectionBounds2d vectorBounds2 = vectorBounds1 .><. vectorBounds2
 
 instance
   space ~ space_ =>
-  CrossProduct (DirectionBounds2d space) (Direction2d space_) (Range Unitless)
+  CrossMultiplication (DirectionBounds2d space) (Direction2d space_) (Range Unitless)
 
 instance
   space ~ space_ =>
-  CrossMultiplication (DirectionBounds2d space) (Direction2d space_)
+  CrossMultiplication' (DirectionBounds2d space) (Direction2d space_)
   where
   type DirectionBounds2d space .><. Direction2d space_ = Range (Unitless :*: Unitless)
   DirectionBounds2d vectorBounds .><. direction = vectorBounds .><. direction
 
 instance
   space ~ space_ =>
-  CrossProduct (Direction2d space) (DirectionBounds2d space_) (Range Unitless)
+  CrossMultiplication (Direction2d space) (DirectionBounds2d space_) (Range Unitless)
 
 instance
   space ~ space_ =>
-  CrossMultiplication (Direction2d space) (DirectionBounds2d space_)
+  CrossMultiplication' (Direction2d space) (DirectionBounds2d space_)
   where
   type Direction2d space .><. DirectionBounds2d space_ = Range (Unitless :*: Unitless)
   direction .><. DirectionBounds2d vectorBounds = direction .><. vectorBounds
 
 instance
   space ~ space_ =>
-  CrossProduct (DirectionBounds2d space) (Vector2d (space_ @ units)) (Range units)
+  CrossMultiplication (DirectionBounds2d space) (Vector2d (space_ @ units)) (Range units)
 
 instance
   space ~ space_ =>
-  CrossMultiplication (DirectionBounds2d space) (Vector2d (space_ @ units))
+  CrossMultiplication' (DirectionBounds2d space) (Vector2d (space_ @ units))
   where
   type DirectionBounds2d space .><. Vector2d (space_ @ units) = Range (Unitless :*: units)
   DirectionBounds2d vectorBounds .><. vector = vectorBounds .><. vector
 
 instance
   space ~ space_ =>
-  CrossProduct (Vector2d (space @ units)) (DirectionBounds2d space_) (Range units)
+  CrossMultiplication (Vector2d (space @ units)) (DirectionBounds2d space_) (Range units)
 
 instance
   space ~ space_ =>
-  CrossMultiplication (Vector2d (space @ units)) (DirectionBounds2d space_)
+  CrossMultiplication' (Vector2d (space @ units)) (DirectionBounds2d space_)
   where
   type Vector2d (space @ units) .><. DirectionBounds2d space_ = Range (units :*: Unitless)
   vector .><. DirectionBounds2d vectorBounds = vector .><. vectorBounds

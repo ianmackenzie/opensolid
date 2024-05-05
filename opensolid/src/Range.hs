@@ -106,19 +106,19 @@ instance units ~ units_ => Intersects (Range units) (Range units_) units where
 instance Negation (Range units) where
   negate (Range low high) = Range_ (negate high) (negate low)
 
-instance Multiplication Sign (Range units) where
+instance Multiplication' Sign (Range units) where
   type Sign .*. Range units = Range (Unitless :*: units)
   Positive .*. range = Units.coerce range
   Negative .*. range = Units.coerce -range
 
-instance Product Sign (Range units) (Range units)
+instance Multiplication Sign (Range units) (Range units)
 
-instance Multiplication (Range units) Sign where
+instance Multiplication' (Range units) Sign where
   type Range units .*. Sign = Range (units :*: Unitless)
   range .*. Positive = Units.coerce range
   range .*. Negative = Units.coerce -range
 
-instance Product (Range units) Sign (Range units)
+instance Multiplication (Range units) Sign (Range units)
 
 instance units ~ units_ => Addition (Range units) (Range units_) (Range units) where
   Range low1 high1 + Range low2 high2 = Range_ (low1 + low2) (high1 + high2)
@@ -138,51 +138,57 @@ instance units ~ units_ => Subtraction (Range units) (Qty units_) (Range units) 
 instance units ~ units_ => Subtraction (Qty units) (Range units_) (Range units) where
   value - Range low high = Range_ (value - high) (value - low)
 
-instance Multiplication (Qty units1) (Range units2) where
+instance Multiplication' (Qty units1) (Range units2) where
   type Qty units1 .*. Range units2 = Range (units1 :*: units2)
   value .*. Range low high = from (value .*. low) (value .*. high)
 
-instance Units.Product units1 units2 units3 => Product (Qty units1) (Range units2) (Range units3)
+instance
+  Units.Product units1 units2 units3 =>
+  Multiplication (Qty units1) (Range units2) (Range units3)
 
-instance Multiplication (Range units1) (Qty units2) where
+instance Multiplication' (Range units1) (Qty units2) where
   type Range units1 .*. Qty units2 = Range (units1 :*: units2)
   Range low high .*. value = from (low .*. value) (high .*. value)
 
-instance Units.Product units1 units2 units3 => Product (Range units1) (Qty units2) (Range units3)
+instance
+  Units.Product units1 units2 units3 =>
+  Multiplication (Range units1) (Qty units2) (Range units3)
 
-instance Multiplication (Range units1) (Range units2) where
+instance Multiplication' (Range units1) (Range units2) where
   type Range units1 .*. Range units2 = Range (units1 :*: units2)
   Range low1 high1 .*. Range low2 high2 =
     hull4 (low1 .*. low2) (low1 .*. high2) (high1 .*. low2) (high1 .*. high2)
 
-instance Units.Product units1 units2 units3 => Product (Range units1) (Range units2) (Range units3)
+instance
+  Units.Product units1 units2 units3 =>
+  Multiplication (Range units1) (Range units2) (Range units3)
 
-instance Division (Qty units1) (Range units2) where
+instance Division' (Qty units1) (Range units2) where
   type Qty units1 ./. Range units2 = Range (units1 :/: units2)
   n ./. Range dl dh =
     if dl > Qty.zero || dh < Qty.zero
       then from (n ./. dl) (n ./. dh)
       else Range_ -Qty.infinity Qty.infinity
 
-instance Units.Quotient units1 units2 units3 => Quotient (Qty units1) (Range units2) (Range units3)
+instance Units.Quotient units1 units2 units3 => Division (Qty units1) (Range units2) (Range units3)
 
-instance Division (Range units1) (Qty units2) where
+instance Division' (Range units1) (Qty units2) where
   type Range units1 ./. Qty units2 = Range (units1 :/: units2)
   Range nl nh ./. d =
     if d /= Qty.zero
       then from (nl ./. d) (nh ./. d)
       else Range_ -Qty.infinity Qty.infinity
 
-instance Units.Quotient units1 units2 units3 => Quotient (Range units1) (Qty units2) (Range units3)
+instance Units.Quotient units1 units2 units3 => Division (Range units1) (Qty units2) (Range units3)
 
-instance Division (Range units1) (Range units2) where
+instance Division' (Range units1) (Range units2) where
   type Range units1 ./. Range units2 = Range (units1 :/: units2)
   Range nl nh ./. Range dl dh =
     if dl > Qty.zero || dh < Qty.zero
       then hull4 (nl ./. dl) (nl ./. dh) (nh ./. dl) (nh ./. dh)
       else Range_ -Qty.infinity Qty.infinity
 
-instance Units.Quotient units1 units2 units3 => Quotient (Range units1) (Range units2) (Range units3)
+instance Units.Quotient units1 units2 units3 => Division (Range units1) (Range units2) (Range units3)
 
 instance Bounds.Interface (Range units) where
   aggregate2 = aggregate2

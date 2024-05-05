@@ -21,10 +21,10 @@ vector :: Direction2d space -> Vector2d (space @ Unitless)
 components :: Direction2d space -> (Float, Float)
 transformBy :: Transform2d.IsRigid a => Transform2d a (space @ units1) -> Direction2d space -> Direction2d space
 
-instance Multiplication (Qty units) (Direction2d space)
+instance Multiplication' (Qty units) (Direction2d space)
 
-instance Product (Qty units) (Direction2d space) (Vector2d (space @ units))
+instance Multiplication (Qty units) (Direction2d space) (Vector2d (space @ units))
 
-instance Multiplication (Direction2d space) (Qty units)
+instance Multiplication' (Direction2d space) (Qty units)
 
-instance Product (Direction2d space) (Qty units) (Vector2d (space @ units))
+instance Multiplication (Direction2d space) (Qty units) (Vector2d (space @ units))

@@ -67,43 +67,43 @@ instance
 instance Negation (Direction2d space) where
   negate direction = Direction2d -(vector direction)
 
-instance Multiplication Sign (Direction2d space) where
+instance Multiplication' Sign (Direction2d space) where
   type Sign .*. Direction2d space = Direction2d space
   Positive .*. direction = direction
   Negative .*. direction = -direction
 
-instance Product Sign (Direction2d space) (Direction2d space)
+instance Multiplication Sign (Direction2d space) (Direction2d space)
 
-instance Multiplication (Direction2d space) Sign where
+instance Multiplication' (Direction2d space) Sign where
   type Direction2d space .*. Sign = Direction2d space
   direction .*. Positive = direction
   direction .*. Negative = -direction
 
-instance Product (Direction2d space) Sign (Direction2d space)
+instance Multiplication (Direction2d space) Sign (Direction2d space)
 
-instance Multiplication (Qty units) (Direction2d space) where
+instance Multiplication' (Qty units) (Direction2d space) where
   type Qty units .*. Direction2d space = Vector2d (space @ (units :*: Unitless))
   scale .*. direction = scale .*. vector direction
 
-instance Product (Qty units) (Direction2d space) (Vector2d (space @ units))
+instance Multiplication (Qty units) (Direction2d space) (Vector2d (space @ units))
 
-instance Multiplication (Direction2d space) (Qty units) where
+instance Multiplication' (Direction2d space) (Qty units) where
   type Direction2d space .*. Qty units = Vector2d (space @ (Unitless :*: units))
   direction .*. scale = vector direction .*. scale
 
-instance Product (Direction2d space) (Qty units) (Vector2d (space @ units))
+instance Multiplication (Direction2d space) (Qty units) (Vector2d (space @ units))
 
-instance space ~ space_ => DotMultiplication (Direction2d space) (Direction2d space_) where
+instance space ~ space_ => DotMultiplication' (Direction2d space) (Direction2d space_) where
   type Direction2d space .<>. Direction2d space_ = Float
   Direction2d v1 .<>. Direction2d v2 = v1 <> v2
 
-instance space ~ space_ => DotProduct (Direction2d space) (Direction2d space_) Float
+instance space ~ space_ => DotMultiplication (Direction2d space) (Direction2d space_) Float
 
-instance space ~ space_ => CrossMultiplication (Direction2d space) (Direction2d space_) where
+instance space ~ space_ => CrossMultiplication' (Direction2d space) (Direction2d space_) where
   type Direction2d space .><. Direction2d space_ = Float
   Direction2d v1 .><. Direction2d v2 = v1 >< v2
 
-instance space ~ space_ => CrossProduct (Direction2d space) (Direction2d space_) Float
+instance space ~ space_ => CrossMultiplication (Direction2d space) (Direction2d space_) Float
 
 {-# INLINE vector #-}
 vector :: Direction2d space -> Vector2d (space @ Unitless)

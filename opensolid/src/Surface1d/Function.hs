@@ -141,16 +141,16 @@ instance Negation (Function units) where
   negate (Quotient' f1 f2) = negate f1 ./. f2
   negate function = Negated function
 
-instance Product Sign (Function units) (Function units)
+instance Multiplication Sign (Function units) (Function units)
 
-instance Multiplication Sign (Function units) where
+instance Multiplication' Sign (Function units) where
   type Sign .*. Function units = Function (Unitless :*: units)
   Positive .*. function = Units.coerce function
   Negative .*. function = Units.coerce -function
 
-instance Product (Function units) Sign (Function units)
+instance Multiplication (Function units) Sign (Function units)
 
-instance Multiplication (Function units) Sign where
+instance Multiplication' (Function units) Sign where
   type Function units .*. Sign = Function (units :*: Unitless)
   function .*. Positive = Units.coerce function
   function .*. Negative = Units.coerce -function
@@ -181,9 +181,9 @@ instance units ~ units_ => Subtraction (Qty units) (Function units_) (Function u
 
 instance
   Units.Product units1 units2 units3 =>
-  Product (Function units1) (Function units2) (Function units3)
+  Multiplication (Function units1) (Function units2) (Function units3)
 
-instance Multiplication (Function units1) (Function units2) where
+instance Multiplication' (Function units1) (Function units2) where
   type Function units1 .*. Function units2 = Function (units1 :*: units2)
   Zero .*. _ = Zero
   _ .*. Zero = Zero
@@ -197,25 +197,25 @@ instance Multiplication (Function units1) (Function units2) where
 
 instance
   Units.Product units1 units2 units3 =>
-  Product (Function units1) (Qty units2) (Function units3)
+  Multiplication (Function units1) (Qty units2) (Function units3)
 
-instance Multiplication (Function units1) (Qty units2) where
+instance Multiplication' (Function units1) (Qty units2) where
   type Function units1 .*. Qty units2 = Function (units1 :*: units2)
   function .*. value = function .*. constant value
 
 instance
   Units.Product units1 units2 units3 =>
-  Product (Qty units1) (Function units2) (Function units3)
+  Multiplication (Qty units1) (Function units2) (Function units3)
 
-instance Multiplication (Qty units1) (Function units2) where
+instance Multiplication' (Qty units1) (Function units2) where
   type Qty units1 .*. Function units2 = Function (units1 :*: units2)
   value .*. function = constant value .*. function
 
 instance
   Units.Quotient units1 units2 units3 =>
-  Quotient (Function units1) (Function units2) (Function units3)
+  Division (Function units1) (Function units2) (Function units3)
 
-instance Division (Function units1) (Function units2) where
+instance Division' (Function units1) (Function units2) where
   type Function units1 ./. Function units2 = Function (units1 :/: units2)
   Zero ./. _ = Zero
   Constant x ./. Constant y = Constant (x ./. y)
@@ -224,17 +224,17 @@ instance Division (Function units1) (Function units2) where
 
 instance
   Units.Quotient units1 units2 units3 =>
-  Quotient (Function units1) (Qty units2) (Function units3)
+  Division (Function units1) (Qty units2) (Function units3)
 
-instance Division (Function units1) (Qty units2) where
+instance Division' (Function units1) (Qty units2) where
   type Function units1 ./. Qty units2 = Function (units1 :/: units2)
   function ./. value = function ./. constant value
 
 instance
   Units.Quotient units1 units2 units3 =>
-  Quotient (Qty units1) (Function units2) (Function units3)
+  Division (Qty units1) (Function units2) (Function units3)
 
-instance Division (Qty units1) (Function units2) where
+instance Division' (Qty units1) (Function units2) where
   type Qty units1 ./. Function units2 = Function (units1 :/: units2)
   value ./. function = constant value ./. function
 

@@ -96,19 +96,19 @@ instance
 instance Negation (Vector2d (space @ units)) where
   negate (Vector2d vx vy) = Vector2d (negate vx) (negate vy)
 
-instance Multiplication Sign (Vector2d (space @ units)) where
+instance Multiplication' Sign (Vector2d (space @ units)) where
   type Sign .*. Vector2d (space @ units) = Vector2d (space @ (Unitless :*: units))
   Positive .*. vector = Units.coerce vector
   Negative .*. vector = Units.coerce -vector
 
-instance Product Sign (Vector2d (space @ units)) (Vector2d (space @ units))
+instance Multiplication Sign (Vector2d (space @ units)) (Vector2d (space @ units))
 
-instance Multiplication (Vector2d (space @ units)) Sign where
+instance Multiplication' (Vector2d (space @ units)) Sign where
   type Vector2d (space @ units) .*. Sign = Vector2d (space @ (units :*: Unitless))
   vector .*. Positive = Units.coerce vector
   vector .*. Negative = Units.coerce -vector
 
-instance Product (Vector2d (space @ units)) Sign (Vector2d (space @ units))
+instance Multiplication (Vector2d (space @ units)) Sign (Vector2d (space @ units))
 
 instance
   ( space ~ space_
@@ -132,75 +132,95 @@ instance
   where
   Vector2d x1 y1 - Vector2d x2 y2 = Vector2d (x1 - x2) (y1 - y2)
 
-instance Multiplication (Qty units1) (Vector2d (space @ units2)) where
+instance Multiplication' (Qty units1) (Vector2d (space @ units2)) where
   type Qty units1 .*. Vector2d (space @ units2) = Vector2d (space @ (units1 :*: units2))
   scale .*. Vector2d vx vy = Vector2d (scale .*. vx) (scale .*. vy)
 
 instance
   Units.Product units1 units2 units3 =>
-  Product (Qty units1) (Vector2d (space @ units2)) (Vector2d (space @ units3))
+  Multiplication (Qty units1) (Vector2d (space @ units2)) (Vector2d (space @ units3))
 
-instance Multiplication (Vector2d (space @ units1)) (Qty units2) where
+instance Multiplication' (Vector2d (space @ units1)) (Qty units2) where
   type Vector2d (space @ units1) .*. Qty units2 = Vector2d (space @ (units1 :*: units2))
   Vector2d vx vy .*. scale = Vector2d (vx .*. scale) (vy .*. scale)
 
 instance
   Units.Product units1 units2 units3 =>
-  Product (Vector2d (space @ units1)) (Qty units2) (Vector2d (space @ units3))
+  Multiplication (Vector2d (space @ units1)) (Qty units2) (Vector2d (space @ units3))
 
-instance Division (Vector2d (space @ units1)) (Qty units2) where
+instance Division' (Vector2d (space @ units1)) (Qty units2) where
   type Vector2d (space @ units1) ./. Qty units2 = Vector2d (space @ (units1 :/: units2))
   Vector2d vx vy ./. scale = Vector2d (vx ./. scale) (vy ./. scale)
 
 instance
   Units.Quotient units1 units2 units3 =>
-  Quotient (Vector2d (space @ units1)) (Qty units2) (Vector2d (space @ units3))
+  Division (Vector2d (space @ units1)) (Qty units2) (Vector2d (space @ units3))
 
 instance
   space ~ space_ =>
-  DotMultiplication (Vector2d (space @ units1)) (Vector2d (space_ @ units2))
+  DotMultiplication' (Vector2d (space @ units1)) (Vector2d (space_ @ units2))
   where
   type Vector2d (space @ units1) .<>. Vector2d (space_ @ units2) = Qty (units1 :*: units2)
   Vector2d x1 y1 .<>. Vector2d x2 y2 = x1 .*. x2 + y1 .*. y2
 
 instance
   (Units.Product units1 units2 units3, space ~ space_) =>
-  DotProduct (Vector2d (space @ units1)) (Vector2d (space_ @ units2)) (Qty units3)
-
-instance space ~ space_ => DotMultiplication (Vector2d (space @ units)) (Direction2d space_) where
-  type Vector2d (space @ units) .<>. Direction2d space_ = Qty (units :*: Unitless)
-  v .<>. d = v .<>. Direction2d.vector d
-
-instance space ~ space_ => DotProduct (Vector2d (space @ units)) (Direction2d space_) (Qty units)
-
-instance space ~ space_ => DotMultiplication (Direction2d space) (Vector2d (space_ @ units)) where
-  type Direction2d space .<>. Vector2d (space_ @ units) = Qty (Unitless :*: units)
-  d .<>. v = Direction2d.vector d .<>. v
-
-instance space ~ space_ => DotProduct (Direction2d space) (Vector2d (space_ @ units)) (Qty units)
+  DotMultiplication (Vector2d (space @ units1)) (Vector2d (space_ @ units2)) (Qty units3)
 
 instance
   space ~ space_ =>
-  CrossMultiplication (Vector2d (space @ units1)) (Vector2d (space_ @ units2))
+  DotMultiplication' (Vector2d (space @ units)) (Direction2d space_)
+  where
+  type Vector2d (space @ units) .<>. Direction2d space_ = Qty (units :*: Unitless)
+  v .<>. d = v .<>. Direction2d.vector d
+
+instance
+  space ~ space_ =>
+  DotMultiplication (Vector2d (space @ units)) (Direction2d space_) (Qty units)
+
+instance
+  space ~ space_ =>
+  DotMultiplication' (Direction2d space) (Vector2d (space_ @ units))
+  where
+  type Direction2d space .<>. Vector2d (space_ @ units) = Qty (Unitless :*: units)
+  d .<>. v = Direction2d.vector d .<>. v
+
+instance
+  space ~ space_ =>
+  DotMultiplication (Direction2d space) (Vector2d (space_ @ units)) (Qty units)
+
+instance
+  space ~ space_ =>
+  CrossMultiplication' (Vector2d (space @ units1)) (Vector2d (space_ @ units2))
   where
   type Vector2d (space @ units1) .><. Vector2d (space_ @ units2) = Qty (units1 :*: units2)
   Vector2d x1 y1 .><. Vector2d x2 y2 = x1 .*. y2 - y1 .*. x2
 
 instance
   (Units.Product units1 units2 units3, space ~ space_) =>
-  CrossProduct (Vector2d (space @ units1)) (Vector2d (space_ @ units2)) (Qty units3)
+  CrossMultiplication (Vector2d (space @ units1)) (Vector2d (space_ @ units2)) (Qty units3)
 
-instance space ~ space_ => CrossMultiplication (Vector2d (space @ units)) (Direction2d space_) where
+instance
+  space ~ space_ =>
+  CrossMultiplication' (Vector2d (space @ units)) (Direction2d space_)
+  where
   type Vector2d (space @ units) .><. Direction2d space_ = Qty (units :*: Unitless)
   v .><. d = v .><. Direction2d.vector d
 
-instance space ~ space_ => CrossProduct (Vector2d (space @ units)) (Direction2d space_) (Qty units)
+instance
+  space ~ space_ =>
+  CrossMultiplication (Vector2d (space @ units)) (Direction2d space_) (Qty units)
 
-instance space ~ space_ => CrossMultiplication (Direction2d space) (Vector2d (space_ @ units)) where
+instance
+  space ~ space_ =>
+  CrossMultiplication' (Direction2d space) (Vector2d (space_ @ units))
+  where
   type Direction2d space .><. Vector2d (space_ @ units) = Qty (Unitless :*: units)
   d .><. v = Direction2d.vector d .><. v
 
-instance space ~ space_ => CrossProduct (Direction2d space) (Vector2d (space_ @ units)) (Qty units)
+instance
+  space ~ space_ =>
+  CrossMultiplication (Direction2d space) (Vector2d (space_ @ units)) (Qty units)
 
 zero :: Vector2d (space @ units)
 zero = Vector2d Qty.zero Qty.zero

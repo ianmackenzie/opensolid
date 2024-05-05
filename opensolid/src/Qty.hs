@@ -75,19 +75,19 @@ instance Negation (Qty units) where
   {-# INLINE negate #-}
   negate (Qty_ x) = Qty_ (Prelude.negate x)
 
-instance Multiplication Sign (Qty units) where
+instance Multiplication' Sign (Qty units) where
   type Sign .*. Qty units = Qty (Unitless :*: units)
   Positive .*. value = Units.coerce value
   Negative .*. value = Units.coerce -value
 
-instance Product Sign (Qty units) (Qty units)
+instance Multiplication Sign (Qty units) (Qty units)
 
-instance Multiplication (Qty units) Sign where
+instance Multiplication' (Qty units) Sign where
   type Qty units .*. Sign = Qty (units :*: Unitless)
   value .*. Positive = Units.coerce value
   value .*. Negative = Units.coerce -value
 
-instance Product (Qty units) Sign (Qty units)
+instance Multiplication (Qty units) Sign (Qty units)
 
 instance units ~ units_ => Addition (Qty units) (Qty units_) (Qty units) where
   {-# INLINE (+) #-}
@@ -97,47 +97,47 @@ instance units ~ units_ => Subtraction (Qty units) (Qty units_) (Qty units) wher
   {-# INLINE (-) #-}
   Qty_ x - Qty_ y = Qty_ (x Prelude.- y)
 
-instance Multiplication (Qty units1) (Qty units2) where
+instance Multiplication' (Qty units1) (Qty units2) where
   type Qty units1 .*. Qty units2 = Qty (units1 :*: units2)
   {-# INLINE (.*.) #-}
   Qty_ x .*. Qty_ y = Qty_ (x Prelude.* y)
 
-instance Units.Product units1 units2 units3 => Product (Qty units1) (Qty units2) (Qty units3)
+instance Units.Product units1 units2 units3 => Multiplication (Qty units1) (Qty units2) (Qty units3)
 
-instance Division (Qty units1) (Qty units2) where
+instance Division' (Qty units1) (Qty units2) where
   type Qty units1 ./. Qty units2 = Qty (units1 :/: units2)
   {-# INLINE (./.) #-}
   Qty_ x ./. Qty_ y = Qty_ (x Prelude./ y)
 
-instance Units.Quotient units1 units2 units3 => Quotient (Qty units1) (Qty units2) (Qty units3)
+instance Units.Quotient units1 units2 units3 => Division (Qty units1) (Qty units2) (Qty units3)
 
-instance Multiplication Int (Qty units) where
+instance Multiplication' Int (Qty units) where
   type Int .*. Qty units = Qty (Unitless :*: units)
   {-# INLINE (.*.) #-}
   n .*. x = Float.fromInt n .*. x
 
-instance Product Int (Qty units) (Qty units)
+instance Multiplication Int (Qty units) (Qty units)
 
-instance Multiplication (Qty units) Int where
+instance Multiplication' (Qty units) Int where
   type Qty units .*. Int = Qty (units :*: Unitless)
   {-# INLINE (.*.) #-}
   x .*. n = x .*. Float.fromInt n
 
-instance Product (Qty units) Int (Qty units)
+instance Multiplication (Qty units) Int (Qty units)
 
-instance Division (Qty units) Int where
+instance Division' (Qty units) Int where
   type Qty units ./. Int = Qty (units :/: Unitless)
   {-# INLINE (./.) #-}
   x ./. n = x ./. Float.fromInt n
 
-instance Quotient (Qty units) Int (Qty units)
+instance Division (Qty units) Int (Qty units)
 
-instance Division Int (Qty units) where
+instance Division' Int (Qty units) where
   type Int ./. Qty units = Qty (Unitless :/: units)
   {-# INLINE (./.) #-}
   n ./. x = Float.fromInt n ./. x
 
-instance Units.Quotient Unitless units1 units2 => Quotient Int (Qty units1) (Qty units2)
+instance Units.Quotient Unitless units1 units2 => Division Int (Qty units1) (Qty units2)
 
 instance DivMod (Qty units) where
   x // y = Prelude.floor (x / y)
