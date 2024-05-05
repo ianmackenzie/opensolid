@@ -7,8 +7,8 @@ module Pointers
 where
 
 import Axis2d qualified
-import Bounds2d qualified
 import Basis2d qualified
+import Bounds2d qualified
 import Direction2d qualified
 import Foreign qualified
 import Foreign.Storable (Storable)
