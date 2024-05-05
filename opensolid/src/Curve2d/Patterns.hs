@@ -13,8 +13,8 @@ pattern Line ::
   Point2d (space @ units) ->
   Point2d (space @ units) ->
   Curve2d (space @ units)
-pattern Line{startPoint, endPoint} <-
-  Internal.Line{startPoint, endPoint}
+pattern Line startPoint endPoint <-
+  Internal.Line startPoint endPoint
 
 pattern Arc ::
   Point2d (space @ units) ->
@@ -23,5 +23,5 @@ pattern Arc ::
   Angle ->
   Angle ->
   Curve2d (space @ units)
-pattern Arc{centerPoint, xVector, yVector, startAngle, endAngle} <-
-  Internal.Arc{centerPoint, xVector, yVector, startAngle, endAngle}
+pattern Arc centerPoint xVector yVector startAngle endAngle <-
+  Internal.Arc centerPoint xVector yVector startAngle endAngle

@@ -181,8 +181,8 @@ testNonEmpty = IO.do
 testLineFromEndpoints :: Tolerance Meters => IO ()
 testLineFromEndpoints = IO.do
   case Line2d.from Point2d.origin (Point2d.centimeters 40.0 30.0) of
-    Curve2d.Line{startPoint, endPoint} -> do
-      let length = Point2d.distanceFrom startPoint endPoint
+    Curve2d.Line p1 p2 -> do
+      let length = Point2d.distanceFrom p1 p2
       log "Line length in centimeters" (Length.inCentimeters length)
     curve -> log "Unexpected curve" curve
 
@@ -200,7 +200,7 @@ testArcFromEndpoints = IO.do
       , Arc2d.sweptAngle Angle.quarterTurn
       )
   case arc of
-    Curve2d.Arc{centerPoint} -> log "Arc center point" centerPoint
+    Curve2d.Arc centerPoint _ _ _ _ -> log "Arc center point" centerPoint
     _ -> log "Unexpected curve" arc
 
 testPlaneTorusIntersection :: Tolerance Meters => IO ()

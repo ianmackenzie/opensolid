@@ -1,5 +1,3 @@
-{-# LANGUAGE NoFieldSelectors #-}
-
 module Arc2d
   ( from
   , build
@@ -52,23 +50,18 @@ from givenStartPoint givenEndPoint givenSweptAngle =
       let tanHalfAngle = Angle.tan (0.5 * givenSweptAngle)
       let linearDeviation = halfDistance * tanHalfAngle
       if linearDeviation ~= Qty.zero
-        then
-          Curve2d.Internal.Line
-            { startPoint = givenStartPoint
-            , endPoint = givenEndPoint
-            }
+        then Curve2d.Internal.Line givenStartPoint givenEndPoint
         else do
           let offset = (halfDistance / tanHalfAngle) * Direction2d.rotateLeft directionBetweenPoints
           let computedCenterPoint = Point2d.midpoint givenStartPoint givenEndPoint + offset
           let computedStartAngle = Point2d.angleFrom computedCenterPoint givenStartPoint
           let r = Point2d.distanceFrom computedCenterPoint givenStartPoint
           Curve2d.Internal.Arc
-            { centerPoint = computedCenterPoint
-            , xVector = Vector2d.x r
-            , yVector = Vector2d.y r
-            , startAngle = computedStartAngle
-            , endAngle = computedStartAngle + givenSweptAngle
-            }
+            computedCenterPoint
+            (Vector2d.x r)
+            (Vector2d.y r)
+            computedStartAngle
+            (computedStartAngle + givenSweptAngle)
 
 newtype CenterPoint coordinateSystem = CenterPoint (Point2d coordinateSystem)
 
@@ -159,12 +152,11 @@ instance
     | otherwise =
         Ok $
           Curve2d.Internal.Arc
-            { centerPoint = givenCenterPoint
-            , xVector = Vector2d.x givenRadius
-            , yVector = Vector2d.y givenRadius
-            , startAngle = givenStartAngle
-            , endAngle = givenEndAngle
-            }
+            givenCenterPoint
+            (Vector2d.x givenRadius)
+            (Vector2d.y givenRadius)
+            givenStartAngle
+            givenEndAngle
 
 instance
   units ~ units_ =>

@@ -36,17 +36,15 @@ import VectorCurve2d qualified
 
 data Curve2d (coordinateSystem :: CoordinateSystem) where
   Line ::
-    { startPoint :: Point2d (space @ units)
-    , endPoint :: Point2d (space @ units)
-    } ->
+    Point2d (space @ units) ->
+    Point2d (space @ units) ->
     Curve2d (space @ units)
   Arc ::
-    { centerPoint :: Point2d (space @ units)
-    , xVector :: Vector2d (space @ units)
-    , yVector :: Vector2d (space @ units)
-    , startAngle :: Angle
-    , endAngle :: Angle
-    } ->
+    Point2d (space @ units) ->
+    Vector2d (space @ units) ->
+    Vector2d (space @ units) ->
+    Angle ->
+    Angle ->
     Curve2d (space @ units)
   Curve ::
     Interface curve (space @ units) =>
@@ -70,19 +68,9 @@ instance
   space ~ space_ =>
   Units.Coercion (Curve2d (space @ units1)) (Curve2d (space_ @ units2))
   where
-  coerce (Line{startPoint = p1, endPoint = p2}) =
-    Line
-      { startPoint = Units.coerce p1
-      , endPoint = Units.coerce p2
-      }
-  coerce (Arc{centerPoint, xVector, yVector, startAngle, endAngle}) =
-    Arc
-      { centerPoint = Units.coerce centerPoint
-      , xVector = Units.coerce xVector
-      , yVector = Units.coerce yVector
-      , startAngle = startAngle
-      , endAngle = endAngle
-      }
+  coerce (Line p1 p2) = Line (Units.coerce p1) (Units.coerce p2)
+  coerce (Arc centerPoint xVector yVector startAngle endAngle) =
+    Arc (Units.coerce centerPoint) (Units.coerce xVector) (Units.coerce yVector) startAngle endAngle
   coerce (Coerce c) = Coerce c
   coerce c = Coerce c
 
@@ -142,21 +130,21 @@ class
   transformByImpl :: Transform2d a coordinateSystem -> curve -> Curve2d coordinateSystem
 
 startPoint :: Curve2d (space @ units) -> Point2d (space @ units)
-startPoint (Line{startPoint = p1}) = p1
+startPoint (Line p1 _) = p1
 startPoint arc@(Arc{}) = evaluateAt 0.0 arc
 startPoint (Curve curve) = startPointImpl curve
 startPoint (Coerce curve) = Units.coerce (startPoint curve)
 startPoint (PlaceIn frame curve) = Point2d.placeIn frame (startPoint curve)
 
 endPoint :: Curve2d (space @ units) -> Point2d (space @ units)
-endPoint (Line{endPoint = p2}) = p2
+endPoint (Line _ p2) = p2
 endPoint arc@(Arc{}) = evaluateAt 1.0 arc
 endPoint (Curve curve) = endPointImpl curve
 endPoint (Coerce curve) = Units.coerce (endPoint curve)
 endPoint (PlaceIn frame curve) = Point2d.placeIn frame (endPoint curve)
 
 evaluateAt :: Float -> Curve2d (space @ units) -> Point2d (space @ units)
-evaluateAt t (Line{startPoint = p1, endPoint = p2}) = Point2d.interpolateFrom p1 p2 t
+evaluateAt t (Line p1 p2) = Point2d.interpolateFrom p1 p2 t
 evaluateAt t (Arc p0 v1 v2 a b) = do
   let theta = Qty.interpolateFrom a b t
   p0 + v1 * Angle.cos theta + v2 * Angle.sin theta
@@ -165,7 +153,7 @@ evaluateAt t (Coerce curve) = Units.coerce (evaluateAt t curve)
 evaluateAt t (PlaceIn frame curve) = Point2d.placeIn frame (evaluateAt t curve)
 
 segmentBounds :: Range Unitless -> Curve2d (space @ units) -> Bounds2d (space @ units)
-segmentBounds (Range t1 t2) (Line{startPoint = p1, endPoint = p2}) =
+segmentBounds (Range t1 t2) (Line p1 p2) =
   Bounds2d.hull2 (Point2d.interpolateFrom p1 p2 t1) (Point2d.interpolateFrom p1 p2 t2)
 segmentBounds t (Arc p0 v1 v2 a b) = do
   let theta = a + (b - a) * t
@@ -175,38 +163,37 @@ segmentBounds t (Coerce curve) = Units.coerce (segmentBounds t curve)
 segmentBounds t (PlaceIn frame curve) = Bounds2d.placeIn frame (segmentBounds t curve)
 
 derivative :: Curve2d (space @ units) -> VectorCurve2d (space @ units)
-derivative (Line{startPoint = p1, endPoint = p2}) = VectorCurve2d.constant (p2 - p1)
+derivative (Line p1 p2) = VectorCurve2d.constant (p2 - p1)
 derivative (Arc _ v1 v2 a b) = VectorCurve2d.derivative (VectorCurve2d.arc v1 v2 a b)
 derivative (Curve curve) = derivativeImpl curve
 derivative (Coerce curve) = Units.coerce (derivative curve)
 derivative (PlaceIn frame curve) = VectorCurve2d.placeIn frame (derivative curve)
 
 reverse :: Curve2d (space @ units) -> Curve2d (space @ units)
-reverse (Line{startPoint = p1, endPoint = p2}) = Line{startPoint = p2, endPoint = p1}
-reverse (Arc{centerPoint, xVector, yVector, startAngle, endAngle}) =
-  Arc{centerPoint, xVector, yVector, startAngle = endAngle, endAngle = startAngle}
+reverse (Line p1 p2) = Line p2 p1
+reverse (Arc centerPoint xVector yVector startAngle endAngle) =
+  Arc centerPoint xVector yVector endAngle startAngle
 reverse (Curve curve) = Curve (reverseImpl curve)
 reverse (Coerce curve) = Units.coerce (reverse curve)
 reverse (PlaceIn frame curve) = PlaceIn frame (reverse curve)
 
 bounds :: Curve2d (space @ units) -> Bounds2d (space @ units)
-bounds (Line{startPoint = p1, endPoint = p2}) = Bounds2d.hull2 p1 p2
+bounds (Line p1 p2) = Bounds2d.hull2 p1 p2
 bounds arc@(Arc{}) = segmentBounds Range.unit arc
 bounds (Curve curve) = boundsImpl curve
 bounds (Coerce curve) = Units.coerce (bounds curve)
 bounds (PlaceIn frame curve) = Bounds2d.placeIn frame (bounds curve)
 
 transformBy :: Transform2d a (space @ units) -> Curve2d (space @ units) -> Curve2d (space @ units)
-transformBy transform (Line{startPoint = p1, endPoint = p2}) =
-  Line{startPoint = Point2d.transformBy transform p1, endPoint = Point2d.transformBy transform p2}
-transformBy transform (Arc{centerPoint, xVector, yVector, startAngle, endAngle}) =
+transformBy transform (Line p1 p2) =
+  Line (Point2d.transformBy transform p1) (Point2d.transformBy transform p2)
+transformBy transform (Arc centerPoint xVector yVector startAngle endAngle) =
   Arc
-    { centerPoint = Point2d.transformBy transform centerPoint
-    , xVector = Vector2d.transformBy transform xVector
-    , yVector = Vector2d.transformBy transform yVector
-    , startAngle = startAngle
-    , endAngle = endAngle
-    }
+    (Point2d.transformBy transform centerPoint)
+    (Vector2d.transformBy transform xVector)
+    (Vector2d.transformBy transform yVector)
+    startAngle
+    endAngle
 transformBy transform (Curve curve) = Curve (transformByImpl transform curve)
 transformBy transform (Coerce curve) = Units.coerce (transformBy (Units.coerce transform) curve)
 transformBy transform (PlaceIn frame curve) =
