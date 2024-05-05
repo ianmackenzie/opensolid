@@ -299,7 +299,7 @@ prependItems pairs items =
   List.foldr (\(item, _) acc -> item : acc) items pairs
 
 isResolved :: Tolerance units => Estimate units -> Bool
-isResolved estimate = boundsWidth estimate <= ?tolerance
+isResolved estimate = boundsWidth estimate ~= Qty.zero
 
 allResolved :: Tolerance units => List (a, Estimate units) -> Bool
 allResolved pairs = List.all (Pair.second >> isResolved) pairs
@@ -366,5 +366,5 @@ sign :: Tolerance units => Estimate units -> Sign
 sign estimate
   | Range.minValue (bounds estimate) > ?tolerance = Positive
   | Range.maxValue (bounds estimate) < negate ?tolerance = Negative
-  | Range.width (bounds estimate) <= ?tolerance = Positive
+  | Range.width (bounds estimate) ~= Qty.zero = Positive
   | otherwise = sign (refine estimate)

@@ -7,15 +7,15 @@ import Curve1d.Root (Root (Root))
 import OpenSolid
 import Test (Test)
 import Test qualified
+import Tolerance qualified
 
 tests :: List Test
 tests =
-  [ crossingRoots
-  , tangentRoots
-  , approximateEquality
-  ]
- where
-  ?tolerance = 1e-12
+  Tolerance.using 1e-12 $
+    [ crossingRoots
+    , tangentRoots
+    , approximateEquality
+    ]
 
 crossingRoots :: Tolerance Unitless => Test
 crossingRoots = Test.verify "Crossing roots" Test.do

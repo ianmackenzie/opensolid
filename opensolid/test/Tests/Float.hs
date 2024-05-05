@@ -3,13 +3,13 @@ module Tests.Float (tests) where
 import OpenSolid
 import Test (Test)
 import Test qualified
+import Tolerance qualified
 
 tests :: List Test
 tests =
-  [ exponentiation
-  ]
- where
-  ?tolerance = 1e-12
+  Tolerance.using 1e-12 $
+    [ exponentiation
+    ]
 
 exponentiation :: Tolerance Unitless => Test
 exponentiation =
