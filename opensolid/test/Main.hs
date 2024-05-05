@@ -22,6 +22,7 @@ import Tests.Region2d qualified
 import Tests.String qualified
 import Tests.VectorBounds2d qualified
 import Tests.VectorBounds3d qualified
+import Tolerance qualified
 
 tests :: List Test
 tests =
