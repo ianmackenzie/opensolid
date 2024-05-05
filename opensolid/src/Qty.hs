@@ -7,9 +7,9 @@ module Qty
   , interpolateFrom
   , midpoint
   , squared
-  , squared_
+  , squared'
   , sqrt
-  , sqrt_
+  , sqrt'
   , hypot2
   , hypot3
   , abs
@@ -159,22 +159,22 @@ isNaN (Qty_ x) = Prelude.isNaN x
 squared :: Units.Squared units1 units2 => Qty units1 -> Qty units2
 squared x = x * x
 
-squared_ :: Qty units -> Qty (units :*: units)
-squared_ x = x .*. x
+squared' :: Qty units -> Qty (units :*: units)
+squared' x = x .*. x
 
 sqrt :: Units.Squared units1 units2 => Qty units2 -> Qty units1
 sqrt x | x <= Qty.zero = Qty.zero
 sqrt (Qty_ x) = Qty_ (Prelude.sqrt x)
 
-sqrt_ :: Qty (units :*: units) -> Qty units
-sqrt_ x | x <= Qty.zero = Qty.zero
-sqrt_ (Qty_ x) = Qty_ (Prelude.sqrt x)
+sqrt' :: Qty (units :*: units) -> Qty units
+sqrt' x | x <= Qty.zero = Qty.zero
+sqrt' (Qty_ x) = Qty_ (Prelude.sqrt x)
 
 hypot2 :: Qty units -> Qty units -> Qty units
-hypot2 x y = sqrt_ (squared_ x + squared_ y)
+hypot2 x y = sqrt' (squared' x + squared' y)
 
 hypot3 :: Qty units -> Qty units -> Qty units -> Qty units
-hypot3 x y z = sqrt_ (squared_ x + squared_ y + squared_ z)
+hypot3 x y z = sqrt' (squared' x + squared' y + squared' z)
 
 {-# INLINE abs #-}
 abs :: Qty units -> Qty units

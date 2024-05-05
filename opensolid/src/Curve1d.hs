@@ -10,9 +10,9 @@ module Curve1d
   , constant
   , t
   , squared
-  , squared_
+  , squared'
   , sqrt
-  , sqrt_
+  , sqrt'
   , sin
   , cos
   , hasInternalZero
@@ -67,18 +67,18 @@ data Curve1d units where
     Curve1d units ->
     Curve1d units ->
     Curve1d units
-  Product_ ::
+  Product' ::
     Curve1d units1 ->
     Curve1d units2 ->
     Curve1d (units1 :*: units2)
-  Quotient_ ::
+  Quotient' ::
     Curve1d units1 ->
     Curve1d units2 ->
     Curve1d (units1 :/: units2)
-  Squared_ ::
+  Squared' ::
     Curve1d units ->
     Curve1d (units :*: units)
-  SquareRoot_ ::
+  SquareRoot' ::
     Curve1d (units :*: units) ->
     Curve1d units
   Sin ::
@@ -129,7 +129,7 @@ instance Negation (Curve1d units) where
   negate (Constant x) = Constant (negate x)
   negate (Negated curve) = curve
   negate (Difference c1 c2) = Difference c2 c1
-  negate (Product_ c1 c2) = negate c1 .*. c2
+  negate (Product' c1 c2) = negate c1 .*. c2
   negate curve = Negated curve
 
 instance Product Sign (Curve1d units) (Curve1d units)
@@ -183,8 +183,8 @@ instance Multiplication (Curve1d units1) (Curve1d units2) where
   Constant (Qty -1.0) .*. curve = Units.coerce (negate curve)
   Constant x .*. Negated c = negate x .*. c
   c1 .*. (Constant x) = Units.commute (Constant x .*. c1)
-  Constant x .*. Product_ (Constant y) c = Units.rightAssociate ((x .*. y) .*. c)
-  curve1 .*. curve2 = Product_ curve1 curve2
+  Constant x .*. Product' (Constant y) c = Units.rightAssociate ((x .*. y) .*. c)
+  curve1 .*. curve2 = Product' curve1 curve2
 
 instance
   Units.Product units1 units2 units3 =>
@@ -211,7 +211,7 @@ instance Division (Curve1d units1) (Curve1d units2) where
   Constant (Qty 0.0) ./. _ = zero
   Constant x ./. Constant y = Constant (x ./. y)
   curve ./. Constant x = (1.0 ./. x) .*^ curve
-  curve1 ./. curve2 = Quotient_ curve1 curve2
+  curve1 ./. curve2 = Quotient' curve1 curve2
 
 instance
   Units.Quotient units1 units2 units3 =>
@@ -238,10 +238,10 @@ evaluateAt tValue curve =
     Negated c -> negate (evaluateAt tValue c)
     Sum c1 c2 -> evaluateAt tValue c1 + evaluateAt tValue c2
     Difference c1 c2 -> evaluateAt tValue c1 - evaluateAt tValue c2
-    Product_ c1 c2 -> evaluateAt tValue c1 .*. evaluateAt tValue c2
-    Quotient_ c1 c2 -> evaluateAt tValue c1 ./. evaluateAt tValue c2
-    Squared_ c -> Qty.squared_ (evaluateAt tValue c)
-    SquareRoot_ c_ -> Qty.sqrt_ (evaluateAt tValue c_)
+    Product' c1 c2 -> evaluateAt tValue c1 .*. evaluateAt tValue c2
+    Quotient' c1 c2 -> evaluateAt tValue c1 ./. evaluateAt tValue c2
+    Squared' c -> Qty.squared' (evaluateAt tValue c)
+    SquareRoot' c' -> Qty.sqrt' (evaluateAt tValue c')
     Sin c -> Angle.sin (evaluateAt tValue c)
     Cos c -> Angle.cos (evaluateAt tValue c)
     Coerce c -> Units.coerce (evaluateAt tValue c)
@@ -258,10 +258,10 @@ segmentBounds tBounds curve =
     Negated c -> negate (segmentBounds tBounds c)
     Sum c1 c2 -> segmentBounds tBounds c1 + segmentBounds tBounds c2
     Difference c1 c2 -> segmentBounds tBounds c1 - segmentBounds tBounds c2
-    Product_ c1 c2 -> segmentBounds tBounds c1 .*. segmentBounds tBounds c2
-    Quotient_ c1 c2 -> segmentBounds tBounds c1 ./. segmentBounds tBounds c2
-    Squared_ c -> Range.squared_ (segmentBounds tBounds c)
-    SquareRoot_ c_ -> Range.sqrt_ (segmentBounds tBounds c_)
+    Product' c1 c2 -> segmentBounds tBounds c1 .*. segmentBounds tBounds c2
+    Quotient' c1 c2 -> segmentBounds tBounds c1 ./. segmentBounds tBounds c2
+    Squared' c -> Range.squared' (segmentBounds tBounds c)
+    SquareRoot' c' -> Range.sqrt' (segmentBounds tBounds c')
     Sin c -> Range.sin (segmentBounds tBounds c)
     Cos c -> Range.cos (segmentBounds tBounds c)
     Coerce c -> Units.coerce (segmentBounds tBounds c)
@@ -275,10 +275,10 @@ derivative curve =
     Negated c -> negate (derivative c)
     Sum c1 c2 -> derivative c1 + derivative c2
     Difference c1 c2 -> derivative c1 - derivative c2
-    Product_ c1 c2 -> derivative c1 .*. c2 + c1 .*. derivative c2
-    Quotient_ c1 c2 -> (derivative c1 .*. c2 - c1 .*. derivative c2) .!/.! squared_ c2
-    Squared_ c -> 2.0 * c .*. derivative c
-    SquareRoot_ c_ -> derivative c_ .!/! (2.0 * sqrt_ c_)
+    Product' c1 c2 -> derivative c1 .*. c2 + c1 .*. derivative c2
+    Quotient' c1 c2 -> (derivative c1 .*. c2 - c1 .*. derivative c2) .!/.! squared' c2
+    Squared' c -> 2.0 * c .*. derivative c
+    SquareRoot' c' -> derivative c' .!/! (2.0 * sqrt' c')
     Sin c -> cos c * Angle.unitless (derivative c)
     Cos c -> negate (sin c) * Angle.unitless (derivative c)
     Coerce c -> Units.coerce (derivative c)
@@ -297,14 +297,14 @@ reverse curve@(Constant _) = curve
 reverse curve = Curve1d (Reversed curve)
 
 squared :: Units.Squared units1 units2 => Curve1d units1 -> Curve1d units2
-squared curve = Units.specialize (squared_ curve)
+squared curve = Units.specialize (squared' curve)
 
-squared_ :: Curve1d units -> Curve1d (units :*: units)
-squared_ (Constant x) = Constant (x .*. x)
-squared_ (Negated c) = squared_ c
-squared_ (Cos c) = Units.unspecialize (cosSquared c)
-squared_ (Sin c) = Units.unspecialize (sinSquared c)
-squared_ curve = Squared_ curve
+squared' :: Curve1d units -> Curve1d (units :*: units)
+squared' (Constant x) = Constant (x .*. x)
+squared' (Negated c) = squared' c
+squared' (Cos c) = Units.unspecialize (cosSquared c)
+squared' (Sin c) = Units.unspecialize (sinSquared c)
+squared' curve = Squared' curve
 
 cosSquared :: Curve1d Radians -> Curve1d Unitless
 cosSquared c = 0.5 * cos (2.0 * c) + 0.5
@@ -313,11 +313,11 @@ sinSquared :: Curve1d Radians -> Curve1d Unitless
 sinSquared c = 0.5 - 0.5 * cos (2.0 * c)
 
 sqrt :: Units.Squared units1 units2 => Curve1d units2 -> Curve1d units1
-sqrt curve = sqrt_ (Units.unspecialize curve)
+sqrt curve = sqrt' (Units.unspecialize curve)
 
-sqrt_ :: Curve1d (units :*: units) -> Curve1d units
-sqrt_ (Constant x) = Constant (Qty.sqrt_ x)
-sqrt_ curve = SquareRoot_ curve
+sqrt' :: Curve1d (units :*: units) -> Curve1d units
+sqrt' (Constant x) = Constant (Qty.sqrt' x)
+sqrt' curve = SquareRoot' curve
 
 sin :: Curve1d Radians -> Curve1d Unitless
 sin (Constant x) = constant (Angle.sin x)

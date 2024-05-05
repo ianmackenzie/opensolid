@@ -12,7 +12,7 @@ module Range
   , endpoints
   , width
   , squared
-  , squared_
+  , squared'
   , includes
   , inclusion
   , exclusion
@@ -24,7 +24,7 @@ module Range
   , isAtomic
   , abs
   , sqrt
-  , sqrt_
+  , sqrt'
   , hypot2
   , hypot3
   , aggregate2
@@ -256,10 +256,10 @@ minAbs (Range low high)
   | otherwise = Qty.zero
 
 squared :: Units.Squared units1 units2 => Range units1 -> Range units2
-squared range = Units.specialize (squared_ range)
+squared range = Units.specialize (squared' range)
 
-squared_ :: Range units -> Range (units :*: units)
-squared_ (Range low high) = do
+squared' :: Range units -> Range (units :*: units)
+squared' (Range low high) = do
   let ll = low .*. low
   let hh = high .*. high
   if
@@ -267,14 +267,14 @@ squared_ (Range low high) = do
     | high <= Qty.zero -> Range_ hh ll
     | otherwise -> Range_ Qty.zero (Qty.max ll hh)
 
-sqrt_ :: Range (units :*: units) -> Range units
-sqrt_ (Range low high) =
+sqrt' :: Range (units :*: units) -> Range units
+sqrt' (Range low high) =
   Range_
-    (Qty.sqrt_ (Qty.max low Qty.zero))
-    (Qty.sqrt_ (Qty.max high Qty.zero))
+    (Qty.sqrt' (Qty.max low Qty.zero))
+    (Qty.sqrt' (Qty.max high Qty.zero))
 
 sqrt :: Units.Squared units1 units2 => Range units2 -> Range units1
-sqrt range = sqrt_ (Units.unspecialize range)
+sqrt range = sqrt' (Units.unspecialize range)
 
 hypot2 :: Range units -> Range units -> Range units
 hypot2 (Range xMin xMax) (Range yMin yMax) = do
@@ -554,8 +554,8 @@ find2 ::
 find2 isCandidate u v
   | not (isCandidate u v) = Nothing
   | isAtomic u && isAtomic v = Just (maxValue u, maxValue v)
-  | isAtomic u = Maybe.map (maxValue u,) (find (\v' -> isCandidate u v') v)
-  | isAtomic v = Maybe.map (,maxValue v) (find (\u' -> isCandidate u' v) u)
+  | isAtomic u = Maybe.map (maxValue u,) (find (\vCandidate -> isCandidate u vCandidate) v)
+  | isAtomic v = Maybe.map (,maxValue v) (find (\uCandidate -> isCandidate uCandidate v) u)
   | otherwise = do
       let (u1, u2) = bisect u
       let (v1, v2) = bisect v

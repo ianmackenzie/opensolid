@@ -94,15 +94,15 @@ data Function units where
     Function units ->
     Function units ->
     Function units
-  Product_ ::
+  Product' ::
     Function units1 ->
     Function units2 ->
     Function (units1 :*: units2)
-  Quotient_ ::
+  Quotient' ::
     Function units1 ->
     Function units2 ->
     Function (units1 :/: units2)
-  Squared_ ::
+  Squared' ::
     Function units ->
     Function (units :*: units)
   SquareRoot ::
@@ -137,8 +137,8 @@ instance Negation (Function units) where
   negate (Coerce function) = Coerce (negate function)
   negate (Negated function) = function
   negate (Difference f1 f2) = Difference f2 f1
-  negate (Product_ f1 f2) = negate f1 .*. f2
-  negate (Quotient_ f1 f2) = negate f1 ./. f2
+  negate (Product' f1 f2) = negate f1 .*. f2
+  negate (Quotient' f1 f2) = negate f1 ./. f2
   negate function = Negated function
 
 instance Product Sign (Function units) (Function units)
@@ -192,8 +192,8 @@ instance Multiplication (Function units1) (Function units2) where
   Constant (Qty -1.0) .*. function = Units.coerce (negate function)
   Constant x .*. Negated c = negate x .*. c
   f1 .*. (Constant x) = Units.commute (Constant x .*. f1)
-  Constant x .*. Product_ (Constant y) c = Units.rightAssociate ((x .*. y) .*. c)
-  function1 .*. function2 = Product_ function1 function2
+  Constant x .*. Product' (Constant y) c = Units.rightAssociate ((x .*. y) .*. c)
+  function1 .*. function2 = Product' function1 function2
 
 instance
   Units.Product units1 units2 units3 =>
@@ -220,7 +220,7 @@ instance Division (Function units1) (Function units2) where
   Zero ./. _ = Zero
   Constant x ./. Constant y = Constant (x ./. y)
   function ./. Constant x = (1.0 ./. x) .*^ function
-  function1 ./. function2 = Quotient_ function1 function2
+  function1 ./. function2 = Quotient' function1 function2
 
 instance
   Units.Quotient units1 units2 units3 =>
@@ -250,9 +250,9 @@ evaluateAt uv function =
     Negated f -> negate (evaluateAt uv f)
     Sum f1 f2 -> evaluateAt uv f1 + evaluateAt uv f2
     Difference f1 f2 -> evaluateAt uv f1 - evaluateAt uv f2
-    Product_ f1 f2 -> evaluateAt uv f1 .*. evaluateAt uv f2
-    Quotient_ f1 f2 -> evaluateAt uv f1 ./. evaluateAt uv f2
-    Squared_ f -> Qty.squared_ (evaluateAt uv f)
+    Product' f1 f2 -> evaluateAt uv f1 .*. evaluateAt uv f2
+    Quotient' f1 f2 -> evaluateAt uv f1 ./. evaluateAt uv f2
+    Squared' f -> Qty.squared' (evaluateAt uv f)
     SquareRoot f -> Qty.sqrt (evaluateAt uv f)
     Sin f -> Angle.sin (evaluateAt uv f)
     Cos f -> Angle.cos (evaluateAt uv f)
@@ -272,9 +272,9 @@ segmentBounds uv function =
     Negated f -> negate (segmentBounds uv f)
     Sum f1 f2 -> segmentBounds uv f1 + segmentBounds uv f2
     Difference f1 f2 -> segmentBounds uv f1 - segmentBounds uv f2
-    Product_ f1 f2 -> segmentBounds uv f1 .*. segmentBounds uv f2
-    Quotient_ f1 f2 -> segmentBounds uv f1 ./. segmentBounds uv f2
-    Squared_ f -> Range.squared_ (segmentBounds uv f)
+    Product' f1 f2 -> segmentBounds uv f1 .*. segmentBounds uv f2
+    Quotient' f1 f2 -> segmentBounds uv f1 ./. segmentBounds uv f2
+    Squared' f -> Range.squared' (segmentBounds uv f)
     SquareRoot f -> Range.sqrt (segmentBounds uv f)
     Sin f -> Range.sin (segmentBounds uv f)
     Cos f -> Range.cos (segmentBounds uv f)
@@ -283,22 +283,24 @@ boundsOn :: Function units -> Uv.Bounds -> Range units
 boundsOn function uvBounds = segmentBounds uvBounds function
 
 derivative :: Parameter -> Function units -> Function units
-derivative p function =
+derivative varyingParameter function =
   case function of
-    Function f -> derivativeImpl p f
+    Function f -> derivativeImpl varyingParameter f
     Zero -> zero
     Constant _ -> zero
-    Coerce f -> Units.coerce (derivative p f)
-    Parameter p' -> if p == p' then constant 1.0 else zero
-    Negated f -> negate (derivative p f)
-    Sum f1 f2 -> derivative p f1 + derivative p f2
-    Difference f1 f2 -> derivative p f1 - derivative p f2
-    Product_ f1 f2 -> derivative p f1 .*. f2 + f1 .*. derivative p f2
-    Quotient_ f1 f2 -> (derivative p f1 .*. f2 - f1 .*. derivative p f2) .!/.! squared_ f2
-    Squared_ f -> 2.0 * f .*. derivative p f
-    SquareRoot f -> derivative p f / (2.0 * sqrt f)
-    Sin f -> cos f * Angle.unitless (derivative p f)
-    Cos f -> negate (sin f) * Angle.unitless (derivative p f)
+    Coerce f -> Units.coerce (derivative varyingParameter f)
+    Parameter p -> if p == varyingParameter then constant 1.0 else zero
+    Negated f -> negate (derivative varyingParameter f)
+    Sum f1 f2 -> derivative varyingParameter f1 + derivative varyingParameter f2
+    Difference f1 f2 -> derivative varyingParameter f1 - derivative varyingParameter f2
+    Product' f1 f2 -> derivative varyingParameter f1 .*. f2 + f1 .*. derivative varyingParameter f2
+    Quotient' f1 f2 ->
+      (derivative varyingParameter f1 .*. f2 - f1 .*. derivative varyingParameter f2)
+        .!/.! squared' f2
+    Squared' f -> 2.0 * f .*. derivative varyingParameter f
+    SquareRoot f -> derivative varyingParameter f / (2.0 * sqrt f)
+    Sin f -> cos f * Angle.unitless (derivative varyingParameter f)
+    Cos f -> negate (sin f) * Angle.unitless (derivative varyingParameter f)
 
 derivativeIn :: Uv.Direction -> Function units -> Function units
 derivativeIn direction function =
@@ -318,15 +320,15 @@ wrap :: Interface function units => function -> Function units
 wrap = Function
 
 squared :: Units.Squared units1 units2 => Function units1 -> Function units2
-squared function = Units.specialize (squared_ function)
+squared function = Units.specialize (squared' function)
 
-squared_ :: Function units -> Function (units :*: units)
-squared_ Zero = Zero
-squared_ (Constant x) = Constant (x .*. x)
-squared_ (Negated f) = squared_ f
-squared_ (Cos f) = Units.unspecialize (cosSquared f)
-squared_ (Sin f) = Units.unspecialize (sinSquared f)
-squared_ function = Squared_ function
+squared' :: Function units -> Function (units :*: units)
+squared' Zero = Zero
+squared' (Constant x) = Constant (x .*. x)
+squared' (Negated f) = squared' f
+squared' (Cos f) = Units.unspecialize (cosSquared f)
+squared' (Sin f) = Units.unspecialize (sinSquared f)
+squared' function = Squared' function
 
 cosSquared :: Function Radians -> Function Unitless
 cosSquared f = 0.5 * cos (2.0 * f) + 0.5
@@ -996,7 +998,7 @@ saddlePointRegion derivatives point expandedBounds = do
   let fvvValue = evaluateAt point fvv
   let (u0, v0) = Point2d.coordinates point
   let (uRange, vRange) = Bounds2d.coordinates expandedBounds
-  let sqrtD = Qty.sqrt_ (fuvValue .*. fuvValue - fuuValue .*. fvvValue)
+  let sqrtD = Qty.sqrt' (fuvValue .*. fuvValue - fuuValue .*. fvvValue)
   let (d1, d2) =
         if Qty.abs fuuValue >= Qty.abs fvvValue
           then
@@ -1034,7 +1036,7 @@ saddlePointRegion derivatives point expandedBounds = do
   let fxxyValue = evaluateAt Point2d.origin fxxy
   let fxyyValue = evaluateAt Point2d.origin fxyy
   let fyyyValue = evaluateAt Point2d.origin fyyy
-  let positiveA = Qty.sqrt_ (-fxxValue .*. fyyValue) / Qty.abs fyyValue
+  let positiveA = Qty.sqrt' (-fxxValue .*. fyyValue) / Qty.abs fyyValue
   let negativeA = -positiveA
   let b a = -(fyyyValue * a ** 3 + 3 * fxyyValue * a ** 2 + 3 * fxxyValue * a + fxxxValue) / (3 * a * fyyValue)
   let positiveSolution = SaddleRegion.Solution{dydx = positiveA, d2ydx2 = b positiveA}
@@ -1338,8 +1340,8 @@ connectingCurve _ saddleRegion curve = Result.do
           (localStartPoint, [localStartFirstDerivative, localStartSecondDerivative])
           (localEndPoint, [localEndFirstDerivative, localEndSecondDerivative])
   let extension = Curve2d.placeIn frame localExtension
-  -- let curveCurvature = Curve2d.curvature_ curve
-  -- let extensionCurvature = Curve2d.curvature_ extension
+  -- let curveCurvature = Curve2d.curvature' curve
+  -- let extensionCurvature = Curve2d.curvature' extension
   -- Debug.log "Extension distance                " (Point2d.distanceFrom localStartPoint localEndPoint)
   -- Debug.log "Error 0.0                         " (evaluateAt (Curve2d.evaluateAt 0.0 extension) f)
   -- Debug.log "Error 0.5                         " (evaluateAt (Curve2d.evaluateAt 0.5 extension) f)

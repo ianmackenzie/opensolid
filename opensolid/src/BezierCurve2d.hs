@@ -156,9 +156,8 @@ hermiteBezier (startPoint, startDerivatives) (endPoint, endDerivatives) = do
 scaleDerivatives :: Sign -> Float -> Float -> List (Vector2d (space @ units)) -> List (Vector2d (space @ units))
 scaleDerivatives _ _ _ [] = []
 scaleDerivatives sign scale n (first : rest) = do
-  let scale' = sign * scale / n
-  let n' = n - 1.0
-  scale' * first : scaleDerivatives sign scale' n' rest
+  let updatedScale = sign * scale / n
+  updatedScale * first : scaleDerivatives sign updatedScale (n - 1.0) rest
 
 offset :: Int -> List (Vector2d (space @ units)) -> Vector2d (space @ units)
 offset i scaledDerivatives =

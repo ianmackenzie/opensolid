@@ -383,9 +383,9 @@ instance Interface (QuotientOf space units1 units2) (space @ (units1 :/: units2)
   derivativeImpl (Quotient vectorCurve3d curve1d) = do
     let p = vectorCurve3d
     let q = curve1d
-    let p' = derivative p
-    let q' = Curve1d.derivative q
-    (p' .*. q - p .*. q') .!/.! Curve1d.squared_ q
+    let pDerivative = derivative p
+    let qDerivative = Curve1d.derivative q
+    (pDerivative .*. q - p .*. qDerivative) .!/.! Curve1d.squared' q
 
 instance
   Units.Quotient units1 units2 units3 =>

@@ -17,11 +17,11 @@ module VectorBounds2d
   , yComponent
   , components
   , squaredMagnitude
-  , squaredMagnitude_
+  , squaredMagnitude'
   , magnitude
   , maxMagnitude
   , maxSquaredMagnitude
-  , maxSquaredMagnitude_
+  , maxSquaredMagnitude'
   , normalize
   , includes
   , contains
@@ -383,10 +383,10 @@ components :: VectorBounds2d (space @ units) -> (Range units, Range units)
 components (VectorBounds2d vx vy) = (vx, vy)
 
 squaredMagnitude :: Units.Squared units1 units2 => VectorBounds2d (space @ units1) -> Range units2
-squaredMagnitude = Units.specialize . squaredMagnitude_
+squaredMagnitude = Units.specialize . squaredMagnitude'
 
-squaredMagnitude_ :: VectorBounds2d (space @ units) -> Range (units :*: units)
-squaredMagnitude_ (VectorBounds2d x y) = Range.squared_ x + Range.squared_ y
+squaredMagnitude' :: VectorBounds2d (space @ units) -> Range (units :*: units)
+squaredMagnitude' (VectorBounds2d x y) = Range.squared' x + Range.squared' y
 
 magnitude :: VectorBounds2d (space @ units) -> Range units
 magnitude (VectorBounds2d x y) = Range.hypot2 x y
@@ -398,13 +398,13 @@ maxMagnitude (VectorBounds2d (Range minX maxX) (Range minY maxY)) = do
   Qty.hypot2 xMagnitude yMagnitude
 
 maxSquaredMagnitude :: Units.Squared units1 units2 => VectorBounds2d (space @ units1) -> Qty units2
-maxSquaredMagnitude = Units.specialize . maxSquaredMagnitude_
+maxSquaredMagnitude = Units.specialize . maxSquaredMagnitude'
 
-maxSquaredMagnitude_ :: VectorBounds2d (space @ units) -> Qty (units :*: units)
-maxSquaredMagnitude_ (VectorBounds2d (Range minX maxX) (Range minY maxY)) = do
+maxSquaredMagnitude' :: VectorBounds2d (space @ units) -> Qty (units :*: units)
+maxSquaredMagnitude' (VectorBounds2d (Range minX maxX) (Range minY maxY)) = do
   let xMagnitude = Qty.max (Qty.abs minX) (Qty.abs maxX)
   let yMagnitude = Qty.max (Qty.abs minY) (Qty.abs maxY)
-  Qty.squared_ xMagnitude + Qty.squared_ yMagnitude
+  Qty.squared' xMagnitude + Qty.squared' yMagnitude
 
 normalize :: VectorBounds2d (space @ units) -> VectorBounds2d (space @ Unitless)
 normalize vectorBounds = do

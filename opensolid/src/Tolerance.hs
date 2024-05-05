@@ -4,8 +4,10 @@ module Tolerance
   , (!=)
   , using
   , exactly
+  , squared
+  , squared'
   , ofSquared
-  , ofSquared_
+  , ofSquared'
   )
 where
 
@@ -99,8 +101,14 @@ using tolerance expression = let ?tolerance = tolerance in expression
 
 infix 4 ~=, !=
 
-ofSquared_ :: Tolerance units => Qty units -> Qty (units :*: units)
-ofSquared_ value = ?tolerance .*. ?tolerance + 2.0 * Qty.abs value .*. ?tolerance
+squared :: (Tolerance units, Units.Squared units squaredUnits) => Qty squaredUnits
+squared = Qty.squared ?tolerance
+
+squared' :: Tolerance units => Qty (units :*: units)
+squared' = Qty.squared' ?tolerance
+
+ofSquared' :: Tolerance units => Qty units -> Qty (units :*: units)
+ofSquared' value = ?tolerance .*. ?tolerance + 2.0 * Qty.abs value .*. ?tolerance
 
 ofSquared :: (Tolerance units, Units.Squared units squaredUnits) => Qty units -> Qty squaredUnits
-ofSquared = Units.specialize . ofSquared_
+ofSquared = Units.specialize . ofSquared'

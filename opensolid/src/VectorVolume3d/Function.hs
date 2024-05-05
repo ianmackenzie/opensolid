@@ -295,7 +295,7 @@ derivative direction function =
       derivative direction f1 .*. f2 + f1 .*. Volume1d.Function.derivative direction f2
     Quotient f1 f2 ->
       (derivative direction f1 .*. f2 - f1 .*. Volume1d.Function.derivative direction f2)
-        .!/.! Volume1d.Function.squared_ f2
+        .!/.! Volume1d.Function.squared' f2
 
 zero :: Function (space @ units)
 zero = Zero

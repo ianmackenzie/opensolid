@@ -176,7 +176,7 @@ fluxIntegral :: Point2d (space @ units) -> Curve2d (space @ units) -> Estimate U
 fluxIntegral point curve = do
   let displacement = point - curve
   let firstDerivative = Curve2d.derivative curve
-  let integrand = (firstDerivative .><. displacement) / VectorCurve2d.squaredMagnitude_ displacement
+  let integrand = (firstDerivative .><. displacement) / VectorCurve2d.squaredMagnitude' displacement
   Curve1d.integral integrand
 
 totalFlux :: Point2d (space @ units) -> Loop (space @ units) -> Estimate Unitless
@@ -205,16 +205,16 @@ classifyLoops ::
 classifyLoops [] = Error EmptyRegion
 classifyLoops (NonEmpty loops) = Result.do
   let (largestLoop, smallerLoops) = pickLargestLoop loops
-  let outerLoop' = fixSign Positive largestLoop
-  let innerLoops' = List.map (fixSign Negative) smallerLoops
-  if List.all (loopIsInside outerLoop') innerLoops'
-    then Ok (Region2d outerLoop' innerLoops')
+  let outerLoopCandidate = fixSign Positive largestLoop
+  let innerLoopCandidates = List.map (fixSign Negative) smallerLoops
+  if List.all (loopIsInside outerLoopCandidate) innerLoopCandidates
+    then Ok (Region2d outerLoopCandidate innerLoopCandidates)
     else Error MultipleDisjointRegions
 
 fixSign :: Tolerance units => Sign -> Loop (space @ units) -> Loop (space @ units)
 fixSign desiredSign loop =
-  Tolerance.using (Qty.squared_ ?tolerance) $
-    if Estimate.sign (loopSignedArea_ loop) == desiredSign then loop else reverseLoop loop
+  Tolerance.using (Qty.squared' ?tolerance) $
+    if Estimate.sign (loopSignedArea' loop) == desiredSign then loop else reverseLoop loop
 
 reverseLoop :: Loop (space @ units) -> Loop (space @ units)
 reverseLoop loop = NonEmpty.reverseMap Curve2d.reverse loop
@@ -224,14 +224,14 @@ pickLargestLoop ::
   NonEmpty (Loop (space @ units)) ->
   (Loop (space @ units), List (Loop (space @ units)))
 pickLargestLoop loops =
-  Tolerance.using (Qty.squared_ ?tolerance) $
-    Estimate.pickLargestBy loopSignedArea_ loops
+  Tolerance.using Tolerance.squared' $
+    Estimate.pickLargestBy loopSignedArea' loops
 
-loopSignedArea_ :: Loop (space @ units) -> Estimate (units :*: units)
-loopSignedArea_ loop = do
+loopSignedArea' :: Loop (space @ units) -> Estimate (units :*: units)
+loopSignedArea' loop = do
   let referencePoint = Curve2d.startPoint (NonEmpty.first loop)
   NonEmpty.toList loop
-    |> List.map (areaIntegral_ referencePoint)
+    |> List.map (areaIntegral' referencePoint)
     |> Estimate.sum
 
 areaIntegral ::
@@ -240,10 +240,10 @@ areaIntegral ::
   Curve2d (space @ units1) ->
   Estimate units2
 areaIntegral referencePoint curve =
-  Units.specialize (areaIntegral_ referencePoint curve)
+  Units.specialize (areaIntegral' referencePoint curve)
 
-areaIntegral_ :: Point2d (space @ units) -> Curve2d (space @ units) -> Estimate (units :*: units)
-areaIntegral_ referencePoint curve = do
+areaIntegral' :: Point2d (space @ units) -> Curve2d (space @ units) -> Estimate (units :*: units)
+areaIntegral' referencePoint curve = do
   let displacement = curve - referencePoint
   let y = VectorCurve2d.yComponent displacement
   let dx = Curve1d.derivative (VectorCurve2d.xComponent displacement)

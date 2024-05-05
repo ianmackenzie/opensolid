@@ -85,24 +85,24 @@ overlappingSegments curve1 curve2 =
     Error error -> Error (Error.message error)
 
 equalUBounds :: Range Unitless -> Range Unitless -> Bool
-equalUBounds (Range low1 high1) (Range low2 high2) =
-  Tolerance.using 1e-12 (low1 ~= low2 && high1 ~= high2)
+equalUBounds (Range actualLow actualHigh) (Range expectedLow expectedHigh) =
+  Tolerance.using 1e-12 (actualLow ~= expectedLow && actualHigh ~= expectedHigh)
 
 equalOverlapSegments :: (Range Unitless, Range Unitless, Sign) -> (Range Unitless, Range Unitless, Sign) -> Bool
-equalOverlapSegments (t1, t2, sign) (t1', t2', sign') =
-  equalUBounds t1 t1' && equalUBounds t2 t2' && sign == sign'
+equalOverlapSegments (actual1, actual2, actualSign) (expected1, expected2, expectedSign) =
+  equalUBounds actual1 expected1 && equalUBounds actual2 expected2 && actualSign == expectedSign
 
 equalOverlapSegmentLists :: List (Range Unitless, Range Unitless, Sign) -> List (Range Unitless, Range Unitless, Sign) -> Bool
-equalOverlapSegmentLists segments1 segments2 =
-  List.allTrue (List.map2 equalOverlapSegments segments1 segments2)
+equalOverlapSegmentLists actualSegments expectedSegments =
+  List.allTrue (List.map2 equalOverlapSegments actualSegments expectedSegments)
 
 curveOverlap1 :: Tolerance Meters => Test
 curveOverlap1 = Test.verify "Overlap detection 1" Test.do
   let arc1 = Arc2d.from (Point2d.meters 1.0 0.0) (Point2d.meters -1.0 0.0) Angle.halfTurn
   let arc2 = Arc2d.from (Point2d.meters 0.0 -1.0) (Point2d.meters 0.0 1.0) Angle.halfTurn
-  segments <- overlappingSegments arc1 arc2
+  actualSegments <- overlappingSegments arc1 arc2
   let expectedSegments = [(Range.from 0.0 0.5, Range.from 0.5 1.0, Positive)]
-  Test.expect (equalOverlapSegmentLists segments expectedSegments)
+  Test.expect (equalOverlapSegmentLists actualSegments expectedSegments)
 
 curveOverlap2 :: Tolerance Meters => Test
 curveOverlap2 = Test.verify "Overlap detection 2" Test.do

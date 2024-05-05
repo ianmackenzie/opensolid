@@ -24,7 +24,7 @@ module VectorCurve2d
   , magnitude
   , unsafeMagnitude
   , squaredMagnitude
-  , squaredMagnitude_
+  , squaredMagnitude'
   , reverse
   , zeros
   , Zeros (ZeroEverywhere, Zeros)
@@ -109,15 +109,15 @@ data VectorCurve2d (coordinateSystem :: CoordinateSystem) where
     VectorCurve2d (space @ units) ->
     VectorCurve2d (space @ units) ->
     VectorCurve2d (space @ units)
-  Product1d2d ::
+  Product1d2d' ::
     Curve1d units1 ->
     VectorCurve2d (space @ units2) ->
     VectorCurve2d (space @ (units1 :*: units2))
-  Product2d1d ::
+  Product2d1d' ::
     VectorCurve2d (space @ units1) ->
     Curve1d units2 ->
     VectorCurve2d (space @ (units1 :*: units2))
-  Quotient ::
+  Quotient' ::
     VectorCurve2d (space @ units1) ->
     Curve1d units2 ->
     VectorCurve2d (space @ (units1 :/: units2))
@@ -179,8 +179,8 @@ instance Negation (VectorCurve2d (space @ units)) where
   negate (XY x y) = XY -x -y
   negate (Negated c) = c
   negate (Difference c1 c2) = Difference c2 c1
-  negate (Product1d2d c1 c2) = Product1d2d -c1 c2
-  negate (Product2d1d c1 c2) = Product2d1d c1 -c2
+  negate (Product1d2d' c1 c2) = Product1d2d' -c1 c2
+  negate (Product2d1d' c1 c2) = Product2d1d' c1 -c2
   negate curve = Negated curve
 
 instance Product Sign (VectorCurve2d (space @ units)) (VectorCurve2d (space @ units))
@@ -259,7 +259,7 @@ instance
 
 instance Multiplication (Curve1d units1) (VectorCurve2d (space @ units2)) where
   type Curve1d units1 .*. VectorCurve2d (space @ units2) = VectorCurve2d (space @ (units1 :*: units2))
-  c1 .*. c2 = Product1d2d c1 c2 -- TODO add special cases
+  c1 .*. c2 = Product1d2d' c1 c2 -- TODO add special cases
 
 instance
   Units.Product units1 units2 units3 =>
@@ -283,7 +283,7 @@ instance
 
 instance Multiplication (VectorCurve2d (space @ units1)) (Curve1d units2) where
   type VectorCurve2d (space @ units1) .*. Curve1d units2 = VectorCurve2d (space @ (units1 :*: units2))
-  c1 .*. c2 = Product2d1d c1 c2 -- TODO add special cases
+  c1 .*. c2 = Product2d1d' c1 c2 -- TODO add special cases
 
 instance
   Units.Product units1 units2 units3 =>
@@ -307,7 +307,7 @@ instance
 
 instance Division (VectorCurve2d (space @ units1)) (Curve1d units2) where
   type VectorCurve2d (space @ units1) ./. Curve1d units2 = VectorCurve2d (space @ (units1 :/: units2))
-  c1 ./. c2 = Quotient c1 c2 -- TODO add special cases
+  c1 ./. c2 = Quotient' c1 c2 -- TODO add special cases
 
 instance
   Units.Quotient units1 units2 units3 =>
@@ -459,9 +459,9 @@ transformBy transform curve = do
     Negated c -> Negated (transformBy transform c)
     Sum c1 c2 -> Sum (transformBy transform c1) (transformBy transform c2)
     Difference c1 c2 -> Difference (transformBy transform c1) (transformBy transform c2)
-    Product1d2d curve1d curve2d -> Product1d2d curve1d (transformBy transform curve2d)
-    Product2d1d curve2d curve1d -> Product2d1d (transformBy transform curve2d) curve1d
-    Quotient curve2d curve1d -> Quotient (transformBy transform curve2d) curve1d
+    Product1d2d' curve1d curve2d -> Product1d2d' curve1d (transformBy transform curve2d)
+    Product2d1d' curve2d curve1d -> Product2d1d' (transformBy transform curve2d) curve1d
+    Quotient' curve2d curve1d -> Quotient' (transformBy transform curve2d) curve1d
     PlaceInBasis basis c -> do
       let localTransform = Transform2d.relativeTo (Frame2d.at Point2d.origin basis) transform
       PlaceInBasis basis (transformBy localTransform c)
@@ -618,9 +618,9 @@ evaluateAt t curve =
     Negated c -> -(evaluateAt t c)
     Sum c1 c2 -> evaluateAt t c1 + evaluateAt t c2
     Difference c1 c2 -> evaluateAt t c1 - evaluateAt t c2
-    Product1d2d c1 c2 -> Curve1d.evaluateAt t c1 .*. evaluateAt t c2
-    Product2d1d c1 c2 -> evaluateAt t c1 .*. Curve1d.evaluateAt t c2
-    Quotient c1 c2 -> evaluateAt t c1 ./. Curve1d.evaluateAt t c2
+    Product1d2d' c1 c2 -> Curve1d.evaluateAt t c1 .*. evaluateAt t c2
+    Product2d1d' c1 c2 -> evaluateAt t c1 .*. Curve1d.evaluateAt t c2
+    Quotient' c1 c2 -> evaluateAt t c1 ./. Curve1d.evaluateAt t c2
     PlaceInBasis basis c -> Vector2d.placeInBasis basis (evaluateAt t c)
     Line v1 v2 -> Vector2d.interpolateFrom v1 v2 t
     Arc v1 v2 a b -> do
@@ -642,9 +642,9 @@ segmentBounds t@(Range tl th) curve =
     Negated c -> -(segmentBounds t c)
     Sum c1 c2 -> segmentBounds t c1 + segmentBounds t c2
     Difference c1 c2 -> segmentBounds t c1 - segmentBounds t c2
-    Product1d2d c1 c2 -> Curve1d.segmentBounds t c1 .*. segmentBounds t c2
-    Product2d1d c1 c2 -> segmentBounds t c1 .*. Curve1d.segmentBounds t c2
-    Quotient c1 c2 -> segmentBounds t c1 ./. Curve1d.segmentBounds t c2
+    Product1d2d' c1 c2 -> Curve1d.segmentBounds t c1 .*. segmentBounds t c2
+    Product2d1d' c1 c2 -> segmentBounds t c1 .*. Curve1d.segmentBounds t c2
+    Quotient' c1 c2 -> segmentBounds t c1 ./. Curve1d.segmentBounds t c2
     PlaceInBasis basis c -> VectorBounds2d.placeInBasis basis (segmentBounds t c)
     Line v1 v2 ->
       VectorBounds2d.hull2
@@ -679,9 +679,9 @@ derivative curve =
     Negated c -> -(derivative c)
     Sum c1 c2 -> derivative c1 + derivative c2
     Difference c1 c2 -> derivative c1 - derivative c2
-    Product1d2d c1 c2 -> Curve1d.derivative c1 .*. c2 + c1 .*. derivative c2
-    Product2d1d c1 c2 -> derivative c1 .*. c2 + c1 .*. Curve1d.derivative c2
-    Quotient c1 c2 -> (derivative c1 .*. c2 - c1 .*. Curve1d.derivative c2) .!/.! Curve1d.squared_ c2
+    Product1d2d' c1 c2 -> Curve1d.derivative c1 .*. c2 + c1 .*. derivative c2
+    Product2d1d' c1 c2 -> derivative c1 .*. c2 + c1 .*. Curve1d.derivative c2
+    Quotient' c1 c2 -> (derivative c1 .*. c2 - c1 .*. Curve1d.derivative c2) .!/.! Curve1d.squared' c2
     PlaceInBasis basis c -> PlaceInBasis basis (derivative c)
     Line v1 v2 -> constant (v2 - v1)
     Arc v1 v2 a b -> do
@@ -706,9 +706,9 @@ reverse curve =
     Negated c -> Negated (reverse c)
     Sum c1 c2 -> Sum (reverse c1) (reverse c2)
     Difference c1 c2 -> Difference (reverse c1) (reverse c2)
-    Product1d2d c1 c2 -> Product1d2d (Curve1d.reverse c1) (reverse c2)
-    Product2d1d c1 c2 -> Product2d1d (reverse c1) (Curve1d.reverse c2)
-    Quotient c1 c2 -> Quotient (reverse c1) (Curve1d.reverse c2)
+    Product1d2d' c1 c2 -> Product1d2d' (Curve1d.reverse c1) (reverse c2)
+    Product2d1d' c1 c2 -> Product2d1d' (reverse c1) (Curve1d.reverse c2)
+    Quotient' c1 c2 -> Quotient' (reverse c1) (Curve1d.reverse c2)
     PlaceInBasis basis c -> PlaceInBasis basis (reverse c)
     Line v1 v2 -> Line v2 v1
     Arc v1 v2 a b -> Arc v1 v2 b a
@@ -717,20 +717,20 @@ reverse curve =
     BezierCurve controlVectors -> BezierCurve (NonEmpty.reverse controlVectors)
     Transformed transform c -> Transformed transform (reverse c)
 
-newtype SquaredMagnitude (coordinateSystem :: CoordinateSystem) = SquaredMagnitude (VectorCurve2d coordinateSystem)
+newtype SquaredMagnitude' (coordinateSystem :: CoordinateSystem) = SquaredMagnitude' (VectorCurve2d coordinateSystem)
 
-deriving instance Show (SquaredMagnitude (space @ units))
+deriving instance Show (SquaredMagnitude' (space @ units))
 
-instance Curve1d.Interface (SquaredMagnitude (space @ units)) (units :*: units) where
-  evaluateAtImpl t (SquaredMagnitude curve) = Vector2d.squaredMagnitude_ (evaluateAt t curve)
-  segmentBoundsImpl t (SquaredMagnitude curve) = VectorBounds2d.squaredMagnitude_ (segmentBounds t curve)
-  derivativeImpl (SquaredMagnitude curve) = 2.0 * curve .<>. derivative curve
+instance Curve1d.Interface (SquaredMagnitude' (space @ units)) (units :*: units) where
+  evaluateAtImpl t (SquaredMagnitude' curve) = Vector2d.squaredMagnitude' (evaluateAt t curve)
+  segmentBoundsImpl t (SquaredMagnitude' curve) = VectorBounds2d.squaredMagnitude' (segmentBounds t curve)
+  derivativeImpl (SquaredMagnitude' curve) = 2.0 * curve .<>. derivative curve
 
 squaredMagnitude :: Units.Squared units1 units2 => VectorCurve2d (space @ units1) -> Curve1d units2
-squaredMagnitude curve = Units.specialize (squaredMagnitude_ curve)
+squaredMagnitude curve = Units.specialize (squaredMagnitude' curve)
 
-squaredMagnitude_ :: VectorCurve2d (space @ units) -> Curve1d (units :*: units)
-squaredMagnitude_ curve = Curve1d.wrap (SquaredMagnitude curve)
+squaredMagnitude' :: VectorCurve2d (space @ units) -> Curve1d (units :*: units)
+squaredMagnitude' curve = Curve1d.wrap (SquaredMagnitude' curve)
 
 newtype NonZeroMagnitude (coordinateSystem :: CoordinateSystem)
   = NonZeroMagnitude (VectorCurve2d coordinateSystem)
@@ -762,8 +762,8 @@ data Zeros = ZeroEverywhere | Zeros (List Float) deriving (Eq, Show)
 
 zeros :: Tolerance units => VectorCurve2d (space @ units) -> Zeros
 zeros curve =
-  Tolerance.using (Qty.squared_ ?tolerance) $
-    case Curve1d.zeros (squaredMagnitude_ curve) of
+  Tolerance.using (Qty.squared' ?tolerance) $
+    case Curve1d.zeros (squaredMagnitude' curve) of
       Curve1d.ZeroEverywhere -> ZeroEverywhere
       Curve1d.Zeros roots -> Zeros (List.map Curve1d.Root.value roots)
 

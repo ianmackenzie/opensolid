@@ -238,11 +238,11 @@ instance
   where
   build (StartPoint givenStartPoint, EndPoint givenEndPoint, Radius givenRadius, givenDirection, givenSize) = Result.do
     chordDirection <- Direction2d.from givenStartPoint givenEndPoint ?? Error DegenerateArc
-    let squaredRadius_ = Qty.squared_ givenRadius
-    let squaredHalfLength_ = Qty.squared_ (0.5 * Point2d.distanceFrom givenStartPoint givenEndPoint)
-    let squaredOffsetMagnitude_ = squaredRadius_ - squaredHalfLength_
-    Result.check (squaredOffsetMagnitude_ >= Qty.zero) ?? Error Arc2d.EndpointsAreTooFarApart
-    let offsetMagnitude = Qty.sqrt_ squaredOffsetMagnitude_
+    let squaredRadius' = Qty.squared' givenRadius
+    let squaredHalfLength' = Qty.squared' (0.5 * Point2d.distanceFrom givenStartPoint givenEndPoint)
+    let squaredOffsetMagnitude' = squaredRadius' - squaredHalfLength'
+    Result.check (squaredOffsetMagnitude' >= Qty.zero) ?? Error Arc2d.EndpointsAreTooFarApart
+    let offsetMagnitude = Qty.sqrt' squaredOffsetMagnitude'
     let offsetDirection = Direction2d.rotateLeft chordDirection
     let offsetDistance =
           case (givenDirection, givenSize) of
@@ -251,7 +251,7 @@ instance
             (Clockwise, Large) -> offsetMagnitude
             (Counterclockwise, Large) -> -offsetMagnitude
     let computedCenterPoint = Point2d.midpoint givenStartPoint givenEndPoint + offsetDirection * offsetDistance
-    let halfLength = Qty.sqrt_ squaredHalfLength_
+    let halfLength = Qty.sqrt' squaredHalfLength'
     let shortAngle = 2.0 * Angle.asin (halfLength / givenRadius)
     let computedSweptAngle =
           case (givenDirection, givenSize) of

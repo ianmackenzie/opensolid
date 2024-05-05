@@ -25,7 +25,7 @@ module Curve2d
   , relativeTo
   , transformBy
   , curvature
-  , curvature_
+  , curvature'
   )
 where
 
@@ -284,8 +284,8 @@ transformBy ::
   Curve2d (space @ units)
 transformBy = Internal.transformBy
 
-curvature_ :: Tolerance units => Curve2d (space @ units) -> Result DegenerateCurve (Curve1d (Unitless :/: units))
-curvature_ curve = Result.do
+curvature' :: Tolerance units => Curve2d (space @ units) -> Result DegenerateCurve (Curve1d (Unitless :/: units))
+curvature' curve = Result.do
   let firstDerivative = derivative curve
   let secondDerivative = VectorCurve2d.derivative firstDerivative
   tangent <- tangentDirection curve
@@ -295,7 +295,7 @@ curvature ::
   (Tolerance units1, Units.Quotient Unitless units1 units2) =>
   Curve2d (space @ units1) ->
   Result DegenerateCurve (Curve1d units2)
-curvature curve = Result.map Units.specialize (curvature_ curve)
+curvature curve = Result.map Units.specialize (curvature' curve)
 
 data TransformBy curve coordinateSystem where
   TransformBy ::
