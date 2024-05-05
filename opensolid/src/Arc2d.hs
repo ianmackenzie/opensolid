@@ -134,17 +134,19 @@ data BuildError
   deriving (Eq, Show, Error)
 
 instance
-  (space ~ space', units ~ units') =>
-  Build (StartPoint (space @ units), EndPoint (space' @ units'), SweptAngle) (space @ units)
+  ( space ~ space_
+  , units ~ units_
+  ) =>
+  Build (StartPoint (space @ units), EndPoint (space_ @ units_), SweptAngle) (space @ units)
   where
   build (StartPoint givenStartPoint, EndPoint givenEndPoint, SweptAngle givenSweptAngle) =
     Ok (from givenStartPoint givenEndPoint givenSweptAngle)
 
 instance
-  units ~ units' =>
+  units ~ units_ =>
   Build
     ( CenterPoint (space @ units)
-    , Radius units'
+    , Radius units_
     , StartAngle
     , EndAngle
     )
@@ -165,12 +167,12 @@ instance
             }
 
 instance
-  units ~ units' =>
+  units ~ units_ =>
   Build
     ( CenterPoint (space @ units)
     , StartAngle
     , EndAngle
-    , Radius units'
+    , Radius units_
     )
     (space @ units)
   where
@@ -178,10 +180,10 @@ instance
     build (givenCenterPoint, givenRadius, givenStartAngle, givenEndAngle)
 
 instance
-  units ~ units' =>
+  units ~ units_ =>
   Build
     ( CenterPoint (space @ units)
-    , Radius units'
+    , Radius units_
     , StartAngle
     , SweptAngle
     )
@@ -196,12 +198,12 @@ instance
       )
 
 instance
-  units ~ units' =>
+  units ~ units_ =>
   Build
     ( CenterPoint (space @ units)
     , StartAngle
     , SweptAngle
-    , Radius units'
+    , Radius units_
     )
     (space @ units)
   where
@@ -209,10 +211,10 @@ instance
     build (givenCenterPoint, givenRadius, givenStartAngle, givenSweptAngle)
 
 instance
-  ( space ~ space'
-  , units ~ units'
+  ( space ~ space_
+  , units ~ units_
   ) =>
-  Build (CenterPoint (space @ units), StartPoint (space' @ units'), SweptAngle) (space @ units)
+  Build (CenterPoint (space @ units), StartPoint (space_ @ units_), SweptAngle) (space @ units)
   where
   build (CenterPoint givenCenterPoint, StartPoint givenStartPoint, givenSweptAngle) =
     build
@@ -223,14 +225,14 @@ instance
       )
 
 instance
-  ( space ~ space'
-  , units ~ units'
-  , units ~ units''
+  ( space ~ space_
+  , units ~ units_
+  , units ~ units__
   ) =>
   Build
     ( StartPoint (space @ units)
-    , EndPoint (space' @ units')
-    , Radius units''
+    , EndPoint (space_ @ units_)
+    , Radius units__
     , Direction
     , Size
     )

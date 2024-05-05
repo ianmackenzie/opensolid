@@ -76,7 +76,10 @@ instance HasUnits (Bounds2d (space @ units)) where
   type Units (Bounds2d (space @ units)) = units
   type Erase (Bounds2d (space @ units)) = Bounds2d (space @ Unitless)
 
-instance space ~ space' => Units.Coercion (Bounds2d (space @ units1)) (Bounds2d (space' @ units2)) where
+instance
+  space1 ~ space2 =>
+  Units.Coercion (Bounds2d (space1 @ units1)) (Bounds2d (space2 @ units2))
+  where
   coerce = Data.Coerce.coerce
 
 instance Bounds.Interface (Bounds2d (space @ units)) where
@@ -84,10 +87,12 @@ instance Bounds.Interface (Bounds2d (space @ units)) where
   intersection = intersection
 
 instance
-  (units ~ units', space ~ space') =>
+  ( space ~ space_
+  , units ~ units_
+  ) =>
   Subtraction
     (Point2d (space @ units))
-    (Bounds2d (space' @ units'))
+    (Bounds2d (space_ @ units_))
     (VectorBounds2d (space @ units))
   where
   point - bounds = do
@@ -96,10 +101,12 @@ instance
     VectorBounds2d.xy (px - bx) (py - by)
 
 instance
-  (units ~ units', space ~ space') =>
+  ( space ~ space_
+  , units ~ units_
+  ) =>
   Subtraction
     (Bounds2d (space @ units))
-    (Point2d (space' @ units'))
+    (Point2d (space_ @ units_))
     (VectorBounds2d (space @ units))
   where
   bounds - point = do
@@ -108,10 +115,12 @@ instance
     VectorBounds2d.xy (bx - px) (by - py)
 
 instance
-  (units ~ units', space ~ space') =>
+  ( space ~ space_
+  , units ~ units_
+  ) =>
   Subtraction
     (Bounds2d (space @ units))
-    (Bounds2d (space' @ units'))
+    (Bounds2d (space_ @ units_))
     (VectorBounds2d (space @ units))
   where
   bounds1 - bounds2 = do
@@ -120,11 +129,13 @@ instance
     VectorBounds2d.xy (x1 - x2) (y1 - y2)
 
 instance
-  (units ~ units', space ~ space') =>
+  ( space ~ space_
+  , units ~ units_
+  ) =>
   Addition
     (Bounds2d (space @ units))
     (VectorBounds2d (space @ units))
-    (Bounds2d (space' @ units'))
+    (Bounds2d (space_ @ units_))
   where
   bounds + vectorBounds = do
     let (x1, y1) = coordinates bounds
@@ -132,36 +143,63 @@ instance
     Bounds2d (x1 + x2) (y1 + y2)
 
 instance
-  (units ~ units', space ~ space') =>
+  ( space ~ space_
+  , units ~ units_
+  ) =>
   Subtraction
     (Bounds2d (space @ units))
     (VectorBounds2d (space @ units))
-    (Bounds2d (space' @ units'))
+    (Bounds2d (space_ @ units_))
   where
   bounds - vectorBounds = do
     let (x1, y1) = coordinates bounds
     let (x2, y2) = VectorBounds2d.components vectorBounds
     Bounds2d (x1 - x2) (y1 - y2)
 
-instance (space ~ space', units ~ units') => ApproximateEquality (Point2d (space @ units)) (Bounds2d (space' @ units')) units where
+instance
+  ( space ~ space_
+  , units ~ units_
+  ) =>
+  ApproximateEquality (Point2d (space @ units)) (Bounds2d (space_ @ units_)) units
+  where
   point ~= bounds = do
     let (px, py) = Point2d.coordinates point
     let (bx, by) = coordinates bounds
     px ~= bx && py ~= by
 
-instance (space ~ space', units ~ units') => ApproximateEquality (Bounds2d (space @ units)) (Point2d (space' @ units')) units where
+instance
+  ( space ~ space_
+  , units ~ units_
+  ) =>
+  ApproximateEquality (Bounds2d (space @ units)) (Point2d (space_ @ units_)) units
+  where
   bounds ~= point = point ~= bounds
 
-instance (space ~ space', units ~ units') => Intersects (Point2d (space @ units)) (Bounds2d (space' @ units')) units where
+instance
+  ( space ~ space_
+  , units ~ units_
+  ) =>
+  Intersects (Point2d (space @ units)) (Bounds2d (space_ @ units_)) units
+  where
   point ^ bounds = do
     let (px, py) = Point2d.coordinates point
     let (bx, by) = coordinates bounds
     px ^ bx && py ^ by
 
-instance (space ~ space', units ~ units') => Intersects (Bounds2d (space @ units)) (Point2d (space' @ units')) units where
+instance
+  ( space ~ space_
+  , units ~ units_
+  ) =>
+  Intersects (Bounds2d (space @ units)) (Point2d (space_ @ units_)) units
+  where
   bounds ^ point = point ^ bounds
 
-instance (space ~ space', units ~ units') => Intersects (Bounds2d (space @ units)) (Bounds2d (space' @ units')) units where
+instance
+  ( space ~ space_
+  , units ~ units_
+  ) =>
+  Intersects (Bounds2d (space @ units)) (Bounds2d (space_ @ units_)) units
+  where
   Bounds2d x1 y1 ^ Bounds2d x2 y2 = x1 ^ x2 && y1 ^ y2
 
 xCoordinate :: Bounds2d (space @ units) -> Range units
