@@ -762,7 +762,7 @@ data Zeros = ZeroEverywhere | Zeros (List Float) deriving (Eq, Show)
 
 zeros :: Tolerance units => VectorCurve2d (space @ units) -> Zeros
 zeros curve =
-  Tolerance.using (Qty.squared' ?tolerance) $
+  Tolerance.using Tolerance.squared' $
     case Curve1d.zeros (squaredMagnitude' curve) of
       Curve1d.ZeroEverywhere -> ZeroEverywhere
       Curve1d.Zeros roots -> Zeros (List.map Curve1d.Root.value roots)

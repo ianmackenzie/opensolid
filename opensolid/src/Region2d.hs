@@ -213,7 +213,7 @@ classifyLoops (NonEmpty loops) = Result.do
 
 fixSign :: Tolerance units => Sign -> Loop (space @ units) -> Loop (space @ units)
 fixSign desiredSign loop =
-  Tolerance.using (Qty.squared' ?tolerance) $
+  Tolerance.using Tolerance.squared' $
     if Estimate.sign (loopSignedArea' loop) == desiredSign then loop else reverseLoop loop
 
 reverseLoop :: Loop (space @ units) -> Loop (space @ units)
