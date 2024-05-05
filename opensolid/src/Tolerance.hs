@@ -25,7 +25,7 @@ type Tolerance units = ?tolerance :: Qty units
 class ApproximateEquality a b units | a b -> units where
   (~=) :: Tolerance units => a -> b -> Bool
 
-instance units ~ units' => ApproximateEquality (Qty units) (Qty units') units where
+instance units ~ units_ => ApproximateEquality (Qty units) (Qty units_) units where
   x ~= y = Qty.abs (x - y) <= ?tolerance
 
 instance ApproximateEquality a b units => ApproximateEquality (List a) (List b) units where
@@ -45,8 +45,8 @@ instance ApproximateEquality a b units => ApproximateEquality (Maybe a) (Maybe b
 
 instance
   ( ApproximateEquality a1 b1 units
-  , ApproximateEquality a2 b2 units'
-  , units ~ units'
+  , ApproximateEquality a2 b2 units_
+  , units ~ units_
   ) =>
   ApproximateEquality (a1, a2) (b1, b2) units
   where
@@ -54,10 +54,10 @@ instance
 
 instance
   ( ApproximateEquality a1 b1 units
-  , ApproximateEquality a2 b2 units'
-  , ApproximateEquality a3 b3 units''
-  , units ~ units'
-  , units ~ units''
+  , ApproximateEquality a2 b2 units_
+  , ApproximateEquality a3 b3 units__
+  , units ~ units_
+  , units ~ units__
   ) =>
   ApproximateEquality (a1, a2, a3) (b1, b2, b3) units
   where
@@ -65,12 +65,12 @@ instance
 
 instance
   ( ApproximateEquality a1 b1 units
-  , ApproximateEquality a2 b2 units'
-  , ApproximateEquality a3 b3 units''
-  , ApproximateEquality a4 b4 units'''
-  , units ~ units'
-  , units ~ units''
-  , units ~ units'''
+  , ApproximateEquality a2 b2 units_
+  , ApproximateEquality a3 b3 units__
+  , ApproximateEquality a4 b4 units___
+  , units ~ units_
+  , units ~ units__
+  , units ~ units___
   ) =>
   ApproximateEquality (a1, a2, a3, a4) (b1, b2, b3, b4) units
   where

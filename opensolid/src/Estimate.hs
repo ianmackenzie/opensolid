@@ -65,7 +65,7 @@ instance Units.Coercion (Estimate units1) (Estimate units2) where
   coerce (Coerce estimate) = Coerce estimate
   coerce estimate = Coerce estimate
 
-instance units ~ units' => ApproximateEquality (Estimate units) (Qty units') units where
+instance units ~ units_ => ApproximateEquality (Estimate units) (Qty units_) units where
   estimate ~= value
     | bounds estimate ~= value = True
     | not (value ^ bounds estimate) = False

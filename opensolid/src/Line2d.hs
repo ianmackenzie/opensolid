@@ -52,24 +52,19 @@ class Build arguments (coordinateSystem :: CoordinateSystem) | arguments -> coor
   build :: Tolerance (Units coordinateSystem) => arguments -> Curve2d coordinateSystem
 
 instance
-  (space ~ space', units ~ units') =>
-  Build
-    ( StartPoint (space @ units)
-    , EndPoint (space' @ units')
-    )
-    (space @ units)
+  ( space ~ space_
+  , units ~ units_
+  ) =>
+  Build (StartPoint (space @ units), EndPoint (space_ @ units_)) (space @ units)
   where
   build (StartPoint givenStartPoint, EndPoint givenEndPoint) =
     from givenStartPoint givenEndPoint
 
 instance
-  (space ~ space', units ~ units') =>
-  Build
-    ( StartPoint (space @ units)
-    , Direction space'
-    , Length units'
-    )
-    (space @ units)
+  ( space ~ space_
+  , units ~ units_
+  ) =>
+  Build (StartPoint (space @ units), Direction space_, Length units_) (space @ units)
   where
   build (StartPoint givenStartPoint, Direction givenDirection, Length givenLength) =
     directed givenStartPoint givenDirection givenLength

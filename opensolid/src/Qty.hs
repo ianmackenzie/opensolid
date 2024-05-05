@@ -89,11 +89,11 @@ instance Multiplication (Qty units) Sign where
 
 instance Product (Qty units) Sign (Qty units)
 
-instance units ~ units' => Addition (Qty units) (Qty units') (Qty units) where
+instance units ~ units_ => Addition (Qty units) (Qty units_) (Qty units) where
   {-# INLINE (+) #-}
   Qty_ x + Qty_ y = Qty_ (x Prelude.+ y)
 
-instance units ~ units' => Subtraction (Qty units) (Qty units') (Qty units) where
+instance units ~ units_ => Subtraction (Qty units) (Qty units_) (Qty units) where
   {-# INLINE (-) #-}
   Qty_ x - Qty_ y = Qty_ (x Prelude.- y)
 

@@ -102,10 +102,10 @@ instance Units.Coercion (Curve1d units1) (Curve1d units2) where
   coerce (Coerce curve) = Coerce curve
   coerce curve = Coerce curve
 
-instance units ~ units' => ApproximateEquality (Curve1d units) (Curve1d units') units where
+instance units ~ units_ => ApproximateEquality (Curve1d units) (Curve1d units_) units where
   curve1 ~= curve2 = isZero (curve1 - curve2)
 
-instance units ~ units' => ApproximateEquality (Curve1d units) (Qty units') units where
+instance units ~ units_ => ApproximateEquality (Curve1d units) (Qty units_) units where
   curve ~= value = isZero (curve - value)
 
 instance Interface (Curve1d units) units where
@@ -146,28 +146,28 @@ instance Multiplication (Curve1d units) Sign where
   curve .*. Positive = Units.coerce curve
   curve .*. Negative = Units.coerce -curve
 
-instance units ~ units' => Addition (Curve1d units) (Curve1d units') (Curve1d units) where
+instance units ~ units_ => Addition (Curve1d units) (Curve1d units_) (Curve1d units) where
   curve + Constant (Qty 0.0) = curve
   Constant (Qty 0.0) + curve = curve
   Constant x + Constant y = constant (x + y)
   curve1 + curve2 = Sum curve1 curve2
 
-instance units ~ units' => Addition (Curve1d units) (Qty units') (Curve1d units) where
+instance units ~ units_ => Addition (Curve1d units) (Qty units_) (Curve1d units) where
   curve + value = curve + constant value
 
-instance units ~ units' => Addition (Qty units) (Curve1d units') (Curve1d units) where
+instance units ~ units_ => Addition (Qty units) (Curve1d units_) (Curve1d units) where
   value + curve = constant value + curve
 
-instance units ~ units' => Subtraction (Curve1d units) (Curve1d units') (Curve1d units) where
+instance units ~ units_ => Subtraction (Curve1d units) (Curve1d units_) (Curve1d units) where
   curve - Constant (Qty 0.0) = curve
   Constant (Qty 0.0) - curve = negate curve
   Constant x - Constant y = constant (x - y)
   curve1 - curve2 = Difference curve1 curve2
 
-instance units ~ units' => Subtraction (Curve1d units) (Qty units') (Curve1d units) where
+instance units ~ units_ => Subtraction (Curve1d units) (Qty units_) (Curve1d units) where
   curve - value = curve - constant value
 
-instance units ~ units' => Subtraction (Qty units) (Curve1d units') (Curve1d units) where
+instance units ~ units_ => Subtraction (Qty units) (Curve1d units_) (Curve1d units) where
   value - curve = constant value - curve
 
 instance

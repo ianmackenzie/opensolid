@@ -155,28 +155,28 @@ instance Multiplication (Function units) Sign where
   function .*. Positive = Units.coerce function
   function .*. Negative = Units.coerce -function
 
-instance units ~ units' => Addition (Function units) (Function units') (Function units) where
+instance units ~ units_ => Addition (Function units) (Function units_) (Function units) where
   Zero + function = function
   function + Zero = function
   Constant x + Constant y = constant (x + y)
   function1 + function2 = Sum function1 function2
 
-instance units ~ units' => Addition (Function units) (Qty units') (Function units) where
+instance units ~ units_ => Addition (Function units) (Qty units_) (Function units) where
   function + value = function + constant value
 
-instance units ~ units' => Addition (Qty units) (Function units') (Function units) where
+instance units ~ units_ => Addition (Qty units) (Function units_) (Function units) where
   value + function = constant value + function
 
-instance units ~ units' => Subtraction (Function units) (Function units') (Function units) where
+instance units ~ units_ => Subtraction (Function units) (Function units_) (Function units) where
   Zero - function = negate function
   function - Zero = function
   Constant x - Constant y = constant (x - y)
   function1 - function2 = Difference function1 function2
 
-instance units ~ units' => Subtraction (Function units) (Qty units') (Function units) where
+instance units ~ units_ => Subtraction (Function units) (Qty units_) (Function units) where
   function - value = function - constant value
 
-instance units ~ units' => Subtraction (Qty units) (Function units') (Function units) where
+instance units ~ units_ => Subtraction (Qty units) (Function units_) (Function units) where
   value - function = constant value - function
 
 instance

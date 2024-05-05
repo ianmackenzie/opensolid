@@ -63,10 +63,10 @@ instance HasUnits (Transform2d a (space @ units)) where
   type Erase (Transform2d a (space @ units)) = Transform2d a (space @ Unitless)
 
 instance
-  (a ~ a', space ~ space') =>
+  (a ~ a_, space ~ space_) =>
   Units.Coercion
     (Transform2d a (space @ units1))
-    (Transform2d a' (space' @ units2))
+    (Transform2d a_ (space_ @ units2))
   where
   coerce (Transform2d p0 vx vy) = Transform2d_ (Units.coerce p0) vx vy
 
@@ -112,12 +112,12 @@ instance Composition AffineTag AffineTag AffineTag where AffineTag >> AffineTag 
 
 instance
   ( Composition a b c
-  , space ~ space'
-  , units ~ units'
+  , space ~ space_
+  , units ~ units_
   ) =>
   Composition
     (Transform2d a (space @ units))
-    (Transform2d b (space' @ units'))
+    (Transform2d b (space_ @ units_))
     (Transform2d c (space @ units))
   where
   transform1 >> transform2 =

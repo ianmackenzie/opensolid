@@ -27,8 +27,10 @@ components :: Vector2d (space @ units) -> (Qty units, Qty units)
 transformBy :: Transform2d a (space @ units1) -> Vector2d (space @ units2) -> Vector2d (space @ units2)
 
 instance
-  (space ~ space', units ~ units') =>
-  Addition (Vector2d (space @ units)) (Vector2d (space' @ units')) (Vector2d (space @ units))
+  ( space ~ space_
+  , units ~ units_
+  ) =>
+  Addition (Vector2d (space @ units)) (Vector2d (space_ @ units_)) (Vector2d (space @ units))
 
 instance Multiplication (Qty units1) (Vector2d (space @ units2))
 

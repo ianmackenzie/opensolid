@@ -45,13 +45,37 @@ instance Bounds.Interface (Bounds3d (space @ units)) where
   aggregate2 = aggregate2
   intersection = intersection
 
-instance (units ~ units', space ~ space') => Subtraction (Point3d (space @ units)) (Bounds3d (space' @ units')) (VectorBounds3d (space @ units)) where
+instance
+  ( space ~ space_
+  , units ~ units_
+  ) =>
+  Subtraction
+    (Point3d (space @ units))
+    (Bounds3d (space_ @ units_))
+    (VectorBounds3d (space @ units))
+  where
   Point3d px py pz - Bounds3d bx by bz = VectorBounds3d (px - bx) (py - by) (pz - bz)
 
-instance (units ~ units', space ~ space') => Subtraction (Bounds3d (space @ units)) (Point3d (space' @ units')) (VectorBounds3d (space @ units)) where
+instance
+  ( space ~ space_
+  , units ~ units_
+  ) =>
+  Subtraction
+    (Bounds3d (space @ units))
+    (Point3d (space_ @ units_))
+    (VectorBounds3d (space @ units))
+  where
   Bounds3d bx by bz - Point3d px py pz = VectorBounds3d (bx - px) (by - py) (bz - pz)
 
-instance (units ~ units', space ~ space') => Subtraction (Bounds3d (space @ units)) (Bounds3d (space' @ units')) (VectorBounds3d (space @ units)) where
+instance
+  ( space ~ space_
+  , units ~ units_
+  ) =>
+  Subtraction
+    (Bounds3d (space @ units))
+    (Bounds3d (space_ @ units_))
+    (VectorBounds3d (space @ units))
+  where
   Bounds3d x1 y1 z1 - Bounds3d x2 y2 z2 = VectorBounds3d (x1 - x2) (y1 - y2) (z1 - z2)
 
 xRange :: Bounds3d (space @ units) -> Range units

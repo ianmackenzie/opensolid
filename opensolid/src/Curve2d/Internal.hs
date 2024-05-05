@@ -67,8 +67,8 @@ instance HasUnits (Curve2d (space @ units)) where
   type Erase (Curve2d (space @ units)) = Curve2d (space @ Unitless)
 
 instance
-  space ~ space' =>
-  Units.Coercion (Curve2d (space @ units1)) (Curve2d (space' @ units2))
+  space ~ space_ =>
+  Units.Coercion (Curve2d (space @ units1)) (Curve2d (space_ @ units2))
   where
   coerce (Line{startPoint = p1, endPoint = p2}) =
     Line
@@ -99,14 +99,18 @@ instance Interface (Curve2d (space @ units)) (space @ units) where
 data DegenerateCurve = DegenerateCurve deriving (Eq, Show, Error)
 
 instance
-  (space ~ space', units ~ units') =>
-  Intersects (Curve2d (space @ units)) (Point2d (space' @ units')) units
+  ( space ~ space_
+  , units ~ units_
+  ) =>
+  Intersects (Curve2d (space @ units)) (Point2d (space_ @ units_)) units
   where
   curve ^ point = Range.any (segmentIsCoincidentWithPoint point curve) Range.unit
 
 instance
-  (space ~ space', units ~ units') =>
-  Intersects (Point2d (space @ units)) (Curve2d (space' @ units')) units
+  ( space ~ space_
+  , units ~ units_
+  ) =>
+  Intersects (Point2d (space @ units)) (Curve2d (space_ @ units_)) units
   where
   point ^ curve = curve ^ point
 
@@ -232,10 +236,12 @@ instance VectorCurve2d.Interface (PointCurveDifference (space @ units)) (space @
         (transformBy (Units.coerce transform) curve)
 
 instance
-  (units ~ units', space ~ space') =>
+  ( space ~ space_
+  , units ~ units_
+  ) =>
   Subtraction
     (Point2d (space @ units))
-    (Curve2d (space' @ units'))
+    (Curve2d (space_ @ units_))
     (VectorCurve2d (space @ units))
   where
   point - curve = VectorCurve2d (PointCurveDifference point curve)
@@ -257,10 +263,12 @@ instance VectorCurve2d.Interface (CurvePointDifference (space @ units)) (space @
         (Point2d.transformBy (Units.coerce transform) point)
 
 instance
-  (units ~ units', space ~ space') =>
+  ( space ~ space_
+  , units ~ units_
+  ) =>
   Subtraction
     (Curve2d (space @ units))
-    (Point2d (space' @ units'))
+    (Point2d (space_ @ units_))
     (VectorCurve2d (space @ units))
   where
   curve - point = VectorCurve2d (CurvePointDifference curve point)

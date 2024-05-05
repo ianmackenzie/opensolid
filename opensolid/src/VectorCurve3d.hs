@@ -58,8 +58,8 @@ instance HasUnits (VectorCurve3d (space @ units)) where
   type Erase (VectorCurve3d (space @ units)) = VectorCurve3d (space @ Unitless)
 
 instance
-  space ~ space' =>
-  Units.Coercion (VectorCurve3d (space @ units1)) (VectorCurve3d (space' @ units2))
+  space ~ space_ =>
+  Units.Coercion (VectorCurve3d (space @ units1)) (VectorCurve3d (space_ @ units2))
   where
   coerce Zero = Zero
   coerce (Constant value) = Constant (Units.coerce value)
@@ -132,28 +132,34 @@ instance Interface (Sum (space @ units)) (space @ units) where
   derivativeImpl (Sum curve1 curve2) = derivative curve1 + derivative curve2
 
 instance
-  space ~ space' =>
+  ( space ~ space_
+  , units ~ units_
+  ) =>
   Addition
     (VectorCurve3d (space @ units))
-    (VectorCurve3d (space' @ units))
+    (VectorCurve3d (space_ @ units_))
     (VectorCurve3d (space @ units))
   where
   curve1 + curve2 = VectorCurve3d (Sum curve1 curve2)
 
 instance
-  space ~ space' =>
+  ( space ~ space_
+  , units ~ units_
+  ) =>
   Addition
     (VectorCurve3d (space @ units))
-    (Vector3d (space' @ units))
+    (Vector3d (space_ @ units_))
     (VectorCurve3d (space @ units))
   where
   curve + vector = curve + constant vector
 
 instance
-  space ~ space' =>
+  ( space ~ space_
+  , units ~ units_
+  ) =>
   Addition
     (Vector3d (space @ units))
-    (VectorCurve3d (space' @ units))
+    (VectorCurve3d (space_ @ units_))
     (VectorCurve3d (space @ units))
   where
   vector + curve = constant vector + curve
@@ -169,28 +175,34 @@ instance Interface (Difference (space @ units)) (space @ units) where
   derivativeImpl (Difference curve1 curve2) = derivative curve1 - derivative curve2
 
 instance
-  space ~ space' =>
+  ( space ~ space_
+  , units ~ units_
+  ) =>
   Subtraction
     (VectorCurve3d (space @ units))
-    (VectorCurve3d (space' @ units))
+    (VectorCurve3d (space_ @ units_))
     (VectorCurve3d (space @ units))
   where
   curve1 - curve2 = VectorCurve3d (Difference curve1 curve2)
 
 instance
-  space ~ space' =>
+  ( space ~ space_
+  , units ~ units_
+  ) =>
   Subtraction
     (VectorCurve3d (space @ units))
-    (Vector3d (space' @ units))
+    (Vector3d (space_ @ units_))
     (VectorCurve3d (space @ units))
   where
   curve - vector = curve - constant vector
 
 instance
-  space ~ space' =>
+  ( space ~ space_
+  , units ~ units_
+  ) =>
   Subtraction
     (Vector3d (space @ units))
-    (VectorCurve3d (space' @ units))
+    (VectorCurve3d (space_ @ units_))
     (VectorCurve3d (space @ units))
   where
   vector - curve = constant vector - curve
@@ -289,36 +301,36 @@ instance Curve1d.Interface (DotProductOf space units1 units2) (units1 :*: units2
     derivative curve1 .<>. curve2 + curve1 .<>. derivative curve2
 
 instance
-  (Units.Product units1 units2 units3, space ~ space') =>
-  DotProduct (VectorCurve3d (space @ units1)) (VectorCurve3d (space' @ units2)) (Curve1d units3)
+  (Units.Product units1 units2 units3, space ~ space_) =>
+  DotProduct (VectorCurve3d (space @ units1)) (VectorCurve3d (space_ @ units2)) (Curve1d units3)
 
 instance
-  space ~ space' =>
-  DotMultiplication (VectorCurve3d (space @ units1)) (VectorCurve3d (space' @ units2))
+  space ~ space_ =>
+  DotMultiplication (VectorCurve3d (space @ units1)) (VectorCurve3d (space_ @ units2))
   where
-  type VectorCurve3d (space @ units1) .<>. VectorCurve3d (space' @ units2) = Curve1d (units1 :*: units2)
+  type VectorCurve3d (space @ units1) .<>. VectorCurve3d (space_ @ units2) = Curve1d (units1 :*: units2)
   curve1 .<>. curve2 = Curve1d.wrap (DotProductOf curve1 curve2)
 
 instance
-  (Units.Product units1 units2 units3, space ~ space') =>
-  DotProduct (VectorCurve3d (space @ units1)) (Vector3d (space' @ units2)) (Curve1d units3)
+  (Units.Product units1 units2 units3, space ~ space_) =>
+  DotProduct (VectorCurve3d (space @ units1)) (Vector3d (space_ @ units2)) (Curve1d units3)
 
 instance
-  space ~ space' =>
-  DotMultiplication (VectorCurve3d (space @ units1)) (Vector3d (space' @ units2))
+  space ~ space_ =>
+  DotMultiplication (VectorCurve3d (space @ units1)) (Vector3d (space_ @ units2))
   where
-  type VectorCurve3d (space @ units1) .<>. Vector3d (space' @ units2) = Curve1d (units1 :*: units2)
+  type VectorCurve3d (space @ units1) .<>. Vector3d (space_ @ units2) = Curve1d (units1 :*: units2)
   curve .<>. vector = Curve1d.wrap (DotProductOf curve (constant vector))
 
 instance
-  (Units.Product units1 units2 units3, space ~ space') =>
-  DotProduct (Vector3d (space @ units1)) (VectorCurve3d (space' @ units2)) (Curve1d units3)
+  (Units.Product units1 units2 units3, space ~ space_) =>
+  DotProduct (Vector3d (space @ units1)) (VectorCurve3d (space_ @ units2)) (Curve1d units3)
 
 instance
-  space ~ space' =>
-  DotMultiplication (Vector3d (space @ units1)) (VectorCurve3d (space' @ units2))
+  space ~ space_ =>
+  DotMultiplication (Vector3d (space @ units1)) (VectorCurve3d (space_ @ units2))
   where
-  type Vector3d (space @ units1) .<>. VectorCurve3d (space' @ units2) = Curve1d (units1 :*: units2)
+  type Vector3d (space @ units1) .<>. VectorCurve3d (space_ @ units2) = Curve1d (units1 :*: units2)
   vector .<>. curve = Curve1d.wrap (DotProductOf (constant vector) curve)
 
 data CrossProductOf space units1 units2
@@ -337,36 +349,51 @@ instance Interface (CrossProductOf space units1 units2) (space @ (units1 :*: uni
     derivative curve1 .><. curve2 + curve1 .><. derivative curve2
 
 instance
-  (Units.Product units1 units2 units3, space ~ space') =>
-  CrossProduct (VectorCurve3d (space @ units1)) (VectorCurve3d (space' @ units2)) (VectorCurve3d (space @ units3))
+  (Units.Product units1 units2 units3, space ~ space_) =>
+  CrossProduct
+    (VectorCurve3d (space @ units1))
+    (VectorCurve3d (space_ @ units2))
+    (VectorCurve3d (space @ units3))
 
 instance
-  space ~ space' =>
-  CrossMultiplication (VectorCurve3d (space @ units1)) (VectorCurve3d (space' @ units2))
+  space ~ space_ =>
+  CrossMultiplication (VectorCurve3d (space @ units1)) (VectorCurve3d (space_ @ units2))
   where
-  type VectorCurve3d (space @ units1) .><. VectorCurve3d (space' @ units2) = VectorCurve3d (space @ (units1 :*: units2))
+  type
+    VectorCurve3d (space @ units1) .><. VectorCurve3d (space_ @ units2) =
+      VectorCurve3d (space @ (units1 :*: units2))
   curve1 .><. curve2 = VectorCurve3d (CrossProductOf curve1 curve2)
 
 instance
-  (Units.Product units1 units2 units3, space ~ space') =>
-  CrossProduct (Vector3d (space @ units1)) (VectorCurve3d (space' @ units2)) (VectorCurve3d (space @ units3))
+  (Units.Product units1 units2 units3, space ~ space_) =>
+  CrossProduct
+    (Vector3d (space @ units1))
+    (VectorCurve3d (space_ @ units2))
+    (VectorCurve3d (space @ units3))
 
 instance
-  space ~ space' =>
-  CrossMultiplication (Vector3d (space @ units1)) (VectorCurve3d (space' @ units2))
+  space ~ space_ =>
+  CrossMultiplication (Vector3d (space @ units1)) (VectorCurve3d (space_ @ units2))
   where
-  type Vector3d (space @ units1) .><. VectorCurve3d (space' @ units2) = VectorCurve3d (space @ (units1 :*: units2))
+  type
+    Vector3d (space @ units1) .><. VectorCurve3d (space_ @ units2) =
+      VectorCurve3d (space @ (units1 :*: units2))
   vector .><. curve = VectorCurve3d (CrossProductOf (constant vector) curve)
 
 instance
-  (Units.Product units1 units2 units3, space ~ space') =>
-  CrossProduct (VectorCurve3d (space @ units1)) (Vector3d (space' @ units2)) (VectorCurve3d (space @ units3))
+  (Units.Product units1 units2 units3, space ~ space_) =>
+  CrossProduct
+    (VectorCurve3d (space @ units1))
+    (Vector3d (space_ @ units2))
+    (VectorCurve3d (space @ units3))
 
 instance
-  space ~ space' =>
-  CrossMultiplication (VectorCurve3d (space @ units1)) (Vector3d (space' @ units2))
+  space ~ space_ =>
+  CrossMultiplication (VectorCurve3d (space @ units1)) (Vector3d (space_ @ units2))
   where
-  type VectorCurve3d (space @ units1) .><. Vector3d (space' @ units2) = VectorCurve3d (space @ (units1 :*: units2))
+  type
+    VectorCurve3d (space @ units1) .><. Vector3d (space_ @ units2) =
+      VectorCurve3d (space @ (units1 :*: units2))
   curve .><. vector = VectorCurve3d (CrossProductOf curve (constant vector))
 
 data QuotientOf space units1 units2 = Quotient (VectorCurve3d (space @ units1)) (Curve1d units2)
@@ -387,7 +414,9 @@ instance
     (VectorCurve3d (space @ units3))
 
 instance Division (VectorCurve3d (space @ units1)) (Curve1d units2) where
-  type VectorCurve3d (space @ units1) ./. Curve1d units2 = VectorCurve3d (space @ (units1 :/: units2))
+  type
+    VectorCurve3d (space @ units1) ./. Curve1d units2 =
+      VectorCurve3d (space @ (units1 :/: units2))
   vectorCurve3d ./. curve1d = VectorCurve3d (Quotient vectorCurve3d curve1d)
 
 newtype SquaredMagnitudeOf (coordinateSystem :: CoordinateSystem)

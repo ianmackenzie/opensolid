@@ -41,7 +41,7 @@ instance HasUnits (DirectionCurve2d space) where
   type Units (DirectionCurve2d space) = Unitless
   type Erase (DirectionCurve2d space) = DirectionCurve2d space
 
-instance space ~ space' => Units.Coercion (DirectionCurve2d space) (DirectionCurve2d space') where
+instance space ~ space_ => Units.Coercion (DirectionCurve2d space) (DirectionCurve2d space_) where
   coerce = identity
 
 unsafe :: VectorCurve2d (space @ Unitless) -> DirectionCurve2d space
@@ -112,157 +112,157 @@ instance Multiplication (DirectionCurve2d space) (Curve1d units) where
   DirectionCurve2d vectorCurve .*. scalarCurve = vectorCurve .*. scalarCurve
 
 instance
-  space ~ space' =>
-  DotProduct (DirectionCurve2d space) (DirectionCurve2d space') (Curve1d Unitless)
+  space ~ space_ =>
+  DotProduct (DirectionCurve2d space) (DirectionCurve2d space_) (Curve1d Unitless)
 
 instance
-  space ~ space' =>
-  DotMultiplication (DirectionCurve2d space) (DirectionCurve2d space')
+  space ~ space_ =>
+  DotMultiplication (DirectionCurve2d space) (DirectionCurve2d space_)
   where
-  type DirectionCurve2d space .<>. DirectionCurve2d space' = Curve1d (Unitless :*: Unitless)
+  type DirectionCurve2d space .<>. DirectionCurve2d space_ = Curve1d (Unitless :*: Unitless)
   DirectionCurve2d curve1 .<>. DirectionCurve2d curve2 = curve1 .<>. curve2
 
 instance
-  space ~ space' =>
-  DotProduct (DirectionCurve2d space) (VectorCurve2d (space' @ units)) (Curve1d units)
+  space ~ space_ =>
+  DotProduct (DirectionCurve2d space) (VectorCurve2d (space_ @ units)) (Curve1d units)
 
 instance
-  space ~ space' =>
-  DotMultiplication (DirectionCurve2d space) (VectorCurve2d (space' @ units))
+  space ~ space_ =>
+  DotMultiplication (DirectionCurve2d space) (VectorCurve2d (space_ @ units))
   where
-  type DirectionCurve2d space .<>. VectorCurve2d (space' @ units) = Curve1d (Unitless :*: units)
+  type DirectionCurve2d space .<>. VectorCurve2d (space_ @ units) = Curve1d (Unitless :*: units)
   DirectionCurve2d curve1 .<>. curve2 = curve1 .<>. curve2
 
 instance
-  space ~ space' =>
-  DotProduct (VectorCurve2d (space @ units)) (DirectionCurve2d space') (Curve1d units)
+  space ~ space_ =>
+  DotProduct (VectorCurve2d (space @ units)) (DirectionCurve2d space_) (Curve1d units)
 
 instance
-  space ~ space' =>
-  DotMultiplication (VectorCurve2d (space @ units)) (DirectionCurve2d space')
+  space ~ space_ =>
+  DotMultiplication (VectorCurve2d (space @ units)) (DirectionCurve2d space_)
   where
-  type VectorCurve2d (space @ units) .<>. DirectionCurve2d space' = Curve1d (units :*: Unitless)
+  type VectorCurve2d (space @ units) .<>. DirectionCurve2d space_ = Curve1d (units :*: Unitless)
   curve1 .<>. DirectionCurve2d curve2 = curve1 .<>. curve2
 
 instance
-  space ~ space' =>
-  DotProduct (DirectionCurve2d space) (Direction2d space') (Curve1d Unitless)
+  space ~ space_ =>
+  DotProduct (DirectionCurve2d space) (Direction2d space_) (Curve1d Unitless)
 
 instance
-  space ~ space' =>
-  DotMultiplication (DirectionCurve2d space) (Direction2d space')
+  space ~ space_ =>
+  DotMultiplication (DirectionCurve2d space) (Direction2d space_)
   where
-  type DirectionCurve2d space .<>. Direction2d space' = Curve1d (Unitless :*: Unitless)
+  type DirectionCurve2d space .<>. Direction2d space_ = Curve1d (Unitless :*: Unitless)
   DirectionCurve2d curve .<>. direction = curve .<>. direction
 
 instance
-  space ~ space' =>
-  DotProduct (Direction2d space) (DirectionCurve2d space') (Curve1d Unitless)
+  space ~ space_ =>
+  DotProduct (Direction2d space) (DirectionCurve2d space_) (Curve1d Unitless)
 
 instance
-  space ~ space' =>
-  DotMultiplication (Direction2d space) (DirectionCurve2d space')
+  space ~ space_ =>
+  DotMultiplication (Direction2d space) (DirectionCurve2d space_)
   where
-  type Direction2d space .<>. DirectionCurve2d space' = Curve1d (Unitless :*: Unitless)
+  type Direction2d space .<>. DirectionCurve2d space_ = Curve1d (Unitless :*: Unitless)
   direction .<>. DirectionCurve2d curve = direction .<>. curve
 
 instance
-  space ~ space' =>
-  DotProduct (DirectionCurve2d space) (Vector2d (space' @ units)) (Curve1d units)
+  space ~ space_ =>
+  DotProduct (DirectionCurve2d space) (Vector2d (space_ @ units)) (Curve1d units)
 
 instance
-  space ~ space' =>
-  DotMultiplication (DirectionCurve2d space) (Vector2d (space' @ units))
+  space ~ space_ =>
+  DotMultiplication (DirectionCurve2d space) (Vector2d (space_ @ units))
   where
-  type DirectionCurve2d space .<>. Vector2d (space' @ units) = Curve1d (Unitless :*: units)
+  type DirectionCurve2d space .<>. Vector2d (space_ @ units) = Curve1d (Unitless :*: units)
   DirectionCurve2d curve .<>. vector = curve .<>. vector
 
 instance
-  space ~ space' =>
-  DotProduct (Vector2d (space @ units)) (DirectionCurve2d space') (Curve1d units)
+  space ~ space_ =>
+  DotProduct (Vector2d (space @ units)) (DirectionCurve2d space_) (Curve1d units)
 
 instance
-  space ~ space' =>
-  DotMultiplication (Vector2d (space @ units)) (DirectionCurve2d space')
+  space ~ space_ =>
+  DotMultiplication (Vector2d (space @ units)) (DirectionCurve2d space_)
   where
-  type Vector2d (space @ units) .<>. DirectionCurve2d space' = Curve1d (units :*: Unitless)
+  type Vector2d (space @ units) .<>. DirectionCurve2d space_ = Curve1d (units :*: Unitless)
   vector .<>. DirectionCurve2d curve = vector .<>. curve
 
 instance
-  space ~ space' =>
-  CrossProduct (DirectionCurve2d space) (DirectionCurve2d space') (Curve1d Unitless)
+  space ~ space_ =>
+  CrossProduct (DirectionCurve2d space) (DirectionCurve2d space_) (Curve1d Unitless)
 
 instance
-  space ~ space' =>
-  CrossMultiplication (DirectionCurve2d space) (DirectionCurve2d space')
+  space ~ space_ =>
+  CrossMultiplication (DirectionCurve2d space) (DirectionCurve2d space_)
   where
-  type DirectionCurve2d space .><. DirectionCurve2d space' = Curve1d (Unitless :*: Unitless)
+  type DirectionCurve2d space .><. DirectionCurve2d space_ = Curve1d (Unitless :*: Unitless)
   DirectionCurve2d curve1 .><. DirectionCurve2d curve2 = curve1 .><. curve2
 
 instance
-  space ~ space' =>
-  CrossProduct (DirectionCurve2d space) (VectorCurve2d (space' @ units)) (Curve1d units)
+  space ~ space_ =>
+  CrossProduct (DirectionCurve2d space) (VectorCurve2d (space_ @ units)) (Curve1d units)
 
 instance
-  space ~ space' =>
-  CrossMultiplication (DirectionCurve2d space) (VectorCurve2d (space' @ units))
+  space ~ space_ =>
+  CrossMultiplication (DirectionCurve2d space) (VectorCurve2d (space_ @ units))
   where
-  type DirectionCurve2d space .><. VectorCurve2d (space' @ units) = Curve1d (Unitless :*: units)
+  type DirectionCurve2d space .><. VectorCurve2d (space_ @ units) = Curve1d (Unitless :*: units)
   DirectionCurve2d curve1 .><. curve2 = curve1 .><. curve2
 
 instance
-  space ~ space' =>
-  CrossProduct (VectorCurve2d (space @ units)) (DirectionCurve2d space') (Curve1d units)
+  space ~ space_ =>
+  CrossProduct (VectorCurve2d (space @ units)) (DirectionCurve2d space_) (Curve1d units)
 
 instance
-  space ~ space' =>
-  CrossMultiplication (VectorCurve2d (space @ units)) (DirectionCurve2d space')
+  space ~ space_ =>
+  CrossMultiplication (VectorCurve2d (space @ units)) (DirectionCurve2d space_)
   where
-  type VectorCurve2d (space @ units) .><. DirectionCurve2d space' = Curve1d (units :*: Unitless)
+  type VectorCurve2d (space @ units) .><. DirectionCurve2d space_ = Curve1d (units :*: Unitless)
   curve1 .><. DirectionCurve2d curve2 = curve1 .><. curve2
 
 instance
-  space ~ space' =>
-  CrossProduct (DirectionCurve2d space) (Direction2d space') (Curve1d Unitless)
+  space ~ space_ =>
+  CrossProduct (DirectionCurve2d space) (Direction2d space_) (Curve1d Unitless)
 
 instance
-  space ~ space' =>
-  CrossMultiplication (DirectionCurve2d space) (Direction2d space')
+  space ~ space_ =>
+  CrossMultiplication (DirectionCurve2d space) (Direction2d space_)
   where
-  type DirectionCurve2d space .><. Direction2d space' = Curve1d (Unitless :*: Unitless)
+  type DirectionCurve2d space .><. Direction2d space_ = Curve1d (Unitless :*: Unitless)
   DirectionCurve2d curve .><. direction = curve .><. direction
 
 instance
-  space ~ space' =>
-  CrossProduct (Direction2d space) (DirectionCurve2d space') (Curve1d Unitless)
+  space ~ space_ =>
+  CrossProduct (Direction2d space) (DirectionCurve2d space_) (Curve1d Unitless)
 
 instance
-  space ~ space' =>
-  CrossMultiplication (Direction2d space) (DirectionCurve2d space')
+  space ~ space_ =>
+  CrossMultiplication (Direction2d space) (DirectionCurve2d space_)
   where
-  type Direction2d space .><. DirectionCurve2d space' = Curve1d (Unitless :*: Unitless)
+  type Direction2d space .><. DirectionCurve2d space_ = Curve1d (Unitless :*: Unitless)
   direction .><. DirectionCurve2d curve = direction .><. curve
 
 instance
-  space ~ space' =>
-  CrossProduct (DirectionCurve2d space) (Vector2d (space' @ units)) (Curve1d units)
+  space ~ space_ =>
+  CrossProduct (DirectionCurve2d space) (Vector2d (space_ @ units)) (Curve1d units)
 
 instance
-  space ~ space' =>
-  CrossMultiplication (DirectionCurve2d space) (Vector2d (space' @ units))
+  space ~ space_ =>
+  CrossMultiplication (DirectionCurve2d space) (Vector2d (space_ @ units))
   where
-  type DirectionCurve2d space .><. Vector2d (space' @ units) = Curve1d (Unitless :*: units)
+  type DirectionCurve2d space .><. Vector2d (space_ @ units) = Curve1d (Unitless :*: units)
   DirectionCurve2d curve .><. vector = curve .><. vector
 
 instance
-  space ~ space' =>
-  CrossProduct (Vector2d (space @ units)) (DirectionCurve2d space') (Curve1d units)
+  space ~ space_ =>
+  CrossProduct (Vector2d (space @ units)) (DirectionCurve2d space_) (Curve1d units)
 
 instance
-  space ~ space' =>
-  CrossMultiplication (Vector2d (space @ units)) (DirectionCurve2d space')
+  space ~ space_ =>
+  CrossMultiplication (Vector2d (space @ units)) (DirectionCurve2d space_)
   where
-  type Vector2d (space @ units) .><. DirectionCurve2d space' = Curve1d (units :*: Unitless)
+  type Vector2d (space @ units) .><. DirectionCurve2d space_ = Curve1d (units :*: Unitless)
   vector .><. DirectionCurve2d curve = vector .><. curve
 
 xComponent :: DirectionCurve2d space -> Curve1d Unitless

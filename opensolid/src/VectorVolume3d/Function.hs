@@ -82,8 +82,8 @@ instance HasUnits (Function (space @ units)) where
   type Erase (Function (space @ units)) = Function (space @ Unitless)
 
 instance
-  space ~ space' =>
-  Units.Coercion (Function (space @ units1)) (Function (space' @ units2))
+  space ~ space_ =>
+  Units.Coercion (Function (space @ units1)) (Function (space_ @ units2))
   where
   coerce Zero = Zero
   coerce (Constant value) = Constant (Units.coerce value)
@@ -114,10 +114,12 @@ instance Multiplication (Function (space @ units)) Sign where
   function .*. Negative = Units.coerce -function
 
 instance
-  (space ~ space', units ~ units') =>
+  ( space ~ space_
+  , units ~ units_
+  ) =>
   Addition
     (Function (space @ units))
-    (Function (space' @ units'))
+    (Function (space_ @ units_))
     (Function (space @ units))
   where
   Zero + function = function
@@ -126,28 +128,34 @@ instance
   function1 + function2 = Sum function1 function2
 
 instance
-  (space ~ space', units ~ units') =>
+  ( space ~ space_
+  , units ~ units_
+  ) =>
   Addition
     (Function (space @ units))
-    (Vector3d (space' @ units'))
+    (Vector3d (space_ @ units_))
     (Function (space @ units))
   where
   function + vector = function + constant vector
 
 instance
-  (space ~ space', units ~ units') =>
+  ( space ~ space_
+  , units ~ units_
+  ) =>
   Addition
     (Vector3d (space @ units))
-    (Function (space' @ units'))
+    (Function (space_ @ units_))
     (Function (space @ units))
   where
   value + function = constant value + function
 
 instance
-  (space ~ space', units ~ units') =>
+  ( space ~ space_
+  , units ~ units_
+  ) =>
   Subtraction
     (Function (space @ units))
-    (Function (space' @ units'))
+    (Function (space_ @ units_))
     (Function (space @ units))
   where
   Zero - function = negate function
@@ -156,19 +164,23 @@ instance
   function1 - function2 = Difference function1 function2
 
 instance
-  (space ~ space', units ~ units') =>
+  ( space ~ space_
+  , units ~ units_
+  ) =>
   Subtraction
     (Function (space @ units))
-    (Vector3d (space' @ units'))
+    (Vector3d (space_ @ units_))
     (Function (space @ units))
   where
   function - vector = function - constant vector
 
 instance
-  (space ~ space', units ~ units') =>
+  ( space ~ space_
+  , units ~ units_
+  ) =>
   Subtraction
     (Vector3d (space @ units))
-    (Function (space' @ units'))
+    (Function (space_ @ units_))
     (Function (space @ units))
   where
   vector - function = constant vector - function
@@ -178,7 +190,9 @@ instance
   Product (Volume1d.Function units1) (Function (space @ units2)) (Function (space @ units3))
 
 instance Multiplication (Volume1d.Function units1) (Function (space @ units2)) where
-  type Volume1d.Function units1 .*. Function (space @ units2) = Function (space @ (units1 :*: units2))
+  type
+    Volume1d.Function units1 .*. Function (space @ units2) =
+      Function (space @ (units1 :*: units2))
   Volume1d.Function.Zero .*. _ = Zero
   _ .*. Zero = Zero
   Volume1d.Function.Constant a .*. Constant b = Constant (a .*. b)
@@ -189,7 +203,9 @@ instance
   Product (Function (space @ units1)) (Volume1d.Function units2) (Function (space @ units3))
 
 instance Multiplication (Function (space @ units1)) (Volume1d.Function units2) where
-  type Function (space @ units1) .*. Volume1d.Function units2 = Function (space @ (units1 :*: units2))
+  type
+    Function (space @ units1) .*. Volume1d.Function units2 =
+      Function (space @ (units1 :*: units2))
   Zero .*. _ = Zero
   _ .*. Volume1d.Function.Zero = Zero
   Constant a .*. Volume1d.Function.Constant b = Constant (a .*. b)
@@ -216,7 +232,9 @@ instance
   Quotient (Function (space @ units1)) (Volume1d.Function units2) (Function (space @ units3))
 
 instance Division (Function (space @ units1)) (Volume1d.Function units2) where
-  type Function (space @ units1) ./. Volume1d.Function units2 = Function (space @ (units1 :/: units2))
+  type
+    Function (space @ units1) ./. Volume1d.Function units2 =
+      Function (space @ (units1 :/: units2))
   Zero ./. _ = Zero
   Constant a ./. Volume1d.Function.Constant b = Constant (a ./. b)
   function ./. Volume1d.Function.Constant x = (1.0 ./. x) .*^ function

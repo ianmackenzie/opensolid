@@ -8,8 +8,10 @@ type role Point3d phantom
 data Point3d (coordinateSystem :: CoordinateSystem)
 
 instance
-  (space ~ space', units ~ units') =>
+  ( space ~ space_
+  , units ~ units_
+  ) =>
   Subtraction
     (Point3d (space @ units))
-    (Point3d (space' @ units'))
+    (Point3d (space_ @ units_))
     (Vector3d (space @ units))

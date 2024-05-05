@@ -54,12 +54,14 @@ instance HasUnits (Vector3d (space @ units)) where
   type Units (Vector3d (space @ units)) = units
   type Erase (Vector3d (space @ units)) = Vector3d (space @ Unitless)
 
-instance space ~ space' => Units.Coercion (Vector3d (space @ units1)) (Vector3d (space' @ units2)) where
+instance space ~ space_ => Units.Coercion (Vector3d (space @ units1)) (Vector3d (space_ @ units2)) where
   coerce = Data.Coerce.coerce
 
 instance
-  (space ~ space', units ~ units') =>
-  ApproximateEquality (Vector3d (space @ units)) (Vector3d (space' @ units')) units
+  ( space ~ space_
+  , units ~ units_
+  ) =>
+  ApproximateEquality (Vector3d (space @ units)) (Vector3d (space_ @ units_)) units
   where
   v1 ~= v2 = magnitude (v1 - v2) ~= Qty.zero
 
@@ -81,23 +83,23 @@ instance Multiplication (Vector3d (space @ units)) Sign where
 instance Product (Vector3d (space @ units)) Sign (Vector3d (space @ units))
 
 instance
-  ( space ~ space'
-  , units ~ units'
+  ( space ~ space_
+  , units ~ units_
   ) =>
   Addition
     (Vector3d (space @ units))
-    (Vector3d (space' @ units'))
+    (Vector3d (space_ @ units_))
     (Vector3d (space @ units))
   where
   Vector3d x1 y1 z1 + Vector3d x2 y2 z2 = Vector3d (x1 + x2) (y1 + y2) (z1 + z2)
 
 instance
-  ( space ~ space'
-  , units ~ units'
+  ( space ~ space_
+  , units ~ units_
   ) =>
   Subtraction
     (Vector3d (space @ units))
-    (Vector3d (space' @ units'))
+    (Vector3d (space_ @ units_))
     (Vector3d (space @ units))
   where
   Vector3d x1 y1 z1 - Vector3d x2 y2 z2 = Vector3d (x1 - x2) (y1 - y2) (z1 - z2)
@@ -127,21 +129,21 @@ instance
   Quotient (Vector3d (space @ units1)) (Qty units2) (Vector3d (space @ units3))
 
 instance
-  space ~ space' =>
-  DotMultiplication (Vector3d (space @ units1)) (Vector3d (space' @ units2))
+  space ~ space_ =>
+  DotMultiplication (Vector3d (space @ units1)) (Vector3d (space_ @ units2))
   where
-  type Vector3d (space @ units1) .<>. Vector3d (space' @ units2) = Qty (units1 :*: units2)
+  type Vector3d (space @ units1) .<>. Vector3d (space_ @ units2) = Qty (units1 :*: units2)
   Vector3d x1 y1 z1 .<>. Vector3d x2 y2 z2 = x1 .*. x2 + y1 .*. y2 + z1 .*. z2
 
 instance
-  (Units.Product units1 units2 units3, space ~ space') =>
-  DotProduct (Vector3d (space @ units1)) (Vector3d (space' @ units2)) (Qty units3)
+  (Units.Product units1 units2 units3, space ~ space_) =>
+  DotProduct (Vector3d (space @ units1)) (Vector3d (space_ @ units2)) (Qty units3)
 
 instance
-  space ~ space' =>
-  CrossMultiplication (Vector3d (space @ units1)) (Vector3d (space' @ units2))
+  space ~ space_ =>
+  CrossMultiplication (Vector3d (space @ units1)) (Vector3d (space_ @ units2))
   where
-  type Vector3d (space @ units1) .><. Vector3d (space' @ units2) = Vector3d (space @ (units1 :*: units2))
+  type Vector3d (space @ units1) .><. Vector3d (space_ @ units2) = Vector3d (space @ (units1 :*: units2))
   Vector3d x1 y1 z1 .><. Vector3d x2 y2 z2 =
     Vector3d
       (y1 .*. z2 - z1 .*. y2)
@@ -149,8 +151,8 @@ instance
       (x1 .*. y2 - y1 .*. x2)
 
 instance
-  (Units.Product units1 units2 units3, space ~ space') =>
-  CrossProduct (Vector3d (space @ units1)) (Vector3d (space' @ units2)) (Vector3d (space @ units3))
+  (Units.Product units1 units2 units3, space ~ space_) =>
+  CrossProduct (Vector3d (space @ units1)) (Vector3d (space_ @ units2)) (Vector3d (space @ units3))
 
 zero :: Vector3d (space @ units)
 zero = Vector3d Qty.zero Qty.zero Qty.zero

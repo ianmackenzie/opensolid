@@ -88,19 +88,19 @@ instance HasUnits (Range units) where
 instance Units.Coercion (Range units1) (Range units2) where
   coerce = Data.Coerce.coerce
 
-instance units ~ units' => ApproximateEquality (Range units) (Qty units') units where
+instance units ~ units_ => ApproximateEquality (Range units) (Qty units_) units where
   Range low high ~= value = low >= value - ?tolerance && high <= value + ?tolerance
 
-instance units ~ units' => ApproximateEquality (Qty units) (Range units') units where
+instance units ~ units_ => ApproximateEquality (Qty units) (Range units_) units where
   value ~= range = range ~= value
 
-instance units ~ units' => Intersects (Qty units) (Range units') units where
+instance units ~ units_ => Intersects (Qty units) (Range units_) units where
   value ^ range = exclusion value range <= ?tolerance
 
-instance units ~ units' => Intersects (Range units) (Qty units') units where
+instance units ~ units_ => Intersects (Range units) (Qty units_) units where
   range ^ value = value ^ range
 
-instance units ~ units' => Intersects (Range units) (Range units') units where
+instance units ~ units_ => Intersects (Range units) (Range units_) units where
   first ^ second = separation first second <= ?tolerance
 
 instance Negation (Range units) where
@@ -120,22 +120,22 @@ instance Multiplication (Range units) Sign where
 
 instance Product (Range units) Sign (Range units)
 
-instance units ~ units' => Addition (Range units) (Range units') (Range units) where
+instance units ~ units_ => Addition (Range units) (Range units_) (Range units) where
   Range low1 high1 + Range low2 high2 = Range_ (low1 + low2) (high1 + high2)
 
-instance units ~ units' => Addition (Range units) (Qty units') (Range units) where
+instance units ~ units_ => Addition (Range units) (Qty units_) (Range units) where
   Range low high + value = Range_ (low + value) (high + value)
 
-instance units ~ units' => Addition (Qty units) (Range units') (Range units) where
+instance units ~ units_ => Addition (Qty units) (Range units_) (Range units) where
   value + Range low high = Range_ (value + low) (value + high)
 
-instance units ~ units' => Subtraction (Range units) (Range units') (Range units) where
+instance units ~ units_ => Subtraction (Range units) (Range units_) (Range units) where
   Range low1 high1 - Range low2 high2 = Range_ (low1 - high2) (high1 - low2)
 
-instance units ~ units' => Subtraction (Range units) (Qty units') (Range units) where
+instance units ~ units_ => Subtraction (Range units) (Qty units_) (Range units) where
   Range low high - value = Range_ (low - value) (high - value)
 
-instance units ~ units' => Subtraction (Qty units) (Range units') (Range units) where
+instance units ~ units_ => Subtraction (Qty units) (Range units_) (Range units) where
   value - Range low high = Range_ (value - high) (value - low)
 
 instance Multiplication (Qty units1) (Range units2) where
