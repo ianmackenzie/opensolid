@@ -374,18 +374,10 @@ data QuotientOf space units1 units2 = Quotient (VectorCurve3d (space @ units1)) 
 deriving instance Show (QuotientOf space units1 units2)
 
 instance Interface (QuotientOf space units1 units2) (space @ (units1 :/: units2)) where
-  evaluateAtImpl t (Quotient vectorCurve3d curve1d) =
-    evaluateAt t vectorCurve3d ./. Curve1d.evaluateAt t curve1d
-
-  segmentBoundsImpl t (Quotient vectorCurve3d curve1d) =
-    segmentBounds t vectorCurve3d ./. Curve1d.segmentBounds t curve1d
-
-  derivativeImpl (Quotient vectorCurve3d curve1d) = do
-    let p = vectorCurve3d
-    let q = curve1d
-    let pDerivative = derivative p
-    let qDerivative = Curve1d.derivative q
-    (pDerivative .*. q - p .*. qDerivative) .!/.! Curve1d.squared' q
+  evaluateAtImpl t (Quotient p q) = evaluateAt t p ./. Curve1d.evaluateAt t q
+  segmentBoundsImpl t (Quotient p q) = segmentBounds t p ./. Curve1d.segmentBounds t q
+  derivativeImpl (Quotient p q) =
+    (derivative p .*. q - p .*. Curve1d.derivative q) .!/.! Curve1d.squared' q
 
 instance
   Units.Quotient units1 units2 units3 =>
