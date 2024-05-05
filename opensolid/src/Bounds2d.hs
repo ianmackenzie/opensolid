@@ -281,8 +281,7 @@ hull4 p1 p2 p3 p4 = do
 hullN :: NonEmpty (Point2d (space @ units)) -> Bounds2d (space @ units)
 hullN (p0 :| rest) = do
   let (x0, y0) = Point2d.coordinates p0
-  let go :: Qty units -> Qty units -> Qty units -> Qty units -> List (Point2d (space @ units)) -> Bounds2d (space @ units)
-      go xLow xHigh yLow yHigh [] = Bounds2d (Range.unsafe xLow xHigh) (Range.unsafe yLow yHigh)
+  let go xLow xHigh yLow yHigh [] = Bounds2d (Range.unsafe xLow xHigh) (Range.unsafe yLow yHigh)
       go xLow xHigh yLow yHigh (point : remaining) = do
         let (x, y) = Point2d.coordinates point
         go (Qty.min xLow x) (Qty.max xHigh x) (Qty.min yLow y) (Qty.max yHigh y) remaining
@@ -391,9 +390,13 @@ resolve assess bounds@(Bounds2d x y) =
             then Resolved value11
             else Unresolved
 
-find :: (Bounds2d (space @ units) -> Bool) -> Bounds2d (space @ units) -> Maybe (Point2d (space @ units))
+find ::
+  (Bounds2d (space @ units) -> Bool) ->
+  Bounds2d (space @ units) ->
+  Maybe (Point2d (space @ units))
 find isCandidate bounds = Maybe.do
-  (x0, y0) <- Range.find2 (\x y -> isCandidate (Bounds2d x y)) (xCoordinate bounds) (yCoordinate bounds)
+  let isCandidate2 x y = isCandidate (Bounds2d x y)
+  (x0, y0) <- Range.find2 isCandidate2 (xCoordinate bounds) (yCoordinate bounds)
   Just (Point2d.xy x0 y0)
 
 placeIn ::
