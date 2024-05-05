@@ -30,8 +30,8 @@ module Map
   )
 where
 
-import Data.Map qualified
 import Data.Map (Map)
+import Data.Map qualified
 import OpenSolid
 import Pair qualified
 import Prelude qualified
@@ -108,8 +108,8 @@ takeMin givenMap =
 takeMax :: Ord k => Map k v -> (Maybe (k, v), Map k v)
 takeMax givenMap =
   if isEmpty givenMap
-      then ( Nothing, givenMap)
-      else  Pair.mapFirst Just (Data.Map.deleteFindMax givenMap)
+    then (Nothing, givenMap)
+    else Pair.mapFirst Just (Data.Map.deleteFindMax givenMap)
 
 foldr :: (v -> a -> a) -> a -> Map k v -> a
 foldr = Data.Map.foldr
