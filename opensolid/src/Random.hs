@@ -8,6 +8,7 @@ module Random
   , map3
   , map4
   , bool
+  , sign
   , int
   , float
   , qty
@@ -16,8 +17,10 @@ module Random
   , seed
   , pair
   , maybe
+  , either
   , oneOf
   , retry
+  , combine
   , (>>=)
   , (>>)
   , return
@@ -106,6 +109,9 @@ map4 function generatorA generatorB generatorC generatorD = Random.do
 bool :: Generator Bool
 bool = Generator System.Random.uniform
 
+sign :: Generator Sign
+sign = Generator System.Random.uniform
+
 int :: Int -> Int -> Generator Int
 int low high = Generator (System.Random.uniformR (low, high))
 
@@ -142,6 +148,11 @@ maybe generator = Random.do
   generateJust <- bool
   if generateJust then map Just generator else return Nothing
 
+either :: Generator a -> Generator a -> Generator a
+either firstGenerator secondGenerator = Random.do
+  coinFlip <- bool
+  if coinFlip then firstGenerator else secondGenerator
+
 oneOf :: NonEmpty (Generator a) -> Generator a
 oneOf (firstGenerator :| remainingGenerators) = do
   let array = Array.fromList remainingGenerators
@@ -157,3 +168,10 @@ retry fallibleGenerator = Random.do
   case result of
     Ok value -> Random.return value
     Error _ -> retry fallibleGenerator
+
+combine :: List (Generator a) -> Generator (List a)
+combine [] = return []
+combine (first : rest) = Random.do
+  firstValue <- first
+  restValues <- combine rest
+  return (firstValue : restValues)
