@@ -104,7 +104,7 @@ map4 function generatorA generatorB generatorC generatorD = Random.do
   return (function valueA valueB valueC valueD)
 
 bool :: Generator Bool
-bool = Generator (System.Random.uniformR (False, True))
+bool = Generator System.Random.uniform
 
 int :: Int -> Int -> Generator Int
 int low high = Generator (System.Random.uniformR (low, high))
