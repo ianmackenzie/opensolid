@@ -200,7 +200,7 @@ testArcFromEndpoints = IO.do
       , Arc2d.sweptAngle Angle.quarterTurn
       )
   case arc of
-    Curve2d.Arc centerPoint _ _ _ _ -> log "Arc center point" centerPoint
+    Curve2d.Arc{centerPoint} -> log "Arc center point" centerPoint
     _ -> log "Unexpected curve" arc
 
 testPlaneTorusIntersection :: Tolerance Meters => IO ()
