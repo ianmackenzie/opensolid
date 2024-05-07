@@ -2,9 +2,13 @@ module Sign (Sign (Positive, Negative)) where
 
 import Arithmetic
 import Basics
+import System.Random.Stateful qualified
 import Prelude qualified
 
-data Sign = Negative | Positive deriving (Eq, Ord, Show)
+data Sign = Negative | Positive deriving (Eq, Ord, Show, Prelude.Enum, Prelude.Bounded)
+
+instance System.Random.Stateful.Uniform Sign where
+  uniformM = System.Random.Stateful.uniformEnumM
 
 instance Negation Sign where
   negate Positive = Negative
