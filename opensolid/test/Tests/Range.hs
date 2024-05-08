@@ -30,10 +30,10 @@ tests =
 
 smaller :: Test
 smaller = Test.check 100 "smaller" Test.do
-  range1 <- Range.generator Random.length
-  range2 <- Range.generator Random.length
-  t1 <- Parameter.generator
-  t2 <- Parameter.generator
+  range1 <- Range.random Random.length
+  range2 <- Range.random Random.length
+  t1 <- Parameter.random
+  t2 <- Parameter.random
   let x1 = Range.interpolate range1 t1
   let x2 = Range.interpolate range2 t2
   let smallerValue = Qty.smaller x1 x2
@@ -48,10 +48,10 @@ smaller = Test.check 100 "smaller" Test.do
 
 larger :: Test
 larger = Test.check 100 "larger" Test.do
-  range1 <- Range.generator Random.length
-  range2 <- Range.generator Random.length
-  t1 <- Parameter.generator
-  t2 <- Parameter.generator
+  range1 <- Range.random Random.length
+  range2 <- Range.random Random.length
+  t1 <- Parameter.random
+  t2 <- Parameter.random
   let x1 = Range.interpolate range1 t1
   let x2 = Range.interpolate range2 t2
   let largerValue = Qty.larger x1 x2
@@ -66,8 +66,8 @@ larger = Test.check 100 "larger" Test.do
 
 valueInRange :: Generator (Length, Range Meters)
 valueInRange = Random.do
-  range <- Range.generator Random.length
-  t <- Parameter.generator
+  range <- Range.random Random.length
+  t <- Parameter.random
   let value = Range.interpolate range t
   Random.return (value, range)
 
@@ -100,8 +100,8 @@ find = Test.verify "find" do
 qtyRangeDivision :: Test
 qtyRangeDivision = Test.check 1000 "qtyRangeDivision" Test.do
   x <- Random.length
-  range <- Range.generator Random.length
-  t <- Parameter.generator
+  range <- Range.random Random.length
+  t <- Parameter.random
   let y = Range.interpolate range t
   let quotient = x / y
   let rangeQuotient = x / range
@@ -114,8 +114,8 @@ qtyRangeDivision = Test.check 1000 "qtyRangeDivision" Test.do
 
 rangeQtyDivision :: Test
 rangeQtyDivision = Test.check 1000 "rangeQtyDivision" Test.do
-  range <- Range.generator Random.length
-  t <- Parameter.generator
+  range <- Range.random Random.length
+  t <- Parameter.random
   let x = Range.interpolate range t
   y <- Random.length
   let quotient = x / y
@@ -132,10 +132,10 @@ Range function with corresponding Qty function
 -}
 rangeRangeDivision :: Test
 rangeRangeDivision = Test.check 1000 "rangeRangeDivision" Test.do
-  range1 <- Range.generator Random.length
-  range2 <- Range.generator Random.length
-  t1 <- Parameter.generator
-  t2 <- Parameter.generator
+  range1 <- Range.random Random.length
+  range2 <- Range.random Random.length
+  t1 <- Parameter.random
+  t2 <- Parameter.random
   let x1 = Range.interpolate range1 t1
   let x2 = Range.interpolate range2 t2
   let quotient = x1 / x2

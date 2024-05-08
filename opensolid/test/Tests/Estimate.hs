@@ -54,8 +54,8 @@ instance Estimate.Interface DummyEstimate Meters where
 
 dummyEstimate :: Generator (Length, Estimate Meters)
 dummyEstimate = Random.do
-  range <- Range.generator Random.length
-  t <- Parameter.generator
+  range <- Range.random Random.length
+  t <- Parameter.random
   let value = Range.interpolate range t
   Random.return (value, Estimate.wrap (DummyEstimate value range))
 

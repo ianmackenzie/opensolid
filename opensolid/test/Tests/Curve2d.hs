@@ -213,7 +213,7 @@ tangentDerivativeIsPerpendicularToTangent =
     let curve = CubicSpline2d.fromControlPoints p0 p1 p2 p3
     tangentDirection <- Curve2d.tangentDirection curve
     let tangentDerivative = DirectionCurve2d.derivative tangentDirection
-    t <- Parameter.generator
+    t <- Parameter.random
     let tangent = DirectionCurve2d.evaluateAt t tangentDirection
     let derivative = VectorCurve2d.evaluateAt t tangentDerivative
     Test.expect (Tolerance.using 1e-12 (derivative <> tangent ~= 0.0))
@@ -264,7 +264,7 @@ firstDerivativeConsistency :: Generator (Curve2d (space @ Meters)) -> Test
 firstDerivativeConsistency curveGenerator = Test.check 100 "First derivative" Test.do
   curve <- curveGenerator
   let firstDerivative = Curve2d.derivative curve
-  t <- Parameter.generator
+  t <- Parameter.random
   let dt = 1e-6
   let numericalFirstDerivative = (Curve2d.evaluateAt (t + dt) curve - Curve2d.evaluateAt (t - dt) curve) / (2 * dt)
   let analyticFirstDerivative = VectorCurve2d.evaluateAt t firstDerivative
@@ -275,7 +275,7 @@ secondDerivativeConsistency curveGenerator = Test.check 100 "Second derivative" 
   curve <- curveGenerator
   let firstDerivative = Curve2d.derivative curve
   let secondDerivative = VectorCurve2d.derivative firstDerivative
-  t <- Parameter.generator
+  t <- Parameter.random
   let dt = 1e-6
   let numericalSecondDerivative = (VectorCurve2d.evaluateAt (t + dt) firstDerivative - VectorCurve2d.evaluateAt (t - dt) firstDerivative) / (2 * dt)
   let analyticSecondDerivative = VectorCurve2d.evaluateAt t secondDerivative
@@ -299,5 +299,5 @@ reversalConsistency =
         Test.check 100 label Test.do
           curve <- generator
           let reversedCurve = Curve2d.reverse curve
-          t <- Parameter.generator
+          t <- Parameter.random
           Test.expect (Curve2d.evaluateAt t curve ~= Curve2d.evaluateAt (1.0 - t) reversedCurve)

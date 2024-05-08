@@ -46,7 +46,7 @@ module Range
   , resolve
   , resolution
   , intersection
-  , generator
+  , random
   , solve
   , find2
   , samples
@@ -579,10 +579,10 @@ find2 isCandidate u v
                 Nothing ->
                   find2 isCandidate u2 v2
 
-generator :: Random.Generator (Qty units) -> Random.Generator (Range units)
-generator qtyGenerator = Random.do
-  a <- qtyGenerator
-  b <- qtyGenerator
+random :: Random.Generator (Qty units) -> Random.Generator (Range units)
+random randomQty = Random.do
+  a <- randomQty
+  b <- randomQty
   Random.return (from a b)
 
 samples :: Range units -> List (Qty units)

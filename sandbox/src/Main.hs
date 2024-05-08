@@ -161,9 +161,9 @@ testIOSequencing = IO.do
 
 testParameter1dGeneration :: IO ()
 testParameter1dGeneration = IO.do
-  t1 <- Random.generate Parameter.generator
-  t2 <- Random.generate Parameter.generator
-  t3 <- Random.generate Parameter.generator
+  t1 <- Random.generate Parameter.random
+  t2 <- Random.generate Parameter.random
+  t3 <- Random.generate Parameter.random
   log "Random parameter value 1" t1
   log "Random parameter value 2" t2
   log "Random parameter value 3" t3

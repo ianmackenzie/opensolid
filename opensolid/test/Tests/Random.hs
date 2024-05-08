@@ -51,7 +51,7 @@ length :: Generator Length
 length = Random.qty (Length.meters -10.0) (Length.meters 10.0)
 
 lengthRange :: Generator (Range Meters)
-lengthRange = Range.generator length
+lengthRange = Range.random length
 
 point2d :: Generator (Point2d (space @ Meters))
 point2d = Random.map2 Point2d.xy length length
@@ -63,7 +63,7 @@ vectorBounds3d :: Generator (VectorBounds3d (space @ Meters))
 vectorBounds3d = Random.map3 VectorBounds3d lengthRange lengthRange lengthRange
 
 axis2d :: Generator (Axis2d (space @ Meters))
-axis2d = Random.map2 Axis2d.through point2d Direction2d.generator
+axis2d = Random.map2 Axis2d.through point2d Direction2d.random
 
 frame2d :: Generator (Frame2d (global @ Meters) (Defines local))
 frame2d = Random.map Frame2d.fromXAxis axis2d

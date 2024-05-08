@@ -25,7 +25,7 @@ module Direction2d
   , relativeTo
   , placeInBasis
   , relativeToBasis
-  , generator
+  , random
   , transformBy
   , rotateBy
   , mirrorIn
@@ -190,8 +190,8 @@ placeInBasis basis = lift (Vector2d.placeInBasis basis)
 relativeToBasis :: Basis2d global (Defines local) -> Direction2d global -> Direction2d local
 relativeToBasis basis = lift (Vector2d.relativeToBasis basis)
 
-generator :: Random.Generator (Direction2d space)
-generator = Random.map fromAngle (Random.qty Angle.zero Angle.twoPi)
+random :: Random.Generator (Direction2d space)
+random = Random.map fromAngle (Random.qty -Angle.pi Angle.pi)
 
 transformBy ::
   Transform2d.IsRigid a =>

@@ -1,6 +1,6 @@
 module Parameter
   ( steps
-  , generator
+  , random
   , leading
   , trailing
   , inBetween
@@ -27,5 +27,5 @@ inBetween n = List.map (/ n) [1 .. n - 1]
 midpoints :: Int -> List Float
 midpoints n = List.map (\i -> (2 * i + 1) / (2 * n)) [0 .. n - 1]
 
-generator :: Random.Generator Float
-generator = Random.float 0.0 1.0
+random :: Random.Generator Float
+random = Random.float 0.0 1.0

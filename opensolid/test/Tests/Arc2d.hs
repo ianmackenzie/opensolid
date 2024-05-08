@@ -42,7 +42,7 @@ deformation :: Tolerance Meters => Test
 deformation = Test.check 100 "deformation" Test.do
   initialArc <- Random.arc2d
   transform <- Random.affineTransform2d
-  t <- Parameter.generator
+  t <- Parameter.random
   let transformedArc = Curve2d.transformBy transform initialArc
   let startOfTransformed = Curve2d.startPoint transformedArc
   let endOfTransformed = Curve2d.endPoint transformedArc

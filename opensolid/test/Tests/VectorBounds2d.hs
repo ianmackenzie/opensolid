@@ -17,8 +17,8 @@ tests =
 placeIn :: Test
 placeIn = Test.check 100 "placeIn" Test.do
   localBounds <- Random.vectorBounds2d
-  u <- Parameter.generator
-  v <- Parameter.generator
+  u <- Parameter.random
+  v <- Parameter.random
   let localVector = VectorBounds2d.interpolate localBounds u v
   frame <- Random.frame2d
   let globalBounds = VectorBounds2d.placeIn frame localBounds
@@ -28,8 +28,8 @@ placeIn = Test.check 100 "placeIn" Test.do
 relativeTo :: Test
 relativeTo = Test.check 100 "relativeTo" Test.do
   globalBounds <- Random.vectorBounds2d
-  u <- Parameter.generator
-  v <- Parameter.generator
+  u <- Parameter.random
+  v <- Parameter.random
   let globalVector = VectorBounds2d.interpolate globalBounds u v
   frame <- Random.frame2d
   let localBounds = VectorBounds2d.relativeTo frame globalBounds
