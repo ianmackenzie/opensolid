@@ -399,6 +399,31 @@ testHermiteBezier = IO.do
   let drawingBounds = Bounds2d.xy coordinateRange coordinateRange
   Drawing2d.writeTo "test-hermite-bezier.svg" drawingBounds [curveEntity]
 
+testStretchedArc :: Tolerance Meters => IO ()
+testStretchedArc = IO.do
+  let initialArc = Arc2d.from (Point2d.meters 1.0 0.0) (Point2d.meters 0.0 1.0) (Angle.degrees 90.0)
+  let axis = Axis2d.through Point2d.origin (Direction2d.degrees 30.0)
+  let stretched = Curve2d.scaleAlong axis 2.0 initialArc
+  let compressed = Curve2d.scaleAlong axis 0.5 initialArc
+  printEllipticalArc "initialArc" initialArc
+  printEllipticalArc "stretched" stretched
+  printEllipticalArc "compressed" compressed
+
+printEllipticalArc :: Tolerance Meters => String -> Curve2d (space @ Meters) -> IO ()
+printEllipticalArc label = \case
+  Curve2d.Arc{centerPoint, majorDirection, minorDirection, majorRadius, minorRadius, startAngle, endAngle} -> IO.do
+    IO.printLine (label + ":")
+    log "  centerPoint" centerPoint
+    log "  majorDirection" majorDirection
+    log "  minorDirection" minorDirection
+    log "  majorRadius" majorRadius
+    log "  minorRadius" minorRadius
+    log "  startAngle" (Angle.inDegrees startAngle)
+    log "  endAngle" (Angle.inDegrees endAngle)
+    log "  start point" (centerPoint + majorRadius * majorDirection * Angle.cos startAngle + minorRadius * minorDirection * Angle.sin startAngle)
+    log "  end point" (centerPoint + majorRadius * majorDirection * Angle.cos endAngle + minorRadius * minorDirection * Angle.sin endAngle)
+  curve -> log ("Expected " + label + " to be an elliptical arc, got") curve
+
 testDebugPrint :: IO ()
 testDebugPrint = do
   let xs = String.repeat 2 "x"
@@ -444,6 +469,7 @@ main = Tolerance.using (Length.meters 1e-9) IO.do
   testBezierSegment
   testHermiteBezier
   testPlaneTorusIntersection
+  testStretchedArc
   testConcurrency
   testIOParallel
   testParallelComputation
