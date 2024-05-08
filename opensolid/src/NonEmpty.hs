@@ -60,6 +60,8 @@ module NonEmpty
   , pickMinimumBy
   , pickMaximum
   , pickMaximumBy
+  , random
+  , shuffle
   )
 where
 
@@ -70,6 +72,9 @@ import Data.List.NonEmpty (NonEmpty ((:|)))
 import Data.List.NonEmpty qualified
 import Data.Semigroup qualified
 import List qualified
+import Pair qualified
+import Random.Internal qualified as Random
+import System.Random qualified
 import Prelude qualified
 
 {-# COMPLETE [], NonEmpty #-}
@@ -305,3 +310,15 @@ pick better (x :| xs) = go [x] [] x xs xs
         if better item currentItem
           then go updatedPrevious previous item remaining remaining
           else go updatedPrevious currentPrevious currentItem currentFollowing remaining
+
+random :: Int -> Random.Generator a -> Random.Generator (NonEmpty a)
+random n randomItem = Random.do
+  firstItem <- randomItem
+  restItems <- List.random (n - 1) randomItem
+  Random.return (firstItem :| restItems)
+
+shuffle :: NonEmpty a -> Random.Generator (NonEmpty a)
+shuffle original = Random.do
+  keys <- random (length original) (Random.Generator System.Random.genWord64)
+  let shuffledPairs = sortBy Pair.second (zip2 original keys)
+  Random.return (NonEmpty.map Pair.first shuffledPairs)

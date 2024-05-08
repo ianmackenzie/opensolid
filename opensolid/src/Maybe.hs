@@ -7,12 +7,15 @@ module Maybe
   , (>>=)
   , (>>)
   , return
+  , random
   )
 where
 
 import Basics
+import Bool qualified
 import Composition
 import Data.Maybe qualified
+import Random qualified
 
 map :: (a -> b) -> Maybe a -> Maybe b
 map function (Just value) = Just (function value)
@@ -34,3 +37,10 @@ collect = Data.Maybe.mapMaybe
 
 values :: List (Maybe a) -> List a
 values = Data.Maybe.catMaybes
+
+random :: Random.Generator a -> Random.Generator (Maybe a)
+random randomValue = Random.do
+  generateJust <- Bool.random
+  if generateJust
+    then Random.map Just randomValue
+    else Random.return Nothing

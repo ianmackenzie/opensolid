@@ -18,6 +18,7 @@ module Tests.Random
 where
 
 import Angle qualified
+import Sign qualified
 import Arc2d qualified
 import Axis2d (Axis2d)
 import Axis2d qualified
@@ -26,9 +27,11 @@ import Bounds2d qualified
 import CubicSpline2d qualified
 import Curve2d (Curve2d)
 import Direction2d qualified
+import Float qualified
 import Frame2d (Frame2d)
 import Frame2d qualified
 import Length (Length)
+import Qty qualified
 import Length qualified
 import Line2d qualified
 import NonEmpty qualified
@@ -48,7 +51,7 @@ import VectorBounds2d (VectorBounds2d (VectorBounds2d))
 import VectorBounds3d (VectorBounds3d (VectorBounds3d))
 
 length :: Generator Length
-length = Random.qty (Length.meters -10.0) (Length.meters 10.0)
+length = Qty.random (Length.meters -10.0) (Length.meters 10.0)
 
 lengthRange :: Generator (Range Meters)
 lengthRange = Range.random length
@@ -81,8 +84,8 @@ arc2d :: Tolerance Meters => Generator (Curve2d (space @ Meters))
 arc2d = Random.do
   startPoint <- point2d
   endPoint <- point2d
-  angleSign <- Random.sign
-  angleMagnitude <- Random.qty (Angle.degrees 5.0) (Angle.degrees 355.0)
+  angleSign <- Sign.random
+  angleMagnitude <- Qty.random (Angle.degrees 5.0) (Angle.degrees 355.0)
   let sweptAngle = angleSign * angleMagnitude
   Random.return (Arc2d.from startPoint endPoint sweptAngle)
 
@@ -98,7 +101,7 @@ translation2d = Random.map Transform2d.translateBy vector2d
 rotation2d :: Generator (Transform2d.Rigid (space @ Meters))
 rotation2d = Random.do
   centerPoint <- point2d
-  angle <- Random.qty (Angle.degrees -360.0) (Angle.degrees 360.0)
+  angle <- Qty.random (Angle.degrees -360.0) (Angle.degrees 360.0)
   Random.return (Transform2d.rotateAround centerPoint angle)
 
 mirror2d :: Generator (Transform2d.Rigid (space @ Meters))
@@ -108,7 +111,7 @@ rigidTransform2d :: Generator (Transform2d.Rigid (space @ Meters))
 rigidTransform2d = Random.oneOf (NonEmpty.of3 translation2d rotation2d mirror2d)
 
 scalingFactor :: Generator Float
-scalingFactor = Random.float 0.5 2.0
+scalingFactor = Float.random 0.5 2.0
 
 uniformScaling2d :: Generator (Transform2d.Uniform (space @ Meters))
 uniformScaling2d = Random.map2 Transform2d.scaleAbout point2d scalingFactor

@@ -12,12 +12,15 @@ module Int
   , choose
   , sum
   , product
+  , random
   )
 where
 
 import List qualified
 import NonEmpty qualified
 import OpenSolid
+import Random.Internal (Generator (Generator))
+import System.Random qualified
 import Text.Read qualified
 import Prelude qualified
 
@@ -75,3 +78,6 @@ sum = List.foldl (+) 0
 
 product :: NonEmpty Int -> Int
 product = NonEmpty.reduce (*)
+
+random :: Int -> Int -> Generator Int
+random low high = Generator (System.Random.uniformR (low, high))

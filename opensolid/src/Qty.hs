@@ -27,6 +27,7 @@ module Qty
   , convert
   , unconvert
   , sum
+  , random
   )
 where
 
@@ -38,7 +39,9 @@ import {-# SOURCE #-} Float (Float, fromRational)
 import {-# SOURCE #-} Float qualified
 import Foreign.Storable (Storable)
 import List qualified
+import Random.Internal qualified as Random
 import Sign (Sign (Negative, Positive))
+import System.Random qualified
 import Units (Unitless, (:*:), (:/:))
 import Units qualified
 import Prelude qualified
@@ -257,3 +260,7 @@ convert factor value = value !* factor
 
 unconvert :: Qty (units2 :/: units1) -> Qty units2 -> Qty units1
 unconvert factor value = value !/ factor
+
+random :: Qty units -> Qty units -> Random.Generator (Qty units)
+random (Qty_ low) (Qty_ high) =
+  Random.map Qty_ (Random.Generator (System.Random.uniformR (low, high)))

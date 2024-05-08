@@ -29,6 +29,7 @@ module Float
   , goldenRatio
   , sum
   , product
+  , random
   )
 where
 
@@ -39,6 +40,7 @@ import NonEmpty (NonEmpty)
 import NonEmpty qualified
 import Qty (Qty (Qty_))
 import Qty qualified
+import Random.Internal qualified as Random
 import {-# SOURCE #-} Result (Result (Error))
 import Sign (Sign)
 import Text.Read qualified
@@ -137,3 +139,6 @@ sum = Qty.sum
 
 product :: NonEmpty Float -> Float
 product = NonEmpty.reduce (*)
+
+random :: Float -> Float -> Random.Generator Float
+random = Qty.random

@@ -18,8 +18,8 @@ import Parameter qualified
 import Point2d qualified
 import Qty qualified
 import Random (Generator)
+import Int qualified
 import Random qualified
-import Random.Shuffle qualified
 import Range (Range (Range))
 import Range qualified
 import Test (Test)
@@ -62,14 +62,14 @@ dummyEstimate = Random.do
 duplicatedDummyEstimates :: Generator (NonEmpty (Length, Estimate Meters))
 duplicatedDummyEstimates = Random.do
   pair <- dummyEstimate
-  numPairs <- Random.int 1 3
+  numPairs <- Int.random 1 3
   Random.return (pair :| List.repeat (numPairs - 1) pair)
 
 dummyEstimates :: Generator (NonEmpty (Length, Estimate Meters))
-dummyEstimates =
-  Random.nonEmpty 10 duplicatedDummyEstimates
-    |> Random.map NonEmpty.concat
-    |> Random.Shuffle.nonEmpty
+dummyEstimates = Random.do
+  nested <- NonEmpty.random 10 duplicatedDummyEstimates
+  let flattened = NonEmpty.concat nested
+  NonEmpty.shuffle flattened
 
 check :: Tolerance units => Estimate units -> Qty units -> (Bool, Range units)
 check estimate value = do

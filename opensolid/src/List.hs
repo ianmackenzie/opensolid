@@ -51,12 +51,17 @@ module List
   , intersperse
   , partition
   , repeat
+  , random
+  , shuffle
   )
 where
 
 import Arithmetic
 import Basics
 import Data.List qualified
+import Pair qualified
+import Random.Internal qualified as Random
+import System.Random qualified
 import Prelude qualified
 
 singleton :: a -> List a
@@ -240,3 +245,17 @@ partition = Data.List.partition
 
 repeat :: Int -> a -> List a
 repeat = Data.List.replicate
+
+random :: Int -> Random.Generator a -> Random.Generator (List a)
+random n randomItem
+  | n <= 0 = Random.return []
+  | otherwise = Random.do
+      item <- randomItem
+      rest <- random (n - 1) randomItem
+      Random.return (item : rest)
+
+shuffle :: List a -> Random.Generator (List a)
+shuffle original = Random.do
+  keys <- random (length original) (Random.Generator System.Random.genWord64)
+  let shuffledPairs = sortBy Pair.second (zip2 original keys)
+  Random.return (List.map Pair.first shuffledPairs)

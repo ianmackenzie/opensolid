@@ -39,6 +39,7 @@ import {-# SOURCE #-} Basis2d (Basis2d)
 import {-# SOURCE #-} Frame2d (Frame2d)
 import OpenSolid
 import {-# SOURCE #-} Point2d (Point2d)
+import Qty qualified
 import Random qualified
 import Transform2d (Transform2d)
 import Transform2d qualified
@@ -191,7 +192,7 @@ relativeToBasis :: Basis2d global (Defines local) -> Direction2d global -> Direc
 relativeToBasis basis = lift (Vector2d.relativeToBasis basis)
 
 random :: Random.Generator (Direction2d space)
-random = Random.map fromAngle (Random.qty -Angle.pi Angle.pi)
+random = Random.map fromAngle (Qty.random -Angle.pi Angle.pi)
 
 transformBy ::
   Transform2d.IsRigid a =>

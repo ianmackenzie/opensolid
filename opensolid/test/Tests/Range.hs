@@ -73,7 +73,7 @@ valueInRange = Random.do
 
 smallest :: Test
 smallest = Test.check 1000 "smallest" Test.do
-  valuesAndRanges <- Random.nonEmpty 5 valueInRange
+  valuesAndRanges <- NonEmpty.random 5 valueInRange
   let (values, ranges) = NonEmpty.unzip2 valuesAndRanges
   let smallestValue = Qty.smallest values
   let smallestRange = Range.smallest ranges
@@ -81,7 +81,7 @@ smallest = Test.check 1000 "smallest" Test.do
 
 largest :: Test
 largest = Test.check 1000 "largest" Test.do
-  valuesAndRanges <- Random.nonEmpty 5 valueInRange
+  valuesAndRanges <- NonEmpty.random 5 valueInRange
   let (values, ranges) = NonEmpty.unzip2 valuesAndRanges
   let largestValue = Qty.largest values
   let largestRange = Range.largest ranges

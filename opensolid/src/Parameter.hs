@@ -8,6 +8,7 @@ module Parameter
   )
 where
 
+import Float qualified
 import List qualified
 import OpenSolid
 import Random qualified
@@ -28,4 +29,4 @@ midpoints :: Int -> List Float
 midpoints n = List.map (\i -> (2 * i + 1) / (2 * n)) [0 .. n - 1]
 
 random :: Random.Generator Float
-random = Random.float 0.0 1.0
+random = Float.random 0.0 1.0

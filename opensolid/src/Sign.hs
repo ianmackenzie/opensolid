@@ -1,7 +1,13 @@
-module Sign (Sign (Positive, Negative)) where
+module Sign
+  ( Sign (Positive, Negative)
+  , random
+  )
+where
 
 import Arithmetic
 import Basics
+import Random.Internal qualified as Random
+import System.Random qualified
 import System.Random.Stateful qualified
 import Prelude qualified
 
@@ -24,3 +30,6 @@ instance Multiplication Sign Sign Sign
 instance Exponentiation Sign Int where
   Positive ** _ = Positive
   Negative ** n = if Prelude.even n then Positive else Negative
+
+random :: Random.Generator Sign
+random = Random.Generator System.Random.uniform

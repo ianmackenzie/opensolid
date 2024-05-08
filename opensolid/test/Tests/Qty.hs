@@ -6,7 +6,6 @@ import Point2d (Point2d)
 import Point2d qualified
 import Qty qualified
 import Random (Generator)
-import Random qualified
 import Test (Test)
 import Test qualified
 import Tests.Random qualified as Random
@@ -19,7 +18,7 @@ tests =
   ]
 
 pointListGenerator :: Generator (NonEmpty (Point2d (space @ Meters)))
-pointListGenerator = Random.nonEmpty 10 Random.point2d
+pointListGenerator = NonEmpty.random 10 Random.point2d
 
 xMagnitude :: Point2d (space @ units) -> Qty units
 xMagnitude point = Qty.abs (Point2d.xCoordinate point)

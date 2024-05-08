@@ -81,6 +81,7 @@ library
       Basis2d
       BezierCurve2d
       Bisection
+      Bool
       Bounded
       Bounds2d
       Bounds3d
@@ -127,7 +128,7 @@ library
       QuadraticSpline2d
       QuadraticSpline3d
       Random
-      Random.Shuffle
+      Random.Internal
       Range
       Region2d
       Result

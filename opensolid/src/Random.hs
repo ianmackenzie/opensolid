@@ -7,70 +7,33 @@ module Random
   , map2
   , map3
   , map4
-  , bool
-  , sign
-  , int
-  , float
-  , qty
-  , list
-  , nonEmpty
   , seed
-  , pair
-  , maybe
   , either
   , oneOf
   , retry
   , combine
   , (>>=)
-  , (>>)
   , return
   )
 where
 
+import Arithmetic
 import Array qualified
-import Maybe qualified
-import OpenSolid
+import Basics
+import Composition
+import Data.List.NonEmpty (NonEmpty ((:|)))
 import Pair qualified
-import Qty (Qty (Qty_))
+import Random.Internal hiding ((>>=))
+import Random.Internal qualified
+import Result (Result (Error, Ok))
 import System.Random (StdGen)
 import System.Random qualified
 import System.Random.Stateful qualified
-import Prelude (Applicative, Functor, Monad)
-import Prelude qualified
-
-newtype Generator a = Generator (StdGen -> (a, StdGen))
 
 newtype Seed = Seed StdGen
 
-return :: a -> Generator a
-return value = Generator (value,)
-
 (>>=) :: Generator a -> (a -> Generator b) -> Generator b
-valueGenerator >>= function =
-  Generator $
-    \stdGen1 -> do
-      let (value, stdGen2) = run valueGenerator stdGen1
-      let newGenerator = function value
-      run newGenerator stdGen2
-
-run :: Generator a -> StdGen -> (a, StdGen)
-run (Generator generator) stdgen = generator stdgen
-
-instance Functor Generator where
-  fmap = map
-
-instance Applicative Generator where
-  pure = return
-
-  functionGenerator <*> valueGenerator =
-    Generator $
-      \stdGen1 -> do
-        let (function, stdGen2) = run functionGenerator stdGen1
-        let (value, stdGen3) = run valueGenerator stdGen2
-        (function value, stdGen3)
-
-instance Monad Generator where
-  (>>=) = (>>=)
+(>>=) = (Random.Internal.>>=)
 
 init :: Int -> Seed
 init givenSeed = Seed (System.Random.mkStdGen givenSeed)
@@ -81,9 +44,6 @@ step generator (Seed stdGen) = Pair.mapSecond Seed (run generator stdGen)
 generate :: Generator a -> IO a
 generate generator =
   System.Random.Stateful.applyAtomicGen (run generator) System.Random.Stateful.globalStdGen
-
-map :: (a -> b) -> Generator a -> Generator b
-map function (Generator generator) = Generator (generator >> Pair.mapFirst function)
 
 map2 :: (a -> b -> c) -> Generator a -> Generator b -> Generator c
 map2 function generatorA generatorB = Random.do
@@ -106,67 +66,30 @@ map4 function generatorA generatorB generatorC generatorD = Random.do
   valueD <- generatorD
   return (function valueA valueB valueC valueD)
 
-bool :: Generator Bool
-bool = Generator System.Random.uniform
-
-sign :: Generator Sign
-sign = Generator System.Random.uniform
-
-int :: Int -> Int -> Generator Int
-int low high = Generator (System.Random.uniformR (low, high))
-
-float :: Float -> Float -> Generator Float
-float = qty
-
-qty :: Qty units -> Qty units -> Generator (Qty units)
-qty (Qty_ low) (Qty_ high) = map Qty_ (Generator (System.Random.uniformR (low, high)))
-
-list :: Int -> Generator a -> Generator (List a)
-list n _ | n <= 0 = return []
-list n itemGenerator = Random.do
-  item <- itemGenerator
-  rest <- list (n - 1) itemGenerator
-  return (item : rest)
-
-nonEmpty :: Int -> Generator a -> Generator (NonEmpty a)
-nonEmpty n itemGenerator = Random.do
-  first <- itemGenerator
-  rest <- list (n - 1) itemGenerator
-  return (first :| rest)
-
 seed :: Generator Seed
 seed = Generator (System.Random.split >> Pair.mapFirst Seed)
 
-pair :: Generator a -> Generator b -> Generator (a, b)
-pair generatorA generatorB = Random.do
-  valueA <- generatorA
-  valueB <- generatorB
-  return (valueA, valueB)
-
-maybe :: Generator a -> Generator (Maybe a)
-maybe generator = Random.do
-  generateJust <- bool
-  if generateJust then map Just generator else return Nothing
-
 either :: Generator a -> Generator a -> Generator a
 either firstGenerator secondGenerator = Random.do
-  coinFlip <- bool
+  coinFlip <- Generator System.Random.uniform
   if coinFlip then firstGenerator else secondGenerator
 
 oneOf :: NonEmpty (Generator a) -> Generator a
 oneOf (firstGenerator :| remainingGenerators) = do
   let array = Array.fromList remainingGenerators
   let n = Array.length array
-  let indexGenerator = int 0 n
+  let indexGenerator = Generator (System.Random.uniformR (0, n))
   Random.do
     index <- indexGenerator
-    Array.get (index - 1) array |> Maybe.withDefault firstGenerator
+    case Array.get (index - 1) array of
+      Just generator -> generator
+      Nothing -> firstGenerator
 
 retry :: Generator (Result x a) -> Generator a
 retry fallibleGenerator = Random.do
   result <- fallibleGenerator
   case result of
-    Ok value -> Random.return value
+    Ok value -> return value
     Error _ -> retry fallibleGenerator
 
 combine :: List (Generator a) -> Generator (List a)

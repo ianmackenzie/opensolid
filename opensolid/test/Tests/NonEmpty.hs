@@ -4,7 +4,7 @@ import Data.List qualified
 import List qualified
 import NonEmpty qualified
 import OpenSolid
-import Random qualified
+import Int qualified
 import Test (Test)
 import Test qualified
 
@@ -16,7 +16,7 @@ tests =
 
 pickMinimum :: Test
 pickMinimum = Test.check 100 "pickMinimum" Test.do
-  values <- Random.nonEmpty 20 (Random.int 0 100)
+  values <- NonEmpty.random 20 (Int.random 0 100)
   let (minValue, remainingValues) = NonEmpty.pickMinimum values
   let minValueIsMin = List.all (>= minValue) remainingValues
   let orderIsUnchanged = remainingValues == Data.List.delete minValue (NonEmpty.toList values)
@@ -29,6 +29,6 @@ pickMinimum = Test.check 100 "pickMinimum" Test.do
 
 reverseMap :: Test
 reverseMap = Test.check 100 "reverseMap" Test.do
-  ints <- Random.nonEmpty 10 (Random.int 1 10)
+  ints <- NonEmpty.random 10 (Int.random 1 10)
   let twice n = 2 * n
   Test.expect (NonEmpty.reverseMap twice ints == NonEmpty.reverse (NonEmpty.map twice ints))
