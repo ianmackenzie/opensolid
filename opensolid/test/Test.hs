@@ -6,7 +6,7 @@ module Test
   , group
   , run
   , expect
-  , expectAll
+  , all
   , output
   , lines
   , pass
@@ -104,8 +104,15 @@ expect :: Bool -> Generator Expectation
 expect True = Random.return Passed
 expect False = Random.return (Failed [])
 
-expectAll :: List Bool -> Generator Expectation
-expectAll checks = expect (List.allTrue checks)
+combineExpectations :: List Expectation -> Expectation
+combineExpectations [] = Passed
+combineExpectations (Passed : rest) = combineExpectations rest
+combineExpectations (Failed messages : rest) = case combineExpectations rest of
+  Passed -> Failed messages
+  Failed restMessages -> Failed (messages + restMessages)
+
+all :: List (Generator Expectation) -> Generator Expectation
+all generators = Random.map combineExpectations (Random.combine generators)
 
 output :: Show a => String -> a -> Generator Expectation -> Generator Expectation
 output label value =

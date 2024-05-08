@@ -66,11 +66,11 @@ find = Test.verify "find" Test.do
   let midParameterValues = Curve2d.find (Point2d.meters 1.0 1.0) testSpline
   let offCurveParameterValues = Curve2d.find (Point2d.meters 1.0 1.1) testSpline
   Tolerance.using 1e-12 $
-    Test.expectAll
-      [ startParameterValues ~= [0.0]
-      , endParameterValues ~= [1.0]
-      , midParameterValues ~= [0.5]
-      , offCurveParameterValues == []
+    Test.all
+      [ Test.expect (startParameterValues ~= [0.0])
+      , Test.expect (endParameterValues ~= [1.0])
+      , Test.expect (midParameterValues ~= [0.5])
+      , Test.expect (offCurveParameterValues == [])
       ]
 
 overlappingSegments ::
