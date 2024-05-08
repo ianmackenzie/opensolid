@@ -424,6 +424,18 @@ printEllipticalArc label = \case
     log "  end point" (centerPoint + majorRadius * majorDirection * Angle.cos endAngle + minorRadius * minorDirection * Angle.sin endAngle)
   curve -> log ("Expected " + label + " to be an elliptical arc, got") curve
 
+testExplicitRandomStep :: IO ()
+testExplicitRandomStep = IO.do
+  let seed0 = Random.init 1234
+  let list0 = [5 .. 10]
+  let generator = List.shuffle list0
+  let (list1, seed1) = Random.step generator seed0
+  log "list1" list1
+  let (list2, seed2) = Random.step generator seed1
+  log "list2" list2
+  let (list3, _) = Random.step generator seed2
+  log "list3" list3
+
 testDebugPrint :: IO ()
 testDebugPrint = do
   let xs = String.repeat 2 "x"
@@ -470,6 +482,7 @@ main = Tolerance.using (Length.meters 1e-9) IO.do
   testHermiteBezier
   testPlaneTorusIntersection
   testStretchedArc
+  testExplicitRandomStep
   testConcurrency
   testIOParallel
   testParallelComputation
