@@ -24,6 +24,20 @@ module Curve2d
   , placeIn
   , relativeTo
   , transformBy
+  , translateBy
+  , translateIn
+  , translateAlong
+  , rotateAround
+  , mirrorAcross
+  , scaleAbout
+  , scaleAlong
+  , translateByOwn
+  , translateInOwn
+  , translateAlongOwn
+  , rotateAroundOwn
+  , mirrorAcrossOwn
+  , scaleAboutOwn
+  , scaleAlongOwn
   , curvature
   , curvature'
   )
@@ -44,6 +58,7 @@ import Curve2d.Intersection qualified as Intersection
 import Curve2d.Patterns
 import Curve2d.Segment (Segment)
 import Curve2d.Segment qualified as Segment
+import Direction2d (Direction2d)
 import DirectionCurve2d (DirectionCurve2d)
 import Frame2d (Frame2d)
 import Frame2d qualified
@@ -57,6 +72,7 @@ import Result qualified
 import Transform2d (Transform2d)
 import Transform2d qualified
 import Units qualified
+import Vector2d (Vector2d)
 import VectorCurve2d (VectorCurve2d)
 import VectorCurve2d qualified
 
@@ -283,6 +299,48 @@ transformBy ::
   Curve2d (space @ units) ->
   Curve2d (space @ units)
 transformBy = Internal.transformBy
+
+translateBy :: Vector2d (space @ units) -> Curve2d (space @ units) -> Curve2d (space @ units)
+translateBy = Transform2d.translateByImpl transformBy
+
+translateIn :: Direction2d space -> Qty units -> Curve2d (space @ units) -> Curve2d (space @ units)
+translateIn = Transform2d.translateInImpl transformBy
+
+translateAlong :: Axis2d (space @ units) -> Qty units -> Curve2d (space @ units) -> Curve2d (space @ units)
+translateAlong = Transform2d.translateAlongImpl transformBy
+
+rotateAround :: Point2d (space @ units) -> Angle -> Curve2d (space @ units) -> Curve2d (space @ units)
+rotateAround = Transform2d.rotateAroundImpl transformBy
+
+mirrorAcross :: Axis2d (space @ units) -> Curve2d (space @ units) -> Curve2d (space @ units)
+mirrorAcross = Transform2d.mirrorAcrossImpl transformBy
+
+scaleAbout :: Point2d (space @ units) -> Float -> Curve2d (space @ units) -> Curve2d (space @ units)
+scaleAbout = Transform2d.scaleAboutImpl transformBy
+
+scaleAlong :: Axis2d (space @ units) -> Float -> Curve2d (space @ units) -> Curve2d (space @ units)
+scaleAlong = Transform2d.scaleAlongImpl transformBy
+
+translateByOwn :: (Curve2d (space @ units) -> Vector2d (space @ units)) -> Curve2d (space @ units) -> Curve2d (space @ units)
+translateByOwn = Transform2d.translateByOwnImpl transformBy
+
+translateInOwn :: (Curve2d (space @ units) -> Direction2d space) -> Qty units -> Curve2d (space @ units) -> Curve2d (space @ units)
+translateInOwn = Transform2d.translateInOwnImpl transformBy
+
+translateAlongOwn :: (Curve2d (space @ units) -> Axis2d (space @ units)) -> Qty units -> Curve2d (space @ units) -> Curve2d (space @ units)
+translateAlongOwn = Transform2d.translateAlongOwnImpl transformBy
+
+rotateAroundOwn :: (Curve2d (space @ units) -> Point2d (space @ units)) -> Angle -> Curve2d (space @ units) -> Curve2d (space @ units)
+rotateAroundOwn = Transform2d.rotateAroundOwnImpl transformBy
+
+mirrorAcrossOwn :: (Curve2d (space @ units) -> Axis2d (space @ units)) -> Curve2d (space @ units) -> Curve2d (space @ units)
+mirrorAcrossOwn = Transform2d.mirrorAcrossOwnImpl transformBy
+
+scaleAboutOwn :: (Curve2d (space @ units) -> Point2d (space @ units)) -> Float -> Curve2d (space @ units) -> Curve2d (space @ units)
+scaleAboutOwn = Transform2d.scaleAboutOwnImpl transformBy
+
+scaleAlongOwn :: (Curve2d (space @ units) -> Axis2d (space @ units)) -> Float -> Curve2d (space @ units) -> Curve2d (space @ units)
+scaleAlongOwn = Transform2d.scaleAlongOwnImpl transformBy
 
 curvature' :: Tolerance units => Curve2d (space @ units) -> Result DegenerateCurve (Curve1d (Unitless :/: units))
 curvature' curve = Result.do
