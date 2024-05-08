@@ -216,51 +216,51 @@ toAffine = Data.Coerce.coerce
 
 -- Helper functions to define specific/concrete transformation functions
 
-translateByImpl :: (Rigid (space @ units) -> a -> a) -> Vector2d (space @ units) -> a -> a
+translateByImpl :: (Rigid (space @ units) -> a -> b) -> Vector2d (space @ units) -> a -> b
 translateByImpl transformBy vector = transformBy (translateBy vector)
 
-translateByOwnImpl :: (Rigid (space @ units) -> a -> a) -> (a -> Vector2d (space @ units)) -> a -> a
+translateByOwnImpl :: (Rigid (space @ units) -> a -> b) -> (a -> Vector2d (space @ units)) -> a -> b
 translateByOwnImpl transformBy getVector argument =
   transformBy (translateBy (getVector argument)) argument
 
-translateInImpl :: (Rigid (space @ units) -> a -> a) -> Direction2d space -> Qty units -> a -> a
+translateInImpl :: (Rigid (space @ units) -> a -> b) -> Direction2d space -> Qty units -> a -> b
 translateInImpl transformBy direction distance = transformBy (translateIn direction distance)
 
-translateInOwnImpl :: (Rigid (space @ units) -> a -> a) -> (a -> Direction2d space) -> Qty units -> a -> a
+translateInOwnImpl :: (Rigid (space @ units) -> a -> b) -> (a -> Direction2d space) -> Qty units -> a -> b
 translateInOwnImpl transformBy getDirection distance argument =
   transformBy (translateIn (getDirection argument) distance) argument
 
-translateAlongImpl :: (Rigid (space @ units) -> a -> a) -> Axis2d (space @ units) -> Qty units -> a -> a
+translateAlongImpl :: (Rigid (space @ units) -> a -> b) -> Axis2d (space @ units) -> Qty units -> a -> b
 translateAlongImpl transformBy axis distance = transformBy (translateAlong axis distance)
 
-translateAlongOwnImpl :: (Rigid (space @ units) -> a -> a) -> (a -> Axis2d (space @ units)) -> Qty units -> a -> a
+translateAlongOwnImpl :: (Rigid (space @ units) -> a -> b) -> (a -> Axis2d (space @ units)) -> Qty units -> a -> b
 translateAlongOwnImpl transformBy getAxis distance argument =
   transformBy (translateAlong (getAxis argument) distance) argument
 
-rotateAroundImpl :: (Rigid (space @ units) -> a -> a) -> Point2d (space @ units) -> Angle -> a -> a
+rotateAroundImpl :: (Rigid (space @ units) -> a -> b) -> Point2d (space @ units) -> Angle -> a -> b
 rotateAroundImpl transformBy centerPoint angle = transformBy (rotateAround centerPoint angle)
 
-rotateAroundOwnImpl :: (Rigid (space @ units) -> a -> a) -> (a -> Point2d (space @ units)) -> Angle -> a -> a
+rotateAroundOwnImpl :: (Rigid (space @ units) -> a -> b) -> (a -> Point2d (space @ units)) -> Angle -> a -> b
 rotateAroundOwnImpl transformBy getCenterPoint angle argument =
   transformBy (rotateAround (getCenterPoint argument) angle) argument
 
-mirrorAcrossImpl :: (Rigid (space @ units) -> a -> a) -> Axis2d (space @ units) -> a -> a
+mirrorAcrossImpl :: (Rigid (space @ units) -> a -> b) -> Axis2d (space @ units) -> a -> b
 mirrorAcrossImpl transformBy axis = transformBy (mirrorAcross axis)
 
-mirrorAcrossOwnImpl :: (Rigid (space @ units) -> a -> a) -> (a -> Axis2d (space @ units)) -> a -> a
+mirrorAcrossOwnImpl :: (Rigid (space @ units) -> a -> b) -> (a -> Axis2d (space @ units)) -> a -> b
 mirrorAcrossOwnImpl transformBy getAxis argument =
   transformBy (mirrorAcross (getAxis argument)) argument
 
-scaleAboutImpl :: (Uniform (space @ units) -> a -> a) -> Point2d (space @ units) -> Float -> a -> a
+scaleAboutImpl :: (Uniform (space @ units) -> a -> b) -> Point2d (space @ units) -> Float -> a -> b
 scaleAboutImpl transformBy centerPoint scale = transformBy (scaleAbout centerPoint scale)
 
-scaleAboutOwnImpl :: (Uniform (space @ units) -> a -> a) -> (a -> Point2d (space @ units)) -> Float -> a -> a
+scaleAboutOwnImpl :: (Uniform (space @ units) -> a -> b) -> (a -> Point2d (space @ units)) -> Float -> a -> b
 scaleAboutOwnImpl transformBy getCenterPoint scale argument =
   transformBy (scaleAbout (getCenterPoint argument) scale) argument
 
-scaleAlongImpl :: (Affine (space @ units) -> a -> a) -> Axis2d (space @ units) -> Float -> a -> a
+scaleAlongImpl :: (Affine (space @ units) -> a -> b) -> Axis2d (space @ units) -> Float -> a -> b
 scaleAlongImpl transformBy axis scale = transformBy (scaleAlong axis scale)
 
-scaleAlongOwnImpl :: (Affine (space @ units) -> a -> a) -> (a -> Axis2d (space @ units)) -> Float -> a -> a
+scaleAlongOwnImpl :: (Affine (space @ units) -> a -> b) -> (a -> Axis2d (space @ units)) -> Float -> a -> b
 scaleAlongOwnImpl transformBy getAxis scale argument =
   transformBy (scaleAlong (getAxis argument) scale) argument
