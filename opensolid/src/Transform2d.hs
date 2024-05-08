@@ -17,6 +17,20 @@ module Transform2d
   , relativeTo
   , fromRigid
   , toAffine
+  , translateByImpl
+  , translateInImpl
+  , translateAlongImpl
+  , rotateAroundImpl
+  , mirrorAcrossImpl
+  , scaleAboutImpl
+  , scaleAlongImpl
+  , translateByOwnImpl
+  , translateInOwnImpl
+  , translateAlongOwnImpl
+  , rotateAroundOwnImpl
+  , mirrorAcrossOwnImpl
+  , scaleAboutOwnImpl
+  , scaleAlongOwnImpl
   )
 where
 
@@ -200,35 +214,53 @@ fromRigid = Data.Coerce.coerce
 toAffine :: Transform2d a (space @ units) -> Affine (space @ units)
 toAffine = Data.Coerce.coerce
 
--- translateBy :: Transformable2d a space units => Vector2d (space @ units) -> a -> a
--- translateBy vector = transformBy (translateBy vector)
+-- Helper functions to define specific/concrete transformation functions
 
--- translateIn :: Transformable2d a space units => Direction2d space -> Qty units -> a -> a
--- translateIn direction distance = transformBy (translateIn direction distance)
+translateByImpl :: (Rigid (space @ units) -> a -> a) -> Vector2d (space @ units) -> a -> a
+translateByImpl transformBy vector = transformBy (translateBy vector)
 
--- translateInOwn :: Transformable2d a space units => (a -> Direction2d space) -> Qty units -> a -> a
--- translateInOwn direction distance value = translateIn (direction value) distance value
+translateByOwnImpl :: (Rigid (space @ units) -> a -> a) -> (a -> Vector2d (space @ units)) -> a -> a
+translateByOwnImpl transformBy getVector argument =
+  transformBy (translateBy (getVector argument)) argument
 
--- translateAlong :: Transformable2d a space units => Axis2d (space @ units) -> Qty units -> a -> a
--- translateAlong axis distance = transformBy (translateAlong axis distance)
+translateInImpl :: (Rigid (space @ units) -> a -> a) -> Direction2d space -> Qty units -> a -> a
+translateInImpl transformBy direction distance = transformBy (translateIn direction distance)
 
--- translateAlongOwn :: Transformable2d a space units => (a -> Axis2d (space @ units)) -> Qty units -> a -> a
--- translateAlongOwn axis distance value = translateAlong (axis value) distance value
+translateInOwnImpl :: (Rigid (space @ units) -> a -> a) -> (a -> Direction2d space) -> Qty units -> a -> a
+translateInOwnImpl transformBy getDirection distance argument =
+  transformBy (translateIn (getDirection argument) distance) argument
 
--- rotateAround :: Transformable2d a space units => Point2d (space @ units) -> Angle -> a -> a
--- rotateAround centerPoint angle = transformBy (rotateAround centerPoint angle)
+translateAlongImpl :: (Rigid (space @ units) -> a -> a) -> Axis2d (space @ units) -> Qty units -> a -> a
+translateAlongImpl transformBy axis distance = transformBy (translateAlong axis distance)
 
--- rotateAroundOwn :: Transformable2d a space units => (a -> Point2d (space @ units)) -> Angle -> a -> a
--- rotateAroundOwn centerPoint angle value = rotateAround (centerPoint value) angle value
+translateAlongOwnImpl :: (Rigid (space @ units) -> a -> a) -> (a -> Axis2d (space @ units)) -> Qty units -> a -> a
+translateAlongOwnImpl transformBy getAxis distance argument =
+  transformBy (translateAlong (getAxis argument) distance) argument
 
--- scaleAbout :: Scalable2d a space units => Point2d (space @ units) -> Float -> a -> Scaled2d a
--- scaleAbout centerPoint scale = scaleBy (scaleAbout centerPoint scale)
+rotateAroundImpl :: (Rigid (space @ units) -> a -> a) -> Point2d (space @ units) -> Angle -> a -> a
+rotateAroundImpl transformBy centerPoint angle = transformBy (rotateAround centerPoint angle)
 
--- scaleAboutOwn :: Scalable2d a space units => (a -> Point2d (space @ units)) -> Float -> a -> Scaled2d a
--- scaleAboutOwn centerPoint scale value = scaleAbout (centerPoint value) scale value
+rotateAroundOwnImpl :: (Rigid (space @ units) -> a -> a) -> (a -> Point2d (space @ units)) -> Angle -> a -> a
+rotateAroundOwnImpl transformBy getCenterPoint angle argument =
+  transformBy (rotateAround (getCenterPoint argument) angle) argument
 
--- scaleAlong :: Deformable2d a space units => Axis2d (space @ units) -> Float -> a -> Deformed2d a
--- scaleAlong axis scale = deformBy (scaleAlong axis scale)
+mirrorAcrossImpl :: (Rigid (space @ units) -> a -> a) -> Axis2d (space @ units) -> a -> a
+mirrorAcrossImpl transformBy axis = transformBy (mirrorAcross axis)
 
--- scaleAlongOwn :: Deformable2d a space units => (a -> Axis2d (space @ units)) -> Float -> a -> Deformed2d a
--- scaleAlongOwn axis scale value = scaleAlong (axis value) scale value
+mirrorAcrossOwnImpl :: (Rigid (space @ units) -> a -> a) -> (a -> Axis2d (space @ units)) -> a -> a
+mirrorAcrossOwnImpl transformBy getAxis argument =
+  transformBy (mirrorAcross (getAxis argument)) argument
+
+scaleAboutImpl :: (Uniform (space @ units) -> a -> a) -> Point2d (space @ units) -> Float -> a -> a
+scaleAboutImpl transformBy centerPoint scale = transformBy (scaleAbout centerPoint scale)
+
+scaleAboutOwnImpl :: (Uniform (space @ units) -> a -> a) -> (a -> Point2d (space @ units)) -> Float -> a -> a
+scaleAboutOwnImpl transformBy getCenterPoint scale argument =
+  transformBy (scaleAbout (getCenterPoint argument) scale) argument
+
+scaleAlongImpl :: (Affine (space @ units) -> a -> a) -> Axis2d (space @ units) -> Float -> a -> a
+scaleAlongImpl transformBy axis scale = transformBy (scaleAlong axis scale)
+
+scaleAlongOwnImpl :: (Affine (space @ units) -> a -> a) -> (a -> Axis2d (space @ units)) -> Float -> a -> a
+scaleAlongOwnImpl transformBy getAxis scale argument =
+  transformBy (scaleAlong (getAxis argument) scale) argument
