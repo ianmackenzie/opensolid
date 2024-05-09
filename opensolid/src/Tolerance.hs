@@ -13,7 +13,6 @@ where
 
 import Arithmetic
 import Basics
-import Float (fromRational)
 import NonEmpty (NonEmpty ((:|)), pattern NonEmpty)
 import Qty (Qty)
 import Qty qualified
@@ -108,7 +107,7 @@ squared' :: Tolerance units => Qty (units :*: units)
 squared' = Qty.squared' ?tolerance
 
 ofSquared' :: Tolerance units => Qty units -> Qty (units :*: units)
-ofSquared' value = ?tolerance .*. ?tolerance + 2.0 * Qty.abs value .*. ?tolerance
+ofSquared' value = ?tolerance .*. ?tolerance + 2 * Qty.abs value .*. ?tolerance
 
 ofSquared :: (Tolerance units, Units.Squared units squaredUnits) => Qty units -> Qty squaredUnits
 ofSquared = Units.specialize . ofSquared'

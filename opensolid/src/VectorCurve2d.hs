@@ -348,6 +348,18 @@ instance Division' (VectorCurve2d (space @ units1)) (Qty units2) where
       VectorCurve2d (space @ (units1 :/: units2))
   curve ./. value = curve ./. Curve1d.constant value
 
+instance Multiplication' (VectorCurve2d (space @ units)) Int where
+  type VectorCurve2d (space @ units) .*. Int = VectorCurve2d (space @ (units :*: Unitless))
+  curve .*. scale = curve .*. Float.fromInt scale
+
+instance Multiplication' Int (VectorCurve2d (space @ units)) where
+  type Int .*. VectorCurve2d (space @ units) = VectorCurve2d (space @ (Unitless :*: units))
+  scale .*. curve = Float.fromInt scale .*. curve
+
+instance Multiplication (VectorCurve2d (space @ units)) Int (VectorCurve2d (space @ units))
+
+instance Multiplication Int (VectorCurve2d (space @ units)) (VectorCurve2d (space @ units))
+
 data DotProductOf space units1 units2
   = DotProductOf (VectorCurve2d (space @ units1)) (VectorCurve2d (space @ units2))
 
@@ -743,9 +755,9 @@ derivative curve =
     Arc v1 v2 a b -> do
       let dTheta = Angle.unitless (b - a)
       Arc (v2 * dTheta) (-v1 * dTheta) a b
-    QuadraticSpline v1 v2 v3 -> line (2.0 * (v2 - v1)) (2.0 * (v3 - v2))
+    QuadraticSpline v1 v2 v3 -> line (2 * (v2 - v1)) (2 * (v3 - v2))
     CubicSpline v1 v2 v3 v4 ->
-      quadraticSpline (3.0 * (v2 - v1)) (3.0 * (v3 - v2)) (3.0 * (v4 - v3))
+      quadraticSpline (3 * (v2 - v1)) (3 * (v3 - v2)) (3 * (v4 - v3))
     BezierCurve (_ :| []) -> zero
     BezierCurve (v1 :| v2 : rest) -> do
       let degree = 1 + List.length rest
@@ -785,7 +797,7 @@ instance Curve1d.Interface (SquaredMagnitude' (space @ units)) (units :*: units)
   segmentBoundsImpl t (SquaredMagnitude' curve) =
     VectorBounds2d.squaredMagnitude' (segmentBounds t curve)
   derivativeImpl (SquaredMagnitude' curve) =
-    2.0 * curve .<>. derivative curve
+    2 * curve .<>. derivative curve
 
 squaredMagnitude :: Units.Squared units1 units2 => VectorCurve2d (space @ units1) -> Curve1d units2
 squaredMagnitude curve = Units.specialize (squaredMagnitude' curve)

@@ -64,7 +64,7 @@ classify (u, v) derivatives1 derivatives2 = do
       let d2Y2_dXdX = secondDerivative1d dX2_dU2 dY2_dU2 d2X2_dU2dU2 d2Y2_dU2dU2
       let d2Y_dXdX = d2Y2_dXdX - d2Y1_dXdX
       let sign1 = Qty.sign d2Y_dXdX
-      let radius1 = Qty.sqrt' (2.0 * ?tolerance ./^ Qty.abs d2Y_dXdX)
+      let radius1 = Qty.sqrt' (2 * ?tolerance ./^ Qty.abs d2Y_dXdX)
       if radius0 <= radius1
         then (Intersection.Crossing, sign0)
         else (Intersection.Tangent, sign1)

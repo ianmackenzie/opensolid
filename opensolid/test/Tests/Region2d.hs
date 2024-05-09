@@ -62,8 +62,8 @@ squareWithHole = Test.verify "squareWithHole" Test.do
   let line2 = Line2d.from p2 p3
   let line3 = Line2d.from p4 p3
   let line4 = Line2d.from p4 p1
-  let centerPoint = Point2d.xy (width / 2.0) (width / 2.0)
-  let holeRadius = width / 4.0
+  let centerPoint = Point2d.xy (width / 2) (width / 2)
+  let holeRadius = width / 4
   arc <-
     Arc2d.build
       ( Arc2d.centerPoint centerPoint
@@ -101,8 +101,8 @@ squareWithTangentHole = Test.verify "squareWithTangentHole" Test.do
   let line2 = Line2d.from p2 p3
   let line3 = Line2d.from p4 p3
   let line4 = Line2d.from p4 p1
-  let centerPoint = Point2d.xy (width / 2.0) (width / 2.0)
-  let holeRadius = width / 2.0
+  let centerPoint = Point2d.xy (width / 2) (width / 2)
+  let holeRadius = width / 2
   arc <-
     Arc2d.build
       ( Arc2d.centerPoint centerPoint

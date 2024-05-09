@@ -105,7 +105,7 @@ pi :: Float
 pi = Prelude.pi
 
 twoPi :: Float
-twoPi = 2.0 * pi
+twoPi = 2 * pi
 
 goldenRatio :: Float
 goldenRatio = 0.5 * (1.0 + sqrt 5.0)

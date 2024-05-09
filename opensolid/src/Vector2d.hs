@@ -52,6 +52,7 @@ import {-# SOURCE #-} Basis2d qualified
 import Data.Coerce qualified
 import {-# SOURCE #-} Direction2d (Direction2d)
 import {-# SOURCE #-} Direction2d qualified
+import Float qualified
 import {-# SOURCE #-} Frame2d (Frame2d)
 import {-# SOURCE #-} Frame2d qualified
 import Length qualified
@@ -131,6 +132,18 @@ instance
     (Vector2d (space @ units))
   where
   Vector2d x1 y1 - Vector2d x2 y2 = Vector2d (x1 - x2) (y1 - y2)
+
+instance Multiplication' Int (Vector2d (space @ units)) where
+  type Int .*. Vector2d (space @ units) = Vector2d (space @ (Unitless :*: units))
+  scale .*. vector = Float.fromInt scale .*. vector
+
+instance Multiplication Int (Vector2d (space @ units)) (Vector2d (space @ units))
+
+instance Multiplication' (Vector2d (space @ units)) Int where
+  type Vector2d (space @ units) .*. Int = Vector2d (space @ (units :*: Unitless))
+  vector .*. scale = vector .*. Float.fromInt scale
+
+instance Multiplication (Vector2d (space @ units)) Int (Vector2d (space @ units))
 
 instance Multiplication' (Qty units1) (Vector2d (space @ units2)) where
   type Qty units1 .*. Vector2d (space @ units2) = Vector2d (space @ (units1 :*: units2))

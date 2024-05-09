@@ -154,6 +154,18 @@ instance
   Units.Product units1 units2 units3 =>
   Multiplication (Range units1) (Qty units2) (Range units3)
 
+instance Multiplication' Int (Range units) where
+  type Int .*. Range units = Range (Unitless :*: units)
+  value .*. range = Float.fromInt value .*. range
+
+instance Multiplication' (Range units) Int where
+  type Range units .*. Int = Range (units :*: Unitless)
+  range .*. value = range .*. Float.fromInt value
+
+instance Multiplication Int (Range units) (Range units)
+
+instance Multiplication (Range units) Int (Range units)
+
 instance Multiplication' (Range units1) (Range units2) where
   type Range units1 .*. Range units2 = Range (units1 :*: units2)
   Range low1 high1 .*. Range low2 high2 =

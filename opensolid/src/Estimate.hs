@@ -121,8 +121,8 @@ instance Interface (Add units) units where
     let width1 = Range.width (bounds first)
     let width2 = Range.width (bounds second)
     if
-      | width1 >= 2.0 * width2 -> refine first + second
-      | width2 >= 2.0 * width1 -> first + refine second
+      | width1 >= 2 * width2 -> refine first + second
+      | width2 >= 2 * width1 -> first + refine second
       | otherwise -> refine first + refine second
 
 instance Addition (Estimate units) (Estimate units) (Estimate units) where
@@ -136,8 +136,8 @@ instance Interface (Subtract units) units where
     let width1 = Range.width (bounds first)
     let width2 = Range.width (bounds second)
     if
-      | width1 >= 2.0 * width2 -> refine first - second
-      | width2 >= 2.0 * width1 -> first - refine second
+      | width1 >= 2 * width2 -> refine first - second
+      | width2 >= 2 * width1 -> first - refine second
       | otherwise -> refine first - refine second
 
 instance Subtraction (Estimate units) (Estimate units) (Estimate units) where

@@ -24,6 +24,7 @@ where
 
 import Curve1d (Curve1d)
 import Curve1d qualified
+import Float qualified
 import OpenSolid
 import Range (Range (Range))
 import Units qualified
@@ -253,6 +254,18 @@ instance Multiplication' (Curve1d units1) (VectorCurve3d (space @ units2)) where
   type Curve1d units1 .*. VectorCurve3d (space @ units2) = VectorCurve3d (space @ (units1 :*: units2))
   curve1d .*. vectorCurve3d = VectorCurve3d (Product1d3d curve1d vectorCurve3d)
 
+instance Multiplication' (VectorCurve3d (space @ units)) Int where
+  type VectorCurve3d (space @ units) .*. Int = VectorCurve3d (space @ (units :*: Unitless))
+  curve .*. scale = curve .*. Float.fromInt scale
+
+instance Multiplication' Int (VectorCurve3d (space @ units)) where
+  type Int .*. VectorCurve3d (space @ units) = VectorCurve3d (space @ (Unitless :*: units))
+  scale .*. curve = Float.fromInt scale .*. curve
+
+instance Multiplication (VectorCurve3d (space @ units)) Int (VectorCurve3d (space @ units))
+
+instance Multiplication Int (VectorCurve3d (space @ units)) (VectorCurve3d (space @ units))
+
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (VectorCurve3d (space @ units1)) (Qty units2) (VectorCurve3d (space @ units3))
@@ -435,7 +448,7 @@ instance
     VectorBounds3d.squaredMagnitude (segmentBounds t expression)
 
   derivativeImpl (SquaredMagnitudeOf expression) =
-    2.0 * expression <> derivative expression
+    2 * expression <> derivative expression
 
 line :: Vector3d (space @ units) -> Vector3d (space @ units) -> VectorCurve3d (space @ units)
 line v1 v2 = if v1 == v2 then Constant v1 else Line v1 v2
@@ -537,8 +550,8 @@ derivative curve =
     Constant _ -> Zero
     Coerce c -> Units.coerce (derivative c)
     Line v1 v2 -> constant (v2 - v1)
-    QuadraticSpline v1 v2 v3 -> line (2.0 * (v2 - v1)) (2.0 * (v3 - v2))
-    CubicSpline v1 v2 v3 v4 -> quadraticSpline (3.0 * (v2 - v1)) (3.0 * (v3 - v2)) (3.0 * (v4 - v3))
+    QuadraticSpline v1 v2 v3 -> line (2 * (v2 - v1)) (2 * (v3 - v2))
+    CubicSpline v1 v2 v3 v4 -> quadraticSpline (3 * (v2 - v1)) (3 * (v3 - v2)) (3 * (v4 - v3))
 
 squaredMagnitude :: Units.Squared units1 units2 => VectorCurve3d (space @ units1) -> Curve1d units2
 squaredMagnitude expression = Curve1d.wrap (SquaredMagnitudeOf expression)

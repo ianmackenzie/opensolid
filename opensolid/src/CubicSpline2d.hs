@@ -52,9 +52,9 @@ instance Curve2d.Interface (CubicSpline2d (space @ units)) (space @ units) where
 
   derivativeImpl (CubicSpline2d p1 p2 p3 p4) =
     VectorCurve2d.quadraticSpline
-      (3.0 * (p2 - p1))
-      (3.0 * (p3 - p2))
-      (3.0 * (p4 - p3))
+      (3 * (p2 - p1))
+      (3 * (p3 - p2))
+      (3 * (p4 - p3))
 
   reverseImpl (CubicSpline2d p1 p2 p3 p4) = CubicSpline2d p4 p3 p2 p1
 

@@ -186,6 +186,18 @@ instance Multiplication' (Curve1d units1) (Curve1d units2) where
   Constant x .*. Product' (Constant y) c = Units.rightAssociate ((x .*. y) .*. c)
   curve1 .*. curve2 = Product' curve1 curve2
 
+instance Multiplication' Int (Curve1d units) where
+  type Int .*. Curve1d units = Curve1d (Unitless :*: units)
+  value .*. curve = Float.fromInt value .*. curve
+
+instance Multiplication' (Curve1d units) Int where
+  type Curve1d units .*. Int = Curve1d (units :*: Unitless)
+  curve .*. value = curve .*. Float.fromInt value
+
+instance Multiplication Int (Curve1d units) (Curve1d units)
+
+instance Multiplication (Curve1d units) Int (Curve1d units)
+
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Curve1d units1) (Qty units2) (Curve1d units3)
@@ -210,7 +222,7 @@ instance Division' (Curve1d units1) (Curve1d units2) where
   type Curve1d units1 ./. Curve1d units2 = Curve1d (units1 :/: units2)
   Constant (Qty 0.0) ./. _ = zero
   Constant x ./. Constant y = Constant (x ./. y)
-  curve ./. Constant x = (1.0 ./. x) .*^ curve
+  curve ./. Constant x = (1 ./. x) .*^ curve
   curve1 ./. curve2 = Quotient' curve1 curve2
 
 instance
@@ -277,8 +289,8 @@ derivative curve =
     Difference c1 c2 -> derivative c1 - derivative c2
     Product' c1 c2 -> derivative c1 .*. c2 + c1 .*. derivative c2
     Quotient' c1 c2 -> (derivative c1 .*. c2 - c1 .*. derivative c2) .!/.! squared' c2
-    Squared' c -> 2.0 * c .*. derivative c
-    SquareRoot' c' -> derivative c' .!/! (2.0 * sqrt' c')
+    Squared' c -> 2 * c .*. derivative c
+    SquareRoot' c' -> derivative c' .!/! (2 * sqrt' c')
     Sin c -> cos c * Angle.unitless (derivative c)
     Cos c -> negate (sin c) * Angle.unitless (derivative c)
     Coerce c -> Units.coerce (derivative c)
@@ -307,10 +319,10 @@ squared' (Sin c) = Units.unspecialize (sinSquared c)
 squared' curve = Squared' curve
 
 cosSquared :: Curve1d Radians -> Curve1d Unitless
-cosSquared c = 0.5 * cos (2.0 * c) + 0.5
+cosSquared c = 0.5 * cos (2 * c) + 0.5
 
 sinSquared :: Curve1d Radians -> Curve1d Unitless
-sinSquared c = 0.5 - 0.5 * cos (2.0 * c)
+sinSquared c = 0.5 - 0.5 * cos (2 * c)
 
 sqrt :: Units.Squared units1 units2 => Curve1d units2 -> Curve1d units1
 sqrt curve = sqrt' (Units.unspecialize curve)

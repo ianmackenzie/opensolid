@@ -89,7 +89,7 @@ twoPi :: Angle
 twoPi = radians Float.twoPi
 
 degree :: Angle
-degree = fullTurn / 360.0
+degree = fullTurn / 360
 
 degrees :: Float -> Angle
 degrees = (* degree)

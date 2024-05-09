@@ -237,7 +237,7 @@ instance Division' (Function (space @ units1)) (Volume1d.Function units2) where
       Function (space @ (units1 :/: units2))
   Zero ./. _ = Zero
   Constant a ./. Volume1d.Function.Constant b = Constant (a ./. b)
-  function ./. Volume1d.Function.Constant x = (1.0 ./. x) .*^ function
+  function ./. Volume1d.Function.Constant x = (1 ./. x) .*^ function
   function1 ./. function2 = Quotient function1 function2
 
 instance

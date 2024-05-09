@@ -8,6 +8,7 @@ import Curve2d qualified
 import Estimate (Estimate)
 import Estimate qualified
 import Float qualified
+import Int qualified
 import Length (Length)
 import Length qualified
 import List qualified
@@ -18,7 +19,6 @@ import Parameter qualified
 import Point2d qualified
 import Qty qualified
 import Random (Generator)
-import Int qualified
 import Random qualified
 import Range (Range (Range))
 import Range qualified
@@ -128,7 +128,7 @@ area = Test.verify "area" Test.do
       )
   let dAdt = Curve2d.yCoordinate curve * VectorCurve2d.xComponent (Curve2d.derivative curve)
   let areaEstimate = Curve1d.integral dAdt
-  let expectedArea = Area.squareMeters (Float.pi / 2.0)
+  let expectedArea = Area.squareMeters (Float.pi / 2)
   areaIsCorrect <- Tolerance.using (Area.squareMeters 1e-6) (resolvesTo expectedArea areaEstimate)
   Test.expect areaIsCorrect
 

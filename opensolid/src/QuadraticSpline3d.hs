@@ -47,7 +47,7 @@ instance Curve3d.Interface (QuadraticSpline3d (space @ units)) (space @ units) w
       (blossom spline th th)
 
   derivativeImpl (QuadraticSpline3d p1 p2 p3) =
-    VectorCurve3d.line (2.0 * (p2 - p1)) (2.0 * (p3 - p2))
+    VectorCurve3d.line (2 * (p2 - p1)) (2 * (p3 - p2))
 
   reverseImpl (QuadraticSpline3d p1 p2 p3) = QuadraticSpline3d p3 p2 p1
 

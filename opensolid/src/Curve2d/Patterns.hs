@@ -30,7 +30,7 @@ pattern Arc{centerPoint, majorDirection, minorDirection, majorRadius, minorRadiu
         let theta =
               if Vector2d.magnitude vx ~= Vector2d.magnitude vy
                 then Angle.degrees 45.0
-                else 0.5 * Angle.atan2 (2.0 * vx .<>. vy) (vx .<>. vx - vy .<>. vy)
+                else 0.5 * Angle.atan2 (2 * vx .<>. vy) (vx .<>. vx - vy .<>. vy)
         let cosTheta = Angle.cos theta
         let sinTheta = Angle.sin theta
         let v1 = vx * cosTheta + vy * sinTheta

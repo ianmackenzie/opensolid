@@ -35,7 +35,7 @@ at t0 secondDerivative = do
   DegenerateEndpoint t0 t1 curve
 
 computeRadius :: Tolerance units => Vector2d (space @ units) -> Float
-computeRadius secondDerivative = Qty.sqrt (2.0 * ?tolerance / Vector2d.magnitude secondDerivative)
+computeRadius secondDerivative = Qty.sqrt (2 * ?tolerance / Vector2d.magnitude secondDerivative)
 
 cutoff :: DegenerateEndpoint space -> Float
 cutoff (DegenerateEndpoint _ t1 _) = t1

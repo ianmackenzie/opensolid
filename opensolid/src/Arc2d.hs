@@ -246,7 +246,7 @@ instance
             (Counterclockwise, Large) -> -offsetMagnitude
     let computedCenterPoint = Point2d.midpoint givenStartPoint givenEndPoint + offsetDirection * offsetDistance
     let halfLength = Qty.sqrt' squaredHalfLength'
-    let shortAngle = 2.0 * Angle.asin (halfLength / givenRadius)
+    let shortAngle = 2 * Angle.asin (halfLength / givenRadius)
     let computedSweptAngle =
           case (givenDirection, givenSize) of
             (Counterclockwise, Small) -> shortAngle

@@ -25,6 +25,7 @@ import Bounds3d (Bounds3d)
 import Bounds3d qualified
 import Direction3d (Direction3d)
 import Direction3d qualified
+import Float qualified
 import OpenSolid
 import Point3d (Point3d)
 import Point3d qualified
@@ -180,6 +181,18 @@ instance Multiplication' (Qty units1) (Function units2) where
   type Qty units1 .*. Function units2 = Function (units1 :*: units2)
   value .*. function = constant value .*. function
 
+instance Multiplication (Function units) Int (Function units)
+
+instance Multiplication' (Function units) Int where
+  type Function units .*. Int = Function (units :*: Unitless)
+  function .*. value = function .*. Float.fromInt value
+
+instance Multiplication Int (Function units) (Function units)
+
+instance Multiplication' Int (Function units) where
+  type Int .*. Function units = Function (Unitless :*: units)
+  value .*. function = Float.fromInt value .*. function
+
 instance
   Units.Quotient units1 units2 units3 =>
   Division (Function units1) (Function units2) (Function units3)
@@ -188,7 +201,7 @@ instance Division' (Function units1) (Function units2) where
   type Function units1 ./. Function units2 = Function (units1 :/: units2)
   Zero ./. _ = Zero
   Constant x ./. Constant y = Constant (x ./. y)
-  function ./. Constant x = (1.0 ./. x) .*^ function
+  function ./. Constant x = (1 ./. x) .*^ function
   function1 ./. function2 = Quotient' function1 function2
 
 instance
@@ -265,8 +278,8 @@ derivative direction function =
     Difference f1 f2 -> derivative direction f1 - derivative direction f2
     Product' f1 f2 -> derivative direction f1 .*. f2 + f1 .*. derivative direction f2
     Quotient' f1 f2 -> (derivative direction f1 .*. f2 - f1 .*. derivative direction f2) .!/.! squared' f2
-    Squared' f -> 2.0 * f .*. derivative direction f
-    SquareRoot' f' -> derivative direction f' .!/! (2.0 * sqrt' f')
+    Squared' f -> 2 * f .*. derivative direction f
+    SquareRoot' f' -> derivative direction f' .!/! (2 * sqrt' f')
     Sin f -> cos f * Angle.unitless (derivative direction f)
     Cos f -> negate (sin f) * Angle.unitless (derivative direction f)
 
@@ -300,10 +313,10 @@ squared' (Sin f) = Units.unspecialize (sinSquared f)
 squared' function = Squared' function
 
 cosSquared :: Function Radians -> Function Unitless
-cosSquared f = 0.5 * cos (2.0 * f) + 0.5
+cosSquared f = 0.5 * cos (2 * f) + 0.5
 
 sinSquared :: Function Radians -> Function Unitless
-sinSquared f = 0.5 - 0.5 * cos (2.0 * f)
+sinSquared f = 0.5 - 0.5 * cos (2 * f)
 
 sqrt :: Units.Squared units1 units2 => Function units2 -> Function units1
 sqrt curve = sqrt' (Units.unspecialize curve)
