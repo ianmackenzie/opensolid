@@ -383,7 +383,7 @@ rotateBy :: Angle -> Vector2d (space @ units) -> Vector2d (space @ units)
 rotateBy theta = transformBy (Transform2d.rotateAround Point2d.origin theta)
 
 mirrorIn :: Direction2d space -> Vector2d (space @ units) -> Vector2d (space @ units)
-mirrorIn mirrorDirection vector = vector - 2.0 * projectionIn mirrorDirection vector
+mirrorIn mirrorDirection vector = vector - 2 * projectionIn mirrorDirection vector
 
 mirrorAcross :: Axis2d (space @ originUnits) -> Vector2d (space @ units) -> Vector2d (space @ units)
 mirrorAcross axis = mirrorIn (Axis2d.normalDirection axis)
