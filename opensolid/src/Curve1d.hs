@@ -158,6 +158,18 @@ instance units ~ units_ => Addition (Curve1d units) (Qty units_) (Curve1d units)
 instance units ~ units_ => Addition (Qty units) (Curve1d units_) (Curve1d units) where
   value + curve = constant value + curve
 
+instance Addition (Curve1d Unitless) Int (Curve1d Unitless) where
+  curve + value = curve + Float.fromInt value
+
+instance Addition Int (Curve1d Unitless) (Curve1d Unitless) where
+  value + curve = Float.fromInt value + curve
+
+instance Subtraction (Curve1d Unitless) Int (Curve1d Unitless) where
+  curve - value = curve - Float.fromInt value
+
+instance Subtraction Int (Curve1d Unitless) (Curve1d Unitless) where
+  value - curve = Float.fromInt value - curve
+
 instance units ~ units_ => Subtraction (Curve1d units) (Curve1d units_) (Curve1d units) where
   curve - Constant (Qty 0.0) = curve
   Constant (Qty 0.0) - curve = negate curve
@@ -300,8 +312,8 @@ newtype Reversed units = Reversed (Curve1d units)
 deriving instance Show (Reversed units)
 
 instance Interface (Reversed units) units where
-  evaluateAtImpl tValue (Reversed curve) = evaluateAt (1.0 - tValue) curve
-  segmentBoundsImpl tBounds (Reversed curve) = segmentBounds (1.0 - tBounds) curve
+  evaluateAtImpl tValue (Reversed curve) = evaluateAt (1 - tValue) curve
+  segmentBoundsImpl tBounds (Reversed curve) = segmentBounds (1 - tBounds) curve
   derivativeImpl (Reversed curve) = -(reverse (derivative curve))
 
 reverse :: Curve1d units -> Curve1d units

@@ -300,4 +300,4 @@ reversalConsistency =
           curve <- generator
           let reversedCurve = Curve2d.reverse curve
           t <- Parameter.random
-          Test.expect (Curve2d.evaluateAt t curve ~= Curve2d.evaluateAt (1.0 - t) reversedCurve)
+          Test.expect (Curve2d.evaluateAt t curve ~= Curve2d.evaluateAt (1 - t) reversedCurve)

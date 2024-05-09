@@ -476,8 +476,8 @@ quadraticBlossom ::
   Float ->
   Vector3d (space @ units)
 quadraticBlossom (Vector3d x1 y1 z1) (Vector3d x2 y2 z2) (Vector3d x3 y3 z3) t1 t2 = do
-  let r1 = 1.0 - t1
-  let r2 = 1.0 - t2
+  let r1 = 1 - t1
+  let r2 = 1 - t2
   let s1 = r1 * r2
   let s2 = r1 * t2 + t1 * r2
   let s3 = t1 * t2
@@ -496,9 +496,9 @@ cubicBlossom ::
   Float ->
   Vector3d (space @ units)
 cubicBlossom (Vector3d x1 y1 z1) (Vector3d x2 y2 z2) (Vector3d x3 y3 z3) (Vector3d x4 y4 z4) t1 t2 t3 = do
-  let r1 = 1.0 - t1
-  let r2 = 1.0 - t2
-  let r3 = 1.0 - t3
+  let r1 = 1 - t1
+  let r2 = 1 - t2
+  let r3 = 1 - t3
   let s1 = r1 * r2 * r3
   let s2 = r1 * r2 * t3 + r1 * t2 * r3 + t1 * r2 * r3
   let s3 = t1 * t2 * r3 + t1 * r2 * t3 + r1 * t2 * t3

@@ -32,8 +32,8 @@ from = do
           Test.expect (Curve2d.evaluateAt 0.5 arc ~= expectedPoint)
   let invSqrt2 = 1 / Float.sqrt 2.0
   Test.group "from" $
-    [ testArcMidpoint 90 (invSqrt2, 1.0 - invSqrt2)
-    , testArcMidpoint -90 (1.0 - invSqrt2, invSqrt2)
+    [ testArcMidpoint 90 (invSqrt2, 1 - invSqrt2)
+    , testArcMidpoint -90 (1 - invSqrt2, invSqrt2)
     , testArcMidpoint 180 (1.0, 0.0)
     , testArcMidpoint -180 (0.0, 1.0)
     ]

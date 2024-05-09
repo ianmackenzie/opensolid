@@ -28,7 +28,7 @@ data DegenerateEndpoint space
 at :: Tolerance units => Float -> VectorCurve2d (space @ units) -> DegenerateEndpoint space
 at t0 secondDerivative = do
   let r = computeRadius (VectorCurve2d.evaluateAt t0 secondDerivative)
-  let t1 = if t0 == 0.0 then r else 1.0 - r
+  let t1 = if t0 == 0.0 then r else 1 - r
   let q = qCurve 0 t0 secondDerivative
   let sign = if t0 == 0.0 then Positive else Negative
   let curve = sign * q / VectorCurve2d.unsafeMagnitude q
@@ -68,7 +68,7 @@ qCurve :: Int -> Float -> VectorCurve2d (space @ units) -> VectorCurve2d (space 
 qCurve n t0 curveDerivative =
   VectorCurve2d.wrap $
     QCurve n t0 curveDerivative $
-      (VectorCurve2d.evaluateAt t0 curveDerivative / (Float.fromInt n + 1.0))
+      (VectorCurve2d.evaluateAt t0 curveDerivative / (Float.fromInt n + 1))
 
 evaluateAt :: Float -> DegenerateEndpoint space -> VectorCurve2d (space @ Unitless) -> Vector2d (space @ Unitless)
 evaluateAt t (DegenerateEndpoint t0 t1 endpointCurve) innerCurve =

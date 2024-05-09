@@ -23,8 +23,8 @@ deriving instance Show (QuadraticSpline3d (space @ units))
 
 blossom :: QuadraticSpline3d (space @ units) -> Float -> Float -> Point3d (space @ units)
 blossom (QuadraticSpline3d (Point3d x1 y1 z1) (Point3d x2 y2 z2) (Point3d x3 y3 z3)) t1 t2 = do
-  let r1 = 1.0 - t1
-  let r2 = 1.0 - t2
+  let r1 = 1 - t1
+  let r2 = 1 - t2
   let s1 = r1 * r2
   let s2 = r1 * t2 + t1 * r2
   let s3 = t1 * t2

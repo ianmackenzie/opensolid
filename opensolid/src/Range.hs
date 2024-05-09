@@ -129,6 +129,12 @@ instance units ~ units_ => Addition (Range units) (Qty units_) (Range units) whe
 instance units ~ units_ => Addition (Qty units) (Range units_) (Range units) where
   value + Range low high = Range_ (value + low) (value + high)
 
+instance Addition (Range Unitless) Int (Range Unitless) where
+  range + value = range + Float.fromInt value
+
+instance Addition Int (Range Unitless) (Range Unitless) where
+  value + range = Float.fromInt value + range
+
 instance units ~ units_ => Subtraction (Range units) (Range units_) (Range units) where
   Range low1 high1 - Range low2 high2 = Range_ (low1 - high2) (high1 - low2)
 
@@ -137,6 +143,12 @@ instance units ~ units_ => Subtraction (Range units) (Qty units_) (Range units) 
 
 instance units ~ units_ => Subtraction (Qty units) (Range units_) (Range units) where
   value - Range low high = Range_ (value - high) (value - low)
+
+instance Subtraction (Range Unitless) Int (Range Unitless) where
+  range - value = range - Float.fromInt value
+
+instance Subtraction Int (Range Unitless) (Range Unitless) where
+  value - range = Float.fromInt value - range
 
 instance Multiplication' (Qty units1) (Range units2) where
   type Qty units1 .*. Range units2 = Range (units1 :*: units2)

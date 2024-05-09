@@ -595,8 +595,8 @@ quadraticBlossom ::
   Float ->
   Vector2d (space @ units)
 quadraticBlossom (Vector2d x1 y1) (Vector2d x2 y2) (Vector2d x3 y3) t1 t2 = do
-  let r1 = 1.0 - t1
-  let r2 = 1.0 - t2
+  let r1 = 1 - t1
+  let r2 = 1 - t2
   let s1 = r1 * r2
   let s2 = r1 * t2 + t1 * r2
   let s3 = t1 * t2
@@ -614,9 +614,9 @@ cubicBlossom ::
   Float ->
   Vector2d (space @ units)
 cubicBlossom (Vector2d x1 y1) (Vector2d x2 y2) (Vector2d x3 y3) (Vector2d x4 y4) t1 t2 t3 = do
-  let r1 = 1.0 - t1
-  let r2 = 1.0 - t2
-  let r3 = 1.0 - t3
+  let r1 = 1 - t1
+  let r2 = 1 - t2
+  let r3 = 1 - t3
   let s1 = r1 * r2 * r3
   let s2 = r1 * r2 * t3 + r1 * t2 * r3 + t1 * r2 * r3
   let s3 = t1 * t2 * r3 + t1 * r2 * t3 + r1 * t2 * t3
@@ -680,7 +680,7 @@ evaluateAt t curve =
     VectorCurve2d c -> evaluateAtImpl t c
     Constant value -> value
     Coerce c -> Units.coerce (evaluateAt t c)
-    Reversed c -> evaluateAt (1.0 - t) c
+    Reversed c -> evaluateAt (1 - t) c
     XY x y -> Vector2d.xy (Curve1d.evaluateAt t x) (Curve1d.evaluateAt t y)
     Negated c -> -(evaluateAt t c)
     Sum c1 c2 -> evaluateAt t c1 + evaluateAt t c2
@@ -704,7 +704,7 @@ segmentBounds t@(Range tl th) curve =
     VectorCurve2d c -> segmentBoundsImpl t c
     Constant value -> VectorBounds2d.constant value
     Coerce c -> Units.coerce (segmentBounds t c)
-    Reversed c -> segmentBounds (1.0 - t) c
+    Reversed c -> segmentBounds (1 - t) c
     XY x y -> VectorBounds2d (Curve1d.segmentBounds t x) (Curve1d.segmentBounds t y)
     Negated c -> -(segmentBounds t c)
     Sum c1 c2 -> segmentBounds t c1 + segmentBounds t c2

@@ -100,6 +100,22 @@ instance units ~ units_ => Subtraction (Qty units) (Qty units_) (Qty units) wher
   {-# INLINE (-) #-}
   Qty_ x - Qty_ y = Qty_ (x Prelude.- y)
 
+instance Addition (Qty Unitless) Int (Qty Unitless) where
+  {-# INLINE (+) #-}
+  x + y = x + Float.fromInt y
+
+instance Addition Int (Qty Unitless) (Qty Unitless) where
+  {-# INLINE (+) #-}
+  x + y = Float.fromInt x + y
+
+instance Subtraction (Qty Unitless) Int (Qty Unitless) where
+  {-# INLINE (-) #-}
+  x - y = x - Float.fromInt y
+
+instance Subtraction Int (Qty Unitless) (Qty Unitless) where
+  {-# INLINE (-) #-}
+  x - y = Float.fromInt x - y
+
 instance Multiplication' (Qty units1) (Qty units2) where
   type Qty units1 .*. Qty units2 = Qty (units1 :*: units2)
   {-# INLINE (.*.) #-}
@@ -246,7 +262,7 @@ interpolateFrom :: Qty units -> Qty units -> Float -> Qty units
 interpolateFrom a b t =
   if t <= 0.5
     then a + (b - a) * t
-    else b + (a - b) * (1.0 - t)
+    else b + (a - b) * (1 - t)
 
 {-# INLINE midpoint #-}
 midpoint :: Qty units -> Qty units -> Qty units
