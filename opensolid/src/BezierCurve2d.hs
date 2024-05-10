@@ -162,7 +162,7 @@ scaleDerivatives sign scale n (first : rest) = do
 offset :: Int -> List (Vector2d (space @ units)) -> Vector2d (space @ units)
 offset i scaledDerivatives =
   List.take i scaledDerivatives
-    |> List.mapWithIndex (\j q -> Float.fromInt (Int.choose (i - 1) j) * q)
+    |> List.mapWithIndex (\j q -> Int.choose (i - 1) j * q)
     |> Vector2d.sum
 
 derivedControlPoints ::

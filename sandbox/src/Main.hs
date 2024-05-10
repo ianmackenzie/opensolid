@@ -257,7 +257,7 @@ drawBounds attributes bounds = do
 
 drawCrossingCurve :: Int -> NonEmpty (Curve2d Uv.Coordinates) -> Drawing2d.Entity Uv.Space
 drawCrossingCurve index segments = do
-  let hue = (Float.fromInt index * Angle.goldenAngle) % Angle.twoPi
+  let hue = (index * Angle.goldenAngle) % Angle.twoPi
   let colour = Colour.hsl hue 0.5 0.5
   Drawing2d.with [Drawing2d.strokeColour colour, Drawing2d.opacity 0.3] $
     List.map drawCurve (NonEmpty.toList segments)
