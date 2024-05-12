@@ -25,28 +25,36 @@ import Random (Generator)
 import Random qualified
 import String qualified
 
-data Expectation
+data TestResult
   = Passed
   | Failed (List String)
 
+newtype Expectation = Expectation (Generator TestResult)
+
+unwrap :: Expectation -> Generator TestResult
+unwrap (Expectation generator) = generator
+
 class Bind m where
-  (>>=) :: m a -> (a -> Generator Expectation) -> Generator Expectation
+  (>>=) :: m a -> (a -> Expectation) -> Expectation
 
 instance Bind Generator where
-  (>>=) = (Random.>>=)
+  valueGenerator >>= toExpectation =
+    Expectation Random.do
+      value <- valueGenerator
+      unwrap (toExpectation value)
 
 instance Bind (Result x) where
   Ok value >>= f = f value
-  Error error >>= _ = Random.return (Failed [Error.message error])
+  Error error >>= _ = Expectation (Random.return (Failed [Error.message error]))
 
 data Test
-  = Check Int String (Generator Expectation)
+  = Check Int String Expectation
   | Group String (List Test)
 
-verify :: String -> Generator Expectation -> Test
+verify :: String -> Expectation -> Test
 verify = check 1
 
-check :: Int -> String -> Generator Expectation -> Test
+check :: Int -> String -> Expectation -> Test
 check = Check
 
 group :: String -> List Test -> Test
@@ -86,40 +94,43 @@ sum ((successes, failures) : rest) = do
   let (restSuccesses, restFailures) = sum rest
   (successes + restSuccesses, failures + restFailures)
 
-fuzzImpl :: List String -> Int -> Generator Expectation -> IO (Int, Int)
+fuzzImpl :: List String -> Int -> Expectation -> IO (Int, Int)
 fuzzImpl _ 0 _ = IO.return (1, 0)
-fuzzImpl context n generator = IO.do
-  expectation <- Random.generate generator
-  case expectation of
-    Passed -> fuzzImpl context (n - 1) generator
+fuzzImpl context n expectation = IO.do
+  let (Expectation generator) = expectation
+  testResult <- Random.generate generator
+  case testResult of
+    Passed -> fuzzImpl context (n - 1) expectation
     Failed messages -> reportError context messages
 
-pass :: Generator Expectation
-pass = Random.return Passed
+pass :: Expectation
+pass = Expectation (Random.return Passed)
 
-fail :: String -> Generator Expectation
-fail message = Random.return (Failed [message])
+fail :: String -> Expectation
+fail message = Expectation (Random.return (Failed [message]))
 
-expect :: Bool -> Generator Expectation
-expect True = Random.return Passed
-expect False = Random.return (Failed [])
+expect :: Bool -> Expectation
+expect True = pass
+expect False = Expectation (Random.return (Failed []))
 
-combineExpectations :: List Expectation -> Expectation
-combineExpectations [] = Passed
-combineExpectations (Passed : rest) = combineExpectations rest
-combineExpectations (Failed messages : rest) = case combineExpectations rest of
+combineTestResults :: List TestResult -> TestResult
+combineTestResults [] = Passed
+combineTestResults (Passed : rest) = combineTestResults rest
+combineTestResults (Failed messages : rest) = case combineTestResults rest of
   Passed -> Failed messages
   Failed restMessages -> Failed (messages + restMessages)
 
-all :: List (Generator Expectation) -> Generator Expectation
-all generators = Random.map combineExpectations (Random.combine generators)
+all :: List Expectation -> Expectation
+all expectations =
+  Expectation (Random.map combineTestResults (Random.combine (List.map unwrap expectations)))
 
-output :: Show a => String -> a -> Generator Expectation -> Generator Expectation
-output label value =
-  Random.map $
-    \case
-      Passed -> Passed
-      Failed messages -> Failed (messages + [label + ": " + show value])
+output :: Show a => String -> a -> Expectation -> Expectation
+output label value (Expectation generator) =
+  Expectation $ Random.map (addOutput label value) generator
+
+addOutput :: Show a => String -> a -> TestResult -> TestResult
+addOutput _ _ Passed = Passed
+addOutput label value (Failed messages) = Failed (messages + [label + ": " + show value])
 
 newtype Lines a = Lines (List a)
 
