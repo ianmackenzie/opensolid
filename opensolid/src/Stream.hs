@@ -6,6 +6,7 @@ module Stream
   , tail
   , nth
   , map
+  , mapWithIndex
   , take
   )
 where
@@ -35,6 +36,13 @@ nth n stream = nth (n - 1) (tail stream)
 
 map :: (a -> b) -> Stream a -> Stream b
 map function (Stream first rest) = Stream (function first) (map function rest)
+
+mapWithIndex :: (Int -> a -> b) -> Stream a -> Stream b
+mapWithIndex = mapWithIndexImpl 0
+
+mapWithIndexImpl :: Int -> (Int -> a -> b) -> Stream a -> Stream b
+mapWithIndexImpl index function (Stream first rest) =
+  Stream (function index first) (mapWithIndexImpl (index + 1) function rest)
 
 take :: Int -> Stream a -> List a
 take n _ | n <= 0 = []

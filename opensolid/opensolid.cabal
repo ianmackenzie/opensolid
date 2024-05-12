@@ -189,6 +189,7 @@ test-suite opensolid-test
       Tests.List
       Tests.Map
       Tests.NonEmpty
+      Tests.Stream
       Tests.String
       Tests.Parameter
       Tests.Qty
