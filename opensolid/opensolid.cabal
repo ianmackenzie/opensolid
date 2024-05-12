@@ -94,6 +94,7 @@ library
       Curve1d
       Curve1d.Root
       Curve2d
+      Curve2d.Extension
       Curve2d.Intersection
       Curve3d
       Debug
@@ -182,6 +183,7 @@ test-suite opensolid-test
       Tests.Bounds2d
       Tests.Curve1d
       Tests.Curve2d
+      Tests.Curve2d.Extension
       Tests.Direction2d
       Tests.DivMod
       Tests.Estimate
