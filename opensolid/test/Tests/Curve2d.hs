@@ -1,4 +1,9 @@
-module Tests.Curve2d (tests) where
+module Tests.Curve2d
+  ( tests
+  , firstDerivativeIsConsistent
+  , secondDerivativeIsConsistent
+  )
+where
 
 import Angle qualified
 import Arc2d qualified
@@ -22,7 +27,7 @@ import QuadraticSpline2d qualified
 import Random (Generator)
 import Range (Range (Range))
 import Range qualified
-import Test (Test)
+import Test (Expectation, Test)
 import Test qualified
 import Tests.Random qualified as Random
 import Tolerance qualified
@@ -236,26 +241,42 @@ degenerateEndPointTangentDerivative =
             |> List.map Vector2d.magnitude
     Test.expect (List.isDescending differences)
 
+firstDerivativeIsConsistent :: Curve2d (space @ Meters) -> Float -> Expectation
+firstDerivativeIsConsistent curve t = do
+  let firstDerivative = Curve2d.derivative curve
+  let dt = 1e-6
+  let p1 = Curve2d.evaluateAt (t - dt) curve
+  let p2 = Curve2d.evaluateAt (t + dt) curve
+  let numericalFirstDerivative = (p2 - p1) / (2 * dt)
+  let analyticFirstDerivative = VectorCurve2d.evaluateAt t firstDerivative
+  Test.expect (Tolerance.using (Length.meters 1e-6) (numericalFirstDerivative ~= analyticFirstDerivative))
+    |> Test.output "numericalFirstDerivative" numericalFirstDerivative
+    |> Test.output "analyticFirstDerivative" analyticFirstDerivative
+
 firstDerivativeConsistency :: Generator (Curve2d (space @ Meters)) -> Test
 firstDerivativeConsistency curveGenerator = Test.check 100 "First derivative" Test.do
   curve <- curveGenerator
-  let firstDerivative = Curve2d.derivative curve
   t <- Parameter.random
+  firstDerivativeIsConsistent curve t
+
+secondDerivativeIsConsistent :: Curve2d (space @ Meters) -> Float -> Expectation
+secondDerivativeIsConsistent curve t = do
+  let firstDerivative = Curve2d.derivative curve
+  let secondDerivative = VectorCurve2d.derivative firstDerivative
   let dt = 1e-6
-  let numericalFirstDerivative = (Curve2d.evaluateAt (t + dt) curve - Curve2d.evaluateAt (t - dt) curve) / (2 * dt)
-  let analyticFirstDerivative = VectorCurve2d.evaluateAt t firstDerivative
-  Test.expect (Tolerance.using (Length.meters 1e-6) (numericalFirstDerivative ~= analyticFirstDerivative))
+  let v1 = VectorCurve2d.evaluateAt (t - dt) firstDerivative
+  let v2 = VectorCurve2d.evaluateAt (t + dt) firstDerivative
+  let numericalSecondDerivative = (v2 - v1) / (2 * dt)
+  let analyticSecondDerivative = VectorCurve2d.evaluateAt t secondDerivative
+  Test.expect (Tolerance.using (Length.meters 1e-6) (numericalSecondDerivative ~= analyticSecondDerivative))
+    |> Test.output "numericalSecondDerivative" numericalSecondDerivative
+    |> Test.output "analyticSecondDerivative" analyticSecondDerivative
 
 secondDerivativeConsistency :: Generator (Curve2d (space @ Meters)) -> Test
 secondDerivativeConsistency curveGenerator = Test.check 100 "Second derivative" Test.do
   curve <- curveGenerator
-  let firstDerivative = Curve2d.derivative curve
-  let secondDerivative = VectorCurve2d.derivative firstDerivative
   t <- Parameter.random
-  let dt = 1e-6
-  let numericalSecondDerivative = (VectorCurve2d.evaluateAt (t + dt) firstDerivative - VectorCurve2d.evaluateAt (t - dt) firstDerivative) / (2 * dt)
-  let analyticSecondDerivative = VectorCurve2d.evaluateAt t secondDerivative
-  Test.expect (Tolerance.using (Length.meters 1e-6) (numericalSecondDerivative ~= analyticSecondDerivative))
+  secondDerivativeIsConsistent curve t
 
 derivativeConsistency :: Tolerance Meters => Test
 derivativeConsistency =
