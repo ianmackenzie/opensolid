@@ -1,5 +1,6 @@
 module Stream
   ( Stream (..)
+  , repeat
   , iterate
   , head
   , tail
@@ -15,6 +16,9 @@ import Prelude qualified
 data Stream a = Stream a ~(Stream a)
 
 instance Prelude.Functor Stream where fmap = map
+
+repeat :: a -> Stream a
+repeat value = Stream value (repeat value)
 
 iterate :: a -> (a -> a) -> Stream a
 iterate first function = Stream first (iterate (function first) function)
