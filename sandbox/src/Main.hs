@@ -186,19 +186,9 @@ testLineFromEndpoints = IO.do
       log "Line length in centimeters" (Length.inCentimeters length)
     curve -> log "Unexpected curve" curve
 
-testDirectedLine :: Tolerance Meters => IO ()
-testDirectedLine = IO.do
-  let line = Line2d.directed Point2d.origin (Direction2d.degrees 45.0) (Length.meters 2.0)
-  log "Line end point" (Curve2d.endPoint line)
-
 testArcFromEndpoints :: Tolerance Meters => IO ()
 testArcFromEndpoints = IO.do
-  arc <-
-    Arc2d.build
-      ( Arc2d.startPoint Point2d.origin
-      , Arc2d.endPoint (Point2d.centimeters 50.0 50.0)
-      , Arc2d.sweptAngle Angle.quarterTurn
-      )
+  let arc = Arc2d.from Point2d.origin (Point2d.centimeters 50.0 50.0) Angle.quarterTurn
   case arc of
     Curve2d.Arc{centerPoint} -> log "Arc center point" centerPoint
     _ -> log "Unexpected curve" arc
@@ -476,7 +466,6 @@ main = Tolerance.using (Length.meters 1e-9) IO.do
   testParameter1dGeneration
   testNonEmpty
   testLineFromEndpoints
-  testDirectedLine
   testArcFromEndpoints
   testBezierSegment
   testHermiteBezier

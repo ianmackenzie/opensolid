@@ -64,14 +64,8 @@ squareWithHole = Test.verify "squareWithHole" Test.do
   let line4 = Line2d.from p4 p1
   let centerPoint = Point2d.xy (width / 2) (width / 2)
   let holeRadius = width / 4
-  arc <-
-    Arc2d.build
-      ( Arc2d.centerPoint centerPoint
-      , Arc2d.radius holeRadius
-      , Arc2d.startAngle zero
-      , Arc2d.sweptAngle (Angle.degrees 360.0)
-      )
-  region <- Region2d.boundedBy [line1, line3, line2, line4, arc]
+  let hole = Arc2d.circle centerPoint holeRadius
+  region <- Region2d.boundedBy [line1, line3, line2, line4, hole]
   let area = Region2d.area region
   let expectedArea = width * width - Float.pi * holeRadius * holeRadius
   Test.expect (Tolerance.using (Area.squareMeters 1e-6) (area ~= expectedArea))
@@ -103,28 +97,15 @@ squareWithTangentHole = Test.verify "squareWithTangentHole" Test.do
   let line4 = Line2d.from p4 p1
   let centerPoint = Point2d.xy (width / 2) (width / 2)
   let holeRadius = width / 2
-  arc <-
-    Arc2d.build
-      ( Arc2d.centerPoint centerPoint
-      , Arc2d.radius holeRadius
-      , Arc2d.startAngle zero
-      , Arc2d.sweptAngle (Angle.degrees 360.0)
-      )
-  case Region2d.boundedBy [line1, line2, line3, line4, arc] of
+  let hole = Arc2d.circle centerPoint holeRadius
+  case Region2d.boundedBy [line1, line2, line3, line4, hole] of
     Ok _ -> Test.fail "Expected non-manifold region construction to fail"
     Error error -> Test.expect (error == Region2d.RegionBoundaryIntersectsItself)
 
 twoCircles :: Tolerance Meters => Test
 twoCircles = Test.verify "twoCircles" Test.do
-  let circle centerPoint radius =
-        Arc2d.build
-          ( Arc2d.centerPoint centerPoint
-          , Arc2d.radius radius
-          , Arc2d.startAngle zero
-          , Arc2d.sweptAngle Angle.fullTurn
-          )
-  circle1 <- circle (Point2d.meters -2.0 0.0) (Length.meters 1.0)
-  circle2 <- circle (Point2d.meters 1.0 0.0) (Length.meters 0.5)
+  let circle1 = Arc2d.circle (Point2d.meters -2.0 0.0) (Length.meters 1.0)
+  let circle2 = Arc2d.circle (Point2d.meters 1.0 0.0) (Length.meters 0.5)
   case Region2d.boundedBy [circle1, circle2] of
     Ok _ -> Test.fail "Expected region construction to fail when given two disjoint circles"
     Error error -> Test.expect (error == Region2d.MultipleDisjointRegions)

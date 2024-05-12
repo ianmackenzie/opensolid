@@ -119,13 +119,7 @@ resolvesTo value estimate
 
 area :: Tolerance Meters => Test
 area = Test.verify "area" Test.do
-  curve <-
-    Arc2d.build
-      ( Arc2d.centerPoint Point2d.origin
-      , Arc2d.startAngle (Angle.degrees 180.0)
-      , Arc2d.sweptAngle (Angle.degrees -180.0)
-      , Arc2d.radius (Length.meters 1.0)
-      )
+  let curve = Arc2d.polar Point2d.origin Length.meter Angle.pi Angle.zero
   let dAdt = Curve2d.yCoordinate curve * VectorCurve2d.xComponent (Curve2d.derivative curve)
   let areaEstimate = Curve1d.integral dAdt
   let expectedArea = Area.squareMeters (Float.pi / 2)

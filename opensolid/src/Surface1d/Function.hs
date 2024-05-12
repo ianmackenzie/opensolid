@@ -555,7 +555,8 @@ data BoundaryPoint = BoundaryPoint
   deriving (Show)
 
 boundaryEdge :: Uv.Point -> Uv.Direction -> Curve2d Uv.Coordinates
-boundaryEdge startPoint direction = Line2d.directed startPoint direction 1.0
+boundaryEdge startPoint direction =
+  Line2d.from startPoint (startPoint + Direction2d.vector direction)
 
 leftEdge :: Curve2d Uv.Coordinates
 leftEdge = boundaryEdge (Point2d.xy 0.0 0.0) Direction2d.y
