@@ -9,6 +9,7 @@ import Length qualified
 import List qualified
 import OpenSolid
 import Parameter qualified
+import Point2d qualified
 import Qty qualified
 import Test (Expectation, Test)
 import Test qualified
@@ -82,7 +83,14 @@ arc = Test.check 100 "arc" Test.do
         ( VectorCurve2d.evaluateAt 1.0 mainDerivative
         , VectorCurve2d.evaluateAt 0.0 extensionDerivative
         )
-
+  let expectPointOnCurve extensionCurve = do
+        let extensionPoint = Curve2d.pointOn extensionCurve t
+        let distance = Point2d.distanceFrom arcCenter extensionPoint
+        -- TODO use stricter tolerance when extension curves have been improved
+        -- (parameterized by normalized arc length)
+        Test.expect (Tolerance.using (Length.meters 1e-10) (distance ~= arcRadius))
+          |> Test.output "distance" distance
+          |> Test.output "error" (Qty.abs (distance - arcRadius))
   Test.all
     [ Test.all
         [ Tests.Curve2d.firstDerivativeIsConsistent startExtensionCurve t
@@ -92,6 +100,7 @@ arc = Test.check 100 "arc" Test.do
             , startExtensionDerivativePair startExtensionCurveSecondDerivative mainCurveSecondDerivative
             , startExtensionDerivativePair startExtensionCurveThirdDerivative mainCurveThirdDerivative
             ]
+        , expectPointOnCurve startExtensionCurve
         ]
     , Test.all
         [ Tests.Curve2d.firstDerivativeIsConsistent endExtensionCurve t
@@ -101,6 +110,7 @@ arc = Test.check 100 "arc" Test.do
             , endExtensionDerivativePair mainCurveSecondDerivative endExtensionCurveSecondDerivative
             , endExtensionDerivativePair mainCurveThirdDerivative endExtensionCurveThirdDerivative
             ]
+        , expectPointOnCurve endExtensionCurve
         ]
     ]
 
