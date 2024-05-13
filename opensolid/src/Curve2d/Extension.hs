@@ -10,10 +10,8 @@ import Curve2d qualified
 import List qualified
 import OpenSolid
 import Point2d (Point2d)
-import Point2d qualified
 import Stream qualified
 import Vector2d (Vector2d)
-import Vector2d qualified
 import VectorCurve2d (VectorCurve2d)
 import VectorCurve2d qualified
 
@@ -22,26 +20,11 @@ start ::
   (Point2d (space @ units), List (Vector2d (space @ units))) ->
   (Curve2d (space @ units), Int) ->
   Curve2d (space @ units)
-start (startPoint, startDerivatives) (endCurve, initialContinuity) = Result.do
+start startCondition (endCurve, initialContinuity) = Result.do
   let endPoint = Curve2d.startPoint endCurve
-  let distance = Point2d.distanceFrom startPoint endPoint
-  let startCondition =
-        case startDerivatives of
-          [] -> (startPoint, [])
-          first : _ -> do
-            let startScale = distance / Vector2d.magnitude first
-            let scaledStartDerivative i v = (startScale ** (i + 1)) * v
-            let scaledStartDerivatives = List.mapWithIndex scaledStartDerivative startDerivatives
-            (startPoint, scaledStartDerivatives)
-
   let endCurveDerivatives = Stream.iterate (Curve2d.derivative endCurve) VectorCurve2d.derivative
   let endDerivativeValues = Stream.map (VectorCurve2d.evaluateAt 0.0) endCurveDerivatives
-  let endFirstDerivativeValue = Stream.head endDerivativeValues
-  let endScale = distance / Vector2d.magnitude endFirstDerivativeValue
-  let scaledEndDerivative i v = (endScale ** (i + 1)) * v
-  let scaledEndDerivativeValues = Stream.mapWithIndex scaledEndDerivative endDerivativeValues
-  let endCondition continuity = (endPoint, Stream.take continuity scaledEndDerivativeValues)
-
+  let endCondition continuity = (endPoint, Stream.take continuity endDerivativeValues)
   let baseCurve continuity = BezierCurve2d.hermite startCondition (endCondition continuity)
   let initialCurve = baseCurve initialContinuity
   let curveDerivative n = nthDerivative n (baseCurve (initialContinuity + n))
