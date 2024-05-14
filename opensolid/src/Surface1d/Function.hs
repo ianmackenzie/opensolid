@@ -450,7 +450,7 @@ findTangentSolutions derivatives boundaryEdges boundaryPoints uvBounds bisection
     -- We're within an existing exclusion region from a previous solution, so no additional solutions
     | List.any (Bounds2d.contains uvBounds) exclusions -> Ok (PartialZeros.empty, [], [])
     -- We're within an existing saddle region from a previous solution, so no additional solutions
-    | List.any (SaddleRegion.contains uvBounds) saddleRegions -> Ok (PartialZeros.empty, [], [])
+    | List.any (SaddleRegion.exclusion >> Bounds2d.contains uvBounds) saddleRegions -> Ok (PartialZeros.empty, [], [])
     -- Try to find a tangent point (saddle or otherwise)
     | Just result <- tangentPointSolution derivatives boundaryPoints uvBounds exclusions saddleRegions -> result
     -- TODO tangent curve solutions
@@ -465,7 +465,7 @@ findTangentSolutions derivatives boundaryEdges boundaryPoints uvBounds bisection
             bounds1
             nextBisectionParameter
             (List.filter (affects bounds1) exclusions)
-            (List.filter (SaddleRegion.bounds >> affects bounds1) saddleRegions)
+            (List.filter (SaddleRegion.exclusion >> affects bounds1) saddleRegions)
         (solutions2, exclusions2, saddleRegions2) <-
           findTangentSolutions
             derivatives
@@ -474,7 +474,7 @@ findTangentSolutions derivatives boundaryEdges boundaryPoints uvBounds bisection
             bounds2
             nextBisectionParameter
             (List.filter (affects bounds2) (exclusions1 + exclusions))
-            (List.filter (SaddleRegion.bounds >> affects bounds2) (saddleRegions1 + saddleRegions))
+            (List.filter (SaddleRegion.exclusion >> affects bounds2) (saddleRegions1 + saddleRegions))
         Ok
           ( PartialZeros.merge solutions1 solutions2
           , exclusions1 + exclusions2
@@ -500,7 +500,7 @@ findCrossingSolutions derivatives boundaryEdges boundaryPoints uvBounds bisectio
     -- We're within an existing exclusion region from a previous solution, so no additional solutions
     | List.any (Bounds2d.contains uvBounds) exclusions -> Ok (PartialZeros.empty, [])
     -- We're within an existing saddle region from a previous solution, so no additional solutions
-    | List.any (SaddleRegion.contains uvBounds) saddleRegions -> Ok (PartialZeros.empty, [])
+    | List.any (SaddleRegion.exclusion >> Bounds2d.contains uvBounds) saddleRegions -> Ok (PartialZeros.empty, [])
     -- Try to find a general crossing curve solution and report it if it exists
     | Just solution <- generalSolution derivatives uvBounds exclusions -> Ok solution
     -- Try to find a horizontal crossing curve solution and report it if it exists
@@ -523,7 +523,7 @@ findCrossingSolutions derivatives boundaryEdges boundaryPoints uvBounds bisectio
             bounds1
             nextBisectionParameter
             (List.filter (affects bounds1) exclusions)
-            (List.filter (SaddleRegion.bounds >> affects bounds1) saddleRegions)
+            (List.filter (SaddleRegion.exclusion >> affects bounds1) saddleRegions)
         (solutions2, exclusions2) <-
           findCrossingSolutions
             derivatives
@@ -532,7 +532,7 @@ findCrossingSolutions derivatives boundaryEdges boundaryPoints uvBounds bisectio
             bounds2
             nextBisectionParameter
             (List.filter (affects bounds2) (exclusions1 + exclusions))
-            (List.filter (SaddleRegion.bounds >> affects bounds2) saddleRegions)
+            (List.filter (SaddleRegion.exclusion >> affects bounds2) saddleRegions)
         Ok
           ( PartialZeros.merge solutions1 solutions2
           , exclusions1 + exclusions2
@@ -959,7 +959,7 @@ tangentPointSolution derivatives boundaryPoints uvBounds exclusions saddleRegion
   let isSolution uv = hasZero uv fu && hasZero uv fv
   if
     | List.any (overlaps expandedBounds) exclusions -> Nothing
-    | List.any (SaddleRegion.bounds >> overlaps expandedBounds) saddleRegions -> Nothing
+    | List.any (SaddleRegion.exclusion >> overlaps expandedBounds) saddleRegions -> Nothing
     -- If second derivatives determinant is not definitely non-zero, then abort
     | Qty.abs determinantResolution < 0.5 -> Nothing
     -- Otherwise, we know there can be only one tangent point
@@ -1054,7 +1054,14 @@ saddlePointRegion derivatives point expandedBounds = do
   let b a = -(fyyyValue * a ** 3 + 3 * fxyyValue * a ** 2 + 3 * fxxyValue * a + fxxxValue) / (3 * a * fyyValue)
   let positiveSolution = SaddleRegion.Solution{dydx = positiveA, d2ydx2 = b positiveA}
   let negativeSolution = SaddleRegion.Solution{dydx = negativeA, d2ydx2 = b negativeA}
-  SaddleRegion{frame, halfWidth, halfHeight, positiveSolution, negativeSolution}
+  SaddleRegion
+    { frame
+    , halfWidth
+    , halfHeight
+    , positiveSolution
+    , negativeSolution
+    , exclusion = expandedBounds
+    }
 
 reparameterize ::
   Frame2d Uv.Coordinates (Defines Uv.Space) ->
