@@ -1318,12 +1318,12 @@ finalizeCrossingCurve f saddleRegions (PartialZeros.CrossingCurve{segments}) = d
     (Nothing, Just endRegion) ->
       Just Result.do
         extension <- connectingCurve f endRegion (Curve2d.reverse lastCurve)
-        Ok (segments + [extension])
+        Ok (segments + [Curve2d.reverse extension])
     (Just startRegion, Just endRegion) ->
       Just Result.do
         startExtension <- connectingCurve f startRegion firstCurve
         endExtension <- connectingCurve f endRegion (Curve2d.reverse lastCurve)
-        Ok ([startExtension] + segments + [endExtension])
+        Ok ([startExtension] + segments + [Curve2d.reverse endExtension])
 
 finalizeTangentCurve :: PartialZeros.TangentCurve -> Maybe (NonEmpty (Curve2d Uv.Coordinates), Sign)
 finalizeTangentCurve (PartialZeros.DegenerateTangentCurve{}) = Nothing
