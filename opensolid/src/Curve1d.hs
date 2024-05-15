@@ -253,6 +253,20 @@ instance Division' (Qty units1) (Curve1d units2) where
   type Qty units1 ./. Curve1d units2 = Curve1d (units1 :/: units2)
   value ./. curve = constant value ./. curve
 
+instance Division (Curve1d units) Int (Curve1d units)
+
+instance Division' (Curve1d units) Int where
+  type Curve1d units ./. Int = Curve1d (units :/: Unitless)
+  curve ./. value = curve ./. Float.fromInt value
+
+instance
+  Units.Quotient Unitless units1 units2 =>
+  Division Int (Curve1d units1) (Curve1d units2)
+
+instance Division' Int (Curve1d units) where
+  type Int ./. Curve1d units = Curve1d (Unitless :/: units)
+  value ./. curve = Float.fromInt value ./. curve
+
 evaluateAt :: Float -> Curve1d units -> Qty units
 evaluateAt tValue curve =
   case curve of

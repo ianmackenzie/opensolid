@@ -432,6 +432,22 @@ instance Division' (VectorCurve3d (space @ units1)) (Curve1d units2) where
       VectorCurve3d (space @ (units1 :/: units2))
   vectorCurve3d ./. curve1d = VectorCurve3d (Quotient vectorCurve3d curve1d)
 
+instance
+  Units.Quotient units1 units2 units3 =>
+  Division (VectorCurve3d (space @ units1)) (Qty units2) (VectorCurve3d (space @ units3))
+
+instance Division' (VectorCurve3d (space @ units1)) (Qty units2) where
+  type
+    VectorCurve3d (space @ units1) ./. Qty units2 =
+      VectorCurve3d (space @ (units1 :/: units2))
+  curve ./. value = curve ./. Curve1d.constant value
+
+instance Division' (VectorCurve3d (space @ units)) Int where
+  type VectorCurve3d (space @ units) ./. Int = VectorCurve3d (space @ (units :/: Unitless))
+  curve ./. value = curve ./. Float.fromInt value
+
+instance Division (VectorCurve3d (space @ units)) Int (VectorCurve3d (space @ units))
+
 newtype SquaredMagnitudeOf (coordinateSystem :: CoordinateSystem)
   = SquaredMagnitudeOf (VectorCurve3d coordinateSystem)
 

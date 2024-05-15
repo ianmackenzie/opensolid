@@ -141,6 +141,12 @@ instance
   Units.Quotient units1 units2 units3 =>
   Division (Vector3d (space @ units1)) (Qty units2) (Vector3d (space @ units3))
 
+instance Division' (Vector3d (space @ units)) Int where
+  type Vector3d (space @ units) ./. Int = Vector3d (space @ (units :/: Unitless))
+  vector ./. scale = vector ./. Float.fromInt scale
+
+instance Division (Vector3d (space @ units)) Int (Vector3d (space @ units))
+
 instance
   space ~ space_ =>
   DotMultiplication' (Vector3d (space @ units1)) (Vector3d (space_ @ units2))

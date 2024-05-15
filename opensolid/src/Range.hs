@@ -205,6 +205,18 @@ instance Division' (Range units1) (Qty units2) where
 
 instance Units.Quotient units1 units2 units3 => Division (Range units1) (Qty units2) (Range units3)
 
+instance Division' Int (Range units) where
+  type Int ./. Range units = Range (Unitless :/: units)
+  n ./. range = Float.fromInt n ./. range
+
+instance Units.Quotient Unitless units1 units2 => Division Int (Range units1) (Range units2)
+
+instance Division' (Range units) Int where
+  type Range units ./. Int = Range (units :/: Unitless)
+  range ./. d = range ./. Float.fromInt d
+
+instance Division (Range units) Int (Range units)
+
 instance Division' (Range units1) (Range units2) where
   type Range units1 ./. Range units2 = Range (units1 :/: units2)
   Range nl nh ./. Range dl dh =

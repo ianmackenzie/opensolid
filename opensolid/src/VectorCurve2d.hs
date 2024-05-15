@@ -348,6 +348,12 @@ instance Division' (VectorCurve2d (space @ units1)) (Qty units2) where
       VectorCurve2d (space @ (units1 :/: units2))
   curve ./. value = curve ./. Curve1d.constant value
 
+instance Division' (VectorCurve2d (space @ units)) Int where
+  type VectorCurve2d (space @ units) ./. Int = VectorCurve2d (space @ (units :/: Unitless))
+  curve ./. value = curve ./. Float.fromInt value
+
+instance Division (VectorCurve2d (space @ units)) Int (VectorCurve2d (space @ units))
+
 instance Multiplication' (VectorCurve2d (space @ units)) Int where
   type VectorCurve2d (space @ units) .*. Int = VectorCurve2d (space @ (units :*: Unitless))
   curve .*. scale = curve .*. Float.fromInt scale

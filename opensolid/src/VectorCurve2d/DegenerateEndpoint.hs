@@ -9,7 +9,6 @@ module VectorCurve2d.DegenerateEndpoint
   )
 where
 
-import Float qualified
 import OpenSolid
 import Qty qualified
 import Range (Range (Range))
@@ -68,7 +67,7 @@ qCurve :: Int -> Float -> VectorCurve2d (space @ units) -> VectorCurve2d (space 
 qCurve n t0 curveDerivative =
   VectorCurve2d.wrap $
     QCurve n t0 curveDerivative $
-      (VectorCurve2d.evaluateAt t0 curveDerivative / (Float.fromInt n + 1))
+      VectorCurve2d.evaluateAt t0 curveDerivative / (n + 1)
 
 evaluateAt :: Float -> DegenerateEndpoint space -> VectorCurve2d (space @ Unitless) -> Vector2d (space @ Unitless)
 evaluateAt t (DegenerateEndpoint t0 t1 endpointCurve) innerCurve =

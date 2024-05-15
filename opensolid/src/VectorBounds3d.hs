@@ -191,6 +191,12 @@ instance
   Units.Quotient units1 units2 units3 =>
   Division (VectorBounds3d (space @ units1)) (Qty units2) (VectorBounds3d (space @ units3))
 
+instance Division' (VectorBounds3d (space @ units)) Int where
+  type VectorBounds3d (space @ units) ./. Int = VectorBounds3d (space @ (units :/: Unitless))
+  vectorBounds ./. value = vectorBounds ./. Float.fromInt value
+
+instance Division (VectorBounds3d (space @ units)) Int (VectorBounds3d (space @ units))
+
 instance Division' (VectorBounds3d (space @ units1)) (Range units2) where
   type
     VectorBounds3d (space @ units1) ./. Range units2 =

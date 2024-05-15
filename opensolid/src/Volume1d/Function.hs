@@ -220,6 +220,20 @@ instance Division' (Qty units1) (Function units2) where
   type Qty units1 ./. Function units2 = Function (units1 :/: units2)
   value ./. function = constant value ./. function
 
+instance Division (Function units) Int (Function units)
+
+instance Division' (Function units) Int where
+  type Function units ./. Int = Function (units :/: Unitless)
+  function ./. value = function ./. Float.fromInt value
+
+instance
+  Units.Quotient Unitless units1 units2 =>
+  Division Int (Function units1) (Function units2)
+
+instance Division' Int (Function units) where
+  type Int ./. Function units = Function (Unitless :/: units)
+  value ./. function = Float.fromInt value ./. function
+
 evaluateAt :: Point3d Uvw.Coordinates -> Function units -> Qty units
 evaluateAt uvw function =
   case function of

@@ -261,6 +261,12 @@ instance Division' (Function (space @ units1)) (Qty units2) where
   type Function (space @ units1) ./. Qty units2 = Function (space @ (units1 :/: units2))
   function ./. value = function ./. Volume1d.Function.constant value
 
+instance Division' (Function (space @ units)) Int where
+  type Function (space @ units) ./. Int = Function (space @ (units :/: Unitless))
+  function ./. scale = function ./. Float.fromInt scale
+
+instance Division (Function (space @ units)) Int (Function (space @ units))
+
 evaluateAt :: Point3d Uvw.Coordinates -> Function (space @ units) -> Vector3d (space @ units)
 evaluateAt uv function =
   case function of
