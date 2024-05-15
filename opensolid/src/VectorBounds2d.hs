@@ -171,6 +171,18 @@ instance
   Units.Product units1 units2 units3 =>
   Multiplication (VectorBounds2d (space @ units1)) (Qty units2) (VectorBounds2d (space @ units3))
 
+instance Multiplication' Int (VectorBounds2d (space @ units)) where
+  type Int .*. VectorBounds2d (space @ units) = VectorBounds2d (space @ (Unitless :*: units))
+  value .*. bounds = Float.fromInt value .*. bounds
+
+instance Multiplication Int (VectorBounds2d (space @ units)) (VectorBounds2d (space @ units))
+
+instance Multiplication' (VectorBounds2d (space @ units)) Int where
+  type VectorBounds2d (space @ units) .*. Int = VectorBounds2d (space @ (units :*: Unitless))
+  vectorBounds .*. value = vectorBounds .*. Float.fromInt value
+
+instance Multiplication (VectorBounds2d (space @ units)) Int (VectorBounds2d (space @ units))
+
 instance Multiplication' (Range units1) (Vector2d (space @ units2)) where
   type Range units1 .*. Vector2d (space @ units2) = VectorBounds2d (space @ (units1 :*: units2))
   range .*. Vector2d x y = VectorBounds2d (range .*. x) (range .*. y)

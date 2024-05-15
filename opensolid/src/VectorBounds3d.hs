@@ -19,6 +19,7 @@ where
 
 import Data.Coerce qualified
 import Direction3d (Direction3d (Direction3d))
+import Float qualified
 import OpenSolid
 import Qty qualified
 import Range (Range (Range))
@@ -147,6 +148,18 @@ instance Multiplication' (VectorBounds3d (space @ units1)) (Qty units2) where
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (VectorBounds3d (space @ units1)) (Qty units2) (VectorBounds3d (space @ units3))
+
+instance Multiplication' Int (VectorBounds3d (space @ units)) where
+  type Int .*. VectorBounds3d (space @ units) = VectorBounds3d (space @ (Unitless :*: units))
+  value .*. bounds = Float.fromInt value .*. bounds
+
+instance Multiplication Int (VectorBounds3d (space @ units)) (VectorBounds3d (space @ units))
+
+instance Multiplication' (VectorBounds3d (space @ units)) Int where
+  type VectorBounds3d (space @ units) .*. Int = VectorBounds3d (space @ (units :*: Unitless))
+  vectorBounds .*. value = vectorBounds .*. Float.fromInt value
+
+instance Multiplication (VectorBounds3d (space @ units)) Int (VectorBounds3d (space @ units))
 
 instance Multiplication' (Range units1) (VectorBounds3d (space @ units2)) where
   type

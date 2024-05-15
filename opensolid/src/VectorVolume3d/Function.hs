@@ -14,6 +14,7 @@ where
 
 import Bounds3d (Bounds3d)
 import Direction3d (Direction3d)
+import Float qualified
 import OpenSolid
 import Point3d (Point3d)
 import Units qualified
@@ -226,6 +227,18 @@ instance
 instance Multiplication' (Qty units1) (Function (space @ units2)) where
   type Qty units1 .*. Function (space @ units2) = Function (space @ (units1 :*: units2))
   value .*. function = Volume1d.Function.constant value .*. function
+
+instance Multiplication' (Function (space @ units)) Int where
+  type Function (space @ units) .*. Int = Function (space @ (units :*: Unitless))
+  function .*. scale = function .*. Float.fromInt scale
+
+instance Multiplication' Int (Function (space @ units)) where
+  type Int .*. Function (space @ units) = Function (space @ (Unitless :*: units))
+  scale .*. function = Float.fromInt scale .*. function
+
+instance Multiplication (Function (space @ units)) Int (Function (space @ units))
+
+instance Multiplication Int (Function (space @ units)) (Function (space @ units))
 
 instance
   Units.Quotient units1 units2 units3 =>
