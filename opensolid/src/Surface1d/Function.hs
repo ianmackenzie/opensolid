@@ -1323,21 +1323,22 @@ finalizeCrossingCurve f saddleRegions (PartialZeros.CrossingCurve{segments}) = d
   let startPoint = Curve2d.startPoint firstCurve
   let endPoint = Curve2d.endPoint lastCurve
   let regionContaining point = List.find (SaddleRegion.includes point) saddleRegions
+  let reverseExtension curves = List.reverseMap Curve2d.reverse curves
   case (regionContaining startPoint, regionContaining endPoint) of
     (Nothing, Nothing) -> Just (Ok segments)
     (Just startRegion, Nothing) ->
       Just Result.do
-        extension <- connectingCurve f startRegion firstCurve
-        Ok ([extension] + segments)
+        extension <- connectingCurves f startRegion firstCurve
+        Ok (extension + segments)
     (Nothing, Just endRegion) ->
       Just Result.do
-        extension <- connectingCurve f endRegion (Curve2d.reverse lastCurve)
-        Ok (segments + [Curve2d.reverse extension])
+        extension <- connectingCurves f endRegion (Curve2d.reverse lastCurve)
+        Ok (segments + reverseExtension extension)
     (Just startRegion, Just endRegion) ->
       Just Result.do
-        startExtension <- connectingCurve f startRegion firstCurve
-        endExtension <- connectingCurve f endRegion (Curve2d.reverse lastCurve)
-        Ok ([startExtension] + segments + [Curve2d.reverse endExtension])
+        startExtension <- connectingCurves f startRegion firstCurve
+        endExtension <- connectingCurves f endRegion (Curve2d.reverse lastCurve)
+        Ok (startExtension + segments + reverseExtension endExtension)
 
 finalizeTangentCurve :: PartialZeros.TangentCurve -> Maybe (NonEmpty (Curve2d Uv.Coordinates), Sign)
 finalizeTangentCurve (PartialZeros.DegenerateTangentCurve{}) = Nothing
@@ -1349,8 +1350,8 @@ finalizeTangentLoop (PartialZeros.TangentLoop{segments, sign}) = (segments, sign
 finalizeTangentPoint :: PartialZeros.TangentPoint -> (Uv.Point, Sign)
 finalizeTangentPoint (PartialZeros.TangentPoint{point, sign}) = (point, sign)
 
-connectingCurve :: Function units -> SaddleRegion -> Curve2d Uv.Coordinates -> Result ZerosError (Curve2d Uv.Coordinates)
-connectingCurve _ saddleRegion curve = Result.do
+connectingCurves :: Function units -> SaddleRegion -> Curve2d Uv.Coordinates -> Result ZerosError (List (Curve2d Uv.Coordinates))
+connectingCurves _ saddleRegion curve = Result.do
   let frame = SaddleRegion.frame saddleRegion
   let localCurve = Curve2d.relativeTo frame curve
   let localCurveFirstDerivative = Curve2d.derivative localCurve
@@ -1392,4 +1393,4 @@ connectingCurve _ saddleRegion curve = Result.do
   -- Debug.log "Extension start second derivative " (VectorCurve2d.evaluateAt 0.0 (VectorCurve2d.derivative (Curve2d.derivative extension)))
   -- Debug.log "Extension end second derivative   " (VectorCurve2d.evaluateAt 1.0 (VectorCurve2d.derivative (Curve2d.derivative extension)))
   -- Debug.log "Curve start second derivative     " (VectorCurve2d.evaluateAt 0.0 (VectorCurve2d.derivative (Curve2d.derivative curve)) * k * k)
-  Ok extension
+  Ok [extension]
