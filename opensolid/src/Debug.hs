@@ -14,6 +14,7 @@ import Basics
 import Composition
 import Control.Exception qualified
 import Debug.Trace qualified
+import GHC.Stack (HasCallStack)
 import System.IO.Unsafe qualified
 import Prelude qualified
 
@@ -31,7 +32,7 @@ print message = Debug (trace message)
 log :: Show a => String -> a -> Debug
 log label value = print (labelled label value)
 
-assert :: Bool -> Debug
+assert :: HasCallStack => Bool -> Debug
 assert condition = Debug (Control.Exception.assert condition)
 
 io :: IO () -> Debug
