@@ -388,7 +388,7 @@ findInternalZero curve domain = do
         let (left, right) = Range.bisect domain
         findInternalZero curve left || findInternalZero curve right
 
-data Zeros = ZeroEverywhere | Zeros (List Root)
+data Zeros = ZeroEverywhere | Zeros (List Root) deriving (Show)
 
 zeros :: Tolerance units => Curve1d units -> Zeros
 zeros (Constant value) = if value ~= Qty.zero then ZeroEverywhere else Zeros []
