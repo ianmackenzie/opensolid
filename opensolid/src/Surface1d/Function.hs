@@ -676,8 +676,8 @@ generalSolution derivatives uvBounds exclusions = do
                   let startBoundary = Boundary.left uvBounds
                   let endBoundary = Boundary.bottom uvBounds
                   if endU - minU >= startV - minV
-                    then crossingSolution (endU == minU) startBoundary endBoundary (horizontalCurve f fu fv minU endU startV minV)
-                    else crossingSolution (startV == minV) startBoundary endBoundary (verticalCurve f fu fv endU minU startV minV)
+                    then crossingSolution (endU == minU) startBoundary endBoundary (horizontalCurve f fu fv minU endU startV minV True)
+                    else crossingSolution (startV == minV) startBoundary endBoundary (verticalCurve f fu fv endU minU startV minV True)
                 (Negative, Positive, Negative, Negative) -> do
                   -- Bottom right positive
                   let startU = solveHorizontally f minU maxU minV
@@ -685,8 +685,8 @@ generalSolution derivatives uvBounds exclusions = do
                   let startBoundary = Boundary.bottom uvBounds
                   let endBoundary = Boundary.right uvBounds
                   if maxU - startU >= endV - minV
-                    then crossingSolution (startU == maxU) startBoundary endBoundary (horizontalCurve f fu fv startU maxU endV minV)
-                    else crossingSolution (endV == minV) startBoundary endBoundary (verticalCurve f fu fv startU maxU minV endV)
+                    then crossingSolution (startU == maxU) startBoundary endBoundary (horizontalCurve f fu fv startU maxU endV minV True)
+                    else crossingSolution (endV == minV) startBoundary endBoundary (verticalCurve f fu fv startU maxU minV endV True)
                 (Negative, Negative, Positive, Negative) -> do
                   -- Top left positive
                   let startU = solveHorizontally f maxU minU maxV
@@ -694,8 +694,8 @@ generalSolution derivatives uvBounds exclusions = do
                   let startBoundary = Boundary.top uvBounds
                   let endBoundary = Boundary.left uvBounds
                   if startU - minU >= maxV - endV
-                    then crossingSolution (startU == minU) startBoundary endBoundary (horizontalCurve f fu fv startU minU endV maxV)
-                    else crossingSolution (endV == maxV) startBoundary endBoundary (verticalCurve f fu fv startU minU maxV endV)
+                    then crossingSolution (startU == minU) startBoundary endBoundary (horizontalCurve f fu fv startU minU endV maxV True)
+                    else crossingSolution (endV == maxV) startBoundary endBoundary (verticalCurve f fu fv startU minU maxV endV True)
                 (Negative, Negative, Negative, Positive) -> do
                   -- Top right positive
                   let startV = solveVertically f maxU minV maxV
@@ -703,8 +703,8 @@ generalSolution derivatives uvBounds exclusions = do
                   let startBoundary = Boundary.right uvBounds
                   let endBoundary = Boundary.top uvBounds
                   if maxU - endU >= maxV - startV
-                    then crossingSolution (endU == maxU) startBoundary endBoundary (horizontalCurve f fu fv maxU endU startV maxV)
-                    else crossingSolution (startV == maxV) startBoundary endBoundary (verticalCurve f fu fv endU maxU startV maxV)
+                    then crossingSolution (endU == maxU) startBoundary endBoundary (horizontalCurve f fu fv maxU endU startV maxV True)
+                    else crossingSolution (startV == maxV) startBoundary endBoundary (verticalCurve f fu fv endU maxU startV maxV True)
                 -- One negative corner
                 (Negative, Positive, Positive, Positive) -> do
                   -- Bottom left negative
@@ -713,8 +713,8 @@ generalSolution derivatives uvBounds exclusions = do
                   let startBoundary = Boundary.bottom uvBounds
                   let endBoundary = Boundary.left uvBounds
                   if startU - minU >= endV - minV
-                    then crossingSolution (startU == minU) startBoundary endBoundary (horizontalCurve f fu fv startU minU minV endV)
-                    else crossingSolution (endV == minV) startBoundary endBoundary (verticalCurve f fu fv minU startU minV endV)
+                    then crossingSolution (startU == minU) startBoundary endBoundary (horizontalCurve f fu fv startU minU minV endV True)
+                    else crossingSolution (endV == minV) startBoundary endBoundary (verticalCurve f fu fv minU startU minV endV True)
                 (Positive, Negative, Positive, Positive) -> do
                   -- Bottom right negative
                   let startV = solveVertically f maxU minV maxV
@@ -722,8 +722,8 @@ generalSolution derivatives uvBounds exclusions = do
                   let startBoundary = Boundary.right uvBounds
                   let endBoundary = Boundary.bottom uvBounds
                   if maxU - endU >= startV - minV
-                    then crossingSolution (endU == maxU) startBoundary endBoundary (horizontalCurve f fu fv maxU endU minV startV)
-                    else crossingSolution (startV == minV) startBoundary endBoundary (verticalCurve f fu fv maxU endU startV minV)
+                    then crossingSolution (endU == maxU) startBoundary endBoundary (horizontalCurve f fu fv maxU endU minV startV True)
+                    else crossingSolution (startV == minV) startBoundary endBoundary (verticalCurve f fu fv maxU endU startV minV True)
                 (Positive, Positive, Negative, Positive) -> do
                   -- Top left negative
                   let startV = solveVertically f minU maxV minV
@@ -731,8 +731,8 @@ generalSolution derivatives uvBounds exclusions = do
                   let startBoundary = Boundary.left uvBounds
                   let endBoundary = Boundary.top uvBounds
                   if endU - minU >= maxV - startV
-                    then crossingSolution (endU == minU) startBoundary endBoundary (horizontalCurve f fu fv minU endU maxV startV)
-                    else crossingSolution (startV == maxV) startBoundary endBoundary (verticalCurve f fu fv minU endU startV maxV)
+                    then crossingSolution (endU == minU) startBoundary endBoundary (horizontalCurve f fu fv minU endU maxV startV True)
+                    else crossingSolution (startV == maxV) startBoundary endBoundary (verticalCurve f fu fv minU endU startV maxV True)
                 (Positive, Positive, Positive, Negative) -> do
                   -- Top right negative
                   let startU = solveHorizontally f maxU minU maxV
@@ -740,8 +740,8 @@ generalSolution derivatives uvBounds exclusions = do
                   let startBoundary = Boundary.top uvBounds
                   let endBoundary = Boundary.right uvBounds
                   if maxU - startU >= maxV - endV
-                    then crossingSolution (startU == maxU) startBoundary endBoundary (horizontalCurve f fu fv startU maxU maxV endV)
-                    else crossingSolution (endV == maxV) startBoundary endBoundary (verticalCurve f fu fv maxU startU maxV endV)
+                    then crossingSolution (startU == maxU) startBoundary endBoundary (horizontalCurve f fu fv startU maxU maxV endV True)
+                    else crossingSolution (endV == maxV) startBoundary endBoundary (verticalCurve f fu fv maxU startU maxV endV True)
                 -- Shouldn't happen
                 (Negative, Positive, Positive, Negative) -> internalError "Inconsistent derivatives"
                 (Positive, Negative, Negative, Positive) -> internalError "Inconsistent derivatives"
@@ -871,7 +871,7 @@ rightwardsSolution f fu fv uvBounds = do
   let (minU, maxU) = Range.endpoints uRange
   let (minV, maxV) = Range.endpoints vRange
   crossingSolution (minU == maxU) (Boundary.Left minU vRange) (Boundary.Right maxU vRange) $
-    horizontalCurve f fu fv minU maxU maxV minV
+    horizontalCurve f fu fv minU maxU maxV minV False
 
 leftwardsSolution ::
   Function units ->
@@ -884,7 +884,7 @@ leftwardsSolution f fu fv uvBounds = do
   let (minU, maxU) = Range.endpoints uRange
   let (minV, maxV) = Range.endpoints vRange
   crossingSolution (minU == maxU) (Boundary.Right maxU vRange) (Boundary.Left minU vRange) $
-    horizontalCurve f fu fv maxU minU minV maxV
+    horizontalCurve f fu fv maxU minU minV maxV False
 
 upwardsSolution ::
   Function units ->
@@ -897,7 +897,7 @@ upwardsSolution f fu fv uvBounds = do
   let (minU, maxU) = Range.endpoints uRange
   let (minV, maxV) = Range.endpoints vRange
   crossingSolution (minV == maxV) (Boundary.Bottom uRange minV) (Boundary.Top uRange maxV) $
-    verticalCurve f fu fv minU maxU minV maxV
+    verticalCurve f fu fv minU maxU minV maxV False
 
 downwardsSolution ::
   Function units ->
@@ -910,7 +910,7 @@ downwardsSolution f fu fv uvBounds = do
   let (minU, maxU) = Range.endpoints uRange
   let (minV, maxV) = Range.endpoints vRange
   crossingSolution (minV == maxV) (Boundary.Top uRange maxV) (Boundary.Bottom uRange minV) $
-    verticalCurve f fu fv maxU minU maxV minV
+    verticalCurve f fu fv maxU minU maxV minV False
 
 crossingSolution ::
   Bool ->
@@ -930,9 +930,10 @@ horizontalCurve ::
   Float ->
   Float ->
   Float ->
+  Bool ->
   Curve2d Uv.Coordinates
-horizontalCurve f fu fv uStart uEnd vLow vHigh =
-  Curve2d.wrap (HorizontalCurve{f, dvdu = -fu / fv, uStart, uEnd, vLow, vHigh})
+horizontalCurve f fu fv uStart uEnd vLow vHigh monotonic =
+  Curve2d.wrap (HorizontalCurve{f, dvdu = -fu / fv, uStart, uEnd, vLow, vHigh, monotonic})
 
 verticalCurve ::
   Function units ->
@@ -942,9 +943,10 @@ verticalCurve ::
   Float ->
   Float ->
   Float ->
+  Bool ->
   Curve2d Uv.Coordinates
-verticalCurve f fu fv uLow uHigh vStart vEnd =
-  Curve2d.wrap (VerticalCurve{f, dudv = -fv / fu, uLow, uHigh, vStart, vEnd})
+verticalCurve f fu fv uLow uHigh vStart vEnd monotonic =
+  Curve2d.wrap (VerticalCurve{f, dudv = -fv / fu, uLow, uHigh, vStart, vEnd, monotonic})
 
 hasZero :: Uv.Bounds -> Function units -> Bool
 hasZero uvBounds function = Range.includes Qty.zero (segmentBounds uvBounds function)
@@ -1159,6 +1161,7 @@ data HorizontalCurve units = HorizontalCurve
   , uEnd :: Float
   , vLow :: Float
   , vHigh :: Float
+  , monotonic :: Bool
   }
   deriving (Show)
 
@@ -1171,14 +1174,17 @@ instance Curve2d.Interface (HorizontalCurve units) Uv.Coordinates where
     let v = solveVertically f u vLow vHigh
     Point2d.xy u v
 
-  segmentBoundsImpl (Range t1 t2) (HorizontalCurve{f, dvdu, uStart, uEnd, vLow, vHigh}) = do
+  segmentBoundsImpl (Range t1 t2) (HorizontalCurve{f, dvdu, uStart, uEnd, vLow, vHigh, monotonic}) = do
     let u1 = Float.interpolateFrom uStart uEnd t1
     let u2 = Float.interpolateFrom uStart uEnd t2
     let v1 = solveVertically f u1 vLow vHigh
     let v2 = solveVertically f u2 vLow vHigh
-    let slopeBounds = segmentBounds (Bounds2d.xy (Range.from u1 u2) (Range.from vLow vHigh)) dvdu
-    let vRange = parallelogramBounds u1 u2 v1 v2 slopeBounds
-    Bounds2d.xy (Range.from u1 u2) vRange
+    if monotonic
+      then Bounds2d.xy (Range.from u1 u2) (Range.from v1 v2)
+      else do
+        let slopeBounds = segmentBounds (Bounds2d.xy (Range.from u1 u2) (Range.from vLow vHigh)) dvdu
+        let vRange = parallelogramBounds u1 u2 v1 v2 slopeBounds
+        Bounds2d.xy (Range.from u1 u2) vRange
 
   derivativeImpl crossingCurve@(HorizontalCurve{dvdu, uStart, uEnd}) = do
     let deltaU = uEnd - uStart
@@ -1186,8 +1192,8 @@ instance Curve2d.Interface (HorizontalCurve units) Uv.Coordinates where
     let dvdt = deltaU * Curve1d.wrap (CurveOnSurface crossingCurve dvdu)
     VectorCurve2d.xy dudt dvdt
 
-  reverseImpl (HorizontalCurve{f, dvdu, uStart, uEnd, vLow, vHigh}) =
-    HorizontalCurve{f, dvdu, uStart = uEnd, uEnd = uStart, vLow, vHigh}
+  reverseImpl (HorizontalCurve{f, dvdu, uStart, uEnd, vLow, vHigh, monotonic}) =
+    HorizontalCurve{f, dvdu, uStart = uEnd, uEnd = uStart, vLow, vHigh, monotonic}
 
   boundsImpl crossingCurve = Curve2d.segmentBoundsImpl Range.unit crossingCurve
 
@@ -1201,6 +1207,7 @@ data VerticalCurve units = VerticalCurve
   , uHigh :: Float
   , vStart :: Float
   , vEnd :: Float
+  , monotonic :: Bool
   }
   deriving (Show)
 
@@ -1213,14 +1220,17 @@ instance Curve2d.Interface (VerticalCurve units) Uv.Coordinates where
     let u = solveHorizontally f uLow uHigh v
     Point2d.xy u v
 
-  segmentBoundsImpl (Range t1 t2) (VerticalCurve{f, dudv, uLow, uHigh, vStart, vEnd}) = do
+  segmentBoundsImpl (Range t1 t2) (VerticalCurve{f, dudv, uLow, uHigh, vStart, vEnd, monotonic}) = do
     let v1 = Float.interpolateFrom vStart vEnd t1
     let v2 = Float.interpolateFrom vStart vEnd t2
     let u1 = solveHorizontally f uLow uHigh v1
     let u2 = solveHorizontally f uLow uHigh v2
-    let slopeBounds = segmentBounds (Bounds2d.xy (Range.from uLow uHigh) (Range.from v1 v2)) dudv
-    let uRange = parallelogramBounds v1 v2 u1 u2 slopeBounds
-    Bounds2d.xy uRange (Range.from v1 v2)
+    if monotonic
+      then Bounds2d.xy (Range.from u1 u2) (Range.from v1 v2)
+      else do
+        let slopeBounds = segmentBounds (Bounds2d.xy (Range.from uLow uHigh) (Range.from v1 v2)) dudv
+        let uRange = parallelogramBounds v1 v2 u1 u2 slopeBounds
+        Bounds2d.xy uRange (Range.from v1 v2)
 
   derivativeImpl crossingCurve@(VerticalCurve{dudv, vStart, vEnd}) = do
     let deltaV = vEnd - vStart
@@ -1228,8 +1238,8 @@ instance Curve2d.Interface (VerticalCurve units) Uv.Coordinates where
     let dudt = deltaV * Curve1d.wrap (CurveOnSurface crossingCurve dudv)
     VectorCurve2d.xy dudt dvdt
 
-  reverseImpl (VerticalCurve{f, dudv, uLow, uHigh, vStart, vEnd}) =
-    VerticalCurve f dudv uLow uHigh vEnd vStart
+  reverseImpl (VerticalCurve{f, dudv, uLow, uHigh, vStart, vEnd, monotonic}) =
+    VerticalCurve{f, dudv, uLow, uHigh, vStart = vEnd, vEnd = vStart, monotonic}
 
   boundsImpl crossingCurve = Curve2d.segmentBoundsImpl Range.unit crossingCurve
 
