@@ -27,7 +27,6 @@ where
 
 import Angle qualified
 import Axis2d qualified
-import BezierCurve2d qualified
 import Bounds2d qualified
 import Curve1d (Curve1d)
 import Curve1d qualified
@@ -1337,17 +1336,17 @@ finalizeCrossingCurve f saddleRegions (PartialZeros.CrossingCurve{segments}) = d
   case (regionContaining startPoint, regionContaining endPoint) of
     (Nothing, Nothing) -> Just (Ok segments)
     (Just startRegion, Nothing) ->
-      Just Result.do
-        extension <- connectingCurves f startRegion firstCurve
+      Just do
+        let extension = connectingCurves f startRegion firstCurve
         Ok (extension + segments)
     (Nothing, Just endRegion) ->
-      Just Result.do
-        extension <- connectingCurves f endRegion (Curve2d.reverse lastCurve)
+      Just do
+        let extension = connectingCurves f endRegion (Curve2d.reverse lastCurve)
         Ok (segments + reverseExtension extension)
     (Just startRegion, Just endRegion) ->
-      Just Result.do
-        startExtension <- connectingCurves f startRegion firstCurve
-        endExtension <- connectingCurves f endRegion (Curve2d.reverse lastCurve)
+      Just do
+        let startExtension = connectingCurves f startRegion firstCurve
+        let endExtension = connectingCurves f endRegion (Curve2d.reverse lastCurve)
         Ok (startExtension + segments + reverseExtension endExtension)
 
 finalizeTangentCurve :: PartialZeros.TangentCurve -> Maybe (NonEmpty (Curve2d Uv.Coordinates), Sign)
@@ -1360,47 +1359,47 @@ finalizeTangentLoop (PartialZeros.TangentLoop{segments, sign}) = (segments, sign
 finalizeTangentPoint :: PartialZeros.TangentPoint -> (Uv.Point, Sign)
 finalizeTangentPoint (PartialZeros.TangentPoint{point, sign}) = (point, sign)
 
-connectingCurves :: Function units -> SaddleRegion -> Curve2d Uv.Coordinates -> Result ZerosError (List (Curve2d Uv.Coordinates))
-connectingCurves _ saddleRegion curve = Result.do
+connectingCurves :: Function units -> SaddleRegion -> Curve2d Uv.Coordinates -> List (Curve2d Uv.Coordinates)
+connectingCurves f saddleRegion curve = do
   let frame = SaddleRegion.frame saddleRegion
-  let localCurve = Curve2d.relativeTo frame curve
-  let localCurveFirstDerivative = Curve2d.derivative localCurve
-  let localCurveSecondDerivative = VectorCurve2d.derivative localCurveFirstDerivative
-  let localStartPoint = Point2d.origin
-  let localEndPoint = Curve2d.startPoint localCurve
-  let (x0, y0) = Point2d.coordinates localEndPoint
-  let localCurveFirstDerivativeAtStart = VectorCurve2d.evaluateAt 0.0 localCurveFirstDerivative
-  let localCurveSecondDerivativeAtStart = VectorCurve2d.evaluateAt 0.0 localCurveSecondDerivative
-  let k = x0 / Vector2d.xComponent localCurveFirstDerivativeAtStart
-  let localEndFirstDerivative = k * localCurveFirstDerivativeAtStart
-  let localEndSecondDerivative = k * k * localCurveSecondDerivativeAtStart
+  let (xEnd, yEnd) = Point2d.coordinates (Point2d.relativeTo frame (Curve2d.startPoint curve))
+  let connectorSize = 1e-3
+  let xConnection = if Qty.abs xEnd <= connectorSize then xEnd else connectorSize * Qty.sign xEnd
+  let fXY = reparameterize frame f
+  let fx = derivative U fXY
+  let fy = derivative V fXY
+  let (yLow, yHigh) =
+        case SaddleRegion.fxxSign saddleRegion of
+          Negative -> (0.0, yEnd)
+          Positive -> (yEnd, 0.0)
+  let exactCurveXY = horizontalCurve fXY fx fy xConnection xEnd yLow yHigh True
+  let degenerateCurveXY = horizontalCurve fXY fx fy 0.0 xConnection yLow yHigh True
   let SaddleRegion.Solution{dydx, d2ydx2} =
-        if y0 / x0 > Qty.zero
-          then SaddleRegion.positiveSolution saddleRegion
-          else SaddleRegion.negativeSolution saddleRegion
-  let localStartFirstDerivative = Vector2d.xy x0 (x0 * dydx)
-  let localStartSecondDerivative = Vector2d.xy 0.0 (x0 * x0 * d2ydx2)
-  let localExtension =
-        BezierCurve2d.hermite
-          (localStartPoint, [localStartFirstDerivative, localStartSecondDerivative])
-          (localEndPoint, [localEndFirstDerivative, localEndSecondDerivative])
-  let extension = Curve2d.placeIn frame localExtension
-  -- let curveCurvature = Curve2d.curvature' curve
-  -- let extensionCurvature = Curve2d.curvature' extension
+        case Qty.sign (yEnd / xEnd) of
+          Positive -> SaddleRegion.positiveSolution saddleRegion
+          Negative -> SaddleRegion.negativeSolution saddleRegion
+  let startFirstDerivativeXY = Vector2d.xy xConnection (xConnection * dydx)
+  let startSecondDerivativeXY = Vector2d.xy 0.0 (xConnection * xConnection * d2ydx2)
+  let startCondition = (Point2d.origin, [startFirstDerivativeXY, startSecondDerivativeXY])
+  let interpolatedCurveXY = Curve2d.removeStartDegeneracy 2 startCondition degenerateCurveXY
+  let exactCurve = Curve2d.placeIn frame exactCurveXY
+  let interpolatedCurve = Curve2d.placeIn frame interpolatedCurveXY
+  -- let exactCurvature = let ?tolerance = 1e-9 in Curve2d.curvature' exactCurve |> Result.withDefault Curve1d.zero
+  -- let interpolatedCurvature = let ?tolerance = 1e-9 in Curve2d.curvature' interpolatedCurve |> Result.withDefault Curve1d.zero
   -- Debug.log "Extension distance                " (Point2d.distanceFrom localStartPoint localEndPoint)
-  -- Debug.log "Error 0.0                         " (evaluateAt (Curve2d.evaluateAt 0.0 extension) f)
-  -- Debug.log "Error 0.5                         " (evaluateAt (Curve2d.evaluateAt 0.5 extension) f)
-  -- Debug.log "Error 1.0                         " (evaluateAt (Curve2d.evaluateAt 1.0 extension) f)
-  -- Debug.log "Extension curvature 0.0           " (Curve1d.evaluateAt 0.0 extensionCurvature)
-  -- Debug.log "Extension curvature 0.5           " (Curve1d.evaluateAt 0.5 extensionCurvature)
-  -- Debug.log "Extension curvature 1.0           " (Curve1d.evaluateAt 1.0 extensionCurvature)
-  -- Debug.log "Curve curvature 0.0               " (Curve1d.evaluateAt 0.0 curveCurvature)
-  -- Debug.log "Curve curvature 0.5               " (Curve1d.evaluateAt 0.5 curveCurvature)
-  -- Debug.log "Curve curvature 1.0               " (Curve1d.evaluateAt 1.0 curveCurvature)
+  -- Debug.log "Error 0.0                         " (evaluateAt (Curve2d.evaluateAt 0.0 interpolatedCurve) f)
+  -- Debug.log "Error 0.5                         " (evaluateAt (Curve2d.evaluateAt 0.5 interpolatedCurve) f)
+  -- Debug.log "Error 1.0                         " (evaluateAt (Curve2d.evaluateAt 1.0 interpolatedCurve) f)
+  -- Debug.log "Interpolated curvature 0.0           " (Curve1d.evaluateAt 0.0 interpolatedCurvature)
+  -- Debug.log "Interpolated curvature 0.5           " (Curve1d.evaluateAt 0.5 interpolatedCurvature)
+  -- Debug.log "Interpolated curvature 1.0           " (Curve1d.evaluateAt 1.0 interpolatedCurvature)
+  -- Debug.log "Exact curvature 0.0                  " (Curve1d.evaluateAt 0.0 exactCurvature)
+  -- Debug.log "Exact curvature 0.5                  " (Curve1d.evaluateAt 0.5 exactCurvature)
+  -- Debug.log "Exact curvature 1.0                  " (Curve1d.evaluateAt 1.0 exactCurvature)
   -- Debug.log "Extension start derivative        " (VectorCurve2d.evaluateAt 0.0 (Curve2d.derivative extension))
   -- Debug.log "Extension end derivative          " (VectorCurve2d.evaluateAt 1.0 (Curve2d.derivative extension))
   -- Debug.log "Curve start derivative            " (VectorCurve2d.evaluateAt 0.0 (Curve2d.derivative curve) * k)
   -- Debug.log "Extension start second derivative " (VectorCurve2d.evaluateAt 0.0 (VectorCurve2d.derivative (Curve2d.derivative extension)))
   -- Debug.log "Extension end second derivative   " (VectorCurve2d.evaluateAt 1.0 (VectorCurve2d.derivative (Curve2d.derivative extension)))
   -- Debug.log "Curve start second derivative     " (VectorCurve2d.evaluateAt 0.0 (VectorCurve2d.derivative (Curve2d.derivative curve)) * k * k)
-  Ok [extension]
+  if xConnection == xEnd then [interpolatedCurve] else [interpolatedCurve, exactCurve]

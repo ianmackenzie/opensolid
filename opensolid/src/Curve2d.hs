@@ -40,11 +40,13 @@ module Curve2d
   , scaleAlongOwn
   , curvature
   , curvature'
+  , removeStartDegeneracy
   )
 where
 
 import Axis2d (Axis2d)
 import Axis2d qualified
+import {-# SOURCE #-} BezierCurve2d qualified
 import Bisection qualified
 import Bounds2d (Bounds2d)
 import Bounds2d qualified
@@ -69,6 +71,7 @@ import Point2d qualified
 import Range (Range)
 import Range qualified
 import Result qualified
+import Stream qualified
 import Transform2d (Transform2d)
 import Transform2d qualified
 import Units qualified
@@ -375,3 +378,68 @@ instance Interface (TransformBy curve (space @ units)) (space @ units) where
   transformByImpl transform (TransformBy existing curve) =
     Curve2d.wrap $
       TransformBy (Transform2d.toAffine existing >> Transform2d.toAffine transform) curve
+
+removeStartDegeneracy ::
+  Int ->
+  (Point2d (space @ units), List (Vector2d (space @ units))) ->
+  Curve2d (space @ units) ->
+  Curve2d (space @ units)
+removeStartDegeneracy continuity startCondition curve = Result.do
+  let curveDerivatives = Stream.iterate (derivative curve) VectorCurve2d.derivative
+  let endDerivativeValues = Stream.map (VectorCurve2d.evaluateAt 1.0) curveDerivatives
+  let endCondition endDegree = (endPoint curve, Stream.take endDegree endDerivativeValues)
+  let baseCurve endDegree = BezierCurve2d.hermite startCondition (endCondition endDegree)
+  let curveDerivative n =
+        VectorCurve2d.wrap $
+          SyntheticDerivative
+            (nthDerivative n (baseCurve (continuity + n)))
+            (curveDerivative (n + 1))
+  wrap (Synthetic (baseCurve continuity) (curveDerivative 1))
+
+nthDerivative :: Int -> Curve2d (space @ units) -> VectorCurve2d (space @ units)
+nthDerivative 0 _ = internalError "nthDerivative should always be called with n >= 1"
+nthDerivative 1 curve = derivative curve
+nthDerivative n curve = VectorCurve2d.derivative (nthDerivative (n - 1) curve)
+
+data Synthetic coordinateSystem where
+  Synthetic ::
+    Curve2d (space @ units) ->
+    ~(VectorCurve2d (space @ units)) ->
+    Synthetic (space @ units)
+
+instance Show (Synthetic (space @ units)) where
+  show _ = "<Synthetic>"
+
+instance Interface (Synthetic (space @ units)) (space @ units) where
+  startPointImpl (Synthetic curve _) = Curve2d.startPoint curve
+  endPointImpl (Synthetic curve _) = Curve2d.endPoint curve
+  evaluateAtImpl t (Synthetic curve _) = Curve2d.evaluateAt t curve
+  segmentBoundsImpl t (Synthetic curve _) = Curve2d.segmentBounds t curve
+  boundsImpl (Synthetic curve _) = Curve2d.bounds curve
+  reverseImpl (Synthetic curve curveDerivative) =
+    Synthetic (Curve2d.reverse curve) (-(VectorCurve2d.reverse curveDerivative))
+  derivativeImpl (Synthetic _ curveDerivative) = curveDerivative
+  transformByImpl transform (Synthetic curve curveDerivative) =
+    Curve2d.wrap $
+      Synthetic
+        (Curve2d.transformBy transform curve)
+        (VectorCurve2d.transformBy transform curveDerivative)
+
+data SyntheticDerivative coordinateSystem where
+  SyntheticDerivative ::
+    VectorCurve2d (space @ units) ->
+    ~(VectorCurve2d (space @ units)) ->
+    SyntheticDerivative (space @ units)
+
+instance Show (SyntheticDerivative (space @ units)) where
+  show _ = "<SyntheticDerivative>"
+
+instance VectorCurve2d.Interface (SyntheticDerivative (space @ units)) (space @ units) where
+  evaluateAtImpl t (SyntheticDerivative current _) = VectorCurve2d.evaluateAt t current
+  segmentBoundsImpl t (SyntheticDerivative current _) = VectorCurve2d.segmentBounds t current
+  derivativeImpl (SyntheticDerivative _ next) = next
+  transformByImpl transform (SyntheticDerivative current next) =
+    VectorCurve2d.wrap $
+      SyntheticDerivative
+        (VectorCurve2d.transformBy transform current)
+        (VectorCurve2d.transformBy transform next)

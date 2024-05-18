@@ -8,7 +8,6 @@ import Tests.Arc2d qualified
 import Tests.Bounds2d qualified
 import Tests.Curve1d qualified
 import Tests.Curve2d qualified
-import Tests.Curve2d.Extension qualified
 import Tests.Direction2d qualified
 import Tests.DivMod qualified
 import Tests.Estimate qualified
@@ -35,7 +34,6 @@ tests =
     , Test.group "VectorBounds3d" Tests.VectorBounds3d.tests
     , Test.group "Curve1d" Tests.Curve1d.tests
     , Test.group "Curve2d" Tests.Curve2d.tests
-    , Test.group "Curve2d.Extension" Tests.Curve2d.Extension.tests
     , Test.group "Estimate" Tests.Estimate.tests
     , Test.group "List" Tests.List.tests
     , Test.group "NonEmpty" Tests.NonEmpty.tests

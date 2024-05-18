@@ -25,8 +25,10 @@ import Point2d qualified
 import Qty qualified
 import QuadraticSpline2d qualified
 import Random (Generator)
+import Random qualified
 import Range (Range (Range))
 import Range qualified
+import Sign qualified
 import Test (Expectation, Test)
 import Test qualified
 import Tests.Random qualified as Random
@@ -58,6 +60,7 @@ tests =
   , degenerateEndPointTangentDerivative
   , derivativeConsistency
   , reversalConsistency
+  , degeneracyRemoval
   ]
 
 find :: Tolerance Meters => Test
@@ -298,3 +301,48 @@ reversalConsistency =
           let reversedCurve = Curve2d.reverse curve
           t <- Parameter.random
           Test.expect (Curve2d.evaluateAt t curve ~= Curve2d.evaluateAt (1 - t) reversedCurve)
+
+degeneracyRemoval :: Tolerance Meters => Test
+degeneracyRemoval = Test.check 100 "degeneracyRemoval" Test.do
+  arcCenter <- Random.point2d
+  arcRadius <- Qty.random (Length.meters 0.1) (Length.meters 10.0)
+  arcStartAngle <- Qty.random -Angle.pi Angle.pi
+  arcSweptAngle <- Random.map (Angle.degree *) Sign.random
+  let arcEndAngle = arcStartAngle + arcSweptAngle
+  t <- Parameter.random
+
+  let arc = Arc2d.polar arcCenter arcRadius arcStartAngle arcEndAngle
+  let arcFirstDerivative = Curve2d.derivative arc
+  let arcSecondDerivative = VectorCurve2d.derivative arcFirstDerivative
+  let arcThirdDerivative = VectorCurve2d.derivative arcSecondDerivative
+
+  let startFirstDerivative = VectorCurve2d.evaluateAt 0.0 arcFirstDerivative
+  let startSecondDerivative = VectorCurve2d.evaluateAt 0.0 arcSecondDerivative
+  let startCondition = (Curve2d.startPoint arc, [startFirstDerivative, startSecondDerivative])
+
+  let interpolatedCurve = Curve2d.removeStartDegeneracy 2 startCondition arc
+  let interpolatedFirstDerivative = Curve2d.derivative interpolatedCurve
+  let interpolatedSecondDerivative = VectorCurve2d.derivative interpolatedFirstDerivative
+  let interpolatedThirdDerivative = VectorCurve2d.derivative interpolatedSecondDerivative
+
+  let arcPoint = Curve2d.pointOn arc t
+  let interpolatedPoint = Curve2d.pointOn interpolatedCurve t
+  let expectEqualPoints =
+        Tolerance.using (Length.meters 1e-14) (Test.expect (arcPoint ~= interpolatedPoint))
+          |> Test.output "point distance" (Point2d.distanceFrom arcPoint interpolatedPoint)
+  let expectEqualDerivatives n arcDerivative interpolatedDerivative = do
+        let arcEndValue = VectorCurve2d.evaluateAt 1.0 arcDerivative
+        let interpolatedEndValue = VectorCurve2d.evaluateAt 1.0 interpolatedDerivative
+        Test.expect (arcEndValue ~= interpolatedEndValue)
+          |> Test.output "Derivative order" n
+          |> Test.output "Derivative at end of arc" arcEndValue
+          |> Test.output "Derivative at start of interpolated curve" interpolatedEndValue
+          |> Test.output "Derivative difference magnitude" (Vector2d.magnitude (interpolatedEndValue - arcEndValue))
+  Test.all
+    [ expectEqualPoints
+    , Tests.Curve2d.firstDerivativeIsConsistent interpolatedCurve t
+    , Tests.Curve2d.secondDerivativeIsConsistent interpolatedCurve t
+    , expectEqualDerivatives 1 arcFirstDerivative interpolatedFirstDerivative
+    , expectEqualDerivatives 2 arcSecondDerivative interpolatedSecondDerivative
+    , expectEqualDerivatives 3 arcThirdDerivative interpolatedThirdDerivative
+    ]
