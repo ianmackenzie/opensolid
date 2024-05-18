@@ -1076,6 +1076,7 @@ saddlePointRegion derivatives point expandedBounds = do
     , positiveSolution
     , negativeSolution
     , exclusion = expandedBounds
+    , fxxSign = Qty.sign fxxValue
     }
 
 reparameterize ::

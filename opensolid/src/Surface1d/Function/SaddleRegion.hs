@@ -22,6 +22,7 @@ data SaddleRegion = SaddleRegion
   , positiveSolution :: Solution
   , negativeSolution :: Solution
   , exclusion :: Uv.Bounds
+  , fxxSign :: Sign
   }
   deriving (Show)
 
