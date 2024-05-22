@@ -30,9 +30,9 @@ module Map
   )
 where
 
+import Basics
 import Data.Map (Map)
 import Data.Map qualified
-import OpenSolid
 import Pair qualified
 import Prelude qualified
 
