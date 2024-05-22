@@ -31,6 +31,11 @@ common config
     , type-errors
     , directory
     , async
+    , aeson
+    , text
+    , bytestring
+    , scientific
+    , vector
   ghc-options:
       -Wall
       -Werror
@@ -113,6 +118,7 @@ library
       Int
       Intersects
       IO
+      Json
       Length
       Line2d
       Line3d
