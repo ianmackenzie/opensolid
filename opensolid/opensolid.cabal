@@ -119,6 +119,7 @@ library
       Intersects
       IO
       Json
+      Json.Schema
       Length
       Line2d
       Line3d
