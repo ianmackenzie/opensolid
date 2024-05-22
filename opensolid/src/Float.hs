@@ -1,6 +1,7 @@
 module Float
   ( Float
   , fromRational
+  , toDouble
   , fromInt
   , parse
   , ceiling
@@ -52,6 +53,10 @@ type Float = Qty Unitless
 {-# INLINE fromRational #-}
 fromRational :: Prelude.Rational -> Float
 fromRational = Prelude.fromRational
+
+{-# INLINE toDouble #-}
+toDouble :: Float -> Prelude.Double
+toDouble = Qty.toDouble
 
 fromInt :: Int -> Float
 fromInt = fromIntegral

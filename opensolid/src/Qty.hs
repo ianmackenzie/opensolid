@@ -1,5 +1,6 @@
 module Qty
   ( Qty (Qty, Qty_)
+  , toDouble
   , zero
   , infinity
   , sign
@@ -161,6 +162,10 @@ instance Units.Quotient Unitless units1 units2 => Division Int (Qty units1) (Qty
 instance DivMod (Qty units) where
   x // y = Prelude.floor (x / y)
   x % y = x - y * (x // y)
+
+{-# INLINE toDouble #-}
+toDouble :: Qty units -> Prelude.Double
+toDouble (Qty_ x) = x
 
 zero :: Qty units
 zero = Data.Coerce.coerce 0.0
