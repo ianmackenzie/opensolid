@@ -3,6 +3,7 @@ module Float
   , fromRational
   , toDouble
   , fromInt
+  , toInt
   , parse
   , ceiling
   , round
@@ -60,6 +61,11 @@ toDouble = Qty.toDouble
 
 fromInt :: Int -> Float
 fromInt = fromIntegral
+
+toInt :: Float -> Maybe Int
+toInt value = do
+  let candidate = round value
+  if fromInt candidate == value then Just candidate else Nothing
 
 parse :: String -> Result String Float
 parse input = Text.Read.readMaybe input ?? Error ("Couldn't parse input as a float: " + input)
