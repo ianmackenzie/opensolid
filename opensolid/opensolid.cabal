@@ -119,7 +119,9 @@ library
       Intersects
       IO
       Json
+      Json.Format
       Json.Schema
+      Json.Serialization
       Length
       Line2d
       Line3d
@@ -169,6 +171,7 @@ library
       Curve2d.Patterns
       Curve2d.Derivatives
       Curve2d.Segment
+      Json.FieldSchema
       Point2d.CoordinateTransformation
       Quadrature
       Surface1d.Function.Boundary
