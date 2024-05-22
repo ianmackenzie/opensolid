@@ -1,5 +1,8 @@
+{-# LANGUAGE AllowAmbiguousTypes #-}
+
 module Units
   ( HasUnits (..)
+  , Metadata (..)
   , Coercion (coerce)
   , erase
   , type (:*:)
@@ -63,6 +66,10 @@ instance HasUnits a => HasUnits (List a) where
 instance HasUnits a => HasUnits (NonEmpty a) where
   type Units (NonEmpty a) = Units a
   type Erase (NonEmpty a) = NonEmpty (Erase a)
+
+class Metadata units where
+  quantity :: String
+  symbol :: String
 
 type Coercion :: Type -> Type -> Constraint
 class Coercion b a => Coercion a b where
@@ -142,19 +149,51 @@ rightAssociate = coerce
 
 data Unitless
 
+instance Metadata Unitless where
+  quantity = "Float"
+  symbol = "unitless"
+
 data Radians
+
+instance Metadata Radians where
+  quantity = "Angle"
+  symbol = "rad"
 
 data Meters
 
+instance Metadata Meters where
+  quantity = "Length"
+  symbol = "m"
+
 data Seconds
+
+instance Metadata Seconds where
+  quantity = "Duration"
+  symbol = "s"
 
 data MetersPerSecond
 
+instance Metadata MetersPerSecond where
+  quantity = "Speed"
+  symbol = "m/s"
+
 data MetersPerSecondSquared
+
+instance Metadata MetersPerSecondSquared where
+  quantity = "Acceleration"
+  symbol = "m/s^2"
 
 data SquareMeters
 
+instance Metadata SquareMeters where
+  quantity = "Area"
+  symbol = "m^2"
+
 data CubicMeters
+
+instance Metadata CubicMeters where
+  quantity = "Volume"
+  symbol = "m^3"
 
 type family a .*. b where
   Unitless .*. Unitless = Unitless
