@@ -5,6 +5,7 @@ module Result
   , andThen
   , withDefault
   , check
+  , mapError
   , onError
   , handleError
   , orNothing
@@ -106,6 +107,9 @@ withDefault fallback (Error _) = fallback
 map :: (a -> value) -> Result x a -> Result x value
 map f (Ok value) = Ok (f value)
 map _ (Error error) = Error error
+
+mapError :: Error y => (Error x => x -> y) -> Result x a -> Result y a
+mapError f = onError (f >> Error)
 
 map2 :: (a -> b -> value) -> Result x a -> Result x b -> Result x value
 map2 function result1 result2 = Result.do
