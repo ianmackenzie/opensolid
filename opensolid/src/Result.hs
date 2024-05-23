@@ -2,6 +2,7 @@ module Result
   ( Result (Ok, Error)
   , map
   , map2
+  , andThen
   , withDefault
   , check
   , onError
@@ -87,6 +88,9 @@ return = Ok
 (>>=) :: Result x a -> (a -> Result x b) -> Result x b
 Ok value >>= function = function value
 Error error >>= _ = Error error
+
+andThen :: (a -> Result x b) -> Result x a -> Result x b
+andThen function result = result >>= function
 
 instance x ~ x' => Composition (Result x ()) (Result x' a) (Result x a) where
   Ok _ >> result = result
