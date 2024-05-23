@@ -121,7 +121,6 @@ library
       Json
       Json.Format
       Json.Schema
-      Json.Serialization
       Length
       Line2d
       Line3d

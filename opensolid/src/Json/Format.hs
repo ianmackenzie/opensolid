@@ -1,13 +1,16 @@
 module Json.Format
   ( Format (..)
   , coerce
+  , map
+  , validate
   , float
   , int
   , bool
   , string
-  , object2
-  , object3
-  , object4
+  , list
+  , nonEmpty
+  , object
+  , singleField
   , requiredField
   , optionalField
   , title
@@ -27,11 +30,10 @@ import Json.FieldSchema (FieldSchema (FieldSchema))
 import Json.FieldSchema qualified as FieldSchema
 import Json.Schema (Schema)
 import Json.Schema qualified
-import {-# SOURCE #-} Json.Serialization (Serialization)
-import {-# SOURCE #-} Json.Serialization qualified
 import List qualified
 import Map (Map)
 import Map qualified
+import NonEmpty qualified
 import OpenSolid
 import Result qualified
 
@@ -57,19 +59,28 @@ examples :: List a -> Format a -> Format a
 examples values format =
   format{schema = (schema format){Json.Schema.examples = List.map (encode format) values}}
 
+removeMetadata :: Schema -> Schema
+removeMetadata schema =
+  schema
+    { Json.Schema.title = Nothing
+    , Json.Schema.description = Nothing
+    , Json.Schema.default_ = Nothing
+    , Json.Schema.examples = []
+    }
+
 coerce :: Coercible a b => Format a -> Format b
-coerce format = do
+coerce = map Data.Coerce.coerce Data.Coerce.coerce
+
+map :: (a -> b) -> (b -> a) -> Format a -> Format b
+map lift drop format = validate (lift >> Ok) drop format
+
+validate :: (a -> Result x b) -> (b -> a) -> Format a -> Format b
+validate lift drop format = do
   let Format{encode, decode, schema} = format
   Format
-    { encode = Data.Coerce.coerce >> encode
-    , decode = decode >> Result.map Data.Coerce.coerce
-    , schema =
-        schema
-          { Json.Schema.title = Nothing
-          , Json.Schema.description = Nothing
-          , Json.Schema.default_ = Nothing
-          , Json.Schema.examples = []
-          }
+    { encode = drop >> encode
+    , decode = decode >> Result.andThen (lift >> Result.mapError Error.message)
+    , schema = removeMetadata schema
     }
 
 bool :: Format Bool
@@ -112,97 +123,103 @@ decodeInt :: Json -> Result String Int
 decodeInt (Json.Number value) = Float.toInt value ?? Error "Expected an integer"
 decodeInt _ = Error "Expected an integer"
 
-encodeObject :: List (parent -> Map String Json -> Map String Json) -> parent -> Json
-encodeObject writers parent = do
-  let fields = List.foldl (\accumulated writer -> writer parent accumulated) Map.empty writers
-  Json.map fields
+decodeArray :: (Json -> Result String a) -> Json -> Result String (List a)
+decodeArray decodeItem = \case
+  Json.Array items -> Result.collect decodeItem items
+  _ -> Error "Expected an array"
+
+list :: Format item -> Format (List item)
+list (Format encodeItem decodeItem itemSchema) =
+  Format
+    { encode = Json.list encodeItem
+    , decode = decodeArray decodeItem
+    , schema = Json.Schema.array{Json.Schema.items = Just itemSchema}
+    }
+
+toNonEmpty :: List item -> Result String (NonEmpty item)
+toNonEmpty (NonEmpty items) = Ok items
+toNonEmpty [] = Error "Array is empty"
+
+nonEmpty :: Format item -> Format (NonEmpty item)
+nonEmpty (Format encodeItem decodeItem itemSchema) =
+  Format
+    { encode = NonEmpty.toList >> Json.list encodeItem
+    , decode = decodeArray decodeItem >> Result.andThen toNonEmpty
+    , schema = Json.Schema.array{Json.Schema.items = Just itemSchema, Json.Schema.minItems = Just 1}
+    }
 
 decodeObject :: (Map String Json -> Result String a) -> Json -> Result String a
 decodeObject fromFields = \case
   Json.Object fields -> fromFields fields
-  _ -> Error "Expecting an object"
+  _ -> Error "Expected an object"
 
-objectSchema :: List FieldSchema -> Schema
-objectSchema fieldSchemas =
-  Json.Schema.object
-    { Json.Schema.required =
-        fieldSchemas
-          |> List.filter FieldSchema.required
-          |> List.map FieldSchema.name
-    , Json.Schema.properties =
-        fieldSchemas
-          |> List.map (\FieldSchema{name, schema} -> (name, schema))
-          |> Map.fromList
+object :: constructor -> Fields constructor parent () -> Format parent
+object constructor (Fields decompose compose properties required) =
+  Format
+    { encode = decompose >> Json.map
+    , decode = decodeObject (\fieldValues -> compose fieldValues constructor)
+    , schema = Json.Schema.object{Json.Schema.required, Json.Schema.properties}
     }
 
-object2 :: (child1 -> child2 -> parent) -> Field parent child1 -> Field parent child2 -> Format parent
-object2 constructor format1 format2 = do
-  let (Field write1 read1 fieldSchema1) = format1
-  let (Field write2 read2 fieldSchema2) = format2
-  let encode = encodeObject [write1, write2]
-  let decode = decodeObject $
-        \fields -> Result.do
-          value1 <- read1 fields
-          value2 <- read2 fields
-          Ok (constructor value1 value2)
-  let schema = objectSchema [fieldSchema1, fieldSchema2]
-  Format{encode, decode, schema}
+singleField :: (child -> parent) -> Field parent child () -> Format parent
+singleField constructor field = object constructor (lastField field)
 
-object3 ::
-  (child1 -> child2 -> child3 -> parent) ->
-  Field parent child1 ->
-  Field parent child2 ->
-  Field parent child3 ->
-  Format parent
-object3 constructor format1 format2 format3 = do
-  let (Field write1 read1 fieldSchema1) = format1
-  let (Field write2 read2 fieldSchema2) = format2
-  let (Field write3 read3 fieldSchema3) = format3
-  let encode = encodeObject [write1, write2, write3]
-  let decode = decodeObject $
-        \fields -> Result.do
-          value1 <- read1 fields
-          value2 <- read2 fields
-          value3 <- read3 fields
-          Ok (constructor value1 value2 value3)
-  let schema = objectSchema [fieldSchema1, fieldSchema2, fieldSchema3]
-  Format{encode, decode, schema}
-
-object4 ::
-  (child1 -> child2 -> child3 -> child4 -> parent) ->
-  Field parent child1 ->
-  Field parent child2 ->
-  Field parent child3 ->
-  Field parent child4 ->
-  Format parent
-object4 constructor format1 format2 format3 format4 = do
-  let (Field write1 read1 fieldSchema1) = format1
-  let (Field write2 read2 fieldSchema2) = format2
-  let (Field write3 read3 fieldSchema3) = format3
-  let (Field write4 read4 fieldSchema4) = format4
-  let encode = encodeObject [write1, write2, write3, write4]
-  let decode = decodeObject $
-        \fields -> Result.do
-          value1 <- read1 fields
-          value2 <- read2 fields
-          value3 <- read3 fields
-          value4 <- read4 fields
-          Ok (constructor value1 value2 value3 value4)
-  let schema = objectSchema [fieldSchema1, fieldSchema2, fieldSchema3, fieldSchema4]
-  Format{encode, decode, schema}
-
-data Field parent child = Field
+data Field parent child dummy = Field
   { write :: parent -> Map String Json -> Map String Json
   , read :: Map String Json -> Result String child
   , fieldSchema :: FieldSchema
   }
 
+data Fields constructor parent dummy = Fields
+  { decompose :: parent -> Map String Json
+  , compose :: Map String Json -> constructor -> Result String parent
+  , properties :: Map String Schema
+  , required :: List String
+  }
+
+instance
+  parent ~ parent' =>
+  Composition
+    (Field parent child ())
+    (Fields constructor parent' ())
+    (Fields (child -> constructor) parent ())
+  where
+  field >> fields = do
+    let (Field write read fieldSchema) = field
+    let (Fields decompose compose properties required) = fields
+    Fields
+      { decompose = \parent -> decompose parent |> write parent
+      , compose = \fieldValues constructor ->
+          read fieldValues
+            |> Result.map constructor
+            |> Result.andThen (compose fieldValues)
+      , properties = properties |> Map.set (FieldSchema.name fieldSchema) (FieldSchema.schema fieldSchema)
+      , required = [FieldSchema.name fieldSchema | FieldSchema.required fieldSchema] + required
+      }
+
+instance
+  parent ~ parent' =>
+  Composition
+    (Field parent child1 ())
+    (Field parent' child2 ())
+    (Fields (child1 -> child2 -> parent) parent ())
+  where
+  field1 >> field2 = field1 >> lastField field2
+
+lastField :: Field parent child () -> Fields (child -> parent) parent ()
+lastField (Field write read fieldSchema) = do
+  let decompose parent = write parent Map.empty
+  let compose fields constructor = Result.map constructor (read fields)
+  let properties = Map.singleton (FieldSchema.name fieldSchema) (FieldSchema.schema fieldSchema)
+  let required = [FieldSchema.name fieldSchema | FieldSchema.required fieldSchema]
+  Fields{decompose, compose, properties, required}
+
 withinField :: String -> Result String a -> Result String a
 withinField fieldName = Error.context ("In field \"" + fieldName + "\"")
 
-requiredField :: Serialization child => String -> (parent -> child) -> Field parent child
-requiredField fieldName getField = do
-  let Format{encode = encodeField, decode = decodeField, schema} = Json.Serialization.format
+requiredField :: String -> (parent -> child) -> Format child -> Field parent child ()
+requiredField fieldName getField fieldFormat = do
+  let Format{encode = encodeField, decode = decodeField, schema} = fieldFormat
   let write parent fields = Map.set fieldName (encodeField (getField parent)) fields
   let read fields = Result.do
         fieldJson <-
@@ -213,12 +230,12 @@ requiredField fieldName getField = do
   Field{write, read, fieldSchema}
 
 optionalField ::
-  Serialization child =>
   String ->
   (parent -> Maybe child) ->
-  Field parent (Maybe child)
-optionalField fieldName getField = do
-  let Format{encode = encodeField, decode = decodeField, schema} = Json.Serialization.format
+  Format child ->
+  Field parent (Maybe child) ()
+optionalField fieldName getField fieldFormat = do
+  let Format{encode = encodeField, decode = decodeField, schema} = fieldFormat
   let write parent fields =
         case getField parent of
           Just fieldValue -> Map.set fieldName (encodeField fieldValue) fields
