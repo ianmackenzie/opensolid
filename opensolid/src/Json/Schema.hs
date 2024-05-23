@@ -22,6 +22,7 @@ data Schema = Schema
   , type_ :: String
   , required :: List String
   , properties :: Map String Schema
+  , items :: Maybe Schema
   , minItems :: Maybe Int
   }
   deriving (Show)
@@ -36,6 +37,7 @@ hasType t =
     , type_ = t
     , required = []
     , properties = Map.empty
+    , items = Nothing
     , minItems = Nothing
     }
 
