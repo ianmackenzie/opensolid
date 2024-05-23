@@ -118,11 +118,11 @@ data CheckFailed = CheckFailed deriving (Eq, Show, Error)
 check :: Bool -> Result CheckFailed ()
 check condition = if condition then Ok () else Error CheckFailed
 
-onError :: (x -> Result y a) -> Result x a -> Result y a
+onError :: (Error x => x -> Result y a) -> Result x a -> Result y a
 onError _ (Ok value) = Ok value
 onError function (Error error) = function error
 
-handleError :: (x -> a) -> Result x a -> a
+handleError :: (Error x => x -> a) -> Result x a -> a
 handleError _ (Ok value) = value
 handleError function (Error error) = function error
 
