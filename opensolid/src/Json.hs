@@ -1,5 +1,6 @@
 module Json
   ( Json (..)
+  , Format
   , object
   , string
   , int
@@ -22,6 +23,7 @@ import Data.Text qualified
 import Data.Vector qualified
 import Float qualified
 import List qualified
+import {-# SOURCE #-} Json.Format (Format)
 import Map (Map)
 import Map qualified
 import OpenSolid
