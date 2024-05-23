@@ -24,6 +24,7 @@ data Schema = Schema
   , properties :: Map String Schema
   , minItems :: Maybe Int
   }
+  deriving (Show)
 
 hasType :: String -> Schema
 hasType t =
