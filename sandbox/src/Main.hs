@@ -9,6 +9,7 @@ import Bounds2d qualified
 import Colour (Colour)
 import Colour qualified
 import Curve2d (Curve2d)
+import Text qualified
 import Curve2d qualified
 import Debug qualified
 import Direction2d qualified
@@ -147,7 +148,7 @@ testIOIteration = IO.forEach [1 .. 3] (log "Looping")
 
 doublingIO :: String -> IO Int
 doublingIO input = IO.do
-  value <- Int.parse input
+  value <- Int.parse (Text.pack input)
   let doubled = 2 * value
   IO.return doubled
 
@@ -436,9 +437,9 @@ testDebugPrint = do
 
 stringSum :: String -> String -> Result String Int
 stringSum s1 s2 = Result.do
-  n1 <- Int.parse s1
+  n1 <- Int.parse (Text.pack s1)
   Debug.log "n1" n1
-  n2 <- Int.parse s2
+  n2 <- Int.parse (Text.pack s2)
   Debug.log "n2" n2
   Ok (n1 + n2)
 

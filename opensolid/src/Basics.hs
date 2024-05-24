@@ -1,6 +1,7 @@
 module Basics
   ( List
   , String
+  , Text
   , ifThenElse
   , fromInteger
   , otherwise
@@ -32,6 +33,7 @@ where
 
 import Control.Concurrent.Async (Async)
 import Data.Kind (Type)
+import Data.Text (Text)
 import Data.Type.Equality (type (~))
 import GHC.Stack (HasCallStack, withFrozenCallStack)
 import Prelude

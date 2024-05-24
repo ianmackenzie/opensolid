@@ -12,6 +12,7 @@ where
 import Arithmetic
 import Basics
 import Composition
+import Data.Text qualified
 import Debug qualified
 import {-# SOURCE #-} IO qualified
 import String qualified
@@ -23,6 +24,9 @@ class (Eq error, Show error) => Error error where
 
 instance Error String where
   message = identity
+
+instance Error Text where
+  message = Data.Text.unpack
 
 class (Error x, Error y) => Map x y m n | m -> x, n -> y, m y -> n where
   map :: (x -> y) -> m a -> n a

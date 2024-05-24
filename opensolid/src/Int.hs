@@ -21,11 +21,11 @@ import NonEmpty qualified
 import OpenSolid
 import Random.Internal (Generator (Generator))
 import System.Random qualified
-import Text.Read qualified
+import Text.Parse qualified
 import Prelude qualified
 
-parse :: String -> Result String Int
-parse input = Text.Read.readMaybe input ?? Error ("Couldn't parse input as an integer: " + input)
+parse :: Text -> Result String Int
+parse = Text.Parse.int
 
 {-# COMPLETE Even, Odd #-}
 

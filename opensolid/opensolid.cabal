@@ -147,6 +147,7 @@ library
       Surface1d
       Surface1d.Function
       Surface1d.Function.Zeros
+      Text
       Tolerance
       Transform2d
       Units
@@ -177,6 +178,7 @@ library
       Surface1d.Function.Boundary
       Surface1d.Function.PartialZeros
       Surface1d.Function.SaddleRegion
+      Text.Parse
       Vector2d.CoordinateTransformation
   hs-source-dirs: src
 

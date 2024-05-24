@@ -37,15 +37,14 @@ where
 
 import Arithmetic
 import Basics
-import Coalesce
 import NonEmpty (NonEmpty)
 import NonEmpty qualified
 import Qty (Qty (Qty_))
 import Qty qualified
 import Random.Internal qualified as Random
-import {-# SOURCE #-} Result (Result (Error))
+import {-# SOURCE #-} Result (Result)
 import Sign (Sign)
-import Text.Read qualified
+import Text.Parse qualified
 import Units (Unitless)
 import Prelude qualified
 
@@ -67,8 +66,8 @@ toInt value = do
   let candidate = round value
   if fromInt candidate == value then Just candidate else Nothing
 
-parse :: String -> Result String Float
-parse input = Text.Read.readMaybe input ?? Error ("Couldn't parse input as a float: " + input)
+parse :: Text -> Result String Float
+parse = Text.Parse.float
 
 {-# INLINE floor #-}
 floor :: Float -> Int

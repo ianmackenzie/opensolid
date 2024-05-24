@@ -31,6 +31,7 @@ where
 
 import Basics
 import Data.List.NonEmpty (NonEmpty ((:|)))
+import Data.Text qualified
 import {-# SOURCE #-} Float (Float)
 import {-# SOURCE #-} Qty (Qty (Qty_))
 import {-# SOURCE #-} Sign (Sign (Negative, Positive))
@@ -140,6 +141,23 @@ instance Multiplication Int Sign Int
 
 instance Addition Int Int Int where
   (+) = (Prelude.+)
+
+instance Addition Text Text Text where
+  (+) = Prelude.mappend
+
+instance Addition Text String Text where
+  text + string = text + Data.Text.pack string
+
+instance Addition String Text Text where
+  string + text = Data.Text.pack string + text
+
+instance Addition Text (Maybe Text) Text where
+  text + Just suffix = text + suffix
+  text + Nothing = text
+
+instance Addition (Maybe Text) Text Text where
+  Just prefix + text = prefix + text
+  Nothing + text = text
 
 instance a ~ a' => Addition (List a) (List a') (List a) where
   (+) = Prelude.mappend
