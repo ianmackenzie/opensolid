@@ -15,27 +15,26 @@ where
 
 import Composition
 import Data.Aeson qualified
-import Data.Aeson.Key qualified
 import Data.Aeson.KeyMap qualified
 import Data.ByteString.Lazy (ByteString)
 import Data.Scientific
-import Data.Text qualified
 import Data.Vector qualified
 import Float qualified
-import List qualified
 import {-# SOURCE #-} Json.Format (Format)
+import List qualified
 import Map (Map)
 import Map qualified
 import OpenSolid
+import Text qualified
 import Prelude qualified
 
 data Json
   = Null
   | Bool Bool
   | Number Float
-  | String String
+  | String Text
   | Array (List Json)
-  | Object (Map String Json)
+  | Object (Map Text Json)
   deriving (Eq, Show)
 
 int :: Int -> Json
@@ -47,48 +46,44 @@ float = Number
 bool :: Bool -> Json
 bool = Bool
 
-string :: String -> Json
+string :: Text -> Json
 string = String
 
 list :: (a -> Json) -> List a -> Json
 list encodeItem items = Array (List.map encodeItem items)
 
-object :: List (String, Json) -> Json
+object :: List (Text, Json) -> Json
 object fields = Object (Map.fromList fields)
 
-map :: Map String Json -> Json
+map :: Map Text Json -> Json
 map = Object
 
-toAesonValue :: Json -> Data.Aeson.Value
-toAesonValue = \case
-  Null -> Data.Aeson.Null
-  Bool value -> Data.Aeson.toJSON value
-  Number value -> Data.Aeson.toJSON (Float.toDouble value)
-  String value -> Data.Aeson.toJSON (Data.Text.pack value)
-  Array values -> Data.Aeson.toJSON (List.map toAesonValue values)
-  Object fields -> do
-    let keyMapEntry (fieldName, fieldValue) =
-          (Data.Aeson.Key.fromString fieldName, toAesonValue fieldValue)
-    let entries = List.map keyMapEntry (Map.toList fields)
-    Data.Aeson.toJSON (Data.Aeson.KeyMap.fromList entries)
+instance Data.Aeson.ToJSON Json where
+  toJSON = \case
+    Null -> Data.Aeson.Null
+    Bool value -> Data.Aeson.toJSON value
+    Number value -> Data.Aeson.toJSON (Float.toDouble value)
+    String value -> Data.Aeson.toJSON value
+    Array values -> Data.Aeson.toJSON values
+    Object fields -> Data.Aeson.toJSON fields
 
-fromAesonValue :: Data.Aeson.Value -> Json
-fromAesonValue = \case
+instance Data.Aeson.FromJSON Json where
+  parseJSON = fromAeson >> Prelude.return
+
+fromAeson :: Data.Aeson.Value -> Json
+fromAeson = \case
   Data.Aeson.Null -> Null
   Data.Aeson.Bool value -> Bool value
   Data.Aeson.Number value -> Number (Data.Scientific.toRealFloat value)
-  Data.Aeson.String value -> String (Data.Text.unpack value)
-  Data.Aeson.Array values ->
-    Array (values |> Data.Vector.map fromAesonValue |> Data.Vector.toList)
-  Data.Aeson.Object values -> do
-    let mapEntry (key, value) = (Data.Aeson.Key.toString key, fromAesonValue value)
-    Object (values |> Data.Aeson.KeyMap.toList |> List.map mapEntry |> Map.fromList)
+  Data.Aeson.String value -> String value
+  Data.Aeson.Array values -> Array (List.map fromAeson (Data.Vector.toList values))
+  Data.Aeson.Object values -> Object (Map.map fromAeson (Data.Aeson.KeyMap.toMapText values))
 
 encode :: Json -> ByteString
-encode = toAesonValue >> Data.Aeson.encode
+encode = Data.Aeson.encode
 
-decode :: ByteString -> Result String Json
+decode :: ByteString -> Result Text Json
 decode byteString =
   case Data.Aeson.eitherDecode byteString of
-    Prelude.Right aesonValue -> Ok (fromAesonValue aesonValue)
-    Prelude.Left error -> Error error
+    Prelude.Right json -> Ok json
+    Prelude.Left error -> Error (Text.pack error)

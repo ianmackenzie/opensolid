@@ -4,30 +4,30 @@ import OpenSolid
 
 newtype Api = Api (List Class)
 
-data Class = Class String (List String) (List ExceptionClass) (List Function)
+data Class = Class Text (List Text) (List ExceptionClass) (List Function)
 
 data ExceptionClass
   = ExceptionClass
-      String -- name
-      (List (Int, String, Maybe ValueType)) -- constructors (tag, name, optional argument)
+      Text -- name
+      (List (Int, Text, Maybe ValueType)) -- constructors (tag, name, optional argument)
   deriving (Show)
 
 data Function
   = Function
       FunctionKind
-      String -- ffi name
-      String -- human readable name
-      (List (String, ValueType)) -- arguments
+      Text -- ffi name
+      Text -- human readable name
+      (List (Text, ValueType)) -- arguments
       ValueType -- return type
 
 data FunctionKind = Method | Static
 
 data ValueType
-  = Pointer String
+  = Pointer Text
   | Float
   | Boolean
   | Maybe ValueType
-  | Result String String ValueType -- Module name, Exception type, Successful type
+  | Result Text Text ValueType -- Module name, Exception type, Successful type
   | Tuple2 ValueType ValueType
   | ImplicitTolerance
   | Self

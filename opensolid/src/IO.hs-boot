@@ -7,8 +7,9 @@ module IO
 where
 
 import Basics
+import {-# SOURCE #-} Error (Error)
 
 return :: a -> IO a
-fail :: String -> IO a
-printLine :: String -> IO ()
-onError :: (String -> IO a) -> IO a -> IO a
+fail :: Error x => x -> IO a
+printLine :: Text -> IO ()
+onError :: (Text -> IO a) -> IO a -> IO a

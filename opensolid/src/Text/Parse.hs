@@ -12,7 +12,7 @@ import Result (Result (Error, Ok))
 import Result qualified
 import Prelude qualified
 
-num :: Prelude.Num a => Reader a -> Text -> Result String a
+num :: Prelude.Num a => Reader a -> Text -> Result Text a
 num reader text =
   case Data.Text.Read.signed reader text of
     Prelude.Right (value, suffix)
@@ -20,15 +20,15 @@ num reader text =
       | otherwise -> do
           let message =
                 "Could not parse '"
-                  + Data.Text.unpack text
+                  + text
                   + "' as a number - has extra trailing text '"
-                  + Data.Text.unpack suffix
+                  + suffix
                   + "'"
           Error message
-    Prelude.Left message -> Error message
+    Prelude.Left message -> Error (Data.Text.pack message)
 
-int :: Text -> Result String Int
+int :: Text -> Result Text Int
 int = num Data.Text.Read.decimal
 
-float :: Text -> Result String Float
+float :: Text -> Result Text Float
 float = num Data.Text.Read.double >> Result.map Qty_

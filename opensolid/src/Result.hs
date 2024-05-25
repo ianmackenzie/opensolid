@@ -24,6 +24,7 @@ import Composition
 import Error (Error)
 import Error qualified
 import {-# SOURCE #-} IO qualified
+import {-# SOURCE #-} Text qualified
 import Prelude (Applicative, Functor, Monad, MonadFail)
 import Prelude qualified
 
@@ -52,8 +53,8 @@ instance Applicative (Result x) where
 instance Monad (Result x) where
   (>>=) = (>>=)
 
-instance MonadFail (Result String) where
-  fail = fail
+instance MonadFail (Result Text) where
+  fail = Text.pack >> fail
 
 instance Composition (Result x ()) (IO a) (IO a) where
   Ok () >> io = io

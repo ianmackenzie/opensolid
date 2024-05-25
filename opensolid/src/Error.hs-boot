@@ -1,9 +1,9 @@
 module Error (Error) where
 
-import Basics (String)
-import Data.Kind (Constraint, Type)
+import Basics
+import Data.Kind (Constraint)
 
 type Error :: Type -> Constraint
 class Error error
 
-instance Error String
+instance Error (List Char)

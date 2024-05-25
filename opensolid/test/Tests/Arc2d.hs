@@ -8,10 +8,10 @@ import OpenSolid
 import Parameter qualified
 import Point2d qualified
 import Qty qualified
-import String qualified
 import Test (Test)
 import Test qualified
 import Tests.Random qualified as Random
+import Text qualified
 import Tolerance qualified
 import Units (Meters)
 
@@ -24,7 +24,7 @@ tests =
 from :: Tolerance Meters => Test
 from = do
   let testArcMidpoint numDegrees (expectedX, expectedY) = do
-        let label = String.fromInt numDegrees + " degrees"
+        let label = Text.int numDegrees + " degrees"
         let sweptAngle = Angle.degrees (Float.fromInt numDegrees)
         let expectedPoint = Point2d.meters expectedX expectedY
         Test.verify label Test.do

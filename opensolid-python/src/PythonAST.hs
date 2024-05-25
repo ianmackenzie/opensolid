@@ -32,7 +32,9 @@ import Language.Python.Common qualified as P
 import Language.Python.Version3.Parser qualified as Parser
 import List qualified
 import OpenSolid
+import Text qualified
 import Prelude (Either (Left, Right))
+import Prelude qualified
 
 type Statement = P.Statement ()
 
@@ -40,9 +42,9 @@ type Expr = P.Expr ()
 
 type Ident = P.Ident ()
 
-prettyStatements :: List Statement -> String
+prettyStatements :: List Statement -> Text
 prettyStatements stmts =
-  P.prettyText (P.Module stmts)
+  Text.pack (P.prettyText (P.Module stmts))
 
 returnStatement :: P.Expr () -> P.Statement ()
 returnStatement expr =
@@ -56,16 +58,16 @@ conditional conditions elseStmt =
 stmtExpr :: Expr -> Statement
 stmtExpr expr = P.StmtExpr expr ()
 
-literalStatement :: String -> List Statement
+literalStatement :: Text -> List Statement
 literalStatement line =
-  case Parser.parseStmt line "<literal>" of
-    Left err -> internalError (show err)
+  case Parser.parseStmt (Text.unpack line) (Text.unpack "<literal>") of
+    Left err -> internalError (Text.show err)
     Right (statements, _) -> List.map void statements
 
-literalStatements :: List String -> List Statement
+literalStatements :: List Text -> List Statement
 literalStatements lst = List.collect literalStatement lst
 
-dot :: Expr -> String -> Expr
+dot :: Expr -> Text -> Expr
 dot exp iden =
   P.Dot exp (ident iden) ()
 
@@ -76,20 +78,20 @@ list exprs =
 -- a string literal, surrounded in double quotes, because
 -- language-python doesn't do that automatically
 -- TODO: should we protect against double quotes within a string?
-string :: String -> Expr
+string :: Text -> Expr
 string st =
-  P.Strings ["\"" + st + "\""] ()
+  P.Strings [Text.unpack ("\"" + st + "\"")] ()
 
 int :: Int -> Expr
 int val =
-  P.Int (fromIntegral val) (show val) ()
+  P.Int (fromIntegral val) (Prelude.show val) ()
 
-ident :: String -> Ident
+ident :: Text -> Ident
 ident name =
-  P.Ident name ()
+  P.Ident (Text.unpack name) ()
 
 -- variable
-var :: String -> Expr
+var :: Text -> Expr
 var name =
   P.Var (ident name) ()
 
@@ -102,7 +104,7 @@ call fnExpr args =
     ()
 
 -- Python function
-def :: String -> List (String, Maybe Expr, Maybe Expr) -> Maybe Expr -> List Statement -> Statement
+def :: Text -> List (Text, Maybe Expr, Maybe Expr) -> Maybe Expr -> List Statement -> Statement
 def name params retType body =
   P.Fun (ident name) (List.map param params) retType body ()
  where
@@ -116,7 +118,7 @@ set name expr =
   P.Assign [name] expr ()
 
 -- Python class declaration
-cls :: String -> List Expr -> List Statement -> Statement
+cls :: Text -> List Expr -> List Statement -> Statement
 cls name args members =
   P.Class
     (ident name)

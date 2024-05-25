@@ -20,7 +20,7 @@ import Tests.Qty qualified
 import Tests.Range qualified
 import Tests.Region2d qualified
 import Tests.Stream qualified
-import Tests.String qualified
+import Tests.Text qualified
 import Tests.VectorBounds2d qualified
 import Tests.VectorBounds3d qualified
 import Tolerance qualified
@@ -44,7 +44,7 @@ tests =
     , Test.group "DivMod" Tests.DivMod.tests
     , Test.group "Float" Tests.Float.tests
     , Test.group "Stream" Tests.Stream.tests
-    , Test.group "String" Tests.String.tests
+    , Test.group "Text" Tests.Text.tests
     , Test.group "Bounds2d" Tests.Bounds2d.tests
     , Test.group "VectorBounds2d" Tests.VectorBounds2d.tests
     ]

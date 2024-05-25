@@ -50,6 +50,7 @@ common config
       -Wsafe
       -dcore-lint
   default-extensions:
+      OverloadedStrings
       RebindableSyntax
       UndecidableInstances
       StrictData
@@ -143,7 +144,6 @@ library
       Result
       Sign
       Stream
-      String
       Surface1d
       Surface1d.Function
       Surface1d.Function.Zeros
@@ -202,7 +202,7 @@ test-suite opensolid-test
       Tests.Map
       Tests.NonEmpty
       Tests.Stream
-      Tests.String
+      Tests.Text
       Tests.Parameter
       Tests.Qty
       Tests.Random

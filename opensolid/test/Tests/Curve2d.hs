@@ -37,7 +37,7 @@ import Units (Meters)
 import Vector2d qualified
 import VectorCurve2d qualified
 
-curveGenerators :: Tolerance Meters => List (String, Generator (Curve2d (space @ Meters)))
+curveGenerators :: Tolerance Meters => List (Text, Generator (Curve2d (space @ Meters)))
 curveGenerators =
   [ ("Line2d", Random.line2d)
   , ("Arc2d", Random.arc2d)
@@ -85,7 +85,7 @@ overlappingSegments ::
   Tolerance units =>
   Curve2d (space @ units) ->
   Curve2d (space @ units) ->
-  Result String (List (Range Unitless, Range Unitless, Sign))
+  Result Text (List (Range Unitless, Range Unitless, Sign))
 overlappingSegments curve1 curve2 =
   case Curve2d.intersections curve1 curve2 of
     Ok _ -> Error "Intersection should have failed (and given overlapping segments)"

@@ -5,15 +5,16 @@ module File
   )
 where
 
+import Data.Text.IO qualified
 import OpenSolid
 import System.Directory
-import Prelude qualified
+import Text qualified
 
-readFrom :: String -> IO String
-readFrom = Prelude.readFile
+readFrom :: Text -> IO Text
+readFrom path = Data.Text.IO.readFile (Text.unpack path)
 
-writeTo :: String -> String -> IO ()
-writeTo = Prelude.writeFile
+writeTo :: Text -> Text -> IO ()
+writeTo path contents = Data.Text.IO.writeFile (Text.unpack path) contents
 
-delete :: String -> IO ()
-delete = System.Directory.removeFile
+delete :: Text -> IO ()
+delete path = System.Directory.removeFile (Text.unpack path)

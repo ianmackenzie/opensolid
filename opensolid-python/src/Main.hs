@@ -14,10 +14,10 @@ import OpenSolidAPI
   , openSolidAPI
   )
 import PythonAST qualified as PY
-import String qualified
 import System.Exit qualified as SE
 import System.IO qualified as SIO
 import System.Process qualified as SP
+import Text qualified
 
 setup :: List PY.Statement
 setup =
@@ -29,7 +29,7 @@ setup =
     , "from ctypes import c_bool, c_double, c_int8, c_void_p, cast, cdll, POINTER, Structure"
     , "global lib"
     , "system = platform.system()"
-    , String.multiline
+    , Text.multiline
         [ "if system == 'Darwin':"
         , "    lib = cdll.LoadLibrary('libopensolid-ffi.dylib')"
         , "elif system == 'Linux':"
@@ -40,7 +40,7 @@ setup =
     , "lib.opensolid_free.argtypes = [c_void_p]"
     , "lib.opensolid_free_stable.argtypes = [c_void_p]"
     , "global_tolerance = None"
-    , String.multiline
+    , Text.multiline
         [ "@contextmanager"
         , "def Tolerance(new_tolerance: float):"
         , "    global global_tolerance"
@@ -52,15 +52,15 @@ setup =
         ]
     , "A = TypeVar('A')"
     , "B = TypeVar('B')"
-    , String.multiline
+    , Text.multiline
         [ "def maybe_reader(read_success: Callable[[c_void_p], A]) -> Callable[[c_void_p], Optional[A]]:"
         , "    return lambda ptr: read_success(ptr) if ptr else None"
         ]
-    , String.multiline
+    , Text.multiline
         [ "class Tuple2Structure(Structure):"
         , "    _fields_ = [('ptr1', c_void_p), ('ptr2', c_void_p)]"
         ]
-    , String.multiline
+    , Text.multiline
         [ "def tuple2_reader(read_a: Callable[[c_void_p], A], read_b: Callable[[c_void_p], B]) -> Callable[[c_void_p], Tuple[A, B]]:"
         , "    def read(ptr: c_void_p) -> Tuple[A, B]:"
         , "        tuple2_struct = cast(ptr, POINTER(Tuple2Structure)).contents"
@@ -69,11 +69,11 @@ setup =
         , "        return res"
         , "    return read"
         ]
-    , String.multiline
+    , Text.multiline
         [ "class ResultStructure(Structure):"
         , "    _fields_ = [('ptr', c_void_p), ('tag', c_int8)]"
         ]
-    , String.multiline
+    , Text.multiline
         [ "def result_reader(read_error: Callable[[c_int8, c_void_p], Exception], read_success: Callable[[c_void_p], A]) -> Callable[[c_void_p], A]:"
         , "    def read(ptr: c_void_p) -> A:"
         , "        result_struct = cast(ptr, POINTER(ResultStructure)).contents"
@@ -86,19 +86,19 @@ setup =
         , "            raise read_error(tag, ptr1)"
         , "    return read"
         ]
-    , String.multiline
+    , Text.multiline
         [ "def read_float(ptr: c_void_p) -> float:"
         , "    val = float(cast(ptr, POINTER(c_double)).contents.value)"
         , "    lib.opensolid_free(ptr)"
         , "    return val"
         ]
-    , String.multiline
+    , Text.multiline
         [ "def read_bool(ptr: c_void_p) -> bool:"
         , "    val = bool(cast(ptr, POINTER(c_bool)).contents.value)"
         , "    lib.opensolid_free(ptr)"
         , "    return val"
         ]
-    , String.multiline
+    , Text.multiline
         [ "def read_tolerance(tolerance: Optional[float]) -> float:"
         , "    tolerance = tolerance or global_tolerance"
         , "    if tolerance is None:"
@@ -188,7 +188,7 @@ cType typ =
     Tuple2 _ _ -> PY.var "c_void_p"
     Self -> PY.var "c_void_p"
 
-pyArgs :: List (String, ValueType) -> List (String, Maybe PY.Expr, Maybe PY.Expr)
+pyArgs :: List (Text, ValueType) -> List (Text, Maybe PY.Expr, Maybe PY.Expr)
 pyArgs = List.map pyArg
  where
   pyArg (name, typ) = do
@@ -197,7 +197,7 @@ pyArgs = List.map pyArg
           _ -> Nothing
     (name, pyType typ, defaultValue)
 
-selfPyArg :: (String, Maybe PY.Expr, Maybe PY.Expr)
+selfPyArg :: (Text, Maybe PY.Expr, Maybe PY.Expr)
 selfPyArg = ("self", Nothing, Nothing)
 
 pyType :: ValueType -> Maybe PY.Expr
@@ -246,7 +246,7 @@ exprReader typ =
     ImplicitTolerance -> PY.var "read_float"
     Self -> PY.var "self" `PY.dot` "ptr"
 
-ffiArgExprs :: List (String, ValueType) -> List PY.Expr
+ffiArgExprs :: List (Text, ValueType) -> List PY.Expr
 ffiArgExprs = List.map ffiArgExpr
  where
   ffiArgExpr (var, typ) =
@@ -256,7 +256,7 @@ ffiArgExprs = List.map ffiArgExpr
       ImplicitTolerance -> PY.call (PY.var "read_tolerance") [PY.var var]
       _ -> PY.var var
 
-apiException :: String -> ExceptionClass -> List PY.Statement
+apiException :: Text -> ExceptionClass -> List PY.Statement
 apiException mod (ExceptionClass name [(tag, constructorName, Nothing)])
   | name == constructorName =
       let retTyp = PY.var mod `PY.dot` name
@@ -280,14 +280,14 @@ apiException mod (ExceptionClass name [(tag, constructorName, Nothing)])
               ]
           ]
 -- TODO: support exceptions with mutiple cases and pointers
-apiException _ ex = internalError (show ex)
+apiException _ ex = internalError (Text.show ex)
 
 main :: IO ()
 main = IO.do
   let pythonCode = PY.prettyStatements (setup + api openSolidAPI)
-  let ruffCmd = SP.proc "ruff" ["format", "--stdin-filename", "opensolid.py", "--quiet"]
+  let ruffCmd = SP.proc (Text.unpack "ruff") (List.map Text.unpack ["format", "--stdin-filename", "opensolid.py", "--quiet"])
   (Just stdinHandle, _, _, process) <- SP.createProcess ruffCmd{SP.std_in = SP.CreatePipe}
-  SIO.hPutStr stdinHandle pythonCode
+  SIO.hPutStr stdinHandle (Text.unpack pythonCode)
   SIO.hClose stdinHandle
   ruffExitCode <- SP.waitForProcess process
   if ruffExitCode == SE.ExitSuccess

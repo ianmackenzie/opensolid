@@ -13,7 +13,7 @@ tests =
   , take
   ]
 
-simpleMap :: Map Int String
+simpleMap :: Map Int Text
 simpleMap = Map.fromList [(1, "a"), (2, "b"), (3, "c")]
 
 foldl :: Test

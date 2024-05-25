@@ -18,20 +18,20 @@ import List qualified
 import Maybe qualified
 import OpenSolid
 import Pointers qualified
-import String qualified
+import Text qualified
 import Prelude qualified
 
 data Class = Class TH.Name (List TH.Name) (List TH.Name) (List Function)
 
-data Function = Function TH.Name TH.Name (List String)
+data Function = Function TH.Name TH.Name (List Text)
 
 cls :: TH.Name -> List TH.Name -> List TH.Name -> List Function -> Class
 cls = Class
 
-method :: TH.Name -> List String -> Function
+method :: TH.Name -> List Text -> Function
 method = Function 'Api.Method
 
-static :: TH.Name -> List String -> Function
+static :: TH.Name -> List Text -> Function
 static = Function 'Api.Static
 
 ffi :: List Class -> TH.Q (List TH.Dec)
@@ -43,10 +43,10 @@ ffi classes = Prelude.do
   ffiClass (Class _ _ _ functions) =
     Prelude.fmap List.concat (Prelude.traverse ffiFunction functions)
 
-freeFunctionFfi :: String -> TH.Name -> TH.Q TH.Dec
+freeFunctionFfi :: Text -> TH.Name -> TH.Q TH.Dec
 freeFunctionFfi ffiName name = Prelude.do
   freeFunctionType <- TH.reifyType name
-  Prelude.return (TH.ForeignD (TH.ExportF TH.CCall ffiName name freeFunctionType))
+  Prelude.return (TH.ForeignD (TH.ExportF TH.CCall (Text.unpack ffiName) name freeFunctionType))
 
 api :: List Class -> TH.Q TH.Exp
 api classes = Prelude.do
@@ -125,28 +125,27 @@ apiFunction (Function kind fnName argNames) = Prelude.do
           else (namesWithTolerance, typesWithTolerance)
   if List.length finalNames /= List.length finalTypes
     then
-      internalError
-        ( String.concat
-            [ "The length of arguments doesn't match the length of their types for "
-            , Maybe.withDefault "" (TH.nameModule fnName)
-            , "."
-            , TH.nameBase fnName
-            , "(names: "
-            , show finalNames
-            , ", types: "
-            , show finalTypes
-            , ")"
-            ]
-        )
+      internalError $
+        Text.concat
+          [ "The length of arguments doesn't match the length of their types for "
+          , Maybe.withDefault "" (Maybe.map Text.pack (TH.nameModule fnName))
+          , "."
+          , Text.pack (TH.nameBase fnName)
+          , "(names: "
+          , Text.show finalNames
+          , ", types: "
+          , Text.show finalTypes
+          , ")"
+          ]
     else
       Prelude.return $
         TH.ConE 'Api.Function
           `TH.AppE` TH.ConE kind
-          `TH.AppE` TH.LitE (TH.StringL (camelToSnake (ffiFunctionName fnName))) -- ffi name
+          `TH.AppE` TH.LitE (TH.StringL (camelToSnake (Text.unpack (ffiFunctionName fnName)))) -- ffi name
           `TH.AppE` apiName fnName
           `TH.AppE` TH.ListE
             ( List.map2
-                (\a t -> TH.TupE [Just (TH.LitE (TH.StringL a)), Just t])
+                (\a t -> TH.TupE [Just (TH.LitE (TH.StringL (Text.unpack a))), Just t])
                 finalNames
                 finalTypes
             )
@@ -186,20 +185,20 @@ apiType typ = Prelude.do
         | name == ''Float -> Prelude.return (TH.ConE 'Api.Float)
         | name == ''Angle -> Prelude.return (TH.ConE 'Api.Float)
         | name == ''Bool -> Prelude.return (TH.ConE 'Api.Boolean)
-      _ -> Prelude.fail ("Unknown type: " + show typ)
+      _ -> Prelude.fail (Text.unpack ("Unknown type: " + Text.show typ))
 
 typeNameBase :: TH.Type -> TH.Q TH.Exp
 typeNameBase (TH.AppT t _) = typeNameBase t
 typeNameBase (TH.ConT name) = Prelude.return (TH.LitE (TH.StringL (TH.nameBase name)))
-typeNameBase typ = Prelude.fail ("Unknown type: " + show typ)
+typeNameBase typ = Prelude.fail (Text.unpack ("Unknown type: " + Text.show typ))
 
 modNameBase :: TH.Type -> TH.Q TH.Exp
 modNameBase (TH.AppT t _) = modNameBase t
 modNameBase typ@(TH.ConT name) =
   case TH.nameModule name of
     Just mod -> Prelude.return (TH.LitE (TH.StringL mod))
-    Nothing -> Prelude.fail ("Unknown module for type: " + show typ)
-modNameBase typ = Prelude.fail ("Unknown module for type: " + show typ)
+    Nothing -> Prelude.fail (Text.unpack ("Unknown module for type: " + Text.show typ))
+modNameBase typ = Prelude.fail (Text.unpack ("Unknown module for type: " + Text.show typ))
 
 -- Generates wrapper function type and clause from the original function
 ffiFunctionInfo :: TH.Type -> TH.Exp -> List TH.Pat -> List TH.Stmt -> TH.Q (TH.Type, TH.Clause)
@@ -231,13 +230,13 @@ type Coords space units = space @ units
 fixupType :: TH.Type -> TH.Type
 -- Replace 'units', 'units1', 'units2', `originUnits` etc. with 'Unitless' in all types
 -- since the FFI only deals with unitless values
-fixupType (TH.VarT name) | String.contains "units" (String.toLower (TH.nameBase name)) = TH.ConT ''Unitless
+fixupType (TH.VarT name) | Text.contains "units" (Text.toLower (Text.pack (TH.nameBase name))) = TH.ConT ''Unitless
 -- Strip 'forall' from function types
 -- (shouldn't be needed since these are generally units-related...)
 fixupType (TH.ForallT _ _ functionType) = fixupType functionType
 -- Template Haskell seems to get confused by type-level use of '@' operator,
 -- so replace any instance of `space @ units` with the equivalent `'Coords space units`
-fixupType (TH.ConT name) | TH.nameBase name == "@" = TH.ConT ''Coords
+fixupType (TH.ConT name) | TH.nameBase name == Text.unpack "@" = TH.ConT ''Coords
 -- In types with parameters, recursively fix up each parameter
 fixupType (TH.AppT t a) = TH.AppT (fixupType t) (fixupType a)
 -- Otherwise, do nothing and return the type as-is
@@ -255,11 +254,11 @@ containsImplicitTolerance _ = False
 -- We wrap a type in a Ptr if it doesn't implement Storable
 ffiArgInfo :: TH.Type -> TH.Q (TH.Pat, TH.Type, TH.Exp, Maybe TH.Stmt)
 ffiArgInfo typ = Prelude.do
-  argName <- TH.newName "x"
+  argName <- TH.newName (Text.unpack "x")
   isPtr <- isPointer typ
   if isPtr
     then Prelude.do
-      unwrappedName <- TH.newName "y"
+      unwrappedName <- TH.newName (Text.unpack "y")
       Prelude.return
         ( TH.VarP argName -- arg name
         , TH.AppT (TH.ConT ''Foreign.Ptr) (TH.ConT ''()) -- arg type
@@ -298,24 +297,24 @@ isPointer typ = Prelude.do
   instances <- TH.reifyInstances ''Storable [fixedTyp]
   Prelude.return (List.isEmpty instances)
 
-camelToSnake :: String -> String
+camelToSnake :: List Char -> List Char
 camelToSnake [] = []
 camelToSnake (x : xs)
   | Char.isUpper x = '_' : Char.toLower x : camelToSnake xs
   | otherwise = x : camelToSnake xs
 
-uppercaseFirstChar :: String -> String
+uppercaseFirstChar :: List Char -> List Char
 uppercaseFirstChar [] = []
 uppercaseFirstChar (x : xs) = Char.toUpper x : xs
 
 -- Generate a name for the FII wrapper function
 -- ''xCoordinate from the Point2d module becomes `opensolidPoint2dXCoordinate`
-ffiFunctionName :: TH.Name -> String
+ffiFunctionName :: TH.Name -> Text
 ffiFunctionName fnName =
-  String.concat
+  Text.concat
     [ "opensolid"
-    , Maybe.withDefault "" (TH.nameModule fnName)
-    , uppercaseFirstChar (TH.nameBase fnName)
+    , Maybe.withDefault "" (Maybe.map Text.pack (TH.nameModule fnName))
+    , Text.pack (uppercaseFirstChar (TH.nameBase fnName))
     ]
 
 -- Wrap the function with an FFI
@@ -324,18 +323,18 @@ ffiFunction (Function _ fnName _) = Prelude.do
   originalFnType <- TH.reifyType fnName
   let fixedFnType = fixupType originalFnType
   let origFunc = TH.SigE (TH.VarE fnName) fixedFnType -- annotate with the fixed up signature
-  let toleranceName = TH.mkName "tolerance"
+  let toleranceName = TH.mkName (Text.unpack "tolerance")
   let needsTolerance = containsImplicitTolerance originalFnType
   let (initialArgs, initialStmts) =
         if needsTolerance
           then
             ( [TH.VarP toleranceName] -- prepend `tolerance` argument
-            , [TH.LetS [TH.ImplicitParamBindD "tolerance" (TH.VarE toleranceName)]] -- `let ?tolerance = tolerance`
+            , [TH.LetS [TH.ImplicitParamBindD (Text.unpack "tolerance") (TH.VarE toleranceName)]] -- `let ?tolerance = tolerance`
             )
           else ([], [])
   (returnType, wrapperClause) <- ffiFunctionInfo fixedFnType origFunc initialArgs initialStmts
 
-  let foreignName = ffiFunctionName fnName
+  let foreignName = Text.unpack (ffiFunctionName fnName)
   let wrapperName = TH.mkName foreignName
   let wrapperType =
         if needsTolerance

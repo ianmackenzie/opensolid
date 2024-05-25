@@ -3,8 +3,8 @@ module Colour
   , rgb
   , rgb255
   , hsl
-  , fromHexString
-  , toHexString
+  , fromHex
+  , toHex
   , lightRed
   , red
   , darkRed
@@ -46,6 +46,7 @@ import Data.Colour.RGBSpace qualified
 import Data.Colour.RGBSpace.HSL qualified
 import Data.Colour.SRGB qualified
 import OpenSolid
+import Text qualified
 
 type Colour = Data.Colour.Colour Float
 
@@ -60,11 +61,11 @@ hsl hue saturation lightness =
   Data.Colour.RGBSpace.HSL.hsl (Angle.inDegrees hue) saturation lightness
     |> Data.Colour.RGBSpace.uncurryRGB rgb
 
-fromHexString :: String -> Colour
-fromHexString = Data.Colour.SRGB.sRGB24read
+fromHex :: Text -> Colour
+fromHex = Text.unpack >> Data.Colour.SRGB.sRGB24read
 
-toHexString :: Colour -> String
-toHexString = Data.Colour.SRGB.sRGB24show
+toHex :: Colour -> Text
+toHex = Data.Colour.SRGB.sRGB24show >> Text.pack
 
 lightRed :: Colour
 lightRed = rgb255 239 41 41

@@ -23,11 +23,12 @@ import List qualified
 import OpenSolid
 import Random (Generator)
 import Random qualified
-import String qualified
+import Text qualified
+import Prelude qualified
 
 data TestResult
   = Passed
-  | Failed (List String)
+  | Failed (List Text)
 
 newtype Expectation = Expectation (Generator TestResult)
 
@@ -48,22 +49,22 @@ instance Bind (Result x) where
   Error error >>= _ = Expectation (Random.return (Failed [Error.message error]))
 
 data Test
-  = Check Int String Expectation
-  | Group String (List Test)
+  = Check Int Text Expectation
+  | Group Text (List Test)
 
-verify :: String -> Expectation -> Test
+verify :: Text -> Expectation -> Test
 verify = check 1
 
-check :: Int -> String -> Expectation -> Test
+check :: Int -> Text -> Expectation -> Test
 check = Check
 
-group :: String -> List Test -> Test
+group :: Text -> List Test -> Test
 group = Group
 
-testCount :: Int -> String -> String
+testCount :: Int -> Text -> Text
 testCount count description = do
   let pluralized = if count == 1 then "test" else "tests"
-  String.join " " [String.fromInt count, pluralized, description]
+  Text.join " " [Text.int count, pluralized, description]
 
 run :: List Test -> IO ()
 run tests = IO.do
@@ -76,15 +77,15 @@ run tests = IO.do
     then IO.printLine ("✅ " + testCount successes "passed")
     else IO.fail (testCount failures "failed")
 
-reportError :: List String -> List String -> IO (Int, Int)
+reportError :: List Text -> List Text -> IO (Int, Int)
 reportError context messages = IO.do
-  IO.printLine ("❌ " + (String.join " | " (List.reverse context) + ":"))
+  IO.printLine ("❌ " + (Text.join " | " (List.reverse context) + ":"))
   IO.printLine ""
-  IO.forEach messages (String.indent "   " >> IO.printLine)
+  IO.forEach messages (Text.indent "   " >> IO.printLine)
   IO.printLine ""
   IO.return (0, 1)
 
-runImpl :: List String -> Test -> IO (Int, Int)
+runImpl :: List Text -> Test -> IO (Int, Int)
 runImpl context (Check count label generator) = fuzzImpl (label : context) count generator
 runImpl context (Group label tests) = IO.collect (runImpl (label : context)) tests |> IO.map sum
 
@@ -94,7 +95,7 @@ sum ((successes, failures) : rest) = do
   let (restSuccesses, restFailures) = sum rest
   (successes + restSuccesses, failures + restFailures)
 
-fuzzImpl :: List String -> Int -> Expectation -> IO (Int, Int)
+fuzzImpl :: List Text -> Int -> Expectation -> IO (Int, Int)
 fuzzImpl _ 0 _ = IO.return (1, 0)
 fuzzImpl context n expectation = IO.do
   let (Expectation generator) = expectation
@@ -106,8 +107,8 @@ fuzzImpl context n expectation = IO.do
 pass :: Expectation
 pass = Expectation (Random.return Passed)
 
-fail :: String -> Expectation
-fail message = Expectation (Random.return (Failed [message]))
+fail :: Error x => x -> Expectation
+fail error = Expectation (Random.return (Failed [Error.message error]))
 
 expect :: Bool -> Expectation
 expect True = pass
@@ -124,18 +125,20 @@ all :: List Expectation -> Expectation
 all expectations =
   Expectation (Random.map combineTestResults (Random.combine (List.map unwrap expectations)))
 
-output :: Show a => String -> a -> Expectation -> Expectation
+output :: Show a => Text -> a -> Expectation -> Expectation
 output label value (Expectation generator) =
   Expectation $ Random.map (addOutput label value) generator
 
-addOutput :: Show a => String -> a -> TestResult -> TestResult
+addOutput :: Show a => Text -> a -> TestResult -> TestResult
 addOutput _ _ Passed = Passed
-addOutput label value (Failed messages) = Failed (messages + [label + ": " + show value])
+addOutput label value (Failed messages) = Failed (messages + [label + ": " + Text.show value])
 
 newtype Lines a = Lines (List a)
 
 instance Show a => Show (Lines a) where
-  show (Lines values) = String.concat (List.map (\value -> "\n  " + show value) values)
+  show (Lines values) =
+    Text.unpack $
+      Text.concat (List.map (\value -> "\n  " + Text.show value) values)
 
 lines :: (Data.Foldable.Foldable container, Show a) => container a -> Lines a
 lines container = Lines (Data.Foldable.toList container)

@@ -66,7 +66,7 @@ toInt value = do
   let candidate = round value
   if fromInt candidate == value then Just candidate else Nothing
 
-parse :: Text -> Result String Float
+parse :: Text -> Result Text Float
 parse = Text.Parse.float
 
 {-# INLINE floor #-}

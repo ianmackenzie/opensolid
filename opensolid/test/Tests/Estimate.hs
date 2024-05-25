@@ -107,7 +107,7 @@ largest = Test.check 100 "largest" Test.do
     |> Test.output "initial bounds list" (Test.lines bounds)
     |> Test.output "finalBounds" finalBounds
 
-resolvesTo :: Tolerance units => Qty units -> Estimate units -> Result String Bool
+resolvesTo :: Tolerance units => Qty units -> Estimate units -> Result Text Bool
 resolvesTo value estimate
   | not (value ^ Estimate.bounds estimate) = Ok False
   | Estimate.bounds estimate ~= value = Ok True

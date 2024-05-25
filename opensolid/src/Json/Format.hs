@@ -6,7 +6,7 @@ module Json.Format
   , float
   , int
   , bool
-  , string
+  , text
   , list
   , nonEmpty
   , object
@@ -39,15 +39,15 @@ import Result qualified
 
 data Format a = Format
   { encode :: a -> Json
-  , decode :: Json -> Result String a
+  , decode :: Json -> Result Text a
   , schema :: Schema
   }
 
-title :: String -> Format a -> Format a
+title :: Text -> Format a -> Format a
 title value format =
   format{schema = (schema format){Json.Schema.title = Just value}}
 
-description :: String -> Format a -> Format a
+description :: Text -> Format a -> Format a
 description value format =
   format{schema = (schema format){Json.Schema.description = Just value}}
 
@@ -89,19 +89,19 @@ bool =
     |> title "Bool"
     |> description "A boolean true or false"
 
-decodeBool :: Json -> Result String Bool
+decodeBool :: Json -> Result Text Bool
 decodeBool (Json.Bool value) = Ok value
 decodeBool _ = Error "Expected a boolean"
 
-string :: Format String
-string =
-  Format{encode = Json.string, decode = decodeString, schema = Json.Schema.string}
-    |> title "String"
-    |> description "A string of text"
+text :: Format Text
+text =
+  Format{encode = Json.string, decode = decodeText, schema = Json.Schema.string}
+    |> title "Text"
+    |> description "Arbitrary text"
 
-decodeString :: Json -> Result String String
-decodeString (Json.String value) = Ok value
-decodeString _ = Error "Expected a string"
+decodeText :: Json -> Result Text Text
+decodeText (Json.String value) = Ok value
+decodeText _ = Error "Expected a string"
 
 float :: Format Float
 float =
@@ -109,7 +109,7 @@ float =
     |> title "Float"
     |> description "A unitless floating-point number"
 
-decodeFloat :: Json -> Result String Float
+decodeFloat :: Json -> Result Text Float
 decodeFloat (Json.Number value) = Ok value
 decodeFloat _ = Error "Expected a float"
 
@@ -119,11 +119,11 @@ int =
     |> title "Int"
     |> description "An integer"
 
-decodeInt :: Json -> Result String Int
+decodeInt :: Json -> Result Text Int
 decodeInt (Json.Number value) = Float.toInt value ?? Error "Expected an integer"
 decodeInt _ = Error "Expected an integer"
 
-decodeArray :: (Json -> Result String a) -> Json -> Result String (List a)
+decodeArray :: (Json -> Result Text a) -> Json -> Result Text (List a)
 decodeArray decodeItem = \case
   Json.Array items -> Result.collect decodeItem items
   _ -> Error "Expected an array"
@@ -136,7 +136,7 @@ list (Format encodeItem decodeItem itemSchema) =
     , schema = Json.Schema.array{Json.Schema.items = Just itemSchema}
     }
 
-toNonEmpty :: List item -> Result String (NonEmpty item)
+toNonEmpty :: List item -> Result Text (NonEmpty item)
 toNonEmpty (NonEmpty items) = Ok items
 toNonEmpty [] = Error "Array is empty"
 
@@ -148,7 +148,7 @@ nonEmpty (Format encodeItem decodeItem itemSchema) =
     , schema = Json.Schema.array{Json.Schema.items = Just itemSchema, Json.Schema.minItems = Just 1}
     }
 
-decodeObject :: (Map String Json -> Result String a) -> Json -> Result String a
+decodeObject :: (Map Text Json -> Result Text a) -> Json -> Result Text a
 decodeObject fromFields = \case
   Json.Object fields -> fromFields fields
   _ -> Error "Expected an object"
@@ -165,16 +165,16 @@ singleField :: (child -> parent) -> Field parent child () -> Format parent
 singleField constructor field = object constructor (lastField field)
 
 data Field parent child dummy = Field
-  { write :: parent -> Map String Json -> Map String Json
-  , read :: Map String Json -> Result String child
+  { write :: parent -> Map Text Json -> Map Text Json
+  , read :: Map Text Json -> Result Text child
   , fieldSchema :: FieldSchema
   }
 
 data Fields constructor parent dummy = Fields
-  { decompose :: parent -> Map String Json
-  , compose :: Map String Json -> constructor -> Result String parent
-  , properties :: Map String Schema
-  , required :: List String
+  { decompose :: parent -> Map Text Json
+  , compose :: Map Text Json -> constructor -> Result Text parent
+  , properties :: Map Text Schema
+  , required :: List Text
   }
 
 instance
@@ -214,10 +214,10 @@ lastField (Field write read fieldSchema) = do
   let required = [FieldSchema.name fieldSchema | FieldSchema.required fieldSchema]
   Fields{decompose, compose, properties, required}
 
-withinField :: String -> Result String a -> Result String a
+withinField :: Text -> Result Text a -> Result Text a
 withinField fieldName = Error.context ("In field \"" + fieldName + "\"")
 
-requiredField :: String -> (parent -> child) -> Format child -> Field parent child ()
+requiredField :: Text -> (parent -> child) -> Format child -> Field parent child ()
 requiredField fieldName getField fieldFormat = do
   let Format{encode = encodeField, decode = decodeField, schema} = fieldFormat
   let write parent fields = Map.set fieldName (encodeField (getField parent)) fields
@@ -230,7 +230,7 @@ requiredField fieldName getField fieldFormat = do
   Field{write, read, fieldSchema}
 
 optionalField ::
-  String ->
+  Text ->
   (parent -> Maybe child) ->
   Format child ->
   Field parent (Maybe child) ()

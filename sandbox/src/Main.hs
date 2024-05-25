@@ -9,7 +9,6 @@ import Bounds2d qualified
 import Colour (Colour)
 import Colour qualified
 import Curve2d (Curve2d)
-import Text qualified
 import Curve2d qualified
 import Debug qualified
 import Direction2d qualified
@@ -33,9 +32,9 @@ import Qty qualified
 import Random qualified
 import Range qualified
 import Result qualified
-import String qualified
 import Surface1d.Function qualified
 import Surface1d.Function.Zeros qualified
+import Text qualified
 import Tolerance qualified
 import Units (Meters)
 import Uv (Parameter (U, V))
@@ -45,8 +44,8 @@ import Vector3d qualified
 import VectorCurve2d qualified
 import Volume qualified
 
-log :: Show a => String -> a -> IO ()
-log label value = IO.printLine (label + ": " + show value)
+log :: Show a => Text -> a -> IO ()
+log label value = IO.printLine (label + ": " + Text.show value)
 
 testScalarArithmetic :: IO ()
 testScalarArithmetic = IO.do
@@ -124,7 +123,7 @@ testListOperations = IO.do
   log "Successive intervals" (List.successive Range.from [1.0, 2.0, 3.0, 4.0])
   log "Prepend Maybe to List" (Just 1 + [2, 3])
 
-getCrossProduct :: Tolerance Meters => Result String Float
+getCrossProduct :: Tolerance Meters => Result Text Float
 getCrossProduct = Error.context "In getCrossProduct" Result.do
   vectorDirection <-
     Vector2d.direction (Vector2d.meters 2.0 3.0)
@@ -146,9 +145,9 @@ testTry =
 testIOIteration :: IO ()
 testIOIteration = IO.forEach [1 .. 3] (log "Looping")
 
-doublingIO :: String -> IO Int
+doublingIO :: Text -> IO Int
 doublingIO input = IO.do
-  value <- Int.parse (Text.pack input)
+  value <- Int.parse input
   let doubled = 2 * value
   IO.return doubled
 
@@ -172,7 +171,7 @@ testParameter1dGeneration = IO.do
 testEmptyCheck :: List Int -> IO ()
 testEmptyCheck [] = IO.printLine "List is empty"
 testEmptyCheck (NonEmpty nonEmpty) =
-  IO.printLine ("List is non-empty, maximum is " + String.fromInt (NonEmpty.maximum nonEmpty))
+  IO.printLine ("List is non-empty, maximum is " + Text.int (NonEmpty.maximum nonEmpty))
 
 testNonEmpty :: IO ()
 testNonEmpty = IO.do
@@ -224,7 +223,7 @@ testPlaneTorusIntersection = IO.do
 strokeWidth :: Length
 strokeWidth = Length.millimeters 0.1
 
-drawZeros :: String -> Surface1d.Function.Zeros.Zeros -> IO ()
+drawZeros :: Text -> Surface1d.Function.Zeros.Zeros -> IO ()
 drawZeros path zeros = IO.do
   let uvRange = Range.convert toDrawing (Range.from -0.05 1.05)
   let viewBox = Bounds2d.xy uvRange uvRange
@@ -275,7 +274,7 @@ drawDot colour point =
 delayedPrint :: Int -> IO ()
 delayedPrint numSeconds = IO.do
   IO.sleep (Duration.seconds (Float.fromInt numSeconds))
-  IO.printLine (String.fromInt numSeconds)
+  IO.printLine (Text.int numSeconds)
 
 testConcurrency :: IO ()
 testConcurrency = IO.do
@@ -400,7 +399,7 @@ testStretchedArc = IO.do
   printEllipticalArc "stretched" stretched
   printEllipticalArc "compressed" compressed
 
-printEllipticalArc :: Tolerance Meters => String -> Curve2d (space @ Meters) -> IO ()
+printEllipticalArc :: Tolerance Meters => Text -> Curve2d (space @ Meters) -> IO ()
 printEllipticalArc label = \case
   Curve2d.Arc{centerPoint, majorDirection, minorDirection, majorRadius, minorRadius, startAngle, endAngle} -> IO.do
     IO.printLine (label + ":")
@@ -429,27 +428,27 @@ testExplicitRandomStep = IO.do
 
 testDebugPrint :: IO ()
 testDebugPrint = do
-  let xs = String.repeat 2 "x"
+  let xs = Text.repeat 2 "x"
   Debug.log "xs" xs
-  let ys = String.repeat 3 "y"
+  let ys = Text.repeat 3 "y"
   Debug.log "ys" ys
   IO.printLine (xs + ys)
 
-stringSum :: String -> String -> Result String Int
-stringSum s1 s2 = Result.do
-  n1 <- Int.parse (Text.pack s1)
+textSum :: Text -> Text -> Result Text Int
+textSum t1 t2 = Result.do
+  n1 <- Int.parse t1
   Debug.log "n1" n1
-  n2 <- Int.parse (Text.pack s2)
+  n2 <- Int.parse t2
   Debug.log "n2" n2
   Ok (n1 + n2)
 
-testStringSum :: IO ()
-testStringSum = IO.do
+testTextSum :: IO ()
+testTextSum = IO.do
   IO.onError IO.printLine IO.do
-    sum <- stringSum "5" "abc"
+    sum <- textSum "5" "abc"
     log "sum" sum
   IO.onError IO.printLine IO.do
-    sum <- stringSum "2" "3"
+    sum <- textSum "2" "3"
     log "sum" sum
 
 main :: IO ()
@@ -477,4 +476,4 @@ main = Tolerance.using (Length.meters 1e-9) IO.do
   testIOParallel
   testParallelComputation
   testDebugPrint
-  testStringSum
+  testTextSum

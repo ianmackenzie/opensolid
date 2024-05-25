@@ -16,6 +16,7 @@ import Frame2d qualified
 import OpenSolid
 import Point2d qualified
 import Range qualified
+import Text qualified
 import Vector2d qualified
 import Prelude qualified
 
@@ -141,5 +142,5 @@ instance (TaggedError error, VoidPtr success) => VoidPtr (Result error success) 
 -- TODO: codegen this
 instance TaggedError Vector2d.IsZero where
   fromTaggedPtr (Word8 1) _ = Prelude.return Vector2d.IsZero
-  fromTaggedPtr tag _ = internalError ("Unexpected tag " + show tag)
+  fromTaggedPtr tag _ = internalError ("Unexpected tag " + Text.show tag)
   toTaggedPtr Vector2d.IsZero = Prelude.return (Word8 1, Foreign.nullPtr)

@@ -15,19 +15,19 @@ import Map qualified
 import OpenSolid
 
 data Schema = Schema
-  { title :: Maybe String
-  , description :: Maybe String
+  { title :: Maybe Text
+  , description :: Maybe Text
   , default_ :: Maybe Json
   , examples :: List Json
-  , type_ :: String
-  , required :: List String
-  , properties :: Map String Schema
+  , type_ :: Text
+  , required :: List Text
+  , properties :: Map Text Schema
   , items :: Maybe Schema
   , minItems :: Maybe Int
   }
   deriving (Show)
 
-hasType :: String -> Schema
+hasType :: Text -> Schema
 hasType t =
   Schema
     { title = Nothing

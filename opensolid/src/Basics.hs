@@ -1,15 +1,15 @@
 module Basics
   ( List
-  , String
   , Text
   , ifThenElse
+  , fromString
   , fromInteger
   , otherwise
   , Int
   , Eq ((==), (/=))
   , Ord ((<), (<=), (>=), (>), compare)
   , Ordering (EQ, GT, LT)
-  , Show (show)
+  , Show
   , Bool (True, False)
   , Char
   , not
@@ -34,6 +34,7 @@ where
 import Control.Concurrent.Async (Async)
 import Data.Kind (Type)
 import Data.Text (Text)
+import Data.Text qualified
 import Data.Type.Equality (type (~))
 import GHC.Stack (HasCallStack, withFrozenCallStack)
 import Prelude
@@ -45,8 +46,7 @@ import Prelude
   , Maybe (Just, Nothing)
   , Ord (compare, (<), (<=), (>), (>=))
   , Ordering (EQ, GT, LT)
-  , Show (show)
-  , String
+  , Show
   , fromIntegral
   , not
   , otherwise
@@ -64,15 +64,23 @@ ifThenElse :: Bool -> a -> a -> a
 ifThenElse True ifBranch _ = ifBranch
 ifThenElse False _ elseBranch = elseBranch
 
+{-# INLINE fromString #-}
+fromString :: List Char -> Text
+fromString = Data.Text.pack
+
 {-# INLINE fromInteger #-}
 fromInteger :: Prelude.Integer -> Int
 fromInteger = Prelude.fromInteger
 
-internalError :: HasCallStack => String -> a
-internalError message = withFrozenCallStack (Prelude.error ("Internal error: " Prelude.++ message))
+internalError :: HasCallStack => Text -> a
+internalError message =
+  withFrozenCallStack $
+    Prelude.error (Data.Text.unpack (Prelude.mappend "Internal error: " message))
 
 notImplemented :: HasCallStack => a
-notImplemented = withFrozenCallStack (Prelude.error "Not implemented")
+notImplemented =
+  withFrozenCallStack $
+    Prelude.error (Data.Text.unpack "Not implemented")
 
 {-# INLINE (|>) #-}
 (|>) :: a -> (a -> b) -> b

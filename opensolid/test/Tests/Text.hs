@@ -1,9 +1,9 @@
-module Tests.String (tests) where
+module Tests.Text (tests) where
 
 import OpenSolid
-import String qualified
 import Test (Test)
 import Test qualified
+import Text qualified
 
 tests :: List Test
 tests =
@@ -13,8 +13,8 @@ tests =
 
 lines :: Test
 lines = do
-  let test label string expected =
-        Test.verify label (Test.expect (String.lines string == expected))
+  let test label text expected =
+        Test.verify label (Test.expect (Text.lines text == expected))
   Test.group "lines" $
     [ test "Empty" "" [""]
     , test "Single line" "line" ["line"]
@@ -25,7 +25,7 @@ lines = do
 multiline :: Test
 multiline = do
   let test label list expected =
-        Test.verify label (Test.expect (String.multiline list == expected))
+        Test.verify label (Test.expect (Text.multiline list == expected))
   Test.group "multiline" $
     [ test "Empty list" [] ""
     , test "Single empty line" [""] ""

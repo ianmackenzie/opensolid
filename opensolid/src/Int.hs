@@ -24,7 +24,7 @@ import System.Random qualified
 import Text.Parse qualified
 import Prelude qualified
 
-parse :: Text -> Result String Int
+parse :: Text -> Result Text Int
 parse = Text.Parse.int
 
 {-# COMPLETE Even, Odd #-}

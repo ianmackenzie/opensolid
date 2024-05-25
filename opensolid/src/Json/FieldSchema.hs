@@ -4,7 +4,7 @@ import Json.Schema (Schema)
 import OpenSolid
 
 data FieldSchema = FieldSchema
-  { name :: String
+  { name :: Text
   , required :: Bool
   , schema :: Schema
   }

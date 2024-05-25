@@ -19,16 +19,19 @@ import Basics
 import Composition
 import Control.Concurrent
 import Control.Concurrent.Async qualified as Async
+import Data.Text.IO qualified
 import {-# SOURCE #-} Duration (Duration)
 import {-# SOURCE #-} Duration qualified
+import Error (Error)
 import Error qualified
 import Float qualified
 import Result (Result (Error, Ok))
 import System.IO.Error qualified
+import Text qualified
 import Prelude qualified
 
-fail :: String -> IO a
-fail = Prelude.fail
+fail :: Error x => x -> IO a
+fail error = Prelude.fail (Text.unpack (Error.message error))
 
 return :: a -> IO a
 return = Prelude.return
@@ -69,9 +72,9 @@ await = Async.wait
 sleep :: Duration -> IO ()
 sleep duration = Control.Concurrent.threadDelay (Float.round (Duration.inMicroseconds duration))
 
-onError :: (String -> IO a) -> IO a -> IO a
+onError :: (Text -> IO a) -> IO a -> IO a
 onError callback io =
-  System.IO.Error.catchIOError io (System.IO.Error.ioeGetErrorString >> callback)
+  System.IO.Error.catchIOError io (System.IO.Error.ioeGetErrorString >> Text.pack >> callback)
 
-printLine :: String -> IO ()
-printLine = Prelude.putStrLn
+printLine :: Text -> IO ()
+printLine = Data.Text.IO.putStrLn

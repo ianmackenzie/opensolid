@@ -6,6 +6,7 @@ module Text
   , join
   , int
   , float
+  , show
   , isEmpty
   , replace
   , split
@@ -48,6 +49,9 @@ int n = pack (Prelude.show n)
 float :: Float -> Text
 float (Qty_ x) = pack (Prelude.show x)
 
+show :: Show a => a -> Text
+show = Prelude.show >> pack
+
 isEmpty :: Text -> Bool
 isEmpty = Data.Text.null
 
@@ -58,10 +62,10 @@ split :: Text -> Text -> List Text
 split = Data.Text.splitOn
 
 lines :: Text -> List Text
-lines = replace (pack "\r\n") (pack "\n") >> split (pack "\n")
+lines = replace "\r\n" "\n" >> split "\n"
 
 multiline :: List Text -> Text
-multiline = join (pack "\n")
+multiline = join "\n"
 
 indent :: Text -> Text -> Text
 indent indentation paragraph =

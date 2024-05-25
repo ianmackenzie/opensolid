@@ -72,12 +72,14 @@ import Range (Range)
 import Range qualified
 import Result qualified
 import Stream qualified
+import Text qualified
 import Transform2d (Transform2d)
 import Transform2d qualified
 import Units qualified
 import Vector2d (Vector2d)
 import VectorCurve2d (VectorCurve2d)
 import VectorCurve2d qualified
+import Prelude qualified
 
 type Curve2d (coordinateSystem :: CoordinateSystem) = Internal.Curve2d coordinateSystem
 
@@ -408,7 +410,7 @@ data Synthetic coordinateSystem where
     Synthetic (space @ units)
 
 instance Show (Synthetic (space @ units)) where
-  show _ = "<Synthetic>"
+  show _ = Text.unpack "<Synthetic>"
 
 instance Interface (Synthetic (space @ units)) (space @ units) where
   startPointImpl (Synthetic curve _) = Curve2d.startPoint curve
@@ -432,7 +434,7 @@ data SyntheticDerivative coordinateSystem where
     SyntheticDerivative (space @ units)
 
 instance Show (SyntheticDerivative (space @ units)) where
-  show _ = "<SyntheticDerivative>"
+  show _ = Text.unpack "<SyntheticDerivative>"
 
 instance VectorCurve2d.Interface (SyntheticDerivative (space @ units)) (space @ units) where
   evaluateAtImpl t (SyntheticDerivative current _) = VectorCurve2d.evaluateAt t current
