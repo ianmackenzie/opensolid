@@ -137,6 +137,52 @@ class Axis2d:
         return Axis2d(lib.opensolid_axis2d_through(point.ptr, direction.ptr))
 
 
+class Basis2d:
+    def __init__(self, ptr: c_void_p):
+        self.ptr = ptr
+
+    def __del__(self):
+        lib.opensolid_free_stable(self.ptr)
+
+    def __repr__(self) -> str:
+        return (
+            "Basis2d(" + str(self.x_direction()) + ", " + str(self.y_direction()) + ")"
+        )
+
+    lib.opensolid_basis2d_xy.argtypes = []
+    lib.opensolid_basis2d_xy.restype = c_void_p
+
+    @staticmethod
+    def xy() -> Basis2d:
+        return Basis2d(lib.opensolid_basis2d_xy())
+
+    lib.opensolid_basis2d_x_direction.argtypes = [c_void_p]
+    lib.opensolid_basis2d_x_direction.restype = c_void_p
+
+    def x_direction(self) -> Direction2d:
+        return Direction2d(lib.opensolid_basis2d_x_direction(self.ptr))
+
+    lib.opensolid_basis2d_y_direction.argtypes = [c_void_p]
+    lib.opensolid_basis2d_y_direction.restype = c_void_p
+
+    def y_direction(self) -> Direction2d:
+        return Direction2d(lib.opensolid_basis2d_y_direction(self.ptr))
+
+    lib.opensolid_basis2d_from_x_direction.argtypes = [c_void_p]
+    lib.opensolid_basis2d_from_x_direction.restype = c_void_p
+
+    @staticmethod
+    def from_x_direction(direction: Direction2d) -> Basis2d:
+        return Basis2d(lib.opensolid_basis2d_from_x_direction(direction.ptr))
+
+    lib.opensolid_basis2d_from_y_direction.argtypes = [c_void_p]
+    lib.opensolid_basis2d_from_y_direction.restype = c_void_p
+
+    @staticmethod
+    def from_y_direction(direction: Direction2d) -> Basis2d:
+        return Basis2d(lib.opensolid_basis2d_from_y_direction(direction.ptr))
+
+
 class Bounds2d:
     def __init__(self, ptr: c_void_p):
         self.ptr = ptr
@@ -372,15 +418,7 @@ class Frame2d:
         lib.opensolid_free_stable(self.ptr)
 
     def __repr__(self) -> str:
-        return (
-            "Frame2d("
-            + str(self.origin_point())
-            + ", "
-            + str(self.x_direction())
-            + ", "
-            + str(self.y_direction())
-            + ")"
-        )
+        return "Frame2d(" + str(self.origin_point()) + ", " + str(self.basis()) + ")"
 
     lib.opensolid_frame2d_xy.argtypes = []
     lib.opensolid_frame2d_xy.restype = c_void_p
@@ -389,18 +427,24 @@ class Frame2d:
     def xy() -> Frame2d:
         return Frame2d(lib.opensolid_frame2d_xy())
 
-    lib.opensolid_frame2d_with_origin_point.argtypes = [c_void_p]
-    lib.opensolid_frame2d_with_origin_point.restype = c_void_p
+    lib.opensolid_frame2d_at.argtypes = [c_void_p, c_void_p]
+    lib.opensolid_frame2d_at.restype = c_void_p
 
     @staticmethod
-    def with_origin_point(point: Point2d) -> Frame2d:
-        return Frame2d(lib.opensolid_frame2d_with_origin_point(point.ptr))
+    def at(point: Point2d, basis: Basis2d) -> Frame2d:
+        return Frame2d(lib.opensolid_frame2d_at(point.ptr, basis.ptr))
 
     lib.opensolid_frame2d_origin_point.argtypes = [c_void_p]
     lib.opensolid_frame2d_origin_point.restype = c_void_p
 
     def origin_point(self) -> Point2d:
         return Point2d(lib.opensolid_frame2d_origin_point(self.ptr))
+
+    lib.opensolid_frame2d_basis.argtypes = [c_void_p]
+    lib.opensolid_frame2d_basis.restype = c_void_p
+
+    def basis(self) -> Basis2d:
+        return Basis2d(lib.opensolid_frame2d_basis(self.ptr))
 
     lib.opensolid_frame2d_x_direction.argtypes = [c_void_p]
     lib.opensolid_frame2d_x_direction.restype = c_void_p
@@ -425,20 +469,6 @@ class Frame2d:
 
     def y_axis(self) -> Axis2d:
         return Axis2d(lib.opensolid_frame2d_y_axis(self.ptr))
-
-    lib.opensolid_frame2d_with_x_direction.argtypes = [c_void_p, c_void_p]
-    lib.opensolid_frame2d_with_x_direction.restype = c_void_p
-
-    @staticmethod
-    def with_x_direction(direction: Direction2d, point: Point2d) -> Frame2d:
-        return Frame2d(lib.opensolid_frame2d_with_x_direction(direction.ptr, point.ptr))
-
-    lib.opensolid_frame2d_with_y_direction.argtypes = [c_void_p, c_void_p]
-    lib.opensolid_frame2d_with_y_direction.restype = c_void_p
-
-    @staticmethod
-    def with_y_direction(direction: Direction2d, point: Point2d) -> Frame2d:
-        return Frame2d(lib.opensolid_frame2d_with_y_direction(direction.ptr, point.ptr))
 
     lib.opensolid_frame2d_from_x_axis.argtypes = [c_void_p]
     lib.opensolid_frame2d_from_x_axis.restype = c_void_p
