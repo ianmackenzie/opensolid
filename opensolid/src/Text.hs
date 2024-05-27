@@ -27,8 +27,8 @@ import Basics
 import Composition
 import Data.Text qualified
 import Float (Float)
+import Float qualified
 import List qualified
-import Qty (Qty (Qty_))
 import Prelude qualified
 
 concat :: List Text -> Text
@@ -47,7 +47,7 @@ int :: Int -> Text
 int n = pack (Prelude.show n)
 
 float :: Float -> Text
-float (Qty_ x) = pack (Prelude.show x)
+float x = pack (Prelude.show (Float.toDouble x))
 
 show :: Show a => a -> Text
 show = Prelude.show >> pack

@@ -7,7 +7,7 @@ import Data.Text qualified
 import Data.Text.Read (Reader)
 import Data.Text.Read qualified
 import {-# SOURCE #-} Float (Float)
-import {-# SOURCE #-} Qty (Qty (Qty_))
+import {-# SOURCE #-} Float qualified
 import Result (Result (Error, Ok))
 import Result qualified
 import Prelude qualified
@@ -31,4 +31,4 @@ int :: Text -> Result Text Int
 int = num Data.Text.Read.decimal
 
 float :: Text -> Result Text Float
-float = num Data.Text.Read.double >> Result.map Qty_
+float = num Data.Text.Read.double >> Result.map Float.fromDouble

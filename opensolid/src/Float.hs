@@ -1,6 +1,7 @@
 module Float
   ( Float
   , fromRational
+  , fromDouble
   , toDouble
   , fromInt
   , toInt
@@ -37,6 +38,7 @@ where
 
 import Arithmetic
 import Basics
+import Data.Coerce qualified
 import NonEmpty (NonEmpty)
 import NonEmpty qualified
 import Qty (Qty (Qty_))
@@ -54,9 +56,13 @@ type Float = Qty Unitless
 fromRational :: Prelude.Rational -> Float
 fromRational = Prelude.fromRational
 
+{-# INLINE fromDouble #-}
+fromDouble :: Prelude.Double -> Float
+fromDouble = Data.Coerce.coerce
+
 {-# INLINE toDouble #-}
 toDouble :: Float -> Prelude.Double
-toDouble = Qty.toDouble
+toDouble = Data.Coerce.coerce
 
 fromInt :: Int -> Float
 fromInt = fromIntegral
