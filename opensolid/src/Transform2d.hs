@@ -1,9 +1,11 @@
 module Transform2d
   ( Transform2d (Transform2d)
   , Rigid
+  , Orthonormal
   , Uniform
   , Affine
   , IsRigid
+  , IsOrthonormal
   , IsUniform
   , identity
   , translateBy
@@ -15,7 +17,8 @@ module Transform2d
   , scaleAlong
   , placeIn
   , relativeTo
-  , fromRigid
+  , toOrthonormal
+  , toUniform
   , toAffine
   , translateByImpl
   , translateInImpl
@@ -86,11 +89,15 @@ instance
 
 data RigidTag = RigidTag
 
+data OrthonormalTag = OrthonormalTag
+
 data UniformTag = UniformTag
 
 data AffineTag = AffineTag
 
 type Rigid coordinateSystem = Transform2d RigidTag coordinateSystem
+
+type Orthonormal coordinateSystem = Transform2d OrthonormalTag coordinateSystem
 
 type Uniform coordinateSystem = Transform2d UniformTag coordinateSystem
 
@@ -98,27 +105,49 @@ type Affine coordinateSystem = Transform2d AffineTag coordinateSystem
 
 class IsRigid a
 
+class IsOrthonormal a
+
 class IsUniform a
 
 instance IsRigid RigidTag
 
+instance IsOrthonormal RigidTag
+
+instance IsOrthonormal OrthonormalTag
+
 instance IsUniform RigidTag
+
+instance IsUniform OrthonormalTag
 
 instance IsUniform UniformTag
 
 instance Composition RigidTag RigidTag RigidTag where RigidTag >> RigidTag = RigidTag
 
+instance Composition RigidTag OrthonormalTag OrthonormalTag where RigidTag >> OrthonormalTag = OrthonormalTag
+
 instance Composition RigidTag UniformTag UniformTag where RigidTag >> UniformTag = UniformTag
 
 instance Composition RigidTag AffineTag AffineTag where RigidTag >> AffineTag = AffineTag
 
+instance Composition OrthonormalTag RigidTag OrthonormalTag where OrthonormalTag >> RigidTag = OrthonormalTag
+
+instance Composition OrthonormalTag OrthonormalTag OrthonormalTag where OrthonormalTag >> OrthonormalTag = OrthonormalTag
+
+instance Composition OrthonormalTag UniformTag UniformTag where OrthonormalTag >> UniformTag = UniformTag
+
+instance Composition OrthonormalTag AffineTag AffineTag where OrthonormalTag >> AffineTag = AffineTag
+
 instance Composition UniformTag RigidTag UniformTag where UniformTag >> RigidTag = UniformTag
+
+instance Composition UniformTag OrthonormalTag UniformTag where UniformTag >> OrthonormalTag = UniformTag
 
 instance Composition UniformTag UniformTag UniformTag where UniformTag >> UniformTag = UniformTag
 
 instance Composition UniformTag AffineTag AffineTag where UniformTag >> AffineTag = AffineTag
 
 instance Composition AffineTag RigidTag AffineTag where AffineTag >> RigidTag = AffineTag
+
+instance Composition AffineTag OrthonormalTag AffineTag where AffineTag >> OrthonormalTag = AffineTag
 
 instance Composition AffineTag UniformTag AffineTag where AffineTag >> UniformTag = AffineTag
 
@@ -175,7 +204,7 @@ rotateAround centerPoint angle = do
   let vy = Vector2d.xy -sin cos
   withFixedPoint centerPoint vx vy
 
-mirrorAcross :: Axis2d (space @ units) -> Rigid (space @ units)
+mirrorAcross :: Axis2d (space @ units) -> Orthonormal (space @ units)
 mirrorAcross axis = do
   let (dx, dy) = Direction2d.components (Axis2d.direction axis)
   let vx = Vector2d.xy (1 - 2 * dy * dy) (2 * dx * dy)
@@ -218,8 +247,11 @@ relativeTo frame transform = do
   let vy = unitY |> Vector2d.placeIn frame |> Vector2d.transformBy transform |> Vector2d.relativeTo frame
   Transform2d_ p0 vx vy
 
-fromRigid :: Rigid (space @ units) -> Transform2d a (space @ units)
-fromRigid = Data.Coerce.coerce
+toOrthonormal :: IsOrthonormal a => Transform2d a (space @ units) -> Orthonormal (space @ units)
+toOrthonormal = Data.Coerce.coerce
+
+toUniform :: IsUniform a => Transform2d a (space @ units) -> Uniform (space @ units)
+toUniform = Data.Coerce.coerce
 
 toAffine :: Transform2d a (space @ units) -> Affine (space @ units)
 toAffine = Data.Coerce.coerce
@@ -254,10 +286,10 @@ rotateAroundOwnImpl :: (Rigid (space @ units) -> a -> b) -> (a -> Point2d (space
 rotateAroundOwnImpl transformBy getCenterPoint angle argument =
   transformBy (rotateAround (getCenterPoint argument) angle) argument
 
-mirrorAcrossImpl :: (Rigid (space @ units) -> a -> b) -> Axis2d (space @ units) -> a -> b
+mirrorAcrossImpl :: (Orthonormal (space @ units) -> a -> b) -> Axis2d (space @ units) -> a -> b
 mirrorAcrossImpl transformBy axis = transformBy (mirrorAcross axis)
 
-mirrorAcrossOwnImpl :: (Rigid (space @ units) -> a -> b) -> (a -> Axis2d (space @ units)) -> a -> b
+mirrorAcrossOwnImpl :: (Orthonormal (space @ units) -> a -> b) -> (a -> Axis2d (space @ units)) -> a -> b
 mirrorAcrossOwnImpl transformBy getAxis argument =
   transformBy (mirrorAcross (getAxis argument)) argument
 

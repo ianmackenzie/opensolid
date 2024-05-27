@@ -13,6 +13,7 @@ module Tests.Random
   , quadraticSpline2d
   , cubicSpline2d
   , rigidTransform2d
+  , orthonormalTransform2d
   , affineTransform2d
   )
 where
@@ -104,11 +105,19 @@ rotation2d = Random.do
   angle <- Qty.random (Angle.degrees -360.0) (Angle.degrees 360.0)
   Random.return (Transform2d.rotateAround centerPoint angle)
 
-mirror2d :: Generator (Transform2d.Rigid (space @ Meters))
+mirror2d :: Generator (Transform2d.Orthonormal (space @ Meters))
 mirror2d = Random.map Transform2d.mirrorAcross axis2d
 
 rigidTransform2d :: Generator (Transform2d.Rigid (space @ Meters))
-rigidTransform2d = Random.oneOf (NonEmpty.of3 translation2d rotation2d mirror2d)
+rigidTransform2d = Random.oneOf (NonEmpty.of2 translation2d rotation2d)
+
+orthonormalTransform2d :: Generator (Transform2d.Orthonormal (space @ Meters))
+orthonormalTransform2d =
+  Random.oneOf $
+    NonEmpty.of3
+      (Random.map Transform2d.toOrthonormal translation2d)
+      (Random.map Transform2d.toOrthonormal rotation2d)
+      mirror2d
 
 scalingFactor :: Generator Float
 scalingFactor = Float.random 0.5 2.0
