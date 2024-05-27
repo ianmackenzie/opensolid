@@ -1,6 +1,7 @@
 module Json
   ( Json (..)
   , Format
+  , Schema
   , object
   , string
   , int
@@ -21,6 +22,7 @@ import Data.Scientific
 import Data.Vector qualified
 import Float qualified
 import {-# SOURCE #-} Json.Format (Format)
+import {-# SOURCE #-} Json.Schema (Schema)
 import List qualified
 import Map (Map)
 import Map qualified

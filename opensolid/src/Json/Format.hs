@@ -28,7 +28,6 @@ import Json (Json)
 import Json qualified
 import Json.FieldSchema (FieldSchema (FieldSchema))
 import Json.FieldSchema qualified as FieldSchema
-import Json.Schema (Schema)
 import Json.Schema qualified
 import List qualified
 import Map (Map)
@@ -40,7 +39,7 @@ import Result qualified
 data Format a = Format
   { encode :: a -> Json
   , decode :: Json -> Result Text a
-  , schema :: Schema
+  , schema :: Json.Schema
   }
 
 title :: Text -> Format a -> Format a
@@ -59,7 +58,7 @@ examples :: List a -> Format a -> Format a
 examples values format =
   format{schema = (schema format){Json.Schema.examples = List.map (encode format) values}}
 
-removeMetadata :: Schema -> Schema
+removeMetadata :: Json.Schema -> Json.Schema
 removeMetadata schema =
   schema
     { Json.Schema.title = Nothing
@@ -173,7 +172,7 @@ data Field parent child dummy = Field
 data Fields constructor parent dummy = Fields
   { decompose :: parent -> Map Text Json
   , compose :: Map Text Json -> constructor -> Result Text parent
-  , properties :: Map Text Schema
+  , properties :: Map Text Json.Schema
   , required :: List Text
   }
 
