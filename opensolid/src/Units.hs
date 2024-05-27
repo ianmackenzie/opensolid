@@ -28,7 +28,7 @@ import Basics
 import Data.Coerce qualified
 import Data.Kind (Constraint)
 import Data.List.NonEmpty (NonEmpty)
-import {-# SOURCE #-} Qty (Qty (Qty_))
+import {-# SOURCE #-} Qty (Qty)
 import {-# SOURCE #-} Result (Result (Error, Ok))
 import {-# SOURCE #-} Sign (Sign)
 
