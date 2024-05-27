@@ -149,7 +149,11 @@ unitY = Vector2d.xy 0.0 1.0
 identity :: Rigid (space @ units)
 identity = Transform2d_ Point2d.origin unitX unitY
 
-withFixedPoint :: Point2d (space @ units) -> Vector2d (space @ Unitless) -> Vector2d (space @ Unitless) -> Transform2d a (space @ units)
+withFixedPoint ::
+  Point2d (space @ units) ->
+  Vector2d (space @ Unitless) ->
+  Vector2d (space @ Unitless) ->
+  Transform2d a (space @ units)
 withFixedPoint fixedPoint vx vy = do
   let (fixedX, fixedY) = Point2d.coordinates fixedPoint
   Transform2d_ (fixedPoint - fixedX * vx - fixedY * vy) vx vy
@@ -194,14 +198,20 @@ scaleAlong axis scale = do
   let vy = Vector2d.xy xy (scale * dy2 + dx2)
   withFixedPoint (Axis2d.originPoint axis) vx vy
 
-placeIn :: Frame2d (global @ units) (Defines local) -> Transform2d a (local @ units) -> Transform2d a (global @ units)
+placeIn ::
+  Frame2d (global @ units) (Defines local) ->
+  Transform2d a (local @ units) ->
+  Transform2d a (global @ units)
 placeIn frame transform = do
   let p0 = Point2d.origin |> Point2d.relativeTo frame |> Point2d.transformBy transform |> Point2d.placeIn frame
   let vx = unitX |> Vector2d.relativeTo frame |> Vector2d.transformBy transform |> Vector2d.placeIn frame
   let vy = unitY |> Vector2d.relativeTo frame |> Vector2d.transformBy transform |> Vector2d.placeIn frame
   Transform2d_ p0 vx vy
 
-relativeTo :: Frame2d (global @ units) (Defines local) -> Transform2d a (global @ units) -> Transform2d a (local @ units)
+relativeTo ::
+  Frame2d (global @ units) (Defines local) ->
+  Transform2d a (global @ units) ->
+  Transform2d a (local @ units)
 relativeTo frame transform = do
   let p0 = Point2d.origin |> Point2d.placeIn frame |> Point2d.transformBy transform |> Point2d.relativeTo frame
   let vx = unitX |> Vector2d.placeIn frame |> Vector2d.transformBy transform |> Vector2d.relativeTo frame
