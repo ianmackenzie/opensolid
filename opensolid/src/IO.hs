@@ -11,6 +11,9 @@ module IO
   , Bind ((>>=))
   , return
   , onError
+  , mapError
+  , debugError
+  , addContext
   , printLine
   )
 where
@@ -20,6 +23,7 @@ import Composition
 import Control.Concurrent
 import Control.Concurrent.Async qualified as Async
 import Data.Text.IO qualified
+import Debug qualified
 import {-# SOURCE #-} Duration (Duration)
 import {-# SOURCE #-} Duration qualified
 import Error (Error)
@@ -75,6 +79,15 @@ sleep duration = Control.Concurrent.threadDelay (Float.round (Duration.inMicrose
 onError :: (Text -> IO a) -> IO a -> IO a
 onError callback io =
   System.IO.Error.catchIOError io (System.IO.Error.ioeGetErrorString >> Text.pack >> callback)
+
+debugError :: (Text -> IO ()) -> IO a -> IO a
+debugError callback = onError (\error -> Debug.io (callback error) >> fail error)
+
+mapError :: (Text -> Text) -> IO a -> IO a
+mapError function = onError (function >> fail)
+
+addContext :: Text -> IO a -> IO a
+addContext text = mapError (Error.addContext text)
 
 printLine :: Text -> IO ()
 printLine = Data.Text.IO.putStrLn

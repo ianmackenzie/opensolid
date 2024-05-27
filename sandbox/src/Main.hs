@@ -124,21 +124,23 @@ testListOperations = IO.do
   log "Prepend Maybe to List" (Just 1 + [2, 3])
 
 getCrossProduct :: Tolerance Meters => Result Text Float
-getCrossProduct = Error.context "In getCrossProduct" Result.do
+getCrossProduct = Result.addContext "In getCrossProduct" Result.do
   vectorDirection <-
     Vector2d.direction (Vector2d.meters 2.0 3.0)
-      |> Error.debug (\_ -> IO.printLine "Couldn't get vector direction!")
-      |> Error.context "When getting vector direction"
+      |> Result.debugError (\_ -> IO.printLine "Couldn't get vector direction!")
+      |> Result.mapError Error.message
+      |> Result.addContext "When getting vector direction"
   lineDirection <-
     Direction2d.from Point2d.origin Point2d.origin
-      |> Error.debug (\_ -> IO.printLine "Couldn't get line direction!")
-      |> Error.context "When getting line direction"
+      |> Result.debugError (\_ -> IO.printLine "Couldn't get line direction!")
+      |> Result.mapError Error.message
+      |> Result.addContext "When getting line direction"
   Ok (vectorDirection >< lineDirection)
 
 testTry :: Tolerance Meters => IO ()
 testTry =
   IO.onError IO.printLine $
-    Error.context "In testTry" IO.do
+    IO.addContext "In testTry" IO.do
       crossProduct <- getCrossProduct
       log "Got cross product" crossProduct
 

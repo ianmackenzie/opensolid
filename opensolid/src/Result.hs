@@ -6,7 +6,9 @@ module Result
   , withDefault
   , check
   , mapError
+  , addContext
   , onError
+  , debugError
   , handleError
   , orNothing
   , collect
@@ -21,6 +23,7 @@ where
 import Basics
 import Coalesce (Coalesce ((??)))
 import Composition
+import Debug qualified
 import Error (Error)
 import Error qualified
 import {-# SOURCE #-} IO qualified
@@ -31,10 +34,6 @@ import Prelude qualified
 data Result x a where
   Ok :: a -> Result x a
   Error :: Error x => x -> Result x a
-
-instance (Error x, Error y) => Error.Map x y (Result x) (Result y) where
-  map _ (Ok value) = Ok value
-  map function (Error error) = Error (function error)
 
 deriving instance (Eq x, Eq a) => Eq (Result x a)
 
@@ -112,6 +111,9 @@ map _ (Error error) = Error error
 mapError :: Error y => (Error x => x -> y) -> Result x a -> Result y a
 mapError f = onError (f >> Error)
 
+addContext :: Text -> Result Text a -> Result Text a
+addContext text = mapError (Error.addContext text)
+
 map2 :: (a -> b -> value) -> Result x a -> Result x b -> Result x value
 map2 function result1 result2 = Result.do
   value1 <- result1
@@ -126,6 +128,9 @@ check condition = if condition then Ok () else Error CheckFailed
 onError :: (Error x => x -> Result y a) -> Result x a -> Result y a
 onError _ (Ok value) = Ok value
 onError function (Error error) = function error
+
+debugError :: (x -> IO ()) -> Result x a -> Result x a
+debugError callback = onError (\error -> Debug.io (callback error) >> Error error)
 
 handleError :: (Error x => x -> a) -> Result x a -> a
 handleError _ (Ok value) = value

@@ -214,7 +214,7 @@ lastField (Field write read fieldSchema) = do
   Fields{decompose, compose, properties, required}
 
 withinField :: Text -> Result Text a -> Result Text a
-withinField fieldName = Error.context ("In field \"" + fieldName + "\"")
+withinField fieldName = Result.addContext ("In field \"" + fieldName + "\"")
 
 requiredField :: Text -> (parent -> child) -> Format child -> Field parent child ()
 requiredField fieldName getField fieldFormat = do
