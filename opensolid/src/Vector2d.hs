@@ -1,6 +1,7 @@
 module Vector2d
   ( Vector2d (Vector2d)
   , zero
+  , unit
   , x
   , y
   , xy
@@ -196,7 +197,7 @@ instance
   DotMultiplication' (Vector2d (space @ units)) (Direction2d space_)
   where
   type Vector2d (space @ units) .<>. Direction2d space_ = Qty (units :*: Unitless)
-  v .<>. d = v .<>. Direction2d.vector d
+  v .<>. d = v .<>. unit d
 
 instance
   space ~ space_ =>
@@ -207,7 +208,7 @@ instance
   DotMultiplication' (Direction2d space) (Vector2d (space_ @ units))
   where
   type Direction2d space .<>. Vector2d (space_ @ units) = Qty (Unitless :*: units)
-  d .<>. v = Direction2d.vector d .<>. v
+  d .<>. v = unit d .<>. v
 
 instance
   space ~ space_ =>
@@ -229,7 +230,7 @@ instance
   CrossMultiplication' (Vector2d (space @ units)) (Direction2d space_)
   where
   type Vector2d (space @ units) .><. Direction2d space_ = Qty (units :*: Unitless)
-  v .><. d = v .><. Direction2d.vector d
+  v .><. d = v .><. unit d
 
 instance
   space ~ space_ =>
@@ -240,7 +241,7 @@ instance
   CrossMultiplication' (Direction2d space) (Vector2d (space_ @ units))
   where
   type Direction2d space .><. Vector2d (space_ @ units) = Qty (Unitless :*: units)
-  d .><. v = Direction2d.vector d .><. v
+  d .><. v = unit d .><. v
 
 instance
   space ~ space_ =>
@@ -248,6 +249,9 @@ instance
 
 zero :: Vector2d (space @ units)
 zero = Vector2d Qty.zero Qty.zero
+
+unit :: Direction2d space -> Vector2d (space @ Unitless)
+unit = Direction2d.unwrap
 
 x :: Qty units -> Vector2d (space @ units)
 x vx = Vector2d vx Qty.zero

@@ -10,7 +10,6 @@ direction2d =
     [ method 'Direction2d.xComponent ["dir"]
     , method 'Direction2d.yComponent ["dir"]
     , static 'Direction2d.unsafe ["v"]
-    , method 'Direction2d.vector ["dir"]
     , static 'Direction2d.x []
     , static 'Direction2d.positiveX []
     , static 'Direction2d.negativeX []

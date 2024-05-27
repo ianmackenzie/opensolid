@@ -424,7 +424,7 @@ instance
   DotMultiplication' (VectorCurve2d (space @ units)) (Direction2d space_)
   where
   type VectorCurve2d (space @ units) .<>. Direction2d space_ = Curve1d (units :*: Unitless)
-  curve .<>. direction2d = curve .<>. Direction2d.vector direction2d
+  curve .<>. direction2d = curve .<>. Vector2d.unit direction2d
 
 instance
   space ~ space_ =>
@@ -435,7 +435,7 @@ instance
   DotMultiplication' (Direction2d space) (VectorCurve2d (space_ @ units))
   where
   type Direction2d space .<>. VectorCurve2d (space_ @ units) = Curve1d (Unitless :*: units)
-  direction2d .<>. curve = Direction2d.vector direction2d .<>. curve
+  direction2d .<>. curve = Vector2d.unit direction2d .<>. curve
 
 data CrossProductOf space units1 units2
   = CrossProductOf (VectorCurve2d (space @ units1)) (VectorCurve2d (space @ units2))
@@ -498,7 +498,7 @@ instance
   CrossMultiplication' (VectorCurve2d (space @ units)) (Direction2d space_)
   where
   type VectorCurve2d (space @ units) .><. Direction2d space_ = Curve1d (units :*: Unitless)
-  curve .><. direction2d = curve .><. Direction2d.vector direction2d
+  curve .><. direction2d = curve .><. Vector2d.unit direction2d
 
 instance
   space ~ space_ =>
@@ -509,7 +509,7 @@ instance
   CrossMultiplication' (Direction2d space) (VectorCurve2d (space_ @ units))
   where
   type Direction2d space .><. VectorCurve2d (space_ @ units) = Curve1d (Unitless :*: units)
-  direction2d .><. curve = Direction2d.vector direction2d .><. curve
+  direction2d .><. curve = Vector2d.unit direction2d .><. curve
 
 transformBy ::
   Transform2d a (space @ units1) ->

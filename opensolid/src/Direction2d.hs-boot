@@ -1,7 +1,7 @@
 module Direction2d
   ( Direction2d
   , unsafe
-  , vector
+  , unwrap
   , components
   , transformBy
   )
@@ -17,7 +17,7 @@ type role Direction2d phantom
 newtype Direction2d (space :: Type) = Direction2d (Vector2d (space @ Unitless))
 
 unsafe :: Vector2d (space @ Unitless) -> Direction2d space
-vector :: Direction2d space -> Vector2d (space @ Unitless)
+unwrap :: Direction2d space -> Vector2d (space @ Unitless)
 components :: Direction2d space -> (Float, Float)
 transformBy :: Transform2d.IsRigid a => Transform2d a (space @ units1) -> Direction2d space -> Direction2d space
 

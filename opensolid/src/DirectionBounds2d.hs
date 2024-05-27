@@ -12,11 +12,11 @@ module DirectionBounds2d
 where
 
 import Direction2d (Direction2d)
-import Direction2d qualified
 import OpenSolid
 import Range (Range)
 import Units qualified
 import Vector2d (Vector2d)
+import Vector2d qualified
 import VectorBounds2d (VectorBounds2d)
 import VectorBounds2d qualified
 
@@ -233,7 +233,7 @@ unwrap :: DirectionBounds2d space -> VectorBounds2d (space @ Unitless)
 unwrap (DirectionBounds2d vectorBounds) = vectorBounds
 
 constant :: Direction2d space -> DirectionBounds2d space
-constant direction = DirectionBounds2d (VectorBounds2d.constant (Direction2d.vector direction))
+constant direction = DirectionBounds2d (VectorBounds2d.constant (Vector2d.unit direction))
 
 hull2 ::
   Direction2d space ->
@@ -242,8 +242,8 @@ hull2 ::
 hull2 direction1 direction2 =
   DirectionBounds2d $
     VectorBounds2d.hull2
-      (Direction2d.vector direction1)
-      (Direction2d.vector direction2)
+      (Vector2d.unit direction1)
+      (Vector2d.unit direction2)
 
 hull3 ::
   Direction2d space ->
@@ -253,9 +253,9 @@ hull3 ::
 hull3 direction1 direction2 direction3 =
   DirectionBounds2d $
     VectorBounds2d.hull3
-      (Direction2d.vector direction1)
-      (Direction2d.vector direction2)
-      (Direction2d.vector direction3)
+      (Vector2d.unit direction1)
+      (Vector2d.unit direction2)
+      (Vector2d.unit direction3)
 
 hull4 ::
   Direction2d space ->
@@ -266,10 +266,10 @@ hull4 ::
 hull4 direction1 direction2 direction3 direction4 =
   DirectionBounds2d $
     VectorBounds2d.hull4
-      (Direction2d.vector direction1)
-      (Direction2d.vector direction2)
-      (Direction2d.vector direction3)
-      (Direction2d.vector direction4)
+      (Vector2d.unit direction1)
+      (Vector2d.unit direction2)
+      (Vector2d.unit direction3)
+      (Vector2d.unit direction4)
 
 xComponent :: DirectionBounds2d space -> Range Unitless
 xComponent (DirectionBounds2d vectorBounds) = VectorBounds2d.xComponent vectorBounds

@@ -1,6 +1,6 @@
 module Direction2d
   ( Direction2d
-  , vector
+  , unwrap
   , xComponent
   , yComponent
   , components
@@ -66,7 +66,7 @@ instance
   d1 ~= d2 = angleFrom d1 d2 ~= Angle.zero
 
 instance Negation (Direction2d space) where
-  negate direction = Direction2d -(vector direction)
+  negate direction = Direction2d -(unwrap direction)
 
 instance Multiplication' Sign (Direction2d space) where
   type Sign .*. Direction2d space = Direction2d space
@@ -84,13 +84,13 @@ instance Multiplication (Direction2d space) Sign (Direction2d space)
 
 instance Multiplication' (Qty units) (Direction2d space) where
   type Qty units .*. Direction2d space = Vector2d (space @ (units :*: Unitless))
-  scale .*. direction = scale .*. vector direction
+  scale .*. direction = scale .*. unwrap direction
 
 instance Multiplication (Qty units) (Direction2d space) (Vector2d (space @ units))
 
 instance Multiplication' (Direction2d space) (Qty units) where
   type Direction2d space .*. Qty units = Vector2d (space @ (Unitless :*: units))
-  direction .*. scale = vector direction .*. scale
+  direction .*. scale = unwrap direction .*. scale
 
 instance Multiplication (Direction2d space) (Qty units) (Vector2d (space @ units))
 
@@ -106,19 +106,19 @@ instance space ~ space_ => CrossMultiplication' (Direction2d space) (Direction2d
 
 instance space ~ space_ => CrossMultiplication (Direction2d space) (Direction2d space_) Float
 
-{-# INLINE vector #-}
-vector :: Direction2d space -> Vector2d (space @ Unitless)
-vector (Direction2d v) = v
+{-# INLINE unwrap #-}
+unwrap :: Direction2d space -> Vector2d (space @ Unitless)
+unwrap (Direction2d v) = v
 
 xComponent :: Direction2d space -> Float
-xComponent direction = Vector2d.xComponent (vector direction)
+xComponent direction = Vector2d.xComponent (unwrap direction)
 
 yComponent :: Direction2d space -> Float
-yComponent direction = Vector2d.yComponent (vector direction)
+yComponent direction = Vector2d.yComponent (unwrap direction)
 
 {-# INLINE components #-}
 components :: Direction2d space -> (Float, Float)
-components direction = Vector2d.components (vector direction)
+components direction = Vector2d.components (unwrap direction)
 
 {-# INLINE unsafe #-}
 unsafe :: Vector2d (space @ Unitless) -> Direction2d space
@@ -126,7 +126,7 @@ unsafe = Direction2d
 
 {-# INLINE lift #-}
 lift :: (Vector2d (space1 @ Unitless) -> Vector2d (space2 @ Unitless)) -> Direction2d space1 -> Direction2d space2
-lift vectorFunction direction = Direction2d (vectorFunction (vector direction))
+lift vectorFunction direction = Direction2d (vectorFunction (unwrap direction))
 
 positiveX :: Direction2d space
 positiveX = unsafe (Vector2d 1.0 0.0)
