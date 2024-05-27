@@ -290,8 +290,9 @@ placeIn ::
   Frame2d (global @ units) (Defines local) ->
   Curve2d (local @ units) ->
   Curve2d (global @ units)
-placeIn globalFrame (Internal.PlaceIn frame curve) = Internal.PlaceIn (Frame2d.placeIn globalFrame frame) curve
-placeIn globalFrame curve = Internal.PlaceIn globalFrame curve
+placeIn globalFrame = \case
+  Internal.PlaceIn frame curve -> Internal.PlaceIn (Frame2d.placeIn globalFrame frame) curve
+  curve -> Internal.PlaceIn globalFrame curve
 
 relativeTo ::
   Frame2d (global @ units) (Defines local) ->
@@ -305,49 +306,118 @@ transformBy ::
   Curve2d (space @ units)
 transformBy = Internal.transformBy
 
-translateBy :: Vector2d (space @ units) -> Curve2d (space @ units) -> Curve2d (space @ units)
+translateBy ::
+  Vector2d (space @ units) ->
+  Curve2d (space @ units) ->
+  Curve2d (space @ units)
 translateBy = Transform2d.translateByImpl transformBy
 
-translateIn :: Direction2d space -> Qty units -> Curve2d (space @ units) -> Curve2d (space @ units)
+translateIn ::
+  Direction2d space ->
+  Qty units ->
+  Curve2d (space @ units) ->
+  Curve2d (space @ units)
 translateIn = Transform2d.translateInImpl transformBy
 
-translateAlong :: Axis2d (space @ units) -> Qty units -> Curve2d (space @ units) -> Curve2d (space @ units)
+translateAlong ::
+  Axis2d (space @ units) ->
+  Qty units ->
+  Curve2d (space @ units) ->
+  Curve2d (space @ units)
 translateAlong = Transform2d.translateAlongImpl transformBy
 
-rotateAround :: Point2d (space @ units) -> Angle -> Curve2d (space @ units) -> Curve2d (space @ units)
+rotateAround ::
+  Point2d (space @ units) ->
+  Angle ->
+  Curve2d (space @ units) ->
+  Curve2d (space @ units)
 rotateAround = Transform2d.rotateAroundImpl transformBy
 
-mirrorAcross :: Axis2d (space @ units) -> Curve2d (space @ units) -> Curve2d (space @ units)
+mirrorAcross ::
+  Axis2d (space @ units) ->
+  Curve2d (space @ units) ->
+  Curve2d (space @ units)
 mirrorAcross = Transform2d.mirrorAcrossImpl transformBy
 
-scaleAbout :: Point2d (space @ units) -> Float -> Curve2d (space @ units) -> Curve2d (space @ units)
+scaleAbout ::
+  Point2d (space @ units) ->
+  Float ->
+  Curve2d (space @ units) ->
+  Curve2d (space @ units)
 scaleAbout = Transform2d.scaleAboutImpl transformBy
 
-scaleAlong :: Axis2d (space @ units) -> Float -> Curve2d (space @ units) -> Curve2d (space @ units)
+scaleAlong ::
+  Axis2d (space @ units) ->
+  Float ->
+  Curve2d (space @ units) ->
+  Curve2d (space @ units)
 scaleAlong = Transform2d.scaleAlongImpl transformBy
 
-translateByOwn :: (Curve2d (space @ units) -> Vector2d (space @ units)) -> Curve2d (space @ units) -> Curve2d (space @ units)
+translateByOwn ::
+  ( Curve2d (space @ units) ->
+    Vector2d (space @ units)
+  ) ->
+  Curve2d (space @ units) ->
+  Curve2d (space @ units)
 translateByOwn = Transform2d.translateByOwnImpl transformBy
 
-translateInOwn :: (Curve2d (space @ units) -> Direction2d space) -> Qty units -> Curve2d (space @ units) -> Curve2d (space @ units)
+translateInOwn ::
+  ( Curve2d (space @ units) ->
+    Direction2d space
+  ) ->
+  Qty units ->
+  Curve2d (space @ units) ->
+  Curve2d (space @ units)
 translateInOwn = Transform2d.translateInOwnImpl transformBy
 
-translateAlongOwn :: (Curve2d (space @ units) -> Axis2d (space @ units)) -> Qty units -> Curve2d (space @ units) -> Curve2d (space @ units)
+translateAlongOwn ::
+  ( Curve2d (space @ units) ->
+    Axis2d (space @ units)
+  ) ->
+  Qty units ->
+  Curve2d (space @ units) ->
+  Curve2d (space @ units)
 translateAlongOwn = Transform2d.translateAlongOwnImpl transformBy
 
-rotateAroundOwn :: (Curve2d (space @ units) -> Point2d (space @ units)) -> Angle -> Curve2d (space @ units) -> Curve2d (space @ units)
+rotateAroundOwn ::
+  ( Curve2d (space @ units) ->
+    Point2d (space @ units)
+  ) ->
+  Angle ->
+  Curve2d (space @ units) ->
+  Curve2d (space @ units)
 rotateAroundOwn = Transform2d.rotateAroundOwnImpl transformBy
 
-mirrorAcrossOwn :: (Curve2d (space @ units) -> Axis2d (space @ units)) -> Curve2d (space @ units) -> Curve2d (space @ units)
+mirrorAcrossOwn ::
+  ( Curve2d (space @ units) ->
+    Axis2d (space @ units)
+  ) ->
+  Curve2d (space @ units) ->
+  Curve2d (space @ units)
 mirrorAcrossOwn = Transform2d.mirrorAcrossOwnImpl transformBy
 
-scaleAboutOwn :: (Curve2d (space @ units) -> Point2d (space @ units)) -> Float -> Curve2d (space @ units) -> Curve2d (space @ units)
+scaleAboutOwn ::
+  ( Curve2d (space @ units) ->
+    Point2d (space @ units)
+  ) ->
+  Float ->
+  Curve2d (space @ units) ->
+  Curve2d (space @ units)
 scaleAboutOwn = Transform2d.scaleAboutOwnImpl transformBy
 
-scaleAlongOwn :: (Curve2d (space @ units) -> Axis2d (space @ units)) -> Float -> Curve2d (space @ units) -> Curve2d (space @ units)
+scaleAlongOwn ::
+  ( Curve2d (space @ units) ->
+    Axis2d (space @ units)
+  ) ->
+  Float ->
+  Curve2d (space @ units) ->
+  Curve2d (space @ units)
 scaleAlongOwn = Transform2d.scaleAlongOwnImpl transformBy
 
-curvature' :: Tolerance units => Curve2d (space @ units) -> Result DegenerateCurve (Curve1d (Unitless :/: units))
+curvature' ::
+  Tolerance units =>
+  Curve2d (space @ units) ->
+  Result DegenerateCurve (Curve1d (Unitless :/: units))
 curvature' curve = Result.do
   let firstDerivative = derivative curve
   let secondDerivative = VectorCurve2d.derivative firstDerivative
@@ -370,13 +440,20 @@ data TransformBy curve coordinateSystem where
 deriving instance Show (TransformBy curve coordinateSystem)
 
 instance Interface (TransformBy curve (space @ units)) (space @ units) where
-  startPointImpl (TransformBy transform curve) = Point2d.transformBy transform (startPointImpl curve)
-  endPointImpl (TransformBy transform curve) = Point2d.transformBy transform (endPointImpl curve)
-  evaluateAtImpl t (TransformBy transform curve) = Point2d.transformBy transform (evaluateAtImpl t curve)
-  segmentBoundsImpl t (TransformBy transform curve) = Bounds2d.transformBy transform (segmentBoundsImpl t curve)
-  derivativeImpl (TransformBy transform curve) = VectorCurve2d.transformBy transform (derivativeImpl curve)
-  reverseImpl (TransformBy transform curve) = TransformBy transform (reverseImpl curve)
-  boundsImpl (TransformBy transform curve) = Bounds2d.transformBy transform (boundsImpl curve)
+  startPointImpl (TransformBy transform curve) =
+    Point2d.transformBy transform (startPointImpl curve)
+  endPointImpl (TransformBy transform curve) =
+    Point2d.transformBy transform (endPointImpl curve)
+  evaluateAtImpl t (TransformBy transform curve) =
+    Point2d.transformBy transform (evaluateAtImpl t curve)
+  segmentBoundsImpl t (TransformBy transform curve) =
+    Bounds2d.transformBy transform (segmentBoundsImpl t curve)
+  derivativeImpl (TransformBy transform curve) =
+    VectorCurve2d.transformBy transform (derivativeImpl curve)
+  reverseImpl (TransformBy transform curve) =
+    TransformBy transform (reverseImpl curve)
+  boundsImpl (TransformBy transform curve) =
+    Bounds2d.transformBy transform (boundsImpl curve)
   transformByImpl transform (TransformBy existing curve) =
     Curve2d.wrap $
       TransformBy (Transform2d.toAffine existing >> Transform2d.toAffine transform) curve
