@@ -19,7 +19,7 @@ newtype Direction2d (space :: Type) = Direction2d (Vector2d (space @ Unitless))
 unsafe :: Vector2d (space @ Unitless) -> Direction2d space
 unwrap :: Direction2d space -> Vector2d (space @ Unitless)
 components :: Direction2d space -> (Float, Float)
-transformBy :: Transform2d.IsRigid a => Transform2d a (space @ units1) -> Direction2d space -> Direction2d space
+transformBy :: Transform2d.IsOrthonormal a => Transform2d a (space @ units1) -> Direction2d space -> Direction2d space
 
 instance Multiplication' (Qty units) (Direction2d space)
 

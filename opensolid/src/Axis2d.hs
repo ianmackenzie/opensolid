@@ -62,7 +62,7 @@ moveTo :: Point2d (space @ units) -> Axis2d (space @ units) -> Axis2d (space @ u
 moveTo newOriginPoint axis = Axis2d newOriginPoint (direction axis)
 
 transformBy ::
-  Transform2d.IsRigid a =>
+  Transform2d.IsOrthonormal a =>
   Transform2d a (space @ units) ->
   Axis2d (space @ units) ->
   Axis2d (space @ units)

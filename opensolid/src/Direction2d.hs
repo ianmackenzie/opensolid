@@ -195,7 +195,7 @@ random :: Random.Generator (Direction2d space)
 random = Random.map fromAngle (Qty.random -Angle.pi Angle.pi)
 
 transformBy ::
-  Transform2d.IsRigid a =>
+  Transform2d.IsOrthonormal a =>
   Transform2d a (space @ translationUnits) ->
   Direction2d space ->
   Direction2d space
