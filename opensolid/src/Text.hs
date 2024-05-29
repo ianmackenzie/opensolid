@@ -19,16 +19,24 @@ module Text
   , endsWith
   , toLower
   , toUpper
+  , encodeUtf8
+  , decodeUtf8
+  , WithReplacementCharacters
+  , acceptReplacementCharacters
   )
 where
 
 import Arithmetic
 import Basics
 import Composition
+import Data.ByteString (ByteString)
 import Data.Text qualified
+import Data.Text.Encoding qualified
+import Error (Error)
 import Float (Float)
 import Float qualified
 import List qualified
+import Result (Result (Error, Ok))
 import Prelude qualified
 
 concat :: List Text -> Text
@@ -91,3 +99,20 @@ toLower = Data.Text.toLower
 
 toUpper :: Text -> Text
 toUpper = Data.Text.toUpper
+
+encodeUtf8 :: Text -> ByteString
+encodeUtf8 = Data.Text.Encoding.encodeUtf8
+
+newtype WithReplacementCharacters = WithReplacementCharacters Text deriving (Show, Eq)
+
+instance Error WithReplacementCharacters
+
+decodeUtf8 :: ByteString -> Result WithReplacementCharacters Text
+decodeUtf8 byteString =
+  case Data.Text.Encoding.decodeUtf8' byteString of
+    Prelude.Right text -> Ok text
+    Prelude.Left _ ->
+      Error (WithReplacementCharacters (Data.Text.Encoding.decodeUtf8Lenient byteString))
+
+acceptReplacementCharacters :: WithReplacementCharacters -> Text
+acceptReplacementCharacters (WithReplacementCharacters text) = text
