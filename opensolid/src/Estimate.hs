@@ -1,6 +1,3 @@
-{-# LANGUAGE NoFieldSelectors #-}
-{-# OPTIONS_GHC -Wno-partial-fields #-}
-
 module Estimate
   ( Estimate
   , Interface (..)
@@ -48,15 +45,8 @@ instance Interface (Qty units) units where
   refineImpl = exact
 
 data Estimate units where
-  Estimate ::
-    Interface a units =>
-    { implementation :: a
-    , cachedBounds :: Range units
-    } ->
-    Estimate units
-  Coerce ::
-    Estimate units1 ->
-    Estimate units2
+  Estimate :: Interface a units => a -> Range units -> Estimate units
+  Coerce :: Estimate units1 -> Estimate units2
 
 instance HasUnits (Estimate units) where
   type Units (Estimate units) = units
@@ -73,17 +63,17 @@ instance units ~ units_ => ApproximateEquality (Estimate units) (Qty units_) uni
     | otherwise = refine estimate ~= value
 
 wrap :: Interface a units => a -> Estimate units
-wrap implementation = Estimate{implementation, cachedBounds = boundsImpl implementation}
+wrap implementation = Estimate implementation (boundsImpl implementation)
 
 exact :: Qty units -> Estimate units
 exact value = wrap value
 
 bounds :: Estimate units -> Range units
-bounds (Estimate{cachedBounds}) = cachedBounds
+bounds (Estimate _ cachedBounds) = cachedBounds
 bounds (Coerce estimate) = Units.coerce (bounds estimate)
 
 refine :: Estimate units -> Estimate units
-refine (Estimate{implementation}) = refineImpl implementation
+refine (Estimate implementation _) = refineImpl implementation
 refine (Coerce estimate) = Coerce (refine estimate)
 
 satisfy :: (Range units -> Bool) -> Estimate units -> Range units
