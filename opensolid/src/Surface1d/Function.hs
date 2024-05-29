@@ -1303,9 +1303,7 @@ finalizeZeros f partialZeros = Result.do
         , tangentPoints
         , saddleRegions
         } = partialZeros
-  let finalizedCrossingCurveResults =
-        Maybe.collect (finalizeCrossingCurve f saddleRegions) crossingCurves
-  finalizedCrossingCurves <- Result.combine finalizedCrossingCurveResults
+  let finalizedCrossingCurves = Maybe.collect (finalizeCrossingCurve f saddleRegions) crossingCurves
   -- Check that there were no degenerate curve segments left
   Debug.assert (List.length finalizedCrossingCurves == List.length crossingCurves)
   Ok
@@ -1324,7 +1322,7 @@ finalizeCrossingCurve ::
   Function units ->
   List SaddleRegion ->
   PartialZeros.CrossingCurve ->
-  Maybe (Result ZerosError (NonEmpty (Curve2d Uv.Coordinates)))
+  Maybe (NonEmpty (Curve2d Uv.Coordinates))
 finalizeCrossingCurve _ _ (PartialZeros.DegenerateCrossingCurve{}) = Nothing
 finalizeCrossingCurve f saddleRegions (PartialZeros.CrossingCurve{segments}) = do
   let firstCurve = NonEmpty.first segments
@@ -1333,21 +1331,18 @@ finalizeCrossingCurve f saddleRegions (PartialZeros.CrossingCurve{segments}) = d
   let endPoint = Curve2d.endPoint lastCurve
   let regionContaining point = List.find (SaddleRegion.includes point) saddleRegions
   let reverseExtension curves = List.reverseMap Curve2d.reverse curves
-  case (regionContaining startPoint, regionContaining endPoint) of
-    (Nothing, Nothing) -> Just (Ok segments)
-    (Just startRegion, Nothing) ->
-      Just do
-        let extension = connectingCurves f startRegion firstCurve
-        Ok (extension + segments)
-    (Nothing, Just endRegion) ->
-      Just do
-        let extension = connectingCurves f endRegion (Curve2d.reverse lastCurve)
-        Ok (segments + reverseExtension extension)
-    (Just startRegion, Just endRegion) ->
-      Just do
-        let startExtension = connectingCurves f startRegion firstCurve
-        let endExtension = connectingCurves f endRegion (Curve2d.reverse lastCurve)
-        Ok (startExtension + segments + reverseExtension endExtension)
+  Just $ case (regionContaining startPoint, regionContaining endPoint) of
+    (Nothing, Nothing) -> segments
+    (Just startRegion, Nothing) -> do
+      let extension = connectingCurves f startRegion startPoint
+      extension + segments
+    (Nothing, Just endRegion) -> do
+      let extension = connectingCurves f endRegion endPoint
+      segments + reverseExtension extension
+    (Just startRegion, Just endRegion) -> do
+      let startExtension = connectingCurves f startRegion startPoint
+      let endExtension = connectingCurves f endRegion endPoint
+      startExtension + segments + reverseExtension endExtension
 
 finalizeTangentCurve :: PartialZeros.TangentCurve -> Maybe (NonEmpty (Curve2d Uv.Coordinates), Sign)
 finalizeTangentCurve (PartialZeros.DegenerateTangentCurve{}) = Nothing
@@ -1359,10 +1354,10 @@ finalizeTangentLoop (PartialZeros.TangentLoop{segments, sign}) = (segments, sign
 finalizeTangentPoint :: PartialZeros.TangentPoint -> (Uv.Point, Sign)
 finalizeTangentPoint (PartialZeros.TangentPoint{point, sign}) = (point, sign)
 
-connectingCurves :: Function units -> SaddleRegion -> Curve2d Uv.Coordinates -> List (Curve2d Uv.Coordinates)
-connectingCurves f saddleRegion curve = do
+connectingCurves :: Function units -> SaddleRegion -> Uv.Point -> List (Curve2d Uv.Coordinates)
+connectingCurves f saddleRegion point = do
   let frame = SaddleRegion.frame saddleRegion
-  let (xEnd, yEnd) = Point2d.coordinates (Point2d.relativeTo frame (Curve2d.startPoint curve))
+  let (xEnd, yEnd) = Point2d.coordinates (Point2d.relativeTo frame point)
   let connectorSize = 1e-3
   let xConnection = if Qty.abs xEnd <= connectorSize then xEnd else connectorSize * Qty.sign xEnd
   let fXY = reparameterize frame f
