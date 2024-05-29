@@ -5,6 +5,7 @@ module Http.Server.Response
   , ok
   , notFound
   , badRequest
+  , methodNotAllowed
   , internalServerError
   , text
   , json
@@ -49,6 +50,9 @@ error status message = custom status [contentType "text/plain"] (Text.encodeUtf8
 
 badRequest :: Text -> Response
 badRequest = error Status.badRequest400
+
+methodNotAllowed :: Response
+methodNotAllowed = custom Status.methodNotAllowed405 [] Data.ByteString.empty
 
 internalServerError :: Text -> Response
 internalServerError = error Status.internalServerError500
