@@ -36,6 +36,10 @@ common config
     , bytestring
     , scientific
     , vector
+    , http-types
+    , case-insensitive
+    , wai
+    , warp
   ghc-options:
       -Wall
       -Werror
@@ -116,6 +120,9 @@ library
       Float
       Frame2d
       Fuzzy
+      Http.Server
+      Http.Server.Request
+      Http.Server.Response
       Int
       Intersects
       IO
