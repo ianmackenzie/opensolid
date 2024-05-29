@@ -15,6 +15,7 @@ import Network.Wai (Application, Request, Response, ResponseReceived)
 import Network.Wai qualified
 import Network.Wai.Handler.Warp qualified as Warp
 import OpenSolid
+import Text qualified
 
 handle ::
   Request ->
@@ -26,4 +27,9 @@ handle request callback respond = IO.do
   callback (Data.ByteString.toStrict bytes) respond
 
 runOnPort :: Int -> Application -> IO ()
-runOnPort = Warp.run
+runOnPort portNumber application = IO.do
+  let settings =
+        Warp.defaultSettings
+          |> Warp.setPort portNumber
+          |> Warp.setBeforeMainLoop (IO.printLine ("Listening on port " + Text.int portNumber))
+  Warp.runSettings settings application
