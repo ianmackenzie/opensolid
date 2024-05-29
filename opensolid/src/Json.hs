@@ -17,7 +17,8 @@ where
 import Composition
 import Data.Aeson qualified
 import Data.Aeson.KeyMap qualified
-import Data.ByteString.Lazy (ByteString)
+import Data.ByteString (ByteString)
+import Data.ByteString qualified
 import Data.Scientific
 import Data.Vector qualified
 import Float qualified
@@ -82,10 +83,10 @@ fromAeson = \case
   Data.Aeson.Object values -> Object (Map.map fromAeson (Data.Aeson.KeyMap.toMapText values))
 
 encode :: Json -> ByteString
-encode = Data.Aeson.encode
+encode = Data.Aeson.encode >> Data.ByteString.toStrict
 
 decode :: ByteString -> Result Text Json
 decode byteString =
-  case Data.Aeson.eitherDecode byteString of
+  case Data.Aeson.eitherDecodeStrict byteString of
     Prelude.Right json -> Ok json
     Prelude.Left error -> Error (Text.pack error)
