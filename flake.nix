@@ -15,6 +15,7 @@
         overlay = final: prev: {
           opensolid = final.callCabal2nix "opensolid" ./opensolid { };
           opensolid-sandbox = final.callCabal2nix "sandbox" ./sandbox { };
+          opensolid-test-server = final.callCabal2nix "test-server" ./test-server { };
           opensolid-api = final.callCabal2nix "opensolid-api" ./opensolid-api { };
           opensolid-python = final.callCabal2nix "opensolid-python" ./opensolid-python { };
           opensolid-ffi = pkgs.haskell.lib.overrideCabal
@@ -52,6 +53,10 @@
             type = "app";
             program = "${myHaskellPackages.opensolid-sandbox}/bin/sandbox";
           };
+          test-server = {
+            type = "app";
+            program = "${myHaskellPackages.opensolid-test-server}/bin/test-server";
+          };
           default = sandbox;
         };
 
@@ -59,6 +64,7 @@
           opensolid = myHaskellPackages.opensolid;
           opensolid-ffi = myHaskellPackages.opensolid-ffi;
           sandbox = myHaskellPackages.opensolid-sandbox;
+          test-server = myHaskellPackages.opensolid-test-server;
           default = opensolid;
         };
 
@@ -67,6 +73,7 @@
             packages = p: [
               p.opensolid
               p.opensolid-sandbox
+              p.opensolid-test-server
               p.opensolid-api
               p.opensolid-ffi
               p.opensolid-python
