@@ -29,6 +29,7 @@ module Estimate
   )
 where
 
+import Float qualified
 import List qualified
 import NonEmpty qualified
 import OpenSolid
@@ -128,6 +129,18 @@ instance Interface (Add units) units where
 instance Addition (Estimate units) (Estimate units) (Estimate units) where
   first + second = wrap (Add first second)
 
+instance Addition (Estimate units) (Qty units) (Estimate units) where
+  estimate + value = estimate + exact value
+
+instance Addition (Qty units) (Estimate units) (Estimate units) where
+  value + estimate = exact value + estimate
+
+instance Addition (Estimate Unitless) Int (Estimate Unitless) where
+  estimate + n = estimate + Float.fromInt n
+
+instance Addition Int (Estimate Unitless) (Estimate Unitless) where
+  n + estimate = Float.fromInt n + estimate
+
 data Subtract units = Subtract (Estimate units) (Estimate units)
 
 instance Interface (Subtract units) units where
@@ -142,6 +155,98 @@ instance Interface (Subtract units) units where
 
 instance Subtraction (Estimate units) (Estimate units) (Estimate units) where
   first - second = wrap (Subtract first second)
+
+instance Subtraction (Estimate units) (Qty units) (Estimate units) where
+  estimate - value = estimate - exact value
+
+instance Subtraction (Qty units) (Estimate units) (Estimate units) where
+  value - estimate = exact value - estimate
+
+instance Subtraction (Estimate Unitless) Int (Estimate Unitless) where
+  estimate - n = estimate - Float.fromInt n
+
+instance Subtraction Int (Estimate Unitless) (Estimate Unitless) where
+  n - estimate = Float.fromInt n - estimate
+
+data Product units1 units2 = Product (Estimate units1) (Estimate units2)
+
+instance Interface (Product units1 units2) (units1 :*: units2) where
+  boundsImpl (Product first second) = bounds first .*. bounds second
+  refineImpl (Product first second) = do
+    let firstBounds = bounds first
+    let secondBounds = bounds second
+    let firstWidth = Range.width firstBounds
+    let secondWidth = Range.width secondBounds
+    let firstMetric = firstWidth .*. Range.midpoint secondBounds
+    let secondMetric = Range.midpoint firstBounds .*. secondWidth
+    let combinedMetric = firstWidth .*. secondWidth
+    let refinedProduct
+          | firstMetric > secondMetric && firstMetric > combinedMetric = Product (refine first) second
+          | secondMetric > firstMetric && secondMetric > combinedMetric = Product first (refine second)
+          | otherwise = Product (refine first) (refine second)
+    wrap refinedProduct
+
+instance Multiplication' (Estimate units1) (Estimate units2) where
+  type Estimate units1 .*. Estimate units2 = Estimate (units1 :*: units2)
+  first .*. second = wrap (Product first second)
+
+instance Multiplication' (Estimate units1) (Qty units2) where
+  type Estimate units1 .*. Qty units2 = Estimate (units1 :*: units2)
+  estimate .*. value = wrap (Product estimate (exact value))
+
+instance Multiplication' (Qty units1) (Estimate units2) where
+  type Qty units1 .*. Estimate units2 = Estimate (units1 :*: units2)
+  value .*. estimate = wrap (Product (exact value) estimate)
+
+instance Multiplication' (Estimate units) Int where
+  type Estimate units .*. Int = Estimate (units :*: Unitless)
+  estimate .*. n = estimate .*. Float.fromInt n
+
+instance Multiplication' Int (Estimate units) where
+  type Int .*. Estimate units = Estimate (Unitless :*: units)
+  n .*. estimate = Float.fromInt n .*. estimate
+
+instance
+  Units.Product units1 units2 units3 =>
+  Multiplication
+    (Estimate units1)
+    (Estimate units2)
+    (Estimate units3)
+
+instance
+  Units.Product units1 units2 units3 =>
+  Multiplication
+    (Estimate units1)
+    (Qty units2)
+    (Estimate units3)
+
+instance
+  Units.Product units1 units2 units3 =>
+  Multiplication
+    (Qty units1)
+    (Estimate units2)
+    (Estimate units3)
+
+instance Multiplication (Estimate units) Int (Estimate units)
+
+instance Multiplication Int (Estimate units) (Estimate units)
+
+instance Division' (Estimate units1) (Qty units2) where
+  type Estimate units1 ./. Qty units2 = Estimate (units1 :/: units2)
+  estimate ./. value = estimate ^*. (1.0 ./. value)
+
+instance
+  Units.Quotient units1 units2 units3 =>
+  Division
+    (Estimate units1)
+    (Qty units2)
+    (Estimate units3)
+
+instance Division' (Estimate units) Int where
+  type Estimate units ./. Int = Estimate (units :/: Unitless)
+  estimate ./. n = estimate ./. Float.fromInt n
+
+instance Division (Estimate units) Int (Estimate units)
 
 newtype Sum units = Sum (NonEmpty (Estimate units))
 
