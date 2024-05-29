@@ -1,4 +1,12 @@
-module Http.Server (Application, runOnPort, handle) where
+module Http.Server
+  ( Application
+  , Request
+  , Response
+  , ResponseReceived
+  , runOnPort
+  , handle
+  )
+where
 
 import Data.ByteString (ByteString)
 import Data.ByteString qualified
