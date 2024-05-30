@@ -1,9 +1,9 @@
 module Json
-  ( Json (..)
+  ( Json (.., Json.Int, Object)
   , Format
   , Schema
   , object
-  , string
+  , text
   , int
   , float
   , bool
@@ -27,48 +27,58 @@ import {-# SOURCE #-} Json.Schema (Schema)
 import List qualified
 import Map (Map)
 import Map qualified
-import OpenSolid
+import OpenSolid hiding (pattern Int)
 import Text qualified
 import Prelude qualified
 
 data Json
   = Null
   | Bool Bool
-  | Number Float
-  | String Text
-  | Array (List Json)
-  | Object (Map Text Json)
+  | Float Float
+  | Text Text
+  | List (List Json)
+  | Map (Map Text Json)
   deriving (Eq, Show)
 
+pattern Int :: Int -> Json
+pattern Int n <- Float (Float.Int n)
+
+pattern Object :: List (Text, Json) -> Json
+pattern Object fields <- (getFields -> Just fields)
+
+getFields :: Json -> Maybe (List (Text, Json))
+getFields (Map fields) = Just (Map.toList fields)
+getFields _ = Nothing
+
 int :: Int -> Json
-int = Float.fromInt >> Number
+int = Float.fromInt >> Float
 
 float :: Float -> Json
-float = Number
+float = Float
 
 bool :: Bool -> Json
 bool = Bool
 
-string :: Text -> Json
-string = String
+text :: Text -> Json
+text = Text
 
 list :: (a -> Json) -> List a -> Json
-list encodeItem items = Array (List.map encodeItem items)
+list encodeItem items = List (List.map encodeItem items)
 
 object :: List (Text, Json) -> Json
-object fields = Object (Map.fromList fields)
+object fields = Map (Map.fromList fields)
 
 map :: Map Text Json -> Json
-map = Object
+map = Map
 
 instance Data.Aeson.ToJSON Json where
   toJSON = \case
     Null -> Data.Aeson.Null
     Bool value -> Data.Aeson.toJSON value
-    Number value -> Data.Aeson.toJSON (Float.toDouble value)
-    String value -> Data.Aeson.toJSON value
-    Array values -> Data.Aeson.toJSON values
-    Object fields -> Data.Aeson.toJSON fields
+    Float value -> Data.Aeson.toJSON (Float.toDouble value)
+    Text value -> Data.Aeson.toJSON value
+    List values -> Data.Aeson.toJSON values
+    Map fields -> Data.Aeson.toJSON fields
 
 instance Data.Aeson.FromJSON Json where
   parseJSON = fromAeson >> Prelude.return
@@ -77,10 +87,10 @@ fromAeson :: Data.Aeson.Value -> Json
 fromAeson = \case
   Data.Aeson.Null -> Null
   Data.Aeson.Bool value -> Bool value
-  Data.Aeson.Number value -> Number (Data.Scientific.toRealFloat value)
-  Data.Aeson.String value -> String value
-  Data.Aeson.Array values -> Array (List.map fromAeson (Data.Vector.toList values))
-  Data.Aeson.Object values -> Object (Map.map fromAeson (Data.Aeson.KeyMap.toMapText values))
+  Data.Aeson.Number value -> Float (Data.Scientific.toRealFloat value)
+  Data.Aeson.String value -> Text value
+  Data.Aeson.Array values -> List (List.map fromAeson (Data.Vector.toList values))
+  Data.Aeson.Object values -> Map (Map.map fromAeson (Data.Aeson.KeyMap.toMapText values))
 
 encode :: Json -> ByteString
 encode = Data.Aeson.encode >> Data.ByteString.toStrict

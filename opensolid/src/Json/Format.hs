@@ -1,7 +1,7 @@
 module Json.Format
   ( Format (..)
   , coerce
-  , map
+  , convert
   , validate
   , float
   , int
@@ -9,6 +9,7 @@ module Json.Format
   , text
   , list
   , nonEmpty
+  , map
   , object
   , singleField
   , requiredField
@@ -23,7 +24,6 @@ where
 import Data.Coerce (Coercible)
 import Data.Coerce qualified
 import Error qualified
-import Float qualified
 import Json (Json)
 import Json qualified
 import Json.FieldSchema (FieldSchema (FieldSchema))
@@ -68,10 +68,10 @@ removeMetadata schema =
     }
 
 coerce :: Coercible a b => Format a -> Format b
-coerce = map Data.Coerce.coerce Data.Coerce.coerce
+coerce = convert Data.Coerce.coerce Data.Coerce.coerce
 
-map :: (a -> b) -> (b -> a) -> Format a -> Format b
-map lift drop format = validate (lift >> Ok) drop format
+convert :: (a -> b) -> (b -> a) -> Format a -> Format b
+convert lift drop format = validate (lift >> Ok) drop format
 
 validate :: (a -> Result x b) -> (b -> a) -> Format a -> Format b
 validate lift drop format = do
@@ -94,13 +94,13 @@ decodeBool _ = Error "Expected a boolean"
 
 text :: Format Text
 text =
-  Format{encode = Json.string, decode = decodeText, schema = Json.Schema.string}
+  Format{encode = Json.text, decode = decodeText, schema = Json.Schema.string}
     |> title "Text"
     |> description "Arbitrary text"
 
 decodeText :: Json -> Result Text Text
-decodeText (Json.String value) = Ok value
-decodeText _ = Error "Expected a string"
+decodeText (Json.Text value) = Ok value
+decodeText _ = Error "Expected text"
 
 float :: Format Float
 float =
@@ -109,8 +109,8 @@ float =
     |> description "A unitless floating-point number"
 
 decodeFloat :: Json -> Result Text Float
-decodeFloat (Json.Number value) = Ok value
-decodeFloat _ = Error "Expected a float"
+decodeFloat (Json.Float value) = Ok value
+decodeFloat _ = Error "Expected a number"
 
 int :: Format Int
 int =
@@ -119,37 +119,56 @@ int =
     |> description "An integer"
 
 decodeInt :: Json -> Result Text Int
-decodeInt (Json.Number value) = Float.toInt value ?? Error "Expected an integer"
+decodeInt (Json.Int value) = Ok value
 decodeInt _ = Error "Expected an integer"
 
-decodeArray :: (Json -> Result Text a) -> Json -> Result Text (List a)
-decodeArray decodeItem = \case
-  Json.Array items -> Result.collect decodeItem items
-  _ -> Error "Expected an array"
+decodeList :: (Json -> Result Text a) -> Json -> Result Text (List a)
+decodeList decodeItem = \case
+  Json.List items -> Result.collect decodeItem items
+  _ -> Error "Expected a list"
 
 list :: Format item -> Format (List item)
 list (Format encodeItem decodeItem itemSchema) =
   Format
     { encode = Json.list encodeItem
-    , decode = decodeArray decodeItem
+    , decode = decodeList decodeItem
     , schema = Json.Schema.array{Json.Schema.items = Just itemSchema}
     }
 
 toNonEmpty :: List item -> Result Text (NonEmpty item)
 toNonEmpty (NonEmpty items) = Ok items
-toNonEmpty [] = Error "Array is empty"
+toNonEmpty [] = Error "List is empty"
 
 nonEmpty :: Format item -> Format (NonEmpty item)
 nonEmpty (Format encodeItem decodeItem itemSchema) =
   Format
     { encode = NonEmpty.toList >> Json.list encodeItem
-    , decode = decodeArray decodeItem >> Result.andThen toNonEmpty
+    , decode = decodeList decodeItem >> Result.andThen toNonEmpty
     , schema = Json.Schema.array{Json.Schema.items = Just itemSchema, Json.Schema.minItems = Just 1}
+    }
+
+decodeMap :: (Json -> Result Text a) -> Json -> Result Text (Map Text a)
+decodeMap decodeItem = \case
+  Json.Map fields ->
+    Map.toList fields
+      |> Result.collect (decodeMapField decodeItem)
+      |> Result.map Map.fromList
+  _ -> Error "Expected a map"
+
+decodeMapField :: (Json -> Result Text a) -> (Text, Json) -> Result Text (Text, a)
+decodeMapField decodeItem (name, json) = Result.map (name,) (decodeItem json)
+
+map :: Format item -> Format (Map Text item)
+map (Format encodeItem decodeItem itemSchema) =
+  Format
+    { encode = Map.map encodeItem >> Json.map
+    , decode = decodeMap decodeItem
+    , schema = Json.Schema.object{Json.Schema.items = Just itemSchema}
     }
 
 decodeObject :: (Map Text Json -> Result Text a) -> Json -> Result Text a
 decodeObject fromFields = \case
-  Json.Object fields -> fromFields fields
+  Json.Map fields -> fromFields fields
   _ -> Error "Expected an object"
 
 object :: constructor -> Fields constructor parent () -> Format parent
