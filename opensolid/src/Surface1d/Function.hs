@@ -214,13 +214,13 @@ instance Multiplication (Function units) Int (Function units)
 
 instance Multiplication' (Function units) Int where
   type Function units .*. Int = Function (units :*: Unitless)
-  function .*. value = function .*. Float.fromInt value
+  function .*. value = function .*. Float.int value
 
 instance Multiplication Int (Function units) (Function units)
 
 instance Multiplication' Int (Function units) where
   type Int .*. Function units = Function (Unitless :*: units)
-  value .*. function = Float.fromInt value .*. function
+  value .*. function = Float.int value .*. function
 
 instance
   Units.Quotient units1 units2 units3 =>
@@ -245,7 +245,7 @@ instance Division (Function units) Int (Function units)
 
 instance Division' (Function units) Int where
   type Function units ./. Int = Function (units :/: Unitless)
-  function ./. value = function ./. Float.fromInt value
+  function ./. value = function ./. Float.int value
 
 instance
   Units.Quotient units1 units2 units3 =>
@@ -261,7 +261,7 @@ instance
 
 instance Division' Int (Function units) where
   type Int ./. Function units = Function (Unitless :/: units)
-  value ./. function = Float.fromInt value ./. function
+  value ./. function = Float.int value ./. function
 
 evaluateAt :: Uv.Point -> Function units -> Qty units
 evaluateAt uv function =

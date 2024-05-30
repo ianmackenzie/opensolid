@@ -159,16 +159,16 @@ instance units ~ units_ => Addition (Qty units) (Curve1d units_) (Curve1d units)
   value + curve = constant value + curve
 
 instance Addition (Curve1d Unitless) Int (Curve1d Unitless) where
-  curve + value = curve + Float.fromInt value
+  curve + value = curve + Float.int value
 
 instance Addition Int (Curve1d Unitless) (Curve1d Unitless) where
-  value + curve = Float.fromInt value + curve
+  value + curve = Float.int value + curve
 
 instance Subtraction (Curve1d Unitless) Int (Curve1d Unitless) where
-  curve - value = curve - Float.fromInt value
+  curve - value = curve - Float.int value
 
 instance Subtraction Int (Curve1d Unitless) (Curve1d Unitless) where
-  value - curve = Float.fromInt value - curve
+  value - curve = Float.int value - curve
 
 instance units ~ units_ => Subtraction (Curve1d units) (Curve1d units_) (Curve1d units) where
   curve - Constant (Qty 0.0) = curve
@@ -200,11 +200,11 @@ instance Multiplication' (Curve1d units1) (Curve1d units2) where
 
 instance Multiplication' Int (Curve1d units) where
   type Int .*. Curve1d units = Curve1d (Unitless :*: units)
-  value .*. curve = Float.fromInt value .*. curve
+  value .*. curve = Float.int value .*. curve
 
 instance Multiplication' (Curve1d units) Int where
   type Curve1d units .*. Int = Curve1d (units :*: Unitless)
-  curve .*. value = curve .*. Float.fromInt value
+  curve .*. value = curve .*. Float.int value
 
 instance Multiplication Int (Curve1d units) (Curve1d units)
 
@@ -257,7 +257,7 @@ instance Division (Curve1d units) Int (Curve1d units)
 
 instance Division' (Curve1d units) Int where
   type Curve1d units ./. Int = Curve1d (units :/: Unitless)
-  curve ./. value = curve ./. Float.fromInt value
+  curve ./. value = curve ./. Float.int value
 
 instance
   Units.Quotient Unitless units1 units2 =>
@@ -265,7 +265,7 @@ instance
 
 instance Division' Int (Curve1d units) where
   type Int ./. Curve1d units = Curve1d (Unitless :/: units)
-  value ./. curve = Float.fromInt value ./. curve
+  value ./. curve = Float.int value ./. curve
 
 evaluateAt :: Float -> Curve1d units -> Qty units
 evaluateAt tValue curve =

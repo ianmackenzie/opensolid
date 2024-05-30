@@ -107,13 +107,13 @@ instance
 
 instance Multiplication' Int (Vector3d (space @ units)) where
   type Int .*. Vector3d (space @ units) = Vector3d (space @ (Unitless :*: units))
-  scale .*. vector = Float.fromInt scale .*. vector
+  scale .*. vector = Float.int scale .*. vector
 
 instance Multiplication Int (Vector3d (space @ units)) (Vector3d (space @ units))
 
 instance Multiplication' (Vector3d (space @ units)) Int where
   type Vector3d (space @ units) .*. Int = Vector3d (space @ (units :*: Unitless))
-  vector .*. scale = vector .*. Float.fromInt scale
+  vector .*. scale = vector .*. Float.int scale
 
 instance Multiplication (Vector3d (space @ units)) Int (Vector3d (space @ units))
 
@@ -143,7 +143,7 @@ instance
 
 instance Division' (Vector3d (space @ units)) Int where
   type Vector3d (space @ units) ./. Int = Vector3d (space @ (units :/: Unitless))
-  vector ./. scale = vector ./. Float.fromInt scale
+  vector ./. scale = vector ./. Float.int scale
 
 instance Division (Vector3d (space @ units)) Int (Vector3d (space @ units))
 

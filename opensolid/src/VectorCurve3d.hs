@@ -256,11 +256,11 @@ instance Multiplication' (Curve1d units1) (VectorCurve3d (space @ units2)) where
 
 instance Multiplication' (VectorCurve3d (space @ units)) Int where
   type VectorCurve3d (space @ units) .*. Int = VectorCurve3d (space @ (units :*: Unitless))
-  curve .*. scale = curve .*. Float.fromInt scale
+  curve .*. scale = curve .*. Float.int scale
 
 instance Multiplication' Int (VectorCurve3d (space @ units)) where
   type Int .*. VectorCurve3d (space @ units) = VectorCurve3d (space @ (Unitless :*: units))
-  scale .*. curve = Float.fromInt scale .*. curve
+  scale .*. curve = Float.int scale .*. curve
 
 instance Multiplication (VectorCurve3d (space @ units)) Int (VectorCurve3d (space @ units))
 
@@ -444,7 +444,7 @@ instance Division' (VectorCurve3d (space @ units1)) (Qty units2) where
 
 instance Division' (VectorCurve3d (space @ units)) Int where
   type VectorCurve3d (space @ units) ./. Int = VectorCurve3d (space @ (units :/: Unitless))
-  curve ./. value = curve ./. Float.fromInt value
+  curve ./. value = curve ./. Float.int value
 
 instance Division (VectorCurve3d (space @ units)) Int (VectorCurve3d (space @ units))
 

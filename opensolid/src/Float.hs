@@ -4,7 +4,7 @@ module Float
   , fromRational
   , fromDouble
   , toDouble
-  , fromInt
+  , int
   , parse
   , ceiling
   , round
@@ -67,13 +67,13 @@ fromDouble = Data.Coerce.coerce
 toDouble :: Float -> Prelude.Double
 toDouble = Data.Coerce.coerce
 
-fromInt :: Int -> Float
-fromInt = fromIntegral
+int :: Int -> Float
+int = fromIntegral
 
 toInt :: Float -> Maybe Int
 toInt value = do
   let candidate = round value
-  if fromInt candidate == value then Just candidate else Nothing
+  if int candidate == value then Just candidate else Nothing
 
 parse :: Text -> Result Text Float
 parse = Text.Parse.float

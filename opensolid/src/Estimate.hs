@@ -126,10 +126,10 @@ instance Addition (Qty units) (Estimate units) (Estimate units) where
   value + estimate = exact value + estimate
 
 instance Addition (Estimate Unitless) Int (Estimate Unitless) where
-  estimate + n = estimate + Float.fromInt n
+  estimate + n = estimate + Float.int n
 
 instance Addition Int (Estimate Unitless) (Estimate Unitless) where
-  n + estimate = Float.fromInt n + estimate
+  n + estimate = Float.int n + estimate
 
 data Subtract units = Subtract (Estimate units) (Estimate units)
 
@@ -153,10 +153,10 @@ instance Subtraction (Qty units) (Estimate units) (Estimate units) where
   value - estimate = exact value - estimate
 
 instance Subtraction (Estimate Unitless) Int (Estimate Unitless) where
-  estimate - n = estimate - Float.fromInt n
+  estimate - n = estimate - Float.int n
 
 instance Subtraction Int (Estimate Unitless) (Estimate Unitless) where
-  n - estimate = Float.fromInt n - estimate
+  n - estimate = Float.int n - estimate
 
 data Product units1 units2 = Product (Estimate units1) (Estimate units2)
 
@@ -190,11 +190,11 @@ instance Multiplication' (Qty units1) (Estimate units2) where
 
 instance Multiplication' (Estimate units) Int where
   type Estimate units .*. Int = Estimate (units :*: Unitless)
-  estimate .*. n = estimate .*. Float.fromInt n
+  estimate .*. n = estimate .*. Float.int n
 
 instance Multiplication' Int (Estimate units) where
   type Int .*. Estimate units = Estimate (Unitless :*: units)
-  n .*. estimate = Float.fromInt n .*. estimate
+  n .*. estimate = Float.int n .*. estimate
 
 instance
   Units.Product units1 units2 units3 =>
@@ -234,7 +234,7 @@ instance
 
 instance Division' (Estimate units) Int where
   type Estimate units ./. Int = Estimate (units :/: Unitless)
-  estimate ./. n = estimate ./. Float.fromInt n
+  estimate ./. n = estimate ./. Float.int n
 
 instance Division (Estimate units) Int (Estimate units)
 

@@ -51,7 +51,7 @@ getFields (Map fields) = Just (Map.toList fields)
 getFields _ = Nothing
 
 int :: Int -> Json
-int = Float.fromInt >> Float
+int = Float.int >> Float
 
 float :: Float -> Json
 float = Float

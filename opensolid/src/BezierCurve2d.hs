@@ -93,7 +93,7 @@ instance Curve2d.Interface (BezierCurve2d (space @ units)) (space @ units) where
   derivativeImpl (BezierCurve2d (_ :| [])) = VectorCurve2d.zero
   derivativeImpl (BezierCurve2d (p1 :| p2 : rest)) = do
     let degree = 1 + List.length rest
-    VectorCurve2d.bezierCurve (controlPointDifferences (Float.fromInt degree) p1 p2 rest)
+    VectorCurve2d.bezierCurve (controlPointDifferences (Float.int degree) p1 p2 rest)
 
   reverseImpl (BezierCurve2d controlPoints) = BezierCurve2d (NonEmpty.reverse controlPoints)
 
@@ -146,8 +146,8 @@ hermiteBezier (startPoint, startDerivatives) (endPoint, endDerivatives) = do
   let numStartDerivatives = List.length startDerivatives
   let numEndDerivatives = List.length endDerivatives
   let curveDegree = 1 + numStartDerivatives + numEndDerivatives
-  let scaledStartDerivatives = scaleDerivatives Positive 1.0 (Float.fromInt curveDegree) startDerivatives
-  let scaledEndDerivatives = scaleDerivatives Negative 1.0 (Float.fromInt curveDegree) endDerivatives
+  let scaledStartDerivatives = scaleDerivatives Positive 1.0 (Float.int curveDegree) startDerivatives
+  let scaledEndDerivatives = scaleDerivatives Negative 1.0 (Float.int curveDegree) endDerivatives
   let startControlPoints = derivedControlPoints startPoint 1 (numStartDerivatives + 1) scaledStartDerivatives
   let endControlPoints = List.reverse (derivedControlPoints endPoint 1 (numEndDerivatives + 1) scaledEndDerivatives)
   let controlPoints = startPoint :| (startControlPoints + endControlPoints + [endPoint])

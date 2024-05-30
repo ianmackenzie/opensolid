@@ -350,17 +350,17 @@ instance Division' (VectorCurve2d (space @ units1)) (Qty units2) where
 
 instance Division' (VectorCurve2d (space @ units)) Int where
   type VectorCurve2d (space @ units) ./. Int = VectorCurve2d (space @ (units :/: Unitless))
-  curve ./. value = curve ./. Float.fromInt value
+  curve ./. value = curve ./. Float.int value
 
 instance Division (VectorCurve2d (space @ units)) Int (VectorCurve2d (space @ units))
 
 instance Multiplication' (VectorCurve2d (space @ units)) Int where
   type VectorCurve2d (space @ units) .*. Int = VectorCurve2d (space @ (units :*: Unitless))
-  curve .*. scale = curve .*. Float.fromInt scale
+  curve .*. scale = curve .*. Float.int scale
 
 instance Multiplication' Int (VectorCurve2d (space @ units)) where
   type Int .*. VectorCurve2d (space @ units) = VectorCurve2d (space @ (Unitless :*: units))
-  scale .*. curve = Float.fromInt scale .*. curve
+  scale .*. curve = Float.int scale .*. curve
 
 instance Multiplication (VectorCurve2d (space @ units)) Int (VectorCurve2d (space @ units))
 
@@ -767,7 +767,7 @@ derivative curve =
     BezierCurve (_ :| []) -> zero
     BezierCurve (v1 :| v2 : rest) -> do
       let degree = 1 + List.length rest
-      BezierCurve (controlVectorDifferences (Float.fromInt degree) v1 v2 rest)
+      BezierCurve (controlVectorDifferences (Float.int degree) v1 v2 rest)
     Transformed transform c -> transformBy transform (derivative c)
 
 reverse :: VectorCurve2d (space @ units) -> VectorCurve2d (space @ units)

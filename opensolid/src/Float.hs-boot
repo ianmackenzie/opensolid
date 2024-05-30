@@ -3,7 +3,7 @@ module Float
   , fromRational
   , fromDouble
   , toDouble
-  , fromInt
+  , int
   )
 where
 
@@ -17,4 +17,4 @@ type Float = Qty Unitless
 fromDouble :: Prelude.Double -> Float
 toDouble :: Float -> Prelude.Double
 fromRational :: Prelude.Rational -> Qty Unitless
-fromInt :: Int -> Float
+int :: Int -> Float

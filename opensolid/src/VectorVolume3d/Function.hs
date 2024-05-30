@@ -230,11 +230,11 @@ instance Multiplication' (Qty units1) (Function (space @ units2)) where
 
 instance Multiplication' (Function (space @ units)) Int where
   type Function (space @ units) .*. Int = Function (space @ (units :*: Unitless))
-  function .*. scale = function .*. Float.fromInt scale
+  function .*. scale = function .*. Float.int scale
 
 instance Multiplication' Int (Function (space @ units)) where
   type Int .*. Function (space @ units) = Function (space @ (Unitless :*: units))
-  scale .*. function = Float.fromInt scale .*. function
+  scale .*. function = Float.int scale .*. function
 
 instance Multiplication (Function (space @ units)) Int (Function (space @ units))
 
@@ -263,7 +263,7 @@ instance Division' (Function (space @ units1)) (Qty units2) where
 
 instance Division' (Function (space @ units)) Int where
   type Function (space @ units) ./. Int = Function (space @ (units :/: Unitless))
-  function ./. scale = function ./. Float.fromInt scale
+  function ./. scale = function ./. Float.int scale
 
 instance Division (Function (space @ units)) Int (Function (space @ units))
 

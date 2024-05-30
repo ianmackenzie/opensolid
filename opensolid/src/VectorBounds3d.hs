@@ -151,13 +151,13 @@ instance
 
 instance Multiplication' Int (VectorBounds3d (space @ units)) where
   type Int .*. VectorBounds3d (space @ units) = VectorBounds3d (space @ (Unitless :*: units))
-  value .*. bounds = Float.fromInt value .*. bounds
+  value .*. bounds = Float.int value .*. bounds
 
 instance Multiplication Int (VectorBounds3d (space @ units)) (VectorBounds3d (space @ units))
 
 instance Multiplication' (VectorBounds3d (space @ units)) Int where
   type VectorBounds3d (space @ units) .*. Int = VectorBounds3d (space @ (units :*: Unitless))
-  vectorBounds .*. value = vectorBounds .*. Float.fromInt value
+  vectorBounds .*. value = vectorBounds .*. Float.int value
 
 instance Multiplication (VectorBounds3d (space @ units)) Int (VectorBounds3d (space @ units))
 
@@ -193,7 +193,7 @@ instance
 
 instance Division' (VectorBounds3d (space @ units)) Int where
   type VectorBounds3d (space @ units) ./. Int = VectorBounds3d (space @ (units :/: Unitless))
-  vectorBounds ./. value = vectorBounds ./. Float.fromInt value
+  vectorBounds ./. value = vectorBounds ./. Float.int value
 
 instance Division (VectorBounds3d (space @ units)) Int (VectorBounds3d (space @ units))
 
