@@ -7,11 +7,13 @@ module OpenSolid.Json
   )
 where
 
+import Angle qualified
 import Direction2d (Direction2d)
 import Direction2d qualified
 import Json qualified
 import Json.Format qualified
 import Length (Length)
+import Length qualified
 import OpenSolid
 import Point2d (Point2d)
 import Point2d qualified
@@ -24,13 +26,13 @@ angle :: Json.Format Angle
 angle =
   Json.Format.title "Angle" $
     Json.Format.description "Units: radians" $
-      Json.Format.coerce Json.Format.float
+      Json.Format.convert Angle.radians Angle.inRadians Json.Format.float
 
 length :: Json.Format Length
 length =
   Json.Format.title "Length" $
     Json.Format.description "Units: meters" $
-      Json.Format.coerce Json.Format.float
+      Json.Format.convert Length.meters Length.inMeters Json.Format.float
 
 direction2d :: Json.Format (Direction2d space)
 direction2d =
