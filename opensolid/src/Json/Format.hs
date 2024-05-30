@@ -2,7 +2,7 @@ module Json.Format
   ( Format (..)
   , coerce
   , convert
-  , validate
+  , lift
   , float
   , int
   , bool
@@ -71,14 +71,14 @@ coerce :: Coercible a b => Format a -> Format b
 coerce = convert Data.Coerce.coerce Data.Coerce.coerce
 
 convert :: (a -> b) -> (b -> a) -> Format a -> Format b
-convert lift drop format = validate (lift >> Ok) drop format
+convert up down format = lift (up >> Ok) down format
 
-validate :: (a -> Result x b) -> (b -> a) -> Format a -> Format b
-validate lift drop format = do
+lift :: (a -> Result x b) -> (b -> a) -> Format a -> Format b
+lift up down format = do
   let Format{encode, decode, schema} = format
   Format
-    { encode = drop >> encode
-    , decode = decode >> Result.andThen (lift >> Result.mapError Error.message)
+    { encode = down >> encode
+    , decode = decode >> Result.andThen (up >> Result.mapError Error.message)
     , schema = removeMetadata schema
     }
 

@@ -39,10 +39,11 @@ direction2d =
   Json.Format.title "Direction2d" $
     Json.Format.description "A direction (unit vector) in 2D space, given by its X and Y components" $
       Json.Format.examples [Direction2d.x] $
-        Json.Format.validate (Tolerance.exactly Vector2d.direction) Vector2d.unit $
-          Json.Format.object Vector2d.xy do
-            Json.Format.requiredField "x" Vector2d.xComponent Json.Format.float
-            Json.Format.requiredField "y" Vector2d.yComponent Json.Format.float
+        Tolerance.exactly $
+          Json.Format.lift Vector2d.direction Vector2d.unit $
+            Json.Format.object Vector2d.xy do
+              Json.Format.requiredField "x" Vector2d.xComponent Json.Format.float
+              Json.Format.requiredField "y" Vector2d.yComponent Json.Format.float
 
 vector2d :: Json.Format (Vector2d (space @ Meters))
 vector2d =
