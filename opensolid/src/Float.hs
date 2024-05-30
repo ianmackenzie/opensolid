@@ -1,5 +1,6 @@
 module Float
   ( Float
+  , pattern Int
   , fromRational
   , fromDouble
   , toDouble
@@ -51,6 +52,9 @@ import Units (Unitless)
 import Prelude qualified
 
 type Float = Qty Unitless
+
+pattern Int :: Int -> Float
+pattern Int n <- (toInt -> Just n)
 
 {-# INLINE fromRational #-}
 fromRational :: Prelude.Rational -> Float
