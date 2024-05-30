@@ -5,7 +5,6 @@ module Float
   , fromDouble
   , toDouble
   , fromInt
-  , toInt
   , parse
   , ceiling
   , round
