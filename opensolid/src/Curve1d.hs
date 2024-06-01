@@ -15,7 +15,6 @@ module Curve1d
   , sqrt'
   , sin
   , cos
-  , hasInternalZero
   , Zeros (..)
   , zeros
   , reverse
@@ -367,24 +366,11 @@ isZero :: Tolerance units => Curve1d units -> Bool
 isZero (Constant value) = value ~= Qty.zero
 isZero curve = List.all (pointOn curve >> (~= Qty.zero)) (Range.samples Range.unit)
 
+----- ROOT FINDING -----
+
 -- TODO report an error if higher-order root detected
 maxRootOrder :: Int
 maxRootOrder = 4
-
------ ROOT FINDING -----
-
-hasInternalZero :: Tolerance units => Curve1d units -> Bool
-hasInternalZero curve = isZero curve || findInternalZero curve Range.unit
-
-findInternalZero :: Tolerance units => Curve1d units -> Range Unitless -> Bool
-findInternalZero curve domain = do
-  let curveBounds = segmentBounds domain curve
-  if
-    | not (curveBounds ^ Qty.zero) -> False
-    | curveBounds ~= Qty.zero -> not (Range.includes 0.0 domain || Range.includes 1.0 domain)
-    | otherwise -> do
-        let (left, right) = Range.bisect domain
-        findInternalZero curve left || findInternalZero curve right
 
 data Zeros = ZeroEverywhere | Zeros (List Root) deriving (Show)
 
