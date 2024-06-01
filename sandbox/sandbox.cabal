@@ -55,3 +55,4 @@ executable sandbox
       BlockArguments
       QualifiedDo
       DisambiguateRecordFields
+      PatternSynonyms

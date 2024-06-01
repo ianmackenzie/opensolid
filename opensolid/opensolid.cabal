@@ -176,7 +176,6 @@ library
   other-modules:
       Curve1d.Integral
       Curve2d.Internal
-      Curve2d.Patterns
       Curve2d.Derivatives
       Curve2d.Segment
       Json.FieldSchema

@@ -1,6 +1,7 @@
 module Main (main) where
 
 import Angle qualified
+import Arc2d (pattern Arc2d)
 import Arc2d qualified
 import Area qualified
 import Axis2d qualified
@@ -21,6 +22,7 @@ import IO qualified
 import Int qualified
 import Length (Length)
 import Length qualified
+import Line2d (pattern Line2d)
 import Line2d qualified
 import List qualified
 import NonEmpty qualified
@@ -181,19 +183,18 @@ testNonEmpty = IO.do
   testEmptyCheck [2, 3, 1]
 
 testLineFromEndpoints :: Tolerance Meters => IO ()
-testLineFromEndpoints = IO.do
+testLineFromEndpoints =
   case Line2d.from Point2d.origin (Point2d.centimeters 40.0 30.0) of
-    Curve2d.Line p1 p2 -> do
-      let length = Point2d.distanceFrom p1 p2
+    Line2d line -> do
+      let length = Point2d.distanceFrom (Line2d.startPoint line) (Line2d.endPoint line)
       log "Line length in centimeters" (Length.inCentimeters length)
     curve -> log "Unexpected curve" curve
 
 testArcFromEndpoints :: Tolerance Meters => IO ()
-testArcFromEndpoints = IO.do
-  let arc = Arc2d.from Point2d.origin (Point2d.centimeters 50.0 50.0) Angle.quarterTurn
-  case arc of
-    Curve2d.Arc{centerPoint} -> log "Arc center point" centerPoint
-    _ -> log "Unexpected curve" arc
+testArcFromEndpoints =
+  case Arc2d.from Point2d.origin (Point2d.centimeters 50.0 50.0) Angle.quarterTurn of
+    Arc2d arc -> log "Arc center point" (Arc2d.centerPoint arc)
+    curve -> log "Unexpected curve" curve
 
 testPlaneTorusIntersection :: Tolerance Meters => IO ()
 testPlaneTorusIntersection = IO.do
@@ -403,7 +404,14 @@ testStretchedArc = IO.do
 
 printEllipticalArc :: Tolerance Meters => Text -> Curve2d (space @ Meters) -> IO ()
 printEllipticalArc label curve = case curve of
-  Curve2d.Arc{centerPoint, majorDirection, minorDirection, majorRadius, minorRadius, startAngle, endAngle} -> IO.do
+  Arc2d arc -> IO.do
+    let centerPoint = Arc2d.centerPoint arc
+    let majorDirection = Arc2d.majorDirection arc
+    let minorDirection = Arc2d.minorDirection arc
+    let majorRadius = Arc2d.majorRadius arc
+    let minorRadius = Arc2d.minorRadius arc
+    let startAngle = Arc2d.startAngle arc
+    let endAngle = Arc2d.endAngle arc
     IO.printLine (label + ":")
     log "  centerPoint" centerPoint
     log "  majorDirection" majorDirection

@@ -4,7 +4,6 @@ module Curve2d
   , Intersection
   , IntersectionError (..)
   , Interface (..)
-  , module Curve2d.Patterns
   , TransformBy (TransformBy)
   , wrap
   , startPoint
@@ -57,7 +56,6 @@ import Curve2d.Internal (DegenerateCurve (DegenerateCurve), Interface (..))
 import Curve2d.Internal qualified as Internal
 import Curve2d.Intersection (Intersection (Intersection))
 import Curve2d.Intersection qualified as Intersection
-import Curve2d.Patterns
 import Curve2d.Segment (Segment)
 import Curve2d.Segment qualified as Segment
 import Direction2d (Direction2d)

@@ -14,6 +14,16 @@ module Arc2d
   , elliptical
   , ellipse
   , generic
+  , pattern Arc2d
+  , Arc2d
+    ( centerPoint
+    , majorDirection
+    , minorDirection
+    , majorRadius
+    , minorRadius
+    , startAngle
+    , endAngle
+    )
   )
 where
 
@@ -26,6 +36,7 @@ import Float qualified
 import Frame2d (Frame2d)
 import Frame2d qualified
 import Line2d qualified
+import Maybe qualified
 import OpenSolid
 import Point2d (Point2d)
 import Point2d qualified
@@ -163,3 +174,45 @@ generic ::
   Angle ->
   Curve2d (space @ units)
 generic = Curve2d.Internal.Arc
+
+data Arc2d (coordinateSystem :: CoordinateSystem) where
+  Arc2d_ ::
+    { centerPoint :: Point2d (space @ units)
+    , majorDirection :: Direction2d space
+    , minorDirection :: Direction2d space
+    , majorRadius :: Qty units
+    , minorRadius :: Qty units
+    , startAngle :: Angle
+    , endAngle :: Angle
+    } ->
+    Arc2d (space @ units)
+
+pattern Arc2d :: Tolerance units => Arc2d (space @ units) -> Curve2d (space @ units)
+pattern Arc2d arc <- (extractArc -> Just arc)
+
+extractArc ::
+  Tolerance units =>
+  Curve2d (space @ units) ->
+  Maybe (Arc2d (space @ units))
+extractArc curve = case curve of
+  Curve2d.Internal.Arc centerPoint vx vy a b -> Maybe.do
+    let theta =
+          if Vector2d.magnitude vx ~= Vector2d.magnitude vy
+            then Angle.degrees 45.0
+            else 0.5 * Angle.atan2 (2 * vx .<>. vy) (vx .<>. vx - vy .<>. vy)
+    let cosTheta = Angle.cos theta
+    let sinTheta = Angle.sin theta
+    let v1 = vx * cosTheta + vy * sinTheta
+    let v2 = vy * cosTheta - vx * sinTheta
+    (r1, d1) <- Vector2d.magnitudeAndDirection v1 ?? Nothing
+    (r2, d2) <- Vector2d.magnitudeAndDirection v2 ?? Nothing
+    if r1 >= r2
+      then do
+        let startAngle = a - theta
+        let endAngle = b - theta
+        Just (Arc2d_ centerPoint d1 d2 r1 r2 startAngle endAngle)
+      else do
+        let startAngle = a - theta - Angle.quarterTurn
+        let endAngle = b - theta - Angle.quarterTurn
+        Just (Arc2d_ centerPoint d2 -d1 r2 r1 startAngle endAngle)
+  _ -> Nothing

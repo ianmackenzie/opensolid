@@ -1,6 +1,7 @@
 module Tests.Arc2d (tests) where
 
 import Angle qualified
+import Arc2d (pattern Arc2d)
 import Arc2d qualified
 import Curve2d qualified
 import Float qualified
@@ -51,36 +52,30 @@ deformation = Test.check 100 "deformation" Test.do
   let transformOfEnd = Point2d.transformBy transform (Curve2d.endPoint initialArc)
   let transformOfPoint = Point2d.transformBy transform (Curve2d.evaluateAt t initialArc)
   case transformedArc of
-    Curve2d.Arc
-      { centerPoint
-      , majorDirection
-      , minorDirection
-      , majorRadius
-      , minorRadius
-      , startAngle
-      , endAngle
-      } -> do
-        let evaluateEllipticalArc u = do
-              let theta = Qty.interpolateFrom startAngle endAngle u
-              centerPoint
-                + (majorRadius * majorDirection * Angle.cos theta)
-                + (minorRadius * minorDirection * Angle.sin theta)
-        Test.all
-          [ Test.expect (startOfTransformed ~= transformOfStart)
-              |> Test.output "startOfTransformed" startOfTransformed
-              |> Test.output "transformOfStart" transformOfStart
-          , Test.expect (endOfTransformed ~= transformOfEnd)
-          , Test.expect (pointOnTransformed ~= transformOfPoint)
-          , Test.expect (startOfTransformed ~= evaluateEllipticalArc 0.0)
-              |> Test.output "startOfTransformed" startOfTransformed
-              |> Test.output "evaluateEllipticalArc 0.0" (evaluateEllipticalArc 0.0)
-          , Test.expect (endOfTransformed ~= evaluateEllipticalArc 1.0)
-          , Test.expect (pointOnTransformed ~= evaluateEllipticalArc t)
-          , Test.expect (Tolerance.using 1e-12 (majorDirection <> minorDirection ~= 0.0))
-              |> Test.output "majorDirection" majorDirection
-              |> Test.output "minorDirection" minorDirection
-              |> Test.output "major/minor dot product" (majorDirection <> minorDirection)
-          ]
+    Arc2d arc -> do
+      let majorDirection = Arc2d.majorDirection arc
+      let minorDirection = Arc2d.minorDirection arc
+      let evaluateEllipticalArc u = do
+            let theta = Qty.interpolateFrom (Arc2d.startAngle arc) (Arc2d.endAngle arc) u
+            Arc2d.centerPoint arc
+              + (Arc2d.majorRadius arc * majorDirection * Angle.cos theta)
+              + (Arc2d.minorRadius arc * minorDirection * Angle.sin theta)
+      Test.all
+        [ Test.expect (startOfTransformed ~= transformOfStart)
+            |> Test.output "startOfTransformed" startOfTransformed
+            |> Test.output "transformOfStart" transformOfStart
+        , Test.expect (endOfTransformed ~= transformOfEnd)
+        , Test.expect (pointOnTransformed ~= transformOfPoint)
+        , Test.expect (startOfTransformed ~= evaluateEllipticalArc 0.0)
+            |> Test.output "startOfTransformed" startOfTransformed
+            |> Test.output "evaluateEllipticalArc 0.0" (evaluateEllipticalArc 0.0)
+        , Test.expect (endOfTransformed ~= evaluateEllipticalArc 1.0)
+        , Test.expect (pointOnTransformed ~= evaluateEllipticalArc t)
+        , Test.expect (Tolerance.using 1e-12 (majorDirection <> minorDirection ~= 0.0))
+            |> Test.output "majorDirection" majorDirection
+            |> Test.output "minorDirection" minorDirection
+            |> Test.output "major/minor dot product" (majorDirection <> minorDirection)
+        ]
     curve ->
       Test.fail "Expected an elliptical arc"
         |> Test.output "Actual curve" curve
