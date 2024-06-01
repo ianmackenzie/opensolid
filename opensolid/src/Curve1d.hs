@@ -268,58 +268,55 @@ instance Division' Int (Curve1d units) where
   value ./. curve = Float.int value ./. curve
 
 evaluateAt :: Float -> Curve1d units -> Qty units
-evaluateAt tValue curve =
-  case curve of
-    Curve1d c -> evaluateAtImpl tValue c
-    Constant x -> x
-    Parameter -> tValue
-    Negated c -> negate (evaluateAt tValue c)
-    Sum c1 c2 -> evaluateAt tValue c1 + evaluateAt tValue c2
-    Difference c1 c2 -> evaluateAt tValue c1 - evaluateAt tValue c2
-    Product' c1 c2 -> evaluateAt tValue c1 .*. evaluateAt tValue c2
-    Quotient' c1 c2 -> evaluateAt tValue c1 ./. evaluateAt tValue c2
-    Squared' c -> Qty.squared' (evaluateAt tValue c)
-    SquareRoot' c' -> Qty.sqrt' (evaluateAt tValue c')
-    Sin c -> Angle.sin (evaluateAt tValue c)
-    Cos c -> Angle.cos (evaluateAt tValue c)
-    Coerce c -> Units.coerce (evaluateAt tValue c)
+evaluateAt tValue curve = case curve of
+  Curve1d c -> evaluateAtImpl tValue c
+  Constant x -> x
+  Parameter -> tValue
+  Negated c -> negate (evaluateAt tValue c)
+  Sum c1 c2 -> evaluateAt tValue c1 + evaluateAt tValue c2
+  Difference c1 c2 -> evaluateAt tValue c1 - evaluateAt tValue c2
+  Product' c1 c2 -> evaluateAt tValue c1 .*. evaluateAt tValue c2
+  Quotient' c1 c2 -> evaluateAt tValue c1 ./. evaluateAt tValue c2
+  Squared' c -> Qty.squared' (evaluateAt tValue c)
+  SquareRoot' c' -> Qty.sqrt' (evaluateAt tValue c')
+  Sin c -> Angle.sin (evaluateAt tValue c)
+  Cos c -> Angle.cos (evaluateAt tValue c)
+  Coerce c -> Units.coerce (evaluateAt tValue c)
 
 pointOn :: Curve1d units -> Float -> Qty units
 pointOn curve tValue = evaluateAt tValue curve
 
 segmentBounds :: Range Unitless -> Curve1d units -> Range units
-segmentBounds tBounds curve =
-  case curve of
-    Curve1d c -> segmentBoundsImpl tBounds c
-    Constant value -> Range.constant value
-    Parameter -> tBounds
-    Negated c -> negate (segmentBounds tBounds c)
-    Sum c1 c2 -> segmentBounds tBounds c1 + segmentBounds tBounds c2
-    Difference c1 c2 -> segmentBounds tBounds c1 - segmentBounds tBounds c2
-    Product' c1 c2 -> segmentBounds tBounds c1 .*. segmentBounds tBounds c2
-    Quotient' c1 c2 -> segmentBounds tBounds c1 ./. segmentBounds tBounds c2
-    Squared' c -> Range.squared' (segmentBounds tBounds c)
-    SquareRoot' c' -> Range.sqrt' (segmentBounds tBounds c')
-    Sin c -> Range.sin (segmentBounds tBounds c)
-    Cos c -> Range.cos (segmentBounds tBounds c)
-    Coerce c -> Units.coerce (segmentBounds tBounds c)
+segmentBounds tBounds curve = case curve of
+  Curve1d c -> segmentBoundsImpl tBounds c
+  Constant value -> Range.constant value
+  Parameter -> tBounds
+  Negated c -> negate (segmentBounds tBounds c)
+  Sum c1 c2 -> segmentBounds tBounds c1 + segmentBounds tBounds c2
+  Difference c1 c2 -> segmentBounds tBounds c1 - segmentBounds tBounds c2
+  Product' c1 c2 -> segmentBounds tBounds c1 .*. segmentBounds tBounds c2
+  Quotient' c1 c2 -> segmentBounds tBounds c1 ./. segmentBounds tBounds c2
+  Squared' c -> Range.squared' (segmentBounds tBounds c)
+  SquareRoot' c' -> Range.sqrt' (segmentBounds tBounds c')
+  Sin c -> Range.sin (segmentBounds tBounds c)
+  Cos c -> Range.cos (segmentBounds tBounds c)
+  Coerce c -> Units.coerce (segmentBounds tBounds c)
 
 derivative :: Curve1d units -> Curve1d units
-derivative curve =
-  case curve of
-    Curve1d c -> derivativeImpl c
-    Constant _ -> zero
-    Parameter -> constant 1.0
-    Negated c -> negate (derivative c)
-    Sum c1 c2 -> derivative c1 + derivative c2
-    Difference c1 c2 -> derivative c1 - derivative c2
-    Product' c1 c2 -> derivative c1 .*. c2 + c1 .*. derivative c2
-    Quotient' c1 c2 -> (derivative c1 .*. c2 - c1 .*. derivative c2) .!/.! squared' c2
-    Squared' c -> 2 * c .*. derivative c
-    SquareRoot' c' -> derivative c' .!/! (2 * sqrt' c')
-    Sin c -> cos c * Angle.unitless (derivative c)
-    Cos c -> negate (sin c) * Angle.unitless (derivative c)
-    Coerce c -> Units.coerce (derivative c)
+derivative curve = case curve of
+  Curve1d c -> derivativeImpl c
+  Constant _ -> zero
+  Parameter -> constant 1.0
+  Negated c -> negate (derivative c)
+  Sum c1 c2 -> derivative c1 + derivative c2
+  Difference c1 c2 -> derivative c1 - derivative c2
+  Product' c1 c2 -> derivative c1 .*. c2 + c1 .*. derivative c2
+  Quotient' c1 c2 -> (derivative c1 .*. c2 - c1 .*. derivative c2) .!/.! squared' c2
+  Squared' c -> 2 * c .*. derivative c
+  SquareRoot' c' -> derivative c' .!/! (2 * sqrt' c')
+  Sin c -> cos c * Angle.unitless (derivative c)
+  Cos c -> negate (sin c) * Angle.unitless (derivative c)
+  Coerce c -> Units.coerce (derivative c)
 
 newtype Reversed units = Reversed (Curve1d units)
 
@@ -338,11 +335,12 @@ squared :: Units.Squared units1 units2 => Curve1d units1 -> Curve1d units2
 squared curve = Units.specialize (squared' curve)
 
 squared' :: Curve1d units -> Curve1d (units :*: units)
-squared' (Constant x) = Constant (x .*. x)
-squared' (Negated c) = squared' c
-squared' (Cos c) = Units.unspecialize (cosSquared c)
-squared' (Sin c) = Units.unspecialize (sinSquared c)
-squared' curve = Squared' curve
+squared' curve = case curve of
+  Constant x -> Constant (x .*. x)
+  Negated c -> squared' c
+  Cos c -> Units.unspecialize (cosSquared c)
+  Sin c -> Units.unspecialize (sinSquared c)
+  _ -> Squared' curve
 
 cosSquared :: Curve1d Radians -> Curve1d Unitless
 cosSquared c = 0.5 * cos (2 * c) + 0.5
