@@ -54,5 +54,4 @@ executable sandbox
       LexicalNegation
       BlockArguments
       QualifiedDo
-      LambdaCase
       DisambiguateRecordFields

@@ -402,7 +402,7 @@ testStretchedArc = IO.do
   printEllipticalArc "compressed" compressed
 
 printEllipticalArc :: Tolerance Meters => Text -> Curve2d (space @ Meters) -> IO ()
-printEllipticalArc label = \case
+printEllipticalArc label curve = case curve of
   Curve2d.Arc{centerPoint, majorDirection, minorDirection, majorRadius, minorRadius, startAngle, endAngle} -> IO.do
     IO.printLine (label + ":")
     log "  centerPoint" centerPoint
@@ -414,7 +414,7 @@ printEllipticalArc label = \case
     log "  endAngle" (Angle.inDegrees endAngle)
     log "  start point" (centerPoint + majorRadius * majorDirection * Angle.cos startAngle + minorRadius * minorDirection * Angle.sin startAngle)
     log "  end point" (centerPoint + majorRadius * majorDirection * Angle.cos endAngle + minorRadius * minorDirection * Angle.sin endAngle)
-  curve -> log ("Expected " + label + " to be an elliptical arc, got") curve
+  _ -> log ("Expected " + label + " to be an elliptical arc, got") curve
 
 testExplicitRandomStep :: IO ()
 testExplicitRandomStep = IO.do

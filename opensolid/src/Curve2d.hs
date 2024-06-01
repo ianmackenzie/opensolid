@@ -290,9 +290,9 @@ placeIn ::
   Frame2d (global @ units) (Defines local) ->
   Curve2d (local @ units) ->
   Curve2d (global @ units)
-placeIn globalFrame = \case
-  Internal.PlaceIn frame curve -> Internal.PlaceIn (Frame2d.placeIn globalFrame frame) curve
-  curve -> Internal.PlaceIn globalFrame curve
+placeIn globalFrame curve = case curve of
+  Internal.PlaceIn frame localCurve -> Internal.PlaceIn (Frame2d.placeIn globalFrame frame) localCurve
+  _ -> Internal.PlaceIn globalFrame curve
 
 relativeTo ::
   Frame2d (global @ units) (Defines local) ->

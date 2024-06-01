@@ -72,7 +72,7 @@ map :: Map Text Json -> Json
 map = Map
 
 instance Data.Aeson.ToJSON Json where
-  toJSON = \case
+  toJSON json = case json of
     Null -> Data.Aeson.Null
     Bool value -> Data.Aeson.toJSON value
     Float value -> Data.Aeson.toJSON (Float.toDouble value)
@@ -84,7 +84,7 @@ instance Data.Aeson.FromJSON Json where
   parseJSON = fromAeson >> Prelude.return
 
 fromAeson :: Data.Aeson.Value -> Json
-fromAeson = \case
+fromAeson aesonValue = case aesonValue of
   Data.Aeson.Null -> Null
   Data.Aeson.Bool value -> Bool value
   Data.Aeson.Number value -> Float (Data.Scientific.toRealFloat value)

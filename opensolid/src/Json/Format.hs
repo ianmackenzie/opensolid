@@ -123,7 +123,7 @@ decodeInt (Json.Int value) = Ok value
 decodeInt _ = Error "Expected an integer"
 
 decodeList :: (Json -> Result Text a) -> Json -> Result Text (List a)
-decodeList decodeItem = \case
+decodeList decodeItem json = case json of
   Json.List items -> Result.collect decodeItem items
   _ -> Error "Expected a list"
 
@@ -148,7 +148,7 @@ nonEmpty (Format encodeItem decodeItem itemSchema) =
     }
 
 decodeMap :: (Json -> Result Text a) -> Json -> Result Text (Map Text a)
-decodeMap decodeItem = \case
+decodeMap decodeItem json = case json of
   Json.Map fields ->
     Map.toList fields
       |> Result.collect (decodeMapField decodeItem)
@@ -167,7 +167,7 @@ map (Format encodeItem decodeItem itemSchema) =
     }
 
 decodeObject :: (Map Text Json -> Result Text a) -> Json -> Result Text a
-decodeObject fromFields = \case
+decodeObject fromFields json = case json of
   Json.Map fields -> fromFields fields
   _ -> Error "Expected an object"
 
