@@ -31,8 +31,7 @@ tail :: Stream a -> Stream a
 tail (Stream _ rest) = rest
 
 nth :: Int -> Stream a -> a
-nth n stream | n <= 0 = head stream
-nth n stream = nth (n - 1) (tail stream)
+nth n stream = if n <= 0 then head stream else nth (n - 1) (tail stream)
 
 map :: (a -> b) -> Stream a -> Stream b
 map function (Stream first rest) = Stream (function first) (map function rest)
