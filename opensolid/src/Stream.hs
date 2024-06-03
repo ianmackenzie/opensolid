@@ -5,6 +5,7 @@ module Stream
   , head
   , tail
   , nth
+  , drop
   , map
   , mapWithIndex
   , take
@@ -48,3 +49,7 @@ mapWithIndexImpl index function (Stream first rest) =
 take :: Int -> Stream a -> List a
 take n _ | n <= 0 = []
 take n stream = head stream : take (n - 1) (tail stream)
+
+drop :: Int -> Stream a -> Stream a
+drop n stream | n <= 0 = stream
+drop n stream = drop (n - 1) (tail stream)
