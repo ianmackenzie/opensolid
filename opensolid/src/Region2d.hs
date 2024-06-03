@@ -46,6 +46,7 @@ data BuildError
   | RegionBoundaryIntersectsItself
   | MultipleDisjointRegions
   | TangentIntersectionAtDegeneratePoint
+  | HigherOrderIntersection
   deriving (Eq, Show, Error)
 
 boundedBy ::
@@ -87,6 +88,8 @@ checkCurvesForInnerIntersection curve1 curve2 =
       Error RegionBoundaryIntersectsItself
     Error Curve2d.TangentIntersectionAtDegeneratePoint ->
       Error TangentIntersectionAtDegeneratePoint
+    Error Curve2d.HigherOrderIntersection ->
+      Error HigherOrderIntersection
     Ok intersections
       | List.all isEndpointIntersection intersections -> Ok ()
       | otherwise -> Error RegionBoundaryIntersectsItself

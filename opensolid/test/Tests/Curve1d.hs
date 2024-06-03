@@ -23,8 +23,9 @@ crossingRoots = Test.verify "Crossing roots" Test.do
   let y = (x - 1) * (x - 1) * (x - 1) - (x - 1)
   let expectedRoots = [Root 0.0 0 Positive, Root (1 / 3) 0 Negative, Root (2 / 3) 0 Positive]
   case Curve1d.zeros y of
-    Curve1d.ZeroEverywhere -> Test.fail "Curve incorrectly reported as identically zero"
-    Curve1d.Zeros roots -> Test.expect (roots ~= expectedRoots)
+    Ok Curve1d.ZeroEverywhere -> Test.fail "Curve incorrectly reported as identically zero"
+    Ok (Curve1d.Zeros roots) -> Test.expect (roots ~= expectedRoots)
+    Error Curve1d.HigherOrderZero -> Test.fail "Curve incorrectly reported as having a higher-order root"
 
 tangentRoots :: Tolerance Unitless => Test
 tangentRoots = Test.verify "Tangent roots" Test.do
@@ -32,8 +33,9 @@ tangentRoots = Test.verify "Tangent roots" Test.do
   let expression = Curve1d.squared (Curve1d.sin theta)
   let expectedRoots = [Root t 1 Positive | t <- [0.0, 0.5, 1.0]]
   case Curve1d.zeros expression of
-    Curve1d.ZeroEverywhere -> Test.fail "Curve incorrectly reported as identically zero"
-    Curve1d.Zeros roots -> Test.expect (roots ~= expectedRoots)
+    Ok Curve1d.ZeroEverywhere -> Test.fail "Curve incorrectly reported as identically zero"
+    Ok (Curve1d.Zeros roots) -> Test.expect (roots ~= expectedRoots)
+    Error Curve1d.HigherOrderZero -> Test.fail "Curve incorrectly reported as having a higher-order root"
 
 approximateEquality :: Tolerance Unitless => Test
 approximateEquality = do

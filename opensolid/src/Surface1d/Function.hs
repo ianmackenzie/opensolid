@@ -408,7 +408,7 @@ isZero function = List.all (~= Qty.zero) (Bounds2d.sample (pointOn function) Uv.
 
 data ZerosError
   = ZeroEverywhere
-  | HigherOrderIntersection
+  | HigherOrderZero
   deriving (Eq, Show, Error)
 
 zeros :: Tolerance units => Function units -> Result ZerosError Zeros
@@ -422,7 +422,7 @@ zeros f = Result.do
   let fvv = derivative V fv
   let fuv = derivative V fu
   let derivatives = Derivatives{f, fu, fv, fuu, fvv, fuv}
-  let (boundaryEdges, boundaryPoints) = findBoundarySolutions f
+  (boundaryEdges, boundaryPoints) <- findBoundarySolutions f
   (tangentSolutions, tangentExclusions, saddleRegions) <- findTangentSolutions derivatives boundaryEdges boundaryPoints Uv.domain U [] []
   (crossingSolutions, _) <- findCrossingSolutions derivatives boundaryEdges boundaryPoints Uv.domain U tangentExclusions saddleRegions
   -- TODO report tangent/crossing curves at domain edges when recognized
@@ -522,7 +522,7 @@ findCrossingSolutions derivatives boundaryEdges boundaryPoints uvBounds bisectio
     | Just solution <- verticalSolution derivatives boundaryEdges boundaryPoints uvBounds exclusions -> Ok solution
     -- Check if we've found a point where all derivatives are zero,
     -- indicating that there's a higher-order solution that we can't solve for
-    | fBounds ~= Qty.zero && allDerivativesZero uvBounds derivatives -> Error HigherOrderIntersection
+    | fBounds ~= Qty.zero && allDerivativesZero uvBounds derivatives -> Error HigherOrderZero
     -- If we haven't been able to identify a specific form of solution within this subdomain,
     -- then we need to recurse into subdomains
     | otherwise -> Result.do
@@ -583,12 +583,12 @@ bottomEdge = boundaryEdge (Point2d.xy 0.0 0.0) Direction2d.x
 topEdge :: Curve2d Uv.Coordinates
 topEdge = boundaryEdge (Point2d.xy 0.0 1.0) Direction2d.x
 
-findBoundarySolutions :: Tolerance units => Function units -> (BoundaryEdges, List BoundaryPoint)
-findBoundarySolutions f = do
-  let (leftEdgeIsSolution, leftPoints) = edgeSolutions f leftEdge Negative
-  let (rightEdgeIsSolution, rightPoints) = edgeSolutions f rightEdge Positive
-  let (bottomEdgeIsSolution, bottomPoints) = edgeSolutions f bottomEdge Negative
-  let (topEdgeIsSolution, topPoints) = edgeSolutions f topEdge Positive
+findBoundarySolutions :: Tolerance units => Function units -> Result ZerosError (BoundaryEdges, List BoundaryPoint)
+findBoundarySolutions f = Result.do
+  (leftEdgeIsSolution, leftPoints) <- edgeSolutions f leftEdge Negative
+  (rightEdgeIsSolution, rightPoints) <- edgeSolutions f rightEdge Positive
+  (bottomEdgeIsSolution, bottomPoints) <- edgeSolutions f bottomEdge Negative
+  (topEdgeIsSolution, topPoints) <- edgeSolutions f topEdge Positive
   let boundaryEdges =
         BoundaryEdges
           { leftEdgeIsSolution
@@ -597,9 +597,14 @@ findBoundarySolutions f = do
           , topEdgeIsSolution
           }
   let boundaryPoints = List.concat [leftPoints, rightPoints, bottomPoints, topPoints]
-  (boundaryEdges, boundaryPoints)
+  Ok (boundaryEdges, boundaryPoints)
 
-edgeSolutions :: Tolerance units => Function units -> Curve2d Uv.Coordinates -> Sign -> (Bool, List BoundaryPoint)
+edgeSolutions ::
+  Tolerance units =>
+  Function units ->
+  Curve2d Uv.Coordinates ->
+  Sign ->
+  Result ZerosError (Bool, List BoundaryPoint)
 edgeSolutions f edgeCurve edgeSign =
   case Curve1d.zeros (Curve1d.wrap (CurveOnSurface edgeCurve f)) of
     -- TODO classify edge curve as crossing or tangent:
@@ -607,8 +612,8 @@ edgeSolutions f edgeCurve edgeSign =
     --   - If zero everywhere, then tangent curve
     --   - If no roots, then crossing curve
     --   - If there *are* roots, then those are tangent/saddle points of some sort
-    Curve1d.ZeroEverywhere -> (True, [])
-    Curve1d.Zeros roots -> do
+    Ok Curve1d.ZeroEverywhere -> Ok (True, [])
+    Ok (Curve1d.Zeros roots) -> do
       let toBoundaryPoint root =
             BoundaryPoint
               { point = Curve2d.pointOn edgeCurve (Curve1d.Root.value root)
@@ -616,7 +621,8 @@ edgeSolutions f edgeCurve edgeSign =
               , rootOrder = Curve1d.Root.order root
               , rootSign = Curve1d.Root.sign root
               }
-      (False, List.map toBoundaryPoint roots)
+      Ok (False, List.map toBoundaryPoint roots)
+    Error Curve1d.HigherOrderZero -> Error HigherOrderZero
 
 affects :: Uv.Bounds -> Uv.Bounds -> Bool
 affects bounds exclusion = overlaps exclusion (expandBounds bounds)

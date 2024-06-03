@@ -26,9 +26,10 @@ module VectorCurve2d
   , squaredMagnitude
   , squaredMagnitude'
   , reverse
+  , HigherOrderZero (HigherOrderZero)
   , zeros
   , Zeros (ZeroEverywhere, Zeros)
-  , HasZeros (HasZeros)
+  , HasZero (HasZero)
   , xComponent
   , yComponent
   , direction
@@ -827,24 +828,26 @@ instance Curve1d.Interface (NonZeroMagnitude (space @ units)) units where
 unsafeMagnitude :: VectorCurve2d (space @ units) -> Curve1d units
 unsafeMagnitude curve = Curve1d.wrap (NonZeroMagnitude curve)
 
-newtype HasZeros = HasZeros Zeros deriving (Eq, Show)
+data HasZero = HasZero deriving (Eq, Show, Error)
 
-deriving anyclass instance Error HasZeros
-
-magnitude :: Tolerance units => VectorCurve2d (space @ units) -> Result HasZeros (Curve1d units)
+magnitude :: Tolerance units => VectorCurve2d (space @ units) -> Result HasZero (Curve1d units)
 magnitude curve = case zeros curve of
-  Zeros [] -> Ok (Curve1d.wrap (NonZeroMagnitude curve))
-  Zeros someZeros -> Error (HasZeros (Zeros someZeros))
-  ZeroEverywhere -> Error (HasZeros ZeroEverywhere)
+  Ok (Zeros []) -> Ok (Curve1d.wrap (NonZeroMagnitude curve))
+  Ok (Zeros List.OneOrMore) -> Error HasZero
+  Ok ZeroEverywhere -> Error HasZero
+  Error HigherOrderZero -> Error HasZero
 
 data Zeros = ZeroEverywhere | Zeros (List Float) deriving (Eq, Show)
 
-zeros :: Tolerance units => VectorCurve2d (space @ units) -> Zeros
+data HigherOrderZero = HigherOrderZero deriving (Eq, Show, Error)
+
+zeros :: Tolerance units => VectorCurve2d (space @ units) -> Result HigherOrderZero Zeros
 zeros curve =
   Tolerance.using Tolerance.squared' $
     case Curve1d.zeros (squaredMagnitude' curve) of
-      Curve1d.ZeroEverywhere -> ZeroEverywhere
-      Curve1d.Zeros roots -> Zeros (List.map Curve1d.Root.value roots)
+      Ok Curve1d.ZeroEverywhere -> Ok ZeroEverywhere
+      Ok (Curve1d.Zeros roots) -> Ok (Zeros (List.map Curve1d.Root.value roots))
+      Error Curve1d.HigherOrderZero -> Error HigherOrderZero
 
 xComponent :: VectorCurve2d (space @ units) -> Curve1d units
 xComponent curve = curve <> Direction2d.x
@@ -855,26 +858,27 @@ yComponent curve = curve <> Direction2d.y
 direction ::
   Tolerance units =>
   VectorCurve2d (space @ units) ->
-  Result HasZeros (DirectionCurve2d space)
+  Result HasZero (DirectionCurve2d space)
 direction curve = case zeros curve of
   -- Definitely can't get the direction of a vector curve
   -- if that vector curve is zero everywhere!
-  ZeroEverywhere -> Error (HasZeros ZeroEverywhere)
+  Ok ZeroEverywhere -> Error HasZero
   -- If the vector curve is not zero anywhere,
   -- then we can safely compute its direction
-  Zeros [] -> Ok (VectorCurve2d.Direction.unsafe curve (derivative curve))
+  Ok (Zeros []) -> Ok (VectorCurve2d.Direction.unsafe curve (derivative curve))
   -- Otherwise, check where the vector curve is zero:
   -- if it's only zero at one or both endpoints,
   -- and the curve's *derivative* is non-zero at those endpoints,
   -- then it's still possible to uniquely determine a tangent direction everywhere
-  Zeros parameterValues -> do
+  Ok (Zeros parameterValues) -> do
     let curveDerivative = derivative curve
     case List.filter (not . isRemovableDegeneracy curveDerivative) parameterValues of
       -- All degeneracies were removable, so we're good
       [] -> Ok (VectorCurve2d.Direction.unsafe curve curveDerivative)
       -- There were some non-removable degeneracies (interior cusps) left,
       -- so report them as an error
-      interiorCusps -> Error (HasZeros (Zeros interiorCusps))
+      List.OneOrMore -> Error HasZero
+  Error HigherOrderZero -> Error HasZero
 
 isRemovableDegeneracy :: Tolerance units => VectorCurve2d (space @ units) -> Float -> Bool
 isRemovableDegeneracy curveDerivative t =

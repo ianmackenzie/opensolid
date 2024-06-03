@@ -69,10 +69,10 @@ find = Test.verify "find" Test.do
   let p2 = Point2d.meters 1.0 2.0
   let p3 = Point2d.meters 2.0 0.0
   let testSpline = QuadraticSpline2d.fromControlPoints p1 p2 p3
-  let startParameterValues = Curve2d.find Point2d.origin testSpline
-  let endParameterValues = Curve2d.find (Point2d.meters 2.0 0.0) testSpline
-  let midParameterValues = Curve2d.find (Point2d.meters 1.0 1.0) testSpline
-  let offCurveParameterValues = Curve2d.find (Point2d.meters 1.0 1.1) testSpline
+  startParameterValues <- Curve2d.find Point2d.origin testSpline
+  endParameterValues <- Curve2d.find (Point2d.meters 2.0 0.0) testSpline
+  midParameterValues <- Curve2d.find (Point2d.meters 1.0 1.0) testSpline
+  offCurveParameterValues <- Curve2d.find (Point2d.meters 1.0 1.1) testSpline
   Tolerance.using 1e-12 $
     Test.all
       [ Test.expect (startParameterValues ~= [0.0])
@@ -150,8 +150,9 @@ solving = Test.verify "Solving via Curve1d" Test.do
   roots <-
     Tolerance.using (Tolerance.ofSquared desiredDistance) $
       case Curve1d.zeros (squaredDistanceFromOrigin - Qty.squared desiredDistance) of
-        Curve1d.ZeroEverywhere -> Error "Internal error in test, curve should not be zero everywhere"
-        Curve1d.Zeros roots -> Ok roots
+        Ok Curve1d.ZeroEverywhere -> Error "Curve incorrectly reported as being zero everywhere"
+        Ok (Curve1d.Zeros roots) -> Ok roots
+        Error Curve1d.HigherOrderZero -> Error "Curve incorrectly reported as having a higher-order root"
   let distances =
         roots
           |> List.map Curve1d.Root.value

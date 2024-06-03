@@ -16,6 +16,7 @@ module Curve2d
   , reverse
   , bounds
   , intersections
+  , HigherOrderZero (HigherOrderZero)
   , find
   , signedDistanceAlong
   , xCoordinate
@@ -127,16 +128,19 @@ xCoordinate = signedDistanceAlong Axis2d.x
 yCoordinate :: Curve2d (space @ units) -> Curve1d units
 yCoordinate = signedDistanceAlong Axis2d.y
 
+data HigherOrderZero = HigherOrderZero deriving (Eq, Show, Error)
+
 find ::
   Tolerance units =>
   Point2d (space @ units) ->
   Curve2d (space @ units) ->
-  List Float
+  Result HigherOrderZero (List Float)
 find point curve =
   case VectorCurve2d.zeros (point - curve) of
-    VectorCurve2d.Zeros parameterValues -> parameterValues
+    Error VectorCurve2d.HigherOrderZero -> Error HigherOrderZero
+    Ok (VectorCurve2d.Zeros parameterValues) -> Ok parameterValues
     -- Shouldn't happen, since curves are enforced to be non-degenerate
-    VectorCurve2d.ZeroEverywhere -> []
+    Ok VectorCurve2d.ZeroEverywhere -> Ok []
 
 overlappingSegments ::
   Tolerance units =>
@@ -171,21 +175,27 @@ isOverlappingSegment curve1 curve2 (domain1, _, _) = do
 data IntersectionError
   = CurvesOverlap (List (Range Unitless, Range Unitless, Sign))
   | TangentIntersectionAtDegeneratePoint
+  | HigherOrderIntersection
   deriving (Eq, Show, Error)
 
 findEndpointParameterValues ::
   Tolerance units =>
   Curve2d (space @ units) ->
   Curve2d (space @ units) ->
-  List (Float, Float)
-findEndpointParameterValues curve1 curve2 =
-  List.sortAndDeduplicate $
-    List.concat
-      [ List.map (0.0,) (find (startPoint curve1) curve2)
-      , List.map (1.0,) (find (endPoint curve1) curve2)
-      , List.map (,0.0) (find (startPoint curve2) curve1)
-      , List.map (,1.0) (find (endPoint curve2) curve1)
-      ]
+  Result HigherOrderZero (List (Float, Float))
+findEndpointParameterValues curve1 curve2 = Result.do
+  start1Roots <- find (startPoint curve1) curve2
+  end1Roots <- find (endPoint curve1) curve2
+  start2Roots <- find (startPoint curve2) curve1
+  end2Roots <- find (endPoint curve2) curve1
+  Ok $
+    List.sortAndDeduplicate $
+      List.concat $
+        [ List.map (0.0,) start1Roots
+        , List.map (1.0,) end1Roots
+        , List.map (,0.0) start2Roots
+        , List.map (,1.0) end2Roots
+        ]
 
 intersections ::
   Tolerance units =>
@@ -193,7 +203,8 @@ intersections ::
   Curve2d (space @ units) ->
   Result IntersectionError (List Intersection)
 intersections curve1 curve2 = Result.do
-  let endpointParameterValues = findEndpointParameterValues curve1 curve2
+  endpointParameterValues <-
+    findEndpointParameterValues curve1 curve2 ?? Error HigherOrderIntersection
   case overlappingSegments curve1 curve2 endpointParameterValues of
     [] -> findIntersections curve1 curve2 endpointParameterValues
     segments -> Error (CurvesOverlap segments)
