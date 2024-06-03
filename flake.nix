@@ -1,6 +1,6 @@
 {
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.11";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05";
     flake-utils.url = "github:numtide/flake-utils";
     flake-compat = {
       url = "github:edolstra/flake-compat";
@@ -10,7 +10,7 @@
   outputs = { flake-utils, nixpkgs, ... }:
     flake-utils.lib.eachDefaultSystem (system:
       let
-        ghcVer = "9.4.6";
+        ghcVer = "9.6.5";
         pkgs = import nixpkgs { inherit system; };
         overlay = final: prev: {
           opensolid = final.callCabal2nix "opensolid" ./opensolid { };
