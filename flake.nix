@@ -29,7 +29,7 @@
                 final.opensolid-api
                 final.template-haskell
               ];
-              # cabal puts the `foreign-library` in `/lib/ghc-9.4.6`,
+              # cabal puts the `foreign-library` in `/lib/ghc-9.6.5`,
               # this script makes the library available in `/lib`
               postInstall = (drv.postInstall or "") + ''
                 ln -s $out/lib/ghc-*/libopensolid-ffi.* $out/lib
@@ -37,7 +37,7 @@
             });
         };
 
-        ghcVerShort = builtins.replaceStrings [ "." ] [ "" ] ghcVer; # "9.4.6" -> "946"
+        ghcVerShort = builtins.replaceStrings [ "." ] [ "" ] ghcVer; # "9.6.5" -> "965"
         myHaskellPackages = pkgs.haskell.packages."ghc${ghcVerShort}".extend overlay;
 
         # When developing locally, `cabal build opensolid-ffi:flib:opensolid-ffi` puts the
