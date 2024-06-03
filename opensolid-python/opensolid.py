@@ -32,7 +32,7 @@ B = TypeVar("B")
 
 
 def maybe_reader(
-    read_success: Callable[[c_void_p], A]
+    read_success: Callable[[c_void_p], A],
 ) -> Callable[[c_void_p], Optional[A]]:
     return lambda ptr: read_success(ptr) if ptr else None
 
@@ -296,12 +296,6 @@ class Direction2d:
     @staticmethod
     def unsafe(v: Vector2d) -> Direction2d:
         return Direction2d(lib.opensolid_direction2d_unsafe(v.ptr))
-
-    lib.opensolid_direction2d_vector.argtypes = [c_void_p]
-    lib.opensolid_direction2d_vector.restype = c_void_p
-
-    def vector(self) -> Vector2d:
-        return Vector2d(lib.opensolid_direction2d_vector(self.ptr))
 
     lib.opensolid_direction2d_x.argtypes = []
     lib.opensolid_direction2d_x.restype = c_void_p
@@ -827,6 +821,13 @@ class Vector2d:
     @staticmethod
     def zero() -> Vector2d:
         return Vector2d(lib.opensolid_vector2d_zero())
+
+    lib.opensolid_vector2d_unit.argtypes = [c_void_p]
+    lib.opensolid_vector2d_unit.restype = c_void_p
+
+    @staticmethod
+    def unit(dir: Direction2d) -> Vector2d:
+        return Vector2d(lib.opensolid_vector2d_unit(dir.ptr))
 
     lib.opensolid_vector2d_x.argtypes = [c_double]
     lib.opensolid_vector2d_x.restype = c_void_p
