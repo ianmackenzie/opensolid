@@ -13,3 +13,4 @@
 - ignore: { name: "Use mapM" }
 - ignore: { name: "Redundant fromIntegral" }
 - ignore: { name: "Use :" }
+- ignore: { name: "Use isJust" }
