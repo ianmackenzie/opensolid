@@ -223,9 +223,6 @@ ffiFunctionInfo returnType retExp argNames bindStmts = Prelude.do
         []
     )
 
--- Alias for coordinate system `@` type, since that seems to confuse Template Haskell (see below)
-type Coords space units = space @ units
-
 -- Fix up function type signatures to play more nicely with Template Haskell
 fixupType :: TH.Type -> TH.Type
 -- Replace 'units', 'units1', 'units2', `originUnits` etc. with 'Unitless' in all types
@@ -234,9 +231,6 @@ fixupType (TH.VarT name) | Text.contains "units" (Text.toLower (Text.pack (TH.na
 -- Strip 'forall' from function types
 -- (shouldn't be needed since these are generally units-related...)
 fixupType (TH.ForallT _ _ functionType) = fixupType functionType
--- Template Haskell seems to get confused by type-level use of '@' operator,
--- so replace any instance of `space @ units` with the equivalent `'Coords space units`
-fixupType (TH.ConT name) | TH.nameBase name == Text.unpack "@" = TH.ConT ''Coords
 -- In types with parameters, recursively fix up each parameter
 fixupType (TH.AppT t a) = TH.AppT (fixupType t) (fixupType a)
 -- Otherwise, do nothing and return the type as-is
