@@ -24,9 +24,11 @@ repeat value = Stream value (repeat value)
 iterate :: a -> (a -> a) -> Stream a
 iterate first function = Stream first (iterate (function first) function)
 
+{-# INLINE head #-}
 head :: Stream a -> a
 head (Stream first _) = first
 
+{-# INLINE tail #-}
 tail :: Stream a -> Stream a
 tail (Stream _ rest) = rest
 
