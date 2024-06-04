@@ -184,6 +184,7 @@ library
     Json.FieldSchema
     Point2d.CoordinateTransformation
     Quadrature
+    Solve1d
     Surface1d.Function.Boundary
     Surface1d.Function.PartialZeros
     Surface1d.Function.SaddleRegion
