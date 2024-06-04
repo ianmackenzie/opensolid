@@ -35,5 +35,6 @@ foreign-library opensolid-ffi
     -Wall
     -Werror
     -Wcompat
+    -Wno-missed-extra-shared-lib
 
   default-extensions: TemplateHaskell

@@ -69,3 +69,4 @@ library
     -Wpartial-fields
     -Wsafe
     -dcore-lint
+    -Wno-missed-extra-shared-lib

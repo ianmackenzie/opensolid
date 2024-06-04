@@ -1,0 +1,16 @@
+packages:
+  - opensolid
+  - opensolid-api
+  - opensolid-ffi
+  - opensolid-python
+  - opensolid-sandbox
+  - opensolid-test-server
+
+# Note that this should be consistent with the version of Nix packages defined in flake.nix
+# ('resolver' here and 'nixpkgs.url' there should use the same GHC version)
+resolver: lts-22.24
+
+# Assume that valid/correct versions of GHC etc. are already available via Nix or otherwise
+# (which they should be if the above comment is followed!)
+system-ghc: true
+notify-if-nix-on-path: false

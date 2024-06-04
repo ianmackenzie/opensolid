@@ -1,6 +1,25 @@
 cradle:
-  multi:
-    - path: "./"
-      config:
-        cradle:
-          cabal:
+  stack:
+    - path: "opensolid/src"
+      component: "opensolid:lib"
+
+    - path: "opensolid/test"
+      component: "opensolid:test:opensolid-test"
+
+    - path: "opensolid-api/src"
+      component: "opensolid-api:lib"
+
+    - path: "opensolid-ffi/src"
+      component: "opensolid-ffi:lib:opensolid-ffi"
+
+    - path: "opensolid-python/src/Main.hs"
+      component: "opensolid-python:exe:opensolid-python"
+
+    - path: "opensolid-python/src/PythonAST.hs"
+      component: "opensolid-python:exe:opensolid-python"
+
+    - path: "opensolid-sandbox/src/Main.hs"
+      component: "opensolid-sandbox:exe:sandbox"
+
+    - path: "opensolid-test-server/src/Main.hs"
+      component: "opensolid-test-server:exe:test-server"
