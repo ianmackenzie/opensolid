@@ -68,9 +68,7 @@ testCount count description = do
 
 run :: List Test -> IO ()
 run tests = IO.do
-  IO.printLine ""
   IO.printLine "Running tests..."
-  IO.printLine ""
   results <- IO.collect (runImpl []) tests
   let (successes, failures) = sum results
   if failures == 0
@@ -80,9 +78,7 @@ run tests = IO.do
 reportError :: List Text -> List Text -> IO (Int, Int)
 reportError context messages = IO.do
   IO.printLine ("❌ " + (Text.join " | " (List.reverse context) + ":"))
-  IO.printLine ""
   IO.forEach messages (Text.indent "   " >> IO.printLine)
-  IO.printLine ""
   IO.return (0, 1)
 
 runImpl :: List Text -> Test -> IO (Int, Int)
