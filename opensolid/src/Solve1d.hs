@@ -3,6 +3,7 @@ module Solve1d
   , overlaps
   , isResolved
   , resolvedSign
+  , subdomain
   )
 where
 
@@ -28,3 +29,8 @@ resolvedSign :: Range units -> Maybe Sign
 resolvedSign range = do
   let resolution = Range.resolution range
   if Qty.abs resolution >= 0.5 then Just (Qty.sign resolution) else Nothing
+
+subdomain :: Int -> Int -> Int -> Range Unitless
+subdomain n i j = do
+  let steps = 2 ** n
+  Range.from (i / steps) (j / steps)
