@@ -29,10 +29,8 @@ executable opensolid-python
     process,
 
   other-modules:
-    Paths_opensolid_python
     PythonAST
 
-  autogen-modules: Paths_opensolid_python
   ghc-options:
     -Wall
     -Werror

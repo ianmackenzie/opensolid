@@ -203,7 +203,6 @@ test-suite opensolid-test
 
   build-depends: opensolid
   other-modules:
-    Paths_opensolid
     Test
     Tests.Arc2d
     Tests.Bounds2d
@@ -226,5 +225,4 @@ test-suite opensolid-test
     Tests.VectorBounds2d
     Tests.VectorBounds3d
 
-  autogen-modules: Paths_opensolid
   hs-source-dirs: test

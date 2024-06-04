@@ -19,8 +19,6 @@ source-repository head
 
 executable test-server
   main-is: Main.hs
-  other-modules: Paths_opensolid_test_server
-  autogen-modules: Paths_opensolid_test_server
   hs-source-dirs: src
   default-language: GHC2021
   build-depends:

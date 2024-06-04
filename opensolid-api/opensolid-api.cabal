@@ -40,10 +40,8 @@ library
     OpenSolidAPI.Point2d
     OpenSolidAPI.Range
     OpenSolidAPI.Vector2d
-    Paths_opensolid_api
     Pointers
 
-  autogen-modules: Paths_opensolid_api
   default-extensions:
     DisambiguateRecordFields
     GADTs

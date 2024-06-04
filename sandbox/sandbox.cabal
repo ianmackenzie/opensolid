@@ -19,8 +19,6 @@ source-repository head
 
 executable sandbox
   main-is: Main.hs
-  other-modules: Paths_opensolid_sandbox
-  autogen-modules: Paths_opensolid_sandbox
   hs-source-dirs: src
   default-language: GHC2021
   build-depends:

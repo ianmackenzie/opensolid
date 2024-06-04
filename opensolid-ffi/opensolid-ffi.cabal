@@ -29,9 +29,7 @@ foreign-library opensolid-ffi
   hs-source-dirs: src
   other-modules:
     OpenSolidFFI
-    Paths_opensolid_ffi
 
-  autogen-modules: Paths_opensolid_ffi
   c-sources: src/wrapper.c
   ghc-options:
     -Wall
