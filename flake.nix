@@ -81,6 +81,7 @@
             buildInputs = with myHaskellPackages; [
               haskell-language-server
               cabal-install
+              cabal-gild
               pkgs.nil
               pkgs.nixpkgs-fmt
             ];

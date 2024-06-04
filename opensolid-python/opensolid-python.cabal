@@ -1,18 +1,17 @@
 cabal-version: 2.2
-
-name:           opensolid-python
-version:        0.1.0.0
-synopsis:       Open-source geometric modelling framework
-description:    Please see the README on GitHub at <https://github.com/ianmackenzie/opensolid#readme>
-category:       Geometry
-homepage:       https://github.com/ianmackenzie/opensolid#readme
-bug-reports:    https://github.com/ianmackenzie/opensolid/issues
-author:         Ian Mackenzie
-maintainer:     ian.e.mackenzie@gmail.com
-copyright:      2023 Ian Mackenzie
-license:        MPL-2.0
-license-file:   LICENSE
-build-type:     Simple
+name: opensolid-python
+version: 0.1.0.0
+synopsis: Open-source geometric modelling framework
+description: Please see the README on GitHub at <https://github.com/ianmackenzie/opensolid#readme>
+category: Geometry
+homepage: https://github.com/ianmackenzie/opensolid#readme
+bug-reports: https://github.com/ianmackenzie/opensolid/issues
+author: Ian Mackenzie
+maintainer: ian.e.mackenzie@gmail.com
+copyright: 2023 Ian Mackenzie
+license: MPL-2.0
+license-file: LICENSE
+build-type: Simple
 
 source-repository head
   type: git
@@ -23,31 +22,36 @@ executable opensolid-python
   hs-source-dirs: src
   main-is: Main.hs
   build-depends:
-      language-python
-    , base
-    , opensolid
-    , opensolid-api
-    , process
-  other-modules: PythonAST, Paths_opensolid_python
+    base,
+    language-python,
+    opensolid,
+    opensolid-api,
+    process,
+
+  other-modules:
+    Paths_opensolid_python
+    PythonAST
+
   autogen-modules: Paths_opensolid_python
   ghc-options:
-      -Wall
-      -Werror
-      -Wcompat
-      -Widentities
-      -Wincomplete-record-updates
-      -Wincomplete-uni-patterns
-      -Wmissing-signatures
-      -Wmissing-exported-signatures
-      -Wmissing-export-lists
-      -Wmissing-home-modules
-      -Wpartial-fields
-      -Wsafe
-      -dcore-lint
-      -threaded
-      -rtsopts
-      -with-rtsopts=-N
+    -Wall
+    -Werror
+    -Wcompat
+    -Widentities
+    -Wincomplete-record-updates
+    -Wincomplete-uni-patterns
+    -Wmissing-signatures
+    -Wmissing-exported-signatures
+    -Wmissing-export-lists
+    -Wmissing-home-modules
+    -Wpartial-fields
+    -Wsafe
+    -dcore-lint
+    -threaded
+    -rtsopts
+    -with-rtsopts=-N
+
   default-extensions:
-      OverloadedStrings
-      RebindableSyntax
-      QualifiedDo
+    OverloadedStrings
+    QualifiedDo
+    RebindableSyntax

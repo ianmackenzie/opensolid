@@ -1,20 +1,20 @@
 cabal-version: 2.2
+name: opensolid
+version: 0.1.0.0
+synopsis: Open-source geometric modelling framework
+description:
+  Please see the README on GitHub at <https://github.com/ianmackenzie/opensolid#readme>
 
-name:           opensolid
-version:        0.1.0.0
-synopsis:       Open-source geometric modelling framework
-description:    Please see the README on GitHub at <https://github.com/ianmackenzie/opensolid#readme>
-category:       Geometry
-homepage:       https://github.com/ianmackenzie/opensolid#readme
-bug-reports:    https://github.com/ianmackenzie/opensolid/issues
-author:         Ian Mackenzie
-maintainer:     ian.e.mackenzie@gmail.com
-copyright:      2023 Ian Mackenzie
-license:        MPL-2.0
-license-file:   LICENSE
-build-type:     Simple
-extra-source-files:
-    README.md
+category: Geometry
+homepage: https://github.com/ianmackenzie/opensolid#readme
+bug-reports: https://github.com/ianmackenzie/opensolid/issues
+author: Ian Mackenzie
+maintainer: ian.e.mackenzie@gmail.com
+copyright: 2023 Ian Mackenzie
+license: MPL-2.0
+license-file: LICENSE
+build-type: Simple
+extra-source-files: README.md
 
 source-repository head
   type: git
@@ -23,199 +23,208 @@ source-repository head
 common config
   default-language: GHC2021
   build-depends:
-      array
-    , base
-    , containers
-    , random
-    , colour
-    , type-errors
-    , directory
-    , async
-    , aeson
-    , text
-    , bytestring
-    , scientific
-    , vector
-    , http-types
-    , case-insensitive
-    , wai
-    , warp
+    aeson,
+    array,
+    async,
+    base,
+    bytestring,
+    case-insensitive,
+    colour,
+    containers,
+    directory,
+    http-types,
+    random,
+    scientific,
+    text,
+    type-errors,
+    vector,
+    wai,
+    warp,
+
   ghc-options:
-      -Wall
-      -Werror
-      -Wcompat
-      -Widentities
-      -Wincomplete-record-updates
-      -Wincomplete-uni-patterns
-      -Wmissing-signatures
-      -Wmissing-exported-signatures
-      -Wmissing-home-modules
-      -Wpartial-fields
-      -Wsafe
-      -dcore-lint
+    -Wall
+    -Werror
+    -Wcompat
+    -Widentities
+    -Wincomplete-record-updates
+    -Wincomplete-uni-patterns
+    -Wmissing-signatures
+    -Wmissing-exported-signatures
+    -Wmissing-home-modules
+    -Wpartial-fields
+    -Wsafe
+    -dcore-lint
+
   default-extensions:
-      OverloadedStrings
-      RebindableSyntax
-      UndecidableInstances
-      StrictData
-      FunctionalDependencies
-      DataKinds
-      GADTs
-      RoleAnnotations
-      LexicalNegation
-      UndecidableSuperClasses
-      ImplicitParams
-      PatternSynonyms
-      BlockArguments
-      QualifiedDo
-      TypeFamilies
-      ExplicitNamespaces
-      DeriveAnyClass
-      DerivingStrategies
-      ViewPatterns
-      LambdaCase
-      DisambiguateRecordFields
-      TypeFamilyDependencies
-      MultiWayIf
+    BlockArguments
+    DataKinds
+    DeriveAnyClass
+    DerivingStrategies
+    DisambiguateRecordFields
+    ExplicitNamespaces
+    FunctionalDependencies
+    GADTs
+    ImplicitParams
+    LambdaCase
+    LexicalNegation
+    MultiWayIf
+    OverloadedStrings
+    PatternSynonyms
+    QualifiedDo
+    RebindableSyntax
+    RoleAnnotations
+    StrictData
+    TypeFamilies
+    TypeFamilyDependencies
+    UndecidableInstances
+    UndecidableSuperClasses
+    ViewPatterns
 
 library
   import: config
   exposed-modules:
-      Angle
-      Arc2d
-      Area
-      Arithmetic
-      Array
-      Axis2d
-      Basics
-      Basis2d
-      BezierCurve2d
-      Bisection
-      Bool
-      Bounded
-      Bounds2d
-      Bounds3d
-      Bounds
-      Coalesce
-      Colour
-      Composition
-      CoordinateSystem
-      CubicSpline2d
-      Curve1d
-      Curve1d.Root
-      Curve2d
-      Curve2d.Intersection
-      Curve3d
-      Debug
-      Map
-      Direction2d
-      Direction3d
-      DirectionBounds2d
-      DirectionCurve2d
-      Drawing2d
-      Duration
-      Error
-      Estimate
-      File
-      Float
-      Frame2d
-      Fuzzy
-      Http.Server
-      Http.Server.Request
-      Http.Server.Response
-      Int
-      Intersects
-      IO
-      Json
-      Json.Format
-      Json.Schema
-      Length
-      Line2d
-      Line3d
-      List
-      Maybe
-      NonEmpty
-      OpenSolid
-      OpenSolid.Json
-      Parameter
-      Pair
-      Point2d
-      Point3d
-      Qty
-      QuadraticSpline2d
-      QuadraticSpline3d
-      Random
-      Random.Internal
-      Range
-      Region2d
-      Result
-      Sign
-      Stream
-      Surface1d
-      Surface1d.Function
-      Surface1d.Function.Zeros
-      Text
-      Tolerance
-      Transform2d
-      Units
-      Uv
-      Uvw
-      Vector2d
-      Vector3d
-      VectorBounds2d
-      VectorBounds3d
-      VectorCurve2d
-      VectorCurve2d.DegenerateEndpoint
-      VectorCurve2d.Direction
-      VectorCurve3d
-      VectorVolume3d.Function
-      Vertex2d
-      Volume
-      Volume1d
-      Volume1d.Function
+    Angle
+    Arc2d
+    Area
+    Arithmetic
+    Array
+    Axis2d
+    Basics
+    Basis2d
+    BezierCurve2d
+    Bisection
+    Bool
+    Bounded
+    Bounds
+    Bounds2d
+    Bounds3d
+    Coalesce
+    Colour
+    Composition
+    CoordinateSystem
+    CubicSpline2d
+    Curve1d
+    Curve1d.Root
+    Curve2d
+    Curve2d.Intersection
+    Curve3d
+    Debug
+    Direction2d
+    Direction3d
+    DirectionBounds2d
+    DirectionCurve2d
+    Drawing2d
+    Duration
+    Error
+    Estimate
+    File
+    Float
+    Frame2d
+    Fuzzy
+    Http.Server
+    Http.Server.Request
+    Http.Server.Response
+    IO
+    Int
+    Intersects
+    Json
+    Json.Format
+    Json.Schema
+    Length
+    Line2d
+    Line3d
+    List
+    Map
+    Maybe
+    NonEmpty
+    OpenSolid
+    OpenSolid.Json
+    Pair
+    Parameter
+    Point2d
+    Point3d
+    Qty
+    QuadraticSpline2d
+    QuadraticSpline3d
+    Random
+    Random.Internal
+    Range
+    Region2d
+    Result
+    Sign
+    Stream
+    Surface1d
+    Surface1d.Function
+    Surface1d.Function.Zeros
+    Text
+    Tolerance
+    Transform2d
+    Units
+    Uv
+    Uvw
+    Vector2d
+    Vector3d
+    VectorBounds2d
+    VectorBounds3d
+    VectorCurve2d
+    VectorCurve2d.DegenerateEndpoint
+    VectorCurve2d.Direction
+    VectorCurve3d
+    VectorVolume3d.Function
+    Vertex2d
+    Volume
+    Volume1d
+    Volume1d.Function
+
   other-modules:
-      Curve1d.Integral
-      Curve2d.Internal
-      Curve2d.Derivatives
-      Curve2d.Segment
-      Json.FieldSchema
-      Point2d.CoordinateTransformation
-      Quadrature
-      Surface1d.Function.Boundary
-      Surface1d.Function.PartialZeros
-      Surface1d.Function.SaddleRegion
-      Text.Parse
-      Vector2d.CoordinateTransformation
+    Curve1d.Integral
+    Curve2d.Derivatives
+    Curve2d.Internal
+    Curve2d.Segment
+    Json.FieldSchema
+    Point2d.CoordinateTransformation
+    Quadrature
+    Surface1d.Function.Boundary
+    Surface1d.Function.PartialZeros
+    Surface1d.Function.SaddleRegion
+    Text.Parse
+    Vector2d.CoordinateTransformation
+
   hs-source-dirs: src
 
 test-suite opensolid-test
   import: config
   type: exitcode-stdio-1.0
   main-is: Main.hs
-  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  ghc-options:
+    -threaded
+    -rtsopts
+    -with-rtsopts=-N
+
   build-depends: opensolid
   other-modules:
-      Test
-      Tests.Arc2d
-      Tests.Bounds2d
-      Tests.Curve1d
-      Tests.Curve2d
-      Tests.Direction2d
-      Tests.DivMod
-      Tests.Estimate
-      Tests.Float
-      Tests.List
-      Tests.Map
-      Tests.NonEmpty
-      Tests.Stream
-      Tests.Text
-      Tests.Parameter
-      Tests.Qty
-      Tests.Random
-      Tests.Range
-      Tests.Region2d
-      Tests.VectorBounds2d
-      Tests.VectorBounds3d
-      Paths_opensolid
+    Paths_opensolid
+    Test
+    Tests.Arc2d
+    Tests.Bounds2d
+    Tests.Curve1d
+    Tests.Curve2d
+    Tests.Direction2d
+    Tests.DivMod
+    Tests.Estimate
+    Tests.Float
+    Tests.List
+    Tests.Map
+    Tests.NonEmpty
+    Tests.Parameter
+    Tests.Qty
+    Tests.Random
+    Tests.Range
+    Tests.Region2d
+    Tests.Stream
+    Tests.Text
+    Tests.VectorBounds2d
+    Tests.VectorBounds3d
+
   autogen-modules: Paths_opensolid
   hs-source-dirs: test
