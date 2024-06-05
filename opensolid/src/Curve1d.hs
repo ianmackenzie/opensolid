@@ -34,7 +34,7 @@ import Int qualified
 import List qualified
 import OpenSolid
 import Qty qualified
-import Range (Range)
+import Range (Range (Range))
 import Range qualified
 import Result qualified
 import Solve1d qualified
@@ -428,13 +428,13 @@ findZerosOrder n derivatives domain exclusions =
             findZerosOrder n derivatives leftDomain $
               -- When solving within the left domain,
               -- we only need to consider exclusions that overlap that domain
-              List.filter (Solve1d.overlaps leftDomain) exclusions
+              List.filter (overlaps leftDomain) exclusions
           (rightRoots, rightExclusions) <-
             findZerosOrder n derivatives rightDomain $
               -- Make sure to pass exclusions reported from the left domain
               -- into findZeros for the right domain,
               -- so we don't report a duplicate root
-              List.filter (Solve1d.overlaps rightDomain) (exclusions + leftExclusions)
+              List.filter (overlaps rightDomain) (exclusions + leftExclusions)
           -- Combine roots and exclusions from both subdomains
           Ok (leftRoots + rightRoots, leftExclusions + rightExclusions)
 
@@ -454,9 +454,9 @@ resolveOrder n derivatives domain exclusions
   -- A lower-order derivative is non-zero, so no solution of the given order exists
   | anyResolved n (Stream.tail derivatives) domain = Resolved Nothing
   -- We're overlapping an exclusion, so we need to bisect further
-  | List.any (Solve1d.overlaps domain) exclusions = Unresolved
+  | List.any (overlaps domain) exclusions = Unresolved
   -- Otherwise, try to solve for a root of the given order
-  | otherwise = solveOrder n derivatives domain (Solve1d.expand domain)
+  | otherwise = solveOrder n derivatives domain (expand domain)
 
 anyResolved :: Int -> Stream (Curve1d units) -> Range Unitless -> Bool
 anyResolved 0 _ _ = False
@@ -509,6 +509,15 @@ solveOrder n derivatives domain expandedDomain = do
               -- No solution for the order-n derivative,
               -- so there can be no root of order n in this domain
               Nothing -> Resolved Nothing
+
+expand :: Range Unitless -> Range Unitless
+expand domain = do
+  let (Range low high) = domain
+  let expansion = 0.5 * (high - low)
+  Range.unsafe (Float.max 0.0 (low - expansion)) (Float.min 1.0 (high + expansion))
+
+overlaps :: Range Unitless -> Range Unitless -> Bool
+overlaps domain exclusion = Range.overlap domain exclusion > Qty.zero
 
 integral :: Curve1d units -> Estimate units
 integral curve = Estimate.wrap (Integral curve (derivative curve) Range.unit)

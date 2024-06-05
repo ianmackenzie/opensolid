@@ -1,26 +1,56 @@
+{-# LANGUAGE NoFieldSelectors #-}
+
 module Solve1d
-  ( expand
-  , overlaps
+  ( domain
+  , bisect
+  , offset
+  , narrow
+  , bounds
+  , overlap
   , isResolved
   , resolvedSign
-  , subdomain
   )
 where
 
-import Float qualified
 import OpenSolid
 import Qty qualified
-import Range (Range (Range))
+import Range (Range)
 import Range qualified
 
-expand :: Range Unitless -> Range Unitless
-expand domain = do
-  let (Range low high) = domain
-  let expansion = 0.5 * (high - low)
-  Range.unsafe (Float.max 0.0 (low - expansion)) (Float.min 1.0 (high + expansion))
+data Subdomain = Subdomain
+  { n :: Int
+  , i :: Int
+  , j :: Int
+  }
+  deriving (Eq, Show)
 
-overlaps :: Range Unitless -> Range Unitless -> Bool
-overlaps domain exclusion = Range.overlap domain exclusion > Qty.zero
+domain :: Subdomain
+domain = Subdomain{n = 1, i = 0, j = 1}
+
+bisect :: Subdomain -> (Subdomain, Subdomain)
+bisect (Subdomain{n, i, j}) = do
+  let n2 = 2 * n
+  let i2 = 2 * i
+  let j2 = 2 * j
+  let mid = i2 + (j - i)
+  (Subdomain n2 i2 mid, Subdomain n2 mid j2)
+
+offset :: Subdomain -> Subdomain
+offset (Subdomain{n, i, j}) = do
+  let delta = j - i
+  Subdomain (2 * n) (2 * i + delta) (2 * j + delta)
+
+narrow :: Subdomain -> Subdomain
+narrow (Subdomain{n, i, j}) = do
+  let delta = j - i
+  Subdomain (8 * n) (8 * i + delta) (8 * j - delta)
+
+bounds :: Subdomain -> Range Unitless
+bounds (Subdomain{n, i, j}) = Range.unsafe (i / n) (j / n)
+
+overlap :: Subdomain -> Subdomain -> Bool
+overlap (Subdomain n1 i1 j1) (Subdomain n2 i2 j2) =
+  i1 * n2 < j2 * n1 && j1 * n2 > i2 * n1
 
 isResolved :: Range units -> Bool
 isResolved range = resolvedSign range /= Nothing
@@ -29,8 +59,3 @@ resolvedSign :: Range units -> Maybe Sign
 resolvedSign range = do
   let resolution = Range.resolution range
   if Qty.abs resolution >= 0.5 then Just (Qty.sign resolution) else Nothing
-
-subdomain :: Int -> Int -> Int -> Range Unitless
-subdomain n i j = do
-  let steps = 2 ** n
-  Range.from (i / steps) (j / steps)
