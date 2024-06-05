@@ -218,7 +218,7 @@ testPlaneTorusIntersection = IO.do
   -- let nz = 1.0
   let f = x * nx + y * ny + z * nz
   zeros <- Surface1d.Function.zeros f
-  drawZeros "test-plane-torus-intersection.svg" zeros
+  drawZeros "opensolid-sandbox/test-plane-torus-intersection.svg" zeros
   IO.printLine "Plane torus intersection solutions:"
   log "  Crossing curves" (List.length (Surface1d.Function.Zeros.crossingCurves zeros))
   log "  Saddle points" (List.length (Surface1d.Function.Zeros.saddlePoints zeros))
@@ -364,7 +364,7 @@ testBezierSegment = IO.do
   let coordinateRange = Range.convert toDrawing (Range.from -1.0 11.0)
   let drawingBounds = Bounds2d.xy coordinateRange coordinateRange
   let curveEntity = drawBezier Colour.blue p1 [p2, p3, p4, p5] p6
-  Drawing2d.writeTo "test-bezier-segment.svg" drawingBounds [curveEntity]
+  Drawing2d.writeTo "opensolid-sandbox/test-bezier-segment.svg" drawingBounds [curveEntity]
 
 testHermiteBezier :: Tolerance Meters => IO ()
 testHermiteBezier = IO.do
@@ -390,7 +390,7 @@ testHermiteBezier = IO.do
   let curveEntity = Drawing2d.polyline curveAttributes sampledPoints
   let coordinateRange = Range.from (Length.meters -1.0) (Length.meters 11.0)
   let drawingBounds = Bounds2d.xy coordinateRange coordinateRange
-  Drawing2d.writeTo "test-hermite-bezier.svg" drawingBounds [curveEntity]
+  Drawing2d.writeTo "opensolid-sandbox/test-hermite-bezier.svg" drawingBounds [curveEntity]
 
 testStretchedArc :: Tolerance Meters => IO ()
 testStretchedArc = IO.do
