@@ -12,12 +12,16 @@ module Solve1d
   , contains
   , isResolved
   , resolvedSign
+  , run
   )
 where
 
+import Debug qualified
 import Float qualified
 import OpenSolid
 import Qty qualified
+import Queue (Queue)
+import Queue qualified
 import Range (Range)
 import Range qualified
 
@@ -79,3 +83,22 @@ resolvedSign :: Range units -> Maybe Sign
 resolvedSign range = do
   let resolution = Range.resolution range
   if Qty.abs resolution >= 0.5 then Just (Qty.sign resolution) else Nothing
+
+run :: a -> (Subdomain -> a -> (a, Bool)) -> a
+run initialState processSubdomain = loop initialState processSubdomain (Queue.singleton domain)
+
+loop :: a -> (Subdomain -> a -> (a, Bool)) -> Queue Subdomain -> a
+loop currentState processSubdomain queue =
+  case Queue.pop queue of
+    Just (subdomain, remaining) -> do
+      let (updatedState, resolved) = processSubdomain subdomain currentState
+      let updatedQueue = if resolved then remaining else remaining |> enqueueChildren subdomain
+      loop updatedState processSubdomain updatedQueue
+    Nothing -> currentState
+
+enqueueChildren :: Subdomain -> Queue Subdomain -> Queue Subdomain
+enqueueChildren subdomain queue = do
+  Debug.assert (not (isAtomic subdomain))
+  let mid = half subdomain
+  let (left, right) = bisect subdomain
+  queue |> Queue.push mid |> Queue.push left |> Queue.push right
