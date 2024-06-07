@@ -31,6 +31,7 @@ common config
     case-insensitive,
     colour,
     containers,
+    deque,
     directory,
     http-types,
     random,
@@ -147,6 +148,7 @@ library
     Qty
     QuadraticSpline2d
     QuadraticSpline3d
+    Queue
     Random
     Random.Internal
     Range
