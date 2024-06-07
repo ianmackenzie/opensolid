@@ -2,30 +2,37 @@
 
 module Solve1d
   ( domain
+  , isAtomic
   , bisect
+  , half
   , offset
-  , narrow
+  , interior
   , bounds
-  , overlap
+  , overlaps
+  , contains
   , isResolved
   , resolvedSign
   )
 where
 
+import Float qualified
 import OpenSolid
 import Qty qualified
 import Range (Range)
 import Range qualified
 
 data Subdomain = Subdomain
-  { n :: Int
-  , i :: Int
-  , j :: Int
+  { n :: Float
+  , i :: Float
+  , j :: Float
   }
   deriving (Eq, Show)
 
 domain :: Subdomain
-domain = Subdomain{n = 1, i = 0, j = 1}
+domain = Subdomain{n = 1.0, i = 0.0, j = 1.0}
+
+isAtomic :: Subdomain -> Bool
+isAtomic (Subdomain{n, i, j}) = (j - i) / n <= Float.epsilon
 
 bisect :: Subdomain -> (Subdomain, Subdomain)
 bisect (Subdomain{n, i, j}) = do
@@ -35,22 +42,35 @@ bisect (Subdomain{n, i, j}) = do
   let mid = i2 + (j - i)
   (Subdomain n2 i2 mid, Subdomain n2 mid j2)
 
+half :: Subdomain -> Subdomain
+half (Subdomain{n, i, j}) = do
+  let n2 = 4 * n
+  let delta = j - i
+  Subdomain n2 (4 * i + delta) (4 * j - delta)
+
 offset :: Subdomain -> Subdomain
 offset (Subdomain{n, i, j}) = do
   let delta = j - i
   Subdomain (2 * n) (2 * i + delta) (2 * j + delta)
 
-narrow :: Subdomain -> Subdomain
-narrow (Subdomain{n, i, j}) = do
-  let delta = j - i
-  Subdomain (8 * n) (8 * i + delta) (8 * j - delta)
-
 bounds :: Subdomain -> Range Unitless
 bounds (Subdomain{n, i, j}) = Range.unsafe (i / n) (j / n)
 
-overlap :: Subdomain -> Subdomain -> Bool
-overlap (Subdomain n1 i1 j1) (Subdomain n2 i2 j2) =
+interior :: Subdomain -> Range Unitless
+interior (Subdomain{n, i, j}) = do
+  let n8 = 8 * n
+  let delta = j - i
+  Range.unsafe
+    (if i == 0.0 then 0.0 else (8 * i + delta) / n8)
+    (if j == n then 1.0 else (8 * j - delta) / n8)
+
+overlaps :: Subdomain -> Subdomain -> Bool
+overlaps (Subdomain n2 i2 j2) (Subdomain n1 i1 j1) =
   i1 * n2 < j2 * n1 && j1 * n2 > i2 * n1
+
+contains :: Subdomain -> Subdomain -> Bool
+contains (Subdomain n2 i2 j2) (Subdomain n1 i1 j1) =
+  i1 * n2 <= i2 * n1 && j1 * n2 >= j2 * n1
 
 isResolved :: Range units -> Bool
 isResolved range = resolvedSign range /= Nothing
