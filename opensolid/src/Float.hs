@@ -33,6 +33,7 @@ module Float
   , sum
   , product
   , random
+  , epsilon
   )
 where
 
@@ -161,3 +162,6 @@ product = NonEmpty.reduce (*)
 
 random :: Float -> Float -> Random.Generator Float
 random = Qty.random
+
+epsilon :: Float
+epsilon = 2.2204460492503131e-16
