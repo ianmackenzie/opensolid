@@ -10,7 +10,6 @@ module Solve1d
   , isAtomic
   , bisect
   , half
-  , offset
   , interior
   , bounds
   , overlaps
@@ -61,11 +60,6 @@ half (Subdomain{n, i, j}) = do
   let n2 = 4 * n
   let delta = j - i
   Subdomain n2 (4 * i + delta) (4 * j - delta)
-
-offset :: Subdomain -> Subdomain
-offset (Subdomain{n, i, j}) = do
-  let delta = j - i
-  Subdomain (2 * n) (2 * i + delta) (2 * j + delta)
 
 bounds :: Subdomain -> Range Unitless
 bounds (Subdomain{n, i, j}) = Range.unsafe (i / n) (j / n)
