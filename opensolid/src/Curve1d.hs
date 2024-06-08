@@ -30,13 +30,15 @@ import Curve1d.Root qualified as Root
 import Estimate (Estimate)
 import Estimate qualified
 import Float qualified
-import Int qualified
 import List qualified
 import OpenSolid
 import Qty qualified
-import Range (Range (Range))
+import Queue (Queue)
+import Queue qualified
+import Range (Range)
 import Range qualified
 import Result qualified
+import Solve1d (Subdomain)
 import Solve1d qualified
 import Stream (Stream (Stream))
 import Stream qualified
@@ -385,78 +387,60 @@ findZeros ::
   Tolerance units =>
   List Int ->
   Stream (Curve1d units) ->
-  Result HigherOrderZero (List Root, List (Range Unitless))
+  Result HigherOrderZero (List Root, List Subdomain)
 findZeros orders derivatives = case orders of
   [] -> Ok ([], []) -- No more orders to try
   n : higherOrders -> Result.do
-    -- Find higher-order zeros first,
-    -- and their corresponding exclusions
+    -- Find higher-order zeros first, and their corresponding exclusions
     (higherOrderZeros, higherOrderExclusions) <- findZeros higherOrders derivatives
-    -- Find roots of the current order,
-    -- taking into account exclusions from the higher-order roots
-    (rootsOrderN, exclusionsOrderN) <- findZerosOrder n derivatives Range.unit higherOrderExclusions
-    -- Combine higher-order and current roots
-    Ok (higherOrderZeros + rootsOrderN, higherOrderExclusions + exclusionsOrderN)
+    findZerosOrder n derivatives higherOrderZeros higherOrderExclusions Solve1d.init
 
 findZerosOrder ::
   Tolerance units =>
   Int ->
   Stream (Curve1d units) ->
-  Range Unitless ->
-  List (Range Unitless) ->
-  Result HigherOrderZero (List Root, List (Range Unitless))
-findZerosOrder n derivatives domain exclusions =
-  -- Attempt to 'resolve' the current domain with respect to the current root order
-  -- (see if it's possible to guarantee the presence or absence of a unique zero)
-  case resolveOrder n derivatives domain exclusions of
-    -- Guaranteed single solution of order n exists in this domain,
-    -- with a corresponding exclusion region
-    Resolved (Just (root, exclusion)) -> Ok ([root], [exclusion])
-    -- Guaranteed no solution of the given order exists in this domain
-    Resolved Nothing -> Ok ([], [])
-    -- We couldn't determine whether or not a unique solution exists in this domain,
-    -- so we need to bisect into subdomains
-    Unresolved
-      -- We can't actually bisect further, since the domain is too small -
-      -- likely means that there's a higher-order root than we were asked to find
-      | Range.isAtomic domain -> Error HigherOrderZero
-      -- Otherwise, bisect the domain
-      -- and recurse into the left and right subdomains
-      | otherwise -> Result.do
-          let (leftDomain, rightDomain) = Range.bisect domain
-          (leftRoots, leftExclusions) <-
-            findZerosOrder n derivatives leftDomain $
-              -- When solving within the left domain,
-              -- we only need to consider exclusions that overlap that domain
-              List.filter (overlaps leftDomain) exclusions
-          (rightRoots, rightExclusions) <-
-            findZerosOrder n derivatives rightDomain $
-              -- Make sure to pass exclusions reported from the left domain
-              -- into findZeros for the right domain,
-              -- so we don't report a duplicate root
-              List.filter (overlaps rightDomain) (exclusions + leftExclusions)
-          -- Combine roots and exclusions from both subdomains
-          Ok (leftRoots + rightRoots, leftExclusions + rightExclusions)
+  List Root ->
+  List Subdomain ->
+  Queue Subdomain ->
+  Result HigherOrderZero (List Root, List Subdomain)
+findZerosOrder n derivatives accumulated exclusions queue =
+  case Queue.pop queue of
+    Just (subdomain, remaining) ->
+      -- Attempt to 'resolve' the current domain with respect to the current root order
+      -- (see if it's possible to guarantee the presence or absence of a unique zero)
+      case resolveOrder n derivatives subdomain exclusions of
+        -- Guaranteed single solution of order n exists in the interior of this domain
+        Resolved (Just root) ->
+          findZerosOrder n derivatives (root : accumulated) (subdomain : exclusions) remaining
+        -- Guaranteed no solution of the given order exists in the interior of this domain
+        Resolved Nothing ->
+          findZerosOrder n derivatives accumulated exclusions remaining
+        -- We couldn't determine whether or not a unique solution exists in this domain,
+        -- so we need to bisect into subdomains
+        Unresolved -> Result.do
+          updatedQueue <- Solve1d.enqueueChildren subdomain remaining ?? Error HigherOrderZero
+          findZerosOrder n derivatives accumulated exclusions updatedQueue
+    Nothing -> Ok (accumulated, exclusions)
 
 resolveOrder ::
   Tolerance units =>
   Int ->
   Stream (Curve1d units) ->
-  Range Unitless ->
-  List (Range Unitless) ->
-  Fuzzy (Maybe (Root, Range Unitless))
-resolveOrder n derivatives domain exclusions
+  Subdomain ->
+  List Subdomain ->
+  Fuzzy (Maybe Root)
+resolveOrder n derivatives subdomain exclusions
   -- The current domain is contained within an exclusion,
   -- so no (additional) solution exists within this domain
-  | List.any (Range.contains domain) exclusions = Resolved Nothing
+  | List.any (Solve1d.contains subdomain) exclusions = Resolved Nothing
   -- The curve itself is non-zero, so no solution exists within this domain
-  | not (segmentBounds domain (Stream.head derivatives) ^ Qty.zero) = Resolved Nothing
+  | not (segmentBounds (Solve1d.bounds subdomain) (Stream.head derivatives) ^ Qty.zero) = Resolved Nothing
   -- A lower-order derivative is non-zero, so no solution of the given order exists
-  | anyResolved n (Stream.tail derivatives) domain = Resolved Nothing
+  | anyResolved n (Stream.tail derivatives) (Solve1d.bounds subdomain) = Resolved Nothing
   -- We're overlapping an exclusion, so we need to bisect further
-  | List.any (overlaps domain) exclusions = Unresolved
+  | List.any (Solve1d.overlaps subdomain) exclusions = Unresolved
   -- Otherwise, try to solve for a root of the given order
-  | otherwise = solveOrder n derivatives domain (expand domain)
+  | otherwise = solveOrder n derivatives (Solve1d.interior subdomain) (Solve1d.bounds subdomain)
 
 anyResolved :: Int -> Stream (Curve1d units) -> Range Unitless -> Bool
 anyResolved 0 _ _ = False
@@ -469,37 +453,35 @@ solveOrder ::
   Stream (Curve1d units) ->
   Range Unitless ->
   Range Unitless ->
-  Fuzzy (Maybe (Root, Range Unitless))
-solveOrder n derivatives domain expandedDomain = do
+  Fuzzy (Maybe Root)
+solveOrder n derivatives subdomainInterior subdomainBounds = do
   -- For a solution of order n,
   -- we need to look at the derivative of order m = n + 1
   let m = n + 1
   let fm = Stream.nth m derivatives
-  let fmBounds = segmentBounds expandedDomain fm
+  let fmBounds = segmentBounds subdomainBounds fm
   case Solve1d.resolvedSign fmBounds of
     Nothing -> Unresolved
     Just fmSign -> do
-      let fmAbs x = Qty.abs (evaluateAt x fm)
-      -- Compute the 'radius' of a root of order n
-      let radius x = (Int.factorial m * ?tolerance / fmAbs x) ** (1 / m)
+      let neighborhood = Solve1d.neighborhood m (Range.maxAbs fmBounds)
       -- Check that the values of all derivatives of order n and lower
       -- (including order 0, the curve itself)
-      -- are zero to within an appropriate tolerance based on the root radius
+      -- are zero to within an appropriate tolerance
       let curveIsZero x = evaluateAt x (Stream.head derivatives) ~= Qty.zero
       let derivativeValue x k = evaluateAt x (Stream.nth k derivatives)
-      let derivativeTolerance x k = fmAbs x * radius x ** (m - k) / Int.factorial (m - k)
-      let derivativeIsZero x k = Qty.abs (derivativeValue x k) < derivativeTolerance x k
+      let derivativeTolerance k = Solve1d.derivativeTolerance neighborhood k
+      let derivativeIsZero x k = Qty.abs (derivativeValue x k) < derivativeTolerance k
       let isSolution x = curveIsZero x && List.all (derivativeIsZero x) [1 .. n]
-      let solution x = Resolved (Just (Root x n fmSign, expandedDomain))
+      let solution x = Resolved (Just (Root x n fmSign))
       if
         -- Snap to 0.0 or 1.0 as a root if possible
-        | Range.includes 0.0 domain && isSolution 0.0 -> solution 0.0
-        | Range.includes 1.0 domain && isSolution 1.0 -> solution 1.0
+        | Range.includes 0.0 subdomainInterior && isSolution 0.0 -> solution 0.0
+        | Range.includes 1.0 subdomainInterior && isSolution 1.0 -> solution 1.0
         -- Otherwise, solve for zero of order-n derivative
         -- and check if that point is actually a root
         -- (all lower-order derivatives are also zero)
         | otherwise -> do
-            case Range.solve (pointOn (Stream.nth n derivatives)) domain of
+            case Range.solve (pointOn (Stream.nth n derivatives)) subdomainInterior of
               Just x
                 -- We found a solution!
                 | isSolution x -> solution x
@@ -509,15 +491,6 @@ solveOrder n derivatives domain expandedDomain = do
               -- No solution for the order-n derivative,
               -- so there can be no root of order n in this domain
               Nothing -> Resolved Nothing
-
-expand :: Range Unitless -> Range Unitless
-expand domain = do
-  let (Range low high) = domain
-  let expansion = 0.5 * (high - low)
-  Range.unsafe (Float.max 0.0 (low - expansion)) (Float.min 1.0 (high + expansion))
-
-overlaps :: Range Unitless -> Range Unitless -> Bool
-overlaps domain exclusion = Range.overlap domain exclusion > Qty.zero
 
 integral :: Curve1d units -> Estimate units
 integral curve = Estimate.wrap (Integral curve (derivative curve) Range.unit)

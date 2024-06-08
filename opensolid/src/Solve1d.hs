@@ -1,7 +1,12 @@
+{-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE NoFieldSelectors #-}
 
 module Solve1d
-  ( domain
+  ( Subdomain
+  , domain
+  , init
+  , IsAtomic (IsAtomic)
+  , enqueueChildren
   , isAtomic
   , bisect
   , half
@@ -12,12 +17,14 @@ module Solve1d
   , contains
   , isResolved
   , resolvedSign
-  , run
+  , Neighborhood
+  , neighborhood
+  , derivativeTolerance
   )
 where
 
-import Debug qualified
 import Float qualified
+import Int qualified
 import OpenSolid
 import Qty qualified
 import Queue (Queue)
@@ -34,6 +41,9 @@ data Subdomain = Subdomain
 
 domain :: Subdomain
 domain = Subdomain{n = 1.0, i = 0.0, j = 1.0}
+
+init :: Queue Subdomain
+init = Queue.singleton domain
 
 isAtomic :: Subdomain -> Bool
 isAtomic (Subdomain{n, i, j}) = (j - i) / n <= Float.epsilon
@@ -84,21 +94,23 @@ resolvedSign range = do
   let resolution = Range.resolution range
   if Qty.abs resolution >= 0.5 then Just (Qty.sign resolution) else Nothing
 
-run :: a -> (Subdomain -> a -> (a, Bool)) -> a
-run initialState processSubdomain = loop initialState processSubdomain (Queue.singleton domain)
+data IsAtomic = IsAtomic deriving (Eq, Show, Error)
 
-loop :: a -> (Subdomain -> a -> (a, Bool)) -> Queue Subdomain -> a
-loop currentState processSubdomain queue =
-  case Queue.pop queue of
-    Just (subdomain, remaining) -> do
-      let (updatedState, resolved) = processSubdomain subdomain currentState
-      let updatedQueue = if resolved then remaining else remaining |> enqueueChildren subdomain
-      loop updatedState processSubdomain updatedQueue
-    Nothing -> currentState
+enqueueChildren :: Subdomain -> Queue Subdomain -> Result IsAtomic (Queue Subdomain)
+enqueueChildren subdomain queue
+  | isAtomic subdomain = Error IsAtomic
+  | otherwise = do
+      let mid = half subdomain
+      let (left, right) = bisect subdomain
+      Ok (queue |> Queue.push mid |> Queue.push left |> Queue.push right)
 
-enqueueChildren :: Subdomain -> Queue Subdomain -> Queue Subdomain
-enqueueChildren subdomain queue = do
-  Debug.assert (not (isAtomic subdomain))
-  let mid = half subdomain
-  let (left, right) = bisect subdomain
-  queue |> Queue.push mid |> Queue.push left |> Queue.push right
+data Neighborhood units = Neighborhood {n :: Int, derivativeMagnitude :: Qty units, radius :: Float}
+
+neighborhood :: Tolerance units => Int -> Qty units -> Neighborhood units
+neighborhood n derivativeMagnitude = do
+  let radius = (Int.factorial n * ?tolerance / derivativeMagnitude) ** (1 / n)
+  Neighborhood{n, derivativeMagnitude, radius}
+
+derivativeTolerance :: Neighborhood units -> Int -> Qty units
+derivativeTolerance (Neighborhood{n, derivativeMagnitude, radius}) k =
+  derivativeMagnitude * radius ** (n - k) / Int.factorial (n - k)
