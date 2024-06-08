@@ -33,8 +33,6 @@ import Float qualified
 import List qualified
 import OpenSolid
 import Qty qualified
-import Queue (Queue)
-import Queue qualified
 import Range (Range)
 import Range qualified
 import Result qualified
@@ -380,86 +378,79 @@ zeros (Constant value) = if value ~= Qty.zero then Ok ZeroEverywhere else Ok (Ze
 zeros curve | isZero curve = Ok ZeroEverywhere
 zeros curve = Result.do
   let derivatives = Stream.iterate curve derivative
-  (roots, _) <- findZeros [0 .. 3] derivatives
+  let cache = Solve1d.init (\range -> Stream.map (segmentBounds range) derivatives)
+  (roots, _) <- findZeros derivatives [0 .. 3] cache
   Ok (Zeros (List.sortBy Root.value roots))
 
 findZeros ::
   Tolerance units =>
-  List Int ->
   Stream (Curve1d units) ->
+  List Int ->
+  Solve1d.Cache (Stream (Range units)) ->
   Result HigherOrderZero (List Root, List Subdomain)
-findZeros orders derivatives = case orders of
+findZeros derivatives orders cache = case orders of
   [] -> Ok ([], []) -- No more orders to try
   n : higherOrders -> Result.do
-    -- Find higher-order zeros first, and their corresponding exclusions
-    (higherOrderZeros, higherOrderExclusions) <- findZeros higherOrders derivatives
-    findZerosOrder n derivatives higherOrderZeros higherOrderExclusions Solve1d.init
+    initialState <- findZeros derivatives higherOrders cache
+    Solve1d.run initialState (findZerosOrder derivatives n) cache ?? Error HigherOrderZero
 
 findZerosOrder ::
   Tolerance units =>
-  Int ->
   Stream (Curve1d units) ->
-  List Root ->
-  List Subdomain ->
-  Queue Subdomain ->
-  Result HigherOrderZero (List Root, List Subdomain)
-findZerosOrder n derivatives accumulated exclusions queue =
-  case Queue.pop queue of
-    Just (subdomain, remaining) ->
-      -- Attempt to 'resolve' the current domain with respect to the current root order
-      -- (see if it's possible to guarantee the presence or absence of a unique zero)
-      case resolveOrder n derivatives subdomain exclusions of
-        -- Guaranteed single solution of order n exists in the interior of this domain
-        Resolved (Just root) ->
-          findZerosOrder n derivatives (root : accumulated) (subdomain : exclusions) remaining
-        -- Guaranteed no solution of the given order exists in the interior of this domain
-        Resolved Nothing ->
-          findZerosOrder n derivatives accumulated exclusions remaining
-        -- We couldn't determine whether or not a unique solution exists in this domain,
-        -- so we need to bisect into subdomains
-        Unresolved -> Result.do
-          updatedQueue <- Solve1d.enqueueChildren subdomain remaining ?? Error HigherOrderZero
-          findZerosOrder n derivatives accumulated exclusions updatedQueue
-    Nothing -> Ok (accumulated, exclusions)
+  Int ->
+  Subdomain ->
+  Stream (Range units) ->
+  (List Root, List Subdomain) ->
+  Solve1d.Action (List Root, List Subdomain)
+findZerosOrder derivatives n subdomain derivativeBounds currentState = do
+  let (accumulated, exclusions) = currentState
+  -- Attempt to 'resolve' the current domain with respect to the current root order
+  -- (see if it's possible to guarantee the presence or absence of a unique zero)
+  case resolveOrder n derivatives derivativeBounds subdomain exclusions of
+    -- Guaranteed single solution of order n exists in the interior of this domain
+    Resolved (Just root) -> Solve1d.return (root : accumulated, subdomain : exclusions)
+    -- Guaranteed no solution of the given order exists in the interior of this domain
+    Resolved Nothing -> Solve1d.return currentState
+    -- We couldn't determine whether or not a unique solution exists in this domain,
+    -- so we need to bisect into subdomains
+    Unresolved -> Solve1d.recurse currentState
 
 resolveOrder ::
   Tolerance units =>
   Int ->
   Stream (Curve1d units) ->
+  Stream (Range units) ->
   Subdomain ->
   List Subdomain ->
   Fuzzy (Maybe Root)
-resolveOrder n derivatives subdomain exclusions
+resolveOrder n derivatives derivativeBounds subdomain exclusions
   -- The current domain is contained within an exclusion,
   -- so no (additional) solution exists within this domain
   | List.any (Solve1d.contains subdomain) exclusions = Resolved Nothing
   -- The curve itself is non-zero, so no solution exists within this domain
-  | not (segmentBounds (Solve1d.bounds subdomain) (Stream.head derivatives) ^ Qty.zero) = Resolved Nothing
+  | not (Stream.head derivativeBounds ^ Qty.zero) = Resolved Nothing
   -- A lower-order derivative is non-zero, so no solution of the given order exists
-  | anyResolved n (Stream.tail derivatives) (Solve1d.bounds subdomain) = Resolved Nothing
+  | anyResolved n (Stream.tail derivativeBounds) = Resolved Nothing
   -- We're overlapping an exclusion, so we need to bisect further
   | List.any (Solve1d.overlaps subdomain) exclusions = Unresolved
   -- Otherwise, try to solve for a root of the given order
-  | otherwise = solveOrder n derivatives (Solve1d.interior subdomain) (Solve1d.bounds subdomain)
+  | otherwise = solveOrder n derivatives derivativeBounds (Solve1d.interior subdomain)
 
-anyResolved :: Int -> Stream (Curve1d units) -> Range Unitless -> Bool
-anyResolved 0 _ _ = False
-anyResolved n (Stream first rest) domain =
-  Solve1d.isResolved (segmentBounds domain first) || anyResolved (n - 1) rest domain
+anyResolved :: Int -> Stream (Range units) -> Bool
+anyResolved n (Stream first rest) = n > 0 && (Solve1d.isResolved first || anyResolved (n - 1) rest)
 
 solveOrder ::
   Tolerance units =>
   Int ->
   Stream (Curve1d units) ->
-  Range Unitless ->
+  Stream (Range units) ->
   Range Unitless ->
   Fuzzy (Maybe Root)
-solveOrder n derivatives subdomainInterior subdomainBounds = do
+solveOrder n derivatives derivativeBounds subdomainInterior = do
   -- For a solution of order n,
   -- we need to look at the derivative of order m = n + 1
   let m = n + 1
-  let fm = Stream.nth m derivatives
-  let fmBounds = segmentBounds subdomainBounds fm
+  let fmBounds = Stream.nth m derivativeBounds
   case Solve1d.resolvedSign fmBounds of
     Nothing -> Unresolved
     Just fmSign -> do

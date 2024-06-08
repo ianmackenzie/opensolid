@@ -4,9 +4,6 @@
 module Solve1d
   ( Subdomain
   , domain
-  , init
-  , IsAtomic (IsAtomic)
-  , enqueueChildren
   , isAtomic
   , bisect
   , half
@@ -19,6 +16,13 @@ module Solve1d
   , Neighborhood
   , neighborhood
   , derivativeTolerance
+  , Cache
+  , init
+  , InfiniteRecursion (InfiniteRecursion)
+  , run
+  , Action
+  , recurse
+  , return
   )
 where
 
@@ -40,9 +44,6 @@ data Subdomain = Subdomain
 
 domain :: Subdomain
 domain = Subdomain{n = 1.0, i = 0.0, j = 1.0}
-
-init :: Queue Subdomain
-init = Queue.singleton domain
 
 isAtomic :: Subdomain -> Bool
 isAtomic (Subdomain{n, i, j}) = (j - i) / n <= Float.epsilon
@@ -87,16 +88,6 @@ resolvedSign range = do
   let resolution = Range.resolution range
   if Qty.abs resolution >= 0.5 then Just (Qty.sign resolution) else Nothing
 
-data IsAtomic = IsAtomic deriving (Eq, Show, Error)
-
-enqueueChildren :: Subdomain -> Queue Subdomain -> Result IsAtomic (Queue Subdomain)
-enqueueChildren subdomain queue
-  | isAtomic subdomain = Error IsAtomic
-  | otherwise = do
-      let mid = half subdomain
-      let (left, right) = bisect subdomain
-      Ok (queue |> Queue.push mid |> Queue.push left |> Queue.push right)
-
 data Neighborhood units = Neighborhood {n :: Int, derivativeMagnitude :: Qty units, radius :: Float}
 
 neighborhood :: Tolerance units => Int -> Qty units -> Neighborhood units
@@ -107,3 +98,71 @@ neighborhood n derivativeMagnitude = do
 derivativeTolerance :: Neighborhood units -> Int -> Qty units
 derivativeTolerance (Neighborhood{n, derivativeMagnitude, radius}) k =
   derivativeMagnitude * radius ** (n - k) / Int.factorial (n - k)
+
+data Cache a
+  = Atomic Subdomain a
+  | Split Subdomain a ~(Cache a) ~(Cache a) ~(Cache a)
+  | Shrink Subdomain a ~(Cache a)
+
+init :: (Range Unitless -> a) -> Cache a
+init function = split function domain
+
+split :: (Range Unitless -> a) -> Subdomain -> Cache a
+split function subdomain = do
+  let cached = function (bounds subdomain)
+  if isAtomic subdomain
+    then Atomic subdomain cached
+    else do
+      let middleSubdomain = half subdomain
+      let (leftSubdomain, rightSubdomain) = bisect subdomain
+      let middleChild = shrink function middleSubdomain
+      let leftChild = split function leftSubdomain
+      let rightChild = split function rightSubdomain
+      Split subdomain cached middleChild leftChild rightChild
+
+shrink :: (Range Unitless -> a) -> Subdomain -> Cache a
+shrink function subdomain = do
+  let cached = function (bounds subdomain)
+  if isAtomic subdomain
+    then Atomic subdomain cached
+    else do
+      let child = shrink function (half subdomain)
+      Shrink subdomain cached child
+
+data InfiniteRecursion = InfiniteRecursion deriving (Eq, Show, Error)
+
+run :: b -> (Subdomain -> a -> b -> Action b) -> Cache a -> Result InfiniteRecursion b
+run initialState processSubdomain cache =
+  process initialState processSubdomain (Queue.singleton cache)
+
+process :: b -> (Subdomain -> a -> b -> Action b) -> Queue (Cache a) -> Result InfiniteRecursion b
+process currentState processSubdomain queue =
+  case Queue.pop queue of
+    Just (first, remaining) -> case first of
+      Atomic subdomain cached ->
+        case processSubdomain subdomain cached currentState of
+          Return updatedState -> process updatedState processSubdomain remaining
+          Recurse _ -> Error InfiniteRecursion
+      Split subdomain cached middleChild leftChild rightChild ->
+        case processSubdomain subdomain cached currentState of
+          Return updatedState -> process updatedState processSubdomain remaining
+          Recurse updatedState -> do
+            let updatedQueue = remaining + middleChild + leftChild + rightChild
+            process updatedState processSubdomain updatedQueue
+      Shrink subdomain cached child ->
+        case processSubdomain subdomain cached currentState of
+          Return updatedState -> process updatedState processSubdomain remaining
+          Recurse updatedState -> do
+            let updatedQueue = remaining + child
+            process updatedState processSubdomain updatedQueue
+    Nothing -> Ok currentState
+
+data Action a
+  = Return a
+  | Recurse a
+
+return :: a -> Action a
+return = Return
+
+recurse :: a -> Action a
+recurse = Recurse
