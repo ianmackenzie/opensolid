@@ -57,9 +57,8 @@ bisect (Subdomain{n, i, j}) = do
 
 half :: Subdomain -> Subdomain
 half (Subdomain{n, i, j}) = do
-  let n2 = 4 * n
   let delta = j - i
-  Subdomain n2 (4 * i + delta) (4 * j - delta)
+  Subdomain (4 * n) (4 * i + delta) (4 * j - delta)
 
 bounds :: Subdomain -> Range Unitless
 bounds (Subdomain{n, i, j}) = Range.unsafe (i / n) (j / n)
