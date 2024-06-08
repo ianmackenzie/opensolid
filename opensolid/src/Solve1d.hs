@@ -125,9 +125,7 @@ shrink function subdomain = do
   let cached = function (bounds subdomain)
   if isAtomic subdomain
     then Atomic subdomain cached
-    else do
-      let child = shrink function (half subdomain)
-      Shrink subdomain cached child
+    else Shrink subdomain cached (shrink function (half subdomain))
 
 data InfiniteRecursion = InfiniteRecursion deriving (Eq, Show, Error)
 
