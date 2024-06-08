@@ -34,7 +34,10 @@ tangentRoots = Test.verify "Tangent roots" Test.do
   let expectedRoots = [Root t 1 Positive | t <- [0.0, 0.5, 1.0]]
   case Curve1d.zeros expression of
     Ok Curve1d.ZeroEverywhere -> Test.fail "Curve incorrectly reported as identically zero"
-    Ok (Curve1d.Zeros roots) -> Test.expect (roots ~= expectedRoots)
+    Ok (Curve1d.Zeros roots) ->
+      Test.expect (roots ~= expectedRoots)
+        |> Test.output "roots" roots
+        |> Test.output "expectedRoots" expectedRoots
     Error Curve1d.HigherOrderZero -> Test.fail "Curve incorrectly reported as having a higher-order root"
 
 approximateEquality :: Tolerance Unitless => Test
