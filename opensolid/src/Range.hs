@@ -11,6 +11,7 @@ module Range
   , midpoint
   , endpoints
   , width
+  , maxAbs
   , squared
   , squared'
   , includes
