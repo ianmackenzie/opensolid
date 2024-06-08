@@ -14,28 +14,29 @@ import Deque.Strict (Deque)
 import Deque.Strict qualified as Deque
 import Maybe qualified
 import OpenSolid
-import Pair qualified
 import Prelude qualified
 
-newtype Queue a = Queue (Deque a) deriving (Eq, Show)
+data Queue a = Queue Int (Deque a) deriving (Eq, Show)
 
 empty :: Queue a
-empty = Queue (Deque.fromConsAndSnocLists [] [])
+empty = Queue 0 (Deque.fromConsAndSnocLists [] [])
 
 singleton :: a -> Queue a
-singleton value = Queue (Deque.fromConsAndSnocLists [value] [])
+singleton value = Queue 1 (Deque.fromConsAndSnocLists [value] [])
 
 isEmpty :: Queue a -> Bool
-isEmpty (Queue deque) = Deque.null deque
+isEmpty (Queue n _) = n == 0
 
 length :: Queue a -> Int
-length (Queue deque) = Prelude.length deque
+length (Queue n _) = n
 
 push :: a -> Queue a -> Queue a
-push value (Queue deque) = Queue (Deque.snoc value deque)
+push value (Queue n deque) = Queue (n + 1) (Deque.snoc value deque)
 
 pop :: Queue a -> Maybe (a, Queue a)
-pop (Queue deque) = Maybe.map (Pair.mapSecond Queue) (Deque.uncons deque)
+pop (Queue n deque) = Maybe.do
+  (first, rest) <- Deque.uncons deque
+  Just (first, Queue (n - 1) rest)
 
 map :: (a -> b) -> Queue a -> Queue b
-map function (Queue deque) = Queue (Prelude.fmap function deque)
+map function (Queue n deque) = Queue n (Prelude.fmap function deque)
