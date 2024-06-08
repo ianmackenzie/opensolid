@@ -18,6 +18,9 @@ import Prelude qualified
 
 data Queue a = Queue Int (Deque a) deriving (Eq, Show)
 
+instance Addition (Queue a) a (Queue a) where
+  queue + item = push item queue
+
 empty :: Queue a
 empty = Queue 0 (Deque.fromConsAndSnocLists [] [])
 
