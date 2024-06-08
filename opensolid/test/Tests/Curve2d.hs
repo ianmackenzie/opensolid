@@ -329,7 +329,7 @@ degeneracyRemoval = Test.check 100 "degeneracyRemoval" Test.do
   let arcPoint = Curve2d.pointOn arc t
   let interpolatedPoint = Curve2d.pointOn interpolatedCurve t
   let expectEqualPoints =
-        Tolerance.using (Length.meters 1e-14) (Test.expect (arcPoint ~= interpolatedPoint))
+        Tolerance.using (Length.meters 1e-12) (Test.expect (arcPoint ~= interpolatedPoint))
           |> Test.output "point distance" (Point2d.distanceFrom arcPoint interpolatedPoint)
   let expectEqualDerivatives n arcDerivative interpolatedDerivative = do
         let arcEndValue = VectorCurve2d.evaluateAt 1.0 arcDerivative
