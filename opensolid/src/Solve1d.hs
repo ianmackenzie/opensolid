@@ -18,16 +18,21 @@ module Solve1d
   , derivativeTolerance
   , Cache
   , init
+  , SomeExclusions
+  , NoExclusions
+  , Exclusions (NoExclusions, SomeExclusions)
   , InfiniteRecursion (InfiniteRecursion)
   , run
   , Action
-  , recurse
   , return
+  , recurse
+  , pass
   )
 where
 
 import Float qualified
 import Int qualified
+import List qualified
 import OpenSolid
 import Qty qualified
 import Queue (Queue)
@@ -99,68 +104,116 @@ derivativeTolerance :: Neighborhood units -> Int -> Qty units
 derivativeTolerance (Neighborhood{n, derivativeMagnitude, radius}) k =
   derivativeMagnitude * radius ** (n - k) / Int.factorial (n - k)
 
-data Cache a
-  = Atomic Subdomain a
-  | Split Subdomain a ~(Cache a) ~(Cache a) ~(Cache a)
-  | Shrink Subdomain a ~(Cache a)
+data Cache cached
+  = Tree Subdomain cached (Node cached)
 
-init :: (Range Unitless -> a) -> Cache a
+data Node cached
+  = Atomic
+  | Splittable ~(Cache cached) ~(Cache cached) ~(Cache cached)
+  | Shrinkable ~(Cache cached)
+
+init :: (Range Unitless -> cached) -> Cache cached
 init function = split function domain
 
-split :: (Range Unitless -> a) -> Subdomain -> Cache a
-split function subdomain = do
+tree :: (Range Unitless -> cached) -> Subdomain -> Node cached -> Cache cached
+tree function subdomain givenNode = do
   let cached = function (bounds subdomain)
-  if isAtomic subdomain
-    then Atomic subdomain cached
-    else do
-      let middleSubdomain = half subdomain
-      let (leftSubdomain, rightSubdomain) = bisect subdomain
-      let middleChild = shrink function middleSubdomain
-      let leftChild = split function leftSubdomain
-      let rightChild = split function rightSubdomain
-      Split subdomain cached middleChild leftChild rightChild
+  let node = if isAtomic subdomain then Atomic else givenNode
+  Tree subdomain cached node
 
-shrink :: (Range Unitless -> a) -> Subdomain -> Cache a
+split :: (Range Unitless -> cached) -> Subdomain -> Cache cached
+split function subdomain = do
+  let middleSubdomain = half subdomain
+  let (leftSubdomain, rightSubdomain) = bisect subdomain
+  let middleChild = shrink function middleSubdomain
+  let leftChild = split function leftSubdomain
+  let rightChild = split function rightSubdomain
+  tree function subdomain (Splittable middleChild leftChild rightChild)
+
+shrink :: (Range Unitless -> cached) -> Subdomain -> Cache cached
 shrink function subdomain = do
-  let cached = function (bounds subdomain)
-  if isAtomic subdomain
-    then Atomic subdomain cached
-    else Shrink subdomain cached (shrink function (half subdomain))
+  let child = shrink function (half subdomain)
+  tree function subdomain (Shrinkable child)
+
+data NoExclusions
+
+data SomeExclusions
+
+data Exclusions exclusions where
+  NoExclusions :: Exclusions NoExclusions
+  SomeExclusions :: NonEmpty Subdomain -> Exclusions SomeExclusions
 
 data InfiniteRecursion = InfiniteRecursion deriving (Eq, Show, Error)
 
-run :: b -> (Subdomain -> a -> b -> Action b) -> Cache a -> Result InfiniteRecursion b
-run initialState processSubdomain cache =
-  process initialState processSubdomain (Queue.singleton cache)
+type Callback cached solution =
+  forall exclusions.
+  Subdomain ->
+  cached ->
+  Exclusions exclusions ->
+  Action exclusions solution
 
-process :: b -> (Subdomain -> a -> b -> Action b) -> Queue (Cache a) -> Result InfiniteRecursion b
-process currentState processSubdomain queue =
+run ::
+  Callback cached solution ->
+  Cache cached ->
+  List solution ->
+  List Subdomain ->
+  Result InfiniteRecursion (List solution, List Subdomain)
+run callback cache solutions exclusions =
+  process callback (Queue.singleton cache) solutions exclusions
+
+process ::
+  forall cached solution.
+  Callback cached solution ->
+  Queue (Cache cached) ->
+  List solution ->
+  List Subdomain ->
+  Result InfiniteRecursion (List solution, List Subdomain)
+process callback queue solutions exclusions =
   case Queue.pop queue of
-    Just (first, remaining) -> case first of
-      Atomic subdomain cached ->
-        case processSubdomain subdomain cached currentState of
-          Return updatedState -> process updatedState processSubdomain remaining
-          Recurse _ -> Error InfiniteRecursion
-      Split subdomain cached middleChild leftChild rightChild ->
-        case processSubdomain subdomain cached currentState of
-          Return updatedState -> process updatedState processSubdomain remaining
-          Recurse updatedState -> do
-            let updatedQueue = remaining + middleChild + leftChild + rightChild
-            process updatedState processSubdomain updatedQueue
-      Shrink subdomain cached child ->
-        case processSubdomain subdomain cached currentState of
-          Return updatedState -> process updatedState processSubdomain remaining
-          Recurse updatedState -> do
-            let updatedQueue = remaining + child
-            process updatedState processSubdomain updatedQueue
-    Nothing -> Ok currentState
+    Just (Tree subdomain cached node, remaining) -> do
+      let filteredExclusions = List.filter (overlaps subdomain) exclusions
+      if List.any (contains subdomain) filteredExclusions
+        then process callback remaining solutions exclusions
+        else case filteredExclusions of
+          NonEmpty someExclusions ->
+            case callback subdomain cached (SomeExclusions someExclusions) of
+              Pass -> process callback remaining solutions exclusions
+              Recurse -> recurseIntoChildrenOf node callback remaining solutions exclusions
+          [] ->
+            case callback subdomain cached NoExclusions of
+              Pass -> process callback remaining solutions exclusions
+              Recurse -> recurseIntoChildrenOf node callback remaining solutions exclusions
+              Return solution ->
+                process callback remaining (solution : solutions) (subdomain : exclusions)
+    Nothing -> Ok (solutions, exclusions)
 
-data Action a
-  = Return a
-  | Recurse a
+{-# INLINE recurseIntoChildrenOf #-}
+recurseIntoChildrenOf ::
+  forall cached solution.
+  Node cached ->
+  Callback cached solution ->
+  Queue (Cache cached) ->
+  List solution ->
+  List Subdomain ->
+  Result InfiniteRecursion (List solution, List Subdomain)
+recurseIntoChildrenOf node callback queue solutions exclusions =
+  case node of
+    Atomic -> Error InfiniteRecursion
+    Shrinkable child -> process callback (queue + child) solutions exclusions
+    Splittable middleChild leftChild rightChild -> do
+      let updatedQueue = queue + middleChild + leftChild + rightChild
+      process callback updatedQueue solutions exclusions
 
-return :: a -> Action a
+data Action exclusions solution where
+  Return :: solution -> Action NoExclusions solution
+  Recurse :: Action exclusions solution
+  Pass :: Action exclusions solution
+
+return :: solution -> Action NoExclusions solution
 return = Return
 
-recurse :: a -> Action a
+recurse :: Action exclusions solution
 recurse = Recurse
+
+pass :: Action exclusions solution
+pass = Pass
