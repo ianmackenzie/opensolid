@@ -402,18 +402,18 @@ findZerosOrder ::
   Stream (Range units) ->
   (List Root, List Subdomain) ->
   Solve1d.Action (List Root, List Subdomain)
-findZerosOrder derivatives n subdomain derivativeBounds currentState = do
-  let (accumulated, exclusions) = currentState
+findZerosOrder derivatives n subdomain derivativeBounds currentResults = do
+  let (accumulated, exclusions) = currentResults
   -- Attempt to 'resolve' the current domain with respect to the current root order
   -- (see if it's possible to guarantee the presence or absence of a unique zero)
   case resolveOrder n derivatives derivativeBounds subdomain exclusions of
     -- Guaranteed single solution of order n exists in the interior of this domain
     Resolved (Just root) -> Solve1d.return (root : accumulated, subdomain : exclusions)
     -- Guaranteed no solution of the given order exists in the interior of this domain
-    Resolved Nothing -> Solve1d.return currentState
+    Resolved Nothing -> Solve1d.return currentResults
     -- We couldn't determine whether or not a unique solution exists in this domain,
     -- so we need to bisect into subdomains
-    Unresolved -> Solve1d.recurse currentState
+    Unresolved -> Solve1d.recurse currentResults
 
 resolveOrder ::
   Tolerance units =>
