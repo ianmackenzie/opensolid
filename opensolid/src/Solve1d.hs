@@ -22,7 +22,7 @@ module Solve1d
   , NoExclusions
   , Exclusions (NoExclusions, SomeExclusions)
   , InfiniteRecursion (InfiniteRecursion)
-  , run
+  , search
   , Action
   , return
   , recurse
@@ -152,13 +152,13 @@ type Callback cached solution =
   Exclusions exclusions ->
   Action exclusions solution
 
-run ::
+search ::
   Callback cached solution ->
   Cache cached ->
   List solution ->
   List Subdomain ->
   Result InfiniteRecursion (List solution, List Subdomain)
-run callback cache solutions exclusions =
+search callback cache solutions exclusions =
   process callback (Queue.singleton cache) solutions exclusions
 
 process ::

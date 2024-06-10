@@ -392,7 +392,7 @@ findZeros derivatives orders cache = case orders of
   [] -> Ok ([], []) -- No more orders to try
   n : higherOrders -> Result.do
     (higherOrderRoots, higherOrderExclusions) <- findZeros derivatives higherOrders cache
-    Solve1d.run (resolveOrder n derivatives) cache higherOrderRoots higherOrderExclusions
+    Solve1d.search (resolveOrder n derivatives) cache higherOrderRoots higherOrderExclusions
       ?? Error HigherOrderZero
 
 resolveOrder ::
