@@ -27,6 +27,7 @@ module Solve1d
   , return
   , recurse
   , pass
+  , monotonic
   )
 where
 
@@ -222,3 +223,74 @@ recurse = Recurse
 
 pass :: Action exclusions solution
 pass = Pass
+
+monotonic ::
+  Tolerance units =>
+  (Float -> Qty units) ->
+  (Float -> Qty units) ->
+  Range Unitless ->
+  Maybe Float
+monotonic function derivative range = do
+  let (x1, x2) = Range.endpoints range
+  let y1 = function x1
+  let y2 = function x2
+  if
+    | y1 == Qty.zero -> Just x1
+    | y2 == Qty.zero -> Just x2
+    | Qty.sign y1 == Qty.sign y2 -> Nothing
+    | otherwise -> solveMonotonic function derivative range (Qty.sign y1) x1 x2
+
+solveMonotonic ::
+  Tolerance units =>
+  (Float -> Qty units) ->
+  (Float -> Qty units) ->
+  Range Unitless ->
+  Sign ->
+  Float ->
+  Float ->
+  Maybe Float
+solveMonotonic function derivative range sign1 x1 x2 = do
+  -- First, try applying Newton-Raphson within [x1,x2]
+  -- to see if that converges to a root
+  let xMid = Qty.midpoint x1 x2
+  let yMid = function xMid
+  case newtonRaphson function derivative range xMid yMid 0 of
+    Ok x -> Just x -- Newton-Raphson converged to a root, return it
+    Error Divergence -- Newton-Raphson did not converge within [x1, x2]
+      | x1 < xMid && xMid < x2 ->
+          -- It's possible to bisect further,
+          -- so recurse into whichever subdomain brackets the root
+          if Qty.sign yMid == sign1
+            then solveMonotonic function derivative range sign1 xMid x2
+            else solveMonotonic function derivative range sign1 x1 xMid
+      | otherwise ->
+          -- We can't bisect any further
+          -- (Newton-Raphson somehow never converged),
+          -- so check if we've found a root by bisection
+          if yMid ~= Qty.zero then Just xMid else Nothing
+
+data Divergence = Divergence deriving (Eq, Show, Error)
+
+newtonRaphson ::
+  Tolerance units =>
+  (Float -> Qty units) ->
+  (Float -> Qty units) ->
+  Range Unitless ->
+  Float ->
+  Qty units ->
+  Int ->
+  Result Divergence Float
+newtonRaphson function derivative range x y iterations =
+  if iterations > 10 -- Check if we've entered an infinite loop
+    then Error Divergence
+    else do
+      let dy = derivative x
+      let x2 = x - y / dy -- Apply Newton step
+      if not (Range.includes x2 range) -- Check if we stepped outside the given range
+        then Error Divergence
+        else do
+          let y2 = function x2
+          if Qty.abs y2 >= Qty.abs y -- Check if we've stopped converging
+            then if y ~= Qty.zero then Ok x else Error Divergence
+            else -- We're still converging, so take another iteration
+              newtonRaphson function derivative range x2 y2 (iterations + 1)
