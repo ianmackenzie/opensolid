@@ -425,14 +425,12 @@ solveOrder ::
   Stream (Range units) ->
   Solve1d.Action Solve1d.NoExclusions Root
 solveOrder n derivatives subdomainInterior derivativeBounds = do
-  -- For a solution of order n,
-  -- we need to look at the derivative of order m = n + 1
-  let m = n + 1
-  let fmBounds = Stream.nth m derivativeBounds
-  case Solve1d.resolvedSign fmBounds of
+  -- For a solution of order n, we need to look at the derivative of order n + 1
+  let nextDerivativeBounds = Stream.nth (n + 1) derivativeBounds
+  case Solve1d.resolvedSign nextDerivativeBounds of
     Nothing -> Solve1d.recurse
     Just sign -> do
-      let neighborhood = Solve1d.neighborhood m (Range.maxAbs fmBounds)
+      let neighborhood = Solve1d.neighborhood (n + 1) (Range.maxAbs nextDerivativeBounds)
       -- Check that the values of all derivatives of order n and lower
       -- (including order 0, the curve itself)
       -- are zero to within an appropriate tolerance
