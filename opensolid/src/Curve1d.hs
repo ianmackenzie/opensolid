@@ -457,7 +457,13 @@ solveOrder n derivatives subdomainInterior derivativeBounds = do
               -- so there can be no root of order n in the interior of this domain
               Nothing -> Solve1d.pass
 
-isSolutionOrder :: Tolerance units => Int -> Solve1d.Neighborhood units -> Stream (Curve1d units) -> Float -> Bool
+isSolutionOrder ::
+  Tolerance units =>
+  Int ->
+  Solve1d.Neighborhood units ->
+  Stream (Curve1d units) ->
+  Float ->
+  Bool
 isSolutionOrder n neighborhood derivatives x = do
   let curve = Stream.head derivatives
   let curveIsZero = evaluateAt x curve ~= Qty.zero
