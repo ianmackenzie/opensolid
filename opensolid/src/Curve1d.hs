@@ -40,6 +40,7 @@ import Solve1d (Subdomain)
 import Solve1d qualified
 import Stream (Stream (Stream))
 import Stream qualified
+import Tolerance qualified
 import Units qualified
 
 class Show curve => Interface curve units | curve -> units where
@@ -444,8 +445,11 @@ solveOrder n derivatives subdomainInterior derivativeBounds = do
         -- and check if that point is actually a root
         -- (all lower-order derivatives are also zero)
         | otherwise -> do
-            let fn = Stream.nth n derivatives
-            case Range.solve (pointOn fn) subdomainInterior of
+            let fn = pointOn (Stream.nth n derivatives)
+            let fm = pointOn (Stream.nth (n + 1) derivatives)
+            let fnTolerance = Solve1d.derivativeTolerance neighborhood n
+            let fnRoot = Tolerance.using fnTolerance (Solve1d.monotonic fn fm subdomainInterior)
+            case fnRoot of
               -- If we found a solution, then return it;
               -- otherwise there is no root of order n in the interior of this domain
               Just x -> if isSolution x then solution x else Solve1d.pass
