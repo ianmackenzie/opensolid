@@ -93,7 +93,12 @@ resolvedSign range = do
   let resolution = Range.resolution range
   if Qty.abs resolution >= 0.5 then Just (Qty.sign resolution) else Nothing
 
-data Neighborhood units = Neighborhood {n :: Int, derivativeMagnitude :: Qty units, radius :: Float}
+data Neighborhood units = Neighborhood
+  { n :: Int
+  , derivativeMagnitude :: Qty units
+  , radius :: Float
+  }
+  deriving (Show)
 
 neighborhood :: Tolerance units => Int -> Qty units -> Neighborhood units
 neighborhood n derivativeMagnitude = do
