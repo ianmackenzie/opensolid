@@ -22,7 +22,7 @@ import Basics
 import Composition
 import Control.Concurrent
 import Control.Concurrent.Async qualified as Async
-import Data.Text.IO qualified
+import Data.ByteString.Char8 qualified
 import Debug qualified
 import {-# SOURCE #-} Duration (Duration)
 import {-# SOURCE #-} Duration qualified
@@ -90,4 +90,4 @@ addContext :: Text -> IO a -> IO a
 addContext text = mapError (Error.addContext text)
 
 printLine :: Text -> IO ()
-printLine = Data.Text.IO.putStrLn
+printLine = Text.encodeUtf8 >> Data.ByteString.Char8.putStrLn
