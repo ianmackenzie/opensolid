@@ -14,3 +14,4 @@
 - ignore: { name: "Redundant fromIntegral" }
 - ignore: { name: "Use :" }
 - ignore: { name: "Use isJust" }
+- ignore: { name: "Redundant IO.return" }
