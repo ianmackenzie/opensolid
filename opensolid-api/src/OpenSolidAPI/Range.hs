@@ -45,7 +45,6 @@ range =
     , -- TODO: support functions
       -- , 'Range.any
       -- , 'Range.all
-      -- , 'Range.solve
       method 'Range.resolution ["range"]
     , method 'Range.intersection ["range1", "range2"]
     -- TODO: support Random.Generator

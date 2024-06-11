@@ -1,6 +1,5 @@
 module Tests.Range (tests) where
 
-import Float qualified
 import Length (Length)
 import NonEmpty qualified
 import OpenSolid
@@ -13,7 +12,6 @@ import Range qualified
 import Test (Test)
 import Test qualified
 import Tests.Random qualified as Random
-import Tolerance qualified
 import Units (Meters)
 
 tests :: List Test
@@ -22,7 +20,6 @@ tests =
   , larger
   , smallest
   , largest
-  , find
   , qtyRangeDivision
   , rangeQtyDivision
   , rangeRangeDivision
@@ -90,12 +87,6 @@ largest = Test.check 1000 "largest" Test.do
     |> Test.output "ranges" (Test.lines ranges)
     |> Test.output "largestValue" largestValue
     |> Test.output "largestRange" largestRange
-
-find :: Test
-find = Test.verify "find" do
-  case Range.solve (\x -> Qty.squared x - 2) (Range.from 1.0 2.0) of
-    Nothing -> Test.fail "Should have found the square root of 2 between 1.0 and 2.0"
-    Just root -> Test.expect (Tolerance.using 1e-12 (root ~= Float.sqrt 2.0))
 
 qtyRangeDivision :: Test
 qtyRangeDivision = Test.check 1000 "qtyRangeDivision" Test.do

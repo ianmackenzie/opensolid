@@ -48,7 +48,6 @@ module Range
   , resolution
   , intersection
   , random
-  , solve
   , find2
   , samples
   , convert
@@ -550,33 +549,6 @@ resolve assess range =
           leftValue <- resolve assess left
           rightValue <- resolve assess right
           if leftValue == rightValue then Resolved leftValue else Unresolved
-
-solve :: (Qty units1 -> Qty units2) -> Range units1 -> Maybe (Qty units1)
-solve f (Range x1 x2) = do
-  let y1 = f x1
-  let y2 = f x2
-  if
-    | y1 < Qty.zero && y2 > Qty.zero -> Just (root f x1 x2 y1 y2)
-    | y2 < Qty.zero && y1 > Qty.zero -> Just (root f x2 x1 y2 y1)
-    | y1 == Qty.zero -> Just x1
-    | y2 == Qty.zero -> Just x2
-    | otherwise -> Nothing
-
-root ::
-  (Qty units1 -> Qty units2) ->
-  Qty units1 ->
-  Qty units1 ->
-  Qty units2 ->
-  Qty units2 ->
-  Qty units1
-root f nx px ny py = do
-  let x = Qty.midpoint nx px
-  let y = f x
-  if
-    | x == nx || x == px -> if -ny <= py then nx else px
-    | y > Qty.zero -> root f nx x ny y
-    | y < Qty.zero -> root f x px y py
-    | otherwise -> x
 
 find :: (Range units -> Bool) -> Range units -> Maybe (Qty units)
 find isCandidate t
