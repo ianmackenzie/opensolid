@@ -10,12 +10,12 @@
     flake-utils.lib.eachDefaultSystem (system:
       let pkgs = nixpkgs.legacyPackages.${system};
       in {
-        # Actually set up a development shell
-        # with all necessary packages installed
+        # Set up a development shell with all necessary tools installed
         devShell = pkgs.mkShell {
+          # Development tools
           buildInputs = [
             pkgs.ghc # The Haskell compiler itself
-            pkgs.stack # The Stack build tool
+            pkgs.stack # The Stack build tool (configured in stack.yaml to use GHC above)
             pkgs.haskell-language-server # Haskell IDE support
             pkgs.zlib # Needed so that GHC can link against it
             pkgs.haskellPackages.fourmolu # For formatting Haskell files
@@ -25,15 +25,17 @@
             pkgs.python312 # For testing the Python extension
             pkgs.ruff # For formatting/linting Python files
           ];
-          shellHook = ''
+          # Convenient tweaks to the development shell
+          shellHook = builtins.concatStringsSep "\n" [
             # Add the 'scripts' directory to PATH for convenience,
             # to allow e.g. format-cabal-files to be run directly
-            export PATH=$PATH:./scripts
-              
+            "export PATH=$PATH:./scripts"
+
             # Set LD_LIBRARY_PATH to the build directory containing libopensolid-ffi.so,
             # so that it can be found by Python when loading the 'opensolid' module
-            export LD_LIBRARY_PATH=opensolid-ffi/$(stack path --dist-dir)/build/opensolid-ffi
-          '';
+            "export LD_LIBRARY_PATH=opensolid-ffi/$(stack path --dist-dir)/build/opensolid-ffi"
+          ];
         };
-      });
+      }
+    );
 }
