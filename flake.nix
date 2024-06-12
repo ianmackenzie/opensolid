@@ -25,10 +25,8 @@
             pkgs.python312 # For testing the Python extension
             pkgs.ruff # For formatting/linting Python files
           ];
-          # Simple script to format all .cabal files with cabal-gild
-          shellHook = ''
-            alias format-cabal-files="for path in \$(find -name *.cabal); do cabal-gild --io=\$path; done"
-          '';
+          # Add the 'scripts' directory to PATH for convenience
+          shellHook = "export PATH=$PATH:./scripts";
         };
       });
 }

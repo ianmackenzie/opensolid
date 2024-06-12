@@ -1,0 +1,6 @@
+#!/bin/bash
+
+for path in $(find -name *.cabal)
+do
+  cabal-gild --io=$path
+done
