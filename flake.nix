@@ -14,16 +14,32 @@
         devShell = pkgs.mkShell {
           # Development tools
           buildInputs = [
-            pkgs.ghc # The Haskell compiler itself
-            pkgs.stack # The Stack build tool (configured in stack.yaml to use GHC above)
-            pkgs.haskell-language-server # Haskell IDE support
-            pkgs.zlib # Needed so that GHC can link against it
-            pkgs.haskellPackages.fourmolu # For formatting Haskell files
-            pkgs.haskellPackages.cabal-gild # For formatting Cabal files
-            pkgs.haskellPackages.implicit-hie # For generating hie.yaml
-            pkgs.nixpkgs-fmt # For formatting Nix files
-            pkgs.python312 # For testing the Python extension
-            pkgs.ruff # For formatting/linting Python files
+            # The Haskell compiler itself
+            pkgs.ghc 
+            # The Stack build tool
+            # (configured in stack.yaml to use whatever GHC is on the PATH,
+            # so we use the GHC we just installed above
+            # instead of having Stack install it)
+            pkgs.stack 
+            # Haskell editor/IDE support
+            pkgs.haskell-language-server 
+            # Needed so that GHC can link against it
+            pkgs.zlib 
+            # For formatting Haskell files
+            pkgs.haskellPackages.fourmolu 
+            # For formatting Cabal files
+            pkgs.haskellPackages.cabal-gild
+            # For (re)generating hie.yaml;
+            # only needed if you add/remove/rename .cabal files
+            pkgs.haskellPackages.implicit-hie 
+            # For formatting this file =)
+            pkgs.nixpkgs-fmt
+            # For testing the Python extension
+            pkgs.python312
+            # For formatting/linting Python files
+            # (used in the opensolid-python executable
+            # for formatting the generated code)
+            pkgs.ruff 
           ];
           # Convenient tweaks to the development shell
           shellHook = builtins.concatStringsSep "\n" [
