@@ -15,3 +15,4 @@
 - ignore: { name: "Use :" }
 - ignore: { name: "Use isJust" }
 - ignore: { name: "Redundant IO.return" }
+- ignore: { name: "Use first" }
