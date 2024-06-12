@@ -1,0 +1,3 @@
+#!/bin/bash
+
+stack run opensolid-python > opensolid-python/opensolid.py
