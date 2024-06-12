@@ -25,8 +25,15 @@
             pkgs.python312 # For testing the Python extension
             pkgs.ruff # For formatting/linting Python files
           ];
-          # Add the 'scripts' directory to PATH for convenience
-          shellHook = "export PATH=$PATH:./scripts";
+          shellHook = ''
+            # Add the 'scripts' directory to PATH for convenience,
+            # to allow e.g. format-cabal-files to be run directly
+            export PATH=$PATH:./scripts
+              
+            # Set LD_LIBRARY_PATH to the build directory containing libopensolid-ffi.so,
+            # so that it can be found by Python when loading the 'opensolid' module
+            export LD_LIBRARY_PATH=opensolid-ffi/$(stack path --dist-dir)/build/opensolid-ffi
+          '';
         };
       });
 }
