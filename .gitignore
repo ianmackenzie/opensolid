@@ -1,9 +1,5 @@
 .stack-work/
 *~
-/dist-newstyle
-cabal.project.local
-result
 __pycache__
-test*.svg
 TODO.txt
 .direnv
