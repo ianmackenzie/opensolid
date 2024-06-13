@@ -34,6 +34,7 @@ import Qty qualified
 import Random qualified
 import Range qualified
 import Result qualified
+import Solve2d qualified
 import Surface1d.Function qualified
 import Surface1d.Function.Zeros qualified
 import Text qualified
@@ -461,6 +462,35 @@ testTextSum = IO.do
     sum <- textSum "2" "3"
     log "sum" sum
 
+testNewtonRaphson2d :: IO ()
+testNewtonRaphson2d = Tolerance.using 1e-9 do
+  let u = Surface1d.Function.parameter U
+  let v = Surface1d.Function.parameter V
+  let f = Surface1d.Function.squared u + Surface1d.Function.squared v - 4.0
+  let fu = Surface1d.Function.derivative U f
+  let fv = Surface1d.Function.derivative V f
+  let g = u - v
+  let gu = Surface1d.Function.derivative U g
+  let gv = Surface1d.Function.derivative V g
+  let p1 = Point2d.xy 1.5 1.5
+  let f1 = Surface1d.Function.pointOn f p1
+  let g1 = Surface1d.Function.pointOn g p1
+  let bounds = Bounds2d.xy (Range.from 0.0 2.0) (Range.from 0.0 2.0)
+  let solution =
+        Solve2d.newtonRaphson
+          (Surface1d.Function.pointOn f)
+          (Surface1d.Function.pointOn fu)
+          (Surface1d.Function.pointOn fv)
+          (Surface1d.Function.pointOn g)
+          (Surface1d.Function.pointOn gu)
+          (Surface1d.Function.pointOn gv)
+          bounds
+          p1
+          f1
+          g1
+          0
+  log "Newton-Raphson solution" solution
+
 main :: IO ()
 main = Tolerance.using (Length.meters 1e-9) IO.do
   testScalarArithmetic
@@ -487,3 +517,4 @@ main = Tolerance.using (Length.meters 1e-9) IO.do
   testParallelComputation
   testDebugPrint
   testTextSum
+  testNewtonRaphson2d

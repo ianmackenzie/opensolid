@@ -17,16 +17,19 @@ module Solve2d
   , return
   , recurse
   , pass
+  , newtonRaphson
   )
 where
 
 import Bounds2d qualified
 import List qualified
 import OpenSolid
+import Qty qualified
 import Queue (Queue)
 import Queue qualified
 import Solve1d qualified
 import Uv qualified
+import Vector2d qualified
 
 data Subdomain = Subdomain Solve1d.Subdomain Solve1d.Subdomain
 
@@ -232,3 +235,41 @@ recurse = Recurse
 
 pass :: Action exclusions solution
 pass = Pass
+
+data Divergence = Divergence deriving (Eq, Show, Error)
+
+newtonRaphson ::
+  Tolerance units =>
+  (Uv.Point -> Qty units) ->
+  (Uv.Point -> Qty units) ->
+  (Uv.Point -> Qty units) ->
+  (Uv.Point -> Qty units) ->
+  (Uv.Point -> Qty units) ->
+  (Uv.Point -> Qty units) ->
+  Uv.Bounds ->
+  Uv.Point ->
+  Qty units ->
+  Qty units ->
+  Int ->
+  Result Divergence Uv.Point
+newtonRaphson f fu fv g gu gv uvBounds p1 f1 g1 iterations =
+  if iterations > 10 -- Check if we've entered an infinite loop
+    then Error Divergence
+    else do
+      let fu1 = fu p1
+      let fv1 = fv p1
+      let gu1 = gu p1
+      let gv1 = gv p1
+      let d = fu1 .*. gv1 - fv1 .*. gu1
+      let deltaU = (fv1 .*. g1 - gv1 .*. f1) / d
+      let deltaV = (gu1 .*. f1 - fu1 .*. g1) / d
+      let p2 = p1 + Vector2d.xy deltaU deltaV
+      if not (Bounds2d.includes p2 uvBounds) -- Check if we stepped outside the given bounds
+        then Error Divergence
+        else do
+          let f2 = f p2
+          let g2 = g p2
+          if Qty.hypot2 f2 g2 >= Qty.hypot2 f1 g1 -- Check if we've stopped converging
+            then if f1 ~= Qty.zero && g1 ~= Qty.zero then Ok p1 else Error Divergence
+            else -- We're still converging, so take another iteration
+              newtonRaphson f fu fv g gu gv uvBounds p2 f2 g2 (iterations + 1)
