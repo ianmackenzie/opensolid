@@ -8,6 +8,7 @@ module Maybe
   , (>>)
   , return
   , random
+  , orElse
   )
 where
 
@@ -44,3 +45,8 @@ random randomValue = Random.do
   if generateJust
     then Random.map Just randomValue
     else Random.return Nothing
+
+orElse :: Maybe a -> Maybe a -> Maybe a
+orElse second first = case first of
+  Just _ -> first
+  Nothing -> second
