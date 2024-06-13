@@ -28,10 +28,13 @@
               pkgs.zlib
               # For formatting Haskell files
               pkgs.haskellPackages.fourmolu
-              # For formatting Cabal files
+              # For formatting .cabal files;
+              # only needed if you're editing .cabal files,
+              # e.g. when adding/removing/renaming Haskell source files
               pkgs.haskellPackages.cabal-gild
               # For (re)generating hie.yaml;
-              # only needed if you add/remove/rename .cabal files
+              # only needed if you add/remove/rename .cabal files,
+              # e.g. when adding a whole new sub-project
               pkgs.haskellPackages.implicit-hie
               # For formatting this file =)
               pkgs.nixpkgs-fmt
