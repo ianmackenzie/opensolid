@@ -472,24 +472,19 @@ testNewtonRaphson2d = Tolerance.using 1e-9 do
   let g = u - v
   let gu = Surface1d.Function.derivative U g
   let gv = Surface1d.Function.derivative V g
-  let p1 = Point2d.xy 1.5 1.5
-  let f1 = Surface1d.Function.pointOn f p1
-  let g1 = Surface1d.Function.pointOn g p1
   let bounds = Bounds2d.xy (Range.from 0.0 2.0) (Range.from 0.0 2.0)
   let solution =
-        Solve2d.newtonRaphson
+        Solve2d.unique
+          (\uvBounds -> Surface1d.Function.segmentBounds uvBounds f)
           (Surface1d.Function.pointOn f)
           (Surface1d.Function.pointOn fu)
           (Surface1d.Function.pointOn fv)
+          (\uvBounds -> Surface1d.Function.segmentBounds uvBounds g)
           (Surface1d.Function.pointOn g)
           (Surface1d.Function.pointOn gu)
           (Surface1d.Function.pointOn gv)
           bounds
-          p1
-          f1
-          g1
-          0
-  log "Newton-Raphson solution" solution
+  log "Solve2d.unique solution" solution
 
 main :: IO ()
 main = Tolerance.using (Length.meters 1e-9) IO.do
