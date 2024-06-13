@@ -448,7 +448,7 @@ solveOrder n derivatives subdomainInterior derivativeBounds = do
             let fn = pointOn (Stream.nth n derivatives)
             let fm = pointOn (Stream.nth (n + 1) derivatives)
             let fnTolerance = Solve1d.derivativeTolerance neighborhood n
-            let fnRoot = Tolerance.using fnTolerance (Solve1d.monotonic fn fm subdomainInterior)
+            let fnRoot = Tolerance.using fnTolerance (Solve1d.unique fn fm subdomainInterior)
             case fnRoot of
               -- If we found a solution, then return it;
               -- otherwise there is no root of order n in the interior of this domain

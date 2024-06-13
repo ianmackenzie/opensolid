@@ -27,7 +27,7 @@ module Solve1d
   , return
   , recurse
   , pass
-  , monotonic
+  , unique
   )
 where
 
@@ -224,13 +224,13 @@ recurse = Recurse
 pass :: Action exclusions solution
 pass = Pass
 
-monotonic ::
+unique ::
   Tolerance units =>
   (Float -> Qty units) ->
   (Float -> Qty units) ->
   Range Unitless ->
   Maybe Float
-monotonic function derivative range = do
+unique function derivative range = do
   let (x1, x2) = Range.endpoints range
   let y1 = function x1
   let y2 = function x2
@@ -238,9 +238,9 @@ monotonic function derivative range = do
     | y1 == Qty.zero -> Just x1
     | y2 == Qty.zero -> Just x2
     | Qty.sign y1 == Qty.sign y2 -> Nothing
-    | otherwise -> solveMonotonic function derivative range (Qty.sign y1) x1 x2
+    | otherwise -> solveUnique function derivative range (Qty.sign y1) x1 x2
 
-solveMonotonic ::
+solveUnique ::
   Tolerance units =>
   (Float -> Qty units) ->
   (Float -> Qty units) ->
@@ -249,7 +249,7 @@ solveMonotonic ::
   Float ->
   Float ->
   Maybe Float
-solveMonotonic function derivative range sign1 x1 x2 = do
+solveUnique function derivative range sign1 x1 x2 = do
   -- First, try applying Newton-Raphson within [x1,x2]
   -- to see if that converges to a root
   let xMid = Qty.midpoint x1 x2
@@ -261,8 +261,8 @@ solveMonotonic function derivative range sign1 x1 x2 = do
           -- It's possible to bisect further,
           -- so recurse into whichever subdomain brackets the root
           if Qty.sign yMid == sign1
-            then solveMonotonic function derivative range sign1 xMid x2
-            else solveMonotonic function derivative range sign1 x1 xMid
+            then solveUnique function derivative range sign1 xMid x2
+            else solveUnique function derivative range sign1 x1 xMid
       | otherwise ->
           -- We can't bisect any further
           -- (Newton-Raphson somehow never converged),
