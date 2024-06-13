@@ -1,18 +1,27 @@
 # opensolid
 
-## Developing with nix flakes
+## Setup
+
+This project uses a Nix flake as the primary way to set up a build environment.
+(If you'd prefer to use something else like plain GHCup, that should also work -
+but consult `flake.nix` as a reference, it's thoroughly commented!)
 
 To activate flakes, include `experimental-features = nix-command flakes` in `~/.config/nix/nix.conf`.
+Then, run `nix develop` within a Git checkout of this repository.
+This will give you a development environment with `ghc`, `stack` and `haskell-language-server` installed
+(plus a variety of other useful tools such as `fourmolu` for source code formatting).
 
-Then, run `nix develop` or `nix-shell`. This will give you development environment with `ghc`, `cabal-install` and `haskell-language-server`. If you use vscode, you should be able to run `code .` from this shell.
+## Development
 
-## Developing python bindings
+Run `stack build` to build everything, and `stack test` to run the tests.
+There's a random collection of little mini-scripts in `opensolid-sandbox/src/Main.hs`
+which you can run with `stack run sandbox` (try adding your own!).
 
-1. run `cabal build opensolid-ffi` to compile the foreign library. If you need to print the generated code, call with `--ghc-options="-ddump-splices"` (you may need to delete `dist-newstyle`).
-2. run `cabal run opensolid-python -v0 > opensolid-python/opensolid.py` to generate the python bindings formatted with `ruff`.
-3. then you can run `python opensolid-python/test.py` to test the bindings
-4. run `PYTHONPATH=./opensolid-python pyright --pythonversion 3.12` to validate the typings
-5. run `ruff opensolid-python/` to lint the python code with `ruff`
+### Python bindings
 
-`nix-shell` automatically sets `LD_LIBRARY_PATH`, so that python knows where to find the
-library during the local development.
+1. Run `stack build` to build the core library plus Python extension (native library).
+2. Run `generate-python-bindings` to generate the Python bindings (Python code).
+3. Run `python opensolid-python/test.py` to test the bindings.
+
+`nix develop` automatically sets `LD_LIBRARY_PATH`,
+so that Python knows where to find the extension library.
