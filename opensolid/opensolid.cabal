@@ -155,6 +155,8 @@ library
     Region2d
     Result
     Sign
+    Solve1d
+    Solve2d
     Stream
     Surface1d
     Surface1d.Function
@@ -187,8 +189,6 @@ library
     Json.FieldSchema
     Point2d.CoordinateTransformation
     Quadrature
-    Solve1d
-    Solve2d
     Surface1d.Function.Boundary
     Surface1d.Function.PartialZeros
     Surface1d.Function.SaddleRegion
