@@ -2,6 +2,7 @@ module Solve2d
   ( Subdomain
   , domain
   , isAtomic
+  , coordinates
   , interior
   , bounds
   , overlaps
@@ -43,6 +44,9 @@ domain = Subdomain Solve1d.domain Solve1d.domain
 
 isAtomic :: Subdomain -> Bool
 isAtomic (Subdomain x y) = Solve1d.isAtomic x && Solve1d.isAtomic y
+
+coordinates :: Subdomain -> (Solve1d.Subdomain, Solve1d.Subdomain)
+coordinates (Subdomain x y) = (x, y)
 
 half :: Subdomain -> Subdomain
 half (Subdomain x y) = Subdomain (Solve1d.half x) (Solve1d.half y)
