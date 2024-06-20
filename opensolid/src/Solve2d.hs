@@ -37,7 +37,7 @@ import Solve1d qualified
 import Uv qualified
 import Vector2d qualified
 
-data Subdomain = Subdomain Solve1d.Subdomain Solve1d.Subdomain
+data Subdomain = Subdomain Solve1d.Subdomain Solve1d.Subdomain deriving (Show)
 
 domain :: Subdomain
 domain = Subdomain Solve1d.domain Solve1d.domain
