@@ -46,7 +46,11 @@ data Subdomain = Subdomain
   , i :: Float
   , j :: Float
   }
-  deriving (Eq, Show)
+  deriving (Show)
+
+instance Eq Subdomain where
+  Subdomain n1 i1 j1 == Subdomain n2 i2 j2 =
+    i1 * n2 == i2 * n1 && j1 * n2 == j2 * n1
 
 domain :: Subdomain
 domain = Subdomain{n = 1.0, i = 0.0, j = 1.0}
