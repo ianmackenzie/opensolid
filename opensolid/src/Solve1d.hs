@@ -3,12 +3,17 @@
 
 module Solve1d
   ( Subdomain
+  , Endpoint
   , domain
+  , endpoints
+  , min
+  , max
   , isAtomic
   , bisect
   , half
   , interior
   , bounds
+  , includes
   , overlaps
   , contains
   , isResolved
@@ -52,11 +57,30 @@ instance Eq Subdomain where
   Subdomain n1 i1 j1 == Subdomain n2 i2 j2 =
     i1 * n2 == i2 * n1 && j1 * n2 == j2 * n1
 
+data Endpoint = Endpoint
+  { n :: Float
+  , i :: Float
+  }
+  deriving (Show)
+
+instance Eq Endpoint where
+  Endpoint n1 i1 == Endpoint n2 i2 =
+    i1 * n2 == i2 * n1
+
 domain :: Subdomain
 domain = Subdomain{n = 1.0, i = 0.0, j = 1.0}
 
 isAtomic :: Subdomain -> Bool
 isAtomic (Subdomain{n, i, j}) = (j - i) / n <= Float.epsilon
+
+endpoints :: Subdomain -> (Endpoint, Endpoint)
+endpoints (Subdomain{n, i, j}) = (Endpoint{n, i}, Endpoint{n, i = j})
+
+min :: Subdomain -> Endpoint
+min (Subdomain{n, i}) = Endpoint{n, i}
+
+max :: Subdomain -> Endpoint
+max (Subdomain{n, j}) = Endpoint{n, i = j}
 
 bisect :: Subdomain -> (Subdomain, Subdomain)
 bisect (Subdomain{n, i, j}) = do
@@ -85,6 +109,10 @@ interior (Subdomain{n, i, j}) = do
 overlaps :: Subdomain -> Subdomain -> Bool
 overlaps (Subdomain n2 i2 j2) (Subdomain n1 i1 j1) =
   i1 * n2 < j2 * n1 && j1 * n2 > i2 * n1
+
+includes :: Endpoint -> Subdomain -> Bool
+includes (Endpoint{n = pn, i = pi}) (Subdomain{n, i, j}) = do
+  pi * n >= i * pn && pi * n <= j * pn
 
 contains :: Subdomain -> Subdomain -> Bool
 contains (Subdomain n2 i2 j2) (Subdomain n1 i1 j1) =
