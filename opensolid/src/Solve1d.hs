@@ -16,6 +16,7 @@ module Solve1d
   , includes
   , overlaps
   , contains
+  , adjacent
   , isResolved
   , resolvedSign
   , Neighborhood
@@ -117,6 +118,10 @@ includes (Endpoint{n = pn, i = pi}) (Subdomain{n, i, j}) = do
 contains :: Subdomain -> Subdomain -> Bool
 contains (Subdomain n2 i2 j2) (Subdomain n1 i1 j1) =
   i1 * n2 <= i2 * n1 && j1 * n2 >= j2 * n1
+
+adjacent :: Subdomain -> Subdomain -> Bool
+adjacent (Subdomain n1 i1 j1) (Subdomain n2 i2 j2) =
+  i1 * n2 == j2 * n1 || j1 * n2 == i2 * n1
 
 isResolved :: Range units -> Bool
 isResolved range = resolvedSign range /= Nothing
