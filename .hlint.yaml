@@ -16,3 +16,5 @@
 - ignore: { name: "Use isJust" }
 - ignore: { name: "Redundant IO.return" }
 - ignore: { name: "Use first" }
+- ignore: { name: "Use second" }
+- ignore: { name: "Use bimap" }
