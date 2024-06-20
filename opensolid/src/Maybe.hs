@@ -1,6 +1,7 @@
 module Maybe
   ( Maybe (Just, Nothing)
   , map
+  , map2
   , withDefault
   , collect
   , values
@@ -21,6 +22,10 @@ import Random qualified
 map :: (a -> b) -> Maybe a -> Maybe b
 map function (Just value) = Just (function value)
 map _ Nothing = Nothing
+
+map2 :: (a -> b -> c) -> Maybe a -> Maybe b -> Maybe c
+map2 function (Just first) second = map (function first) second
+map2 _ Nothing _ = Nothing
 
 return :: a -> Maybe a
 return = Just
