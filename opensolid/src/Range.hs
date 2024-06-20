@@ -14,6 +14,7 @@ module Range
   , maxAbs
   , squared
   , squared'
+  , clampTo
   , includes
   , inclusion
   , exclusion
@@ -376,6 +377,9 @@ hypot3 (Range xMin xMax) (Range yMin yMax) (Range zMin zMax) = do
     | positiveY -> Range_ yMin maxMagnitude
     | negativeY -> Range_ -yMax maxMagnitude
     | otherwise -> Range_ Qty.zero maxMagnitude
+
+clampTo :: Range units -> Qty units -> Qty units
+clampTo (Range low high) value = Qty.clamp low high value
 
 includes :: Qty units -> Range units -> Bool
 includes value (Range low high) = low <= value && value <= high
