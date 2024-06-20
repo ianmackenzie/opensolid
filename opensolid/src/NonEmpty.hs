@@ -16,6 +16,7 @@ module NonEmpty
   , last
   , toList
   , prepend
+  , append
   , length
   , map
   , mapWithIndex
@@ -130,6 +131,9 @@ toList (x :| xs) = x : xs
 
 prepend :: a -> NonEmpty a -> NonEmpty a
 prepend = Data.List.NonEmpty.cons
+
+append :: a -> NonEmpty a -> NonEmpty a
+append value nonEmpty = nonEmpty + [value]
 
 length :: NonEmpty a -> Int
 length = Data.List.NonEmpty.length
