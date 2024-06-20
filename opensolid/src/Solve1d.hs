@@ -322,10 +322,10 @@ newtonRaphson function derivative range x y iterations =
     then Error Divergence
     else do
       let dy = derivative x
-      let x2 = x - y / dy -- Apply Newton step
-      if not (Range.includes x2 range) -- Check if we stepped outside the given range
+      if dy == Qty.zero -- Can't take Newton step if derivative is zero
         then Error Divergence
         else do
+          let x2 = Range.clampTo range (x - y / dy) -- Apply (bounded) Newton step
           let y2 = function x2
           if Qty.abs y2 >= Qty.abs y -- Check if we've stopped converging
             then if y ~= Qty.zero then Ok x else Error Divergence
