@@ -1,8 +1,15 @@
 module Solve2d
   ( Subdomain
+  , Boundary
   , domain
   , isAtomic
   , coordinates
+  , leftBoundary
+  , rightBoundary
+  , bottomBoundary
+  , topBoundary
+  , adjacent
+  , contacts
   , interior
   , bounds
   , overlaps
@@ -39,6 +46,11 @@ import Vector2d qualified
 
 data Subdomain = Subdomain Solve1d.Subdomain Solve1d.Subdomain deriving (Show)
 
+data Boundary
+  = VerticalBoundary Solve1d.Endpoint Solve1d.Subdomain
+  | HorizontalBoundary Solve1d.Subdomain Solve1d.Endpoint
+  deriving (Show)
+
 domain :: Subdomain
 domain = Subdomain Solve1d.domain Solve1d.domain
 
@@ -47,6 +59,29 @@ isAtomic (Subdomain x y) = Solve1d.isAtomic x && Solve1d.isAtomic y
 
 coordinates :: Subdomain -> (Solve1d.Subdomain, Solve1d.Subdomain)
 coordinates (Subdomain x y) = (x, y)
+
+leftBoundary :: Subdomain -> Boundary
+leftBoundary (Subdomain x y) = VerticalBoundary (Solve1d.min x) y
+
+rightBoundary :: Subdomain -> Boundary
+rightBoundary (Subdomain x y) = VerticalBoundary (Solve1d.max x) y
+
+bottomBoundary :: Subdomain -> Boundary
+bottomBoundary (Subdomain x y) = HorizontalBoundary x (Solve1d.min y)
+
+topBoundary :: Subdomain -> Boundary
+topBoundary (Subdomain x y) = HorizontalBoundary x (Solve1d.max y)
+
+adjacent :: Boundary -> Boundary -> Bool
+adjacent (HorizontalBoundary{}) (VerticalBoundary{}) = False
+adjacent (VerticalBoundary{}) (HorizontalBoundary{}) = False
+adjacent (HorizontalBoundary x1 y1) (HorizontalBoundary x2 y2) = Solve1d.overlaps x1 x2 && y1 == y2
+adjacent (VerticalBoundary x1 y1) (VerticalBoundary x2 y2) = x1 == x2 && Solve1d.overlaps y1 y2
+
+contacts :: Subdomain -> Boundary -> Bool
+contacts (Subdomain x y) boundary = case boundary of
+  VerticalBoundary bx by -> Solve1d.overlaps by y && (bx == Solve1d.min x || bx == Solve1d.max x)
+  HorizontalBoundary bx by -> Solve1d.overlaps bx x && (by == Solve1d.min y || by == Solve1d.max y)
 
 half :: Subdomain -> Subdomain
 half (Subdomain x y) = Subdomain (Solve1d.half x) (Solve1d.half y)
