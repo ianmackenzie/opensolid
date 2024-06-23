@@ -327,7 +327,8 @@ newtonRaphson function derivative range x y iterations =
         else do
           let x2 = Range.clampTo range (x - y / dy) -- Apply (bounded) Newton step
           let y2 = function x2
-          if Qty.abs y2 >= Qty.abs y -- Check if we've stopped converging
-            then if y ~= Qty.zero then Ok x else Error Divergence
+          if Qty.abs y2 >= Qty.abs y
+            then -- We've stopped converging, check if we're actually at a root
+              if y ~= Qty.zero then Ok x else Error Divergence
             else -- We're still converging, so take another iteration
               newtonRaphson function derivative range x2 y2 (iterations + 1)
