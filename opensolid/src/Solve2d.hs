@@ -136,19 +136,21 @@ horizontal :: (Uv.Bounds -> a) -> Subdomain -> Cache a
 horizontal function subdomain = do
   let (Subdomain x y) = subdomain
   let (x1, x2) = Solve1d.bisect x
-  let leftChild = horizontal function (Subdomain x1 y)
+  let yMid = Solve1d.half y
+  let leftChild = horizontal function (Subdomain x1 yMid)
   let middleChild = central function (half subdomain)
-  let rightChild = horizontal function (Subdomain x2 y)
+  let rightChild = horizontal function (Subdomain x2 yMid)
   let node = Horizontal leftChild middleChild rightChild
   tree function subdomain node
 
 vertical :: (Uv.Bounds -> a) -> Subdomain -> Cache a
 vertical function subdomain = do
   let (Subdomain x y) = subdomain
+  let xMid = Solve1d.half x
   let (y1, y2) = Solve1d.bisect y
-  let bottomChild = vertical function (Subdomain x y1)
+  let bottomChild = vertical function (Subdomain xMid y1)
   let middleChild = central function (half subdomain)
-  let topChild = vertical function (Subdomain x y2)
+  let topChild = vertical function (Subdomain xMid y2)
   let node = Vertical bottomChild middleChild topChild
   tree function subdomain node
 
