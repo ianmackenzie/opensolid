@@ -23,7 +23,7 @@ module Basics
   , always
   , fromIntegral
   , internalError
-  , notImplemented
+  , todo
   , (|>)
   , ($)
   , (.)
@@ -73,14 +73,13 @@ fromInteger :: Prelude.Integer -> Int
 fromInteger = Prelude.fromInteger
 
 internalError :: HasCallStack => Text -> a
-internalError message =
-  withFrozenCallStack $
-    Prelude.error (Data.Text.unpack (Prelude.mappend "Internal error: " message))
+internalError message = withFrozenCallStack $ abort (Prelude.mappend "Internal error: " message)
 
-notImplemented :: HasCallStack => a
-notImplemented =
-  withFrozenCallStack $
-    Prelude.error (Data.Text.unpack "Not implemented")
+todo :: HasCallStack => a
+todo = withFrozenCallStack $ abort "Not implemented"
+
+abort :: Text -> a
+abort message = Prelude.error (Data.Text.unpack message)
 
 {-# INLINE (|>) #-}
 (|>) :: a -> (a -> b) -> b
