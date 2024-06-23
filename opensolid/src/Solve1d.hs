@@ -33,7 +33,7 @@ module Solve1d
   , return
   , recurse
   , pass
-  , unique
+  , monotonic
   )
 where
 
@@ -261,23 +261,23 @@ recurse = Recurse
 pass :: Action exclusions solution
 pass = Pass
 
-unique ::
+monotonic ::
   Tolerance units =>
   (Float -> Qty units) ->
   (Float -> Qty units) ->
   Range Unitless ->
-  Maybe Float
-unique function derivative range = do
+  Float
+monotonic function derivative range = do
   let (x1, x2) = Range.endpoints range
   let y1 = function x1
   let y2 = function x2
   if
-    | y1 == Qty.zero -> Just x1
-    | y2 == Qty.zero -> Just x2
-    | Qty.sign y1 == Qty.sign y2 -> Nothing
-    | otherwise -> solveUnique function derivative range (Qty.sign y1) x1 x2
+    | y1 == Qty.zero -> x1
+    | y2 == Qty.zero -> x2
+    | Qty.sign y1 == Qty.sign y2 -> if Qty.abs y1 <= Qty.abs y2 then x1 else x2
+    | otherwise -> solveMonotonic function derivative range (Qty.sign y1) x1 x2
 
-solveUnique ::
+solveMonotonic ::
   Tolerance units =>
   (Float -> Qty units) ->
   (Float -> Qty units) ->
@@ -285,26 +285,22 @@ solveUnique ::
   Sign ->
   Float ->
   Float ->
-  Maybe Float
-solveUnique function derivative range sign1 x1 x2 = do
+  Float
+solveMonotonic function derivative range sign1 x1 x2 = do
   -- First, try applying Newton-Raphson within [x1,x2]
   -- to see if that converges to a root
   let xMid = Qty.midpoint x1 x2
   let yMid = function xMid
   case newtonRaphson function derivative range xMid yMid 0 of
-    Ok x -> Just x -- Newton-Raphson converged to a root, return it
+    Ok x -> x -- Newton-Raphson converged to a root, return it
     Error Divergence -- Newton-Raphson did not converge within [x1, x2]
       | x1 < xMid && xMid < x2 ->
           -- It's possible to bisect further,
           -- so recurse into whichever subdomain brackets the root
           if Qty.sign yMid == sign1
-            then solveUnique function derivative range sign1 xMid x2
-            else solveUnique function derivative range sign1 x1 xMid
-      | otherwise ->
-          -- We can't bisect any further
-          -- (Newton-Raphson somehow never converged),
-          -- so check if we've found a root by bisection
-          if yMid ~= Qty.zero then Just xMid else Nothing
+            then solveMonotonic function derivative range sign1 xMid x2
+            else solveMonotonic function derivative range sign1 x1 xMid
+      | otherwise -> xMid -- We've converged to a root by bisection
 
 data Divergence = Divergence deriving (Eq, Show, Error)
 

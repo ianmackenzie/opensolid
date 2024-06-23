@@ -5,197 +5,133 @@
 module Surface1d.Function.PartialZeros
   ( PartialZeros (..)
   , CrossingCurve (..)
-  , TangentCurve (..)
-  , TangentLoop (..)
-  , TangentPoint (..)
   , empty
-  , crossingCurve
-  , degenerateCrossingCurve
-  , tangentPoint
-  , saddleRegion
-  , merge
+  , addCrossingCurve
+  , addTangentPoint
+  , addSaddleRegion
+  , finalize
   )
 where
 
 import Curve2d (Curve2d)
+import Curve2d qualified
 import List qualified
 import NonEmpty qualified
 import OpenSolid
 import Pair qualified
-import Surface1d.Function.Boundary (Boundary)
-import Surface1d.Function.Boundary qualified as Boundary
-import Surface1d.Function.SaddleRegion (SaddleRegion)
+import Solve2d (Subdomain)
+import Solve2d qualified
+import Surface1d.Function.SaddleRegion (SaddleRegion (..))
+import Surface1d.Function.SaddleRegion qualified as SaddleRegion
+import Surface1d.Function.Zeros (Zeros (..))
+import Surface1d.Function.Zeros qualified as Zeros
 import Uv qualified
 
 data PartialZeros = PartialZeros
   { crossingCurves :: List CrossingCurve
   , crossingLoops :: List CrossingLoop
-  , tangentCurves :: List TangentCurve
-  , tangentLoops :: List TangentLoop
-  , tangentPoints :: List TangentPoint
-  , saddleRegions :: List SaddleRegion
+  , tangentPoints :: List (Uv.Point, Sign)
+  , saddleRegions :: List (Subdomain, SaddleRegion)
   }
 
 data CrossingCurve
-  = CrossingCurve {start :: Boundary, end :: Boundary, segments :: NonEmpty (Curve2d Uv.Coordinates)}
-  | DegenerateCrossingCurve {start :: Boundary, end :: Boundary}
+  = CrossingCurve Solve2d.Boundary Solve2d.Boundary (NonEmpty (Curve2d Uv.Coordinates))
+  deriving (Show)
 
-type CrossingLoop =
-  NonEmpty (Curve2d Uv.Coordinates)
-
-data TangentCurve
-  = TangentCurve {start :: Boundary, end :: Boundary, segments :: NonEmpty (Curve2d Uv.Coordinates), sign :: Sign}
-  | DegenerateTangentCurve {start :: Boundary, end :: Boundary, sign :: Sign}
-
-data TangentLoop = TangentLoop
-  { segments :: NonEmpty (Curve2d Uv.Coordinates)
-  , sign :: Sign
-  }
-
-data TangentPoint = TangentPoint
-  { point :: Uv.Point
-  , sign :: Sign
-  }
+type CrossingLoop = NonEmpty (Curve2d Uv.Coordinates)
 
 empty :: PartialZeros
 empty =
   PartialZeros
     { crossingCurves = []
     , crossingLoops = []
-    , tangentCurves = []
-    , tangentLoops = []
     , tangentPoints = []
     , saddleRegions = []
     }
 
-crossingCurve :: Boundary -> Boundary -> Curve2d Uv.Coordinates -> PartialZeros
-crossingCurve start end curve =
-  empty{crossingCurves = [CrossingCurve{start, end, segments = NonEmpty.singleton curve}]}
-
-degenerateCrossingCurve :: Boundary -> Boundary -> PartialZeros
-degenerateCrossingCurve start end =
-  empty{crossingCurves = [DegenerateCrossingCurve{start, end}]}
-
-tangentPoint :: Uv.Point -> Sign -> PartialZeros
-tangentPoint point sign =
-  empty{tangentPoints = [TangentPoint{point, sign}]}
-
-saddleRegion :: SaddleRegion -> PartialZeros
-saddleRegion region =
-  empty{saddleRegions = [region]}
-
-merge :: PartialZeros -> PartialZeros -> PartialZeros
-merge left right = do
-  let PartialZeros
-        { crossingCurves = leftCrossingCurves
-        , crossingLoops = leftCrossingLoops
-        , tangentCurves = leftTangentCurves
-        , tangentLoops = leftTangentLoops
-        , tangentPoints = leftTangentPoints
-        , saddleRegions = leftSaddleRegions
-        } = left
-  let PartialZeros
-        { crossingCurves = rightCrossingCurves
-        , crossingLoops = rightCrossingLoops
-        , tangentCurves = rightTangentCurves
-        , tangentLoops = rightTangentLoops
-        , tangentPoints = rightTangentPoints
-        , saddleRegions = rightSaddleRegions
-        } = right
-  let (mergedCrossingCurves, newCrossingLoops) = mergeCrossingCurves leftCrossingCurves rightCrossingCurves
-  let (mergedTangentCurves, newTangentLoops) = mergeTangentCurves leftTangentCurves rightTangentCurves
-  PartialZeros
-    { crossingCurves = mergedCrossingCurves
-    , crossingLoops = List.concat [newCrossingLoops, leftCrossingLoops, rightCrossingLoops]
-    , tangentCurves = mergedTangentCurves
-    , tangentLoops = List.concat [newTangentLoops, leftTangentLoops, rightTangentLoops]
-    , tangentPoints = leftTangentPoints + rightTangentPoints
-    , saddleRegions = leftSaddleRegions + rightSaddleRegions
+addCrossingCurve :: CrossingCurve -> PartialZeros -> PartialZeros
+addCrossingCurve newCrossingCurve partialZeros = do
+  let PartialZeros{crossingCurves, crossingLoops} = partialZeros
+  let (updatedCrossingCurves, updatedCrossingLoops) =
+        insertCrossingCurve newCrossingCurve crossingCurves crossingLoops
+  partialZeros
+    { Surface1d.Function.PartialZeros.crossingCurves = updatedCrossingCurves
+    , Surface1d.Function.PartialZeros.crossingLoops = updatedCrossingLoops
     }
 
-mergeCrossingCurves :: List CrossingCurve -> List CrossingCurve -> (List CrossingCurve, List CrossingLoop)
-mergeCrossingCurves left right = List.foldr addCrossingCurve (right, []) left
+insertCrossingCurve ::
+  CrossingCurve ->
+  List CrossingCurve ->
+  List CrossingLoop ->
+  (List CrossingCurve, List CrossingLoop)
+insertCrossingCurve newCrossingCurve crossingCurves crossingLoops =
+  case crossingCurves of
+    [] -> ([newCrossingCurve], crossingLoops)
+    crossingCurve : remainingCrossingCurves ->
+      case joinCrossingCurves newCrossingCurve crossingCurve of
+        Just (JoinedCrossingCurve joinedCrossingCurve) ->
+          insertCrossingCurve joinedCrossingCurve remainingCrossingCurves crossingLoops
+        Just (NewCrossingLoop newCrossingLoop) ->
+          (remainingCrossingCurves, newCrossingLoop : crossingLoops)
+        Nothing ->
+          Pair.mapFirst (crossingCurve :) $
+            insertCrossingCurve newCrossingCurve remainingCrossingCurves crossingLoops
 
 data JoinCrossingCurveResult
   = JoinedCrossingCurve CrossingCurve
   | NewCrossingLoop CrossingLoop
 
-addCrossingCurve :: CrossingCurve -> (List CrossingCurve, List CrossingLoop) -> (List CrossingCurve, List CrossingLoop)
-addCrossingCurve givenCrossingCurve ([], loops) = ([givenCrossingCurve], loops)
-addCrossingCurve givenCrossingCurve (first : rest, loops) =
-  case joinCrossingCurves givenCrossingCurve first of
-    Just (JoinedCrossingCurve joinedCrossingCurve) -> addCrossingCurve joinedCrossingCurve (rest, loops)
-    Just (NewCrossingLoop newCrossingLoop) -> (rest, newCrossingLoop : loops)
-    Nothing -> Pair.mapFirst (first :) (addCrossingCurve givenCrossingCurve (rest, loops))
-
 joinCrossingCurves :: CrossingCurve -> CrossingCurve -> Maybe JoinCrossingCurveResult
 joinCrossingCurves (CrossingCurve start1 end1 segments1) (CrossingCurve start2 end2 segments2)
-  | Boundary.adjacent end1 start2 && Boundary.adjacent end2 start1 =
+  | Solve2d.adjacent end1 start2 && Solve2d.adjacent end2 start1 =
       Just (NewCrossingLoop (segments1 + segments2))
-  | Boundary.adjacent end1 start2 =
+  | Solve2d.adjacent end1 start2 =
       Just (JoinedCrossingCurve (CrossingCurve start1 end2 (segments1 + segments2)))
-  | Boundary.adjacent end2 start1 =
+  | Solve2d.adjacent end2 start1 =
       Just (JoinedCrossingCurve (CrossingCurve start2 end1 (segments2 + segments1)))
   | otherwise = Nothing
-joinCrossingCurves (CrossingCurve start1 end1 segments) (DegenerateCrossingCurve start2 end2)
-  | Boundary.adjacent end1 start2 && Boundary.adjacent end2 start1 =
-      Just (NewCrossingLoop segments)
-  | Boundary.adjacent end1 start2 =
-      Just (JoinedCrossingCurve (CrossingCurve start1 end2 segments))
-  | Boundary.adjacent end2 start1 =
-      Just (JoinedCrossingCurve (CrossingCurve start2 end1 segments))
-  | otherwise = Nothing
-joinCrossingCurves (DegenerateCrossingCurve start1 end1) (CrossingCurve start2 end2 segments)
-  | Boundary.adjacent end1 start2 && Boundary.adjacent end2 start1 =
-      Just (NewCrossingLoop segments)
-  | Boundary.adjacent end1 start2 =
-      Just (JoinedCrossingCurve (CrossingCurve start1 end2 segments))
-  | Boundary.adjacent end2 start1 =
-      Just (JoinedCrossingCurve (CrossingCurve start2 end1 segments))
-  | otherwise = Nothing
-joinCrossingCurves (DegenerateCrossingCurve{}) (DegenerateCrossingCurve{}) = Nothing
 
-mergeTangentCurves :: List TangentCurve -> List TangentCurve -> (List TangentCurve, List TangentLoop)
-mergeTangentCurves left right = List.foldr addTangentCurve (right, []) left
+addTangentPoint :: (Uv.Point, Sign) -> PartialZeros -> PartialZeros
+addTangentPoint tangentPoint partialZeros = do
+  let PartialZeros{tangentPoints} = partialZeros
+  partialZeros
+    { Surface1d.Function.PartialZeros.tangentPoints = tangentPoint : tangentPoints
+    }
 
-data JoinTangentCurveResult
-  = JoinedTangentCurve TangentCurve
-  | NewTangentLoop TangentLoop
+addSaddleRegion :: Subdomain -> SaddleRegion -> PartialZeros -> PartialZeros
+addSaddleRegion subdomain saddleRegion partialZeros = do
+  let PartialZeros{saddleRegions} = partialZeros
+  partialZeros{saddleRegions = (subdomain, saddleRegion) : saddleRegions}
 
-addTangentCurve :: TangentCurve -> (List TangentCurve, List TangentLoop) -> (List TangentCurve, List TangentLoop)
-addTangentCurve tangentCurve ([], loops) = ([tangentCurve], loops)
-addTangentCurve tangentCurve (first : rest, loops) =
-  case joinTangentCurves tangentCurve first of
-    Just (JoinedTangentCurve joinedTangentCurve) -> addTangentCurve joinedTangentCurve (rest, loops)
-    Just (NewTangentLoop newTangentLoop) -> (rest, newTangentLoop : loops)
-    Nothing -> Pair.mapFirst (first :) (addTangentCurve tangentCurve (rest, loops))
+finalize :: PartialZeros -> Zeros
+finalize partialZeros = do
+  let PartialZeros{crossingCurves, crossingLoops, tangentPoints, saddleRegions} = partialZeros
+  let extendedCrossingCurves =
+        List.map (\crossingCurve -> List.foldl extend crossingCurve saddleRegions) crossingCurves
+  -- TODO add logic to check for saddle regions that touch a UV domain boundary,
+  -- and then add connecting curves to zeros found on that boundary
+  -- (because there will be no crossing curve to connect to in that case)
+  Zeros
+    { Zeros.crossingCurves =
+        List.map (\(CrossingCurve _ _ segments) -> segments) extendedCrossingCurves
+    , Zeros.crossingLoops = crossingLoops
+    , Zeros.tangentPoints = tangentPoints
+    , Zeros.saddlePoints =
+        List.map (\(subdomain, saddleRegion) -> (SaddleRegion.point saddleRegion, Solve2d.bounds subdomain)) saddleRegions
+    }
 
-joinTangentCurves :: TangentCurve -> TangentCurve -> Maybe JoinTangentCurveResult
-joinTangentCurves (TangentCurve start1 end1 segments1 sign1) (TangentCurve start2 end2 segments2 sign2)
-  | sign1 /= sign2 = Nothing
-  | Boundary.adjacent end1 start2 && Boundary.adjacent end2 start1 =
-      Just (NewTangentLoop (TangentLoop (segments1 + segments2) sign1))
-  | Boundary.adjacent end1 start2 =
-      Just (JoinedTangentCurve (TangentCurve start1 end2 (segments1 + segments2) sign1))
-  | Boundary.adjacent end2 start1 =
-      Just (JoinedTangentCurve (TangentCurve start2 end1 (segments2 + segments1) sign1))
-  | otherwise = Nothing
-joinTangentCurves (TangentCurve start1 end1 segments1 sign1) (DegenerateTangentCurve start2 end2 sign2)
-  | sign1 /= sign2 = Nothing
-  | Boundary.adjacent end1 start2 && Boundary.adjacent end2 start1 =
-      Just (NewTangentLoop (TangentLoop segments1 sign1))
-  | Boundary.adjacent end1 start2 =
-      Just (JoinedTangentCurve (TangentCurve start1 end2 segments1 sign1))
-  | Boundary.adjacent end2 start1 =
-      Just (JoinedTangentCurve (TangentCurve start2 end1 segments1 sign1))
-  | otherwise = Nothing
-joinTangentCurves (DegenerateTangentCurve start1 end1 sign1) (TangentCurve start2 end2 segments2 sign2)
-  | sign1 /= sign2 = Nothing
-  | Boundary.adjacent end1 start2 && Boundary.adjacent end2 start1 =
-      Just (NewTangentLoop (TangentLoop segments2 sign1))
-  | Boundary.adjacent end1 start2 =
-      Just (JoinedTangentCurve (TangentCurve start1 end2 segments2 sign1))
-  | Boundary.adjacent end2 start1 =
-      Just (JoinedTangentCurve (TangentCurve start2 end1 segments2 sign1))
-  | otherwise = Nothing
-joinTangentCurves (DegenerateTangentCurve{}) (DegenerateTangentCurve{}) = Nothing
+extend :: CrossingCurve -> (Subdomain, SaddleRegion) -> CrossingCurve
+extend curve (subdomain, saddleRegion) = do
+  let (CrossingCurve start end segments) = curve
+  let SaddleRegion{connectingCurves} = saddleRegion
+  let extendStart = Solve2d.contacts subdomain start
+  let extendEnd = Solve2d.contacts subdomain end
+  let startExtension = connectingCurves (Curve2d.startPoint (NonEmpty.first segments))
+  let endExtension =
+        connectingCurves (Curve2d.endPoint (NonEmpty.last segments))
+          |> List.reverseMap Curve2d.reverse
+  case (extendStart, extendEnd) of
+    (False, False) -> curve
+    (True, False) -> CrossingCurve start end (startExtension + segments)
+    (False, True) -> CrossingCurve start end (segments + endExtension)
+    (True, True) -> CrossingCurve start end (startExtension + segments + endExtension)

@@ -1,39 +1,27 @@
 module Surface1d.Function.SaddleRegion
   ( SaddleRegion (..)
-  , Solution (..)
   , Frame
-  , point
-  , includes
   )
 where
 
-import Bounds2d qualified
+import Curve2d (Curve2d)
 import Frame2d (Frame2d)
-import Frame2d qualified
 import OpenSolid
+import Text qualified
 import Uv qualified
+import Prelude qualified
 
 type Frame = Frame2d Uv.Coordinates (Defines Uv.Space)
 
 data SaddleRegion = SaddleRegion
-  { frame :: Frame
-  , halfWidth :: Float
-  , halfHeight :: Float
-  , positiveSolution :: Solution
-  , negativeSolution :: Solution
-  , exclusion :: Uv.Bounds
-  , fxxSign :: Sign
+  { point :: Uv.Point
+  , connectingCurves :: Uv.Point -> List (Curve2d Uv.Coordinates)
   }
-  deriving (Show)
 
-data Solution = Solution
-  { dydx :: Float
-  , d2ydx2 :: Float
-  }
-  deriving (Show)
-
-point :: SaddleRegion -> Uv.Point
-point (SaddleRegion{frame}) = Frame2d.originPoint frame
-
-includes :: Uv.Point -> SaddleRegion -> Bool
-includes givenPoint (SaddleRegion{exclusion}) = Bounds2d.includes givenPoint exclusion
+instance Show SaddleRegion where
+  showsPrec precedence (SaddleRegion{point}) =
+    Prelude.showParen (precedence > 10) $
+      ( Prelude.showString (Text.unpack "SaddleRegion ")
+          . Prelude.showsPrec (precedence + 1) point
+          . Prelude.showString (Text.unpack " <function>")
+      )

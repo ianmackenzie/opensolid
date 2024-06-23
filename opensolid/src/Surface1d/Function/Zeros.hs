@@ -7,11 +7,8 @@ import Uv qualified
 data Zeros = Zeros
   { crossingCurves :: List (NonEmpty (Curve2d Uv.Coordinates))
   , crossingLoops :: List (NonEmpty (Curve2d Uv.Coordinates))
-  , tangentCurves :: List (NonEmpty (Curve2d Uv.Coordinates), Sign)
-  , tangentLoops :: List (NonEmpty (Curve2d Uv.Coordinates), Sign)
-  , saddlePoints :: List Uv.Point
   , tangentPoints :: List (Uv.Point, Sign)
-  , crossingPoints :: List Uv.Point
+  , saddlePoints :: List (Uv.Point, Uv.Bounds)
   }
 
 empty :: Zeros
@@ -19,9 +16,6 @@ empty =
   Zeros
     { crossingCurves = []
     , crossingLoops = []
-    , tangentCurves = []
-    , tangentLoops = []
-    , saddlePoints = []
     , tangentPoints = []
-    , crossingPoints = []
+    , saddlePoints = []
     }

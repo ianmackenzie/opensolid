@@ -34,12 +34,14 @@ import Bounds2d qualified
 import List qualified
 import Maybe qualified
 import OpenSolid
+import Pair qualified
 import Point2d qualified
 import Qty qualified
 import Queue (Queue)
 import Queue qualified
 import Range (Range)
 import Range qualified
+import Result qualified
 import Solve1d qualified
 import Uv qualified
 import Vector2d qualified
@@ -104,8 +106,8 @@ data Cache cached
 data Node cached
   = Atomic
   | Central ~(Cache cached)
-  | Horizontal ~(Cache cached) ~(Cache cached) ~(Cache cached)
-  | Vertical ~(Cache cached) ~(Cache cached) ~(Cache cached)
+  | Row ~(Cache cached) ~(Cache cached) ~(Cache cached)
+  | Column ~(Cache cached) ~(Cache cached) ~(Cache cached)
   | Quadrant
       ~(Cache cached)
       ~(Cache cached)
@@ -132,26 +134,26 @@ central function subdomain = do
   let node = Central child
   tree function subdomain node
 
-horizontal :: (Uv.Bounds -> a) -> Subdomain -> Cache a
-horizontal function subdomain = do
+row :: (Uv.Bounds -> a) -> Subdomain -> Cache a
+row function subdomain = do
   let (Subdomain x y) = subdomain
   let (x1, x2) = Solve1d.bisect x
   let yMid = Solve1d.half y
-  let leftChild = horizontal function (Subdomain x1 yMid)
+  let leftChild = row function (Subdomain x1 yMid)
   let middleChild = central function (half subdomain)
-  let rightChild = horizontal function (Subdomain x2 yMid)
-  let node = Horizontal leftChild middleChild rightChild
+  let rightChild = row function (Subdomain x2 yMid)
+  let node = Row leftChild middleChild rightChild
   tree function subdomain node
 
-vertical :: (Uv.Bounds -> a) -> Subdomain -> Cache a
-vertical function subdomain = do
+column :: (Uv.Bounds -> a) -> Subdomain -> Cache a
+column function subdomain = do
   let (Subdomain x y) = subdomain
   let xMid = Solve1d.half x
   let (y1, y2) = Solve1d.bisect y
-  let bottomChild = vertical function (Subdomain xMid y1)
+  let bottomChild = column function (Subdomain xMid y1)
   let middleChild = central function (half subdomain)
-  let topChild = vertical function (Subdomain xMid y2)
-  let node = Vertical bottomChild middleChild topChild
+  let topChild = column function (Subdomain xMid y2)
+  let node = Column bottomChild middleChild topChild
   tree function subdomain node
 
 quadrant :: (Uv.Bounds -> a) -> Subdomain -> Cache a
@@ -162,13 +164,13 @@ quadrant function subdomain = do
   let xMid = Solve1d.half x
   let yMid = Solve1d.half y
   let bottomLeftChild = quadrant function (Subdomain x1 y1)
-  let bottomMiddleChild = vertical function (Subdomain xMid y1)
+  let bottomMiddleChild = column function (Subdomain xMid y1)
   let bottomRightChild = quadrant function (Subdomain x2 y1)
-  let middleLeftChild = horizontal function (Subdomain x1 yMid)
+  let middleLeftChild = row function (Subdomain x1 yMid)
   let middleChild = central function (Subdomain xMid yMid)
-  let middleRightChild = horizontal function (Subdomain x2 yMid)
+  let middleRightChild = row function (Subdomain x2 yMid)
   let topLeftChild = quadrant function (Subdomain x1 y2)
-  let topMiddleChild = vertical function (Subdomain xMid y2)
+  let topMiddleChild = column function (Subdomain xMid y2)
   let topRightChild = quadrant function (Subdomain x2 y2)
   let node =
         Quadrant
@@ -191,6 +193,8 @@ data Exclusions exclusions where
   NoExclusions :: Exclusions NoExclusions
   SomeExclusions :: NonEmpty Subdomain -> Exclusions SomeExclusions
 
+deriving instance Show (Exclusions exclusions)
+
 data InfiniteRecursion = InfiniteRecursion deriving (Eq, Show, Error)
 
 type Callback cached solution =
@@ -203,37 +207,69 @@ type Callback cached solution =
 search ::
   Callback cached solution ->
   Cache cached ->
-  List solution ->
-  List Subdomain ->
-  Result InfiniteRecursion (List solution, List Subdomain)
-search callback cache solutions exclusions =
-  process callback (Queue.singleton cache) solutions exclusions
+  List (solution, Subdomain) ->
+  Result InfiniteRecursion (List (solution, Subdomain))
+search callback cache accumulated =
+  process callback (Queue.singleton cache) accumulated
 
 process ::
   forall cached solution.
   Callback cached solution ->
   Queue (Cache cached) ->
-  List solution ->
-  List Subdomain ->
-  Result InfiniteRecursion (List solution, List Subdomain)
-process callback queue solutions exclusions =
+  List (solution, Subdomain) ->
+  Result InfiniteRecursion (List (solution, Subdomain))
+process callback queue accumulated =
   case Queue.pop queue of
+    Nothing -> Ok accumulated -- We're done! No more subdomains to process
     Just (Tree subdomain cached node, remaining) -> do
-      let filteredExclusions = List.filter (overlaps subdomain) exclusions
-      if List.any (contains subdomain) filteredExclusions
-        then process callback remaining solutions exclusions
-        else case filteredExclusions of
-          NonEmpty someExclusions ->
-            case callback subdomain cached (SomeExclusions someExclusions) of
-              Pass -> process callback remaining solutions exclusions
-              Recurse -> recurseIntoChildrenOf node callback remaining solutions exclusions
-          [] ->
-            case callback subdomain cached NoExclusions of
-              Pass -> process callback remaining solutions exclusions
-              Recurse -> recurseIntoChildrenOf node callback remaining solutions exclusions
-              Return solution ->
-                process callback remaining (solution : solutions) (subdomain : exclusions)
-    Nothing -> Ok (solutions, exclusions)
+      -- TODO optimize to check for containment and overlapping subdomains in a single pass
+      -- (maybe use the call stack to avoid even constructing the overlapping domain list
+      -- if the subdomain is actually contained?)
+      let filteredExclusions = List.filter (overlaps subdomain) (List.map Pair.second accumulated)
+      if containedBy filteredExclusions subdomain
+        then process callback remaining accumulated
+        else do
+          case filteredExclusions of
+            NonEmpty someExclusions ->
+              case callback subdomain cached (SomeExclusions someExclusions) of
+                Pass -> process callback remaining accumulated
+                Recurse -> recurseIntoChildrenOf node callback remaining accumulated
+            [] ->
+              case callback subdomain cached NoExclusions of
+                Pass -> process callback remaining accumulated
+                Recurse -> recurseIntoChildrenOf node callback remaining accumulated
+                Return solution ->
+                  process callback remaining ((solution, subdomain) : accumulated)
+
+containedBy :: List Subdomain -> Subdomain -> Bool
+containedBy exclusions subdomain =
+  List.any (contains subdomain) exclusions || do
+    let (Subdomain x y) = subdomain
+    let (x1, x2) = Solve1d.endpoints (Solve1d.half x)
+    let (y1, y2) = Solve1d.endpoints (Solve1d.half y)
+    checkContainment exclusions x1 x2 y1 y2 False False False False
+
+checkContainment ::
+  List Subdomain ->
+  Solve1d.Endpoint ->
+  Solve1d.Endpoint ->
+  Solve1d.Endpoint ->
+  Solve1d.Endpoint ->
+  Bool ->
+  Bool ->
+  Bool ->
+  Bool ->
+  Bool
+checkContainment exclusions x1 x2 y1 y2 contained11 contained12 contained21 contained22 =
+  case exclusions of
+    [] -> contained11 && contained12 && contained21 && contained22
+    first : rest -> do
+      let (Subdomain x y) = first
+      let updated11 = contained11 || (Solve1d.includes x1 x && Solve1d.includes y1 y)
+      let updated12 = contained12 || (Solve1d.includes x1 x && Solve1d.includes y2 y)
+      let updated21 = contained21 || (Solve1d.includes x2 x && Solve1d.includes y1 y)
+      let updated22 = contained22 || (Solve1d.includes x2 x && Solve1d.includes y2 y)
+      checkContainment rest x1 x2 y1 y2 updated11 updated12 updated21 updated22
 
 {-# INLINE recurseIntoChildrenOf #-}
 recurseIntoChildrenOf ::
@@ -241,32 +277,17 @@ recurseIntoChildrenOf ::
   Node cached ->
   Callback cached solution ->
   Queue (Cache cached) ->
-  List solution ->
-  List Subdomain ->
-  Result InfiniteRecursion (List solution, List Subdomain)
-recurseIntoChildrenOf node callback queue solutions exclusions =
-  case node of
+  List (solution, Subdomain) ->
+  Result InfiniteRecursion (List (solution, Subdomain))
+recurseIntoChildrenOf node callback queue accumulated = Result.do
+  updatedQueue <- case node of
     Atomic -> Error InfiniteRecursion
-    Central child -> process callback (queue + child) solutions exclusions
-    Horizontal left middle right -> do
-      let updatedQueue = queue + middle + left + right
-      process callback updatedQueue solutions exclusions
-    Vertical bottom middle top -> do
-      let updatedQueue = queue + middle + bottom + top
-      process callback updatedQueue solutions exclusions
-    Quadrant bottomLeft bottomMiddle bottomRight middleLeft middle middleRight topLeft topMiddle topRight -> do
-      let updatedQueue =
-            queue
-              |> Queue.push middle
-              |> Queue.push middleLeft
-              |> Queue.push middleRight
-              |> Queue.push bottomMiddle
-              |> Queue.push topMiddle
-              |> Queue.push bottomLeft
-              |> Queue.push bottomRight
-              |> Queue.push topLeft
-              |> Queue.push topRight
-      process callback updatedQueue solutions exclusions
+    Central child -> Ok (queue + child)
+    Row leftChild middleChild rightChild -> Ok (queue + middleChild + leftChild + rightChild)
+    Column bottomChild middleChild topChild -> Ok (queue + middleChild + bottomChild + topChild)
+    Quadrant bottomLeft bottomMiddle bottomRight middleLeft middle middleRight topLeft topMiddle topRight ->
+      Ok (queue + middle + middleLeft + middleRight + bottomMiddle + topMiddle + bottomLeft + bottomRight + topLeft + topRight)
+  process callback updatedQueue accumulated
 
 data Action exclusions solution where
   Return :: solution -> Action NoExclusions solution

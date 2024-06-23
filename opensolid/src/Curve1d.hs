@@ -410,53 +410,46 @@ resolveOrder n derivatives subdomain derivativeBounds exclusions
   -- A lower-order derivative is non-zero, so no solution of the given order exists
   | anyResolved n (Stream.tail derivativeBounds) = Solve1d.pass
   | otherwise = case exclusions of
-      -- No exclusions, so try to solve for a root of the given order
-      Solve1d.NoExclusions -> solveOrder n derivatives (Solve1d.interior subdomain) derivativeBounds
-      -- We're overlapping an exclusion, so we need to bisect further
+      -- We're overlapping at least one exclusion, so we need to bisect further
       Solve1d.SomeExclusions _ -> Solve1d.recurse
+      -- No exclusions, so try to solve for a root of order n
+      Solve1d.NoExclusions -> do
+        -- For a solution of order n, we need to look at the derivative of order n + 1
+        let nextDerivativeBounds = Stream.nth (n + 1) derivativeBounds
+        case Solve1d.resolvedSign nextDerivativeBounds of
+          -- Next derivative is not resolved, need to bisect further
+          Nothing -> Solve1d.recurse
+          -- Next derivative *is* resolved, try to find a root of order n
+          Just sign -> do
+            let subdomainInterior = Solve1d.interior subdomain
+            let neighborhood = Solve1d.neighborhood (n + 1) (Range.maxAbs nextDerivativeBounds)
+            let isSolution = isSolutionOrder n neighborhood derivatives
+            if
+              | Range.includes 0.0 subdomainInterior && isSolution 0.0 ->
+                  Solve1d.return (Root 0.0 n sign)
+              | Range.includes 1.0 subdomainInterior && isSolution 1.0 ->
+                  Solve1d.return (Root 1.0 n sign)
+              | otherwise -> do
+                  let fn = pointOn (Stream.nth n derivatives)
+                  let fm = pointOn (Stream.nth (n + 1) derivatives)
+                  let fnTolerance = Solve1d.derivativeTolerance neighborhood n
+                  let subdomainBounds = Solve1d.bounds subdomain
+                  let x = Tolerance.using fnTolerance (Solve1d.monotonic fn fm subdomainBounds)
+                  if isSolutionOrder n neighborhood derivatives x
+                    then
+                      if Range.includes x subdomainInterior
+                        then -- We've found a valid root of order n
+                          Solve1d.return (Root x n sign)
+                        else -- We found a root, but it's not in the interior of this subdomain
+                          Solve1d.recurse
+                    else Solve1d.pass -- No root of order n in this subdomain
 
 anyResolved :: Int -> Stream (Range units) -> Bool
 anyResolved n (Stream first rest) = n > 0 && (Solve1d.isResolved first || anyResolved (n - 1) rest)
 
-solveOrder ::
-  Tolerance units =>
-  Int ->
-  Stream (Curve1d units) ->
-  Range Unitless ->
-  Stream (Range units) ->
-  Solve1d.Action Solve1d.NoExclusions Root
-solveOrder n derivatives subdomainInterior derivativeBounds = do
-  -- For a solution of order n, we need to look at the derivative of order n + 1
-  let nextDerivativeBounds = Stream.nth (n + 1) derivativeBounds
-  case Solve1d.resolvedSign nextDerivativeBounds of
-    Nothing -> Solve1d.recurse
-    Just sign -> do
-      let neighborhood = Solve1d.neighborhood (n + 1) (Range.maxAbs nextDerivativeBounds)
-      -- Check that the values of all derivatives of order n and lower
-      -- (including order 0, the curve itself)
-      -- are zero to within an appropriate tolerance
-      let solution x = Solve1d.return (Root x n sign)
-      let isSolution = isSolutionOrder n neighborhood derivatives
-      if
-        -- Snap to 0.0 or 1.0 as a root if possible
-        | Range.includes 0.0 subdomainInterior && isSolution 0.0 -> solution 0.0
-        | Range.includes 1.0 subdomainInterior && isSolution 1.0 -> solution 1.0
-        -- Otherwise, solve for zero of order-n derivative
-        -- and check if that point is actually a root
-        -- (all lower-order derivatives are also zero)
-        | otherwise -> do
-            let fn = pointOn (Stream.nth n derivatives)
-            let fm = pointOn (Stream.nth (n + 1) derivatives)
-            let fnTolerance = Solve1d.derivativeTolerance neighborhood n
-            let fnRoot = Tolerance.using fnTolerance (Solve1d.unique fn fm subdomainInterior)
-            case fnRoot of
-              -- If we found a solution, then return it;
-              -- otherwise there is no root of order n in the interior of this domain
-              Just x -> if isSolution x then solution x else Solve1d.pass
-              -- No solution for the order-n derivative,
-              -- so there can be no root of order n in the interior of this domain
-              Nothing -> Solve1d.pass
-
+-- Check that the values of all derivatives of order n and lower
+-- (including order 0, the curve itself)
+-- are zero to within an appropriate tolerance
 isSolutionOrder ::
   Tolerance units =>
   Int ->

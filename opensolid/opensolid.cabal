@@ -189,7 +189,6 @@ library
     Json.FieldSchema
     Point2d.CoordinateTransformation
     Quadrature
-    Surface1d.Function.Boundary
     Surface1d.Function.PartialZeros
     Surface1d.Function.SaddleRegion
     Text.Parse

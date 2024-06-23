@@ -256,8 +256,16 @@ drawCrossingCurve index segments = do
   Drawing2d.with [Drawing2d.strokeColour colour, Drawing2d.opacity 0.3] $
     List.map drawCurve (NonEmpty.toList segments)
 
-drawSaddlePoint :: Uv.Point -> Drawing2d.Entity Uv.Space
-drawSaddlePoint point = drawDot Colour.orange point
+drawSaddlePoint :: (Uv.Point, Uv.Bounds) -> Drawing2d.Entity Uv.Space
+drawSaddlePoint (point, bounds) =
+  Drawing2d.group
+    [ drawDot Colour.orange point
+    , drawBounds
+        [ Drawing2d.strokeColour Colour.gray
+        , Drawing2d.strokeWidth (Length.millimeters 0.05)
+        ]
+        bounds
+    ]
 
 toDrawing :: Qty (Meters :/: Unitless)
 toDrawing = Length.centimeters 10.0 ./. 1.0

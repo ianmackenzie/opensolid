@@ -6,8 +6,9 @@ module Uv
   , Direction
   , Bounds
   , domain
-  , bisect
-  , cycle
+  , Derivatives
+  , derivatives
+  , map
   )
 where
 
@@ -33,16 +34,36 @@ type Direction = Direction2d Space
 domain :: Bounds
 domain = Bounds2d.xy Range.unit Range.unit
 
-bisect :: Parameter -> Bounds -> (Bounds, Bounds)
-bisect U bounds = do
-  let (uRange, vRange) = Bounds2d.coordinates bounds
-  let (u1, u2) = Range.bisect uRange
-  (Bounds2d.xy u1 vRange, Bounds2d.xy u2 vRange)
-bisect V bounds = do
-  let (uRange, vRange) = Bounds2d.coordinates bounds
-  let (v1, v2) = Range.bisect vRange
-  (Bounds2d.xy uRange v1, Bounds2d.xy uRange v2)
+data Derivatives a
+  = Derivatives a ~(Derivatives a) ~(Derivatives a)
 
-cycle :: Parameter -> Parameter
-cycle U = V
-cycle V = U
+derivatives :: a -> (a -> a) -> (a -> a) -> Derivatives a
+derivatives f du dv = do
+  let derivativesU = derivatives (du f) du dv
+  Derivatives f derivativesU (derivativesV derivativesU (dv f) dv)
+
+derivativesV :: Derivatives a -> a -> (a -> a) -> Derivatives a
+derivativesV derivativesU fv dv = do
+  let derivativesUV = derivative V derivativesU
+  Derivatives fv derivativesUV (derivativesV derivativesUV (dv fv) dv)
+
+value :: Derivatives a -> a
+value (Derivatives v _ _) = v
+
+derivative :: Parameter -> Derivatives a -> Derivatives a
+derivative U (Derivatives _ du _) = du
+derivative V (Derivatives _ _ dv) = dv
+
+map :: (a -> b) -> Derivatives a -> Derivatives b
+map function unmapped = do
+  let mappedValue = function (value unmapped)
+  let mappedU = map function (derivative U unmapped)
+  let mappedV = mapV mappedU function (derivative V unmapped)
+  Derivatives mappedValue mappedU mappedV
+
+mapV :: Derivatives b -> (a -> b) -> Derivatives a -> Derivatives b
+mapV mappedU function unmappedV = do
+  let mappedValue = function (value unmappedV)
+  let mappedUV = derivative V mappedU
+  let mappedVV = mapV mappedUV function (derivative V unmappedV)
+  Derivatives mappedValue mappedUV mappedVV
