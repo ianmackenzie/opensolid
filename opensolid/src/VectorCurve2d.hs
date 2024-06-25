@@ -682,116 +682,112 @@ controlVectorDifferences scale v1 v2 rest = do
     v3 : remaining -> NonEmpty.prepend difference (controlVectorDifferences scale v2 v3 remaining)
 
 evaluateAt :: Float -> VectorCurve2d (space @ units) -> Vector2d (space @ units)
-evaluateAt t curve =
-  case curve of
-    VectorCurve2d c -> evaluateAtImpl t c
-    Constant value -> value
-    Coerce c -> Units.coerce (evaluateAt t c)
-    Reversed c -> evaluateAt (1 - t) c
-    XY x y -> Vector2d.xy (Curve1d.evaluateAt t x) (Curve1d.evaluateAt t y)
-    Negated c -> -(evaluateAt t c)
-    Sum c1 c2 -> evaluateAt t c1 + evaluateAt t c2
-    Difference c1 c2 -> evaluateAt t c1 - evaluateAt t c2
-    Product1d2d' c1 c2 -> Curve1d.evaluateAt t c1 .*. evaluateAt t c2
-    Product2d1d' c1 c2 -> evaluateAt t c1 .*. Curve1d.evaluateAt t c2
-    Quotient' c1 c2 -> evaluateAt t c1 ./. Curve1d.evaluateAt t c2
-    PlaceInBasis basis c -> Vector2d.placeInBasis basis (evaluateAt t c)
-    Line v1 v2 -> Vector2d.interpolateFrom v1 v2 t
-    Arc v1 v2 a b -> do
-      let theta = Qty.interpolateFrom a b t
-      Angle.cos theta * v1 + Angle.sin theta * v2
-    QuadraticSpline v1 v2 v3 -> quadraticBlossom v1 v2 v3 t t
-    CubicSpline v1 v2 v3 v4 -> cubicBlossom v1 v2 v3 v4 t t t
-    BezierCurve controlVectors -> deCasteljau t controlVectors
-    Transformed transform c -> Vector2d.transformBy transform (evaluateAt t c)
+evaluateAt t curve = case curve of
+  VectorCurve2d c -> evaluateAtImpl t c
+  Constant value -> value
+  Coerce c -> Units.coerce (evaluateAt t c)
+  Reversed c -> evaluateAt (1 - t) c
+  XY x y -> Vector2d.xy (Curve1d.evaluateAt t x) (Curve1d.evaluateAt t y)
+  Negated c -> -(evaluateAt t c)
+  Sum c1 c2 -> evaluateAt t c1 + evaluateAt t c2
+  Difference c1 c2 -> evaluateAt t c1 - evaluateAt t c2
+  Product1d2d' c1 c2 -> Curve1d.evaluateAt t c1 .*. evaluateAt t c2
+  Product2d1d' c1 c2 -> evaluateAt t c1 .*. Curve1d.evaluateAt t c2
+  Quotient' c1 c2 -> evaluateAt t c1 ./. Curve1d.evaluateAt t c2
+  PlaceInBasis basis c -> Vector2d.placeInBasis basis (evaluateAt t c)
+  Line v1 v2 -> Vector2d.interpolateFrom v1 v2 t
+  Arc v1 v2 a b -> do
+    let theta = Qty.interpolateFrom a b t
+    Angle.cos theta * v1 + Angle.sin theta * v2
+  QuadraticSpline v1 v2 v3 -> quadraticBlossom v1 v2 v3 t t
+  CubicSpline v1 v2 v3 v4 -> cubicBlossom v1 v2 v3 v4 t t t
+  BezierCurve controlVectors -> deCasteljau t controlVectors
+  Transformed transform c -> Vector2d.transformBy transform (evaluateAt t c)
 
 segmentBounds :: Range Unitless -> VectorCurve2d (space @ units) -> VectorBounds2d (space @ units)
-segmentBounds t@(Range tl th) curve =
-  case curve of
-    VectorCurve2d c -> segmentBoundsImpl t c
-    Constant value -> VectorBounds2d.constant value
-    Coerce c -> Units.coerce (segmentBounds t c)
-    Reversed c -> segmentBounds (1 - t) c
-    XY x y -> VectorBounds2d (Curve1d.segmentBounds t x) (Curve1d.segmentBounds t y)
-    Negated c -> -(segmentBounds t c)
-    Sum c1 c2 -> segmentBounds t c1 + segmentBounds t c2
-    Difference c1 c2 -> segmentBounds t c1 - segmentBounds t c2
-    Product1d2d' c1 c2 -> Curve1d.segmentBounds t c1 .*. segmentBounds t c2
-    Product2d1d' c1 c2 -> segmentBounds t c1 .*. Curve1d.segmentBounds t c2
-    Quotient' c1 c2 -> segmentBounds t c1 ./. Curve1d.segmentBounds t c2
-    PlaceInBasis basis c -> VectorBounds2d.placeInBasis basis (segmentBounds t c)
-    Line v1 v2 ->
-      VectorBounds2d.hull2
-        (Vector2d.interpolateFrom v1 v2 tl)
-        (Vector2d.interpolateFrom v1 v2 th)
-    Arc v1 v2 a b -> do
-      let theta = a + (b - a) * t
-      Range.cos theta * v1 + Range.sin theta * v2
-    QuadraticSpline v1 v2 v3 ->
-      VectorBounds2d.hull3
-        (quadraticBlossom v1 v2 v3 tl tl)
-        (quadraticBlossom v1 v2 v3 tl th)
-        (quadraticBlossom v1 v2 v3 th th)
-    CubicSpline v1 v2 v3 v4 ->
-      VectorBounds2d.hull4
-        (cubicBlossom v1 v2 v3 v4 tl tl tl)
-        (cubicBlossom v1 v2 v3 v4 tl tl th)
-        (cubicBlossom v1 v2 v3 v4 tl th th)
-        (cubicBlossom v1 v2 v3 v4 th th th)
-    BezierCurve controlVectors ->
-      VectorBounds2d.hullN (segmentControlVectors tl th controlVectors)
-    Transformed transform c -> VectorBounds2d.transformBy transform (segmentBounds t c)
+segmentBounds t@(Range tl th) curve = case curve of
+  VectorCurve2d c -> segmentBoundsImpl t c
+  Constant value -> VectorBounds2d.constant value
+  Coerce c -> Units.coerce (segmentBounds t c)
+  Reversed c -> segmentBounds (1 - t) c
+  XY x y -> VectorBounds2d (Curve1d.segmentBounds t x) (Curve1d.segmentBounds t y)
+  Negated c -> -(segmentBounds t c)
+  Sum c1 c2 -> segmentBounds t c1 + segmentBounds t c2
+  Difference c1 c2 -> segmentBounds t c1 - segmentBounds t c2
+  Product1d2d' c1 c2 -> Curve1d.segmentBounds t c1 .*. segmentBounds t c2
+  Product2d1d' c1 c2 -> segmentBounds t c1 .*. Curve1d.segmentBounds t c2
+  Quotient' c1 c2 -> segmentBounds t c1 ./. Curve1d.segmentBounds t c2
+  PlaceInBasis basis c -> VectorBounds2d.placeInBasis basis (segmentBounds t c)
+  Line v1 v2 ->
+    VectorBounds2d.hull2
+      (Vector2d.interpolateFrom v1 v2 tl)
+      (Vector2d.interpolateFrom v1 v2 th)
+  Arc v1 v2 a b -> do
+    let theta = a + (b - a) * t
+    Range.cos theta * v1 + Range.sin theta * v2
+  QuadraticSpline v1 v2 v3 ->
+    VectorBounds2d.hull3
+      (quadraticBlossom v1 v2 v3 tl tl)
+      (quadraticBlossom v1 v2 v3 tl th)
+      (quadraticBlossom v1 v2 v3 th th)
+  CubicSpline v1 v2 v3 v4 ->
+    VectorBounds2d.hull4
+      (cubicBlossom v1 v2 v3 v4 tl tl tl)
+      (cubicBlossom v1 v2 v3 v4 tl tl th)
+      (cubicBlossom v1 v2 v3 v4 tl th th)
+      (cubicBlossom v1 v2 v3 v4 th th th)
+  BezierCurve controlVectors ->
+    VectorBounds2d.hullN (segmentControlVectors tl th controlVectors)
+  Transformed transform c -> VectorBounds2d.transformBy transform (segmentBounds t c)
 
 derivative :: VectorCurve2d (space @ units) -> VectorCurve2d (space @ units)
-derivative curve =
-  case curve of
-    VectorCurve2d c -> derivativeImpl c
-    Constant _ -> zero
-    Coerce c -> Units.coerce (derivative c)
-    Reversed c -> negate (reverse (derivative c))
-    XY x y -> XY (Curve1d.derivative x) (Curve1d.derivative y)
-    Negated c -> -(derivative c)
-    Sum c1 c2 -> derivative c1 + derivative c2
-    Difference c1 c2 -> derivative c1 - derivative c2
-    Product1d2d' c1 c2 -> Curve1d.derivative c1 .*. c2 + c1 .*. derivative c2
-    Product2d1d' c1 c2 -> derivative c1 .*. c2 + c1 .*. Curve1d.derivative c2
-    Quotient' c1 c2 ->
-      (derivative c1 .*. c2 - c1 .*. Curve1d.derivative c2) .!/.! Curve1d.squared' c2
-    PlaceInBasis basis c -> PlaceInBasis basis (derivative c)
-    Line v1 v2 -> constant (v2 - v1)
-    Arc v1 v2 a b -> do
-      let dTheta = Angle.unitless (b - a)
-      Arc (v2 * dTheta) (-v1 * dTheta) a b
-    QuadraticSpline v1 v2 v3 -> line (2 * (v2 - v1)) (2 * (v3 - v2))
-    CubicSpline v1 v2 v3 v4 ->
-      quadraticSpline (3 * (v2 - v1)) (3 * (v3 - v2)) (3 * (v4 - v3))
-    BezierCurve (_ :| []) -> zero
-    BezierCurve (v1 :| v2 : rest) -> do
-      let degree = 1 + List.length rest
-      BezierCurve (controlVectorDifferences (Float.int degree) v1 v2 rest)
-    Transformed transform c -> transformBy transform (derivative c)
+derivative curve = case curve of
+  VectorCurve2d c -> derivativeImpl c
+  Constant _ -> zero
+  Coerce c -> Units.coerce (derivative c)
+  Reversed c -> negate (reverse (derivative c))
+  XY x y -> XY (Curve1d.derivative x) (Curve1d.derivative y)
+  Negated c -> -(derivative c)
+  Sum c1 c2 -> derivative c1 + derivative c2
+  Difference c1 c2 -> derivative c1 - derivative c2
+  Product1d2d' c1 c2 -> Curve1d.derivative c1 .*. c2 + c1 .*. derivative c2
+  Product2d1d' c1 c2 -> derivative c1 .*. c2 + c1 .*. Curve1d.derivative c2
+  Quotient' c1 c2 ->
+    (derivative c1 .*. c2 - c1 .*. Curve1d.derivative c2) .!/.! Curve1d.squared' c2
+  PlaceInBasis basis c -> PlaceInBasis basis (derivative c)
+  Line v1 v2 -> constant (v2 - v1)
+  Arc v1 v2 a b -> do
+    let dTheta = Angle.unitless (b - a)
+    Arc (v2 * dTheta) (-v1 * dTheta) a b
+  QuadraticSpline v1 v2 v3 -> line (2 * (v2 - v1)) (2 * (v3 - v2))
+  CubicSpline v1 v2 v3 v4 ->
+    quadraticSpline (3 * (v2 - v1)) (3 * (v3 - v2)) (3 * (v4 - v3))
+  BezierCurve (_ :| []) -> zero
+  BezierCurve (v1 :| v2 : rest) -> do
+    let degree = 1 + List.length rest
+    BezierCurve (controlVectorDifferences (Float.int degree) v1 v2 rest)
+  Transformed transform c -> transformBy transform (derivative c)
 
 reverse :: VectorCurve2d (space @ units) -> VectorCurve2d (space @ units)
-reverse curve =
-  case curve of
-    VectorCurve2d _ -> Reversed curve
-    Constant _ -> curve
-    Coerce c -> Units.coerce (reverse c)
-    Reversed c -> c
-    XY x y -> XY (Curve1d.reverse x) (Curve1d.reverse y)
-    Negated c -> Negated (reverse c)
-    Sum c1 c2 -> Sum (reverse c1) (reverse c2)
-    Difference c1 c2 -> Difference (reverse c1) (reverse c2)
-    Product1d2d' c1 c2 -> Product1d2d' (Curve1d.reverse c1) (reverse c2)
-    Product2d1d' c1 c2 -> Product2d1d' (reverse c1) (Curve1d.reverse c2)
-    Quotient' c1 c2 -> Quotient' (reverse c1) (Curve1d.reverse c2)
-    PlaceInBasis basis c -> PlaceInBasis basis (reverse c)
-    Line v1 v2 -> Line v2 v1
-    Arc v1 v2 a b -> Arc v1 v2 b a
-    QuadraticSpline v1 v2 v3 -> QuadraticSpline v3 v2 v1
-    CubicSpline v1 v2 v3 v4 -> CubicSpline v4 v3 v2 v1
-    BezierCurve controlVectors -> BezierCurve (NonEmpty.reverse controlVectors)
-    Transformed transform c -> Transformed transform (reverse c)
+reverse curve = case curve of
+  VectorCurve2d _ -> Reversed curve
+  Constant _ -> curve
+  Coerce c -> Units.coerce (reverse c)
+  Reversed c -> c
+  XY x y -> XY (Curve1d.reverse x) (Curve1d.reverse y)
+  Negated c -> Negated (reverse c)
+  Sum c1 c2 -> Sum (reverse c1) (reverse c2)
+  Difference c1 c2 -> Difference (reverse c1) (reverse c2)
+  Product1d2d' c1 c2 -> Product1d2d' (Curve1d.reverse c1) (reverse c2)
+  Product2d1d' c1 c2 -> Product2d1d' (reverse c1) (Curve1d.reverse c2)
+  Quotient' c1 c2 -> Quotient' (reverse c1) (Curve1d.reverse c2)
+  PlaceInBasis basis c -> PlaceInBasis basis (reverse c)
+  Line v1 v2 -> Line v2 v1
+  Arc v1 v2 a b -> Arc v1 v2 b a
+  QuadraticSpline v1 v2 v3 -> QuadraticSpline v3 v2 v1
+  CubicSpline v1 v2 v3 v4 -> CubicSpline v4 v3 v2 v1
+  BezierCurve controlVectors -> BezierCurve (NonEmpty.reverse controlVectors)
+  Transformed transform c -> Transformed transform (reverse c)
 
 newtype SquaredMagnitude' (coordinateSystem :: CoordinateSystem)
   = SquaredMagnitude' (VectorCurve2d coordinateSystem)
