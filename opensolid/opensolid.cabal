@@ -161,6 +161,8 @@ library
     Surface1d
     Surface1d.Function
     Surface1d.Function.Zeros
+    Surface3d
+    Surface3d.Function
     Text
     Tolerance
     Transform2d
@@ -175,6 +177,8 @@ library
     VectorCurve2d.DegenerateEndpoint
     VectorCurve2d.Direction
     VectorCurve3d
+    VectorSurface3d
+    VectorSurface3d.Function
     VectorVolume3d.Function
     Vertex2d
     Volume
