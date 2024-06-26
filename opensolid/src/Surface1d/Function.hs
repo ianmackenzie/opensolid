@@ -945,9 +945,6 @@ instance Curve2d.Interface (VerticalCurve units) Uv.Coordinates where
   transformByImpl transform crossingCurve =
     Curve2d.wrap (Curve2d.TransformBy transform crossingCurve)
 
--- connectingCurves :: Function units -> SaddleRegion -> Uv.Point -> List (Curve2d Uv.Coordinates)
--- connectingCurves f saddleRegion point = do
-
 parallelogramBounds ::
   Float ->
   Float ->
