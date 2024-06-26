@@ -372,10 +372,10 @@ data CurveOnSurface units where
 deriving instance Show (CurveOnSurface units)
 
 instance Curve1d.Interface (CurveOnSurface units) units where
-  evaluateAtImpl t (CurveOnSurface uvCurve function) =
+  pointOnImpl (CurveOnSurface uvCurve function) t =
     evaluate function (Curve2d.evaluateAtImpl t uvCurve)
 
-  segmentBoundsImpl t (CurveOnSurface uvCurve function) =
+  segmentBoundsImpl (CurveOnSurface uvCurve function) t =
     bounds function (Curve2d.segmentBoundsImpl t uvCurve)
 
   derivativeImpl (CurveOnSurface uvCurve function) = do

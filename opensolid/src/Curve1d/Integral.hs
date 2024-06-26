@@ -16,10 +16,10 @@ data Integral units = Integral (Curve1d units) (Curve1d units) (Range Unitless)
 instance Estimate.Interface (Integral units) units where
   boundsImpl (Integral curve derivative domain) = do
     let dx = Range.width domain
-    let derivativeBounds = Curve1d.segmentBounds domain derivative
-    let estimate0 = dx * Curve1d.segmentBounds domain curve
-    let y1 = Curve1d.evaluateAt (Range.minValue domain) curve
-    let y2 = Curve1d.evaluateAt (Range.maxValue domain) curve
+    let derivativeBounds = Curve1d.segmentBounds derivative domain
+    let estimate0 = dx * Curve1d.segmentBounds curve domain
+    let y1 = Curve1d.pointOn curve (Range.minValue domain)
+    let y2 = Curve1d.pointOn curve (Range.maxValue domain)
     let m = Range.width derivativeBounds
     let error1 = 0.125 * m * dx * dx
     let estimate1 = dx * Qty.midpoint y1 y2 + Range.from -error1 error1

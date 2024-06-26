@@ -373,8 +373,8 @@ data DotProductOf space units1 units2
 deriving instance Show (DotProductOf space units1 units2)
 
 instance Curve1d.Interface (DotProductOf space units1 units2) (units1 :*: units2) where
-  evaluateAtImpl t (DotProductOf c1 c2) = evaluateAt t c1 .<>. evaluateAt t c2
-  segmentBoundsImpl t (DotProductOf c1 c2) = segmentBounds t c1 .<>. segmentBounds t c2
+  pointOnImpl (DotProductOf c1 c2) t = evaluateAt t c1 .<>. evaluateAt t c2
+  segmentBoundsImpl (DotProductOf c1 c2) t = segmentBounds t c1 .<>. segmentBounds t c2
   derivativeImpl (DotProductOf c1 c2) = derivative c1 .<>. c2 + c1 .<>. derivative c2
 
 instance
@@ -444,8 +444,8 @@ data CrossProductOf space units1 units2
 deriving instance Show (CrossProductOf space units1 units2)
 
 instance Curve1d.Interface (CrossProductOf space units1 units2) (units1 :*: units2) where
-  evaluateAtImpl t (CrossProductOf c1 c2) = evaluateAt t c1 .><. evaluateAt t c2
-  segmentBoundsImpl t (CrossProductOf c1 c2) = segmentBounds t c1 .><. segmentBounds t c2
+  pointOnImpl (CrossProductOf c1 c2) t = evaluateAt t c1 .><. evaluateAt t c2
+  segmentBoundsImpl (CrossProductOf c1 c2) t = segmentBounds t c1 .><. segmentBounds t c2
   derivativeImpl (CrossProductOf c1 c2) = derivative c1 .><. c2 + c1 .><. derivative c2
 
 instance
@@ -687,13 +687,13 @@ evaluateAt t curve = case curve of
   Constant value -> value
   Coerce c -> Units.coerce (evaluateAt t c)
   Reversed c -> evaluateAt (1 - t) c
-  XY x y -> Vector2d.xy (Curve1d.evaluateAt t x) (Curve1d.evaluateAt t y)
+  XY x y -> Vector2d.xy (Curve1d.pointOn x t) (Curve1d.pointOn y t)
   Negated c -> -(evaluateAt t c)
   Sum c1 c2 -> evaluateAt t c1 + evaluateAt t c2
   Difference c1 c2 -> evaluateAt t c1 - evaluateAt t c2
-  Product1d2d' c1 c2 -> Curve1d.evaluateAt t c1 .*. evaluateAt t c2
-  Product2d1d' c1 c2 -> evaluateAt t c1 .*. Curve1d.evaluateAt t c2
-  Quotient' c1 c2 -> evaluateAt t c1 ./. Curve1d.evaluateAt t c2
+  Product1d2d' c1 c2 -> Curve1d.pointOn c1 t .*. evaluateAt t c2
+  Product2d1d' c1 c2 -> evaluateAt t c1 .*. Curve1d.pointOn c2 t
+  Quotient' c1 c2 -> evaluateAt t c1 ./. Curve1d.pointOn c2 t
   PlaceInBasis basis c -> Vector2d.placeInBasis basis (evaluateAt t c)
   Line v1 v2 -> Vector2d.interpolateFrom v1 v2 t
   Arc v1 v2 a b -> do
@@ -710,13 +710,13 @@ segmentBounds t@(Range tl th) curve = case curve of
   Constant value -> VectorBounds2d.constant value
   Coerce c -> Units.coerce (segmentBounds t c)
   Reversed c -> segmentBounds (1 - t) c
-  XY x y -> VectorBounds2d (Curve1d.segmentBounds t x) (Curve1d.segmentBounds t y)
+  XY x y -> VectorBounds2d (Curve1d.segmentBounds x t) (Curve1d.segmentBounds y t)
   Negated c -> -(segmentBounds t c)
   Sum c1 c2 -> segmentBounds t c1 + segmentBounds t c2
   Difference c1 c2 -> segmentBounds t c1 - segmentBounds t c2
-  Product1d2d' c1 c2 -> Curve1d.segmentBounds t c1 .*. segmentBounds t c2
-  Product2d1d' c1 c2 -> segmentBounds t c1 .*. Curve1d.segmentBounds t c2
-  Quotient' c1 c2 -> segmentBounds t c1 ./. Curve1d.segmentBounds t c2
+  Product1d2d' c1 c2 -> Curve1d.segmentBounds c1 t .*. segmentBounds t c2
+  Product2d1d' c1 c2 -> segmentBounds t c1 .*. Curve1d.segmentBounds c2 t
+  Quotient' c1 c2 -> segmentBounds t c1 ./. Curve1d.segmentBounds c2 t
   PlaceInBasis basis c -> VectorBounds2d.placeInBasis basis (segmentBounds t c)
   Line v1 v2 ->
     VectorBounds2d.hull2
@@ -795,9 +795,9 @@ newtype SquaredMagnitude' (coordinateSystem :: CoordinateSystem)
 deriving instance Show (SquaredMagnitude' (space @ units))
 
 instance Curve1d.Interface (SquaredMagnitude' (space @ units)) (units :*: units) where
-  evaluateAtImpl t (SquaredMagnitude' curve) =
+  pointOnImpl (SquaredMagnitude' curve) t =
     Vector2d.squaredMagnitude' (evaluateAt t curve)
-  segmentBoundsImpl t (SquaredMagnitude' curve) =
+  segmentBoundsImpl (SquaredMagnitude' curve) t =
     VectorBounds2d.squaredMagnitude' (segmentBounds t curve)
   derivativeImpl (SquaredMagnitude' curve) =
     2 * curve .<>. derivative curve
@@ -814,9 +814,9 @@ newtype NonZeroMagnitude (coordinateSystem :: CoordinateSystem)
 deriving instance Show (NonZeroMagnitude (space @ units))
 
 instance Curve1d.Interface (NonZeroMagnitude (space @ units)) units where
-  evaluateAtImpl t (NonZeroMagnitude curve) =
+  pointOnImpl (NonZeroMagnitude curve) t =
     Vector2d.magnitude (VectorCurve2d.evaluateAt t curve)
-  segmentBoundsImpl t (NonZeroMagnitude curve) =
+  segmentBoundsImpl (NonZeroMagnitude curve) t =
     VectorBounds2d.magnitude (VectorCurve2d.segmentBounds t curve)
   derivativeImpl (NonZeroMagnitude curve) =
     (VectorCurve2d.derivative curve .<>. curve) .!/! Curve1d.wrap (NonZeroMagnitude curve)

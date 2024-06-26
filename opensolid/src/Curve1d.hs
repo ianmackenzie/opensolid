@@ -1,7 +1,6 @@
 module Curve1d
   ( Curve1d
   , Interface (..)
-  , evaluateAt
   , pointOn
   , segmentBounds
   , derivative
@@ -44,8 +43,8 @@ import Tolerance qualified
 import Units qualified
 
 class Show curve => Interface curve units | curve -> units where
-  evaluateAtImpl :: Float -> curve -> Qty units
-  segmentBoundsImpl :: Range Unitless -> curve -> Range units
+  pointOnImpl :: curve -> Float -> Qty units
+  segmentBoundsImpl :: curve -> Range Unitless -> Range units
   derivativeImpl :: curve -> Curve1d units
 
 data Curve1d units where
@@ -110,7 +109,7 @@ instance units ~ units_ => ApproximateEquality (Curve1d units) (Qty units_) unit
   curve ~= value = isZero (curve - value)
 
 instance Interface (Curve1d units) units where
-  evaluateAtImpl = evaluateAt
+  pointOnImpl = pointOn
   segmentBoundsImpl = segmentBounds
   derivativeImpl = derivative
 
@@ -268,40 +267,37 @@ instance Division' Int (Curve1d units) where
   type Int ./. Curve1d units = Curve1d (Unitless :/: units)
   value ./. curve = Float.int value ./. curve
 
-evaluateAt :: Float -> Curve1d units -> Qty units
-evaluateAt tValue curve = case curve of
-  Curve1d c -> evaluateAtImpl tValue c
+pointOn :: Curve1d units -> Float -> Qty units
+pointOn curve tValue = case curve of
+  Curve1d c -> pointOnImpl c tValue
   Constant x -> x
   Parameter -> tValue
-  Negated c -> negate (evaluateAt tValue c)
-  Sum c1 c2 -> evaluateAt tValue c1 + evaluateAt tValue c2
-  Difference c1 c2 -> evaluateAt tValue c1 - evaluateAt tValue c2
-  Product' c1 c2 -> evaluateAt tValue c1 .*. evaluateAt tValue c2
-  Quotient' c1 c2 -> evaluateAt tValue c1 ./. evaluateAt tValue c2
-  Squared' c -> Qty.squared' (evaluateAt tValue c)
-  SquareRoot' c' -> Qty.sqrt' (evaluateAt tValue c')
-  Sin c -> Angle.sin (evaluateAt tValue c)
-  Cos c -> Angle.cos (evaluateAt tValue c)
-  Coerce c -> Units.coerce (evaluateAt tValue c)
+  Negated c -> negate (pointOn c tValue)
+  Sum c1 c2 -> pointOn c1 tValue + pointOn c2 tValue
+  Difference c1 c2 -> pointOn c1 tValue - pointOn c2 tValue
+  Product' c1 c2 -> pointOn c1 tValue .*. pointOn c2 tValue
+  Quotient' c1 c2 -> pointOn c1 tValue ./. pointOn c2 tValue
+  Squared' c -> Qty.squared' (pointOn c tValue)
+  SquareRoot' c' -> Qty.sqrt' (pointOn c' tValue)
+  Sin c -> Angle.sin (pointOn c tValue)
+  Cos c -> Angle.cos (pointOn c tValue)
+  Coerce c -> Units.coerce (pointOn c tValue)
 
-pointOn :: Curve1d units -> Float -> Qty units
-pointOn curve tValue = evaluateAt tValue curve
-
-segmentBounds :: Range Unitless -> Curve1d units -> Range units
-segmentBounds tBounds curve = case curve of
-  Curve1d c -> segmentBoundsImpl tBounds c
+segmentBounds :: Curve1d units -> Range Unitless -> Range units
+segmentBounds curve tBounds = case curve of
+  Curve1d c -> segmentBoundsImpl c tBounds
   Constant value -> Range.constant value
   Parameter -> tBounds
-  Negated c -> negate (segmentBounds tBounds c)
-  Sum c1 c2 -> segmentBounds tBounds c1 + segmentBounds tBounds c2
-  Difference c1 c2 -> segmentBounds tBounds c1 - segmentBounds tBounds c2
-  Product' c1 c2 -> segmentBounds tBounds c1 .*. segmentBounds tBounds c2
-  Quotient' c1 c2 -> segmentBounds tBounds c1 ./. segmentBounds tBounds c2
-  Squared' c -> Range.squared' (segmentBounds tBounds c)
-  SquareRoot' c' -> Range.sqrt' (segmentBounds tBounds c')
-  Sin c -> Range.sin (segmentBounds tBounds c)
-  Cos c -> Range.cos (segmentBounds tBounds c)
-  Coerce c -> Units.coerce (segmentBounds tBounds c)
+  Negated c -> negate (segmentBounds c tBounds)
+  Sum c1 c2 -> segmentBounds c1 tBounds + segmentBounds c2 tBounds
+  Difference c1 c2 -> segmentBounds c1 tBounds - segmentBounds c2 tBounds
+  Product' c1 c2 -> segmentBounds c1 tBounds .*. segmentBounds c2 tBounds
+  Quotient' c1 c2 -> segmentBounds c1 tBounds ./. segmentBounds c2 tBounds
+  Squared' c -> Range.squared' (segmentBounds c tBounds)
+  SquareRoot' c' -> Range.sqrt' (segmentBounds c' tBounds)
+  Sin c -> Range.sin (segmentBounds c tBounds)
+  Cos c -> Range.cos (segmentBounds c tBounds)
+  Coerce c -> Units.coerce (segmentBounds c tBounds)
 
 derivative :: Curve1d units -> Curve1d units
 derivative curve = case curve of
@@ -324,8 +320,8 @@ newtype Reversed units = Reversed (Curve1d units)
 deriving instance Show (Reversed units)
 
 instance Interface (Reversed units) units where
-  evaluateAtImpl tValue (Reversed curve) = evaluateAt (1 - tValue) curve
-  segmentBoundsImpl tBounds (Reversed curve) = segmentBounds (1 - tBounds) curve
+  pointOnImpl (Reversed curve) tValue = pointOn curve (1 - tValue)
+  segmentBoundsImpl (Reversed curve) tBounds = segmentBounds curve (1 - tBounds)
   derivativeImpl (Reversed curve) = -(reverse (derivative curve))
 
 reverse :: Curve1d units -> Curve1d units
@@ -379,7 +375,9 @@ zeros (Constant value) = if value ~= Qty.zero then Ok ZeroEverywhere else Ok (Ze
 zeros curve | isZero curve = Ok ZeroEverywhere
 zeros curve = Result.do
   let derivatives = Stream.iterate curve derivative
-  let cache = Solve1d.init (\range -> Stream.map (segmentBounds range) derivatives)
+  let cache =
+        Solve1d.init $
+          \range -> Stream.map (\curveDerivative -> segmentBounds curveDerivative range) derivatives
   (roots, _) <- findZeros derivatives [0 .. 3] cache
   Ok (Zeros (List.sortBy Root.value roots))
 
@@ -459,9 +457,9 @@ isSolutionOrder ::
   Bool
 isSolutionOrder n neighborhood derivatives x = do
   let curve = Stream.head derivatives
-  let curveIsZero = evaluateAt x curve ~= Qty.zero
+  let curveIsZero = pointOn curve x ~= Qty.zero
   let curveDerivative k = Stream.nth k derivatives
-  let derivativeValue k = evaluateAt x (curveDerivative k)
+  let derivativeValue k = pointOn (curveDerivative k) x
   let derivativeTolerance k = Solve1d.derivativeTolerance neighborhood k
   let derivativeIsZero k = Qty.abs (derivativeValue k) < derivativeTolerance k
   curveIsZero && List.all derivativeIsZero [1 .. n]

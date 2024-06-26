@@ -1,6 +1,6 @@
 module Curve1d
   ( Curve1d
-  , evaluateAt
+  , pointOn
   , segmentBounds
   , derivative
   )
@@ -14,6 +14,6 @@ type role Curve1d nominal
 type Curve1d :: Type -> Type
 data Curve1d units
 
-evaluateAt :: Float -> Curve1d units -> Qty units
-segmentBounds :: Range Unitless -> Curve1d units -> Range units
+pointOn :: Curve1d units -> Float -> Qty units
+segmentBounds :: Curve1d units -> Range Unitless -> Range units
 derivative :: Curve1d units -> Curve1d units

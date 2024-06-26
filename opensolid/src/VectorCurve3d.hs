@@ -80,10 +80,10 @@ deriving instance Show (XYZ coordinateSystem)
 
 instance Interface (XYZ (space @ units)) (space @ units) where
   evaluateAtImpl t (XYZ x y z) =
-    Vector3d (Curve1d.evaluateAt t x) (Curve1d.evaluateAt t y) (Curve1d.evaluateAt t z)
+    Vector3d (Curve1d.pointOn x t) (Curve1d.pointOn y t) (Curve1d.pointOn z t)
 
   segmentBoundsImpl t (XYZ x y z) =
-    VectorBounds3d (Curve1d.segmentBounds t x) (Curve1d.segmentBounds t y) (Curve1d.segmentBounds t z)
+    VectorBounds3d (Curve1d.segmentBounds x t) (Curve1d.segmentBounds y t) (Curve1d.segmentBounds z t)
 
   derivativeImpl (XYZ x y z) =
     xyz (Curve1d.derivative x) (Curve1d.derivative y) (Curve1d.derivative z)
@@ -220,20 +220,20 @@ deriving instance Show (Product3d1d space units1 units2)
 
 instance Interface (Product3d1d space units1 units2) (space @ (units1 :*: units2)) where
   evaluateAtImpl t (Product3d1d vectorCurve3d curve1d) =
-    evaluateAt t vectorCurve3d .*. Curve1d.evaluateAt t curve1d
+    evaluateAt t vectorCurve3d .*. Curve1d.pointOn curve1d t
 
   segmentBoundsImpl t (Product3d1d vectorCurve3d curve1d) =
-    segmentBounds t vectorCurve3d .*. Curve1d.segmentBounds t curve1d
+    segmentBounds t vectorCurve3d .*. Curve1d.segmentBounds curve1d t
 
   derivativeImpl (Product3d1d vectorCurve3d curve1d) =
     derivative vectorCurve3d .*. curve1d + vectorCurve3d .*. Curve1d.derivative curve1d
 
 instance Interface (Product1d3d space units1 units2) (space @ (units1 :*: units2)) where
   evaluateAtImpl t (Product1d3d curve1d vectorCurve3d) =
-    Curve1d.evaluateAt t curve1d .*. evaluateAt t vectorCurve3d
+    Curve1d.pointOn curve1d t .*. evaluateAt t vectorCurve3d
 
   segmentBoundsImpl t (Product1d3d curve1d vectorCurve3d) =
-    Curve1d.segmentBounds t curve1d .*. segmentBounds t vectorCurve3d
+    Curve1d.segmentBounds curve1d t .*. segmentBounds t vectorCurve3d
 
   derivativeImpl (Product1d3d curve1d vectorCurve3d) =
     Curve1d.derivative curve1d .*. vectorCurve3d + curve1d .*. derivative vectorCurve3d
@@ -304,10 +304,10 @@ data DotProductOf space units1 units2
 deriving instance Show (DotProductOf space units1 units2)
 
 instance Curve1d.Interface (DotProductOf space units1 units2) (units1 :*: units2) where
-  evaluateAtImpl t (DotProductOf curve1 curve2) =
+  pointOnImpl (DotProductOf curve1 curve2) t =
     evaluateAt t curve1 .<>. evaluateAt t curve2
 
-  segmentBoundsImpl t (DotProductOf curve1 curve2) =
+  segmentBoundsImpl (DotProductOf curve1 curve2) t =
     segmentBounds t curve1 .<>. segmentBounds t curve2
 
   derivativeImpl (DotProductOf curve1 curve2) =
@@ -414,8 +414,8 @@ data QuotientOf space units1 units2 = Quotient (VectorCurve3d (space @ units1)) 
 deriving instance Show (QuotientOf space units1 units2)
 
 instance Interface (QuotientOf space units1 units2) (space @ (units1 :/: units2)) where
-  evaluateAtImpl t (Quotient p q) = evaluateAt t p ./. Curve1d.evaluateAt t q
-  segmentBoundsImpl t (Quotient p q) = segmentBounds t p ./. Curve1d.segmentBounds t q
+  evaluateAtImpl t (Quotient p q) = evaluateAt t p ./. Curve1d.pointOn q t
+  segmentBoundsImpl t (Quotient p q) = segmentBounds t p ./. Curve1d.segmentBounds q t
   derivativeImpl (Quotient p q) =
     (derivative p .*. q - p .*. Curve1d.derivative q) .!/.! Curve1d.squared' q
 
@@ -457,10 +457,10 @@ instance
   Units.Squared units1 units2 =>
   Curve1d.Interface (SquaredMagnitudeOf (space @ units1)) units2
   where
-  evaluateAtImpl t (SquaredMagnitudeOf expression) =
+  pointOnImpl (SquaredMagnitudeOf expression) t =
     Vector3d.squaredMagnitude (evaluateAt t expression)
 
-  segmentBoundsImpl t (SquaredMagnitudeOf expression) =
+  segmentBoundsImpl (SquaredMagnitudeOf expression) t =
     VectorBounds3d.squaredMagnitude (segmentBounds t expression)
 
   derivativeImpl (SquaredMagnitudeOf expression) =
