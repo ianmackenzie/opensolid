@@ -69,9 +69,9 @@ evaluate function uv = case function of
   Constant v -> v
   XYZ x y z ->
     Vector3d.xyz
-      (Surface1d.Function.evaluateAt uv x)
-      (Surface1d.Function.evaluateAt uv y)
-      (Surface1d.Function.evaluateAt uv z)
+      (Surface1d.Function.evaluate x uv)
+      (Surface1d.Function.evaluate y uv)
+      (Surface1d.Function.evaluate z uv)
 
 bounds :: Function (space @ units) -> Uv.Bounds -> VectorBounds3d (space @ units)
 bounds function uv = case function of
@@ -80,6 +80,6 @@ bounds function uv = case function of
   Constant v -> VectorBounds3d.constant v
   XYZ x y z ->
     VectorBounds3d.xyz
-      (Surface1d.Function.segmentBounds uv x)
-      (Surface1d.Function.segmentBounds uv y)
-      (Surface1d.Function.segmentBounds uv z)
+      (Surface1d.Function.bounds x uv)
+      (Surface1d.Function.bounds y uv)
+      (Surface1d.Function.bounds z uv)

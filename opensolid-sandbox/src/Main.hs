@@ -483,14 +483,14 @@ testNewtonRaphson2d = Tolerance.using 1e-9 do
   let bounds = Bounds2d.xy (Range.from 0.0 2.0) (Range.from 0.0 2.0)
   let solution =
         Solve2d.unique
-          (\uvBounds -> Surface1d.Function.segmentBounds uvBounds f)
-          (Surface1d.Function.pointOn f)
-          (Surface1d.Function.pointOn fu)
-          (Surface1d.Function.pointOn fv)
-          (\uvBounds -> Surface1d.Function.segmentBounds uvBounds g)
-          (Surface1d.Function.pointOn g)
-          (Surface1d.Function.pointOn gu)
-          (Surface1d.Function.pointOn gv)
+          (Surface1d.Function.bounds f)
+          (Surface1d.Function.evaluate f)
+          (Surface1d.Function.evaluate fu)
+          (Surface1d.Function.evaluate fv)
+          (Surface1d.Function.bounds g)
+          (Surface1d.Function.evaluate g)
+          (Surface1d.Function.evaluate gu)
+          (Surface1d.Function.evaluate gv)
           bounds
   log "Solve2d.unique solution" solution
 

@@ -5,10 +5,8 @@
 module Surface1d.Function
   ( Function
   , Interface (..)
-  , evaluateAt
-  , pointOn
-  , segmentBounds
-  , boundsOn
+  , evaluate
+  , bounds
   , derivative
   , derivativeIn
   , zero
@@ -61,8 +59,8 @@ import Vector2d qualified
 import VectorCurve2d qualified
 
 class Show function => Interface function units | function -> units where
-  evaluateAtImpl :: Uv.Point -> function -> Qty units
-  segmentBoundsImpl :: Uv.Bounds -> function -> Range units
+  evaluateImpl :: function -> Uv.Point -> Qty units
+  boundsImpl :: function -> Uv.Bounds -> Range units
   derivativeImpl :: Parameter -> function -> Function units
 
 data Function units where
@@ -259,49 +257,41 @@ instance Division' Int (Function units) where
   type Int ./. Function units = Function (Unitless :/: units)
   value ./. function = Float.int value ./. function
 
-evaluateAt :: Uv.Point -> Function units -> Qty units
-evaluateAt uv function =
-  case function of
-    Function f -> evaluateAtImpl uv f
-    Zero -> Qty.zero
-    Constant x -> x
-    Coerce f -> Units.coerce (evaluateAt uv f)
-    Parameter U -> Point2d.xCoordinate uv
-    Parameter V -> Point2d.yCoordinate uv
-    Negated f -> negate (evaluateAt uv f)
-    Sum f1 f2 -> evaluateAt uv f1 + evaluateAt uv f2
-    Difference f1 f2 -> evaluateAt uv f1 - evaluateAt uv f2
-    Product' f1 f2 -> evaluateAt uv f1 .*. evaluateAt uv f2
-    Quotient' f1 f2 -> evaluateAt uv f1 ./. evaluateAt uv f2
-    Squared' f -> Qty.squared' (evaluateAt uv f)
-    SquareRoot f -> Qty.sqrt (evaluateAt uv f)
-    Sin f -> Angle.sin (evaluateAt uv f)
-    Cos f -> Angle.cos (evaluateAt uv f)
+evaluate :: Function units -> Uv.Point -> Qty units
+evaluate function uv = case function of
+  Function f -> evaluateImpl f uv
+  Zero -> Qty.zero
+  Constant x -> x
+  Coerce f -> Units.coerce (evaluate f uv)
+  Parameter U -> Point2d.xCoordinate uv
+  Parameter V -> Point2d.yCoordinate uv
+  Negated f -> negate (evaluate f uv)
+  Sum f1 f2 -> evaluate f1 uv + evaluate f2 uv
+  Difference f1 f2 -> evaluate f1 uv - evaluate f2 uv
+  Product' f1 f2 -> evaluate f1 uv .*. evaluate f2 uv
+  Quotient' f1 f2 -> evaluate f1 uv ./. evaluate f2 uv
+  Squared' f -> Qty.squared' (evaluate f uv)
+  SquareRoot f -> Qty.sqrt (evaluate f uv)
+  Sin f -> Angle.sin (evaluate f uv)
+  Cos f -> Angle.cos (evaluate f uv)
 
-pointOn :: Function units -> Uv.Point -> Qty units
-pointOn function uv = evaluateAt uv function
-
-segmentBounds :: Uv.Bounds -> Function units -> Range units
-segmentBounds uv function =
-  case function of
-    Function f -> segmentBoundsImpl uv f
-    Zero -> Range.constant Qty.zero
-    Constant x -> Range.constant x
-    Coerce f -> Units.coerce (segmentBounds uv f)
-    Parameter U -> Bounds2d.xCoordinate uv
-    Parameter V -> Bounds2d.yCoordinate uv
-    Negated f -> negate (segmentBounds uv f)
-    Sum f1 f2 -> segmentBounds uv f1 + segmentBounds uv f2
-    Difference f1 f2 -> segmentBounds uv f1 - segmentBounds uv f2
-    Product' f1 f2 -> segmentBounds uv f1 .*. segmentBounds uv f2
-    Quotient' f1 f2 -> segmentBounds uv f1 ./. segmentBounds uv f2
-    Squared' f -> Range.squared' (segmentBounds uv f)
-    SquareRoot f -> Range.sqrt (segmentBounds uv f)
-    Sin f -> Range.sin (segmentBounds uv f)
-    Cos f -> Range.cos (segmentBounds uv f)
-
-boundsOn :: Function units -> Uv.Bounds -> Range units
-boundsOn function uvBounds = segmentBounds uvBounds function
+bounds :: Function units -> Uv.Bounds -> Range units
+bounds function uv = case function of
+  Function f -> boundsImpl f uv
+  Zero -> Range.constant Qty.zero
+  Constant x -> Range.constant x
+  Coerce f -> Units.coerce (bounds f uv)
+  Parameter U -> Bounds2d.xCoordinate uv
+  Parameter V -> Bounds2d.yCoordinate uv
+  Negated f -> negate (bounds f uv)
+  Sum f1 f2 -> bounds f1 uv + bounds f2 uv
+  Difference f1 f2 -> bounds f1 uv - bounds f2 uv
+  Product' f1 f2 -> bounds f1 uv .*. bounds f2 uv
+  Quotient' f1 f2 -> bounds f1 uv ./. bounds f2 uv
+  Squared' f -> Range.squared' (bounds f uv)
+  SquareRoot f -> Range.sqrt (bounds f uv)
+  Sin f -> Range.sin (bounds f uv)
+  Cos f -> Range.cos (bounds f uv)
 
 derivative :: Parameter -> Function units -> Function units
 derivative varyingParameter function =
@@ -383,10 +373,10 @@ deriving instance Show (CurveOnSurface units)
 
 instance Curve1d.Interface (CurveOnSurface units) units where
   evaluateAtImpl t (CurveOnSurface uvCurve function) =
-    evaluateAt (Curve2d.evaluateAtImpl t uvCurve) function
+    evaluate function (Curve2d.evaluateAtImpl t uvCurve)
 
   segmentBoundsImpl t (CurveOnSurface uvCurve function) =
-    segmentBounds (Curve2d.segmentBoundsImpl t uvCurve) function
+    bounds function (Curve2d.segmentBoundsImpl t uvCurve)
 
   derivativeImpl (CurveOnSurface uvCurve function) = do
     let fU = derivative U function
@@ -400,7 +390,7 @@ curveOnSurface :: Curve2d Uv.Coordinates -> Function units -> Curve1d units
 curveOnSurface uvCurve function = Curve1d.wrap (CurveOnSurface uvCurve function)
 
 isZero :: Tolerance units => Function units -> Bool
-isZero function = List.all (~= Qty.zero) (Bounds2d.sample (pointOn function) Uv.domain)
+isZero function = List.all (~= Qty.zero) (Bounds2d.sample (evaluate function) Uv.domain)
 
 data ZerosError
   = ZeroEverywhere
@@ -466,12 +456,12 @@ data DerivativeBounds units = DerivativeBounds
 computeDerivativeBounds :: Derivatives units -> Uv.Bounds -> DerivativeBounds units
 computeDerivativeBounds (Derivatives{f, fu, fv, fuu, fvv, fuv}) uvBounds =
   DerivativeBounds
-    { fBounds = segmentBounds uvBounds f
-    , fuBounds = segmentBounds uvBounds fu
-    , fvBounds = segmentBounds uvBounds fv
-    , fuuBounds = segmentBounds uvBounds fuu
-    , fuvBounds = segmentBounds uvBounds fuv
-    , fvvBounds = segmentBounds uvBounds fvv
+    { fBounds = bounds f uvBounds
+    , fuBounds = bounds fu uvBounds
+    , fvBounds = bounds fv uvBounds
+    , fuuBounds = bounds fuu uvBounds
+    , fuvBounds = bounds fuv uvBounds
+    , fvvBounds = bounds fvv uvBounds
     }
 
 findTangentSolution ::
@@ -514,18 +504,18 @@ tangentPointSolution derivatives subdomain derivativeBounds = do
       let Derivatives{f, fu, fv, fuu, fuv, fvv} = derivatives
       let maybePoint =
             Solve2d.unique
-              (boundsOn fu)
-              (pointOn fu)
-              (pointOn fuu)
-              (pointOn fuv)
-              (boundsOn fv)
-              (pointOn fv)
-              (pointOn fuv)
-              (pointOn fvv)
+              (bounds fu)
+              (evaluate fu)
+              (evaluate fuu)
+              (evaluate fuv)
+              (bounds fv)
+              (evaluate fv)
+              (evaluate fuv)
+              (evaluate fvv)
               (Solve2d.interior subdomain)
       if
         | Just point <- maybePoint
-        , evaluateAt point f ~= Qty.zero ->
+        , evaluate f point ~= Qty.zero ->
             -- We've found a tangent point! Now to check if it's a saddle point
             case Qty.sign determinantResolution of
               Positive -> do
@@ -542,9 +532,9 @@ tangentPointSolution derivatives subdomain derivativeBounds = do
 saddleRegionSolution :: Tolerance units => Derivatives units -> Uv.Point -> Solution
 saddleRegionSolution derivatives point = do
   let Derivatives{f, fuu, fuv, fvv} = derivatives
-  let fuuValue = evaluateAt point fuu
-  let fuvValue = evaluateAt point fuv
-  let fvvValue = evaluateAt point fvv
+  let fuuValue = evaluate fuu point
+  let fuvValue = evaluate fuv point
+  let fvvValue = evaluate fvv point
   let sqrtD = Qty.sqrt' (fuvValue .*. fuvValue - fuuValue .*. fvvValue)
   let (d1, d2) =
         if Qty.abs fuuValue >= Qty.abs fvvValue
@@ -570,12 +560,12 @@ saddleRegionSolution derivatives point = do
   let fxyy = derivative U fyy
   let fyyy = derivative V fyy
   let derivativesXY = Derivatives{f = fXY, fu = fx, fv = fy, fuu = fxx, fuv = fxy, fvv = fyy}
-  let fxxValue = evaluateAt Point2d.origin fxx
-  let fyyValue = evaluateAt Point2d.origin fyy
-  let fxxxValue = evaluateAt Point2d.origin fxxx
-  let fxxyValue = evaluateAt Point2d.origin fxxy
-  let fxyyValue = evaluateAt Point2d.origin fxyy
-  let fyyyValue = evaluateAt Point2d.origin fyyy
+  let fxxValue = evaluate fxx Point2d.origin
+  let fyyValue = evaluate fyy Point2d.origin
+  let fxxxValue = evaluate fxxx Point2d.origin
+  let fxxyValue = evaluate fxxy Point2d.origin
+  let fxyyValue = evaluate fxyy Point2d.origin
+  let fyyyValue = evaluate fyyy Point2d.origin
   let positiveA = Qty.sqrt' (-fxxValue .*. fyyValue) / Qty.abs fyyValue
   let negativeA = -positiveA
   let b a = -(fyyyValue * a ** 3 + 3 * fxyyValue * a ** 2 + 3 * fxxyValue * a + fxxxValue) / (3 * a * fyyValue)
@@ -635,11 +625,11 @@ data Reparameterized units where
 deriving instance Show (Reparameterized units)
 
 instance Interface (Reparameterized units) units where
-  evaluateAtImpl uvPoint (Reparameterized frame function) =
-    evaluateAt (Point2d.placeIn frame uvPoint) function
+  evaluateImpl (Reparameterized frame function) uvPoint =
+    evaluate function (Point2d.placeIn frame uvPoint)
 
-  segmentBoundsImpl uvBounds (Reparameterized frame function) =
-    segmentBounds (Bounds2d.placeIn frame uvBounds) function
+  boundsImpl (Reparameterized frame function) uvBounds =
+    bounds function (Bounds2d.placeIn frame uvBounds)
 
   derivativeImpl U (Reparameterized frame function) =
     reparameterize frame (derivativeIn (Frame2d.xDirection frame) function)
@@ -778,16 +768,16 @@ findCrossingSolution derivatives subdomain derivativeBounds exclusions = do
 solveVertically :: Tolerance units => Derivatives units -> Float -> Range Unitless -> Maybe Float
 solveVertically derivatives u vRange = do
   let Derivatives{f, fv} = derivatives
-  let fValue v = pointOn f (Point2d.xy u v)
-  let fvValue v = pointOn fv (Point2d.xy u v)
+  let fValue v = evaluate f (Point2d.xy u v)
+  let fvValue v = evaluate fv (Point2d.xy u v)
   let v0 = Solve1d.monotonic fValue fvValue vRange
   if fValue v0 ~= Qty.zero then Just v0 else Nothing
 
 solveHorizontally :: Tolerance units => Derivatives units -> Range Unitless -> Float -> Maybe Float
 solveHorizontally derivatives uRange v = do
   let Derivatives{f, fu} = derivatives
-  let fValue u = pointOn f (Point2d.xy u v)
-  let fuValue u = pointOn fu (Point2d.xy u v)
+  let fValue u = evaluate f (Point2d.xy u v)
+  let fuValue u = evaluate fu (Point2d.xy u v)
   let u0 = Solve1d.monotonic fValue fuValue uRange
   if fValue u0 ~= Qty.zero then Just u0 else Nothing
 
@@ -847,8 +837,8 @@ data HorizontalCurve units = HorizontalCurve
 solveForV :: HorizontalCurve units -> Float -> Float
 solveForV (HorizontalCurve{derivatives, vRange, tolerance}) u = Tolerance.using tolerance do
   let Derivatives{f, fv} = derivatives
-  let fValue v = pointOn f (Point2d.xy u v)
-  let fvValue v = pointOn fv (Point2d.xy u v)
+  let fValue v = evaluate f (Point2d.xy u v)
+  let fvValue v = evaluate fv (Point2d.xy u v)
   Solve1d.monotonic fValue fvValue vRange
 
 instance Curve2d.Interface (HorizontalCurve units) Uv.Coordinates where
@@ -871,7 +861,7 @@ instance Curve2d.Interface (HorizontalCurve units) Uv.Coordinates where
     if monotonic
       then Bounds2d.xy (Range.from u1 u2) (Range.from v1 v2)
       else do
-        let slopeBounds = segmentBounds (Bounds2d.xy (Range.from u1 u2) vRange) dvdu
+        let slopeBounds = bounds dvdu (Bounds2d.xy (Range.from u1 u2) vRange)
         let vBounds = parallelogramBounds u1 u2 v1 v2 slopeBounds
         Bounds2d.xy (Range.from u1 u2) vBounds
 
@@ -903,8 +893,8 @@ data VerticalCurve units = VerticalCurve
 solveForU :: VerticalCurve units -> Float -> Float
 solveForU (VerticalCurve{derivatives, uRange, tolerance}) v = Tolerance.using tolerance do
   let Derivatives{f, fu} = derivatives
-  let fValue u = pointOn f (Point2d.xy u v)
-  let fuValue u = pointOn fu (Point2d.xy u v)
+  let fValue u = evaluate f (Point2d.xy u v)
+  let fuValue u = evaluate fu (Point2d.xy u v)
   Solve1d.monotonic fValue fuValue uRange
 
 instance Curve2d.Interface (VerticalCurve units) Uv.Coordinates where
@@ -927,7 +917,7 @@ instance Curve2d.Interface (VerticalCurve units) Uv.Coordinates where
     if monotonic
       then Bounds2d.xy (Range.from u1 u2) (Range.from v1 v2)
       else do
-        let slopeBounds = segmentBounds (Bounds2d.xy uRange (Range.from v1 v2)) dudv
+        let slopeBounds = bounds dudv (Bounds2d.xy uRange (Range.from v1 v2))
         let uBounds = parallelogramBounds v1 v2 u1 u2 slopeBounds
         Bounds2d.xy uBounds (Range.from v1 v2)
 
