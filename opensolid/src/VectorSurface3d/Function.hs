@@ -2,6 +2,7 @@ module VectorSurface3d.Function
   ( Function
   , Interface (..)
   , wrap
+  , constant
   , evaluate
   , bounds
   )
@@ -61,6 +62,9 @@ instance
 
 wrap :: Interface function (space @ units) => function -> Function (space @ units)
 wrap = Function
+
+constant :: Vector3d (space @ units) -> Function (space @ units)
+constant = Constant
 
 evaluate :: Function (space @ units) -> Uv.Point -> Vector3d (space @ units)
 evaluate function uv = case function of
