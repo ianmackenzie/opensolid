@@ -179,13 +179,15 @@ instance Interface (VectorCurve2d (space @ units)) (space @ units) where
   transformByImpl = transformBy
 
 instance Negation (VectorCurve2d (space @ units)) where
-  negate (Constant value) = Constant -value
-  negate (XY x y) = XY -x -y
-  negate (Negated c) = c
-  negate (Difference c1 c2) = Difference c2 c1
-  negate (Product1d2d' c1 c2) = Product1d2d' -c1 c2
-  negate (Product2d1d' c1 c2) = Product2d1d' c1 -c2
-  negate curve = Negated curve
+  negate curve = case curve of
+    Constant value -> Constant -value
+    Coerce c -> Coerce -c
+    XY x y -> XY -x -y
+    Negated c -> c
+    Difference c1 c2 -> Difference c2 c1
+    Product1d2d' c1 c2 -> Product1d2d' -c1 c2
+    Product2d1d' c1 c2 -> Product2d1d' c1 -c2
+    _ -> Negated curve
 
 instance Multiplication Sign (VectorCurve2d (space @ units)) (VectorCurve2d (space @ units))
 
