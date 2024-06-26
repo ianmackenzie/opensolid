@@ -17,8 +17,8 @@ class
   Interface function (coordinateSystem :: CoordinateSystem)
     | function -> coordinateSystem
   where
-  evaluateAtImpl :: Uv.Point -> function -> Point3d coordinateSystem
-  segmentBoundsImpl :: Uv.Bounds -> function -> Bounds3d coordinateSystem
+  evaluateImpl :: function -> Uv.Point -> Point3d coordinateSystem
+  boundsImpl :: function -> Uv.Bounds -> Bounds3d coordinateSystem
   derivativeImpl :: Parameter -> function -> VectorSurface3d.Function coordinateSystem
 
 data Function (coordinateSystem :: CoordinateSystem) where
