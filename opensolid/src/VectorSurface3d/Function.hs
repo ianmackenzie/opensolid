@@ -56,9 +56,10 @@ instance
   space ~ space_ =>
   Units.Coercion (Function (space @ units1)) (Function (space_ @ units2))
   where
-  coerce (Constant value) = Constant (Units.coerce value)
-  coerce (Coerce curve) = Coerce curve
-  coerce curve = Coerce curve
+  coerce function = case function of
+    Constant v -> Constant (Units.coerce v)
+    Coerce f -> Coerce f
+    _ -> Coerce function
 
 wrap :: Interface function (space @ units) => function -> Function (space @ units)
 wrap = Function
