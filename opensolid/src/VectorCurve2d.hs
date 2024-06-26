@@ -267,7 +267,7 @@ instance
     (VectorCurve2d (space_ @ units_))
     (VectorCurve2d (space @ units))
   where
-  vector - curve = constant vector + curve
+  vector - curve = constant vector - curve
 
 instance
   Units.Product units1 units2 units3 =>
