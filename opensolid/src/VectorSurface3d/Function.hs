@@ -70,6 +70,10 @@ data Function (coordinateSystem :: CoordinateSystem) where
     Function (space @ units1) ->
     Surface1d.Function units2 ->
     Function (space @ (units1 :/: units2))
+  CrossProduct' ::
+    Function (space @ units1) ->
+    Function (space @ units2) ->
+    Function (space @ (units1 :*: units2))
 
 deriving instance Show (Function (space @ units))
 
@@ -179,6 +183,51 @@ instance
   where
   v - f = constant v - f
 
+instance
+  (Units.Product units1 units2 units3, space ~ space_) =>
+  CrossMultiplication (Function (space @ units1)) (Function (space_ @ units2)) (Function (space @ units3))
+
+instance
+  space ~ space_ =>
+  CrossMultiplication' (Function (space @ units1)) (Function (space_ @ units2))
+  where
+  type
+    Function (space @ units1) .><. Function (space_ @ units2) =
+      Function (space @ (units1 :*: units2))
+  (.><.) = CrossProduct'
+
+instance
+  (Units.Product units1 units2 units3, space ~ space_) =>
+  CrossMultiplication
+    (Function (space @ units1))
+    (Vector3d (space_ @ units2))
+    (Function (space @ units3))
+
+instance
+  space ~ space_ =>
+  CrossMultiplication' (Function (space @ units1)) (Vector3d (space_ @ units2))
+  where
+  type
+    Function (space @ units1) .><. Vector3d (space_ @ units2) =
+      Function (space @ (units1 :*: units2))
+  f .><. v = f .><. constant v
+
+instance
+  (Units.Product units1 units2 units3, space ~ space_) =>
+  CrossMultiplication
+    (Vector3d (space @ units1))
+    (Function (space_ @ units2))
+    (Function (space @ units3))
+
+instance
+  space ~ space_ =>
+  CrossMultiplication' (Vector3d (space @ units1)) (Function (space_ @ units2))
+  where
+  type
+    Vector3d (space @ units1) .><. Function (space_ @ units2) =
+      Function (space @ (units1 :*: units2))
+  v .><. f = constant v .><. f
+
 wrap :: Interface function (space @ units) => function -> Function (space @ units)
 wrap = Function
 
@@ -211,6 +260,7 @@ evaluate function uv = case function of
   Product1d3d' f1 f2 -> Surface1d.Function.evaluate f1 uv .*. evaluate f2 uv
   Product3d1d' f1 f2 -> evaluate f1 uv .*. Surface1d.Function.evaluate f2 uv
   Quotient' f1 f2 -> evaluate f1 uv ./. Surface1d.Function.evaluate f2 uv
+  CrossProduct' f1 f2 -> evaluate f1 uv .><. evaluate f2 uv
 
 bounds :: Function (space @ units) -> Uv.Bounds -> VectorBounds3d (space @ units)
 bounds function uv = case function of
@@ -228,3 +278,4 @@ bounds function uv = case function of
   Product1d3d' f1 f2 -> Surface1d.Function.bounds f1 uv .*. bounds f2 uv
   Product3d1d' f1 f2 -> bounds f1 uv .*. Surface1d.Function.bounds f2 uv
   Quotient' f1 f2 -> bounds f1 uv ./. Surface1d.Function.bounds f2 uv
+  CrossProduct' f1 f2 -> bounds f1 uv .><. bounds f2 uv
