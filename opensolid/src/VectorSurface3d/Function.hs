@@ -185,7 +185,10 @@ instance
 
 instance
   (Units.Product units1 units2 units3, space ~ space_) =>
-  CrossMultiplication (Function (space @ units1)) (Function (space_ @ units2)) (Function (space @ units3))
+  CrossMultiplication
+    (Function (space @ units1))
+    (Function (space_ @ units2))
+    (Function (space @ units3))
 
 instance
   space ~ space_ =>
