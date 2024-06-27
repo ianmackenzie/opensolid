@@ -70,8 +70,6 @@ data Function units where
     Interface function units =>
     function ->
     Function units
-  Zero ::
-    Function units
   Constant ::
     Qty units ->
     Function units
@@ -120,13 +118,11 @@ instance HasUnits (Function units) where
   type Erase (Function units) = Function Unitless
 
 instance Units.Coercion (Function units1) (Function units2) where
-  coerce Zero = Zero
   coerce (Constant value) = Constant (Units.coerce value)
   coerce (Coerce function) = Coerce function
   coerce function = Coerce function
 
 instance Negation (Function units) where
-  negate Zero = Zero
   negate (Constant x) = Constant (negate x)
   negate (Coerce function) = Coerce (negate function)
   negate (Negated function) = function
@@ -150,8 +146,8 @@ instance Multiplication' (Function units) Sign where
   function .*. Negative = Units.coerce -function
 
 instance units ~ units_ => Addition (Function units) (Function units_) (Function units) where
-  Zero + function = function
-  function + Zero = function
+  Constant (Qty 0.0) + function = function
+  function + Constant (Qty 0.0) = function
   Constant x + Constant y = constant (x + y)
   function1 + function2 = Sum function1 function2
 
@@ -162,8 +158,8 @@ instance units ~ units_ => Addition (Qty units) (Function units_) (Function unit
   value + function = constant value + function
 
 instance units ~ units_ => Subtraction (Function units) (Function units_) (Function units) where
-  Zero - function = negate function
-  function - Zero = function
+  Constant (Qty 0.0) - function = negate function
+  function - Constant (Qty 0.0) = function
   Constant x - Constant y = constant (x - y)
   function1 - function2 = Difference function1 function2
 
@@ -179,8 +175,8 @@ instance
 
 instance Multiplication' (Function units1) (Function units2) where
   type Function units1 .*. Function units2 = Function (units1 :*: units2)
-  Zero .*. _ = Zero
-  _ .*. Zero = Zero
+  Constant (Qty 0.0) .*. _ = zero
+  _ .*. Constant (Qty 0.0) = zero
   Constant x .*. Constant y = Constant (x .*. y)
   Constant (Qty 1.0) .*. function = Units.coerce function
   Constant (Qty -1.0) .*. function = Units.coerce (negate function)
@@ -223,7 +219,7 @@ instance
 
 instance Division' (Function units1) (Function units2) where
   type Function units1 ./. Function units2 = Function (units1 :/: units2)
-  Zero ./. _ = Zero
+  Constant (Qty 0.0) ./. _ = zero
   Constant x ./. Constant y = Constant (x ./. y)
   function ./. Constant x = (1 ./. x) .*^ function
   function1 ./. function2 = Quotient' function1 function2
@@ -261,7 +257,6 @@ instance Division' Int (Function units) where
 evaluate :: Function units -> Uv.Point -> Qty units
 evaluate function uv = case function of
   Function f -> evaluateImpl f uv
-  Zero -> Qty.zero
   Constant x -> x
   Coerce f -> Units.coerce (evaluate f uv)
   Parameter U -> Point2d.xCoordinate uv
@@ -279,7 +274,6 @@ evaluate function uv = case function of
 bounds :: Function units -> Uv.Bounds -> Range units
 bounds function uv = case function of
   Function f -> boundsImpl f uv
-  Zero -> Range.constant Qty.zero
   Constant x -> Range.constant x
   Coerce f -> Units.coerce (bounds f uv)
   Parameter U -> Bounds2d.xCoordinate uv
@@ -298,7 +292,6 @@ derivative :: Parameter -> Function units -> Function units
 derivative varyingParameter function =
   case function of
     Function f -> derivativeImpl varyingParameter f
-    Zero -> zero
     Constant _ -> zero
     Coerce f -> Units.coerce (derivative varyingParameter f)
     Parameter p -> if p == varyingParameter then constant 1.0 else zero
@@ -320,10 +313,10 @@ derivativeIn direction function =
     + Direction2d.yComponent direction * derivative V function
 
 zero :: Function units
-zero = Zero
+zero = constant Qty.zero
 
 constant :: Qty units -> Function units
-constant value = if value == Qty.zero then Zero else Constant value
+constant = Constant
 
 parameter :: Parameter -> Function Unitless
 parameter = Parameter
@@ -335,7 +328,6 @@ squared :: Units.Squared units1 units2 => Function units1 -> Function units2
 squared function = Units.specialize (squared' function)
 
 squared' :: Function units -> Function (units :*: units)
-squared' Zero = Zero
 squared' (Constant x) = Constant (x .*. x)
 squared' (Negated f) = squared' f
 squared' (Cos f) = Units.unspecialize (cosSquared f)
@@ -352,17 +344,14 @@ sqrt :: Units.Squared units1 units2 => Function units2 -> Function units1
 sqrt function = sqrt' (Units.unspecialize function)
 
 sqrt' :: Function (units :*: units) -> Function units
-sqrt' Zero = Zero
 sqrt' (Constant x) = Constant (Qty.sqrt' x)
 sqrt' function = SquareRoot' function
 
 sin :: Function Radians -> Function Unitless
-sin Zero = Zero
 sin (Constant x) = constant (Angle.sin x)
 sin function = Sin function
 
 cos :: Function Radians -> Function Unitless
-cos Zero = Constant 1.0
 cos (Constant x) = constant (Angle.cos x)
 cos function = Cos function
 
@@ -402,7 +391,6 @@ data ZerosError
   deriving (Eq, Show, Error)
 
 zeros :: Tolerance units => Function units -> Result ZerosError Zeros
-zeros Zero = Error ZeroEverywhere
 zeros (Constant value) = if value ~= Qty.zero then Error ZeroEverywhere else Ok Zeros.empty
 zeros function | isZero function = Error ZeroEverywhere
 zeros function = Result.do
