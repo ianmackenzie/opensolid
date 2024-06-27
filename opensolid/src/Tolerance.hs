@@ -15,6 +15,7 @@ where
 
 import Arithmetic
 import Basics
+import Composition
 import NonEmpty (NonEmpty ((:|)), pattern NonEmpty)
 import Qty (Qty)
 import Qty qualified

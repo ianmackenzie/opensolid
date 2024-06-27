@@ -22,7 +22,7 @@ import Angle (Angle)
 import Arithmetic
 import Basics
 import Coalesce (Coalesce ((??)))
-import Composition (Composition ((>>)))
+import Composition (Composition ((>>)), (.))
 import CoordinateSystem (CoordinateSystem, Defines, LocalSpace, type (@))
 import Error (Error)
 import Float (Float, fromRational, pattern Int)

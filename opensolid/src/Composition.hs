@@ -1,4 +1,4 @@
-module Composition (Composition ((>>))) where
+module Composition (Composition ((>>)), (.)) where
 
 import Prelude (IO, type (~))
 import Prelude qualified
@@ -11,3 +11,7 @@ instance b ~ b' => Composition (a -> b) (b' -> c) (a -> c) where
 
 instance Composition (IO ()) (IO a) (IO a) where
   (>>) = (Prelude.>>)
+
+{-# INLINE (.) #-}
+(.) :: Composition a b c => b -> a -> c
+f . g = g >> f

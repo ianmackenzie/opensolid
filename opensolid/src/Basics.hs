@@ -26,7 +26,6 @@ module Basics
   , todo
   , (|>)
   , ($)
-  , (.)
   , type (~)
   )
 where
@@ -52,7 +51,6 @@ import Prelude
   , otherwise
   , ($)
   , (&&)
-  , (.)
   , (||)
   )
 import Prelude qualified
