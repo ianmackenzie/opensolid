@@ -1,3 +1,11 @@
+-- Needed for 'Surface1d.Function * Vector3d = Function'
+-- and 'Vector3d * Surface1d.Function = Function' instances,
+-- which lead to unresolvable circular dependencies
+-- if they're defined in the Surface1d.Function or Vector3d modules
+-- and really conceptually make more sense
+-- to define in this module anyways
+{-# OPTIONS_GHC -Wno-orphans #-}
+
 module VectorSurface3d.Function
   ( Function
   , Interface (..)
@@ -10,6 +18,8 @@ module VectorSurface3d.Function
   )
 where
 
+import Direction3d (Direction3d)
+import Float qualified
 import OpenSolid
 import Surface1d qualified
 import Surface1d.Function qualified
@@ -184,6 +194,100 @@ instance
   v - f = constant v - f
 
 instance
+  Units.Product units1 units2 units3 =>
+  Multiplication (Surface1d.Function units1) (Function (space @ units2)) (Function (space @ units3))
+
+instance Multiplication' (Surface1d.Function units1) (Function (space @ units2)) where
+  type
+    Surface1d.Function units1 .*. Function (space @ units2) =
+      Function (space @ (units1 :*: units2))
+  f1 .*. f2 = Product1d3d' f1 f2 -- TODO add special cases
+
+instance
+  Units.Product units1 units2 units3 =>
+  Multiplication (Qty units1) (Function (space @ units2)) (Function (space @ units3))
+
+instance Multiplication' (Qty units1) (Function (space @ units2)) where
+  type Qty units1 .*. Function (space @ units2) = Function (space @ (units1 :*: units2))
+  f1 .*. f2 = Surface1d.Function.constant f1 .*. f2
+
+instance
+  Units.Product units1 units2 units3 =>
+  Multiplication (Surface1d.Function units1) (Vector3d (space @ units2)) (Function (space @ units3))
+
+instance Multiplication' (Surface1d.Function units1) (Vector3d (space @ units2)) where
+  type
+    Surface1d.Function units1 .*. Vector3d (space @ units2) =
+      Function (space @ (units1 :*: units2))
+  function .*. vector = function .*. constant vector
+
+instance
+  Units.Product units1 units2 units3 =>
+  Multiplication (Function (space @ units1)) (Surface1d.Function units2) (Function (space @ units3))
+
+instance Multiplication' (Function (space @ units1)) (Surface1d.Function units2) where
+  type
+    Function (space @ units1) .*. Surface1d.Function units2 =
+      Function (space @ (units1 :*: units2))
+  f1 .*. f2 = Product3d1d' f1 f2 -- TODO add special cases
+
+instance
+  Units.Product units1 units2 units3 =>
+  Multiplication (Function (space @ units1)) (Qty units2) (Function (space @ units3))
+
+instance Multiplication' (Function (space @ units1)) (Qty units2) where
+  type Function (space @ units1) .*. Qty units2 = Function (space @ (units1 :*: units2))
+  function .*. value = function .*. Surface1d.Function.constant value
+
+instance
+  Units.Product units1 units2 units3 =>
+  Multiplication (Vector3d (space @ units1)) (Surface1d.Function units2) (Function (space @ units3))
+
+instance Multiplication' (Vector3d (space @ units1)) (Surface1d.Function units2) where
+  type
+    Vector3d (space @ units1) .*. Surface1d.Function units2 =
+      Function (space @ (units1 :*: units2))
+  vector .*. function = constant vector .*. function
+
+instance
+  Units.Quotient units1 units2 units3 =>
+  Division (Function (space @ units1)) (Surface1d.Function units2) (Function (space @ units3))
+
+instance Division' (Function (space @ units1)) (Surface1d.Function units2) where
+  type
+    Function (space @ units1) ./. Surface1d.Function units2 =
+      Function (space @ (units1 :/: units2))
+  f1 ./. f2 = Quotient' f1 f2 -- TODO add special cases
+
+instance
+  Units.Quotient units1 units2 units3 =>
+  Division (Function (space @ units1)) (Qty units2) (Function (space @ units3))
+
+instance Division' (Function (space @ units1)) (Qty units2) where
+  type
+    Function (space @ units1) ./. Qty units2 =
+      Function (space @ (units1 :/: units2))
+  function ./. value = function ./. Surface1d.Function.constant value
+
+instance Division' (Function (space @ units)) Int where
+  type Function (space @ units) ./. Int = Function (space @ (units :/: Unitless))
+  function ./. value = function ./. Float.int value
+
+instance Division (Function (space @ units)) Int (Function (space @ units))
+
+instance Multiplication' (Function (space @ units)) Int where
+  type Function (space @ units) .*. Int = Function (space @ (units :*: Unitless))
+  function .*. scale = function .*. Float.int scale
+
+instance Multiplication' Int (Function (space @ units)) where
+  type Int .*. Function (space @ units) = Function (space @ (Unitless :*: units))
+  scale .*. function = Float.int scale .*. function
+
+instance Multiplication (Function (space @ units)) Int (Function (space @ units))
+
+instance Multiplication Int (Function (space @ units)) (Function (space @ units))
+
+instance
   (Units.Product units1 units2 units3, space ~ space_) =>
   CrossMultiplication
     (Function (space @ units1))
@@ -230,6 +334,87 @@ instance
     Vector3d (space @ units1) .><. Function (space_ @ units2) =
       Function (space @ (units1 :*: units2))
   v .><. f = constant v .><. f
+
+data DotProductOf space units1 units2
+  = DotProductOf (Function (space @ units1)) (Function (space @ units2))
+
+deriving instance Show (DotProductOf space units1 units2)
+
+instance Surface1d.Function.Interface (DotProductOf space units1 units2) (units1 :*: units2) where
+  evaluateImpl (DotProductOf f1 f2) t = evaluate f1 t .<>. evaluate f2 t
+  boundsImpl (DotProductOf f1 f2) t = bounds f1 t .<>. bounds f2 t
+  derivativeImpl parameter (DotProductOf f1 f2) =
+    derivative parameter f1 .<>. f2 + f1 .<>. derivative parameter f2
+
+instance
+  (Units.Product units1 units2 units3, space ~ space_) =>
+  DotMultiplication
+    (Function (space @ units1))
+    (Function (space_ @ units2))
+    (Surface1d.Function units3)
+
+instance
+  space ~ space_ =>
+  DotMultiplication' (Function (space @ units1)) (Function (space_ @ units2))
+  where
+  type
+    Function (space @ units1) .<>. Function (space_ @ units2) =
+      Surface1d.Function (units1 :*: units2)
+  f1 .<>. f2 = Surface1d.Function.wrap (DotProductOf f1 f2) -- TODO add special cases
+
+instance
+  (Units.Product units1 units2 units3, space ~ space_) =>
+  DotMultiplication
+    (Function (space @ units1))
+    (Vector3d (space_ @ units2))
+    (Surface1d.Function units3)
+
+instance
+  space ~ space_ =>
+  DotMultiplication' (Function (space @ units1)) (Vector3d (space_ @ units2))
+  where
+  type
+    Function (space @ units1) .<>. Vector3d (space_ @ units2) =
+      Surface1d.Function (units1 :*: units2)
+  function .<>. vector = function .<>. constant vector
+
+instance
+  (Units.Product units1 units2 units3, space ~ space_) =>
+  DotMultiplication
+    (Vector3d (space @ units1))
+    (Function (space_ @ units2))
+    (Surface1d.Function units3)
+
+instance
+  space ~ space_ =>
+  DotMultiplication' (Vector3d (space @ units1)) (Function (space_ @ units2))
+  where
+  type
+    Vector3d (space @ units1) .<>. Function (space_ @ units2) =
+      Surface1d.Function (units1 :*: units2)
+  vector .<>. function = constant vector .<>. function
+
+instance
+  space ~ space_ =>
+  DotMultiplication (Function (space @ units)) (Direction3d space_) (Surface1d.Function units)
+
+instance
+  space ~ space_ =>
+  DotMultiplication' (Function (space @ units)) (Direction3d space_)
+  where
+  type Function (space @ units) .<>. Direction3d space_ = Surface1d.Function (units :*: Unitless)
+  function .<>. direction = function .<>. Vector3d.unit direction
+
+instance
+  space ~ space_ =>
+  DotMultiplication (Direction3d space) (Function (space_ @ units)) (Surface1d.Function units)
+
+instance
+  space ~ space_ =>
+  DotMultiplication' (Direction3d space) (Function (space_ @ units))
+  where
+  type Direction3d space .<>. Function (space_ @ units) = Surface1d.Function (Unitless :*: units)
+  direction .<>. function = Vector3d.unit direction .<>. function
 
 wrap :: Interface function (space @ units) => function -> Function (space @ units)
 wrap = Function
@@ -282,3 +467,25 @@ bounds function uv = case function of
   Product3d1d' f1 f2 -> bounds f1 uv .*. Surface1d.Function.bounds f2 uv
   Quotient' f1 f2 -> bounds f1 uv ./. Surface1d.Function.bounds f2 uv
   CrossProduct' f1 f2 -> bounds f1 uv .><. bounds f2 uv
+
+derivative :: Uv.Parameter -> Function (space @ units) -> Function (space @ units)
+derivative parameter function = case function of
+  Function f -> derivativeImpl parameter f
+  Coerce f -> Coerce (derivative parameter f)
+  Constant _ -> zero
+  XYZ x y z ->
+    XYZ
+      (Surface1d.Function.derivative parameter x)
+      (Surface1d.Function.derivative parameter y)
+      (Surface1d.Function.derivative parameter z)
+  Negated f -> -(derivative parameter f)
+  Sum f1 f2 -> derivative parameter f1 + derivative parameter f2
+  Difference f1 f2 -> derivative parameter f1 - derivative parameter f2
+  Product1d3d' f1 f2 ->
+    Surface1d.Function.derivative parameter f1 .*. f2 + f1 .*. derivative parameter f2
+  Product3d1d' f1 f2 ->
+    derivative parameter f1 .*. f2 + f1 .*. Surface1d.Function.derivative parameter f2
+  Quotient' f1 f2 ->
+    (derivative parameter f1 .*. f2 - f1 .*. Surface1d.Function.derivative parameter f2)
+      .!/.! Surface1d.Function.squared' f2
+  CrossProduct' f1 f2 -> derivative parameter f1 .><. f2 + f1 .><. derivative parameter f2
