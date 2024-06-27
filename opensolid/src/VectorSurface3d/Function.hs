@@ -208,6 +208,7 @@ instance Multiplication' (Surface1d.Function units1) (Function (space @ units2))
       Function (space @ (units1 :*: units2))
   Surface1d.Function.Constant (Qty 0.0) .*. _ = zero
   Surface1d.Function.Constant (Qty 1.0) .*. f2 = Units.coerce f2
+  Surface1d.Function.Constant (Qty -1.0) .*. f2 = Units.coerce -f2
   _ .*. Constant v | v == Vector3d.zero = zero
   f1 .*. f2 = Product1d3d' f1 f2
 
@@ -240,6 +241,7 @@ instance Multiplication' (Function (space @ units1)) (Surface1d.Function units2)
   Constant v .*. _ | v == Vector3d.zero = zero
   _ .*. Surface1d.Function.Constant (Qty 0.0) = zero
   f1 .*. Surface1d.Function.Constant (Qty 1.0) = Units.coerce f1
+  f1 .*. Surface1d.Function.Constant (Qty -1.0) = Units.coerce -f1
   f1 .*. f2 = Product3d1d' f1 f2
 
 instance
@@ -269,7 +271,7 @@ instance Division' (Function (space @ units1)) (Surface1d.Function units2) where
     Function (space @ units1) ./. Surface1d.Function units2 =
       Function (space @ (units1 :/: units2))
   Constant v ./. _ | v == Vector3d.zero = zero
-  f1 ./. Surface1d.Function.Constant (Qty 1.0) = Units.coerce f1
+  f1 ./. Surface1d.Function.Constant x = (1 ./. x) .*^ f1
   f1 ./. f2 = Quotient' f1 f2
 
 instance
