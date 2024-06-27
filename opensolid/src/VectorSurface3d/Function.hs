@@ -350,15 +350,15 @@ instance
       Function (space @ (units1 :*: units2))
   v .><. f = constant v .><. f
 
-data DotProductOf space units1 units2
-  = DotProductOf (Function (space @ units1)) (Function (space @ units2))
+data DotProduct' space units1 units2
+  = DotProduct' (Function (space @ units1)) (Function (space @ units2))
 
-deriving instance Show (DotProductOf space units1 units2)
+deriving instance Show (DotProduct' space units1 units2)
 
-instance Surface1d.Function.Interface (DotProductOf space units1 units2) (units1 :*: units2) where
-  evaluateImpl (DotProductOf f1 f2) t = evaluate f1 t .<>. evaluate f2 t
-  boundsImpl (DotProductOf f1 f2) t = bounds f1 t .<>. bounds f2 t
-  derivativeImpl parameter (DotProductOf f1 f2) =
+instance Surface1d.Function.Interface (DotProduct' space units1 units2) (units1 :*: units2) where
+  evaluateImpl (DotProduct' f1 f2) t = evaluate f1 t .<>. evaluate f2 t
+  boundsImpl (DotProduct' f1 f2) t = bounds f1 t .<>. bounds f2 t
+  derivativeImpl parameter (DotProduct' f1 f2) =
     derivative parameter f1 .<>. f2 + f1 .<>. derivative parameter f2
 
 instance
@@ -377,7 +377,7 @@ instance
       Surface1d.Function (units1 :*: units2)
   Constant v .<>. _ | v == Vector3d.zero = Surface1d.Function.zero
   _ .<>. Constant v | v == Vector3d.zero = Surface1d.Function.zero
-  f1 .<>. f2 = Surface1d.Function.wrap (DotProductOf f1 f2)
+  f1 .<>. f2 = Surface1d.Function.wrap (DotProduct' f1 f2)
 
 instance
   (Units.Product units1 units2 units3, space ~ space_) =>
