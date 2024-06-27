@@ -134,7 +134,10 @@ instance
     (Function (space_ @ units_))
     (Function (space @ units))
   where
-  -- TODO add special cases
+  f1 + Constant v | v == Vector3d.zero = f1
+  Constant v + f2 | v == Vector3d.zero = f2
+  f1 + Negated f2 = f1 - f2
+  Negated f1 + f2 = f2 - f1
   f1 + f2 = Sum f1 f2
 
 instance
@@ -168,7 +171,9 @@ instance
     (Function (space_ @ units_))
     (Function (space @ units))
   where
-  -- TODO add special cases
+  f1 - Constant v | v == Vector3d.zero = f1
+  Constant v - f2 | v == Vector3d.zero = -f2
+  f1 - Negated f2 = f1 + f2
   f1 - f2 = Difference f1 f2
 
 instance
@@ -201,7 +206,10 @@ instance Multiplication' (Surface1d.Function units1) (Function (space @ units2))
   type
     Surface1d.Function units1 .*. Function (space @ units2) =
       Function (space @ (units1 :*: units2))
-  f1 .*. f2 = Product1d3d' f1 f2 -- TODO add special cases
+  Surface1d.Function.Constant (Qty 0.0) .*. _ = zero
+  Surface1d.Function.Constant (Qty 1.0) .*. f2 = Units.coerce f2
+  _ .*. Constant v | v == Vector3d.zero = zero
+  f1 .*. f2 = Product1d3d' f1 f2
 
 instance
   Units.Product units1 units2 units3 =>
@@ -229,7 +237,10 @@ instance Multiplication' (Function (space @ units1)) (Surface1d.Function units2)
   type
     Function (space @ units1) .*. Surface1d.Function units2 =
       Function (space @ (units1 :*: units2))
-  f1 .*. f2 = Product3d1d' f1 f2 -- TODO add special cases
+  Constant v .*. _ | v == Vector3d.zero = zero
+  _ .*. Surface1d.Function.Constant (Qty 0.0) = zero
+  f1 .*. Surface1d.Function.Constant (Qty 1.0) = Units.coerce f1
+  f1 .*. f2 = Product3d1d' f1 f2
 
 instance
   Units.Product units1 units2 units3 =>
@@ -257,7 +268,9 @@ instance Division' (Function (space @ units1)) (Surface1d.Function units2) where
   type
     Function (space @ units1) ./. Surface1d.Function units2 =
       Function (space @ (units1 :/: units2))
-  f1 ./. f2 = Quotient' f1 f2 -- TODO add special cases
+  Constant v ./. _ | v == Vector3d.zero = zero
+  f1 ./. Surface1d.Function.Constant (Qty 1.0) = Units.coerce f1
+  f1 ./. f2 = Quotient' f1 f2
 
 instance
   Units.Quotient units1 units2 units3 =>
@@ -301,7 +314,9 @@ instance
   type
     Function (space @ units1) .><. Function (space_ @ units2) =
       Function (space @ (units1 :*: units2))
-  (.><.) = CrossProduct'
+  Constant v .><. _ | v == Vector3d.zero = zero
+  _ .><. Constant v | v == Vector3d.zero = zero
+  f1 .><. f2 = CrossProduct' f1 f2
 
 instance
   (Units.Product units1 units2 units3, space ~ space_) =>
@@ -360,7 +375,9 @@ instance
   type
     Function (space @ units1) .<>. Function (space_ @ units2) =
       Surface1d.Function (units1 :*: units2)
-  f1 .<>. f2 = Surface1d.Function.wrap (DotProductOf f1 f2) -- TODO add special cases
+  Constant v .<>. _ | v == Vector3d.zero = Surface1d.Function.zero
+  _ .<>. Constant v | v == Vector3d.zero = Surface1d.Function.zero
+  f1 .<>. f2 = Surface1d.Function.wrap (DotProductOf f1 f2)
 
 instance
   (Units.Product units1 units2 units3, space ~ space_) =>
