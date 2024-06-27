@@ -15,7 +15,9 @@ module Surface1d.Function
   , zeros
   , wrap
   , squared
+  , squared'
   , sqrt
+  , sqrt'
   , sin
   , cos
   , curveOnSurface
@@ -98,10 +100,9 @@ data Function units where
   Squared' ::
     Function units ->
     Function (units :*: units)
-  SquareRoot ::
-    Units.Squared units1 units2 =>
-    Function units2 ->
-    Function units1
+  SquareRoot' ::
+    Function (units :*: units) ->
+    Function units
   Sin ::
     Function Radians ->
     Function Unitless
@@ -271,7 +272,7 @@ evaluate function uv = case function of
   Product' f1 f2 -> evaluate f1 uv .*. evaluate f2 uv
   Quotient' f1 f2 -> evaluate f1 uv ./. evaluate f2 uv
   Squared' f -> Qty.squared' (evaluate f uv)
-  SquareRoot f -> Qty.sqrt (evaluate f uv)
+  SquareRoot' f -> Qty.sqrt' (evaluate f uv)
   Sin f -> Angle.sin (evaluate f uv)
   Cos f -> Angle.cos (evaluate f uv)
 
@@ -289,7 +290,7 @@ bounds function uv = case function of
   Product' f1 f2 -> bounds f1 uv .*. bounds f2 uv
   Quotient' f1 f2 -> bounds f1 uv ./. bounds f2 uv
   Squared' f -> Range.squared' (bounds f uv)
-  SquareRoot f -> Range.sqrt (bounds f uv)
+  SquareRoot' f -> Range.sqrt' (bounds f uv)
   Sin f -> Range.sin (bounds f uv)
   Cos f -> Range.cos (bounds f uv)
 
@@ -309,7 +310,7 @@ derivative varyingParameter function =
       (derivative varyingParameter f1 .*. f2 - f1 .*. derivative varyingParameter f2)
         .!/.! squared' f2
     Squared' f -> 2 * f .*. derivative varyingParameter f
-    SquareRoot f -> derivative varyingParameter f / (2 * sqrt f)
+    SquareRoot' f -> derivative varyingParameter f .!/! (2 * sqrt' f)
     Sin f -> cos f * Angle.unitless (derivative varyingParameter f)
     Cos f -> negate (sin f) * Angle.unitless (derivative varyingParameter f)
 
@@ -348,9 +349,12 @@ sinSquared :: Function Radians -> Function Unitless
 sinSquared f = 0.5 - 0.5 * cos (2 * f)
 
 sqrt :: Units.Squared units1 units2 => Function units2 -> Function units1
-sqrt Zero = Zero
-sqrt (Constant x) = Constant (Qty.sqrt x)
-sqrt function = SquareRoot function
+sqrt function = sqrt' (Units.unspecialize function)
+
+sqrt' :: Function (units :*: units) -> Function units
+sqrt' Zero = Zero
+sqrt' (Constant x) = Constant (Qty.sqrt' x)
+sqrt' function = SquareRoot' function
 
 sin :: Function Radians -> Function Unitless
 sin Zero = Zero
