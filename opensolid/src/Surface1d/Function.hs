@@ -11,6 +11,8 @@ module Surface1d.Function
   , derivativeIn
   , zero
   , constant
+  , u
+  , v
   , parameter
   , zeros
   , wrap
@@ -316,6 +318,12 @@ zero = constant Qty.zero
 
 constant :: Qty units -> Function units
 constant = Constant
+
+u :: Function Unitless
+u = parameter U
+
+v :: Function Unitless
+v = parameter V
 
 parameter :: Parameter -> Function Unitless
 parameter = Parameter
@@ -756,18 +764,18 @@ findCrossingSolution derivatives subdomain derivativeBounds exclusions = do
             _ -> Solve2d.recurse
 
 solveVertically :: Tolerance units => Derivatives units -> Float -> Range Unitless -> Maybe Float
-solveVertically derivatives u vRange = do
+solveVertically derivatives uValue vRange = do
   let Derivatives{f, fv} = derivatives
-  let fValue v = evaluate f (Point2d.xy u v)
-  let fvValue v = evaluate fv (Point2d.xy u v)
+  let fValue vValue = evaluate f (Point2d.xy uValue vValue)
+  let fvValue vValue = evaluate fv (Point2d.xy uValue vValue)
   let v0 = Solve1d.monotonic fValue fvValue vRange
   if fValue v0 ~= Qty.zero then Just v0 else Nothing
 
 solveHorizontally :: Tolerance units => Derivatives units -> Range Unitless -> Float -> Maybe Float
-solveHorizontally derivatives uRange v = do
+solveHorizontally derivatives uRange vValue = do
   let Derivatives{f, fu} = derivatives
-  let fValue u = evaluate f (Point2d.xy u v)
-  let fuValue u = evaluate fu (Point2d.xy u v)
+  let fValue uValue = evaluate f (Point2d.xy uValue vValue)
+  let fuValue uValue = evaluate fu (Point2d.xy uValue vValue)
   let u0 = Solve1d.monotonic fValue fuValue uRange
   if fValue u0 ~= Qty.zero then Just u0 else Nothing
 
@@ -825,21 +833,21 @@ data HorizontalCurve units = HorizontalCurve
   deriving (Show)
 
 solveForV :: HorizontalCurve units -> Float -> Float
-solveForV (HorizontalCurve{derivatives, vRange, tolerance}) u = Tolerance.using tolerance do
+solveForV (HorizontalCurve{derivatives, vRange, tolerance}) uValue = Tolerance.using tolerance do
   let Derivatives{f, fv} = derivatives
-  let fValue v = evaluate f (Point2d.xy u v)
-  let fvValue v = evaluate fv (Point2d.xy u v)
+  let fValue vValue = evaluate f (Point2d.xy uValue vValue)
+  let fvValue vValue = evaluate fv (Point2d.xy uValue vValue)
   Solve1d.monotonic fValue fvValue vRange
 
 instance Curve2d.Interface (HorizontalCurve units) Uv.Coordinates where
   startPointImpl = Curve2d.evaluateAtImpl 0.0
   endPointImpl = Curve2d.evaluateAtImpl 1.0
 
-  evaluateAtImpl t curve = do
+  evaluateAtImpl tValue curve = do
     let (HorizontalCurve{uStart, uEnd}) = curve
-    let u = Float.interpolateFrom uStart uEnd t
-    let v = solveForV curve u
-    Point2d.xy u v
+    let uValue = Float.interpolateFrom uStart uEnd tValue
+    let vValue = solveForV curve uValue
+    Point2d.xy uValue vValue
 
   segmentBoundsImpl t curve = do
     let (HorizontalCurve{dvdu, uStart, uEnd, vRange, monotonic}) = curve
@@ -881,21 +889,21 @@ data VerticalCurve units = VerticalCurve
   deriving (Show)
 
 solveForU :: VerticalCurve units -> Float -> Float
-solveForU (VerticalCurve{derivatives, uRange, tolerance}) v = Tolerance.using tolerance do
+solveForU (VerticalCurve{derivatives, uRange, tolerance}) vValue = Tolerance.using tolerance do
   let Derivatives{f, fu} = derivatives
-  let fValue u = evaluate f (Point2d.xy u v)
-  let fuValue u = evaluate fu (Point2d.xy u v)
+  let fValue uValue = evaluate f (Point2d.xy uValue vValue)
+  let fuValue uValue = evaluate fu (Point2d.xy uValue vValue)
   Solve1d.monotonic fValue fuValue uRange
 
 instance Curve2d.Interface (VerticalCurve units) Uv.Coordinates where
   startPointImpl = Curve2d.evaluateAtImpl 0.0
   endPointImpl = Curve2d.evaluateAtImpl 1.0
 
-  evaluateAtImpl t curve = do
+  evaluateAtImpl tValue curve = do
     let (VerticalCurve{vStart, vEnd}) = curve
-    let v = Float.interpolateFrom vStart vEnd t
-    let u = solveForU curve v
-    Point2d.xy u v
+    let vValue = Float.interpolateFrom vStart vEnd tValue
+    let uValue = solveForU curve vValue
+    Point2d.xy uValue vValue
 
   segmentBoundsImpl t curve = do
     let (VerticalCurve{dudv, uRange, vStart, vEnd, monotonic}) = curve
