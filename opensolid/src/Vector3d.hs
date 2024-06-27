@@ -1,6 +1,7 @@
 module Vector3d
   ( Vector3d (Vector3d)
   , zero
+  , unit
   , x
   , y
   , z
@@ -175,6 +176,9 @@ instance
 
 zero :: Vector3d (space @ units)
 zero = Vector3d Qty.zero Qty.zero Qty.zero
+
+unit :: Direction3d space -> Vector3d (space @ Unitless)
+unit = Direction3d.unwrap
 
 x :: Qty units -> Vector3d (space @ units)
 x vx = Vector3d vx Qty.zero Qty.zero
