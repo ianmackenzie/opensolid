@@ -858,7 +858,7 @@ instance Curve2d.Interface (HorizontalCurve units) Uv.Coordinates where
   derivativeImpl crossingCurve@(HorizontalCurve{dvdu, uStart, uEnd}) = do
     let deltaU = uEnd - uStart
     let dudt = Curve1d.constant deltaU
-    let dvdt = deltaU * (Curve2d.wrap crossingCurve >> dvdu)
+    let dvdt = dudt * dvdu . Curve2d.wrap crossingCurve
     VectorCurve2d.xy dudt dvdt
 
   reverseImpl (HorizontalCurve{derivatives, dvdu, uStart, uEnd, vRange, monotonic, tolerance}) =
@@ -914,7 +914,7 @@ instance Curve2d.Interface (VerticalCurve units) Uv.Coordinates where
   derivativeImpl crossingCurve@(VerticalCurve{dudv, vStart, vEnd}) = do
     let deltaV = vEnd - vStart
     let dvdt = Curve1d.constant deltaV
-    let dudt = deltaV * (Curve2d.wrap crossingCurve >> dudv)
+    let dudt = dvdt * dudv . Curve2d.wrap crossingCurve
     VectorCurve2d.xy dudt dvdt
 
   reverseImpl (VerticalCurve{derivatives, dudv, uRange, vStart, vEnd, monotonic, tolerance}) =
