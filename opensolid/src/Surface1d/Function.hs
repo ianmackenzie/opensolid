@@ -20,7 +20,6 @@ module Surface1d.Function
   , sqrt'
   , sin
   , cos
-  , curveOnSurface
   , isZero
   )
 where
@@ -357,8 +356,7 @@ cos function = Cos function
 
 data CurveOnSurface units where
   CurveOnSurface ::
-    Curve2d.Interface curve Uv.Coordinates =>
-    curve ->
+    Curve2d Uv.Coordinates ->
     Function units ->
     CurveOnSurface units
 
@@ -379,8 +377,8 @@ instance Curve1d.Interface (CurveOnSurface units) units where
     let vT = VectorCurve2d.yComponent uvT
     Curve1d.wrap (CurveOnSurface uvCurve fU) * uT + Curve1d.wrap (CurveOnSurface uvCurve fV) * vT
 
-curveOnSurface :: Curve2d Uv.Coordinates -> Function units -> Curve1d units
-curveOnSurface uvCurve function = Curve1d.wrap (CurveOnSurface uvCurve function)
+instance Composition (Curve2d Uv.Coordinates) (Function units) (Curve1d units) where
+  uvCurve >> function = Curve1d.wrap (CurveOnSurface uvCurve function)
 
 isZero :: Tolerance units => Function units -> Bool
 isZero function = List.all (~= Qty.zero) (Bounds2d.sample (evaluate function) Uv.domain)
@@ -860,7 +858,7 @@ instance Curve2d.Interface (HorizontalCurve units) Uv.Coordinates where
   derivativeImpl crossingCurve@(HorizontalCurve{dvdu, uStart, uEnd}) = do
     let deltaU = uEnd - uStart
     let dudt = Curve1d.constant deltaU
-    let dvdt = deltaU * Curve1d.wrap (CurveOnSurface crossingCurve dvdu)
+    let dvdt = deltaU * (Curve2d.wrap crossingCurve >> dvdu)
     VectorCurve2d.xy dudt dvdt
 
   reverseImpl (HorizontalCurve{derivatives, dvdu, uStart, uEnd, vRange, monotonic, tolerance}) =
@@ -916,7 +914,7 @@ instance Curve2d.Interface (VerticalCurve units) Uv.Coordinates where
   derivativeImpl crossingCurve@(VerticalCurve{dudv, vStart, vEnd}) = do
     let deltaV = vEnd - vStart
     let dvdt = Curve1d.constant deltaV
-    let dudt = deltaV * Curve1d.wrap (CurveOnSurface crossingCurve dudv)
+    let dudt = deltaV * (Curve2d.wrap crossingCurve >> dudv)
     VectorCurve2d.xy dudt dvdt
 
   reverseImpl (VerticalCurve{derivatives, dudv, uRange, vStart, vEnd, monotonic, tolerance}) =
