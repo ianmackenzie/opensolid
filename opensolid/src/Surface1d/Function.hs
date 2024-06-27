@@ -3,7 +3,7 @@
 {-# OPTIONS_GHC -Wno-partial-fields #-}
 
 module Surface1d.Function
-  ( Function
+  ( Function (Constant)
   , Interface (..)
   , evaluate
   , bounds
