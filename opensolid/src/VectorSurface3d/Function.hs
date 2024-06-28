@@ -31,6 +31,8 @@ import Vector3d (Vector3d)
 import Vector3d qualified
 import VectorBounds3d (VectorBounds3d)
 import VectorBounds3d qualified
+import VectorCurve3d (VectorCurve3d)
+import VectorCurve3d qualified
 
 class
   Show function =>
@@ -434,6 +436,32 @@ instance
   where
   type Direction3d space .<>. Function (space_ @ units) = Surface1d.Function (Unitless :*: units)
   direction .<>. function = Vector3d.unit direction .<>. function
+
+data SurfaceCurveComposition (coordinateSystem :: CoordinateSystem) where
+  SurfaceCurveComposition ::
+    Surface1d.Function Unitless ->
+    VectorCurve3d (space @ units) ->
+    SurfaceCurveComposition (space @ units)
+
+deriving instance Show (SurfaceCurveComposition coordinateSystem)
+
+instance
+  Composition
+    (Surface1d.Function Unitless)
+    (VectorCurve3d (space @ units))
+    (Function (space @ units))
+  where
+  function >> curve = wrap (SurfaceCurveComposition function curve)
+
+instance Interface (SurfaceCurveComposition (space @ units)) (space @ units) where
+  evaluateImpl (SurfaceCurveComposition function curve) uv =
+    VectorCurve3d.evaluateAt (Surface1d.Function.evaluate function uv) curve
+
+  boundsImpl (SurfaceCurveComposition function curve) uv =
+    VectorCurve3d.segmentBounds (Surface1d.Function.bounds function uv) curve
+
+  derivativeImpl parameter (SurfaceCurveComposition function curve) =
+    (VectorCurve3d.derivative curve . function) * Surface1d.Function.derivative parameter function
 
 wrap :: Interface function (space @ units) => function -> Function (space @ units)
 wrap = Function
