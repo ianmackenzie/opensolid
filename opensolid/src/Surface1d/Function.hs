@@ -380,10 +380,10 @@ instance Curve1d.Interface (CurveOnSurface units) units where
   derivativeImpl (CurveOnSurface uvCurve function) = do
     let fU = derivative U function
     let fV = derivative V function
-    let uvT = Curve2d.derivativeImpl uvCurve
+    let uvT = Curve2d.derivative uvCurve
     let uT = VectorCurve2d.xComponent uvT
     let vT = VectorCurve2d.yComponent uvT
-    Curve1d.wrap (CurveOnSurface uvCurve fU) * uT + Curve1d.wrap (CurveOnSurface uvCurve fV) * vT
+    fU . uvCurve * uT + fV . uvCurve * vT
 
 instance Composition (Curve2d Uv.Coordinates) (Function units) (Curve1d units) where
   uvCurve >> function = Curve1d.wrap (CurveOnSurface uvCurve function)
