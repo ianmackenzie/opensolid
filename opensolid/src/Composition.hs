@@ -6,6 +6,8 @@ import Prelude qualified
 class Composition a b c | a b -> c where
   (>>) :: a -> b -> c
 
+infixl 9 >>
+
 instance b ~ b' => Composition (a -> b) (b' -> c) (a -> c) where
   f >> g = g Prelude.. f
 
@@ -15,3 +17,5 @@ instance Composition (IO ()) (IO a) (IO a) where
 {-# INLINE (.) #-}
 (.) :: Composition a b c => b -> a -> c
 f . g = g >> f
+
+infixr 9 .
