@@ -451,7 +451,7 @@ instance
     (VectorCurve3d (space @ units))
     (Function (space @ units))
   where
-  function >> curve = wrap (SurfaceCurveComposition function curve)
+  curve . function = wrap (SurfaceCurveComposition function curve)
 
 instance Interface (SurfaceCurveComposition (space @ units)) (space @ units) where
   evaluateImpl (SurfaceCurveComposition function curve) uv =
