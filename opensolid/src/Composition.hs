@@ -5,17 +5,17 @@ import Prelude qualified
 
 class Composition a b c | a b -> c where
   (>>) :: a -> b -> c
+  (.) :: b -> a -> c
+  a >> b = b . a
+  a . b = b >> a
+  {-# MINIMAL (>>) | (.) #-}
 
 infixl 9 >>
 
+infixr 9 .
+
 instance b ~ b' => Composition (a -> b) (b' -> c) (a -> c) where
-  f >> g = g Prelude.. f
+  (.) = (Prelude..)
 
 instance Composition (IO ()) (IO a) (IO a) where
   (>>) = (Prelude.>>)
-
-{-# INLINE (.) #-}
-(.) :: Composition a b c => b -> a -> c
-f . g = g >> f
-
-infixr 9 .
