@@ -362,13 +362,12 @@ cos :: Function Radians -> Function Unitless
 cos (Constant x) = constant (Angle.cos x)
 cos function = Cos function
 
-data CurveOnSurface units where
-  CurveOnSurface ::
-    Curve2d Uv.Coordinates ->
-    Function units ->
-    CurveOnSurface units
+data CurveOnSurface units
+  = CurveOnSurface (Curve2d Uv.Coordinates) (Function units)
+  deriving (Show)
 
-deriving instance Show (CurveOnSurface units)
+instance Composition (Curve2d Uv.Coordinates) (Function units) (Curve1d units) where
+  function . uvCurve = Curve1d.wrap (CurveOnSurface uvCurve function)
 
 instance Curve1d.Interface (CurveOnSurface units) units where
   pointOnImpl (CurveOnSurface uvCurve function) t =
@@ -384,9 +383,6 @@ instance Curve1d.Interface (CurveOnSurface units) units where
     let uT = VectorCurve2d.xComponent uvT
     let vT = VectorCurve2d.yComponent uvT
     fU . uvCurve * uT + fV . uvCurve * vT
-
-instance Composition (Curve2d Uv.Coordinates) (Function units) (Curve1d units) where
-  uvCurve >> function = Curve1d.wrap (CurveOnSurface uvCurve function)
 
 isZero :: Tolerance units => Function units -> Bool
 isZero function = List.all (~= Qty.zero) (Bounds2d.sample (evaluate function) Uv.domain)
