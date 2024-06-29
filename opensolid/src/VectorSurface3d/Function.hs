@@ -15,6 +15,7 @@ module VectorSurface3d.Function
   , xyz
   , evaluate
   , bounds
+  , derivative
   )
 where
 
