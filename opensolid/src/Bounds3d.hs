@@ -22,12 +22,14 @@ module Bounds3d
 where
 
 import Bounds qualified
+import Data.Coerce qualified
 import Maybe qualified
 import OpenSolid
 import Point3d (Point3d (Point3d))
 import Qty qualified
 import Range (Range)
 import Range qualified
+import Units qualified
 import VectorBounds3d (VectorBounds3d (VectorBounds3d))
 
 type role Bounds3d phantom
@@ -44,6 +46,16 @@ deriving instance Show (Bounds3d (space @ units))
 instance Bounds.Interface (Bounds3d (space @ units)) where
   aggregate2 = aggregate2
   intersection = intersection
+
+instance HasUnits (Bounds3d (space @ units)) where
+  type Units (Bounds3d (space @ units)) = units
+  type Erase (Bounds3d (space @ units)) = Bounds3d (space @ Unitless)
+
+instance
+  space ~ space_ =>
+  Units.Coercion (Bounds3d (space @ units1)) (Bounds3d (space_ @ units2))
+  where
+  coerce = Data.Coerce.coerce
 
 instance
   ( space ~ space_
