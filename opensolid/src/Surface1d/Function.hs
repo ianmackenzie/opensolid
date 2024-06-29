@@ -34,6 +34,8 @@ import Curve1d qualified
 import Curve2d (Curve2d)
 import Curve2d qualified
 import Direction2d qualified
+import Domain2d (Domain2d)
+import Domain2d qualified
 import Float qualified
 import Frame2d (Frame2d)
 import Frame2d qualified
@@ -46,9 +48,6 @@ import Qty qualified
 import Range (Range)
 import Range qualified
 import Result qualified
-import Solve1d qualified
-import Solve2d (Subdomain)
-import Solve2d qualified
 import Surface1d.Function.PartialZeros (PartialZeros)
 import Surface1d.Function.PartialZeros qualified as PartialZeros
 import Surface1d.Function.SaddleRegion (SaddleRegion (..))
@@ -56,7 +55,9 @@ import Surface1d.Function.Zeros (Zeros (..))
 import Surface1d.Function.Zeros qualified as Zeros
 import Tolerance qualified
 import Units qualified
+import Solve1d qualified
 import Uv (Parameter (U, V))
+import Solve2d qualified
 import Uv qualified
 import Vector2d qualified
 import VectorCurve2d qualified
@@ -413,7 +414,7 @@ data Solution
   | SaddleRegionSolution SaddleRegion
   deriving (Show)
 
-addSolution :: PartialZeros -> (Solution, Subdomain) -> PartialZeros
+addSolution :: PartialZeros -> (Solution, Domain2d) -> PartialZeros
 addSolution partialZeros (solution, subdomain) = case solution of
   CrossingCurveSolution curve -> PartialZeros.addCrossingCurve curve partialZeros
   TangentPointSolution tangentPoint -> PartialZeros.addTangentPoint tangentPoint partialZeros
@@ -461,7 +462,7 @@ computeDerivativeBounds (Derivatives{f, fu, fv, fuu, fvv, fuv}) uvBounds =
 findTangentSolution ::
   Tolerance units =>
   Derivatives units ->
-  Subdomain ->
+  Domain2d ->
   DerivativeBounds units ->
   Solve2d.Exclusions exclusions ->
   Solve2d.Action exclusions Solution
@@ -486,7 +487,7 @@ findTangentSolution derivatives subdomain derivativeBounds exclusions = do
 tangentPointSolution ::
   Tolerance units =>
   Derivatives units ->
-  Subdomain ->
+  Domain2d ->
   DerivativeBounds units ->
   Maybe Solution
 tangentPointSolution derivatives subdomain derivativeBounds = do
@@ -506,7 +507,7 @@ tangentPointSolution derivatives subdomain derivativeBounds = do
               (evaluate fv)
               (evaluate fuv)
               (evaluate fvv)
-              (Solve2d.interior subdomain)
+              (Domain2d.interior subdomain)
       if
         | Just point <- maybePoint
         , evaluate f point ~= Qty.zero ->
@@ -637,14 +638,14 @@ instance Interface (Reparameterized units) units where
 
 -- isTangentPoint ::
 --   Tolerance units =>
---   Solve1d.Neighborhood units ->
+--   Domain1d.Neighborhood units ->
 --   Derivatives units ->
 --   Uv.Point ->
 --   Bool
 -- isTangentPoint neighborhood derivatives point = do
 --   let Derivatives{f, fu, fv} = derivatives
 --   let fIsZero = evaluateAt point f ~= Qty.zero
---   let derivativeTolerance = Solve1d.derivativeTolerance neighborhood 1
+--   let derivativeTolerance = Domain1d.derivativeTolerance neighborhood 1
 --   let fuIsZero = Qty.abs (evaluateAt point fu) <= derivativeTolerance
 --   let fvIsZero = Qty.abs (evaluateAt point fv) <= derivativeTolerance
 --   fIsZero && fuIsZero && fvIsZero
@@ -652,7 +653,7 @@ instance Interface (Reparameterized units) units where
 findCrossingSolution ::
   Tolerance units =>
   Derivatives units ->
-  Subdomain ->
+  Domain2d ->
   DerivativeBounds units ->
   Solve2d.Exclusions exclusions ->
   Solve2d.Action exclusions Solution
@@ -668,8 +669,8 @@ findCrossingSolution derivatives subdomain derivativeBounds exclusions = do
           let fvSign = Solve1d.resolvedSign fvBounds
           let fuResolved = fuSign /= Nothing
           let fvResolved = fvSign /= Nothing
-          let uvBounds = Solve2d.bounds subdomain
-          let uvInterior = Solve2d.interior subdomain
+          let uvBounds = Domain2d.bounds subdomain
+          let uvInterior = Domain2d.interior subdomain
           let (uRange, vRange) = Bounds2d.coordinates uvBounds
           let (uInterior, vInterior) = Bounds2d.coordinates uvInterior
           let (uLeft, uRight) = Range.endpoints uRange
@@ -678,10 +679,10 @@ findCrossingSolution derivatives subdomain derivativeBounds exclusions = do
           let rightSolution = Maybe.map2 (,) fvSign (solveVertically derivatives uRight vInterior)
           let bottomSolution = Maybe.map2 (,) fuSign (solveHorizontally derivatives uInterior vBottom)
           let topSolution = Maybe.map2 (,) fuSign (solveHorizontally derivatives uInterior vTop)
-          let leftBoundary = Solve2d.leftBoundary subdomain
-          let rightBoundary = Solve2d.rightBoundary subdomain
-          let bottomBoundary = Solve2d.bottomBoundary subdomain
-          let topBoundary = Solve2d.topBoundary subdomain
+          let leftBoundary = Domain2d.leftBoundary subdomain
+          let rightBoundary = Domain2d.rightBoundary subdomain
+          let bottomBoundary = Domain2d.bottomBoundary subdomain
+          let topBoundary = Domain2d.topBoundary subdomain
           let horizontalSolution startBoundary endBoundary uStart uEnd vBounds monotonic =
                 CrossingCurveSolution $
                   PartialZeros.CrossingCurve startBoundary endBoundary $

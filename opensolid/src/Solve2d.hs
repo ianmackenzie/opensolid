@@ -1,20 +1,5 @@
 module Solve2d
-  ( Subdomain
-  , Boundary
-  , domain
-  , isAtomic
-  , coordinates
-  , leftBoundary
-  , rightBoundary
-  , bottomBoundary
-  , topBoundary
-  , adjacent
-  , contacts
-  , interior
-  , bounds
-  , overlaps
-  , contains
-  , Cache
+  ( Cache
   , init
   , SomeExclusions
   , NoExclusions
@@ -30,78 +15,26 @@ module Solve2d
   )
 where
 
-import Bounds2d qualified
-import List qualified
-import Maybe qualified
 import OpenSolid
-import Pair qualified
-import Point2d qualified
-import Qty qualified
-import Queue (Queue)
-import Queue qualified
-import Range (Range)
-import Range qualified
-import Result qualified
-import Solve1d qualified
-import Uv qualified
+import Domain2d (Domain2d(Domain2d))
+import Domain2d qualified
+import List qualified
 import Vector2d qualified
-
-data Subdomain = Subdomain Solve1d.Subdomain Solve1d.Subdomain deriving (Show)
-
-data Boundary
-  = VerticalBoundary Solve1d.Endpoint Solve1d.Subdomain
-  | HorizontalBoundary Solve1d.Subdomain Solve1d.Endpoint
-  deriving (Show)
-
-domain :: Subdomain
-domain = Subdomain Solve1d.domain Solve1d.domain
-
-isAtomic :: Subdomain -> Bool
-isAtomic (Subdomain x y) = Solve1d.isAtomic x && Solve1d.isAtomic y
-
-coordinates :: Subdomain -> (Solve1d.Subdomain, Solve1d.Subdomain)
-coordinates (Subdomain x y) = (x, y)
-
-leftBoundary :: Subdomain -> Boundary
-leftBoundary (Subdomain x y) = VerticalBoundary (Solve1d.min x) y
-
-rightBoundary :: Subdomain -> Boundary
-rightBoundary (Subdomain x y) = VerticalBoundary (Solve1d.max x) y
-
-bottomBoundary :: Subdomain -> Boundary
-bottomBoundary (Subdomain x y) = HorizontalBoundary x (Solve1d.min y)
-
-topBoundary :: Subdomain -> Boundary
-topBoundary (Subdomain x y) = HorizontalBoundary x (Solve1d.max y)
-
-adjacent :: Boundary -> Boundary -> Bool
-adjacent (HorizontalBoundary{}) (VerticalBoundary{}) = False
-adjacent (VerticalBoundary{}) (HorizontalBoundary{}) = False
-adjacent (HorizontalBoundary x1 y1) (HorizontalBoundary x2 y2) = Solve1d.overlaps x1 x2 && y1 == y2
-adjacent (VerticalBoundary x1 y1) (VerticalBoundary x2 y2) = x1 == x2 && Solve1d.overlaps y1 y2
-
-contacts :: Subdomain -> Boundary -> Bool
-contacts (Subdomain x y) boundary = case boundary of
-  VerticalBoundary bx by -> Solve1d.overlaps by y && (bx == Solve1d.min x || bx == Solve1d.max x)
-  HorizontalBoundary bx by -> Solve1d.overlaps bx x && (by == Solve1d.min y || by == Solve1d.max y)
-
-half :: Subdomain -> Subdomain
-half (Subdomain x y) = Subdomain (Solve1d.half x) (Solve1d.half y)
-
-bounds :: Subdomain -> Uv.Bounds
-bounds (Subdomain x y) = Bounds2d.xy (Solve1d.bounds x) (Solve1d.bounds y)
-
-interior :: Subdomain -> Uv.Bounds
-interior (Subdomain x y) = Bounds2d.xy (Solve1d.interior x) (Solve1d.interior y)
-
-overlaps :: Subdomain -> Subdomain -> Bool
-overlaps (Subdomain x2 y2) (Subdomain x1 y1) = Solve1d.overlaps x2 x1 && Solve1d.overlaps y2 y1
-
-contains :: Subdomain -> Subdomain -> Bool
-contains (Subdomain x2 y2) (Subdomain x1 y1) = Solve1d.contains x2 x1 && Solve1d.contains y2 y1
+import Uv qualified
+import Domain1d qualified
+import Qty qualified
+import Maybe qualified
+import Pair qualified
+import Bounds2d qualified
+import Result qualified
+import Point2d qualified
+import Queue (Queue)
+import Range qualified
+import Range (Range)
+import Queue qualified
 
 data Cache cached
-  = Tree Subdomain cached (Node cached)
+  = Tree Domain2d cached (Node cached)
 
 data Node cached
   = Atomic
@@ -120,58 +53,58 @@ data Node cached
       ~(Cache cached)
 
 init :: (Uv.Bounds -> cached) -> Cache cached
-init function = quadrant function domain
+init function = quadrant function Domain2d.unit
 
-tree :: (Uv.Bounds -> cached) -> Subdomain -> Node cached -> Cache cached
+tree :: (Uv.Bounds -> cached) -> Domain2d -> Node cached -> Cache cached
 tree function subdomain givenNode = do
-  let cached = function (bounds subdomain)
-  let node = if isAtomic subdomain then Atomic else givenNode
+  let cached = function (Domain2d.bounds subdomain)
+  let node = if Domain2d.isAtomic subdomain then Atomic else givenNode
   Tree subdomain cached node
 
-central :: (Uv.Bounds -> a) -> Subdomain -> Cache a
+central :: (Uv.Bounds -> a) -> Domain2d -> Cache a
 central function subdomain = do
-  let child = central function (half subdomain)
+  let child = central function (Domain2d.half subdomain)
   let node = Central child
   tree function subdomain node
 
-row :: (Uv.Bounds -> a) -> Subdomain -> Cache a
+row :: (Uv.Bounds -> a) -> Domain2d -> Cache a
 row function subdomain = do
-  let (Subdomain x y) = subdomain
-  let (x1, x2) = Solve1d.bisect x
-  let yMid = Solve1d.half y
-  let leftChild = row function (Subdomain x1 yMid)
-  let middleChild = central function (half subdomain)
-  let rightChild = row function (Subdomain x2 yMid)
+  let (Domain2d x y) = subdomain
+  let (x1, x2) = Domain1d.bisect x
+  let yMid = Domain1d.half y
+  let leftChild = row function (Domain2d x1 yMid)
+  let middleChild = central function (Domain2d.half subdomain)
+  let rightChild = row function (Domain2d x2 yMid)
   let node = Row leftChild middleChild rightChild
   tree function subdomain node
 
-column :: (Uv.Bounds -> a) -> Subdomain -> Cache a
+column :: (Uv.Bounds -> a) -> Domain2d -> Cache a
 column function subdomain = do
-  let (Subdomain x y) = subdomain
-  let xMid = Solve1d.half x
-  let (y1, y2) = Solve1d.bisect y
-  let bottomChild = column function (Subdomain xMid y1)
-  let middleChild = central function (half subdomain)
-  let topChild = column function (Subdomain xMid y2)
+  let (Domain2d x y) = subdomain
+  let xMid = Domain1d.half x
+  let (y1, y2) = Domain1d.bisect y
+  let bottomChild = column function (Domain2d xMid y1)
+  let middleChild = central function (Domain2d.half subdomain)
+  let topChild = column function (Domain2d xMid y2)
   let node = Column bottomChild middleChild topChild
   tree function subdomain node
 
-quadrant :: (Uv.Bounds -> a) -> Subdomain -> Cache a
+quadrant :: (Uv.Bounds -> a) -> Domain2d -> Cache a
 quadrant function subdomain = do
-  let (Subdomain x y) = subdomain
-  let (x1, x2) = Solve1d.bisect x
-  let (y1, y2) = Solve1d.bisect y
-  let xMid = Solve1d.half x
-  let yMid = Solve1d.half y
-  let bottomLeftChild = quadrant function (Subdomain x1 y1)
-  let bottomMiddleChild = column function (Subdomain xMid y1)
-  let bottomRightChild = quadrant function (Subdomain x2 y1)
-  let middleLeftChild = row function (Subdomain x1 yMid)
-  let middleChild = central function (Subdomain xMid yMid)
-  let middleRightChild = row function (Subdomain x2 yMid)
-  let topLeftChild = quadrant function (Subdomain x1 y2)
-  let topMiddleChild = column function (Subdomain xMid y2)
-  let topRightChild = quadrant function (Subdomain x2 y2)
+  let (Domain2d x y) = subdomain
+  let (x1, x2) = Domain1d.bisect x
+  let (y1, y2) = Domain1d.bisect y
+  let xMid = Domain1d.half x
+  let yMid = Domain1d.half y
+  let bottomLeftChild = quadrant function (Domain2d x1 y1)
+  let bottomMiddleChild = column function (Domain2d xMid y1)
+  let bottomRightChild = quadrant function (Domain2d x2 y1)
+  let middleLeftChild = row function (Domain2d x1 yMid)
+  let middleChild = central function (Domain2d xMid yMid)
+  let middleRightChild = row function (Domain2d x2 yMid)
+  let topLeftChild = quadrant function (Domain2d x1 y2)
+  let topMiddleChild = column function (Domain2d xMid y2)
+  let topRightChild = quadrant function (Domain2d x2 y2)
   let node =
         Quadrant
           bottomLeftChild
@@ -191,7 +124,7 @@ data SomeExclusions
 
 data Exclusions exclusions where
   NoExclusions :: Exclusions NoExclusions
-  SomeExclusions :: NonEmpty Subdomain -> Exclusions SomeExclusions
+  SomeExclusions :: NonEmpty Domain2d -> Exclusions SomeExclusions
 
 deriving instance Show (Exclusions exclusions)
 
@@ -199,7 +132,7 @@ data InfiniteRecursion = InfiniteRecursion deriving (Eq, Show, Error)
 
 type Callback cached solution =
   forall exclusions.
-  Subdomain ->
+  Domain2d ->
   cached ->
   Exclusions exclusions ->
   Action exclusions solution
@@ -207,8 +140,8 @@ type Callback cached solution =
 search ::
   Callback cached solution ->
   Cache cached ->
-  List (solution, Subdomain) ->
-  Result InfiniteRecursion (List (solution, Subdomain))
+  List (solution, Domain2d) ->
+  Result InfiniteRecursion (List (solution, Domain2d))
 search callback cache accumulated =
   process callback (Queue.singleton cache) accumulated
 
@@ -216,8 +149,8 @@ process ::
   forall cached solution.
   Callback cached solution ->
   Queue (Cache cached) ->
-  List (solution, Subdomain) ->
-  Result InfiniteRecursion (List (solution, Subdomain))
+  List (solution, Domain2d) ->
+  Result InfiniteRecursion (List (solution, Domain2d))
 process callback queue accumulated =
   case Queue.pop queue of
     Nothing -> Ok accumulated -- We're done! No more subdomains to process
@@ -225,7 +158,9 @@ process callback queue accumulated =
       -- TODO optimize to check for containment and overlapping subdomains in a single pass
       -- (maybe use the call stack to avoid even constructing the overlapping domain list
       -- if the subdomain is actually contained?)
-      let filteredExclusions = List.filter (overlaps subdomain) (List.map Pair.second accumulated)
+      let filteredExclusions = 
+            List.map Pair.second accumulated
+              |> List.filter (Domain2d.overlaps subdomain)
       if containedBy filteredExclusions subdomain
         then process callback remaining accumulated
         else do
@@ -241,20 +176,20 @@ process callback queue accumulated =
                 Return solution ->
                   process callback remaining ((solution, subdomain) : accumulated)
 
-containedBy :: List Subdomain -> Subdomain -> Bool
+containedBy :: List Domain2d -> Domain2d -> Bool
 containedBy exclusions subdomain =
-  List.any (contains subdomain) exclusions || do
-    let (Subdomain x y) = subdomain
-    let (x1, x2) = Solve1d.endpoints (Solve1d.half x)
-    let (y1, y2) = Solve1d.endpoints (Solve1d.half y)
+  List.any (Domain2d.contains subdomain) exclusions || do
+    let (Domain2d x y) = subdomain
+    let (x1, x2) = Domain1d.endpoints (Domain1d.half x)
+    let (y1, y2) = Domain1d.endpoints (Domain1d.half y)
     checkContainment exclusions x1 x2 y1 y2 False False False False
 
 checkContainment ::
-  List Subdomain ->
-  Solve1d.Endpoint ->
-  Solve1d.Endpoint ->
-  Solve1d.Endpoint ->
-  Solve1d.Endpoint ->
+  List Domain2d ->
+  Domain1d.Boundary ->
+  Domain1d.Boundary ->
+  Domain1d.Boundary ->
+  Domain1d.Boundary ->
   Bool ->
   Bool ->
   Bool ->
@@ -264,11 +199,11 @@ checkContainment exclusions x1 x2 y1 y2 contained11 contained12 contained21 cont
   case exclusions of
     [] -> contained11 && contained12 && contained21 && contained22
     first : rest -> do
-      let (Subdomain x y) = first
-      let updated11 = contained11 || (Solve1d.includes x1 x && Solve1d.includes y1 y)
-      let updated12 = contained12 || (Solve1d.includes x1 x && Solve1d.includes y2 y)
-      let updated21 = contained21 || (Solve1d.includes x2 x && Solve1d.includes y1 y)
-      let updated22 = contained22 || (Solve1d.includes x2 x && Solve1d.includes y2 y)
+      let (Domain2d x y) = first
+      let updated11 = contained11 || (Domain1d.includes x1 x && Domain1d.includes y1 y)
+      let updated12 = contained12 || (Domain1d.includes x1 x && Domain1d.includes y2 y)
+      let updated21 = contained21 || (Domain1d.includes x2 x && Domain1d.includes y1 y)
+      let updated22 = contained22 || (Domain1d.includes x2 x && Domain1d.includes y2 y)
       checkContainment rest x1 x2 y1 y2 updated11 updated12 updated21 updated22
 
 {-# INLINE recurseIntoChildrenOf #-}
@@ -277,8 +212,8 @@ recurseIntoChildrenOf ::
   Node cached ->
   Callback cached solution ->
   Queue (Cache cached) ->
-  List (solution, Subdomain) ->
-  Result InfiniteRecursion (List (solution, Subdomain))
+  List (solution, Domain2d) ->
+  Result InfiniteRecursion (List (solution, Domain2d))
 recurseIntoChildrenOf node callback queue accumulated = Result.do
   updatedQueue <- case node of
     Atomic -> Error InfiniteRecursion

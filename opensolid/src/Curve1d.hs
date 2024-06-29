@@ -26,6 +26,8 @@ import Angle qualified
 import Curve1d.Integral (Integral (Integral))
 import Curve1d.Root (Root (Root))
 import Curve1d.Root qualified as Root
+import Domain1d (Domain1d)
+import Domain1d qualified
 import Estimate (Estimate)
 import Estimate qualified
 import Float qualified
@@ -35,7 +37,6 @@ import Qty qualified
 import Range (Range)
 import Range qualified
 import Result qualified
-import Solve1d (Subdomain)
 import Solve1d qualified
 import Stream (Stream (Stream))
 import Stream qualified
@@ -386,7 +387,7 @@ findZeros ::
   Stream (Curve1d units) ->
   List Int ->
   Solve1d.Cache (Stream (Range units)) ->
-  Result HigherOrderZero (List Root, List Subdomain)
+  Result HigherOrderZero (List Root, List Domain1d)
 findZeros derivatives orders cache = case orders of
   [] -> Ok ([], []) -- No more orders to try
   n : higherOrders -> Result.do
@@ -398,7 +399,7 @@ resolveOrder ::
   Tolerance units =>
   Int ->
   Stream (Curve1d units) ->
-  Subdomain ->
+  Domain1d ->
   Stream (Range units) ->
   Solve1d.Exclusions exclusions ->
   Solve1d.Action exclusions Root
@@ -419,7 +420,7 @@ resolveOrder n derivatives subdomain derivativeBounds exclusions
           Nothing -> Solve1d.recurse
           -- Next derivative *is* resolved, try to find a root of order n
           Just sign -> do
-            let subdomainInterior = Solve1d.interior subdomain
+            let subdomainInterior = Domain1d.interior subdomain
             let neighborhood = Solve1d.neighborhood (n + 1) (Range.maxAbs nextDerivativeBounds)
             let isSolution = isSolutionOrder n neighborhood derivatives
             if
@@ -431,7 +432,7 @@ resolveOrder n derivatives subdomain derivativeBounds exclusions
                   let fn = pointOn (Stream.nth n derivatives)
                   let fm = pointOn (Stream.nth (n + 1) derivatives)
                   let fnTolerance = Solve1d.derivativeTolerance neighborhood n
-                  let subdomainBounds = Solve1d.bounds subdomain
+                  let subdomainBounds = Domain1d.bounds subdomain
                   let x = Tolerance.using fnTolerance (Solve1d.monotonic fn fm subdomainBounds)
                   if isSolutionOrder n neighborhood derivatives x
                     then

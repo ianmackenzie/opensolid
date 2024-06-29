@@ -115,6 +115,8 @@ library
     Direction3d
     DirectionBounds2d
     DirectionCurve2d
+    Domain1d
+    Domain2d
     Drawing2d
     Duration
     Error

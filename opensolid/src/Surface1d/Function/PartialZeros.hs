@@ -15,12 +15,12 @@ where
 
 import Curve2d (Curve2d)
 import Curve2d qualified
+import Domain2d (Domain2d)
+import Domain2d qualified
 import List qualified
 import NonEmpty qualified
 import OpenSolid
 import Pair qualified
-import Solve2d (Subdomain)
-import Solve2d qualified
 import Surface1d.Function.SaddleRegion (SaddleRegion (..))
 import Surface1d.Function.SaddleRegion qualified as SaddleRegion
 import Surface1d.Function.Zeros (Zeros (..))
@@ -31,11 +31,11 @@ data PartialZeros = PartialZeros
   { crossingCurves :: List CrossingCurve
   , crossingLoops :: List CrossingLoop
   , tangentPoints :: List (Uv.Point, Sign)
-  , saddleRegions :: List (Subdomain, SaddleRegion)
+  , saddleRegions :: List (Domain2d, SaddleRegion)
   }
 
 data CrossingCurve
-  = CrossingCurve Solve2d.Boundary Solve2d.Boundary (NonEmpty (Curve2d Uv.Coordinates))
+  = CrossingCurve Domain2d.Boundary Domain2d.Boundary (NonEmpty (Curve2d Uv.Coordinates))
   deriving (Show)
 
 type CrossingLoop = NonEmpty (Curve2d Uv.Coordinates)
@@ -83,11 +83,11 @@ data JoinCrossingCurveResult
 
 joinCrossingCurves :: CrossingCurve -> CrossingCurve -> Maybe JoinCrossingCurveResult
 joinCrossingCurves (CrossingCurve start1 end1 segments1) (CrossingCurve start2 end2 segments2)
-  | Solve2d.adjacent end1 start2 && Solve2d.adjacent end2 start1 =
+  | Domain2d.adjacent end1 start2 && Domain2d.adjacent end2 start1 =
       Just (NewCrossingLoop (segments1 + segments2))
-  | Solve2d.adjacent end1 start2 =
+  | Domain2d.adjacent end1 start2 =
       Just (JoinedCrossingCurve (CrossingCurve start1 end2 (segments1 + segments2)))
-  | Solve2d.adjacent end2 start1 =
+  | Domain2d.adjacent end2 start1 =
       Just (JoinedCrossingCurve (CrossingCurve start2 end1 (segments2 + segments1)))
   | otherwise = Nothing
 
@@ -98,7 +98,7 @@ addTangentPoint tangentPoint partialZeros = do
     { Surface1d.Function.PartialZeros.tangentPoints = tangentPoint : tangentPoints
     }
 
-addSaddleRegion :: Subdomain -> SaddleRegion -> PartialZeros -> PartialZeros
+addSaddleRegion :: Domain2d -> SaddleRegion -> PartialZeros -> PartialZeros
 addSaddleRegion subdomain saddleRegion partialZeros = do
   let PartialZeros{saddleRegions} = partialZeros
   partialZeros{saddleRegions = (subdomain, saddleRegion) : saddleRegions}
@@ -117,15 +117,15 @@ finalize partialZeros = do
     , Zeros.crossingLoops = crossingLoops
     , Zeros.tangentPoints = tangentPoints
     , Zeros.saddlePoints =
-        List.map (\(subdomain, saddleRegion) -> (SaddleRegion.point saddleRegion, Solve2d.bounds subdomain)) saddleRegions
+        List.map (\(subdomain, saddleRegion) -> (SaddleRegion.point saddleRegion, Domain2d.bounds subdomain)) saddleRegions
     }
 
-extend :: CrossingCurve -> (Subdomain, SaddleRegion) -> CrossingCurve
+extend :: CrossingCurve -> (Domain2d, SaddleRegion) -> CrossingCurve
 extend curve (subdomain, saddleRegion) = do
   let (CrossingCurve start end segments) = curve
   let SaddleRegion{connectingCurves} = saddleRegion
-  let extendStart = Solve2d.contacts subdomain start
-  let extendEnd = Solve2d.contacts subdomain end
+  let extendStart = Domain2d.contacts subdomain start
+  let extendEnd = Domain2d.contacts subdomain end
   let startExtension = connectingCurves (Curve2d.startPoint (NonEmpty.first segments))
   let endExtension =
         connectingCurves (Curve2d.endPoint (NonEmpty.last segments))

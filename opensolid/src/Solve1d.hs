@@ -1,23 +1,5 @@
-{-# LANGUAGE DuplicateRecordFields #-}
-{-# LANGUAGE NoFieldSelectors #-}
-
 module Solve1d
-  ( Subdomain
-  , Endpoint
-  , domain
-  , endpoints
-  , min
-  , max
-  , isAtomic
-  , bisect
-  , half
-  , interior
-  , bounds
-  , includes
-  , overlaps
-  , contains
-  , adjacent
-  , isResolved
+  ( isResolved
   , resolvedSign
   , Neighborhood
   , neighborhood
@@ -37,91 +19,16 @@ module Solve1d
   )
 where
 
-import Float qualified
+import OpenSolid
+import Domain1d (Domain1d)
+import Domain1d qualified
+import Qty qualified
+import Range (Range)
 import Int qualified
 import List qualified
-import OpenSolid
-import Qty qualified
+import Range qualified
 import Queue (Queue)
 import Queue qualified
-import Range (Range)
-import Range qualified
-
-data Subdomain = Subdomain
-  { n :: Float
-  , i :: Float
-  , j :: Float
-  }
-  deriving (Show)
-
-instance Eq Subdomain where
-  Subdomain n1 i1 j1 == Subdomain n2 i2 j2 =
-    i1 * n2 == i2 * n1 && j1 * n2 == j2 * n1
-
-data Endpoint = Endpoint
-  { n :: Float
-  , i :: Float
-  }
-  deriving (Show)
-
-instance Eq Endpoint where
-  Endpoint n1 i1 == Endpoint n2 i2 =
-    i1 * n2 == i2 * n1
-
-domain :: Subdomain
-domain = Subdomain{n = 1.0, i = 0.0, j = 1.0}
-
-isAtomic :: Subdomain -> Bool
-isAtomic (Subdomain{n, i, j}) = (j - i) / n <= Float.epsilon
-
-endpoints :: Subdomain -> (Endpoint, Endpoint)
-endpoints (Subdomain{n, i, j}) = (Endpoint{n, i}, Endpoint{n, i = j})
-
-min :: Subdomain -> Endpoint
-min (Subdomain{n, i}) = Endpoint{n, i}
-
-max :: Subdomain -> Endpoint
-max (Subdomain{n, j}) = Endpoint{n, i = j}
-
-bisect :: Subdomain -> (Subdomain, Subdomain)
-bisect (Subdomain{n, i, j}) = do
-  let n2 = 2 * n
-  let i2 = 2 * i
-  let j2 = 2 * j
-  let mid = i2 + (j - i)
-  (Subdomain n2 i2 mid, Subdomain n2 mid j2)
-
-half :: Subdomain -> Subdomain
-half (Subdomain{n, i, j}) = do
-  let delta = j - i
-  Subdomain (4 * n) (4 * i + delta) (4 * j - delta)
-
-bounds :: Subdomain -> Range Unitless
-bounds (Subdomain{n, i, j}) = Range.unsafe (i / n) (j / n)
-
-interior :: Subdomain -> Range Unitless
-interior (Subdomain{n, i, j}) = do
-  let n8 = 8 * n
-  let delta = j - i
-  Range.unsafe
-    (if i == 0.0 then 0.0 else (8 * i + delta) / n8)
-    (if j == n then 1.0 else (8 * j - delta) / n8)
-
-overlaps :: Subdomain -> Subdomain -> Bool
-overlaps (Subdomain n2 i2 j2) (Subdomain n1 i1 j1) =
-  i1 * n2 < j2 * n1 && j1 * n2 > i2 * n1
-
-includes :: Endpoint -> Subdomain -> Bool
-includes (Endpoint{n = pn, i = pi}) (Subdomain{n, i, j}) = do
-  pi * n >= i * pn && pi * n <= j * pn
-
-contains :: Subdomain -> Subdomain -> Bool
-contains (Subdomain n2 i2 j2) (Subdomain n1 i1 j1) =
-  i1 * n2 <= i2 * n1 && j1 * n2 >= j2 * n1
-
-adjacent :: Subdomain -> Subdomain -> Bool
-adjacent (Subdomain n1 i1 j1) (Subdomain n2 i2 j2) =
-  i1 * n2 == j2 * n1 || j1 * n2 == i2 * n1
 
 isResolved :: Range units -> Bool
 isResolved range = resolvedSign range /= Nothing
@@ -148,7 +55,7 @@ derivativeTolerance (Neighborhood{n, derivativeMagnitude, radius}) k =
   derivativeMagnitude * radius ** (n - k) / Int.factorial (n - k)
 
 data Cache cached
-  = Tree Subdomain cached (Node cached)
+  = Tree Domain1d cached (Node cached)
 
 data Node cached
   = Atomic
@@ -156,26 +63,26 @@ data Node cached
   | Shrinkable ~(Cache cached)
 
 init :: (Range Unitless -> cached) -> Cache cached
-init function = split function domain
+init function = split function Domain1d.unit
 
-tree :: (Range Unitless -> cached) -> Subdomain -> Node cached -> Cache cached
+tree :: (Range Unitless -> cached) -> Domain1d -> Node cached -> Cache cached
 tree function subdomain givenNode = do
-  let cached = function (bounds subdomain)
-  let node = if isAtomic subdomain then Atomic else givenNode
+  let cached = function (Domain1d.bounds subdomain)
+  let node = if Domain1d.isAtomic subdomain then Atomic else givenNode
   Tree subdomain cached node
 
-split :: (Range Unitless -> cached) -> Subdomain -> Cache cached
+split :: (Range Unitless -> cached) -> Domain1d -> Cache cached
 split function subdomain = do
-  let middleSubdomain = half subdomain
-  let (leftSubdomain, rightSubdomain) = bisect subdomain
+  let middleSubdomain = Domain1d.half subdomain
+  let (leftSubdomain, rightSubdomain) = Domain1d.bisect subdomain
   let middleChild = shrink function middleSubdomain
   let leftChild = split function leftSubdomain
   let rightChild = split function rightSubdomain
   tree function subdomain (Splittable middleChild leftChild rightChild)
 
-shrink :: (Range Unitless -> cached) -> Subdomain -> Cache cached
+shrink :: (Range Unitless -> cached) -> Domain1d -> Cache cached
 shrink function subdomain = do
-  let child = shrink function (half subdomain)
+  let child = shrink function (Domain1d.half subdomain)
   tree function subdomain (Shrinkable child)
 
 data NoExclusions
@@ -184,13 +91,13 @@ data SomeExclusions
 
 data Exclusions exclusions where
   NoExclusions :: Exclusions NoExclusions
-  SomeExclusions :: NonEmpty Subdomain -> Exclusions SomeExclusions
+  SomeExclusions :: NonEmpty Domain1d -> Exclusions SomeExclusions
 
 data InfiniteRecursion = InfiniteRecursion deriving (Eq, Show, Error)
 
 type Callback cached solution =
   forall exclusions.
-  Subdomain ->
+  Domain1d ->
   cached ->
   Exclusions exclusions ->
   Action exclusions solution
@@ -199,8 +106,8 @@ search ::
   Callback cached solution ->
   Cache cached ->
   List solution ->
-  List Subdomain ->
-  Result InfiniteRecursion (List solution, List Subdomain)
+  List Domain1d ->
+  Result InfiniteRecursion (List solution, List Domain1d)
 search callback cache solutions exclusions =
   process callback (Queue.singleton cache) solutions exclusions
 
@@ -209,13 +116,13 @@ process ::
   Callback cached solution ->
   Queue (Cache cached) ->
   List solution ->
-  List Subdomain ->
-  Result InfiniteRecursion (List solution, List Subdomain)
+  List Domain1d ->
+  Result InfiniteRecursion (List solution, List Domain1d)
 process callback queue solutions exclusions =
   case Queue.pop queue of
     Just (Tree subdomain cached node, remaining) -> do
-      let filteredExclusions = List.filter (overlaps subdomain) exclusions
-      if List.any (contains subdomain) filteredExclusions
+      let filteredExclusions = List.filter (Domain1d.overlaps subdomain) exclusions
+      if List.any (Domain1d.contains subdomain) filteredExclusions
         then process callback remaining solutions exclusions
         else case filteredExclusions of
           NonEmpty someExclusions ->
@@ -237,8 +144,8 @@ recurseIntoChildrenOf ::
   Callback cached solution ->
   Queue (Cache cached) ->
   List solution ->
-  List Subdomain ->
-  Result InfiniteRecursion (List solution, List Subdomain)
+  List Domain1d ->
+  Result InfiniteRecursion (List solution, List Domain1d)
 recurseIntoChildrenOf node callback queue solutions exclusions =
   case node of
     Atomic -> Error InfiniteRecursion
