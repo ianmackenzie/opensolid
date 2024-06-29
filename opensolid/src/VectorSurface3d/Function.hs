@@ -7,7 +7,7 @@
 {-# OPTIONS_GHC -Wno-orphans #-}
 
 module VectorSurface3d.Function
-  ( Function
+  ( Function (Constant)
   , Interface (..)
   , wrap
   , zero
