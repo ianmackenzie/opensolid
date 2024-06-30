@@ -19,6 +19,11 @@ module Point3d
   , midpoint
   , interpolateFrom
   , distanceFrom
+  , placeIn
+  , relativeTo
+  , convert
+  , unconvert
+  , transformBy
   )
 where
 
@@ -26,9 +31,12 @@ import Bounded qualified
 import {-# SOURCE #-} Bounds3d (Bounds3d)
 import {-# SOURCE #-} Bounds3d qualified
 import Data.Coerce qualified
+import {-# SOURCE #-} Frame3d (Frame3d)
 import Length qualified
 import OpenSolid
+import Point3d.CoordinateTransformation qualified
 import Qty qualified
+import Transform3d (Transform3d (Transform3d))
 import Units (Meters)
 import Units qualified
 import Vector3d (Vector3d (Vector3d))
@@ -190,3 +198,29 @@ midpoint (Point3d x1 y1 z1) (Point3d x2 y2 z2) =
 
 distanceFrom :: Point3d (space @ units) -> Point3d (space @ units) -> Qty units
 distanceFrom p1 p2 = Vector3d.magnitude (p2 - p1)
+
+placeIn ::
+  Frame3d (global @ units) (Defines local) ->
+  Point3d (local @ units) ->
+  Point3d (global @ units)
+placeIn = Point3d.CoordinateTransformation.placeIn
+
+relativeTo ::
+  Frame3d (global @ units) (Defines local) ->
+  Point3d (global @ units) ->
+  Point3d (local @ units)
+relativeTo = Point3d.CoordinateTransformation.relativeTo
+
+convert :: Qty (units2 :/: units1) -> Point3d (space @ units1) -> Point3d (space @ units2)
+convert conversion (Point3d px py pz) =
+  Point3d (Qty.convert conversion px) (Qty.convert conversion py) (Qty.convert conversion pz)
+
+unconvert :: Qty (units2 :/: units1) -> Point3d (space @ units2) -> Point3d (space @ units1)
+unconvert conversion (Point3d px py pz) =
+  Point3d (Qty.unconvert conversion px) (Qty.unconvert conversion py) (Qty.unconvert conversion pz)
+
+transformBy :: Transform3d tag (space @ units) -> Point3d (space @ units) -> Point3d (space @ units)
+transformBy transform point = do
+  let (Transform3d p0 vx vy vz) = transform
+  let (px, py, pz) = coordinates point
+  p0 + px * vx + py * vy + pz * vz

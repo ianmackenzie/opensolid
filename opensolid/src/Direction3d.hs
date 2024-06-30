@@ -3,6 +3,7 @@ module Direction3d
   , xComponent
   , yComponent
   , zComponent
+  , components
   , unsafe
   , unwrap
   , x
@@ -15,25 +16,28 @@ module Direction3d
   , positiveZ
   , negativeZ
   , angleFrom
+  , placeIn
+  , relativeTo
+  , placeInBasis
+  , relativeToBasis
+  , transformBy
   )
 where
 
 import Angle qualified
+import {-# SOURCE #-} Basis3d (Basis3d)
+import {-# SOURCE #-} Frame3d (Frame3d)
 import OpenSolid
+import Transform qualified
+import Transform3d (Transform3d)
 import Units qualified
 import Vector3d (Vector3d (Vector3d))
 import Vector3d qualified
 
 type role Direction3d phantom
 
-newtype Direction3d (space :: Type) = Direction3d_ (Vector3d (space @ Unitless))
+newtype Direction3d (space :: Type) = Direction3d (Vector3d (space @ Unitless))
   deriving (Eq, Show)
-
-{-# COMPLETE Direction3d #-}
-
-{-# INLINE Direction3d #-}
-pattern Direction3d :: Vector3d (space @ Unitless) -> Direction3d space
-pattern Direction3d v <- Direction3d_ v
 
 instance HasUnits (Direction3d space) where
   type Units (Direction3d space) = Unitless
@@ -65,24 +69,6 @@ instance Multiplication' (Direction3d space) Sign where
   direction .*. Positive = direction
   direction .*. Negative = -direction
 
-instance space ~ space_ => DotMultiplication (Direction3d space) (Direction3d space_) Float
-
-instance space ~ space_ => DotMultiplication' (Direction3d space) (Direction3d space_) where
-  type Direction3d space .<>. Direction3d space_ = Qty (Unitless :*: Unitless)
-  Direction3d vector1 .<>. Direction3d vector2 = vector1 .<>. vector2
-
-instance space ~ space_ => DotMultiplication (Vector3d (space @ units)) (Direction3d space_) (Qty units)
-
-instance space ~ space_ => DotMultiplication' (Vector3d (space @ units)) (Direction3d space_) where
-  type Vector3d (space @ units) .<>. Direction3d space_ = Qty (units :*: Unitless)
-  vector1 .<>. Direction3d vector2 = vector1 .<>. vector2
-
-instance space ~ space_ => DotMultiplication (Direction3d space) (Vector3d (space_ @ units)) (Qty units)
-
-instance space ~ space_ => DotMultiplication' (Direction3d space) (Vector3d (space_ @ units)) where
-  type Direction3d space .<>. Vector3d (space_ @ units) = Qty (Unitless :*: units)
-  Direction3d vector1 .<>. vector2 = vector1 .<>. vector2
-
 instance Multiplication (Qty units) (Direction3d space) (Vector3d (space @ units))
 
 instance Multiplication' (Qty units) (Direction3d space) where
@@ -95,21 +81,11 @@ instance Multiplication' (Direction3d space) (Qty units) where
   type Direction3d space .*. Qty units = Vector3d (space @ (Unitless :*: units))
   Direction3d vector .*. scale = vector .*. scale
 
-instance
-  space ~ space_ =>
-  CrossMultiplication (Vector3d (space @ units)) (Direction3d space_) (Vector3d (space @ units))
+instance space ~ space_ => DotMultiplication (Direction3d space) (Direction3d space_) Float
 
-instance space ~ space_ => CrossMultiplication' (Vector3d (space @ units)) (Direction3d space_) where
-  type Vector3d (space @ units) .><. Direction3d space_ = Vector3d (space @ (units :*: Unitless))
-  vector1 .><. Direction3d vector2 = vector1 .><. vector2
-
-instance
-  space ~ space_ =>
-  CrossMultiplication (Direction3d space) (Vector3d (space_ @ units)) (Vector3d (space @ units))
-
-instance space ~ space_ => CrossMultiplication' (Direction3d space) (Vector3d (space_ @ units)) where
-  type Direction3d space .><. Vector3d (space_ @ units) = Vector3d (space @ (Unitless :*: units))
-  Direction3d vector1 .><. vector2 = vector1 .><. vector2
+instance space ~ space_ => DotMultiplication' (Direction3d space) (Direction3d space_) where
+  type Direction3d space .<>. Direction3d space_ = Qty (Unitless :*: Unitless)
+  Direction3d vector1 .<>. Direction3d vector2 = vector1 .<>. vector2
 
 instance
   space ~ space_ =>
@@ -120,19 +96,27 @@ instance space ~ space_ => CrossMultiplication' (Direction3d space) (Direction3d
   Direction3d vector1 .><. Direction3d vector2 = vector1 .><. vector2
 
 xComponent :: Direction3d space -> Float
-xComponent (Direction3d_ vector) = Vector3d.xComponent vector
+xComponent (Direction3d vector) = Vector3d.xComponent vector
 
 yComponent :: Direction3d space -> Float
-yComponent (Direction3d_ vector) = Vector3d.yComponent vector
+yComponent (Direction3d vector) = Vector3d.yComponent vector
 
 zComponent :: Direction3d space -> Float
-zComponent (Direction3d_ vector) = Vector3d.zComponent vector
+zComponent (Direction3d vector) = Vector3d.zComponent vector
+
+{-# INLINE components #-}
+components :: Direction3d space -> (Float, Float, Float)
+components direction = Vector3d.components (unwrap direction)
 
 unsafe :: Vector3d (space @ Unitless) -> Direction3d space
-unsafe = Direction3d_
+unsafe = Direction3d
 
 unwrap :: Direction3d space -> Vector3d (space @ Unitless)
 unwrap (Direction3d vector) = vector
+
+{-# INLINE lift #-}
+lift :: (Vector3d (space1 @ Unitless) -> Vector3d (space2 @ Unitless)) -> Direction3d space1 -> Direction3d space2
+lift vectorFunction direction = Direction3d (vectorFunction (unwrap direction))
 
 positiveX :: Direction3d space
 positiveX = unsafe (Vector3d 1.0 0.0 0.0)
@@ -163,3 +147,22 @@ z = positiveZ
 
 angleFrom :: Direction3d space -> Direction3d space -> Angle
 angleFrom d1 d2 = Angle.atan2 (Vector3d.magnitude (d1 >< d2)) (d1 <> d2)
+
+placeIn :: Frame3d (global @ originUnits) (Defines local) -> Direction3d local -> Direction3d global
+placeIn frame = lift (Vector3d.placeIn frame)
+
+relativeTo :: Frame3d (global @ originUnits) (Defines local) -> Direction3d global -> Direction3d local
+relativeTo frame = lift (Vector3d.relativeTo frame)
+
+placeInBasis :: Basis3d global (Defines local) -> Direction3d local -> Direction3d global
+placeInBasis basis = lift (Vector3d.placeInBasis basis)
+
+relativeToBasis :: Basis3d global (Defines local) -> Direction3d global -> Direction3d local
+relativeToBasis basis = lift (Vector3d.relativeToBasis basis)
+
+transformBy ::
+  Transform.IsOrthonormal tag =>
+  Transform3d tag (space @ translationUnits) ->
+  Direction3d space ->
+  Direction3d space
+transformBy transform = lift (Vector3d.transformBy transform)

@@ -91,8 +91,10 @@ library
     Arithmetic
     Array
     Axis2d
+    Axis3d
     Basics
     Basis2d
+    Basis3d
     BezierCurve2d
     Bisection
     Bool
@@ -124,6 +126,7 @@ library
     File
     Float
     Frame2d
+    Frame3d
     Fuzzy
     Http.Server
     Http.Server.Request
@@ -169,6 +172,7 @@ library
     Tolerance
     Transform
     Transform2d
+    Transform3d
     Units
     Uv
     Uvw
@@ -195,11 +199,13 @@ library
     Curve2d.Segment
     Json.FieldSchema
     Point2d.CoordinateTransformation
+    Point3d.CoordinateTransformation
     Quadrature
     Surface1d.Function.PartialZeros
     Surface1d.Function.SaddleRegion
     Text.Parse
     Vector2d.CoordinateTransformation
+    Vector3d.CoordinateTransformation
 
   hs-source-dirs: src
 
