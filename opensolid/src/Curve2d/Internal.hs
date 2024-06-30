@@ -4,7 +4,6 @@
 module Curve2d.Internal
   ( Curve2d (..)
   , Interface (..)
-  , DegenerateCurve (DegenerateCurve)
   , startPoint
   , endPoint
   , evaluateAt
@@ -83,8 +82,6 @@ instance Interface (Curve2d (space @ units)) (space @ units) where
   reverseImpl = reverse
   boundsImpl = bounds
   transformByImpl = transformBy
-
-data DegenerateCurve = DegenerateCurve deriving (Eq, Show, Error)
 
 instance
   ( space ~ space_

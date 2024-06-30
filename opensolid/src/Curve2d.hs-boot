@@ -11,7 +11,6 @@ module Curve2d
 where
 
 import Bounds2d (Bounds2d)
-import Curve2d.Internal (DegenerateCurve (DegenerateCurve))
 import Curve2d.Internal qualified as Internal
 import DirectionCurve2d (DirectionCurve2d)
 import OpenSolid
@@ -20,6 +19,8 @@ import Range (Range)
 import VectorCurve2d (VectorCurve2d)
 
 type Curve2d (coordinateSystem :: CoordinateSystem) = Internal.Curve2d coordinateSystem
+
+data DegenerateCurve = DegenerateCurve
 
 startPoint :: Curve2d (space @ units) -> Point2d (space @ units)
 endPoint :: Curve2d (space @ units) -> Point2d (space @ units)

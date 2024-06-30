@@ -53,7 +53,7 @@ import Bounds2d qualified
 import Curve1d (Curve1d)
 import Curve2d.Derivatives (Derivatives)
 import Curve2d.Derivatives qualified as Derivatives
-import Curve2d.Internal (DegenerateCurve (DegenerateCurve), Interface (..))
+import Curve2d.Internal (Interface (..))
 import Curve2d.Internal qualified as Internal
 import Curve2d.Intersection (Intersection (Intersection))
 import Curve2d.Intersection qualified as Intersection
@@ -81,6 +81,8 @@ import VectorCurve2d qualified
 import Prelude qualified
 
 type Curve2d (coordinateSystem :: CoordinateSystem) = Internal.Curve2d coordinateSystem
+
+data DegenerateCurve = DegenerateCurve deriving (Eq, Show, Error)
 
 wrap :: Interface curve (space @ units) => curve -> Curve2d (space @ units)
 wrap = Internal.Curve
