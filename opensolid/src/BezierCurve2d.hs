@@ -74,7 +74,7 @@ controlPointDifferences scale p1 p2 rest = do
     [] -> NonEmpty.singleton v1
     p3 : remaining -> NonEmpty.prepend v1 (controlPointDifferences scale p2 p3 remaining)
 
-transformBy :: Transform2d a (space @ units) -> BezierCurve2d (space @ units) -> BezierCurve2d (space @ units)
+transformBy :: Transform2d tag (space @ units) -> BezierCurve2d (space @ units) -> BezierCurve2d (space @ units)
 transformBy transform (BezierCurve2d controlPoints) =
   BezierCurve2d (NonEmpty.map (Point2d.transformBy transform) controlPoints)
 

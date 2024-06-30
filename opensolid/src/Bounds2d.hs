@@ -470,7 +470,7 @@ relativeTo frame (Bounds2d x y) = do
   Bounds2d (Range.from (x0 - rx) (x0 + rx)) (Range.from (y0 - ry) (y0 + ry))
 
 transformBy ::
-  Transform2d a (space @ units) ->
+  Transform2d tag (space @ units) ->
   Bounds2d (space @ units) ->
   Bounds2d (space @ units)
 transformBy transform (Bounds2d x y) = do

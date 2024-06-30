@@ -507,7 +507,7 @@ relativeToBasis basis (VectorBounds2d x y) = do
   let ry = 0.5 * xWidth * Float.abs jx + 0.5 * yWidth * Float.abs jy
   VectorBounds2d (Range.from (x0 - rx) (x0 + rx)) (Range.from (y0 - ry) (y0 + ry))
 
-transformBy :: Transform2d a (space @ units1) -> VectorBounds2d (space @ units2) -> VectorBounds2d (space @ units2)
+transformBy :: Transform2d tag (space @ units1) -> VectorBounds2d (space @ units2) -> VectorBounds2d (space @ units2)
 transformBy transform (VectorBounds2d x y) = do
   let xMid = Range.midpoint x
   let yMid = Range.midpoint y

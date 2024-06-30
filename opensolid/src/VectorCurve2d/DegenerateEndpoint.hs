@@ -84,6 +84,6 @@ segmentBounds (Range tLow tHigh) (DegenerateEndpoint t0 t1 endpointCurve) innerC
     (Vector2d.interpolateFrom v0 v1 ((tLow - t0) / (t1 - t0)))
     (Vector2d.interpolateFrom v0 v1 ((tHigh - t0) / (t1 - t0)))
 
-transformBy :: Transform2d a (space @ units) -> DegenerateEndpoint space -> DegenerateEndpoint space
+transformBy :: Transform2d tag (space @ units) -> DegenerateEndpoint space -> DegenerateEndpoint space
 transformBy transform (DegenerateEndpoint t0 t1 endpointCurve) =
   DegenerateEndpoint t0 t1 (VectorCurve2d.transformBy transform endpointCurve)

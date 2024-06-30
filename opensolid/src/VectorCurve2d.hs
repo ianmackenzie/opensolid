@@ -80,7 +80,7 @@ class
   segmentBoundsImpl :: Range Unitless -> curve -> VectorBounds2d coordinateSystem
   derivativeImpl :: curve -> VectorCurve2d coordinateSystem
   transformByImpl ::
-    Transform2d a (Space coordinateSystem @ transformUnits) ->
+    Transform2d tag (Space coordinateSystem @ transformUnits) ->
     curve ->
     VectorCurve2d coordinateSystem
 
@@ -515,7 +515,7 @@ instance
   direction2d .><. curve = Vector2d.unit direction2d .><. curve
 
 transformBy ::
-  Transform2d a (space @ units1) ->
+  Transform2d tag (space @ units1) ->
   VectorCurve2d (space @ units2) ->
   VectorCurve2d (space @ units2)
 transformBy transform curve = do

@@ -386,7 +386,7 @@ sum :: List (Vector2d (space @ units)) -> Vector2d (space @ units)
 sum = List.foldl (+) zero
 
 transformBy ::
-  Transform2d a (space @ translationUnits) ->
+  Transform2d tag (space @ translationUnits) ->
   Vector2d (space @ units) ->
   Vector2d (space @ units)
 transformBy transform vector = do

@@ -310,7 +310,7 @@ relativeTo ::
 relativeTo frame = placeIn (Frame2d.inverse frame)
 
 transformBy ::
-  Transform2d a (space @ units) ->
+  Transform2d tag (space @ units) ->
   Curve2d (space @ units) ->
   Curve2d (space @ units)
 transformBy = Internal.transformBy
@@ -442,7 +442,7 @@ curvature curve = Result.map Units.specialize (curvature' curve)
 data TransformBy curve coordinateSystem where
   TransformBy ::
     Interface curve (space @ units) =>
-    Transform2d a (space @ units) ->
+    Transform2d tag (space @ units) ->
     curve ->
     TransformBy curve (space @ units)
 

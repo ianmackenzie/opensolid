@@ -127,7 +127,7 @@ class
   derivativeImpl :: curve -> VectorCurve2d coordinateSystem
   reverseImpl :: curve -> curve
   boundsImpl :: curve -> Bounds2d coordinateSystem
-  transformByImpl :: Transform2d a coordinateSystem -> curve -> Curve2d coordinateSystem
+  transformByImpl :: Transform2d tag coordinateSystem -> curve -> Curve2d coordinateSystem
 
 startPoint :: Curve2d (space @ units) -> Point2d (space @ units)
 startPoint (Line p1 _) = p1
@@ -184,7 +184,7 @@ bounds (Curve curve) = boundsImpl curve
 bounds (Coerce curve) = Units.coerce (bounds curve)
 bounds (PlaceIn frame curve) = Bounds2d.placeIn frame (bounds curve)
 
-transformBy :: Transform2d a (space @ units) -> Curve2d (space @ units) -> Curve2d (space @ units)
+transformBy :: Transform2d tag (space @ units) -> Curve2d (space @ units) -> Curve2d (space @ units)
 transformBy transform (Line p1 p2) =
   Line (Point2d.transformBy transform p1) (Point2d.transformBy transform p2)
 transformBy transform (Arc centerPoint xVector yVector startAngle endAngle) =

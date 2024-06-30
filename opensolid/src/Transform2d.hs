@@ -56,14 +56,14 @@ import Vector2d.CoordinateTransformation qualified as Vector2d
 type role Transform2d phantom nominal
 
 type Transform2d :: Type -> CoordinateSystem -> Type
-data Transform2d a (coordinateSystem :: CoordinateSystem) where
+data Transform2d tag (coordinateSystem :: CoordinateSystem) where
   Transform2d_ ::
     Point2d (space @ units) ->
     Vector2d (space @ Unitless) ->
     Vector2d (space @ Unitless) ->
-    Transform2d a (space @ units)
+    Transform2d tag (space @ units)
 
-deriving instance Show (Transform2d a (space @ units))
+deriving instance Show (Transform2d tag (space @ units))
 
 {-# COMPLETE Transform2d #-}
 
@@ -72,18 +72,18 @@ pattern Transform2d ::
   Point2d (space @ units) ->
   Vector2d (space @ Unitless) ->
   Vector2d (space @ Unitless) ->
-  Transform2d a (space @ units)
+  Transform2d tag (space @ units)
 pattern Transform2d p0 vx vy <- Transform2d_ p0 vx vy
 
-instance HasUnits (Transform2d a (space @ units)) where
-  type Units (Transform2d a (space @ units)) = units
-  type Erase (Transform2d a (space @ units)) = Transform2d a (space @ Unitless)
+instance HasUnits (Transform2d tag (space @ units)) where
+  type Units (Transform2d tag (space @ units)) = units
+  type Erase (Transform2d tag (space @ units)) = Transform2d tag (space @ Unitless)
 
 instance
-  (a ~ a_, space ~ space_) =>
+  (tag ~ tag_, space ~ space_) =>
   Units.Coercion
-    (Transform2d a (space @ units1))
-    (Transform2d a_ (space_ @ units2))
+    (Transform2d tag (space @ units1))
+    (Transform2d tag_ (space_ @ units2))
   where
   coerce (Transform2d p0 vx vy) = Transform2d_ (Units.coerce p0) vx vy
 
@@ -154,14 +154,14 @@ instance Composition AffineTag UniformTag AffineTag where AffineTag >> UniformTa
 instance Composition AffineTag AffineTag AffineTag where AffineTag >> AffineTag = AffineTag
 
 instance
-  ( Composition a b c
+  ( Composition tag1 tag2 tag3
   , space ~ space_
   , units ~ units_
   ) =>
   Composition
-    (Transform2d a (space @ units))
-    (Transform2d b (space_ @ units_))
-    (Transform2d c (space @ units))
+    (Transform2d tag1 (space @ units))
+    (Transform2d tag2 (space_ @ units_))
+    (Transform2d tag3 (space @ units))
   where
   transform1 >> transform2 =
     Transform2d_
@@ -182,7 +182,7 @@ withFixedPoint ::
   Point2d (space @ units) ->
   Vector2d (space @ Unitless) ->
   Vector2d (space @ Unitless) ->
-  Transform2d a (space @ units)
+  Transform2d tag (space @ units)
 withFixedPoint fixedPoint vx vy = do
   let (fixedX, fixedY) = Point2d.coordinates fixedPoint
   Transform2d_ (fixedPoint - fixedX * vx - fixedY * vy) vx vy
@@ -229,8 +229,8 @@ scaleAlong axis scale = do
 
 placeIn ::
   Frame2d (global @ units) (Defines local) ->
-  Transform2d a (local @ units) ->
-  Transform2d a (global @ units)
+  Transform2d tag (local @ units) ->
+  Transform2d tag (global @ units)
 placeIn frame transform = do
   let p0 = Point2d.origin |> Point2d.relativeTo frame |> Point2d.transformBy transform |> Point2d.placeIn frame
   let vx = unitX |> Vector2d.relativeTo frame |> Vector2d.transformBy transform |> Vector2d.placeIn frame
@@ -239,8 +239,8 @@ placeIn frame transform = do
 
 relativeTo ::
   Frame2d (global @ units) (Defines local) ->
-  Transform2d a (global @ units) ->
-  Transform2d a (local @ units)
+  Transform2d tag (global @ units) ->
+  Transform2d tag (local @ units)
 relativeTo frame transform = do
   let p0 = Point2d.origin |> Point2d.placeIn frame |> Point2d.transformBy transform |> Point2d.relativeTo frame
   let vx = unitX |> Vector2d.placeIn frame |> Vector2d.transformBy transform |> Vector2d.relativeTo frame
@@ -253,7 +253,7 @@ toOrthonormal = Data.Coerce.coerce
 toUniform :: IsUniform a => Transform2d a (space @ units) -> Uniform (space @ units)
 toUniform = Data.Coerce.coerce
 
-toAffine :: Transform2d a (space @ units) -> Affine (space @ units)
+toAffine :: Transform2d tag (space @ units) -> Affine (space @ units)
 toAffine = Data.Coerce.coerce
 
 -- Helper functions to define specific/concrete transformation functions

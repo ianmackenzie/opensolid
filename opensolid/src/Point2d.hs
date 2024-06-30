@@ -235,7 +235,7 @@ convert conversion (Point2d px py) = Point2d (Qty.convert conversion px) (Qty.co
 unconvert :: Qty (units2 :/: units1) -> Point2d (space @ units2) -> Point2d (space @ units1)
 unconvert conversion (Point2d px py) = Point2d (Qty.unconvert conversion px) (Qty.unconvert conversion py)
 
-transformBy :: Transform2d a (space @ units) -> Point2d (space @ units) -> Point2d (space @ units)
+transformBy :: Transform2d tag (space @ units) -> Point2d (space @ units) -> Point2d (space @ units)
 transformBy transform point = do
   let (Transform2d p0 vx vy) = transform
   let (px, py) = coordinates point

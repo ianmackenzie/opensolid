@@ -29,7 +29,7 @@ class
   segmentBoundsImpl :: Range Unitless -> curve -> VectorBounds2d coordinateSystem
   derivativeImpl :: curve -> VectorCurve2d coordinateSystem
   transformByImpl ::
-    Transform2d a (Space coordinateSystem @ transformUnits) ->
+    Transform2d tag (Space coordinateSystem @ transformUnits) ->
     curve ->
     VectorCurve2d coordinateSystem
 
@@ -91,6 +91,6 @@ segmentBounds :: Range Unitless -> VectorCurve2d (space @ units) -> VectorBounds
 derivative :: VectorCurve2d (space @ units) -> VectorCurve2d (space @ units)
 unsafeMagnitude :: VectorCurve2d (space @ units) -> Curve1d units
 transformBy ::
-  Transform2d a (space @ units1) ->
+  Transform2d tag (space @ units1) ->
   VectorCurve2d (space @ units2) ->
   VectorCurve2d (space @ units2)
