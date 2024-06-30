@@ -16,17 +16,21 @@ module VectorCurve3d
   , constant
   , xyz
   , line
+  , arc
   , quadraticSpline
   , cubicSpline
   , squaredMagnitude
   )
 where
 
+import Angle qualified
 import Curve1d (Curve1d)
 import Curve1d qualified
 import Float qualified
 import OpenSolid
+import Qty qualified
 import Range (Range (Range))
+import Range qualified
 import Units qualified
 import Vector3d (Vector3d (Vector3d))
 import Vector3d qualified
@@ -44,6 +48,7 @@ data VectorCurve3d (coordinateSystem :: CoordinateSystem) where
   Constant :: Vector3d (space @ units) -> VectorCurve3d (space @ units)
   Coerce :: VectorCurve3d (space @ units1) -> VectorCurve3d (space @ units2)
   Line :: Vector3d (space @ units) -> Vector3d (space @ units) -> VectorCurve3d (space @ units)
+  Arc :: Vector3d (space @ units) -> Vector3d (space @ units) -> Angle -> Angle -> VectorCurve3d (space @ units)
   QuadraticSpline :: Vector3d (space @ units) -> Vector3d (space @ units) -> Vector3d (space @ units) -> VectorCurve3d (space @ units)
   CubicSpline :: Vector3d (space @ units) -> Vector3d (space @ units) -> Vector3d (space @ units) -> Vector3d (space @ units) -> VectorCurve3d (space @ units)
 
@@ -469,6 +474,12 @@ instance
 line :: Vector3d (space @ units) -> Vector3d (space @ units) -> VectorCurve3d (space @ units)
 line v1 v2 = if v1 == v2 then Constant v1 else Line v1 v2
 
+arc :: Vector3d (space @ units) -> Vector3d (space @ units) -> Angle -> Angle -> VectorCurve3d (space @ units)
+arc v1 v2 a b
+  | v1 == Vector3d.zero && v2 == Vector3d.zero = zero
+  | a == b = constant (Angle.cos a * v1 + Angle.sin a * v2)
+  | otherwise = Arc v1 v2 a b
+
 quadraticSpline ::
   Vector3d (space @ units) ->
   Vector3d (space @ units) ->
@@ -532,6 +543,9 @@ evaluateAt t curve =
     Constant v -> v
     Coerce c -> Units.coerce (evaluateAt t c)
     Line v1 v2 -> Vector3d.interpolateFrom v1 v2 t
+    Arc v1 v2 a b -> do
+      let theta = Qty.interpolateFrom a b t
+      Angle.cos theta * v1 + Angle.sin theta * v2
     QuadraticSpline v1 v2 v3 -> quadraticBlossom v1 v2 v3 t t
     CubicSpline v1 v2 v3 v4 -> cubicBlossom v1 v2 v3 v4 t t t
 
@@ -546,6 +560,9 @@ segmentBounds t@(Range tl th) curve =
       VectorBounds3d.hull2
         (Vector3d.interpolateFrom v1 v2 tl)
         (Vector3d.interpolateFrom v1 v2 th)
+    Arc v1 v2 a b -> do
+      let theta = a + (b - a) * t
+      Range.cos theta * v1 + Range.sin theta * v2
     QuadraticSpline v1 v2 v3 ->
       VectorBounds3d.hull3
         (quadraticBlossom v1 v2 v3 tl tl)
@@ -566,6 +583,9 @@ derivative curve =
     Constant _ -> Zero
     Coerce c -> Units.coerce (derivative c)
     Line v1 v2 -> constant (v2 - v1)
+    Arc v1 v2 a b -> do
+      let dTheta = Angle.unitless (b - a)
+      Arc (v2 * dTheta) (-v1 * dTheta) a b
     QuadraticSpline v1 v2 v3 -> line (2 * (v2 - v1)) (2 * (v3 - v2))
     CubicSpline v1 v2 v3 v4 -> quadraticSpline (3 * (v2 - v1)) (3 * (v3 - v2)) (3 * (v4 - v3))
 
