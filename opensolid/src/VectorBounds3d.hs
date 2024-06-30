@@ -1,3 +1,7 @@
+-- Needed for 'Range * Vector3d = VectorBounds3d'
+-- and 'Vector3d * Range = VectorBounds3d' instances
+{-# OPTIONS_GHC -Wno-orphans #-}
+
 module VectorBounds3d
   ( VectorBounds3d (VectorBounds3d)
   , constant
@@ -160,6 +164,22 @@ instance Multiplication' (VectorBounds3d (space @ units)) Int where
   vectorBounds .*. value = vectorBounds .*. Float.int value
 
 instance Multiplication (VectorBounds3d (space @ units)) Int (VectorBounds3d (space @ units))
+
+instance Multiplication' (Range units1) (Vector3d (space @ units2)) where
+  type Range units1 .*. Vector3d (space @ units2) = VectorBounds3d (space @ (units1 :*: units2))
+  range .*. Vector3d x y z = VectorBounds3d (range .*. x) (range .*. y) (range .*. z)
+
+instance
+  Units.Product units1 units2 units3 =>
+  Multiplication (Range units1) (Vector3d (space @ units2)) (VectorBounds3d (space @ units3))
+
+instance Multiplication' (Vector3d (space @ units1)) (Range units2) where
+  type Vector3d (space @ units1) .*. Range units2 = VectorBounds3d (space @ (units1 :*: units2))
+  Vector3d x y z .*. range = VectorBounds3d (x .*. range) (y .*. range) (z .*. range)
+
+instance
+  Units.Product units1 units2 units3 =>
+  Multiplication (Vector3d (space @ units1)) (Range units2) (VectorBounds3d (space @ units3))
 
 instance Multiplication' (Range units1) (VectorBounds3d (space @ units2)) where
   type
