@@ -1,37 +1,29 @@
 module Line3d
   ( from
+  , pattern Line3d
+  , Line3d (startPoint, endPoint)
   )
 where
 
-import Bounds3d qualified
-import Curve3d (Curve3d (Curve3d))
-import Curve3d qualified
+import Curve3d (Curve3d)
+import Curve3d.Internal qualified
 import OpenSolid
 import Point3d (Point3d)
-import Point3d qualified
-import Range (Range (Range))
-import VectorCurve3d qualified
-
-data Line3d (coordinateSystem :: CoordinateSystem)
-  = Line3d (Point3d coordinateSystem) (Point3d coordinateSystem)
-
-instance Curve3d.Interface (Line3d (space @ units)) (space @ units) where
-  startPointImpl (Line3d p1 _) = p1
-
-  endPointImpl (Line3d _ p2) = p2
-
-  evaluateImpl (Line3d p1 p2) t = Point3d.interpolateFrom p1 p2 t
-
-  segmentBoundsImpl (Line3d p1 p2) (Range tl th) =
-    Bounds3d.hull2
-      (Point3d.interpolateFrom p1 p2 tl)
-      (Point3d.interpolateFrom p1 p2 th)
-
-  derivativeImpl (Line3d p1 p2) = VectorCurve3d.constant (p2 - p1)
-
-  reverseImpl (Line3d p1 p2) = Line3d p2 p1
-
-  boundsImpl (Line3d p1 p2) = Bounds3d.hull2 p1 p2
 
 from :: Point3d (space @ units) -> Point3d (space @ units) -> Curve3d (space @ units)
-from p1 p2 = Curve3d (Line3d p1 p2)
+from = Curve3d.Internal.Line
+
+pattern Line3d :: Line3d (space @ units) -> Curve3d (space @ units)
+pattern Line3d line <- (extractLine -> Just line)
+
+data Line3d (coordinateSystem :: CoordinateSystem) where
+  Line3d_ ::
+    { startPoint :: Point3d (space @ units)
+    , endPoint :: Point3d (space @ units)
+    } ->
+    Line3d (space @ units)
+
+extractLine :: Curve3d (space @ units) -> Maybe (Line3d (space @ units))
+extractLine curve = case curve of
+  Curve3d.Internal.Line p1 p2 -> Just (Line3d_ p1 p2)
+  _ -> Nothing

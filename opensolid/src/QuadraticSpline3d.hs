@@ -5,7 +5,7 @@ module QuadraticSpline3d
 where
 
 import Bounds3d qualified
-import Curve3d (Curve3d (Curve3d))
+import Curve3d (Curve3d)
 import Curve3d qualified
 import OpenSolid
 import Point3d (Point3d (Point3d))
@@ -38,7 +38,7 @@ instance Curve3d.Interface (QuadraticSpline3d (space @ units)) (space @ units) w
 
   endPointImpl (QuadraticSpline3d _ _ p3) = p3
 
-  evaluateImpl spline t = blossom spline t t
+  pointOnImpl spline t = blossom spline t t
 
   segmentBoundsImpl spline (Range tl th) =
     Bounds3d.hull3
@@ -58,7 +58,5 @@ fromControlPoints ::
   Point3d (space @ units) ->
   Point3d (space @ units) ->
   Point3d (space @ units) ->
-  Result Curve3d.DegenerateCurve (Curve3d (space @ units))
-fromControlPoints p1 p2 p3
-  | p1 ~= p2 && p2 ~= p3 = Error Curve3d.DegenerateCurve
-  | otherwise = Ok (Curve3d (QuadraticSpline3d p1 p2 p3))
+  Curve3d (space @ units)
+fromControlPoints p1 p2 p3 = Curve3d.wrap (QuadraticSpline3d p1 p2 p3)

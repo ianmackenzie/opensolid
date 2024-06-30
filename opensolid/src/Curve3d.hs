@@ -1,46 +1,54 @@
 module Curve3d
-  ( Curve3d (..)
+  ( Curve3d
   , Interface (..)
   , DegenerateCurve (DegenerateCurve)
+  , wrap
+  , constant
+  , startPoint
+  , endPoint
+  , pointOn
+  , segmentBounds
+  , derivative
+  , reverse
+  , bounds
   )
 where
 
 import Bounds3d (Bounds3d)
-import Bounds3d qualified
+import Curve3d.Internal (Interface (..))
+import Curve3d.Internal qualified as Internal
 import OpenSolid
 import Point3d (Point3d)
 import Range (Range)
 import VectorCurve3d (VectorCurve3d)
-import VectorCurve3d qualified
 
-class Interface curve (coordinateSystem :: CoordinateSystem) | curve -> coordinateSystem where
-  startPointImpl :: curve -> Point3d coordinateSystem
-  endPointImpl :: curve -> Point3d coordinateSystem
-  evaluateImpl :: curve -> Float -> Point3d coordinateSystem
-  segmentBoundsImpl :: curve -> Range Unitless -> Bounds3d coordinateSystem
-  derivativeImpl :: curve -> VectorCurve3d coordinateSystem
-  reverseImpl :: curve -> curve
-  boundsImpl :: curve -> Bounds3d coordinateSystem
-
-data Curve3d (coordinateSystem :: CoordinateSystem) where
-  Curve3d :: Interface curve (space @ units) => curve -> Curve3d (space @ units)
-
-instance Interface (Point3d (space @ units)) (space @ units) where
-  startPointImpl = identity
-  endPointImpl = identity
-  evaluateImpl point _ = point
-  segmentBoundsImpl point _ = Bounds3d.constant point
-  derivativeImpl _ = VectorCurve3d.zero
-  reverseImpl = identity
-  boundsImpl = Bounds3d.constant
-
-instance Interface (Curve3d (space @ units)) (space @ units) where
-  startPointImpl (Curve3d curve) = startPointImpl curve
-  endPointImpl (Curve3d curve) = endPointImpl curve
-  evaluateImpl (Curve3d curve) = evaluateImpl curve
-  segmentBoundsImpl (Curve3d curve) = segmentBoundsImpl curve
-  derivativeImpl (Curve3d curve) = derivativeImpl curve
-  reverseImpl (Curve3d curve) = Curve3d (reverseImpl curve)
-  boundsImpl (Curve3d curve) = boundsImpl curve
+type Curve3d (coordinateSystem :: CoordinateSystem) = Internal.Curve3d coordinateSystem
 
 data DegenerateCurve = DegenerateCurve deriving (Eq, Show, Error)
+
+wrap :: Interface curve (space @ units) => curve -> Curve3d (space @ units)
+wrap = Internal.Curve
+
+constant :: Point3d (space @ units) -> Curve3d (space @ units)
+constant = Internal.Constant
+
+startPoint :: Curve3d (space @ units) -> Point3d (space @ units)
+startPoint = Internal.startPoint
+
+endPoint :: Curve3d (space @ units) -> Point3d (space @ units)
+endPoint = Internal.endPoint
+
+pointOn :: Curve3d (space @ units) -> Float -> Point3d (space @ units)
+pointOn = Internal.pointOn
+
+segmentBounds :: Curve3d (space @ units) -> Range Unitless -> Bounds3d (space @ units)
+segmentBounds = Internal.segmentBounds
+
+derivative :: Curve3d (space @ units) -> VectorCurve3d (space @ units)
+derivative = Internal.derivative
+
+reverse :: Curve3d (space @ units) -> Curve3d (space @ units)
+reverse = Internal.reverse
+
+bounds :: Curve3d (space @ units) -> Bounds3d (space @ units)
+bounds = Internal.bounds

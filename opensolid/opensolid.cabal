@@ -197,6 +197,7 @@ library
     Curve2d.Derivatives
     Curve2d.Internal
     Curve2d.Segment
+    Curve3d.Internal
     Json.FieldSchema
     Point2d.CoordinateTransformation
     Point3d.CoordinateTransformation
