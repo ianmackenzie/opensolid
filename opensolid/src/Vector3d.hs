@@ -56,7 +56,12 @@ instance HasUnits (Vector3d (space @ units)) where
   type Units (Vector3d (space @ units)) = units
   type Erase (Vector3d (space @ units)) = Vector3d (space @ Unitless)
 
-instance space ~ space_ => Units.Coercion (Vector3d (space @ units1)) (Vector3d (space_ @ units2)) where
+instance
+  space ~ space_ =>
+  Units.Coercion
+    (Vector3d (space @ units1))
+    (Vector3d (space_ @ units2))
+  where
   coerce = Data.Coerce.coerce
 
 instance
