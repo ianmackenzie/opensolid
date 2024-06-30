@@ -24,6 +24,7 @@ import Direction2d qualified
 import OpenSolid
 import Point2d (Point2d)
 import Point2d qualified
+import Transform qualified
 import Transform2d (Transform2d)
 import Transform2d qualified
 import Vector2d (Vector2d)
@@ -62,8 +63,8 @@ moveTo :: Point2d (space @ units) -> Axis2d (space @ units) -> Axis2d (space @ u
 moveTo newOriginPoint axis = Axis2d newOriginPoint (direction axis)
 
 transformBy ::
-  Transform2d.IsOrthonormal a =>
-  Transform2d a (space @ units) ->
+  Transform.IsOrthonormal tag =>
+  Transform2d tag (space @ units) ->
   Axis2d (space @ units) ->
   Axis2d (space @ units)
 transformBy transform axis = do

@@ -41,8 +41,8 @@ import OpenSolid
 import {-# SOURCE #-} Point2d (Point2d)
 import Qty qualified
 import Random qualified
+import Transform qualified
 import Transform2d (Transform2d)
-import Transform2d qualified
 import Units qualified
 import Vector2d (Vector2d (Vector2d))
 import Vector2d qualified
@@ -195,8 +195,8 @@ random :: Random.Generator (Direction2d space)
 random = Random.map fromAngle (Qty.random -Angle.pi Angle.pi)
 
 transformBy ::
-  Transform2d.IsOrthonormal a =>
-  Transform2d a (space @ translationUnits) ->
+  Transform.IsOrthonormal tag =>
+  Transform2d tag (space @ translationUnits) ->
   Direction2d space ->
   Direction2d space
 transformBy transform = lift (Vector2d.transformBy transform)

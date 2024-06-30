@@ -4,9 +4,6 @@ module Transform2d
   , Orthonormal
   , Uniform
   , Affine
-  , IsRigid
-  , IsOrthonormal
-  , IsUniform
   , identity
   , translateBy
   , translateIn
@@ -48,6 +45,7 @@ import OpenSolid hiding (identity)
 import {-# SOURCE #-} Point2d (Point2d)
 import {-# SOURCE #-} Point2d qualified
 import Point2d.CoordinateTransformation qualified as Point2d
+import Transform qualified
 import Units qualified
 import {-# SOURCE #-} Vector2d (Vector2d)
 import {-# SOURCE #-} Vector2d qualified
@@ -87,71 +85,13 @@ instance
   where
   coerce (Transform2d p0 vx vy) = Transform2d_ (Units.coerce p0) vx vy
 
-data RigidTag = RigidTag
+type Rigid coordinateSystem = Transform2d Transform.Rigid coordinateSystem
 
-data OrthonormalTag = OrthonormalTag
+type Orthonormal coordinateSystem = Transform2d Transform.Orthonormal coordinateSystem
 
-data UniformTag = UniformTag
+type Uniform coordinateSystem = Transform2d Transform.Uniform coordinateSystem
 
-data AffineTag = AffineTag
-
-type Rigid coordinateSystem = Transform2d RigidTag coordinateSystem
-
-type Orthonormal coordinateSystem = Transform2d OrthonormalTag coordinateSystem
-
-type Uniform coordinateSystem = Transform2d UniformTag coordinateSystem
-
-type Affine coordinateSystem = Transform2d AffineTag coordinateSystem
-
-class IsRigid a
-
-class IsOrthonormal a
-
-class IsUniform a
-
-instance IsRigid RigidTag
-
-instance IsOrthonormal RigidTag
-
-instance IsOrthonormal OrthonormalTag
-
-instance IsUniform RigidTag
-
-instance IsUniform OrthonormalTag
-
-instance IsUniform UniformTag
-
-instance Composition RigidTag RigidTag RigidTag where RigidTag >> RigidTag = RigidTag
-
-instance Composition RigidTag OrthonormalTag OrthonormalTag where RigidTag >> OrthonormalTag = OrthonormalTag
-
-instance Composition RigidTag UniformTag UniformTag where RigidTag >> UniformTag = UniformTag
-
-instance Composition RigidTag AffineTag AffineTag where RigidTag >> AffineTag = AffineTag
-
-instance Composition OrthonormalTag RigidTag OrthonormalTag where OrthonormalTag >> RigidTag = OrthonormalTag
-
-instance Composition OrthonormalTag OrthonormalTag OrthonormalTag where OrthonormalTag >> OrthonormalTag = OrthonormalTag
-
-instance Composition OrthonormalTag UniformTag UniformTag where OrthonormalTag >> UniformTag = UniformTag
-
-instance Composition OrthonormalTag AffineTag AffineTag where OrthonormalTag >> AffineTag = AffineTag
-
-instance Composition UniformTag RigidTag UniformTag where UniformTag >> RigidTag = UniformTag
-
-instance Composition UniformTag OrthonormalTag UniformTag where UniformTag >> OrthonormalTag = UniformTag
-
-instance Composition UniformTag UniformTag UniformTag where UniformTag >> UniformTag = UniformTag
-
-instance Composition UniformTag AffineTag AffineTag where UniformTag >> AffineTag = AffineTag
-
-instance Composition AffineTag RigidTag AffineTag where AffineTag >> RigidTag = AffineTag
-
-instance Composition AffineTag OrthonormalTag AffineTag where AffineTag >> OrthonormalTag = AffineTag
-
-instance Composition AffineTag UniformTag AffineTag where AffineTag >> UniformTag = AffineTag
-
-instance Composition AffineTag AffineTag AffineTag where AffineTag >> AffineTag = AffineTag
+type Affine coordinateSystem = Transform2d Transform.Affine coordinateSystem
 
 instance
   ( Composition tag1 tag2 tag3
@@ -247,10 +187,10 @@ relativeTo frame transform = do
   let vy = unitY |> Vector2d.placeIn frame |> Vector2d.transformBy transform |> Vector2d.relativeTo frame
   Transform2d_ p0 vx vy
 
-toOrthonormal :: IsOrthonormal a => Transform2d a (space @ units) -> Orthonormal (space @ units)
+toOrthonormal :: Transform.IsOrthonormal tag => Transform2d tag (space @ units) -> Orthonormal (space @ units)
 toOrthonormal = Data.Coerce.coerce
 
-toUniform :: IsUniform a => Transform2d a (space @ units) -> Uniform (space @ units)
+toUniform :: Transform.IsUniform tag => Transform2d tag (space @ units) -> Uniform (space @ units)
 toUniform = Data.Coerce.coerce
 
 toAffine :: Transform2d tag (space @ units) -> Affine (space @ units)

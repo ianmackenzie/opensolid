@@ -167,6 +167,7 @@ library
     Surface3d.Function
     Text
     Tolerance
+    Transform
     Transform2d
     Units
     Uv
