@@ -52,7 +52,10 @@
               "export PATH=$PATH:./scripts"
               # Set LD_LIBRARY_PATH to the build directory containing libopensolid-ffi.so,
               # so that it can be found by Python when loading the 'opensolid' module
-              "export LD_LIBRARY_PATH=opensolid-ffi/$(stack path --dist-dir)/build/opensolid-ffi"
+              "export LD_LIBRARY_PATH=$PWD/opensolid-ffi/$(stack path --dist-dir)/build/opensolid-ffi"
+              # Set PYTHONPATH so 'import opensolid' works
+              # when running Python interactively from the repository root
+              "export PYTHONPATH=$PWD/opensolid-python"
             ];
           };
         });
