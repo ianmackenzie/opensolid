@@ -404,5 +404,4 @@ mirrorAcross :: Axis2d (space @ originUnits) -> Vector2d (space @ units) -> Vect
 mirrorAcross axis = mirrorIn (Axis2d.normalDirection axis)
 
 scaleIn :: Direction2d space -> Float -> Vector2d (space @ units) -> Vector2d (space @ units)
-scaleIn scaleDirection scale =
-  transformBy (Transform2d.scaleAlong (Axis2d.through Point2d.origin scaleDirection) scale)
+scaleIn scaleDirection scale vector = vector + (scale - 1) * projectionIn scaleDirection vector
