@@ -9,11 +9,15 @@ module Axis2d
   , moveTo
   , transformBy
   , translateBy
+  , translateByOwn
   , translateIn
   , translateInOwn
   , translateAlong
+  , translateAlongOwn
   , rotateAround
   , rotateAroundOwn
+  , mirrorAcross
+  , mirrorAcrossOwn
   , offsetBy
   )
 where
@@ -72,36 +76,71 @@ transformBy transform axis = do
   let transformedDirection = Direction2d.transformBy transform (direction axis)
   Axis2d transformedOriginPoint transformedDirection
 
-translateBy :: Vector2d (space @ units) -> Axis2d (space @ units) -> Axis2d (space @ units)
-translateBy displacement axis =
-  Axis2d (Point2d.translateBy displacement (originPoint axis)) (direction axis)
+offsetBy :: Qty units -> Axis2d (space @ units) -> Axis2d (space @ units)
+offsetBy distance = translateInOwn normalDirection distance
 
-translateIn :: Direction2d space -> Qty units -> Axis2d (space @ units) -> Axis2d (space @ units)
-translateIn givenDirection distance = translateBy (givenDirection * distance)
+translateBy ::
+  Vector2d (space @ units) ->
+  Axis2d (space @ units) ->
+  Axis2d (space @ units)
+translateBy = Transform2d.translateByImpl transformBy
 
-translateInOwn ::
-  (Axis2d (space @ units) -> Direction2d space) ->
+translateIn ::
+  Direction2d space ->
   Qty units ->
   Axis2d (space @ units) ->
   Axis2d (space @ units)
-translateInOwn getDirection distance axis = translateIn (getDirection axis) distance axis
-
-offsetBy :: Qty units -> Axis2d (space @ units) -> Axis2d (space @ units)
-offsetBy distance = translateInOwn normalDirection distance
+translateIn = Transform2d.translateInImpl transformBy
 
 translateAlong ::
   Axis2d (space @ units) ->
   Qty units ->
   Axis2d (space @ units) ->
   Axis2d (space @ units)
-translateAlong otherAxis distance = transformBy (Transform2d.translateAlong otherAxis distance)
+translateAlong = Transform2d.translateAlongImpl transformBy
 
-rotateAround :: Point2d (space @ units) -> Angle -> Axis2d (space @ units) -> Axis2d (space @ units)
-rotateAround centerPoint angle = transformBy (Transform2d.rotateAround centerPoint angle)
+rotateAround ::
+  Point2d (space @ units) ->
+  Angle ->
+  Axis2d (space @ units) ->
+  Axis2d (space @ units)
+rotateAround = Transform2d.rotateAroundImpl transformBy
+
+mirrorAcross ::
+  Axis2d (space @ units) ->
+  Axis2d (space @ units) ->
+  Axis2d (space @ units)
+mirrorAcross = Transform2d.mirrorAcrossImpl transformBy
+
+translateByOwn ::
+  (Axis2d (space @ units) -> Vector2d (space @ units)) ->
+  Axis2d (space @ units) ->
+  Axis2d (space @ units)
+translateByOwn = Transform2d.translateByOwnImpl transformBy
+
+translateInOwn ::
+  (Axis2d (space @ units) -> Direction2d space) ->
+  Qty units ->
+  Axis2d (space @ units) ->
+  Axis2d (space @ units)
+translateInOwn = Transform2d.translateInOwnImpl transformBy
+
+translateAlongOwn ::
+  (Axis2d (space @ units) -> Axis2d (space @ units)) ->
+  Qty units ->
+  Axis2d (space @ units) ->
+  Axis2d (space @ units)
+translateAlongOwn = Transform2d.translateAlongOwnImpl transformBy
 
 rotateAroundOwn ::
   (Axis2d (space @ units) -> Point2d (space @ units)) ->
   Angle ->
   Axis2d (space @ units) ->
   Axis2d (space @ units)
-rotateAroundOwn getCenterPoint angle axis = rotateAround (getCenterPoint axis) angle axis
+rotateAroundOwn = Transform2d.rotateAroundOwnImpl transformBy
+
+mirrorAcrossOwn ::
+  (Axis2d (space @ units) -> Axis2d (space @ units)) ->
+  Axis2d (space @ units) ->
+  Axis2d (space @ units)
+mirrorAcrossOwn = Transform2d.mirrorAcrossOwnImpl transformBy
