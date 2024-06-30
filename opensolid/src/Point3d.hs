@@ -3,6 +3,7 @@ module Point3d
   , xCoordinate
   , yCoordinate
   , zCoordinate
+  , coordinates
   , origin
   , x
   , y
@@ -128,6 +129,10 @@ yCoordinate (Point3d _ py _) = py
 
 zCoordinate :: Point3d (space @ units) -> Qty units
 zCoordinate (Point3d _ _ pz) = pz
+
+{-# INLINE coordinates #-}
+coordinates :: Point3d (space @ units) -> (Qty units, Qty units, Qty units)
+coordinates (Point3d px py pz) = (px, py, pz)
 
 origin :: Point3d (space @ units)
 origin = Point3d Qty.zero Qty.zero Qty.zero
