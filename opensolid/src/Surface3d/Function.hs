@@ -1,3 +1,6 @@
+-- Needed for CurveSurfaceComposition
+{-# OPTIONS_GHC -Wno-orphans #-}
+
 module Surface3d.Function
   ( Function (Constant)
   , Interface (..)
@@ -12,6 +15,8 @@ where
 
 import Bounds3d (Bounds3d)
 import Bounds3d qualified
+import Curve3d (Curve3d)
+import Curve3d qualified
 import OpenSolid
 import Point3d (Point3d)
 import Point3d qualified
@@ -171,3 +176,29 @@ derivative parameter function = case function of
       (Surface1d.Function.derivative parameter z)
   Sum f1 f2 -> derivative parameter f1 + VectorSurface3d.Function.derivative parameter f2
   Difference f1 f2 -> derivative parameter f1 - VectorSurface3d.Function.derivative parameter f2
+
+data SurfaceCurveComposition (coordinateSystem :: CoordinateSystem) where
+  SurfaceCurveComposition ::
+    Surface1d.Function Unitless ->
+    Curve3d (space @ units) ->
+    SurfaceCurveComposition (space @ units)
+
+deriving instance Show (SurfaceCurveComposition coordinateSystem)
+
+instance
+  Composition
+    (Surface1d.Function Unitless)
+    (Curve3d (space @ units))
+    (Function (space @ units))
+  where
+  curve . function = wrap (SurfaceCurveComposition function curve)
+
+instance Interface (SurfaceCurveComposition (space @ units)) (space @ units) where
+  evaluateImpl (SurfaceCurveComposition function curve) uv =
+    Curve3d.pointOn curve (Surface1d.Function.evaluate function uv)
+
+  boundsImpl (SurfaceCurveComposition function curve) uv =
+    Curve3d.segmentBounds curve (Surface1d.Function.bounds function uv)
+
+  derivativeImpl parameter (SurfaceCurveComposition function curve) =
+    (Curve3d.derivative curve . function) * Surface1d.Function.derivative parameter function
