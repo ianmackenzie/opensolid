@@ -31,11 +31,6 @@ instance
     (Point2d (space_ @ units_))
     (Vector2d (space @ units))
 
-origin :: Point2d (space @ units)
-xy :: Qty units -> Qty units -> Point2d (space @ units)
-coordinates :: Point2d (space @ units) -> (Qty units, Qty units)
-transformBy :: Transform2d a (space @ units) -> Point2d (space @ units) -> Point2d (space @ units)
-
 instance
   ( space ~ space_
   , units ~ units_
@@ -53,3 +48,8 @@ instance
     (Point2d (space @ units))
     (Vector2d (space_ @ units_))
     (Point2d (space @ units))
+
+origin :: Point2d (space @ units)
+xy :: Qty units -> Qty units -> Point2d (space @ units)
+coordinates :: Point2d (space @ units) -> (Qty units, Qty units)
+transformBy :: Transform2d tag (space @ units) -> Point2d (space @ units) -> Point2d (space @ units)
