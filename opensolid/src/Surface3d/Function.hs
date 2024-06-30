@@ -1,5 +1,5 @@
 module Surface3d.Function
-  ( Function
+  ( Function (Constant)
   , Interface (..)
   , wrap
   , constant
