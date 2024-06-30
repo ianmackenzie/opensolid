@@ -20,12 +20,6 @@ instance Eq (Vector2d (space @ units))
 
 instance Show (Vector2d (space @ units))
 
-xy :: Qty units -> Qty units -> Vector2d (space @ units)
-xComponent :: Vector2d (space @ units) -> Qty units
-yComponent :: Vector2d (space @ units) -> Qty units
-components :: Vector2d (space @ units) -> (Qty units, Qty units)
-transformBy :: Transform2d a (space @ units1) -> Vector2d (space @ units2) -> Vector2d (space @ units2)
-
 instance
   ( space ~ space_
   , units ~ units_
@@ -43,3 +37,9 @@ instance Multiplication' (Vector2d (space @ units1)) (Qty units2)
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Vector2d (space @ units1)) (Qty units2) (Vector2d (space @ units3))
+
+xy :: Qty units -> Qty units -> Vector2d (space @ units)
+xComponent :: Vector2d (space @ units) -> Qty units
+yComponent :: Vector2d (space @ units) -> Qty units
+components :: Vector2d (space @ units) -> (Qty units, Qty units)
+transformBy :: Transform2d tag (space @ units1) -> Vector2d (space @ units2) -> Vector2d (space @ units2)
