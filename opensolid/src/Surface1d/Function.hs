@@ -48,6 +48,8 @@ import Qty qualified
 import Range (Range)
 import Range qualified
 import Result qualified
+import Solve1d qualified
+import Solve2d qualified
 import Surface1d.Function.PartialZeros (PartialZeros)
 import Surface1d.Function.PartialZeros qualified as PartialZeros
 import Surface1d.Function.SaddleRegion (SaddleRegion (..))
@@ -55,9 +57,7 @@ import Surface1d.Function.Zeros (Zeros (..))
 import Surface1d.Function.Zeros qualified as Zeros
 import Tolerance qualified
 import Units qualified
-import Solve1d qualified
 import Uv (Parameter (U, V))
-import Solve2d qualified
 import Uv qualified
 import Vector2d qualified
 import VectorCurve2d qualified
@@ -490,39 +490,33 @@ tangentPointSolution ::
   Domain2d ->
   DerivativeBounds units ->
   Maybe Solution
-tangentPointSolution derivatives subdomain derivativeBounds = do
+tangentPointSolution derivatives subdomain derivativeBounds = Maybe.do
   let DerivativeBounds{fuuBounds, fuvBounds, fvvBounds} = derivativeBounds
-  let determinantResolution = Range.resolution (fuuBounds .*. fvvBounds - fuvBounds .*. fuvBounds)
-  if Qty.abs determinantResolution < 0.5
-    then Nothing
-    else do
-      let Derivatives{f, fu, fv, fuu, fuv, fvv} = derivatives
-      let maybePoint =
-            Solve2d.unique
-              (bounds fu)
-              (evaluate fu)
-              (evaluate fuu)
-              (evaluate fuv)
-              (bounds fv)
-              (evaluate fv)
-              (evaluate fuv)
-              (evaluate fvv)
-              (Domain2d.interior subdomain)
-      if
-        | Just point <- maybePoint
-        , evaluate f point ~= Qty.zero ->
-            -- We've found a tangent point! Now to check if it's a saddle point
-            case Qty.sign determinantResolution of
-              Positive -> do
-                -- Non-saddle tangent point
-                -- Note that fuu and fvv must be either both positive or both negative
-                -- to reach this code path, so we can take the sign of either one
-                -- to determine the sign of the tangent point
-                let sign = Qty.sign (Range.minValue fuuBounds)
-                Just (TangentPointSolution (point, sign))
-              Negative ->
-                Just (saddleRegionSolution derivatives point)
-        | otherwise -> Nothing
+  let determinant = fuuBounds .*. fvvBounds - fuvBounds .*. fuvBounds
+  determinantSign <- Range.resolvedSign determinant
+  let Derivatives{f, fu, fv, fuu, fuv, fvv} = derivatives
+  point <-
+    Solve2d.unique
+      (bounds fu)
+      (evaluate fu)
+      (evaluate fuu)
+      (evaluate fuv)
+      (bounds fv)
+      (evaluate fv)
+      (evaluate fuv)
+      (evaluate fvv)
+      (Domain2d.interior subdomain)
+  if evaluate f point ~= Qty.zero
+    then case determinantSign of
+      Negative -> Just (saddleRegionSolution derivatives point)
+      Positive -> do
+        -- Non-saddle tangent point
+        -- Note that fuu and fvv must be either both positive or both negative
+        -- to reach this code path, so we can take the sign of either one
+        -- to determine the sign of the tangent point
+        let sign = Qty.sign (Range.minValue fuuBounds)
+        Just (TangentPointSolution (point, sign))
+    else Nothing
 
 saddleRegionSolution :: Tolerance units => Derivatives units -> Uv.Point -> Solution
 saddleRegionSolution derivatives point = do
@@ -665,8 +659,8 @@ findCrossingSolution derivatives subdomain derivativeBounds exclusions = do
       case exclusions of
         Solve2d.SomeExclusions _ -> Solve2d.recurse
         Solve2d.NoExclusions -> do
-          let fuSign = Solve1d.resolvedSign fuBounds
-          let fvSign = Solve1d.resolvedSign fvBounds
+          let fuSign = Range.resolvedSign fuBounds
+          let fvSign = Range.resolvedSign fvBounds
           let fuResolved = fuSign /= Nothing
           let fvResolved = fvSign /= Nothing
           let uvBounds = Domain2d.bounds subdomain

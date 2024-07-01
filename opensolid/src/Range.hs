@@ -47,6 +47,8 @@ module Range
   , all
   , resolve
   , resolution
+  , isResolved
+  , resolvedSign
   , intersection
   , random
   , find2
@@ -521,6 +523,19 @@ resolution (Range low high)
   | low > Qty.zero = low / high
   | high < Qty.zero = -high / low
   | otherwise = 0.0
+
+resolutionThreshold :: Float
+resolutionThreshold = 0.5
+
+isResolved :: Range units -> Bool
+isResolved range = Float.abs (resolution range) >= resolutionThreshold
+
+resolvedSign :: Range units -> Maybe Sign
+resolvedSign range = do
+  let rangeResolution = resolution range
+  if Float.abs rangeResolution >= resolutionThreshold
+    then Just (Float.sign rangeResolution)
+    else Nothing
 
 any :: (Range units -> Fuzzy Bool) -> Range units -> Bool
 any assess range =

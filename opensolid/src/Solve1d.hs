@@ -1,7 +1,5 @@
 module Solve1d
-  ( isResolved
-  , resolvedSign
-  , Neighborhood
+  ( Neighborhood
   , neighborhood
   , derivativeTolerance
   , Cache
@@ -19,24 +17,16 @@ module Solve1d
   )
 where
 
-import OpenSolid
 import Domain1d (Domain1d)
 import Domain1d qualified
-import Qty qualified
-import Range (Range)
 import Int qualified
 import List qualified
-import Range qualified
+import OpenSolid
+import Qty qualified
 import Queue (Queue)
 import Queue qualified
-
-isResolved :: Range units -> Bool
-isResolved range = resolvedSign range /= Nothing
-
-resolvedSign :: Range units -> Maybe Sign
-resolvedSign range = do
-  let resolution = Range.resolution range
-  if Qty.abs resolution >= 0.5 then Just (Qty.sign resolution) else Nothing
+import Range (Range)
+import Range qualified
 
 data Neighborhood units = Neighborhood
   { n :: Int

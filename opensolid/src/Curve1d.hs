@@ -415,7 +415,7 @@ resolveOrder n derivatives subdomain derivativeBounds exclusions
       Solve1d.NoExclusions -> do
         -- For a solution of order n, we need to look at the derivative of order n + 1
         let nextDerivativeBounds = Stream.nth (n + 1) derivativeBounds
-        case Solve1d.resolvedSign nextDerivativeBounds of
+        case Range.resolvedSign nextDerivativeBounds of
           -- Next derivative is not resolved, need to bisect further
           Nothing -> Solve1d.recurse
           -- Next derivative *is* resolved, try to find a root of order n
@@ -444,7 +444,7 @@ resolveOrder n derivatives subdomain derivativeBounds exclusions
                     else Solve1d.pass -- No root of order n in this subdomain
 
 anyResolved :: Int -> Stream (Range units) -> Bool
-anyResolved n (Stream first rest) = n > 0 && (Solve1d.isResolved first || anyResolved (n - 1) rest)
+anyResolved n (Stream first rest) = n > 0 && (Range.isResolved first || anyResolved (n - 1) rest)
 
 -- Check that the values of all derivatives of order n and lower
 -- (including order 0, the curve itself)
