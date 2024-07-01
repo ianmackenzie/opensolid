@@ -3,7 +3,7 @@ module Curve2d
   , DegenerateCurve (DegenerateCurve)
   , startPoint
   , endPoint
-  , evaluateAt
+  , pointOn
   , segmentBounds
   , derivative
   , tangentDirection
@@ -24,7 +24,7 @@ data DegenerateCurve = DegenerateCurve
 
 startPoint :: Curve2d (space @ units) -> Point2d (space @ units)
 endPoint :: Curve2d (space @ units) -> Point2d (space @ units)
-evaluateAt :: Float -> Curve2d (space @ units) -> Point2d (space @ units)
-segmentBounds :: Range Unitless -> Curve2d (space @ units) -> Bounds2d (space @ units)
+pointOn :: Curve2d (space @ units) -> Float -> Point2d (space @ units)
+segmentBounds :: Curve2d (space @ units) -> Range Unitless -> Bounds2d (space @ units)
 derivative :: Curve2d (space @ units) -> VectorCurve2d (space @ units)
 tangentDirection :: Tolerance units => Curve2d (space @ units) -> Result DegenerateCurve (DirectionCurve2d space)

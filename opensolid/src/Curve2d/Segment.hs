@@ -44,7 +44,7 @@ init ::
   Segment (space @ units)
 init derivatives domain =
   Segment
-    { curveBounds = Curve2d.segmentBounds domain (Derivatives.curve derivatives)
+    { curveBounds = Curve2d.segmentBounds (Derivatives.curve derivatives) domain
     , firstBounds = VectorCurve2d.segmentBounds domain (Derivatives.first derivatives)
     , secondBounds = VectorCurve2d.segmentBounds domain (Derivatives.second derivatives)
     }
@@ -230,8 +230,8 @@ isTangentIntersection ::
   Range Unitless ->
   Bool
 isTangentIntersection derivatives1 derivatives2 tBounds1 tBounds2 = do
-  let bounds1 = Curve2d.segmentBounds tBounds1 (Derivatives.curve derivatives1)
-  let bounds2 = Curve2d.segmentBounds tBounds2 (Derivatives.curve derivatives2)
+  let bounds1 = Curve2d.segmentBounds (Derivatives.curve derivatives1) tBounds1
+  let bounds2 = Curve2d.segmentBounds (Derivatives.curve derivatives2) tBounds2
   let difference = bounds1 - bounds2
   let distance = VectorBounds2d.magnitude difference
   let firstBounds1 = VectorCurve2d.segmentBounds tBounds1 (Derivatives.first derivatives1)
@@ -289,6 +289,6 @@ isCrossingIntersection ::
   Range Unitless ->
   Bool
 isCrossingIntersection curve1 curve2 tBounds1 tBounds2 = do
-  let curveBounds1 = Curve2d.segmentBounds tBounds1 curve1
-  let curveBounds2 = Curve2d.segmentBounds tBounds2 curve2
+  let curveBounds1 = Curve2d.segmentBounds curve1 tBounds1
+  let curveBounds2 = Curve2d.segmentBounds curve2 tBounds2
   Bounds2d.overlap curveBounds1 curveBounds2 >= Qty.zero

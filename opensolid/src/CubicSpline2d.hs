@@ -41,9 +41,9 @@ instance Curve2d.Interface (CubicSpline2d (space @ units)) (space @ units) where
 
   endPointImpl (CubicSpline2d _ _ _ p4) = p4
 
-  evaluateAtImpl t spline = blossom spline t t t
+  pointOnImpl spline t = blossom spline t t t
 
-  segmentBoundsImpl (Range tl th) spline =
+  segmentBoundsImpl spline (Range tl th) =
     Bounds2d.hull4
       (blossom spline tl tl tl)
       (blossom spline tl tl th)

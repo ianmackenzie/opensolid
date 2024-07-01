@@ -6,7 +6,7 @@ module Curve2d.Internal
   , Interface (..)
   , startPoint
   , endPoint
-  , evaluateAt
+  , pointOn
   , segmentBounds
   , derivative
   , reverse
@@ -76,7 +76,7 @@ instance
 instance Interface (Curve2d (space @ units)) (space @ units) where
   startPointImpl = startPoint
   endPointImpl = endPoint
-  evaluateAtImpl = evaluateAt
+  pointOnImpl = pointOn
   segmentBoundsImpl = segmentBounds
   derivativeImpl = derivative
   reverseImpl = reverse
@@ -106,7 +106,7 @@ segmentIsCoincidentWithPoint ::
   Range Unitless ->
   Fuzzy Bool
 segmentIsCoincidentWithPoint point curve domain = do
-  let candidateBounds = segmentBounds domain curve
+  let candidateBounds = segmentBounds curve domain
   if
     | not (point ^ candidateBounds) -> Resolved False
     | candidateBounds ~= point -> Resolved True
@@ -119,8 +119,8 @@ class
   where
   startPointImpl :: curve -> Point2d coordinateSystem
   endPointImpl :: curve -> Point2d coordinateSystem
-  evaluateAtImpl :: Float -> curve -> Point2d coordinateSystem
-  segmentBoundsImpl :: Range Unitless -> curve -> Bounds2d coordinateSystem
+  pointOnImpl :: curve -> Float -> Point2d coordinateSystem
+  segmentBoundsImpl :: curve -> Range Unitless -> Bounds2d coordinateSystem
   derivativeImpl :: curve -> VectorCurve2d coordinateSystem
   reverseImpl :: curve -> curve
   boundsImpl :: curve -> Bounds2d coordinateSystem
@@ -128,36 +128,36 @@ class
 
 startPoint :: Curve2d (space @ units) -> Point2d (space @ units)
 startPoint (Line p1 _) = p1
-startPoint arc@(Arc{}) = evaluateAt 0.0 arc
+startPoint arc@(Arc{}) = pointOn arc 0.0
 startPoint (Curve curve) = startPointImpl curve
 startPoint (Coerce curve) = Units.coerce (startPoint curve)
 startPoint (PlaceIn frame curve) = Point2d.placeIn frame (startPoint curve)
 
 endPoint :: Curve2d (space @ units) -> Point2d (space @ units)
 endPoint (Line _ p2) = p2
-endPoint arc@(Arc{}) = evaluateAt 1.0 arc
+endPoint arc@(Arc{}) = pointOn arc 1.0
 endPoint (Curve curve) = endPointImpl curve
 endPoint (Coerce curve) = Units.coerce (endPoint curve)
 endPoint (PlaceIn frame curve) = Point2d.placeIn frame (endPoint curve)
 
-evaluateAt :: Float -> Curve2d (space @ units) -> Point2d (space @ units)
-evaluateAt t (Line p1 p2) = Point2d.interpolateFrom p1 p2 t
-evaluateAt t (Arc p0 v1 v2 a b) = do
+pointOn :: Curve2d (space @ units) -> Float -> Point2d (space @ units)
+pointOn (Line p1 p2) t = Point2d.interpolateFrom p1 p2 t
+pointOn (Arc p0 v1 v2 a b) t = do
   let theta = Qty.interpolateFrom a b t
   p0 + v1 * Angle.cos theta + v2 * Angle.sin theta
-evaluateAt t (Curve curve) = evaluateAtImpl t curve
-evaluateAt t (Coerce curve) = Units.coerce (evaluateAt t curve)
-evaluateAt t (PlaceIn frame curve) = Point2d.placeIn frame (evaluateAt t curve)
+pointOn (Curve curve) t = pointOnImpl curve t
+pointOn (Coerce curve) t = Units.coerce (pointOn curve t)
+pointOn (PlaceIn frame curve) t = Point2d.placeIn frame (pointOn curve t)
 
-segmentBounds :: Range Unitless -> Curve2d (space @ units) -> Bounds2d (space @ units)
-segmentBounds (Range t1 t2) (Line p1 p2) =
+segmentBounds :: Curve2d (space @ units) -> Range Unitless -> Bounds2d (space @ units)
+segmentBounds (Line p1 p2) (Range t1 t2) =
   Bounds2d.hull2 (Point2d.interpolateFrom p1 p2 t1) (Point2d.interpolateFrom p1 p2 t2)
-segmentBounds t (Arc p0 v1 v2 a b) = do
+segmentBounds (Arc p0 v1 v2 a b) t = do
   let theta = a + (b - a) * t
   p0 + Range.cos theta * v1 + Range.sin theta * v2
-segmentBounds t (Curve curve) = segmentBoundsImpl t curve
-segmentBounds t (Coerce curve) = Units.coerce (segmentBounds t curve)
-segmentBounds t (PlaceIn frame curve) = Bounds2d.placeIn frame (segmentBounds t curve)
+segmentBounds (Curve curve) t = segmentBoundsImpl curve t
+segmentBounds (Coerce curve) t = Units.coerce (segmentBounds curve t)
+segmentBounds (PlaceIn frame curve) t = Bounds2d.placeIn frame (segmentBounds curve t)
 
 derivative :: Curve2d (space @ units) -> VectorCurve2d (space @ units)
 derivative (Line p1 p2) = VectorCurve2d.constant (p2 - p1)
@@ -176,7 +176,7 @@ reverse (PlaceIn frame curve) = PlaceIn frame (reverse curve)
 
 bounds :: Curve2d (space @ units) -> Bounds2d (space @ units)
 bounds (Line p1 p2) = Bounds2d.hull2 p1 p2
-bounds arc@(Arc{}) = segmentBounds Range.unit arc
+bounds arc@(Arc{}) = segmentBounds arc Range.unit
 bounds (Curve curve) = boundsImpl curve
 bounds (Coerce curve) = Units.coerce (bounds curve)
 bounds (PlaceIn frame curve) = Bounds2d.placeIn frame (bounds curve)
@@ -202,8 +202,8 @@ data PointCurveDifference (coordinateSystem :: CoordinateSystem)
 deriving instance Show (PointCurveDifference (space @ units))
 
 instance VectorCurve2d.Interface (PointCurveDifference (space @ units)) (space @ units) where
-  evaluateAtImpl t (PointCurveDifference point curve) = point - evaluateAt t curve
-  segmentBoundsImpl t (PointCurveDifference point curve) = point - segmentBounds t curve
+  evaluateAtImpl t (PointCurveDifference point curve) = point - pointOn curve t
+  segmentBoundsImpl t (PointCurveDifference point curve) = point - segmentBounds curve t
   derivativeImpl (PointCurveDifference _ curve) = -(derivative curve)
   transformByImpl transform (PointCurveDifference point curve) =
     VectorCurve2d.wrap $
@@ -236,8 +236,8 @@ data CurvePointDifference (coordinateSystem :: CoordinateSystem)
 deriving instance Show (CurvePointDifference (space @ units))
 
 instance VectorCurve2d.Interface (CurvePointDifference (space @ units)) (space @ units) where
-  evaluateAtImpl t (CurvePointDifference curve point) = evaluateAt t curve - point
-  segmentBoundsImpl t (CurvePointDifference curve point) = segmentBounds t curve - point
+  evaluateAtImpl t (CurvePointDifference curve point) = pointOn curve t - point
+  segmentBoundsImpl t (CurvePointDifference curve point) = segmentBounds curve t - point
   derivativeImpl (CurvePointDifference curve _) = derivative curve
   transformByImpl transform (CurvePointDifference curve point) =
     VectorCurve2d.wrap $

@@ -83,9 +83,9 @@ instance Curve2d.Interface (BezierCurve2d (space @ units)) (space @ units) where
 
   endPointImpl (BezierCurve2d controlPoints) = NonEmpty.last controlPoints
 
-  evaluateAtImpl t (BezierCurve2d controlPoints) = deCasteljau t controlPoints
+  pointOnImpl (BezierCurve2d controlPoints) t = deCasteljau t controlPoints
 
-  segmentBoundsImpl (Range a b) (BezierCurve2d controlPoints) =
+  segmentBoundsImpl (BezierCurve2d controlPoints) (Range a b) =
     Bounds2d.hullN (segmentControlPoints a b controlPoints)
 
   boundsImpl (BezierCurve2d controlPoints) = Bounds2d.hullN controlPoints

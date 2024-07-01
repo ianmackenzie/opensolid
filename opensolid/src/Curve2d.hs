@@ -8,7 +8,6 @@ module Curve2d
   , wrap
   , startPoint
   , endPoint
-  , evaluateAt
   , pointOn
   , segmentBounds
   , derivative
@@ -93,13 +92,10 @@ startPoint = Internal.startPoint
 endPoint :: Curve2d (space @ units) -> Point2d (space @ units)
 endPoint = Internal.endPoint
 
-evaluateAt :: Float -> Curve2d (space @ units) -> Point2d (space @ units)
-evaluateAt = Internal.evaluateAt
-
 pointOn :: Curve2d (space @ units) -> Float -> Point2d (space @ units)
-pointOn curve t = evaluateAt t curve
+pointOn = Internal.pointOn
 
-segmentBounds :: Range Unitless -> Curve2d (space @ units) -> Bounds2d (space @ units)
+segmentBounds :: Curve2d (space @ units) -> Range Unitless -> Bounds2d (space @ units)
 segmentBounds = Internal.segmentBounds
 
 derivative :: Curve2d (space @ units) -> VectorCurve2d (space @ units)
@@ -168,7 +164,7 @@ isOverlappingSegment ::
   (Range Unitless, Range Unitless, Sign) ->
   Bool
 isOverlappingSegment curve1 curve2 (domain1, _, _) = do
-  let segmentStartPoint = evaluateAt (Range.minValue domain1) curve1
+  let segmentStartPoint = pointOn curve1 (Range.minValue domain1)
   let curve1TestPoints = List.map (pointOn curve1) (Range.samples domain1)
   let segment1IsNondegenerate = List.any (!= segmentStartPoint) curve1TestPoints
   let segment1LiesOnSegment2 = List.all (^ curve2) curve1TestPoints
@@ -455,10 +451,10 @@ instance Interface (TransformBy curve (space @ units)) (space @ units) where
     Point2d.transformBy transform (startPointImpl curve)
   endPointImpl (TransformBy transform curve) =
     Point2d.transformBy transform (endPointImpl curve)
-  evaluateAtImpl t (TransformBy transform curve) =
-    Point2d.transformBy transform (evaluateAtImpl t curve)
-  segmentBoundsImpl t (TransformBy transform curve) =
-    Bounds2d.transformBy transform (segmentBoundsImpl t curve)
+  pointOnImpl (TransformBy transform curve) t =
+    Point2d.transformBy transform (pointOnImpl curve t)
+  segmentBoundsImpl (TransformBy transform curve) t =
+    Bounds2d.transformBy transform (segmentBoundsImpl curve t)
   derivativeImpl (TransformBy transform curve) =
     VectorCurve2d.transformBy transform (derivativeImpl curve)
   reverseImpl (TransformBy transform curve) =
@@ -503,8 +499,8 @@ instance Show (Synthetic (space @ units)) where
 instance Interface (Synthetic (space @ units)) (space @ units) where
   startPointImpl (Synthetic curve _) = Curve2d.startPoint curve
   endPointImpl (Synthetic curve _) = Curve2d.endPoint curve
-  evaluateAtImpl t (Synthetic curve _) = Curve2d.evaluateAt t curve
-  segmentBoundsImpl t (Synthetic curve _) = Curve2d.segmentBounds t curve
+  pointOnImpl (Synthetic curve _) t = Curve2d.pointOn curve t
+  segmentBoundsImpl (Synthetic curve _) t = Curve2d.segmentBounds curve t
   boundsImpl (Synthetic curve _) = Curve2d.bounds curve
   reverseImpl (Synthetic curve curveDerivative) =
     Synthetic (Curve2d.reverse curve) (-(VectorCurve2d.reverse curveDerivative))

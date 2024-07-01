@@ -372,10 +372,10 @@ instance Composition (Curve2d Uv.Coordinates) (Function units) (Curve1d units) w
 
 instance Curve1d.Interface (CurveOnSurface units) units where
   pointOnImpl (CurveOnSurface uvCurve function) t =
-    evaluate function (Curve2d.evaluateAtImpl t uvCurve)
+    evaluate function (Curve2d.pointOnImpl uvCurve t)
 
   segmentBoundsImpl (CurveOnSurface uvCurve function) t =
-    bounds function (Curve2d.segmentBoundsImpl t uvCurve)
+    bounds function (Curve2d.segmentBoundsImpl uvCurve t)
 
   derivativeImpl (CurveOnSurface uvCurve function) = do
     let fU = derivative U function
@@ -831,18 +831,18 @@ solveForV (HorizontalCurve{derivatives, vRange, tolerance}) uValue = Tolerance.u
   Solve1d.monotonic fValue fvValue vRange
 
 instance Curve2d.Interface (HorizontalCurve units) Uv.Coordinates where
-  startPointImpl = Curve2d.evaluateAtImpl 0.0
-  endPointImpl = Curve2d.evaluateAtImpl 1.0
+  startPointImpl curve = Curve2d.pointOnImpl curve 0.0
+  endPointImpl curve = Curve2d.pointOnImpl curve 1.0
 
-  evaluateAtImpl tValue curve = do
+  pointOnImpl curve tValue = do
     let (HorizontalCurve{uStart, uEnd}) = curve
     let uValue = Float.interpolateFrom uStart uEnd tValue
     let vValue = solveForV curve uValue
     Point2d.xy uValue vValue
 
-  segmentBoundsImpl t curve = do
+  segmentBoundsImpl curve tRange = do
     let (HorizontalCurve{dvdu, uStart, uEnd, vRange, monotonic}) = curve
-    let (t1, t2) = Range.endpoints t
+    let (t1, t2) = Range.endpoints tRange
     let u1 = Float.interpolateFrom uStart uEnd t1
     let u2 = Float.interpolateFrom uStart uEnd t2
     let v1 = solveForV curve u1
@@ -863,7 +863,7 @@ instance Curve2d.Interface (HorizontalCurve units) Uv.Coordinates where
   reverseImpl (HorizontalCurve{derivatives, dvdu, uStart, uEnd, vRange, monotonic, tolerance}) =
     HorizontalCurve{derivatives, dvdu, uStart = uEnd, uEnd = uStart, vRange, monotonic, tolerance}
 
-  boundsImpl crossingCurve = Curve2d.segmentBoundsImpl Range.unit crossingCurve
+  boundsImpl crossingCurve = Curve2d.segmentBoundsImpl crossingCurve Range.unit
 
   transformByImpl transform crossingCurve =
     Curve2d.wrap (Curve2d.TransformBy transform crossingCurve)
@@ -887,18 +887,18 @@ solveForU (VerticalCurve{derivatives, uRange, tolerance}) vValue = Tolerance.usi
   Solve1d.monotonic fValue fuValue uRange
 
 instance Curve2d.Interface (VerticalCurve units) Uv.Coordinates where
-  startPointImpl = Curve2d.evaluateAtImpl 0.0
-  endPointImpl = Curve2d.evaluateAtImpl 1.0
+  startPointImpl curve = Curve2d.pointOnImpl curve 0.0
+  endPointImpl curve = Curve2d.pointOnImpl curve 1.0
 
-  evaluateAtImpl tValue curve = do
+  pointOnImpl curve tValue = do
     let (VerticalCurve{vStart, vEnd}) = curve
     let vValue = Float.interpolateFrom vStart vEnd tValue
     let uValue = solveForU curve vValue
     Point2d.xy uValue vValue
 
-  segmentBoundsImpl t curve = do
+  segmentBoundsImpl curve tRange = do
     let (VerticalCurve{dudv, uRange, vStart, vEnd, monotonic}) = curve
-    let (t1, t2) = Range.endpoints t
+    let (t1, t2) = Range.endpoints tRange
     let v1 = Float.interpolateFrom vStart vEnd t1
     let v2 = Float.interpolateFrom vStart vEnd t2
     let u1 = solveForU curve v1
@@ -919,7 +919,7 @@ instance Curve2d.Interface (VerticalCurve units) Uv.Coordinates where
   reverseImpl (VerticalCurve{derivatives, dudv, uRange, vStart, vEnd, monotonic, tolerance}) =
     VerticalCurve{derivatives, dudv, uRange, vStart = vEnd, vEnd = vStart, monotonic, tolerance}
 
-  boundsImpl crossingCurve = Curve2d.segmentBoundsImpl Range.unit crossingCurve
+  boundsImpl crossingCurve = Curve2d.segmentBoundsImpl crossingCurve Range.unit
 
   transformByImpl transform crossingCurve =
     Curve2d.wrap (Curve2d.TransformBy transform crossingCurve)

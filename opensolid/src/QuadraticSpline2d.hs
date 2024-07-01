@@ -41,9 +41,9 @@ instance Curve2d.Interface (QuadraticSpline2d (space @ units)) (space @ units) w
 
   endPointImpl (QuadraticSpline2d _ _ p3) = p3
 
-  evaluateAtImpl t spline = blossom spline t t
+  pointOnImpl spline t = blossom spline t t
 
-  segmentBoundsImpl (Range tl th) spline =
+  segmentBoundsImpl spline (Range tl th) =
     Bounds2d.hull3
       (blossom spline tl tl)
       (blossom spline tl th)

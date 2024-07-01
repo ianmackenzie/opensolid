@@ -356,10 +356,7 @@ drawBezier colour startPoint innerControlPoints endPoint = do
             | point <- drawingControlPoints
             ]
         ]
-    , Drawing2d.polyline [] $
-        [ Curve2d.evaluateAt t curve
-        | t <- Parameter.steps 100
-        ]
+    , Drawing2d.polyline [] [Curve2d.pointOn curve t | t <- Parameter.steps 100]
     ]
 
 testBezierSegment :: Tolerance Meters => IO ()
@@ -391,7 +388,7 @@ testHermiteBezier = IO.do
   log "End first derivative" (VectorCurve2d.evaluateAt 1.0 curveFirstDerivative)
   log "End second derivative" (VectorCurve2d.evaluateAt 1.0 curveSecondDerivative)
   log "End third derivative" (VectorCurve2d.evaluateAt 1.0 curveThirdDerivative)
-  let sampledPoints = [Curve2d.evaluateAt t curve | t <- Parameter.steps 100]
+  let sampledPoints = [Curve2d.pointOn curve t | t <- Parameter.steps 100]
   let curveAttributes =
         [ Drawing2d.strokeColour Colour.blue
         , Drawing2d.strokeWidth (Length.centimeters 3.0)
