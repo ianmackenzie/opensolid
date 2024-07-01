@@ -1,6 +1,9 @@
 module Basis2d
   ( Basis2d
   , xy
+  , yNegativeX
+  , flipX
+  , flipY
   , fromXDirection
   , fromYDirection
   , xDirection
@@ -33,6 +36,15 @@ deriving instance Show (Basis2d space defines)
 
 xy :: Basis2d space defines
 xy = Basis2d Direction2d.x Direction2d.y
+
+yNegativeX :: Basis2d space defines
+yNegativeX = Basis2d Direction2d.y Direction2d.negativeX
+
+flipX :: Basis2d space defines -> Basis2d space defines
+flipX (Basis2d dx dy) = Basis2d -dx dy
+
+flipY :: Basis2d space defines -> Basis2d space defines
+flipY (Basis2d dx dy) = Basis2d dx -dy
 
 fromXDirection :: Direction2d space -> Basis2d space defines
 fromXDirection dx = Basis2d dx (Direction2d.rotateLeft dx)
