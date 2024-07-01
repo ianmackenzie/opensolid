@@ -362,8 +362,11 @@ cos (Constant x) = constant (Angle.cos x)
 cos curve = Cos curve
 
 isZero :: Tolerance units => Curve1d units -> Bool
-isZero (Constant value) = value ~= Qty.zero
-isZero curve = List.all (pointOn curve >> (~= Qty.zero)) (Range.samples Range.unit)
+isZero curve = case curve of
+  Constant value -> value ~= Qty.zero
+  _ -> do
+    let sampledValues = List.map (pointOn curve) (Range.samples Range.unit)
+    List.all (~= Qty.zero) sampledValues
 
 ----- ROOT FINDING -----
 
