@@ -15,23 +15,23 @@ module Solve2d
   )
 where
 
-import OpenSolid
-import Domain2d (Domain2d(Domain2d))
+import Bounds2d qualified
+import Domain1d qualified
+import Domain2d (Domain2d (Domain2d))
 import Domain2d qualified
 import List qualified
-import Vector2d qualified
-import Uv qualified
-import Domain1d qualified
-import Qty qualified
 import Maybe qualified
+import OpenSolid
 import Pair qualified
-import Bounds2d qualified
-import Result qualified
 import Point2d qualified
+import Qty qualified
 import Queue (Queue)
-import Range qualified
-import Range (Range)
 import Queue qualified
+import Range (Range)
+import Range qualified
+import Result qualified
+import Uv qualified
+import Vector2d qualified
 
 data Cache cached
   = Tree Domain2d cached (Node cached)
@@ -158,7 +158,7 @@ process callback queue accumulated =
       -- TODO optimize to check for containment and overlapping subdomains in a single pass
       -- (maybe use the call stack to avoid even constructing the overlapping domain list
       -- if the subdomain is actually contained?)
-      let filteredExclusions = 
+      let filteredExclusions =
             List.map Pair.second accumulated
               |> List.filter (Domain2d.overlaps subdomain)
       if containedBy filteredExclusions subdomain

@@ -1,10 +1,10 @@
 module Tests.NonEmpty (tests) where
 
 import Data.List qualified
+import Int qualified
 import List qualified
 import NonEmpty qualified
 import OpenSolid
-import Int qualified
 import Test (Test)
 import Test qualified
 

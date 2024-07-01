@@ -1,8 +1,8 @@
 module Bool (random) where
 
-import Random.Internal (Generator(Generator))
-import System.Random qualified
 import Basics
+import Random.Internal (Generator (Generator))
+import System.Random qualified
 
 random :: Generator Bool
-random = Generator System.Random.uniform 
+random = Generator System.Random.uniform
