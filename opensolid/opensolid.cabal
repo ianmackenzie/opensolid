@@ -148,6 +148,7 @@ library
     OpenSolid.Json
     Pair
     Parameter
+    Plane3d
     Point2d
     Point3d
     Qty
