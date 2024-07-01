@@ -14,6 +14,8 @@ module Float
   , pi
   , twoPi
   , sqrt
+  , hypot2
+  , hypot3
   , sin
   , cos
   , tan
@@ -132,6 +134,12 @@ goldenRatio = 0.5 * (1.0 + sqrt 5.0)
 
 sqrt :: Float -> Float
 sqrt = Qty.sqrt
+
+hypot2 :: Float -> Float -> Float
+hypot2 = Qty.hypot2
+
+hypot3 :: Float -> Float -> Float -> Float
+hypot3 = Qty.hypot3
 
 sin :: Float -> Float
 sin (Qty_ x) = Qty_ (Prelude.sin x)
