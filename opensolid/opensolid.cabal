@@ -155,6 +155,7 @@ library
     QuadraticSpline2d
     QuadraticSpline3d
     Queue
+    Radians
     Random
     Random.Internal
     Range

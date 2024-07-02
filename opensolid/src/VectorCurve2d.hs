@@ -759,8 +759,8 @@ derivative curve = case curve of
   PlaceInBasis basis c -> PlaceInBasis basis (derivative c)
   Line v1 v2 -> constant (v2 - v1)
   Arc v1 v2 a b -> do
-    let dTheta = Angle.unitless (b - a)
-    Arc (v2 * dTheta) (-v1 * dTheta) a b
+    let scale = Angle.inRadians (b - a)
+    Arc (v2 * scale) (-v1 * scale) a b
   QuadraticSpline v1 v2 v3 -> line (2 * (v2 - v1)) (2 * (v3 - v2))
   CubicSpline v1 v2 v3 v4 ->
     quadraticSpline (3 * (v2 - v1)) (3 * (v3 - v2)) (3 * (v4 - v3))

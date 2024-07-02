@@ -92,7 +92,7 @@ corner ::
 corner cornerPoint incomingDirection outgoingDirection givenRadius = do
   let radius = Qty.abs givenRadius
   let sweptAngle = Direction2d.angleFrom incomingDirection outgoingDirection
-  if radius * Float.squared (Angle.unitless sweptAngle) / 4 ~= Qty.zero
+  if radius * Float.squared (Angle.inRadians sweptAngle) / 4 ~= Qty.zero
     then Line2d.from cornerPoint cornerPoint
     else do
       let offset = radius * Qty.abs (Angle.tan (0.5 * sweptAngle))

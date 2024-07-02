@@ -22,7 +22,6 @@ module Angle
   , quarterTurn
   , turns
   , inTurns
-  , unitless
   )
 where
 
@@ -32,8 +31,7 @@ import Float (Float, fromRational)
 import Float qualified
 import Qty (Qty (Qty, Qty_))
 import Qty qualified
-import Units (HasUnits (Units), Radians)
-import Units qualified
+import Units (Radians)
 import Prelude qualified
 
 type Angle = Qty Radians
@@ -70,14 +68,6 @@ radian = radians 1.0
 
 radians :: Float -> Angle
 radians = Qty
-
-unitless ::
-  ( Units a ~ Radians
-  , Units.Coercion a (Units.Erase a)
-  ) =>
-  a ->
-  Units.Erase a
-unitless = Units.erase
 
 inRadians :: Angle -> Float
 inRadians (Qty x) = x

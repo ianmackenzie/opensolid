@@ -45,6 +45,7 @@ import NonEmpty qualified
 import OpenSolid
 import Point2d qualified
 import Qty qualified
+import Radians qualified
 import Range (Range)
 import Range qualified
 import Result qualified
@@ -306,8 +307,8 @@ derivative varyingParameter function =
         .!/.! squared' f2
     Squared' f -> 2 * f .*. derivative varyingParameter f
     SquareRoot' f -> derivative varyingParameter f .!/! (2 * sqrt' f)
-    Sin f -> cos f * Angle.unitless (derivative varyingParameter f)
-    Cos f -> negate (sin f) * Angle.unitless (derivative varyingParameter f)
+    Sin f -> cos f * Radians.toUnitless (derivative varyingParameter f)
+    Cos f -> negate (sin f) * Radians.toUnitless (derivative varyingParameter f)
 
 derivativeIn :: Uv.Direction -> Function units -> Function units
 derivativeIn direction function =

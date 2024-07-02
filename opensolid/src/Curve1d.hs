@@ -34,6 +34,7 @@ import Float qualified
 import List qualified
 import OpenSolid
 import Qty qualified
+import Radians qualified
 import Range (Range)
 import Range qualified
 import Result qualified
@@ -312,8 +313,8 @@ derivative curve = case curve of
   Quotient' c1 c2 -> (derivative c1 .*. c2 - c1 .*. derivative c2) .!/.! squared' c2
   Squared' c -> 2 * c .*. derivative c
   SquareRoot' c' -> derivative c' .!/! (2 * sqrt' c')
-  Sin c -> cos c * Angle.unitless (derivative c)
-  Cos c -> negate (sin c) * Angle.unitless (derivative c)
+  Sin c -> cos c * Radians.toUnitless (derivative c)
+  Cos c -> negate (sin c) * Radians.toUnitless (derivative c)
   Coerce c -> Units.coerce (derivative c)
 
 newtype Reversed units = Reversed (Curve1d units)
