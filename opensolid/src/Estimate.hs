@@ -6,6 +6,7 @@ module Estimate
   , bounds
   , refine
   , satisfy
+  , resolve
   , abs
   , sum
   , min
@@ -80,6 +81,12 @@ satisfy :: (Range units -> Bool) -> Estimate units -> Range units
 satisfy predicate estimate = do
   let current = bounds estimate
   if predicate current then current else satisfy predicate (refine estimate)
+
+resolve :: (Range units -> Fuzzy a) -> Estimate units -> a
+resolve function estimate =
+  case function (bounds estimate) of
+    Resolved value -> value
+    Unresolved -> resolve function (refine estimate)
 
 newtype Negate units = Negate (Estimate units)
 
