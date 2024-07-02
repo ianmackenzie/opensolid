@@ -19,6 +19,7 @@ import Angle qualified
 import Bounds2d (Bounds2d)
 import Bounds2d qualified
 import Frame2d (Frame2d)
+import List qualified
 import OpenSolid
 import Point2d (Point2d)
 import Point2d qualified
@@ -98,6 +99,15 @@ instance
   Intersects (Point2d (space @ units)) (Curve2d (space_ @ units_)) units
   where
   point ^ curve = curve ^ point
+
+instance
+  ( space ~ space_
+  , units ~ units_
+  ) =>
+  ApproximateEquality (Curve2d (space @ units)) (Curve2d (space_ @ units_)) units
+  where
+  curve1 ~= curve2 =
+    List.allTrue [pointOn curve1 t ~= pointOn curve2 t | t <- Range.samples Range.unit]
 
 segmentIsCoincidentWithPoint ::
   Tolerance units =>
