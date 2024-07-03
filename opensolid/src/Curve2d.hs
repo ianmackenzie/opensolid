@@ -1,5 +1,7 @@
 module Curve2d
   ( Curve2d
+  , pattern Line
+  , pattern Arc
   , DegenerateCurve (DegenerateCurve)
   , Intersection
   , IntersectionError (..)
@@ -43,6 +45,7 @@ module Curve2d
   )
 where
 
+import {-# SOURCE #-} Arc2d (Arc2d)
 import Axis2d (Axis2d)
 import Axis2d qualified
 import {-# SOURCE #-} BezierCurve2d qualified
@@ -62,6 +65,7 @@ import Direction2d (Direction2d)
 import DirectionCurve2d (DirectionCurve2d)
 import Frame2d (Frame2d)
 import Frame2d qualified
+import {-# SOURCE #-} Line2d (Line2d)
 import List qualified
 import OpenSolid
 import Point2d (Point2d)
@@ -80,6 +84,12 @@ import VectorCurve2d qualified
 import Prelude qualified
 
 type Curve2d (coordinateSystem :: CoordinateSystem) = Internal.Curve2d coordinateSystem
+
+pattern Line :: Line2d (space @ units) -> Curve2d (space @ units)
+pattern Line line <- (Internal.asLine -> Just line)
+
+pattern Arc :: Arc2d (space @ units) -> Curve2d (space @ units)
+pattern Arc arc <- (Internal.asArc -> Just arc)
 
 data DegenerateCurve = DegenerateCurve deriving (Eq, Show, Error)
 

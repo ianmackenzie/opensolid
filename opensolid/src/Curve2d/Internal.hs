@@ -12,40 +12,32 @@ module Curve2d.Internal
   , reverse
   , bounds
   , transformBy
+  , asLine
+  , asArc
   )
 where
 
-import Angle qualified
+import {-# SOURCE #-} Arc2d (Arc2d)
+import {-# SOURCE #-} Arc2d qualified
 import Bounds2d (Bounds2d)
 import Bounds2d qualified
 import Frame2d (Frame2d)
+import {-# SOURCE #-} Line2d (Line2d)
+import {-# SOURCE #-} Line2d qualified
 import List qualified
+import Maybe qualified
 import OpenSolid
 import Point2d (Point2d)
 import Point2d qualified
-import Qty qualified
-import Range (Range (Range))
+import Range (Range)
 import Range qualified
 import Transform2d (Transform2d)
 import Transform2d qualified
 import Units qualified
-import Vector2d (Vector2d)
-import Vector2d qualified
 import VectorCurve2d (VectorCurve2d (VectorCurve2d))
 import VectorCurve2d qualified
 
 data Curve2d (coordinateSystem :: CoordinateSystem) where
-  Line ::
-    Point2d (space @ units) ->
-    Point2d (space @ units) ->
-    Curve2d (space @ units)
-  Arc ::
-    Point2d (space @ units) ->
-    Vector2d (space @ units) ->
-    Vector2d (space @ units) ->
-    Angle ->
-    Angle ->
-    Curve2d (space @ units)
   Curve ::
     Interface curve (space @ units) =>
     curve ->
@@ -68,9 +60,6 @@ instance
   space ~ space_ =>
   Units.Coercion (Curve2d (space @ units1)) (Curve2d (space_ @ units2))
   where
-  coerce (Line p1 p2) = Line (Units.coerce p1) (Units.coerce p2)
-  coerce (Arc centerPoint xVector yVector startAngle endAngle) =
-    Arc (Units.coerce centerPoint) (Units.coerce xVector) (Units.coerce yVector) startAngle endAngle
   coerce (Coerce c) = Coerce c
   coerce c = Coerce c
 
@@ -83,6 +72,8 @@ instance Interface (Curve2d (space @ units)) (space @ units) where
   reverseImpl = reverse
   boundsImpl = bounds
   transformByImpl = transformBy
+  asLineImpl = asLine
+  asArcImpl = asArc
 
 instance
   ( space ~ space_
@@ -136,75 +127,63 @@ class
   boundsImpl :: curve -> Bounds2d coordinateSystem
   transformByImpl :: Transform2d tag coordinateSystem -> curve -> Curve2d coordinateSystem
 
+  asLineImpl :: curve -> Maybe (Line2d coordinateSystem)
+  asLineImpl _ = Nothing
+  asArcImpl :: curve -> Maybe (Arc2d coordinateSystem)
+  asArcImpl _ = Nothing
+
 startPoint :: Curve2d (space @ units) -> Point2d (space @ units)
-startPoint (Line p1 _) = p1
-startPoint arc@(Arc{}) = pointOn arc 0.0
 startPoint (Curve curve) = startPointImpl curve
 startPoint (Coerce curve) = Units.coerce (startPoint curve)
 startPoint (PlaceIn frame curve) = Point2d.placeIn frame (startPoint curve)
 
 endPoint :: Curve2d (space @ units) -> Point2d (space @ units)
-endPoint (Line _ p2) = p2
-endPoint arc@(Arc{}) = pointOn arc 1.0
 endPoint (Curve curve) = endPointImpl curve
 endPoint (Coerce curve) = Units.coerce (endPoint curve)
 endPoint (PlaceIn frame curve) = Point2d.placeIn frame (endPoint curve)
 
 pointOn :: Curve2d (space @ units) -> Float -> Point2d (space @ units)
-pointOn (Line p1 p2) t = Point2d.interpolateFrom p1 p2 t
-pointOn (Arc p0 v1 v2 a b) t = do
-  let theta = Qty.interpolateFrom a b t
-  p0 + v1 * Angle.cos theta + v2 * Angle.sin theta
 pointOn (Curve curve) t = pointOnImpl curve t
 pointOn (Coerce curve) t = Units.coerce (pointOn curve t)
 pointOn (PlaceIn frame curve) t = Point2d.placeIn frame (pointOn curve t)
 
 segmentBounds :: Curve2d (space @ units) -> Range Unitless -> Bounds2d (space @ units)
-segmentBounds (Line p1 p2) (Range t1 t2) =
-  Bounds2d.hull2 (Point2d.interpolateFrom p1 p2 t1) (Point2d.interpolateFrom p1 p2 t2)
-segmentBounds (Arc p0 v1 v2 a b) t = do
-  let theta = a + (b - a) * t
-  p0 + Range.cos theta * v1 + Range.sin theta * v2
 segmentBounds (Curve curve) t = segmentBoundsImpl curve t
 segmentBounds (Coerce curve) t = Units.coerce (segmentBounds curve t)
 segmentBounds (PlaceIn frame curve) t = Bounds2d.placeIn frame (segmentBounds curve t)
 
 derivative :: Curve2d (space @ units) -> VectorCurve2d (space @ units)
-derivative (Line p1 p2) = VectorCurve2d.constant (p2 - p1)
-derivative (Arc _ v1 v2 a b) = VectorCurve2d.derivative (VectorCurve2d.arc v1 v2 a b)
 derivative (Curve curve) = derivativeImpl curve
 derivative (Coerce curve) = Units.coerce (derivative curve)
 derivative (PlaceIn frame curve) = VectorCurve2d.placeIn frame (derivative curve)
 
 reverse :: Curve2d (space @ units) -> Curve2d (space @ units)
-reverse (Line p1 p2) = Line p2 p1
-reverse (Arc centerPoint xVector yVector startAngle endAngle) =
-  Arc centerPoint xVector yVector endAngle startAngle
 reverse (Curve curve) = Curve (reverseImpl curve)
 reverse (Coerce curve) = Units.coerce (reverse curve)
 reverse (PlaceIn frame curve) = PlaceIn frame (reverse curve)
 
 bounds :: Curve2d (space @ units) -> Bounds2d (space @ units)
-bounds (Line p1 p2) = Bounds2d.hull2 p1 p2
-bounds arc@(Arc{}) = segmentBounds arc Range.unit
 bounds (Curve curve) = boundsImpl curve
 bounds (Coerce curve) = Units.coerce (bounds curve)
 bounds (PlaceIn frame curve) = Bounds2d.placeIn frame (bounds curve)
 
 transformBy :: Transform2d tag (space @ units) -> Curve2d (space @ units) -> Curve2d (space @ units)
-transformBy transform (Line p1 p2) =
-  Line (Point2d.transformBy transform p1) (Point2d.transformBy transform p2)
-transformBy transform (Arc centerPoint xVector yVector startAngle endAngle) =
-  Arc
-    (Point2d.transformBy transform centerPoint)
-    (Vector2d.transformBy transform xVector)
-    (Vector2d.transformBy transform yVector)
-    startAngle
-    endAngle
 transformBy transform (Curve curve) = Curve (transformByImpl transform curve)
 transformBy transform (Coerce curve) = Units.coerce (transformBy (Units.coerce transform) curve)
 transformBy transform (PlaceIn frame curve) =
   PlaceIn frame (transformBy (Transform2d.relativeTo frame transform) curve)
+
+asLine :: Curve2d (space @ units) -> Maybe (Line2d (space @ units))
+asLine curve = case curve of
+  Curve c -> asLineImpl c
+  Coerce c -> Maybe.map Units.coerce (asLine c)
+  PlaceIn frame c -> Maybe.map (Line2d.placeIn frame) (asLine c)
+
+asArc :: Curve2d (space @ units) -> Maybe (Arc2d (space @ units))
+asArc curve = case curve of
+  Curve c -> asArcImpl c
+  Coerce c -> Maybe.map Units.coerce (asArc c)
+  PlaceIn frame c -> Maybe.map (Arc2d.placeIn frame) (asArc c)
 
 data PointCurveDifference (coordinateSystem :: CoordinateSystem)
   = PointCurveDifference (Point2d coordinateSystem) (Curve2d coordinateSystem)

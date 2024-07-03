@@ -1,7 +1,6 @@
 module Tests.Arc2d (tests) where
 
 import Angle qualified
-import Arc2d (pattern Arc2d)
 import Arc2d qualified
 import Curve2d qualified
 import Float qualified
@@ -52,7 +51,7 @@ deformation = Test.check 100 "deformation" Test.do
   let transformOfEnd = Point2d.transformBy transform (Curve2d.endPoint initialArc)
   let transformOfPoint = Point2d.transformBy transform (Curve2d.pointOn initialArc t)
   case transformedArc of
-    Arc2d arc -> do
+    Curve2d.Arc arc -> do
       let majorDirection = Arc2d.majorDirection arc
       let minorDirection = Arc2d.minorDirection arc
       let evaluateEllipticalArc u = do

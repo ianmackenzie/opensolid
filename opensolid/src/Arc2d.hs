@@ -14,22 +14,23 @@ module Arc2d
   , elliptical
   , ellipse
   , generic
-  , pattern Arc2d
   , Arc2d
-    ( centerPoint
-    , majorDirection
-    , minorDirection
-    , majorRadius
-    , minorRadius
-    , startAngle
-    , endAngle
-    )
+  , centerPoint
+  , majorDirection
+  , minorDirection
+  , majorRadius
+  , minorRadius
+  , startAngle
+  , endAngle
+  , placeIn
   )
 where
 
 import Angle qualified
+import CoordinateSystem (Space)
 import Curve2d (Curve2d)
-import Curve2d.Internal qualified
+import Curve2d qualified
+import Data.Coerce qualified
 import Direction2d (Direction2d)
 import Direction2d qualified
 import Float qualified
@@ -41,8 +42,61 @@ import OpenSolid
 import Point2d (Point2d)
 import Point2d qualified
 import Qty qualified
+import Range qualified
+import Tolerance qualified
+import Units qualified
 import Vector2d (Vector2d)
 import Vector2d qualified
+import VectorCurve2d qualified
+
+data Arc (coordinateSystem :: CoordinateSystem) where
+  Arc ::
+    Point2d coordinateSystem ->
+    Vector2d coordinateSystem ->
+    Vector2d coordinateSystem ->
+    Angle ->
+    Angle ->
+    Arc coordinateSystem
+
+deriving instance Show (Arc (space @ units))
+
+instance Curve2d.Interface (Arc (space @ units)) (space @ units) where
+  startPointImpl arc = Curve2d.pointOnImpl arc 0.0
+  endPointImpl arc = Curve2d.pointOnImpl arc 1.0
+  pointOnImpl (Arc p0 vx vy a b) t = do
+    let theta = Qty.interpolateFrom a b t
+    p0 + vx * Angle.cos theta + vy * Angle.sin theta
+  segmentBoundsImpl (Arc p0 vx vy a b) t = do
+    let theta = a + (b - a) * t
+    p0 + Range.cos theta * vx + Range.sin theta * vy
+  derivativeImpl (Arc _ vx vy a b) = VectorCurve2d.derivative (VectorCurve2d.arc vx vy a b)
+  reverseImpl (Arc p0 vx vy a b) = Arc p0 vx vy b a
+  boundsImpl arc = Curve2d.segmentBoundsImpl arc Range.unit
+  transformByImpl transform (Arc p0 vx vy a b) =
+    Curve2d.wrap $
+      Arc
+        (Point2d.transformBy transform p0)
+        (Vector2d.transformBy transform vx)
+        (Vector2d.transformBy transform vy)
+        a
+        b
+  asArcImpl (Arc centerPoint vx vy a b) = Maybe.do
+    let theta = 0.5 * Angle.atan2 (2 * vx .<>. vy) (vx .<>. vx - vy .<>. vy)
+    let cosTheta = Angle.cos theta
+    let sinTheta = Angle.sin theta
+    let v1 = vx * cosTheta + vy * sinTheta
+    let v2 = vy * cosTheta - vx * sinTheta
+    (r1, d1) <- Tolerance.exactly (Vector2d.magnitudeAndDirection v1) ?? Nothing
+    (r2, d2) <- Tolerance.exactly (Vector2d.magnitudeAndDirection v2) ?? Nothing
+    if r1 >= r2
+      then do
+        let startAngle = a - theta
+        let endAngle = b - theta
+        Just (Arc2d centerPoint d1 d2 r1 r2 startAngle endAngle)
+      else do
+        let startAngle = a - theta - Angle.quarterTurn
+        let endAngle = b - theta - Angle.quarterTurn
+        Just (Arc2d centerPoint d2 -d1 r2 r1 startAngle endAngle)
 
 from ::
   Tolerance units =>
@@ -67,11 +121,11 @@ from startPoint endPoint sweptAngle =
           let yVector = Vector2d.y radius
           let startAngle = Point2d.angleFrom centerPoint startPoint
           let endAngle = startAngle + sweptAngle
-          Curve2d.Internal.Arc centerPoint xVector yVector startAngle endAngle
+          Curve2d.wrap (Arc centerPoint xVector yVector startAngle endAngle)
 
 polar :: Point2d (space @ units) -> Qty units -> Angle -> Angle -> Curve2d (space @ units)
 polar centerPoint radius startAngle endAngle =
-  Curve2d.Internal.Arc centerPoint (Vector2d.x radius) (Vector2d.y radius) startAngle endAngle
+  Curve2d.wrap (Arc centerPoint (Vector2d.x radius) (Vector2d.y radius) startAngle endAngle)
 
 circle :: Point2d (space @ units) -> Qty units -> Curve2d (space @ units)
 circle centerPoint radius = polar centerPoint radius Angle.zero Angle.twoPi
@@ -173,46 +227,42 @@ generic ::
   Angle ->
   Angle ->
   Curve2d (space @ units)
-generic = Curve2d.Internal.Arc
+generic p0 v1 v2 a b = Curve2d.wrap (Arc p0 v1 v2 a b)
+
+type role Arc2d phantom
 
 data Arc2d (coordinateSystem :: CoordinateSystem) where
-  Arc2d_ ::
-    { centerPoint :: Point2d (space @ units)
-    , majorDirection :: Direction2d space
-    , minorDirection :: Direction2d space
-    , majorRadius :: Qty units
-    , minorRadius :: Qty units
+  Arc2d ::
+    { centerPoint :: Point2d coordinateSystem
+    , majorDirection :: Direction2d (Space coordinateSystem)
+    , minorDirection :: Direction2d (Space coordinateSystem)
+    , majorRadius :: Qty (Units coordinateSystem)
+    , minorRadius :: Qty (Units coordinateSystem)
     , startAngle :: Angle
     , endAngle :: Angle
     } ->
-    Arc2d (space @ units)
+    Arc2d coordinateSystem
 
-pattern Arc2d :: Tolerance units => Arc2d (space @ units) -> Curve2d (space @ units)
-pattern Arc2d arc <- (extractArc -> Just arc)
+instance HasUnits (Arc2d (space @ units)) where
+  type Units (Arc2d (space @ units)) = units
+  type Erase (Arc2d (space @ units)) = Arc2d (space @ Unitless)
 
-extractArc ::
-  Tolerance units =>
-  Curve2d (space @ units) ->
-  Maybe (Arc2d (space @ units))
-extractArc curve = case curve of
-  Curve2d.Internal.Arc centerPoint vx vy a b -> Maybe.do
-    let theta =
-          if Vector2d.magnitude vx ~= Vector2d.magnitude vy
-            then Angle.degrees 45.0
-            else 0.5 * Angle.atan2 (2 * vx .<>. vy) (vx .<>. vx - vy .<>. vy)
-    let cosTheta = Angle.cos theta
-    let sinTheta = Angle.sin theta
-    let v1 = vx * cosTheta + vy * sinTheta
-    let v2 = vy * cosTheta - vx * sinTheta
-    (r1, d1) <- Vector2d.magnitudeAndDirection v1 ?? Nothing
-    (r2, d2) <- Vector2d.magnitudeAndDirection v2 ?? Nothing
-    if r1 >= r2
-      then do
-        let startAngle = a - theta
-        let endAngle = b - theta
-        Just (Arc2d_ centerPoint d1 d2 r1 r2 startAngle endAngle)
-      else do
-        let startAngle = a - theta - Angle.quarterTurn
-        let endAngle = b - theta - Angle.quarterTurn
-        Just (Arc2d_ centerPoint d2 -d1 r2 r1 startAngle endAngle)
-  _ -> Nothing
+instance
+  space1 ~ space2 =>
+  Units.Coercion (Arc2d (space1 @ units1)) (Arc2d (space2 @ units2))
+  where
+  coerce = Data.Coerce.coerce
+
+placeIn ::
+  Frame2d (global @ units) (Defines local) ->
+  Arc2d (local @ units) ->
+  Arc2d (global @ units)
+placeIn frame (Arc2d p0 d1 d2 r1 r2 a b) =
+  Arc2d
+    (Point2d.placeIn frame p0)
+    (Direction2d.placeIn frame d1)
+    (Direction2d.placeIn frame d2)
+    r1
+    r2
+    a
+    b

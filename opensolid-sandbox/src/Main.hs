@@ -1,7 +1,6 @@
 module Main (main) where
 
 import Angle qualified
-import Arc2d (pattern Arc2d)
 import Arc2d qualified
 import Area qualified
 import Axis2d qualified
@@ -22,7 +21,6 @@ import IO qualified
 import Int qualified
 import Length (Length)
 import Length qualified
-import Line2d (pattern Line2d)
 import Line2d qualified
 import List qualified
 import NonEmpty qualified
@@ -186,7 +184,7 @@ testNonEmpty = IO.do
 testLineFromEndpoints :: Tolerance Meters => IO ()
 testLineFromEndpoints =
   case Line2d.from Point2d.origin (Point2d.centimeters 40.0 30.0) of
-    Line2d line -> do
+    Curve2d.Line line -> do
       let length = Point2d.distanceFrom (Line2d.startPoint line) (Line2d.endPoint line)
       log "Line length in centimeters" (Length.inCentimeters length)
     curve -> log "Unexpected curve" curve
@@ -194,7 +192,7 @@ testLineFromEndpoints =
 testArcFromEndpoints :: Tolerance Meters => IO ()
 testArcFromEndpoints =
   case Arc2d.from Point2d.origin (Point2d.centimeters 50.0 50.0) Angle.quarterTurn of
-    Arc2d arc -> log "Arc center point" (Arc2d.centerPoint arc)
+    Curve2d.Arc arc -> log "Arc center point" (Arc2d.centerPoint arc)
     curve -> log "Unexpected curve" curve
 
 testPlaneTorusIntersection :: Tolerance Meters => IO ()
@@ -410,7 +408,7 @@ testStretchedArc = IO.do
 
 printEllipticalArc :: Tolerance Meters => Text -> Curve2d (space @ Meters) -> IO ()
 printEllipticalArc label curve = case curve of
-  Arc2d arc -> IO.do
+  Curve2d.Arc arc -> IO.do
     let centerPoint = Arc2d.centerPoint arc
     let majorDirection = Arc2d.majorDirection arc
     let minorDirection = Arc2d.minorDirection arc
