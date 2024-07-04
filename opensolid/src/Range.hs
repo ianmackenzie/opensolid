@@ -68,13 +68,14 @@ import List qualified
 import Maybe qualified
 import NonEmpty qualified
 import OpenSolid
+import Parameter qualified
 import Qty qualified
-import Quadrature qualified
 import Random qualified
 import Units qualified
 
 type role Range phantom
 
+type Range :: Type -> Type
 data Range units = Range_ (Qty units) (Qty units)
   deriving (Eq, Show)
 
@@ -614,7 +615,7 @@ random randomQty = Random.do
   Random.return (from a b)
 
 samples :: Range units -> List (Qty units)
-samples range = List.map (interpolate range) Quadrature.points
+samples range = List.map (interpolate range) Parameter.samples
 
 convert :: Qty (units2 :/: units1) -> Range units1 -> Range units2
 convert conversion (Range low high) = from (Qty.convert conversion low) (Qty.convert conversion high)

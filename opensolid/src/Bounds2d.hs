@@ -353,13 +353,10 @@ interpolate (Bounds2d x y) u v =
   Point2d.xy (Range.interpolate x u) (Range.interpolate y v)
 
 sample :: (Point2d (space @ units) -> a) -> Bounds2d (space @ units) -> List a
-sample function (Bounds2d x y) =
-  [ function (Point2d.xy (Range.interpolate x Quadrature.t1) (Range.interpolate y Quadrature.t1))
-  , function (Point2d.xy (Range.interpolate x Quadrature.t2) (Range.interpolate y Quadrature.t5))
-  , function (Point2d.xy (Range.interpolate x Quadrature.t3) (Range.interpolate y Quadrature.t3))
-  , function (Point2d.xy (Range.interpolate x Quadrature.t4) (Range.interpolate y Quadrature.t4))
-  , function (Point2d.xy (Range.interpolate x Quadrature.t5) (Range.interpolate y Quadrature.t2))
-  ]
+sample function bounds = do
+  let (t1, t2, t3, t4) = Quadrature.abscissae4
+  let f u v = function (interpolate bounds u v)
+  [f t1 t3, f t2 t1, f t3 t4, f t4 t2]
 
 any :: (Bounds2d (space @ units) -> Fuzzy Bool) -> Bounds2d (space @ units) -> Bool
 any assess bounds@(Bounds2d x y) =

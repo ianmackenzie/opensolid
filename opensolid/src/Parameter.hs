@@ -6,15 +6,17 @@ module Parameter
   , inBetween
   , midpoints
   , intervals
+  , samples
   )
 where
 
 import Float qualified
 import List qualified
 import OpenSolid
+import Quadrature qualified
 import Random qualified
-import Range (Range)
-import Range qualified
+import {-# SOURCE #-} Range (Range)
+import {-# SOURCE #-} Range qualified
 
 steps :: Int -> List Float
 steps n = if n > 0 then List.map (/ n) [0 .. n] else []
@@ -36,6 +38,11 @@ intervalOf n i = Range.from (i / n) ((i + 1) / n)
 
 intervals :: Int -> List (Range Unitless)
 intervals n = if n > 0 then List.map (intervalOf n) [0 .. n - 1] else []
+
+samples :: List Float
+samples = do
+  let (p1, p2, p3, p4) = Quadrature.abscissae4
+  [p1, p2, p3, p4]
 
 random :: Random.Generator Float
 random = Float.random 0.0 1.0
