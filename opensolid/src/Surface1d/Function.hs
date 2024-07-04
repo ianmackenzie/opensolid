@@ -387,7 +387,7 @@ instance Curve1d.Interface (CurveOnSurface units) units where
     fU . uvCurve * uT + fV . uvCurve * vT
 
 isZero :: Tolerance units => Function units -> Bool
-isZero function = List.all (~= Qty.zero) (Bounds2d.sample (evaluate function) Uv.domain)
+isZero function = List.allTrue [evaluate function uv ~= Qty.zero | uv <- Uv.samples]
 
 data ZerosError
   = ZeroEverywhere
