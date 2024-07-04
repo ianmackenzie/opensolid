@@ -47,9 +47,9 @@ module NonEmpty
   , sortAndDeduplicate
   , intersperse
   , partition
-  , all
+  , allSatisfy
   , allTrue
-  , any
+  , anySatisfy
   , anyTrue
   , minimum
   , maximum
@@ -241,14 +241,14 @@ dedup current (next : remaining)
   | current == next = dedup current remaining
   | otherwise = prepend current (dedup next remaining)
 
-all :: (a -> Bool) -> NonEmpty a -> Bool
-all = Prelude.all
+allSatisfy :: (a -> Bool) -> NonEmpty a -> Bool
+allSatisfy = Prelude.all
 
 allTrue :: NonEmpty Bool -> Bool
 allTrue = Prelude.and
 
-any :: (a -> Bool) -> NonEmpty a -> Bool
-any = Prelude.any
+anySatisfy :: (a -> Bool) -> NonEmpty a -> Bool
+anySatisfy = Prelude.any
 
 anyTrue :: NonEmpty Bool -> Bool
 anyTrue = Prelude.or

@@ -90,9 +90,10 @@ checkCurvesForInnerIntersection curve1 curve2 =
       Error TangentIntersectionAtDegeneratePoint
     Error Curve2d.HigherOrderIntersection ->
       Error HigherOrderIntersection
-    Ok intersections
-      | List.all isEndpointIntersection intersections -> Ok ()
-      | otherwise -> Error RegionBoundaryIntersectsItself
+    Ok intersections ->
+      if List.allSatisfy isEndpointIntersection intersections
+        then Ok ()
+        else Error RegionBoundaryIntersectsItself
 
 isEndpointIntersection :: Intersection -> Bool
 isEndpointIntersection (Intersection{t1, t2}) = isEndpoint t1 && isEndpoint t2
@@ -171,9 +172,10 @@ classify ::
   Point2d (space @ units) ->
   NonEmpty (Curve2d (space @ units)) ->
   Maybe Sign
-classify point curves
-  | NonEmpty.any (^ point) curves = Nothing
-  | otherwise = Just (classifyNonBoundary point curves)
+classify point curves =
+  if NonEmpty.anySatisfy (^ point) curves
+    then Nothing
+    else Just (classifyNonBoundary point curves)
 
 fluxIntegral :: Point2d (space @ units) -> Curve2d (space @ units) -> Estimate Unitless
 fluxIntegral point curve = do
@@ -210,7 +212,7 @@ classifyLoops (NonEmpty loops) = Result.do
   let (largestLoop, smallerLoops) = pickLargestLoop loops
   let outerLoopCandidate = fixSign Positive largestLoop
   let innerLoopCandidates = List.map (fixSign Negative) smallerLoops
-  if List.all (loopIsInside outerLoopCandidate) innerLoopCandidates
+  if List.allSatisfy (loopIsInside outerLoopCandidate) innerLoopCandidates
     then Ok (Region2d outerLoopCandidate innerLoopCandidates)
     else Error MultipleDisjointRegions
 

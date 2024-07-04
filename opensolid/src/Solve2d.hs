@@ -178,7 +178,7 @@ process callback queue accumulated =
 
 containedBy :: List Domain2d -> Domain2d -> Bool
 containedBy exclusions subdomain =
-  List.any (Domain2d.contains subdomain) exclusions || do
+  List.anySatisfy (Domain2d.contains subdomain) exclusions || do
     let (Domain2d x y) = subdomain
     let (x1, x2) = Domain1d.endpoints (Domain1d.half x)
     let (y1, y2) = Domain1d.endpoints (Domain1d.half y)

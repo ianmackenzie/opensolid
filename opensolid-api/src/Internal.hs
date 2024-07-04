@@ -238,7 +238,7 @@ fixupType typ = typ
 
 -- Check if a given function has the implicit tolerance
 containsImplicitTolerance :: TH.Type -> Bool
-containsImplicitTolerance (TH.ForallT _ ctxt _) = List.any hasConstraint ctxt
+containsImplicitTolerance (TH.ForallT _ ctxt _) = List.anySatisfy hasConstraint ctxt
  where
   hasConstraint (TH.AppT (TH.ConT className) _) = className == ''Tolerance
   hasConstraint _ = False

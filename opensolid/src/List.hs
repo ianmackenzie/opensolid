@@ -42,9 +42,9 @@ module List
   , isAscending
   , isNonAscending
   , isDescending
-  , all
+  , allSatisfy
   , allTrue
-  , any
+  , anySatisfy
   , anyTrue
   , successive
   , count
@@ -218,14 +218,14 @@ isNonAscending = isOrdered (>=)
 isDescending :: Ord a => List a -> Bool
 isDescending = isOrdered (>)
 
-all :: (a -> Bool) -> List a -> Bool
-all = Prelude.all
+allSatisfy :: (a -> Bool) -> List a -> Bool
+allSatisfy = Prelude.all
 
 allTrue :: List Bool -> Bool
 allTrue = Prelude.and
 
-any :: (a -> Bool) -> List a -> Bool
-any = Prelude.any
+anySatisfy :: (a -> Bool) -> List a -> Bool
+anySatisfy = Prelude.any
 
 anyTrue :: List Bool -> Bool
 anyTrue = Prelude.or

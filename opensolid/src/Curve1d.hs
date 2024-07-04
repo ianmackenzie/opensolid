@@ -466,7 +466,7 @@ isSolutionOrder n neighborhood derivatives x = do
   let derivativeValue k = pointOn (curveDerivative k) x
   let derivativeTolerance k = Solve1d.derivativeTolerance neighborhood k
   let derivativeIsZero k = Qty.abs (derivativeValue k) < derivativeTolerance k
-  curveIsZero && List.all derivativeIsZero [1 .. n]
+  curveIsZero && List.allSatisfy derivativeIsZero [1 .. n]
 
 integral :: Curve1d units -> Estimate units
 integral curve = Estimate.wrap (Integral curve (derivative curve) Range.unit)

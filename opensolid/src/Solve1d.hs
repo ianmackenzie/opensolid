@@ -112,7 +112,7 @@ process callback queue solutions exclusions =
   case Queue.pop queue of
     Just (Tree subdomain cached node, remaining) -> do
       let filteredExclusions = List.filter (Domain1d.overlaps subdomain) exclusions
-      if List.any (Domain1d.contains subdomain) filteredExclusions
+      if List.anySatisfy (Domain1d.contains subdomain) filteredExclusions
         then process callback remaining solutions exclusions
         else case filteredExclusions of
           NonEmpty someExclusions ->

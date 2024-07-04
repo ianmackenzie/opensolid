@@ -295,7 +295,7 @@ asPoint :: Tolerance units => Curve2d (space @ units) -> Maybe (Point2d (space @
 asPoint curve = do
   let testPoint = pointOn curve 0.5
   let sampledPoints = List.map (pointOn curve) Parameter.samples
-  if List.all (~= testPoint) sampledPoints then Just testPoint else Nothing
+  if List.allSatisfy (~= testPoint) sampledPoints then Just testPoint else Nothing
 
 asLine :: Tolerance units => Curve2d (space @ units) -> Maybe (Line2d (space @ units))
 asLine curve = case curve of
@@ -368,8 +368,8 @@ isOverlappingSegment ::
 isOverlappingSegment curve1 curve2 (domain1, _, _) = do
   let segmentStartPoint = pointOn curve1 (Range.minValue domain1)
   let curve1TestPoints = List.map (pointOn curve1) (Range.samples domain1)
-  let segment1IsNondegenerate = List.any (!= segmentStartPoint) curve1TestPoints
-  let segment1LiesOnSegment2 = List.all (^ curve2) curve1TestPoints
+  let segment1IsNondegenerate = List.anySatisfy (!= segmentStartPoint) curve1TestPoints
+  let segment1LiesOnSegment2 = List.allSatisfy (^ curve2) curve1TestPoints
   segment1IsNondegenerate && segment1LiesOnSegment2
 
 data IntersectionError

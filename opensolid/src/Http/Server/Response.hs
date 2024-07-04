@@ -40,7 +40,9 @@ ok headers (Body defaultContentType bytes) =
 
 withDefaultContentType :: Text -> List (Text, Text) -> List (Text, Text)
 withDefaultContentType defaultContentType headers =
-  if List.any isContentType headers then headers else contentType defaultContentType : headers
+  if List.anySatisfy isContentType headers
+    then headers
+    else contentType defaultContentType : headers
 
 notFound :: Response
 notFound = custom Status.notFound404 [] Data.ByteString.empty
