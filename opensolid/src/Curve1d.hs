@@ -33,6 +33,7 @@ import Estimate qualified
 import Float qualified
 import List qualified
 import OpenSolid
+import Parameter qualified
 import Qty qualified
 import Radians qualified
 import Range (Range)
@@ -365,9 +366,7 @@ cos curve = Cos curve
 isZero :: Tolerance units => Curve1d units -> Bool
 isZero curve = case curve of
   Constant value -> value ~= Qty.zero
-  _ -> do
-    let sampledValues = List.map (pointOn curve) (Range.samples Range.unit)
-    List.all (~= Qty.zero) sampledValues
+  _ -> List.allTrue [pointOn curve tValue ~= Qty.zero | tValue <- Parameter.samples]
 
 ----- ROOT FINDING -----
 
