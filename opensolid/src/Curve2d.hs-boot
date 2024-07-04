@@ -11,14 +11,15 @@ module Curve2d
 where
 
 import Bounds2d (Bounds2d)
-import Curve2d.Internal qualified as Internal
 import DirectionCurve2d (DirectionCurve2d)
 import OpenSolid
 import Point2d (Point2d)
 import Range (Range)
 import VectorCurve2d (VectorCurve2d)
 
-type Curve2d (coordinateSystem :: CoordinateSystem) = Internal.Curve2d coordinateSystem
+type role Curve2d nominal
+
+data Curve2d (coordinateSystem :: CoordinateSystem)
 
 data DegenerateCurve = DegenerateCurve
 

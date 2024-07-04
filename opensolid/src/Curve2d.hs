@@ -1,5 +1,6 @@
 module Curve2d
   ( Curve2d
+  , pattern Point
   , pattern Line
   , pattern Arc
   , DegenerateCurve (DegenerateCurve)
@@ -17,8 +18,8 @@ module Curve2d
   , reverse
   , bounds
   , intersections
-  , HigherOrderZero (HigherOrderZero)
-  , find
+  , FindPointError (..)
+  , findPoint
   , signedDistanceAlong
   , xCoordinate
   , yCoordinate
@@ -46,6 +47,7 @@ module Curve2d
 where
 
 import {-# SOURCE #-} Arc2d (Arc2d)
+import {-# SOURCE #-} Arc2d qualified
 import Axis2d (Axis2d)
 import Axis2d qualified
 import {-# SOURCE #-} BezierCurve2d qualified
@@ -55,8 +57,6 @@ import Bounds2d qualified
 import Curve1d (Curve1d)
 import Curve2d.Derivatives (Derivatives)
 import Curve2d.Derivatives qualified as Derivatives
-import Curve2d.Internal (Interface (..))
-import Curve2d.Internal qualified as Internal
 import Curve2d.Intersection (Intersection (Intersection))
 import Curve2d.Intersection qualified as Intersection
 import Curve2d.Segment (Segment)
@@ -66,8 +66,11 @@ import DirectionCurve2d (DirectionCurve2d)
 import Frame2d (Frame2d)
 import Frame2d qualified
 import {-# SOURCE #-} Line2d (Line2d)
+import {-# SOURCE #-} Line2d qualified
 import List qualified
+import Maybe qualified
 import OpenSolid
+import Parameter qualified
 import Point2d (Point2d)
 import Point2d qualified
 import Range (Range)
@@ -75,47 +78,237 @@ import Range qualified
 import Result qualified
 import Stream qualified
 import Text qualified
+import Tolerance qualified
 import Transform2d (Transform2d)
 import Transform2d qualified
 import Units qualified
 import Vector2d (Vector2d)
-import VectorCurve2d (VectorCurve2d)
+import VectorCurve2d (VectorCurve2d (VectorCurve2d))
 import VectorCurve2d qualified
 import Prelude qualified
 
-type Curve2d (coordinateSystem :: CoordinateSystem) = Internal.Curve2d coordinateSystem
+type role Curve2d nominal
 
-pattern Line :: Line2d (space @ units) -> Curve2d (space @ units)
-pattern Line line <- (Internal.asLine -> Just line)
+data Curve2d (coordinateSystem :: CoordinateSystem) where
+  Curve ::
+    Interface curve (space @ units) =>
+    curve ->
+    Curve2d (space @ units)
+  Coerce ::
+    Curve2d (space @ units1) ->
+    Curve2d (space @ units2)
+  PlaceIn ::
+    Frame2d (global @ units) (Defines local) ->
+    Curve2d (local @ units) ->
+    Curve2d (global @ units)
 
-pattern Arc :: Arc2d (space @ units) -> Curve2d (space @ units)
-pattern Arc arc <- (Internal.asArc -> Just arc)
+deriving instance Show (Curve2d (space @ units))
+
+instance HasUnits (Curve2d (space @ units)) where
+  type Units (Curve2d (space @ units)) = units
+  type Erase (Curve2d (space @ units)) = Curve2d (space @ Unitless)
+
+instance
+  space ~ space_ =>
+  Units.Coercion (Curve2d (space @ units1)) (Curve2d (space_ @ units2))
+  where
+  coerce (Coerce c) = Coerce c
+  coerce c = Coerce c
+
+instance
+  ( space1 ~ space2
+  , units1 ~ units2
+  ) =>
+  Intersects (Curve2d (space1 @ units1)) (Point2d (space2 @ units2)) units1
+  where
+  curve ^ point = case findPoint point curve of
+    Ok [] -> False
+    Ok List.OneOrMore -> True
+    Error CurveIsCoincidentWithPoint -> True
+    Error HigherOrderSolution -> True
+
+instance
+  ( space1 ~ space2
+  , units1 ~ units2
+  ) =>
+  Intersects (Point2d (space1 @ units1)) (Curve2d (space2 @ units2)) units1
+  where
+  point ^ curve = curve ^ point
+
+instance
+  ( space1 ~ space2
+  , units1 ~ units2
+  ) =>
+  ApproximateEquality (Curve2d (space1 @ units1)) (Curve2d (space2 @ units2)) units1
+  where
+  curve1 ~= curve2 =
+    List.allTrue [pointOn curve1 t ~= pointOn curve2 t | t <- Range.samples Range.unit]
+
+pattern Point :: Tolerance units => Point2d (space @ units) -> Curve2d (space @ units)
+pattern Point point <- (asPoint -> Just point)
+
+pattern Line :: Tolerance units => Line2d (space @ units) -> Curve2d (space @ units)
+pattern Line line <- (asLine -> Just line)
+
+pattern Arc :: Tolerance units => Arc2d (space @ units) -> Curve2d (space @ units)
+pattern Arc arc <- (asArc -> Just arc)
 
 data DegenerateCurve = DegenerateCurve deriving (Eq, Show, Error)
 
+class
+  Show curve =>
+  Interface curve (coordinateSystem :: CoordinateSystem)
+    | curve -> coordinateSystem
+  where
+  startPointImpl :: curve -> Point2d coordinateSystem
+  endPointImpl :: curve -> Point2d coordinateSystem
+  pointOnImpl :: curve -> Float -> Point2d coordinateSystem
+  segmentBoundsImpl :: curve -> Range Unitless -> Bounds2d coordinateSystem
+  derivativeImpl :: curve -> VectorCurve2d coordinateSystem
+  reverseImpl :: curve -> curve
+  boundsImpl :: curve -> Bounds2d coordinateSystem
+  transformByImpl :: Transform2d tag coordinateSystem -> curve -> Curve2d coordinateSystem
+
+  asLineImpl :: Tolerance (Units coordinateSystem) => curve -> Maybe (Line2d coordinateSystem)
+  asLineImpl _ = Nothing
+  asArcImpl :: Tolerance (Units coordinateSystem) => curve -> Maybe (Arc2d coordinateSystem)
+  asArcImpl _ = Nothing
+
+instance Interface (Curve2d (space @ units)) (space @ units) where
+  startPointImpl = startPoint
+  endPointImpl = endPoint
+  pointOnImpl = pointOn
+  segmentBoundsImpl = segmentBounds
+  derivativeImpl = derivative
+  reverseImpl = reverse
+  boundsImpl = bounds
+  transformByImpl = transformBy
+  asLineImpl = asLine
+  asArcImpl = asArc
+
+data PointCurveDifference (coordinateSystem :: CoordinateSystem)
+  = PointCurveDifference (Point2d coordinateSystem) (Curve2d coordinateSystem)
+
+deriving instance Show (PointCurveDifference (space @ units))
+
+instance VectorCurve2d.Interface (PointCurveDifference (space @ units)) (space @ units) where
+  evaluateAtImpl t (PointCurveDifference point curve) = point - pointOn curve t
+  segmentBoundsImpl t (PointCurveDifference point curve) = point - segmentBounds curve t
+  derivativeImpl (PointCurveDifference _ curve) = -(derivative curve)
+  transformByImpl transform (PointCurveDifference point curve) =
+    VectorCurve2d.wrap $
+      PointCurveDifference
+        -- Note the slight hack here:
+        -- the definition of VectorCurve2d.Interface states that the units of the transform
+        -- do *not* have to match the units of the vector curve,
+        -- because vectors and vector curves ignore translation
+        -- (and the units of the transform are just the units of its translation part).
+        -- This would in general mean that we couldn't apply the given transform to a Point2d or Curve2d,
+        -- but in this case it's safe since any translation will cancel out
+        -- when the point and curve are subtracted from each other.
+        (Point2d.transformBy (Units.coerce transform) point)
+        (transformBy (Units.coerce transform) curve)
+
+instance
+  ( space ~ space_
+  , units ~ units_
+  ) =>
+  Subtraction
+    (Point2d (space @ units))
+    (Curve2d (space_ @ units_))
+    (VectorCurve2d (space @ units))
+  where
+  point - curve = VectorCurve2d (PointCurveDifference point curve)
+
+data CurvePointDifference (coordinateSystem :: CoordinateSystem)
+  = CurvePointDifference (Curve2d coordinateSystem) (Point2d coordinateSystem)
+
+deriving instance Show (CurvePointDifference (space @ units))
+
+instance VectorCurve2d.Interface (CurvePointDifference (space @ units)) (space @ units) where
+  evaluateAtImpl t (CurvePointDifference curve point) = pointOn curve t - point
+  segmentBoundsImpl t (CurvePointDifference curve point) = segmentBounds curve t - point
+  derivativeImpl (CurvePointDifference curve _) = derivative curve
+  transformByImpl transform (CurvePointDifference curve point) =
+    VectorCurve2d.wrap $
+      CurvePointDifference
+        -- Note the same slight hack here as described in PointCurveDifference above
+        (transformBy (Units.coerce transform) curve)
+        (Point2d.transformBy (Units.coerce transform) point)
+
+instance
+  ( space ~ space_
+  , units ~ units_
+  ) =>
+  Subtraction
+    (Curve2d (space @ units))
+    (Point2d (space_ @ units_))
+    (VectorCurve2d (space @ units))
+  where
+  curve - point = VectorCurve2d (CurvePointDifference curve point)
+
 wrap :: Interface curve (space @ units) => curve -> Curve2d (space @ units)
-wrap = Internal.Curve
+wrap = Curve
 
 startPoint :: Curve2d (space @ units) -> Point2d (space @ units)
-startPoint = Internal.startPoint
+startPoint curve = case curve of
+  Curve c -> startPointImpl c
+  Coerce c -> Units.coerce (startPoint c)
+  PlaceIn frame c -> Point2d.placeIn frame (startPoint c)
 
 endPoint :: Curve2d (space @ units) -> Point2d (space @ units)
-endPoint = Internal.endPoint
+endPoint curve = case curve of
+  Curve c -> endPointImpl c
+  Coerce c -> Units.coerce (endPoint c)
+  PlaceIn frame c -> Point2d.placeIn frame (endPoint c)
 
 pointOn :: Curve2d (space @ units) -> Float -> Point2d (space @ units)
-pointOn = Internal.pointOn
+pointOn curve t = case curve of
+  Curve c -> pointOnImpl c t
+  Coerce c -> Units.coerce (pointOn c t)
+  PlaceIn frame c -> Point2d.placeIn frame (pointOn c t)
 
 segmentBounds :: Curve2d (space @ units) -> Range Unitless -> Bounds2d (space @ units)
-segmentBounds = Internal.segmentBounds
+segmentBounds curve t = case curve of
+  Curve c -> segmentBoundsImpl c t
+  Coerce c -> Units.coerce (segmentBounds c t)
+  PlaceIn frame c -> Bounds2d.placeIn frame (segmentBounds c t)
 
 derivative :: Curve2d (space @ units) -> VectorCurve2d (space @ units)
-derivative = Internal.derivative
+derivative curve = case curve of
+  Curve c -> derivativeImpl c
+  Coerce c -> Units.coerce (derivative c)
+  PlaceIn frame c -> VectorCurve2d.placeIn frame (derivative c)
 
 reverse :: Curve2d (space @ units) -> Curve2d (space @ units)
-reverse = Internal.reverse
+reverse curve = case curve of
+  Curve c -> Curve (reverseImpl c)
+  Coerce c -> Units.coerce (reverse c)
+  PlaceIn frame c -> PlaceIn frame (reverse c)
 
 bounds :: Curve2d (space @ units) -> Bounds2d (space @ units)
-bounds = Internal.bounds
+bounds curve = case curve of
+  Curve c -> boundsImpl c
+  Coerce c -> Units.coerce (bounds c)
+  PlaceIn frame c -> Bounds2d.placeIn frame (bounds c)
+
+asPoint :: Tolerance units => Curve2d (space @ units) -> Maybe (Point2d (space @ units))
+asPoint curve = do
+  let testPoint = pointOn curve 0.5
+  let sampledPoints = List.map (pointOn curve) Parameter.samples
+  if List.all (~= testPoint) sampledPoints then Just testPoint else Nothing
+
+asLine :: Tolerance units => Curve2d (space @ units) -> Maybe (Line2d (space @ units))
+asLine curve = case curve of
+  Curve c -> asLineImpl c
+  Coerce c -> Maybe.map Units.coerce (Tolerance.using (Units.coerce ?tolerance) (asLine c))
+  PlaceIn frame c -> Maybe.map (Line2d.placeIn frame) (asLine c)
+
+asArc :: Tolerance units => Curve2d (space @ units) -> Maybe (Arc2d (space @ units))
+asArc curve = case curve of
+  Curve c -> asArcImpl c
+  Coerce c -> Maybe.map Units.coerce (Tolerance.using (Units.coerce ?tolerance) (asArc c))
+  PlaceIn frame c -> Maybe.map (Arc2d.placeIn frame) (asArc c)
 
 tangentDirection ::
   Tolerance units =>
@@ -123,8 +316,6 @@ tangentDirection ::
   Result DegenerateCurve (DirectionCurve2d space)
 tangentDirection curve =
   VectorCurve2d.direction (derivative curve) ?? Error DegenerateCurve
-
-data CurveIsCoincidentWithPoint = CurveIsCoincidentWithPoint deriving (Eq, Show, Error)
 
 signedDistanceAlong :: Axis2d (space @ units) -> Curve2d (space @ units) -> Curve1d units
 signedDistanceAlong axis curve =
@@ -136,19 +327,21 @@ xCoordinate = signedDistanceAlong Axis2d.x
 yCoordinate :: Curve2d (space @ units) -> Curve1d units
 yCoordinate = signedDistanceAlong Axis2d.y
 
-data HigherOrderZero = HigherOrderZero deriving (Eq, Show, Error)
+data FindPointError
+  = HigherOrderSolution
+  | CurveIsCoincidentWithPoint
+  deriving (Eq, Show, Error)
 
-find ::
+findPoint ::
   Tolerance units =>
   Point2d (space @ units) ->
   Curve2d (space @ units) ->
-  Result HigherOrderZero (List Float)
-find point curve =
+  Result FindPointError (List Float)
+findPoint point curve =
   case VectorCurve2d.zeros (point - curve) of
-    Error VectorCurve2d.HigherOrderZero -> Error HigherOrderZero
+    Error VectorCurve2d.HigherOrderZero -> Error HigherOrderSolution
     Ok (VectorCurve2d.Zeros parameterValues) -> Ok parameterValues
-    -- Shouldn't happen, since curves are enforced to be non-degenerate
-    Ok VectorCurve2d.ZeroEverywhere -> Ok []
+    Ok VectorCurve2d.ZeroEverywhere -> Error CurveIsCoincidentWithPoint
 
 overlappingSegments ::
   Tolerance units =>
@@ -186,16 +379,28 @@ data IntersectionError
   | HigherOrderIntersection
   deriving (Eq, Show, Error)
 
+findEndpointRoots ::
+  Tolerance units =>
+  Point2d (space @ units) ->
+  Curve2d (space @ units) ->
+  Result IntersectionError (List Float)
+findEndpointRoots point curve =
+  case findPoint point curve of
+    Ok parameterValues -> Ok parameterValues
+    Error HigherOrderSolution -> Error HigherOrderIntersection
+    -- Shouldn't happen, curve passed here should be guaranteed non-degenerate
+    Error CurveIsCoincidentWithPoint -> Error HigherOrderIntersection
+
 findEndpointParameterValues ::
   Tolerance units =>
   Curve2d (space @ units) ->
   Curve2d (space @ units) ->
-  Result HigherOrderZero (List (Float, Float))
+  Result IntersectionError (List (Float, Float))
 findEndpointParameterValues curve1 curve2 = Result.do
-  start1Roots <- find (startPoint curve1) curve2
-  end1Roots <- find (endPoint curve1) curve2
-  start2Roots <- find (startPoint curve2) curve1
-  end2Roots <- find (endPoint curve2) curve1
+  start1Roots <- findEndpointRoots (startPoint curve1) curve2
+  end1Roots <- findEndpointRoots (endPoint curve1) curve2
+  start2Roots <- findEndpointRoots (startPoint curve2) curve1
+  end2Roots <- findEndpointRoots (endPoint curve2) curve1
   Ok $
     List.sortAndDeduplicate $
       List.concat $
@@ -210,12 +415,25 @@ intersections ::
   Curve2d (space @ units) ->
   Curve2d (space @ units) ->
   Result IntersectionError (List Intersection)
-intersections curve1 curve2 = Result.do
-  endpointParameterValues <-
-    findEndpointParameterValues curve1 curve2 ?? Error HigherOrderIntersection
-  case overlappingSegments curve1 curve2 endpointParameterValues of
-    [] -> findIntersections curve1 curve2 endpointParameterValues
-    segments -> Error (CurvesOverlap segments)
+intersections curve1 curve2 =
+  case (curve1, curve2) of
+    (Point p1, Point p2) ->
+      if p1 ~= p2 then Error (CurvesOverlap [(Range.unit, Range.unit, Positive)]) else Ok []
+    (Point p1, _) ->
+      case findEndpointRoots p1 curve2 of
+        Error error -> Error error
+        Ok [] -> Ok []
+        Ok roots -> Error (CurvesOverlap [(Range.unit, Range.constant t, Positive) | t <- roots])
+    (_, Point p2) ->
+      case findEndpointRoots p2 curve1 of
+        Error error -> Error error
+        Ok [] -> Ok []
+        Ok roots -> Error (CurvesOverlap [(Range.constant t, Range.unit, Positive) | t <- roots])
+    _ -> Result.do
+      endpointParameterValues <- findEndpointParameterValues curve1 curve2
+      case overlappingSegments curve1 curve2 endpointParameterValues of
+        [] -> findIntersections curve1 curve2 endpointParameterValues
+        segments -> Error (CurvesOverlap segments)
 
 type SearchTree (coordinateSystem :: CoordinateSystem) =
   Bisection.Tree (Segment coordinateSystem)
@@ -308,8 +526,8 @@ placeIn ::
   Curve2d (local @ units) ->
   Curve2d (global @ units)
 placeIn globalFrame curve = case curve of
-  Internal.PlaceIn frame localCurve -> Internal.PlaceIn (Frame2d.placeIn globalFrame frame) localCurve
-  _ -> Internal.PlaceIn globalFrame curve
+  PlaceIn frame localCurve -> PlaceIn (Frame2d.placeIn globalFrame frame) localCurve
+  _ -> PlaceIn globalFrame curve
 
 relativeTo ::
   Frame2d (global @ units) (Defines local) ->
@@ -317,11 +535,11 @@ relativeTo ::
   Curve2d (local @ units)
 relativeTo frame = placeIn (Frame2d.inverse frame)
 
-transformBy ::
-  Transform2d tag (space @ units) ->
-  Curve2d (space @ units) ->
-  Curve2d (space @ units)
-transformBy = Internal.transformBy
+transformBy :: Transform2d tag (space @ units) -> Curve2d (space @ units) -> Curve2d (space @ units)
+transformBy transform curve = case curve of
+  Curve c -> Curve (transformByImpl transform c)
+  Coerce c -> Units.coerce (transformBy (Units.coerce transform) c)
+  PlaceIn frame c -> PlaceIn frame (transformBy (Transform2d.relativeTo frame transform) c)
 
 translateBy ::
   Vector2d (space @ units) ->

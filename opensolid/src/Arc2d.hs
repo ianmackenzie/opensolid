@@ -43,7 +43,6 @@ import Point2d (Point2d)
 import Point2d qualified
 import Qty qualified
 import Range qualified
-import Tolerance qualified
 import Units qualified
 import Vector2d (Vector2d)
 import Vector2d qualified
@@ -86,8 +85,8 @@ instance Curve2d.Interface (Arc (space @ units)) (space @ units) where
     let sinTheta = Angle.sin theta
     let v1 = vx * cosTheta + vy * sinTheta
     let v2 = vy * cosTheta - vx * sinTheta
-    (r1, d1) <- Tolerance.exactly (Vector2d.magnitudeAndDirection v1) ?? Nothing
-    (r2, d2) <- Tolerance.exactly (Vector2d.magnitudeAndDirection v2) ?? Nothing
+    (r1, d1) <- Vector2d.magnitudeAndDirection v1 ?? Nothing
+    (r2, d2) <- Vector2d.magnitudeAndDirection v2 ?? Nothing
     if r1 >= r2
       then do
         let startAngle = a - theta

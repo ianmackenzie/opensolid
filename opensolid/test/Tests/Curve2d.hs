@@ -69,10 +69,10 @@ find = Test.verify "find" Test.do
   let p2 = Point2d.meters 1.0 2.0
   let p3 = Point2d.meters 2.0 0.0
   let testSpline = QuadraticSpline2d.fromControlPoints p1 p2 p3
-  startParameterValues <- Curve2d.find Point2d.origin testSpline
-  endParameterValues <- Curve2d.find (Point2d.meters 2.0 0.0) testSpline
-  midParameterValues <- Curve2d.find (Point2d.meters 1.0 1.0) testSpline
-  offCurveParameterValues <- Curve2d.find (Point2d.meters 1.0 1.1) testSpline
+  startParameterValues <- Curve2d.findPoint Point2d.origin testSpline
+  endParameterValues <- Curve2d.findPoint (Point2d.meters 2.0 0.0) testSpline
+  midParameterValues <- Curve2d.findPoint (Point2d.meters 1.0 1.0) testSpline
+  offCurveParameterValues <- Curve2d.findPoint (Point2d.meters 1.0 1.1) testSpline
   Tolerance.using 1e-12 $
     Test.all
       [ Test.expect (startParameterValues ~= [0.0])
