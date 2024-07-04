@@ -25,7 +25,6 @@ module Bounds2d
   , corners
   , diameter
   , interpolate
-  , sample
   , any
   , all
   , resolve
@@ -53,7 +52,6 @@ import OpenSolid
 import Point2d (Point2d)
 import Point2d qualified
 import Qty qualified
-import Quadrature qualified
 import Range (Range)
 import Range qualified
 import Transform2d (Transform2d (Transform2d))
@@ -351,12 +349,6 @@ diameter (Bounds2d x y) = Qty.hypot2 (Range.width x) (Range.width y)
 interpolate :: Bounds2d (space @ units) -> Float -> Float -> Point2d (space @ units)
 interpolate (Bounds2d x y) u v =
   Point2d.xy (Range.interpolate x u) (Range.interpolate y v)
-
-sample :: (Point2d (space @ units) -> a) -> Bounds2d (space @ units) -> List a
-sample function bounds = do
-  let (t1, t2, t3, t4) = Quadrature.abscissae4
-  let f u v = function (interpolate bounds u v)
-  [f t1 t3, f t2 t1, f t3 t4, f t4 t2]
 
 any :: (Bounds2d (space @ units) -> Fuzzy Bool) -> Bounds2d (space @ units) -> Bool
 any assess bounds@(Bounds2d x y) =
