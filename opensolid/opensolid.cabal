@@ -161,6 +161,7 @@ library
     Range
     Region2d
     Result
+    Result2
     Sign
     Solve1d
     Solve2d

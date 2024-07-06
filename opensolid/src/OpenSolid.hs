@@ -4,6 +4,7 @@ module OpenSolid
   , module Composition
   , module Arithmetic
   , module Result
+  , module Result2
   , module Error
   , module Qty
   , module Float
@@ -31,6 +32,7 @@ import Intersects (Intersects ((^)))
 import NonEmpty (NonEmpty ((:|)), (|:), pattern NonEmpty)
 import Qty (Qty (Qty))
 import Result (Result (Error, Ok))
+import Result2 (Result2 (Catch, Fail, Succeed))
 import Sign (Sign (Negative, Positive))
 import Tolerance (ApproximateEquality ((~=)), Tolerance, (!=))
 import Units (HasUnits (Units), Radians, Unitless, (:*:), (:/:))
