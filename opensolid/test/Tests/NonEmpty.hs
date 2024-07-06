@@ -18,7 +18,7 @@ pickMinimum :: Test
 pickMinimum = Test.check 100 "pickMinimum" Test.do
   values <- NonEmpty.random 20 (Int.random 0 100)
   let (minValue, remainingValues) = NonEmpty.pickMinimum values
-  let minValueIsMin = List.all (>= minValue) remainingValues
+  let minValueIsMin = List.allSatisfy (>= minValue) remainingValues
   let orderIsUnchanged = remainingValues == Data.List.delete minValue (NonEmpty.toList values)
   Test.expect (minValueIsMin && orderIsUnchanged)
     |> Test.output "minValueIsMin" minValueIsMin
