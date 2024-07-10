@@ -1,9 +1,8 @@
 module Radians (toUnitless, fromUnitless) where
 
-import Units (Units, Radians, Erase)
-import Units qualified
 import Basics
-
+import Units (Erase, Radians, Units)
+import Units qualified
 
 toUnitless ::
   ( Units a ~ Radians
