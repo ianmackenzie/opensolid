@@ -102,7 +102,6 @@ search callback cache solutions exclusions =
   process callback (Queue.singleton cache) solutions exclusions
 
 process ::
-  forall cached solution.
   Callback cached solution ->
   Queue (Cache cached) ->
   List solution ->
@@ -129,7 +128,6 @@ process callback queue solutions exclusions =
 
 {-# INLINE recurseIntoChildrenOf #-}
 recurseIntoChildrenOf ::
-  forall cached solution.
   Node cached ->
   Callback cached solution ->
   Queue (Cache cached) ->
