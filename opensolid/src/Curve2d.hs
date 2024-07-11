@@ -187,6 +187,16 @@ instance Interface (Curve2d (space @ units)) (space @ units) where
   asLineImpl = asLine
   asArcImpl = asArc
 
+instance Interface (Point2d (space @ units)) (space @ units) where
+  startPointImpl = identity
+  endPointImpl = identity
+  pointOnImpl point _ = point
+  segmentBoundsImpl point _ = Bounds2d.constant point
+  derivativeImpl _ = VectorCurve2d.zero
+  reverseImpl = identity
+  boundsImpl = Bounds2d.constant
+  transformByImpl transform point = wrap (Point2d.transformBy transform point)
+
 data PointCurveDifference (coordinateSystem :: CoordinateSystem)
   = PointCurveDifference (Point2d coordinateSystem) (Curve2d coordinateSystem)
 
