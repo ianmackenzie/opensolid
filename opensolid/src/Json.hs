@@ -98,5 +98,5 @@ encode = Data.Aeson.encode >> Data.ByteString.toStrict
 decode :: ByteString -> Result Text Json
 decode byteString =
   case Data.Aeson.eitherDecodeStrict byteString of
-    Prelude.Right json -> Ok json
-    Prelude.Left error -> Error (Text.pack error)
+    Prelude.Right json -> Success json
+    Prelude.Left error -> Failure (Text.pack error)

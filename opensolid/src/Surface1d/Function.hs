@@ -14,6 +14,7 @@ module Surface1d.Function
   , u
   , v
   , parameter
+  , Zeros
   , zeros
   , wrap
   , squared
@@ -389,25 +390,21 @@ instance Curve1d.Interface (CurveOnSurface units) units where
 isZero :: Tolerance units => Function units -> Bool
 isZero function = List.allTrue [evaluate function uv ~= Qty.zero | uv <- Uv.samples]
 
-data ZerosError
-  = ZeroEverywhere
-  | HigherOrderZero
-  deriving (Eq, Show, Error)
-
-zeros :: Tolerance units => Function units -> Result ZerosError Zeros
-zeros (Constant value) = if value ~= Qty.zero then Error ZeroEverywhere else Ok Zeros.empty
-zeros function | isZero function = Error ZeroEverywhere
-zeros function = Result.do
-  let derivatives = computeDerivatives function
-  let cache = Solve2d.init (computeDerivativeBounds derivatives)
-  tangentSolutions <-
-    Solve2d.search (findTangentSolution derivatives) cache []
-      ?? Error HigherOrderZero
-  solutions <-
-    Solve2d.search (findCrossingSolution derivatives) cache tangentSolutions
-      ?? Error HigherOrderZero
-  let partialZeros = List.foldl addSolution PartialZeros.empty solutions
-  Ok (PartialZeros.finalize partialZeros)
+zeros :: Tolerance units => Function units -> Result Zeros.Error Zeros
+zeros function =
+  if isZero function
+    then Failure Zeros.ZeroEverywhere
+    else Result.do
+      let derivatives = computeDerivatives function
+      let cache = Solve2d.init (computeDerivativeBounds derivatives)
+      tangentSolutions <-
+        Solve2d.search (findTangentSolution derivatives) cache []
+          |> Result.onError (\Solve2d.InfiniteRecursion -> Failure Zeros.HigherOrderZero)
+      solutions <-
+        Solve2d.search (findCrossingSolution derivatives) cache tangentSolutions
+          |> Result.onError (\Solve2d.InfiniteRecursion -> Failure Zeros.HigherOrderZero)
+      let partialZeros = List.foldl addSolution PartialZeros.empty solutions
+      Success (PartialZeros.finalize partialZeros)
 
 data Solution
   = CrossingCurveSolution PartialZeros.CrossingCurve

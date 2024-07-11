@@ -1,6 +1,5 @@
 module Region2d
   ( Region2d
-  , BuildError (..)
   , boundedBy
   , outerLoop
   , innerLoops
@@ -17,8 +16,9 @@ import Bounds2d qualified
 import Curve1d qualified
 import Curve2d (Curve2d)
 import Curve2d qualified
-import Curve2d.Intersection (Intersection (Intersection))
-import Curve2d.Intersection qualified
+import Curve2d.IntersectionPoint (IntersectionPoint (IntersectionPoint))
+import Curve2d.IntersectionPoint qualified
+import Curve2d.Intersections qualified
 import Estimate (Estimate)
 import Estimate qualified
 import Float qualified
@@ -29,6 +29,7 @@ import Point2d (Point2d)
 import Qty qualified
 import Range (Range)
 import Range qualified
+import Region2d.BoundedBy qualified as BoundedBy
 import Result qualified
 import Tolerance qualified
 import Units qualified
@@ -40,19 +41,10 @@ data Region2d (coordinateSystem :: CoordinateSystem)
 type Loop (coordinateSystem :: CoordinateSystem) =
   NonEmpty (Curve2d coordinateSystem)
 
-data BuildError
-  = EmptyRegion
-  | RegionBoundaryHasGaps
-  | RegionBoundaryIntersectsItself
-  | MultipleDisjointRegions
-  | TangentIntersectionAtDegeneratePoint
-  | HigherOrderIntersection
-  deriving (Eq, Show, Error)
-
 boundedBy ::
   Tolerance units =>
   List (Curve2d (space @ units)) ->
-  Result BuildError (Region2d (space @ units))
+  Result BoundedBy.Error (Region2d (space @ units))
 boundedBy curves = Result.do
   checkForInnerIntersection curves
   loops <- connect curves
@@ -61,8 +53,8 @@ boundedBy curves = Result.do
 checkForInnerIntersection ::
   Tolerance units =>
   List (Curve2d (space @ units)) ->
-  Result BuildError ()
-checkForInnerIntersection [] = Ok ()
+  Result BoundedBy.Error ()
+checkForInnerIntersection [] = Success ()
 checkForInnerIntersection (first : rest) = Result.do
   checkCurveForInnerIntersection first rest
   checkForInnerIntersection rest
@@ -71,8 +63,8 @@ checkCurveForInnerIntersection ::
   Tolerance units =>
   Curve2d (space @ units) ->
   List (Curve2d (space @ units)) ->
-  Result BuildError ()
-checkCurveForInnerIntersection _ [] = Ok ()
+  Result BoundedBy.Error ()
+checkCurveForInnerIntersection _ [] = Success ()
 checkCurveForInnerIntersection curve (first : rest) = Result.do
   checkCurvesForInnerIntersection curve first
   checkCurveForInnerIntersection curve rest
@@ -81,22 +73,31 @@ checkCurvesForInnerIntersection ::
   Tolerance units =>
   Curve2d (space @ units) ->
   Curve2d (space @ units) ->
-  Result BuildError ()
+  Result BoundedBy.Error ()
 checkCurvesForInnerIntersection curve1 curve2 =
   case Curve2d.intersections curve1 curve2 of
-    Error (Curve2d.CurvesOverlap _) ->
-      Error RegionBoundaryIntersectsItself
-    Error Curve2d.TangentIntersectionAtDegeneratePoint ->
-      Error TangentIntersectionAtDegeneratePoint
-    Error Curve2d.HigherOrderIntersection ->
-      Error HigherOrderIntersection
-    Ok intersections ->
-      if List.allSatisfy isEndpointIntersection intersections
-        then Ok ()
-        else Error RegionBoundaryIntersectsItself
+    Failure Curve2d.Intersections.CurveHasDegeneracy ->
+      Failure BoundedBy.BoundaryCurveHasDegeneracy
+    Failure Curve2d.Intersections.HigherOrderIntersection ->
+      Failure BoundedBy.BoundaryCurvesHaveHigherOrderIntersection
+    -- We can ignore cases where either curve is actually a point,
+    -- since we'll still find any inner intersections
+    -- when we check with the *neighbours* of those degenerate curves
+    Failure Curve2d.Intersections.FirstCurveIsPoint -> Success ()
+    Failure Curve2d.Intersections.SecondCurveIsPoint -> Success ()
+    -- Any overlap between boundary curves is bad
+    Success (Just (Curve2d.OverlappingSegments _)) ->
+      Failure BoundedBy.BoundaryIntersectsItself
+    -- If there are no intersections at all then we're good!
+    Success Nothing -> Success ()
+    -- Otherwise, make sure curves only intersect (meet) at endpoints
+    Success (Just (Curve2d.IntersectionPoints intersectionPoints)) ->
+      if NonEmpty.allSatisfy isEndpointIntersection intersectionPoints
+        then Success ()
+        else Failure BoundedBy.BoundaryIntersectsItself
 
-isEndpointIntersection :: Intersection -> Bool
-isEndpointIntersection (Intersection{t1, t2}) = isEndpoint t1 && isEndpoint t2
+isEndpointIntersection :: IntersectionPoint -> Bool
+isEndpointIntersection (IntersectionPoint{t1, t2}) = isEndpoint t1 && isEndpoint t2
 
 isEndpoint :: Float -> Bool
 isEndpoint t = t == 0.0 || t == 1.0
@@ -104,12 +105,12 @@ isEndpoint t = t == 0.0 || t == 1.0
 connect ::
   Tolerance units =>
   List (Curve2d (space @ units)) ->
-  Result BuildError (List (Loop (space @ units)))
-connect [] = Ok []
+  Result BoundedBy.Error (List (Loop (space @ units)))
+connect [] = Success []
 connect (first : rest) = Result.do
   (loop, remainingCurves) <- buildLoop (startLoop first) rest
   remainingLoops <- connect remainingCurves
-  Ok (loop : remainingLoops)
+  Success (loop : remainingLoops)
 
 data PartialLoop coordinateSystem
   = PartialLoop
@@ -121,9 +122,9 @@ buildLoop ::
   Tolerance units =>
   PartialLoop (space @ units) ->
   List (Curve2d (space @ units)) ->
-  Result BuildError (Loop (space @ units), List (Curve2d (space @ units)))
+  Result BoundedBy.Error (Loop (space @ units), List (Curve2d (space @ units)))
 buildLoop partialLoop@(PartialLoop currentStart currentCurves loopEnd) remainingCurves
-  | currentStart ~= loopEnd = Ok (currentCurves, remainingCurves)
+  | currentStart ~= loopEnd = Success (currentCurves, remainingCurves)
   | otherwise = Result.do
       (updatedPartialLoop, updatedRemainingCurves) <- extendPartialLoop partialLoop remainingCurves
       buildLoop updatedPartialLoop updatedRemainingCurves
@@ -132,16 +133,16 @@ extendPartialLoop ::
   Tolerance units =>
   PartialLoop (space @ units) ->
   List (Curve2d (space @ units)) ->
-  Result BuildError (PartialLoop (space @ units), List (Curve2d (space @ units)))
+  Result BoundedBy.Error (PartialLoop (space @ units), List (Curve2d (space @ units)))
 extendPartialLoop (PartialLoop currentStart currentCurves loopEnd) curves =
   case List.partition (hasEndpoint currentStart) curves of
-    ([], _) -> Error RegionBoundaryHasGaps
+    ([], _) -> Failure BoundedBy.BoundaryHasGaps
     (List.One curve, remaining) -> do
       let newCurve = if Curve2d.endPoint curve ~= currentStart then curve else Curve2d.reverse curve
       let newStart = Curve2d.startPoint newCurve
       let updatedCurves = NonEmpty.prepend newCurve currentCurves
-      Ok (PartialLoop newStart updatedCurves loopEnd, remaining)
-    (List.TwoOrMore, _) -> Error RegionBoundaryIntersectsItself
+      Success (PartialLoop newStart updatedCurves loopEnd, remaining)
+    (List.TwoOrMore, _) -> Failure BoundedBy.BoundaryIntersectsItself
 
 hasEndpoint :: Tolerance units => Point2d (space @ units) -> Curve2d (space @ units) -> Bool
 hasEndpoint point curve =
@@ -206,15 +207,15 @@ containmentIsDeterminate flux = not (Range.contains bothPossibleFluxValues flux)
 classifyLoops ::
   Tolerance units =>
   List (Loop (space @ units)) ->
-  Result BuildError (Region2d (space @ units))
-classifyLoops [] = Error EmptyRegion
+  Result BoundedBy.Error (Region2d (space @ units))
+classifyLoops [] = Failure BoundedBy.EmptyRegion
 classifyLoops (NonEmpty loops) = Result.do
   let (largestLoop, smallerLoops) = pickLargestLoop loops
   let outerLoopCandidate = fixSign Positive largestLoop
   let innerLoopCandidates = List.map (fixSign Negative) smallerLoops
   if List.allSatisfy (loopIsInside outerLoopCandidate) innerLoopCandidates
-    then Ok (Region2d outerLoopCandidate innerLoopCandidates)
-    else Error MultipleDisjointRegions
+    then Success (Region2d outerLoopCandidate innerLoopCandidates)
+    else Failure BoundedBy.MultipleDisjointRegions
 
 fixSign :: Tolerance units => Sign -> Loop (space @ units) -> Loop (space @ units)
 fixSign desiredSign loop =

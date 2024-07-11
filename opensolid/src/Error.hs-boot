@@ -1,9 +1,9 @@
-module Error (Error) where
+module Error (Message) where
 
 import Basics
 import Data.Kind (Constraint)
 
-type Error :: Type -> Constraint
-class Error error
+type Message :: Type -> Constraint
+class Message error
 
-instance Error (List Char)
+instance Message (List Char)

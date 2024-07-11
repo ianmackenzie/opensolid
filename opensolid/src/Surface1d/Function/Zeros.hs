@@ -1,6 +1,7 @@
-module Surface1d.Function.Zeros (Zeros (..), empty) where
+module Surface1d.Function.Zeros (Zeros (..), empty, Error (..)) where
 
 import Curve2d (Curve2d)
+import Error qualified
 import OpenSolid
 import Uv qualified
 
@@ -19,3 +20,8 @@ empty =
     , tangentPoints = []
     , saddlePoints = []
     }
+
+data Error
+  = HigherOrderZero
+  | ZeroEverywhere
+  deriving (Eq, Show, Error.Message)

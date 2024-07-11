@@ -14,8 +14,8 @@ module Curve1d
   , sqrt'
   , sin
   , cos
-  , Zeros (ZeroEverywhere, Zeros)
-  , HigherOrderZero (HigherOrderZero)
+  , isZero
+  , hasZero
   , zeros
   , reverse
   , integral
@@ -26,6 +26,7 @@ import Angle qualified
 import Curve1d.Integral (Integral (Integral))
 import Curve1d.Root (Root (Root))
 import Curve1d.Root qualified as Root
+import Curve1d.Zeros qualified as Zeros
 import Domain1d (Domain1d)
 import Domain1d qualified
 import Estimate (Estimate)
@@ -364,39 +365,46 @@ cos (Constant x) = constant (Angle.cos x)
 cos curve = Cos curve
 
 isZero :: Tolerance units => Curve1d units -> Bool
-isZero curve = case curve of
-  Constant value -> value ~= Qty.zero
-  _ -> List.allTrue [pointOn curve tValue ~= Qty.zero | tValue <- Parameter.samples]
+isZero (Constant value) = value ~= Qty.zero
+isZero curve = List.allTrue [pointOn curve tValue ~= Qty.zero | tValue <- Parameter.samples]
+
+hasZero :: Tolerance units => Curve1d units -> Bool
+hasZero curve =
+  -- TODO optimize this to use a special Solve1d.find or similar
+  -- to efficiently check if there is *a* zero anywhere
+  -- instead of finding *all* zeros (and their exact locations)
+  case zeros curve of
+    Success [] -> False
+    Success List.OneOrMore -> True
+    Failure Zeros.ZeroEverywhere -> True
+    Failure Zeros.HigherOrderZero -> True
 
 ----- ROOT FINDING -----
 
-data HigherOrderZero = HigherOrderZero deriving (Eq, Show, Error)
-
-data Zeros = ZeroEverywhere | Zeros (List Root) deriving (Show)
-
-zeros :: Tolerance units => Curve1d units -> Result HigherOrderZero Zeros
-zeros (Constant value) = if value ~= Qty.zero then Ok ZeroEverywhere else Ok (Zeros [])
-zeros curve | isZero curve = Ok ZeroEverywhere
-zeros curve = Result.do
-  let derivatives = Stream.iterate curve derivative
-  let cache =
-        Solve1d.init $
-          \range -> Stream.map (\curveDerivative -> segmentBounds curveDerivative range) derivatives
-  (roots, _) <- findZeros derivatives [0 .. 3] cache
-  Ok (Zeros (List.sortBy Root.value roots))
+zeros :: Tolerance units => Curve1d units -> Result Zeros.Error (List Root)
+zeros curve =
+  if isZero curve
+    then Failure Zeros.ZeroEverywhere
+    else Result.do
+      let derivatives = Stream.iterate curve derivative
+      let derivativeBounds tBounds =
+            Stream.map (\curveDerivative -> segmentBounds curveDerivative tBounds) derivatives
+      let cache = Solve1d.init derivativeBounds
+      (roots, _) <- findZeros derivatives [0 .. 3] cache
+      Success (List.sortBy Root.value roots)
 
 findZeros ::
   Tolerance units =>
   Stream (Curve1d units) ->
   List Int ->
   Solve1d.Cache (Stream (Range units)) ->
-  Result HigherOrderZero (List Root, List Domain1d)
+  Result Zeros.Error (List Root, List Domain1d)
 findZeros derivatives orders cache = case orders of
-  [] -> Ok ([], []) -- No more orders to try
+  [] -> Success ([], []) -- No more orders to try
   n : higherOrders -> Result.do
     (higherOrderRoots, higherOrderExclusions) <- findZeros derivatives higherOrders cache
     Solve1d.search (resolveOrder n derivatives) cache higherOrderRoots higherOrderExclusions
-      ?? Error HigherOrderZero
+      |> Result.onError (\Solve1d.InfiniteRecursion -> Failure Zeros.HigherOrderZero)
 
 resolveOrder ::
   Tolerance units =>

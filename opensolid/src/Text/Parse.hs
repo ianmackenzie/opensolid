@@ -8,7 +8,7 @@ import Data.Text.Read (Reader)
 import Data.Text.Read qualified
 import {-# SOURCE #-} Float (Float)
 import {-# SOURCE #-} Float qualified
-import Result (Result (Error, Ok))
+import Result (Result (Failure, Success))
 import Result qualified
 import Prelude qualified
 
@@ -16,7 +16,7 @@ num :: Prelude.Num a => Reader a -> Text -> Result Text a
 num reader text =
   case Data.Text.Read.signed reader text of
     Prelude.Right (value, suffix)
-      | Data.Text.null suffix -> Ok value
+      | Data.Text.null suffix -> Success value
       | otherwise -> do
           let message =
                 "Could not parse '"
@@ -24,8 +24,8 @@ num reader text =
                   + "' as a number - has extra trailing text '"
                   + suffix
                   + "'"
-          Error message
-    Prelude.Left message -> Error (Data.Text.pack message)
+          Failure message
+    Prelude.Left message -> Failure (Data.Text.pack message)
 
 int :: Text -> Result Text Int
 int = num Data.Text.Read.decimal

@@ -10,6 +10,7 @@ import Axis2d qualified
 import Basis2d qualified
 import Bounds2d qualified
 import Direction2d qualified
+import Error qualified
 import Foreign qualified
 import Foreign.Storable (Storable)
 import Frame2d qualified
@@ -117,7 +118,7 @@ instance (VoidPtr a, VoidPtr b) => VoidPtr (a, b) where
 pointerSize :: Int
 pointerSize = Foreign.sizeOf Foreign.nullPtr
 
-class Error error => TaggedError error where
+class Error.Message error => TaggedError error where
   fromTaggedPtr :: Foreign.Word8 -> Foreign.Ptr () -> IO error
   toTaggedPtr :: error -> IO (Foreign.Word8, Foreign.Ptr ())
 
@@ -126,15 +127,15 @@ instance (TaggedError error, VoidPtr success) => VoidPtr (Result error success) 
     voidPtr <- Foreign.peek (Foreign.castPtr ptr)
     tag <- Foreign.peekByteOff ptr pointerSize
     case tag of
-      Word8 0 -> Prelude.fmap Ok (fromVoidPtr voidPtr)
-      _ -> Prelude.fmap Error (fromTaggedPtr tag voidPtr)
+      Word8 0 -> Prelude.fmap Success (fromVoidPtr voidPtr)
+      _ -> Prelude.fmap Failure (fromTaggedPtr tag voidPtr)
   toVoidPtr res = Prelude.do
     ptr <- Foreign.mallocBytes (pointerSize + (1 :: Int))
     (tag, nestedPtr) <- case res of
-      Error err -> toTaggedPtr err
-      Ok success -> Prelude.do
-        succPtr <- toVoidPtr success
-        Prelude.return (Word8 0, succPtr)
+      Failure error -> toTaggedPtr error
+      Success value -> Prelude.do
+        valuePtr <- toVoidPtr value
+        Prelude.return (Word8 0, valuePtr)
     Foreign.poke ptr nestedPtr
     Foreign.pokeByteOff ptr pointerSize tag
     Prelude.return (Foreign.castPtr ptr)

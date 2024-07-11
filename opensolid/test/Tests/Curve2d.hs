@@ -12,13 +12,15 @@ import Curve1d qualified
 import Curve1d.Root qualified
 import Curve2d (Curve2d)
 import Curve2d qualified
-import Curve2d.Intersection (Intersection (Intersection))
-import Curve2d.Intersection qualified as Intersection
+import Curve2d.IntersectionPoint (IntersectionPoint (IntersectionPoint))
+import Curve2d.IntersectionPoint qualified as IntersectionPoint
+import Curve2d.OverlappingSegment (OverlappingSegment (OverlappingSegment))
 import Direction2d qualified
 import DirectionCurve2d qualified
 import Error qualified
 import Length qualified
 import List qualified
+import NonEmpty qualified
 import OpenSolid
 import Parameter qualified
 import Point2d qualified
@@ -47,7 +49,7 @@ curveGenerators =
 
 tests :: Tolerance Meters => List Test
 tests =
-  [ find
+  [ findPoint
   , curveOverlap1
   , curveOverlap2
   , crossingIntersection
@@ -63,8 +65,8 @@ tests =
   , degeneracyRemoval
   ]
 
-find :: Tolerance Meters => Test
-find = Test.verify "find" Test.do
+findPoint :: Tolerance Meters => Test
+findPoint = Test.verify "findPoint" Test.do
   let p1 = Point2d.meters 0.0 0.0
   let p2 = Point2d.meters 1.0 2.0
   let p3 = Point2d.meters 2.0 0.0
@@ -85,38 +87,37 @@ overlappingSegments ::
   Tolerance units =>
   Curve2d (space @ units) ->
   Curve2d (space @ units) ->
-  Result Text (List (Range Unitless, Range Unitless, Sign))
+  Result Text (NonEmpty OverlappingSegment)
 overlappingSegments curve1 curve2 =
   case Curve2d.intersections curve1 curve2 of
-    Ok _ -> Error "Intersection should have failed (and given overlapping segments)"
-    Error (Curve2d.CurvesOverlap segments) -> Ok segments
-    Error error -> Error (Error.message error)
+    Success (Just (Curve2d.OverlappingSegments segments)) -> Success segments
+    Success (Just (Curve2d.IntersectionPoints _)) -> 
+      Failure "Should have found some overlapping segments, got intersection points instead"
+    Success Nothing -> Failure "Should have found some overlapping segments"
+    Failure error -> Failure (Error.message error)
 
 equalUBounds :: Range Unitless -> Range Unitless -> Bool
 equalUBounds (Range actualLow actualHigh) (Range expectedLow expectedHigh) =
   Tolerance.using 1e-12 (actualLow ~= expectedLow && actualHigh ~= expectedHigh)
 
-equalOverlapSegments ::
-  (Range Unitless, Range Unitless, Sign) ->
-  (Range Unitless, Range Unitless, Sign) ->
-  Bool
-equalOverlapSegments (actual1, actual2, actualSign) (expected1, expected2, expectedSign) =
+equalOverlapSegments :: OverlappingSegment -> OverlappingSegment -> Bool
+equalOverlapSegments segment1 segment2 = do
+  let (OverlappingSegment actual1 actual2 actualSign) = segment1
+  let (OverlappingSegment expected1 expected2 expectedSign) = segment2
   equalUBounds actual1 expected1 && equalUBounds actual2 expected2 && actualSign == expectedSign
 
-equalOverlapSegmentLists ::
-  List (Range Unitless, Range Unitless, Sign) ->
-  List (Range Unitless, Range Unitless, Sign) ->
-  Bool
+equalOverlapSegmentLists :: NonEmpty OverlappingSegment -> NonEmpty OverlappingSegment -> Bool
 equalOverlapSegmentLists actualSegments expectedSegments =
-  List.length actualSegments == List.length expectedSegments
-    && List.allTrue (List.map2 equalOverlapSegments actualSegments expectedSegments)
+  NonEmpty.length actualSegments == NonEmpty.length expectedSegments
+    && NonEmpty.allTrue (NonEmpty.map2 equalOverlapSegments actualSegments expectedSegments)
 
 curveOverlap1 :: Tolerance Meters => Test
 curveOverlap1 = Test.verify "Overlap detection 1" Test.do
   let arc1 = Arc2d.from (Point2d.meters 1.0 0.0) (Point2d.meters -1.0 0.0) Angle.halfTurn
   let arc2 = Arc2d.from (Point2d.meters 0.0 -1.0) (Point2d.meters 0.0 1.0) Angle.halfTurn
   actualSegments <- overlappingSegments arc1 arc2
-  let expectedSegments = [(Range.from 0.0 0.5, Range.from 0.5 1.0, Positive)]
+  let expectedSegments =
+        NonEmpty.singleton (OverlappingSegment (Range.from 0.0 0.5) (Range.from 0.5 1.0) Positive)
   Test.expect (equalOverlapSegmentLists actualSegments expectedSegments)
 
 curveOverlap2 :: Tolerance Meters => Test
@@ -125,9 +126,9 @@ curveOverlap2 = Test.verify "Overlap detection 2" Test.do
   let arc2 = Arc2d.polar Point2d.origin Length.meter (Angle.degrees -45.0) (Angle.degrees 225.0)
   segments <- overlappingSegments arc1 arc2
   let expectedSegments =
-        [ (Range.from 0.0 (1 / 4), Range.from 0.0 (1 / 6), Negative)
-        , (Range.from (3 / 4) 1.0, Range.from (5 / 6) 1.0, Negative)
-        ]
+        NonEmpty.of2
+          (OverlappingSegment (Range.from 0.0 (1 / 4)) (Range.from 0.0 (1 / 6)) Negative)
+          (OverlappingSegment (Range.from (3 / 4) 1.0) (Range.from (5 / 6) 1.0) Negative)
   Test.expect (equalOverlapSegmentLists segments expectedSegments)
 
 crossingIntersection :: Tolerance Meters => Test
@@ -135,19 +136,30 @@ crossingIntersection = Test.verify "Crossing intersection" Test.do
   let arc1 = Arc2d.from Point2d.origin (Point2d.meters 0.0 1.0) Angle.halfTurn
   let arc2 = Arc2d.from Point2d.origin (Point2d.meters 1.0 0.0) -Angle.halfTurn
   intersections <- Curve2d.intersections arc1 arc2
-  let expectedIntersections =
-        [ Intersection 0.0 0.0 Intersection.Crossing Positive
-        , Intersection 0.5 0.5 Intersection.Crossing Negative
-        ]
-  Tolerance.using 1e-12 (Test.expect (intersections ~= expectedIntersections))
+  let expectedIntersectionPoints =
+        NonEmpty.of2
+          (IntersectionPoint 0.0 0.0 IntersectionPoint.Crossing Positive)
+          (IntersectionPoint 0.5 0.5 IntersectionPoint.Crossing Negative)
+  case intersections of
+    Nothing -> Test.fail "Should have found some intersection points"
+    Just (Curve2d.IntersectionPoints actualIntersectionPoints) ->
+      Tolerance.using 1e-12 (Test.expect (actualIntersectionPoints ~= expectedIntersectionPoints))
+    Just (Curve2d.OverlappingSegments _) ->
+      Test.fail "Should have found some intersection points, got overlapping segments instead"
 
 tangentIntersection :: Tolerance Meters => Test
 tangentIntersection = Test.verify "Tangent intersection" Test.do
   let arc1 = Arc2d.polar Point2d.origin Length.meter Angle.zero Angle.pi
   let arc2 = Arc2d.polar (Point2d.meters 0.0 1.5) (Length.meters 0.5) -Angle.pi Angle.zero
   intersections <- Curve2d.intersections arc1 arc2
-  let expectedIntersections = [Intersection 0.5 0.5 Intersection.Tangent Positive]
-  Tolerance.using 1e-12 (Test.expect (intersections ~= expectedIntersections))
+  let expectedIntersectionPoints =
+        NonEmpty.singleton (IntersectionPoint 0.5 0.5 IntersectionPoint.Tangent Positive)
+  case intersections of
+    Nothing -> Test.fail "Should have found some intersection points"
+    Just (Curve2d.IntersectionPoints actualIntersectionPoints) ->
+      Tolerance.using 1e-12 (Test.expect (actualIntersectionPoints ~= expectedIntersectionPoints))
+    Just (Curve2d.OverlappingSegments _) ->
+      Test.fail "Should have found some intersection points, got overlapping segments instead"
 
 solving :: Tolerance Meters => Test
 solving = Test.verify "Solving via Curve1d" Test.do
@@ -156,10 +168,7 @@ solving = Test.verify "Solving via Curve1d" Test.do
   let desiredDistance = Length.meters 0.5
   roots <-
     Tolerance.using (Tolerance.ofSquared desiredDistance) $
-      case Curve1d.zeros (squaredDistanceFromOrigin - Qty.squared desiredDistance) of
-        Ok Curve1d.ZeroEverywhere -> Error "Curve incorrectly reported as being zero everywhere"
-        Ok (Curve1d.Zeros roots) -> Ok roots
-        Error Curve1d.HigherOrderZero -> Error "Curve incorrectly reported as having a higher-order root"
+      Curve1d.zeros (squaredDistanceFromOrigin - Qty.squared desiredDistance)
   let distances =
         roots
           |> List.map Curve1d.Root.value

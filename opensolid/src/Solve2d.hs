@@ -19,6 +19,7 @@ import Bounds2d qualified
 import Domain1d qualified
 import Domain2d (Domain2d (Domain2d))
 import Domain2d qualified
+import Error qualified
 import List qualified
 import Maybe qualified
 import OpenSolid
@@ -128,7 +129,7 @@ data Exclusions exclusions where
 
 deriving instance Show (Exclusions exclusions)
 
-data InfiniteRecursion = InfiniteRecursion deriving (Eq, Show, Error)
+data InfiniteRecursion = InfiniteRecursion deriving (Eq, Show, Error.Message)
 
 type Callback cached solution =
   forall exclusions.
@@ -153,7 +154,7 @@ process ::
   Result InfiniteRecursion (List (solution, Domain2d))
 process callback queue accumulated =
   case Queue.pop queue of
-    Nothing -> Ok accumulated -- We're done! No more subdomains to process
+    Nothing -> Success accumulated -- We're done! No more subdomains to process
     Just (Tree subdomain cached node, remaining) -> do
       -- TODO optimize to check for containment and overlapping subdomains in a single pass
       -- (maybe use the call stack to avoid even constructing the overlapping domain list
@@ -216,12 +217,14 @@ recurseIntoChildrenOf ::
   Result InfiniteRecursion (List (solution, Domain2d))
 recurseIntoChildrenOf node callback queue accumulated = Result.do
   updatedQueue <- case node of
-    Atomic -> Error InfiniteRecursion
-    Central child -> Ok (queue + child)
-    Row leftChild middleChild rightChild -> Ok (queue + middleChild + leftChild + rightChild)
-    Column bottomChild middleChild topChild -> Ok (queue + middleChild + bottomChild + topChild)
+    Atomic -> Failure InfiniteRecursion
+    Central child -> Success (queue + child)
+    Row leftChild middleChild rightChild ->
+      Success (queue + middleChild + leftChild + rightChild)
+    Column bottomChild middleChild topChild ->
+      Success (queue + middleChild + bottomChild + topChild)
     Quadrant bottomLeft bottomMiddle bottomRight middleLeft middle middleRight topLeft topMiddle topRight ->
-      Ok (queue + middle + middleLeft + middleRight + bottomMiddle + topMiddle + bottomLeft + bottomRight + topLeft + topRight)
+      Success (queue + middle + middleLeft + middleRight + bottomMiddle + topMiddle + bottomLeft + bottomRight + topLeft + topRight)
   process callback updatedQueue accumulated
 
 data Action exclusions solution where
@@ -279,8 +282,8 @@ solveUnique localBounds fBounds f fu fv gBounds g gu gv globalBounds =
       -- First, try applying Newton-Raphson starting at the center point of localBounds
       -- to see if that converges to a root
       case newtonRaphson f fu fv g gu gv globalBounds pMid fMid gMid of
-        Ok point -> Just point -- Newton-Raphson converged to a root, return it
-        Error Divergence -- Newton-Raphson did not converge starting from pMid
+        Success point -> Just point -- Newton-Raphson converged to a root, return it
+        Failure Divergence -- Newton-Raphson did not converge starting from pMid
           | Range.isAtomic uRange || Range.isAtomic vRange ->
               -- We can't bisect any further
               -- (Newton-Raphson somehow never converged),
@@ -297,7 +300,7 @@ solveUnique localBounds fBounds f fu fv gBounds g gu gv globalBounds =
                 |> Maybe.orElse (solveRecursively (Bounds2d.xy u2 v2))
     else Nothing
 
-data Divergence = Divergence deriving (Eq, Show, Error)
+data Divergence = Divergence deriving (Eq, Show, Error.Message)
 
 newtonRaphson ::
   Tolerance units =>
@@ -330,7 +333,7 @@ solveNewtonRaphson ::
   Result Divergence Uv.Point
 solveNewtonRaphson iterations f fu fv g gu gv uvBounds p1 f1 g1 =
   if iterations > 10 -- Check if we've entered an infinite loop
-    then Error Divergence
+    then Failure Divergence
     else do
       let fu1 = fu p1
       let fv1 = fv p1
@@ -341,11 +344,11 @@ solveNewtonRaphson iterations f fu fv g gu gv uvBounds p1 f1 g1 =
       let deltaV = (gu1 .*. f1 - fu1 .*. g1) / d
       let p2 = p1 + Vector2d.xy deltaU deltaV
       if not (Bounds2d.includes p2 uvBounds) -- Check if we stepped outside the given bounds
-        then Error Divergence
+        then Failure Divergence
         else do
           let f2 = f p2
           let g2 = g p2
           if Qty.hypot2 f2 g2 >= Qty.hypot2 f1 g1 -- Check if we've stopped converging
-            then if f1 ~= Qty.zero && g1 ~= Qty.zero then Ok p1 else Error Divergence
+            then if f1 ~= Qty.zero && g1 ~= Qty.zero then Success p1 else Failure Divergence
             else -- We're still converging, so take another iteration
               solveNewtonRaphson (iterations + 1) f fu fv g gu gv uvBounds p2 f2 g2

@@ -29,7 +29,7 @@ import Data.Coerce qualified
 import Data.Kind (Constraint)
 import Data.List.NonEmpty (NonEmpty)
 import {-# SOURCE #-} Qty (Qty)
-import {-# SOURCE #-} Result (Result (Error, Ok))
+import {-# SOURCE #-} Result (Result (Failure, Success))
 import {-# SOURCE #-} Sign (Sign)
 
 class Units (Erase a) ~ Unitless => HasUnits (a :: k) where
@@ -82,8 +82,8 @@ instance Coercion a b => Coercion (Maybe a) (Maybe b) where
   coerce Nothing = Nothing
 
 instance Coercion a b => Coercion (Result x a) (Result x b) where
-  coerce (Ok value) = Ok (coerce value)
-  coerce (Error error) = Error error
+  coerce (Success value) = Success (coerce value)
+  coerce (Failure error) = Failure error
 
 instance (Coercion a b, Data.Coerce.Coercible a b) => Coercion (List a) (List b) where
   coerce = Data.Coerce.coerce

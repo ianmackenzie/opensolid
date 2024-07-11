@@ -1,39 +1,32 @@
 module Result
-  ( Result (Ok, Error)
+  ( Result (Success, Failure)
   , map
   , map2
   , andThen
-  , withDefault
-  , check
-  , mapError
   , addContext
   , onError
-  , debugError
-  , handleError
-  , orNothing
+  , try
   , collect
   , combine
   , (>>=)
   , (>>)
-  , return
-  , fail
   )
 where
 
 import Basics
 import Coalesce (Coalesce ((??)))
 import Composition
-import Debug qualified
-import Error (Error)
 import Error qualified
-import {-# SOURCE #-} IO qualified
+import System.IO.Error
 import {-# SOURCE #-} Text qualified
 import Prelude (Applicative, Functor, Monad, MonadFail)
 import Prelude qualified
 
 data Result x a where
-  Ok :: a -> Result x a
-  Error :: Error x => x -> Result x a
+  Success :: a -> Result x a
+  Failure :: Error.Message x => x -> Result x a
+
+{-# COMPLETE Success, Failure #-}
 
 deriving instance (Eq x, Eq a) => Eq (Result x a)
 
@@ -43,102 +36,65 @@ instance Functor (Result x) where
   fmap = map
 
 instance Applicative (Result x) where
-  pure = return
+  pure = Success
 
-  Ok function <*> Ok value = Ok (function value)
-  Error error <*> _ = Error error
-  Ok _ <*> Error error = Error error
+  Success function <*> Success value = Success (function value)
+  Failure error <*> _ = Failure error
+  _ <*> Failure error = Failure error
 
 instance Monad (Result x) where
   (>>=) = (>>=)
 
 instance MonadFail (Result Text) where
-  fail = Text.pack >> fail
+  fail = Text.pack >> Failure
 
-instance Composition (Result x ()) (IO a) (IO a) where
-  Ok () >> io = io
-  Error error >> _ = IO.fail (Error.message error)
+instance Composition (Result x ()) (Result x a) (Result x a) where
+  Success () >> result = result
+  Failure error >> _ = Failure error
 
-instance a ~ a' => Coalesce (Result x a) (Result y a') (Result y a) where
-  Ok value ?? _ = Ok value
-  Error _ ?? fallback = fallback
-
-instance a ~ a' => Coalesce (Result x a) (Maybe a') (Maybe a) where
-  Ok value ?? _ = Just value
-  Error _ ?? fallback = fallback
-
-instance a ~ a' => Coalesce (Maybe a) (Result x a') (Result x a) where
-  Just value ?? _ = Ok value
+instance a1 ~ a2 => Coalesce (Maybe a1) (Result x a2) (Result x a1) where
+  Just value ?? _ = Success value
   Nothing ?? fallback = fallback
 
-instance a ~ a' => Coalesce (Result x a) (IO a') (IO a) where
-  Ok value ?? _ = IO.return value
-  Error _ ?? fallback = fallback
-
-instance a ~ a' => Coalesce (IO a) (Result x a') (IO a) where
+instance a1 ~ a2 => Coalesce (IO a1) (Result x a2) (IO a1) where
   io ?? fallback =
-    io |> IO.onError do
-      \_ ->
-        case fallback of
-          Ok value -> IO.return value
-          Error error -> IO.fail (Error.message error)
-
-return :: a -> Result x a
-return = Ok
+    System.IO.Error.catchIOError io $
+      \_ -> case fallback of
+        Success value -> Prelude.return value
+        Failure error -> Prelude.fail (Text.unpack (Error.message error))
 
 (>>=) :: Result x a -> (a -> Result x b) -> Result x b
-Ok value >>= function = function value
-Error error >>= _ = Error error
+Success value >>= function = function value
+Failure error >>= _ = Failure error
 
 andThen :: (a -> Result x b) -> Result x a -> Result x b
 andThen function result = result >>= function
 
-instance x ~ x' => Composition (Result x ()) (Result x' a) (Result x a) where
-  Ok _ >> result = result
-  Error error >> _ = Error error
+map :: (a -> b) -> Result x a -> Result x b
+map function result = case result of
+  Success value -> Success (function value)
+  Failure error -> Failure error
 
-fail :: Error x => x -> Result x a
-fail = Error
+addContext :: Text -> Result x a -> Result Text a
+addContext context result = case result of
+  Success value -> Success value
+  Failure error -> Failure (Error.addContext context (Error.message error))
 
-withDefault :: a -> Result x a -> a
-withDefault _ (Ok value) = value
-withDefault fallback (Error _) = fallback
-
-map :: (a -> value) -> Result x a -> Result x value
-map f (Ok value) = Ok (f value)
-map _ (Error error) = Error error
-
-mapError :: Error y => (Error x => x -> y) -> Result x a -> Result y a
-mapError f = onError (f >> Error)
-
-addContext :: Text -> Result Text a -> Result Text a
-addContext text = mapError (Error.addContext text)
-
-map2 :: (a -> b -> value) -> Result x a -> Result x b -> Result x value
-map2 function result1 result2 = Result.do
+map2 :: (a -> b -> c) -> Result x a -> Result x b -> Result x c
+map2 function result1 result = Result.do
   value1 <- result1
-  value2 <- result2
-  return (function value1 value2)
+  value2 <- result
+  Success (function value1 value2)
 
-data CheckFailed = CheckFailed deriving (Eq, Show, Error)
+onError :: (x -> Result y a) -> Result x a -> Result y a
+onError function result = case result of
+  Success value -> Success value
+  Failure error -> function error
 
-check :: Bool -> Result CheckFailed ()
-check condition = if condition then Ok () else Error CheckFailed
-
-onError :: (Error x => x -> Result y a) -> Result x a -> Result y a
-onError _ (Ok value) = Ok value
-onError function (Error error) = function error
-
-debugError :: (x -> IO ()) -> Result x a -> Result x a
-debugError callback = onError (\error -> Debug.io (callback error) >> Error error)
-
-handleError :: (Error x => x -> a) -> Result x a -> a
-handleError _ (Ok value) = value
-handleError function (Error error) = function error
-
-orNothing :: Result x a -> Maybe a
-orNothing (Ok value) = Just value
-orNothing (Error _) = Nothing
+try :: Result x a -> Result Text a
+try result = case result of
+  Success value -> Success value
+  Failure error -> Failure (Error.message error)
 
 collect :: (a -> Result x b) -> List a -> Result x (List b)
 collect = Prelude.mapM

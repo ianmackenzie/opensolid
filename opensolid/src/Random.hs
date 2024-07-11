@@ -25,7 +25,7 @@ import Data.List.NonEmpty (NonEmpty ((:|)))
 import Pair qualified
 import Random.Internal hiding ((>>=))
 import Random.Internal qualified
-import Result (Result (Error, Ok))
+import Result (Result (Failure, Success))
 import System.Random (StdGen)
 import System.Random qualified
 import System.Random.Stateful qualified
@@ -89,8 +89,8 @@ retry :: Generator (Result x a) -> Generator a
 retry fallibleGenerator = Random.do
   result <- fallibleGenerator
   case result of
-    Ok value -> return value
-    Error _ -> retry fallibleGenerator
+    Success value -> return value
+    Failure _ -> retry fallibleGenerator
 
 combine :: List (Generator a) -> Generator (List a)
 combine [] = return []

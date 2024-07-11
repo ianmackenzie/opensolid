@@ -109,8 +109,12 @@ library
     CubicSpline2d
     Curve1d
     Curve1d.Root
+    Curve1d.Zeros
     Curve2d
-    Curve2d.Intersection
+    Curve2d.FindPoint
+    Curve2d.IntersectionPoint
+    Curve2d.Intersections
+    Curve2d.OverlappingSegment
     Curve3d
     Debug
     Direction2d
@@ -160,8 +164,8 @@ library
     Random.Internal
     Range
     Region2d
+    Region2d.BoundedBy
     Result
-    Result2
     Sign
     Solve1d
     Solve2d
@@ -186,6 +190,7 @@ library
     VectorCurve2d
     VectorCurve2d.DegenerateEndpoint
     VectorCurve2d.Direction
+    VectorCurve2d.Zeros
     VectorCurve3d
     VectorSurface3d
     VectorSurface3d.Function

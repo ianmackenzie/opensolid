@@ -24,17 +24,16 @@ import Control.Concurrent
 import Control.Concurrent.Async qualified as Async
 import Data.ByteString.Char8 qualified
 import Debug qualified
-import {-# SOURCE #-} Duration (Duration)
-import {-# SOURCE #-} Duration qualified
-import Error (Error)
+import Duration (Duration)
+import Duration qualified
 import Error qualified
 import Float qualified
-import Result (Result (Error, Ok))
+import Result (Result (Failure, Success))
 import System.IO.Error qualified
 import Text qualified
 import Prelude qualified
 
-fail :: Error x => x -> IO a
+fail :: Error.Message x => x -> IO a
 fail error = Prelude.fail (Text.unpack (Error.message error))
 
 return :: a -> IO a
@@ -47,8 +46,8 @@ instance Bind IO where
   (>>=) = (Prelude.>>=)
 
 instance Bind (Result x) where
-  Ok value >>= function = function value
-  Error error >>= _ = fail (Error.message error)
+  Success value >>= function = function value
+  Failure error >>= _ = fail error
 
 map :: (a -> b) -> IO a -> IO b
 map = Prelude.fmap

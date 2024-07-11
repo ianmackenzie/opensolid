@@ -7,7 +7,7 @@ where
 
 import {-# SOURCE #-} Curve2d (Curve2d)
 import {-# SOURCE #-} Curve2d qualified
-import Curve2d.Intersection qualified as Intersection
+import Curve2d.IntersectionPoint qualified as IntersectionPoint
 import OpenSolid
 import Qty qualified
 import Vector2d qualified
@@ -35,7 +35,7 @@ classify ::
   (Float, Float) ->
   Derivatives (space @ units) ->
   Derivatives (space @ units) ->
-  (Intersection.Kind, Sign)
+  (IntersectionPoint.Kind, Sign)
 classify (u, v) derivatives1 derivatives2 = do
   let first1 = VectorCurve2d.evaluateAt u (first derivatives1)
   let first2 = VectorCurve2d.evaluateAt v (first derivatives2)
@@ -50,7 +50,7 @@ classify (u, v) derivatives1 derivatives2 = do
   let sign0 = Qty.sign tangentCrossProduct
   let radius0 = ?tolerance / crossProductMagnitude
   if crossProductMagnitude > 0.1
-    then (Intersection.Crossing, sign0)
+    then (IntersectionPoint.Crossing, sign0)
     else do
       let dX1_dU1 = first1Magnitude
       let dY1_dU1 = Qty.zero
@@ -66,8 +66,8 @@ classify (u, v) derivatives1 derivatives2 = do
       let sign1 = Qty.sign d2Y_dXdX
       let radius1 = Qty.sqrt' (2 * ?tolerance ./^ Qty.abs d2Y_dXdX)
       if radius0 <= radius1
-        then (Intersection.Crossing, sign0)
-        else (Intersection.Tangent, sign1)
+        then (IntersectionPoint.Crossing, sign0)
+        else (IntersectionPoint.Tangent, sign1)
 
 secondDerivative1d :: Qty units -> Qty units -> Qty units -> Qty units -> Qty (Unitless :/: units)
 secondDerivative1d dXdU dYdU d2XdU2 d2YdU2 =

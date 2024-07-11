@@ -20,9 +20,9 @@ module Text
   , toLower
   , toUpper
   , encodeUtf8
+  , InvalidUtf8 (InvalidUtf8)
   , decodeUtf8
-  , WithReplacementCharacters
-  , acceptReplacementCharacters
+  , assumeUtf8
   )
 where
 
@@ -32,11 +32,11 @@ import Composition
 import Data.ByteString (ByteString)
 import Data.Text qualified
 import Data.Text.Encoding qualified
-import Error (Error)
+import Error qualified
 import Float (Float)
 import Float qualified
 import List qualified
-import Result (Result (Error, Ok))
+import Result (Result (Failure, Success))
 import Prelude qualified
 
 concat :: List Text -> Text
@@ -103,16 +103,13 @@ toUpper = Data.Text.toUpper
 encodeUtf8 :: Text -> ByteString
 encodeUtf8 = Data.Text.Encoding.encodeUtf8
 
-newtype WithReplacementCharacters = WithReplacementCharacters Text deriving (Show, Eq)
+data InvalidUtf8 = InvalidUtf8 deriving (Eq, Show, Error.Message)
 
-instance Error WithReplacementCharacters
-
-decodeUtf8 :: ByteString -> Result WithReplacementCharacters Text
+decodeUtf8 :: ByteString -> Result InvalidUtf8 Text
 decodeUtf8 byteString =
   case Data.Text.Encoding.decodeUtf8' byteString of
-    Prelude.Right text -> Ok text
-    Prelude.Left _ ->
-      Error (WithReplacementCharacters (Data.Text.Encoding.decodeUtf8Lenient byteString))
+    Prelude.Right text -> Success text
+    Prelude.Left _ -> Failure InvalidUtf8
 
-acceptReplacementCharacters :: WithReplacementCharacters -> Text
-acceptReplacementCharacters (WithReplacementCharacters text) = text
+assumeUtf8 :: ByteString -> Text
+assumeUtf8 = Data.Text.Encoding.decodeUtf8Lenient

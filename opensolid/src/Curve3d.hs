@@ -17,6 +17,7 @@ where
 import Bounds3d (Bounds3d)
 import Curve3d.Internal (Interface (..))
 import Curve3d.Internal qualified as Internal
+import Error qualified
 import OpenSolid
 import Point3d (Point3d)
 import Range (Range)
@@ -24,7 +25,7 @@ import VectorCurve3d (VectorCurve3d)
 
 type Curve3d (coordinateSystem :: CoordinateSystem) = Internal.Curve3d coordinateSystem
 
-data DegenerateCurve = DegenerateCurve deriving (Eq, Show, Error)
+data DegenerateCurve = DegenerateCurve deriving (Eq, Show, Error.Message)
 
 wrap :: Interface curve (space @ units) => curve -> Curve3d (space @ units)
 wrap = Internal.Curve

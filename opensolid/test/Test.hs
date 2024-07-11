@@ -45,8 +45,8 @@ instance Bind Generator where
       unwrap (toExpectation value)
 
 instance Bind (Result x) where
-  Ok value >>= f = f value
-  Error error >>= _ = Expectation (Random.return (Failed [Error.message error]))
+  Success value >>= f = f value
+  Failure error >>= _ = fail error
 
 data Test
   = Check Int Text Expectation
@@ -103,7 +103,7 @@ fuzzImpl context n expectation = IO.do
 pass :: Expectation
 pass = Expectation (Random.return Passed)
 
-fail :: Error x => x -> Expectation
+fail :: Error.Message x => x -> Expectation
 fail error = Expectation (Random.return (Failed [Error.message error]))
 
 expect :: Bool -> Expectation

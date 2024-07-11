@@ -19,6 +19,7 @@ where
 
 import Domain1d (Domain1d)
 import Domain1d qualified
+import Error qualified
 import Int qualified
 import List qualified
 import OpenSolid
@@ -83,7 +84,7 @@ data Exclusions exclusions where
   NoExclusions :: Exclusions NoExclusions
   SomeExclusions :: NonEmpty Domain1d -> Exclusions SomeExclusions
 
-data InfiniteRecursion = InfiniteRecursion deriving (Eq, Show, Error)
+data InfiniteRecursion = InfiniteRecursion deriving (Eq, Show, Error.Message)
 
 type Callback cached solution =
   forall exclusions.
@@ -124,7 +125,7 @@ process callback queue solutions exclusions =
               Recurse -> recurseIntoChildrenOf node callback remaining solutions exclusions
               Return solution ->
                 process callback remaining (solution : solutions) (subdomain : exclusions)
-    Nothing -> Ok (solutions, exclusions)
+    Nothing -> Success (solutions, exclusions)
 
 {-# INLINE recurseIntoChildrenOf #-}
 recurseIntoChildrenOf ::
@@ -136,7 +137,7 @@ recurseIntoChildrenOf ::
   Result InfiniteRecursion (List solution, List Domain1d)
 recurseIntoChildrenOf node callback queue solutions exclusions =
   case node of
-    Atomic -> Error InfiniteRecursion
+    Atomic -> Failure InfiniteRecursion
     Shrinkable child -> process callback (queue + child) solutions exclusions
     Splittable middleChild leftChild rightChild -> do
       let updatedQueue = queue + middleChild + leftChild + rightChild
@@ -187,8 +188,8 @@ solveMonotonic function derivative range sign1 x1 x2 = do
   let xMid = Qty.midpoint x1 x2
   let yMid = function xMid
   case newtonRaphson function derivative range xMid yMid 0 of
-    Ok x -> x -- Newton-Raphson converged to a root, return it
-    Error Divergence -- Newton-Raphson did not converge within [x1, x2]
+    Success x -> x -- Newton-Raphson converged to a root, return it
+    Failure Divergence -- Newton-Raphson did not converge within [x1, x2]
       | x1 < xMid && xMid < x2 ->
           -- It's possible to bisect further,
           -- so recurse into whichever subdomain brackets the root
@@ -197,7 +198,7 @@ solveMonotonic function derivative range sign1 x1 x2 = do
             else solveMonotonic function derivative range sign1 x1 xMid
       | otherwise -> xMid -- We've converged to a root by bisection
 
-data Divergence = Divergence deriving (Eq, Show, Error)
+data Divergence = Divergence deriving (Eq, Show, Error.Message)
 
 newtonRaphson ::
   Tolerance units =>
@@ -210,16 +211,16 @@ newtonRaphson ::
   Result Divergence Float
 newtonRaphson function derivative range x y iterations =
   if iterations > 10 -- Check if we've entered an infinite loop
-    then Error Divergence
+    then Failure Divergence
     else do
       let dy = derivative x
       if dy == Qty.zero -- Can't take Newton step if derivative is zero
-        then Error Divergence
+        then Failure Divergence
         else do
           let x2 = Range.clampTo range (x - y / dy) -- Apply (bounded) Newton step
           let y2 = function x2
           if Qty.abs y2 >= Qty.abs y
             then -- We've stopped converging, check if we're actually at a root
-              if y ~= Qty.zero then Ok x else Error Divergence
+              if y ~= Qty.zero then Success x else Failure Divergence
             else -- We're still converging, so take another iteration
               newtonRaphson function derivative range x2 y2 (iterations + 1)

@@ -18,8 +18,8 @@ import {-# SOURCE #-} Curve2d (Curve2d)
 import {-# SOURCE #-} Curve2d qualified
 import Curve2d.Derivatives (Derivatives)
 import Curve2d.Derivatives qualified as Derivatives
-import Curve2d.Intersection (Intersection)
-import Curve2d.Intersection qualified as Intersection
+import Curve2d.IntersectionPoint (IntersectionPoint)
+import Curve2d.IntersectionPoint qualified as IntersectionPoint
 import Maybe qualified
 import OpenSolid
 import Qty qualified
@@ -64,7 +64,7 @@ isEndpointIntersectionCandidate (tValue1, tValue2) tBounds1 tBounds2 _ _ =
   Range.includes tValue1 tBounds1 && Range.includes tValue2 tBounds2
 
 endpointIntersectionResolved ::
-  (Intersection.Kind, Sign) ->
+  (IntersectionPoint.Kind, Sign) ->
   Range Unitless ->
   Range Unitless ->
   Segment (space @ units) ->
@@ -78,11 +78,11 @@ endpointIntersectionResolved intersectionType _ _ segment1 segment2 =
 computeIntersectionType ::
   Segment (space @ units) ->
   Segment (space @ units) ->
-  Fuzzy (Intersection.Kind, Sign)
+  Fuzzy (IntersectionPoint.Kind, Sign)
 computeIntersectionType segment1 segment2 = do
   let firstResolution = crossProductResolution segment1 segment2
   if Qty.abs firstResolution >= 0.5
-    then Resolved (Intersection.Crossing, Qty.sign firstResolution)
+    then Resolved (IntersectionPoint.Crossing, Qty.sign firstResolution)
     else do
       let firstBounds1 = firstBounds segment1
       let firstBounds2 = firstBounds segment2
@@ -121,7 +121,7 @@ computeIntersectionType segment1 segment2 = do
               then resolutionXY
               else -resolutionYX
       if Qty.abs secondResolution >= 0.5
-        then Resolved (Intersection.Tangent, Qty.sign secondResolution)
+        then Resolved (IntersectionPoint.Tangent, Qty.sign secondResolution)
         else Unresolved
 
 isTangentIntersectionCandidate ::
@@ -217,10 +217,10 @@ findTangentIntersection ::
   Segment (space @ units) ->
   Segment (space @ units) ->
   Sign ->
-  Maybe Intersection
+  Maybe IntersectionPoint
 findTangentIntersection derivatives1 derivatives2 tBounds1 tBounds2 _ _ sign = Maybe.do
   (t1, t2) <- Range.find2 (isTangentIntersection derivatives1 derivatives2) tBounds1 tBounds2
-  Just (Intersection.tangent t1 t2 sign)
+  Just (IntersectionPoint.tangent t1 t2 sign)
 
 isTangentIntersection ::
   Tolerance units =>
@@ -275,12 +275,12 @@ findCrossingIntersection ::
   Segment (space @ units) ->
   Segment (space @ units) ->
   Sign ->
-  Maybe Intersection
+  Maybe IntersectionPoint
 findCrossingIntersection derivatives1 derivatives2 tBounds1 tBounds2 _ _ sign = Maybe.do
   let curve1 = Derivatives.curve derivatives1
   let curve2 = Derivatives.curve derivatives2
   (t1, t2) <- Range.find2 (isCrossingIntersection curve1 curve2) tBounds1 tBounds2
-  Just (Intersection.crossing t1 t2 sign)
+  Just (IntersectionPoint.crossing t1 t2 sign)
 
 isCrossingIntersection ::
   Curve2d (space @ units) ->

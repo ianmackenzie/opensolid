@@ -15,7 +15,6 @@ import Direction2d qualified
 import Direction3d ()
 import Drawing2d qualified
 import Duration qualified
-import Error qualified
 import Float qualified
 import IO qualified
 import Int qualified
@@ -109,9 +108,12 @@ offsetPoint ::
   Point2d (space @ units) ->
   Qty units ->
   Point2d (space @ units)
-offsetPoint startPoint endPoint distance = Result.withDefault startPoint Result.do
-  direction <- Direction2d.from startPoint endPoint
-  Ok (Point2d.midpoint startPoint endPoint + distance * Direction2d.perpendicularTo direction)
+offsetPoint startPoint endPoint distance =
+  case Direction2d.from startPoint endPoint of
+    Failure Direction2d.PointsAreCoincident -> startPoint
+    Success direction -> do
+      let displacement = distance * Direction2d.perpendicularTo direction
+      Point2d.midpoint startPoint endPoint + displacement
 
 testCustomFunction :: Tolerance Meters => IO ()
 testCustomFunction =
@@ -128,15 +130,11 @@ getCrossProduct :: Tolerance Meters => Result Text Float
 getCrossProduct = Result.addContext "In getCrossProduct" Result.do
   vectorDirection <-
     Vector2d.direction (Vector2d.meters 2.0 3.0)
-      |> Result.debugError (\_ -> IO.printLine "Couldn't get vector direction!")
-      |> Result.mapError Error.message
       |> Result.addContext "When getting vector direction"
   lineDirection <-
     Direction2d.from Point2d.origin Point2d.origin
-      |> Result.debugError (\_ -> IO.printLine "Couldn't get line direction!")
-      |> Result.mapError Error.message
       |> Result.addContext "When getting line direction"
-  Ok (vectorDirection >< lineDirection)
+  Success (vectorDirection >< lineDirection)
 
 testTry :: Tolerance Meters => IO ()
 testTry =
@@ -225,15 +223,17 @@ testPlaneTorusIntersection = IO.do
 strokeWidth :: Length
 strokeWidth = Length.millimeters 0.1
 
-drawZeros :: Text -> Surface1d.Function.Zeros.Zeros -> IO ()
+drawZeros :: Text -> Surface1d.Function.Zeros -> IO ()
 drawZeros path zeros = IO.do
   let uvRange = Range.convert toDrawing (Range.from -0.05 1.05)
   let viewBox = Bounds2d.xy uvRange uvRange
+  let crossingCurves = Surface1d.Function.Zeros.crossingCurves zeros
+  let saddlePoints = Surface1d.Function.Zeros.saddlePoints zeros
   Drawing2d.writeTo path viewBox $
     [ Drawing2d.with [Drawing2d.strokeWidth strokeWidth] $
         [ drawBounds [] Uv.domain
-        , Drawing2d.group (List.mapWithIndex drawCrossingCurve (Surface1d.Function.Zeros.crossingCurves zeros))
-        , Drawing2d.group (List.map drawSaddlePoint (Surface1d.Function.Zeros.saddlePoints zeros))
+        , Drawing2d.group (List.mapWithIndex drawCrossingCurve crossingCurves)
+        , Drawing2d.group (List.map drawSaddlePoint saddlePoints)
         ]
     ]
 
@@ -454,7 +454,7 @@ textSum t1 t2 = Result.do
   Debug.log "n1" n1
   n2 <- Int.parse t2
   Debug.log "n2" n2
-  Ok (n1 + n2)
+  Success (n1 + n2)
 
 testTextSum :: IO ()
 testTextSum = IO.do

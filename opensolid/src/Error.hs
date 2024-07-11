@@ -1,5 +1,5 @@
 module Error
-  ( Error (message)
+  ( Message (message)
   , addContext
   )
 where
@@ -8,15 +8,16 @@ import Arithmetic
 import Basics
 import {-# SOURCE #-} Text qualified
 
-class (Eq error, Show error) => Error error where
+class (Eq error, Show error) => Message error where
   message :: error -> Text
   message = Text.show
 
-instance Error (List Char) where
+instance Message (List Char) where
   message = Text.pack
 
-instance Error Text where
+instance Message Text where
   message = identity
 
 addContext :: Text -> Text -> Text
-addContext string text = string + ":\n" + Text.indent "  " text
+addContext context "" = context
+addContext context existing = context + ":\n" + Text.indent "  " existing

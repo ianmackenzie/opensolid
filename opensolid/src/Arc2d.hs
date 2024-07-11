@@ -85,8 +85,8 @@ instance Curve2d.Interface (Arc (space @ units)) (space @ units) where
     let sinTheta = Angle.sin theta
     let v1 = vx * cosTheta + vy * sinTheta
     let v2 = vy * cosTheta - vx * sinTheta
-    (r1, d1) <- Vector2d.magnitudeAndDirection v1 ?? Nothing
-    (r2, d2) <- Vector2d.magnitudeAndDirection v2 ?? Nothing
+    (r1, d1) <- maybeMagnitudeAndDirection v1
+    (r2, d2) <- maybeMagnitudeAndDirection v2
     if r1 >= r2
       then do
         let startAngle = a - theta
@@ -97,6 +97,12 @@ instance Curve2d.Interface (Arc (space @ units)) (space @ units) where
         let endAngle = b - theta - Angle.quarterTurn
         Just (Arc2d centerPoint d2 -d1 r2 r1 startAngle endAngle)
 
+maybeMagnitudeAndDirection :: Tolerance units => Vector2d (space @ units) -> Maybe (Qty units, Direction2d space)
+maybeMagnitudeAndDirection vector =
+  case Vector2d.magnitudeAndDirection vector of
+    Success magnitudeAndDirection -> Just magnitudeAndDirection
+    Failure Vector2d.IsZero -> Nothing
+
 from ::
   Tolerance units =>
   Point2d (space @ units) ->
@@ -105,8 +111,8 @@ from ::
   Curve2d (space @ units)
 from startPoint endPoint sweptAngle =
   case Vector2d.magnitudeAndDirection (endPoint - startPoint) of
-    Error Vector2d.IsZero -> Line2d.from startPoint endPoint
-    Ok (distanceBetweenPoints, directionBetweenPoints) -> do
+    Failure Vector2d.IsZero -> Line2d.from startPoint endPoint
+    Success (distanceBetweenPoints, directionBetweenPoints) -> do
       let halfDistance = 0.5 * distanceBetweenPoints
       let tanHalfAngle = Angle.tan (0.5 * sweptAngle)
       let linearDeviation = halfDistance * tanHalfAngle
@@ -163,7 +169,7 @@ withRadius ::
   Curve2d (space @ units)
 withRadius givenRadius startPoint endPoint direction size =
   case Direction2d.from startPoint endPoint of
-    Ok chordDirection -> do
+    Success chordDirection -> do
       let halfDistance = 0.5 * Point2d.distanceFrom startPoint endPoint
       let radius = Qty.max (Qty.abs givenRadius) halfDistance
       let offsetMagnitude = Qty.sqrt' (Qty.squared' radius - Qty.squared' halfDistance)
@@ -184,7 +190,7 @@ withRadius givenRadius startPoint endPoint direction size =
               (Clockwise, Large) -> shortAngle - Angle.fullTurn
               (Counterclockwise, Large) -> Angle.fullTurn - shortAngle
       swept centerPoint startPoint sweptAngle
-    Error Direction2d.PointsAreCoincident ->
+    Failure Direction2d.PointsAreCoincident ->
       Line2d.from startPoint endPoint
 
 data Direction = Clockwise | Counterclockwise

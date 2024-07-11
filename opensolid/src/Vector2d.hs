@@ -53,6 +53,7 @@ import {-# SOURCE #-} Basis2d qualified
 import Data.Coerce qualified
 import {-# SOURCE #-} Direction2d (Direction2d)
 import {-# SOURCE #-} Direction2d qualified
+import Error qualified
 import Float qualified
 import {-# SOURCE #-} Frame2d (Frame2d)
 import {-# SOURCE #-} Frame2d qualified
@@ -332,12 +333,12 @@ squaredMagnitude' (Vector2d vx vy) = Qty.squared' vx + Qty.squared' vy
 angle :: Vector2d (space @ units) -> Angle
 angle (Vector2d vx vy) = Angle.atan2 vy vx
 
-data IsZero = IsZero deriving (Eq, Show, Error)
+data IsZero = IsZero deriving (Eq, Show, Error.Message)
 
 direction :: Tolerance units => Vector2d (space @ units) -> Result IsZero (Direction2d space)
 direction vector = do
   let vm = magnitude vector
-  if vm ~= Qty.zero then Error Vector2d.IsZero else Ok (Direction2d.unsafe (vector / vm))
+  if vm ~= Qty.zero then Failure IsZero else Success (Direction2d.unsafe (vector / vm))
 
 magnitudeAndDirection ::
   Tolerance units =>
@@ -345,7 +346,7 @@ magnitudeAndDirection ::
   Result IsZero (Qty units, Direction2d space)
 magnitudeAndDirection vector = do
   let vm = magnitude vector
-  if vm ~= Qty.zero then Error Vector2d.IsZero else Ok (vm, Direction2d.unsafe (vector / vm))
+  if vm ~= Qty.zero then Failure IsZero else Success (vm, Direction2d.unsafe (vector / vm))
 
 normalize :: Vector2d (space @ units) -> Vector2d (space @ Unitless)
 normalize vector = do

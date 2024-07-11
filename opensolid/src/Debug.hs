@@ -17,7 +17,7 @@ import Data.Text qualified
 import Debug.Trace qualified
 import GHC.Stack (HasCallStack)
 import System.IO.Unsafe qualified
-import {-# SOURCE #-} Text qualified
+import Text qualified
 import Prelude qualified
 
 newtype Debug = Debug (() -> ())

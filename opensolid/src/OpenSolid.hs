@@ -4,8 +4,6 @@ module OpenSolid
   , module Composition
   , module Arithmetic
   , module Result
-  , module Result2
-  , module Error
   , module Qty
   , module Float
   , module NonEmpty
@@ -25,14 +23,12 @@ import Basics
 import Coalesce (Coalesce ((??)))
 import Composition (Composition ((>>)), (.))
 import CoordinateSystem (CoordinateSystem, Defines, LocalSpace, type (@))
-import Error (Error)
 import Float (Float, fromRational, pattern Int)
 import Fuzzy (Fuzzy (Resolved, Unresolved))
 import Intersects (Intersects ((^)))
 import NonEmpty (NonEmpty ((:|)), (|:), pattern NonEmpty)
 import Qty (Qty (Qty))
-import Result (Result (Error, Ok))
-import Result2 (Result2 (Catch, Fail, Succeed))
+import Result (Result (Failure, Success))
 import Sign (Sign (Negative, Positive))
 import Tolerance (ApproximateEquality ((~=)), Tolerance, (!=))
 import Units (HasUnits (Units), Radians, Unitless, (:*:), (:/:))

@@ -36,6 +36,7 @@ where
 import Angle qualified
 import {-# SOURCE #-} Axis2d (Axis2d)
 import {-# SOURCE #-} Basis2d (Basis2d)
+import Error qualified
 import {-# SOURCE #-} Frame2d (Frame2d)
 import OpenSolid
 import {-# SOURCE #-} Point2d (Point2d)
@@ -146,14 +147,17 @@ x = positiveX
 y :: Direction2d space
 y = positiveY
 
-data PointsAreCoincident = PointsAreCoincident deriving (Eq, Show, Error)
+data PointsAreCoincident = PointsAreCoincident deriving (Eq, Show, Error.Message)
 
 from ::
   Tolerance units =>
   Point2d (space @ units) ->
   Point2d (space @ units) ->
   Result PointsAreCoincident (Direction2d space)
-from p1 p2 = Vector2d.direction (p2 - p1) ?? Error PointsAreCoincident
+from p1 p2 =
+  case Vector2d.direction (p2 - p1) of
+    Success direction -> Success direction
+    Failure Vector2d.IsZero -> Failure PointsAreCoincident
 
 fromAngle :: Angle -> Direction2d space
 fromAngle angle = unsafe (Vector2d.polar 1.0 angle)

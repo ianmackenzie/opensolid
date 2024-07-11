@@ -3,9 +3,7 @@ module Curve2d
   , pattern Point
   , pattern Line
   , pattern Arc
-  , DegenerateCurve (DegenerateCurve)
-  , Intersection
-  , IntersectionError (..)
+  , HasDegeneracy (HasDegeneracy)
   , Interface (..)
   , TransformBy (TransformBy)
   , wrap
@@ -17,8 +15,10 @@ module Curve2d
   , tangentDirection
   , reverse
   , bounds
+  , Intersections (..)
+  , IntersectionPoint
+  , OverlappingSegment
   , intersections
-  , FindPointError (..)
   , findPoint
   , signedDistanceAlong
   , xCoordinate
@@ -57,12 +57,17 @@ import Bounds2d qualified
 import Curve1d (Curve1d)
 import Curve2d.Derivatives (Derivatives)
 import Curve2d.Derivatives qualified as Derivatives
-import Curve2d.Intersection (Intersection (Intersection))
-import Curve2d.Intersection qualified as Intersection
+import Curve2d.FindPoint qualified as FindPoint
+import Curve2d.IntersectionPoint (IntersectionPoint (IntersectionPoint))
+import Curve2d.IntersectionPoint qualified as IntersectionPoint
+import Curve2d.Intersections qualified as Intersections
+import Curve2d.OverlappingSegment (OverlappingSegment (OverlappingSegment))
+import Curve2d.OverlappingSegment qualified as OverlappingSegment
 import Curve2d.Segment (Segment)
 import Curve2d.Segment qualified as Segment
 import Direction2d (Direction2d)
 import DirectionCurve2d (DirectionCurve2d)
+import Error qualified
 import Frame2d (Frame2d)
 import Frame2d qualified
 import {-# SOURCE #-} Line2d (Line2d)
@@ -85,6 +90,7 @@ import Units qualified
 import Vector2d (Vector2d)
 import VectorCurve2d (VectorCurve2d (VectorCurve2d))
 import VectorCurve2d qualified
+import VectorCurve2d.Zeros qualified
 import Prelude qualified
 
 type role Curve2d nominal
@@ -121,11 +127,7 @@ instance
   ) =>
   Intersects (Curve2d (space1 @ units1)) (Point2d (space2 @ units2)) units1
   where
-  curve ^ point = case findPoint point curve of
-    Ok [] -> False
-    Ok List.OneOrMore -> True
-    Error CurveIsCoincidentWithPoint -> True
-    Error HigherOrderSolution -> True
+  curve ^ point = VectorCurve2d.hasZero (curve - point)
 
 instance
   ( space1 ~ space2
@@ -152,7 +154,7 @@ pattern Line line <- (asLine -> Just line)
 pattern Arc :: Tolerance units => Arc2d (space @ units) -> Curve2d (space @ units)
 pattern Arc arc <- (asArc -> Just arc)
 
-data DegenerateCurve = DegenerateCurve deriving (Eq, Show, Error)
+data HasDegeneracy = HasDegeneracy deriving (Eq, Show, Error.Message)
 
 class
   Show curve =>
@@ -312,9 +314,11 @@ asArc curve = case curve of
 tangentDirection ::
   Tolerance units =>
   Curve2d (space @ units) ->
-  Result DegenerateCurve (DirectionCurve2d space)
+  Result HasDegeneracy (DirectionCurve2d space)
 tangentDirection curve =
-  VectorCurve2d.direction (derivative curve) ?? Error DegenerateCurve
+  case VectorCurve2d.direction (derivative curve) of
+    Success directionCurve -> Success directionCurve
+    Failure VectorCurve2d.HasZero -> Failure HasDegeneracy
 
 signedDistanceAlong :: Axis2d (space @ units) -> Curve2d (space @ units) -> Curve1d units
 signedDistanceAlong axis curve =
@@ -326,36 +330,31 @@ xCoordinate = signedDistanceAlong Axis2d.x
 yCoordinate :: Curve2d (space @ units) -> Curve1d units
 yCoordinate = signedDistanceAlong Axis2d.y
 
-data FindPointError
-  = HigherOrderSolution
-  | CurveIsCoincidentWithPoint
-  deriving (Eq, Show, Error)
-
 findPoint ::
   Tolerance units =>
   Point2d (space @ units) ->
   Curve2d (space @ units) ->
-  Result FindPointError (List Float)
+  Result FindPoint.Error (List Float)
 findPoint point curve =
   case VectorCurve2d.zeros (point - curve) of
-    Error VectorCurve2d.HigherOrderZero -> Error HigherOrderSolution
-    Ok (VectorCurve2d.Zeros parameterValues) -> Ok parameterValues
-    Ok VectorCurve2d.ZeroEverywhere -> Error CurveIsCoincidentWithPoint
+    Failure VectorCurve2d.Zeros.ZeroEverywhere -> Failure FindPoint.CurveIsCoincidentWithPoint
+    Failure VectorCurve2d.Zeros.HigherOrderZero -> Failure FindPoint.HigherOrderSolution
+    Success parameterValues -> Success parameterValues
 
 overlappingSegments ::
   Tolerance units =>
   Curve2d (space @ units) ->
   Curve2d (space @ units) ->
   List (Float, Float) ->
-  List (Range Unitless, Range Unitless, Sign)
+  List OverlappingSegment
 overlappingSegments curve1 curve2 endpointParameterValues =
   endpointParameterValues
     |> List.successive
       ( \(t1Start, t2Start) (t1End, t2End) ->
-          ( Range.from t1Start t1End
-          , Range.from t2Start t2End
-          , if (t1Start < t1End) == (t2Start < t2End) then Positive else Negative
-          )
+          OverlappingSegment
+            (Range.from t1Start t1End)
+            (Range.from t2Start t2End)
+            (if (t1Start < t1End) == (t2Start < t2End) then Positive else Negative)
       )
     |> List.filter (isOverlappingSegment curve1 curve2)
 
@@ -363,44 +362,38 @@ isOverlappingSegment ::
   Tolerance units =>
   Curve2d (space @ units) ->
   Curve2d (space @ units) ->
-  (Range Unitless, Range Unitless, Sign) ->
+  OverlappingSegment ->
   Bool
-isOverlappingSegment curve1 curve2 (domain1, _, _) = do
-  let segmentStartPoint = pointOn curve1 (Range.minValue domain1)
-  let curve1TestPoints = List.map (pointOn curve1) (Range.samples domain1)
+isOverlappingSegment curve1 curve2 (OverlappingSegment{t1}) = do
+  let segmentStartPoint = pointOn curve1 (Range.minValue t1)
+  let curve1TestPoints = List.map (pointOn curve1) (Range.samples t1)
   let segment1IsNondegenerate = List.anySatisfy (!= segmentStartPoint) curve1TestPoints
   let segment1LiesOnSegment2 = List.allSatisfy (^ curve2) curve1TestPoints
   segment1IsNondegenerate && segment1LiesOnSegment2
-
-data IntersectionError
-  = CurvesOverlap (List (Range Unitless, Range Unitless, Sign))
-  | TangentIntersectionAtDegeneratePoint
-  | HigherOrderIntersection
-  deriving (Eq, Show, Error)
 
 findEndpointRoots ::
   Tolerance units =>
   Point2d (space @ units) ->
   Curve2d (space @ units) ->
-  Result IntersectionError (List Float)
-findEndpointRoots point curve =
-  case findPoint point curve of
-    Ok parameterValues -> Ok parameterValues
-    Error HigherOrderSolution -> Error HigherOrderIntersection
-    -- Shouldn't happen, curve passed here should be guaranteed non-degenerate
-    Error CurveIsCoincidentWithPoint -> Error HigherOrderIntersection
+  Intersections.Error ->
+  Result Intersections.Error (List Float)
+findEndpointRoots endpoint curve curveIsPointError =
+  case findPoint endpoint curve of
+    Success parameterValues -> Success parameterValues
+    Failure FindPoint.HigherOrderSolution -> Failure Intersections.HigherOrderIntersection
+    Failure FindPoint.CurveIsCoincidentWithPoint -> Failure curveIsPointError
 
 findEndpointParameterValues ::
   Tolerance units =>
   Curve2d (space @ units) ->
   Curve2d (space @ units) ->
-  Result IntersectionError (List (Float, Float))
+  Result Intersections.Error (List (Float, Float))
 findEndpointParameterValues curve1 curve2 = Result.do
-  start1Roots <- findEndpointRoots (startPoint curve1) curve2
-  end1Roots <- findEndpointRoots (endPoint curve1) curve2
-  start2Roots <- findEndpointRoots (startPoint curve2) curve1
-  end2Roots <- findEndpointRoots (endPoint curve2) curve1
-  Ok $
+  start1Roots <- findEndpointRoots (startPoint curve1) curve2 Intersections.SecondCurveIsPoint
+  end1Roots <- findEndpointRoots (endPoint curve1) curve2 Intersections.SecondCurveIsPoint
+  start2Roots <- findEndpointRoots (startPoint curve2) curve1 Intersections.FirstCurveIsPoint
+  end2Roots <- findEndpointRoots (endPoint curve2) curve1 Intersections.FirstCurveIsPoint
+  Success $
     List.sortAndDeduplicate $
       List.concat $
         [ List.map (0.0,) start1Roots
@@ -409,41 +402,36 @@ findEndpointParameterValues curve1 curve2 = Result.do
         , List.map (,1.0) end2Roots
         ]
 
+data Intersections
+  = IntersectionPoints (NonEmpty IntersectionPoint)
+  | OverlappingSegments (NonEmpty OverlappingSegment)
+  deriving (Show)
+
 intersections ::
   Tolerance units =>
   Curve2d (space @ units) ->
   Curve2d (space @ units) ->
-  Result IntersectionError (List Intersection)
-intersections curve1 curve2 =
-  case (curve1, curve2) of
-    (Point p1, Point p2) ->
-      if p1 ~= p2 then Error (CurvesOverlap [(Range.unit, Range.unit, Positive)]) else Ok []
-    (Point p1, _) ->
-      case findEndpointRoots p1 curve2 of
-        Error error -> Error error
-        Ok [] -> Ok []
-        Ok roots -> Error (CurvesOverlap [(Range.unit, Range.constant t, Positive) | t <- roots])
-    (_, Point p2) ->
-      case findEndpointRoots p2 curve1 of
-        Error error -> Error error
-        Ok [] -> Ok []
-        Ok roots -> Error (CurvesOverlap [(Range.constant t, Range.unit, Positive) | t <- roots])
-    _ -> Result.do
-      endpointParameterValues <- findEndpointParameterValues curve1 curve2
-      case overlappingSegments curve1 curve2 endpointParameterValues of
-        [] -> findIntersections curve1 curve2 endpointParameterValues
-        segments -> Error (CurvesOverlap segments)
+  Result Intersections.Error (Maybe Intersections)
+intersections curve1 curve2 = Result.do
+  endpointParameterValues <- findEndpointParameterValues curve1 curve2
+  case overlappingSegments curve1 curve2 endpointParameterValues of
+    [] -> Result.do
+      intersectionPoints <- findIntersectionPoints curve1 curve2 endpointParameterValues
+      case intersectionPoints of
+        [] -> Success Nothing
+        NonEmpty points -> Success (Just (IntersectionPoints points))
+    NonEmpty segments -> Success (Just (OverlappingSegments segments))
 
 type SearchTree (coordinateSystem :: CoordinateSystem) =
   Bisection.Tree (Segment coordinateSystem)
 
-findIntersections ::
+findIntersectionPoints ::
   Tolerance units =>
   Curve2d (space @ units) ->
   Curve2d (space @ units) ->
   List (Float, Float) ->
-  Result IntersectionError (List Intersection)
-findIntersections curve1 curve2 endpointParameterValues = Result.do
+  Result Intersections.Error (List IntersectionPoint)
+findIntersectionPoints curve1 curve2 endpointParameterValues = Result.do
   let derivatives1 = Derivatives.ofCurve curve1
   let derivatives2 = Derivatives.ofCurve curve2
   let searchTree1 = Bisection.tree (Segment.init derivatives1)
@@ -454,7 +442,7 @@ findIntersections curve1 curve2 endpointParameterValues = Result.do
         endpointResults
           |> findTangentIntersections derivatives1 derivatives2 searchTree1 searchTree2
           |> findCrossingIntersections derivatives1 derivatives2 searchTree1 searchTree2
-  Ok (List.sort allIntersections)
+  Success (List.sort allIntersections)
 
 findEndpointIntersections ::
   Tolerance units =>
@@ -463,9 +451,9 @@ findEndpointIntersections ::
   List (Float, Float) ->
   SearchTree (space @ units) ->
   SearchTree (space @ units) ->
-  (List Intersection, List (Range Unitless, Range Unitless)) ->
-  Result IntersectionError (List Intersection, List (Range Unitless, Range Unitless))
-findEndpointIntersections _ _ [] _ _ accumulated = Ok accumulated
+  (List IntersectionPoint, List (Range Unitless, Range Unitless)) ->
+  Result Intersections.Error (List IntersectionPoint, List (Range Unitless, Range Unitless))
+findEndpointIntersections _ _ [] _ _ accumulated = Success accumulated
 findEndpointIntersections derivatives1 derivatives2 (uv : rest) searchTree1 searchTree2 accumulated = Result.do
   updated <- findEndpointIntersection derivatives1 derivatives2 uv searchTree1 searchTree2 accumulated
   findEndpointIntersections derivatives1 derivatives2 rest searchTree1 searchTree2 updated
@@ -477,17 +465,17 @@ findEndpointIntersection ::
   (Float, Float) ->
   SearchTree (space @ units) ->
   SearchTree (space @ units) ->
-  (List Intersection, List (Range Unitless, Range Unitless)) ->
-  Result IntersectionError (List Intersection, List (Range Unitless, Range Unitless))
+  (List IntersectionPoint, List (Range Unitless, Range Unitless)) ->
+  Result Intersections.Error (List IntersectionPoint, List (Range Unitless, Range Unitless))
 findEndpointIntersection derivatives1 derivatives2 t1t2 searchTree1 searchTree2 accumulated = Result.do
   let intersectionType = Derivatives.classify t1t2 derivatives1 derivatives2
   let (kind, sign) = intersectionType
   let (t1, t2) = t1t2
-  Ok $
+  Success $
     Bisection.solve2
       (Segment.isEndpointIntersectionCandidate t1t2)
       (Segment.endpointIntersectionResolved intersectionType)
-      (\_ _ _ _ _ -> Just (Intersection{t1, t2, kind, sign}))
+      (\_ _ _ _ _ -> Just (IntersectionPoint{t1, t2, kind, sign}))
       searchTree1
       searchTree2
       accumulated
@@ -498,8 +486,8 @@ findTangentIntersections ::
   Derivatives (space @ units) ->
   SearchTree (space @ units) ->
   SearchTree (space @ units) ->
-  (List Intersection, List (Range Unitless, Range Unitless)) ->
-  (List Intersection, List (Range Unitless, Range Unitless))
+  (List IntersectionPoint, List (Range Unitless, Range Unitless)) ->
+  (List IntersectionPoint, List (Range Unitless, Range Unitless))
 findTangentIntersections derivatives1 derivatives2 =
   Bisection.solve2
     Segment.isTangentIntersectionCandidate
@@ -512,8 +500,8 @@ findCrossingIntersections ::
   Derivatives (space @ units) ->
   SearchTree (space @ units) ->
   SearchTree (space @ units) ->
-  (List Intersection, List (Range Unitless, Range Unitless)) ->
-  (List Intersection, List (Range Unitless, Range Unitless))
+  (List IntersectionPoint, List (Range Unitless, Range Unitless)) ->
+  (List IntersectionPoint, List (Range Unitless, Range Unitless))
 findCrossingIntersections derivatives1 derivatives2 =
   Bisection.solve2
     Segment.isCrossingIntersectionCandidate
@@ -651,17 +639,17 @@ scaleAlongOwn = Transform2d.scaleAlongOwnImpl transformBy
 curvature' ::
   Tolerance units =>
   Curve2d (space @ units) ->
-  Result DegenerateCurve (Curve1d (Unitless :/: units))
+  Result HasDegeneracy (Curve1d (Unitless :/: units))
 curvature' curve = Result.do
   let firstDerivative = derivative curve
   let secondDerivative = VectorCurve2d.derivative firstDerivative
   tangent <- tangentDirection curve
-  Ok ((tangent >< secondDerivative) !/!. (firstDerivative .<>. firstDerivative))
+  Success ((tangent >< secondDerivative) !/!. (firstDerivative .<>. firstDerivative))
 
 curvature ::
   (Tolerance units1, Units.Quotient Unitless units1 units2) =>
   Curve2d (space @ units1) ->
-  Result DegenerateCurve (Curve1d units2)
+  Result HasDegeneracy (Curve1d units2)
 curvature curve = Result.map Units.specialize (curvature' curve)
 
 data TransformBy curve coordinateSystem where

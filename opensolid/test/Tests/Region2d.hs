@@ -10,6 +10,7 @@ import OpenSolid
 import Point2d qualified
 import Qty (zero)
 import Region2d qualified
+import Region2d.BoundedBy qualified
 import Test (Test)
 import Test qualified
 import Tolerance qualified
@@ -81,8 +82,8 @@ incompleteSquare = Test.verify "incompleteSquare" Test.do
   let line2 = Line2d.from p2 p3
   let line3 = Line2d.from p4 p3
   case Region2d.boundedBy [line1, line2, line3] of
-    Ok _ -> Test.fail "Expected region construction to fail on incomplete boundary"
-    Error error -> Test.expect (error == Region2d.RegionBoundaryHasGaps)
+    Success _ -> Test.fail "Expected region construction to fail on incomplete boundary"
+    Failure error -> Test.expect (error == Region2d.BoundedBy.BoundaryHasGaps)
 
 squareWithTangentHole :: Tolerance Meters => Test
 squareWithTangentHole = Test.verify "squareWithTangentHole" Test.do
@@ -99,13 +100,13 @@ squareWithTangentHole = Test.verify "squareWithTangentHole" Test.do
   let holeRadius = width / 2
   let hole = Arc2d.circle centerPoint holeRadius
   case Region2d.boundedBy [line1, line2, line3, line4, hole] of
-    Ok _ -> Test.fail "Expected non-manifold region construction to fail"
-    Error error -> Test.expect (error == Region2d.RegionBoundaryIntersectsItself)
+    Success _ -> Test.fail "Expected non-manifold region construction to fail"
+    Failure error -> Test.expect (error == Region2d.BoundedBy.BoundaryIntersectsItself)
 
 twoCircles :: Tolerance Meters => Test
 twoCircles = Test.verify "twoCircles" Test.do
   let circle1 = Arc2d.circle (Point2d.meters -2.0 0.0) (Length.meters 1.0)
   let circle2 = Arc2d.circle (Point2d.meters 1.0 0.0) (Length.meters 0.5)
   case Region2d.boundedBy [circle1, circle2] of
-    Ok _ -> Test.fail "Expected region construction to fail when given two disjoint circles"
-    Error error -> Test.expect (error == Region2d.MultipleDisjointRegions)
+    Success _ -> Test.fail "Expected region construction to fail when given two disjoint circles"
+    Failure error -> Test.expect (error == Region2d.BoundedBy.MultipleDisjointRegions)

@@ -47,6 +47,7 @@ import {-# SOURCE #-} Basis3d (Basis3d)
 import Data.Coerce qualified
 import {-# SOURCE #-} Direction3d (Direction3d)
 import {-# SOURCE #-} Direction3d qualified
+import Error qualified
 import Float qualified
 import {-# SOURCE #-} Frame3d (Frame3d)
 import Length qualified
@@ -328,12 +329,12 @@ magnitude (Vector3d vx vy vz) = Qty.hypot3 vx vy vz
 squaredMagnitude :: Units.Squared units1 units2 => Vector3d (space @ units1) -> Qty units2
 squaredMagnitude (Vector3d vx vy vz) = Qty.squared vx + Qty.squared vy + Qty.squared vz
 
-data IsZero = IsZero deriving (Eq, Show, Error)
+data IsZero = IsZero deriving (Eq, Show, Error.Message)
 
 direction :: Tolerance units => Vector3d (space @ units) -> Result IsZero (Direction3d space)
 direction vector = do
   let vm = magnitude vector
-  if vm ~= Qty.zero then Error Vector3d.IsZero else Ok (Direction3d.unsafe (vector / vm))
+  if vm ~= Qty.zero then Failure IsZero else Success (Direction3d.unsafe (vector / vm))
 
 magnitudeAndDirection ::
   Tolerance units =>
@@ -341,7 +342,7 @@ magnitudeAndDirection ::
   Result IsZero (Qty units, Direction3d space)
 magnitudeAndDirection vector = do
   let vm = magnitude vector
-  if vm ~= Qty.zero then Error Vector3d.IsZero else Ok (vm, Direction3d.unsafe (vector / vm))
+  if vm ~= Qty.zero then Failure IsZero else Success (vm, Direction3d.unsafe (vector / vm))
 
 normalize :: Vector3d (space @ units) -> Vector3d (space @ Unitless)
 normalize vector = do

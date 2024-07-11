@@ -17,14 +17,10 @@ import Network.HTTP.Types qualified
 import Network.Wai (Request)
 import Network.Wai qualified
 import OpenSolid
-import Result qualified
 import Text qualified
 
-assumeUtf8 :: ByteString -> Text
-assumeUtf8 = Text.decodeUtf8 >> Result.handleError Text.acceptReplacementCharacters
-
 method :: Request -> Text
-method = Network.Wai.requestMethod >> assumeUtf8 >> Text.toUpper
+method = Network.Wai.requestMethod >> Text.assumeUtf8 >> Text.toUpper
 
 path :: Request -> List Text
 path = Network.Wai.pathInfo
@@ -35,7 +31,7 @@ headers request =
 
 header :: Network.HTTP.Types.Header -> (Text, Text)
 header (nameCI, valueBytes) =
-  (assumeUtf8 (Data.CaseInsensitive.original nameCI), assumeUtf8 valueBytes)
+  (Text.assumeUtf8 (Data.CaseInsensitive.original nameCI), Text.assumeUtf8 valueBytes)
 
 headerValues :: Text -> Request -> List Text
 headerValues name request = do
@@ -44,7 +40,7 @@ headerValues name request = do
 
 headerValue :: Data.CaseInsensitive.CI ByteString -> Network.HTTP.Types.Header -> Maybe Text
 headerValue givenName (name, valueBytes) =
-  if name == givenName then Just (assumeUtf8 valueBytes) else Nothing
+  if name == givenName then Just (Text.assumeUtf8 valueBytes) else Nothing
 
 parameters :: Request -> List (Text, Maybe Text)
 parameters request =
@@ -52,7 +48,7 @@ parameters request =
 
 parameter :: Network.HTTP.Types.QueryItem -> (Text, Maybe Text)
 parameter (nameBytes, maybeValueBytes) =
-  (assumeUtf8 nameBytes, Maybe.map assumeUtf8 maybeValueBytes)
+  (Text.assumeUtf8 nameBytes, Maybe.map Text.assumeUtf8 maybeValueBytes)
 
 parameterValues :: Text -> Request -> List Text
 parameterValues name request = do
@@ -61,4 +57,4 @@ parameterValues name request = do
 
 parameterValue :: ByteString -> Network.HTTP.Types.QueryItem -> Maybe Text
 parameterValue givenName (name, valueBytes) =
-  if name == givenName then Maybe.map assumeUtf8 valueBytes else Nothing
+  if name == givenName then Maybe.map Text.assumeUtf8 valueBytes else Nothing
