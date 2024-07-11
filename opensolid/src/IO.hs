@@ -9,7 +9,7 @@ module IO
   , sleep
   , (>>)
   , Bind ((>>=))
-  , return
+  , succeed
   , onError
   , mapError
   , debugError
@@ -36,8 +36,8 @@ import Prelude qualified
 fail :: Error.Message x => x -> IO a
 fail error = Prelude.fail (Text.unpack (Error.message error))
 
-return :: a -> IO a
-return = Prelude.return
+succeed :: a -> IO a
+succeed = Prelude.return
 
 class Bind m where
   (>>=) :: m a -> (a -> IO b) -> IO b
@@ -53,15 +53,15 @@ map :: (a -> b) -> IO a -> IO b
 map = Prelude.fmap
 
 forEach :: List a -> (a -> IO ()) -> IO ()
-forEach [] _ = return ()
+forEach [] _ = succeed ()
 forEach (first : rest) function = function first >> forEach rest function
 
 collect :: (a -> IO b) -> List a -> IO (List b)
-collect _ [] = return []
+collect _ [] = succeed []
 collect function (first : rest) = IO.do
   firstValue <- function first
   restValues <- collect function rest
-  return (firstValue : restValues)
+  succeed (firstValue : restValues)
 
 parallel :: (a -> IO b) -> List a -> IO (List b)
 parallel = Async.mapConcurrently

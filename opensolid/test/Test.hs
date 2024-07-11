@@ -79,7 +79,7 @@ reportError :: List Text -> List Text -> IO (Int, Int)
 reportError context messages = IO.do
   IO.printLine ("❌ " + (Text.join " | " (List.reverse context) + ":"))
   IO.forEach messages (Text.indent "   " >> IO.printLine)
-  IO.return (0, 1)
+  IO.succeed (0, 1)
 
 runImpl :: List Text -> Test -> IO (Int, Int)
 runImpl context (Check count label generator) = fuzzImpl (label : context) count generator
@@ -92,7 +92,7 @@ sum ((successes, failures) : rest) = do
   (successes + restSuccesses, failures + restFailures)
 
 fuzzImpl :: List Text -> Int -> Expectation -> IO (Int, Int)
-fuzzImpl _ 0 _ = IO.return (1, 0)
+fuzzImpl _ 0 _ = IO.succeed (1, 0)
 fuzzImpl context n expectation = IO.do
   let (Expectation generator) = expectation
   testResult <- Random.generate generator

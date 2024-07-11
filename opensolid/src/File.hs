@@ -15,7 +15,7 @@ readFrom :: Text -> IO Text
 readFrom path = IO.do
   bytes <- Data.ByteString.readFile (Text.unpack path)
   text <- Text.decodeUtf8 bytes
-  IO.return text
+  IO.succeed text
 
 writeTo :: Text -> Text -> IO ()
 writeTo path contents = Data.ByteString.writeFile (Text.unpack path) (Text.encodeUtf8 contents)

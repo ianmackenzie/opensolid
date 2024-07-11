@@ -150,7 +150,7 @@ doublingIO :: Text -> IO Int
 doublingIO input = IO.do
   value <- Int.parse input
   let doubled = 2 * value
-  IO.return doubled
+  IO.succeed doubled
 
 doubleManyIO :: IO (List Int)
 doubleManyIO = IO.collect doublingIO ["1", "-2", "3"]
@@ -305,7 +305,7 @@ testConcurrency = IO.do
 computeSquareRoot :: Float -> IO Float
 computeSquareRoot value = IO.do
   IO.sleep Duration.second
-  IO.return (Float.sqrt value)
+  IO.succeed (Float.sqrt value)
 
 testIOParallel :: IO ()
 testIOParallel = IO.do
