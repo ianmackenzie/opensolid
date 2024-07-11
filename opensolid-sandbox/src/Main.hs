@@ -305,7 +305,7 @@ testConcurrency = IO.do
 computeSquareRoot :: Float -> IO Float
 computeSquareRoot value = IO.do
   IO.sleep Duration.second
-  IO.succeed (Float.sqrt value)
+  Success (Float.sqrt value)
 
 testIOParallel :: IO ()
 testIOParallel = IO.do

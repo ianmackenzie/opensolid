@@ -29,6 +29,7 @@ import Duration qualified
 import Error qualified
 import Float qualified
 import Result (Result (Failure, Success))
+import Result qualified
 import System.IO.Error qualified
 import Text qualified
 import Prelude qualified
@@ -39,13 +40,16 @@ fail error = Prelude.fail (Text.unpack (Error.message error))
 succeed :: a -> IO a
 succeed = Prelude.return
 
-class Bind m where
-  (>>=) :: m a -> (a -> IO b) -> IO b
+class Bind m1 m2 where
+  (>>=) :: m1 a -> (a -> m2 b) -> IO b
 
-instance Bind IO where
+instance Bind IO (Result x) where
+  io >>= function = io >>= (function >> Result.toIO)
+
+instance Bind IO IO where
   (>>=) = (Prelude.>>=)
 
-instance Bind (Result x) where
+instance Bind (Result x) IO where
   Success value >>= function = function value
   Failure error >>= _ = fail error
 

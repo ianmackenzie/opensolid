@@ -291,5 +291,5 @@ main = IO.do
   SIO.hClose stdinHandle
   ruffExitCode <- SP.waitForProcess process
   if ruffExitCode == SE.ExitSuccess
-    then IO.succeed ()
-    else IO.fail "Error when running Ruff"
+    then Success ()
+    else Failure "Error when running Ruff"

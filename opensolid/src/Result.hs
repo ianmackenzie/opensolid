@@ -10,6 +10,7 @@ module Result
   , combine
   , (>>=)
   , (>>)
+  , toIO
   )
 where
 
@@ -51,6 +52,12 @@ instance MonadFail (Result Text) where
 instance Composition (Result x ()) (Result x a) (Result x a) where
   Success () >> result = result
   Failure error >> _ = Failure error
+
+instance Composition (IO ()) (Result x a) (IO a) where
+  io >> result = io >> toIO result
+
+instance Composition (Result x ()) (IO a) (IO a) where
+  result >> io = toIO result >> io
 
 instance a1 ~ a2 => Coalesce (Maybe a1) (Result x a2) (Result x a1) where
   Just value ?? _ = Success value
@@ -101,3 +108,7 @@ collect = Prelude.mapM
 
 combine :: List (Result x a) -> Result x (List a)
 combine = Prelude.sequence
+
+toIO :: Result x a -> IO a
+toIO (Success value) = Prelude.return value
+toIO (Failure error) = Prelude.fail (Text.unpack (Error.message error))
