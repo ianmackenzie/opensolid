@@ -1,0 +1,3 @@
+#!/bin/bash
+
+grep -Prho "(?<=\{-# SOURCE #-\} )[\w.]+" . | sort | uniq
