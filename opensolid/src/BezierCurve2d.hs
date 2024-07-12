@@ -97,7 +97,7 @@ instance Curve2d.Interface (BezierCurve2d (space @ units)) (space @ units) where
 
   reverseImpl (BezierCurve2d controlPoints) = BezierCurve2d (NonEmpty.reverse controlPoints)
 
-  transformByImpl transform bezierCurve = Curve2d.wrap (transformBy transform bezierCurve)
+  transformByImpl transform bezierCurve = Curve2d.new (transformBy transform bezierCurve)
 
 {- | Construct a Bezier curve from its start point (first control point), inner control points and
 end point (last control point). For example,
@@ -113,7 +113,7 @@ fromControlPoints ::
   Point2d (space @ units) ->
   Curve2d (space @ units)
 fromControlPoints startPoint innerControlPoints endPoint =
-  Curve2d.wrap (BezierCurve2d (startPoint :| (innerControlPoints + [endPoint])))
+  Curve2d.new (BezierCurve2d (startPoint :| (innerControlPoints + [endPoint])))
 
 {- | Construct a Bezier curve with the given start point, start derivatives, end point and end
 derivatives. For example,
@@ -136,7 +136,7 @@ hermite ::
   (Point2d (space @ units), List (Vector2d (space @ units))) ->
   (Point2d (space @ units), List (Vector2d (space @ units))) ->
   Curve2d (space @ units)
-hermite startCondition endCondition = Curve2d.wrap (hermiteBezier startCondition endCondition)
+hermite startCondition endCondition = Curve2d.new (hermiteBezier startCondition endCondition)
 
 hermiteBezier ::
   (Point2d (space @ units), List (Vector2d (space @ units))) ->

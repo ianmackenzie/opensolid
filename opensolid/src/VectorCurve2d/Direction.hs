@@ -79,14 +79,14 @@ instance VectorCurve2d.Interface (PiecewiseCurve space) (space @ Unitless) where
             (DegenerateEndpoint.segmentBounds (Range.from tEnd t2) degenerateEnd inner)
 
   derivativeImpl (PiecewiseCurve start general end) =
-    VectorCurve2d.wrap $
+    VectorCurve2d.new $
       PiecewiseCurve
         (Maybe.map DegenerateEndpoint.derivative start)
         (VectorCurve2d.derivative general)
         (Maybe.map DegenerateEndpoint.derivative end)
 
   transformByImpl transform (PiecewiseCurve start general end) =
-    VectorCurve2d.wrap $
+    VectorCurve2d.new $
       PiecewiseCurve
         (Maybe.map (DegenerateEndpoint.transformBy transform) start)
         (VectorCurve2d.transformBy transform general)
@@ -99,7 +99,7 @@ unsafe ::
   DirectionCurve2d space
 unsafe firstDerivative secondDerivative =
   DirectionCurve2d.unsafe $
-    VectorCurve2d.wrap $
+    VectorCurve2d.new $
       PiecewiseCurve
         (endpoint 0.0 firstDerivative secondDerivative)
         (firstDerivative / VectorCurve2d.unsafeMagnitude firstDerivative)

@@ -72,7 +72,7 @@ instance Curve2d.Interface (Arc (space @ units)) (space @ units) where
   reverseImpl (Arc p0 vx vy a b) = Arc p0 vx vy b a
   boundsImpl arc = Curve2d.segmentBoundsImpl arc Range.unit
   transformByImpl transform (Arc p0 vx vy a b) =
-    Curve2d.wrap $
+    Curve2d.new $
       Arc
         (Point2d.transformBy transform p0)
         (Vector2d.transformBy transform vx)
@@ -126,11 +126,11 @@ from startPoint endPoint sweptAngle =
           let yVector = Vector2d.y radius
           let startAngle = Point2d.angleFrom centerPoint startPoint
           let endAngle = startAngle + sweptAngle
-          Curve2d.wrap (Arc centerPoint xVector yVector startAngle endAngle)
+          Curve2d.new (Arc centerPoint xVector yVector startAngle endAngle)
 
 polar :: Point2d (space @ units) -> Qty units -> Angle -> Angle -> Curve2d (space @ units)
 polar centerPoint radius startAngle endAngle =
-  Curve2d.wrap (Arc centerPoint (Vector2d.x radius) (Vector2d.y radius) startAngle endAngle)
+  Curve2d.new (Arc centerPoint (Vector2d.x radius) (Vector2d.y radius) startAngle endAngle)
 
 circle :: Point2d (space @ units) -> Qty units -> Curve2d (space @ units)
 circle centerPoint radius = polar centerPoint radius Angle.zero Angle.twoPi
@@ -232,7 +232,7 @@ generic ::
   Angle ->
   Angle ->
   Curve2d (space @ units)
-generic p0 v1 v2 a b = Curve2d.wrap (Arc p0 v1 v2 a b)
+generic p0 v1 v2 a b = Curve2d.new (Arc p0 v1 v2 a b)
 
 type role Arc2d phantom
 

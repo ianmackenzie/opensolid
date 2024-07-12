@@ -59,4 +59,4 @@ fromControlPoints ::
   Point3d (space @ units) ->
   Point3d (space @ units) ->
   Curve3d (space @ units)
-fromControlPoints p1 p2 p3 = Curve3d.wrap (QuadraticSpline3d p1 p2 p3)
+fromControlPoints p1 p2 p3 = Curve3d.new (QuadraticSpline3d p1 p2 p3)

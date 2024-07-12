@@ -6,7 +6,7 @@ module Curve2d
   , HasDegeneracy (HasDegeneracy)
   , Interface (..)
   , TransformBy (TransformBy)
-  , wrap
+  , new
   , startPoint
   , endPoint
   , pointOn
@@ -195,7 +195,7 @@ instance Interface (Point2d (space @ units)) (space @ units) where
   derivativeImpl _ = VectorCurve2d.zero
   reverseImpl = identity
   boundsImpl = Bounds2d.constant
-  transformByImpl transform point = wrap (Point2d.transformBy transform point)
+  transformByImpl transform point = new (Point2d.transformBy transform point)
 
 data PointCurveDifference (coordinateSystem :: CoordinateSystem)
   = PointCurveDifference (Point2d coordinateSystem) (Curve2d coordinateSystem)
@@ -207,7 +207,7 @@ instance VectorCurve2d.Interface (PointCurveDifference (space @ units)) (space @
   segmentBoundsImpl t (PointCurveDifference point curve) = point - segmentBounds curve t
   derivativeImpl (PointCurveDifference _ curve) = -(derivative curve)
   transformByImpl transform (PointCurveDifference point curve) =
-    VectorCurve2d.wrap $
+    VectorCurve2d.new $
       PointCurveDifference
         -- Note the slight hack here:
         -- the definition of VectorCurve2d.Interface states that the units of the transform
@@ -241,7 +241,7 @@ instance VectorCurve2d.Interface (CurvePointDifference (space @ units)) (space @
   segmentBoundsImpl t (CurvePointDifference curve point) = segmentBounds curve t - point
   derivativeImpl (CurvePointDifference curve _) = derivative curve
   transformByImpl transform (CurvePointDifference curve point) =
-    VectorCurve2d.wrap $
+    VectorCurve2d.new $
       CurvePointDifference
         -- Note the same slight hack here as described in PointCurveDifference above
         (transformBy (Units.coerce transform) curve)
@@ -258,8 +258,8 @@ instance
   where
   curve - point = VectorCurve2d (CurvePointDifference curve point)
 
-wrap :: Interface curve (space @ units) => curve -> Curve2d (space @ units)
-wrap = Curve
+new :: Interface curve (space @ units) => curve -> Curve2d (space @ units)
+new = Curve
 
 startPoint :: Curve2d (space @ units) -> Point2d (space @ units)
 startPoint curve = case curve of
@@ -687,7 +687,7 @@ instance Interface (TransformBy curve (space @ units)) (space @ units) where
   boundsImpl (TransformBy transform curve) =
     Bounds2d.transformBy transform (boundsImpl curve)
   transformByImpl transform (TransformBy existing curve) =
-    Curve2d.wrap $
+    Curve2d.new $
       TransformBy (Transform2d.toAffine existing >> Transform2d.toAffine transform) curve
 
 removeStartDegeneracy ::
@@ -701,11 +701,11 @@ removeStartDegeneracy continuity startCondition curve = Result.do
   let endCondition endDegree = (endPoint curve, Stream.take endDegree endDerivativeValues)
   let baseCurve endDegree = BezierCurve2d.hermite startCondition (endCondition endDegree)
   let curveDerivative n =
-        VectorCurve2d.wrap $
+        VectorCurve2d.new $
           SyntheticDerivative
             (nthDerivative n (baseCurve (continuity + n)))
             (curveDerivative (n + 1))
-  wrap (Synthetic (baseCurve continuity) (curveDerivative 1))
+  new (Synthetic (baseCurve continuity) (curveDerivative 1))
 
 nthDerivative :: Int -> Curve2d (space @ units) -> VectorCurve2d (space @ units)
 nthDerivative 0 _ = internalError "nthDerivative should always be called with n >= 1"
@@ -731,7 +731,7 @@ instance Interface (Synthetic (space @ units)) (space @ units) where
     Synthetic (Curve2d.reverse curve) (-(VectorCurve2d.reverse curveDerivative))
   derivativeImpl (Synthetic _ curveDerivative) = curveDerivative
   transformByImpl transform (Synthetic curve curveDerivative) =
-    Curve2d.wrap $
+    Curve2d.new $
       Synthetic
         (Curve2d.transformBy transform curve)
         (VectorCurve2d.transformBy transform curveDerivative)
@@ -750,7 +750,7 @@ instance VectorCurve2d.Interface (SyntheticDerivative (space @ units)) (space @ 
   segmentBoundsImpl t (SyntheticDerivative current _) = VectorCurve2d.segmentBounds t current
   derivativeImpl (SyntheticDerivative _ next) = next
   transformByImpl transform (SyntheticDerivative current next) =
-    VectorCurve2d.wrap $
+    VectorCurve2d.new $
       SyntheticDerivative
         (VectorCurve2d.transformBy transform current)
         (VectorCurve2d.transformBy transform next)

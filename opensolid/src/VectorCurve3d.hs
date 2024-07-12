@@ -327,7 +327,7 @@ instance
   DotMultiplication' (VectorCurve3d (space @ units1)) (VectorCurve3d (space_ @ units2))
   where
   type VectorCurve3d (space @ units1) .<>. VectorCurve3d (space_ @ units2) = Curve1d (units1 :*: units2)
-  curve1 .<>. curve2 = Curve1d.wrap (DotProductOf curve1 curve2)
+  curve1 .<>. curve2 = Curve1d.new (DotProductOf curve1 curve2)
 
 instance
   (Units.Product units1 units2 units3, space ~ space_) =>
@@ -338,7 +338,7 @@ instance
   DotMultiplication' (VectorCurve3d (space @ units1)) (Vector3d (space_ @ units2))
   where
   type VectorCurve3d (space @ units1) .<>. Vector3d (space_ @ units2) = Curve1d (units1 :*: units2)
-  curve .<>. vector = Curve1d.wrap (DotProductOf curve (constant vector))
+  curve .<>. vector = Curve1d.new (DotProductOf curve (constant vector))
 
 instance
   (Units.Product units1 units2 units3, space ~ space_) =>
@@ -349,7 +349,7 @@ instance
   DotMultiplication' (Vector3d (space @ units1)) (VectorCurve3d (space_ @ units2))
   where
   type Vector3d (space @ units1) .<>. VectorCurve3d (space_ @ units2) = Curve1d (units1 :*: units2)
-  vector .<>. curve = Curve1d.wrap (DotProductOf (constant vector) curve)
+  vector .<>. curve = Curve1d.new (DotProductOf (constant vector) curve)
 
 data CrossProductOf space units1 units2
   = CrossProductOf (VectorCurve3d (space @ units1)) (VectorCurve3d (space @ units2))
@@ -590,4 +590,4 @@ derivative curve =
     CubicSpline v1 v2 v3 v4 -> quadraticSpline (3 * (v2 - v1)) (3 * (v3 - v2)) (3 * (v4 - v3))
 
 squaredMagnitude :: Units.Squared units1 units2 => VectorCurve3d (space @ units1) -> Curve1d units2
-squaredMagnitude expression = Curve1d.wrap (SquaredMagnitudeOf expression)
+squaredMagnitude expression = Curve1d.new (SquaredMagnitudeOf expression)

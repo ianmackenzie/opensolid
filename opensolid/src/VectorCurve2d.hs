@@ -9,7 +9,7 @@
 module VectorCurve2d
   ( VectorCurve2d (VectorCurve2d)
   , Interface (..)
-  , wrap
+  , new
   , evaluateAt
   , segmentBounds
   , derivative
@@ -393,7 +393,7 @@ instance
   type
     VectorCurve2d (space @ units1) .<>. VectorCurve2d (space_ @ units2) =
       Curve1d (units1 :*: units2)
-  curve1 .<>. curve2 = Curve1d.wrap (DotProductOf curve1 curve2) -- TODO add special cases
+  curve1 .<>. curve2 = Curve1d.new (DotProductOf curve1 curve2) -- TODO add special cases
 
 instance
   (Units.Product units1 units2 units3, space ~ space_) =>
@@ -464,7 +464,7 @@ instance
   type
     VectorCurve2d (space @ units1) .><. VectorCurve2d (space_ @ units2) =
       Curve1d (units1 :*: units2)
-  curve1 .><. curve2 = Curve1d.wrap (CrossProductOf curve1 curve2) -- TODO add special cases
+  curve1 .><. curve2 = Curve1d.new (CrossProductOf curve1 curve2) -- TODO add special cases
 
 instance
   (Units.Product units1 units2 units3, space ~ space_) =>
@@ -555,8 +555,8 @@ transformBy transform curve = do
       BezierCurve (NonEmpty.map (Vector2d.transformBy t) controlVectors)
     Transformed existing c -> Transformed (existing >> t) c
 
-wrap :: Interface curve (space @ units) => curve -> VectorCurve2d (space @ units)
-wrap = VectorCurve2d
+new :: Interface curve (space @ units) => curve -> VectorCurve2d (space @ units)
+new = VectorCurve2d
 
 zero :: VectorCurve2d (space @ units)
 zero = constant Vector2d.zero
@@ -811,7 +811,7 @@ squaredMagnitude :: Units.Squared units1 units2 => VectorCurve2d (space @ units1
 squaredMagnitude curve = Units.specialize (squaredMagnitude' curve)
 
 squaredMagnitude' :: VectorCurve2d (space @ units) -> Curve1d (units :*: units)
-squaredMagnitude' curve = Curve1d.wrap (SquaredMagnitude' curve)
+squaredMagnitude' curve = Curve1d.new (SquaredMagnitude' curve)
 
 newtype NonZeroMagnitude (coordinateSystem :: CoordinateSystem)
   = NonZeroMagnitude (VectorCurve2d coordinateSystem)
@@ -824,10 +824,10 @@ instance Curve1d.Interface (NonZeroMagnitude (space @ units)) units where
   segmentBoundsImpl (NonZeroMagnitude curve) t =
     VectorBounds2d.magnitude (VectorCurve2d.segmentBounds t curve)
   derivativeImpl (NonZeroMagnitude curve) =
-    (VectorCurve2d.derivative curve .<>. curve) .!/! Curve1d.wrap (NonZeroMagnitude curve)
+    (VectorCurve2d.derivative curve .<>. curve) .!/! Curve1d.new (NonZeroMagnitude curve)
 
 unsafeMagnitude :: VectorCurve2d (space @ units) -> Curve1d units
-unsafeMagnitude curve = Curve1d.wrap (NonZeroMagnitude curve)
+unsafeMagnitude curve = Curve1d.new (NonZeroMagnitude curve)
 
 data HasZero = HasZero deriving (Eq, Show, Error.Message)
 
@@ -837,7 +837,7 @@ magnitude ::
   Result HasZero (Curve1d units)
 magnitude curve =
   case zeros curve of
-    Success [] -> Success (Curve1d.wrap (NonZeroMagnitude curve))
+    Success [] -> Success (Curve1d.new (NonZeroMagnitude curve))
     Success List.OneOrMore -> Failure HasZero
     Failure Zeros.ZeroEverywhere -> Failure HasZero
     Failure Zeros.HigherOrderZero -> Failure HasZero

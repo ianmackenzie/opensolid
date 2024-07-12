@@ -2,7 +2,7 @@ module Curve3d
   ( Curve3d
   , Interface (..)
   , DegenerateCurve (DegenerateCurve)
-  , wrap
+  , new
   , constant
   , startPoint
   , endPoint
@@ -27,8 +27,8 @@ type Curve3d (coordinateSystem :: CoordinateSystem) = Internal.Curve3d coordinat
 
 data DegenerateCurve = DegenerateCurve deriving (Eq, Show, Error.Message)
 
-wrap :: Interface curve (space @ units) => curve -> Curve3d (space @ units)
-wrap = Internal.Curve
+new :: Interface curve (space @ units) => curve -> Curve3d (space @ units)
+new = Internal.Curve
 
 constant :: Point3d (space @ units) -> Curve3d (space @ units)
 constant = Internal.Constant

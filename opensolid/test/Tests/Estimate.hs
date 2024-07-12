@@ -50,14 +50,14 @@ instance Estimate.Interface DummyEstimate Meters where
   boundsImpl (DummyEstimate _ range) = range
   refineImpl (DummyEstimate value (Range low high)) = do
     let refinedRange = Range.from (Qty.midpoint low value) (Qty.midpoint value high)
-    Estimate.wrap (DummyEstimate value refinedRange)
+    Estimate.new (DummyEstimate value refinedRange)
 
 dummyEstimate :: Generator (Length, Estimate Meters)
 dummyEstimate = Random.do
   range <- Range.random Random.length
   t <- Parameter.random
   let value = Range.interpolate range t
-  Random.return (value, Estimate.wrap (DummyEstimate value range))
+  Random.return (value, Estimate.new (DummyEstimate value range))
 
 duplicatedDummyEstimates :: Generator (NonEmpty (Length, Estimate Meters))
 duplicatedDummyEstimates = Random.do

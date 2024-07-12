@@ -10,7 +10,7 @@ module Volume1d.Function
   , u
   , v
   , w
-  , wrap
+  , new
   , squared
   , squared'
   , sqrt
@@ -313,8 +313,8 @@ v = V
 w :: Function Unitless
 w = W
 
-wrap :: Interface function units => function -> Function units
-wrap = Function
+new :: Interface function units => function -> Function units
+new = Function
 
 squared :: Units.Squared units1 units2 => Function units1 -> Function units2
 squared = Units.specialize . squared'

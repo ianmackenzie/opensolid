@@ -61,7 +61,7 @@ instance Curve2d.Interface (CubicSpline2d (space @ units)) (space @ units) where
   boundsImpl (CubicSpline2d p1 p2 p3 p4) = Bounds2d.hull4 p1 p2 p3 p4
 
   transformByImpl transform (CubicSpline2d p1 p2 p3 p4) =
-    Curve2d.wrap $
+    Curve2d.new $
       CubicSpline2d
         (Point2d.transformBy transform p1)
         (Point2d.transformBy transform p2)
@@ -75,4 +75,4 @@ fromControlPoints ::
   Point2d (space @ units) ->
   Point2d (space @ units) ->
   Curve2d (space @ units)
-fromControlPoints p1 p2 p3 p4 = Curve2d.wrap (CubicSpline2d p1 p2 p3 p4)
+fromControlPoints p1 p2 p3 p4 = Curve2d.new (CubicSpline2d p1 p2 p3 p4)

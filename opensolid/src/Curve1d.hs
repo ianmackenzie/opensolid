@@ -4,7 +4,7 @@ module Curve1d
   , pointOn
   , segmentBounds
   , derivative
-  , wrap
+  , new
   , zero
   , constant
   , t
@@ -117,8 +117,8 @@ instance Interface (Curve1d units) units where
   segmentBoundsImpl = segmentBounds
   derivativeImpl = derivative
 
-wrap :: Interface curve units => curve -> Curve1d units
-wrap = Curve1d
+new :: Interface curve units => curve -> Curve1d units
+new = Curve1d
 
 zero :: Curve1d units
 zero = constant Qty.zero
@@ -477,4 +477,4 @@ isSolutionOrder n neighborhood derivatives x = do
   curveIsZero && List.allSatisfy derivativeIsZero [1 .. n]
 
 integral :: Curve1d units -> Estimate units
-integral curve = Estimate.wrap (Integral curve (derivative curve) Range.unit)
+integral curve = Estimate.new (Integral curve (derivative curve) Range.unit)

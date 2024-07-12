@@ -31,4 +31,4 @@ instance Estimate.Interface (Integral units) units where
     let (leftDomain, rightDomain) = Range.bisect domain
     let leftIntegral = Integral curve derivative leftDomain
     let rightIntegral = Integral curve derivative rightDomain
-    Estimate.wrap leftIntegral + Estimate.wrap rightIntegral
+    Estimate.new leftIntegral + Estimate.new rightIntegral

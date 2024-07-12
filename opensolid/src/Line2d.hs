@@ -20,7 +20,7 @@ import Units qualified
 import VectorCurve2d qualified
 
 from :: Point2d (space @ units) -> Point2d (space @ units) -> Curve2d (space @ units)
-from p1 p2 = Curve2d.wrap (Line2d p1 p2)
+from p1 p2 = Curve2d.new (Line2d p1 p2)
 
 type role Line2d phantom
 
@@ -52,8 +52,7 @@ instance Curve2d.Interface (Line2d (space @ units)) (space @ units) where
   reverseImpl (Line2d p1 p2) = Line2d p2 p1
   boundsImpl (Line2d p1 p2) = Bounds2d.hull2 p1 p2
   transformByImpl transform (Line2d p1 p2) =
-    Curve2d.wrap $
-      Line2d (Point2d.transformBy transform p1) (Point2d.transformBy transform p2)
+    Curve2d.new (Line2d (Point2d.transformBy transform p1) (Point2d.transformBy transform p2))
   asLineImpl line = Just line
 
 placeIn ::

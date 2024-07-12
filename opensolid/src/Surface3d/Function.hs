@@ -4,7 +4,7 @@
 module Surface3d.Function
   ( Function (Constant)
   , Interface (..)
-  , wrap
+  , new
   , constant
   , xyz
   , evaluate
@@ -125,8 +125,8 @@ instance
   where
   f - v = f - VectorSurface3d.Function.constant v
 
-wrap :: Interface function (space @ units) => function -> Function (space @ units)
-wrap = Function
+new :: Interface function (space @ units) => function -> Function (space @ units)
+new = Function
 
 constant :: Point3d (space @ units) -> Function (space @ units)
 constant = Constant
@@ -191,7 +191,7 @@ instance
     (Curve3d (space @ units))
     (Function (space @ units))
   where
-  curve . function = wrap (SurfaceCurveComposition function curve)
+  curve . function = new (SurfaceCurveComposition function curve)
 
 instance Interface (SurfaceCurveComposition (space @ units)) (space @ units) where
   evaluateImpl (SurfaceCurveComposition function curve) uv =

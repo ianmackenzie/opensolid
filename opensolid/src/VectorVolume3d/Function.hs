@@ -7,7 +7,7 @@ module VectorVolume3d.Function
   , derivative
   , zero
   , constant
-  , wrap
+  , new
   , xyz
   )
 where
@@ -340,8 +340,8 @@ zero = Zero
 constant :: Vector3d (space @ units) -> Function (space @ units)
 constant vector = if vector == Vector3d.zero then Zero else Constant vector
 
-wrap :: Interface function (space @ units) => function -> Function (space @ units)
-wrap = Function
+new :: Interface function (space @ units) => function -> Function (space @ units)
+new = Function
 
 xyz ::
   Volume1d.Function units ->

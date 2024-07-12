@@ -61,11 +61,11 @@ instance VectorCurve2d.Interface (QCurve (space @ units)) (space @ units) where
   transformByImpl transform (QCurve n t0 curveDerivative value) = do
     let transformedCurveDerivative = VectorCurve2d.transformBy transform curveDerivative
     let transformedValue = Vector2d.transformBy transform value
-    VectorCurve2d.wrap (QCurve n t0 transformedCurveDerivative transformedValue)
+    VectorCurve2d.new (QCurve n t0 transformedCurveDerivative transformedValue)
 
 qCurve :: Int -> Float -> VectorCurve2d (space @ units) -> VectorCurve2d (space @ units)
 qCurve n t0 curveDerivative =
-  VectorCurve2d.wrap $
+  VectorCurve2d.new $
     QCurve n t0 curveDerivative $
       VectorCurve2d.evaluateAt t0 curveDerivative / (n + 1)
 

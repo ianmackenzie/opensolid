@@ -1,7 +1,7 @@
 module Estimate
   ( Estimate
   , Interface (..)
-  , wrap
+  , new
   , exact
   , bounds
   , refine
@@ -63,11 +63,11 @@ instance units ~ units_ => ApproximateEquality (Estimate units) (Qty units_) uni
     | not (value ^ bounds estimate) = False
     | otherwise = refine estimate ~= value
 
-wrap :: Interface a units => a -> Estimate units
-wrap implementation = Estimate implementation (boundsImpl implementation)
+new :: Interface a units => a -> Estimate units
+new implementation = Estimate implementation (boundsImpl implementation)
 
 exact :: Qty units -> Estimate units
-exact value = wrap value
+exact value = new value
 
 bounds :: Estimate units -> Range units
 bounds (Estimate _ cachedBounds) = cachedBounds
@@ -95,7 +95,7 @@ instance Interface (Negate units) units where
   refineImpl (Negate estimate) = negate (refine estimate)
 
 instance Negation (Estimate units) where
-  negate estimate = wrap (Negate estimate)
+  negate estimate = new (Negate estimate)
 
 instance Multiplication' Sign (Estimate units) where
   type Sign .*. Estimate units = Estimate (Unitless :*: units)
@@ -124,7 +124,7 @@ instance Interface (Add units) units where
       | otherwise -> refine first + refine second
 
 instance Addition (Estimate units) (Estimate units) (Estimate units) where
-  first + second = wrap (Add first second)
+  first + second = new (Add first second)
 
 instance Addition (Estimate units) (Qty units) (Estimate units) where
   estimate + value = estimate + exact value
@@ -151,7 +151,7 @@ instance Interface (Subtract units) units where
       | otherwise -> refine first - refine second
 
 instance Subtraction (Estimate units) (Estimate units) (Estimate units) where
-  first - second = wrap (Subtract first second)
+  first - second = new (Subtract first second)
 
 instance Subtraction (Estimate units) (Qty units) (Estimate units) where
   estimate - value = estimate - exact value
@@ -181,19 +181,19 @@ instance Interface (Product units1 units2) (units1 :*: units2) where
           | firstMetric > secondMetric && firstMetric > combinedMetric = Product (refine first) second
           | secondMetric > firstMetric && secondMetric > combinedMetric = Product first (refine second)
           | otherwise = Product (refine first) (refine second)
-    wrap refinedProduct
+    new refinedProduct
 
 instance Multiplication' (Estimate units1) (Estimate units2) where
   type Estimate units1 .*. Estimate units2 = Estimate (units1 :*: units2)
-  first .*. second = wrap (Product first second)
+  first .*. second = new (Product first second)
 
 instance Multiplication' (Estimate units1) (Qty units2) where
   type Estimate units1 .*. Qty units2 = Estimate (units1 :*: units2)
-  estimate .*. value = wrap (Product estimate (exact value))
+  estimate .*. value = new (Product estimate (exact value))
 
 instance Multiplication' (Qty units1) (Estimate units2) where
   type Qty units1 .*. Estimate units2 = Estimate (units1 :*: units2)
-  value .*. estimate = wrap (Product (exact value) estimate)
+  value .*. estimate = new (Product (exact value) estimate)
 
 instance Multiplication' (Estimate units) Int where
   type Estimate units .*. Int = Estimate (units :*: Unitless)
@@ -252,16 +252,16 @@ instance Interface (Sum units) units where
   refineImpl (Sum estimates) = do
     let maxWidth = NonEmpty.maximumOf boundsWidth estimates
     let refinedEstimates = NonEmpty.map (refineWiderThan (0.5 * maxWidth)) estimates
-    wrap (Sum refinedEstimates)
+    new (Sum refinedEstimates)
 
 newtype Abs units = Abs (Estimate units)
 
 instance Interface (Abs units) units where
   boundsImpl (Abs estimate) = Range.abs (bounds estimate)
-  refineImpl (Abs estimate) = wrap (Abs (refine estimate))
+  refineImpl (Abs estimate) = new (Abs (refine estimate))
 
 abs :: Estimate units -> Estimate units
-abs estimate = wrap (Abs estimate)
+abs estimate = new (Abs estimate)
 
 refineWiderThan :: Qty units -> Estimate units -> Estimate units
 refineWiderThan desiredWidth estimate
@@ -270,7 +270,7 @@ refineWiderThan desiredWidth estimate
 
 sum :: List (Estimate units) -> Estimate units
 sum [] = exact Qty.zero
-sum (NonEmpty estimates) = wrap (Sum estimates)
+sum (NonEmpty estimates) = new (Sum estimates)
 
 data Min units = Min (Estimate units) (Estimate units)
 
@@ -285,7 +285,7 @@ instance Interface (Min units) units where
       | otherwise -> min (refine first) (refine second)
 
 min :: Estimate units -> Estimate units -> Estimate units
-min first second = wrap (Min first second)
+min first second = new (Min first second)
 
 data Max units = Max (Estimate units) (Estimate units)
 
@@ -300,7 +300,7 @@ instance Interface (Max units) units where
       | otherwise -> max (refine first) (refine second)
 
 max :: Estimate units -> Estimate units -> Estimate units
-max first second = wrap (Max first second)
+max first second = new (Max first second)
 
 data Smaller units = Smaller (Estimate units) (Estimate units)
 
@@ -315,7 +315,7 @@ instance Interface (Smaller units) units where
       | otherwise -> smaller (refine first) (refine second)
 
 smaller :: Estimate units -> Estimate units -> Estimate units
-smaller first second = wrap (Smaller first second)
+smaller first second = new (Smaller first second)
 
 data Larger units = Larger (Estimate units) (Estimate units)
 
@@ -330,7 +330,7 @@ instance Interface (Larger units) units where
       | otherwise -> larger (refine first) (refine second)
 
 larger :: Estimate units -> Estimate units -> Estimate units
-larger first second = wrap (Larger first second)
+larger first second = new (Larger first second)
 
 internalErrorFilteredListIsEmpty :: a
 internalErrorFilteredListIsEmpty =
@@ -357,7 +357,7 @@ instance Interface (Smallest units) units where
 
 smallest :: NonEmpty (Estimate units) -> Estimate units
 smallest estimates =
-  wrap (Smallest estimates (Range.smallest (NonEmpty.map bounds estimates)))
+  new (Smallest estimates (Range.smallest (NonEmpty.map bounds estimates)))
 
 data Largest units = Largest (NonEmpty (Estimate units)) (Range units)
 
@@ -374,7 +374,7 @@ instance Interface (Largest units) units where
 
 largest :: NonEmpty (Estimate units) -> Estimate units
 largest estimates =
-  wrap (Largest estimates (Range.largest (NonEmpty.map bounds estimates)))
+  new (Largest estimates (Range.largest (NonEmpty.map bounds estimates)))
 
 estimateUpperBound :: (a, Estimate units) -> Qty units
 estimateUpperBound (_, estimate) = Range.maxValue (bounds estimate)

@@ -9,7 +9,7 @@
 module VectorSurface3d.Function
   ( Function (Constant)
   , Interface (..)
-  , wrap
+  , new
   , zero
   , constant
   , xyz
@@ -382,7 +382,7 @@ instance
       Surface1d.Function (units1 :*: units2)
   Constant v .<>. _ | v == Vector3d.zero = Surface1d.Function.zero
   _ .<>. Constant v | v == Vector3d.zero = Surface1d.Function.zero
-  f1 .<>. f2 = Surface1d.Function.wrap (DotProduct' f1 f2)
+  f1 .<>. f2 = Surface1d.Function.new (DotProduct' f1 f2)
 
 instance
   (Units.Product units1 units2 units3, space ~ space_) =>
@@ -452,7 +452,7 @@ instance
     (VectorCurve3d (space @ units))
     (Function (space @ units))
   where
-  curve . function = wrap (SurfaceCurveComposition function curve)
+  curve . function = new (SurfaceCurveComposition function curve)
 
 instance Interface (SurfaceCurveComposition (space @ units)) (space @ units) where
   evaluateImpl (SurfaceCurveComposition function curve) uv =
@@ -464,8 +464,8 @@ instance Interface (SurfaceCurveComposition (space @ units)) (space @ units) whe
   derivativeImpl parameter (SurfaceCurveComposition function curve) =
     (VectorCurve3d.derivative curve . function) * Surface1d.Function.derivative parameter function
 
-wrap :: Interface function (space @ units) => function -> Function (space @ units)
-wrap = Function
+new :: Interface function (space @ units) => function -> Function (space @ units)
+new = Function
 
 zero :: Function (space @ units)
 zero = constant Vector3d.zero
