@@ -68,10 +68,10 @@ choose n k = do
     | otherwise -> prod (n - d + 1) (n - d + 2) n // prod 2 3 d
 
 prod :: Int -> Int -> Int -> Int
-prod !acc a b
-  | a < b = prod (acc * a) (a + 1) b
-  | a == b = acc * a
-  | otherwise = acc
+prod !acc a b = case compare a b of
+  LT -> prod (acc * a) (a + 1) b
+  EQ -> acc * a
+  GT -> acc
 
 sum :: List Int -> Int
 sum = List.foldl (+) 0
