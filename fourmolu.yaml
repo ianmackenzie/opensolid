@@ -8,6 +8,12 @@ newlines-between-decls: 1
 haddock-style: multi-line
 respectful: false
 fixities:
+  # Built-in operators
+  - infix 4 ==, /=, <, >, <=, >=
+  - infixr 3 &&
+  - infixr 2 ||
+  - infixr 0 $
+  # Custom operators
   - "infix 4 ^"
   - "infix 4 ~="
   - "infix 4 !="
