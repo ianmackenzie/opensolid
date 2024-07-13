@@ -91,7 +91,7 @@ overlappingSegments ::
 overlappingSegments curve1 curve2 =
   case Curve2d.intersections curve1 curve2 of
     Success (Just (Curve2d.OverlappingSegments segments)) -> Success segments
-    Success (Just (Curve2d.IntersectionPoints _)) -> 
+    Success (Just (Curve2d.IntersectionPoints _)) ->
       Failure "Should have found some overlapping segments, got intersection points instead"
     Success Nothing -> Failure "Should have found some overlapping segments"
     Failure error -> Failure (Error.message error)
