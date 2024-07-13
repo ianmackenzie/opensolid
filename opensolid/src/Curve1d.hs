@@ -435,9 +435,9 @@ resolveOrder n derivatives subdomain derivativeBounds exclusions
             let isSolution = isSolutionOrder n neighborhood derivatives
             if
               | Range.includes 0.0 subdomainInterior && isSolution 0.0 ->
-                  Solve1d.return (Root 0.0 n sign)
+                  Solve1d.return [Root 0.0 n sign]
               | Range.includes 1.0 subdomainInterior && isSolution 1.0 ->
-                  Solve1d.return (Root 1.0 n sign)
+                  Solve1d.return [Root 1.0 n sign]
               | otherwise -> do
                   let fn = pointOn (Stream.nth n derivatives)
                   let fm = pointOn (Stream.nth (n + 1) derivatives)
@@ -448,7 +448,7 @@ resolveOrder n derivatives subdomain derivativeBounds exclusions
                     then
                       if Range.includes x subdomainInterior
                         then -- We've found a valid root of order n
-                          Solve1d.return (Root x n sign)
+                          Solve1d.return [Root x n sign]
                         else -- We found a root, but it's not in the interior of this subdomain
                           Solve1d.recurse
                     else Solve1d.pass -- No root of order n in this subdomain

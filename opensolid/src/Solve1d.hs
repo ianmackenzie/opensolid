@@ -123,8 +123,8 @@ process callback queue solutions exclusions =
             case callback subdomain cached NoExclusions of
               Pass -> process callback remaining solutions exclusions
               Recurse -> recurseIntoChildrenOf node callback remaining solutions exclusions
-              Return solution ->
-                process callback remaining (solution : solutions) (subdomain : exclusions)
+              Return newSolutions ->
+                process callback remaining (newSolutions + solutions) (subdomain : exclusions)
     Nothing -> Success (solutions, exclusions)
 
 {-# INLINE recurseIntoChildrenOf #-}
@@ -144,11 +144,11 @@ recurseIntoChildrenOf node callback queue solutions exclusions =
       process callback updatedQueue solutions exclusions
 
 data Action exclusions solution where
-  Return :: solution -> Action NoExclusions solution
+  Return :: List solution -> Action NoExclusions solution
   Recurse :: Action exclusions solution
   Pass :: Action exclusions solution
 
-return :: solution -> Action NoExclusions solution
+return :: List solution -> Action NoExclusions solution
 return = Return
 
 recurse :: Action exclusions solution
