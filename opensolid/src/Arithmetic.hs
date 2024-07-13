@@ -44,8 +44,12 @@ class (Multiplication Sign a a, Multiplication a Sign a) => Negation a where
 class Addition a b c | a b -> c where
   (+) :: a -> b -> c
 
+infixl 6 +
+
 class Subtraction a b c | a b -> c where
   (-) :: a -> b -> c
+
+infixl 6 -
 
 subtract :: Subtraction a b c => b -> a -> c
 subtract b a = a - b
@@ -53,6 +57,8 @@ subtract b a = a - b
 class Multiplication' b a => Multiplication' a b where
   type a .*. b
   (.*.) :: a -> b -> a .*. b
+
+infixl 7 .*.
 
 class
   ( Multiplication' a b
@@ -66,9 +72,13 @@ class
   (*) :: a -> b -> c
   a * b = Units.specialize (a .*. b)
 
+infixl 7 *
+
 class Division' a b where
   type a ./. b
   (./.) :: a -> b -> a ./. b
+
+infixl 7 ./.
 
 class
   ( Division' a b
@@ -81,9 +91,13 @@ class
   (/) :: a -> b -> c
   a / b = Units.specialize (a ./. b)
 
+infixl 7 /
+
 class DotMultiplication' a b where
   type a .<>. b
   (.<>.) :: a -> b -> a .<>. b
+
+infixl 7 .<>.
 
 class
   ( DotMultiplication' a b
@@ -97,9 +111,13 @@ class
   (<>) :: a -> b -> c
   a <> b = Units.specialize (a .<>. b)
 
+infixl 7 <>
+
 class CrossMultiplication' a b where
   type a .><. b
   (.><.) :: a -> b -> a .><. b
+
+infixl 7 .><.
 
 class
   ( CrossMultiplication' a b
@@ -113,9 +131,13 @@ class
   (><) :: a -> b -> c
   a >< b = Units.specialize (a .><. b)
 
+infixl 7 ><
+
 class DivMod a where
   (//) :: a -> a -> Int
   (%) :: a -> a -> a
+
+infixl 7 //, %
 
 instance DivMod Int where
   (//) = Prelude.div
@@ -203,10 +225,6 @@ instance Division' Int Int where
 
 instance Division Int Int Float
 
-infixl 6 +, -
-
-infixl 7 *, /, <>, ><, //, %, .*., ./., .<>., .><.
-
 class Exponentiation a b where
   (**) :: a -> b -> a
 
@@ -238,6 +256,8 @@ instance
   c
 a *! b = Units.coerce (a .*. b)
 
+infixl 7 *!
+
 (!*) ::
   ( Multiplication' a b
   , Units.Coercion (a .*. b) c
@@ -249,6 +269,8 @@ a *! b = Units.coerce (a .*. b)
   b ->
   c
 a !* b = Units.coerce (a .*. b)
+
+infixl 7 !*
 
 (^*.) ::
   ( Multiplication' a b
@@ -262,6 +284,8 @@ a !* b = Units.coerce (a .*. b)
   c
 a ^*. b = Units.coerce (a .*. b)
 
+infixl 7 ^*.
+
 (.*^) ::
   ( Multiplication' a b
   , Units.Coercion (a .*. b) c
@@ -273,6 +297,8 @@ a ^*. b = Units.coerce (a .*. b)
   b ->
   c
 a .*^ b = Units.coerce (a .*. b)
+
+infixl 7 .*^
 
 (/%) ::
   ( Division' a b
@@ -286,6 +312,8 @@ a .*^ b = Units.coerce (a .*. b)
   c
 a /% b = Units.coerce (a ./. b)
 
+infixl 7 /%
+
 (!/) ::
   ( Division' a b
   , Units.Coercion (a ./. b) c
@@ -297,6 +325,8 @@ a /% b = Units.coerce (a ./. b)
   b ->
   c
 a !/ b = Units.coerce (a ./. b)
+
+infixl 7 !/
 
 (.!/!) ::
   ( Division' a b
@@ -310,6 +340,8 @@ a !/ b = Units.coerce (a ./. b)
   c
 a .!/! b = Units.coerce (a ./. b)
 
+infixl 7 .!/!
+
 (!./!) ::
   ( Division' a b
   , Units.Coercion (a ./. b) c
@@ -321,6 +353,8 @@ a .!/! b = Units.coerce (a ./. b)
   b ->
   c
 a !./! b = Units.coerce (a ./. b)
+
+infixl 7 !./!
 
 (!/!.) ::
   ( Division' a b
@@ -334,6 +368,8 @@ a !./! b = Units.coerce (a ./. b)
   c
 a !/!. b = Units.coerce (a ./. b)
 
+infixl 7 !/!.
+
 (!/.!) ::
   ( Division' a b
   , Units.Coercion (a ./. b) c
@@ -345,6 +381,8 @@ a !/!. b = Units.coerce (a ./. b)
   b ->
   c
 a !/.! b = Units.coerce (a ./. b)
+
+infixl 7 !/.!
 
 (.!/.!) ::
   ( Division' a b
@@ -358,6 +396,8 @@ a !/.! b = Units.coerce (a ./. b)
   c
 a .!/.! b = Units.coerce (a ./. b)
 
+infixl 7 .!/.!
+
 (./^) ::
   ( Division' a b
   , Units.Coercion (a ./. b) c
@@ -369,6 +409,8 @@ a .!/.! b = Units.coerce (a ./. b)
   b ->
   c
 a ./^ b = Units.coerce (a ./. b)
+
+infixl 7 ./^
 
 (!?/.!?) ::
   ( Division' a b
@@ -382,4 +424,4 @@ a ./^ b = Units.coerce (a ./. b)
   c
 a !?/.!? b = Units.coerce (a ./. b)
 
-infixl 7 ^*., .*^, .!/!, !./!, !/!., !/.!, .!/.!, ./^, !?/.!?
+infixl 7 !?/.!?

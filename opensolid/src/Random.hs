@@ -35,6 +35,8 @@ newtype Seed = Seed StdGen
 (>>=) :: Generator a -> (a -> Generator b) -> Generator b
 (>>=) = (Random.Internal.>>=)
 
+infixl 1 >>=
+
 init :: Int -> Seed
 init givenSeed = Seed (System.Random.mkStdGen givenSeed)
 

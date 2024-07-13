@@ -74,6 +74,8 @@ instance a1 ~ a2 => Coalesce (IO a1) (Result x a2) (IO a1) where
 Success value >>= function = function value
 Failure error >>= _ = Failure error
 
+infixl 1 >>=
+
 andThen :: (a -> Result x b) -> Result x a -> Result x b
 andThen function result = result >>= function
 

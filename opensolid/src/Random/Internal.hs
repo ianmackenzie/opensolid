@@ -25,6 +25,8 @@ instance Applicative Generator where
 instance Monad Generator where
   (>>=) = (>>=)
 
+infixl 1 >>=
+
 run :: Generator a -> StdGen -> (a, StdGen)
 run (Generator generator) stdgen = generator stdgen
 

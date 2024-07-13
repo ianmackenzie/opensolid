@@ -3,7 +3,6 @@ module Debug
   , print
   , log
   , assert
-  , io
   , trace
   , intercept
   )
@@ -16,7 +15,6 @@ import Control.Exception qualified
 import Data.Text qualified
 import Debug.Trace qualified
 import GHC.Stack (HasCallStack)
-import System.IO.Unsafe qualified
 import Text qualified
 import Prelude qualified
 
@@ -36,9 +34,6 @@ log label value = print (labelled label value)
 
 assert :: HasCallStack => Bool -> Debug
 assert condition = Debug (Control.Exception.assert condition)
-
-io :: IO () -> Debug
-io debugIO = Debug (Prelude.seq (System.IO.Unsafe.unsafePerformIO debugIO))
 
 trace :: Text -> a -> a
 trace = Data.Text.unpack >> Debug.Trace.trace

@@ -28,6 +28,8 @@ instance Applicative Fuzzy where
 instance Monad Fuzzy where
   (>>=) = (>>=)
 
+infixl 1 >>=
+
 (>>=) :: Fuzzy a -> (a -> Fuzzy b) -> Fuzzy b
 Resolved value >>= function = function value
 Unresolved >>= _ = Unresolved

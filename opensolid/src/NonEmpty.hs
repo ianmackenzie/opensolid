@@ -87,6 +87,8 @@ pattern NonEmpty nonEmpty <- (Data.List.NonEmpty.nonEmpty -> Just nonEmpty)
 [] |: item = singleton item
 (x : xs) |: item = x :| Prelude.mappend xs [item]
 
+infixl 5 |:
+
 singleton :: a -> NonEmpty a
 singleton value = value :| []
 

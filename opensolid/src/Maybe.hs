@@ -34,6 +34,8 @@ return = Just
 Just value >>= function = function value
 Nothing >>= _ = Nothing
 
+infixl 1 >>=
+
 withDefault :: a -> Maybe a -> a
 withDefault _ (Just value) = value
 withDefault value Nothing = value
