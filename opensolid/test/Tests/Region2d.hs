@@ -2,18 +2,21 @@ module Tests.Region2d (tests) where
 
 import Angle qualified
 import Arc2d qualified
+import Area (Area)
 import Area qualified
+import Estimate qualified
 import Float qualified
 import Length qualified
 import Line2d qualified
 import OpenSolid
 import Point2d qualified
 import Qty (zero)
+import Range qualified
+import Region2d (Region2d)
 import Region2d qualified
 import Region2d.BoundedBy qualified
 import Test (Test)
 import Test qualified
-import Tolerance qualified
 import Units (Meters)
 
 tests :: Tolerance Meters => List Test
@@ -25,6 +28,11 @@ tests =
   , squareWithTangentHole
   , twoCircles
   ]
+
+areaIsApproximately :: Area -> Region2d (space @ Meters) -> Bool
+areaIsApproximately expectedArea region =
+  Estimate.within (Area.squareMeters 1e-6) (Region2d.area region)
+    |> Range.includes expectedArea
 
 square :: Tolerance Meters => Test
 square = Test.verify "square" Test.do
@@ -38,7 +46,7 @@ square = Test.verify "square" Test.do
   let line3 = Line2d.from p4 p3
   let line4 = Line2d.from p4 p1
   region <- Region2d.boundedBy [line1, line3, line2, line4]
-  Test.expect (Tolerance.using (Area.squareMeters 1e-6) (Region2d.area region ~= width * width))
+  Test.expect (areaIsApproximately (width * width) region)
 
 quarterCircle :: Tolerance Meters => Test
 quarterCircle = Test.verify "quarterCircle" Test.do
@@ -50,7 +58,8 @@ quarterCircle = Test.verify "quarterCircle" Test.do
   let line2 = Line2d.from p1 p3
   let arc = Arc2d.from p2 p3 Angle.quarterTurn
   region <- Region2d.boundedBy [line1, line2, arc]
-  Test.expect (Tolerance.using (Area.squareMeters 1e-6) (Region2d.area region ~= 0.25 * Float.pi * radius * radius))
+  let expectedArea = 0.25 * Float.pi * radius * radius
+  Test.expect (areaIsApproximately expectedArea region)
 
 squareWithHole :: Tolerance Meters => Test
 squareWithHole = Test.verify "squareWithHole" Test.do
@@ -67,9 +76,8 @@ squareWithHole = Test.verify "squareWithHole" Test.do
   let holeRadius = width / 4
   let hole = Arc2d.circle centerPoint holeRadius
   region <- Region2d.boundedBy [line1, line3, line2, line4, hole]
-  let area = Region2d.area region
   let expectedArea = width * width - Float.pi * holeRadius * holeRadius
-  Test.expect (Tolerance.using (Area.squareMeters 1e-6) (area ~= expectedArea))
+  Test.expect (areaIsApproximately expectedArea region)
 
 incompleteSquare :: Tolerance Meters => Test
 incompleteSquare = Test.verify "incompleteSquare" Test.do
