@@ -26,6 +26,9 @@
               pkgs.haskell-language-server
               # Needed so that GHC can link against it
               pkgs.zlib
+              # Haskell static analysis tool,
+              # provides various warnings/suggestions
+              pkgs.haskellPackages.stan
               # For formatting Haskell files
               pkgs.haskellPackages.fourmolu
               # For formatting .cabal files;

@@ -56,6 +56,8 @@ common config
     -Wsafe
     -dcore-lint
     -Wno-missed-extra-shared-lib
+    -fwrite-ide-info
+    -hiedir=.hie
 
   default-extensions:
     BlockArguments
