@@ -6,6 +6,7 @@ module Estimate
   , bounds
   , refine
   , satisfy
+  , within
   , resolve
   , abs
   , sum
@@ -75,6 +76,9 @@ satisfy :: (Range units -> Bool) -> Estimate units -> Range units
 satisfy predicate estimate = do
   let current = bounds estimate
   if predicate current then current else satisfy predicate (refine estimate)
+
+within :: Qty units -> Estimate units -> Range units
+within tolerance = satisfy (Range.width >> (<= tolerance))
 
 resolve :: (Range units -> Fuzzy a) -> Estimate units -> a
 resolve function estimate =
