@@ -339,16 +339,33 @@ solveNewtonRaphson iterations f fu fv g gu gv uvBounds p1 f1 g1 =
       let fv1 = fv p1
       let gu1 = gu p1
       let gv1 = gv p1
-      let d = fu1 .*. gv1 - fv1 .*. gu1
-      let deltaU = (fv1 .*. g1 - gv1 .*. f1) / d
-      let deltaV = (gu1 .*. f1 - fu1 .*. g1) / d
-      let p2 = p1 + Vector2d.xy deltaU deltaV
-      if not (Bounds2d.includes p2 uvBounds) -- Check if we stepped outside the given bounds
+      let determinant = fu1 .*. gv1 - fv1 .*. gu1
+      if determinant == Qty.zero
         then Failure Divergence
         else do
+          let deltaU = (fv1 .*. g1 - gv1 .*. f1) / determinant
+          let deltaV = (gu1 .*. f1 - fu1 .*. g1) / determinant
+          let p2 = boundedStep uvBounds p1 (p1 + Vector2d.xy deltaU deltaV)
           let f2 = f p2
           let g2 = g p2
           if Qty.hypot2 f2 g2 >= Qty.hypot2 f1 g1 -- Check if we've stopped converging
             then if f1 ~= Qty.zero && g1 ~= Qty.zero then Success p1 else Failure Divergence
             else -- We're still converging, so take another iteration
               solveNewtonRaphson (iterations + 1) f fu fv g gu gv uvBounds p2 f2 g2
+
+boundedStep :: Uv.Bounds -> Uv.Point -> Uv.Point -> Uv.Point
+boundedStep uvBounds p1 p2 =
+  if Bounds2d.includes p2 uvBounds
+    then p2 -- Stepped point is still within the given bounds, so we can use it
+    else do
+      -- Stepped point is outside the given bounds,
+      -- pull it back in along the step direction
+      let (uRange, vRange) = Bounds2d.coordinates uvBounds
+      let (u1, v1) = Point2d.coordinates p1
+      let (u2, v2) = Point2d.coordinates p2
+      let clampedU = Range.clampTo uRange u2
+      let clampedV = Range.clampTo vRange v2
+      let uScale = if u1 == u2 then 1.0 else (clampedU - u1) / (u2 - u1)
+      let vScale = if v1 == v2 then 1.0 else (clampedV - v1) / (v2 - v1)
+      let scale = Qty.min uScale vScale
+      Point2d.interpolateFrom p1 p2 scale
