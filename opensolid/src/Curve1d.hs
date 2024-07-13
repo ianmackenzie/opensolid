@@ -7,7 +7,7 @@ module Curve1d
   , new
   , zero
   , constant
-  , t
+  , parameter
   , squared
   , squared'
   , sqrt
@@ -126,8 +126,8 @@ zero = constant Qty.zero
 constant :: Qty units -> Curve1d units
 constant = Constant
 
-t :: Curve1d Unitless
-t = Parameter
+parameter :: Curve1d Unitless
+parameter = Parameter
 
 instance Negation (Curve1d units) where
   negate (Constant x) = Constant (negate x)
