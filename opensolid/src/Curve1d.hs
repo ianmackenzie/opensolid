@@ -101,7 +101,7 @@ instance HasUnits (Curve1d units) where
   type Units (Curve1d units) = units
   type Erase (Curve1d units) = Curve1d Unitless
 
-instance Units.Coercion (Curve1d units1) (Curve1d units2) where
+instance Units.Coercion (Curve1d unitsA) (Curve1d unitsB) where
   coerce (Constant value) = Constant (Units.coerce value)
   coerce (Coerce curve) = Coerce curve
   coerce curve = Coerce curve

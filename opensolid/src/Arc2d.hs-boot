@@ -10,7 +10,7 @@ data Arc2d (coordinateSystem :: CoordinateSystem)
 
 instance
   space1 ~ space2 =>
-  Units.Coercion (Arc2d (space1 @ units1)) (Arc2d (space2 @ units2))
+  Units.Coercion (Arc2d (space1 @ unitsA)) (Arc2d (space2 @ unitsB))
 
 placeIn ::
   Frame2d (global @ units) (Defines local) ->

@@ -80,10 +80,10 @@ instance HasUnits (Transform3d tag (space @ units)) where
   type Erase (Transform3d tag (space @ units)) = Transform3d tag (space @ Unitless)
 
 instance
-  (tag ~ tag_, space ~ space_) =>
+  (tag1 ~ tag2, space1 ~ space2) =>
   Units.Coercion
-    (Transform3d tag (space @ units1))
-    (Transform3d tag_ (space_ @ units2))
+    (Transform3d tag1 (space1 @ unitsA))
+    (Transform3d tag2 (space2 @ unitsB))
   where
   coerce (Transform3d p0 vx vy vz) = Transform3d_ (Units.coerce p0) vx vy vz
 

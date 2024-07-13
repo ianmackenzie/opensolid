@@ -115,8 +115,8 @@ instance HasUnits (Curve2d (space @ units)) where
   type Erase (Curve2d (space @ units)) = Curve2d (space @ Unitless)
 
 instance
-  space ~ space_ =>
-  Units.Coercion (Curve2d (space @ units1)) (Curve2d (space_ @ units2))
+  space1 ~ space2 =>
+  Units.Coercion (Curve2d (space1 @ unitsA)) (Curve2d (space2 @ unitsB))
   where
   coerce (Coerce c) = Coerce c
   coerce c = Coerce c

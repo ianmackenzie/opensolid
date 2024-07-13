@@ -41,7 +41,10 @@ instance HasUnits (DirectionCurve2d space) where
   type Units (DirectionCurve2d space) = Unitless
   type Erase (DirectionCurve2d space) = DirectionCurve2d space
 
-instance space ~ space_ => Units.Coercion (DirectionCurve2d space) (DirectionCurve2d space_) where
+instance
+  space1 ~ space2 =>
+  Units.Coercion (DirectionCurve2d space1) (DirectionCurve2d space2)
+  where
   coerce = identity
 
 unsafe :: VectorCurve2d (space @ Unitless) -> DirectionCurve2d space

@@ -20,34 +20,34 @@ instance Show (Point2d (space @ units))
 
 instance HasUnits (Point2d (space @ units))
 
-instance space ~ space_ => Units.Coercion (Point2d (space @ units1)) (Point2d (space_ @ units2))
+instance space1 ~ space2 => Units.Coercion (Point2d (space1 @ unitsA)) (Point2d (space2 @ unitsB))
 
 instance
-  ( space ~ space_
-  , units ~ units_
+  ( space1 ~ space2
+  , units1 ~ units2
   ) =>
   Subtraction
-    (Point2d (space @ units))
-    (Point2d (space_ @ units_))
-    (Vector2d (space @ units))
+    (Point2d (space1 @ units1))
+    (Point2d (space2 @ units2))
+    (Vector2d (space1 @ units1))
 
 instance
-  ( space ~ space_
-  , units ~ units_
+  ( space1 ~ space2
+  , units1 ~ units2
   ) =>
   Addition
-    (Point2d (space @ units))
-    (Vector2d (space_ @ units_))
-    (Point2d (space @ units))
+    (Point2d (space1 @ units1))
+    (Vector2d (space2 @ units2))
+    (Point2d (space1 @ units1))
 
 instance
-  ( space ~ space_
-  , units ~ units_
+  ( space1 ~ space2
+  , units1 ~ units2
   ) =>
   Subtraction
-    (Point2d (space @ units))
-    (Vector2d (space_ @ units_))
-    (Point2d (space @ units))
+    (Point2d (space1 @ units1))
+    (Vector2d (space2 @ units2))
+    (Point2d (space1 @ units1))
 
 origin :: Point2d (space @ units)
 xy :: Qty units -> Qty units -> Point2d (space @ units)

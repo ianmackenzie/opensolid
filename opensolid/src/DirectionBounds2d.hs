@@ -28,7 +28,10 @@ instance HasUnits (DirectionBounds2d space) where
   type Units (DirectionBounds2d space) = Unitless
   type Erase (DirectionBounds2d space) = DirectionBounds2d space
 
-instance space ~ space_ => Units.Coercion (DirectionBounds2d space) (DirectionBounds2d space_) where
+instance
+  space1 ~ space2 =>
+  Units.Coercion (DirectionBounds2d space1) (DirectionBounds2d space2)
+  where
   coerce = identity
 
 instance Negation (DirectionBounds2d space) where

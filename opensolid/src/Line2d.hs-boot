@@ -10,7 +10,7 @@ data Line2d (coordinateSystem :: CoordinateSystem)
 
 instance
   space1 ~ space2 =>
-  Units.Coercion (Line2d (space1 @ units1)) (Line2d (space2 @ units2))
+  Units.Coercion (Line2d (space1 @ unitsA)) (Line2d (space2 @ unitsB))
 
 placeIn ::
   Frame2d (global @ units) (Defines local) ->

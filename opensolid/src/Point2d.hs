@@ -74,8 +74,8 @@ instance HasUnits (Point2d (space @ units)) where
   type Erase (Point2d (space @ units)) = Point2d (space @ Unitless)
 
 instance
-  space ~ space_ =>
-  Units.Coercion (Point2d (space @ units1)) (Point2d (space_ @ units2))
+  space1 ~ space2 =>
+  Units.Coercion (Point2d (space1 @ unitsA)) (Point2d (space2 @ unitsB))
   where
   coerce = Data.Coerce.coerce
 

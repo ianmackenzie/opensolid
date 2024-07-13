@@ -168,8 +168,8 @@ instance HasUnits (VectorCurve2d (space @ units)) where
   type Erase (VectorCurve2d (space @ units)) = VectorCurve2d (space @ Unitless)
 
 instance
-  space ~ space_ =>
-  Units.Coercion (VectorCurve2d (space @ units1)) (VectorCurve2d (space_ @ units2))
+  space1 ~ space2 =>
+  Units.Coercion (VectorCurve2d (space1 @ unitsA)) (VectorCurve2d (space2 @ unitsB))
   where
   coerce (Constant value) = Constant (Units.coerce value)
   coerce (Coerce curve) = Coerce curve

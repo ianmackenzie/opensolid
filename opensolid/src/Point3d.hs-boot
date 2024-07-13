@@ -20,7 +20,9 @@ instance Show (Point3d (space @ units))
 
 instance HasUnits (Point3d (space @ units))
 
-instance space ~ space_ => Units.Coercion (Point3d (space @ units1)) (Point3d (space_ @ units2))
+instance
+  space1 ~ space2 =>
+  Units.Coercion (Point3d (space1 @ unitsA)) (Point3d (space2 @ unitsB))
 
 instance
   ( space ~ space_

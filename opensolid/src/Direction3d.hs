@@ -43,7 +43,7 @@ instance HasUnits (Direction3d space) where
   type Units (Direction3d space) = Unitless
   type Erase (Direction3d space) = Direction3d space
 
-instance space ~ space_ => Units.Coercion (Direction3d space) (Direction3d space_) where
+instance space1 ~ space2 => Units.Coercion (Direction3d space1) (Direction3d space2) where
   coerce = identity
 
 instance
@@ -115,8 +115,11 @@ unwrap :: Direction3d space -> Vector3d (space @ Unitless)
 unwrap (Direction3d vector) = vector
 
 {-# INLINE lift #-}
-lift :: (Vector3d (space1 @ Unitless) -> Vector3d (space2 @ Unitless)) -> Direction3d space1 -> Direction3d space2
-lift vectorFunction direction = Direction3d (vectorFunction (unwrap direction))
+lift ::
+  (Vector3d (spaceA @ Unitless) -> Vector3d (spaceB @ Unitless)) ->
+  Direction3d spaceA ->
+  Direction3d spaceB
+lift function (Direction3d vector) = Direction3d (function vector)
 
 positiveX :: Direction3d space
 positiveX = unsafe (Vector3d 1.0 0.0 0.0)

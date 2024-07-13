@@ -89,7 +89,7 @@ instance HasUnits (Range units) where
   type Units (Range units) = units
   type Erase (Range units) = Range Unitless
 
-instance Units.Coercion (Range units1) (Range units2) where
+instance Units.Coercion (Range unitsA) (Range unitsB) where
   coerce = Data.Coerce.coerce
 
 instance units ~ units_ => ApproximateEquality (Range units) (Qty units_) units where

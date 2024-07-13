@@ -64,8 +64,8 @@ instance HasUnits (VectorCurve3d (space @ units)) where
   type Erase (VectorCurve3d (space @ units)) = VectorCurve3d (space @ Unitless)
 
 instance
-  space ~ space_ =>
-  Units.Coercion (VectorCurve3d (space @ units1)) (VectorCurve3d (space_ @ units2))
+  space1 ~ space2 =>
+  Units.Coercion (VectorCurve3d (space1 @ unitsA)) (VectorCurve3d (space2 @ unitsB))
   where
   coerce Zero = Zero
   coerce (Constant value) = Constant (Units.coerce value)

@@ -50,8 +50,8 @@ instance Multiplication' (VectorCurve2d (space @ units)) Sign
 instance Multiplication (VectorCurve2d (space @ units)) Sign (VectorCurve2d (space @ units))
 
 instance
-  space ~ space_ =>
-  Units.Coercion (VectorCurve2d (space @ units1)) (VectorCurve2d (space_ @ units2))
+  space1 ~ space2 =>
+  Units.Coercion (VectorCurve2d (space1 @ unitsA)) (VectorCurve2d (space2 @ unitsB))
 
 instance Multiplication' (Curve1d units1) (VectorCurve2d (space @ units2))
 

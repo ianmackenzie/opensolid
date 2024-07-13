@@ -37,7 +37,7 @@ instance HasUnits (Line2d (space @ units)) where
 
 instance
   space1 ~ space2 =>
-  Units.Coercion (Line2d (space1 @ units1)) (Line2d (space2 @ units2))
+  Units.Coercion (Line2d (space1 @ unitsA)) (Line2d (space2 @ unitsB))
   where
   coerce = Data.Coerce.coerce
 

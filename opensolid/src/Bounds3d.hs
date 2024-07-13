@@ -52,63 +52,63 @@ instance HasUnits (Bounds3d (space @ units)) where
   type Erase (Bounds3d (space @ units)) = Bounds3d (space @ Unitless)
 
 instance
-  space ~ space_ =>
-  Units.Coercion (Bounds3d (space @ units1)) (Bounds3d (space_ @ units2))
+  space1 ~ space2 =>
+  Units.Coercion (Bounds3d (space1 @ unitsA)) (Bounds3d (space2 @ unitsB))
   where
   coerce = Data.Coerce.coerce
 
 instance
-  ( space ~ space_
-  , units ~ units_
+  ( space1 ~ space2
+  , units1 ~ units2
   ) =>
   Addition
-    (Bounds3d (space @ units))
-    (VectorBounds3d (space @ units))
-    (Bounds3d (space_ @ units_))
+    (Bounds3d (space1 @ units1))
+    (VectorBounds3d (space2 @ units2))
+    (Bounds3d (space1 @ units1))
   where
   Bounds3d x1 y1 z1 + VectorBounds3d x2 y2 z2 = Bounds3d (x1 + x2) (y1 + y2) (z1 + z2)
 
 instance
-  ( space ~ space_
-  , units ~ units_
+  ( space1 ~ space2
+  , units1 ~ units2
   ) =>
   Subtraction
-    (Bounds3d (space @ units))
-    (VectorBounds3d (space @ units))
-    (Bounds3d (space_ @ units_))
+    (Bounds3d (space1 @ units1))
+    (VectorBounds3d (space2 @ units2))
+    (Bounds3d (space1 @ units1))
   where
   Bounds3d x1 y1 z1 - VectorBounds3d x2 y2 z2 = Bounds3d (x1 - x2) (y1 - y2) (z1 - z2)
 
 instance
-  ( space ~ space_
-  , units ~ units_
+  ( space1 ~ space2
+  , units1 ~ units2
   ) =>
   Subtraction
-    (Point3d (space @ units))
-    (Bounds3d (space_ @ units_))
-    (VectorBounds3d (space @ units))
+    (Point3d (space1 @ units1))
+    (Bounds3d (space2 @ units2))
+    (VectorBounds3d (space1 @ units1))
   where
   Point3d px py pz - Bounds3d bx by bz = VectorBounds3d (px - bx) (py - by) (pz - bz)
 
 instance
-  ( space ~ space_
-  , units ~ units_
+  ( space1 ~ space2
+  , units1 ~ units2
   ) =>
   Subtraction
-    (Bounds3d (space @ units))
-    (Point3d (space_ @ units_))
-    (VectorBounds3d (space @ units))
+    (Bounds3d (space1 @ units1))
+    (Point3d (space2 @ units2))
+    (VectorBounds3d (space1 @ units1))
   where
   Bounds3d bx by bz - Point3d px py pz = VectorBounds3d (bx - px) (by - py) (bz - pz)
 
 instance
-  ( space ~ space_
-  , units ~ units_
+  ( space1 ~ space2
+  , units1 ~ units2
   ) =>
   Subtraction
-    (Bounds3d (space @ units))
-    (Bounds3d (space_ @ units_))
-    (VectorBounds3d (space @ units))
+    (Bounds3d (space1 @ units1))
+    (Bounds3d (space2 @ units2))
+    (VectorBounds3d (space1 @ units1))
   where
   Bounds3d x1 y1 z1 - Bounds3d x2 y2 z2 = VectorBounds3d (x1 - x2) (y1 - y2) (z1 - z2)
 

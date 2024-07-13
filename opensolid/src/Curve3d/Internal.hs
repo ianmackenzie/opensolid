@@ -55,8 +55,8 @@ instance HasUnits (Curve3d (space @ units)) where
   type Erase (Curve3d (space @ units)) = Curve3d (space @ Unitless)
 
 instance
-  space ~ space_ =>
-  Units.Coercion (Curve3d (space @ units1)) (Curve3d (space_ @ units2))
+  space1 ~ space2 =>
+  Units.Coercion (Curve3d (space1 @ unitsA)) (Curve3d (space2 @ unitsB))
   where
   coerce curve = case curve of
     Line p1 p2 -> Line (Units.coerce p1) (Units.coerce p2)

@@ -67,8 +67,8 @@ instance HasUnits (VectorBounds2d (space @ units)) where
   type Erase (VectorBounds2d (space @ units)) = VectorBounds2d (space @ Unitless)
 
 instance
-  space ~ space_ =>
-  Units.Coercion (VectorBounds2d (space @ units1)) (VectorBounds2d (space_ @ units2))
+  space1 ~ space2 =>
+  Units.Coercion (VectorBounds2d (space1 @ unitsA)) (VectorBounds2d (space2 @ unitsB))
   where
   coerce = Data.Coerce.coerce
 

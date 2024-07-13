@@ -254,7 +254,7 @@ instance HasUnits (Arc2d (space @ units)) where
 
 instance
   space1 ~ space2 =>
-  Units.Coercion (Arc2d (space1 @ units1)) (Arc2d (space2 @ units2))
+  Units.Coercion (Arc2d (space1 @ unitsA)) (Arc2d (space2 @ unitsB))
   where
   coerce = Data.Coerce.coerce
 

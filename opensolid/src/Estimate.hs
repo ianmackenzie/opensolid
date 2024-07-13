@@ -53,7 +53,7 @@ instance HasUnits (Estimate units) where
   type Units (Estimate units) = units
   type Erase (Estimate units) = Estimate Unitless
 
-instance Units.Coercion (Estimate units1) (Estimate units2) where
+instance Units.Coercion (Estimate unitsA) (Estimate unitsB) where
   coerce (Coerce estimate) = Coerce estimate
   coerce estimate = Coerce estimate
 

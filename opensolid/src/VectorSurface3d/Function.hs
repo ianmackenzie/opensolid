@@ -95,8 +95,8 @@ instance HasUnits (Function (space @ units)) where
   type Erase (Function (space @ units)) = Function (space @ Unitless)
 
 instance
-  space ~ space_ =>
-  Units.Coercion (Function (space @ units1)) (Function (space_ @ units2))
+  space1 ~ space2 =>
+  Units.Coercion (Function (space1 @ unitsA)) (Function (space2 @ unitsB))
   where
   coerce function = case function of
     Constant v -> Constant (Units.coerce v)
