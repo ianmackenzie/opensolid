@@ -387,8 +387,7 @@ zeros curve =
     then Failure Zeros.ZeroEverywhere
     else Result.do
       let derivatives = Stream.iterate curve derivative
-      let derivativeBounds tBounds =
-            Stream.map (\curveDerivative -> segmentBounds curveDerivative tBounds) derivatives
+      let derivativeBounds t = Stream.map (\f -> segmentBounds f t) derivatives
       let cache = Solve1d.init derivativeBounds
       (roots, _) <- findZeros derivatives [0 .. 3] cache
       Success (List.sortBy Root.value roots)
