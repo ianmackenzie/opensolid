@@ -95,11 +95,13 @@ type role (:*:) phantom phantom
 
 data units1 :*: units2
 
+infixl 7 :*:
+
 type role (:/:) phantom phantom
 
 data units1 :/: units2
 
-infixl 7 :*:, :/:
+infixl 7 :/:
 
 {-# INLINE erase #-}
 erase :: Coercion a (Erase a) => a -> Erase a

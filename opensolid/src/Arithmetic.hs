@@ -137,7 +137,9 @@ class DivMod a where
   (//) :: a -> a -> Int
   (%) :: a -> a -> a
 
-infixl 7 //, %
+infixl 7 //
+
+infixl 7 %
 
 instance DivMod Int where
   (//) = Prelude.div

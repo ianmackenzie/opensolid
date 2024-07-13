@@ -27,6 +27,8 @@ type Tolerance units = ?tolerance :: Qty units
 class ApproximateEquality a b units | a b -> units where
   (~=) :: Tolerance units => a -> b -> Bool
 
+infix 4 ~=
+
 instance units ~ units_ => ApproximateEquality (Qty units) (Qty units_) units where
   x ~= y = Qty.abs (x - y) <= ?tolerance
 
@@ -81,6 +83,8 @@ instance
 (!=) :: (ApproximateEquality a b units, Tolerance units) => a -> b -> Bool
 (!=) first second = not (first ~= second)
 
+infix 4 !=
+
 {- | Take an expression which would normally require a tolerance,
 and evaluate it using a tolerance of zero. For example, the expression
 
@@ -100,8 +104,6 @@ exactly expression = using Qty.zero expression
 
 using :: Qty units -> (Tolerance units => a) -> a
 using tolerance expression = let ?tolerance = tolerance in expression
-
-infix 4 ~=, !=
 
 squared :: (Tolerance units, Units.Squared units squaredUnits) => Qty squaredUnits
 squared = Qty.squared ?tolerance
