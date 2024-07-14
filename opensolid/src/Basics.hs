@@ -23,7 +23,7 @@ module Basics
   , always
   , fromIntegral
   , internalError
-  , todo
+  , pattern TODO
   , (|>)
   , ($)
   , type (~)
@@ -73,6 +73,13 @@ fromInteger = Prelude.fromInteger
 
 internalError :: HasCallStack => Text -> a
 internalError message = withFrozenCallStack $ abort (Prelude.mappend "Internal error: " message)
+
+pattern TODO :: HasCallStack => a
+pattern TODO <- (withFrozenCallStack todo -> ())
+  where
+    TODO = withFrozenCallStack todo
+
+{-# COMPLETE TODO #-}
 
 todo :: HasCallStack => a
 todo = withFrozenCallStack $ abort "Not implemented"
