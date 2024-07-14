@@ -77,7 +77,7 @@ internalError message = withFrozenCallStack $ abort (Prelude.mappend "Internal e
 todo :: HasCallStack => a
 todo = withFrozenCallStack $ abort "Not implemented"
 
-abort :: Text -> a
+abort :: HasCallStack => Text -> a
 abort message = Prelude.error (Data.Text.unpack message)
 
 {-# INLINE (|>) #-}
