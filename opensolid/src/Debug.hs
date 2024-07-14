@@ -14,7 +14,6 @@ import Composition
 import Control.Exception qualified
 import Data.Text qualified
 import Debug.Trace qualified
-import GHC.Stack (HasCallStack)
 import Text qualified
 import Prelude qualified
 

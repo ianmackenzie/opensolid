@@ -27,6 +27,7 @@ module Basics
   , (|>)
   , ($)
   , type (~)
+  , HasCallStack
   )
 where
 
