@@ -17,7 +17,9 @@ module Test
 where
 
 import Data.Foldable qualified
+import Duration qualified
 import Error qualified
+import Float qualified
 import IO qualified
 import List qualified
 import OpenSolid
@@ -25,6 +27,7 @@ import Random (Generator)
 import Random qualified
 import System.Environment
 import Text qualified
+import Text.Printf qualified
 import Prelude qualified
 
 data TestResult
@@ -92,15 +95,25 @@ runImpl args context test = case test of
       | List.isEmpty args ->
           -- No test filter specified, silently run all tests
           fuzzImpl fullName count generator
-      | List.anySatisfy (\arg -> Text.contains arg fullName) args ->
+      | List.anySatisfy (\arg -> Text.contains arg fullName) args -> IO.do
           -- Test filter specified, so print out which tests we're running
-          IO.printLine ("Running " + fullName) >> fuzzImpl fullName count generator
+          -- and how long they took (with an extra emoji to flag slow tests)
+          (results, elapsed) <- IO.time (fuzzImpl fullName count generator)
+          let elapsedText = fixed 3 (Duration.inSeconds elapsed) + "s"
+          let elapsedSuffix = if elapsed > Duration.seconds 0.1 then " ⏲️" else ""
+          IO.printLine (fullName + ": " + elapsedText + elapsedSuffix)
+          IO.succeed results
       | otherwise ->
           -- Current test didn't match filter, so return 0 successes and 0 failures
           IO.succeed (0, 0)
   Group label tests -> IO.do
     successesAndFailuresPerGroup <- IO.collect (runImpl args (appendTo context label)) tests
     IO.succeed (sum successesAndFailuresPerGroup)
+
+fixed :: Int -> Float -> Text
+fixed decimalPlaces value = do
+  let formatString = "%." + Text.int decimalPlaces + "f"
+  Text.pack (Text.Printf.printf (Text.unpack formatString) (Float.toDouble value))
 
 appendTo :: Text -> Text -> Text
 appendTo "" name = name
