@@ -24,6 +24,8 @@ crossingRoots = Test.verify "crossingRoots" Test.do
   let expectedRoots = [Root 0.0 0 Positive, Root (1 / 3) 0 Negative, Root (2 / 3) 0 Positive]
   roots <- Curve1d.zeros y
   Test.expect (roots ~= expectedRoots)
+    |> Test.output "roots" roots
+    |> Test.output "expectedRoots" expectedRoots
 
 tangentRoots :: Tolerance Unitless => Test
 tangentRoots = Test.verify "tangentRoots" Test.do
