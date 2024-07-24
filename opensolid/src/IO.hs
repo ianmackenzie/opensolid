@@ -14,6 +14,7 @@ module IO
   , mapError
   , addContext
   , printLine
+  , time
   )
 where
 
@@ -22,6 +23,7 @@ import Composition
 import Control.Concurrent
 import Control.Concurrent.Async qualified as Async
 import Data.ByteString.Char8 qualified
+import Data.Time.Clock qualified
 import Duration (Duration)
 import Duration qualified
 import Error qualified
@@ -89,3 +91,10 @@ addContext text = mapError (Error.addContext text)
 
 printLine :: Text -> IO ()
 printLine = Text.encodeUtf8 >> Data.ByteString.Char8.putStrLn
+
+time :: IO a -> IO (a, Duration)
+time io = IO.do
+  startTime <- Data.Time.Clock.getCurrentTime
+  result <- io
+  endTime <- Data.Time.Clock.getCurrentTime
+  succeed (result, Duration.from startTime endTime)

@@ -37,6 +37,7 @@ common config
     random,
     scientific,
     text,
+    time,
     type-errors,
     vector,
     wai,
