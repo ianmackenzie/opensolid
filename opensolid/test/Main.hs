@@ -28,25 +28,25 @@ import Tolerance qualified
 tests :: List Test
 tests =
   Tolerance.using (Length.meters 1e-9) $
-    [ Test.group "Parameter" Tests.Parameter.tests
-    , Test.group "Qty" Tests.Qty.tests
-    , Test.group "Range" Tests.Range.tests
-    , Test.group "VectorBounds3d" Tests.VectorBounds3d.tests
-    , Test.group "Curve1d" Tests.Curve1d.tests
-    , Test.group "Curve2d" Tests.Curve2d.tests
-    , Test.group "Estimate" Tests.Estimate.tests
-    , Test.group "List" Tests.List.tests
-    , Test.group "NonEmpty" Tests.NonEmpty.tests
-    , Test.group "Region2d" Tests.Region2d.tests
-    , Test.group "Direction2d" Tests.Direction2d.tests
-    , Test.group "Arc2d" Tests.Arc2d.tests
-    , Test.group "Map" Tests.Map.tests
-    , Test.group "DivMod" Tests.DivMod.tests
-    , Test.group "Float" Tests.Float.tests
-    , Test.group "Stream" Tests.Stream.tests
-    , Test.group "Text" Tests.Text.tests
-    , Test.group "Bounds2d" Tests.Bounds2d.tests
-    , Test.group "VectorBounds2d" Tests.VectorBounds2d.tests
+    [ Test.group "Tests.Parameter" Tests.Parameter.tests
+    , Test.group "Tests.Qty" Tests.Qty.tests
+    , Test.group "Tests.Range" Tests.Range.tests
+    , Test.group "Tests.VectorBounds3d" Tests.VectorBounds3d.tests
+    , Test.group "Tests.Curve1d" Tests.Curve1d.tests
+    , Test.group "Tests.Curve2d" Tests.Curve2d.tests
+    , Test.group "Tests.Estimate" Tests.Estimate.tests
+    , Test.group "Tests.List" Tests.List.tests
+    , Test.group "Tests.NonEmpty" Tests.NonEmpty.tests
+    , Test.group "Tests.Region2d" Tests.Region2d.tests
+    , Test.group "Tests.Direction2d" Tests.Direction2d.tests
+    , Test.group "Tests.Arc2d" Tests.Arc2d.tests
+    , Test.group "Tests.Map" Tests.Map.tests
+    , Test.group "Tests.DivMod" Tests.DivMod.tests
+    , Test.group "Tests.Float" Tests.Float.tests
+    , Test.group "Tests.Stream" Tests.Stream.tests
+    , Test.group "Tests.Text" Tests.Text.tests
+    , Test.group "Tests.Bounds2d" Tests.Bounds2d.tests
+    , Test.group "Tests.VectorBounds2d" Tests.VectorBounds2d.tests
     ]
 
 main :: IO ()

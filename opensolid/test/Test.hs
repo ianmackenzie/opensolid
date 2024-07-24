@@ -23,6 +23,7 @@ import List qualified
 import OpenSolid
 import Random (Generator)
 import Random qualified
+import System.Environment
 import Text qualified
 import Prelude qualified
 
@@ -49,7 +50,7 @@ instance Bind (Result x) where
   Failure error >>= _ = fail error
 
 data Test
-  = Check Int Text Expectation
+  = Check Int Text ~Expectation
   | Group Text (List Test)
 
 verify :: Text -> Expectation -> Test
@@ -69,21 +70,41 @@ testCount count description = do
 run :: List Test -> IO ()
 run tests = IO.do
   IO.printLine "Running tests..."
-  results <- IO.collect (runImpl []) tests
+  argStrings <- System.Environment.getArgs
+  let args = List.map Text.pack argStrings
+  results <- IO.collect (runImpl args "") tests
   let (successes, failures) = sum results
   if failures == 0
     then IO.printLine ("✅ " + testCount successes "passed")
     else IO.fail (testCount failures "failed")
 
-reportError :: List Text -> List Text -> IO (Int, Int)
+reportError :: Text -> List Text -> IO (Int, Int)
 reportError context messages = IO.do
-  IO.printLine ("❌ " + (Text.join " | " (List.reverse context) + ":"))
+  IO.printLine ("❌ " + context + ":")
   IO.forEach messages (Text.indent "   " >> IO.printLine)
   IO.succeed (0, 1)
 
-runImpl :: List Text -> Test -> IO (Int, Int)
-runImpl context (Check count label generator) = fuzzImpl (label : context) count generator
-runImpl context (Group label tests) = IO.collect (runImpl (label : context)) tests |> IO.map sum
+runImpl :: List Text -> Text -> Test -> IO (Int, Int)
+runImpl args context test = case test of
+  Check count label generator -> do
+    let fullName = appendTo context label
+    if
+      | List.isEmpty args ->
+          -- No test filter specified, silently run all tests
+          fuzzImpl fullName count generator
+      | List.anySatisfy (\arg -> Text.contains arg fullName) args ->
+          -- Test filter specified, so print out which tests we're running
+          IO.printLine ("Running " + fullName) >> fuzzImpl fullName count generator
+      | otherwise ->
+          -- Current test didn't match filter, so return 0 successes and 0 failures
+          IO.succeed (0, 0)
+  Group label tests -> IO.do
+    successesAndFailuresPerGroup <- IO.collect (runImpl args (appendTo context label)) tests
+    IO.succeed (sum successesAndFailuresPerGroup)
+
+appendTo :: Text -> Text -> Text
+appendTo "" name = name
+appendTo context name = context + "." + name
 
 sum :: List (Int, Int) -> (Int, Int)
 sum [] = (0, 0)
@@ -91,7 +112,7 @@ sum ((successes, failures) : rest) = do
   let (restSuccesses, restFailures) = sum rest
   (successes + restSuccesses, failures + restFailures)
 
-fuzzImpl :: List Text -> Int -> Expectation -> IO (Int, Int)
+fuzzImpl :: Text -> Int -> Expectation -> IO (Int, Int)
 fuzzImpl _ 0 _ = IO.succeed (1, 0)
 fuzzImpl context n expectation = IO.do
   let (Expectation generator) = expectation

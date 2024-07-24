@@ -18,7 +18,7 @@ tests =
     ]
 
 crossingRoots :: Tolerance Unitless => Test
-crossingRoots = Test.verify "Crossing roots" Test.do
+crossingRoots = Test.verify "crossingRoots" Test.do
   let x = 3 * Curve1d.parameter
   let y = (x - 1) * (x - 1) * (x - 1) - (x - 1)
   let expectedRoots = [Root 0.0 0 Positive, Root (1 / 3) 0 Negative, Root (2 / 3) 0 Positive]
@@ -26,7 +26,7 @@ crossingRoots = Test.verify "Crossing roots" Test.do
   Test.expect (roots ~= expectedRoots)
 
 tangentRoots :: Tolerance Unitless => Test
-tangentRoots = Test.verify "Tangent roots" Test.do
+tangentRoots = Test.verify "tangentRoots" Test.do
   let theta = Angle.twoPi * Curve1d.parameter
   let expression = Curve1d.squared (Curve1d.sin theta)
   let expectedRoots = [Root t 1 Positive | t <- [0.0, 0.5, 1.0]]
@@ -36,18 +36,14 @@ tangentRoots = Test.verify "Tangent roots" Test.do
     |> Test.output "expectedRoots" expectedRoots
 
 approximateEquality :: Tolerance Unitless => Test
-approximateEquality = do
+approximateEquality = Test.verify "approximateEquality" Test.do
   let theta = Angle.twoPi * Curve1d.parameter
   let sinTheta = Curve1d.sin theta
   let cosTheta = Curve1d.cos theta
   let sumOfSquares = Curve1d.squared sinTheta + Curve1d.squared cosTheta
-  Test.group "Approximate equality" $
-    [ Test.verify "sin(x) != cos(x)" $
-        Test.expect (sinTheta != cosTheta)
-    , Test.verify "sin(x) ~= cos(pi/2 - x)" $
-        Test.expect (sinTheta ~= Curve1d.cos (Angle.degrees 90.0 - theta))
-    , Test.verify "sin^2(x) + cos^2(x) ~= 1.0" $
-        Test.expect (sumOfSquares ~= 1.0)
-    , Test.verify "sin^2(x) + cos^2(x) != 2.0" $
-        Test.expect (sumOfSquares != 2.0)
+  Test.all
+    [ Test.expect (sinTheta != cosTheta)
+    , Test.expect (sinTheta ~= Curve1d.cos (Angle.degrees 90.0 - theta))
+    , Test.expect (sumOfSquares ~= 1.0)
+    , Test.expect (sumOfSquares != 2.0)
     ]
