@@ -10,7 +10,5 @@ data Root = Root
   deriving (Eq, Show)
 
 instance ApproximateEquality Root Root Unitless where
-  root1 ~= root2 =
-    value root1 ~= value root2
-      && order root1 == order root2
-      && sign root1 == sign root2
+  Root value1 order1 sign1 ~= Root value2 order2 sign2 =
+    value1 ~= value2 && order1 == order2 && sign1 == sign2
