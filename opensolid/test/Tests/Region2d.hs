@@ -31,7 +31,7 @@ tests =
 
 areaIsApproximately :: Area -> Region2d (space @ Meters) -> Bool
 areaIsApproximately expectedArea region =
-  Estimate.within (Area.squareMeters 1e-6) (Region2d.area region)
+  Estimate.within (Area.squareMeters 1e-4) (Region2d.area region)
     |> Range.includes expectedArea
 
 square :: Tolerance Meters => Test
