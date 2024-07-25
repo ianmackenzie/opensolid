@@ -28,11 +28,13 @@ import Error qualified
 import Int qualified
 import List qualified
 import OpenSolid
+import Pair qualified
 import Qty qualified
 import Queue (Queue)
 import Queue qualified
 import Range (Range)
 import Range qualified
+import Result qualified
 
 data Neighborhood units = Neighborhood
   { n :: Int
@@ -107,11 +109,10 @@ type Callback cached solution =
 search ::
   Callback cached solution ->
   Cache cached ->
-  List solution ->
-  List Domain1d ->
-  Result InfiniteRecursion (List solution, List Domain1d)
-search callback cache solutions exclusions =
-  process callback (Queue.singleton cache) solutions exclusions
+  Result InfiniteRecursion (List solution)
+search callback cache =
+  Result.map Pair.first $
+    process callback (Queue.singleton cache) [] []
 
 process ::
   Callback cached solution ->

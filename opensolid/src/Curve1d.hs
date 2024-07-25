@@ -386,8 +386,8 @@ zeros curve
       let derivatives = Stream.iterate curve derivative
       let derivativeBounds tBounds = Stream.map (\f -> segmentBounds f tBounds) derivatives
       let cache = Solve1d.init derivativeBounds
-      case Solve1d.search (findZeros derivatives) cache [] [] of
-        Success (roots, _) -> Success (List.sortBy Root.value roots)
+      case Solve1d.search (findZeros derivatives) cache of
+        Success roots -> Success (List.sortBy Root.value roots)
         Failure Solve1d.InfiniteRecursion -> Failure Zeros.HigherOrderZero
 
 findZeros ::
