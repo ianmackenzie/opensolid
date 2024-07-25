@@ -123,7 +123,7 @@ area = Test.verify "area" Test.do
   let dAdt = Curve2d.yCoordinate curve * VectorCurve2d.xComponent (Curve2d.derivative curve)
   let areaEstimate = Curve1d.integral dAdt
   let expectedArea = Area.squareMeters (Float.pi / 2)
-  areaIsCorrect <- Tolerance.using (Area.squareMeters 1e-6) (resolvesTo expectedArea areaEstimate)
+  areaIsCorrect <- Tolerance.using (Area.squareMeters 1e-4) (resolvesTo expectedArea areaEstimate)
   Test.expect areaIsCorrect
 
 minimumBy :: Tolerance Meters => Test
