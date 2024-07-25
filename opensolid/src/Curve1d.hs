@@ -405,7 +405,7 @@ findZeros derivatives subdomain derivativeBounds exclusions
   -- before attempting more sophisticated/complex solving
   | Range.width (Domain1d.bounds subdomain) > 1 / 16 = Solve1d.recurse
   | otherwise = case exclusions of
-      Solve1d.SomeExclusions _ -> Solve1d.recurse
+      Solve1d.SomeExclusions -> Solve1d.recurse
       Solve1d.NoExclusions -> findMonotonicOrder derivatives subdomain derivativeBounds 0
 
 maxRootOrder :: Int

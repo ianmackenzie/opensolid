@@ -125,7 +125,7 @@ data SomeExclusions
 
 data Exclusions exclusions where
   NoExclusions :: Exclusions NoExclusions
-  SomeExclusions :: NonEmpty Domain2d -> Exclusions SomeExclusions
+  SomeExclusions :: Exclusions SomeExclusions
 
 deriving instance Show (Exclusions exclusions)
 
@@ -166,16 +166,14 @@ process callback queue accumulated =
         then process callback remaining accumulated
         else do
           case filteredExclusions of
-            NonEmpty someExclusions ->
-              case callback subdomain cached (SomeExclusions someExclusions) of
-                Pass -> process callback remaining accumulated
-                Recurse -> recurseIntoChildrenOf node callback remaining accumulated
-            [] ->
-              case callback subdomain cached NoExclusions of
-                Pass -> process callback remaining accumulated
-                Recurse -> recurseIntoChildrenOf node callback remaining accumulated
-                Return solution ->
-                  process callback remaining ((solution, subdomain) : accumulated)
+            [] -> case callback subdomain cached NoExclusions of
+              Pass -> process callback remaining accumulated
+              Recurse -> recurseIntoChildrenOf node callback remaining accumulated
+              Return solution ->
+                process callback remaining ((solution, subdomain) : accumulated)
+            List.OneOrMore -> case callback subdomain cached SomeExclusions of
+              Pass -> process callback remaining accumulated
+              Recurse -> recurseIntoChildrenOf node callback remaining accumulated
 
 containedBy :: List Domain2d -> Domain2d -> Bool
 containedBy exclusions subdomain =

@@ -480,7 +480,7 @@ findTangentSolution derivatives subdomain derivativeBounds exclusions = do
               Solve2d.return solution
           -- TODO try to find tangent curve
           | otherwise -> Solve2d.recurse
-        Solve2d.SomeExclusions _ -> Solve2d.recurse
+        Solve2d.SomeExclusions -> Solve2d.recurse
 
 tangentPointSolution ::
   Tolerance units =>
@@ -655,7 +655,7 @@ findCrossingSolution derivatives subdomain derivativeBounds exclusions = do
     then Solve2d.pass
     else do
       case exclusions of
-        Solve2d.SomeExclusions _ -> Solve2d.recurse
+        Solve2d.SomeExclusions -> Solve2d.recurse
         Solve2d.NoExclusions -> do
           let fuSign = Range.resolvedSign fuBounds
           let fvSign = Range.resolvedSign fvBounds

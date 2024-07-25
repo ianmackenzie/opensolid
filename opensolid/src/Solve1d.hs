@@ -95,7 +95,7 @@ data SomeExclusions
 
 data Exclusions exclusions where
   NoExclusions :: Exclusions NoExclusions
-  SomeExclusions :: NonEmpty Domain1d -> Exclusions SomeExclusions
+  SomeExclusions :: Exclusions SomeExclusions
 
 data InfiniteRecursion = InfiniteRecursion deriving (Eq, Show, Error.Message)
 
@@ -127,16 +127,14 @@ process callback queue solutions exclusions =
       if List.anySatisfy (Domain1d.contains subdomain) filteredExclusions
         then process callback remaining solutions exclusions
         else case filteredExclusions of
-          NonEmpty someExclusions ->
-            case callback subdomain cached (SomeExclusions someExclusions) of
-              Pass -> process callback remaining solutions exclusions
-              Recurse -> recurseIntoChildrenOf node callback remaining solutions exclusions
-          [] ->
-            case callback subdomain cached NoExclusions of
-              Pass -> process callback remaining solutions exclusions
-              Recurse -> recurseIntoChildrenOf node callback remaining solutions exclusions
-              Return newSolutions ->
-                process callback remaining (newSolutions + solutions) (subdomain : exclusions)
+          [] -> case callback subdomain cached NoExclusions of
+            Pass -> process callback remaining solutions exclusions
+            Recurse -> recurseIntoChildrenOf node callback remaining solutions exclusions
+            Return newSolutions ->
+              process callback remaining (newSolutions + solutions) (subdomain : exclusions)
+          List.OneOrMore -> case callback subdomain cached SomeExclusions of
+            Pass -> process callback remaining solutions exclusions
+            Recurse -> recurseIntoChildrenOf node callback remaining solutions exclusions
     Nothing -> Success (solutions, exclusions)
 
 {-# INLINE recurseIntoChildrenOf #-}
