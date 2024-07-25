@@ -1,7 +1,11 @@
+{-# LANGUAGE DuplicateRecordFields #-}
+{-# LANGUAGE NoFieldSelectors #-}
+
 module Solve1d
   ( Neighborhood
   , neighborhood
   , derivativeTolerance
+  , root
   , Cache
   , init
   , SomeExclusions
@@ -17,6 +21,7 @@ module Solve1d
   )
 where
 
+import Curve1d.Root (Root (Root))
 import Domain1d (Domain1d)
 import Domain1d qualified
 import Error qualified
@@ -31,19 +36,25 @@ import Range qualified
 
 data Neighborhood units = Neighborhood
   { n :: Int
-  , derivativeMagnitude :: Qty units
+  , sign :: Sign
+  , magnitude :: Qty units
   , radius :: Float
   }
   deriving (Show)
 
 neighborhood :: Tolerance units => Int -> Qty units -> Neighborhood units
-neighborhood n derivativeMagnitude = do
-  let radius = (Int.factorial n * ?tolerance / derivativeMagnitude) ** (1 / n)
-  Neighborhood{n, derivativeMagnitude, radius}
+neighborhood n value = do
+  let sign = Qty.sign value
+  let magnitude = Qty.abs value
+  let radius = (Int.factorial n * ?tolerance / magnitude) ** (1 / n)
+  Neighborhood{n, sign, magnitude, radius}
 
 derivativeTolerance :: Neighborhood units -> Int -> Qty units
-derivativeTolerance (Neighborhood{n, derivativeMagnitude, radius}) k =
-  derivativeMagnitude * radius ** (n - k) / Int.factorial (n - k)
+derivativeTolerance (Neighborhood{n, magnitude, radius}) k = do
+  magnitude * radius ** (n - k) / Int.factorial (n - k)
+
+root :: Float -> Neighborhood units -> Root
+root value (Neighborhood{n, sign}) = Root value (n - 1) sign
 
 data Cache cached
   = Tree Domain1d cached (Node cached)
