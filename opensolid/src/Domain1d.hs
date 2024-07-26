@@ -8,6 +8,7 @@ module Domain1d
   , endpoints
   , lowerBoundary
   , upperBoundary
+  , midpoint
   , isAtomic
   , bisect
   , half
@@ -64,6 +65,9 @@ lowerBoundary (Domain1d{n, i}) = Boundary{n, i}
 
 upperBoundary :: Domain1d -> Boundary
 upperBoundary (Domain1d{n, j}) = Boundary{n, i = j}
+
+midpoint :: Domain1d -> Boundary
+midpoint (Domain1d n i j) = Boundary (n * 2) (i + j)
 
 bisect :: Domain1d -> (Domain1d, Domain1d)
 bisect (Domain1d{n, i, j}) = do
