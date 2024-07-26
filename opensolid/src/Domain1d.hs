@@ -46,6 +46,10 @@ instance Eq Boundary where
   Boundary n1 i1 == Boundary n2 i2 =
     i1 * n2 == i2 * n1
 
+instance Ord Boundary where
+  compare (Boundary n1 i1) (Boundary n2 i2) =
+    compare (i1 * n2) (i2 * n1)
+
 unit :: Domain1d
 unit = Domain1d{n = 1.0, i = 0.0, j = 1.0}
 
