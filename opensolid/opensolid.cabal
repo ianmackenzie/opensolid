@@ -24,6 +24,7 @@ common config
   default-language: GHC2021
   build-depends:
     aeson,
+    ansi-terminal,
     array,
     async,
     base,

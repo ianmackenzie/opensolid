@@ -25,6 +25,7 @@ import List qualified
 import OpenSolid
 import Random (Generator)
 import Random qualified
+import System.Console.ANSI qualified
 import System.Environment
 import Text qualified
 import Text.Printf qualified
@@ -78,12 +79,17 @@ run tests = IO.do
   results <- IO.collect (runImpl args "") tests
   let (successes, failures) = sum results
   if failures == 0
-    then IO.printLine ("✅ " + testCount successes "passed")
+    then IO.do
+      System.Console.ANSI.setSGR [System.Console.ANSI.SetColor System.Console.ANSI.Foreground System.Console.ANSI.Vivid System.Console.ANSI.Green]
+      IO.printLine (testCount successes "passed")
+      System.Console.ANSI.setSGR [System.Console.ANSI.Reset]
     else IO.fail (testCount failures "failed")
 
 reportError :: Text -> List Text -> IO (Int, Int)
 reportError context messages = IO.do
-  IO.printLine ("❌ " + context + ":")
+  System.Console.ANSI.setSGR [System.Console.ANSI.SetColor System.Console.ANSI.Foreground System.Console.ANSI.Vivid System.Console.ANSI.Red]
+  IO.printLine (context + " failed:")
+  System.Console.ANSI.setSGR [System.Console.ANSI.Reset]
   IO.forEach messages (Text.indent "   " >> IO.printLine)
   IO.succeed (0, 1)
 
