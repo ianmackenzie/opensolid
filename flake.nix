@@ -15,6 +15,9 @@
           default = pkgs.mkShell {
             # Development tools
             packages = [
+              # Get Nix to provide a proper Bash shell with builtins like 'complete', see e.g.
+              # https://discourse.nixos.org/t/non-interactive-bash-errors-from-flake-nix-mkshell/33310
+              pkgs.bashInteractive
               # The Haskell compiler itself
               pkgs.ghc
               # The Stack build tool,
