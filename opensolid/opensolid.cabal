@@ -186,6 +186,7 @@ library
     Transform3d
     Units
     Uv
+    Uv.Derivatives
     Uvw
     Vector2d
     Vector3d
