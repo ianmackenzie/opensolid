@@ -221,13 +221,13 @@ instance VectorCurve2d.Interface (PointCurveDifference (space @ units)) (space @
         (transformBy (Units.coerce transform) curve)
 
 instance
-  ( space ~ space_
-  , units ~ units_
+  ( space1 ~ space2
+  , units1 ~ units2
   ) =>
   Subtraction
-    (Point2d (space @ units))
-    (Curve2d (space_ @ units_))
-    (VectorCurve2d (space @ units))
+    (Point2d (space1 @ units1))
+    (Curve2d (space2 @ units2))
+    (VectorCurve2d (space1 @ units1))
   where
   point - curve = VectorCurve2d (PointCurveDifference point curve)
 
@@ -248,13 +248,13 @@ instance VectorCurve2d.Interface (CurvePointDifference (space @ units)) (space @
         (Point2d.transformBy (Units.coerce transform) point)
 
 instance
-  ( space ~ space_
-  , units ~ units_
+  ( space1 ~ space2
+  , units1 ~ units2
   ) =>
   Subtraction
-    (Curve2d (space @ units))
-    (Point2d (space_ @ units_))
-    (VectorCurve2d (space @ units))
+    (Curve2d (space1 @ units1))
+    (Point2d (space2 @ units2))
+    (VectorCurve2d (space1 @ units1))
   where
   curve - point = VectorCurve2d (CurvePointDifference curve point)
 

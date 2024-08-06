@@ -61,8 +61,8 @@ instance space1 ~ space2 => Units.Coercion (Direction2d space1) (Direction2d spa
   coerce = identity
 
 instance
-  space ~ space_ =>
-  ApproximateEquality (Direction2d space) (Direction2d space_) Radians
+  space1 ~ space2 =>
+  ApproximateEquality (Direction2d space1) (Direction2d space2) Radians
   where
   d1 ~= d2 = angleFrom d1 d2 ~= Angle.zero
 
@@ -95,17 +95,17 @@ instance Multiplication' (Direction2d space) (Qty units) where
 
 instance Multiplication (Direction2d space) (Qty units) (Vector2d (space @ units))
 
-instance space ~ space_ => DotMultiplication' (Direction2d space) (Direction2d space_) where
-  type Direction2d space .<>. Direction2d space_ = Float
+instance space1 ~ space2 => DotMultiplication' (Direction2d space1) (Direction2d space2) where
+  type Direction2d space1 .<>. Direction2d space2 = Float
   Direction2d v1 .<>. Direction2d v2 = v1 <> v2
 
-instance space ~ space_ => DotMultiplication (Direction2d space) (Direction2d space_) Float
+instance space1 ~ space2 => DotMultiplication (Direction2d space1) (Direction2d space2) Float
 
-instance space ~ space_ => CrossMultiplication' (Direction2d space) (Direction2d space_) where
-  type Direction2d space .><. Direction2d space_ = Float
+instance space1 ~ space2 => CrossMultiplication' (Direction2d space1) (Direction2d space2) where
+  type Direction2d space1 .><. Direction2d space2 = Float
   Direction2d v1 .><. Direction2d v2 = v1 >< v2
 
-instance space ~ space_ => CrossMultiplication (Direction2d space) (Direction2d space_) Float
+instance space1 ~ space2 => CrossMultiplication (Direction2d space1) (Direction2d space2) Float
 
 {-# INLINE unwrap #-}
 unwrap :: Direction2d space -> Vector2d (space @ Unitless)

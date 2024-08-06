@@ -47,8 +47,8 @@ instance space1 ~ space2 => Units.Coercion (Direction3d space1) (Direction3d spa
   coerce = identity
 
 instance
-  space ~ space_ =>
-  ApproximateEquality (Direction3d space) (Direction3d space_) Radians
+  space1 ~ space2 =>
+  ApproximateEquality (Direction3d space1) (Direction3d space2) Radians
   where
   d1 ~= d2 = angleFrom d1 d2 ~= Angle.zero
 
@@ -81,18 +81,18 @@ instance Multiplication' (Direction3d space) (Qty units) where
   type Direction3d space .*. Qty units = Vector3d (space @ (Unitless :*: units))
   Direction3d vector .*. scale = vector .*. scale
 
-instance space ~ space_ => DotMultiplication (Direction3d space) (Direction3d space_) Float
+instance space1 ~ space2 => DotMultiplication (Direction3d space1) (Direction3d space2) Float
 
-instance space ~ space_ => DotMultiplication' (Direction3d space) (Direction3d space_) where
-  type Direction3d space .<>. Direction3d space_ = Qty (Unitless :*: Unitless)
+instance space1 ~ space2 => DotMultiplication' (Direction3d space1) (Direction3d space2) where
+  type Direction3d space1 .<>. Direction3d space2 = Qty (Unitless :*: Unitless)
   Direction3d vector1 .<>. Direction3d vector2 = vector1 .<>. vector2
 
 instance
-  space ~ space_ =>
-  CrossMultiplication (Direction3d space) (Direction3d space_) (Vector3d (space @ Unitless))
+  space1 ~ space2 =>
+  CrossMultiplication (Direction3d space1) (Direction3d space2) (Vector3d (space1 @ Unitless))
 
-instance space ~ space_ => CrossMultiplication' (Direction3d space) (Direction3d space_) where
-  type Direction3d space .><. Direction3d space_ = Vector3d (space @ (Unitless :*: Unitless))
+instance space1 ~ space2 => CrossMultiplication' (Direction3d space1) (Direction3d space2) where
+  type Direction3d space1 .><. Direction3d space2 = Vector3d (space1 @ (Unitless :*: Unitless))
   Direction3d vector1 .><. Direction3d vector2 = vector1 .><. vector2
 
 xComponent :: Direction3d space -> Float
