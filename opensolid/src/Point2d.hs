@@ -80,65 +80,65 @@ instance
   coerce = Data.Coerce.coerce
 
 instance
-  ( space ~ space_
-  , units ~ units_
+  ( space1 ~ space2
+  , units1 ~ units2
   ) =>
   Addition
-    (Point2d (space @ units))
-    (Vector2d (space_ @ units_))
-    (Point2d (space @ units))
+    (Point2d (space1 @ units1))
+    (Vector2d (space2 @ units2))
+    (Point2d (space1 @ units1))
   where
   Point2d px py + Vector2d vx vy = Point2d (px + vx) (py + vy)
 
 instance
-  ( space ~ space_
-  , units ~ units_
+  ( space1 ~ space2
+  , units1 ~ units2
   ) =>
   Subtraction
-    (Point2d (space @ units))
-    (Vector2d (space_ @ units_))
-    (Point2d (space @ units))
+    (Point2d (space1 @ units1))
+    (Vector2d (space2 @ units2))
+    (Point2d (space1 @ units1))
   where
   Point2d px py - Vector2d vx vy = Point2d (px - vx) (py - vy)
 
 instance
-  ( space ~ space_
-  , units ~ units_
+  ( space1 ~ space2
+  , units1 ~ units2
   ) =>
   Subtraction
-    (Point2d (space @ units))
-    (Point2d (space_ @ units_))
-    (Vector2d (space @ units))
+    (Point2d (space1 @ units1))
+    (Point2d (space2 @ units2))
+    (Vector2d (space1 @ units1))
   where
   Point2d x1 y1 - Point2d x2 y2 = Vector2d (x1 - x2) (y1 - y2)
 
 instance
-  ( space ~ space_
-  , units ~ units_
+  ( space1 ~ space2
+  , units1 ~ units2
   ) =>
   Addition
-    (Point2d (space @ units))
-    (VectorBounds2d (space_ @ units_))
-    (Bounds2d (space @ units))
+    (Point2d (space1 @ units1))
+    (VectorBounds2d (space2 @ units2))
+    (Bounds2d (space1 @ units1))
   where
   Point2d px py + VectorBounds2d vx vy = Bounds2d.xy (px + vx) (py + vy)
 
 instance
-  ( space ~ space_
-  , units ~ units_
+  ( space1 ~ space2
+  , units1 ~ units2
   ) =>
   Subtraction
-    (Point2d (space @ units))
-    (VectorBounds2d (space_ @ units_))
-    (Bounds2d (space @ units))
+    (Point2d (space1 @ units1))
+    (VectorBounds2d (space2 @ units2))
+    (Bounds2d (space1 @ units1))
   where
   Point2d px py - VectorBounds2d vx vy = Bounds2d.xy (px - vx) (py - vy)
 
 instance
-  ( space ~ space_
-  , units ~ units_
+  ( space1 ~ space2
+  , units1 ~ units2
   ) =>
-  ApproximateEquality (Point2d (space @ units)) (Point2d (space_ @ units_)) units
+  ApproximateEquality (Point2d (space1 @ units1)) (Point2d (space2 @ units2)) units1
   where
   p1 ~= p2 = distanceFrom p1 p2 ~= Qty.zero
 
