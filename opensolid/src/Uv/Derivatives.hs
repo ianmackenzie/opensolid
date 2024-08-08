@@ -1,6 +1,6 @@
 module Uv.Derivatives
   ( Derivatives
-  , derivatives
+  , init
   , map
   , value
   , derivative
@@ -12,15 +12,15 @@ import Uv (Parameter (U, V))
 data Derivatives a
   = Derivatives a ~(Derivatives a) ~(Derivatives a)
 
-derivatives :: a -> (Parameter -> a -> a) -> Derivatives a
-derivatives f df = do
-  let derivativesU = derivatives (df U f) df
-  Derivatives f derivativesU (derivativesV derivativesU (df V f) (df V))
+init :: a -> (Parameter -> a -> a) -> Derivatives a
+init f df = do
+  let derivativesU = init (df U f) df
+  Derivatives f derivativesU (initV derivativesU (df V f) (df V))
 
-derivativesV :: Derivatives a -> a -> (a -> a) -> Derivatives a
-derivativesV derivativesU fv dv = do
+initV :: Derivatives a -> a -> (a -> a) -> Derivatives a
+initV derivativesU fv dv = do
   let derivativesUV = derivative V derivativesU
-  Derivatives fv derivativesUV (derivativesV derivativesUV (dv fv) dv)
+  Derivatives fv derivativesUV (initV derivativesUV (dv fv) dv)
 
 value :: Derivatives a -> a
 value (Derivatives v _ _) = v
