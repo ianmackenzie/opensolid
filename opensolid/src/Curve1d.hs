@@ -377,6 +377,9 @@ cos :: Curve1d Radians -> Curve1d Unitless
 cos (Constant x) = constant (Angle.cos x)
 cos curve = Cos curve
 
+integral :: Curve1d units -> Estimate units
+integral curve = Estimate.new (Integral curve (derivative curve) Range.unit)
+
 ----- ROOT FINDING -----
 
 zeros :: Tolerance units => Curve1d units -> Result Zeros.Error (List Root)
@@ -479,6 +482,3 @@ solveMonotonic m fm fn tRange = do
           if t0 == tLow || t0 == tHigh
             then Unresolved
             else Resolved [(t0, Solve1d.neighborhood n (pointOn fn t0))]
-
-integral :: Curve1d units -> Estimate units
-integral curve = Estimate.new (Integral curve (derivative curve) Range.unit)
