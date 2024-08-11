@@ -8,6 +8,7 @@ module List
   , pattern ThreeOrMore
   , pattern FourOrMore
   , singleton
+  , maybe
   , range
   , isEmpty
   , length
@@ -66,6 +67,10 @@ import Prelude qualified
 
 singleton :: a -> List a
 singleton = Data.List.singleton
+
+maybe :: Maybe a -> List a
+maybe (Just value) = [value]
+maybe Nothing = []
 
 range :: Int -> Int -> List Int
 range a b
