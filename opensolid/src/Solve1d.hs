@@ -27,6 +27,7 @@ import Domain1d qualified
 import Error qualified
 import Int qualified
 import List qualified
+import NonEmpty qualified
 import OpenSolid
 import Pair qualified
 import Qty qualified
@@ -131,7 +132,7 @@ process callback queue solutions exclusions =
             Pass -> process callback remaining solutions exclusions
             Recurse -> recurseIntoChildrenOf node callback remaining solutions exclusions
             Return newSolutions ->
-              process callback remaining (newSolutions + solutions) (subdomain : exclusions)
+              process callback remaining (NonEmpty.toList newSolutions + solutions) (subdomain : exclusions)
           List.OneOrMore -> case callback subdomain cached SomeExclusions of
             Pass -> process callback remaining solutions exclusions
             Recurse -> recurseIntoChildrenOf node callback remaining solutions exclusions
@@ -154,11 +155,11 @@ recurseIntoChildrenOf node callback queue solutions exclusions =
       process callback updatedQueue solutions exclusions
 
 data Action exclusions solution where
-  Return :: List solution -> Action NoExclusions solution
+  Return :: NonEmpty solution -> Action NoExclusions solution
   Recurse :: Action exclusions solution
   Pass :: Action exclusions solution
 
-return :: List solution -> Action NoExclusions solution
+return :: NonEmpty solution -> Action NoExclusions solution
 return = Return
 
 recurse :: Action exclusions solution

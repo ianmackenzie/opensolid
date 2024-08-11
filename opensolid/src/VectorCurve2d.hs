@@ -843,10 +843,10 @@ magnitude curve =
     Failure Zeros.HigherOrderZero -> Failure HasZero
 
 isZero :: Tolerance units => VectorCurve2d (space @ units) -> Bool
-isZero curve = Tolerance.using Tolerance.squared' (Curve1d.isZero (squaredMagnitude' curve))
+isZero curve = Tolerance.using Tolerance.squared' (squaredMagnitude' curve ~= Qty.zero)
 
 hasZero :: Tolerance units => VectorCurve2d (space @ units) -> Bool
-hasZero curve = Tolerance.using Tolerance.squared' (Curve1d.hasZero (squaredMagnitude' curve))
+hasZero curve = Tolerance.using Tolerance.squared' (squaredMagnitude' curve ^ Qty.zero)
 
 zeros :: Tolerance units => VectorCurve2d (space @ units) -> Result Zeros.Error (List Float)
 zeros curve =

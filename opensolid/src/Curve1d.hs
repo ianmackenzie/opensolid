@@ -14,8 +14,6 @@ module Curve1d
   , sqrt'
   , sin
   , cos
-  , isZero
-  , hasZero
   , zeros
   , reverse
   , integral
@@ -32,7 +30,9 @@ import Domain1d qualified
 import Estimate (Estimate)
 import Estimate qualified
 import Float qualified
+import Fuzzy qualified
 import List qualified
+import NonEmpty qualified
 import OpenSolid
 import Parameter qualified
 import Qty qualified
@@ -105,10 +105,25 @@ instance Units.Coercion (Curve1d unitsA) (Curve1d unitsB) where
   coerce curve = Coerce curve
 
 instance units ~ units_ => ApproximateEquality (Curve1d units) (Curve1d units_) units where
-  curve1 ~= curve2 = isZero (curve1 - curve2)
+  curve1 ~= curve2 = curve1 - curve2 ~= Qty.zero
 
 instance units ~ units_ => ApproximateEquality (Curve1d units) (Qty units_) units where
-  curve ~= value = isZero (curve - value)
+  Constant value1 ~= value2 = value1 ~= value2
+  curve ~= value = List.allTrue [pointOn curve tValue ~= value | tValue <- Parameter.samples]
+
+instance units1 ~ units2 => Intersects (Curve1d units1) (Qty units2) units1 where
+  curve ^ value =
+    -- TODO optimize this to use a special Solve1d.find or similar
+    -- to efficiently check if there is *a* zero anywhere
+    -- instead of finding *all* zeros (and their exact locations)
+    case zeros (curve - value) of
+      Success [] -> False
+      Success List.OneOrMore -> True
+      Failure Zeros.ZeroEverywhere -> True
+      Failure Zeros.HigherOrderZero -> True
+
+instance units1 ~ units2 => Intersects (Qty units1) (Curve1d units2) units1 where
+  value ^ curve = curve ^ value
 
 instance Interface (Curve1d units) units where
   pointOnImpl = pointOn
@@ -362,26 +377,11 @@ cos :: Curve1d Radians -> Curve1d Unitless
 cos (Constant x) = constant (Angle.cos x)
 cos curve = Cos curve
 
-isZero :: Tolerance units => Curve1d units -> Bool
-isZero (Constant value) = value ~= Qty.zero
-isZero curve = List.allTrue [pointOn curve tValue ~= Qty.zero | tValue <- Parameter.samples]
-
-hasZero :: Tolerance units => Curve1d units -> Bool
-hasZero curve =
-  -- TODO optimize this to use a special Solve1d.find or similar
-  -- to efficiently check if there is *a* zero anywhere
-  -- instead of finding *all* zeros (and their exact locations)
-  case zeros curve of
-    Success [] -> False
-    Success List.OneOrMore -> True
-    Failure Zeros.ZeroEverywhere -> True
-    Failure Zeros.HigherOrderZero -> True
-
 ----- ROOT FINDING -----
 
 zeros :: Tolerance units => Curve1d units -> Result Zeros.Error (List Root)
 zeros curve
-  | isZero curve = Failure Zeros.ZeroEverywhere
+  | curve ~= Qty.zero = Failure Zeros.ZeroEverywhere
   | otherwise = Result.do
       let derivatives = Stream.iterate curve derivative
       let derivativeBounds tBounds = Stream.map (\f -> segmentBounds f tBounds) derivatives
@@ -402,131 +402,83 @@ findZeros derivatives subdomain derivativeBounds exclusions
   | not (Stream.head derivativeBounds ^ Qty.zero) = Solve1d.pass
   -- Optimization heuristic: bisect down to "smallish" domains first,
   -- to quickly eliminate most of the curve based on simple value bounds
-  -- before attempting more sophisticated/complex solving
+  -- before attempting more complex/sophisticated solving
   | Range.width (Domain1d.bounds subdomain) > 1 / 16 = Solve1d.recurse
   | otherwise = case exclusions of
       Solve1d.SomeExclusions -> Solve1d.recurse
-      Solve1d.NoExclusions -> findMonotonicOrder derivatives subdomain derivativeBounds 0
+      Solve1d.NoExclusions ->
+        case findZerosOrder 0 derivatives subdomain derivativeBounds of
+          Unresolved -> Solve1d.recurse
+          Resolved [] -> Solve1d.pass
+          Resolved (NonEmpty subdomainZeros) -> do
+            let subdomainInterior = Domain1d.interior subdomain
+            if NonEmpty.allSatisfy (\(t0, _) -> Range.includes t0 subdomainInterior) subdomainZeros
+              then Solve1d.return (NonEmpty.map toRoot subdomainZeros)
+              else Solve1d.recurse
+
+toRoot :: (Float, Solve1d.Neighborhood units) -> Root
+toRoot (t0, neighborhood) = Solve1d.root t0 neighborhood
 
 maxRootOrder :: Int
 maxRootOrder = 3
 
-findMonotonicOrder ::
+findZerosOrder ::
   Tolerance units =>
+  Int ->
   Stream (Curve1d units) ->
   Domain1d ->
   Stream (Range units) ->
-  Int ->
-  Solve1d.Action Solve1d.NoExclusions Root
-findMonotonicOrder derivatives subdomain derivativeBounds candidateOrder
-  | candidateOrder > maxRootOrder = Solve1d.recurse
-  | Range.isResolved (Stream.nth (candidateOrder + 1) derivativeBounds) = do
-      let subdomainRoots = solveMonotonic derivatives candidateOrder (Domain1d.bounds subdomain)
-      -- Only actually report those roots if they're all within the interior of the subdomain;
-      -- otherwise recurse to try a different (offset or smaller) subdomain
-      let subdomainInterior = Domain1d.interior subdomain
-      let isInterior root = Range.includes (Root.value root) subdomainInterior
-      if List.allSatisfy isInterior subdomainRoots
-        then Solve1d.return subdomainRoots
-        else Solve1d.recurse
-  | otherwise = findMonotonicOrder derivatives subdomain derivativeBounds (candidateOrder + 1)
+  Fuzzy (List (Float, Solve1d.Neighborhood units))
+findZerosOrder k derivatives subdomain derivativeBounds
+  -- The function itself is non-zero, so no roots
+  | k == 0 && not (Stream.head derivativeBounds ^ Qty.zero) = Resolved []
+  -- A derivative is resolved, so it has no zeros
+  | k > 0 && Range.isResolved (Stream.head derivativeBounds) = Resolved []
+  -- We've exceeded the maximum root order without finding a non-zero derivative
+  | k > maxRootOrder = Unresolved
+  -- Otherwise, find higher-order roots and then search in between them
+  | otherwise = Fuzzy.do
+      let higherDerivatives = Stream.tail derivatives
+      let higherDerivativeBounds = Stream.tail derivativeBounds
+      let currentDerivative = Stream.head derivatives
+      let nextDerivative = Stream.head higherDerivatives
+      let tRange = Domain1d.bounds subdomain
+      higherOrderZeros <- findZerosOrder (k + 1) higherDerivatives subdomain higherDerivativeBounds
+      case higherOrderZeros of
+        [] -> solveMonotonic k currentDerivative nextDerivative tRange
+        List.One (t0, neighborhood) -> do
+          if Qty.abs (pointOn currentDerivative t0) <= Solve1d.derivativeTolerance neighborhood k
+            then Resolved [(t0, neighborhood)]
+            else Fuzzy.do
+              let leftRange = Range.from (Range.minValue tRange) t0
+              let rightRange = Range.from t0 (Range.maxValue tRange)
+              leftZeros <- solveMonotonic k currentDerivative nextDerivative leftRange
+              rightZeros <- solveMonotonic k currentDerivative nextDerivative rightRange
+              Resolved (leftZeros + rightZeros)
+        List.TwoOrMore -> Unresolved
 
 solveMonotonic ::
   Tolerance units =>
-  Stream (Curve1d units) ->
   Int ->
+  Curve1d units ->
+  Curve1d units ->
   Range Unitless ->
-  List Root
-solveMonotonic derivatives m tRange = do
+  Fuzzy (List (Float, Solve1d.Neighborhood units))
+solveMonotonic m fm fn tRange = do
   let n = m + 1
-  let fm = Stream.nth m derivatives
-  let fn = Stream.nth n derivatives
-  if
-    | Range.includes 0.0 tRange
-    , let neighborhood = Solve1d.neighborhood n (pointOn fn 0.0)
-    , Qty.abs (pointOn fm 0.0) <= Solve1d.derivativeTolerance neighborhood m ->
-        bifurcate derivatives tRange 0.0 n neighborhood m
-    | Range.includes 1.0 tRange
-    , let neighborhood = Solve1d.neighborhood n (pointOn fn 1.0)
-    , Qty.abs (pointOn fm 1.0) <= Solve1d.derivativeTolerance neighborhood m ->
-        bifurcate derivatives tRange 1.0 n neighborhood m
-    | otherwise -> solveMonotonicInterior derivatives tRange m
-
-solveMonotonicInterior ::
-  Tolerance units =>
-  Stream (Curve1d units) ->
-  Range Unitless ->
-  Int ->
-  List Root
-solveMonotonicInterior derivatives tRange m = do
-  let n = m + 1
-  let fm = Stream.nth m derivatives
-  let fn = Stream.nth n derivatives
-  let t0 = Solve1d.monotonic (pointOn fm) (pointOn fn) tRange
-  if t0 == Range.minValue tRange || t0 == Range.maxValue tRange
-    then do
-      -- No actual zero of the mth derivative in this subdomain;
-      -- if m = 0 then that means there are no roots in this subdomain,
-      -- otherwise it means that the (m - 1)th derivative is monotonic
-      if m == 0 then [] else solveMonotonic derivatives (m - 1) tRange
+  let (tLow, tHigh) = Range.endpoints tRange
+  let startNeighborhood = Solve1d.neighborhood n (pointOn fn tLow)
+  if Qty.abs (pointOn fm tLow) <= Solve1d.derivativeTolerance startNeighborhood m
+    then if tLow == 0.0 then Resolved [(0.0, startNeighborhood)] else Unresolved
     else do
-      -- We found a zero of the mth derivative in the interior of this subdomain
-      let neighborhood = Solve1d.neighborhood n (pointOn fn t0)
-      bifurcate derivatives tRange t0 n neighborhood m
-
-bifurcate ::
-  Tolerance units =>
-  Stream (Curve1d units) ->
-  Range Unitless ->
-  Float ->
-  Int ->
-  Solve1d.Neighborhood units ->
-  Int ->
-  List Root
-bifurcate derivatives tRange t0 n neighborhood r
-  | r == 0 = [Solve1d.root t0 neighborhood]
-  | otherwise = do
-      let k = r - 1
-      let fk = Stream.nth k derivatives
-      let valueK = pointOn fk t0
-      if Qty.abs valueK <= Solve1d.derivativeTolerance neighborhood k
-        then bifurcate derivatives tRange t0 n neighborhood k
+      let endNeighborhood = Solve1d.neighborhood n (pointOn fn tHigh)
+      if Qty.abs (pointOn fm tHigh) <= Solve1d.derivativeTolerance endNeighborhood m
+        then if tHigh == 1.0 then Resolved [(1.0, endNeighborhood)] else Unresolved
         else do
-          -- Derivative order k is non-zero at t0,
-          -- which means it must be monotonic to the left and right of t0;
-          -- solve for roots in the left and right subdomains
-          let (tLow, tHigh) = Range.endpoints tRange
-          let tLeft = Range.from tLow t0
-          let tRight = Range.from t0 tHigh
-          let leftRoots = if t0 > tLow then solveMonotonic derivatives k tLeft else []
-          let rightRoots = if t0 < tHigh then solveMonotonic derivatives k tRight else []
-          -- Also see if there's a root *at* t0
-          let neighborhoodK = Solve1d.neighborhood k valueK
-          let root = findRoot derivatives t0 k neighborhoodK (k - 1)
-          leftRoots + root + rightRoots
-
-findRoot ::
-  Tolerance units =>
-  Stream (Curve1d units) ->
-  Float ->
-  Int ->
-  Solve1d.Neighborhood units ->
-  Int ->
-  Maybe Root
-findRoot derivatives t0 n neighborhood k
-  | n == 0 = Nothing
-  | otherwise = do
-      let fk = Stream.nth k derivatives
-      let valueK = pointOn fk t0
-      if Qty.abs valueK <= Solve1d.derivativeTolerance neighborhood k
-        then
-          if k == 0
-            then Just (Solve1d.root t0 neighborhood)
-            else findRoot derivatives t0 n neighborhood (k - 1)
-        else
-          if k == 0
-            then Nothing
-            else findRoot derivatives t0 k (Solve1d.neighborhood k valueK) (k - 1)
+          let t0 = Solve1d.monotonic (pointOn fm) (pointOn fn) tRange
+          if t0 == tLow || t0 == tHigh
+            then Unresolved
+            else Resolved [(t0, Solve1d.neighborhood n (pointOn fn t0))]
 
 integral :: Curve1d units -> Estimate units
 integral curve = Estimate.new (Integral curve (derivative curve) Range.unit)
