@@ -25,6 +25,7 @@ import Curve1d.Root (Root (Root))
 import Domain1d (Domain1d)
 import Domain1d qualified
 import Error qualified
+import Float qualified
 import Int qualified
 import List qualified
 import NonEmpty qualified
@@ -125,7 +126,7 @@ process callback queue solutions exclusions =
   case Queue.pop queue of
     Just (Tree subdomain cached node, remaining) -> do
       let filteredExclusions = List.filter (Domain1d.overlaps subdomain) exclusions
-      if List.anySatisfy (Domain1d.contains subdomain) filteredExclusions
+      if containedBy filteredExclusions subdomain
         then process callback remaining solutions exclusions
         else case filteredExclusions of
           [] -> case callback subdomain cached NoExclusions of
@@ -139,6 +140,10 @@ process callback queue solutions exclusions =
             Pass -> process callback remaining solutions exclusions
             Recurse -> recurseIntoChildrenOf node callback remaining solutions exclusions
     Nothing -> Success (solutions, exclusions)
+
+containedBy :: List Domain1d -> Domain1d -> Bool
+containedBy exclusions subdomain =
+  Float.sum (List.map (Domain1d.intersectionWidth subdomain) exclusions) == Domain1d.width subdomain
 
 {-# INLINE recurseIntoChildrenOf #-}
 recurseIntoChildrenOf ::
