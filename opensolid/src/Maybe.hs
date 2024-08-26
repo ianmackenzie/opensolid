@@ -10,6 +10,7 @@ module Maybe
   , return
   , random
   , orElse
+  , oneOf
   )
 where
 
@@ -57,3 +58,9 @@ orElse :: Maybe a -> Maybe a -> Maybe a
 orElse second first = case first of
   Just _ -> first
   Nothing -> second
+
+oneOf :: List (Maybe a) -> Maybe a
+oneOf maybes = case maybes of
+  Just value : _ -> Just value
+  Nothing : rest -> oneOf rest
+  [] -> Nothing
