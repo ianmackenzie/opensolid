@@ -1,5 +1,5 @@
 module Bounds2d
-  ( Bounds2d
+  ( Bounds2d (Bounds2d)
   , xCoordinate
   , yCoordinate
   , coordinates
