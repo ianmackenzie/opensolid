@@ -84,6 +84,8 @@ data Range units = Range_ (Qty units) (Qty units)
 {-# INLINE Range #-}
 pattern Range :: Qty units -> Qty units -> Range units
 pattern Range low high <- Range_ low high
+  where
+    Range a b = if a <= b then Range_ a b else Range_ b a
 
 instance HasUnits (Range units) where
   type Units (Range units) = units
@@ -247,7 +249,7 @@ unit = Range_ 0.0 1.0
 
 {-# INLINE from #-}
 from :: Qty units -> Qty units -> Range units
-from a b = if a <= b then Range_ a b else Range_ b a
+from = Range
 
 aggregate2 :: Range units -> Range units -> Range units
 aggregate2 (Range low1 high1) (Range low2 high2) =
