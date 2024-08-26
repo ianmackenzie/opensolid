@@ -97,26 +97,16 @@ quadrant function subdomain = do
   let (y1, y2) = Domain1d.bisect y
   let xMid = Domain1d.half x
   let yMid = Domain1d.half y
-  let bottomLeftChild = quadrant function (Domain2d x1 y1)
-  let bottomMiddleChild = column function (Domain2d xMid y1)
-  let bottomRightChild = quadrant function (Domain2d x2 y1)
-  let middleLeftChild = row function (Domain2d x1 yMid)
-  let middleChild = central function (Domain2d xMid yMid)
-  let middleRightChild = row function (Domain2d x2 yMid)
-  let topLeftChild = quadrant function (Domain2d x1 y2)
-  let topMiddleChild = column function (Domain2d xMid y2)
-  let topRightChild = quadrant function (Domain2d x2 y2)
-  let node =
-        Quadrant
-          bottomLeftChild
-          bottomMiddleChild
-          bottomRightChild
-          middleLeftChild
-          middleChild
-          middleRightChild
-          topLeftChild
-          topMiddleChild
-          topRightChild
+  let lBot = quadrant function (Domain2d x1 y1)
+  let cBot = column function (Domain2d xMid y1)
+  let rBot = quadrant function (Domain2d x2 y1)
+  let lMid = row function (Domain2d x1 yMid)
+  let cMid = central function (Domain2d xMid yMid)
+  let rMid = row function (Domain2d x2 yMid)
+  let lTop = quadrant function (Domain2d x1 y2)
+  let cTop = column function (Domain2d xMid y2)
+  let rTop = quadrant function (Domain2d x2 y2)
+  let node = Quadrant lBot cBot rBot lMid cMid rMid lTop cTop rTop
   tree function subdomain node
 
 data NoExclusions
