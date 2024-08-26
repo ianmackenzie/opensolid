@@ -153,13 +153,13 @@ recurseIntoChildrenOf ::
   List solution ->
   List Domain1d ->
   Result InfiniteRecursion (List solution, List Domain1d)
-recurseIntoChildrenOf node callback queue solutions exclusions =
+recurseIntoChildrenOf node callback queue solutions exclusions = do
+  let continueWith updatedQueue = process callback updatedQueue solutions exclusions
   case node of
     Atomic -> Failure InfiniteRecursion
-    Shrinkable child -> process callback (queue + child) solutions exclusions
-    Splittable middleChild leftChild rightChild -> do
-      let updatedQueue = queue + middleChild + leftChild + rightChild
-      process callback updatedQueue solutions exclusions
+    Shrinkable child -> continueWith (queue + child)
+    Splittable middleChild leftChild rightChild ->
+      continueWith (queue + middleChild + leftChild + rightChild)
 
 data Action exclusions solution where
   Return :: NonEmpty solution -> Action NoExclusions solution
