@@ -5,6 +5,7 @@ module Fuzzy
   , (>>)
   , map
   , return
+  , fromMaybe
   )
 where
 
@@ -36,6 +37,10 @@ Unresolved >>= _ = Unresolved
 
 return :: a -> Fuzzy a
 return = Resolved
+
+fromMaybe :: Maybe a -> Fuzzy a
+fromMaybe (Just value) = Resolved value
+fromMaybe Nothing = Unresolved
 
 map :: (a -> b) -> Fuzzy a -> Fuzzy b
 map f (Resolved value) = Resolved (f value)
