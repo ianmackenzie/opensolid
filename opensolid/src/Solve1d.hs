@@ -33,7 +33,7 @@ import Pair qualified
 import Qty qualified
 import Queue (Queue)
 import Queue qualified
-import Range (Range)
+import Range (Range (Range))
 import Range qualified
 import Result qualified
 
@@ -177,7 +177,7 @@ monotonic ::
   Range Unitless ->
   Float
 monotonic function derivative range = do
-  let (x1, x2) = Range.endpoints range
+  let Range x1 x2 = range
   let y1 = function x1
   let y2 = function x2
   if
