@@ -124,6 +124,7 @@ process ::
   Result InfiniteRecursion (List solution, List Domain1d)
 process callback queue solutions exclusions =
   case Queue.pop queue of
+    Nothing -> Success (solutions, exclusions) -- We're done! No more subdomains to process
     Just (Tree subdomain cached node, remaining) -> do
       let filteredExclusions = List.filter (Domain1d.overlaps subdomain) exclusions
       if containedBy filteredExclusions subdomain
@@ -139,7 +140,6 @@ process callback queue solutions exclusions =
           List.OneOrMore -> case callback subdomain cached SomeExclusions of
             Pass -> process callback remaining solutions exclusions
             Recurse -> recurseIntoChildrenOf node callback remaining solutions exclusions
-    Nothing -> Success (solutions, exclusions)
 
 containedBy :: List Domain1d -> Domain1d -> Bool
 containedBy exclusions subdomain =
