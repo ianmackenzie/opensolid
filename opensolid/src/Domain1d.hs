@@ -9,6 +9,7 @@ module Domain1d
   , lowerBoundary
   , upperBoundary
   , midpoint
+  , width
   , isAtomic
   , bisect
   , half
@@ -18,6 +19,7 @@ module Domain1d
   , overlaps
   , contains
   , adjacent
+  , intersectionWidth
   )
 where
 
@@ -69,6 +71,9 @@ upperBoundary (Domain1d{n, j}) = Boundary{n, i = j}
 midpoint :: Domain1d -> Boundary
 midpoint (Domain1d n i j) = Boundary (n * 2) (i + j)
 
+width :: Domain1d -> Float
+width (Domain1d n i j) = (j - i) / n
+
 bisect :: Domain1d -> (Domain1d, Domain1d)
 bisect (Domain1d{n, i, j}) = do
   let n2 = 2 * n
@@ -108,3 +113,9 @@ contains (Domain1d n2 i2 j2) (Domain1d n1 i1 j1) =
 adjacent :: Domain1d -> Domain1d -> Bool
 adjacent (Domain1d n1 i1 j1) (Domain1d n2 i2 j2) =
   i1 * n2 == j2 * n1 || j1 * n2 == i2 * n1
+
+intersectionWidth :: Domain1d -> Domain1d -> Float
+intersectionWidth (Domain1d n1 i1 j1) (Domain1d n2 i2 j2) = do
+  let low = Float.max (i1 / n1) (i2 / n2)
+  let high = Float.min (j1 / n1) (j2 / n2)
+  Float.max (high - low) 0.0

@@ -15,6 +15,8 @@ module Domain2d
   , bounds
   , overlaps
   , contains
+  , area
+  , intersectionArea
   )
 where
 
@@ -79,3 +81,10 @@ overlaps (Domain2d x2 y2) (Domain2d x1 y1) = Domain1d.overlaps x2 x1 && Domain1d
 
 contains :: Domain2d -> Domain2d -> Bool
 contains (Domain2d x2 y2) (Domain2d x1 y1) = Domain1d.contains x2 x1 && Domain1d.contains y2 y1
+
+area :: Domain2d -> Float
+area (Domain2d x y) = Domain1d.width x * Domain1d.width y
+
+intersectionArea :: Domain2d -> Domain2d -> Float
+intersectionArea (Domain2d x1 y1) (Domain2d x2 y2) =
+  Domain1d.intersectionWidth x1 x2 * Domain1d.intersectionWidth y1 y2
