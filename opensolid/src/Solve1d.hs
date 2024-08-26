@@ -131,8 +131,10 @@ process callback queue solutions exclusions =
           [] -> case callback subdomain cached NoExclusions of
             Pass -> process callback remaining solutions exclusions
             Recurse -> recurseIntoChildrenOf node callback remaining solutions exclusions
-            Return newSolutions ->
-              process callback remaining (NonEmpty.toList newSolutions + solutions) (subdomain : exclusions)
+            Return newSolutions -> do
+              let updatedSolutions = NonEmpty.toList newSolutions + solutions
+              let updatedExclusions = subdomain : exclusions
+              process callback remaining updatedSolutions updatedExclusions
           List.OneOrMore -> case callback subdomain cached SomeExclusions of
             Pass -> process callback remaining solutions exclusions
             Recurse -> recurseIntoChildrenOf node callback remaining solutions exclusions
