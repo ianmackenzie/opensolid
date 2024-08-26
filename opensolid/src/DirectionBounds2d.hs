@@ -3,9 +3,6 @@ module DirectionBounds2d
   , unsafe
   , unwrap
   , constant
-  , hull2
-  , hull3
-  , hull4
   , xComponent
   , yComponent
   )
@@ -237,42 +234,6 @@ unwrap (DirectionBounds2d vectorBounds) = vectorBounds
 
 constant :: Direction2d space -> DirectionBounds2d space
 constant direction = DirectionBounds2d (VectorBounds2d.constant (Vector2d.unit direction))
-
-hull2 ::
-  Direction2d space ->
-  Direction2d space ->
-  DirectionBounds2d space
-hull2 direction1 direction2 =
-  DirectionBounds2d $
-    VectorBounds2d.hull2
-      (Vector2d.unit direction1)
-      (Vector2d.unit direction2)
-
-hull3 ::
-  Direction2d space ->
-  Direction2d space ->
-  Direction2d space ->
-  DirectionBounds2d space
-hull3 direction1 direction2 direction3 =
-  DirectionBounds2d $
-    VectorBounds2d.hull3
-      (Vector2d.unit direction1)
-      (Vector2d.unit direction2)
-      (Vector2d.unit direction3)
-
-hull4 ::
-  Direction2d space ->
-  Direction2d space ->
-  Direction2d space ->
-  Direction2d space ->
-  DirectionBounds2d space
-hull4 direction1 direction2 direction3 direction4 =
-  DirectionBounds2d $
-    VectorBounds2d.hull4
-      (Vector2d.unit direction1)
-      (Vector2d.unit direction2)
-      (Vector2d.unit direction3)
-      (Vector2d.unit direction4)
 
 xComponent :: DirectionBounds2d space -> Range Unitless
 xComponent (DirectionBounds2d vectorBounds) = VectorBounds2d.xComponent vectorBounds
