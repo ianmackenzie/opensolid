@@ -1,6 +1,7 @@
 module Fuzzy
   ( Fuzzy (Resolved, Unresolved)
   , collect
+  , oneOf
   , (>>=)
   , (>>)
   , map
@@ -48,3 +49,9 @@ map _ Unresolved = Unresolved
 
 collect :: (a -> Fuzzy b) -> List a -> Fuzzy (List b)
 collect = Prelude.mapM
+
+oneOf :: List (Fuzzy a) -> Fuzzy a
+oneOf fuzzies = case fuzzies of
+  Resolved value : _ -> Resolved value
+  Unresolved : rest -> oneOf rest
+  [] -> Unresolved
