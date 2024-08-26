@@ -6,6 +6,7 @@ module Surface1d.Function.PartialZeros
   ( PartialZeros (..)
   , CrossingCurve (..)
   , empty
+  , crossingCurve
   , addCrossingCurve
   , addTangentPoint
   , addSaddleRegion
@@ -38,6 +39,10 @@ data CrossingCurve
   = CrossingCurve Domain2d.Boundary Domain2d.Boundary (NonEmpty (Curve2d Uv.Coordinates))
   deriving (Show)
 
+crossingCurve :: Domain2d.Boundary -> Domain2d.Boundary -> Curve2d Uv.Coordinates -> CrossingCurve
+crossingCurve startBoundary endBoundary curve =
+  CrossingCurve startBoundary endBoundary (NonEmpty.singleton curve)
+
 type CrossingLoop = NonEmpty (Curve2d Uv.Coordinates)
 
 empty :: PartialZeros
@@ -67,14 +72,14 @@ insertCrossingCurve ::
 insertCrossingCurve newCrossingCurve crossingCurves crossingLoops =
   case crossingCurves of
     [] -> ([newCrossingCurve], crossingLoops)
-    crossingCurve : remainingCrossingCurves ->
-      case joinCrossingCurves newCrossingCurve crossingCurve of
+    firstCrossingCurve : remainingCrossingCurves ->
+      case joinCrossingCurves newCrossingCurve firstCrossingCurve of
         Just (JoinedCrossingCurve joinedCrossingCurve) ->
           insertCrossingCurve joinedCrossingCurve remainingCrossingCurves crossingLoops
         Just (NewCrossingLoop newCrossingLoop) ->
           (remainingCrossingCurves, newCrossingLoop : crossingLoops)
         Nothing ->
-          Pair.mapFirst (crossingCurve :) $
+          Pair.mapFirst (firstCrossingCurve :) $
             insertCrossingCurve newCrossingCurve remainingCrossingCurves crossingLoops
 
 data JoinCrossingCurveResult
