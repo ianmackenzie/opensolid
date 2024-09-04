@@ -27,6 +27,7 @@ module List
   , unzip4
   , filter
   , find
+  , contains
   , collect
   , concat
   , foldl
@@ -159,6 +160,9 @@ filter = Data.List.filter
 
 find :: (a -> Bool) -> List a -> Maybe a
 find = Data.List.find
+
+contains :: Eq a => a -> List a -> Bool
+contains = Data.List.elem
 
 collect :: (a -> List b) -> List a -> List b
 collect = Prelude.concatMap
