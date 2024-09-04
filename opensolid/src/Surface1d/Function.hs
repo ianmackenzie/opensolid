@@ -126,6 +126,27 @@ instance Units.Coercion (Function unitsA) (Function unitsB) where
   coerce (Coerce function) = Coerce function
   coerce function = Coerce function
 
+instance units1 ~ units2 => ApproximateEquality (Function units1) (Function units2) units1 where
+  function1 ~= function2 = function1 - function2 ~= Qty.zero
+
+instance units1 ~ units2 => ApproximateEquality (Function units1) (Qty units2) units1 where
+  Constant value1 ~= value2 = value1 ~= value2
+  function ~= value = List.allTrue [evaluate function uvPoint ~= value | uvPoint <- Uv.samples]
+
+instance units1 ~ units2 => Intersects (Function units1) (Qty units2) units1 where
+  function ^ value =
+    -- TODO optimize this to use a special Solve2d.find or similar
+    -- to efficiently check if there is *a* zero anywhere
+    -- instead of finding *all* zeros (and the full geometry of each)
+    case zeros (function - value) of
+      Success (Zeros [] [] [] []) -> False
+      Success (Zeros{}) -> True
+      Failure Zeros.ZeroEverywhere -> True
+      Failure Zeros.HigherOrderZero -> True
+
+instance units1 ~ units2 => Intersects (Qty units1) (Function units2) units1 where
+  value ^ function = function ^ value
+
 instance Negation (Function units) where
   negate (Constant x) = Constant (negate x)
   negate (Coerce function) = Coerce (negate function)
