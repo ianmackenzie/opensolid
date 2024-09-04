@@ -6,6 +6,7 @@ module Maybe
   , collect
   , values
   , (>>=)
+  , andThen
   , (>>)
   , return
   , random
@@ -34,6 +35,9 @@ return = Just
 (>>=) :: Maybe a -> (a -> Maybe b) -> Maybe b
 Just value >>= function = function value
 Nothing >>= _ = Nothing
+
+andThen :: (a -> Maybe b) -> Maybe a -> Maybe b
+andThen function maybe = maybe >>= function
 
 infixl 1 >>=
 
