@@ -1,5 +1,6 @@
 module Basis3d
   ( Basis3d
+  , coerce
   , xyz
   , yzx
   , zxy
@@ -43,6 +44,9 @@ data Basis3d space defines where
     Basis3d space defines
 
 deriving instance Show (Basis3d space defines)
+
+coerce :: Basis3d space defines1 -> Basis3d space defines2
+coerce Basis3d{xDirection, yDirection, zDirection} = Basis3d{xDirection, yDirection, zDirection}
 
 xyz :: Basis3d space defines
 xyz = Basis3d Direction3d.x Direction3d.y Direction3d.z

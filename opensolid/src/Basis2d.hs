@@ -1,5 +1,6 @@
 module Basis2d
   ( Basis2d
+  , coerce
   , xy
   , yNegativeX
   , flipX
@@ -33,6 +34,9 @@ data Basis2d space defines where
     Basis2d space defines
 
 deriving instance Show (Basis2d space defines)
+
+coerce :: Basis2d space defines1 -> Basis2d space defines2
+coerce Basis2d{xDirection, yDirection} = Basis2d{xDirection, yDirection}
 
 xy :: Basis2d space defines
 xy = Basis2d Direction2d.x Direction2d.y

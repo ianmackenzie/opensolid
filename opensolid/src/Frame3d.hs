@@ -1,5 +1,6 @@
 module Frame3d
   ( Frame3d
+  , coerce
   , xyz
   , at
   , originPoint
@@ -36,6 +37,9 @@ data Frame3d coordinateSystem defines where
     Frame3d (space @ units) defines
 
 deriving instance Show (Frame3d coordinateSystem defines)
+
+coerce :: Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
+coerce Frame3d{originPoint, basis} = Frame3d{originPoint, basis = Basis3d.coerce basis}
 
 xDirection :: Frame3d (space @ units) defines -> Direction3d space
 xDirection frame = Basis3d.xDirection (basis frame)

@@ -1,5 +1,6 @@
 module Frame2d
   ( Frame2d
+  , coerce
   , xy
   , at
   , originPoint
@@ -36,6 +37,9 @@ data Frame2d coordinateSystem defines where
     Frame2d (space @ units) defines
 
 deriving instance Show (Frame2d coordinateSystem defines)
+
+coerce :: Frame2d (space @ units) defines1 -> Frame2d (space @ units) defines2
+coerce Frame2d{originPoint, basis} = Frame2d{originPoint, basis = Basis2d.coerce basis}
 
 xDirection :: Frame2d (space @ units) defines -> Direction2d space
 xDirection frame = Basis2d.xDirection (basis frame)
