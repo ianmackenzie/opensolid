@@ -5,6 +5,7 @@ module Domain1d
   ( Domain1d
   , Boundary
   , unit
+  , constant
   , endpoints
   , lowerBoundary
   , upperBoundary
@@ -55,6 +56,9 @@ instance Ord Boundary where
 
 unit :: Domain1d
 unit = Domain1d{n = 1.0, i = 0.0, j = 1.0}
+
+constant :: Boundary -> Domain1d
+constant Boundary{n, i} = Domain1d{n, i, j = i}
 
 isAtomic :: Domain1d -> Bool
 isAtomic (Domain1d{n, i, j}) = (j - i) / n <= Float.epsilon
