@@ -7,6 +7,7 @@ module Axis2d
   , y
   , through
   , moveTo
+  , reverse
   , transformBy
   , translateBy
   , translateByOwn
@@ -65,6 +66,9 @@ through = Axis2d
 
 moveTo :: Point2d (space @ units) -> Axis2d (space @ units) -> Axis2d (space @ units)
 moveTo newOriginPoint axis = Axis2d newOriginPoint (direction axis)
+
+reverse :: Axis2d (space @ units) -> Axis2d (space @ units)
+reverse (Axis2d p0 d) = Axis2d p0 -d
 
 transformBy ::
   Transform.IsOrthonormal tag =>

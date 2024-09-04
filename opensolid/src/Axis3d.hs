@@ -7,6 +7,7 @@ module Axis3d
   , z
   , through
   , moveTo
+  , reverse
   , transformBy
   )
 where
@@ -52,6 +53,9 @@ through = Axis3d
 
 moveTo :: Point3d (space @ units) -> Axis3d (space @ units) -> Axis3d (space @ units)
 moveTo newOriginPoint axis = Axis3d newOriginPoint (direction axis)
+
+reverse :: Axis3d (space @ units) -> Axis3d (space @ units)
+reverse (Axis3d p0 d) = Axis3d p0 -d
 
 transformBy ::
   Transform.IsOrthonormal tag =>
