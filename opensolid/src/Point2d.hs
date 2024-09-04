@@ -1,5 +1,5 @@
 module Point2d
-  ( Point2d
+  ( Point2d (Point2d)
   , origin
   , x
   , y
