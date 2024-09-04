@@ -12,6 +12,7 @@ where
 
 import Deque.Strict (Deque)
 import Deque.Strict qualified as Deque
+import List qualified
 import Maybe qualified
 import OpenSolid
 import Prelude qualified
@@ -20,6 +21,9 @@ data Queue a = Queue Int (Deque a) deriving (Eq, Show)
 
 instance Addition (Queue a) a (Queue a) where
   queue + item = push item queue
+
+instance Addition (Queue a) (List a) (Queue a) where
+  queue + items = List.foldl (+) queue items
 
 empty :: Queue a
 empty = Queue 0 (Deque.fromConsAndSnocLists [] [])
