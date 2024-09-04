@@ -348,9 +348,9 @@ boundedStep uvBounds p1 p2 =
     else do
       -- Stepped point is outside the given bounds,
       -- pull it back in along the step direction
-      let (uRange, vRange) = Bounds2d.coordinates uvBounds
-      let (u1, v1) = Point2d.coordinates p1
-      let (u2, v2) = Point2d.coordinates p2
+      let Bounds2d uRange vRange = uvBounds
+      let Point2d u1 v1 = p1
+      let Point2d u2 v2 = p2
       let clampedU = Range.clampTo uRange u2
       let clampedV = Range.clampTo vRange v2
       let uScale = if u1 == u2 then 1.0 else (clampedU - u1) / (u2 - u1)
