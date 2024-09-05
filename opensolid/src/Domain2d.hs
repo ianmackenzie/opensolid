@@ -4,10 +4,14 @@ module Domain2d
   , unit
   , isAtomic
   , coordinates
-  , leftBoundary
-  , rightBoundary
-  , bottomBoundary
-  , topBoundary
+  , leftEdge
+  , rightEdge
+  , bottomEdge
+  , topEdge
+  , bottomLeftCorner
+  , bottomRightCorner
+  , topLeftCorner
+  , topRightCorner
   , adjacent
   , contacts
   , half
@@ -29,8 +33,9 @@ import Uv qualified
 data Domain2d = Domain2d Domain1d Domain1d deriving (Show)
 
 data Boundary
-  = VerticalBoundary Domain1d.Boundary Domain1d
-  | HorizontalBoundary Domain1d Domain1d.Boundary
+  = Corner Sign Sign Domain1d.Boundary Domain1d.Boundary
+  | VerticalEdge Sign Domain1d.Boundary Domain1d
+  | HorizontalEdge Sign Domain1d Domain1d.Boundary
   deriving (Show)
 
 unit :: Domain2d
@@ -42,30 +47,76 @@ isAtomic (Domain2d x y) = Domain1d.isAtomic x && Domain1d.isAtomic y
 coordinates :: Domain2d -> (Domain1d, Domain1d)
 coordinates (Domain2d x y) = (x, y)
 
-leftBoundary :: Domain2d -> Boundary
-leftBoundary (Domain2d x y) = VerticalBoundary (Domain1d.lowerBoundary x) y
+leftEdge :: Domain2d -> Boundary
+leftEdge (Domain2d x y) = VerticalEdge Negative (Domain1d.lowerBoundary x) y
 
-rightBoundary :: Domain2d -> Boundary
-rightBoundary (Domain2d x y) = VerticalBoundary (Domain1d.upperBoundary x) y
+rightEdge :: Domain2d -> Boundary
+rightEdge (Domain2d x y) = VerticalEdge Positive (Domain1d.upperBoundary x) y
 
-bottomBoundary :: Domain2d -> Boundary
-bottomBoundary (Domain2d x y) = HorizontalBoundary x (Domain1d.lowerBoundary y)
+bottomEdge :: Domain2d -> Boundary
+bottomEdge (Domain2d x y) = HorizontalEdge Negative x (Domain1d.lowerBoundary y)
 
-topBoundary :: Domain2d -> Boundary
-topBoundary (Domain2d x y) = HorizontalBoundary x (Domain1d.upperBoundary y)
+topEdge :: Domain2d -> Boundary
+topEdge (Domain2d x y) = HorizontalEdge Positive x (Domain1d.upperBoundary y)
+
+bottomLeftCorner :: Domain2d -> Boundary
+bottomLeftCorner (Domain2d x y) =
+  Corner Negative Negative (Domain1d.lowerBoundary x) (Domain1d.lowerBoundary y)
+
+bottomRightCorner :: Domain2d -> Boundary
+bottomRightCorner (Domain2d x y) =
+  Corner Positive Negative (Domain1d.upperBoundary x) (Domain1d.lowerBoundary y)
+
+topLeftCorner :: Domain2d -> Boundary
+topLeftCorner (Domain2d x y) =
+  Corner Negative Positive (Domain1d.lowerBoundary x) (Domain1d.upperBoundary y)
+
+topRightCorner :: Domain2d -> Boundary
+topRightCorner (Domain2d x y) =
+  Corner Positive Positive (Domain1d.upperBoundary x) (Domain1d.upperBoundary y)
 
 adjacent :: Boundary -> Boundary -> Bool
-adjacent (HorizontalBoundary{}) (VerticalBoundary{}) = False
-adjacent (VerticalBoundary{}) (HorizontalBoundary{}) = False
-adjacent (HorizontalBoundary x1 y1) (HorizontalBoundary x2 y2) = Domain1d.overlaps x1 x2 && y1 == y2
-adjacent (VerticalBoundary x1 y1) (VerticalBoundary x2 y2) = x1 == x2 && Domain1d.overlaps y1 y2
+adjacent (Corner xSign1 ySign1 x1 y1) (Corner xSign2 ySign2 x2 y2) =
+  xSign1 /= xSign2 && ySign1 /= ySign2 && x1 == x2 && y1 == y2
+adjacent (Corner xSign1 _ x1 y1) (VerticalEdge xSign2 x2 y2) =
+  xSign1 /= xSign2 && x1 == x2 && Domain1d.includes y1 y2
+adjacent (Corner _ ySign1 x1 y1) (HorizontalEdge ySign2 x2 y2) =
+  ySign1 /= ySign2 && Domain1d.includes x1 x2 && y1 == y2
+adjacent (VerticalEdge xSign1 x1 y1) (Corner xSign2 _ x2 y2) =
+  xSign1 /= xSign2 && x1 == x2 && Domain1d.includes y2 y1
+adjacent (VerticalEdge xSign1 x1 y1) (VerticalEdge xSign2 x2 y2) =
+  xSign1 /= xSign2 && x1 == x2 && Domain1d.overlaps y1 y2
+adjacent VerticalEdge{} HorizontalEdge{} =
+  False
+adjacent (HorizontalEdge ySign1 x1 y1) (Corner _ ySign2 x2 y2) =
+  ySign1 /= ySign2 && Domain1d.includes x2 x1 && y1 == y2
+adjacent HorizontalEdge{} VerticalEdge{} =
+  False
+adjacent (HorizontalEdge ySign1 x1 y1) (HorizontalEdge ySign2 x2 y2) =
+  ySign1 /= ySign2 && Domain1d.overlaps x1 x2 && y1 == y2
 
 contacts :: Domain2d -> Boundary -> Bool
-contacts (Domain2d x y) boundary = case boundary of
-  VerticalBoundary bx by ->
-    Domain1d.overlaps by y && (bx == Domain1d.lowerBoundary x || bx == Domain1d.upperBoundary x)
-  HorizontalBoundary bx by ->
-    Domain1d.overlaps bx x && (by == Domain1d.lowerBoundary y || by == Domain1d.upperBoundary y)
+contacts (Domain2d xDomain yDomain) boundary = case boundary of
+  Corner Negative Negative boundaryX boundaryY ->
+    (boundaryY == Domain1d.upperBoundary yDomain && Domain1d.includes boundaryX xDomain)
+      || (boundaryX == Domain1d.upperBoundary xDomain && Domain1d.includes boundaryY yDomain)
+  Corner Positive Negative boundaryX boundaryY ->
+    (boundaryY == Domain1d.upperBoundary yDomain && Domain1d.includes boundaryX xDomain)
+      || (boundaryX == Domain1d.lowerBoundary xDomain && Domain1d.includes boundaryY yDomain)
+  Corner Negative Positive boundaryX boundaryY ->
+    (boundaryY == Domain1d.lowerBoundary yDomain && Domain1d.includes boundaryX xDomain)
+      || (boundaryX == Domain1d.upperBoundary xDomain && Domain1d.includes boundaryY yDomain)
+  Corner Positive Positive boundaryX boundaryY ->
+    (boundaryY == Domain1d.lowerBoundary yDomain && Domain1d.includes boundaryX xDomain)
+      || (boundaryX == Domain1d.lowerBoundary xDomain && Domain1d.includes boundaryY yDomain)
+  VerticalEdge Negative boundaryX boundaryYDomain ->
+    boundaryX == Domain1d.upperBoundary xDomain && Domain1d.overlaps yDomain boundaryYDomain
+  VerticalEdge Positive boundaryX boundaryYDomain ->
+    boundaryX == Domain1d.lowerBoundary xDomain && Domain1d.overlaps yDomain boundaryYDomain
+  HorizontalEdge Negative boundaryXDomain boundaryY ->
+    boundaryY == Domain1d.upperBoundary yDomain && Domain1d.overlaps xDomain boundaryXDomain
+  HorizontalEdge Positive boundaryXDomain boundaryY ->
+    boundaryY == Domain1d.lowerBoundary yDomain && Domain1d.overlaps xDomain boundaryXDomain
 
 half :: Domain2d -> Domain2d
 half (Domain2d x y) = Domain2d (Domain1d.half x) (Domain1d.half y)

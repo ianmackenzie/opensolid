@@ -176,6 +176,10 @@ library
     Stream
     Surface1d
     Surface1d.Function
+    Surface1d.Function.HorizontalCurve
+    Surface1d.Function.Internal
+    Surface1d.Function.Subproblem
+    Surface1d.Function.VerticalCurve
     Surface1d.Function.Zeros
     Surface3d
     Surface3d.Function

@@ -2,15 +2,20 @@ module Uv.Derivatives
   ( Derivatives
   , init
   , map
-  , value
-  , derivative
+  , get
   )
 where
 
+import OpenSolid
 import Uv (Parameter (U, V))
 
 data Derivatives a
   = Derivatives a ~(Derivatives a) ~(Derivatives a)
+  deriving (Show)
+
+instance Composition (Derivatives a) Parameter (Derivatives a) where
+  (Derivatives _ du _) >> U = du
+  (Derivatives _ _ dv) >> V = dv
 
 init :: a -> (Parameter -> a -> a) -> Derivatives a
 init f df = do
@@ -19,26 +24,22 @@ init f df = do
 
 initV :: Derivatives a -> a -> (a -> a) -> Derivatives a
 initV derivativesU fv dv = do
-  let derivativesUV = derivative V derivativesU
+  let derivativesUV = derivativesU >> V
   Derivatives fv derivativesUV (initV derivativesUV (dv fv) dv)
 
-value :: Derivatives a -> a
-value (Derivatives v _ _) = v
-
-derivative :: Parameter -> Derivatives a -> Derivatives a
-derivative U (Derivatives _ du _) = du
-derivative V (Derivatives _ _ dv) = dv
+get :: Derivatives a -> a
+get (Derivatives f _ _) = f
 
 map :: (a -> b) -> Derivatives a -> Derivatives b
 map function unmapped = do
-  let mappedValue = function (value unmapped)
-  let mappedU = map function (derivative U unmapped)
-  let mappedV = mapV mappedU function (derivative V unmapped)
+  let mappedValue = function (get unmapped)
+  let mappedU = map function (unmapped >> U)
+  let mappedV = mapV mappedU function (unmapped >> V)
   Derivatives mappedValue mappedU mappedV
 
 mapV :: Derivatives b -> (a -> b) -> Derivatives a -> Derivatives b
 mapV mappedU function unmappedV = do
-  let mappedValue = function (value unmappedV)
-  let mappedUV = derivative V mappedU
-  let mappedVV = mapV mappedUV function (derivative V unmappedV)
+  let mappedValue = function (get unmappedV)
+  let mappedUV = mappedU >> V
+  let mappedVV = mapV mappedUV function (unmappedV >> V)
   Derivatives mappedValue mappedUV mappedVV

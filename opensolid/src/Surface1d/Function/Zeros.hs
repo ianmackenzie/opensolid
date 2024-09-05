@@ -1,4 +1,9 @@
-module Surface1d.Function.Zeros (Zeros (..), empty, Error (..)) where
+module Surface1d.Function.Zeros
+  ( Zeros (..)
+  , empty
+  , Error (..)
+  )
+where
 
 import Curve2d (Curve2d)
 import Error qualified
@@ -6,9 +11,9 @@ import OpenSolid
 import Uv qualified
 
 data Zeros = Zeros
-  { crossingCurves :: List (NonEmpty (Curve2d Uv.Coordinates))
-  , crossingLoops :: List (NonEmpty (Curve2d Uv.Coordinates))
-  , tangentPoints :: List (Uv.Point, Sign)
+  { crossingCurves :: List (NonEmpty (Curve2d Uv.Coordinates, Uv.Bounds))
+  , crossingLoops :: List (NonEmpty (Curve2d Uv.Coordinates, Uv.Bounds))
+  , tangentPoints :: List (Uv.Point, Sign, Uv.Bounds)
   , saddlePoints :: List (Uv.Point, Uv.Bounds)
   }
 

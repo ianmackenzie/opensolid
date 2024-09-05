@@ -23,45 +23,47 @@ module Surface1d.Function
   , sqrt'
   , sin
   , cos
-  , isZero
   )
 where
 
 import Angle qualified
-import Axis2d qualified
+import Bounds2d (Bounds2d (Bounds2d))
 import Bounds2d qualified
 import Curve1d (Curve1d)
 import Curve1d qualified
 import Curve2d (Curve2d)
 import Curve2d qualified
 import Direction2d qualified
-import Domain2d (Domain2d)
+import Domain1d qualified
+import Domain2d (Domain2d (Domain2d))
 import Domain2d qualified
 import Float qualified
-import Frame2d (Frame2d)
-import Frame2d qualified
+import Fuzzy qualified
 import List qualified
-import Maybe qualified
 import NonEmpty qualified
 import OpenSolid
+import Point2d (Point2d (Point2d))
 import Point2d qualified
 import Qty qualified
 import Radians qualified
-import Range (Range)
+import Range (Range (Range))
 import Range qualified
-import Result qualified
-import Solve1d qualified
 import Solve2d qualified
+import Surface1d.Function.HorizontalCurve qualified as HorizontalCurve
 import Surface1d.Function.PartialZeros (PartialZeros)
 import Surface1d.Function.PartialZeros qualified as PartialZeros
-import Surface1d.Function.SaddleRegion (SaddleRegion (..))
+import Surface1d.Function.SaddleRegion (SaddleRegion)
+import Surface1d.Function.SaddleRegion qualified as SaddleRegion
+import Surface1d.Function.Subproblem (CornerValues (..), Subproblem (..))
+import Surface1d.Function.Subproblem qualified as Subproblem
+import Surface1d.Function.VerticalCurve qualified as VerticalCurve
 import Surface1d.Function.Zeros (Zeros (..))
 import Surface1d.Function.Zeros qualified as Zeros
-import Tolerance qualified
 import Units qualified
 import Uv (Parameter (U, V))
 import Uv qualified
-import Vector2d qualified
+import Uv.Derivatives (Derivatives)
+import Uv.Derivatives qualified as Derivatives
 import VectorCurve2d qualified
 
 class Show function => Interface function units | function -> units where
@@ -408,554 +410,326 @@ instance Curve1d.Interface (CurveOnSurface units) units where
     let vT = VectorCurve2d.yComponent uvT
     fU . uvCurve * uT + fV . uvCurve * vT
 
-isZero :: Tolerance units => Function units -> Bool
-isZero function = List.allTrue [evaluate function uv ~= Qty.zero | uv <- Uv.samples]
-
 zeros :: Tolerance units => Function units -> Result Zeros.Error Zeros
-zeros function =
-  if isZero function
-    then Failure Zeros.ZeroEverywhere
-    else Result.do
-      let derivatives = computeDerivatives function
-      let cache = Solve2d.init (computeDerivativeBounds derivatives)
-      tangentSolutions <-
-        Solve2d.search (findTangentSolution derivatives) cache []
-          |> Result.onError (\Solve2d.InfiniteRecursion -> Failure Zeros.HigherOrderZero)
-      solutions <-
-        Solve2d.search (findCrossingSolution derivatives) cache tangentSolutions
-          |> Result.onError (\Solve2d.InfiniteRecursion -> Failure Zeros.HigherOrderZero)
-      let partialZeros = List.foldl addSolution PartialZeros.empty solutions
-      Success (PartialZeros.finalize partialZeros)
+zeros function
+  | function ~= Qty.zero = Failure Zeros.ZeroEverywhere
+  | otherwise = Result.do
+      let derivatives = Derivatives.init function derivative
+      case Solve2d.search (findZeros derivatives) AllZeroTypes of
+        Success solutions -> do
+          let partialZeros = List.foldl addSolution PartialZeros.empty solutions
+          Success (PartialZeros.finalize partialZeros)
+        Failure Solve2d.InfiniteRecursion -> Failure Zeros.HigherOrderZero
 
-data Solution
+addSolution :: PartialZeros units -> Solution units -> PartialZeros units
+addSolution partialZeros solution = case solution of
+  CrossingCurveSolution curve ->
+    PartialZeros.addCrossingCurve curve partialZeros
+  TangentPointSolution tangentPoint ->
+    PartialZeros.addTangentPoint tangentPoint partialZeros
+  SaddleRegionSolution saddleRegion ->
+    PartialZeros.addSaddleRegion saddleRegion partialZeros
+
+data FindZerosContext = AllZeroTypes | CrossingCurvesOnly deriving (Show)
+
+data Solution units
   = CrossingCurveSolution PartialZeros.CrossingCurve
-  | TangentPointSolution (Uv.Point, Sign)
-  | SaddleRegionSolution SaddleRegion
-  deriving (Show)
+  | TangentPointSolution (Uv.Point, Sign, Uv.Bounds)
+  | SaddleRegionSolution (SaddleRegion units)
 
-addSolution :: PartialZeros -> (Solution, Domain2d) -> PartialZeros
-addSolution partialZeros (solution, subdomain) = case solution of
-  CrossingCurveSolution curve -> PartialZeros.addCrossingCurve curve partialZeros
-  TangentPointSolution tangentPoint -> PartialZeros.addTangentPoint tangentPoint partialZeros
-  SaddleRegionSolution saddleRegion -> PartialZeros.addSaddleRegion subdomain saddleRegion partialZeros
-
-data Derivatives units = Derivatives
-  { f :: Function units
-  , fu :: Function units
-  , fv :: Function units
-  , fuu :: Function units
-  , fuv :: Function units
-  , fvv :: Function units
-  }
-  deriving (Show)
-
-computeDerivatives :: Function units -> Derivatives units
-computeDerivatives f = do
-  let fu = derivative U f
-  let fv = derivative V f
-  let fuu = derivative U fu
-  let fuv = derivative U fv
-  let fvv = derivative V fv
-  Derivatives{f, fu, fv, fuu, fuv, fvv}
-
-data DerivativeBounds units = DerivativeBounds
-  { fBounds :: ~(Range units)
-  , fuBounds :: ~(Range units)
-  , fvBounds :: ~(Range units)
-  , fuuBounds :: ~(Range units)
-  , fuvBounds :: ~(Range units)
-  , fvvBounds :: ~(Range units)
-  }
-
-computeDerivativeBounds :: Derivatives units -> Uv.Bounds -> DerivativeBounds units
-computeDerivativeBounds (Derivatives{f, fu, fv, fuu, fvv, fuv}) uvBounds =
-  DerivativeBounds
-    { fBounds = bounds f uvBounds
-    , fuBounds = bounds fu uvBounds
-    , fvBounds = bounds fv uvBounds
-    , fuuBounds = bounds fuu uvBounds
-    , fuvBounds = bounds fuv uvBounds
-    , fvvBounds = bounds fvv uvBounds
-    }
-
-findTangentSolution ::
+findZeros ::
   Tolerance units =>
-  Derivatives units ->
+  Derivatives (Function units) ->
+  FindZerosContext ->
   Domain2d ->
-  DerivativeBounds units ->
   Solve2d.Exclusions exclusions ->
-  Solve2d.Action exclusions Solution
-findTangentSolution derivatives subdomain derivativeBounds exclusions = do
-  let DerivativeBounds{fBounds, fuBounds, fvBounds} = derivativeBounds
-  if
-    -- The function is non-zero for this subdomain, so no solutions
-    | not (fBounds ^ Qty.zero) -> Solve2d.pass
-    -- Derivative with respect to U is non-zero for this subdomain, so no tangent solutions
-    | not (fuBounds ^ Qty.zero) -> Solve2d.pass
-    -- Derivative with respect to V is non-zero for this subdomain, so no tangent solutions
-    | not (fvBounds ^ Qty.zero) -> Solve2d.pass
-    | otherwise -> case exclusions of
-        Solve2d.NoExclusions
-          -- Try to find a tangent point (saddle or otherwise)
-          | Just solution <- tangentPointSolution derivatives subdomain derivativeBounds ->
-              Solve2d.return solution
-          -- TODO try to find tangent curve
-          | otherwise -> Solve2d.recurse
-        Solve2d.SomeExclusions -> Solve2d.recurse
-
-tangentPointSolution ::
-  Tolerance units =>
-  Derivatives units ->
-  Domain2d ->
-  DerivativeBounds units ->
-  Maybe Solution
-tangentPointSolution derivatives subdomain derivativeBounds = Maybe.do
-  let DerivativeBounds{fuuBounds, fuvBounds, fvvBounds} = derivativeBounds
-  let determinant = fuuBounds .*. fvvBounds - fuvBounds .*. fuvBounds
-  determinantSign <- Range.resolvedSign determinant
-  let Derivatives{f, fu, fv, fuu, fuv, fvv} = derivatives
-  point <-
-    Solve2d.unique
-      (bounds fu)
-      (evaluate fu)
-      (evaluate fuu)
-      (evaluate fuv)
-      (bounds fv)
-      (evaluate fv)
-      (evaluate fuv)
-      (evaluate fvv)
-      (Domain2d.interior subdomain)
-  if evaluate f point ~= Qty.zero
-    then case determinantSign of
-      Negative -> Just (saddleRegionSolution derivatives point)
-      Positive -> do
-        -- Non-saddle tangent point
-        -- Note that fuu and fvv must be either both positive or both negative
-        -- to reach this code path, so we can take the sign of either one
-        -- to determine the sign of the tangent point
-        let sign = Qty.sign (Range.minValue fuuBounds)
-        Just (TangentPointSolution (point, sign))
-    else Nothing
-
-saddleRegionSolution :: Tolerance units => Derivatives units -> Uv.Point -> Solution
-saddleRegionSolution derivatives point = do
-  let Derivatives{f, fuu, fuv, fvv} = derivatives
-  let fuuValue = evaluate fuu point
-  let fuvValue = evaluate fuv point
-  let fvvValue = evaluate fvv point
-  let sqrtD = Qty.sqrt' (fuvValue .*. fuvValue - fuuValue .*. fvvValue)
-  let (d1, d2) =
-        if Qty.abs fuuValue >= Qty.abs fvvValue
-          then
-            ( Vector2d.normalize (Vector2d.xy (-fuvValue + sqrtD) fuuValue)
-            , Vector2d.normalize (Vector2d.xy (-fuvValue - sqrtD) fuuValue)
-            )
-          else
-            ( Vector2d.normalize (Vector2d.xy fvvValue (-fuvValue + sqrtD))
-            , Vector2d.normalize (Vector2d.xy fvvValue (-fuvValue - sqrtD))
-            )
-  let xDirection = Direction2d.unsafe (Vector2d.normalize (d1 + d2))
-  let xAxis = Axis2d.through point xDirection
-  let frame = Frame2d.fromXAxis xAxis
-  let fXY = reparameterize frame f
-  let fx = derivative U fXY
-  let fy = derivative V fXY
-  let fxx = derivative U fx
-  let fxy = derivative V fx
-  let fyy = derivative V fy
-  let fxxx = derivative U fxx
-  let fxxy = derivative V fxx
-  let fxyy = derivative U fyy
-  let fyyy = derivative V fyy
-  let derivativesXY = Derivatives{f = fXY, fu = fx, fv = fy, fuu = fxx, fuv = fxy, fvv = fyy}
-  let fxxValue = evaluate fxx Point2d.origin
-  let fyyValue = evaluate fyy Point2d.origin
-  let fxxxValue = evaluate fxxx Point2d.origin
-  let fxxyValue = evaluate fxxy Point2d.origin
-  let fxyyValue = evaluate fxyy Point2d.origin
-  let fyyyValue = evaluate fyyy Point2d.origin
-  let positiveA = Qty.sqrt' (-fxxValue .*. fyyValue) / Qty.abs fyyValue
-  let negativeA = -positiveA
-  let b a = -(fyyyValue * a ** 3 + 3 * fxyyValue * a ** 2 + 3 * fxxyValue * a + fxxxValue) / (3 * a * fyyValue)
-  let connectingCurves endpoint = do
-        let (xEnd, yEnd) = Point2d.coordinates (Point2d.relativeTo frame endpoint)
-        let connectorSize = 1e-3
-        let xConnection = if Qty.abs xEnd <= connectorSize then xEnd else connectorSize * Qty.sign xEnd
-        let yRange =
-              case Qty.sign fxxValue of
-                Negative -> Range.from 0.0 yEnd
-                Positive -> Range.from yEnd 0.0
-        let exactCurveXY = horizontalCurve derivativesXY xConnection xEnd yRange True
-        let degenerateCurveXY = horizontalCurve derivativesXY 0.0 xConnection yRange True
-        let dydx = case Qty.sign (yEnd / xEnd) of
-              Positive -> positiveA
-              Negative -> negativeA
-        let d2ydx2 = b dydx
-        let startFirstDerivativeXY = Vector2d.xy xConnection (xConnection * dydx)
-        let startSecondDerivativeXY = Vector2d.xy 0.0 (xConnection * xConnection * d2ydx2)
-        let startCondition = (Point2d.origin, [startFirstDerivativeXY, startSecondDerivativeXY])
-        let interpolatedCurveXY = Curve2d.removeStartDegeneracy 2 startCondition degenerateCurveXY
-        let exactCurve = Curve2d.placeIn frame exactCurveXY
-        let interpolatedCurve = Curve2d.placeIn frame interpolatedCurveXY
-        -- let exactCurvature = let ?tolerance = 1e-9 in Curve2d.curvature' exactCurve |> Result.withDefault Curve1d.zero
-        -- let interpolatedCurvature = let ?tolerance = 1e-9 in Curve2d.curvature' interpolatedCurve |> Result.withDefault Curve1d.zero
-        -- Debug.log "Extension distance                " (Point2d.distanceFrom localStartPoint localEndPoint)
-        -- Debug.log "Error 0.0                         " (evaluateAt (Curve2d.evaluateAt 0.0 interpolatedCurve) f)
-        -- Debug.log "Error 0.5                         " (evaluateAt (Curve2d.evaluateAt 0.5 interpolatedCurve) f)
-        -- Debug.log "Error 1.0                         " (evaluateAt (Curve2d.evaluateAt 1.0 interpolatedCurve) f)
-        -- Debug.log "Interpolated curvature 0.0           " (Curve1d.evaluateAt 0.0 interpolatedCurvature)
-        -- Debug.log "Interpolated curvature 0.5           " (Curve1d.evaluateAt 0.5 interpolatedCurvature)
-        -- Debug.log "Interpolated curvature 1.0           " (Curve1d.evaluateAt 1.0 interpolatedCurvature)
-        -- Debug.log "Exact curvature 0.0                  " (Curve1d.evaluateAt 0.0 exactCurvature)
-        -- Debug.log "Exact curvature 0.5                  " (Curve1d.evaluateAt 0.5 exactCurvature)
-        -- Debug.log "Exact curvature 1.0                  " (Curve1d.evaluateAt 1.0 exactCurvature)
-        -- Debug.log "Extension start derivative        " (VectorCurve2d.evaluateAt 0.0 (Curve2d.derivative extension))
-        -- Debug.log "Extension end derivative          " (VectorCurve2d.evaluateAt 1.0 (Curve2d.derivative extension))
-        -- Debug.log "Curve start derivative            " (VectorCurve2d.evaluateAt 0.0 (Curve2d.derivative curve) * k)
-        -- Debug.log "Extension start second derivative " (VectorCurve2d.evaluateAt 0.0 (VectorCurve2d.derivative (Curve2d.derivative extension)))
-        -- Debug.log "Extension end second derivative   " (VectorCurve2d.evaluateAt 1.0 (VectorCurve2d.derivative (Curve2d.derivative extension)))
-        -- Debug.log "Curve start second derivative     " (VectorCurve2d.evaluateAt 0.0 (VectorCurve2d.derivative (Curve2d.derivative curve)) * k * k)
-        if xConnection == xEnd then [interpolatedCurve] else [interpolatedCurve, exactCurve]
-  SaddleRegionSolution (SaddleRegion{point, connectingCurves = connectingCurves})
-
-reparameterize ::
-  Frame2d Uv.Coordinates (Defines Uv.Space) ->
-  Function units ->
-  Function units
-reparameterize localFrame function = Function (Reparameterized localFrame function)
-
-data Reparameterized units where
-  Reparameterized ::
-    Frame2d Uv.Coordinates (Defines Uv.Space) ->
-    Function units ->
-    Reparameterized units
-
-deriving instance Show (Reparameterized units)
-
-instance Interface (Reparameterized units) units where
-  evaluateImpl (Reparameterized frame function) uvPoint =
-    evaluate function (Point2d.placeIn frame uvPoint)
-
-  boundsImpl (Reparameterized frame function) uvBounds =
-    bounds function (Bounds2d.placeIn frame uvBounds)
-
-  derivativeImpl U (Reparameterized frame function) =
-    reparameterize frame (derivativeIn (Frame2d.xDirection frame) function)
-  derivativeImpl V (Reparameterized frame function) =
-    reparameterize frame (derivativeIn (Frame2d.yDirection frame) function)
-
--- let fuuMagnitude = Range.maxAbs fuuBounds
--- let fuvMagnitude = Range.maxAbs fuvBounds
--- let fvvMagnitude = Range.maxAbs fvvBounds
--- let maxSecondDerivativeMagnitude = fuuMagnitude + 2 * fuvMagnitude + fvvMagnitude
-
--- isTangentPoint ::
---   Tolerance units =>
---   Domain1d.Neighborhood units ->
---   Derivatives units ->
---   Uv.Point ->
---   Bool
--- isTangentPoint neighborhood derivatives point = do
---   let Derivatives{f, fu, fv} = derivatives
---   let fIsZero = evaluateAt point f ~= Qty.zero
---   let derivativeTolerance = Domain1d.derivativeTolerance neighborhood 1
---   let fuIsZero = Qty.abs (evaluateAt point fu) <= derivativeTolerance
---   let fvIsZero = Qty.abs (evaluateAt point fv) <= derivativeTolerance
---   fIsZero && fuIsZero && fvIsZero
-
-findCrossingSolution ::
-  Tolerance units =>
-  Derivatives units ->
-  Domain2d ->
-  DerivativeBounds units ->
-  Solve2d.Exclusions exclusions ->
-  Solve2d.Action exclusions Solution
-findCrossingSolution derivatives subdomain derivativeBounds exclusions = do
-  let DerivativeBounds{fBounds, fuBounds, fvBounds} = derivativeBounds
-  if not (fBounds ^ Qty.zero)
+  Solve2d.Action exclusions FindZerosContext (Solution units)
+findZeros derivatives context subdomain exclusions = do
+  let subproblem = Subproblem.new derivatives subdomain
+  if not (Subproblem.isZeroCandidate subproblem)
     then Solve2d.pass
+    else case exclusions of
+      Solve2d.SomeExclusions -> Solve2d.recurse context
+      Solve2d.NoExclusions ->
+        case context of
+          CrossingCurvesOnly -> findCrossingCurves subproblem
+          AllZeroTypes -> do
+            let Subproblem{derivativeBounds} = subproblem
+            let fuBounds = Derivatives.get (derivativeBounds >> U)
+            let fvBounds = Derivatives.get (derivativeBounds >> V)
+            if Range.isResolved fuBounds || Range.isResolved fvBounds
+              then findCrossingCurves subproblem
+              else findTangentSolutions subproblem
+
+findTangentSolutions ::
+  Tolerance units =>
+  Subproblem units ->
+  Solve2d.Action Solve2d.NoExclusions FindZerosContext (Solution units)
+findTangentSolutions subproblem = do
+  let Subproblem{derivatives, subdomain, uvBounds, derivativeBounds} = subproblem
+  let fuuBounds = Derivatives.get (derivativeBounds >> U >> U)
+  let fuvBounds = Derivatives.get (derivativeBounds >> U >> V)
+  let fvvBounds = Derivatives.get (derivativeBounds >> V >> V)
+  let determinant = fuuBounds .*. fvvBounds - fuvBounds .*. fuvBounds
+  case Range.resolvedSign determinant of
+    Resolved determinantSign -> do
+      let fu = Derivatives.get (derivatives >> U)
+      let fv = Derivatives.get (derivatives >> V)
+      let fuu = Derivatives.get (derivatives >> U >> U)
+      let fuv = Derivatives.get (derivatives >> U >> V)
+      let fvv = Derivatives.get (derivatives >> V >> V)
+      let maybePoint =
+            Solve2d.unique
+              (bounds fu)
+              (evaluate fu)
+              (evaluate fuu)
+              (evaluate fuv)
+              (bounds fv)
+              (evaluate fv)
+              (evaluate fuv)
+              (evaluate fvv)
+              uvBounds
+      case maybePoint of
+        Nothing -> Solve2d.recurse CrossingCurvesOnly
+        Just point ->
+          if Bounds2d.includes point (Domain2d.interior subdomain)
+            then case determinantSign of
+              Positive -> do
+                -- Non-saddle tangent point
+                -- Note that fuu and fvv must be either both positive or both negative
+                -- to reach this code path, so we can take the sign of either one
+                -- to determine the sign of the tangent point
+                let sign = Qty.sign (Range.minValue fuuBounds)
+                Solve2d.return (NonEmpty.singleton (TangentPointSolution (point, sign, uvBounds)))
+              Negative -> do
+                -- Saddle region
+                let saddleRegion = SaddleRegion.quadratic subproblem point
+                Solve2d.return (NonEmpty.singleton (SaddleRegionSolution saddleRegion))
+            else do
+              Solve2d.recurse CrossingCurvesOnly
+    Unresolved -> do
+      -- TODO check for tangent curves
+      Solve2d.recurse AllZeroTypes
+
+findCrossingCurves ::
+  Tolerance units =>
+  Subproblem units ->
+  Solve2d.Action Solve2d.NoExclusions FindZerosContext (Solution units)
+findCrossingCurves subproblem =
+  case crossingCurve subproblem of
+    Unresolved -> Solve2d.recurse CrossingCurvesOnly
+    Resolved Nothing -> Solve2d.pass
+    Resolved (Just curve) -> Solve2d.return (NonEmpty.singleton (CrossingCurveSolution curve))
+
+crossingCurve :: Tolerance units => Subproblem units -> Fuzzy (Maybe PartialZeros.CrossingCurve)
+crossingCurve subproblem = do
+  Fuzzy.oneOf
+    [ diagonalCrossingCurve subproblem
+    , horizontalCrossingCurve subproblem
+    , verticalCrossingCurve subproblem
+    ]
+
+diagonalCrossingCurve ::
+  Tolerance units =>
+  Subproblem units ->
+  Fuzzy (Maybe PartialZeros.CrossingCurve)
+diagonalCrossingCurve subproblem = Fuzzy.do
+  let Subproblem{derivativeBounds} = subproblem
+  let fuBounds = Derivatives.get (derivativeBounds >> U)
+  let fvBounds = Derivatives.get (derivativeBounds >> V)
+  fuSign <- Range.resolvedSign fuBounds
+  fvSign <- Range.resolvedSign fvBounds
+  Resolved $
+    case (fuSign, fvSign) of
+      (Negative, Negative) -> southeastCrossingCurve subproblem
+      (Negative, Positive) -> southwestCrossingCurve subproblem
+      (Positive, Negative) -> northeastCrossingCurve subproblem
+      (Positive, Positive) -> northwestCrossingCurve subproblem
+
+southeastCrossingCurve :: Tolerance units => Subproblem units -> Maybe PartialZeros.CrossingCurve
+southeastCrossingCurve subproblem = do
+  let Subproblem{derivatives, uvBounds, derivativeValues} = subproblem
+  let fValues = Derivatives.get derivativeValues
+  let CornerValues{bottomLeft = f11, bottomRight = f21, topLeft = f12, topRight = f22} = fValues
+  if f11 <= Qty.zero || f22 >= Qty.zero
+    then Nothing
     else do
-      case exclusions of
-        Solve2d.SomeExclusions -> Solve2d.recurse
-        Solve2d.NoExclusions -> do
-          let fuSign = Range.resolvedSign fuBounds
-          let fvSign = Range.resolvedSign fvBounds
-          let fuResolved = fuSign /= Nothing
-          let fvResolved = fvSign /= Nothing
-          let uvBounds = Domain2d.bounds subdomain
-          let uvInterior = Domain2d.interior subdomain
-          let (uRange, vRange) = Bounds2d.coordinates uvBounds
-          let (uInterior, vInterior) = Bounds2d.coordinates uvInterior
-          let (uLeft, uRight) = Range.endpoints uRange
-          let (vBottom, vTop) = Range.endpoints vRange
-          let leftSolution = Maybe.map2 (,) fvSign (solveVertically derivatives uLeft vInterior)
-          let rightSolution = Maybe.map2 (,) fvSign (solveVertically derivatives uRight vInterior)
-          let bottomSolution = Maybe.map2 (,) fuSign (solveHorizontally derivatives uInterior vBottom)
-          let topSolution = Maybe.map2 (,) fuSign (solveHorizontally derivatives uInterior vTop)
-          let leftBoundary = Domain2d.leftBoundary subdomain
-          let rightBoundary = Domain2d.rightBoundary subdomain
-          let bottomBoundary = Domain2d.bottomBoundary subdomain
-          let topBoundary = Domain2d.topBoundary subdomain
-          let horizontalSolution startBoundary endBoundary uStart uEnd vBounds monotonic =
-                CrossingCurveSolution $
-                  PartialZeros.CrossingCurve startBoundary endBoundary $
-                    NonEmpty.singleton (horizontalCurve derivatives uStart uEnd vBounds monotonic)
-          let verticalSolution startBoundary endBoundary vStart vEnd uBounds monotonic =
-                CrossingCurveSolution $
-                  PartialZeros.CrossingCurve startBoundary endBoundary $
-                    NonEmpty.singleton (verticalCurve derivatives uBounds vStart vEnd monotonic)
-          case (leftSolution, rightSolution, bottomSolution, topSolution) of
-            (Just (vSign, vLeft), Just (_, vRight), Nothing, Nothing) -> do
-              -- Horizontal curve, fv is resolved
-              let (uStart, uEnd, startBoundary, endBoundary) = case vSign of
-                    Positive -> (uRight, uLeft, rightBoundary, leftBoundary)
-                    Negative -> (uLeft, uRight, leftBoundary, rightBoundary)
-              let solution = horizontalSolution startBoundary endBoundary uStart uEnd
-              if fuResolved
-                then Solve2d.return (solution (Range.from vLeft vRight) True)
-                else do
-                  let vBounds = parallelogramBounds uLeft uRight vLeft vRight (-fuBounds / fvBounds)
-                  if Range.contains vBounds vInterior
-                    then Solve2d.return (solution vBounds False)
-                    else Solve2d.recurse
-            (Nothing, Nothing, Just (uSign, uBottom), Just (_, uTop)) -> do
-              -- Vertical curve, fu is resolved
-              let (vStart, vEnd, startBoundary, endBoundary) = case uSign of
-                    Positive -> (vBottom, vTop, bottomBoundary, topBoundary)
-                    Negative -> (vTop, vBottom, topBoundary, bottomBoundary)
-              let solution = verticalSolution startBoundary endBoundary vStart vEnd
-              if fvResolved
-                then Solve2d.return (solution (Range.from uBottom uTop) True)
-                else do
-                  let uBounds = parallelogramBounds vBottom vTop uBottom uTop (-fvBounds / fuBounds)
-                  if Range.contains uBounds uInterior
-                    then Solve2d.return (solution uBounds False)
-                    else Solve2d.recurse
-            (Just (vSign, vLeft), Nothing, Just (_, uBottom), Nothing) ->
-              -- Bottom left diagonal, fu and fv are resolved
-              Solve2d.return $
-                if uBottom - uLeft >= vLeft - vBottom
-                  then case vSign of
-                    Positive -> horizontalSolution bottomBoundary leftBoundary uBottom uLeft (Range.from vBottom vLeft) True
-                    Negative -> horizontalSolution leftBoundary bottomBoundary uLeft uBottom (Range.from vBottom vLeft) True
-                  else case vSign of
-                    Positive -> verticalSolution bottomBoundary leftBoundary vBottom vLeft (Range.from uLeft uBottom) True
-                    Negative -> verticalSolution leftBoundary bottomBoundary vLeft vBottom (Range.from uLeft uBottom) True
-            (Just (vSign, vLeft), Nothing, Nothing, Just (_, uTop)) ->
-              -- Top left diagonal, fu and fv are resolved
-              Solve2d.return $
-                if uTop - uLeft >= vTop - vLeft
-                  then case vSign of
-                    Positive -> horizontalSolution topBoundary leftBoundary uTop uLeft (Range.from vLeft vTop) True
-                    Negative -> horizontalSolution leftBoundary topBoundary uLeft uTop (Range.from vLeft vTop) True
-                  else case vSign of
-                    Positive -> verticalSolution topBoundary leftBoundary vTop vLeft (Range.from uLeft uTop) True
-                    Negative -> verticalSolution leftBoundary topBoundary vLeft vTop (Range.from uLeft uTop) True
-            (Nothing, Just (vSign, vRight), Just (_, uBottom), Nothing) ->
-              -- Bottom right diagonal, fu and fv are resolved
-              Solve2d.return $
-                if uRight - uBottom >= vRight - vBottom
-                  then case vSign of
-                    Positive -> horizontalSolution rightBoundary bottomBoundary uRight uBottom (Range.from vBottom vRight) True
-                    Negative -> horizontalSolution bottomBoundary rightBoundary uBottom uRight (Range.from vBottom vRight) True
-                  else case vSign of
-                    Positive -> verticalSolution rightBoundary bottomBoundary vRight vBottom (Range.from uBottom uRight) True
-                    Negative -> verticalSolution bottomBoundary rightBoundary vBottom vRight (Range.from uBottom uRight) True
-            (Nothing, Just (vSign, vRight), Nothing, Just (_, uTop)) ->
-              -- Top right diagonal, fu and fv are resolved
-              Solve2d.return $
-                if uRight - uTop >= vTop - vRight
-                  then case vSign of
-                    Positive -> horizontalSolution rightBoundary topBoundary uRight uTop (Range.from vRight vTop) True
-                    Negative -> horizontalSolution topBoundary rightBoundary uTop uRight (Range.from vRight vTop) True
-                  else case vSign of
-                    Positive -> verticalSolution rightBoundary topBoundary vRight vTop (Range.from uTop uRight) True
-                    Negative -> verticalSolution topBoundary rightBoundary vTop vRight (Range.from uTop uRight) True
-            _ -> Solve2d.recurse
+      let start = case compare f12 Qty.zero of
+            LT -> Subproblem.leftEdgePoint subproblem
+            EQ -> Subproblem.topLeftPoint subproblem
+            GT -> Subproblem.topEdgePoint subproblem
+      let end = case compare f21 Qty.zero of
+            LT -> Subproblem.bottomEdgePoint subproblem
+            EQ -> Subproblem.bottomRightPoint subproblem
+            GT -> Subproblem.rightEdgePoint subproblem
+      Just (diagonalCurve derivatives uvBounds start end)
 
-solveVertically :: Tolerance units => Derivatives units -> Float -> Range Unitless -> Maybe Float
-solveVertically derivatives uValue vRange = do
-  let Derivatives{f, fv} = derivatives
-  let fValue vValue = evaluate f (Point2d.xy uValue vValue)
-  let fvValue vValue = evaluate fv (Point2d.xy uValue vValue)
-  let v0 = Solve1d.monotonic fValue fvValue vRange
-  if fValue v0 ~= Qty.zero then Just v0 else Nothing
+southwestCrossingCurve :: Tolerance units => Subproblem units -> Maybe PartialZeros.CrossingCurve
+southwestCrossingCurve subproblem = do
+  let Subproblem{derivatives, uvBounds, derivativeValues} = subproblem
+  let fValues = Derivatives.get derivativeValues
+  let CornerValues{bottomLeft = f11, bottomRight = f21, topLeft = f12, topRight = f22} = fValues
+  if f12 <= Qty.zero || f21 >= Qty.zero
+    then Nothing
+    else do
+      let start = case compare f22 Qty.zero of
+            LT -> Subproblem.topEdgePoint subproblem
+            EQ -> Subproblem.topRightPoint subproblem
+            GT -> Subproblem.rightEdgePoint subproblem
+      let end = case compare f11 Qty.zero of
+            LT -> Subproblem.leftEdgePoint subproblem
+            EQ -> Subproblem.bottomLeftPoint subproblem
+            GT -> Subproblem.bottomEdgePoint subproblem
+      Just (diagonalCurve derivatives uvBounds start end)
 
-solveHorizontally :: Tolerance units => Derivatives units -> Range Unitless -> Float -> Maybe Float
-solveHorizontally derivatives uRange vValue = do
-  let Derivatives{f, fu} = derivatives
-  let fValue uValue = evaluate f (Point2d.xy uValue vValue)
-  let fuValue uValue = evaluate fu (Point2d.xy uValue vValue)
-  let u0 = Solve1d.monotonic fValue fuValue uRange
-  if fValue u0 ~= Qty.zero then Just u0 else Nothing
+northeastCrossingCurve :: Tolerance units => Subproblem units -> Maybe PartialZeros.CrossingCurve
+northeastCrossingCurve subproblem = do
+  let Subproblem{derivatives, uvBounds, derivativeValues} = subproblem
+  let fValues = Derivatives.get derivativeValues
+  let CornerValues{bottomLeft = f11, bottomRight = f21, topLeft = f12, topRight = f22} = fValues
+  if f21 <= Qty.zero || f12 >= Qty.zero
+    then Nothing
+    else do
+      let start = case compare f11 Qty.zero of
+            LT -> Subproblem.bottomEdgePoint subproblem
+            EQ -> Subproblem.bottomLeftPoint subproblem
+            GT -> Subproblem.leftEdgePoint subproblem
+      let end = case compare f22 Qty.zero of
+            LT -> Subproblem.rightEdgePoint subproblem
+            EQ -> Subproblem.topRightPoint subproblem
+            GT -> Subproblem.topEdgePoint subproblem
+      Just (diagonalCurve derivatives uvBounds start end)
+
+northwestCrossingCurve :: Tolerance units => Subproblem units -> Maybe PartialZeros.CrossingCurve
+northwestCrossingCurve subproblem = do
+  let Subproblem{derivatives, uvBounds, derivativeValues} = subproblem
+  let fValues = Derivatives.get derivativeValues
+  let CornerValues{bottomLeft = f11, bottomRight = f21, topLeft = f12, topRight = f22} = fValues
+  if f22 <= Qty.zero || f11 >= Qty.zero
+    then Nothing
+    else do
+      let start = case compare f21 Qty.zero of
+            LT -> Subproblem.rightEdgePoint subproblem
+            EQ -> Subproblem.bottomRightPoint subproblem
+            GT -> Subproblem.bottomEdgePoint subproblem
+      let end = case compare f12 Qty.zero of
+            LT -> Subproblem.topEdgePoint subproblem
+            EQ -> Subproblem.topLeftPoint subproblem
+            GT -> Subproblem.leftEdgePoint subproblem
+      Just (diagonalCurve derivatives uvBounds start end)
+
+diagonalCurve ::
+  Tolerance units =>
+  Derivatives (Function units) ->
+  Uv.Bounds ->
+  (Uv.Point, Domain2d.Boundary) ->
+  (Uv.Point, Domain2d.Boundary) ->
+  PartialZeros.CrossingCurve
+diagonalCurve derivatives uvBounds start end = do
+  let (Point2d uStart vStart, startBoundary) = start
+  let (Point2d uEnd vEnd, endBoundary) = end
+  PartialZeros.crossingCurve startBoundary endBoundary uvBounds $
+    if Float.abs (uEnd - uStart) >= Float.abs (vEnd - vStart)
+      then HorizontalCurve.monotonic derivatives uStart uEnd (Range vStart vEnd)
+      else VerticalCurve.monotonic derivatives (Range uStart uEnd) vStart vEnd
+
+horizontalCrossingCurve ::
+  Tolerance units =>
+  Subproblem units ->
+  Fuzzy (Maybe PartialZeros.CrossingCurve)
+horizontalCrossingCurve subproblem = Fuzzy.do
+  let Subproblem{derivativeBounds} = subproblem
+  let fvBounds = Derivatives.get (derivativeBounds >> V)
+  if Range.isResolved fvBounds
+    then Fuzzy.do
+      let bottomEdgeBounds = Subproblem.bottomEdgeBounds subproblem
+      let topEdgeBounds = Subproblem.topEdgeBounds subproblem
+      bottomEdgeSign <- Range.resolvedSign bottomEdgeBounds
+      topEdgeSign <- Range.resolvedSign topEdgeBounds
+      case (bottomEdgeSign, topEdgeSign) of
+        (Negative, Negative) -> Resolved Nothing
+        (Positive, Positive) -> Resolved Nothing
+        (Negative, Positive) ->
+          Fuzzy.map Just (westCrossingCurve subproblem)
+        (Positive, Negative) ->
+          Fuzzy.map Just (eastCrossingCurve subproblem)
+    else Unresolved
+
+eastCrossingCurve :: Tolerance units => Subproblem units -> Fuzzy PartialZeros.CrossingCurve
+eastCrossingCurve subproblem = do
+  let start = Subproblem.leftEdgePoint subproblem
+  let end = Subproblem.rightEdgePoint subproblem
+  horizontalCurve subproblem start end
+
+westCrossingCurve :: Tolerance units => Subproblem units -> Fuzzy PartialZeros.CrossingCurve
+westCrossingCurve subproblem = do
+  let start = Subproblem.rightEdgePoint subproblem
+  let end = Subproblem.leftEdgePoint subproblem
+  horizontalCurve subproblem start end
 
 horizontalCurve ::
   Tolerance units =>
-  Derivatives units ->
-  Float ->
-  Float ->
-  Range Unitless ->
-  Bool ->
-  Curve2d Uv.Coordinates
-horizontalCurve derivatives uStart uEnd vRange monotonic = do
-  let Derivatives{fu, fv} = derivatives
-  Curve2d.new $
-    HorizontalCurve
-      { derivatives
-      , dvdu = -fu / fv
-      , uStart
-      , uEnd
-      , vRange
-      , monotonic
-      , tolerance = ?tolerance
-      }
+  Subproblem units ->
+  (Uv.Point, Domain2d.Boundary) ->
+  (Uv.Point, Domain2d.Boundary) ->
+  Fuzzy PartialZeros.CrossingCurve
+horizontalCurve Subproblem{derivatives, subdomain, uvBounds} start end = do
+  let (Point2d uStart _, startBoundary) = start
+  let (Point2d uEnd _, endBoundary) = end
+  let Bounds2d _ vBounds = uvBounds
+  let curve = HorizontalCurve.new derivatives uStart uEnd vBounds
+  let Domain2d _ vSubdomain = subdomain
+  let Bounds2d _ curveVBounds = Curve2d.bounds curve
+  if Range.contains curveVBounds (Domain1d.interior vSubdomain)
+    then Resolved (PartialZeros.crossingCurve startBoundary endBoundary uvBounds curve)
+    else Unresolved
+
+verticalCrossingCurve ::
+  Tolerance units =>
+  Subproblem units ->
+  Fuzzy (Maybe PartialZeros.CrossingCurve)
+verticalCrossingCurve subproblem = Fuzzy.do
+  let Subproblem{derivativeBounds} = subproblem
+  let fuBounds = Derivatives.get (derivativeBounds >> U)
+  if Range.isResolved fuBounds
+    then Fuzzy.do
+      let leftEdgeBounds = Subproblem.leftEdgeBounds subproblem
+      let rightEdgeBounds = Subproblem.rightEdgeBounds subproblem
+      leftEdgeSign <- Range.resolvedSign leftEdgeBounds
+      rightEdgeSign <- Range.resolvedSign rightEdgeBounds
+      case (leftEdgeSign, rightEdgeSign) of
+        (Negative, Negative) -> Resolved Nothing
+        (Positive, Positive) -> Resolved Nothing
+        (Negative, Positive) ->
+          Fuzzy.map Just (northCrossingCurve subproblem)
+        (Positive, Negative) ->
+          Fuzzy.map Just (southCrossingCurve subproblem)
+    else Unresolved
+
+southCrossingCurve :: Tolerance units => Subproblem units -> Fuzzy PartialZeros.CrossingCurve
+southCrossingCurve subproblem = Fuzzy.do
+  let start = Subproblem.topEdgePoint subproblem
+  let end = Subproblem.bottomEdgePoint subproblem
+  verticalCurve subproblem start end
+
+northCrossingCurve :: Tolerance units => Subproblem units -> Fuzzy PartialZeros.CrossingCurve
+northCrossingCurve subproblem = Fuzzy.do
+  let start = Subproblem.bottomEdgePoint subproblem
+  let end = Subproblem.topEdgePoint subproblem
+  verticalCurve subproblem start end
 
 verticalCurve ::
   Tolerance units =>
-  Derivatives units ->
-  Range Unitless ->
-  Float ->
-  Float ->
-  Bool ->
-  Curve2d Uv.Coordinates
-verticalCurve derivatives uRange vStart vEnd monotonic = do
-  let Derivatives{fu, fv} = derivatives
-  Curve2d.new $
-    VerticalCurve
-      { derivatives
-      , dudv = -fv / fu
-      , uRange
-      , vStart
-      , vEnd
-      , monotonic
-      , tolerance = ?tolerance
-      }
-
-data HorizontalCurve units = HorizontalCurve
-  { derivatives :: Derivatives units
-  , dvdu :: Function Unitless
-  , uStart :: Float
-  , uEnd :: Float
-  , vRange :: Range Unitless
-  , monotonic :: Bool
-  , tolerance :: Qty units
-  }
-  deriving (Show)
-
-solveForV :: HorizontalCurve units -> Float -> Float
-solveForV (HorizontalCurve{derivatives, vRange, tolerance}) uValue = Tolerance.using tolerance do
-  let Derivatives{f, fv} = derivatives
-  let fValue vValue = evaluate f (Point2d.xy uValue vValue)
-  let fvValue vValue = evaluate fv (Point2d.xy uValue vValue)
-  Solve1d.monotonic fValue fvValue vRange
-
-instance Curve2d.Interface (HorizontalCurve units) Uv.Coordinates where
-  startPointImpl curve = Curve2d.pointOnImpl curve 0.0
-  endPointImpl curve = Curve2d.pointOnImpl curve 1.0
-
-  pointOnImpl curve tValue = do
-    let (HorizontalCurve{uStart, uEnd}) = curve
-    let uValue = Float.interpolateFrom uStart uEnd tValue
-    let vValue = solveForV curve uValue
-    Point2d.xy uValue vValue
-
-  segmentBoundsImpl curve tRange = do
-    let (HorizontalCurve{dvdu, uStart, uEnd, vRange, monotonic}) = curve
-    let (t1, t2) = Range.endpoints tRange
-    let u1 = Float.interpolateFrom uStart uEnd t1
-    let u2 = Float.interpolateFrom uStart uEnd t2
-    let v1 = solveForV curve u1
-    let v2 = solveForV curve u2
-    if monotonic
-      then Bounds2d.xy (Range.from u1 u2) (Range.from v1 v2)
-      else do
-        let slopeBounds = bounds dvdu (Bounds2d.xy (Range.from u1 u2) vRange)
-        let vBounds = parallelogramBounds u1 u2 v1 v2 slopeBounds
-        Bounds2d.xy (Range.from u1 u2) vBounds
-
-  derivativeImpl crossingCurve@(HorizontalCurve{dvdu, uStart, uEnd}) = do
-    let deltaU = uEnd - uStart
-    let dudt = Curve1d.constant deltaU
-    let dvdt = dudt * dvdu . Curve2d.new crossingCurve
-    VectorCurve2d.xy dudt dvdt
-
-  reverseImpl (HorizontalCurve{derivatives, dvdu, uStart, uEnd, vRange, monotonic, tolerance}) =
-    HorizontalCurve{derivatives, dvdu, uStart = uEnd, uEnd = uStart, vRange, monotonic, tolerance}
-
-  boundsImpl crossingCurve = Curve2d.segmentBoundsImpl crossingCurve Range.unit
-
-  transformByImpl transform crossingCurve =
-    Curve2d.new (Curve2d.TransformBy transform crossingCurve)
-
-data VerticalCurve units = VerticalCurve
-  { derivatives :: Derivatives units
-  , dudv :: Function Unitless
-  , uRange :: Range Unitless
-  , vStart :: Float
-  , vEnd :: Float
-  , monotonic :: Bool
-  , tolerance :: Qty units
-  }
-  deriving (Show)
-
-solveForU :: VerticalCurve units -> Float -> Float
-solveForU (VerticalCurve{derivatives, uRange, tolerance}) vValue = Tolerance.using tolerance do
-  let Derivatives{f, fu} = derivatives
-  let fValue uValue = evaluate f (Point2d.xy uValue vValue)
-  let fuValue uValue = evaluate fu (Point2d.xy uValue vValue)
-  Solve1d.monotonic fValue fuValue uRange
-
-instance Curve2d.Interface (VerticalCurve units) Uv.Coordinates where
-  startPointImpl curve = Curve2d.pointOnImpl curve 0.0
-  endPointImpl curve = Curve2d.pointOnImpl curve 1.0
-
-  pointOnImpl curve tValue = do
-    let (VerticalCurve{vStart, vEnd}) = curve
-    let vValue = Float.interpolateFrom vStart vEnd tValue
-    let uValue = solveForU curve vValue
-    Point2d.xy uValue vValue
-
-  segmentBoundsImpl curve tRange = do
-    let (VerticalCurve{dudv, uRange, vStart, vEnd, monotonic}) = curve
-    let (t1, t2) = Range.endpoints tRange
-    let v1 = Float.interpolateFrom vStart vEnd t1
-    let v2 = Float.interpolateFrom vStart vEnd t2
-    let u1 = solveForU curve v1
-    let u2 = solveForU curve v2
-    if monotonic
-      then Bounds2d.xy (Range.from u1 u2) (Range.from v1 v2)
-      else do
-        let slopeBounds = bounds dudv (Bounds2d.xy uRange (Range.from v1 v2))
-        let uBounds = parallelogramBounds v1 v2 u1 u2 slopeBounds
-        Bounds2d.xy uBounds (Range.from v1 v2)
-
-  derivativeImpl crossingCurve@(VerticalCurve{dudv, vStart, vEnd}) = do
-    let deltaV = vEnd - vStart
-    let dvdt = Curve1d.constant deltaV
-    let dudt = dvdt * dudv . Curve2d.new crossingCurve
-    VectorCurve2d.xy dudt dvdt
-
-  reverseImpl (VerticalCurve{derivatives, dudv, uRange, vStart, vEnd, monotonic, tolerance}) =
-    VerticalCurve{derivatives, dudv, uRange, vStart = vEnd, vEnd = vStart, monotonic, tolerance}
-
-  boundsImpl crossingCurve = Curve2d.segmentBoundsImpl crossingCurve Range.unit
-
-  transformByImpl transform crossingCurve =
-    Curve2d.new (Curve2d.TransformBy transform crossingCurve)
-
-parallelogramBounds ::
-  Float ->
-  Float ->
-  Float ->
-  Float ->
-  Range Unitless ->
-  Range Unitless
-parallelogramBounds x1 x2 y1 y2 slopeBounds = do
-  let (minSlope, maxSlope) = Range.endpoints slopeBounds
-  let deltaX = x2 - x1
-  let deltaY = y2 - y1
-  let deltaXLow = (maxSlope * deltaX - deltaY) / (maxSlope - minSlope) |> Qty.clamp 0.0 deltaX
-  let deltaXHigh = (deltaY - minSlope * deltaX) / (maxSlope - minSlope) |> Qty.clamp 0.0 deltaX
-  let yLow = y1 + minSlope * deltaXLow
-  let yHigh = y1 + maxSlope * deltaXHigh
-  Range.hull4 y1 y2 yLow yHigh
+  Subproblem units ->
+  (Uv.Point, Domain2d.Boundary) ->
+  (Uv.Point, Domain2d.Boundary) ->
+  Fuzzy PartialZeros.CrossingCurve
+verticalCurve Subproblem{derivatives, subdomain, uvBounds} start end = do
+  let (Point2d _ vStart, startBoundary) = start
+  let (Point2d _ vEnd, endBoundary) = end
+  let curve = VerticalCurve.new derivatives (Bounds2d.xCoordinate uvBounds) vStart vEnd
+  let Domain2d uSubdomain _ = subdomain
+  let Bounds2d curveUBounds _ = Curve2d.bounds curve
+  if Range.contains curveUBounds (Domain1d.interior uSubdomain)
+    then Resolved (PartialZeros.crossingCurve startBoundary endBoundary uvBounds curve)
+    else Unresolved

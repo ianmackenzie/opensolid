@@ -533,12 +533,12 @@ resolutionThreshold = 0.5
 isResolved :: Range units -> Bool
 isResolved range = Float.abs (resolution range) >= resolutionThreshold
 
-resolvedSign :: Range units -> Maybe Sign
+resolvedSign :: Range units -> Fuzzy Sign
 resolvedSign range = do
   let rangeResolution = resolution range
   if Float.abs rangeResolution >= resolutionThreshold
-    then Just (Float.sign rangeResolution)
-    else Nothing
+    then Resolved (Float.sign rangeResolution)
+    else Unresolved
 
 any :: (Range units -> Fuzzy Bool) -> Range units -> Bool
 any assess range =

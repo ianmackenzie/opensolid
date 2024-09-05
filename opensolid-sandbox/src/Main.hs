@@ -247,12 +247,20 @@ drawBounds attributes bounds = do
     , point 0.0 1.0
     ]
 
-drawCrossingCurve :: Int -> NonEmpty (Curve2d Uv.Coordinates) -> Drawing2d.Entity Uv.Space
+drawCrossingCurve :: Int -> NonEmpty (Curve2d Uv.Coordinates, Uv.Bounds) -> Drawing2d.Entity Uv.Space
 drawCrossingCurve index segments = do
   let hue = (index * Angle.goldenAngle) % Angle.twoPi
   let colour = Colour.hsl hue 0.5 0.5
-  Drawing2d.with [Drawing2d.strokeColour colour, Drawing2d.opacity 0.3] $
-    List.map drawCurve (NonEmpty.toList segments)
+  let (curves, bounds) = List.unzip2 (NonEmpty.toList segments)
+  Drawing2d.group
+    [ Drawing2d.with [Drawing2d.strokeColour colour, Drawing2d.opacity 0.3] $
+        List.map drawCurve curves
+    , Drawing2d.with
+        [ Drawing2d.strokeColour Colour.gray
+        , Drawing2d.strokeWidth (Length.millimeters 0.05)
+        ]
+        (List.map (drawBounds []) bounds)
+    ]
 
 drawSaddlePoint :: (Uv.Point, Uv.Bounds) -> Drawing2d.Entity Uv.Space
 drawSaddlePoint (point, bounds) =

@@ -1,7 +1,5 @@
 module Solve2d
-  ( Cache
-  , init
-  , SomeExclusions
+  ( SomeExclusions
   , NoExclusions
   , Exclusions (NoExclusions, SomeExclusions)
   , InfiniteRecursion (InfiniteRecursion)
@@ -15,6 +13,7 @@ module Solve2d
   )
 where
 
+import Bounds2d (Bounds2d (Bounds2d))
 import Bounds2d qualified
 import Domain1d qualified
 import Domain2d (Domain2d (Domain2d))
@@ -22,8 +21,10 @@ import Domain2d qualified
 import Error qualified
 import List qualified
 import Maybe qualified
+import NonEmpty qualified
 import OpenSolid
 import Pair qualified
+import Point2d (Point2d (Point2d))
 import Point2d qualified
 import Qty qualified
 import Queue (Queue)
@@ -34,80 +35,11 @@ import Result qualified
 import Uv qualified
 import Vector2d qualified
 
-data Cache cached
-  = Tree Domain2d cached (Node cached)
-
-data Node cached
-  = Atomic
-  | Central ~(Cache cached)
-  | Row ~(Cache cached) ~(Cache cached) ~(Cache cached)
-  | Column ~(Cache cached) ~(Cache cached) ~(Cache cached)
+data RecursionType
+  = Central
+  | Row
+  | Column
   | Quadrant
-      ~(Cache cached)
-      ~(Cache cached)
-      ~(Cache cached)
-      ~(Cache cached)
-      ~(Cache cached)
-      ~(Cache cached)
-      ~(Cache cached)
-      ~(Cache cached)
-      ~(Cache cached)
-
-init :: (Uv.Bounds -> cached) -> Cache cached
-init function = quadrant function Domain2d.unit
-
-tree :: (Uv.Bounds -> cached) -> Domain2d -> Node cached -> Cache cached
-tree function subdomain givenNode = do
-  let cached = function (Domain2d.bounds subdomain)
-  let node = if Domain2d.isAtomic subdomain then Atomic else givenNode
-  Tree subdomain cached node
-
-central :: (Uv.Bounds -> a) -> Domain2d -> Cache a
-central function subdomain = do
-  let child = central function (Domain2d.half subdomain)
-  let node = Central child
-  tree function subdomain node
-
-row :: (Uv.Bounds -> a) -> Domain2d -> Cache a
-row function subdomain = do
-  let (Domain2d x y) = subdomain
-  let (x1, x2) = Domain1d.bisect x
-  let yMid = Domain1d.half y
-  let leftChild = row function (Domain2d x1 yMid)
-  let middleChild = central function (Domain2d.half subdomain)
-  let rightChild = row function (Domain2d x2 yMid)
-  let node = Row leftChild middleChild rightChild
-  tree function subdomain node
-
-column :: (Uv.Bounds -> a) -> Domain2d -> Cache a
-column function subdomain = do
-  let (Domain2d x y) = subdomain
-  let xMid = Domain1d.half x
-  let (y1, y2) = Domain1d.bisect y
-  let bottomChild = column function (Domain2d xMid y1)
-  let middleChild = central function (Domain2d.half subdomain)
-  let topChild = column function (Domain2d xMid y2)
-  let node = Column bottomChild middleChild topChild
-  tree function subdomain node
-
-quadrant :: (Uv.Bounds -> a) -> Domain2d -> Cache a
-quadrant function subdomain = do
-  let (Domain2d x y) = subdomain
-  let (x1, x2) = Domain1d.bisect x
-  let (y1, y2) = Domain1d.bisect y
-  let xMid = Domain1d.half x
-  let yMid = Domain1d.half y
-  let lBot = quadrant function (Domain2d x1 y1)
-  let cBot = column function (Domain2d xMid y1)
-  let rBot = quadrant function (Domain2d x2 y1)
-  let lMid = row function (Domain2d x1 yMid)
-  let cMid = central function (Domain2d xMid yMid)
-  let rMid = row function (Domain2d x2 yMid)
-  let lTop = quadrant function (Domain2d x1 y2)
-  let cTop = column function (Domain2d xMid y2)
-  let rTop = quadrant function (Domain2d x2 y2)
-  let node = Quadrant lBot cBot rBot lMid cMid rMid lTop cTop rTop
-  tree function subdomain node
 
 data NoExclusions
 
@@ -121,112 +53,120 @@ deriving instance Show (Exclusions exclusions)
 
 data InfiniteRecursion = InfiniteRecursion deriving (Eq, Show, Error.Message)
 
-type Callback cached solution =
+type Callback context solution =
   forall exclusions.
+  context ->
   Domain2d ->
-  cached ->
   Exclusions exclusions ->
-  Action exclusions solution
+  Action exclusions context solution
 
-search ::
-  Callback cached solution ->
-  Cache cached ->
-  List (solution, Domain2d) ->
-  Result InfiniteRecursion (List (solution, Domain2d))
-search callback cache accumulated =
-  process callback (Queue.singleton cache) accumulated
+search :: Callback context solution -> context -> Result InfiniteRecursion (List solution)
+search callback initialContext =
+  Result.map Pair.first $
+    process callback (Queue.singleton (Domain2d.unit, initialContext, Quadrant)) [] []
 
 process ::
-  forall cached solution.
-  Callback cached solution ->
-  Queue (Cache cached) ->
-  List (solution, Domain2d) ->
-  Result InfiniteRecursion (List (solution, Domain2d))
-process callback queue accumulated =
+  Callback context solution ->
+  Queue (Domain2d, context, RecursionType) ->
+  List solution ->
+  List Domain2d ->
+  Result InfiniteRecursion (List solution, List Domain2d)
+process callback queue solutions exclusions =
   case Queue.pop queue of
-    Nothing -> Success accumulated -- We're done! No more subdomains to process
-    Just (Tree subdomain cached node, remaining) -> do
+    Nothing -> Success (solutions, exclusions) -- We're done! No more subdomains to process
+    Just ((subdomain, context, recursionType), remaining) -> do
       -- TODO optimize to check for containment and overlapping subdomains in a single pass
       -- (maybe use the call stack to avoid even constructing the overlapping domain list
       -- if the subdomain is actually contained?)
-      let filteredExclusions =
-            List.map Pair.second accumulated
-              |> List.filter (Domain2d.overlaps subdomain)
-      if containedBy filteredExclusions subdomain
-        then process callback remaining accumulated
+      let filteredExclusions = List.filter (Domain2d.overlaps subdomain) exclusions
+      let convergenceSubdomain = convergenceDomain subdomain recursionType
+      if List.anySatisfy (Domain2d.contains convergenceSubdomain) filteredExclusions
+        then process callback remaining solutions exclusions
         else do
           case filteredExclusions of
-            [] -> case callback subdomain cached NoExclusions of
-              Pass -> process callback remaining accumulated
-              Recurse -> recurseIntoChildrenOf node callback remaining accumulated
-              Return solution ->
-                process callback remaining ((solution, subdomain) : accumulated)
-            List.OneOrMore -> case callback subdomain cached SomeExclusions of
-              Pass -> process callback remaining accumulated
-              Recurse -> recurseIntoChildrenOf node callback remaining accumulated
+            [] -> case callback context subdomain NoExclusions of
+              Pass -> process callback remaining solutions exclusions
+              Recurse updatedContext -> Result.do
+                children <- recurseInto subdomain updatedContext recursionType
+                process callback (remaining + children) solutions exclusions
+              Return newSolutions -> do
+                let updatedSolutions = NonEmpty.toList newSolutions + solutions
+                let updatedExclusions = subdomain : exclusions
+                process callback remaining updatedSolutions updatedExclusions
+            List.OneOrMore -> case callback context subdomain SomeExclusions of
+              Pass -> process callback remaining solutions exclusions
+              Recurse updatedContext -> Result.do
+                children <- recurseInto subdomain updatedContext recursionType
+                process callback (remaining + children) solutions exclusions
 
-containedBy :: List Domain2d -> Domain2d -> Bool
-containedBy exclusions subdomain =
-  List.anySatisfy (Domain2d.contains subdomain) exclusions || do
-    let (Domain2d x y) = subdomain
-    let (x1, x2) = Domain1d.endpoints (Domain1d.half x)
-    let (y1, y2) = Domain1d.endpoints (Domain1d.half y)
-    checkContainment exclusions x1 x2 y1 y2 False False False False
+convergenceDomain :: Domain2d -> RecursionType -> Domain2d
+convergenceDomain subdomain recursionType = do
+  let Domain2d xSubdomain ySubdomain = subdomain
+  let midX = Domain1d.constant (Domain1d.midpoint xSubdomain)
+  let midY = Domain1d.constant (Domain1d.midpoint ySubdomain)
+  case recursionType of
+    Quadrant -> subdomain
+    Row -> Domain2d xSubdomain midY
+    Column -> Domain2d midX ySubdomain
+    Central -> Domain2d midX midY
 
-checkContainment ::
-  List Domain2d ->
-  Domain1d.Boundary ->
-  Domain1d.Boundary ->
-  Domain1d.Boundary ->
-  Domain1d.Boundary ->
-  Bool ->
-  Bool ->
-  Bool ->
-  Bool ->
-  Bool
-checkContainment exclusions x1 x2 y1 y2 contained11 contained12 contained21 contained22 =
-  case exclusions of
-    [] -> contained11 && contained12 && contained21 && contained22
-    first : rest -> do
-      let (Domain2d x y) = first
-      let updated11 = contained11 || (Domain1d.includes x1 x && Domain1d.includes y1 y)
-      let updated12 = contained12 || (Domain1d.includes x1 x && Domain1d.includes y2 y)
-      let updated21 = contained21 || (Domain1d.includes x2 x && Domain1d.includes y1 y)
-      let updated22 = contained22 || (Domain1d.includes x2 x && Domain1d.includes y2 y)
-      checkContainment rest x1 x2 y1 y2 updated11 updated12 updated21 updated22
+recurseInto ::
+  Domain2d ->
+  context ->
+  RecursionType ->
+  Result InfiniteRecursion (List (Domain2d, context, RecursionType))
+recurseInto subdomain context recursionType
+  | Domain2d.isAtomic subdomain = Failure InfiniteRecursion
+  | otherwise = Success $ case recursionType of
+      Central ->
+        [(Domain2d.half subdomain, context, Central)]
+      Row -> do
+        let Domain2d x y = subdomain
+        let (x1, x2) = Domain1d.bisect x
+        let xMid = Domain1d.half x
+        let yMid = Domain1d.half y
+        let left = (Domain2d x1 yMid, context, Row)
+        let middle = (Domain2d xMid yMid, context, Central)
+        let right = (Domain2d x2 yMid, context, Row)
+        [left, middle, right]
+      Column -> do
+        let Domain2d x y = subdomain
+        let xMid = Domain1d.half x
+        let yMid = Domain1d.half y
+        let (y1, y2) = Domain1d.bisect y
+        let bottom = (Domain2d xMid y1, context, Column)
+        let middle = (Domain2d xMid yMid, context, Central)
+        let top = (Domain2d xMid y2, context, Column)
+        [bottom, middle, top]
+      Quadrant -> do
+        let Domain2d x y = subdomain
+        let (x1, x2) = Domain1d.bisect x
+        let (y1, y2) = Domain1d.bisect y
+        let xMid = Domain1d.half x
+        let yMid = Domain1d.half y
+        let lBot = (Domain2d x1 y1, context, Quadrant)
+        let cBot = (Domain2d xMid y1, context, Column)
+        let rBot = (Domain2d x2 y1, context, Quadrant)
+        let lMid = (Domain2d x1 yMid, context, Row)
+        let cMid = (Domain2d xMid yMid, context, Central)
+        let rMid = (Domain2d x2 yMid, context, Row)
+        let lTop = (Domain2d x1 y2, context, Quadrant)
+        let cTop = (Domain2d xMid y2, context, Column)
+        let rTop = (Domain2d x2 y2, context, Quadrant)
+        [lBot, cBot, rBot, lMid, cMid, rMid, lTop, cTop, rTop]
 
-{-# INLINE recurseIntoChildrenOf #-}
-recurseIntoChildrenOf ::
-  forall cached solution.
-  Node cached ->
-  Callback cached solution ->
-  Queue (Cache cached) ->
-  List (solution, Domain2d) ->
-  Result InfiniteRecursion (List (solution, Domain2d))
-recurseIntoChildrenOf node callback queue accumulated = Result.do
-  updatedQueue <- case node of
-    Atomic -> Failure InfiniteRecursion
-    Central child -> Success (queue + child)
-    Row leftChild middleChild rightChild ->
-      Success (queue + middleChild + leftChild + rightChild)
-    Column bottomChild middleChild topChild ->
-      Success (queue + middleChild + bottomChild + topChild)
-    Quadrant bottomLeft bottomMiddle bottomRight middleLeft middle middleRight topLeft topMiddle topRight ->
-      Success (queue + middle + middleLeft + middleRight + bottomMiddle + topMiddle + bottomLeft + bottomRight + topLeft + topRight)
-  process callback updatedQueue accumulated
+data Action exclusions context solution where
+  Return :: NonEmpty solution -> Action NoExclusions context solution
+  Recurse :: context -> Action exclusions context solution
+  Pass :: Action exclusions context solution
 
-data Action exclusions solution where
-  Return :: solution -> Action NoExclusions solution
-  Recurse :: Action exclusions solution
-  Pass :: Action exclusions solution
-
-return :: solution -> Action NoExclusions solution
+return :: NonEmpty solution -> Action NoExclusions context solution
 return = Return
 
-recurse :: Action exclusions solution
+recurse :: context -> Action exclusions context solution
 recurse = Recurse
 
-pass :: Action exclusions solution
+pass :: Action exclusions context solution
 pass = Pass
 
 unique ::
