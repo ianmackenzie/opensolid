@@ -181,6 +181,8 @@ library
     Surface1d.Function.Subproblem
     Surface1d.Function.VerticalCurve
     Surface1d.Function.Zeros
+    Surface2d
+    Surface2d.Function
     Surface3d
     Surface3d.Function
     Text
@@ -201,6 +203,8 @@ library
     VectorCurve2d.Direction
     VectorCurve2d.Zeros
     VectorCurve3d
+    VectorSurface2d
+    VectorSurface2d.Function
     VectorSurface3d
     VectorSurface3d.Function
     VectorVolume3d.Function
