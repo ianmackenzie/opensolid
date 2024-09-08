@@ -7,11 +7,15 @@ module Uv.Derivatives
 where
 
 import OpenSolid
+import Text qualified
 import Uv (Parameter (U, V))
+import Prelude qualified
 
 data Derivatives a
   = Derivatives a ~(Derivatives a) ~(Derivatives a)
-  deriving (Show)
+
+instance Show (Derivatives a) where
+  show _ = Text.unpack "<Derivatives>"
 
 instance Composition (Derivatives a) Parameter (Derivatives a) where
   (Derivatives _ du _) >> U = du
