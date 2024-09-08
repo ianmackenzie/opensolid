@@ -1,3 +1,7 @@
+-- {-# OPTIONS_GHC -Wno-unused-imports #-}
+-- {-# OPTIONS_GHC -Wno-unused-local-binds #-}
+-- {-# OPTIONS_GHC -Wno-unused-top-binds #-}
+
 module Main (main) where
 
 import Angle qualified
