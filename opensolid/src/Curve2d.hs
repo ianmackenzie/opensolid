@@ -88,6 +88,7 @@ import Transform2d (Transform2d)
 import Transform2d qualified
 import Units qualified
 import Vector2d (Vector2d)
+import Vector2d qualified
 import VectorCurve2d (VectorCurve2d (VectorCurve2d))
 import VectorCurve2d qualified
 import VectorCurve2d.Zeros qualified
@@ -107,6 +108,14 @@ data Curve2d (coordinateSystem :: CoordinateSystem) where
     Frame2d (global @ units) (Defines local) ->
     Curve2d (local @ units) ->
     Curve2d (global @ units)
+  Addition ::
+    Curve2d (space @ units) ->
+    VectorCurve2d (space @ units) ->
+    Curve2d (space @ units)
+  Subtraction ::
+    Curve2d (space @ units) ->
+    VectorCurve2d (space @ units) ->
+    Curve2d (space @ units)
 
 deriving instance Show (Curve2d (space @ units))
 
@@ -232,6 +241,30 @@ instance
   ( space1 ~ space2
   , units1 ~ units2
   ) =>
+  Addition
+    (Curve2d (space1 @ units1))
+    (VectorCurve2d (space2 @ units2))
+    (Curve2d (space1 @ units1))
+  where
+  c + VectorCurve2d.Constant v | v == Vector2d.zero = c
+  c + v = Addition c v
+
+instance
+  ( space1 ~ space2
+  , units1 ~ units2
+  ) =>
+  Subtraction
+    (Curve2d (space1 @ units1))
+    (VectorCurve2d (space2 @ units2))
+    (Curve2d (space1 @ units1))
+  where
+  c - VectorCurve2d.Constant v | v == Vector2d.zero = c
+  c - v = Subtraction c v
+
+instance
+  ( space1 ~ space2
+  , units1 ~ units2
+  ) =>
   Subtraction
     (Point2d (space1 @ units1))
     (Curve2d (space2 @ units2))
@@ -274,42 +307,56 @@ startPoint curve = case curve of
   Curve c -> startPointImpl c
   Coerce c -> Units.coerce (startPoint c)
   PlaceIn frame c -> Point2d.placeIn frame (startPoint c)
+  Addition c v -> startPoint c + VectorCurve2d.evaluateAt 0.0 v
+  Subtraction c v -> startPoint c - VectorCurve2d.evaluateAt 0.0 v
 
 endPoint :: Curve2d (space @ units) -> Point2d (space @ units)
 endPoint curve = case curve of
   Curve c -> endPointImpl c
   Coerce c -> Units.coerce (endPoint c)
   PlaceIn frame c -> Point2d.placeIn frame (endPoint c)
+  Addition c v -> endPoint c + VectorCurve2d.evaluateAt 1.0 v
+  Subtraction c v -> endPoint c - VectorCurve2d.evaluateAt 1.0 v
 
 pointOn :: Curve2d (space @ units) -> Float -> Point2d (space @ units)
 pointOn curve t = case curve of
   Curve c -> pointOnImpl c t
   Coerce c -> Units.coerce (pointOn c t)
   PlaceIn frame c -> Point2d.placeIn frame (pointOn c t)
+  Addition c v -> pointOn c t + VectorCurve2d.evaluateAt t v
+  Subtraction c v -> pointOn c t - VectorCurve2d.evaluateAt t v
 
 segmentBounds :: Curve2d (space @ units) -> Range Unitless -> Bounds2d (space @ units)
 segmentBounds curve t = case curve of
   Curve c -> segmentBoundsImpl c t
   Coerce c -> Units.coerce (segmentBounds c t)
   PlaceIn frame c -> Bounds2d.placeIn frame (segmentBounds c t)
+  Addition c v -> segmentBounds c t + VectorCurve2d.segmentBounds t v
+  Subtraction c v -> segmentBounds c t - VectorCurve2d.segmentBounds t v
 
 derivative :: Curve2d (space @ units) -> VectorCurve2d (space @ units)
 derivative curve = case curve of
   Curve c -> derivativeImpl c
   Coerce c -> Units.coerce (derivative c)
   PlaceIn frame c -> VectorCurve2d.placeIn frame (derivative c)
+  Addition c v -> derivative c + VectorCurve2d.derivative v
+  Subtraction c v -> derivative c - VectorCurve2d.derivative v
 
 reverse :: Curve2d (space @ units) -> Curve2d (space @ units)
 reverse curve = case curve of
   Curve c -> Curve (reverseImpl c)
   Coerce c -> Units.coerce (reverse c)
   PlaceIn frame c -> PlaceIn frame (reverse c)
+  Addition c v -> reverse c + VectorCurve2d.reverse v
+  Subtraction c v -> reverse c - VectorCurve2d.reverse v
 
 bounds :: Curve2d (space @ units) -> Bounds2d (space @ units)
 bounds curve = case curve of
   Curve c -> boundsImpl c
   Coerce c -> Units.coerce (bounds c)
   PlaceIn frame c -> Bounds2d.placeIn frame (bounds c)
+  Addition c v -> bounds c + VectorCurve2d.segmentBounds Range.unit v
+  Subtraction c v -> bounds c - VectorCurve2d.segmentBounds Range.unit v
 
 asPoint :: Tolerance units => Curve2d (space @ units) -> Maybe (Point2d (space @ units))
 asPoint curve = do
@@ -322,12 +369,16 @@ asLine curve = case curve of
   Curve c -> asLineImpl c
   Coerce c -> Maybe.map Units.coerce (Tolerance.using (Units.coerce ?tolerance) (asLine c))
   PlaceIn frame c -> Maybe.map (Line2d.placeIn frame) (asLine c)
+  Addition{} -> Nothing
+  Subtraction{} -> Nothing
 
 asArc :: Tolerance units => Curve2d (space @ units) -> Maybe (Arc2d (space @ units))
 asArc curve = case curve of
   Curve c -> asArcImpl c
   Coerce c -> Maybe.map Units.coerce (Tolerance.using (Units.coerce ?tolerance) (asArc c))
   PlaceIn frame c -> Maybe.map (Arc2d.placeIn frame) (asArc c)
+  Addition{} -> Nothing
+  Subtraction{} -> Nothing
 
 tangentDirection ::
   Tolerance units =>
@@ -545,6 +596,8 @@ transformBy transform curve = case curve of
   Curve c -> Curve (transformByImpl transform c)
   Coerce c -> Units.coerce (transformBy (Units.coerce transform) c)
   PlaceIn frame c -> PlaceIn frame (transformBy (Transform2d.relativeTo frame transform) c)
+  Addition c v -> transformBy transform c + VectorCurve2d.transformBy transform v
+  Subtraction c v -> transformBy transform c - VectorCurve2d.transformBy transform v
 
 translateBy ::
   Vector2d (space @ units) ->
