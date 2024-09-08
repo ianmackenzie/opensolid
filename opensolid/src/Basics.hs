@@ -28,6 +28,7 @@ module Basics
   , ($)
   , type (~)
   , HasCallStack
+  , withFrozenCallStack
   )
 where
 
