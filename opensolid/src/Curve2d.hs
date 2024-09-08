@@ -145,6 +145,14 @@ instance
   where
   curve1 ~= curve2 = List.allTrue [pointOn curve1 t ~= pointOn curve2 t | t <- Parameter.samples]
 
+instance
+  ( space1 ~ space2
+  , units1 ~ units2
+  ) =>
+  ApproximateEquality (Curve2d (space1 @ units1)) (Point2d (space2 @ units2)) units1
+  where
+  curve ~= point = List.allTrue [pointOn curve t ~= point | t <- Parameter.samples]
+
 pattern Point :: Tolerance units => Point2d (space @ units) -> Curve2d (space @ units)
 pattern Point point <- (asPoint -> Just point)
 
