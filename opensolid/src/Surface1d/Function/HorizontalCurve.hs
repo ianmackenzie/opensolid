@@ -1,5 +1,6 @@
 module Surface1d.Function.HorizontalCurve
   ( HorizontalCurve
+  , MonotonicSpace
   , new
   , monotonic
   , bounded
@@ -14,6 +15,7 @@ import Curve2d (Curve2d)
 import Curve2d qualified
 import Direction2d qualified
 import Float qualified
+import Frame2d
 import List qualified
 import OpenSolid
 import Point2d (Point2d (Point2d))
@@ -38,10 +40,18 @@ data HorizontalCurve units = HorizontalCurve
   , uStart :: Float
   , uEnd :: Float
   , vBounds :: Range Unitless
-  , isMonotonic :: Bool
+  , monotonicity :: Monotonicity
   , boundingAxes :: List (Axis2d Uv.Coordinates)
   , tolerance :: Qty units
   }
+  deriving (Show)
+
+data MonotonicSpace
+
+data Monotonicity
+  = Monotonic
+  | MonotonicIn (Frame2d Uv.Coordinates (Defines MonotonicSpace))
+  | NotMonotonic
   deriving (Show)
 
 new ::
@@ -61,7 +71,7 @@ new derivatives uStart uEnd vBounds = do
       , uStart
       , uEnd
       , vBounds
-      , isMonotonic = False
+      , monotonicity = NotMonotonic
       , boundingAxes = []
       , tolerance = ?tolerance
       }
@@ -83,7 +93,7 @@ monotonic derivatives uStart uEnd vBounds = do
       , uStart
       , uEnd
       , vBounds
-      , isMonotonic = True
+      , monotonicity = Monotonic
       , boundingAxes = []
       , tolerance = ?tolerance
       }
@@ -94,9 +104,10 @@ bounded ::
   Float ->
   Float ->
   Range Unitless ->
+  Frame2d Uv.Coordinates defines ->
   List (Axis2d Uv.Coordinates) ->
   Curve2d Uv.Coordinates
-bounded derivatives uStart uEnd vBounds boundingAxes = do
+bounded derivatives uStart uEnd vBounds monotonicFrame boundingAxes = do
   let fu = Derivatives.get (derivatives >> U)
   let fv = Derivatives.get (derivatives >> V)
   Curve2d.new $
@@ -106,7 +117,7 @@ bounded derivatives uStart uEnd vBounds boundingAxes = do
       , uStart
       , uEnd
       , vBounds
-      , isMonotonic = False
+      , monotonicity = MonotonicIn (Frame2d.coerce monotonicFrame)
       , boundingAxes
       , tolerance = ?tolerance
       }
@@ -122,15 +133,20 @@ instance Curve2d.Interface (HorizontalCurve units) Uv.Coordinates where
     Point2d.xy uValue vValue
 
   segmentBoundsImpl curve tRange = do
-    let HorizontalCurve{dvdu, uStart, uEnd, vBounds, isMonotonic} = curve
+    let HorizontalCurve{dvdu, uStart, uEnd, vBounds, monotonicity} = curve
     let Range t1 t2 = tRange
     let u1 = Float.interpolateFrom uStart uEnd t1
     let u2 = Float.interpolateFrom uStart uEnd t2
     let v1 = solveForV curve u1
     let v2 = solveForV curve u2
-    if isMonotonic
-      then Bounds2d.xy (Range.from u1 u2) (Range.from v1 v2)
-      else do
+    case monotonicity of
+      Monotonic -> Bounds2d.xy (Range.from u1 u2) (Range.from v1 v2)
+      MonotonicIn frame -> do
+        let p1 = Point2d u1 v1
+        let p2 = Point2d u2 v2
+        Bounds2d.hull2 (Point2d.relativeTo frame p1) (Point2d.relativeTo frame p2)
+          |> Bounds2d.placeIn frame
+      NotMonotonic -> do
         let slopeBounds = Function.bounds dvdu (Bounds2d.xy (Range.from u1 u2) vBounds)
         let segmentVBounds = Internal.curveBounds u1 u2 v1 v2 slopeBounds
         Bounds2d.xy (Range.from u1 u2) segmentVBounds
@@ -148,7 +164,7 @@ instance Curve2d.Interface (HorizontalCurve units) Uv.Coordinates where
       , uStart
       , uEnd
       , vBounds
-      , isMonotonic
+      , monotonicity
       , boundingAxes
       , tolerance
       } =
@@ -158,7 +174,7 @@ instance Curve2d.Interface (HorizontalCurve units) Uv.Coordinates where
         , uStart = uEnd
         , uEnd = uStart
         , vBounds
-        , isMonotonic
+        , monotonicity
         , boundingAxes
         , tolerance
         }

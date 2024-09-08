@@ -101,22 +101,22 @@ connectingCurves boundaryPoint SaddleRegion{subproblem, frame, d1, d2} = do
   let dy = Frame2d.yDirection frame
   case (Qty.sign x, Qty.sign y) of
     (Positive, Positive) ->
-      connect subproblem saddlePoint d1 boundaryPoint $
+      connect subproblem frame d1 boundaryPoint $
         [ Axis2d.through saddlePoint dx
         , Axis2d.through saddlePoint -dy
         ]
     (Positive, Negative) ->
-      connect subproblem saddlePoint d2 boundaryPoint $
+      connect subproblem frame d2 boundaryPoint $
         [ Axis2d.through saddlePoint -dx
         , Axis2d.through saddlePoint -dy
         ]
     (Negative, Positive) ->
-      connect subproblem saddlePoint -d2 boundaryPoint $
+      connect subproblem frame -d2 boundaryPoint $
         [ Axis2d.through saddlePoint dx
         , Axis2d.through saddlePoint dy
         ]
     (Negative, Negative) ->
-      connect subproblem saddlePoint -d1 boundaryPoint $
+      connect subproblem frame -d1 boundaryPoint $
         [ Axis2d.through saddlePoint -dx
         , Axis2d.through saddlePoint dy
         ]
@@ -124,12 +124,13 @@ connectingCurves boundaryPoint SaddleRegion{subproblem, frame, d1, d2} = do
 connect ::
   Tolerance units =>
   Subproblem units ->
-  Uv.Point ->
+  Frame2d Uv.Coordinates (Defines PrincipalAxisSpace) ->
   Uv.Direction ->
   Uv.Point ->
   List (Axis2d Uv.Coordinates) ->
   NonEmpty (Curve2d Uv.Coordinates)
-connect subproblem startPoint startDirection endPoint boundingAxes = do
+connect subproblem frame startDirection endPoint boundingAxes = do
+  let startPoint = Frame2d.originPoint frame
   let Subproblem{derivatives, uvBounds} = subproblem
   let Bounds2d uBounds vBounds = uvBounds
   let Point2d u1 v1 = startPoint
@@ -140,21 +141,21 @@ connect subproblem startPoint startDirection endPoint boundingAxes = do
       let uMid = u1 + 1e-3 * Qty.sign (u2 - u1) |> Qty.clamp u1 u2
       let startDerivative = Vector2d (uMid - u1) ((uMid - u1) * (dv / du))
       let interpolatingCurve =
-            HorizontalCurve.bounded derivatives u1 uMid vBounds boundingAxes
+            HorizontalCurve.bounded derivatives u1 uMid vBounds frame boundingAxes
               |> Curve2d.removeStartDegeneracy 2 (startPoint, [startDerivative])
       if uMid == u2
         then NonEmpty.singleton interpolatingCurve
         else do
-          let implicitCurve = HorizontalCurve.bounded derivatives uMid u2 vBounds boundingAxes
+          let implicitCurve = HorizontalCurve.bounded derivatives uMid u2 vBounds frame boundingAxes
           NonEmpty.of2 interpolatingCurve implicitCurve
     else do
       let vMid = v1 + 1e-3 * Qty.sign (v2 - v1) |> Qty.clamp v1 v2
       let startDerivative = Vector2d ((vMid - v1) * (du / dv)) (vMid - v1)
       let interpolatingCurve =
-            VerticalCurve.bounded derivatives uBounds v1 vMid boundingAxes
+            VerticalCurve.bounded derivatives uBounds v1 vMid frame boundingAxes
               |> Curve2d.removeStartDegeneracy 2 (startPoint, [startDerivative])
       if vMid == v2
         then NonEmpty.singleton interpolatingCurve
         else do
-          let implicitCurve = VerticalCurve.bounded derivatives uBounds vMid v2 boundingAxes
+          let implicitCurve = VerticalCurve.bounded derivatives uBounds vMid v2 frame boundingAxes
           NonEmpty.of2 interpolatingCurve implicitCurve
