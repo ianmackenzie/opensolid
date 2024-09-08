@@ -18,6 +18,7 @@ import Curve2d (Curve2d)
 import Curve2d qualified
 import Domain2d qualified
 import List qualified
+import Maybe qualified
 import NonEmpty qualified
 import OpenSolid
 import Pair qualified
@@ -120,8 +121,7 @@ finalize partialZeros = do
   -- and then add connecting curves to zeros found on that boundary
   -- (because there will be no crossing curve to connect to in that case)
   Zeros
-    { Zeros.crossingCurves =
-        List.map (\(CrossingCurve _ _ segments) -> segments) extendedCrossingCurves
+    { Zeros.crossingCurves = Maybe.collect filterDegenerateCurves extendedCrossingCurves
     , Zeros.crossingLoops = crossingLoops
     , Zeros.tangentPoints = tangentPoints
     , Zeros.saddlePoints =
@@ -131,6 +131,13 @@ finalize partialZeros = do
                 (SaddleRegion.point saddleRegion, SaddleRegion.bounds saddleRegion)
             )
     }
+
+filterDegenerateCurves :: CrossingCurve -> Maybe (NonEmpty (Curve2d Uv.Coordinates, Uv.Bounds))
+filterDegenerateCurves (CrossingCurve _ _ segments) = do
+  let isNondegenerate (curve, _) = Curve2d.startPoint curve /= Curve2d.endPoint curve
+  case NonEmpty.filter isNondegenerate segments of
+    NonEmpty filtered -> Just filtered
+    [] -> Nothing
 
 extend :: Tolerance units => CrossingCurve -> SaddleRegion units -> CrossingCurve
 extend curve saddleRegion = do
