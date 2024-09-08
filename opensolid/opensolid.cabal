@@ -190,6 +190,7 @@ library
     Transform
     Transform2d
     Transform3d
+    Triangle2d
     Units
     Uv
     Uv.Derivatives
