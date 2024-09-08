@@ -35,6 +35,8 @@ import Tolerance qualified
 import Units qualified
 import VectorCurve2d qualified
 
+type role Region2d nominal
+
 data Region2d (coordinateSystem :: CoordinateSystem)
   = Region2d (Loop coordinateSystem) (List (Loop coordinateSystem))
 
