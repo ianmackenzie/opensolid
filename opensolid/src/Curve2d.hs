@@ -43,6 +43,7 @@ module Curve2d
   , curvature
   , curvature'
   , removeStartDegeneracy
+  , toPolyline
   )
 where
 
@@ -68,6 +69,7 @@ import Curve2d.Segment qualified as Segment
 import Direction2d (Direction2d)
 import DirectionCurve2d (DirectionCurve2d)
 import Error qualified
+import Float qualified
 import Frame2d (Frame2d)
 import Frame2d qualified
 import {-# SOURCE #-} Line2d (Line2d)
@@ -78,6 +80,8 @@ import OpenSolid
 import Parameter qualified
 import Point2d (Point2d)
 import Point2d qualified
+import Polyline2d (Polyline2d (Polyline2d))
+import Qty qualified
 import Range (Range)
 import Range qualified
 import Result qualified
@@ -89,6 +93,7 @@ import Transform2d qualified
 import Units qualified
 import Vector2d (Vector2d)
 import Vector2d qualified
+import VectorBounds2d qualified
 import VectorCurve2d (VectorCurve2d)
 import VectorCurve2d qualified
 import VectorCurve2d.Zeros qualified
@@ -815,3 +820,40 @@ instance VectorCurve2d.Interface (SyntheticDerivative (space @ units)) (space @ 
       SyntheticDerivative
         (VectorCurve2d.transformBy transform current)
         (VectorCurve2d.transformBy transform next)
+
+toPolyline ::
+  HasCallStack =>
+  Qty units ->
+  (Float -> vertex) ->
+  Curve2d (space @ units) ->
+  Polyline2d vertex
+toPolyline maxError function curve = do
+  let secondDerivative = VectorCurve2d.derivative (Curve2d.derivative curve)
+  let epsilon = Qty.abs maxError
+  let predicate subdomain = do
+        let secondDerivativeBounds = VectorCurve2d.segmentBounds subdomain secondDerivative
+        let secondDerivativeMagnitude = VectorBounds2d.magnitude secondDerivativeBounds
+        let maxSecondDerivativeMagnitude = Range.maxValue secondDerivativeMagnitude
+        maxSecondDerivativeMagnitude == Qty.zero
+          || Range.width subdomain <= Float.sqrt (8.0 * epsilon / maxSecondDerivativeMagnitude)
+  Polyline2d (function 0.0 :| collectVertices predicate function Range.unit [function 1.0])
+
+collectVertices ::
+  HasCallStack =>
+  (Range Unitless -> Bool) ->
+  (Float -> vertex) ->
+  Range Unitless ->
+  List vertex ->
+  List vertex
+collectVertices predicate function subdomain accumulated = do
+  if predicate subdomain
+    then accumulated
+    else
+      if Range.isAtomic subdomain
+        then internalError "Infinite recursion in Curve2d.toPolyline"
+        else do
+          let (left, right) = Range.bisect subdomain
+          let midpoint = Range.midpoint subdomain
+          let rightAccumulated = collectVertices predicate function right accumulated
+          withFrozenCallStack $
+            collectVertices predicate function left (function midpoint : rightAccumulated)
