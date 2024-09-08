@@ -445,6 +445,9 @@ findZeros ::
   Solve2d.Exclusions exclusions ->
   Solve2d.Action exclusions FindZerosContext (Solution units)
 findZeros derivatives context subdomain exclusions = do
+  -- TODO find zeros along unit domain boundaries
+  -- (including nasty cases like curves emanating from a saddle point
+  -- being along a domain boundary)
   let subproblem = Subproblem.new derivatives subdomain
   if not (Subproblem.isZeroCandidate subproblem)
     then Solve2d.pass
