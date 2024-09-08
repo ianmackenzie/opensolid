@@ -54,11 +54,11 @@ data Function (coordinateSystem :: CoordinateSystem) where
     Surface1d.Function units ->
     Surface1d.Function units ->
     Function (space @ units)
-  Sum ::
+  Addition ::
     Function (space @ units) ->
     VectorSurface2d.Function (space @ units) ->
     Function (space @ units)
-  Difference ::
+  Subtraction ::
     Function (space @ units) ->
     VectorSurface2d.Function (space @ units) ->
     Function (space @ units)
@@ -88,7 +88,7 @@ instance
     (Function (space1 @ units1))
   where
   f1 + VectorSurface2d.Function.Constant v | v == Vector2d.zero = f1
-  f1 + f2 = Sum f1 f2
+  f1 + f2 = Addition f1 f2
 
 instance
   ( space1 ~ space2
@@ -111,7 +111,7 @@ instance
     (Function (space1 @ units1))
   where
   f1 - VectorSurface2d.Function.Constant v | v == Vector2d.zero = f1
-  f1 - f2 = Difference f1 f2
+  f1 - f2 = Subtraction f1 f2
 
 instance
   ( space1 ~ space2
@@ -123,6 +123,31 @@ instance
     (Function (space1 @ units1))
   where
   f - v = f - VectorSurface2d.Function.constant v
+
+data Difference (coordinateSystem :: CoordinateSystem) where
+  Difference ::
+    Function (space @ units) ->
+    Function (space @ units) ->
+    Difference (space @ units)
+
+deriving instance Show (Difference (space @ units))
+
+instance VectorSurface2d.Function.Interface (Difference (space @ units)) (space @ units) where
+  evaluateImpl (Difference f1 f2) uv = evaluate f1 uv - evaluate f2 uv
+  boundsImpl (Difference f1 f2) uv = bounds f1 uv - bounds f2 uv
+  derivativeImpl parameter (Difference f1 f2) = derivative parameter f1 - derivative parameter f2
+
+instance
+  ( space1 ~ space2
+  , units1 ~ units2
+  ) =>
+  Subtraction
+    (Function (space1 @ units1))
+    (Function (space2 @ units2))
+    (VectorSurface2d.Function (space1 @ units1))
+  where
+  Constant p1 - Constant p2 = VectorSurface2d.Function.Constant (p1 - p2)
+  f1 - f2 = VectorSurface2d.Function.new (Difference f1 f2)
 
 new :: Interface function (space @ units) => function -> Function (space @ units)
 new = Function
@@ -145,8 +170,8 @@ evaluate function uv = case function of
     Point2d.xy
       (Surface1d.Function.evaluate x uv)
       (Surface1d.Function.evaluate y uv)
-  Sum f1 f2 -> evaluate f1 uv + VectorSurface2d.Function.evaluate f2 uv
-  Difference f1 f2 -> evaluate f1 uv - VectorSurface2d.Function.evaluate f2 uv
+  Addition f1 f2 -> evaluate f1 uv + VectorSurface2d.Function.evaluate f2 uv
+  Subtraction f1 f2 -> evaluate f1 uv - VectorSurface2d.Function.evaluate f2 uv
 
 bounds :: Function (space @ units) -> Uv.Bounds -> Bounds2d (space @ units)
 bounds function uv = case function of
@@ -157,8 +182,8 @@ bounds function uv = case function of
     Bounds2d.xy
       (Surface1d.Function.bounds x uv)
       (Surface1d.Function.bounds y uv)
-  Sum f1 f2 -> bounds f1 uv + VectorSurface2d.Function.bounds f2 uv
-  Difference f1 f2 -> bounds f1 uv - VectorSurface2d.Function.bounds f2 uv
+  Addition f1 f2 -> bounds f1 uv + VectorSurface2d.Function.bounds f2 uv
+  Subtraction f1 f2 -> bounds f1 uv - VectorSurface2d.Function.bounds f2 uv
 
 derivative :: Uv.Parameter -> Function (space @ units) -> VectorSurface2d.Function (space @ units)
 derivative parameter function = case function of
@@ -169,8 +194,8 @@ derivative parameter function = case function of
     VectorSurface2d.Function.xy
       (Surface1d.Function.derivative parameter x)
       (Surface1d.Function.derivative parameter y)
-  Sum f1 f2 -> derivative parameter f1 + VectorSurface2d.Function.derivative parameter f2
-  Difference f1 f2 -> derivative parameter f1 - VectorSurface2d.Function.derivative parameter f2
+  Addition f1 f2 -> derivative parameter f1 + VectorSurface2d.Function.derivative parameter f2
+  Subtraction f1 f2 -> derivative parameter f1 - VectorSurface2d.Function.derivative parameter f2
 
 data SurfaceCurveComposition (coordinateSystem :: CoordinateSystem) where
   SurfaceCurveComposition ::
