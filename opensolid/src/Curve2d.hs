@@ -89,7 +89,7 @@ import Transform2d qualified
 import Units qualified
 import Vector2d (Vector2d)
 import Vector2d qualified
-import VectorCurve2d (VectorCurve2d (VectorCurve2d))
+import VectorCurve2d (VectorCurve2d)
 import VectorCurve2d qualified
 import VectorCurve2d.Zeros qualified
 import Prelude qualified
