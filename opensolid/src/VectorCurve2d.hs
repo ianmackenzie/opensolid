@@ -7,7 +7,7 @@
 {-# OPTIONS_GHC -Wno-orphans #-}
 
 module VectorCurve2d
-  ( VectorCurve2d (VectorCurve2d)
+  ( VectorCurve2d (Constant)
   , Interface (..)
   , new
   , evaluateAt
