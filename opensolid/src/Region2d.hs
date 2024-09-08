@@ -8,6 +8,7 @@ module Region2d
   , contains
   , bounds
   , area
+  , toPolygon
   )
 where
 
@@ -26,6 +27,9 @@ import List qualified
 import NonEmpty qualified
 import OpenSolid
 import Point2d (Point2d)
+import Polygon2d (Polygon2d)
+import Polygon2d qualified
+import Polyline2d qualified
 import Qty qualified
 import Range (Range)
 import Range qualified
@@ -34,6 +38,7 @@ import Result qualified
 import Tolerance qualified
 import Units qualified
 import VectorCurve2d qualified
+import Vertex2d (Vertex2d)
 
 type role Region2d nominal
 
@@ -274,3 +279,29 @@ area :: Units.Squared units1 units2 => Region2d (space @ units1) -> Estimate uni
 area region = do
   let referencePoint = Curve2d.startPoint (NonEmpty.first (outerLoop region))
   Estimate.sum (List.map (areaIntegral referencePoint) (NonEmpty.toList (boundaryCurves region)))
+
+toPolygon ::
+  Vertex2d vertex (space @ units) =>
+  Qty units ->
+  (Curve2d (space @ units) -> Float -> vertex) ->
+  Region2d (space @ units) ->
+  Polygon2d vertex
+toPolygon maxError function region =
+  Polygon2d.withHoles
+    (List.map (toPolygonLoop maxError function) (innerLoops region))
+    (toPolygonLoop maxError function (outerLoop region))
+
+toPolygonLoop ::
+  Qty units ->
+  (Curve2d (space @ units) -> Float -> vertex) ->
+  NonEmpty (Curve2d (space @ units)) ->
+  NonEmpty vertex
+toPolygonLoop maxError function loop = do
+  let curveVertices curve =
+        Curve2d.toPolyline maxError (function curve) curve
+          |> Polyline2d.vertices
+          |> NonEmpty.rest
+  let allVertices = List.collect curveVertices (NonEmpty.toList loop)
+  case allVertices of
+    NonEmpty vertices -> vertices
+    [] -> internalError "Should always have at least one vertex"
