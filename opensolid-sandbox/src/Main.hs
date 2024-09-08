@@ -31,6 +31,8 @@ import OpenSolid
 import Parameter qualified
 import Point2d (Point2d)
 import Point2d qualified
+import Polyline2d (Polyline2d (Polyline2d))
+import Polyline2d qualified
 import Qty qualified
 import Random qualified
 import Range qualified
@@ -261,7 +263,7 @@ drawCrossingCurve index segments = do
   let (curves, bounds) = List.unzip2 (NonEmpty.toList segments)
   Drawing2d.group
     [ Drawing2d.with [Drawing2d.strokeColour colour, Drawing2d.opacity 0.3] $
-        List.map drawCurve curves
+        List.map drawUvCurve curves
     , Drawing2d.with
         [ Drawing2d.strokeColour Colour.gray
         , Drawing2d.strokeWidth (Length.millimeters 0.05)
@@ -283,11 +285,10 @@ drawSaddlePoint (point, bounds) =
 toDrawing :: Qty (Meters :/: Unitless)
 toDrawing = Length.centimeters 10.0 ./. 1.0
 
-drawCurve :: Curve2d Uv.Coordinates -> Drawing2d.Entity Uv.Space
-drawCurve curve = do
-  let pointOnCurve t = Point2d.convert toDrawing (Curve2d.pointOn curve t)
-  let sampledPoints = List.map pointOnCurve (Parameter.steps 20)
-  Drawing2d.polyline [] sampledPoints
+drawUvCurve :: Curve2d Uv.Coordinates -> Drawing2d.Entity Uv.Space
+drawUvCurve curve = do
+  let polyline = Curve2d.toPolyline 0.001 (Curve2d.pointOn curve) curve
+  Drawing2d.polyline [] (Polyline2d.map (Point2d.convert toDrawing) polyline)
 
 drawDot :: Colour -> Uv.Point -> Drawing2d.Entity Uv.Space
 drawDot colour point =
@@ -358,18 +359,18 @@ drawBezier colour startPoint innerControlPoints endPoint = do
   let drawingStartPoint = Point2d.convert toDrawing startPoint
   let drawingEndPoint = Point2d.convert toDrawing endPoint
   let drawingInnerControlPoints = List.map (Point2d.convert toDrawing) innerControlPoints
-  let drawingControlPoints = List.concat [[drawingStartPoint], drawingInnerControlPoints, [drawingEndPoint]]
+  let drawingControlPoints = drawingStartPoint :| (drawingInnerControlPoints + [drawingEndPoint])
   let curve = BezierCurve2d.fromControlPoints drawingStartPoint drawingInnerControlPoints drawingEndPoint
   Drawing2d.with
     [Drawing2d.strokeColour colour, Drawing2d.strokeWidth (Length.millimeters 1.0)]
     [ Drawing2d.with [Drawing2d.opacity 0.3] $
-        [ Drawing2d.polyline [] drawingControlPoints
+        [ Drawing2d.polyline [] (Polyline2d drawingControlPoints)
         , Drawing2d.with [Drawing2d.fillColour colour] $
             [ Drawing2d.circle [] point (Length.millimeters 5.0)
-            | point <- drawingControlPoints
+            | point <- NonEmpty.toList drawingControlPoints
             ]
         ]
-    , Drawing2d.polyline [] [Curve2d.pointOn curve t | t <- Parameter.steps 100]
+    , Drawing2d.curve [] Length.millimeter curve
     ]
 
 testBezierSegment :: Tolerance Meters => IO ()
@@ -401,12 +402,11 @@ testHermiteBezier = IO.do
   log "End first derivative" (VectorCurve2d.evaluateAt 1.0 curveFirstDerivative)
   log "End second derivative" (VectorCurve2d.evaluateAt 1.0 curveSecondDerivative)
   log "End third derivative" (VectorCurve2d.evaluateAt 1.0 curveThirdDerivative)
-  let sampledPoints = [Curve2d.pointOn curve t | t <- Parameter.steps 100]
   let curveAttributes =
         [ Drawing2d.strokeColour Colour.blue
         , Drawing2d.strokeWidth (Length.centimeters 3.0)
         ]
-  let curveEntity = Drawing2d.polyline curveAttributes sampledPoints
+  let curveEntity = Drawing2d.curve curveAttributes Length.millimeter curve
   let coordinateRange = Range.from (Length.meters -1.0) (Length.meters 11.0)
   let drawingBounds = Bounds2d.xy coordinateRange coordinateRange
   Drawing2d.writeTo "opensolid-sandbox/test-hermite-bezier.svg" drawingBounds [curveEntity]

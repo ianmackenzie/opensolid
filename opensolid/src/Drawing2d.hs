@@ -12,6 +12,7 @@ module Drawing2d
   , polyline
   , polygon
   , circle
+  , curve
   , blackStroke
   , strokeColour
   , strokeWidth
@@ -25,17 +26,24 @@ import Bounds2d (Bounds2d)
 import Bounds2d qualified
 import Colour (Colour)
 import Colour qualified
+import Curve2d (Curve2d)
+import Curve2d qualified
 import File qualified
 import Length (Length)
 import Length qualified
 import List qualified
 import Maybe qualified
+import NonEmpty qualified
 import OpenSolid
 import Point2d (Point2d)
 import Point2d qualified
+import Polyline2d (Polyline2d)
+import Polyline2d qualified
 import Range qualified
 import Text qualified
 import Units (Meters)
+import Vertex2d (Vertex2d)
+import Vertex2d qualified
 
 type Entity :: Type -> Type
 data Entity space = Empty | Node Text (List (Attribute space)) (List (Entity space))
@@ -108,8 +116,13 @@ line attributes p1 p2 = do
   let y2Attribute = Attribute "y2" (lengthText -y2)
   Node "line" (x1Attribute : y1Attribute : x2Attribute : y2Attribute : attributes) []
 
-polyline :: List (Attribute space) -> List (Point space) -> Entity space
-polyline attributes vertices =
+polyline ::
+  Vertex2d vertex (space @ Meters) =>
+  List (Attribute space) ->
+  Polyline2d vertex ->
+  Entity space
+polyline attributes givenPolyline = do
+  let vertices = List.map Vertex2d.position (NonEmpty.toList (Polyline2d.vertices givenPolyline))
   Node "polyline" (noFill : pointsAttribute vertices : attributes) []
 
 polygon :: List (Attribute space) -> List (Point space) -> Entity space
@@ -123,6 +136,15 @@ circle attributes centerPoint radius = do
   let cyAttribute = Attribute "cy" (lengthText -cy)
   let rAttribute = Attribute "r" (lengthText radius)
   Node "circle" (cxAttribute : cyAttribute : rAttribute : attributes) []
+
+curve ::
+  List (Attribute space) ->
+  Length ->
+  Curve2d (space @ Meters) ->
+  Entity space
+curve attributes maxError givenCurve = do
+  let approximation = Curve2d.toPolyline maxError (Curve2d.pointOn givenCurve) givenCurve
+  polyline attributes approximation
 
 pointsAttribute :: List (Point space) -> Attribute space
 pointsAttribute givenPoints =
