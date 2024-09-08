@@ -218,6 +218,9 @@ testPlaneTorusIntersection = IO.do
   -- let ny = 0.0
   -- let nz = 1.0
   let f = x * nx + y * ny + z * nz
+  -- let u = Surface1d.Function.u
+  -- let v = Surface1d.Function.v
+  -- let f = (Surface1d.Function.squared (u - 0.5) - Surface1d.Function.squared (v - 0.5)) * Length.meter
   zeros <- Surface1d.Function.zeros f
   drawZeros "opensolid-sandbox/test-plane-torus-intersection.svg" zeros
   IO.printLine "Plane torus intersection solutions:"
