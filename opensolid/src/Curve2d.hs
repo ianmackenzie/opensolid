@@ -237,7 +237,7 @@ instance
     (Curve2d (space2 @ units2))
     (VectorCurve2d (space1 @ units1))
   where
-  point - curve = VectorCurve2d (PointCurveDifference point curve)
+  point - curve = VectorCurve2d.new (PointCurveDifference point curve)
 
 data CurvePointDifference (coordinateSystem :: CoordinateSystem)
   = CurvePointDifference (Curve2d coordinateSystem) (Point2d coordinateSystem)
@@ -264,7 +264,7 @@ instance
     (Point2d (space2 @ units2))
     (VectorCurve2d (space1 @ units1))
   where
-  curve - point = VectorCurve2d (CurvePointDifference curve point)
+  curve - point = VectorCurve2d.new (CurvePointDifference curve point)
 
 new :: Interface curve (space @ units) => curve -> Curve2d (space @ units)
 new = Curve
