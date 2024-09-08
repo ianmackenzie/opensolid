@@ -159,6 +159,8 @@ library
     Plane3d
     Point2d
     Point3d
+    Polyline2d
+    Polygon2d
     Qty
     QuadraticSpline2d
     QuadraticSpline3d
