@@ -51,6 +51,7 @@ module NonEmpty
   , allTrue
   , anySatisfy
   , anyTrue
+  , successive
   , minimum
   , maximum
   , minimumOf
@@ -254,6 +255,9 @@ anySatisfy = Prelude.any
 
 anyTrue :: NonEmpty Bool -> Bool
 anyTrue = Prelude.or
+
+successive :: (a -> a -> b) -> NonEmpty a -> List b
+successive function nonEmpty = List.successive function (toList nonEmpty)
 
 intersperse :: a -> NonEmpty a -> NonEmpty a
 intersperse = Data.List.NonEmpty.intersperse
