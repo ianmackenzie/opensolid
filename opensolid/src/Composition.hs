@@ -1,6 +1,6 @@
-module Composition (Composition ((>>)), (.)) where
+module Composition (Composition ((>>)), (.), Of (..)) where
 
-import Prelude (IO, type (~))
+import Prelude (IO, Show, type (~))
 import Prelude qualified
 
 class Composition a b c | a b -> c where
@@ -19,3 +19,5 @@ instance b ~ b' => Composition (a -> b) (b' -> c) (a -> c) where
 
 instance Composition (IO ()) (IO a) (IO a) where
   (>>) = (Prelude.>>)
+
+data Of a b = Of a b deriving (Show)
