@@ -277,21 +277,23 @@ instance
     (Curve2d (space2 @ units2))
     (VectorCurve2d (space1 @ units1))
   where
-  point - curve = VectorCurve2d.new (PointCurveDifference point curve)
+  point - curve = VectorCurve2d.new (Arithmetic.Difference point curve)
 
-data CurvePointDifference (coordinateSystem :: CoordinateSystem)
-  = CurvePointDifference (Curve2d coordinateSystem) (Point2d coordinateSystem)
-
-deriving instance Show (CurvePointDifference (space @ units))
-
-instance VectorCurve2d.Interface (CurvePointDifference (space @ units)) (space @ units) where
-  evaluateAtImpl t (CurvePointDifference curve point) = pointOn curve t - point
-  segmentBoundsImpl t (CurvePointDifference curve point) = segmentBounds curve t - point
-  derivativeImpl (CurvePointDifference curve _) = derivative curve
-  transformByImpl transform (CurvePointDifference curve point) =
+instance
+  ( space1 ~ space2
+  , units1 ~ units2
+  ) =>
+  VectorCurve2d.Interface
+    (Arithmetic.Difference (Curve2d (space1 @ units1)) (Point2d (space2 @ units2)))
+    (space1 @ units1)
+  where
+  evaluateAtImpl t (Arithmetic.Difference curve point) = pointOn curve t - point
+  segmentBoundsImpl t (Arithmetic.Difference curve point) = segmentBounds curve t - point
+  derivativeImpl (Arithmetic.Difference curve _) = derivative curve
+  transformByImpl transform (Arithmetic.Difference curve point) =
     VectorCurve2d.new $
-      CurvePointDifference
-        -- Note the same slight hack here as described in PointCurveDifference above
+      Arithmetic.Difference
+        -- Note the same slight hack here as described above for point-curve differences
         (transformBy (Units.coerce transform) curve)
         (Point2d.transformBy (Units.coerce transform) point)
 
