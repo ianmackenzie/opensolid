@@ -532,7 +532,6 @@ testCurveMedialAxis = IO.do
   segments <- Curve2d.medialAxis curve1 curve2
   let drawCurve = Drawing2d.curve [] (Length.millimeters 0.1)
   let drawSegment segment = do
-        Debug.print "Drawing segment..."
         let t1Curve = Curve2d.MedialAxis.t1 segment
         let t2Curve = Curve2d.MedialAxis.t2 segment
         let segmentCurve1 = curve1 . t1Curve
