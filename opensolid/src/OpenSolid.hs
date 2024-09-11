@@ -18,7 +18,14 @@ module OpenSolid
 where
 
 import Angle (Angle)
-import Arithmetic
+import Arithmetic hiding
+  ( CrossProduct (CrossProduct)
+  , Difference (Difference)
+  , DotProduct (DotProduct)
+  , Product (Product)
+  , Quotient (Quotient)
+  , Sum (Sum)
+  )
 import Basics
 import Coalesce (Coalesce ((??)))
 import Composition (Composition ((>>)), (.))

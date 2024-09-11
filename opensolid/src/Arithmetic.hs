@@ -1,17 +1,23 @@
 module Arithmetic
   ( Negation (negate)
   , Addition ((+))
+  , Sum (Sum)
   , Subtraction ((-))
   , subtract
+  , Difference (Difference)
   , Multiplication' (type (.*.), (.*.))
   , Multiplication ((*))
+  , Product (Product)
   , Division' (type (./.), (./.))
   , Division ((/))
+  , Quotient (Quotient)
   , DivMod ((//), (%))
   , DotMultiplication' (type (.<>.), (.<>.))
   , DotMultiplication ((<>))
+  , DotProduct (DotProduct)
   , CrossMultiplication' (type (.><.), (.><.))
   , CrossMultiplication ((><))
+  , CrossProduct (CrossProduct)
   , Exponentiation ((**))
   , (*!)
   , (!*)
@@ -46,6 +52,8 @@ class Addition a b c | a b -> c where
 
 infixl 6 +
 
+data Sum a b = Sum a b deriving (Show)
+
 class Subtraction a b c | a b -> c where
   (-) :: a -> b -> c
 
@@ -53,6 +61,8 @@ infixl 6 -
 
 subtract :: Subtraction a b c => b -> a -> c
 subtract b a = a - b
+
+data Difference a b = Difference a b deriving (Show)
 
 class Multiplication' b a => Multiplication' a b where
   type a .*. b
@@ -74,6 +84,8 @@ class
 
 infixl 7 *
 
+data Product a b = Product a b deriving (Show)
+
 class Division' a b where
   type a ./. b
   (./.) :: a -> b -> a ./. b
@@ -92,6 +104,8 @@ class
   a / b = Units.specialize (a ./. b)
 
 infixl 7 /
+
+data Quotient a b = Quotient a b deriving (Show)
 
 class DotMultiplication' a b where
   type a .<>. b
@@ -113,6 +127,8 @@ class
 
 infixl 7 <>
 
+data DotProduct a b = DotProduct a b deriving (Show)
+
 class CrossMultiplication' a b where
   type a .><. b
   (.><.) :: a -> b -> a .><. b
@@ -132,6 +148,8 @@ class
   a >< b = Units.specialize (a .><. b)
 
 infixl 7 ><
+
+data CrossProduct a b = CrossProduct a b deriving (Show)
 
 class DivMod a where
   (//) :: a -> a -> Int
