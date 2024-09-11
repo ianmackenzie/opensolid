@@ -268,6 +268,9 @@ instance
   type Vector2d (space1 @ units) .><. DirectionCurve2d space2 = Curve1d (units :*: Unitless)
   vector .><. DirectionCurve2d curve = vector .><. curve
 
+instance Composition (Curve1d Unitless) (DirectionCurve2d space) (DirectionCurve2d space) where
+  curve1d >> DirectionCurve2d curve = DirectionCurve2d (curve1d >> curve)
+
 xComponent :: DirectionCurve2d space -> Curve1d Unitless
 xComponent curve = curve <> Direction2d.x
 
