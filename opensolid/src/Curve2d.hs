@@ -219,18 +219,20 @@ instance Interface (Point2d (space @ units)) (space @ units) where
   boundsImpl = Bounds2d.constant
   transformByImpl transform point = new (Point2d.transformBy transform point)
 
-data PointCurveDifference (coordinateSystem :: CoordinateSystem)
-  = PointCurveDifference (Point2d coordinateSystem) (Curve2d coordinateSystem)
-
-deriving instance Show (PointCurveDifference (space @ units))
-
-instance VectorCurve2d.Interface (PointCurveDifference (space @ units)) (space @ units) where
-  evaluateAtImpl t (PointCurveDifference point curve) = point - pointOn curve t
-  segmentBoundsImpl t (PointCurveDifference point curve) = point - segmentBounds curve t
-  derivativeImpl (PointCurveDifference _ curve) = -(derivative curve)
-  transformByImpl transform (PointCurveDifference point curve) =
+instance
+  ( space1 ~ space2
+  , units1 ~ units2
+  ) =>
+  VectorCurve2d.Interface
+    (Arithmetic.Difference (Point2d (space1 @ units1)) (Curve2d (space2 @ units2)))
+    (space1 @ units1)
+  where
+  evaluateAtImpl t (Arithmetic.Difference point curve) = point - pointOn curve t
+  segmentBoundsImpl t (Arithmetic.Difference point curve) = point - segmentBounds curve t
+  derivativeImpl (Arithmetic.Difference _ curve) = -(derivative curve)
+  transformByImpl transform (Arithmetic.Difference point curve) =
     VectorCurve2d.new $
-      PointCurveDifference
+      Arithmetic.Difference
         -- Note the slight hack here:
         -- the definition of VectorCurve2d.Interface states that the units of the transform
         -- do *not* have to match the units of the vector curve,
