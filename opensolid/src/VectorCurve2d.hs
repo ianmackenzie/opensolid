@@ -44,6 +44,7 @@ where
 import Angle qualified
 import Basis2d (Basis2d)
 import Basis2d qualified
+import Composition qualified
 import CoordinateSystem (Space)
 import Curve1d (Curve1d)
 import Curve1d qualified
@@ -516,6 +517,28 @@ instance
   where
   type Direction2d space .><. VectorCurve2d (space_ @ units) = Curve1d (Unitless :*: units)
   direction2d .><. curve = Vector2d.unit direction2d .><. curve
+
+instance
+  Composition
+    (Curve1d Unitless)
+    (VectorCurve2d (space @ units))
+    (VectorCurve2d (space @ units))
+  where
+  curve1d >> curve2d = VectorCurve2d.new (Composition.Of curve1d curve2d)
+
+instance
+  VectorCurve2d.Interface
+    (Composition.Of (Curve1d Unitless) (VectorCurve2d (space @ units)))
+    (space @ units)
+  where
+  evaluateAtImpl t (Composition.Of curve1d vectorCurve2d) =
+    evaluateAt (Curve1d.pointOn curve1d t) vectorCurve2d
+  segmentBoundsImpl t (Composition.Of curve1d vectorCurve2d) =
+    segmentBounds (Curve1d.segmentBounds curve1d t) vectorCurve2d
+  derivativeImpl (Composition.Of curve1d vectorCurve2d) =
+    (derivative vectorCurve2d . curve1d) * Curve1d.derivative curve1d
+  transformByImpl transform (Composition.Of curve1d vectorCurve2d) =
+    new (Composition.Of curve1d (transformBy transform vectorCurve2d))
 
 transformBy ::
   Transform2d tag (space @ units1) ->
