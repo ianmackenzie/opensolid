@@ -49,6 +49,7 @@ where
 
 import {-# SOURCE #-} Arc2d (Arc2d)
 import {-# SOURCE #-} Arc2d qualified
+import Arithmetic qualified
 import Axis2d (Axis2d)
 import Axis2d qualified
 import {-# SOURCE #-} BezierCurve2d qualified
