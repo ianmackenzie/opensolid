@@ -23,6 +23,15 @@ data Curve2d (coordinateSystem :: CoordinateSystem)
 
 data HasDegeneracy = HasDegeneracy
 
+instance
+  ( space1 ~ space2
+  , units1 ~ units2
+  ) =>
+  Addition
+    (Curve2d (space1 @ units1))
+    (VectorCurve2d (space2 @ units2))
+    (Curve2d (space1 @ units1))
+
 startPoint :: Curve2d (space @ units) -> Point2d (space @ units)
 endPoint :: Curve2d (space @ units) -> Point2d (space @ units)
 pointOn :: Curve2d (space @ units) -> Float -> Point2d (space @ units)
