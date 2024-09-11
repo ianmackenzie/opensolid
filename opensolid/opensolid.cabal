@@ -118,6 +118,7 @@ library
     Curve2d.FindPoint
     Curve2d.IntersectionPoint
     Curve2d.Intersections
+    Curve2d.MedialAxis
     Curve2d.OverlappingSegment
     Curve3d
     Debug

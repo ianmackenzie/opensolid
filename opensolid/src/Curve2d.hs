@@ -44,6 +44,7 @@ module Curve2d
   , curvature'
   , removeStartDegeneracy
   , toPolyline
+  , medialAxis
   )
 where
 
@@ -65,6 +66,7 @@ import Curve2d.FindPoint qualified as FindPoint
 import Curve2d.IntersectionPoint (IntersectionPoint (IntersectionPoint))
 import Curve2d.IntersectionPoint qualified as IntersectionPoint
 import Curve2d.Intersections qualified as Intersections
+import {-# SOURCE #-} Curve2d.MedialAxis qualified as MedialAxis
 import Curve2d.OverlappingSegment (OverlappingSegment (OverlappingSegment))
 import Curve2d.OverlappingSegment qualified as OverlappingSegment
 import Curve2d.Segment (Segment)
@@ -915,3 +917,11 @@ collectVertices predicate function subdomain accumulated = do
           let rightAccumulated = collectVertices predicate function right accumulated
           withFrozenCallStack $
             collectVertices predicate function left (function midpoint : rightAccumulated)
+
+medialAxis ::
+  forall space units.
+  Tolerance units =>
+  Curve2d (space @ units) ->
+  Curve2d (space @ units) ->
+  Result MedialAxis.Error (List (MedialAxis.Segment (space @ units)))
+medialAxis = MedialAxis.solve
