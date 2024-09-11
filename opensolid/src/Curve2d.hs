@@ -304,6 +304,35 @@ instance
   ) =>
   Subtraction
     (Curve2d (space1 @ units1))
+    (Curve2d (space2 @ units2))
+    (VectorCurve2d (space1 @ units1))
+  where
+  curve1 - curve2 = VectorCurve2d.new (Arithmetic.Difference curve1 curve2)
+
+instance
+  ( space1 ~ space2
+  , units1 ~ units2
+  ) =>
+  VectorCurve2d.Interface
+    (Arithmetic.Difference (Curve2d (space1 @ units1)) (Curve2d (space2 @ units2)))
+    (space1 @ units1)
+  where
+  evaluateAtImpl t (Arithmetic.Difference curve1 curve2) = pointOn curve1 t - pointOn curve2 t
+  segmentBoundsImpl t (Arithmetic.Difference curve1 curve2) = segmentBounds curve1 t - segmentBounds curve2 t
+  derivativeImpl (Arithmetic.Difference curve1 curve2) = derivative curve1 - derivative curve2
+  transformByImpl transform (Arithmetic.Difference curve1 curve2) =
+    VectorCurve2d.new $
+      Arithmetic.Difference
+        -- Note the same slight hack here as described above for point-curve differences
+        (transformBy (Units.coerce transform) curve1)
+        (transformBy (Units.coerce transform) curve2)
+
+instance
+  ( space1 ~ space2
+  , units1 ~ units2
+  ) =>
+  Subtraction
+    (Curve2d (space1 @ units1))
     (Point2d (space2 @ units2))
     (VectorCurve2d (space1 @ units1))
   where
