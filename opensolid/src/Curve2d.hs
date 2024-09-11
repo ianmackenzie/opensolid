@@ -336,7 +336,7 @@ instance
     (Point2d (space2 @ units2))
     (VectorCurve2d (space1 @ units1))
   where
-  curve - point = VectorCurve2d.new (CurvePointDifference curve point)
+  curve - point = VectorCurve2d.new (Arithmetic.Difference curve point)
 
 new :: Interface curve (space @ units) => curve -> Curve2d (space @ units)
 new = Curve
