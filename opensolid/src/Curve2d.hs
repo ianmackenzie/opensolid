@@ -56,7 +56,9 @@ import {-# SOURCE #-} BezierCurve2d qualified
 import Bisection qualified
 import Bounds2d (Bounds2d)
 import Bounds2d qualified
+import Composition qualified
 import Curve1d (Curve1d)
+import Curve1d qualified
 import Curve2d.Derivatives (Derivatives)
 import Curve2d.Derivatives qualified as Derivatives
 import Curve2d.FindPoint qualified as FindPoint
@@ -337,6 +339,28 @@ instance
     (VectorCurve2d (space1 @ units1))
   where
   curve - point = VectorCurve2d.new (Arithmetic.Difference curve point)
+
+instance Composition (Curve1d Unitless) (Curve2d (space @ units)) (Curve2d (space @ units)) where
+  curve1d >> curve2d = Curve2d.new (Composition.Of curve1d curve2d)
+
+instance
+  Curve2d.Interface
+    (Composition.Of (Curve1d Unitless) (Curve2d (space @ units)))
+    (space @ units)
+  where
+  startPointImpl c = pointOnImpl c 0.0
+  endPointImpl c = pointOnImpl c 1.0
+  pointOnImpl (Composition.Of curve1d curve2d) t =
+    pointOn curve2d (Curve1d.pointOn curve1d t)
+  segmentBoundsImpl (Composition.Of curve1d curve2d) t =
+    segmentBounds curve2d (Curve1d.segmentBounds curve1d t)
+  boundsImpl c = segmentBoundsImpl c Range.unit
+  derivativeImpl (Composition.Of curve1d curve2d) =
+    (derivative curve2d . curve1d) * Curve1d.derivative curve1d
+  reverseImpl (Composition.Of curve1d curve2d) =
+    Composition.Of (Curve1d.reverse curve1d) curve2d
+  transformByImpl transform (Composition.Of curve1d curve2d) =
+    new (Composition.Of curve1d (transformBy transform curve2d))
 
 new :: Interface curve (space @ units) => curve -> Curve2d (space @ units)
 new = Curve
