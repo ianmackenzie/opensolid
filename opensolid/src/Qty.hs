@@ -80,6 +80,7 @@ instance Negation (Qty units) where
 
 instance Multiplication' Sign (Qty units) where
   type Sign .*. Qty units = Qty (Unitless :*: units)
+  {-# INLINE (.*.) #-}
   Positive .*. value = Units.coerce value
   Negative .*. value = Units.coerce -value
 
@@ -87,6 +88,7 @@ instance Multiplication Sign (Qty units) (Qty units)
 
 instance Multiplication' (Qty units) Sign where
   type Qty units .*. Sign = Qty (units :*: Unitless)
+  {-# INLINE (.*.) #-}
   value .*. Positive = Units.coerce value
   value .*. Negative = Units.coerce -value
 
@@ -159,9 +161,12 @@ instance Division' Int (Qty units) where
 instance Units.Quotient Unitless units1 units2 => Division Int (Qty units1) (Qty units2)
 
 instance DivMod (Qty units) where
+  {-# INLINE (//) #-}
   x // y = Prelude.floor (x / y)
+  {-# INLINE (%) #-}
   x % y = x - y * (x // y)
 
+{-# INLINE zero #-}
 zero :: Qty units
 zero = Data.Coerce.coerce 0.0
 
@@ -178,6 +183,7 @@ isNaN (Qty_ x) = Prelude.isNaN x
 squared :: Units.Squared units1 units2 => Qty units1 -> Qty units2
 squared x = x * x
 
+{-# INLINE squared' #-}
 squared' :: Qty units -> Qty (units :*: units)
 squared' x = x .*. x
 
