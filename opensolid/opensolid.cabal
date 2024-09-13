@@ -94,6 +94,7 @@ library
     Arc2d
     Area
     Arithmetic
+    Arithmetic.Unboxed
     Array
     Axis2d
     Axis3d
