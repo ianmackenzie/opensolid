@@ -69,12 +69,15 @@ class Coercion b a => Coercion a b where
   coerce :: a -> b
 
 instance Coercion Int Int where
+  {-# INLINE coerce #-}
   coerce = identity
 
 instance Coercion (Qty units1) (Qty units2) where
+  {-# INLINE coerce #-}
   coerce = Data.Coerce.coerce
 
 instance Coercion Sign Sign where
+  {-# INLINE coerce #-}
   coerce = identity
 
 instance Coercion a b => Coercion (Maybe a) (Maybe b) where
