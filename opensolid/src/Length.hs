@@ -22,6 +22,7 @@ where
 import OpenSolid
 import Qty qualified
 import Units (Meters)
+import Units qualified
 
 type Length = Qty Meters
 
@@ -32,10 +33,10 @@ meter :: Length
 meter = meters 1.0
 
 meters :: Float -> Length
-meters = Qty
+meters = Units.coerce
 
 inMeters :: Length -> Float
-inMeters (Qty x) = x
+inMeters = Units.coerce
 
 millimeter :: Length
 millimeter = meters 0.001

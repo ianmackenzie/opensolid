@@ -14,6 +14,7 @@ import Length qualified
 import OpenSolid
 import Qty qualified
 import Units (CubicMeters)
+import Units qualified
 
 type Volume = Qty CubicMeters
 
@@ -24,10 +25,10 @@ cubicMeter :: Volume
 cubicMeter = cubicMeters 1.0
 
 cubicMeters :: Float -> Volume
-cubicMeters = Qty
+cubicMeters = Units.coerce
 
 inCubicMeters :: Volume -> Float
-inCubicMeters (Qty x) = x
+inCubicMeters = Units.coerce
 
 cubicCentimeter :: Volume
 cubicCentimeter = Length.centimeter * Length.centimeter * Length.centimeter

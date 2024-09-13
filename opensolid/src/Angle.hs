@@ -32,6 +32,7 @@ import Float qualified
 import Qty (Qty (Qty, Qty_))
 import Qty qualified
 import Units (Radians)
+import Units qualified
 import Prelude qualified
 
 type Angle = Qty Radians
@@ -67,10 +68,10 @@ radian :: Angle
 radian = radians 1.0
 
 radians :: Float -> Angle
-radians = Qty
+radians = Units.coerce
 
 inRadians :: Angle -> Float
-inRadians (Qty x) = x
+inRadians = Units.coerce
 
 pi :: Angle
 pi = radians Float.pi

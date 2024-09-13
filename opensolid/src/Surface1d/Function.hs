@@ -173,8 +173,8 @@ instance Multiplication' (Function units) Sign where
   function .*. Negative = Units.coerce -function
 
 instance units ~ units_ => Addition (Function units) (Function units_) (Function units) where
-  Constant (Qty 0.0) + function = function
-  function + Constant (Qty 0.0) = function
+  Constant x + function | x == Qty.zero = function
+  function + Constant x | x == Qty.zero = function
   Constant x + Constant y = constant (x + y)
   function1 + function2 = Sum function1 function2
 
@@ -185,8 +185,8 @@ instance units ~ units_ => Addition (Qty units) (Function units_) (Function unit
   value + function = constant value + function
 
 instance units ~ units_ => Subtraction (Function units) (Function units_) (Function units) where
-  Constant (Qty 0.0) - function = negate function
-  function - Constant (Qty 0.0) = function
+  Constant x - function | x == Qty.zero = negate function
+  function - Constant x | x == Qty.zero = function
   Constant x - Constant y = constant (x - y)
   function1 - function2 = Difference function1 function2
 
@@ -202,11 +202,11 @@ instance
 
 instance Multiplication' (Function units1) (Function units2) where
   type Function units1 .*. Function units2 = Function (units1 :*: units2)
-  Constant (Qty 0.0) .*. _ = zero
-  _ .*. Constant (Qty 0.0) = zero
+  Constant x .*. _ | x == Qty.zero = zero
+  _ .*. Constant x | x == Qty.zero = zero
   Constant x .*. Constant y = Constant (x .*. y)
-  Constant (Qty 1.0) .*. function = Units.coerce function
-  Constant (Qty -1.0) .*. function = Units.coerce (negate function)
+  Constant x .*. function | x == Units.coerce 1.0 = Units.coerce function
+  Constant x .*. function | x == Units.coerce -1.0 = Units.coerce (negate function)
   Constant x .*. Negated c = negate x .*. c
   f1 .*. (Constant x) = Units.commute (Constant x .*. f1)
   Constant x .*. Product' (Constant y) c = Units.rightAssociate ((x .*. y) .*. c)
@@ -246,7 +246,7 @@ instance
 
 instance Division' (Function units1) (Function units2) where
   type Function units1 ./. Function units2 = Function (units1 :/: units2)
-  Constant (Qty 0.0) ./. _ = zero
+  Constant x ./. _ | x == Qty.zero = zero
   Constant x ./. Constant y = Constant (x ./. y)
   function ./. Constant x = (1 ./. x) .*^ function
   function1 ./. function2 = Quotient' function1 function2

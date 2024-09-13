@@ -22,6 +22,7 @@ where
 import Direction3d (Direction3d)
 import Float qualified
 import OpenSolid
+import Qty qualified
 import Surface1d qualified
 import Surface1d.Function qualified
 import Units (Erase)
@@ -209,9 +210,9 @@ instance Multiplication' (Surface1d.Function units1) (Function (space @ units2))
   type
     Surface1d.Function units1 .*. Function (space @ units2) =
       Function (space @ (units1 :*: units2))
-  Surface1d.Function.Constant (Qty 0.0) .*. _ = zero
-  Surface1d.Function.Constant (Qty 1.0) .*. f2 = Units.coerce f2
-  Surface1d.Function.Constant (Qty -1.0) .*. f2 = Units.coerce -f2
+  Surface1d.Function.Constant x .*. _ | x == Qty.zero = zero
+  Surface1d.Function.Constant x .*. f2 | x == Units.coerce 1.0 = Units.coerce f2
+  Surface1d.Function.Constant x .*. f2 | x == Units.coerce -1.0 = Units.coerce -f2
   _ .*. Constant v | v == Vector3d.zero = zero
   f1 .*. f2 = Product1d3d' f1 f2
 
@@ -242,9 +243,9 @@ instance Multiplication' (Function (space @ units1)) (Surface1d.Function units2)
     Function (space @ units1) .*. Surface1d.Function units2 =
       Function (space @ (units1 :*: units2))
   Constant v .*. _ | v == Vector3d.zero = zero
-  _ .*. Surface1d.Function.Constant (Qty 0.0) = zero
-  f1 .*. Surface1d.Function.Constant (Qty 1.0) = Units.coerce f1
-  f1 .*. Surface1d.Function.Constant (Qty -1.0) = Units.coerce -f1
+  _ .*. Surface1d.Function.Constant x | x == Qty.zero = zero
+  f1 .*. Surface1d.Function.Constant x | x == Units.coerce 1.0 = Units.coerce f1
+  f1 .*. Surface1d.Function.Constant x | x == Units.coerce -1.0 = Units.coerce -f1
   f1 .*. f2 = Product3d1d' f1 f2
 
 instance

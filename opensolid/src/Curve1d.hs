@@ -164,8 +164,8 @@ instance Multiplication' (Curve1d units) Sign where
   curve .*. Negative = Units.coerce -curve
 
 instance units ~ units_ => Addition (Curve1d units) (Curve1d units_) (Curve1d units) where
-  curve + Constant (Qty 0.0) = curve
-  Constant (Qty 0.0) + curve = curve
+  curve + Constant x | x == Qty.zero = curve
+  Constant x + curve | x == Qty.zero = curve
   Constant x + Constant y = constant (x + y)
   curve1 + curve2 = Sum curve1 curve2
 
@@ -188,8 +188,8 @@ instance Subtraction Int (Curve1d Unitless) (Curve1d Unitless) where
   value - curve = Float.int value - curve
 
 instance units ~ units_ => Subtraction (Curve1d units) (Curve1d units_) (Curve1d units) where
-  curve - Constant (Qty 0.0) = curve
-  Constant (Qty 0.0) - curve = negate curve
+  curve - Constant x | x == Qty.zero = curve
+  Constant x - curve | x == Qty.zero = negate curve
   Constant x - Constant y = constant (x - y)
   curve1 - curve2 = Difference curve1 curve2
 
@@ -205,11 +205,11 @@ instance
 
 instance Multiplication' (Curve1d units1) (Curve1d units2) where
   type Curve1d units1 .*. Curve1d units2 = Curve1d (units1 :*: units2)
-  Constant (Qty 0.0) .*. _ = zero
-  _ .*. Constant (Qty 0.0) = zero
+  Constant x .*. _ | x == Qty.zero = zero
+  _ .*. Constant x | x == Qty.zero = zero
   Constant x .*. Constant y = Constant (x .*. y)
-  Constant (Qty 1.0) .*. curve = Units.coerce curve
-  Constant (Qty -1.0) .*. curve = Units.coerce (negate curve)
+  Constant x .*. curve | x == Units.coerce 1.0 = Units.coerce curve
+  Constant x .*. curve | x == Units.coerce -1.0 = Units.coerce (negate curve)
   Constant x .*. Negated c = negate x .*. c
   c1 .*. (Constant x) = Units.commute (Constant x .*. c1)
   Constant x .*. Product' (Constant y) c = Units.rightAssociate ((x .*. y) .*. c)
@@ -249,7 +249,7 @@ instance
 
 instance Division' (Curve1d units1) (Curve1d units2) where
   type Curve1d units1 ./. Curve1d units2 = Curve1d (units1 :/: units2)
-  Constant (Qty 0.0) ./. _ = zero
+  Constant x ./. _ | x == Qty.zero = zero
   Constant x ./. Constant y = Constant (x ./. y)
   curve ./. Constant x = (1 ./. x) .*^ curve
   curve1 ./. curve2 = Quotient' curve1 curve2

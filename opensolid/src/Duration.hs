@@ -25,6 +25,7 @@ import Data.Time.Clock qualified
 import OpenSolid
 import Qty qualified
 import Units (Seconds)
+import Units qualified
 import Prelude qualified
 
 type Duration = Qty Seconds
@@ -41,10 +42,10 @@ second :: Duration
 second = seconds 1.0
 
 seconds :: Float -> Duration
-seconds = Qty
+seconds = Units.coerce
 
 inSeconds :: Duration -> Float
-inSeconds (Qty x) = x
+inSeconds = Units.coerce
 
 microsecond :: Duration
 microsecond = seconds 1e-6

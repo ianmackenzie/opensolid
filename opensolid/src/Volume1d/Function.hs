@@ -159,8 +159,8 @@ instance Multiplication' (Function units1) (Function units2) where
   Zero .*. _ = Zero
   _ .*. Zero = Zero
   Constant x .*. Constant y = Constant (x .*. y)
-  Constant (Qty 1.0) .*. function = Units.coerce function
-  Constant (Qty -1.0) .*. function = Units.coerce -function
+  Constant x .*. function | x == Units.coerce 1.0 = Units.coerce function
+  Constant x .*. function | x == Units.coerce -1.0 = Units.coerce -function
   Constant x .*. Negated c = negate x .*. c
   f1 .*. (Constant x) = Units.commute (Constant x .*. f1)
   Constant x .*. Product' (Constant y) c = Units.rightAssociate ((x .*. y) .*. c)

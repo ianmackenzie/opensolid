@@ -10,6 +10,7 @@ where
 import OpenSolid
 import Qty qualified
 import Units (SquareMeters)
+import Units qualified
 
 type Area = Qty SquareMeters
 
@@ -20,7 +21,7 @@ squareMeter :: Area
 squareMeter = squareMeters 1.0
 
 squareMeters :: Float -> Area
-squareMeters = Qty
+squareMeters = Units.coerce
 
 inSquareMeters :: Area -> Float
-inSquareMeters (Qty x) = x
+inSquareMeters = Units.coerce
