@@ -28,6 +28,7 @@ module List
   , filter
   , find
   , contains
+  , indexOf
   , collect
   , concat
   , foldl
@@ -163,6 +164,9 @@ find = Data.List.find
 
 contains :: Eq a => a -> List a -> Bool
 contains = Data.List.elem
+
+indexOf :: Eq a => a -> List a -> Maybe Int
+indexOf = Data.List.elemIndex
 
 collect :: (a -> List b) -> List a -> List b
 collect = Prelude.concatMap
