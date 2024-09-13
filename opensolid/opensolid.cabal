@@ -85,6 +85,7 @@ common config
     UndecidableInstances
     UndecidableSuperClasses
     ViewPatterns
+    MagicHash
 
 library
   import: config
