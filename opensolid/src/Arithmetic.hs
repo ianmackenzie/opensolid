@@ -79,6 +79,7 @@ class
   Multiplication a b c
     | a b -> c
   where
+  {-# INLINEABLE (*) #-}
   (*) :: a -> b -> c
   a * b = Units.specialize (a .*. b)
 
@@ -100,6 +101,7 @@ class
   Division a b c
     | a b -> c
   where
+  {-# INLINEABLE (/) #-}
   (/) :: a -> b -> c
   a / b = Units.specialize (a ./. b)
 
@@ -122,6 +124,7 @@ class
   DotMultiplication a b c
     | a b -> c
   where
+  {-# INLINEABLE (<>) #-}
   (<>) :: a -> b -> c
   a <> b = Units.specialize (a .<>. b)
 
@@ -144,6 +147,7 @@ class
   CrossMultiplication a b c
     | a b -> c
   where
+  {-# INLINEABLE (><) #-}
   (><) :: a -> b -> c
   a >< b = Units.specialize (a .><. b)
 
@@ -168,6 +172,7 @@ instance Negation Int where
 
 instance Multiplication' Sign Int where
   type Sign .*. Int = Int
+  {-# INLINEABLE (.*.) #-}
   Positive .*. n = n
   Negative .*. n = -n
 
@@ -175,15 +180,18 @@ instance Multiplication Sign Int Int
 
 instance Multiplication' Int Sign where
   type Int .*. Sign = Int
+  {-# INLINEABLE (.*.) #-}
   n .*. Positive = n
   n .*. Negative = -n
 
 instance Multiplication Int Sign Int
 
 instance Addition Int Int Int where
+  {-# INLINEABLE (+) #-}
   (+) = (Prelude.+)
 
 instance Addition Text Text Text where
+  {-# INLINEABLE (+) #-}
   (+) = Prelude.mappend
 
 instance Addition Text (Maybe Text) Text where
