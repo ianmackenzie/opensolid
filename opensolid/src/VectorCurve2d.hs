@@ -42,6 +42,7 @@ module VectorCurve2d
 where
 
 import Angle qualified
+import Arithmetic.Unboxed
 import Basis2d (Basis2d)
 import Basis2d qualified
 import Composition qualified
@@ -61,6 +62,7 @@ import List qualified
 import NonEmpty qualified
 import OpenSolid
 import Point2d qualified
+import Qty (Qty (Qty#))
 import Qty qualified
 import Range (Range (Range))
 import Range qualified
@@ -68,7 +70,7 @@ import Tolerance qualified
 import Transform2d (Transform2d)
 import Transform2d qualified
 import Units qualified
-import Vector2d (Vector2d (Vector2d))
+import Vector2d (Vector2d (Vector2d#))
 import Vector2d qualified
 import VectorBounds2d (VectorBounds2d (VectorBounds2d))
 import VectorBounds2d qualified
@@ -629,15 +631,20 @@ quadraticBlossom ::
   Float ->
   Float ->
   Vector2d (space @ units)
-quadraticBlossom (Vector2d x1 y1) (Vector2d x2 y2) (Vector2d x3 y3) t1 t2 = do
-  let r1 = 1 - t1
-  let r2 = 1 - t2
-  let s1 = r1 * r2
-  let s2 = r1 * t2 + t1 * r2
-  let s3 = t1 * t2
-  let x = s1 * x1 + s2 * x2 + s3 * x3
-  let y = s1 * y1 + s2 * y2 + s3 * y3
-  Vector2d x y
+quadraticBlossom v1 v2 v3 t1 t2 = do
+  let !(Vector2d# x1# y1#) = v1
+  let !(Vector2d# x2# y2#) = v2
+  let !(Vector2d# x3# y3#) = v3
+  let !(Qty# t1#) = t1
+  let !(Qty# t2#) = t2
+  let r1# = 1.0## -# t1#
+  let r2# = 1.0## -# t2#
+  let s1# = r1# *# r2#
+  let s2# = r1# *# t2# +# t1# *# r2#
+  let s3# = t1# *# t2#
+  let x# = s1# *# x1# +# s2# *# x2# +# s3# *# x3#
+  let y# = s1# *# y1# +# s2# *# y2# +# s3# *# y3#
+  Vector2d# x# y#
 
 cubicBlossom ::
   Vector2d (space @ units) ->
@@ -648,17 +655,24 @@ cubicBlossom ::
   Float ->
   Float ->
   Vector2d (space @ units)
-cubicBlossom (Vector2d x1 y1) (Vector2d x2 y2) (Vector2d x3 y3) (Vector2d x4 y4) t1 t2 t3 = do
-  let r1 = 1 - t1
-  let r2 = 1 - t2
-  let r3 = 1 - t3
-  let s1 = r1 * r2 * r3
-  let s2 = r1 * r2 * t3 + r1 * t2 * r3 + t1 * r2 * r3
-  let s3 = t1 * t2 * r3 + t1 * r2 * t3 + r1 * t2 * t3
-  let s4 = t1 * t2 * t3
-  let x = s1 * x1 + s2 * x2 + s3 * x3 + s4 * x4
-  let y = s1 * y1 + s2 * y2 + s3 * y3 + s4 * y4
-  Vector2d x y
+cubicBlossom v1 v2 v3 v4 t1 t2 t3 = do
+  let !(Vector2d# x1# y1#) = v1
+  let !(Vector2d# x2# y2#) = v2
+  let !(Vector2d# x3# y3#) = v3
+  let !(Vector2d# x4# y4#) = v4
+  let !(Qty# t1#) = t1
+  let !(Qty# t2#) = t2
+  let !(Qty# t3#) = t3
+  let r1# = 1.0## -# t1#
+  let r2# = 1.0## -# t2#
+  let r3# = 1.0## -# t3#
+  let s1# = r1# *# r2# *# r3#
+  let s2# = r1# *# r2# *# t3# +# r1# *# t2# *# r3# +# t1# *# r2# *# r3#
+  let s3# = t1# *# t2# *# r3# +# t1# *# r2# *# t3# +# r1# *# t2# *# t3#
+  let s4# = t1# *# t2# *# t3#
+  let x# = s1# *# x1# +# s2# *# x2# +# s3# *# x3# +# s4# *# x4#
+  let y# = s1# *# y1# +# s2# *# y2# +# s3# *# y3# +# s4# *# y4#
+  Vector2d# x# y#
 
 deCasteljau :: Float -> NonEmpty (Vector2d (space @ units)) -> Vector2d (space @ units)
 deCasteljau _ (vector :| []) = vector

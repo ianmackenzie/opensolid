@@ -29,7 +29,7 @@ import Arithmetic
 import Basics
 import Float (Float, fromRational)
 import Float qualified
-import Qty (Qty (Qty, Qty_))
+import Qty (Qty (Qty))
 import Qty qualified
 import Units (Radians)
 import Units qualified
@@ -44,25 +44,25 @@ goldenAngle :: Angle
 goldenAngle = radians (Float.pi * (3.0 - Float.sqrt 5.0))
 
 sin :: Angle -> Float
-sin (Qty_ x) = Qty_ (Prelude.sin x)
+sin (Qty x) = Qty (Prelude.sin x)
 
 cos :: Angle -> Float
-cos (Qty_ x) = Qty_ (Prelude.cos x)
+cos (Qty x) = Qty (Prelude.cos x)
 
 tan :: Angle -> Float
-tan (Qty_ x) = Qty_ (Prelude.tan x)
+tan (Qty x) = Qty (Prelude.tan x)
 
 asin :: Float -> Angle
-asin (Qty_ x) = Qty_ (Prelude.asin x)
+asin (Qty x) = Qty (Prelude.asin x)
 
 acos :: Float -> Angle
-acos (Qty_ x) = Qty_ (Prelude.acos x)
+acos (Qty x) = Qty (Prelude.acos x)
 
 atan :: Float -> Angle
-atan (Qty_ x) = Qty_ (Prelude.atan x)
+atan (Qty x) = Qty (Prelude.atan x)
 
 atan2 :: Qty units -> Qty units -> Angle
-atan2 (Qty_ y) (Qty_ x) = Qty_ (Prelude.atan2 y x)
+atan2 (Qty y) (Qty x) = Qty (Prelude.atan2 y x)
 
 radian :: Angle
 radian = radians 1.0

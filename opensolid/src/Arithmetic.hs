@@ -38,7 +38,7 @@ where
 import Basics
 import Data.List.NonEmpty (NonEmpty ((:|)))
 import {-# SOURCE #-} Float (Float)
-import {-# SOURCE #-} Qty (Qty (Qty_))
+import {-# SOURCE #-} Qty (Qty (Qty))
 import {-# SOURCE #-} Sign (Sign (Negative, Positive))
 import Units (Unitless, Units, (:*:), (:/:))
 import Units qualified
@@ -249,7 +249,7 @@ instance Multiplication Int Int Int
 
 instance Division' Int Int where
   type Int ./. Int = Float
-  n ./. m = Qty_ (fromIntegral n Prelude./ fromIntegral m)
+  n ./. m = Qty (fromIntegral n Prelude./ fromIntegral m)
 
 instance Division Int Int Float
 

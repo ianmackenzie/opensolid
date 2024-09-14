@@ -42,7 +42,6 @@ import Fuzzy qualified
 import List qualified
 import NonEmpty qualified
 import OpenSolid
-import Point2d (Point2d (Point2d))
 import Point2d qualified
 import Qty qualified
 import Radians qualified
@@ -629,8 +628,10 @@ diagonalCurve ::
   (Uv.Point, Domain2d.Boundary) ->
   PartialZeros.CrossingCurve
 diagonalCurve derivatives uvBounds start end = do
-  let (Point2d uStart vStart, startBoundary) = start
-  let (Point2d uEnd vEnd, endBoundary) = end
+  let (startPoint, startBoundary) = start
+  let (endPoint, endBoundary) = end
+  let (uStart, vStart) = Point2d.coordinates startPoint
+  let (uEnd, vEnd) = Point2d.coordinates endPoint
   PartialZeros.crossingCurve startBoundary endBoundary uvBounds $
     if Float.abs (uEnd - uStart) >= Float.abs (vEnd - vStart)
       then HorizontalCurve.monotonic derivatives uStart uEnd (Range vStart vEnd)
@@ -677,8 +678,10 @@ horizontalCurve ::
   (Uv.Point, Domain2d.Boundary) ->
   Fuzzy PartialZeros.CrossingCurve
 horizontalCurve Subproblem{derivatives, subdomain, uvBounds} start end = do
-  let (Point2d uStart _, startBoundary) = start
-  let (Point2d uEnd _, endBoundary) = end
+  let (startPoint, startBoundary) = start
+  let (endPoint, endBoundary) = end
+  let uStart = Point2d.xCoordinate startPoint
+  let uEnd = Point2d.xCoordinate endPoint
   let Bounds2d _ vBounds = uvBounds
   let curve = HorizontalCurve.new derivatives uStart uEnd vBounds
   let Domain2d _ vSubdomain = subdomain
@@ -728,8 +731,10 @@ verticalCurve ::
   (Uv.Point, Domain2d.Boundary) ->
   Fuzzy PartialZeros.CrossingCurve
 verticalCurve Subproblem{derivatives, subdomain, uvBounds} start end = do
-  let (Point2d _ vStart, startBoundary) = start
-  let (Point2d _ vEnd, endBoundary) = end
+  let (startPoint, startBoundary) = start
+  let (endPoint, endBoundary) = end
+  let vStart = Point2d.yCoordinate startPoint
+  let vEnd = Point2d.yCoordinate endPoint
   let curve = VerticalCurve.new derivatives (Bounds2d.xCoordinate uvBounds) vStart vEnd
   let Domain2d uSubdomain _ = subdomain
   let Bounds2d curveUBounds _ = Curve2d.bounds curve

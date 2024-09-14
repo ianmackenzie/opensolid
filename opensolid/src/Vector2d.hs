@@ -1,5 +1,5 @@
 module Vector2d
-  ( Vector2d (Vector2d)
+  ( Vector2d (Vector2d#)
   , zero
   , unit
   , x
@@ -46,6 +46,7 @@ where
 
 import Angle qualified
 import Area qualified
+import Arithmetic.Unboxed
 import {-# SOURCE #-} Axis2d (Axis2d)
 import {-# SOURCE #-} Axis2d qualified
 import {-# SOURCE #-} Basis2d (Basis2d)
@@ -62,6 +63,7 @@ import List qualified
 import OpenSolid
 import {-# SOURCE #-} Point2d (Point2d)
 import {-# SOURCE #-} Point2d qualified
+import Qty (Qty (Qty#))
 import Qty qualified
 import Transform2d (Transform2d (Transform2d))
 import Transform2d qualified
@@ -71,11 +73,7 @@ import Vector2d.CoordinateTransformation qualified
 
 type role Vector2d phantom
 
-data Vector2d (coordinateSystem :: CoordinateSystem) where
-  Vector2d ::
-    Qty (Units coordinateSystem) ->
-    Qty (Units coordinateSystem) ->
-    Vector2d coordinateSystem
+data Vector2d (coordinateSystem :: CoordinateSystem) = Vector2d# Double# Double#
 
 deriving instance Eq (Vector2d (space @ units))
 
@@ -102,7 +100,7 @@ instance
   v1 ~= v2 = magnitude (v1 - v2) ~= Qty.zero
 
 instance Negation (Vector2d (space @ units)) where
-  negate (Vector2d vx vy) = Vector2d (negate vx) (negate vy)
+  negate (Vector2d# vx# vy#) = Vector2d# (negate# vx#) (negate# vy#)
 
 instance Multiplication' Sign (Vector2d (space @ units)) where
   type Sign .*. Vector2d (space @ units) = Vector2d (space @ (Unitless :*: units))
@@ -127,7 +125,7 @@ instance
     (Vector2d (space_ @ units_))
     (Vector2d (space @ units))
   where
-  Vector2d x1 y1 + Vector2d x2 y2 = Vector2d (x1 + x2) (y1 + y2)
+  Vector2d# x1 y1 + Vector2d# x2 y2 = Vector2d# (x1 +# x2) (y1 +# y2)
 
 instance
   ( space ~ space_
@@ -138,7 +136,7 @@ instance
     (Vector2d (space_ @ units_))
     (Vector2d (space @ units))
   where
-  Vector2d x1 y1 - Vector2d x2 y2 = Vector2d (x1 - x2) (y1 - y2)
+  Vector2d# x1 y1 - Vector2d# x2 y2 = Vector2d# (x1 -# x2) (y1 -# y2)
 
 instance Multiplication' Int (Vector2d (space @ units)) where
   type Int .*. Vector2d (space @ units) = Vector2d (space @ (Unitless :*: units))
@@ -154,7 +152,7 @@ instance Multiplication (Vector2d (space @ units)) Int (Vector2d (space @ units)
 
 instance Multiplication' (Qty units1) (Vector2d (space @ units2)) where
   type Qty units1 .*. Vector2d (space @ units2) = Vector2d (space @ (units1 :*: units2))
-  scale .*. Vector2d vx vy = Vector2d (scale .*. vx) (scale .*. vy)
+  Qty# scale .*. Vector2d# vx vy = Vector2d# (scale *# vx) (scale *# vy)
 
 instance
   Units.Product units1 units2 units3 =>
@@ -162,7 +160,7 @@ instance
 
 instance Multiplication' (Vector2d (space @ units1)) (Qty units2) where
   type Vector2d (space @ units1) .*. Qty units2 = Vector2d (space @ (units1 :*: units2))
-  Vector2d vx vy .*. scale = Vector2d (vx .*. scale) (vy .*. scale)
+  Vector2d# vx vy .*. Qty# scale = Vector2d# (vx *# scale) (vy *# scale)
 
 instance
   Units.Product units1 units2 units3 =>
@@ -170,7 +168,7 @@ instance
 
 instance Division' (Vector2d (space @ units1)) (Qty units2) where
   type Vector2d (space @ units1) ./. Qty units2 = Vector2d (space @ (units1 :/: units2))
-  Vector2d vx vy ./. scale = Vector2d (vx ./. scale) (vy ./. scale)
+  Vector2d# vx vy ./. Qty# scale = Vector2d# (vx /# scale) (vy /# scale)
 
 instance
   Units.Quotient units1 units2 units3 =>
@@ -187,7 +185,7 @@ instance
   DotMultiplication' (Vector2d (space @ units1)) (Vector2d (space_ @ units2))
   where
   type Vector2d (space @ units1) .<>. Vector2d (space_ @ units2) = Qty (units1 :*: units2)
-  Vector2d x1 y1 .<>. Vector2d x2 y2 = x1 .*. x2 + y1 .*. y2
+  Vector2d# x1 y1 .<>. Vector2d# x2 y2 = Qty# (x1 *# x2 +# y1 *# y2)
 
 instance
   (Units.Product units1 units2 units3, space ~ space_) =>
@@ -220,7 +218,7 @@ instance
   CrossMultiplication' (Vector2d (space @ units1)) (Vector2d (space_ @ units2))
   where
   type Vector2d (space @ units1) .><. Vector2d (space_ @ units2) = Qty (units1 :*: units2)
-  Vector2d x1 y1 .><. Vector2d x2 y2 = x1 .*. y2 - y1 .*. x2
+  Vector2d# x1 y1 .><. Vector2d# x2 y2 = Qty# (x1 *# y2 -# y1 *# x2)
 
 instance
   (Units.Product units1 units2 units3, space ~ space_) =>
@@ -249,19 +247,19 @@ instance
   CrossMultiplication (Direction2d space) (Vector2d (space_ @ units)) (Qty units)
 
 zero :: Vector2d (space @ units)
-zero = Vector2d Qty.zero Qty.zero
+zero = Vector2d# 0.0## 0.0##
 
 unit :: Direction2d space -> Vector2d (space @ Unitless)
 unit = Direction2d.unwrap
 
 x :: Qty units -> Vector2d (space @ units)
-x vx = Vector2d vx Qty.zero
+x (Qty# vx) = Vector2d# vx 0.0##
 
 y :: Qty units -> Vector2d (space @ units)
-y vy = Vector2d Qty.zero vy
+y (Qty# vy) = Vector2d# 0.0## vy
 
 xy :: Qty units -> Qty units -> Vector2d (space @ units)
-xy = Vector2d
+xy (Qty# vx) (Qty# vy) = Vector2d# vx vy
 
 xyIn :: Frame2d (space @ originUnits) defines -> Qty units -> Qty units -> Vector2d (space @ units)
 xyIn frame = xyInBasis (Frame2d.basis frame)
@@ -273,7 +271,10 @@ from :: Point2d (space @ units) -> Point2d (space @ units) -> Vector2d (space @ 
 from p1 p2 = p2 - p1
 
 apply :: (Float -> Qty units) -> Float -> Float -> Vector2d (space @ units)
-apply units px py = Vector2d (units px) (units py)
+apply units px py = do
+  let !(Qty# vx) = units px
+  let !(Qty# vy) = units py
+  Vector2d# vx vy
 
 meters :: Float -> Float -> Vector2d (space @ Meters)
 meters = apply Length.meters
@@ -288,16 +289,16 @@ inches :: Float -> Float -> Vector2d (space @ Meters)
 inches = apply Length.inches
 
 squareMeters :: Float -> Float -> Vector2d (space @ SquareMeters)
-squareMeters vx vy = Vector2d (Area.squareMeters vx) (Area.squareMeters vy)
+squareMeters = apply Area.squareMeters
 
 polar :: Qty units -> Angle -> Vector2d (space @ units)
-polar r theta = Vector2d (r * Angle.cos theta) (r * Angle.sin theta)
+polar (Qty# r) (Qty# theta#) = Vector2d# (r *# cos# theta#) (r *# sin# theta#)
 
 xComponent :: Vector2d (space @ units) -> Qty units
-xComponent (Vector2d vx _) = vx
+xComponent (Vector2d# vx _) = Qty# vx
 
 yComponent :: Vector2d (space @ units) -> Qty units
-yComponent (Vector2d _ vy) = vy
+yComponent (Vector2d# _ vy) = Qty# vy
 
 componentIn :: Direction2d space -> Vector2d (space @ units) -> Qty units
 componentIn = (<>)
@@ -307,31 +308,31 @@ projectionIn givenDirection vector = givenDirection * componentIn givenDirection
 
 {-# INLINE components #-}
 components :: Vector2d (space @ units) -> (Qty units, Qty units)
-components (Vector2d vx vy) = (vx, vy)
+components (Vector2d# vx vy) = (Qty# vx, Qty# vy)
 
 interpolateFrom ::
   Vector2d (space @ units) ->
   Vector2d (space @ units) ->
   Float ->
   Vector2d (space @ units)
-interpolateFrom (Vector2d x1 y1) (Vector2d x2 y2) t =
-  Vector2d (Qty.interpolateFrom x1 x2 t) (Qty.interpolateFrom y1 y2 t)
+interpolateFrom (Vector2d# x1 y1) (Vector2d# x2 y2) (Qty# t) =
+  Vector2d# (x1 +# t *# (x2 -# x1)) (y1 +# t *# (y2 -# y1))
 
 midpoint :: Vector2d (space @ units) -> Vector2d (space @ units) -> Vector2d (space @ units)
-midpoint (Vector2d x1 y1) (Vector2d x2 y2) =
-  Vector2d (Qty.midpoint x1 x2) (Qty.midpoint y1 y2)
+midpoint (Vector2d# x1 y1) (Vector2d# x2 y2) =
+  Vector2d# (0.5## *# (x1 +# x2)) (0.5## *# (y1 +# y2))
 
 magnitude :: Vector2d (space @ units) -> Qty units
-magnitude (Vector2d vx vy) = Qty.hypot2 vx vy
+magnitude (Vector2d# vx vy) = Qty# (sqrt# (vx *# vx +# vy *# vy))
 
 squaredMagnitude :: Units.Squared units1 units2 => Vector2d (space @ units1) -> Qty units2
 squaredMagnitude = Units.specialize . squaredMagnitude'
 
 squaredMagnitude' :: Vector2d (space @ units) -> Qty (units :*: units)
-squaredMagnitude' (Vector2d vx vy) = Qty.squared' vx + Qty.squared' vy
+squaredMagnitude' (Vector2d# vx vy) = Qty# (vx *# vx +# vy *# vy)
 
 angle :: Vector2d (space @ units) -> Angle
-angle (Vector2d vx vy) = Angle.atan2 vy vx
+angle (Vector2d# vx vy) = Angle.atan2 (Qty# vy) (Qty# vx)
 
 data IsZero = IsZero deriving (Eq, Show, Error.Message)
 
@@ -354,10 +355,10 @@ normalize vector = do
   if vm == Qty.zero then zero else vector / vm
 
 rotateLeft :: Vector2d (space @ units) -> Vector2d (space @ units)
-rotateLeft (Vector2d vx vy) = Vector2d -vy vx
+rotateLeft (Vector2d# vx# vy#) = Vector2d# (negate# vy#) vx#
 
 rotateRight :: Vector2d (space @ units) -> Vector2d (space @ units)
-rotateRight (Vector2d vx vy) = Vector2d vy -vx
+rotateRight (Vector2d# vx# vy#) = Vector2d# vy# (negate# vx#)
 
 placeIn ::
   Frame2d (global @ originUnits) (Defines local) ->

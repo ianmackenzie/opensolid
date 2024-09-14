@@ -1,5 +1,5 @@
 module Qty
-  ( Qty (Qty, Qty_)
+  ( Qty (Qty, Qty#)
   , zero
   , infinity
   , sign
@@ -32,12 +32,14 @@ module Qty
 where
 
 import Arithmetic
+import Arithmetic.Unboxed
 import Basics
 import Data.Coerce qualified
 import Data.List.NonEmpty (NonEmpty ((:|)))
 import {-# SOURCE #-} Float (Float, fromRational)
 import {-# SOURCE #-} Float qualified
 import Foreign.Storable (Storable)
+import GHC.Exts (Double (D#))
 import List qualified
 import Random.Internal qualified as Random
 import Sign (Sign (Negative, Positive))
@@ -49,14 +51,13 @@ import Prelude qualified
 type role Qty phantom
 
 type Qty :: Type -> Type
-newtype Qty units = Qty_ Prelude.Double deriving (Eq, Ord, Show)
+newtype Qty units = Qty Prelude.Double deriving (Eq, Ord, Show)
 
-{-# COMPLETE Qty #-}
+{-# COMPLETE Qty# #-}
 
-pattern Qty :: Qty Unitless -> Qty units
-pattern Qty float <- Qty_ (Qty_ -> float)
-  where
-    Qty (Qty_ double) = Qty_ double
+{-# INLINE Qty# #-}
+pattern Qty# :: Double# -> Qty units
+pattern Qty# x# <- Qty (D# x#) where Qty# x# = Qty (D# x#)
 
 deriving newtype instance Prelude.Num Float
 
@@ -76,7 +77,7 @@ deriving newtype instance Storable (Qty units)
 
 instance Negation (Qty units) where
   {-# INLINE negate #-}
-  negate (Qty_ x) = Qty_ (Prelude.negate x)
+  negate (Qty x) = Qty (Prelude.negate x)
 
 instance Multiplication' Sign (Qty units) where
   type Sign .*. Qty units = Qty (Unitless :*: units)
@@ -96,11 +97,11 @@ instance Multiplication (Qty units) Sign (Qty units)
 
 instance units ~ units_ => Addition (Qty units) (Qty units_) (Qty units) where
   {-# INLINE (+) #-}
-  Qty_ x + Qty_ y = Qty_ (x Prelude.+ y)
+  Qty x + Qty y = Qty (x Prelude.+ y)
 
 instance units ~ units_ => Subtraction (Qty units) (Qty units_) (Qty units) where
   {-# INLINE (-) #-}
-  Qty_ x - Qty_ y = Qty_ (x Prelude.- y)
+  Qty x - Qty y = Qty (x Prelude.- y)
 
 instance Addition (Qty Unitless) Int (Qty Unitless) where
   {-# INLINE (+) #-}
@@ -121,14 +122,14 @@ instance Subtraction Int (Qty Unitless) (Qty Unitless) where
 instance Multiplication' (Qty units1) (Qty units2) where
   type Qty units1 .*. Qty units2 = Qty (units1 :*: units2)
   {-# INLINE (.*.) #-}
-  Qty_ x .*. Qty_ y = Qty_ (x Prelude.* y)
+  Qty x .*. Qty y = Qty (x Prelude.* y)
 
 instance Units.Product units1 units2 units3 => Multiplication (Qty units1) (Qty units2) (Qty units3)
 
 instance Division' (Qty units1) (Qty units2) where
   type Qty units1 ./. Qty units2 = Qty (units1 :/: units2)
   {-# INLINE (./.) #-}
-  Qty_ x ./. Qty_ y = Qty_ (x Prelude./ y)
+  Qty x ./. Qty y = Qty (x Prelude./ y)
 
 instance Units.Quotient units1 units2 units3 => Division (Qty units1) (Qty units2) (Qty units3)
 
@@ -177,7 +178,7 @@ sign :: Qty units -> Sign
 sign value = if value >= zero then Positive else Negative
 
 isNaN :: Qty units -> Bool
-isNaN (Qty_ x) = Prelude.isNaN x
+isNaN (Qty x) = Prelude.isNaN x
 
 {-# INLINE squared #-}
 squared :: Units.Squared units1 units2 => Qty units1 -> Qty units2
@@ -189,11 +190,11 @@ squared' x = x .*. x
 
 sqrt :: Units.Squared units1 units2 => Qty units2 -> Qty units1
 sqrt x | x <= Qty.zero = Qty.zero
-sqrt (Qty_ x) = Qty_ (Prelude.sqrt x)
+sqrt (Qty x) = Qty (Prelude.sqrt x)
 
 sqrt' :: Qty (units :*: units) -> Qty units
 sqrt' x | x <= Qty.zero = Qty.zero
-sqrt' (Qty_ x) = Qty_ (Prelude.sqrt x)
+sqrt' (Qty x) = Qty (Prelude.sqrt x)
 
 hypot2 :: Qty units -> Qty units -> Qty units
 hypot2 x y = sqrt' (squared' x + squared' y)
@@ -203,7 +204,7 @@ hypot3 x y z = sqrt' (squared' x + squared' y + squared' z)
 
 {-# INLINE abs #-}
 abs :: Qty units -> Qty units
-abs (Qty_ x) = Qty_ (Prelude.abs x)
+abs (Qty x) = Qty (Prelude.abs x)
 
 clamp :: Qty units -> Qty units -> Qty units -> Qty units
 clamp a b value = do
@@ -284,5 +285,5 @@ unconvert :: Qty (units2 :/: units1) -> Qty units2 -> Qty units1
 unconvert factor value = value !/ factor
 
 random :: Qty units -> Qty units -> Random.Generator (Qty units)
-random (Qty_ low) (Qty_ high) =
-  Random.map Qty_ (Random.Generator (System.Random.uniformR (low, high)))
+random (Qty low) (Qty high) =
+  Random.map Qty (Random.Generator (System.Random.uniformR (low, high)))

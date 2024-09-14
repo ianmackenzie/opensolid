@@ -13,6 +13,7 @@ module Solve2d
   )
 where
 
+import Arithmetic.Unboxed
 import Bounds2d (Bounds2d (Bounds2d))
 import Bounds2d qualified
 import Domain1d qualified
@@ -24,8 +25,9 @@ import Maybe qualified
 import NonEmpty qualified
 import OpenSolid
 import Pair qualified
-import Point2d (Point2d (Point2d))
+import Point2d (Point2d (Point2d#))
 import Point2d qualified
+import Qty (Qty (Qty#))
 import Qty qualified
 import Queue (Queue)
 import Queue qualified
@@ -289,15 +291,15 @@ boundedStep uvBounds p1 p2 =
       -- Stepped point is outside the given bounds,
       -- pull it back in along the step direction
       let Bounds2d uRange vRange = uvBounds
-      let Point2d u1 v1 = p1
-      let Point2d u2 v2 = p2
-      let clampedU = Range.clampTo uRange u2
-      let clampedV = Range.clampTo vRange v2
-      let uScale = if u1 == u2 then 1.0 else (clampedU - u1) / (u2 - u1)
-      let vScale = if v1 == v2 then 1.0 else (clampedV - v1) / (v2 - v1)
+      let !(Point2d# u1 v1) = p1
+      let !(Point2d# u2 v2) = p2
+      let clampedU = Range.clampTo uRange (Qty# u2)
+      let clampedV = Range.clampTo vRange (Qty# v2)
+      let uScale = if u1 ==# u2 then 1.0 else (clampedU - Qty# u1) / Qty# (u2 -# u1)
+      let vScale = if v1 ==# v2 then 1.0 else (clampedV - Qty# v1) / Qty# (v2 -# v1)
       let scale = Qty.min uScale vScale
-      let Point2d u v = Point2d.interpolateFrom p1 p2 scale
+      let !(Point2d# u v) = Point2d.interpolateFrom p1 p2 scale
       -- Perform a final clamping step
       -- in case numerical roundoff during interpolation
       -- left the point *slightly* outside uvBounds
-      Point2d (Range.clampTo uRange u) (Range.clampTo vRange v)
+      Point2d.xy (Range.clampTo uRange (Qty# u)) (Range.clampTo vRange (Qty# v))

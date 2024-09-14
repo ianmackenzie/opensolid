@@ -1,5 +1,5 @@
 module Point2d
-  ( Point2d (Point2d)
+  ( Point2d (Point2d#)
   , origin
   , x
   , y
@@ -34,6 +34,7 @@ module Point2d
   )
 where
 
+import Arithmetic.Unboxed
 import {-# SOURCE #-} Axis2d (Axis2d)
 import {-# SOURCE #-} Axis2d qualified
 import Bounded qualified
@@ -46,22 +47,19 @@ import {-# SOURCE #-} Frame2d qualified
 import Length qualified
 import OpenSolid
 import Point2d.CoordinateTransformation qualified
+import Qty (Qty (Qty#))
 import Qty qualified
 import Transform2d (Transform2d (Transform2d))
 import Transform2d qualified
 import Units (Meters)
 import Units qualified
-import Vector2d (Vector2d (Vector2d))
+import Vector2d (Vector2d (Vector2d#))
 import Vector2d qualified
 import VectorBounds2d (VectorBounds2d (VectorBounds2d))
 
 type role Point2d phantom
 
-data Point2d (coordinateSystem :: CoordinateSystem) where
-  Point2d ::
-    Qty (Units coordinateSystem) ->
-    Qty (Units coordinateSystem) ->
-    Point2d coordinateSystem
+data Point2d (coordinateSystem :: CoordinateSystem) = Point2d# Double# Double#
 
 deriving instance Eq (Point2d (space @ units))
 
@@ -88,7 +86,7 @@ instance
     (Vector2d (space2 @ units2))
     (Point2d (space1 @ units1))
   where
-  Point2d px py + Vector2d vx vy = Point2d (px + vx) (py + vy)
+  Point2d# px# py# + Vector2d# vx# vy# = Point2d# (px# +# vx#) (py# +# vy#)
 
 instance
   ( space1 ~ space2
@@ -99,7 +97,7 @@ instance
     (Vector2d (space2 @ units2))
     (Point2d (space1 @ units1))
   where
-  Point2d px py - Vector2d vx vy = Point2d (px - vx) (py - vy)
+  Point2d# px# py# - Vector2d# vx# vy# = Point2d# (px# -# vx#) (py# -# vy#)
 
 instance
   ( space1 ~ space2
@@ -110,7 +108,7 @@ instance
     (Point2d (space2 @ units2))
     (Vector2d (space1 @ units1))
   where
-  Point2d x1 y1 - Point2d x2 y2 = Vector2d (x1 - x2) (y1 - y2)
+  Point2d# x1# y1# - Point2d# x2# y2# = Vector2d# (x1# -# x2#) (y1# -# y2#)
 
 instance
   ( space1 ~ space2
@@ -121,7 +119,7 @@ instance
     (VectorBounds2d (space2 @ units2))
     (Bounds2d (space1 @ units1))
   where
-  Point2d px py + VectorBounds2d vx vy = Bounds2d.xy (px + vx) (py + vy)
+  Point2d# px# py# + VectorBounds2d vx vy = Bounds2d.xy (Qty# px# + vx) (Qty# py# + vy)
 
 instance
   ( space1 ~ space2
@@ -132,7 +130,7 @@ instance
     (VectorBounds2d (space2 @ units2))
     (Bounds2d (space1 @ units1))
   where
-  Point2d px py - VectorBounds2d vx vy = Bounds2d.xy (px - vx) (py - vy)
+  Point2d# px# py# - VectorBounds2d vx vy = Bounds2d.xy (Qty# px# - vx) (Qty# py# - vy)
 
 instance
   ( space1 ~ space2
@@ -146,26 +144,29 @@ instance Bounded.Interface (Point2d (space @ units)) (Bounds2d (space @ units)) 
   bounds = Bounds2d.constant
 
 origin :: Point2d (space @ units)
-origin = Point2d Qty.zero Qty.zero
+origin = Point2d# 0.0## 0.0##
 
 x :: Qty units -> Point2d (space @ units)
-x px = Point2d px Qty.zero
+x (Qty# px#) = Point2d# px# 0.0##
 
 y :: Qty units -> Point2d (space @ units)
-y py = Point2d Qty.zero py
+y (Qty# py#) = Point2d# 0.0## py#
 
 along :: Axis2d (space @ units) -> Qty units -> Point2d (space @ units)
 along axis distance = Axis2d.originPoint axis + distance * Axis2d.direction axis
 
 xy :: Qty units -> Qty units -> Point2d (space @ units)
-xy = Point2d
+xy (Qty# px#) (Qty# py#) = Point2d# px# py#
 
 xyIn :: Frame2d (space @ units) defines -> Qty units -> Qty units -> Point2d (space @ units)
 xyIn frame px py =
   Frame2d.originPoint frame + px * Frame2d.xDirection frame + py * Frame2d.yDirection frame
 
 apply :: (Float -> Qty units) -> Float -> Float -> Point2d (space @ units)
-apply units px py = Point2d (units px) (units py)
+apply units fx fy = do
+  let !(Qty# px#) = units fx
+  let !(Qty# py#) = units fy
+  Point2d# px# py#
 
 meters :: Float -> Float -> Point2d (space @ Meters)
 meters = apply Length.meters
@@ -180,28 +181,26 @@ inches :: Float -> Float -> Point2d (space @ Meters)
 inches = apply Length.inches
 
 xCoordinate :: Point2d (space @ units) -> Qty units
-xCoordinate (Point2d px _) = px
+xCoordinate (Point2d# px# _) = Qty# px#
 
 yCoordinate :: Point2d (space @ units) -> Qty units
-yCoordinate (Point2d _ py) = py
+yCoordinate (Point2d# _ py#) = Qty# py#
 
 {-# INLINE coordinates #-}
 coordinates :: Point2d (space @ units) -> (Qty units, Qty units)
-coordinates (Point2d px py) = (px, py)
+coordinates (Point2d# px# py#) = (Qty# px#, Qty# py#)
 
 interpolateFrom ::
   Point2d (space @ units) ->
   Point2d (space @ units) ->
   Float ->
   Point2d (space @ units)
-interpolateFrom (Point2d x1 y1) (Point2d x2 y2) t =
-  Point2d
-    (Qty.interpolateFrom x1 x2 t)
-    (Qty.interpolateFrom y1 y2 t)
+interpolateFrom (Point2d# x1# y1#) (Point2d# x2# y2#) (Qty# t#) =
+  Point2d# (x1# +# t# *# (x2# -# x1#)) (y1# +# t# *# (y2# -# y1#))
 
 midpoint :: Point2d (space @ units) -> Point2d (space @ units) -> Point2d (space @ units)
-midpoint (Point2d x1 y1) (Point2d x2 y2) =
-  Point2d (Qty.midpoint x1 x2) (Qty.midpoint y1 y2)
+midpoint (Point2d# x1# y1#) (Point2d# x2# y2#) =
+  Point2d# (0.5## *# (x1# +# x2#)) (0.5## *# (y1# +# y2#))
 
 distanceFrom :: Point2d (space @ units) -> Point2d (space @ units) -> Qty units
 distanceFrom p1 p2 = Vector2d.magnitude (p2 - p1)
@@ -230,10 +229,10 @@ relativeTo ::
 relativeTo = Point2d.CoordinateTransformation.relativeTo
 
 convert :: Qty (units2 :/: units1) -> Point2d (space @ units1) -> Point2d (space @ units2)
-convert conversion (Point2d px py) = Point2d (Qty.convert conversion px) (Qty.convert conversion py)
+convert (Qty# factor#) (Point2d# px# py#) = Point2d# (factor# *# px#) (factor# *# py#)
 
 unconvert :: Qty (units2 :/: units1) -> Point2d (space @ units2) -> Point2d (space @ units1)
-unconvert conversion (Point2d px py) = Point2d (Qty.unconvert conversion px) (Qty.unconvert conversion py)
+unconvert (Qty# factor#) (Point2d# px# py#) = Point2d# (px# /# factor#) (py# /# factor#)
 
 transformBy :: Transform2d tag (space @ units) -> Point2d (space @ units) -> Point2d (space @ units)
 transformBy transform point = do

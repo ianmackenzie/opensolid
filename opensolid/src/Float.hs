@@ -44,7 +44,7 @@ import Basics
 import Data.Coerce qualified
 import NonEmpty (NonEmpty)
 import NonEmpty qualified
-import Qty (Qty (Qty_))
+import Qty (Qty (Qty))
 import Qty qualified
 import Random.Internal qualified as Random
 import {-# SOURCE #-} Result (Result)
@@ -83,15 +83,15 @@ parse = Text.Parse.float
 
 {-# INLINE floor #-}
 floor :: Float -> Int
-floor (Qty_ x) = Prelude.floor x
+floor (Qty x) = Prelude.floor x
 
 {-# INLINE ceiling #-}
 ceiling :: Float -> Int
-ceiling (Qty_ x) = Prelude.ceiling x
+ceiling (Qty x) = Prelude.ceiling x
 
 {-# INLINE round #-}
 round :: Float -> Int
-round (Qty_ x) = Prelude.round x
+round (Qty x) = Prelude.round x
 
 infinity :: Float
 infinity = Qty.infinity
@@ -142,25 +142,25 @@ hypot3 :: Float -> Float -> Float -> Float
 hypot3 = Qty.hypot3
 
 sin :: Float -> Float
-sin (Qty_ x) = Qty_ (Prelude.sin x)
+sin (Qty x) = Qty (Prelude.sin x)
 
 cos :: Float -> Float
-cos (Qty_ x) = Qty_ (Prelude.cos x)
+cos (Qty x) = Qty (Prelude.cos x)
 
 tan :: Float -> Float
-tan (Qty_ x) = Qty_ (Prelude.tan x)
+tan (Qty x) = Qty (Prelude.tan x)
 
 asin :: Float -> Float
-asin (Qty_ x) = Qty_ (Prelude.asin x)
+asin (Qty x) = Qty (Prelude.asin x)
 
 acos :: Float -> Float
-acos (Qty_ x) = Qty_ (Prelude.acos x)
+acos (Qty x) = Qty (Prelude.acos x)
 
 atan :: Float -> Float
-atan (Qty_ x) = Qty_ (Prelude.atan x)
+atan (Qty x) = Qty (Prelude.atan x)
 
 atan2 :: Qty units -> Qty units -> Float
-atan2 (Qty_ y) (Qty_ x) = Qty_ (Prelude.atan2 y x)
+atan2 (Qty y) (Qty x) = Qty (Prelude.atan2 y x)
 
 sum :: List Float -> Float
 sum = Qty.sum

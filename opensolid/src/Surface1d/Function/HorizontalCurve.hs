@@ -7,6 +7,7 @@ module Surface1d.Function.HorizontalCurve
   )
 where
 
+import Arithmetic.Unboxed
 import Axis2d (Axis2d)
 import Axis2d qualified
 import Bounds2d qualified
@@ -18,8 +19,9 @@ import Float qualified
 import Frame2d
 import List qualified
 import OpenSolid
-import Point2d (Point2d (Point2d))
+import Point2d (Point2d (Point2d#))
 import Point2d qualified
+import Qty (Qty (Qty#))
 import Qty qualified
 import Range (Range (Range))
 import Range qualified
@@ -31,7 +33,7 @@ import Uv (Parameter (U, V))
 import Uv qualified
 import Uv.Derivatives (Derivatives)
 import Uv.Derivatives qualified as Derivatives
-import Vector2d (Vector2d (Vector2d))
+import Vector2d (Vector2d (Vector2d#))
 import VectorCurve2d qualified
 
 data HorizontalCurve units = HorizontalCurve
@@ -142,8 +144,8 @@ instance Curve2d.Interface (HorizontalCurve units) Uv.Coordinates where
     case monotonicity of
       Monotonic -> Bounds2d.xy (Range.from u1 u2) (Range.from v1 v2)
       MonotonicIn frame -> do
-        let p1 = Point2d u1 v1
-        let p2 = Point2d u2 v2
+        let p1 = Point2d.xy u1 v1
+        let p2 = Point2d.xy u2 v2
         Bounds2d.hull2 (Point2d.relativeTo frame p1) (Point2d.relativeTo frame p2)
           |> Bounds2d.placeIn frame
       NotMonotonic -> do
@@ -190,11 +192,11 @@ solveForV (HorizontalCurve{derivatives, vBounds, boundingAxes, tolerance}) uValu
   Tolerance.using tolerance (Internal.solveForV derivatives uValue clampedBounds)
 
 clamp :: Float -> Range Unitless -> Axis2d Uv.Coordinates -> Range Unitless
-clamp u (Range vLow vHigh) axis = do
-  let Point2d u0 v0 = Axis2d.originPoint axis
-  let Vector2d du dv = Direction2d.unwrap (Axis2d.direction axis)
-  let v = v0 + (u - u0) * dv / du
+clamp (Qty# u#) (Range vLow vHigh) axis = do
+  let !(Point2d# u0# v0#) = Axis2d.originPoint axis
+  let !(Vector2d# du# dv#) = Direction2d.unwrap (Axis2d.direction axis)
+  let v = Qty# (v0# +# (u# -# u0#) *# dv# /# du#)
   if
-    | du > 0.0 -> Range (Qty.max vLow v) vHigh
-    | du < 0.0 -> Range vLow (Qty.min vHigh v)
+    | du# ># 0.0## -> Range (Qty.max vLow v) vHigh
+    | du# <# 0.0## -> Range vLow (Qty.min vHigh v)
     | otherwise -> Range vLow vHigh

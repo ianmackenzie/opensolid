@@ -40,12 +40,13 @@ import Error qualified
 import {-# SOURCE #-} Frame2d (Frame2d)
 import OpenSolid
 import {-# SOURCE #-} Point2d (Point2d)
+import Qty (Qty (Qty#))
 import Qty qualified
 import Random qualified
 import Transform qualified
 import Transform2d (Transform2d)
 import Units qualified
-import Vector2d (Vector2d (Vector2d))
+import Vector2d (Vector2d (Vector2d#))
 import Vector2d qualified
 
 type role Direction2d phantom
@@ -133,13 +134,13 @@ lift ::
 lift function (Direction2d vector) = Direction2d (function vector)
 
 positiveX :: Direction2d space
-positiveX = unsafe (Vector2d 1.0 0.0)
+positiveX = unsafe (Vector2d# 1.0## 0.0##)
 
 negativeX :: Direction2d space
 negativeX = -positiveX
 
 positiveY :: Direction2d space
-positiveY = unsafe (Vector2d 0.0 1.0)
+positiveY = unsafe (Vector2d# 0.0## 1.0##)
 
 negativeY :: Direction2d space
 negativeY = -positiveY
@@ -166,7 +167,7 @@ fromAngle :: Angle -> Direction2d space
 fromAngle angle = unsafe (Vector2d.polar 1.0 angle)
 
 toAngle :: Direction2d space -> Angle
-toAngle (Direction2d (Vector2d dx dy)) = Angle.atan2 dy dx
+toAngle (Direction2d (Vector2d# dx dy)) = Angle.atan2 (Qty# dy) (Qty# dx)
 
 degrees :: Float -> Direction2d space
 degrees value = fromAngle (Angle.degrees value)

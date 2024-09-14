@@ -20,7 +20,6 @@ import Frame2d (Frame2d)
 import Frame2d qualified
 import NonEmpty qualified
 import OpenSolid
-import Point2d (Point2d (Point2d))
 import Point2d qualified
 import Qty qualified
 import {-# SOURCE #-} Surface1d.Function qualified as Function
@@ -31,7 +30,6 @@ import Surface1d.Function.VerticalCurve qualified as VerticalCurve
 import Uv (Parameter (U, V))
 import Uv qualified
 import Uv.Derivatives qualified as Derivatives
-import Vector2d (Vector2d (Vector2d))
 import Vector2d qualified
 
 data SaddleRegion units = SaddleRegion
@@ -66,8 +64,8 @@ quadratic subproblem saddlePoint = do
   let dA = Direction2d.rotateRight dB
   let vA = Direction2d.unwrap dA
   let vB = Direction2d.unwrap dB
-  let Vector2d ua va = vA
-  let Vector2d ub vb = vB
+  let (ua, va) = Vector2d.components vA
+  let (ub, vb) = Vector2d.components vB
   let faa = ua * ua * fuu + 2 * ua * va * fuv + va * va * fvv
   let fab = ua * ub * fuu + (ua * vb + ub * va) * fuv + va * vb * fvv
   let fbb = ub * ub * fuu + 2 * ub * vb * fuv + vb * vb * fvv
@@ -86,7 +84,7 @@ quadratic subproblem saddlePoint = do
 
 secondDerivative :: Qty units -> Qty units -> Qty units -> Uv.Direction -> Qty units
 secondDerivative fuu fuv fvv direction = do
-  let Vector2d du dv = Direction2d.unwrap direction
+  let (du, dv) = Direction2d.components direction
   du * du * fuu + 2 * du * dv * fuv + dv * dv * fvv
 
 connectingCurves ::
@@ -95,7 +93,7 @@ connectingCurves ::
   SaddleRegion units ->
   NonEmpty (Curve2d Uv.Coordinates)
 connectingCurves boundaryPoint SaddleRegion{subproblem, frame, d1, d2} = do
-  let Point2d x y = Point2d.relativeTo frame boundaryPoint
+  let (x, y) = Point2d.coordinates (Point2d.relativeTo frame boundaryPoint)
   let saddlePoint = Frame2d.originPoint frame
   let dx = Frame2d.xDirection frame
   let dy = Frame2d.yDirection frame
@@ -133,13 +131,13 @@ connect subproblem frame startDirection endPoint boundingAxes = do
   let startPoint = Frame2d.originPoint frame
   let Subproblem{derivatives, uvBounds} = subproblem
   let Bounds2d uBounds vBounds = uvBounds
-  let Point2d u1 v1 = startPoint
-  let Point2d u2 v2 = endPoint
-  let Vector2d du dv = Direction2d.unwrap startDirection
+  let (u1, v1) = Point2d.coordinates startPoint
+  let (u2, v2) = Point2d.coordinates endPoint
+  let (du, dv) = Direction2d.components startDirection
   if Qty.abs du >= Qty.abs dv
     then do
       let uMid = u1 + 1e-3 * Qty.sign (u2 - u1) |> Qty.clamp u1 u2
-      let startDerivative = Vector2d (uMid - u1) ((uMid - u1) * (dv / du))
+      let startDerivative = Vector2d.xy (uMid - u1) ((uMid - u1) * (dv / du))
       let interpolatingCurve =
             HorizontalCurve.bounded derivatives u1 uMid vBounds frame boundingAxes
               |> Curve2d.removeStartDegeneracy 2 (startPoint, [startDerivative])
@@ -150,7 +148,7 @@ connect subproblem frame startDirection endPoint boundingAxes = do
           NonEmpty.of2 interpolatingCurve implicitCurve
     else do
       let vMid = v1 + 1e-3 * Qty.sign (v2 - v1) |> Qty.clamp v1 v2
-      let startDerivative = Vector2d ((vMid - v1) * (du / dv)) (vMid - v1)
+      let startDerivative = Vector2d.xy ((vMid - v1) * (du / dv)) (vMid - v1)
       let interpolatingCurve =
             VerticalCurve.bounded derivatives uBounds v1 vMid frame boundingAxes
               |> Curve2d.removeStartDegeneracy 2 (startPoint, [startDerivative])

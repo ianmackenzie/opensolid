@@ -27,6 +27,7 @@ module Arc2d
 where
 
 import Angle qualified
+import Arithmetic.Unboxed
 import CoordinateSystem (Space)
 import Curve2d (Curve2d)
 import Curve2d qualified
@@ -39,12 +40,13 @@ import Frame2d qualified
 import Line2d qualified
 import Maybe qualified
 import OpenSolid
-import Point2d (Point2d)
+import Point2d (Point2d (Point2d#))
 import Point2d qualified
+import Qty (Qty (Qty#))
 import Qty qualified
 import Range qualified
 import Units qualified
-import Vector2d (Vector2d)
+import Vector2d (Vector2d (Vector2d#))
 import Vector2d qualified
 import VectorCurve2d qualified
 
@@ -62,9 +64,16 @@ deriving instance Show (Arc (space @ units))
 instance Curve2d.Interface (Arc (space @ units)) (space @ units) where
   startPointImpl arc = Curve2d.pointOnImpl arc 0.0
   endPointImpl arc = Curve2d.pointOnImpl arc 1.0
-  pointOnImpl (Arc p0 vx vy a b) t = do
-    let theta = Qty.interpolateFrom a b t
-    p0 + vx * Angle.cos theta + vy * Angle.sin theta
+  pointOnImpl (Arc p0 vx vy (Qty# a#) (Qty# b#)) (Qty# t#) = do
+    let !(Point2d# x0# y0#) = p0
+    let !(Vector2d# x1# y1#) = vx
+    let !(Vector2d# x2# y2#) = vy
+    let theta# = a# +# t# *# (b# -# a#)
+    let cosTheta# = cos# theta#
+    let sinTheta# = sin# theta#
+    let x# = x0# +# cosTheta# *# x1# +# sinTheta# *# x2#
+    let y# = y0# +# cosTheta# *# y1# +# sinTheta# *# y2#
+    Point2d# x# y#
   segmentBoundsImpl (Arc p0 vx vy a b) t = do
     let theta = a + (b - a) * t
     p0 + Range.cos theta * vx + Range.sin theta * vy
