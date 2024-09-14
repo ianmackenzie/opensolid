@@ -81,7 +81,7 @@ instance Negation (Qty units) where
 
 instance Multiplication' Sign (Qty units) where
   type Sign .*. Qty units = Qty (Unitless :*: units)
-  {-# INLINE (.*.) #-}
+  {-# INLINEABLE (.*.) #-}
   Positive .*. value = Units.coerce value
   Negative .*. value = Units.coerce -value
 
@@ -89,7 +89,7 @@ instance Multiplication Sign (Qty units) (Qty units)
 
 instance Multiplication' (Qty units) Sign where
   type Qty units .*. Sign = Qty (units :*: Unitless)
-  {-# INLINE (.*.) #-}
+  {-# INLINEABLE (.*.) #-}
   value .*. Positive = Units.coerce value
   value .*. Negative = Units.coerce -value
 
