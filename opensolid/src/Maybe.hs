@@ -3,6 +3,7 @@ module Maybe
   , map
   , map2
   , withDefault
+  , find
   , collect
   , values
   , (>>=)
@@ -44,6 +45,10 @@ infixl 1 >>=
 withDefault :: a -> Maybe a -> a
 withDefault _ (Just value) = value
 withDefault value Nothing = value
+
+find :: (a -> Maybe b) -> List a -> Maybe b
+find _ [] = Nothing
+find f (first : rest) = f first |> orElse (find f rest)
 
 collect :: (a -> Maybe b) -> List a -> List b
 collect = Data.Maybe.mapMaybe
