@@ -564,21 +564,13 @@ testCurveMedialAxis = IO.do
                       ]
                       p0
                       (Qty.abs r)
-              let circleCenter = Drawing2d.circle [] p0 (Length.millimeters 0.1)
-              let tangentPoints =
-                    Drawing2d.group
-                      [ Drawing2d.circle [] p1 (Length.millimeters 0.2)
-                      , Drawing2d.circle [] p2 (Length.millimeters 0.2)
-                      ]
-              (tangentCircle, tangentPoints, circleCenter)
+              tangentCircle
         List.map drawTangentCircle (Parameter.steps 2)
-  let (tangentCircles, tangentPoints, circleCenters) = List.unzip3 (List.collect drawCircles segments)
+  let tangentCircles = List.collect drawCircles segments
   Drawing2d.writeTo "curve-medial-axis.svg" drawingBounds $
     [ Drawing2d.group tangentCircles
     , drawCurve curve1
     , drawCurve curve2
-    , Drawing2d.group tangentPoints
-    , Drawing2d.group circleCenters
     , Drawing2d.group (List.map drawSegment segments)
     ]
 
