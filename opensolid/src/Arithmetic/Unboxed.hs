@@ -84,31 +84,31 @@ infixl 7 /#
 
 {-# INLINE (==#) #-}
 (==#) :: Double# -> Double# -> Bool
-x# ==# y# = GHC.Exts.isTrue# (x# GHC.Exts.==## y#)
+x# ==# y# = case x# GHC.Exts.==## y# of 1# -> True; _ -> False
 
 infix 4 ==#
 
 {-# INLINE (<#) #-}
 (<#) :: Double# -> Double# -> Bool
-x# <# y# = GHC.Exts.isTrue# (x# GHC.Exts.<## y#)
+x# <# y# = case x# GHC.Exts.<## y# of 1# -> True; _ -> False
 
 infix 4 <#
 
 {-# INLINE (>#) #-}
 (>#) :: Double# -> Double# -> Bool
-x# ># y# = GHC.Exts.isTrue# (x# GHC.Exts.>## y#)
+x# ># y# = case x# GHC.Exts.>## y# of 1# -> True; _ -> False
 
 infix 4 >#
 
 {-# INLINE (>=#) #-}
 (>=#) :: Double# -> Double# -> Bool
-x# >=# y# = GHC.Exts.isTrue# (x# GHC.Exts.>=## y#)
+x# >=# y# = case x# GHC.Exts.>=## y# of 1# -> True; _ -> False
 
 infix 4 >=#
 
 {-# INLINE (<=#) #-}
 (<=#) :: Double# -> Double# -> Bool
-x# <=# y# = GHC.Exts.isTrue# (x# GHC.Exts.<=## y#)
+x# <=# y# = case x# GHC.Exts.<=## y# of 1# -> True; _ -> False
 
 infix 4 <=#
 
