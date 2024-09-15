@@ -27,6 +27,7 @@ import Duration qualified
 import Float qualified
 import IO qualified
 import Int qualified
+import Jit qualified
 import Length (Length)
 import Length qualified
 import Line2d qualified
@@ -574,6 +575,53 @@ testCurveMedialAxis = IO.do
     , Drawing2d.group (List.map drawSegment segments)
     ]
 
+data Expression
+  = Constant Float
+  | Parameter
+  | Sum Expression Expression
+  | Product Expression Expression
+  | Quotient Expression Expression
+  | Sqrt Expression
+  deriving (Eq)
+
+data SumOp = SumOp deriving (Eq, Show)
+
+instance Jit.BinaryOp SumOp Float Float Float where
+  evalBinary SumOp x y = Debug.intercept "Sum x" x + Debug.intercept "Sum y" y
+
+data ProductOp = ProductOp deriving (Eq, Show)
+
+instance Jit.BinaryOp ProductOp Float Float Float where
+  evalBinary ProductOp x y = Debug.intercept "Product x" x * Debug.intercept "Product y" y
+
+data QuotientOp = QuotientOp deriving (Eq, Show)
+
+instance Jit.BinaryOp QuotientOp Float Float Float where
+  evalBinary QuotientOp x y = Debug.intercept "Quotient x" x / Debug.intercept "Quotient y" y
+
+data SqrtOp = SqrtOp deriving (Eq, Show)
+
+instance Jit.UnaryOp SqrtOp Float Float where
+  evalUnary SqrtOp x = Float.sqrt x
+
+instance Jit.Expr Expression Float Float where
+  toAst :: Expression -> Jit.Ast Float Float
+  toAst expression = case expression of
+    Constant value -> Jit.constant value
+    Parameter -> Jit.input
+    Sum x y -> Jit.binary SumOp x y
+    Product x y -> Jit.binary ProductOp x y
+    Quotient x y -> Jit.binary QuotientOp x y
+    Sqrt x -> Jit.unary SqrtOp x
+
+testJit :: IO ()
+testJit = IO.do
+  let x = Parameter
+  let xSquared = Product x x
+  let expr = Quotient xSquared (Sum (Constant 1.0) xSquared)
+  let f = Jit.compile expr
+  log "evaluated" (f 2.0)
+
 main :: IO ()
 main = Tolerance.using (Length.meters 1e-9) IO.do
   testScalarArithmetic
@@ -592,6 +640,7 @@ main = Tolerance.using (Length.meters 1e-9) IO.do
   testArcFromEndpoints
   testBezierSegment
   testHermiteBezier
+  testJit
   testPlaneTorusIntersection
   testCurveMedialAxis
   testStretchedArc
