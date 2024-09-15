@@ -145,6 +145,7 @@ library
     IO
     Int
     Intersects
+    Jit
     Json
     Json.Format
     Json.Schema
