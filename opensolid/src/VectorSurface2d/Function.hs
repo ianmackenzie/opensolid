@@ -25,7 +25,6 @@ import OpenSolid
 import Qty qualified
 import Surface1d qualified
 import Surface1d.Function qualified
-import Units (Erase)
 import Units qualified
 import Uv (Parameter)
 import Uv qualified
@@ -88,7 +87,6 @@ deriving instance Show (Function (space @ units))
 
 instance HasUnits (Function (space @ units)) where
   type Units (Function (space @ units)) = units
-  type Erase (Function (space @ units)) = Function (space @ Unitless)
 
 instance
   space1 ~ space2 =>

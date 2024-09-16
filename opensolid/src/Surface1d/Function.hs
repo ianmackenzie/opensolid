@@ -119,7 +119,6 @@ deriving instance Show (Function units)
 
 instance HasUnits (Function units) where
   type Units (Function units) = units
-  type Erase (Function units) = Function Unitless
 
 instance Units.Coercion (Function unitsA) (Function unitsB) where
   coerce (Constant value) = Constant (Units.coerce value)

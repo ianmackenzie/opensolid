@@ -168,7 +168,6 @@ deriving instance Show (VectorCurve2d (space @ units))
 
 instance HasUnits (VectorCurve2d (space @ units)) where
   type Units (VectorCurve2d (space @ units)) = units
-  type Erase (VectorCurve2d (space @ units)) = VectorCurve2d (space @ Unitless)
 
 instance
   space1 ~ space2 =>

@@ -8,7 +8,7 @@ module CoordinateSystem
 where
 
 import Basics
-import Units (HasUnits, Unitless)
+import Units (HasUnits)
 import Units qualified
 
 data CoordinateSystem = CoordinateSystem Type Type
@@ -21,7 +21,6 @@ type Defines space = 'LocalSpace space
 
 instance HasUnits (space @ units) where
   type Units (space @ units) = units
-  type Erase (space @ units) = space @ Unitless
 
 type Space :: CoordinateSystem -> Type
 type family Space coordinateSystem where

@@ -32,37 +32,29 @@ import {-# SOURCE #-} Qty (Qty)
 import {-# SOURCE #-} Result (Result (Failure, Success))
 import {-# SOURCE #-} Sign (Sign)
 
-class Units (Erase a) ~ Unitless => HasUnits (a :: k) where
+class HasUnits (a :: k) where
   type Units a
-  type Erase a :: k
 
 instance HasUnits Int where
   type Units Int = Unitless
-  type Erase Int = Int
 
 instance HasUnits (Qty units) where
   type Units (Qty units) = units
-  type Erase (Qty units) = Qty Unitless
 
 instance HasUnits Sign where
   type Units Sign = Unitless
-  type Erase Sign = Sign
 
 instance HasUnits a => HasUnits (Maybe a) where
   type Units (Maybe a) = Units a
-  type Erase (Maybe a) = Maybe (Erase a)
 
 instance HasUnits a => HasUnits (Result x a) where
   type Units (Result x a) = Units a
-  type Erase (Result x a) = Result x (Erase a)
 
 instance HasUnits a => HasUnits (List a) where
   type Units (List a) = Units a
-  type Erase (List a) = List (Erase a)
 
 instance HasUnits a => HasUnits (NonEmpty a) where
   type Units (NonEmpty a) = Units a
-  type Erase (NonEmpty a) = NonEmpty (Erase a)
 
 type Coercion :: Type -> Type -> Constraint
 class Coercion b a => Coercion a b where
@@ -107,7 +99,7 @@ data units1 :/: units2
 infixl 7 :/:
 
 {-# INLINE erase #-}
-erase :: Coercion a (Erase a) => a -> Erase a
+erase :: (Coercion a b, Units b ~ Unitless) => a -> b
 erase = coerce
 
 {-# INLINE specialize #-}

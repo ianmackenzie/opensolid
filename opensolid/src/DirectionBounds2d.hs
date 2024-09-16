@@ -23,7 +23,6 @@ newtype DirectionBounds2d space
 
 instance HasUnits (DirectionBounds2d space) where
   type Units (DirectionBounds2d space) = Unitless
-  type Erase (DirectionBounds2d space) = DirectionBounds2d space
 
 instance
   space1 ~ space2 =>

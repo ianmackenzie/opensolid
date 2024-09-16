@@ -96,7 +96,6 @@ deriving instance Show (Curve1d units)
 
 instance HasUnits (Curve1d units) where
   type Units (Curve1d units) = units
-  type Erase (Curve1d units) = Curve1d Unitless
 
 instance Units.Coercion (Curve1d unitsA) (Curve1d unitsB) where
   coerce (Constant value) = Constant (Units.coerce value)

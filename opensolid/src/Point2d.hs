@@ -69,7 +69,6 @@ deriving instance Show (Point2d (space @ units))
 
 instance HasUnits (Point2d (space @ units)) where
   type Units (Point2d (space @ units)) = units
-  type Erase (Point2d (space @ units)) = Point2d (space @ Unitless)
 
 instance
   space1 ~ space2 =>

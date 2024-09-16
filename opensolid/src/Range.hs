@@ -89,7 +89,6 @@ pattern Range low high <- Range_ low high
 
 instance HasUnits (Range units) where
   type Units (Range units) = units
-  type Erase (Range units) = Range Unitless
 
 instance Units.Coercion (Range unitsA) (Range unitsB) where
   coerce = Data.Coerce.coerce

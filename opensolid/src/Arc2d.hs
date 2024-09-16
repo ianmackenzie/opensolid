@@ -259,7 +259,6 @@ data Arc2d (coordinateSystem :: CoordinateSystem) where
 
 instance HasUnits (Arc2d (space @ units)) where
   type Units (Arc2d (space @ units)) = units
-  type Erase (Arc2d (space @ units)) = Arc2d (space @ Unitless)
 
 instance
   space1 ~ space2 =>

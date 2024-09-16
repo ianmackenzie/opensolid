@@ -77,7 +77,6 @@ pattern Transform3d p0 vx vy vz <- Transform3d_ p0 vx vy vz
 
 instance HasUnits (Transform3d tag (space @ units)) where
   type Units (Transform3d tag (space @ units)) = units
-  type Erase (Transform3d tag (space @ units)) = Transform3d tag (space @ Unitless)
 
 instance
   (tag1 ~ tag2, space1 ~ space2) =>

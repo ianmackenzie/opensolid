@@ -72,7 +72,6 @@ deriving instance Show (Bounds2d (space @ units))
 
 instance HasUnits (Bounds2d (space @ units)) where
   type Units (Bounds2d (space @ units)) = units
-  type Erase (Bounds2d (space @ units)) = Bounds2d (space @ Unitless)
 
 instance
   space1 ~ space2 =>

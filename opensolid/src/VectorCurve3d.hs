@@ -61,7 +61,6 @@ instance Interface (VectorCurve3d (space @ units)) (space @ units) where
 
 instance HasUnits (VectorCurve3d (space @ units)) where
   type Units (VectorCurve3d (space @ units)) = units
-  type Erase (VectorCurve3d (space @ units)) = VectorCurve3d (space @ Unitless)
 
 instance
   space1 ~ space2 =>

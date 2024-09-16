@@ -49,7 +49,6 @@ instance Bounds.Interface (Bounds3d (space @ units)) where
 
 instance HasUnits (Bounds3d (space @ units)) where
   type Units (Bounds3d (space @ units)) = units
-  type Erase (Bounds3d (space @ units)) = Bounds3d (space @ Unitless)
 
 instance
   space1 ~ space2 =>

@@ -33,7 +33,6 @@ deriving instance Show (Line2d (space @ units))
 
 instance HasUnits (Line2d (space @ units)) where
   type Units (Line2d (space @ units)) = units
-  type Erase (Line2d (space @ units)) = Line2d (space @ Unitless)
 
 instance
   space1 ~ space2 =>

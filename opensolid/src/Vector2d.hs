@@ -81,7 +81,6 @@ deriving instance Show (Vector2d (space @ units))
 
 instance HasUnits (Vector2d (space @ units)) where
   type Units (Vector2d (space @ units)) = units
-  type Erase (Vector2d (space @ units)) = Vector2d (space @ Unitless)
 
 instance
   space1 ~ space2 =>

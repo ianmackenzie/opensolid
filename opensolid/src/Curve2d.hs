@@ -131,7 +131,6 @@ deriving instance Show (Curve2d (space @ units))
 
 instance HasUnits (Curve2d (space @ units)) where
   type Units (Curve2d (space @ units)) = units
-  type Erase (Curve2d (space @ units)) = Curve2d (space @ Unitless)
 
 instance
   space1 ~ space2 =>

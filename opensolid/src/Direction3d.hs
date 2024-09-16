@@ -41,7 +41,6 @@ newtype Direction3d (space :: Type) = Direction3d (Vector3d (space @ Unitless))
 
 instance HasUnits (Direction3d space) where
   type Units (Direction3d space) = Unitless
-  type Erase (Direction3d space) = Direction3d space
 
 instance space1 ~ space2 => Units.Coercion (Direction3d space1) (Direction3d space2) where
   coerce = identity

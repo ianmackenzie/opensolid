@@ -68,7 +68,6 @@ deriving instance Show (Function (space @ units))
 
 instance HasUnits (Function (space @ units)) where
   type Units (Function (space @ units)) = units
-  type Erase (Function (space @ units)) = Function (space @ Unitless)
 
 instance
   space1 ~ space2 =>

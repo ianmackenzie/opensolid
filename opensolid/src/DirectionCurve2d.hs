@@ -39,7 +39,6 @@ newtype DirectionCurve2d space = DirectionCurve2d (VectorCurve2d (space @ Unitle
 
 instance HasUnits (DirectionCurve2d space) where
   type Units (DirectionCurve2d space) = Unitless
-  type Erase (DirectionCurve2d space) = DirectionCurve2d space
 
 instance
   space1 ~ space2 =>
