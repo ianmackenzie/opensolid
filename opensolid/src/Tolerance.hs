@@ -19,7 +19,7 @@ import Composition
 import NonEmpty (NonEmpty ((:|)), pattern NonEmpty)
 import Qty (Qty)
 import Qty qualified
-import Units ((:*:))
+import Units (Units (..))
 import Units qualified
 
 type Tolerance units = ?tolerance :: Qty units

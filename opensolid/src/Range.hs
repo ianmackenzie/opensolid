@@ -75,7 +75,7 @@ import Units qualified
 
 type role Range phantom
 
-type Range :: Type -> Type
+type Range :: Units -> Type
 data Range units = Range_ (Qty units) (Qty units)
   deriving (Eq, Show)
 

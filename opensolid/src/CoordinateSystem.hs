@@ -8,10 +8,10 @@ module CoordinateSystem
 where
 
 import Basics
-import Units (HasUnits)
+import Units (HasUnits, Units)
 import Units qualified
 
-data CoordinateSystem = CoordinateSystem Type Type
+data CoordinateSystem = CoordinateSystem Type Units
 
 type space @ units = 'CoordinateSystem space units
 

@@ -44,13 +44,13 @@ import List qualified
 import Random.Internal qualified as Random
 import Sign (Sign (Negative, Positive))
 import System.Random qualified
-import Units (Unitless, (:*:), (:/:))
+import Units (Units (..))
 import Units qualified
 import Prelude qualified
 
 type role Qty phantom
 
-type Qty :: Type -> Type
+type Qty :: Units -> Type
 newtype Qty units = Qty Prelude.Double deriving (Eq, Ord, Show)
 
 {-# COMPLETE Qty# #-}

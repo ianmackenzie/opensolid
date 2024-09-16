@@ -43,6 +43,7 @@ library
     Pointers
 
   default-extensions:
+    DataKinds
     DisambiguateRecordFields
     GADTs
     ImplicitParams

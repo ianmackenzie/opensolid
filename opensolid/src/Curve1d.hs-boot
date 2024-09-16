@@ -11,7 +11,7 @@ import Range (Range)
 
 type role Curve1d nominal
 
-type Curve1d :: Type -> Type
+type Curve1d :: Units -> Type
 data Curve1d units
 
 pointOn :: Curve1d units -> Float -> Qty units

@@ -1,8 +1,6 @@
 module Units
-  ( UnitsOf
-  , Unitless
-  , type (:*:)
-  , type (:/:)
+  ( Units (..)
+  , UnitsOf
   , Product
   , Quotient
   , Squared
@@ -10,31 +8,30 @@ module Units
 where
 
 import Basics
+import Data.Kind (Constraint)
+import GHC.TypeLits (Symbol)
 
-type UnitsOf :: k -> Type
-type family UnitsOf a
-
-data Unitless
-
-type role (:*:) phantom phantom
-
-data units1 :*: units2
-
-type role (:/:) phantom phantom
-
-data units1 :/: units2
+data Units
+  = Unitless
+  | Units Symbol
+  | Units :*: Units
+  | Units :/: Units
 
 infixl 7 :*:, :/:
 
-type (.*.) :: Type -> Type -> Type
+type UnitsOf :: k -> Units
+type family UnitsOf a
+
+type (.*.) :: Units -> Units -> Units
 type family a .*. b
 
-type (./.) :: Type -> Type -> Type
+type (./.) :: Units -> Units -> Units
 type family a ./. b
 
-type Sqr :: Type -> Type
+type Sqr :: Units -> Units
 type family Sqr units = squaredUnits | squaredUnits -> units
 
+type Product :: Units -> Units -> Units -> Constraint
 type Product units1 units2 units3 =
   ( units1 .*. units2 ~ units3
   , units2 .*. units1 ~ units3
@@ -42,6 +39,7 @@ type Product units1 units2 units3 =
   , units3 ./. units2 ~ units1
   )
 
+type Quotient :: Units -> Units -> Units -> Constraint
 type Quotient units1 units2 units3 =
   ( units1 ./. units2 ~ units3
   , units2 .*. units3 ~ units1
@@ -49,6 +47,7 @@ type Quotient units1 units2 units3 =
   , units1 ./. units3 ~ units2
   )
 
+type Squared :: Units -> Units -> Constraint
 type Squared units1 units2 =
   ( Sqr units1 ~ units2
   , Product units1 units1 units2

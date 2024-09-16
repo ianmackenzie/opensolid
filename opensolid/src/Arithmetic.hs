@@ -40,7 +40,7 @@ import Data.List.NonEmpty (NonEmpty ((:|)))
 import {-# SOURCE #-} Float (Float)
 import {-# SOURCE #-} Qty (Qty (Qty))
 import {-# SOURCE #-} Sign (Sign (Negative, Positive))
-import Units (Unitless, UnitsOf, (:*:), (:/:))
+import Units (Units (..), UnitsOf)
 import Units qualified
 import Prelude qualified
 
