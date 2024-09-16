@@ -6,6 +6,7 @@ module Jit
   , Ast
   , input
   , constant
+  , call
   , unary
   , binary
   , compile
@@ -105,6 +106,9 @@ input = NonConstant Input
 
 constant :: Value value => value -> Ast input value
 constant = Constant
+
+call :: UnaryOp op input output => op -> Ast input output
+call op = NonConstant (NonInput (Unary op Input))
 
 unary :: (UnaryOp op arg output, Expr expr input arg) => op -> expr -> Ast input output
 unary op expr = case toAst expr of
