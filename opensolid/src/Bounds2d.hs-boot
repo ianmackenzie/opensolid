@@ -14,8 +14,8 @@ type role Bounds2d phantom
 
 data Bounds2d (coordinateSystem :: CoordinateSystem) where
   Bounds2d ::
-    Range (Units coordinateSystem) ->
-    Range (Units coordinateSystem) ->
+    Range (UnitsOf coordinateSystem) ->
+    Range (UnitsOf coordinateSystem) ->
     Bounds2d coordinateSystem
 
 instance Bounds.Interface (Bounds2d (space @ units))

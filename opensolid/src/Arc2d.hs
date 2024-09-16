@@ -250,15 +250,15 @@ data Arc2d (coordinateSystem :: CoordinateSystem) where
     { centerPoint :: Point2d coordinateSystem
     , majorDirection :: Direction2d (Space coordinateSystem)
     , minorDirection :: Direction2d (Space coordinateSystem)
-    , majorRadius :: Qty (Units coordinateSystem)
-    , minorRadius :: Qty (Units coordinateSystem)
+    , majorRadius :: Qty (UnitsOf coordinateSystem)
+    , minorRadius :: Qty (UnitsOf coordinateSystem)
     , startAngle :: Angle
     , endAngle :: Angle
     } ->
     Arc2d coordinateSystem
 
 instance HasUnits (Arc2d (space @ units)) where
-  type Units (Arc2d (space @ units)) = units
+  type UnitsOf (Arc2d (space @ units)) = units
 
 instance
   space1 ~ space2 =>

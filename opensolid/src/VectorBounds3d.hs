@@ -33,15 +33,15 @@ import Vector3d (Vector3d (Vector3d))
 
 data VectorBounds3d (coordinateSystem :: CoordinateSystem) where
   VectorBounds3d ::
-    Range (Units coordinateSystem) ->
-    Range (Units coordinateSystem) ->
-    Range (Units coordinateSystem) ->
+    Range (UnitsOf coordinateSystem) ->
+    Range (UnitsOf coordinateSystem) ->
+    Range (UnitsOf coordinateSystem) ->
     VectorBounds3d coordinateSystem
 
 deriving instance Show (VectorBounds3d (space @ units))
 
 instance HasUnits (VectorBounds3d (space @ units)) where
-  type Units (VectorBounds3d (space @ units)) = units
+  type UnitsOf (VectorBounds3d (space @ units)) = units
 
 instance
   space1 ~ space2 =>

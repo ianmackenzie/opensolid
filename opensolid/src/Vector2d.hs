@@ -80,7 +80,7 @@ deriving instance Eq (Vector2d (space @ units))
 deriving instance Show (Vector2d (space @ units))
 
 instance HasUnits (Vector2d (space @ units)) where
-  type Units (Vector2d (space @ units)) = units
+  type UnitsOf (Vector2d (space @ units)) = units
 
 instance
   space1 ~ space2 =>

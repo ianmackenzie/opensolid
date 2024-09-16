@@ -66,9 +66,9 @@ type role Vector3d phantom
 
 data Vector3d (coordinateSystem :: CoordinateSystem) where
   Vector3d ::
-    Qty (Units coordinateSystem) ->
-    Qty (Units coordinateSystem) ->
-    Qty (Units coordinateSystem) ->
+    Qty (UnitsOf coordinateSystem) ->
+    Qty (UnitsOf coordinateSystem) ->
+    Qty (UnitsOf coordinateSystem) ->
     Vector3d coordinateSystem
 
 deriving instance Eq (Vector3d (space @ units))
@@ -76,7 +76,7 @@ deriving instance Eq (Vector3d (space @ units))
 deriving instance Show (Vector3d (space @ units))
 
 instance HasUnits (Vector3d (space @ units)) where
-  type Units (Vector3d (space @ units)) = units
+  type UnitsOf (Vector3d (space @ units)) = units
 
 instance
   space1 ~ space2 =>

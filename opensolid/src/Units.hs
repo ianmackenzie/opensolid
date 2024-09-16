@@ -33,28 +33,28 @@ import {-# SOURCE #-} Result (Result (Failure, Success))
 import {-# SOURCE #-} Sign (Sign)
 
 class HasUnits (a :: k) where
-  type Units a
+  type UnitsOf a
 
 instance HasUnits Int where
-  type Units Int = Unitless
+  type UnitsOf Int = Unitless
 
 instance HasUnits (Qty units) where
-  type Units (Qty units) = units
+  type UnitsOf (Qty units) = units
 
 instance HasUnits Sign where
-  type Units Sign = Unitless
+  type UnitsOf Sign = Unitless
 
 instance HasUnits a => HasUnits (Maybe a) where
-  type Units (Maybe a) = Units a
+  type UnitsOf (Maybe a) = UnitsOf a
 
 instance HasUnits a => HasUnits (Result x a) where
-  type Units (Result x a) = Units a
+  type UnitsOf (Result x a) = UnitsOf a
 
 instance HasUnits a => HasUnits (List a) where
-  type Units (List a) = Units a
+  type UnitsOf (List a) = UnitsOf a
 
 instance HasUnits a => HasUnits (NonEmpty a) where
-  type Units (NonEmpty a) = Units a
+  type UnitsOf (NonEmpty a) = UnitsOf a
 
 type Coercion :: Type -> Type -> Constraint
 class Coercion b a => Coercion a b where
@@ -99,21 +99,21 @@ data units1 :/: units2
 infixl 7 :/:
 
 {-# INLINE erase #-}
-erase :: (Coercion a b, Units b ~ Unitless) => a -> b
+erase :: (Coercion a b, UnitsOf b ~ Unitless) => a -> b
 erase = coerce
 
 {-# INLINE specialize #-}
-specialize :: (Coercion a b, Specialize (Units a) (Units b)) => a -> b
+specialize :: (Coercion a b, Specialize (UnitsOf a) (UnitsOf b)) => a -> b
 specialize = coerce
 
 {-# INLINE unspecialize #-}
-unspecialize :: (Coercion a b, Specialize (Units a) (Units b)) => b -> a
+unspecialize :: (Coercion a b, Specialize (UnitsOf a) (UnitsOf b)) => b -> a
 unspecialize = coerce
 
 commute ::
   ( Coercion a b
-  , Units a ~ units1 :*: units2
-  , Units b ~ units2 :*: units1
+  , UnitsOf a ~ units1 :*: units2
+  , UnitsOf b ~ units2 :*: units1
   ) =>
   a ->
   b
@@ -121,8 +121,8 @@ commute = coerce
 
 leftAssociate ::
   ( Coercion a b
-  , Units a ~ units1 :*: (units2 :*: units3)
-  , Units b ~ (units1 :*: units2) :*: units3
+  , UnitsOf a ~ units1 :*: (units2 :*: units3)
+  , UnitsOf b ~ (units1 :*: units2) :*: units3
   ) =>
   a ->
   b
@@ -130,8 +130,8 @@ leftAssociate = coerce
 
 rightAssociate ::
   ( Coercion a b
-  , Units a ~ (units1 :*: units2) :*: units3
-  , Units b ~ units1 :*: (units2 :*: units3)
+  , UnitsOf a ~ (units1 :*: units2) :*: units3
+  , UnitsOf b ~ units1 :*: (units2 :*: units3)
   ) =>
   a ->
   b

@@ -167,7 +167,7 @@ data VectorCurve2d (coordinateSystem :: CoordinateSystem) where
 deriving instance Show (VectorCurve2d (space @ units))
 
 instance HasUnits (VectorCurve2d (space @ units)) where
-  type Units (VectorCurve2d (space @ units)) = units
+  type UnitsOf (VectorCurve2d (space @ units)) = units
 
 instance
   space1 ~ space2 =>

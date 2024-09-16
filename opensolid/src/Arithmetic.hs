@@ -40,7 +40,7 @@ import Data.List.NonEmpty (NonEmpty ((:|)))
 import {-# SOURCE #-} Float (Float)
 import {-# SOURCE #-} Qty (Qty (Qty))
 import {-# SOURCE #-} Sign (Sign (Negative, Positive))
-import Units (Unitless, Units, (:*:), (:/:))
+import Units (Unitless, UnitsOf, (:*:), (:/:))
 import Units qualified
 import Prelude qualified
 
@@ -73,7 +73,7 @@ infixl 7 .*.
 class
   ( Multiplication' a b
   , Units.Coercion (a .*. b) c
-  , Units.Specialize (Units (a .*. b)) (Units c)
+  , Units.Specialize (UnitsOf (a .*. b)) (UnitsOf c)
   , Multiplication b a c
   ) =>
   Multiplication a b c
@@ -96,7 +96,7 @@ infixl 7 ./.
 class
   ( Division' a b
   , Units.Coercion (a ./. b) c
-  , Units.Specialize (Units (a ./. b)) (Units c)
+  , Units.Specialize (UnitsOf (a ./. b)) (UnitsOf c)
   ) =>
   Division a b c
     | a b -> c
@@ -118,7 +118,7 @@ infixl 7 .<>.
 class
   ( DotMultiplication' a b
   , Units.Coercion (a .<>. b) c
-  , Units.Specialize (Units (a .<>. b)) (Units c)
+  , Units.Specialize (UnitsOf (a .<>. b)) (UnitsOf c)
   , DotMultiplication b a c
   ) =>
   DotMultiplication a b c
@@ -141,7 +141,7 @@ infixl 7 .><.
 class
   ( CrossMultiplication' a b
   , Units.Coercion (a .><. b) c
-  , Units.Specialize (Units (a .><. b)) (Units c)
+  , Units.Specialize (UnitsOf (a .><. b)) (UnitsOf c)
   , CrossMultiplication b a c
   ) =>
   CrossMultiplication a b c
@@ -275,9 +275,9 @@ instance
 (*!) ::
   ( Multiplication' a b
   , Units.Coercion (a .*. b) c
-  , Units a ~ units1 :/: units2
-  , Units b ~ units2
-  , Units c ~ units1
+  , UnitsOf a ~ units1 :/: units2
+  , UnitsOf b ~ units2
+  , UnitsOf c ~ units1
   ) =>
   a ->
   b ->
@@ -289,9 +289,9 @@ infixl 7 *!
 (!*) ::
   ( Multiplication' a b
   , Units.Coercion (a .*. b) c
-  , Units a ~ units2
-  , Units b ~ units1 :/: units2
-  , Units c ~ units1
+  , UnitsOf a ~ units2
+  , UnitsOf b ~ units1 :/: units2
+  , UnitsOf c ~ units1
   ) =>
   a ->
   b ->
@@ -303,9 +303,9 @@ infixl 7 !*
 (^*.) ::
   ( Multiplication' a b
   , Units.Coercion (a .*. b) c
-  , Units a ~ units1
-  , Units b ~ Unitless :/: units2
-  , Units c ~ units1 :/: units2
+  , UnitsOf a ~ units1
+  , UnitsOf b ~ Unitless :/: units2
+  , UnitsOf c ~ units1 :/: units2
   ) =>
   a ->
   b ->
@@ -317,9 +317,9 @@ infixl 7 ^*.
 (.*^) ::
   ( Multiplication' a b
   , Units.Coercion (a .*. b) c
-  , Units a ~ Unitless :/: units2
-  , Units b ~ units1
-  , Units c ~ units1 :/: units2
+  , UnitsOf a ~ Unitless :/: units2
+  , UnitsOf b ~ units1
+  , UnitsOf c ~ units1 :/: units2
   ) =>
   a ->
   b ->
@@ -331,9 +331,9 @@ infixl 7 .*^
 (/%) ::
   ( Division' a b
   , Units.Coercion (a ./. b) c
-  , Units a ~ Unitless
-  , Units b ~ units1 :/: units2
-  , Units c ~ units2 :/: units1
+  , UnitsOf a ~ Unitless
+  , UnitsOf b ~ units1 :/: units2
+  , UnitsOf c ~ units2 :/: units1
   ) =>
   a ->
   b ->
@@ -345,9 +345,9 @@ infixl 7 /%
 (!/) ::
   ( Division' a b
   , Units.Coercion (a ./. b) c
-  , Units a ~ units1
-  , Units b ~ units1 :/: units2
-  , Units c ~ units2
+  , UnitsOf a ~ units1
+  , UnitsOf b ~ units1 :/: units2
+  , UnitsOf c ~ units2
   ) =>
   a ->
   b ->
@@ -359,9 +359,9 @@ infixl 7 !/
 (.!/!) ::
   ( Division' a b
   , Units.Coercion (a ./. b) c
-  , Units a ~ units1 :*: units2
-  , Units b ~ units2
-  , Units c ~ units1
+  , UnitsOf a ~ units1 :*: units2
+  , UnitsOf b ~ units2
+  , UnitsOf c ~ units1
   ) =>
   a ->
   b ->
@@ -373,9 +373,9 @@ infixl 7 .!/!
 (!./!) ::
   ( Division' a b
   , Units.Coercion (a ./. b) c
-  , Units a ~ units1 :*: units2
-  , Units b ~ units1
-  , Units c ~ units2
+  , UnitsOf a ~ units1 :*: units2
+  , UnitsOf b ~ units1
+  , UnitsOf c ~ units2
   ) =>
   a ->
   b ->
@@ -387,9 +387,9 @@ infixl 7 !./!
 (!/!.) ::
   ( Division' a b
   , Units.Coercion (a ./. b) c
-  , Units a ~ units1
-  , Units b ~ units1 :*: units2
-  , Units c ~ Unitless :/: units2
+  , UnitsOf a ~ units1
+  , UnitsOf b ~ units1 :*: units2
+  , UnitsOf c ~ Unitless :/: units2
   ) =>
   a ->
   b ->
@@ -401,9 +401,9 @@ infixl 7 !/!.
 (!/.!) ::
   ( Division' a b
   , Units.Coercion (a ./. b) c
-  , Units a ~ units2
-  , Units b ~ units1 :*: units2
-  , Units c ~ Unitless :/: units1
+  , UnitsOf a ~ units2
+  , UnitsOf b ~ units1 :*: units2
+  , UnitsOf c ~ Unitless :/: units1
   ) =>
   a ->
   b ->
@@ -415,9 +415,9 @@ infixl 7 !/.!
 (.!/.!) ::
   ( Division' a b
   , Units.Coercion (a ./. b) c
-  , Units a ~ units1 :*: units3
-  , Units b ~ units2 :*: units3
-  , Units c ~ units1 :/: units2
+  , UnitsOf a ~ units1 :*: units3
+  , UnitsOf b ~ units2 :*: units3
+  , UnitsOf c ~ units1 :/: units2
   ) =>
   a ->
   b ->
@@ -429,9 +429,9 @@ infixl 7 .!/.!
 (./^) ::
   ( Division' a b
   , Units.Coercion (a ./. b) c
-  , Units a ~ units1
-  , Units b ~ Unitless :/: units2
-  , Units c ~ units1 :*: units2
+  , UnitsOf a ~ units1
+  , UnitsOf b ~ Unitless :/: units2
+  , UnitsOf c ~ units1 :*: units2
   ) =>
   a ->
   b ->
@@ -443,9 +443,9 @@ infixl 7 ./^
 (!?/.!?) ::
   ( Division' a b
   , Units.Coercion (a ./. b) c
-  , Units a ~ units1 :*: units2
-  , Units b ~ units1 :*: units2 :*: units3
-  , Units c ~ Unitless :/: units3
+  , UnitsOf a ~ units1 :*: units2
+  , UnitsOf b ~ units1 :*: units2 :*: units3
+  , UnitsOf c ~ Unitless :/: units3
   ) =>
   a ->
   b ->

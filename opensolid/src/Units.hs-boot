@@ -1,5 +1,5 @@
 module Units
-  ( Units
+  ( UnitsOf
   , Unitless
   , type (:*:)
   , type (:/:)
@@ -11,8 +11,8 @@ where
 
 import Basics
 
-type Units :: k -> Type
-type family Units a
+type UnitsOf :: k -> Type
+type family UnitsOf a
 
 data Unitless
 

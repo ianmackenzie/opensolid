@@ -47,9 +47,9 @@ type role Point3d phantom
 
 data Point3d (coordinateSystem :: CoordinateSystem) where
   Point3d ::
-    Qty (Units coordinateSystem) ->
-    Qty (Units coordinateSystem) ->
-    Qty (Units coordinateSystem) ->
+    Qty (UnitsOf coordinateSystem) ->
+    Qty (UnitsOf coordinateSystem) ->
+    Qty (UnitsOf coordinateSystem) ->
     Point3d coordinateSystem
 
 deriving instance Eq (Point3d (space @ units))
@@ -57,7 +57,7 @@ deriving instance Eq (Point3d (space @ units))
 deriving instance Show (Point3d (space @ units))
 
 instance HasUnits (Point3d (space @ units)) where
-  type Units (Point3d (space @ units)) = units
+  type UnitsOf (Point3d (space @ units)) = units
 
 instance
   space1 ~ space2 =>

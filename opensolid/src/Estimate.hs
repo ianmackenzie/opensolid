@@ -51,7 +51,7 @@ data Estimate units where
   Coerce :: Estimate units1 -> Estimate units2
 
 instance HasUnits (Estimate units) where
-  type Units (Estimate units) = units
+  type UnitsOf (Estimate units) = units
 
 instance Units.Coercion (Estimate unitsA) (Estimate unitsB) where
   coerce (Coerce estimate) = Coerce estimate

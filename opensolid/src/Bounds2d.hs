@@ -64,14 +64,14 @@ type role Bounds2d phantom
 
 data Bounds2d (coordinateSystem :: CoordinateSystem) where
   Bounds2d ::
-    Range (Units coordinateSystem) ->
-    Range (Units coordinateSystem) ->
+    Range (UnitsOf coordinateSystem) ->
+    Range (UnitsOf coordinateSystem) ->
     Bounds2d coordinateSystem
 
 deriving instance Show (Bounds2d (space @ units))
 
 instance HasUnits (Bounds2d (space @ units)) where
-  type Units (Bounds2d (space @ units)) = units
+  type UnitsOf (Bounds2d (space @ units)) = units
 
 instance
   space1 ~ space2 =>

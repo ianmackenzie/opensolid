@@ -40,7 +40,7 @@ newtype Direction3d (space :: Type) = Direction3d (Vector3d (space @ Unitless))
   deriving (Eq, Show)
 
 instance HasUnits (Direction3d space) where
-  type Units (Direction3d space) = Unitless
+  type UnitsOf (Direction3d space) = Unitless
 
 instance space1 ~ space2 => Units.Coercion (Direction3d space1) (Direction3d space2) where
   coerce = identity

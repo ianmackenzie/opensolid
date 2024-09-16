@@ -36,9 +36,9 @@ type role Bounds3d phantom
 
 data Bounds3d (coordinateSystem :: CoordinateSystem) where
   Bounds3d ::
-    Range (Units coordinateSystem) ->
-    Range (Units coordinateSystem) ->
-    Range (Units coordinateSystem) ->
+    Range (UnitsOf coordinateSystem) ->
+    Range (UnitsOf coordinateSystem) ->
+    Range (UnitsOf coordinateSystem) ->
     Bounds3d coordinateSystem
 
 deriving instance Show (Bounds3d (space @ units))
@@ -48,7 +48,7 @@ instance Bounds.Interface (Bounds3d (space @ units)) where
   intersection = intersection
 
 instance HasUnits (Bounds3d (space @ units)) where
-  type Units (Bounds3d (space @ units)) = units
+  type UnitsOf (Bounds3d (space @ units)) = units
 
 instance
   space1 ~ space2 =>

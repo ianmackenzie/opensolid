@@ -68,7 +68,7 @@ deriving instance Ord (Point2d (space @ units))
 deriving instance Show (Point2d (space @ units))
 
 instance HasUnits (Point2d (space @ units)) where
-  type Units (Point2d (space @ units)) = units
+  type UnitsOf (Point2d (space @ units)) = units
 
 instance
   space1 ~ space2 =>

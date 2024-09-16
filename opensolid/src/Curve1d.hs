@@ -95,7 +95,7 @@ data Curve1d units where
 deriving instance Show (Curve1d units)
 
 instance HasUnits (Curve1d units) where
-  type Units (Curve1d units) = units
+  type UnitsOf (Curve1d units) = units
 
 instance Units.Coercion (Curve1d unitsA) (Curve1d unitsB) where
   coerce (Constant value) = Constant (Units.coerce value)

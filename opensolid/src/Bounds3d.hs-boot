@@ -14,9 +14,9 @@ type role Bounds3d phantom
 
 data Bounds3d (coordinateSystem :: CoordinateSystem) where
   Bounds3d ::
-    Range (Units coordinateSystem) ->
-    Range (Units coordinateSystem) ->
-    Range (Units coordinateSystem) ->
+    Range (UnitsOf coordinateSystem) ->
+    Range (UnitsOf coordinateSystem) ->
+    Range (UnitsOf coordinateSystem) ->
     Bounds3d coordinateSystem
 
 instance Bounds.Interface (Bounds3d (space @ units))

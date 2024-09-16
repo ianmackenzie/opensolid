@@ -88,7 +88,7 @@ pattern Range low high <- Range_ low high
     Range a b = if a <= b then Range_ a b else Range_ b a
 
 instance HasUnits (Range units) where
-  type Units (Range units) = units
+  type UnitsOf (Range units) = units
 
 instance Units.Coercion (Range unitsA) (Range unitsB) where
   coerce = Data.Coerce.coerce

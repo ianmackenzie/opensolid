@@ -22,7 +22,7 @@ newtype DirectionBounds2d space
   deriving (Show)
 
 instance HasUnits (DirectionBounds2d space) where
-  type Units (DirectionBounds2d space) = Unitless
+  type UnitsOf (DirectionBounds2d space) = Unitless
 
 instance
   space1 ~ space2 =>

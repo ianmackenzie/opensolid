@@ -57,14 +57,14 @@ type role VectorBounds2d phantom
 
 data VectorBounds2d (coordinateSystem :: CoordinateSystem) where
   VectorBounds2d ::
-    Range (Units coordinateSystem) ->
-    Range (Units coordinateSystem) ->
+    Range (UnitsOf coordinateSystem) ->
+    Range (UnitsOf coordinateSystem) ->
     VectorBounds2d coordinateSystem
 
 deriving instance Show (VectorBounds2d (space @ units))
 
 instance HasUnits (VectorBounds2d (space @ units)) where
-  type Units (VectorBounds2d (space @ units)) = units
+  type UnitsOf (VectorBounds2d (space @ units)) = units
 
 instance
   space1 ~ space2 =>

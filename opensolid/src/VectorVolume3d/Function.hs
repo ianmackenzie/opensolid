@@ -79,7 +79,7 @@ data Function (coordinateSystem :: CoordinateSystem) where
 deriving instance Show (Function (space @ units))
 
 instance HasUnits (Function (space @ units)) where
-  type Units (Function (space @ units)) = units
+  type UnitsOf (Function (space @ units)) = units
 
 instance
   space1 ~ space2 =>

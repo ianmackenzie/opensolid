@@ -60,7 +60,7 @@ instance Interface (VectorCurve3d (space @ units)) (space @ units) where
   derivativeImpl = derivative
 
 instance HasUnits (VectorCurve3d (space @ units)) where
-  type Units (VectorCurve3d (space @ units)) = units
+  type UnitsOf (VectorCurve3d (space @ units)) = units
 
 instance
   space1 ~ space2 =>

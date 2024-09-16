@@ -130,7 +130,7 @@ data Curve2d (coordinateSystem :: CoordinateSystem) where
 deriving instance Show (Curve2d (space @ units))
 
 instance HasUnits (Curve2d (space @ units)) where
-  type Units (Curve2d (space @ units)) = units
+  type UnitsOf (Curve2d (space @ units)) = units
 
 instance
   space1 ~ space2 =>
@@ -196,9 +196,9 @@ class
   boundsImpl :: curve -> Bounds2d coordinateSystem
   transformByImpl :: Transform2d tag coordinateSystem -> curve -> Curve2d coordinateSystem
 
-  asLineImpl :: Tolerance (Units coordinateSystem) => curve -> Maybe (Line2d coordinateSystem)
+  asLineImpl :: Tolerance (UnitsOf coordinateSystem) => curve -> Maybe (Line2d coordinateSystem)
   asLineImpl _ = Nothing
-  asArcImpl :: Tolerance (Units coordinateSystem) => curve -> Maybe (Arc2d coordinateSystem)
+  asArcImpl :: Tolerance (UnitsOf coordinateSystem) => curve -> Maybe (Arc2d coordinateSystem)
   asArcImpl _ = Nothing
 
 instance Interface (Curve2d (space @ units)) (space @ units) where

@@ -118,7 +118,7 @@ data Function units where
 deriving instance Show (Function units)
 
 instance HasUnits (Function units) where
-  type Units (Function units) = units
+  type UnitsOf (Function units) = units
 
 instance Units.Coercion (Function unitsA) (Function unitsB) where
   coerce (Constant value) = Constant (Units.coerce value)
