@@ -30,7 +30,6 @@ import OpenSolid
 import Point3d (Point3d)
 import Point3d qualified
 import Qty qualified
-import Radians qualified
 import Range (Range)
 import Range qualified
 import Units qualified
@@ -295,8 +294,8 @@ derivative direction function =
     Quotient' f1 f2 -> (derivative direction f1 .*. f2 - f1 .*. derivative direction f2) .!/.! squared' f2
     Squared' f -> 2 * f .*. derivative direction f
     SquareRoot' f' -> derivative direction f' .!/! (2 * sqrt' f')
-    Sin f -> cos f * Radians.toUnitless (derivative direction f)
-    Cos f -> negate (sin f) * Radians.toUnitless (derivative direction f)
+    Sin f -> cos f * (derivative direction f / Angle.radian)
+    Cos f -> negate (sin f) * (derivative direction f / Angle.radian)
 
 zero :: Function units
 zero = Zero
