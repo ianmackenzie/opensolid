@@ -73,6 +73,7 @@ common config
     ImplicitParams
     LambdaCase
     LexicalNegation
+    MagicHash
     MultiWayIf
     OverloadedStrings
     PatternSynonyms
@@ -85,7 +86,6 @@ common config
     UndecidableInstances
     UndecidableSuperClasses
     ViewPatterns
-    MagicHash
 
 library
   import: config
@@ -163,8 +163,8 @@ library
     Plane3d
     Point2d
     Point3d
-    Polyline2d
     Polygon2d
+    Polyline2d
     Qty
     QuadraticSpline2d
     QuadraticSpline3d
