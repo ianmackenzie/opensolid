@@ -9,7 +9,7 @@ import Uv qualified
 
 type role Function nominal
 
-type Function :: Units -> Type
+type Function :: Type -> Type
 data Function units
 
 instance Show (Function units)

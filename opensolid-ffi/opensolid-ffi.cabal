@@ -37,6 +37,4 @@ foreign-library opensolid-ffi
     -Wcompat
     -Wno-missed-extra-shared-lib
 
-  default-extensions:
-    DataKinds
-    TemplateHaskell
+  default-extensions: TemplateHaskell

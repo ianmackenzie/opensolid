@@ -1,12 +1,12 @@
 module Qty (Qty (Qty)) where
 
 import Data.Kind (Type)
-import {-# SOURCE #-} Units (Units (..))
+import {-# SOURCE #-} Units (Unitless)
 import Prelude qualified
 
 type role Qty phantom
 
-type Qty :: Units -> Type
+type Qty :: Type -> Type
 newtype Qty units = Qty Prelude.Double
 
 instance Prelude.Num (Qty Unitless)

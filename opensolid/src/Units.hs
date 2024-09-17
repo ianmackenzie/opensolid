@@ -1,8 +1,9 @@
 module Units
-  ( Units (..)
-  , HasUnits (..)
+  ( HasUnits (..)
   , Coercion (coerce)
   , erase
+  , type (:*:)
+  , type (:/:)
   , Specialize
   , specialize
   , unspecialize
@@ -12,6 +13,7 @@ module Units
   , Product
   , Squared
   , Quotient
+  , Unitless
   , Radians
   , Meters
   , Seconds
@@ -26,21 +28,12 @@ import Basics
 import Data.Coerce qualified
 import Data.Kind (Constraint)
 import Data.List.NonEmpty (NonEmpty)
-import GHC.TypeLits (Symbol)
 import {-# SOURCE #-} Qty (Qty)
 import {-# SOURCE #-} Result (Result (Failure, Success))
 import {-# SOURCE #-} Sign (Sign)
 
-data Units
-  = Unitless
-  | Units Symbol
-  | Units :*: Units
-  | Units :/: Units
-
-infixl 7 :*:, :/:
-
 class HasUnits (a :: k) where
-  type UnitsOf a :: Units
+  type UnitsOf a
 
 instance HasUnits Int where
   type UnitsOf Int = Unitless
@@ -93,6 +86,18 @@ instance (Coercion a b, Data.Coerce.Coercible a b) => Coercion (List a) (List b)
 instance (Coercion a b, Data.Coerce.Coercible a b) => Coercion (NonEmpty a) (NonEmpty b) where
   coerce = Data.Coerce.coerce
 
+type role (:*:) phantom phantom
+
+data units1 :*: units2
+
+infixl 7 :*:
+
+type role (:/:) phantom phantom
+
+data units1 :/: units2
+
+infixl 7 :/:
+
 {-# INLINE erase #-}
 erase :: (Coercion a b, UnitsOf b ~ Unitless) => a -> b
 erase = coerce
@@ -132,21 +137,22 @@ rightAssociate ::
   b
 rightAssociate = coerce
 
-type Radians = 'Units "rad"
+data Unitless
 
-type Meters = 'Units "m"
+data Radians
 
-type Seconds = 'Units "s"
+data Meters
 
-type MetersPerSecond = 'Units "m/s"
+data Seconds
 
-type MetersPerSecondSquared = 'Units "m/s^2"
+data MetersPerSecond
 
-type SquareMeters = 'Units "m^2"
+data MetersPerSecondSquared
 
-type CubicMeters = 'Units "m^3"
+data SquareMeters
 
-type (.*.) :: Units -> Units -> Units
+data CubicMeters
+
 type family a .*. b where
   Unitless .*. Unitless = Unitless
   Unitless .*. units = units
@@ -161,7 +167,6 @@ type family a .*. b where
 
 infixl 7 .*.
 
-type (./.) :: Units -> Units -> Units
 type family a ./. b where
   Unitless ./. Unitless = Unitless
   units ./. Unitless = units
@@ -176,12 +181,10 @@ type family a ./. b where
 
 infixl 7 ./.
 
-type Sqr :: Units -> Units
 type family Sqr units = squaredUnits | squaredUnits -> units where
   Sqr Unitless = Unitless
   Sqr Meters = SquareMeters
 
-type Product :: Units -> Units -> Units -> Constraint
 type Product units1 units2 units3 =
   ( units1 .*. units2 ~ units3
   , units2 .*. units1 ~ units3
@@ -189,7 +192,6 @@ type Product units1 units2 units3 =
   , units3 ./. units2 ~ units1
   )
 
-type Quotient :: Units -> Units -> Units -> Constraint
 type Quotient units1 units2 units3 =
   ( units1 ./. units2 ~ units3
   , units2 .*. units3 ~ units1
@@ -197,13 +199,12 @@ type Quotient units1 units2 units3 =
   , units1 ./. units3 ~ units2
   )
 
-type Squared :: Units -> Units -> Constraint
 type Squared units1 units2 =
   ( Sqr units1 ~ units2
   , Product units1 units1 units2
   )
 
-class Specialize (genericUnits :: Units) (specificUnits :: Units) | genericUnits -> specificUnits
+class Specialize genericUnits specificUnits | genericUnits -> specificUnits
 
 instance Product units1 units2 units3 => Specialize (units1 :*: units2) units3
 

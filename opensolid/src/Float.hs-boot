@@ -9,7 +9,7 @@ where
 
 import Basics
 import {-# SOURCE #-} Qty (Qty)
-import {-# SOURCE #-} Units (Units (..))
+import {-# SOURCE #-} Units (Unitless)
 import Prelude qualified
 
 type Float = Qty Unitless

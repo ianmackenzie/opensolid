@@ -48,7 +48,6 @@ executable sandbox
 
   default-extensions:
     BlockArguments
-    DataKinds
     DisambiguateRecordFields
     GADTs
     LexicalNegation

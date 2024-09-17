@@ -50,7 +50,7 @@ import Random.Internal qualified as Random
 import {-# SOURCE #-} Result (Result)
 import Sign (Sign)
 import Text.Parse qualified
-import Units (Units (..))
+import Units (Unitless)
 import Prelude qualified
 
 type Float = Qty Unitless

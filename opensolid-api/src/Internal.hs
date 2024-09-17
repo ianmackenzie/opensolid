@@ -227,7 +227,7 @@ ffiFunctionInfo returnType retExp argNames bindStmts = Prelude.do
 fixupType :: TH.Type -> TH.Type
 -- Replace 'units', 'units1', 'units2', `originUnits` etc. with 'Unitless' in all types
 -- since the FFI only deals with unitless values
-fixupType (TH.VarT name) | Text.contains "units" (Text.toLower (Text.pack (TH.nameBase name))) = TH.ConT 'Unitless
+fixupType (TH.VarT name) | Text.contains "units" (Text.toLower (Text.pack (TH.nameBase name))) = TH.ConT ''Unitless
 -- Strip 'forall' from function types
 -- (shouldn't be needed since these are generally units-related...)
 fixupType (TH.ForallT _ _ functionType) = fixupType functionType
