@@ -70,13 +70,13 @@ data NonConstant input output where
 
 deriving instance Show (NonConstant input output)
 
-instance Eq (NonConstant input output) where (==) = eqNC
+instance Eq (NonConstant input output) where (==) = equalNonConstants
 
-eqNC :: NonConstant input a -> NonConstant input b -> Bool
-eqNC Input Input = True
-eqNC (NonInput x) (NonInput y) = eqNI x y
-eqNC Input NonInput{} = False
-eqNC NonInput{} Input = False
+equalNonConstants :: NonConstant input a -> NonConstant input b -> Bool
+equalNonConstants Input Input = True
+equalNonConstants (NonInput x) (NonInput y) = equalNonInputs x y
+equalNonConstants Input NonInput{} = False
+equalNonConstants NonInput{} Input = False
 
 data NonInput input output where
   Unary ::
@@ -93,13 +93,15 @@ data NonInput input output where
 
 deriving instance Show (NonInput input output)
 
-eqNI :: NonInput input a -> NonInput input b -> Bool
-eqNI (Unary op1 x1) (Unary op2 x2) = Typeable.equal op1 op2 && eqNC x1 x2
-eqNI (Binary op1 x1 y1) (Binary op2 x2 y2) = Typeable.equal op1 op2 && eqNC x1 x2 && eqNC y1 y2
-eqNI Unary{} Binary{} = False
-eqNI Binary{} Unary{} = False
+equalNonInputs :: NonInput input a -> NonInput input b -> Bool
+equalNonInputs (Unary op1 x1) (Unary op2 x2) =
+  Typeable.equal op1 op2 && equalNonConstants x1 x2
+equalNonInputs (Binary op1 x1 y1) (Binary op2 x2 y2) =
+  Typeable.equal op1 op2 && equalNonConstants x1 x2 && equalNonConstants y1 y2
+equalNonInputs Unary{} Binary{} = False
+equalNonInputs Binary{} Unary{} = False
 
-instance Eq (NonInput input output) where (==) = eqNI
+instance Eq (NonInput input output) where (==) = equalNonInputs
 
 input :: Ast input input
 input = NonConstant Input
@@ -191,7 +193,7 @@ data Evaluation input where
 deriving instance Show (Evaluation input)
 
 instance Eq (Evaluation input) where
-  Evaluation nonInput1 == Evaluation nonInput2 = eqNI nonInput1 nonInput2
+  Evaluation nonInput1 == Evaluation nonInput2 = equalNonInputs nonInput1 nonInput2
 
 newtype Code input = Code (forall state. input -> STArray state Int Any -> ST state ())
 
