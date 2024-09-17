@@ -1,6 +1,5 @@
 module Jit
   ( Value
-  , Expr (..)
   , UnaryOp (..)
   , BinaryOp (..)
   , Ast
@@ -28,14 +27,6 @@ import Unsafe.Coerce (unsafeCoerce)
 import Prelude qualified
 
 type Value value = (Eq value, Typeable value)
-
-class
-  Value expr =>
-  Expr expr input output
-    | expr -> input
-    , expr -> output
-  where
-  toAst :: expr -> Ast input output
 
 class
   (Value op, Show op, Value input, Show input, Value output) =>
@@ -112,27 +103,15 @@ constant = Constant
 call :: UnaryOp op input output => op -> Ast input output
 call op = NonConstant (NonInput (Unary op Input))
 
-unary :: (UnaryOp op arg output, Expr expr input arg) => op -> expr -> Ast input output
-unary op expr = case toAst expr of
-  Constant value -> Constant (evalUnary op value)
-  NonConstant nonConstant -> NonConstant (NonInput (Unary op nonConstant))
+unary :: UnaryOp op arg output => op -> Ast input arg -> Ast input output
+unary op (Constant arg) = Constant (evalUnary op arg)
+unary op (NonConstant arg) = NonConstant (NonInput (Unary op arg))
 
-binary ::
-  ( BinaryOp op lhs rhs output
-  , Expr expr1 input lhs
-  , Expr expr2 input rhs
-  ) =>
-  op ->
-  expr1 ->
-  expr2 ->
-  Ast input output
-binary op arg1 arg2 = applyBinary op (toAst arg1) (toAst arg2)
-
-applyBinary :: BinaryOp op lhs rhs output => op -> Ast input lhs -> Ast input rhs -> Ast input output
-applyBinary op (Constant lhs) (Constant rhs) = Constant (evalBinary op lhs rhs)
-applyBinary op (Constant lhs) (NonConstant rhs) = NonConstant (NonInput (Unary (ConstantLhs op lhs) rhs))
-applyBinary op (NonConstant lhs) (Constant rhs) = NonConstant (NonInput (Unary (ConstantRhs op rhs) lhs))
-applyBinary op (NonConstant lhs) (NonConstant rhs) = NonConstant (NonInput (Binary op lhs rhs))
+binary :: BinaryOp op lhs rhs output => op -> Ast input lhs -> Ast input rhs -> Ast input output
+binary op (Constant lhs) (Constant rhs) = Constant (evalBinary op lhs rhs)
+binary op (Constant lhs) (NonConstant rhs) = NonConstant (NonInput (Unary (ConstantLhs op lhs) rhs))
+binary op (NonConstant lhs) (Constant rhs) = NonConstant (NonInput (Unary (ConstantRhs op rhs) lhs))
+binary op (NonConstant lhs) (NonConstant rhs) = NonConstant (NonInput (Binary op lhs rhs))
 
 data ConstantLhs rhs output where
   ConstantLhs :: BinaryOp op lhs rhs output => op -> lhs -> ConstantLhs rhs output
@@ -169,7 +148,7 @@ instance
   Composition (Ast input inner1) (Ast inner2 output) (Ast input output)
   where
   Constant value . _ = Constant value
-  outer . Constant value = Constant (compileAst outer value)
+  outer . Constant value = Constant (compile outer $ value)
   NonConstant x . NonConstant y = NonConstant (x . y)
 
 instance
@@ -268,11 +247,8 @@ evalNonInput nonInput computation = do
               MArray.writeArray locals outputIndex output
         (Computation updatedEvaluations updatedCode, outputIndex)
 
-compile :: Expr expr input output => expr -> (input -> output)
-compile = toAst >> compileAst
-
-compileAst :: Ast input output -> (input -> output)
-compileAst ast = case ast of
+compile :: Ast input output -> (input -> output)
+compile ast = case ast of
   Constant value -> always value
   NonConstant nonConstant -> compileNonConstant nonConstant
 

@@ -604,22 +604,21 @@ data SqrtOp = SqrtOp deriving (Eq, Show)
 instance Jit.UnaryOp SqrtOp Float Float where
   evalUnary SqrtOp x = Float.sqrt x
 
-instance Jit.Expr Expression Float Float where
-  toAst :: Expression -> Jit.Ast Float Float
-  toAst expression = case expression of
-    Constant value -> Jit.constant value
-    Parameter -> Jit.input
-    Sum x y -> Jit.binary SumOp x y
-    Product x y -> Jit.binary ProductOp x y
-    Quotient x y -> Jit.binary QuotientOp x y
-    Sqrt x -> Jit.unary SqrtOp x
+toAst :: Expression -> Jit.Ast Float Float
+toAst expression = case expression of
+  Constant value -> Jit.constant value
+  Parameter -> Jit.input
+  Sum x y -> Jit.binary SumOp (toAst x) (toAst y)
+  Product x y -> Jit.binary ProductOp (toAst x) (toAst y)
+  Quotient x y -> Jit.binary QuotientOp (toAst x) (toAst y)
+  Sqrt x -> Jit.unary SqrtOp (toAst x)
 
 testJit :: IO ()
 testJit = IO.do
   let x = Parameter
   let xSquared = Product x x
   let expr = Quotient xSquared (Sum (Constant 1.0) xSquared)
-  let f = Jit.compile expr
+  let f = Jit.compile (toAst expr)
   log "evaluated" (f 2.0)
 
 main :: IO ()
