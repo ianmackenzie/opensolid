@@ -30,6 +30,7 @@ module Basics
   , HasCallStack
   , withFrozenCallStack
   , Typeable
+  , Known
   )
 where
 
@@ -103,3 +104,5 @@ identity value = value
 {-# INLINE always #-}
 always :: a -> b -> a
 always value _ = value
+
+type Known a = (Eq a, Show a, Typeable a)
