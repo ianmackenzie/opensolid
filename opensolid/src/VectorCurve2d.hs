@@ -78,7 +78,6 @@ import VectorCurve2d.Direction qualified
 import VectorCurve2d.Zeros qualified as Zeros
 
 class
-  Show curve =>
   Interface curve (coordinateSystem :: CoordinateSystem)
     | curve -> coordinateSystem
   where
@@ -92,13 +91,14 @@ class
 
 data VectorCurve2d (coordinateSystem :: CoordinateSystem) where
   VectorCurve2d ::
-    Interface curve (space @ units) =>
+    (Known curve, Interface curve (space @ units)) =>
     curve ->
     VectorCurve2d (space @ units)
   Constant ::
     Vector2d (space @ units) ->
     VectorCurve2d (space @ units)
   Coerce ::
+    (Known units1, Known units2) =>
     VectorCurve2d (space @ units1) ->
     VectorCurve2d (space @ units2)
   Reversed ::
@@ -120,18 +120,22 @@ data VectorCurve2d (coordinateSystem :: CoordinateSystem) where
     VectorCurve2d (space @ units) ->
     VectorCurve2d (space @ units)
   Product1d2d' ::
+    (Known units1, Known units2) =>
     Curve1d units1 ->
     VectorCurve2d (space @ units2) ->
     VectorCurve2d (space @ (units1 :*: units2))
   Product2d1d' ::
+    (Known units1, Known units2) =>
     VectorCurve2d (space @ units1) ->
     Curve1d units2 ->
     VectorCurve2d (space @ (units1 :*: units2))
   Quotient' ::
+    (Known units1, Known units2) =>
     VectorCurve2d (space @ units1) ->
     Curve1d units2 ->
     VectorCurve2d (space @ (units1 :/: units2))
   PlaceInBasis ::
+    (Known global, Known local) =>
     Basis2d global (Defines local) ->
     VectorCurve2d (local @ units) ->
     VectorCurve2d (global @ units)
@@ -160,9 +164,48 @@ data VectorCurve2d (coordinateSystem :: CoordinateSystem) where
     NonEmpty (Vector2d (space @ units)) ->
     VectorCurve2d (space @ units)
   Transformed ::
+    Known space =>
     Transform2d.Affine (space @ Unitless) ->
-    VectorCurve2d (space @ units2) ->
-    VectorCurve2d (space @ units2)
+    VectorCurve2d (space @ units) ->
+    VectorCurve2d (space @ units)
+
+instance (Known space, Known units) => Eq (VectorCurve2d (space @ units)) where
+  VectorCurve2d c1 == VectorCurve2d c2 = Typeable.equal c1 c2
+  VectorCurve2d{} == _ = False
+  Constant v1 == Constant v2 = v1 == v2
+  Constant{} == _ = False
+  Coerce c1 == Coerce c2 = Typeable.equal c1 c2
+  Coerce{} == _ = False
+  Reversed c1 == Reversed c2 = c1 == c2
+  Reversed{} == _ = False
+  XY x1 y1 == XY x2 y2 = x1 == x2 && y1 == y2
+  XY{} == _ = False
+  Negated c1 == Negated c2 = c1 == c2
+  Negated{} == _ = False
+  Sum lhs1 rhs1 == Sum lhs2 rhs2 = lhs1 == lhs2 && rhs1 == rhs2
+  Sum{} == _ = False
+  Difference lhs1 rhs1 == Difference lhs2 rhs2 = lhs1 == lhs2 && rhs1 == rhs2
+  Difference{} == _ = False
+  Product1d2d' lhs1 rhs1 == Product1d2d' lhs2 rhs2 = lhs1 == lhs2 && rhs1 == rhs2
+  Product1d2d'{} == _ = False
+  Product2d1d' lhs1 rhs1 == Product2d1d' lhs2 rhs2 = lhs1 == lhs2 && rhs1 == rhs2
+  Product2d1d'{} == _ = False
+  Quotient' lhs1 rhs1 == Quotient' lhs2 rhs2 = lhs1 == lhs2 && rhs1 == rhs2
+  Quotient'{} == _ = False
+  PlaceInBasis b1 c1 == PlaceInBasis b2 c2 = Typeable.equal b1 b2 && Typeable.equal c1 c2
+  PlaceInBasis{} == _ = False
+  Line a1 b1 == Line a2 b2 = a1 == a2 && b1 == b2
+  Line{} == _ = False
+  Arc x1 y1 a1 b1 == Arc x2 y2 a2 b2 = x1 == x2 && y1 == y2 && a1 == a2 && b1 == b2
+  Arc{} == _ = False
+  QuadraticSpline a1 b1 c1 == QuadraticSpline a2 b2 c2 = a1 == a2 && b1 == b2 && c1 == c2
+  QuadraticSpline{} == _ = False
+  CubicSpline a1 b1 c1 d1 == CubicSpline a2 b2 c2 d2 = a1 == a2 && b1 == b2 && c1 == c2 && d1 == d2
+  CubicSpline{} == _ = False
+  BezierCurve ps1 == BezierCurve ps2 = ps1 == ps2
+  BezierCurve{} == _ = False
+  Transformed t1 c1 == Transformed t2 c2 = t1 == t2 && c1 == c2
+  Transformed{} == _ = False
 
 deriving instance Show (VectorCurve2d (space @ units))
 
@@ -579,7 +622,7 @@ transformBy transform curve = do
       BezierCurve (NonEmpty.map (Vector2d.transformBy t) controlVectors)
     Transformed existing c -> Transformed (existing >> t) c
 
-new :: Interface curve (space @ units) => curve -> VectorCurve2d (space @ units)
+new :: (Known curve, Interface curve (space @ units)) => curve -> VectorCurve2d (space @ units)
 new = VectorCurve2d
 
 zero :: VectorCurve2d (space @ units)

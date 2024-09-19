@@ -21,7 +21,6 @@ import Vector2d (Vector2d)
 import VectorBounds2d (VectorBounds2d)
 
 class
-  Show curve =>
   Interface curve (coordinateSystem :: CoordinateSystem)
     | curve -> coordinateSystem
   where
@@ -85,7 +84,7 @@ instance
     (Curve1d units3)
 
 constant :: Vector2d (space @ units) -> VectorCurve2d (space @ units)
-new :: Interface curve (space @ units) => curve -> VectorCurve2d (space @ units)
+new :: (Known curve, Interface curve (space @ units)) => curve -> VectorCurve2d (space @ units)
 evaluateAt :: Float -> VectorCurve2d (space @ units) -> Vector2d (space @ units)
 segmentBounds :: Range Unitless -> VectorCurve2d (space @ units) -> VectorBounds2d (space @ units)
 derivative :: VectorCurve2d (space @ units) -> VectorCurve2d (space @ units)
