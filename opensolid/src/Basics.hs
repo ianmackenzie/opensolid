@@ -29,6 +29,7 @@ module Basics
   , type (~)
   , HasCallStack
   , withFrozenCallStack
+  , Typeable
   )
 where
 
@@ -37,6 +38,7 @@ import Data.Kind (Type)
 import Data.Text (Text)
 import Data.Text qualified
 import Data.Type.Equality (type (~))
+import Data.Typeable (Typeable)
 import GHC.Stack (HasCallStack, withFrozenCallStack)
 import Prelude
   ( Bool (False, True)

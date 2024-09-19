@@ -1,7 +1,7 @@
 module Typeable (Typeable, equal) where
 
 import Basics
-import Data.Typeable (Typeable, (:~:) (Refl))
+import Data.Typeable ((:~:) (Refl))
 import Data.Typeable qualified
 
 equal :: forall a b. (Eq a, Eq b, Typeable a, Typeable b) => a -> b -> Bool
