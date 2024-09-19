@@ -41,16 +41,17 @@ import Range qualified
 import Solve1d qualified
 import Stream (Stream)
 import Stream qualified
+import Typeable qualified
 import Units qualified
 
-class Show curve => Interface curve units | curve -> units where
+class Interface curve units | curve -> units where
   pointOnImpl :: curve -> Float -> Qty units
   segmentBoundsImpl :: curve -> Range Unitless -> Range units
   derivativeImpl :: curve -> Curve1d units
 
 data Curve1d units where
   Curve1d ::
-    Interface curve units =>
+    (Known curve, Interface curve units) =>
     curve ->
     Curve1d units
   Constant ::
@@ -69,17 +70,21 @@ data Curve1d units where
     Curve1d units ->
     Curve1d units
   Product' ::
+    (Known units1, Known units2) =>
     Curve1d units1 ->
     Curve1d units2 ->
     Curve1d (units1 :*: units2)
   Quotient' ::
+    (Known units1, Known units2) =>
     Curve1d units1 ->
     Curve1d units2 ->
     Curve1d (units1 :/: units2)
   Squared' ::
+    Known units =>
     Curve1d units ->
     Curve1d (units :*: units)
   SquareRoot' ::
+    Known (units :*: units) =>
     Curve1d (units :*: units) ->
     Curve1d units
   Sin ::
@@ -89,8 +94,37 @@ data Curve1d units where
     Curve1d Radians ->
     Curve1d Unitless
   Coerce ::
+    (Known units1, Known units2) =>
     Curve1d units1 ->
     Curve1d units2
+
+instance Known units => Eq (Curve1d units) where
+  Curve1d c1 == Curve1d c2 = Typeable.equal c1 c2
+  Curve1d{} == _ = False
+  Constant x == Constant y = x == y
+  Constant{} == _ = False
+  Parameter == Parameter = True
+  Parameter{} == _ = False
+  Negated c1 == Negated c2 = c1 == c2
+  Negated{} == _ = False
+  Sum lhs1 rhs1 == Sum lhs2 rhs2 = lhs1 == lhs2 && rhs1 == rhs2
+  Sum{} == _ = False
+  Difference lhs1 rhs1 == Difference lhs2 rhs2 = lhs1 == lhs2 && rhs1 == rhs2
+  Difference{} == _ = False
+  Product' lhs1 rhs1 == Product' lhs2 rhs2 = Typeable.equal lhs1 lhs2 && Typeable.equal rhs1 rhs2
+  Product'{} == _ = False
+  Quotient' lhs1 rhs1 == Quotient' lhs2 rhs2 = Typeable.equal lhs1 lhs2 && Typeable.equal rhs1 rhs2
+  Quotient'{} == _ = False
+  Squared' c1 == Squared' c2 = c1 == c2
+  Squared'{} == _ = False
+  SquareRoot' c1 == SquareRoot' c2 = c1 == c2
+  SquareRoot'{} == _ = False
+  Sin c1 == Sin c2 = c1 == c2
+  Sin{} == _ = False
+  Cos c1 == Cos c2 = c1 == c2
+  Cos{} == _ = False
+  Coerce c1 == Coerce c2 = Typeable.equal c1 c2
+  Coerce{} == _ = False
 
 deriving instance Show (Curve1d units)
 
@@ -128,7 +162,7 @@ instance Interface (Curve1d units) units where
   segmentBoundsImpl = segmentBounds
   derivativeImpl = derivative
 
-new :: Interface curve units => curve -> Curve1d units
+new :: (Known curve, Interface curve units) => curve -> Curve1d units
 new = Curve1d
 
 zero :: Curve1d units
