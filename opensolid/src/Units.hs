@@ -88,13 +88,13 @@ instance (Coercion a b, Data.Coerce.Coercible a b) => Coercion (NonEmpty a) (Non
 
 type role (:*:) phantom phantom
 
-data units1 :*: units2
+data units1 :*: units2 deriving (Eq, Show)
 
 infixl 7 :*:
 
 type role (:/:) phantom phantom
 
-data units1 :/: units2
+data units1 :/: units2 deriving (Eq, Show)
 
 infixl 7 :/:
 
@@ -137,21 +137,21 @@ rightAssociate ::
   b
 rightAssociate = coerce
 
-data Unitless
+data Unitless deriving (Eq, Show)
 
-data Radians
+data Radians deriving (Eq, Show)
 
-data Meters
+data Meters deriving (Eq, Show)
 
-data Seconds
+data Seconds deriving (Eq, Show)
 
-data MetersPerSecond
+data MetersPerSecond deriving (Eq, Show)
 
-data MetersPerSecondSquared
+data MetersPerSecondSquared deriving (Eq, Show)
 
-data SquareMeters
+data SquareMeters deriving (Eq, Show)
 
-data CubicMeters
+data CubicMeters deriving (Eq, Show)
 
 type family a .*. b where
   Unitless .*. Unitless = Unitless
