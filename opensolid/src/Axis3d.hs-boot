@@ -10,7 +10,7 @@ import {-# SOURCE #-} Direction3d (Direction3d)
 import OpenSolid
 import {-# SOURCE #-} Point3d (Point3d)
 
-type role Axis3d phantom
+type role Axis3d nominal
 
 data Axis3d (coordinateSystem :: CoordinateSystem)
 

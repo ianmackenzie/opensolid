@@ -12,7 +12,6 @@ module Axis3d
   )
 where
 
-import CoordinateSystem (Space)
 import Direction3d (Direction3d)
 import Direction3d qualified
 import OpenSolid
@@ -21,13 +20,11 @@ import Point3d qualified
 import Transform qualified
 import Transform3d (Transform3d)
 
-type role Axis3d phantom
-
 data Axis3d (coordinateSystem :: CoordinateSystem) where
   Axis3d ::
-    Point3d coordinateSystem ->
-    Direction3d (Space coordinateSystem) ->
-    Axis3d coordinateSystem
+    Point3d (space @ units) ->
+    Direction3d space ->
+    Axis3d (space @ units)
 
 deriving instance Eq (Axis3d (space @ units))
 
