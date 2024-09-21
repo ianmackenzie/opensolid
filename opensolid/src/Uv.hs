@@ -21,7 +21,7 @@ import Range qualified
 
 data Parameter = U | V deriving (Eq, Show, Ord)
 
-data Space
+data Space deriving (Eq, Show)
 
 type Coordinates = Space @ Unitless
 
