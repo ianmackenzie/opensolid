@@ -52,12 +52,12 @@ import VectorCurve2d qualified
 
 data Arc (coordinateSystem :: CoordinateSystem) where
   Arc ::
-    Point2d coordinateSystem ->
-    Vector2d coordinateSystem ->
-    Vector2d coordinateSystem ->
+    Point2d (space @ units) ->
+    Vector2d (space @ units) ->
+    Vector2d (space @ units) ->
     Angle ->
     Angle ->
-    Arc coordinateSystem
+    Arc (space @ units)
 
 deriving instance Show (Arc (space @ units))
 
