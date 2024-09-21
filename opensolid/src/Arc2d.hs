@@ -28,10 +28,8 @@ where
 
 import Angle qualified
 import Arithmetic.Unboxed
-import CoordinateSystem (Space)
 import Curve2d (Curve2d)
 import Curve2d qualified
-import Data.Coerce qualified
 import Direction2d (Direction2d)
 import Direction2d qualified
 import Float qualified
@@ -243,19 +241,19 @@ generic ::
   Curve2d (space @ units)
 generic p0 v1 v2 a b = Curve2d.new (Arc p0 v1 v2 a b)
 
-type role Arc2d phantom
+type role Arc2d nominal
 
 data Arc2d (coordinateSystem :: CoordinateSystem) where
   Arc2d ::
-    { centerPoint :: Point2d coordinateSystem
-    , majorDirection :: Direction2d (Space coordinateSystem)
-    , minorDirection :: Direction2d (Space coordinateSystem)
-    , majorRadius :: Qty (UnitsOf coordinateSystem)
-    , minorRadius :: Qty (UnitsOf coordinateSystem)
+    { centerPoint :: Point2d (space @ units)
+    , majorDirection :: Direction2d space
+    , minorDirection :: Direction2d space
+    , majorRadius :: Qty units
+    , minorRadius :: Qty units
     , startAngle :: Angle
     , endAngle :: Angle
     } ->
-    Arc2d coordinateSystem
+    Arc2d (space @ units)
 
 instance HasUnits (Arc2d (space @ units)) where
   type UnitsOf (Arc2d (space @ units)) = units
@@ -264,7 +262,12 @@ instance
   space1 ~ space2 =>
   Units.Coercion (Arc2d (space1 @ unitsA)) (Arc2d (space2 @ unitsB))
   where
-  coerce = Data.Coerce.coerce
+  coerce arc =
+    arc
+      { centerPoint = Units.coerce (centerPoint arc)
+      , majorRadius = Units.coerce (majorRadius arc)
+      , minorRadius = Units.coerce (minorRadius arc)
+      }
 
 placeIn ::
   Frame2d (global @ units) (Defines local) ->

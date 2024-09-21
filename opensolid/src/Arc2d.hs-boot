@@ -4,7 +4,7 @@ import Frame2d (Frame2d)
 import OpenSolid
 import Units qualified
 
-type role Arc2d phantom
+type role Arc2d nominal
 
 data Arc2d (coordinateSystem :: CoordinateSystem)
 
