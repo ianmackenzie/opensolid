@@ -36,7 +36,7 @@ data Frame2d coordinateSystem defines where
     } ->
     Frame2d (space @ units) defines
 
-deriving instance Show (Frame2d coordinateSystem defines)
+deriving instance Show (Frame2d (space @ units) defines)
 
 coerce :: Frame2d (space @ units) defines1 -> Frame2d (space @ units) defines2
 coerce Frame2d{originPoint, basis} = Frame2d{originPoint, basis = Basis2d.coerce basis}
