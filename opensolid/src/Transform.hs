@@ -11,13 +11,13 @@ where
 
 import OpenSolid
 
-data Rigid = Rigid
+data Rigid = Rigid deriving (Eq, Show)
 
-data Orthonormal = Orthonormal
+data Orthonormal = Orthonormal deriving (Eq, Show)
 
-data Uniform = Uniform
+data Uniform = Uniform deriving (Eq, Show)
 
-data Affine = Affine
+data Affine = Affine deriving (Eq, Show)
 
 class IsRigid tag
 
