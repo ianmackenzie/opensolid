@@ -52,7 +52,7 @@ class Addition a b c | a b -> c where
 
 infixl 6 +
 
-data Sum a b = Sum a b deriving (Show)
+data Sum a b = Sum a b deriving (Eq, Show)
 
 class Subtraction a b c | a b -> c where
   (-) :: a -> b -> c
@@ -62,7 +62,7 @@ infixl 6 -
 subtract :: Subtraction a b c => b -> a -> c
 subtract b a = a - b
 
-data Difference a b = Difference a b deriving (Show)
+data Difference a b = Difference a b deriving (Eq, Show)
 
 class Multiplication' b a => Multiplication' a b where
   type a .*. b
@@ -85,7 +85,7 @@ class
 
 infixl 7 *
 
-data Product a b = Product a b deriving (Show)
+data Product a b = Product a b deriving (Eq, Show)
 
 class Division' a b where
   type a ./. b
@@ -107,7 +107,7 @@ class
 
 infixl 7 /
 
-data Quotient a b = Quotient a b deriving (Show)
+data Quotient a b = Quotient a b deriving (Eq, Show)
 
 class DotMultiplication' a b where
   type a .<>. b
