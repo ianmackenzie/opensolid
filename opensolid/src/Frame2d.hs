@@ -36,6 +36,8 @@ data Frame2d coordinateSystem defines where
     } ->
     Frame2d (space @ units) defines
 
+deriving instance Eq (Frame2d (space @ units) defines)
+
 deriving instance Show (Frame2d (space @ units) defines)
 
 coerce :: Frame2d (space @ units) defines1 -> Frame2d (space @ units) defines2
