@@ -16,6 +16,8 @@ type role Point2d phantom
 
 data Point2d (coordinateSystem :: CoordinateSystem)
 
+instance Eq (Point2d (space @ units))
+
 instance Show (Point2d (space @ units))
 
 instance HasUnits (Point2d (space @ units))
@@ -50,6 +52,6 @@ instance
     (Point2d (space1 @ units1))
 
 origin :: Point2d (space @ units)
-xy :: Qty units -> Qty units -> Point2d (space @ units)
+xy :: forall space units. Qty units -> Qty units -> Point2d (space @ units)
 coordinates :: Point2d (space @ units) -> (Qty units, Qty units)
 transformBy :: Transform2d tag (space @ units) -> Point2d (space @ units) -> Point2d (space @ units)

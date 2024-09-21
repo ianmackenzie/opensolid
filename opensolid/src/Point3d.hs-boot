@@ -16,6 +16,8 @@ type role Point3d phantom
 
 data Point3d (coordinateSystem :: CoordinateSystem)
 
+instance Eq (Point3d (space @ units))
+
 instance Show (Point3d (space @ units))
 
 instance HasUnits (Point3d (space @ units))
