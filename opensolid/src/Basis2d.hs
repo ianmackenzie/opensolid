@@ -33,6 +33,8 @@ data Basis2d space defines where
     } ->
     Basis2d space defines
 
+deriving instance Eq (Basis2d space defines)
+
 deriving instance Show (Basis2d space defines)
 
 coerce :: Basis2d space defines1 -> Basis2d space defines2

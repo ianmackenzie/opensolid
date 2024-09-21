@@ -43,6 +43,8 @@ data Basis3d space defines where
     } ->
     Basis3d space defines
 
+deriving instance Eq (Basis3d space defines)
+
 deriving instance Show (Basis3d space defines)
 
 coerce :: Basis3d space defines1 -> Basis3d space defines2
