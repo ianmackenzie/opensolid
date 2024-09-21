@@ -273,12 +273,9 @@ placeIn ::
   Frame2d (global @ units) (Defines local) ->
   Arc2d (local @ units) ->
   Arc2d (global @ units)
-placeIn frame (Arc2d p0 d1 d2 r1 r2 a b) =
-  Arc2d
-    (Point2d.placeIn frame p0)
-    (Direction2d.placeIn frame d1)
-    (Direction2d.placeIn frame d2)
-    r1
-    r2
-    a
-    b
+placeIn frame arc =
+  arc
+    { centerPoint = Point2d.placeIn frame (centerPoint arc)
+    , majorDirection = Direction2d.placeIn frame (majorDirection arc)
+    , minorDirection = Direction2d.placeIn frame (minorDirection arc)
+    }
