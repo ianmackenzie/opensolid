@@ -21,7 +21,6 @@ import GHC.Exts (Any)
 import List qualified
 import OpenSolid
 import Text qualified
-import Typeable (Typeable)
 import Typeable qualified
 import Unsafe.Coerce (unsafeCoerce)
 import Prelude qualified
