@@ -62,6 +62,8 @@ data Transform3d tag (coordinateSystem :: CoordinateSystem) where
     Vector3d (space @ Unitless) ->
     Transform3d tag (space @ units)
 
+deriving instance Eq (Transform3d tag (space @ units))
+
 deriving instance Show (Transform3d tag (space @ units))
 
 {-# COMPLETE Transform3d #-}

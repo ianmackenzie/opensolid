@@ -61,6 +61,8 @@ data Transform2d tag (coordinateSystem :: CoordinateSystem) where
     Vector2d (space @ Unitless) ->
     Transform2d tag (space @ units)
 
+deriving instance Eq (Transform2d tag (space @ units))
+
 deriving instance Show (Transform2d tag (space @ units))
 
 {-# COMPLETE Transform2d #-}
