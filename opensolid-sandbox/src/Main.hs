@@ -540,7 +540,7 @@ testCurveMedialAxis = IO.do
         let segmentTangent1 = tangent1 . t1Curve
         let segmentNormal1 =
               DirectionCurve2d.unwrap segmentTangent1
-                |> VectorCurve2d.transformBy (Transform2d.rotateAround Point2d.origin Angle.quarterTurn)
+                |> VectorCurve2d.rotateBy Angle.quarterTurn
         let segmentDisplacement = segmentCurve2 - segmentCurve1
         let segmentRadius = (segmentDisplacement <> segmentDisplacement) / (2.0 * (segmentTangent1 >< segmentDisplacement))
         let segmentMedialAxis = segmentCurve1 + segmentRadius * segmentNormal1

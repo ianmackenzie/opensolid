@@ -38,6 +38,7 @@ module VectorCurve2d
   , placeInBasis
   , relativeToBasis
   , transformBy
+  , rotateBy
   )
 where
 
@@ -621,6 +622,13 @@ transformBy transform curve = do
     BezierCurve controlVectors ->
       BezierCurve (NonEmpty.map (Vector2d.transformBy t) controlVectors)
     Transformed existing c -> Transformed (existing >> t) c
+
+rotateBy ::
+  forall space units.
+  Angle ->
+  VectorCurve2d (space @ units) ->
+  VectorCurve2d (space @ units)
+rotateBy angle = transformBy (Transform2d.rotateAround (Point2d.origin @space @units) angle)
 
 new :: (Known curve, Interface curve (space @ units)) => curve -> VectorCurve2d (space @ units)
 new = VectorCurve2d
