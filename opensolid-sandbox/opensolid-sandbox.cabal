@@ -55,3 +55,4 @@ executable sandbox
     PatternSynonyms
     QualifiedDo
     RebindableSyntax
+    TypeApplications
