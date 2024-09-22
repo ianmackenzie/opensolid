@@ -154,7 +154,7 @@ y (Qty# py#) = Point2d# 0.0## py#
 along :: Axis2d (space @ units) -> Qty units -> Point2d (space @ units)
 along axis distance = Axis2d.originPoint axis + distance * Axis2d.direction axis
 
-xy :: Qty units -> Qty units -> Point2d (space @ units)
+xy :: forall space units. Qty units -> Qty units -> Point2d (space @ units)
 xy (Qty# px#) (Qty# py#) = Point2d# px# py#
 
 xyIn :: Frame2d (space @ units) defines -> Qty units -> Qty units -> Point2d (space @ units)
