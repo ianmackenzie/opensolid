@@ -56,6 +56,8 @@ import Vector3d qualified
 import VectorCurve2d qualified
 import Volume qualified
 
+data Global deriving (Eq, Show)
+
 log :: Show a => Text -> a -> IO ()
 log label value = IO.printLine (label + ": " + Text.show value)
 
@@ -192,16 +194,20 @@ testNonEmpty = IO.do
   testEmptyCheck [2, 3, 1]
 
 testLineFromEndpoints :: Tolerance Meters => IO ()
-testLineFromEndpoints =
-  case Line2d.from Point2d.origin (Point2d.centimeters 40.0 30.0) of
+testLineFromEndpoints = do
+  let startPoint = Point2d.origin @Global
+  let endPoint = Point2d.centimeters 40.0 30.0
+  case Line2d.from startPoint endPoint of
     Curve2d.Line line -> do
       let length = Point2d.distanceFrom (Line2d.startPoint line) (Line2d.endPoint line)
       log "Line length in centimeters" (Length.inCentimeters length)
     curve -> log "Unexpected curve" curve
 
 testArcFromEndpoints :: Tolerance Meters => IO ()
-testArcFromEndpoints =
-  case Arc2d.from Point2d.origin (Point2d.centimeters 50.0 50.0) Angle.quarterTurn of
+testArcFromEndpoints = do
+  let startPoint = Point2d.origin @Global
+  let endPoint = Point2d.centimeters 50.0 50.0
+  case Arc2d.from startPoint endPoint Angle.quarterTurn of
     Curve2d.Arc arc -> log "Arc center point" (Arc2d.centerPoint arc)
     curve -> log "Unexpected curve" curve
 
@@ -381,7 +387,7 @@ drawBezier colour startPoint innerControlPoints endPoint = do
 
 testBezierSegment :: Tolerance Meters => IO ()
 testBezierSegment = IO.do
-  let p1 = Point2d.xy 0.0 0.0
+  let p1 = Point2d.origin @Global
   let p2 = Point2d.xy 0.0 5.0
   let p3 = Point2d.xy 2.5 10.0
   let p4 = Point2d.xy 5.0 0.0
@@ -394,7 +400,7 @@ testBezierSegment = IO.do
 
 testHermiteBezier :: Tolerance Meters => IO ()
 testHermiteBezier = IO.do
-  let startPoint = Point2d.origin
+  let startPoint = Point2d.origin @Global
   let startDerivatives = [Vector2d.meters 10.0 10.0]
   let endDerivatives = [Vector2d.meters 0.0 -10.0, Vector2d.zero]
   let endPoint = Point2d.meters 10.0 0.0
@@ -419,7 +425,9 @@ testHermiteBezier = IO.do
 
 testStretchedArc :: Tolerance Meters => IO ()
 testStretchedArc = IO.do
-  let initialArc = Arc2d.from (Point2d.meters 1.0 0.0) (Point2d.meters 0.0 1.0) (Angle.degrees 90.0)
+  let startPoint = Point2d.meters @Global 1.0 0.0
+  let endPoint = Point2d.meters @Global 0.0 1.0
+  let initialArc = Arc2d.from startPoint endPoint (Angle.degrees 90.0)
   let axis = Axis2d.through Point2d.origin (Direction2d.degrees 30.0)
   let stretched = Curve2d.scaleAlong axis 2.0 initialArc
   let compressed = Curve2d.scaleAlong axis 0.5 initialArc
@@ -514,10 +522,10 @@ testCurveMedialAxis :: Tolerance Meters => IO ()
 testCurveMedialAxis = IO.do
   let curve1 =
         CubicSpline2d.fromControlPoints
-          (Point2d.centimeters 0.0 10.0)
-          (Point2d.centimeters 5.0 6.0)
-          (Point2d.centimeters 10.0 9.0)
-          (Point2d.centimeters 15.0 7.0)
+          (Point2d.centimeters @Global 0.0 10.0)
+          (Point2d.centimeters @Global 5.0 6.0)
+          (Point2d.centimeters @Global 10.0 9.0)
+          (Point2d.centimeters @Global 15.0 7.0)
   let curve2 =
         Arc2d.from (Point2d.centimeters 15.0 0.0) Point2d.origin (Angle.degrees 20.0)
   -- let curve1 =
