@@ -398,7 +398,7 @@ testBezierSegment = IO.do
   let curveEntity = drawBezier Colour.blue p1 [p2, p3, p4, p5] p6
   Drawing2d.writeTo "opensolid-sandbox/test-bezier-segment.svg" drawingBounds [curveEntity]
 
-testHermiteBezier :: Tolerance Meters => IO ()
+testHermiteBezier :: IO ()
 testHermiteBezier = IO.do
   let startPoint = Point2d.origin @Global
   let startDerivatives = [Vector2d.meters 10.0 10.0]
