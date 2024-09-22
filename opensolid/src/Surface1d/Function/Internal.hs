@@ -14,19 +14,15 @@ import Range qualified
 import Solve1d qualified
 import {-# SOURCE #-} Surface1d.Function (Function)
 import {-# SOURCE #-} Surface1d.Function qualified as Function
-import Uv (Parameter (U, V))
-import Uv.Derivatives (Derivatives)
-import Uv.Derivatives qualified as Derivatives
 
 solveForU ::
   Tolerance units =>
-  Derivatives (Function units) ->
+  Function units ->
+  Function units ->
   Range Unitless ->
   Float ->
   Float
-solveForU derivatives uBounds vValue = do
-  let f = Derivatives.get derivatives
-  let fu = Derivatives.get (derivatives >> U)
+solveForU f fu uBounds vValue = do
   let uvPoint uValue = Point2d.xy uValue vValue
   let fValue uValue = Function.evaluate f (uvPoint uValue)
   let fuValue uValue = Function.evaluate fu (uvPoint uValue)
@@ -34,13 +30,12 @@ solveForU derivatives uBounds vValue = do
 
 solveForV ::
   Tolerance units =>
-  Derivatives (Function units) ->
+  Function units ->
+  Function units ->
   Float ->
   Range Unitless ->
   Float
-solveForV derivatives uValue vBounds = do
-  let f = Derivatives.get derivatives
-  let fv = Derivatives.get (derivatives >> V)
+solveForV f fv uValue vBounds = do
   let uvPoint vValue = Point2d.xy uValue vValue
   let fValue vValue = Function.evaluate f (uvPoint vValue)
   let fvValue vValue = Function.evaluate fv (uvPoint vValue)

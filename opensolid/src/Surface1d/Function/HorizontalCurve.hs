@@ -37,7 +37,9 @@ import Vector2d (Vector2d (Vector2d#))
 import VectorCurve2d qualified
 
 data HorizontalCurve units = HorizontalCurve
-  { derivatives :: Derivatives (Function units)
+  { f :: Function units
+  , fu :: Function units
+  , fv :: Function units
   , dvdu :: Function Unitless
   , uStart :: Float
   , uEnd :: Float
@@ -64,11 +66,14 @@ new ::
   Range Unitless ->
   Curve2d Uv.Coordinates
 new derivatives uStart uEnd vBounds = do
+  let f = Derivatives.get derivatives
   let fu = Derivatives.get (derivatives >> U)
   let fv = Derivatives.get (derivatives >> V)
   Curve2d.new $
     HorizontalCurve
-      { derivatives
+      { f
+      , fu
+      , fv
       , dvdu = -fu / fv
       , uStart
       , uEnd
@@ -86,11 +91,14 @@ monotonic ::
   Range Unitless ->
   Curve2d Uv.Coordinates
 monotonic derivatives uStart uEnd vBounds = do
+  let f = Derivatives.get derivatives
   let fu = Derivatives.get (derivatives >> U)
   let fv = Derivatives.get (derivatives >> V)
   Curve2d.new $
     HorizontalCurve
-      { derivatives
+      { f
+      , fu
+      , fv
       , dvdu = -fu / fv
       , uStart
       , uEnd
@@ -110,11 +118,14 @@ bounded ::
   List (Axis2d Uv.Coordinates) ->
   Curve2d Uv.Coordinates
 bounded derivatives uStart uEnd vBounds monotonicFrame boundingAxes = do
+  let f = Derivatives.get derivatives
   let fu = Derivatives.get (derivatives >> U)
   let fv = Derivatives.get (derivatives >> V)
   Curve2d.new $
     HorizontalCurve
-      { derivatives
+      { f
+      , fu
+      , fv
       , dvdu = -fu / fv
       , uStart
       , uEnd
@@ -161,7 +172,9 @@ instance Curve2d.Interface (HorizontalCurve units) Uv.Coordinates where
 
   reverseImpl
     HorizontalCurve
-      { derivatives
+      { f
+      , fu
+      , fv
       , dvdu
       , uStart
       , uEnd
@@ -171,7 +184,9 @@ instance Curve2d.Interface (HorizontalCurve units) Uv.Coordinates where
       , tolerance
       } =
       HorizontalCurve
-        { derivatives
+        { f
+        , fu
+        , fv
         , dvdu
         , uStart = uEnd
         , uEnd = uStart
@@ -187,9 +202,9 @@ instance Curve2d.Interface (HorizontalCurve units) Uv.Coordinates where
     Curve2d.new (Curve2d.TransformBy transform curve)
 
 solveForV :: HorizontalCurve units -> Float -> Float
-solveForV (HorizontalCurve{derivatives, vBounds, boundingAxes, tolerance}) uValue = do
+solveForV (HorizontalCurve{f, fv, vBounds, boundingAxes, tolerance}) uValue = do
   let clampedBounds = List.foldl (clamp uValue) vBounds boundingAxes
-  Tolerance.using tolerance (Internal.solveForV derivatives uValue clampedBounds)
+  Tolerance.using tolerance (Internal.solveForV f fv uValue clampedBounds)
 
 clamp :: Float -> Range Unitless -> Axis2d Uv.Coordinates -> Range Unitless
 clamp (Qty# u#) (Range vLow vHigh) axis = do

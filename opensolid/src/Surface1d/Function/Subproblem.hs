@@ -80,22 +80,30 @@ cornerValues (Bounds2d (Range u1 u2) (Range v1 v2)) function =
 leftEdgePoint :: Tolerance units => Subproblem units -> (Uv.Point, Domain2d.Boundary)
 leftEdgePoint Subproblem{derivatives, subdomain, uvBounds} = do
   let Bounds2d (Range u1 _) vBounds = uvBounds
-  (Point2d.xy u1 (Internal.solveForV derivatives u1 vBounds), Domain2d.leftEdge subdomain)
+  let f = Derivatives.get derivatives
+  let fv = Derivatives.get (derivatives >> V)
+  (Point2d.xy u1 (Internal.solveForV f fv u1 vBounds), Domain2d.leftEdge subdomain)
 
 rightEdgePoint :: Tolerance units => Subproblem units -> (Uv.Point, Domain2d.Boundary)
 rightEdgePoint Subproblem{derivatives, subdomain, uvBounds} = do
   let Bounds2d (Range _ u2) vBounds = uvBounds
-  (Point2d.xy u2 (Internal.solveForV derivatives u2 vBounds), Domain2d.rightEdge subdomain)
+  let f = Derivatives.get derivatives
+  let fv = Derivatives.get (derivatives >> V)
+  (Point2d.xy u2 (Internal.solveForV f fv u2 vBounds), Domain2d.rightEdge subdomain)
 
 bottomEdgePoint :: Tolerance units => Subproblem units -> (Uv.Point, Domain2d.Boundary)
 bottomEdgePoint Subproblem{derivatives, subdomain, uvBounds} = do
   let Bounds2d uBounds (Range v1 _) = uvBounds
-  (Point2d.xy (Internal.solveForU derivatives uBounds v1) v1, Domain2d.bottomEdge subdomain)
+  let f = Derivatives.get derivatives
+  let fu = Derivatives.get (derivatives >> U)
+  (Point2d.xy (Internal.solveForU f fu uBounds v1) v1, Domain2d.bottomEdge subdomain)
 
 topEdgePoint :: Tolerance units => Subproblem units -> (Uv.Point, Domain2d.Boundary)
 topEdgePoint Subproblem{derivatives, subdomain, uvBounds} = do
   let Bounds2d uBounds (Range _ v2) = uvBounds
-  (Point2d.xy (Internal.solveForU derivatives uBounds v2) v2, Domain2d.topEdge subdomain)
+  let f = Derivatives.get derivatives
+  let fu = Derivatives.get (derivatives >> U)
+  (Point2d.xy (Internal.solveForU f fu uBounds v2) v2, Domain2d.topEdge subdomain)
 
 bottomLeftPoint :: Subproblem units -> (Uv.Point, Domain2d.Boundary)
 bottomLeftPoint Subproblem{subdomain, uvBounds} = do
