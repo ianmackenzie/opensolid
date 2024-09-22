@@ -48,7 +48,6 @@ import Surface1d.Function qualified
 import Surface1d.Function.Zeros qualified
 import Text qualified
 import Tolerance qualified
-import Transform2d qualified
 import Units (Meters)
 import Uv (Parameter (U, V))
 import Uv qualified
