@@ -1,6 +1,5 @@
 module Jit
-  ( Value
-  , UnaryOp (..)
+  ( UnaryOp (..)
   , BinaryOp (..)
   , Ast
   , input
@@ -25,10 +24,8 @@ import Typeable qualified
 import Unsafe.Coerce (unsafeCoerce)
 import Prelude qualified
 
-type Value value = (Eq value, Typeable value)
-
 class
-  (Value op, Show op, Value input, Show input, Value output) =>
+  (Known op, Show op, Known input, Show input, Known output) =>
   UnaryOp op input output
     | op -> input
     , op -> output
@@ -36,7 +33,7 @@ class
   evalUnary :: op -> input -> output
 
 class
-  (Value op, Show op, Value lhs, Show lhs, Value rhs, Show rhs, Value output) =>
+  (Known op, Show op, Known lhs, Show lhs, Known rhs, Show rhs, Known output) =>
   BinaryOp op lhs rhs output
     | op -> lhs
     , op -> rhs
@@ -122,7 +119,7 @@ instance Eq (ConstantLhs rhs output) where
     Typeable.equal op1 op2 && Typeable.equal lhs1 lhs2
 
 instance
-  (Value rhs, Show rhs, Value output) =>
+  (Known rhs, Show rhs, Known output) =>
   UnaryOp (ConstantLhs rhs output) rhs output
   where
   evalUnary (ConstantLhs binaryOp lhs) rhs = evalBinary binaryOp lhs rhs
@@ -137,13 +134,13 @@ instance Eq (ConstantRhs lhs output) where
     Typeable.equal op1 op2 && Typeable.equal rhs1 rhs2
 
 instance
-  (Value lhs, Show lhs, Value output) =>
+  (Known lhs, Show lhs, Known output) =>
   UnaryOp (ConstantRhs lhs output) lhs output
   where
   evalUnary (ConstantRhs binaryOp rhs) lhs = evalBinary binaryOp lhs rhs
 
 instance
-  (inner1 ~ inner2, Value output) =>
+  (inner1 ~ inner2, Known output) =>
   Composition (Ast input inner1) (Ast inner2 output) (Ast input output)
   where
   Constant value . _ = Constant value
@@ -151,7 +148,7 @@ instance
   NonConstant x . NonConstant y = NonConstant (x . y)
 
 instance
-  (inner1 ~ inner2, Value output) =>
+  (inner1 ~ inner2, Known output) =>
   Composition (NonConstant input inner1) (NonConstant inner2 output) (NonConstant input output)
   where
   Input . inner = inner
@@ -159,7 +156,7 @@ instance
   NonInput x . y = NonInput (x . y)
 
 instance
-  (inner1 ~ inner2, Value output) =>
+  (inner1 ~ inner2, Known output) =>
   Composition (NonConstant input inner1) (NonInput inner2 output) (NonInput input output)
   where
   Unary op arg . inner = Unary op (arg . inner)
