@@ -111,9 +111,9 @@ instance Known units => Eq (Curve1d units) where
   Sum{} == _ = False
   Difference lhs1 rhs1 == Difference lhs2 rhs2 = lhs1 == lhs2 && rhs1 == rhs2
   Difference{} == _ = False
-  Product' lhs1 rhs1 == Product' lhs2 rhs2 = Typeable.equal lhs1 lhs2 && Typeable.equal rhs1 rhs2
+  Product' lhs1 rhs1 == Product' lhs2 rhs2 = lhs1 == lhs2 && rhs1 == rhs2
   Product'{} == _ = False
-  Quotient' lhs1 rhs1 == Quotient' lhs2 rhs2 = Typeable.equal lhs1 lhs2 && Typeable.equal rhs1 rhs2
+  Quotient' lhs1 rhs1 == Quotient' lhs2 rhs2 = lhs1 == lhs2 && rhs1 == rhs2
   Quotient'{} == _ = False
   Squared' c1 == Squared' c2 = c1 == c2
   Squared'{} == _ = False
