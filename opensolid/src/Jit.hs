@@ -45,11 +45,11 @@ class
   evalBinary :: op -> lhs -> rhs -> output
 
 data Ast input output where
-  Constant :: Value value => value -> Ast input value
+  Constant :: Eq value => value -> Ast input value
   NonConstant :: NonConstant input output -> Ast input output
 
 instance Eq (Ast input output) where
-  Constant x == Constant y = Typeable.equal x y
+  Constant x == Constant y = x == y
   NonConstant x == NonConstant y = x == y
   Constant{} == NonConstant{} = False
   NonConstant{} == Constant{} = False
@@ -96,7 +96,7 @@ instance Eq (NonInput input output) where (==) = equalNonInputs
 input :: Ast input input
 input = NonConstant Input
 
-constant :: Value value => value -> Ast input value
+constant :: Eq value => value -> Ast input value
 constant = Constant
 
 call :: UnaryOp op input output => op -> Ast input output
