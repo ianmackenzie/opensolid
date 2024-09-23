@@ -44,14 +44,14 @@ import Stream qualified
 import Typeable qualified
 import Units qualified
 
-class Interface curve units | curve -> units where
+class Known curve => Interface curve units | curve -> units where
   pointOnImpl :: curve -> Float -> Qty units
   segmentBoundsImpl :: curve -> Range Unitless -> Range units
   derivativeImpl :: curve -> Curve1d units
 
 data Curve1d units where
   Curve1d ::
-    (Known curve, Interface curve units) =>
+    Interface curve units =>
     curve ->
     Curve1d units
   Constant ::
@@ -162,7 +162,7 @@ instance Interface (Curve1d units) units where
   segmentBoundsImpl = segmentBounds
   derivativeImpl = derivative
 
-new :: (Known curve, Interface curve units) => curve -> Curve1d units
+new :: Interface curve units => curve -> Curve1d units
 new = Curve1d
 
 zero :: Curve1d units
