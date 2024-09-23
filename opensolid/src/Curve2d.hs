@@ -95,6 +95,7 @@ import Text qualified
 import Tolerance qualified
 import Transform2d (Transform2d)
 import Transform2d qualified
+import Typeable qualified
 import Units qualified
 import Vector2d (Vector2d)
 import Vector2d qualified
@@ -108,13 +109,15 @@ type role Curve2d nominal
 
 data Curve2d (coordinateSystem :: CoordinateSystem) where
   Curve ::
-    Interface curve (space @ units) =>
+    Interface curve coordinateSystem =>
     curve ->
-    Curve2d (space @ units)
+    Curve2d coordinateSystem
   Coerce ::
+    (Known space, Known units1, Known units2) =>
     Curve2d (space @ units1) ->
     Curve2d (space @ units2)
   PlaceIn ::
+    (Known global, Known local) =>
     Frame2d (global @ units) (Defines local) ->
     Curve2d (local @ units) ->
     Curve2d (global @ units)
@@ -129,28 +132,35 @@ data Curve2d (coordinateSystem :: CoordinateSystem) where
 
 deriving instance Show (Curve2d (space @ units))
 
+instance
+  (Known space, Known units) =>
+  Eq (Curve2d (space @ units))
+  where
+  curve1 == curve2 = case curve1 of
+    Curve c1 | Curve c2 <- curve2 -> Typeable.equal c1 c2 | otherwise -> False
+    Coerce c1 | Coerce c2 <- curve2 -> Typeable.equal c1 c2 | otherwise -> False
+    PlaceIn f1 c1 | PlaceIn f2 c2 <- curve2 -> Typeable.equal f1 f2 && Typeable.equal c1 c2 | otherwise -> False
+    Addition c1 v1 | Addition c2 v2 <- curve2 -> c1 == c2 && v1 == v2 | otherwise -> False
+    Subtraction c1 v1 | Subtraction c2 v2 <- curve2 -> c1 == c2 && v1 == v2 | otherwise -> False
+
 instance HasUnits (Curve2d (space @ units)) where
   type UnitsOf (Curve2d (space @ units)) = units
 
 instance
-  space1 ~ space2 =>
+  (Known space1, Known space2, Known unitsA, Known unitsB, space1 ~ space2) =>
   Units.Coercion (Curve2d (space1 @ unitsA)) (Curve2d (space2 @ unitsB))
   where
   coerce (Coerce c) = Coerce c
   coerce c = Coerce c
 
 instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
+  (Known space1, Known space2, Known units1, Known units2, space1 ~ space2, units1 ~ units2) =>
   Intersects (Curve2d (space1 @ units1)) (Point2d (space2 @ units2)) units1
   where
   curve ^ point = VectorCurve2d.hasZero (curve - point)
 
 instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
+  (Known space1, Known space2, Known units1, Known units2, space1 ~ space2, units1 ~ units2) =>
   Intersects (Point2d (space1 @ units1)) (Curve2d (space2 @ units2)) units1
   where
   point ^ curve = curve ^ point
@@ -183,7 +193,7 @@ pattern Arc arc <- (asArc -> Just arc)
 data HasDegeneracy = HasDegeneracy deriving (Eq, Show, Error.Message)
 
 class
-  Show curve =>
+  Known curve =>
   Interface curve (coordinateSystem :: CoordinateSystem)
     | curve -> coordinateSystem
   where
@@ -194,14 +204,20 @@ class
   derivativeImpl :: curve -> VectorCurve2d coordinateSystem
   reverseImpl :: curve -> curve
   boundsImpl :: curve -> Bounds2d coordinateSystem
-  transformByImpl :: Transform2d tag coordinateSystem -> curve -> Curve2d coordinateSystem
-
+  transformByImpl ::
+    Known tag =>
+    Transform2d tag coordinateSystem ->
+    curve ->
+    Curve2d coordinateSystem
   asLineImpl :: Tolerance (UnitsOf coordinateSystem) => curve -> Maybe (Line2d coordinateSystem)
   asLineImpl _ = Nothing
   asArcImpl :: Tolerance (UnitsOf coordinateSystem) => curve -> Maybe (Arc2d coordinateSystem)
   asArcImpl _ = Nothing
 
-instance Interface (Curve2d (space @ units)) (space @ units) where
+instance
+  (Known space, Known units) =>
+  Interface (Curve2d (space @ units)) (space @ units)
+  where
   startPointImpl = startPoint
   endPointImpl = endPoint
   pointOnImpl = pointOn
@@ -213,7 +229,10 @@ instance Interface (Curve2d (space @ units)) (space @ units) where
   asLineImpl = asLine
   asArcImpl = asArc
 
-instance Interface (Point2d (space @ units)) (space @ units) where
+instance
+  (Known space, Known units) =>
+  Interface (Point2d (space @ units)) (space @ units)
+  where
   startPointImpl = identity
   endPointImpl = identity
   pointOnImpl point _ = point
@@ -224,9 +243,7 @@ instance Interface (Point2d (space @ units)) (space @ units) where
   transformByImpl transform point = new (Point2d.transformBy transform point)
 
 instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
+  (Known space1, Known space2, Known units1, Known units2, space1 ~ space2, units1 ~ units2) =>
   VectorCurve2d.Interface
     (Arithmetic.Difference (Point2d (space1 @ units1)) (Curve2d (space2 @ units2)))
     (space1 @ units1)
@@ -273,9 +290,7 @@ instance
   c - v = Subtraction c v
 
 instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
+  (Known space1, Known space2, Known units1, Known units2, space1 ~ space2, units1 ~ units2) =>
   Subtraction
     (Point2d (space1 @ units1))
     (Curve2d (space2 @ units2))
@@ -284,9 +299,7 @@ instance
   point - curve = VectorCurve2d.new (Arithmetic.Difference point curve)
 
 instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
+  (Known space1, Known space2, Known units1, Known units2, space1 ~ space2, units1 ~ units2) =>
   VectorCurve2d.Interface
     (Arithmetic.Difference (Curve2d (space1 @ units1)) (Point2d (space2 @ units2)))
     (space1 @ units1)
@@ -302,9 +315,7 @@ instance
         (Point2d.transformBy (Units.coerce transform) point)
 
 instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
+  (Known space1, Known space2, Known units1, Known units2, space1 ~ space2, units1 ~ units2) =>
   Subtraction
     (Curve2d (space1 @ units1))
     (Curve2d (space2 @ units2))
@@ -313,9 +324,7 @@ instance
   curve1 - curve2 = VectorCurve2d.new (Arithmetic.Difference curve1 curve2)
 
 instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
+  (Known space1, Known space2, Known units1, Known units2, space1 ~ space2, units1 ~ units2) =>
   VectorCurve2d.Interface
     (Arithmetic.Difference (Curve2d (space1 @ units1)) (Curve2d (space2 @ units2)))
     (space1 @ units1)
@@ -331,9 +340,7 @@ instance
         (transformBy (Units.coerce transform) curve2)
 
 instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
+  (Known space1, Known space2, Known units1, Known units2, space1 ~ space2, units1 ~ units2) =>
   Subtraction
     (Curve2d (space1 @ units1))
     (Point2d (space2 @ units2))
@@ -341,10 +348,14 @@ instance
   where
   curve - point = VectorCurve2d.new (Arithmetic.Difference curve point)
 
-instance Composition (Curve1d Unitless) (Curve2d (space @ units)) (Curve2d (space @ units)) where
+instance
+  (Known space, Known units) =>
+  Composition (Curve1d Unitless) (Curve2d (space @ units)) (Curve2d (space @ units))
+  where
   curve1d >> curve2d = Curve2d.new (Composition.Of curve1d curve2d)
 
 instance
+  (Known space, Known units) =>
   Curve2d.Interface
     (Composition.Of (Curve1d Unitless) (Curve2d (space @ units)))
     (space @ units)
@@ -398,7 +409,7 @@ segmentBounds curve t = case curve of
   Addition c v -> segmentBounds c t + VectorCurve2d.segmentBounds t v
   Subtraction c v -> segmentBounds c t - VectorCurve2d.segmentBounds t v
 
-derivative :: Curve2d (space @ units) -> VectorCurve2d (space @ units)
+derivative :: (Known space, Known units) => Curve2d (space @ units) -> VectorCurve2d (space @ units)
 derivative curve = case curve of
   Curve c -> derivativeImpl c
   Coerce c -> Units.coerce (derivative c)
@@ -406,7 +417,7 @@ derivative curve = case curve of
   Addition c v -> derivative c + VectorCurve2d.derivative v
   Subtraction c v -> derivative c - VectorCurve2d.derivative v
 
-reverse :: Curve2d (space @ units) -> Curve2d (space @ units)
+reverse :: (Known space, Known units) => Curve2d (space @ units) -> Curve2d (space @ units)
 reverse curve = case curve of
   Curve c -> Curve (reverseImpl c)
   Coerce c -> Units.coerce (reverse c)
@@ -445,7 +456,7 @@ asArc curve = case curve of
   Subtraction{} -> Nothing
 
 tangentDirection ::
-  Tolerance units =>
+  (Known space, Known units, Tolerance units) =>
   Curve2d (space @ units) ->
   Result HasDegeneracy (DirectionCurve2d space)
 tangentDirection curve =
@@ -453,18 +464,22 @@ tangentDirection curve =
     Success directionCurve -> Success directionCurve
     Failure VectorCurve2d.HasZero -> Failure HasDegeneracy
 
-signedDistanceAlong :: Axis2d (space @ units) -> Curve2d (space @ units) -> Curve1d units
+signedDistanceAlong ::
+  (Known space, Known units) =>
+  Axis2d (space @ units) ->
+  Curve2d (space @ units) ->
+  Curve1d units
 signedDistanceAlong axis curve =
   (curve - Axis2d.originPoint axis) <> Axis2d.direction axis
 
-xCoordinate :: Curve2d (space @ units) -> Curve1d units
+xCoordinate :: (Known space, Known units) => Curve2d (space @ units) -> Curve1d units
 xCoordinate = signedDistanceAlong Axis2d.x
 
-yCoordinate :: Curve2d (space @ units) -> Curve1d units
+yCoordinate :: (Known space, Known units) => Curve2d (space @ units) -> Curve1d units
 yCoordinate = signedDistanceAlong Axis2d.y
 
 findPoint ::
-  Tolerance units =>
+  (Known space, Known units, Tolerance units) =>
   Point2d (space @ units) ->
   Curve2d (space @ units) ->
   Result FindPoint.Error (List Float)
@@ -475,7 +490,7 @@ findPoint point curve =
     Success parameterValues -> Success parameterValues
 
 overlappingSegments ::
-  Tolerance units =>
+  (Known space, Known units, Tolerance units) =>
   Curve2d (space @ units) ->
   Curve2d (space @ units) ->
   List (Float, Float) ->
@@ -492,7 +507,7 @@ overlappingSegments curve1 curve2 endpointParameterValues =
     |> List.filter (isOverlappingSegment curve1 curve2)
 
 isOverlappingSegment ::
-  Tolerance units =>
+  (Known space, Known units, Tolerance units) =>
   Curve2d (space @ units) ->
   Curve2d (space @ units) ->
   OverlappingSegment ->
@@ -505,7 +520,7 @@ isOverlappingSegment curve1 curve2 (OverlappingSegment{t1}) = do
   segment1IsNondegenerate && segment1LiesOnSegment2
 
 findEndpointRoots ::
-  Tolerance units =>
+  (Known space, Known units, Tolerance units) =>
   Point2d (space @ units) ->
   Curve2d (space @ units) ->
   Intersections.Error ->
@@ -517,7 +532,7 @@ findEndpointRoots endpoint curve curveIsPointError =
     Failure FindPoint.CurveIsCoincidentWithPoint -> Failure curveIsPointError
 
 findEndpointParameterValues ::
-  Tolerance units =>
+  (Known space, Known units, Tolerance units) =>
   Curve2d (space @ units) ->
   Curve2d (space @ units) ->
   Result Intersections.Error (List (Float, Float))
@@ -541,7 +556,7 @@ data Intersections
   deriving (Show)
 
 intersections ::
-  Tolerance units =>
+  (Known space, Known units, Tolerance units) =>
   Curve2d (space @ units) ->
   Curve2d (space @ units) ->
   Result Intersections.Error (Maybe Intersections)
@@ -559,7 +574,7 @@ type SearchTree (coordinateSystem :: CoordinateSystem) =
   Bisection.Tree (Segment coordinateSystem)
 
 findIntersectionPoints ::
-  Tolerance units =>
+  (Known space, Known units, Tolerance units) =>
   Curve2d (space @ units) ->
   Curve2d (space @ units) ->
   List (Float, Float) ->
@@ -642,6 +657,7 @@ findCrossingIntersections derivatives1 derivatives2 =
     (Segment.findCrossingIntersection derivatives1 derivatives2)
 
 placeIn ::
+  (Known local, Known global, Known units) =>
   Frame2d (global @ units) (Defines local) ->
   Curve2d (local @ units) ->
   Curve2d (global @ units)
@@ -650,12 +666,17 @@ placeIn globalFrame curve = case curve of
   _ -> PlaceIn globalFrame curve
 
 relativeTo ::
+  (Known local, Known global, Known units) =>
   Frame2d (global @ units) (Defines local) ->
   Curve2d (global @ units) ->
   Curve2d (local @ units)
 relativeTo frame = placeIn (Frame2d.inverse frame)
 
-transformBy :: Transform2d tag (space @ units) -> Curve2d (space @ units) -> Curve2d (space @ units)
+transformBy ::
+  (Known space, Known units, Known tag) =>
+  Transform2d tag (space @ units) ->
+  Curve2d (space @ units) ->
+  Curve2d (space @ units)
 transformBy transform curve = case curve of
   Curve c -> Curve (transformByImpl transform c)
   Coerce c -> Units.coerce (transformBy (Units.coerce transform) c)
@@ -664,12 +685,14 @@ transformBy transform curve = case curve of
   Subtraction c v -> transformBy transform c - VectorCurve2d.transformBy transform v
 
 translateBy ::
+  (Known space, Known units) =>
   Vector2d (space @ units) ->
   Curve2d (space @ units) ->
   Curve2d (space @ units)
 translateBy = Transform2d.translateByImpl transformBy
 
 translateIn ::
+  (Known space, Known units) =>
   Direction2d space ->
   Qty units ->
   Curve2d (space @ units) ->
@@ -677,6 +700,7 @@ translateIn ::
 translateIn = Transform2d.translateInImpl transformBy
 
 translateAlong ::
+  (Known space, Known units) =>
   Axis2d (space @ units) ->
   Qty units ->
   Curve2d (space @ units) ->
@@ -684,6 +708,7 @@ translateAlong ::
 translateAlong = Transform2d.translateAlongImpl transformBy
 
 rotateAround ::
+  (Known space, Known units) =>
   Point2d (space @ units) ->
   Angle ->
   Curve2d (space @ units) ->
@@ -691,12 +716,14 @@ rotateAround ::
 rotateAround = Transform2d.rotateAroundImpl transformBy
 
 mirrorAcross ::
+  (Known space, Known units) =>
   Axis2d (space @ units) ->
   Curve2d (space @ units) ->
   Curve2d (space @ units)
 mirrorAcross = Transform2d.mirrorAcrossImpl transformBy
 
 scaleAbout ::
+  (Known space, Known units) =>
   Point2d (space @ units) ->
   Float ->
   Curve2d (space @ units) ->
@@ -704,6 +731,7 @@ scaleAbout ::
 scaleAbout = Transform2d.scaleAboutImpl transformBy
 
 scaleAlong ::
+  (Known space, Known units) =>
   Axis2d (space @ units) ->
   Float ->
   Curve2d (space @ units) ->
@@ -711,6 +739,7 @@ scaleAlong ::
 scaleAlong = Transform2d.scaleAlongImpl transformBy
 
 translateByOwn ::
+  (Known space, Known units) =>
   ( Curve2d (space @ units) ->
     Vector2d (space @ units)
   ) ->
@@ -719,6 +748,7 @@ translateByOwn ::
 translateByOwn = Transform2d.translateByOwnImpl transformBy
 
 translateInOwn ::
+  (Known space, Known units) =>
   ( Curve2d (space @ units) ->
     Direction2d space
   ) ->
@@ -728,6 +758,7 @@ translateInOwn ::
 translateInOwn = Transform2d.translateInOwnImpl transformBy
 
 translateAlongOwn ::
+  (Known space, Known units) =>
   ( Curve2d (space @ units) ->
     Axis2d (space @ units)
   ) ->
@@ -737,6 +768,7 @@ translateAlongOwn ::
 translateAlongOwn = Transform2d.translateAlongOwnImpl transformBy
 
 rotateAroundOwn ::
+  (Known space, Known units) =>
   ( Curve2d (space @ units) ->
     Point2d (space @ units)
   ) ->
@@ -746,6 +778,7 @@ rotateAroundOwn ::
 rotateAroundOwn = Transform2d.rotateAroundOwnImpl transformBy
 
 mirrorAcrossOwn ::
+  (Known space, Known units) =>
   ( Curve2d (space @ units) ->
     Axis2d (space @ units)
   ) ->
@@ -754,6 +787,7 @@ mirrorAcrossOwn ::
 mirrorAcrossOwn = Transform2d.mirrorAcrossOwnImpl transformBy
 
 scaleAboutOwn ::
+  (Known space, Known units) =>
   ( Curve2d (space @ units) ->
     Point2d (space @ units)
   ) ->
@@ -763,6 +797,7 @@ scaleAboutOwn ::
 scaleAboutOwn = Transform2d.scaleAboutOwnImpl transformBy
 
 scaleAlongOwn ::
+  (Known space, Known units) =>
   ( Curve2d (space @ units) ->
     Axis2d (space @ units)
   ) ->
@@ -772,7 +807,7 @@ scaleAlongOwn ::
 scaleAlongOwn = Transform2d.scaleAlongOwnImpl transformBy
 
 curvature' ::
-  Tolerance units =>
+  (Known space, Known units, Tolerance units) =>
   Curve2d (space @ units) ->
   Result HasDegeneracy (Curve1d (Unitless :/: units))
 curvature' curve = Result.do
@@ -782,21 +817,27 @@ curvature' curve = Result.do
   Success ((tangent >< secondDerivative) !/!. (firstDerivative .<>. firstDerivative))
 
 curvature ::
-  (Tolerance units1, Units.Quotient Unitless units1 units2) =>
+  (Known space, Known units1, Known units2, Tolerance units1, Units.Inverse units1 units2) =>
   Curve2d (space @ units1) ->
   Result HasDegeneracy (Curve1d units2)
 curvature curve = Result.map Units.specialize (curvature' curve)
 
 data TransformBy curve coordinateSystem where
   TransformBy ::
-    Interface curve (space @ units) =>
+    (Known tag, Interface curve (space @ units)) =>
     Transform2d tag (space @ units) ->
     curve ->
     TransformBy curve (space @ units)
 
-deriving instance Show (TransformBy curve coordinateSystem)
+deriving instance Show (TransformBy curve (space @ units))
 
-instance Interface (TransformBy curve (space @ units)) (space @ units) where
+instance (Known space, Known units) => Eq (TransformBy curve (space @ units)) where
+  TransformBy t1 c1 == TransformBy t2 c2 = Typeable.equal t1 t2 && Typeable.equal c1 c2
+
+instance
+  (Known space, Known units, Known curve) =>
+  Interface (TransformBy curve (space @ units)) (space @ units)
+  where
   startPointImpl (TransformBy transform curve) =
     Point2d.transformBy transform (startPointImpl curve)
   endPointImpl (TransformBy transform curve) =
@@ -816,6 +857,7 @@ instance Interface (TransformBy curve (space @ units)) (space @ units) where
       TransformBy (Transform2d.toAffine existing >> Transform2d.toAffine transform) curve
 
 removeStartDegeneracy ::
+  (Known space, Known units) =>
   Int ->
   (Point2d (space @ units), List (Vector2d (space @ units))) ->
   Curve2d (space @ units) ->
@@ -832,7 +874,11 @@ removeStartDegeneracy continuity startCondition curve = Result.do
             (curveDerivative (n + 1))
   new (Synthetic (baseCurve continuity) (curveDerivative 1))
 
-nthDerivative :: Int -> Curve2d (space @ units) -> VectorCurve2d (space @ units)
+nthDerivative ::
+  (Known space, Known units) =>
+  Int ->
+  Curve2d (space @ units) ->
+  VectorCurve2d (space @ units)
 nthDerivative 0 _ = internalError "nthDerivative should always be called with n >= 1"
 nthDerivative 1 curve = derivative curve
 nthDerivative n curve = VectorCurve2d.derivative (nthDerivative (n - 1) curve)
@@ -846,7 +892,13 @@ data Synthetic coordinateSystem where
 instance Show (Synthetic (space @ units)) where
   show _ = Text.unpack "<Synthetic>"
 
-instance Interface (Synthetic (space @ units)) (space @ units) where
+instance (Known space, Known units) => Eq (Synthetic (space @ units)) where
+  Synthetic c1 _ == Synthetic c2 _ = c1 == c2
+
+instance
+  (Known space, Known units) =>
+  Interface (Synthetic (space @ units)) (space @ units)
+  where
   startPointImpl (Synthetic curve _) = Curve2d.startPoint curve
   endPointImpl (Synthetic curve _) = Curve2d.endPoint curve
   pointOnImpl (Synthetic curve _) t = Curve2d.pointOn curve t
@@ -870,7 +922,13 @@ data SyntheticDerivative coordinateSystem where
 instance Show (SyntheticDerivative (space @ units)) where
   show _ = Text.unpack "<SyntheticDerivative>"
 
-instance VectorCurve2d.Interface (SyntheticDerivative (space @ units)) (space @ units) where
+instance (Known space, Known units) => Eq (SyntheticDerivative (space @ units)) where
+  SyntheticDerivative c1 _ == SyntheticDerivative c2 _ = c1 == c2
+
+instance
+  (Known space, Known units) =>
+  VectorCurve2d.Interface (SyntheticDerivative (space @ units)) (space @ units)
+  where
   evaluateAtImpl t (SyntheticDerivative current _) = VectorCurve2d.evaluateAt t current
   segmentBoundsImpl t (SyntheticDerivative current _) = VectorCurve2d.segmentBounds t current
   derivativeImpl (SyntheticDerivative _ next) = next
@@ -881,7 +939,7 @@ instance VectorCurve2d.Interface (SyntheticDerivative (space @ units)) (space @ 
         (VectorCurve2d.transformBy transform next)
 
 toPolyline ::
-  HasCallStack =>
+  (Known space, Known units, HasCallStack) =>
   Qty units ->
   (Float -> vertex) ->
   Curve2d (space @ units) ->
@@ -919,7 +977,7 @@ collectVertices predicate function subdomain accumulated = do
 
 medialAxis ::
   forall space units.
-  Tolerance units =>
+  (Known space, Known units, Tolerance units) =>
   Curve2d (space @ units) ->
   Curve2d (space @ units) ->
   Result MedialAxis.Error (List (MedialAxis.Segment (space @ units)))

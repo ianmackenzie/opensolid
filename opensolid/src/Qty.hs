@@ -159,7 +159,7 @@ instance Division' Int (Qty units) where
   {-# INLINE (./.) #-}
   n ./. x = Float.int n ./. x
 
-instance Units.Quotient Unitless units1 units2 => Division Int (Qty units1) (Qty units2)
+instance Units.Inverse units1 units2 => Division Int (Qty units1) (Qty units2)
 
 instance DivMod (Qty units) where
   {-# INLINE (//) #-}

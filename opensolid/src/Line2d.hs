@@ -19,7 +19,11 @@ import Range qualified
 import Units qualified
 import VectorCurve2d qualified
 
-from :: Point2d (space @ units) -> Point2d (space @ units) -> Curve2d (space @ units)
+from ::
+  (Known space, Known units) =>
+  Point2d (space @ units) ->
+  Point2d (space @ units) ->
+  Curve2d (space @ units)
 from p1 p2 = Curve2d.new (Line2d p1 p2)
 
 type role Line2d phantom
@@ -28,6 +32,8 @@ data Line2d (coordinateSystem :: CoordinateSystem) = Line2d
   { startPoint :: Point2d coordinateSystem
   , endPoint :: Point2d coordinateSystem
   }
+
+deriving instance Eq (Line2d (space @ units))
 
 deriving instance Show (Line2d (space @ units))
 
@@ -40,7 +46,10 @@ instance
   where
   coerce = Data.Coerce.coerce
 
-instance Curve2d.Interface (Line2d (space @ units)) (space @ units) where
+instance
+  (Known space, Known units) =>
+  Curve2d.Interface (Line2d (space @ units)) (space @ units)
+  where
   startPointImpl (Line2d p1 _) = p1
   endPointImpl (Line2d _ p2) = p2
   pointOnImpl (Line2d p1 p2) t = Point2d.interpolateFrom p1 p2 t

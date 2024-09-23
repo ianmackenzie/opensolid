@@ -13,6 +13,7 @@ module Units
   , Product
   , Squared
   , Quotient
+  , Inverse
   , Unitless
   , Radians
   , Meters
@@ -202,6 +203,11 @@ type Quotient units1 units2 units3 =
 type Squared units1 units2 =
   ( Sqr units1 ~ units2
   , Product units1 units1 units2
+  )
+
+type Inverse units1 units2 =
+  ( Quotient Unitless units1 units2
+  , Quotient Unitless units2 units1
   )
 
 class Specialize genericUnits specificUnits | genericUnits -> specificUnits

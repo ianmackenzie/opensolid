@@ -36,5 +36,8 @@ startPoint :: Curve2d (space @ units) -> Point2d (space @ units)
 endPoint :: Curve2d (space @ units) -> Point2d (space @ units)
 pointOn :: Curve2d (space @ units) -> Float -> Point2d (space @ units)
 segmentBounds :: Curve2d (space @ units) -> Range Unitless -> Bounds2d (space @ units)
-derivative :: Curve2d (space @ units) -> VectorCurve2d (space @ units)
-tangentDirection :: Tolerance units => Curve2d (space @ units) -> Result HasDegeneracy (DirectionCurve2d space)
+derivative :: (Known space, Known units) => Curve2d (space @ units) -> VectorCurve2d (space @ units)
+tangentDirection ::
+  (Known space, Known units, Tolerance units) =>
+  Curve2d (space @ units) ->
+  Result HasDegeneracy (DirectionCurve2d space)

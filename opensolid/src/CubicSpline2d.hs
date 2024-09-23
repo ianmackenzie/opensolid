@@ -21,6 +21,8 @@ data CubicSpline2d (coordinateSystem :: CoordinateSystem) where
 
 deriving instance Show (CubicSpline2d (space @ units))
 
+deriving instance Eq (CubicSpline2d (space @ units))
+
 blossom :: CubicSpline2d (space @ units) -> Float -> Float -> Float -> Point2d (space @ units)
 blossom (CubicSpline2d p1 p2 p3 p4) (Qty# t1#) (Qty# t2#) (Qty# t3#) = do
   let !(Point2d# x1# y1#) = p1
@@ -38,7 +40,10 @@ blossom (CubicSpline2d p1 p2 p3 p4) (Qty# t1#) (Qty# t2#) (Qty# t3#) = do
   let y# = s1# *# y1# +# s2# *# y2# +# s3# *# y3# +# s4# *# y4#
   Point2d.xy (Qty# x#) (Qty# y#)
 
-instance Curve2d.Interface (CubicSpline2d (space @ units)) (space @ units) where
+instance
+  (Known space, Known units) =>
+  Curve2d.Interface (CubicSpline2d (space @ units)) (space @ units)
+  where
   startPointImpl (CubicSpline2d p1 _ _ _) = p1
 
   endPointImpl (CubicSpline2d _ _ _ p4) = p4
@@ -71,7 +76,7 @@ instance Curve2d.Interface (CubicSpline2d (space @ units)) (space @ units) where
         (Point2d.transformBy transform p4)
 
 fromControlPoints ::
-  Tolerance units =>
+  (Known space, Known units, Tolerance units) =>
   Point2d (space @ units) ->
   Point2d (space @ units) ->
   Point2d (space @ units) ->

@@ -214,7 +214,7 @@ instance Division' Int (Range units) where
   type Int ./. Range units = Range (Unitless :/: units)
   n ./. range = Float.int n ./. range
 
-instance Units.Quotient Unitless units1 units2 => Division Int (Range units1) (Range units2)
+instance Units.Inverse units1 units2 => Division Int (Range units1) (Range units2)
 
 instance Division' (Range units) Int where
   type Range units ./. Int = Range (units :/: Unitless)

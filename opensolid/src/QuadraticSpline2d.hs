@@ -22,6 +22,8 @@ data QuadraticSpline2d (coordinateSystem :: CoordinateSystem) where
 
 deriving instance Show (QuadraticSpline2d (space @ units))
 
+deriving instance Eq (QuadraticSpline2d (space @ units))
+
 blossom :: QuadraticSpline2d (space @ units) -> Float -> Float -> Point2d (space @ units)
 blossom (QuadraticSpline2d p1 p2 p3) t1 t2 = do
   let (x1, y1) = Point2d.coordinates p1
@@ -36,7 +38,10 @@ blossom (QuadraticSpline2d p1 p2 p3) t1 t2 = do
   let y = s1 * y1 + s2 * y2 + s3 * y3
   Point2d.xy x y
 
-instance Curve2d.Interface (QuadraticSpline2d (space @ units)) (space @ units) where
+instance
+  (Known space, Known units) =>
+  Curve2d.Interface (QuadraticSpline2d (space @ units)) (space @ units)
+  where
   startPointImpl (QuadraticSpline2d p1 _ _) = p1
 
   endPointImpl (QuadraticSpline2d _ _ p3) = p3
@@ -64,7 +69,7 @@ instance Curve2d.Interface (QuadraticSpline2d (space @ units)) (space @ units) w
         (Point2d.transformBy transform p3)
 
 fromControlPoints ::
-  Tolerance units =>
+  (Known space, Known units, Tolerance units) =>
   Point2d (space @ units) ->
   Point2d (space @ units) ->
   Point2d (space @ units) ->

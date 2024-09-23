@@ -59,7 +59,12 @@ data Arc (coordinateSystem :: CoordinateSystem) where
 
 deriving instance Show (Arc (space @ units))
 
-instance Curve2d.Interface (Arc (space @ units)) (space @ units) where
+deriving instance Eq (Arc (space @ units))
+
+instance
+  (Known space, Known units) =>
+  Curve2d.Interface (Arc (space @ units)) (space @ units)
+  where
   startPointImpl arc = Curve2d.pointOnImpl arc 0.0
   endPointImpl arc = Curve2d.pointOnImpl arc 1.0
   pointOnImpl (Arc p0 vx vy (Qty# a#) (Qty# b#)) (Qty# t#) = do
@@ -111,7 +116,7 @@ maybeMagnitudeAndDirection vector =
     Failure Vector2d.IsZero -> Nothing
 
 from ::
-  Tolerance units =>
+  (Known space, Known units, Tolerance units) =>
   Point2d (space @ units) ->
   Point2d (space @ units) ->
   Angle ->
@@ -135,21 +140,36 @@ from startPoint endPoint sweptAngle =
           let endAngle = startAngle + sweptAngle
           Curve2d.new (Arc centerPoint xVector yVector startAngle endAngle)
 
-polar :: Point2d (space @ units) -> Qty units -> Angle -> Angle -> Curve2d (space @ units)
+polar ::
+  (Known space, Known units) =>
+  Point2d (space @ units) ->
+  Qty units ->
+  Angle ->
+  Angle ->
+  Curve2d (space @ units)
 polar centerPoint radius startAngle endAngle =
   Curve2d.new (Arc centerPoint (Vector2d.x radius) (Vector2d.y radius) startAngle endAngle)
 
-circle :: Point2d (space @ units) -> Qty units -> Curve2d (space @ units)
+circle ::
+  (Known space, Known units) =>
+  Point2d (space @ units) ->
+  Qty units ->
+  Curve2d (space @ units)
 circle centerPoint radius = polar centerPoint radius Angle.zero Angle.twoPi
 
-swept :: Point2d (space @ units) -> Point2d (space @ units) -> Angle -> Curve2d (space @ units)
+swept ::
+  (Known space, Known units) =>
+  Point2d (space @ units) ->
+  Point2d (space @ units) ->
+  Angle ->
+  Curve2d (space @ units)
 swept centerPoint startPoint sweptAngle = do
   let radius = Point2d.distanceFrom centerPoint startPoint
   let startAngle = Point2d.angleFrom centerPoint startPoint
   polar centerPoint radius startAngle (startAngle + sweptAngle)
 
 corner ::
-  Tolerance units =>
+  (Known space, Known units, Tolerance units) =>
   Point2d (space @ units) ->
   Direction2d space ->
   Direction2d space ->
@@ -167,6 +187,7 @@ corner cornerPoint incomingDirection outgoingDirection givenRadius = do
       from startPoint endPoint sweptAngle
 
 withRadius ::
+  (Known space, Known units) =>
   Qty units ->
   Tolerance units =>
   Point2d (space @ units) ->
@@ -217,6 +238,7 @@ large :: Size
 large = Large
 
 elliptical ::
+  (Known space, Known units) =>
   Frame2d (space @ units) defines ->
   Qty units ->
   Qty units ->
@@ -229,10 +251,16 @@ elliptical axes xRadius yRadius startAngle endAngle = do
   let yVector = yRadius * Frame2d.yDirection axes
   generic centerPoint xVector yVector startAngle endAngle
 
-ellipse :: Frame2d (space @ units) defines -> Qty units -> Qty units -> Curve2d (space @ units)
+ellipse ::
+  (Known space, Known units) =>
+  Frame2d (space @ units) defines ->
+  Qty units ->
+  Qty units ->
+  Curve2d (space @ units)
 ellipse axes xRadius yRadius = elliptical axes xRadius yRadius Angle.zero Angle.twoPi
 
 generic ::
+  (Known space, Known units) =>
   Point2d (space @ units) ->
   Vector2d (space @ units) ->
   Vector2d (space @ units) ->

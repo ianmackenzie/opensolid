@@ -14,15 +14,21 @@ data Function units
 
 instance Show (Function units)
 
-instance Negation (Function units)
+instance Eq (Function units)
 
-instance Division' (Function units1) (Function units2)
+instance Known units => Negation (Function units)
 
 instance
-  Units.Quotient units1 units2 units3 =>
+  (Known units1, Known units2) =>
+  Division' (Function units1) (Function units2)
+
+instance
+  (Known units1, Known units2, Known units3, Units.Quotient units1 units2 units3) =>
   Division (Function units1) (Function units2) (Function units3)
 
-instance Composition (Curve2d Uv.Coordinates) (Function units) (Curve1d units)
+instance
+  Known units =>
+  Composition (Curve2d Uv.Coordinates) (Function units) (Curve1d units)
 
 evaluate :: Function units -> Uv.Point -> Qty units
 bounds :: Function units -> Uv.Bounds -> Range units

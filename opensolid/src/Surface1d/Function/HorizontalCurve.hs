@@ -48,7 +48,7 @@ data HorizontalCurve units = HorizontalCurve
   , boundingAxes :: List (Axis2d Uv.Coordinates)
   , tolerance :: Qty units
   }
-  deriving (Show)
+  deriving (Eq, Show)
 
 data MonotonicSpace
 
@@ -56,10 +56,10 @@ data Monotonicity
   = Monotonic
   | MonotonicIn (Frame2d Uv.Coordinates (Defines MonotonicSpace))
   | NotMonotonic
-  deriving (Show)
+  deriving (Eq, Show)
 
 new ::
-  Tolerance units =>
+  (Known units, Tolerance units) =>
   Derivatives (Function units) ->
   Float ->
   Float ->
@@ -84,7 +84,7 @@ new derivatives uStart uEnd vBounds = do
       }
 
 monotonic ::
-  Tolerance units =>
+  (Known units, Tolerance units) =>
   Derivatives (Function units) ->
   Float ->
   Float ->
@@ -109,7 +109,7 @@ monotonic derivatives uStart uEnd vBounds = do
       }
 
 bounded ::
-  Tolerance units =>
+  (Known units, Tolerance units) =>
   Derivatives (Function units) ->
   Float ->
   Float ->
@@ -135,7 +135,10 @@ bounded derivatives uStart uEnd vBounds monotonicFrame boundingAxes = do
       , tolerance = ?tolerance
       }
 
-instance Curve2d.Interface (HorizontalCurve units) Uv.Coordinates where
+instance
+  Known units =>
+  Curve2d.Interface (HorizontalCurve units) Uv.Coordinates
+  where
   startPointImpl curve = Curve2d.pointOnImpl curve 0.0
   endPointImpl curve = Curve2d.pointOnImpl curve 1.0
 

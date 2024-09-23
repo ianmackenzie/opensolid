@@ -25,6 +25,7 @@ import OpenSolid
 import Qty qualified
 import Surface1d qualified
 import Surface1d.Function qualified
+import Typeable qualified
 import Units qualified
 import Uv (Parameter)
 import Uv qualified
@@ -36,7 +37,7 @@ import VectorCurve2d (VectorCurve2d)
 import VectorCurve2d qualified
 
 class
-  Show function =>
+  Known function =>
   Interface function (coordinateSystem :: CoordinateSystem)
     | function -> coordinateSystem
   where
@@ -50,6 +51,7 @@ data Function (coordinateSystem :: CoordinateSystem) where
     function ->
     Function (space @ units)
   Coerce ::
+    (Known units1, Known units2) =>
     Function (space @ units1) ->
     Function (space @ units2)
   Constant ::
@@ -71,17 +73,33 @@ data Function (coordinateSystem :: CoordinateSystem) where
     Function (space @ units) ->
     Function (space @ units)
   Product1d2d' ::
+    (Known units1, Known units2) =>
     Surface1d.Function units1 ->
     Function (space @ units2) ->
     Function (space @ (units1 :*: units2))
   Product2d1d' ::
+    (Known units1, Known units2) =>
     Function (space @ units1) ->
     Surface1d.Function units2 ->
     Function (space @ (units1 :*: units2))
   Quotient' ::
+    (Known units1, Known units2) =>
     Function (space @ units1) ->
     Surface1d.Function units2 ->
     Function (space @ (units1 :/: units2))
+
+instance (Known space, Known units) => Eq (Function (space @ units)) where
+  function1 == function2 = case function1 of
+    Function f1 | Function f2 <- function2 -> Typeable.equal f1 f2 | otherwise -> False
+    Coerce f1 | Coerce f2 <- function2 -> Typeable.equal f1 f2 | otherwise -> False
+    Constant x | Constant y <- function2 -> x == y | otherwise -> False
+    XY x1 y1 | XY x2 y2 <- function2 -> x1 == x2 && y1 == y2 | otherwise -> False
+    Negated f1 | Negated f2 <- function2 -> f1 == f2 | otherwise -> False
+    Sum lhs1 rhs1 | Sum lhs2 rhs2 <- function2 -> lhs1 == lhs2 && rhs1 == rhs2 | otherwise -> False
+    Difference lhs1 rhs1 | Difference lhs2 rhs2 <- function2 -> lhs1 == lhs2 && rhs1 == rhs2 | otherwise -> False
+    Product1d2d' lhs1 rhs1 | Product1d2d' lhs2 rhs2 <- function2 -> lhs1 == lhs2 && rhs1 == rhs2 | otherwise -> False
+    Product2d1d' lhs1 rhs1 | Product2d1d' lhs2 rhs2 <- function2 -> lhs1 == lhs2 && rhs1 == rhs2 | otherwise -> False
+    Quotient' lhs1 rhs1 | Quotient' lhs2 rhs2 <- function2 -> lhs1 == lhs2 && rhs1 == rhs2 | otherwise -> False
 
 deriving instance Show (Function (space @ units))
 
@@ -89,7 +107,7 @@ instance HasUnits (Function (space @ units)) where
   type UnitsOf (Function (space @ units)) = units
 
 instance
-  space1 ~ space2 =>
+  (Known space1, Known space2, Known unitsA, Known unitsB, space1 ~ space2) =>
   Units.Coercion (Function (space1 @ unitsA)) (Function (space2 @ unitsB))
   where
   coerce function = case function of
@@ -97,7 +115,7 @@ instance
     Coerce f -> Coerce f
     _ -> Coerce function
 
-instance Negation (Function (space @ units)) where
+instance (Known space, Known units) => Negation (Function (space @ units)) where
   negate function = case function of
     Coerce f -> Coerce -f
     Constant v -> Constant -v
@@ -108,24 +126,29 @@ instance Negation (Function (space @ units)) where
     Product2d1d' f1 f2 -> Product2d1d' f1 -f2
     _ -> Negated function
 
-instance Multiplication Sign (Function (space @ units)) (Function (space @ units))
+instance
+  (Known space, Known units) =>
+  Multiplication Sign (Function (space @ units)) (Function (space @ units))
 
-instance Multiplication' Sign (Function (space @ units)) where
+instance (Known space, Known units) => Multiplication' Sign (Function (space @ units)) where
   type Sign .*. Function (space @ units) = Function (space @ (Unitless :*: units))
   Positive .*. function = Units.coerce function
   Negative .*. function = Units.coerce -function
 
-instance Multiplication (Function (space @ units)) Sign (Function (space @ units))
+instance
+  (Known space, Known units) =>
+  Multiplication (Function (space @ units)) Sign (Function (space @ units))
 
-instance Multiplication' (Function (space @ units)) Sign where
+instance
+  (Known space, Known units) =>
+  Multiplication' (Function (space @ units)) Sign
+  where
   type Function (space @ units) .*. Sign = Function (space @ (units :*: Unitless))
   function .*. Positive = Units.coerce function
   function .*. Negative = Units.coerce -function
 
 instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
+  (Known space1, Known space2, Known units1, Known units2, space1 ~ space2, units1 ~ units2) =>
   Addition
     (Function (space1 @ units1))
     (Function (space2 @ units2))
@@ -138,9 +161,7 @@ instance
   f1 + f2 = Sum f1 f2
 
 instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
+  (Known space1, Known space2, Known units1, Known units2, space1 ~ space2, units1 ~ units2) =>
   Addition
     (Function (space1 @ units1))
     (Vector2d (space2 @ units2))
@@ -149,9 +170,7 @@ instance
   f + v = f + constant v
 
 instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
+  (Known space1, Known space2, Known units1, Known units2, space1 ~ space2, units1 ~ units2) =>
   Addition
     (Vector2d (space1 @ units1))
     (Function (space2 @ units2))
@@ -160,9 +179,7 @@ instance
   v + f = constant v + f
 
 instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
+  (Known space1, Known space2, Known units1, Known units2, space1 ~ space2, units1 ~ units2) =>
   Subtraction
     (Function (space1 @ units1))
     (Function (space2 @ units2))
@@ -174,9 +191,7 @@ instance
   f1 - f2 = Difference f1 f2
 
 instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
+  (Known space1, Known space2, Known units1, Known units2, space1 ~ space2, units1 ~ units2) =>
   Subtraction
     (Function (space1 @ units1))
     (Vector2d (space2 @ units2))
@@ -185,9 +200,7 @@ instance
   f - v = f - constant v
 
 instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
+  (Known space1, Known space2, Known units1, Known units2, space1 ~ space2, units1 ~ units2) =>
   Subtraction
     (Vector2d (space1 @ units1))
     (Function (space2 @ units2))
@@ -196,10 +209,19 @@ instance
   v - f = constant v - f
 
 instance
-  Units.Product units1 units2 units3 =>
+  ( Known space
+  , Known units1
+  , Known units2
+  , Known units3
+  , space1 ~ space2
+  , Units.Product units1 units2 units3
+  ) =>
   Multiplication (Surface1d.Function units1) (Function (space @ units2)) (Function (space @ units3))
 
-instance Multiplication' (Surface1d.Function units1) (Function (space @ units2)) where
+instance
+  (Known space, Known units1, Known units2) =>
+  Multiplication' (Surface1d.Function units1) (Function (space @ units2))
+  where
   type
     Surface1d.Function units1 .*. Function (space @ units2) =
       Function (space @ (units1 :*: units2))
@@ -210,28 +232,55 @@ instance Multiplication' (Surface1d.Function units1) (Function (space @ units2))
   f1 .*. f2 = Product1d2d' f1 f2
 
 instance
-  Units.Product units1 units2 units3 =>
+  ( Known space
+  , Known units1
+  , Known units2
+  , Known units3
+  , space1 ~ space2
+  , Units.Product units1 units2 units3
+  ) =>
   Multiplication (Qty units1) (Function (space @ units2)) (Function (space @ units3))
 
-instance Multiplication' (Qty units1) (Function (space @ units2)) where
+instance
+  (Known space, Known units1, Known units2) =>
+  Multiplication' (Qty units1) (Function (space @ units2))
+  where
   type Qty units1 .*. Function (space @ units2) = Function (space @ (units1 :*: units2))
   f1 .*. f2 = Surface1d.Function.constant f1 .*. f2
 
 instance
-  Units.Product units1 units2 units3 =>
+  ( Known space
+  , Known units1
+  , Known units2
+  , Known units3
+  , space1 ~ space2
+  , Units.Product units1 units2 units3
+  ) =>
   Multiplication (Surface1d.Function units1) (Vector2d (space @ units2)) (Function (space @ units3))
 
-instance Multiplication' (Surface1d.Function units1) (Vector2d (space @ units2)) where
+instance
+  (Known space, Known units1, Known units2) =>
+  Multiplication' (Surface1d.Function units1) (Vector2d (space @ units2))
+  where
   type
     Surface1d.Function units1 .*. Vector2d (space @ units2) =
       Function (space @ (units1 :*: units2))
   function .*. vector = function .*. constant vector
 
 instance
-  Units.Product units1 units2 units3 =>
+  ( Known space
+  , Known units1
+  , Known units2
+  , Known units3
+  , space1 ~ space2
+  , Units.Product units1 units2 units3
+  ) =>
   Multiplication (Function (space @ units1)) (Surface1d.Function units2) (Function (space @ units3))
 
-instance Multiplication' (Function (space @ units1)) (Surface1d.Function units2) where
+instance
+  (Known space, Known units1, Known units2) =>
+  Multiplication' (Function (space @ units1)) (Surface1d.Function units2)
+  where
   type
     Function (space @ units1) .*. Surface1d.Function units2 =
       Function (space @ (units1 :*: units2))
@@ -242,28 +291,55 @@ instance Multiplication' (Function (space @ units1)) (Surface1d.Function units2)
   f1 .*. f2 = Product2d1d' f1 f2
 
 instance
-  Units.Product units1 units2 units3 =>
+  ( Known space
+  , Known units1
+  , Known units2
+  , Known units3
+  , space1 ~ space2
+  , Units.Product units1 units2 units3
+  ) =>
   Multiplication (Function (space @ units1)) (Qty units2) (Function (space @ units3))
 
-instance Multiplication' (Function (space @ units1)) (Qty units2) where
+instance
+  (Known space, Known units1, Known units2) =>
+  Multiplication' (Function (space @ units1)) (Qty units2)
+  where
   type Function (space @ units1) .*. Qty units2 = Function (space @ (units1 :*: units2))
   function .*. value = function .*. Surface1d.Function.constant value
 
 instance
-  Units.Product units1 units2 units3 =>
+  ( Known space
+  , Known units1
+  , Known units2
+  , Known units3
+  , space1 ~ space2
+  , Units.Product units1 units2 units3
+  ) =>
   Multiplication (Vector2d (space @ units1)) (Surface1d.Function units2) (Function (space @ units3))
 
-instance Multiplication' (Vector2d (space @ units1)) (Surface1d.Function units2) where
+instance
+  (Known space, Known units1, Known units2) =>
+  Multiplication' (Vector2d (space @ units1)) (Surface1d.Function units2)
+  where
   type
     Vector2d (space @ units1) .*. Surface1d.Function units2 =
       Function (space @ (units1 :*: units2))
   vector .*. function = constant vector .*. function
 
 instance
-  Units.Quotient units1 units2 units3 =>
+  ( Known space
+  , Known units1
+  , Known units2
+  , Known units3
+  , space1 ~ space2
+  , Units.Quotient units1 units2 units3
+  ) =>
   Division (Function (space @ units1)) (Surface1d.Function units2) (Function (space @ units3))
 
-instance Division' (Function (space @ units1)) (Surface1d.Function units2) where
+instance
+  (Known space, Known units1, Known units2) =>
+  Division' (Function (space @ units1)) (Surface1d.Function units2)
+  where
   type
     Function (space @ units1) ./. Surface1d.Function units2 =
       Function (space @ (units1 :/: units2))
@@ -272,57 +348,86 @@ instance Division' (Function (space @ units1)) (Surface1d.Function units2) where
   f1 ./. f2 = Quotient' f1 f2
 
 instance
-  Units.Quotient units1 units2 units3 =>
+  ( Known space
+  , Known units1
+  , Known units2
+  , Known units3
+  , space1 ~ space2
+  , Units.Quotient units1 units2 units3
+  ) =>
   Division (Function (space @ units1)) (Qty units2) (Function (space @ units3))
 
-instance Division' (Function (space @ units1)) (Qty units2) where
+instance
+  (Known space, Known units1, Known units2) =>
+  Division' (Function (space @ units1)) (Qty units2)
+  where
   type
     Function (space @ units1) ./. Qty units2 =
       Function (space @ (units1 :/: units2))
   function ./. value = function ./. Surface1d.Function.constant value
 
-instance Division' (Function (space @ units)) Int where
+instance (Known space, Known units) => Division' (Function (space @ units)) Int where
   type Function (space @ units) ./. Int = Function (space @ (units :/: Unitless))
   function ./. value = function ./. Float.int value
 
-instance Division (Function (space @ units)) Int (Function (space @ units))
+instance
+  (Known space, Known units) =>
+  Division (Function (space @ units)) Int (Function (space @ units))
 
-instance Multiplication' (Function (space @ units)) Int where
+instance (Known space, Known units) => Multiplication' (Function (space @ units)) Int where
   type Function (space @ units) .*. Int = Function (space @ (units :*: Unitless))
   function .*. scale = function .*. Float.int scale
 
-instance Multiplication' Int (Function (space @ units)) where
+instance (Known space, Known units) => Multiplication' Int (Function (space @ units)) where
   type Int .*. Function (space @ units) = Function (space @ (Unitless :*: units))
   scale .*. function = Float.int scale .*. function
 
-instance Multiplication (Function (space @ units)) Int (Function (space @ units))
+instance
+  (Known space, Known units) =>
+  Multiplication (Function (space @ units)) Int (Function (space @ units))
 
-instance Multiplication Int (Function (space @ units)) (Function (space @ units))
+instance
+  (Known space, Known units) =>
+  Multiplication Int (Function (space @ units)) (Function (space @ units))
 
 data CrossProduct' space units1 units2
   = CrossProduct' (Function (space @ units1)) (Function (space @ units2))
 
 deriving instance Show (CrossProduct' space units1 units2)
 
-instance Surface1d.Function.Interface (CrossProduct' space units1 units2) (units1 :*: units2) where
+deriving instance
+  (Known space, Known units1, Known units2) =>
+  Eq (CrossProduct' space units1 units2)
+
+instance
+  (Known space, Known units1, Known units2) =>
+  Surface1d.Function.Interface (CrossProduct' space units1 units2) (units1 :*: units2)
+  where
   evaluateImpl (CrossProduct' f1 f2) t = evaluate f1 t .><. evaluate f2 t
   boundsImpl (CrossProduct' f1 f2) t = bounds f1 t .><. bounds f2 t
   derivativeImpl parameter (CrossProduct' f1 f2) =
     derivative parameter f1 .><. f2 + f1 .><. derivative parameter f2
 
 instance
-  (Units.Product units1 units2 units3, space ~ space_) =>
+  ( Known space1
+  , Known space2
+  , Known units1
+  , Known units2
+  , Known units3
+  , Units.Product units1 units2 units3
+  , space1 ~ space2
+  ) =>
   CrossMultiplication
-    (Function (space @ units1))
-    (Function (space_ @ units2))
+    (Function (space1 @ units1))
+    (Function (space2 @ units2))
     (Surface1d.Function units3)
 
 instance
-  space ~ space_ =>
-  CrossMultiplication' (Function (space @ units1)) (Function (space_ @ units2))
+  (Known space1, Known space2, Known units1, Known units2, space1 ~ space2) =>
+  CrossMultiplication' (Function (space1 @ units1)) (Function (space2 @ units2))
   where
   type
-    Function (space @ units1) .><. Function (space_ @ units2) =
+    Function (space1 @ units1) .><. Function (space2 @ units2) =
       Surface1d.Function (units1 :*: units2)
   Constant v .><. _ | v == Vector2d.zero = Surface1d.Function.zero
   _ .><. Constant v | v == Vector2d.zero = Surface1d.Function.zero
@@ -330,57 +435,71 @@ instance
   f1 .><. f2 = Surface1d.Function.new (CrossProduct' f1 f2)
 
 instance
-  (Units.Product units1 units2 units3, space ~ space_) =>
+  ( Known space1
+  , Known space2
+  , Known units1
+  , Known units2
+  , Known units3
+  , Units.Product units1 units2 units3
+  , space1 ~ space2
+  ) =>
   CrossMultiplication
-    (Function (space @ units1))
-    (Vector2d (space_ @ units2))
+    (Function (space1 @ units1))
+    (Vector2d (space2 @ units2))
     (Surface1d.Function units3)
 
 instance
-  space ~ space_ =>
-  CrossMultiplication' (Function (space @ units1)) (Vector2d (space_ @ units2))
+  (Known space1, Known space2, Known units1, Known units2, space1 ~ space2) =>
+  CrossMultiplication' (Function (space1 @ units1)) (Vector2d (space2 @ units2))
   where
   type
-    Function (space @ units1) .><. Vector2d (space_ @ units2) =
+    Function (space1 @ units1) .><. Vector2d (space2 @ units2) =
       Surface1d.Function (units1 :*: units2)
   function .><. vector = function .><. constant vector
 
 instance
-  (Units.Product units1 units2 units3, space ~ space_) =>
+  ( Known space1
+  , Known space2
+  , Known units1
+  , Known units2
+  , Known units3
+  , Units.Product units1 units2 units3
+  , space1 ~ space2
+  ) =>
   CrossMultiplication
-    (Vector2d (space @ units1))
-    (Function (space_ @ units2))
+    (Vector2d (space1 @ units1))
+    (Function (space2 @ units2))
     (Surface1d.Function units3)
 
 instance
-  space ~ space_ =>
-  CrossMultiplication' (Vector2d (space @ units1)) (Function (space_ @ units2))
+  (Known space1, Known space2, Known units1, Known units2, space1 ~ space2) =>
+  CrossMultiplication' (Vector2d (space1 @ units1)) (Function (space2 @ units2))
   where
   type
-    Vector2d (space @ units1) .><. Function (space_ @ units2) =
+    Vector2d (space1 @ units1) .><. Function (space2 @ units2) =
       Surface1d.Function (units1 :*: units2)
   vector .><. function = constant vector .><. function
 
 instance
-  space ~ space_ =>
-  CrossMultiplication (Function (space @ units)) (Direction2d space_) (Surface1d.Function units)
+  (Known space1, Known space2, Known units, space1 ~ space2) =>
+  CrossMultiplication (Function (space1 @ units)) (Direction2d space2) (Surface1d.Function units)
 
 instance
-  space ~ space_ =>
-  CrossMultiplication' (Function (space @ units)) (Direction2d space_)
+  (Known space1, Known space2, Known units, space1 ~ space2) =>
+  CrossMultiplication' (Function (space1 @ units)) (Direction2d space2)
   where
-  type Function (space @ units) .><. Direction2d space_ = Surface1d.Function (units :*: Unitless)
+  type Function (space1 @ units) .><. Direction2d space2 = Surface1d.Function (units :*: Unitless)
   function .><. direction = function .><. Vector2d.unit direction
 
 instance
-  space ~ space_ =>
-  CrossMultiplication (Direction2d space) (Function (space_ @ units)) (Surface1d.Function units)
+  (Known space1, Known space2, Known units, space1 ~ space2) =>
+  CrossMultiplication (Direction2d space1) (Function (space2 @ units)) (Surface1d.Function units)
 
 instance
-  space ~ space_ =>
-  CrossMultiplication' (Direction2d space) (Function (space_ @ units))
+  (Known space1, Known space2, Known units, space1 ~ space2) =>
+  CrossMultiplication' (Direction2d space1) (Function (space2 @ units))
   where
-  type Direction2d space .><. Function (space_ @ units) = Surface1d.Function (Unitless :*: units)
+  type Direction2d space1 .><. Function (space2 @ units) = Surface1d.Function (Unitless :*: units)
   direction .><. function = Vector2d.unit direction .<>. function
 
 data DotProduct' space units1 units2
@@ -388,25 +507,37 @@ data DotProduct' space units1 units2
 
 deriving instance Show (DotProduct' space units1 units2)
 
-instance Surface1d.Function.Interface (DotProduct' space units1 units2) (units1 :*: units2) where
+deriving instance (Known space, Known units1, Known units2) => Eq (DotProduct' space units1 units2)
+
+instance
+  (Known space, Known units1, Known units2) =>
+  Surface1d.Function.Interface (DotProduct' space units1 units2) (units1 :*: units2)
+  where
   evaluateImpl (DotProduct' f1 f2) t = evaluate f1 t .<>. evaluate f2 t
   boundsImpl (DotProduct' f1 f2) t = bounds f1 t .<>. bounds f2 t
   derivativeImpl parameter (DotProduct' f1 f2) =
     derivative parameter f1 .<>. f2 + f1 .<>. derivative parameter f2
 
 instance
-  (Units.Product units1 units2 units3, space ~ space_) =>
+  ( Known space1
+  , Known space2
+  , Known units1
+  , Known units2
+  , Known units3
+  , Units.Product units1 units2 units3
+  , space1 ~ space2
+  ) =>
   DotMultiplication
-    (Function (space @ units1))
-    (Function (space_ @ units2))
+    (Function (space1 @ units1))
+    (Function (space2 @ units2))
     (Surface1d.Function units3)
 
 instance
-  space ~ space_ =>
-  DotMultiplication' (Function (space @ units1)) (Function (space_ @ units2))
+  (Known space1, Known space2, Known units1, Known units2, space1 ~ space2) =>
+  DotMultiplication' (Function (space1 @ units1)) (Function (space2 @ units2))
   where
   type
-    Function (space @ units1) .<>. Function (space_ @ units2) =
+    Function (space1 @ units1) .<>. Function (space2 @ units2) =
       Surface1d.Function (units1 :*: units2)
   Constant v .<>. _ | v == Vector2d.zero = Surface1d.Function.zero
   _ .<>. Constant v | v == Vector2d.zero = Surface1d.Function.zero
@@ -414,57 +545,71 @@ instance
   f1 .<>. f2 = Surface1d.Function.new (DotProduct' f1 f2)
 
 instance
-  (Units.Product units1 units2 units3, space ~ space_) =>
+  ( Known space1
+  , Known space2
+  , Known units1
+  , Known units2
+  , Known units3
+  , Units.Product units1 units2 units3
+  , space1 ~ space2
+  ) =>
   DotMultiplication
-    (Function (space @ units1))
-    (Vector2d (space_ @ units2))
+    (Function (space1 @ units1))
+    (Vector2d (space2 @ units2))
     (Surface1d.Function units3)
 
 instance
-  space ~ space_ =>
-  DotMultiplication' (Function (space @ units1)) (Vector2d (space_ @ units2))
+  (Known space1, Known space2, Known units1, Known units2, space1 ~ space2) =>
+  DotMultiplication' (Function (space1 @ units1)) (Vector2d (space2 @ units2))
   where
   type
-    Function (space @ units1) .<>. Vector2d (space_ @ units2) =
+    Function (space1 @ units1) .<>. Vector2d (space2 @ units2) =
       Surface1d.Function (units1 :*: units2)
   function .<>. vector = function .<>. constant vector
 
 instance
-  (Units.Product units1 units2 units3, space ~ space_) =>
+  ( Known space1
+  , Known space2
+  , Known units1
+  , Known units2
+  , Known units3
+  , Units.Product units1 units2 units3
+  , space1 ~ space2
+  ) =>
   DotMultiplication
-    (Vector2d (space @ units1))
-    (Function (space_ @ units2))
+    (Vector2d (space1 @ units1))
+    (Function (space2 @ units2))
     (Surface1d.Function units3)
 
 instance
-  space ~ space_ =>
-  DotMultiplication' (Vector2d (space @ units1)) (Function (space_ @ units2))
+  (Known space1, Known space2, Known units1, Known units2, space1 ~ space2) =>
+  DotMultiplication' (Vector2d (space1 @ units1)) (Function (space2 @ units2))
   where
   type
-    Vector2d (space @ units1) .<>. Function (space_ @ units2) =
+    Vector2d (space1 @ units1) .<>. Function (space2 @ units2) =
       Surface1d.Function (units1 :*: units2)
   vector .<>. function = constant vector .<>. function
 
 instance
-  space ~ space_ =>
-  DotMultiplication (Function (space @ units)) (Direction2d space_) (Surface1d.Function units)
+  (Known space1, Known space2, Known units, space1 ~ space2) =>
+  DotMultiplication (Function (space1 @ units)) (Direction2d space2) (Surface1d.Function units)
 
 instance
-  space ~ space_ =>
-  DotMultiplication' (Function (space @ units)) (Direction2d space_)
+  (Known space1, Known space2, Known units, space1 ~ space2) =>
+  DotMultiplication' (Function (space1 @ units)) (Direction2d space2)
   where
-  type Function (space @ units) .<>. Direction2d space_ = Surface1d.Function (units :*: Unitless)
+  type Function (space1 @ units) .<>. Direction2d space2 = Surface1d.Function (units :*: Unitless)
   function .<>. direction = function .<>. Vector2d.unit direction
 
 instance
-  space ~ space_ =>
-  DotMultiplication (Direction2d space) (Function (space_ @ units)) (Surface1d.Function units)
+  (Known space1, Known space2, Known units, space1 ~ space2) =>
+  DotMultiplication (Direction2d space1) (Function (space2 @ units)) (Surface1d.Function units)
 
 instance
-  space ~ space_ =>
-  DotMultiplication' (Direction2d space) (Function (space_ @ units))
+  (Known space1, Known space2, Known units, space1 ~ space2) =>
+  DotMultiplication' (Direction2d space1) (Function (space2 @ units))
   where
-  type Direction2d space .<>. Function (space_ @ units) = Surface1d.Function (Unitless :*: units)
+  type Direction2d space1 .<>. Function (space2 @ units) = Surface1d.Function (Unitless :*: units)
   direction .<>. function = Vector2d.unit direction .<>. function
 
 data SurfaceCurveComposition (coordinateSystem :: CoordinateSystem) where
@@ -473,9 +618,12 @@ data SurfaceCurveComposition (coordinateSystem :: CoordinateSystem) where
     VectorCurve2d (space @ units) ->
     SurfaceCurveComposition (space @ units)
 
-deriving instance Show (SurfaceCurveComposition coordinateSystem)
+deriving instance Show (SurfaceCurveComposition (space @ units))
+
+deriving instance (Known space, Known units) => Eq (SurfaceCurveComposition (space @ units))
 
 instance
+  (Known space, Known units) =>
   Composition
     (Surface1d.Function Unitless)
     (VectorCurve2d (space @ units))
@@ -483,7 +631,10 @@ instance
   where
   curve . function = new (SurfaceCurveComposition function curve)
 
-instance Interface (SurfaceCurveComposition (space @ units)) (space @ units) where
+instance
+  (Known space, Known units) =>
+  Interface (SurfaceCurveComposition (space @ units)) (space @ units)
+  where
   evaluateImpl (SurfaceCurveComposition function curve) uv =
     VectorCurve2d.evaluateAt (Surface1d.Function.evaluate function uv) curve
 
@@ -540,7 +691,11 @@ bounds function uv = case function of
   Product2d1d' f1 f2 -> bounds f1 uv .*. Surface1d.Function.bounds f2 uv
   Quotient' f1 f2 -> bounds f1 uv ./. Surface1d.Function.bounds f2 uv
 
-derivative :: Uv.Parameter -> Function (space @ units) -> Function (space @ units)
+derivative ::
+  (Known space, Known units) =>
+  Uv.Parameter ->
+  Function (space @ units) ->
+  Function (space @ units)
 derivative parameter function = case function of
   Function f -> derivativeImpl parameter f
   Coerce f -> Coerce (derivative parameter f)

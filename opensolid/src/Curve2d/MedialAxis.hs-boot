@@ -29,7 +29,7 @@ data Segment (coordinateSystem :: CoordinateSystem) where
 
 solve ::
   forall space units.
-  Tolerance units =>
+  (Known space, Known units, Tolerance units) =>
   Curve2d (space @ units) ->
   Curve2d (space @ units) ->
   Result Error (List (Segment (space @ units)))
