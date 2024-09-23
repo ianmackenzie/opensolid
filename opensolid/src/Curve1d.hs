@@ -98,7 +98,7 @@ data Curve1d units where
     Curve1d units1 ->
     Curve1d units2
 
-instance Known units => Eq (Curve1d units) where
+instance Eq (Curve1d units) where
   Curve1d c1 == Curve1d c2 = Typeable.equal c1 c2
   Curve1d{} == _ = False
   Constant x == Constant y = x == y
