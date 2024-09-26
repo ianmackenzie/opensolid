@@ -127,7 +127,7 @@ instance
   evalUnary (ConstantRhs binaryOp rhs) lhs = evalBinary binaryOp lhs rhs
 
 instance
-  (inner1 ~ inner2, Known output) =>
+  (Known input, Known inner1, Known inner2, Known output, inner1 ~ inner2) =>
   Composition (Ast input inner1) (Ast inner2 output) (Ast input output)
   where
   Constant value . _ = Constant value
@@ -135,7 +135,12 @@ instance
   NonConstant x . NonConstant y = NonConstant (x . y)
 
 instance
-  (inner1 ~ inner2, Known output) =>
+  ( Known input
+  , Known inner1
+  , Known inner2
+  , Known output
+  , inner1 ~ inner2
+  ) =>
   Composition (NonConstant input inner1) (NonConstant inner2 output) (NonConstant input output)
   where
   Input . inner = inner
@@ -143,25 +148,29 @@ instance
   NonInput outer . inner = NonInput (outer . inner)
 
 instance
-  (inner1 ~ inner2, Known output) =>
+  (Known input, Known inner1, Known inner2, Known output, inner1 ~ inner2) =>
   Composition (NonConstant input inner1) (NonInput inner2 output) (NonInput input output)
   where
   Unary op arg . inner = Unary op (arg . inner)
   Binary op arg1 arg2 . inner = Binary op (arg1 . inner) (arg2 . inner)
 
 data Evaluation input where
-  Evaluation :: NonInput input output -> Evaluation input
+  Evaluation :: Known output => NonInput input output -> Evaluation input
 
 deriving instance Show (Evaluation input)
 
-instance Eq (Evaluation input) where
-  Evaluation nonInput1 == Evaluation nonInput2 = equalNonInputs nonInput1 nonInput2
+instance Known input => Eq (Evaluation input) where
+  Evaluation nonInput1 == Evaluation nonInput2 = Typeable.equal nonInput1 nonInput2
 
 newtype Code input = Code (forall state. input -> STArray state Int Any -> ST state ())
 
 data Computation input = Computation (List (Evaluation input)) (Code input)
 
-evalNonInput :: NonInput input output -> Computation input -> (Computation input, Int)
+evalNonInput ::
+  (Known input, Known output) =>
+  NonInput input output ->
+  Computation input ->
+  (Computation input, Int)
 evalNonInput nonInput computation = do
   let Computation evaluations0 (Code runEvaluations0) = computation
   case List.indexOf (Evaluation nonInput) evaluations0 of
@@ -230,17 +239,17 @@ evalNonInput nonInput computation = do
               MArray.writeArray locals outputIndex output
         (Computation updatedEvaluations updatedCode, outputIndex)
 
-compile :: Ast input output -> (input -> output)
+compile :: (Known input, Known output) => Ast input output -> (input -> output)
 compile ast = case ast of
   Constant value -> always value
   NonConstant nonConstant -> compileNonConstant nonConstant
 
-compileNonConstant :: NonConstant input output -> (input -> output)
+compileNonConstant :: (Known input, Known output) => NonConstant input output -> (input -> output)
 compileNonConstant nonConstant = case nonConstant of
   Input -> identity
   NonInput nonInput -> compileNonInput nonInput
 
-compileNonInput :: NonInput input output -> (input -> output)
+compileNonInput :: (Known input, Known output) => NonInput input output -> (input -> output)
 compileNonInput nonInput = case nonInput of
   Unary op Input -> evalUnary op
   Unary op (NonInput arg) -> evalUnary op . compileNonInput arg
