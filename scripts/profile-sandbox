@@ -1,0 +1,3 @@
+#!/bin/bash
+
+stack run --profile sandbox -- +RTS -pj -RTS
