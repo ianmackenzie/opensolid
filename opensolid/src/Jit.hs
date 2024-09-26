@@ -42,14 +42,9 @@ class
   evalBinary :: op -> lhs -> rhs -> output
 
 data Ast input output where
-  Constant :: Eq value => value -> Ast input value
+  Constant :: value -> Ast input value
   NonConstant :: NonConstant input output -> Ast input output
-
-instance Eq (Ast input output) where
-  Constant x == Constant y = x == y
-  NonConstant x == NonConstant y = x == y
-  Constant{} == NonConstant{} = False
-  NonConstant{} == Constant{} = False
+  deriving (Eq, Show)
 
 data NonConstant input output where
   Input :: NonConstant input input
