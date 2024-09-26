@@ -273,11 +273,11 @@ _debugEvaluations (NonEmpty evaluations) = do
 
 printEvaluations :: NonEmpty (Evaluation input) -> Debug
 printEvaluations evaluations = case evaluations of
-  first :| [] -> printEvaluation first
-  first :| NonEmpty rest -> do
-    printEvaluation first
+  Evaluation first :| [] -> printNonInput first
+  Evaluation first :| NonEmpty rest -> do
+    printNonInput first
     printEvaluations rest
 
-printEvaluation :: Evaluation input -> Debug
-printEvaluation (Evaluation (Unary op _)) = Debug.print ("  " + Text.show op)
-printEvaluation (Evaluation (Binary op _ _)) = Debug.print ("  " + Text.show op)
+printNonInput :: NonInput input output -> Debug
+printNonInput (Unary op _) = Debug.print ("  " + Text.show op)
+printNonInput (Binary op _ _) = Debug.print ("  " + Text.show op)
