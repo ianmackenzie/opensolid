@@ -268,7 +268,7 @@ compileNonInput nonInput = case nonInput of
 _debugEvaluations :: List (Evaluation input) -> Debug
 _debugEvaluations [] = Debug.print "No evaluations"
 _debugEvaluations (NonEmpty evaluations) = do
-  Debug.print "Evaluations:"
+  Debug.print ("Evaluations (" + Text.int (NonEmpty.length evaluations) + "):")
   printEvaluations evaluations
 
 printEvaluations :: NonEmpty (Evaluation input) -> Debug
