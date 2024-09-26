@@ -243,7 +243,7 @@ compileNonConstant nonConstant = case nonConstant of
 compileNonInput :: NonInput input output -> (input -> output)
 compileNonInput nonInput = case nonInput of
   Unary op Input -> evalUnary op
-  Unary op arg -> evalUnary op . compileNonConstant arg
+  Unary op (NonInput arg) -> evalUnary op . compileNonInput arg
   Binary op Input Input -> \inputValue -> evalBinary op inputValue inputValue
   Binary op Input (NonInput rhs) -> do
     let evalRhs = compileNonInput rhs
