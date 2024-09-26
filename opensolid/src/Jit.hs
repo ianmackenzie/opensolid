@@ -52,13 +52,10 @@ data NonConstant input output where
 
 deriving instance Show (NonConstant input output)
 
-instance Eq (NonConstant input output) where (==) = equalNonConstants
-
-equalNonConstants :: NonConstant input a -> NonConstant input b -> Bool
-equalNonConstants Input Input = True
-equalNonConstants (NonInput x) (NonInput y) = equalNonInputs x y
-equalNonConstants Input NonInput{} = False
-equalNonConstants NonInput{} Input = False
+instance (Known input, Known output) => Eq (NonConstant input output) where
+  nonConstant1 == nonConstant2 = case nonConstant1 of
+    Input | Input <- nonConstant2 -> True | otherwise -> False
+    NonInput x | NonInput y <- nonConstant2 -> x == y | otherwise -> False
 
 data NonInput input output where
   Unary ::
@@ -75,15 +72,10 @@ data NonInput input output where
 
 deriving instance Show (NonInput input output)
 
-equalNonInputs :: NonInput input a -> NonInput input b -> Bool
-equalNonInputs (Unary op1 x1) (Unary op2 x2) =
-  Typeable.equal op1 op2 && equalNonConstants x1 x2
-equalNonInputs (Binary op1 x1 y1) (Binary op2 x2 y2) =
-  Typeable.equal op1 op2 && equalNonConstants x1 x2 && equalNonConstants y1 y2
-equalNonInputs Unary{} Binary{} = False
-equalNonInputs Binary{} Unary{} = False
-
-instance Eq (NonInput input output) where (==) = equalNonInputs
+instance (Known input, Known output) => Eq (NonInput input output) where
+  nonInput1 == nonInput2 = case nonInput1 of
+    Unary op1 x1 | Unary op2 x2 <- nonInput2 -> Typeable.equal op1 op2 && Typeable.equal x1 x2 | otherwise -> False
+    Binary op1 x1 y1 | Binary op2 x2 y2 <- nonInput2 -> Typeable.equal op1 op2 && Typeable.equal x1 x2 && Typeable.equal y1 y2 | otherwise -> False
 
 input :: Ast input input
 input = NonConstant Input
