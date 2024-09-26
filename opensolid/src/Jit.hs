@@ -8,20 +8,44 @@ module Jit
   , unary
   , binary
   , compile
+  , negate
+  , sum
+  , difference
+  , product
+  , quotient
+  , dotProduct
+  , crossProduct
+  , xy
+  , xCoordinate
+  , yCoordinate
+  , squaredMagnitude
+  , magnitude
+  , squared
+  , sqrt
+  , sin
+  , cos
   )
 where
 
+import Angle qualified
 import Control.Monad.ST (ST, runST)
 import Data.Array.MArray qualified as MArray
 import Data.Array.ST (STArray)
 import Debug (Debug)
 import Debug qualified
+import Float qualified
 import GHC.Exts (Any)
 import List qualified
-import OpenSolid
+import NonEmpty qualified
+import OpenSolid hiding (negate)
+import OpenSolid qualified
+import Point2d (Point2d)
+import Point2d qualified
 import Text qualified
 import Typeable qualified
 import Unsafe.Coerce (unsafeCoerce)
+import Vector2d (Vector2d)
+import Vector2d qualified
 import Prelude qualified
 
 class
@@ -290,3 +314,249 @@ printEvaluations evaluations = case evaluations of
 printNonInput :: NonInput input output -> Debug
 printNonInput (Unary op _) = Debug.print ("  " + Text.show op)
 printNonInput (Binary op _ _) = Debug.print ("  " + Text.show op)
+
+-- OPS
+
+data Negate arg = Negate deriving (Eq, Show)
+
+instance (Known arg, Negation arg) => UnaryOp (Negate arg) arg arg where
+  evalUnary Negate arg = OpenSolid.negate arg
+
+negate ::
+  forall input output.
+  (Known output, Negation output) =>
+  Ast input output ->
+  Ast input output
+negate ast = unary (Negate @output) ast
+
+data Sum lhs rhs = Sum deriving (Eq, Show)
+
+instance
+  (Known lhs, Known rhs, Known output, Addition lhs rhs output) =>
+  BinaryOp (Sum lhs rhs) lhs rhs output
+  where
+  evalBinary Sum lhs rhs = lhs + rhs
+
+sum ::
+  forall input lhs rhs output.
+  (Known lhs, Known rhs, Known output, Addition lhs rhs output) =>
+  Ast input lhs ->
+  Ast input rhs ->
+  Ast input output
+sum = binary (Sum @lhs @rhs)
+
+data Difference lhs rhs = Difference deriving (Eq, Show)
+
+instance
+  (Known lhs, Known rhs, Known output, Subtraction lhs rhs output) =>
+  BinaryOp (Difference lhs rhs) lhs rhs output
+  where
+  evalBinary Difference lhs rhs = lhs - rhs
+
+difference ::
+  forall input lhs rhs output.
+  (Known lhs, Known rhs, Known output, Subtraction lhs rhs output) =>
+  Ast input lhs ->
+  Ast input rhs ->
+  Ast input output
+difference = binary (Difference @lhs @rhs)
+
+data Product lhs rhs = Product deriving (Eq, Show)
+
+instance
+  (Known lhs, Known rhs, Known output, Multiplication lhs rhs output) =>
+  BinaryOp (Product lhs rhs) lhs rhs output
+  where
+  evalBinary Product lhs rhs = lhs * rhs
+
+product ::
+  forall input lhs rhs output.
+  (Known lhs, Known rhs, Known output, Multiplication lhs rhs output) =>
+  Ast input lhs ->
+  Ast input rhs ->
+  Ast input output
+product = binary (Product @lhs @rhs)
+
+data Quotient lhs rhs = Quotient deriving (Eq, Show)
+
+instance
+  (Known lhs, Known rhs, Known output, Division lhs rhs output) =>
+  BinaryOp (Quotient lhs rhs) lhs rhs output
+  where
+  evalBinary Quotient lhs rhs = lhs / rhs
+
+quotient ::
+  forall input lhs rhs output.
+  (Known lhs, Known rhs, Known output, Division lhs rhs output) =>
+  Ast input lhs ->
+  Ast input rhs ->
+  Ast input output
+quotient = binary (Quotient @lhs @rhs)
+
+data DotProduct lhs rhs = DotProduct deriving (Eq, Show)
+
+instance
+  (Known lhs, Known rhs, Known output, DotMultiplication lhs rhs output) =>
+  BinaryOp (DotProduct lhs rhs) lhs rhs output
+  where
+  evalBinary DotProduct lhs rhs = lhs <> rhs
+
+dotProduct ::
+  forall input lhs rhs output.
+  (Known lhs, Known rhs, Known output, DotMultiplication lhs rhs output) =>
+  Ast input lhs ->
+  Ast input rhs ->
+  Ast input output
+dotProduct = binary (DotProduct @lhs @rhs)
+
+data CrossProduct lhs rhs = CrossProduct deriving (Eq, Show)
+
+instance
+  (Known lhs, Known rhs, Known output, CrossMultiplication lhs rhs output) =>
+  BinaryOp (CrossProduct lhs rhs) lhs rhs output
+  where
+  evalBinary CrossProduct lhs rhs = lhs >< rhs
+
+crossProduct ::
+  forall input lhs rhs output.
+  (Known lhs, Known rhs, Known output, CrossMultiplication lhs rhs output) =>
+  Ast input lhs ->
+  Ast input rhs ->
+  Ast input output
+crossProduct = binary (CrossProduct @lhs @rhs)
+
+data SquaredMagnitude arg = SquaredMagnitude deriving (Eq, Show)
+
+instance
+  Known space =>
+  UnaryOp (SquaredMagnitude (Vector2d (space @ Unitless))) (Vector2d (space @ Unitless)) Float
+  where
+  evalUnary SquaredMagnitude = Vector2d.squaredMagnitude
+
+data XY output = XY deriving (Eq, Show)
+
+instance
+  Known space =>
+  BinaryOp (XY (Point2d (space @ Unitless))) Float Float (Point2d (space @ Unitless))
+  where
+  evalBinary XY = Point2d.xy
+
+instance
+  Known space =>
+  BinaryOp (XY (Vector2d (space @ Unitless))) Float Float (Vector2d (space @ Unitless))
+  where
+  evalBinary XY = Vector2d.xy
+
+xy ::
+  forall input output.
+  BinaryOp (XY output) Float Float output =>
+  Ast input Float ->
+  Ast input Float ->
+  Ast input output
+xy = binary (XY @output)
+
+data XCoordinate arg = XCoordinate deriving (Eq, Show)
+
+instance
+  Known space =>
+  UnaryOp (XCoordinate (Point2d (space @ Unitless))) (Point2d (space @ Unitless)) Float
+  where
+  evalUnary XCoordinate = Point2d.xCoordinate
+
+xCoordinate ::
+  forall input arg output.
+  UnaryOp (XCoordinate arg) arg output =>
+  Ast input arg ->
+  Ast input output
+xCoordinate = unary (XCoordinate @arg)
+
+data YCoordinate arg = YCoordinate deriving (Eq, Show)
+
+instance
+  Known space =>
+  UnaryOp (YCoordinate (Point2d (space @ Unitless))) (Point2d (space @ Unitless)) Float
+  where
+  evalUnary YCoordinate = Point2d.yCoordinate
+
+yCoordinate ::
+  forall input arg output.
+  UnaryOp (YCoordinate arg) arg output =>
+  Ast input arg ->
+  Ast input output
+yCoordinate = unary (YCoordinate @arg)
+
+squaredMagnitude ::
+  forall input arg output.
+  UnaryOp (SquaredMagnitude arg) arg output =>
+  Ast input arg ->
+  Ast input output
+squaredMagnitude = unary (SquaredMagnitude @arg)
+
+data Magnitude input = Magnitude deriving (Eq, Show)
+
+instance
+  Known space =>
+  UnaryOp (Magnitude (Vector2d (space @ Unitless))) (Vector2d (space @ Unitless)) Float
+  where
+  evalUnary Magnitude = Vector2d.magnitude
+
+magnitude ::
+  forall input arg output.
+  UnaryOp (Magnitude arg) arg output =>
+  Ast input arg ->
+  Ast input output
+magnitude = unary (Magnitude @arg)
+
+data Squared arg = Squared deriving (Eq, Show)
+
+instance UnaryOp (Squared Float) Float Float where
+  evalUnary Squared = Float.squared
+
+squared ::
+  forall input arg output.
+  UnaryOp (Squared arg) arg output =>
+  Ast input arg ->
+  Ast input output
+squared = unary (Squared @arg)
+
+data SquareRoot arg = SquareRoot deriving (Eq, Show)
+
+instance UnaryOp (SquareRoot Float) Float Float where
+  evalUnary SquareRoot = Float.sqrt
+
+sqrt ::
+  forall input arg output.
+  UnaryOp (SquareRoot arg) arg output =>
+  Ast input arg ->
+  Ast input output
+sqrt = unary (SquareRoot @arg)
+
+data Sine arg = Sine deriving (Eq, Show)
+
+instance UnaryOp (Sine Float) Float Float where
+  evalUnary Sine = Float.sin
+
+instance UnaryOp (Sine Angle) Angle Float where
+  evalUnary Sine = Angle.sin
+
+sin ::
+  forall input arg output.
+  UnaryOp (Sine arg) arg output =>
+  Ast input arg ->
+  Ast input output
+sin = unary (Sine @arg)
+
+data Cosine arg = Cosine deriving (Eq, Show)
+
+instance UnaryOp (Cosine Float) Float Float where
+  evalUnary Cosine = Float.cos
+
+instance UnaryOp (Cosine Angle) Angle Float where
+  evalUnary Cosine = Angle.cos
+
+cos ::
+  forall input arg output.
+  UnaryOp (Cosine arg) arg output =>
+  Ast input arg ->
+  Ast input output
+cos = unary (Cosine @arg)
