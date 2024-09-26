@@ -153,7 +153,7 @@ instance
   where
   Input . inner = inner
   outer . Input = outer
-  NonInput x . y = NonInput (x . y)
+  NonInput outer . inner = NonInput (outer . inner)
 
 instance
   (inner1 ~ inner2, Known output) =>
