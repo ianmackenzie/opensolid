@@ -265,11 +265,9 @@ largestBy function (x :| xs) = go x (abs (function x)) xs
       then go next nextAbsValue remaining
       else go current currentAbsValue remaining
 
+{-# INLINE interpolateFrom #-}
 interpolateFrom :: Qty units -> Qty units -> Float -> Qty units
-interpolateFrom a b t =
-  if t <= 0.5
-    then a + (b - a) * t
-    else b + (a - b) * (1 - t)
+interpolateFrom a b t = a + (b - a) * t
 
 {-# INLINE midpoint #-}
 midpoint :: Qty units -> Qty units -> Qty units
