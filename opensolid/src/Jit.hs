@@ -84,7 +84,7 @@ constant :: Eq value => value -> Ast input value
 constant = Constant
 
 call :: UnaryOp op input output => op -> Ast input output
-call op = NonConstant (NonInput (Unary op Input))
+call op = unary op input
 
 unary :: UnaryOp op arg output => op -> Ast input arg -> Ast input output
 unary op (Constant arg) = Constant (evalUnary op arg)
