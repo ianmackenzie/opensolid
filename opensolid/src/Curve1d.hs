@@ -17,6 +17,7 @@ module Curve1d
   , zeros
   , reverse
   , integral
+  , toAst
   )
 where
 
@@ -31,6 +32,7 @@ import Estimate (Estimate)
 import Estimate qualified
 import Float qualified
 import Fuzzy qualified
+import Jit qualified
 import List qualified
 import NonEmpty qualified
 import OpenSolid
@@ -48,6 +50,7 @@ class Known curve => Interface curve units | curve -> units where
   pointOnImpl :: curve -> Float -> Qty units
   segmentBoundsImpl :: curve -> Range Unitless -> Range units
   derivativeImpl :: curve -> Curve1d units
+  toAstImpl :: curve -> Jit.Ast Float Float
 
 data Curve1d units where
   Curve1d ::
@@ -170,6 +173,7 @@ instance Known units => Interface (Curve1d units) units where
   pointOnImpl = pointOn
   segmentBoundsImpl = segmentBounds
   derivativeImpl = derivative
+  toAstImpl = toAst
 
 new :: Interface curve units => curve -> Curve1d units
 new = Curve1d
@@ -412,6 +416,7 @@ instance Known units => Interface (Reversed units) units where
   pointOnImpl (Reversed curve) tValue = pointOn curve (1 - tValue)
   segmentBoundsImpl (Reversed curve) tBounds = segmentBounds curve (1 - tBounds)
   derivativeImpl (Reversed curve) = -(reverse (derivative curve))
+  toAstImpl (Reversed curve) = toAst curve . toAst (1.0 - parameter)
 
 reverse :: Known units => Curve1d units -> Curve1d units
 reverse curve@(Constant _) = curve
@@ -457,6 +462,22 @@ cos curve = Cos curve
 
 integral :: Known units => Curve1d units -> Estimate units
 integral curve = Estimate.new (Integral curve (derivative curve) Range.unit)
+
+toAst :: Curve1d units -> Jit.Ast Float Float
+toAst curve = case curve of
+  Curve1d c -> toAstImpl c
+  Constant x -> Jit.constant (Units.coerce x)
+  Parameter -> Jit.input
+  Negated c -> Jit.negate (toAst c)
+  Sum c1 c2 -> Jit.sum (toAst c1) (toAst c2)
+  Difference c1 c2 -> Jit.sum (toAst c1) (toAst c2)
+  Product' c1 c2 -> Jit.product (toAst c1) (toAst c2)
+  Quotient' c1 c2 -> Jit.quotient (toAst c1) (toAst c2)
+  Squared' c -> Jit.squared (toAst c)
+  SquareRoot' c -> Jit.sqrt (toAst c)
+  Sin c -> Jit.sin (toAst c)
+  Cos c -> Jit.cos (toAst c)
+  Coerce c -> toAst c
 
 ----- ROOT FINDING -----
 

@@ -45,6 +45,7 @@ module Curve2d
   , removeStartDegeneracy
   , toPolyline
   , medialAxis
+  , toAst
   )
 where
 
@@ -77,6 +78,7 @@ import Error qualified
 import Float qualified
 import Frame2d (Frame2d)
 import Frame2d qualified
+import Jit qualified
 import {-# SOURCE #-} Line2d (Line2d)
 import {-# SOURCE #-} Line2d qualified
 import List qualified
@@ -241,6 +243,20 @@ instance
   reverseImpl = identity
   boundsImpl = Bounds2d.constant
   transformByImpl transform point = new (Point2d.transformBy transform point)
+
+-- TODO actually compile Curve2d to Jit.Ast values
+-- instead of leaving them as 'atomic' operations?
+instance
+  (Known space, Known units) =>
+  Jit.UnaryOp (Curve2d (space @ units)) Float (Point2d (space @ Unitless))
+  where
+  evalUnary curve t = Units.coerce (pointOn curve t)
+
+toAst ::
+  (Known space, Known units) =>
+  Curve2d (space @ units) ->
+  Jit.Ast Float (Point2d (space @ Unitless))
+toAst curve = Jit.call curve
 
 instance
   (Known space1, Known space2, Known units1, Known units2, space1 ~ space2, units1 ~ units2) =>

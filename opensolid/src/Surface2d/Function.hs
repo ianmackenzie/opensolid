@@ -10,13 +10,16 @@ module Surface2d.Function
   , evaluate
   , bounds
   , derivative
+  , toAst
   )
 where
 
 import Bounds2d (Bounds2d)
 import Bounds2d qualified
+import CoordinateSystem (Space)
 import Curve2d (Curve2d)
 import Curve2d qualified
+import Jit qualified
 import OpenSolid
 import Point2d (Point2d)
 import Point2d qualified
@@ -39,6 +42,7 @@ class
   evaluateImpl :: function -> Uv.Point -> Point2d coordinateSystem
   boundsImpl :: function -> Uv.Bounds -> Bounds2d coordinateSystem
   derivativeImpl :: Parameter -> function -> VectorSurface2d.Function coordinateSystem
+  toAstImpl :: function -> Jit.Ast Uv.Point (Point2d (Space coordinateSystem @ Unitless))
 
 data Function (coordinateSystem :: CoordinateSystem) where
   Function ::
@@ -151,6 +155,7 @@ instance
   evaluateImpl (Difference f1 f2) uv = evaluate f1 uv - evaluate f2 uv
   boundsImpl (Difference f1 f2) uv = bounds f1 uv - bounds f2 uv
   derivativeImpl parameter (Difference f1 f2) = derivative parameter f1 - derivative parameter f2
+  toAstImpl (Difference f1 f2) = Jit.difference (toAst f1) (toAst f2)
 
 instance
   (Known space1, Known space2, Known units1, Known units2, space1 ~ space2, units1 ~ units2) =>
@@ -245,3 +250,15 @@ instance
 
   derivativeImpl parameter (SurfaceCurveComposition function curve) =
     (Curve2d.derivative curve . function) * Surface1d.Function.derivative parameter function
+
+  toAstImpl (SurfaceCurveComposition function curve) =
+    Curve2d.toAst curve . Surface1d.Function.toAst function
+
+toAst :: Known space => Function (space @ units) -> Jit.Ast Uv.Point (Point2d (space @ Unitless))
+toAst function = case function of
+  Function f -> toAstImpl f
+  Coerce f -> toAst f
+  Constant p -> Jit.constant (Units.coerce p)
+  XY x y -> Jit.xy (Surface1d.Function.toAst x) (Surface1d.Function.toAst y)
+  Addition f1 f2 -> Jit.sum (toAst f1) (VectorSurface2d.Function.toAst f2)
+  Subtraction f1 f2 -> Jit.difference (toAst f1) (VectorSurface2d.Function.toAst f2)

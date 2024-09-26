@@ -23,10 +23,11 @@ module Surface1d.Function
   , sqrt'
   , sin
   , cos
+  , toAst
+  , unwrap
   )
 where
 
-import Angle qualified
 import Bounds2d (Bounds2d (Bounds2d))
 import Bounds2d qualified
 import Curve1d (Curve1d)
@@ -39,6 +40,7 @@ import Domain2d (Domain2d (Domain2d))
 import Domain2d qualified
 import Float qualified
 import Fuzzy qualified
+import Jit qualified
 import List qualified
 import NonEmpty qualified
 import OpenSolid
@@ -47,6 +49,8 @@ import Qty qualified
 import Range (Range (Range))
 import Range qualified
 import Solve2d qualified
+import Surface1d.Function.Expression (Expression (Expression))
+import Surface1d.Function.Expression qualified as Expression
 import Surface1d.Function.HorizontalCurve qualified as HorizontalCurve
 import Surface1d.Function.PartialZeros (PartialZeros)
 import Surface1d.Function.PartialZeros qualified as PartialZeros
@@ -57,94 +61,44 @@ import Surface1d.Function.Subproblem qualified as Subproblem
 import Surface1d.Function.VerticalCurve qualified as VerticalCurve
 import Surface1d.Function.Zeros (Zeros (..))
 import Surface1d.Function.Zeros qualified as Zeros
-import Typeable qualified
+import Text qualified
 import Units qualified
 import Uv (Parameter (U, V))
 import Uv qualified
 import Uv.Derivatives (Derivatives)
 import Uv.Derivatives qualified as Derivatives
 import VectorCurve2d qualified
+import Prelude qualified
+
+data Function units = Function (Expression units) ~(Uv.Point -> Qty units)
+
+instance Show (Function units) where show _ = Text.unpack "<Surface1d.Function>" -- TODO
+
+pattern Constant :: Qty units -> Function units
+pattern Constant value <- Function (Expression.Constant value) _
+
+build :: Expression units -> Function units
+build expression = do
+  let evaluator = Units.coerce . Jit.compile (Expression.toAst expression)
+  Function expression evaluator
+
+unwrap :: Function units -> Expression units
+unwrap (Function expression _) = expression
+
+instance Eq (Function units) where
+  Function expression1 _ == Function expression2 _ = expression1 == expression2
 
 class Known function => Interface function units | function -> units where
   evaluateImpl :: function -> Uv.Point -> Qty units
   boundsImpl :: function -> Uv.Bounds -> Range units
   derivativeImpl :: Parameter -> function -> Function units
-
-data Function units where
-  Function ::
-    Interface function units =>
-    function ->
-    Function units
-  Constant ::
-    Qty units ->
-    Function units
-  Parameter ::
-    Parameter ->
-    Function Unitless
-  Negated ::
-    Function units ->
-    Function units
-  Sum ::
-    Function units ->
-    Function units ->
-    Function units
-  Difference ::
-    Function units ->
-    Function units ->
-    Function units
-  Product' ::
-    (Known units1, Known units2) =>
-    Function units1 ->
-    Function units2 ->
-    Function (units1 :*: units2)
-  Quotient' ::
-    (Known units1, Known units2) =>
-    Function units1 ->
-    Function units2 ->
-    Function (units1 :/: units2)
-  Squared' ::
-    Known units =>
-    Function units ->
-    Function (units :*: units)
-  SquareRoot' ::
-    Function (units :*: units) ->
-    Function units
-  Sin ::
-    Function Radians ->
-    Function Unitless
-  Cos ::
-    Function Radians ->
-    Function Unitless
-  Coerce ::
-    (Known units1, Known units2) =>
-    Function units1 ->
-    Function units2
-
-deriving instance Show (Function units)
-
-instance Eq (Function units) where
-  function1 == function2 = case function1 of
-    Function f1 | Function f2 <- function2 -> Typeable.equal f1 f2 | otherwise -> False
-    Constant x | Constant y <- function2 -> x == y | otherwise -> False
-    Parameter p1 | Parameter p2 <- function2 -> p1 == p2 | otherwise -> False
-    Negated f1 | Negated f2 <- function2 -> f1 == f2 | otherwise -> False
-    Sum lhs1 rhs1 | Sum lhs2 rhs2 <- function2 -> lhs1 == lhs2 && rhs1 == rhs2 | otherwise -> False
-    Difference lhs1 rhs1 | Difference lhs2 rhs2 <- function2 -> lhs1 == lhs2 && rhs1 == rhs2 | otherwise -> False
-    Product' lhs1 rhs1 | Product' lhs2 rhs2 <- function2 -> lhs1 == lhs2 && rhs1 == rhs2 | otherwise -> False
-    Quotient' lhs1 rhs1 | Quotient' lhs2 rhs2 <- function2 -> lhs1 == lhs2 && rhs1 == rhs2 | otherwise -> False
-    Squared' f1 | Squared' f2 <- function2 -> f1 == f2 | otherwise -> False
-    SquareRoot' f1 | SquareRoot' f2 <- function2 -> f1 == f2 | otherwise -> False
-    Sin f1 | Sin f2 <- function2 -> f1 == f2 | otherwise -> False
-    Cos f1 | Cos f2 <- function2 -> f1 == f2 | otherwise -> False
-    Coerce f1 | Coerce f2 <- function2 -> Typeable.equal f1 f2 | otherwise -> False
+  toAstImpl :: function -> Jit.Ast Uv.Point Float
 
 instance HasUnits (Function units) where
   type UnitsOf (Function units) = units
 
 instance (Known unitsA, Known unitsB) => Units.Coercion (Function unitsA) (Function unitsB) where
-  coerce (Constant value) = Constant (Units.coerce value)
-  coerce (Coerce function) = Coerce function
-  coerce function = Coerce function
+  coerce (Function expression _) = build (Units.coerce expression)
 
 instance
   (Known units1, Known units2, units1 ~ units2) =>
@@ -156,7 +110,7 @@ instance
   (Known units1, Known units2, units1 ~ units2) =>
   ApproximateEquality (Function units1) (Qty units2) units1
   where
-  Constant value1 ~= value2 = value1 ~= value2
+  Function (Expression.Constant value1) _ ~= value2 = value1 ~= value2
   function ~= value = List.allTrue [evaluate function uvPoint ~= value | uvPoint <- Uv.samples]
 
 instance
@@ -180,60 +134,46 @@ instance
   value ^ function = function ^ value
 
 instance Known units => Negation (Function units) where
-  negate (Constant x) = Constant (negate x)
-  negate (Coerce function) = Coerce (negate function)
-  negate (Negated function) = function
-  negate (Difference f1 f2) = Difference f2 f1
-  negate (Product' f1 f2) = negate f1 .*. f2
-  negate (Quotient' f1 f2) = negate f1 ./. f2
-  negate function = Negated function
+  negate (Function expression _) = build (negate expression)
 
 instance Known units => Multiplication Sign (Function units) (Function units)
 
 instance Known units => Multiplication' Sign (Function units) where
   type Sign .*. Function units = Function (Unitless :*: units)
-  Positive .*. function = Units.coerce function
-  Negative .*. function = Units.coerce -function
+  sign .*. (Function expression _) = build (sign .*. expression)
 
 instance Known units => Multiplication (Function units) Sign (Function units)
 
 instance Known units => Multiplication' (Function units) Sign where
   type Function units .*. Sign = Function (units :*: Unitless)
-  function .*. Positive = Units.coerce function
-  function .*. Negative = Units.coerce -function
+  (Function expression _) .*. sign = build (expression .*. sign)
 
 instance units ~ units_ => Addition (Function units) (Function units_) (Function units) where
-  Constant x + function | x == Qty.zero = function
-  function + Constant x | x == Qty.zero = function
-  Constant x + Constant y = constant (x + y)
-  function1 + function2 = Sum function1 function2
+  Function expression1 _ + Function expression2 _ = build (expression1 + expression2)
 
 instance units ~ units_ => Addition (Function units) (Qty units_) (Function units) where
-  function + value = function + constant value
+  Function expression _ + value = build (expression + value)
 
 instance units ~ units_ => Addition (Qty units) (Function units_) (Function units) where
-  value + function = constant value + function
+  value + Function expression _ = build (value + expression)
 
 instance
   (Known units1, Known units2, units1 ~ units2) =>
   Subtraction (Function units1) (Function units2) (Function units1)
   where
-  Constant x - function | x == Qty.zero = negate function
-  function - Constant x | x == Qty.zero = function
-  Constant x - Constant y = constant (x - y)
-  function1 - function2 = Difference function1 function2
+  Function expression1 _ - Function expression2 _ = build (expression1 - expression2)
 
 instance
   (Known units1, Known units2, units1 ~ units2) =>
   Subtraction (Function units1) (Qty units2) (Function units1)
   where
-  function - value = function - constant value
+  Function expression _ - value = build (expression - value)
 
 instance
   (Known units1, Known units2, units1 ~ units2) =>
   Subtraction (Qty units1) (Function units2) (Function units1)
   where
-  value - function = constant value - function
+  value - Function expression _ = build (value - expression)
 
 instance
   (Known units1, Known units2, Known units3, Units.Product units1 units2 units3) =>
@@ -244,15 +184,7 @@ instance
   Multiplication' (Function units1) (Function units2)
   where
   type Function units1 .*. Function units2 = Function (units1 :*: units2)
-  Constant x .*. _ | x == Qty.zero = zero
-  _ .*. Constant x | x == Qty.zero = zero
-  Constant x .*. Constant y = Constant (x .*. y)
-  Constant x .*. function | x == Units.coerce 1.0 = Units.coerce function
-  Constant x .*. function | x == Units.coerce -1.0 = Units.coerce (negate function)
-  Constant x .*. Negated c = negate x .*. c
-  f1 .*. (Constant x) = Units.commute (Constant x .*. f1)
-  Constant x .*. Product' (Constant y) c = Units.rightAssociate ((x .*. y) .*. c)
-  function1 .*. function2 = Product' function1 function2
+  Function expression1 _ .*. Function expression2 _ = build (expression1 .*. expression2)
 
 instance
   (Known units1, Known units2, Known units3, Units.Product units1 units2 units3) =>
@@ -263,7 +195,7 @@ instance
   Multiplication' (Function units1) (Qty units2)
   where
   type Function units1 .*. Qty units2 = Function (units1 :*: units2)
-  function .*. value = function .*. constant value
+  Function expression _ .*. value = build (expression .*. value)
 
 instance
   (Known units1, Known units2, Known units3, Units.Product units1 units2 units3) =>
@@ -274,19 +206,19 @@ instance
   Multiplication' (Qty units1) (Function units2)
   where
   type Qty units1 .*. Function units2 = Function (units1 :*: units2)
-  value .*. function = constant value .*. function
+  value .*. Function expression _ = build (value .*. expression)
 
 instance Known units => Multiplication (Function units) Int (Function units)
 
 instance Known units => Multiplication' (Function units) Int where
   type Function units .*. Int = Function (units :*: Unitless)
-  function .*. value = function .*. Float.int value
+  Function expression _ .*. value = build (expression .*. value)
 
 instance Known units => Multiplication Int (Function units) (Function units)
 
 instance Known units => Multiplication' Int (Function units) where
   type Int .*. Function units = Function (Unitless :*: units)
-  value .*. function = Float.int value .*. function
+  value .*. Function expression _ = build (value .*. expression)
 
 instance
   (Known units1, Known units2, Known units3, Units.Quotient units1 units2 units3) =>
@@ -294,10 +226,7 @@ instance
 
 instance (Known units1, Known units2) => Division' (Function units1) (Function units2) where
   type Function units1 ./. Function units2 = Function (units1 :/: units2)
-  Constant x ./. _ | x == Qty.zero = zero
-  Constant x ./. Constant y = Constant (x ./. y)
-  function ./. Constant x = (1 ./. x) .*^ function
-  function1 ./. function2 = Quotient' function1 function2
+  Function expression1 _ ./. Function expression2 _ = build (expression1 ./. expression2)
 
 instance
   (Known units1, Known units2, Known units3, Units.Quotient units1 units2 units3) =>
@@ -308,13 +237,13 @@ instance
   Division' (Function units1) (Qty units2)
   where
   type Function units1 ./. Qty units2 = Function (units1 :/: units2)
-  function ./. value = function ./. constant value
+  Function expression _ ./. value = build (expression ./. value)
 
 instance Known units => Division (Function units) Int (Function units)
 
 instance Known units => Division' (Function units) Int where
   type Function units ./. Int = Function (units :/: Unitless)
-  function ./. value = function ./. Float.int value
+  Function expression _ ./. value = build (expression ./. value)
 
 instance
   (Known units1, Known units2, Known units3, Units.Quotient units1 units2 units3) =>
@@ -325,7 +254,7 @@ instance
   Division' (Qty units1) (Function units2)
   where
   type Qty units1 ./. Function units2 = Function (units1 :/: units2)
-  value ./. function = constant value ./. function
+  value ./. Function expression _ = build (value ./. expression)
 
 instance
   (Known units1, Known units2, Units.Inverse units1 units2) =>
@@ -333,60 +262,17 @@ instance
 
 instance Known units => Division' Int (Function units) where
   type Int ./. Function units = Function (Unitless :/: units)
-  value ./. function = Float.int value ./. function
+  value ./. Function expression _ = build (value ./. expression)
 
 evaluate :: Function units -> Uv.Point -> Qty units
-evaluate function uv = case function of
-  Function f -> evaluateImpl f uv
-  Constant x -> x
-  Coerce f -> Units.coerce (evaluate f uv)
-  Parameter U -> Point2d.xCoordinate uv
-  Parameter V -> Point2d.yCoordinate uv
-  Negated f -> negate (evaluate f uv)
-  Sum f1 f2 -> evaluate f1 uv + evaluate f2 uv
-  Difference f1 f2 -> evaluate f1 uv - evaluate f2 uv
-  Product' f1 f2 -> evaluate f1 uv .*. evaluate f2 uv
-  Quotient' f1 f2 -> evaluate f1 uv ./. evaluate f2 uv
-  Squared' f -> Qty.squared' (evaluate f uv)
-  SquareRoot' f -> Qty.sqrt' (evaluate f uv)
-  Sin f -> Angle.sin (evaluate f uv)
-  Cos f -> Angle.cos (evaluate f uv)
+evaluate (Function expression _) uv = Expression.evaluate expression uv
 
 bounds :: Function units -> Uv.Bounds -> Range units
-bounds function uv = case function of
-  Function f -> boundsImpl f uv
-  Constant x -> Range.constant x
-  Coerce f -> Units.coerce (bounds f uv)
-  Parameter U -> Bounds2d.xCoordinate uv
-  Parameter V -> Bounds2d.yCoordinate uv
-  Negated f -> negate (bounds f uv)
-  Sum f1 f2 -> bounds f1 uv + bounds f2 uv
-  Difference f1 f2 -> bounds f1 uv - bounds f2 uv
-  Product' f1 f2 -> bounds f1 uv .*. bounds f2 uv
-  Quotient' f1 f2 -> bounds f1 uv ./. bounds f2 uv
-  Squared' f -> Range.squared' (bounds f uv)
-  SquareRoot' f -> Range.sqrt' (bounds f uv)
-  Sin f -> Range.sin (bounds f uv)
-  Cos f -> Range.cos (bounds f uv)
+bounds (Function expression _) uv = Expression.bounds expression uv
 
 derivative :: Known units => Parameter -> Function units -> Function units
-derivative varyingParameter function =
-  case function of
-    Function f -> derivativeImpl varyingParameter f
-    Constant _ -> zero
-    Coerce f -> Units.coerce (derivative varyingParameter f)
-    Parameter p -> if p == varyingParameter then constant 1.0 else zero
-    Negated f -> negate (derivative varyingParameter f)
-    Sum f1 f2 -> derivative varyingParameter f1 + derivative varyingParameter f2
-    Difference f1 f2 -> derivative varyingParameter f1 - derivative varyingParameter f2
-    Product' f1 f2 -> derivative varyingParameter f1 .*. f2 + f1 .*. derivative varyingParameter f2
-    Quotient' f1 f2 ->
-      (derivative varyingParameter f1 .*. f2 - f1 .*. derivative varyingParameter f2)
-        .!/.! squared' f2
-    Squared' f -> 2 * f .*. derivative varyingParameter f
-    SquareRoot' f -> derivative varyingParameter f .!/! (2 * sqrt' f)
-    Sin f -> cos f * (derivative varyingParameter f / Angle.radian)
-    Cos f -> negate (sin f) * (derivative varyingParameter f / Angle.radian)
+derivative varyingParameter (Function expression _) =
+  build (Expression.derivative varyingParameter expression)
 
 derivativeIn :: Known units => Uv.Direction -> Function units -> Function units
 derivativeIn direction function =
@@ -397,7 +283,7 @@ zero :: Function units
 zero = constant Qty.zero
 
 constant :: Qty units -> Function units
-constant = Constant
+constant = build . Expression.Constant
 
 u :: Function Unitless
 u = parameter U
@@ -406,10 +292,10 @@ v :: Function Unitless
 v = parameter V
 
 parameter :: Parameter -> Function Unitless
-parameter = Parameter
+parameter = build . Expression.Parameter
 
 new :: Interface function units => function -> Function units
-new = Function
+new = build . Expression
 
 squared ::
   (Known units1, Known units2, Units.Squared units1 units2) =>
@@ -418,36 +304,22 @@ squared ::
 squared function = Units.specialize (squared' function)
 
 squared' :: Known units => Function units -> Function (units :*: units)
-squared' (Constant x) = Constant (x .*. x)
-squared' (Negated f) = squared' f
-squared' (Cos f) = Units.unspecialize (cosSquared f)
-squared' (Sin f) = Units.unspecialize (sinSquared f)
-squared' function = Squared' function
-
-cosSquared :: Function Radians -> Function Unitless
-cosSquared f = 0.5 * cos (2 * f) + 0.5
-
-sinSquared :: Function Radians -> Function Unitless
-sinSquared f = 0.5 - 0.5 * cos (2 * f)
+squared' (Function expression _) = build (Expression.squared' expression)
 
 sqrt ::
-  (Known units1, Known units2) =>
-  Units.Squared units1 units2 =>
+  (Known units1, Known units2, Units.Squared units1 units2) =>
   Function units2 ->
   Function units1
 sqrt function = sqrt' (Units.unspecialize function)
 
 sqrt' :: Function (units :*: units) -> Function units
-sqrt' (Constant x) = Constant (Qty.sqrt' x)
-sqrt' function = SquareRoot' function
+sqrt' (Function expression _) = build (Expression.sqrt' expression)
 
 sin :: Function Radians -> Function Unitless
-sin (Constant x) = constant (Angle.sin x)
-sin function = Sin function
+sin (Function expression _) = build (Expression.sin expression)
 
 cos :: Function Radians -> Function Unitless
-cos (Constant x) = constant (Angle.cos x)
-cos function = Cos function
+cos (Function expression _) = build (Expression.cos expression)
 
 data CurveOnSurface units
   = CurveOnSurface (Curve2d Uv.Coordinates) (Function units)
@@ -476,6 +348,11 @@ instance
     let uT = VectorCurve2d.xComponent uvT
     let vT = VectorCurve2d.yComponent uvT
     fU . uvCurve * uT + fV . uvCurve * vT
+
+  toAstImpl (CurveOnSurface uvCurve function) = toAst function . Curve2d.toAst uvCurve
+
+toAst :: Function units -> Jit.Ast Uv.Point Float
+toAst (Function expression _) = Expression.toAst expression
 
 zeros :: (Known units, Tolerance units) => Function units -> Result Zeros.Error Zeros
 zeros function

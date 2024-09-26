@@ -181,6 +181,7 @@ library
     Stream
     Surface1d
     Surface1d.Function
+    Surface1d.Function.Expression
     Surface1d.Function.HorizontalCurve
     Surface1d.Function.Internal
     Surface1d.Function.Subproblem

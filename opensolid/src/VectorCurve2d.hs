@@ -39,6 +39,7 @@ module VectorCurve2d
   , relativeToBasis
   , transformBy
   , rotateBy
+  , toAst
   )
 where
 
@@ -59,6 +60,7 @@ import Error qualified
 import Float qualified
 import Frame2d (Frame2d)
 import Frame2d qualified
+import Jit qualified
 import List qualified
 import NonEmpty qualified
 import OpenSolid
@@ -231,6 +233,20 @@ instance
   segmentBoundsImpl = segmentBounds
   derivativeImpl = derivative
   transformByImpl = transformBy
+
+-- TODO actually compile VectorCurve2d to Jit.Ast values
+-- instead of leaving them as 'atomic' operations?
+instance
+  (Known space, Known units) =>
+  Jit.UnaryOp (VectorCurve2d (space @ units)) Float (Vector2d (space @ Unitless))
+  where
+  evalUnary vectorCurve t = Units.coerce (evaluateAt t vectorCurve)
+
+toAst ::
+  (Known space, Known units) =>
+  VectorCurve2d (space @ units) ->
+  Jit.Ast Float (Vector2d (space @ Unitless))
+toAst vectorCurve = Jit.call vectorCurve
 
 instance Known units => Negation (VectorCurve2d (space @ units)) where
   negate curve = case curve of
@@ -474,6 +490,7 @@ instance
   pointOnImpl (DotProductOf c1 c2) t = evaluateAt t c1 .<>. evaluateAt t c2
   segmentBoundsImpl (DotProductOf c1 c2) t = segmentBounds t c1 .<>. segmentBounds t c2
   derivativeImpl (DotProductOf c1 c2) = derivative c1 .<>. c2 + c1 .<>. derivative c2
+  toAstImpl (DotProductOf c1 c2) = Jit.dotProduct (toAst c1) (toAst c2)
 
 instance
   ( Known space1
@@ -571,6 +588,7 @@ instance
   pointOnImpl (CrossProductOf c1 c2) t = evaluateAt t c1 .><. evaluateAt t c2
   segmentBoundsImpl (CrossProductOf c1 c2) t = segmentBounds t c1 .><. segmentBounds t c2
   derivativeImpl (CrossProductOf c1 c2) = derivative c1 .><. c2 + c1 .><. derivative c2
+  toAstImpl (CrossProductOf c1 c2) = Jit.crossProduct (toAst c1) (toAst c2)
 
 instance
   ( Known space1
@@ -1008,6 +1026,7 @@ instance
     VectorBounds2d.squaredMagnitude' (segmentBounds t curve)
   derivativeImpl (SquaredMagnitude' curve) =
     2 * curve .<>. derivative curve
+  toAstImpl (SquaredMagnitude' curve) = Jit.squaredMagnitude (toAst curve)
 
 squaredMagnitude ::
   (Known space, Known units1, Known units2, Units.Squared units1 units2) =>
@@ -1038,6 +1057,7 @@ instance
     VectorBounds2d.magnitude (VectorCurve2d.segmentBounds t curve)
   derivativeImpl (NonZeroMagnitude curve) =
     (VectorCurve2d.derivative curve .<>. curve) .!/! Curve1d.new (NonZeroMagnitude curve)
+  toAstImpl (NonZeroMagnitude curve) = Jit.magnitude (toAst curve)
 
 unsafeMagnitude :: (Known space, Known units) => VectorCurve2d (space @ units) -> Curve1d units
 unsafeMagnitude curve = Curve1d.new (NonZeroMagnitude curve)

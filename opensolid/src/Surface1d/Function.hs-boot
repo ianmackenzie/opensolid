@@ -1,11 +1,20 @@
-module Surface1d.Function (Function, evaluate, bounds) where
+module Surface1d.Function (Interface(..), Function, unwrap, evaluate, bounds) where
 
 import Curve1d (Curve1d)
 import Curve2d (Curve2d)
 import OpenSolid
+import {-# SOURCE #-} Surface1d.Function.Expression (Expression)
 import Range (Range)
 import Units qualified
 import Uv qualified
+import Jit qualified
+import Uv (Parameter)
+
+class Known function => Interface function units | function -> units where
+  evaluateImpl :: function -> Uv.Point -> Qty units
+  boundsImpl :: function -> Uv.Bounds -> Range units
+  derivativeImpl :: Parameter -> function -> Function units
+  toAstImpl :: function -> Jit.Ast Uv.Point Float
 
 type role Function nominal
 
@@ -32,3 +41,4 @@ instance
 
 evaluate :: Function units -> Uv.Point -> Qty units
 bounds :: Function units -> Uv.Bounds -> Range units
+unwrap :: Function units -> Expression units

@@ -16,11 +16,14 @@ module VectorSurface2d.Function
   , evaluate
   , bounds
   , derivative
+  , toAst
   )
 where
 
+import CoordinateSystem (Space)
 import Direction2d (Direction2d)
 import Float qualified
+import Jit qualified
 import OpenSolid
 import Qty qualified
 import Surface1d qualified
@@ -44,6 +47,7 @@ class
   evaluateImpl :: function -> Uv.Point -> Vector2d coordinateSystem
   boundsImpl :: function -> Uv.Bounds -> VectorBounds2d coordinateSystem
   derivativeImpl :: Parameter -> function -> Function coordinateSystem
+  toAstImpl :: function -> Jit.Ast Uv.Point (Vector2d (Space coordinateSystem @ Unitless))
 
 data Function (coordinateSystem :: CoordinateSystem) where
   Function ::
@@ -407,6 +411,7 @@ instance
   boundsImpl (CrossProduct' f1 f2) t = bounds f1 t .><. bounds f2 t
   derivativeImpl parameter (CrossProduct' f1 f2) =
     derivative parameter f1 .><. f2 + f1 .><. derivative parameter f2
+  toAstImpl (CrossProduct' f1 f2) = Jit.crossProduct (toAst f1) (toAst f2)
 
 instance
   ( Known space1
@@ -517,6 +522,7 @@ instance
   boundsImpl (DotProduct' f1 f2) t = bounds f1 t .<>. bounds f2 t
   derivativeImpl parameter (DotProduct' f1 f2) =
     derivative parameter f1 .<>. f2 + f1 .<>. derivative parameter f2
+  toAstImpl (DotProduct' f1 f2) = Jit.dotProduct (toAst f1) (toAst f2)
 
 instance
   ( Known space1
@@ -644,6 +650,9 @@ instance
   derivativeImpl parameter (SurfaceCurveComposition function curve) =
     (VectorCurve2d.derivative curve . function) * Surface1d.Function.derivative parameter function
 
+  toAstImpl (SurfaceCurveComposition function curve) =
+    VectorCurve2d.toAst curve . Surface1d.Function.toAst function
+
 new :: Interface function (space @ units) => function -> Function (space @ units)
 new = Function
 
@@ -714,3 +723,16 @@ derivative parameter function = case function of
   Quotient' f1 f2 ->
     (derivative parameter f1 .*. f2 - f1 .*. Surface1d.Function.derivative parameter f2)
       .!/.! Surface1d.Function.squared' f2
+
+toAst :: Known space => Function (space @ units) -> Jit.Ast Uv.Point (Vector2d (space @ Unitless))
+toAst function = case function of
+  Function f -> toAstImpl f
+  Coerce f -> toAst f
+  Constant v -> Jit.constant (Units.coerce v)
+  XY x y -> Jit.xy (Surface1d.Function.toAst x) (Surface1d.Function.toAst y)
+  Negated f -> Jit.negate (toAst f)
+  Sum f1 f2 -> Jit.sum (toAst f1) (toAst f2)
+  Difference f1 f2 -> Jit.difference (toAst f1) (toAst f2)
+  Product1d2d' f1 f2 -> Jit.product (Surface1d.Function.toAst f1) (toAst f2)
+  Product2d1d' f1 f2 -> Jit.product (toAst f1) (Surface1d.Function.toAst f2)
+  Quotient' f1 f2 -> Jit.quotient (toAst f1) (Surface1d.Function.toAst f2)
