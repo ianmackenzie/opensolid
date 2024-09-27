@@ -1,0 +1,16 @@
+[package]
+edition = "2021"
+name = "opensolid-jit"
+version = "0.1.0"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+cranelift = "0.112.1"
+cranelift-codegen = "0.112.1"
+cranelift-jit = "0.112.1"
+cranelift-module = "0.112.1"
+cranelift-native = "0.112.1"
+
+[lib]
+crate-type = ["cdylib"]

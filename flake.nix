@@ -1,7 +1,7 @@
 {
   # Note that this should be consistent with the Stack resolver defined in stack.yaml
   # (the NixOS version here and the Stack resolver there should use the same GHC version)
-  inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-24.05";
+  inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
   outputs = { self, nixpkgs }:
     # All supported platforms/architectures
     let supportedSystems = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
@@ -9,8 +9,16 @@
       # Define a dev shell for each supported platform/architecture
       devShells = nixpkgs.lib.genAttrs supportedSystems (system:
         # Get the Nix packages for the current platform/architecture
-        let pkgs = nixpkgs.legacyPackages.${system};
-        in {
+        let
+          pkgs = nixpkgs.legacyPackages.${system};
+          ld_library_path = builtins.concatStringsSep ":" [
+            # Allow Haskell to find libopensolidjit.so
+            "$PWD/opensolid-jit/target/release"
+            # Allow Python to find libopensolid-ffi.so
+            "$PWD/opensolid-ffi/$(stack path --dist-dir)/build/opensolid-ffi"
+          ];
+        in
+        {
           # Define the configuration for an OpenSolid development shell
           default = pkgs.mkShell {
             # Development tools
@@ -44,6 +52,12 @@
               pkgs.haskellPackages.implicit-hie
               # For formatting this file =)
               pkgs.nixpkgs-fmt
+              # The Rust compiler, for libopensolidjit
+              pkgs.rustc
+              # The Cargo build tool for Rust
+              pkgs.cargo
+              # For formatting Rust files
+              pkgs.rustfmt
               # For testing the Python extension
               pkgs.python312
               # For formatting/linting Python files
@@ -58,10 +72,12 @@
               "export PATH=$PATH:./scripts"
               # Set LD_LIBRARY_PATH to the build directory containing libopensolid-ffi.so,
               # so that it can be found by Python when loading the 'opensolid' module
-              "export LD_LIBRARY_PATH=$PWD/opensolid-ffi/$(stack path --dist-dir)/build/opensolid-ffi"
+              "export LD_LIBRARY_PATH=${ld_library_path}"
               # Set PYTHONPATH so 'import opensolid' works
               # when running Python interactively from the repository root
               "export PYTHONPATH=$PWD/opensolid-python"
+              # Ensure rust-analyzer can find Rust core library source code
+              "export RUST_SRC_PATH=${pkgs.rust.packages.stable.rustPlatform.rustLibSrc}"
             ];
           };
         });

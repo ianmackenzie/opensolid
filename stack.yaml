@@ -8,7 +8,7 @@ packages:
 
 # Note that this should be consistent with the version of Nix packages defined in flake.nix
 # (the resolver here and the NixOS version there should use the same GHC version)
-resolver: lts-22.24
+resolver: lts-22.31
 
 # Assume that valid/correct versions of GHC etc. are already available via Nix or otherwise
 # (which they should be if the above comment is followed!)
