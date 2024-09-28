@@ -90,6 +90,14 @@ common config
 library
   import: config
   exposed-modules:
+    -- Curve3d
+    -- Line3d
+    -- QuadraticSpline3d
+    -- Surface3d
+    -- Surface3d.Function
+    -- VectorCurve3d
+    -- VectorSurface3d
+    -- VectorSurface3d.Function
     Angle
     Arc2d
     Area
@@ -122,7 +130,6 @@ library
     Curve2d.Intersections
     Curve2d.MedialAxis
     Curve2d.OverlappingSegment
-    -- Curve3d
     Debug
     Direction2d
     Direction3d
@@ -151,7 +158,6 @@ library
     Json.Schema
     Length
     Line2d
-    -- Line3d
     List
     Map
     Maybe
@@ -167,7 +173,6 @@ library
     Polyline2d
     Qty
     QuadraticSpline2d
-    -- QuadraticSpline3d
     Queue
     Random
     Random.Internal
@@ -189,8 +194,6 @@ library
     Surface1d.Function.Zeros
     Surface2d
     Surface2d.Function
-    -- Surface3d
-    -- Surface3d.Function
     Text
     Tolerance
     Transform
@@ -210,11 +213,8 @@ library
     VectorCurve2d.DegenerateEndpoint
     VectorCurve2d.Direction
     VectorCurve2d.Zeros
-    -- VectorCurve3d
     VectorSurface2d
     VectorSurface2d.Function
-    -- VectorSurface3d
-    -- VectorSurface3d.Function
     VectorVolume3d.Function
     Vertex2d
     Volume
@@ -222,10 +222,10 @@ library
     Volume1d.Function
 
   other-modules:
+    -- Curve3d.Internal
     Curve1d.Integral
     Curve2d.Derivatives
     Curve2d.Segment
-    -- Curve3d.Internal
     Json.FieldSchema
     Point2d.CoordinateTransformation
     Point3d.CoordinateTransformation
