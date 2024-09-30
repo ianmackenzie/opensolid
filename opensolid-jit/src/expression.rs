@@ -40,7 +40,8 @@ impl Expression {
 
 #[no_mangle]
 pub extern "C" fn opensolid_jit_constant(value: f64) -> *mut Expression {
-    Expression::Constant(Constant(value)).to_c()
+    let constant = Constant(value);
+    Expression::Constant(constant).to_c()
 }
 
 #[no_mangle]
