@@ -52,11 +52,7 @@ pub extern "C" fn opensolid_jit_argument(index: i64) -> *mut Expression {
 #[no_mangle]
 pub extern "C" fn opensolid_jit_negate(ptr: *mut Expression) -> *mut Expression {
     let arg = Expression::from_c(ptr);
-    if let Expression::Constant(constant) = *arg {
-        Expression::Constant(Constant(-constant.0)).to_c()
-    } else {
-        Expression::Negate(arg).to_c()
-    }
+    Expression::Negate(arg).to_c()
 }
 
 #[no_mangle]
@@ -102,29 +98,17 @@ pub extern "C" fn opensolid_jit_quotient(
 #[no_mangle]
 pub extern "C" fn opensolid_jit_sqrt(ptr: *mut Expression) -> *mut Expression {
     let arg = Expression::from_c(ptr);
-    if let Expression::Constant(constant) = *arg {
-        Expression::Constant(Constant(constant.0.sqrt())).to_c()
-    } else {
-        Expression::SquareRoot(arg).to_c()
-    }
+    Expression::SquareRoot(arg).to_c()
 }
 
 #[no_mangle]
 pub extern "C" fn opensolid_jit_sin(ptr: *mut Expression) -> *mut Expression {
     let arg = Expression::from_c(ptr);
-    if let Expression::Constant(constant) = *arg {
-        Expression::Constant(Constant(constant.0.sin())).to_c()
-    } else {
-        Expression::Sine(arg).to_c()
-    }
+    Expression::Sine(arg).to_c()
 }
 
 #[no_mangle]
 pub extern "C" fn opensolid_jit_cos(ptr: *mut Expression) -> *mut Expression {
     let arg = Expression::from_c(ptr);
-    if let Expression::Constant(constant) = *arg {
-        Expression::Constant(Constant(constant.0.cos())).to_c()
-    } else {
-        Expression::Cosine(arg).to_c()
-    }
+    Expression::Cosine(arg).to_c()
 }
