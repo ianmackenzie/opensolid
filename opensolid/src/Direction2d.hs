@@ -1,5 +1,5 @@
 module Direction2d
-  ( Direction2d
+  ( Direction2d (Direction2d)
   , unwrap
   , xComponent
   , yComponent
@@ -46,13 +46,19 @@ import Random qualified
 import Transform qualified
 import Transform2d (Transform2d)
 import Units qualified
-import Vector2d (Vector2d (Vector2d#))
+import Vector2d (Vector2d (Vector2d, Vector2d#))
 import Vector2d qualified
 
 type role Direction2d phantom
 
-newtype Direction2d (space :: Type) = Direction2d (Vector2d (space @ Unitless))
+newtype Direction2d (space :: Type) = Unit (Vector2d (space @ Unitless))
   deriving (Eq, Show)
+
+{-# COMPLETE Direction2d #-}
+
+{-# INLINE Direction2d #-}
+pattern Direction2d :: Float -> Float -> Direction2d space
+pattern Direction2d dx dy <- Unit (Vector2d dx dy)
 
 instance HasUnits (Direction2d space) where
   type UnitsOf (Direction2d space) = Unitless
@@ -67,7 +73,7 @@ instance
   d1 ~= d2 = angleFrom d1 d2 ~= Angle.zero
 
 instance Negation (Direction2d space) where
-  negate direction = Direction2d -(unwrap direction)
+  negate direction = Unit -(unwrap direction)
 
 instance Multiplication' Sign (Direction2d space) where
   type Sign .*. Direction2d space = Direction2d space
@@ -97,19 +103,19 @@ instance Multiplication (Direction2d space) (Qty units) (Vector2d (space @ units
 
 instance space1 ~ space2 => DotMultiplication' (Direction2d space1) (Direction2d space2) where
   type Direction2d space1 .<>. Direction2d space2 = Float
-  Direction2d v1 .<>. Direction2d v2 = v1 <> v2
+  Unit v1 .<>. Unit v2 = v1 <> v2
 
 instance space1 ~ space2 => DotMultiplication (Direction2d space1) (Direction2d space2) Float
 
 instance space1 ~ space2 => CrossMultiplication' (Direction2d space1) (Direction2d space2) where
   type Direction2d space1 .><. Direction2d space2 = Float
-  Direction2d v1 .><. Direction2d v2 = v1 >< v2
+  Unit v1 .><. Unit v2 = v1 >< v2
 
 instance space1 ~ space2 => CrossMultiplication (Direction2d space1) (Direction2d space2) Float
 
 {-# INLINE unwrap #-}
 unwrap :: Direction2d space -> Vector2d (space @ Unitless)
-unwrap (Direction2d v) = v
+unwrap (Unit v) = v
 
 xComponent :: Direction2d space -> Float
 xComponent direction = Vector2d.xComponent (unwrap direction)
@@ -123,14 +129,14 @@ components direction = Vector2d.components (unwrap direction)
 
 {-# INLINE unsafe #-}
 unsafe :: Vector2d (space @ Unitless) -> Direction2d space
-unsafe = Direction2d
+unsafe = Unit
 
 {-# INLINE lift #-}
 lift ::
   (Vector2d (spaceA @ Unitless) -> Vector2d (spaceB @ Unitless)) ->
   Direction2d spaceA ->
   Direction2d spaceB
-lift function (Direction2d vector) = Direction2d (function vector)
+lift function (Unit vector) = Unit (function vector)
 
 positiveX :: Direction2d space
 positiveX = unsafe (Vector2d# 1.0## 0.0##)
@@ -166,7 +172,7 @@ fromAngle :: Angle -> Direction2d space
 fromAngle angle = unsafe (Vector2d.polar 1.0 angle)
 
 toAngle :: Direction2d space -> Angle
-toAngle (Direction2d (Vector2d# dx dy)) = Angle.atan2 (Qty# dy) (Qty# dx)
+toAngle (Unit (Vector2d# dx dy)) = Angle.atan2 (Qty# dy) (Qty# dx)
 
 degrees :: Float -> Direction2d space
 degrees value = fromAngle (Angle.degrees value)

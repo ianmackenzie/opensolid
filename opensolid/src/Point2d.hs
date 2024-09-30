@@ -1,5 +1,5 @@
 module Point2d
-  ( Point2d (Point2d#)
+  ( Point2d (Point2d#, Point2d)
   , origin
   , x
   , y
@@ -60,6 +60,12 @@ import VectorBounds2d (VectorBounds2d (VectorBounds2d))
 type role Point2d phantom
 
 data Point2d (coordinateSystem :: CoordinateSystem) = Point2d# Double# Double#
+
+{-# COMPLETE Point2d #-}
+
+{-# INLINE Point2d #-}
+pattern Point2d :: Qty units -> Qty units -> Point2d (space @ units)
+pattern Point2d px py <- (coordinates# -> (# px, py #)) where Point2d = xy
 
 deriving instance Eq (Point2d (space @ units))
 
@@ -188,6 +194,10 @@ yCoordinate (Point2d# _ py#) = Qty# py#
 {-# INLINE coordinates #-}
 coordinates :: Point2d (space @ units) -> (Qty units, Qty units)
 coordinates (Point2d# px# py#) = (Qty# px#, Qty# py#)
+
+{-# INLINE coordinates# #-}
+coordinates# :: Point2d (space @ units) -> (# Qty units, Qty units #)
+coordinates# (Point2d# px# py#) = (# Qty# px#, Qty# py# #)
 
 interpolateFrom ::
   Point2d (space @ units) ->

@@ -14,7 +14,7 @@ import {-# SOURCE #-} Vector2d (Vector2d)
 
 type role Direction2d phantom
 
-newtype Direction2d (space :: Type) = Direction2d (Vector2d (space @ Unitless))
+newtype Direction2d (space :: Type) = Unit (Vector2d (space @ Unitless))
 
 unsafe :: Vector2d (space @ Unitless) -> Direction2d space
 unwrap :: Direction2d space -> Vector2d (space @ Unitless)

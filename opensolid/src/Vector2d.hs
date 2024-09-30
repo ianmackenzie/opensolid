@@ -1,5 +1,5 @@
 module Vector2d
-  ( Vector2d (Vector2d#)
+  ( Vector2d (Vector2d#, Vector2d)
   , zero
   , unit
   , x
@@ -74,6 +74,12 @@ import Vector2d.CoordinateTransformation qualified
 type role Vector2d phantom
 
 data Vector2d (coordinateSystem :: CoordinateSystem) = Vector2d# Double# Double#
+
+{-# COMPLETE Vector2d #-}
+
+{-# INLINE Vector2d #-}
+pattern Vector2d :: Qty units -> Qty units -> Vector2d (space @ units)
+pattern Vector2d px py <- (components# -> (# px, py #)) where Vector2d = xy
 
 deriving instance Eq (Vector2d (space @ units))
 
@@ -308,6 +314,10 @@ projectionIn givenDirection vector = givenDirection * componentIn givenDirection
 {-# INLINE components #-}
 components :: Vector2d (space @ units) -> (Qty units, Qty units)
 components (Vector2d# vx vy) = (Qty# vx, Qty# vy)
+
+{-# INLINE components# #-}
+components# :: Vector2d (space @ units) -> (# Qty units, Qty units #)
+components# (Vector2d# vx# vy#) = (# Qty# vx#, Qty# vy# #)
 
 interpolateFrom ::
   Vector2d (space @ units) ->
