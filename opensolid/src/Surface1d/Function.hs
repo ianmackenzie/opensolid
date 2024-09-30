@@ -110,7 +110,7 @@ instance
   (Known units1, Known units2, units1 ~ units2) =>
   ApproximateEquality (Function units1) (Qty units2) units1
   where
-  Constant value1 _ ~= value2 = value1 ~= value2
+  Constant value1 ~= value2 = value1 ~= value2
   function ~= value = List.allTrue [evaluate function uvPoint ~= value | uvPoint <- Uv.samples]
 
 instance
