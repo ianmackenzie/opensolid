@@ -18,9 +18,9 @@ data PiecewiseCurve space
       (Maybe (DegenerateEndpoint space))
       (VectorCurve2d (space @ Unitless))
       (Maybe (DegenerateEndpoint space))
-  deriving (Eq, Show)
+  deriving (Show)
 
-instance Known space => VectorCurve2d.Interface (PiecewiseCurve space) (space @ Unitless) where
+instance VectorCurve2d.Interface (PiecewiseCurve space) (space @ Unitless) where
   evaluateAtImpl t (PiecewiseCurve Nothing inner Nothing) = VectorCurve2d.evaluateAt t inner
   evaluateAtImpl t (PiecewiseCurve (Just degenerateStart) inner Nothing)
     | t >= DegenerateEndpoint.cutoff degenerateStart = VectorCurve2d.evaluateAt t inner
@@ -96,7 +96,7 @@ instance Known space => VectorCurve2d.Interface (PiecewiseCurve space) (space @ 
   toAstImpl PiecewiseCurve{} = Nothing -- TODO support piecewise curves in JIT
 
 unsafe ::
-  (Known space, Known units, Tolerance units) =>
+  Tolerance units =>
   VectorCurve2d (space @ units) ->
   VectorCurve2d (space @ units) ->
   DirectionCurve2d space
@@ -109,7 +109,7 @@ unsafe firstDerivative secondDerivative =
         (endpoint 1.0 firstDerivative secondDerivative)
 
 endpoint ::
-  (Known space, Known units, Tolerance units) =>
+  Tolerance units =>
   Float ->
   VectorCurve2d (space @ units) ->
   VectorCurve2d (space @ units) ->

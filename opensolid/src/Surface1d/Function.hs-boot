@@ -11,7 +11,11 @@ import Units qualified
 import Uv (Parameter)
 import Uv qualified
 
-class Known function => Interface function units | function -> units where
+class
+  Show function =>
+  Interface function units
+    | function -> units
+  where
   evaluateImpl :: function -> Uv.Point -> Qty units
   boundsImpl :: function -> Uv.Bounds -> Range units
   derivativeImpl :: Parameter -> function -> Function units
@@ -24,21 +28,15 @@ data Function units
 
 instance Show (Function units)
 
-instance Eq (Function units)
+instance Negation (Function units)
 
-instance Known units => Negation (Function units)
-
-instance
-  (Known units1, Known units2) =>
-  Division' (Function units1) (Function units2)
+instance Division' (Function units1) (Function units2)
 
 instance
-  (Known units1, Known units2, Known units3, Units.Quotient units1 units2 units3) =>
+  Units.Quotient units1 units2 units3 =>
   Division (Function units1) (Function units2) (Function units3)
 
-instance
-  Known units =>
-  Composition (Curve2d Uv.Coordinates) (Function units) (Curve1d units)
+instance Composition (Curve2d Uv.Coordinates) (Function units) (Curve1d units)
 
 evaluate :: Function units -> Uv.Point -> Qty units
 bounds :: Function units -> Uv.Bounds -> Range units

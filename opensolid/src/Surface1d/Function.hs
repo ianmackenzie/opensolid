@@ -85,10 +85,11 @@ build symbolic = Function symbolic (Symbolic.evaluator symbolic)
 unwrap :: Function units -> Symbolic units
 unwrap (Function symbolic _) = symbolic
 
-instance Eq (Function units) where
-  Function symbolic1 _ == Function symbolic2 _ = symbolic1 == symbolic2
-
-class Known function => Interface function units | function -> units where
+class
+  Show function =>
+  Interface function units
+    | function -> units
+  where
   evaluateImpl :: function -> Uv.Point -> Qty units
   boundsImpl :: function -> Uv.Bounds -> Range units
   derivativeImpl :: Parameter -> function -> Function units
@@ -97,24 +98,24 @@ class Known function => Interface function units | function -> units where
 instance HasUnits (Function units) where
   type UnitsOf (Function units) = units
 
-instance (Known unitsA, Known unitsB) => Units.Coercion (Function unitsA) (Function unitsB) where
+instance Units.Coercion (Function unitsA) (Function unitsB) where
   coerce (Function symbolic _) = build (Units.coerce symbolic)
 
 instance
-  (Known units1, Known units2, units1 ~ units2) =>
+  units1 ~ units2 =>
   ApproximateEquality (Function units1) (Function units2) units1
   where
   function1 ~= function2 = function1 - function2 ~= Qty.zero
 
 instance
-  (Known units1, Known units2, units1 ~ units2) =>
+  units1 ~ units2 =>
   ApproximateEquality (Function units1) (Qty units2) units1
   where
   Constant value1 ~= value2 = value1 ~= value2
   function ~= value = List.allTrue [evaluate function uvPoint ~= value | uvPoint <- Uv.samples]
 
 instance
-  (Known units1, Known units2, units1 ~ units2) =>
+  units1 ~ units2 =>
   Intersects (Function units1) (Qty units2) units1
   where
   function ^ value =
@@ -128,23 +129,23 @@ instance
       Failure Zeros.HigherOrderZero -> True
 
 instance
-  (Known units1, Known units2, units1 ~ units2) =>
+  units1 ~ units2 =>
   Intersects (Qty units1) (Function units2) units1
   where
   value ^ function = function ^ value
 
-instance Known units => Negation (Function units) where
+instance Negation (Function units) where
   negate (Function symbolic _) = build (negate symbolic)
 
-instance Known units => Multiplication Sign (Function units) (Function units)
+instance Multiplication Sign (Function units) (Function units)
 
-instance Known units => Multiplication' Sign (Function units) where
+instance Multiplication' Sign (Function units) where
   type Sign .*. Function units = Function (Unitless :*: units)
   sign .*. (Function symbolic _) = build (sign .*. symbolic)
 
-instance Known units => Multiplication (Function units) Sign (Function units)
+instance Multiplication (Function units) Sign (Function units)
 
-instance Known units => Multiplication' (Function units) Sign where
+instance Multiplication' (Function units) Sign where
   type Function units .*. Sign = Function (units :*: Unitless)
   (Function symbolic _) .*. sign = build (symbolic .*. sign)
 
@@ -158,109 +159,94 @@ instance units ~ units_ => Addition (Qty units) (Function units_) (Function unit
   value + Function symbolic _ = build (value + symbolic)
 
 instance
-  (Known units1, Known units2, units1 ~ units2) =>
+  units1 ~ units2 =>
   Subtraction (Function units1) (Function units2) (Function units1)
   where
   Function symbolic1 _ - Function symbolic2 _ = build (symbolic1 - symbolic2)
 
 instance
-  (Known units1, Known units2, units1 ~ units2) =>
+  units1 ~ units2 =>
   Subtraction (Function units1) (Qty units2) (Function units1)
   where
   Function symbolic _ - value = build (symbolic - value)
 
 instance
-  (Known units1, Known units2, units1 ~ units2) =>
+  units1 ~ units2 =>
   Subtraction (Qty units1) (Function units2) (Function units1)
   where
   value - Function symbolic _ = build (value - symbolic)
 
 instance
-  (Known units1, Known units2, Known units3, Units.Product units1 units2 units3) =>
+  Units.Product units1 units2 units3 =>
   Multiplication (Function units1) (Function units2) (Function units3)
 
-instance
-  (Known units1, Known units2) =>
-  Multiplication' (Function units1) (Function units2)
-  where
+instance Multiplication' (Function units1) (Function units2) where
   type Function units1 .*. Function units2 = Function (units1 :*: units2)
   Function symbolic1 _ .*. Function symbolic2 _ = build (symbolic1 .*. symbolic2)
 
 instance
-  (Known units1, Known units2, Known units3, Units.Product units1 units2 units3) =>
+  Units.Product units1 units2 units3 =>
   Multiplication (Function units1) (Qty units2) (Function units3)
 
-instance
-  (Known units1, Known units2) =>
-  Multiplication' (Function units1) (Qty units2)
-  where
+instance Multiplication' (Function units1) (Qty units2) where
   type Function units1 .*. Qty units2 = Function (units1 :*: units2)
   Function symbolic _ .*. value = build (symbolic .*. value)
 
 instance
-  (Known units1, Known units2, Known units3, Units.Product units1 units2 units3) =>
+  Units.Product units1 units2 units3 =>
   Multiplication (Qty units1) (Function units2) (Function units3)
 
-instance
-  (Known units1, Known units2) =>
-  Multiplication' (Qty units1) (Function units2)
-  where
+instance Multiplication' (Qty units1) (Function units2) where
   type Qty units1 .*. Function units2 = Function (units1 :*: units2)
   value .*. Function symbolic _ = build (value .*. symbolic)
 
-instance Known units => Multiplication (Function units) Int (Function units)
+instance Multiplication (Function units) Int (Function units)
 
-instance Known units => Multiplication' (Function units) Int where
+instance Multiplication' (Function units) Int where
   type Function units .*. Int = Function (units :*: Unitless)
   Function symbolic _ .*. value = build (symbolic .*. value)
 
-instance Known units => Multiplication Int (Function units) (Function units)
+instance Multiplication Int (Function units) (Function units)
 
-instance Known units => Multiplication' Int (Function units) where
+instance Multiplication' Int (Function units) where
   type Int .*. Function units = Function (Unitless :*: units)
   value .*. Function symbolic _ = build (value .*. symbolic)
 
 instance
-  (Known units1, Known units2, Known units3, Units.Quotient units1 units2 units3) =>
+  Units.Quotient units1 units2 units3 =>
   Division (Function units1) (Function units2) (Function units3)
 
-instance (Known units1, Known units2) => Division' (Function units1) (Function units2) where
+instance Division' (Function units1) (Function units2) where
   type Function units1 ./. Function units2 = Function (units1 :/: units2)
   Function symbolic1 _ ./. Function symbolic2 _ = build (symbolic1 ./. symbolic2)
 
 instance
-  (Known units1, Known units2, Known units3, Units.Quotient units1 units2 units3) =>
+  Units.Quotient units1 units2 units3 =>
   Division (Function units1) (Qty units2) (Function units3)
 
-instance
-  (Known units1, Known units2) =>
-  Division' (Function units1) (Qty units2)
-  where
+instance Division' (Function units1) (Qty units2) where
   type Function units1 ./. Qty units2 = Function (units1 :/: units2)
   Function symbolic _ ./. value = build (symbolic ./. value)
 
-instance Known units => Division (Function units) Int (Function units)
+instance Division (Function units) Int (Function units)
 
-instance Known units => Division' (Function units) Int where
+instance Division' (Function units) Int where
   type Function units ./. Int = Function (units :/: Unitless)
   Function symbolic _ ./. value = build (symbolic ./. value)
 
 instance
-  (Known units1, Known units2, Known units3, Units.Quotient units1 units2 units3) =>
+  Units.Quotient units1 units2 units3 =>
   Division (Qty units1) (Function units2) (Function units3)
 
-instance
-  (Known units1, Known units2) =>
-  Division' (Qty units1) (Function units2)
-  where
+instance Division' (Qty units1) (Function units2) where
   type Qty units1 ./. Function units2 = Function (units1 :/: units2)
   value ./. Function symbolic _ = build (value ./. symbolic)
 
 instance
-  (Known units1, Known units2, Units.Inverse units1 units2) =>
+  Units.Inverse units1 units2 =>
   Division Int (Function units1) (Function units2)
 
-instance Known units => Division' Int (Function units) where
+instance Division' Int (Function units) where
   type Int ./. Function units = Function (Unitless :/: units)
   value ./. Function symbolic _ = build (value ./. symbolic)
 
@@ -270,11 +256,11 @@ evaluate (Function _ evaluator) uv = evaluator uv
 bounds :: Function units -> Uv.Bounds -> Range units
 bounds (Function symbolic _) uv = Symbolic.bounds symbolic uv
 
-derivative :: Known units => Parameter -> Function units -> Function units
+derivative :: Parameter -> Function units -> Function units
 derivative varyingParameter (Function symbolic _) =
   build (Symbolic.derivative varyingParameter symbolic)
 
-derivativeIn :: Known units => Uv.Direction -> Function units -> Function units
+derivativeIn :: Uv.Direction -> Function units -> Function units
 derivativeIn direction function =
   Direction2d.xComponent direction * derivative U function
     + Direction2d.yComponent direction * derivative V function
@@ -297,19 +283,13 @@ parameter = build . Symbolic.Parameter
 new :: Interface function units => function -> Function units
 new = build . Symbolic.Function
 
-squared ::
-  (Known units1, Known units2, Units.Squared units1 units2) =>
-  Function units1 ->
-  Function units2
+squared :: Units.Squared units1 units2 => Function units1 -> Function units2
 squared function = Units.specialize (squared' function)
 
-squared' :: Known units => Function units -> Function (units :*: units)
+squared' :: Function units -> Function (units :*: units)
 squared' (Function symbolic _) = build (Symbolic.squared' symbolic)
 
-sqrt ::
-  (Known units1, Known units2, Units.Squared units1 units2) =>
-  Function units2 ->
-  Function units1
+sqrt :: Units.Squared units1 units2 => Function units2 -> Function units1
 sqrt function = sqrt' (Units.unspecialize function)
 
 sqrt' :: Function (units :*: units) -> Function units
@@ -323,18 +303,12 @@ cos (Function symbolic _) = build (Symbolic.cos symbolic)
 
 data CurveOnSurface units
   = CurveOnSurface (Curve2d Uv.Coordinates) (Function units)
-  deriving (Eq, Show)
+  deriving (Show)
 
-instance
-  Known units =>
-  Composition (Curve2d Uv.Coordinates) (Function units) (Curve1d units)
-  where
+instance Composition (Curve2d Uv.Coordinates) (Function units) (Curve1d units) where
   function . uvCurve = Curve1d.new (CurveOnSurface uvCurve function)
 
-instance
-  Known units =>
-  Curve1d.Interface (CurveOnSurface units) units
-  where
+instance Curve1d.Interface (CurveOnSurface units) units where
   pointOnImpl (CurveOnSurface uvCurve function) t =
     evaluate function (Curve2d.pointOnImpl uvCurve t)
 
@@ -355,7 +329,7 @@ instance
 toAst :: Function units -> Maybe (Expression Expression.Surface)
 toAst (Function symbolic _) = Symbolic.toAst symbolic
 
-zeros :: (Known units, Tolerance units) => Function units -> Result Zeros.Error Zeros
+zeros :: Tolerance units => Function units -> Result Zeros.Error Zeros
 zeros function
   | function ~= Qty.zero = Failure Zeros.ZeroEverywhere
   | otherwise = Result.do
@@ -383,7 +357,7 @@ data Solution units
   | SaddleRegionSolution (SaddleRegion units)
 
 findZeros ::
-  (Known units, Tolerance units) =>
+  Tolerance units =>
   Derivatives (Function units) ->
   FindZerosContext ->
   Domain2d ->
@@ -460,7 +434,7 @@ findTangentSolutions subproblem = do
       Solve2d.recurse AllZeroTypes
 
 findCrossingCurves ::
-  (Known units, Tolerance units) =>
+  Tolerance units =>
   Subproblem units ->
   Solve2d.Action Solve2d.NoExclusions FindZerosContext (Solution units)
 findCrossingCurves subproblem =
@@ -470,7 +444,7 @@ findCrossingCurves subproblem =
     Resolved (Just curve) -> Solve2d.return (NonEmpty.singleton (CrossingCurveSolution curve))
 
 crossingCurve ::
-  (Known units, Tolerance units) =>
+  Tolerance units =>
   Subproblem units ->
   Fuzzy (Maybe PartialZeros.CrossingCurve)
 crossingCurve subproblem = do
@@ -481,7 +455,7 @@ crossingCurve subproblem = do
     ]
 
 diagonalCrossingCurve ::
-  (Known units, Tolerance units) =>
+  Tolerance units =>
   Subproblem units ->
   Fuzzy (Maybe PartialZeros.CrossingCurve)
 diagonalCrossingCurve subproblem = Fuzzy.do
@@ -497,10 +471,7 @@ diagonalCrossingCurve subproblem = Fuzzy.do
       (Positive, Negative) -> northeastCrossingCurve subproblem
       (Positive, Positive) -> northwestCrossingCurve subproblem
 
-southeastCrossingCurve ::
-  (Known units, Tolerance units) =>
-  Subproblem units ->
-  Maybe PartialZeros.CrossingCurve
+southeastCrossingCurve :: Tolerance units => Subproblem units -> Maybe PartialZeros.CrossingCurve
 southeastCrossingCurve subproblem = do
   let Subproblem{derivatives, uvBounds, derivativeValues} = subproblem
   let fValues = Derivatives.get derivativeValues
@@ -518,10 +489,7 @@ southeastCrossingCurve subproblem = do
             GT -> Subproblem.rightEdgePoint subproblem
       Just (diagonalCurve derivatives uvBounds start end)
 
-southwestCrossingCurve ::
-  (Known units, Tolerance units) =>
-  Subproblem units ->
-  Maybe PartialZeros.CrossingCurve
+southwestCrossingCurve :: Tolerance units => Subproblem units -> Maybe PartialZeros.CrossingCurve
 southwestCrossingCurve subproblem = do
   let Subproblem{derivatives, uvBounds, derivativeValues} = subproblem
   let fValues = Derivatives.get derivativeValues
@@ -539,10 +507,7 @@ southwestCrossingCurve subproblem = do
             GT -> Subproblem.bottomEdgePoint subproblem
       Just (diagonalCurve derivatives uvBounds start end)
 
-northeastCrossingCurve ::
-  (Known units, Tolerance units) =>
-  Subproblem units ->
-  Maybe PartialZeros.CrossingCurve
+northeastCrossingCurve :: Tolerance units => Subproblem units -> Maybe PartialZeros.CrossingCurve
 northeastCrossingCurve subproblem = do
   let Subproblem{derivatives, uvBounds, derivativeValues} = subproblem
   let fValues = Derivatives.get derivativeValues
@@ -560,10 +525,7 @@ northeastCrossingCurve subproblem = do
             GT -> Subproblem.topEdgePoint subproblem
       Just (diagonalCurve derivatives uvBounds start end)
 
-northwestCrossingCurve ::
-  (Known units, Tolerance units) =>
-  Subproblem units ->
-  Maybe PartialZeros.CrossingCurve
+northwestCrossingCurve :: Tolerance units => Subproblem units -> Maybe PartialZeros.CrossingCurve
 northwestCrossingCurve subproblem = do
   let Subproblem{derivatives, uvBounds, derivativeValues} = subproblem
   let fValues = Derivatives.get derivativeValues
@@ -582,7 +544,7 @@ northwestCrossingCurve subproblem = do
       Just (diagonalCurve derivatives uvBounds start end)
 
 diagonalCurve ::
-  (Known units, Tolerance units) =>
+  Tolerance units =>
   Derivatives (Function units) ->
   Uv.Bounds ->
   (Uv.Point, Domain2d.Boundary) ->
@@ -599,7 +561,7 @@ diagonalCurve derivatives uvBounds start end = do
       else VerticalCurve.monotonic derivatives (Range uStart uEnd) vStart vEnd
 
 horizontalCrossingCurve ::
-  (Known units, Tolerance units) =>
+  Tolerance units =>
   Subproblem units ->
   Fuzzy (Maybe PartialZeros.CrossingCurve)
 horizontalCrossingCurve subproblem = Fuzzy.do
@@ -620,26 +582,20 @@ horizontalCrossingCurve subproblem = Fuzzy.do
           Fuzzy.map Just (eastCrossingCurve subproblem)
     else Unresolved
 
-eastCrossingCurve ::
-  (Known units, Tolerance units) =>
-  Subproblem units ->
-  Fuzzy PartialZeros.CrossingCurve
+eastCrossingCurve :: Tolerance units => Subproblem units -> Fuzzy PartialZeros.CrossingCurve
 eastCrossingCurve subproblem = do
   let start = Subproblem.leftEdgePoint subproblem
   let end = Subproblem.rightEdgePoint subproblem
   horizontalCurve subproblem start end
 
-westCrossingCurve ::
-  (Known units, Tolerance units) =>
-  Subproblem units ->
-  Fuzzy PartialZeros.CrossingCurve
+westCrossingCurve :: Tolerance units => Subproblem units -> Fuzzy PartialZeros.CrossingCurve
 westCrossingCurve subproblem = do
   let start = Subproblem.rightEdgePoint subproblem
   let end = Subproblem.leftEdgePoint subproblem
   horizontalCurve subproblem start end
 
 horizontalCurve ::
-  (Known units, Tolerance units) =>
+  Tolerance units =>
   Subproblem units ->
   (Uv.Point, Domain2d.Boundary) ->
   (Uv.Point, Domain2d.Boundary) ->
@@ -658,7 +614,7 @@ horizontalCurve Subproblem{derivatives, subdomain, uvBounds} start end = do
     else Unresolved
 
 verticalCrossingCurve ::
-  (Known units, Tolerance units) =>
+  Tolerance units =>
   Subproblem units ->
   Fuzzy (Maybe PartialZeros.CrossingCurve)
 verticalCrossingCurve subproblem = Fuzzy.do
@@ -679,26 +635,20 @@ verticalCrossingCurve subproblem = Fuzzy.do
           Fuzzy.map Just (southCrossingCurve subproblem)
     else Unresolved
 
-southCrossingCurve ::
-  (Known units, Tolerance units) =>
-  Subproblem units ->
-  Fuzzy PartialZeros.CrossingCurve
+southCrossingCurve :: Tolerance units => Subproblem units -> Fuzzy PartialZeros.CrossingCurve
 southCrossingCurve subproblem = Fuzzy.do
   let start = Subproblem.topEdgePoint subproblem
   let end = Subproblem.bottomEdgePoint subproblem
   verticalCurve subproblem start end
 
-northCrossingCurve ::
-  (Known units, Tolerance units) =>
-  Subproblem units ->
-  Fuzzy PartialZeros.CrossingCurve
+northCrossingCurve :: Tolerance units => Subproblem units -> Fuzzy PartialZeros.CrossingCurve
 northCrossingCurve subproblem = Fuzzy.do
   let start = Subproblem.bottomEdgePoint subproblem
   let end = Subproblem.topEdgePoint subproblem
   verticalCurve subproblem start end
 
 verticalCurve ::
-  (Known units, Tolerance units) =>
+  Tolerance units =>
   Subproblem units ->
   (Uv.Point, Domain2d.Boundary) ->
   (Uv.Point, Domain2d.Boundary) ->

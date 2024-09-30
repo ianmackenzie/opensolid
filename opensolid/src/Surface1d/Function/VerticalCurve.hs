@@ -48,7 +48,7 @@ data VerticalCurve units = VerticalCurve
   , boundingAxes :: List (Axis2d Uv.Coordinates)
   , tolerance :: Qty units
   }
-  deriving (Eq, Show)
+  deriving (Show)
 
 data MonotonicSpace
 
@@ -59,7 +59,7 @@ data Monotonicity
   deriving (Eq, Show)
 
 new ::
-  (Known units, Tolerance units) =>
+  Tolerance units =>
   Derivatives (Function units) ->
   Range Unitless ->
   Float ->
@@ -84,7 +84,7 @@ new derivatives uBounds vStart vEnd = do
       }
 
 monotonic ::
-  (Known units, Tolerance units) =>
+  Tolerance units =>
   Derivatives (Function units) ->
   Range Unitless ->
   Float ->
@@ -109,7 +109,7 @@ monotonic derivatives uBounds vStart vEnd = do
       }
 
 bounded ::
-  (Known units, Tolerance units) =>
+  Tolerance units =>
   Derivatives (Function units) ->
   Range Unitless ->
   Float ->
@@ -135,10 +135,7 @@ bounded derivatives uBounds vStart vEnd monotonicFrame boundingAxes = do
       , tolerance = ?tolerance
       }
 
-instance
-  Known units =>
-  Curve2d.Interface (VerticalCurve units) Uv.Coordinates
-  where
+instance Curve2d.Interface (VerticalCurve units) Uv.Coordinates where
   startPointImpl curve = Curve2d.pointOnImpl curve 0.0
   endPointImpl curve = Curve2d.pointOnImpl curve 1.0
 

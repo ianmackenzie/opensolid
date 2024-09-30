@@ -24,7 +24,6 @@ import Qty qualified
 import Range (Range)
 import Range qualified
 import {-# SOURCE #-} Surface1d.Function qualified as Function
-import Typeable qualified
 import Units qualified
 import Uv (Parameter (U, V))
 import Uv qualified
@@ -52,17 +51,14 @@ data Symbolic units where
     Symbolic units ->
     Symbolic units
   Product' ::
-    (Known units1, Known units2) =>
     Symbolic units1 ->
     Symbolic units2 ->
     Symbolic (units1 :*: units2)
   Quotient' ::
-    (Known units1, Known units2) =>
     Symbolic units1 ->
     Symbolic units2 ->
     Symbolic (units1 :/: units2)
   Squared' ::
-    Known units =>
     Symbolic units ->
     Symbolic (units :*: units)
   SquareRoot' ::
@@ -75,37 +71,20 @@ data Symbolic units where
     Symbolic Radians ->
     Symbolic Unitless
   Coerce ::
-    (Known units1, Known units2) =>
     Symbolic units1 ->
     Symbolic units2
 
 deriving instance Show (Symbolic units)
 
-instance Eq (Symbolic units) where
-  expression1 == expression2 = case expression1 of
-    Function f1 | Function f2 <- expression2 -> Typeable.equal f1 f2 | otherwise -> False
-    Constant x | Constant y <- expression2 -> x == y | otherwise -> False
-    Parameter p1 | Parameter p2 <- expression2 -> p1 == p2 | otherwise -> False
-    Negated f1 | Negated f2 <- expression2 -> f1 == f2 | otherwise -> False
-    Sum lhs1 rhs1 | Sum lhs2 rhs2 <- expression2 -> lhs1 == lhs2 && rhs1 == rhs2 | otherwise -> False
-    Difference lhs1 rhs1 | Difference lhs2 rhs2 <- expression2 -> lhs1 == lhs2 && rhs1 == rhs2 | otherwise -> False
-    Product' lhs1 rhs1 | Product' lhs2 rhs2 <- expression2 -> lhs1 == lhs2 && rhs1 == rhs2 | otherwise -> False
-    Quotient' lhs1 rhs1 | Quotient' lhs2 rhs2 <- expression2 -> lhs1 == lhs2 && rhs1 == rhs2 | otherwise -> False
-    Squared' f1 | Squared' f2 <- expression2 -> f1 == f2 | otherwise -> False
-    SquareRoot' f1 | SquareRoot' f2 <- expression2 -> f1 == f2 | otherwise -> False
-    Sin f1 | Sin f2 <- expression2 -> f1 == f2 | otherwise -> False
-    Cos f1 | Cos f2 <- expression2 -> f1 == f2 | otherwise -> False
-    Coerce f1 | Coerce f2 <- expression2 -> Typeable.equal f1 f2 | otherwise -> False
-
 instance HasUnits (Symbolic units) where
   type UnitsOf (Symbolic units) = units
 
-instance (Known unitsA, Known unitsB) => Units.Coercion (Symbolic unitsA) (Symbolic unitsB) where
+instance Units.Coercion (Symbolic unitsA) (Symbolic unitsB) where
   coerce (Constant value) = Constant (Units.coerce value)
   coerce (Coerce function) = Coerce function
   coerce expression = Coerce expression
 
-instance Known units => Negation (Symbolic units) where
+instance Negation (Symbolic units) where
   negate (Constant x) = Constant (negate x)
   negate (Coerce function) = Coerce (negate function)
   negate (Negated function) = function
@@ -114,16 +93,16 @@ instance Known units => Negation (Symbolic units) where
   negate (Quotient' f1 f2) = negate f1 ./. f2
   negate function = Negated function
 
-instance Known units => Multiplication Sign (Symbolic units) (Symbolic units)
+instance Multiplication Sign (Symbolic units) (Symbolic units)
 
-instance Known units => Multiplication (Symbolic units) Sign (Symbolic units)
+instance Multiplication (Symbolic units) Sign (Symbolic units)
 
-instance Known units => Multiplication' Sign (Symbolic units) where
+instance Multiplication' Sign (Symbolic units) where
   type Sign .*. Symbolic units = Symbolic (Unitless :*: units)
   Positive .*. function = Units.coerce function
   Negative .*. function = Units.coerce -function
 
-instance Known units => Multiplication' (Symbolic units) Sign where
+instance Multiplication' (Symbolic units) Sign where
   type Symbolic units .*. Sign = Symbolic (units :*: Unitless)
   function .*. Positive = Units.coerce function
   function .*. Negative = Units.coerce -function
@@ -141,7 +120,7 @@ instance units ~ units_ => Addition (Qty units) (Symbolic units_) (Symbolic unit
   value + expression = Constant value + expression
 
 instance
-  (Known units1, Known units2, units1 ~ units2) =>
+  units1 ~ units2 =>
   Subtraction (Symbolic units1) (Symbolic units2) (Symbolic units1)
   where
   Constant x - function | x == Qty.zero = negate function
@@ -150,25 +129,22 @@ instance
   function1 - function2 = Difference function1 function2
 
 instance
-  (Known units1, Known units2, units1 ~ units2) =>
+  units1 ~ units2 =>
   Subtraction (Symbolic units1) (Qty units2) (Symbolic units1)
   where
   expression - value = expression - Constant value
 
 instance
-  (Known units1, Known units2, units1 ~ units2) =>
+  units1 ~ units2 =>
   Subtraction (Qty units1) (Symbolic units2) (Symbolic units1)
   where
   value - expression = Constant value - expression
 
 instance
-  (Known units1, Known units2, Known units3, Units.Product units1 units2 units3) =>
+  Units.Product units1 units2 units3 =>
   Multiplication (Symbolic units1) (Symbolic units2) (Symbolic units3)
 
-instance
-  (Known units1, Known units2) =>
-  Multiplication' (Symbolic units1) (Symbolic units2)
-  where
+instance Multiplication' (Symbolic units1) (Symbolic units2) where
   type Symbolic units1 .*. Symbolic units2 = Symbolic (units1 :*: units2)
   Constant x .*. _ | x == Qty.zero = Constant Qty.zero
   _ .*. Constant x | x == Qty.zero = Constant Qty.zero
@@ -181,44 +157,38 @@ instance
   function1 .*. function2 = Product' function1 function2
 
 instance
-  (Known units1, Known units2, Known units3, Units.Product units1 units2 units3) =>
+  Units.Product units1 units2 units3 =>
   Multiplication (Symbolic units1) (Qty units2) (Symbolic units3)
 
-instance
-  (Known units1, Known units2) =>
-  Multiplication' (Symbolic units1) (Qty units2)
-  where
+instance Multiplication' (Symbolic units1) (Qty units2) where
   type Symbolic units1 .*. Qty units2 = Symbolic (units1 :*: units2)
   expression .*. value = expression .*. Constant value
 
 instance
-  (Known units1, Known units2, Known units3, Units.Product units1 units2 units3) =>
+  Units.Product units1 units2 units3 =>
   Multiplication (Qty units1) (Symbolic units2) (Symbolic units3)
 
-instance
-  (Known units1, Known units2) =>
-  Multiplication' (Qty units1) (Symbolic units2)
-  where
+instance Multiplication' (Qty units1) (Symbolic units2) where
   type Qty units1 .*. Symbolic units2 = Symbolic (units1 :*: units2)
   value .*. function = Constant value .*. function
 
-instance Known units => Multiplication (Symbolic units) Int (Symbolic units)
+instance Multiplication (Symbolic units) Int (Symbolic units)
 
-instance Known units => Multiplication' (Symbolic units) Int where
+instance Multiplication' (Symbolic units) Int where
   type Symbolic units .*. Int = Symbolic (units :*: Unitless)
   expression .*. value = expression .*. Float.int value
 
-instance Known units => Multiplication Int (Symbolic units) (Symbolic units)
+instance Multiplication Int (Symbolic units) (Symbolic units)
 
-instance Known units => Multiplication' Int (Symbolic units) where
+instance Multiplication' Int (Symbolic units) where
   type Int .*. Symbolic units = Symbolic (Unitless :*: units)
   value .*. expression = Float.int value .*. expression
 
 instance
-  (Known units1, Known units2, Known units3, Units.Quotient units1 units2 units3) =>
+  Units.Quotient units1 units2 units3 =>
   Division (Symbolic units1) (Symbolic units2) (Symbolic units3)
 
-instance (Known units1, Known units2) => Division' (Symbolic units1) (Symbolic units2) where
+instance Division' (Symbolic units1) (Symbolic units2) where
   type Symbolic units1 ./. Symbolic units2 = Symbolic (units1 :/: units2)
   Constant x ./. _ | x == Qty.zero = Constant Qty.zero
   Constant x ./. Constant y = Constant (x ./. y)
@@ -226,38 +196,32 @@ instance (Known units1, Known units2) => Division' (Symbolic units1) (Symbolic u
   function1 ./. function2 = Quotient' function1 function2
 
 instance
-  (Known units1, Known units2, Known units3, Units.Quotient units1 units2 units3) =>
+  Units.Quotient units1 units2 units3 =>
   Division (Symbolic units1) (Qty units2) (Symbolic units3)
 
-instance
-  (Known units1, Known units2) =>
-  Division' (Symbolic units1) (Qty units2)
-  where
+instance Division' (Symbolic units1) (Qty units2) where
   type Symbolic units1 ./. Qty units2 = Symbolic (units1 :/: units2)
   function ./. value = function ./. Constant value
 
-instance Known units => Division (Symbolic units) Int (Symbolic units)
+instance Division (Symbolic units) Int (Symbolic units)
 
-instance Known units => Division' (Symbolic units) Int where
+instance Division' (Symbolic units) Int where
   type Symbolic units ./. Int = Symbolic (units :/: Unitless)
   expression ./. value = expression ./. Float.int value
 
 instance
-  (Known units1, Known units2, Known units3, Units.Quotient units1 units2 units3) =>
+  Units.Quotient units1 units2 units3 =>
   Division (Qty units1) (Symbolic units2) (Symbolic units3)
 
-instance
-  (Known units1, Known units2) =>
-  Division' (Qty units1) (Symbolic units2)
-  where
+instance Division' (Qty units1) (Symbolic units2) where
   type Qty units1 ./. Symbolic units2 = Symbolic (units1 :/: units2)
   value ./. expression = Constant value ./. expression
 
 instance
-  (Known units1, Known units2, Units.Inverse units1 units2) =>
+  Units.Inverse units1 units2 =>
   Division Int (Symbolic units1) (Symbolic units2)
 
-instance Known units => Division' Int (Symbolic units) where
+instance Division' Int (Symbolic units) where
   type Int ./. Symbolic units = Symbolic (Unitless :/: units)
   value ./. expression = Float.int value ./. expression
 
@@ -295,7 +259,7 @@ bounds expression uv = case expression of
   Sin f -> Range.sin (bounds f uv)
   Cos f -> Range.cos (bounds f uv)
 
-derivative :: Known units => Parameter -> Symbolic units -> Symbolic units
+derivative :: Parameter -> Symbolic units -> Symbolic units
 derivative varyingParameter expression =
   case expression of
     Function f -> Function.unwrap (Function.derivativeImpl varyingParameter f)
@@ -314,7 +278,7 @@ derivative varyingParameter expression =
     Sin f -> cos f * (derivative varyingParameter f / Angle.radian)
     Cos f -> negate (sin f) * (derivative varyingParameter f / Angle.radian)
 
-squared' :: Known units => Symbolic units -> Symbolic (units :*: units)
+squared' :: Symbolic units -> Symbolic (units :*: units)
 squared' (Constant x) = Constant (x .*. x)
 squared' (Negated f) = squared' f
 squared' (Cos f) = Units.unspecialize (cosSquared f)

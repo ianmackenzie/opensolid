@@ -29,8 +29,6 @@ module Basics
   , type (~)
   , HasCallStack
   , withFrozenCallStack
-  , Typeable
-  , Known
   )
 where
 
@@ -39,7 +37,6 @@ import Data.Kind (Type)
 import Data.Text (Text)
 import Data.Text qualified
 import Data.Type.Equality (type (~))
-import Data.Typeable (Typeable)
 import GHC.Stack (HasCallStack, withFrozenCallStack)
 import Prelude
   ( Bool (False, True)
@@ -104,5 +101,3 @@ identity value = value
 {-# INLINE always #-}
 always :: a -> b -> a
 always value _ = value
-
-type Known a = (Eq a, Show a, Typeable a)

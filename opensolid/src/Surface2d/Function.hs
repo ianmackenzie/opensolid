@@ -27,7 +27,6 @@ import Point2d (Point2d)
 import Point2d qualified
 import Surface1d qualified
 import Surface1d.Function qualified
-import Typeable qualified
 import Units qualified
 import Uv (Parameter)
 import Uv qualified
@@ -37,7 +36,7 @@ import VectorSurface2d qualified
 import VectorSurface2d.Function qualified
 
 class
-  Known function =>
+  Show function =>
   Interface function (coordinateSystem :: CoordinateSystem)
     | function -> coordinateSystem
   where
@@ -52,7 +51,6 @@ data Function (coordinateSystem :: CoordinateSystem) where
     function ->
     Function (space @ units)
   Coerce ::
-    (Known units1, Known units2) =>
     Function (space @ units1) ->
     Function (space @ units2)
   Constant ::
@@ -71,22 +69,13 @@ data Function (coordinateSystem :: CoordinateSystem) where
     VectorSurface2d.Function (space @ units) ->
     Function (space @ units)
 
-instance (Known space, Known units) => Eq (Function (space @ units)) where
-  function1 == function2 = case function1 of
-    Function f1 | Function f2 <- function2 -> Typeable.equal f1 f2 | otherwise -> False
-    Coerce f1 | Coerce f2 <- function2 -> Typeable.equal f1 f2 | otherwise -> False
-    Constant x | Constant y <- function2 -> x == y | otherwise -> False
-    XY x1 y1 | XY x2 y2 <- function2 -> x1 == x2 && y1 == y2 | otherwise -> False
-    Addition lhs1 rhs1 | Addition lhs2 rhs2 <- function2 -> lhs1 == lhs2 && rhs1 == rhs2 | otherwise -> False
-    Subtraction lhs1 rhs1 | Subtraction lhs2 rhs2 <- function2 -> lhs1 == lhs2 && rhs1 == rhs2 | otherwise -> False
-
 deriving instance Show (Function (space @ units))
 
 instance HasUnits (Function (space @ units)) where
   type UnitsOf (Function (space @ units)) = units
 
 instance
-  (Known space1, Known space2, Known unitsA, Known unitsB, space1 ~ space2) =>
+  space1 ~ space2 =>
   Units.Coercion (Function (space1 @ unitsA)) (Function (space2 @ unitsB))
   where
   coerce function = case function of
@@ -146,21 +135,16 @@ data Difference (coordinateSystem :: CoordinateSystem) where
     Function (space @ units) ->
     Difference (space @ units)
 
-deriving instance (Known space, Known units) => Eq (Difference (space @ units))
-
 deriving instance Show (Difference (space @ units))
 
-instance
-  (Known space, Known units) =>
-  VectorSurface2d.Function.Interface (Difference (space @ units)) (space @ units)
-  where
+instance VectorSurface2d.Function.Interface (Difference (space @ units)) (space @ units) where
   evaluateImpl (Difference f1 f2) uv = evaluate f1 uv - evaluate f2 uv
   boundsImpl (Difference f1 f2) uv = bounds f1 uv - bounds f2 uv
   derivativeImpl parameter (Difference f1 f2) = derivative parameter f1 - derivative parameter f2
   toAstImpl (Difference f1 f2) = Maybe.map2 (-) (toAst f1) (toAst f2)
 
 instance
-  (Known space1, Known space2, Known units1, Known units2, space1 ~ space2, units1 ~ units2) =>
+  (space1 ~ space2, units1 ~ units2) =>
   Subtraction
     (Function (space1 @ units1))
     (Function (space2 @ units2))
@@ -205,11 +189,7 @@ bounds function uv = case function of
   Addition f1 f2 -> bounds f1 uv + VectorSurface2d.Function.bounds f2 uv
   Subtraction f1 f2 -> bounds f1 uv - VectorSurface2d.Function.bounds f2 uv
 
-derivative ::
-  (Known space, Known units) =>
-  Uv.Parameter ->
-  Function (space @ units) ->
-  VectorSurface2d.Function (space @ units)
+derivative :: Uv.Parameter -> Function (space @ units) -> VectorSurface2d.Function (space @ units)
 derivative parameter function = case function of
   Function f -> derivativeImpl parameter f
   Coerce f -> Units.coerce (derivative parameter f)
@@ -229,10 +209,7 @@ data SurfaceCurveComposition (coordinateSystem :: CoordinateSystem) where
 
 deriving instance Show (SurfaceCurveComposition (space @ units))
 
-deriving instance (Known space, Known units) => Eq (SurfaceCurveComposition (space @ units))
-
 instance
-  (Known space, Known units) =>
   Composition
     (Surface1d.Function Unitless)
     (Curve2d (space @ units))
@@ -240,10 +217,7 @@ instance
   where
   curve . function = new (SurfaceCurveComposition function curve)
 
-instance
-  (Known space, Known units) =>
-  Interface (SurfaceCurveComposition (space @ units)) (space @ units)
-  where
+instance Interface (SurfaceCurveComposition (space @ units)) (space @ units) where
   evaluateImpl (SurfaceCurveComposition function curve) uv =
     Curve2d.pointOn curve (Surface1d.Function.evaluate function uv)
 
@@ -256,7 +230,7 @@ instance
   toAstImpl (SurfaceCurveComposition function curve) =
     Maybe.map2 (.) (Curve2d.toAst curve) (Surface1d.Function.toAst function)
 
-toAst :: Known space => Function (space @ units) -> Maybe (Expression2d Expression.Surface)
+toAst :: Function (space @ units) -> Maybe (Expression2d Expression.Surface)
 toAst function = case function of
   Function f -> toAstImpl f
   Coerce f -> toAst f

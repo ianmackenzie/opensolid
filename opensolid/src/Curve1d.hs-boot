@@ -16,4 +16,4 @@ data Curve1d units
 
 pointOn :: Curve1d units -> Float -> Qty units
 segmentBounds :: Curve1d units -> Range Unitless -> Range units
-derivative :: Known units => Curve1d units -> Curve1d units
+derivative :: Curve1d units -> Curve1d units

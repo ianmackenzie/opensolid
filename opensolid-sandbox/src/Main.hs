@@ -359,7 +359,7 @@ testParallelComputation = IO.do
   log "sqrt25" sqrt25
 
 drawBezier ::
-  (Known space, Tolerance Meters) =>
+  Tolerance Meters =>
   Colour ->
   Point2d (space @ Unitless) ->
   List (Point2d (space @ Unitless)) ->

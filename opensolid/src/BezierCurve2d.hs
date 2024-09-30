@@ -28,8 +28,6 @@ newtype BezierCurve2d (coordinateSystem :: CoordinateSystem)
 
 deriving instance Show (BezierCurve2d (space @ units))
 
-deriving instance Eq (BezierCurve2d (space @ units))
-
 deCasteljau :: Float -> NonEmpty (Point2d (space @ units)) -> Point2d (space @ units)
 deCasteljau _ (point :| []) = point
 deCasteljau t (p1 :| p2 : rest) = deCasteljau t (deCasteljauStep t p1 p2 rest)
@@ -83,10 +81,7 @@ transformBy :: Transform2d tag (space @ units) -> BezierCurve2d (space @ units) 
 transformBy transform (BezierCurve2d controlPoints) =
   BezierCurve2d (NonEmpty.map (Point2d.transformBy transform) controlPoints)
 
-instance
-  (Known space, Known units) =>
-  Curve2d.Interface (BezierCurve2d (space @ units)) (space @ units)
-  where
+instance Curve2d.Interface (BezierCurve2d (space @ units)) (space @ units) where
   startPointImpl (BezierCurve2d controlPoints) = NonEmpty.first controlPoints
 
   endPointImpl (BezierCurve2d controlPoints) = NonEmpty.last controlPoints
@@ -128,7 +123,6 @@ end point (last control point). For example,
 will return a cubic spline with the given four control points.
 -}
 fromControlPoints ::
-  (Known space, Known units, Tolerance units) =>
   Point2d (space @ units) ->
   List (Point2d (space @ units)) ->
   Point2d (space @ units) ->
@@ -154,7 +148,6 @@ In general, the degree of the resulting spline will be equal to 1 plus the total
 derivatives given.
 -}
 hermite ::
-  (Known space, Known units) =>
   (Point2d (space @ units), List (Vector2d (space @ units))) ->
   (Point2d (space @ units), List (Vector2d (space @ units))) ->
   Curve2d (space @ units)

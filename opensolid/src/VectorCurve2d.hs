@@ -75,7 +75,6 @@ import Range qualified
 import Tolerance qualified
 import Transform2d (Transform2d)
 import Transform2d qualified
-import Typeable qualified
 import Units qualified
 import Vector2d (Vector2d (Vector2d#))
 import Vector2d qualified
@@ -85,6 +84,7 @@ import VectorCurve2d.Direction qualified
 import VectorCurve2d.Zeros qualified as Zeros
 
 class
+  Show curve =>
   Interface curve (coordinateSystem :: CoordinateSystem)
     | curve -> coordinateSystem
   where
@@ -92,7 +92,6 @@ class
   segmentBoundsImpl :: Range Unitless -> curve -> VectorBounds2d coordinateSystem
   derivativeImpl :: curve -> VectorCurve2d coordinateSystem
   transformByImpl ::
-    (Known tag, Known translationUnits) =>
     Transform2d tag (Space coordinateSystem @ translationUnits) ->
     curve ->
     VectorCurve2d coordinateSystem
@@ -100,14 +99,13 @@ class
 
 data VectorCurve2d (coordinateSystem :: CoordinateSystem) where
   VectorCurve2d ::
-    (Known curve, Interface curve (space @ units)) =>
+    Interface curve (space @ units) =>
     curve ->
     VectorCurve2d (space @ units)
   Constant ::
     Vector2d (space @ units) ->
     VectorCurve2d (space @ units)
   Coerce ::
-    (Known units1, Known units2) =>
     VectorCurve2d (space @ units1) ->
     VectorCurve2d (space @ units2)
   Reversed ::
@@ -129,22 +127,18 @@ data VectorCurve2d (coordinateSystem :: CoordinateSystem) where
     VectorCurve2d (space @ units) ->
     VectorCurve2d (space @ units)
   Product1d2d' ::
-    (Known units1, Known units2) =>
     Curve1d units1 ->
     VectorCurve2d (space @ units2) ->
     VectorCurve2d (space @ (units1 :*: units2))
   Product2d1d' ::
-    (Known units1, Known units2) =>
     VectorCurve2d (space @ units1) ->
     Curve1d units2 ->
     VectorCurve2d (space @ (units1 :*: units2))
   Quotient' ::
-    (Known units1, Known units2) =>
     VectorCurve2d (space @ units1) ->
     Curve1d units2 ->
     VectorCurve2d (space @ (units1 :/: units2))
   PlaceInBasis ::
-    (Known global, Known local) =>
     Basis2d global (Defines local) ->
     VectorCurve2d (local @ units) ->
     VectorCurve2d (global @ units)
@@ -173,48 +167,9 @@ data VectorCurve2d (coordinateSystem :: CoordinateSystem) where
     NonEmpty (Vector2d (space @ units)) ->
     VectorCurve2d (space @ units)
   Transformed ::
-    Known space =>
     Transform2d.Affine (space @ Unitless) ->
     VectorCurve2d (space @ units) ->
     VectorCurve2d (space @ units)
-
-instance (Known space, Known units) => Eq (VectorCurve2d (space @ units)) where
-  VectorCurve2d c1 == VectorCurve2d c2 = Typeable.equal c1 c2
-  VectorCurve2d{} == _ = False
-  Constant v1 == Constant v2 = v1 == v2
-  Constant{} == _ = False
-  Coerce c1 == Coerce c2 = Typeable.equal c1 c2
-  Coerce{} == _ = False
-  Reversed c1 == Reversed c2 = c1 == c2
-  Reversed{} == _ = False
-  XY x1 y1 == XY x2 y2 = x1 == x2 && y1 == y2
-  XY{} == _ = False
-  Negated c1 == Negated c2 = c1 == c2
-  Negated{} == _ = False
-  Sum lhs1 rhs1 == Sum lhs2 rhs2 = lhs1 == lhs2 && rhs1 == rhs2
-  Sum{} == _ = False
-  Difference lhs1 rhs1 == Difference lhs2 rhs2 = lhs1 == lhs2 && rhs1 == rhs2
-  Difference{} == _ = False
-  Product1d2d' lhs1 rhs1 == Product1d2d' lhs2 rhs2 = lhs1 == lhs2 && rhs1 == rhs2
-  Product1d2d'{} == _ = False
-  Product2d1d' lhs1 rhs1 == Product2d1d' lhs2 rhs2 = lhs1 == lhs2 && rhs1 == rhs2
-  Product2d1d'{} == _ = False
-  Quotient' lhs1 rhs1 == Quotient' lhs2 rhs2 = lhs1 == lhs2 && rhs1 == rhs2
-  Quotient'{} == _ = False
-  PlaceInBasis b1 c1 == PlaceInBasis b2 c2 = Typeable.equal b1 b2 && Typeable.equal c1 c2
-  PlaceInBasis{} == _ = False
-  Line a1 b1 == Line a2 b2 = a1 == a2 && b1 == b2
-  Line{} == _ = False
-  Arc x1 y1 a1 b1 == Arc x2 y2 a2 b2 = x1 == x2 && y1 == y2 && a1 == a2 && b1 == b2
-  Arc{} == _ = False
-  QuadraticSpline a1 b1 c1 == QuadraticSpline a2 b2 c2 = a1 == a2 && b1 == b2 && c1 == c2
-  QuadraticSpline{} == _ = False
-  CubicSpline a1 b1 c1 d1 == CubicSpline a2 b2 c2 d2 = a1 == a2 && b1 == b2 && c1 == c2 && d1 == d2
-  CubicSpline{} == _ = False
-  BezierCurve ps1 == BezierCurve ps2 = ps1 == ps2
-  BezierCurve{} == _ = False
-  Transformed t1 c1 == Transformed t2 c2 = t1 == t2 && c1 == c2
-  Transformed{} == _ = False
 
 deriving instance Show (VectorCurve2d (space @ units))
 
@@ -222,27 +177,21 @@ instance HasUnits (VectorCurve2d (space @ units)) where
   type UnitsOf (VectorCurve2d (space @ units)) = units
 
 instance
-  (Known unitsA, Known unitsB, space1 ~ space2) =>
+  space1 ~ space2 =>
   Units.Coercion (VectorCurve2d (space1 @ unitsA)) (VectorCurve2d (space2 @ unitsB))
   where
   coerce (Constant value) = Constant (Units.coerce value)
   coerce (Coerce curve) = Coerce curve
   coerce curve = Coerce curve
 
-instance
-  (Known space, Known units) =>
-  Interface (VectorCurve2d (space @ units)) (space @ units)
-  where
+instance Interface (VectorCurve2d (space @ units)) (space @ units) where
   evaluateAtImpl = evaluateAt
   segmentBoundsImpl = segmentBounds
   derivativeImpl = derivative
   transformByImpl = transformBy
   toAstImpl = toAst
 
-toAst ::
-  (Known space, Known units) =>
-  VectorCurve2d (space @ units) ->
-  Maybe (VectorExpression2d Expression.Curve)
+toAst :: VectorCurve2d (space @ units) -> Maybe (VectorExpression2d Expression.Curve)
 toAst vectorCurve = case vectorCurve of
   VectorCurve2d v -> toAstImpl v
   Constant v -> Just (VectorExpression2d.constant v)
@@ -276,7 +225,7 @@ bezierCurveAstImpl controlPoints = case controlPoints of
 collapseControlPoints :: VectorExpression2d.Curve -> VectorExpression2d.Curve -> VectorExpression2d.Curve
 collapseControlPoints p1 p2 = VectorExpression2d.interpolateFrom p1 p2 Expression.parameter
 
-instance Known units => Negation (VectorCurve2d (space @ units)) where
+instance Negation (VectorCurve2d (space @ units)) where
   negate curve = case curve of
     Constant value -> Constant -value
     Coerce c -> Coerce -c
@@ -287,20 +236,16 @@ instance Known units => Negation (VectorCurve2d (space @ units)) where
     Product2d1d' c1 c2 -> Product2d1d' c1 -c2
     _ -> Negated curve
 
-instance
-  Known units =>
-  Multiplication Sign (VectorCurve2d (space @ units)) (VectorCurve2d (space @ units))
+instance Multiplication Sign (VectorCurve2d (space @ units)) (VectorCurve2d (space @ units))
 
-instance Known units => Multiplication' Sign (VectorCurve2d (space @ units)) where
+instance Multiplication' Sign (VectorCurve2d (space @ units)) where
   type Sign .*. VectorCurve2d (space @ units) = VectorCurve2d (space @ (Unitless :*: units))
   Positive .*. curve = Units.coerce curve
   Negative .*. curve = Units.coerce -curve
 
-instance
-  Known units =>
-  Multiplication (VectorCurve2d (space @ units)) Sign (VectorCurve2d (space @ units))
+instance Multiplication (VectorCurve2d (space @ units)) Sign (VectorCurve2d (space @ units))
 
-instance Known units => Multiplication' (VectorCurve2d (space @ units)) Sign where
+instance Multiplication' (VectorCurve2d (space @ units)) Sign where
   type VectorCurve2d (space @ units) .*. Sign = VectorCurve2d (space @ (units :*: Unitless))
   curve .*. Positive = Units.coerce curve
   curve .*. Negative = Units.coerce -curve
@@ -374,168 +319,122 @@ instance
   vector - curve = constant vector - curve
 
 instance
-  (Known units1, Known units2, Known units3, Units.Product units1 units2 units3) =>
+  Units.Product units1 units2 units3 =>
   Multiplication (Curve1d units1) (VectorCurve2d (space @ units2)) (VectorCurve2d (space @ units3))
 
-instance
-  (Known units1, Known units2) =>
-  Multiplication' (Curve1d units1) (VectorCurve2d (space @ units2))
-  where
+instance Multiplication' (Curve1d units1) (VectorCurve2d (space @ units2)) where
   type
     Curve1d units1 .*. VectorCurve2d (space @ units2) =
       VectorCurve2d (space @ (units1 :*: units2))
   c1 .*. c2 = Product1d2d' c1 c2 -- TODO add special cases
 
 instance
-  (Known units1, Known units2, Known units3, Units.Product units1 units2 units3) =>
+  Units.Product units1 units2 units3 =>
   Multiplication (Qty units1) (VectorCurve2d (space @ units2)) (VectorCurve2d (space @ units3))
 
-instance
-  (Known units1, Known units2) =>
-  Multiplication' (Qty units1) (VectorCurve2d (space @ units2))
-  where
+instance Multiplication' (Qty units1) (VectorCurve2d (space @ units2)) where
   type
     Qty units1 .*. VectorCurve2d (space @ units2) =
       VectorCurve2d (space @ (units1 :*: units2))
   c1 .*. c2 = Curve1d.constant c1 .*. c2
 
 instance
-  (Known units1, Known units2, Known units3, Units.Product units1 units2 units3) =>
+  Units.Product units1 units2 units3 =>
   Multiplication (Curve1d units1) (Vector2d (space @ units2)) (VectorCurve2d (space @ units3))
 
-instance
-  (Known units1, Known units2) =>
-  Multiplication' (Curve1d units1) (Vector2d (space @ units2))
-  where
+instance Multiplication' (Curve1d units1) (Vector2d (space @ units2)) where
   type
     Curve1d units1 .*. Vector2d (space @ units2) =
       VectorCurve2d (space @ (units1 :*: units2))
   curve .*. vector = curve .*. constant vector
 
 instance
-  (Known units1, Known units2, Known units3, Units.Product units1 units2 units3) =>
+  Units.Product units1 units2 units3 =>
   Multiplication (VectorCurve2d (space @ units1)) (Curve1d units2) (VectorCurve2d (space @ units3))
 
-instance
-  (Known units1, Known units2) =>
-  Multiplication' (VectorCurve2d (space @ units1)) (Curve1d units2)
-  where
+instance Multiplication' (VectorCurve2d (space @ units1)) (Curve1d units2) where
   type
     VectorCurve2d (space @ units1) .*. Curve1d units2 =
       VectorCurve2d (space @ (units1 :*: units2))
   c1 .*. c2 = Product2d1d' c1 c2 -- TODO add special cases
 
 instance
-  (Known units1, Known units2, Known units3, Units.Product units1 units2 units3) =>
+  Units.Product units1 units2 units3 =>
   Multiplication (VectorCurve2d (space @ units1)) (Qty units2) (VectorCurve2d (space @ units3))
 
-instance
-  (Known units1, Known units2) =>
-  Multiplication' (VectorCurve2d (space @ units1)) (Qty units2)
-  where
+instance Multiplication' (VectorCurve2d (space @ units1)) (Qty units2) where
   type
     VectorCurve2d (space @ units1) .*. Qty units2 =
       VectorCurve2d (space @ (units1 :*: units2))
   curve .*. value = curve .*. Curve1d.constant value
 
 instance
-  (Known units1, Known units2, Known units3, Units.Product units1 units2 units3) =>
+  Units.Product units1 units2 units3 =>
   Multiplication (Vector2d (space @ units1)) (Curve1d units2) (VectorCurve2d (space @ units3))
 
-instance
-  (Known units1, Known units2) =>
-  Multiplication' (Vector2d (space @ units1)) (Curve1d units2)
-  where
+instance Multiplication' (Vector2d (space @ units1)) (Curve1d units2) where
   type
     Vector2d (space @ units1) .*. Curve1d units2 =
       VectorCurve2d (space @ (units1 :*: units2))
   vector .*. curve = constant vector .*. curve
 
 instance
-  (Known units1, Known units2, Known units3, Units.Quotient units1 units2 units3) =>
+  Units.Quotient units1 units2 units3 =>
   Division (VectorCurve2d (space @ units1)) (Curve1d units2) (VectorCurve2d (space @ units3))
 
-instance
-  (Known units1, Known units2) =>
-  Division' (VectorCurve2d (space @ units1)) (Curve1d units2)
-  where
+instance Division' (VectorCurve2d (space @ units1)) (Curve1d units2) where
   type
     VectorCurve2d (space @ units1) ./. Curve1d units2 =
       VectorCurve2d (space @ (units1 :/: units2))
   c1 ./. c2 = Quotient' c1 c2 -- TODO add special cases
 
 instance
-  (Known units1, Known units2, Known units3, Units.Quotient units1 units2 units3) =>
+  Units.Quotient units1 units2 units3 =>
   Division (VectorCurve2d (space @ units1)) (Qty units2) (VectorCurve2d (space @ units3))
 
-instance
-  (Known units1, Known units2) =>
-  Division' (VectorCurve2d (space @ units1)) (Qty units2)
-  where
+instance Division' (VectorCurve2d (space @ units1)) (Qty units2) where
   type
     VectorCurve2d (space @ units1) ./. Qty units2 =
       VectorCurve2d (space @ (units1 :/: units2))
   curve ./. value = curve ./. Curve1d.constant value
 
-instance Known units => Division' (VectorCurve2d (space @ units)) Int where
+instance Division' (VectorCurve2d (space @ units)) Int where
   type VectorCurve2d (space @ units) ./. Int = VectorCurve2d (space @ (units :/: Unitless))
   curve ./. value = curve ./. Float.int value
 
-instance
-  Known units =>
-  Division (VectorCurve2d (space @ units)) Int (VectorCurve2d (space @ units))
+instance Division (VectorCurve2d (space @ units)) Int (VectorCurve2d (space @ units))
 
-instance
-  Known units =>
-  Multiplication' (VectorCurve2d (space @ units)) Int
-  where
+instance Multiplication' (VectorCurve2d (space @ units)) Int where
   type VectorCurve2d (space @ units) .*. Int = VectorCurve2d (space @ (units :*: Unitless))
   curve .*. scale = curve .*. Float.int scale
 
-instance
-  Known units =>
-  Multiplication' Int (VectorCurve2d (space @ units))
-  where
+instance Multiplication' Int (VectorCurve2d (space @ units)) where
   type Int .*. VectorCurve2d (space @ units) = VectorCurve2d (space @ (Unitless :*: units))
   scale .*. curve = Float.int scale .*. curve
 
-instance
-  Known units =>
-  Multiplication (VectorCurve2d (space @ units)) Int (VectorCurve2d (space @ units))
+instance Multiplication (VectorCurve2d (space @ units)) Int (VectorCurve2d (space @ units))
 
-instance
-  Known units =>
-  Multiplication Int (VectorCurve2d (space @ units)) (VectorCurve2d (space @ units))
+instance Multiplication Int (VectorCurve2d (space @ units)) (VectorCurve2d (space @ units))
 
 data DotProductOf space units1 units2
   = DotProductOf (VectorCurve2d (space @ units1)) (VectorCurve2d (space @ units2))
-  deriving (Eq, Show)
+  deriving (Show)
 
-instance
-  (Known space, Known units1, Known units2) =>
-  Curve1d.Interface (DotProductOf space units1 units2) (units1 :*: units2)
-  where
+instance Curve1d.Interface (DotProductOf space units1 units2) (units1 :*: units2) where
   pointOnImpl (DotProductOf c1 c2) t = evaluateAt t c1 .<>. evaluateAt t c2
   segmentBoundsImpl (DotProductOf c1 c2) t = segmentBounds t c1 .<>. segmentBounds t c2
   derivativeImpl (DotProductOf c1 c2) = derivative c1 .<>. c2 + c1 .<>. derivative c2
   toAstImpl (DotProductOf c1 c2) = Maybe.map2 (<>) (toAst c1) (toAst c2)
 
 instance
-  ( Known space1
-  , Known space2
-  , Known units1
-  , Known units2
-  , Known units3
-  , Units.Product units1 units2 units3
-  , space1 ~ space2
-  ) =>
+  (Units.Product units1 units2 units3, space1 ~ space2) =>
   DotMultiplication
     (VectorCurve2d (space1 @ units1))
     (VectorCurve2d (space2 @ units2))
     (Curve1d units3)
 
 instance
-  (Known space1, Known space2, Known units1, Known units2, space1 ~ space2) =>
+  space1 ~ space2 =>
   DotMultiplication' (VectorCurve2d (space1 @ units1)) (VectorCurve2d (space2 @ units2))
   where
   type
@@ -544,18 +443,11 @@ instance
   curve1 .<>. curve2 = Curve1d.new (DotProductOf curve1 curve2) -- TODO add special cases
 
 instance
-  ( Known space1
-  , Known space2
-  , Known units1
-  , Known units2
-  , Known units3
-  , Units.Product units1 units2 units3
-  , space1 ~ space2
-  ) =>
+  (Units.Product units1 units2 units3, space1 ~ space2) =>
   DotMultiplication (VectorCurve2d (space1 @ units1)) (Vector2d (space2 @ units2)) (Curve1d units3)
 
 instance
-  (Known space1, Known space2, Known units1, Known units2, space1 ~ space2) =>
+  space1 ~ space2 =>
   DotMultiplication' (VectorCurve2d (space1 @ units1)) (Vector2d (space2 @ units2))
   where
   type
@@ -564,18 +456,11 @@ instance
   curve .<>. vector = curve .<>. constant vector
 
 instance
-  ( Known space1
-  , Known space2
-  , Known units1
-  , Known units2
-  , Known units3
-  , Units.Product units1 units2 units3
-  , space1 ~ space2
-  ) =>
+  (Units.Product units1 units2 units3, space1 ~ space2) =>
   DotMultiplication (Vector2d (space1 @ units1)) (VectorCurve2d (space2 @ units2)) (Curve1d units3)
 
 instance
-  (Known space1, Known space2, Known units1, Known units2, space1 ~ space2) =>
+  space1 ~ space2 =>
   DotMultiplication' (Vector2d (space1 @ units1)) (VectorCurve2d (space2 @ units2))
   where
   type
@@ -584,22 +469,22 @@ instance
   vector .<>. curve = constant vector .<>. curve
 
 instance
-  (Known space1, Known space2, Known units, space1 ~ space2) =>
+  space1 ~ space2 =>
   DotMultiplication (VectorCurve2d (space1 @ units)) (Direction2d space2) (Curve1d units)
 
 instance
-  (Known space1, Known space2, Known units, space1 ~ space2) =>
+  space1 ~ space2 =>
   DotMultiplication' (VectorCurve2d (space1 @ units)) (Direction2d space2)
   where
   type VectorCurve2d (space1 @ units) .<>. Direction2d space2 = Curve1d (units :*: Unitless)
   curve .<>. direction2d = curve .<>. Vector2d.unit direction2d
 
 instance
-  (Known space1, Known space2, Known units, space1 ~ space2) =>
+  space1 ~ space2 =>
   DotMultiplication (Direction2d space1) (VectorCurve2d (space2 @ units)) (Curve1d units)
 
 instance
-  (Known space1, Known space2, Known units, space1 ~ space2) =>
+  space1 ~ space2 =>
   DotMultiplication' (Direction2d space1) (VectorCurve2d (space2 @ units))
   where
   type Direction2d space1 .<>. VectorCurve2d (space2 @ units) = Curve1d (Unitless :*: units)
@@ -607,33 +492,23 @@ instance
 
 data CrossProductOf space units1 units2
   = CrossProductOf (VectorCurve2d (space @ units1)) (VectorCurve2d (space @ units2))
-  deriving (Eq, Show)
+  deriving (Show)
 
-instance
-  (Known space, Known units1, Known units2) =>
-  Curve1d.Interface (CrossProductOf space units1 units2) (units1 :*: units2)
-  where
+instance Curve1d.Interface (CrossProductOf space units1 units2) (units1 :*: units2) where
   pointOnImpl (CrossProductOf c1 c2) t = evaluateAt t c1 .><. evaluateAt t c2
   segmentBoundsImpl (CrossProductOf c1 c2) t = segmentBounds t c1 .><. segmentBounds t c2
   derivativeImpl (CrossProductOf c1 c2) = derivative c1 .><. c2 + c1 .><. derivative c2
   toAstImpl (CrossProductOf c1 c2) = Maybe.map2 (><) (toAst c1) (toAst c2)
 
 instance
-  ( Known space1
-  , Known space2
-  , Known units1
-  , Known units2
-  , Known units3
-  , Units.Product units1 units2 units3
-  , space1 ~ space2
-  ) =>
+  (Units.Product units1 units2 units3, space1 ~ space2) =>
   CrossMultiplication
     (VectorCurve2d (space1 @ units1))
     (VectorCurve2d (space2 @ units2))
     (Curve1d units3)
 
 instance
-  (Known space1, Known space2, Known units1, Known units2, space1 ~ space2) =>
+  space1 ~ space2 =>
   CrossMultiplication' (VectorCurve2d (space1 @ units1)) (VectorCurve2d (space2 @ units2))
   where
   type
@@ -642,21 +517,14 @@ instance
   curve1 .><. curve2 = Curve1d.new (CrossProductOf curve1 curve2) -- TODO add special cases
 
 instance
-  ( Known space1
-  , Known space2
-  , Known units1
-  , Known units2
-  , Known units3
-  , Units.Product units1 units2 units3
-  , space1 ~ space2
-  ) =>
+  (Units.Product units1 units2 units3, space1 ~ space2) =>
   CrossMultiplication
     (VectorCurve2d (space1 @ units1))
     (Vector2d (space2 @ units2))
     (Curve1d units3)
 
 instance
-  (Known space1, Known space2, Known units1, Known units2, space1 ~ space2) =>
+  space1 ~ space2 =>
   CrossMultiplication' (VectorCurve2d (space1 @ units1)) (Vector2d (space2 @ units2))
   where
   type
@@ -665,21 +533,14 @@ instance
   curve .><. vector = curve .><. constant vector
 
 instance
-  ( Known space1
-  , Known space2
-  , Known units1
-  , Known units2
-  , Known units3
-  , Units.Product units1 units2 units3
-  , space1 ~ space2
-  ) =>
+  (Units.Product units1 units2 units3, space1 ~ space2) =>
   CrossMultiplication
     (Vector2d (space1 @ units1))
     (VectorCurve2d (space2 @ units2))
     (Curve1d units3)
 
 instance
-  (Known space1, Known space2, Known units1, Known units2, space1 ~ space2) =>
+  space1 ~ space2 =>
   CrossMultiplication' (Vector2d (space1 @ units1)) (VectorCurve2d (space2 @ units2))
   where
   type
@@ -688,29 +549,28 @@ instance
   vector .><. curve = constant vector .><. curve
 
 instance
-  (Known space1, Known space2, Known units, space1 ~ space2) =>
+  space1 ~ space2 =>
   CrossMultiplication (VectorCurve2d (space1 @ units)) (Direction2d space2) (Curve1d units)
 
 instance
-  (Known space1, Known space2, Known units, space1 ~ space2) =>
+  space1 ~ space2 =>
   CrossMultiplication' (VectorCurve2d (space1 @ units)) (Direction2d space2)
   where
   type VectorCurve2d (space1 @ units) .><. Direction2d space2 = Curve1d (units :*: Unitless)
   curve .><. direction2d = curve .><. Vector2d.unit direction2d
 
 instance
-  (Known space1, Known space2, Known units, space1 ~ space2) =>
+  space1 ~ space2 =>
   CrossMultiplication (Direction2d space1) (VectorCurve2d (space2 @ units)) (Curve1d units)
 
 instance
-  (Known space1, Known space2, Known units, space1 ~ space2) =>
+  space1 ~ space2 =>
   CrossMultiplication' (Direction2d space1) (VectorCurve2d (space2 @ units))
   where
   type Direction2d space1 .><. VectorCurve2d (space2 @ units) = Curve1d (Unitless :*: units)
   direction2d .><. curve = Vector2d.unit direction2d .><. curve
 
 instance
-  (Known space, Known units) =>
   Composition
     (Curve1d Unitless)
     (VectorCurve2d (space @ units))
@@ -719,7 +579,6 @@ instance
   curve1d >> curve2d = VectorCurve2d.new (Composition.Of curve1d curve2d)
 
 instance
-  (Known space, Known units) =>
   VectorCurve2d.Interface
     (Composition.Of (Curve1d Unitless) (VectorCurve2d (space @ units)))
     (space @ units)
@@ -736,7 +595,6 @@ instance
     Maybe.map2 (.) (toAst vectorCurve2d) (Curve1d.toAst curve1d)
 
 transformBy ::
-  (Known space, Known units, Known tag, Known translationUnits) =>
   Transform2d tag (space @ translationUnits) ->
   VectorCurve2d (space @ units) ->
   VectorCurve2d (space @ units)
@@ -776,13 +634,12 @@ transformBy transform curve = do
 
 rotateBy ::
   forall space units.
-  (Known space, Known units) =>
   Angle ->
   VectorCurve2d (space @ units) ->
   VectorCurve2d (space @ units)
 rotateBy angle = transformBy (Transform2d.rotateAround (Point2d.origin @space @units) angle)
 
-new :: (Known curve, Interface curve (space @ units)) => curve -> VectorCurve2d (space @ units)
+new :: Interface curve (space @ units) => curve -> VectorCurve2d (space @ units)
 new = VectorCurve2d
 
 zero :: VectorCurve2d (space @ units)
@@ -985,7 +842,6 @@ segmentBounds t@(Range tl th) curve = case curve of
   Transformed transform c -> VectorBounds2d.transformBy transform (segmentBounds t c)
 
 derivative ::
-  (Known space, Known units) =>
   VectorCurve2d (space @ units) ->
   VectorCurve2d (space @ units)
 derivative curve = case curve of
@@ -1016,7 +872,6 @@ derivative curve = case curve of
   Transformed transform c -> transformBy transform (derivative c)
 
 reverse ::
-  (Known space, Known units) =>
   VectorCurve2d (space @ units) ->
   VectorCurve2d (space @ units)
 reverse curve = case curve of
@@ -1042,14 +897,9 @@ reverse curve = case curve of
 newtype SquaredMagnitude' (coordinateSystem :: CoordinateSystem)
   = SquaredMagnitude' (VectorCurve2d coordinateSystem)
 
-deriving instance (Known space, Known units) => Eq (SquaredMagnitude' (space @ units))
-
 deriving instance Show (SquaredMagnitude' (space @ units))
 
-instance
-  (Known space, Known units) =>
-  Curve1d.Interface (SquaredMagnitude' (space @ units)) (units :*: units)
-  where
+instance Curve1d.Interface (SquaredMagnitude' (space @ units)) (units :*: units) where
   pointOnImpl (SquaredMagnitude' curve) t =
     Vector2d.squaredMagnitude' (evaluateAt t curve)
   segmentBoundsImpl (SquaredMagnitude' curve) t =
@@ -1058,16 +908,10 @@ instance
     2 * curve .<>. derivative curve
   toAstImpl (SquaredMagnitude' curve) = Maybe.map VectorExpression2d.squaredMagnitude (toAst curve)
 
-squaredMagnitude ::
-  (Known space, Known units1, Known units2, Units.Squared units1 units2) =>
-  VectorCurve2d (space @ units1) ->
-  Curve1d units2
+squaredMagnitude :: Units.Squared units1 units2 => VectorCurve2d (space @ units1) -> Curve1d units2
 squaredMagnitude curve = Units.specialize (squaredMagnitude' curve)
 
-squaredMagnitude' ::
-  (Known space, Known units) =>
-  VectorCurve2d (space @ units) ->
-  Curve1d (units :*: units)
+squaredMagnitude' :: VectorCurve2d (space @ units) -> Curve1d (units :*: units)
 squaredMagnitude' curve = Curve1d.new (SquaredMagnitude' curve)
 
 newtype NonZeroMagnitude (coordinateSystem :: CoordinateSystem)
@@ -1075,12 +919,7 @@ newtype NonZeroMagnitude (coordinateSystem :: CoordinateSystem)
 
 deriving instance Show (NonZeroMagnitude (space @ units))
 
-deriving instance (Known space, Known units) => Eq (NonZeroMagnitude (space @ units))
-
-instance
-  (Known space, Known units) =>
-  Curve1d.Interface (NonZeroMagnitude (space @ units)) units
-  where
+instance Curve1d.Interface (NonZeroMagnitude (space @ units)) units where
   pointOnImpl (NonZeroMagnitude curve) t =
     Vector2d.magnitude (VectorCurve2d.evaluateAt t curve)
   segmentBoundsImpl (NonZeroMagnitude curve) t =
@@ -1089,15 +928,12 @@ instance
     (VectorCurve2d.derivative curve .<>. curve) .!/! Curve1d.new (NonZeroMagnitude curve)
   toAstImpl (NonZeroMagnitude curve) = Maybe.map VectorExpression2d.magnitude (toAst curve)
 
-unsafeMagnitude :: (Known space, Known units) => VectorCurve2d (space @ units) -> Curve1d units
+unsafeMagnitude :: VectorCurve2d (space @ units) -> Curve1d units
 unsafeMagnitude curve = Curve1d.new (NonZeroMagnitude curve)
 
 data HasZero = HasZero deriving (Eq, Show, Error.Message)
 
-magnitude ::
-  (Known space, Known units, Tolerance units) =>
-  VectorCurve2d (space @ units) ->
-  Result HasZero (Curve1d units)
+magnitude :: Tolerance units => VectorCurve2d (space @ units) -> Result HasZero (Curve1d units)
 magnitude curve =
   case zeros curve of
     Success [] -> Success (Curve1d.new (NonZeroMagnitude curve))
@@ -1105,30 +941,27 @@ magnitude curve =
     Failure Zeros.ZeroEverywhere -> Failure HasZero
     Failure Zeros.HigherOrderZero -> Failure HasZero
 
-isZero :: (Known space, Known units, Tolerance units) => VectorCurve2d (space @ units) -> Bool
+isZero :: Tolerance units => VectorCurve2d (space @ units) -> Bool
 isZero curve = Tolerance.using Tolerance.squared' (squaredMagnitude' curve ~= Qty.zero)
 
-hasZero :: (Known space, Known units, Tolerance units) => VectorCurve2d (space @ units) -> Bool
+hasZero :: Tolerance units => VectorCurve2d (space @ units) -> Bool
 hasZero curve = Tolerance.using Tolerance.squared' (squaredMagnitude' curve ^ Qty.zero)
 
-zeros ::
-  (Known space, Known units, Tolerance units) =>
-  VectorCurve2d (space @ units) ->
-  Result Zeros.Error (List Float)
+zeros :: Tolerance units => VectorCurve2d (space @ units) -> Result Zeros.Error (List Float)
 zeros curve =
   case Tolerance.using Tolerance.squared' (Curve1d.zeros (squaredMagnitude' curve)) of
     Success roots -> Success (List.map Curve1d.Root.value roots)
     Failure Curve1d.Zeros.ZeroEverywhere -> Failure Zeros.ZeroEverywhere
     Failure Curve1d.Zeros.HigherOrderZero -> Failure Zeros.HigherOrderZero
 
-xComponent :: (Known space, Known units) => VectorCurve2d (space @ units) -> Curve1d units
+xComponent :: VectorCurve2d (space @ units) -> Curve1d units
 xComponent curve = curve <> Direction2d.x
 
-yComponent :: (Known space, Known units) => VectorCurve2d (space @ units) -> Curve1d units
+yComponent :: VectorCurve2d (space @ units) -> Curve1d units
 yComponent curve = curve <> Direction2d.y
 
 direction ::
-  (Known space, Known units, Tolerance units) =>
+  Tolerance units =>
   VectorCurve2d (space @ units) ->
   Result HasZero (DirectionCurve2d space)
 direction curve =
@@ -1158,21 +991,18 @@ isRemovableDegeneracy curveDerivative t =
   (t == 0.0 || t == 1.0) && evaluateAt t curveDerivative != Vector2d.zero
 
 placeIn ::
-  (Known local, Known global, Known units) =>
   Frame2d (global @ originUnits) (Defines local) ->
   VectorCurve2d (local @ units) ->
   VectorCurve2d (global @ units)
 placeIn globalFrame = placeInBasis (Frame2d.basis globalFrame)
 
 relativeTo ::
-  (Known local, Known global, Known units) =>
   Frame2d (global @ originUnits) (Defines local) ->
   VectorCurve2d (global @ units) ->
   VectorCurve2d (local @ units)
 relativeTo globalFrame = relativeToBasis (Frame2d.basis globalFrame)
 
 placeInBasis ::
-  (Known local, Known global, Known units) =>
   Basis2d global (Defines local) ->
   VectorCurve2d (local @ units) ->
   VectorCurve2d (global @ units)
@@ -1182,7 +1012,6 @@ placeInBasis globalBasis curve =
   PlaceInBasis globalBasis curve
 
 relativeToBasis ::
-  (Known local, Known global, Known units) =>
   Basis2d global (Defines local) ->
   VectorCurve2d (global @ units) ->
   VectorCurve2d (local @ units)

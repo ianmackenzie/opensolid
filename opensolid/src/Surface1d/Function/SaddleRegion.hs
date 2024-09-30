@@ -88,7 +88,7 @@ secondDerivative fuu fuv fvv direction = do
   du * du * fuu + 2 * du * dv * fuv + dv * dv * fvv
 
 connectingCurves ::
-  (Known units, Tolerance units) =>
+  Tolerance units =>
   Uv.Point ->
   SaddleRegion units ->
   NonEmpty (Curve2d Uv.Coordinates)
@@ -120,7 +120,7 @@ connectingCurves boundaryPoint SaddleRegion{subproblem, frame, d1, d2} = do
         ]
 
 connect ::
-  (Known units, Tolerance units) =>
+  Tolerance units =>
   Subproblem units ->
   Frame2d Uv.Coordinates (Defines PrincipalAxisSpace) ->
   Uv.Direction ->

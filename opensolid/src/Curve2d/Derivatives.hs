@@ -20,10 +20,7 @@ data Derivatives (coordinateSystem :: CoordinateSystem) = Derivatives
   , second :: VectorCurve2d coordinateSystem
   }
 
-ofCurve ::
-  (Known space, Known units, Tolerance units) =>
-  Curve2d (space @ units) ->
-  Derivatives (space @ units)
+ofCurve :: Tolerance units => Curve2d (space @ units) -> Derivatives (space @ units)
 ofCurve givenCurve = do
   let firstDerivative = Curve2d.derivative givenCurve
   let secondDerivative = VectorCurve2d.derivative firstDerivative

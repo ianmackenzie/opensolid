@@ -23,13 +23,9 @@ import {-# SOURCE #-} VectorCurve2d qualified
 
 data DegenerateEndpoint space
   = DegenerateEndpoint Float Float (VectorCurve2d (space @ Unitless))
-  deriving (Eq, Show)
+  deriving (Show)
 
-at ::
-  (Known space, Known units, Tolerance units) =>
-  Float ->
-  VectorCurve2d (space @ units) ->
-  DegenerateEndpoint space
+at :: Tolerance units => Float -> VectorCurve2d (space @ units) -> DegenerateEndpoint space
 at t0 secondDerivative = do
   let r = computeRadius (VectorCurve2d.evaluateAt t0 secondDerivative)
   let t1 = if t0 == 0.0 then r else 1 - r
@@ -44,7 +40,7 @@ computeRadius secondDerivative = Qty.sqrt (2 * ?tolerance / Vector2d.magnitude s
 cutoff :: DegenerateEndpoint space -> Float
 cutoff (DegenerateEndpoint _ t1 _) = t1
 
-derivative :: Known space => DegenerateEndpoint space -> DegenerateEndpoint space
+derivative :: DegenerateEndpoint space -> DegenerateEndpoint space
 derivative (DegenerateEndpoint t0 t1 curve) =
   DegenerateEndpoint t0 t1 (VectorCurve2d.derivative curve)
 
@@ -58,12 +54,7 @@ data QCurve coordinateSystem where
 
 deriving instance Show (QCurve (space @ units))
 
-deriving instance (Known space, Known units) => Eq (QCurve (space @ units))
-
-instance
-  (Known space, Known units) =>
-  VectorCurve2d.Interface (QCurve (space @ units)) (space @ units)
-  where
+instance VectorCurve2d.Interface (QCurve (space @ units)) (space @ units) where
   evaluateAtImpl _ (QCurve _ _ _ value) = value
   segmentBoundsImpl _ (QCurve _ _ _ value) = VectorBounds2d.constant value
   derivativeImpl (QCurve n t0 curveDerivative _) =
@@ -74,19 +65,13 @@ instance
     VectorCurve2d.new (QCurve n t0 transformedCurveDerivative transformedValue)
   toAstImpl (QCurve _ _ _ value) = Just (VectorExpression2d.constant value)
 
-qCurve ::
-  (Known space, Known units) =>
-  Int ->
-  Float ->
-  VectorCurve2d (space @ units) ->
-  VectorCurve2d (space @ units)
+qCurve :: Int -> Float -> VectorCurve2d (space @ units) -> VectorCurve2d (space @ units)
 qCurve n t0 curveDerivative =
   VectorCurve2d.new $
     QCurve n t0 curveDerivative $
       VectorCurve2d.evaluateAt t0 curveDerivative / (n + 1)
 
 evaluateAt ::
-  Known space =>
   Float ->
   DegenerateEndpoint space ->
   VectorCurve2d (space @ Unitless) ->
@@ -110,7 +95,6 @@ segmentBounds (Range tLow tHigh) (DegenerateEndpoint t0 t1 endpointCurve) innerC
     (Vector2d.interpolateFrom v0 v1 ((tHigh - t0) / (t1 - t0)))
 
 transformBy ::
-  (Known space, Known units, Known tag) =>
   Transform2d tag (space @ units) ->
   DegenerateEndpoint space ->
   DegenerateEndpoint space

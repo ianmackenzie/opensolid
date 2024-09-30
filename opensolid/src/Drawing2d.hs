@@ -138,7 +138,6 @@ circle attributes centerPoint radius = do
   Node "circle" (cxAttribute : cyAttribute : rAttribute : attributes) []
 
 curve ::
-  Known space =>
   List (Attribute space) ->
   Length ->
   Curve2d (space @ Meters) ->

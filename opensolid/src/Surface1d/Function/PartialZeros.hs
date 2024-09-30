@@ -112,7 +112,7 @@ addSaddleRegion saddleRegion partialZeros = do
   let PartialZeros{saddleRegions} = partialZeros
   partialZeros{saddleRegions = saddleRegion : saddleRegions}
 
-finalize :: (Known units, Tolerance units) => PartialZeros units -> Zeros
+finalize :: Tolerance units => PartialZeros units -> Zeros
 finalize partialZeros = do
   let PartialZeros{crossingCurves, crossingLoops, tangentPoints, saddleRegions} = partialZeros
   let extendedCrossingCurves =
@@ -139,7 +139,7 @@ filterDegenerateCurves (CrossingCurve _ _ segments) = do
     NonEmpty filtered -> Just filtered
     [] -> Nothing
 
-extend :: Known units => Tolerance units => CrossingCurve -> SaddleRegion units -> CrossingCurve
+extend :: Tolerance units => CrossingCurve -> SaddleRegion units -> CrossingCurve
 extend curve saddleRegion = do
   let (CrossingCurve start end segments) = curve
   let subdomain = SaddleRegion.subdomain saddleRegion

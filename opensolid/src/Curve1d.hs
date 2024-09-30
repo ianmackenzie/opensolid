@@ -45,10 +45,13 @@ import Range qualified
 import Solve1d qualified
 import Stream (Stream)
 import Stream qualified
-import Typeable qualified
 import Units qualified
 
-class Known curve => Interface curve units | curve -> units where
+class
+  Show curve =>
+  Interface curve units
+    | curve -> units
+  where
   pointOnImpl :: curve -> Float -> Qty units
   segmentBoundsImpl :: curve -> Range Unitless -> Range units
   derivativeImpl :: curve -> Curve1d units
@@ -75,21 +78,17 @@ data Curve1d units where
     Curve1d units ->
     Curve1d units
   Product' ::
-    (Known units1, Known units2) =>
     Curve1d units1 ->
     Curve1d units2 ->
     Curve1d (units1 :*: units2)
   Quotient' ::
-    (Known units1, Known units2) =>
     Curve1d units1 ->
     Curve1d units2 ->
     Curve1d (units1 :/: units2)
   Squared' ::
-    Known units =>
     Curve1d units ->
     Curve1d (units :*: units)
   SquareRoot' ::
-    Known (units :*: units) =>
     Curve1d (units :*: units) ->
     Curve1d units
   Sin ::
@@ -99,60 +98,34 @@ data Curve1d units where
     Curve1d Radians ->
     Curve1d Unitless
   Coerce ::
-    (Known units1, Known units2) =>
     Curve1d units1 ->
     Curve1d units2
-
-instance Eq (Curve1d units) where
-  Curve1d c1 == Curve1d c2 = Typeable.equal c1 c2
-  Curve1d{} == _ = False
-  Constant x == Constant y = x == y
-  Constant{} == _ = False
-  Parameter == Parameter = True
-  Parameter{} == _ = False
-  Negated c1 == Negated c2 = c1 == c2
-  Negated{} == _ = False
-  Sum lhs1 rhs1 == Sum lhs2 rhs2 = lhs1 == lhs2 && rhs1 == rhs2
-  Sum{} == _ = False
-  Difference lhs1 rhs1 == Difference lhs2 rhs2 = lhs1 == lhs2 && rhs1 == rhs2
-  Difference{} == _ = False
-  Product' lhs1 rhs1 == Product' lhs2 rhs2 = lhs1 == lhs2 && rhs1 == rhs2
-  Product'{} == _ = False
-  Quotient' lhs1 rhs1 == Quotient' lhs2 rhs2 = lhs1 == lhs2 && rhs1 == rhs2
-  Quotient'{} == _ = False
-  Squared' c1 == Squared' c2 = c1 == c2
-  Squared'{} == _ = False
-  SquareRoot' c1 == SquareRoot' c2 = c1 == c2
-  SquareRoot'{} == _ = False
-  Sin c1 == Sin c2 = c1 == c2
-  Sin{} == _ = False
-  Cos c1 == Cos c2 = c1 == c2
-  Cos{} == _ = False
-  Coerce c1 == Coerce c2 = Typeable.equal c1 c2
-  Coerce{} == _ = False
 
 deriving instance Show (Curve1d units)
 
 instance HasUnits (Curve1d units) where
   type UnitsOf (Curve1d units) = units
 
-instance (Known unitsA, Known unitsB) => Units.Coercion (Curve1d unitsA) (Curve1d unitsB) where
+instance Units.Coercion (Curve1d unitsA) (Curve1d unitsB) where
   coerce (Constant value) = Constant (Units.coerce value)
   coerce (Coerce curve) = Coerce curve
   coerce curve = Coerce curve
 
 instance
-  (Known units1, Known units2, units1 ~ units2) =>
+  units1 ~ units2 =>
   ApproximateEquality (Curve1d units1) (Curve1d units2) units1
   where
   curve1 ~= curve2 = curve1 - curve2 ~= Qty.zero
 
-instance units ~ units_ => ApproximateEquality (Curve1d units) (Qty units_) units where
+instance
+  units1 ~ units2 =>
+  ApproximateEquality (Curve1d units1) (Qty units2) units1
+  where
   Constant value1 ~= value2 = value1 ~= value2
   curve ~= value = List.allTrue [pointOn curve tValue ~= value | tValue <- Parameter.samples]
 
 instance
-  (Known units1, Known units2, units1 ~ units2) =>
+  units1 ~ units2 =>
   Intersects (Curve1d units1) (Qty units2) units1
   where
   curve ^ value =
@@ -166,12 +139,12 @@ instance
       Failure Zeros.HigherOrderZero -> True
 
 instance
-  (Known units1, Known units2, units1 ~ units2) =>
+  units1 ~ units2 =>
   Intersects (Qty units1) (Curve1d units2) units1
   where
   value ^ curve = curve ^ value
 
-instance Known units => Interface (Curve1d units) units where
+instance Interface (Curve1d units) units where
   pointOnImpl = pointOn
   segmentBoundsImpl = segmentBounds
   derivativeImpl = derivative
@@ -189,23 +162,23 @@ constant = Constant
 parameter :: Curve1d Unitless
 parameter = Parameter
 
-instance Known units => Negation (Curve1d units) where
+instance Negation (Curve1d units) where
   negate (Constant x) = Constant (negate x)
   negate (Negated curve) = curve
   negate (Difference c1 c2) = Difference c2 c1
   negate (Product' c1 c2) = negate c1 .*. c2
   negate curve = Negated curve
 
-instance Known units => Multiplication Sign (Curve1d units) (Curve1d units)
+instance Multiplication Sign (Curve1d units) (Curve1d units)
 
-instance Known units => Multiplication' Sign (Curve1d units) where
+instance Multiplication' Sign (Curve1d units) where
   type Sign .*. Curve1d units = Curve1d (Unitless :*: units)
   Positive .*. curve = Units.coerce curve
   Negative .*. curve = Units.coerce -curve
 
-instance Known units => Multiplication (Curve1d units) Sign (Curve1d units)
+instance Multiplication (Curve1d units) Sign (Curve1d units)
 
-instance Known units => Multiplication' (Curve1d units) Sign where
+instance Multiplication' (Curve1d units) Sign where
   type Curve1d units .*. Sign = Curve1d (units :*: Unitless)
   curve .*. Positive = Units.coerce curve
   curve .*. Negative = Units.coerce -curve
@@ -235,7 +208,7 @@ instance Subtraction Int (Curve1d Unitless) (Curve1d Unitless) where
   value - curve = Float.int value - curve
 
 instance
-  (Known units1, Known units2, units1 ~ units2) =>
+  units1 ~ units2 =>
   Subtraction (Curve1d units1) (Curve1d units2) (Curve1d units1)
   where
   curve - Constant x | x == Qty.zero = curve
@@ -244,25 +217,22 @@ instance
   curve1 - curve2 = Difference curve1 curve2
 
 instance
-  (Known units1, Known units2, units1 ~ units2) =>
+  units1 ~ units2 =>
   Subtraction (Curve1d units1) (Qty units2) (Curve1d units1)
   where
   curve - value = curve - constant value
 
 instance
-  (Known units1, Known units2, units1 ~ units2) =>
+  units1 ~ units2 =>
   Subtraction (Qty units1) (Curve1d units2) (Curve1d units1)
   where
   value - curve = constant value - curve
 
 instance
-  (Known units1, Known units2, Known units3, Units.Product units1 units2 units3) =>
+  Units.Product units1 units2 units3 =>
   Multiplication (Curve1d units1) (Curve1d units2) (Curve1d units3)
 
-instance
-  (Known units1, Known units2) =>
-  Multiplication' (Curve1d units1) (Curve1d units2)
-  where
+instance Multiplication' (Curve1d units1) (Curve1d units2) where
   type Curve1d units1 .*. Curve1d units2 = Curve1d (units1 :*: units2)
   Constant x .*. _ | x == Qty.zero = zero
   _ .*. Constant x | x == Qty.zero = zero
@@ -274,54 +244,39 @@ instance
   Constant x .*. Product' (Constant y) c = Units.rightAssociate ((x .*. y) .*. c)
   curve1 .*. curve2 = Product' curve1 curve2
 
-instance
-  Known units =>
-  Multiplication' Int (Curve1d units)
-  where
+instance Multiplication' Int (Curve1d units) where
   type Int .*. Curve1d units = Curve1d (Unitless :*: units)
   value .*. curve = Float.int value .*. curve
 
-instance
-  Known units =>
-  Multiplication' (Curve1d units) Int
-  where
+instance Multiplication' (Curve1d units) Int where
   type Curve1d units .*. Int = Curve1d (units :*: Unitless)
   curve .*. value = curve .*. Float.int value
 
-instance Known units => Multiplication Int (Curve1d units) (Curve1d units)
+instance Multiplication Int (Curve1d units) (Curve1d units)
 
-instance Known units => Multiplication (Curve1d units) Int (Curve1d units)
+instance Multiplication (Curve1d units) Int (Curve1d units)
 
 instance
-  (Known units1, Known units2, Known units3, Units.Product units1 units2 units3) =>
+  Units.Product units1 units2 units3 =>
   Multiplication (Curve1d units1) (Qty units2) (Curve1d units3)
 
-instance
-  (Known units1, Known units2) =>
-  Multiplication' (Curve1d units1) (Qty units2)
-  where
+instance Multiplication' (Curve1d units1) (Qty units2) where
   type Curve1d units1 .*. Qty units2 = Curve1d (units1 :*: units2)
   curve .*. value = curve .*. constant value
 
 instance
-  (Known units1, Known units2, Known units3, Units.Product units1 units2 units3) =>
+  Units.Product units1 units2 units3 =>
   Multiplication (Qty units1) (Curve1d units2) (Curve1d units3)
 
-instance
-  (Known units1, Known units2) =>
-  Multiplication' (Qty units1) (Curve1d units2)
-  where
+instance Multiplication' (Qty units1) (Curve1d units2) where
   type Qty units1 .*. Curve1d units2 = Curve1d (units1 :*: units2)
   value .*. curve = constant value .*. curve
 
 instance
-  (Known units1, Known units2, Known units3, Units.Quotient units1 units2 units3) =>
+  Units.Quotient units1 units2 units3 =>
   Division (Curve1d units1) (Curve1d units2) (Curve1d units3)
 
-instance
-  (Known units1, Known units2) =>
-  Division' (Curve1d units1) (Curve1d units2)
-  where
+instance Division' (Curve1d units1) (Curve1d units2) where
   type Curve1d units1 ./. Curve1d units2 = Curve1d (units1 :/: units2)
   Constant x ./. _ | x == Qty.zero = zero
   Constant x ./. Constant y = Constant (x ./. y)
@@ -329,38 +284,32 @@ instance
   curve1 ./. curve2 = Quotient' curve1 curve2
 
 instance
-  (Known units1, Known units2, Known units3, Units.Quotient units1 units2 units3) =>
+  Units.Quotient units1 units2 units3 =>
   Division (Curve1d units1) (Qty units2) (Curve1d units3)
 
-instance
-  (Known units1, Known units2) =>
-  Division' (Curve1d units1) (Qty units2)
-  where
+instance Division' (Curve1d units1) (Qty units2) where
   type Curve1d units1 ./. Qty units2 = Curve1d (units1 :/: units2)
   curve ./. value = curve ./. constant value
 
 instance
-  (Known units1, Known units2, Known units3, Units.Quotient units1 units2 units3) =>
+  Units.Quotient units1 units2 units3 =>
   Division (Qty units1) (Curve1d units2) (Curve1d units3)
 
-instance
-  (Known units1, Known units2) =>
-  Division' (Qty units1) (Curve1d units2)
-  where
+instance Division' (Qty units1) (Curve1d units2) where
   type Qty units1 ./. Curve1d units2 = Curve1d (units1 :/: units2)
   value ./. curve = constant value ./. curve
 
-instance Known units => Division (Curve1d units) Int (Curve1d units)
+instance Division (Curve1d units) Int (Curve1d units)
 
-instance Known units => Division' (Curve1d units) Int where
+instance Division' (Curve1d units) Int where
   type Curve1d units ./. Int = Curve1d (units :/: Unitless)
   curve ./. value = curve ./. Float.int value
 
 instance
-  (Known units1, Known units2, Units.Inverse units1 units2) =>
+  Units.Inverse units1 units2 =>
   Division Int (Curve1d units1) (Curve1d units2)
 
-instance Known units => Division' Int (Curve1d units) where
+instance Division' Int (Curve1d units) where
   type Int ./. Curve1d units = Curve1d (Unitless :/: units)
   value ./. curve = Float.int value ./. curve
 
@@ -396,7 +345,7 @@ segmentBounds curve tBounds = case curve of
   Cos c -> Range.cos (segmentBounds c tBounds)
   Coerce c -> Units.coerce (segmentBounds c tBounds)
 
-derivative :: Known units => Curve1d units -> Curve1d units
+derivative :: Curve1d units -> Curve1d units
 derivative curve = case curve of
   Curve1d c -> derivativeImpl c
   Constant _ -> zero
@@ -412,25 +361,22 @@ derivative curve = case curve of
   Cos c -> negate (sin c) * (derivative c / Angle.radian)
   Coerce c -> Units.coerce (derivative c)
 
-newtype Reversed units = Reversed (Curve1d units) deriving (Eq, Show)
+newtype Reversed units = Reversed (Curve1d units) deriving (Show)
 
-instance Known units => Interface (Reversed units) units where
+instance Interface (Reversed units) units where
   pointOnImpl (Reversed curve) tValue = pointOn curve (1 - tValue)
   segmentBoundsImpl (Reversed curve) tBounds = segmentBounds curve (1 - tBounds)
   derivativeImpl (Reversed curve) = -(reverse (derivative curve))
   toAstImpl (Reversed curve) = Maybe.map (. (1.0 - Expression.parameter)) (toAst curve)
 
-reverse :: Known units => Curve1d units -> Curve1d units
+reverse :: Curve1d units -> Curve1d units
 reverse curve@(Constant _) = curve
 reverse curve = Curve1d (Reversed curve)
 
-squared ::
-  (Known units1, Known units2, Units.Squared units1 units2) =>
-  Curve1d units1 ->
-  Curve1d units2
+squared :: Units.Squared units1 units2 => Curve1d units1 -> Curve1d units2
 squared curve = Units.specialize (squared' curve)
 
-squared' :: Known units => Curve1d units -> Curve1d (units :*: units)
+squared' :: Curve1d units -> Curve1d (units :*: units)
 squared' curve = case curve of
   Constant x -> Constant (x .*. x)
   Negated c -> squared' c
@@ -444,13 +390,10 @@ cosSquared c = 0.5 * cos (2 * c) + 0.5
 sinSquared :: Curve1d Radians -> Curve1d Unitless
 sinSquared c = 0.5 - 0.5 * cos (2 * c)
 
-sqrt ::
-  (Known units1, Known units2, Units.Squared units1 units2) =>
-  Curve1d units2 ->
-  Curve1d units1
+sqrt :: Units.Squared units1 units2 => Curve1d units2 -> Curve1d units1
 sqrt curve = sqrt' (Units.unspecialize curve)
 
-sqrt' :: Known units => Curve1d (units :*: units) -> Curve1d units
+sqrt' :: Curve1d (units :*: units) -> Curve1d units
 sqrt' (Constant x) = Constant (Qty.sqrt' x)
 sqrt' curve = SquareRoot' curve
 
@@ -462,7 +405,7 @@ cos :: Curve1d Radians -> Curve1d Unitless
 cos (Constant x) = constant (Angle.cos x)
 cos curve = Cos curve
 
-integral :: Known units => Curve1d units -> Estimate units
+integral :: Curve1d units -> Estimate units
 integral curve = Estimate.new (Integral curve (derivative curve) Range.unit)
 
 toAst :: Curve1d units -> Maybe (Expression Expression.Curve)
@@ -483,7 +426,7 @@ toAst curve = case curve of
 
 ----- ROOT FINDING -----
 
-zeros :: (Known units, Tolerance units) => Curve1d units -> Result Zeros.Error (List Root)
+zeros :: Tolerance units => Curve1d units -> Result Zeros.Error (List Root)
 zeros curve
   | curve ~= Qty.zero = Failure Zeros.ZeroEverywhere
   | otherwise = Result.do
