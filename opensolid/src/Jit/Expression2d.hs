@@ -13,7 +13,6 @@ module Jit.Expression2d
 where
 
 import Arithmetic.Unboxed (Double#)
-import Direction2d (Direction2d (Direction2d))
 import Foreign (FunPtr, Ptr)
 import Foreign qualified
 import Foreign.Marshal.Alloc qualified as Alloc
@@ -33,6 +32,7 @@ import Transform2d (Transform2d (Transform2d))
 import Units qualified
 import Uv qualified
 import Vector2d (Vector2d)
+import Vector2d qualified
 
 data Expression2d parameterization
   = Expression2d (Expression parameterization) (Expression parameterization)

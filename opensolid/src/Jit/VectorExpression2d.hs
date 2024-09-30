@@ -19,7 +19,6 @@ where
 
 import Basis2d (Basis2d)
 import Basis2d qualified
-import Direction2d (Direction2d (Direction2d))
 import Frame2d (Frame2d)
 import Frame2d qualified
 import Jit.Expression (Expression)
@@ -30,6 +29,7 @@ import Point2d (Point2d (Point2d))
 import Transform2d (Transform2d (Transform2d))
 import Units qualified
 import Vector2d (Vector2d (Vector2d))
+import Vector2d qualified
 
 data VectorExpression2d parameterization
   = VectorExpression2d (Expression parameterization) (Expression parameterization)
