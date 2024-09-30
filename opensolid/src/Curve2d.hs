@@ -78,7 +78,9 @@ import Error qualified
 import Float qualified
 import Frame2d (Frame2d)
 import Frame2d qualified
-import Jit qualified
+import Jit.Expression qualified as Expression
+import Jit.Expression2d (Expression2d)
+import Jit.Expression2d qualified as Expression2d
 import {-# SOURCE #-} Line2d (Line2d)
 import {-# SOURCE #-} Line2d qualified
 import List qualified
@@ -215,6 +217,7 @@ class
   asLineImpl _ = Nothing
   asArcImpl :: Tolerance (UnitsOf coordinateSystem) => curve -> Maybe (Arc2d coordinateSystem)
   asArcImpl _ = Nothing
+  toAstImpl :: curve -> Maybe (Expression2d Expression.Curve)
 
 instance
   (Known space, Known units) =>
@@ -230,6 +233,7 @@ instance
   transformByImpl = transformBy
   asLineImpl = asLine
   asArcImpl = asArc
+  toAstImpl = toAst
 
 instance
   (Known space, Known units) =>
@@ -243,20 +247,18 @@ instance
   reverseImpl = identity
   boundsImpl = Bounds2d.constant
   transformByImpl transform point = new (Point2d.transformBy transform point)
-
--- TODO actually compile Curve2d to Jit.Ast values
--- instead of leaving them as 'atomic' operations?
-instance
-  (Known space, Known units) =>
-  Jit.UnaryOp (Curve2d (space @ units)) Float (Point2d (space @ Unitless))
-  where
-  evalUnary curve t = Units.coerce (pointOn curve t)
+  toAstImpl point = Just (Expression2d.constant point)
 
 toAst ::
   (Known space, Known units) =>
   Curve2d (space @ units) ->
-  Jit.Ast Float (Point2d (space @ Unitless))
-toAst curve = Jit.call curve
+  Maybe (Expression2d Expression.Curve)
+toAst curve = case curve of
+  Curve c -> toAstImpl c
+  Coerce c -> toAst c
+  PlaceIn frame c -> Maybe.map (Expression2d.placeIn frame) (toAst c)
+  Addition c1 c2 -> Maybe.map2 (+) (toAst c1) (VectorCurve2d.toAst c2)
+  Subtraction c1 c2 -> Maybe.map2 (-) (toAst c1) (VectorCurve2d.toAst c2)
 
 instance
   (Known space1, Known space2, Known units1, Known units2, space1 ~ space2, units1 ~ units2) =>
@@ -280,6 +282,7 @@ instance
         -- when the point and curve are subtracted from each other.
         (Point2d.transformBy (Units.coerce transform) point)
         (transformBy (Units.coerce transform) curve)
+  toAstImpl (Arithmetic.Difference point curve) = Maybe.map (point -) (toAst curve)
 
 instance
   ( space1 ~ space2
@@ -329,6 +332,7 @@ instance
         -- Note the same slight hack here as described above for point-curve differences
         (transformBy (Units.coerce transform) curve)
         (Point2d.transformBy (Units.coerce transform) point)
+  toAstImpl (Arithmetic.Difference curve point) = Maybe.map (- point) (toAst curve)
 
 instance
   (Known space1, Known space2, Known units1, Known units2, space1 ~ space2, units1 ~ units2) =>
@@ -354,6 +358,7 @@ instance
         -- Note the same slight hack here as described above for point-curve differences
         (transformBy (Units.coerce transform) curve1)
         (transformBy (Units.coerce transform) curve2)
+  toAstImpl (Arithmetic.Difference curve1 curve2) = Maybe.map2 (-) (toAst curve1) (toAst curve2)
 
 instance
   (Known space1, Known space2, Known units1, Known units2, space1 ~ space2, units1 ~ units2) =>
@@ -389,6 +394,8 @@ instance
     Composition.Of (Curve1d.reverse curve1d) curve2d
   transformByImpl transform (Composition.Of curve1d curve2d) =
     new (Composition.Of curve1d (transformBy transform curve2d))
+  toAstImpl (Composition.Of curve1d curve2d) =
+    Maybe.map2 (.) (toAst curve2d) (Curve1d.toAst curve1d)
 
 new :: Interface curve (space @ units) => curve -> Curve2d (space @ units)
 new = Curve
@@ -871,6 +878,8 @@ instance
   transformByImpl transform (TransformBy existing curve) =
     Curve2d.new $
       TransformBy (Transform2d.toAffine existing >> Transform2d.toAffine transform) curve
+  toAstImpl (TransformBy transform curve) =
+    Maybe.map (Expression2d.transformBy transform) (toAstImpl curve)
 
 removeStartDegeneracy ::
   (Known space, Known units) =>
@@ -928,6 +937,7 @@ instance
       Synthetic
         (Curve2d.transformBy transform curve)
         (VectorCurve2d.transformBy transform curveDerivative)
+  toAstImpl (Synthetic curve _) = toAst curve
 
 data SyntheticDerivative coordinateSystem where
   SyntheticDerivative ::
@@ -953,6 +963,7 @@ instance
       SyntheticDerivative
         (VectorCurve2d.transformBy transform current)
         (VectorCurve2d.transformBy transform next)
+  toAstImpl (SyntheticDerivative current _) = VectorCurve2d.toAst current
 
 toPolyline ::
   (Known space, Known units, HasCallStack) =>

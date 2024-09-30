@@ -9,6 +9,7 @@ module VectorCurve2d.DegenerateEndpoint
   )
 where
 
+import Jit.VectorExpression2d qualified as VectorExpression2d
 import OpenSolid
 import Qty qualified
 import Range (Range (Range))
@@ -71,6 +72,7 @@ instance
     let transformedCurveDerivative = VectorCurve2d.transformBy transform curveDerivative
     let transformedValue = Vector2d.transformBy transform value
     VectorCurve2d.new (QCurve n t0 transformedCurveDerivative transformedValue)
+  toAstImpl (QCurve _ _ _ value) = Just (VectorExpression2d.constant value)
 
 qCurve ::
   (Known space, Known units) =>

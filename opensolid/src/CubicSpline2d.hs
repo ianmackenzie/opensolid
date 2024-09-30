@@ -1,9 +1,11 @@
 module CubicSpline2d (fromControlPoints) where
 
 import Arithmetic.Unboxed
+import BezierCurve2d qualified
 import Bounds2d qualified
 import Curve2d (Curve2d)
 import Curve2d qualified
+import NonEmpty qualified
 import OpenSolid
 import Point2d (Point2d (Point2d#))
 import Point2d qualified
@@ -74,6 +76,9 @@ instance
         (Point2d.transformBy transform p2)
         (Point2d.transformBy transform p3)
         (Point2d.transformBy transform p4)
+
+  toAstImpl (CubicSpline2d p1 p2 p3 p4) =
+    Just (BezierCurve2d.toAst (NonEmpty.of4 p1 p2 p3 p4))
 
 fromControlPoints ::
   (Known space, Known units, Tolerance units) =>

@@ -1,6 +1,7 @@
 module BezierCurve2d
   ( fromControlPoints
   , hermite
+  , toAst
   )
 where
 
@@ -9,6 +10,8 @@ import Curve2d (Curve2d)
 import Curve2d qualified
 import Float qualified
 import Int qualified
+import Jit.Expression as Expression
+import Jit.Expression2d qualified as Expression2d
 import List qualified
 import NonEmpty qualified
 import OpenSolid
@@ -103,6 +106,19 @@ instance
   reverseImpl (BezierCurve2d controlPoints) = BezierCurve2d (NonEmpty.reverse controlPoints)
 
   transformByImpl transform bezierCurve = Curve2d.new (transformBy transform bezierCurve)
+
+  toAstImpl (BezierCurve2d controlPoints) = Just (toAst controlPoints)
+
+toAst :: NonEmpty (Point2d (space @ units)) -> Expression2d.Curve
+toAst controlPoints = toAstImpl (NonEmpty.map Expression2d.constant controlPoints)
+
+toAstImpl :: NonEmpty Expression2d.Curve -> Expression2d.Curve
+toAstImpl controlPoints = case controlPoints of
+  point :| [] -> point
+  _ :| NonEmpty rest -> toAstImpl (NonEmpty.map2 collapse controlPoints rest)
+
+collapse :: Expression2d.Curve -> Expression2d.Curve -> Expression2d.Curve
+collapse p1 p2 = Expression2d.interpolateFrom p1 p2 Expression.parameter
 
 {- | Construct a Bezier curve from its start point (first control point), inner control points and
 end point (last control point). For example,

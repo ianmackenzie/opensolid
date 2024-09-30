@@ -60,8 +60,11 @@ import Error qualified
 import Float qualified
 import Frame2d (Frame2d)
 import Frame2d qualified
-import Jit qualified
+import Jit.Expression qualified as Expression
+import Jit.VectorExpression2d (VectorExpression2d)
+import Jit.VectorExpression2d qualified as VectorExpression2d
 import List qualified
+import Maybe qualified
 import NonEmpty qualified
 import OpenSolid
 import Point2d qualified
@@ -93,6 +96,7 @@ class
     Transform2d tag (Space coordinateSystem @ translationUnits) ->
     curve ->
     VectorCurve2d coordinateSystem
+  toAstImpl :: curve -> Maybe (VectorExpression2d Expression.Curve)
 
 data VectorCurve2d (coordinateSystem :: CoordinateSystem) where
   VectorCurve2d ::
@@ -233,20 +237,44 @@ instance
   segmentBoundsImpl = segmentBounds
   derivativeImpl = derivative
   transformByImpl = transformBy
-
--- TODO actually compile VectorCurve2d to Jit.Ast values
--- instead of leaving them as 'atomic' operations?
-instance
-  (Known space, Known units) =>
-  Jit.UnaryOp (VectorCurve2d (space @ units)) Float (Vector2d (space @ Unitless))
-  where
-  evalUnary vectorCurve t = Units.coerce (evaluateAt t vectorCurve)
+  toAstImpl = toAst
 
 toAst ::
   (Known space, Known units) =>
   VectorCurve2d (space @ units) ->
-  Jit.Ast Float (Vector2d (space @ Unitless))
-toAst vectorCurve = Jit.call vectorCurve
+  Maybe (VectorExpression2d Expression.Curve)
+toAst vectorCurve = case vectorCurve of
+  VectorCurve2d v -> toAstImpl v
+  Constant v -> Just (VectorExpression2d.constant v)
+  Coerce c -> toAst c
+  Reversed c -> Maybe.map (. (1.0 - Expression.parameter)) (toAst c)
+  XY x y -> Maybe.map2 VectorExpression2d.xy (Curve1d.toAst x) (Curve1d.toAst y)
+  Negated c -> Maybe.map negate (toAst c)
+  Sum c1 c2 -> Maybe.map2 (+) (toAst c1) (toAst c2)
+  Difference c1 c2 -> Maybe.map2 (-) (toAst c1) (toAst c2)
+  Product1d2d' c1 c2 -> Maybe.map2 (*) (Curve1d.toAst c1) (toAst c2)
+  Product2d1d' c1 c2 -> Maybe.map2 (*) (toAst c1) (Curve1d.toAst c2)
+  Quotient' c1 c2 -> Maybe.map2 (/) (toAst c1) (Curve1d.toAst c2)
+  PlaceInBasis basis c -> Maybe.map (VectorExpression2d.placeInBasis basis) (toAst c)
+  Line v1 v2 -> Just (v1 + Expression.parameter * (v2 - v1))
+  Arc i j a b -> do
+    let angle = a + Expression.parameter * (b - a)
+    Just (i * Expression.cos angle + j * Expression.sin angle)
+  QuadraticSpline v1 v2 v3 -> Just (bezierCurveAst (NonEmpty.of3 v1 v2 v3))
+  CubicSpline v1 v2 v3 v4 -> Just (bezierCurveAst (NonEmpty.of4 v1 v2 v3 v4))
+  BezierCurve controlPoints -> Just (bezierCurveAst controlPoints)
+  Transformed transform c -> Maybe.map (VectorExpression2d.transformBy transform) (toAst c)
+
+bezierCurveAst :: NonEmpty (Vector2d (space @ units)) -> VectorExpression2d.Curve
+bezierCurveAst = bezierCurveAstImpl . NonEmpty.map VectorExpression2d.constant
+
+bezierCurveAstImpl :: NonEmpty VectorExpression2d.Curve -> VectorExpression2d.Curve
+bezierCurveAstImpl controlPoints = case controlPoints of
+  point :| [] -> point
+  _ :| NonEmpty rest -> bezierCurveAstImpl (NonEmpty.map2 collapseControlPoints controlPoints rest)
+
+collapseControlPoints :: VectorExpression2d.Curve -> VectorExpression2d.Curve -> VectorExpression2d.Curve
+collapseControlPoints p1 p2 = VectorExpression2d.interpolateFrom p1 p2 Expression.parameter
 
 instance Known units => Negation (VectorCurve2d (space @ units)) where
   negate curve = case curve of
@@ -490,7 +518,7 @@ instance
   pointOnImpl (DotProductOf c1 c2) t = evaluateAt t c1 .<>. evaluateAt t c2
   segmentBoundsImpl (DotProductOf c1 c2) t = segmentBounds t c1 .<>. segmentBounds t c2
   derivativeImpl (DotProductOf c1 c2) = derivative c1 .<>. c2 + c1 .<>. derivative c2
-  toAstImpl (DotProductOf c1 c2) = Jit.dotProduct (toAst c1) (toAst c2)
+  toAstImpl (DotProductOf c1 c2) = Maybe.map2 (<>) (toAst c1) (toAst c2)
 
 instance
   ( Known space1
@@ -588,7 +616,7 @@ instance
   pointOnImpl (CrossProductOf c1 c2) t = evaluateAt t c1 .><. evaluateAt t c2
   segmentBoundsImpl (CrossProductOf c1 c2) t = segmentBounds t c1 .><. segmentBounds t c2
   derivativeImpl (CrossProductOf c1 c2) = derivative c1 .><. c2 + c1 .><. derivative c2
-  toAstImpl (CrossProductOf c1 c2) = Jit.crossProduct (toAst c1) (toAst c2)
+  toAstImpl (CrossProductOf c1 c2) = Maybe.map2 (><) (toAst c1) (toAst c2)
 
 instance
   ( Known space1
@@ -704,6 +732,8 @@ instance
     (derivative vectorCurve2d . curve1d) * Curve1d.derivative curve1d
   transformByImpl transform (Composition.Of curve1d vectorCurve2d) =
     new (Composition.Of curve1d (transformBy transform vectorCurve2d))
+  toAstImpl (Composition.Of curve1d vectorCurve2d) =
+    Maybe.map2 (.) (toAst vectorCurve2d) (Curve1d.toAst curve1d)
 
 transformBy ::
   (Known space, Known units, Known tag, Known translationUnits) =>
@@ -1026,7 +1056,7 @@ instance
     VectorBounds2d.squaredMagnitude' (segmentBounds t curve)
   derivativeImpl (SquaredMagnitude' curve) =
     2 * curve .<>. derivative curve
-  toAstImpl (SquaredMagnitude' curve) = Jit.squaredMagnitude (toAst curve)
+  toAstImpl (SquaredMagnitude' curve) = Maybe.map VectorExpression2d.squaredMagnitude (toAst curve)
 
 squaredMagnitude ::
   (Known space, Known units1, Known units2, Units.Squared units1 units2) =>
@@ -1057,7 +1087,7 @@ instance
     VectorBounds2d.magnitude (VectorCurve2d.segmentBounds t curve)
   derivativeImpl (NonZeroMagnitude curve) =
     (VectorCurve2d.derivative curve .<>. curve) .!/! Curve1d.new (NonZeroMagnitude curve)
-  toAstImpl (NonZeroMagnitude curve) = Jit.magnitude (toAst curve)
+  toAstImpl (NonZeroMagnitude curve) = Maybe.map VectorExpression2d.magnitude (toAst curve)
 
 unsafeMagnitude :: (Known space, Known units) => VectorCurve2d (space @ units) -> Curve1d units
 unsafeMagnitude curve = Curve1d.new (NonZeroMagnitude curve)

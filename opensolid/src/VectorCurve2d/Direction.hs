@@ -92,6 +92,9 @@ instance Known space => VectorCurve2d.Interface (PiecewiseCurve space) (space @ 
         (VectorCurve2d.transformBy transform general)
         (Maybe.map (DegenerateEndpoint.transformBy transform) end)
 
+  toAstImpl (PiecewiseCurve Nothing general Nothing) = VectorCurve2d.toAst general
+  toAstImpl PiecewiseCurve{} = Nothing -- TODO support piecewise curves in JIT
+
 unsafe ::
   (Known space, Known units, Tolerance units) =>
   VectorCurve2d (space @ units) ->

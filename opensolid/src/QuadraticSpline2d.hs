@@ -4,9 +4,11 @@ module QuadraticSpline2d
   )
 where
 
+import BezierCurve2d qualified
 import Bounds2d qualified
 import Curve2d (Curve2d)
 import Curve2d qualified
+import NonEmpty qualified
 import OpenSolid
 import Point2d (Point2d)
 import Point2d qualified
@@ -67,6 +69,9 @@ instance
         (Point2d.transformBy transform p1)
         (Point2d.transformBy transform p2)
         (Point2d.transformBy transform p3)
+
+  toAstImpl (QuadraticSpline2d p1 p2 p3) =
+    Just (BezierCurve2d.toAst (NonEmpty.of3 p1 p2 p3))
 
 fromControlPoints ::
   (Known space, Known units, Tolerance units) =>

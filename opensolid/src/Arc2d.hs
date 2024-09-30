@@ -35,6 +35,7 @@ import Direction2d qualified
 import Float qualified
 import Frame2d (Frame2d)
 import Frame2d qualified
+import Jit.Expression qualified as Expression
 import Line2d qualified
 import Maybe qualified
 import OpenSolid
@@ -108,6 +109,9 @@ instance
         let startAngle = a - theta - Angle.quarterTurn
         let endAngle = b - theta - Angle.quarterTurn
         Just (Arc2d centerPoint d2 -d1 r2 r1 startAngle endAngle)
+  toAstImpl (Arc p0 vx vy a b) = do
+    let angle = a + Expression.parameter * (b - a)
+    Just (p0 + vx * Expression.cos angle + vy * Expression.sin angle)
 
 maybeMagnitudeAndDirection :: Tolerance units => Vector2d (space @ units) -> Maybe (Qty units, Direction2d space)
 maybeMagnitudeAndDirection vector =

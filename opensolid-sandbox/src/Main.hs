@@ -24,7 +24,8 @@ import Duration qualified
 import Float qualified
 import IO qualified
 import Int qualified
-import Jit qualified
+import Jit.Expression qualified as Expression
+import Jit.Expression2d qualified as Expression2d
 import Length (Length)
 import Length qualified
 import Line2d qualified
@@ -579,51 +580,21 @@ testCurveMedialAxis = IO.do
     , Drawing2d.group (List.map drawSegment segments)
     ]
 
-data Expression
-  = Constant Float
-  | Parameter
-  | Sum Expression Expression
-  | Product Expression Expression
-  | Quotient Expression Expression
-  | Sqrt Expression
-  deriving (Eq)
-
-data SumOp = SumOp deriving (Eq, Show)
-
-instance Jit.BinaryOp SumOp Float Float Float where
-  evalBinary SumOp x y = Debug.intercept "Sum x" x + Debug.intercept "Sum y" y
-
-data ProductOp = ProductOp deriving (Eq, Show)
-
-instance Jit.BinaryOp ProductOp Float Float Float where
-  evalBinary ProductOp x y = Debug.intercept "Product x" x * Debug.intercept "Product y" y
-
-data QuotientOp = QuotientOp deriving (Eq, Show)
-
-instance Jit.BinaryOp QuotientOp Float Float Float where
-  evalBinary QuotientOp x y = Debug.intercept "Quotient x" x / Debug.intercept "Quotient y" y
-
-data SqrtOp = SqrtOp deriving (Eq, Show)
-
-instance Jit.UnaryOp SqrtOp Float Float where
-  evalUnary SqrtOp x = Float.sqrt x
-
-toAst :: Expression -> Jit.Ast Float Float
-toAst expression = case expression of
-  Constant value -> Jit.constant value
-  Parameter -> Jit.input
-  Sum x y -> Jit.binary SumOp (toAst x) (toAst y)
-  Product x y -> Jit.binary ProductOp (toAst x) (toAst y)
-  Quotient x y -> Jit.binary QuotientOp (toAst x) (toAst y)
-  Sqrt x -> Jit.unary SqrtOp (toAst x)
-
 testJit :: IO ()
 testJit = IO.do
-  let x = Parameter
-  let xSquared = Product x x
-  let expr = Quotient xSquared (Sum (Constant 1.0) xSquared)
-  let f = Jit.compile (toAst expr)
+  let x = Expression.parameter
+  let xSquared = Expression.squared x
+  let expr = xSquared / (xSquared + 1.0)
+  let f = Expression.curve expr
   log "evaluated" (f 2.0)
+
+testJitCurve2d :: IO ()
+testJitCurve2d = IO.do
+  let x = 10.0 * Expression.parameter
+  let y = Expression.sqrt Expression.parameter
+  let curve = Expression2d.xy x y
+  let f = Expression2d.curve curve
+  log "Evaluated 2D curve" (f 3.0)
 
 main :: IO ()
 main = Tolerance.using (Length.meters 1e-9) IO.do
@@ -644,6 +615,7 @@ main = Tolerance.using (Length.meters 1e-9) IO.do
   testBezierSegment
   testHermiteBezier
   testJit
+  testJitCurve2d
   testPlaneTorusIntersection
   testCurveMedialAxis
   testStretchedArc

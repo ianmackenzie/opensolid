@@ -13,7 +13,6 @@ maintainer: ian.e.mackenzie@gmail.com
 copyright: 2023 Ian Mackenzie
 license: MPL-2.0
 license-file: LICENSE
-build-type: Simple
 extra-source-files: README.md
 
 source-repository head
@@ -86,7 +85,17 @@ common config
     UnboxedTuples
     UndecidableInstances
     UndecidableSuperClasses
+    UnliftedFFITypes
     ViewPatterns
+
+custom-setup
+  setup-depends:
+    Cabal,
+    Cabal-syntax,
+    base,
+    directory,
+    filepath,
+    process,
 
 library
   import: config
@@ -153,7 +162,9 @@ library
     IO
     Int
     Intersects
-    Jit
+    Jit.Expression
+    Jit.Expression2d
+    Jit.VectorExpression2d
     Json
     Json.Format
     Json.Schema
@@ -187,10 +198,10 @@ library
     Stream
     Surface1d
     Surface1d.Function
-    Surface1d.Function.Expression
     Surface1d.Function.HorizontalCurve
     Surface1d.Function.Internal
     Surface1d.Function.Subproblem
+    Surface1d.Function.Symbolic
     Surface1d.Function.VerticalCurve
     Surface1d.Function.Zeros
     Surface2d
@@ -238,6 +249,8 @@ library
     Vector3d.CoordinateTransformation
 
   hs-source-dirs: src
+  extra-libraries:
+    opensolid_jit
 
 test-suite opensolid-test
   import: config
