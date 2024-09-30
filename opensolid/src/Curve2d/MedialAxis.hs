@@ -36,7 +36,7 @@ solve ::
   Curve2d (space @ units) ->
   Curve2d (space @ units) ->
   Result Error (List (Segment (space @ units)))
-solve curve1 curve2 = Result.do
+solve curve1 curve2 = do
   let p1 = curve1 . Surface1d.Function.u
   let p2 = curve2 . Surface1d.Function.v
   let v1 = Curve2d.derivative curve1 . Surface1d.Function.u
