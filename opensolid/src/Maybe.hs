@@ -6,6 +6,8 @@ module Maybe
   , find
   , collect
   , values
+  , any
+  , all
   , (>>=)
   , andThen
   , (>>)
@@ -55,6 +57,16 @@ collect = Data.Maybe.mapMaybe
 
 values :: List (Maybe a) -> List a
 values = Data.Maybe.catMaybes
+
+any :: List (Maybe a) -> Maybe a
+any (Just first : _) = Just first
+any (Nothing : rest) = any rest
+any [] = Nothing
+
+all :: List (Maybe a) -> Maybe (List a)
+all (Just first : rest) = map (first :) (all rest)
+all (Nothing : _) = Nothing
+all [] = Just []
 
 random :: Random.Generator a -> Random.Generator (Maybe a)
 random randomValue = Random.do
