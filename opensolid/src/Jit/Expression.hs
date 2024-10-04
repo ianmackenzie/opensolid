@@ -330,6 +330,9 @@ foreign import ccall unsafe "dynamic"
 
 curve :: Expression Curve -> (Float -> Qty units)
 curve expression = do
+  -- TODO perform garbage collection on JIT-compiled functions:
+  -- use GHC.Weak.mkWeak on f# to associate a finalizer with it
+  -- that calls a Rust function to delete the underlying JIT-compiled function/module
   let f# = curve1d_function (opensolid_jit_compile_curve1d (toPtr expression))
   \(Qty# x#) -> Qty# (f# x#)
 
