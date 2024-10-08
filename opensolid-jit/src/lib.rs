@@ -1,5 +1,8 @@
+mod builtins;
 mod expression;
+mod function_compiler;
 mod jit;
+mod module_compiler;
 
 #[cfg(test)]
 mod tests {
@@ -15,7 +18,7 @@ mod tests {
                 Box::new(Expression::Constant(Constant(1.0))),
             )),
         );
-        let compiled = jit::compile(1, &[&expression]);
+        let compiled = jit::compile_value(1, &[&expression]);
         let function = unsafe { std::mem::transmute::<_, fn(f64) -> f64>(compiled) };
         assert_eq!(function(3.0), 0.75);
     }
@@ -26,7 +29,7 @@ mod tests {
             Box::new(Expression::Argument(0)),
             Box::new(Expression::Constant(Constant(1.0))),
         )));
-        let compiled = jit::compile(1, &[&expression]);
+        let compiled = jit::compile_value(1, &[&expression]);
         let function = unsafe { std::mem::transmute::<_, fn(f64) -> f64>(compiled) };
         assert_eq!(function(8.0), 3.0);
     }
@@ -38,7 +41,7 @@ mod tests {
             Box::new(Expression::Argument(0)),
         );
         let y = Expression::SquareRoot(Box::new(Expression::Argument(0)));
-        let compiled = jit::compile(1, &[&x, &y]);
+        let compiled = jit::compile_value(1, &[&x, &y]);
         let function = unsafe { std::mem::transmute::<_, fn(f64, *mut f64)>(compiled) };
         let mut output: [f64; 2] = [0.0, 0.0];
         function(0.5, output.as_mut_ptr());
