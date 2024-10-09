@@ -132,7 +132,10 @@ interpolateFrom ::
   Expression2d parameterization
 interpolateFrom start end t = start + t * (end - start)
 
-placeIn :: Frame2d (space @ units) defines -> Expression2d parameterization -> Expression2d parameterization
+placeIn ::
+  Frame2d (space @ units) defines ->
+  Expression2d parameterization ->
+  Expression2d parameterization
 placeIn frame (Expression2d x y) = do
   let p0 = Frame2d.originPoint frame
   let i = Vector2d.unit (Frame2d.xDirection frame)
