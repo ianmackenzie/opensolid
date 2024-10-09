@@ -277,50 +277,50 @@ data Expression#
 
 type Ptr = Foreign.Ptr Expression#
 
-foreign import ccall unsafe "opensolid_jit_constant"
-  opensolid_jit_constant :: Double -> Ptr
+foreign import ccall unsafe "opensolid_expression_constant"
+  opensolid_expression_constant :: Double -> Ptr
 
-foreign import ccall unsafe "opensolid_jit_argument"
-  opensolid_jit_argument :: Int64 -> Ptr
+foreign import ccall unsafe "opensolid_expression_argument"
+  opensolid_expression_argument :: Int64 -> Ptr
 
-foreign import ccall unsafe "opensolid_jit_negate"
-  opensolid_jit_negate :: Ptr -> Ptr
+foreign import ccall unsafe "opensolid_expression_negate"
+  opensolid_expression_negate :: Ptr -> Ptr
 
-foreign import ccall unsafe "opensolid_jit_sum"
-  opensolid_jit_sum :: Ptr -> Ptr -> Ptr
+foreign import ccall unsafe "opensolid_expression_sum"
+  opensolid_expression_sum :: Ptr -> Ptr -> Ptr
 
-foreign import ccall unsafe "opensolid_jit_difference"
-  opensolid_jit_difference :: Ptr -> Ptr -> Ptr
+foreign import ccall unsafe "opensolid_expression_difference"
+  opensolid_expression_difference :: Ptr -> Ptr -> Ptr
 
-foreign import ccall unsafe "opensolid_jit_product"
-  opensolid_jit_product :: Ptr -> Ptr -> Ptr
+foreign import ccall unsafe "opensolid_expression_product"
+  opensolid_expression_product :: Ptr -> Ptr -> Ptr
 
-foreign import ccall unsafe "opensolid_jit_quotient"
-  opensolid_jit_quotient :: Ptr -> Ptr -> Ptr
+foreign import ccall unsafe "opensolid_expression_quotient"
+  opensolid_expression_quotient :: Ptr -> Ptr -> Ptr
 
-foreign import ccall unsafe "opensolid_jit_sqrt"
-  opensolid_jit_sqrt :: Ptr -> Ptr
+foreign import ccall unsafe "opensolid_expression_sqrt"
+  opensolid_expression_sqrt :: Ptr -> Ptr
 
-foreign import ccall unsafe "opensolid_jit_sin"
-  opensolid_jit_sin :: Ptr -> Ptr
+foreign import ccall unsafe "opensolid_expression_sin"
+  opensolid_expression_sin :: Ptr -> Ptr
 
-foreign import ccall unsafe "opensolid_jit_cos"
-  opensolid_jit_cos :: Ptr -> Ptr
+foreign import ccall unsafe "opensolid_expression_cos"
+  opensolid_expression_cos :: Ptr -> Ptr
 
 toPtr :: Expression parameterization -> Ptr
 toPtr expression = case expression of
-  Parameter -> opensolid_jit_argument (fromIntegral 0)
-  U -> opensolid_jit_argument (fromIntegral 0)
-  V -> opensolid_jit_argument (fromIntegral 1)
-  Constant value -> opensolid_jit_constant (Float.toDouble value)
-  Negated arg -> opensolid_jit_negate (toPtr arg)
-  Sum lhs rhs -> opensolid_jit_sum (toPtr lhs) (toPtr rhs)
-  Difference lhs rhs -> opensolid_jit_difference (toPtr lhs) (toPtr rhs)
-  Product lhs rhs -> opensolid_jit_product (toPtr lhs) (toPtr rhs)
-  Quotient lhs rhs -> opensolid_jit_quotient (toPtr lhs) (toPtr rhs)
-  SquareRoot arg -> opensolid_jit_sqrt (toPtr arg)
-  Sine arg -> opensolid_jit_sin (toPtr arg)
-  Cosine arg -> opensolid_jit_cos (toPtr arg)
+  Parameter -> opensolid_expression_argument (fromIntegral 0)
+  U -> opensolid_expression_argument (fromIntegral 0)
+  V -> opensolid_expression_argument (fromIntegral 1)
+  Constant value -> opensolid_expression_constant (Float.toDouble value)
+  Negated arg -> opensolid_expression_negate (toPtr arg)
+  Sum lhs rhs -> opensolid_expression_sum (toPtr lhs) (toPtr rhs)
+  Difference lhs rhs -> opensolid_expression_difference (toPtr lhs) (toPtr rhs)
+  Product lhs rhs -> opensolid_expression_product (toPtr lhs) (toPtr rhs)
+  Quotient lhs rhs -> opensolid_expression_quotient (toPtr lhs) (toPtr rhs)
+  SquareRoot arg -> opensolid_expression_sqrt (toPtr arg)
+  Sine arg -> opensolid_expression_sin (toPtr arg)
+  Cosine arg -> opensolid_expression_cos (toPtr arg)
 
 foreign import ccall unsafe "opensolid_jit_compile_curve1d_value"
   opensolid_jit_compile_curve1d_value :: Ptr -> FunPtr (Double# -> Double#)

@@ -40,24 +40,24 @@ impl Expression {
 }
 
 #[no_mangle]
-pub extern "C" fn opensolid_jit_constant(value: f64) -> *mut Expression {
+pub extern "C" fn opensolid_expression_constant(value: f64) -> *mut Expression {
     let constant = Constant(value);
     Expression::Constant(constant).to_c()
 }
 
 #[no_mangle]
-pub extern "C" fn opensolid_jit_argument(index: i64) -> *mut Expression {
+pub extern "C" fn opensolid_expression_argument(index: i64) -> *mut Expression {
     Expression::Argument(index).to_c()
 }
 
 #[no_mangle]
-pub extern "C" fn opensolid_jit_negate(ptr: *mut Expression) -> *mut Expression {
+pub extern "C" fn opensolid_expression_negate(ptr: *mut Expression) -> *mut Expression {
     let arg = Expression::from_c(ptr);
     Expression::Negate(arg).to_c()
 }
 
 #[no_mangle]
-pub extern "C" fn opensolid_jit_sum(
+pub extern "C" fn opensolid_expression_sum(
     ptr1: *mut Expression,
     ptr2: *mut Expression,
 ) -> *mut Expression {
@@ -67,7 +67,7 @@ pub extern "C" fn opensolid_jit_sum(
 }
 
 #[no_mangle]
-pub extern "C" fn opensolid_jit_difference(
+pub extern "C" fn opensolid_expression_difference(
     ptr1: *mut Expression,
     ptr2: *mut Expression,
 ) -> *mut Expression {
@@ -77,7 +77,7 @@ pub extern "C" fn opensolid_jit_difference(
 }
 
 #[no_mangle]
-pub extern "C" fn opensolid_jit_product(
+pub extern "C" fn opensolid_expression_product(
     ptr1: *mut Expression,
     ptr2: *mut Expression,
 ) -> *mut Expression {
@@ -87,7 +87,7 @@ pub extern "C" fn opensolid_jit_product(
 }
 
 #[no_mangle]
-pub extern "C" fn opensolid_jit_quotient(
+pub extern "C" fn opensolid_expression_quotient(
     ptr1: *mut Expression,
     ptr2: *mut Expression,
 ) -> *mut Expression {
@@ -97,19 +97,19 @@ pub extern "C" fn opensolid_jit_quotient(
 }
 
 #[no_mangle]
-pub extern "C" fn opensolid_jit_sqrt(ptr: *mut Expression) -> *mut Expression {
+pub extern "C" fn opensolid_expression_sqrt(ptr: *mut Expression) -> *mut Expression {
     let arg = Expression::from_c(ptr);
     Expression::SquareRoot(arg).to_c()
 }
 
 #[no_mangle]
-pub extern "C" fn opensolid_jit_sin(ptr: *mut Expression) -> *mut Expression {
+pub extern "C" fn opensolid_expression_sin(ptr: *mut Expression) -> *mut Expression {
     let arg = Expression::from_c(ptr);
     Expression::Sine(arg).to_c()
 }
 
 #[no_mangle]
-pub extern "C" fn opensolid_jit_cos(ptr: *mut Expression) -> *mut Expression {
+pub extern "C" fn opensolid_expression_cos(ptr: *mut Expression) -> *mut Expression {
     let arg = Expression::from_c(ptr);
     Expression::Cosine(arg).to_c()
 }
