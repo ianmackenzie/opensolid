@@ -1,6 +1,7 @@
 module Qty
   ( Qty (Qty, Qty#)
   , zero
+  , unit
   , infinity
   , sign
   , isNaN
@@ -170,6 +171,10 @@ instance DivMod (Qty units) where
 {-# INLINE zero #-}
 zero :: Qty units
 zero = Data.Coerce.coerce 0.0
+
+{-# INLINE unit #-}
+unit :: Qty units
+unit = Data.Coerce.coerce 1.0
 
 infinity :: Qty units
 infinity = Data.Coerce.coerce (1.0 / 0.0)
