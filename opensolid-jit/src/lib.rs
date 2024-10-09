@@ -1,3 +1,4 @@
+mod bounds;
 mod builtins;
 mod expression;
 mod function_compiler;
