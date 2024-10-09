@@ -1,3 +1,4 @@
+#[derive(Copy, Clone)]
 pub struct Constant(pub f64);
 
 impl PartialEq for Constant {
@@ -14,7 +15,7 @@ impl std::hash::Hash for Constant {
     }
 }
 
-#[derive(PartialEq, Eq, Hash)]
+#[derive(PartialEq, Eq, Hash, Clone)]
 pub enum Expression {
     Argument(i64),
     Constant(Constant),
