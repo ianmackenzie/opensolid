@@ -5,9 +5,10 @@ use cranelift_codegen::Context;
 use cranelift_jit::{JITBuilder, JITModule};
 use cranelift_module::Module;
 
+use crate::bounds_function_compiler::BoundsFunctionCompiler;
 use crate::builtins::Builtins;
 use crate::expression::Expression;
-use crate::function_compiler::FunctionCompiler;
+use crate::value_function_compiler::ValueFunctionCompiler;
 
 pub struct ModuleCompiler {
     module: JITModule,
@@ -27,7 +28,7 @@ impl ModuleCompiler {
         let mut module = JITModule::new(jit_builder);
         let builder_context = FunctionBuilderContext::new();
         let mut context = module.make_context();
-        let builtins = Builtins::declare_in(&mut module, &mut context.func);
+        let builtins = Builtins::declare_in(&mut module, &mut context.func, pointer_type);
         let mem_flags = MemFlags::new();
         ModuleCompiler {
             module,
@@ -46,9 +47,17 @@ impl ModuleCompiler {
         cranelift::prelude::settings::Flags::new(builder)
     }
 
-    pub fn compile_value(mut self, input_dimension: usize, outputs: &[&Expression]) -> *const u8 {
+    fn add_param(&mut self, t: Type) {
+        self.context.func.signature.params.push(AbiParam::new(t));
+    }
+
+    pub fn compile_value_function(
+        mut self,
+        input_dimension: usize,
+        outputs: &[&Expression],
+    ) -> *const u8 {
         for _ in 0..input_dimension {
-            self.context.func.signature.params.push(AbiParam::new(F64));
+            self.add_param(F64);
         }
         if outputs.len() == 1 {
             // 1D output means we can just return a double,
@@ -58,14 +67,10 @@ impl ModuleCompiler {
             // 2D or 3D output means we write to an output pointer,
             // e.g. `void foo(double u, double v, double* output)` for evaluating a 3D surface
             // (assuming 'output' points to an array of 3 double values)
-            self.context
-                .func
-                .signature
-                .params
-                .push(AbiParam::new(self.pointer_type));
+            self.add_param(self.pointer_type);
         }
 
-        let mut function_compiler = FunctionCompiler::new(
+        let mut function_compiler = ValueFunctionCompiler::new(
             self.builtins,
             self.mem_flags,
             input_dimension,
@@ -82,6 +87,33 @@ impl ModuleCompiler {
             }
             function_compiler.return_void();
         }
+        self.finalize()
+    }
+
+    pub fn compile_bounds_function(
+        mut self,
+        input_dimension: usize,
+        outputs: &[&Expression],
+    ) -> *const u8 {
+        for _ in 0..input_dimension {
+            self.add_param(F64);
+            self.add_param(F64);
+        }
+        self.add_param(self.pointer_type);
+
+        let mut function_compiler = BoundsFunctionCompiler::new(
+            self.builtins,
+            self.mem_flags,
+            self.pointer_type,
+            2 * input_dimension,
+            &mut self.context.func,
+            &mut self.builder_context,
+        );
+        for i in 0..outputs.len() {
+            let (lower, upper) = function_compiler.compute_bounds(outputs[i]);
+            function_compiler.write_output_bounds(i, lower, upper);
+        }
+        function_compiler.return_void();
         self.finalize()
     }
 

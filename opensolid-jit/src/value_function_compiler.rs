@@ -9,34 +9,34 @@ use cranelift_codegen::ir::{Function, MemFlags};
 use crate::builtins::Builtins;
 use crate::expression::Expression;
 
-pub struct FunctionCompiler<'a> {
+pub struct ValueFunctionCompiler<'a> {
     function_builder: FunctionBuilder<'a>,
     mem_flags: MemFlags,
     builtins: Builtins,
-    num_inputs: usize,
+    output_argument_index: usize,
     entry_block: Block,
     evaluated: HashMap<&'a Expression, Variable>,
 }
 
-impl<'a> FunctionCompiler<'a> {
+impl<'a> ValueFunctionCompiler<'a> {
     pub fn new(
         builtins: Builtins,
         mem_flags: MemFlags,
-        num_inputs: usize,
+        output_argument_index: usize,
         function: &'a mut Function,
         builder_context: &'a mut FunctionBuilderContext,
-    ) -> FunctionCompiler<'a> {
+    ) -> ValueFunctionCompiler<'a> {
         let mut function_builder = FunctionBuilder::new(function, builder_context);
         let entry_block = function_builder.create_block();
         function_builder.append_block_params_for_function_params(entry_block);
         function_builder.switch_to_block(entry_block);
         function_builder.seal_block(entry_block);
 
-        FunctionCompiler {
+        ValueFunctionCompiler {
             function_builder,
             mem_flags,
             builtins,
-            num_inputs,
+            output_argument_index,
             entry_block,
             evaluated: HashMap::new(),
         }
@@ -124,7 +124,8 @@ impl<'a> FunctionCompiler<'a> {
     }
 
     pub fn write_output_value(&mut self, index: usize, value: Value) {
-        let output_pointer = self.function_builder.block_params(self.entry_block)[self.num_inputs];
+        let output_pointer =
+            self.function_builder.block_params(self.entry_block)[self.output_argument_index];
         let byte_offset = 8 * index as i32;
         self.function_builder
             .ins()

@@ -13,7 +13,6 @@ module Jit.Expression
   , sin
   , cos
   , interpolateFrom
-  , curve
   , surface
   )
 where
@@ -322,27 +321,13 @@ toPtr expression = case expression of
   Sine arg -> opensolid_expression_sin (toPtr arg)
   Cosine arg -> opensolid_expression_cos (toPtr arg)
 
-foreign import ccall unsafe "opensolid_jit_compile_curve1d_value"
-  opensolid_jit_compile_curve1d_value :: Ptr -> FunPtr (Double# -> Double#)
-
-foreign import ccall unsafe "dynamic"
-  curve1d_function :: FunPtr (Double# -> Double#) -> (Double# -> Double#)
-
-curve :: Expression Curve -> (Float -> Qty units)
-curve expression = do
-  -- TODO perform garbage collection on JIT-compiled functions:
-  -- use GHC.Weak.mkWeak on f# to associate a finalizer with it
-  -- that calls a Rust function to delete the underlying JIT-compiled function/module
-  let f# = curve1d_function (opensolid_jit_compile_curve1d_value (toPtr expression))
-  \(Qty# x#) -> Qty# (f# x#)
-
-foreign import ccall unsafe "opensolid_jit_compile_surface1d_value"
-  opensolid_jit_compile_surface1d_value :: Ptr -> FunPtr (Double# -> Double# -> Double#)
+foreign import ccall unsafe "opensolid_jit_compile_surface1d_value_function"
+  opensolid_jit_compile_surface1d_value_function :: Ptr -> FunPtr (Double# -> Double# -> Double#)
 
 foreign import ccall unsafe "dynamic"
   surface1d_function :: FunPtr (Double# -> Double# -> Double#) -> (Double# -> Double# -> Double#)
 
 surface :: Expression Surface -> (Uv.Point -> Qty units)
 surface expression = do
-  let f# = surface1d_function (opensolid_jit_compile_surface1d_value (toPtr expression))
+  let f# = surface1d_function (opensolid_jit_compile_surface1d_value_function (toPtr expression))
   \(Point2d# u# v#) -> Qty# (f# u# v#)

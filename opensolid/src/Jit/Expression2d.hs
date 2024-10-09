@@ -148,8 +148,8 @@ transformBy ::
   Expression2d parameterization
 transformBy (Transform2d p0 i j) (Expression2d x y) = p0 + x * i + y * j
 
-foreign import ccall unsafe "opensolid_jit_compile_curve2d_value"
-  opensolid_jit_compile_curve2d_value ::
+foreign import ccall unsafe "opensolid_jit_compile_curve2d_value_function"
+  opensolid_jit_compile_curve2d_value_function ::
     Expression.Ptr ->
     Expression.Ptr ->
     FunPtr (Double# -> Ptr (Qty units) -> IO ())
@@ -161,7 +161,7 @@ foreign import ccall unsafe "dynamic"
 
 curve :: Expression2d Expression.Curve -> (Float -> Point2d (space @ units))
 curve (Expression2d x y) = do
-  let f# = curve2d_function (opensolid_jit_compile_curve2d_value (Expression.toPtr x) (Expression.toPtr y))
+  let f# = curve2d_function (opensolid_jit_compile_curve2d_value_function (Expression.toPtr x) (Expression.toPtr y))
   \(Qty# t#) -> unsafeDupablePerformIO IO.do
     outputs <- Alloc.mallocBytes 16
     f# t# outputs
@@ -170,8 +170,8 @@ curve (Expression2d x y) = do
     Alloc.free outputs
     IO.succeed (Point2d.xy px py)
 
-foreign import ccall unsafe "opensolid_jit_compile_surface2d_value"
-  opensolid_jit_compile_surface2d_value ::
+foreign import ccall unsafe "opensolid_jit_compile_surface2d_value_function"
+  opensolid_jit_compile_surface2d_value_function ::
     Expression.Ptr ->
     Expression.Ptr ->
     FunPtr (Double# -> Double# -> Ptr (Qty units) -> IO ())
@@ -183,7 +183,7 @@ foreign import ccall unsafe "dynamic"
 
 surface :: Expression2d Expression.Surface -> (Uv.Point -> Point2d (space @ units))
 surface (Expression2d x y) = do
-  let f# = surface2d_function (opensolid_jit_compile_surface2d_value (Expression.toPtr x) (Expression.toPtr y))
+  let f# = surface2d_function (opensolid_jit_compile_surface2d_value_function (Expression.toPtr x) (Expression.toPtr y))
   \(Point2d# u# v#) -> unsafeDupablePerformIO IO.do
     outputs <- Alloc.mallocBytes 16
     f# u# v# outputs

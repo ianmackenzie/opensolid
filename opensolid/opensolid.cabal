@@ -162,6 +162,7 @@ library
     IO
     Int
     Intersects
+    Jit.Curve1d
     Jit.Expression
     Jit.Expression2d
     Jit.VectorExpression2d

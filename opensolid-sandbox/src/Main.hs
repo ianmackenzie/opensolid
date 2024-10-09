@@ -24,6 +24,7 @@ import Duration qualified
 import Float qualified
 import IO qualified
 import Int qualified
+import Jit.Curve1d qualified
 import Jit.Expression qualified as Expression
 import Jit.Expression2d qualified as Expression2d
 import Length (Length)
@@ -585,8 +586,10 @@ testJit = IO.do
   let x = Expression.parameter
   let xSquared = Expression.squared x
   let expr = xSquared / (xSquared + 1.0)
-  let f = Expression.curve expr
-  log "evaluated" (f 2.0)
+  let valueFunction = Jit.Curve1d.valueFunction expr
+  let boundsFunction = Jit.Curve1d.boundsFunction expr
+  log "JIT evaluated" (valueFunction 2.0)
+  log "JIT bounds" (boundsFunction (Range.from 1.0 3.0))
 
 testJitCurve2d :: IO ()
 testJitCurve2d = IO.do
