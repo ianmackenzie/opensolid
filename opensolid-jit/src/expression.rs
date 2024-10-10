@@ -9,13 +9,25 @@ impl PartialEq for Constant {
 
 impl Eq for Constant {}
 
+impl PartialOrd for Constant {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        self.0.to_bits().partial_cmp(&other.0.to_bits())
+    }
+}
+
+impl Ord for Constant {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.0.to_bits().cmp(&other.0.to_bits())
+    }
+}
+
 impl std::hash::Hash for Constant {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.0.to_bits().hash(state);
     }
 }
 
-#[derive(PartialEq, Eq, Hash, Clone)]
+#[derive(PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
 pub enum Expression {
     Argument(i64),
     Constant(Constant),
@@ -63,7 +75,11 @@ pub extern "C" fn opensolid_expression_sum(
 ) -> *mut Expression {
     let lhs = Expression::from_c(ptr1);
     let rhs = Expression::from_c(ptr2);
-    Expression::Sum(lhs, rhs).to_c()
+    if *lhs <= *rhs {
+        Expression::Sum(lhs, rhs).to_c()
+    } else {
+        Expression::Sum(rhs, lhs).to_c()
+    }
 }
 
 #[no_mangle]
@@ -83,7 +99,11 @@ pub extern "C" fn opensolid_expression_product(
 ) -> *mut Expression {
     let lhs = Expression::from_c(ptr1);
     let rhs = Expression::from_c(ptr2);
-    Expression::Product(lhs, rhs).to_c()
+    if *lhs <= *rhs {
+        Expression::Product(lhs, rhs).to_c()
+    } else {
+        Expression::Product(rhs, lhs).to_c()
+    }
 }
 
 #[no_mangle]
