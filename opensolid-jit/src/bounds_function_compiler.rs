@@ -116,16 +116,27 @@ impl<'a> BoundsFunctionCompiler<'a> {
         self.fmax(abc, d)
     }
 
-    fn lt(&mut self, x: Value, y: Value) -> Value {
-        self.function_builder.ins().fcmp(FloatCC::LessThan, x, y)
+    fn le(&mut self, x: Value, y: Value) -> Value {
+        self.function_builder
+            .ins()
+            .fcmp(FloatCC::LessThanOrEqual, x, y)
     }
 
-    fn gt(&mut self, x: Value, y: Value) -> Value {
-        self.function_builder.ins().fcmp(FloatCC::GreaterThan, x, y)
+    fn ge(&mut self, x: Value, y: Value) -> Value {
+        self.function_builder
+            .ins()
+            .fcmp(FloatCC::GreaterThanOrEqual, x, y)
     }
 
-    fn bor(&mut self, lhs: Value, rhs: Value) -> Value {
-        self.function_builder.ins().bor(lhs, rhs)
+    fn band(&mut self, lhs: Value, rhs: Value) -> Value {
+        self.function_builder.ins().band(lhs, rhs)
+    }
+
+    fn includes_zero(&mut self, lower: Value, upper: Value) -> Value {
+        let zero = self.zero();
+        let lower_le_zero = self.le(lower, zero);
+        let upper_ge_zero = self.ge(upper, zero);
+        self.band(lower_le_zero, upper_ge_zero)
     }
 
     fn select(&mut self, condition: Value, if_true: Value, if_false: Value) -> Value {
@@ -242,16 +253,13 @@ impl<'a> BoundsFunctionCompiler<'a> {
                     let lu = self.fdiv(lhs_lower, rhs_upper);
                     let ul = self.fdiv(lhs_upper, rhs_lower);
                     let uu = self.fdiv(lhs_upper, rhs_upper);
-                    let zero = self.zero();
                     let positive_infinity = self.positive_infinity();
                     let negative_infinity = self.negative_infinity();
-                    let rhs_lower_positive = self.gt(rhs_lower, zero);
-                    let rhs_upper_negative = self.lt(rhs_upper, zero);
-                    let rhs_nonzero = self.bor(rhs_lower_positive, rhs_upper_negative);
+                    let rhs_includes_zero = self.includes_zero(rhs_lower, rhs_upper);
                     let finite_lower = self.fmin4(ll, lu, ul, uu);
                     let finite_upper = self.fmax4(ll, lu, ul, uu);
-                    let lower = self.select(rhs_nonzero, finite_lower, negative_infinity);
-                    let upper = self.select(rhs_nonzero, finite_upper, positive_infinity);
+                    let lower = self.select(rhs_includes_zero, negative_infinity, finite_lower);
+                    let upper = self.select(rhs_includes_zero, positive_infinity, finite_upper);
                     self.define_bounds(expression, lower, upper)
                 }
                 Expression::SquareRoot(arg) => {
