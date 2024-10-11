@@ -1,17 +1,18 @@
 module BezierCurve2d
   ( fromControlPoints
   , hermite
-  , toAst
+  , expression
   )
 where
 
 import Bounds2d qualified
 import Curve2d (Curve2d)
 import Curve2d qualified
+import Expression (Expression)
+import Expression qualified
+import Expression.Point2d qualified
 import Float qualified
 import Int qualified
-import Jit.Expression as Expression
-import Jit.Expression2d qualified as Expression2d
 import List qualified
 import NonEmpty qualified
 import OpenSolid
@@ -102,18 +103,23 @@ instance Curve2d.Interface (BezierCurve2d (space @ units)) (space @ units) where
 
   transformByImpl transform bezierCurve = Curve2d.new (transformBy transform bezierCurve)
 
-  toAstImpl (BezierCurve2d controlPoints) = Just (toAst controlPoints)
+  expressionImpl (BezierCurve2d controlPoints) = Just (expression controlPoints)
 
-toAst :: NonEmpty (Point2d (space @ units)) -> Expression2d.Curve
-toAst controlPoints = toAstImpl (NonEmpty.map Expression2d.constant controlPoints)
+expression :: NonEmpty (Point2d (space @ units)) -> Expression Float (Point2d (space @ units))
+expression controlPoints = expressionImpl (NonEmpty.map Expression.Point2d.constant controlPoints)
 
-toAstImpl :: NonEmpty Expression2d.Curve -> Expression2d.Curve
-toAstImpl controlPoints = case controlPoints of
+expressionImpl ::
+  NonEmpty (Expression Float (Point2d (space @ units))) ->
+  Expression Float (Point2d (space @ units))
+expressionImpl controlPoints = case controlPoints of
   point :| [] -> point
-  _ :| NonEmpty rest -> toAstImpl (NonEmpty.map2 collapse controlPoints rest)
+  _ :| NonEmpty rest -> expressionImpl (NonEmpty.map2 collapse controlPoints rest)
 
-collapse :: Expression2d.Curve -> Expression2d.Curve -> Expression2d.Curve
-collapse p1 p2 = Expression2d.interpolateFrom p1 p2 Expression.parameter
+collapse ::
+  Expression Float (Point2d (space @ units)) ->
+  Expression Float (Point2d (space @ units)) ->
+  Expression Float (Point2d (space @ units))
+collapse p1 p2 = Expression.Point2d.interpolateFrom p1 p2 Expression.parameter
 
 {- | Construct a Bezier curve from its start point (first control point), inner control points and
 end point (last control point). For example,

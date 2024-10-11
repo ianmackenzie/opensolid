@@ -10,7 +10,7 @@ module Surface2d.Function
   , evaluate
   , bounds
   , derivative
-  , toAst
+  , expression
   )
 where
 
@@ -18,9 +18,8 @@ import Bounds2d (Bounds2d)
 import Bounds2d qualified
 import Curve2d (Curve2d)
 import Curve2d qualified
-import Jit.Expression qualified as Expression
-import Jit.Expression2d (Expression2d)
-import Jit.Expression2d qualified as Expression2d
+import Expression (Expression)
+import Expression.Point2d qualified
 import Maybe qualified
 import OpenSolid
 import Point2d (Point2d)
@@ -43,7 +42,7 @@ class
   evaluateImpl :: function -> Uv.Point -> Point2d coordinateSystem
   boundsImpl :: function -> Uv.Bounds -> Bounds2d coordinateSystem
   derivativeImpl :: Parameter -> function -> VectorSurface2d.Function coordinateSystem
-  toAstImpl :: function -> Maybe (Expression2d Expression.Surface)
+  expressionImpl :: function -> Maybe (Expression Uv.Point (Point2d coordinateSystem))
 
 data Function (coordinateSystem :: CoordinateSystem) where
   Function ::
@@ -141,7 +140,7 @@ instance VectorSurface2d.Function.Interface (Difference (space @ units)) (space 
   evaluateImpl (Difference f1 f2) uv = evaluate f1 uv - evaluate f2 uv
   boundsImpl (Difference f1 f2) uv = bounds f1 uv - bounds f2 uv
   derivativeImpl parameter (Difference f1 f2) = derivative parameter f1 - derivative parameter f2
-  toAstImpl (Difference f1 f2) = Maybe.map2 (-) (toAst f1) (toAst f2)
+  expressionImpl (Difference f1 f2) = Maybe.map2 (-) (expression f1) (expression f2)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -227,14 +226,14 @@ instance Interface (SurfaceCurveComposition (space @ units)) (space @ units) whe
   derivativeImpl parameter (SurfaceCurveComposition function curve) =
     (Curve2d.derivative curve . function) * Surface1d.Function.derivative parameter function
 
-  toAstImpl (SurfaceCurveComposition function curve) =
-    Maybe.map2 (.) (Curve2d.toAst curve) (Surface1d.Function.toAst function)
+  expressionImpl (SurfaceCurveComposition function curve) =
+    Maybe.map2 (.) (Curve2d.expression curve) (Surface1d.Function.expression function)
 
-toAst :: Function (space @ units) -> Maybe (Expression2d Expression.Surface)
-toAst function = case function of
-  Function f -> toAstImpl f
-  Coerce f -> toAst f
-  Constant p -> Just (Expression2d.constant p)
-  XY x y -> Maybe.map2 Expression2d.xy (Surface1d.Function.toAst x) (Surface1d.Function.toAst y)
-  Addition f1 f2 -> Maybe.map2 (+) (toAst f1) (VectorSurface2d.Function.toAst f2)
-  Subtraction f1 f2 -> Maybe.map2 (-) (toAst f1) (VectorSurface2d.Function.toAst f2)
+expression :: Function (space @ units) -> Maybe (Expression Uv.Point (Point2d (space @ units)))
+expression function = case function of
+  Function f -> expressionImpl f
+  Coerce f -> Units.coerce (expression f)
+  Constant p -> Just (Expression.Point2d.constant p)
+  XY x y -> Maybe.map2 Expression.Point2d.xy (Surface1d.Function.expression x) (Surface1d.Function.expression y)
+  Addition f1 f2 -> Maybe.map2 (+) (expression f1) (VectorSurface2d.Function.expression f2)
+  Subtraction f1 f2 -> Maybe.map2 (-) (expression f1) (VectorSurface2d.Function.expression f2)

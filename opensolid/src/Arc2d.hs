@@ -32,10 +32,10 @@ import Curve2d (Curve2d)
 import Curve2d qualified
 import Direction2d (Direction2d)
 import Direction2d qualified
+import Expression qualified
 import Float qualified
 import Frame2d (Frame2d)
 import Frame2d qualified
-import Jit.Expression qualified as Expression
 import Line2d qualified
 import Maybe qualified
 import OpenSolid
@@ -106,7 +106,7 @@ instance Curve2d.Interface (Arc (space @ units)) (space @ units) where
         let startAngle = a - theta - Angle.quarterTurn
         let endAngle = b - theta - Angle.quarterTurn
         Just (Arc2d centerPoint d2 -d1 r2 r1 startAngle endAngle)
-  toAstImpl (Arc p0 vx vy a b) = do
+  expressionImpl (Arc p0 vx vy a b) = do
     let angle = a + Expression.parameter * (b - a)
     Just (p0 + vx * Expression.cos angle + vy * Expression.sin angle)
 

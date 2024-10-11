@@ -23,7 +23,7 @@ module Surface1d.Function
   , sqrt'
   , sin
   , cos
-  , toAst
+  , expression
   , unwrap
   )
 where
@@ -38,10 +38,9 @@ import Direction2d qualified
 import Domain1d qualified
 import Domain2d (Domain2d (Domain2d))
 import Domain2d qualified
+import Expression (Expression)
 import Float qualified
 import Fuzzy qualified
-import Jit.Expression (Expression)
-import Jit.Expression qualified as Expression
 import List qualified
 import Maybe qualified
 import NonEmpty qualified
@@ -93,7 +92,7 @@ class
   evaluateImpl :: function -> Uv.Point -> Qty units
   boundsImpl :: function -> Uv.Bounds -> Range units
   derivativeImpl :: Parameter -> function -> Function units
-  toAstImpl :: function -> Maybe (Expression Expression.Surface)
+  expressionImpl :: function -> Maybe (Expression Uv.Point (Qty units))
 
 instance HasUnits (Function units) where
   type UnitsOf (Function units) = units
@@ -323,11 +322,11 @@ instance Curve1d.Interface (CurveOnSurface units) units where
     let vT = VectorCurve2d.yComponent uvT
     fU . uvCurve * uT + fV . uvCurve * vT
 
-  toAstImpl (CurveOnSurface uvCurve function) =
-    Maybe.map2 (.) (toAst function) (Curve2d.toAst uvCurve)
+  expressionImpl (CurveOnSurface uvCurve function) =
+    Maybe.map2 (.) (expression function) (Curve2d.expression uvCurve)
 
-toAst :: Function units -> Maybe (Expression Expression.Surface)
-toAst (Function symbolic _) = Symbolic.toAst symbolic
+expression :: Function units -> Maybe (Expression Uv.Point (Qty units))
+expression (Function symbolic _) = Symbolic.expression symbolic
 
 zeros :: Tolerance units => Function units -> Result Zeros.Error Zeros
 zeros function

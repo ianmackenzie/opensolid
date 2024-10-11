@@ -3,7 +3,7 @@ module Surface1d.Function.Symbolic
   , derivative
   , evaluate
   , bounds
-  , toAst
+  , expression
   , squared'
   , sqrt'
   , sin
@@ -14,9 +14,9 @@ where
 
 import Angle qualified
 import Bounds2d qualified
+import Expression (Expression)
+import Expression qualified
 import Float qualified
-import Jit.Expression (Expression)
-import Jit.Expression qualified as Expression
 import Maybe qualified
 import OpenSolid
 import Point2d qualified
@@ -82,7 +82,7 @@ instance HasUnits (Symbolic units) where
 instance Units.Coercion (Symbolic unitsA) (Symbolic unitsB) where
   coerce (Constant value) = Constant (Units.coerce value)
   coerce (Coerce function) = Coerce function
-  coerce expression = Coerce expression
+  coerce symbolic = Coerce symbolic
 
 instance Negation (Symbolic units) where
   negate (Constant x) = Constant (negate x)
@@ -114,10 +114,10 @@ instance units ~ units_ => Addition (Symbolic units) (Symbolic units_) (Symbolic
   function1 + function2 = Sum function1 function2
 
 instance units ~ units_ => Addition (Symbolic units) (Qty units_) (Symbolic units) where
-  expression + value = expression + Constant value
+  symbolic + value = symbolic + Constant value
 
 instance units ~ units_ => Addition (Qty units) (Symbolic units_) (Symbolic units) where
-  value + expression = Constant value + expression
+  value + symbolic = Constant value + symbolic
 
 instance
   units1 ~ units2 =>
@@ -132,13 +132,13 @@ instance
   units1 ~ units2 =>
   Subtraction (Symbolic units1) (Qty units2) (Symbolic units1)
   where
-  expression - value = expression - Constant value
+  symbolic - value = symbolic - Constant value
 
 instance
   units1 ~ units2 =>
   Subtraction (Qty units1) (Symbolic units2) (Symbolic units1)
   where
-  value - expression = Constant value - expression
+  value - symbolic = Constant value - symbolic
 
 instance
   Units.Product units1 units2 units3 =>
@@ -162,7 +162,7 @@ instance
 
 instance Multiplication' (Symbolic units1) (Qty units2) where
   type Symbolic units1 .*. Qty units2 = Symbolic (units1 :*: units2)
-  expression .*. value = expression .*. Constant value
+  symbolic .*. value = symbolic .*. Constant value
 
 instance
   Units.Product units1 units2 units3 =>
@@ -176,13 +176,13 @@ instance Multiplication (Symbolic units) Int (Symbolic units)
 
 instance Multiplication' (Symbolic units) Int where
   type Symbolic units .*. Int = Symbolic (units :*: Unitless)
-  expression .*. value = expression .*. Float.int value
+  symbolic .*. value = symbolic .*. Float.int value
 
 instance Multiplication Int (Symbolic units) (Symbolic units)
 
 instance Multiplication' Int (Symbolic units) where
   type Int .*. Symbolic units = Symbolic (Unitless :*: units)
-  value .*. expression = Float.int value .*. expression
+  value .*. symbolic = Float.int value .*. symbolic
 
 instance
   Units.Quotient units1 units2 units3 =>
@@ -207,7 +207,7 @@ instance Division (Symbolic units) Int (Symbolic units)
 
 instance Division' (Symbolic units) Int where
   type Symbolic units ./. Int = Symbolic (units :/: Unitless)
-  expression ./. value = expression ./. Float.int value
+  symbolic ./. value = symbolic ./. Float.int value
 
 instance
   Units.Quotient units1 units2 units3 =>
@@ -215,7 +215,7 @@ instance
 
 instance Division' (Qty units1) (Symbolic units2) where
   type Qty units1 ./. Symbolic units2 = Symbolic (units1 :/: units2)
-  value ./. expression = Constant value ./. expression
+  value ./. symbolic = Constant value ./. symbolic
 
 instance
   Units.Inverse units1 units2 =>
@@ -223,7 +223,7 @@ instance
 
 instance Division' Int (Symbolic units) where
   type Int ./. Symbolic units = Symbolic (Unitless :/: units)
-  value ./. expression = Float.int value ./. expression
+  value ./. symbolic = Float.int value ./. symbolic
 
 evaluate :: Symbolic units -> Uv.Point -> Qty units
 evaluate function uv = case function of
@@ -243,7 +243,7 @@ evaluate function uv = case function of
   Cos f -> Angle.cos (evaluate f uv)
 
 bounds :: Symbolic units -> Uv.Bounds -> Range units
-bounds expression uv = case expression of
+bounds symbolic uv = case symbolic of
   Function f -> Function.boundsImpl f uv
   Constant x -> Range.constant x
   Coerce f -> Units.coerce (bounds f uv)
@@ -260,8 +260,8 @@ bounds expression uv = case expression of
   Cos f -> Range.cos (bounds f uv)
 
 derivative :: Parameter -> Symbolic units -> Symbolic units
-derivative varyingParameter expression =
-  case expression of
+derivative varyingParameter symbolic =
+  case symbolic of
     Function f -> Function.unwrap (Function.derivativeImpl varyingParameter f)
     Constant _ -> Constant Qty.zero
     Coerce f -> Units.coerce (derivative varyingParameter f)
@@ -283,19 +283,19 @@ squared' (Constant x) = Constant (x .*. x)
 squared' (Negated f) = squared' f
 squared' (Cos f) = Units.unspecialize (cosSquared f)
 squared' (Sin f) = Units.unspecialize (sinSquared f)
-squared' expression = Squared' expression
+squared' symbolic = Squared' symbolic
 
 sqrt' :: Symbolic (units :*: units) -> Symbolic units
 sqrt' (Constant x) = Constant (Qty.sqrt' x)
-sqrt' expression = SquareRoot' expression
+sqrt' symbolic = SquareRoot' symbolic
 
 sin :: Symbolic Radians -> Symbolic Unitless
 sin (Constant x) = Constant (Angle.sin x)
-sin function = Sin function
+sin symbolic = Sin symbolic
 
 cos :: Symbolic Radians -> Symbolic Unitless
 cos (Constant x) = Constant (Angle.cos x)
-cos function = Cos function
+cos symbolic = Cos symbolic
 
 cosSquared :: Symbolic Radians -> Symbolic Unitless
 cosSquared f = 0.5 * cos (2 * f) + 0.5
@@ -303,26 +303,26 @@ cosSquared f = 0.5 * cos (2 * f) + 0.5
 sinSquared :: Symbolic Radians -> Symbolic Unitless
 sinSquared f = 0.5 - 0.5 * cos (2 * f)
 
-toAst :: Symbolic units -> Maybe (Expression Expression.Surface)
-toAst function = case function of
-  Function f -> Function.toAstImpl f
+expression :: Symbolic units -> Maybe (Expression Uv.Point (Qty units))
+expression symbolic = case symbolic of
+  Function f -> Function.expressionImpl f
   Constant x -> Just (Expression.constant x)
   Parameter U -> Just Expression.u
   Parameter V -> Just Expression.v
-  Negated f -> Maybe.map negate (toAst f)
-  Sum f1 f2 -> Maybe.map2 (+) (toAst f1) (toAst f2)
-  Difference f1 f2 -> Maybe.map2 (-) (toAst f1) (toAst f2)
-  Product' f1 f2 -> Maybe.map2 (*) (toAst f1) (toAst f2)
-  Quotient' f1 f2 -> Maybe.map2 (/) (toAst f1) (toAst f2)
-  Squared' f -> Maybe.map Expression.squared (toAst f)
-  SquareRoot' f -> Maybe.map Expression.sqrt (toAst f)
-  Sin f -> Maybe.map Expression.sin (toAst f)
-  Cos f -> Maybe.map Expression.cos (toAst f)
-  Coerce f -> toAst f
+  Negated f -> Maybe.map negate (expression f)
+  Sum f1 f2 -> Maybe.map2 (+) (expression f1) (expression f2)
+  Difference f1 f2 -> Maybe.map2 (-) (expression f1) (expression f2)
+  Product' f1 f2 -> Maybe.map2 (.*.) (expression f1) (expression f2)
+  Quotient' f1 f2 -> Maybe.map2 (./.) (expression f1) (expression f2)
+  Squared' f -> Maybe.map Expression.squared' (expression f)
+  SquareRoot' f -> Maybe.map Expression.sqrt' (expression f)
+  Sin f -> Maybe.map Expression.sin (expression f)
+  Cos f -> Maybe.map Expression.cos (expression f)
+  Coerce f -> Units.coerce (expression f)
 
 evaluator :: Symbolic units -> (Uv.Point -> Qty units)
-evaluator symbolic = case toAst symbolic of
-  Just expression -> Expression.surface expression
+evaluator symbolic = case expression symbolic of
+  Just expr -> Expression.valueFunction expr
   Nothing -> case symbolic of
     Function f -> Function.evaluateImpl f
     Constant x -> always x

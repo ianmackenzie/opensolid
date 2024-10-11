@@ -11,8 +11,8 @@ import Bounds2d qualified
 import Curve2d (Curve2d)
 import Curve2d qualified
 import Data.Coerce qualified
+import Expression qualified
 import Frame2d (Frame2d)
-import Jit.Expression qualified as Expression
 import OpenSolid
 import Point2d (Point2d)
 import Point2d qualified
@@ -57,7 +57,7 @@ instance Curve2d.Interface (Line2d (space @ units)) (space @ units) where
   transformByImpl transform (Line2d p1 p2) =
     Curve2d.new (Line2d (Point2d.transformBy transform p1) (Point2d.transformBy transform p2))
   asLineImpl line = Just line
-  toAstImpl (Line2d p1 p2) = Just (p1 + Expression.parameter * (p2 - p1))
+  expressionImpl (Line2d p1 p2) = Just (p1 + Expression.parameter * (p2 - p1))
 
 placeIn ::
   Frame2d (global @ units) (Defines local) ->

@@ -2,8 +2,7 @@ module Surface1d.Function (Interface (..), Function, unwrap, evaluate, bounds) w
 
 import Curve1d (Curve1d)
 import Curve2d (Curve2d)
-import Jit.Expression (Expression)
-import Jit.Expression qualified as Expression
+import Expression (Expression)
 import OpenSolid
 import Range (Range)
 import {-# SOURCE #-} Surface1d.Function.Symbolic (Symbolic)
@@ -19,7 +18,7 @@ class
   evaluateImpl :: function -> Uv.Point -> Qty units
   boundsImpl :: function -> Uv.Bounds -> Range units
   derivativeImpl :: Parameter -> function -> Function units
-  toAstImpl :: function -> Maybe (Expression Expression.Surface)
+  expressionImpl :: function -> Maybe (Expression Uv.Point (Qty units))
 
 type role Function nominal
 

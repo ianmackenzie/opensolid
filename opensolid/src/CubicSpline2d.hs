@@ -72,8 +72,8 @@ instance Curve2d.Interface (CubicSpline2d (space @ units)) (space @ units) where
         (Point2d.transformBy transform p3)
         (Point2d.transformBy transform p4)
 
-  toAstImpl (CubicSpline2d p1 p2 p3 p4) =
-    Just (BezierCurve2d.toAst (NonEmpty.of4 p1 p2 p3 p4))
+  expressionImpl (CubicSpline2d p1 p2 p3 p4) =
+    Just (BezierCurve2d.expression (NonEmpty.of4 p1 p2 p3 p4))
 
 fromControlPoints ::
   Point2d (space @ units) ->

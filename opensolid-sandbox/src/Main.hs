@@ -21,12 +21,11 @@ import Direction3d ()
 import DirectionCurve2d qualified
 import Drawing2d qualified
 import Duration qualified
+import Expression qualified
+import Expression.Point2d qualified
 import Float qualified
 import IO qualified
 import Int qualified
-import Jit.Curve1d qualified
-import Jit.Expression qualified as Expression
-import Jit.Expression2d qualified as Expression2d
 import Length (Length)
 import Length qualified
 import Line2d qualified
@@ -586,8 +585,8 @@ testJit = IO.do
   let x = Expression.parameter
   let xSquared = Expression.squared x
   let expr = xSquared / (xSquared + 1.0)
-  let valueFunction = Jit.Curve1d.valueFunction expr
-  let boundsFunction = Jit.Curve1d.boundsFunction expr
+  let valueFunction = Expression.valueFunction expr
+  let boundsFunction = Expression.boundsFunction expr
   log "JIT evaluated" (valueFunction 2.0)
   log "JIT bounds" (boundsFunction (Range.from 1.0 3.0))
 
@@ -595,8 +594,8 @@ testJitCurve2d :: IO ()
 testJitCurve2d = IO.do
   let x = 10.0 * Expression.parameter
   let y = Expression.sqrt Expression.parameter
-  let curve = Expression2d.xy x y
-  let f = Expression2d.curve curve
+  let curve = Expression.Point2d.xy x y
+  let f = Expression.valueFunction curve
   log "Evaluated 2D curve" (f 3.0)
 
 main :: IO ()

@@ -10,31 +10,31 @@ pub fn bounds_function(input_dimension: usize, outputs: &[&Expression]) -> *cons
 }
 
 #[no_mangle]
-pub extern "C" fn opensolid_jit_compile_curve1d_value_function(ptr: *mut Expression) -> *const u8 {
+pub extern "C" fn opensolid_curve1d_value_function(ptr: *mut Expression) -> *const u8 {
     value_function(1, unsafe { &[&*ptr] })
 }
 
 #[no_mangle]
-pub extern "C" fn opensolid_jit_compile_curve1d_bounds_function(ptr: *mut Expression) -> *const u8 {
+pub extern "C" fn opensolid_curve1d_bounds_function(ptr: *mut Expression) -> *const u8 {
     bounds_function(1, unsafe { &[&*ptr] })
 }
 
 #[no_mangle]
-pub extern "C" fn opensolid_jit_compile_surface1d_value_function(
+pub extern "C" fn opensolid_surface1d_value_function(
     ptr: *mut Expression,
 ) -> *const u8 {
     value_function(2, unsafe { &[&*ptr] })
 }
 
 #[no_mangle]
-pub extern "C" fn opensolid_jit_compile_surface1d_bounds_function(
+pub extern "C" fn opensolid_surface1d_bounds_function(
     ptr: *mut Expression,
 ) -> *const u8 {
     bounds_function(2, unsafe { &[&*ptr] })
 }
 
 #[no_mangle]
-pub extern "C" fn opensolid_jit_compile_curve2d_value_function(
+pub extern "C" fn opensolid_curve2d_value_function(
     px: *mut Expression,
     py: *mut Expression,
 ) -> *const u8 {
@@ -42,7 +42,7 @@ pub extern "C" fn opensolid_jit_compile_curve2d_value_function(
 }
 
 #[no_mangle]
-pub extern "C" fn opensolid_jit_compile_curve2d_bounds_function(
+pub extern "C" fn opensolid_curve2d_bounds_function(
     px: *mut Expression,
     py: *mut Expression,
 ) -> *const u8 {
@@ -50,7 +50,7 @@ pub extern "C" fn opensolid_jit_compile_curve2d_bounds_function(
 }
 
 #[no_mangle]
-pub extern "C" fn opensolid_jit_compile_surface2d_value_function(
+pub extern "C" fn opensolid_surface2d_value_function(
     px: *mut Expression,
     py: *mut Expression,
 ) -> *const u8 {
@@ -58,7 +58,7 @@ pub extern "C" fn opensolid_jit_compile_surface2d_value_function(
 }
 
 #[no_mangle]
-pub extern "C" fn opensolid_jit_compile_surface2d_bounds_function(
+pub extern "C" fn opensolid_surface2d_bounds_function(
     px: *mut Expression,
     py: *mut Expression,
 ) -> *const u8 {
@@ -66,7 +66,7 @@ pub extern "C" fn opensolid_jit_compile_surface2d_bounds_function(
 }
 
 #[no_mangle]
-pub extern "C" fn opensolid_jit_compile_curve3d_value_function(
+pub extern "C" fn opensolid_curve3d_value_function(
     px: *mut Expression,
     py: *mut Expression,
     pz: *mut Expression,
@@ -75,7 +75,7 @@ pub extern "C" fn opensolid_jit_compile_curve3d_value_function(
 }
 
 #[no_mangle]
-pub extern "C" fn opensolid_jit_compile_curve3d_bounds_function(
+pub extern "C" fn opensolid_curve3d_bounds_function(
     px: *mut Expression,
     py: *mut Expression,
     pz: *mut Expression,
@@ -84,7 +84,7 @@ pub extern "C" fn opensolid_jit_compile_curve3d_bounds_function(
 }
 
 #[no_mangle]
-pub extern "C" fn opensolid_jit_compile_surface3d_value_function(
+pub extern "C" fn opensolid_surface3d_value_function(
     px: *mut Expression,
     py: *mut Expression,
     pz: *mut Expression,
@@ -93,7 +93,7 @@ pub extern "C" fn opensolid_jit_compile_surface3d_value_function(
 }
 
 #[no_mangle]
-pub extern "C" fn opensolid_jit_compile_surface3d_bounds_function(
+pub extern "C" fn opensolid_surface3d_bounds_function(
     px: *mut Expression,
     py: *mut Expression,
     pz: *mut Expression,

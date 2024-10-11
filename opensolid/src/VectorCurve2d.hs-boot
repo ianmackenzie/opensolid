@@ -8,14 +8,13 @@ module VectorCurve2d
   , derivative
   , unsafeMagnitude
   , transformBy
-  , toAst
+  , expression
   )
 where
 
 import CoordinateSystem (Space)
 import {-# SOURCE #-} Curve1d (Curve1d)
-import Jit.Expression qualified as Expression
-import Jit.VectorExpression2d (VectorExpression2d)
+import Expression (Expression)
 import OpenSolid
 import Range (Range)
 import Transform2d (Transform2d)
@@ -35,7 +34,7 @@ class
     Transform2d tag (Space coordinateSystem @ translationUnits) ->
     curve ->
     VectorCurve2d coordinateSystem
-  toAstImpl :: curve -> Maybe (VectorExpression2d Expression.Curve)
+  expressionImpl :: curve -> Maybe (Expression Float (Vector2d coordinateSystem))
 
 type role VectorCurve2d nominal
 
@@ -98,4 +97,4 @@ transformBy ::
   Transform2d tag (space @ translationUnits) ->
   VectorCurve2d (space @ units) ->
   VectorCurve2d (space @ units)
-toAst :: VectorCurve2d (space @ units) -> Maybe (VectorExpression2d Expression.Curve)
+expression :: VectorCurve2d (space @ units) -> Maybe (Expression Float (Vector2d (space @ units)))

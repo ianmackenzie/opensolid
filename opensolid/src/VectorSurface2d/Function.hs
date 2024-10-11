@@ -16,15 +16,14 @@ module VectorSurface2d.Function
   , evaluate
   , bounds
   , derivative
-  , toAst
+  , expression
   )
 where
 
 import Direction2d (Direction2d)
+import Expression (Expression)
+import Expression.Vector2d qualified
 import Float qualified
-import Jit.Expression qualified as Expression
-import Jit.VectorExpression2d (VectorExpression2d)
-import Jit.VectorExpression2d qualified as VectorExpression2d
 import Maybe qualified
 import OpenSolid
 import Qty qualified
@@ -48,7 +47,7 @@ class
   evaluateImpl :: function -> Uv.Point -> Vector2d coordinateSystem
   boundsImpl :: function -> Uv.Bounds -> VectorBounds2d coordinateSystem
   derivativeImpl :: Parameter -> function -> Function coordinateSystem
-  toAstImpl :: function -> Maybe (VectorExpression2d Expression.Surface)
+  expressionImpl :: function -> Maybe (Expression Uv.Point (Vector2d coordinateSystem))
 
 data Function (coordinateSystem :: CoordinateSystem) where
   Function ::
@@ -303,7 +302,7 @@ instance Surface1d.Function.Interface (CrossProduct' space units1 units2) (units
   boundsImpl (CrossProduct' f1 f2) t = bounds f1 t .><. bounds f2 t
   derivativeImpl parameter (CrossProduct' f1 f2) =
     derivative parameter f1 .><. f2 + f1 .><. derivative parameter f2
-  toAstImpl (CrossProduct' f1 f2) = Maybe.map2 (><) (toAst f1) (toAst f2)
+  expressionImpl (CrossProduct' f1 f2) = Maybe.map2 (.><.) (expression f1) (expression f2)
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -388,7 +387,7 @@ instance Surface1d.Function.Interface (DotProduct' space units1 units2) (units1 
   boundsImpl (DotProduct' f1 f2) t = bounds f1 t .<>. bounds f2 t
   derivativeImpl parameter (DotProduct' f1 f2) =
     derivative parameter f1 .<>. f2 + f1 .<>. derivative parameter f2
-  toAstImpl (DotProduct' f1 f2) = Maybe.map2 (<>) (toAst f1) (toAst f2)
+  expressionImpl (DotProduct' f1 f2) = Maybe.map2 (.<>.) (expression f1) (expression f2)
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -489,8 +488,8 @@ instance Interface (SurfaceCurveComposition (space @ units)) (space @ units) whe
   derivativeImpl parameter (SurfaceCurveComposition function curve) =
     (VectorCurve2d.derivative curve . function) * Surface1d.Function.derivative parameter function
 
-  toAstImpl (SurfaceCurveComposition function curve) =
-    Maybe.map2 (.) (VectorCurve2d.toAst curve) (Surface1d.Function.toAst function)
+  expressionImpl (SurfaceCurveComposition function curve) =
+    Maybe.map2 (.) (VectorCurve2d.expression curve) (Surface1d.Function.expression function)
 
 new :: Interface function (space @ units) => function -> Function (space @ units)
 new = Function
@@ -559,15 +558,15 @@ derivative parameter function = case function of
     (derivative parameter f1 .*. f2 - f1 .*. Surface1d.Function.derivative parameter f2)
       .!/.! Surface1d.Function.squared' f2
 
-toAst :: Function (space @ units) -> Maybe (VectorExpression2d Expression.Surface)
-toAst function = case function of
-  Function f -> toAstImpl f
-  Coerce f -> toAst f
-  Constant v -> Just (VectorExpression2d.constant v)
-  XY x y -> Maybe.map2 VectorExpression2d.xy (Surface1d.Function.toAst x) (Surface1d.Function.toAst y)
-  Negated f -> Maybe.map negate (toAst f)
-  Sum f1 f2 -> Maybe.map2 (+) (toAst f1) (toAst f2)
-  Difference f1 f2 -> Maybe.map2 (-) (toAst f1) (toAst f2)
-  Product1d2d' f1 f2 -> Maybe.map2 (*) (Surface1d.Function.toAst f1) (toAst f2)
-  Product2d1d' f1 f2 -> Maybe.map2 (*) (toAst f1) (Surface1d.Function.toAst f2)
-  Quotient' f1 f2 -> Maybe.map2 (/) (toAst f1) (Surface1d.Function.toAst f2)
+expression :: Function (space @ units) -> Maybe (Expression Uv.Point (Vector2d (space @ units)))
+expression function = case function of
+  Function f -> expressionImpl f
+  Coerce f -> Units.coerce (expression f)
+  Constant v -> Just (Expression.Vector2d.constant v)
+  XY x y -> Maybe.map2 Expression.Vector2d.xy (Surface1d.Function.expression x) (Surface1d.Function.expression y)
+  Negated f -> Maybe.map negate (expression f)
+  Sum f1 f2 -> Maybe.map2 (+) (expression f1) (expression f2)
+  Difference f1 f2 -> Maybe.map2 (-) (expression f1) (expression f2)
+  Product1d2d' f1 f2 -> Maybe.map2 (.*.) (Surface1d.Function.expression f1) (expression f2)
+  Product2d1d' f1 f2 -> Maybe.map2 (.*.) (expression f1) (Surface1d.Function.expression f2)
+  Quotient' f1 f2 -> Maybe.map2 (./.) (expression f1) (Surface1d.Function.expression f2)

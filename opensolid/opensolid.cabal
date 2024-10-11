@@ -151,6 +151,9 @@ library
     Duration
     Error
     Estimate
+    Expression
+    Expression.Point2d
+    Expression.Vector2d
     File
     Float
     Frame2d
@@ -162,10 +165,6 @@ library
     IO
     Int
     Intersects
-    Jit.Curve1d
-    Jit.Expression
-    Jit.Expression2d
-    Jit.VectorExpression2d
     Json
     Json.Format
     Json.Schema
