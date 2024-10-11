@@ -5,3 +5,4 @@ TODO.txt
 .direnv
 .hie
 *.prof
+*.svg
