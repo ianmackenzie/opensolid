@@ -87,6 +87,11 @@ impl<'a> ValueFunctionCompiler<'a> {
                     let quotient_value = self.function_builder.ins().fdiv(lhs_value, rhs_value);
                     self.define_value(expression, quotient_value)
                 }
+                Expression::Squared(arg) => {
+                    let arg_value = self.compute_value(&arg);
+                    let squared_value = self.function_builder.ins().fmul(arg_value, arg_value);
+                    self.define_value(expression, squared_value)
+                }
                 Expression::SquareRoot(arg) => {
                     let arg_value = self.compute_value(&arg);
                     let sqrt_inst = self

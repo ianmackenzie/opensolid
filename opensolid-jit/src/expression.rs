@@ -36,6 +36,7 @@ pub enum Expression {
     Difference(Box<Expression>, Box<Expression>),
     Product(Box<Expression>, Box<Expression>),
     Quotient(Box<Expression>, Box<Expression>),
+    Squared(Box<Expression>),
     SquareRoot(Box<Expression>),
     Sine(Box<Expression>),
     Cosine(Box<Expression>),
@@ -114,6 +115,12 @@ pub extern "C" fn opensolid_expression_quotient(
     let lhs = Expression::from_c(ptr1);
     let rhs = Expression::from_c(ptr2);
     Expression::Quotient(lhs, rhs).to_c()
+}
+
+#[no_mangle]
+pub extern "C" fn opensolid_expression_squared(ptr: *mut Expression) -> *mut Expression {
+    let arg = Expression::from_c(ptr);
+    Expression::Squared(arg).to_c()
 }
 
 #[no_mangle]

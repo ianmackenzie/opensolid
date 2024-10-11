@@ -271,6 +271,17 @@ impl<'a> BoundsFunctionCompiler<'a> {
                     let upper = self.sqrt(clamped_upper);
                     self.define_bounds(expression, lower, upper)
                 }
+                Expression::Squared(arg) => {
+                    let (arg_lower, arg_upper) = self.compute_bounds(arg);
+                    let ll = self.fmul(arg_lower, arg_lower);
+                    let uu = self.fmul(arg_upper, arg_upper);
+                    let arg_includes_zero = self.includes_zero(arg_lower, arg_upper);
+                    let zero = self.zero();
+                    let min = self.fmin(ll, uu);
+                    let lower = self.select(arg_includes_zero, zero, min);
+                    let upper = self.fmax(ll, uu);
+                    self.define_bounds(expression, lower, upper)
+                }
                 Expression::Sine(arg) => {
                     let (arg_lower, arg_upper) = self.compute_bounds(arg);
                     let bounds_sin_args = [
