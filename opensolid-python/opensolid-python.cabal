@@ -44,7 +44,6 @@ executable opensolid-python
     -Wmissing-home-modules
     -Wpartial-fields
     -Wsafe
-    -dcore-lint
     -threaded
     -rtsopts
     -with-rtsopts=-N

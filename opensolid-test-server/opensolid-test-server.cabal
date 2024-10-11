@@ -41,7 +41,6 @@ executable test-server
     -Wmissing-home-modules
     -Wpartial-fields
     -Wsafe
-    -dcore-lint
     -threaded
     -rtsopts
     -with-rtsopts=-N
