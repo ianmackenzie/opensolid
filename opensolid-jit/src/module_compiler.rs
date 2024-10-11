@@ -51,11 +51,7 @@ impl ModuleCompiler {
         self.context.func.signature.params.push(AbiParam::new(t));
     }
 
-    pub fn compile_value_function(
-        mut self,
-        input_dimension: usize,
-        outputs: &[&Expression],
-    ) -> *const u8 {
+    pub fn value_function(mut self, input_dimension: usize, outputs: &[&Expression]) -> *const u8 {
         for _ in 0..input_dimension {
             self.add_param(F64);
         }
@@ -90,11 +86,7 @@ impl ModuleCompiler {
         self.finalize()
     }
 
-    pub fn compile_bounds_function(
-        mut self,
-        input_dimension: usize,
-        outputs: &[&Expression],
-    ) -> *const u8 {
+    pub fn bounds_function(mut self, input_dimension: usize, outputs: &[&Expression]) -> *const u8 {
         for _ in 0..input_dimension {
             self.add_param(F64);
             self.add_param(F64);
