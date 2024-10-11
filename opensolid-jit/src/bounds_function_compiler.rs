@@ -245,9 +245,9 @@ impl<'a> BoundsFunctionCompiler<'a> {
                     let zero = self.zero();
                     let positive_infinity = self.positive_infinity();
                     let negative_infinity = self.negative_infinity();
-                    let rhs_lower_gt_zero = self.gt(rhs_lower, zero);
-                    let rhs_upper_lt_zero = self.lt(rhs_upper, zero);
-                    let rhs_nonzero = self.bor(rhs_lower_gt_zero, rhs_upper_lt_zero);
+                    let rhs_lower_positive = self.gt(rhs_lower, zero);
+                    let rhs_upper_negative = self.lt(rhs_upper, zero);
+                    let rhs_nonzero = self.bor(rhs_lower_positive, rhs_upper_negative);
                     let finite_lower = self.fmin4(ll, lu, ul, uu);
                     let finite_upper = self.fmax4(ll, lu, ul, uu);
                     let lower = self.select(rhs_nonzero, finite_lower, negative_infinity);
