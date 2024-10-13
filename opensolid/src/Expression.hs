@@ -12,7 +12,10 @@ module Expression
   , sin
   , cos
   , interpolateFrom
-  , derivative
+  , CurveDerivative
+  , curveDerivative
+  , SurfaceDerivative
+  , surfaceDerivative
   , ValueFunction
   , valueFunction
   , BoundsFunction
@@ -1176,75 +1179,78 @@ interpolateFrom start end t = start + t * (end - start)
 --- DIFFERENTIATION ---
 -----------------------
 
-class Derivative expression derivative | expression -> derivative where
-  derivative :: expression -> derivative
+class CurveDerivative expression derivative | expression -> derivative where
+  curveDerivative :: expression -> derivative
+
+class SurfaceDerivative expression derivative | expression -> derivative where
+  surfaceDerivative :: Uv.Parameter -> expression -> derivative
 
 instance
-  Derivative
+  CurveDerivative
     (Expression Float (Qty units))
     (Expression Float (Qty units))
   where
-  derivative expression = case expression of
+  curveDerivative expression = case expression of
     Constant _ -> zero
     Parameter -> constant 1.0
-    Negated c -> negate (derivative c)
-    Sum c1 c2 -> derivative c1 + derivative c2
-    Difference c1 c2 -> derivative c1 - derivative c2
-    Product' c1 c2 -> derivative c1 .*. c2 + c1 .*. derivative c2
-    Quotient' c1 c2 -> (derivative c1 .*. c2 - c1 .*. derivative c2) .!/.! squared' c2
-    Squared' c -> 2.0 * c .*. derivative c
-    SquareRoot' c' -> derivative c' .!/! (2.0 * sqrt' c')
-    Sine c -> cos c * (derivative c / Angle.radian)
-    Cosine c -> negate (sin c) * (derivative c / Angle.radian)
-    Coerce c -> Units.coerce (derivative c)
+    Negated c -> negate (curveDerivative c)
+    Sum c1 c2 -> curveDerivative c1 + curveDerivative c2
+    Difference c1 c2 -> curveDerivative c1 - curveDerivative c2
+    Product' c1 c2 -> curveDerivative c1 .*. c2 + c1 .*. curveDerivative c2
+    Quotient' c1 c2 -> (curveDerivative c1 .*. c2 - c1 .*. curveDerivative c2) .!/.! squared' c2
+    Squared' c -> 2.0 * c .*. curveDerivative c
+    SquareRoot' c' -> curveDerivative c' .!/! (2.0 * sqrt' c')
+    Sine c -> cos c * (curveDerivative c / Angle.radian)
+    Cosine c -> negate (sin c) * (curveDerivative c / Angle.radian)
+    Coerce c -> Units.coerce (curveDerivative c)
 
 instance
-  Derivative
+  SurfaceDerivative
     (Expression Uv.Point (Qty units))
-    (Uv.Parameter -> Expression Uv.Point (Qty units))
+    (Expression Uv.Point (Qty units))
   where
-  derivative expression p = case expression of
+  surfaceDerivative p expression = case expression of
     Constant _ -> zero
     U -> if p == Uv.U then constant 1.0 else zero
     V -> if p == Uv.V then constant 1.0 else zero
-    Negated c -> negate (derivative c p)
-    Sum c1 c2 -> derivative c1 p + derivative c2 p
-    Difference c1 c2 -> derivative c1 p - derivative c2 p
-    Product' c1 c2 -> derivative c1 p .*. c2 + c1 .*. derivative c2 p
-    Quotient' c1 c2 -> (derivative c1 p .*. c2 - c1 .*. derivative c2 p) .!/.! squared' c2
-    Squared' c -> 2.0 * c .*. derivative c p
-    SquareRoot' c' -> derivative c' p .!/! (2.0 * sqrt' c')
-    Sine c -> cos c * (derivative c p / Angle.radian)
-    Cosine c -> negate (sin c) * (derivative c p / Angle.radian)
-    Coerce c -> Units.coerce (derivative c p)
+    Negated c -> negate (surfaceDerivative p c)
+    Sum c1 c2 -> surfaceDerivative p c1 + surfaceDerivative p c2
+    Difference c1 c2 -> surfaceDerivative p c1 - surfaceDerivative p c2
+    Product' c1 c2 -> surfaceDerivative p c1 .*. c2 + c1 .*. surfaceDerivative p c2
+    Quotient' c1 c2 -> (surfaceDerivative p c1 .*. c2 - c1 .*. surfaceDerivative p c2) .!/.! squared' c2
+    Squared' c -> 2.0 * c .*. surfaceDerivative p c
+    SquareRoot' c' -> surfaceDerivative p c' .!/! (2.0 * sqrt' c')
+    Sine c -> cos c * (surfaceDerivative p c / Angle.radian)
+    Cosine c -> negate (sin c) * (surfaceDerivative p c / Angle.radian)
+    Coerce c -> Units.coerce (surfaceDerivative p c)
 
 instance
-  Derivative
+  CurveDerivative
     (Expression Float (Vector2d (space @ units)))
     (Expression Float (Vector2d (space @ units)))
   where
-  derivative (Vector2d x y) = Vector2d (derivative x) (derivative y)
+  curveDerivative (Vector2d x y) = Vector2d (curveDerivative x) (curveDerivative y)
 
 instance
-  Derivative
+  CurveDerivative
     (Expression Float (Point2d (space @ units)))
     (Expression Float (Vector2d (space @ units)))
   where
-  derivative (Point2d x y) = Vector2d (derivative x) (derivative y)
+  curveDerivative (Point2d x y) = Vector2d (curveDerivative x) (curveDerivative y)
 
 instance
-  Derivative
+  SurfaceDerivative
     (Expression Uv.Point (Vector2d (space @ units)))
-    (Uv.Parameter -> Expression Uv.Point (Vector2d (space @ units)))
+    (Expression Uv.Point (Vector2d (space @ units)))
   where
-  derivative (Vector2d x y) p = Vector2d (derivative x p) (derivative y p)
+  surfaceDerivative p (Vector2d x y) = Vector2d (surfaceDerivative p x) (surfaceDerivative p y)
 
 instance
-  Derivative
+  SurfaceDerivative
     (Expression Uv.Point (Point2d (space @ units)))
-    (Uv.Parameter -> Expression Uv.Point (Vector2d (space @ units)))
+    (Expression Uv.Point (Vector2d (space @ units)))
   where
-  derivative (Point2d x y) p = Vector2d (derivative x p) (derivative y p)
+  surfaceDerivative p (Point2d x y) = Vector2d (surfaceDerivative p x) (surfaceDerivative p y)
 
 -----------------
 --- COMPILING ---
