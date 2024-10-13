@@ -1,5 +1,5 @@
 use std::f64;
-use std::f64::consts::{FRAC_PI_2, FRAC_PI_4, PI};
+use std::f64::consts::{FRAC_PI_2, PI};
 
 #[no_mangle]
 pub extern "C" fn opensolid_bounds_sin(
@@ -10,12 +10,12 @@ pub extern "C" fn opensolid_bounds_sin(
 ) {
     let sin_low = f64::sin(in_low);
     let sin_high = f64::sin(in_high);
-    let low = if contains_sinusoidal_extreme(in_low, in_high, -FRAC_PI_4) {
+    let low = if contains_sinusoidal_extreme(in_low, in_high, -FRAC_PI_2) {
         -1.0
     } else {
         f64::min(sin_low, sin_high)
     };
-    let high = if contains_sinusoidal_extreme(in_low, in_high, FRAC_PI_4) {
+    let high = if contains_sinusoidal_extreme(in_low, in_high, FRAC_PI_2) {
         1.0
     } else {
         f64::max(sin_low, sin_high)
@@ -35,7 +35,7 @@ pub extern "C" fn opensolid_bounds_cos(
 ) {
     let cos_low = f64::cos(in_low);
     let cos_high = f64::cos(in_high);
-    let low = if contains_sinusoidal_extreme(in_low, in_high, FRAC_PI_2) {
+    let low = if contains_sinusoidal_extreme(in_low, in_high, PI) {
         -1.0
     } else {
         f64::min(cos_low, cos_high)

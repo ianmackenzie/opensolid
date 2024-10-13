@@ -10,6 +10,7 @@ mod value_function_compiler;
 mod tests {
     use crate::expression::{Constant, Expression};
     use crate::jit;
+    use std::f64::consts::PI;
 
     #[test]
     fn test_basic_arithmetic() {
@@ -69,5 +70,16 @@ mod tests {
         function(1.0, 2.0, output.as_mut_ptr());
         assert_eq!(output[0], 0.2);
         assert_eq!(output[1], 2.0);
+    }
+
+    #[test]
+    fn test_sin_bounds() {
+        let expression = Expression::Sine(Box::new(Expression::Argument(0)));
+        let compiled = jit::bounds_function(1, &[&expression]);
+        let function = unsafe { std::mem::transmute::<_, fn(f64, f64, *mut f64) -> ()>(compiled) };
+        let mut output: [f64; 2] = [0.0, 0.0];
+        function(PI / 4.0, 5.0 * PI / 4.0, output.as_mut_ptr());
+        assert_eq!(output[0], -0.7071067811865475);
+        assert_eq!(output[1], 1.0);
     }
 }
