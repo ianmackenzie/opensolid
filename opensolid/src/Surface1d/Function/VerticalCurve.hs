@@ -61,11 +61,12 @@ data Monotonicity
 new ::
   Tolerance units =>
   Derivatives (Function units) ->
+  Function Unitless ->
   Range Unitless ->
   Float ->
   Float ->
   Curve2d Uv.Coordinates
-new derivatives uBounds vStart vEnd = do
+new derivatives dudv uBounds vStart vEnd = do
   let f = Derivatives.get derivatives
   let fu = Derivatives.get (derivatives >> U)
   let fv = Derivatives.get (derivatives >> V)
@@ -74,7 +75,7 @@ new derivatives uBounds vStart vEnd = do
       { f
       , fu
       , fv
-      , dudv = -fv / fu
+      , dudv
       , uBounds
       , vStart
       , vEnd
@@ -86,11 +87,12 @@ new derivatives uBounds vStart vEnd = do
 monotonic ::
   Tolerance units =>
   Derivatives (Function units) ->
+  Function Unitless ->
   Range Unitless ->
   Float ->
   Float ->
   Curve2d Uv.Coordinates
-monotonic derivatives uBounds vStart vEnd = do
+monotonic derivatives dudv uBounds vStart vEnd = do
   let f = Derivatives.get derivatives
   let fu = Derivatives.get (derivatives >> U)
   let fv = Derivatives.get (derivatives >> V)
@@ -99,7 +101,7 @@ monotonic derivatives uBounds vStart vEnd = do
       { f
       , fu
       , fv
-      , dudv = -fv / fu
+      , dudv
       , uBounds
       , vStart
       , vEnd
@@ -111,13 +113,14 @@ monotonic derivatives uBounds vStart vEnd = do
 bounded ::
   Tolerance units =>
   Derivatives (Function units) ->
+  Function Unitless ->
   Range Unitless ->
   Float ->
   Float ->
   Frame2d Uv.Coordinates defines ->
   List (Axis2d Uv.Coordinates) ->
   Curve2d Uv.Coordinates
-bounded derivatives uBounds vStart vEnd monotonicFrame boundingAxes = do
+bounded derivatives dudv uBounds vStart vEnd monotonicFrame boundingAxes = do
   let f = Derivatives.get derivatives
   let fu = Derivatives.get (derivatives >> U)
   let fv = Derivatives.get (derivatives >> V)
@@ -126,7 +129,7 @@ bounded derivatives uBounds vStart vEnd monotonicFrame boundingAxes = do
       { f
       , fu
       , fv
-      , dudv = -fv / fu
+      , dudv
       , uBounds
       , vStart
       , vEnd

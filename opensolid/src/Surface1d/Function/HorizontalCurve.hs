@@ -61,11 +61,12 @@ data Monotonicity
 new ::
   Tolerance units =>
   Derivatives (Function units) ->
+  Function Unitless ->
   Float ->
   Float ->
   Range Unitless ->
   Curve2d Uv.Coordinates
-new derivatives uStart uEnd vBounds = do
+new derivatives dvdu uStart uEnd vBounds = do
   let f = Derivatives.get derivatives
   let fu = Derivatives.get (derivatives >> U)
   let fv = Derivatives.get (derivatives >> V)
@@ -74,7 +75,7 @@ new derivatives uStart uEnd vBounds = do
       { f
       , fu
       , fv
-      , dvdu = -fu / fv
+      , dvdu
       , uStart
       , uEnd
       , vBounds
@@ -86,11 +87,12 @@ new derivatives uStart uEnd vBounds = do
 monotonic ::
   Tolerance units =>
   Derivatives (Function units) ->
+  Function Unitless ->
   Float ->
   Float ->
   Range Unitless ->
   Curve2d Uv.Coordinates
-monotonic derivatives uStart uEnd vBounds = do
+monotonic derivatives dvdu uStart uEnd vBounds = do
   let f = Derivatives.get derivatives
   let fu = Derivatives.get (derivatives >> U)
   let fv = Derivatives.get (derivatives >> V)
@@ -99,7 +101,7 @@ monotonic derivatives uStart uEnd vBounds = do
       { f
       , fu
       , fv
-      , dvdu = -fu / fv
+      , dvdu
       , uStart
       , uEnd
       , vBounds
@@ -111,13 +113,14 @@ monotonic derivatives uStart uEnd vBounds = do
 bounded ::
   Tolerance units =>
   Derivatives (Function units) ->
+  Function Unitless ->
   Float ->
   Float ->
   Range Unitless ->
   Frame2d Uv.Coordinates defines ->
   List (Axis2d Uv.Coordinates) ->
   Curve2d Uv.Coordinates
-bounded derivatives uStart uEnd vBounds monotonicFrame boundingAxes = do
+bounded derivatives dvdu uStart uEnd vBounds monotonicFrame boundingAxes = do
   let f = Derivatives.get derivatives
   let fu = Derivatives.get (derivatives >> U)
   let fv = Derivatives.get (derivatives >> V)
@@ -126,7 +129,7 @@ bounded derivatives uStart uEnd vBounds monotonicFrame boundingAxes = do
       { f
       , fu
       , fv
-      , dvdu = -fu / fv
+      , dvdu
       , uStart
       , uEnd
       , vBounds

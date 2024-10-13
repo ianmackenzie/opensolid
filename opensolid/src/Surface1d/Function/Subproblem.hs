@@ -38,6 +38,8 @@ import Uv.Derivatives qualified as Derivatives
 
 data Subproblem units = Subproblem
   { derivatives :: Derivatives (Function units)
+  , dudv :: Function Unitless
+  , dvdu :: Function Unitless
   , subdomain :: Domain2d
   , uvBounds :: Uv.Bounds
   , derivativeBounds :: Derivatives (Range units)
@@ -45,9 +47,13 @@ data Subproblem units = Subproblem
   }
 
 instance Composition (Subproblem units) Uv.Parameter (Subproblem units) where
-  Subproblem{derivatives, subdomain, uvBounds, derivativeBounds, derivativeValues} >> parameter =
+  Subproblem{derivatives, subdomain, uvBounds, derivativeBounds, derivativeValues} >> parameter = do
+    let du = Derivatives.get (derivatives >> parameter >> U)
+    let dv = Derivatives.get (derivatives >> parameter >> V)
     Subproblem
       { derivatives = derivatives >> parameter
+      , dudv = -dv / du
+      , dvdu = -du / dv
       , subdomain = subdomain
       , uvBounds = uvBounds
       , derivativeBounds = derivativeBounds >> parameter
@@ -66,7 +72,11 @@ new derivatives subdomain = do
   let uvBounds = Domain2d.bounds subdomain
   let derivativeBounds = Derivatives.map (\d -> Function.bounds d uvBounds) derivatives
   let derivativeValues = Derivatives.map (cornerValues uvBounds) derivatives
-  Subproblem{derivatives, subdomain, uvBounds, derivativeBounds, derivativeValues}
+  let du = Derivatives.get (derivatives >> U)
+  let dv = Derivatives.get (derivatives >> V)
+  let dudv = -dv / du
+  let dvdu = -du / dv
+  Subproblem{derivatives, dudv, dvdu, subdomain, uvBounds, derivativeBounds, derivativeValues}
 
 cornerValues :: Uv.Bounds -> Function units -> CornerValues units
 cornerValues (Bounds2d (Range u1 u2) (Range v1 v2)) function =
