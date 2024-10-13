@@ -71,18 +71,27 @@ import Uv.Derivatives qualified as Derivatives
 import VectorCurve2d qualified
 import Prelude qualified
 
-data Function units = Function (Symbolic units) ~(Uv.Point -> Qty units)
+data Function units = Function
+  { symbolic :: Symbolic units
+  , valueFunction :: ~(Uv.Point -> Qty units)
+  , boundsFunction :: ~(Uv.Bounds -> Range units)
+  }
 
 instance Show (Function units) where show _ = Text.unpack "<Surface1d.Function>" -- TODO
 
 pattern Constant :: Qty units -> Function units
-pattern Constant value <- Function (Symbolic.Constant value) _
+pattern Constant value <- Function{symbolic = Symbolic.Constant value}
 
 build :: Symbolic units -> Function units
-build symbolic = Function symbolic (Symbolic.evaluator symbolic)
+build symbolic =
+  Function
+    { symbolic
+    , valueFunction = Symbolic.valueFunction symbolic
+    , boundsFunction = Symbolic.boundsFunction symbolic
+    }
 
 unwrap :: Function units -> Symbolic units
-unwrap (Function symbolic _) = symbolic
+unwrap Function{symbolic} = symbolic
 
 class
   Show function =>
@@ -98,7 +107,7 @@ instance HasUnits (Function units) where
   type UnitsOf (Function units) = units
 
 instance Units.Coercion (Function unitsA) (Function unitsB) where
-  coerce (Function symbolic _) = build (Units.coerce symbolic)
+  coerce Function{symbolic} = build (Units.coerce symbolic)
 
 instance
   units1 ~ units2 =>
@@ -134,46 +143,46 @@ instance
   value ^ function = function ^ value
 
 instance Negation (Function units) where
-  negate (Function symbolic _) = build (negate symbolic)
+  negate Function{symbolic} = build (negate symbolic)
 
 instance Multiplication Sign (Function units) (Function units)
 
 instance Multiplication' Sign (Function units) where
   type Sign .*. Function units = Function (Unitless :*: units)
-  sign .*. (Function symbolic _) = build (sign .*. symbolic)
+  sign .*. Function{symbolic} = build (sign .*. symbolic)
 
 instance Multiplication (Function units) Sign (Function units)
 
 instance Multiplication' (Function units) Sign where
   type Function units .*. Sign = Function (units :*: Unitless)
-  (Function symbolic _) .*. sign = build (symbolic .*. sign)
+  Function{symbolic} .*. sign = build (symbolic .*. sign)
 
 instance units ~ units_ => Addition (Function units) (Function units_) (Function units) where
-  Function symbolic1 _ + Function symbolic2 _ = build (symbolic1 + symbolic2)
+  Function{symbolic = symbolic1} + Function{symbolic = symbolic2} = build (symbolic1 + symbolic2)
 
 instance units ~ units_ => Addition (Function units) (Qty units_) (Function units) where
-  Function symbolic _ + value = build (symbolic + value)
+  Function{symbolic} + value = build (symbolic + value)
 
 instance units ~ units_ => Addition (Qty units) (Function units_) (Function units) where
-  value + Function symbolic _ = build (value + symbolic)
+  value + Function{symbolic} = build (value + symbolic)
 
 instance
   units1 ~ units2 =>
   Subtraction (Function units1) (Function units2) (Function units1)
   where
-  Function symbolic1 _ - Function symbolic2 _ = build (symbolic1 - symbolic2)
+  Function{symbolic = symbolic1} - Function{symbolic = symbolic2} = build (symbolic1 - symbolic2)
 
 instance
   units1 ~ units2 =>
   Subtraction (Function units1) (Qty units2) (Function units1)
   where
-  Function symbolic _ - value = build (symbolic - value)
+  Function{symbolic} - value = build (symbolic - value)
 
 instance
   units1 ~ units2 =>
   Subtraction (Qty units1) (Function units2) (Function units1)
   where
-  value - Function symbolic _ = build (value - symbolic)
+  value - Function{symbolic} = build (value - symbolic)
 
 instance
   Units.Product units1 units2 units3 =>
@@ -181,7 +190,7 @@ instance
 
 instance Multiplication' (Function units1) (Function units2) where
   type Function units1 .*. Function units2 = Function (units1 :*: units2)
-  Function symbolic1 _ .*. Function symbolic2 _ = build (symbolic1 .*. symbolic2)
+  Function{symbolic = symbolic1} .*. Function{symbolic = symbolic2} = build (symbolic1 .*. symbolic2)
 
 instance
   Units.Product units1 units2 units3 =>
@@ -189,7 +198,7 @@ instance
 
 instance Multiplication' (Function units1) (Qty units2) where
   type Function units1 .*. Qty units2 = Function (units1 :*: units2)
-  Function symbolic _ .*. value = build (symbolic .*. value)
+  Function{symbolic} .*. value = build (symbolic .*. value)
 
 instance
   Units.Product units1 units2 units3 =>
@@ -197,19 +206,19 @@ instance
 
 instance Multiplication' (Qty units1) (Function units2) where
   type Qty units1 .*. Function units2 = Function (units1 :*: units2)
-  value .*. Function symbolic _ = build (value .*. symbolic)
+  value .*. Function{symbolic} = build (value .*. symbolic)
 
 instance Multiplication (Function units) Int (Function units)
 
 instance Multiplication' (Function units) Int where
   type Function units .*. Int = Function (units :*: Unitless)
-  Function symbolic _ .*. value = build (symbolic .*. value)
+  Function{symbolic} .*. value = build (symbolic .*. value)
 
 instance Multiplication Int (Function units) (Function units)
 
 instance Multiplication' Int (Function units) where
   type Int .*. Function units = Function (Unitless :*: units)
-  value .*. Function symbolic _ = build (value .*. symbolic)
+  value .*. Function{symbolic} = build (value .*. symbolic)
 
 instance
   Units.Quotient units1 units2 units3 =>
@@ -217,7 +226,7 @@ instance
 
 instance Division' (Function units1) (Function units2) where
   type Function units1 ./. Function units2 = Function (units1 :/: units2)
-  Function symbolic1 _ ./. Function symbolic2 _ = build (symbolic1 ./. symbolic2)
+  Function{symbolic = symbolic1} ./. Function{symbolic = symbolic2} = build (symbolic1 ./. symbolic2)
 
 instance
   Units.Quotient units1 units2 units3 =>
@@ -225,13 +234,13 @@ instance
 
 instance Division' (Function units1) (Qty units2) where
   type Function units1 ./. Qty units2 = Function (units1 :/: units2)
-  Function symbolic _ ./. value = build (symbolic ./. value)
+  Function{symbolic} ./. value = build (symbolic ./. value)
 
 instance Division (Function units) Int (Function units)
 
 instance Division' (Function units) Int where
   type Function units ./. Int = Function (units :/: Unitless)
-  Function symbolic _ ./. value = build (symbolic ./. value)
+  Function{symbolic} ./. value = build (symbolic ./. value)
 
 instance
   Units.Quotient units1 units2 units3 =>
@@ -239,7 +248,7 @@ instance
 
 instance Division' (Qty units1) (Function units2) where
   type Qty units1 ./. Function units2 = Function (units1 :/: units2)
-  value ./. Function symbolic _ = build (value ./. symbolic)
+  value ./. Function{symbolic} = build (value ./. symbolic)
 
 instance
   Units.Inverse units1 units2 =>
@@ -247,16 +256,16 @@ instance
 
 instance Division' Int (Function units) where
   type Int ./. Function units = Function (Unitless :/: units)
-  value ./. Function symbolic _ = build (value ./. symbolic)
+  value ./. Function{symbolic} = build (value ./. symbolic)
 
 evaluate :: Function units -> Uv.Point -> Qty units
-evaluate (Function _ evaluator) uv = evaluator uv
+evaluate Function{valueFunction} uv = valueFunction uv
 
 bounds :: Function units -> Uv.Bounds -> Range units
-bounds (Function symbolic _) uv = Symbolic.bounds symbolic uv
+bounds Function{boundsFunction} uv = boundsFunction uv
 
 derivative :: Parameter -> Function units -> Function units
-derivative varyingParameter (Function symbolic _) =
+derivative varyingParameter (Function{symbolic}) =
   build (Symbolic.derivative varyingParameter symbolic)
 
 derivativeIn :: Uv.Direction -> Function units -> Function units
@@ -286,19 +295,19 @@ squared :: Units.Squared units1 units2 => Function units1 -> Function units2
 squared function = Units.specialize (squared' function)
 
 squared' :: Function units -> Function (units :*: units)
-squared' (Function symbolic _) = build (Symbolic.squared' symbolic)
+squared' Function{symbolic} = build (Symbolic.squared' symbolic)
 
 sqrt :: Units.Squared units1 units2 => Function units2 -> Function units1
 sqrt function = sqrt' (Units.unspecialize function)
 
 sqrt' :: Function (units :*: units) -> Function units
-sqrt' (Function symbolic _) = build (Symbolic.sqrt' symbolic)
+sqrt' Function{symbolic} = build (Symbolic.sqrt' symbolic)
 
 sin :: Function Radians -> Function Unitless
-sin (Function symbolic _) = build (Symbolic.sin symbolic)
+sin Function{symbolic} = build (Symbolic.sin symbolic)
 
 cos :: Function Radians -> Function Unitless
-cos (Function symbolic _) = build (Symbolic.cos symbolic)
+cos Function{symbolic} = build (Symbolic.cos symbolic)
 
 data CurveOnSurface units
   = CurveOnSurface (Curve2d Uv.Coordinates) (Function units)
@@ -326,7 +335,7 @@ instance Curve1d.Interface (CurveOnSurface units) units where
     Maybe.map2 (.) (expression function) (Curve2d.expression uvCurve)
 
 expression :: Function units -> Maybe (Expression Uv.Point (Qty units))
-expression (Function symbolic _) = Symbolic.expression symbolic
+expression Function{symbolic} = Symbolic.expression symbolic
 
 zeros :: Tolerance units => Function units -> Result Zeros.Error Zeros
 zeros function

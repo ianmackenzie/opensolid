@@ -8,7 +8,8 @@ module Surface1d.Function.Symbolic
   , sqrt'
   , sin
   , cos
-  , evaluator
+  , valueFunction
+  , boundsFunction
   )
 where
 
@@ -320,33 +321,64 @@ expression symbolic = case symbolic of
   Cos f -> Maybe.map Expression.cos (expression f)
   Coerce f -> Units.coerce (expression f)
 
-evaluator :: Symbolic units -> (Uv.Point -> Qty units)
-evaluator symbolic = case expression symbolic of
+valueFunction :: Symbolic units -> (Uv.Point -> Qty units)
+valueFunction symbolic = case expression symbolic of
   Just expr -> Expression.valueFunction expr
   Nothing -> case symbolic of
     Function f -> Function.evaluateImpl f
     Constant x -> always x
-    Coerce f -> Units.coerce . evaluator f
+    Coerce f -> Units.coerce . valueFunction f
     Parameter U -> Point2d.xCoordinate
     Parameter V -> Point2d.yCoordinate
-    Negated f -> negate . evaluator f
+    Negated f -> negate . valueFunction f
     Sum f1 f2 -> do
-      let evaluator1 = evaluator f1
-      let evaluator2 = evaluator f2
-      \uv -> evaluator1 uv + evaluator2 uv
+      let valueFunction1 = valueFunction f1
+      let valueFunction2 = valueFunction f2
+      \uv -> valueFunction1 uv + valueFunction2 uv
     Difference f1 f2 -> do
-      let evaluator1 = evaluator f1
-      let evaluator2 = evaluator f2
-      \uv -> evaluator1 uv - evaluator2 uv
+      let valueFunction1 = valueFunction f1
+      let valueFunction2 = valueFunction f2
+      \uv -> valueFunction1 uv - valueFunction2 uv
     Product' f1 f2 -> do
-      let evaluator1 = evaluator f1
-      let evaluator2 = evaluator f2
-      \uv -> evaluator1 uv .*. evaluator2 uv
+      let valueFunction1 = valueFunction f1
+      let valueFunction2 = valueFunction f2
+      \uv -> valueFunction1 uv .*. valueFunction2 uv
     Quotient' f1 f2 -> do
-      let evaluator1 = evaluator f1
-      let evaluator2 = evaluator f2
-      \uv -> evaluator1 uv ./. evaluator2 uv
-    Squared' f -> Qty.squared' . evaluator f
-    SquareRoot' f -> Qty.sqrt' . evaluator f
-    Sin f -> Angle.sin . evaluator f
-    Cos f -> Angle.cos . evaluator f
+      let valueFunction1 = valueFunction f1
+      let valueFunction2 = valueFunction f2
+      \uv -> valueFunction1 uv ./. valueFunction2 uv
+    Squared' f -> Qty.squared' . valueFunction f
+    SquareRoot' f -> Qty.sqrt' . valueFunction f
+    Sin f -> Angle.sin . valueFunction f
+    Cos f -> Angle.cos . valueFunction f
+
+boundsFunction :: Symbolic units -> (Uv.Bounds -> Range units)
+boundsFunction symbolic = case expression symbolic of
+  Just expr -> Expression.boundsFunction expr
+  Nothing -> case symbolic of
+    Function f -> Function.boundsImpl f
+    Constant x -> always (Range.constant x)
+    Coerce f -> Units.coerce . boundsFunction f
+    Parameter U -> Bounds2d.xCoordinate
+    Parameter V -> Bounds2d.yCoordinate
+    Negated f -> negate . boundsFunction f
+    Sum f1 f2 -> do
+      let boundsFunction1 = boundsFunction f1
+      let boundsFunction2 = boundsFunction f2
+      \uv -> boundsFunction1 uv + boundsFunction2 uv
+    Difference f1 f2 -> do
+      let boundsFunction1 = boundsFunction f1
+      let boundsFunction2 = boundsFunction f2
+      \uv -> boundsFunction1 uv - boundsFunction2 uv
+    Product' f1 f2 -> do
+      let boundsFunction1 = boundsFunction f1
+      let boundsFunction2 = boundsFunction f2
+      \uv -> boundsFunction1 uv .*. boundsFunction2 uv
+    Quotient' f1 f2 -> do
+      let boundsFunction1 = boundsFunction f1
+      let boundsFunction2 = boundsFunction f2
+      \uv -> boundsFunction1 uv ./. boundsFunction2 uv
+    Squared' f -> Range.squared' . boundsFunction f
+    SquareRoot' f -> Range.sqrt' . boundsFunction f
+    Sin f -> Range.sin . boundsFunction f
+    Cos f -> Range.cos . boundsFunction f
