@@ -403,6 +403,7 @@ findTangentSolutions subproblem = do
   let determinant = fuuBounds .*. fvvBounds - fuvBounds .*. fuvBounds
   case Range.resolvedSign determinant of
     Resolved determinantSign -> do
+      let f = Derivatives.get derivatives
       let fu = Derivatives.get (derivatives >> U)
       let fv = Derivatives.get (derivatives >> V)
       let fuu = Derivatives.get (derivatives >> U >> U)
@@ -422,7 +423,7 @@ findTangentSolutions subproblem = do
       case maybePoint of
         Nothing -> Solve2d.recurse CrossingCurvesOnly
         Just point ->
-          if Bounds2d.includes point (Domain2d.interior subdomain)
+          if Bounds2d.includes point (Domain2d.interior subdomain) && evaluate f point ~= Qty.zero
             then case determinantSign of
               Positive -> do
                 -- Non-saddle tangent point
