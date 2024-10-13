@@ -1401,17 +1401,20 @@ instance ValueFunction (Expression Uv.Point (Qty units)) (Uv.Point -> Qty units)
 
 instance BoundsFunction (Expression Uv.Point (Qty units)) (Uv.Bounds -> Range units) where
   boundsFunction expression = do
-    let f = surface1d_bounds_function (opensolid_surface1d_bounds_function (ptr expression))
-    \uvBounds -> unsafeDupablePerformIO IO.do
-      let Bounds2d uRange vRange = uvBounds
-      let Range (Qty uLow) (Qty uHigh) = uRange
-      let Range (Qty vLow) (Qty vHigh) = vRange
-      outputs <- Alloc.mallocBytes 16
-      f uLow uHigh vLow vHigh outputs
-      low <- Foreign.peekElemOff outputs 0
-      high <- Foreign.peekElemOff outputs 1
-      Alloc.free outputs
-      IO.succeed (Range (Qty low) (Qty high))
+    let expressionPtr = ptr expression
+    let nativeFunction = opensolid_surface1d_bounds_function expressionPtr
+    let wrappedFunction = surface1d_bounds_function nativeFunction
+    let returnedFunction uvBounds = unsafeDupablePerformIO IO.do
+          let Bounds2d uRange vRange = uvBounds
+          let Range (Qty uLow) (Qty uHigh) = uRange
+          let Range (Qty vLow) (Qty vHigh) = vRange
+          outputs <- Alloc.mallocBytes 16
+          wrappedFunction uLow uHigh vLow vHigh outputs
+          low <- Foreign.peekElemOff outputs 0
+          high <- Foreign.peekElemOff outputs 1
+          Alloc.free outputs
+          IO.succeed (Range (Qty low) (Qty high))
+    returnedFunction
 
 instance
   ValueFunction
