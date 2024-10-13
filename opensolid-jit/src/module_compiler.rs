@@ -5,6 +5,7 @@ use cranelift_codegen::Context;
 use cranelift_jit::{JITBuilder, JITModule};
 use cranelift_module::Module;
 
+use crate::bounds::{opensolid_bounds_cos, opensolid_bounds_sin};
 use crate::bounds_function_compiler::BoundsFunctionCompiler;
 use crate::builtins::Builtins;
 use crate::expression::Expression;
@@ -24,7 +25,9 @@ impl ModuleCompiler {
         let isa_builder = cranelift_native::builder().unwrap();
         let isa = isa_builder.finish(ModuleCompiler::flags()).unwrap();
         let pointer_type = isa.pointer_type();
-        let jit_builder = JITBuilder::with_isa(isa, cranelift_module::default_libcall_names());
+        let mut jit_builder = JITBuilder::with_isa(isa, cranelift_module::default_libcall_names());
+        jit_builder.symbol("opensolid_bounds_sin", opensolid_bounds_sin as *const u8);
+        jit_builder.symbol("opensolid_bounds_cos", opensolid_bounds_cos as *const u8);
         let mut module = JITModule::new(jit_builder);
         let builder_context = FunctionBuilderContext::new();
         let mut context = module.make_context();
