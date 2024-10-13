@@ -20,16 +20,12 @@ pub extern "C" fn opensolid_curve1d_bounds_function(ptr: *mut Expression) -> *co
 }
 
 #[no_mangle]
-pub extern "C" fn opensolid_surface1d_value_function(
-    ptr: *mut Expression,
-) -> *const u8 {
+pub extern "C" fn opensolid_surface1d_value_function(ptr: *mut Expression) -> *const u8 {
     value_function(2, unsafe { &[&*ptr] })
 }
 
 #[no_mangle]
-pub extern "C" fn opensolid_surface1d_bounds_function(
-    ptr: *mut Expression,
-) -> *const u8 {
+pub extern "C" fn opensolid_surface1d_bounds_function(ptr: *mut Expression) -> *const u8 {
     bounds_function(2, unsafe { &[&*ptr] })
 }
 
