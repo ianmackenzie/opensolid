@@ -46,20 +46,6 @@ data Subproblem units = Subproblem
   , derivativeValues :: Derivatives (CornerValues units)
   }
 
-instance Composition (Subproblem units) Uv.Parameter (Subproblem units) where
-  Subproblem{derivatives, subdomain, uvBounds, derivativeBounds, derivativeValues} >> parameter = do
-    let du = Derivatives.get (derivatives >> parameter >> U)
-    let dv = Derivatives.get (derivatives >> parameter >> V)
-    Subproblem
-      { derivatives = derivatives >> parameter
-      , dudv = -dv / du
-      , dvdu = -du / dv
-      , subdomain = subdomain
-      , uvBounds = uvBounds
-      , derivativeBounds = derivativeBounds >> parameter
-      , derivativeValues = derivativeValues >> parameter
-      }
-
 data CornerValues units = CornerValues
   { bottomLeft :: Qty units
   , bottomRight :: Qty units
