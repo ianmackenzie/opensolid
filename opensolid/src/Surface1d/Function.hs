@@ -342,7 +342,11 @@ zeros function
   | function ~= Qty.zero = Failure Zeros.ZeroEverywhere
   | otherwise = Result.do
       let derivatives = Derivatives.init function derivative
-      case Solve2d.search (findZeros derivatives) AllZeroTypes of
+      let fu = Derivatives.get (derivatives >> U)
+      let fv = Derivatives.get (derivatives >> V)
+      let dudv = -fv / fu
+      let dvdu = -fu / fv
+      case Solve2d.search (findZeros derivatives dudv dvdu) AllZeroTypes of
         Success solutions -> do
           let partialZeros = List.foldl addSolution PartialZeros.empty solutions
           Success (PartialZeros.finalize partialZeros)
@@ -367,15 +371,17 @@ data Solution units
 findZeros ::
   Tolerance units =>
   Derivatives (Function units) ->
+  Function Unitless ->
+  Function Unitless ->
   FindZerosContext ->
   Domain2d ->
   Solve2d.Exclusions exclusions ->
   Solve2d.Action exclusions FindZerosContext (Solution units)
-findZeros derivatives context subdomain exclusions = do
+findZeros derivatives dudv dvdu context subdomain exclusions = do
   -- TODO find zeros along unit domain boundaries
   -- (including nasty cases like curves emanating from a saddle point
   -- being along a domain boundary)
-  let subproblem = Subproblem.new derivatives subdomain
+  let subproblem = Subproblem.new derivatives dudv dvdu subdomain
   if not (Subproblem.isZeroCandidate subproblem)
     then Solve2d.pass
     else case exclusions of

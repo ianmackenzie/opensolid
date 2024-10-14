@@ -53,15 +53,16 @@ data CornerValues units = CornerValues
   , topRight :: Qty units
   }
 
-new :: Derivatives (Function units) -> Domain2d -> Subproblem units
-new derivatives subdomain = do
+new ::
+  Derivatives (Function units) ->
+  Function Unitless ->
+  Function Unitless ->
+  Domain2d ->
+  Subproblem units
+new derivatives dudv dvdu subdomain = do
   let uvBounds = Domain2d.bounds subdomain
   let derivativeBounds = Derivatives.map (\d -> Function.bounds d uvBounds) derivatives
   let derivativeValues = Derivatives.map (cornerValues uvBounds) derivatives
-  let du = Derivatives.get (derivatives >> U)
-  let dv = Derivatives.get (derivatives >> V)
-  let dudv = -dv / du
-  let dvdu = -du / dv
   Subproblem{derivatives, dudv, dvdu, subdomain, uvBounds, derivativeBounds, derivativeValues}
 
 cornerValues :: Uv.Bounds -> Function units -> CornerValues units
