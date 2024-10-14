@@ -5,6 +5,7 @@ module Debug
   , assert
   , trace
   , intercept
+  , callStack
   )
 where
 
@@ -14,6 +15,7 @@ import Composition
 import Control.Exception qualified
 import Data.Text qualified
 import Debug.Trace qualified
+import GHC.Stack qualified
 import Text qualified
 import Prelude qualified
 
@@ -39,3 +41,8 @@ trace = Data.Text.unpack >> Debug.Trace.trace
 
 intercept :: Show a => Text -> a -> a
 intercept label value = trace (labelled label value) value
+
+callStack :: HasCallStack => Text
+callStack = do
+  let callerCallStack = GHC.Stack.popCallStack GHC.Stack.callStack
+  Text.pack (GHC.Stack.prettyCallStack callerCallStack)
