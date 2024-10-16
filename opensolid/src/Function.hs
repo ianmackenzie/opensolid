@@ -101,39 +101,6 @@ data Function input output where
     Expression Uv.Point ->
     Function Uv.Point (Vector3d (space @ units))
 
-expression1d :: Qty units -> Expression input
-expression1d value = Expression.constant (Units.coerce value)
-
-curve1d :: Qty units -> Function Float (Qty units)
-curve1d x = Curve1d (expression1d x)
-
-surface1d :: Qty units -> Function Uv.Point (Qty units)
-surface1d x = Surface1d (expression1d x)
-
-curve2d :: Point2d (space @ units) -> Function Float (Point2d (space @ units))
-curve2d (Point2d x y) = Curve2d (expression1d x) (expression1d y)
-
-surface2d :: Point2d (space @ units) -> Function Uv.Point (Point2d (space @ units))
-surface2d (Point2d x y) = Surface2d (expression1d x) (expression1d y)
-
-vectorCurve2d :: Vector2d (space @ units) -> Function Float (Vector2d (space @ units))
-vectorCurve2d (Vector2d x y) = VectorCurve2d (expression1d x) (expression1d y)
-
-vectorSurface2d :: Vector2d (space @ units) -> Function Uv.Point (Vector2d (space @ units))
-vectorSurface2d (Vector2d x y) = VectorSurface2d (expression1d x) (expression1d y)
-
-curve3d :: Point3d (space @ units) -> Function Float (Point3d (space @ units))
-curve3d (Point3d x y z) = Curve3d (expression1d x) (expression1d y) (expression1d z)
-
-surface3d :: Point3d (space @ units) -> Function Uv.Point (Point3d (space @ units))
-surface3d (Point3d x y z) = Surface3d (expression1d x) (expression1d y) (expression1d z)
-
-vectorCurve3d :: Vector3d (space @ units) -> Function Float (Vector3d (space @ units))
-vectorCurve3d (Vector3d x y z) = VectorCurve3d (expression1d x) (expression1d y) (expression1d z)
-
-vectorSurface3d :: Vector3d (space @ units) -> Function Uv.Point (Vector3d (space @ units))
-vectorSurface3d (Vector3d x y z) = VectorSurface3d (expression1d x) (expression1d y) (expression1d z)
-
 -------------
 --- UNITS ---
 -------------
@@ -306,25 +273,25 @@ instance
   units1 ~ units2 =>
   Addition (Function Float (Qty units1)) (Qty units2) (Function Float (Qty units1))
   where
-  expression + value = expression + curve1d value
+  expression + value = expression + constant @Float value
 
 instance
   units1 ~ units2 =>
   Addition (Function Uv.Point (Qty units1)) (Qty units2) (Function Uv.Point (Qty units1))
   where
-  expression + value = expression + surface1d value
+  expression + value = expression + constant @Uv.Point value
 
 instance
   units1 ~ units2 =>
   Addition (Qty units1) (Function Float (Qty units2)) (Function Float (Qty units1))
   where
-  value + expression = curve1d value + expression
+  value + expression = constant @Float value + expression
 
 instance
   units1 ~ units2 =>
   Addition (Qty units1) (Function Uv.Point (Qty units2)) (Function Uv.Point (Qty units1))
   where
-  value + expression = surface1d value + expression
+  value + expression = constant @Uv.Point value + expression
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -353,7 +320,7 @@ instance
     (Vector2d (space2 @ units2))
     (Function Float (Vector2d (space1 @ units1)))
   where
-  expression + vector = expression + vectorCurve2d vector
+  expression + vector = expression + constant @Float vector
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -362,7 +329,7 @@ instance
     (Vector2d (space2 @ units2))
     (Function Uv.Point (Vector2d (space1 @ units1)))
   where
-  expression + vector = expression + vectorSurface2d vector
+  expression + vector = expression + constant @Uv.Point vector
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -371,7 +338,7 @@ instance
     (Function Float (Vector2d (space2 @ units2)))
     (Function Float (Vector2d (space1 @ units1)))
   where
-  vector + expression = vectorCurve2d vector + expression
+  vector + expression = constant @Float vector + expression
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -380,7 +347,7 @@ instance
     (Function Uv.Point (Vector2d (space2 @ units2)))
     (Function Uv.Point (Vector2d (space1 @ units1)))
   where
-  vector + expression = vectorSurface2d vector + expression
+  vector + expression = constant @Uv.Point vector + expression
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -409,7 +376,7 @@ instance
     (Vector3d (space2 @ units2))
     (Function Float (Vector3d (space1 @ units1)))
   where
-  expression + vector = expression + vectorCurve3d vector
+  expression + vector = expression + constant @Float vector
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -418,7 +385,7 @@ instance
     (Vector3d (space2 @ units2))
     (Function Uv.Point (Vector3d (space1 @ units1)))
   where
-  expression + vector = expression + vectorSurface3d vector
+  expression + vector = expression + constant @Uv.Point vector
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -427,7 +394,7 @@ instance
     (Function Float (Vector3d (space2 @ units2)))
     (Function Float (Vector3d (space1 @ units1)))
   where
-  vector + expression = vectorCurve3d vector + expression
+  vector + expression = constant @Float vector + expression
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -436,7 +403,7 @@ instance
     (Function Uv.Point (Vector3d (space2 @ units2)))
     (Function Uv.Point (Vector3d (space1 @ units1)))
   where
-  vector + expression = vectorSurface3d vector + expression
+  vector + expression = constant @Uv.Point vector + expression
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -465,7 +432,7 @@ instance
     (Vector2d (space2 @ units2))
     (Function Float (Point2d (space1 @ units1)))
   where
-  expression + vector = expression + vectorCurve2d vector
+  expression + vector = expression + constant @Float vector
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -474,7 +441,7 @@ instance
     (Vector2d (space2 @ units2))
     (Function Uv.Point (Point2d (space1 @ units1)))
   where
-  expression + vector = expression + vectorSurface2d vector
+  expression + vector = expression + constant @Uv.Point vector
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -483,7 +450,7 @@ instance
     (Function Float (Vector2d (space2 @ units2)))
     (Function Float (Point2d (space1 @ units1)))
   where
-  point + expression = curve2d point + expression
+  point + expression = constant @Float point + expression
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -492,7 +459,7 @@ instance
     (Function Uv.Point (Vector2d (space2 @ units2)))
     (Function Uv.Point (Point2d (space1 @ units1)))
   where
-  point + expression = surface2d point + expression
+  point + expression = constant @Uv.Point point + expression
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -521,7 +488,7 @@ instance
     (Vector3d (space2 @ units2))
     (Function Float (Point3d (space1 @ units1)))
   where
-  expression + vector = expression + vectorCurve3d vector
+  expression + vector = expression + constant @Float vector
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -530,7 +497,7 @@ instance
     (Vector3d (space2 @ units2))
     (Function Uv.Point (Point3d (space1 @ units1)))
   where
-  expression + vector = expression + vectorSurface3d vector
+  expression + vector = expression + constant @Uv.Point vector
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -539,7 +506,7 @@ instance
     (Function Float (Vector3d (space2 @ units2)))
     (Function Float (Point3d (space1 @ units1)))
   where
-  point + expression = curve3d point + expression
+  point + expression = constant @Float point + expression
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -548,7 +515,7 @@ instance
     (Function Uv.Point (Vector3d (space2 @ units2)))
     (Function Uv.Point (Point3d (space1 @ units1)))
   where
-  point + expression = surface3d point + expression
+  point + expression = constant @Uv.Point point + expression
 
 -------------------
 --- SUBTRACTION ---
@@ -576,25 +543,25 @@ instance
   units1 ~ units2 =>
   Subtraction (Function Float (Qty units1)) (Qty units2) (Function Float (Qty units1))
   where
-  expression - value = expression - curve1d value
+  expression - value = expression - constant @Float value
 
 instance
   units1 ~ units2 =>
   Subtraction (Function Uv.Point (Qty units1)) (Qty units2) (Function Uv.Point (Qty units1))
   where
-  expression - value = expression - surface1d value
+  expression - value = expression - constant @Uv.Point value
 
 instance
   units1 ~ units2 =>
   Subtraction (Qty units1) (Function Float (Qty units2)) (Function Float (Qty units1))
   where
-  value - expression = curve1d value - expression
+  value - expression = constant @Float value - expression
 
 instance
   units1 ~ units2 =>
   Subtraction (Qty units1) (Function Uv.Point (Qty units2)) (Function Uv.Point (Qty units1))
   where
-  value - expression = surface1d value - expression
+  value - expression = constant @Uv.Point value - expression
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -623,7 +590,7 @@ instance
     (Vector2d (space2 @ units2))
     (Function Float (Vector2d (space1 @ units1)))
   where
-  expression - vector = expression - vectorCurve2d vector
+  expression - vector = expression - constant @Float vector
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -632,7 +599,7 @@ instance
     (Vector2d (space2 @ units2))
     (Function Uv.Point (Vector2d (space1 @ units1)))
   where
-  expression - vector = expression - vectorSurface2d vector
+  expression - vector = expression - constant @Uv.Point vector
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -641,7 +608,7 @@ instance
     (Function Float (Vector2d (space2 @ units2)))
     (Function Float (Vector2d (space1 @ units1)))
   where
-  vector - expression = vectorCurve2d vector - expression
+  vector - expression = constant @Float vector - expression
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -650,7 +617,7 @@ instance
     (Function Uv.Point (Vector2d (space2 @ units2)))
     (Function Uv.Point (Vector2d (space1 @ units1)))
   where
-  vector - expression = vectorSurface2d vector - expression
+  vector - expression = constant @Uv.Point vector - expression
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -685,7 +652,7 @@ instance
     (Vector3d (space2 @ units2))
     (Function Float (Vector3d (space1 @ units1)))
   where
-  expression - vector = expression - vectorCurve3d vector
+  expression - vector = expression - constant @Float vector
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -694,7 +661,7 @@ instance
     (Vector3d (space2 @ units2))
     (Function Uv.Point (Vector3d (space1 @ units1)))
   where
-  expression - vector = expression - vectorSurface3d vector
+  expression - vector = expression - constant @Uv.Point vector
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -703,7 +670,7 @@ instance
     (Function Float (Vector3d (space2 @ units2)))
     (Function Float (Vector3d (space1 @ units1)))
   where
-  vector - expression = vectorCurve3d vector - expression
+  vector - expression = constant @Float vector - expression
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -712,7 +679,7 @@ instance
     (Function Uv.Point (Vector3d (space2 @ units2)))
     (Function Uv.Point (Vector3d (space1 @ units1)))
   where
-  vector - expression = vectorSurface3d vector - expression
+  vector - expression = constant @Uv.Point vector - expression
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -741,7 +708,7 @@ instance
     (Vector2d (space2 @ units2))
     (Function Float (Point2d (space1 @ units1)))
   where
-  expression - vector = expression - vectorCurve2d vector
+  expression - vector = expression - constant @Float vector
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -750,7 +717,7 @@ instance
     (Vector2d (space2 @ units2))
     (Function Uv.Point (Point2d (space1 @ units1)))
   where
-  expression - vector = expression - vectorSurface2d vector
+  expression - vector = expression - constant @Uv.Point vector
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -759,7 +726,7 @@ instance
     (Function Float (Vector2d (space2 @ units2)))
     (Function Float (Point2d (space1 @ units1)))
   where
-  point - expression = curve2d point - expression
+  point - expression = constant @Float point - expression
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -768,7 +735,7 @@ instance
     (Function Uv.Point (Vector2d (space2 @ units2)))
     (Function Uv.Point (Point2d (space1 @ units1)))
   where
-  point - expression = surface2d point - expression
+  point - expression = constant @Uv.Point point - expression
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -797,7 +764,7 @@ instance
     (Point2d (space2 @ units2))
     (Function Float (Vector2d (space1 @ units1)))
   where
-  expression - point = expression - curve2d point
+  expression - point = expression - constant @Float point
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -806,7 +773,7 @@ instance
     (Point2d (space2 @ units2))
     (Function Uv.Point (Vector2d (space1 @ units1)))
   where
-  expression - point = expression - surface2d point
+  expression - point = expression - constant @Uv.Point point
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -815,7 +782,7 @@ instance
     (Function Float (Point2d (space2 @ units2)))
     (Function Float (Vector2d (space1 @ units1)))
   where
-  point - expression = curve2d point - expression
+  point - expression = constant @Float point - expression
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -824,7 +791,7 @@ instance
     (Function Uv.Point (Point2d (space2 @ units2)))
     (Function Uv.Point (Vector2d (space1 @ units1)))
   where
-  point - expression = surface2d point - expression
+  point - expression = constant @Uv.Point point - expression
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -859,7 +826,7 @@ instance
     (Vector3d (space2 @ units2))
     (Function Float (Point3d (space1 @ units1)))
   where
-  expression - vector = expression - vectorCurve3d vector
+  expression - vector = expression - constant @Float vector
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -868,7 +835,7 @@ instance
     (Vector3d (space2 @ units2))
     (Function Uv.Point (Point3d (space1 @ units1)))
   where
-  expression - vector = expression - vectorSurface3d vector
+  expression - vector = expression - constant @Uv.Point vector
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -877,7 +844,7 @@ instance
     (Function Float (Vector3d (space2 @ units2)))
     (Function Float (Point3d (space1 @ units1)))
   where
-  point - expression = curve3d point - expression
+  point - expression = constant @Float point - expression
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -886,7 +853,7 @@ instance
     (Function Uv.Point (Vector3d (space2 @ units2)))
     (Function Uv.Point (Point3d (space1 @ units1)))
   where
-  point - expression = surface3d point - expression
+  point - expression = constant @Uv.Point point - expression
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -921,7 +888,7 @@ instance
     (Point3d (space2 @ units2))
     (Function Float (Vector3d (space1 @ units1)))
   where
-  expression - point = expression - curve3d point
+  expression - point = expression - constant @Float point
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -930,7 +897,7 @@ instance
     (Point3d (space2 @ units2))
     (Function Uv.Point (Vector3d (space1 @ units1)))
   where
-  expression - point = expression - surface3d point
+  expression - point = expression - constant @Uv.Point point
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -939,7 +906,7 @@ instance
     (Function Float (Point3d (space2 @ units2)))
     (Function Float (Vector3d (space1 @ units1)))
   where
-  point - expression = curve3d point - expression
+  point - expression = constant @Float point - expression
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -948,7 +915,7 @@ instance
     (Function Uv.Point (Point3d (space2 @ units2)))
     (Function Uv.Point (Vector3d (space1 @ units1)))
   where
-  point - expression = surface3d point - expression
+  point - expression = constant @Uv.Point point - expression
 
 ----------------------
 --- MULTIPLICATION ---
@@ -1132,23 +1099,23 @@ instance Multiplication' (Function Uv.Point (Qty units1)) (Function Uv.Point (Qt
 
 instance Multiplication' (Qty units1) (Function Float (Qty units2)) where
   type Qty units1 .*. Function Float (Qty units2) = Function Float (Qty (units1 :*: units2))
-  value .*. expression = curve1d value .*. expression
+  value .*. expression = constant @Float value .*. expression
 
 instance Multiplication' (Qty units1) (Function Uv.Point (Qty units2)) where
   type
     Qty units1 .*. Function Uv.Point (Qty units2) =
       Function Uv.Point (Qty (units1 :*: units2))
-  value .*. expression = surface1d value .*. expression
+  value .*. expression = constant @Uv.Point value .*. expression
 
 instance Multiplication' (Function Float (Qty units1)) (Qty units2) where
   type Function Float (Qty units1) .*. Qty units2 = Function Float (Qty (units1 :*: units2))
-  expression .*. value = expression .*. curve1d value
+  expression .*. value = expression .*. constant @Float value
 
 instance Multiplication' (Function Uv.Point (Qty units1)) (Qty units2) where
   type
     Function Uv.Point (Qty units1) .*. Qty units2 =
       Function Uv.Point (Qty (units1 :*: units2))
-  expression .*. value = expression .*. surface1d value
+  expression .*. value = expression .*. constant @Uv.Point value
 
 --- Qty-Vector2d ---
 --------------------
@@ -1171,25 +1138,25 @@ instance Multiplication' (Qty units1) (Function Float (Vector2d (space @ units2)
   type
     Qty units1 .*. Function Float (Vector2d (space @ units2)) =
       Function Float (Vector2d (space @ (units1 :*: units2)))
-  value .*. expression = curve1d value .*. expression
+  value .*. expression = constant @Float value .*. expression
 
 instance Multiplication' (Qty units1) (Function Uv.Point (Vector2d (space @ units2))) where
   type
     Qty units1 .*. Function Uv.Point (Vector2d (space @ units2)) =
       Function Uv.Point (Vector2d (space @ (units1 :*: units2)))
-  value .*. expression = surface1d value .*. expression
+  value .*. expression = constant @Uv.Point value .*. expression
 
 instance Multiplication' (Function Float (Qty units1)) (Vector2d (space @ units2)) where
   type
     Function Float (Qty units1) .*. Vector2d (space @ units2) =
       Function Float (Vector2d (space @ (units1 :*: units2)))
-  expression .*. vector = expression .*. vectorCurve2d vector
+  expression .*. vector = expression .*. constant @Float vector
 
 instance Multiplication' (Function Uv.Point (Qty units1)) (Vector2d (space @ units2)) where
   type
     Function Uv.Point (Qty units1) .*. Vector2d (space @ units2) =
       Function Uv.Point (Vector2d (space @ (units1 :*: units2)))
-  expression .*. vector = expression .*. vectorSurface2d vector
+  expression .*. vector = expression .*. constant @Uv.Point vector
 
 --- Qty-Direction2d ---
 -----------------------
@@ -1227,25 +1194,25 @@ instance Multiplication' (Vector2d (space @ units1)) (Function Float (Qty units2
   type
     Vector2d (space @ units1) .*. Function Float (Qty units2) =
       Function Float (Vector2d (space @ (units1 :*: units2)))
-  vector .*. expression = vectorCurve2d vector .*. expression
+  vector .*. expression = constant @Float vector .*. expression
 
 instance Multiplication' (Vector2d (space @ units1)) (Function Uv.Point (Qty units2)) where
   type
     Vector2d (space @ units1) .*. Function Uv.Point (Qty units2) =
       Function Uv.Point (Vector2d (space @ (units1 :*: units2)))
-  vector .*. expression = vectorSurface2d vector .*. expression
+  vector .*. expression = constant @Uv.Point vector .*. expression
 
 instance Multiplication' (Function Float (Vector2d (space @ units1))) (Qty units2) where
   type
     Function Float (Vector2d (space @ units1)) .*. Qty units2 =
       Function Float (Vector2d (space @ (units1 :*: units2)))
-  expression .*. value = expression .*. curve1d value
+  expression .*. value = expression .*. constant @Float value
 
 instance Multiplication' (Function Uv.Point (Vector2d (space @ units1))) (Qty units2) where
   type
     Function Uv.Point (Vector2d (space @ units1)) .*. Qty units2 =
       Function Uv.Point (Vector2d (space @ (units1 :*: units2)))
-  expression .*. value = expression .*. surface1d value
+  expression .*. value = expression .*. constant @Uv.Point value
 
 --- Direction2d-Qty ---
 -----------------------
@@ -1368,23 +1335,23 @@ instance Division' (Function Uv.Point (Qty units1)) (Function Uv.Point (Qty unit
 
 instance Division' (Function Float (Qty units1)) (Qty units2) where
   type Function Float (Qty units1) ./. Qty units2 = Function Float (Qty (units1 :/: units2))
-  expression ./. value = expression ./. curve1d value
+  expression ./. value = expression ./. constant @Float value
 
 instance Division' (Function Uv.Point (Qty units1)) (Qty units2) where
   type
     Function Uv.Point (Qty units1) ./. Qty units2 =
       Function Uv.Point (Qty (units1 :/: units2))
-  expression ./. value = expression ./. surface1d value
+  expression ./. value = expression ./. constant @Uv.Point value
 
 instance Division' (Qty units1) (Function Float (Qty units2)) where
   type Qty units1 ./. Function Float (Qty units2) = Function Float (Qty (units1 :/: units2))
-  value ./. expression = curve1d value ./. expression
+  value ./. expression = constant @Float value ./. expression
 
 instance Division' (Qty units1) (Function Uv.Point (Qty units2)) where
   type
     Qty units1 ./. Function Uv.Point (Qty units2) =
       Function Uv.Point (Qty (units1 :/: units2))
-  value ./. expression = surface1d value ./. expression
+  value ./. expression = constant @Uv.Point value ./. expression
 
 --- Vector2d-Qty ---
 --------------------
@@ -1407,25 +1374,25 @@ instance Division' (Vector2d (space @ units1)) (Function Float (Qty units2)) whe
   type
     Vector2d (space @ units1) ./. Function Float (Qty units2) =
       Function Float (Vector2d (space @ (units1 :/: units2)))
-  vector ./. expression = vectorCurve2d vector ./. expression
+  vector ./. expression = constant @Float vector ./. expression
 
 instance Division' (Vector2d (space @ units1)) (Function Uv.Point (Qty units2)) where
   type
     Vector2d (space @ units1) ./. Function Uv.Point (Qty units2) =
       Function Uv.Point (Vector2d (space @ (units1 :/: units2)))
-  vector ./. expression = vectorSurface2d vector ./. expression
+  vector ./. expression = constant @Uv.Point vector ./. expression
 
 instance Division' (Function Float (Vector2d (space @ units1))) (Qty units2) where
   type
     Function Float (Vector2d (space @ units1)) ./. Qty units2 =
       Function Float (Vector2d (space @ (units1 :/: units2)))
-  expression ./. value = expression ./. curve1d value
+  expression ./. value = expression ./. constant @Float value
 
 instance Division' (Function Uv.Point (Vector2d (space @ units1))) (Qty units2) where
   type
     Function Uv.Point (Vector2d (space @ units1)) ./. Qty units2 =
       Function Uv.Point (Vector2d (space @ (units1 :/: units2)))
-  expression ./. value = expression ./. surface1d value
+  expression ./. value = expression ./. constant @Uv.Point value
 
 -------------------
 --- DOT PRODUCT ---
@@ -1542,7 +1509,7 @@ instance
   type
     Function Float (Vector2d (space1 @ units1)) .<>. Vector2d (space2 @ units2) =
       Function Float (Qty (units1 :*: units2))
-  expression .<>. vector = expression .<>. vectorCurve2d vector
+  expression .<>. vector = expression .<>. constant @Float vector
 
 instance
   space1 ~ space2 =>
@@ -1553,7 +1520,7 @@ instance
   type
     Function Uv.Point (Vector2d (space1 @ units1)) .<>. Vector2d (space2 @ units2) =
       Function Uv.Point (Qty (units1 :*: units2))
-  expression .<>. vector = expression .<>. vectorSurface2d vector
+  expression .<>. vector = expression .<>. constant @Uv.Point vector
 
 instance
   space1 ~ space2 =>
@@ -1564,7 +1531,7 @@ instance
   type
     Vector2d (space1 @ units1) .<>. Function Float (Vector2d (space2 @ units2)) =
       Function Float (Qty (units1 :*: units2))
-  vector .<>. expression = vectorCurve2d vector .<>. expression
+  vector .<>. expression = constant @Float vector .<>. expression
 
 instance
   space1 ~ space2 =>
@@ -1575,7 +1542,7 @@ instance
   type
     Vector2d (space1 @ units1) .<>. Function Uv.Point (Vector2d (space2 @ units2)) =
       Function Uv.Point (Qty (units1 :*: units2))
-  vector .<>. expression = vectorSurface2d vector .<>. expression
+  vector .<>. expression = constant @Uv.Point vector .<>. expression
 
 instance
   space1 ~ space2 =>
@@ -1736,7 +1703,7 @@ instance
   type
     Function Float (Vector2d (space1 @ units1)) .><. Vector2d (space2 @ units2) =
       Function Float (Qty (units1 :*: units2))
-  expression .><. vector = expression .><. vectorCurve2d vector
+  expression .><. vector = expression .><. constant @Float vector
 
 instance
   space1 ~ space2 =>
@@ -1747,7 +1714,7 @@ instance
   type
     Function Uv.Point (Vector2d (space1 @ units1)) .><. Vector2d (space2 @ units2) =
       Function Uv.Point (Qty (units1 :*: units2))
-  expression .><. vector = expression .><. vectorSurface2d vector
+  expression .><. vector = expression .><. constant @Uv.Point vector
 
 instance
   space1 ~ space2 =>
@@ -1758,7 +1725,7 @@ instance
   type
     Vector2d (space1 @ units1) .><. Function Float (Vector2d (space2 @ units2)) =
       Function Float (Qty (units1 :*: units2))
-  vector .><. expression = vectorCurve2d vector .><. expression
+  vector .><. expression = constant @Float vector .><. expression
 
 instance
   space1 ~ space2 =>
@@ -1769,7 +1736,7 @@ instance
   type
     Vector2d (space1 @ units1) .><. Function Uv.Point (Vector2d (space2 @ units2)) =
       Function Uv.Point (Qty (units1 :*: units2))
-  vector .><. expression = vectorSurface2d vector .><. expression
+  vector .><. expression = constant @Uv.Point vector .><. expression
 
 instance
   space1 ~ space2 =>
@@ -1921,34 +1888,42 @@ class Constant input output where
   constant :: output -> Function input output
 
 instance Constant Float (Qty units) where
-  constant value = Curve1d (expression1d value)
+  constant value = Curve1d (Expression.constant value)
 
 instance Constant Uv.Point (Qty units) where
-  constant value = Surface1d (expression1d value)
+  constant value = Surface1d (Expression.constant value)
 
 instance Constant Float (Vector2d (space @ units)) where
-  constant (Vector2d x y) = VectorCurve2d (expression1d x) (expression1d y)
+  constant (Vector2d x y) =
+    VectorCurve2d (Expression.constant x) (Expression.constant y)
 
 instance Constant Uv.Point (Vector2d (space @ units)) where
-  constant (Vector2d x y) = VectorSurface2d (expression1d x) (expression1d y)
+  constant (Vector2d x y) =
+    VectorSurface2d (Expression.constant x) (Expression.constant y)
 
 instance Constant Float (Vector3d (space @ units)) where
-  constant (Vector3d x y z) = VectorCurve3d (expression1d x) (expression1d y) (expression1d z)
+  constant (Vector3d x y z) =
+    VectorCurve3d (Expression.constant x) (Expression.constant y) (Expression.constant z)
 
 instance Constant Uv.Point (Vector3d (space @ units)) where
-  constant (Vector3d x y z) = VectorSurface3d (expression1d x) (expression1d y) (expression1d z)
+  constant (Vector3d x y z) =
+    VectorSurface3d (Expression.constant x) (Expression.constant y) (Expression.constant z)
 
 instance Constant Float (Point2d (space @ units)) where
-  constant (Point2d x y) = Curve2d (expression1d x) (expression1d y)
+  constant (Point2d x y) =
+    Curve2d (Expression.constant x) (Expression.constant y)
 
 instance Constant Uv.Point (Point2d (space @ units)) where
-  constant (Point2d x y) = Surface2d (expression1d x) (expression1d y)
+  constant (Point2d x y) =
+    Surface2d (Expression.constant x) (Expression.constant y)
 
 instance Constant Float (Point3d (space @ units)) where
-  constant (Point3d x y z) = Curve3d (expression1d x) (expression1d y) (expression1d z)
+  constant (Point3d x y z) =
+    Curve3d (Expression.constant x) (Expression.constant y) (Expression.constant z)
 
 instance Constant Uv.Point (Point3d (space @ units)) where
-  constant (Point3d x y z) = Surface3d (expression1d x) (expression1d y) (expression1d z)
+  constant (Point3d x y z) =
+    Surface3d (Expression.constant x) (Expression.constant y) (Expression.constant z)
 
 class XY input output where
   xy ::

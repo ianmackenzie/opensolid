@@ -29,6 +29,7 @@ import List qualified
 import OpenSolid
 import Qty (Qty (Qty))
 import Text qualified
+import Units qualified
 import Uv qualified
 import Prelude (Double)
 
@@ -142,8 +143,8 @@ zero = constant 0.0
 one :: Expression input
 one = constant 1.0
 
-constant :: Float -> Expression input
-constant = Constant
+constant :: Qty units -> Expression input
+constant value = Constant (Units.coerce value)
 
 parameter :: Expression Float
 parameter = Parameter
