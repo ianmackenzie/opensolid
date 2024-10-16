@@ -330,6 +330,8 @@ foreign import ccall unsafe "opensolid_expression_sin"
 foreign import ccall unsafe "opensolid_expression_cos"
   opensolid_expression_cos :: Ptr -> Ptr
 
+-- TODO attach a finalizer to the returned Ptr value,
+-- to delete the underlying Rust value?
 ptr :: Expression input -> Ptr
 ptr expression = case expression of
   Parameter -> opensolid_expression_argument (fromIntegral 0)
