@@ -18,8 +18,8 @@ import Bounds2d (Bounds2d)
 import Bounds2d qualified
 import Curve2d (Curve2d)
 import Curve2d qualified
-import Expression (Expression)
-import Expression.Surface2d qualified
+import Function qualified
+import Function.Surface2d qualified
 import Maybe qualified
 import OpenSolid
 import Point2d (Point2d)
@@ -42,7 +42,7 @@ class
   evaluateImpl :: function -> Uv.Point -> Point2d coordinateSystem
   boundsImpl :: function -> Uv.Bounds -> Bounds2d coordinateSystem
   derivativeImpl :: Parameter -> function -> VectorSurface2d.Function coordinateSystem
-  expressionImpl :: function -> Maybe (Expression Uv.Point (Point2d coordinateSystem))
+  expressionImpl :: function -> Maybe (Function.Function Uv.Point (Point2d coordinateSystem))
 
 data Function (coordinateSystem :: CoordinateSystem) where
   Function ::
@@ -229,11 +229,11 @@ instance Interface (SurfaceCurveComposition (space @ units)) (space @ units) whe
   expressionImpl (SurfaceCurveComposition function curve) =
     Maybe.map2 (.) (Curve2d.expression curve) (Surface1d.Function.expression function)
 
-expression :: Function (space @ units) -> Maybe (Expression Uv.Point (Point2d (space @ units)))
+expression :: Function (space @ units) -> Maybe (Function.Function Uv.Point (Point2d (space @ units)))
 expression function = case function of
   Function f -> expressionImpl f
   Coerce f -> Units.coerce (expression f)
-  Constant p -> Just (Expression.Surface2d.constant p)
-  XY x y -> Maybe.map2 Expression.Surface2d.xy (Surface1d.Function.expression x) (Surface1d.Function.expression y)
+  Constant p -> Just (Function.Surface2d.constant p)
+  XY x y -> Maybe.map2 Function.Surface2d.xy (Surface1d.Function.expression x) (Surface1d.Function.expression y)
   Addition f1 f2 -> Maybe.map2 (+) (expression f1) (VectorSurface2d.Function.expression f2)
   Subtraction f1 f2 -> Maybe.map2 (-) (expression f1) (VectorSurface2d.Function.expression f2)

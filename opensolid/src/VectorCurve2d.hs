@@ -57,12 +57,12 @@ import Direction2d (Direction2d)
 import Direction2d qualified
 import {-# SOURCE #-} DirectionCurve2d (DirectionCurve2d)
 import Error qualified
-import Expression (Expression)
-import Expression qualified
-import Expression.VectorCurve2d qualified
+import Function (Function)
+import Function qualified
 import Float qualified
 import Frame2d (Frame2d)
 import Frame2d qualified
+import Function.VectorCurve2d qualified
 import List qualified
 import Maybe qualified
 import NonEmpty qualified
@@ -95,7 +95,7 @@ class
     Transform2d tag (Space coordinateSystem @ translationUnits) ->
     curve ->
     VectorCurve2d coordinateSystem
-  expressionImpl :: curve -> Maybe (Expression Float (Vector2d coordinateSystem))
+  expressionImpl :: curve -> Maybe (Function Float (Vector2d coordinateSystem))
 
 data VectorCurve2d (coordinateSystem :: CoordinateSystem) where
   VectorCurve2d ::
@@ -191,44 +191,44 @@ instance Interface (VectorCurve2d (space @ units)) (space @ units) where
   transformByImpl = transformBy
   expressionImpl = expression
 
-expression :: VectorCurve2d (space @ units) -> Maybe (Expression Float (Vector2d (space @ units)))
+expression :: VectorCurve2d (space @ units) -> Maybe (Function Float (Vector2d (space @ units)))
 expression vectorCurve = case vectorCurve of
   VectorCurve2d v -> expressionImpl v
-  Constant v -> Just (Expression.VectorCurve2d.constant v)
+  Constant v -> Just (Function.VectorCurve2d.constant v)
   Coerce c -> Units.coerce (expression c)
-  Reversed c -> Maybe.map (. (1.0 - Expression.parameter)) (expression c)
-  XY x y -> Maybe.map2 Expression.VectorCurve2d.xy (Curve1d.expression x) (Curve1d.expression y)
+  Reversed c -> Maybe.map (. (1.0 - Function.parameter)) (expression c)
+  XY x y -> Maybe.map2 Function.VectorCurve2d.xy (Curve1d.expression x) (Curve1d.expression y)
   Negated c -> Maybe.map negate (expression c)
   Sum c1 c2 -> Maybe.map2 (+) (expression c1) (expression c2)
   Difference c1 c2 -> Maybe.map2 (-) (expression c1) (expression c2)
   Product1d2d' c1 c2 -> Maybe.map2 (.*.) (Curve1d.expression c1) (expression c2)
   Product2d1d' c1 c2 -> Maybe.map2 (.*.) (expression c1) (Curve1d.expression c2)
   Quotient' c1 c2 -> Maybe.map2 (./.) (expression c1) (Curve1d.expression c2)
-  PlaceInBasis basis c -> Maybe.map (Expression.VectorCurve2d.placeInBasis basis) (expression c)
-  Line v1 v2 -> Just (v1 + Expression.parameter * (v2 - v1))
+  PlaceInBasis basis c -> Maybe.map (Function.VectorCurve2d.placeInBasis basis) (expression c)
+  Line v1 v2 -> Just (v1 + Function.parameter * (v2 - v1))
   Arc i j a b -> do
-    let angle = a + Expression.parameter * (b - a)
-    Just (i * Expression.cos angle + j * Expression.sin angle)
+    let angle = a + Function.parameter * (b - a)
+    Just (i * Function.cos angle + j * Function.sin angle)
   QuadraticSpline v1 v2 v3 -> Just (bezierCurveExpression (NonEmpty.of3 v1 v2 v3))
   CubicSpline v1 v2 v3 v4 -> Just (bezierCurveExpression (NonEmpty.of4 v1 v2 v3 v4))
   BezierCurve controlPoints -> Just (bezierCurveExpression controlPoints)
-  Transformed transform c -> Maybe.map (Expression.VectorCurve2d.transformBy transform) (expression c)
+  Transformed transform c -> Maybe.map (Function.VectorCurve2d.transformBy transform) (expression c)
 
-bezierCurveExpression :: NonEmpty (Vector2d (space @ units)) -> Expression Float (Vector2d (space @ units))
-bezierCurveExpression = bezierCurveExpressionImpl . NonEmpty.map Expression.VectorCurve2d.constant
+bezierCurveExpression :: NonEmpty (Vector2d (space @ units)) -> Function Float (Vector2d (space @ units))
+bezierCurveExpression = bezierCurveExpressionImpl . NonEmpty.map Function.VectorCurve2d.constant
 
 bezierCurveExpressionImpl ::
-  NonEmpty (Expression Float (Vector2d (space @ units))) ->
-  Expression Float (Vector2d (space @ units))
+  NonEmpty (Function Float (Vector2d (space @ units))) ->
+  Function Float (Vector2d (space @ units))
 bezierCurveExpressionImpl controlPoints = case controlPoints of
   point :| [] -> point
   _ :| NonEmpty rest -> bezierCurveExpressionImpl (NonEmpty.map2 collapseControlPoints controlPoints rest)
 
 collapseControlPoints ::
-  Expression Float (Vector2d (space @ units)) ->
-  Expression Float (Vector2d (space @ units)) ->
-  Expression Float (Vector2d (space @ units))
-collapseControlPoints p1 p2 = Expression.VectorCurve2d.interpolateFrom p1 p2 Expression.parameter
+  Function Float (Vector2d (space @ units)) ->
+  Function Float (Vector2d (space @ units)) ->
+  Function Float (Vector2d (space @ units))
+collapseControlPoints p1 p2 = Function.VectorCurve2d.interpolateFrom p1 p2 Function.parameter
 
 instance Negation (VectorCurve2d (space @ units)) where
   negate curve = case curve of
@@ -911,7 +911,7 @@ instance Curve1d.Interface (SquaredMagnitude' (space @ units)) (units :*: units)
     VectorBounds2d.squaredMagnitude' (segmentBounds t curve)
   derivativeImpl (SquaredMagnitude' curve) =
     2 * curve .<>. derivative curve
-  expressionImpl (SquaredMagnitude' curve) = Maybe.map Expression.VectorCurve2d.squaredMagnitude' (expression curve)
+  expressionImpl (SquaredMagnitude' curve) = Maybe.map Function.VectorCurve2d.squaredMagnitude' (expression curve)
 
 squaredMagnitude :: Units.Squared units1 units2 => VectorCurve2d (space @ units1) -> Curve1d units2
 squaredMagnitude curve = Units.specialize (squaredMagnitude' curve)
@@ -931,7 +931,7 @@ instance Curve1d.Interface (NonZeroMagnitude (space @ units)) units where
     VectorBounds2d.magnitude (VectorCurve2d.segmentBounds t curve)
   derivativeImpl (NonZeroMagnitude curve) =
     (VectorCurve2d.derivative curve .<>. curve) .!/! Curve1d.new (NonZeroMagnitude curve)
-  expressionImpl (NonZeroMagnitude curve) = Maybe.map Expression.VectorCurve2d.magnitude (expression curve)
+  expressionImpl (NonZeroMagnitude curve) = Maybe.map Function.VectorCurve2d.magnitude (expression curve)
 
 unsafeMagnitude :: VectorCurve2d (space @ units) -> Curve1d units
 unsafeMagnitude curve = Curve1d.new (NonZeroMagnitude curve)

@@ -14,7 +14,7 @@ where
 
 import CoordinateSystem (Space)
 import {-# SOURCE #-} Curve1d (Curve1d)
-import Expression (Expression)
+import Function (Function)
 import OpenSolid
 import Range (Range)
 import Transform2d (Transform2d)
@@ -34,7 +34,7 @@ class
     Transform2d tag (Space coordinateSystem @ translationUnits) ->
     curve ->
     VectorCurve2d coordinateSystem
-  expressionImpl :: curve -> Maybe (Expression Float (Vector2d coordinateSystem))
+  expressionImpl :: curve -> Maybe (Function Float (Vector2d coordinateSystem))
 
 type role VectorCurve2d nominal
 
@@ -97,4 +97,4 @@ transformBy ::
   Transform2d tag (space @ translationUnits) ->
   VectorCurve2d (space @ units) ->
   VectorCurve2d (space @ units)
-expression :: VectorCurve2d (space @ units) -> Maybe (Expression Float (Vector2d (space @ units)))
+expression :: VectorCurve2d (space @ units) -> Maybe (Function Float (Vector2d (space @ units)))

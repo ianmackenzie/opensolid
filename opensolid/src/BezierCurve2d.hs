@@ -8,10 +8,10 @@ where
 import Bounds2d qualified
 import Curve2d (Curve2d)
 import Curve2d qualified
-import Expression (Expression)
-import Expression qualified
-import Expression.Curve2d qualified
+import Function (Function)
+import Function qualified
 import Float qualified
+import Function.Curve2d qualified
 import Int qualified
 import List qualified
 import NonEmpty qualified
@@ -105,21 +105,21 @@ instance Curve2d.Interface (BezierCurve2d (space @ units)) (space @ units) where
 
   expressionImpl (BezierCurve2d controlPoints) = Just (expression controlPoints)
 
-expression :: NonEmpty (Point2d (space @ units)) -> Expression Float (Point2d (space @ units))
-expression controlPoints = expressionImpl (NonEmpty.map Expression.Curve2d.constant controlPoints)
+expression :: NonEmpty (Point2d (space @ units)) -> Function Float (Point2d (space @ units))
+expression controlPoints = expressionImpl (NonEmpty.map Function.Curve2d.constant controlPoints)
 
 expressionImpl ::
-  NonEmpty (Expression Float (Point2d (space @ units))) ->
-  Expression Float (Point2d (space @ units))
+  NonEmpty (Function Float (Point2d (space @ units))) ->
+  Function Float (Point2d (space @ units))
 expressionImpl controlPoints = case controlPoints of
   point :| [] -> point
   _ :| NonEmpty rest -> expressionImpl (NonEmpty.map2 collapse controlPoints rest)
 
 collapse ::
-  Expression Float (Point2d (space @ units)) ->
-  Expression Float (Point2d (space @ units)) ->
-  Expression Float (Point2d (space @ units))
-collapse p1 p2 = Expression.Curve2d.interpolateFrom p1 p2 Expression.parameter
+  Function Float (Point2d (space @ units)) ->
+  Function Float (Point2d (space @ units)) ->
+  Function Float (Point2d (space @ units))
+collapse p1 p2 = Function.Curve2d.interpolateFrom p1 p2 Function.parameter
 
 {- | Construct a Bezier curve from its start point (first control point), inner control points and
 end point (last control point). For example,

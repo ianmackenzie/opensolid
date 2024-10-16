@@ -1,5 +1,5 @@
-module Expression.Expression1d
-  ( Expression1d
+module Function.Expression
+  ( Expression
   , zero
   , constant
   , parameter
@@ -32,22 +32,22 @@ import Text qualified
 import Uv qualified
 import Prelude (Double)
 
-data Expression1d input where
-  Constant :: Float -> Expression1d input
-  Parameter :: Expression1d Float
-  U :: Expression1d Uv.Point
-  V :: Expression1d Uv.Point
-  Negated :: Expression1d input -> Expression1d input
-  Sum :: Expression1d input -> Expression1d input -> Expression1d input
-  Difference :: Expression1d input -> Expression1d input -> Expression1d input
-  Squared :: Expression1d input -> Expression1d input
-  Product :: Expression1d input -> Expression1d input -> Expression1d input
-  Quotient :: Expression1d input -> Expression1d input -> Expression1d input
-  Sqrt :: Expression1d input -> Expression1d input
-  Sin :: Expression1d input -> Expression1d input
-  Cos :: Expression1d input -> Expression1d input
+data Expression input where
+  Constant :: Float -> Expression input
+  Parameter :: Expression Float
+  U :: Expression Uv.Point
+  V :: Expression Uv.Point
+  Negated :: Expression input -> Expression input
+  Sum :: Expression input -> Expression input -> Expression input
+  Difference :: Expression input -> Expression input -> Expression input
+  Squared :: Expression input -> Expression input
+  Product :: Expression input -> Expression input -> Expression input
+  Quotient :: Expression input -> Expression input -> Expression input
+  Sqrt :: Expression input -> Expression input
+  Sin :: Expression input -> Expression input
+  Cos :: Expression input -> Expression input
 
-instance Eq (Expression1d input) where
+instance Eq (Expression input) where
   Constant a == Constant b = a == b
   Constant _ == _ = False
   Parameter == Parameter = True
@@ -75,7 +75,7 @@ instance Eq (Expression1d input) where
   Cos arg1 == Cos arg2 = arg1 == arg2
   Cos _ == _ = False
 
-instance Ord (Expression1d input) where
+instance Ord (Expression input) where
   compare (Constant a) (Constant b) = compare a b
   compare (Constant _) _ = LT
   compare Parameter Parameter = EQ
@@ -103,7 +103,7 @@ instance Ord (Expression1d input) where
   compare (Cos arg1) (Cos arg2) = compare arg1 arg2
   compare (Cos _) _ = LT
 
-instance Composition (Expression1d input) (Expression1d Float) (Expression1d input) where
+instance Composition (Expression input) (Expression Float) (Expression input) where
   Constant value . _ = constant value
   Parameter . input = input
   Negated arg . input = negated (arg . input)
@@ -119,9 +119,9 @@ instance Composition (Expression1d input) (Expression1d Float) (Expression1d inp
 instance
   input1 ~ input2 =>
   Composition
-    (Expression1d input1, Expression1d input2)
-    (Expression1d Uv.Point)
-    (Expression1d input1)
+    (Expression input1, Expression input2)
+    (Expression Uv.Point)
+    (Expression input1)
   where
   Constant value . _ = constant value
   U . (input, _) = input
@@ -136,31 +136,31 @@ instance
   Sin arg . inputs = sin (arg . inputs)
   Cos arg . inputs = cos (arg . inputs)
 
-zero :: Expression1d input
+zero :: Expression input
 zero = constant 0.0
 
-one :: Expression1d input
+one :: Expression input
 one = constant 1.0
 
-constant :: Float -> Expression1d input
+constant :: Float -> Expression input
 constant = Constant
 
-parameter :: Expression1d Float
+parameter :: Expression Float
 parameter = Parameter
 
-u :: Expression1d Uv.Point
+u :: Expression Uv.Point
 u = U
 
-v :: Expression1d Uv.Point
+v :: Expression Uv.Point
 v = V
 
-negated :: Expression1d input -> Expression1d input
+negated :: Expression input -> Expression input
 negated (Constant value) = Constant (negate value)
 negated (Negated expression) = expression
 negated (Difference lhs rhs) = Difference rhs lhs
 negated expression = Negated expression
 
-sum :: Expression1d input -> Expression1d input -> Expression1d input
+sum :: Expression input -> Expression input -> Expression input
 sum (Constant a) (Constant b) = Constant (a + b)
 sum expression (Constant 0.0) = expression -- x + 0 = x
 sum (Constant 0.0) expression = expression -- 0 + x = x
@@ -172,7 +172,7 @@ sum (Constant a) (Difference expression (Constant b)) = Sum (Constant (a - b)) e
 sum (Difference expression (Constant a)) (Constant b) = Sum (Constant (b - a)) expression -- (x - a) + b = (b - a) + x
 sum lhs rhs = if lhs <= rhs then Sum lhs rhs else Sum rhs lhs -- Canonicalize argument order using lexical ordering
 
-difference :: Expression1d input -> Expression1d input -> Expression1d input
+difference :: Expression input -> Expression input -> Expression input
 difference (Constant a) (Constant b) = constant (a - b)
 difference expression (Constant 0.0) = expression -- x - 0 = x
 difference (Constant 0.0) expression = negated expression -- 0 - x = -x
@@ -184,7 +184,7 @@ difference (Constant a) (Difference expression (Constant b)) = difference (const
 difference (Difference expression (Constant a)) (Constant b) = difference expression (constant (a + b)) -- (x - a) - b = x - (a + b)
 difference lhs rhs = Difference lhs rhs
 
-product :: Expression1d input -> Expression1d input -> Expression1d input
+product :: Expression input -> Expression input -> Expression input
 product (Constant a) (Constant b) = constant (a * b)
 product _ (Constant 0.0) = zero
 product (Constant 0.0) _ = zero
@@ -196,39 +196,39 @@ product (Constant a) (Quotient (Constant b) expression) = quotient (constant (a 
 product (Quotient (Constant a) expression) (Constant b) = quotient (constant (a * b)) expression -- (a / x) * b = (a * b) / x
 product lhs rhs = if lhs <= rhs then Product lhs rhs else Product rhs lhs -- Canonicalize argument order using lexical ordering
 
-twice :: Expression1d input -> Expression1d input
+twice :: Expression input -> Expression input
 twice = product (constant 2.0)
 
-half :: Expression1d input -> Expression1d input
+half :: Expression input -> Expression input
 half = product (constant 0.5)
 
-quotient :: Expression1d input -> Expression1d input -> Expression1d input
+quotient :: Expression input -> Expression input -> Expression input
 quotient (Constant a) (Constant b) = constant (a / b)
 quotient (Constant 0.0) _ = zero
 quotient expression (Constant a) = product (constant (1.0 / a)) expression
 quotient expression (Quotient lhs rhs) = product expression (quotient rhs lhs)
 quotient lhs rhs = Quotient lhs rhs
 
-squared :: Expression1d input -> Expression1d input
+squared :: Expression input -> Expression input
 squared (Constant value) = constant (Float.squared value)
 squared (Negated arg) = squared arg
 squared (Sqrt expression) = expression
 squared expression = Squared expression
 
-sqrt :: Expression1d input -> Expression1d input
+sqrt :: Expression input -> Expression input
 sqrt (Constant value) = constant (Float.sqrt value)
 sqrt expression = Sqrt expression
 
-sin :: Expression1d input -> Expression1d input
+sin :: Expression input -> Expression input
 sin (Constant value) = constant (Float.sin value)
 sin expression = Sin expression
 
-cos :: Expression1d input -> Expression1d input
+cos :: Expression input -> Expression input
 cos (Constant value) = constant (Float.cos value)
 cos (Negated expression) = cos expression
 cos expression = Cos expression
 
-curveDerivative :: Expression1d Float -> Expression1d Float
+curveDerivative :: Expression Float -> Expression Float
 curveDerivative expression = case expression of
   Constant _ -> zero
   Parameter -> one
@@ -245,7 +245,7 @@ curveDerivative expression = case expression of
   Sin arg -> product (curveDerivative arg) (cos arg)
   Cos arg -> product (negated (curveDerivative arg)) (sin arg)
 
-surfaceDerivative :: Uv.Parameter -> Expression1d Uv.Point -> Expression1d Uv.Point
+surfaceDerivative :: Uv.Parameter -> Expression Uv.Point -> Expression Uv.Point
 surfaceDerivative p expression = case expression of
   Constant _ -> zero
   U -> if p == Uv.U then one else zero
@@ -264,10 +264,10 @@ surfaceDerivative p expression = case expression of
   Sin arg -> product (surfaceDerivative p arg) (cos arg)
   Cos arg -> product (negated (surfaceDerivative p arg)) (sin arg)
 
-show :: Expression1d input -> Text
+show :: Expression input -> Text
 show = showWithPrecedence 0
 
-showWithPrecedence :: Int -> Expression1d input -> Text
+showWithPrecedence :: Int -> Expression input -> Text
 showWithPrecedence precedence expression = case expression of
   Parameter -> "t"
   U -> "u"
@@ -283,7 +283,7 @@ showWithPrecedence precedence expression = case expression of
   Sin arg -> showFunctionCall precedence "sin" [arg]
   Cos arg -> showFunctionCall precedence "cos" [arg]
 
-showFunctionCall :: Int -> Text -> List (Expression1d input) -> Text
+showFunctionCall :: Int -> Text -> List (Expression input) -> Text
 showFunctionCall precedence functionName arguments =
   showParenthesized (precedence >= 10) $
     Text.join " " (functionName : List.map (showWithPrecedence 10) arguments)
@@ -329,7 +329,7 @@ foreign import ccall unsafe "opensolid_expression_sin"
 foreign import ccall unsafe "opensolid_expression_cos"
   opensolid_expression_cos :: Ptr -> Ptr
 
-ptr :: Expression1d input -> Ptr
+ptr :: Expression input -> Ptr
 ptr expression = case expression of
   Parameter -> opensolid_expression_argument (fromIntegral 0)
   U -> opensolid_expression_argument (fromIntegral 0)

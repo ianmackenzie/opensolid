@@ -30,8 +30,8 @@ import Domain1d (Domain1d)
 import Domain1d qualified
 import Estimate (Estimate)
 import Estimate qualified
-import Expression (Expression)
-import Expression qualified
+import Function (Function)
+import Function qualified
 import Float qualified
 import Fuzzy qualified
 import List qualified
@@ -55,7 +55,7 @@ class
   pointOnImpl :: curve -> Float -> Qty units
   segmentBoundsImpl :: curve -> Range Unitless -> Range units
   derivativeImpl :: curve -> Curve1d units
-  expressionImpl :: curve -> Maybe (Expression Float (Qty units))
+  expressionImpl :: curve -> Maybe (Function Float (Qty units))
 
 data Curve1d units where
   Curve1d ::
@@ -367,7 +367,7 @@ instance Interface (Reversed units) units where
   pointOnImpl (Reversed curve) tValue = pointOn curve (1 - tValue)
   segmentBoundsImpl (Reversed curve) tBounds = segmentBounds curve (1 - tBounds)
   derivativeImpl (Reversed curve) = -(reverse (derivative curve))
-  expressionImpl (Reversed curve) = Maybe.map (. (1.0 - Expression.parameter)) (expression curve)
+  expressionImpl (Reversed curve) = Maybe.map (. (1.0 - Function.parameter)) (expression curve)
 
 reverse :: Curve1d units -> Curve1d units
 reverse curve@(Constant _) = curve
@@ -408,20 +408,20 @@ cos curve = Cos curve
 integral :: Curve1d units -> Estimate units
 integral curve = Estimate.new (Integral curve (derivative curve) Range.unit)
 
-expression :: Curve1d units -> Maybe (Expression Float (Qty units))
+expression :: Curve1d units -> Maybe (Function Float (Qty units))
 expression curve = case curve of
   Curve1d c -> expressionImpl c
-  Constant x -> Just (Expression.constant x)
-  Parameter -> Just Expression.parameter
+  Constant x -> Just (Function.constant x)
+  Parameter -> Just Function.parameter
   Negated c -> Maybe.map negate (expression c)
   Sum c1 c2 -> Maybe.map2 (+) (expression c1) (expression c2)
   Difference c1 c2 -> Maybe.map2 (-) (expression c1) (expression c2)
   Product' c1 c2 -> Maybe.map2 (.*.) (expression c1) (expression c2)
   Quotient' c1 c2 -> Maybe.map2 (./.) (expression c1) (expression c2)
-  Squared' c -> Maybe.map Expression.squared' (expression c)
-  SquareRoot' c -> Maybe.map Expression.sqrt' (expression c)
-  Sin c -> Maybe.map Expression.sin (expression c)
-  Cos c -> Maybe.map Expression.cos (expression c)
+  Squared' c -> Maybe.map Function.squared' (expression c)
+  SquareRoot' c -> Maybe.map Function.sqrt' (expression c)
+  Sin c -> Maybe.map Function.sin (expression c)
+  Cos c -> Maybe.map Function.cos (expression c)
   Coerce c -> Units.coerce (expression c)
 
 ----- ROOT FINDING -----

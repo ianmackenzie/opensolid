@@ -15,8 +15,8 @@ where
 
 import Angle qualified
 import Bounds2d qualified
-import Expression (Expression)
-import Expression qualified
+import Function (Function)
+import Function qualified
 import Float qualified
 import Maybe qualified
 import OpenSolid
@@ -304,26 +304,26 @@ cosSquared f = 0.5 * cos (2 * f) + 0.5
 sinSquared :: Symbolic Radians -> Symbolic Unitless
 sinSquared f = 0.5 - 0.5 * cos (2 * f)
 
-expression :: Symbolic units -> Maybe (Expression Uv.Point (Qty units))
+expression :: Symbolic units -> Maybe (Function Uv.Point (Qty units))
 expression symbolic = case symbolic of
   Function f -> Function.expressionImpl f
-  Constant x -> Just (Expression.constant x)
-  Parameter U -> Just Expression.u
-  Parameter V -> Just Expression.v
+  Constant x -> Just (Function.constant x)
+  Parameter U -> Just Function.u
+  Parameter V -> Just Function.v
   Negated f -> Maybe.map negate (expression f)
   Sum f1 f2 -> Maybe.map2 (+) (expression f1) (expression f2)
   Difference f1 f2 -> Maybe.map2 (-) (expression f1) (expression f2)
   Product' f1 f2 -> Maybe.map2 (.*.) (expression f1) (expression f2)
   Quotient' f1 f2 -> Maybe.map2 (./.) (expression f1) (expression f2)
-  Squared' f -> Maybe.map Expression.squared' (expression f)
-  SquareRoot' f -> Maybe.map Expression.sqrt' (expression f)
-  Sin f -> Maybe.map Expression.sin (expression f)
-  Cos f -> Maybe.map Expression.cos (expression f)
+  Squared' f -> Maybe.map Function.squared' (expression f)
+  SquareRoot' f -> Maybe.map Function.sqrt' (expression f)
+  Sin f -> Maybe.map Function.sin (expression f)
+  Cos f -> Maybe.map Function.cos (expression f)
   Coerce f -> Units.coerce (expression f)
 
 valueFunction :: Symbolic units -> (Uv.Point -> Qty units)
 valueFunction symbolic = case expression symbolic of
-  Just expr -> Expression.valueFunction expr
+  Just expr -> Function.valueFunction expr
   Nothing -> case symbolic of
     Function f -> Function.evaluateImpl f
     Constant x -> always x
@@ -354,7 +354,7 @@ valueFunction symbolic = case expression symbolic of
 
 boundsFunction :: Symbolic units -> (Uv.Bounds -> Range units)
 boundsFunction symbolic = case expression symbolic of
-  Just expr -> Expression.boundsFunction expr
+  Just expr -> Function.boundsFunction expr
   Nothing -> case symbolic of
     Function f -> Function.boundsImpl f
     Constant x -> always (Range.constant x)
