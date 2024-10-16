@@ -60,6 +60,9 @@ type role Function nominal nominal
 data Function input output where
   Curve1d ::
     Expression Float ->
+    ~Curve1dValueFunction ->
+    ~Curve1dBoundsFunction ->
+    ~(Function Float (Qty units)) ->
     Function Float (Qty units)
   Surface1d ::
     Expression Uv.Point ->
@@ -101,6 +104,14 @@ data Function input output where
     Expression Uv.Point ->
     Function Uv.Point (Vector3d (space @ units))
 
+curve1d :: Expression Float -> Function Float (Qty units)
+curve1d expression = do
+  let expressionPtr = Expression.ptr expression
+  let fValue = curve1d_value_function (opensolid_curve1d_value_function expressionPtr)
+  let fBounds = curve1d_bounds_function (opensolid_curve1d_bounds_function expressionPtr)
+  let derivative = curve1d (Expression.curveDerivative expression)
+  Curve1d expression fValue fBounds derivative
+
 -------------
 --- UNITS ---
 -------------
@@ -124,7 +135,8 @@ instance
   input1 ~ input2 =>
   Units.Coercion (Function input1 (Qty units1)) (Function input2 (Qty units2))
   where
-  coerce (Curve1d expression) = Curve1d expression
+  coerce (Curve1d expression fValue fBounds derivative) =
+    Curve1d expression fValue fBounds (Units.coerce derivative)
   coerce (Surface1d expression) = Surface1d expression
 
 instance
@@ -168,7 +180,7 @@ instance
 ----------------
 
 instance Negation (Function input (Qty units)) where
-  negate (Curve1d x) = Curve1d (Expression.negated x)
+  negate (Curve1d x _ _ _) = curve1d (Expression.negated x)
   negate (Surface1d x) = Surface1d (Expression.negated x)
 
 instance Negation (Function input (Vector2d (space @ units))) where
@@ -258,7 +270,7 @@ instance
     (Function Float (Qty units2))
     (Function Float (Qty units1))
   where
-  Curve1d lhs + Curve1d rhs = Curve1d (Expression.sum lhs rhs)
+  Curve1d lhs _ _ _ + Curve1d rhs _ _ _ = curve1d (Expression.sum lhs rhs)
 
 instance
   units1 ~ units2 =>
@@ -528,7 +540,7 @@ instance
     (Function Float (Qty units2))
     (Function Float (Qty units1))
   where
-  Curve1d lhs - Curve1d rhs = Curve1d (Expression.difference lhs rhs)
+  Curve1d lhs _ _ _ - Curve1d rhs _ _ _ = curve1d (Expression.difference lhs rhs)
 
 instance
   units1 ~ units2 =>
@@ -1089,7 +1101,7 @@ instance Multiplication' (Function Float (Qty units1)) (Function Float (Qty unit
   type
     Function Float (Qty units1) .*. Function Float (Qty units2) =
       Function Float (Qty (units1 :*: units2))
-  Curve1d lhs .*. Curve1d rhs = Curve1d (Expression.product lhs rhs)
+  Curve1d lhs _ _ _ .*. Curve1d rhs _ _ _ = curve1d (Expression.product lhs rhs)
 
 instance Multiplication' (Function Uv.Point (Qty units1)) (Function Uv.Point (Qty units2)) where
   type
@@ -1124,7 +1136,7 @@ instance Multiplication' (Function Float (Qty units1)) (Function Float (Vector2d
   type
     Function Float (Qty units1) .*. Function Float (Vector2d (space @ units2)) =
       Function Float (Vector2d (space @ (units1 :*: units2)))
-  Curve1d scale .*. VectorCurve2d x y =
+  Curve1d scale _ _ _ .*. VectorCurve2d x y =
     VectorCurve2d (Expression.product scale x) (Expression.product scale y)
 
 instance Multiplication' (Function Uv.Point (Qty units1)) (Function Uv.Point (Vector2d (space @ units2))) where
@@ -1180,7 +1192,7 @@ instance Multiplication' (Function Float (Vector2d (space @ units1))) (Function 
   type
     Function Float (Vector2d (space @ units1)) .*. Function Float (Qty units2) =
       Function Float (Vector2d (space @ (units1 :*: units2)))
-  VectorCurve2d x y .*. Curve1d scale =
+  VectorCurve2d x y .*. Curve1d scale _ _ _ =
     VectorCurve2d (Expression.product x scale) (Expression.product y scale)
 
 instance Multiplication' (Function Uv.Point (Vector2d (space @ units1))) (Function Uv.Point (Qty units2)) where
@@ -1325,7 +1337,7 @@ instance Division' (Function Float (Qty units1)) (Function Float (Qty units2)) w
   type
     Function Float (Qty units1) ./. Function Float (Qty units2) =
       Function Float (Qty (units1 :/: units2))
-  Curve1d lhs ./. Curve1d rhs = Curve1d (Expression.quotient lhs rhs)
+  Curve1d lhs _ _ _ ./. Curve1d rhs _ _ _ = curve1d (Expression.quotient lhs rhs)
 
 instance Division' (Function Uv.Point (Qty units1)) (Function Uv.Point (Qty units2)) where
   type
@@ -1360,7 +1372,7 @@ instance Division' (Function Float (Vector2d (space @ units1))) (Function Float 
   type
     Function Float (Vector2d (space @ units1)) ./. Function Float (Qty units2) =
       Function Float (Vector2d (space @ (units1 :/: units2)))
-  VectorCurve2d x y ./. Curve1d scale =
+  VectorCurve2d x y ./. Curve1d scale _ _ _ =
     VectorCurve2d (Expression.quotient x scale) (Expression.quotient y scale)
 
 instance Division' (Function Uv.Point (Vector2d (space @ units1))) (Function Uv.Point (Qty units2)) where
@@ -1485,7 +1497,7 @@ instance
       .<>. Function Float (Vector2d (space2 @ units2)) =
       Function Float (Qty (units1 :*: units2))
   VectorCurve2d x1 y1 .<>. VectorCurve2d x2 y2 =
-    Curve1d (Expression.sum (Expression.product x1 x2) (Expression.product y1 y2))
+    curve1d (Expression.sum (Expression.product x1 x2) (Expression.product y1 y2))
 
 instance
   space1 ~ space2 =>
@@ -1679,7 +1691,7 @@ instance
       .><. Function Float (Vector2d (space2 @ units2)) =
       Function Float (Qty (units1 :*: units2))
   VectorCurve2d x1 y1 .><. VectorCurve2d x2 y2 =
-    Curve1d (Expression.difference (Expression.product x1 y2) (Expression.product y1 x2))
+    curve1d (Expression.difference (Expression.product x1 y2) (Expression.product y1 x2))
 
 instance
   space1 ~ space2 =>
@@ -1792,9 +1804,9 @@ instance
     (Function Float output)
     (Function Float output)
   where
-  curve . Curve1d input =
+  curve . Curve1d input _ _ _ =
     case curve of
-      Curve1d x -> Curve1d (x . input)
+      Curve1d x _ _ _ -> curve1d (x . input)
       Curve2d x y -> Curve2d (x . input) (y . input)
       VectorCurve2d x y -> VectorCurve2d (x . input) (y . input)
       Curve3d x y z -> Curve3d (x . input) (y . input) (z . input)
@@ -1808,7 +1820,7 @@ instance
   where
   curve . Surface1d input =
     case curve of
-      Curve1d x -> Surface1d (x . input)
+      Curve1d x _ _ _ -> Surface1d (x . input)
       Curve2d x y -> Surface2d (x . input) (y . input)
       VectorCurve2d x y -> VectorSurface2d (x . input) (y . input)
       Curve3d x y z -> Surface3d (x . input) (y . input) (z . input)
@@ -1823,7 +1835,7 @@ instance
   surface . Curve2d uInput vInput = do
     let inputs = (uInput, vInput)
     case surface of
-      Surface1d x -> Curve1d (x . inputs)
+      Surface1d x -> curve1d (x . inputs)
       Surface2d x y -> Curve2d (x . inputs) (y . inputs)
       VectorSurface2d x y -> VectorCurve2d (x . inputs) (y . inputs)
       Surface3d x y z -> Curve3d (x . inputs) (y . inputs) (z . inputs)
@@ -1888,7 +1900,7 @@ class Constant input output where
   constant :: output -> Function input output
 
 instance Constant Float (Qty units) where
-  constant value = Curve1d (Expression.constant value)
+  constant value = curve1d (Expression.constant value)
 
 instance Constant Uv.Point (Qty units) where
   constant value = Surface1d (Expression.constant value)
@@ -1932,13 +1944,13 @@ class XY input output where
     Function input output
 
 instance XY Float (Vector2d (space @ units)) where
-  xy (Curve1d x) (Curve1d y) = VectorCurve2d x y
+  xy (Curve1d x _ _ _) (Curve1d y _ _ _) = VectorCurve2d x y
 
 instance XY Uv.Point (Vector2d (space @ units)) where
   xy (Surface1d x) (Surface1d y) = VectorSurface2d x y
 
 instance XY Float (Point2d (space @ units)) where
-  xy (Curve1d x) (Curve1d y) = Curve2d x y
+  xy (Curve1d x _ _ _) (Curve1d y _ _ _) = Curve2d x y
 
 instance XY Uv.Point (Point2d (space @ units)) where
   xy (Surface1d x) (Surface1d y) = Surface2d x y
@@ -1951,13 +1963,13 @@ class XYZ input output where
     Function input output
 
 instance XYZ Float (Vector3d (space @ units)) where
-  xyz (Curve1d x) (Curve1d y) (Curve1d z) = VectorCurve3d x y z
+  xyz (Curve1d x _ _ _) (Curve1d y _ _ _) (Curve1d z _ _ _) = VectorCurve3d x y z
 
 instance XYZ Uv.Point (Vector3d (space @ units)) where
   xyz (Surface1d x) (Surface1d y) (Surface1d z) = VectorSurface3d x y z
 
 instance XYZ Float (Point3d (space @ units)) where
-  xyz (Curve1d x) (Curve1d y) (Curve1d z) = Curve3d x y z
+  xyz (Curve1d x _ _ _) (Curve1d y _ _ _) (Curve1d z _ _ _) = Curve3d x y z
 
 instance XYZ Uv.Point (Point3d (space @ units)) where
   xyz (Surface1d x) (Surface1d y) (Surface1d z) = Surface3d x y z
@@ -1972,23 +1984,23 @@ class ZComponent input output where
   zComponent :: Function input output -> Function input (Qty (UnitsOf output))
 
 instance XComponent input (Vector2d (space @ units)) where
-  xComponent (VectorCurve2d x _) = Curve1d x
+  xComponent (VectorCurve2d x _) = curve1d x
   xComponent (VectorSurface2d x _) = Surface1d x
 
 instance XComponent input (Vector3d (space @ units)) where
-  xComponent (VectorCurve3d x _ _) = Curve1d x
+  xComponent (VectorCurve3d x _ _) = curve1d x
   xComponent (VectorSurface3d x _ _) = Surface1d x
 
 instance YComponent input (Vector2d (space @ units)) where
-  yComponent (VectorCurve2d _ y) = Curve1d y
+  yComponent (VectorCurve2d _ y) = curve1d y
   yComponent (VectorSurface2d _ y) = Surface1d y
 
 instance YComponent input (Vector3d (space @ units)) where
-  yComponent (VectorCurve3d _ y _) = Curve1d y
+  yComponent (VectorCurve3d _ y _) = curve1d y
   yComponent (VectorSurface3d _ y _) = Surface1d y
 
 instance ZComponent input (Vector3d (space @ units)) where
-  zComponent (VectorCurve3d _ _ z) = Curve1d z
+  zComponent (VectorCurve3d _ _ z) = curve1d z
   zComponent (VectorSurface3d _ _ z) = Surface1d z
 
 class XCoordinate input output where
@@ -2001,27 +2013,27 @@ class ZCoordinate input output where
   zCoordinate :: Function input output -> Function input (Qty (UnitsOf output))
 
 instance XCoordinate input (Point2d (space @ units)) where
-  xCoordinate (Curve2d x _) = Curve1d x
+  xCoordinate (Curve2d x _) = curve1d x
   xCoordinate (Surface2d x _) = Surface1d x
 
 instance XCoordinate input (Point3d (space @ units)) where
-  xCoordinate (Curve3d x _ _) = Curve1d x
+  xCoordinate (Curve3d x _ _) = curve1d x
   xCoordinate (Surface3d x _ _) = Surface1d x
 
 instance YCoordinate input (Point2d (space @ units)) where
-  yCoordinate (Curve2d _ y) = Curve1d y
+  yCoordinate (Curve2d _ y) = curve1d y
   yCoordinate (Surface2d _ y) = Surface1d y
 
 instance YCoordinate input (Point3d (space @ units)) where
-  yCoordinate (Curve3d _ y _) = Curve1d y
+  yCoordinate (Curve3d _ y _) = curve1d y
   yCoordinate (Surface3d _ y _) = Surface1d y
 
 instance ZCoordinate input (Point3d (space @ units)) where
-  zCoordinate (Curve3d _ _ z) = Curve1d z
+  zCoordinate (Curve3d _ _ z) = curve1d z
   zCoordinate (Surface3d _ _ z) = Surface1d z
 
 parameter :: Function Float Float
-parameter = Curve1d Expression.parameter
+parameter = curve1d Expression.parameter
 
 u :: Function Uv.Point Float
 u = Surface1d Expression.u
@@ -2030,7 +2042,7 @@ v :: Function Uv.Point Float
 v = Surface1d Expression.v
 
 squared' :: Function input (Qty units) -> Function input (Qty (units :*: units))
-squared' (Curve1d expression) = Curve1d (Expression.squared expression)
+squared' (Curve1d expression _ _ _) = curve1d (Expression.squared expression)
 squared' (Surface1d expression) = Surface1d (Expression.squared expression)
 
 squared ::
@@ -2040,7 +2052,7 @@ squared ::
 squared = Units.specialize . squared'
 
 sqrt' :: Function input (Qty (units :*: units)) -> Function input (Qty units)
-sqrt' (Curve1d expression) = Curve1d (Expression.sqrt expression)
+sqrt' (Curve1d expression _ _ _) = curve1d (Expression.sqrt expression)
 sqrt' (Surface1d expression) = Surface1d (Expression.sqrt expression)
 
 sqrt ::
@@ -2050,11 +2062,11 @@ sqrt ::
 sqrt = sqrt' . Units.unspecialize
 
 sin :: Function input Angle -> Function input Float
-sin (Curve1d expression) = Curve1d (Expression.sin expression)
+sin (Curve1d expression _ _ _) = curve1d (Expression.sin expression)
 sin (Surface1d expression) = Surface1d (Expression.sin expression)
 
 cos :: Function input Angle -> Function input Float
-cos (Curve1d expression) = Curve1d (Expression.cos expression)
+cos (Curve1d expression _ _ _) = curve1d (Expression.cos expression)
 cos (Surface1d expression) = Surface1d (Expression.cos expression)
 
 -----------------------
@@ -2072,7 +2084,7 @@ instance
     (Function Float (Qty units))
     (Function Float (Qty units))
   where
-  curveDerivative (Curve1d expression) = Curve1d (Expression.curveDerivative expression)
+  curveDerivative (Curve1d expression _ _ _) = curve1d (Expression.curveDerivative expression)
 
 instance
   SurfaceDerivative
@@ -2200,14 +2212,11 @@ class BoundsFunction expression function | expression -> function, function -> e
   boundsFunction :: expression -> function
 
 instance ValueFunction (Function Float (Qty units)) (Float -> Qty units) where
-  valueFunction (Curve1d expression) = do
-    let f = curve1d_value_function (opensolid_curve1d_value_function (Expression.ptr expression))
-    \(Qty.Qty x) -> Qty.Qty (f x)
+  valueFunction (Curve1d _ f _ _) (Qty.Qty x) = Qty.Qty (f x)
 
 instance BoundsFunction (Function Float (Qty units)) (Range Unitless -> Range units) where
-  boundsFunction (Curve1d expression) = do
-    let f = curve1d_bounds_function (opensolid_curve1d_bounds_function (Expression.ptr expression))
-    \(Range (Qty.Qty xLow) (Qty.Qty xHigh)) -> unsafeDupablePerformIO IO.do
+  boundsFunction (Curve1d _ _ f _) (Range (Qty.Qty xLow) (Qty.Qty xHigh)) =
+    unsafeDupablePerformIO IO.do
       outputs <- Alloc.mallocBytes 16
       f xLow xHigh outputs
       yLow <- Foreign.peekElemOff outputs 0
