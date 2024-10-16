@@ -573,7 +573,7 @@ testCurveMedialAxis = IO.do
               tangentCircle
         List.map drawTangentCircle (Parameter.steps 2)
   let tangentCircles = List.collect drawCircles segments
-  Drawing2d.writeTo "curve-medial-axis.svg" drawingBounds $
+  Drawing2d.writeTo "opensolid-sandbox/curve-medial-axis.svg" drawingBounds $
     [ Drawing2d.group tangentCircles
     , drawCurve curve1
     , drawCurve curve2
