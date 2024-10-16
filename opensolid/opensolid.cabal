@@ -151,8 +151,10 @@ library
     Error
     Estimate
     Expression
-    Expression.Point2d
-    Expression.Vector2d
+    Expression.Curve2d
+    Expression.Surface2d
+    Expression.VectorCurve2d
+    Expression.VectorSurface2d
     File
     Float
     Frame2d

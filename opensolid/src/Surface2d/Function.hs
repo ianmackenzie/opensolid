@@ -19,7 +19,7 @@ import Bounds2d qualified
 import Curve2d (Curve2d)
 import Curve2d qualified
 import Expression (Expression)
-import Expression.Point2d qualified
+import Expression.Surface2d qualified
 import Maybe qualified
 import OpenSolid
 import Point2d (Point2d)
@@ -233,7 +233,7 @@ expression :: Function (space @ units) -> Maybe (Expression Uv.Point (Point2d (s
 expression function = case function of
   Function f -> expressionImpl f
   Coerce f -> Units.coerce (expression f)
-  Constant p -> Just (Expression.Point2d.constant p)
-  XY x y -> Maybe.map2 Expression.Point2d.xy (Surface1d.Function.expression x) (Surface1d.Function.expression y)
+  Constant p -> Just (Expression.Surface2d.constant p)
+  XY x y -> Maybe.map2 Expression.Surface2d.xy (Surface1d.Function.expression x) (Surface1d.Function.expression y)
   Addition f1 f2 -> Maybe.map2 (+) (expression f1) (VectorSurface2d.Function.expression f2)
   Subtraction f1 f2 -> Maybe.map2 (-) (expression f1) (VectorSurface2d.Function.expression f2)

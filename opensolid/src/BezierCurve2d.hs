@@ -10,7 +10,7 @@ import Curve2d (Curve2d)
 import Curve2d qualified
 import Expression (Expression)
 import Expression qualified
-import Expression.Point2d qualified
+import Expression.Curve2d qualified
 import Float qualified
 import Int qualified
 import List qualified
@@ -106,7 +106,7 @@ instance Curve2d.Interface (BezierCurve2d (space @ units)) (space @ units) where
   expressionImpl (BezierCurve2d controlPoints) = Just (expression controlPoints)
 
 expression :: NonEmpty (Point2d (space @ units)) -> Expression Float (Point2d (space @ units))
-expression controlPoints = expressionImpl (NonEmpty.map Expression.Point2d.constant controlPoints)
+expression controlPoints = expressionImpl (NonEmpty.map Expression.Curve2d.constant controlPoints)
 
 expressionImpl ::
   NonEmpty (Expression Float (Point2d (space @ units))) ->
@@ -119,7 +119,7 @@ collapse ::
   Expression Float (Point2d (space @ units)) ->
   Expression Float (Point2d (space @ units)) ->
   Expression Float (Point2d (space @ units))
-collapse p1 p2 = Expression.Point2d.interpolateFrom p1 p2 Expression.parameter
+collapse p1 p2 = Expression.Curve2d.interpolateFrom p1 p2 Expression.parameter
 
 {- | Construct a Bezier curve from its start point (first control point), inner control points and
 end point (last control point). For example,

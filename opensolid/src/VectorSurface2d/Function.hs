@@ -22,7 +22,7 @@ where
 
 import Direction2d (Direction2d)
 import Expression (Expression)
-import Expression.Vector2d qualified
+import Expression.VectorSurface2d qualified
 import Float qualified
 import Maybe qualified
 import OpenSolid
@@ -562,8 +562,8 @@ expression :: Function (space @ units) -> Maybe (Expression Uv.Point (Vector2d (
 expression function = case function of
   Function f -> expressionImpl f
   Coerce f -> Units.coerce (expression f)
-  Constant v -> Just (Expression.Vector2d.constant v)
-  XY x y -> Maybe.map2 Expression.Vector2d.xy (Surface1d.Function.expression x) (Surface1d.Function.expression y)
+  Constant v -> Just (Expression.VectorSurface2d.constant v)
+  XY x y -> Maybe.map2 Expression.VectorSurface2d.xy (Surface1d.Function.expression x) (Surface1d.Function.expression y)
   Negated f -> Maybe.map negate (expression f)
   Sum f1 f2 -> Maybe.map2 (+) (expression f1) (expression f2)
   Difference f1 f2 -> Maybe.map2 (-) (expression f1) (expression f2)

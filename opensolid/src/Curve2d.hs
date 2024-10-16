@@ -76,7 +76,7 @@ import Direction2d (Direction2d)
 import DirectionCurve2d (DirectionCurve2d)
 import Error qualified
 import Expression (Expression)
-import Expression.Point2d qualified
+import Expression.Curve2d qualified
 import Float qualified
 import Frame2d (Frame2d)
 import Frame2d qualified
@@ -225,13 +225,13 @@ instance Interface (Point2d (space @ units)) (space @ units) where
   reverseImpl = identity
   boundsImpl = Bounds2d.constant
   transformByImpl transform point = new (Point2d.transformBy transform point)
-  expressionImpl point = Just (Expression.Point2d.constant point)
+  expressionImpl point = Just (Expression.Curve2d.constant point)
 
 expression :: Curve2d (space @ units) -> Maybe (Expression Float (Point2d (space @ units)))
 expression curve = case curve of
   Curve c -> expressionImpl c
   Coerce c -> Units.coerce (expression c)
-  PlaceIn frame c -> Maybe.map (Expression.Point2d.placeIn frame) (expression c)
+  PlaceIn frame c -> Maybe.map (Expression.Curve2d.placeIn frame) (expression c)
   Addition c1 c2 -> Maybe.map2 (+) (expression c1) (VectorCurve2d.expression c2)
   Subtraction c1 c2 -> Maybe.map2 (-) (expression c1) (VectorCurve2d.expression c2)
 
@@ -823,7 +823,7 @@ instance Interface (TransformBy curve (space @ units)) (space @ units) where
     Curve2d.new $
       TransformBy (Transform2d.toAffine existing >> Transform2d.toAffine transform) curve
   expressionImpl (TransformBy transform curve) =
-    Maybe.map (Expression.Point2d.transformBy transform) (expressionImpl curve)
+    Maybe.map (Expression.Curve2d.transformBy transform) (expressionImpl curve)
 
 removeStartDegeneracy ::
   Int ->

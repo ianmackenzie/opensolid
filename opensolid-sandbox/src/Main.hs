@@ -22,7 +22,7 @@ import DirectionCurve2d qualified
 import Drawing2d qualified
 import Duration qualified
 import Expression qualified
-import Expression.Point2d qualified
+import Expression.Curve2d qualified
 import Float qualified
 import IO qualified
 import Int qualified
@@ -594,7 +594,7 @@ testJitCurve2d :: IO ()
 testJitCurve2d = IO.do
   let x = 10.0 * Expression.parameter
   let y = Expression.sqrt Expression.parameter
-  let curve = Expression.Point2d.xy x y
+  let curve = Expression.Curve2d.xy x y
   let f = Expression.valueFunction curve
   log "Evaluated 2D curve" (f 3.0)
 
