@@ -48,8 +48,8 @@ import Qty (Qty (Qty))
 import Qty qualified
 import Range (Range (Range))
 import System.IO.Unsafe (unsafeDupablePerformIO)
-import Uv (Parameter (U, V))
 import Units qualified
+import Uv (Parameter (U, V))
 import Uv qualified
 import Vector2d (Vector2d (Vector2d))
 import Vector2d qualified
