@@ -15,9 +15,9 @@ where
 
 import Angle qualified
 import Bounds2d qualified
+import Float qualified
 import Function (Function)
 import Function qualified
-import Float qualified
 import Maybe qualified
 import OpenSolid
 import Point2d qualified
