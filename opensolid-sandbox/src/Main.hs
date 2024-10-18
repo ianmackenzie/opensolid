@@ -24,7 +24,6 @@ import Duration qualified
 import Float qualified
 import Function (Function)
 import Function qualified
-import Function.Curve2d qualified
 import IO qualified
 import Int qualified
 import Length (Length)
