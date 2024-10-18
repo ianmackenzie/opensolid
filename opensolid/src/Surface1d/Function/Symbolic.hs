@@ -323,7 +323,7 @@ expression symbolic = case symbolic of
 
 valueFunction :: Symbolic units -> (Uv.Point -> Qty units)
 valueFunction symbolic = case expression symbolic of
-  Just expr -> Function.valueFunction expr
+  Just expr -> Function.value expr
   Nothing -> case symbolic of
     Function f -> Surface1d.Function.evaluateImpl f
     Constant x -> always x
@@ -354,7 +354,7 @@ valueFunction symbolic = case expression symbolic of
 
 boundsFunction :: Symbolic units -> (Uv.Bounds -> Range units)
 boundsFunction symbolic = case expression symbolic of
-  Just expr -> Function.boundsFunction expr
+  Just expr -> Function.bounds expr
   Nothing -> case symbolic of
     Function f -> Surface1d.Function.boundsImpl f
     Constant x -> always (Range.constant x)

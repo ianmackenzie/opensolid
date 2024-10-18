@@ -20,14 +20,10 @@ module Function
   , squared'
   , sin
   , cos
-  , CurveDerivative
-  , curveDerivative
-  , SurfaceDerivative
-  , surfaceDerivative
-  , ValueFunction
-  , valueFunction
-  , BoundsFunction
-  , boundsFunction
+  , CurveDerivative (curveDerivative)
+  , SurfaceDerivative (surfaceDerivative)
+  , Value (value)
+  , Bounds (bounds)
   )
 where
 
@@ -76,40 +72,76 @@ data Function input output where
     } ->
     Function Uv.Point (Qty units)
   Curve2d ::
-    Expression Float ->
-    Expression Float ->
+    { c2x :: Expression Float
+    , c2y :: Expression Float
+    , c2v :: ~Curve2dValueFunction
+    , c2b :: ~Curve2dBoundsFunction
+    , c2d :: ~(Function Float (Vector2d (space @ units)))
+    } ->
     Function Float (Point2d (space @ units))
   Surface2d ::
-    Expression Uv.Point ->
-    Expression Uv.Point ->
+    { s2x :: Expression Uv.Point
+    , s2y :: Expression Uv.Point
+    , s2v :: ~Surface2dValueFunction
+    , s2b :: ~Surface2dBoundsFunction
+    , s2du :: ~(Function Uv.Point (Vector2d (space @ units)))
+    , s2dv :: ~(Function Uv.Point (Vector2d (space @ units)))
+    } ->
     Function Uv.Point (Point2d (space @ units))
   VectorCurve2d ::
-    Expression Float ->
-    Expression Float ->
+    { vc2x :: Expression Float
+    , vc2y :: Expression Float
+    , vc2v :: ~Curve2dValueFunction
+    , vc2b :: ~Curve2dBoundsFunction
+    , vc2d :: ~(Function Float (Vector2d (space @ units)))
+    } ->
     Function Float (Vector2d (space @ units))
   VectorSurface2d ::
-    Expression Uv.Point ->
-    Expression Uv.Point ->
+    { vs2x :: Expression Uv.Point
+    , vs2y :: Expression Uv.Point
+    , vs2v :: ~Surface2dValueFunction
+    , vs2b :: ~Surface2dBoundsFunction
+    , vs2du :: ~(Function Uv.Point (Vector2d (space @ units)))
+    , vs2dv :: ~(Function Uv.Point (Vector2d (space @ units)))
+    } ->
     Function Uv.Point (Vector2d (space @ units))
   Curve3d ::
-    Expression Float ->
-    Expression Float ->
-    Expression Float ->
+    { c3x :: Expression Float
+    , c3y :: Expression Float
+    , c3z :: Expression Float
+    , c3v :: ~Curve3dValueFunction
+    , c3b :: ~Curve3dBoundsFunction
+    , c3d :: ~(Function Float (Vector3d (space @ units)))
+    } ->
     Function Float (Point3d (space @ units))
   Surface3d ::
-    Expression Uv.Point ->
-    Expression Uv.Point ->
-    Expression Uv.Point ->
+    { s3x :: Expression Uv.Point
+    , s3y :: Expression Uv.Point
+    , s3z :: Expression Uv.Point
+    , s3v :: ~Surface3dValueFunction
+    , s3b :: ~Surface3dBoundsFunction
+    , s3du :: ~(Function Uv.Point (Vector3d (space @ units)))
+    , s3dv :: ~(Function Uv.Point (Vector3d (space @ units)))
+    } ->
     Function Uv.Point (Point3d (space @ units))
   VectorCurve3d ::
-    Expression Float ->
-    Expression Float ->
-    Expression Float ->
+    { vc3x :: Expression Float
+    , vc3y :: Expression Float
+    , vc3z :: Expression Float
+    , vc3v :: ~Curve3dValueFunction
+    , vc3b :: ~Curve3dBoundsFunction
+    , vc3d :: ~(Function Float (Vector3d (space @ units)))
+    } ->
     Function Float (Vector3d (space @ units))
   VectorSurface3d ::
-    Expression Uv.Point ->
-    Expression Uv.Point ->
-    Expression Uv.Point ->
+    { vs3x :: Expression Uv.Point
+    , vs3y :: Expression Uv.Point
+    , vs3z :: Expression Uv.Point
+    , vs3v :: ~Surface3dValueFunction
+    , vs3b :: ~Surface3dBoundsFunction
+    , vs3du :: ~(Function Uv.Point (Vector3d (space @ units)))
+    , vs3dv :: ~(Function Uv.Point (Vector3d (space @ units)))
+    } ->
     Function Uv.Point (Vector3d (space @ units))
 
 curve1d :: Expression Float -> Function Float (Qty units)
@@ -148,6 +180,216 @@ surface1dv expression sibling = do
     , s1dv = dv
     }
 
+curve2d :: Expression Float -> Expression Float -> Function Float (Point2d (space @ units))
+curve2d x y = do
+  let px = Expression.ptr x
+  let py = Expression.ptr y
+  Curve2d
+    { c2x = x
+    , c2y = y
+    , c2v = curve2d_value_function (opensolid_curve2d_value_function px py)
+    , c2b = curve2d_bounds_function (opensolid_curve2d_bounds_function px py)
+    , c2d = vectorCurve2d (Expression.curveDerivative x) (Expression.curveDerivative y)
+    }
+
+surface2d ::
+  Expression Uv.Point ->
+  Expression Uv.Point ->
+  Function Uv.Point (Point2d (space @ units))
+surface2d x y = do
+  let px = Expression.ptr x
+  let py = Expression.ptr y
+  let du = vectorSurface2d (Expression.surfaceDerivative U x) (Expression.surfaceDerivative U y)
+  let dv = vectorSurface2dv (Expression.surfaceDerivative V x) (Expression.surfaceDerivative V y) du
+  Surface2d
+    { s2x = x
+    , s2y = y
+    , s2v = surface2d_value_function (opensolid_surface2d_value_function px py)
+    , s2b = surface2d_bounds_function (opensolid_surface2d_bounds_function px py)
+    , s2du = du
+    , s2dv = dv
+    }
+
+vectorCurve2d :: Expression Float -> Expression Float -> Function Float (Vector2d (space @ units))
+vectorCurve2d x y = do
+  let px = Expression.ptr x
+  let py = Expression.ptr y
+  VectorCurve2d
+    { vc2x = x
+    , vc2y = y
+    , vc2v = curve2d_value_function (opensolid_curve2d_value_function px py)
+    , vc2b = curve2d_bounds_function (opensolid_curve2d_bounds_function px py)
+    , vc2d = vectorCurve2d (Expression.curveDerivative x) (Expression.curveDerivative y)
+    }
+
+vectorSurface2d ::
+  Expression Uv.Point ->
+  Expression Uv.Point ->
+  Function Uv.Point (Vector2d (space @ units))
+vectorSurface2d x y = do
+  let px = Expression.ptr x
+  let py = Expression.ptr y
+  let du = vectorSurface2d (Expression.surfaceDerivative U x) (Expression.surfaceDerivative U y)
+  let dv = vectorSurface2dv (Expression.surfaceDerivative V x) (Expression.surfaceDerivative V y) du
+  VectorSurface2d
+    { vs2x = x
+    , vs2y = y
+    , vs2v = surface2d_value_function (opensolid_surface2d_value_function px py)
+    , vs2b = surface2d_bounds_function (opensolid_surface2d_bounds_function px py)
+    , vs2du = du
+    , vs2dv = dv
+    }
+
+vectorSurface2dv ::
+  Expression Uv.Point ->
+  Expression Uv.Point ->
+  Function Uv.Point (Vector2d (space @ units)) ->
+  Function Uv.Point (Vector2d (space @ units))
+vectorSurface2dv x y sibling = do
+  let px = Expression.ptr x
+  let py = Expression.ptr y
+  let du = vs2dv sibling
+  let dv = vectorSurface2dv (Expression.surfaceDerivative V x) (Expression.surfaceDerivative V y) du
+  VectorSurface2d
+    { vs2x = x
+    , vs2y = y
+    , vs2v = surface2d_value_function (opensolid_surface2d_value_function px py)
+    , vs2b = surface2d_bounds_function (opensolid_surface2d_bounds_function px py)
+    , vs2du = du
+    , vs2dv = dv
+    }
+
+curve3d ::
+  Expression Float ->
+  Expression Float ->
+  Expression Float ->
+  Function Float (Point3d (space @ units))
+curve3d x y z = do
+  let px = Expression.ptr x
+  let py = Expression.ptr y
+  let pz = Expression.ptr z
+  Curve3d
+    { c3x = x
+    , c3y = y
+    , c3z = z
+    , c3v = curve3d_value_function (opensolid_curve3d_value_function px py pz)
+    , c3b = curve3d_bounds_function (opensolid_curve3d_bounds_function px py pz)
+    , c3d =
+        vectorCurve3d
+          (Expression.curveDerivative x)
+          (Expression.curveDerivative y)
+          (Expression.curveDerivative z)
+    }
+
+surface3d ::
+  Expression Uv.Point ->
+  Expression Uv.Point ->
+  Expression Uv.Point ->
+  Function Uv.Point (Point3d (space @ units))
+surface3d x y z = do
+  let px = Expression.ptr x
+  let py = Expression.ptr y
+  let pz = Expression.ptr z
+  let du =
+        vectorSurface3d
+          (Expression.surfaceDerivative U x)
+          (Expression.surfaceDerivative U y)
+          (Expression.surfaceDerivative U z)
+  let dv =
+        vectorSurface3dv
+          (Expression.surfaceDerivative V x)
+          (Expression.surfaceDerivative V y)
+          (Expression.surfaceDerivative V z)
+          du
+  Surface3d
+    { s3x = x
+    , s3y = y
+    , s3z = z
+    , s3v = surface3d_value_function (opensolid_surface3d_value_function px py pz)
+    , s3b = surface3d_bounds_function (opensolid_surface3d_bounds_function px py pz)
+    , s3du = du
+    , s3dv = dv
+    }
+
+vectorCurve3d ::
+  Expression Float ->
+  Expression Float ->
+  Expression Float ->
+  Function Float (Vector3d (space @ units))
+vectorCurve3d x y z = do
+  let px = Expression.ptr x
+  let py = Expression.ptr y
+  let pz = Expression.ptr z
+  VectorCurve3d
+    { vc3x = x
+    , vc3y = y
+    , vc3z = z
+    , vc3v = curve3d_value_function (opensolid_curve3d_value_function px py pz)
+    , vc3b = curve3d_bounds_function (opensolid_curve3d_bounds_function px py pz)
+    , vc3d =
+        vectorCurve3d
+          (Expression.curveDerivative x)
+          (Expression.curveDerivative y)
+          (Expression.curveDerivative z)
+    }
+
+vectorSurface3d ::
+  Expression Uv.Point ->
+  Expression Uv.Point ->
+  Expression Uv.Point ->
+  Function Uv.Point (Vector3d (space @ units))
+vectorSurface3d x y z = do
+  let px = Expression.ptr x
+  let py = Expression.ptr y
+  let pz = Expression.ptr z
+  let du =
+        vectorSurface3d
+          (Expression.surfaceDerivative U x)
+          (Expression.surfaceDerivative U y)
+          (Expression.surfaceDerivative U z)
+  let dv =
+        vectorSurface3dv
+          (Expression.surfaceDerivative V x)
+          (Expression.surfaceDerivative V y)
+          (Expression.surfaceDerivative V z)
+          du
+  VectorSurface3d
+    { vs3x = x
+    , vs3y = y
+    , vs3z = z
+    , vs3v = surface3d_value_function (opensolid_surface3d_value_function px py pz)
+    , vs3b = surface3d_bounds_function (opensolid_surface3d_bounds_function px py pz)
+    , vs3du = du
+    , vs3dv = dv
+    }
+
+vectorSurface3dv ::
+  Expression Uv.Point ->
+  Expression Uv.Point ->
+  Expression Uv.Point ->
+  Function Uv.Point (Vector3d (space @ units)) ->
+  Function Uv.Point (Vector3d (space @ units))
+vectorSurface3dv x y z sibling = do
+  let px = Expression.ptr x
+  let py = Expression.ptr y
+  let pz = Expression.ptr z
+  let du = vs3dv sibling
+  let dv =
+        vectorSurface3dv
+          (Expression.surfaceDerivative V x)
+          (Expression.surfaceDerivative V y)
+          (Expression.surfaceDerivative V z)
+          du
+  VectorSurface3d
+    { vs3x = x
+    , vs3y = y
+    , vs3z = z
+    , vs3v = surface3d_value_function (opensolid_surface3d_value_function px py pz)
+    , vs3b = surface3d_bounds_function (opensolid_surface3d_bounds_function px py pz)
+    , vs3du = du
+    , vs3dv = dv
+    }
+
 -------------
 --- UNITS ---
 -------------
@@ -169,132 +411,240 @@ instance HasUnits (Function input (Point3d (space @ units))) where
 
 instance
   input1 ~ input2 =>
-  Units.Coercion (Function input1 (Qty units1)) (Function input2 (Qty units2))
+  Units.Coercion
+    (Function input1 (Qty units1))
+    (Function input2 (Qty units2))
   where
-  coerce Curve1d{c1x, c1v, c1b, c1d} =
-    Curve1d{c1x, c1v, c1b, c1d = Units.coerce c1d}
+  coerce Curve1d{c1x, c1v, c1b, c1d} = Curve1d{c1x, c1v, c1b, c1d = Units.coerce c1d}
   coerce Surface1d{s1x, s1v, s1b, s1du, s1dv} =
     Surface1d{s1x, s1v, s1b, s1du = Units.coerce s1du, s1dv = Units.coerce s1dv}
 
 instance
   (input1 ~ input2, space1 ~ space2) =>
   Units.Coercion
-    (Function input1 (Vector2d (space1 @ units1)))
-    (Function input2 (Vector2d (space2 @ units2)))
+    (Function input1 (Point2d (space @ units1)))
+    (Function input2 (Point2d (space @ units2)))
   where
-  coerce (VectorCurve2d x y) = VectorCurve2d x y
-  coerce (VectorSurface2d x y) = VectorSurface2d x y
+  coerce Curve2d{c2x, c2y, c2v, c2b, c2d} = Curve2d{c2x, c2y, c2v, c2b, c2d = Units.coerce c2d}
+  coerce Surface2d{s2x, s2y, s2v, s2b, s2du, s2dv} =
+    Surface2d{s2x, s2y, s2v, s2b, s2du = Units.coerce s2du, s2dv = Units.coerce s2dv}
 
 instance
   (input1 ~ input2, space1 ~ space2) =>
   Units.Coercion
-    (Function input1 (Vector3d (space1 @ units1)))
-    (Function input2 (Vector3d (space2 @ units2)))
+    (Function input1 (Vector2d (space @ units1)))
+    (Function input2 (Vector2d (space @ units2)))
   where
-  coerce (VectorCurve3d x y z) = VectorCurve3d x y z
-  coerce (VectorSurface3d x y z) = VectorSurface3d x y z
+  coerce VectorCurve2d{vc2x, vc2y, vc2v, vc2b, vc2d} =
+    VectorCurve2d{vc2x, vc2y, vc2v, vc2b, vc2d = Units.coerce vc2d}
+  coerce VectorSurface2d{vs2x, vs2y, vs2v, vs2b, vs2du, vs2dv} =
+    VectorSurface2d{vs2x, vs2y, vs2v, vs2b, vs2du = Units.coerce vs2du, vs2dv = Units.coerce vs2dv}
 
 instance
   (input1 ~ input2, space1 ~ space2) =>
   Units.Coercion
-    (Function input1 (Point2d (space1 @ units1)))
-    (Function input2 (Point2d (space2 @ units2)))
+    (Function input1 (Point3d (space @ units1)))
+    (Function input2 (Point3d (space @ units2)))
   where
-  coerce (Curve2d x y) = Curve2d x y
-  coerce (Surface2d x y) = Surface2d x y
+  coerce Curve3d{c3x, c3y, c3z, c3v, c3b, c3d} =
+    Curve3d{c3x, c3y, c3z, c3v, c3b, c3d = Units.coerce c3d}
+  coerce Surface3d{s3x, s3y, s3z, s3v, s3b, s3du, s3dv} =
+    Surface3d{s3x, s3y, s3z, s3v, s3b, s3du = Units.coerce s3du, s3dv = Units.coerce s3dv}
 
 instance
   (input1 ~ input2, space1 ~ space2) =>
   Units.Coercion
-    (Function input (Point3d (space1 @ units1)))
-    (Function input (Point3d (space2 @ units2)))
+    (Function input1 (Vector3d (space @ units1)))
+    (Function input2 (Vector3d (space @ units2)))
   where
-  coerce (Curve3d x y z) = Curve3d x y z
-  coerce (Surface3d x y z) = Surface3d x y z
+  coerce VectorCurve3d{vc3x, vc3y, vc3z, vc3v, vc3b, vc3d} =
+    VectorCurve3d{vc3x, vc3y, vc3z, vc3v, vc3b, vc3d = Units.coerce vc3d}
+  coerce VectorSurface3d{vs3x, vs3y, vs3z, vs3v, vs3b, vs3du, vs3dv} =
+    VectorSurface3d
+      { vs3x
+      , vs3y
+      , vs3z
+      , vs3v
+      , vs3b
+      , vs3du = Units.coerce vs3du
+      , vs3dv = Units.coerce vs3dv
+      }
 
 ----------------
 --- NEGATION ---
 ----------------
 
-instance Negation (Function input (Qty units)) where
-  negate Curve1d{c1x} = curve1d (Expression.negated c1x)
-  negate Surface1d{s1x} = surface1d (Expression.negated s1x)
+instance Negation (Function Float (Qty units)) where
+  negate Curve1d{c1x} =
+    curve1d (Expression.negated c1x)
 
-instance Negation (Function input (Vector2d (space @ units))) where
-  negate (VectorCurve2d x y) = VectorCurve2d (Expression.negated x) (Expression.negated y)
-  negate (VectorSurface2d x y) = VectorSurface2d (Expression.negated x) (Expression.negated y)
+instance Negation (Function Uv.Point (Qty units)) where
+  negate Surface1d{s1x} =
+    surface1d (Expression.negated s1x)
 
-instance Negation (Function input (Vector3d (space @ units))) where
-  negate (VectorCurve3d x y z) =
-    VectorCurve3d (Expression.negated x) (Expression.negated y) (Expression.negated z)
-  negate (VectorSurface3d x y z) =
-    VectorSurface3d (Expression.negated x) (Expression.negated y) (Expression.negated z)
+instance Negation (Function Float (Vector2d (space @ units))) where
+  negate VectorCurve2d{vc2x, vc2y} =
+    vectorCurve2d (Expression.negated vc2x) (Expression.negated vc2y)
 
-instance Multiplication' Sign (Function input (Qty units)) where
-  type Sign .*. Function input (Qty units) = Function input (Qty (Unitless :*: units))
+instance Negation (Function Uv.Point (Vector2d (space @ units))) where
+  negate VectorSurface2d{vs2x, vs2y} =
+    vectorSurface2d (Expression.negated vs2x) (Expression.negated vs2y)
+
+instance Negation (Function Float (Vector3d (space @ units))) where
+  negate VectorCurve3d{vc3x, vc3y, vc3z} =
+    vectorCurve3d (Expression.negated vc3x) (Expression.negated vc3y) (Expression.negated vc3z)
+
+instance Negation (Function Uv.Point (Vector3d (space @ units))) where
+  negate VectorSurface3d{vs3x, vs3y, vs3z} =
+    vectorSurface3d (Expression.negated vs3x) (Expression.negated vs3y) (Expression.negated vs3z)
+
+instance Multiplication' Sign (Function Float (Qty units)) where
+  type Sign .*. Function Float (Qty units) = Function Float (Qty (Unitless :*: units))
   Positive .*. expression = Units.coerce expression
   Negative .*. expression = Units.coerce -expression
 
-instance Multiplication' (Function input (Qty units)) Sign where
-  type Function input (Qty units) .*. Sign = Function input (Qty (units :*: Unitless))
-  expression .*. Positive = Units.coerce expression
-  expression .*. Negative = Units.coerce -expression
-
-instance Multiplication' Sign (Function input (Vector2d (space @ units))) where
-  type
-    Sign .*. Function input (Vector2d (space @ units)) =
-      Function input (Vector2d (space @ (Unitless :*: units)))
+instance Multiplication' Sign (Function Uv.Point (Qty units)) where
+  type Sign .*. Function Uv.Point (Qty units) = Function Uv.Point (Qty (Unitless :*: units))
   Positive .*. expression = Units.coerce expression
   Negative .*. expression = Units.coerce -expression
 
-instance Multiplication' (Function input (Vector2d (space @ units))) Sign where
-  type
-    Function input (Vector2d (space @ units)) .*. Sign =
-      Function input (Vector2d (space @ (units :*: Unitless)))
+instance Multiplication' (Function Float (Qty units)) Sign where
+  type Function Float (Qty units) .*. Sign = Function Float (Qty (units :*: Unitless))
   expression .*. Positive = Units.coerce expression
   expression .*. Negative = Units.coerce -expression
 
-instance Multiplication' Sign (Function input (Vector3d (space @ units))) where
+instance Multiplication' (Function Uv.Point (Qty units)) Sign where
+  type Function Uv.Point (Qty units) .*. Sign = Function Uv.Point (Qty (units :*: Unitless))
+  expression .*. Positive = Units.coerce expression
+  expression .*. Negative = Units.coerce -expression
+
+instance Multiplication' Sign (Function Float (Vector2d (space @ units))) where
   type
-    Sign .*. Function input (Vector3d (space @ units)) =
-      Function input (Vector3d (space @ (Unitless :*: units)))
+    Sign .*. Function Float (Vector2d (space @ units)) =
+      Function Float (Vector2d (space @ (Unitless :*: units)))
   Positive .*. expression = Units.coerce expression
   Negative .*. expression = Units.coerce -expression
 
-instance Multiplication' (Function input (Vector3d (space @ units))) Sign where
+instance Multiplication' Sign (Function Uv.Point (Vector2d (space @ units))) where
   type
-    Function input (Vector3d (space @ units)) .*. Sign =
-      Function input (Vector3d (space @ (units :*: Unitless)))
+    Sign .*. Function Uv.Point (Vector2d (space @ units)) =
+      Function Uv.Point (Vector2d (space @ (Unitless :*: units)))
+  Positive .*. expression = Units.coerce expression
+  Negative .*. expression = Units.coerce -expression
+
+instance Multiplication' (Function Float (Vector2d (space @ units))) Sign where
+  type
+    Function Float (Vector2d (space @ units)) .*. Sign =
+      Function Float (Vector2d (space @ (units :*: Unitless)))
   expression .*. Positive = Units.coerce expression
   expression .*. Negative = Units.coerce -expression
 
-instance Multiplication Sign (Function input (Qty units)) (Function input (Qty units))
+instance Multiplication' (Function Uv.Point (Vector2d (space @ units))) Sign where
+  type
+    Function Uv.Point (Vector2d (space @ units)) .*. Sign =
+      Function Uv.Point (Vector2d (space @ (units :*: Unitless)))
+  expression .*. Positive = Units.coerce expression
+  expression .*. Negative = Units.coerce -expression
 
-instance Multiplication (Function input (Qty units)) Sign (Function input (Qty units))
+instance Multiplication' Sign (Function Float (Vector3d (space @ units))) where
+  type
+    Sign .*. Function Float (Vector3d (space @ units)) =
+      Function Float (Vector3d (space @ (Unitless :*: units)))
+  Positive .*. expression = Units.coerce expression
+  Negative .*. expression = Units.coerce -expression
+
+instance Multiplication' Sign (Function Uv.Point (Vector3d (space @ units))) where
+  type
+    Sign .*. Function Uv.Point (Vector3d (space @ units)) =
+      Function Uv.Point (Vector3d (space @ (Unitless :*: units)))
+  Positive .*. expression = Units.coerce expression
+  Negative .*. expression = Units.coerce -expression
+
+instance Multiplication' (Function Float (Vector3d (space @ units))) Sign where
+  type
+    Function Float (Vector3d (space @ units)) .*. Sign =
+      Function Float (Vector3d (space @ (units :*: Unitless)))
+  expression .*. Positive = Units.coerce expression
+  expression .*. Negative = Units.coerce -expression
+
+instance Multiplication' (Function Uv.Point (Vector3d (space @ units))) Sign where
+  type
+    Function Uv.Point (Vector3d (space @ units)) .*. Sign =
+      Function Uv.Point (Vector3d (space @ (units :*: Unitless)))
+  expression .*. Positive = Units.coerce expression
+  expression .*. Negative = Units.coerce -expression
 
 instance
   Multiplication
     Sign
-    (Function input (Vector2d (space @ units)))
-    (Function input (Vector2d (space @ units)))
-
-instance
-  Multiplication
-    (Function input (Vector2d (space @ units)))
-    Sign
-    (Function input (Vector2d (space @ units)))
+    (Function Float (Qty units))
+    (Function Float (Qty units))
 
 instance
   Multiplication
     Sign
-    (Function input (Vector3d (space @ units)))
-    (Function input (Vector3d (space @ units)))
+    (Function Uv.Point (Qty units))
+    (Function Uv.Point (Qty units))
 
 instance
   Multiplication
-    (Function input (Vector3d (space @ units)))
+    (Function Float (Qty units))
     Sign
-    (Function input (Vector3d (space @ units)))
+    (Function Float (Qty units))
+
+instance
+  Multiplication
+    (Function Uv.Point (Qty units))
+    Sign
+    (Function Uv.Point (Qty units))
+
+instance
+  Multiplication
+    Sign
+    (Function Float (Vector2d (space @ units)))
+    (Function Float (Vector2d (space @ units)))
+
+instance
+  Multiplication
+    Sign
+    (Function Uv.Point (Vector2d (space @ units)))
+    (Function Uv.Point (Vector2d (space @ units)))
+
+instance
+  Multiplication
+    (Function Float (Vector2d (space @ units)))
+    Sign
+    (Function Float (Vector2d (space @ units)))
+
+instance
+  Multiplication
+    (Function Uv.Point (Vector2d (space @ units)))
+    Sign
+    (Function Uv.Point (Vector2d (space @ units)))
+
+instance
+  Multiplication
+    Sign
+    (Function Float (Vector3d (space @ units)))
+    (Function Float (Vector3d (space @ units)))
+
+instance
+  Multiplication
+    Sign
+    (Function Uv.Point (Vector3d (space @ units)))
+    (Function Uv.Point (Vector3d (space @ units)))
+
+instance
+  Multiplication
+    (Function Float (Vector3d (space @ units)))
+    Sign
+    (Function Float (Vector3d (space @ units)))
+
+instance
+  Multiplication
+    (Function Uv.Point (Vector3d (space @ units)))
+    Sign
+    (Function Uv.Point (Vector3d (space @ units)))
 
 ----------------
 --- ADDITION ---
@@ -322,25 +672,25 @@ instance
   units1 ~ units2 =>
   Addition (Function Float (Qty units1)) (Qty units2) (Function Float (Qty units1))
   where
-  expression + value = expression + constant @Float value
+  expression + qty = expression + constant @Float qty
 
 instance
   units1 ~ units2 =>
   Addition (Function Uv.Point (Qty units1)) (Qty units2) (Function Uv.Point (Qty units1))
   where
-  expression + value = expression + constant @Uv.Point value
+  expression + qty = expression + constant @Uv.Point qty
 
 instance
   units1 ~ units2 =>
   Addition (Qty units1) (Function Float (Qty units2)) (Function Float (Qty units1))
   where
-  value + expression = constant @Float value + expression
+  qty + expression = constant @Float qty + expression
 
 instance
   units1 ~ units2 =>
   Addition (Qty units1) (Function Uv.Point (Qty units2)) (Function Uv.Point (Qty units1))
   where
-  value + expression = constant @Uv.Point value + expression
+  qty + expression = constant @Uv.Point qty + expression
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -349,8 +699,8 @@ instance
     (Function Float (Vector2d (space2 @ units2)))
     (Function Float (Vector2d (space1 @ units1)))
   where
-  VectorCurve2d x1 y1 + VectorCurve2d x2 y2 =
-    VectorCurve2d (Expression.sum x1 x2) (Expression.sum y1 y2)
+  VectorCurve2d{vc2x = x1, vc2y = y1} + VectorCurve2d{vc2x = x2, vc2y = y2} =
+    vectorCurve2d (Expression.sum x1 x2) (Expression.sum y1 y2)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -359,8 +709,8 @@ instance
     (Function Uv.Point (Vector2d (space2 @ units2)))
     (Function Uv.Point (Vector2d (space1 @ units1)))
   where
-  VectorSurface2d x1 y1 + VectorSurface2d x2 y2 =
-    VectorSurface2d (Expression.sum x1 x2) (Expression.sum y1 y2)
+  VectorSurface2d{vs2x = x1, vs2y = y1} + VectorSurface2d{vs2x = x2, vs2y = y2} =
+    vectorSurface2d (Expression.sum x1 x2) (Expression.sum y1 y2)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -405,8 +755,9 @@ instance
     (Function Float (Vector3d (space2 @ units2)))
     (Function Float (Vector3d (space1 @ units1)))
   where
-  VectorCurve3d x1 y1 z1 + VectorCurve3d x2 y2 z2 =
-    VectorCurve3d (Expression.sum x1 x2) (Expression.sum y1 y2) (Expression.sum z1 z2)
+  VectorCurve3d{vc3x = x1, vc3y = y1, vc3z = z1}
+    + VectorCurve3d{vc3x = x2, vc3y = y2, vc3z = z2} =
+      vectorCurve3d (Expression.sum x1 x2) (Expression.sum y1 y2) (Expression.sum z1 z2)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -415,8 +766,9 @@ instance
     (Function Uv.Point (Vector3d (space2 @ units2)))
     (Function Uv.Point (Vector3d (space1 @ units1)))
   where
-  VectorSurface3d x1 y1 z1 + VectorSurface3d x2 y2 z2 =
-    VectorSurface3d (Expression.sum x1 x2) (Expression.sum y1 y2) (Expression.sum z1 z2)
+  VectorSurface3d{vs3x = x1, vs3y = y1, vs3z = z1}
+    + VectorSurface3d{vs3x = x2, vs3y = y2, vs3z = z2} =
+      vectorSurface3d (Expression.sum x1 x2) (Expression.sum y1 y2) (Expression.sum z1 z2)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -461,8 +813,8 @@ instance
     (Function Float (Vector2d (space2 @ units2)))
     (Function Float (Point2d (space1 @ units1)))
   where
-  Curve2d x1 y1 + VectorCurve2d x2 y2 =
-    Curve2d (Expression.sum x1 x2) (Expression.sum y1 y2)
+  Curve2d{c2x = x1, c2y = y1} + VectorCurve2d{vc2x = x2, vc2y = y2} =
+    curve2d (Expression.sum x1 x2) (Expression.sum y1 y2)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -471,8 +823,8 @@ instance
     (Function Uv.Point (Vector2d (space2 @ units2)))
     (Function Uv.Point (Point2d (space1 @ units1)))
   where
-  Surface2d x1 y1 + VectorSurface2d x2 y2 =
-    Surface2d (Expression.sum x1 x2) (Expression.sum y1 y2)
+  Surface2d{s2x = x1, s2y = y1} + VectorSurface2d{vs2x = x2, vs2y = y2} =
+    surface2d (Expression.sum x1 x2) (Expression.sum y1 y2)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -517,8 +869,8 @@ instance
     (Function Float (Vector3d (space2 @ units2)))
     (Function Float (Point3d (space1 @ units1)))
   where
-  Curve3d x1 y1 z1 + VectorCurve3d x2 y2 z2 =
-    Curve3d (Expression.sum x1 x2) (Expression.sum y1 y2) (Expression.sum z1 z2)
+  Curve3d{c3x = x1, c3y = y1, c3z = z1} + VectorCurve3d{vc3x = x2, vc3y = y2, vc3z = z2} =
+    curve3d (Expression.sum x1 x2) (Expression.sum y1 y2) (Expression.sum z1 z2)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -527,8 +879,8 @@ instance
     (Function Uv.Point (Vector3d (space2 @ units2)))
     (Function Uv.Point (Point3d (space1 @ units1)))
   where
-  Surface3d x1 y1 z1 + VectorSurface3d x2 y2 z2 =
-    Surface3d (Expression.sum x1 x2) (Expression.sum y1 y2) (Expression.sum z1 z2)
+  Surface3d{s3x = x1, s3y = y1, s3z = z1} + VectorSurface3d{vs3x = x2, vs3y = y2, vs3z = z2} =
+    surface3d (Expression.sum x1 x2) (Expression.sum y1 y2) (Expression.sum z1 z2)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -592,25 +944,25 @@ instance
   units1 ~ units2 =>
   Subtraction (Function Float (Qty units1)) (Qty units2) (Function Float (Qty units1))
   where
-  expression - value = expression - constant @Float value
+  expression - qty = expression - constant @Float qty
 
 instance
   units1 ~ units2 =>
   Subtraction (Function Uv.Point (Qty units1)) (Qty units2) (Function Uv.Point (Qty units1))
   where
-  expression - value = expression - constant @Uv.Point value
+  expression - qty = expression - constant @Uv.Point qty
 
 instance
   units1 ~ units2 =>
   Subtraction (Qty units1) (Function Float (Qty units2)) (Function Float (Qty units1))
   where
-  value - expression = constant @Float value - expression
+  qty - expression = constant @Float qty - expression
 
 instance
   units1 ~ units2 =>
   Subtraction (Qty units1) (Function Uv.Point (Qty units2)) (Function Uv.Point (Qty units1))
   where
-  value - expression = constant @Uv.Point value - expression
+  qty - expression = constant @Uv.Point qty - expression
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -619,8 +971,8 @@ instance
     (Function Float (Vector2d (space2 @ units2)))
     (Function Float (Vector2d (space1 @ units1)))
   where
-  VectorCurve2d x1 y1 - VectorCurve2d x2 y2 =
-    VectorCurve2d (Expression.difference x1 x2) (Expression.difference y1 y2)
+  VectorCurve2d{vc2x = x1, vc2y = y1} - VectorCurve2d{vc2x = x2, vc2y = y2} =
+    vectorCurve2d (Expression.difference x1 x2) (Expression.difference y1 y2)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -629,8 +981,8 @@ instance
     (Function Uv.Point (Vector2d (space2 @ units2)))
     (Function Uv.Point (Vector2d (space1 @ units1)))
   where
-  VectorSurface2d x1 y1 - VectorSurface2d x2 y2 =
-    VectorSurface2d (Expression.difference x1 x2) (Expression.difference y1 y2)
+  VectorSurface2d{vs2x = x1, vs2y = y1} - VectorSurface2d{vs2x = x2, vs2y = y2} =
+    vectorSurface2d (Expression.difference x1 x2) (Expression.difference y1 y2)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -675,8 +1027,8 @@ instance
     (Function Float (Vector3d (space2 @ units2)))
     (Function Float (Vector3d (space1 @ units1)))
   where
-  VectorCurve3d x1 y1 z1 - VectorCurve3d x2 y2 z2 =
-    VectorCurve3d
+  VectorCurve3d{vc3x = x1, vc3y = y1, vc3z = z1} - VectorCurve3d{vc3x = x2, vc3y = y2, vc3z = z2} =
+    vectorCurve3d
       (Expression.difference x1 x2)
       (Expression.difference y1 y2)
       (Expression.difference z1 z2)
@@ -688,11 +1040,12 @@ instance
     (Function Uv.Point (Vector3d (space2 @ units2)))
     (Function Uv.Point (Vector3d (space1 @ units1)))
   where
-  VectorSurface3d x1 y1 z1 - VectorSurface3d x2 y2 z2 =
-    VectorSurface3d
-      (Expression.difference x1 x2)
-      (Expression.difference y1 y2)
-      (Expression.difference z1 z2)
+  VectorSurface3d{vs3x = x1, vs3y = y1, vs3z = z1}
+    - VectorSurface3d{vs3x = x2, vs3y = y2, vs3z = z2} =
+      vectorSurface3d
+        (Expression.difference x1 x2)
+        (Expression.difference y1 y2)
+        (Expression.difference z1 z2)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -737,8 +1090,8 @@ instance
     (Function Float (Vector2d (space2 @ units2)))
     (Function Float (Point2d (space1 @ units1)))
   where
-  Curve2d x1 y1 - VectorCurve2d x2 y2 =
-    Curve2d (Expression.difference x1 x2) (Expression.difference y1 y2)
+  Curve2d{c2x = x1, c2y = y1} - VectorCurve2d{vc2x = x2, vc2y = y2} =
+    curve2d (Expression.difference x1 x2) (Expression.difference y1 y2)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -747,8 +1100,8 @@ instance
     (Function Uv.Point (Vector2d (space2 @ units2)))
     (Function Uv.Point (Point2d (space1 @ units1)))
   where
-  Surface2d x1 y1 - VectorSurface2d x2 y2 =
-    Surface2d (Expression.difference x1 x2) (Expression.difference y1 y2)
+  Surface2d{s2x = x1, s2y = y1} - VectorSurface2d{vs2x = x2, vs2y = y2} =
+    surface2d (Expression.difference x1 x2) (Expression.difference y1 y2)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -793,8 +1146,8 @@ instance
     (Function Float (Point2d (space2 @ units2)))
     (Function Float (Vector2d (space1 @ units1)))
   where
-  Curve2d x1 y1 - Curve2d x2 y2 =
-    VectorCurve2d (Expression.difference x1 x2) (Expression.difference y1 y2)
+  Curve2d{c2x = x1, c2y = y1} - Curve2d{c2x = x2, c2y = y2} =
+    vectorCurve2d (Expression.difference x1 x2) (Expression.difference y1 y2)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -803,8 +1156,8 @@ instance
     (Function Uv.Point (Point2d (space2 @ units2)))
     (Function Uv.Point (Vector2d (space1 @ units1)))
   where
-  Surface2d x1 y1 - Surface2d x2 y2 =
-    VectorSurface2d (Expression.difference x1 x2) (Expression.difference y1 y2)
+  Surface2d{s2x = x1, s2y = y1} - Surface2d{s2x = x2, s2y = y2} =
+    vectorSurface2d (Expression.difference x1 x2) (Expression.difference y1 y2)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -849,8 +1202,8 @@ instance
     (Function Float (Vector3d (space2 @ units2)))
     (Function Float (Point3d (space1 @ units1)))
   where
-  Curve3d x1 y1 z1 - VectorCurve3d x2 y2 z2 =
-    Curve3d
+  Curve3d{c3x = x1, c3y = y1, c3z = z1} - VectorCurve3d{vc3x = x2, vc3y = y2, vc3z = z2} =
+    curve3d
       (Expression.difference x1 x2)
       (Expression.difference y1 y2)
       (Expression.difference z1 z2)
@@ -862,8 +1215,8 @@ instance
     (Function Uv.Point (Vector3d (space2 @ units2)))
     (Function Uv.Point (Point3d (space1 @ units1)))
   where
-  Surface3d x1 y1 z1 - VectorSurface3d x2 y2 z2 =
-    Surface3d
+  Surface3d{s3x = x1, s3y = y1, s3z = z1} - VectorSurface3d{vs3x = x2, vs3y = y2, vs3z = z2} =
+    surface3d
       (Expression.difference x1 x2)
       (Expression.difference y1 y2)
       (Expression.difference z1 z2)
@@ -911,8 +1264,8 @@ instance
     (Function Float (Point3d (space2 @ units2)))
     (Function Float (Vector3d (space1 @ units1)))
   where
-  Curve3d x1 y1 z1 - Curve3d x2 y2 z2 =
-    VectorCurve3d
+  Curve3d{c3x = x1, c3y = y1, c3z = z1} - Curve3d{c3x = x2, c3y = y2, c3z = z2} =
+    vectorCurve3d
       (Expression.difference x1 x2)
       (Expression.difference y1 y2)
       (Expression.difference z1 z2)
@@ -924,8 +1277,8 @@ instance
     (Function Uv.Point (Point3d (space2 @ units2)))
     (Function Uv.Point (Vector3d (space1 @ units1)))
   where
-  Surface3d x1 y1 z1 - Surface3d x2 y2 z2 =
-    VectorSurface3d
+  Surface3d{s3x = x1, s3y = y1, s3z = z1} - Surface3d{s3x = x2, s3y = y2, s3z = z2} =
+    vectorSurface3d
       (Expression.difference x1 x2)
       (Expression.difference y1 y2)
       (Expression.difference z1 z2)
@@ -1148,23 +1501,23 @@ instance Multiplication' (Function Uv.Point (Qty units1)) (Function Uv.Point (Qt
 
 instance Multiplication' (Qty units1) (Function Float (Qty units2)) where
   type Qty units1 .*. Function Float (Qty units2) = Function Float (Qty (units1 :*: units2))
-  value .*. expression = constant @Float value .*. expression
+  qty .*. expression = constant @Float qty .*. expression
 
 instance Multiplication' (Qty units1) (Function Uv.Point (Qty units2)) where
   type
     Qty units1 .*. Function Uv.Point (Qty units2) =
       Function Uv.Point (Qty (units1 :*: units2))
-  value .*. expression = constant @Uv.Point value .*. expression
+  qty .*. expression = constant @Uv.Point qty .*. expression
 
 instance Multiplication' (Function Float (Qty units1)) (Qty units2) where
   type Function Float (Qty units1) .*. Qty units2 = Function Float (Qty (units1 :*: units2))
-  expression .*. value = expression .*. constant @Float value
+  expression .*. qty = expression .*. constant @Float qty
 
 instance Multiplication' (Function Uv.Point (Qty units1)) (Qty units2) where
   type
     Function Uv.Point (Qty units1) .*. Qty units2 =
       Function Uv.Point (Qty (units1 :*: units2))
-  expression .*. value = expression .*. constant @Uv.Point value
+  expression .*. qty = expression .*. constant @Uv.Point qty
 
 --- Qty-Vector2d ---
 --------------------
@@ -1173,27 +1526,27 @@ instance Multiplication' (Function Float (Qty units1)) (Function Float (Vector2d
   type
     Function Float (Qty units1) .*. Function Float (Vector2d (space @ units2)) =
       Function Float (Vector2d (space @ (units1 :*: units2)))
-  Curve1d{c1x = scale} .*. VectorCurve2d x y =
-    VectorCurve2d (Expression.product scale x) (Expression.product scale y)
+  Curve1d{c1x = scale} .*. VectorCurve2d{vc2x, vc2y} =
+    vectorCurve2d (Expression.product scale vc2x) (Expression.product scale vc2y)
 
 instance Multiplication' (Function Uv.Point (Qty units1)) (Function Uv.Point (Vector2d (space @ units2))) where
   type
     Function Uv.Point (Qty units1) .*. Function Uv.Point (Vector2d (space @ units2)) =
       Function Uv.Point (Vector2d (space @ (units1 :*: units2)))
-  Surface1d{s1x = scale} .*. VectorSurface2d x y =
-    VectorSurface2d (Expression.product scale x) (Expression.product scale y)
+  Surface1d{s1x = scale} .*. VectorSurface2d{vs2x, vs2y} =
+    vectorSurface2d (Expression.product scale vs2x) (Expression.product scale vs2y)
 
 instance Multiplication' (Qty units1) (Function Float (Vector2d (space @ units2))) where
   type
     Qty units1 .*. Function Float (Vector2d (space @ units2)) =
       Function Float (Vector2d (space @ (units1 :*: units2)))
-  value .*. expression = constant @Float value .*. expression
+  qty .*. expression = constant @Float qty .*. expression
 
 instance Multiplication' (Qty units1) (Function Uv.Point (Vector2d (space @ units2))) where
   type
     Qty units1 .*. Function Uv.Point (Vector2d (space @ units2)) =
       Function Uv.Point (Vector2d (space @ (units1 :*: units2)))
-  value .*. expression = constant @Uv.Point value .*. expression
+  qty .*. expression = constant @Uv.Point qty .*. expression
 
 instance Multiplication' (Function Float (Qty units1)) (Vector2d (space @ units2)) where
   type
@@ -1229,15 +1582,15 @@ instance Multiplication' (Function Float (Vector2d (space @ units1))) (Function 
   type
     Function Float (Vector2d (space @ units1)) .*. Function Float (Qty units2) =
       Function Float (Vector2d (space @ (units1 :*: units2)))
-  VectorCurve2d x y .*. Curve1d{c1x = scale} =
-    VectorCurve2d (Expression.product x scale) (Expression.product y scale)
+  VectorCurve2d{vc2x, vc2y} .*. Curve1d{c1x = scale} =
+    vectorCurve2d (Expression.product vc2x scale) (Expression.product vc2y scale)
 
 instance Multiplication' (Function Uv.Point (Vector2d (space @ units1))) (Function Uv.Point (Qty units2)) where
   type
     Function Uv.Point (Vector2d (space @ units1)) .*. Function Uv.Point (Qty units2) =
       Function Uv.Point (Vector2d (space @ (units1 :*: units2)))
-  VectorSurface2d x y .*. Surface1d{s1x = scale} =
-    VectorSurface2d (Expression.product x scale) (Expression.product y scale)
+  VectorSurface2d{vs2x, vs2y} .*. Surface1d{s1x = scale} =
+    vectorSurface2d (Expression.product vs2x scale) (Expression.product vs2y scale)
 
 instance Multiplication' (Vector2d (space @ units1)) (Function Float (Qty units2)) where
   type
@@ -1255,13 +1608,13 @@ instance Multiplication' (Function Float (Vector2d (space @ units1))) (Qty units
   type
     Function Float (Vector2d (space @ units1)) .*. Qty units2 =
       Function Float (Vector2d (space @ (units1 :*: units2)))
-  expression .*. value = expression .*. constant @Float value
+  expression .*. qty = expression .*. constant @Float qty
 
 instance Multiplication' (Function Uv.Point (Vector2d (space @ units1))) (Qty units2) where
   type
     Function Uv.Point (Vector2d (space @ units1)) .*. Qty units2 =
       Function Uv.Point (Vector2d (space @ (units1 :*: units2)))
-  expression .*. value = expression .*. constant @Uv.Point value
+  expression .*. qty = expression .*. constant @Uv.Point qty
 
 --- Direction2d-Qty ---
 -----------------------
@@ -1384,23 +1737,23 @@ instance Division' (Function Uv.Point (Qty units1)) (Function Uv.Point (Qty unit
 
 instance Division' (Function Float (Qty units1)) (Qty units2) where
   type Function Float (Qty units1) ./. Qty units2 = Function Float (Qty (units1 :/: units2))
-  expression ./. value = expression ./. constant @Float value
+  expression ./. qty = expression ./. constant @Float qty
 
 instance Division' (Function Uv.Point (Qty units1)) (Qty units2) where
   type
     Function Uv.Point (Qty units1) ./. Qty units2 =
       Function Uv.Point (Qty (units1 :/: units2))
-  expression ./. value = expression ./. constant @Uv.Point value
+  expression ./. qty = expression ./. constant @Uv.Point qty
 
 instance Division' (Qty units1) (Function Float (Qty units2)) where
   type Qty units1 ./. Function Float (Qty units2) = Function Float (Qty (units1 :/: units2))
-  value ./. expression = constant @Float value ./. expression
+  qty ./. expression = constant @Float qty ./. expression
 
 instance Division' (Qty units1) (Function Uv.Point (Qty units2)) where
   type
     Qty units1 ./. Function Uv.Point (Qty units2) =
       Function Uv.Point (Qty (units1 :/: units2))
-  value ./. expression = constant @Uv.Point value ./. expression
+  qty ./. expression = constant @Uv.Point qty ./. expression
 
 --- Vector2d-Qty ---
 --------------------
@@ -1409,15 +1762,15 @@ instance Division' (Function Float (Vector2d (space @ units1))) (Function Float 
   type
     Function Float (Vector2d (space @ units1)) ./. Function Float (Qty units2) =
       Function Float (Vector2d (space @ (units1 :/: units2)))
-  VectorCurve2d x y ./. Curve1d{c1x = scale} =
-    VectorCurve2d (Expression.quotient x scale) (Expression.quotient y scale)
+  VectorCurve2d{vc2x, vc2y} ./. Curve1d{c1x = scale} =
+    vectorCurve2d (Expression.quotient vc2x scale) (Expression.quotient vc2y scale)
 
 instance Division' (Function Uv.Point (Vector2d (space @ units1))) (Function Uv.Point (Qty units2)) where
   type
     Function Uv.Point (Vector2d (space @ units1)) ./. Function Uv.Point (Qty units2) =
       Function Uv.Point (Vector2d (space @ (units1 :/: units2)))
-  VectorSurface2d x y ./. Surface1d{s1x = scale} =
-    VectorSurface2d (Expression.quotient x scale) (Expression.quotient y scale)
+  VectorSurface2d{vs2x, vs2y} ./. Surface1d{s1x = scale} =
+    vectorSurface2d (Expression.quotient vs2x scale) (Expression.quotient vs2y scale)
 
 instance Division' (Vector2d (space @ units1)) (Function Float (Qty units2)) where
   type
@@ -1435,13 +1788,13 @@ instance Division' (Function Float (Vector2d (space @ units1))) (Qty units2) whe
   type
     Function Float (Vector2d (space @ units1)) ./. Qty units2 =
       Function Float (Vector2d (space @ (units1 :/: units2)))
-  expression ./. value = expression ./. constant @Float value
+  expression ./. qty = expression ./. constant @Float qty
 
 instance Division' (Function Uv.Point (Vector2d (space @ units1))) (Qty units2) where
   type
     Function Uv.Point (Vector2d (space @ units1)) ./. Qty units2 =
       Function Uv.Point (Vector2d (space @ (units1 :/: units2)))
-  expression ./. value = expression ./. constant @Uv.Point value
+  expression ./. qty = expression ./. constant @Uv.Point qty
 
 -------------------
 --- DOT PRODUCT ---
@@ -1533,7 +1886,7 @@ instance
     Function Float (Vector2d (space1 @ units1))
       .<>. Function Float (Vector2d (space2 @ units2)) =
       Function Float (Qty (units1 :*: units2))
-  VectorCurve2d x1 y1 .<>. VectorCurve2d x2 y2 =
+  VectorCurve2d{vc2x = x1, vc2y = y1} .<>. VectorCurve2d{vc2x = x2, vc2y = y2} =
     curve1d (Expression.sum (Expression.product x1 x2) (Expression.product y1 y2))
 
 instance
@@ -1546,7 +1899,7 @@ instance
     Function Uv.Point (Vector2d (space1 @ units1))
       .<>. Function Uv.Point (Vector2d (space2 @ units2)) =
       Function Uv.Point (Qty (units1 :*: units2))
-  VectorSurface2d x1 y1 .<>. VectorSurface2d x2 y2 =
+  VectorSurface2d{vs2x = x1, vs2y = y1} .<>. VectorSurface2d{vs2x = x2, vs2y = y2} =
     surface1d (Expression.sum (Expression.product x1 x2) (Expression.product y1 y2))
 
 instance
@@ -1727,7 +2080,7 @@ instance
     Function Float (Vector2d (space1 @ units1))
       .><. Function Float (Vector2d (space2 @ units2)) =
       Function Float (Qty (units1 :*: units2))
-  VectorCurve2d x1 y1 .><. VectorCurve2d x2 y2 =
+  VectorCurve2d{vc2x = x1, vc2y = y1} .><. VectorCurve2d{vc2x = x2, vc2y = y2} =
     curve1d (Expression.difference (Expression.product x1 y2) (Expression.product y1 x2))
 
 instance
@@ -1740,7 +2093,7 @@ instance
     Function Uv.Point (Vector2d (space1 @ units1))
       .><. Function Uv.Point (Vector2d (space2 @ units2)) =
       Function Uv.Point (Qty (units1 :*: units2))
-  VectorSurface2d x1 y1 .><. VectorSurface2d x2 y2 =
+  VectorSurface2d{vs2x = x1, vs2y = y1} .><. VectorSurface2d{vs2x = x2, vs2y = y2} =
     surface1d (Expression.difference (Expression.product x1 y2) (Expression.product y1 x2))
 
 instance
@@ -1844,10 +2197,10 @@ instance
   curve . Curve1d{c1x = input} =
     case curve of
       Curve1d{c1x} -> curve1d (c1x . input)
-      Curve2d x y -> Curve2d (x . input) (y . input)
-      VectorCurve2d x y -> VectorCurve2d (x . input) (y . input)
-      Curve3d x y z -> Curve3d (x . input) (y . input) (z . input)
-      VectorCurve3d x y z -> VectorCurve3d (x . input) (y . input) (z . input)
+      Curve2d{c2x, c2y} -> curve2d (c2x . input) (c2y . input)
+      VectorCurve2d{vc2x, vc2y} -> vectorCurve2d (vc2x . input) (vc2y . input)
+      Curve3d{c3x, c3y, c3z} -> curve3d (c3x . input) (c3y . input) (c3z . input)
+      VectorCurve3d{vc3x, vc3y, vc3z} -> vectorCurve3d (vc3x . input) (vc3y . input) (vc3z . input)
 
 instance
   Composition
@@ -1858,10 +2211,11 @@ instance
   curve . Surface1d{s1x = input} =
     case curve of
       Curve1d{c1x} -> surface1d (c1x . input)
-      Curve2d x y -> Surface2d (x . input) (y . input)
-      VectorCurve2d x y -> VectorSurface2d (x . input) (y . input)
-      Curve3d x y z -> Surface3d (x . input) (y . input) (z . input)
-      VectorCurve3d x y z -> VectorSurface3d (x . input) (y . input) (z . input)
+      Curve2d{c2x, c2y} -> surface2d (c2x . input) (c2y . input)
+      VectorCurve2d{vc2x, vc2y} -> vectorSurface2d (vc2x . input) (vc2y . input)
+      Curve3d{c3x, c3y, c3z} -> surface3d (c3x . input) (c3y . input) (c3z . input)
+      VectorCurve3d{vc3x, vc3y, vc3z} ->
+        vectorSurface3d (vc3x . input) (vc3y . input) (vc3z . input)
 
 instance
   Composition
@@ -1869,14 +2223,15 @@ instance
     (Function Uv.Point output)
     (Function Float output)
   where
-  surface . Curve2d uInput vInput = do
+  surface . Curve2d{c2x = uInput, c2y = vInput} = do
     let inputs = (uInput, vInput)
     case surface of
       Surface1d{s1x} -> curve1d (s1x . inputs)
-      Surface2d x y -> Curve2d (x . inputs) (y . inputs)
-      VectorSurface2d x y -> VectorCurve2d (x . inputs) (y . inputs)
-      Surface3d x y z -> Curve3d (x . inputs) (y . inputs) (z . inputs)
-      VectorSurface3d x y z -> VectorCurve3d (x . inputs) (y . inputs) (z . inputs)
+      Surface2d{s2x, s2y} -> curve2d (s2x . inputs) (s2y . inputs)
+      VectorSurface2d{vs2x, vs2y} -> vectorCurve2d (vs2x . inputs) (vs2y . inputs)
+      Surface3d{s3x, s3y, s3z} -> curve3d (s3x . inputs) (s3y . inputs) (s3z . inputs)
+      VectorSurface3d{vs3x, vs3y, vs3z} ->
+        vectorCurve3d (vs3x . inputs) (vs3y . inputs) (vs3z . inputs)
 
 instance
   Composition
@@ -1884,14 +2239,15 @@ instance
     (Function Uv.Point output)
     (Function Uv.Point output)
   where
-  surface . Surface2d uInput vInput = do
+  surface . Surface2d{s2x = uInput, s2y = vInput} = do
     let inputs = (uInput, vInput)
     case surface of
       Surface1d{s1x} -> surface1d (s1x . inputs)
-      Surface2d x y -> Surface2d (x . inputs) (y . inputs)
-      VectorSurface2d x y -> VectorSurface2d (x . inputs) (y . inputs)
-      Surface3d x y z -> Surface3d (x . inputs) (y . inputs) (z . inputs)
-      VectorSurface3d x y z -> VectorSurface3d (x . inputs) (y . inputs) (z . inputs)
+      Surface2d{s2x, s2y} -> surface2d (s2x . inputs) (s2y . inputs)
+      VectorSurface2d{vs2x, vs2y} -> vectorSurface2d (vs2x . inputs) (vs2y . inputs)
+      Surface3d{s3x, s3y, s3z} -> surface3d (s3x . inputs) (s3y . inputs) (s3z . inputs)
+      VectorSurface3d{vs3x, vs3y, vs3z} ->
+        vectorSurface3d (vs3x . inputs) (vs3y . inputs) (vs3z . inputs)
 
 -----------------
 --- FUNCTIONS ---
@@ -1937,42 +2293,42 @@ class Constant input output where
   constant :: output -> Function input output
 
 instance Constant Float (Qty units) where
-  constant value = curve1d (Expression.constant value)
+  constant qty = curve1d (Expression.constant qty)
 
 instance Constant Uv.Point (Qty units) where
-  constant value = surface1d (Expression.constant value)
+  constant qty = surface1d (Expression.constant qty)
 
 instance Constant Float (Vector2d (space @ units)) where
   constant (Vector2d x y) =
-    VectorCurve2d (Expression.constant x) (Expression.constant y)
+    vectorCurve2d (Expression.constant x) (Expression.constant y)
 
 instance Constant Uv.Point (Vector2d (space @ units)) where
   constant (Vector2d x y) =
-    VectorSurface2d (Expression.constant x) (Expression.constant y)
+    vectorSurface2d (Expression.constant x) (Expression.constant y)
 
 instance Constant Float (Vector3d (space @ units)) where
   constant (Vector3d x y z) =
-    VectorCurve3d (Expression.constant x) (Expression.constant y) (Expression.constant z)
+    vectorCurve3d (Expression.constant x) (Expression.constant y) (Expression.constant z)
 
 instance Constant Uv.Point (Vector3d (space @ units)) where
   constant (Vector3d x y z) =
-    VectorSurface3d (Expression.constant x) (Expression.constant y) (Expression.constant z)
+    vectorSurface3d (Expression.constant x) (Expression.constant y) (Expression.constant z)
 
 instance Constant Float (Point2d (space @ units)) where
   constant (Point2d x y) =
-    Curve2d (Expression.constant x) (Expression.constant y)
+    curve2d (Expression.constant x) (Expression.constant y)
 
 instance Constant Uv.Point (Point2d (space @ units)) where
   constant (Point2d x y) =
-    Surface2d (Expression.constant x) (Expression.constant y)
+    surface2d (Expression.constant x) (Expression.constant y)
 
 instance Constant Float (Point3d (space @ units)) where
   constant (Point3d x y z) =
-    Curve3d (Expression.constant x) (Expression.constant y) (Expression.constant z)
+    curve3d (Expression.constant x) (Expression.constant y) (Expression.constant z)
 
 instance Constant Uv.Point (Point3d (space @ units)) where
   constant (Point3d x y z) =
-    Surface3d (Expression.constant x) (Expression.constant y) (Expression.constant z)
+    surface3d (Expression.constant x) (Expression.constant y) (Expression.constant z)
 
 class XY input output where
   xy ::
@@ -1981,16 +2337,16 @@ class XY input output where
     Function input output
 
 instance XY Float (Vector2d (space @ units)) where
-  xy Curve1d{c1x = x} Curve1d{c1x = y} = VectorCurve2d x y
+  xy Curve1d{c1x = x} Curve1d{c1x = y} = vectorCurve2d x y
 
 instance XY Uv.Point (Vector2d (space @ units)) where
-  xy Surface1d{s1x = x} Surface1d{s1x = y} = VectorSurface2d x y
+  xy Surface1d{s1x = x} Surface1d{s1x = y} = vectorSurface2d x y
 
 instance XY Float (Point2d (space @ units)) where
-  xy Curve1d{c1x = x} Curve1d{c1x = y} = Curve2d x y
+  xy Curve1d{c1x = x} Curve1d{c1x = y} = curve2d x y
 
 instance XY Uv.Point (Point2d (space @ units)) where
-  xy Surface1d{s1x = x} Surface1d{s1x = y} = Surface2d x y
+  xy Surface1d{s1x = x} Surface1d{s1x = y} = surface2d x y
 
 class XYZ input output where
   xyz ::
@@ -2000,16 +2356,16 @@ class XYZ input output where
     Function input output
 
 instance XYZ Float (Vector3d (space @ units)) where
-  xyz Curve1d{c1x = x} Curve1d{c1x = y} Curve1d{c1x = z} = VectorCurve3d x y z
+  xyz Curve1d{c1x = x} Curve1d{c1x = y} Curve1d{c1x = z} = vectorCurve3d x y z
 
 instance XYZ Uv.Point (Vector3d (space @ units)) where
-  xyz Surface1d{s1x = x} Surface1d{s1x = y} Surface1d{s1x = z} = VectorSurface3d x y z
+  xyz Surface1d{s1x = x} Surface1d{s1x = y} Surface1d{s1x = z} = vectorSurface3d x y z
 
 instance XYZ Float (Point3d (space @ units)) where
-  xyz Curve1d{c1x = x} Curve1d{c1x = y} Curve1d{c1x = z} = Curve3d x y z
+  xyz Curve1d{c1x = x} Curve1d{c1x = y} Curve1d{c1x = z} = curve3d x y z
 
 instance XYZ Uv.Point (Point3d (space @ units)) where
-  xyz Surface1d{s1x = x} Surface1d{s1x = y} Surface1d{s1x = z} = Surface3d x y z
+  xyz Surface1d{s1x = x} Surface1d{s1x = y} Surface1d{s1x = z} = surface3d x y z
 
 class XComponent input output where
   xComponent :: Function input output -> Function input (Qty (UnitsOf output))
@@ -2021,24 +2377,24 @@ class ZComponent input output where
   zComponent :: Function input output -> Function input (Qty (UnitsOf output))
 
 instance XComponent input (Vector2d (space @ units)) where
-  xComponent (VectorCurve2d x _) = curve1d x
-  xComponent (VectorSurface2d x _) = surface1d x
+  xComponent VectorCurve2d{vc2x} = curve1d vc2x
+  xComponent VectorSurface2d{vs2x} = surface1d vs2x
 
 instance XComponent input (Vector3d (space @ units)) where
-  xComponent (VectorCurve3d x _ _) = curve1d x
-  xComponent (VectorSurface3d x _ _) = surface1d x
+  xComponent VectorCurve3d{vc3x} = curve1d vc3x
+  xComponent VectorSurface3d{vs3x} = surface1d vs3x
 
 instance YComponent input (Vector2d (space @ units)) where
-  yComponent (VectorCurve2d _ y) = curve1d y
-  yComponent (VectorSurface2d _ y) = surface1d y
+  yComponent VectorCurve2d{vc2y} = curve1d vc2y
+  yComponent VectorSurface2d{vs2y} = surface1d vs2y
 
 instance YComponent input (Vector3d (space @ units)) where
-  yComponent (VectorCurve3d _ y _) = curve1d y
-  yComponent (VectorSurface3d _ y _) = surface1d y
+  yComponent VectorCurve3d{vc3y} = curve1d vc3y
+  yComponent VectorSurface3d{vs3y} = surface1d vs3y
 
 instance ZComponent input (Vector3d (space @ units)) where
-  zComponent (VectorCurve3d _ _ z) = curve1d z
-  zComponent (VectorSurface3d _ _ z) = surface1d z
+  zComponent VectorCurve3d{vc3z} = curve1d vc3z
+  zComponent VectorSurface3d{vs3z} = surface1d vs3z
 
 class XCoordinate input output where
   xCoordinate :: Function input output -> Function input (Qty (UnitsOf output))
@@ -2050,24 +2406,24 @@ class ZCoordinate input output where
   zCoordinate :: Function input output -> Function input (Qty (UnitsOf output))
 
 instance XCoordinate input (Point2d (space @ units)) where
-  xCoordinate (Curve2d x _) = curve1d x
-  xCoordinate (Surface2d x _) = surface1d x
+  xCoordinate Curve2d{c2x} = curve1d c2x
+  xCoordinate Surface2d{s2x} = surface1d s2x
 
 instance XCoordinate input (Point3d (space @ units)) where
-  xCoordinate (Curve3d x _ _) = curve1d x
-  xCoordinate (Surface3d x _ _) = surface1d x
+  xCoordinate Curve3d{c3x} = curve1d c3x
+  xCoordinate Surface3d{s3x} = surface1d s3x
 
 instance YCoordinate input (Point2d (space @ units)) where
-  yCoordinate (Curve2d _ y) = curve1d y
-  yCoordinate (Surface2d _ y) = surface1d y
+  yCoordinate Curve2d{c2y} = curve1d c2y
+  yCoordinate Surface2d{s2y} = surface1d s2y
 
 instance YCoordinate input (Point3d (space @ units)) where
-  yCoordinate (Curve3d _ y _) = curve1d y
-  yCoordinate (Surface3d _ y _) = surface1d y
+  yCoordinate Curve3d{c3y} = curve1d c3y
+  yCoordinate Surface3d{s3y} = surface1d s3y
 
 instance ZCoordinate input (Point3d (space @ units)) where
-  zCoordinate (Curve3d _ _ z) = curve1d z
-  zCoordinate (Surface3d _ _ z) = surface1d z
+  zCoordinate Curve3d{c3z} = curve1d c3z
+  zCoordinate Surface3d{s3z} = surface1d s3z
 
 parameter :: Function Float Float
 parameter = curve1d Expression.parameter
@@ -2136,40 +2492,60 @@ instance
     (Function Float (Vector2d (space @ units)))
     (Function Float (Vector2d (space @ units)))
   where
-  curveDerivative (VectorCurve2d x y) =
-    VectorCurve2d
-      (Expression.curveDerivative x)
-      (Expression.curveDerivative y)
+  curveDerivative = vc2d
 
 instance
   CurveDerivative
     (Function Float (Point2d (space @ units)))
     (Function Float (Vector2d (space @ units)))
   where
-  curveDerivative (Curve2d x y) =
-    VectorCurve2d
-      (Expression.curveDerivative x)
-      (Expression.curveDerivative y)
+  curveDerivative = c2d
 
 instance
   SurfaceDerivative
     (Function Uv.Point (Vector2d (space @ units)))
     (Function Uv.Point (Vector2d (space @ units)))
   where
-  surfaceDerivative p (VectorSurface2d x y) =
-    VectorSurface2d
-      (Expression.surfaceDerivative p x)
-      (Expression.surfaceDerivative p y)
+  surfaceDerivative U = vs2du
+  surfaceDerivative V = vs2dv
 
 instance
   SurfaceDerivative
     (Function Uv.Point (Point2d (space @ units)))
     (Function Uv.Point (Vector2d (space @ units)))
   where
-  surfaceDerivative p (Surface2d x y) =
-    VectorSurface2d
-      (Expression.surfaceDerivative p x)
-      (Expression.surfaceDerivative p y)
+  surfaceDerivative U = s2du
+  surfaceDerivative V = s2dv
+
+instance
+  CurveDerivative
+    (Function Float (Vector3d (space @ units)))
+    (Function Float (Vector3d (space @ units)))
+  where
+  curveDerivative = vc3d
+
+instance
+  CurveDerivative
+    (Function Float (Point3d (space @ units)))
+    (Function Float (Vector3d (space @ units)))
+  where
+  curveDerivative = c3d
+
+instance
+  SurfaceDerivative
+    (Function Uv.Point (Vector3d (space @ units)))
+    (Function Uv.Point (Vector3d (space @ units)))
+  where
+  surfaceDerivative U = vs3du
+  surfaceDerivative V = vs3dv
+
+instance
+  SurfaceDerivative
+    (Function Uv.Point (Point3d (space @ units)))
+    (Function Uv.Point (Vector3d (space @ units)))
+  where
+  surfaceDerivative U = s3du
+  surfaceDerivative V = s3dv
 
 -----------------
 --- COMPILING ---
@@ -2190,6 +2566,14 @@ type Curve2dBoundsFunction = Double -> Double -> Ptr Double -> IO ()
 type Surface2dValueFunction = Double -> Double -> Ptr Double -> IO ()
 
 type Surface2dBoundsFunction = Double -> Double -> Double -> Double -> Ptr Double -> IO ()
+
+type Curve3dValueFunction = Double -> Ptr Double -> IO ()
+
+type Curve3dBoundsFunction = Double -> Double -> Ptr Double -> IO ()
+
+type Surface3dValueFunction = Double -> Double -> Ptr Double -> IO ()
+
+type Surface3dBoundsFunction = Double -> Double -> Double -> Double -> Ptr Double -> IO ()
 
 foreign import ccall unsafe "opensolid_curve1d_value_function"
   opensolid_curve1d_value_function :: Expression.Ptr -> FunPtr Curve1dValueFunction
@@ -2215,6 +2599,18 @@ foreign import ccall unsafe "opensolid_surface2d_value_function"
 foreign import ccall unsafe "opensolid_surface2d_bounds_function"
   opensolid_surface2d_bounds_function :: Expression.Ptr -> Expression.Ptr -> FunPtr Surface2dBoundsFunction
 
+foreign import ccall unsafe "opensolid_curve3d_value_function"
+  opensolid_curve3d_value_function :: Expression.Ptr -> Expression.Ptr -> Expression.Ptr -> FunPtr Curve3dValueFunction
+
+foreign import ccall unsafe "opensolid_curve3d_bounds_function"
+  opensolid_curve3d_bounds_function :: Expression.Ptr -> Expression.Ptr -> Expression.Ptr -> FunPtr Curve3dBoundsFunction
+
+foreign import ccall unsafe "opensolid_surface3d_value_function"
+  opensolid_surface3d_value_function :: Expression.Ptr -> Expression.Ptr -> Expression.Ptr -> FunPtr Surface3dValueFunction
+
+foreign import ccall unsafe "opensolid_surface3d_bounds_function"
+  opensolid_surface3d_bounds_function :: Expression.Ptr -> Expression.Ptr -> Expression.Ptr -> FunPtr Surface3dBoundsFunction
+
 foreign import ccall unsafe "dynamic"
   curve1d_value_function :: FunPtr Curve1dValueFunction -> Curve1dValueFunction
 
@@ -2239,21 +2635,37 @@ foreign import ccall unsafe "dynamic"
 foreign import ccall unsafe "dynamic"
   surface2d_bounds_function :: FunPtr Surface2dBoundsFunction -> Surface2dBoundsFunction
 
+foreign import ccall unsafe "dynamic"
+  curve3d_value_function :: FunPtr Curve3dValueFunction -> Curve3dValueFunction
+
+foreign import ccall unsafe "dynamic"
+  curve3d_bounds_function :: FunPtr Curve3dBoundsFunction -> Curve3dBoundsFunction
+
+foreign import ccall unsafe "dynamic"
+  surface3d_value_function :: FunPtr Surface3dValueFunction -> Surface3dValueFunction
+
+foreign import ccall unsafe "dynamic"
+  surface3d_bounds_function :: FunPtr Surface3dBoundsFunction -> Surface3dBoundsFunction
+
 -- TODO perform garbage collection on JIT-compiled functions:
 -- use GHC.Weak.mkWeak on f# to associate a finalizer with it
 -- that calls a Rust function to delete the underlying JIT-compiled function/module
 
-class ValueFunction expression function | expression -> function, function -> expression where
-  valueFunction :: expression -> function
+class Value input output where
+  value :: Function input output -> input -> output
 
-class BoundsFunction expression function | expression -> function, function -> expression where
-  boundsFunction :: expression -> function
+class
+  Bounds input output inputBounds outputBounds
+    | input -> inputBounds
+    , output -> outputBounds
+  where
+  bounds :: Function input output -> inputBounds -> outputBounds
 
-instance ValueFunction (Function Float (Qty units)) (Float -> Qty units) where
-  valueFunction Curve1d{c1v} (Qty x) = Qty (c1v x)
+instance Value Float (Qty units) where
+  value Curve1d{c1v} (Qty tValue) = Qty (c1v tValue)
 
-instance BoundsFunction (Function Float (Qty units)) (Range Unitless -> Range units) where
-  boundsFunction Curve1d{c1b} tRange =
+instance Bounds Float (Qty units) (Range Unitless) (Range units) where
+  bounds Curve1d{c1b} tRange =
     unsafeDupablePerformIO IO.do
       let Range (Qty tLow) (Qty tHigh) = tRange
       outputs <- Alloc.mallocBytes 16
@@ -2263,11 +2675,13 @@ instance BoundsFunction (Function Float (Qty units)) (Range Unitless -> Range un
       Alloc.free outputs
       IO.succeed (Range (Qty xLow) (Qty xHigh))
 
-instance ValueFunction (Function Uv.Point (Qty units)) (Uv.Point -> Qty units) where
-  valueFunction Surface1d{s1v} (Point2d.Point2d (Qty x) (Qty y)) = Qty (s1v x y)
+instance Value Uv.Point (Qty units) where
+  value Surface1d{s1v} uvPoint = do
+    let Point2d (Qty uValue) (Qty vValue) = uvPoint
+    Qty (s1v uValue vValue)
 
-instance BoundsFunction (Function Uv.Point (Qty units)) (Uv.Bounds -> Range units) where
-  boundsFunction Surface1d{s1b} uvBounds =
+instance Bounds Uv.Point (Qty units) Uv.Bounds (Range units) where
+  bounds Surface1d{s1b} uvBounds =
     unsafeDupablePerformIO IO.do
       let Bounds2d uRange vRange = uvBounds
       let Range (Qty uLow) (Qty uHigh) = uRange
@@ -2279,32 +2693,22 @@ instance BoundsFunction (Function Uv.Point (Qty units)) (Uv.Bounds -> Range unit
       Alloc.free outputs
       IO.succeed (Range (Qty low) (Qty high))
 
-instance
-  ValueFunction
-    (Function Float (Point2d (space @ units)))
-    (Float -> Point2d (space @ units))
-  where
-  valueFunction (Curve2d x y) = do
-    let f = curve2d_value_function (opensolid_curve2d_value_function (Expression.ptr x) (Expression.ptr y))
-    \(Qty tValue) -> unsafeDupablePerformIO IO.do
+instance Value Float (Point2d (space @ units)) where
+  value Curve2d{c2v} (Qty tValue) =
+    unsafeDupablePerformIO IO.do
       outputs <- Alloc.mallocBytes 16
-      f tValue outputs
+      c2v tValue outputs
       px <- Foreign.peekElemOff outputs 0
       py <- Foreign.peekElemOff outputs 1
       Alloc.free outputs
       IO.succeed (Point2d.xy (Qty px) (Qty py))
 
-instance
-  BoundsFunction
-    (Function Float (Point2d (space @ units)))
-    (Range Unitless -> Bounds2d (space @ units))
-  where
-  boundsFunction (Curve2d x y) = do
-    let f = curve2d_bounds_function (opensolid_curve2d_bounds_function (Expression.ptr x) (Expression.ptr y))
-    \tRange -> unsafeDupablePerformIO IO.do
+instance Bounds Float (Point2d (space @ units)) (Range Unitless) (Bounds2d (space @ units)) where
+  bounds Curve2d{c2b} tRange =
+    unsafeDupablePerformIO IO.do
       let Range (Qty tLow) (Qty tHigh) = tRange
       outputs <- Alloc.mallocBytes 32
-      f tLow tHigh outputs
+      c2b tLow tHigh outputs
       xLow <- Foreign.peekElemOff outputs 0
       xHigh <- Foreign.peekElemOff outputs 1
       yLow <- Foreign.peekElemOff outputs 2
@@ -2314,34 +2718,25 @@ instance
       Alloc.free outputs
       IO.succeed (Bounds2d xRange yRange)
 
-instance
-  ValueFunction
-    (Function Uv.Point (Point2d (space @ units)))
-    (Uv.Point -> Point2d (space @ units))
-  where
-  valueFunction (Surface2d x y) = do
-    let f = surface2d_value_function (opensolid_surface2d_value_function (Expression.ptr x) (Expression.ptr y))
-    \(Point2d.Point2d (Qty uValue) (Qty vValue)) -> unsafeDupablePerformIO IO.do
+instance Value Uv.Point (Point2d (space @ units)) where
+  value Surface2d{s2v} uvPoint =
+    unsafeDupablePerformIO IO.do
+      let Point2d (Qty uValue) (Qty vValue) = uvPoint
       outputs <- Alloc.mallocBytes 16
-      f uValue vValue outputs
+      s2v uValue vValue outputs
       px <- Foreign.peekElemOff outputs 0
       py <- Foreign.peekElemOff outputs 1
       Alloc.free outputs
       IO.succeed (Point2d.xy (Qty px) (Qty py))
 
-instance
-  BoundsFunction
-    (Function Uv.Point (Point2d (space @ units)))
-    (Uv.Bounds -> Bounds2d (space @ units))
-  where
-  boundsFunction (Surface2d x y) = do
-    let f = surface2d_bounds_function (opensolid_surface2d_bounds_function (Expression.ptr x) (Expression.ptr y))
-    \uvBounds -> unsafeDupablePerformIO IO.do
+instance Bounds Uv.Point (Point2d (space @ units)) Uv.Bounds (Bounds2d (space @ units)) where
+  bounds Surface2d{s2b} uvBounds =
+    unsafeDupablePerformIO IO.do
       let Bounds2d uRange vRange = uvBounds
       let Range (Qty uLow) (Qty uHigh) = uRange
       let Range (Qty vLow) (Qty vHigh) = vRange
       outputs <- Alloc.mallocBytes 32
-      f uLow uHigh vLow vHigh outputs
+      s2b uLow uHigh vLow vHigh outputs
       xLow <- Foreign.peekElemOff outputs 0
       xHigh <- Foreign.peekElemOff outputs 1
       yLow <- Foreign.peekElemOff outputs 2

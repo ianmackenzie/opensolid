@@ -21,8 +21,9 @@ import Direction3d ()
 import DirectionCurve2d qualified
 import Drawing2d qualified
 import Duration qualified
-import Function qualified
 import Float qualified
+import Function (Function)
+import Function qualified
 import Function.Curve2d qualified
 import IO qualified
 import Int qualified
@@ -584,19 +585,16 @@ testJit :: IO ()
 testJit = IO.do
   let x = Function.parameter
   let xSquared = Function.squared x
-  let expr = xSquared / (xSquared + 1.0)
-  let valueFunction = Function.valueFunction expr
-  let boundsFunction = Function.boundsFunction expr
-  log "JIT evaluated" (valueFunction 2.0)
-  log "JIT bounds" (boundsFunction (Range.from 1.0 3.0))
+  let function = xSquared / (xSquared + 1.0)
+  log "JIT evaluated" (Function.value function 2.0)
+  log "JIT bounds" (Function.bounds function (Range.from 1.0 3.0))
 
 testJitCurve2d :: IO ()
 testJitCurve2d = IO.do
   let x = 10.0 * Function.parameter
   let y = Function.sqrt Function.parameter
-  let curve = Function.Curve2d.xy x y
-  let f = Function.valueFunction curve
-  log "Evaluated 2D curve" (f 3.0)
+  let curve = Function.xy x y :: Function Float (Point2d (Global @ Unitless))
+  log "Evaluated 2D curve" (Function.value curve 3.0)
 
 main :: IO ()
 main = Tolerance.using (Length.meters 1e-9) IO.do
