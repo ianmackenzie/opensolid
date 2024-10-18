@@ -239,6 +239,17 @@ testPlaneTorusIntersection = IO.do
   log "  Crossing curves" (List.length (Surface1d.Function.Zeros.crossingCurves zeros))
   log "  Saddle points" (List.length (Surface1d.Function.Zeros.saddlePoints zeros))
 
+testPlaneParaboloidIntersection :: IO ()
+testPlaneParaboloidIntersection = Tolerance.using 1e-9 IO.do
+  let u = Surface1d.Function.u
+  let v = Surface1d.Function.v
+  let f = Surface1d.Function.squared u + Surface1d.Function.squared v - 0.5
+  zeros <- Surface1d.Function.zeros f
+  drawZeros "opensolid-sandbox/test-plane-paraboloid-intersection.svg" zeros
+  IO.printLine "Plane paraboloid intersection solutions:"
+  log "  Crossing curves" (List.length (Surface1d.Function.Zeros.crossingCurves zeros))
+  log "  Saddle points" (List.length (Surface1d.Function.Zeros.saddlePoints zeros))
+
 strokeWidth :: Length
 strokeWidth = Length.millimeters 0.1
 
@@ -615,6 +626,7 @@ main = Tolerance.using (Length.meters 1e-9) IO.do
   testHermiteBezier
   testJit
   testJitCurve2d
+  testPlaneParaboloidIntersection
   testPlaneTorusIntersection
   testCurveMedialAxis
   testStretchedArc
