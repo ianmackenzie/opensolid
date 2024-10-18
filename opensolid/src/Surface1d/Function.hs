@@ -107,7 +107,12 @@ instance HasUnits (Function units) where
   type UnitsOf (Function units) = units
 
 instance Units.Coercion (Function unitsA) (Function unitsB) where
-  coerce Function{symbolic} = build (Units.coerce symbolic)
+  coerce Function{symbolic, valueFunction, boundsFunction} =
+    Function
+      { symbolic = Units.coerce symbolic
+      , valueFunction = Units.coerce . valueFunction
+      , boundsFunction = Units.coerce . boundsFunction
+      }
 
 instance
   units1 ~ units2 =>
