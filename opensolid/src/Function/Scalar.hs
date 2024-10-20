@@ -1,5 +1,5 @@
-module Function.Expression
-  ( Expression
+module Function.Scalar
+  ( Scalar
   , zero
   , constant
   , parameter
@@ -33,26 +33,26 @@ import Units qualified
 import Uv qualified
 import Prelude (Double)
 
-data Expression input where
-  Constant :: Float -> Expression input
-  Parameter :: Expression Float
-  U :: Expression Uv.Point
-  V :: Expression Uv.Point
-  Negated :: Expression input -> Expression input
-  Sum :: Expression input -> Expression input -> Expression input
-  Difference :: Expression input -> Expression input -> Expression input
-  Squared :: Expression input -> Expression input
-  Product :: Expression input -> Expression input -> Expression input
-  Quotient :: Expression input -> Expression input -> Expression input
-  Sqrt :: Expression input -> Expression input
-  Sin :: Expression input -> Expression input
-  Cos :: Expression input -> Expression input
+data Scalar input where
+  Constant :: Float -> Scalar input
+  Parameter :: Scalar Float
+  U :: Scalar Uv.Point
+  V :: Scalar Uv.Point
+  Negated :: Scalar input -> Scalar input
+  Sum :: Scalar input -> Scalar input -> Scalar input
+  Difference :: Scalar input -> Scalar input -> Scalar input
+  Squared :: Scalar input -> Scalar input
+  Product :: Scalar input -> Scalar input -> Scalar input
+  Quotient :: Scalar input -> Scalar input -> Scalar input
+  Sqrt :: Scalar input -> Scalar input
+  Sin :: Scalar input -> Scalar input
+  Cos :: Scalar input -> Scalar input
 
-deriving instance Eq (Expression input)
+deriving instance Eq (Scalar input)
 
-deriving instance Ord (Expression input)
+deriving instance Ord (Scalar input)
 
-instance Composition (Expression input) (Expression Float) (Expression input) where
+instance Composition (Scalar input) (Scalar Float) (Scalar input) where
   Constant value . _ = constant value
   Parameter . input = input
   Negated arg . input = negated (arg . input)
@@ -68,9 +68,9 @@ instance Composition (Expression input) (Expression Float) (Expression input) wh
 instance
   input1 ~ input2 =>
   Composition
-    (Expression input1, Expression input2)
-    (Expression Uv.Point)
-    (Expression input1)
+    (Scalar input1, Scalar input2)
+    (Scalar Uv.Point)
+    (Scalar input1)
   where
   Constant value . _ = constant value
   U . (input, _) = input
@@ -85,31 +85,31 @@ instance
   Sin arg . inputs = sin (arg . inputs)
   Cos arg . inputs = cos (arg . inputs)
 
-zero :: Expression input
+zero :: Scalar input
 zero = constant 0.0
 
-one :: Expression input
+one :: Scalar input
 one = constant 1.0
 
-constant :: Qty units -> Expression input
+constant :: Qty units -> Scalar input
 constant value = Constant (Units.coerce value)
 
-parameter :: Expression Float
+parameter :: Scalar Float
 parameter = Parameter
 
-u :: Expression Uv.Point
+u :: Scalar Uv.Point
 u = U
 
-v :: Expression Uv.Point
+v :: Scalar Uv.Point
 v = V
 
-negated :: Expression input -> Expression input
+negated :: Scalar input -> Scalar input
 negated (Constant value) = Constant (negate value)
 negated (Negated expression) = expression
 negated (Difference lhs rhs) = Difference rhs lhs
 negated expression = Negated expression
 
-sum :: Expression input -> Expression input -> Expression input
+sum :: Scalar input -> Scalar input -> Scalar input
 sum (Constant a) (Constant b) = Constant (a + b)
 sum expression (Constant 0.0) = expression -- x + 0 = x
 sum (Constant 0.0) expression = expression -- 0 + x = x
@@ -121,7 +121,7 @@ sum (Constant a) (Difference expression (Constant b)) = Sum (Constant (a - b)) e
 sum (Difference expression (Constant a)) (Constant b) = Sum (Constant (b - a)) expression -- (x - a) + b = (b - a) + x
 sum lhs rhs = if lhs <= rhs then Sum lhs rhs else Sum rhs lhs -- Canonicalize argument order using lexical ordering
 
-difference :: Expression input -> Expression input -> Expression input
+difference :: Scalar input -> Scalar input -> Scalar input
 difference (Constant a) (Constant b) = constant (a - b)
 difference expression (Constant 0.0) = expression -- x - 0 = x
 difference (Constant 0.0) expression = negated expression -- 0 - x = -x
@@ -133,7 +133,7 @@ difference (Constant a) (Difference expression (Constant b)) = difference (const
 difference (Difference expression (Constant a)) (Constant b) = difference expression (constant (a + b)) -- (x - a) - b = x - (a + b)
 difference lhs rhs = Difference lhs rhs
 
-product :: Expression input -> Expression input -> Expression input
+product :: Scalar input -> Scalar input -> Scalar input
 product (Constant a) (Constant b) = constant (a * b)
 product _ (Constant 0.0) = zero
 product (Constant 0.0) _ = zero
@@ -145,39 +145,39 @@ product (Constant a) (Quotient (Constant b) expression) = quotient (constant (a 
 product (Quotient (Constant a) expression) (Constant b) = quotient (constant (a * b)) expression -- (a / x) * b = (a * b) / x
 product lhs rhs = if lhs <= rhs then Product lhs rhs else Product rhs lhs -- Canonicalize argument order using lexical ordering
 
-twice :: Expression input -> Expression input
+twice :: Scalar input -> Scalar input
 twice = product (constant 2.0)
 
-half :: Expression input -> Expression input
+half :: Scalar input -> Scalar input
 half = product (constant 0.5)
 
-quotient :: Expression input -> Expression input -> Expression input
+quotient :: Scalar input -> Scalar input -> Scalar input
 quotient (Constant a) (Constant b) = constant (a / b)
 quotient (Constant 0.0) _ = zero
 quotient expression (Constant a) = product (constant (1.0 / a)) expression
 quotient expression (Quotient lhs rhs) = product expression (quotient rhs lhs)
 quotient lhs rhs = Quotient lhs rhs
 
-squared :: Expression input -> Expression input
+squared :: Scalar input -> Scalar input
 squared (Constant value) = constant (Float.squared value)
 squared (Negated arg) = squared arg
 squared (Sqrt expression) = expression
 squared expression = Squared expression
 
-sqrt :: Expression input -> Expression input
+sqrt :: Scalar input -> Scalar input
 sqrt (Constant value) = constant (Float.sqrt value)
 sqrt expression = Sqrt expression
 
-sin :: Expression input -> Expression input
+sin :: Scalar input -> Scalar input
 sin (Constant value) = constant (Float.sin value)
 sin expression = Sin expression
 
-cos :: Expression input -> Expression input
+cos :: Scalar input -> Scalar input
 cos (Constant value) = constant (Float.cos value)
 cos (Negated expression) = cos expression
 cos expression = Cos expression
 
-curveDerivative :: Expression Float -> Expression Float
+curveDerivative :: Scalar Float -> Scalar Float
 curveDerivative expression = case expression of
   Constant _ -> zero
   Parameter -> one
@@ -194,7 +194,7 @@ curveDerivative expression = case expression of
   Sin arg -> product (curveDerivative arg) (cos arg)
   Cos arg -> product (negated (curveDerivative arg)) (sin arg)
 
-surfaceDerivative :: Uv.Parameter -> Expression Uv.Point -> Expression Uv.Point
+surfaceDerivative :: Uv.Parameter -> Scalar Uv.Point -> Scalar Uv.Point
 surfaceDerivative p expression = case expression of
   Constant _ -> zero
   U -> if p == Uv.U then one else zero
@@ -213,10 +213,10 @@ surfaceDerivative p expression = case expression of
   Sin arg -> product (surfaceDerivative p arg) (cos arg)
   Cos arg -> product (negated (surfaceDerivative p arg)) (sin arg)
 
-show :: Expression input -> Text
+show :: Scalar input -> Text
 show = showWithPrecedence 0
 
-showWithPrecedence :: Int -> Expression input -> Text
+showWithPrecedence :: Int -> Scalar input -> Text
 showWithPrecedence precedence expression = case expression of
   Parameter -> "t"
   U -> "u"
@@ -232,7 +232,7 @@ showWithPrecedence precedence expression = case expression of
   Sin arg -> showFunctionCall precedence "sin" [arg]
   Cos arg -> showFunctionCall precedence "cos" [arg]
 
-showFunctionCall :: Int -> Text -> List (Expression input) -> Text
+showFunctionCall :: Int -> Text -> List (Scalar input) -> Text
 showFunctionCall precedence functionName arguments =
   showParenthesized (precedence >= 10) $
     Text.join " " (functionName : List.map (showWithPrecedence 10) arguments)
@@ -241,9 +241,9 @@ showParenthesized :: Bool -> Text -> Text
 showParenthesized True text = "(" + text + ")"
 showParenthesized False text = text
 
-data Expression#
+data Scalar#
 
-type Ptr = Foreign.Ptr Expression#
+type Ptr = Foreign.Ptr Scalar#
 
 foreign import ccall unsafe "opensolid_expression_constant"
   opensolid_expression_constant :: Double -> Ptr
@@ -280,7 +280,7 @@ foreign import ccall unsafe "opensolid_expression_cos"
 
 -- TODO attach a finalizer to the returned Ptr value,
 -- to delete the underlying Rust value?
-ptr :: Expression input -> Ptr
+ptr :: Scalar input -> Ptr
 ptr expression = case expression of
   Parameter -> opensolid_expression_argument (fromIntegral 0)
   U -> opensolid_expression_argument (fromIntegral 0)

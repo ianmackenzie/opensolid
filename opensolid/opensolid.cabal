@@ -238,7 +238,7 @@ library
     Curve1d.Integral
     Curve2d.Derivatives
     Curve2d.Segment
-    Function.Expression
+    Function.Scalar
     Json.FieldSchema
     Point2d.CoordinateTransformation
     Point3d.CoordinateTransformation
