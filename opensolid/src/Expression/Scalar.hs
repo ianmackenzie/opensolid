@@ -17,6 +17,7 @@ module Expression.Scalar
   , curveDerivative
   , surfaceDerivative
   , show
+  , showWithPrecedence
   , Ptr
   , ptr
   )
