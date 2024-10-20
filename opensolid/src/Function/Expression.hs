@@ -79,30 +79,41 @@ instance Eq (Expression input) where
 instance Ord (Expression input) where
   compare (Constant a) (Constant b) = compare a b
   compare (Constant _) _ = LT
+  compare _ (Constant _) = GT
   compare Parameter Parameter = EQ
   compare Parameter _ = LT
+  compare _ Parameter = LT
   compare U U = EQ
   compare U _ = LT
+  compare _ U = GT
   compare V V = EQ
   compare V _ = LT
+  compare _ V = GT
   compare (Negated arg1) (Negated arg2) = compare arg1 arg2
   compare (Negated _) _ = LT
+  compare _ (Negated _) = GT
   compare (Sum lhs1 rhs1) (Sum lhs2 rhs2) = compare (lhs1, rhs1) (lhs2, rhs2)
   compare (Sum _ _) _ = LT
+  compare _ (Sum _ _) = GT
   compare (Difference lhs1 rhs1) (Difference lhs2 rhs2) = compare (lhs1, rhs1) (lhs2, rhs2)
   compare (Difference _ _) _ = LT
+  compare _ (Difference _ _) = GT
   compare (Squared arg1) (Squared arg2) = compare arg1 arg2
   compare (Squared _) _ = LT
+  compare _ (Squared _) = GT
   compare (Product lhs1 rhs1) (Product lhs2 rhs2) = compare (lhs1, rhs1) (lhs2, rhs2)
   compare (Product _ _) _ = LT
+  compare _ (Product _ _) = GT
   compare (Quotient lhs1 rhs1) (Quotient lhs2 rhs2) = compare (lhs1, rhs1) (lhs2, rhs2)
   compare (Quotient _ _) _ = LT
+  compare _ (Quotient _ _) = GT
   compare (Sqrt arg1) (Sqrt arg2) = compare arg1 arg2
   compare (Sqrt _) _ = LT
+  compare _ (Sqrt _) = GT
   compare (Sin arg1) (Sin arg2) = compare arg1 arg2
   compare (Sin _) _ = LT
+  compare _ (Sin _) = GT
   compare (Cos arg1) (Cos arg2) = compare arg1 arg2
-  compare (Cos _) _ = LT
 
 instance Composition (Expression input) (Expression Float) (Expression input) where
   Constant value . _ = constant value
