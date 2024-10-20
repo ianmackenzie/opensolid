@@ -171,6 +171,11 @@ instance Show (Expression input output) where
             "(" + Scalar.show vs3x + "," + Scalar.show vs3y + "," + Scalar.show vs3z + ")"
     prefix + suffix
 
+-- TODO special-case compiling of very simple expressions (constants or parameter values)
+-- to pure Haskell functions, to avoid FFI overhead when the expression itself is trivial
+--   -> maybe even have heuristics on 'size' of expression,
+--      and/or whether it includes any repeated subexpressions
+
 curve1d :: Scalar Float -> Expression Float (Qty units)
 curve1d expression = do
   let px = Scalar.ptr expression
