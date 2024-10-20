@@ -29,11 +29,11 @@ where
 
 import Bounds2d (Bounds2d (Bounds2d))
 import Direction2d (Direction2d)
+import Expression.Scalar (Scalar)
+import Expression.Scalar qualified as Scalar
 import Foreign (FunPtr, Ptr)
 import Foreign qualified
 import Foreign.Marshal.Alloc qualified as Alloc
-import Expression.Scalar (Scalar)
-import Expression.Scalar qualified as Scalar
 import IO qualified
 import OpenSolid
 import Point2d (Point2d (Point2d))
