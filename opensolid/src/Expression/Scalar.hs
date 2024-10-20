@@ -1,4 +1,4 @@
-module Function.Scalar
+module Expression.Scalar
   ( Scalar
   , zero
   , constant

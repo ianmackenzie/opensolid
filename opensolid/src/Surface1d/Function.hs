@@ -38,7 +38,7 @@ import Direction2d qualified
 import Domain1d qualified
 import Domain2d (Domain2d (Domain2d))
 import Domain2d qualified
-import Function qualified
+import Expression (Expression)
 import Float qualified
 import Fuzzy qualified
 import List qualified
@@ -101,7 +101,7 @@ class
   evaluateImpl :: function -> Uv.Point -> Qty units
   boundsImpl :: function -> Uv.Bounds -> Range units
   derivativeImpl :: Parameter -> function -> Function units
-  expressionImpl :: function -> Maybe (Function.Function Uv.Point (Qty units))
+  expressionImpl :: function -> Maybe (Expression Uv.Point (Qty units))
 
 instance HasUnits (Function units) where
   type UnitsOf (Function units) = units
@@ -339,7 +339,7 @@ instance Curve1d.Interface (CurveOnSurface units) units where
   expressionImpl (CurveOnSurface uvCurve function) =
     Maybe.map2 (.) (expression function) (Curve2d.expression uvCurve)
 
-expression :: Function units -> Maybe (Function.Function Uv.Point (Qty units))
+expression :: Function units -> Maybe (Expression Uv.Point (Qty units))
 expression Function{symbolic} = Symbolic.expression symbolic
 
 zeros :: Tolerance units => Function units -> Result Zeros.Error Zeros

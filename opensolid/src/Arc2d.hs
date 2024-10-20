@@ -32,7 +32,7 @@ import Curve2d (Curve2d)
 import Curve2d qualified
 import Direction2d (Direction2d)
 import Direction2d qualified
-import Function qualified
+import Expression qualified
 import Float qualified
 import Frame2d (Frame2d)
 import Frame2d qualified
@@ -107,8 +107,8 @@ instance Curve2d.Interface (Arc (space @ units)) (space @ units) where
         let endAngle = b - theta - Angle.quarterTurn
         Just (Arc2d centerPoint d2 -d1 r2 r1 startAngle endAngle)
   expressionImpl (Arc p0 vx vy a b) = do
-    let angle = a + Function.parameter * (b - a)
-    Just (p0 + vx * Function.cos angle + vy * Function.sin angle)
+    let angle = a + Expression.parameter * (b - a)
+    Just (p0 + vx * Expression.cos angle + vy * Expression.sin angle)
 
 maybeMagnitudeAndDirection :: Tolerance units => Vector2d (space @ units) -> Maybe (Qty units, Direction2d space)
 maybeMagnitudeAndDirection vector =

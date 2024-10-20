@@ -9,7 +9,7 @@ module VectorCurve2d.DegenerateEndpoint
   )
 where
 
-import Function.VectorCurve2d qualified
+import Expression.VectorCurve2d qualified
 import OpenSolid
 import Qty qualified
 import Range (Range (Range))
@@ -63,7 +63,7 @@ instance VectorCurve2d.Interface (QCurve (space @ units)) (space @ units) where
     let transformedCurveDerivative = VectorCurve2d.transformBy transform curveDerivative
     let transformedValue = Vector2d.transformBy transform value
     VectorCurve2d.new (QCurve n t0 transformedCurveDerivative transformedValue)
-  expressionImpl (QCurve _ _ _ value) = Just (Function.VectorCurve2d.constant value)
+  expressionImpl (QCurve _ _ _ value) = Just (Expression.VectorCurve2d.constant value)
 
 qCurve :: Int -> Float -> VectorCurve2d (space @ units) -> VectorCurve2d (space @ units)
 qCurve n t0 curveDerivative =

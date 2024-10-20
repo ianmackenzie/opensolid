@@ -22,8 +22,8 @@ import DirectionCurve2d qualified
 import Drawing2d qualified
 import Duration qualified
 import Float qualified
-import Function (Function)
-import Function qualified
+import Expression (Expression)
+import Expression qualified
 import IO qualified
 import Int qualified
 import Length (Length)
@@ -593,18 +593,18 @@ testCurveMedialAxis = IO.do
 
 testJit :: IO ()
 testJit = IO.do
-  let x = Function.parameter
-  let xSquared = Function.squared x
+  let x = Expression.parameter
+  let xSquared = Expression.squared x
   let function = xSquared / (xSquared + 1.0)
-  log "JIT evaluated" (Function.value function 2.0)
-  log "JIT bounds" (Function.bounds function (Range.from 1.0 3.0))
+  log "JIT evaluated" (Expression.value function 2.0)
+  log "JIT bounds" (Expression.bounds function (Range.from 1.0 3.0))
 
 testJitCurve2d :: IO ()
 testJitCurve2d = IO.do
-  let x = 10.0 * Function.parameter
-  let y = Function.sqrt Function.parameter
-  let curve = Function.xy x y :: Function Float (Point2d (Global @ Unitless))
-  log "Evaluated 2D curve" (Function.value curve 3.0)
+  let x = 10.0 * Expression.parameter
+  let y = Expression.sqrt Expression.parameter
+  let curve = Expression.xy x y :: Expression Float (Point2d (Global @ Unitless))
+  log "Evaluated 2D curve" (Expression.value curve 3.0)
 
 main :: IO ()
 main = Tolerance.using (Length.meters 1e-9) IO.do

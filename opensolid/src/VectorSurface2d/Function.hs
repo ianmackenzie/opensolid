@@ -21,9 +21,9 @@ module VectorSurface2d.Function
 where
 
 import Direction2d (Direction2d)
-import Function qualified
+import Expression (Expression)
 import Float qualified
-import Function.VectorSurface2d qualified
+import Expression.VectorSurface2d qualified
 import Maybe qualified
 import OpenSolid
 import Qty qualified
@@ -47,7 +47,7 @@ class
   evaluateImpl :: function -> Uv.Point -> Vector2d coordinateSystem
   boundsImpl :: function -> Uv.Bounds -> VectorBounds2d coordinateSystem
   derivativeImpl :: Parameter -> function -> Function coordinateSystem
-  expressionImpl :: function -> Maybe (Function.Function Uv.Point (Vector2d coordinateSystem))
+  expressionImpl :: function -> Maybe (Expression Uv.Point (Vector2d coordinateSystem))
 
 data Function (coordinateSystem :: CoordinateSystem) where
   Function ::
@@ -558,12 +558,12 @@ derivative parameter function = case function of
     (derivative parameter f1 .*. f2 - f1 .*. Surface1d.Function.derivative parameter f2)
       .!/.! Surface1d.Function.squared' f2
 
-expression :: Function (space @ units) -> Maybe (Function.Function Uv.Point (Vector2d (space @ units)))
+expression :: Function (space @ units) -> Maybe (Expression Uv.Point (Vector2d (space @ units)))
 expression function = case function of
   Function f -> expressionImpl f
   Coerce f -> Units.coerce (expression f)
-  Constant v -> Just (Function.VectorSurface2d.constant v)
-  XY x y -> Maybe.map2 Function.VectorSurface2d.xy (Surface1d.Function.expression x) (Surface1d.Function.expression y)
+  Constant v -> Just (Expression.VectorSurface2d.constant v)
+  XY x y -> Maybe.map2 Expression.VectorSurface2d.xy (Surface1d.Function.expression x) (Surface1d.Function.expression y)
   Negated f -> Maybe.map negate (expression f)
   Sum f1 f2 -> Maybe.map2 (+) (expression f1) (expression f2)
   Difference f1 f2 -> Maybe.map2 (-) (expression f1) (expression f2)

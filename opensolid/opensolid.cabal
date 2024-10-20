@@ -150,11 +150,11 @@ library
     Duration
     Error
     Estimate
-    Function
-    Function.Curve2d
-    Function.Surface2d
-    Function.VectorCurve2d
-    Function.VectorSurface2d
+    Expression
+    Expression.Curve2d
+    Expression.Surface2d
+    Expression.VectorCurve2d
+    Expression.VectorSurface2d
     File
     Float
     Frame2d
@@ -238,7 +238,7 @@ library
     Curve1d.Integral
     Curve2d.Derivatives
     Curve2d.Segment
-    Function.Scalar
+    Expression.Scalar
     Json.FieldSchema
     Point2d.CoordinateTransformation
     Point3d.CoordinateTransformation

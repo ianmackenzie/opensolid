@@ -16,22 +16,22 @@ where
 import Angle qualified
 import Bounds2d qualified
 import Float qualified
-import Function (Function)
-import Function qualified
+import Expression (Expression)
+import Expression qualified
 import Maybe qualified
 import OpenSolid
 import Point2d qualified
 import Qty qualified
 import Range (Range)
 import Range qualified
-import {-# SOURCE #-} Surface1d.Function qualified
+import {-# SOURCE #-} Surface1d.Function qualified as Function
 import Units qualified
 import Uv (Parameter (U, V))
 import Uv qualified
 
 data Symbolic units where
   Function ::
-    Surface1d.Function.Interface function units =>
+    Function.Interface function units =>
     function ->
     Symbolic units
   Constant ::
@@ -228,7 +228,7 @@ instance Division' Int (Symbolic units) where
 
 evaluate :: Symbolic units -> Uv.Point -> Qty units
 evaluate function uv = case function of
-  Function f -> Surface1d.Function.evaluateImpl f uv
+  Function f -> Function.evaluateImpl f uv
   Constant x -> x
   Coerce f -> Units.coerce (evaluate f uv)
   Parameter U -> Point2d.xCoordinate uv
@@ -245,7 +245,7 @@ evaluate function uv = case function of
 
 bounds :: Symbolic units -> Uv.Bounds -> Range units
 bounds symbolic uv = case symbolic of
-  Function f -> Surface1d.Function.boundsImpl f uv
+  Function f -> Function.boundsImpl f uv
   Constant x -> Range.constant x
   Coerce f -> Units.coerce (bounds f uv)
   Parameter U -> Bounds2d.xCoordinate uv
@@ -263,7 +263,7 @@ bounds symbolic uv = case symbolic of
 derivative :: Parameter -> Symbolic units -> Symbolic units
 derivative varyingParameter symbolic =
   case symbolic of
-    Function f -> Surface1d.Function.unwrap (Surface1d.Function.derivativeImpl varyingParameter f)
+    Function f -> Function.unwrap (Function.derivativeImpl varyingParameter f)
     Constant _ -> Constant Qty.zero
     Coerce f -> Units.coerce (derivative varyingParameter f)
     Parameter p -> if p == varyingParameter then Constant 1.0 else Constant 0.0
@@ -304,28 +304,28 @@ cosSquared f = 0.5 * cos (2 * f) + 0.5
 sinSquared :: Symbolic Radians -> Symbolic Unitless
 sinSquared f = 0.5 - 0.5 * cos (2 * f)
 
-expression :: Symbolic units -> Maybe (Function Uv.Point (Qty units))
+expression :: Symbolic units -> Maybe (Expression Uv.Point (Qty units))
 expression symbolic = case symbolic of
-  Function f -> Surface1d.Function.expressionImpl f
-  Constant x -> Just (Function.constant x)
-  Parameter U -> Just Function.u
-  Parameter V -> Just Function.v
+  Function f -> Function.expressionImpl f
+  Constant x -> Just (Expression.constant x)
+  Parameter U -> Just Expression.u
+  Parameter V -> Just Expression.v
   Negated f -> Maybe.map negate (expression f)
   Sum f1 f2 -> Maybe.map2 (+) (expression f1) (expression f2)
   Difference f1 f2 -> Maybe.map2 (-) (expression f1) (expression f2)
   Product' f1 f2 -> Maybe.map2 (.*.) (expression f1) (expression f2)
   Quotient' f1 f2 -> Maybe.map2 (./.) (expression f1) (expression f2)
-  Squared' f -> Maybe.map Function.squared' (expression f)
-  SquareRoot' f -> Maybe.map Function.sqrt' (expression f)
-  Sin f -> Maybe.map Function.sin (expression f)
-  Cos f -> Maybe.map Function.cos (expression f)
+  Squared' f -> Maybe.map Expression.squared' (expression f)
+  SquareRoot' f -> Maybe.map Expression.sqrt' (expression f)
+  Sin f -> Maybe.map Expression.sin (expression f)
+  Cos f -> Maybe.map Expression.cos (expression f)
   Coerce f -> Units.coerce (expression f)
 
 valueFunction :: Symbolic units -> (Uv.Point -> Qty units)
 valueFunction symbolic = case expression symbolic of
-  Just expr -> Function.value expr
+  Just expr -> Expression.value expr
   Nothing -> case symbolic of
-    Function f -> Surface1d.Function.evaluateImpl f
+    Function f -> Function.evaluateImpl f
     Constant x -> always x
     Coerce f -> Units.coerce . valueFunction f
     Parameter U -> Point2d.xCoordinate
@@ -354,9 +354,9 @@ valueFunction symbolic = case expression symbolic of
 
 boundsFunction :: Symbolic units -> (Uv.Bounds -> Range units)
 boundsFunction symbolic = case expression symbolic of
-  Just expr -> Function.bounds expr
+  Just expr -> Expression.bounds expr
   Nothing -> case symbolic of
-    Function f -> Surface1d.Function.boundsImpl f
+    Function f -> Function.boundsImpl f
     Constant x -> always (Range.constant x)
     Coerce f -> Units.coerce . boundsFunction f
     Parameter U -> Bounds2d.xCoordinate

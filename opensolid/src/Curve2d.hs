@@ -75,11 +75,11 @@ import Curve2d.Segment qualified as Segment
 import Direction2d (Direction2d)
 import DirectionCurve2d (DirectionCurve2d)
 import Error qualified
-import Function (Function)
+import Expression (Expression)
 import Float qualified
 import Frame2d (Frame2d)
 import Frame2d qualified
-import Function.Curve2d qualified
+import Expression.Curve2d qualified
 import {-# SOURCE #-} Line2d (Line2d)
 import {-# SOURCE #-} Line2d qualified
 import List qualified
@@ -201,7 +201,7 @@ class
   asArcImpl :: Tolerance (UnitsOf coordinateSystem) => curve -> Maybe (Arc2d coordinateSystem)
   asArcImpl _ = Nothing
 
-  expressionImpl :: curve -> Maybe (Function Float (Point2d coordinateSystem))
+  expressionImpl :: curve -> Maybe (Expression Float (Point2d coordinateSystem))
 
 instance Interface (Curve2d (space @ units)) (space @ units) where
   startPointImpl = startPoint
@@ -225,13 +225,13 @@ instance Interface (Point2d (space @ units)) (space @ units) where
   reverseImpl = identity
   boundsImpl = Bounds2d.constant
   transformByImpl transform point = new (Point2d.transformBy transform point)
-  expressionImpl point = Just (Function.Curve2d.constant point)
+  expressionImpl point = Just (Expression.Curve2d.constant point)
 
-expression :: Curve2d (space @ units) -> Maybe (Function Float (Point2d (space @ units)))
+expression :: Curve2d (space @ units) -> Maybe (Expression Float (Point2d (space @ units)))
 expression curve = case curve of
   Curve c -> expressionImpl c
   Coerce c -> Units.coerce (expression c)
-  PlaceIn frame c -> Maybe.map (Function.Curve2d.placeIn frame) (expression c)
+  PlaceIn frame c -> Maybe.map (Expression.Curve2d.placeIn frame) (expression c)
   Addition c1 c2 -> Maybe.map2 (+) (expression c1) (VectorCurve2d.expression c2)
   Subtraction c1 c2 -> Maybe.map2 (-) (expression c1) (VectorCurve2d.expression c2)
 
@@ -823,7 +823,7 @@ instance Interface (TransformBy curve (space @ units)) (space @ units) where
     Curve2d.new $
       TransformBy (Transform2d.toAffine existing >> Transform2d.toAffine transform) curve
   expressionImpl (TransformBy transform curve) =
-    Maybe.map (Function.Curve2d.transformBy transform) (expressionImpl curve)
+    Maybe.map (Expression.Curve2d.transformBy transform) (expressionImpl curve)
 
 removeStartDegeneracy ::
   Int ->
