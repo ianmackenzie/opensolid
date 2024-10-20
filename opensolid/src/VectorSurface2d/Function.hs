@@ -22,11 +22,10 @@ where
 
 import Direction2d (Direction2d)
 import Expression (Expression)
-import Float qualified
 import Expression.VectorSurface2d qualified
+import Float qualified
 import Maybe qualified
 import OpenSolid
-import Qty qualified
 import Surface1d qualified
 import Surface1d.Function qualified
 import Units qualified
@@ -196,9 +195,8 @@ instance Multiplication' (Surface1d.Function units1) (Function (space @ units2))
   type
     Surface1d.Function units1 .*. Function (space @ units2) =
       Function (space @ (units1 :*: units2))
-  Surface1d.Function.Constant x .*. _ | x == Qty.zero = zero
-  Surface1d.Function.Constant x .*. f2 | x == Units.coerce 1.0 = Units.coerce f2
-  Surface1d.Function.Constant x .*. f2 | x == Units.coerce -1.0 = Units.coerce -f2
+
+  -- TODO add Expresssion case
   _ .*. Constant v | v == Vector2d.zero = zero
   f1 .*. f2 = Product1d2d' f1 f2
 
@@ -229,9 +227,7 @@ instance Multiplication' (Function (space @ units1)) (Surface1d.Function units2)
     Function (space @ units1) .*. Surface1d.Function units2 =
       Function (space @ (units1 :*: units2))
   Constant v .*. _ | v == Vector2d.zero = zero
-  _ .*. Surface1d.Function.Constant x | x == Qty.zero = zero
-  f1 .*. Surface1d.Function.Constant x | x == Units.coerce 1.0 = Units.coerce f1
-  f1 .*. Surface1d.Function.Constant x | x == Units.coerce -1.0 = Units.coerce -f1
+  -- TODO add Expresssion case
   f1 .*. f2 = Product2d1d' f1 f2
 
 instance
@@ -261,7 +257,7 @@ instance Division' (Function (space @ units1)) (Surface1d.Function units2) where
     Function (space @ units1) ./. Surface1d.Function units2 =
       Function (space @ (units1 :/: units2))
   Constant v ./. _ | v == Vector2d.zero = zero
-  f1 ./. Surface1d.Function.Constant x = (1 ./. x) .*^ f1
+  -- TODO add Expresssion case
   f1 ./. f2 = Quotient' f1 f2
 
 instance
@@ -292,6 +288,7 @@ instance Multiplication (Function (space @ units)) Int (Function (space @ units)
 
 instance Multiplication Int (Function (space @ units)) (Function (space @ units))
 
+-- TODO create Expresssion-based Surface1d if both vector surfaces are Expression-based
 data CrossProduct' space units1 units2
   = CrossProduct' (Function (space @ units1)) (Function (space @ units2))
 
@@ -302,7 +299,6 @@ instance Surface1d.Function.Interface (CrossProduct' space units1 units2) (units
   boundsImpl (CrossProduct' f1 f2) t = bounds f1 t .><. bounds f2 t
   derivativeImpl parameter (CrossProduct' f1 f2) =
     derivative parameter f1 .><. f2 + f1 .><. derivative parameter f2
-  expressionImpl (CrossProduct' f1 f2) = Maybe.map2 (.><.) (expression f1) (expression f2)
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -377,6 +373,7 @@ instance
   type Direction2d space1 .><. Function (space2 @ units) = Surface1d.Function (Unitless :*: units)
   direction .><. function = Vector2d.unit direction .<>. function
 
+-- TODO create Expresssion-based Surface1d if both vector surfaces are Expression-based
 data DotProduct' space units1 units2
   = DotProduct' (Function (space @ units1)) (Function (space @ units2))
 
@@ -387,7 +384,6 @@ instance Surface1d.Function.Interface (DotProduct' space units1 units2) (units1 
   boundsImpl (DotProduct' f1 f2) t = bounds f1 t .<>. bounds f2 t
   derivativeImpl parameter (DotProduct' f1 f2) =
     derivative parameter f1 .<>. f2 + f1 .<>. derivative parameter f2
-  expressionImpl (DotProduct' f1 f2) = Maybe.map2 (.<>.) (expression f1) (expression f2)
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -462,6 +458,7 @@ instance
   type Direction2d space1 .<>. Function (space2 @ units) = Surface1d.Function (Unitless :*: units)
   direction .<>. function = Vector2d.unit direction .<>. function
 
+-- TODO create Expresssion-based output if both inputs are Expression-based
 data SurfaceCurveComposition (coordinateSystem :: CoordinateSystem) where
   SurfaceCurveComposition ::
     Surface1d.Function Unitless ->
@@ -489,7 +486,7 @@ instance Interface (SurfaceCurveComposition (space @ units)) (space @ units) whe
     (VectorCurve2d.derivative curve . function) * Surface1d.Function.derivative parameter function
 
   expressionImpl (SurfaceCurveComposition function curve) =
-    Maybe.map2 (.) (VectorCurve2d.expression curve) (Surface1d.Function.expression function)
+    Maybe.map2 (.) (VectorCurve2d.expression curve) (Surface1d.Function.toExpression function)
 
 new :: Interface function (space @ units) => function -> Function (space @ units)
 new = Function
@@ -563,10 +560,10 @@ expression function = case function of
   Function f -> expressionImpl f
   Coerce f -> Units.coerce (expression f)
   Constant v -> Just (Expression.VectorSurface2d.constant v)
-  XY x y -> Maybe.map2 Expression.VectorSurface2d.xy (Surface1d.Function.expression x) (Surface1d.Function.expression y)
+  XY x y -> Maybe.map2 Expression.VectorSurface2d.xy (Surface1d.Function.toExpression x) (Surface1d.Function.toExpression y)
   Negated f -> Maybe.map negate (expression f)
   Sum f1 f2 -> Maybe.map2 (+) (expression f1) (expression f2)
   Difference f1 f2 -> Maybe.map2 (-) (expression f1) (expression f2)
-  Product1d2d' f1 f2 -> Maybe.map2 (.*.) (Surface1d.Function.expression f1) (expression f2)
-  Product2d1d' f1 f2 -> Maybe.map2 (.*.) (expression f1) (Surface1d.Function.expression f2)
-  Quotient' f1 f2 -> Maybe.map2 (./.) (expression f1) (Surface1d.Function.expression f2)
+  Product1d2d' f1 f2 -> Maybe.map2 (.*.) (Surface1d.Function.toExpression f1) (expression f2)
+  Product2d1d' f1 f2 -> Maybe.map2 (.*.) (expression f1) (Surface1d.Function.toExpression f2)
+  Quotient' f1 f2 -> Maybe.map2 (./.) (expression f1) (Surface1d.Function.toExpression f2)

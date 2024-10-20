@@ -202,7 +202,6 @@ library
     Surface1d.Function.HorizontalCurve
     Surface1d.Function.Internal
     Surface1d.Function.Subproblem
-    Surface1d.Function.Symbolic
     Surface1d.Function.VerticalCurve
     Surface1d.Function.Zeros
     Surface2d

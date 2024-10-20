@@ -3,7 +3,7 @@
 {-# OPTIONS_GHC -Wno-partial-fields #-}
 
 module Surface1d.Function
-  ( Function (Constant)
+  ( Function (Parametric)
   , Interface (..)
   , evaluate
   , bounds
@@ -23,11 +23,11 @@ module Surface1d.Function
   , sqrt'
   , sin
   , cos
-  , expression
-  , unwrap
+  , toExpression
   )
 where
 
+import Angle qualified
 import Bounds2d (Bounds2d (Bounds2d))
 import Bounds2d qualified
 import Curve1d (Curve1d)
@@ -39,6 +39,7 @@ import Domain1d qualified
 import Domain2d (Domain2d (Domain2d))
 import Domain2d qualified
 import Expression (Expression)
+import Expression qualified
 import Float qualified
 import Fuzzy qualified
 import List qualified
@@ -57,41 +58,60 @@ import Surface1d.Function.SaddleRegion (SaddleRegion)
 import Surface1d.Function.SaddleRegion qualified as SaddleRegion
 import Surface1d.Function.Subproblem (CornerValues (..), Subproblem (..))
 import Surface1d.Function.Subproblem qualified as Subproblem
-import Surface1d.Function.Symbolic (Symbolic)
-import Surface1d.Function.Symbolic qualified as Symbolic
 import Surface1d.Function.VerticalCurve qualified as VerticalCurve
 import Surface1d.Function.Zeros (Zeros (..))
 import Surface1d.Function.Zeros qualified as Zeros
-import Text qualified
 import Units qualified
 import Uv (Parameter (U, V))
 import Uv qualified
 import Uv.Derivatives (Derivatives)
 import Uv.Derivatives qualified as Derivatives
 import VectorCurve2d qualified
-import Prelude qualified
 
-data Function units = Function
-  { symbolic :: Symbolic units
-  , valueFunction :: ~(Uv.Point -> Qty units)
-  , boundsFunction :: ~(Uv.Bounds -> Range units)
-  }
+data Function units where
+  Function ::
+    Interface function units =>
+    function ->
+    Function units
+  Parametric ::
+    Expression Uv.Point (Qty units) ->
+    Function units
+  Negated ::
+    Function units ->
+    Function units
+  Sum ::
+    Function units ->
+    Function units ->
+    Function units
+  Difference ::
+    Function units ->
+    Function units ->
+    Function units
+  Product' ::
+    Function units1 ->
+    Function units2 ->
+    Function (units1 :*: units2)
+  Quotient' ::
+    Function units1 ->
+    Function units2 ->
+    Function (units1 :/: units2)
+  Squared' ::
+    Function units ->
+    Function (units :*: units)
+  SquareRoot' ::
+    Function (units :*: units) ->
+    Function units
+  Sin ::
+    Function Radians ->
+    Function Unitless
+  Cos ::
+    Function Radians ->
+    Function Unitless
+  Coerce ::
+    Function units1 ->
+    Function units2
 
-instance Show (Function units) where show _ = Text.unpack "<Surface1d.Function>" -- TODO
-
-pattern Constant :: Qty units -> Function units
-pattern Constant value <- Function{symbolic = Symbolic.Constant value}
-
-build :: Symbolic units -> Function units
-build symbolic =
-  Function
-    { symbolic
-    , valueFunction = Symbolic.valueFunction symbolic
-    , boundsFunction = Symbolic.boundsFunction symbolic
-    }
-
-unwrap :: Function units -> Symbolic units
-unwrap Function{symbolic} = symbolic
+deriving instance Show (Function units)
 
 class
   Show function =>
@@ -101,18 +121,14 @@ class
   evaluateImpl :: function -> Uv.Point -> Qty units
   boundsImpl :: function -> Uv.Bounds -> Range units
   derivativeImpl :: Parameter -> function -> Function units
-  expressionImpl :: function -> Maybe (Expression Uv.Point (Qty units))
 
 instance HasUnits (Function units) where
   type UnitsOf (Function units) = units
 
 instance Units.Coercion (Function unitsA) (Function unitsB) where
-  coerce Function{symbolic, valueFunction, boundsFunction} =
-    Function
-      { symbolic = Units.coerce symbolic
-      , valueFunction = Units.coerce . valueFunction
-      , boundsFunction = Units.coerce . boundsFunction
-      }
+  coerce (Parametric expression) = Parametric (Units.coerce expression)
+  coerce (Coerce function) = Coerce function
+  coerce function = Coerce function
 
 instance
   units1 ~ units2 =>
@@ -124,7 +140,6 @@ instance
   units1 ~ units2 =>
   ApproximateEquality (Function units1) (Qty units2) units1
   where
-  Constant value1 ~= value2 = value1 ~= value2
   function ~= value = List.allTrue [evaluate function uvPoint ~= value | uvPoint <- Uv.samples]
 
 instance
@@ -148,46 +163,56 @@ instance
   value ^ function = function ^ value
 
 instance Negation (Function units) where
-  negate Function{symbolic} = build (negate symbolic)
+  negate (Parametric expression) = Parametric (negate expression)
+  negate (Coerce function) = Coerce (negate function)
+  negate (Negated function) = function
+  negate (Difference f1 f2) = Difference f2 f1
+  negate (Product' f1 f2) = negate f1 .*. f2
+  negate (Quotient' f1 f2) = negate f1 ./. f2
+  negate function = Negated function
 
 instance Multiplication Sign (Function units) (Function units)
 
 instance Multiplication' Sign (Function units) where
   type Sign .*. Function units = Function (Unitless :*: units)
-  sign .*. Function{symbolic} = build (sign .*. symbolic)
+  Positive .*. function = Units.coerce function
+  Negative .*. function = Units.coerce -function
 
 instance Multiplication (Function units) Sign (Function units)
 
 instance Multiplication' (Function units) Sign where
   type Function units .*. Sign = Function (units :*: Unitless)
-  Function{symbolic} .*. sign = build (symbolic .*. sign)
+  function .*. Positive = Units.coerce function
+  function .*. Negative = Units.coerce -function
 
 instance units ~ units_ => Addition (Function units) (Function units_) (Function units) where
-  Function{symbolic = symbolic1} + Function{symbolic = symbolic2} = build (symbolic1 + symbolic2)
+  Parametric lhs + Parametric rhs = Parametric (lhs + rhs)
+  function1 + function2 = Sum function1 function2
 
 instance units ~ units_ => Addition (Function units) (Qty units_) (Function units) where
-  Function{symbolic} + value = build (symbolic + value)
+  function + value = function + constant value
 
 instance units ~ units_ => Addition (Qty units) (Function units_) (Function units) where
-  value + Function{symbolic} = build (value + symbolic)
+  value + function = constant value + function
 
 instance
   units1 ~ units2 =>
   Subtraction (Function units1) (Function units2) (Function units1)
   where
-  Function{symbolic = symbolic1} - Function{symbolic = symbolic2} = build (symbolic1 - symbolic2)
+  Parametric lhs - Parametric rhs = Parametric (lhs - rhs)
+  function1 - function2 = Difference function1 function2
 
 instance
   units1 ~ units2 =>
   Subtraction (Function units1) (Qty units2) (Function units1)
   where
-  Function{symbolic} - value = build (symbolic - value)
+  function - value = function - constant value
 
 instance
   units1 ~ units2 =>
   Subtraction (Qty units1) (Function units2) (Function units1)
   where
-  value - Function{symbolic} = build (value - symbolic)
+  value - function = constant value - function
 
 instance
   Units.Product units1 units2 units3 =>
@@ -195,7 +220,8 @@ instance
 
 instance Multiplication' (Function units1) (Function units2) where
   type Function units1 .*. Function units2 = Function (units1 :*: units2)
-  Function{symbolic = symbolic1} .*. Function{symbolic = symbolic2} = build (symbolic1 .*. symbolic2)
+  Parametric lhs .*. Parametric rhs = Parametric (lhs .*. rhs)
+  lhs .*. rhs = Product' lhs rhs
 
 instance
   Units.Product units1 units2 units3 =>
@@ -203,7 +229,7 @@ instance
 
 instance Multiplication' (Function units1) (Qty units2) where
   type Function units1 .*. Qty units2 = Function (units1 :*: units2)
-  Function{symbolic} .*. value = build (symbolic .*. value)
+  function .*. value = function .*. constant value
 
 instance
   Units.Product units1 units2 units3 =>
@@ -211,19 +237,19 @@ instance
 
 instance Multiplication' (Qty units1) (Function units2) where
   type Qty units1 .*. Function units2 = Function (units1 :*: units2)
-  value .*. Function{symbolic} = build (value .*. symbolic)
+  value .*. function = constant value .*. function
 
 instance Multiplication (Function units) Int (Function units)
 
 instance Multiplication' (Function units) Int where
   type Function units .*. Int = Function (units :*: Unitless)
-  Function{symbolic} .*. value = build (symbolic .*. value)
+  function .*. value = function .*. Float.int value
 
 instance Multiplication Int (Function units) (Function units)
 
 instance Multiplication' Int (Function units) where
   type Int .*. Function units = Function (Unitless :*: units)
-  value .*. Function{symbolic} = build (value .*. symbolic)
+  value .*. function = Float.int value .*. function
 
 instance
   Units.Quotient units1 units2 units3 =>
@@ -231,7 +257,8 @@ instance
 
 instance Division' (Function units1) (Function units2) where
   type Function units1 ./. Function units2 = Function (units1 :/: units2)
-  Function{symbolic = symbolic1} ./. Function{symbolic = symbolic2} = build (symbolic1 ./. symbolic2)
+  Parametric lhs ./. Parametric rhs = Parametric (lhs ./. rhs)
+  lhs ./. rhs = Quotient' lhs rhs
 
 instance
   Units.Quotient units1 units2 units3 =>
@@ -239,13 +266,13 @@ instance
 
 instance Division' (Function units1) (Qty units2) where
   type Function units1 ./. Qty units2 = Function (units1 :/: units2)
-  Function{symbolic} ./. value = build (symbolic ./. value)
+  function ./. value = function ./. constant value
 
 instance Division (Function units) Int (Function units)
 
 instance Division' (Function units) Int where
   type Function units ./. Int = Function (units :/: Unitless)
-  Function{symbolic} ./. value = build (symbolic ./. value)
+  function ./. value = function ./. Float.int value
 
 instance
   Units.Quotient units1 units2 units3 =>
@@ -253,7 +280,7 @@ instance
 
 instance Division' (Qty units1) (Function units2) where
   type Qty units1 ./. Function units2 = Function (units1 :/: units2)
-  value ./. Function{symbolic} = build (value ./. symbolic)
+  value ./. function = constant value ./. function
 
 instance
   Units.Inverse units1 units2 =>
@@ -261,17 +288,54 @@ instance
 
 instance Division' Int (Function units) where
   type Int ./. Function units = Function (Unitless :/: units)
-  value ./. Function{symbolic} = build (value ./. symbolic)
+  value ./. function = Float.int value ./. function
 
 evaluate :: Function units -> Uv.Point -> Qty units
-evaluate Function{valueFunction} uv = valueFunction uv
+evaluate function uv = case function of
+  Function f -> evaluateImpl f uv
+  Parametric x -> Expression.value x uv
+  Coerce f -> Units.coerce (evaluate f uv)
+  Negated f -> negate (evaluate f uv)
+  Sum f1 f2 -> evaluate f1 uv + evaluate f2 uv
+  Difference f1 f2 -> evaluate f1 uv - evaluate f2 uv
+  Product' f1 f2 -> evaluate f1 uv .*. evaluate f2 uv
+  Quotient' f1 f2 -> evaluate f1 uv ./. evaluate f2 uv
+  Squared' f -> Qty.squared' (evaluate f uv)
+  SquareRoot' f -> Qty.sqrt' (evaluate f uv)
+  Sin f -> Angle.sin (evaluate f uv)
+  Cos f -> Angle.cos (evaluate f uv)
 
 bounds :: Function units -> Uv.Bounds -> Range units
-bounds Function{boundsFunction} uv = boundsFunction uv
+bounds function uv = case function of
+  Function f -> boundsImpl f uv
+  Parametric expression -> Expression.bounds expression uv
+  Coerce f -> Units.coerce (bounds f uv)
+  Negated f -> negate (bounds f uv)
+  Sum f1 f2 -> bounds f1 uv + bounds f2 uv
+  Difference f1 f2 -> bounds f1 uv - bounds f2 uv
+  Product' f1 f2 -> bounds f1 uv .*. bounds f2 uv
+  Quotient' f1 f2 -> bounds f1 uv ./. bounds f2 uv
+  Squared' f -> Range.squared' (bounds f uv)
+  SquareRoot' f -> Range.sqrt' (bounds f uv)
+  Sin f -> Range.sin (bounds f uv)
+  Cos f -> Range.cos (bounds f uv)
 
 derivative :: Parameter -> Function units -> Function units
-derivative varyingParameter (Function{symbolic}) =
-  build (Symbolic.derivative varyingParameter symbolic)
+derivative varyingParameter function = case function of
+  Function f -> derivativeImpl varyingParameter f
+  Parametric expression -> Parametric (Expression.surfaceDerivative varyingParameter expression)
+  Coerce f -> Units.coerce (derivative varyingParameter f)
+  Negated f -> negate (derivative varyingParameter f)
+  Sum f1 f2 -> derivative varyingParameter f1 + derivative varyingParameter f2
+  Difference f1 f2 -> derivative varyingParameter f1 - derivative varyingParameter f2
+  Product' f1 f2 -> derivative varyingParameter f1 .*. f2 + f1 .*. derivative varyingParameter f2
+  Quotient' f1 f2 ->
+    (derivative varyingParameter f1 .*. f2 - f1 .*. derivative varyingParameter f2)
+      .!/.! squared' f2
+  Squared' f -> 2 * f .*. derivative varyingParameter f
+  SquareRoot' f -> derivative varyingParameter f .!/! (2 * sqrt' f)
+  Sin f -> cos f * (derivative varyingParameter f / Angle.radian)
+  Cos f -> negate (sin f) * (derivative varyingParameter f / Angle.radian)
 
 derivativeIn :: Uv.Direction -> Function units -> Function units
 derivativeIn direction function =
@@ -282,43 +346,54 @@ zero :: Function units
 zero = constant Qty.zero
 
 constant :: Qty units -> Function units
-constant = build . Symbolic.Constant
+constant = Parametric . Expression.constant
 
 u :: Function Unitless
-u = parameter U
+u = Parametric Expression.u
 
 v :: Function Unitless
-v = parameter V
+v = Parametric Expression.v
 
 parameter :: Parameter -> Function Unitless
-parameter = build . Symbolic.Parameter
+parameter U = u
+parameter V = v
 
 new :: Interface function units => function -> Function units
-new = build . Symbolic.Function
+new = Function
 
 squared :: Units.Squared units1 units2 => Function units1 -> Function units2
 squared function = Units.specialize (squared' function)
 
 squared' :: Function units -> Function (units :*: units)
-squared' Function{symbolic} = build (Symbolic.squared' symbolic)
+squared' (Parametric expression) = Parametric (Expression.squared' expression)
+squared' (Negated f) = squared' f
+squared' function = Squared' function
 
 sqrt :: Units.Squared units1 units2 => Function units2 -> Function units1
 sqrt function = sqrt' (Units.unspecialize function)
 
 sqrt' :: Function (units :*: units) -> Function units
-sqrt' Function{symbolic} = build (Symbolic.sqrt' symbolic)
+sqrt' (Parametric expression) = Parametric (Expression.sqrt' expression)
+sqrt' function = SquareRoot' function
 
 sin :: Function Radians -> Function Unitless
-sin Function{symbolic} = build (Symbolic.sin symbolic)
+sin (Parametric expression) = Parametric (Expression.sin expression)
+sin function = Sin function
 
 cos :: Function Radians -> Function Unitless
-cos Function{symbolic} = build (Symbolic.cos symbolic)
+cos (Parametric expression) = Parametric (Expression.cos expression)
+cos function = Cos function
+
+toExpression :: Function units -> Maybe (Expression Uv.Point (Qty units))
+toExpression (Parametric expression) = Just expression
+toExpression _ = Nothing
 
 data CurveOnSurface units
   = CurveOnSurface (Curve2d Uv.Coordinates) (Function units)
   deriving (Show)
 
 instance Composition (Curve2d Uv.Coordinates) (Function units) (Curve1d units) where
+  -- TODO special case for when Curve2d and Function are both expressions
   function . uvCurve = Curve1d.new (CurveOnSurface uvCurve function)
 
 instance Curve1d.Interface (CurveOnSurface units) units where
@@ -337,10 +412,7 @@ instance Curve1d.Interface (CurveOnSurface units) units where
     fU . uvCurve * uT + fV . uvCurve * vT
 
   expressionImpl (CurveOnSurface uvCurve function) =
-    Maybe.map2 (.) (expression function) (Curve2d.expression uvCurve)
-
-expression :: Function units -> Maybe (Expression Uv.Point (Qty units))
-expression Function{symbolic} = Symbolic.expression symbolic
+    Maybe.map2 (.) (toExpression function) (Curve2d.expression uvCurve)
 
 zeros :: Tolerance units => Function units -> Result Zeros.Error Zeros
 zeros function

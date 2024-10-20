@@ -227,13 +227,13 @@ instance Interface (SurfaceCurveComposition (space @ units)) (space @ units) whe
     (Curve2d.derivative curve . function) * Surface1d.Function.derivative parameter function
 
   expressionImpl (SurfaceCurveComposition function curve) =
-    Maybe.map2 (.) (Curve2d.expression curve) (Surface1d.Function.expression function)
+    Maybe.map2 (.) (Curve2d.expression curve) (Surface1d.Function.toExpression function)
 
 expression :: Function (space @ units) -> Maybe (Expression Uv.Point (Point2d (space @ units)))
 expression function = case function of
   Function f -> expressionImpl f
   Coerce f -> Units.coerce (expression f)
   Constant p -> Just (Expression.Surface2d.constant p)
-  XY x y -> Maybe.map2 Expression.Surface2d.xy (Surface1d.Function.expression x) (Surface1d.Function.expression y)
+  XY x y -> Maybe.map2 Expression.Surface2d.xy (Surface1d.Function.toExpression x) (Surface1d.Function.toExpression y)
   Addition f1 f2 -> Maybe.map2 (+) (expression f1) (VectorSurface2d.Function.expression f2)
   Subtraction f1 f2 -> Maybe.map2 (-) (expression f1) (VectorSurface2d.Function.expression f2)

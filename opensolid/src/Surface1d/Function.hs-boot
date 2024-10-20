@@ -1,11 +1,9 @@
-module Surface1d.Function (Interface (..), Function, unwrap, evaluate, bounds) where
+module Surface1d.Function (Interface (..), Function, evaluate, bounds) where
 
 import Curve1d (Curve1d)
 import Curve2d (Curve2d)
-import Expression (Expression)
 import OpenSolid
 import Range (Range)
-import {-# SOURCE #-} Surface1d.Function.Symbolic (Symbolic)
 import Units qualified
 import Uv (Parameter)
 import Uv qualified
@@ -18,7 +16,6 @@ class
   evaluateImpl :: function -> Uv.Point -> Qty units
   boundsImpl :: function -> Uv.Bounds -> Range units
   derivativeImpl :: Parameter -> function -> Function units
-  expressionImpl :: function -> Maybe (Expression Uv.Point (Qty units))
 
 type role Function nominal
 
@@ -39,4 +36,3 @@ instance Composition (Curve2d Uv.Coordinates) (Function units) (Curve1d units)
 
 evaluate :: Function units -> Uv.Point -> Qty units
 bounds :: Function units -> Uv.Bounds -> Range units
-unwrap :: Function units -> Symbolic units
