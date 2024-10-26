@@ -167,10 +167,14 @@ hermiteBezier (startPoint, startDerivatives) (endPoint, endDerivatives) = do
   let numStartDerivatives = List.length startDerivatives
   let numEndDerivatives = List.length endDerivatives
   let curveDegree = 1 + numStartDerivatives + numEndDerivatives
-  let scaledStartDerivatives = scaleDerivatives Positive 1.0 (Float.int curveDegree) startDerivatives
-  let scaledEndDerivatives = scaleDerivatives Negative 1.0 (Float.int curveDegree) endDerivatives
-  let startControlPoints = derivedControlPoints startPoint 1 (numStartDerivatives + 1) scaledStartDerivatives
-  let endControlPoints = List.reverse (derivedControlPoints endPoint 1 (numEndDerivatives + 1) scaledEndDerivatives)
+  let scaledStartDerivatives =
+        scaleDerivatives Positive 1.0 (Float.int curveDegree) startDerivatives
+  let scaledEndDerivatives =
+        scaleDerivatives Negative 1.0 (Float.int curveDegree) endDerivatives
+  let startControlPoints =
+        derivedControlPoints startPoint 1 (numStartDerivatives + 1) scaledStartDerivatives
+  let endControlPoints =
+        List.reverse (derivedControlPoints endPoint 1 (numEndDerivatives + 1) scaledEndDerivatives)
   let controlPoints = startPoint :| (startControlPoints + endControlPoints + [endPoint])
   BezierCurve2d controlPoints
 
