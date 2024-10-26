@@ -1,5 +1,5 @@
 module Expression.Scalar
-  ( Scalar
+  ( Scalar (Constant)
   , zero
   , constant
   , parameter
