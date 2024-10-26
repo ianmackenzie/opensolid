@@ -14,6 +14,8 @@ module Expression.Scalar
   , sqrt
   , sin
   , cos
+  , quadraticSpline
+  , cubicSpline
   , curveDerivative
   , surfaceDerivative
   , show
@@ -48,6 +50,8 @@ data Scalar input where
   Sqrt :: Scalar input -> Scalar input
   Sin :: Scalar input -> Scalar input
   Cos :: Scalar input -> Scalar input
+  QuadraticSpline :: Float -> Float -> Float -> Scalar input -> Scalar input
+  CubicSpline :: Float -> Float -> Float -> Float -> Scalar input -> Scalar input
 
 deriving instance Eq (Scalar input)
 
@@ -65,6 +69,8 @@ instance Composition (Scalar input) (Scalar Float) (Scalar input) where
   Sqrt arg . input = sqrt (arg . input)
   Sin arg . input = sin (arg . input)
   Cos arg . input = cos (arg . input)
+  QuadraticSpline p1 p2 p3 param . input = QuadraticSpline p1 p2 p3 (param . input)
+  CubicSpline p1 p2 p3 p4 param . input = CubicSpline p1 p2 p3 p4 (param . input)
 
 instance
   input1 ~ input2 =>
@@ -85,6 +91,9 @@ instance
   Sqrt arg . inputs = sqrt (arg . inputs)
   Sin arg . inputs = sin (arg . inputs)
   Cos arg . inputs = cos (arg . inputs)
+  QuadraticSpline p1 p2 p3 param . inputs = QuadraticSpline p1 p2 p3 (param . inputs)
+  CubicSpline p1 p2 p3 p4 param . inputs = CubicSpline p1 p2 p3 p4 (param . inputs)
+
 
 zero :: Scalar input
 zero = constant 0.0
@@ -178,6 +187,17 @@ cos (Constant value) = constant (Float.cos value)
 cos (Negated expression) = cos expression
 cos expression = Cos expression
 
+line :: Qty units -> Qty units -> Scalar input -> Scalar input
+line a b param = sum (constant a) (product param (constant (b - a)))
+
+quadraticSpline :: Qty units -> Qty units -> Qty units -> Scalar input -> Scalar input
+quadraticSpline p1 p2 p3 param =
+  QuadraticSpline (Units.coerce p1) (Units.coerce p2) (Units.coerce p3) param
+
+cubicSpline :: Qty units -> Qty units -> Qty units -> Qty units -> Scalar input -> Scalar input
+cubicSpline p1 p2 p3 p4 param =
+  CubicSpline (Units.coerce p1) (Units.coerce p2) (Units.coerce p3) (Units.coerce p4) param
+
 curveDerivative :: Scalar Float -> Scalar Float
 curveDerivative expression = case expression of
   Constant _ -> zero
@@ -194,6 +214,15 @@ curveDerivative expression = case expression of
   Sqrt arg -> quotient (half (curveDerivative arg)) expression
   Sin arg -> product (curveDerivative arg) (cos arg)
   Cos arg -> product (negated (curveDerivative arg)) (sin arg)
+  QuadraticSpline p1 p2 p3 param -> do
+    let d1 = 2.0 * (p2 - p1)
+    let d2 = 2.0 * (p3 - p2)
+    product (line d1 d2 param) (curveDerivative param)
+  CubicSpline p1 p2 p3 p4 param -> do
+    let d1 = 3.0 * (p2 - p1)
+    let d2 = 3.0 * (p3 - p2)
+    let d3 = 3.0 * (p4 - p3)
+    product (quadraticSpline d1 d2 d3 param) (curveDerivative param)
 
 surfaceDerivative :: Uv.Parameter -> Scalar Uv.Point -> Scalar Uv.Point
 surfaceDerivative p expression = case expression of
@@ -213,6 +242,15 @@ surfaceDerivative p expression = case expression of
   Sqrt arg -> quotient (half (surfaceDerivative p arg)) expression
   Sin arg -> product (surfaceDerivative p arg) (cos arg)
   Cos arg -> product (negated (surfaceDerivative p arg)) (sin arg)
+  QuadraticSpline p1 p2 p3 param -> do
+    let d1 = 2.0 * (p2 - p1)
+    let d2 = 2.0 * (p3 - p2)
+    product (line d1 d2 param) (surfaceDerivative p param)
+  CubicSpline p1 p2 p3 p4 param -> do
+    let d1 = 3.0 * (p2 - p1)
+    let d2 = 3.0 * (p3 - p2)
+    let d3 = 3.0 * (p4 - p3)
+    product (quadraticSpline d1 d2 d3 param) (surfaceDerivative p param)
 
 show :: Scalar input -> Text
 show = showWithPrecedence 0
@@ -232,6 +270,12 @@ showWithPrecedence precedence expression = case expression of
   Sqrt arg -> showFunctionCall precedence "sqrt" [arg]
   Sin arg -> showFunctionCall precedence "sin" [arg]
   Cos arg -> showFunctionCall precedence "cos" [arg]
+  QuadraticSpline p1 p2 p3 param -> do
+    let args = [constant p1, constant p2, constant p3, param]
+    showFunctionCall precedence "quadraticSpline" args
+  CubicSpline p1 p2 p3 p4 param -> do
+    let args = [constant p1, constant p2, constant p3, constant p4, param]
+    showFunctionCall precedence "cubicSpline" args
 
 showFunctionCall :: Int -> Text -> List (Scalar input) -> Text
 showFunctionCall precedence functionName arguments =
@@ -279,6 +323,12 @@ foreign import ccall unsafe "opensolid_expression_sin"
 foreign import ccall unsafe "opensolid_expression_cos"
   opensolid_expression_cos :: Ptr -> Ptr
 
+foreign import ccall unsafe "opensolid_expression_quadratic_spline"
+  opensolid_expression_quadratic_spline :: Double -> Double -> Double -> Ptr -> Ptr
+
+foreign import ccall unsafe "opensolid_expression_cubic_spline"
+  opensolid_expression_cubic_spline :: Double -> Double -> Double -> Double -> Ptr -> Ptr
+
 -- TODO attach a finalizer to the returned Ptr value,
 -- to delete the underlying Rust value?
 ptr :: Scalar input -> Ptr
@@ -296,3 +346,7 @@ ptr expression = case expression of
   Sqrt arg -> opensolid_expression_sqrt (ptr arg)
   Sin arg -> opensolid_expression_sin (ptr arg)
   Cos arg -> opensolid_expression_cos (ptr arg)
+  QuadraticSpline (Qty p1) (Qty p2) (Qty p3) param ->
+    opensolid_expression_quadratic_spline p1 p2 p3 (ptr param)
+  CubicSpline (Qty p1) (Qty p2) (Qty p3) (Qty p4) param ->
+    opensolid_expression_cubic_spline p1 p2 p3 p4 (ptr param)
