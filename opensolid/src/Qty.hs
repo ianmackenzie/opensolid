@@ -125,14 +125,24 @@ instance Multiplication' (Qty units1) (Qty units2) where
   {-# INLINE (.*.) #-}
   Qty x .*. Qty y = Qty (x Prelude.* y)
 
-instance Units.Product units1 units2 units3 => Multiplication (Qty units1) (Qty units2) (Qty units3)
+instance
+  Units.Product units1 units2 units3 =>
+  Multiplication (Qty units1) (Qty units2) (Qty units3)
+  where
+  {-# INLINEABLE (*) #-}
+  Qty x * Qty y = Qty (x Prelude.* y)
 
 instance Division' (Qty units1) (Qty units2) where
   type Qty units1 ./. Qty units2 = Qty (units1 :/: units2)
   {-# INLINE (./.) #-}
   Qty x ./. Qty y = Qty (x Prelude./ y)
 
-instance Units.Quotient units1 units2 units3 => Division (Qty units1) (Qty units2) (Qty units3)
+instance
+  Units.Quotient units1 units2 units3 =>
+  Division (Qty units1) (Qty units2) (Qty units3)
+  where
+  {-# INLINEABLE (/) #-}
+  Qty x / Qty y = Qty (x Prelude./ y)
 
 instance Multiplication' Int (Qty units) where
   type Int .*. Qty units = Qty (Unitless :*: units)
