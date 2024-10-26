@@ -284,26 +284,26 @@ impl<'a> BoundsFunctionCompiler<'a> {
                 }
                 Expression::Sine(arg) => {
                     let (arg_lower, arg_upper) = self.compute_bounds(arg);
-                    let bounds_sin_args = [
+                    let sin_bounds_args = [
                         arg_lower,
                         arg_upper,
                         self.lower_address(),
                         self.upper_address(),
                     ];
-                    self.call(self.builtins.bounds_sin, &bounds_sin_args);
+                    self.call(self.builtins.sin_bounds, &sin_bounds_args);
                     let lower = self.load_lower();
                     let upper = self.load_upper();
                     self.define_bounds(expression, lower, upper)
                 }
                 Expression::Cosine(arg) => {
                     let (arg_lower, arg_upper) = self.compute_bounds(arg);
-                    let bounds_cos_args = [
+                    let cos_bounds_args = [
                         arg_lower,
                         arg_upper,
                         self.lower_address(),
                         self.upper_address(),
                     ];
-                    self.call(self.builtins.bounds_cos, &bounds_cos_args);
+                    self.call(self.builtins.cos_bounds, &cos_bounds_args);
                     let lower = self.load_lower();
                     let upper = self.load_upper();
                     self.define_bounds(expression, lower, upper)

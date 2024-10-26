@@ -1,58 +1,105 @@
-use std::f64;
-use std::f64::consts::{FRAC_PI_2, PI};
+use std::ops::{Add, Mul, Sub};
 
-#[no_mangle]
-pub extern "C" fn opensolid_bounds_sin(
-    in_low: f64,
-    in_high: f64,
-    out_low: *mut f64,
-    out_high: *mut f64,
-) {
-    let sin_low = f64::sin(in_low);
-    let sin_high = f64::sin(in_high);
-    let low = if contains_sinusoidal_extreme(in_low, in_high, -FRAC_PI_2) {
-        -1.0
-    } else {
-        f64::min(sin_low, sin_high)
-    };
-    let high = if contains_sinusoidal_extreme(in_low, in_high, FRAC_PI_2) {
-        1.0
-    } else {
-        f64::max(sin_low, sin_high)
-    };
-    unsafe {
-        *out_low = low;
-        *out_high = high;
+#[derive(Copy, Clone)]
+pub struct Bounds {
+    pub low: f64,
+    pub high: f64,
+}
+
+impl Bounds {
+    pub fn singleton(value: f64) -> Bounds {
+        Bounds {
+            low: value,
+            high: value,
+        }
+    }
+
+    pub fn hull2(a: f64, b: f64) -> Bounds {
+        Bounds {
+            low: f64::min(a, b),
+            high: f64::max(a, b),
+        }
     }
 }
 
-#[no_mangle]
-pub extern "C" fn opensolid_bounds_cos(
-    in_low: f64,
-    in_high: f64,
-    out_low: *mut f64,
-    out_high: *mut f64,
-) {
-    let cos_low = f64::cos(in_low);
-    let cos_high = f64::cos(in_high);
-    let low = if contains_sinusoidal_extreme(in_low, in_high, PI) {
-        -1.0
-    } else {
-        f64::min(cos_low, cos_high)
-    };
-    let high = if contains_sinusoidal_extreme(in_low, in_high, 0.0) {
-        1.0
-    } else {
-        f64::max(cos_low, cos_high)
-    };
-    unsafe {
-        *out_low = low;
-        *out_high = high;
+impl Add<Bounds> for f64 {
+    type Output = Bounds;
+
+    fn add(self, rhs: Bounds) -> Bounds {
+        Bounds {
+            low: self + rhs.low,
+            high: self + rhs.high,
+        }
     }
 }
 
-fn contains_sinusoidal_extreme(low: f64, high: f64, location: f64) -> bool {
-    let low_index = f64::floor((low - location) / (2.0 * PI));
-    let high_index = f64::floor((high - location) / (2.0 * PI));
-    low_index != high_index
+impl Add for Bounds {
+    type Output = Bounds;
+
+    fn add(self, rhs: Bounds) -> Bounds {
+        Bounds {
+            low: self.low + rhs.low,
+            high: self.high + rhs.high,
+        }
+    }
+}
+
+impl Sub for Bounds {
+    type Output = Bounds;
+    fn sub(self, rhs: Bounds) -> Bounds {
+        Bounds {
+            low: self.low - rhs.high,
+            high: self.high - rhs.low,
+        }
+    }
+}
+
+impl Mul<Bounds> for f64 {
+    type Output = Bounds;
+
+    fn mul(self, rhs: Bounds) -> Bounds {
+        if self >= 0.0 {
+            Bounds {
+                low: self * rhs.low,
+                high: self * rhs.high,
+            }
+        } else {
+            Bounds {
+                low: self * rhs.high,
+                high: self * rhs.low,
+            }
+        }
+    }
+}
+
+impl Mul<f64> for Bounds {
+    type Output = Bounds;
+
+    fn mul(self, rhs: f64) -> Bounds {
+        if rhs >= 0.0 {
+            Bounds {
+                low: self.low * rhs,
+                high: self.high * rhs,
+            }
+        } else {
+            Bounds {
+                low: self.high * rhs,
+                high: self.low * rhs,
+            }
+        }
+    }
+}
+
+impl Mul for Bounds {
+    type Output = Bounds;
+    fn mul(self, rhs: Bounds) -> Bounds {
+        let ll = self.low * rhs.low;
+        let lh = self.low * rhs.high;
+        let hl = self.high * rhs.low;
+        let hh = self.high * rhs.high;
+        Bounds {
+            low: ll.min(lh).min(hl).min(hh),
+            high: ll.max(lh).max(hl).max(hh),
+        }
+    }
 }
