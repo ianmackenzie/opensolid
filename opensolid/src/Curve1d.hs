@@ -502,7 +502,7 @@ findZerosOrder k derivatives subdomain derivativeBounds
               leftZeros <- solveMonotonic k currentDerivative nextDerivative leftRange
               rightZeros <- solveMonotonic k currentDerivative nextDerivative rightRange
               Resolved (leftZeros + rightZeros)
-        List.TwoOrMore -> Unresolved
+        List.TwoOrMore{} -> Unresolved
 
 solveMonotonic ::
   Tolerance units =>

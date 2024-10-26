@@ -149,7 +149,7 @@ extendPartialLoop (PartialLoop currentStart currentCurves loopEnd) curves =
       let newStart = Curve2d.startPoint newCurve
       let updatedCurves = NonEmpty.prepend newCurve currentCurves
       Success (PartialLoop newStart updatedCurves loopEnd, remaining)
-    (List.TwoOrMore, _) -> Failure BoundedBy.BoundaryIntersectsItself
+    (List.TwoOrMore{}, _) -> Failure BoundedBy.BoundaryIntersectsItself
 
 hasEndpoint :: Tolerance units => Point2d (space @ units) -> Curve2d (space @ units) -> Bool
 hasEndpoint point curve =

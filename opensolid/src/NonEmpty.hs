@@ -1,6 +1,14 @@
 module NonEmpty
   ( NonEmpty ((:|))
   , pattern NonEmpty
+  , pattern One
+  , pattern Two
+  , pattern Three
+  , pattern Four
+  , pattern TwoOrMore
+  , pattern ThreeOrMore
+  , pattern FourOrMore
+  , pattern FiveOrMore
   , (|:)
   , singleton
   , range
@@ -81,8 +89,41 @@ import Prelude qualified
 
 {-# COMPLETE [], NonEmpty #-}
 
+{-# COMPLETE One, TwoOrMore #-}
+
+{-# COMPLETE One, Two, ThreeOrMore #-}
+
+{-# COMPLETE One, Two, Three, FourOrMore #-}
+
+{-# COMPLETE One, Two, Three, Four, FiveOrMore #-}
+
 pattern NonEmpty :: NonEmpty a -> List a
 pattern NonEmpty nonEmpty <- (Data.List.NonEmpty.nonEmpty -> Just nonEmpty)
+
+pattern One :: a -> NonEmpty a
+pattern One item = item :| []
+
+pattern Two :: a -> a -> NonEmpty a
+pattern Two first second = first :| [second]
+
+pattern Three :: a -> a -> a -> NonEmpty a
+pattern Three first second third = first :| [second, third]
+
+pattern Four :: a -> a -> a -> a -> NonEmpty a
+pattern Four first second third fourth = first :| [second, third, fourth]
+
+pattern TwoOrMore :: a -> a -> List a -> NonEmpty a
+pattern TwoOrMore first second rest = first :| (second : rest)
+
+pattern ThreeOrMore :: a -> a -> a -> List a -> NonEmpty a
+pattern ThreeOrMore first second third rest = first :| (second : third : rest)
+
+pattern FourOrMore :: a -> a -> a -> a -> List a -> NonEmpty a
+pattern FourOrMore first second third fourth rest = first :| (second : third : fourth : rest)
+
+pattern FiveOrMore :: a -> a -> a -> a -> a -> List a -> NonEmpty a
+pattern FiveOrMore first second third fourth fifth rest =
+  first :| (second : third : fourth : fifth : rest)
 
 (|:) :: List a -> a -> NonEmpty a
 [] |: item = singleton item

@@ -3,10 +3,12 @@ module List
   , pattern One
   , pattern Two
   , pattern Three
+  , pattern Four
   , pattern OneOrMore
   , pattern TwoOrMore
   , pattern ThreeOrMore
   , pattern FourOrMore
+  , pattern FiveOrMore
   , singleton
   , maybe
   , range
@@ -93,6 +95,8 @@ length = Data.List.length
 
 {-# COMPLETE [], One, Two, Three, FourOrMore #-}
 
+{-# COMPLETE [], One, Two, Three, Four, FiveOrMore #-}
+
 pattern One :: a -> List a
 pattern One item = [item]
 
@@ -102,17 +106,24 @@ pattern Two first second = [first, second]
 pattern Three :: a -> a -> a -> List a
 pattern Three first second third = [first, second, third]
 
+pattern Four :: a -> a -> a -> a -> List a
+pattern Four first second third fourth = [first, second, third, fourth]
+
 pattern OneOrMore :: List a
 pattern OneOrMore <- _ : _
 
-pattern TwoOrMore :: List a
-pattern TwoOrMore <- _ : _ : _
+pattern TwoOrMore :: a -> a -> List a -> List a
+pattern TwoOrMore first second rest = first : second : rest
 
-pattern ThreeOrMore :: List a
-pattern ThreeOrMore <- _ : _ : _ : _
+pattern ThreeOrMore :: a -> a -> a -> List a -> List a
+pattern ThreeOrMore first second third rest = first : second : third : rest
 
-pattern FourOrMore :: List a
-pattern FourOrMore <- _ : _ : _ : _ : _
+pattern FourOrMore :: a -> a -> a -> a -> List a -> List a
+pattern FourOrMore first second third fourth rest = first : second : third : fourth : rest
+
+pattern FiveOrMore :: a -> a -> a -> a -> a -> List a -> List a
+pattern FiveOrMore first second third fourth fifth rest =
+  first : second : third : fourth : fifth : rest
 
 map :: (a -> b) -> List a -> List b
 map = Data.List.map
