@@ -9,6 +9,7 @@ import Curve1d (Curve1d)
 import {-# SOURCE #-} Curve2d (Curve2d)
 import Error qualified
 import OpenSolid
+import Uv qualified
 
 data Error
   = HigherOrderSolution
@@ -24,6 +25,7 @@ data Segment (coordinateSystem :: CoordinateSystem) where
   Segment ::
     { t1 :: Curve1d Unitless
     , t2 :: Curve1d Unitless
+    , t12 :: Curve2d Uv.Coordinates
     } ->
     Segment (space @ units)
 
