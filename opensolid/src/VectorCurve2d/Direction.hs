@@ -100,13 +100,14 @@ unsafe ::
   VectorCurve2d (space @ units) ->
   VectorCurve2d (space @ units) ->
   DirectionCurve2d space
-unsafe firstDerivative secondDerivative =
+unsafe firstDerivative secondDerivative = do
+  let degenerateStart = endpoint 0.0 firstDerivative secondDerivative
+  let degenerateEnd = endpoint 1.0 firstDerivative secondDerivative
+  let normalized = firstDerivative / VectorCurve2d.unsafeMagnitude firstDerivative
   DirectionCurve2d.unsafe $
-    VectorCurve2d.new $
-      PiecewiseCurve
-        (endpoint 0.0 firstDerivative secondDerivative)
-        (firstDerivative / VectorCurve2d.unsafeMagnitude firstDerivative)
-        (endpoint 1.0 firstDerivative secondDerivative)
+    case (degenerateStart, degenerateEnd) of
+      (Nothing, Nothing) -> normalized
+      _ -> VectorCurve2d.new (PiecewiseCurve degenerateStart normalized degenerateEnd)
 
 endpoint ::
   Tolerance units =>
