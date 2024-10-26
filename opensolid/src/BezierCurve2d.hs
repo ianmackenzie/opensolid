@@ -178,7 +178,12 @@ hermiteBezier (startPoint, startDerivatives) (endPoint, endDerivatives) = do
   let controlPoints = startPoint :| (startControlPoints + endControlPoints + [endPoint])
   BezierCurve2d controlPoints
 
-scaleDerivatives :: Sign -> Float -> Float -> List (Vector2d (space @ units)) -> List (Vector2d (space @ units))
+scaleDerivatives ::
+  Sign ->
+  Float ->
+  Float ->
+  List (Vector2d (space @ units)) ->
+  List (Vector2d (space @ units))
 scaleDerivatives _ _ _ [] = []
 scaleDerivatives sign scale n (first : rest) = do
   let updatedScale = sign * scale / n
