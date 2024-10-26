@@ -149,6 +149,10 @@ product _ (Constant 0.0) = zero
 product (Constant 0.0) _ = zero
 product expression (Constant 1.0) = expression
 product (Constant 1.0) expression = expression
+product expression (Constant -1.0) = negated expression
+product (Constant -1.0) expression = negated expression
+product (Constant a) (Negated expression) = product (Constant -a) expression
+product (Negated expression) (Constant a) = product expression (Constant -a)
 product (Constant a) (Product (Constant b) expression) = product (constant (a * b)) expression -- a * (b * x) = (a * b) * x
 product (Product (Constant a) expression) (Constant b) = product (constant (a * b)) expression -- (a * x) * b = (a * b) * x
 product (Constant a) (Quotient (Constant b) expression) = quotient (constant (a * b)) expression -- a * (b / x) = (a * b) / x
