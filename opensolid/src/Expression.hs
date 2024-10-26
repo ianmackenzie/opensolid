@@ -2784,3 +2784,56 @@ instance Bounds Uv.Point (Point2d (space @ units)) Uv.Bounds (Bounds2d (space @ 
       let yRange = Range (Qty yLow) (Qty yHigh)
       Alloc.free outputs
       IO.succeed (Bounds2d xRange yRange)
+
+instance Value Float (Vector2d (space @ units)) where
+  value VectorCurve2d{vc2v} (Qty tValue) =
+    unsafeDupablePerformIO IO.do
+      outputs <- Alloc.mallocBytes 16
+      vc2v tValue outputs
+      px <- Foreign.peekElemOff outputs 0
+      py <- Foreign.peekElemOff outputs 1
+      Alloc.free outputs
+      IO.succeed (Vector2d.xy (Qty px) (Qty py))
+
+instance Bounds Float (Vector2d (space @ units)) (Range Unitless) (VectorBounds2d (space @ units)) where
+  bounds VectorCurve2d{vc2b} tRange =
+    unsafeDupablePerformIO IO.do
+      let Range (Qty tLow) (Qty tHigh) = tRange
+      outputs <- Alloc.mallocBytes 32
+      vc2b tLow tHigh outputs
+      xLow <- Foreign.peekElemOff outputs 0
+      xHigh <- Foreign.peekElemOff outputs 1
+      yLow <- Foreign.peekElemOff outputs 2
+      yHigh <- Foreign.peekElemOff outputs 3
+      let xRange = Range (Qty xLow) (Qty xHigh)
+      let yRange = Range (Qty yLow) (Qty yHigh)
+      Alloc.free outputs
+      IO.succeed (VectorBounds2d xRange yRange)
+
+instance Value Uv.Point (Vector2d (space @ units)) where
+  value VectorSurface2d{vs2v} uvPoint =
+    unsafeDupablePerformIO IO.do
+      let Point2d (Qty uValue) (Qty vValue) = uvPoint
+      outputs <- Alloc.mallocBytes 16
+      vs2v uValue vValue outputs
+      px <- Foreign.peekElemOff outputs 0
+      py <- Foreign.peekElemOff outputs 1
+      Alloc.free outputs
+      IO.succeed (Vector2d.xy (Qty px) (Qty py))
+
+instance Bounds Uv.Point (Vector2d (space @ units)) Uv.Bounds (VectorBounds2d (space @ units)) where
+  bounds VectorSurface2d{vs2b} uvBounds =
+    unsafeDupablePerformIO IO.do
+      let Bounds2d uRange vRange = uvBounds
+      let Range (Qty uLow) (Qty uHigh) = uRange
+      let Range (Qty vLow) (Qty vHigh) = vRange
+      outputs <- Alloc.mallocBytes 32
+      vs2b uLow uHigh vLow vHigh outputs
+      xLow <- Foreign.peekElemOff outputs 0
+      xHigh <- Foreign.peekElemOff outputs 1
+      yLow <- Foreign.peekElemOff outputs 2
+      yHigh <- Foreign.peekElemOff outputs 3
+      let xRange = Range (Qty xLow) (Qty xHigh)
+      let yRange = Range (Qty yLow) (Qty yHigh)
+      Alloc.free outputs
+      IO.succeed (VectorBounds2d xRange yRange)
