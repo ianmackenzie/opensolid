@@ -48,6 +48,8 @@ pub enum Expression {
     SquareRoot(Box<Expression>),
     Sine(Box<Expression>),
     Cosine(Box<Expression>),
+    QuadraticSpline(Constant, Constant, Constant, Box<Expression>),
+    CubicSpline(Constant, Constant, Constant, Constant, Box<Expression>),
 }
 
 impl Expression {
@@ -147,4 +149,38 @@ pub extern "C" fn opensolid_expression_sin(ptr: *mut Expression) -> *mut Express
 pub extern "C" fn opensolid_expression_cos(ptr: *mut Expression) -> *mut Expression {
     let arg = Expression::from_c(ptr);
     Expression::Cosine(arg).to_c()
+}
+
+#[no_mangle]
+pub extern "C" fn opensolid_expression_quadratic_spline(
+    p1: f64,
+    p2: f64,
+    p3: f64,
+    t: *mut Expression,
+) -> *mut Expression {
+    Expression::QuadraticSpline(
+        Constant::new(p1),
+        Constant::new(p2),
+        Constant::new(p3),
+        Expression::from_c(t),
+    )
+    .to_c()
+}
+
+#[no_mangle]
+pub extern "C" fn opensolid_expression_cubic_spline(
+    p1: f64,
+    p2: f64,
+    p3: f64,
+    p4: f64,
+    t: *mut Expression,
+) -> *mut Expression {
+    Expression::CubicSpline(
+        Constant::new(p1),
+        Constant::new(p2),
+        Constant::new(p3),
+        Constant::new(p4),
+        Expression::from_c(t),
+    )
+    .to_c()
 }

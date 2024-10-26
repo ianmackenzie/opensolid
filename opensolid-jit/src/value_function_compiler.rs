@@ -118,6 +118,28 @@ impl<'a> ValueFunctionCompiler<'a> {
                     let cos_value = self.function_builder.inst_results(cos_inst)[0];
                     self.define_value(expression, cos_value)
                 }
+                Expression::QuadraticSpline(p1, p2, p3, t) => {
+                    let p1_value = self.constant_value(p1.value);
+                    let p2_value = self.constant_value(p2.value);
+                    let p3_value = self.constant_value(p3.value);
+                    let t_value = self.compute_value(t);
+                    let function_arguments = [p1_value, p2_value, p3_value, t_value];
+                    let function_call =
+                        self.call(self.builtins.quadratic_spline, &function_arguments);
+                    let spline_value = self.function_builder.inst_results(function_call)[0];
+                    self.define_value(expression, spline_value)
+                }
+                Expression::CubicSpline(p1, p2, p3, p4, t) => {
+                    let p1_value = self.constant_value(p1.value);
+                    let p2_value = self.constant_value(p2.value);
+                    let p3_value = self.constant_value(p3.value);
+                    let p4_value = self.constant_value(p4.value);
+                    let t_value = self.compute_value(t);
+                    let function_arguments = [p1_value, p2_value, p3_value, p4_value, t_value];
+                    let function_call = self.call(self.builtins.cubic_spline, &function_arguments);
+                    let spline_value = self.function_builder.inst_results(function_call)[0];
+                    self.define_value(expression, spline_value)
+                }
             },
         }
     }
