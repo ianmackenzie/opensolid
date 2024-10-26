@@ -178,13 +178,20 @@ instance Show (Expression input output) where
 
 curve1d :: Scalar Float -> Expression Float (Qty units)
 curve1d expression = do
-  let px = Scalar.ptr expression
-  Curve1d
-    { c1x = expression
-    , c1v = curve1d_value_function (opensolid_curve1d_value_function px)
-    , c1b = curve1d_bounds_function (opensolid_curve1d_bounds_function px)
-    , c1d = curve1d (Scalar.curveDerivative expression)
-    }
+  let (c1v, c1b) = case expression of
+        Scalar.Constant x -> do
+          let d = Float.toDouble x
+          let fv = always d
+          -- TODO: refactor this to avoid allocating and writing to temporary memory
+          -- in the constant-curve special case
+          let fb _ _ out = Foreign.pokeElemOff out 0 d >> Foreign.pokeElemOff out 1 d
+          (fv, fb)
+        _ -> do
+          let px = Scalar.ptr expression
+          let fv = curve1d_value_function (opensolid_curve1d_value_function px)
+          let fb = curve1d_bounds_function (opensolid_curve1d_bounds_function px)
+          (fv, fb)
+  Curve1d{c1x = expression, c1v, c1b, c1d = curve1d (Scalar.curveDerivative expression)}
 
 surface1d :: Scalar Uv.Point -> Expression Uv.Point (Qty units)
 surface1d expression = do
