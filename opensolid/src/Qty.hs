@@ -42,6 +42,7 @@ import {-# SOURCE #-} Float qualified
 import Foreign.Storable (Storable)
 import GHC.Exts (Double (D#))
 import List qualified
+import NonEmpty qualified
 import Random.Internal qualified as Random
 import Sign (Sign (Negative, Positive))
 import System.Random qualified
@@ -259,7 +260,7 @@ largest :: NonEmpty (Qty units) -> Qty units
 largest (x :| xs) = List.foldl larger x xs
 
 smallestBy :: (a -> Qty units) -> NonEmpty a -> a
-smallestBy _ (x :| []) = x
+smallestBy _ (NonEmpty.One x) = x
 smallestBy function (x :| xs) = go x (abs (function x)) xs
  where
   go current _ [] = current
@@ -270,7 +271,7 @@ smallestBy function (x :| xs) = go x (abs (function x)) xs
       else go current currentAbsValue remaining
 
 largestBy :: (a -> Qty units) -> NonEmpty a -> a
-largestBy _ (x :| []) = x
+largestBy _ (NonEmpty.One x) = x
 largestBy function (x :| xs) = go x (abs (function x)) xs
  where
   go current _ [] = current
