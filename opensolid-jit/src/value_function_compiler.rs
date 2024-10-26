@@ -4,7 +4,7 @@ use cranelift::prelude::{
     Block, FunctionBuilder, FunctionBuilderContext, InstBuilder, Value, Variable,
 };
 use cranelift_codegen::ir::types::F64;
-use cranelift_codegen::ir::{Function, MemFlags};
+use cranelift_codegen::ir::{FuncRef, Function, Inst, MemFlags};
 
 use crate::builtins::Builtins;
 use crate::expression::Expression;
@@ -44,6 +44,10 @@ impl<'a> ValueFunctionCompiler<'a> {
 
     fn constant_value(&mut self, value: f64) -> Value {
         self.function_builder.ins().f64const(value)
+    }
+
+    fn call(&mut self, func_ref: FuncRef, args: &[Value]) -> Inst {
+        self.function_builder.ins().call(func_ref, args)
     }
 
     fn define_value(&mut self, expression: &'a Expression, value: Value) -> Value {
@@ -98,28 +102,19 @@ impl<'a> ValueFunctionCompiler<'a> {
                 }
                 Expression::SquareRoot(arg) => {
                     let arg_value = self.compute_value(&arg);
-                    let sqrt_inst = self
-                        .function_builder
-                        .ins()
-                        .call(self.builtins.sqrt, &[arg_value]);
+                    let sqrt_inst = self.call(self.builtins.sqrt, &[arg_value]);
                     let sqrt_value = self.function_builder.inst_results(sqrt_inst)[0];
                     self.define_value(expression, sqrt_value)
                 }
                 Expression::Sine(arg) => {
                     let arg_value = self.compute_value(&arg);
-                    let sin_inst = self
-                        .function_builder
-                        .ins()
-                        .call(self.builtins.sin, &[arg_value]);
+                    let sin_inst = self.call(self.builtins.sin, &[arg_value]);
                     let sin_value = self.function_builder.inst_results(sin_inst)[0];
                     self.define_value(expression, sin_value)
                 }
                 Expression::Cosine(arg) => {
                     let arg_value = self.compute_value(&arg);
-                    let cos_inst = self
-                        .function_builder
-                        .ins()
-                        .call(self.builtins.cos, &[arg_value]);
+                    let cos_inst = self.call(self.builtins.cos, &[arg_value]);
                     let cos_value = self.function_builder.inst_results(cos_inst)[0];
                     self.define_value(expression, cos_value)
                 }
