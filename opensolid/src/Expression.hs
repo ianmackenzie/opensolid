@@ -53,6 +53,7 @@ import Vector2d (Vector2d (Vector2d))
 import Vector2d qualified
 import Vector3d (Vector3d (Vector3d))
 import Vector3d qualified
+import VectorBounds2d (VectorBounds2d (VectorBounds2d))
 import Prelude (Double)
 import Prelude qualified
 
