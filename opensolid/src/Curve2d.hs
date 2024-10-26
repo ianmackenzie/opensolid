@@ -842,10 +842,7 @@ removeStartDegeneracy continuity startCondition curve = Result.do
             (curveDerivative (n + 1))
   new (Synthetic (baseCurve continuity) (curveDerivative 1))
 
-nthDerivative ::
-  Int ->
-  Curve2d (space @ units) ->
-  VectorCurve2d (space @ units)
+nthDerivative :: Int -> Curve2d (space @ units) -> VectorCurve2d (space @ units)
 nthDerivative 0 _ = internalError "nthDerivative should always be called with n >= 1"
 nthDerivative 1 curve = derivative curve
 nthDerivative n curve = VectorCurve2d.derivative (nthDerivative (n - 1) curve)
