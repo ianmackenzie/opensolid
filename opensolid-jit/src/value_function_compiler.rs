@@ -42,6 +42,10 @@ impl<'a> ValueFunctionCompiler<'a> {
         }
     }
 
+    fn constant_value(&mut self, value: f64) -> Value {
+        self.function_builder.ins().f64const(value)
+    }
+
     fn define_value(&mut self, expression: &'a Expression, value: Value) -> Value {
         let variable = Variable::from_u32(self.evaluated.len() as u32);
         self.function_builder.declare_var(variable, F64);
@@ -57,7 +61,7 @@ impl<'a> ValueFunctionCompiler<'a> {
                 Expression::Argument(index) => {
                     self.function_builder.block_params(self.entry_block)[*index as usize]
                 }
-                Expression::Constant(constant) => self.function_builder.ins().f64const(constant.0),
+                Expression::Constant(constant) => self.constant_value(constant.value),
                 Expression::Negate(arg) => {
                     let arg_value = self.compute_value(&arg);
                     let negated_value = self.function_builder.ins().fneg(arg_value);

@@ -60,20 +60,20 @@ impl<'a> BoundsFunctionCompiler<'a> {
         }
     }
 
-    fn f64const(&mut self, value: f64) -> Value {
+    fn constant_value(&mut self, value: f64) -> Value {
         self.function_builder.ins().f64const(value)
     }
 
     fn zero(&mut self) -> Value {
-        self.f64const(0.0)
+        self.constant_value(0.0)
     }
 
     fn negative_infinity(&mut self) -> Value {
-        self.f64const(f64::NEG_INFINITY)
+        self.constant_value(f64::NEG_INFINITY)
     }
 
     fn positive_infinity(&mut self) -> Value {
-        self.f64const(f64::INFINITY)
+        self.constant_value(f64::INFINITY)
     }
 
     fn fneg(&mut self, arg: Value) -> Value {
@@ -212,7 +212,7 @@ impl<'a> BoundsFunctionCompiler<'a> {
                     (arguments[2 * i], arguments[2 * i + 1])
                 }
                 Expression::Constant(constant) => {
-                    let value = self.f64const(constant.0);
+                    let value = self.constant_value(constant.value);
                     (value, value)
                 }
                 Expression::Negate(arg) => {

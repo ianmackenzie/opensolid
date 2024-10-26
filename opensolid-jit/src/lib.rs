@@ -18,7 +18,7 @@ mod tests {
             Box::new(Expression::Argument(0)),
             Box::new(Expression::Sum(
                 Box::new(Expression::Argument(0)),
-                Box::new(Expression::Constant(Constant(1.0))),
+                Box::new(Expression::Constant(Constant::new(1.0))),
             )),
         );
         let compiled = jit::value_function(1, &[&expression]);
@@ -30,7 +30,7 @@ mod tests {
     fn test_sqrt() {
         let expression = Expression::SquareRoot(Box::new(Expression::Sum(
             Box::new(Expression::Argument(0)),
-            Box::new(Expression::Constant(Constant(1.0))),
+            Box::new(Expression::Constant(Constant::new(1.0))),
         )));
         let compiled = jit::value_function(1, &[&expression]);
         let function = unsafe { std::mem::transmute::<_, fn(f64) -> f64>(compiled) };
@@ -40,7 +40,7 @@ mod tests {
     #[test]
     fn test_curve2d() {
         let x = Expression::Product(
-            Box::new(Expression::Constant(Constant(3.0))),
+            Box::new(Expression::Constant(Constant::new(3.0))),
             Box::new(Expression::Argument(0)),
         );
         let y = Expression::SquareRoot(Box::new(Expression::Argument(0)));
@@ -58,7 +58,7 @@ mod tests {
         let x_squared = Expression::Product(Box::new(x.clone()), Box::new(x));
         let x_squared_plus_one = Expression::Sum(
             Box::new(x_squared.clone()),
-            Box::new(Expression::Constant(Constant(1.0))),
+            Box::new(Expression::Constant(Constant::new(1.0))),
         );
         let expression = Expression::Quotient(
             Box::new(x_squared.clone()),

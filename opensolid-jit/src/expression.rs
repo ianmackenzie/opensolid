@@ -1,9 +1,17 @@
 #[derive(Copy, Clone)]
-pub struct Constant(pub f64);
+pub struct Constant {
+    pub value: f64,
+}
+
+impl Constant {
+    pub fn new(value: f64) -> Constant {
+        Constant { value }
+    }
+}
 
 impl PartialEq for Constant {
     fn eq(&self, other: &Self) -> bool {
-        self.0.to_bits() == other.0.to_bits()
+        self.value.to_bits() == other.value.to_bits()
     }
 }
 
@@ -11,19 +19,19 @@ impl Eq for Constant {}
 
 impl PartialOrd for Constant {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        self.0.to_bits().partial_cmp(&other.0.to_bits())
+        self.value.to_bits().partial_cmp(&other.value.to_bits())
     }
 }
 
 impl Ord for Constant {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        self.0.to_bits().cmp(&other.0.to_bits())
+        self.value.to_bits().cmp(&other.value.to_bits())
     }
 }
 
 impl std::hash::Hash for Constant {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        self.0.to_bits().hash(state);
+        self.value.to_bits().hash(state);
     }
 }
 
@@ -54,7 +62,7 @@ impl Expression {
 
 #[no_mangle]
 pub extern "C" fn opensolid_expression_constant(value: f64) -> *mut Expression {
-    let constant = Constant(value);
+    let constant = Constant::new(value);
     Expression::Constant(constant).to_c()
 }
 
