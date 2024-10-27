@@ -547,21 +547,16 @@ testCurveMedialAxis = IO.do
   --         (Point2d.centimeters 5.0 15.0)
   -- let curve2 = Line2d.from Point2d.origin (Point2d.centimeters 20.0 0.0)
   tangent1 <- Curve2d.tangentDirection curve1
+  let normal1 = DirectionCurve2d.unwrap tangent1 |> VectorCurve2d.rotateBy Angle.quarterTurn
+  let displacement = curve2 . Surface1d.Function.v - curve1 . Surface1d.Function.u
+  let radius = (displacement <> displacement) / (2.0 * (DirectionCurve2d.unwrap tangent1 . Surface1d.Function.u) >< displacement)
+  let magic = (curve1 . Surface1d.Function.u) + radius * (normal1 . Surface1d.Function.u)
   let drawingBounds = Bounds2d.hull2 (Point2d.centimeters -10.0 -10.0) (Point2d.centimeters 30.0 20.0)
   segments <- Curve2d.medialAxis curve1 curve2
   let drawCurve = Drawing2d.curve [] (Length.millimeters 0.1)
   let drawSegment segment = do
-        let t1Curve = Curve2d.MedialAxis.t1 segment
-        let t2Curve = Curve2d.MedialAxis.t2 segment
-        let segmentCurve1 = curve1 . t1Curve
-        let segmentCurve2 = curve2 . t2Curve
-        let segmentTangent1 = tangent1 . t1Curve
-        let segmentNormal1 =
-              DirectionCurve2d.unwrap segmentTangent1
-                |> VectorCurve2d.rotateBy Angle.quarterTurn
-        let segmentDisplacement = segmentCurve2 - segmentCurve1
-        let segmentRadius = (segmentDisplacement <> segmentDisplacement) / (2.0 * (segmentTangent1 >< segmentDisplacement))
-        let segmentMedialAxis = segmentCurve1 + segmentRadius * segmentNormal1
+        let t12Curve = Curve2d.MedialAxis.t12 segment
+        let segmentMedialAxis = magic . t12Curve
         drawCurve segmentMedialAxis
   let drawCircles segment = do
         let t1Curve = Curve2d.MedialAxis.t1 segment
