@@ -533,6 +533,11 @@ testNewtonRaphson2d = Tolerance.using 1e-9 do
           bounds
   log "Solve2d.unique solution" solution
 
+timeCurveMedialAxis :: Tolerance Meters => IO ()
+timeCurveMedialAxis = IO.do
+  ((), elapsed) <- IO.time testCurveMedialAxis
+  IO.printLine ("Medial axis computation time: " + Text.int (Float.round (Duration.inMilliseconds elapsed)) + " ms")
+
 testCurveMedialAxis :: Tolerance Meters => IO ()
 testCurveMedialAxis = IO.do
   let curve1 =
@@ -629,7 +634,7 @@ main = Tolerance.using (Length.meters 1e-9) IO.do
   testJitCurve2d
   testPlaneParaboloidIntersection
   testPlaneTorusIntersection
-  testCurveMedialAxis
+  timeCurveMedialAxis
   testStretchedArc
   testExplicitRandomStep
   testConcurrency
