@@ -21,6 +21,7 @@ import Direction2d qualified
 import Direction3d ()
 import DirectionCurve2d qualified
 import Drawing2d qualified
+import Duration (Duration)
 import Duration qualified
 import Expression (Expression)
 import Expression qualified
@@ -319,20 +320,20 @@ drawDot colour point =
     (Point2d.convert toDrawing point)
     (Length.millimeters 0.5)
 
-delayedPrint :: Int -> IO ()
-delayedPrint numSeconds = IO.do
-  IO.sleep (Duration.seconds (Float.int numSeconds))
-  IO.printLine (Text.int numSeconds)
+delayedPrint :: Int -> Duration -> IO ()
+delayedPrint number delay = IO.do
+  IO.sleep delay
+  IO.printLine (Text.int number)
 
 testConcurrency :: IO ()
 testConcurrency = IO.do
   IO.printLine "Starting concurrency test..."
   IO.printLine "0"
-  print5 <- IO.async (delayedPrint 5)
-  print2 <- IO.async (delayedPrint 2)
-  print3 <- IO.async (delayedPrint 3)
-  print4 <- IO.async (delayedPrint 4)
-  print1 <- IO.async (delayedPrint 1)
+  print5 <- IO.async (delayedPrint 5 (Duration.milliseconds 250.0))
+  print2 <- IO.async (delayedPrint 2 (Duration.milliseconds 100.0))
+  print3 <- IO.async (delayedPrint 3 (Duration.milliseconds 150.0))
+  print4 <- IO.async (delayedPrint 4 (Duration.milliseconds 200.0))
+  print1 <- IO.async (delayedPrint 1 (Duration.milliseconds 50.0))
   IO.await print4
   IO.await print2
   IO.await print3
@@ -342,7 +343,7 @@ testConcurrency = IO.do
 
 computeSquareRoot :: Float -> IO Float
 computeSquareRoot value = IO.do
-  IO.sleep Duration.second
+  IO.sleep (Duration.milliseconds 100.0)
   Success (Float.sqrt value)
 
 testIOParallel :: IO ()
