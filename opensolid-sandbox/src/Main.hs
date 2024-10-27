@@ -22,9 +22,9 @@ import Direction3d ()
 import DirectionCurve2d qualified
 import Drawing2d qualified
 import Duration qualified
-import Float qualified
 import Expression (Expression)
 import Expression qualified
+import Float qualified
 import IO qualified
 import Int qualified
 import Length (Length)
