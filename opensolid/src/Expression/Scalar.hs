@@ -126,6 +126,7 @@ negated (Negated expression) = expression
 negated (Difference lhs rhs) = Difference rhs lhs
 negated expression = Negated expression
 
+-- TODO special cases for spline types
 sum :: Scalar input -> Scalar input -> Scalar input
 sum (Constant a) (Constant b) = Constant (a + b)
 sum expression (Constant 0.0) = expression -- x + 0 = x
@@ -138,6 +139,7 @@ sum (Constant a) (Difference expression (Constant b)) = Sum (Constant (a - b)) e
 sum (Difference expression (Constant a)) (Constant b) = Sum (Constant (b - a)) expression -- (x - a) + b = (b - a) + x
 sum lhs rhs = if lhs <= rhs then Sum lhs rhs else Sum rhs lhs -- Canonicalize argument order using lexical ordering
 
+-- TODO special cases for spline types
 difference :: Scalar input -> Scalar input -> Scalar input
 difference (Constant a) (Constant b) = constant (a - b)
 difference expression (Constant 0.0) = expression -- x - 0 = x
@@ -150,6 +152,7 @@ difference (Constant a) (Difference expression (Constant b)) = difference (const
 difference (Difference expression (Constant a)) (Constant b) = difference expression (constant (a + b)) -- (x - a) - b = x - (a + b)
 difference lhs rhs = Difference lhs rhs
 
+-- TODO special cases for spline types
 product :: Scalar input -> Scalar input -> Scalar input
 product (Constant a) (Constant b) = constant (a * b)
 product _ (Constant 0.0) = zero
