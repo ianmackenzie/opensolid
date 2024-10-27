@@ -1,5 +1,6 @@
 module Random
   ( Generator
+  , Seed
   , init
   , generate
   , step
