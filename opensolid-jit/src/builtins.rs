@@ -2,12 +2,10 @@ use std::f64;
 use std::f64::consts::{FRAC_PI_2, PI};
 
 use cranelift::prelude::{AbiParam, Type};
-use cranelift_codegen::ir::types::F64;
+use cranelift_codegen::ir::types::{F64, I64};
 use cranelift_codegen::ir::{FuncRef, Function};
 use cranelift_jit::{JITBuilder, JITModule};
 use cranelift_module::{Linkage, Module};
-
-use crate::bounds::Bounds;
 
 #[derive(Copy, Clone)]
 pub struct Builtins {
@@ -20,6 +18,8 @@ pub struct Builtins {
     pub cubic_spline: FuncRef,
     pub quadratic_spline_bounds: FuncRef,
     pub cubic_spline_bounds: FuncRef,
+    pub bezier: FuncRef,
+    pub bezier_bounds: FuncRef,
 }
 
 impl Builtins {
@@ -41,6 +41,11 @@ impl Builtins {
         jit_builder.symbol(
             "opensolid_cubic_spline_bounds",
             opensolid_cubic_spline_bounds as *const u8,
+        );
+        jit_builder.symbol("opensolid_bezier", opensolid_bezier as *const u8);
+        jit_builder.symbol(
+            "opensolid_bezier_bounds",
+            opensolid_bezier_bounds as *const u8,
         );
     }
 
@@ -77,6 +82,8 @@ impl Builtins {
                 function,
                 pointer_type,
             ),
+            bezier: Builtins::declare_bezier(module, function, pointer_type),
+            bezier_bounds: Builtins::declare_bezier_bounds(module, function, pointer_type),
         }
     }
 
@@ -176,23 +183,65 @@ impl Builtins {
             .unwrap();
         module.declare_func_in_func(func_id, function)
     }
+
+    fn declare_bezier(
+        module: &mut JITModule,
+        function: &mut Function,
+        pointer_type: Type,
+    ) -> FuncRef {
+        let mut signature = module.make_signature();
+        signature.params.push(AbiParam::new(I64));
+        signature.params.push(AbiParam::new(pointer_type));
+        signature.params.push(AbiParam::new(F64));
+        let func_id = module
+            .declare_function("opensolid_bezier", Linkage::Import, &signature)
+            .unwrap();
+        module.declare_func_in_func(func_id, function)
+    }
+
+    fn declare_bezier_bounds(
+        module: &mut JITModule,
+        function: &mut Function,
+        pointer_type: Type,
+    ) -> FuncRef {
+        let mut signature = module.make_signature();
+        signature.params.push(AbiParam::new(I64));
+        signature.params.push(AbiParam::new(pointer_type));
+        signature.params.push(AbiParam::new(pointer_type));
+        signature.params.push(AbiParam::new(F64));
+        signature.params.push(AbiParam::new(F64));
+        signature.params.push(AbiParam::new(pointer_type));
+        signature.params.push(AbiParam::new(pointer_type));
+        let func_id = module
+            .declare_function("opensolid_bezier_bounds", Linkage::Import, &signature)
+            .unwrap();
+        module.declare_func_in_func(func_id, function)
+    }
+}
+
+#[inline]
+fn quadratic_blossom(p1: f64, p2: f64, p3: f64, t1: f64, t2: f64) -> f64 {
+    let q1 = p1 + t1 * (p2 - p1);
+    let q2 = p2 + t1 * (p3 - p2);
+    q1 + t2 * (q2 - q1)
+}
+
+#[inline]
+fn cubic_blossom(p1: f64, p2: f64, p3: f64, p4: f64, t1: f64, t2: f64, t3: f64) -> f64 {
+    let q1 = p1 + t1 * (p2 - p1);
+    let q2 = p2 + t1 * (p3 - p2);
+    let q3 = p3 + t1 * (p4 - p3);
+    quadratic_blossom(q1, q2, q3, t2, t3)
 }
 
 #[no_mangle]
 pub extern "C" fn opensolid_quadratic_spline(p1: f64, p2: f64, p3: f64, t: f64) -> f64 {
-    let p12 = p1 + t * (p2 - p1);
-    let p23 = p2 + t * (p3 - p2);
-    p12 + t * (p23 - p12)
+    quadratic_blossom(p1, p2, p3, t, t)
 }
 
 #[no_mangle]
 pub extern "C" fn opensolid_cubic_spline(p1: f64, p2: f64, p3: f64, p4: f64, t: f64) -> f64 {
-    let p12 = p1 + t * (p2 - p1);
-    let p23 = p2 + t * (p3 - p2);
-    let p34 = p3 + t * (p4 - p3);
-    let p123 = p12 + t * (p23 - p12);
-    let p234 = p23 + t * (p34 - p23);
-    p123 + t * (p234 - p123)
+    cubic_blossom(p1, p2, p3, p4, t, t, t)
 }
 
 #[no_mangle]
@@ -205,16 +254,14 @@ pub extern "C" fn opensolid_quadratic_spline_bounds(
     out_low: *mut f64,
     out_high: *mut f64,
 ) {
-    let t = Bounds {
-        low: t_low,
-        high: t_high,
-    };
-    let p12 = p1 + t * (p2 - p1);
-    let p23 = p2 + t * (p3 - p2);
-    let bounds = p12 + t * (p23 - p12);
+    let q1 = quadratic_blossom(p1, p2, p3, t_low, t_low);
+    let q2 = quadratic_blossom(p1, p2, p3, t_low, t_high);
+    let q3 = quadratic_blossom(p1, p2, p3, t_high, t_high);
+    let low = q1.min(q2).min(q3);
+    let high = q1.max(q2).max(q3);
     unsafe {
-        *out_low = bounds.low;
-        *out_high = bounds.high;
+        *out_low = low;
+        *out_high = high;
     }
 }
 
@@ -229,19 +276,60 @@ pub extern "C" fn opensolid_cubic_spline_bounds(
     out_low: *mut f64,
     out_high: *mut f64,
 ) {
-    let t = Bounds {
-        low: t_low,
-        high: t_high,
-    };
-    let p12 = p1 + t * (p2 - p1);
-    let p23 = p2 + t * (p3 - p2);
-    let p34 = p3 + t * (p4 - p3);
-    let p123 = p12 + t * (p23 - p12);
-    let p234 = p23 + t * (p34 - p23);
-    let bounds = p123 + t * (p234 - p123);
+    let q1 = cubic_blossom(p1, p2, p3, p4, t_low, t_low, t_low);
+    let q2 = cubic_blossom(p1, p2, p3, p4, t_low, t_low, t_high);
+    let q3 = cubic_blossom(p1, p2, p3, p4, t_low, t_high, t_high);
+    let q4 = cubic_blossom(p1, p2, p3, p4, t_high, t_high, t_high);
+    let low = q1.min(q2).min(q3).min(q4);
+    let high = q1.max(q2).max(q3).max(q4);
     unsafe {
-        *out_low = bounds.low;
-        *out_high = bounds.high;
+        *out_low = low;
+        *out_high = high;
+    }
+}
+
+fn bezier_blossom(control_points: &mut [f64], t_low: f64, t_high: f64, nl: usize) {
+    for i in (1..control_points.len()).rev() {
+        let t = if i <= nl { t_low } else { t_high };
+        let mut a = control_points[0];
+        for j in 0..i {
+            let b = control_points[j + 1];
+            control_points[j] = a + t * (b - a);
+            a = b;
+        }
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn opensolid_bezier(n: i64, p: *mut f64, t: f64) {
+    let control_points = unsafe { std::slice::from_raw_parts_mut(p, n as usize) };
+    bezier_blossom(control_points, t, t, 0);
+}
+
+#[no_mangle]
+pub extern "C" fn opensolid_bezier_bounds(
+    n: i64,
+    p: *const f64,
+    p_mut: *mut f64,
+    t_low: f64,
+    t_high: f64,
+    out_low: *mut f64,
+    out_high: *mut f64,
+) {
+    let control_points = unsafe { std::slice::from_raw_parts(p, n as usize) };
+    let mut control_points_mut = unsafe { std::slice::from_raw_parts_mut(p_mut, n as usize) };
+    let mut low = f64::INFINITY;
+    let mut high = -f64::INFINITY;
+    for nl in 0..n as usize {
+        control_points_mut.copy_from_slice(control_points);
+        bezier_blossom(&mut control_points_mut, t_low, t_high, nl);
+        let segment_control_point = control_points_mut[0];
+        low = low.min(segment_control_point);
+        high = high.max(segment_control_point);
+    }
+    unsafe {
+        *out_low = low;
+        *out_high = high;
     }
 }
 

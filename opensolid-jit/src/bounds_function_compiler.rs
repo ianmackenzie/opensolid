@@ -6,7 +6,7 @@ use cranelift::prelude::{
 };
 use cranelift_codegen::ir::condcodes::FloatCC;
 use cranelift_codegen::ir::stackslot::{StackSlotData, StackSlotKind};
-use cranelift_codegen::ir::types::F64;
+use cranelift_codegen::ir::types::{F64, I64};
 use cranelift_codegen::ir::{FuncRef, Function, Inst, MemFlags, StackSlot};
 
 use crate::builtins::Builtins;
@@ -60,20 +60,24 @@ impl<'a> BoundsFunctionCompiler<'a> {
         }
     }
 
-    fn constant_value(&mut self, value: f64) -> Value {
+    fn constant_float(&mut self, value: f64) -> Value {
         self.function_builder.ins().f64const(value)
     }
 
+    fn constant_int(&mut self, value: i64) -> Value {
+        self.function_builder.ins().iconst(I64, value)
+    }
+
     fn zero(&mut self) -> Value {
-        self.constant_value(0.0)
+        self.constant_float(0.0)
     }
 
     fn negative_infinity(&mut self) -> Value {
-        self.constant_value(f64::NEG_INFINITY)
+        self.constant_float(f64::NEG_INFINITY)
     }
 
     fn positive_infinity(&mut self) -> Value {
-        self.constant_value(f64::INFINITY)
+        self.constant_float(f64::INFINITY)
     }
 
     fn fneg(&mut self, arg: Value) -> Value {
@@ -178,6 +182,18 @@ impl<'a> BoundsFunctionCompiler<'a> {
         self.function_builder.ins().call(func_ref, args)
     }
 
+    fn stack_addr(&mut self, stack_slot: StackSlot) -> Value {
+        self.function_builder
+            .ins()
+            .stack_addr(self.pointer_type, stack_slot, 0)
+    }
+
+    fn stack_store_f64(&mut self, value: Value, stack_slot: StackSlot, index: i64) -> Inst {
+        self.function_builder
+            .ins()
+            .stack_store(value, stack_slot, 8 * index as i32)
+    }
+
     fn define_bounds(
         &mut self,
         expression: &'a Expression,
@@ -212,7 +228,7 @@ impl<'a> BoundsFunctionCompiler<'a> {
                     (arguments[2 * i], arguments[2 * i + 1])
                 }
                 Expression::Constant(constant) => {
-                    let value = self.constant_value(constant.value);
+                    let value = self.constant_float(constant.value);
                     (value, value)
                 }
                 Expression::Negate(arg) => {
@@ -344,6 +360,49 @@ impl<'a> BoundsFunctionCompiler<'a> {
                         self.upper_address(),
                     ];
                     self.call(self.builtins.cubic_spline_bounds, &function_args);
+                    let lower = self.load_lower();
+                    let upper = self.load_upper();
+                    self.define_bounds(expression, lower, upper)
+                }
+                Expression::BezierCurve(control_points, t) => {
+                    let (t_lower, t_upper) = self.compute_bounds(t);
+                    let num_control_points = control_points.len();
+                    let stack_slot_data = StackSlotData {
+                        // Fixed size
+                        kind: StackSlotKind::ExplicitSlot,
+                        // Space for num_control_points f64 values
+                        size: num_control_points as u32 * 8,
+                        // 2^3 = 8 bytes, alignment for an f64
+                        align_shift: 3,
+                    };
+                    // Create stack slot storing control point values
+                    let immutable_stack_slot = self
+                        .function_builder
+                        .create_sized_stack_slot(stack_slot_data.clone());
+                    // Initialize stack slot with control point values
+                    for i in 0..num_control_points {
+                        let control_point = self.constant_float(control_points[i].value);
+                        self.stack_store_f64(control_point, immutable_stack_slot, i as i64);
+                    }
+                    // Create buffer used for Bezier blossoming
+                    let mutable_stack_slot = self
+                        .function_builder
+                        .create_sized_stack_slot(stack_slot_data);
+
+                    // Call Bezier bounds function on stack data
+                    let immutable_stack_pointer = self.stack_addr(immutable_stack_slot);
+                    let mutable_stack_pointer = self.stack_addr(mutable_stack_slot);
+                    let num_control_points_value = self.constant_int(num_control_points as i64);
+                    let function_arguments = [
+                        num_control_points_value,
+                        immutable_stack_pointer,
+                        mutable_stack_pointer,
+                        t_lower,
+                        t_upper,
+                        self.lower_address(),
+                        self.upper_address(),
+                    ];
+                    self.call(self.builtins.bezier_bounds, &function_arguments);
                     let lower = self.load_lower();
                     let upper = self.load_upper();
                     self.define_bounds(expression, lower, upper)

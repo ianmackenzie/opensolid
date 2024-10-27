@@ -50,6 +50,7 @@ pub enum Expression {
     Cosine(Box<Expression>),
     QuadraticSpline(Constant, Constant, Constant, Box<Expression>),
     CubicSpline(Constant, Constant, Constant, Constant, Box<Expression>),
+    BezierCurve(Vec<Constant>, Box<Expression>),
 }
 
 impl Expression {
@@ -183,4 +184,18 @@ pub extern "C" fn opensolid_expression_cubic_spline(
         Expression::from_c(t),
     )
     .to_c()
+}
+
+#[no_mangle]
+pub extern "C" fn opensolid_expression_bezier_curve(
+    num_control_points: i64,
+    control_points: *const f64,
+    t: *mut Expression,
+) -> *mut Expression {
+    let control_points_vec =
+        unsafe { std::slice::from_raw_parts(control_points, num_control_points as usize) }
+            .iter()
+            .map(|value| Constant::new(*value))
+            .collect();
+    Expression::BezierCurve(control_points_vec, Expression::from_c(t)).to_c()
 }

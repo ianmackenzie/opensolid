@@ -70,6 +70,7 @@ impl ModuleCompiler {
         let mut function_compiler = ValueFunctionCompiler::new(
             self.builtins,
             self.mem_flags,
+            self.pointer_type,
             input_dimension,
             &mut self.context.func,
             &mut self.builder_context,
