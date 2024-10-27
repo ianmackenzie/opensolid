@@ -612,6 +612,16 @@ testJitCurve2d = IO.do
   let curve = Expression.xy x y :: Expression Float (Point2d (Global @ Unitless))
   log "Evaluated 2D curve" (Expression.value curve 3.0)
 
+testQuadraticSplineExpression :: IO ()
+testQuadraticSplineExpression = IO.do
+  let p1 = Point2d.meters 1.0 2.0
+  let p2 = Point2d.meters 3.0 4.0
+  let p3 = Point2d.meters 5.0 6.0
+  let spline = QuadraticSpline2d.fromControlPoints p1 p2 p3
+  log "spline" spline
+  log "spline.x" (Curve2d.xCoordinate spline)
+  log "spline.x.derivative" (Curve1d.derivative (Curve2d.xCoordinate spline))
+
 main :: IO ()
 main = Tolerance.using (Length.meters 1e-9) IO.do
   testScalarArithmetic
@@ -643,3 +653,4 @@ main = Tolerance.using (Length.meters 1e-9) IO.do
   testDebugPrint
   testTextSum
   testNewtonRaphson2d
+  testQuadraticSplineExpression
