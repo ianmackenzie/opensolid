@@ -204,8 +204,6 @@ instance Curve2d.Interface (HorizontalCurve units) Uv.Coordinates where
   transformByImpl transform curve =
     Curve2d.new (Curve2d.TransformBy transform curve)
 
-  expressionImpl _ = Nothing -- TODO actually support Newton-Raphson solving in JIT code
-
 solveForV :: HorizontalCurve units -> Float -> Float
 solveForV (HorizontalCurve{f, fv, vBounds, boundingAxes, tolerance}) uValue = do
   let clampedBounds = List.foldl (clamp uValue) vBounds boundingAxes

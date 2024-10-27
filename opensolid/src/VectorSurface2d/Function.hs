@@ -7,7 +7,7 @@
 {-# OPTIONS_GHC -Wno-orphans #-}
 
 module VectorSurface2d.Function
-  ( Function (Constant)
+  ( Function (Parametric)
   , Interface (..)
   , new
   , zero
@@ -16,20 +16,26 @@ module VectorSurface2d.Function
   , evaluate
   , bounds
   , derivative
-  , expression
+  , transformBy
   )
 where
 
+import Composition
+import CoordinateSystem (Space)
+import Curve2d (Curve2d)
+import Curve2d qualified
 import Direction2d (Direction2d)
 import Expression (Expression)
+import Expression qualified
 import Expression.VectorSurface2d qualified
 import Float qualified
-import Maybe qualified
 import OpenSolid
 import Surface1d qualified
 import Surface1d.Function qualified
+import Transform2d (Transform2d)
+import Transform2d qualified
 import Units qualified
-import Uv (Parameter)
+import Uv (Parameter (U, V))
 import Uv qualified
 import Vector2d (Vector2d)
 import Vector2d qualified
@@ -46,7 +52,10 @@ class
   evaluateImpl :: function -> Uv.Point -> Vector2d coordinateSystem
   boundsImpl :: function -> Uv.Bounds -> VectorBounds2d coordinateSystem
   derivativeImpl :: Parameter -> function -> Function coordinateSystem
-  expressionImpl :: function -> Maybe (Expression Uv.Point (Vector2d coordinateSystem))
+  transformByImpl ::
+    Transform2d tag (Space coordinateSystem @ translationUnits) ->
+    function ->
+    Function coordinateSystem
 
 data Function (coordinateSystem :: CoordinateSystem) where
   Function ::
@@ -56,8 +65,8 @@ data Function (coordinateSystem :: CoordinateSystem) where
   Coerce ::
     Function (space @ units1) ->
     Function (space @ units2)
-  Constant ::
-    Vector2d (space @ units) ->
+  Parametric ::
+    Expression Uv.Point (Vector2d (space @ units)) ->
     Function (space @ units)
   XY ::
     Surface1d.Function units ->
@@ -86,6 +95,10 @@ data Function (coordinateSystem :: CoordinateSystem) where
     Function (space @ units1) ->
     Surface1d.Function units2 ->
     Function (space @ (units1 :/: units2))
+  Transformed ::
+    Transform2d.Affine (space @ Unitless) ->
+    Function (space @ units) ->
+    Function (space @ units)
 
 deriving instance Show (Function (space @ units))
 
@@ -97,14 +110,14 @@ instance
   Units.Coercion (Function (space1 @ unitsA)) (Function (space2 @ unitsB))
   where
   coerce function = case function of
-    Constant v -> Constant (Units.coerce v)
+    Parametric expression -> Parametric (Units.coerce expression)
     Coerce f -> Coerce f
     _ -> Coerce function
 
 instance Negation (Function (space @ units)) where
   negate function = case function of
     Coerce f -> Coerce -f
-    Constant v -> Constant -v
+    Parametric expression -> Parametric -expression
     XY x y -> XY -x -y
     Negated f -> f
     Difference f1 f2 -> Difference f2 f1
@@ -133,11 +146,10 @@ instance
     (Function (space2 @ units2))
     (Function (space1 @ units1))
   where
-  f1 + Constant v | v == Vector2d.zero = f1
-  Constant v + f2 | v == Vector2d.zero = f2
-  f1 + Negated f2 = f1 - f2
-  Negated f1 + f2 = f2 - f1
-  f1 + f2 = Sum f1 f2
+  Parametric lhs + Parametric rhs = Parametric (lhs + rhs)
+  lhs + Negated rhs = lhs - rhs
+  Negated lhs + rhs = rhs - lhs
+  lhs + rhs = Sum lhs rhs
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -164,10 +176,9 @@ instance
     (Function (space2 @ units2))
     (Function (space1 @ units1))
   where
-  f1 - Constant v | v == Vector2d.zero = f1
-  Constant v - f2 | v == Vector2d.zero = -f2
-  f1 - Negated f2 = f1 + f2
-  f1 - f2 = Difference f1 f2
+  Parametric lhs - Parametric rhs = Parametric (lhs - rhs)
+  lhs - Negated rhs = lhs + rhs
+  lhs - rhs = Difference lhs rhs
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -195,10 +206,8 @@ instance Multiplication' (Surface1d.Function units1) (Function (space @ units2))
   type
     Surface1d.Function units1 .*. Function (space @ units2) =
       Function (space @ (units1 :*: units2))
-
-  -- TODO add Expresssion case
-  _ .*. Constant v | v == Vector2d.zero = zero
-  f1 .*. f2 = Product1d2d' f1 f2
+  Surface1d.Function.Parametric lhs .*. Parametric rhs = Parametric (lhs .*. rhs)
+  lhs .*. rhs = Product1d2d' lhs rhs
 
 instance
   (space1 ~ space2, Units.Product units1 units2 units3) =>
@@ -226,9 +235,8 @@ instance Multiplication' (Function (space @ units1)) (Surface1d.Function units2)
   type
     Function (space @ units1) .*. Surface1d.Function units2 =
       Function (space @ (units1 :*: units2))
-  Constant v .*. _ | v == Vector2d.zero = zero
-  -- TODO add Expresssion case
-  f1 .*. f2 = Product2d1d' f1 f2
+  Parametric lhs .*. Surface1d.Function.Parametric rhs = Parametric (lhs .*. rhs)
+  lhs .*. rhs = Product2d1d' lhs rhs
 
 instance
   (space1 ~ space2, Units.Product units1 units2 units3) =>
@@ -256,9 +264,8 @@ instance Division' (Function (space @ units1)) (Surface1d.Function units2) where
   type
     Function (space @ units1) ./. Surface1d.Function units2 =
       Function (space @ (units1 :/: units2))
-  Constant v ./. _ | v == Vector2d.zero = zero
-  -- TODO add Expresssion case
-  f1 ./. f2 = Quotient' f1 f2
+  Parametric lhs ./. Surface1d.Function.Parametric rhs = Parametric (lhs ./. rhs)
+  lhs ./. rhs = Quotient' lhs rhs
 
 instance
   (space1 ~ space2, Units.Quotient units1 units2 units3) =>
@@ -288,7 +295,6 @@ instance Multiplication (Function (space @ units)) Int (Function (space @ units)
 
 instance Multiplication Int (Function (space @ units)) (Function (space @ units))
 
--- TODO create Expresssion-based Surface1d if both vector surfaces are Expression-based
 data CrossProduct' space units1 units2
   = CrossProduct' (Function (space @ units1)) (Function (space @ units2))
 
@@ -314,10 +320,8 @@ instance
   type
     Function (space1 @ units1) .><. Function (space2 @ units2) =
       Surface1d.Function (units1 :*: units2)
-  Constant v .><. _ | v == Vector2d.zero = Surface1d.Function.zero
-  _ .><. Constant v | v == Vector2d.zero = Surface1d.Function.zero
-  Constant v1 .><. Constant v2 = Surface1d.Function.constant (v1 .><. v2)
-  f1 .><. f2 = Surface1d.Function.new (CrossProduct' f1 f2)
+  Parametric lhs .><. Parametric rhs = Surface1d.Function.Parametric (lhs .><. rhs)
+  lhs .><. rhs = Surface1d.Function.new (CrossProduct' lhs rhs)
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -373,7 +377,6 @@ instance
   type Direction2d space1 .><. Function (space2 @ units) = Surface1d.Function (Unitless :*: units)
   direction .><. function = Vector2d.unit direction .<>. function
 
--- TODO create Expresssion-based Surface1d if both vector surfaces are Expression-based
 data DotProduct' space units1 units2
   = DotProduct' (Function (space @ units1)) (Function (space @ units2))
 
@@ -399,10 +402,8 @@ instance
   type
     Function (space1 @ units1) .<>. Function (space2 @ units2) =
       Surface1d.Function (units1 :*: units2)
-  Constant v .<>. _ | v == Vector2d.zero = Surface1d.Function.zero
-  _ .<>. Constant v | v == Vector2d.zero = Surface1d.Function.zero
-  Constant v1 .<>. Constant v2 = Surface1d.Function.constant (v1 .<>. v2)
-  f1 .<>. f2 = Surface1d.Function.new (DotProduct' f1 f2)
+  Parametric lhs .<>. Parametric rhs = Surface1d.Function.Parametric (lhs .<>. rhs)
+  lhs .<>. rhs = Surface1d.Function.new (DotProduct' lhs rhs)
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -458,35 +459,52 @@ instance
   type Direction2d space1 .<>. Function (space2 @ units) = Surface1d.Function (Unitless :*: units)
   direction .<>. function = Vector2d.unit direction .<>. function
 
--- TODO create Expresssion-based output if both inputs are Expression-based
-data SurfaceCurveComposition (coordinateSystem :: CoordinateSystem) where
-  SurfaceCurveComposition ::
-    Surface1d.Function Unitless ->
-    VectorCurve2d (space @ units) ->
-    SurfaceCurveComposition (space @ units)
-
-deriving instance Show (SurfaceCurveComposition (space @ units))
-
 instance
   Composition
     (Surface1d.Function Unitless)
     (VectorCurve2d (space @ units))
     (Function (space @ units))
   where
-  curve . function = new (SurfaceCurveComposition function curve)
+  VectorCurve2d.Parametric curve . Surface1d.Function.Parametric function =
+    Parametric (curve . function)
+  curve . function = new (curve :.: function)
 
-instance Interface (SurfaceCurveComposition (space @ units)) (space @ units) where
-  evaluateImpl (SurfaceCurveComposition function curve) uv =
+instance
+  Interface
+    (VectorCurve2d (space @ units) :.: Surface1d.Function Unitless)
+    (space @ units)
+  where
+  evaluateImpl (curve :.: function) uv =
     VectorCurve2d.evaluateAt (Surface1d.Function.evaluate function uv) curve
-
-  boundsImpl (SurfaceCurveComposition function curve) uv =
+  boundsImpl (curve :.: function) uv =
     VectorCurve2d.segmentBounds (Surface1d.Function.bounds function uv) curve
-
-  derivativeImpl parameter (SurfaceCurveComposition function curve) =
+  derivativeImpl parameter (curve :.: function) =
     (VectorCurve2d.derivative curve . function) * Surface1d.Function.derivative parameter function
+  transformByImpl transform (curve :.: function) =
+    VectorCurve2d.transformBy transform curve . function
 
-  expressionImpl (SurfaceCurveComposition function curve) =
-    Maybe.map2 (.) (VectorCurve2d.expression curve) (Surface1d.Function.toExpression function)
+instance
+  Composition
+    (Curve2d Uv.Coordinates)
+    (Function (space @ units))
+    (VectorCurve2d (space @ units))
+  where
+  Parametric function . Curve2d.Parametric curve = VectorCurve2d.Parametric (function . curve)
+  function . curve = VectorCurve2d.new (function :.: curve)
+
+instance
+  VectorCurve2d.Interface
+    (Function (space @ units) :.: Curve2d Uv.Coordinates)
+    (space @ units)
+  where
+  evaluateAtImpl t (function :.: curve) = evaluate function (Curve2d.pointOn curve t)
+  segmentBoundsImpl t (function :.: curve) = bounds function (Curve2d.segmentBounds curve t)
+  derivativeImpl (function :.: curve) = do
+    let curveDerivative = Curve2d.derivative curve
+    let dudt = VectorCurve2d.xComponent curveDerivative
+    let dvdt = VectorCurve2d.yComponent curveDerivative
+    (derivative U function . curve) * dudt + (derivative V function . curve) * dvdt
+  transformByImpl transform (function :.: curve) = transformBy transform function . curve
 
 new :: Interface function (space @ units) => function -> Function (space @ units)
 new = Function
@@ -495,19 +513,40 @@ zero :: Function (space @ units)
 zero = constant Vector2d.zero
 
 constant :: Vector2d (space @ units) -> Function (space @ units)
-constant = Constant
+constant = Parametric . Expression.constant
 
 xy ::
   Surface1d.Function units ->
   Surface1d.Function units ->
   Function (space @ units)
-xy = XY
+xy (Surface1d.Function.Parametric x) (Surface1d.Function.Parametric y) =
+  Parametric (Expression.xy x y)
+xy x y = XY x y
+
+transformBy ::
+  Transform2d tag (space @ translationUnits) ->
+  Function (space @ units) ->
+  Function (space @ units)
+transformBy transform function = do
+  let t = Units.erase (Transform2d.toAffine transform)
+  case function of
+    Function f -> transformByImpl transform f
+    Coerce f -> Coerce (transformBy transform f)
+    Parametric expression -> Parametric (Expression.VectorSurface2d.transformBy t expression)
+    XY _ _ -> Transformed t function
+    Negated arg -> negate (transformBy transform arg)
+    Sum lhs rhs -> transformBy transform lhs + transformBy transform rhs
+    Difference lhs rhs -> transformBy transform lhs - transformBy transform rhs
+    Product1d2d' f1 f2 -> Product1d2d' f1 (transformBy transform f2)
+    Product2d1d' f1 f2 -> Product2d1d' (transformBy transform f1) f2
+    Quotient' f1 f2 -> Quotient' (transformBy transform f1) f2
+    Transformed existing c -> Transformed (existing >> t) c
 
 evaluate :: Function (space @ units) -> Uv.Point -> Vector2d (space @ units)
 evaluate function uv = case function of
   Function f -> evaluateImpl f uv
   Coerce f -> Units.coerce (evaluate f uv)
-  Constant v -> v
+  Parametric expression -> Expression.value expression uv
   XY x y ->
     Vector2d.xy
       (Surface1d.Function.evaluate x uv)
@@ -518,12 +557,13 @@ evaluate function uv = case function of
   Product1d2d' f1 f2 -> Surface1d.Function.evaluate f1 uv .*. evaluate f2 uv
   Product2d1d' f1 f2 -> evaluate f1 uv .*. Surface1d.Function.evaluate f2 uv
   Quotient' f1 f2 -> evaluate f1 uv ./. Surface1d.Function.evaluate f2 uv
+  Transformed transform f -> Vector2d.transformBy transform (evaluate f uv)
 
 bounds :: Function (space @ units) -> Uv.Bounds -> VectorBounds2d (space @ units)
 bounds function uv = case function of
   Function f -> boundsImpl f uv
   Coerce f -> Units.coerce (bounds f uv)
-  Constant v -> VectorBounds2d.constant v
+  Parametric expression -> Expression.bounds expression uv
   XY x y ->
     VectorBounds2d.xy
       (Surface1d.Function.bounds x uv)
@@ -534,12 +574,13 @@ bounds function uv = case function of
   Product1d2d' f1 f2 -> Surface1d.Function.bounds f1 uv .*. bounds f2 uv
   Product2d1d' f1 f2 -> bounds f1 uv .*. Surface1d.Function.bounds f2 uv
   Quotient' f1 f2 -> bounds f1 uv ./. Surface1d.Function.bounds f2 uv
+  Transformed transform f -> VectorBounds2d.transformBy transform (bounds f uv)
 
 derivative :: Uv.Parameter -> Function (space @ units) -> Function (space @ units)
 derivative parameter function = case function of
   Function f -> derivativeImpl parameter f
   Coerce f -> Coerce (derivative parameter f)
-  Constant _ -> zero
+  Parametric expression -> Parametric (Expression.surfaceDerivative parameter expression)
   XY x y ->
     XY
       (Surface1d.Function.derivative parameter x)
@@ -554,16 +595,4 @@ derivative parameter function = case function of
   Quotient' f1 f2 ->
     (derivative parameter f1 .*. f2 - f1 .*. Surface1d.Function.derivative parameter f2)
       .!/.! Surface1d.Function.squared' f2
-
-expression :: Function (space @ units) -> Maybe (Expression Uv.Point (Vector2d (space @ units)))
-expression function = case function of
-  Function f -> expressionImpl f
-  Coerce f -> Units.coerce (expression f)
-  Constant v -> Just (Expression.VectorSurface2d.constant v)
-  XY x y -> Maybe.map2 Expression.VectorSurface2d.xy (Surface1d.Function.toExpression x) (Surface1d.Function.toExpression y)
-  Negated f -> Maybe.map negate (expression f)
-  Sum f1 f2 -> Maybe.map2 (+) (expression f1) (expression f2)
-  Difference f1 f2 -> Maybe.map2 (-) (expression f1) (expression f2)
-  Product1d2d' f1 f2 -> Maybe.map2 (.*.) (Surface1d.Function.toExpression f1) (expression f2)
-  Product2d1d' f1 f2 -> Maybe.map2 (.*.) (expression f1) (Surface1d.Function.toExpression f2)
-  Quotient' f1 f2 -> Maybe.map2 (./.) (expression f1) (Surface1d.Function.toExpression f2)
+  Transformed transform f -> transformBy transform (derivative parameter f)

@@ -2,7 +2,7 @@
 {-# OPTIONS_GHC -Wno-orphans #-}
 
 module Surface2d.Function
-  ( Function (Constant)
+  ( Function (Parametric)
   , Interface (..)
   , new
   , constant
@@ -10,27 +10,30 @@ module Surface2d.Function
   , evaluate
   , bounds
   , derivative
-  , expression
   )
 where
 
+import Arithmetic qualified
 import Bounds2d (Bounds2d)
 import Bounds2d qualified
+import Composition
 import Curve2d (Curve2d)
 import Curve2d qualified
 import Expression (Expression)
+import Expression qualified
 import Expression.Surface2d qualified
-import Maybe qualified
 import OpenSolid
 import Point2d (Point2d)
 import Point2d qualified
 import Surface1d qualified
 import Surface1d.Function qualified
+import Transform2d (Transform2d)
+import Transform2d qualified
 import Units qualified
-import Uv (Parameter)
+import Uv (Parameter (U, V))
 import Uv qualified
 import Vector2d (Vector2d)
-import Vector2d qualified
+import VectorCurve2d qualified
 import VectorSurface2d qualified
 import VectorSurface2d.Function qualified
 
@@ -42,7 +45,7 @@ class
   evaluateImpl :: function -> Uv.Point -> Point2d coordinateSystem
   boundsImpl :: function -> Uv.Bounds -> Bounds2d coordinateSystem
   derivativeImpl :: Parameter -> function -> VectorSurface2d.Function coordinateSystem
-  expressionImpl :: function -> Maybe (Expression Uv.Point (Point2d coordinateSystem))
+  transformByImpl :: Transform2d tag coordinateSystem -> function -> Function coordinateSystem
 
 data Function (coordinateSystem :: CoordinateSystem) where
   Function ::
@@ -52,8 +55,8 @@ data Function (coordinateSystem :: CoordinateSystem) where
   Coerce ::
     Function (space @ units1) ->
     Function (space @ units2)
-  Constant ::
-    Point2d (space @ units) ->
+  Parametric ::
+    Expression Uv.Point (Point2d (space @ units)) ->
     Function (space @ units)
   XY ::
     Surface1d.Function units ->
@@ -67,6 +70,10 @@ data Function (coordinateSystem :: CoordinateSystem) where
     Function (space @ units) ->
     VectorSurface2d.Function (space @ units) ->
     Function (space @ units)
+  Transformed ::
+    Transform2d.Affine (space @ units) ->
+    Function (space @ units) ->
+    Function (space @ units)
 
 deriving instance Show (Function (space @ units))
 
@@ -78,7 +85,7 @@ instance
   Units.Coercion (Function (space1 @ unitsA)) (Function (space2 @ unitsB))
   where
   coerce function = case function of
-    Constant v -> Constant (Units.coerce v)
+    Parametric expression -> Parametric (Units.coerce expression)
     Coerce f -> Coerce f
     _ -> Coerce function
 
@@ -91,8 +98,8 @@ instance
     (VectorSurface2d.Function (space2 @ units2))
     (Function (space1 @ units1))
   where
-  f1 + VectorSurface2d.Function.Constant v | v == Vector2d.zero = f1
-  f1 + f2 = Addition f1 f2
+  Parametric lhs + VectorSurface2d.Function.Parametric rhs = Parametric (lhs + rhs)
+  lhs + rhs = Addition lhs rhs
 
 instance
   ( space1 ~ space2
@@ -114,8 +121,8 @@ instance
     (VectorSurface2d.Function (space2 @ units2))
     (Function (space1 @ units1))
   where
-  f1 - VectorSurface2d.Function.Constant v | v == Vector2d.zero = f1
-  f1 - f2 = Subtraction f1 f2
+  Parametric lhs - VectorSurface2d.Function.Parametric rhs = Parametric (lhs - rhs)
+  lhs - rhs = Subtraction lhs rhs
 
 instance
   ( space1 ~ space2
@@ -128,19 +135,30 @@ instance
   where
   f - v = f - VectorSurface2d.Function.constant v
 
-data Difference (coordinateSystem :: CoordinateSystem) where
-  Difference ::
-    Function (space @ units) ->
-    Function (space @ units) ->
-    Difference (space @ units)
-
-deriving instance Show (Difference (space @ units))
-
-instance VectorSurface2d.Function.Interface (Difference (space @ units)) (space @ units) where
-  evaluateImpl (Difference f1 f2) uv = evaluate f1 uv - evaluate f2 uv
-  boundsImpl (Difference f1 f2) uv = bounds f1 uv - bounds f2 uv
-  derivativeImpl parameter (Difference f1 f2) = derivative parameter f1 - derivative parameter f2
-  expressionImpl (Difference f1 f2) = Maybe.map2 (-) (expression f1) (expression f2)
+instance
+  VectorSurface2d.Function.Interface
+    (Arithmetic.Difference (Function (space @ units)) (Function (space @ units)))
+    (space @ units)
+  where
+  evaluateImpl (Arithmetic.Difference f1 f2) uv =
+    evaluate f1 uv - evaluate f2 uv
+  boundsImpl (Arithmetic.Difference f1 f2) uv =
+    bounds f1 uv - bounds f2 uv
+  derivativeImpl parameter (Arithmetic.Difference f1 f2) =
+    derivative parameter f1 - derivative parameter f2
+  transformByImpl transform (Arithmetic.Difference f1 f2) =
+    VectorSurface2d.Function.new $
+      Arithmetic.Difference
+        -- Note the slight hack here:
+        -- the definition of VectorCurve2d.Interface states that the units of the transform
+        -- do *not* have to match the units of the vector curve,
+        -- because vectors and vector curves ignore translation
+        -- (and the units of the transform are just the units of its translation part).
+        -- This would in general mean that we couldn't apply the given transform to a Point2d or Curve2d,
+        -- but in this case it's safe since any translation will cancel out
+        -- when the point and curve are subtracted from each other.
+        (transformBy (Units.coerce transform) f1)
+        (transformBy (Units.coerce transform) f2)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -149,64 +167,75 @@ instance
     (Function (space2 @ units2))
     (VectorSurface2d.Function (space1 @ units1))
   where
-  Constant p1 - Constant p2 = VectorSurface2d.Function.Constant (p1 - p2)
-  f1 - f2 = VectorSurface2d.Function.new (Difference f1 f2)
+  Parametric lhs - Parametric rhs = VectorSurface2d.Function.Parametric (lhs - rhs)
+  lhs - rhs = VectorSurface2d.Function.new (Arithmetic.Difference lhs rhs)
 
 new :: Interface function (space @ units) => function -> Function (space @ units)
 new = Function
 
 constant :: Point2d (space @ units) -> Function (space @ units)
-constant = Constant
+constant = Parametric . Expression.constant
 
 xy ::
   Surface1d.Function units ->
   Surface1d.Function units ->
   Function (space @ units)
-xy = XY
+xy (Surface1d.Function.Parametric x) (Surface1d.Function.Parametric y) =
+  Parametric (Expression.xy x y)
+xy x y = XY x y
 
 evaluate :: Function (space @ units) -> Uv.Point -> Point2d (space @ units)
 evaluate function uv = case function of
   Function f -> evaluateImpl f uv
   Coerce f -> Units.coerce (evaluate f uv)
-  Constant v -> v
+  Parametric expression -> Expression.value expression uv
   XY x y ->
     Point2d.xy
       (Surface1d.Function.evaluate x uv)
       (Surface1d.Function.evaluate y uv)
   Addition f1 f2 -> evaluate f1 uv + VectorSurface2d.Function.evaluate f2 uv
   Subtraction f1 f2 -> evaluate f1 uv - VectorSurface2d.Function.evaluate f2 uv
+  Transformed transform f -> Point2d.transformBy transform (evaluate f uv)
 
 bounds :: Function (space @ units) -> Uv.Bounds -> Bounds2d (space @ units)
 bounds function uv = case function of
   Function f -> boundsImpl f uv
   Coerce f -> Units.coerce (bounds f uv)
-  Constant v -> Bounds2d.constant v
+  Parametric expression -> Expression.bounds expression uv
   XY x y ->
     Bounds2d.xy
       (Surface1d.Function.bounds x uv)
       (Surface1d.Function.bounds y uv)
   Addition f1 f2 -> bounds f1 uv + VectorSurface2d.Function.bounds f2 uv
   Subtraction f1 f2 -> bounds f1 uv - VectorSurface2d.Function.bounds f2 uv
+  Transformed transform f -> Bounds2d.transformBy transform (bounds f uv)
 
 derivative :: Uv.Parameter -> Function (space @ units) -> VectorSurface2d.Function (space @ units)
 derivative parameter function = case function of
   Function f -> derivativeImpl parameter f
   Coerce f -> Units.coerce (derivative parameter f)
-  Constant _ -> VectorSurface2d.Function.zero
+  Parametric expression ->
+    VectorSurface2d.Function.Parametric (Expression.surfaceDerivative parameter expression)
   XY x y ->
     VectorSurface2d.Function.xy
       (Surface1d.Function.derivative parameter x)
       (Surface1d.Function.derivative parameter y)
   Addition f1 f2 -> derivative parameter f1 + VectorSurface2d.Function.derivative parameter f2
   Subtraction f1 f2 -> derivative parameter f1 - VectorSurface2d.Function.derivative parameter f2
+  Transformed transform f -> VectorSurface2d.Function.transformBy transform (derivative parameter f)
 
-data SurfaceCurveComposition (coordinateSystem :: CoordinateSystem) where
-  SurfaceCurveComposition ::
-    Surface1d.Function Unitless ->
-    Curve2d (space @ units) ->
-    SurfaceCurveComposition (space @ units)
-
-deriving instance Show (SurfaceCurveComposition (space @ units))
+transformBy ::
+  Transform2d tag (space @ units) ->
+  Function (space @ units) ->
+  Function (space @ units)
+transformBy transform function = case function of
+  Function f -> transformByImpl transform f
+  Coerce c -> Units.coerce (transformBy (Units.coerce transform) c)
+  Parametric expression -> Parametric (Expression.Surface2d.transformBy transform expression)
+  XY{} -> Transformed (Transform2d.toAffine transform) function
+  Addition f1 f2 -> transformBy transform f1 + VectorSurface2d.Function.transformBy transform f2
+  Subtraction c v -> transformBy transform c - VectorSurface2d.Function.transformBy transform v
+  Transformed current f -> Transformed (Transform2d.toAffine transform . current) f
 
 instance
   Composition
@@ -214,26 +243,46 @@ instance
     (Curve2d (space @ units))
     (Function (space @ units))
   where
-  curve . function = new (SurfaceCurveComposition function curve)
+  Curve2d.Parametric outer . Surface1d.Function.Parametric inner = Parametric (outer . inner)
+  curve . function = new (curve :.: function)
 
-instance Interface (SurfaceCurveComposition (space @ units)) (space @ units) where
-  evaluateImpl (SurfaceCurveComposition function curve) uv =
+instance
+  Interface
+    (Curve2d (space @ units) :.: Surface1d.Function.Function Unitless)
+    (space @ units)
+  where
+  evaluateImpl (curve :.: function) uv =
     Curve2d.pointOn curve (Surface1d.Function.evaluate function uv)
-
-  boundsImpl (SurfaceCurveComposition function curve) uv =
+  boundsImpl (curve :.: function) uv =
     Curve2d.segmentBounds curve (Surface1d.Function.bounds function uv)
-
-  derivativeImpl parameter (SurfaceCurveComposition function curve) =
+  derivativeImpl parameter (curve :.: function) =
     (Curve2d.derivative curve . function) * Surface1d.Function.derivative parameter function
+  transformByImpl transform (curve :.: function) =
+    Curve2d.transformBy transform curve . function
 
-  expressionImpl (SurfaceCurveComposition function curve) =
-    Maybe.map2 (.) (Curve2d.expression curve) (Surface1d.Function.toExpression function)
+instance
+  Composition
+    (Curve2d Uv.Coordinates)
+    (Function (space @ units))
+    (Curve2d (space @ units))
+  where
+  Parametric function . Curve2d.Parametric curve = Curve2d.Parametric (function . curve)
+  function . curve = Curve2d.new (function :.: curve)
 
-expression :: Function (space @ units) -> Maybe (Expression Uv.Point (Point2d (space @ units)))
-expression function = case function of
-  Function f -> expressionImpl f
-  Coerce f -> Units.coerce (expression f)
-  Constant p -> Just (Expression.Surface2d.constant p)
-  XY x y -> Maybe.map2 Expression.Surface2d.xy (Surface1d.Function.toExpression x) (Surface1d.Function.toExpression y)
-  Addition f1 f2 -> Maybe.map2 (+) (expression f1) (VectorSurface2d.Function.expression f2)
-  Subtraction f1 f2 -> Maybe.map2 (-) (expression f1) (VectorSurface2d.Function.expression f2)
+instance
+  Curve2d.Interface
+    (Function (space @ units) :.: Curve2d Uv.Coordinates)
+    (space @ units)
+  where
+  startPointImpl (function :.: curve) = evaluate function (Curve2d.pointOn curve 0.0)
+  endPointImpl (function :.: curve) = evaluate function (Curve2d.pointOn curve 1.0)
+  pointOnImpl (function :.: curve) t = evaluate function (Curve2d.pointOn curve t)
+  segmentBoundsImpl (function :.: curve) t = bounds function (Curve2d.segmentBounds curve t)
+  boundsImpl (function :.: curve) = bounds function (Curve2d.bounds curve)
+  derivativeImpl (function :.: curve) = do
+    let curveDerivative = Curve2d.derivative curve
+    let dudt = VectorCurve2d.xComponent curveDerivative
+    let dvdt = VectorCurve2d.yComponent curveDerivative
+    (derivative U function . curve) * dudt + (derivative V function . curve) * dvdt
+  reverseImpl (function :.: curve) = function :.: Curve2d.reverse curve
+  transformByImpl transform (function :.: curve) = transformBy transform function . curve

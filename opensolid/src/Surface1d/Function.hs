@@ -23,13 +23,13 @@ module Surface1d.Function
   , sqrt'
   , sin
   , cos
-  , toExpression
   )
 where
 
 import Angle qualified
 import Bounds2d (Bounds2d (Bounds2d))
 import Bounds2d qualified
+import Composition
 import Curve1d (Curve1d)
 import Curve1d qualified
 import Curve2d (Curve2d)
@@ -43,7 +43,6 @@ import Expression qualified
 import Float qualified
 import Fuzzy qualified
 import List qualified
-import Maybe qualified
 import NonEmpty qualified
 import OpenSolid
 import Point2d qualified
@@ -384,35 +383,24 @@ cos :: Function Radians -> Function Unitless
 cos (Parametric expression) = Parametric (Expression.cos expression)
 cos function = Cos function
 
-toExpression :: Function units -> Maybe (Expression Uv.Point (Qty units))
-toExpression (Parametric expression) = Just expression
-toExpression _ = Nothing
-
-data CurveOnSurface units
-  = CurveOnSurface (Curve2d Uv.Coordinates) (Function units)
-  deriving (Show)
-
 instance Composition (Curve2d Uv.Coordinates) (Function units) (Curve1d units) where
-  -- TODO special case for when Curve2d and Function are both expressions
-  function . uvCurve = Curve1d.new (CurveOnSurface uvCurve function)
+  Parametric outer . Curve2d.Parametric inner = Curve1d.Parametric (outer . inner)
+  outer . inner = Curve1d.new (outer :.: inner)
 
-instance Curve1d.Interface (CurveOnSurface units) units where
-  pointOnImpl (CurveOnSurface uvCurve function) t =
+instance Curve1d.Interface (Function units :.: Curve2d Uv.Coordinates) units where
+  pointOnImpl (function :.: uvCurve) t =
     evaluate function (Curve2d.pointOnImpl uvCurve t)
 
-  segmentBoundsImpl (CurveOnSurface uvCurve function) t =
+  segmentBoundsImpl (function :.: uvCurve) t =
     bounds function (Curve2d.segmentBoundsImpl uvCurve t)
 
-  derivativeImpl (CurveOnSurface uvCurve function) = do
+  derivativeImpl (function :.: uvCurve) = do
     let fU = derivative U function
     let fV = derivative V function
     let uvT = Curve2d.derivative uvCurve
     let uT = VectorCurve2d.xComponent uvT
     let vT = VectorCurve2d.yComponent uvT
     fU . uvCurve * uT + fV . uvCurve * vT
-
-  expressionImpl (CurveOnSurface uvCurve function) =
-    Maybe.map2 (.) (toExpression function) (Curve2d.expression uvCurve)
 
 zeros :: Tolerance units => Function units -> Result Zeros.Error Zeros
 zeros function

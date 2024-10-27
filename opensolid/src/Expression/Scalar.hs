@@ -2,7 +2,7 @@ module Expression.Scalar
   ( Scalar (Constant)
   , zero
   , constant
-  , parameter
+  , t
   , u
   , v
   , negated
@@ -43,7 +43,7 @@ import Prelude (Double)
 
 data Scalar input where
   Constant :: Float -> Scalar input
-  Parameter :: Scalar Float
+  T :: Scalar Float
   U :: Scalar Uv.Point
   V :: Scalar Uv.Point
   Negated :: Scalar input -> Scalar input
@@ -65,7 +65,7 @@ deriving instance Ord (Scalar input)
 
 instance Composition (Scalar input) (Scalar Float) (Scalar input) where
   Constant value . _ = constant value
-  Parameter . input = input
+  T . input = input
   Negated arg . input = negated (arg . input)
   Sum lhs rhs . input = sum (lhs . input) (rhs . input)
   Difference lhs rhs . input = difference (lhs . input) (rhs . input)
@@ -111,8 +111,8 @@ one = constant 1.0
 constant :: Qty units -> Scalar input
 constant value = Constant (Units.coerce value)
 
-parameter :: Scalar Float
-parameter = Parameter
+t :: Scalar Float
+t = T
 
 u :: Scalar Uv.Point
 u = U
@@ -222,7 +222,7 @@ bezierCurve controlPoints param = BezierCurve (NonEmpty.map Units.coerce control
 curveDerivative :: Scalar Float -> Scalar Float
 curveDerivative expression = case expression of
   Constant _ -> zero
-  Parameter -> one
+  T -> one
   Negated arg -> negated (curveDerivative arg)
   Sum lhs rhs -> sum (curveDerivative lhs) (curveDerivative rhs)
   Difference lhs rhs -> difference (curveDerivative lhs) (curveDerivative rhs)
@@ -294,7 +294,7 @@ show = showWithPrecedence 0
 
 showWithPrecedence :: Int -> Scalar input -> Text
 showWithPrecedence precedence expression = case expression of
-  Parameter -> "t"
+  T -> "t"
   U -> "u"
   V -> "v"
   Constant value -> Text.float value
@@ -376,7 +376,7 @@ foreign import ccall unsafe "opensolid_expression_bezier_curve"
 -- to delete the underlying Rust value?
 ptr :: Scalar input -> Ptr
 ptr expression = case expression of
-  Parameter -> opensolid_expression_argument (fromIntegral 0)
+  T -> opensolid_expression_argument (fromIntegral 0)
   U -> opensolid_expression_argument (fromIntegral 0)
   V -> opensolid_expression_argument (fromIntegral 1)
   Constant (Qty value) -> opensolid_expression_constant value

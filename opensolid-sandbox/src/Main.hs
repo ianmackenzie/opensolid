@@ -30,7 +30,6 @@ import IO qualified
 import Int qualified
 import Length (Length)
 import Length qualified
-import Line2d qualified
 import List qualified
 import NonEmpty qualified
 import OpenSolid
@@ -40,6 +39,7 @@ import Point2d qualified
 import Polyline2d (Polyline2d (Polyline2d))
 import Polyline2d qualified
 import Qty qualified
+import QuadraticSpline2d qualified
 import Random qualified
 import Range qualified
 import Result qualified
@@ -192,24 +192,6 @@ testNonEmpty :: IO ()
 testNonEmpty = IO.do
   testEmptyCheck []
   testEmptyCheck [2, 3, 1]
-
-testLineFromEndpoints :: Tolerance Meters => IO ()
-testLineFromEndpoints = do
-  let startPoint = Point2d.origin @Global
-  let endPoint = Point2d.centimeters 40.0 30.0
-  case Line2d.from startPoint endPoint of
-    Curve2d.Line line -> do
-      let length = Point2d.distanceFrom (Line2d.startPoint line) (Line2d.endPoint line)
-      log "Line length in centimeters" (Length.inCentimeters length)
-    curve -> log "Unexpected curve" curve
-
-testArcFromEndpoints :: Tolerance Meters => IO ()
-testArcFromEndpoints = do
-  let startPoint = Point2d.origin @Global
-  let endPoint = Point2d.centimeters 50.0 50.0
-  case Arc2d.from startPoint endPoint Angle.quarterTurn of
-    Curve2d.Arc arc -> log "Arc center point" (Arc2d.centerPoint arc)
-    curve -> log "Unexpected curve" curve
 
 testPlaneTorusIntersection :: Tolerance Meters => IO ()
 testPlaneTorusIntersection = IO.do
@@ -383,7 +365,7 @@ drawBezier colour startPoint innerControlPoints endPoint = do
   let drawingEndPoint = Point2d.convert toDrawing endPoint
   let drawingInnerControlPoints = List.map (Point2d.convert toDrawing) innerControlPoints
   let drawingControlPoints = drawingStartPoint :| (drawingInnerControlPoints + [drawingEndPoint])
-  let curve = BezierCurve2d.fromControlPoints drawingStartPoint drawingInnerControlPoints drawingEndPoint
+  let curve = BezierCurve2d.fromControlPoints drawingControlPoints
   let drawSegmentBounds tBounds = drawBounds [] (Curve2d.segmentBounds curve tBounds)
   Drawing2d.with
     [Drawing2d.strokeColour colour, Drawing2d.strokeWidth (Length.millimeters 1.0)]
@@ -437,40 +419,6 @@ testHermiteBezier = IO.do
   let coordinateRange = Range.from (Length.meters -1.0) (Length.meters 11.0)
   let drawingBounds = Bounds2d.xy coordinateRange coordinateRange
   Drawing2d.writeTo "opensolid-sandbox/test-hermite-bezier.svg" drawingBounds [curveEntity]
-
-testStretchedArc :: Tolerance Meters => IO ()
-testStretchedArc = IO.do
-  let startPoint = Point2d.meters @Global 1.0 0.0
-  let endPoint = Point2d.meters @Global 0.0 1.0
-  let initialArc = Arc2d.from startPoint endPoint (Angle.degrees 90.0)
-  let axis = Axis2d.through Point2d.origin (Direction2d.degrees 30.0)
-  let stretched = Curve2d.scaleAlong axis 2.0 initialArc
-  let compressed = Curve2d.scaleAlong axis 0.5 initialArc
-  printEllipticalArc "initialArc" initialArc
-  printEllipticalArc "stretched" stretched
-  printEllipticalArc "compressed" compressed
-
-printEllipticalArc :: Tolerance Meters => Text -> Curve2d (space @ Meters) -> IO ()
-printEllipticalArc label curve = case curve of
-  Curve2d.Arc arc -> IO.do
-    let centerPoint = Arc2d.centerPoint arc
-    let majorDirection = Arc2d.majorDirection arc
-    let minorDirection = Arc2d.minorDirection arc
-    let majorRadius = Arc2d.majorRadius arc
-    let minorRadius = Arc2d.minorRadius arc
-    let startAngle = Arc2d.startAngle arc
-    let endAngle = Arc2d.endAngle arc
-    IO.printLine (label + ":")
-    log "  centerPoint" centerPoint
-    log "  majorDirection" majorDirection
-    log "  minorDirection" minorDirection
-    log "  majorRadius" majorRadius
-    log "  minorRadius" minorRadius
-    log "  startAngle" (Angle.inDegrees startAngle)
-    log "  endAngle" (Angle.inDegrees endAngle)
-    log "  start point" (centerPoint + majorRadius * majorDirection * Angle.cos startAngle + minorRadius * minorDirection * Angle.sin startAngle)
-    log "  end point" (centerPoint + majorRadius * majorDirection * Angle.cos endAngle + minorRadius * minorDirection * Angle.sin endAngle)
-  _ -> log ("Expected " + label + " to be an elliptical arc, got") curve
 
 testExplicitRandomStep :: IO ()
 testExplicitRandomStep = IO.do
@@ -599,7 +547,7 @@ testCurveMedialAxis = IO.do
 
 testJit :: IO ()
 testJit = IO.do
-  let x = Expression.parameter
+  let x = Expression.t
   let xSquared = Expression.squared x
   let function = xSquared / (xSquared + 1.0)
   log "JIT evaluated" (Expression.value function 2.0)
@@ -607,8 +555,8 @@ testJit = IO.do
 
 testJitCurve2d :: IO ()
 testJitCurve2d = IO.do
-  let x = 10.0 * Expression.parameter
-  let y = Expression.sqrt Expression.parameter
+  let x = 10.0 * Expression.t
+  let y = Expression.sqrt Expression.t
   let curve = Expression.xy x y :: Expression Float (Point2d (Global @ Unitless))
   log "Evaluated 2D curve" (Expression.value curve 3.0)
 
@@ -636,8 +584,6 @@ main = Tolerance.using (Length.meters 1e-9) IO.do
   testListOperations
   testParameter1dGeneration
   testNonEmpty
-  testLineFromEndpoints
-  testArcFromEndpoints
   testBezierSegment
   testHermiteBezier
   testJit
@@ -645,7 +591,6 @@ main = Tolerance.using (Length.meters 1e-9) IO.do
   testPlaneParaboloidIntersection
   testPlaneTorusIntersection
   timeCurveMedialAxis
-  testStretchedArc
   testExplicitRandomStep
   testConcurrency
   testIOParallel

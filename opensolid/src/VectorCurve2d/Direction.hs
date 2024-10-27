@@ -92,9 +92,6 @@ instance VectorCurve2d.Interface (PiecewiseCurve space) (space @ Unitless) where
         (VectorCurve2d.transformBy transform general)
         (Maybe.map (DegenerateEndpoint.transformBy transform) end)
 
-  expressionImpl (PiecewiseCurve Nothing general Nothing) = VectorCurve2d.expression general
-  expressionImpl PiecewiseCurve{} = Nothing -- TODO support piecewise curves in JIT
-
 unsafe ::
   Tolerance units =>
   VectorCurve2d (space @ units) ->

@@ -1,5 +1,5 @@
 module Curve1d
-  ( Curve1d
+  ( Curve1d (Parametric)
   , Interface (..)
   , pointOn
   , segmentBounds
@@ -17,11 +17,11 @@ module Curve1d
   , zeros
   , reverse
   , integral
-  , expression
   )
 where
 
 import Angle qualified
+import Composition
 import Curve1d.Integral (Integral (Integral))
 import Curve1d.Root (Root)
 import Curve1d.Root qualified as Root
@@ -35,7 +35,6 @@ import Expression qualified
 import Float qualified
 import Fuzzy qualified
 import List qualified
-import Maybe qualified
 import NonEmpty qualified
 import OpenSolid
 import Parameter qualified
@@ -55,17 +54,15 @@ class
   pointOnImpl :: curve -> Float -> Qty units
   segmentBoundsImpl :: curve -> Range Unitless -> Range units
   derivativeImpl :: curve -> Curve1d units
-  expressionImpl :: curve -> Maybe (Expression Float (Qty units))
 
 data Curve1d units where
   Curve1d ::
     Interface curve units =>
     curve ->
     Curve1d units
-  Constant ::
-    Qty units -> Curve1d units
-  Parameter ::
-    Curve1d Unitless
+  Parametric ::
+    Expression Float (Qty units) ->
+    Curve1d units
   Negated ::
     Curve1d units ->
     Curve1d units
@@ -100,6 +97,9 @@ data Curve1d units where
   Coerce ::
     Curve1d units1 ->
     Curve1d units2
+  Reversed ::
+    Curve1d units ->
+    Curve1d units
 
 deriving instance Show (Curve1d units)
 
@@ -107,7 +107,7 @@ instance HasUnits (Curve1d units) where
   type UnitsOf (Curve1d units) = units
 
 instance Units.Coercion (Curve1d unitsA) (Curve1d unitsB) where
-  coerce (Constant value) = Constant (Units.coerce value)
+  coerce (Parametric expression) = Parametric (Units.coerce expression)
   coerce (Coerce curve) = Coerce curve
   coerce curve = Coerce curve
 
@@ -121,7 +121,6 @@ instance
   units1 ~ units2 =>
   ApproximateEquality (Curve1d units1) (Qty units2) units1
   where
-  Constant value1 ~= value2 = value1 ~= value2
   curve ~= value = List.allTrue [pointOn curve tValue ~= value | tValue <- Parameter.samples]
 
 instance
@@ -148,7 +147,6 @@ instance Interface (Curve1d units) units where
   pointOnImpl = pointOn
   segmentBoundsImpl = segmentBounds
   derivativeImpl = derivative
-  expressionImpl = expression
 
 new :: Interface curve units => curve -> Curve1d units
 new = Curve1d
@@ -157,13 +155,13 @@ zero :: Curve1d units
 zero = constant Qty.zero
 
 constant :: Qty units -> Curve1d units
-constant = Constant
+constant = Parametric . Expression.constant
 
 parameter :: Curve1d Unitless
-parameter = Parameter
+parameter = Parametric Expression.t
 
 instance Negation (Curve1d units) where
-  negate (Constant x) = Constant (negate x)
+  negate (Parametric expression) = Parametric -expression
   negate (Negated curve) = curve
   negate (Difference c1 c2) = Difference c2 c1
   negate (Product' c1 c2) = negate c1 .*. c2
@@ -184,10 +182,8 @@ instance Multiplication' (Curve1d units) Sign where
   curve .*. Negative = Units.coerce -curve
 
 instance units ~ units_ => Addition (Curve1d units) (Curve1d units_) (Curve1d units) where
-  curve + Constant x | x == Qty.zero = curve
-  Constant x + curve | x == Qty.zero = curve
-  Constant x + Constant y = constant (x + y)
-  curve1 + curve2 = Sum curve1 curve2
+  Parametric lhs + Parametric rhs = Parametric (lhs + rhs)
+  lhs + rhs = Sum lhs rhs
 
 instance units ~ units_ => Addition (Curve1d units) (Qty units_) (Curve1d units) where
   curve + value = curve + constant value
@@ -211,10 +207,8 @@ instance
   units1 ~ units2 =>
   Subtraction (Curve1d units1) (Curve1d units2) (Curve1d units1)
   where
-  curve - Constant x | x == Qty.zero = curve
-  Constant x - curve | x == Qty.zero = negate curve
-  Constant x - Constant y = constant (x - y)
-  curve1 - curve2 = Difference curve1 curve2
+  Parametric lhs - Parametric rhs = Parametric (lhs - rhs)
+  lhs - rhs = Difference lhs rhs
 
 instance
   units1 ~ units2 =>
@@ -234,15 +228,8 @@ instance
 
 instance Multiplication' (Curve1d units1) (Curve1d units2) where
   type Curve1d units1 .*. Curve1d units2 = Curve1d (units1 :*: units2)
-  Constant x .*. _ | x == Qty.zero = zero
-  _ .*. Constant x | x == Qty.zero = zero
-  Constant x .*. Constant y = Constant (x .*. y)
-  Constant x .*. curve | x == Units.coerce 1.0 = Units.coerce curve
-  Constant x .*. curve | x == Units.coerce -1.0 = Units.coerce (negate curve)
-  Constant x .*. Negated c = negate x .*. c
-  c1 .*. (Constant x) = Units.commute (Constant x .*. c1)
-  Constant x .*. Product' (Constant y) c = Units.rightAssociate ((x .*. y) .*. c)
-  curve1 .*. curve2 = Product' curve1 curve2
+  Parametric lhs .*. Parametric rhs = Parametric (lhs .*. rhs)
+  lhs .*. rhs = Product' lhs rhs
 
 instance Multiplication' Int (Curve1d units) where
   type Int .*. Curve1d units = Curve1d (Unitless :*: units)
@@ -278,10 +265,8 @@ instance
 
 instance Division' (Curve1d units1) (Curve1d units2) where
   type Curve1d units1 ./. Curve1d units2 = Curve1d (units1 :/: units2)
-  Constant x ./. _ | x == Qty.zero = zero
-  Constant x ./. Constant y = Constant (x ./. y)
-  curve ./. Constant x = (1 ./. x) .*^ curve
-  curve1 ./. curve2 = Quotient' curve1 curve2
+  Parametric lhs ./. Parametric rhs = Parametric (lhs ./. rhs)
+  lhs ./. rhs = Quotient' lhs rhs
 
 instance
   Units.Quotient units1 units2 units3 =>
@@ -313,11 +298,22 @@ instance Division' Int (Curve1d units) where
   type Int ./. Curve1d units = Curve1d (Unitless :/: units)
   value ./. curve = Float.int value ./. curve
 
+instance Composition (Curve1d Unitless) (Curve1d units) (Curve1d units) where
+  Parametric outer . Parametric inner = Parametric (outer . inner)
+  outer . inner = new (outer :.: inner)
+
+instance Interface (Curve1d units :.: Curve1d Unitless) units where
+  pointOnImpl (outer :.: inner) tValue =
+    pointOn outer (pointOn inner tValue)
+  segmentBoundsImpl (outer :.: inner) tBounds =
+    segmentBounds outer (segmentBounds inner tBounds)
+  derivativeImpl (outer :.: inner) =
+    (derivative outer . inner) * derivative inner
+
 pointOn :: Curve1d units -> Float -> Qty units
 pointOn curve tValue = case curve of
   Curve1d c -> pointOnImpl c tValue
-  Constant x -> x
-  Parameter -> tValue
+  Parametric expression -> Expression.value expression tValue
   Negated c -> negate (pointOn c tValue)
   Sum c1 c2 -> pointOn c1 tValue + pointOn c2 tValue
   Difference c1 c2 -> pointOn c1 tValue - pointOn c2 tValue
@@ -328,12 +324,12 @@ pointOn curve tValue = case curve of
   Sin c -> Angle.sin (pointOn c tValue)
   Cos c -> Angle.cos (pointOn c tValue)
   Coerce c -> Units.coerce (pointOn c tValue)
+  Reversed c -> pointOn c (1 - tValue)
 
 segmentBounds :: Curve1d units -> Range Unitless -> Range units
 segmentBounds curve tBounds = case curve of
   Curve1d c -> segmentBoundsImpl c tBounds
-  Constant value -> Range.constant value
-  Parameter -> tBounds
+  Parametric expression -> Expression.bounds expression tBounds
   Negated c -> negate (segmentBounds c tBounds)
   Sum c1 c2 -> segmentBounds c1 tBounds + segmentBounds c2 tBounds
   Difference c1 c2 -> segmentBounds c1 tBounds - segmentBounds c2 tBounds
@@ -344,12 +340,12 @@ segmentBounds curve tBounds = case curve of
   Sin c -> Range.sin (segmentBounds c tBounds)
   Cos c -> Range.cos (segmentBounds c tBounds)
   Coerce c -> Units.coerce (segmentBounds c tBounds)
+  Reversed c -> segmentBounds c (1.0 - tBounds)
 
 derivative :: Curve1d units -> Curve1d units
 derivative curve = case curve of
   Curve1d c -> derivativeImpl c
-  Constant _ -> zero
-  Parameter -> constant 1.0
+  Parametric expression -> Parametric (Expression.curveDerivative expression)
   Negated c -> negate (derivative c)
   Sum c1 c2 -> derivative c1 + derivative c2
   Difference c1 c2 -> derivative c1 - derivative c2
@@ -360,69 +356,37 @@ derivative curve = case curve of
   Sin c -> cos c * (derivative c / Angle.radian)
   Cos c -> negate (sin c) * (derivative c / Angle.radian)
   Coerce c -> Units.coerce (derivative c)
-
-newtype Reversed units = Reversed (Curve1d units) deriving (Show)
-
-instance Interface (Reversed units) units where
-  pointOnImpl (Reversed curve) tValue = pointOn curve (1 - tValue)
-  segmentBoundsImpl (Reversed curve) tBounds = segmentBounds curve (1 - tBounds)
-  derivativeImpl (Reversed curve) = -(reverse (derivative curve))
-  expressionImpl (Reversed curve) = Maybe.map (. (1.0 - Expression.parameter)) (expression curve)
+  Reversed c -> -(reverse (derivative c))
 
 reverse :: Curve1d units -> Curve1d units
-reverse curve@(Constant _) = curve
+reverse (Parametric expression) = Parametric (expression . (1.0 - Expression.t))
 reverse curve = Curve1d (Reversed curve)
 
 squared :: Units.Squared units1 units2 => Curve1d units1 -> Curve1d units2
 squared curve = Units.specialize (squared' curve)
 
 squared' :: Curve1d units -> Curve1d (units :*: units)
-squared' curve = case curve of
-  Constant x -> Constant (x .*. x)
-  Negated c -> squared' c
-  Cos c -> Units.unspecialize (cosSquared c)
-  Sin c -> Units.unspecialize (sinSquared c)
-  _ -> Squared' curve
-
-cosSquared :: Curve1d Radians -> Curve1d Unitless
-cosSquared c = 0.5 * cos (2 * c) + 0.5
-
-sinSquared :: Curve1d Radians -> Curve1d Unitless
-sinSquared c = 0.5 - 0.5 * cos (2 * c)
+squared' (Parametric expression) = Parametric (Expression.squared' expression)
+squared' (Negated c) = squared' c
+squared' curve = Squared' curve
 
 sqrt :: Units.Squared units1 units2 => Curve1d units2 -> Curve1d units1
 sqrt curve = sqrt' (Units.unspecialize curve)
 
 sqrt' :: Curve1d (units :*: units) -> Curve1d units
-sqrt' (Constant x) = Constant (Qty.sqrt' x)
+sqrt' (Parametric expression) = Parametric (Expression.sqrt' expression)
 sqrt' curve = SquareRoot' curve
 
 sin :: Curve1d Radians -> Curve1d Unitless
-sin (Constant x) = constant (Angle.sin x)
+sin (Parametric expression) = Parametric (Expression.sin expression)
 sin curve = Sin curve
 
 cos :: Curve1d Radians -> Curve1d Unitless
-cos (Constant x) = constant (Angle.cos x)
+cos (Parametric expression) = Parametric (Expression.cos expression)
 cos curve = Cos curve
 
 integral :: Curve1d units -> Estimate units
 integral curve = Estimate.new (Integral curve (derivative curve) Range.unit)
-
-expression :: Curve1d units -> Maybe (Expression Float (Qty units))
-expression curve = case curve of
-  Curve1d c -> expressionImpl c
-  Constant x -> Just (Expression.constant x)
-  Parameter -> Just Expression.parameter
-  Negated c -> Maybe.map negate (expression c)
-  Sum c1 c2 -> Maybe.map2 (+) (expression c1) (expression c2)
-  Difference c1 c2 -> Maybe.map2 (-) (expression c1) (expression c2)
-  Product' c1 c2 -> Maybe.map2 (.*.) (expression c1) (expression c2)
-  Quotient' c1 c2 -> Maybe.map2 (./.) (expression c1) (expression c2)
-  Squared' c -> Maybe.map Expression.squared' (expression c)
-  SquareRoot' c -> Maybe.map Expression.sqrt' (expression c)
-  Sin c -> Maybe.map Expression.sin (expression c)
-  Cos c -> Maybe.map Expression.cos (expression c)
-  Coerce c -> Units.coerce (expression c)
 
 ----- ROOT FINDING -----
 

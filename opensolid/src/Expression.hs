@@ -11,7 +11,7 @@ module Expression
   , xCoordinate
   , yCoordinate
   , zCoordinate
-  , parameter
+  , t
   , u
   , v
   , sqrt
@@ -20,6 +20,9 @@ module Expression
   , squared'
   , sin
   , cos
+  , quadraticSpline
+  , cubicSpline
+  , bezierCurve
   , CurveDerivative (curveDerivative)
   , SurfaceDerivative (surfaceDerivative)
   , Value (value)
@@ -36,6 +39,7 @@ import Foreign (FunPtr, Ptr)
 import Foreign qualified
 import Foreign.Marshal.Alloc qualified as Alloc
 import IO qualified
+import NonEmpty qualified
 import OpenSolid
 import Point2d (Point2d (Point2d))
 import Point2d qualified
@@ -2466,8 +2470,8 @@ instance ZCoordinate input (Point3d (space @ units)) where
   zCoordinate Curve3d{c3z} = curve1d c3z
   zCoordinate Surface3d{s3z} = surface1d s3z
 
-parameter :: Expression Float Float
-parameter = curve1d Scalar.parameter
+t :: Expression Float Float
+t = curve1d Scalar.t
 
 u :: Expression Uv.Point Float
 u = surface1d Scalar.u
@@ -2502,6 +2506,102 @@ sin Surface1d{s1x} = surface1d (Scalar.sin s1x)
 cos :: Expression input Angle -> Expression input Float
 cos Curve1d{c1x} = curve1d (Scalar.cos c1x)
 cos Surface1d{s1x} = surface1d (Scalar.cos s1x)
+
+class QuadraticSpline output where
+  quadraticSpline :: output -> output -> output -> Expression Float output
+
+instance QuadraticSpline (Qty units) where
+  quadraticSpline p1 p2 p3 = curve1d (Scalar.quadraticSpline p1 p2 p3 Scalar.t)
+
+instance QuadraticSpline (Point2d (space @ units)) where
+  quadraticSpline (Point2d x1 y1) (Point2d x2 y2) (Point2d x3 y3) =
+    curve2d
+      (Scalar.quadraticSpline x1 x2 x3 Scalar.t)
+      (Scalar.quadraticSpline y1 y2 y3 Scalar.t)
+
+instance QuadraticSpline (Vector2d (space @ units)) where
+  quadraticSpline (Vector2d x1 y1) (Vector2d x2 y2) (Vector2d x3 y3) =
+    vectorCurve2d
+      (Scalar.quadraticSpline x1 x2 x3 Scalar.t)
+      (Scalar.quadraticSpline y1 y2 y3 Scalar.t)
+
+instance QuadraticSpline (Point3d (space @ units)) where
+  quadraticSpline (Point3d x1 y1 z1) (Point3d x2 y2 z2) (Point3d x3 y3 z3) =
+    curve3d
+      (Scalar.quadraticSpline x1 x2 x3 Scalar.t)
+      (Scalar.quadraticSpline y1 y2 y3 Scalar.t)
+      (Scalar.quadraticSpline z1 z2 z3 Scalar.t)
+
+instance QuadraticSpline (Vector3d (space @ units)) where
+  quadraticSpline (Vector3d x1 y1 z1) (Vector3d x2 y2 z2) (Vector3d x3 y3 z3) =
+    vectorCurve3d
+      (Scalar.quadraticSpline x1 x2 x3 Scalar.t)
+      (Scalar.quadraticSpline y1 y2 y3 Scalar.t)
+      (Scalar.quadraticSpline z1 z2 z3 Scalar.t)
+
+class CubicSpline output where
+  cubicSpline :: output -> output -> output -> output -> Expression Float output
+
+instance CubicSpline (Qty units) where
+  cubicSpline p1 p2 p3 p4 = curve1d (Scalar.cubicSpline p1 p2 p3 p4 Scalar.t)
+
+instance CubicSpline (Point2d (space @ units)) where
+  cubicSpline (Point2d x1 y1) (Point2d x2 y2) (Point2d x3 y3) (Point2d x4 y4) =
+    curve2d
+      (Scalar.cubicSpline x1 x2 x3 x4 Scalar.t)
+      (Scalar.cubicSpline y1 y2 y3 y4 Scalar.t)
+
+instance CubicSpline (Vector2d (space @ units)) where
+  cubicSpline (Vector2d x1 y1) (Vector2d x2 y2) (Vector2d x3 y3) (Vector2d x4 y4) =
+    vectorCurve2d
+      (Scalar.cubicSpline x1 x2 x3 x4 Scalar.t)
+      (Scalar.cubicSpline y1 y2 y3 y4 Scalar.t)
+
+instance CubicSpline (Point3d (space @ units)) where
+  cubicSpline (Point3d x1 y1 z1) (Point3d x2 y2 z2) (Point3d x3 y3 z3) (Point3d x4 y4 z4) =
+    curve3d
+      (Scalar.cubicSpline x1 x2 x3 x4 Scalar.t)
+      (Scalar.cubicSpline y1 y2 y3 y4 Scalar.t)
+      (Scalar.cubicSpline z1 z2 z3 z4 Scalar.t)
+
+instance CubicSpline (Vector3d (space @ units)) where
+  cubicSpline (Vector3d x1 y1 z1) (Vector3d x2 y2 z2) (Vector3d x3 y3 z3) (Vector3d x4 y4 z4) =
+    vectorCurve3d
+      (Scalar.cubicSpline x1 x2 x3 x4 Scalar.t)
+      (Scalar.cubicSpline y1 y2 y3 y4 Scalar.t)
+      (Scalar.cubicSpline z1 z2 z3 z4 Scalar.t)
+
+class BezierCurve output where
+  bezierCurve :: NonEmpty output -> Expression Float output
+
+instance BezierCurve (Qty units) where
+  bezierCurve controlPoints = curve1d (Scalar.bezierCurve controlPoints Scalar.t)
+
+instance BezierCurve (Point2d (space @ units)) where
+  bezierCurve controlPoints =
+    curve2d
+      (Scalar.bezierCurve (NonEmpty.map Point2d.xCoordinate controlPoints) Scalar.t)
+      (Scalar.bezierCurve (NonEmpty.map Point2d.yCoordinate controlPoints) Scalar.t)
+
+instance BezierCurve (Vector2d (space @ units)) where
+  bezierCurve controlPoints =
+    vectorCurve2d
+      (Scalar.bezierCurve (NonEmpty.map Vector2d.xComponent controlPoints) Scalar.t)
+      (Scalar.bezierCurve (NonEmpty.map Vector2d.yComponent controlPoints) Scalar.t)
+
+instance BezierCurve (Point3d (space @ units)) where
+  bezierCurve controlPoints =
+    curve3d
+      (Scalar.bezierCurve (NonEmpty.map Point3d.xCoordinate controlPoints) Scalar.t)
+      (Scalar.bezierCurve (NonEmpty.map Point3d.yCoordinate controlPoints) Scalar.t)
+      (Scalar.bezierCurve (NonEmpty.map Point3d.zCoordinate controlPoints) Scalar.t)
+
+instance BezierCurve (Vector3d (space @ units)) where
+  bezierCurve controlPoints =
+    vectorCurve3d
+      (Scalar.bezierCurve (NonEmpty.map Vector3d.xComponent controlPoints) Scalar.t)
+      (Scalar.bezierCurve (NonEmpty.map Vector3d.yComponent controlPoints) Scalar.t)
+      (Scalar.bezierCurve (NonEmpty.map Vector3d.zComponent controlPoints) Scalar.t)
 
 -----------------------
 --- DIFFERENTIATION ---
