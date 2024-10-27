@@ -97,14 +97,15 @@ runImpl :: List Text -> Text -> Test -> IO (Int, Int)
 runImpl args context test = case test of
   Check count label generator -> do
     let fullName = appendTo context label
+    let initialSeed = Random.init 0
     if
       | List.isEmpty args ->
           -- No test filter specified, silently run all tests
-          fuzzImpl fullName count generator
+          fuzzImpl fullName count initialSeed generator
       | List.anySatisfy (\arg -> Text.contains arg fullName) args -> IO.do
           -- Test filter specified, so print out which tests we're running
           -- and how long they took (with an extra emoji to flag slow tests)
-          (results, elapsed) <- IO.time (fuzzImpl fullName count generator)
+          (results, elapsed) <- IO.time (fuzzImpl fullName count initialSeed generator)
           let elapsedText = fixed 3 (Duration.inSeconds elapsed) + "s"
           let elapsedSuffix = if elapsed > Duration.seconds 0.1 then " ⏲️" else ""
           IO.printLine (fullName + ": " + elapsedText + elapsedSuffix)
@@ -131,14 +132,15 @@ sum ((successes, failures) : rest) = do
   let (restSuccesses, restFailures) = sum rest
   (successes + restSuccesses, failures + restFailures)
 
-fuzzImpl :: Text -> Int -> Expectation -> IO (Int, Int)
-fuzzImpl _ 0 _ = IO.succeed (1, 0)
-fuzzImpl context n expectation = IO.do
-  let (Expectation generator) = expectation
-  testResult <- Random.generate generator
-  case testResult of
-    Passed -> fuzzImpl context (n - 1) expectation
-    Failed messages -> reportError context messages
+fuzzImpl :: Text -> Int -> Random.Seed -> Expectation -> IO (Int, Int)
+fuzzImpl context n seed expectation = case n of
+  0 -> IO.succeed (1,0) -- We've finished fuzzing, report 1 successful test
+  _ -> IO.do
+    let (Expectation generator) = expectation
+    let (testResult, updatedSeed) = Random.step generator seed
+    case testResult of
+      Passed -> fuzzImpl context (n - 1) updatedSeed expectation
+      Failed messages -> reportError context messages
 
 pass :: Expectation
 pass = Expectation (Random.return Passed)
