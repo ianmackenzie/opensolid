@@ -7,6 +7,7 @@ import Arc2d qualified
 import Area qualified
 import Axis2d qualified
 import BezierCurve2d qualified
+import Bounds2d (Bounds2d)
 import Bounds2d qualified
 import Colour (Colour)
 import Colour qualified
@@ -261,15 +262,15 @@ drawZeros path zeros = IO.do
   let saddlePoints = Surface1d.Function.Zeros.saddlePoints zeros
   Drawing2d.writeTo path viewBox $
     [ Drawing2d.with [Drawing2d.strokeWidth strokeWidth] $
-        [ drawBounds [] Uv.domain
+        [ drawBounds [] (Bounds2d.convert toDrawing Uv.domain)
         , Drawing2d.group (List.mapWithIndex drawCrossingCurve crossingCurves)
         , Drawing2d.group (List.map drawSaddlePoint saddlePoints)
         ]
     ]
 
-drawBounds :: List (Drawing2d.Attribute Uv.Space) -> Uv.Bounds -> Drawing2d.Entity Uv.Space
+drawBounds :: List (Drawing2d.Attribute space) -> Bounds2d (space @ Meters) -> Drawing2d.Entity space
 drawBounds attributes bounds = do
-  let point x y = Point2d.convert toDrawing (Bounds2d.interpolate bounds x y)
+  let point x y = Bounds2d.interpolate bounds x y
   Drawing2d.polygon attributes $
     [ point 0.0 0.0
     , point 1.0 0.0
@@ -289,7 +290,7 @@ drawCrossingCurve index segments = do
         [ Drawing2d.strokeColour Colour.gray
         , Drawing2d.strokeWidth (Length.millimeters 0.05)
         ]
-        (List.map (drawBounds []) bounds)
+        (List.map (drawBounds [] . Bounds2d.convert toDrawing) bounds)
     ]
 
 drawSaddlePoint :: (Uv.Point, Uv.Bounds) -> Drawing2d.Entity Uv.Space
@@ -300,7 +301,7 @@ drawSaddlePoint (point, bounds) =
         [ Drawing2d.strokeColour Colour.gray
         , Drawing2d.strokeWidth (Length.millimeters 0.05)
         ]
-        bounds
+        (Bounds2d.convert toDrawing bounds)
     ]
 
 toDrawing :: Qty (Meters :/: Unitless)
