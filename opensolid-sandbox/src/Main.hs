@@ -384,6 +384,7 @@ drawBezier colour startPoint innerControlPoints endPoint = do
   let drawingInnerControlPoints = List.map (Point2d.convert toDrawing) innerControlPoints
   let drawingControlPoints = drawingStartPoint :| (drawingInnerControlPoints + [drawingEndPoint])
   let curve = BezierCurve2d.fromControlPoints drawingStartPoint drawingInnerControlPoints drawingEndPoint
+  let drawSegmentBounds tBounds = drawBounds [] (Curve2d.segmentBounds curve tBounds)
   Drawing2d.with
     [Drawing2d.strokeColour colour, Drawing2d.strokeWidth (Length.millimeters 1.0)]
     [ Drawing2d.with [Drawing2d.opacity 0.3] $
@@ -393,6 +394,8 @@ drawBezier colour startPoint innerControlPoints endPoint = do
             | point <- NonEmpty.toList drawingControlPoints
             ]
         ]
+    , Drawing2d.with [Drawing2d.opacity 0.3] $
+        List.map drawSegmentBounds (Parameter.intervals 10)
     , Drawing2d.curve [] Length.millimeter curve
     ]
 
