@@ -419,6 +419,7 @@ testHermiteBezier = IO.do
   let endDerivatives = [Vector2d.meters 0.0 -10.0, Vector2d.zero]
   let endPoint = Point2d.meters 10.0 0.0
   let curve = BezierCurve2d.hermite (startPoint, startDerivatives) (endPoint, endDerivatives)
+  log "Hermite Bezier curve" curve
   let curveFirstDerivative = Curve2d.derivative curve
   let curveSecondDerivative = VectorCurve2d.derivative curveFirstDerivative
   let curveThirdDerivative = VectorCurve2d.derivative curveSecondDerivative
