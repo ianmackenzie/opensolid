@@ -1,7 +1,6 @@
 .stack-work/
 *~
 __pycache__
-TODO.txt
 .direnv
 .hie
 *.prof
