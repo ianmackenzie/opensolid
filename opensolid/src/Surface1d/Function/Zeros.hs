@@ -8,13 +8,13 @@ where
 import Curve2d (Curve2d)
 import Error qualified
 import OpenSolid
-import Uv qualified
+import SurfaceParameter (UvBounds, UvCoordinates, UvPoint)
 
 data Zeros = Zeros
-  { crossingCurves :: List (NonEmpty (Curve2d Uv.Coordinates, Uv.Bounds))
-  , crossingLoops :: List (NonEmpty (Curve2d Uv.Coordinates, Uv.Bounds))
-  , tangentPoints :: List (Uv.Point, Sign, Uv.Bounds)
-  , saddlePoints :: List (Uv.Point, Uv.Bounds)
+  { crossingCurves :: List (NonEmpty (Curve2d UvCoordinates, UvBounds))
+  , crossingLoops :: List (NonEmpty (Curve2d UvCoordinates, UvBounds))
+  , tangentPoints :: List (UvPoint, Sign, UvBounds)
+  , saddlePoints :: List (UvPoint, UvBounds)
   }
 
 empty :: Zeros

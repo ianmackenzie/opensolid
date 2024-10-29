@@ -24,9 +24,8 @@ import Point3d (Point3d)
 import Point3d qualified
 import Surface1d qualified
 import Surface1d.Function qualified
+import SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvPoint)
 import Units qualified
-import Uv (Parameter)
-import Uv qualified
 import Vector3d (Vector3d)
 import Vector3d qualified
 import VectorSurface3d qualified
@@ -37,8 +36,8 @@ class
   Interface function (coordinateSystem :: CoordinateSystem)
     | function -> coordinateSystem
   where
-  evaluateImpl :: function -> Uv.Point -> Point3d coordinateSystem
-  boundsImpl :: function -> Uv.Bounds -> Bounds3d coordinateSystem
+  evaluateImpl :: function -> UvPoint -> Point3d coordinateSystem
+  boundsImpl :: function -> UvBounds -> Bounds3d coordinateSystem
   derivativeImpl :: Parameter -> function -> VectorSurface3d.Function coordinateSystem
 
 data Function (coordinateSystem :: CoordinateSystem) where
@@ -139,7 +138,7 @@ xyz ::
   Function (space @ units)
 xyz = XYZ
 
-evaluate :: Function (space @ units) -> Uv.Point -> Point3d (space @ units)
+evaluate :: Function (space @ units) -> UvPoint -> Point3d (space @ units)
 evaluate function uv = case function of
   Function f -> evaluateImpl f uv
   Coerce f -> Units.coerce (evaluate f uv)
@@ -152,7 +151,7 @@ evaluate function uv = case function of
   Sum f1 f2 -> evaluate f1 uv + VectorSurface3d.Function.evaluate f2 uv
   Difference f1 f2 -> evaluate f1 uv - VectorSurface3d.Function.evaluate f2 uv
 
-bounds :: Function (space @ units) -> Uv.Bounds -> Bounds3d (space @ units)
+bounds :: Function (space @ units) -> UvBounds -> Bounds3d (space @ units)
 bounds function uv = case function of
   Function f -> boundsImpl f uv
   Coerce f -> Units.coerce (bounds f uv)
@@ -165,7 +164,10 @@ bounds function uv = case function of
   Sum f1 f2 -> bounds f1 uv + VectorSurface3d.Function.bounds f2 uv
   Difference f1 f2 -> bounds f1 uv - VectorSurface3d.Function.bounds f2 uv
 
-derivative :: Uv.Parameter -> Function (space @ units) -> VectorSurface3d.Function (space @ units)
+derivative ::
+  SurfaceParameter ->
+  Function (space @ units) ->
+  VectorSurface3d.Function (space @ units)
 derivative parameter function = case function of
   Function f -> derivativeImpl parameter f
   Coerce f -> Units.coerce (derivative parameter f)

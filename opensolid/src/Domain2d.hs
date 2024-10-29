@@ -28,7 +28,7 @@ import Bounds2d qualified
 import Domain1d (Domain1d)
 import Domain1d qualified
 import OpenSolid
-import Uv qualified
+import SurfaceParameter (UvBounds)
 
 data Domain2d = Domain2d Domain1d Domain1d deriving (Show)
 
@@ -121,10 +121,10 @@ contacts (Domain2d xDomain yDomain) boundary = case boundary of
 half :: Domain2d -> Domain2d
 half (Domain2d x y) = Domain2d (Domain1d.half x) (Domain1d.half y)
 
-bounds :: Domain2d -> Uv.Bounds
+bounds :: Domain2d -> UvBounds
 bounds (Domain2d x y) = Bounds2d.xy (Domain1d.bounds x) (Domain1d.bounds y)
 
-interior :: Domain2d -> Uv.Bounds
+interior :: Domain2d -> UvBounds
 interior (Domain2d x y) = Bounds2d.xy (Domain1d.interior x) (Domain1d.interior y)
 
 overlaps :: Domain2d -> Domain2d -> Bool

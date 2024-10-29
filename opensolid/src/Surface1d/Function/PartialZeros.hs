@@ -26,28 +26,28 @@ import Surface1d.Function.SaddleRegion (SaddleRegion)
 import Surface1d.Function.SaddleRegion qualified as SaddleRegion
 import Surface1d.Function.Zeros (Zeros (..))
 import Surface1d.Function.Zeros qualified as Zeros
-import Uv qualified
+import SurfaceParameter (UvBounds, UvCoordinates, UvPoint)
 
 data PartialZeros units = PartialZeros
   { crossingCurves :: List CrossingCurve
   , crossingLoops :: List CrossingLoop
-  , tangentPoints :: List (Uv.Point, Sign, Uv.Bounds)
+  , tangentPoints :: List (UvPoint, Sign, UvBounds)
   , saddleRegions :: List (SaddleRegion units)
   }
 
 data CrossingCurve
-  = CrossingCurve Domain2d.Boundary Domain2d.Boundary (NonEmpty (Curve2d Uv.Coordinates, Uv.Bounds))
+  = CrossingCurve Domain2d.Boundary Domain2d.Boundary (NonEmpty (Curve2d UvCoordinates, UvBounds))
 
 crossingCurve ::
   Domain2d.Boundary ->
   Domain2d.Boundary ->
-  Uv.Bounds ->
-  Curve2d Uv.Coordinates ->
+  UvBounds ->
+  Curve2d UvCoordinates ->
   CrossingCurve
 crossingCurve startBoundary endBoundary uvBounds curve =
   CrossingCurve startBoundary endBoundary (NonEmpty.singleton (curve, uvBounds))
 
-type CrossingLoop = NonEmpty (Curve2d Uv.Coordinates, Uv.Bounds)
+type CrossingLoop = NonEmpty (Curve2d UvCoordinates, UvBounds)
 
 empty :: PartialZeros units
 empty =
@@ -100,7 +100,7 @@ joinCrossingCurves (CrossingCurve start1 end1 segments1) (CrossingCurve start2 e
       Just (JoinedCrossingCurve (CrossingCurve start2 end1 (segments2 + segments1)))
   | otherwise = Nothing
 
-addTangentPoint :: (Uv.Point, Sign, Uv.Bounds) -> PartialZeros units -> PartialZeros units
+addTangentPoint :: (UvPoint, Sign, UvBounds) -> PartialZeros units -> PartialZeros units
 addTangentPoint tangentPoint partialZeros = do
   let PartialZeros{tangentPoints} = partialZeros
   partialZeros
@@ -132,7 +132,7 @@ finalize partialZeros = do
             )
     }
 
-filterDegenerateCurves :: CrossingCurve -> Maybe (NonEmpty (Curve2d Uv.Coordinates, Uv.Bounds))
+filterDegenerateCurves :: CrossingCurve -> Maybe (NonEmpty (Curve2d UvCoordinates, UvBounds))
 filterDegenerateCurves (CrossingCurve _ _ segments) = do
   let isNondegenerate (curve, _) = Curve2d.startPoint curve /= Curve2d.endPoint curve
   case NonEmpty.filter isNondegenerate segments of

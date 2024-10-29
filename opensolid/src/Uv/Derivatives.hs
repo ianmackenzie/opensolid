@@ -7,8 +7,8 @@ module Uv.Derivatives
 where
 
 import OpenSolid
+import SurfaceParameter (SurfaceParameter (U, V))
 import Text qualified
-import Uv (Parameter (U, V))
 import Prelude qualified
 
 data Derivatives a
@@ -17,11 +17,11 @@ data Derivatives a
 instance Show (Derivatives a) where
   show _ = Text.unpack "<Derivatives>"
 
-instance Composition (Derivatives a) Parameter (Derivatives a) where
+instance Composition (Derivatives a) SurfaceParameter (Derivatives a) where
   (Derivatives _ du _) >> U = du
   (Derivatives _ _ dv) >> V = dv
 
-init :: a -> (Parameter -> a -> a) -> Derivatives a
+init :: a -> (SurfaceParameter -> a -> a) -> Derivatives a
 init f df = do
   let derivativesU = init (df U f) df
   Derivatives f derivativesU (initV derivativesU (df V f) (df V))

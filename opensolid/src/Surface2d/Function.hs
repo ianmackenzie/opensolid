@@ -27,11 +27,10 @@ import Point2d (Point2d)
 import Point2d qualified
 import Surface1d qualified
 import Surface1d.Function qualified
+import SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvCoordinates, UvPoint)
 import Transform2d (Transform2d)
 import Transform2d qualified
 import Units qualified
-import Uv (Parameter (U, V))
-import Uv qualified
 import Vector2d (Vector2d)
 import VectorCurve2d qualified
 import VectorSurface2d qualified
@@ -42,9 +41,9 @@ class
   Interface function (coordinateSystem :: CoordinateSystem)
     | function -> coordinateSystem
   where
-  evaluateImpl :: function -> Uv.Point -> Point2d coordinateSystem
-  boundsImpl :: function -> Uv.Bounds -> Bounds2d coordinateSystem
-  derivativeImpl :: Parameter -> function -> VectorSurface2d.Function coordinateSystem
+  evaluateImpl :: function -> UvPoint -> Point2d coordinateSystem
+  boundsImpl :: function -> UvBounds -> Bounds2d coordinateSystem
+  derivativeImpl :: SurfaceParameter -> function -> VectorSurface2d.Function coordinateSystem
   transformByImpl :: Transform2d tag coordinateSystem -> function -> Function coordinateSystem
 
 data Function (coordinateSystem :: CoordinateSystem) where
@@ -56,7 +55,7 @@ data Function (coordinateSystem :: CoordinateSystem) where
     Function (space @ units1) ->
     Function (space @ units2)
   Parametric ::
-    Expression Uv.Point (Point2d (space @ units)) ->
+    Expression UvPoint (Point2d (space @ units)) ->
     Function (space @ units)
   XY ::
     Surface1d.Function units ->
@@ -184,7 +183,7 @@ xy (Surface1d.Function.Parametric x) (Surface1d.Function.Parametric y) =
   Parametric (Expression.xy x y)
 xy x y = XY x y
 
-evaluate :: Function (space @ units) -> Uv.Point -> Point2d (space @ units)
+evaluate :: Function (space @ units) -> UvPoint -> Point2d (space @ units)
 evaluate function uv = case function of
   Function f -> evaluateImpl f uv
   Coerce f -> Units.coerce (evaluate f uv)
@@ -197,7 +196,7 @@ evaluate function uv = case function of
   Subtraction f1 f2 -> evaluate f1 uv - VectorSurface2d.Function.evaluate f2 uv
   Transformed transform f -> Point2d.transformBy transform (evaluate f uv)
 
-bounds :: Function (space @ units) -> Uv.Bounds -> Bounds2d (space @ units)
+bounds :: Function (space @ units) -> UvBounds -> Bounds2d (space @ units)
 bounds function uv = case function of
   Function f -> boundsImpl f uv
   Coerce f -> Units.coerce (bounds f uv)
@@ -210,7 +209,7 @@ bounds function uv = case function of
   Subtraction f1 f2 -> bounds f1 uv - VectorSurface2d.Function.bounds f2 uv
   Transformed transform f -> Bounds2d.transformBy transform (bounds f uv)
 
-derivative :: Uv.Parameter -> Function (space @ units) -> VectorSurface2d.Function (space @ units)
+derivative :: SurfaceParameter -> Function (space @ units) -> VectorSurface2d.Function (space @ units)
 derivative parameter function = case function of
   Function f -> derivativeImpl parameter f
   Coerce f -> Units.coerce (derivative parameter f)
@@ -262,7 +261,7 @@ instance
 
 instance
   Composition
-    (Curve2d Uv.Coordinates)
+    (Curve2d UvCoordinates)
     (Function (space @ units))
     (Curve2d (space @ units))
   where
@@ -271,7 +270,7 @@ instance
 
 instance
   Curve2d.Interface
-    (Function (space @ units) :.: Curve2d Uv.Coordinates)
+    (Function (space @ units) :.: Curve2d UvCoordinates)
     (space @ units)
   where
   startPointImpl (function :.: curve) = evaluate function (Curve2d.pointOn curve 0.0)

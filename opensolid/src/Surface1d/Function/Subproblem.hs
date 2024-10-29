@@ -31,8 +31,7 @@ import Range qualified
 import {-# SOURCE #-} Surface1d.Function (Function)
 import {-# SOURCE #-} Surface1d.Function qualified as Function
 import Surface1d.Function.Internal qualified as Internal
-import Uv (Parameter (U, V))
-import Uv qualified
+import SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvPoint)
 import Uv.Derivatives (Derivatives)
 import Uv.Derivatives qualified as Derivatives
 
@@ -41,7 +40,7 @@ data Subproblem units = Subproblem
   , dudv :: Function Unitless
   , dvdu :: Function Unitless
   , subdomain :: Domain2d
-  , uvBounds :: Uv.Bounds
+  , uvBounds :: UvBounds
   , derivativeBounds :: Derivatives (Range units)
   , derivativeValues :: Derivatives (CornerValues units)
   }
@@ -65,7 +64,7 @@ new derivatives dudv dvdu subdomain = do
   let derivativeValues = Derivatives.map (cornerValues uvBounds) derivatives
   Subproblem{derivatives, dudv, dvdu, subdomain, uvBounds, derivativeBounds, derivativeValues}
 
-cornerValues :: Uv.Bounds -> Function units -> CornerValues units
+cornerValues :: UvBounds -> Function units -> CornerValues units
 cornerValues (Bounds2d (Range u1 u2) (Range v1 v2)) function =
   CornerValues
     { bottomLeft = Function.evaluate function (Point2d.xy u1 v1)
@@ -74,50 +73,50 @@ cornerValues (Bounds2d (Range u1 u2) (Range v1 v2)) function =
     , topRight = Function.evaluate function (Point2d.xy u2 v2)
     }
 
-leftEdgePoint :: Tolerance units => Subproblem units -> (Uv.Point, Domain2d.Boundary)
+leftEdgePoint :: Tolerance units => Subproblem units -> (UvPoint, Domain2d.Boundary)
 leftEdgePoint Subproblem{derivatives, subdomain, uvBounds} = do
   let Bounds2d (Range u1 _) vBounds = uvBounds
   let f = Derivatives.get derivatives
   let fv = Derivatives.get (derivatives >> V)
   (Point2d.xy u1 (Internal.solveForV f fv u1 vBounds), Domain2d.leftEdge subdomain)
 
-rightEdgePoint :: Tolerance units => Subproblem units -> (Uv.Point, Domain2d.Boundary)
+rightEdgePoint :: Tolerance units => Subproblem units -> (UvPoint, Domain2d.Boundary)
 rightEdgePoint Subproblem{derivatives, subdomain, uvBounds} = do
   let Bounds2d (Range _ u2) vBounds = uvBounds
   let f = Derivatives.get derivatives
   let fv = Derivatives.get (derivatives >> V)
   (Point2d.xy u2 (Internal.solveForV f fv u2 vBounds), Domain2d.rightEdge subdomain)
 
-bottomEdgePoint :: Tolerance units => Subproblem units -> (Uv.Point, Domain2d.Boundary)
+bottomEdgePoint :: Tolerance units => Subproblem units -> (UvPoint, Domain2d.Boundary)
 bottomEdgePoint Subproblem{derivatives, subdomain, uvBounds} = do
   let Bounds2d uBounds (Range v1 _) = uvBounds
   let f = Derivatives.get derivatives
   let fu = Derivatives.get (derivatives >> U)
   (Point2d.xy (Internal.solveForU f fu uBounds v1) v1, Domain2d.bottomEdge subdomain)
 
-topEdgePoint :: Tolerance units => Subproblem units -> (Uv.Point, Domain2d.Boundary)
+topEdgePoint :: Tolerance units => Subproblem units -> (UvPoint, Domain2d.Boundary)
 topEdgePoint Subproblem{derivatives, subdomain, uvBounds} = do
   let Bounds2d uBounds (Range _ v2) = uvBounds
   let f = Derivatives.get derivatives
   let fu = Derivatives.get (derivatives >> U)
   (Point2d.xy (Internal.solveForU f fu uBounds v2) v2, Domain2d.topEdge subdomain)
 
-bottomLeftPoint :: Subproblem units -> (Uv.Point, Domain2d.Boundary)
+bottomLeftPoint :: Subproblem units -> (UvPoint, Domain2d.Boundary)
 bottomLeftPoint Subproblem{subdomain, uvBounds} = do
   let Bounds2d (Range u1 _) (Range v1 _) = uvBounds
   (Point2d.xy u1 v1, Domain2d.bottomLeftCorner subdomain)
 
-bottomRightPoint :: Subproblem units -> (Uv.Point, Domain2d.Boundary)
+bottomRightPoint :: Subproblem units -> (UvPoint, Domain2d.Boundary)
 bottomRightPoint Subproblem{subdomain, uvBounds} = do
   let Bounds2d (Range _ u2) (Range v1 _) = uvBounds
   (Point2d.xy u2 v1, Domain2d.bottomRightCorner subdomain)
 
-topLeftPoint :: Subproblem units -> (Uv.Point, Domain2d.Boundary)
+topLeftPoint :: Subproblem units -> (UvPoint, Domain2d.Boundary)
 topLeftPoint Subproblem{subdomain, uvBounds} = do
   let Bounds2d (Range u1 _) (Range _ v2) = uvBounds
   (Point2d.xy u1 v2, Domain2d.topLeftCorner subdomain)
 
-topRightPoint :: Subproblem units -> (Uv.Point, Domain2d.Boundary)
+topRightPoint :: Subproblem units -> (UvPoint, Domain2d.Boundary)
 topRightPoint Subproblem{subdomain, uvBounds} = do
   let Bounds2d (Range _ u2) (Range _ v2) = uvBounds
   (Point2d.xy u2 v2, Domain2d.topRightCorner subdomain)

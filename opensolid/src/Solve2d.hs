@@ -34,7 +34,7 @@ import Queue qualified
 import Range (Range)
 import Range qualified
 import Result qualified
-import Uv qualified
+import SurfaceParameter (UvBounds, UvPoint)
 import Vector2d qualified
 
 data RecursionType
@@ -173,32 +173,32 @@ pass = Pass
 
 unique ::
   Tolerance units =>
-  (Uv.Bounds -> Range units) ->
-  (Uv.Point -> Qty units) ->
-  (Uv.Point -> Qty units) ->
-  (Uv.Point -> Qty units) ->
-  (Uv.Bounds -> Range units) ->
-  (Uv.Point -> Qty units) ->
-  (Uv.Point -> Qty units) ->
-  (Uv.Point -> Qty units) ->
-  Uv.Bounds ->
-  Maybe Uv.Point
+  (UvBounds -> Range units) ->
+  (UvPoint -> Qty units) ->
+  (UvPoint -> Qty units) ->
+  (UvPoint -> Qty units) ->
+  (UvBounds -> Range units) ->
+  (UvPoint -> Qty units) ->
+  (UvPoint -> Qty units) ->
+  (UvPoint -> Qty units) ->
+  UvBounds ->
+  Maybe UvPoint
 unique fBounds f fu fv gBounds g gu gv uvBounds =
   solveUnique uvBounds fBounds f fu fv gBounds g gu gv uvBounds
 
 solveUnique ::
   Tolerance units =>
-  Uv.Bounds ->
-  (Uv.Bounds -> Range units) ->
-  (Uv.Point -> Qty units) ->
-  (Uv.Point -> Qty units) ->
-  (Uv.Point -> Qty units) ->
-  (Uv.Bounds -> Range units) ->
-  (Uv.Point -> Qty units) ->
-  (Uv.Point -> Qty units) ->
-  (Uv.Point -> Qty units) ->
-  Uv.Bounds ->
-  Maybe Uv.Point
+  UvBounds ->
+  (UvBounds -> Range units) ->
+  (UvPoint -> Qty units) ->
+  (UvPoint -> Qty units) ->
+  (UvPoint -> Qty units) ->
+  (UvBounds -> Range units) ->
+  (UvPoint -> Qty units) ->
+  (UvPoint -> Qty units) ->
+  (UvPoint -> Qty units) ->
+  UvBounds ->
+  Maybe UvPoint
 solveUnique localBounds fBounds f fu fv gBounds g gu gv globalBounds =
   -- First check if it's *possible* that there's a solution within localBounds
   if fBounds localBounds ^ Qty.zero && gBounds localBounds ^ Qty.zero
@@ -234,33 +234,33 @@ data Divergence = Divergence deriving (Eq, Show, Error.Message)
 
 newtonRaphson ::
   Tolerance units =>
-  (Uv.Point -> Qty units) ->
-  (Uv.Point -> Qty units) ->
-  (Uv.Point -> Qty units) ->
-  (Uv.Point -> Qty units) ->
-  (Uv.Point -> Qty units) ->
-  (Uv.Point -> Qty units) ->
-  Uv.Bounds ->
-  Uv.Point ->
+  (UvPoint -> Qty units) ->
+  (UvPoint -> Qty units) ->
+  (UvPoint -> Qty units) ->
+  (UvPoint -> Qty units) ->
+  (UvPoint -> Qty units) ->
+  (UvPoint -> Qty units) ->
+  UvBounds ->
+  UvPoint ->
   Qty units ->
   Qty units ->
-  Result Divergence Uv.Point
+  Result Divergence UvPoint
 newtonRaphson = solveNewtonRaphson 0
 
 solveNewtonRaphson ::
   Tolerance units =>
   Int ->
-  (Uv.Point -> Qty units) ->
-  (Uv.Point -> Qty units) ->
-  (Uv.Point -> Qty units) ->
-  (Uv.Point -> Qty units) ->
-  (Uv.Point -> Qty units) ->
-  (Uv.Point -> Qty units) ->
-  Uv.Bounds ->
-  Uv.Point ->
+  (UvPoint -> Qty units) ->
+  (UvPoint -> Qty units) ->
+  (UvPoint -> Qty units) ->
+  (UvPoint -> Qty units) ->
+  (UvPoint -> Qty units) ->
+  (UvPoint -> Qty units) ->
+  UvBounds ->
+  UvPoint ->
   Qty units ->
   Qty units ->
-  Result Divergence Uv.Point
+  Result Divergence UvPoint
 solveNewtonRaphson iterations f fu fv g gu gv uvBounds p1 f1 g1 =
   if iterations > 10 -- Check if we've entered an infinite loop
     then Failure Divergence
@@ -283,7 +283,7 @@ solveNewtonRaphson iterations f fu fv g gu gv uvBounds p1 f1 g1 =
             else -- We're still converging, so take another iteration
               solveNewtonRaphson (iterations + 1) f fu fv g gu gv uvBounds p2 f2 g2
 
-boundedStep :: Uv.Bounds -> Uv.Point -> Uv.Point -> Uv.Point
+boundedStep :: UvBounds -> UvPoint -> UvPoint -> UvPoint
 boundedStep uvBounds p1 p2 =
   if Bounds2d.includes p2 uvBounds
     then p2 -- Stepped point is still within the given bounds, so we can use it

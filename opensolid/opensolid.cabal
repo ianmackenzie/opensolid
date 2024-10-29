@@ -206,6 +206,7 @@ library
     Surface1d.Function.Zeros
     Surface2d
     Surface2d.Function
+    SurfaceParameter
     Text
     Tolerance
     Transform
@@ -213,7 +214,6 @@ library
     Transform3d
     Triangle2d
     Units
-    Uv
     Uv.Derivatives
     Uvw
     Vector2d

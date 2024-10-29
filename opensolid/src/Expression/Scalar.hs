@@ -2,9 +2,8 @@ module Expression.Scalar
   ( Scalar (Constant)
   , zero
   , constant
-  , t
-  , u
-  , v
+  , curveParameter
+  , surfaceParameter
   , negated
   , sum
   , difference
@@ -35,17 +34,17 @@ import List qualified
 import NonEmpty qualified
 import OpenSolid
 import Qty (Qty (Qty))
+import SurfaceParameter (SurfaceParameter, UvPoint)
+import SurfaceParameter qualified
 import System.IO.Unsafe (unsafeDupablePerformIO)
 import Text qualified
 import Units qualified
-import Uv qualified
 import Prelude (Double)
 
 data Scalar input where
   Constant :: Float -> Scalar input
-  T :: Scalar Float
-  U :: Scalar Uv.Point
-  V :: Scalar Uv.Point
+  CurveParameter :: Scalar Float
+  SurfaceParameter :: SurfaceParameter -> Scalar UvPoint
   Negated :: Scalar input -> Scalar input
   Sum :: Scalar input -> Scalar input -> Scalar input
   Difference :: Scalar input -> Scalar input -> Scalar input
@@ -65,7 +64,7 @@ deriving instance Ord (Scalar input)
 
 instance Composition (Scalar input) (Scalar Float) (Scalar input) where
   Constant value . _ = constant value
-  T . input = input
+  CurveParameter . input = input
   Negated arg . input = negated (arg . input)
   Sum lhs rhs . input = sum (lhs . input) (rhs . input)
   Difference lhs rhs . input = difference (lhs . input) (rhs . input)
@@ -83,12 +82,12 @@ instance
   input1 ~ input2 =>
   Composition
     (Scalar input1, Scalar input2)
-    (Scalar Uv.Point)
+    (Scalar UvPoint)
     (Scalar input1)
   where
   Constant value . _ = constant value
-  U . (input, _) = input
-  V . (_, input) = input
+  SurfaceParameter SurfaceParameter.U . (input, _) = input
+  SurfaceParameter SurfaceParameter.V . (_, input) = input
   Negated arg . inputs = negated (arg . inputs)
   Sum lhs rhs . inputs = sum (lhs . inputs) (rhs . inputs)
   Difference lhs rhs . inputs = difference (lhs . inputs) (rhs . inputs)
@@ -111,14 +110,11 @@ one = constant 1.0
 constant :: Qty units -> Scalar input
 constant value = Constant (Units.coerce value)
 
-t :: Scalar Float
-t = T
+curveParameter :: Scalar Float
+curveParameter = CurveParameter
 
-u :: Scalar Uv.Point
-u = U
-
-v :: Scalar Uv.Point
-v = V
+surfaceParameter :: SurfaceParameter -> Scalar UvPoint
+surfaceParameter = SurfaceParameter
 
 negated :: Scalar input -> Scalar input
 negated (Constant value) = Constant (negate value)
@@ -222,7 +218,7 @@ bezierCurve controlPoints param = BezierCurve (NonEmpty.map Units.coerce control
 curveDerivative :: Scalar Float -> Scalar Float
 curveDerivative expression = case expression of
   Constant _ -> zero
-  T -> one
+  CurveParameter -> one
   Negated arg -> negated (curveDerivative arg)
   Sum lhs rhs -> sum (curveDerivative lhs) (curveDerivative rhs)
   Difference lhs rhs -> difference (curveDerivative lhs) (curveDerivative rhs)
@@ -253,33 +249,39 @@ curveDerivative expression = case expression of
       NonEmpty derivativeControlPoints ->
         product (bezierCurve derivativeControlPoints param) (curveDerivative param)
 
-surfaceDerivative :: Uv.Parameter -> Scalar Uv.Point -> Scalar Uv.Point
-surfaceDerivative p expression = case expression of
+surfaceDerivative :: SurfaceParameter -> Scalar UvPoint -> Scalar UvPoint
+surfaceDerivative varyingParameter expression = case expression of
   Constant _ -> zero
-  U -> if p == Uv.U then one else zero
-  V -> if p == Uv.V then one else zero
-  Negated arg -> negated (surfaceDerivative p arg)
-  Sum lhs rhs -> sum (surfaceDerivative p lhs) (surfaceDerivative p rhs)
-  Difference lhs rhs -> difference (surfaceDerivative p lhs) (surfaceDerivative p rhs)
-  Squared arg -> twice (product (surfaceDerivative p arg) arg)
+  SurfaceParameter parameter -> if parameter == varyingParameter then one else zero
+  Negated arg -> negated (surfaceDerivative varyingParameter arg)
+  Sum lhs rhs ->
+    sum (surfaceDerivative varyingParameter lhs) (surfaceDerivative varyingParameter rhs)
+  Difference lhs rhs ->
+    difference (surfaceDerivative varyingParameter lhs) (surfaceDerivative varyingParameter rhs)
+  Squared arg -> twice (product (surfaceDerivative varyingParameter arg) arg)
   Product lhs rhs ->
-    sum (product (surfaceDerivative p lhs) rhs) (product lhs (surfaceDerivative p rhs))
+    sum
+      (product (surfaceDerivative varyingParameter lhs) rhs)
+      (product lhs (surfaceDerivative varyingParameter rhs))
   Quotient lhs rhs ->
     quotient
-      (difference (product (surfaceDerivative p lhs) rhs) (product lhs (surfaceDerivative p rhs)))
+      ( difference
+          (product (surfaceDerivative varyingParameter lhs) rhs)
+          (product lhs (surfaceDerivative varyingParameter rhs))
+      )
       (squared rhs)
-  Sqrt arg -> quotient (half (surfaceDerivative p arg)) expression
-  Sin arg -> product (surfaceDerivative p arg) (cos arg)
-  Cos arg -> product (negated (surfaceDerivative p arg)) (sin arg)
+  Sqrt arg -> quotient (half (surfaceDerivative varyingParameter arg)) expression
+  Sin arg -> product (surfaceDerivative varyingParameter arg) (cos arg)
+  Cos arg -> product (negated (surfaceDerivative varyingParameter arg)) (sin arg)
   QuadraticSpline p1 p2 p3 param -> do
     let d1 = 2.0 * (p2 - p1)
     let d2 = 2.0 * (p3 - p2)
-    product (line d1 d2 param) (surfaceDerivative p param)
+    product (line d1 d2 param) (surfaceDerivative varyingParameter param)
   CubicSpline p1 p2 p3 p4 param -> do
     let d1 = 3.0 * (p2 - p1)
     let d2 = 3.0 * (p3 - p2)
     let d3 = 3.0 * (p4 - p3)
-    product (quadraticSpline d1 d2 d3 param) (surfaceDerivative p param)
+    product (quadraticSpline d1 d2 d3 param) (surfaceDerivative varyingParameter param)
   BezierCurve controlPoints param -> do
     let n = Float.int (NonEmpty.length controlPoints)
     let scaledDifference p1 p2 = (n - 1) * (p2 - p1)
@@ -287,16 +289,18 @@ surfaceDerivative p expression = case expression of
     case scaledDifferences of
       [] -> zero
       NonEmpty derivativeControlPoints ->
-        product (bezierCurve derivativeControlPoints param) (surfaceDerivative p param)
+        product
+          (bezierCurve derivativeControlPoints param)
+          (surfaceDerivative varyingParameter param)
 
 show :: Scalar input -> Text
 show = showWithPrecedence 0
 
 showWithPrecedence :: Int -> Scalar input -> Text
 showWithPrecedence precedence expression = case expression of
-  T -> "t"
-  U -> "u"
-  V -> "v"
+  CurveParameter -> "u"
+  SurfaceParameter SurfaceParameter.U -> "u"
+  SurfaceParameter SurfaceParameter.V -> "v"
   Constant value -> Text.float value
   Negated arg -> showParenthesized (precedence >= 6) ("-" + showWithPrecedence 6 arg)
   Sum lhs rhs -> showParenthesized (precedence >= 6) (showWithPrecedence 6 lhs + " + " + showWithPrecedence 6 rhs)
@@ -376,9 +380,9 @@ foreign import ccall unsafe "opensolid_expression_bezier_curve"
 -- to delete the underlying Rust value?
 ptr :: Scalar input -> Ptr
 ptr expression = case expression of
-  T -> opensolid_expression_argument (fromIntegral 0)
-  U -> opensolid_expression_argument (fromIntegral 0)
-  V -> opensolid_expression_argument (fromIntegral 1)
+  CurveParameter -> opensolid_expression_argument (fromIntegral 0)
+  SurfaceParameter SurfaceParameter.U -> opensolid_expression_argument (fromIntegral 0)
+  SurfaceParameter SurfaceParameter.V -> opensolid_expression_argument (fromIntegral 1)
   Constant (Qty value) -> opensolid_expression_constant value
   Negated arg -> opensolid_expression_negate (ptr arg)
   Sum lhs rhs -> opensolid_expression_sum (ptr lhs) (ptr rhs)

@@ -1,10 +1,10 @@
-module Uv
-  ( Parameter (U, V)
-  , Space
-  , Coordinates
-  , Point
-  , Direction
-  , Bounds
+module SurfaceParameter
+  ( SurfaceParameter (U, V)
+  , UvSpace
+  , UvCoordinates
+  , UvPoint
+  , UvDirection
+  , UvBounds
   , domain
   , samples
   )
@@ -19,22 +19,22 @@ import Point2d qualified
 import Quadrature qualified
 import Range qualified
 
-data Parameter = U | V deriving (Eq, Show, Ord)
+data SurfaceParameter = U | V deriving (Eq, Show, Ord)
 
-data Space deriving (Eq, Show)
+data UvSpace deriving (Eq, Show)
 
-type Coordinates = Space @ Unitless
+type UvCoordinates = UvSpace @ Unitless
 
-type Point = Point2d Coordinates
+type UvPoint = Point2d UvCoordinates
 
-type Bounds = Bounds2d Coordinates
+type UvBounds = Bounds2d UvCoordinates
 
-type Direction = Direction2d Space
+type UvDirection = Direction2d UvSpace
 
-domain :: Bounds
+domain :: UvBounds
 domain = Bounds2d.xy Range.unit Range.unit
 
-samples :: List Point
+samples :: List UvPoint
 samples = do
   let (t1, t2, t3, t4) = Quadrature.abscissae4
   [Point2d.xy t1 t3, Point2d.xy t2 t1, Point2d.xy t3 t4, Point2d.xy t4 t2]

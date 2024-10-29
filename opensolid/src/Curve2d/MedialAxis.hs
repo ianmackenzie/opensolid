@@ -16,8 +16,8 @@ import OpenSolid
 import Surface1d.Function qualified
 import Surface1d.Function.Zeros qualified
 import Surface2d.Function ()
+import SurfaceParameter (UvCoordinates)
 import Tolerance qualified
-import Uv qualified
 
 data Error
   = HigherOrderSolution
@@ -28,7 +28,7 @@ data Segment (coordinateSystem :: CoordinateSystem) where
   Segment ::
     { t1 :: Curve1d Unitless
     , t2 :: Curve1d Unitless
-    , t12 :: Curve2d Uv.Coordinates
+    , t12 :: Curve2d UvCoordinates
     } ->
     Segment (space @ units)
 

@@ -60,9 +60,9 @@ import Surface1d.Function.Subproblem qualified as Subproblem
 import Surface1d.Function.VerticalCurve qualified as VerticalCurve
 import Surface1d.Function.Zeros (Zeros (..))
 import Surface1d.Function.Zeros qualified as Zeros
+import SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvCoordinates, UvDirection, UvPoint)
+import SurfaceParameter qualified
 import Units qualified
-import Uv (Parameter (U, V))
-import Uv qualified
 import Uv.Derivatives (Derivatives)
 import Uv.Derivatives qualified as Derivatives
 import VectorCurve2d qualified
@@ -73,7 +73,7 @@ data Function units where
     function ->
     Function units
   Parametric ::
-    Expression Uv.Point (Qty units) ->
+    Expression UvPoint (Qty units) ->
     Function units
   Negated ::
     Function units ->
@@ -117,9 +117,9 @@ class
   Interface function units
     | function -> units
   where
-  evaluateImpl :: function -> Uv.Point -> Qty units
-  boundsImpl :: function -> Uv.Bounds -> Range units
-  derivativeImpl :: Parameter -> function -> Function units
+  evaluateImpl :: function -> UvPoint -> Qty units
+  boundsImpl :: function -> UvBounds -> Range units
+  derivativeImpl :: SurfaceParameter -> function -> Function units
 
 instance HasUnits (Function units) where
   type UnitsOf (Function units) = units
@@ -139,7 +139,8 @@ instance
   units1 ~ units2 =>
   ApproximateEquality (Function units1) (Qty units2) units1
   where
-  function ~= value = List.allTrue [evaluate function uvPoint ~= value | uvPoint <- Uv.samples]
+  function ~= value =
+    List.allTrue [evaluate function uvPoint ~= value | uvPoint <- SurfaceParameter.samples]
 
 instance
   units1 ~ units2 =>
@@ -289,7 +290,7 @@ instance Division' Int (Function units) where
   type Int ./. Function units = Function (Unitless :/: units)
   value ./. function = Float.int value ./. function
 
-evaluate :: Function units -> Uv.Point -> Qty units
+evaluate :: Function units -> UvPoint -> Qty units
 evaluate function uv = case function of
   Function f -> evaluateImpl f uv
   Parametric x -> Expression.value x uv
@@ -304,7 +305,7 @@ evaluate function uv = case function of
   Sin f -> Angle.sin (evaluate f uv)
   Cos f -> Angle.cos (evaluate f uv)
 
-bounds :: Function units -> Uv.Bounds -> Range units
+bounds :: Function units -> UvBounds -> Range units
 bounds function uv = case function of
   Function f -> boundsImpl f uv
   Parametric expression -> Expression.bounds expression uv
@@ -319,7 +320,7 @@ bounds function uv = case function of
   Sin f -> Range.sin (bounds f uv)
   Cos f -> Range.cos (bounds f uv)
 
-derivative :: Parameter -> Function units -> Function units
+derivative :: SurfaceParameter -> Function units -> Function units
 derivative varyingParameter function = case function of
   Function f -> derivativeImpl varyingParameter f
   Parametric expression -> Parametric (Expression.surfaceDerivative varyingParameter expression)
@@ -336,7 +337,7 @@ derivative varyingParameter function = case function of
   Sin f -> cos f * (derivative varyingParameter f / Angle.radian)
   Cos f -> negate (sin f) * (derivative varyingParameter f / Angle.radian)
 
-derivativeIn :: Uv.Direction -> Function units -> Function units
+derivativeIn :: UvDirection -> Function units -> Function units
 derivativeIn direction function =
   Direction2d.xComponent direction * derivative U function
     + Direction2d.yComponent direction * derivative V function
@@ -353,7 +354,7 @@ u = Parametric Expression.u
 v :: Function Unitless
 v = Parametric Expression.v
 
-parameter :: Parameter -> Function Unitless
+parameter :: SurfaceParameter -> Function Unitless
 parameter U = u
 parameter V = v
 
@@ -383,11 +384,11 @@ cos :: Function Radians -> Function Unitless
 cos (Parametric expression) = Parametric (Expression.cos expression)
 cos function = Cos function
 
-instance Composition (Curve2d Uv.Coordinates) (Function units) (Curve1d units) where
+instance Composition (Curve2d UvCoordinates) (Function units) (Curve1d units) where
   Parametric outer . Curve2d.Parametric inner = Curve1d.Parametric (outer . inner)
   outer . inner = Curve1d.new (outer :.: inner)
 
-instance Curve1d.Interface (Function units :.: Curve2d Uv.Coordinates) units where
+instance Curve1d.Interface (Function units :.: Curve2d UvCoordinates) units where
   pointOnImpl (function :.: uvCurve) t =
     evaluate function (Curve2d.pointOnImpl uvCurve t)
 
@@ -430,7 +431,7 @@ data FindZerosContext = AllZeroTypes | CrossingCurvesOnly deriving (Show)
 
 data Solution units
   = CrossingCurveSolution PartialZeros.CrossingCurve
-  | TangentPointSolution (Uv.Point, Sign, Uv.Bounds)
+  | TangentPointSolution (UvPoint, Sign, UvBounds)
   | SaddleRegionSolution (SaddleRegion units)
 
 findZeros ::
@@ -626,9 +627,9 @@ northwestCrossingCurve subproblem = do
 diagonalCurve ::
   Tolerance units =>
   Subproblem units ->
-  Uv.Bounds ->
-  (Uv.Point, Domain2d.Boundary) ->
-  (Uv.Point, Domain2d.Boundary) ->
+  UvBounds ->
+  (UvPoint, Domain2d.Boundary) ->
+  (UvPoint, Domain2d.Boundary) ->
   PartialZeros.CrossingCurve
 diagonalCurve subproblem uvBounds start end = do
   let Subproblem{derivatives, dvdu, dudv} = subproblem
@@ -678,8 +679,8 @@ westCrossingCurve subproblem = do
 horizontalCurve ::
   Tolerance units =>
   Subproblem units ->
-  (Uv.Point, Domain2d.Boundary) ->
-  (Uv.Point, Domain2d.Boundary) ->
+  (UvPoint, Domain2d.Boundary) ->
+  (UvPoint, Domain2d.Boundary) ->
   Fuzzy PartialZeros.CrossingCurve
 horizontalCurve Subproblem{derivatives, dvdu, subdomain, uvBounds} start end = do
   let (startPoint, startBoundary) = start
@@ -731,8 +732,8 @@ northCrossingCurve subproblem = Fuzzy.do
 verticalCurve ::
   Tolerance units =>
   Subproblem units ->
-  (Uv.Point, Domain2d.Boundary) ->
-  (Uv.Point, Domain2d.Boundary) ->
+  (UvPoint, Domain2d.Boundary) ->
+  (UvPoint, Domain2d.Boundary) ->
   Fuzzy PartialZeros.CrossingCurve
 verticalCurve Subproblem{derivatives, dudv, subdomain, uvBounds} start end = do
   let (startPoint, startBoundary) = start

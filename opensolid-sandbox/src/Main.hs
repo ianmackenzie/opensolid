@@ -46,11 +46,11 @@ import Result qualified
 import Solve2d qualified
 import Surface1d.Function qualified
 import Surface1d.Function.Zeros qualified
+import SurfaceParameter (UvBounds, UvCoordinates, UvPoint, UvSpace)
+import SurfaceParameter qualified
 import Text qualified
 import Tolerance qualified
 import Units (Meters)
-import Uv (Parameter (U, V))
-import Uv qualified
 import Vector2d qualified
 import Vector3d qualified
 import VectorCurve2d qualified
@@ -195,8 +195,8 @@ testNonEmpty = IO.do
 
 testPlaneTorusIntersection :: Tolerance Meters => IO ()
 testPlaneTorusIntersection = IO.do
-  let theta = Angle.twoPi * Surface1d.Function.parameter U
-  let phi = Angle.twoPi * Surface1d.Function.parameter V
+  let theta = Angle.twoPi * Surface1d.Function.u
+  let phi = Angle.twoPi * Surface1d.Function.v
   let minorRadius = Length.centimeters 1.0
   let majorRadius = Length.centimeters 2.0
   let r = majorRadius + minorRadius * Surface1d.Function.cos phi
@@ -245,7 +245,7 @@ drawZeros path zeros = IO.do
   let saddlePoints = Surface1d.Function.Zeros.saddlePoints zeros
   Drawing2d.writeTo path viewBox $
     [ Drawing2d.with [Drawing2d.strokeWidth strokeWidth] $
-        [ drawBounds [] (Bounds2d.convert toDrawing Uv.domain)
+        [ drawBounds [] (Bounds2d.convert toDrawing SurfaceParameter.domain)
         , Drawing2d.group (List.mapWithIndex drawCrossingCurve crossingCurves)
         , Drawing2d.group (List.map drawSaddlePoint saddlePoints)
         ]
@@ -261,7 +261,7 @@ drawBounds attributes bounds = do
     , point 0.0 1.0
     ]
 
-drawCrossingCurve :: Int -> NonEmpty (Curve2d Uv.Coordinates, Uv.Bounds) -> Drawing2d.Entity Uv.Space
+drawCrossingCurve :: Int -> NonEmpty (Curve2d UvCoordinates, UvBounds) -> Drawing2d.Entity UvSpace
 drawCrossingCurve index segments = do
   let hue = (index * Angle.goldenAngle) % Angle.twoPi
   let colour = Colour.hsl hue 0.5 0.5
@@ -276,7 +276,7 @@ drawCrossingCurve index segments = do
         (List.map (drawBounds [] . Bounds2d.convert toDrawing) bounds)
     ]
 
-drawSaddlePoint :: (Uv.Point, Uv.Bounds) -> Drawing2d.Entity Uv.Space
+drawSaddlePoint :: (UvPoint, UvBounds) -> Drawing2d.Entity UvSpace
 drawSaddlePoint (point, bounds) =
   Drawing2d.group
     [ drawDot Colour.orange point
@@ -290,12 +290,12 @@ drawSaddlePoint (point, bounds) =
 toDrawing :: Qty (Meters :/: Unitless)
 toDrawing = Length.centimeters 10.0 ./. 1.0
 
-drawUvCurve :: Curve2d Uv.Coordinates -> Drawing2d.Entity Uv.Space
+drawUvCurve :: Curve2d UvCoordinates -> Drawing2d.Entity UvSpace
 drawUvCurve curve = do
   let polyline = Curve2d.toPolyline 0.001 (Curve2d.pointOn curve) curve
   Drawing2d.polyline [] (Polyline2d.map (Point2d.convert toDrawing) polyline)
 
-drawDot :: Colour -> Uv.Point -> Drawing2d.Entity Uv.Space
+drawDot :: Colour -> UvPoint -> Drawing2d.Entity UvSpace
 drawDot colour point =
   Drawing2d.circle
     [Drawing2d.fillColour colour]
@@ -459,14 +459,14 @@ testTextSum = IO.do
 
 testNewtonRaphson2d :: IO ()
 testNewtonRaphson2d = Tolerance.using 1e-9 do
-  let u = Surface1d.Function.parameter U
-  let v = Surface1d.Function.parameter V
+  let u = Surface1d.Function.u
+  let v = Surface1d.Function.v
   let f = Surface1d.Function.squared u + Surface1d.Function.squared v - 4.0
-  let fu = Surface1d.Function.derivative U f
-  let fv = Surface1d.Function.derivative V f
+  let fu = Surface1d.Function.derivative SurfaceParameter.U f
+  let fv = Surface1d.Function.derivative SurfaceParameter.V f
   let g = u - v
-  let gu = Surface1d.Function.derivative U g
-  let gv = Surface1d.Function.derivative V g
+  let gu = Surface1d.Function.derivative SurfaceParameter.U g
+  let gv = Surface1d.Function.derivative SurfaceParameter.V g
   let bounds = Bounds2d.xy (Range.from 0.0 2.0) (Range.from 0.0 2.0)
   let solution =
         Solve2d.unique

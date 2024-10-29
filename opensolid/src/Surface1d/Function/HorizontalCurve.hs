@@ -28,9 +28,8 @@ import Range qualified
 import {-# SOURCE #-} Surface1d.Function (Function)
 import {-# SOURCE #-} Surface1d.Function qualified as Function
 import Surface1d.Function.Internal qualified as Internal
+import SurfaceParameter (SurfaceParameter (U, V), UvCoordinates)
 import Tolerance
-import Uv (Parameter (U, V))
-import Uv qualified
 import Uv.Derivatives (Derivatives)
 import Uv.Derivatives qualified as Derivatives
 import Vector2d (Vector2d (Vector2d#))
@@ -45,7 +44,7 @@ data HorizontalCurve units = HorizontalCurve
   , uEnd :: Float
   , vBounds :: Range Unitless
   , monotonicity :: Monotonicity
-  , boundingAxes :: List (Axis2d Uv.Coordinates)
+  , boundingAxes :: List (Axis2d UvCoordinates)
   , tolerance :: Qty units
   }
   deriving (Show)
@@ -54,7 +53,7 @@ data MonotonicSpace
 
 data Monotonicity
   = Monotonic
-  | MonotonicIn (Frame2d Uv.Coordinates (Defines MonotonicSpace))
+  | MonotonicIn (Frame2d UvCoordinates (Defines MonotonicSpace))
   | NotMonotonic
   deriving (Eq, Show)
 
@@ -65,7 +64,7 @@ new ::
   Float ->
   Float ->
   Range Unitless ->
-  Curve2d Uv.Coordinates
+  Curve2d UvCoordinates
 new derivatives dvdu uStart uEnd vBounds = do
   let f = Derivatives.get derivatives
   let fu = Derivatives.get (derivatives >> U)
@@ -91,7 +90,7 @@ monotonic ::
   Float ->
   Float ->
   Range Unitless ->
-  Curve2d Uv.Coordinates
+  Curve2d UvCoordinates
 monotonic derivatives dvdu uStart uEnd vBounds = do
   let f = Derivatives.get derivatives
   let fu = Derivatives.get (derivatives >> U)
@@ -117,9 +116,9 @@ bounded ::
   Float ->
   Float ->
   Range Unitless ->
-  Frame2d Uv.Coordinates defines ->
-  List (Axis2d Uv.Coordinates) ->
-  Curve2d Uv.Coordinates
+  Frame2d UvCoordinates defines ->
+  List (Axis2d UvCoordinates) ->
+  Curve2d UvCoordinates
 bounded derivatives dvdu uStart uEnd vBounds monotonicFrame boundingAxes = do
   let f = Derivatives.get derivatives
   let fu = Derivatives.get (derivatives >> U)
@@ -138,7 +137,7 @@ bounded derivatives dvdu uStart uEnd vBounds monotonicFrame boundingAxes = do
       , tolerance = ?tolerance
       }
 
-instance Curve2d.Interface (HorizontalCurve units) Uv.Coordinates where
+instance Curve2d.Interface (HorizontalCurve units) UvCoordinates where
   startPointImpl curve = Curve2d.pointOnImpl curve 0.0
   endPointImpl curve = Curve2d.pointOnImpl curve 1.0
 
@@ -209,7 +208,7 @@ solveForV (HorizontalCurve{f, fv, vBounds, boundingAxes, tolerance}) uValue = do
   let clampedBounds = List.foldl (clamp uValue) vBounds boundingAxes
   Tolerance.using tolerance (Internal.solveForV f fv uValue clampedBounds)
 
-clamp :: Float -> Range Unitless -> Axis2d Uv.Coordinates -> Range Unitless
+clamp :: Float -> Range Unitless -> Axis2d UvCoordinates -> Range Unitless
 clamp (Qty# u#) (Range vLow vHigh) axis = do
   let !(Point2d# u0# v0#) = Axis2d.originPoint axis
   let !(Vector2d# du# dv#) = Direction2d.unwrap (Axis2d.direction axis)

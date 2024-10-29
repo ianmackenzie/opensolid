@@ -32,11 +32,10 @@ import Float qualified
 import OpenSolid
 import Surface1d qualified
 import Surface1d.Function qualified
+import SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvCoordinates, UvPoint)
 import Transform2d (Transform2d)
 import Transform2d qualified
 import Units qualified
-import Uv (Parameter (U, V))
-import Uv qualified
 import Vector2d (Vector2d)
 import Vector2d qualified
 import VectorBounds2d (VectorBounds2d)
@@ -49,9 +48,9 @@ class
   Interface function (coordinateSystem :: CoordinateSystem)
     | function -> coordinateSystem
   where
-  evaluateImpl :: function -> Uv.Point -> Vector2d coordinateSystem
-  boundsImpl :: function -> Uv.Bounds -> VectorBounds2d coordinateSystem
-  derivativeImpl :: Parameter -> function -> Function coordinateSystem
+  evaluateImpl :: function -> UvPoint -> Vector2d coordinateSystem
+  boundsImpl :: function -> UvBounds -> VectorBounds2d coordinateSystem
+  derivativeImpl :: SurfaceParameter -> function -> Function coordinateSystem
   transformByImpl ::
     Transform2d tag (Space coordinateSystem @ translationUnits) ->
     function ->
@@ -66,7 +65,7 @@ data Function (coordinateSystem :: CoordinateSystem) where
     Function (space @ units1) ->
     Function (space @ units2)
   Parametric ::
-    Expression Uv.Point (Vector2d (space @ units)) ->
+    Expression UvPoint (Vector2d (space @ units)) ->
     Function (space @ units)
   XY ::
     Surface1d.Function units ->
@@ -474,10 +473,10 @@ instance
     (VectorCurve2d (space @ units) :.: Surface1d.Function Unitless)
     (space @ units)
   where
-  evaluateImpl (curve :.: function) uv =
-    VectorCurve2d.evaluateAt (Surface1d.Function.evaluate function uv) curve
-  boundsImpl (curve :.: function) uv =
-    VectorCurve2d.segmentBounds (Surface1d.Function.bounds function uv) curve
+  evaluateImpl (curve :.: function) uvPoint =
+    VectorCurve2d.evaluateAt (Surface1d.Function.evaluate function uvPoint) curve
+  boundsImpl (curve :.: function) uvBounds =
+    VectorCurve2d.segmentBounds (Surface1d.Function.bounds function uvBounds) curve
   derivativeImpl parameter (curve :.: function) =
     (VectorCurve2d.derivative curve . function) * Surface1d.Function.derivative parameter function
   transformByImpl transform (curve :.: function) =
@@ -485,7 +484,7 @@ instance
 
 instance
   Composition
-    (Curve2d Uv.Coordinates)
+    (Curve2d UvCoordinates)
     (Function (space @ units))
     (VectorCurve2d (space @ units))
   where
@@ -494,11 +493,13 @@ instance
 
 instance
   VectorCurve2d.Interface
-    (Function (space @ units) :.: Curve2d Uv.Coordinates)
+    (Function (space @ units) :.: Curve2d UvCoordinates)
     (space @ units)
   where
-  evaluateAtImpl t (function :.: curve) = evaluate function (Curve2d.pointOn curve t)
-  segmentBoundsImpl t (function :.: curve) = bounds function (Curve2d.segmentBounds curve t)
+  evaluateAtImpl tValue (function :.: curve) =
+    evaluate function (Curve2d.pointOn curve tValue)
+  segmentBoundsImpl tBounds (function :.: curve) =
+    bounds function (Curve2d.segmentBounds curve tBounds)
   derivativeImpl (function :.: curve) = do
     let curveDerivative = Curve2d.derivative curve
     let dudt = VectorCurve2d.xComponent curveDerivative
@@ -542,7 +543,7 @@ transformBy transform function = do
     Quotient' f1 f2 -> Quotient' (transformBy transform f1) f2
     Transformed existing c -> Transformed (existing >> t) c
 
-evaluate :: Function (space @ units) -> Uv.Point -> Vector2d (space @ units)
+evaluate :: Function (space @ units) -> UvPoint -> Vector2d (space @ units)
 evaluate function uv = case function of
   Function f -> evaluateImpl f uv
   Coerce f -> Units.coerce (evaluate f uv)
@@ -559,7 +560,7 @@ evaluate function uv = case function of
   Quotient' f1 f2 -> evaluate f1 uv ./. Surface1d.Function.evaluate f2 uv
   Transformed transform f -> Vector2d.transformBy transform (evaluate f uv)
 
-bounds :: Function (space @ units) -> Uv.Bounds -> VectorBounds2d (space @ units)
+bounds :: Function (space @ units) -> UvBounds -> VectorBounds2d (space @ units)
 bounds function uv = case function of
   Function f -> boundsImpl f uv
   Coerce f -> Units.coerce (bounds f uv)
@@ -576,7 +577,7 @@ bounds function uv = case function of
   Quotient' f1 f2 -> bounds f1 uv ./. Surface1d.Function.bounds f2 uv
   Transformed transform f -> VectorBounds2d.transformBy transform (bounds f uv)
 
-derivative :: Uv.Parameter -> Function (space @ units) -> Function (space @ units)
+derivative :: SurfaceParameter -> Function (space @ units) -> Function (space @ units)
 derivative parameter function = case function of
   Function f -> derivativeImpl parameter f
   Coerce f -> Coerce (derivative parameter f)

@@ -27,32 +27,31 @@ import Surface1d.Function.HorizontalCurve qualified as HorizontalCurve
 import Surface1d.Function.Subproblem (Subproblem (Subproblem))
 import Surface1d.Function.Subproblem qualified as Subproblem
 import Surface1d.Function.VerticalCurve qualified as VerticalCurve
-import Uv (Parameter (U, V))
-import Uv qualified
+import SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvCoordinates, UvDirection, UvPoint)
 import Uv.Derivatives qualified as Derivatives
 import Vector2d qualified
 
 data SaddleRegion units = SaddleRegion
   { subproblem :: Subproblem units
   , frame :: Frame
-  , d1 :: Uv.Direction
-  , d2 :: Uv.Direction
+  , d1 :: UvDirection
+  , d2 :: UvDirection
   }
 
 data PrincipalAxisSpace
 
-type Frame = Frame2d Uv.Coordinates (Defines PrincipalAxisSpace)
+type Frame = Frame2d UvCoordinates (Defines PrincipalAxisSpace)
 
-point :: SaddleRegion units -> Uv.Point
+point :: SaddleRegion units -> UvPoint
 point SaddleRegion{frame} = Frame2d.originPoint frame
 
 subdomain :: SaddleRegion units -> Domain2d
 subdomain SaddleRegion{subproblem} = Subproblem.subdomain subproblem
 
-bounds :: SaddleRegion units -> Uv.Bounds
+bounds :: SaddleRegion units -> UvBounds
 bounds SaddleRegion{subproblem} = Subproblem.uvBounds subproblem
 
-quadratic :: Subproblem units -> Uv.Point -> SaddleRegion units
+quadratic :: Subproblem units -> UvPoint -> SaddleRegion units
 quadratic subproblem saddlePoint = do
   let Subproblem{derivatives} = subproblem
   let fuu = Function.evaluate (Derivatives.get (derivatives >> U >> U)) saddlePoint
@@ -82,16 +81,16 @@ quadratic subproblem saddlePoint = do
   let frame = Frame2d.fromXAxis (Axis2d.through saddlePoint dX)
   SaddleRegion{subproblem, frame, d1, d2}
 
-secondDerivative :: Qty units -> Qty units -> Qty units -> Uv.Direction -> Qty units
+secondDerivative :: Qty units -> Qty units -> Qty units -> UvDirection -> Qty units
 secondDerivative fuu fuv fvv direction = do
   let (du, dv) = Direction2d.components direction
   du * du * fuu + 2 * du * dv * fuv + dv * dv * fvv
 
 connectingCurves ::
   Tolerance units =>
-  Uv.Point ->
+  UvPoint ->
   SaddleRegion units ->
-  NonEmpty (Curve2d Uv.Coordinates)
+  NonEmpty (Curve2d UvCoordinates)
 connectingCurves boundaryPoint SaddleRegion{subproblem, frame, d1, d2} = do
   let (x, y) = Point2d.coordinates (Point2d.relativeTo frame boundaryPoint)
   let saddlePoint = Frame2d.originPoint frame
@@ -122,11 +121,11 @@ connectingCurves boundaryPoint SaddleRegion{subproblem, frame, d1, d2} = do
 connect ::
   Tolerance units =>
   Subproblem units ->
-  Frame2d Uv.Coordinates (Defines PrincipalAxisSpace) ->
-  Uv.Direction ->
-  Uv.Point ->
-  List (Axis2d Uv.Coordinates) ->
-  NonEmpty (Curve2d Uv.Coordinates)
+  Frame2d UvCoordinates (Defines PrincipalAxisSpace) ->
+  UvDirection ->
+  UvPoint ->
+  List (Axis2d UvCoordinates) ->
+  NonEmpty (Curve2d UvCoordinates)
 connect subproblem frame startDirection endPoint boundingAxes = do
   let startPoint = Frame2d.originPoint frame
   let Subproblem{derivatives, dvdu, dudv, uvBounds} = subproblem
