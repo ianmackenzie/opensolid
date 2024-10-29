@@ -134,7 +134,7 @@ sum ((successes, failures) : rest) = do
 
 fuzzImpl :: Text -> Int -> Random.Seed -> Expectation -> IO (Int, Int)
 fuzzImpl context n seed expectation = case n of
-  0 -> IO.succeed (1,0) -- We've finished fuzzing, report 1 successful test
+  0 -> IO.succeed (1, 0) -- We've finished fuzzing, report 1 successful test
   _ -> IO.do
     let (Expectation generator) = expectation
     let (testResult, updatedSeed) = Random.step generator seed
