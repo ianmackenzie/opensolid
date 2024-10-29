@@ -82,7 +82,7 @@ testVectorArithmetic = IO.do
   log "2D cross product" (v1 >< v2)
   let squareRoot = Qty.sqrt dotProduct
   log "Square root" squareRoot
-  let translatedPoint = Point2d.meters 2.0 3.0 |> Point2d.translateBy (Vector2d.meters 4.0 5.0)
+  let translatedPoint = Point2d.meters 2.0 3.0 + Vector2d.meters 4.0 5.0
   log "Translated point" translatedPoint
   let vectorSum = Vector2d.meters 1.0 2.0 + Vector2d.meters 2.0 3.0
   log "Vector sum" vectorSum
