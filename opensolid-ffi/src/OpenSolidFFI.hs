@@ -1,3 +1,6 @@
+-- Avoid errors when running Fourmolu
+{-# LANGUAGE TemplateHaskell #-}
+
 module OpenSolidFFI () where
 
 import OpenSolidAPI (generateForeignFunctions)

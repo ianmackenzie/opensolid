@@ -1,3 +1,5 @@
+-- Avoid errors when running Fourmolu
+{-# LANGUAGE GHC2021 #-}
 -- Needed for CurveSurfaceComposition
 {-# OPTIONS_GHC -Wno-orphans #-}
 

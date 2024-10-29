@@ -1,3 +1,5 @@
+-- Avoid errors when running Fourmolu
+{-# LANGUAGE GHC2021 #-}
 -- Needed for 'Surface1d.Function * Vector3d = Function'
 -- and 'Vector3d * Surface1d.Function = Function' instances,
 -- which lead to unresolvable circular dependencies

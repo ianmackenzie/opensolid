@@ -1,3 +1,7 @@
+-- Avoid errors when running Fourmolu
+{-# LANGUAGE GHC2021 #-}
+{-# LANGUAGE PatternSynonyms #-}
+
 module Line3d
   ( from
   , pattern Line3d

@@ -1,3 +1,6 @@
+-- Avoid errors when running Fourmolu
+{-# LANGUAGE GHC2021 #-}
+
 module QuadraticSpline3d
   ( QuadraticSpline3d
   , fromControlPoints

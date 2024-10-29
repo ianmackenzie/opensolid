@@ -1,3 +1,5 @@
+-- Avoid errors when running Fourmolu
+{-# LANGUAGE GHC2021 #-}
 -- Needed for 'Curve1d * Vector3d = VectorCurve3d'
 -- and 'Vector3d * Curve1d = VectorCurve3d' instances,
 -- which lead to unresolvable circular dependencies
