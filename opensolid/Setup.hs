@@ -1,21 +1,24 @@
+-- Avoid errors when running Fourmolu
+{-# LANGUAGE GHC2021 #-}
+
 import Distribution.Simple qualified
-import System.Directory qualified
-import System.FilePath qualified as FilePath
+import Distribution.Types.BuildInfo qualified as BuildInfo
+import Distribution.Types.Library qualified as Library
 import Distribution.Types.LocalBuildInfo qualified as LocalBuildInfo
 import Distribution.Types.PackageDescription qualified as PackageDescription
-import Distribution.Types.Library qualified as Library
-import Distribution.Types.BuildInfo qualified as BuildInfo
+import System.Directory qualified
 import System.Exit qualified
+import System.FilePath qualified as FilePath
 import System.Process qualified
 
-{-| Get the path to the opensolid-jit directory -}
+-- | Get the path to the opensolid-jit directory
 getJitDir :: IO String
 getJitDir = do
   cwd <- System.Directory.getCurrentDirectory
   let parentDir = FilePath.takeDirectory cwd
   return (FilePath.joinPath [parentDir, "opensolid-jit"])
 
-{-| Build the opensolid-jit library with Cargo -}
+-- | Build the opensolid-jit library with Cargo
 buildJitLibrary :: IO ()
 buildJitLibrary = do
   jitDir <- getJitDir
@@ -31,7 +34,7 @@ main =
   Distribution.Simple.defaultMainWithHooks $
     Distribution.Simple.simpleUserHooks
       { Distribution.Simple.confHook =
-          \( genericPackageDescription, hookedBuildInfo ) configFlags -> do
+          \(genericPackageDescription, hookedBuildInfo) configFlags -> do
             -- Build the opensolid-jit library first,
             -- since Cabal will check for it during configuration
             -- (because it's listed under extra-libraries in opensolid.cabal)
@@ -40,7 +43,7 @@ main =
             jitDir <- getJitDir
             let rustLibDir = FilePath.joinPath [jitDir, "target", "release"]
             let defaultConfHook = Distribution.Simple.confHook Distribution.Simple.simpleUserHooks
-            localBuildInfo <- defaultConfHook ( genericPackageDescription, hookedBuildInfo ) configFlags
+            localBuildInfo <- defaultConfHook (genericPackageDescription, hookedBuildInfo) configFlags
             let packageDescription = LocalBuildInfo.localPkgDescr localBuildInfo
             Just library <- return (PackageDescription.library packageDescription)
             let buildInfo = Library.libBuildInfo library
