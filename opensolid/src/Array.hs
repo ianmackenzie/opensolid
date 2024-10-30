@@ -12,19 +12,17 @@ module Array
   )
 where
 
-import Data.Array ((!))
 import Data.Array qualified
 import Data.Foldable qualified
 import List qualified
 import OpenSolid
+import Pair qualified
 import Prelude qualified
 
 type Array a = Data.Array.Array Int a
 
 length :: Array a -> Int
-length array = do
-  let (_, i) = Data.Array.bounds array
-  i + 1
+length array = Pair.second (Data.Array.bounds array) + 1
 
 empty :: Array a
 empty = Data.Array.array (0, -1) []
@@ -42,7 +40,7 @@ get :: Int -> Array a -> Maybe a
 get index array = do
   let (_, i) = Data.Array.bounds array
   if index >= 0 && index <= i
-    then Just (array ! index)
+    then Just (array Data.Array.! index)
     else Nothing
 
 map :: (a -> b) -> Array a -> Array b
