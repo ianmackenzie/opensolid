@@ -138,16 +138,13 @@ bounded derivatives dudv uBounds vStart vEnd monotonicFrame boundingAxes = do
       }
 
 instance Curve2d.Interface (VerticalCurve units) UvCoordinates where
-  startPointImpl curve = Curve2d.pointOnImpl curve 0.0
-  endPointImpl curve = Curve2d.pointOnImpl curve 1.0
-
-  pointOnImpl curve tValue = do
+  evaluateImpl curve tValue = do
     let VerticalCurve{vStart, vEnd} = curve
     let vValue = Float.interpolateFrom vStart vEnd tValue
     let uValue = solveForU curve vValue
     Point2d.xy uValue vValue
 
-  segmentBoundsImpl curve tRange = do
+  evaluateBoundsImpl curve tRange = do
     let VerticalCurve{dudv, uBounds, vStart, vEnd, monotonicity} = curve
     let Range t1 t2 = tRange
     let v1 = Float.interpolateFrom vStart vEnd t1
@@ -162,7 +159,7 @@ instance Curve2d.Interface (VerticalCurve units) UvCoordinates where
         Bounds2d.hull2 (Point2d.relativeTo frame p1) (Point2d.relativeTo frame p2)
           |> Bounds2d.placeIn frame
       NotMonotonic -> do
-        let slopeBounds = Function.bounds dudv (Bounds2d.xy uBounds (Range.from v1 v2))
+        let slopeBounds = Function.evaluateBounds dudv (Bounds2d.xy uBounds (Range.from v1 v2))
         let segmentUBounds = Internal.curveBounds v1 v2 u1 u2 slopeBounds
         Bounds2d.xy segmentUBounds (Range.from v1 v2)
 
@@ -197,8 +194,6 @@ instance Curve2d.Interface (VerticalCurve units) UvCoordinates where
         , boundingAxes
         , tolerance
         }
-
-  boundsImpl curve = Curve2d.segmentBoundsImpl curve Range.unit
 
   transformByImpl transform curve =
     Curve2d.new (Curve2d.TransformBy transform curve)

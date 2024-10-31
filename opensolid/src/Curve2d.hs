@@ -7,8 +7,8 @@ module Curve2d
   , new
   , startPoint
   , endPoint
-  , pointOn
-  , segmentBounds
+  , evaluate
+  , evaluateBounds
   , derivative
   , tangentDirection
   , reverse
@@ -155,7 +155,7 @@ instance
   ) =>
   ApproximateEquality (Curve2d (space1 @ units1)) (Curve2d (space2 @ units2)) units1
   where
-  curve1 ~= curve2 = List.allTrue [pointOn curve1 t ~= pointOn curve2 t | t <- Parameter.samples]
+  curve1 ~= curve2 = List.allTrue [evaluate curve1 t ~= evaluate curve2 t | t <- Parameter.samples]
 
 instance
   ( space1 ~ space2
@@ -163,7 +163,7 @@ instance
   ) =>
   ApproximateEquality (Curve2d (space1 @ units1)) (Point2d (space2 @ units2)) units1
   where
-  curve ~= point = List.allTrue [pointOn curve t ~= point | t <- Parameter.samples]
+  curve ~= point = List.allTrue [evaluate curve t ~= point | t <- Parameter.samples]
 
 pattern Point :: Tolerance units => Point2d (space @ units) -> Curve2d (space @ units)
 pattern Point point <- (asPoint -> Just point)
@@ -177,18 +177,22 @@ class
   where
   startPointImpl :: curve -> Point2d coordinateSystem
   endPointImpl :: curve -> Point2d coordinateSystem
-  pointOnImpl :: curve -> Float -> Point2d coordinateSystem
-  segmentBoundsImpl :: curve -> Range Unitless -> Bounds2d coordinateSystem
+  evaluateImpl :: curve -> Float -> Point2d coordinateSystem
+  evaluateBoundsImpl :: curve -> Range Unitless -> Bounds2d coordinateSystem
   derivativeImpl :: curve -> VectorCurve2d coordinateSystem
   reverseImpl :: curve -> curve
   boundsImpl :: curve -> Bounds2d coordinateSystem
   transformByImpl :: Transform2d tag coordinateSystem -> curve -> Curve2d coordinateSystem
 
+  startPointImpl curve = evaluateImpl curve 0.0
+  endPointImpl curve = evaluateImpl curve 1.0
+  boundsImpl curve = evaluateBoundsImpl curve Range.unit
+
 instance Interface (Curve2d (space @ units)) (space @ units) where
   startPointImpl = startPoint
   endPointImpl = endPoint
-  pointOnImpl = pointOn
-  segmentBoundsImpl = segmentBounds
+  evaluateImpl = evaluate
+  evaluateBoundsImpl = evaluateBounds
   derivativeImpl = derivative
   reverseImpl = reverse
   boundsImpl = bounds
@@ -200,9 +204,12 @@ instance
     (Arithmetic.Difference (Point2d (space1 @ units1)) (Curve2d (space2 @ units2)))
     (space1 @ units1)
   where
-  evaluateAtImpl t (Arithmetic.Difference point curve) = point - pointOn curve t
-  segmentBoundsImpl t (Arithmetic.Difference point curve) = point - segmentBounds curve t
+  evaluateAtImpl t (Arithmetic.Difference point curve) = point - evaluate curve t
+
+  segmentBoundsImpl t (Arithmetic.Difference point curve) = point - evaluateBounds curve t
+
   derivativeImpl (Arithmetic.Difference _ curve) = -(derivative curve)
+
   transformByImpl transform (Arithmetic.Difference point curve) =
     VectorCurve2d.new $
       Arithmetic.Difference
@@ -257,9 +264,12 @@ instance
     (Arithmetic.Difference (Curve2d (space1 @ units1)) (Point2d (space2 @ units2)))
     (space1 @ units1)
   where
-  evaluateAtImpl t (Arithmetic.Difference curve point) = pointOn curve t - point
-  segmentBoundsImpl t (Arithmetic.Difference curve point) = segmentBounds curve t - point
+  evaluateAtImpl t (Arithmetic.Difference curve point) = evaluate curve t - point
+
+  segmentBoundsImpl t (Arithmetic.Difference curve point) = evaluateBounds curve t - point
+
   derivativeImpl (Arithmetic.Difference curve _) = derivative curve
+
   transformByImpl transform (Arithmetic.Difference curve point) =
     VectorCurve2d.new $
       Arithmetic.Difference
@@ -283,9 +293,15 @@ instance
     (Arithmetic.Difference (Curve2d (space1 @ units1)) (Curve2d (space2 @ units2)))
     (space1 @ units1)
   where
-  evaluateAtImpl t (Arithmetic.Difference curve1 curve2) = pointOn curve1 t - pointOn curve2 t
-  segmentBoundsImpl t (Arithmetic.Difference curve1 curve2) = segmentBounds curve1 t - segmentBounds curve2 t
-  derivativeImpl (Arithmetic.Difference curve1 curve2) = derivative curve1 - derivative curve2
+  evaluateAtImpl t (Arithmetic.Difference curve1 curve2) =
+    evaluate curve1 t - evaluate curve2 t
+
+  segmentBoundsImpl t (Arithmetic.Difference curve1 curve2) =
+    evaluateBounds curve1 t - evaluateBounds curve2 t
+
+  derivativeImpl (Arithmetic.Difference curve1 curve2) =
+    derivative curve1 - derivative curve2
+
   transformByImpl transform (Arithmetic.Difference curve1 curve2) =
     VectorCurve2d.new $
       Arithmetic.Difference
@@ -308,17 +324,18 @@ instance Composition (Curve1d Unitless) (Curve2d (space @ units)) (Curve2d (spac
   outer . inner = new (outer :.: inner)
 
 instance Curve2d.Interface (Curve2d (space @ units) :.: Curve1d Unitless) (space @ units) where
-  startPointImpl c = pointOnImpl c 0.0
-  endPointImpl c = pointOnImpl c 1.0
-  pointOnImpl (curve2d :.: curve1d) t =
-    pointOn curve2d (Curve1d.pointOn curve1d t)
-  segmentBoundsImpl (curve2d :.: curve1d) t =
-    segmentBounds curve2d (Curve1d.segmentBounds curve1d t)
-  boundsImpl c = segmentBoundsImpl c Range.unit
+  evaluateImpl (curve2d :.: curve1d) tRange =
+    evaluate curve2d (Curve1d.evaluate curve1d tRange)
+
+  evaluateBoundsImpl (curve2d :.: curve1d) tRange =
+    evaluateBounds curve2d (Curve1d.evaluateBounds curve1d tRange)
+
   derivativeImpl (curve2d :.: curve1d) =
     (derivative curve2d . curve1d) * Curve1d.derivative curve1d
+
   reverseImpl (curve2d :.: curve1d) =
     curve2d :.: Curve1d.reverse curve1d
+
   transformByImpl transform (curve2d :.: curve1d) =
     new (transformBy transform curve2d . curve1d)
 
@@ -328,7 +345,7 @@ new = Curve
 startPoint :: Curve2d (space @ units) -> Point2d (space @ units)
 startPoint curve = case curve of
   Curve c -> startPointImpl c
-  Parametric expresssion -> Expression.value expresssion 0.0
+  Parametric expresssion -> Expression.evaluate expresssion 0.0
   Coerce c -> Units.coerce (startPoint c)
   PlaceIn frame c -> Point2d.placeIn frame (startPoint c)
   Addition c v -> startPoint c + VectorCurve2d.evaluateAt 0.0 v
@@ -337,29 +354,29 @@ startPoint curve = case curve of
 endPoint :: Curve2d (space @ units) -> Point2d (space @ units)
 endPoint curve = case curve of
   Curve c -> endPointImpl c
-  Parametric expresssion -> Expression.value expresssion 1.0
+  Parametric expresssion -> Expression.evaluate expresssion 1.0
   Coerce c -> Units.coerce (endPoint c)
   PlaceIn frame c -> Point2d.placeIn frame (endPoint c)
   Addition c v -> endPoint c + VectorCurve2d.evaluateAt 1.0 v
   Subtraction c v -> endPoint c - VectorCurve2d.evaluateAt 1.0 v
 
-pointOn :: Curve2d (space @ units) -> Float -> Point2d (space @ units)
-pointOn curve t = case curve of
-  Curve c -> pointOnImpl c t
-  Parametric expresssion -> Expression.value expresssion t
-  Coerce c -> Units.coerce (pointOn c t)
-  PlaceIn frame c -> Point2d.placeIn frame (pointOn c t)
-  Addition c v -> pointOn c t + VectorCurve2d.evaluateAt t v
-  Subtraction c v -> pointOn c t - VectorCurve2d.evaluateAt t v
+evaluate :: Curve2d (space @ units) -> Float -> Point2d (space @ units)
+evaluate curve tValue = case curve of
+  Curve c -> evaluateImpl c tValue
+  Parametric expresssion -> Expression.evaluate expresssion tValue
+  Coerce c -> Units.coerce (evaluate c tValue)
+  PlaceIn frame c -> Point2d.placeIn frame (evaluate c tValue)
+  Addition c v -> evaluate c tValue + VectorCurve2d.evaluateAt tValue v
+  Subtraction c v -> evaluate c tValue - VectorCurve2d.evaluateAt tValue v
 
-segmentBounds :: Curve2d (space @ units) -> Range Unitless -> Bounds2d (space @ units)
-segmentBounds curve t = case curve of
-  Curve c -> segmentBoundsImpl c t
-  Parametric expresssion -> Expression.bounds expresssion t
-  Coerce c -> Units.coerce (segmentBounds c t)
-  PlaceIn frame c -> Bounds2d.placeIn frame (segmentBounds c t)
-  Addition c v -> segmentBounds c t + VectorCurve2d.segmentBounds t v
-  Subtraction c v -> segmentBounds c t - VectorCurve2d.segmentBounds t v
+evaluateBounds :: Curve2d (space @ units) -> Range Unitless -> Bounds2d (space @ units)
+evaluateBounds curve tRange = case curve of
+  Curve c -> evaluateBoundsImpl c tRange
+  Parametric expresssion -> Expression.evaluateBounds expresssion tRange
+  Coerce c -> Units.coerce (evaluateBounds c tRange)
+  PlaceIn frame c -> Bounds2d.placeIn frame (evaluateBounds c tRange)
+  Addition c v -> evaluateBounds c tRange + VectorCurve2d.segmentBounds tRange v
+  Subtraction c v -> evaluateBounds c tRange - VectorCurve2d.segmentBounds tRange v
 
 derivative :: Curve2d (space @ units) -> VectorCurve2d (space @ units)
 derivative curve = case curve of
@@ -382,7 +399,7 @@ reverse curve = case curve of
 bounds :: Curve2d (space @ units) -> Bounds2d (space @ units)
 bounds curve = case curve of
   Curve c -> boundsImpl c
-  Parametric expression -> Expression.bounds expression Range.unit
+  Parametric expression -> Expression.evaluateBounds expression Range.unit
   Coerce c -> Units.coerce (bounds c)
   PlaceIn frame c -> Bounds2d.placeIn frame (bounds c)
   Addition c v -> bounds c + VectorCurve2d.segmentBounds Range.unit v
@@ -390,8 +407,8 @@ bounds curve = case curve of
 
 asPoint :: Tolerance units => Curve2d (space @ units) -> Maybe (Point2d (space @ units))
 asPoint curve = do
-  let testPoint = pointOn curve 0.5
-  let sampledPoints = List.map (pointOn curve) Parameter.samples
+  let testPoint = evaluate curve 0.5
+  let sampledPoints = List.map (evaluate curve) Parameter.samples
   if List.allSatisfy (~= testPoint) sampledPoints then Just testPoint else Nothing
 
 tangentDirection ::
@@ -404,8 +421,7 @@ tangentDirection curve =
     Failure VectorCurve2d.HasZero -> Failure HasDegeneracy
 
 signedDistanceAlong :: Axis2d (space @ units) -> Curve2d (space @ units) -> Curve1d units
-signedDistanceAlong axis curve =
-  (curve - Axis2d.originPoint axis) <> Axis2d.direction axis
+signedDistanceAlong axis curve = (curve - Axis2d.originPoint axis) <> Axis2d.direction axis
 
 xCoordinate :: Curve2d (space @ units) -> Curve1d units
 xCoordinate = signedDistanceAlong Axis2d.x
@@ -448,8 +464,8 @@ isOverlappingSegment ::
   OverlappingSegment ->
   Bool
 isOverlappingSegment curve1 curve2 (OverlappingSegment{t1}) = do
-  let segmentStartPoint = pointOn curve1 (Range.minValue t1)
-  let curve1TestPoints = List.map (pointOn curve1) (Range.samples t1)
+  let segmentStartPoint = evaluate curve1 (Range.minValue t1)
+  let curve1TestPoints = List.map (evaluate curve1) (Range.samples t1)
   let segment1IsNondegenerate = List.anySatisfy (!= segmentStartPoint) curve1TestPoints
   let segment1LiesOnSegment2 = List.allSatisfy (^ curve2) curve1TestPoints
   segment1IsNondegenerate && segment1LiesOnSegment2
@@ -753,18 +769,25 @@ deriving instance Show (TransformBy curve (space @ units))
 instance Interface (TransformBy curve (space @ units)) (space @ units) where
   startPointImpl (TransformBy transform curve) =
     Point2d.transformBy transform (startPointImpl curve)
+
   endPointImpl (TransformBy transform curve) =
     Point2d.transformBy transform (endPointImpl curve)
-  pointOnImpl (TransformBy transform curve) t =
-    Point2d.transformBy transform (pointOnImpl curve t)
-  segmentBoundsImpl (TransformBy transform curve) t =
-    Bounds2d.transformBy transform (segmentBoundsImpl curve t)
+
+  evaluateImpl (TransformBy transform curve) tValue =
+    Point2d.transformBy transform (evaluateImpl curve tValue)
+
+  evaluateBoundsImpl (TransformBy transform curve) tRange =
+    Bounds2d.transformBy transform (evaluateBoundsImpl curve tRange)
+
   derivativeImpl (TransformBy transform curve) =
     VectorCurve2d.transformBy transform (derivativeImpl curve)
+
   reverseImpl (TransformBy transform curve) =
     TransformBy transform (reverseImpl curve)
+
   boundsImpl (TransformBy transform curve) =
     Bounds2d.transformBy transform (boundsImpl curve)
+
   transformByImpl transform (TransformBy existing curve) =
     Curve2d.new $
       TransformBy (Transform2d.toAffine existing >> Transform2d.toAffine transform) curve
@@ -803,14 +826,20 @@ instance Show (Synthetic (space @ units)) where
 -- TODO make Synthetic a first-class constructors,
 -- so that it can participate properly in binary operations?
 instance Interface (Synthetic (space @ units)) (space @ units) where
-  startPointImpl (Synthetic curve _) = Curve2d.startPoint curve
-  endPointImpl (Synthetic curve _) = Curve2d.endPoint curve
-  pointOnImpl (Synthetic curve _) t = Curve2d.pointOn curve t
-  segmentBoundsImpl (Synthetic curve _) t = Curve2d.segmentBounds curve t
-  boundsImpl (Synthetic curve _) = Curve2d.bounds curve
+  startPointImpl (Synthetic curve _) = startPoint curve
+
+  endPointImpl (Synthetic curve _) = endPoint curve
+
+  evaluateImpl (Synthetic curve _) t = evaluate curve t
+  evaluateBoundsImpl (Synthetic curve _) tRange = evaluateBounds curve tRange
+
+  boundsImpl (Synthetic curve _) = bounds curve
+
   reverseImpl (Synthetic curve curveDerivative) =
     Synthetic (Curve2d.reverse curve) (-(VectorCurve2d.reverse curveDerivative))
+
   derivativeImpl (Synthetic _ curveDerivative) = curveDerivative
+
   transformByImpl transform (Synthetic curve curveDerivative) =
     Curve2d.new $
       Synthetic
@@ -828,8 +857,11 @@ instance Show (SyntheticDerivative (space @ units)) where
 
 instance VectorCurve2d.Interface (SyntheticDerivative (space @ units)) (space @ units) where
   evaluateAtImpl t (SyntheticDerivative current _) = VectorCurve2d.evaluateAt t current
+
   segmentBoundsImpl t (SyntheticDerivative current _) = VectorCurve2d.segmentBounds t current
+
   derivativeImpl (SyntheticDerivative _ next) = next
+
   transformByImpl transform (SyntheticDerivative current next) =
     VectorCurve2d.new $
       SyntheticDerivative

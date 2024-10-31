@@ -143,7 +143,7 @@ curve ::
   Curve2d (space @ Meters) ->
   Entity space
 curve attributes maxError givenCurve = do
-  let approximation = Curve2d.toPolyline maxError (Curve2d.pointOn givenCurve) givenCurve
+  let approximation = Curve2d.toPolyline maxError (Curve2d.evaluate givenCurve) givenCurve
   polyline attributes approximation
 
 pointsAttribute :: List (Point space) -> Attribute space

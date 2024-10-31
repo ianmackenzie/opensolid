@@ -60,7 +60,7 @@ new ::
   Subproblem units
 new derivatives dudv dvdu subdomain = do
   let uvBounds = Domain2d.bounds subdomain
-  let derivativeBounds = Derivatives.map (\d -> Function.bounds d uvBounds) derivatives
+  let derivativeBounds = Derivatives.map (\d -> Function.evaluateBounds d uvBounds) derivatives
   let derivativeValues = Derivatives.map (cornerValues uvBounds) derivatives
   Subproblem{derivatives, dudv, dvdu, subdomain, uvBounds, derivativeBounds, derivativeValues}
 

@@ -25,8 +25,7 @@ module Expression
   , bezierCurve
   , CurveDerivative (curveDerivative)
   , SurfaceDerivative (surfaceDerivative)
-  , Value (value)
-  , Bounds (bounds)
+  , Evaluation (evaluate, evaluateBounds)
   )
 where
 
@@ -2808,21 +2807,24 @@ foreign import ccall unsafe "dynamic"
 -- use GHC.Weak.mkWeak on f# to associate a finalizer with it
 -- that calls a Rust function to delete the underlying JIT-compiled function/module
 
-class Value input output where
-  value :: Expression input output -> input -> output
-
 class
-  Bounds input output inputBounds outputBounds
+  Evaluation input output inputBounds outputBounds
     | input -> inputBounds
     , output -> outputBounds
   where
-  bounds :: Expression input output -> inputBounds -> outputBounds
+  evaluate :: Expression input output -> input -> output
+  evaluateBounds :: Expression input output -> inputBounds -> outputBounds
 
-instance Value Float (Qty units) where
-  value Curve1d{c1v} (Qty tValue) = Qty (c1v tValue)
+instance
+  Evaluation
+    Float
+    (Qty units)
+    (Range Unitless)
+    (Range units)
+  where
+  evaluate Curve1d{c1v} (Qty tValue) = Qty (c1v tValue)
 
-instance Bounds Float (Qty units) (Range Unitless) (Range units) where
-  bounds Curve1d{c1b} tRange =
+  evaluateBounds Curve1d{c1b} tRange =
     unsafeDupablePerformIO IO.do
       let Range (Qty tLow) (Qty tHigh) = tRange
       outputs <- Alloc.mallocBytes 16
@@ -2832,13 +2834,18 @@ instance Bounds Float (Qty units) (Range Unitless) (Range units) where
       Alloc.free outputs
       IO.succeed (Range (Qty xLow) (Qty xHigh))
 
-instance Value UvPoint (Qty units) where
-  value Surface1d{s1v} uvPoint = do
+instance
+  Evaluation
+    UvPoint
+    (Qty units)
+    UvBounds
+    (Range units)
+  where
+  evaluate Surface1d{s1v} uvPoint = do
     let Point2d (Qty uValue) (Qty vValue) = uvPoint
     Qty (s1v uValue vValue)
 
-instance Bounds UvPoint (Qty units) UvBounds (Range units) where
-  bounds Surface1d{s1b} uvBounds =
+  evaluateBounds Surface1d{s1b} uvBounds =
     unsafeDupablePerformIO IO.do
       let Bounds2d uRange vRange = uvBounds
       let Range (Qty uLow) (Qty uHigh) = uRange
@@ -2850,8 +2857,14 @@ instance Bounds UvPoint (Qty units) UvBounds (Range units) where
       Alloc.free outputs
       IO.succeed (Range (Qty low) (Qty high))
 
-instance Value Float (Point2d (space @ units)) where
-  value Curve2d{c2v} (Qty tValue) =
+instance
+  Evaluation
+    Float
+    (Point2d (space @ units))
+    (Range Unitless)
+    (Bounds2d (space @ units))
+  where
+  evaluate Curve2d{c2v} (Qty tValue) =
     unsafeDupablePerformIO IO.do
       outputs <- Alloc.mallocBytes 16
       c2v tValue outputs
@@ -2860,8 +2873,7 @@ instance Value Float (Point2d (space @ units)) where
       Alloc.free outputs
       IO.succeed (Point2d.xy (Qty px) (Qty py))
 
-instance Bounds Float (Point2d (space @ units)) (Range Unitless) (Bounds2d (space @ units)) where
-  bounds Curve2d{c2b} tRange =
+  evaluateBounds Curve2d{c2b} tRange =
     unsafeDupablePerformIO IO.do
       let Range (Qty tLow) (Qty tHigh) = tRange
       outputs <- Alloc.mallocBytes 32
@@ -2875,8 +2887,14 @@ instance Bounds Float (Point2d (space @ units)) (Range Unitless) (Bounds2d (spac
       Alloc.free outputs
       IO.succeed (Bounds2d xRange yRange)
 
-instance Value UvPoint (Point2d (space @ units)) where
-  value Surface2d{s2v} uvPoint =
+instance
+  Evaluation
+    UvPoint
+    (Point2d (space @ units))
+    UvBounds
+    (Bounds2d (space @ units))
+  where
+  evaluate Surface2d{s2v} uvPoint =
     unsafeDupablePerformIO IO.do
       let Point2d (Qty uValue) (Qty vValue) = uvPoint
       outputs <- Alloc.mallocBytes 16
@@ -2886,8 +2904,7 @@ instance Value UvPoint (Point2d (space @ units)) where
       Alloc.free outputs
       IO.succeed (Point2d.xy (Qty px) (Qty py))
 
-instance Bounds UvPoint (Point2d (space @ units)) UvBounds (Bounds2d (space @ units)) where
-  bounds Surface2d{s2b} uvBounds =
+  evaluateBounds Surface2d{s2b} uvBounds =
     unsafeDupablePerformIO IO.do
       let Bounds2d uRange vRange = uvBounds
       let Range (Qty uLow) (Qty uHigh) = uRange
@@ -2903,8 +2920,14 @@ instance Bounds UvPoint (Point2d (space @ units)) UvBounds (Bounds2d (space @ un
       Alloc.free outputs
       IO.succeed (Bounds2d xRange yRange)
 
-instance Value Float (Vector2d (space @ units)) where
-  value VectorCurve2d{vc2v} (Qty tValue) =
+instance
+  Evaluation
+    Float
+    (Vector2d (space @ units))
+    (Range Unitless)
+    (VectorBounds2d (space @ units))
+  where
+  evaluate VectorCurve2d{vc2v} (Qty tValue) =
     unsafeDupablePerformIO IO.do
       outputs <- Alloc.mallocBytes 16
       vc2v tValue outputs
@@ -2913,8 +2936,7 @@ instance Value Float (Vector2d (space @ units)) where
       Alloc.free outputs
       IO.succeed (Vector2d.xy (Qty px) (Qty py))
 
-instance Bounds Float (Vector2d (space @ units)) (Range Unitless) (VectorBounds2d (space @ units)) where
-  bounds VectorCurve2d{vc2b} tRange =
+  evaluateBounds VectorCurve2d{vc2b} tRange =
     unsafeDupablePerformIO IO.do
       let Range (Qty tLow) (Qty tHigh) = tRange
       outputs <- Alloc.mallocBytes 32
@@ -2928,8 +2950,14 @@ instance Bounds Float (Vector2d (space @ units)) (Range Unitless) (VectorBounds2
       Alloc.free outputs
       IO.succeed (VectorBounds2d xRange yRange)
 
-instance Value UvPoint (Vector2d (space @ units)) where
-  value VectorSurface2d{vs2v} uvPoint =
+instance
+  Evaluation
+    UvPoint
+    (Vector2d (space @ units))
+    UvBounds
+    (VectorBounds2d (space @ units))
+  where
+  evaluate VectorSurface2d{vs2v} uvPoint =
     unsafeDupablePerformIO IO.do
       let Point2d (Qty uValue) (Qty vValue) = uvPoint
       outputs <- Alloc.mallocBytes 16
@@ -2939,8 +2967,7 @@ instance Value UvPoint (Vector2d (space @ units)) where
       Alloc.free outputs
       IO.succeed (Vector2d.xy (Qty px) (Qty py))
 
-instance Bounds UvPoint (Vector2d (space @ units)) UvBounds (VectorBounds2d (space @ units)) where
-  bounds VectorSurface2d{vs2b} uvBounds =
+  evaluateBounds VectorSurface2d{vs2b} uvBounds =
     unsafeDupablePerformIO IO.do
       let Bounds2d uRange vRange = uvBounds
       let Range (Qty uLow) (Qty uHigh) = uRange

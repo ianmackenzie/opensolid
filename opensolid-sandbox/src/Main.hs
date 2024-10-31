@@ -292,7 +292,7 @@ toDrawing = Length.centimeters 10.0 ./. 1.0
 
 drawUvCurve :: Curve2d UvCoordinates -> Drawing2d.Entity UvSpace
 drawUvCurve curve = do
-  let polyline = Curve2d.toPolyline 0.001 (Curve2d.pointOn curve) curve
+  let polyline = Curve2d.toPolyline 0.001 (Curve2d.evaluate curve) curve
   Drawing2d.polyline [] (Polyline2d.map (Point2d.convert toDrawing) polyline)
 
 drawDot :: Colour -> UvPoint -> Drawing2d.Entity UvSpace
@@ -366,7 +366,7 @@ drawBezier colour startPoint innerControlPoints endPoint = do
   let drawingInnerControlPoints = List.map (Point2d.convert toDrawing) innerControlPoints
   let drawingControlPoints = drawingStartPoint :| (drawingInnerControlPoints + [drawingEndPoint])
   let curve = BezierCurve2d.fromControlPoints drawingControlPoints
-  let drawSegmentBounds tBounds = drawBounds [] (Curve2d.segmentBounds curve tBounds)
+  let drawSegmentBounds tBounds = drawBounds [] (Curve2d.evaluateBounds curve tBounds)
   Drawing2d.with
     [Drawing2d.strokeColour colour, Drawing2d.strokeWidth (Length.millimeters 1.0)]
     [ Drawing2d.with [Drawing2d.opacity 0.3] $
@@ -470,11 +470,11 @@ testNewtonRaphson2d = Tolerance.using 1e-9 do
   let bounds = Bounds2d.xy (Range.from 0.0 2.0) (Range.from 0.0 2.0)
   let solution =
         Solve2d.unique
-          (Surface1d.Function.bounds f)
+          (Surface1d.Function.evaluateBounds f)
           (Surface1d.Function.evaluate f)
           (Surface1d.Function.evaluate fu)
           (Surface1d.Function.evaluate fv)
-          (Surface1d.Function.bounds g)
+          (Surface1d.Function.evaluateBounds g)
           (Surface1d.Function.evaluate g)
           (Surface1d.Function.evaluate gu)
           (Surface1d.Function.evaluate gv)
@@ -519,10 +519,10 @@ testCurveMedialAxis = IO.do
         let t1Curve = Curve2d.MedialAxis.t1 segment
         let t2Curve = Curve2d.MedialAxis.t2 segment
         let drawTangentCircle t = do
-              let t1 = Curve1d.pointOn t1Curve t
-              let t2 = Curve1d.pointOn t2Curve t
-              let p1 = Curve2d.pointOn curve1 t1
-              let p2 = Curve2d.pointOn curve2 t2
+              let t1 = Curve1d.evaluate t1Curve t
+              let t2 = Curve1d.evaluate t2Curve t
+              let p1 = Curve2d.evaluate curve1 t1
+              let p2 = Curve2d.evaluate curve2 t2
               let tangentDirection1 = DirectionCurve2d.evaluateAt t1 tangent1
               let normalDirection1 = Direction2d.rotateLeft tangentDirection1
               let d = p2 - p1
@@ -550,15 +550,15 @@ testJit = IO.do
   let x = Expression.t
   let xSquared = Expression.squared x
   let function = xSquared / (xSquared + 1.0)
-  log "JIT evaluated" (Expression.value function 2.0)
-  log "JIT bounds" (Expression.bounds function (Range.from 1.0 3.0))
+  log "JIT evaluated" (Expression.evaluate function 2.0)
+  log "JIT bounds" (Expression.evaluateBounds function (Range.from 1.0 3.0))
 
 testJitCurve2d :: IO ()
 testJitCurve2d = IO.do
   let x = 10.0 * Expression.t
   let y = Expression.sqrt Expression.t
   let curve = Expression.xy x y :: Expression Float (Point2d (Global @ Unitless))
-  log "Evaluated 2D curve" (Expression.value curve 3.0)
+  log "Evaluated 2D curve" (Expression.evaluate curve 3.0)
 
 testQuadraticSplineExpression :: IO ()
 testQuadraticSplineExpression = IO.do

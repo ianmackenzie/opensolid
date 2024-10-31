@@ -3,8 +3,8 @@ module Curve2d
   , HasDegeneracy (HasDegeneracy)
   , startPoint
   , endPoint
-  , pointOn
-  , segmentBounds
+  , evaluate
+  , evaluateBounds
   , derivative
   , tangentDirection
   )
@@ -34,8 +34,8 @@ instance
 
 startPoint :: Curve2d (space @ units) -> Point2d (space @ units)
 endPoint :: Curve2d (space @ units) -> Point2d (space @ units)
-pointOn :: Curve2d (space @ units) -> Float -> Point2d (space @ units)
-segmentBounds :: Curve2d (space @ units) -> Range Unitless -> Bounds2d (space @ units)
+evaluate :: Curve2d (space @ units) -> Float -> Point2d (space @ units)
+evaluateBounds :: Curve2d (space @ units) -> Range Unitless -> Bounds2d (space @ units)
 derivative :: Curve2d (space @ units) -> VectorCurve2d (space @ units)
 tangentDirection ::
   Tolerance units =>

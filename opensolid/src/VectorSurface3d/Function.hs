@@ -362,7 +362,7 @@ deriving instance Show (DotProduct' space units1 units2)
 
 instance Surface1d.Function.Interface (DotProduct' space units1 units2) (units1 :*: units2) where
   evaluateImpl (DotProduct' f1 f2) t = evaluate f1 t .<>. evaluate f2 t
-  boundsImpl (DotProduct' f1 f2) t = bounds f1 t .<>. bounds f2 t
+  evaluateBoundsImpl (DotProduct' f1 f2) t = bounds f1 t .<>. bounds f2 t
   derivativeImpl parameter (DotProduct' f1 f2) =
     derivative parameter f1 .<>. f2 + f1 .<>. derivative parameter f2
 
@@ -459,7 +459,7 @@ instance Interface (SurfaceCurveComposition (space @ units)) (space @ units) whe
     VectorCurve3d.evaluateAt (Surface1d.Function.evaluate function uv) curve
 
   boundsImpl (SurfaceCurveComposition function curve) uv =
-    VectorCurve3d.segmentBounds (Surface1d.Function.bounds function uv) curve
+    VectorCurve3d.segmentBounds (Surface1d.Function.evaluateBounds function uv) curve
 
   derivativeImpl parameter (SurfaceCurveComposition function curve) =
     (VectorCurve3d.derivative curve . function) * Surface1d.Function.derivative parameter function
@@ -505,15 +505,15 @@ bounds function uv = case function of
   Constant v -> VectorBounds3d.constant v
   XYZ x y z ->
     VectorBounds3d.xyz
-      (Surface1d.Function.bounds x uv)
-      (Surface1d.Function.bounds y uv)
-      (Surface1d.Function.bounds z uv)
+      (Surface1d.Function.evaluateBounds x uv)
+      (Surface1d.Function.evaluateBounds y uv)
+      (Surface1d.Function.evaluateBounds z uv)
   Negated f -> negate (bounds f uv)
   Sum f1 f2 -> bounds f1 uv + bounds f2 uv
   Difference f1 f2 -> bounds f1 uv - bounds f2 uv
-  Product1d3d' f1 f2 -> Surface1d.Function.bounds f1 uv .*. bounds f2 uv
-  Product3d1d' f1 f2 -> bounds f1 uv .*. Surface1d.Function.bounds f2 uv
-  Quotient' f1 f2 -> bounds f1 uv ./. Surface1d.Function.bounds f2 uv
+  Product1d3d' f1 f2 -> Surface1d.Function.evaluateBounds f1 uv .*. bounds f2 uv
+  Product3d1d' f1 f2 -> bounds f1 uv .*. Surface1d.Function.evaluateBounds f2 uv
+  Quotient' f1 f2 -> bounds f1 uv ./. Surface1d.Function.evaluateBounds f2 uv
   CrossProduct' f1 f2 -> bounds f1 uv .><. bounds f2 uv
 
 derivative :: SurfaceParameter -> Function (space @ units) -> Function (space @ units)

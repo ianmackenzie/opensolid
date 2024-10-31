@@ -6,7 +6,7 @@ module Surface1d.Function
   ( Function (Parametric)
   , Interface (..)
   , evaluate
-  , bounds
+  , evaluateBounds
   , derivative
   , derivativeIn
   , zero
@@ -118,7 +118,7 @@ class
     | function -> units
   where
   evaluateImpl :: function -> UvPoint -> Qty units
-  boundsImpl :: function -> UvBounds -> Range units
+  evaluateBoundsImpl :: function -> UvBounds -> Range units
   derivativeImpl :: SurfaceParameter -> function -> Function units
 
 instance HasUnits (Function units) where
@@ -293,7 +293,7 @@ instance Division' Int (Function units) where
 evaluate :: Function units -> UvPoint -> Qty units
 evaluate function uv = case function of
   Function f -> evaluateImpl f uv
-  Parametric x -> Expression.value x uv
+  Parametric x -> Expression.evaluate x uv
   Coerce f -> Units.coerce (evaluate f uv)
   Negated f -> negate (evaluate f uv)
   Sum f1 f2 -> evaluate f1 uv + evaluate f2 uv
@@ -305,20 +305,20 @@ evaluate function uv = case function of
   Sin f -> Angle.sin (evaluate f uv)
   Cos f -> Angle.cos (evaluate f uv)
 
-bounds :: Function units -> UvBounds -> Range units
-bounds function uv = case function of
-  Function f -> boundsImpl f uv
-  Parametric expression -> Expression.bounds expression uv
-  Coerce f -> Units.coerce (bounds f uv)
-  Negated f -> negate (bounds f uv)
-  Sum f1 f2 -> bounds f1 uv + bounds f2 uv
-  Difference f1 f2 -> bounds f1 uv - bounds f2 uv
-  Product' f1 f2 -> bounds f1 uv .*. bounds f2 uv
-  Quotient' f1 f2 -> bounds f1 uv ./. bounds f2 uv
-  Squared' f -> Range.squared' (bounds f uv)
-  SquareRoot' f -> Range.sqrt' (bounds f uv)
-  Sin f -> Range.sin (bounds f uv)
-  Cos f -> Range.cos (bounds f uv)
+evaluateBounds :: Function units -> UvBounds -> Range units
+evaluateBounds function uv = case function of
+  Function f -> evaluateBoundsImpl f uv
+  Parametric expression -> Expression.evaluateBounds expression uv
+  Coerce f -> Units.coerce (evaluateBounds f uv)
+  Negated f -> negate (evaluateBounds f uv)
+  Sum f1 f2 -> evaluateBounds f1 uv + evaluateBounds f2 uv
+  Difference f1 f2 -> evaluateBounds f1 uv - evaluateBounds f2 uv
+  Product' f1 f2 -> evaluateBounds f1 uv .*. evaluateBounds f2 uv
+  Quotient' f1 f2 -> evaluateBounds f1 uv ./. evaluateBounds f2 uv
+  Squared' f -> Range.squared' (evaluateBounds f uv)
+  SquareRoot' f -> Range.sqrt' (evaluateBounds f uv)
+  Sin f -> Range.sin (evaluateBounds f uv)
+  Cos f -> Range.cos (evaluateBounds f uv)
 
 derivative :: SurfaceParameter -> Function units -> Function units
 derivative varyingParameter function = case function of
@@ -389,11 +389,11 @@ instance Composition (Curve2d UvCoordinates) (Function units) (Curve1d units) wh
   outer . inner = Curve1d.new (outer :.: inner)
 
 instance Curve1d.Interface (Function units :.: Curve2d UvCoordinates) units where
-  pointOnImpl (function :.: uvCurve) t =
-    evaluate function (Curve2d.pointOnImpl uvCurve t)
+  evaluateImpl (function :.: uvCurve) t =
+    evaluate function (Curve2d.evaluate uvCurve t)
 
-  segmentBoundsImpl (function :.: uvCurve) t =
-    bounds function (Curve2d.segmentBoundsImpl uvCurve t)
+  evaluateBoundsImpl (function :.: uvCurve) t =
+    evaluateBounds function (Curve2d.evaluateBounds uvCurve t)
 
   derivativeImpl (function :.: uvCurve) = do
     let fU = derivative U function
@@ -483,11 +483,11 @@ findTangentSolutions subproblem = do
       let fvv = Derivatives.get (derivatives >> V >> V)
       let maybePoint =
             Solve2d.unique
-              (bounds fu)
+              (evaluateBounds fu)
               (evaluate fu)
               (evaluate fuu)
               (evaluate fuv)
-              (bounds fv)
+              (evaluateBounds fv)
               (evaluate fv)
               (evaluate fuv)
               (evaluate fvv)

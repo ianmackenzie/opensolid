@@ -27,7 +27,7 @@ from = do
         let expectedPoint = Point2d.meters expectedX expectedY
         Test.verify label Test.do
           let arc = Arc2d.from Point2d.origin (Point2d.meters 1.0 1.0) sweptAngle
-          Test.expect (Curve2d.pointOn arc 0.5 ~= expectedPoint)
+          Test.expect (Curve2d.evaluate arc 0.5 ~= expectedPoint)
   let invSqrt2 = 1 / Float.sqrt 2.0
   Test.group "from" $
     [ testArcMidpoint 90 (invSqrt2, 1 - invSqrt2)
@@ -44,10 +44,10 @@ deformation = Test.check 100 "deformation" Test.do
   let transformedArc = Curve2d.transformBy transform initialArc
   let startOfTransformed = Curve2d.startPoint transformedArc
   let endOfTransformed = Curve2d.endPoint transformedArc
-  let pointOnTransformed = Curve2d.pointOn transformedArc t
+  let pointOnTransformed = Curve2d.evaluate transformedArc t
   let transformOfStart = Point2d.transformBy transform (Curve2d.startPoint initialArc)
   let transformOfEnd = Point2d.transformBy transform (Curve2d.endPoint initialArc)
-  let transformOfPoint = Point2d.transformBy transform (Curve2d.pointOn initialArc t)
+  let transformOfPoint = Point2d.transformBy transform (Curve2d.evaluate initialArc t)
   Test.all
     [ Test.expect (startOfTransformed ~= transformOfStart)
         |> Test.output "startOfTransformed" startOfTransformed

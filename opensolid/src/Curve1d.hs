@@ -1,8 +1,8 @@
 module Curve1d
   ( Curve1d (Parametric)
   , Interface (..)
-  , pointOn
-  , segmentBounds
+  , evaluate
+  , evaluateBounds
   , derivative
   , new
   , zero
@@ -51,8 +51,8 @@ class
   Interface curve units
     | curve -> units
   where
-  pointOnImpl :: curve -> Float -> Qty units
-  segmentBoundsImpl :: curve -> Range Unitless -> Range units
+  evaluateImpl :: curve -> Float -> Qty units
+  evaluateBoundsImpl :: curve -> Range Unitless -> Range units
   derivativeImpl :: curve -> Curve1d units
 
 data Curve1d units where
@@ -121,7 +121,7 @@ instance
   units1 ~ units2 =>
   ApproximateEquality (Curve1d units1) (Qty units2) units1
   where
-  curve ~= value = List.allTrue [pointOn curve tValue ~= value | tValue <- Parameter.samples]
+  curve ~= value = List.allTrue [evaluate curve tValue ~= value | tValue <- Parameter.samples]
 
 instance
   units1 ~ units2 =>
@@ -144,8 +144,8 @@ instance
   value ^ curve = curve ^ value
 
 instance Interface (Curve1d units) units where
-  pointOnImpl = pointOn
-  segmentBoundsImpl = segmentBounds
+  evaluateImpl = evaluate
+  evaluateBoundsImpl = evaluateBounds
   derivativeImpl = derivative
 
 new :: Interface curve units => curve -> Curve1d units
@@ -303,44 +303,44 @@ instance Composition (Curve1d Unitless) (Curve1d units) (Curve1d units) where
   outer . inner = new (outer :.: inner)
 
 instance Interface (Curve1d units :.: Curve1d Unitless) units where
-  pointOnImpl (outer :.: inner) tValue =
-    pointOn outer (pointOn inner tValue)
-  segmentBoundsImpl (outer :.: inner) tBounds =
-    segmentBounds outer (segmentBounds inner tBounds)
+  evaluateImpl (outer :.: inner) tValue =
+    evaluate outer (evaluate inner tValue)
+  evaluateBoundsImpl (outer :.: inner) tBounds =
+    evaluateBounds outer (evaluateBounds inner tBounds)
   derivativeImpl (outer :.: inner) =
     (derivative outer . inner) * derivative inner
 
-pointOn :: Curve1d units -> Float -> Qty units
-pointOn curve tValue = case curve of
-  Curve1d c -> pointOnImpl c tValue
-  Parametric expression -> Expression.value expression tValue
-  Negated c -> negate (pointOn c tValue)
-  Sum c1 c2 -> pointOn c1 tValue + pointOn c2 tValue
-  Difference c1 c2 -> pointOn c1 tValue - pointOn c2 tValue
-  Product' c1 c2 -> pointOn c1 tValue .*. pointOn c2 tValue
-  Quotient' c1 c2 -> pointOn c1 tValue ./. pointOn c2 tValue
-  Squared' c -> Qty.squared' (pointOn c tValue)
-  SquareRoot' c' -> Qty.sqrt' (pointOn c' tValue)
-  Sin c -> Angle.sin (pointOn c tValue)
-  Cos c -> Angle.cos (pointOn c tValue)
-  Coerce c -> Units.coerce (pointOn c tValue)
-  Reversed c -> pointOn c (1 - tValue)
+evaluate :: Curve1d units -> Float -> Qty units
+evaluate curve tValue = case curve of
+  Curve1d c -> evaluateImpl c tValue
+  Parametric expression -> Expression.evaluate expression tValue
+  Negated c -> negate (evaluate c tValue)
+  Sum c1 c2 -> evaluate c1 tValue + evaluate c2 tValue
+  Difference c1 c2 -> evaluate c1 tValue - evaluate c2 tValue
+  Product' c1 c2 -> evaluate c1 tValue .*. evaluate c2 tValue
+  Quotient' c1 c2 -> evaluate c1 tValue ./. evaluate c2 tValue
+  Squared' c -> Qty.squared' (evaluate c tValue)
+  SquareRoot' c' -> Qty.sqrt' (evaluate c' tValue)
+  Sin c -> Angle.sin (evaluate c tValue)
+  Cos c -> Angle.cos (evaluate c tValue)
+  Coerce c -> Units.coerce (evaluate c tValue)
+  Reversed c -> evaluate c (1 - tValue)
 
-segmentBounds :: Curve1d units -> Range Unitless -> Range units
-segmentBounds curve tBounds = case curve of
-  Curve1d c -> segmentBoundsImpl c tBounds
-  Parametric expression -> Expression.bounds expression tBounds
-  Negated c -> negate (segmentBounds c tBounds)
-  Sum c1 c2 -> segmentBounds c1 tBounds + segmentBounds c2 tBounds
-  Difference c1 c2 -> segmentBounds c1 tBounds - segmentBounds c2 tBounds
-  Product' c1 c2 -> segmentBounds c1 tBounds .*. segmentBounds c2 tBounds
-  Quotient' c1 c2 -> segmentBounds c1 tBounds ./. segmentBounds c2 tBounds
-  Squared' c -> Range.squared' (segmentBounds c tBounds)
-  SquareRoot' c' -> Range.sqrt' (segmentBounds c' tBounds)
-  Sin c -> Range.sin (segmentBounds c tBounds)
-  Cos c -> Range.cos (segmentBounds c tBounds)
-  Coerce c -> Units.coerce (segmentBounds c tBounds)
-  Reversed c -> segmentBounds c (1.0 - tBounds)
+evaluateBounds :: Curve1d units -> Range Unitless -> Range units
+evaluateBounds curve tBounds = case curve of
+  Curve1d c -> evaluateBoundsImpl c tBounds
+  Parametric expression -> Expression.evaluateBounds expression tBounds
+  Negated c -> negate (evaluateBounds c tBounds)
+  Sum c1 c2 -> evaluateBounds c1 tBounds + evaluateBounds c2 tBounds
+  Difference c1 c2 -> evaluateBounds c1 tBounds - evaluateBounds c2 tBounds
+  Product' c1 c2 -> evaluateBounds c1 tBounds .*. evaluateBounds c2 tBounds
+  Quotient' c1 c2 -> evaluateBounds c1 tBounds ./. evaluateBounds c2 tBounds
+  Squared' c -> Range.squared' (evaluateBounds c tBounds)
+  SquareRoot' c' -> Range.sqrt' (evaluateBounds c' tBounds)
+  Sin c -> Range.sin (evaluateBounds c tBounds)
+  Cos c -> Range.cos (evaluateBounds c tBounds)
+  Coerce c -> Units.coerce (evaluateBounds c tBounds)
+  Reversed c -> evaluateBounds c (1.0 - tBounds)
 
 derivative :: Curve1d units -> Curve1d units
 derivative curve = case curve of
@@ -395,7 +395,7 @@ zeros curve
   | curve ~= Qty.zero = Failure Zeros.ZeroEverywhere
   | otherwise = Result.do
       let derivatives = Stream.iterate curve derivative
-      let derivativeBounds tBounds = Stream.map (\f -> segmentBounds f tBounds) derivatives
+      let derivativeBounds tBounds = Stream.map (\f -> evaluateBounds f tBounds) derivatives
       let cache = Solve1d.init derivativeBounds
       case Solve1d.search (findZeros derivatives) cache of
         Success roots -> Success (List.sortBy Root.value roots)
@@ -458,7 +458,7 @@ findZerosOrder k derivatives subdomain derivativeBounds
       case higherOrderZeros of
         [] -> solveMonotonic k currentDerivative nextDerivative tRange
         List.One (t0, neighborhood) -> do
-          if Qty.abs (pointOn currentDerivative t0) <= Solve1d.derivativeTolerance neighborhood k
+          if Qty.abs (evaluate currentDerivative t0) <= Solve1d.derivativeTolerance neighborhood k
             then Resolved [(t0, neighborhood)]
             else Fuzzy.do
               let leftRange = Range.from (Range.minValue tRange) t0
@@ -478,15 +478,15 @@ solveMonotonic ::
 solveMonotonic m fm fn tRange = do
   let n = m + 1
   let (tLow, tHigh) = Range.endpoints tRange
-  let startNeighborhood = Solve1d.neighborhood n (pointOn fn tLow)
-  if Qty.abs (pointOn fm tLow) <= Solve1d.derivativeTolerance startNeighborhood m
+  let startNeighborhood = Solve1d.neighborhood n (evaluate fn tLow)
+  if Qty.abs (evaluate fm tLow) <= Solve1d.derivativeTolerance startNeighborhood m
     then if tLow == 0.0 then Resolved [(0.0, startNeighborhood)] else Unresolved
     else do
-      let endNeighborhood = Solve1d.neighborhood n (pointOn fn tHigh)
-      if Qty.abs (pointOn fm tHigh) <= Solve1d.derivativeTolerance endNeighborhood m
+      let endNeighborhood = Solve1d.neighborhood n (evaluate fn tHigh)
+      if Qty.abs (evaluate fm tHigh) <= Solve1d.derivativeTolerance endNeighborhood m
         then if tHigh == 1.0 then Resolved [(1.0, endNeighborhood)] else Unresolved
         else do
-          let t0 = Solve1d.monotonic (pointOn fm) (pointOn fn) tRange
+          let t0 = Solve1d.monotonic (evaluate fm) (evaluate fn) tRange
           if t0 == tLow || t0 == tHigh
             then Unresolved
-            else Resolved [(t0, Solve1d.neighborhood n (pointOn fn t0))]
+            else Resolved [(t0, Solve1d.neighborhood n (evaluate fn t0))]

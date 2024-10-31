@@ -1,4 +1,4 @@
-module Surface1d.Function (Interface (..), Function, evaluate, bounds) where
+module Surface1d.Function (Interface (..), Function, evaluate, evaluateBounds) where
 
 import Curve1d (Curve1d)
 import Curve2d (Curve2d)
@@ -13,7 +13,7 @@ class
     | function -> units
   where
   evaluateImpl :: function -> UvPoint -> Qty units
-  boundsImpl :: function -> UvBounds -> Range units
+  evaluateBoundsImpl :: function -> UvBounds -> Range units
   derivativeImpl :: SurfaceParameter -> function -> Function units
 
 type role Function nominal
@@ -34,4 +34,4 @@ instance
 instance Composition (Curve2d UvCoordinates) (Function units) (Curve1d units)
 
 evaluate :: Function units -> UvPoint -> Qty units
-bounds :: Function units -> UvBounds -> Range units
+evaluateBounds :: Function units -> UvBounds -> Range units

@@ -172,7 +172,7 @@ solving = Test.verify "solving" Test.do
   let distances =
         roots
           |> List.map Curve1d.Root.value
-          |> List.map (Curve2d.pointOn arc)
+          |> List.map (Curve2d.evaluate arc)
           |> List.map (Point2d.distanceFrom Point2d.origin)
   Test.expect (distances ~= [desiredDistance, desiredDistance])
 
@@ -272,8 +272,8 @@ firstDerivativeIsConsistent :: Curve2d (space @ Meters) -> Float -> Expectation
 firstDerivativeIsConsistent curve t = do
   let firstDerivative = Curve2d.derivative curve
   let dt = 1e-6
-  let p1 = Curve2d.pointOn curve (t - dt)
-  let p2 = Curve2d.pointOn curve (t + dt)
+  let p1 = Curve2d.evaluate curve (t - dt)
+  let p2 = Curve2d.evaluate curve (t + dt)
   let numericalFirstDerivative = (p2 - p1) / (2 * dt)
   let analyticFirstDerivative = VectorCurve2d.evaluateAt t firstDerivative
   Test.expect (Tolerance.using (Length.meters 1e-6) (numericalFirstDerivative ~= analyticFirstDerivative))
@@ -324,7 +324,7 @@ reversalConsistency =
           curve <- generator
           let reversedCurve = Curve2d.reverse curve
           t <- Parameter.random
-          Test.expect (Curve2d.pointOn curve t ~= Curve2d.pointOn reversedCurve (1 - t))
+          Test.expect (Curve2d.evaluate curve t ~= Curve2d.evaluate reversedCurve (1 - t))
 
 degeneracyRemoval :: Tolerance Meters => Test
 degeneracyRemoval = Test.check 100 "degeneracyRemoval" Test.do
@@ -349,8 +349,8 @@ degeneracyRemoval = Test.check 100 "degeneracyRemoval" Test.do
   let interpolatedSecondDerivative = VectorCurve2d.derivative interpolatedFirstDerivative
   let interpolatedThirdDerivative = VectorCurve2d.derivative interpolatedSecondDerivative
 
-  let arcPoint = Curve2d.pointOn arc t
-  let interpolatedPoint = Curve2d.pointOn interpolatedCurve t
+  let arcPoint = Curve2d.evaluate arc t
+  let interpolatedPoint = Curve2d.evaluate interpolatedCurve t
   let expectEqualPoints =
         Tolerance.using (Length.meters 1e-12) (Test.expect (arcPoint ~= interpolatedPoint))
           |> Test.output "point distance" (Point2d.distanceFrom arcPoint interpolatedPoint)

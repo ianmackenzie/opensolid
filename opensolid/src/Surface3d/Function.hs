@@ -158,9 +158,9 @@ bounds function uv = case function of
   Constant v -> Bounds3d.constant v
   XYZ x y z ->
     Bounds3d.xyz
-      (Surface1d.Function.bounds x uv)
-      (Surface1d.Function.bounds y uv)
-      (Surface1d.Function.bounds z uv)
+      (Surface1d.Function.evaluateBounds x uv)
+      (Surface1d.Function.evaluateBounds y uv)
+      (Surface1d.Function.evaluateBounds z uv)
   Sum f1 f2 -> bounds f1 uv + VectorSurface3d.Function.bounds f2 uv
   Difference f1 f2 -> bounds f1 uv - VectorSurface3d.Function.bounds f2 uv
 
@@ -201,7 +201,7 @@ instance Interface (SurfaceCurveComposition (space @ units)) (space @ units) whe
     Curve3d.pointOn curve (Surface1d.Function.evaluate function uv)
 
   boundsImpl (SurfaceCurveComposition function curve) uv =
-    Curve3d.segmentBounds curve (Surface1d.Function.bounds function uv)
+    Curve3d.segmentBounds curve (Surface1d.Function.evaluateBounds function uv)
 
   derivativeImpl parameter (SurfaceCurveComposition function curve) =
     (Curve3d.derivative curve . function) * Surface1d.Function.derivative parameter function

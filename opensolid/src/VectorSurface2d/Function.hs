@@ -301,7 +301,7 @@ deriving instance Show (CrossProduct' space units1 units2)
 
 instance Surface1d.Function.Interface (CrossProduct' space units1 units2) (units1 :*: units2) where
   evaluateImpl (CrossProduct' f1 f2) t = evaluate f1 t .><. evaluate f2 t
-  boundsImpl (CrossProduct' f1 f2) t = bounds f1 t .><. bounds f2 t
+  evaluateBoundsImpl (CrossProduct' f1 f2) t = bounds f1 t .><. bounds f2 t
   derivativeImpl parameter (CrossProduct' f1 f2) =
     derivative parameter f1 .><. f2 + f1 .><. derivative parameter f2
 
@@ -383,7 +383,7 @@ deriving instance Show (DotProduct' space units1 units2)
 
 instance Surface1d.Function.Interface (DotProduct' space units1 units2) (units1 :*: units2) where
   evaluateImpl (DotProduct' f1 f2) t = evaluate f1 t .<>. evaluate f2 t
-  boundsImpl (DotProduct' f1 f2) t = bounds f1 t .<>. bounds f2 t
+  evaluateBoundsImpl (DotProduct' f1 f2) t = bounds f1 t .<>. bounds f2 t
   derivativeImpl parameter (DotProduct' f1 f2) =
     derivative parameter f1 .<>. f2 + f1 .<>. derivative parameter f2
 
@@ -476,7 +476,7 @@ instance
   evaluateImpl (curve :.: function) uvPoint =
     VectorCurve2d.evaluateAt (Surface1d.Function.evaluate function uvPoint) curve
   boundsImpl (curve :.: function) uvBounds =
-    VectorCurve2d.segmentBounds (Surface1d.Function.bounds function uvBounds) curve
+    VectorCurve2d.segmentBounds (Surface1d.Function.evaluateBounds function uvBounds) curve
   derivativeImpl parameter (curve :.: function) =
     (VectorCurve2d.derivative curve . function) * Surface1d.Function.derivative parameter function
   transformByImpl transform (curve :.: function) =
@@ -497,9 +497,9 @@ instance
     (space @ units)
   where
   evaluateAtImpl tValue (function :.: curve) =
-    evaluate function (Curve2d.pointOn curve tValue)
+    evaluate function (Curve2d.evaluate curve tValue)
   segmentBoundsImpl tBounds (function :.: curve) =
-    bounds function (Curve2d.segmentBounds curve tBounds)
+    bounds function (Curve2d.evaluateBounds curve tBounds)
   derivativeImpl (function :.: curve) = do
     let curveDerivative = Curve2d.derivative curve
     let dudt = VectorCurve2d.xComponent curveDerivative
@@ -544,56 +544,61 @@ transformBy transform function = do
     Transformed existing c -> Transformed (existing >> t) c
 
 evaluate :: Function (space @ units) -> UvPoint -> Vector2d (space @ units)
-evaluate function uv = case function of
-  Function f -> evaluateImpl f uv
-  Coerce f -> Units.coerce (evaluate f uv)
-  Parametric expression -> Expression.value expression uv
+evaluate function uvPoint = case function of
+  Function f -> evaluateImpl f uvPoint
+  Coerce f -> Units.coerce (evaluate f uvPoint)
+  Parametric expression -> Expression.evaluate expression uvPoint
   XY x y ->
     Vector2d.xy
-      (Surface1d.Function.evaluate x uv)
-      (Surface1d.Function.evaluate y uv)
-  Negated f -> negate (evaluate f uv)
-  Sum f1 f2 -> evaluate f1 uv + evaluate f2 uv
-  Difference f1 f2 -> evaluate f1 uv - evaluate f2 uv
-  Product1d2d' f1 f2 -> Surface1d.Function.evaluate f1 uv .*. evaluate f2 uv
-  Product2d1d' f1 f2 -> evaluate f1 uv .*. Surface1d.Function.evaluate f2 uv
-  Quotient' f1 f2 -> evaluate f1 uv ./. Surface1d.Function.evaluate f2 uv
-  Transformed transform f -> Vector2d.transformBy transform (evaluate f uv)
+      (Surface1d.Function.evaluate x uvPoint)
+      (Surface1d.Function.evaluate y uvPoint)
+  Negated f -> negate (evaluate f uvPoint)
+  Sum f1 f2 -> evaluate f1 uvPoint + evaluate f2 uvPoint
+  Difference f1 f2 -> evaluate f1 uvPoint - evaluate f2 uvPoint
+  Product1d2d' f1 f2 -> Surface1d.Function.evaluate f1 uvPoint .*. evaluate f2 uvPoint
+  Product2d1d' f1 f2 -> evaluate f1 uvPoint .*. Surface1d.Function.evaluate f2 uvPoint
+  Quotient' f1 f2 -> evaluate f1 uvPoint ./. Surface1d.Function.evaluate f2 uvPoint
+  Transformed transform f -> Vector2d.transformBy transform (evaluate f uvPoint)
 
 bounds :: Function (space @ units) -> UvBounds -> VectorBounds2d (space @ units)
-bounds function uv = case function of
-  Function f -> boundsImpl f uv
-  Coerce f -> Units.coerce (bounds f uv)
-  Parametric expression -> Expression.bounds expression uv
+bounds function uvBounds = case function of
+  Function f -> boundsImpl f uvBounds
+  Coerce f -> Units.coerce (bounds f uvBounds)
+  Parametric expression -> Expression.evaluateBounds expression uvBounds
   XY x y ->
     VectorBounds2d.xy
-      (Surface1d.Function.bounds x uv)
-      (Surface1d.Function.bounds y uv)
-  Negated f -> negate (bounds f uv)
-  Sum f1 f2 -> bounds f1 uv + bounds f2 uv
-  Difference f1 f2 -> bounds f1 uv - bounds f2 uv
-  Product1d2d' f1 f2 -> Surface1d.Function.bounds f1 uv .*. bounds f2 uv
-  Product2d1d' f1 f2 -> bounds f1 uv .*. Surface1d.Function.bounds f2 uv
-  Quotient' f1 f2 -> bounds f1 uv ./. Surface1d.Function.bounds f2 uv
-  Transformed transform f -> VectorBounds2d.transformBy transform (bounds f uv)
+      (Surface1d.Function.evaluateBounds x uvBounds)
+      (Surface1d.Function.evaluateBounds y uvBounds)
+  Negated f -> negate (bounds f uvBounds)
+  Sum f1 f2 -> bounds f1 uvBounds + bounds f2 uvBounds
+  Difference f1 f2 -> bounds f1 uvBounds - bounds f2 uvBounds
+  Product1d2d' f1 f2 -> Surface1d.Function.evaluateBounds f1 uvBounds .*. bounds f2 uvBounds
+  Product2d1d' f1 f2 -> bounds f1 uvBounds .*. Surface1d.Function.evaluateBounds f2 uvBounds
+  Quotient' f1 f2 -> bounds f1 uvBounds ./. Surface1d.Function.evaluateBounds f2 uvBounds
+  Transformed transform f -> VectorBounds2d.transformBy transform (bounds f uvBounds)
 
 derivative :: SurfaceParameter -> Function (space @ units) -> Function (space @ units)
-derivative parameter function = case function of
-  Function f -> derivativeImpl parameter f
-  Coerce f -> Coerce (derivative parameter f)
-  Parametric expression -> Parametric (Expression.surfaceDerivative parameter expression)
+derivative varyingParameter function = case function of
+  Function f -> derivativeImpl varyingParameter f
+  Coerce f -> Coerce (derivative varyingParameter f)
+  Parametric expression -> Parametric (Expression.surfaceDerivative varyingParameter expression)
   XY x y ->
     XY
-      (Surface1d.Function.derivative parameter x)
-      (Surface1d.Function.derivative parameter y)
-  Negated f -> -(derivative parameter f)
-  Sum f1 f2 -> derivative parameter f1 + derivative parameter f2
-  Difference f1 f2 -> derivative parameter f1 - derivative parameter f2
+      (Surface1d.Function.derivative varyingParameter x)
+      (Surface1d.Function.derivative varyingParameter y)
+  Negated f -> -(derivative varyingParameter f)
+  Sum f1 f2 -> derivative varyingParameter f1 + derivative varyingParameter f2
+  Difference f1 f2 -> derivative varyingParameter f1 - derivative varyingParameter f2
   Product1d2d' f1 f2 ->
-    Surface1d.Function.derivative parameter f1 .*. f2 + f1 .*. derivative parameter f2
+    Surface1d.Function.derivative varyingParameter f1 .*. f2
+      + f1 .*. derivative varyingParameter f2
   Product2d1d' f1 f2 ->
-    derivative parameter f1 .*. f2 + f1 .*. Surface1d.Function.derivative parameter f2
-  Quotient' f1 f2 ->
-    (derivative parameter f1 .*. f2 - f1 .*. Surface1d.Function.derivative parameter f2)
-      .!/.! Surface1d.Function.squared' f2
-  Transformed transform f -> transformBy transform (derivative parameter f)
+    derivative varyingParameter f1 .*. f2
+      + f1 .*. Surface1d.Function.derivative varyingParameter f2
+  Quotient' f1 f2 -> do
+    let numerator =
+          derivative varyingParameter f1 .*. f2
+            - f1 .*. Surface1d.Function.derivative varyingParameter f2
+    let denominator = Surface1d.Function.squared' f2
+    numerator .!/.! denominator
+  Transformed transform f -> transformBy transform (derivative varyingParameter f)
