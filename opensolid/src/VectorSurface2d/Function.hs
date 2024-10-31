@@ -474,11 +474,14 @@ instance
     (space @ units)
   where
   evaluateImpl (curve :.: function) uvPoint =
-    VectorCurve2d.evaluateAt (Surface1d.Function.evaluate function uvPoint) curve
+    VectorCurve2d.evaluate curve (Surface1d.Function.evaluate function uvPoint)
+
   boundsImpl (curve :.: function) uvBounds =
-    VectorCurve2d.segmentBounds (Surface1d.Function.evaluateBounds function uvBounds) curve
+    VectorCurve2d.evaluateBounds curve (Surface1d.Function.evaluateBounds function uvBounds)
+
   derivativeImpl parameter (curve :.: function) =
     (VectorCurve2d.derivative curve . function) * Surface1d.Function.derivative parameter function
+
   transformByImpl transform (curve :.: function) =
     VectorCurve2d.transformBy transform curve . function
 
@@ -496,15 +499,18 @@ instance
     (Function (space @ units) :.: Curve2d UvCoordinates)
     (space @ units)
   where
-  evaluateAtImpl tValue (function :.: curve) =
+  evaluateImpl (function :.: curve) tValue =
     evaluate function (Curve2d.evaluate curve tValue)
-  segmentBoundsImpl tBounds (function :.: curve) =
-    bounds function (Curve2d.evaluateBounds curve tBounds)
+
+  evaluateBoundsImpl (function :.: curve) tRange =
+    bounds function (Curve2d.evaluateBounds curve tRange)
+
   derivativeImpl (function :.: curve) = do
     let curveDerivative = Curve2d.derivative curve
     let dudt = VectorCurve2d.xComponent curveDerivative
     let dvdt = VectorCurve2d.yComponent curveDerivative
     (derivative U function . curve) * dudt + (derivative V function . curve) * dvdt
+
   transformByImpl transform (function :.: curve) = transformBy transform function . curve
 
 new :: Interface function (space @ units) => function -> Function (space @ units)

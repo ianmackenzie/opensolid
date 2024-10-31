@@ -3,8 +3,8 @@ module VectorCurve2d
   , VectorCurve2d
   , constant
   , new
-  , evaluateAt
-  , segmentBounds
+  , evaluate
+  , evaluateBounds
   , derivative
   , unsafeMagnitude
   , transformBy
@@ -25,8 +25,8 @@ class
   Interface curve (coordinateSystem :: CoordinateSystem)
     | curve -> coordinateSystem
   where
-  evaluateAtImpl :: Float -> curve -> Vector2d coordinateSystem
-  segmentBoundsImpl :: Range Unitless -> curve -> VectorBounds2d coordinateSystem
+  evaluateImpl :: curve -> Float -> Vector2d coordinateSystem
+  evaluateBoundsImpl :: curve -> Range Unitless -> VectorBounds2d coordinateSystem
   derivativeImpl :: curve -> VectorCurve2d coordinateSystem
   transformByImpl ::
     Transform2d tag (Space coordinateSystem @ translationUnits) ->
@@ -86,8 +86,8 @@ instance
 
 constant :: Vector2d (space @ units) -> VectorCurve2d (space @ units)
 new :: Interface curve (space @ units) => curve -> VectorCurve2d (space @ units)
-evaluateAt :: Float -> VectorCurve2d (space @ units) -> Vector2d (space @ units)
-segmentBounds :: Range Unitless -> VectorCurve2d (space @ units) -> VectorBounds2d (space @ units)
+evaluate :: VectorCurve2d (space @ units) -> Float -> Vector2d (space @ units)
+evaluateBounds :: VectorCurve2d (space @ units) -> Range Unitless -> VectorBounds2d (space @ units)
 derivative :: VectorCurve2d (space @ units) -> VectorCurve2d (space @ units)
 unsafeMagnitude :: VectorCurve2d (space @ units) -> Curve1d units
 transformBy ::

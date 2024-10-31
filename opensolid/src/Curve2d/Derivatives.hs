@@ -37,10 +37,10 @@ classify ::
   Derivatives (space @ units) ->
   (IntersectionPoint.Kind, Sign)
 classify (u, v) derivatives1 derivatives2 = do
-  let first1 = VectorCurve2d.evaluateAt u (first derivatives1)
-  let first2 = VectorCurve2d.evaluateAt v (first derivatives2)
-  let second1 = VectorCurve2d.evaluateAt u (second derivatives1)
-  let second2 = VectorCurve2d.evaluateAt v (second derivatives2)
+  let first1 = VectorCurve2d.evaluate (first derivatives1) u
+  let first2 = VectorCurve2d.evaluate (first derivatives2) v
+  let second1 = VectorCurve2d.evaluate (second derivatives1) u
+  let second2 = VectorCurve2d.evaluate (second derivatives2) v
   let first1Magnitude = Vector2d.magnitude first1
   let first2Magnitude = Vector2d.magnitude first2
   let tangent1 = first1 / first1Magnitude

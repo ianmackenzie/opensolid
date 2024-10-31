@@ -2,8 +2,10 @@ module DirectionCurve2d
   ( DirectionCurve2d
   , unsafe
   , unwrap
-  , evaluateAt
-  , segmentBounds
+  , startValue
+  , endValue
+  , evaluate
+  , evaluateBounds
   , derivative
   , constant
   , arc
@@ -52,13 +54,19 @@ unsafe = DirectionCurve2d
 unwrap :: DirectionCurve2d space -> VectorCurve2d (space @ Unitless)
 unwrap (DirectionCurve2d vectorCurve) = vectorCurve
 
-evaluateAt :: Float -> DirectionCurve2d space -> Direction2d space
-evaluateAt t (DirectionCurve2d vectorCurve) =
-  Direction2d.unsafe (VectorCurve2d.evaluateAt t vectorCurve)
+startValue :: DirectionCurve2d space -> Direction2d space
+startValue curve = evaluate curve 0.0
 
-segmentBounds :: Range Unitless -> DirectionCurve2d space -> DirectionBounds2d space
-segmentBounds t (DirectionCurve2d vectorCurve) =
-  DirectionBounds2d.unsafe (VectorCurve2d.segmentBounds t vectorCurve)
+endValue :: DirectionCurve2d space -> Direction2d space
+endValue curve = evaluate curve 1.0
+
+evaluate :: DirectionCurve2d space -> Float -> Direction2d space
+evaluate (DirectionCurve2d vectorCurve) tValue =
+  Direction2d.unsafe (VectorCurve2d.evaluate vectorCurve tValue)
+
+evaluateBounds :: DirectionCurve2d space -> Range Unitless -> DirectionBounds2d space
+evaluateBounds (DirectionCurve2d vectorCurve) tRange =
+  DirectionBounds2d.unsafe (VectorCurve2d.evaluateBounds vectorCurve tRange)
 
 derivative :: DirectionCurve2d space -> VectorCurve2d (space @ Unitless)
 derivative (DirectionCurve2d vectorCurve) = VectorCurve2d.derivative vectorCurve

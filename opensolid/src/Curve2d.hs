@@ -204,11 +204,14 @@ instance
     (Arithmetic.Difference (Point2d (space1 @ units1)) (Curve2d (space2 @ units2)))
     (space1 @ units1)
   where
-  evaluateAtImpl t (Arithmetic.Difference point curve) = point - evaluate curve t
+  evaluateImpl (Arithmetic.Difference point curve) tValue =
+    point - evaluate curve tValue
 
-  segmentBoundsImpl t (Arithmetic.Difference point curve) = point - evaluateBounds curve t
+  evaluateBoundsImpl (Arithmetic.Difference point curve) tRange =
+    point - evaluateBounds curve tRange
 
-  derivativeImpl (Arithmetic.Difference _ curve) = -(derivative curve)
+  derivativeImpl (Arithmetic.Difference _ curve) =
+    negate (derivative curve)
 
   transformByImpl transform (Arithmetic.Difference point curve) =
     VectorCurve2d.new $
@@ -264,11 +267,14 @@ instance
     (Arithmetic.Difference (Curve2d (space1 @ units1)) (Point2d (space2 @ units2)))
     (space1 @ units1)
   where
-  evaluateAtImpl t (Arithmetic.Difference curve point) = evaluate curve t - point
+  evaluateImpl (Arithmetic.Difference curve point) tValue =
+    evaluate curve tValue - point
 
-  segmentBoundsImpl t (Arithmetic.Difference curve point) = evaluateBounds curve t - point
+  evaluateBoundsImpl (Arithmetic.Difference curve point) tRange =
+    evaluateBounds curve tRange - point
 
-  derivativeImpl (Arithmetic.Difference curve _) = derivative curve
+  derivativeImpl (Arithmetic.Difference curve _) =
+    derivative curve
 
   transformByImpl transform (Arithmetic.Difference curve point) =
     VectorCurve2d.new $
@@ -293,11 +299,11 @@ instance
     (Arithmetic.Difference (Curve2d (space1 @ units1)) (Curve2d (space2 @ units2)))
     (space1 @ units1)
   where
-  evaluateAtImpl t (Arithmetic.Difference curve1 curve2) =
-    evaluate curve1 t - evaluate curve2 t
+  evaluateImpl (Arithmetic.Difference curve1 curve2) tValue =
+    evaluate curve1 tValue - evaluate curve2 tValue
 
-  segmentBoundsImpl t (Arithmetic.Difference curve1 curve2) =
-    evaluateBounds curve1 t - evaluateBounds curve2 t
+  evaluateBoundsImpl (Arithmetic.Difference curve1 curve2) tRange =
+    evaluateBounds curve1 tRange - evaluateBounds curve2 tRange
 
   derivativeImpl (Arithmetic.Difference curve1 curve2) =
     derivative curve1 - derivative curve2
@@ -348,8 +354,8 @@ startPoint curve = case curve of
   Parametric expresssion -> Expression.evaluate expresssion 0.0
   Coerce c -> Units.coerce (startPoint c)
   PlaceIn frame c -> Point2d.placeIn frame (startPoint c)
-  Addition c v -> startPoint c + VectorCurve2d.evaluateAt 0.0 v
-  Subtraction c v -> startPoint c - VectorCurve2d.evaluateAt 0.0 v
+  Addition c v -> startPoint c + VectorCurve2d.startValue v
+  Subtraction c v -> startPoint c - VectorCurve2d.startValue v
 
 endPoint :: Curve2d (space @ units) -> Point2d (space @ units)
 endPoint curve = case curve of
@@ -357,8 +363,8 @@ endPoint curve = case curve of
   Parametric expresssion -> Expression.evaluate expresssion 1.0
   Coerce c -> Units.coerce (endPoint c)
   PlaceIn frame c -> Point2d.placeIn frame (endPoint c)
-  Addition c v -> endPoint c + VectorCurve2d.evaluateAt 1.0 v
-  Subtraction c v -> endPoint c - VectorCurve2d.evaluateAt 1.0 v
+  Addition c v -> endPoint c + VectorCurve2d.endValue v
+  Subtraction c v -> endPoint c - VectorCurve2d.endValue v
 
 evaluate :: Curve2d (space @ units) -> Float -> Point2d (space @ units)
 evaluate curve tValue = case curve of
@@ -366,8 +372,8 @@ evaluate curve tValue = case curve of
   Parametric expresssion -> Expression.evaluate expresssion tValue
   Coerce c -> Units.coerce (evaluate c tValue)
   PlaceIn frame c -> Point2d.placeIn frame (evaluate c tValue)
-  Addition c v -> evaluate c tValue + VectorCurve2d.evaluateAt tValue v
-  Subtraction c v -> evaluate c tValue - VectorCurve2d.evaluateAt tValue v
+  Addition c v -> evaluate c tValue + VectorCurve2d.evaluate v tValue
+  Subtraction c v -> evaluate c tValue - VectorCurve2d.evaluate v tValue
 
 evaluateBounds :: Curve2d (space @ units) -> Range Unitless -> Bounds2d (space @ units)
 evaluateBounds curve tRange = case curve of
@@ -375,8 +381,8 @@ evaluateBounds curve tRange = case curve of
   Parametric expresssion -> Expression.evaluateBounds expresssion tRange
   Coerce c -> Units.coerce (evaluateBounds c tRange)
   PlaceIn frame c -> Bounds2d.placeIn frame (evaluateBounds c tRange)
-  Addition c v -> evaluateBounds c tRange + VectorCurve2d.segmentBounds tRange v
-  Subtraction c v -> evaluateBounds c tRange - VectorCurve2d.segmentBounds tRange v
+  Addition c v -> evaluateBounds c tRange + VectorCurve2d.evaluateBounds v tRange
+  Subtraction c v -> evaluateBounds c tRange - VectorCurve2d.evaluateBounds v tRange
 
 derivative :: Curve2d (space @ units) -> VectorCurve2d (space @ units)
 derivative curve = case curve of
@@ -402,8 +408,8 @@ bounds curve = case curve of
   Parametric expression -> Expression.evaluateBounds expression Range.unit
   Coerce c -> Units.coerce (bounds c)
   PlaceIn frame c -> Bounds2d.placeIn frame (bounds c)
-  Addition c v -> bounds c + VectorCurve2d.segmentBounds Range.unit v
-  Subtraction c v -> bounds c - VectorCurve2d.segmentBounds Range.unit v
+  Addition c v -> bounds c + VectorCurve2d.evaluateBounds v Range.unit
+  Subtraction c v -> bounds c - VectorCurve2d.evaluateBounds v Range.unit
 
 asPoint :: Tolerance units => Curve2d (space @ units) -> Maybe (Point2d (space @ units))
 asPoint curve = do
@@ -799,7 +805,7 @@ removeStartDegeneracy ::
   Curve2d (space @ units)
 removeStartDegeneracy continuity startCondition curve = Result.do
   let curveDerivatives = Stream.iterate (derivative curve) VectorCurve2d.derivative
-  let endDerivativeValues = Stream.map (VectorCurve2d.evaluateAt 1.0) curveDerivatives
+  let endDerivativeValues = Stream.map VectorCurve2d.endValue curveDerivatives
   let endCondition endDegree = (endPoint curve, Stream.take endDegree endDerivativeValues)
   let baseCurve endDegree = BezierCurve2d.hermite startCondition (endCondition endDegree)
   let curveDerivative n =
@@ -831,6 +837,7 @@ instance Interface (Synthetic (space @ units)) (space @ units) where
   endPointImpl (Synthetic curve _) = endPoint curve
 
   evaluateImpl (Synthetic curve _) t = evaluate curve t
+
   evaluateBoundsImpl (Synthetic curve _) tRange = evaluateBounds curve tRange
 
   boundsImpl (Synthetic curve _) = bounds curve
@@ -856,9 +863,11 @@ instance Show (SyntheticDerivative (space @ units)) where
   show (SyntheticDerivative curve _) = Text.unpack ("SyntheticDerivative: " + Text.show curve)
 
 instance VectorCurve2d.Interface (SyntheticDerivative (space @ units)) (space @ units) where
-  evaluateAtImpl t (SyntheticDerivative current _) = VectorCurve2d.evaluateAt t current
+  evaluateImpl (SyntheticDerivative current _) tValue =
+    VectorCurve2d.evaluate current tValue
 
-  segmentBoundsImpl t (SyntheticDerivative current _) = VectorCurve2d.segmentBounds t current
+  evaluateBoundsImpl (SyntheticDerivative current _) tRange =
+    VectorCurve2d.evaluateBounds current tRange
 
   derivativeImpl (SyntheticDerivative _ next) = next
 
@@ -878,7 +887,7 @@ toPolyline maxError function curve = do
   let secondDerivative = VectorCurve2d.derivative (Curve2d.derivative curve)
   let epsilon = Qty.abs maxError
   let predicate subdomain = do
-        let secondDerivativeBounds = VectorCurve2d.segmentBounds subdomain secondDerivative
+        let secondDerivativeBounds = VectorCurve2d.evaluateBounds secondDerivative subdomain
         let secondDerivativeMagnitude = VectorBounds2d.magnitude secondDerivativeBounds
         let maxSecondDerivativeMagnitude = Range.maxValue secondDerivativeMagnitude
         maxSecondDerivativeMagnitude == Qty.zero

@@ -405,12 +405,12 @@ testHermiteBezier = IO.do
   let curveFirstDerivative = Curve2d.derivative curve
   let curveSecondDerivative = VectorCurve2d.derivative curveFirstDerivative
   let curveThirdDerivative = VectorCurve2d.derivative curveSecondDerivative
-  log "Start first derivative" (VectorCurve2d.evaluateAt 0.0 curveFirstDerivative)
-  log "Start second derivative" (VectorCurve2d.evaluateAt 0.0 curveSecondDerivative)
-  log "Start third derivative" (VectorCurve2d.evaluateAt 0.0 curveThirdDerivative)
-  log "End first derivative" (VectorCurve2d.evaluateAt 1.0 curveFirstDerivative)
-  log "End second derivative" (VectorCurve2d.evaluateAt 1.0 curveSecondDerivative)
-  log "End third derivative" (VectorCurve2d.evaluateAt 1.0 curveThirdDerivative)
+  log "Start first derivative" (VectorCurve2d.startValue curveFirstDerivative)
+  log "Start second derivative" (VectorCurve2d.startValue curveSecondDerivative)
+  log "Start third derivative" (VectorCurve2d.startValue curveThirdDerivative)
+  log "End first derivative" (VectorCurve2d.endValue curveFirstDerivative)
+  log "End second derivative" (VectorCurve2d.endValue curveSecondDerivative)
+  log "End third derivative" (VectorCurve2d.endValue curveThirdDerivative)
   let curveAttributes =
         [ Drawing2d.strokeColour Colour.blue
         , Drawing2d.strokeWidth (Length.centimeters 3.0)
@@ -523,7 +523,7 @@ testCurveMedialAxis = IO.do
               let t2 = Curve1d.evaluate t2Curve t
               let p1 = Curve2d.evaluate curve1 t1
               let p2 = Curve2d.evaluate curve2 t2
-              let tangentDirection1 = DirectionCurve2d.evaluateAt t1 tangent1
+              let tangentDirection1 = DirectionCurve2d.evaluate tangent1 t1
               let normalDirection1 = Direction2d.rotateLeft tangentDirection1
               let d = p2 - p1
               let r = (d <> d) / (2.0 * (tangentDirection1 >< d))

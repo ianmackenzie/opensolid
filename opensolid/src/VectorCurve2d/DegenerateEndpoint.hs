@@ -3,8 +3,8 @@ module VectorCurve2d.DegenerateEndpoint
   , at
   , derivative
   , cutoff
-  , evaluateAt
-  , segmentBounds
+  , evaluate
+  , evaluateBounds
   , transformBy
   )
 where
@@ -26,7 +26,7 @@ data DegenerateEndpoint space
 
 at :: Tolerance units => Float -> VectorCurve2d (space @ units) -> DegenerateEndpoint space
 at t0 secondDerivative = do
-  let r = computeRadius (VectorCurve2d.evaluateAt t0 secondDerivative)
+  let r = computeRadius (VectorCurve2d.evaluate secondDerivative t0)
   let t1 = if t0 == 0.0 then r else 1 - r
   let q = qCurve 0 t0 secondDerivative
   let sign = if t0 == 0.0 then Positive else Negative
@@ -54,10 +54,13 @@ data QCurve coordinateSystem where
 deriving instance Show (QCurve (space @ units))
 
 instance VectorCurve2d.Interface (QCurve (space @ units)) (space @ units) where
-  evaluateAtImpl _ (QCurve _ _ _ value) = value
-  segmentBoundsImpl _ (QCurve _ _ _ value) = VectorBounds2d.constant value
+  evaluateImpl (QCurve _ _ _ value) _ = value
+
+  evaluateBoundsImpl (QCurve _ _ _ value) _ = VectorBounds2d.constant value
+
   derivativeImpl (QCurve n t0 curveDerivative _) =
     qCurve (n + 1) t0 (VectorCurve2d.derivative curveDerivative)
+
   transformByImpl transform (QCurve n t0 curveDerivative value) = do
     let transformedCurveDerivative = VectorCurve2d.transformBy transform curveDerivative
     let transformedValue = Vector2d.transformBy transform value
@@ -67,27 +70,27 @@ qCurve :: Int -> Float -> VectorCurve2d (space @ units) -> VectorCurve2d (space 
 qCurve n t0 curveDerivative =
   VectorCurve2d.new $
     QCurve n t0 curveDerivative $
-      VectorCurve2d.evaluateAt t0 curveDerivative / (n + 1)
+      VectorCurve2d.evaluate curveDerivative t0 / (n + 1)
 
-evaluateAt ::
+evaluate ::
+  DegenerateEndpoint space ->
+  VectorCurve2d (space @ Unitless) ->
   Float ->
-  DegenerateEndpoint space ->
-  VectorCurve2d (space @ Unitless) ->
   Vector2d (space @ Unitless)
-evaluateAt t (DegenerateEndpoint t0 t1 endpointCurve) innerCurve =
+evaluate (DegenerateEndpoint t0 t1 endpointCurve) innerCurve tValue =
   Vector2d.interpolateFrom
-    (VectorCurve2d.evaluateAt t0 endpointCurve)
-    (VectorCurve2d.evaluateAt t1 innerCurve)
-    ((t - t0) / (t1 - t0))
+    (VectorCurve2d.evaluate endpointCurve t0)
+    (VectorCurve2d.evaluate innerCurve t1)
+    ((tValue - t0) / (t1 - t0))
 
-segmentBounds ::
-  Range Unitless ->
+evaluateBounds ::
   DegenerateEndpoint space ->
   VectorCurve2d (space @ Unitless) ->
+  Range Unitless ->
   VectorBounds2d (space @ Unitless)
-segmentBounds (Range tLow tHigh) (DegenerateEndpoint t0 t1 endpointCurve) innerCurve = do
-  let v0 = VectorCurve2d.evaluateAt t0 endpointCurve
-  let v1 = VectorCurve2d.evaluateAt t1 innerCurve
+evaluateBounds (DegenerateEndpoint t0 t1 endpointCurve) innerCurve (Range tLow tHigh) = do
+  let v0 = VectorCurve2d.evaluate endpointCurve t0
+  let v1 = VectorCurve2d.evaluate innerCurve t1
   VectorBounds2d.hull2
     (Vector2d.interpolateFrom v0 v1 ((tLow - t0) / (t1 - t0)))
     (Vector2d.interpolateFrom v0 v1 ((tHigh - t0) / (t1 - t0)))

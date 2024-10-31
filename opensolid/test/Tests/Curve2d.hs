@@ -184,8 +184,8 @@ degenerateStartPointTangent = Test.check 100 "degenerateStartPointTangent" Test.
   let curve = CubicSpline2d.fromControlPoints p0 p0 p1 p2
   let decreasingTValues = [2.0 ** -n | n <- [8 .. 16]]
   tangentDirection <- Curve2d.tangentDirection curve
-  let startTangent = DirectionCurve2d.evaluateAt 0.0 tangentDirection
-  let otherTangents = [DirectionCurve2d.evaluateAt t tangentDirection | t <- decreasingTValues]
+  let startTangent = DirectionCurve2d.startValue tangentDirection
+  let otherTangents = List.map (DirectionCurve2d.evaluate tangentDirection) decreasingTValues
   let angleDifference otherTangent = Qty.abs (Direction2d.angleFrom startTangent otherTangent)
   let angleDifferences = List.map angleDifference otherTangents
   Test.expect (List.isDescending angleDifferences)
@@ -198,8 +198,8 @@ degenerateEndPointTangent = Test.check 100 "degenerateEndPointTangent" Test.do
   let curve = CubicSpline2d.fromControlPoints p0 p1 p2 p2
   let increasingTValues = [1.0 - 2.0 ** -n | n <- [8 .. 16]]
   tangentDirection <- Curve2d.tangentDirection curve
-  let endTangent = DirectionCurve2d.evaluateAt 1.0 tangentDirection
-  let otherTangents = [DirectionCurve2d.evaluateAt t tangentDirection | t <- increasingTValues]
+  let endTangent = DirectionCurve2d.endValue tangentDirection
+  let otherTangents = List.map (DirectionCurve2d.evaluate tangentDirection) increasingTValues
   let angleDifference otherTangent = Qty.abs (Direction2d.angleFrom endTangent otherTangent)
   let angleDifferences = List.map angleDifference otherTangents
   Test.expect (List.isDescending angleDifferences)
@@ -214,11 +214,11 @@ tangentDerivativeIsPerpendicularToTangent =
     let curve = CubicSpline2d.fromControlPoints p0 p1 p2 p3
     tangentDirection <- Curve2d.tangentDirection curve
     let tangentDerivative = DirectionCurve2d.derivative tangentDirection
-    t <- Parameter.random
-    let tangent = DirectionCurve2d.evaluateAt t tangentDirection
-    let derivative = VectorCurve2d.evaluateAt t tangentDerivative
+    tValue <- Parameter.random
+    let tangent = DirectionCurve2d.evaluate tangentDirection tValue
+    let derivative = VectorCurve2d.evaluate tangentDerivative tValue
     Test.expect (Tolerance.using 1e-12 (derivative <> tangent ~= 0.0))
-      |> Test.output "t" t
+      |> Test.output "tValue" tValue
       |> Test.output "tangent" tangent
       |> Test.output "derivative" derivative
       |> Test.output "dot product" (derivative <> tangent)
@@ -233,9 +233,9 @@ degenerateStartPointTangentDerivative =
     let decreasingTValues = [2.0 ** -n | n <- [8 .. 16]]
     tangentDirection <- Curve2d.tangentDirection curve
     let tangentDerivative = DirectionCurve2d.derivative tangentDirection
-    let startTangentDerivative = VectorCurve2d.evaluateAt 0.0 tangentDerivative
+    let startTangentDerivative = VectorCurve2d.startValue tangentDerivative
     let otherTangentDerivatives =
-          [VectorCurve2d.evaluateAt t tangentDerivative | t <- decreasingTValues]
+          List.map (VectorCurve2d.evaluate tangentDerivative) decreasingTValues
     let differences =
           otherTangentDerivatives
             |> List.map (- startTangentDerivative)
@@ -254,9 +254,9 @@ degenerateEndPointTangentDerivative =
     let increasingTValues = [1.0 - 2.0 ** -n | n <- [8 .. 16]]
     tangentDirection <- Curve2d.tangentDirection curve
     let tangentDerivative = DirectionCurve2d.derivative tangentDirection
-    let endTangentDerivative = VectorCurve2d.evaluateAt 1.0 tangentDerivative
+    let endTangentDerivative = VectorCurve2d.endValue tangentDerivative
     let otherTangentDerivatives =
-          [VectorCurve2d.evaluateAt t tangentDerivative | t <- increasingTValues]
+          List.map (VectorCurve2d.evaluate tangentDerivative) increasingTValues
     let differences =
           otherTangentDerivatives
             |> List.map (- endTangentDerivative)
@@ -269,13 +269,13 @@ degenerateEndPointTangentDerivative =
       |> Test.output "endTangentDerivative" endTangentDerivative
 
 firstDerivativeIsConsistent :: Curve2d (space @ Meters) -> Float -> Expectation
-firstDerivativeIsConsistent curve t = do
+firstDerivativeIsConsistent curve tValue = do
   let firstDerivative = Curve2d.derivative curve
   let dt = 1e-6
-  let p1 = Curve2d.evaluate curve (t - dt)
-  let p2 = Curve2d.evaluate curve (t + dt)
+  let p1 = Curve2d.evaluate curve (tValue - dt)
+  let p2 = Curve2d.evaluate curve (tValue + dt)
   let numericalFirstDerivative = (p2 - p1) / (2 * dt)
-  let analyticFirstDerivative = VectorCurve2d.evaluateAt t firstDerivative
+  let analyticFirstDerivative = VectorCurve2d.evaluate firstDerivative tValue
   Tolerance.using (Length.meters 1e-6) do
     Test.expect (numericalFirstDerivative ~= analyticFirstDerivative)
       |> Test.output "numericalFirstDerivative" numericalFirstDerivative
@@ -288,14 +288,14 @@ firstDerivativeConsistency curveGenerator = Test.check 100 "firstDerivativeConsi
   firstDerivativeIsConsistent curve t
 
 secondDerivativeIsConsistent :: Curve2d (space @ Meters) -> Float -> Expectation
-secondDerivativeIsConsistent curve t = do
+secondDerivativeIsConsistent curve tValue = do
   let firstDerivative = Curve2d.derivative curve
   let secondDerivative = VectorCurve2d.derivative firstDerivative
   let dt = 1e-6
-  let v1 = VectorCurve2d.evaluateAt (t - dt) firstDerivative
-  let v2 = VectorCurve2d.evaluateAt (t + dt) firstDerivative
+  let v1 = VectorCurve2d.evaluate firstDerivative (tValue - dt)
+  let v2 = VectorCurve2d.evaluate firstDerivative (tValue + dt)
   let numericalSecondDerivative = (v2 - v1) / (2 * dt)
-  let analyticSecondDerivative = VectorCurve2d.evaluateAt t secondDerivative
+  let analyticSecondDerivative = VectorCurve2d.evaluate secondDerivative tValue
   Tolerance.using (Length.meters 1e-6) do
     Test.expect (numericalSecondDerivative ~= analyticSecondDerivative)
       |> Test.output "numericalSecondDerivative" numericalSecondDerivative
@@ -342,8 +342,8 @@ degeneracyRemoval = Test.check 100 "degeneracyRemoval" Test.do
   let arcSecondDerivative = VectorCurve2d.derivative arcFirstDerivative
   let arcThirdDerivative = VectorCurve2d.derivative arcSecondDerivative
 
-  let startFirstDerivative = VectorCurve2d.evaluateAt 0.0 arcFirstDerivative
-  let startSecondDerivative = VectorCurve2d.evaluateAt 0.0 arcSecondDerivative
+  let startFirstDerivative = VectorCurve2d.startValue arcFirstDerivative
+  let startSecondDerivative = VectorCurve2d.startValue arcSecondDerivative
   let startCondition = (Curve2d.startPoint arc, [startFirstDerivative, startSecondDerivative])
 
   let interpolatedCurve = Curve2d.removeStartDegeneracy 2 startCondition arc
@@ -358,8 +358,8 @@ degeneracyRemoval = Test.check 100 "degeneracyRemoval" Test.do
           Test.expect (arcPoint ~= interpolatedPoint)
             |> Test.output "point distance" (Point2d.distanceFrom arcPoint interpolatedPoint)
   let expectEqualDerivatives n arcDerivative interpolatedDerivative = do
-        let arcEndValue = VectorCurve2d.evaluateAt 1.0 arcDerivative
-        let interpolatedEndValue = VectorCurve2d.evaluateAt 1.0 interpolatedDerivative
+        let arcEndValue = VectorCurve2d.endValue arcDerivative
+        let interpolatedEndValue = VectorCurve2d.endValue interpolatedDerivative
         Test.expect (arcEndValue ~= interpolatedEndValue)
           |> Test.output "Derivative order" n
           |> Test.output "Derivative at end of arc" arcEndValue

@@ -45,8 +45,8 @@ init ::
 init derivatives domain =
   Segment
     { curveBounds = Curve2d.evaluateBounds (Derivatives.curve derivatives) domain
-    , firstBounds = VectorCurve2d.segmentBounds domain (Derivatives.first derivatives)
-    , secondBounds = VectorCurve2d.segmentBounds domain (Derivatives.second derivatives)
+    , firstBounds = VectorCurve2d.evaluateBounds (Derivatives.first derivatives) domain
+    , secondBounds = VectorCurve2d.evaluateBounds (Derivatives.second derivatives) domain
     }
 
 crossProductResolution :: Segment (space @ units) -> Segment (space @ units) -> Float
@@ -234,8 +234,8 @@ isTangentIntersection derivatives1 derivatives2 tBounds1 tBounds2 = do
   let bounds2 = Curve2d.evaluateBounds (Derivatives.curve derivatives2) tBounds2
   let difference = bounds1 - bounds2
   let distance = VectorBounds2d.magnitude difference
-  let firstBounds1 = VectorCurve2d.segmentBounds tBounds1 (Derivatives.first derivatives1)
-  let firstBounds2 = VectorCurve2d.segmentBounds tBounds2 (Derivatives.first derivatives2)
+  let firstBounds1 = VectorCurve2d.evaluateBounds (Derivatives.first derivatives1) tBounds1
+  let firstBounds2 = VectorCurve2d.evaluateBounds (Derivatives.first derivatives2) tBounds2
   let crossProduct = firstBounds1 .><. firstBounds2
   let dotProduct1 = firstBounds1 .<>. difference
   let dotProduct2 = firstBounds2 .<>. difference

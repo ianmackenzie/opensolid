@@ -21,62 +21,64 @@ data PiecewiseCurve space
   deriving (Show)
 
 instance VectorCurve2d.Interface (PiecewiseCurve space) (space @ Unitless) where
-  evaluateAtImpl t (PiecewiseCurve Nothing inner Nothing) = VectorCurve2d.evaluateAt t inner
-  evaluateAtImpl t (PiecewiseCurve (Just degenerateStart) inner Nothing)
-    | t >= DegenerateEndpoint.cutoff degenerateStart = VectorCurve2d.evaluateAt t inner
-    | otherwise = DegenerateEndpoint.evaluateAt t degenerateStart inner
-  evaluateAtImpl t (PiecewiseCurve Nothing inner (Just degenerateEnd))
-    | t <= DegenerateEndpoint.cutoff degenerateEnd = VectorCurve2d.evaluateAt t inner
-    | otherwise = DegenerateEndpoint.evaluateAt t degenerateEnd inner
-  evaluateAtImpl t (PiecewiseCurve (Just degenerateStart) inner (Just degenerateEnd))
-    | t < DegenerateEndpoint.cutoff degenerateStart =
-        DegenerateEndpoint.evaluateAt t degenerateStart inner
-    | t > DegenerateEndpoint.cutoff degenerateEnd =
-        DegenerateEndpoint.evaluateAt t degenerateEnd inner
-    | otherwise = VectorCurve2d.evaluateAt t inner
+  evaluateImpl (PiecewiseCurve Nothing inner Nothing) tValue =
+    VectorCurve2d.evaluate inner tValue
+  evaluateImpl (PiecewiseCurve (Just degenerateStart) inner Nothing) tValue
+    | tValue >= DegenerateEndpoint.cutoff degenerateStart = VectorCurve2d.evaluate inner tValue
+    | otherwise = DegenerateEndpoint.evaluate degenerateStart inner tValue
+  evaluateImpl (PiecewiseCurve Nothing inner (Just degenerateEnd)) tValue
+    | tValue <= DegenerateEndpoint.cutoff degenerateEnd = VectorCurve2d.evaluate inner tValue
+    | otherwise = DegenerateEndpoint.evaluate degenerateEnd inner tValue
+  evaluateImpl (PiecewiseCurve (Just degenerateStart) inner (Just degenerateEnd)) tValue
+    | tValue < DegenerateEndpoint.cutoff degenerateStart =
+        DegenerateEndpoint.evaluate degenerateStart inner tValue
+    | tValue > DegenerateEndpoint.cutoff degenerateEnd =
+        DegenerateEndpoint.evaluate degenerateEnd inner tValue
+    | otherwise = VectorCurve2d.evaluate inner tValue
 
-  segmentBoundsImpl t (PiecewiseCurve Nothing inner Nothing) = VectorCurve2d.segmentBounds t inner
-  segmentBoundsImpl t (PiecewiseCurve (Just degenerateStart) inner Nothing) = do
-    let (Range t1 t2) = t
+  evaluateBoundsImpl (PiecewiseCurve Nothing inner Nothing) tRange =
+    VectorCurve2d.evaluateBounds inner tRange
+  evaluateBoundsImpl (PiecewiseCurve (Just degenerateStart) inner Nothing) tRange = do
+    let (Range t1 t2) = tRange
     let tStart = DegenerateEndpoint.cutoff degenerateStart
     if
-      | t1 >= tStart -> VectorCurve2d.segmentBounds t inner
-      | t2 <= tStart -> DegenerateEndpoint.segmentBounds t degenerateStart inner
+      | t1 >= tStart -> VectorCurve2d.evaluateBounds inner tRange
+      | t2 <= tStart -> DegenerateEndpoint.evaluateBounds degenerateStart inner tRange
       | otherwise ->
           VectorBounds2d.aggregate2
-            (DegenerateEndpoint.segmentBounds (Range.from t1 tStart) degenerateStart inner)
-            (VectorCurve2d.segmentBounds (Range.from tStart t2) inner)
-  segmentBoundsImpl t (PiecewiseCurve Nothing inner (Just degenerateEnd)) = do
-    let (Range t1 t2) = t
+            (DegenerateEndpoint.evaluateBounds degenerateStart inner (Range.from t1 tStart))
+            (VectorCurve2d.evaluateBounds inner (Range.from tStart t2))
+  evaluateBoundsImpl (PiecewiseCurve Nothing inner (Just degenerateEnd)) tRange = do
+    let (Range t1 t2) = tRange
     let tEnd = DegenerateEndpoint.cutoff degenerateEnd
     if
-      | t2 <= tEnd -> VectorCurve2d.segmentBounds t inner
-      | t1 >= tEnd -> DegenerateEndpoint.segmentBounds t degenerateEnd inner
+      | t2 <= tEnd -> VectorCurve2d.evaluateBounds inner tRange
+      | t1 >= tEnd -> DegenerateEndpoint.evaluateBounds degenerateEnd inner tRange
       | otherwise ->
           VectorBounds2d.aggregate2
-            (VectorCurve2d.segmentBounds (Range.from t1 tEnd) inner)
-            (DegenerateEndpoint.segmentBounds (Range.from tEnd t2) degenerateEnd inner)
-  segmentBoundsImpl t (PiecewiseCurve (Just degenerateStart) inner (Just degenerateEnd)) = do
-    let (Range t1 t2) = t
+            (VectorCurve2d.evaluateBounds inner (Range.from t1 tEnd))
+            (DegenerateEndpoint.evaluateBounds degenerateEnd inner (Range.from tEnd t2))
+  evaluateBoundsImpl (PiecewiseCurve (Just degenerateStart) inner (Just degenerateEnd)) tRange = do
+    let (Range t1 t2) = tRange
     let tStart = DegenerateEndpoint.cutoff degenerateStart
     let tEnd = DegenerateEndpoint.cutoff degenerateEnd
     if
-      | t1 >= tStart && t2 <= tEnd -> VectorCurve2d.segmentBounds t inner
-      | t2 <= tStart -> DegenerateEndpoint.segmentBounds t degenerateStart inner
-      | t1 >= tEnd -> DegenerateEndpoint.segmentBounds t degenerateEnd inner
+      | t1 >= tStart && t2 <= tEnd -> VectorCurve2d.evaluateBounds inner tRange
+      | t2 <= tStart -> DegenerateEndpoint.evaluateBounds degenerateStart inner tRange
+      | t1 >= tEnd -> DegenerateEndpoint.evaluateBounds degenerateEnd inner tRange
       | t1 >= tStart ->
           VectorBounds2d.aggregate2
-            (VectorCurve2d.segmentBounds (Range.from t1 tEnd) inner)
-            (DegenerateEndpoint.segmentBounds (Range.from tEnd t2) degenerateEnd inner)
+            (VectorCurve2d.evaluateBounds inner (Range.from t1 tEnd))
+            (DegenerateEndpoint.evaluateBounds degenerateEnd inner (Range.from tEnd t2))
       | t2 <= tEnd ->
           VectorBounds2d.aggregate2
-            (DegenerateEndpoint.segmentBounds (Range.from t1 tStart) degenerateStart inner)
-            (VectorCurve2d.segmentBounds (Range.from tStart t2) inner)
+            (DegenerateEndpoint.evaluateBounds degenerateStart inner (Range.from t1 tStart))
+            (VectorCurve2d.evaluateBounds inner (Range.from tStart t2))
       | otherwise ->
           VectorBounds2d.aggregate3
-            (DegenerateEndpoint.segmentBounds (Range.from t1 tStart) degenerateStart inner)
-            (VectorCurve2d.segmentBounds (Range.from tStart tEnd) inner)
-            (DegenerateEndpoint.segmentBounds (Range.from tEnd t2) degenerateEnd inner)
+            (DegenerateEndpoint.evaluateBounds degenerateStart inner (Range.from t1 tStart))
+            (VectorCurve2d.evaluateBounds inner (Range.from tStart tEnd))
+            (DegenerateEndpoint.evaluateBounds degenerateEnd inner (Range.from tEnd t2))
 
   derivativeImpl (PiecewiseCurve start general end) =
     VectorCurve2d.new $
@@ -113,6 +115,6 @@ endpoint ::
   VectorCurve2d (space @ units) ->
   Maybe (DegenerateEndpoint space)
 endpoint t0 firstDerivative secondDerivative
-  | VectorCurve2d.evaluateAt t0 firstDerivative ~= Vector2d.zero =
+  | VectorCurve2d.evaluate firstDerivative t0 ~= Vector2d.zero =
       Just (DegenerateEndpoint.at t0 secondDerivative)
   | otherwise = Nothing

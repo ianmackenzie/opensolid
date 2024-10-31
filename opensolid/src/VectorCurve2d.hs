@@ -10,8 +10,10 @@ module VectorCurve2d
   ( VectorCurve2d (Parametric)
   , Interface (..)
   , new
-  , evaluateAt
-  , segmentBounds
+  , startValue
+  , endValue
+  , evaluate
+  , evaluateBounds
   , derivative
   , zero
   , constant
@@ -82,8 +84,8 @@ class
   Interface curve (coordinateSystem :: CoordinateSystem)
     | curve -> coordinateSystem
   where
-  evaluateAtImpl :: Float -> curve -> Vector2d coordinateSystem
-  segmentBoundsImpl :: Range Unitless -> curve -> VectorBounds2d coordinateSystem
+  evaluateImpl :: curve -> Float -> Vector2d coordinateSystem
+  evaluateBoundsImpl :: curve -> Range Unitless -> VectorBounds2d coordinateSystem
   derivativeImpl :: curve -> VectorCurve2d coordinateSystem
   transformByImpl ::
     Transform2d tag (Space coordinateSystem @ translationUnits) ->
@@ -154,8 +156,8 @@ instance
   coerce curve = Coerce curve
 
 instance Interface (VectorCurve2d (space @ units)) (space @ units) where
-  evaluateAtImpl = evaluateAt
-  segmentBoundsImpl = segmentBounds
+  evaluateImpl = evaluate
+  evaluateBoundsImpl = evaluateBounds
   derivativeImpl = derivative
   transformByImpl = transformBy
 
@@ -358,9 +360,14 @@ data DotProductOf space units1 units2
   deriving (Show)
 
 instance Curve1d.Interface (DotProductOf space units1 units2) (units1 :*: units2) where
-  evaluateImpl (DotProductOf c1 c2) t = evaluateAt t c1 .<>. evaluateAt t c2
-  evaluateBoundsImpl (DotProductOf c1 c2) t = segmentBounds t c1 .<>. segmentBounds t c2
-  derivativeImpl (DotProductOf c1 c2) = derivative c1 .<>. c2 + c1 .<>. derivative c2
+  evaluateImpl (DotProductOf c1 c2) tValue =
+    evaluate c1 tValue .<>. evaluate c2 tValue
+
+  evaluateBoundsImpl (DotProductOf c1 c2) tRange =
+    evaluateBounds c1 tRange .<>. evaluateBounds c2 tRange
+
+  derivativeImpl (DotProductOf c1 c2) =
+    derivative c1 .<>. c2 + c1 .<>. derivative c2
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -432,9 +439,14 @@ data CrossProductOf space units1 units2
   deriving (Show)
 
 instance Curve1d.Interface (CrossProductOf space units1 units2) (units1 :*: units2) where
-  evaluateImpl (CrossProductOf c1 c2) t = evaluateAt t c1 .><. evaluateAt t c2
-  evaluateBoundsImpl (CrossProductOf c1 c2) t = segmentBounds t c1 .><. segmentBounds t c2
-  derivativeImpl (CrossProductOf c1 c2) = derivative c1 .><. c2 + c1 .><. derivative c2
+  evaluateImpl (CrossProductOf c1 c2) tValue =
+    evaluate c1 tValue .><. evaluate c2 tValue
+
+  evaluateBoundsImpl (CrossProductOf c1 c2) tRange =
+    evaluateBounds c1 tRange .><. evaluateBounds c2 tRange
+
+  derivativeImpl (CrossProductOf c1 c2) =
+    derivative c1 .><. c2 + c1 .><. derivative c2
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -521,12 +533,15 @@ instance
     (VectorCurve2d (space @ units) :.: Curve1d Unitless)
     (space @ units)
   where
-  evaluateAtImpl t (vectorCurve2d :.: curve1d) =
-    evaluateAt (Curve1d.evaluate curve1d t) vectorCurve2d
-  segmentBoundsImpl t (vectorCurve2d :.: curve1d) =
-    segmentBounds (Curve1d.evaluateBounds curve1d t) vectorCurve2d
+  evaluateImpl (vectorCurve2d :.: curve1d) tValue =
+    evaluate vectorCurve2d (Curve1d.evaluate curve1d tValue)
+
+  evaluateBoundsImpl (vectorCurve2d :.: curve1d) tRange =
+    evaluateBounds vectorCurve2d (Curve1d.evaluateBounds curve1d tRange)
+
   derivativeImpl (vectorCurve2d :.: curve1d) =
     (derivative vectorCurve2d . curve1d) * Curve1d.derivative curve1d
+
   transformByImpl transform (vectorCurve2d :.: curve1d) =
     new (transformBy transform vectorCurve2d :.: curve1d)
 
@@ -610,37 +625,43 @@ cubicSpline v1 v2 v3 v4 =
 bezierCurve :: NonEmpty (Vector2d (space @ units)) -> VectorCurve2d (space @ units)
 bezierCurve = Parametric . Expression.bezierCurve
 
-evaluateAt :: Float -> VectorCurve2d (space @ units) -> Vector2d (space @ units)
-evaluateAt t curve = case curve of
-  VectorCurve2d c -> evaluateAtImpl t c
-  Parametric expression -> Expression.evaluate expression t
-  Coerce c -> Units.coerce (evaluateAt t c)
-  Reversed c -> evaluateAt (1 - t) c
-  XY x y -> Vector2d.xy (Curve1d.evaluate x t) (Curve1d.evaluate y t)
-  Negated c -> -(evaluateAt t c)
-  Sum c1 c2 -> evaluateAt t c1 + evaluateAt t c2
-  Difference c1 c2 -> evaluateAt t c1 - evaluateAt t c2
-  Product1d2d' c1 c2 -> Curve1d.evaluate c1 t .*. evaluateAt t c2
-  Product2d1d' c1 c2 -> evaluateAt t c1 .*. Curve1d.evaluate c2 t
-  Quotient' c1 c2 -> evaluateAt t c1 ./. Curve1d.evaluate c2 t
-  PlaceInBasis basis c -> Vector2d.placeInBasis basis (evaluateAt t c)
-  Transformed transform c -> Vector2d.transformBy transform (evaluateAt t c)
+startValue :: VectorCurve2d (space @ units) -> Vector2d (space @ units)
+startValue curve = evaluate curve 0.0
 
-segmentBounds :: Range Unitless -> VectorCurve2d (space @ units) -> VectorBounds2d (space @ units)
-segmentBounds t curve = case curve of
-  VectorCurve2d c -> segmentBoundsImpl t c
-  Parametric expression -> Expression.evaluateBounds expression t
-  Coerce c -> Units.coerce (segmentBounds t c)
-  Reversed c -> segmentBounds (1 - t) c
-  XY x y -> VectorBounds2d (Curve1d.evaluateBounds x t) (Curve1d.evaluateBounds y t)
-  Negated c -> -(segmentBounds t c)
-  Sum c1 c2 -> segmentBounds t c1 + segmentBounds t c2
-  Difference c1 c2 -> segmentBounds t c1 - segmentBounds t c2
-  Product1d2d' c1 c2 -> Curve1d.evaluateBounds c1 t .*. segmentBounds t c2
-  Product2d1d' c1 c2 -> segmentBounds t c1 .*. Curve1d.evaluateBounds c2 t
-  Quotient' c1 c2 -> segmentBounds t c1 ./. Curve1d.evaluateBounds c2 t
-  PlaceInBasis basis c -> VectorBounds2d.placeInBasis basis (segmentBounds t c)
-  Transformed transform c -> VectorBounds2d.transformBy transform (segmentBounds t c)
+endValue :: VectorCurve2d (space @ units) -> Vector2d (space @ units)
+endValue curve = evaluate curve 1.0
+
+evaluate :: VectorCurve2d (space @ units) -> Float -> Vector2d (space @ units)
+evaluate curve tValue = case curve of
+  VectorCurve2d c -> evaluateImpl c tValue
+  Parametric expression -> Expression.evaluate expression tValue
+  Coerce c -> Units.coerce (evaluate c tValue)
+  Reversed c -> evaluate c (1 - tValue)
+  XY x y -> Vector2d.xy (Curve1d.evaluate x tValue) (Curve1d.evaluate y tValue)
+  Negated c -> negate (evaluate c tValue)
+  Sum c1 c2 -> evaluate c1 tValue + evaluate c2 tValue
+  Difference c1 c2 -> evaluate c1 tValue - evaluate c2 tValue
+  Product1d2d' c1 c2 -> Curve1d.evaluate c1 tValue .*. evaluate c2 tValue
+  Product2d1d' c1 c2 -> evaluate c1 tValue .*. Curve1d.evaluate c2 tValue
+  Quotient' c1 c2 -> evaluate c1 tValue ./. Curve1d.evaluate c2 tValue
+  PlaceInBasis basis c -> Vector2d.placeInBasis basis (evaluate c tValue)
+  Transformed transform c -> Vector2d.transformBy transform (evaluate c tValue)
+
+evaluateBounds :: VectorCurve2d (space @ units) -> Range Unitless -> VectorBounds2d (space @ units)
+evaluateBounds curve tRange = case curve of
+  VectorCurve2d c -> evaluateBoundsImpl c tRange
+  Parametric expression -> Expression.evaluateBounds expression tRange
+  Coerce c -> Units.coerce (evaluateBounds c tRange)
+  Reversed c -> evaluateBounds c (1 - tRange)
+  XY x y -> VectorBounds2d (Curve1d.evaluateBounds x tRange) (Curve1d.evaluateBounds y tRange)
+  Negated c -> negate (evaluateBounds c tRange)
+  Sum c1 c2 -> evaluateBounds c1 tRange + evaluateBounds c2 tRange
+  Difference c1 c2 -> evaluateBounds c1 tRange - evaluateBounds c2 tRange
+  Product1d2d' c1 c2 -> Curve1d.evaluateBounds c1 tRange .*. evaluateBounds c2 tRange
+  Product2d1d' c1 c2 -> evaluateBounds c1 tRange .*. Curve1d.evaluateBounds c2 tRange
+  Quotient' c1 c2 -> evaluateBounds c1 tRange ./. Curve1d.evaluateBounds c2 tRange
+  PlaceInBasis basis c -> VectorBounds2d.placeInBasis basis (evaluateBounds c tRange)
+  Transformed transform c -> VectorBounds2d.transformBy transform (evaluateBounds c tRange)
 
 derivative ::
   VectorCurve2d (space @ units) ->
@@ -685,10 +706,12 @@ newtype SquaredMagnitude' (coordinateSystem :: CoordinateSystem)
 deriving instance Show (SquaredMagnitude' (space @ units))
 
 instance Curve1d.Interface (SquaredMagnitude' (space @ units)) (units :*: units) where
-  evaluateImpl (SquaredMagnitude' curve) t =
-    Vector2d.squaredMagnitude' (evaluateAt t curve)
-  evaluateBoundsImpl (SquaredMagnitude' curve) t =
-    VectorBounds2d.squaredMagnitude' (segmentBounds t curve)
+  evaluateImpl (SquaredMagnitude' curve) tValue =
+    Vector2d.squaredMagnitude' (evaluate curve tValue)
+
+  evaluateBoundsImpl (SquaredMagnitude' curve) tRange =
+    VectorBounds2d.squaredMagnitude' (evaluateBounds curve tRange)
+
   derivativeImpl (SquaredMagnitude' curve) =
     2 * curve .<>. derivative curve
 
@@ -706,10 +729,12 @@ newtype NonZeroMagnitude (coordinateSystem :: CoordinateSystem)
 deriving instance Show (NonZeroMagnitude (space @ units))
 
 instance Curve1d.Interface (NonZeroMagnitude (space @ units)) units where
-  evaluateImpl (NonZeroMagnitude curve) t =
-    Vector2d.magnitude (VectorCurve2d.evaluateAt t curve)
-  evaluateBoundsImpl (NonZeroMagnitude curve) t =
-    VectorBounds2d.magnitude (VectorCurve2d.segmentBounds t curve)
+  evaluateImpl (NonZeroMagnitude curve) tValue =
+    Vector2d.magnitude (VectorCurve2d.evaluate curve tValue)
+
+  evaluateBoundsImpl (NonZeroMagnitude curve) tRange =
+    VectorBounds2d.magnitude (VectorCurve2d.evaluateBounds curve tRange)
+
   derivativeImpl (NonZeroMagnitude curve) =
     (VectorCurve2d.derivative curve .<>. curve) .!/! Curve1d.new (NonZeroMagnitude curve)
 
@@ -771,11 +796,11 @@ direction curve =
     Failure Zeros.HigherOrderZero -> Failure HasZero
 
 isRemovableDegeneracy :: Tolerance units => VectorCurve2d (space @ units) -> Float -> Bool
-isRemovableDegeneracy curveDerivative t =
+isRemovableDegeneracy curveDerivative tValue =
   -- A degeneracy (zero value of a vector curve) when computing the direction of that vector curve
   -- is removable at an endpoint if the curve derivative at that endpoint is non-zero,
   -- since in that case we can substitute the curve derivative value for the curve value itself
-  (t == 0.0 || t == 1.0) && evaluateAt t curveDerivative != Vector2d.zero
+  (tValue == 0.0 || tValue == 1.0) && evaluate curveDerivative tValue != Vector2d.zero
 
 placeIn ::
   Frame2d (global @ originUnits) (Defines local) ->
