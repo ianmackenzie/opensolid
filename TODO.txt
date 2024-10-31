@@ -1,16 +1,15 @@
-Implement bits of functionality to switch over to Function: 
-- synthetic functions (hopefully won't require Rust changes)
-- HorizontalCurve and VerticalCurve
-- VectorCurve2d.Direction (piecewise curve)
-  -> switch to Bezier interpolation between endpoint and curve 
-  -> maybe just disable temporarily for now?
+Move language extensions into actual source files?
+-> maybe wait until GHC 9.10 is available with GHC2024, to avoid needing e.g. GADTs everywhere?
+-> will still need NoImplicitPrelude, RebindableSyntax, LexicalNegation, StrictData in most files...
+-> maybe go extension-by-extension, starting with less common or more dangerous ones?
 
-Remove Function.Function when possible
+Add VectorSurface2d.Function.zeros for generic 2-equations-2-unknowns solving
 
 Move primitives to Primitives.hs
 
 Switch all curves and surfaces to use pointOn instead of evaluateAt
 -> or 'value' and 'bounds' and 'segmentBounds'?
+-> 'evaluate', 'bounds', 'evaluateBounds'
 
 Use space1 ~ space2 instead of space ~ space_ everywhere
 
