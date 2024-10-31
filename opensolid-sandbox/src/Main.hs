@@ -99,8 +99,8 @@ testRangeArithmetic = IO.do
   log "Range product" rangeProduct
 
 testEquality :: IO ()
-testEquality =
-  log "Equality test" (Tolerance.using Length.centimeter (Length.meters 1.0 ~= Length.meters 1.005))
+testEquality = Tolerance.using Length.centimeter do
+  log "Equality test" (Length.meters 1.0 ~= Length.meters 1.005)
 
 testTransformation :: IO ()
 testTransformation = IO.do

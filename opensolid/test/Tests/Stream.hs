@@ -19,6 +19,7 @@ mapWithIndex = Test.verify "mapWithIndex" Test.do
           |> Stream.mapWithIndex (\i n -> n / (2 ** i))
           |> Stream.take 11
           |> Float.sum
-  Test.expect (Tolerance.using 1e-3 (sum ~= 2.0))
-    |> Test.output "sum" sum
-    |> Test.output "error" (sum - 2.0)
+  Tolerance.using 1e-3 do
+    Test.expect (sum ~= 2.0)
+      |> Test.output "sum" sum
+      |> Test.output "error" (sum - 2.0)

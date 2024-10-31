@@ -36,7 +36,7 @@ floatDiv =
 
 floatMod :: Test
 floatMod =
-  Tolerance.using 1e-12 $
+  Tolerance.using 1e-12 do
     Test.group "Float %" $
       [ Test.verify "1.7 % 0.5" (Test.expect (1.7 % 0.5 ~= 0.2))
       , Test.verify "-1.7 % 0.5" (Test.expect (-1.7 % 0.5 ~= 0.3))

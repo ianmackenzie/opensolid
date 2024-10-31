@@ -75,7 +75,7 @@ findPoint = Test.verify "findPoint" Test.do
   endParameterValues <- Curve2d.findPoint (Point2d.meters 2.0 0.0) testSpline
   midParameterValues <- Curve2d.findPoint (Point2d.meters 1.0 1.0) testSpline
   offCurveParameterValues <- Curve2d.findPoint (Point2d.meters 1.0 1.1) testSpline
-  Tolerance.using 1e-12 $
+  Tolerance.using 1e-12 do
     Test.all
       [ Test.expect (startParameterValues ~= [0.0])
       , Test.expect (endParameterValues ~= [1.0])
@@ -167,7 +167,7 @@ solving = Test.verify "solving" Test.do
   let squaredDistanceFromOrigin = VectorCurve2d.squaredMagnitude (arc - Point2d.origin)
   let desiredDistance = Length.meters 0.5
   roots <-
-    Tolerance.using (Tolerance.ofSquared desiredDistance) $
+    Tolerance.using (Tolerance.ofSquared desiredDistance) do
       Curve1d.zeros (squaredDistanceFromOrigin - Qty.squared desiredDistance)
   let distances =
         roots
@@ -276,9 +276,10 @@ firstDerivativeIsConsistent curve t = do
   let p2 = Curve2d.evaluate curve (t + dt)
   let numericalFirstDerivative = (p2 - p1) / (2 * dt)
   let analyticFirstDerivative = VectorCurve2d.evaluateAt t firstDerivative
-  Test.expect (Tolerance.using (Length.meters 1e-6) (numericalFirstDerivative ~= analyticFirstDerivative))
-    |> Test.output "numericalFirstDerivative" numericalFirstDerivative
-    |> Test.output "analyticFirstDerivative" analyticFirstDerivative
+  Tolerance.using (Length.meters 1e-6) do
+    Test.expect (numericalFirstDerivative ~= analyticFirstDerivative)
+      |> Test.output "numericalFirstDerivative" numericalFirstDerivative
+      |> Test.output "analyticFirstDerivative" analyticFirstDerivative
 
 firstDerivativeConsistency :: Generator (Curve2d (space @ Meters)) -> Test
 firstDerivativeConsistency curveGenerator = Test.check 100 "firstDerivativeConsistency" Test.do
@@ -295,9 +296,10 @@ secondDerivativeIsConsistent curve t = do
   let v2 = VectorCurve2d.evaluateAt (t + dt) firstDerivative
   let numericalSecondDerivative = (v2 - v1) / (2 * dt)
   let analyticSecondDerivative = VectorCurve2d.evaluateAt t secondDerivative
-  Test.expect (Tolerance.using (Length.meters 1e-6) (numericalSecondDerivative ~= analyticSecondDerivative))
-    |> Test.output "numericalSecondDerivative" numericalSecondDerivative
-    |> Test.output "analyticSecondDerivative" analyticSecondDerivative
+  Tolerance.using (Length.meters 1e-6) do
+    Test.expect (numericalSecondDerivative ~= analyticSecondDerivative)
+      |> Test.output "numericalSecondDerivative" numericalSecondDerivative
+      |> Test.output "analyticSecondDerivative" analyticSecondDerivative
 
 secondDerivativeConsistency :: Generator (Curve2d (space @ Meters)) -> Test
 secondDerivativeConsistency curveGenerator = Test.check 100 "secondDerivativeConsistency" Test.do
@@ -352,8 +354,9 @@ degeneracyRemoval = Test.check 100 "degeneracyRemoval" Test.do
   let arcPoint = Curve2d.evaluate arc t
   let interpolatedPoint = Curve2d.evaluate interpolatedCurve t
   let expectEqualPoints =
-        Tolerance.using (Length.meters 1e-12) (Test.expect (arcPoint ~= interpolatedPoint))
-          |> Test.output "point distance" (Point2d.distanceFrom arcPoint interpolatedPoint)
+        Tolerance.using (Length.meters 1e-12) do
+          Test.expect (arcPoint ~= interpolatedPoint)
+            |> Test.output "point distance" (Point2d.distanceFrom arcPoint interpolatedPoint)
   let expectEqualDerivatives n arcDerivative interpolatedDerivative = do
         let arcEndValue = VectorCurve2d.evaluateAt 1.0 arcDerivative
         let interpolatedEndValue = VectorCurve2d.evaluateAt 1.0 interpolatedDerivative

@@ -20,7 +20,8 @@ angleFrom = do
           let endDirection = Direction2d.degrees endDegrees
           let computedAngle = Direction2d.angleFrom startDirection endDirection
           let expectedAngle = Angle.degrees expectedDegrees
-          Test.expect (Tolerance.using (Angle.radians 1e-12) (computedAngle ~= expectedAngle))
+          Tolerance.using (Angle.radians 1e-12) do
+            Test.expect (computedAngle ~= expectedAngle)
   Test.group "angleFrom" $
     [ testCase 10.0 30.0 20.0
     , testCase 10.0 350.0 -20.0

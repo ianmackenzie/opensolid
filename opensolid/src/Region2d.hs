@@ -228,7 +228,7 @@ classifyLoops (NonEmpty loops) = Result.do
 
 fixSign :: Tolerance units => Sign -> Loop (space @ units) -> Loop (space @ units)
 fixSign desiredSign loop =
-  Tolerance.using Tolerance.squared' $
+  Tolerance.using Tolerance.squared' do
     if Estimate.sign (loopSignedArea' loop) == desiredSign then loop else reverseLoop loop
 
 reverseLoop :: Loop (space @ units) -> Loop (space @ units)
@@ -239,7 +239,7 @@ pickLargestLoop ::
   NonEmpty (Loop (space @ units)) ->
   (Loop (space @ units), List (Loop (space @ units)))
 pickLargestLoop loops =
-  Tolerance.using Tolerance.squared' $
+  Tolerance.using Tolerance.squared' do
     Estimate.pickLargestBy loopSignedArea' loops
 
 loopSignedArea' :: Loop (space @ units) -> Estimate (units :*: units)
