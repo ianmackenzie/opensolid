@@ -250,12 +250,15 @@ instance
     (Curve2d (space @ units) :.: Surface1d.Function.Function Unitless)
     (space @ units)
   where
-  evaluateImpl (curve :.: function) uv =
-    Curve2d.evaluate curve (Surface1d.Function.evaluate function uv)
-  evaluateBoundsImpl (curve :.: function) uv =
-    Curve2d.evaluateBounds curve (Surface1d.Function.evaluateBounds function uv)
+  evaluateImpl (curve :.: function) uvPoint =
+    Curve2d.evaluate curve (Surface1d.Function.evaluate function uvPoint)
+
+  evaluateBoundsImpl (curve :.: function) uvBounds =
+    Curve2d.evaluateBounds curve (Surface1d.Function.evaluateBounds function uvBounds)
+
   derivativeImpl parameter (curve :.: function) =
     (Curve2d.derivative curve . function) * Surface1d.Function.derivative parameter function
+
   transformByImpl transform (curve :.: function) =
     Curve2d.transformBy transform curve . function
 
