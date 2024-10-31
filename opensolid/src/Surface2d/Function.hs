@@ -139,12 +139,15 @@ instance
     (Arithmetic.Difference (Function (space @ units)) (Function (space @ units)))
     (space @ units)
   where
-  evaluateImpl (Arithmetic.Difference f1 f2) uv =
-    evaluate f1 uv - evaluate f2 uv
-  boundsImpl (Arithmetic.Difference f1 f2) uv =
-    evaluateBounds f1 uv - evaluateBounds f2 uv
+  evaluateImpl (Arithmetic.Difference f1 f2) uvPoint =
+    evaluate f1 uvPoint - evaluate f2 uvPoint
+
+  evaluateBoundsImpl (Arithmetic.Difference f1 f2) uvBounds =
+    evaluateBounds f1 uvBounds - evaluateBounds f2 uvBounds
+
   derivativeImpl parameter (Arithmetic.Difference f1 f2) =
     derivative parameter f1 - derivative parameter f2
+
   transformByImpl transform (Arithmetic.Difference f1 f2) =
     VectorSurface2d.Function.new $
       Arithmetic.Difference
@@ -205,8 +208,8 @@ evaluateBounds function uv = case function of
     Bounds2d.xy
       (Surface1d.Function.evaluateBounds x uv)
       (Surface1d.Function.evaluateBounds y uv)
-  Addition f1 f2 -> evaluateBounds f1 uv + VectorSurface2d.Function.bounds f2 uv
-  Subtraction f1 f2 -> evaluateBounds f1 uv - VectorSurface2d.Function.bounds f2 uv
+  Addition f1 f2 -> evaluateBounds f1 uv + VectorSurface2d.Function.evaluateBounds f2 uv
+  Subtraction f1 f2 -> evaluateBounds f1 uv - VectorSurface2d.Function.evaluateBounds f2 uv
   Transformed transform f -> Bounds2d.transformBy transform (evaluateBounds f uv)
 
 derivative :: SurfaceParameter -> Function (space @ units) -> VectorSurface2d.Function (space @ units)
