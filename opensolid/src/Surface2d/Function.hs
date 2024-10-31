@@ -282,11 +282,17 @@ instance
   evaluateBoundsImpl (function :.: curve) tRange =
     evaluateBounds function (Curve2d.evaluateBounds curve tRange)
 
-  boundsImpl (function :.: curve) = evaluateBounds function (Curve2d.bounds curve)
+  boundsImpl (function :.: curve) =
+    evaluateBounds function (Curve2d.bounds curve)
+
   derivativeImpl (function :.: curve) = do
     let curveDerivative = Curve2d.derivative curve
     let dudt = VectorCurve2d.xComponent curveDerivative
     let dvdt = VectorCurve2d.yComponent curveDerivative
     (derivative U function . curve) * dudt + (derivative V function . curve) * dvdt
-  reverseImpl (function :.: curve) = function :.: Curve2d.reverse curve
-  transformByImpl transform (function :.: curve) = transformBy transform function . curve
+
+  reverseImpl (function :.: curve) =
+    function :.: Curve2d.reverse curve
+
+  transformByImpl transform (function :.: curve) =
+    transformBy transform function . curve
