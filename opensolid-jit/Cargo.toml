@@ -6,11 +6,11 @@ version = "0.1.0"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-cranelift = "0.112.1"
-cranelift-codegen = "0.112.1"
-cranelift-jit = "0.112.1"
-cranelift-module = "0.112.1"
-cranelift-native = "0.112.1"
+cranelift = "0.113.0"
+cranelift-codegen = "0.113.0"
+cranelift-jit = "0.113.0"
+cranelift-module = "0.113.0"
+cranelift-native = "0.113.0"
 
 [lib]
 crate-type = ["staticlib"]
