@@ -305,8 +305,8 @@ instance Composition (Curve1d Unitless) (Curve1d units) (Curve1d units) where
 instance Interface (Curve1d units :.: Curve1d Unitless) units where
   evaluateImpl (outer :.: inner) tValue =
     evaluate outer (evaluate inner tValue)
-  evaluateBoundsImpl (outer :.: inner) tBounds =
-    evaluateBounds outer (evaluateBounds inner tBounds)
+  evaluateBoundsImpl (outer :.: inner) tRange =
+    evaluateBounds outer (evaluateBounds inner tRange)
   derivativeImpl (outer :.: inner) =
     (derivative outer . inner) * derivative inner
 
@@ -327,20 +327,20 @@ evaluate curve tValue = case curve of
   Reversed c -> evaluate c (1 - tValue)
 
 evaluateBounds :: Curve1d units -> Range Unitless -> Range units
-evaluateBounds curve tBounds = case curve of
-  Curve1d c -> evaluateBoundsImpl c tBounds
-  Parametric expression -> Expression.evaluateBounds expression tBounds
-  Negated c -> negate (evaluateBounds c tBounds)
-  Sum c1 c2 -> evaluateBounds c1 tBounds + evaluateBounds c2 tBounds
-  Difference c1 c2 -> evaluateBounds c1 tBounds - evaluateBounds c2 tBounds
-  Product' c1 c2 -> evaluateBounds c1 tBounds .*. evaluateBounds c2 tBounds
-  Quotient' c1 c2 -> evaluateBounds c1 tBounds ./. evaluateBounds c2 tBounds
-  Squared' c -> Range.squared' (evaluateBounds c tBounds)
-  SquareRoot' c' -> Range.sqrt' (evaluateBounds c' tBounds)
-  Sin c -> Range.sin (evaluateBounds c tBounds)
-  Cos c -> Range.cos (evaluateBounds c tBounds)
-  Coerce c -> Units.coerce (evaluateBounds c tBounds)
-  Reversed c -> evaluateBounds c (1.0 - tBounds)
+evaluateBounds curve tRange = case curve of
+  Curve1d c -> evaluateBoundsImpl c tRange
+  Parametric expression -> Expression.evaluateBounds expression tRange
+  Negated c -> negate (evaluateBounds c tRange)
+  Sum c1 c2 -> evaluateBounds c1 tRange + evaluateBounds c2 tRange
+  Difference c1 c2 -> evaluateBounds c1 tRange - evaluateBounds c2 tRange
+  Product' c1 c2 -> evaluateBounds c1 tRange .*. evaluateBounds c2 tRange
+  Quotient' c1 c2 -> evaluateBounds c1 tRange ./. evaluateBounds c2 tRange
+  Squared' c -> Range.squared' (evaluateBounds c tRange)
+  SquareRoot' c' -> Range.sqrt' (evaluateBounds c' tRange)
+  Sin c -> Range.sin (evaluateBounds c tRange)
+  Cos c -> Range.cos (evaluateBounds c tRange)
+  Coerce c -> Units.coerce (evaluateBounds c tRange)
+  Reversed c -> evaluateBounds c (1.0 - tRange)
 
 derivative :: Curve1d units -> Curve1d units
 derivative curve = case curve of
@@ -395,7 +395,7 @@ zeros curve
   | curve ~= Qty.zero = Failure Zeros.ZeroEverywhere
   | otherwise = Result.do
       let derivatives = Stream.iterate curve derivative
-      let derivativeBounds tBounds = Stream.map (\f -> evaluateBounds f tBounds) derivatives
+      let derivativeBounds tRange = Stream.map (\f -> evaluateBounds f tRange) derivatives
       let cache = Solve1d.init derivativeBounds
       case Solve1d.search (findZeros derivatives) cache of
         Success roots -> Success (List.sortBy Root.value roots)

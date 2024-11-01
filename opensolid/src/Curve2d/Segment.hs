@@ -60,8 +60,8 @@ isEndpointIntersectionCandidate ::
   Segment (space @ units) ->
   Segment (space @ units) ->
   Bool
-isEndpointIntersectionCandidate (tValue1, tValue2) tBounds1 tBounds2 _ _ =
-  Range.includes tValue1 tBounds1 && Range.includes tValue2 tBounds2
+isEndpointIntersectionCandidate (tValue1, tValue2) tRange1 tRange2 _ _ =
+  Range.includes tValue1 tRange1 && Range.includes tValue2 tRange2
 
 endpointIntersectionResolved ::
   (IntersectionPoint.Kind, Sign) ->
@@ -218,8 +218,8 @@ findTangentIntersection ::
   Segment (space @ units) ->
   Sign ->
   Maybe IntersectionPoint
-findTangentIntersection derivatives1 derivatives2 tBounds1 tBounds2 _ _ sign = Maybe.do
-  (t1, t2) <- Range.find2 (isTangentIntersection derivatives1 derivatives2) tBounds1 tBounds2
+findTangentIntersection derivatives1 derivatives2 tRange1 tRange2 _ _ sign = Maybe.do
+  (t1, t2) <- Range.find2 (isTangentIntersection derivatives1 derivatives2) tRange1 tRange2
   Just (IntersectionPoint.tangent t1 t2 sign)
 
 isTangentIntersection ::
@@ -229,13 +229,13 @@ isTangentIntersection ::
   Range Unitless ->
   Range Unitless ->
   Bool
-isTangentIntersection derivatives1 derivatives2 tBounds1 tBounds2 = do
-  let bounds1 = Curve2d.evaluateBounds (Derivatives.curve derivatives1) tBounds1
-  let bounds2 = Curve2d.evaluateBounds (Derivatives.curve derivatives2) tBounds2
+isTangentIntersection derivatives1 derivatives2 tRange1 tRange2 = do
+  let bounds1 = Curve2d.evaluateBounds (Derivatives.curve derivatives1) tRange1
+  let bounds2 = Curve2d.evaluateBounds (Derivatives.curve derivatives2) tRange2
   let difference = bounds1 - bounds2
   let distance = VectorBounds2d.magnitude difference
-  let firstBounds1 = VectorCurve2d.evaluateBounds (Derivatives.first derivatives1) tBounds1
-  let firstBounds2 = VectorCurve2d.evaluateBounds (Derivatives.first derivatives2) tBounds2
+  let firstBounds1 = VectorCurve2d.evaluateBounds (Derivatives.first derivatives1) tRange1
+  let firstBounds2 = VectorCurve2d.evaluateBounds (Derivatives.first derivatives2) tRange2
   let crossProduct = firstBounds1 .><. firstBounds2
   let dotProduct1 = firstBounds1 .<>. difference
   let dotProduct2 = firstBounds2 .<>. difference
@@ -276,10 +276,10 @@ findCrossingIntersection ::
   Segment (space @ units) ->
   Sign ->
   Maybe IntersectionPoint
-findCrossingIntersection derivatives1 derivatives2 tBounds1 tBounds2 _ _ sign = Maybe.do
+findCrossingIntersection derivatives1 derivatives2 tRange1 tRange2 _ _ sign = Maybe.do
   let curve1 = Derivatives.curve derivatives1
   let curve2 = Derivatives.curve derivatives2
-  (t1, t2) <- Range.find2 (isCrossingIntersection curve1 curve2) tBounds1 tBounds2
+  (t1, t2) <- Range.find2 (isCrossingIntersection curve1 curve2) tRange1 tRange2
   Just (IntersectionPoint.crossing t1 t2 sign)
 
 isCrossingIntersection ::
@@ -288,7 +288,7 @@ isCrossingIntersection ::
   Range Unitless ->
   Range Unitless ->
   Bool
-isCrossingIntersection curve1 curve2 tBounds1 tBounds2 = do
-  let curveBounds1 = Curve2d.evaluateBounds curve1 tBounds1
-  let curveBounds2 = Curve2d.evaluateBounds curve2 tBounds2
+isCrossingIntersection curve1 curve2 tRange1 tRange2 = do
+  let curveBounds1 = Curve2d.evaluateBounds curve1 tRange1
+  let curveBounds2 = Curve2d.evaluateBounds curve2 tRange2
   Bounds2d.overlap curveBounds1 curveBounds2 >= Qty.zero
