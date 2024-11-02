@@ -104,8 +104,6 @@ library
     -- QuadraticSpline3d
     -- Surface3d
     -- Surface3d.Function
-    -- VectorSurface3d
-    -- VectorSurface3d.Function
     Angle
     Arc2d
     Area
@@ -232,6 +230,8 @@ library
     VectorCurve3d.Zeros
     VectorSurface2d
     VectorSurface2d.Function
+    VectorSurface3d
+    VectorSurface3d.Function
     VectorVolume3d.Function
     Vertex2d
     Volume

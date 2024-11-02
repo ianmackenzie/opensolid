@@ -1,5 +1,3 @@
--- Avoid errors when running Fourmolu
-{-# LANGUAGE GHC2021 #-}
 -- Needed for 'Surface1d.Function * Vector3d = Function'
 -- and 'Vector3d * Surface1d.Function = Function' instances,
 -- which lead to unresolvable circular dependencies
@@ -9,22 +7,24 @@
 {-# OPTIONS_GHC -Wno-orphans #-}
 
 module VectorSurface3d.Function
-  ( Function (Constant)
+  ( Function (Parametric)
   , Interface (..)
   , new
   , zero
   , constant
   , xyz
   , evaluate
-  , bounds
+  , evaluateBounds
   , derivative
   )
 where
 
+import Composition
 import Direction3d (Direction3d)
+import Expression (Expression)
+import Expression qualified
 import Float qualified
 import OpenSolid
-import Qty qualified
 import Surface1d qualified
 import Surface1d.Function qualified
 import SurfaceParameter (SurfaceParameter, UvBounds, UvPoint)
@@ -42,7 +42,7 @@ class
     | function -> coordinateSystem
   where
   evaluateImpl :: function -> UvPoint -> Vector3d coordinateSystem
-  boundsImpl :: function -> UvBounds -> VectorBounds3d coordinateSystem
+  evaluateBoundsImpl :: function -> UvBounds -> VectorBounds3d coordinateSystem
   derivativeImpl :: SurfaceParameter -> function -> Function coordinateSystem
 
 data Function (coordinateSystem :: CoordinateSystem) where
@@ -53,8 +53,8 @@ data Function (coordinateSystem :: CoordinateSystem) where
   Coerce ::
     Function (space @ units1) ->
     Function (space @ units2)
-  Constant ::
-    Vector3d (space @ units) ->
+  Parametric ::
+    Expression UvPoint (Vector3d (space @ units)) ->
     Function (space @ units)
   XYZ ::
     Surface1d.Function units ->
@@ -99,14 +99,14 @@ instance
   Units.Coercion (Function (space1 @ unitsA)) (Function (space2 @ unitsB))
   where
   coerce function = case function of
-    Constant v -> Constant (Units.coerce v)
+    Parametric expression -> Parametric (Units.coerce expression)
     Coerce f -> Coerce f
     _ -> Coerce function
 
 instance Negation (Function (space @ units)) where
   negate function = case function of
     Coerce f -> Coerce -f
-    Constant v -> Constant -v
+    Parametric expression -> Parametric -expression
     XYZ x y z -> XYZ -x -y -z
     Negated f -> f
     Difference f1 f2 -> Difference f2 f1
@@ -137,11 +137,10 @@ instance
     (Function (space_ @ units_))
     (Function (space @ units))
   where
-  f1 + Constant v | v == Vector3d.zero = f1
-  Constant v + f2 | v == Vector3d.zero = f2
-  f1 + Negated f2 = f1 - f2
-  Negated f1 + f2 = f2 - f1
-  f1 + f2 = Sum f1 f2
+  Parametric lhs + Parametric rhs = Parametric (lhs + rhs)
+  lhs + Negated rhs = lhs - rhs
+  Negated lhs + rhs = rhs - lhs
+  lhs + rhs = Sum lhs rhs
 
 instance
   ( space ~ space_
@@ -174,10 +173,9 @@ instance
     (Function (space_ @ units_))
     (Function (space @ units))
   where
-  f1 - Constant v | v == Vector3d.zero = f1
-  Constant v - f2 | v == Vector3d.zero = -f2
-  f1 - Negated f2 = f1 + f2
-  f1 - f2 = Difference f1 f2
+  Parametric lhs - Parametric rhs = Parametric (lhs - rhs)
+  lhs - Negated rhs = lhs + rhs
+  lhs - rhs = Difference lhs rhs
 
 instance
   ( space ~ space_
@@ -209,11 +207,8 @@ instance Multiplication' (Surface1d.Function units1) (Function (space @ units2))
   type
     Surface1d.Function units1 .*. Function (space @ units2) =
       Function (space @ (units1 :*: units2))
-  Surface1d.Function.Constant x .*. _ | x == Qty.zero = zero
-  Surface1d.Function.Constant x .*. f2 | x == Units.coerce 1.0 = Units.coerce f2
-  Surface1d.Function.Constant x .*. f2 | x == Units.coerce -1.0 = Units.coerce -f2
-  _ .*. Constant v | v == Vector3d.zero = zero
-  f1 .*. f2 = Product1d3d' f1 f2
+  Surface1d.Function.Parametric lhs .*. Parametric rhs = Parametric (lhs .*. rhs)
+  lhs .*. rhs = Product1d3d' lhs rhs
 
 instance
   Units.Product units1 units2 units3 =>
@@ -241,11 +236,8 @@ instance Multiplication' (Function (space @ units1)) (Surface1d.Function units2)
   type
     Function (space @ units1) .*. Surface1d.Function units2 =
       Function (space @ (units1 :*: units2))
-  Constant v .*. _ | v == Vector3d.zero = zero
-  _ .*. Surface1d.Function.Constant x | x == Qty.zero = zero
-  f1 .*. Surface1d.Function.Constant x | x == Units.coerce 1.0 = Units.coerce f1
-  f1 .*. Surface1d.Function.Constant x | x == Units.coerce -1.0 = Units.coerce -f1
-  f1 .*. f2 = Product3d1d' f1 f2
+  Parametric lhs .*. Surface1d.Function.Parametric rhs = Parametric (lhs .*. rhs)
+  lhs .*. rhs = Product3d1d' lhs rhs
 
 instance
   Units.Product units1 units2 units3 =>
@@ -273,9 +265,8 @@ instance Division' (Function (space @ units1)) (Surface1d.Function units2) where
   type
     Function (space @ units1) ./. Surface1d.Function units2 =
       Function (space @ (units1 :/: units2))
-  Constant v ./. _ | v == Vector3d.zero = zero
-  f1 ./. Surface1d.Function.Constant x = (1 ./. x) .*^ f1
-  f1 ./. f2 = Quotient' f1 f2
+  Parametric lhs ./. Surface1d.Function.Parametric rhs = Parametric (lhs ./. rhs)
+  lhs ./. rhs = Quotient' lhs rhs
 
 instance
   Units.Quotient units1 units2 units3 =>
@@ -319,9 +310,8 @@ instance
   type
     Function (space @ units1) .><. Function (space_ @ units2) =
       Function (space @ (units1 :*: units2))
-  Constant v .><. _ | v == Vector3d.zero = zero
-  _ .><. Constant v | v == Vector3d.zero = zero
-  f1 .><. f2 = CrossProduct' f1 f2
+  Parametric lhs .><. Parametric rhs = Parametric (lhs .><. rhs)
+  lhs .><. rhs = CrossProduct' lhs rhs
 
 instance
   (Units.Product units1 units2 units3, space ~ space_) =>
@@ -361,8 +351,12 @@ data DotProduct' space units1 units2
 deriving instance Show (DotProduct' space units1 units2)
 
 instance Surface1d.Function.Interface (DotProduct' space units1 units2) (units1 :*: units2) where
-  evaluateImpl (DotProduct' f1 f2) t = evaluate f1 t .<>. evaluate f2 t
-  evaluateBoundsImpl (DotProduct' f1 f2) t = bounds f1 t .<>. bounds f2 t
+  evaluateImpl (DotProduct' f1 f2) tValue =
+    evaluate f1 tValue .<>. evaluate f2 tValue
+
+  evaluateBoundsImpl (DotProduct' f1 f2) tRange =
+    evaluateBounds f1 tRange .<>. evaluateBounds f2 tRange
+
   derivativeImpl parameter (DotProduct' f1 f2) =
     derivative parameter f1 .<>. f2 + f1 .<>. derivative parameter f2
 
@@ -380,9 +374,8 @@ instance
   type
     Function (space @ units1) .<>. Function (space_ @ units2) =
       Surface1d.Function (units1 :*: units2)
-  Constant v .<>. _ | v == Vector3d.zero = Surface1d.Function.zero
-  _ .<>. Constant v | v == Vector3d.zero = Surface1d.Function.zero
-  f1 .<>. f2 = Surface1d.Function.new (DotProduct' f1 f2)
+  Parametric lhs .<>. Parametric rhs = Surface1d.Function.Parametric (lhs .<>. rhs)
+  lhs .<>. rhs = Surface1d.Function.new (DotProduct' lhs rhs)
 
 instance
   (Units.Product units1 units2 units3, space ~ space_) =>
@@ -438,30 +431,22 @@ instance
   type Direction3d space .<>. Function (space_ @ units) = Surface1d.Function (Unitless :*: units)
   direction .<>. function = Vector3d.unit direction .<>. function
 
-data SurfaceCurveComposition (coordinateSystem :: CoordinateSystem) where
-  SurfaceCurveComposition ::
-    Surface1d.Function Unitless ->
-    VectorCurve3d (space @ units) ->
-    SurfaceCurveComposition (space @ units)
-
-deriving instance Show (SurfaceCurveComposition coordinateSystem)
-
 instance
   Composition
     (Surface1d.Function Unitless)
     (VectorCurve3d (space @ units))
     (Function (space @ units))
   where
-  curve . function = new (SurfaceCurveComposition function curve)
+  curve . function = new (curve :.: function)
 
-instance Interface (SurfaceCurveComposition (space @ units)) (space @ units) where
-  evaluateImpl (SurfaceCurveComposition function curve) uv =
-    VectorCurve3d.evaluateAt (Surface1d.Function.evaluate function uv) curve
+instance Interface (VectorCurve3d (space @ units) :.: Surface1d.Function Unitless) (space @ units) where
+  evaluateImpl (curve :.: function) uvPoint =
+    VectorCurve3d.evaluate curve (Surface1d.Function.evaluate function uvPoint)
 
-  boundsImpl (SurfaceCurveComposition function curve) uv =
-    VectorCurve3d.segmentBounds (Surface1d.Function.evaluateBounds function uv) curve
+  evaluateBoundsImpl (curve :.: function) uvBounds =
+    VectorCurve3d.evaluateBounds curve (Surface1d.Function.evaluateBounds function uvBounds)
 
-  derivativeImpl parameter (SurfaceCurveComposition function curve) =
+  derivativeImpl parameter (curve :.: function) =
     (VectorCurve3d.derivative curve . function) * Surface1d.Function.derivative parameter function
 
 new :: Interface function (space @ units) => function -> Function (space @ units)
@@ -471,7 +456,7 @@ zero :: Function (space @ units)
 zero = constant Vector3d.zero
 
 constant :: Vector3d (space @ units) -> Function (space @ units)
-constant = Constant
+constant = Parametric . Expression.constant
 
 xyz ::
   Surface1d.Function units ->
@@ -481,46 +466,46 @@ xyz ::
 xyz = XYZ
 
 evaluate :: Function (space @ units) -> UvPoint -> Vector3d (space @ units)
-evaluate function uv = case function of
-  Function f -> evaluateImpl f uv
-  Coerce f -> Units.coerce (evaluate f uv)
-  Constant v -> v
+evaluate function uvPoint = case function of
+  Function f -> evaluateImpl f uvPoint
+  Coerce f -> Units.coerce (evaluate f uvPoint)
+  Parametric expression -> Expression.evaluate expression uvPoint
   XYZ x y z ->
     Vector3d.xyz
-      (Surface1d.Function.evaluate x uv)
-      (Surface1d.Function.evaluate y uv)
-      (Surface1d.Function.evaluate z uv)
-  Negated f -> negate (evaluate f uv)
-  Sum f1 f2 -> evaluate f1 uv + evaluate f2 uv
-  Difference f1 f2 -> evaluate f1 uv - evaluate f2 uv
-  Product1d3d' f1 f2 -> Surface1d.Function.evaluate f1 uv .*. evaluate f2 uv
-  Product3d1d' f1 f2 -> evaluate f1 uv .*. Surface1d.Function.evaluate f2 uv
-  Quotient' f1 f2 -> evaluate f1 uv ./. Surface1d.Function.evaluate f2 uv
-  CrossProduct' f1 f2 -> evaluate f1 uv .><. evaluate f2 uv
+      (Surface1d.Function.evaluate x uvPoint)
+      (Surface1d.Function.evaluate y uvPoint)
+      (Surface1d.Function.evaluate z uvPoint)
+  Negated f -> negate (evaluate f uvPoint)
+  Sum f1 f2 -> evaluate f1 uvPoint + evaluate f2 uvPoint
+  Difference f1 f2 -> evaluate f1 uvPoint - evaluate f2 uvPoint
+  Product1d3d' f1 f2 -> Surface1d.Function.evaluate f1 uvPoint .*. evaluate f2 uvPoint
+  Product3d1d' f1 f2 -> evaluate f1 uvPoint .*. Surface1d.Function.evaluate f2 uvPoint
+  Quotient' f1 f2 -> evaluate f1 uvPoint ./. Surface1d.Function.evaluate f2 uvPoint
+  CrossProduct' f1 f2 -> evaluate f1 uvPoint .><. evaluate f2 uvPoint
 
-bounds :: Function (space @ units) -> UvBounds -> VectorBounds3d (space @ units)
-bounds function uv = case function of
-  Function f -> boundsImpl f uv
-  Coerce f -> Units.coerce (bounds f uv)
-  Constant v -> VectorBounds3d.constant v
+evaluateBounds :: Function (space @ units) -> UvBounds -> VectorBounds3d (space @ units)
+evaluateBounds function uvBounds = case function of
+  Function f -> evaluateBoundsImpl f uvBounds
+  Coerce f -> Units.coerce (evaluateBounds f uvBounds)
+  Parametric expression -> Expression.evaluateBounds expression uvBounds
   XYZ x y z ->
     VectorBounds3d.xyz
-      (Surface1d.Function.evaluateBounds x uv)
-      (Surface1d.Function.evaluateBounds y uv)
-      (Surface1d.Function.evaluateBounds z uv)
-  Negated f -> negate (bounds f uv)
-  Sum f1 f2 -> bounds f1 uv + bounds f2 uv
-  Difference f1 f2 -> bounds f1 uv - bounds f2 uv
-  Product1d3d' f1 f2 -> Surface1d.Function.evaluateBounds f1 uv .*. bounds f2 uv
-  Product3d1d' f1 f2 -> bounds f1 uv .*. Surface1d.Function.evaluateBounds f2 uv
-  Quotient' f1 f2 -> bounds f1 uv ./. Surface1d.Function.evaluateBounds f2 uv
-  CrossProduct' f1 f2 -> bounds f1 uv .><. bounds f2 uv
+      (Surface1d.Function.evaluateBounds x uvBounds)
+      (Surface1d.Function.evaluateBounds y uvBounds)
+      (Surface1d.Function.evaluateBounds z uvBounds)
+  Negated f -> negate (evaluateBounds f uvBounds)
+  Sum f1 f2 -> evaluateBounds f1 uvBounds + evaluateBounds f2 uvBounds
+  Difference f1 f2 -> evaluateBounds f1 uvBounds - evaluateBounds f2 uvBounds
+  Product1d3d' f1 f2 -> Surface1d.Function.evaluateBounds f1 uvBounds .*. evaluateBounds f2 uvBounds
+  Product3d1d' f1 f2 -> evaluateBounds f1 uvBounds .*. Surface1d.Function.evaluateBounds f2 uvBounds
+  Quotient' f1 f2 -> evaluateBounds f1 uvBounds ./. Surface1d.Function.evaluateBounds f2 uvBounds
+  CrossProduct' f1 f2 -> evaluateBounds f1 uvBounds .><. evaluateBounds f2 uvBounds
 
 derivative :: SurfaceParameter -> Function (space @ units) -> Function (space @ units)
 derivative parameter function = case function of
   Function f -> derivativeImpl parameter f
   Coerce f -> Coerce (derivative parameter f)
-  Constant _ -> zero
+  Parametric expression -> Parametric (Expression.surfaceDerivative parameter expression)
   XYZ x y z ->
     XYZ
       (Surface1d.Function.derivative parameter x)
