@@ -143,6 +143,7 @@ library
     Direction2d
     Direction3d
     DirectionBounds2d
+    DirectionBounds3d
     DirectionCurve2d
     Domain1d
     Domain2d
