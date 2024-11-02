@@ -818,6 +818,8 @@ placeInBasis ::
   Basis2d global (Defines local) ->
   VectorCurve2d (local @ units) ->
   VectorCurve2d (global @ units)
+placeInBasis globalBasis (Parametric expression) =
+  Parametric (Expression.VectorCurve2d.placeInBasis globalBasis expression)
 placeInBasis globalBasis (PlaceInBasis basis curve) =
   PlaceInBasis (Basis2d.placeInBasis globalBasis basis) curve
 placeInBasis globalBasis curve =
