@@ -44,13 +44,12 @@ import Float qualified
 import {-# SOURCE #-} Frame2d (Frame2d)
 import {-# SOURCE #-} Frame2d qualified
 import OpenSolid
-import Qty (Qty (Qty#))
 import Qty qualified
 import Range (Range (Range))
 import Range qualified
 import Transform2d (Transform2d (Transform2d))
 import Units qualified
-import Vector2d (Vector2d (Vector2d#))
+import Vector2d (Vector2d (Vector2d))
 import Vector2d qualified
 
 type role VectorBounds2d phantom
@@ -109,7 +108,7 @@ instance
     (Vector2d (space_ @ units_))
     (VectorBounds2d (space @ units))
   where
-  VectorBounds2d x1 y1 + Vector2d# x2 y2 = VectorBounds2d (x1 + Qty# x2) (y1 + Qty# y2)
+  VectorBounds2d x1 y1 + Vector2d x2 y2 = VectorBounds2d (x1 + x2) (y1 + y2)
 
 instance
   ( space ~ space_
@@ -120,7 +119,7 @@ instance
     (VectorBounds2d (space_ @ units_))
     (VectorBounds2d (space @ units))
   where
-  Vector2d# x1 y1 + VectorBounds2d x2 y2 = VectorBounds2d (Qty# x1 + x2) (Qty# y1 + y2)
+  Vector2d x1 y1 + VectorBounds2d x2 y2 = VectorBounds2d (x1 + x2) (y1 + y2)
 
 instance
   ( space ~ space_
@@ -142,7 +141,7 @@ instance
     (Vector2d (space_ @ units_))
     (VectorBounds2d (space @ units))
   where
-  VectorBounds2d x1 y1 - Vector2d# x2 y2 = VectorBounds2d (x1 - Qty# x2) (y1 - Qty# y2)
+  VectorBounds2d x1 y1 - Vector2d x2 y2 = VectorBounds2d (x1 - x2) (y1 - y2)
 
 instance
   ( space ~ space_
@@ -153,7 +152,7 @@ instance
     (VectorBounds2d (space_ @ units_))
     (VectorBounds2d (space @ units))
   where
-  Vector2d# x1 y1 - VectorBounds2d x2 y2 = VectorBounds2d (Qty# x1 - x2) (Qty# y1 - y2)
+  Vector2d x1 y1 - VectorBounds2d x2 y2 = VectorBounds2d (x1 - x2) (y1 - y2)
 
 instance Multiplication' (Qty units1) (VectorBounds2d (space @ units2)) where
   type Qty units1 .*. VectorBounds2d (space @ units2) = VectorBounds2d (space @ (units1 :*: units2))
@@ -185,7 +184,7 @@ instance Multiplication (VectorBounds2d (space @ units)) Int (VectorBounds2d (sp
 
 instance Multiplication' (Range units1) (Vector2d (space @ units2)) where
   type Range units1 .*. Vector2d (space @ units2) = VectorBounds2d (space @ (units1 :*: units2))
-  range .*. Vector2d# x y = VectorBounds2d (range .*. Qty# x) (range .*. Qty# y)
+  range .*. Vector2d x y = VectorBounds2d (range .*. x) (range .*. y)
 
 instance
   Units.Product units1 units2 units3 =>
@@ -193,7 +192,7 @@ instance
 
 instance Multiplication' (Vector2d (space @ units1)) (Range units2) where
   type Vector2d (space @ units1) .*. Range units2 = VectorBounds2d (space @ (units1 :*: units2))
-  Vector2d# x y .*. range = VectorBounds2d (Qty# x .*. range) (Qty# y .*. range)
+  Vector2d x y .*. range = VectorBounds2d (x .*. range) (y .*. range)
 
 instance
   Units.Product units1 units2 units3 =>
@@ -246,7 +245,7 @@ instance
   DotMultiplication' (Vector2d (space @ units1)) (VectorBounds2d (space_ @ units2))
   where
   type Vector2d (space @ units1) .<>. VectorBounds2d (space_ @ units2) = Range (units1 :*: units2)
-  Vector2d# x1 y1 .<>. VectorBounds2d x2 y2 = Qty# x1 .*. x2 + Qty# y1 .*. y2
+  Vector2d x1 y1 .<>. VectorBounds2d x2 y2 = x1 .*. x2 + y1 .*. y2
 
 instance
   (Units.Product units1 units2 units3, space ~ space_) =>
@@ -257,7 +256,7 @@ instance
   DotMultiplication' (VectorBounds2d (space @ units1)) (Vector2d (space_ @ units2))
   where
   type VectorBounds2d (space @ units1) .<>. Vector2d (space_ @ units2) = Range (units1 :*: units2)
-  VectorBounds2d x1 y1 .<>. Vector2d# x2 y2 = x1 .*. Qty# x2 + y1 .*. Qty# y2
+  VectorBounds2d x1 y1 .<>. Vector2d x2 y2 = x1 .*. x2 + y1 .*. y2
 
 instance
   space ~ space_ =>
@@ -301,7 +300,7 @@ instance
   CrossMultiplication' (Vector2d (space @ units1)) (VectorBounds2d (space_ @ units2))
   where
   type Vector2d (space @ units1) .><. VectorBounds2d (space_ @ units2) = Range (units1 :*: units2)
-  Vector2d# x1 y1 .><. VectorBounds2d x2 y2 = Qty# x1 .*. y2 - Qty# y1 .*. x2
+  Vector2d x1 y1 .><. VectorBounds2d x2 y2 = x1 .*. y2 - y1 .*. x2
 
 instance
   (Units.Product units1 units2 units3, space ~ space_) =>
@@ -312,7 +311,7 @@ instance
   CrossMultiplication' (VectorBounds2d (space @ units1)) (Vector2d (space_ @ units2))
   where
   type VectorBounds2d (space @ units1) .><. Vector2d (space_ @ units2) = Range (units1 :*: units2)
-  VectorBounds2d x1 y1 .><. Vector2d# x2 y2 = x1 .*. Qty# y2 - y1 .*. Qty# x2
+  VectorBounds2d x1 y1 .><. Vector2d x2 y2 = x1 .*. y2 - y1 .*. x2
 
 instance space ~ space_ => CrossMultiplication (Direction2d space) (VectorBounds2d (space_ @ units)) (Range units)
 
@@ -344,24 +343,25 @@ instance
   VectorBounds2d x1 y1 .><. VectorBounds2d x2 y2 = x1 .*. y2 - y1 .*. x2
 
 constant :: Vector2d (space @ units) -> VectorBounds2d (space @ units)
-constant (Vector2d# x y) = VectorBounds2d (Range.constant (Qty# x)) (Range.constant (Qty# y))
+constant (Vector2d x y) = VectorBounds2d (Range.constant x) (Range.constant y)
 
 xy :: Range units -> Range units -> VectorBounds2d (space @ units)
 xy = VectorBounds2d
 
 hull2 :: Vector2d (space @ units) -> Vector2d (space @ units) -> VectorBounds2d (space @ units)
-hull2 (Vector2d# x1 y1) (Vector2d# x2 y2) = VectorBounds2d (Range.from (Qty# x1) (Qty# x2)) (Range.from (Qty# y1) (Qty# y2))
+hull2 (Vector2d x1 y1) (Vector2d x2 y2) =
+  VectorBounds2d (Range.from x1 x2) (Range.from y1 y2)
 
 hull3 ::
   Vector2d (space @ units) ->
   Vector2d (space @ units) ->
   Vector2d (space @ units) ->
   VectorBounds2d (space @ units)
-hull3 (Vector2d# x1 y1) (Vector2d# x2 y2) (Vector2d# x3 y3) = do
-  let minX = Qty.min (Qty.min (Qty# x1) (Qty# x2)) (Qty# x3)
-  let maxX = Qty.max (Qty.max (Qty# x1) (Qty# x2)) (Qty# x3)
-  let minY = Qty.min (Qty.min (Qty# y1) (Qty# y2)) (Qty# y3)
-  let maxY = Qty.max (Qty.max (Qty# y1) (Qty# y2)) (Qty# y3)
+hull3 (Vector2d x1 y1) (Vector2d x2 y2) (Vector2d x3 y3) = do
+  let minX = Qty.min (Qty.min x1 x2) x3
+  let maxX = Qty.max (Qty.max x1 x2) x3
+  let minY = Qty.min (Qty.min y1 y2) y3
+  let maxY = Qty.max (Qty.max y1 y2) y3
   VectorBounds2d (Range.unsafe minX maxX) (Range.unsafe minY maxY)
 
 hull4 ::
@@ -370,20 +370,20 @@ hull4 ::
   Vector2d (space @ units) ->
   Vector2d (space @ units) ->
   VectorBounds2d (space @ units)
-hull4 (Vector2d# x1 y1) (Vector2d# x2 y2) (Vector2d# x3 y3) (Vector2d# x4 y4) = do
-  let minX = Qty.min (Qty.min (Qty.min (Qty# x1) (Qty# x2)) (Qty# x3)) (Qty# x4)
-  let maxX = Qty.max (Qty.max (Qty.max (Qty# x1) (Qty# x2)) (Qty# x3)) (Qty# x4)
-  let minY = Qty.min (Qty.min (Qty.min (Qty# y1) (Qty# y2)) (Qty# y3)) (Qty# y4)
-  let maxY = Qty.max (Qty.max (Qty.max (Qty# y1) (Qty# y2)) (Qty# y3)) (Qty# y4)
+hull4 (Vector2d x1 y1) (Vector2d x2 y2) (Vector2d x3 y3) (Vector2d x4 y4) = do
+  let minX = Qty.min (Qty.min (Qty.min x1 x2) x3) x4
+  let maxX = Qty.max (Qty.max (Qty.max x1 x2) x3) x4
+  let minY = Qty.min (Qty.min (Qty.min y1 y2) y3) y4
+  let maxY = Qty.max (Qty.max (Qty.max y1 y2) y3) y4
   VectorBounds2d (Range.unsafe minX maxX) (Range.unsafe minY maxY)
 
 hullN :: NonEmpty (Vector2d (space @ units)) -> VectorBounds2d (space @ units)
-hullN (Vector2d# x0 y0 :| rest) = go (Qty# x0) (Qty# x0) (Qty# y0) (Qty# y0) rest
+hullN (Vector2d x0 y0 :| rest) = go x0 x0 y0 y0 rest
  where
   go :: Qty units -> Qty units -> Qty units -> Qty units -> List (Vector2d (space @ units)) -> VectorBounds2d (space @ units)
   go xLow xHigh yLow yHigh [] = VectorBounds2d (Range.unsafe xLow xHigh) (Range.unsafe yLow yHigh)
-  go xLow xHigh yLow yHigh (Vector2d# x y : remaining) =
-    go (Qty.min xLow (Qty# x)) (Qty.max xHigh (Qty# x)) (Qty.min yLow (Qty# y)) (Qty.max yHigh (Qty# y)) remaining
+  go xLow xHigh yLow yHigh (Vector2d x y : remaining) =
+    go (Qty.min xLow x) (Qty.max xHigh x) (Qty.min yLow y) (Qty.max yHigh y) remaining
 
 aggregate2 ::
   VectorBounds2d (space @ units) ->
@@ -450,7 +450,7 @@ clampNormalized (Range low high) =
     (Qty.clamp -1.0 1.0 high)
 
 includes :: Vector2d (space @ units) -> VectorBounds2d (space @ units) -> Bool
-includes (Vector2d# vx vy) (VectorBounds2d x y) = Range.includes (Qty# vx) x && Range.includes (Qty# vy) y
+includes (Vector2d vx vy) (VectorBounds2d x y) = Range.includes vx x && Range.includes vy y
 
 contains :: VectorBounds2d (space @ units) -> VectorBounds2d (space @ units) -> Bool
 contains (VectorBounds2d x2 y2) (VectorBounds2d x1 y1) =
@@ -484,28 +484,28 @@ placeInBasis basis (VectorBounds2d x y) = do
   let yMid = Range.midpoint y
   let xWidth = Range.width x
   let yWidth = Range.width y
-  let !(Vector2d# x0 y0) = Vector2d.xyInBasis basis xMid yMid
+  let Vector2d x0 y0 = Vector2d.xyInBasis basis xMid yMid
   let (ix, iy) = Direction2d.components (Basis2d.xDirection basis)
   let (jx, jy) = Direction2d.components (Basis2d.yDirection basis)
   let rx = 0.5 * xWidth * Float.abs ix + 0.5 * yWidth * Float.abs jx
   let ry = 0.5 * xWidth * Float.abs iy + 0.5 * yWidth * Float.abs jy
-  VectorBounds2d (Range.from (Qty# x0 - rx) (Qty# x0 + rx)) (Range.from (Qty# y0 - ry) (Qty# y0 + ry))
+  VectorBounds2d (Range.from (x0 - rx) (x0 + rx)) (Range.from (y0 - ry) (y0 + ry))
 
 relativeToBasis ::
   Basis2d global (Defines local) ->
   VectorBounds2d (global @ units) ->
   VectorBounds2d (local @ units)
 relativeToBasis basis (VectorBounds2d x y) = do
-  let !(Qty# xMid) = Range.midpoint x
-  let !(Qty# yMid) = Range.midpoint y
+  let xMid = Range.midpoint x
+  let yMid = Range.midpoint y
   let xWidth = Range.width x
   let yWidth = Range.width y
-  let !(Vector2d# x0 y0) = Vector2d.relativeToBasis basis (Vector2d# xMid yMid)
+  let Vector2d x0 y0 = Vector2d.relativeToBasis basis (Vector2d xMid yMid)
   let (ix, iy) = Direction2d.components (Basis2d.xDirection basis)
   let (jx, jy) = Direction2d.components (Basis2d.yDirection basis)
   let rx = 0.5 * xWidth * Float.abs ix + 0.5 * yWidth * Float.abs iy
   let ry = 0.5 * xWidth * Float.abs jx + 0.5 * yWidth * Float.abs jy
-  VectorBounds2d (Range.from (Qty# x0 - rx) (Qty# x0 + rx)) (Range.from (Qty# y0 - ry) (Qty# y0 + ry))
+  VectorBounds2d (Range.from (x0 - rx) (x0 + rx)) (Range.from (y0 - ry) (y0 + ry))
 
 transformBy ::
   Transform2d tag (space @ units1) ->
