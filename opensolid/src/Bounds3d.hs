@@ -1,5 +1,5 @@
 module Bounds3d
-  ( Bounds3d
+  ( Bounds3d (Bounds3d)
   , xRange
   , yRange
   , zRange
