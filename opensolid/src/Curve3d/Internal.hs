@@ -1,6 +1,3 @@
--- Avoid errors when running Fourmolu
-{-# LANGUAGE GHC2021 #-}
-
 module Curve3d.Internal
   ( Curve3d (..)
   , Interface (..)
