@@ -99,8 +99,6 @@ custom-setup
 library
   import: config
   exposed-modules:
-    -- Surface3d
-    -- Surface3d.Function
     Angle
     Arc2d
     Area
@@ -206,6 +204,8 @@ library
     Surface1d.Function.Zeros
     Surface2d
     Surface2d.Function
+    Surface3d
+    Surface3d.Function
     SurfaceParameter
     Text
     Tolerance

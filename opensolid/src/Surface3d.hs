@@ -1,7 +1,7 @@
 module Surface3d
   ( Surface3d
   , Function
-  , parametric
+  , new
   , function
   )
 where
@@ -11,10 +11,10 @@ import Surface3d.Function (Function)
 import SurfaceParameter (UvCoordinates)
 
 data Surface3d units where
-  Parametric :: Function units -> Region2d UvCoordinates -> Surface3d units
+  Surface3d :: Function units -> Region2d UvCoordinates -> Surface3d units
 
-parametric :: Function units -> Region2d UvCoordinates -> Surface3d units
-parametric = Parametric
+new :: Function units -> Region2d UvCoordinates -> Surface3d units
+new = Surface3d
 
 function :: Surface3d units -> Function units
-function (Parametric f _) = f
+function (Surface3d f _) = f
