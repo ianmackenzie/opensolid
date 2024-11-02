@@ -104,7 +104,6 @@ library
     -- QuadraticSpline3d
     -- Surface3d
     -- Surface3d.Function
-    -- VectorCurve3d
     -- VectorSurface3d
     -- VectorSurface3d.Function
     Angle
@@ -145,6 +144,7 @@ library
     DirectionBounds2d
     DirectionBounds3d
     DirectionCurve2d
+    DirectionCurve3d
     Domain1d
     Domain2d
     Drawing2d
@@ -155,6 +155,7 @@ library
     Expression.Curve2d
     Expression.Surface2d
     Expression.VectorCurve2d
+    Expression.VectorCurve3d
     Expression.VectorSurface2d
     File
     Float
@@ -225,6 +226,10 @@ library
     VectorCurve2d.DegenerateEndpoint
     VectorCurve2d.Direction
     VectorCurve2d.Zeros
+    VectorCurve3d
+    VectorCurve3d.DegenerateEndpoint
+    VectorCurve3d.Direction
+    VectorCurve3d.Zeros
     VectorSurface2d
     VectorSurface2d.Function
     VectorVolume3d.Function
