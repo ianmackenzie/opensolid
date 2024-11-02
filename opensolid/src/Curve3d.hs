@@ -2,7 +2,7 @@
 {-# LANGUAGE GHC2021 #-}
 
 module Curve3d
-  ( Curve3d
+  ( Curve3d (Parametric)
   , Interface (..)
   , DegenerateCurve (DegenerateCurve)
   , new
@@ -18,7 +18,7 @@ module Curve3d
 where
 
 import Bounds3d (Bounds3d)
-import Curve3d.Internal (Interface (..))
+import Curve3d.Internal (Curve3d (Parametric), Interface (..))
 import Curve3d.Internal qualified as Internal
 import Error qualified
 import Expression qualified
@@ -26,8 +26,6 @@ import OpenSolid
 import Point3d (Point3d)
 import Range (Range)
 import VectorCurve3d (VectorCurve3d)
-
-type Curve3d (coordinateSystem :: CoordinateSystem) = Internal.Curve3d coordinateSystem
 
 data DegenerateCurve = DegenerateCurve deriving (Eq, Show, Error.Message)
 

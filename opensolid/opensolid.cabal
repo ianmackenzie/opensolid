@@ -99,7 +99,6 @@ custom-setup
 library
   import: config
   exposed-modules:
-    -- Line3d
     -- QuadraticSpline3d
     -- Surface3d
     -- Surface3d.Function
@@ -171,6 +170,7 @@ library
     Json.Schema
     Length
     Line2d
+    Line3d
     List
     Map
     Maybe
