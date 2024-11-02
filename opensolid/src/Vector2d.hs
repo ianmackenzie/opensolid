@@ -79,7 +79,9 @@ data Vector2d (coordinateSystem :: CoordinateSystem) = Vector2d# Double# Double#
 
 {-# INLINE Vector2d #-}
 pattern Vector2d :: Qty units -> Qty units -> Vector2d (space @ units)
-pattern Vector2d px py <- (components# -> (# px, py #)) where Vector2d = xy
+pattern Vector2d vx vy <- (components# -> (# vx, vy #))
+  where
+    Vector2d (Qty# vx#) (Qty# vy#) = Vector2d# vx# vy#
 
 deriving instance Eq (Vector2d (space @ units))
 
@@ -264,7 +266,7 @@ y :: Qty units -> Vector2d (space @ units)
 y (Qty# vy#) = Vector2d# 0.0## vy#
 
 xy :: Qty units -> Qty units -> Vector2d (space @ units)
-xy (Qty# vx) (Qty# vy) = Vector2d# vx vy
+xy = Vector2d
 
 xyIn :: Frame2d (space @ originUnits) defines -> Qty units -> Qty units -> Vector2d (space @ units)
 xyIn frame = xyInBasis (Frame2d.basis frame)
