@@ -9,8 +9,8 @@ module Curve3d
   , constant
   , startPoint
   , endPoint
-  , pointOn
-  , segmentBounds
+  , evaluate
+  , evaluateBounds
   , derivative
   , reverse
   , bounds
@@ -21,6 +21,7 @@ import Bounds3d (Bounds3d)
 import Curve3d.Internal (Interface (..))
 import Curve3d.Internal qualified as Internal
 import Error qualified
+import Expression qualified
 import OpenSolid
 import Point3d (Point3d)
 import Range (Range)
@@ -34,7 +35,7 @@ new :: Interface curve (space @ units) => curve -> Curve3d (space @ units)
 new = Internal.Curve
 
 constant :: Point3d (space @ units) -> Curve3d (space @ units)
-constant = Internal.Constant
+constant = Internal.Parametric . Expression.constant
 
 startPoint :: Curve3d (space @ units) -> Point3d (space @ units)
 startPoint = Internal.startPoint
@@ -42,11 +43,11 @@ startPoint = Internal.startPoint
 endPoint :: Curve3d (space @ units) -> Point3d (space @ units)
 endPoint = Internal.endPoint
 
-pointOn :: Curve3d (space @ units) -> Float -> Point3d (space @ units)
-pointOn = Internal.pointOn
+evaluate :: Curve3d (space @ units) -> Float -> Point3d (space @ units)
+evaluate = Internal.evaluate
 
-segmentBounds :: Curve3d (space @ units) -> Range Unitless -> Bounds3d (space @ units)
-segmentBounds = Internal.segmentBounds
+evaluateBounds :: Curve3d (space @ units) -> Range Unitless -> Bounds3d (space @ units)
+evaluateBounds = Internal.evaluateBounds
 
 derivative :: Curve3d (space @ units) -> VectorCurve3d (space @ units)
 derivative = Internal.derivative

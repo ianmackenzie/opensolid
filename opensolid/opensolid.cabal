@@ -99,7 +99,6 @@ custom-setup
 library
   import: config
   exposed-modules:
-    -- Curve3d
     -- Line3d
     -- QuadraticSpline3d
     -- Surface3d
@@ -136,6 +135,7 @@ library
     Curve2d.Intersections
     Curve2d.MedialAxis
     Curve2d.OverlappingSegment
+    Curve3d
     Debug
     Direction2d
     Direction3d
@@ -239,10 +239,10 @@ library
     Volume1d.Function
 
   other-modules:
-    -- Curve3d.Internal
     Curve1d.Integral
     Curve2d.Derivatives
     Curve2d.Segment
+    Curve3d.Internal
     Expression.Scalar
     Json.FieldSchema
     Point2d.CoordinateTransformation
