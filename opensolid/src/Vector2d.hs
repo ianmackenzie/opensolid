@@ -400,8 +400,8 @@ transformBy ::
   Vector2d (space @ units) ->
   Vector2d (space @ units)
 transformBy transform vector = do
-  let (Transform2d _ i j) = transform
-  let (vx, vy) = components vector
+  let Transform2d _ i j = transform
+  let Vector2d vx vy = vector
   vx * i + vy * j
 
 rotateBy :: Angle -> Vector2d (space @ units) -> Vector2d (space @ units)
