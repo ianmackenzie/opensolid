@@ -278,10 +278,7 @@ from :: Point2d (space @ units) -> Point2d (space @ units) -> Vector2d (space @ 
 from p1 p2 = p2 - p1
 
 apply :: (Float -> Qty units) -> Float -> Float -> Vector2d (space @ units)
-apply units px py = do
-  let !(Qty# vx) = units px
-  let !(Qty# vy) = units py
-  Vector2d# vx vy
+apply units px py = Vector2d (units px) (units py)
 
 meters :: Float -> Float -> Vector2d (space @ Meters)
 meters = apply Length.meters
@@ -343,7 +340,7 @@ squaredMagnitude' :: Vector2d (space @ units) -> Qty (units :*: units)
 squaredMagnitude' (Vector2d# vx# vy#) = Qty# (vx# *# vx# +# vy# *# vy#)
 
 angle :: Vector2d (space @ units) -> Angle
-angle (Vector2d# vx vy) = Angle.atan2 (Qty# vy) (Qty# vx)
+angle (Vector2d vx vy) = Angle.atan2 vy vx
 
 data IsZero = IsZero deriving (Eq, Show, Error.Message)
 
