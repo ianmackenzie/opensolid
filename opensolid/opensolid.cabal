@@ -99,7 +99,6 @@ custom-setup
 library
   import: config
   exposed-modules:
-    -- QuadraticSpline3d
     -- Surface3d
     -- Surface3d.Function
     Angle
@@ -186,6 +185,7 @@ library
     Polyline2d
     Qty
     QuadraticSpline2d
+    QuadraticSpline3d
     Queue
     Random
     Random.Internal
