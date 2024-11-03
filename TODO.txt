@@ -1,45 +1,29 @@
+Add VectorSurface2d.Function.zeros for generic 2-equations-2-unknowns solving
+-> then can remove Range.find2
+
+Implement 1D monotonic solving in Rust
+
+Specialize xComponent etc. for Parametric cases
+
+Remove Int multiplication typeclass instances?
+
 Move language extensions into actual source files?
 -> maybe wait until GHC 9.10 is available with GHC2024, to avoid needing e.g. GADTs everywhere?
 -> will still need NoImplicitPrelude, RebindableSyntax, LexicalNegation, StrictData in most files...
 -> maybe go extension-by-extension, starting with less common or more dangerous ones?
-
-Add VectorSurface2d.Function.zeros for generic 2-equations-2-unknowns solving
+  -> plus ones that Fourmolu needs to know about explicitly...
 
 Move primitives to Primitives.hs
-
-Switch all curves and surfaces to use pointOn instead of evaluateAt
--> or 'value' and 'bounds' and 'segmentBounds'?
--> 'evaluate', 'bounds', 'evaluateBounds'
 
 Use space1 ~ space2 instead of space ~ space_ everywhere
 
 Refactor Estimate to return an error if convergence fails/stalls
 
-Remove Range.find2
-
-Add 'Plus' and 'Times' variants to Expression type in Rust and use them from Haskell
-
-Implement 1D monotonic solving in Rust
 
 Specialize Multiplication for primitive types, for performance
 -> avoid units coercion and extra typeclass lookup
 
-Support piecewise expressions
--> just support splitting at a single parameter value? can use recursively...
-
-Add Direction#d expressions
-
-Implement 3D product, dot product, cross product for Expression
-
-Replace Symbolic type with Expression?
-
 Optimizations to try:
 - cache expressions on Rust side (per thread?)
-- optimize away 'c1 * (c2 * expr)' and similar
-  - might need to do canonicalization on Haskell side to ensure constants are always first...
-- have callback for Rust code to create (e.g.) a 'StablePtr (Point2d (space @ units))',
-  and call that instead of allocating temporary memory from Haskell
 - refactor JIT code to directly generate 'primop' style code directly callable from Haskell
-
-Check generated Haddock JSON to ensure there are no missing arithmetic typeclass instances?
--> might not be necessary, Python bindings generation should find any missing instances
+- add CMM wrappers around C functions so they can be directly used as primops
