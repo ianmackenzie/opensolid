@@ -26,6 +26,7 @@ import OpenSolid
 import Transform3d (Transform3d (Transform3d))
 import Units qualified
 import Vector3d (Vector3d)
+import Vector3d qualified
 
 constant :: Vector3d (space @ units) -> Expression Float (Vector3d (space @ units))
 constant = Expression.constant
@@ -86,24 +87,32 @@ placeInBasis ::
   Basis3d global (Defines local) ->
   Expression Float (Vector3d (local @ units)) ->
   Expression Float (Vector3d (global @ units))
-placeInBasis basis expression =
-  xComponent expression * Basis3d.xDirection basis
-    + yComponent expression * Basis3d.yDirection basis
-    + zComponent expression * Basis3d.zDirection basis
+placeInBasis basis expression = do
+  let i = Vector3d.unit (Basis3d.xDirection basis)
+  let j = Vector3d.unit (Basis3d.yDirection basis)
+  let k = Vector3d.unit (Basis3d.zDirection basis)
+  xComponent expression * constant i
+    + yComponent expression * constant j
+    + zComponent expression * constant k
 
 relativeToBasis ::
   Basis3d global (Defines local) ->
   Expression Float (Vector3d (global @ units)) ->
   Expression Float (Vector3d (local @ units))
-relativeToBasis basis expression =
+relativeToBasis basis expression = do
+  let i = Vector3d.unit (Basis3d.xDirection basis)
+  let j = Vector3d.unit (Basis3d.yDirection basis)
+  let k = Vector3d.unit (Basis3d.zDirection basis)
   xyz
-    (expression <> Basis3d.xDirection basis)
-    (expression <> Basis3d.yDirection basis)
-    (expression <> Basis3d.zDirection basis)
+    (expression <> constant i)
+    (expression <> constant j)
+    (expression <> constant k)
 
 transformBy ::
   Transform3d a (space @ translationUnits) ->
   Expression Float (Vector3d (space @ units)) ->
   Expression Float (Vector3d (space @ units))
 transformBy (Transform3d _ i j k) expression =
-  xComponent expression * i + yComponent expression * j + zComponent expression * k
+  xComponent expression * constant i
+    + yComponent expression * constant j
+    + zComponent expression * constant k

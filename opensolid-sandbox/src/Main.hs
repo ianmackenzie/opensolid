@@ -25,6 +25,7 @@ import Duration (Duration)
 import Duration qualified
 import Expression (Expression)
 import Expression qualified
+import Expression.Curve1d qualified
 import Float qualified
 import IO qualified
 import Int qualified
@@ -549,13 +550,13 @@ testJit :: IO ()
 testJit = IO.do
   let x = Expression.t
   let xSquared = Expression.squared x
-  let function = xSquared / (xSquared + 1.0)
+  let function = xSquared / (xSquared + Expression.Curve1d.constant 1.0)
   log "JIT evaluated" (Expression.evaluate function 2.0)
   log "JIT bounds" (Expression.evaluateBounds function (Range.from 1.0 3.0))
 
 testJitCurve2d :: IO ()
 testJitCurve2d = IO.do
-  let x = 10.0 * Expression.t
+  let x = Expression.Curve1d.constant 10.0 * Expression.t
   let y = Expression.sqrt Expression.t
   let curve = Expression.xy x y :: Expression Float (Point2d (Global @ Unitless))
   log "Evaluated 2D curve" (Expression.evaluate curve 3.0)

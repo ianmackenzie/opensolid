@@ -26,6 +26,7 @@ import SurfaceParameter (UvPoint)
 import Transform2d (Transform2d (Transform2d))
 import Units qualified
 import Vector2d (Vector2d)
+import Vector2d qualified
 
 constant :: Vector2d (space @ units) -> Expression UvPoint (Vector2d (space @ units))
 constant = Expression.constant
@@ -80,18 +81,23 @@ placeInBasis ::
   Basis2d global (Defines local) ->
   Expression UvPoint (Vector2d (local @ units)) ->
   Expression UvPoint (Vector2d (global @ units))
-placeInBasis basis vector =
-  xComponent vector * Basis2d.xDirection basis + yComponent vector * Basis2d.yDirection basis
+placeInBasis basis expression = do
+  let i = Vector2d.unit (Basis2d.xDirection basis)
+  let j = Vector2d.unit (Basis2d.yDirection basis)
+  xComponent expression * constant i + yComponent expression * constant j
 
 relativeToBasis ::
   Basis2d global (Defines local) ->
   Expression UvPoint (Vector2d (global @ units)) ->
   Expression UvPoint (Vector2d (local @ units))
-relativeToBasis basis vector =
-  xy (vector <> Basis2d.xDirection basis) (vector <> Basis2d.yDirection basis)
+relativeToBasis basis expression = do
+  let i = Vector2d.unit (Basis2d.xDirection basis)
+  let j = Vector2d.unit (Basis2d.yDirection basis)
+  xy (expression <> constant i) (expression <> constant j)
 
 transformBy ::
   Transform2d a (space @ translationUnits) ->
   Expression UvPoint (Vector2d (space @ units)) ->
   Expression UvPoint (Vector2d (space @ units))
-transformBy (Transform2d _ i j) vector = xComponent vector * i + yComponent vector * j
+transformBy (Transform2d _ i j) vector =
+  xComponent vector * constant i + yComponent vector * constant j

@@ -396,7 +396,7 @@ derivative curve = case curve of
 reverse :: Curve2d (space @ units) -> Curve2d (space @ units)
 reverse curve = case curve of
   Curve c -> Curve (reverseImpl c)
-  Parametric expression -> Parametric (expression . (1.0 - Expression.t))
+  Parametric expression -> Parametric (expression . Expression.r)
   Coerce c -> Units.coerce (reverse c)
   PlaceIn frame c -> PlaceIn frame (reverse c)
   Addition c v -> reverse c + VectorCurve2d.reverse v

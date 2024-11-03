@@ -59,6 +59,7 @@ import {-# SOURCE #-} DirectionCurve3d (DirectionCurve3d)
 import Error qualified
 import Expression (Expression)
 import Expression qualified
+import Expression.Curve1d qualified
 import Expression.VectorCurve3d qualified
 import Float qualified
 import Frame3d (Frame3d)
@@ -585,7 +586,10 @@ xyz (Curve1d.Parametric x) (Curve1d.Parametric y) (Curve1d.Parametric z) =
 xyz x y z = XYZ x y z
 
 line :: Vector3d (space @ units) -> Vector3d (space @ units) -> VectorCurve3d (space @ units)
-line v1 v2 = Parametric (v1 + Expression.t * (v2 - v1))
+line v1 v2 =
+  Parametric $
+    Expression.VectorCurve3d.constant v1
+      + Expression.t * Expression.VectorCurve3d.constant (v2 - v1)
 
 arc ::
   Vector3d (space @ units) ->
@@ -597,9 +601,10 @@ arc v1 v2 a b
   | v1 == Vector3d.zero && v2 == Vector3d.zero = zero
   | a == b = constant (Angle.cos a * v1 + Angle.sin a * v2)
   | otherwise = do
-      let angle = a + Expression.t * (b - a)
-      let expression = v1 * Expression.cos angle + v2 * Expression.sin angle
-      Parametric expression
+      let angle = Expression.Curve1d.constant a + Expression.t * Expression.Curve1d.constant (b - a)
+      Parametric $
+        Expression.VectorCurve3d.constant v1 * Expression.cos angle
+          + Expression.VectorCurve3d.constant v2 * Expression.sin angle
 
 quadraticSpline ::
   Vector3d (space @ units) ->
@@ -691,7 +696,7 @@ reverse ::
   VectorCurve3d (space @ units)
 reverse curve = case curve of
   VectorCurve3d _ -> Reversed curve
-  Parametric expression -> Parametric (expression . (1.0 - Expression.t))
+  Parametric expression -> Parametric (expression . Expression.r)
   Coerce c -> Units.coerce (reverse c)
   Reversed c -> c
   XYZ x y z -> XYZ (Curve1d.reverse x) (Curve1d.reverse y) (Curve1d.reverse z)

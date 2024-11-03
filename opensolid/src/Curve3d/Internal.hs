@@ -102,7 +102,7 @@ derivative curve = case curve of
 
 reverse :: Curve3d (space @ units) -> Curve3d (space @ units)
 reverse curve = case curve of
-  Parametric expression -> Parametric (expression . (1.0 - Expression.t))
+  Parametric expression -> Parametric (expression . Expression.r)
   Curve c -> Curve (reverseImpl c)
   Coerce c -> Units.coerce (reverse c)
 

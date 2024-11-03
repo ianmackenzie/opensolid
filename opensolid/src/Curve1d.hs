@@ -359,7 +359,7 @@ derivative curve = case curve of
   Reversed c -> -(reverse (derivative c))
 
 reverse :: Curve1d units -> Curve1d units
-reverse (Parametric expression) = Parametric (expression . (1.0 - Expression.t))
+reverse (Parametric expression) = Parametric (expression . Expression.r)
 reverse curve = Curve1d (Reversed curve)
 
 squared :: Units.Squared units1 units2 => Curve1d units1 -> Curve1d units2

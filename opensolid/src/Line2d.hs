@@ -10,6 +10,8 @@ import Curve2d (Curve2d)
 import Curve2d qualified
 import Data.Coerce qualified
 import Expression qualified
+import Expression.Curve2d qualified
+import Expression.VectorCurve2d qualified
 import OpenSolid
 import Point2d (Point2d)
 import Units qualified
@@ -18,7 +20,9 @@ from ::
   Point2d (space @ units) ->
   Point2d (space @ units) ->
   Curve2d (space @ units)
-from p1 p2 = Curve2d.Parametric (p1 + Expression.t * (p2 - p1))
+from p1 p2 =
+  Curve2d.Parametric $
+    Expression.Curve2d.constant p1 + Expression.t * Expression.VectorCurve2d.constant (p2 - p1)
 
 type role Line2d phantom
 

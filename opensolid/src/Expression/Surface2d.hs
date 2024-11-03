@@ -12,12 +12,14 @@ where
 
 import Expression (Expression)
 import Expression qualified
+import Expression.VectorSurface2d qualified
 import Frame2d (Frame2d)
 import Frame2d qualified
 import OpenSolid
 import Point2d (Point2d)
 import SurfaceParameter (UvPoint)
 import Transform2d (Transform2d (Transform2d))
+import Vector2d qualified
 
 constant :: Point2d (space @ units) -> Expression UvPoint (Point2d (space @ units))
 constant = Expression.constant
@@ -45,21 +47,30 @@ placeIn ::
   Frame2d (global @ units) (Defines local) ->
   Expression UvPoint (Point2d (local @ units)) ->
   Expression UvPoint (Point2d (global @ units))
-placeIn frame point =
-  Frame2d.originPoint frame
-    + xCoordinate point * Frame2d.xDirection frame
-    + yCoordinate point * Frame2d.yDirection frame
+placeIn frame expression = do
+  let i = Vector2d.unit (Frame2d.xDirection frame)
+  let j = Vector2d.unit (Frame2d.yDirection frame)
+  constant (Frame2d.originPoint frame)
+    + xCoordinate expression * Expression.VectorSurface2d.constant i
+    + yCoordinate expression * Expression.VectorSurface2d.constant j
 
 relativeTo ::
   Frame2d (global @ units) (Defines local) ->
   Expression UvPoint (Point2d (global @ units)) ->
   Expression UvPoint (Point2d (local @ units))
-relativeTo frame point = do
-  let displacement = point - Frame2d.originPoint frame
-  xy (displacement <> Frame2d.xDirection frame) (displacement <> Frame2d.yDirection frame)
+relativeTo frame expression = do
+  let i = Vector2d.unit (Frame2d.xDirection frame)
+  let j = Vector2d.unit (Frame2d.yDirection frame)
+  let displacement = expression - constant (Frame2d.originPoint frame)
+  xy
+    (displacement <> Expression.VectorSurface2d.constant i)
+    (displacement <> Expression.VectorSurface2d.constant j)
 
 transformBy ::
   Transform2d tag (space @ units) ->
   Expression UvPoint (Point2d (space @ units)) ->
   Expression UvPoint (Point2d (space @ units))
-transformBy (Transform2d p0 i j) point = p0 + xCoordinate point * i + yCoordinate point * j
+transformBy (Transform2d p0 i j) expression =
+  constant p0
+    + xCoordinate expression * Expression.VectorSurface2d.constant i
+    + yCoordinate expression * Expression.VectorSurface2d.constant j

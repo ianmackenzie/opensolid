@@ -10,6 +10,8 @@ import Curve3d (Curve3d)
 import Curve3d qualified
 import Data.Coerce qualified
 import Expression qualified
+import Expression.Curve3d qualified
+import Expression.VectorCurve3d qualified
 import OpenSolid
 import Point3d (Point3d)
 import Units qualified
@@ -18,7 +20,9 @@ from ::
   Point3d (space @ units) ->
   Point3d (space @ units) ->
   Curve3d (space @ units)
-from p1 p2 = Curve3d.Parametric (p1 + Expression.t * (p2 - p1))
+from p1 p2 =
+  Curve3d.Parametric $
+    Expression.Curve3d.constant p1 + Expression.t * Expression.VectorCurve3d.constant (p2 - p1)
 
 type role Line3d phantom
 

@@ -23,6 +23,9 @@ import Curve2d qualified
 import Direction2d (Direction2d)
 import Direction2d qualified
 import Expression qualified
+import Expression.Curve1d qualified
+import Expression.Curve2d qualified
+import Expression.VectorCurve2d qualified
 import Float qualified
 import Frame2d (Frame2d)
 import Frame2d qualified
@@ -164,6 +167,8 @@ new ::
   Angle ->
   Curve2d (space @ units)
 new p0 v1 v2 a b = do
-  let angle = a + Expression.t * (b - a)
-  let expression = p0 + v1 * Expression.cos angle + v2 * Expression.sin angle
-  Curve2d.Parametric expression
+  let angle = Expression.Curve1d.constant a + Expression.t * Expression.Curve1d.constant (b - a)
+  Curve2d.Parametric $
+    Expression.Curve2d.constant p0
+      + Expression.VectorCurve2d.constant v1 * Expression.cos angle
+      + Expression.VectorCurve2d.constant v2 * Expression.sin angle

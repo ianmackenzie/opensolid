@@ -146,7 +146,9 @@ library
     Error
     Estimate
     Expression
+    Expression.Curve1d
     Expression.Curve2d
+    Expression.Curve3d
     Expression.Surface2d
     Expression.VectorCurve2d
     Expression.VectorCurve3d
