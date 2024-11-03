@@ -298,7 +298,7 @@ show = showWithPrecedence 0
 
 showWithPrecedence :: Int -> Scalar input -> Text
 showWithPrecedence precedence expression = case expression of
-  CurveParameter -> "u"
+  CurveParameter -> "t"
   SurfaceParameter SurfaceParameter.U -> "u"
   SurfaceParameter SurfaceParameter.V -> "v"
   Constant value -> Text.float value
