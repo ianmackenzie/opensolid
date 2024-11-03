@@ -5,6 +5,7 @@ module Curve2d
   , Interface (..)
   , TransformBy (TransformBy)
   , new
+  , constant
   , startPoint
   , endPoint
   , evaluate
@@ -199,35 +200,6 @@ instance Interface (Curve2d (space @ units)) (space @ units) where
   transformByImpl = transformBy
 
 instance
-  (space1 ~ space2, units1 ~ units2) =>
-  VectorCurve2d.Interface
-    (Arithmetic.Difference (Point2d (space1 @ units1)) (Curve2d (space2 @ units2)))
-    (space1 @ units1)
-  where
-  evaluateImpl (Arithmetic.Difference point curve) tValue =
-    point - evaluate curve tValue
-
-  evaluateBoundsImpl (Arithmetic.Difference point curve) tRange =
-    point - evaluateBounds curve tRange
-
-  derivativeImpl (Arithmetic.Difference _ curve) =
-    negate (derivative curve)
-
-  transformByImpl transform (Arithmetic.Difference point curve) =
-    VectorCurve2d.new $
-      Arithmetic.Difference
-        -- Note the slight hack here:
-        -- the definition of VectorCurve2d.Interface states that the units of the transform
-        -- do *not* have to match the units of the vector curve,
-        -- because vectors and vector curves ignore translation
-        -- (and the units of the transform are just the units of its translation part).
-        -- This would in general mean that we couldn't apply the given transform to a Point2d or Curve2d,
-        -- but in this case it's safe since any translation will cancel out
-        -- when the point and curve are subtracted from each other.
-        (Point2d.transformBy (Units.coerce transform) point)
-        (transformBy (Units.coerce transform) curve)
-
-instance
   ( space1 ~ space2
   , units1 ~ units2
   ) =>
@@ -250,38 +222,6 @@ instance
   where
   Parametric lhs - VectorCurve2d.Parametric rhs = Parametric (lhs - rhs)
   lhs - rhs = Subtraction lhs rhs
-
-instance
-  (space1 ~ space2, units1 ~ units2) =>
-  Subtraction
-    (Point2d (space1 @ units1))
-    (Curve2d (space2 @ units2))
-    (VectorCurve2d (space1 @ units1))
-  where
-  point - Parametric expression = VectorCurve2d.Parametric (point - expression)
-  point - curve = VectorCurve2d.new (Arithmetic.Difference point curve)
-
-instance
-  (space1 ~ space2, units1 ~ units2) =>
-  VectorCurve2d.Interface
-    (Arithmetic.Difference (Curve2d (space1 @ units1)) (Point2d (space2 @ units2)))
-    (space1 @ units1)
-  where
-  evaluateImpl (Arithmetic.Difference curve point) tValue =
-    evaluate curve tValue - point
-
-  evaluateBoundsImpl (Arithmetic.Difference curve point) tRange =
-    evaluateBounds curve tRange - point
-
-  derivativeImpl (Arithmetic.Difference curve _) =
-    derivative curve
-
-  transformByImpl transform (Arithmetic.Difference curve point) =
-    VectorCurve2d.new $
-      Arithmetic.Difference
-        -- Note the same slight hack here as described above for point-curve differences
-        (transformBy (Units.coerce transform) curve)
-        (Point2d.transformBy (Units.coerce transform) point)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -311,7 +251,14 @@ instance
   transformByImpl transform (Arithmetic.Difference curve1 curve2) =
     VectorCurve2d.new $
       Arithmetic.Difference
-        -- Note the same slight hack here as described above for point-curve differences
+        -- Note the slight hack here:
+        -- the definition of VectorCurve2d.Interface states that the units of the transform
+        -- do *not* have to match the units of the vector curve,
+        -- because vectors and vector curves ignore translation
+        -- (and the units of the transform are just the units of its translation part).
+        -- This would in general mean that we couldn't apply the given transform to a Curve2d,
+        -- but in this case it's safe since any translation will cancel out
+        -- when the two curves are subtracted from each other.
         (transformBy (Units.coerce transform) curve1)
         (transformBy (Units.coerce transform) curve2)
 
@@ -322,8 +269,16 @@ instance
     (Point2d (space2 @ units2))
     (VectorCurve2d (space1 @ units1))
   where
-  Parametric expression - point = VectorCurve2d.Parametric (expression - point)
-  curve - point = VectorCurve2d.new (Arithmetic.Difference curve point)
+  curve - point = curve - constant point
+
+instance
+  (space1 ~ space2, units1 ~ units2) =>
+  Subtraction
+    (Point2d (space1 @ units1))
+    (Curve2d (space2 @ units2))
+    (VectorCurve2d (space1 @ units1))
+  where
+  point - curve = constant point - curve
 
 instance Composition (Curve1d Unitless) (Curve2d (space @ units)) (Curve2d (space @ units)) where
   Parametric outer . Curve1d.Parametric inner = Parametric (outer . inner)
@@ -347,6 +302,9 @@ instance Curve2d.Interface (Curve2d (space @ units) :.: Curve1d Unitless) (space
 
 new :: Interface curve (space @ units) => curve -> Curve2d (space @ units)
 new = Curve
+
+constant :: Point2d (space @ units) -> Curve2d (space @ units)
+constant = Parametric . Expression.constant
 
 startPoint :: Curve2d (space @ units) -> Point2d (space @ units)
 startPoint curve = case curve of
