@@ -1,9 +1,8 @@
 module VectorVolume3d.Function
   ( Function
   , Interface (..)
-  , evaluateAt
-  , pointOn
-  , segmentBounds
+  , evaluate
+  , evaluateBounds
   , derivative
   , zero
   , constant
@@ -12,38 +11,36 @@ module VectorVolume3d.Function
   )
 where
 
-import Bounds3d (Bounds3d)
-import Direction3d (Direction3d)
+import Expression (Expression)
+import Expression qualified
 import Float qualified
 import OpenSolid
-import Point3d (Point3d)
 import Units qualified
-import Uvw qualified
 import Vector3d (Vector3d)
 import Vector3d qualified
 import VectorBounds3d (VectorBounds3d)
 import VectorBounds3d qualified
 import Volume1d qualified
 import Volume1d.Function qualified
+import VolumeParameter (UvwBounds, UvwPoint, VolumeParameter)
 
 class
   Show function =>
   Interface function (coordinateSystem :: CoordinateSystem)
     | function -> coordinateSystem
   where
-  evaluateAtImpl :: Point3d Uvw.Coordinates -> function -> Vector3d coordinateSystem
-  segmentBoundsImpl :: Bounds3d Uvw.Coordinates -> function -> VectorBounds3d coordinateSystem
-  derivativeImpl :: Direction3d Uvw.Space -> function -> Function coordinateSystem
+  evaluateImpl :: function -> UvwPoint -> Vector3d coordinateSystem
+  evaluateBoundsImpl :: function -> UvwBounds -> VectorBounds3d coordinateSystem
+  derivativeImpl :: VolumeParameter -> function -> Function coordinateSystem
 
 data Function (coordinateSystem :: CoordinateSystem) where
   Function ::
     Interface function (space @ units) =>
     function ->
     Function (space @ units)
-  Zero ::
+  Parametric ::
+    Expression UvwPoint (Vector3d (space @ units)) ->
     Function (space @ units)
-  Constant ::
-    Vector3d (space @ units) -> Function (space @ units)
   Coerce ::
     Function (space @ units1) ->
     Function (space @ units2)
@@ -85,14 +82,12 @@ instance
   space1 ~ space2 =>
   Units.Coercion (Function (space1 @ unitsA)) (Function (space2 @ unitsB))
   where
-  coerce Zero = Zero
-  coerce (Constant value) = Constant (Units.coerce value)
+  coerce (Parametric expression) = Parametric (Units.coerce expression)
   coerce (Coerce function) = Coerce function
   coerce function = Coerce function
 
 instance Negation (Function (space @ units)) where
-  negate Zero = Zero
-  negate (Constant x) = Constant (negate x)
+  negate (Parametric expression) = Parametric (negate expression)
   negate (Negated function) = function
   negate (Difference f1 f2) = Difference f2 f1
   negate (Product1d3d f1 f2) = negate f1 .*. f2
@@ -122,10 +117,8 @@ instance
     (Function (space_ @ units_))
     (Function (space @ units))
   where
-  Zero + function = function
-  function + Zero = function
-  Constant v1 + Constant v2 = constant (v1 + v2)
-  function1 + function2 = Sum function1 function2
+  Parametric lhs + Parametric rhs = Parametric (lhs + rhs)
+  lhs + rhs = Sum lhs rhs
 
 instance
   ( space ~ space_
@@ -158,10 +151,8 @@ instance
     (Function (space_ @ units_))
     (Function (space @ units))
   where
-  Zero - function = negate function
-  function - Zero = function
-  Constant v1 - Constant v2 = constant (v1 - v2)
-  function1 - function2 = Difference function1 function2
+  Parametric lhs - Parametric rhs = Parametric (lhs - rhs)
+  lhs - rhs = Difference lhs rhs
 
 instance
   ( space ~ space_
@@ -193,10 +184,8 @@ instance Multiplication' (Volume1d.Function units1) (Function (space @ units2)) 
   type
     Volume1d.Function units1 .*. Function (space @ units2) =
       Function (space @ (units1 :*: units2))
-  Volume1d.Function.Zero .*. _ = Zero
-  _ .*. Zero = Zero
-  Volume1d.Function.Constant a .*. Constant b = Constant (a .*. b)
-  f1 .*. f2 = Product1d3d f1 f2
+  Volume1d.Function.Parametric lhs .*. Parametric rhs = Parametric (lhs .*. rhs)
+  lhs .*. rhs = Product1d3d lhs rhs
 
 instance
   Units.Product units1 units2 units3 =>
@@ -206,10 +195,8 @@ instance Multiplication' (Function (space @ units1)) (Volume1d.Function units2) 
   type
     Function (space @ units1) .*. Volume1d.Function units2 =
       Function (space @ (units1 :*: units2))
-  Zero .*. _ = Zero
-  _ .*. Volume1d.Function.Zero = Zero
-  Constant a .*. Volume1d.Function.Constant b = Constant (a .*. b)
-  f1 .*. f2 = Product3d1d f1 f2
+  Parametric lhs .*. Volume1d.Function.Parametric rhs = Parametric (lhs .*. rhs)
+  lhs .*. rhs = Product3d1d lhs rhs
 
 instance
   Units.Product units1 units2 units3 =>
@@ -247,10 +234,8 @@ instance Division' (Function (space @ units1)) (Volume1d.Function units2) where
   type
     Function (space @ units1) ./. Volume1d.Function units2 =
       Function (space @ (units1 :/: units2))
-  Zero ./. _ = Zero
-  Constant a ./. Volume1d.Function.Constant b = Constant (a ./. b)
-  function ./. Volume1d.Function.Constant x = (1 ./. x) .*^ function
-  function1 ./. function2 = Quotient function1 function2
+  Parametric lhs ./. Volume1d.Function.Parametric rhs = Parametric (lhs ./. rhs)
+  lhs ./. rhs = Quotient lhs rhs
 
 instance
   Units.Quotient units1 units2 units3 =>
@@ -266,78 +251,75 @@ instance Division' (Function (space @ units)) Int where
 
 instance Division (Function (space @ units)) Int (Function (space @ units))
 
-evaluateAt :: Point3d Uvw.Coordinates -> Function (space @ units) -> Vector3d (space @ units)
-evaluateAt uv function =
+evaluate :: Function (space @ units) -> UvwPoint -> Vector3d (space @ units)
+evaluate function uvwPoint =
   case function of
-    Function f -> evaluateAtImpl uv f
-    Zero -> Vector3d.zero
-    Constant v -> v
-    Coerce f -> Units.coerce (evaluateAt uv f)
+    Function f -> evaluateImpl f uvwPoint
+    Parametric expression -> Expression.evaluate expression uvwPoint
+    Coerce f -> Units.coerce (evaluate f uvwPoint)
     XYZ x y z ->
       Vector3d.xyz
-        (Volume1d.Function.evaluateAt uv x)
-        (Volume1d.Function.evaluateAt uv y)
-        (Volume1d.Function.evaluateAt uv z)
-    Negated f -> negate (evaluateAt uv f)
-    Sum f1 f2 -> evaluateAt uv f1 + evaluateAt uv f2
-    Difference f1 f2 -> evaluateAt uv f1 - evaluateAt uv f2
-    Product1d3d f1 f2 -> Volume1d.Function.evaluateAt uv f1 .*. evaluateAt uv f2
-    Product3d1d f1 f2 -> evaluateAt uv f1 .*. Volume1d.Function.evaluateAt uv f2
-    Quotient f1 f2 -> evaluateAt uv f1 ./. Volume1d.Function.evaluateAt uv f2
+        (Volume1d.Function.evaluate x uvwPoint)
+        (Volume1d.Function.evaluate y uvwPoint)
+        (Volume1d.Function.evaluate z uvwPoint)
+    Negated f -> negate (evaluate f uvwPoint)
+    Sum f1 f2 -> evaluate f1 uvwPoint + evaluate f2 uvwPoint
+    Difference f1 f2 -> evaluate f1 uvwPoint - evaluate f2 uvwPoint
+    Product1d3d f1 f2 -> Volume1d.Function.evaluate f1 uvwPoint .*. evaluate f2 uvwPoint
+    Product3d1d f1 f2 -> evaluate f1 uvwPoint .*. Volume1d.Function.evaluate f2 uvwPoint
+    Quotient f1 f2 -> evaluate f1 uvwPoint ./. Volume1d.Function.evaluate f2 uvwPoint
 
-pointOn :: Function (space @ units) -> Point3d Uvw.Coordinates -> Vector3d (space @ units)
-pointOn function uv = evaluateAt uv function
-
-segmentBounds ::
-  Bounds3d Uvw.Coordinates ->
+evaluateBounds ::
   Function (space @ units) ->
+  UvwBounds ->
   VectorBounds3d (space @ units)
-segmentBounds uv function =
+evaluateBounds function uvwBounds =
   case function of
-    Function f -> segmentBoundsImpl uv f
-    Zero -> VectorBounds3d.constant Vector3d.zero
-    Constant v -> VectorBounds3d.constant v
-    Coerce f -> Units.coerce (segmentBounds uv f)
+    Function f -> evaluateBoundsImpl f uvwBounds
+    Parametric expression -> Expression.evaluateBounds expression uvwBounds
+    Coerce f -> Units.coerce (evaluateBounds f uvwBounds)
     XYZ x y z ->
       VectorBounds3d.xyz
-        (Volume1d.Function.segmentBounds uv x)
-        (Volume1d.Function.segmentBounds uv y)
-        (Volume1d.Function.segmentBounds uv z)
-    Negated f -> negate (segmentBounds uv f)
-    Sum f1 f2 -> segmentBounds uv f1 + segmentBounds uv f2
-    Difference f1 f2 -> segmentBounds uv f1 - segmentBounds uv f2
-    Product1d3d f1 f2 -> Volume1d.Function.segmentBounds uv f1 .*. segmentBounds uv f2
-    Product3d1d f1 f2 -> segmentBounds uv f1 .*. Volume1d.Function.segmentBounds uv f2
-    Quotient f1 f2 -> segmentBounds uv f1 ./. Volume1d.Function.segmentBounds uv f2
+        (Volume1d.Function.evaluateBounds x uvwBounds)
+        (Volume1d.Function.evaluateBounds y uvwBounds)
+        (Volume1d.Function.evaluateBounds z uvwBounds)
+    Negated f -> negate (evaluateBounds f uvwBounds)
+    Sum f1 f2 -> evaluateBounds f1 uvwBounds + evaluateBounds f2 uvwBounds
+    Difference f1 f2 -> evaluateBounds f1 uvwBounds - evaluateBounds f2 uvwBounds
+    Product1d3d f1 f2 ->
+      Volume1d.Function.evaluateBounds f1 uvwBounds .*. evaluateBounds f2 uvwBounds
+    Product3d1d f1 f2 ->
+      evaluateBounds f1 uvwBounds .*. Volume1d.Function.evaluateBounds f2 uvwBounds
+    Quotient f1 f2 ->
+      evaluateBounds f1 uvwBounds ./. Volume1d.Function.evaluateBounds f2 uvwBounds
 
-derivative :: Direction3d Uvw.Space -> Function units -> Function units
-derivative direction function =
+derivative :: VolumeParameter -> Function units -> Function units
+derivative varyingParameter function =
   case function of
-    Function f -> derivativeImpl direction f
-    Zero -> zero
-    Constant _ -> zero
-    Coerce f -> Units.coerce (derivative direction f)
+    Function f -> derivativeImpl varyingParameter f
+    Parametric expression -> Parametric (Expression.volumeDerivative varyingParameter expression)
+    Coerce f -> Units.coerce (derivative varyingParameter f)
     XYZ x y z ->
       XYZ
-        (Volume1d.Function.derivative direction x)
-        (Volume1d.Function.derivative direction y)
-        (Volume1d.Function.derivative direction z)
-    Negated f -> negate (derivative direction f)
-    Sum f1 f2 -> derivative direction f1 + derivative direction f2
-    Difference f1 f2 -> derivative direction f1 - derivative direction f2
+        (Volume1d.Function.derivative varyingParameter x)
+        (Volume1d.Function.derivative varyingParameter y)
+        (Volume1d.Function.derivative varyingParameter z)
+    Negated f -> negate (derivative varyingParameter f)
+    Sum f1 f2 -> derivative varyingParameter f1 + derivative varyingParameter f2
+    Difference f1 f2 -> derivative varyingParameter f1 - derivative varyingParameter f2
     Product1d3d f1 f2 ->
-      Volume1d.Function.derivative direction f1 .*. f2 + f1 .*. derivative direction f2
+      Volume1d.Function.derivative varyingParameter f1 .*. f2 + f1 .*. derivative varyingParameter f2
     Product3d1d f1 f2 ->
-      derivative direction f1 .*. f2 + f1 .*. Volume1d.Function.derivative direction f2
+      derivative varyingParameter f1 .*. f2 + f1 .*. Volume1d.Function.derivative varyingParameter f2
     Quotient f1 f2 ->
-      (derivative direction f1 .*. f2 - f1 .*. Volume1d.Function.derivative direction f2)
+      (derivative varyingParameter f1 .*. f2 - f1 .*. Volume1d.Function.derivative varyingParameter f2)
         .!/.! Volume1d.Function.squared' f2
 
 zero :: Function (space @ units)
-zero = Zero
+zero = Parametric Expression.zero
 
 constant :: Vector3d (space @ units) -> Function (space @ units)
-constant vector = if vector == Vector3d.zero then Zero else Constant vector
+constant = Parametric . Expression.constant
 
 new :: Interface function (space @ units) => function -> Function (space @ units)
 new = Function
@@ -347,4 +329,9 @@ xyz ::
   Volume1d.Function units ->
   Volume1d.Function units ->
   Function (space @ units)
-xyz = XYZ
+xyz
+  (Volume1d.Function.Parametric x)
+  (Volume1d.Function.Parametric y)
+  (Volume1d.Function.Parametric z) =
+    Parametric (Expression.xyz x y z)
+xyz x y z = XYZ x y z

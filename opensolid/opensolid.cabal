@@ -217,7 +217,6 @@ library
     Triangle2d
     Units
     Uv.Derivatives
-    Uvw
     Vector2d
     Vector3d
     VectorBounds2d
@@ -239,6 +238,7 @@ library
     Volume
     Volume1d
     Volume1d.Function
+    VolumeParameter
 
   other-modules:
     Curve1d.Integral

@@ -1,15 +1,15 @@
 module Volume1d.Function
-  ( Function (Zero, Constant)
+  ( Function (Parametric)
   , Interface (..)
-  , evaluateAt
-  , pointOn
-  , segmentBounds
+  , evaluate
+  , evaluateBounds
   , derivative
   , zero
   , constant
   , u
   , v
   , w
+  , parameter
   , new
   , squared
   , squared'
@@ -21,43 +21,32 @@ module Volume1d.Function
 where
 
 import Angle qualified
-import Bounds3d (Bounds3d)
-import Bounds3d qualified
-import Direction3d (Direction3d)
-import Direction3d qualified
+import Expression (Expression)
+import Expression qualified
 import Float qualified
 import OpenSolid
-import Point3d (Point3d)
-import Point3d qualified
 import Qty qualified
 import Range (Range)
 import Range qualified
 import Units qualified
-import Uvw qualified
+import VolumeParameter (UvwBounds, UvwPoint, VolumeParameter (U, V, W))
 
 class Show function => Interface function units | function -> units where
-  evaluateAtImpl :: Point3d Uvw.Coordinates -> function -> Qty units
-  segmentBoundsImpl :: Bounds3d Uvw.Coordinates -> function -> Range units
-  derivativeImpl :: Direction3d Uvw.Space -> function -> Function units
+  evaluateImpl :: function -> UvwPoint -> Qty units
+  evaluateBoundsImpl :: function -> UvwBounds -> Range units
+  derivativeImpl :: VolumeParameter -> function -> Function units
 
 data Function units where
   Function ::
     Interface function units =>
     function ->
     Function units
-  Zero ::
+  Parametric ::
+    Expression UvwPoint (Qty units) ->
     Function units
-  Constant ::
-    Qty units -> Function units
   Coerce ::
     Function units1 ->
     Function units2
-  U ::
-    Function Unitless
-  V ::
-    Function Unitless
-  W ::
-    Function Unitless
   Negated ::
     Function units ->
     Function units
@@ -96,14 +85,12 @@ instance HasUnits (Function units) where
   type UnitsOf (Function units) = units
 
 instance Units.Coercion (Function unitsA) (Function unitsB) where
-  coerce Zero = Zero
-  coerce (Constant value) = Constant (Units.coerce value)
+  coerce (Parametric expression) = Parametric (Units.coerce expression)
   coerce (Coerce function) = Coerce function
   coerce function = Coerce function
 
 instance Negation (Function units) where
-  negate Zero = Zero
-  negate (Constant x) = Constant (negate x)
+  negate (Parametric expression) = Parametric (negate expression)
   negate (Negated function) = function
   negate (Difference f1 f2) = Difference f2 f1
   negate (Product' f1 f2) = negate f1 .*. f2
@@ -125,10 +112,8 @@ instance Multiplication' (Function units) Sign where
   function .*. Negative = Units.coerce -function
 
 instance units ~ units_ => Addition (Function units) (Function units_) (Function units) where
-  Zero + function = function
-  function + Zero = function
-  Constant x + Constant y = constant (x + y)
-  function1 + function2 = Sum function1 function2
+  Parametric lhs + Parametric rhs = Parametric (lhs + rhs)
+  lhs + rhs = Sum lhs rhs
 
 instance units ~ units_ => Addition (Function units) (Qty units_) (Function units) where
   function + value = function + constant value
@@ -137,10 +122,8 @@ instance units ~ units_ => Addition (Qty units) (Function units_) (Function unit
   value + function = constant value + function
 
 instance units ~ units_ => Subtraction (Function units) (Function units_) (Function units) where
-  Zero - function = negate function
-  function - Zero = function
-  Constant x - Constant y = constant (x - y)
-  function1 - function2 = Difference function1 function2
+  Parametric lhs - Parametric rhs = Parametric (lhs - rhs)
+  lhs - rhs = Difference lhs rhs
 
 instance units ~ units_ => Subtraction (Function units) (Qty units_) (Function units) where
   function - value = function - constant value
@@ -154,15 +137,8 @@ instance
 
 instance Multiplication' (Function units1) (Function units2) where
   type Function units1 .*. Function units2 = Function (units1 :*: units2)
-  Zero .*. _ = Zero
-  _ .*. Zero = Zero
-  Constant x .*. Constant y = Constant (x .*. y)
-  Constant x .*. function | x == Units.coerce 1.0 = Units.coerce function
-  Constant x .*. function | x == Units.coerce -1.0 = Units.coerce -function
-  Constant x .*. Negated c = negate x .*. c
-  f1 .*. (Constant x) = Units.commute (Constant x .*. f1)
-  Constant x .*. Product' (Constant y) c = Units.rightAssociate ((x .*. y) .*. c)
-  function1 .*. function2 = Product' function1 function2
+  Parametric lhs .*. Parametric rhs = Parametric (lhs .*. rhs)
+  lhs .*. rhs = Product' lhs rhs
 
 instance
   Units.Product units1 units2 units3 =>
@@ -198,10 +174,8 @@ instance
 
 instance Division' (Function units1) (Function units2) where
   type Function units1 ./. Function units2 = Function (units1 :/: units2)
-  Zero ./. _ = Zero
-  Constant x ./. Constant y = Constant (x ./. y)
-  function ./. Constant x = (1 ./. x) .*^ function
-  function1 ./. function2 = Quotient' function1 function2
+  Parametric lhs ./. Parametric rhs = Parametric (lhs ./. rhs)
+  lhs ./. rhs = Quotient' lhs rhs
 
 instance
   Units.Quotient units1 units2 units3 =>
@@ -231,83 +205,75 @@ instance Division' Int (Function units) where
   type Int ./. Function units = Function (Unitless :/: units)
   value ./. function = Float.int value ./. function
 
-evaluateAt :: Point3d Uvw.Coordinates -> Function units -> Qty units
-evaluateAt uvw function =
+evaluate :: Function units -> UvwPoint -> Qty units
+evaluate function uvwPoint =
   case function of
-    Function f -> evaluateAtImpl uvw f
-    Zero -> Qty.zero
-    Constant x -> x
-    Coerce f -> Units.coerce (evaluateAt uvw f)
-    U -> Point3d.xCoordinate uvw
-    V -> Point3d.yCoordinate uvw
-    W -> Point3d.zCoordinate uvw
-    Negated f -> negate (evaluateAt uvw f)
-    Sum f1 f2 -> evaluateAt uvw f1 + evaluateAt uvw f2
-    Difference f1 f2 -> evaluateAt uvw f1 - evaluateAt uvw f2
-    Product' f1 f2 -> evaluateAt uvw f1 .*. evaluateAt uvw f2
-    Quotient' f1 f2 -> evaluateAt uvw f1 ./. evaluateAt uvw f2
-    Squared' f -> Qty.squared' (evaluateAt uvw f)
-    SquareRoot' f' -> Qty.sqrt' (evaluateAt uvw f')
-    Sin f -> Angle.sin (evaluateAt uvw f)
-    Cos f -> Angle.cos (evaluateAt uvw f)
+    Function f -> evaluateImpl f uvwPoint
+    Parametric expression -> Expression.evaluate expression uvwPoint
+    Coerce f -> Units.coerce (evaluate f uvwPoint)
+    Negated f -> negate (evaluate f uvwPoint)
+    Sum f1 f2 -> evaluate f1 uvwPoint + evaluate f2 uvwPoint
+    Difference f1 f2 -> evaluate f1 uvwPoint - evaluate f2 uvwPoint
+    Product' f1 f2 -> evaluate f1 uvwPoint .*. evaluate f2 uvwPoint
+    Quotient' f1 f2 -> evaluate f1 uvwPoint ./. evaluate f2 uvwPoint
+    Squared' f -> Qty.squared' (evaluate f uvwPoint)
+    SquareRoot' f' -> Qty.sqrt' (evaluate f' uvwPoint)
+    Sin f -> Angle.sin (evaluate f uvwPoint)
+    Cos f -> Angle.cos (evaluate f uvwPoint)
 
-pointOn :: Function units -> Point3d Uvw.Coordinates -> Qty units
-pointOn function uvw = evaluateAt uvw function
-
-segmentBounds :: Bounds3d Uvw.Coordinates -> Function units -> Range units
-segmentBounds uvw function =
+evaluateBounds :: Function units -> UvwBounds -> Range units
+evaluateBounds function uvwBounds =
   case function of
-    Function f -> segmentBoundsImpl uvw f
-    Zero -> Range.constant Qty.zero
-    Constant x -> Range.constant x
-    Coerce f -> Units.coerce (segmentBounds uvw f)
-    U -> Bounds3d.xRange uvw
-    V -> Bounds3d.yRange uvw
-    W -> Bounds3d.zRange uvw
-    Negated f -> negate (segmentBounds uvw f)
-    Sum f1 f2 -> segmentBounds uvw f1 + segmentBounds uvw f2
-    Difference f1 f2 -> segmentBounds uvw f1 - segmentBounds uvw f2
-    Product' f1 f2 -> segmentBounds uvw f1 .*. segmentBounds uvw f2
-    Quotient' f1 f2 -> segmentBounds uvw f1 ./. segmentBounds uvw f2
-    Squared' f -> Range.squared' (segmentBounds uvw f)
-    SquareRoot' f' -> Range.sqrt' (segmentBounds uvw f')
-    Sin f -> Range.sin (segmentBounds uvw f)
-    Cos f -> Range.cos (segmentBounds uvw f)
+    Function f -> evaluateBoundsImpl f uvwBounds
+    Parametric expression -> Expression.evaluateBounds expression uvwBounds
+    Coerce f -> Units.coerce (evaluateBounds f uvwBounds)
+    Negated f -> negate (evaluateBounds f uvwBounds)
+    Sum f1 f2 -> evaluateBounds f1 uvwBounds + evaluateBounds f2 uvwBounds
+    Difference f1 f2 -> evaluateBounds f1 uvwBounds - evaluateBounds f2 uvwBounds
+    Product' f1 f2 -> evaluateBounds f1 uvwBounds .*. evaluateBounds f2 uvwBounds
+    Quotient' f1 f2 -> evaluateBounds f1 uvwBounds ./. evaluateBounds f2 uvwBounds
+    Squared' f -> Range.squared' (evaluateBounds f uvwBounds)
+    SquareRoot' f' -> Range.sqrt' (evaluateBounds f' uvwBounds)
+    Sin f -> Range.sin (evaluateBounds f uvwBounds)
+    Cos f -> Range.cos (evaluateBounds f uvwBounds)
 
-derivative :: Direction3d Uvw.Space -> Function units -> Function units
-derivative direction function =
+derivative :: VolumeParameter -> Function units -> Function units
+derivative varyingParameter function =
   case function of
-    Function f -> derivativeImpl direction f
-    Zero -> zero
-    Constant _ -> zero
-    Coerce f -> Units.coerce (derivative direction f)
-    U -> constant (Direction3d.xComponent direction)
-    V -> constant (Direction3d.yComponent direction)
-    W -> constant (Direction3d.zComponent direction)
-    Negated f -> negate (derivative direction f)
-    Sum f1 f2 -> derivative direction f1 + derivative direction f2
-    Difference f1 f2 -> derivative direction f1 - derivative direction f2
-    Product' f1 f2 -> derivative direction f1 .*. f2 + f1 .*. derivative direction f2
-    Quotient' f1 f2 -> (derivative direction f1 .*. f2 - f1 .*. derivative direction f2) .!/.! squared' f2
-    Squared' f -> 2 * f .*. derivative direction f
-    SquareRoot' f' -> derivative direction f' .!/! (2 * sqrt' f')
-    Sin f -> cos f * (derivative direction f / Angle.radian)
-    Cos f -> negate (sin f) * (derivative direction f / Angle.radian)
+    Function f -> derivativeImpl varyingParameter f
+    Parametric expression -> Parametric (Expression.volumeDerivative varyingParameter expression)
+    Coerce f -> Units.coerce (derivative varyingParameter f)
+    Negated f -> negate (derivative varyingParameter f)
+    Sum f1 f2 -> derivative varyingParameter f1 + derivative varyingParameter f2
+    Difference f1 f2 -> derivative varyingParameter f1 - derivative varyingParameter f2
+    Product' f1 f2 -> derivative varyingParameter f1 .*. f2 + f1 .*. derivative varyingParameter f2
+    Quotient' f1 f2 ->
+      (derivative varyingParameter f1 .*. f2 - f1 .*. derivative varyingParameter f2)
+        .!/.! squared' f2
+    Squared' f -> 2 * f .*. derivative varyingParameter f
+    SquareRoot' f' -> derivative varyingParameter f' .!/! (2.0 * function)
+    Sin f -> cos f * (derivative varyingParameter f / Angle.radian)
+    Cos f -> negate (sin f) * (derivative varyingParameter f / Angle.radian)
 
 zero :: Function units
-zero = Zero
+zero = constant Qty.zero
 
 constant :: Qty units -> Function units
-constant value = if value == Qty.zero then Zero else Constant value
+constant = Parametric . Expression.constant
 
 u :: Function Unitless
-u = U
+u = Parametric Expression.u
 
 v :: Function Unitless
-v = V
+v = Parametric Expression.v
 
 w :: Function Unitless
-w = W
+w = Parametric Expression.w
+
+parameter :: VolumeParameter -> Function Unitless
+parameter U = u
+parameter V = v
+parameter W = w
 
 new :: Interface function units => function -> Function units
 new = Function
@@ -316,33 +282,29 @@ squared :: Units.Squared units1 units2 => Function units1 -> Function units2
 squared = Units.specialize . squared'
 
 squared' :: Function units -> Function (units :*: units)
-squared' Zero = Zero
-squared' (Constant x) = Constant (x .*. x)
+squared' (Parametric expression) = Parametric (Expression.squared' expression)
 squared' (Negated f) = squared' f
 squared' (Cos f) = Units.unspecialize (cosSquared f)
 squared' (Sin f) = Units.unspecialize (sinSquared f)
 squared' function = Squared' function
 
 cosSquared :: Function Radians -> Function Unitless
-cosSquared f = 0.5 * cos (2 * f) + 0.5
+cosSquared f = 0.5 * cos (2.0 * f) + 0.5
 
 sinSquared :: Function Radians -> Function Unitless
-sinSquared f = 0.5 - 0.5 * cos (2 * f)
+sinSquared f = 0.5 - 0.5 * cos (2.0 * f)
 
 sqrt :: Units.Squared units1 units2 => Function units2 -> Function units1
 sqrt curve = sqrt' (Units.unspecialize curve)
 
 sqrt' :: Function (units :*: units) -> Function units
-sqrt' Zero = Zero
-sqrt' (Constant x') = Constant (Qty.sqrt' x')
+sqrt' (Parametric expression) = Parametric (Expression.sqrt' expression)
 sqrt' function' = SquareRoot' function'
 
 sin :: Function Radians -> Function Unitless
-sin Zero = Zero
-sin (Constant x) = constant (Angle.sin x)
+sin (Parametric expression) = Parametric (Expression.sin expression)
 sin function = Sin function
 
 cos :: Function Radians -> Function Unitless
-cos Zero = Constant 1.0
-cos (Constant x) = constant (Angle.cos x)
+cos (Parametric expression) = Parametric (Expression.cos expression)
 cos function = Cos function

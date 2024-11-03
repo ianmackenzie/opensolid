@@ -15,6 +15,7 @@ module Expression
   , r
   , u
   , v
+  , w
   , sqrt
   , sqrt'
   , squared
@@ -26,6 +27,7 @@ module Expression
   , bezierCurve
   , CurveDerivative (curveDerivative)
   , SurfaceDerivative (surfaceDerivative)
+  , VolumeDerivative (volumeDerivative)
   , Evaluation (evaluate, evaluateBounds)
   )
 where
@@ -59,6 +61,8 @@ import Vector3d (Vector3d (Vector3d))
 import Vector3d qualified
 import VectorBounds2d (VectorBounds2d (VectorBounds2d))
 import VectorBounds3d (VectorBounds3d (VectorBounds3d))
+import VolumeParameter (UvwBounds, UvwPoint, VolumeParameter)
+import VolumeParameter qualified
 import Prelude (Double)
 import Prelude qualified
 
@@ -80,6 +84,15 @@ data Expression input output where
     , s1dv :: ~(Expression UvPoint (Qty units))
     } ->
     Expression UvPoint (Qty units)
+  Volume1d ::
+    { v1x :: Scalar UvwPoint
+    , v1v :: ~Volume1dValueFunction
+    , v1b :: ~Volume1dBoundsFunction
+    , v1du :: ~(Expression UvwPoint (Qty units))
+    , v1dv :: ~(Expression UvwPoint (Qty units))
+    , v1dw :: ~(Expression UvwPoint (Qty units))
+    } ->
+    Expression UvwPoint (Qty units)
   Curve2d ::
     { c2x :: Scalar Float
     , c2y :: Scalar Float
@@ -152,6 +165,17 @@ data Expression input output where
     , vs3dv :: ~(Expression UvPoint (Vector3d (space @ units)))
     } ->
     Expression UvPoint (Vector3d (space @ units))
+  VectorVolume3d ::
+    { vv3x :: Scalar UvwPoint
+    , vv3y :: Scalar UvwPoint
+    , vv3z :: Scalar UvwPoint
+    , vv3v :: ~Volume3dValueFunction
+    , vv3b :: ~Volume3dBoundsFunction
+    , vv3du :: ~(Expression UvwPoint (Vector3d (space @ units)))
+    , vv3dv :: ~(Expression UvwPoint (Vector3d (space @ units)))
+    , vv3dw :: ~(Expression UvwPoint (Vector3d (space @ units)))
+    } ->
+    Expression UvwPoint (Vector3d (space @ units))
 
 instance Show (Expression input output) where
   showsPrec precedence expression suffix = do
@@ -160,6 +184,8 @@ instance Show (Expression input output) where
             Scalar.showWithPrecedence precedence c1x
           Surface1d{s1x} ->
             Scalar.showWithPrecedence precedence s1x
+          Volume1d{v1x} ->
+            Scalar.showWithPrecedence precedence v1x
           Curve2d{c2x, c2y} ->
             "(" + Scalar.show c2x + "," + Scalar.show c2y + ")"
           Surface2d{s2x, s2y} ->
@@ -176,6 +202,8 @@ instance Show (Expression input output) where
             "(" + Scalar.show vc3x + "," + Scalar.show vc3y + "," + Scalar.show vc3z + ")"
           VectorSurface3d{vs3x, vs3y, vs3z} ->
             "(" + Scalar.show vs3x + "," + Scalar.show vs3y + "," + Scalar.show vs3z + ")"
+          VectorVolume3d{vv3x, vv3y, vv3z} ->
+            "(" + Scalar.show vv3x + "," + Scalar.show vv3y + "," + Scalar.show vv3z + ")"
     prefix + suffix
 
 -- TODO special-case compiling of very simple expressions (constants or parameter values)
@@ -224,6 +252,55 @@ surface1dv expression sibling = do
     , s1b = surface1d_bounds_function (opensolid_surface1d_bounds_function px)
     , s1du = du
     , s1dv = dv
+    }
+
+volume1d :: Scalar UvwPoint -> Expression UvwPoint (Qty units)
+volume1d fScalar = do
+  let fPtr = Scalar.ptr fScalar
+  let du = volume1d (Scalar.volumeDerivative VolumeParameter.U fScalar)
+  let dv = volume1dv du (Scalar.volumeDerivative VolumeParameter.V fScalar)
+  let dw = volume1dw du dv (Scalar.volumeDerivative VolumeParameter.W fScalar)
+  Volume1d
+    { v1x = fScalar
+    , v1v = volume1d_value_function (opensolid_volume1d_value_function fPtr)
+    , v1b = volume1d_bounds_function (opensolid_volume1d_bounds_function fPtr)
+    , v1du = du
+    , v1dv = dv
+    , v1dw = dw
+    }
+
+volume1dv :: Expression UvwPoint (Qty units) -> Scalar UvwPoint -> Expression UvwPoint (Qty units)
+volume1dv du dvScalar = do
+  let dvPtr = Scalar.ptr dvScalar
+  let dvu = v1dv du
+  let dvv = volume1dv dvu (Scalar.volumeDerivative VolumeParameter.V dvScalar)
+  let dvw = volume1dw dvu dvv (Scalar.volumeDerivative VolumeParameter.W dvScalar)
+  Volume1d
+    { v1x = dvScalar
+    , v1v = volume1d_value_function (opensolid_volume1d_value_function dvPtr)
+    , v1b = volume1d_bounds_function (opensolid_volume1d_bounds_function dvPtr)
+    , v1du = dvu
+    , v1dv = dvv
+    , v1dw = dvw
+    }
+
+volume1dw ::
+  Expression UvwPoint (Qty units) ->
+  Expression UvwPoint (Qty units) ->
+  Scalar UvwPoint ->
+  Expression UvwPoint (Qty units)
+volume1dw du dv dwScalar = do
+  let dwPtr = Scalar.ptr dwScalar
+  let dwu = v1dw du
+  let dwv = v1dw dv
+  let dww = volume1dw dwu dwv (Scalar.volumeDerivative VolumeParameter.W dwScalar)
+  Volume1d
+    { v1x = dwScalar
+    , v1v = volume1d_value_function (opensolid_volume1d_value_function dwPtr)
+    , v1b = volume1d_bounds_function (opensolid_volume1d_bounds_function dwPtr)
+    , v1du = dwu
+    , v1dv = dwv
+    , v1dw = dww
     }
 
 curve2d :: Scalar Float -> Scalar Float -> Expression Float (Point2d (space @ units))
@@ -446,6 +523,110 @@ vectorSurface3dv x y z sibling = do
     , vs3dv = dv
     }
 
+vectorVolume3d ::
+  Scalar UvwPoint ->
+  Scalar UvwPoint ->
+  Scalar UvwPoint ->
+  Expression UvwPoint (Vector3d (space @ units))
+vectorVolume3d xScalar yScalar zScalar = do
+  let xPtr = Scalar.ptr xScalar
+  let yPtr = Scalar.ptr yScalar
+  let zPtr = Scalar.ptr zScalar
+  let du =
+        vectorVolume3d
+          (Scalar.volumeDerivative VolumeParameter.U xScalar)
+          (Scalar.volumeDerivative VolumeParameter.U yScalar)
+          (Scalar.volumeDerivative VolumeParameter.U zScalar)
+  let dv =
+        vectorVolume3dv
+          du
+          (Scalar.volumeDerivative VolumeParameter.V xScalar)
+          (Scalar.volumeDerivative VolumeParameter.V yScalar)
+          (Scalar.volumeDerivative VolumeParameter.V zScalar)
+  let dw =
+        vectorVolume3dw
+          du
+          dv
+          (Scalar.volumeDerivative VolumeParameter.W xScalar)
+          (Scalar.volumeDerivative VolumeParameter.W yScalar)
+          (Scalar.volumeDerivative VolumeParameter.W zScalar)
+  VectorVolume3d
+    { vv3x = xScalar
+    , vv3y = yScalar
+    , vv3z = zScalar
+    , vv3v = volume3d_value_function (opensolid_volume3d_value_function xPtr yPtr zPtr)
+    , vv3b = volume3d_bounds_function (opensolid_volume3d_bounds_function xPtr yPtr zPtr)
+    , vv3du = du
+    , vv3dv = dv
+    , vv3dw = dw
+    }
+
+vectorVolume3dv ::
+  Expression UvwPoint (Vector3d (space @ units)) ->
+  Scalar UvwPoint ->
+  Scalar UvwPoint ->
+  Scalar UvwPoint ->
+  Expression UvwPoint (Vector3d (space @ units))
+vectorVolume3dv du xvScalar yvScalar zvScalar = do
+  let xvPtr = Scalar.ptr xvScalar
+  let yvPtr = Scalar.ptr yvScalar
+  let zvPtr = Scalar.ptr zvScalar
+  let dvu = vv3dv du
+  let dvv =
+        vectorVolume3dv
+          dvu
+          (Scalar.volumeDerivative VolumeParameter.V xvScalar)
+          (Scalar.volumeDerivative VolumeParameter.V yvScalar)
+          (Scalar.volumeDerivative VolumeParameter.V zvScalar)
+  let dvw =
+        vectorVolume3dw
+          dvu
+          dvv
+          (Scalar.volumeDerivative VolumeParameter.W xvScalar)
+          (Scalar.volumeDerivative VolumeParameter.W yvScalar)
+          (Scalar.volumeDerivative VolumeParameter.W zvScalar)
+  VectorVolume3d
+    { vv3x = xvScalar
+    , vv3y = yvScalar
+    , vv3z = zvScalar
+    , vv3v = volume3d_value_function (opensolid_volume3d_value_function xvPtr yvPtr zvPtr)
+    , vv3b = volume3d_bounds_function (opensolid_volume3d_bounds_function xvPtr yvPtr zvPtr)
+    , vv3du = dvu
+    , vv3dv = dvv
+    , vv3dw = dvw
+    }
+
+vectorVolume3dw ::
+  Expression UvwPoint (Vector3d (space @ units)) ->
+  Expression UvwPoint (Vector3d (space @ units)) ->
+  Scalar UvwPoint ->
+  Scalar UvwPoint ->
+  Scalar UvwPoint ->
+  Expression UvwPoint (Vector3d (space @ units))
+vectorVolume3dw du dv xwScalar ywScalar zwScalar = do
+  let xwPtr = Scalar.ptr xwScalar
+  let ywPtr = Scalar.ptr ywScalar
+  let zwPtr = Scalar.ptr zwScalar
+  let dwu = vv3dw du
+  let dwv = vv3dw dv
+  let dww =
+        vectorVolume3dw
+          dwu
+          dwv
+          (Scalar.volumeDerivative VolumeParameter.W xwScalar)
+          (Scalar.volumeDerivative VolumeParameter.W ywScalar)
+          (Scalar.volumeDerivative VolumeParameter.W zwScalar)
+  VectorVolume3d
+    { vv3x = xwScalar
+    , vv3y = ywScalar
+    , vv3z = zwScalar
+    , vv3v = volume3d_value_function (opensolid_volume3d_value_function xwPtr ywPtr zwPtr)
+    , vv3b = volume3d_bounds_function (opensolid_volume3d_bounds_function xwPtr ywPtr zwPtr)
+    , vv3du = dwu
+    , vv3dv = dwv
+    , vv3dw = dww
+    }
+
 -------------
 --- UNITS ---
 -------------
@@ -474,6 +655,15 @@ instance
   coerce Curve1d{c1x, c1v, c1b, c1d} = Curve1d{c1x, c1v, c1b, c1d = Units.coerce c1d}
   coerce Surface1d{s1x, s1v, s1b, s1du, s1dv} =
     Surface1d{s1x, s1v, s1b, s1du = Units.coerce s1du, s1dv = Units.coerce s1dv}
+  coerce Volume1d{v1x, v1v, v1b, v1du, v1dv, v1dw} =
+    Volume1d
+      { v1x
+      , v1v
+      , v1b
+      , v1du = Units.coerce v1du
+      , v1dv = Units.coerce v1dv
+      , v1dw = Units.coerce v1dw
+      }
 
 instance
   (input1 ~ input2, space1 ~ space2) =>
@@ -525,6 +715,17 @@ instance
       , vs3du = Units.coerce vs3du
       , vs3dv = Units.coerce vs3dv
       }
+  coerce VectorVolume3d{vv3x, vv3y, vv3z, vv3v, vv3b, vv3du, vv3dv, vv3dw} =
+    VectorVolume3d
+      { vv3x
+      , vv3y
+      , vv3z
+      , vv3v
+      , vv3b
+      , vv3du = Units.coerce vv3du
+      , vv3dv = Units.coerce vv3dv
+      , vv3dw = Units.coerce vv3dw
+      }
 
 ----------------
 --- NEGATION ---
@@ -537,6 +738,10 @@ instance Negation (Expression Float (Qty units)) where
 instance Negation (Expression UvPoint (Qty units)) where
   negate Surface1d{s1x} =
     surface1d (Scalar.negated s1x)
+
+instance Negation (Expression UvwPoint (Qty units)) where
+  negate Volume1d{v1x} =
+    volume1d (Scalar.negated v1x)
 
 instance Negation (Expression Float (Vector2d (space @ units))) where
   negate VectorCurve2d{vc2x, vc2y} =
@@ -554,6 +759,10 @@ instance Negation (Expression UvPoint (Vector3d (space @ units))) where
   negate VectorSurface3d{vs3x, vs3y, vs3z} =
     vectorSurface3d (Scalar.negated vs3x) (Scalar.negated vs3y) (Scalar.negated vs3z)
 
+instance Negation (Expression UvwPoint (Vector3d (space @ units))) where
+  negate VectorVolume3d{vv3x, vv3y, vv3z} =
+    vectorVolume3d (Scalar.negated vv3x) (Scalar.negated vv3y) (Scalar.negated vv3z)
+
 instance Multiplication' Sign (Expression Float (Qty units)) where
   type Sign .*. Expression Float (Qty units) = Expression Float (Qty (Unitless :*: units))
   Positive .*. expression = Units.coerce expression
@@ -564,6 +773,11 @@ instance Multiplication' Sign (Expression UvPoint (Qty units)) where
   Positive .*. expression = Units.coerce expression
   Negative .*. expression = Units.coerce -expression
 
+instance Multiplication' Sign (Expression UvwPoint (Qty units)) where
+  type Sign .*. Expression UvwPoint (Qty units) = Expression UvwPoint (Qty (Unitless :*: units))
+  Positive .*. expression = Units.coerce expression
+  Negative .*. expression = Units.coerce -expression
+
 instance Multiplication' (Expression Float (Qty units)) Sign where
   type Expression Float (Qty units) .*. Sign = Expression Float (Qty (units :*: Unitless))
   expression .*. Positive = Units.coerce expression
@@ -571,6 +785,11 @@ instance Multiplication' (Expression Float (Qty units)) Sign where
 
 instance Multiplication' (Expression UvPoint (Qty units)) Sign where
   type Expression UvPoint (Qty units) .*. Sign = Expression UvPoint (Qty (units :*: Unitless))
+  expression .*. Positive = Units.coerce expression
+  expression .*. Negative = Units.coerce -expression
+
+instance Multiplication' (Expression UvwPoint (Qty units)) Sign where
+  type Expression UvwPoint (Qty units) .*. Sign = Expression UvwPoint (Qty (units :*: Unitless))
   expression .*. Positive = Units.coerce expression
   expression .*. Negative = Units.coerce -expression
 
@@ -616,6 +835,13 @@ instance Multiplication' Sign (Expression UvPoint (Vector3d (space @ units))) wh
   Positive .*. expression = Units.coerce expression
   Negative .*. expression = Units.coerce -expression
 
+instance Multiplication' Sign (Expression UvwPoint (Vector3d (space @ units))) where
+  type
+    Sign .*. Expression UvwPoint (Vector3d (space @ units)) =
+      Expression UvwPoint (Vector3d (space @ (Unitless :*: units)))
+  Positive .*. expression = Units.coerce expression
+  Negative .*. expression = Units.coerce -expression
+
 instance Multiplication' (Expression Float (Vector3d (space @ units))) Sign where
   type
     Expression Float (Vector3d (space @ units)) .*. Sign =
@@ -630,6 +856,13 @@ instance Multiplication' (Expression UvPoint (Vector3d (space @ units))) Sign wh
   expression .*. Positive = Units.coerce expression
   expression .*. Negative = Units.coerce -expression
 
+instance Multiplication' (Expression UvwPoint (Vector3d (space @ units))) Sign where
+  type
+    Expression UvwPoint (Vector3d (space @ units)) .*. Sign =
+      Expression UvwPoint (Vector3d (space @ (units :*: Unitless)))
+  expression .*. Positive = Units.coerce expression
+  expression .*. Negative = Units.coerce -expression
+
 instance
   Multiplication
     Sign
@@ -644,6 +877,12 @@ instance
 
 instance
   Multiplication
+    Sign
+    (Expression UvwPoint (Qty units))
+    (Expression UvwPoint (Qty units))
+
+instance
+  Multiplication
     (Expression Float (Qty units))
     Sign
     (Expression Float (Qty units))
@@ -653,6 +892,12 @@ instance
     (Expression UvPoint (Qty units))
     Sign
     (Expression UvPoint (Qty units))
+
+instance
+  Multiplication
+    (Expression UvwPoint (Qty units))
+    Sign
+    (Expression UvwPoint (Qty units))
 
 instance
   Multiplication
@@ -692,6 +937,12 @@ instance
 
 instance
   Multiplication
+    Sign
+    (Expression UvwPoint (Vector3d (space @ units)))
+    (Expression UvwPoint (Vector3d (space @ units)))
+
+instance
+  Multiplication
     (Expression Float (Vector3d (space @ units)))
     Sign
     (Expression Float (Vector3d (space @ units)))
@@ -701,6 +952,12 @@ instance
     (Expression UvPoint (Vector3d (space @ units)))
     Sign
     (Expression UvPoint (Vector3d (space @ units)))
+
+instance
+  Multiplication
+    (Expression UvwPoint (Vector3d (space @ units)))
+    Sign
+    (Expression UvwPoint (Vector3d (space @ units)))
 
 ----------------
 --- ADDITION ---
@@ -723,6 +980,15 @@ instance
     (Expression UvPoint (Qty units1))
   where
   Surface1d{s1x = lhs} + Surface1d{s1x = rhs} = surface1d (Scalar.sum lhs rhs)
+
+instance
+  units1 ~ units2 =>
+  Addition
+    (Expression UvwPoint (Qty units1))
+    (Expression UvwPoint (Qty units2))
+    (Expression UvwPoint (Qty units1))
+  where
+  Volume1d{v1x = lhs} + Volume1d{v1x = rhs} = volume1d (Scalar.sum lhs rhs)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -765,6 +1031,17 @@ instance
   VectorSurface3d{vs3x = x1, vs3y = y1, vs3z = z1}
     + VectorSurface3d{vs3x = x2, vs3y = y2, vs3z = z2} =
       vectorSurface3d (Scalar.sum x1 x2) (Scalar.sum y1 y2) (Scalar.sum z1 z2)
+
+instance
+  (space1 ~ space2, units1 ~ units2) =>
+  Addition
+    (Expression UvwPoint (Vector3d (space1 @ units1)))
+    (Expression UvwPoint (Vector3d (space2 @ units2)))
+    (Expression UvwPoint (Vector3d (space1 @ units1)))
+  where
+  VectorVolume3d{vv3x = x1, vv3y = y1, vv3z = z1}
+    + VectorVolume3d{vv3x = x2, vv3y = y2, vv3z = z2} =
+      vectorVolume3d (Scalar.sum x1 x2) (Scalar.sum y1 y2) (Scalar.sum z1 z2)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -829,6 +1106,15 @@ instance
   Surface1d{s1x = lhs} - Surface1d{s1x = rhs} = surface1d (Scalar.difference lhs rhs)
 
 instance
+  units1 ~ units2 =>
+  Subtraction
+    (Expression UvwPoint (Qty units1))
+    (Expression UvwPoint (Qty units2))
+    (Expression UvwPoint (Qty units1))
+  where
+  Volume1d{v1x = lhs} - Volume1d{v1x = rhs} = volume1d (Scalar.difference lhs rhs)
+
+instance
   (space1 ~ space2, units1 ~ units2) =>
   Subtraction
     (Expression Float (Vector2d (space1 @ units1)))
@@ -871,6 +1157,20 @@ instance
   VectorSurface3d{vs3x = x1, vs3y = y1, vs3z = z1}
     - VectorSurface3d{vs3x = x2, vs3y = y2, vs3z = z2} =
       vectorSurface3d
+        (Scalar.difference x1 x2)
+        (Scalar.difference y1 y2)
+        (Scalar.difference z1 z2)
+
+instance
+  (space1 ~ space2, units1 ~ units2) =>
+  Subtraction
+    (Expression UvwPoint (Vector3d (space1 @ units1)))
+    (Expression UvwPoint (Vector3d (space2 @ units2)))
+    (Expression UvwPoint (Vector3d (space1 @ units1)))
+  where
+  VectorVolume3d{vv3x = x1, vv3y = y1, vv3z = z1}
+    - VectorVolume3d{vv3x = x2, vv3y = y2, vv3z = z2} =
+      vectorVolume3d
         (Scalar.difference x1 x2)
         (Scalar.difference y1 y2)
         (Scalar.difference z1 z2)
@@ -992,6 +1292,13 @@ instance
     (Expression UvPoint (Qty units2))
     (Expression UvPoint (Qty units3))
 
+instance
+  Units.Product units1 units2 units3 =>
+  Multiplication
+    (Expression UvwPoint (Qty units1))
+    (Expression UvwPoint (Qty units2))
+    (Expression UvwPoint (Qty units3))
+
 --- Qty-Vector2d ---
 --------------------
 
@@ -1043,6 +1350,13 @@ instance
     (Expression UvPoint (Vector3d (space @ units2)))
     (Expression UvPoint (Vector3d (space @ units3)))
 
+instance
+  Units.Product units1 units2 units3 =>
+  Multiplication
+    (Expression UvwPoint (Qty units1))
+    (Expression UvwPoint (Vector3d (space @ units2)))
+    (Expression UvwPoint (Vector3d (space @ units3)))
+
 --- Vector3d-Qty ---
 --------------------
 
@@ -1059,6 +1373,13 @@ instance
     (Expression UvPoint (Vector3d (space @ units1)))
     (Expression UvPoint (Qty units2))
     (Expression UvPoint (Vector3d (space @ units3)))
+
+instance
+  Units.Product units1 units2 units3 =>
+  Multiplication
+    (Expression UvwPoint (Vector3d (space @ units1)))
+    (Expression UvwPoint (Qty units2))
+    (Expression UvwPoint (Vector3d (space @ units3)))
 
 ---------------------------------
 --- Multiplication' instances ---
@@ -1078,6 +1399,12 @@ instance Multiplication' (Expression UvPoint (Qty units1)) (Expression UvPoint (
     Expression UvPoint (Qty units1) .*. Expression UvPoint (Qty units2) =
       Expression UvPoint (Qty (units1 :*: units2))
   Surface1d{s1x = lhs} .*. Surface1d{s1x = rhs} = surface1d (Scalar.product lhs rhs)
+
+instance Multiplication' (Expression UvwPoint (Qty units1)) (Expression UvwPoint (Qty units2)) where
+  type
+    Expression UvwPoint (Qty units1) .*. Expression UvwPoint (Qty units2) =
+      Expression UvwPoint (Qty (units1 :*: units2))
+  Volume1d{v1x = lhs} .*. Volume1d{v1x = rhs} = volume1d (Scalar.product lhs rhs)
 
 --- Qty-Vector2d ---
 --------------------
@@ -1136,6 +1463,16 @@ instance Multiplication' (Expression UvPoint (Qty units1)) (Expression UvPoint (
       (Scalar.product scale vs3y)
       (Scalar.product scale vs3z)
 
+instance Multiplication' (Expression UvwPoint (Qty units1)) (Expression UvwPoint (Vector3d (space @ units2))) where
+  type
+    Expression UvwPoint (Qty units1) .*. Expression UvwPoint (Vector3d (space @ units2)) =
+      Expression UvwPoint (Vector3d (space @ (units1 :*: units2)))
+  Volume1d{v1x = scale} .*. VectorVolume3d{vv3x, vv3y, vv3z} =
+    vectorVolume3d
+      (Scalar.product scale vv3x)
+      (Scalar.product scale vv3y)
+      (Scalar.product scale vv3z)
+
 --- Vector3d-Qty ---
 --------------------
 
@@ -1158,6 +1495,16 @@ instance Multiplication' (Expression UvPoint (Vector3d (space @ units1))) (Expre
       (Scalar.product vs3x scale)
       (Scalar.product vs3y scale)
       (Scalar.product vs3z scale)
+
+instance Multiplication' (Expression UvwPoint (Vector3d (space @ units1))) (Expression UvwPoint (Qty units2)) where
+  type
+    Expression UvwPoint (Vector3d (space @ units1)) .*. Expression UvwPoint (Qty units2) =
+      Expression UvwPoint (Vector3d (space @ (units1 :*: units2)))
+  VectorVolume3d{vv3x, vv3y, vv3z} .*. Volume1d{v1x = scale} =
+    vectorVolume3d
+      (Scalar.product vv3x scale)
+      (Scalar.product vv3y scale)
+      (Scalar.product vv3z scale)
 
 ----------------
 --- DIVISION ---
@@ -1182,6 +1529,13 @@ instance
     (Expression UvPoint (Qty units1))
     (Expression UvPoint (Qty units2))
     (Expression UvPoint (Qty units3))
+
+instance
+  Units.Quotient units1 units2 units3 =>
+  Division
+    (Expression UvwPoint (Qty units1))
+    (Expression UvwPoint (Qty units2))
+    (Expression UvwPoint (Qty units3))
 
 --- Vector2d-Qty ---
 --------------------
@@ -1217,6 +1571,13 @@ instance
     (Expression UvPoint (Qty units2))
     (Expression UvPoint (Vector3d (space @ units3)))
 
+instance
+  Units.Quotient units1 units2 units3 =>
+  Division
+    (Expression UvwPoint (Vector3d (space @ units1)))
+    (Expression UvwPoint (Qty units2))
+    (Expression UvwPoint (Vector3d (space @ units3)))
+
 ---------------------------
 --- Division' instances ---
 ---------------------------
@@ -1235,6 +1596,12 @@ instance Division' (Expression UvPoint (Qty units1)) (Expression UvPoint (Qty un
     Expression UvPoint (Qty units1) ./. Expression UvPoint (Qty units2) =
       Expression UvPoint (Qty (units1 :/: units2))
   Surface1d{s1x = lhs} ./. Surface1d{s1x = rhs} = surface1d (Scalar.quotient lhs rhs)
+
+instance Division' (Expression UvwPoint (Qty units1)) (Expression UvwPoint (Qty units2)) where
+  type
+    Expression UvwPoint (Qty units1) ./. Expression UvwPoint (Qty units2) =
+      Expression UvwPoint (Qty (units1 :/: units2))
+  Volume1d{v1x = lhs} ./. Volume1d{v1x = rhs} = volume1d (Scalar.quotient lhs rhs)
 
 --- Vector2d-Qty ---
 --------------------
@@ -1276,6 +1643,16 @@ instance Division' (Expression UvPoint (Vector3d (space @ units1))) (Expression 
       (Scalar.quotient vs3y scale)
       (Scalar.quotient vs3z scale)
 
+instance Division' (Expression UvwPoint (Vector3d (space @ units1))) (Expression UvwPoint (Qty units2)) where
+  type
+    Expression UvwPoint (Vector3d (space @ units1)) ./. Expression UvwPoint (Qty units2) =
+      Expression UvwPoint (Vector3d (space @ (units1 :/: units2)))
+  VectorVolume3d{vv3x, vv3y, vv3z} ./. Volume1d{v1x = scale} =
+    vectorVolume3d
+      (Scalar.quotient vv3x scale)
+      (Scalar.quotient vv3y scale)
+      (Scalar.quotient vv3z scale)
+
 -------------------
 --- DOT PRODUCT ---
 -------------------
@@ -1310,6 +1687,13 @@ instance
     (Expression UvPoint (Vector3d (space1 @ units1)))
     (Expression UvPoint (Vector3d (space2 @ units2)))
     (Expression UvPoint (Qty units3))
+
+instance
+  (space1 ~ space2, Units.Product units1 units2 units3) =>
+  DotMultiplication
+    (Expression UvwPoint (Vector3d (space1 @ units1)))
+    (Expression UvwPoint (Vector3d (space2 @ units2)))
+    (Expression UvwPoint (Qty units3))
 
 --- DotMultiplication' instances ---
 ------------------------------------
@@ -1374,6 +1758,23 @@ instance
           (Scalar.sum (Scalar.product x1 x2) (Scalar.product y1 y2))
           (Scalar.product z1 z2)
 
+instance
+  space1 ~ space2 =>
+  DotMultiplication'
+    (Expression UvwPoint (Vector3d (space1 @ units1)))
+    (Expression UvwPoint (Vector3d (space2 @ units2)))
+  where
+  type
+    Expression UvwPoint (Vector3d (space1 @ units1))
+      .<>. Expression UvwPoint (Vector3d (space2 @ units2)) =
+      Expression UvwPoint (Qty (units1 :*: units2))
+  VectorVolume3d{vv3x = x1, vv3y = y1, vv3z = z1}
+    .<>. VectorVolume3d{vv3x = x2, vv3y = y2, vv3z = z2} =
+      volume1d $
+        Scalar.sum
+          (Scalar.sum (Scalar.product x1 x2) (Scalar.product y1 y2))
+          (Scalar.product z1 z2)
+
 ---------------------
 --- CROSS PRODUCT ---
 ---------------------
@@ -1408,6 +1809,13 @@ instance
     (Expression UvPoint (Vector3d (space1 @ units1)))
     (Expression UvPoint (Vector3d (space2 @ units2)))
     (Expression UvPoint (Vector3d (space1 @ units3)))
+
+instance
+  (space1 ~ space2, Units.Product units1 units2 units3) =>
+  CrossMultiplication
+    (Expression UvwPoint (Vector3d (space1 @ units1)))
+    (Expression UvwPoint (Vector3d (space2 @ units2)))
+    (Expression UvwPoint (Vector3d (space1 @ units3)))
 
 --- CrossMultiplication' instances ---
 --------------------------------------
@@ -1468,6 +1876,23 @@ instance
   VectorSurface3d{vs3x = x1, vs3y = y1, vs3z = z1}
     .><. VectorSurface3d{vs3x = x2, vs3y = y2, vs3z = z2} =
       vectorSurface3d
+        (Scalar.difference (Scalar.product y1 z2) (Scalar.product z1 y2))
+        (Scalar.difference (Scalar.product z1 x2) (Scalar.product x1 z2))
+        (Scalar.difference (Scalar.product x1 y2) (Scalar.product y1 x2))
+
+instance
+  space1 ~ space2 =>
+  CrossMultiplication'
+    (Expression UvwPoint (Vector3d (space1 @ units1)))
+    (Expression UvwPoint (Vector3d (space2 @ units2)))
+  where
+  type
+    Expression UvwPoint (Vector3d (space1 @ units1))
+      .><. Expression UvwPoint (Vector3d (space2 @ units2)) =
+      Expression UvwPoint (Vector3d (space1 @ (units1 :*: units2)))
+  VectorVolume3d{vv3x = x1, vv3y = y1, vv3z = z1}
+    .><. VectorVolume3d{vv3x = x2, vv3y = y2, vv3z = z2} =
+      vectorVolume3d
         (Scalar.difference (Scalar.product y1 z2) (Scalar.product z1 y2))
         (Scalar.difference (Scalar.product z1 x2) (Scalar.product x1 z2))
         (Scalar.difference (Scalar.product x1 y2) (Scalar.product y1 x2))
@@ -1550,6 +1975,9 @@ instance Zero Float (Qty units) where
 instance Zero UvPoint (Qty units) where
   zero = constant Qty.zero
 
+instance Zero UvwPoint (Qty units) where
+  zero = constant Qty.zero
+
 instance Zero Float (Vector2d (space @ units)) where
   zero = constant Vector2d.zero
 
@@ -1560,6 +1988,9 @@ instance Zero Float (Vector3d (space @ units)) where
   zero = constant Vector3d.zero
 
 instance Zero UvPoint (Vector3d (space @ units)) where
+  zero = constant Vector3d.zero
+
+instance Zero UvwPoint (Vector3d (space @ units)) where
   zero = constant Vector3d.zero
 
 class Origin input output where
@@ -1586,6 +2017,9 @@ instance Constant Float (Qty units) where
 instance Constant UvPoint (Qty units) where
   constant qty = surface1d (Scalar.constant qty)
 
+instance Constant UvwPoint (Qty units) where
+  constant qty = volume1d (Scalar.constant qty)
+
 instance Constant Float (Vector2d (space @ units)) where
   constant (Vector2d x y) =
     vectorCurve2d (Scalar.constant x) (Scalar.constant y)
@@ -1601,6 +2035,10 @@ instance Constant Float (Vector3d (space @ units)) where
 instance Constant UvPoint (Vector3d (space @ units)) where
   constant (Vector3d x y z) =
     vectorSurface3d (Scalar.constant x) (Scalar.constant y) (Scalar.constant z)
+
+instance Constant UvwPoint (Vector3d (space @ units)) where
+  constant (Vector3d x y z) =
+    vectorVolume3d (Scalar.constant x) (Scalar.constant y) (Scalar.constant z)
 
 instance Constant Float (Point2d (space @ units)) where
   constant (Point2d x y) =
@@ -1649,6 +2087,9 @@ instance XYZ Float (Vector3d (space @ units)) where
 instance XYZ UvPoint (Vector3d (space @ units)) where
   xyz Surface1d{s1x = x} Surface1d{s1x = y} Surface1d{s1x = z} = vectorSurface3d x y z
 
+instance XYZ UvwPoint (Vector3d (space @ units)) where
+  xyz Volume1d{v1x = x} Volume1d{v1x = y} Volume1d{v1x = z} = vectorVolume3d x y z
+
 instance XYZ Float (Point3d (space @ units)) where
   xyz Curve1d{c1x = x} Curve1d{c1x = y} Curve1d{c1x = z} = curve3d x y z
 
@@ -1671,6 +2112,7 @@ instance XComponent input (Vector2d (space @ units)) where
 instance XComponent input (Vector3d (space @ units)) where
   xComponent VectorCurve3d{vc3x} = curve1d vc3x
   xComponent VectorSurface3d{vs3x} = surface1d vs3x
+  xComponent VectorVolume3d{vv3x} = volume1d vv3x
 
 instance YComponent input (Vector2d (space @ units)) where
   yComponent VectorCurve2d{vc2y} = curve1d vc2y
@@ -1679,10 +2121,12 @@ instance YComponent input (Vector2d (space @ units)) where
 instance YComponent input (Vector3d (space @ units)) where
   yComponent VectorCurve3d{vc3y} = curve1d vc3y
   yComponent VectorSurface3d{vs3y} = surface1d vs3y
+  yComponent VectorVolume3d{vv3y} = volume1d vv3y
 
 instance ZComponent input (Vector3d (space @ units)) where
   zComponent VectorCurve3d{vc3z} = curve1d vc3z
   zComponent VectorSurface3d{vs3z} = surface1d vs3z
+  zComponent VectorVolume3d{vv3z} = volume1d vv3z
 
 class XCoordinate input output where
   xCoordinate :: Expression input output -> Expression input (Qty (UnitsOf output))
@@ -1725,15 +2169,28 @@ class U input where
 class V input where
   v :: Expression input Float
 
+class W input where
+  w :: Expression input Float
+
 instance U UvPoint where
   u = surface1d (Scalar.surfaceParameter SurfaceParameter.U)
 
 instance V UvPoint where
   v = surface1d (Scalar.surfaceParameter SurfaceParameter.V)
 
+instance U UvwPoint where
+  u = volume1d (Scalar.volumeParameter VolumeParameter.U)
+
+instance V UvwPoint where
+  v = volume1d (Scalar.volumeParameter VolumeParameter.V)
+
+instance W UvwPoint where
+  w = volume1d (Scalar.volumeParameter VolumeParameter.W)
+
 squared' :: Expression input (Qty units) -> Expression input (Qty (units :*: units))
 squared' Curve1d{c1x} = curve1d (Scalar.squared c1x)
 squared' Surface1d{s1x} = surface1d (Scalar.squared s1x)
+squared' Volume1d{v1x} = volume1d (Scalar.squared v1x)
 
 squared ::
   Units.Squared units1 units2 =>
@@ -1744,6 +2201,7 @@ squared = Units.specialize . squared'
 sqrt' :: Expression input (Qty (units :*: units)) -> Expression input (Qty units)
 sqrt' Curve1d{c1x} = curve1d (Scalar.sqrt c1x)
 sqrt' Surface1d{s1x} = surface1d (Scalar.sqrt s1x)
+sqrt' Volume1d{v1x} = volume1d (Scalar.sqrt v1x)
 
 sqrt ::
   Units.Squared units1 units2 =>
@@ -1754,10 +2212,12 @@ sqrt = sqrt' . Units.unspecialize
 sin :: Expression input Angle -> Expression input Float
 sin Curve1d{c1x} = curve1d (Scalar.sin c1x)
 sin Surface1d{s1x} = surface1d (Scalar.sin s1x)
+sin Volume1d{v1x} = volume1d (Scalar.sin v1x)
 
 cos :: Expression input Angle -> Expression input Float
 cos Curve1d{c1x} = curve1d (Scalar.cos c1x)
 cos Surface1d{s1x} = surface1d (Scalar.cos s1x)
+cos Volume1d{v1x} = volume1d (Scalar.cos v1x)
 
 class QuadraticSpline output where
   quadraticSpline :: output -> output -> output -> Expression Float output
@@ -1865,6 +2325,9 @@ class CurveDerivative expression derivative | expression -> derivative where
 class SurfaceDerivative expression derivative | expression -> derivative where
   surfaceDerivative :: SurfaceParameter -> expression -> derivative
 
+class VolumeDerivative expression derivative | expression -> derivative where
+  volumeDerivative :: VolumeParameter -> expression -> derivative
+
 instance
   CurveDerivative
     (Expression Float (Qty units))
@@ -1879,6 +2342,15 @@ instance
   where
   surfaceDerivative SurfaceParameter.U = s1du
   surfaceDerivative SurfaceParameter.V = s1dv
+
+instance
+  VolumeDerivative
+    (Expression UvwPoint (Qty units))
+    (Expression UvwPoint (Qty units))
+  where
+  volumeDerivative VolumeParameter.U = v1du
+  volumeDerivative VolumeParameter.V = v1dv
+  volumeDerivative VolumeParameter.W = v1dw
 
 instance
   CurveDerivative
@@ -1940,6 +2412,15 @@ instance
   surfaceDerivative SurfaceParameter.U = s3du
   surfaceDerivative SurfaceParameter.V = s3dv
 
+instance
+  VolumeDerivative
+    (Expression UvwPoint (Vector3d (space @ units)))
+    (Expression UvwPoint (Vector3d (space @ units)))
+  where
+  volumeDerivative VolumeParameter.U = vv3du
+  volumeDerivative VolumeParameter.V = vv3dv
+  volumeDerivative VolumeParameter.W = vv3dw
+
 -----------------
 --- COMPILING ---
 -----------------
@@ -1951,6 +2432,10 @@ type Curve1dBoundsFunction = Double -> Double -> Ptr Double -> IO ()
 type Surface1dValueFunction = Double -> Double -> Double
 
 type Surface1dBoundsFunction = Double -> Double -> Double -> Double -> Ptr Double -> IO ()
+
+type Volume1dValueFunction = Double -> Double -> Double -> Double
+
+type Volume1dBoundsFunction = Double -> Double -> Double -> Double -> Double -> Double -> Ptr Double -> IO ()
 
 type Curve2dValueFunction = Double -> Ptr Double -> IO ()
 
@@ -1968,6 +2453,10 @@ type Surface3dValueFunction = Double -> Double -> Ptr Double -> IO ()
 
 type Surface3dBoundsFunction = Double -> Double -> Double -> Double -> Ptr Double -> IO ()
 
+type Volume3dValueFunction = Double -> Double -> Double -> Ptr Double -> IO ()
+
+type Volume3dBoundsFunction = Double -> Double -> Double -> Double -> Double -> Double -> Ptr Double -> IO ()
+
 foreign import ccall unsafe "opensolid_curve1d_value_function"
   opensolid_curve1d_value_function :: Scalar.Ptr -> FunPtr Curve1dValueFunction
 
@@ -1979,6 +2468,12 @@ foreign import ccall unsafe "opensolid_surface1d_value_function"
 
 foreign import ccall unsafe "opensolid_surface1d_bounds_function"
   opensolid_surface1d_bounds_function :: Scalar.Ptr -> FunPtr Surface1dBoundsFunction
+
+foreign import ccall unsafe "opensolid_volume1d_value_function"
+  opensolid_volume1d_value_function :: Scalar.Ptr -> FunPtr Volume1dValueFunction
+
+foreign import ccall unsafe "opensolid_volume1d_bounds_function"
+  opensolid_volume1d_bounds_function :: Scalar.Ptr -> FunPtr Volume1dBoundsFunction
 
 foreign import ccall unsafe "opensolid_curve2d_value_function"
   opensolid_curve2d_value_function :: Scalar.Ptr -> Scalar.Ptr -> FunPtr Curve2dValueFunction
@@ -2004,6 +2499,12 @@ foreign import ccall unsafe "opensolid_surface3d_value_function"
 foreign import ccall unsafe "opensolid_surface3d_bounds_function"
   opensolid_surface3d_bounds_function :: Scalar.Ptr -> Scalar.Ptr -> Scalar.Ptr -> FunPtr Surface3dBoundsFunction
 
+foreign import ccall unsafe "opensolid_volume3d_value_function"
+  opensolid_volume3d_value_function :: Scalar.Ptr -> Scalar.Ptr -> Scalar.Ptr -> FunPtr Volume3dValueFunction
+
+foreign import ccall unsafe "opensolid_volume3d_bounds_function"
+  opensolid_volume3d_bounds_function :: Scalar.Ptr -> Scalar.Ptr -> Scalar.Ptr -> FunPtr Volume3dBoundsFunction
+
 foreign import ccall unsafe "dynamic"
   curve1d_value_function :: FunPtr Curve1dValueFunction -> Curve1dValueFunction
 
@@ -2015,6 +2516,12 @@ foreign import ccall unsafe "dynamic"
 
 foreign import ccall unsafe "dynamic"
   surface1d_bounds_function :: FunPtr Surface1dBoundsFunction -> Surface1dBoundsFunction
+
+foreign import ccall unsafe "dynamic"
+  volume1d_value_function :: FunPtr Volume1dValueFunction -> Volume1dValueFunction
+
+foreign import ccall unsafe "dynamic"
+  volume1d_bounds_function :: FunPtr Volume1dBoundsFunction -> Volume1dBoundsFunction
 
 foreign import ccall unsafe "dynamic"
   curve2d_value_function :: FunPtr Curve2dValueFunction -> Curve2dValueFunction
@@ -2039,6 +2546,12 @@ foreign import ccall unsafe "dynamic"
 
 foreign import ccall unsafe "dynamic"
   surface3d_bounds_function :: FunPtr Surface3dBoundsFunction -> Surface3dBoundsFunction
+
+foreign import ccall unsafe "dynamic"
+  volume3d_value_function :: FunPtr Volume3dValueFunction -> Volume3dValueFunction
+
+foreign import ccall unsafe "dynamic"
+  volume3d_bounds_function :: FunPtr Volume3dBoundsFunction -> Volume3dBoundsFunction
 
 -- TODO perform garbage collection on JIT-compiled functions:
 -- use GHC.Weak.mkWeak on f# to associate a finalizer with it
@@ -2089,6 +2602,30 @@ instance
       let Range (Qty vLow) (Qty vHigh) = vRange
       outputs <- Alloc.mallocBytes 16
       s1b uLow uHigh vLow vHigh outputs
+      low <- Foreign.peekElemOff outputs 0
+      high <- Foreign.peekElemOff outputs 1
+      Alloc.free outputs
+      IO.succeed (Range (Qty low) (Qty high))
+
+instance
+  Evaluation
+    UvwPoint
+    (Qty units)
+    UvwBounds
+    (Range units)
+  where
+  evaluate Volume1d{v1v} uvwPoint = do
+    let Point3d (Qty uValue) (Qty vValue) (Qty wValue) = uvwPoint
+    Qty (v1v uValue vValue wValue)
+
+  evaluateBounds Volume1d{v1b} uvwBounds =
+    unsafeDupablePerformIO IO.do
+      let Bounds3d uRange vRange wRange = uvwBounds
+      let Range (Qty uLow) (Qty uHigh) = uRange
+      let Range (Qty vLow) (Qty vHigh) = vRange
+      let Range (Qty wLow) (Qty wHigh) = wRange
+      outputs <- Alloc.mallocBytes 16
+      v1b uLow uHigh vLow vHigh wLow wHigh outputs
       low <- Foreign.peekElemOff outputs 0
       high <- Foreign.peekElemOff outputs 1
       Alloc.free outputs
@@ -2350,6 +2887,44 @@ instance
       let Range (Qty vLow) (Qty vHigh) = vRange
       outputs <- Alloc.mallocBytes 48
       vs3b uLow uHigh vLow vHigh outputs
+      xLow <- Foreign.peekElemOff outputs 0
+      xHigh <- Foreign.peekElemOff outputs 1
+      yLow <- Foreign.peekElemOff outputs 2
+      yHigh <- Foreign.peekElemOff outputs 3
+      zLow <- Foreign.peekElemOff outputs 4
+      zHigh <- Foreign.peekElemOff outputs 5
+      let xRange = Range (Qty xLow) (Qty xHigh)
+      let yRange = Range (Qty yLow) (Qty yHigh)
+      let zRange = Range (Qty zLow) (Qty zHigh)
+      Alloc.free outputs
+      IO.succeed (VectorBounds3d xRange yRange zRange)
+
+instance
+  Evaluation
+    UvwPoint
+    (Vector3d (space @ units))
+    UvwBounds
+    (VectorBounds3d (space @ units))
+  where
+  evaluate VectorVolume3d{vv3v} uvwPoint =
+    unsafeDupablePerformIO IO.do
+      let Point3d (Qty uValue) (Qty vValue) (Qty wValue) = uvwPoint
+      outputs <- Alloc.mallocBytes 24
+      vv3v uValue vValue wValue outputs
+      vx <- Foreign.peekElemOff outputs 0
+      vy <- Foreign.peekElemOff outputs 1
+      vz <- Foreign.peekElemOff outputs 2
+      Alloc.free outputs
+      IO.succeed (Vector3d.xyz (Qty vx) (Qty vy) (Qty vz))
+
+  evaluateBounds VectorVolume3d{vv3b} uvwBounds =
+    unsafeDupablePerformIO IO.do
+      let Bounds3d uRange vRange wRange = uvwBounds
+      let Range (Qty uLow) (Qty uHigh) = uRange
+      let Range (Qty vLow) (Qty vHigh) = vRange
+      let Range (Qty wLow) (Qty wHigh) = wRange
+      outputs <- Alloc.mallocBytes 48
+      vv3b uLow uHigh vLow vHigh wLow wHigh outputs
       xLow <- Foreign.peekElemOff outputs 0
       xHigh <- Foreign.peekElemOff outputs 1
       yLow <- Foreign.peekElemOff outputs 2
