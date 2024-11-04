@@ -40,7 +40,6 @@ import Error qualified
 import {-# SOURCE #-} Frame2d (Frame2d)
 import OpenSolid
 import {-# SOURCE #-} Point2d (Point2d)
-import Qty (Qty (Qty#))
 import Qty qualified
 import Random qualified
 import Transform qualified
@@ -172,7 +171,7 @@ fromAngle :: Angle -> Direction2d space
 fromAngle angle = unsafe (Vector2d.polar 1.0 angle)
 
 toAngle :: Direction2d space -> Angle
-toAngle (Unit (Vector2d# dx dy)) = Angle.atan2 (Qty# dy) (Qty# dx)
+toAngle (Unit vector) = Vector2d.angle vector
 
 degrees :: Float -> Direction2d space
 degrees value = fromAngle (Angle.degrees value)
