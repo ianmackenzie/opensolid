@@ -1,10 +1,8 @@
 module Array
   ( Array
+  , fromNonEmpty
+  , toNonEmpty
   , length
-  , empty
-  , initialize
-  , fromList
-  , toList
   , get
   , map
   , foldl
@@ -12,42 +10,39 @@ module Array
   )
 where
 
+import Data.Array ((!))
 import Data.Array qualified
 import Data.Foldable qualified
-import List qualified
+import NonEmpty qualified
 import OpenSolid
-import Pair qualified
 import Prelude qualified
 
-type Array a = Data.Array.Array Int a
+data Array a = Array Int (Data.Array.Array Int a)
 
+fromNonEmpty :: NonEmpty a -> Array a
+fromNonEmpty items = do
+  let n = NonEmpty.length items
+  Array n (Data.Array.listArray (0, n - 1) (NonEmpty.toList items))
+
+toNonEmpty :: Array a -> NonEmpty a
+toNonEmpty (Array _ array) =
+  case Data.Array.elems array of
+    NonEmpty items -> items
+    [] -> internalError "Array should never be empty"
+
+{-# INLINE length #-}
 length :: Array a -> Int
-length array = Pair.second (Data.Array.bounds array) + 1
+length (Array n _) = n
 
-empty :: Array a
-empty = Data.Array.array (0, -1) []
-
-initialize :: Int -> (Int -> a) -> Array a
-initialize n function = Data.Array.array (0, n - 1) [(i, function i) | i <- [0 .. n - 1]]
-
-fromList :: List a -> Array a
-fromList items = Data.Array.listArray (0, List.length items - 1) items
-
-toList :: Array a -> List a
-toList = Data.Array.elems
-
-get :: Int -> Array a -> Maybe a
-get index array = do
-  let (_, i) = Data.Array.bounds array
-  if index >= 0 && index <= i
-    then Just (array Data.Array.! index)
-    else Nothing
+{-# INLINE get #-}
+get :: Int -> Array a -> a
+get index (Array n array) = array ! (index % n)
 
 map :: (a -> b) -> Array a -> Array b
-map = Prelude.fmap
+map f (Array n array) = Array n (Prelude.fmap f array)
 
 foldl :: (b -> a -> b) -> b -> Array a -> b
-foldl = Data.Foldable.foldl'
+foldl f init (Array _ array) = Data.Foldable.foldl' f init array
 
 foldr :: (a -> b -> b) -> b -> Array a -> b
-foldr = Data.Foldable.foldr
+foldr f init (Array _ array) = Data.Foldable.foldr f init array

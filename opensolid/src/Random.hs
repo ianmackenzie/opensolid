@@ -22,7 +22,8 @@ import Arithmetic
 import Array qualified
 import Basics
 import Composition
-import Data.List.NonEmpty (NonEmpty ((:|)))
+import Data.List.NonEmpty (NonEmpty)
+import Int qualified
 import Pair qualified
 import Random.Internal hiding ((>>=))
 import Random.Internal qualified
@@ -78,15 +79,12 @@ either firstGenerator secondGenerator = Random.do
   if coinFlip then firstGenerator else secondGenerator
 
 oneOf :: NonEmpty (Generator a) -> Generator a
-oneOf (firstGenerator :| remainingGenerators) = do
-  let array = Array.fromList remainingGenerators
-  let n = Array.length array
-  let indexGenerator = Generator (System.Random.uniformR (0, n))
+oneOf generators = do
+  let generatorArray = Array.fromNonEmpty generators
+  let indexGenerator = Int.random 0 (Array.length generatorArray - 1)
   Random.do
     index <- indexGenerator
-    case Array.get (index - 1) array of
-      Just generator -> generator
-      Nothing -> firstGenerator
+    Array.get index generatorArray
 
 retry :: Generator (Result x a) -> Generator a
 retry fallibleGenerator = Random.do
