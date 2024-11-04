@@ -4,7 +4,7 @@ module Map
   , isEmpty
   , size
   , singleton
-  , fromList
+  , fromKeyValuePairs
   , toList
   , get
   , take
@@ -48,8 +48,8 @@ size = Data.Map.Strict.size
 singleton :: k -> v -> Map k v
 singleton = Data.Map.Strict.singleton
 
-fromList :: Ord k => List (k, v) -> Map k v
-fromList = Data.Map.Strict.fromList
+fromKeyValuePairs :: Ord k => List (k, v) -> Map k v
+fromKeyValuePairs = Data.Map.Strict.fromList
 
 toList :: Map k v -> List (k, v)
 toList = Data.Map.Strict.toList

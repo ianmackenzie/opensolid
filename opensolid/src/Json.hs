@@ -66,7 +66,7 @@ list :: (a -> Json) -> List a -> Json
 list encodeItem items = List (List.map encodeItem items)
 
 object :: List (Text, Json) -> Json
-object fields = Map (Map.fromList fields)
+object fields = Map (Map.fromKeyValuePairs fields)
 
 map :: Map Text Json -> Json
 map = Map

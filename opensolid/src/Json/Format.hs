@@ -151,7 +151,7 @@ decodeMap decodeItem json = case json of
   Json.Map fields ->
     Map.toList fields
       |> Result.collect (decodeMapField decodeItem)
-      |> Result.map Map.fromList
+      |> Result.map Map.fromKeyValuePairs
   _ -> Failure "Expected a map"
 
 decodeMapField :: (Json -> Result Text a) -> (Text, Json) -> Result Text (Text, a)

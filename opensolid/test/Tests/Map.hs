@@ -14,7 +14,7 @@ tests =
   ]
 
 simpleMap :: Map Int Text
-simpleMap = Map.fromList [(1, "a"), (2, "b"), (3, "c")]
+simpleMap = Map.fromKeyValuePairs [(1, "a"), (2, "b"), (3, "c")]
 
 foldl :: Test
 foldl = Test.verify "foldl" Test.do
@@ -33,7 +33,7 @@ take =
   Test.group "take" $
     [ Test.verify "exists" Test.do
         let actual = Map.take 2 simpleMap
-        let expected = (Just "b", Map.fromList [(1, "a"), (3, "c")])
+        let expected = (Just "b", Map.fromKeyValuePairs [(1, "a"), (3, "c")])
         Test.expect (actual == expected)
     , Test.verify "does not exist" Test.do
         let actual = Map.take 4 simpleMap
