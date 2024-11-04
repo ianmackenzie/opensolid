@@ -61,7 +61,6 @@ import Expression (Expression)
 import Expression qualified
 import Expression.Curve1d qualified
 import Expression.VectorCurve3d qualified
-import Float qualified
 import Frame3d (Frame3d)
 import Frame3d qualified
 import List qualified
@@ -343,24 +342,6 @@ instance Division' (VectorCurve3d (space @ units1)) (Qty units2) where
       VectorCurve3d (space @ (units1 :/: units2))
   curve ./. value = curve ./. Curve1d.constant value
 
-instance Division' (VectorCurve3d (space @ units)) Int where
-  type VectorCurve3d (space @ units) ./. Int = VectorCurve3d (space @ (units :/: Unitless))
-  curve ./. value = curve ./. Float.int value
-
-instance Division (VectorCurve3d (space @ units)) Int (VectorCurve3d (space @ units))
-
-instance Multiplication' (VectorCurve3d (space @ units)) Int where
-  type VectorCurve3d (space @ units) .*. Int = VectorCurve3d (space @ (units :*: Unitless))
-  curve .*. scale = curve .*. Float.int scale
-
-instance Multiplication' Int (VectorCurve3d (space @ units)) where
-  type Int .*. VectorCurve3d (space @ units) = VectorCurve3d (space @ (Unitless :*: units))
-  scale .*. curve = Float.int scale .*. curve
-
-instance Multiplication (VectorCurve3d (space @ units)) Int (VectorCurve3d (space @ units))
-
-instance Multiplication Int (VectorCurve3d (space @ units)) (VectorCurve3d (space @ units))
-
 data DotProductOf space units1 units2
   = DotProductOf (VectorCurve3d (space @ units1)) (VectorCurve3d (space @ units2))
   deriving (Show)
@@ -637,7 +618,7 @@ evaluate curve tValue = case curve of
   VectorCurve3d c -> evaluateImpl c tValue
   Parametric expression -> Expression.evaluate expression tValue
   Coerce c -> Units.coerce (evaluate c tValue)
-  Reversed c -> evaluate c (1 - tValue)
+  Reversed c -> evaluate c (1.0 - tValue)
   XYZ x y z ->
     Vector3d.xyz (Curve1d.evaluate x tValue) (Curve1d.evaluate y tValue) (Curve1d.evaluate z tValue)
   Negated c -> negate (evaluate c tValue)
@@ -655,7 +636,7 @@ evaluateBounds curve tRange = case curve of
   VectorCurve3d c -> evaluateBoundsImpl c tRange
   Parametric expression -> Expression.evaluateBounds expression tRange
   Coerce c -> Units.coerce (evaluateBounds c tRange)
-  Reversed c -> evaluateBounds c (1 - tRange)
+  Reversed c -> evaluateBounds c (1.0 - tRange)
   XYZ x y z ->
     VectorBounds3d
       (Curve1d.evaluateBounds x tRange)
@@ -723,7 +704,7 @@ instance Curve1d.Interface (SquaredMagnitude' (space @ units)) (units :*: units)
     VectorBounds3d.squaredMagnitude' (evaluateBounds curve tRange)
 
   derivativeImpl (SquaredMagnitude' curve) =
-    2 * curve .<>. derivative curve
+    2.0 * curve .<>. derivative curve
 
 squaredMagnitude :: Units.Squared units1 units2 => VectorCurve3d (space @ units1) -> Curve1d units2
 squaredMagnitude curve = Units.specialize (squaredMagnitude' curve)

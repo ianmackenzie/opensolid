@@ -122,7 +122,7 @@ area = Test.verify "area" Test.do
   let curve = Arc2d.polar Point2d.origin Length.meter Angle.pi Angle.zero
   let dAdt = Curve2d.yCoordinate curve * VectorCurve2d.xComponent (Curve2d.derivative curve)
   let areaEstimate = Curve1d.integral dAdt
-  let expectedArea = Area.squareMeters (Float.pi / 2)
+  let expectedArea = Area.squareMeters (Float.pi / 2.0)
   areaIsCorrect <- Tolerance.using (Area.squareMeters 1e-4) (resolvesTo expectedArea areaEstimate)
   Test.expect areaIsCorrect
 

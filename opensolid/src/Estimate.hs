@@ -28,7 +28,6 @@ module Estimate
   )
 where
 
-import Float qualified
 import List qualified
 import NonEmpty qualified
 import OpenSolid
@@ -116,8 +115,8 @@ instance Interface (Add units) units where
     let width1 = Range.width (bounds first)
     let width2 = Range.width (bounds second)
     if
-      | width1 >= 2 * width2 -> refine first + second
-      | width2 >= 2 * width1 -> first + refine second
+      | width1 >= 2.0 * width2 -> refine first + second
+      | width2 >= 2.0 * width1 -> first + refine second
       | otherwise -> refine first + refine second
 
 instance Addition (Estimate units) (Estimate units) (Estimate units) where
@@ -129,12 +128,6 @@ instance Addition (Estimate units) (Qty units) (Estimate units) where
 instance Addition (Qty units) (Estimate units) (Estimate units) where
   value + estimate = exact value + estimate
 
-instance Addition (Estimate Unitless) Int (Estimate Unitless) where
-  estimate + n = estimate + Float.int n
-
-instance Addition Int (Estimate Unitless) (Estimate Unitless) where
-  n + estimate = Float.int n + estimate
-
 data Subtract units = Subtract (Estimate units) (Estimate units)
 
 instance Interface (Subtract units) units where
@@ -143,8 +136,8 @@ instance Interface (Subtract units) units where
     let width1 = Range.width (bounds first)
     let width2 = Range.width (bounds second)
     if
-      | width1 >= 2 * width2 -> refine first - second
-      | width2 >= 2 * width1 -> first - refine second
+      | width1 >= 2.0 * width2 -> refine first - second
+      | width2 >= 2.0 * width1 -> first - refine second
       | otherwise -> refine first - refine second
 
 instance Subtraction (Estimate units) (Estimate units) (Estimate units) where
@@ -155,12 +148,6 @@ instance Subtraction (Estimate units) (Qty units) (Estimate units) where
 
 instance Subtraction (Qty units) (Estimate units) (Estimate units) where
   value - estimate = exact value - estimate
-
-instance Subtraction (Estimate Unitless) Int (Estimate Unitless) where
-  estimate - n = estimate - Float.int n
-
-instance Subtraction Int (Estimate Unitless) (Estimate Unitless) where
-  n - estimate = Float.int n - estimate
 
 data Product units1 units2 = Product (Estimate units1) (Estimate units2)
 
@@ -192,14 +179,6 @@ instance Multiplication' (Qty units1) (Estimate units2) where
   type Qty units1 .*. Estimate units2 = Estimate (units1 :*: units2)
   value .*. estimate = new (Product (exact value) estimate)
 
-instance Multiplication' (Estimate units) Int where
-  type Estimate units .*. Int = Estimate (units :*: Unitless)
-  estimate .*. n = estimate .*. Float.int n
-
-instance Multiplication' Int (Estimate units) where
-  type Int .*. Estimate units = Estimate (Unitless :*: units)
-  n .*. estimate = Float.int n .*. estimate
-
 instance
   Units.Product units1 units2 units3 =>
   Multiplication
@@ -221,10 +200,6 @@ instance
     (Estimate units2)
     (Estimate units3)
 
-instance Multiplication (Estimate units) Int (Estimate units)
-
-instance Multiplication Int (Estimate units) (Estimate units)
-
 instance Division' (Estimate units1) (Qty units2) where
   type Estimate units1 ./. Qty units2 = Estimate (units1 :/: units2)
   estimate ./. value = estimate ^*. (1.0 ./. value)
@@ -235,12 +210,6 @@ instance
     (Estimate units1)
     (Qty units2)
     (Estimate units3)
-
-instance Division' (Estimate units) Int where
-  type Estimate units ./. Int = Estimate (units :/: Unitless)
-  estimate ./. n = estimate ./. Float.int n
-
-instance Division (Estimate units) Int (Estimate units)
 
 newtype Sum units = Sum (NonEmpty (Estimate units))
 

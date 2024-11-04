@@ -65,9 +65,9 @@ quadratic subproblem saddlePoint = do
   let vB = Direction2d.unwrap dB
   let (ua, va) = Vector2d.components vA
   let (ub, vb) = Vector2d.components vB
-  let faa = ua * ua * fuu + 2 * ua * va * fuv + va * va * fvv
+  let faa = ua * ua * fuu + 2.0 * ua * va * fuv + va * va * fvv
   let fab = ua * ub * fuu + (ua * vb + ub * va) * fuv + va * vb * fvv
-  let fbb = ub * ub * fuu + 2 * ub * vb * fuv + vb * vb * fvv
+  let fbb = ub * ub * fuu + 2.0 * ub * vb * fuv + vb * vb * fvv
   let determinant = fab .*. fab - faa .*. faa
   let sqrtD = Qty.sqrt' determinant
   let m1 = (-fab + sqrtD) / fbb
@@ -84,7 +84,7 @@ quadratic subproblem saddlePoint = do
 secondDerivative :: Qty units -> Qty units -> Qty units -> UvDirection -> Qty units
 secondDerivative fuu fuv fvv direction = do
   let (du, dv) = Direction2d.components direction
-  du * du * fuu + 2 * du * dv * fuv + dv * dv * fvv
+  du * du * fuu + 2.0 * du * dv * fuv + dv * dv * fvv
 
 connectingCurves ::
   Tolerance units =>

@@ -72,8 +72,8 @@ squareWithHole = Test.verify "squareWithHole" Test.do
   let line2 = Line2d.from p2 p3
   let line3 = Line2d.from p4 p3
   let line4 = Line2d.from p4 p1
-  let centerPoint = Point2d.xy (width / 2) (width / 2)
-  let holeRadius = width / 4
+  let centerPoint = Point2d.xy (0.5 * width) (0.5 * width)
+  let holeRadius = 0.25 * width
   let hole = Arc2d.circle centerPoint holeRadius
   region <- Region2d.boundedBy [line1, line3, line2, line4, hole]
   let expectedArea = width * width - Float.pi * holeRadius * holeRadius
@@ -104,8 +104,8 @@ squareWithTangentHole = Test.verify "squareWithTangentHole" Test.do
   let line2 = Line2d.from p2 p3
   let line3 = Line2d.from p4 p3
   let line4 = Line2d.from p4 p1
-  let centerPoint = Point2d.xy (width / 2) (width / 2)
-  let holeRadius = width / 2
+  let centerPoint = Point2d.xy (0.5 * width) (0.5 * width)
+  let holeRadius = 0.5 * width
   let hole = Arc2d.circle centerPoint holeRadius
   case Region2d.boundedBy [line1, line2, line3, line4, hole] of
     Success _ -> Test.fail "Expected non-manifold region construction to fail"

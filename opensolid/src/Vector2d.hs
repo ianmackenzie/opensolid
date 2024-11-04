@@ -55,7 +55,6 @@ import Data.Coerce qualified
 import {-# SOURCE #-} Direction2d (Direction2d)
 import {-# SOURCE #-} Direction2d qualified
 import Error qualified
-import Float qualified
 import {-# SOURCE #-} Frame2d (Frame2d)
 import {-# SOURCE #-} Frame2d qualified
 import Length qualified
@@ -145,18 +144,6 @@ instance
   where
   Vector2d# x1 y1 - Vector2d# x2 y2 = Vector2d# (x1 -# x2) (y1 -# y2)
 
-instance Multiplication' Int (Vector2d (space @ units)) where
-  type Int .*. Vector2d (space @ units) = Vector2d (space @ (Unitless :*: units))
-  scale .*. vector = Float.int scale .*. vector
-
-instance Multiplication Int (Vector2d (space @ units)) (Vector2d (space @ units))
-
-instance Multiplication' (Vector2d (space @ units)) Int where
-  type Vector2d (space @ units) .*. Int = Vector2d (space @ (units :*: Unitless))
-  vector .*. scale = vector .*. Float.int scale
-
-instance Multiplication (Vector2d (space @ units)) Int (Vector2d (space @ units))
-
 instance Multiplication' (Qty units1) (Vector2d (space @ units2)) where
   type Qty units1 .*. Vector2d (space @ units2) = Vector2d (space @ (units1 :*: units2))
   Qty# scale# .*. Vector2d# vx# vy# = Vector2d# (scale# *# vx#) (scale# *# vy#)
@@ -180,12 +167,6 @@ instance Division' (Vector2d (space @ units1)) (Qty units2) where
 instance
   Units.Quotient units1 units2 units3 =>
   Division (Vector2d (space @ units1)) (Qty units2) (Vector2d (space @ units3))
-
-instance Division' (Vector2d (space @ units)) Int where
-  type Vector2d (space @ units) ./. Int = Vector2d (space @ (units :/: Unitless))
-  vector ./. scale = vector ./. Float.int scale
-
-instance Division (Vector2d (space @ units)) Int (Vector2d (space @ units))
 
 instance
   space ~ space_ =>
@@ -408,10 +389,10 @@ rotateBy :: Angle -> Vector2d (space @ units) -> Vector2d (space @ units)
 rotateBy theta = transformBy (Transform2d.rotateAround Point2d.origin theta)
 
 mirrorIn :: Direction2d space -> Vector2d (space @ units) -> Vector2d (space @ units)
-mirrorIn mirrorDirection vector = vector - 2 * projectionIn mirrorDirection vector
+mirrorIn mirrorDirection vector = vector - 2.0 * projectionIn mirrorDirection vector
 
 mirrorAcross :: Axis2d (space @ originUnits) -> Vector2d (space @ units) -> Vector2d (space @ units)
 mirrorAcross axis = mirrorIn (Axis2d.normalDirection axis)
 
 scaleIn :: Direction2d space -> Float -> Vector2d (space @ units) -> Vector2d (space @ units)
-scaleIn scaleDirection scale vector = vector + (scale - 1) * projectionIn scaleDirection vector
+scaleIn scaleDirection scale vector = vector + (scale - 1.0) * projectionIn scaleDirection vector

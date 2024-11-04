@@ -105,22 +105,6 @@ instance units ~ units_ => Subtraction (Qty units) (Qty units_) (Qty units) wher
   {-# INLINE (-) #-}
   Qty x - Qty y = Qty (x Prelude.- y)
 
-instance Addition (Qty Unitless) Int (Qty Unitless) where
-  {-# INLINE (+) #-}
-  x + y = x + Float.int y
-
-instance Addition Int (Qty Unitless) (Qty Unitless) where
-  {-# INLINE (+) #-}
-  x + y = Float.int x + y
-
-instance Subtraction (Qty Unitless) Int (Qty Unitless) where
-  {-# INLINE (-) #-}
-  x - y = x - Float.int y
-
-instance Subtraction Int (Qty Unitless) (Qty Unitless) where
-  {-# INLINE (-) #-}
-  x - y = Float.int x - y
-
 instance Multiplication' (Qty units1) (Qty units2) where
   type Qty units1 .*. Qty units2 = Qty (units1 :*: units2)
   {-# INLINE (.*.) #-}
@@ -145,39 +129,11 @@ instance
   {-# INLINEABLE (/) #-}
   Qty x / Qty y = Qty (x Prelude./ y)
 
-instance Multiplication' Int (Qty units) where
-  type Int .*. Qty units = Qty (Unitless :*: units)
-  {-# INLINE (.*.) #-}
-  n .*. x = Float.int n .*. x
-
-instance Multiplication Int (Qty units) (Qty units)
-
-instance Multiplication' (Qty units) Int where
-  type Qty units .*. Int = Qty (units :*: Unitless)
-  {-# INLINE (.*.) #-}
-  x .*. n = x .*. Float.int n
-
-instance Multiplication (Qty units) Int (Qty units)
-
-instance Division' (Qty units) Int where
-  type Qty units ./. Int = Qty (units :/: Unitless)
-  {-# INLINE (./.) #-}
-  x ./. n = x ./. Float.int n
-
-instance Division (Qty units) Int (Qty units)
-
-instance Division' Int (Qty units) where
-  type Int ./. Qty units = Qty (Unitless :/: units)
-  {-# INLINE (./.) #-}
-  n ./. x = Float.int n ./. x
-
-instance Units.Inverse units1 units2 => Division Int (Qty units1) (Qty units2)
-
 instance DivMod (Qty units) where
   {-# INLINE (//) #-}
   x // y = Prelude.floor (x / y)
   {-# INLINE (%) #-}
-  x % y = x - y * (x // y)
+  x % y = x - y * Float.int (x // y)
 
 {-# INLINE zero #-}
 zero :: Qty units

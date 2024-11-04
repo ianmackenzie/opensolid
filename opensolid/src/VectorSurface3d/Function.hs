@@ -23,7 +23,6 @@ import Composition
 import Direction3d (Direction3d)
 import Expression (Expression)
 import Expression qualified
-import Float qualified
 import OpenSolid
 import Surface1d qualified
 import Surface1d.Function qualified
@@ -277,24 +276,6 @@ instance Division' (Function (space @ units1)) (Qty units2) where
     Function (space @ units1) ./. Qty units2 =
       Function (space @ (units1 :/: units2))
   function ./. value = function ./. Surface1d.Function.constant value
-
-instance Division' (Function (space @ units)) Int where
-  type Function (space @ units) ./. Int = Function (space @ (units :/: Unitless))
-  function ./. value = function ./. Float.int value
-
-instance Division (Function (space @ units)) Int (Function (space @ units))
-
-instance Multiplication' (Function (space @ units)) Int where
-  type Function (space @ units) .*. Int = Function (space @ (units :*: Unitless))
-  function .*. scale = function .*. Float.int scale
-
-instance Multiplication' Int (Function (space @ units)) where
-  type Int .*. Function (space @ units) = Function (space @ (Unitless :*: units))
-  scale .*. function = Float.int scale .*. function
-
-instance Multiplication (Function (space @ units)) Int (Function (space @ units))
-
-instance Multiplication Int (Function (space @ units)) (Function (space @ units))
 
 instance
   (Units.Product units1 units2 units3, space ~ space_) =>

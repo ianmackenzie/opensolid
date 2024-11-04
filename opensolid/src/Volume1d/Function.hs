@@ -23,7 +23,6 @@ where
 import Angle qualified
 import Expression (Expression)
 import Expression qualified
-import Float qualified
 import OpenSolid
 import Qty qualified
 import Range (Range)
@@ -156,18 +155,6 @@ instance Multiplication' (Qty units1) (Function units2) where
   type Qty units1 .*. Function units2 = Function (units1 :*: units2)
   value .*. function = constant value .*. function
 
-instance Multiplication (Function units) Int (Function units)
-
-instance Multiplication' (Function units) Int where
-  type Function units .*. Int = Function (units :*: Unitless)
-  function .*. value = function .*. Float.int value
-
-instance Multiplication Int (Function units) (Function units)
-
-instance Multiplication' Int (Function units) where
-  type Int .*. Function units = Function (Unitless :*: units)
-  value .*. function = Float.int value .*. function
-
 instance
   Units.Quotient units1 units2 units3 =>
   Division (Function units1) (Function units2) (Function units3)
@@ -192,18 +179,6 @@ instance
 instance Division' (Qty units1) (Function units2) where
   type Qty units1 ./. Function units2 = Function (units1 :/: units2)
   value ./. function = constant value ./. function
-
-instance Division (Function units) Int (Function units)
-
-instance Division' (Function units) Int where
-  type Function units ./. Int = Function (units :/: Unitless)
-  function ./. value = function ./. Float.int value
-
-instance Units.Inverse units1 units2 => Division Int (Function units1) (Function units2)
-
-instance Division' Int (Function units) where
-  type Int ./. Function units = Function (Unitless :/: units)
-  value ./. function = Float.int value ./. function
 
 evaluate :: Function units -> UvwPoint -> Qty units
 evaluate function uvwPoint =
@@ -250,7 +225,7 @@ derivative varyingParameter function =
     Quotient' f1 f2 ->
       (derivative varyingParameter f1 .*. f2 - f1 .*. derivative varyingParameter f2)
         .!/.! squared' f2
-    Squared' f -> 2 * f .*. derivative varyingParameter f
+    Squared' f -> 2.0 * f .*. derivative varyingParameter f
     SquareRoot' f' -> derivative varyingParameter f' .!/! (2.0 * function)
     Sin f -> cos f * (derivative varyingParameter f / Angle.radian)
     Cos f -> negate (sin f) * (derivative varyingParameter f / Angle.radian)

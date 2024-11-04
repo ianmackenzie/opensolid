@@ -26,7 +26,6 @@ module Angle
 where
 
 import Arithmetic
-import Basics
 import Float (Float, fromRational)
 import Float qualified
 import Qty (Qty (Qty))
@@ -80,7 +79,7 @@ twoPi :: Angle
 twoPi = radians Float.twoPi
 
 degree :: Angle
-degree = fullTurn / 360
+degree = fullTurn / 360.0
 
 degrees :: Float -> Angle
 degrees = (* degree)

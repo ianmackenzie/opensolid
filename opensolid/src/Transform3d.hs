@@ -162,9 +162,9 @@ rotateAround axis angle = do
   let yy = qy * qy
   let yz = qy * qz
   let zz = qz * qz
-  let vx = Vector3d.xyz (1 - 2 * (yy + zz)) (2 * (xy + wz)) (2 * (xz - wy))
-  let vy = Vector3d.xyz (2 * (xy - wz)) (1 - 2 * (xx + zz)) (2 * (yz + wx))
-  let vz = Vector3d.xyz (2 * (xz + wy)) (2 * (yz - wx)) (1 - 2 * (xx + yy))
+  let vx = Vector3d.xyz (1.0 - 2.0 * (yy + zz)) (2.0 * (xy + wz)) (2.0 * (xz - wy))
+  let vy = Vector3d.xyz (2.0 * (xy - wz)) (1.0 - 2.0 * (xx + zz)) (2.0 * (yz + wx))
+  let vz = Vector3d.xyz (2.0 * (xz + wy)) (2.0 * (yz - wx)) (1.0 - 2.0 * (xx + yy))
   withFixedPoint (Axis3d.originPoint axis) vx vy vz
 
 scaleAbout :: Point3d (space @ units) -> Float -> Uniform (space @ units)
@@ -179,9 +179,9 @@ scaleAlong axis scale = do
   let d = Axis3d.direction axis
   let (dx, dy, dz) = Direction3d.components d
   -- TODO refactor to use Vector3d.scaleIn?
-  let vx = unitX + (scale - 1) * dx * d
-  let vy = unitY + (scale - 1) * dy * d
-  let vz = unitZ + (scale - 1) * dz * d
+  let vx = unitX + (scale - 1.0) * dx * d
+  let vy = unitY + (scale - 1.0) * dy * d
+  let vz = unitZ + (scale - 1.0) * dz * d
   withFixedPoint (Axis3d.originPoint axis) vx vy vz
 
 placeIn ::

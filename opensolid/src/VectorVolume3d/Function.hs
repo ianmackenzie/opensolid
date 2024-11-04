@@ -13,7 +13,6 @@ where
 
 import Expression (Expression)
 import Expression qualified
-import Float qualified
 import OpenSolid
 import Units qualified
 import Vector3d (Vector3d)
@@ -214,18 +213,6 @@ instance Multiplication' (Qty units1) (Function (space @ units2)) where
   type Qty units1 .*. Function (space @ units2) = Function (space @ (units1 :*: units2))
   value .*. function = Volume1d.Function.constant value .*. function
 
-instance Multiplication' (Function (space @ units)) Int where
-  type Function (space @ units) .*. Int = Function (space @ (units :*: Unitless))
-  function .*. scale = function .*. Float.int scale
-
-instance Multiplication' Int (Function (space @ units)) where
-  type Int .*. Function (space @ units) = Function (space @ (Unitless :*: units))
-  scale .*. function = Float.int scale .*. function
-
-instance Multiplication (Function (space @ units)) Int (Function (space @ units))
-
-instance Multiplication Int (Function (space @ units)) (Function (space @ units))
-
 instance
   Units.Quotient units1 units2 units3 =>
   Division (Function (space @ units1)) (Volume1d.Function units2) (Function (space @ units3))
@@ -244,12 +231,6 @@ instance
 instance Division' (Function (space @ units1)) (Qty units2) where
   type Function (space @ units1) ./. Qty units2 = Function (space @ (units1 :/: units2))
   function ./. value = function ./. Volume1d.Function.constant value
-
-instance Division' (Function (space @ units)) Int where
-  type Function (space @ units) ./. Int = Function (space @ (units :/: Unitless))
-  function ./. scale = function ./. Float.int scale
-
-instance Division (Function (space @ units)) Int (Function (space @ units))
 
 evaluate :: Function (space @ units) -> UvwPoint -> Vector3d (space @ units)
 evaluate function uvwPoint =

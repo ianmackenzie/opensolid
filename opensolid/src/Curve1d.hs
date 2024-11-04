@@ -32,7 +32,6 @@ import Estimate (Estimate)
 import Estimate qualified
 import Expression (Expression)
 import Expression qualified
-import Float qualified
 import Fuzzy qualified
 import List qualified
 import NonEmpty qualified
@@ -191,18 +190,6 @@ instance units ~ units_ => Addition (Curve1d units) (Qty units_) (Curve1d units)
 instance units ~ units_ => Addition (Qty units) (Curve1d units_) (Curve1d units) where
   value + curve = constant value + curve
 
-instance Addition (Curve1d Unitless) Int (Curve1d Unitless) where
-  curve + value = curve + Float.int value
-
-instance Addition Int (Curve1d Unitless) (Curve1d Unitless) where
-  value + curve = Float.int value + curve
-
-instance Subtraction (Curve1d Unitless) Int (Curve1d Unitless) where
-  curve - value = curve - Float.int value
-
-instance Subtraction Int (Curve1d Unitless) (Curve1d Unitless) where
-  value - curve = Float.int value - curve
-
 instance
   units1 ~ units2 =>
   Subtraction (Curve1d units1) (Curve1d units2) (Curve1d units1)
@@ -230,18 +217,6 @@ instance Multiplication' (Curve1d units1) (Curve1d units2) where
   type Curve1d units1 .*. Curve1d units2 = Curve1d (units1 :*: units2)
   Parametric lhs .*. Parametric rhs = Parametric (lhs .*. rhs)
   lhs .*. rhs = Product' lhs rhs
-
-instance Multiplication' Int (Curve1d units) where
-  type Int .*. Curve1d units = Curve1d (Unitless :*: units)
-  value .*. curve = Float.int value .*. curve
-
-instance Multiplication' (Curve1d units) Int where
-  type Curve1d units .*. Int = Curve1d (units :*: Unitless)
-  curve .*. value = curve .*. Float.int value
-
-instance Multiplication Int (Curve1d units) (Curve1d units)
-
-instance Multiplication (Curve1d units) Int (Curve1d units)
 
 instance
   Units.Product units1 units2 units3 =>
@@ -284,20 +259,6 @@ instance Division' (Qty units1) (Curve1d units2) where
   type Qty units1 ./. Curve1d units2 = Curve1d (units1 :/: units2)
   value ./. curve = constant value ./. curve
 
-instance Division (Curve1d units) Int (Curve1d units)
-
-instance Division' (Curve1d units) Int where
-  type Curve1d units ./. Int = Curve1d (units :/: Unitless)
-  curve ./. value = curve ./. Float.int value
-
-instance
-  Units.Inverse units1 units2 =>
-  Division Int (Curve1d units1) (Curve1d units2)
-
-instance Division' Int (Curve1d units) where
-  type Int ./. Curve1d units = Curve1d (Unitless :/: units)
-  value ./. curve = Float.int value ./. curve
-
 instance Composition (Curve1d Unitless) (Curve1d units) (Curve1d units) where
   Parametric outer . Parametric inner = Parametric (outer . inner)
   outer . inner = new (outer :.: inner)
@@ -324,7 +285,7 @@ evaluate curve tValue = case curve of
   Sin c -> Angle.sin (evaluate c tValue)
   Cos c -> Angle.cos (evaluate c tValue)
   Coerce c -> Units.coerce (evaluate c tValue)
-  Reversed c -> evaluate c (1 - tValue)
+  Reversed c -> evaluate c (1.0 - tValue)
 
 evaluateBounds :: Curve1d units -> Range Unitless -> Range units
 evaluateBounds curve tRange = case curve of
@@ -351,8 +312,8 @@ derivative curve = case curve of
   Difference c1 c2 -> derivative c1 - derivative c2
   Product' c1 c2 -> derivative c1 .*. c2 + c1 .*. derivative c2
   Quotient' c1 c2 -> (derivative c1 .*. c2 - c1 .*. derivative c2) .!/.! squared' c2
-  Squared' c -> 2 * c .*. derivative c
-  SquareRoot' c' -> derivative c' .!/! (2 * sqrt' c')
+  Squared' c -> 2.0 * c .*. derivative c
+  SquareRoot' c' -> derivative c' .!/! (2.0 * sqrt' c')
   Sin c -> cos c * (derivative c / Angle.radian)
   Cos c -> negate (sin c) * (derivative c / Angle.radian)
   Coerce c -> Units.coerce (derivative c)

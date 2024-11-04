@@ -28,10 +28,10 @@ from = do
         Test.verify label Test.do
           let arc = Arc2d.from Point2d.origin (Point2d.meters 1.0 1.0) sweptAngle
           Test.expect (Curve2d.evaluate arc 0.5 ~= expectedPoint)
-  let invSqrt2 = 1 / Float.sqrt 2.0
+  let invSqrt2 = 1.0 / Float.sqrt 2.0
   Test.group "from" $
-    [ testArcMidpoint 90 (invSqrt2, 1 - invSqrt2)
-    , testArcMidpoint -90 (1 - invSqrt2, invSqrt2)
+    [ testArcMidpoint 90 (invSqrt2, 1.0 - invSqrt2)
+    , testArcMidpoint -90 (1.0 - invSqrt2, invSqrt2)
     , testArcMidpoint 180 (1.0, 0.0)
     , testArcMidpoint -180 (0.0, 1.0)
     ]

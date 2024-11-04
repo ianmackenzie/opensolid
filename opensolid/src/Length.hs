@@ -66,7 +66,7 @@ inInches :: Length -> Float
 inInches = (/ inch)
 
 pixel :: Length
-pixel = inch / 96
+pixel = inch / 96.0
 
 pixels :: Float -> Length
 pixels = (* pixel)

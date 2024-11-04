@@ -9,6 +9,7 @@ module VectorCurve2d.DegenerateEndpoint
   )
 where
 
+import Float qualified
 import OpenSolid
 import Qty qualified
 import Range (Range (Range))
@@ -27,14 +28,14 @@ data DegenerateEndpoint space
 at :: Tolerance units => Float -> VectorCurve2d (space @ units) -> DegenerateEndpoint space
 at t0 secondDerivative = do
   let r = computeRadius (VectorCurve2d.evaluate secondDerivative t0)
-  let t1 = if t0 == 0.0 then r else 1 - r
+  let t1 = if t0 == 0.0 then r else 1.0 - r
   let q = qCurve 0 t0 secondDerivative
   let sign = if t0 == 0.0 then Positive else Negative
   let curve = sign * q / VectorCurve2d.unsafeMagnitude q
   DegenerateEndpoint t0 t1 curve
 
 computeRadius :: Tolerance units => Vector2d (space @ units) -> Float
-computeRadius secondDerivative = Qty.sqrt (2 * ?tolerance / Vector2d.magnitude secondDerivative)
+computeRadius secondDerivative = Qty.sqrt (2.0 * ?tolerance / Vector2d.magnitude secondDerivative)
 
 cutoff :: DegenerateEndpoint space -> Float
 cutoff (DegenerateEndpoint _ t1 _) = t1
@@ -70,7 +71,7 @@ qCurve :: Int -> Float -> VectorCurve2d (space @ units) -> VectorCurve2d (space 
 qCurve n t0 curveDerivative =
   VectorCurve2d.new $
     QCurve n t0 curveDerivative $
-      VectorCurve2d.evaluate curveDerivative t0 / (n + 1)
+      VectorCurve2d.evaluate curveDerivative t0 / Float.int (n + 1)
 
 evaluate ::
   DegenerateEndpoint space ->

@@ -19,8 +19,8 @@ tests =
 
 crossingRoots :: Tolerance Unitless => Test
 crossingRoots = Test.verify "crossingRoots" Test.do
-  let x = 3 * Curve1d.parameter
-  let y = (x - 1) * (x - 1) * (x - 1) - (x - 1)
+  let x = 3.0 * Curve1d.parameter
+  let y = (x - 1.0) * (x - 1.0) * (x - 1.0) - (x - 1.0)
   let expectedRoots = [Root 0.0 0 Positive, Root (1 / 3) 0 Negative, Root (2 / 3) 0 Positive]
   roots <- Curve1d.zeros y
   Test.expect (roots ~= expectedRoots)

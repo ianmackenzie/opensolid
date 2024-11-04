@@ -274,7 +274,7 @@ firstDerivativeIsConsistent curve tValue = do
   let dt = 1e-6
   let p1 = Curve2d.evaluate curve (tValue - dt)
   let p2 = Curve2d.evaluate curve (tValue + dt)
-  let numericalFirstDerivative = (p2 - p1) / (2 * dt)
+  let numericalFirstDerivative = (p2 - p1) / (2.0 * dt)
   let analyticFirstDerivative = VectorCurve2d.evaluate firstDerivative tValue
   Tolerance.using (Length.meters 1e-6) do
     Test.expect (numericalFirstDerivative ~= analyticFirstDerivative)
@@ -294,7 +294,7 @@ secondDerivativeIsConsistent curve tValue = do
   let dt = 1e-6
   let v1 = VectorCurve2d.evaluate firstDerivative (tValue - dt)
   let v2 = VectorCurve2d.evaluate firstDerivative (tValue + dt)
-  let numericalSecondDerivative = (v2 - v1) / (2 * dt)
+  let numericalSecondDerivative = (v2 - v1) / (2.0 * dt)
   let analyticSecondDerivative = VectorCurve2d.evaluate secondDerivative tValue
   Tolerance.using (Length.meters 1e-6) do
     Test.expect (numericalSecondDerivative ~= analyticSecondDerivative)
@@ -326,7 +326,7 @@ reversalConsistency =
           curve <- generator
           let reversedCurve = Curve2d.reverse curve
           t <- Parameter.random
-          Test.expect (Curve2d.evaluate curve t ~= Curve2d.evaluate reversedCurve (1 - t))
+          Test.expect (Curve2d.evaluate curve t ~= Curve2d.evaluate reversedCurve (1.0 - t))
 
 degeneracyRemoval :: Tolerance Meters => Test
 degeneracyRemoval = Test.check 100 "degeneracyRemoval" Test.do

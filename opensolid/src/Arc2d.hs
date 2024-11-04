@@ -85,7 +85,7 @@ corner ::
 corner cornerPoint incomingDirection outgoingDirection givenRadius = do
   let radius = Qty.abs givenRadius
   let sweptAngle = Direction2d.angleFrom incomingDirection outgoingDirection
-  if radius * Float.squared (Angle.inRadians sweptAngle) / 4 ~= Qty.zero
+  if radius * Float.squared (Angle.inRadians sweptAngle) / 4.0 ~= Qty.zero
     then Line2d.from cornerPoint cornerPoint
     else do
       let offset = radius * Qty.abs (Angle.tan (0.5 * sweptAngle))
@@ -116,7 +116,7 @@ withRadius givenRadius startPoint endPoint direction size =
               (Counterclockwise, Large) -> -offsetMagnitude
       let offset = offsetDirection * offsetDistance
       let centerPoint = Point2d.midpoint startPoint endPoint + offset
-      let shortAngle = 2 * Angle.asin (halfDistance / givenRadius)
+      let shortAngle = 2.0 * Angle.asin (halfDistance / givenRadius)
       let sweptAngle =
             case (direction, size) of
               (Counterclockwise, Small) -> shortAngle

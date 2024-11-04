@@ -273,8 +273,8 @@ curveDerivative expression = case expression of
     let d3 = 3.0 * (p4 - p3)
     product (quadraticSpline d1 d2 d3 param) (curveDerivative param)
   BezierCurve controlPoints param -> do
-    let n = Float.int (NonEmpty.length controlPoints)
-    let scaledDifference p1 p2 = (n - 1) * (p2 - p1)
+    let scale = Float.int (NonEmpty.length controlPoints - 1)
+    let scaledDifference p1 p2 = scale * (p2 - p1)
     let scaledDifferences = NonEmpty.successive scaledDifference controlPoints
     case scaledDifferences of
       [] -> zero
@@ -315,8 +315,8 @@ surfaceDerivative varyingParameter expression = case expression of
     let d3 = 3.0 * (p4 - p3)
     product (quadraticSpline d1 d2 d3 param) (surfaceDerivative varyingParameter param)
   BezierCurve controlPoints param -> do
-    let n = Float.int (NonEmpty.length controlPoints)
-    let scaledDifference p1 p2 = (n - 1) * (p2 - p1)
+    let scale = Float.int (NonEmpty.length controlPoints - 1)
+    let scaledDifference p1 p2 = scale * (p2 - p1)
     let scaledDifferences = NonEmpty.successive scaledDifference controlPoints
     case scaledDifferences of
       [] -> zero
@@ -359,8 +359,8 @@ volumeDerivative varyingParameter expression = case expression of
     let d3 = 3.0 * (p4 - p3)
     product (quadraticSpline d1 d2 d3 param) (volumeDerivative varyingParameter param)
   BezierCurve controlPoints param -> do
-    let n = Float.int (NonEmpty.length controlPoints)
-    let scaledDifference p1 p2 = (n - 1) * (p2 - p1)
+    let scale = Float.int (NonEmpty.length controlPoints - 1)
+    let scaledDifference p1 p2 = scale * (p2 - p1)
     let scaledDifferences = NonEmpty.successive scaledDifference controlPoints
     case scaledDifferences of
       [] -> zero

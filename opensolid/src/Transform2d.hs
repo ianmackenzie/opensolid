@@ -148,8 +148,8 @@ rotateAround centerPoint angle = do
 mirrorAcross :: Axis2d (space @ units) -> Orthonormal (space @ units)
 mirrorAcross axis = do
   let (dx, dy) = Direction2d.components (Axis2d.direction axis)
-  let vx = Vector2d.xy (1 - 2 * dy * dy) (2 * dx * dy)
-  let vy = Vector2d.xy (2 * dx * dy) (1 - 2 * dx * dx)
+  let vx = Vector2d.xy (1.0 - 2.0 * dy * dy) (2.0 * dx * dy)
+  let vy = Vector2d.xy (2.0 * dx * dy) (1.0 - 2.0 * dx * dx)
   withFixedPoint (Axis2d.originPoint axis) vx vy
 
 scaleAbout :: Point2d (space @ units) -> Float -> Uniform (space @ units)
@@ -163,7 +163,7 @@ scaleAlong axis scale = do
   let (dx, dy) = Direction2d.components (Axis2d.direction axis)
   let dx2 = dx * dx
   let dy2 = dy * dy
-  let xy = (scale - 1) * dx * dy
+  let xy = (scale - 1.0) * dx * dy
   let vx = Vector2d.xy (scale * dx2 + dy2) xy
   let vy = Vector2d.xy xy (scale * dy2 + dx2)
   withFixedPoint (Axis2d.originPoint axis) vx vy

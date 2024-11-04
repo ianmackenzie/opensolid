@@ -134,12 +134,6 @@ instance units ~ units_ => Addition (Range units) (Qty units_) (Range units) whe
 instance units ~ units_ => Addition (Qty units) (Range units_) (Range units) where
   value + Range low high = Range_ (value + low) (value + high)
 
-instance Addition (Range Unitless) Int (Range Unitless) where
-  range + value = range + Float.int value
-
-instance Addition Int (Range Unitless) (Range Unitless) where
-  value + range = Float.int value + range
-
 instance units ~ units_ => Subtraction (Range units) (Range units_) (Range units) where
   Range low1 high1 - Range low2 high2 = Range_ (low1 - high2) (high1 - low2)
 
@@ -148,12 +142,6 @@ instance units ~ units_ => Subtraction (Range units) (Qty units_) (Range units) 
 
 instance units ~ units_ => Subtraction (Qty units) (Range units_) (Range units) where
   value - Range low high = Range_ (value - high) (value - low)
-
-instance Subtraction (Range Unitless) Int (Range Unitless) where
-  range - value = range - Float.int value
-
-instance Subtraction Int (Range Unitless) (Range Unitless) where
-  value - range = Float.int value - range
 
 instance Multiplication' (Qty units1) (Range units2) where
   type Qty units1 .*. Range units2 = Range (units1 :*: units2)
@@ -170,18 +158,6 @@ instance Multiplication' (Range units1) (Qty units2) where
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Range units1) (Qty units2) (Range units3)
-
-instance Multiplication' Int (Range units) where
-  type Int .*. Range units = Range (Unitless :*: units)
-  value .*. range = Float.int value .*. range
-
-instance Multiplication' (Range units) Int where
-  type Range units .*. Int = Range (units :*: Unitless)
-  range .*. value = range .*. Float.int value
-
-instance Multiplication Int (Range units) (Range units)
-
-instance Multiplication (Range units) Int (Range units)
 
 instance Multiplication' (Range units1) (Range units2) where
   type Range units1 .*. Range units2 = Range (units1 :*: units2)
@@ -209,18 +185,6 @@ instance Division' (Range units1) (Qty units2) where
       else Range_ -Qty.infinity Qty.infinity
 
 instance Units.Quotient units1 units2 units3 => Division (Range units1) (Qty units2) (Range units3)
-
-instance Division' Int (Range units) where
-  type Int ./. Range units = Range (Unitless :/: units)
-  n ./. range = Float.int n ./. range
-
-instance Units.Inverse units1 units2 => Division Int (Range units1) (Range units2)
-
-instance Division' (Range units) Int where
-  type Range units ./. Int = Range (units :/: Unitless)
-  range ./. d = range ./. Float.int d
-
-instance Division (Range units) Int (Range units)
 
 instance Division' (Range units1) (Range units2) where
   type Range units1 ./. Range units2 = Range (units1 :/: units2)
