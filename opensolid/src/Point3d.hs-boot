@@ -27,31 +27,31 @@ instance
   Units.Coercion (Point3d (space1 @ unitsA)) (Point3d (space2 @ unitsB))
 
 instance
-  ( space ~ space_
-  , units ~ units_
+  ( space1 ~ space2
+  , units1 ~ units2
   ) =>
   Subtraction
-    (Point3d (space @ units))
-    (Point3d (space_ @ units_))
-    (Vector3d (space @ units))
+    (Point3d (space1 @ units1))
+    (Point3d (space2 @ units2))
+    (Vector3d (space1 @ units1))
 
 instance
-  ( space ~ space_
-  , units ~ units_
+  ( space1 ~ space2
+  , units1 ~ units2
   ) =>
   Addition
-    (Point3d (space @ units))
-    (Vector3d (space_ @ units_))
-    (Point3d (space @ units))
+    (Point3d (space1 @ units1))
+    (Vector3d (space2 @ units2))
+    (Point3d (space1 @ units1))
 
 instance
-  ( space ~ space_
-  , units ~ units_
+  ( space1 ~ space2
+  , units1 ~ units2
   ) =>
   Subtraction
-    (Point3d (space @ units))
-    (Vector3d (space_ @ units_))
-    (Point3d (space @ units))
+    (Point3d (space1 @ units1))
+    (Vector3d (space2 @ units2))
+    (Point3d (space1 @ units1))
 
 origin :: Point3d (space @ units)
 xyz :: Qty units -> Qty units -> Qty units -> Point3d (space @ units)

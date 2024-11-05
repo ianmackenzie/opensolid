@@ -98,13 +98,13 @@ type Affine coordinateSystem = Transform3d Transform.Affine coordinateSystem
 
 instance
   ( Composition tag1 tag2 tag3
-  , space ~ space_
-  , units ~ units_
+  , space1 ~ space2
+  , units1 ~ units2
   ) =>
   Composition
-    (Transform3d tag1 (space @ units))
-    (Transform3d tag2 (space_ @ units_))
-    (Transform3d tag3 (space @ units))
+    (Transform3d tag1 (space1 @ units1))
+    (Transform3d tag2 (space2 @ units2))
+    (Transform3d tag3 (space1 @ units1))
   where
   transform1 >> transform2 =
     Transform3d_

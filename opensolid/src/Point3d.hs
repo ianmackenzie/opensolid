@@ -66,65 +66,65 @@ instance
   coerce = Data.Coerce.coerce
 
 instance
-  ( space ~ space_
-  , units ~ units_
+  ( space1 ~ space2
+  , units1 ~ units2
   ) =>
   Addition
-    (Point3d (space @ units))
-    (Vector3d (space_ @ units_))
-    (Point3d (space @ units))
+    (Point3d (space1 @ units1))
+    (Vector3d (space2 @ units2))
+    (Point3d (space1 @ units1))
   where
   Point3d px py pz + Vector3d vx vy vz = Point3d (px + vx) (py + vy) (pz + vz)
 
 instance
-  ( space ~ space_
-  , units ~ units_
+  ( space1 ~ space2
+  , units1 ~ units2
   ) =>
   Subtraction
-    (Point3d (space @ units))
-    (Vector3d (space_ @ units_))
-    (Point3d (space @ units))
+    (Point3d (space1 @ units1))
+    (Vector3d (space2 @ units2))
+    (Point3d (space1 @ units1))
   where
   Point3d px py pz - Vector3d vx vy vz = Point3d (px - vx) (py - vy) (pz - vz)
 
 instance
-  ( space ~ space_
-  , units ~ units_
+  ( space1 ~ space2
+  , units1 ~ units2
   ) =>
   Subtraction
-    (Point3d (space @ units))
-    (Point3d (space_ @ units_))
-    (Vector3d (space @ units))
+    (Point3d (space1 @ units1))
+    (Point3d (space2 @ units2))
+    (Vector3d (space1 @ units1))
   where
   Point3d x1 y1 z1 - Point3d x2 y2 z2 = Vector3d (x1 - x2) (y1 - y2) (z1 - z2)
 
 instance
-  ( space ~ space_
-  , units ~ units_
+  ( space1 ~ space2
+  , units1 ~ units2
   ) =>
   Addition
-    (Point3d (space @ units))
-    (VectorBounds3d (space_ @ units_))
-    (Bounds3d (space @ units))
+    (Point3d (space1 @ units1))
+    (VectorBounds3d (space2 @ units2))
+    (Bounds3d (space1 @ units1))
   where
   Point3d px py pz + VectorBounds3d vx vy vz = Bounds3d.xyz (px + vx) (py + vy) (pz + vz)
 
 instance
-  ( space ~ space_
-  , units ~ units_
+  ( space1 ~ space2
+  , units1 ~ units2
   ) =>
   Subtraction
-    (Point3d (space @ units))
-    (VectorBounds3d (space_ @ units_))
-    (Bounds3d (space @ units))
+    (Point3d (space1 @ units1))
+    (VectorBounds3d (space2 @ units2))
+    (Bounds3d (space1 @ units1))
   where
   Point3d px py pz - VectorBounds3d vx vy vz = Bounds3d.xyz (px - vx) (py - vy) (pz - vz)
 
 instance
-  ( space ~ space_
-  , units ~ units_
+  ( space1 ~ space2
+  , units1 ~ units2
   ) =>
-  ApproximateEquality (Point3d (space @ units)) (Point3d (space_ @ units_)) units
+  ApproximateEquality (Point3d (space1 @ units1)) (Point3d (space2 @ units2)) units1
   where
   p1 ~= p2 = distanceFrom p1 p2 ~= Qty.zero
 
