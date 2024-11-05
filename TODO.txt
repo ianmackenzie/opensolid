@@ -1,11 +1,10 @@
 Add VectorSurface2d.Function.zeros for generic 2-equations-2-unknowns solving
+-> then use this to replace existing Curve2d intersection
 -> then can remove Range.find2
 
 Implement 1D monotonic solving in Rust
 
 Specialize xComponent etc. for Parametric cases
-
-Remove Int multiplication typeclass instances?
 
 Move language extensions into actual source files?
 -> maybe wait until GHC 9.10 is available with GHC2024, to avoid needing e.g. GADTs everywhere?
@@ -18,7 +17,6 @@ Move primitives to Primitives.hs
 Use space1 ~ space2 instead of space ~ space_ everywhere
 
 Refactor Estimate to return an error if convergence fails/stalls
-
 
 Specialize Multiplication for primitive types, for performance
 -> avoid units coercion and extra typeclass lookup
