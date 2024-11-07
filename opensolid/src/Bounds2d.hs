@@ -49,7 +49,7 @@ import Frame2d qualified
 import Fuzzy qualified
 import Maybe qualified
 import OpenSolid
-import Point2d (Point2d)
+import Point2d (Point2d (Point2d))
 import Point2d qualified
 import Qty qualified
 import Range (Range)
@@ -57,8 +57,7 @@ import Range qualified
 import Transform2d (Transform2d (Transform2d))
 import Units qualified
 import Vector2d qualified
-import VectorBounds2d (VectorBounds2d)
-import VectorBounds2d qualified
+import VectorBounds2d (VectorBounds2d (VectorBounds2d))
 
 type role Bounds2d phantom
 
@@ -92,10 +91,7 @@ instance
     (Bounds2d (space2 @ units2))
     (VectorBounds2d (space1 @ units1))
   where
-  point - bounds = do
-    let (px, py) = Point2d.coordinates point
-    let (bx, by) = coordinates bounds
-    VectorBounds2d.xy (px - bx) (py - by)
+  Point2d px py - Bounds2d bx by = VectorBounds2d (px - bx) (py - by)
 
 instance
   ( space1 ~ space2
@@ -106,10 +102,7 @@ instance
     (Point2d (space2 @ units2))
     (VectorBounds2d (space1 @ units1))
   where
-  bounds - point = do
-    let (bx, by) = coordinates bounds
-    let (px, py) = Point2d.coordinates point
-    VectorBounds2d.xy (bx - px) (by - py)
+  Bounds2d bx by - Point2d px py = VectorBounds2d (bx - px) (by - py)
 
 instance
   ( space1 ~ space2
@@ -120,10 +113,7 @@ instance
     (Bounds2d (space2 @ units2))
     (VectorBounds2d (space1 @ units1))
   where
-  bounds1 - bounds2 = do
-    let (x1, y1) = coordinates bounds1
-    let (x2, y2) = coordinates bounds2
-    VectorBounds2d.xy (x1 - x2) (y1 - y2)
+  Bounds2d x1 y1 - Bounds2d x2 y2 = VectorBounds2d (x1 - x2) (y1 - y2)
 
 instance
   ( space1 ~ space2
@@ -134,10 +124,7 @@ instance
     (VectorBounds2d (space2 @ units2))
     (Bounds2d (space1 @ units1))
   where
-  bounds + vectorBounds = do
-    let (x1, y1) = coordinates bounds
-    let (x2, y2) = VectorBounds2d.components vectorBounds
-    Bounds2d (x1 + x2) (y1 + y2)
+  Bounds2d x1 y1 + VectorBounds2d x2 y2 = Bounds2d (x1 + x2) (y1 + y2)
 
 instance
   ( space1 ~ space2
@@ -148,10 +135,7 @@ instance
     (VectorBounds2d (space2 @ units2))
     (Bounds2d (space1 @ units1))
   where
-  bounds - vectorBounds = do
-    let (x1, y1) = coordinates bounds
-    let (x2, y2) = VectorBounds2d.components vectorBounds
-    Bounds2d (x1 - x2) (y1 - y2)
+  Bounds2d x1 y1 - VectorBounds2d x2 y2 = Bounds2d (x1 - x2) (y1 - y2)
 
 instance
   ( space1 ~ space2
@@ -159,10 +143,7 @@ instance
   ) =>
   ApproximateEquality (Point2d (space1 @ units1)) (Bounds2d (space2 @ units2)) units1
   where
-  point ~= bounds = do
-    let (px, py) = Point2d.coordinates point
-    let (bx, by) = coordinates bounds
-    px ~= bx && py ~= by
+  Point2d px py ~= Bounds2d bx by = px ~= bx && py ~= by
 
 instance
   ( space1 ~ space2
@@ -178,10 +159,7 @@ instance
   ) =>
   Intersects (Point2d (space1 @ units1)) (Bounds2d (space2 @ units2)) units1
   where
-  point ^ bounds = do
-    let (px, py) = Point2d.coordinates point
-    let (bx, by) = coordinates bounds
-    px ^ bx && py ^ by
+  Point2d px py ^ Bounds2d bx by = px ^ bx && py ^ by
 
 instance
   ( space1 ~ space2
