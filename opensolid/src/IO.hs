@@ -2,8 +2,11 @@ module IO
   ( fail
   , map
   , forEach
+  , forEachWithIndex
   , collect
+  , collectWithIndex
   , parallel
+  , parallelWithIndex
   , async
   , await
   , sleep
@@ -28,6 +31,7 @@ import Duration (Duration)
 import Duration qualified
 import Error qualified
 import Float qualified
+import List qualified
 import Result (Result (Failure, Success))
 import Result qualified
 import System.IO.Error qualified
@@ -60,6 +64,10 @@ forEach :: List a -> (a -> IO ()) -> IO ()
 forEach [] _ = succeed ()
 forEach (first : rest) function = function first >> forEach rest function
 
+forEachWithIndex :: List a -> (Int -> a -> IO ()) -> IO ()
+forEachWithIndex list function =
+  forEach (List.indexed list) (\(index, item) -> function index item)
+
 collect :: (a -> IO b) -> List a -> IO (List b)
 collect _ [] = succeed []
 collect function (first : rest) = IO.do
@@ -67,8 +75,16 @@ collect function (first : rest) = IO.do
   restValues <- collect function rest
   succeed (firstValue : restValues)
 
+collectWithIndex :: (Int -> a -> IO b) -> List a -> IO (List b)
+collectWithIndex function list =
+  collect (\(index, item) -> function index item) (List.indexed list)
+
 parallel :: (a -> IO b) -> List a -> IO (List b)
 parallel = Async.mapConcurrently
+
+parallelWithIndex :: (Int -> a -> IO b) -> List a -> IO (List b)
+parallelWithIndex function list =
+  parallel (\(index, item) -> function index item) (List.indexed list)
 
 async :: IO a -> IO (Async a)
 async = Async.async
