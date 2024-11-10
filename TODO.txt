@@ -1,5 +1,3 @@
-Add 'Factory' to FFI module (specialized version of 'StaticFunction') to help with type inference
-Rename 'StaticFunction' to 'Static', 'MemberFunction' to 'Member' (since there are no constants/fields)
 Figure out how to list all classes (and exceptions) in the API
 
 Switch Solve2d.return back to taking a single value instead of a NonEmpty
