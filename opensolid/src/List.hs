@@ -16,6 +16,7 @@ module List
   , length
   , map
   , mapWithIndex
+  , indexed
   , reverseMap
   , forEach
   , map2
@@ -130,6 +131,9 @@ map = Data.List.map
 
 mapWithIndex :: (Int -> a -> b) -> List a -> List b
 mapWithIndex function list = map2 function [0 ..] list
+
+indexed :: List a -> List (Int, a)
+indexed = mapWithIndex (,)
 
 reverseMap :: (a -> b) -> List a -> List b
 reverseMap function list = go list []
