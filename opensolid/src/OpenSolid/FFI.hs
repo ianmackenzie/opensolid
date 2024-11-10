@@ -1,10 +1,7 @@
 module OpenSolid.FFI
   ( FFI (..)
   , Representation (..)
-  , Members (..)
   , Value (Value)
-  , UnionValue (UnionValue)
-  , UnionMember (UnionMember)
   , Space
   , Function (..)
   , FloatCoordinates
@@ -58,14 +55,6 @@ data Representation a where
   Result :: FFI a => (x -> Exception) -> Representation (Result x a)
   -- An opaque pointer to a Haskell value
   Class :: Text -> List (Function a) -> Representation a
-
-data Members value = ClassMembers
-
-data UnionValue where
-  UnionValue :: FFI member => Int -> member -> UnionValue
-
-data UnionMember a where
-  UnionMember :: FFI member => Int -> Proxy member -> (member -> a) -> UnionMember a
 
 data Function value where
   Constructor1 ::
