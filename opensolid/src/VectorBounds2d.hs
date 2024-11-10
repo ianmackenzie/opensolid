@@ -71,6 +71,30 @@ instance
   where
   coerce = Data.Coerce.coerce
 
+instance
+  ( space1 ~ space2
+  , units1 ~ units2
+  ) =>
+  Intersects (Vector2d (space1 @ units1)) (VectorBounds2d (space2 @ units2)) units1
+  where
+  Vector2d vx vy ^ VectorBounds2d bx by = vx ^ bx && vy ^ by
+
+instance
+  ( space1 ~ space2
+  , units1 ~ units2
+  ) =>
+  Intersects (VectorBounds2d (space1 @ units1)) (Vector2d (space2 @ units2)) units1
+  where
+  bounds ^ point = point ^ bounds
+
+instance
+  ( space1 ~ space2
+  , units1 ~ units2
+  ) =>
+  Intersects (VectorBounds2d (space1 @ units1)) (VectorBounds2d (space2 @ units2)) units1
+  where
+  VectorBounds2d x1 y1 ^ VectorBounds2d x2 y2 = x1 ^ x2 && y1 ^ y2
+
 instance Negation (VectorBounds2d (space @ units)) where
   negate (VectorBounds2d x y) = VectorBounds2d (negate x) (negate y)
 

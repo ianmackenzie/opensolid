@@ -51,25 +51,22 @@ import Arithmetic qualified
 import Axis2d (Axis2d)
 import Axis2d qualified
 import {-# SOURCE #-} BezierCurve2d qualified
-import Bisection qualified
 import Bounds2d (Bounds2d)
 import Bounds2d qualified
 import Composition
 import Curve1d (Curve1d)
 import Curve1d qualified
-import Curve2d.Derivatives (Derivatives)
-import Curve2d.Derivatives qualified as Derivatives
 import Curve2d.FindPoint qualified as FindPoint
-import Curve2d.IntersectionPoint (IntersectionPoint (IntersectionPoint))
+import Curve2d.IntersectionPoint (IntersectionPoint)
 import Curve2d.IntersectionPoint qualified as IntersectionPoint
 import Curve2d.Intersections qualified as Intersections
 import {-# SOURCE #-} Curve2d.MedialAxis qualified as MedialAxis
 import Curve2d.OverlappingSegment (OverlappingSegment (OverlappingSegment))
 import Curve2d.OverlappingSegment qualified as OverlappingSegment
-import Curve2d.Segment (Segment)
-import Curve2d.Segment qualified as Segment
 import Direction2d (Direction2d)
 import DirectionCurve2d (DirectionCurve2d)
+import Domain2d (Domain2d)
+import Domain2d qualified
 import Error qualified
 import Expression (Expression)
 import Expression qualified
@@ -78,25 +75,33 @@ import Float qualified
 import Frame2d (Frame2d)
 import Frame2d qualified
 import List qualified
+import NonEmpty qualified
 import OpenSolid
 import Parameter qualified
-import Point2d (Point2d)
+import Point2d (Point2d (Point2d))
 import Point2d qualified
 import Polyline2d (Polyline2d (Polyline2d))
 import Qty qualified
 import Range (Range)
 import Range qualified
 import Result qualified
+import Solve2d qualified
 import Stream qualified
+import Surface1d.Function qualified
+import Surface2d.Function ()
+import SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvPoint)
 import Text qualified
+import Tolerance qualified
 import Transform2d (Transform2d)
 import Transform2d qualified
 import Units qualified
 import Vector2d (Vector2d)
+import Vector2d qualified
 import VectorBounds2d qualified
 import VectorCurve2d (VectorCurve2d)
 import VectorCurve2d qualified
 import VectorCurve2d.Zeros qualified
+import VectorSurface2d.Function qualified
 import Prelude qualified
 
 type role Curve2d nominal
@@ -408,12 +413,12 @@ overlappingSegments ::
   Tolerance units =>
   Curve2d (space @ units) ->
   Curve2d (space @ units) ->
-  List (Float, Float) ->
+  List UvPoint ->
   List OverlappingSegment
 overlappingSegments curve1 curve2 endpointParameterValues =
   endpointParameterValues
     |> List.successive
-      ( \(t1Start, t2Start) (t1End, t2End) ->
+      ( \(Point2d t1Start t2Start) (Point2d t1End t2End) ->
           OverlappingSegment
             (Range.from t1Start t1End)
             (Range.from t2Start t2End)
@@ -446,12 +451,12 @@ findEndpointRoots endpoint curve curveIsPointError =
     Failure FindPoint.HigherOrderSolution -> Failure Intersections.HigherOrderIntersection
     Failure FindPoint.CurveIsCoincidentWithPoint -> Failure curveIsPointError
 
-findEndpointParameterValues ::
+findEndpointIntersections ::
   Tolerance units =>
   Curve2d (space @ units) ->
   Curve2d (space @ units) ->
-  Result Intersections.Error (List (Float, Float))
-findEndpointParameterValues curve1 curve2 = Result.do
+  Result Intersections.Error (List UvPoint)
+findEndpointIntersections curve1 curve2 = Result.do
   start1Roots <- findEndpointRoots (startPoint curve1) curve2 Intersections.SecondCurveIsPoint
   end1Roots <- findEndpointRoots (endPoint curve1) curve2 Intersections.SecondCurveIsPoint
   start2Roots <- findEndpointRoots (startPoint curve2) curve1 Intersections.FirstCurveIsPoint
@@ -459,10 +464,10 @@ findEndpointParameterValues curve1 curve2 = Result.do
   Success $
     List.sortAndDeduplicate $
       List.concat $
-        [ List.map (0.0,) start1Roots
-        , List.map (1.0,) end1Roots
-        , List.map (,0.0) start2Roots
-        , List.map (,1.0) end2Roots
+        [ List.map (\t2 -> Point2d 0.0 t2) start1Roots
+        , List.map (\t2 -> Point2d 1.0 t2) end1Roots
+        , List.map (\t1 -> Point2d t1 0.0) start2Roots
+        , List.map (\t1 -> Point2d t1 1.0) end2Roots
         ]
 
 data Intersections
@@ -476,100 +481,98 @@ intersections ::
   Curve2d (space @ units) ->
   Result Intersections.Error (Maybe Intersections)
 intersections curve1 curve2 = Result.do
-  endpointParameterValues <- findEndpointParameterValues curve1 curve2
-  case overlappingSegments curve1 curve2 endpointParameterValues of
+  endpointIntersections <- findEndpointIntersections curve1 curve2
+  case overlappingSegments curve1 curve2 endpointIntersections of
     [] -> Result.do
-      intersectionPoints <- findIntersectionPoints curve1 curve2 endpointParameterValues
-      case intersectionPoints of
-        [] -> Success Nothing
-        NonEmpty points -> Success (Just (IntersectionPoints points))
+      let derivative1 = derivative curve1
+      let derivative2 = derivative curve2
+      if VectorCurve2d.hasZero derivative1 || VectorCurve2d.hasZero derivative2
+        then Failure Intersections.CurveHasDegeneracy
+        else do
+          let u = Surface1d.Function.u
+          let v = Surface1d.Function.v
+          let f = curve1 . u - curve2 . v
+          let fu = VectorSurface2d.Function.derivative U f
+          let fv = VectorSurface2d.Function.derivative V f
+          let g = VectorSurface2d.Function.xy (fu .><. fv) ((derivative1 . u) .<>. f)
+          let gu = VectorSurface2d.Function.derivative U g
+          let gv = VectorSurface2d.Function.derivative V g
+          case Solve2d.search (findIntersectionPoints f fu fv g gu gv endpointIntersections) () of
+            Success (NonEmpty points) -> Success (Just (IntersectionPoints points))
+            Success [] -> Success Nothing
+            Failure Solve2d.InfiniteRecursion -> Failure Intersections.HigherOrderIntersection
     NonEmpty segments -> Success (Just (OverlappingSegments segments))
 
-type SearchTree (coordinateSystem :: CoordinateSystem) =
-  Bisection.Tree (Segment coordinateSystem)
+endpointIntersection :: List UvPoint -> UvBounds -> Maybe UvPoint
+endpointIntersection uvPoints uvBounds =
+  List.find (\point -> Bounds2d.includes point uvBounds) uvPoints
 
 findIntersectionPoints ::
   Tolerance units =>
-  Curve2d (space @ units) ->
-  Curve2d (space @ units) ->
-  List (Float, Float) ->
-  Result Intersections.Error (List IntersectionPoint)
-findIntersectionPoints curve1 curve2 endpointParameterValues = Result.do
-  let derivatives1 = Derivatives.ofCurve curve1
-  let derivatives2 = Derivatives.ofCurve curve2
-  let searchTree1 = Bisection.tree (Segment.init derivatives1)
-  let searchTree2 = Bisection.tree (Segment.init derivatives2)
-  endpointResults <-
-    findEndpointIntersections derivatives1 derivatives2 endpointParameterValues searchTree1 searchTree2 ([], [])
-  let (allIntersections, _) =
-        endpointResults
-          |> findTangentIntersections derivatives1 derivatives2 searchTree1 searchTree2
-          |> findCrossingIntersections derivatives1 derivatives2 searchTree1 searchTree2
-  Success (List.sort allIntersections)
-
-findEndpointIntersections ::
-  Tolerance units =>
-  Derivatives (space @ units) ->
-  Derivatives (space @ units) ->
-  List (Float, Float) ->
-  SearchTree (space @ units) ->
-  SearchTree (space @ units) ->
-  (List IntersectionPoint, List (Range Unitless, Range Unitless)) ->
-  Result Intersections.Error (List IntersectionPoint, List (Range Unitless, Range Unitless))
-findEndpointIntersections _ _ [] _ _ accumulated = Success accumulated
-findEndpointIntersections derivatives1 derivatives2 (uv : rest) searchTree1 searchTree2 accumulated = Result.do
-  updated <- findEndpointIntersection derivatives1 derivatives2 uv searchTree1 searchTree2 accumulated
-  findEndpointIntersections derivatives1 derivatives2 rest searchTree1 searchTree2 updated
-
-findEndpointIntersection ::
-  Tolerance units =>
-  Derivatives (space @ units) ->
-  Derivatives (space @ units) ->
-  (Float, Float) ->
-  SearchTree (space @ units) ->
-  SearchTree (space @ units) ->
-  (List IntersectionPoint, List (Range Unitless, Range Unitless)) ->
-  Result Intersections.Error (List IntersectionPoint, List (Range Unitless, Range Unitless))
-findEndpointIntersection derivatives1 derivatives2 t1t2 searchTree1 searchTree2 accumulated = Result.do
-  let intersectionType = Derivatives.classify t1t2 derivatives1 derivatives2
-  let (kind, sign) = intersectionType
-  let (t1, t2) = t1t2
-  Success $
-    Bisection.solve2
-      (Segment.isEndpointIntersectionCandidate t1t2)
-      (Segment.endpointIntersectionResolved intersectionType)
-      (\_ _ _ _ _ -> Just (IntersectionPoint{t1, t2, kind, sign}))
-      searchTree1
-      searchTree2
-      accumulated
-
-findTangentIntersections ::
-  Tolerance units =>
-  Derivatives (space @ units) ->
-  Derivatives (space @ units) ->
-  SearchTree (space @ units) ->
-  SearchTree (space @ units) ->
-  (List IntersectionPoint, List (Range Unitless, Range Unitless)) ->
-  (List IntersectionPoint, List (Range Unitless, Range Unitless))
-findTangentIntersections derivatives1 derivatives2 =
-  Bisection.solve2
-    Segment.isTangentIntersectionCandidate
-    Segment.tangentIntersectionSign
-    (Segment.findTangentIntersection derivatives1 derivatives2)
-
-findCrossingIntersections ::
-  Tolerance units =>
-  Derivatives (space @ units) ->
-  Derivatives (space @ units) ->
-  SearchTree (space @ units) ->
-  SearchTree (space @ units) ->
-  (List IntersectionPoint, List (Range Unitless, Range Unitless)) ->
-  (List IntersectionPoint, List (Range Unitless, Range Unitless))
-findCrossingIntersections derivatives1 derivatives2 =
-  Bisection.solve2
-    Segment.isCrossingIntersectionCandidate
-    Segment.crossingIntersectionSign
-    (Segment.findCrossingIntersection derivatives1 derivatives2)
+  VectorSurface2d.Function.Function (space @ units) ->
+  VectorSurface2d.Function.Function (space @ units) ->
+  VectorSurface2d.Function.Function (space @ units) ->
+  VectorSurface2d.Function.Function (space @ (units :*: units)) ->
+  VectorSurface2d.Function.Function (space @ (units :*: units)) ->
+  VectorSurface2d.Function.Function (space @ (units :*: units)) ->
+  List UvPoint ->
+  () ->
+  Domain2d ->
+  Solve2d.Exclusions exclusions ->
+  Solve2d.Action exclusions () IntersectionPoint
+findIntersectionPoints f fu fv g gu gv endpointIntersections () subdomain exclusions = do
+  let uvBounds = Domain2d.bounds subdomain
+  if not (VectorSurface2d.Function.evaluateBounds f uvBounds ^ Vector2d.zero)
+    then Solve2d.pass
+    else case exclusions of
+      Solve2d.SomeExclusions -> Solve2d.recurse ()
+      Solve2d.NoExclusions -> do
+        let fuBounds = VectorSurface2d.Function.evaluateBounds fu uvBounds
+        let fvBounds = VectorSurface2d.Function.evaluateBounds fv uvBounds
+        let domainInterior = Domain2d.interior subdomain
+        let validate point constructor sign =
+              if Bounds2d.includes point domainInterior
+                then do
+                  let Point2d t1 t2 = point
+                  Solve2d.return (NonEmpty.singleton (constructor t1 t2 sign))
+                else Solve2d.recurse ()
+        case Range.resolvedSign (fvBounds .><. fuBounds) of
+          Resolved sign -> do
+            case endpointIntersection endpointIntersections uvBounds of
+              Just point -> validate point IntersectionPoint.crossing sign
+              Nothing -> do
+                let solution =
+                      Solve2d.unique
+                        (VectorSurface2d.Function.evaluateBounds f)
+                        (VectorSurface2d.Function.evaluate f)
+                        (VectorSurface2d.Function.evaluate fu)
+                        (VectorSurface2d.Function.evaluate fv)
+                        uvBounds
+                case solution of
+                  Just point -> validate point IntersectionPoint.crossing sign
+                  Nothing -> Solve2d.pass
+          Unresolved -> do
+            let guBounds = VectorSurface2d.Function.evaluateBounds gu uvBounds
+            let gvBounds = VectorSurface2d.Function.evaluateBounds gv uvBounds
+            case Range.resolvedSign (gvBounds .><. guBounds) of
+              Resolved sign -> do
+                case endpointIntersection endpointIntersections uvBounds of
+                  Just point -> validate point IntersectionPoint.tangent sign
+                  Nothing -> do
+                    let gBounds = VectorSurface2d.Function.evaluateBounds g uvBounds
+                    let convergenceTolerance = 1e-9 * Range.maxValue (VectorBounds2d.magnitude gBounds)
+                    let solution =
+                          Tolerance.using convergenceTolerance $
+                            Solve2d.unique
+                              (VectorSurface2d.Function.evaluateBounds g)
+                              (VectorSurface2d.Function.evaluate g)
+                              (VectorSurface2d.Function.evaluate gu)
+                              (VectorSurface2d.Function.evaluate gv)
+                              uvBounds
+                    case solution of
+                      Just point -> validate point IntersectionPoint.tangent sign
+                      Nothing -> Solve2d.pass
+              Unresolved -> Solve2d.recurse ()
 
 placeIn ::
   Frame2d (global @ units) (Defines local) ->

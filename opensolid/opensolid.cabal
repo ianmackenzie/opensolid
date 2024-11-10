@@ -111,7 +111,6 @@ library
     Basis2d
     Basis3d
     BezierCurve2d
-    Bisection
     Bool
     Bounded
     Bounds
@@ -242,8 +241,6 @@ library
 
   other-modules:
     Curve1d.Integral
-    Curve2d.Derivatives
-    Curve2d.Segment
     Curve3d.Internal
     Expression.Scalar
     Json.FieldSchema

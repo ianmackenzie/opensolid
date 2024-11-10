@@ -157,7 +157,10 @@ tangentIntersection = Test.verify "tangentIntersection" Test.do
   case intersections of
     Nothing -> Test.fail "Should have found some intersection points"
     Just (Curve2d.IntersectionPoints actualIntersectionPoints) ->
-      Tolerance.using 1e-12 (Test.expect (actualIntersectionPoints ~= expectedIntersectionPoints))
+      Tolerance.using 1e-12 do
+        Test.expect (actualIntersectionPoints ~= expectedIntersectionPoints)
+          |> Test.output "expectedIntersectionPoints" expectedIntersectionPoints
+          |> Test.output "actualIntersectionPoints" actualIntersectionPoints
     Just (Curve2d.OverlappingSegments _) ->
       Test.fail "Should have found some intersection points, got overlapping segments instead"
 

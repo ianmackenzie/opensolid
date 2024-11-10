@@ -27,6 +27,7 @@ import Expression (Expression)
 import Expression qualified
 import Expression.Curve1d qualified
 import Float qualified
+import VectorSurface2d.Function qualified
 import IO qualified
 import Int qualified
 import Length (Length)
@@ -463,22 +464,15 @@ testNewtonRaphson2d = Tolerance.using 1e-9 do
   let u = Surface1d.Function.u
   let v = Surface1d.Function.v
   let f = Surface1d.Function.squared u + Surface1d.Function.squared v - 4.0
-  let fu = Surface1d.Function.derivative SurfaceParameter.U f
-  let fv = Surface1d.Function.derivative SurfaceParameter.V f
   let g = u - v
-  let gu = Surface1d.Function.derivative SurfaceParameter.U g
-  let gv = Surface1d.Function.derivative SurfaceParameter.V g
   let bounds = Bounds2d.xy (Range.from 0.0 2.0) (Range.from 0.0 2.0)
+  let function = VectorSurface2d.Function.xy f g
   let solution =
         Solve2d.unique
-          (Surface1d.Function.evaluateBounds f)
-          (Surface1d.Function.evaluate f)
-          (Surface1d.Function.evaluate fu)
-          (Surface1d.Function.evaluate fv)
-          (Surface1d.Function.evaluateBounds g)
-          (Surface1d.Function.evaluate g)
-          (Surface1d.Function.evaluate gu)
-          (Surface1d.Function.evaluate gv)
+          (VectorSurface2d.Function.evaluateBounds function)
+          (VectorSurface2d.Function.evaluate function)
+          (VectorSurface2d.Function.evaluate (VectorSurface2d.Function.derivative SurfaceParameter.U function))
+          (VectorSurface2d.Function.evaluate (VectorSurface2d.Function.derivative SurfaceParameter.V function))
           bounds
   log "Solve2d.unique solution" solution
 

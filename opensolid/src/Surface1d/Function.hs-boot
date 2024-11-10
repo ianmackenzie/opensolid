@@ -1,7 +1,7 @@
 module Surface1d.Function (Interface (..), Function, evaluate, evaluateBounds) where
 
 import Curve1d (Curve1d)
-import Curve2d (Curve2d)
+import {-# SOURCE #-} Curve2d (Curve2d)
 import OpenSolid
 import Range (Range)
 import SurfaceParameter (SurfaceParameter, UvBounds, UvCoordinates, UvPoint)

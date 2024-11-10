@@ -5,7 +5,7 @@ module Surface1d.Function.Zeros
   )
 where
 
-import Curve2d (Curve2d)
+import {-# SOURCE #-} Curve2d (Curve2d)
 import Error qualified
 import OpenSolid
 import SurfaceParameter (UvBounds, UvCoordinates, UvPoint)

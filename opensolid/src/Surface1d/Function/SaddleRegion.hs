@@ -12,8 +12,8 @@ where
 import Axis2d (Axis2d)
 import Axis2d qualified
 import Bounds2d (Bounds2d (Bounds2d))
-import Curve2d (Curve2d)
-import Curve2d qualified
+import {-# SOURCE #-} Curve2d (Curve2d)
+import {-# SOURCE #-} Curve2d qualified
 import Direction2d qualified
 import Domain2d (Domain2d)
 import Frame2d (Frame2d)

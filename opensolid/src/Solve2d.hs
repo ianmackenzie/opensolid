@@ -31,11 +31,12 @@ import Qty (Qty (Qty#))
 import Qty qualified
 import Queue (Queue)
 import Queue qualified
-import Range (Range)
 import Range qualified
 import Result qualified
 import SurfaceParameter (UvBounds, UvPoint)
+import Vector2d (Vector2d (Vector2d))
 import Vector2d qualified
+import VectorBounds2d (VectorBounds2d)
 
 data RecursionType
   = Central
@@ -173,57 +174,48 @@ pass = Pass
 
 unique ::
   Tolerance units =>
-  (UvBounds -> Range units) ->
-  (UvPoint -> Qty units) ->
-  (UvPoint -> Qty units) ->
-  (UvPoint -> Qty units) ->
-  (UvBounds -> Range units) ->
-  (UvPoint -> Qty units) ->
-  (UvPoint -> Qty units) ->
-  (UvPoint -> Qty units) ->
+  (UvBounds -> VectorBounds2d (space @ units)) ->
+  (UvPoint -> Vector2d (space @ units)) ->
+  (UvPoint -> Vector2d (space @ units)) ->
+  (UvPoint -> Vector2d (space @ units)) ->
   UvBounds ->
   Maybe UvPoint
-unique fBounds f fu fv gBounds g gu gv uvBounds =
-  solveUnique uvBounds fBounds f fu fv gBounds g gu gv uvBounds
+unique fBounds f fu fv uvBounds =
+  solveUnique uvBounds fBounds f fu fv uvBounds
 
 solveUnique ::
   Tolerance units =>
   UvBounds ->
-  (UvBounds -> Range units) ->
-  (UvPoint -> Qty units) ->
-  (UvPoint -> Qty units) ->
-  (UvPoint -> Qty units) ->
-  (UvBounds -> Range units) ->
-  (UvPoint -> Qty units) ->
-  (UvPoint -> Qty units) ->
-  (UvPoint -> Qty units) ->
+  (UvBounds -> VectorBounds2d (space @ units)) ->
+  (UvPoint -> Vector2d (space @ units)) ->
+  (UvPoint -> Vector2d (space @ units)) ->
+  (UvPoint -> Vector2d (space @ units)) ->
   UvBounds ->
   Maybe UvPoint
-solveUnique localBounds fBounds f fu fv gBounds g gu gv globalBounds =
+solveUnique localBounds fBounds f fu fv globalBounds =
   -- First check if it's *possible* that there's a solution within localBounds
-  if fBounds localBounds ^ Qty.zero && gBounds localBounds ^ Qty.zero
+  if fBounds localBounds ^ Vector2d.zero
     then do
       let (uRange, vRange) = Bounds2d.coordinates localBounds
       let uMid = Range.midpoint uRange
       let vMid = Range.midpoint vRange
       let pMid = Point2d.xy uMid vMid
       let fMid = f pMid
-      let gMid = g pMid
       -- First, try applying Newton-Raphson starting at the center point of localBounds
       -- to see if that converges to a root
-      case newtonRaphson f fu fv g gu gv globalBounds pMid fMid gMid of
+      case newtonRaphson f fu fv globalBounds pMid fMid of
         Success point -> Just point -- Newton-Raphson converged to a root, return it
         Failure Divergence -- Newton-Raphson did not converge starting from pMid
           | Range.isAtomic uRange || Range.isAtomic vRange ->
               -- We can't bisect any further
               -- (Newton-Raphson somehow never converged),
               -- so check if we've found a root by bisection
-              if fMid ~= Qty.zero && gMid ~= Qty.zero then Just pMid else Nothing
+              if fMid ~= Vector2d.zero then Just pMid else Nothing
           | otherwise -> do
               -- Recurse into subdomains
               let (u1, u2) = Range.bisect uRange
               let (v1, v2) = Range.bisect vRange
-              let solveRecursively uv = solveUnique uv fBounds f fu fv gBounds g gu gv globalBounds
+              let solveRecursively uv = solveUnique uv fBounds f fu fv globalBounds
               solveRecursively (Bounds2d.xy u1 v1)
                 |> Maybe.orElse (solveRecursively (Bounds2d.xy u1 v2))
                 |> Maybe.orElse (solveRecursively (Bounds2d.xy u2 v1))
@@ -234,54 +226,44 @@ data Divergence = Divergence deriving (Eq, Show, Error.Message)
 
 newtonRaphson ::
   Tolerance units =>
-  (UvPoint -> Qty units) ->
-  (UvPoint -> Qty units) ->
-  (UvPoint -> Qty units) ->
-  (UvPoint -> Qty units) ->
-  (UvPoint -> Qty units) ->
-  (UvPoint -> Qty units) ->
+  (UvPoint -> Vector2d (space @ units)) ->
+  (UvPoint -> Vector2d (space @ units)) ->
+  (UvPoint -> Vector2d (space @ units)) ->
   UvBounds ->
   UvPoint ->
-  Qty units ->
-  Qty units ->
+  Vector2d (space @ units) ->
   Result Divergence UvPoint
 newtonRaphson = solveNewtonRaphson 0
 
 solveNewtonRaphson ::
   Tolerance units =>
   Int ->
-  (UvPoint -> Qty units) ->
-  (UvPoint -> Qty units) ->
-  (UvPoint -> Qty units) ->
-  (UvPoint -> Qty units) ->
-  (UvPoint -> Qty units) ->
-  (UvPoint -> Qty units) ->
+  (UvPoint -> Vector2d (space @ units)) ->
+  (UvPoint -> Vector2d (space @ units)) ->
+  (UvPoint -> Vector2d (space @ units)) ->
   UvBounds ->
   UvPoint ->
-  Qty units ->
-  Qty units ->
+  Vector2d (space @ units) ->
   Result Divergence UvPoint
-solveNewtonRaphson iterations f fu fv g gu gv uvBounds p1 f1 g1 =
+solveNewtonRaphson iterations f fu fv uvBounds p1 f1 =
   if iterations > 10 -- Check if we've entered an infinite loop
     then Failure Divergence
     else do
-      let fu1 = fu p1
-      let fv1 = fv p1
-      let gu1 = gu p1
-      let gv1 = gv p1
-      let determinant = fu1 .*. gv1 - fv1 .*. gu1
+      let Vector2d x1 y1 = f1
+      let Vector2d xu1 yu1 = fu p1
+      let Vector2d xv1 yv1 = fv p1
+      let determinant = xu1 .*. yv1 - xv1 .*. yu1
       if determinant == Qty.zero
         then Failure Divergence
         else do
-          let deltaU = (fv1 .*. g1 - gv1 .*. f1) / determinant
-          let deltaV = (gu1 .*. f1 - fu1 .*. g1) / determinant
+          let deltaU = (xv1 .*. y1 - yv1 .*. x1) / determinant
+          let deltaV = (yu1 .*. x1 - xu1 .*. y1) / determinant
           let p2 = boundedStep uvBounds p1 (p1 + Vector2d.xy deltaU deltaV)
           let f2 = f p2
-          let g2 = g p2
-          if Qty.hypot2 f2 g2 >= Qty.hypot2 f1 g1 -- Check if we've stopped converging
-            then if f1 ~= Qty.zero && g1 ~= Qty.zero then Success p1 else Failure Divergence
+          if Vector2d.squaredMagnitude' f2 >= Vector2d.squaredMagnitude' f1 -- Check if we've stopped converging
+            then if f1 ~= Vector2d.zero then Success p1 else Failure Divergence
             else -- We're still converging, so take another iteration
-              solveNewtonRaphson (iterations + 1) f fu fv g gu gv uvBounds p2 f2 g2
+              solveNewtonRaphson (iterations + 1) f fu fv uvBounds p2 f2
 
 boundedStep :: UvBounds -> UvPoint -> UvPoint -> UvPoint
 boundedStep uvBounds p1 p2 =

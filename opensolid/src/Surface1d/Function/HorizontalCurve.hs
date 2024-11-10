@@ -12,8 +12,8 @@ import Axis2d (Axis2d)
 import Axis2d qualified
 import Bounds2d qualified
 import Curve1d qualified
-import Curve2d (Curve2d)
-import Curve2d qualified
+import {-# SOURCE #-} Curve2d (Curve2d)
+import {-# SOURCE #-} Curve2d qualified
 import Direction2d qualified
 import Float qualified
 import Frame2d

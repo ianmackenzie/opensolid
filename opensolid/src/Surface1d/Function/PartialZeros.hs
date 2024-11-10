@@ -14,8 +14,8 @@ module Surface1d.Function.PartialZeros
   )
 where
 
-import Curve2d (Curve2d)
-import Curve2d qualified
+import {-# SOURCE #-} Curve2d (Curve2d)
+import {-# SOURCE #-} Curve2d qualified
 import Domain2d qualified
 import List qualified
 import Maybe qualified

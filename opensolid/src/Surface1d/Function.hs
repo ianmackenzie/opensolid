@@ -32,8 +32,8 @@ import Bounds2d qualified
 import Composition
 import Curve1d (Curve1d)
 import Curve1d qualified
-import Curve2d (Curve2d)
-import Curve2d qualified
+import {-# SOURCE #-} Curve2d (Curve2d)
+import {-# SOURCE #-} Curve2d qualified
 import Direction2d qualified
 import Domain1d qualified
 import Domain2d (Domain2d (Domain2d))
@@ -65,6 +65,8 @@ import SurfaceParameter qualified
 import Units qualified
 import Uv.Derivatives (Derivatives)
 import Uv.Derivatives qualified as Derivatives
+import Vector2d (Vector2d (Vector2d))
+import VectorBounds2d (VectorBounds2d (VectorBounds2d))
 import VectorCurve2d qualified
 
 data Function units where
@@ -457,14 +459,10 @@ findTangentSolutions subproblem = do
       let fvv = Derivatives.get (derivatives >> V >> V)
       let maybePoint =
             Solve2d.unique
-              (evaluateBounds fu)
-              (evaluate fu)
-              (evaluate fuu)
-              (evaluate fuv)
-              (evaluateBounds fv)
-              (evaluate fv)
-              (evaluate fuv)
-              (evaluate fvv)
+              (\bounds -> VectorBounds2d (evaluateBounds fu bounds) (evaluateBounds fv bounds))
+              (\point -> Vector2d (evaluate fu point) (evaluate fv point))
+              (\point -> Vector2d (evaluate fuu point) (evaluate fuv point))
+              (\point -> Vector2d (evaluate fuv point) (evaluate fvv point))
               uvBounds
       case maybePoint of
         Nothing -> Solve2d.recurse CrossingCurvesOnly
