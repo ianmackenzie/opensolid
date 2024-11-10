@@ -27,7 +27,7 @@ import {-# SOURCE #-} Json.Schema (Schema)
 import List qualified
 import Map (Map)
 import Map qualified
-import OpenSolid hiding (pattern Int)
+import OpenSolid
 import Text qualified
 import Prelude qualified
 
@@ -41,7 +41,13 @@ data Json
   deriving (Eq, Show)
 
 pattern Int :: Int -> Json
-pattern Int n <- Float (Float.Int n)
+pattern Int n <- (toInt -> Just n)
+
+toInt :: Json -> Maybe Int
+toInt (Float value) = do
+  let rounded = Float.round value
+  if Float.int rounded == value then Just rounded else Nothing
+toInt _ = Nothing
 
 pattern Object :: List (Text, Json) -> Json
 pattern Object fields <- (getFields -> Just fields)

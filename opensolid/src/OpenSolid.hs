@@ -30,7 +30,7 @@ import Basics
 import Coalesce (Coalesce ((??)))
 import Composition (Composition ((>>)), (.))
 import CoordinateSystem (CoordinateSystem, Defines, LocalSpace, type (@))
-import Float (Float, fromRational, pattern Int)
+import Float (Float, fromRational)
 import Fuzzy (Fuzzy (Resolved, Unresolved))
 import Intersects (Intersects ((^)))
 import NonEmpty (NonEmpty ((:|)), (|:), pattern NonEmpty)

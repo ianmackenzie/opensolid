@@ -1,6 +1,5 @@
 module Float
   ( Float
-  , pattern Int
   , fromRational
   , fromDouble
   , toDouble
@@ -55,9 +54,6 @@ import Prelude qualified
 
 type Float = Qty Unitless
 
-pattern Int :: Int -> Float
-pattern Int n <- (toInt -> Just n)
-
 {-# INLINE fromRational #-}
 fromRational :: Prelude.Rational -> Float
 fromRational = Prelude.fromRational
@@ -72,11 +68,6 @@ toDouble = Data.Coerce.coerce
 
 int :: Int -> Float
 int = fromIntegral
-
-toInt :: Float -> Maybe Int
-toInt value = do
-  let candidate = round value
-  if int candidate == value then Just candidate else Nothing
 
 parse :: Text -> Result Text Float
 parse = Text.Parse.float
