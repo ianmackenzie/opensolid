@@ -46,6 +46,8 @@ import {-# SOURCE #-} Frame2d (Frame2d)
 import {-# SOURCE #-} Frame2d qualified
 import Length qualified
 import OpenSolid
+import OpenSolid.FFI (FFI)
+import OpenSolid.FFI qualified as FFI
 import Point2d.CoordinateTransformation qualified
 import Qty (Qty (Qty#))
 import Qty qualified
@@ -269,3 +271,34 @@ scaleAbout centerPoint scale = transformBy (Transform2d.scaleAbout centerPoint s
 
 scaleAlong :: Axis2d (space @ units) -> Float -> Point2d (space @ units) -> Point2d (space @ units)
 scaleAlong axis scale = transformBy (Transform2d.scaleAlong axis scale)
+
+----- FFI -----
+
+instance FFI (Point2d FFI.FloatCoordinates) where
+  representation _ = representation "Point2f"
+
+instance FFI (Point2d FFI.LengthCoordinates) where
+  representation _ = representation "Point2d"
+
+representation ::
+  forall units.
+  (FFI (Qty units), FFI (Point2d (FFI.Space @ units))) =>
+  Text ->
+  FFI.Representation (Point2d (FFI.Space @ units))
+representation name =
+  FFI.Class
+    name
+    [ FFI.Constructor2 "x" "y" xy
+    ]
+    [ FFI.StaticFunction0 "origin" (origin :: Point2d (FFI.Space @ units))
+    , FFI.StaticFunction1 "x" "x" (x :: Qty units -> Point2d (FFI.Space @ units))
+    , FFI.StaticFunction1 "y" "y" (y :: Qty units -> Point2d (FFI.Space @ units))
+    , FFI.StaticFunction2 "midpoint" "p1" "p2" $
+        ( midpoint ::
+            Point2d (FFI.Space @ units) ->
+            Point2d (FFI.Space @ units) ->
+            Point2d (FFI.Space @ units)
+        )
+    ]
+    [ FFI.MemberFunction1 "distance to" "other" distanceFrom
+    ]
