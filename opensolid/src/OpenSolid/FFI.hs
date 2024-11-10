@@ -43,7 +43,7 @@ data Representation a where
   -- A 64-bit float
   Float :: Representation Float
   -- A 64-bit float, wrapped inside a target language class
-  Qty :: Representation (Qty units)
+  Qty :: Text -> Representation (Qty units)
   -- A struct with a 64-bit integer size and a pointer to an array of items
   List :: FFI a => Representation (List a)
   -- A struct with the first item and then the second
@@ -204,7 +204,7 @@ size :: FFI a => Proxy a -> Int
 size proxy = case representation proxy of
   Int -> 8
   Float -> 8
-  Qty -> 8
+  Qty{} -> 8
   List -> 16
   Pair -> pairSize proxy
   Triple -> tripleSize proxy
@@ -238,7 +238,7 @@ instance FFI Int where
   representation _ = Int
 
 instance FFI Length where
-  representation _ = Qty
+  representation _ = Qty "Length"
 
 instance FFI item => FFI (List item) where
   representation _ = List
@@ -263,7 +263,7 @@ store ptr offset value = do
   case representation proxy of
     Int -> Foreign.pokeByteOff ptr offset (fromIntegral value :: Int64)
     Float -> Foreign.pokeByteOff ptr offset (Float.toDouble value)
-    Qty -> do
+    Qty{} -> do
       let Qty.Qty doubleValue = value
       Foreign.pokeByteOff ptr offset doubleValue
     List -> IO.do
@@ -321,7 +321,7 @@ load ptr offset = do
   case representation proxy of
     Int -> IO.map fromInt64 (Foreign.peekByteOff ptr offset)
     Float -> IO.map Float.fromDouble (Foreign.peekByteOff ptr offset)
-    Qty -> IO.map Qty.Qty (Foreign.peekByteOff ptr offset)
+    Qty{} -> IO.map Qty.Qty (Foreign.peekByteOff ptr offset)
     List -> IO.do
       let itemSize = listItemSize proxy
       numItems <- IO.map fromInt64 (Foreign.peekByteOff ptr offset)
