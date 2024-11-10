@@ -1,16 +1,20 @@
-Add VectorSurface2d.Function.zeros for generic 2-equations-2-unknowns solving
--> then use this to replace existing Curve2d intersection
--> then can remove Range.find2
+Add 'Factory' to FFI module (specialized version of 'StaticFunction') to help with type inference
+Rename 'StaticFunction' to 'Static', 'MemberFunction' to 'Member' (since there are no constants/fields)
+Figure out how to list all classes (and exceptions) in the API
+
+Switch Solve2d.return back to taking a single value instead of a NonEmpty
+
+Sandbox executable to start generating Region2d medial axis curves and points?
+-> need to be able to solve for medial axis of curve and *point* first
+
+Introduce curve function types and properly support piecewise curves
+
+Switch types back to 'space @ units' instead of 'coordinateSystem' where possible?
+-> if that makes coercion more expensive, specialize arithmetic operators instead
 
 Implement 1D monotonic solving in Rust
 
 Specialize xComponent etc. for Parametric cases
-
-Move language extensions into actual source files?
--> maybe wait until GHC 9.10 is available with GHC2024, to avoid needing e.g. GADTs everywhere?
--> will still need NoImplicitPrelude, RebindableSyntax, LexicalNegation, StrictData in most files...
--> maybe go extension-by-extension, starting with less common or more dangerous ones?
-  -> plus ones that Fourmolu needs to know about explicitly...
 
 Move primitives to Primitives.hs
 
