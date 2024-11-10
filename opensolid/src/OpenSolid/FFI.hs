@@ -6,10 +6,7 @@ module OpenSolid.FFI
   , UnionValue (UnionValue)
   , UnionMember (UnionMember)
   , Space
-  , Constructor (..)
-  , Constant (..)
-  , StaticFunction (..)
-  , MemberFunction (..)
+  , Function (..)
   , FloatCoordinates
   , LengthCoordinates
   )
@@ -60,12 +57,7 @@ data Representation a where
   -- followed by the representation of the successful value or exception
   Result :: FFI a => (x -> Exception) -> Representation (Result x a)
   -- An opaque pointer to a Haskell value
-  Class ::
-    Text ->
-    List (Constructor a) ->
-    List StaticFunction ->
-    List (MemberFunction a) ->
-    Representation a
+  Class :: Text -> List (Function a) -> Representation a
 
 data Members value = ClassMembers
 
@@ -75,28 +67,25 @@ data UnionValue where
 data UnionMember a where
   UnionMember :: FFI member => Int -> Proxy member -> (member -> a) -> UnionMember a
 
-data Constant where
-  Constant :: FFI value => Text -> value -> Constant
-
-data Constructor value where
+data Function value where
   Constructor1 ::
     (FFI a, FFI value) =>
     Text ->
     (a -> value) ->
-    Constructor value
+    Function value
   Constructor2 ::
     (FFI a, FFI b, FFI value) =>
     Text ->
     Text ->
     (a -> b -> value) ->
-    Constructor value
+    Function value
   Constructor3 ::
     (FFI a, FFI b, FFI c, FFI value) =>
     Text ->
     Text ->
     Text ->
     (a -> b -> c -> value) ->
-    Constructor value
+    Function value
   Constructor4 ::
     (FFI a, FFI b, FFI c, FFI d, FFI value) =>
     Text ->
@@ -104,36 +93,69 @@ data Constructor value where
     Text ->
     Text ->
     (a -> b -> c -> d -> value) ->
-    Constructor value
-
-data StaticFunction where
-  StaticFunction0 ::
+    Function value
+  Factory0 ::
+    FFI value =>
+    Text ->
+    value ->
+    Function value
+  Factory1 ::
+    (FFI a, FFI value) =>
+    Text ->
+    Text ->
+    (a -> value) ->
+    Function value
+  Factory2 ::
+    (FFI a, FFI b, FFI value) =>
+    Text ->
+    Text ->
+    Text ->
+    (a -> b -> value) ->
+    Function value
+  Factory3 ::
+    (FFI a, FFI b, FFI c, FFI value) =>
+    Text ->
+    Text ->
+    Text ->
+    Text ->
+    (a -> b -> c -> value) ->
+    Function value
+  Factory4 ::
+    (FFI a, FFI b, FFI c, FFI d, FFI value) =>
+    Text ->
+    Text ->
+    Text ->
+    Text ->
+    Text ->
+    (a -> b -> c -> d -> value) ->
+    Function value
+  Static0 ::
     FFI result =>
     Text ->
     result ->
-    StaticFunction
-  StaticFunction1 ::
+    Function value
+  Static1 ::
     (FFI a, FFI result) =>
     Text ->
     Text ->
     (a -> result) ->
-    StaticFunction
-  StaticFunction2 ::
+    Function value
+  Static2 ::
     (FFI a, FFI b, FFI result) =>
     Text ->
     Text ->
     Text ->
     (a -> b -> result) ->
-    StaticFunction
-  StaticFunction3 ::
+    Function value
+  Static3 ::
     (FFI a, FFI b, FFI c, FFI result) =>
     Text ->
     Text ->
     Text ->
     Text ->
     (a -> b -> c -> result) ->
-    StaticFunction
-  StaticFunction4 ::
+    Function value
+  Static4 ::
     (FFI a, FFI b, FFI c, FFI d, FFI result) =>
     Text ->
     Text ->
@@ -141,36 +163,34 @@ data StaticFunction where
     Text ->
     Text ->
     (a -> b -> c -> d -> result) ->
-    StaticFunction
-
-data MemberFunction value where
-  MemberFunction0 ::
+    Function value
+  Member0 ::
     (FFI value, FFI result) =>
     Text ->
     (value -> result) ->
-    MemberFunction value
-  MemberFunction1 ::
+    Function value
+  Member1 ::
     (FFI a, FFI value, FFI result) =>
     Text ->
     Text ->
     (a -> value -> result) ->
-    MemberFunction value
-  MemberFunction2 ::
+    Function value
+  Member2 ::
     (FFI a, FFI b, FFI value, FFI result) =>
     Text ->
     Text ->
     Text ->
     (a -> b -> value -> result) ->
-    MemberFunction value
-  MemberFunction3 ::
+    Function value
+  Member3 ::
     (FFI a, FFI b, FFI c, FFI value, FFI result) =>
     Text ->
     Text ->
     Text ->
     Text ->
     (a -> b -> c -> value -> result) ->
-    MemberFunction value
-  MemberFunction4 ::
+    Function value
+  Member4 ::
     (FFI a, FFI b, FFI c, FFI d, FFI value, FFI result) =>
     Text ->
     Text ->
@@ -178,7 +198,7 @@ data MemberFunction value where
     Text ->
     Text ->
     (a -> b -> c -> d -> value -> result) ->
-    MemberFunction value
+    Function value
 
 size :: FFI a => Proxy a -> Int
 size proxy = case representation proxy of

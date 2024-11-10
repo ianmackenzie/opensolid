@@ -1,6 +1,6 @@
 module OpenSolid.FFI.Exception
   ( Interface (..)
-  , MemberFunction (..)
+  , Function (..)
   , Exception (..)
   )
 where
@@ -13,36 +13,36 @@ class Interface x where
   code :: Proxy x -> Int
   name :: Proxy x -> Text
   message :: x -> Text
-  memberFunctions :: Proxy x -> List (MemberFunction x)
+  functions :: Proxy x -> List (Function x)
 
-data MemberFunction x where
-  MemberFunction0 ::
+data Function x where
+  Function0 ::
     FFI result =>
     Text ->
     (x -> result) ->
-    MemberFunction x
-  MemberFunction1 ::
+    Function x
+  Function1 ::
     (FFI a, FFI result) =>
     Text ->
     Text ->
     (a -> x -> result) ->
-    MemberFunction x
-  MemberFunction2 ::
+    Function x
+  Function2 ::
     (FFI a, FFI b, FFI result) =>
     Text ->
     Text ->
     Text ->
     (a -> b -> x -> result) ->
-    MemberFunction x
-  MemberFunction3 ::
+    Function x
+  Function3 ::
     (FFI a, FFI b, FFI c, FFI result) =>
     Text ->
     Text ->
     Text ->
     Text ->
     (a -> b -> c -> x -> result) ->
-    MemberFunction x
-  MemberFunction4 ::
+    Function x
+  Function4 ::
     (FFI a, FFI b, FFI c, FFI d, FFI result) =>
     Text ->
     Text ->
@@ -50,7 +50,7 @@ data MemberFunction x where
     Text ->
     Text ->
     (a -> b -> c -> d -> x -> result) ->
-    MemberFunction x
+    Function x
 
 data Exception where
   Exception :: Interface x => x -> Exception

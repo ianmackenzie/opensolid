@@ -286,19 +286,11 @@ representation ::
   Text ->
   FFI.Representation (Point2d (FFI.Space @ units))
 representation name =
-  FFI.Class
-    name
+  FFI.Class name $
     [ FFI.Constructor2 "x" "y" xy
-    ]
-    [ FFI.StaticFunction0 "origin" (origin :: Point2d (FFI.Space @ units))
-    , FFI.StaticFunction1 "x" "x" (x :: Qty units -> Point2d (FFI.Space @ units))
-    , FFI.StaticFunction1 "y" "y" (y :: Qty units -> Point2d (FFI.Space @ units))
-    , FFI.StaticFunction2 "midpoint" "p1" "p2" $
-        ( midpoint ::
-            Point2d (FFI.Space @ units) ->
-            Point2d (FFI.Space @ units) ->
-            Point2d (FFI.Space @ units)
-        )
-    ]
-    [ FFI.MemberFunction1 "distance to" "other" distanceFrom
+    , FFI.Factory0 "origin" origin
+    , FFI.Factory1 "x" "x" x
+    , FFI.Factory1 "y" "y" y
+    , FFI.Member1 "distance to" "other" distanceFrom
+    , FFI.Member1 "midpoint" "other" midpoint
     ]
