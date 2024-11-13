@@ -1,18 +1,16 @@
 module OpenSolid.FFI
   ( FFI (representation)
+  , size
+  , store
+  , load
   , Representation (..)
-  , Value (Value)
-  , Space
-  , Function (..)
-  , FloatCoordinates
-  , LengthCoordinates
   )
 where
 
 import Data.Int (Int64)
 import Data.Proxy (Proxy (Proxy))
 import Float qualified
-import Foreign (Ptr, Storable)
+import Foreign (Ptr)
 import Foreign qualified
 import Foreign.Marshal.Alloc qualified
 import Foreign.StablePtr qualified
@@ -23,13 +21,6 @@ import OpenSolid
 import OpenSolid.FFI.Exception (Exception (Exception))
 import OpenSolid.FFI.Exception qualified as Exception
 import Qty qualified
-import Units (Meters)
-
-data Space
-
-type FloatCoordinates = Space @ Unitless
-
-type LengthCoordinates = Space @ Meters
 
 class FFI a where
   representation :: Proxy a -> Representation a
@@ -44,181 +35,88 @@ data Representation a where
   -- A struct with a 64-bit integer size and a pointer to an array of items
   List :: FFI a => Representation (List a)
   -- A struct with the first item and then the second
-  Pair :: (FFI a, FFI b) => Representation (a, b)
+  Tuple2 :: (FFI a, FFI b) => Representation (a, b)
   -- A struct with the three items in order
-  Triple :: (FFI a, FFI b, FFI c) => Representation (a, b, c)
+  Tuple3 :: (FFI a, FFI b, FFI c) => Representation (a, b, c)
+  -- A struct with the four items in order
+  Tuple4 :: (FFI a, FFI b, FFI c, FFI d) => Representation (a, b, c, d)
+  -- A struct with the five items in order
+  Tuple5 :: (FFI a, FFI b, FFI c, FFI d, FFI e) => Representation (a, b, c, d, e)
+  -- A struct with the six items in order
+  Tuple6 :: (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f) => Representation (a, b, c, d, e, f)
   -- A struct with a 64-bit integer tag (0 = Just, 1 = Nothing)
   -- followed by the representation of the value
   Maybe :: FFI a => Representation (Maybe a)
   -- A struct with a 64-bit signed integer tag (0 = Success, 1+ = Failure)
   -- followed by the representation of the successful value or exception
   Result :: FFI a => (x -> Exception) -> Representation (Result x a)
-  -- An opaque pointer to a Haskell value
-  Class :: Text -> List (Function a) -> Representation a
-
-data Function value where
-  Constructor1 ::
-    (FFI a, FFI value) =>
-    Text ->
-    (a -> value) ->
-    Function value
-  Constructor2 ::
-    (FFI a, FFI b, FFI value) =>
-    Text ->
-    Text ->
-    (a -> b -> value) ->
-    Function value
-  Constructor3 ::
-    (FFI a, FFI b, FFI c, FFI value) =>
-    Text ->
-    Text ->
-    Text ->
-    (a -> b -> c -> value) ->
-    Function value
-  Constructor4 ::
-    (FFI a, FFI b, FFI c, FFI d, FFI value) =>
-    Text ->
-    Text ->
-    Text ->
-    Text ->
-    (a -> b -> c -> d -> value) ->
-    Function value
-  Factory0 ::
-    FFI value =>
-    Text ->
-    value ->
-    Function value
-  Factory1 ::
-    (FFI a, FFI value) =>
-    Text ->
-    Text ->
-    (a -> value) ->
-    Function value
-  Factory2 ::
-    (FFI a, FFI b, FFI value) =>
-    Text ->
-    Text ->
-    Text ->
-    (a -> b -> value) ->
-    Function value
-  Factory3 ::
-    (FFI a, FFI b, FFI c, FFI value) =>
-    Text ->
-    Text ->
-    Text ->
-    Text ->
-    (a -> b -> c -> value) ->
-    Function value
-  Factory4 ::
-    (FFI a, FFI b, FFI c, FFI d, FFI value) =>
-    Text ->
-    Text ->
-    Text ->
-    Text ->
-    Text ->
-    (a -> b -> c -> d -> value) ->
-    Function value
-  Static0 ::
-    FFI result =>
-    Text ->
-    result ->
-    Function value
-  Static1 ::
-    (FFI a, FFI result) =>
-    Text ->
-    Text ->
-    (a -> result) ->
-    Function value
-  Static2 ::
-    (FFI a, FFI b, FFI result) =>
-    Text ->
-    Text ->
-    Text ->
-    (a -> b -> result) ->
-    Function value
-  Static3 ::
-    (FFI a, FFI b, FFI c, FFI result) =>
-    Text ->
-    Text ->
-    Text ->
-    Text ->
-    (a -> b -> c -> result) ->
-    Function value
-  Static4 ::
-    (FFI a, FFI b, FFI c, FFI d, FFI result) =>
-    Text ->
-    Text ->
-    Text ->
-    Text ->
-    Text ->
-    (a -> b -> c -> d -> result) ->
-    Function value
-  Member0 ::
-    (FFI value, FFI result) =>
-    Text ->
-    (value -> result) ->
-    Function value
-  Member1 ::
-    (FFI a, FFI value, FFI result) =>
-    Text ->
-    Text ->
-    (a -> value -> result) ->
-    Function value
-  Member2 ::
-    (FFI a, FFI b, FFI value, FFI result) =>
-    Text ->
-    Text ->
-    Text ->
-    (a -> b -> value -> result) ->
-    Function value
-  Member3 ::
-    (FFI a, FFI b, FFI c, FFI value, FFI result) =>
-    Text ->
-    Text ->
-    Text ->
-    Text ->
-    (a -> b -> c -> value -> result) ->
-    Function value
-  Member4 ::
-    (FFI a, FFI b, FFI c, FFI d, FFI value, FFI result) =>
-    Text ->
-    Text ->
-    Text ->
-    Text ->
-    Text ->
-    (a -> b -> c -> d -> value -> result) ->
-    Function value
+  -- A class containing an opaque pointer to a Haskell value
+  Class :: Text -> Representation a
 
 size :: FFI a => Proxy a -> Int
 size proxy = case representation proxy of
   Int -> 8
   Float -> 8
-  Qty{} -> 8
+  Qty _ -> 8
   List -> 16
-  Pair -> pairSize proxy
-  Triple -> tripleSize proxy
+  Tuple2 -> tuple2Size proxy
+  Tuple3 -> tuple3Size proxy
+  Tuple4 -> tuple4Size proxy
+  Tuple5 -> tuple5Size proxy
+  Tuple6 -> tuple6Size proxy
   Maybe -> maybeSize proxy
   Result _ -> resultSize proxy
-  Class{} -> 8
+  Class _ -> 8
 
-pairSize :: forall a b. (FFI a, FFI b) => Proxy (a, b) -> Int
-pairSize _ = do
-  let sizeA = size (Proxy :: Proxy a)
-  let sizeB = size (Proxy :: Proxy b)
-  sizeA + sizeB
+tuple2Size :: forall a b. (FFI a, FFI b) => Proxy (a, b) -> Int
+tuple2Size _ = do
+  let size1 = size @a Proxy
+  let size2 = size @b Proxy
+  size1 + size2
 
-tripleSize :: forall a b c. (FFI a, FFI b, FFI c) => Proxy (a, b, c) -> Int
-tripleSize _ = do
-  let sizeA = size (Proxy :: Proxy a)
-  let sizeB = size (Proxy :: Proxy b)
-  let sizeC = size (Proxy :: Proxy c)
-  sizeA + sizeB + sizeC
+tuple3Size :: forall a b c. (FFI a, FFI b, FFI c) => Proxy (a, b, c) -> Int
+tuple3Size _ = do
+  let size1 = size @a Proxy
+  let size2 = size @b Proxy
+  let size3 = size @c Proxy
+  size1 + size2 + size3
+
+tuple4Size :: forall a b c d. (FFI a, FFI b, FFI c, FFI d) => Proxy (a, b, c, d) -> Int
+tuple4Size _ = do
+  let size1 = size @a Proxy
+  let size2 = size @b Proxy
+  let size3 = size @c Proxy
+  let size4 = size @d Proxy
+  size1 + size2 + size3 + size4
+
+tuple5Size :: forall a b c d e. (FFI a, FFI b, FFI c, FFI d, FFI e) => Proxy (a, b, c, d, e) -> Int
+tuple5Size _ = do
+  let size1 = size @a Proxy
+  let size2 = size @b Proxy
+  let size3 = size @c Proxy
+  let size4 = size @d Proxy
+  let size5 = size @e Proxy
+  size1 + size2 + size3 + size4 + size5
+
+tuple6Size ::
+  forall a b c d e f.
+  (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f) =>
+  Proxy (a, b, c, d, e, f) ->
+  Int
+tuple6Size _ = do
+  let size1 = size @a Proxy
+  let size2 = size @b Proxy
+  let size3 = size @c Proxy
+  let size4 = size @d Proxy
+  let size5 = size @e Proxy
+  let size6 = size @f Proxy
+  size1 + size2 + size3 + size4 + size5 + size6
 
 maybeSize :: forall a. FFI a => Proxy (Maybe a) -> Int
-maybeSize _ = 8 + size (Proxy :: Proxy a)
+maybeSize _ = 8 + size @a Proxy
 
 resultSize :: forall x a. FFI a => Proxy (Result x a) -> Int
-resultSize _ = 8 + size (Proxy :: Proxy a)
+resultSize _ = 8 + size @a Proxy
 
 instance FFI Float where
   representation _ = Float
@@ -232,19 +130,20 @@ instance FFI Length where
 instance FFI item => FFI (List item) where
   representation _ = List
 
-instance (FFI first, FFI second) => FFI (first, second) where
-  representation _ = Pair
+instance (FFI a, FFI b) => FFI (a, b) where
+  representation _ = Tuple2
 
-instance (FFI first, FFI second, FFI third) => FFI (first, second, third) where
-  representation _ = Triple
+instance (FFI a, FFI b, FFI c) => FFI (a, b, c) where
+  representation _ = Tuple3
 
-newtype Value value = Value value
+instance (FFI a, FFI b, FFI c, FFI d) => FFI (a, b, c, d) where
+  representation _ = Tuple4
 
-instance FFI value => Storable (Value value) where
-  alignment _ = 8
-  sizeOf _ = size (Proxy @value)
-  poke ptr (Value value) = store ptr 0 value
-  peek ptr = IO.map Value (load ptr 0)
+instance (FFI a, FFI b, FFI c, FFI d, FFI e) => FFI (a, b, c, d, e) where
+  representation _ = Tuple5
+
+instance (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f) => FFI (a, b, c, d, e, f) where
+  representation _ = Tuple6
 
 store :: forall parent value. FFI value => Ptr parent -> Int -> value -> IO ()
 store ptr offset value = do
@@ -252,9 +151,9 @@ store ptr offset value = do
   case representation proxy of
     Int -> Foreign.pokeByteOff ptr offset (fromIntegral value :: Int64)
     Float -> Foreign.pokeByteOff ptr offset (Float.toDouble value)
-    Qty{} -> do
-      let Qty.Qty doubleValue = value
-      Foreign.pokeByteOff ptr offset doubleValue
+    Qty _ -> do
+      let Qty.Qty double = value
+      Foreign.pokeByteOff ptr offset double
     List -> IO.do
       let numItems = List.length value
       let itemSize = listItemSize proxy
@@ -263,17 +162,61 @@ store ptr offset value = do
       IO.forEachWithIndex value storeItem
       Foreign.pokeByteOff ptr offset (toInt64 numItems)
       Foreign.pokeByteOff ptr (offset + 8) itemsPtr
-    Pair -> IO.do
-      let (a, b) = value
-      let (sizeA, _) = pairItemSizes proxy
-      store ptr offset a
-      store ptr (offset + sizeA) b
-    Triple -> IO.do
-      let (a, b, c) = value
-      let (sizeA, sizeB, _) = tripleItemSizes proxy
-      store ptr offset a
-      store ptr (offset + sizeA) b
-      store ptr (offset + sizeA + sizeB) c
+    Tuple2 -> IO.do
+      let (value1, value2) = value
+      let (size1, _) = tuple2ItemSizes proxy
+      let offset1 = offset
+      let offset2 = offset1 + size1
+      store ptr offset1 value1
+      store ptr offset2 value2
+    Tuple3 -> IO.do
+      let (value1, value2, value3) = value
+      let (size1, size2, _) = tuple3ItemSizes proxy
+      let offset1 = offset
+      let offset2 = offset1 + size1
+      let offset3 = offset2 + size2
+      store ptr offset1 value1
+      store ptr offset2 value2
+      store ptr offset3 value3
+    Tuple4 -> IO.do
+      let (value1, value2, value3, value4) = value
+      let (size1, size2, size3, _) = tuple4ItemSizes proxy
+      let offset1 = offset
+      let offset2 = offset1 + size1
+      let offset3 = offset2 + size2
+      let offset4 = offset3 + size3
+      store ptr offset1 value1
+      store ptr offset2 value2
+      store ptr offset3 value3
+      store ptr offset4 value4
+    Tuple5 -> IO.do
+      let (value1, value2, value3, value4, value5) = value
+      let (size1, size2, size3, size4, _) = tuple5ItemSizes proxy
+      let offset1 = offset
+      let offset2 = offset1 + size1
+      let offset3 = offset2 + size2
+      let offset4 = offset3 + size3
+      let offset5 = offset4 + size4
+      store ptr offset1 value1
+      store ptr offset2 value2
+      store ptr offset3 value3
+      store ptr offset4 value4
+      store ptr offset5 value5
+    Tuple6 -> IO.do
+      let (value1, value2, value3, value4, value5, value6) = value
+      let (size1, size2, size3, size4, size5, _) = tuple6ItemSizes proxy
+      let offset1 = offset
+      let offset2 = offset1 + size1
+      let offset3 = offset2 + size2
+      let offset4 = offset3 + size3
+      let offset5 = offset4 + size4
+      let offset6 = offset5 + size5
+      store ptr offset1 value1
+      store ptr offset2 value2
+      store ptr offset3 value3
+      store ptr offset4 value4
+      store ptr offset5 value5
+      store ptr offset6 value6
     Maybe -> IO.do
       let tag = case value of Just _ -> 0; Nothing -> 1
       Foreign.pokeByteOff ptr offset (toInt64 tag)
@@ -289,7 +232,7 @@ store ptr offset value = do
           let exception = toException errorValue
           Foreign.pokeByteOff ptr offset (toInt64 (exceptionCode exception))
           storeException ptr (offset + 8) exception
-    Class{} -> IO.do
+    Class _ -> IO.do
       stablePtr <- Foreign.StablePtr.newStablePtr value
       Foreign.pokeByteOff ptr offset stablePtr
 
@@ -297,7 +240,7 @@ exceptionCode :: Exception -> Int
 exceptionCode (Exception exception) = exceptionCodeImpl exception
 
 exceptionCodeImpl :: forall x. Exception.Interface x => x -> Int
-exceptionCodeImpl _ = Exception.code (Proxy :: Proxy x)
+exceptionCodeImpl _ = Exception.code @x Proxy
 
 storeException :: Ptr parent -> Int -> Exception -> IO ()
 storeException ptr offset (Exception exception) = IO.do
@@ -310,56 +253,131 @@ load ptr offset = do
   case representation proxy of
     Int -> IO.map fromInt64 (Foreign.peekByteOff ptr offset)
     Float -> IO.map Float.fromDouble (Foreign.peekByteOff ptr offset)
-    Qty{} -> IO.map Qty.Qty (Foreign.peekByteOff ptr offset)
+    Qty _ -> IO.map Qty.Qty (Foreign.peekByteOff ptr offset)
     List -> IO.do
       let itemSize = listItemSize proxy
       numItems <- IO.map fromInt64 (Foreign.peekByteOff ptr offset)
       itemsPtr <- Foreign.peekByteOff ptr (offset + 8)
       let loadItem index = load itemsPtr (index * itemSize)
       IO.collect loadItem (List.range 0 (numItems - 1))
-    Pair -> IO.do
-      let (firstSize, _) = pairItemSizes proxy
-      firstValue <- load ptr offset
-      secondValue <- load ptr (offset + firstSize)
-      IO.succeed (firstValue, secondValue)
-    Triple -> IO.do
-      let (firstSize, secondSize, _) = tripleItemSizes proxy
-      firstValue <- load ptr offset
-      secondValue <- load ptr (offset + firstSize)
-      thirdValue <- load ptr (offset + firstSize + secondSize)
-      IO.succeed (firstValue, secondValue, thirdValue)
+    Tuple2 -> IO.do
+      let (size1, _) = tuple2ItemSizes proxy
+      let offset1 = offset
+      let offset2 = offset1 + size1
+      value1 <- load ptr offset1
+      value2 <- load ptr offset2
+      IO.succeed (value1, value2)
+    Tuple3 -> IO.do
+      let (size1, size2, _) = tuple3ItemSizes proxy
+      let offset1 = offset
+      let offset2 = offset1 + size1
+      let offset3 = offset2 + size2
+      value1 <- load ptr offset1
+      value2 <- load ptr offset2
+      value3 <- load ptr offset3
+      IO.succeed (value1, value2, value3)
+    Tuple4 -> IO.do
+      let (size1, size2, size3, _) = tuple4ItemSizes proxy
+      let offset1 = offset
+      let offset2 = offset1 + size1
+      let offset3 = offset2 + size2
+      let offset4 = offset3 + size3
+      value1 <- load ptr offset1
+      value2 <- load ptr offset2
+      value3 <- load ptr offset3
+      value4 <- load ptr offset4
+      IO.succeed (value1, value2, value3, value4)
+    Tuple5 -> IO.do
+      let (size1, size2, size3, size4, _) = tuple5ItemSizes proxy
+      let offset1 = offset
+      let offset2 = offset1 + size1
+      let offset3 = offset2 + size2
+      let offset4 = offset3 + size3
+      let offset5 = offset4 + size4
+      value1 <- load ptr offset1
+      value2 <- load ptr offset2
+      value3 <- load ptr offset3
+      value4 <- load ptr offset4
+      value5 <- load ptr offset5
+      IO.succeed (value1, value2, value3, value4, value5)
+    Tuple6 -> IO.do
+      let (size1, size2, size3, size4, size5, _) = tuple6ItemSizes proxy
+      let offset1 = offset
+      let offset2 = offset1 + size1
+      let offset3 = offset2 + size2
+      let offset4 = offset3 + size3
+      let offset5 = offset4 + size4
+      let offset6 = offset5 + size5
+      value1 <- load ptr offset1
+      value2 <- load ptr offset2
+      value3 <- load ptr offset3
+      value4 <- load ptr offset4
+      value5 <- load ptr offset5
+      value6 <- load ptr offset6
+      IO.succeed (value1, value2, value3, value4, value5, value6)
     Maybe -> IO.do
       tag <- IO.map fromInt64 (Foreign.peekByteOff ptr offset)
       if tag == 0
         then IO.map Just (load ptr (offset + 8))
         else IO.succeed Nothing
     Result{} -> internalError "Passing Result values as FFI arguments is not supported"
-    Class{} -> IO.do
+    Class _ -> IO.do
       stablePtr <- Foreign.peekByteOff ptr offset
       Foreign.StablePtr.deRefStablePtr stablePtr
 
 listItemSize :: forall item. FFI item => Proxy (List item) -> Int
 listItemSize _ = size (Proxy @item)
 
-pairItemSizes ::
-  forall first second.
-  (FFI first, FFI second) =>
-  Proxy (first, second) ->
-  (Int, Int)
-pairItemSizes _ =
-  ( size (Proxy @first)
-  , size (Proxy @second)
+tuple2ItemSizes :: forall a b. (FFI a, FFI b) => Proxy (a, b) -> (Int, Int)
+tuple2ItemSizes _ =
+  ( size @a Proxy
+  , size @b Proxy
   )
 
-tripleItemSizes ::
-  forall first second third.
-  (FFI first, FFI second, FFI third) =>
-  Proxy (first, second, third) ->
-  (Int, Int, Int)
-tripleItemSizes _ =
-  ( size (Proxy @first)
-  , size (Proxy @second)
-  , size (Proxy @third)
+tuple3ItemSizes :: forall a b c. (FFI a, FFI b, FFI c) => Proxy (a, b, c) -> (Int, Int, Int)
+tuple3ItemSizes _ =
+  ( size @a Proxy
+  , size @b Proxy
+  , size @c Proxy
+  )
+
+tuple4ItemSizes ::
+  forall a b c d.
+  (FFI a, FFI b, FFI c, FFI d) =>
+  Proxy (a, b, c, d) ->
+  (Int, Int, Int, Int)
+tuple4ItemSizes _ =
+  ( size @a Proxy
+  , size @b Proxy
+  , size @c Proxy
+  , size @d Proxy
+  )
+
+tuple5ItemSizes ::
+  forall a b c d e.
+  (FFI a, FFI b, FFI c, FFI d, FFI e) =>
+  Proxy (a, b, c, d, e) ->
+  (Int, Int, Int, Int, Int)
+tuple5ItemSizes _ =
+  ( size @a Proxy
+  , size @b Proxy
+  , size @c Proxy
+  , size @d Proxy
+  , size @e Proxy
+  )
+
+tuple6ItemSizes ::
+  forall a b c d e f.
+  (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f) =>
+  Proxy (a, b, c, d, e, f) ->
+  (Int, Int, Int, Int, Int, Int)
+tuple6ItemSizes _ =
+  ( size @a Proxy
+  , size @b Proxy
+  , size @c Proxy
+  , size @d Proxy
+  , size @e Proxy
+  , size @f Proxy
   )
 
 toInt64 :: Int -> Int64

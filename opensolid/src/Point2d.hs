@@ -75,6 +75,12 @@ deriving instance Ord (Point2d (space @ units))
 
 deriving instance Show (Point2d (space @ units))
 
+instance FFI (Point2d (space @ Unitless)) where
+  representation _ = FFI.Class "Point2f"
+
+instance FFI (Point2d (space @ Meters)) where
+  representation _ = FFI.Class "Point2d"
+
 instance HasUnits (Point2d (space @ units)) where
   type UnitsOf (Point2d (space @ units)) = units
 
@@ -271,26 +277,3 @@ scaleAbout centerPoint scale = transformBy (Transform2d.scaleAbout centerPoint s
 
 scaleAlong :: Axis2d (space @ units) -> Float -> Point2d (space @ units) -> Point2d (space @ units)
 scaleAlong axis scale = transformBy (Transform2d.scaleAlong axis scale)
-
------ FFI -----
-
-instance FFI (Point2d FFI.FloatCoordinates) where
-  representation _ = representation "Point2f"
-
-instance FFI (Point2d FFI.LengthCoordinates) where
-  representation _ = representation "Point2d"
-
-representation ::
-  forall units.
-  (FFI (Qty units), FFI (Point2d (FFI.Space @ units))) =>
-  Text ->
-  FFI.Representation (Point2d (FFI.Space @ units))
-representation name =
-  FFI.Class name $
-    [ FFI.Constructor2 "x" "y" xy
-    , FFI.Factory0 "origin" origin
-    , FFI.Factory1 "x" "x" x
-    , FFI.Factory1 "y" "y" y
-    , FFI.Member1 "distance to" "other" distanceFrom
-    , FFI.Member1 "midpoint" "other" midpoint
-    ]
