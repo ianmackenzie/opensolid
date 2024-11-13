@@ -1,5 +1,5 @@
 module OpenSolid.FFI
-  ( FFI (..)
+  ( FFI (representation)
   , Representation (..)
   , Value (Value)
   , Space
