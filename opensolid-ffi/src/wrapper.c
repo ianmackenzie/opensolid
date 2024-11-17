@@ -13,6 +13,11 @@ void call_hs_exit()
   hs_exit();
 }
 
+void* opensolid_malloc(size_t bytes)
+{
+  return malloc(bytes);
+}
+
 void opensolid_free(void *ptr)
 {
   free(ptr);
