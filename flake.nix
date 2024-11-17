@@ -2,7 +2,7 @@
   # Note that this should be consistent with the Stack resolver defined in stack.yaml
   # (the NixOS version here and the Stack resolver there should use the same GHC version)
   inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-  outputs = { nixpkgs }:
+  outputs = { nixpkgs, ... }:
     # All supported platforms/architectures
     let
       supportedSystems =
