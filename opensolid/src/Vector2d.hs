@@ -60,6 +60,8 @@ import {-# SOURCE #-} Frame2d qualified
 import Length qualified
 import List qualified
 import OpenSolid
+import OpenSolid.FFI (FFI)
+import OpenSolid.FFI qualified as FFI
 import {-# SOURCE #-} Point2d (Point2d)
 import {-# SOURCE #-} Point2d qualified
 import Qty (Qty (Qty#))
@@ -85,6 +87,12 @@ pattern Vector2d vx vy <- (components# -> (# vx, vy #))
 deriving instance Eq (Vector2d (space @ units))
 
 deriving instance Show (Vector2d (space @ units))
+
+instance FFI (Vector2d (space @ Unitless)) where
+  representation _ = FFI.Class "Vector2f"
+
+instance FFI (Vector2d (space @ Meters)) where
+  representation _ = FFI.Class "Vector2d"
 
 instance HasUnits (Vector2d (space @ units)) where
   type UnitsOf (Vector2d (space @ units)) = units

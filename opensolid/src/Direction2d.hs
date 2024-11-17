@@ -39,6 +39,8 @@ import {-# SOURCE #-} Basis2d (Basis2d)
 import Error qualified
 import {-# SOURCE #-} Frame2d (Frame2d)
 import OpenSolid
+import OpenSolid.FFI (FFI)
+import OpenSolid.FFI qualified as FFI
 import {-# SOURCE #-} Point2d (Point2d)
 import Qty qualified
 import Random qualified
@@ -61,6 +63,9 @@ pattern Direction2d dx dy <- Unit (Vector2d dx dy)
 
 instance HasUnits (Direction2d space) where
   type UnitsOf (Direction2d space) = Unitless
+
+instance FFI (Direction2d space) where
+  representation _ = FFI.Class "Direction2d"
 
 instance space1 ~ space2 => Units.Coercion (Direction2d space1) (Direction2d space2) where
   coerce = identity
