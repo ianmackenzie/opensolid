@@ -6,6 +6,7 @@ module Text
   , join
   , int
   , float
+  , char
   , show
   , isEmpty
   , replace
@@ -17,6 +18,7 @@ module Text
   , contains
   , startsWith
   , endsWith
+  , drop
   , toLower
   , toUpper
   , encodeUtf8
@@ -57,6 +59,9 @@ int n = pack (Prelude.show n)
 float :: Float -> Text
 float x = pack (Prelude.show (Float.toDouble x))
 
+char :: Char -> Text
+char c = pack [c]
+
 show :: Show a => a -> Text
 show = Prelude.show >> pack
 
@@ -93,6 +98,9 @@ startsWith = Data.Text.isPrefixOf
 
 endsWith :: Text -> Text -> Bool
 endsWith = Data.Text.isSuffixOf
+
+drop :: Int -> Text -> Text
+drop = Data.Text.drop
 
 toLower :: Text -> Text
 toLower = Data.Text.toLower
