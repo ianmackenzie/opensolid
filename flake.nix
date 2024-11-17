@@ -4,7 +4,9 @@
   inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
   outputs = { nixpkgs }:
     # All supported platforms/architectures
-    let supportedSystems = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
+    let
+      supportedSystems =
+        [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
     in {
       # Define a dev shell for each supported platform/architecture
       devShells = nixpkgs.lib.genAttrs supportedSystems (system:
@@ -17,8 +19,7 @@
             # Allow Python to find libopensolid-ffi.so
             "$PWD/opensolid-ffi/$(stack path --dist-dir)/build/opensolid-ffi"
           ];
-        in
-        {
+        in {
           # Define the configuration for an OpenSolid development shell
           default = pkgs.mkShell {
             # Development tools
@@ -51,7 +52,7 @@
               # e.g. when adding a whole new sub-project
               pkgs.haskellPackages.implicit-hie
               # For formatting this file =)
-              pkgs.nixpkgs-fmt
+              pkgs.nixfmt
               # Language server for Nix files
               pkgs.nixd
               # The Rust compiler, for libopensolidjit
