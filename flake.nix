@@ -52,6 +52,8 @@
               pkgs.haskellPackages.implicit-hie
               # For formatting this file =)
               pkgs.nixpkgs-fmt
+              # Language server for Nix files
+              pkgs.nixd
               # The Rust compiler, for libopensolidjit
               pkgs.rustc
               # The Cargo build tool for Rust
