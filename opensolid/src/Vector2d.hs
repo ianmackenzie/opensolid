@@ -240,13 +240,13 @@ zero = Vector2d# 0.0## 0.0##
 unit :: Direction2d space -> Vector2d (space @ Unitless)
 unit = Direction2d.unwrap
 
-x :: Qty units -> Vector2d (space @ units)
+x :: forall space units. Qty units -> Vector2d (space @ units)
 x (Qty# vx#) = Vector2d# vx# 0.0##
 
-y :: Qty units -> Vector2d (space @ units)
+y :: forall space units. Qty units -> Vector2d (space @ units)
 y (Qty# vy#) = Vector2d# 0.0## vy#
 
-xy :: Qty units -> Qty units -> Vector2d (space @ units)
+xy :: forall space units. Qty units -> Qty units -> Vector2d (space @ units)
 xy = Vector2d
 
 xyIn :: Frame2d (space @ originUnits) defines -> Qty units -> Qty units -> Vector2d (space @ units)

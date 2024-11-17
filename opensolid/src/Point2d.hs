@@ -159,10 +159,10 @@ instance Bounded.Interface (Point2d (space @ units)) (Bounds2d (space @ units)) 
 origin :: Point2d (space @ units)
 origin = Point2d# 0.0## 0.0##
 
-x :: Qty units -> Point2d (space @ units)
+x :: forall space units. Qty units -> Point2d (space @ units)
 x (Qty# px#) = Point2d# px# 0.0##
 
-y :: Qty units -> Point2d (space @ units)
+y :: forall space units. Qty units -> Point2d (space @ units)
 y (Qty# py#) = Point2d# 0.0## py#
 
 along :: Axis2d (space @ units) -> Qty units -> Point2d (space @ units)
