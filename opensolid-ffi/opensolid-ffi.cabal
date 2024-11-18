@@ -18,12 +18,10 @@ source-repository head
   location: https://github.com/ianmackenzie/opensolid
 
 foreign-library opensolid-ffi
-  default-language: Haskell2010
+  default-language: GHC2021
   build-depends:
     base,
     opensolid,
-    opensolid-api,
-    template-haskell,
 
   type: native-shared
   hs-source-dirs: src
@@ -37,4 +35,6 @@ foreign-library opensolid-ffi
     -Wcompat
     -Wno-missed-extra-shared-lib
 
-  default-extensions: TemplateHaskell
+  default-extensions:
+    OverloadedStrings
+    RebindableSyntax

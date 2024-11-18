@@ -177,7 +177,6 @@ library
     OpenSolid.API
     OpenSolid.API.Class
     OpenSolid.FFI
-    OpenSolid.FFI.Exception
     OpenSolid.Json
     Pair
     Parameter

@@ -23,13 +23,18 @@ executable opensolid-python
   main-is: Main.hs
   build-depends:
     base,
-    language-python,
+    containers,
     opensolid,
-    opensolid-api,
-    process,
 
   other-modules:
-    PythonAST
+    CTypes
+    Constructor
+    Function
+    MemberFunction
+    Python
+    StaticFunction
+    Type
+    TypeRegistry
 
   ghc-options:
     -Wall
@@ -49,6 +54,7 @@ executable opensolid-python
     -with-rtsopts=-N
 
   default-extensions:
+    GADTs
     OverloadedStrings
     QualifiedDo
     RebindableSyntax

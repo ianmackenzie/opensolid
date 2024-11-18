@@ -9,17 +9,17 @@ where
 
 import Data.Int (Int64)
 import Data.Proxy (Proxy (Proxy))
+import Data.Text.Foreign qualified
+import Data.Word (Word8)
+import Error qualified
 import Float qualified
 import Foreign (Ptr)
 import Foreign qualified
 import Foreign.Marshal.Alloc qualified
-import Foreign.StablePtr qualified
 import IO qualified
 import Length (Length)
 import List qualified
 import OpenSolid
-import OpenSolid.FFI.Exception (Exception (Exception))
-import OpenSolid.FFI.Exception qualified as Exception
 import Qty qualified
 
 class FFI a where
@@ -49,7 +49,7 @@ data Representation a where
   Maybe :: FFI a => Representation (Maybe a)
   -- A struct with a 64-bit signed integer tag (0 = Success, 1+ = Failure)
   -- followed by the representation of the successful value or exception
-  Result :: FFI a => (x -> Exception) -> Representation (Result x a)
+  Result :: FFI a => Representation (Result x a)
   -- A class containing an opaque pointer to a Haskell value
   Class :: Text -> Representation a
 
@@ -65,7 +65,7 @@ size proxy = case representation proxy of
   Tuple5 -> tuple5Size proxy
   Tuple6 -> tuple6Size proxy
   Maybe -> maybeSize proxy
-  Result _ -> resultSize proxy
+  Result -> resultSize proxy
   Class _ -> 8
 
 tuple2Size :: forall a b. (FFI a, FFI b) => Proxy (a, b) -> Int
@@ -116,7 +116,7 @@ maybeSize :: forall a. FFI a => Proxy (Maybe a) -> Int
 maybeSize _ = 8 + size @a Proxy
 
 resultSize :: forall x a. FFI a => Proxy (Result x a) -> Int
-resultSize _ = 8 + size @a Proxy
+resultSize _ = 16 + size @a Proxy
 
 instance FFI Float where
   representation _ = Float
@@ -126,6 +126,9 @@ instance FFI Int where
 
 instance FFI Length where
   representation _ = Qty "Length"
+
+instance FFI Angle where
+  representation _ = Qty "Angle"
 
 instance FFI item => FFI (List item) where
   representation _ = List
@@ -144,6 +147,12 @@ instance (FFI a, FFI b, FFI c, FFI d, FFI e) => FFI (a, b, c, d, e) where
 
 instance (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f) => FFI (a, b, c, d, e, f) where
   representation _ = Tuple6
+
+instance FFI a => FFI (Maybe a) where
+  representation _ = Maybe
+
+instance FFI a => FFI (Result x a) where
+  representation _ = Result
 
 store :: forall parent value. FFI value => Ptr parent -> Int -> value -> IO ()
 store ptr offset value = do
@@ -223,29 +232,24 @@ store ptr offset value = do
       case value of
         Just actualValue -> store ptr (offset + 8) actualValue
         Nothing -> IO.succeed ()
-    Result toException ->
+    Result ->
       case value of
         Success successfulValue -> IO.do
           Foreign.pokeByteOff ptr offset (toInt64 0)
-          store ptr (offset + 8) successfulValue
+          store ptr (offset + 16) successfulValue
         Failure errorValue -> IO.do
-          let exception = toException errorValue
-          Foreign.pokeByteOff ptr offset (toInt64 (exceptionCode exception))
-          storeException ptr (offset + 8) exception
+          -- Construct null-terminated string with error message
+          let message = Error.message errorValue
+          let messageBytes = Data.Text.Foreign.lengthWord8 message
+          messagePtr <- Foreign.Marshal.Alloc.mallocBytes (messageBytes + 1)
+          Data.Text.Foreign.unsafeCopyToPtr message messagePtr
+          Foreign.pokeByteOff messagePtr messageBytes (fromIntegral 0 :: Word8)
+          -- Set error code and store pointer to string in output
+          Foreign.pokeByteOff ptr offset (toInt64 1)
+          Foreign.pokeByteOff ptr (offset + 8) messagePtr
     Class _ -> IO.do
-      stablePtr <- Foreign.StablePtr.newStablePtr value
+      stablePtr <- Foreign.newStablePtr value
       Foreign.pokeByteOff ptr offset stablePtr
-
-exceptionCode :: Exception -> Int
-exceptionCode (Exception exception) = exceptionCodeImpl exception
-
-exceptionCodeImpl :: forall x. Exception.Interface x => x -> Int
-exceptionCodeImpl _ = Exception.code @x Proxy
-
-storeException :: Ptr parent -> Int -> Exception -> IO ()
-storeException ptr offset (Exception exception) = IO.do
-  exceptionPtr <- Foreign.StablePtr.newStablePtr exception
-  Foreign.pokeByteOff ptr offset exceptionPtr
 
 load :: forall parent value. FFI value => Ptr parent -> Int -> IO value
 load ptr offset = do
@@ -323,7 +327,7 @@ load ptr offset = do
     Result{} -> internalError "Passing Result values as FFI arguments is not supported"
     Class _ -> IO.do
       stablePtr <- Foreign.peekByteOff ptr offset
-      Foreign.StablePtr.deRefStablePtr stablePtr
+      Foreign.deRefStablePtr stablePtr
 
 listItemSize :: forall item. FFI item => Proxy (List item) -> Int
 listItemSize _ = size (Proxy @item)

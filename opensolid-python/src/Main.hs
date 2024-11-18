@@ -1,295 +1,372 @@
+{-# OPTIONS_GHC -Wno-unused-binds -Wno-unused-top-binds #-}
+
 module Main (main) where
 
+import CTypes qualified
+import Constructor qualified
+import Data.Proxy (Proxy (Proxy))
 import IO qualified
+import Length (Length)
 import List qualified
-import Maybe qualified
+import MemberFunction qualified
 import OpenSolid
-import OpenSolidAPI
-  ( Api (..)
-  , Class (..)
-  , ExceptionClass (..)
-  , Function (..)
-  , FunctionKind (..)
-  , ValueType (..)
-  , openSolidAPI
-  )
-import PythonAST qualified as PY
-import System.Exit qualified as SE
-import System.IO qualified as SIO
-import System.Process qualified as SP
-import Text qualified
+import OpenSolid.API qualified as API
+import OpenSolid.API.Class (Class (Class), Constraint (..), Constructor (..), MemberFunction (..), StaticFunction (..))
+import OpenSolid.API.Class qualified as Class
+import OpenSolid.FFI (FFI)
+import Pair qualified
+import Python qualified
+import StaticFunction qualified
+import TypeRegistry (TypeRegistry)
+import TypeRegistry qualified
+import Units (Meters)
 
-setup :: List PY.Statement
-setup =
-  PY.literalStatements
-    [ "from __future__ import annotations"
-    , "from contextlib import contextmanager"
-    , "from typing import Optional, Callable, TypeVar, Tuple"
+preamble :: Text
+preamble =
+  Python.lines
+    [ "\"\"\"A collection of classes for 2D/3D geometric modelling.\"\"\""
+    , ""
+    , "from __future__ import annotations"
+    , ""
+    , "import ctypes"
     , "import platform"
-    , "from ctypes import c_bool, c_double, c_int8, c_void_p, cast, cdll, POINTER, Structure"
-    , "global lib"
-    , "system = platform.system()"
-    , Text.multiline
-        [ "if system == 'Darwin':"
-        , "    lib = cdll.LoadLibrary('libopensolid-ffi.dylib')"
-        , "elif system == 'Linux':"
-        , "    lib = cdll.LoadLibrary('libopensolid-ffi.so')"
-        , "else:"
-        , "    raise Exception('System ' + system + ' is not supported')"
-        ]
-    , "lib.opensolid_free.argtypes = [c_void_p]"
-    , "lib.opensolid_free_stable.argtypes = [c_void_p]"
-    , "global_tolerance = None"
-    , Text.multiline
-        [ "@contextmanager"
-        , "def Tolerance(new_tolerance: float):"
-        , "    global global_tolerance"
-        , "    (saved_tolerance, global_tolerance) = (global_tolerance, new_tolerance)"
-        , "    try:"
-        , "        yield"
-        , "    finally:"
-        , "        global_tolerance = saved_tolerance"
-        ]
-    , "A = TypeVar('A')"
-    , "B = TypeVar('B')"
-    , Text.multiline
-        [ "def maybe_reader(read_success: Callable[[c_void_p], A]) -> Callable[[c_void_p], Optional[A]]:"
-        , "    return lambda ptr: read_success(ptr) if ptr else None"
-        ]
-    , Text.multiline
-        [ "class Tuple2Structure(Structure):"
-        , "    _fields_ = [('ptr1', c_void_p), ('ptr2', c_void_p)]"
-        ]
-    , Text.multiline
-        [ "def tuple2_reader(read_a: Callable[[c_void_p], A], read_b: Callable[[c_void_p], B]) -> Callable[[c_void_p], Tuple[A, B]]:"
-        , "    def read(ptr: c_void_p) -> Tuple[A, B]:"
-        , "        tuple2_struct = cast(ptr, POINTER(Tuple2Structure)).contents"
-        , "        res = (read_a(tuple2_struct.ptr1), read_b(tuple2_struct.ptr2))"
-        , "        lib.opensolid_free(ptr)"
-        , "        return res"
-        , "    return read"
-        ]
-    , Text.multiline
-        [ "class ResultStructure(Structure):"
-        , "    _fields_ = [('ptr', c_void_p), ('tag', c_int8)]"
-        ]
-    , Text.multiline
-        [ "def result_reader(read_error: Callable[[c_int8, c_void_p], Exception], read_success: Callable[[c_void_p], A]) -> Callable[[c_void_p], A]:"
-        , "    def read(ptr: c_void_p) -> A:"
-        , "        result_struct = cast(ptr, POINTER(ResultStructure)).contents"
-        , "        tag = result_struct.tag"
-        , "        ptr1 = result_struct.ptr"
-        , "        lib.opensolid_free(ptr)"
-        , "        if tag == 0:"
-        , "            return read_success(ptr1)"
-        , "        else:"
-        , "            raise read_error(tag, ptr1)"
-        , "    return read"
-        ]
-    , Text.multiline
-        [ "def read_float(ptr: c_void_p) -> float:"
-        , "    val = float(cast(ptr, POINTER(c_double)).contents.value)"
-        , "    lib.opensolid_free(ptr)"
-        , "    return val"
-        ]
-    , Text.multiline
-        [ "def read_bool(ptr: c_void_p) -> bool:"
-        , "    val = bool(cast(ptr, POINTER(c_bool)).contents.value)"
-        , "    lib.opensolid_free(ptr)"
-        , "    return val"
-        ]
-    , Text.multiline
-        [ "def read_tolerance(tolerance: Optional[float]) -> float:"
-        , "    tolerance = tolerance or global_tolerance"
-        , "    if tolerance is None:"
-        , "        raise Exception('Tolerance is not set')"
-        , "    return tolerance"
-        ]
+    , "from contextlib import contextmanager"
+    , "from ctypes import CDLL, Structure, Union, c_char_p, c_double, c_int, c_int64, c_size_t, c_void_p"
+    , "from typing import Any, Generator, overload"
+    , ""
+    , "# Load the native library"
+    , "_load_path = \"libopensolid-ffi.so\""
+    , "if platform.system() == \"Darwin\":"
+    , "    _load_path = \"libopensolid-ffi.dylib\""
+    , "_lib : CDLL = ctypes.cdll.LoadLibrary(_load_path)"
+    , ""
+    , "# Define the signatures of the C API functions"
+    , "_lib.opensolid_invoke.argtypes = [c_int, c_int, c_void_p, c_void_p]"
+    , "_lib.opensolid_malloc.argtypes = [c_size_t]"
+    , "_lib.opensolid_malloc.restype = c_void_p"
+    , "_lib.opensolid_free.argtypes = [c_void_p]"
+    , "_lib.opensolid_release.argtypes = [c_void_p]"
+    , ""
+    , "class Error(Exception):"
+    , "    pass"
+    , ""
+    , "class _ErrorMessage(Union):"
+    , "    _fields_ = ((\"as_char\", c_char_p), (\"as_void\", c_void_p))"
+    , ""
+    , "def _error(output: Any) -> Any: # noqa: ANN401"
+    , "    message = output.field1.as_char.decode(\"utf-8\")"
+    , "    _lib.opensolid_free(output.field1.as_void)"
+    , "    raise Error(message)"
+    , ""
+    , "class Length:"
+    , "    \"\"\"A length, stored as a value in meters.\"\"\""
+    , ""
+    , "    def __init__(self, value: float) -> None:"
+    , "        \"\"\"Create a Length from a float value in meters.\"\"\""
+    , "        self.value = value"
+    , ""
+    , "class Angle:"
+    , "    \"\"\"An angle, stored as a value in radians.\"\"\""
+    , ""
+    , "    def __init__(self, value: float) -> None:"
+    , "        \"\"\"Create an Angle from a float value in radians.\"\"\""
+    , "        self.value = value"
+    , ""
+    , "class Tolerance:"
+    , "    \"\"\"Manages a global tolerance value.\"\"\""
+    , ""
+    , "    current: float | Length | Angle | None = None"
+    , ""
+    , "    @staticmethod"
+    , "    @contextmanager"
+    , "    def of(value: float | Length | Angle | None) -> Generator[None]:"
+    , "        \"\"\"Set the implicit tolerance to be used in the nested block."
+    , ""
+    , "        The tolerance will be restored to its previous value when the block exits."
+    , "        \"\"\""
+    , "        saved = Tolerance.current"
+    , "        Tolerance.current = value"
+    , "        try:"
+    , "            yield"
+    , "        finally:"
+    , "            Tolerance.current = saved"
+    , ""
+    , "def _float_tolerance() -> float:"
+    , "    if isinstance(Tolerance.current, float):"
+    , "        return Tolerance.current"
+    , "    if Tolerance.current is None:"
+    , "        message = \"No float tolerance set, please set one using Tolerance.of\""
+    , "        raise TypeError(message)"
+    , "    message = \"Expected a tolerance of type float but current tolerance is of type \" + type(Tolerance.current).__name__"
+    , "    raise TypeError(message)"
+    , ""
+    , "def _length_tolerance() -> Length:"
+    , "    if isinstance(Tolerance.current, Length):"
+    , "        return Tolerance.current"
+    , "    if Tolerance.current is None:"
+    , "        message = \"No length tolerance set, please set one using Tolerance.of\""
+    , "        raise TypeError(message)"
+    , "    message = \"Expected a tolerance of type Length but current tolerance is of type \" + type(Tolerance.current).__name__"
+    , "    raise TypeError(message)"
+    , ""
+    , "def _angle_tolerance() -> Angle:"
+    , "    if isinstance(Tolerance.current, Angle):"
+    , "        return Tolerance.current"
+    , "    if Tolerance.current is None:"
+    , "        message = \"No angle tolerance set, please set one using Tolerance.of\""
+    , "        raise TypeError(message)"
+    , "    message = \"Expected a tolerance of type Angle but current tolerance is of type \" + type(Tolerance.current).__name__"
+    , "    raise TypeError(message)"
     ]
 
-api :: Api -> List PY.Statement
-api (Api classes) =
-  List.map apiClass classes
+classDefinition :: Int -> Class -> Text
+classDefinition classId cls = do
+  Python.lines
+    [ "class " + Class.name cls + ":"
+    , Python.indent [Class.withConstructors cls (Constructor.definition classId)]
+    , Python.indent (Class.mapStaticFunctions cls (StaticFunction.definition classId))
+    , Python.indent (Class.mapMemberFunctions cls (MemberFunction.definition classId))
+    ]
 
-apiClass :: Class -> PY.Statement
-apiClass (Class clsName representationProps errorClasses functions) =
-  PY.cls clsName [] $
-    List.concat
-      [ [constructor, destructor, representation]
-      , List.collect apiFunction functions
-      , List.collect (apiException clsName) errorClasses
-      ]
- where
-  constructor =
-    PY.def "__init__" [selfPyArg, ("ptr", Just (PY.var "c_void_p"), Nothing)] Nothing $
-      [PY.set (PY.var "self" `PY.dot` "ptr") (PY.var "ptr")]
+ffiTypeDeclarations :: Text
+ffiTypeDeclarations = do
+  let registry = List.foldr registerClassTypes TypeRegistry.empty API.classes
+  TypeRegistry.typeDeclarations registry
 
-  destructor =
-    PY.def "__del__" [selfPyArg] Nothing $
-      [PY.stmtExpr (PY.call (PY.var "lib" `PY.dot` "opensolid_free_stable") [PY.var "self" `PY.dot` "ptr"])]
+registerClassTypes :: Class -> TypeRegistry -> TypeRegistry
+registerClassTypes (Class _ constructors staticFunctions memberFunctions) registry0 = do
+  let staticFunctionOverloads = List.collect Pair.second staticFunctions
+  let memberFunctionOverloads = List.collect Pair.second memberFunctions
+  let registry1 = List.foldr registerConstructorTypes registry0 constructors
+  let registry2 = List.foldr registerStaticFunctionTypes registry1 staticFunctionOverloads
+  let registry3 = List.foldr registerMemberFunctionTypes registry2 memberFunctionOverloads
+  registry3
 
-  representation =
-    PY.def "__repr__" [selfPyArg] (Just (PY.var "str")) $
-      [ PY.returnStatement
-          ( List.foldl
-              PY.plus
-              (PY.string (clsName + "("))
-              ( List.intersperse
-                  (PY.string ", ")
-                  (List.map (\prop -> PY.call (PY.var "str") [PY.call (PY.var "self" `PY.dot` prop) []]) representationProps)
-              )
-              `PY.plus` PY.string ")"
-          )
-      ]
+registerConstructorTypes :: Constructor value -> TypeRegistry -> TypeRegistry
+registerConstructorTypes constructor registry = case constructor of
+  C0 N v -> register0N v registry
+  C0 F v -> register0F v registry
+  C0 L v -> register0L v registry
+  C1 N _ f -> register1N f registry
+  C1 F _ f -> register1F f registry
+  C1 L _ f -> register1L f registry
+  C2 N _ _ f -> register2N f registry
+  C2 F _ _ f -> register2F f registry
+  C2 L _ _ f -> register2L f registry
+  C3 N _ _ _ f -> register3N f registry
+  C3 F _ _ _ f -> register3F f registry
+  C3 L _ _ _ f -> register3L f registry
+  C4 N _ _ _ _ f -> register4N f registry
+  C4 F _ _ _ _ f -> register4F f registry
+  C4 L _ _ _ _ f -> register4L f registry
 
-apiFunction :: Function -> List PY.Statement
-apiFunction (Function kind ffiName pyName args retType) =
-  [ -- lib.opensolid_point2d_xy.argtypes = [c_double, c_double]
-    PY.set (libName `PY.dot` "argtypes") (PY.list (List.map (\(_, typ) -> cType typ) args))
-  , -- lib.opensolid_point2d_xy.restype = c_void_p
-    PY.set (libName `PY.dot` "restype") (cType retType)
-  , case kind of
-      Static ->
-        PY.staticmethod $
-          PY.def
-            pyName
-            -- "tolerance" is the last arg
-            (pyArgs (argsWithoutTolerance + maybeTolerance))
-            (pyType retType)
-            (fnBody retType libName (ffiArgExprs args))
-      Method ->
-        PY.def
-          pyName
-          -- "self" is the first, "tolerance" is the last arg
-          (selfPyArg : pyArgs (removeLast argsWithoutTolerance + maybeTolerance))
-          (pyType retType)
-          (fnBody retType libName (ffiArgExprs args))
-  ]
- where
-  libName = PY.var "lib" `PY.dot` ffiName
-  (maybeTolerance, argsWithoutTolerance) = takeTolerance args
+registerStaticFunctionTypes :: StaticFunction -> TypeRegistry -> TypeRegistry
+registerStaticFunctionTypes function registry = case function of
+  S0 N v -> register0N v registry
+  S0 F v -> register0F v registry
+  S0 L v -> register0L v registry
+  S1 N _ f -> register1N f registry
+  S1 F _ f -> register1F f registry
+  S1 L _ f -> register1L f registry
+  S2 N _ _ f -> register2N f registry
+  S2 F _ _ f -> register2F f registry
+  S2 L _ _ f -> register2L f registry
+  S3 N _ _ _ f -> register3N f registry
+  S3 F _ _ _ f -> register3F f registry
+  S3 L _ _ _ f -> register3L f registry
+  S4 N _ _ _ _ f -> register4N f registry
+  S4 F _ _ _ _ f -> register4F f registry
+  S4 L _ _ _ _ f -> register4L f registry
 
-  removeLast [] = []
-  removeLast [_] = []
-  removeLast (h : t) = h : removeLast t
+registerMemberFunctionTypes :: MemberFunction value -> TypeRegistry -> TypeRegistry
+registerMemberFunctionTypes function registry = case function of
+  M0 N f -> register1N f registry
+  M0 F f -> register1F f registry
+  M0 L f -> register1L f registry
+  M1 N _ f -> register2N f registry
+  M1 F _ f -> register2F f registry
+  M1 L _ f -> register2L f registry
+  M2 N _ _ f -> register3N f registry
+  M2 F _ _ f -> register3F f registry
+  M2 L _ _ f -> register3L f registry
+  M3 N _ _ _ f -> register4N f registry
+  M3 F _ _ _ f -> register4F f registry
+  M3 L _ _ _ f -> register4L f registry
+  M4 N _ _ _ _ f -> register5N f registry
+  M4 F _ _ _ _ f -> register5F f registry
+  M4 L _ _ _ _ f -> register5L f registry
 
-  takeTolerance ((tol, ImplicitTolerance) : rest) = (Just (tol, ImplicitTolerance), rest)
-  takeTolerance rest = (Nothing, rest)
+register0N :: forall a. FFI a => a -> TypeRegistry -> TypeRegistry
+register0N _ registry =
+  registry
+    |> CTypes.registerType @a Proxy
 
-cType :: ValueType -> PY.Expr
-cType typ =
-  case typ of
-    ImplicitTolerance -> PY.var "c_double"
-    Pointer _ -> PY.var "c_void_p"
-    Float -> PY.var "c_double"
-    Boolean -> PY.var "c_bool"
-    Maybe _ -> PY.var "c_void_p"
-    Result{} -> PY.var "c_void_p"
-    Tuple2 _ _ -> PY.var "c_void_p"
-    Self -> PY.var "c_void_p"
+register0F :: forall a. FFI a => (Tolerance Unitless => a) -> TypeRegistry -> TypeRegistry
+register0F _ registry =
+  registry
+    |> CTypes.registerType @Float Proxy
+    |> CTypes.registerType @a Proxy
 
-pyArgs :: List (Text, ValueType) -> List (Text, Maybe PY.Expr, Maybe PY.Expr)
-pyArgs = List.map pyArg
- where
-  pyArg (name, typ) = do
-    let defaultValue = case typ of
-          ImplicitTolerance -> Just (PY.var "None")
-          _ -> Nothing
-    (name, pyType typ, defaultValue)
+register0L :: forall a. FFI a => (Tolerance Meters => a) -> TypeRegistry -> TypeRegistry
+register0L _ registry =
+  registry
+    |> CTypes.registerType @Length Proxy
+    |> CTypes.registerType @a Proxy
 
-selfPyArg :: (Text, Maybe PY.Expr, Maybe PY.Expr)
-selfPyArg = ("self", Nothing, Nothing)
+register1N :: forall a b. (FFI a, FFI b) => (a -> b) -> TypeRegistry -> TypeRegistry
+register1N _ registry =
+  registry
+    |> CTypes.registerType @a Proxy
+    |> CTypes.registerType @b Proxy
 
-pyType :: ValueType -> Maybe PY.Expr
-pyType typ =
-  case typ of
-    ImplicitTolerance -> Just (PY.subscript (PY.var "Optional") [PY.var "float"])
-    Pointer name -> Just (PY.var name)
-    Float -> Just (PY.var "float")
-    Boolean -> Just (PY.var "bool")
-    Maybe nestedTyp -> Just (PY.subscript (PY.var "Optional") (Maybe.collect pyType [nestedTyp]))
-    Result _ _ val -> pyType val -- we throw an exception in case of an err
-    Tuple2 val1 val2 -> Just (PY.subscript (PY.var "Tuple") (Maybe.collect pyType [val1, val2]))
-    Self -> Nothing
+register1F :: forall a b. (FFI a, FFI b) => (Tolerance Unitless => a -> b) -> TypeRegistry -> TypeRegistry
+register1F _ registry =
+  registry
+    |> CTypes.registerType @(Float, a) Proxy
+    |> CTypes.registerType @b Proxy
 
-fnBody :: ValueType -> PY.Expr -> List PY.Expr -> [PY.Statement]
-fnBody typ ffiFunc args =
-  [PY.returnStatement expression]
- where
-  fnCall = PY.call ffiFunc args
-  expression = case typ of
-    Pointer _ -> PY.call (exprReader typ) [fnCall]
-    Tuple2 _ _ -> PY.call (exprReader typ) [fnCall]
-    Result{} -> PY.call (exprReader typ) [fnCall]
-    Maybe _ -> PY.call (exprReader typ) [fnCall]
-    Self -> PY.var "self" `PY.dot` "ptr"
-    _ -> fnCall
+register1L :: forall a b. (FFI a, FFI b) => (Tolerance Meters => a -> b) -> TypeRegistry -> TypeRegistry
+register1L _ registry =
+  registry
+    |> CTypes.registerType @(Length, a) Proxy
+    |> CTypes.registerType @b Proxy
 
--- Compose the readers that decode the result value of the c function
--- stable pointers are wrapped in the python class
--- tuples and results are transformed into python values and
--- the c pointers are freed
-exprReader :: ValueType -> PY.Expr
-exprReader typ =
-  case typ of
-    Pointer p -> PY.var p
-    Tuple2 a b -> PY.call (PY.var "tuple2_reader") [exprReader a, exprReader b]
-    Result mod err succ ->
-      PY.call
-        (PY.var "result_reader")
-        [ PY.var mod `PY.dot` err `PY.dot` "from_tag"
-        , exprReader succ
-        ]
-    Maybe succ -> PY.call (PY.var "maybe_reader") [exprReader succ]
-    Float -> PY.var "read_float"
-    Boolean -> PY.var "read_bool"
-    ImplicitTolerance -> PY.var "read_float"
-    Self -> PY.var "self" `PY.dot` "ptr"
+register2N ::
+  forall a b c.
+  (FFI a, FFI b, FFI c) =>
+  (a -> b -> c) ->
+  TypeRegistry ->
+  TypeRegistry
+register2N _ registry =
+  registry
+    |> CTypes.registerType @(a, b) Proxy
+    |> CTypes.registerType @c Proxy
 
-ffiArgExprs :: List (Text, ValueType) -> List PY.Expr
-ffiArgExprs = List.map ffiArgExpr
- where
-  ffiArgExpr (var, typ) =
-    case typ of
-      Self -> PY.var "self" `PY.dot` "ptr"
-      Pointer _ -> PY.var var `PY.dot` "ptr"
-      ImplicitTolerance -> PY.call (PY.var "read_tolerance") [PY.var var]
-      _ -> PY.var var
+register2F ::
+  forall a b c.
+  (FFI a, FFI b, FFI c) =>
+  (Tolerance Unitless => a -> b -> c) ->
+  TypeRegistry ->
+  TypeRegistry
+register2F _ registry =
+  registry
+    |> CTypes.registerType @(Float, a, b) Proxy
+    |> CTypes.registerType @c Proxy
 
-apiException :: Text -> ExceptionClass -> List PY.Statement
-apiException mod (ExceptionClass name [(tag, constructorName, Nothing)])
-  | name == constructorName =
-      let retTyp = PY.var mod `PY.dot` name
-       in [ PY.cls name [PY.var "Exception"] $
-              [ PY.staticmethod
-                  ( PY.def
-                      "from_tag"
-                      [ ("tag", Just (PY.var "c_int8"), Nothing)
-                      , ("ptr", Just (PY.var "c_void_p"), Nothing)
-                      ]
-                      (Just retTyp)
-                      [ PY.conditional
-                          [
-                            ( PY.var "tag" `PY.eq` PY.int tag
-                            , [PY.returnStatement (PY.call retTyp [])]
-                            )
-                          ]
-                          (PY.literalStatement "raise ValueError('Unkown exception tag ' + str(tag))")
-                      ]
-                  )
-              ]
-          ]
--- TODO: support exceptions with mutiple cases and pointers
-apiException _ ex = internalError (Text.show ex)
+register2L ::
+  forall a b c.
+  (FFI a, FFI b, FFI c) =>
+  (Tolerance Meters => a -> b -> c) ->
+  TypeRegistry ->
+  TypeRegistry
+register2L _ registry =
+  registry
+    |> CTypes.registerType @(Length, a, b) Proxy
+    |> CTypes.registerType @c Proxy
+
+register3N ::
+  forall a b c d.
+  (FFI a, FFI b, FFI c, FFI d) =>
+  (a -> b -> c -> d) ->
+  TypeRegistry ->
+  TypeRegistry
+register3N _ registry =
+  registry
+    |> CTypes.registerType @(a, b, c) Proxy
+    |> CTypes.registerType @d Proxy
+
+register3F ::
+  forall a b c d.
+  (FFI a, FFI b, FFI c, FFI d) =>
+  (Tolerance Unitless => a -> b -> c -> d) ->
+  TypeRegistry ->
+  TypeRegistry
+register3F _ registry =
+  registry
+    |> CTypes.registerType @(Float, a, b, c) Proxy
+    |> CTypes.registerType @d Proxy
+
+register3L ::
+  forall a b c d.
+  (FFI a, FFI b, FFI c, FFI d) =>
+  (Tolerance Meters => a -> b -> c -> d) ->
+  TypeRegistry ->
+  TypeRegistry
+register3L _ registry =
+  registry
+    |> CTypes.registerType @(Length, a, b, c) Proxy
+    |> CTypes.registerType @d Proxy
+
+register4N ::
+  forall a b c d e.
+  (FFI a, FFI b, FFI c, FFI d, FFI e) =>
+  (a -> b -> c -> d -> e) ->
+  TypeRegistry ->
+  TypeRegistry
+register4N _ registry =
+  registry
+    |> CTypes.registerType @(a, b, c, d) Proxy
+    |> CTypes.registerType @e Proxy
+
+register4F ::
+  forall a b c d e.
+  (FFI a, FFI b, FFI c, FFI d, FFI e) =>
+  (Tolerance Unitless => a -> b -> c -> d -> e) ->
+  TypeRegistry ->
+  TypeRegistry
+register4F _ registry =
+  registry
+    |> CTypes.registerType @(Float, a, b, c, d) Proxy
+    |> CTypes.registerType @e Proxy
+
+register4L ::
+  forall a b c d e.
+  (FFI a, FFI b, FFI c, FFI d, FFI e) =>
+  (Tolerance Meters => a -> b -> c -> d -> e) ->
+  TypeRegistry ->
+  TypeRegistry
+register4L _ registry =
+  registry
+    |> CTypes.registerType @(Length, a, b, c, d) Proxy
+    |> CTypes.registerType @e Proxy
+
+register5N ::
+  forall a b c d e f.
+  (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f) =>
+  (a -> b -> c -> d -> e -> f) ->
+  TypeRegistry ->
+  TypeRegistry
+register5N _ registry =
+  registry
+    |> CTypes.registerType @(a, b, c, d, e) Proxy
+    |> CTypes.registerType @f Proxy
+
+register5F ::
+  forall a b c d e f.
+  (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f) =>
+  (Tolerance Unitless => a -> b -> c -> d -> e -> f) ->
+  TypeRegistry ->
+  TypeRegistry
+register5F _ registry =
+  registry
+    |> CTypes.registerType @(Float, a, b, c, d, e) Proxy
+    |> CTypes.registerType @f Proxy
+
+register5L ::
+  forall a b c d e f.
+  (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f) =>
+  (Tolerance Meters => a -> b -> c -> d -> e -> f) ->
+  TypeRegistry ->
+  TypeRegistry
+register5L _ registry =
+  registry
+    |> CTypes.registerType @(Length, a, b, c, d, e) Proxy
+    |> CTypes.registerType @f Proxy
+
+classDefinitions :: Text
+classDefinitions = Python.separate (List.mapWithIndex classDefinition API.classes)
 
 main :: IO ()
 main = IO.do
-  let pythonCode = PY.prettyStatements (setup + api openSolidAPI)
-  let ruffCmd = SP.proc (Text.unpack "ruff") (List.map Text.unpack ["format", "--stdin-filename", "opensolid.py", "--quiet"])
-  (Just stdinHandle, _, _, process) <- SP.createProcess ruffCmd{SP.std_in = SP.CreatePipe}
-  SIO.hPutStr stdinHandle (Text.unpack pythonCode)
-  SIO.hClose stdinHandle
-  ruffExitCode <- SP.waitForProcess process
-  if ruffExitCode == SE.ExitSuccess
-    then Success ()
-    else Failure "Error when running Ruff"
+  let pythonCode = Python.separate [preamble, ffiTypeDeclarations, classDefinitions]
+  IO.printLine pythonCode
