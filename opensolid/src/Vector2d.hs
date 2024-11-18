@@ -335,7 +335,10 @@ squaredMagnitude' (Vector2d# vx# vy#) = Qty# (vx# *# vx# +# vy# *# vy#)
 angle :: Vector2d (space @ units) -> Angle
 angle (Vector2d vx vy) = Angle.atan2 vy vx
 
-data IsZero = IsZero deriving (Eq, Show, Error.Message)
+data IsZero = IsZero deriving (Eq, Show)
+
+instance Error.Message IsZero where
+  message IsZero = "Vector is zero"
 
 direction :: Tolerance units => Vector2d (space @ units) -> Result IsZero (Direction2d space)
 direction vector = do
