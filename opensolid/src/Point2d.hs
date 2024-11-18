@@ -6,6 +6,7 @@ module Point2d
   , along
   , xy
   , xyIn
+  , fromCoordinates
   , meters
   , centimeters
   , millimeters
@@ -174,6 +175,9 @@ xy (Qty# px#) (Qty# py#) = Point2d# px# py#
 xyIn :: Frame2d (space @ units) defines -> Qty units -> Qty units -> Point2d (space @ units)
 xyIn frame px py =
   Frame2d.originPoint frame + px * Frame2d.xDirection frame + py * Frame2d.yDirection frame
+
+fromCoordinates :: (Qty units, Qty units) -> Point2d (space @ units)
+fromCoordinates (px, py) = Point2d px py
 
 apply :: (Float -> Qty units) -> Float -> Float -> Point2d (space @ units)
 apply units fx fy = do
