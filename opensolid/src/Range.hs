@@ -68,9 +68,12 @@ import List qualified
 import Maybe qualified
 import NonEmpty qualified
 import OpenSolid
+import OpenSolid.FFI (FFI)
+import OpenSolid.FFI qualified as FFI
 import Parameter qualified
 import Qty qualified
 import Random qualified
+import Units (Meters)
 import Units qualified
 
 type role Range phantom
@@ -86,6 +89,12 @@ pattern Range :: Qty units -> Qty units -> Range units
 pattern Range low high <- Range_ low high
   where
     Range a b = if a <= b then Range_ a b else Range_ b a
+
+instance FFI (Range Unitless) where
+  representation _ = FFI.Class "FloatRange"
+
+instance FFI (Range Meters) where
+  representation _ = FFI.Class "LengthRange"
 
 instance HasUnits (Range units) where
   type UnitsOf (Range units) = units
