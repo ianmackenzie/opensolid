@@ -28,7 +28,6 @@ module Bounds2d
   , any
   , all
   , resolve
-  , find
   , placeIn
   , relativeTo
   , transformBy
@@ -393,15 +392,6 @@ resolve assess bounds@(Bounds2d x y) =
           if value11 == value12 && value11 == value21 && value11 == value22
             then Resolved value11
             else Unresolved
-
-find ::
-  (Bounds2d (space @ units) -> Bool) ->
-  Bounds2d (space @ units) ->
-  Maybe (Point2d (space @ units))
-find isCandidate bounds = Maybe.do
-  let isCandidate2 x y = isCandidate (Bounds2d x y)
-  (x0, y0) <- Range.find2 isCandidate2 (xCoordinate bounds) (yCoordinate bounds)
-  Just (Point2d.xy x0 y0)
 
 placeIn ::
   Frame2d (global @ units) (Defines local) ->

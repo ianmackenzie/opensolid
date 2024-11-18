@@ -51,7 +51,6 @@ module Range
   , resolvedSign
   , intersection
   , random
-  , find2
   , samples
   , convert
   , unconvert
@@ -65,7 +64,6 @@ import Debug qualified
 import Float qualified
 import Fuzzy qualified
 import List qualified
-import Maybe qualified
 import NonEmpty qualified
 import OpenSolid
 import OpenSolid.FFI (FFI)
@@ -543,44 +541,6 @@ resolve assess range =
           leftValue <- resolve assess left
           rightValue <- resolve assess right
           if leftValue == rightValue then Resolved leftValue else Unresolved
-
-find :: (Range units -> Bool) -> Range units -> Maybe (Qty units)
-find isCandidate t
-  | not (isCandidate t) = Nothing
-  | isAtomic t = Just (maxValue t)
-  | otherwise = do
-      let (t1, t2) = bisect t
-      let result1 = find isCandidate t1
-      case result1 of
-        Just _ -> result1
-        Nothing -> find isCandidate t2
-
-find2 ::
-  (Range units1 -> Range units2 -> Bool) ->
-  Range units1 ->
-  Range units2 ->
-  Maybe (Qty units1, Qty units2)
-find2 isCandidate u v
-  | not (isCandidate u v) = Nothing
-  | isAtomic u && isAtomic v = Just (maxValue u, maxValue v)
-  | isAtomic u = Maybe.map (maxValue u,) (find (\vCandidate -> isCandidate u vCandidate) v)
-  | isAtomic v = Maybe.map (,maxValue v) (find (\uCandidate -> isCandidate uCandidate v) u)
-  | otherwise = do
-      let (u1, u2) = bisect u
-      let (v1, v2) = bisect v
-      let result11 = find2 isCandidate u1 v1
-      case result11 of
-        Just _ -> result11
-        Nothing -> do
-          let result12 = find2 isCandidate u1 v2
-          case result12 of
-            Just _ -> result12
-            Nothing -> do
-              let result21 = find2 isCandidate u2 v1
-              case result21 of
-                Just _ -> result21
-                Nothing ->
-                  find2 isCandidate u2 v2
 
 random :: Random.Generator (Qty units) -> Random.Generator (Range units)
 random randomQty = Random.do
