@@ -1,6 +1,25 @@
-Figure out how to list all classes (and exceptions) in the API
-
 Switch Solve2d.return back to taking a single value instead of a NonEmpty
+
+Move Http module out into separate opensolid-http package
+-> reduce dependencies of libopensolid-ffi.so
+
+Try publishing to PyPI
+-> can start with test.pypi.org (using fake package name)
+-> some combination of uv and cibuildwheel?
+
+Improve Python bindings
+- Nice __repr__ and/or __str__ for primitive types
+- Add arithmetic operators (includig for Qty values)
+- Add consructors/conversions to Qty modules based on values provided as part of API definition?
+- Support lists
+- Support 'in' operator?
+- Support constructors and static functions that use a tolerance
+- Add docstrings
+- Define class (and quantity) members "in place" in class instance instead of separately?
+
+Add 'compiled'/'processed' form of API definition for generating bindings?
+- indexed functions
+- functions represented more dynamically (e.g. lists of argument names/types)
 
 Sandbox executable to start generating Region2d medial axis curves and points?
 -> need to be able to solve for medial axis of curve and *point* first
