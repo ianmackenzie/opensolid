@@ -7,6 +7,7 @@ module Vector2d
   , xy
   , xyIn
   , xyInBasis
+  , fromComponents
   , from
   , meters
   , centimeters
@@ -262,6 +263,9 @@ xyIn frame = xyInBasis (Frame2d.basis frame)
 
 xyInBasis :: Basis2d space defines -> Qty units -> Qty units -> Vector2d (space @ units)
 xyInBasis basis vx vy = vx * Basis2d.xDirection basis + vy * Basis2d.yDirection basis
+
+fromComponents :: (Qty units, Qty units) -> Vector2d (space @ units)
+fromComponents (vx, vy) = Vector2d vx vy
 
 from :: Point2d (space @ units) -> Point2d (space @ units) -> Vector2d (space @ units)
 from p1 p2 = p2 - p1
