@@ -11,6 +11,7 @@ module Int
   , factorial
   , choose
   , sum
+  , sumOf
   , product
   , random
   )
@@ -75,6 +76,9 @@ prod !acc a b = case compare a b of
 
 sum :: List Int -> Int
 sum = List.foldl (+) 0
+
+sumOf :: (a -> Int) -> List a -> Int
+sumOf f list = sum (List.map f list)
 
 product :: NonEmpty Int -> Int
 product = NonEmpty.reduce (*)
