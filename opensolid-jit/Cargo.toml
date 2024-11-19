@@ -13,4 +13,4 @@ cranelift-module = "0.113.0"
 cranelift-native = "0.113.0"
 
 [lib]
-crate-type = ["staticlib"]
+crate-type = ["cdylib"]
