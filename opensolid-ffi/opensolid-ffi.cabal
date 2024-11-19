@@ -18,6 +18,8 @@ source-repository head
   location: https://github.com/ianmackenzie/opensolid
 
 foreign-library opensolid-ffi
+  if os(windows)
+    options: standalone
   default-language: GHC2021
   build-depends:
     base,
