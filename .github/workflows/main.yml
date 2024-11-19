@@ -33,5 +33,12 @@ jobs:
           enable-stack: true
           ghc-version: 9.6.6
           stack-version: 3.1.1
+      - run: cargo build --release
+        working-directory: opensolid-jit
+      - name: Store built opensolid-jit binaries
+        uses: actions/upload-artifact@v4
+        with:
+          name: opensolid-jit-binaries
+          path: opensolid-jit
       - run: stack build
       - run: stack test
