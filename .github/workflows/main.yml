@@ -14,6 +14,12 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-13, macos-latest]
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        name: Cache ~/.stack
+        with:
+          path: ~/.stack
+          key: ${{ runner.os }}-stack-${{ hashFiles('stack.yaml') }}-${{ hashFiles('**/*.cabal') }}
+          restore-keys: ${{ runner.os }}-stack
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: 1.80.1
