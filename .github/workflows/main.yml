@@ -18,7 +18,7 @@ jobs:
       - uses: actions/cache@v4
         name: Cache built Haskell dependencies
         with:
-          path: ${{ env.APPDIR + '\stack' }}
+          path: ${{ format('{0}\stack', env.APPDIR) }}
           key: windows-stack-${{ hashFiles('stack.yaml') }}-${{ hashFiles('**/*.cabal') }}
           restore-keys: windows-stack
       # Install Haskell toolchain
