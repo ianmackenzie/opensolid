@@ -18,8 +18,8 @@ jobs:
         name: Cache ~/.stack
         with:
           path: ~/.stack
-          key: ${{ runner.os }}-stack-${{ hashFiles('stack.yaml') }}-${{ hashFiles('**/*.cabal') }}
-          restore-keys: ${{ runner.os }}-stack
+          key: ${{ matrix.os }}-stack-${{ hashFiles('stack.yaml') }}-${{ hashFiles('**/*.cabal') }}
+          restore-keys: ${{ matrix.os }}-stack
       - uses: dtolnay/rust-toolchain@master
         if: matrix.os != 'windows-latest'
         with:
