@@ -38,7 +38,7 @@ jobs:
       - name: Store built opensolid-jit binaries
         uses: actions/upload-artifact@v4
         with:
-          name: opensolid-jit-binaries-${{ runner.os }}
+          name: opensolid-jit-binaries-${{ matrix.os }}
           path: opensolid-jit
       - run: stack build
       - run: stack test
