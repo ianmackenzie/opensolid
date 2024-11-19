@@ -22,12 +22,12 @@ jobs:
           key: windows-stack-${{ hashFiles('stack.yaml') }}-${{ hashFiles('**/*.cabal') }}
           restore-keys: windows-stack
       # Install Haskell toolchain
-      - uses: haskell-actions/setup@v2
-        with:
-          enable-stack: true
-          ghc-version: 9.10.1
-          cabal-version: 3.12.1
-          stack-version: 3.1.1
+      # - uses: haskell-actions/setup@v2
+      #   with:
+      #     enable-stack: true
+      #     ghc-version: 9.10.1
+      #     cabal-version: 3.12.1
+      #     stack-version: 3.1.1
       # Build opensolid_jit library
       - run: cargo build --release
         working-directory: opensolid-jit
@@ -37,7 +37,7 @@ jobs:
           name: opensolid-jit-binaries
           path: opensolid-jit
       # Build and test Haskell libraries
-      - run: stack build
+      - run: stack --resolver nightly-2024-11-19 build
 
       # echo "LIBRARY_PATH=$env:GITHUB_WORKSPACE\\opensolid-jit\\target\\release" >> $env:GITHUB_ENV
 # jobs:
