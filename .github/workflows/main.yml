@@ -11,7 +11,15 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-13, macos-latest]
+        include:
+          - os: ubuntu-latest
+            rust-target: x86_64-unknown-linux-gnu
+          - os: windows-latest
+            rust-target: x86_64-pc-windows-gnu
+          - os: macos-13
+            rust-target: x86_64-apple-darwin
+          - os: macos-latest
+            rust-target: aarch64-apple-darwin
     steps:
       - uses: actions/checkout@v4
       - uses: actions/cache@v4
@@ -21,13 +29,8 @@ jobs:
           key: ${{ matrix.os }}-stack-${{ hashFiles('stack.yaml') }}-${{ hashFiles('**/*.cabal') }}
           restore-keys: ${{ matrix.os }}-stack
       - uses: dtolnay/rust-toolchain@master
-        if: matrix.os != 'windows-latest'
         with:
-          toolchain: 1.80.1
-      - uses: dtolnay/rust-toolchain@master
-        if: matrix.os == 'windows-latest'
-        with:
-          toolchain: 1.80.1-x86_64-pc-windows-gnu
+          toolchain: 1.80.1-${{ matrix.rust-target }}
       - uses: haskell-actions/setup@v2
         with:
           enable-stack: true
