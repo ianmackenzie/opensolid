@@ -10,8 +10,7 @@ jobs:
   windows:
     runs-on: windows-2022
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
+      # Set up caching
       - name: Set up Cabal cache
         uses: actions/cache@v4
         with:
@@ -29,6 +28,9 @@ jobs:
             ~\.cargo\registry\cache\
             ~\.cargo\git\db\
           key: windows-cargo-${{ hashFiles('opensolid-jit/Cargo.lock') }}
+      # Build and test
+      - name: Check out repository
+        uses: actions/checkout@v4
       - name: Install Rust toolchain
         run: |
           rustup install 1.80.1-x86_64-pc-windows-gnu
@@ -44,16 +46,8 @@ jobs:
           cabal build all
       - name: Run sandbox
         run: cabal run sandbox
-      - name: Store medial axis SVG image
-        uses: actions/upload-artifact@v4
-        with:
-          name: Curve medial axis
-          path: opensolid-sandbox/curve-medial-axis.svg
       - name: Run tests
         run: cabal test opensolid
-
-      # cabal run sandbox
-      # cabal build all --ghc-options="-Wno-x-data-list-nonempty-unzip"
 
 # jobs:
 #   test:
