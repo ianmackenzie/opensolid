@@ -38,10 +38,12 @@ jobs:
       - name: Build opensolid-jit library
         run: cargo build --release
         working-directory: opensolid-jit
-      - name: Build Haskell libraries
-        run: |
-          cabal update
-          cabal build --dependencies-only opensolid
+      - name: Check for CABAL_DIR
+        run: echo $env:CABAL_DIR
+      # - name: Build Haskell libraries
+      #   run: |
+      #     cabal update
+      #     cabal build --dependencies-only opensolid
       # - name: Run tests
       #   run: cabal test opensolid
       # - name: Store medial axis SVG image
