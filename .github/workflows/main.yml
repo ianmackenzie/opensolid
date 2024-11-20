@@ -32,7 +32,7 @@ jobs:
       - run: cargo build --release
         working-directory: opensolid-jit
       # Build and test Haskell libraries
-      - run: stack --resolver nightly-2024-11-19 build
+      - run: stack --resolver nightly-2024-11-19 build --only-dependencies opensolid
 
       # echo "LIBRARY_PATH=$env:GITHUB_WORKSPACE\\opensolid-jit\\target\\release" >> $env:GITHUB_ENV
 # jobs:
