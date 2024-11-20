@@ -44,8 +44,6 @@ jobs:
         run: |
           cabal update
           cabal build all
-
-      # echo "LIBRARY_PATH=$env:GITHUB_WORKSPACE\\opensolid-jit\\target\\release" >> $env:GITHUB_ENV
 # jobs:
 #   test:
 #     runs-on: ${{ matrix.os }}
