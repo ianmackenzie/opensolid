@@ -17,17 +17,18 @@ jobs:
           path: |
             C:\cabal\packages
             C:\cabal\store
+            dist-newstyle
           key: windows-cabal-${{ hashFiles('cabal.project') }}-${{ hashFiles('**/*.cabal') }}
-          restore-keys: windows-cabal
       - name: Set up Cargo cache
         uses: actions/cache@v4
         with:
           path: |
-            ~\.cargo\bin\
-            ~\.cargo\registry\index\
-            ~\.cargo\registry\cache\
-            ~\.cargo\git\db\
-          key: windows-cargo-${{ hashFiles('opensolid-jit/Cargo.lock') }}
+            ~\.cargo\bin
+            ~\.cargo\registry\index
+            ~\.cargo\registry\cache
+            ~\.cargo\git\db
+            target
+          key: windows-cargo-${{ hashFiles('opensolid-jit/Cargo.*') }}
       # Build and test
       - name: Check out repository
         uses: actions/checkout@v4
