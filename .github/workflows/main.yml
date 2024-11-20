@@ -42,7 +42,6 @@ jobs:
         run: |
           cabal update
           cabal build --dependencies-only opensolid
-          cabal run sandbox
       # - name: Run tests
       #   run: cabal test opensolid
       # - name: Store medial axis SVG image
@@ -51,6 +50,7 @@ jobs:
       #     name: Curve medial axis
       #     path: opensolid-sandbox/curve-medial-axis.svg
 
+      # cabal run sandbox
       # cabal build all --ghc-options="-Wno-x-data-list-nonempty-unzip"
 
 # jobs:
