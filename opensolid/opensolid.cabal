@@ -59,6 +59,10 @@ common config
     -fwrite-ide-info
     -hiedir=.hie
 
+  if impl(ghc >= 9.10)
+    ghc-options:
+      -Wno-x-data-list-nonempty-unzip
+
   default-extensions:
     BlockArguments
     DataKinds
