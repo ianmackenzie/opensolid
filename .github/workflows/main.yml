@@ -51,7 +51,7 @@ jobs:
       - name: Build Haskell libraries
         run: |
           cabal update
-          cabal build --dependencies-only opensolid
+          cabal build all
 
       # echo "LIBRARY_PATH=$env:GITHUB_WORKSPACE\\opensolid-jit\\target\\release" >> $env:GITHUB_ENV
 # jobs:
