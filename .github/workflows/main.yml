@@ -41,14 +41,16 @@ jobs:
       - name: Build Haskell libraries
         run: |
           cabal update
-          cabal build --dependencies-only opensolid
+          cabal build sandbox
+          Copy-Item opensolid-jit\target\release\opensolid_jit.dll -Destination dist-newstyle\build\x86_64-windows\ghc-9.10.1\opensolid-sandbox-0.1.0.0\x\sandbox\build\sandbox
+          cabal run sandbox
       # - name: Run tests
       #   run: cabal test opensolid
-      # - name: Store medial axis SVG image
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: Curve medial axis
-      #     path: opensolid-sandbox/curve-medial-axis.svg
+      - name: Store medial axis SVG image
+        uses: actions/upload-artifact@v4
+        with:
+          name: Curve medial axis
+          path: opensolid-sandbox/curve-medial-axis.svg
 
       # cabal run sandbox
       # cabal build all --ghc-options="-Wno-x-data-list-nonempty-unzip"
