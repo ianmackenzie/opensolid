@@ -31,11 +31,6 @@ jobs:
       # Build opensolid_jit library
       - run: cargo build --release
         working-directory: opensolid-jit
-      - name: Store built opensolid-jit binaries
-        uses: actions/upload-artifact@v4
-        with:
-          name: opensolid-jit-binaries
-          path: opensolid-jit
       # Build and test Haskell libraries
       - run: stack --resolver nightly-2024-11-19 build
 
