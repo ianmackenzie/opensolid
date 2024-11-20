@@ -41,15 +41,18 @@ jobs:
       - name: Build Haskell libraries
         run: |
           cabal update
-          cabal build all --ghc-options="-Wno-x-data-list-nonempty-unzip"
+          cabal build --dependencies-only opensolid
           cabal run sandbox
       # - name: Run tests
       #   run: cabal test opensolid
-      - name: Store medial axis SVG image
-        uses: actions/upload-artifact@v4
-        with:
-          name: Curve medial axis
-          path: opensolid-sandbox/curve-medial-axis.svg
+      # - name: Store medial axis SVG image
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: Curve medial axis
+      #     path: opensolid-sandbox/curve-medial-axis.svg
+
+      # cabal build all --ghc-options="-Wno-x-data-list-nonempty-unzip"
+
 # jobs:
 #   test:
 #     runs-on: ${{ matrix.os }}
