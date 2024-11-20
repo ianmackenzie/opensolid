@@ -36,19 +36,21 @@ jobs:
       - name: Build opensolid-jit library
         run: cargo build --release
         working-directory: opensolid-jit
+      - name: Add opensolid-jit build directory to PATH
+        run: echo "PATH=$env:PATH;$env:GITHUB_WORKSPACE\opensolid-jit\target\release" >> $env:GITHUB_ENV
       - name: Build Haskell libraries
         run: |
           cabal update
-          cabal build sandbox
-          Copy-Item opensolid-jit\target\release\opensolid_jit.dll -Destination dist-newstyle\build\x86_64-windows\ghc-9.10.1\opensolid-sandbox-0.1.0.0\x\sandbox\build\sandbox
-          cabal run sandbox
-      # - name: Run tests
-      #   run: cabal test opensolid
+          cabal build all
+      - name: Run sandbox
+        run: cabal run sandbox
       - name: Store medial axis SVG image
         uses: actions/upload-artifact@v4
         with:
           name: Curve medial axis
           path: opensolid-sandbox/curve-medial-axis.svg
+      - name: Run tests
+        run: cabal test opensolid
 
       # cabal run sandbox
       # cabal build all --ghc-options="-Wno-x-data-list-nonempty-unzip"
