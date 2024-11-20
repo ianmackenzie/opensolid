@@ -36,8 +36,6 @@ jobs:
       - name: Build opensolid-jit library
         run: cargo build --release
         working-directory: opensolid-jit
-      - name: Check for CABAL_DIR
-        run: echo $env:CABAL_DIR
       - name: Build Haskell libraries
         run: |
           cabal update
