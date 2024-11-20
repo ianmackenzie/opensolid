@@ -1,7 +1,7 @@
 module Qty (Qty (Qty)) where
 
 import Data.Kind (Type)
-import {-# SOURCE #-} Units (Unitless)
+import Unitless (Unitless)
 import Prelude qualified
 
 type role Qty phantom

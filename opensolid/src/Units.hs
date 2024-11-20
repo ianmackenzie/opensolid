@@ -32,6 +32,7 @@ import Data.List.NonEmpty (NonEmpty)
 import {-# SOURCE #-} Qty (Qty)
 import {-# SOURCE #-} Result (Result (Failure, Success))
 import {-# SOURCE #-} Sign (Sign)
+import Unitless (Unitless)
 
 class HasUnits (a :: k) where
   type UnitsOf a
@@ -137,8 +138,6 @@ rightAssociate ::
   a ->
   b
 rightAssociate = coerce
-
-data Unitless deriving (Eq, Show)
 
 data Radians deriving (Eq, Show)
 
