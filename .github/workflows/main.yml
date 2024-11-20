@@ -11,7 +11,7 @@ jobs:
     runs-on: windows-2022
     steps:
       - uses: actions/checkout@v4
-      - run: echo ${{ format('{0}\stack', env.APPDATA) }}
+      - run: echo $env:APPDATA
 
       # # Install Rust toolchain
       # - uses: dtolnay/rust-toolchain@master
