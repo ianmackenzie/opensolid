@@ -10,33 +10,26 @@ jobs:
   windows:
     runs-on: windows-2022
     steps:
-      - uses: actions/checkout@v4
-      - run: Add-Content -Path $env:GITHUB_ENV -Value 'STACK_ROOT=${{ github.workspace }}\stack_root'
-      # Install Rust toolchain
-      - uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: 1.80.1-x86_64-pc-windows-gnu
-      - uses: actions/cache@v4
-        name: Cache built Haskell dependencies
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set STACK_ROOT environment variable
+        run: Add-Content -Path $env:GITHUB_ENV -Value 'STACK_ROOT=${{ github.workspace }}\stack_root'
+      - name: Set up Stack cache
+        uses: actions/cache@v4
         with:
           path: ${{ github.workspace }}\stack_root
           key: windows-stack-${{ hashFiles('stack.yaml') }}-${{ hashFiles('**/*.cabal') }}
           restore-keys: windows-stack
-      # Install Haskell toolchain
-      # - uses: haskell-actions/setup@v2
-      #   with:
-      #     enable-stack: true
-      #     ghc-version: 9.10.1
-      #     cabal-version: 3.12.1
-      #     stack-version: 3.1.1
-      # Build opensolid_jit library
-      - run: cargo build --release
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@master
+        with:
+          # Use MinGW instead of MSVC version,
+          # for compatibility with GHC
+          toolchain: 1.80.1-x86_64-pc-windows-gnu
+      - name: Build opensolid-jit library
+        run: cargo build --release
         working-directory: opensolid-jit
-      # Sanity check
-      - name: Sanity check STACK_ROOT
-        run: echo $env:STACK_ROOT
-      # Build and test Haskell libraries
-      - name: stack build
+      - name: Build Haskell libraries
         run: stack --resolver nightly-2024-11-19 build --only-dependencies opensolid
 
       # echo "LIBRARY_PATH=$env:GITHUB_WORKSPACE\\opensolid-jit\\target\\release" >> $env:GITHUB_ENV
