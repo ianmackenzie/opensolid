@@ -12,22 +12,25 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
-      - name: Set CABAL_DIR environment variable
-        run: Add-Content -Path $env:GITHUB_ENV -Value 'CABAL_DIR=${{ github.workspace }}\cabal_dir'
-      - name: Set CARGO_HOME environment variable
-        run: Add-Content -Path $env:GITHUB_ENV -Value 'CARGO_HOME=${{ github.workspace }}\cargo_home'
       - name: Set up Cabal cache
         uses: actions/cache@v4
         with:
-          path: ${{ github.workspace }}\cabal_dir
+          path: |
+            ~\AppData\Roaming\cabal\packages
+            ~\AppData\Roaming\cabal\store
+            ~\AppData\Local\Programs\cabal\packages
+            ~\AppData\Local\Programs\cabal\store
           key: windows-cabal-${{ hashFiles('cabal.project') }}-${{ hashFiles('**/*.cabal') }}
           restore-keys: windows-cabal
       - name: Set up Cargo cache
         uses: actions/cache@v4
         with:
-          path: ${{ github.workspace }}\cargo_home
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
           key: windows-cargo-${{ hashFiles('opensolid-jit/Cargo.lock') }}
-          restore-keys: windows-cargo
       - name: Install Rust toolchain
         run: |
           rustup install 1.80.1-x86_64-pc-windows-gnu
