@@ -44,6 +44,8 @@ jobs:
         run: |
           cabal update
           cabal build all
+      - name: Run tests
+        run: cabal test opensolid
 # jobs:
 #   test:
 #     runs-on: ${{ matrix.os }}
