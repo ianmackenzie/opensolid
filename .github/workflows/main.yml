@@ -11,28 +11,30 @@ jobs:
     runs-on: windows-2022
     steps:
       - uses: actions/checkout@v4
-      # Install Rust toolchain
-      - uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: 1.80.1-x86_64-pc-windows-gnu
-      - uses: actions/cache@v4
-        name: Cache built Haskell dependencies
-        with:
-          path: ${{ format('{0}\stack', env.APPDATA) }}
-          key: windows-stack-${{ hashFiles('stack.yaml') }}-${{ hashFiles('**/*.cabal') }}
-          restore-keys: windows-stack
-      # Install Haskell toolchain
-      # - uses: haskell-actions/setup@v2
+      - run: echo ${{ format('{0}\stack', env.APPDATA) }}
+
+      # # Install Rust toolchain
+      # - uses: dtolnay/rust-toolchain@master
       #   with:
-      #     enable-stack: true
-      #     ghc-version: 9.10.1
-      #     cabal-version: 3.12.1
-      #     stack-version: 3.1.1
-      # Build opensolid_jit library
-      - run: cargo build --release
-        working-directory: opensolid-jit
-      # Build and test Haskell libraries
-      - run: stack --resolver nightly-2024-11-19 build --only-dependencies opensolid
+      #     toolchain: 1.80.1-x86_64-pc-windows-gnu
+      # - uses: actions/cache@v4
+      #   name: Cache built Haskell dependencies
+      #   with:
+      #     path: ${{ format('{0}\stack', env.APPDATA) }}
+      #     key: windows-stack-${{ hashFiles('stack.yaml') }}-${{ hashFiles('**/*.cabal') }}
+      #     restore-keys: windows-stack
+      # # Install Haskell toolchain
+      # # - uses: haskell-actions/setup@v2
+      # #   with:
+      # #     enable-stack: true
+      # #     ghc-version: 9.10.1
+      # #     cabal-version: 3.12.1
+      # #     stack-version: 3.1.1
+      # # Build opensolid_jit library
+      # - run: cargo build --release
+      #   working-directory: opensolid-jit
+      # # Build and test Haskell libraries
+      # - run: stack --resolver nightly-2024-11-19 build --only-dependencies opensolid
 
       # echo "LIBRARY_PATH=$env:GITHUB_WORKSPACE\\opensolid-jit\\target\\release" >> $env:GITHUB_ENV
 # jobs:
