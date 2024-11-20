@@ -56,7 +56,6 @@ common config
     -Wpartial-fields
     -Wsafe
     -Wno-missed-extra-shared-lib
-    -Wno-x-data-list-nonempty-unzip
     -fwrite-ide-info
     -hiedir=.hie
 

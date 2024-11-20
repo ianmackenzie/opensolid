@@ -41,7 +41,7 @@ jobs:
       - name: Build Haskell libraries
         run: |
           cabal update
-          cabal build all
+          cabal build all --ghc-options="-Wno-x-data-list-nonempty-unzip"
       # - name: Run tests
       #   run: cabal test opensolid
 
