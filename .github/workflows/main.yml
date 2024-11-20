@@ -11,32 +11,33 @@ jobs:
     runs-on: windows-2022
     steps:
       - uses: actions/checkout@v4
-      - run: |
-          echo $env:APPDATA
-          echo ${{ github.workspace }}
-
-      # # Install Rust toolchain
-      # - uses: dtolnay/rust-toolchain@master
+      - run: Add-Content -Path $env:GITHUB_ENV -Value 'STACK_ROOT=${{ github.workspace }}\stack_root'
+      # Install Rust toolchain
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: 1.80.1-x86_64-pc-windows-gnu
+      - uses: actions/cache@v4
+        name: Cache built Haskell dependencies
+        with:
+          path: ${{ github.workspace }}\stack_root
+          key: windows-stack-${{ hashFiles('stack.yaml') }}-${{ hashFiles('**/*.cabal') }}
+          restore-keys: windows-stack
+      # Install Haskell toolchain
+      # - uses: haskell-actions/setup@v2
       #   with:
-      #     toolchain: 1.80.1-x86_64-pc-windows-gnu
-      # - uses: actions/cache@v4
-      #   name: Cache built Haskell dependencies
-      #   with:
-      #     path: ${{ format('{0}\stack', env.APPDATA) }}
-      #     key: windows-stack-${{ hashFiles('stack.yaml') }}-${{ hashFiles('**/*.cabal') }}
-      #     restore-keys: windows-stack
-      # # Install Haskell toolchain
-      # # - uses: haskell-actions/setup@v2
-      # #   with:
-      # #     enable-stack: true
-      # #     ghc-version: 9.10.1
-      # #     cabal-version: 3.12.1
-      # #     stack-version: 3.1.1
-      # # Build opensolid_jit library
-      # - run: cargo build --release
-      #   working-directory: opensolid-jit
-      # # Build and test Haskell libraries
-      # - run: stack --resolver nightly-2024-11-19 build --only-dependencies opensolid
+      #     enable-stack: true
+      #     ghc-version: 9.10.1
+      #     cabal-version: 3.12.1
+      #     stack-version: 3.1.1
+      # Build opensolid_jit library
+      - run: cargo build --release
+        working-directory: opensolid-jit
+      # Sanity check
+      - name: Sanity check STACK_ROOT
+        run: echo $env:STACK_ROOT
+      # Build and test Haskell libraries
+      - name: stack build
+        run: stack --resolver nightly-2024-11-19 build --only-dependencies opensolid
 
       # echo "LIBRARY_PATH=$env:GITHUB_WORKSPACE\\opensolid-jit\\target\\release" >> $env:GITHUB_ENV
 # jobs:
