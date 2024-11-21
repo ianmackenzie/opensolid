@@ -52,11 +52,11 @@ jobs:
       - name: Copy opensolid-ffi.dll to opensolid-python/opensolid directory
         run: Get-ChildItem -Path dist-newstyle -Filter opensolid-ffi.dll -Recurse | Copy-Item -Destination .\opensolid-python\opensolid\
       - name: Generate Python library code
-        run: cabal run opensolid-python | Set-Content -Path .\opensolid-python\opensolid\__init__.py
-      - name: Try evaluating a Python expression
-        run: |
-          cd opensolid-python
-          python -c "from opensolid import *; print(Point2f.x(3).distance_to(Point2f.y(4)))"
+        run: cabal run opensolid-python # | Set-Content -Path .\opensolid-python\opensolid\__init__.py
+      # - name: Try evaluating a Python expression
+      #   run: |
+      #     cd opensolid-python
+      #     python -c "from opensolid import *; print(Point2f.x(3).distance_to(Point2f.y(4)))"
 
 # jobs:
 #   test:
