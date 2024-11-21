@@ -20,6 +20,7 @@ source-repository head
 foreign-library opensolid-ffi
   if os(windows)
     options: standalone
+    mod-def-file: opensolid-ffi.def
   default-language: GHC2021
   build-depends:
     base,

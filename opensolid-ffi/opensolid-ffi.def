@@ -1,0 +1,7 @@
+EXPORTS
+ opensolid_init
+ opensolid_invoke
+ opensolid_malloc
+ opensolid_free
+ opensolid_release
+ opensolid_exit
