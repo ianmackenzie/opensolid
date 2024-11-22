@@ -14,7 +14,7 @@
         let
           pkgs = nixpkgs.legacyPackages.${system};
           ld_library_path = builtins.concatStringsSep ":" [
-            # Allow Haskell to find libopensolid_jit.a
+            # Allow Haskell to find libopensolid_jit
             "$PWD/opensolid-jit/target/release"
             # Allow Python to find libopensolid-ffi.so
             "$PWD/opensolid-ffi/$(stack path --dist-dir)/build/opensolid-ffi"
