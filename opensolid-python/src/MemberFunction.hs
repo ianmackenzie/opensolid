@@ -16,14 +16,14 @@ import Units (Meters)
 
 definition :: forall value. FFI value => Int -> Text -> List (Int, MemberFunction value) -> Text
 definition classId functionName indexedFunctions = do
-  case List.map (overload classId functionName) indexedFunctions of
+  case List.map (overload classId (Python.name functionName)) indexedFunctions of
     [(signature, _, body)] -> Python.lines [signature, Python.indent body]
     overloads -> do
       let overloadDeclaration (signature, _, _) = Function.overloadDeclaration signature
       let overloadCase (_, pattern, body) = Function.overloadCase pattern body
       Python.lines
         [ Python.lines (List.map overloadDeclaration overloads)
-        , "def " + Function.name functionName + "(self, *args, **keywords):"
+        , "def " + Python.name functionName + "(self, *args, **keywords):"
         , Python.indent
             [ "match (args, keywords):"
             , Python.indent
@@ -43,9 +43,9 @@ overload classId functionName (functionId, function) = case function of
     , body0N classId functionId v
     )
   M1 N argName1 f ->
-    ( signature1 functionName argName1 f
-    , Function.matchPattern1 argName1 f
-    , body1N classId functionId argName1 f
+    ( signature1 functionName (Python.name argName1) f
+    , Function.matchPattern1 (Python.name argName1) f
+    , body1N classId functionId (Python.name argName1) f
     )
   M2 N argName1 argName2 f ->
     ( signature2 functionName argName1 argName2 f
