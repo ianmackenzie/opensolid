@@ -1,3 +1,6 @@
+-- Avoid errors when running Fourmolu
+{-# LANGUAGE GHC2021 #-}
+
 module OpenSolidFFI () where
 
 import OpenSolid
