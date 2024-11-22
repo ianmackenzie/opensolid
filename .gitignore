@@ -7,3 +7,4 @@ __pycache__
 *.svg
 .zed
 dist-newstyle
+opensolid-python/opensolid/*.dll
