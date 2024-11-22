@@ -2,7 +2,10 @@
 
 set -euo pipefail
 
-stack run opensolid-python > opensolid-python/opensolid/__init__.py
+cabal build opensolid-python
+cabal run opensolid-python > opensolid-python/opensolid/__init__.py
 ruff format opensolid-python/opensolid/__init__.py
+cabal build opensolid-ffi
+cp $(find dist-newstyle -name libopensolid-ffi.so) opensolid-python/opensolid
 ruff check --select ALL --ignore D203 --ignore D213 --ignore N801 --ignore COM812 --ignore D101 --ignore D107 --ignore D102 opensolid-python/opensolid/__init__.py
 # D102: Missing docstring in public method
