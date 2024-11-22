@@ -1,5 +1,7 @@
 #include <stdlib.h>
-#include "HsFFI.h"
+
+extern void hs_init(int *argc, char **argv[]);
+extern void hs_exit(void);
 
 void opensolid_init()
 {
