@@ -27,7 +27,6 @@ import Expression (Expression)
 import Expression qualified
 import Expression.Curve1d qualified
 import Float qualified
-import VectorSurface2d.Function qualified
 import IO qualified
 import Int qualified
 import Length (Length)
@@ -56,6 +55,7 @@ import Units (Meters)
 import Vector2d qualified
 import Vector3d qualified
 import VectorCurve2d qualified
+import VectorSurface2d.Function qualified
 import Volume qualified
 
 data Global deriving (Eq, Show)

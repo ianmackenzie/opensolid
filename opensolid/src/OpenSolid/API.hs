@@ -1,5 +1,6 @@
 module OpenSolid.API (classes) where
 
+import Curve1d qualified
 import Direction2d qualified
 import OpenSolid
 import OpenSolid.API.Class (Class (..), Constraint (..), Constructor (..), MemberFunction (..), StaticFunction (..))
@@ -10,7 +11,6 @@ import Range (Range)
 import Range qualified
 import Vector2d (Vector2d)
 import Vector2d qualified
-import Curve1d qualified
 
 data Space
 
@@ -199,7 +199,7 @@ curve1f =
     , staticFunctions =
         [ "t" .| S0 N Curve1d.parameter
         ]
-    , memberFunctions = 
+    , memberFunctions =
         [ "evaluate" .| M1 N "parameter value" (\t curve -> Curve1d.evaluate curve t)
         , "squared" .| M0 N (Curve1d.squared @Unitless)
         ]

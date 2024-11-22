@@ -34,10 +34,10 @@ import Expression (Expression)
 import Expression qualified
 import Fuzzy qualified
 import List qualified
-import OpenSolid.FFI (FFI)
-import OpenSolid.FFI qualified as FFI
 import NonEmpty qualified
 import OpenSolid
+import OpenSolid.FFI (FFI)
+import OpenSolid.FFI qualified as FFI
 import Parameter qualified
 import Qty qualified
 import Range (Range)

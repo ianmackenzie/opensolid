@@ -3,15 +3,15 @@
 
 module OpenSolidFFI () where
 
-import OpenSolid
-import OpenSolid.API qualified as API
-import Foreign (Ptr, StablePtr)
 import Array (Array)
 import Array qualified
+import Foreign (Ptr, StablePtr)
 import Foreign qualified
 import List qualified
+import OpenSolid
+import OpenSolid.API qualified as API
+import OpenSolid.API.Class (Class (Class))
 import OpenSolid.API.Class qualified as Class
-import OpenSolid.API.Class (Class(Class))
 import Pair qualified
 
 unsafeArray :: List a -> Array a
