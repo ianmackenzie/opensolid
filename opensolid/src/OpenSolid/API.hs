@@ -10,6 +10,7 @@ import Range (Range)
 import Range qualified
 import Vector2d (Vector2d)
 import Vector2d qualified
+import Curve1d qualified
 
 data Space
 
@@ -22,6 +23,7 @@ classes =
   , direction2d
   , point2f
   , point2d
+  , curve1f
   ]
 
 (.:) :: a -> b -> (a, b)
@@ -188,3 +190,17 @@ point2dMemberFunctions _ =
   , "distance to" .| M1 N "other" Point2d.distanceFrom
   , "midpoint" .| M1 N "other" Point2d.midpoint
   ]
+
+curve1f :: Class
+curve1f =
+  Class
+    { name = "Curve1f"
+    , constructors = []
+    , staticFunctions =
+        [ "t" .| S0 N Curve1d.parameter
+        ]
+    , memberFunctions = 
+        [ "evaluate" .| M1 N "parameter value" (\t curve -> Curve1d.evaluate curve t)
+        , "squared" .| M0 N (Curve1d.squared @Unitless)
+        ]
+    }
