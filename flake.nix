@@ -27,11 +27,8 @@
               pkgs.bashInteractive
               # The Haskell compiler itself
               pkgs.ghc
-              # The Stack build tool,
-              # configured in stack.yaml to use whatever GHC is on the PATH
-              # so that we use the GHC we just installed above
-              # instead of having Stack install it
-              pkgs.stack
+              # The Cabal build tool for Haskell
+              pkgs.cabal-install
               # Haskell editor/IDE support
               pkgs.haskell-language-server
               # Needed so that GHC can link against it
