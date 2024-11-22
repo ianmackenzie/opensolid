@@ -34,6 +34,8 @@ import Expression (Expression)
 import Expression qualified
 import Fuzzy qualified
 import List qualified
+import OpenSolid.FFI (FFI)
+import OpenSolid.FFI qualified as FFI
 import NonEmpty qualified
 import OpenSolid
 import Parameter qualified
@@ -43,6 +45,7 @@ import Range qualified
 import Solve1d qualified
 import Stream (Stream)
 import Stream qualified
+import Units (Meters)
 import Units qualified
 
 class
@@ -101,6 +104,12 @@ data Curve1d units where
     Curve1d units
 
 deriving instance Show (Curve1d units)
+
+instance FFI (Curve1d Unitless) where
+  representation _ = FFI.Class "Curve1f"
+
+instance FFI (Curve1d Meters) where
+  representation _ = FFI.Class "Curve1d"
 
 instance HasUnits (Curve1d units) where
   type UnitsOf (Curve1d units) = units
