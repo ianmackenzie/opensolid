@@ -1,0 +1,3 @@
+# Shared libraries copied in during build
+opensolid/*.dll
+opensolid/*.so
