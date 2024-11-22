@@ -341,7 +341,7 @@ callMemberFunction function = case function of
       FFI.store outputPtr 0 (Tolerance.using tolerance (f self))
   M1 N _ f ->
     \inputPtr outputPtr -> IO.do
-      (self, arg1) <- FFI.load inputPtr 0
+      (arg1, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (f arg1 self)
   M1 F _ f ->
     \inputPtr outputPtr -> IO.do
@@ -353,7 +353,7 @@ callMemberFunction function = case function of
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 self))
   M2 N _ _ f ->
     \inputPtr outputPtr -> IO.do
-      (self, arg1, arg2) <- FFI.load inputPtr 0
+      (arg1, arg2, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (f arg1 arg2 self)
   M2 F _ _ f ->
     \inputPtr outputPtr -> IO.do
@@ -365,7 +365,7 @@ callMemberFunction function = case function of
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 arg2 self))
   M3 N _ _ _ f ->
     \inputPtr outputPtr -> IO.do
-      (self, arg1, arg2, arg3) <- FFI.load inputPtr 0
+      (arg1, arg2, arg3, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (f arg1 arg2 arg3 self)
   M3 F _ _ _ f ->
     \inputPtr outputPtr -> IO.do
@@ -377,7 +377,7 @@ callMemberFunction function = case function of
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 arg2 arg3 self))
   M4 N _ _ _ _ f ->
     \inputPtr outputPtr -> IO.do
-      (self, arg1, arg2, arg3, arg4) <- FFI.load inputPtr 0
+      (arg1, arg2, arg3, arg4, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (f arg1 arg2 arg3 arg4 self)
   M4 F _ _ _ _ f ->
     \inputPtr outputPtr -> IO.do
