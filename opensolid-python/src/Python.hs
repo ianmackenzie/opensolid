@@ -6,6 +6,7 @@ module Python
   , list
   , tuple
   , call
+  , name
   )
 where
 
@@ -22,7 +23,7 @@ separate :: List Text -> Text
 separate blocks = Text.join "\n\n" blocks
 
 str :: Text -> Text
-str name = "\"" + name + "\""
+str contents = "\"" + contents + "\""
 
 list :: List Text -> Text
 list entries = "[" + Text.join "," entries + "]"
@@ -34,3 +35,6 @@ tuple entries = "(" + Text.join "," entries + ")"
 
 call :: Text -> List Text -> Text
 call function arguments = function + "(" + Text.join "," arguments + ")"
+
+name :: Text -> Text
+name = Text.replace " " "_"
