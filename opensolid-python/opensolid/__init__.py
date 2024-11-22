@@ -16,20 +16,31 @@ from ctypes import (
     c_size_t,
     c_void_p,
 )
+from pathlib import Path
 from typing import Any, Generator, overload
 
 # Load the native library
-_load_path = "libopensolid-ffi.so"
-if platform.system() == "Darwin":
-    _load_path = "libopensolid-ffi.dylib"
-_lib: CDLL = ctypes.cdll.LoadLibrary(_load_path)
+match platform.system():
+    case "Windows":
+        _load_path = Path(__file__).parent / "opensolid-ffi.dll"
+    case "Darwin":
+        _load_path = Path(__file__).parent / "libopensolid-ffi.dylib"
+    case _:
+        # Assume Linux-like by default
+        _load_path = Path(__file__).parent / "libopensolid-ffi.so"
+
+_lib: CDLL = ctypes.cdll.LoadLibrary(str(_load_path))
 
 # Define the signatures of the C API functions
+_lib.opensolid_init.argtypes = []
 _lib.opensolid_invoke.argtypes = [c_int, c_int, c_void_p, c_void_p]
 _lib.opensolid_malloc.argtypes = [c_size_t]
 _lib.opensolid_malloc.restype = c_void_p
 _lib.opensolid_free.argtypes = [c_void_p]
 _lib.opensolid_release.argtypes = [c_void_p]
+
+# Initialize the Haskell runtime
+_lib.opensolid_init()
 
 
 class Error(Exception):
@@ -121,16 +132,16 @@ def _angle_tolerance() -> Angle:
     raise TypeError(message)
 
 
+class _Tuple2_c_double_c_void_p(Structure):
+    _fields_ = [("field0", c_double), ("field1", c_void_p)]  # noqa: RUF012
+
+
 class _Tuple2_c_double_c_double(Structure):
     _fields_ = [("field0", c_double), ("field1", c_double)]  # noqa: RUF012
 
 
 class _Tuple2_c_void_p_c_void_p(Structure):
     _fields_ = [("field0", c_void_p), ("field1", c_void_p)]  # noqa: RUF012
-
-
-class _Tuple2_c_double_c_void_p(Structure):
-    _fields_ = [("field0", c_double), ("field1", c_void_p)]  # noqa: RUF012
 
 
 class _Result_c_void_p(Structure):
@@ -795,3 +806,26 @@ class Point2d:
         output = c_void_p()
         _lib.opensolid_invoke(6, 7, ctypes.byref(inputs), ctypes.byref(output))
         return Point2d(__ptr__=output)
+
+
+class Curve1f:
+    def __init__(self, *, __ptr__: c_void_p) -> None:
+        self.__ptr__ = __ptr__
+
+    @staticmethod
+    def t() -> Curve1f:
+        output = c_void_p()
+        _lib.opensolid_invoke(7, 0, c_void_p(), ctypes.byref(output))
+        return Curve1f(__ptr__=output)
+
+    def evaluate(self, parameter_value: float) -> float:
+        inputs = _Tuple2_c_double_c_void_p(parameter_value, self.__ptr__)
+        output = c_double()
+        _lib.opensolid_invoke(7, 1, ctypes.byref(inputs), ctypes.byref(output))
+        return output.value
+
+    def squared(self) -> Curve1f:
+        inputs = self.__ptr__
+        output = c_void_p()
+        _lib.opensolid_invoke(7, 2, ctypes.byref(inputs), ctypes.byref(output))
+        return Curve1f(__ptr__=output)
