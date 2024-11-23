@@ -49,14 +49,16 @@ jobs:
         run: cabal run sandbox
       - name: Run tests
         run: cabal test opensolid
-      - name: Copy opensolid-ffi.dll to opensolid-python/opensolid directory
-        run: Get-ChildItem -Path dist-newstyle -Filter opensolid-ffi.dll -Recurse | Copy-Item -Destination .\opensolid-python\opensolid\
-      - name: Generate Python library code
-        run: cabal run opensolid-python # | Set-Content -Path .\opensolid-python\opensolid\__init__.py
-      # - name: Try evaluating a Python expression
-      #   run: |
-      #     cd opensolid-python
-      #     python -c "from opensolid import *; print(Point2f.x(3).distance_to(Point2f.y(4)))"
+      - name: Build Python bindings
+        run: |
+          Copy-Item -Path .\opensolid-jit\target\release\opensolit_jit.dll -Destionatin .\opensolid-python\opensolid\
+          cabal run opensolid-python
+          cabal run generate-def-file
+          cabal build opensolid-ffi
+          Get-ChildItem -Path dist-newstyle -Filter opensolid-ffi.dll -Recurse | Copy-Item -Destination .\opensolid-python\opensolid\
+      - name: Try running Python script
+        working-directory: opensolid-python
+        run: python check.py
 
 # jobs:
 #   test:
