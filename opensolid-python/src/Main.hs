@@ -5,7 +5,6 @@ module Main (main) where
 import CTypes qualified
 import Constructor qualified
 import Data.Proxy (Proxy (Proxy))
-import IO qualified
 import Length (Length)
 import List qualified
 import MemberFunction qualified
@@ -17,6 +16,7 @@ import OpenSolid.API.Class.MemberFunction (MemberFunction (..))
 import OpenSolid.API.Class.StaticFunction (StaticFunction (..))
 import OpenSolid.API.Constraint (Constraint (..))
 import OpenSolid.FFI (FFI)
+import File qualified
 import Pair qualified
 import Python qualified
 import StaticFunction qualified
@@ -391,4 +391,4 @@ classDefinitions = Python.separate (List.map (classDefinition "opensolid__") API
 main :: IO ()
 main = IO.do
   let pythonCode = Python.separate [preamble, ffiTypeDeclarations, classDefinitions]
-  IO.printLine pythonCode
+  File.writeTo "opensolid-python/opensolid/__init__.py" pythonCode

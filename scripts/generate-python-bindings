@@ -2,10 +2,8 @@
 
 set -euo pipefail
 
-# Build the Python code generator executable
-cabal build opensolid-python
 # Run the Python code generator executable to create __init__.py
-cabal run opensolid-python > opensolid-python/opensolid/__init__.py
+cabal run opensolid-python
 # Format __init__.py for readability
 ruff format opensolid-python/opensolid/__init__.py
 # Check __init__.py for errors
