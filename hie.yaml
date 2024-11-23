@@ -12,6 +12,9 @@ cradle:
     - path: "opensolid-ffi/src"
       component: "opensolid-ffi:flib:opensolid-ffi"
 
+    - path: "opensolid-ffi/generate-def-file/Main.hs"
+      component: "opensolid-ffi:exe:generate-def-file"
+
     - path: "opensolid-python/src/Main.hs"
       component: "opensolid-python:exe:opensolid-python"
 
