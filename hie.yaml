@@ -1,13 +1,13 @@
 cradle:
-  stack:
+  cabal:
     - path: "opensolid/src"
-      component: "opensolid:lib"
+      component: "lib:opensolid"
 
     - path: "opensolid/test"
       component: "opensolid:test:opensolid-test"
 
     - path: "opensolid-api/src"
-      component: "opensolid-api:lib"
+      component: "lib:opensolid-api"
 
     - path: "opensolid-ffi/src"
       component: "opensolid-ffi:lib:opensolid-ffi"
@@ -15,7 +15,28 @@ cradle:
     - path: "opensolid-python/src/Main.hs"
       component: "opensolid-python:exe:opensolid-python"
 
-    - path: "opensolid-python/src/PythonAST.hs"
+    - path: "opensolid-python/src/CTypes.hs"
+      component: "opensolid-python:exe:opensolid-python"
+
+    - path: "opensolid-python/src/Constructor.hs"
+      component: "opensolid-python:exe:opensolid-python"
+
+    - path: "opensolid-python/src/Function.hs"
+      component: "opensolid-python:exe:opensolid-python"
+
+    - path: "opensolid-python/src/MemberFunction.hs"
+      component: "opensolid-python:exe:opensolid-python"
+
+    - path: "opensolid-python/src/Python.hs"
+      component: "opensolid-python:exe:opensolid-python"
+
+    - path: "opensolid-python/src/StaticFunction.hs"
+      component: "opensolid-python:exe:opensolid-python"
+
+    - path: "opensolid-python/src/Type.hs"
+      component: "opensolid-python:exe:opensolid-python"
+
+    - path: "opensolid-python/src/TypeRegistry.hs"
       component: "opensolid-python:exe:opensolid-python"
 
     - path: "opensolid-sandbox/src/Main.hs"
