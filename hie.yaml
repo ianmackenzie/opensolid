@@ -10,7 +10,7 @@ cradle:
       component: "lib:opensolid-api"
 
     - path: "opensolid-ffi/src"
-      component: "opensolid-ffi:lib:opensolid-ffi"
+      component: "opensolid-ffi:flib:opensolid-ffi"
 
     - path: "opensolid-python/src/Main.hs"
       component: "opensolid-python:exe:opensolid-python"
