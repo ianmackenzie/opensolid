@@ -49,6 +49,7 @@ preamble =
     , "_lib : CDLL = ctypes.cdll.LoadLibrary(str(_load_path))"
     , ""
     , "# Define the signatures of the C API functions"
+    , "# (also an early sanity check to make sure the library has been loaded OK)"
     , "_lib.opensolid_init.argtypes = []"
     , "_lib.opensolid_invoke.argtypes = [c_int, c_int, c_void_p, c_void_p]"
     , "_lib.opensolid_malloc.argtypes = [c_size_t]"
