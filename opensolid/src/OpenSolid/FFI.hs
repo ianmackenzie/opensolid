@@ -1,5 +1,7 @@
 module OpenSolid.FFI
   ( FFI (representation)
+  , typeName
+  , compositeName
   , size
   , store
   , load
@@ -21,6 +23,7 @@ import Length (Length)
 import List qualified
 import OpenSolid
 import Qty qualified
+import Text qualified
 
 class FFI a where
   representation :: Proxy a -> Representation a
@@ -52,6 +55,94 @@ data Representation a where
   Result :: FFI a => Representation (Result x a)
   -- A class containing an opaque pointer to a Haskell value
   Class :: Text -> Representation a
+
+typeName :: FFI a => Proxy a -> Text
+typeName proxy = case representation proxy of
+  Int -> "Int"
+  Float -> "Float"
+  Qty qtyName -> qtyName
+  List -> listTypeName proxy
+  Tuple2 -> tuple2TypeName proxy
+  Tuple3 -> tuple3TypeName proxy
+  Tuple4 -> tuple4TypeName proxy
+  Tuple5 -> tuple5TypeName proxy
+  Tuple6 -> tuple6TypeName proxy
+  Maybe -> maybeTypeName proxy
+  Result -> resultTypeName proxy
+  Class className -> className
+
+compositeName :: List Text -> Text
+compositeName = Text.join "_"
+
+listTypeName :: forall a. FFI a => Proxy (List a) -> Text
+listTypeName _ = compositeName ["List", typeName @a Proxy]
+
+tuple2TypeName :: forall a b. (FFI a, FFI b) => Proxy (a, b) -> Text
+tuple2TypeName _ = compositeName ["Tuple2", typeName @a Proxy, typeName @b Proxy]
+
+tuple3TypeName ::
+  forall a b c.
+  (FFI a, FFI b, FFI c) =>
+  Proxy (a, b, c) ->
+  Text
+tuple3TypeName _ =
+  compositeName
+    [ "Tuple3"
+    , typeName @a Proxy
+    , typeName @b Proxy
+    , typeName @c Proxy
+    ]
+
+tuple4TypeName ::
+  forall a b c d.
+  (FFI a, FFI b, FFI c, FFI d) =>
+  Proxy (a, b, c, d) ->
+  Text
+tuple4TypeName _ =
+  compositeName
+    [ "Tuple4"
+    , typeName @a Proxy
+    , typeName @b Proxy
+    , typeName @c Proxy
+    , typeName @d Proxy
+    ]
+
+tuple5TypeName ::
+  forall a b c d e.
+  (FFI a, FFI b, FFI c, FFI d, FFI e) =>
+  Proxy (a, b, c, d, e) ->
+  Text
+tuple5TypeName _ =
+  compositeName
+    [ "Tuple5"
+    , typeName @a Proxy
+    , typeName @b Proxy
+    , typeName @c Proxy
+    , typeName @d Proxy
+    , typeName @e Proxy
+    ]
+
+tuple6TypeName ::
+  forall a b c d e f.
+  (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f) =>
+  Proxy (a, b, c, d, e, f) ->
+  Text
+tuple6TypeName _ =
+  compositeName
+    [ "Tuple6"
+    , typeName @a Proxy
+    , typeName @b Proxy
+    , typeName @c Proxy
+    , typeName @d Proxy
+    , typeName @e Proxy
+    , typeName @f Proxy
+    ]
+
+maybeTypeName :: forall a. FFI a => Proxy (Maybe a) -> Text
+maybeTypeName _ = compositeName ["Maybe", typeName @a Proxy]
+
+resultTypeName :: forall x a. FFI a => Proxy (Result x a) -> Text
+resultTypeName _ = compositeName ["Result", typeName @a Proxy]
 
 size :: FFI a => Proxy a -> Int
 size proxy = case representation proxy of

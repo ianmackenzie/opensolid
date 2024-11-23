@@ -642,6 +642,6 @@ registerResult proxy registry = do
     |> registerType @a Proxy
     |> TypeRegistry.add name declaration
 
-invoke :: Int -> Int -> Text -> Text -> Text
-invoke classId functionId inputPtr outputPtr =
-  Python.call "_lib.opensolid_invoke" [Text.int classId, Text.int functionId, inputPtr, outputPtr]
+invoke :: Text -> Text -> Text -> Text
+invoke ffiFunctionName inputPtr outputPtr =
+  Python.call ("_lib." + ffiFunctionName) [inputPtr, outputPtr]

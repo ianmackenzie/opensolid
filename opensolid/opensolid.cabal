@@ -179,6 +179,10 @@ library
     OpenSolid
     OpenSolid.API
     OpenSolid.API.Class
+    OpenSolid.API.Class.Constructor
+    OpenSolid.API.Class.MemberFunction
+    OpenSolid.API.Class.StaticFunction
+    OpenSolid.API.Constraint
     OpenSolid.FFI
     OpenSolid.Json
     Pair

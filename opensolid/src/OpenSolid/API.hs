@@ -1,10 +1,20 @@
-module OpenSolid.API (classes) where
+module OpenSolid.API (classes, functions) where
 
 import Curve1d qualified
 import Direction2d qualified
+import Foreign (Ptr)
+import List qualified
 import OpenSolid
-import OpenSolid.API.Class (Class (..), Constraint (..), Constructor (..), MemberFunction (..), StaticFunction (..))
+import OpenSolid.API.Class (Class (..))
+import OpenSolid.API.Class.Constructor (Constructor (..))
+import OpenSolid.API.Class.Constructor qualified as Constructor
+import OpenSolid.API.Class.MemberFunction (MemberFunction (..))
+import OpenSolid.API.Class.MemberFunction qualified as MemberFunction
+import OpenSolid.API.Class.StaticFunction (StaticFunction (..))
+import OpenSolid.API.Class.StaticFunction qualified as StaticFunction
+import OpenSolid.API.Constraint (Constraint (..))
 import OpenSolid.FFI (FFI)
+import Pair qualified
 import Point2d (Point2d)
 import Point2d qualified
 import Range (Range)
@@ -43,6 +53,7 @@ floatRange =
     , constructors = rangeConstructors F
     , staticFunctions = ("unit", [S0 N Range.unit]) : rangeStaticFunctions F
     , memberFunctions = rangeMemberFunctions F
+    , nestedClasses = []
     }
 
 lengthRange :: Class
@@ -52,6 +63,7 @@ lengthRange =
     , constructors = rangeConstructors L
     , staticFunctions = rangeStaticFunctions L
     , memberFunctions = rangeMemberFunctions L
+    , nestedClasses = []
     }
 
 rangeConstructors ::
@@ -91,6 +103,7 @@ vector2f =
     , constructors = C1 N "direction" Vector2d.unit : vector2dConstructors F
     , staticFunctions = vector2dStaticFunctions F
     , memberFunctions = vector2dMemberFunctions F
+    , nestedClasses = []
     }
 
 vector2d :: Class
@@ -100,6 +113,7 @@ vector2d =
     , constructors = vector2dConstructors L
     , staticFunctions = vector2dStaticFunctions L
     , memberFunctions = vector2dMemberFunctions L
+    , nestedClasses = []
     }
 
 vector2dConstructors ::
@@ -150,15 +164,16 @@ direction2d =
     , memberFunctions =
         [ "to angle" .| M0 N Direction2d.toAngle
         ]
+    , nestedClasses = []
     }
 
 point2f :: Class
 point2f =
-  Class "Point2f" (point2dConstructors F) (point2dStaticFunctions F) (point2dMemberFunctions F)
+  Class "Point2f" (point2dConstructors F) (point2dStaticFunctions F) (point2dMemberFunctions F) []
 
 point2d :: Class
 point2d =
-  Class "Point2d" (point2dConstructors L) (point2dStaticFunctions L) (point2dMemberFunctions L)
+  Class "Point2d" (point2dConstructors L) (point2dStaticFunctions L) (point2dMemberFunctions L) []
 
 point2dConstructors ::
   (FFI (Qty units), FFI (Point2d (Space @ units))) =>
@@ -203,4 +218,45 @@ curve1f =
         [ "evaluate" .| M1 N "parameter value" (\t curve -> Curve1d.evaluate curve t)
         , "squared" .| M0 N (Curve1d.squared @Unitless)
         ]
+    , nestedClasses = []
     }
+
+type ForeignFunction = Ptr () -> Ptr () -> IO ()
+
+functions :: List (Text, ForeignFunction)
+functions =
+  List.map (Pair.mapFirst ("opensolid__" +)) $
+    List.collect classFunctionPairs classes
+
+constructorPair :: Constructor value -> (Text, ForeignFunction)
+constructorPair constructor =
+  (Constructor.ffiName constructor, Constructor.invoke constructor)
+
+staticFunctionPair :: Text -> StaticFunction -> (Text, ForeignFunction)
+staticFunctionPair functionName staticFunction =
+  (StaticFunction.ffiName functionName staticFunction, StaticFunction.invoke staticFunction)
+
+staticFunctionPairs :: (Text, List StaticFunction) -> List (Text, ForeignFunction)
+staticFunctionPairs (functionName, overloads) =
+  List.map (staticFunctionPair functionName) overloads
+
+memberFunctionPair :: Text -> MemberFunction value -> (Text, ForeignFunction)
+memberFunctionPair functionName memberFunction =
+  (MemberFunction.ffiName functionName memberFunction, MemberFunction.invoke memberFunction)
+
+memberFunctionPairs :: (Text, List (MemberFunction value)) -> List (Text, ForeignFunction)
+memberFunctionPairs (functionName, overloads) =
+  List.map (memberFunctionPair functionName) overloads
+
+prefixWith :: Text -> (Text, a) -> (Text, a)
+prefixWith prefix = Pair.mapFirst (prefix +)
+
+classFunctionPairs :: Class -> List (Text, Ptr () -> Ptr () -> IO ())
+classFunctionPairs (Class name constructors staticFunctions memberFunctions nestedClasses) =
+  List.map (prefixWith (name + "__")) $
+    List.concat
+      [ List.map constructorPair constructors
+      , List.collect staticFunctionPairs staticFunctions
+      , List.collect memberFunctionPairs memberFunctions
+      ]
+      + List.map (prefixWith (name + "_")) (List.collect classFunctionPairs nestedClasses)

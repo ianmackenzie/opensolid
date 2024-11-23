@@ -25,11 +25,13 @@ foreign-library opensolid-ffi
   build-depends:
     base,
     opensolid,
+    template-haskell,
 
   type: native-shared
   hs-source-dirs: src
   other-modules:
-    OpenSolidFFI
+    FFI
+    ForeignExports
 
   c-sources: src/wrapper.c
   ghc-options:
@@ -41,3 +43,22 @@ foreign-library opensolid-ffi
   default-extensions:
     OverloadedStrings
     RebindableSyntax
+    TemplateHaskell
+    QualifiedDo
+
+executable generate-def-file
+  main-is: Main.hs
+  hs-source-dirs: generate-def-file
+  default-language: GHC2021
+  build-depends:
+    base,
+    opensolid,
+  ghc-options:
+    -Wall
+    -Werror
+    -Wcompat
+    -Wno-missed-extra-shared-lib
+  default-extensions:
+    OverloadedStrings
+    RebindableSyntax
+    QualifiedDo

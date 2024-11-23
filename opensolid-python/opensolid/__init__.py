@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import ctypes
-import platform
+import os
 from contextlib import contextmanager
 from ctypes import (
     CDLL,
@@ -11,7 +11,6 @@ from ctypes import (
     Union,
     c_char_p,
     c_double,
-    c_int,
     c_int64,
     c_size_t,
     c_void_p,
@@ -19,21 +18,22 @@ from ctypes import (
 from pathlib import Path
 from typing import Any, Generator, overload
 
-# Load the native library
-match platform.system():
+# Load the native library, assuming it's located in the same directory as __init__.py
+_lib_dir = Path(__file__).parent
+match os.uname().sysname:
     case "Windows":
-        _load_path = Path(__file__).parent / "opensolid-ffi.dll"
+        _load_path = _lib_dir / "opensolid-ffi.dll"
     case "Darwin":
-        _load_path = Path(__file__).parent / "libopensolid-ffi.dylib"
-    case _:
-        # Assume Linux-like by default
-        _load_path = Path(__file__).parent / "libopensolid-ffi.so"
-
+        _load_path = _lib_dir / "libopensolid-ffi.dylib"
+    case "Linux":
+        _load_path = _lib_dir / "libopensolid-ffi.so"
+    case unsupported_system:
+        raise OSError(unsupported_system + " is not yet supported")
 _lib: CDLL = ctypes.cdll.LoadLibrary(str(_load_path))
 
 # Define the signatures of the C API functions
+# (also an early sanity check to make sure the library has been loaded OK)
 _lib.opensolid_init.argtypes = []
-_lib.opensolid_invoke.argtypes = [c_int, c_int, c_void_p, c_void_p]
 _lib.opensolid_malloc.argtypes = [c_size_t]
 _lib.opensolid_malloc.restype = c_void_p
 _lib.opensolid_free.argtypes = [c_void_p]
@@ -132,27 +132,27 @@ def _angle_tolerance() -> Angle:
     raise TypeError(message)
 
 
-class _Tuple2_c_double_c_void_p(Structure):
+class _Tuple2_c_double_c_void_p(Structure):  # noqa: N801
     _fields_ = [("field0", c_double), ("field1", c_void_p)]  # noqa: RUF012
 
 
-class _Tuple2_c_double_c_double(Structure):
+class _Tuple2_c_double_c_double(Structure):  # noqa: N801
     _fields_ = [("field0", c_double), ("field1", c_double)]  # noqa: RUF012
 
 
-class _Tuple2_c_void_p_c_void_p(Structure):
+class _Tuple2_c_void_p_c_void_p(Structure):  # noqa: N801
     _fields_ = [("field0", c_void_p), ("field1", c_void_p)]  # noqa: RUF012
 
 
-class _Result_c_void_p(Structure):
+class _Result_c_void_p(Structure):  # noqa: N801
     _fields_ = [("field0", c_int64), ("field1", _ErrorMessage), ("field2", c_void_p)]  # noqa: RUF012
 
 
-class _Tuple3_c_void_p_c_void_p_c_void_p(Structure):
+class _Tuple3_c_void_p_c_void_p_c_void_p(Structure):  # noqa: N801
     _fields_ = [("field0", c_void_p), ("field1", c_void_p), ("field2", c_void_p)]  # noqa: RUF012
 
 
-class _Maybe_c_void_p(Structure):
+class _Maybe_c_void_p(Structure):  # noqa: N801
     _fields_ = [("field0", c_int64), ("field1", c_void_p)]  # noqa: RUF012
 
 
@@ -179,8 +179,8 @@ class FloatRange:
             ) if not rest:
                 self.__ptr__ = c_void_p()
                 inputs = c_double(value)
-                _lib.opensolid_invoke(
-                    0, 0, ctypes.byref(inputs), ctypes.byref(self.__ptr__)
+                _lib.opensolid__FloatRange__constructor__Float(
+                    ctypes.byref(inputs), ctypes.byref(self.__ptr__)
                 )
             case (
                 ([float() | int() as low, float() | int() as high], {**rest})
@@ -195,8 +195,8 @@ class FloatRange:
             ) if not rest:
                 self.__ptr__ = c_void_p()
                 inputs = _Tuple2_c_double_c_double(low, high)
-                _lib.opensolid_invoke(
-                    0, 1, ctypes.byref(inputs), ctypes.byref(self.__ptr__)
+                _lib.opensolid__FloatRange__constructor__Float_Float(
+                    ctypes.byref(inputs), ctypes.byref(self.__ptr__)
                 )
             case _:
                 message = "Unexpected constructor arguments"
@@ -205,7 +205,7 @@ class FloatRange:
     @staticmethod
     def unit() -> FloatRange:
         output = c_void_p()
-        _lib.opensolid_invoke(0, 2, c_void_p(), ctypes.byref(output))
+        _lib.opensolid__FloatRange__unit(c_void_p(), ctypes.byref(output))
         return FloatRange(__ptr__=output)
 
     @overload
@@ -236,7 +236,9 @@ class FloatRange:
             ) if not rest:
                 inputs = _Tuple2_c_void_p_c_void_p(first.__ptr__, second.__ptr__)
                 output = c_void_p()
-                _lib.opensolid_invoke(0, 3, ctypes.byref(inputs), ctypes.byref(output))
+                _lib.opensolid__FloatRange__aggregate__FloatRange_FloatRange(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
                 return FloatRange(__ptr__=output)
             case (
                 (
@@ -261,7 +263,9 @@ class FloatRange:
                     first.__ptr__, second.__ptr__, third.__ptr__
                 )
                 output = c_void_p()
-                _lib.opensolid_invoke(0, 4, ctypes.byref(inputs), ctypes.byref(output))
+                _lib.opensolid__FloatRange__aggregate__FloatRange_FloatRange_FloatRange(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
                 return FloatRange(__ptr__=output)
             case _:
                 message = "Unexpected function arguments"
@@ -270,13 +274,17 @@ class FloatRange:
     def endpoints(self) -> tuple[float, float]:
         inputs = self.__ptr__
         output = _Tuple2_c_double_c_double()
-        _lib.opensolid_invoke(0, 5, ctypes.byref(inputs), ctypes.byref(output))
+        _lib.opensolid__FloatRange__endpoints(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
         return (output.field0, output.field1)
 
     def intersection(self, other: FloatRange) -> FloatRange | None:
         inputs = _Tuple2_c_void_p_c_void_p(other.__ptr__, self.__ptr__)
         output = _Maybe_c_void_p()
-        _lib.opensolid_invoke(0, 6, ctypes.byref(inputs), ctypes.byref(output))
+        _lib.opensolid__FloatRange__intersection__FloatRange(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
         return (
             FloatRange(__ptr__=c_void_p(output.field1)) if output.field0 == 0 else None
         )
@@ -305,8 +313,8 @@ class LengthRange:
             ) if not rest:
                 self.__ptr__ = c_void_p()
                 inputs = c_double(value.value)
-                _lib.opensolid_invoke(
-                    1, 0, ctypes.byref(inputs), ctypes.byref(self.__ptr__)
+                _lib.opensolid__LengthRange__constructor__Length(
+                    ctypes.byref(inputs), ctypes.byref(self.__ptr__)
                 )
             case (
                 ([Length() as low, Length() as high], {**rest})
@@ -314,8 +322,8 @@ class LengthRange:
             ) if not rest:
                 self.__ptr__ = c_void_p()
                 inputs = _Tuple2_c_double_c_double(low.value, high.value)
-                _lib.opensolid_invoke(
-                    1, 1, ctypes.byref(inputs), ctypes.byref(self.__ptr__)
+                _lib.opensolid__LengthRange__constructor__Length_Length(
+                    ctypes.byref(inputs), ctypes.byref(self.__ptr__)
                 )
             case _:
                 message = "Unexpected constructor arguments"
@@ -349,7 +357,9 @@ class LengthRange:
             ) if not rest:
                 inputs = _Tuple2_c_void_p_c_void_p(first.__ptr__, second.__ptr__)
                 output = c_void_p()
-                _lib.opensolid_invoke(1, 2, ctypes.byref(inputs), ctypes.byref(output))
+                _lib.opensolid__LengthRange__aggregate__LengthRange_LengthRange(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
                 return LengthRange(__ptr__=output)
             case (
                 (
@@ -374,7 +384,9 @@ class LengthRange:
                     first.__ptr__, second.__ptr__, third.__ptr__
                 )
                 output = c_void_p()
-                _lib.opensolid_invoke(1, 3, ctypes.byref(inputs), ctypes.byref(output))
+                _lib.opensolid__LengthRange__aggregate__LengthRange_LengthRange_LengthRange(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
                 return LengthRange(__ptr__=output)
             case _:
                 message = "Unexpected function arguments"
@@ -383,13 +395,17 @@ class LengthRange:
     def endpoints(self) -> tuple[Length, Length]:
         inputs = self.__ptr__
         output = _Tuple2_c_double_c_double()
-        _lib.opensolid_invoke(1, 4, ctypes.byref(inputs), ctypes.byref(output))
+        _lib.opensolid__LengthRange__endpoints(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
         return (Length(output.field0), Length(output.field1))
 
     def intersection(self, other: LengthRange) -> LengthRange | None:
         inputs = _Tuple2_c_void_p_c_void_p(other.__ptr__, self.__ptr__)
         output = _Maybe_c_void_p()
-        _lib.opensolid_invoke(1, 5, ctypes.byref(inputs), ctypes.byref(output))
+        _lib.opensolid__LengthRange__intersection__LengthRange(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
         return (
             LengthRange(__ptr__=c_void_p(output.field1)) if output.field0 == 0 else None
         )
@@ -422,8 +438,8 @@ class Vector2f:
             ) if not rest:
                 self.__ptr__ = c_void_p()
                 inputs = direction.__ptr__
-                _lib.opensolid_invoke(
-                    2, 0, ctypes.byref(inputs), ctypes.byref(self.__ptr__)
+                _lib.opensolid__Vector2f__constructor__Direction2d(
+                    ctypes.byref(inputs), ctypes.byref(self.__ptr__)
                 )
             case (
                 ([float() | int() as x, float() | int() as y], {**rest})
@@ -431,8 +447,8 @@ class Vector2f:
             ) if not rest:
                 self.__ptr__ = c_void_p()
                 inputs = _Tuple2_c_double_c_double(x, y)
-                _lib.opensolid_invoke(
-                    2, 1, ctypes.byref(inputs), ctypes.byref(self.__ptr__)
+                _lib.opensolid__Vector2f__constructor__Float_Float(
+                    ctypes.byref(inputs), ctypes.byref(self.__ptr__)
                 )
             case (
                 ([(float() | int(), float() | int()) as components], {**rest})
@@ -446,8 +462,8 @@ class Vector2f:
             ) if not rest:
                 self.__ptr__ = c_void_p()
                 inputs = _Tuple2_c_double_c_double(components[0], components[1])
-                _lib.opensolid_invoke(
-                    2, 2, ctypes.byref(inputs), ctypes.byref(self.__ptr__)
+                _lib.opensolid__Vector2f__constructor__Tuple2_Float_Float(
+                    ctypes.byref(inputs), ctypes.byref(self.__ptr__)
                 )
             case _:
                 message = "Unexpected constructor arguments"
@@ -456,34 +472,34 @@ class Vector2f:
     @staticmethod
     def zero() -> Vector2f:
         output = c_void_p()
-        _lib.opensolid_invoke(2, 3, c_void_p(), ctypes.byref(output))
+        _lib.opensolid__Vector2f__zero(c_void_p(), ctypes.byref(output))
         return Vector2f(__ptr__=output)
 
     @staticmethod
     def x(x: float) -> Vector2f:
         inputs = c_double(x)
         output = c_void_p()
-        _lib.opensolid_invoke(2, 4, ctypes.byref(inputs), ctypes.byref(output))
+        _lib.opensolid__Vector2f__x_Float(ctypes.byref(inputs), ctypes.byref(output))
         return Vector2f(__ptr__=output)
 
     @staticmethod
     def y(y: float) -> Vector2f:
         inputs = c_double(y)
         output = c_void_p()
-        _lib.opensolid_invoke(2, 5, ctypes.byref(inputs), ctypes.byref(output))
+        _lib.opensolid__Vector2f__y_Float(ctypes.byref(inputs), ctypes.byref(output))
         return Vector2f(__ptr__=output)
 
     def components(self) -> tuple[float, float]:
         inputs = self.__ptr__
         output = _Tuple2_c_double_c_double()
-        _lib.opensolid_invoke(2, 6, ctypes.byref(inputs), ctypes.byref(output))
+        _lib.opensolid__Vector2f__components(ctypes.byref(inputs), ctypes.byref(output))
         return (output.field0, output.field1)
 
     def direction(self) -> Direction2d:
         tolerance = _float_tolerance()
         inputs = _Tuple2_c_double_c_void_p(tolerance, self.__ptr__)
         output = _Result_c_void_p()
-        _lib.opensolid_invoke(2, 7, ctypes.byref(inputs), ctypes.byref(output))
+        _lib.opensolid__Vector2f__direction(ctypes.byref(inputs), ctypes.byref(output))
         return (
             Direction2d(__ptr__=c_void_p(output.field2))
             if output.field0 == 0
@@ -514,8 +530,8 @@ class Vector2d:
             ) if not rest:
                 self.__ptr__ = c_void_p()
                 inputs = _Tuple2_c_double_c_double(x.value, y.value)
-                _lib.opensolid_invoke(
-                    3, 0, ctypes.byref(inputs), ctypes.byref(self.__ptr__)
+                _lib.opensolid__Vector2d__constructor__Length_Length(
+                    ctypes.byref(inputs), ctypes.byref(self.__ptr__)
                 )
             case (
                 ([(Length(), Length()) as components], {**rest})
@@ -525,8 +541,8 @@ class Vector2d:
                 inputs = _Tuple2_c_double_c_double(
                     components[0].value, components[1].value
                 )
-                _lib.opensolid_invoke(
-                    3, 1, ctypes.byref(inputs), ctypes.byref(self.__ptr__)
+                _lib.opensolid__Vector2d__constructor__Tuple2_Length_Length(
+                    ctypes.byref(inputs), ctypes.byref(self.__ptr__)
                 )
             case _:
                 message = "Unexpected constructor arguments"
@@ -535,34 +551,34 @@ class Vector2d:
     @staticmethod
     def zero() -> Vector2d:
         output = c_void_p()
-        _lib.opensolid_invoke(3, 2, c_void_p(), ctypes.byref(output))
+        _lib.opensolid__Vector2d__zero(c_void_p(), ctypes.byref(output))
         return Vector2d(__ptr__=output)
 
     @staticmethod
     def x(x: Length) -> Vector2d:
         inputs = c_double(x.value)
         output = c_void_p()
-        _lib.opensolid_invoke(3, 3, ctypes.byref(inputs), ctypes.byref(output))
+        _lib.opensolid__Vector2d__x_Length(ctypes.byref(inputs), ctypes.byref(output))
         return Vector2d(__ptr__=output)
 
     @staticmethod
     def y(y: Length) -> Vector2d:
         inputs = c_double(y.value)
         output = c_void_p()
-        _lib.opensolid_invoke(3, 4, ctypes.byref(inputs), ctypes.byref(output))
+        _lib.opensolid__Vector2d__y_Length(ctypes.byref(inputs), ctypes.byref(output))
         return Vector2d(__ptr__=output)
 
     def components(self) -> tuple[Length, Length]:
         inputs = self.__ptr__
         output = _Tuple2_c_double_c_double()
-        _lib.opensolid_invoke(3, 5, ctypes.byref(inputs), ctypes.byref(output))
+        _lib.opensolid__Vector2d__components(ctypes.byref(inputs), ctypes.byref(output))
         return (Length(output.field0), Length(output.field1))
 
     def direction(self) -> Direction2d:
         tolerance = _length_tolerance()
         inputs = _Tuple2_c_double_c_void_p(tolerance.value, self.__ptr__)
         output = _Result_c_void_p()
-        _lib.opensolid_invoke(3, 6, ctypes.byref(inputs), ctypes.byref(output))
+        _lib.opensolid__Vector2d__direction(ctypes.byref(inputs), ctypes.byref(output))
         return (
             Direction2d(__ptr__=c_void_p(output.field2))
             if output.field0 == 0
@@ -589,8 +605,8 @@ class Direction2d:
             ) if not rest:
                 self.__ptr__ = c_void_p()
                 inputs = c_double(angle.value)
-                _lib.opensolid_invoke(
-                    4, 0, ctypes.byref(inputs), ctypes.byref(self.__ptr__)
+                _lib.opensolid__Direction2d__constructor__Angle(
+                    ctypes.byref(inputs), ctypes.byref(self.__ptr__)
                 )
             case _:
                 message = "Unexpected constructor arguments"
@@ -599,43 +615,45 @@ class Direction2d:
     @staticmethod
     def x() -> Direction2d:
         output = c_void_p()
-        _lib.opensolid_invoke(4, 1, c_void_p(), ctypes.byref(output))
+        _lib.opensolid__Direction2d__x(c_void_p(), ctypes.byref(output))
         return Direction2d(__ptr__=output)
 
     @staticmethod
     def y() -> Direction2d:
         output = c_void_p()
-        _lib.opensolid_invoke(4, 2, c_void_p(), ctypes.byref(output))
+        _lib.opensolid__Direction2d__y(c_void_p(), ctypes.byref(output))
         return Direction2d(__ptr__=output)
 
     @staticmethod
     def positive_x() -> Direction2d:
         output = c_void_p()
-        _lib.opensolid_invoke(4, 3, c_void_p(), ctypes.byref(output))
+        _lib.opensolid__Direction2d__positive_x(c_void_p(), ctypes.byref(output))
         return Direction2d(__ptr__=output)
 
     @staticmethod
     def positive_y() -> Direction2d:
         output = c_void_p()
-        _lib.opensolid_invoke(4, 4, c_void_p(), ctypes.byref(output))
+        _lib.opensolid__Direction2d__positive_y(c_void_p(), ctypes.byref(output))
         return Direction2d(__ptr__=output)
 
     @staticmethod
     def negative_x() -> Direction2d:
         output = c_void_p()
-        _lib.opensolid_invoke(4, 5, c_void_p(), ctypes.byref(output))
+        _lib.opensolid__Direction2d__negative_x(c_void_p(), ctypes.byref(output))
         return Direction2d(__ptr__=output)
 
     @staticmethod
     def negative_y() -> Direction2d:
         output = c_void_p()
-        _lib.opensolid_invoke(4, 6, c_void_p(), ctypes.byref(output))
+        _lib.opensolid__Direction2d__negative_y(c_void_p(), ctypes.byref(output))
         return Direction2d(__ptr__=output)
 
     def to_angle(self) -> Angle:
         inputs = self.__ptr__
         output = c_double()
-        _lib.opensolid_invoke(4, 7, ctypes.byref(inputs), ctypes.byref(output))
+        _lib.opensolid__Direction2d__to_angle(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
         return Angle(output.value)
 
 
@@ -662,8 +680,8 @@ class Point2f:
             ) if not rest:
                 self.__ptr__ = c_void_p()
                 inputs = _Tuple2_c_double_c_double(x, y)
-                _lib.opensolid_invoke(
-                    5, 0, ctypes.byref(inputs), ctypes.byref(self.__ptr__)
+                _lib.opensolid__Point2f__constructor__Float_Float(
+                    ctypes.byref(inputs), ctypes.byref(self.__ptr__)
                 )
             case (
                 ([(float() | int(), float() | int()) as coordinates], {**rest})
@@ -682,8 +700,8 @@ class Point2f:
             ) if not rest:
                 self.__ptr__ = c_void_p()
                 inputs = _Tuple2_c_double_c_double(coordinates[0], coordinates[1])
-                _lib.opensolid_invoke(
-                    5, 1, ctypes.byref(inputs), ctypes.byref(self.__ptr__)
+                _lib.opensolid__Point2f__constructor__Tuple2_Float_Float(
+                    ctypes.byref(inputs), ctypes.byref(self.__ptr__)
                 )
             case _:
                 message = "Unexpected constructor arguments"
@@ -692,39 +710,43 @@ class Point2f:
     @staticmethod
     def origin() -> Point2f:
         output = c_void_p()
-        _lib.opensolid_invoke(5, 2, c_void_p(), ctypes.byref(output))
+        _lib.opensolid__Point2f__origin(c_void_p(), ctypes.byref(output))
         return Point2f(__ptr__=output)
 
     @staticmethod
     def x(x: float) -> Point2f:
         inputs = c_double(x)
         output = c_void_p()
-        _lib.opensolid_invoke(5, 3, ctypes.byref(inputs), ctypes.byref(output))
+        _lib.opensolid__Point2f__x_Float(ctypes.byref(inputs), ctypes.byref(output))
         return Point2f(__ptr__=output)
 
     @staticmethod
     def y(y: float) -> Point2f:
         inputs = c_double(y)
         output = c_void_p()
-        _lib.opensolid_invoke(5, 4, ctypes.byref(inputs), ctypes.byref(output))
+        _lib.opensolid__Point2f__y_Float(ctypes.byref(inputs), ctypes.byref(output))
         return Point2f(__ptr__=output)
 
     def coordinates(self) -> tuple[float, float]:
         inputs = self.__ptr__
         output = _Tuple2_c_double_c_double()
-        _lib.opensolid_invoke(5, 5, ctypes.byref(inputs), ctypes.byref(output))
+        _lib.opensolid__Point2f__coordinates(ctypes.byref(inputs), ctypes.byref(output))
         return (output.field0, output.field1)
 
     def distance_to(self, other: Point2f) -> float:
         inputs = _Tuple2_c_void_p_c_void_p(other.__ptr__, self.__ptr__)
         output = c_double()
-        _lib.opensolid_invoke(5, 6, ctypes.byref(inputs), ctypes.byref(output))
+        _lib.opensolid__Point2f__distance_to__Point2f(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
         return output.value
 
     def midpoint(self, other: Point2f) -> Point2f:
         inputs = _Tuple2_c_void_p_c_void_p(other.__ptr__, self.__ptr__)
         output = c_void_p()
-        _lib.opensolid_invoke(5, 7, ctypes.byref(inputs), ctypes.byref(output))
+        _lib.opensolid__Point2f__midpoint__Point2f(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
         return Point2f(__ptr__=output)
 
 
@@ -751,8 +773,8 @@ class Point2d:
             ) if not rest:
                 self.__ptr__ = c_void_p()
                 inputs = _Tuple2_c_double_c_double(x.value, y.value)
-                _lib.opensolid_invoke(
-                    6, 0, ctypes.byref(inputs), ctypes.byref(self.__ptr__)
+                _lib.opensolid__Point2d__constructor__Length_Length(
+                    ctypes.byref(inputs), ctypes.byref(self.__ptr__)
                 )
             case (
                 ([(Length(), Length()) as coordinates], {**rest})
@@ -762,8 +784,8 @@ class Point2d:
                 inputs = _Tuple2_c_double_c_double(
                     coordinates[0].value, coordinates[1].value
                 )
-                _lib.opensolid_invoke(
-                    6, 1, ctypes.byref(inputs), ctypes.byref(self.__ptr__)
+                _lib.opensolid__Point2d__constructor__Tuple2_Length_Length(
+                    ctypes.byref(inputs), ctypes.byref(self.__ptr__)
                 )
             case _:
                 message = "Unexpected constructor arguments"
@@ -772,39 +794,43 @@ class Point2d:
     @staticmethod
     def origin() -> Point2d:
         output = c_void_p()
-        _lib.opensolid_invoke(6, 2, c_void_p(), ctypes.byref(output))
+        _lib.opensolid__Point2d__origin(c_void_p(), ctypes.byref(output))
         return Point2d(__ptr__=output)
 
     @staticmethod
     def x(x: Length) -> Point2d:
         inputs = c_double(x.value)
         output = c_void_p()
-        _lib.opensolid_invoke(6, 3, ctypes.byref(inputs), ctypes.byref(output))
+        _lib.opensolid__Point2d__x_Length(ctypes.byref(inputs), ctypes.byref(output))
         return Point2d(__ptr__=output)
 
     @staticmethod
     def y(y: Length) -> Point2d:
         inputs = c_double(y.value)
         output = c_void_p()
-        _lib.opensolid_invoke(6, 4, ctypes.byref(inputs), ctypes.byref(output))
+        _lib.opensolid__Point2d__y_Length(ctypes.byref(inputs), ctypes.byref(output))
         return Point2d(__ptr__=output)
 
     def coordinates(self) -> tuple[Length, Length]:
         inputs = self.__ptr__
         output = _Tuple2_c_double_c_double()
-        _lib.opensolid_invoke(6, 5, ctypes.byref(inputs), ctypes.byref(output))
+        _lib.opensolid__Point2d__coordinates(ctypes.byref(inputs), ctypes.byref(output))
         return (Length(output.field0), Length(output.field1))
 
     def distance_to(self, other: Point2d) -> Length:
         inputs = _Tuple2_c_void_p_c_void_p(other.__ptr__, self.__ptr__)
         output = c_double()
-        _lib.opensolid_invoke(6, 6, ctypes.byref(inputs), ctypes.byref(output))
+        _lib.opensolid__Point2d__distance_to__Point2d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
         return Length(output.value)
 
     def midpoint(self, other: Point2d) -> Point2d:
         inputs = _Tuple2_c_void_p_c_void_p(other.__ptr__, self.__ptr__)
         output = c_void_p()
-        _lib.opensolid_invoke(6, 7, ctypes.byref(inputs), ctypes.byref(output))
+        _lib.opensolid__Point2d__midpoint__Point2d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
         return Point2d(__ptr__=output)
 
 
@@ -815,17 +841,19 @@ class Curve1f:
     @staticmethod
     def t() -> Curve1f:
         output = c_void_p()
-        _lib.opensolid_invoke(7, 0, c_void_p(), ctypes.byref(output))
+        _lib.opensolid__Curve1f__t(c_void_p(), ctypes.byref(output))
         return Curve1f(__ptr__=output)
 
     def evaluate(self, parameter_value: float) -> float:
         inputs = _Tuple2_c_double_c_void_p(parameter_value, self.__ptr__)
         output = c_double()
-        _lib.opensolid_invoke(7, 1, ctypes.byref(inputs), ctypes.byref(output))
+        _lib.opensolid__Curve1f__evaluate__Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
         return output.value
 
     def squared(self) -> Curve1f:
         inputs = self.__ptr__
         output = c_void_p()
-        _lib.opensolid_invoke(7, 2, ctypes.byref(inputs), ctypes.byref(output))
+        _lib.opensolid__Curve1f__squared(ctypes.byref(inputs), ctypes.byref(output))
         return Curve1f(__ptr__=output)

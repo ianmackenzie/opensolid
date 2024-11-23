@@ -11,8 +11,11 @@ import List qualified
 import MemberFunction qualified
 import OpenSolid
 import OpenSolid.API qualified as API
-import OpenSolid.API.Class (Class (Class), Constraint (..), Constructor (..), MemberFunction (..), StaticFunction (..))
-import OpenSolid.API.Class qualified as Class
+import OpenSolid.API.Class (Class (Class))
+import OpenSolid.API.Class.Constructor (Constructor (..))
+import OpenSolid.API.Class.MemberFunction (MemberFunction (..))
+import OpenSolid.API.Class.StaticFunction (StaticFunction (..))
+import OpenSolid.API.Constraint (Constraint (..))
 import OpenSolid.FFI (FFI)
 import Pair qualified
 import Python qualified
@@ -31,7 +34,7 @@ preamble =
     , "import ctypes"
     , "import os"
     , "from contextlib import contextmanager"
-    , "from ctypes import CDLL, Structure, Union, c_char_p, c_double, c_int, c_int64, c_size_t, c_void_p"
+    , "from ctypes import CDLL, Structure, Union, c_char_p, c_double, c_int64, c_size_t, c_void_p"
     , "from pathlib import Path"
     , "from typing import Any, Generator, overload"
     , ""
@@ -51,7 +54,6 @@ preamble =
     , "# Define the signatures of the C API functions"
     , "# (also an early sanity check to make sure the library has been loaded OK)"
     , "_lib.opensolid_init.argtypes = []"
-    , "_lib.opensolid_invoke.argtypes = [c_int, c_int, c_void_p, c_void_p]"
     , "_lib.opensolid_malloc.argtypes = [c_size_t]"
     , "_lib.opensolid_malloc.restype = c_void_p"
     , "_lib.opensolid_free.argtypes = [c_void_p]"
@@ -132,13 +134,16 @@ preamble =
     , "    raise TypeError(message)"
     ]
 
-classDefinition :: Int -> Class -> Text
-classDefinition classId cls = do
+classDefinition :: Text -> Class -> Text
+classDefinition classPrefix (Class className constructors staticFunctions memberFunctions nestedClasses) = do
+  let functionPrefix = classPrefix + className + "__"
+  let nestedClassPrefix = classPrefix + className + "_"
   Python.lines
-    [ "class " + Class.name cls + ":"
-    , Python.indent [Class.withConstructors cls (Constructor.definition classId)]
-    , Python.indent (Class.mapStaticFunctions cls (StaticFunction.definition classId))
-    , Python.indent (Class.mapMemberFunctions cls (MemberFunction.definition classId))
+    [ "class " + className + ":"
+    , Python.indent [Constructor.definition functionPrefix constructors]
+    , Python.indent (List.map (StaticFunction.definition functionPrefix) staticFunctions)
+    , Python.indent (List.map (MemberFunction.definition functionPrefix) memberFunctions)
+    , Python.indent (List.map (classDefinition nestedClassPrefix) nestedClasses)
     ]
 
 ffiTypeDeclarations :: Text
@@ -147,13 +152,14 @@ ffiTypeDeclarations = do
   TypeRegistry.typeDeclarations registry
 
 registerClassTypes :: Class -> TypeRegistry -> TypeRegistry
-registerClassTypes (Class _ constructors staticFunctions memberFunctions) registry0 = do
+registerClassTypes (Class _ constructors staticFunctions memberFunctions nestedClasses) registry0 = do
   let staticFunctionOverloads = List.collect Pair.second staticFunctions
   let memberFunctionOverloads = List.collect Pair.second memberFunctions
   let registry1 = List.foldr registerConstructorTypes registry0 constructors
   let registry2 = List.foldr registerStaticFunctionTypes registry1 staticFunctionOverloads
   let registry3 = List.foldr registerMemberFunctionTypes registry2 memberFunctionOverloads
-  registry3
+  let registry4 = List.foldr registerClassTypes registry3 nestedClasses
+  registry4
 
 registerConstructorTypes :: Constructor value -> TypeRegistry -> TypeRegistry
 registerConstructorTypes constructor registry = case constructor of
@@ -377,7 +383,7 @@ register5L _ registry =
     |> CTypes.registerType @f Proxy
 
 classDefinitions :: Text
-classDefinitions = Python.separate (List.mapWithIndex classDefinition API.classes)
+classDefinitions = Python.separate (List.map (classDefinition "opensolid__") API.classes)
 
 main :: IO ()
 main = IO.do
