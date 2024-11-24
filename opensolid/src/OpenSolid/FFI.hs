@@ -69,7 +69,7 @@ typeName proxy = case representation proxy of
   Tuple6 -> tuple6TypeName proxy
   Maybe -> maybeTypeName proxy
   Result -> resultTypeName proxy
-  Class className -> className
+  Class className -> Text.replace "." "_" className
 
 compositeName :: List Text -> Text
 compositeName = Text.join "_"
