@@ -31,8 +31,9 @@ classes =
   [ range
   , rangeUnitless
   , rangeMeters
-  , vector2f
   , vector2d
+  , vector2dUnitless
+  , vector2dMeters
   , direction2d
   , point2f
   , point2d
@@ -88,43 +89,38 @@ rangeMemberFunctions _ =
   , "intersection" .| M1 N "other" Range.intersection
   ]
 
-vector2f :: Class
-vector2f =
-  Class
-    { name = "Vector2f"
-    , constructors = C1 N "direction" Vector2d.unit : vector2dConstructors F
-    , staticFunctions = vector2dStaticFunctions F
-    , memberFunctions = vector2dMemberFunctions F
-    }
-
 vector2d :: Class
-vector2d =
-  Class
-    { name = "Vector2d"
-    , constructors = vector2dConstructors L
-    , staticFunctions = vector2dStaticFunctions L
-    , memberFunctions = vector2dMemberFunctions L
-    }
+vector2d = do
+  Class.abstract "Vector2d" $
+    [ "zero" .| S0 N (Vector2d.zero @Space @Meters)
+    , "unit" .| S1 N "direction" (Vector2d.unit @Space)
+    , "xy"
+        .: [ S2 N "x_component" "y_component" (Vector2d.xy @Space @Unitless)
+           , S2 N "x_component" "y_component" (Vector2d.xy @Space @Meters)
+           ]
+    , "x"
+        .: [ S1 N "x_component" (Vector2d.x @Space @Unitless)
+           , S1 N "x_component" (Vector2d.x @Space @Meters)
+           ]
+    , "y"
+        .: [ S1 N "y_component" (Vector2d.y @Space @Unitless)
+           , S1 N "y_component" (Vector2d.y @Space @Meters)
+           ]
+    , "from_components"
+        .: [ S1 N "components" (Vector2d.fromComponents @Space @Unitless)
+           , S1 N "components" (Vector2d.fromComponents @Space @Meters)
+           ]
+    ]
 
-vector2dConstructors ::
-  (FFI (Qty units), FFI (Vector2d (Space @ units))) =>
-  Constraint (Tolerance units) ->
-  List (Constructor (Vector2d (Space @ units)))
-vector2dConstructors _ =
-  [ C2 N "x" "y" Vector2d.xy
-  , C1 N "components" Vector2d.fromComponents
-  ]
+vector2dUnitless :: Class
+vector2dUnitless =
+  Class.concrete "Vector2d_Unitless" $
+    vector2dMemberFunctions F
 
-vector2dStaticFunctions ::
-  forall units.
-  (FFI (Qty units), FFI (Vector2d (Space @ units))) =>
-  Constraint (Tolerance units) ->
-  List (Text, List StaticFunction)
-vector2dStaticFunctions _ =
-  [ "zero" .| S0 N (Vector2d.zero @Space @units)
-  , "x" .| S1 N "x" (Vector2d.x @Space @units)
-  , "y" .| S1 N "y" (Vector2d.y @Space @units)
-  ]
+vector2dMeters :: Class
+vector2dMeters =
+  Class.concrete "Vector2d_Meters" $
+    vector2dMemberFunctions L
 
 vector2dMemberFunctions ::
   forall units.

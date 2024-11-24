@@ -90,10 +90,10 @@ deriving instance Eq (Vector2d (space @ units))
 deriving instance Show (Vector2d (space @ units))
 
 instance FFI (Vector2d (space @ Unitless)) where
-  representation _ = FFI.Class "Vector2f"
+  representation _ = FFI.Class "Vector2d_Unitless"
 
 instance FFI (Vector2d (space @ Meters)) where
-  representation _ = FFI.Class "Vector2d"
+  representation _ = FFI.Class "Vector2d_Meters"
 
 instance HasUnits (Vector2d (space @ units)) where
   type UnitsOf (Vector2d (space @ units)) = units
@@ -264,7 +264,7 @@ xyIn frame = xyInBasis (Frame2d.basis frame)
 xyInBasis :: Basis2d space defines -> Qty units -> Qty units -> Vector2d (space @ units)
 xyInBasis basis vx vy = vx * Basis2d.xDirection basis + vy * Basis2d.yDirection basis
 
-fromComponents :: (Qty units, Qty units) -> Vector2d (space @ units)
+fromComponents :: forall space units. (Qty units, Qty units) -> Vector2d (space @ units)
 fromComponents (vx, vy) = Vector2d vx vy
 
 from :: Point2d (space @ units) -> Point2d (space @ units) -> Vector2d (space @ units)

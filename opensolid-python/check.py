@@ -1,4 +1,4 @@
-from opensolid import Curve1f, Point2f, Range, Length, Tolerance, Vector2f
+from opensolid import Curve1f, Point2f, Range, Length, Tolerance, Vector2d
 
 p1 = Point2f(1, 2)
 p2 = Point2f(3, 4)
@@ -20,6 +20,6 @@ else:
     print(a.value)
     print(b.value)
 
-v = Vector2f(1,2)
+v = Vector2d.xy(1,2)
 with Tolerance(1e-12):
     print(v.direction())
