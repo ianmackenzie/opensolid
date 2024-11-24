@@ -15,8 +15,9 @@ ruff format opensolid-python/opensolid/__init__.py
 #   D101: Undocumented public class
 #   D102: Undocumented public __init__
 #   D102: Undocumented public method
+#   D105: Undocumented magic method
 #   D106: Undocuemnted public nested class
-ruff check --select ALL --ignore D203 --ignore D213 --ignore COM812 --ignore D101 --ignore D106 --ignore D107 --ignore D102 opensolid-python/opensolid/__init__.py
+ruff check --select ALL --ignore D203 --ignore D213 --ignore COM812 --ignore D101 --ignore D105 --ignore D106 --ignore D107 --ignore D102 opensolid-python/opensolid/__init__.py
 # Generate the opensolid-ffi.def file with all API functions listed
 # (necessary for Windows builds)
 cabal run generate-def-file
