@@ -58,3 +58,5 @@ executable opensolid-python
     OverloadedStrings
     QualifiedDo
     RebindableSyntax
+    PatternSynonyms
+    ViewPatterns
