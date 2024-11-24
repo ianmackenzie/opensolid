@@ -29,6 +29,8 @@ data Space
 classes :: List Class
 classes =
   [ range
+  , rangeUnitless
+  , rangeMeters
   , vector2f
   , vector2d
   , direction2d
@@ -49,8 +51,7 @@ infixr 0 .|
 
 range :: Class
 range =
-  Class.outer
-    "Range"
+  Class.abstract "Range" $
     [ "unit" .| S0 N Range.unit
     , "constant"
         .: [ S1 N "value" (Range.constant @Unitless)
@@ -67,29 +68,16 @@ range =
            , S3 N "a" "b" "c" (Range.aggregate3 @Meters)
            ]
     ]
-    [ rangeUnitless
-    , rangeMeters
-    ]
 
 rangeUnitless :: Class
 rangeUnitless =
-  Class
-    { name = "Unitless"
-    , constructors = []
-    , staticFunctions = []
-    , memberFunctions = rangeMemberFunctions F
-    , nestedClasses = []
-    }
+  Class.concrete "Range_Unitless" $
+    rangeMemberFunctions F
 
 rangeMeters :: Class
 rangeMeters =
-  Class
-    { name = "Meters"
-    , constructors = []
-    , staticFunctions = []
-    , memberFunctions = rangeMemberFunctions L
-    , nestedClasses = []
-    }
+  Class.concrete "Range_Meters" $
+    rangeMemberFunctions L
 
 rangeMemberFunctions ::
   (FFI (Qty units), FFI (Range units)) =>
@@ -107,7 +95,6 @@ vector2f =
     , constructors = C1 N "direction" Vector2d.unit : vector2dConstructors F
     , staticFunctions = vector2dStaticFunctions F
     , memberFunctions = vector2dMemberFunctions F
-    , nestedClasses = []
     }
 
 vector2d :: Class
@@ -117,7 +104,6 @@ vector2d =
     , constructors = vector2dConstructors L
     , staticFunctions = vector2dStaticFunctions L
     , memberFunctions = vector2dMemberFunctions L
-    , nestedClasses = []
     }
 
 vector2dConstructors ::
@@ -168,16 +154,15 @@ direction2d =
     , memberFunctions =
         [ "to angle" .| M0 N Direction2d.toAngle
         ]
-    , nestedClasses = []
     }
 
 point2f :: Class
 point2f =
-  Class "Point2f" (point2dConstructors F) (point2dStaticFunctions F) (point2dMemberFunctions F) []
+  Class "Point2f" (point2dConstructors F) (point2dStaticFunctions F) (point2dMemberFunctions F)
 
 point2d :: Class
 point2d =
-  Class "Point2d" (point2dConstructors L) (point2dStaticFunctions L) (point2dMemberFunctions L) []
+  Class "Point2d" (point2dConstructors L) (point2dStaticFunctions L) (point2dMemberFunctions L)
 
 point2dConstructors ::
   (FFI (Qty units), FFI (Point2d (Space @ units))) =>
@@ -222,7 +207,6 @@ curve1f =
         [ "evaluate" .| M1 N "parameter value" (\t curve -> Curve1d.evaluate curve t)
         , "squared" .| M0 N (Curve1d.squared @Unitless)
         ]
-    , nestedClasses = []
     }
 
 type ForeignFunction = Ptr () -> Ptr () -> IO ()
@@ -256,13 +240,10 @@ prefixWith :: Text -> (Text, a) -> (Text, a)
 prefixWith prefix = Pair.mapFirst (prefix +)
 
 classFunctionPairs :: Class -> List (Text, Ptr () -> Ptr () -> IO ())
-classFunctionPairs (Class name constructors staticFunctions memberFunctions nestedClasses) =
-  List.concat
-    [ List.map (prefixWith (name + "__")) $
-        List.concat
-          [ List.map constructorPair constructors
-          , List.collect staticFunctionPairs staticFunctions
-          , List.collect memberFunctionPairs memberFunctions
-          ]
-    , List.map (prefixWith (name + "_")) (List.collect classFunctionPairs nestedClasses)
-    ]
+classFunctionPairs (Class name constructors staticFunctions memberFunctions) =
+  List.map (prefixWith (name + "__")) $
+    List.concat
+      [ List.map constructorPair constructors
+      , List.collect staticFunctionPairs staticFunctions
+      , List.collect memberFunctionPairs memberFunctions
+      ]

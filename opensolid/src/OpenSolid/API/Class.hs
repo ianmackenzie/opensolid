@@ -1,6 +1,7 @@
 module OpenSolid.API.Class
   ( Class (..)
-  , outer
+  , abstract
+  , concrete
   )
 where
 
@@ -17,16 +18,23 @@ data Class where
     , constructors :: List (Constructor value)
     , staticFunctions :: List (Text, List StaticFunction)
     , memberFunctions :: List (Text, List (MemberFunction value))
-    , nestedClasses :: List Class
     } ->
     Class
 
-outer :: Text -> List (Text, List StaticFunction) -> List Class -> Class
-outer name staticFunctions nestedClasses =
+abstract :: Text -> List (Text, List StaticFunction) -> Class
+abstract name staticFunctions =
   Class
     { name
     , constructors = [] :: List (Constructor Int)
     , staticFunctions
     , memberFunctions = [] :: List (Text, List (MemberFunction Int))
-    , nestedClasses
+    }
+
+concrete :: FFI value => Text -> List (Text, List (MemberFunction value)) -> Class
+concrete name memberFunctions =
+  Class
+    { name
+    , constructors = [] :: List (Constructor value)
+    , staticFunctions = []
+    , memberFunctions
     }

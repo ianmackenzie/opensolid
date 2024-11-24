@@ -131,21 +131,14 @@ preamble =
     , "    raise TypeError(message)"
     ]
 
-classDefinition :: Maybe Text -> Text -> Class -> Text
-classDefinition parentClassName classPrefix (Class className constructors staticFunctions memberFunctions nestedClasses) = do
-  let functionPrefix = classPrefix + className + "__"
-  let nestedClassPrefix = classPrefix + className + "_"
-  let classNamePrefix = if parentClassName == Nothing then "" else "_"
+classDefinition :: Class -> Text
+classDefinition (Class className constructors staticFunctions memberFunctions) = do
+  let functionPrefix = "opensolid__" + className + "__"
   Python.lines
-    [ "class " + classNamePrefix + className + ":"
+    [ "class " + className + ":"
     , Python.indent [Constructor.definition functionPrefix constructors]
     , Python.indent (List.map (StaticFunction.definition functionPrefix) staticFunctions)
     , Python.indent (List.map (MemberFunction.definition functionPrefix) memberFunctions)
-    , Python.indent (List.map (classDefinition (Just className) nestedClassPrefix) nestedClasses)
-    , case parentClassName of
-        Nothing -> ""
-        Just parentName ->
-          className + " = type(\"" + parentName + "." + className + "\", (_" + className + ",), {})"
     ]
 
 ffiTypeDeclarations :: Text
@@ -154,14 +147,13 @@ ffiTypeDeclarations = do
   TypeRegistry.typeDeclarations registry
 
 registerClassTypes :: Class -> TypeRegistry -> TypeRegistry
-registerClassTypes (Class _ constructors staticFunctions memberFunctions nestedClasses) registry0 = do
+registerClassTypes (Class _ constructors staticFunctions memberFunctions) registry0 = do
   let staticFunctionOverloads = List.collect Pair.second staticFunctions
   let memberFunctionOverloads = List.collect Pair.second memberFunctions
   let registry1 = List.foldr registerConstructorTypes registry0 constructors
   let registry2 = List.foldr registerStaticFunctionTypes registry1 staticFunctionOverloads
   let registry3 = List.foldr registerMemberFunctionTypes registry2 memberFunctionOverloads
-  let registry4 = List.foldr registerClassTypes registry3 nestedClasses
-  registry4
+  registry3
 
 registerConstructorTypes :: Constructor value -> TypeRegistry -> TypeRegistry
 registerConstructorTypes constructor registry = case constructor of
@@ -385,7 +377,7 @@ register5L _ registry =
     |> CTypes.registerType @f Proxy
 
 classDefinitions :: Text
-classDefinitions = Python.separate (List.map (classDefinition Nothing "opensolid__") API.classes)
+classDefinitions = Python.separate (List.map classDefinition API.classes)
 
 main :: IO ()
 main = IO.do
