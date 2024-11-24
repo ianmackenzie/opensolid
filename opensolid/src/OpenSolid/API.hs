@@ -140,9 +140,7 @@ direction2d :: Class
 direction2d =
   Class
     { name = "Direction2d"
-    , constructors =
-        [ C1 N "angle" Direction2d.fromAngle
-        ]
+    , constructors = []
     , staticFunctions =
         [ "x" .| S0 N Direction2d.x
         , "y" .| S0 N Direction2d.y
@@ -150,6 +148,7 @@ direction2d =
         , "positive y" .| S0 N Direction2d.positiveY
         , "negative x" .| S0 N Direction2d.negativeX
         , "negative y" .| S0 N Direction2d.negativeY
+        , "from_angle" .| S1 N "angle" Direction2d.fromAngle
         ]
     , memberFunctions =
         [ "to angle" .| M0 N Direction2d.toAngle
