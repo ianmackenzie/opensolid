@@ -40,6 +40,10 @@ jobs:
       - name: Update Cabal package index
         run: |
           cabal update
+      - name: Install Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
       # Build and test
       - name: Build opensolid-jit library
         working-directory: opensolid-jit
