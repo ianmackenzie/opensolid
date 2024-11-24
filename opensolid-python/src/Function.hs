@@ -29,9 +29,9 @@ overloadDeclaration signature =
     ]
 
 overloadCase :: Text -> List Text -> Text
-overloadCase pattern body =
+overloadCase matchPattern body =
   Python.lines
-    [ "case " + pattern + ":"
+    [ "case " + matchPattern + ":"
     , Python.indent body
     ]
 

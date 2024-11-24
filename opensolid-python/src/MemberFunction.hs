@@ -22,7 +22,7 @@ definition functionPrefix (functionName, memberFunctions) = do
     [(signature, _, body)] -> Python.lines [signature, Python.indent body]
     overloads -> do
       let overloadDeclaration (signature, _, _) = Function.overloadDeclaration signature
-      let overloadCase (_, pattern, body) = Function.overloadCase pattern body
+      let overloadCase (_, matchPattern, body) = Function.overloadCase matchPattern body
       Python.lines
         [ Python.lines (List.map overloadDeclaration overloads)
         , "def " + Python.name functionName + "(self, *args, **keywords):"
