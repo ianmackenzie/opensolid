@@ -11,12 +11,13 @@ import OpenSolid.API.Class.StaticFunction (StaticFunction (..))
 import OpenSolid.API.Class.StaticFunction qualified as StaticFunction
 import OpenSolid.API.Constraint (Constraint (..))
 import OpenSolid.FFI (FFI)
+import Python (pattern Name)
 import Python qualified
 import Text qualified
 import Type qualified
 
 definition :: Text -> (Text, List StaticFunction) -> Text
-definition functionPrefix (functionName, staticFunctions) = do
+definition functionPrefix (Name functionName, staticFunctions) = do
   case List.map (overload functionPrefix functionName) staticFunctions of
     [(signature, _, body)] -> Python.lines [signature, Python.indent body]
     overloads -> do
@@ -47,22 +48,22 @@ overload functionPrefix functionName staticFunction = do
       , Function.matchPattern0
       , body0 ffiFunctionName v
       )
-    S1 N argName1 f ->
+    S1 N (Name argName1) f ->
       ( signature1 functionName argName1 f
       , Function.matchPattern1 argName1 f
       , body1 ffiFunctionName argName1 f
       )
-    S2 N argName1 argName2 f ->
+    S2 N (Name argName1) (Name argName2) f ->
       ( signature2 functionName argName1 argName2 f
       , Function.matchPattern2 argName1 argName2 f
       , body2 ffiFunctionName argName1 argName2 f
       )
-    S3 N argName1 argName2 argName3 f ->
+    S3 N (Name argName1) (Name argName2) (Name argName3) f ->
       ( signature3 functionName argName1 argName2 argName3 f
       , Function.matchPattern3 argName1 argName2 argName3 f
       , body3 ffiFunctionName argName1 argName2 argName3 f
       )
-    S4 N argName1 argName2 argName3 argName4 f ->
+    S4 N (Name argName1) (Name argName2) (Name argName3) (Name argName4) f ->
       ( signature4 functionName argName1 argName2 argName3 argName4 f
       , Function.matchPattern4 argName1 argName2 argName3 argName4 f
       , body4 ffiFunctionName argName1 argName2 argName3 argName4 f

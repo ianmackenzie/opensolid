@@ -10,6 +10,7 @@ import OpenSolid.API.Class.MemberFunction (MemberFunction (..))
 import OpenSolid.API.Class.MemberFunction qualified as MemberFunction
 import OpenSolid.API.Constraint (Constraint (..))
 import OpenSolid.FFI (FFI)
+import Python (pattern Name)
 import Python qualified
 import Text qualified
 import Tolerance qualified
@@ -17,7 +18,7 @@ import Type qualified
 import Units (Meters)
 
 definition :: forall value. FFI value => Text -> (Text, List (MemberFunction value)) -> Text
-definition functionPrefix (functionName, memberFunctions) = do
+definition functionPrefix (Name functionName, memberFunctions) = do
   case List.map (overload functionPrefix (Python.name functionName)) memberFunctions of
     [(signature, _, body)] -> Python.lines [signature, Python.indent body]
     overloads -> do
@@ -46,22 +47,22 @@ overload functionPrefix functionName memberFunction = do
       , Function.matchPattern0
       , body0N ffiFunctionName v
       )
-    M1 N argName1 f ->
-      ( signature1 functionName (Python.name argName1) f
-      , Function.matchPattern1 (Python.name argName1) f
-      , body1N ffiFunctionName (Python.name argName1) f
+    M1 N (Name argName1) f ->
+      ( signature1 functionName argName1 f
+      , Function.matchPattern1 argName1 f
+      , body1N ffiFunctionName argName1 f
       )
-    M2 N argName1 argName2 f ->
+    M2 N (Name argName1) (Name argName2) f ->
       ( signature2 functionName argName1 argName2 f
       , Function.matchPattern2 argName1 argName2 f
       , body2N ffiFunctionName argName1 argName2 f
       )
-    M3 N argName1 argName2 argName3 f ->
+    M3 N (Name argName1) (Name argName2) (Name argName3) f ->
       ( signature3 functionName argName1 argName2 argName3 f
       , Function.matchPattern3 argName1 argName2 argName3 f
       , body3N ffiFunctionName argName1 argName2 argName3 f
       )
-    M4 N argName1 argName2 argName3 argName4 f ->
+    M4 N (Name argName1) (Name argName2) (Name argName3) (Name argName4) f ->
       ( signature4 functionName argName1 argName2 argName3 argName4 f
       , Function.matchPattern4 argName1 argName2 argName3 argName4 f
       , body4N ffiFunctionName argName1 argName2 argName3 argName4 f
@@ -71,22 +72,22 @@ overload functionPrefix functionName memberFunction = do
       , Function.matchPattern0
       , body0F ffiFunctionName v
       )
-    M1 F argName1 f ->
+    M1 F (Name argName1) f ->
       ( signature1 functionName argName1 (Tolerance.exactly f)
       , Function.matchPattern1 argName1 (Tolerance.exactly f)
       , body1F ffiFunctionName argName1 f
       )
-    M2 F argName1 argName2 f ->
+    M2 F (Name argName1) (Name argName2) f ->
       ( signature2 functionName argName1 argName2 (Tolerance.exactly f)
       , Function.matchPattern2 argName1 argName2 (Tolerance.exactly f)
       , body2F ffiFunctionName argName1 argName2 f
       )
-    M3 F argName1 argName2 argName3 f ->
+    M3 F (Name argName1) (Name argName2) (Name argName3) f ->
       ( signature3 functionName argName1 argName2 argName3 (Tolerance.exactly f)
       , Function.matchPattern3 argName1 argName2 argName3 (Tolerance.exactly f)
       , body3F ffiFunctionName argName1 argName2 argName3 f
       )
-    M4 F argName1 argName2 argName3 argName4 f ->
+    M4 F (Name argName1) (Name argName2) (Name argName3) (Name argName4) f ->
       ( signature4 functionName argName1 argName2 argName3 argName4 (Tolerance.exactly f)
       , Function.matchPattern4 argName1 argName2 argName3 argName4 (Tolerance.exactly f)
       , body4F ffiFunctionName argName1 argName2 argName3 argName4 f
@@ -96,22 +97,22 @@ overload functionPrefix functionName memberFunction = do
       , Function.matchPattern0
       , body0L ffiFunctionName v
       )
-    M1 L argName1 f ->
+    M1 L (Name argName1) f ->
       ( signature1 functionName argName1 (Tolerance.exactly f)
       , Function.matchPattern1 argName1 (Tolerance.exactly f)
       , body1L ffiFunctionName argName1 f
       )
-    M2 L argName1 argName2 f ->
+    M2 L (Name argName1) (Name argName2) f ->
       ( signature2 functionName argName1 argName2 (Tolerance.exactly f)
       , Function.matchPattern2 argName1 argName2 (Tolerance.exactly f)
       , body2L ffiFunctionName argName1 argName2 f
       )
-    M3 L argName1 argName2 argName3 f ->
+    M3 L (Name argName1) (Name argName2) (Name argName3) f ->
       ( signature3 functionName argName1 argName2 argName3 (Tolerance.exactly f)
       , Function.matchPattern3 argName1 argName2 argName3 (Tolerance.exactly f)
       , body3L ffiFunctionName argName1 argName2 argName3 f
       )
-    M4 L argName1 argName2 argName3 argName4 f ->
+    M4 L (Name argName1) (Name argName2) (Name argName3) (Name argName4) f ->
       ( signature4 functionName argName1 argName2 argName3 argName4 (Tolerance.exactly f)
       , Function.matchPattern4 argName1 argName2 argName3 argName4 (Tolerance.exactly f)
       , body4L ffiFunctionName argName1 argName2 argName3 argName4 f
