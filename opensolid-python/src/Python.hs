@@ -7,11 +7,17 @@ module Python
   , tuple
   , call
   , name
+  , pattern Name
   )
 where
 
 import OpenSolid
 import Text qualified
+
+{-# COMPLETE Name #-}
+
+pattern Name :: Text -> Text
+pattern Name converted <- (name -> converted)
 
 lines :: List Text -> Text
 lines = Text.multiline
