@@ -74,7 +74,8 @@ ffiName functionName staticFunction = case staticFunction of
   S4 L _ _ _ _ f -> ffiName4 functionName (Tolerance.exactly f)
 
 ffiName1 :: forall a value. (FFI a, FFI value) => Text -> (a -> value) -> Text
-ffiName1 functionName _ = FFI.compositeName [functionName, FFI.typeName @a Proxy]
+ffiName1 functionName _ =
+  toSnakeCase functionName + "__" + FFI.typeName @a Proxy
 
 ffiName2 :: forall a b value. (FFI a, FFI b, FFI value) => Text -> (a -> b -> value) -> Text
 ffiName2 functionName _ =
