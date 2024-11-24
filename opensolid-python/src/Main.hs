@@ -5,6 +5,7 @@ module Main (main) where
 import CTypes qualified
 import Constructor qualified
 import Data.Proxy (Proxy (Proxy))
+import File qualified
 import Length (Length)
 import List qualified
 import MemberFunction qualified
@@ -16,7 +17,6 @@ import OpenSolid.API.Class.MemberFunction (MemberFunction (..))
 import OpenSolid.API.Class.StaticFunction (StaticFunction (..))
 import OpenSolid.API.Constraint (Constraint (..))
 import OpenSolid.FFI (FFI)
-import File qualified
 import Pair qualified
 import Python qualified
 import StaticFunction qualified
