@@ -137,16 +137,21 @@ preamble =
     , "    raise TypeError(message)"
     ]
 
-classDefinition :: Text -> Class -> Text
-classDefinition classPrefix (Class className constructors staticFunctions memberFunctions nestedClasses) = do
+classDefinition :: Maybe Text -> Text -> Class -> Text
+classDefinition parentClassName classPrefix (Class className constructors staticFunctions memberFunctions nestedClasses) = do
   let functionPrefix = classPrefix + className + "__"
   let nestedClassPrefix = classPrefix + className + "_"
+  let classNamePrefix = if parentClassName == Nothing then "" else "_"
   Python.lines
-    [ "class " + className + ":"
+    [ "class " + classNamePrefix + className + ":"
     , Python.indent [Constructor.definition functionPrefix constructors]
     , Python.indent (List.map (StaticFunction.definition functionPrefix) staticFunctions)
     , Python.indent (List.map (MemberFunction.definition functionPrefix) memberFunctions)
-    , Python.indent (List.map (classDefinition nestedClassPrefix) nestedClasses)
+    , Python.indent (List.map (classDefinition (Just className) nestedClassPrefix) nestedClasses)
+    , case parentClassName of
+        Nothing -> ""
+        Just parentName ->
+          className + " = type(\"" + parentName + "." + className + "\", (_" + className + ",), {})"
     ]
 
 ffiTypeDeclarations :: Text
@@ -386,7 +391,7 @@ register5L _ registry =
     |> CTypes.registerType @f Proxy
 
 classDefinitions :: Text
-classDefinitions = Python.separate (List.map (classDefinition "opensolid__") API.classes)
+classDefinitions = Python.separate (List.map (classDefinition Nothing "opensolid__") API.classes)
 
 main :: IO ()
 main = IO.do

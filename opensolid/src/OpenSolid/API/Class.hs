@@ -1,5 +1,6 @@
 module OpenSolid.API.Class
   ( Class (..)
+  , outer
   )
 where
 
@@ -19,3 +20,13 @@ data Class where
     , nestedClasses :: List Class
     } ->
     Class
+
+outer :: Text -> List (Text, List StaticFunction) -> List Class -> Class
+outer name staticFunctions nestedClasses =
+  Class
+    { name
+    , constructors = [] :: List (Constructor Int)
+    , staticFunctions
+    , memberFunctions = [] :: List (Text, List (MemberFunction Int))
+    , nestedClasses
+    }

@@ -6,6 +6,7 @@ import Foreign (Ptr)
 import List qualified
 import OpenSolid
 import OpenSolid.API.Class (Class (..))
+import OpenSolid.API.Class qualified as Class
 import OpenSolid.API.Class.Constructor (Constructor (..))
 import OpenSolid.API.Class.Constructor qualified as Constructor
 import OpenSolid.API.Class.MemberFunction (MemberFunction (..))
@@ -19,6 +20,7 @@ import Point2d (Point2d)
 import Point2d qualified
 import Range (Range)
 import Range qualified
+import Units (Meters)
 import Vector2d (Vector2d)
 import Vector2d qualified
 
@@ -26,8 +28,7 @@ data Space
 
 classes :: List Class
 classes =
-  [ floatRange
-  , lengthRange
+  [ range
   , vector2f
   , vector2d
   , direction2d
@@ -46,46 +47,49 @@ infixr 0 .:
 
 infixr 0 .|
 
-floatRange :: Class
-floatRange =
+range :: Class
+range =
+  Class.outer
+    "Range"
+    [ "unit" .| S0 N Range.unit
+    , "constant"
+        .: [ S1 N "value" (Range.constant @Unitless)
+           , S1 N "value" (Range.constant @Meters)
+           ]
+    , "from_endpoints"
+        .: [ S2 N "a" "b" (Range.from @Unitless)
+           , S2 N "a" "b" (Range.from @Meters)
+           ]
+    , "aggregate"
+        .: [ S2 N "a" "b" (Range.aggregate2 @Unitless)
+           , S3 N "a" "b" "c" (Range.aggregate3 @Unitless)
+           , S2 N "a" "b" (Range.aggregate2 @Meters)
+           , S3 N "a" "b" "c" (Range.aggregate3 @Meters)
+           ]
+    ]
+    [ rangeUnitless
+    , rangeMeters
+    ]
+
+rangeUnitless :: Class
+rangeUnitless =
   Class
-    { name = "FloatRange"
-    , constructors = rangeConstructors F
-    , staticFunctions = ("unit", [S0 N Range.unit]) : rangeStaticFunctions F
+    { name = "Unitless"
+    , constructors = []
+    , staticFunctions = []
     , memberFunctions = rangeMemberFunctions F
     , nestedClasses = []
     }
 
-lengthRange :: Class
-lengthRange =
+rangeMeters :: Class
+rangeMeters =
   Class
-    { name = "LengthRange"
-    , constructors = rangeConstructors L
-    , staticFunctions = rangeStaticFunctions L
+    { name = "Meters"
+    , constructors = []
+    , staticFunctions = []
     , memberFunctions = rangeMemberFunctions L
     , nestedClasses = []
     }
-
-rangeConstructors ::
-  (FFI (Qty units), FFI (Range units)) =>
-  Constraint (Tolerance units) ->
-  List (Constructor (Range units))
-rangeConstructors _ =
-  [ C1 N "value" Range.constant
-  , C2 N "low" "high" Range.from
-  ]
-
-rangeStaticFunctions ::
-  forall units.
-  (FFI (Qty units), FFI (Range units)) =>
-  Constraint (Tolerance units) ->
-  List (Text, List StaticFunction)
-rangeStaticFunctions _ =
-  [ "aggregate"
-      .: [ S2 N "first" "second" (Range.aggregate2 @units)
-         , S3 N "first" "second" "third" (Range.aggregate3 @units)
-         ]
-  ]
 
 rangeMemberFunctions ::
   (FFI (Qty units), FFI (Range units)) =>
