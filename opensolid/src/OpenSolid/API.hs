@@ -58,7 +58,7 @@ range =
         .: [ S1 N "value" (Range.constant @Unitless)
            , S1 N "value" (Range.constant @Meters)
            ]
-    , "from_endpoints"
+    , "from endpoints"
         .: [ S2 N "a" "b" (Range.from @Unitless)
            , S2 N "a" "b" (Range.from @Meters)
            ]
@@ -95,18 +95,18 @@ vector2d = do
     [ "zero" .| S0 N (Vector2d.zero @Space @Meters)
     , "unit" .| S1 N "direction" (Vector2d.unit @Space)
     , "xy"
-        .: [ S2 N "x_component" "y_component" (Vector2d.xy @Space @Unitless)
-           , S2 N "x_component" "y_component" (Vector2d.xy @Space @Meters)
+        .: [ S2 N "x component" "y component" (Vector2d.xy @Space @Unitless)
+           , S2 N "x component" "y component" (Vector2d.xy @Space @Meters)
            ]
     , "x"
-        .: [ S1 N "x_component" (Vector2d.x @Space @Unitless)
-           , S1 N "x_component" (Vector2d.x @Space @Meters)
+        .: [ S1 N "x component" (Vector2d.x @Space @Unitless)
+           , S1 N "x component" (Vector2d.x @Space @Meters)
            ]
     , "y"
-        .: [ S1 N "y_component" (Vector2d.y @Space @Unitless)
-           , S1 N "y_component" (Vector2d.y @Space @Meters)
+        .: [ S1 N "y component" (Vector2d.y @Space @Unitless)
+           , S1 N "y component" (Vector2d.y @Space @Meters)
            ]
-    , "from_components"
+    , "from components"
         .: [ S1 N "components" (Vector2d.fromComponents @Space @Unitless)
            , S1 N "components" (Vector2d.fromComponents @Space @Meters)
            ]
@@ -144,7 +144,7 @@ direction2d =
         , "positive y" .| S0 N Direction2d.positiveY
         , "negative x" .| S0 N Direction2d.negativeX
         , "negative y" .| S0 N Direction2d.negativeY
-        , "from_angle" .| S1 N "angle" Direction2d.fromAngle
+        , "from angle" .| S1 N "angle" Direction2d.fromAngle
         ]
     , memberFunctions =
         [ "to angle" .| M0 N Direction2d.toAngle
