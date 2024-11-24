@@ -253,10 +253,12 @@ prefixWith prefix = Pair.mapFirst (prefix +)
 
 classFunctionPairs :: Class -> List (Text, Ptr () -> Ptr () -> IO ())
 classFunctionPairs (Class name constructors staticFunctions memberFunctions nestedClasses) =
-  List.map (prefixWith (name + "__")) $
-    List.concat
-      [ List.map constructorPair constructors
-      , List.collect staticFunctionPairs staticFunctions
-      , List.collect memberFunctionPairs memberFunctions
-      ]
-      + List.map (prefixWith (name + "_")) (List.collect classFunctionPairs nestedClasses)
+  List.concat
+    [ List.map (prefixWith (name + "__")) $
+        List.concat
+          [ List.map constructorPair constructors
+          , List.collect staticFunctionPairs staticFunctions
+          , List.collect memberFunctionPairs memberFunctions
+          ]
+    , List.map (prefixWith (name + "_")) (List.collect classFunctionPairs nestedClasses)
+    ]
