@@ -43,15 +43,15 @@ namedPattern _ argName =
   Python.str argName + ": " + typePattern @a Proxy + " as " + argName
 
 matchPattern0 :: Text
-matchPattern0 = "([], {**entries}) if not entries"
+matchPattern0 = "([], entries) if not entries"
 
 matchPattern1 :: forall a value. FFI a => Text -> (a -> value) -> Text
 matchPattern1 argName1 _ = do
   let asPattern1 = asPattern @a Proxy argName1
-  let positionalPattern = "([" + asPattern1 + "],{**rest})"
+  let positionalPattern = "([" + asPattern1 + "],{})"
   let namedPattern1 = namedPattern @a Proxy argName1
-  let keywordPattern = "([],{" + namedPattern1 + ", **rest})"
-  "(" + positionalPattern + " | " + keywordPattern + ") if not rest"
+  let keywordPattern = "([],{" + namedPattern1 + "})"
+  positionalPattern + " | " + keywordPattern
 
 matchPattern2 ::
   forall a b value.
@@ -63,11 +63,11 @@ matchPattern2 ::
 matchPattern2 argName1 argName2 _ = do
   let asPattern1 = asPattern @a Proxy argName1
   let asPattern2 = asPattern @b Proxy argName2
-  let positionalPattern = "([" + asPattern1 + "," + asPattern2 + "],{**rest})"
+  let positionalPattern = "([" + asPattern1 + "," + asPattern2 + "],{})"
   let namedPattern1 = namedPattern @a Proxy argName1
   let namedPattern2 = namedPattern @b Proxy argName2
-  let keywordPattern = "([],{" + namedPattern1 + "," + namedPattern2 + ", **rest})"
-  "(" + positionalPattern + " | " + keywordPattern + ") if not rest"
+  let keywordPattern = "([],{" + namedPattern1 + "," + namedPattern2 + "})"
+  positionalPattern + " | " + keywordPattern
 
 matchPattern3 ::
   forall a b c value.
@@ -81,12 +81,12 @@ matchPattern3 argName1 argName2 argName3 _ = do
   let asPattern1 = asPattern @a Proxy argName1
   let asPattern2 = asPattern @b Proxy argName2
   let asPattern3 = asPattern @c Proxy argName3
-  let positionalPattern = "([" + asPattern1 + "," + asPattern2 + "," + asPattern3 + "],{**rest})"
+  let positionalPattern = "([" + asPattern1 + "," + asPattern2 + "," + asPattern3 + "],{})"
   let namedPattern1 = namedPattern @a Proxy argName1
   let namedPattern2 = namedPattern @b Proxy argName2
   let namedPattern3 = namedPattern @c Proxy argName3
-  let keywordPattern = "([], {" + namedPattern1 + "," + namedPattern2 + "," + namedPattern3 + ", **rest})"
-  "(" + positionalPattern + " | " + keywordPattern + ") if not rest"
+  let keywordPattern = "([], {" + namedPattern1 + "," + namedPattern2 + "," + namedPattern3 + "})"
+  positionalPattern + " | " + keywordPattern
 
 matchPattern4 ::
   forall a b c d value.
@@ -102,13 +102,13 @@ matchPattern4 argName1 argName2 argName3 argName4 _ = do
   let asPattern2 = asPattern @b Proxy argName2
   let asPattern3 = asPattern @c Proxy argName3
   let asPattern4 = asPattern @d Proxy argName4
-  let positionalPattern = "([" + asPattern1 + "," + asPattern2 + "," + asPattern3 + "," + asPattern4 + "],{**rest})"
+  let positionalPattern = "([" + asPattern1 + "," + asPattern2 + "," + asPattern3 + "," + asPattern4 + "],{})"
   let namedPattern1 = namedPattern @a Proxy argName1
   let namedPattern2 = namedPattern @b Proxy argName2
   let namedPattern3 = namedPattern @c Proxy argName3
   let namedPattern4 = namedPattern @d Proxy argName4
-  let keywordPattern = "([],{" + namedPattern1 + "," + namedPattern2 + "," + namedPattern3 + "," + namedPattern4 + ", **rest})"
-  "(" + positionalPattern + " | " + keywordPattern + ") if not rest"
+  let keywordPattern = "([],{" + namedPattern1 + "," + namedPattern2 + "," + namedPattern3 + "," + namedPattern4 + "})"
+  positionalPattern + " | " + keywordPattern
 
 typePattern :: FFI a => Proxy a -> Text
 typePattern proxy = case FFI.representation proxy of
