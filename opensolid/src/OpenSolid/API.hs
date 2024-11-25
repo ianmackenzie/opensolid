@@ -35,8 +35,9 @@ classes =
   , vector2dUnitless
   , vector2dMeters
   , direction2d
-  , point2f
   , point2d
+  , point2dUnitless
+  , point2dMeters
   , curve1f
   ]
 
@@ -151,33 +152,37 @@ direction2d =
         ]
     }
 
-point2f :: Class
-point2f =
-  Class "Point2f" (point2dConstructors F) (point2dStaticFunctions F) (point2dMemberFunctions F)
-
 point2d :: Class
 point2d =
-  Class "Point2d" (point2dConstructors L) (point2dStaticFunctions L) (point2dMemberFunctions L)
+  Class.abstract "Point2d" $
+    [ "origin" .| S0 N (Point2d.origin @Space @Meters)
+    , "xy"
+        .: [ S2 N "x coordinate" "y coordinate" (Point2d.xy @Space @Unitless)
+           , S2 N "x coordinate" "y coordinate" (Point2d.xy @Space @Meters)
+           ]
+    , "x"
+        .: [ S1 N "x coordinate" (Point2d.x @Space @Unitless)
+           , S1 N "x coordinate" (Point2d.x @Space @Meters)
+           ]
+    , "y"
+        .: [ S1 N "y coordinate" (Point2d.y @Space @Unitless)
+           , S1 N "y coordinate" (Point2d.y @Space @Meters)
+           ]
+    , "from coordinates"
+        .: [ S1 N "coordinates" (Point2d.fromCoordinates @Space @Unitless)
+           , S1 N "coordinates" (Point2d.fromCoordinates @Space @Meters)
+           ]
+    ]
 
-point2dConstructors ::
-  (FFI (Qty units), FFI (Point2d (Space @ units))) =>
-  Constraint (Tolerance units) ->
-  List (Constructor (Point2d (Space @ units)))
-point2dConstructors _ =
-  [ C2 N "x" "y" Point2d.xy
-  , C1 N "coordinates" Point2d.fromCoordinates
-  ]
+point2dUnitless :: Class
+point2dUnitless =
+  Class.concrete "Point2d_Unitless" $
+    point2dMemberFunctions F
 
-point2dStaticFunctions ::
-  forall units.
-  (FFI (Qty units), FFI (Point2d (Space @ units))) =>
-  Constraint (Tolerance units) ->
-  List (Text, List StaticFunction)
-point2dStaticFunctions _ =
-  [ "origin" .| S0 N (Point2d.origin @Space @units)
-  , "x" .| S1 N "x" (Point2d.x @Space @units)
-  , "y" .| S1 N "y" (Point2d.y @Space @units)
-  ]
+point2dMeters :: Class
+point2dMeters =
+  Class.concrete "Point2d_Meters" $
+    point2dMemberFunctions L
 
 point2dMemberFunctions ::
   forall units.

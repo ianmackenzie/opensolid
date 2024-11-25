@@ -77,10 +77,10 @@ deriving instance Ord (Point2d (space @ units))
 deriving instance Show (Point2d (space @ units))
 
 instance FFI (Point2d (space @ Unitless)) where
-  representation _ = FFI.Class "Point2f"
+  representation _ = FFI.Class "Point2d_Unitless"
 
 instance FFI (Point2d (space @ Meters)) where
-  representation _ = FFI.Class "Point2d"
+  representation _ = FFI.Class "Point2d_Meters"
 
 instance HasUnits (Point2d (space @ units)) where
   type UnitsOf (Point2d (space @ units)) = units
@@ -176,7 +176,7 @@ xyIn :: Frame2d (space @ units) defines -> Qty units -> Qty units -> Point2d (sp
 xyIn frame px py =
   Frame2d.originPoint frame + px * Frame2d.xDirection frame + py * Frame2d.yDirection frame
 
-fromCoordinates :: (Qty units, Qty units) -> Point2d (space @ units)
+fromCoordinates :: forall space units. (Qty units, Qty units) -> Point2d (space @ units)
 fromCoordinates (px, py) = Point2d px py
 
 apply :: (Float -> Qty units) -> Float -> Float -> Point2d (space @ units)
