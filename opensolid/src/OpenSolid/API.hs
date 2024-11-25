@@ -44,6 +44,8 @@ classes =
   , curve1dMeters
   ]
 
+----- HELPER OPERATORS -----
+
 (.:) :: a -> b -> (a, b)
 (.:) = (,)
 
@@ -53,6 +55,8 @@ infixr 0 .:
 (.|) a b = (a, [b])
 
 infixr 0 .|
+
+----- API DEFINITION -----
 
 range :: Class
 range =
@@ -224,6 +228,8 @@ curve1dMemberFunctions ::
 curve1dMemberFunctions _ =
   [ "evaluate" .| M1 N "parameter value" (\t curve -> Curve1d.evaluate curve t)
   ]
+
+----- FUNCTION COLLECTION -----
 
 type ForeignFunction = Ptr () -> Ptr () -> IO ()
 
