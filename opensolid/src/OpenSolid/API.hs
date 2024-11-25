@@ -1,5 +1,6 @@
 module OpenSolid.API (classes, functions) where
 
+import Curve1d (Curve1d)
 import Curve1d qualified
 import Direction2d qualified
 import Foreign (Ptr)
@@ -38,7 +39,9 @@ classes =
   , point2d
   , point2dUnitless
   , point2dMeters
-  , curve1f
+  , curve1d
+  , curve1dUnitless
+  , curve1dMeters
   ]
 
 (.:) :: a -> b -> (a, b)
@@ -195,19 +198,32 @@ point2dMemberFunctions _ =
   , "midpoint" .| M1 N "other" Point2d.midpoint
   ]
 
-curve1f :: Class
-curve1f =
-  Class
-    { name = "Curve1f"
-    , constructors = []
-    , staticFunctions =
-        [ "t" .| S0 N Curve1d.parameter
-        ]
-    , memberFunctions =
-        [ "evaluate" .| M1 N "parameter value" (\t curve -> Curve1d.evaluate curve t)
-        , "squared" .| M0 N (Curve1d.squared @Unitless)
-        ]
-    }
+curve1d :: Class
+curve1d =
+  Class.abstract
+    "Curve1d"
+    [ "t" .| S0 N Curve1d.parameter
+    ]
+
+curve1dUnitless :: Class
+curve1dUnitless =
+  Class.concrete "Curve1d_Unitless" $
+    ("squared" .| M0 N (Curve1d.squared @Unitless))
+      : curve1dMemberFunctions F
+
+curve1dMeters :: Class
+curve1dMeters =
+  Class.concrete "Curve1d_Meters" $
+    curve1dMemberFunctions L
+
+curve1dMemberFunctions ::
+  forall units.
+  (FFI (Qty units), FFI (Curve1d units)) =>
+  Constraint (Tolerance units) ->
+  List (Text, List (MemberFunction (Curve1d units)))
+curve1dMemberFunctions _ =
+  [ "evaluate" .| M1 N "parameter value" (\t curve -> Curve1d.evaluate curve t)
+  ]
 
 type ForeignFunction = Ptr () -> Ptr () -> IO ()
 

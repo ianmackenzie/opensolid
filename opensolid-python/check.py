@@ -1,9 +1,9 @@
-from opensolid import Curve1f, Point2d, Range, Length, Tolerance, Vector2d
+from opensolid import Curve1d, Point2d, Range, Length, Tolerance, Vector2d
 
 p1 = Point2d.xy(1, 2)
 p2 = Point2d.xy(3, 4)
 print(p1.distance_to(p2))
-c1 = Curve1f.t()
+c1 = Curve1d.t()
 print(c1.evaluate(0.5))
 c2 = c1.squared()
 print(c2.evaluate(0.5))
