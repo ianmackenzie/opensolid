@@ -28,7 +28,6 @@ executable opensolid-python
 
   other-modules:
     CTypes
-    Constructor
     Function
     MemberFunction
     Python

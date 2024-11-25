@@ -236,7 +236,7 @@ outputValue proxy varName = case FFI.representation proxy of
   FFI.Tuple6 -> tuple6OutputValue proxy varName
   FFI.Maybe -> maybeOutputValue proxy varName
   FFI.Result -> resultOutputValue proxy varName
-  FFI.Class className -> className + "(__ptr__ = " + varName + ")"
+  FFI.Class className -> className + "(ptr = " + varName + ")"
 
 fieldOutputValue :: forall a. FFI a => Proxy a -> Text -> Text
 fieldOutputValue proxy varName = case FFI.representation proxy of
@@ -251,7 +251,7 @@ fieldOutputValue proxy varName = case FFI.representation proxy of
   FFI.Tuple6 -> tuple6OutputValue proxy varName
   FFI.Maybe -> maybeOutputValue proxy varName
   FFI.Result -> resultOutputValue proxy varName
-  FFI.Class className -> className + "(__ptr__=c_void_p(" + varName + "))"
+  FFI.Class className -> className + "(ptr=c_void_p(" + varName + "))"
 
 tuple2OutputValue :: forall a b. (FFI a, FFI b) => Proxy (a, b) -> Text -> Text
 tuple2OutputValue _ varName =

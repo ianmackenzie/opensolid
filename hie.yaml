@@ -21,9 +21,6 @@ cradle:
     - path: "opensolid-python/src/CTypes.hs"
       component: "opensolid-python:exe:opensolid-python"
 
-    - path: "opensolid-python/src/Constructor.hs"
-      component: "opensolid-python:exe:opensolid-python"
-
     - path: "opensolid-python/src/Function.hs"
       component: "opensolid-python:exe:opensolid-python"
 

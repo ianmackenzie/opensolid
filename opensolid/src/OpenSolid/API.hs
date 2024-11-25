@@ -8,8 +8,6 @@ import List qualified
 import OpenSolid
 import OpenSolid.API.Class (Class (..))
 import OpenSolid.API.Class qualified as Class
-import OpenSolid.API.Class.Constructor (Constructor (..))
-import OpenSolid.API.Class.Constructor qualified as Constructor
 import OpenSolid.API.Class.MemberFunction (MemberFunction (..))
 import OpenSolid.API.Class.MemberFunction qualified as MemberFunction
 import OpenSolid.API.Class.StaticFunction (StaticFunction (..))
@@ -144,7 +142,6 @@ direction2d :: Class
 direction2d =
   Class
     { name = "Direction2d"
-    , constructors = []
     , staticFunctions =
         [ "x" .| S0 N Direction2d.x
         , "y" .| S0 N Direction2d.y
@@ -238,10 +235,6 @@ functions =
   List.map (Pair.mapFirst ("opensolid__" +)) $
     List.collect classFunctionPairs classes
 
-constructorPair :: Constructor value -> (Text, ForeignFunction)
-constructorPair constructor =
-  (Constructor.ffiName constructor, Constructor.invoke constructor)
-
 staticFunctionPair :: Text -> StaticFunction -> (Text, ForeignFunction)
 staticFunctionPair functionName staticFunction =
   (StaticFunction.ffiName functionName staticFunction, StaticFunction.invoke staticFunction)
@@ -262,10 +255,9 @@ prefixWith :: Text -> (Text, a) -> (Text, a)
 prefixWith prefix = Pair.mapFirst (prefix +)
 
 classFunctionPairs :: Class -> List (Text, Ptr () -> Ptr () -> IO ())
-classFunctionPairs (Class name constructors staticFunctions memberFunctions) =
+classFunctionPairs (Class name staticFunctions memberFunctions) =
   List.map (prefixWith (name + "__")) $
     List.concat
-      [ List.map constructorPair constructors
-      , List.collect staticFunctionPairs staticFunctions
+      [ List.collect staticFunctionPairs staticFunctions
       , List.collect memberFunctionPairs memberFunctions
       ]

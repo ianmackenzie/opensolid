@@ -3,7 +3,6 @@
 module Main (main) where
 
 import CTypes qualified
-import Constructor qualified
 import Data.Proxy (Proxy (Proxy))
 import File qualified
 import Length (Length)
@@ -12,7 +11,6 @@ import MemberFunction qualified
 import OpenSolid
 import OpenSolid.API qualified as API
 import OpenSolid.API.Class (Class (Class))
-import OpenSolid.API.Class.Constructor (Constructor (..))
 import OpenSolid.API.Class.MemberFunction (MemberFunction (..))
 import OpenSolid.API.Class.StaticFunction (StaticFunction (..))
 import OpenSolid.API.Constraint (Constraint (..))
@@ -132,11 +130,12 @@ preamble =
     ]
 
 classDefinition :: Class -> Text
-classDefinition (Class className constructors staticFunctions memberFunctions) = do
+classDefinition (Class className staticFunctions memberFunctions) = do
   let functionPrefix = "opensolid__" + className + "__"
   Python.lines
     [ "class " + className + ":"
-    , Python.indent [Constructor.definition functionPrefix constructors]
+    , "    def __init__(self, *, ptr : c_void_p) -> None:"
+    , "        self.__ptr__ = ptr"
     , Python.indent (List.map (StaticFunction.definition functionPrefix) staticFunctions)
     , Python.indent (List.map (MemberFunction.definition functionPrefix) memberFunctions)
     ]
@@ -147,31 +146,12 @@ ffiTypeDeclarations = do
   TypeRegistry.typeDeclarations registry
 
 registerClassTypes :: Class -> TypeRegistry -> TypeRegistry
-registerClassTypes (Class _ constructors staticFunctions memberFunctions) registry0 = do
+registerClassTypes (Class _ staticFunctions memberFunctions) registry0 = do
   let staticFunctionOverloads = List.collect Pair.second staticFunctions
   let memberFunctionOverloads = List.collect Pair.second memberFunctions
-  let registry1 = List.foldr registerConstructorTypes registry0 constructors
-  let registry2 = List.foldr registerStaticFunctionTypes registry1 staticFunctionOverloads
-  let registry3 = List.foldr registerMemberFunctionTypes registry2 memberFunctionOverloads
-  registry3
-
-registerConstructorTypes :: Constructor value -> TypeRegistry -> TypeRegistry
-registerConstructorTypes constructor registry = case constructor of
-  C0 N v -> register0N v registry
-  C0 F v -> register0F v registry
-  C0 L v -> register0L v registry
-  C1 N _ f -> register1N f registry
-  C1 F _ f -> register1F f registry
-  C1 L _ f -> register1L f registry
-  C2 N _ _ f -> register2N f registry
-  C2 F _ _ f -> register2F f registry
-  C2 L _ _ f -> register2L f registry
-  C3 N _ _ _ f -> register3N f registry
-  C3 F _ _ _ f -> register3F f registry
-  C3 L _ _ _ f -> register3L f registry
-  C4 N _ _ _ _ f -> register4N f registry
-  C4 F _ _ _ _ f -> register4F f registry
-  C4 L _ _ _ _ f -> register4L f registry
+  let registry1 = List.foldr registerStaticFunctionTypes registry0 staticFunctionOverloads
+  let registry2 = List.foldr registerMemberFunctionTypes registry1 memberFunctionOverloads
+  registry2
 
 registerStaticFunctionTypes :: StaticFunction -> TypeRegistry -> TypeRegistry
 registerStaticFunctionTypes function registry = case function of

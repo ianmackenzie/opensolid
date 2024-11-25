@@ -13,7 +13,7 @@ Improve Python bindings
 - Add consructors/conversions to Qty modules based on values provided as part of API definition?
 - Support lists
 - Support 'in' operator?
-- Support constructors and static functions that use a tolerance
+- Support static functions that use a tolerance
 - Add docstrings
 - Define class (and quantity) members "in place" in class instance instead of separately?
 
