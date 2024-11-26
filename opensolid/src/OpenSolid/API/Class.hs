@@ -8,12 +8,15 @@ where
 import OpenSolid
 import OpenSolid.API.Class.MemberFunction (MemberFunction)
 import OpenSolid.API.Class.StaticFunction (StaticFunction)
+import OpenSolid.API.Name (Name)
+import OpenSolid.API.Name qualified as Name
 import OpenSolid.FFI (FFI)
 
 data Class where
   Class ::
     FFI value =>
-    { name :: Text
+    { name :: Name
+    , units :: Maybe Name
     , staticFunctions :: List (Text, List StaticFunction)
     , memberFunctions :: List (Text, List (MemberFunction value))
     } ->
@@ -22,15 +25,17 @@ data Class where
 abstract :: Text -> List (Text, List StaticFunction) -> Class
 abstract name staticFunctions =
   Class
-    { name
+    { name = Name.parse name
+    , units = Nothing
     , staticFunctions
     , memberFunctions = [] :: List (Text, List (MemberFunction Int))
     }
 
-concrete :: FFI value => Text -> List (Text, List (MemberFunction value)) -> Class
-concrete name memberFunctions =
+concrete :: FFI value => Text -> Text -> List (Text, List (MemberFunction value)) -> Class
+concrete name units memberFunctions =
   Class
-    { name
+    { name = Name.parse name
+    , units = Just (Name.parse units)
     , staticFunctions = []
     , memberFunctions
     }

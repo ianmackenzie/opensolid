@@ -34,6 +34,8 @@ import Basics
 import Composition
 import Data.ByteString (ByteString)
 import Data.Char qualified
+import Data.List.NonEmpty (NonEmpty ((:|)))
+import Data.List.NonEmpty qualified
 import Data.Text qualified
 import Data.Text.Encoding qualified
 import Error qualified
@@ -73,10 +75,12 @@ isEmpty = Data.Text.null
 replace :: Text -> Text -> Text -> Text
 replace = Data.Text.replace
 
-split :: Text -> Text -> List Text
-split = Data.Text.splitOn
+split :: Text -> Text -> NonEmpty Text
+split separator text = case Data.Text.splitOn separator text of
+  first : rest -> first :| rest
+  [] -> internalError "Splitting text should never give an empty list"
 
-lines :: Text -> List Text
+lines :: Text -> NonEmpty Text
 lines = replace "\r\n" "\n" >> split "\n"
 
 multiline :: List Text -> Text
@@ -86,6 +90,7 @@ indent :: Text -> Text -> Text
 indent indentation paragraph =
   paragraph
     |> lines
+    |> Data.List.NonEmpty.toList
     |> List.map (indentation +)
     |> multiline
 

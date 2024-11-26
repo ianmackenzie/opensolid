@@ -7,6 +7,7 @@ import Data.Proxy (Proxy (Proxy))
 import File qualified
 import Length (Length)
 import List qualified
+import Maybe qualified
 import MemberFunction qualified
 import OpenSolid
 import OpenSolid.API qualified as API
@@ -14,6 +15,7 @@ import OpenSolid.API.Class (Class (Class))
 import OpenSolid.API.Class.MemberFunction (MemberFunction (..))
 import OpenSolid.API.Class.StaticFunction (StaticFunction (..))
 import OpenSolid.API.Constraint (Constraint (..))
+import OpenSolid.API.Name qualified as Name
 import OpenSolid.FFI (FFI)
 import Pair qualified
 import Python qualified
@@ -131,10 +133,14 @@ preamble =
     ]
 
 classDefinition :: Class -> Text
-classDefinition (Class className staticFunctions memberFunctions) = do
-  let functionPrefix = "opensolid_" + Text.replace "_" "" className + "_"
+classDefinition (Class className classUnits staticFunctions memberFunctions) = do
+  let pascalClassName = Name.pascalCase className
+  let pythonClassName = case classUnits of
+        Just units -> Text.concat [pascalClassName, "_", Name.pascalCase units]
+        Nothing -> pascalClassName
+  let functionPrefix = "opensolid_" + pascalClassName + Maybe.map Name.pascalCase classUnits + "_"
   Python.lines
-    [ "class " + className + ":"
+    [ "class " + pythonClassName + ":"
     , "    def __init__(self, *, ptr : c_void_p) -> None:"
     , "        self.__ptr__ = ptr"
     , Python.indent (List.map (StaticFunction.definition functionPrefix) staticFunctions)
@@ -147,7 +153,7 @@ ffiTypeDeclarations = do
   TypeRegistry.typeDeclarations registry
 
 registerClassTypes :: Class -> TypeRegistry -> TypeRegistry
-registerClassTypes (Class _ staticFunctions memberFunctions) registry0 = do
+registerClassTypes (Class _ _ staticFunctions memberFunctions) registry0 = do
   let staticFunctionOverloads = List.collect Pair.second staticFunctions
   let memberFunctionOverloads = List.collect Pair.second memberFunctions
   let registry1 = List.foldr registerStaticFunctionTypes registry0 staticFunctionOverloads

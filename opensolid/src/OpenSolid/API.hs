@@ -5,6 +5,7 @@ import Curve1d qualified
 import Direction2d qualified
 import Foreign (Ptr)
 import List qualified
+import Maybe qualified
 import OpenSolid
 import OpenSolid.API.Class (Class (..))
 import OpenSolid.API.Class qualified as Class
@@ -13,12 +14,12 @@ import OpenSolid.API.Class.MemberFunction qualified as MemberFunction
 import OpenSolid.API.Class.StaticFunction (StaticFunction (..))
 import OpenSolid.API.Class.StaticFunction qualified as StaticFunction
 import OpenSolid.API.Constraint (Constraint (..))
+import OpenSolid.API.Name qualified as Name
 import Pair qualified
 import Point2d (Point2d)
 import Point2d qualified
 import Range (Range)
 import Range qualified
-import Text qualified
 import Units (Meters)
 import Vector2d (Vector2d)
 import Vector2d qualified
@@ -68,11 +69,11 @@ range =
              , S3 N "a" "b" "c" (Range.aggregate3 @Meters)
              ]
       ]
-  , Class.concrete @(Range Unitless) "Range_Unitless" $
+  , Class.concrete @(Range Unitless) "Range" "Unitless" $
       [ "endpoints" .| M0 N Range.endpoints
       , "intersection" .| M1 N "other" Range.intersection
       ]
-  , Class.concrete @(Range Meters) "Range_Meters" $
+  , Class.concrete @(Range Meters) "Range" "Meters" $
       [ "endpoints" .| M0 N Range.endpoints
       , "intersection" .| M1 N "other" Range.intersection
       ]
@@ -100,11 +101,11 @@ vector2d =
              , S1 N "components" (Vector2d.fromComponents @Space @Meters)
              ]
       ]
-  , Class.concrete @(Vector2d (Space @ Unitless)) "Vector2d_Unitless" $
+  , Class.concrete @(Vector2d (Space @ Unitless)) "Vector2d" "Unitless" $
       [ "components" .| M0 N Vector2d.components
       , "direction" .| M0 F Vector2d.direction
       ]
-  , Class.concrete @(Vector2d (Space @ Meters)) "Vector2d_Meters" $
+  , Class.concrete @(Vector2d (Space @ Meters)) "Vector2d" "Meters" $
       [ "components" .| M0 N Vector2d.components
       , "direction" .| M0 L Vector2d.direction
       ]
@@ -113,7 +114,8 @@ vector2d =
 direction2d :: List Class
 direction2d =
   [ Class
-      { name = "Direction2d"
+      { name = Name.parse "Direction2d"
+      , units = Nothing
       , staticFunctions =
           [ "x" .| S0 N Direction2d.x
           , "y" .| S0 N Direction2d.y
@@ -150,12 +152,12 @@ point2d =
              , S1 N "coordinates" (Point2d.fromCoordinates @Space @Meters)
              ]
       ]
-  , Class.concrete @(Point2d (Space @ Unitless)) "Point2d_Unitless" $
+  , Class.concrete @(Point2d (Space @ Unitless)) "Point2d" "Unitless" $
       [ "coordinates" .| M0 N Point2d.coordinates
       , "distance to" .| M1 N "other" Point2d.distanceFrom
       , "midpoint" .| M1 N "other" Point2d.midpoint
       ]
-  , Class.concrete @(Point2d (Space @ Meters)) "Point2d_Meters" $
+  , Class.concrete @(Point2d (Space @ Meters)) "Point2d" "Meters" $
       [ "coordinates" .| M0 N Point2d.coordinates
       , "distance to" .| M1 N "other" Point2d.distanceFrom
       , "midpoint" .| M1 N "other" Point2d.midpoint
@@ -167,11 +169,11 @@ curve1d =
   [ Class.abstract "Curve1d" $
       [ "t" .| S0 N Curve1d.parameter
       ]
-  , Class.concrete @(Curve1d Unitless) "Curve1d_Unitless" $
+  , Class.concrete @(Curve1d Unitless) "Curve1d" "Unitless" $
       [ "squared" .| M0 N Curve1d.squared
       , "evaluate" .| M1 N "parameter value" (\t curve -> Curve1d.evaluate curve t)
       ]
-  , Class.concrete @(Curve1d Meters) "Curve1d_Meters" $
+  , Class.concrete @(Curve1d Meters) "Curve1d" "Meters" $
       [ "evaluate" .| M1 N "parameter value" (\t curve -> Curve1d.evaluate curve t)
       ]
   ]
@@ -205,8 +207,8 @@ prefixWith :: Text -> (Text, a) -> (Text, a)
 prefixWith prefix = Pair.mapFirst (prefix +)
 
 classFunctionPairs :: Class -> List (Text, Ptr () -> Ptr () -> IO ())
-classFunctionPairs (Class name staticFunctions memberFunctions) =
-  List.map (prefixWith (Text.replace "_" "" name + "_")) $
+classFunctionPairs (Class name units staticFunctions memberFunctions) = do
+  List.map (prefixWith (Name.pascalCase name + Maybe.map Name.pascalCase units + "_")) $
     List.concat
       [ List.collect staticFunctionPairs staticFunctions
       , List.collect memberFunctionPairs memberFunctions

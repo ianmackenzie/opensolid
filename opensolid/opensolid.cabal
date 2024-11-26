@@ -182,6 +182,7 @@ library
     OpenSolid.API.Class.MemberFunction
     OpenSolid.API.Class.StaticFunction
     OpenSolid.API.Constraint
+    OpenSolid.API.Name
     OpenSolid.FFI
     OpenSolid.Json
     Pair

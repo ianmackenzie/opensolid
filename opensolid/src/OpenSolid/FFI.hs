@@ -72,10 +72,9 @@ typeName proxy = case representation proxy of
   Class className -> Text.replace "_" "" className
 
 toCamelCase :: Text -> Text
-toCamelCase name =
-  case Text.split " " name of
-    [] -> ""
-    first : rest -> Text.concat (first : List.map Text.capitalize rest)
+toCamelCase name = do
+  let first :| rest = Text.split " " name
+  Text.concat (first : List.map Text.capitalize rest)
 
 listTypeName :: forall a. FFI a => Proxy (List a) -> Text
 listTypeName _ = Text.concat ["List", typeName @a Proxy]
