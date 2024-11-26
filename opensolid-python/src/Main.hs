@@ -18,6 +18,7 @@ import OpenSolid.FFI (FFI)
 import Pair qualified
 import Python qualified
 import StaticFunction qualified
+import Text qualified
 import TypeRegistry (TypeRegistry)
 import TypeRegistry qualified
 import Units (Meters)
@@ -131,7 +132,7 @@ preamble =
 
 classDefinition :: Class -> Text
 classDefinition (Class className staticFunctions memberFunctions) = do
-  let functionPrefix = "opensolid__" + className + "__"
+  let functionPrefix = "opensolid_" + Text.replace "_" "" className + "_"
   Python.lines
     [ "class " + className + ":"
     , "    def __init__(self, *, ptr : c_void_p) -> None:"

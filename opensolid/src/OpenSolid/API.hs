@@ -18,6 +18,7 @@ import Point2d (Point2d)
 import Point2d qualified
 import Range (Range)
 import Range qualified
+import Text qualified
 import Units (Meters)
 import Vector2d (Vector2d)
 import Vector2d qualified
@@ -181,7 +182,7 @@ type ForeignFunction = Ptr () -> Ptr () -> IO ()
 
 functions :: List (Text, ForeignFunction)
 functions =
-  List.map (Pair.mapFirst ("opensolid__" +)) $
+  List.map (Pair.mapFirst ("opensolid_" +)) $
     List.collect classFunctionPairs classes
 
 staticFunctionPair :: Text -> StaticFunction -> (Text, ForeignFunction)
@@ -205,7 +206,7 @@ prefixWith prefix = Pair.mapFirst (prefix +)
 
 classFunctionPairs :: Class -> List (Text, Ptr () -> Ptr () -> IO ())
 classFunctionPairs (Class name staticFunctions memberFunctions) =
-  List.map (prefixWith (name + "__")) $
+  List.map (prefixWith (Text.replace "_" "" name + "_")) $
     List.concat
       [ List.collect staticFunctionPairs staticFunctions
       , List.collect memberFunctionPairs memberFunctions

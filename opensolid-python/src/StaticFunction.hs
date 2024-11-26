@@ -41,7 +41,8 @@ definition functionPrefix (Name functionName, staticFunctions) = do
 
 overload :: Text -> Text -> StaticFunction -> (Text, Text, List Text)
 overload functionPrefix functionName staticFunction = do
-  let ffiFunctionName = functionPrefix + StaticFunction.ffiName functionName staticFunction
+  -- TODO fix hack here which "un-snake-cases" the name before calling ffiName
+  let ffiFunctionName = functionPrefix + StaticFunction.ffiName (Text.replace "_" " " functionName) staticFunction
   case staticFunction of
     S0 N v ->
       ( signature0 functionName v

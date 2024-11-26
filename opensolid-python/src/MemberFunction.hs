@@ -40,7 +40,8 @@ definition functionPrefix (Name functionName, memberFunctions) = do
 
 overload :: forall value. FFI value => Text -> Text -> MemberFunction value -> (Text, Text, List Text)
 overload functionPrefix functionName memberFunction = do
-  let ffiFunctionName = functionPrefix + MemberFunction.ffiName functionName memberFunction
+  -- TODO fix hack here which "un-snake-cases" the name before calling ffiName
+  let ffiFunctionName = functionPrefix + MemberFunction.ffiName (Text.replace "_" " " functionName) memberFunction
   case memberFunction of
     M0 N v ->
       ( signature0 functionName v

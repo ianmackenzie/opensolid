@@ -21,6 +21,7 @@ module Text
   , drop
   , toLower
   , toUpper
+  , capitalize
   , encodeUtf8
   , InvalidUtf8 (InvalidUtf8)
   , decodeUtf8
@@ -32,6 +33,7 @@ import Arithmetic
 import Basics
 import Composition
 import Data.ByteString (ByteString)
+import Data.Char qualified
 import Data.Text qualified
 import Data.Text.Encoding qualified
 import Error qualified
@@ -107,6 +109,12 @@ toLower = Data.Text.toLower
 
 toUpper :: Text -> Text
 toUpper = Data.Text.toUpper
+
+capitalize :: Text -> Text
+capitalize text =
+  case Data.Text.uncons text of
+    Just (first, rest) -> Data.Text.cons (Data.Char.toUpper first) rest
+    Nothing -> ""
 
 encodeUtf8 :: Text -> ByteString
 encodeUtf8 = Data.Text.Encoding.encodeUtf8

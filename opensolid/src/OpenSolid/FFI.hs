@@ -1,7 +1,7 @@
 module OpenSolid.FFI
   ( FFI (representation)
   , typeName
-  , compositeName
+  , toCamelCase
   , size
   , store
   , load
@@ -69,16 +69,19 @@ typeName proxy = case representation proxy of
   Tuple6 -> tuple6TypeName proxy
   Maybe -> maybeTypeName proxy
   Result -> resultTypeName proxy
-  Class className -> className
+  Class className -> Text.replace "_" "" className
 
-compositeName :: List Text -> Text
-compositeName = Text.join "_"
+toCamelCase :: Text -> Text
+toCamelCase name =
+  case Text.split " " name of
+    [] -> ""
+    first : rest -> Text.concat (first : List.map Text.capitalize rest)
 
 listTypeName :: forall a. FFI a => Proxy (List a) -> Text
-listTypeName _ = compositeName ["List", typeName @a Proxy]
+listTypeName _ = Text.concat ["List", typeName @a Proxy]
 
 tuple2TypeName :: forall a b. (FFI a, FFI b) => Proxy (a, b) -> Text
-tuple2TypeName _ = compositeName ["Tuple2", typeName @a Proxy, typeName @b Proxy]
+tuple2TypeName _ = Text.concat ["Tuple2", typeName @a Proxy, typeName @b Proxy]
 
 tuple3TypeName ::
   forall a b c.
@@ -86,7 +89,7 @@ tuple3TypeName ::
   Proxy (a, b, c) ->
   Text
 tuple3TypeName _ =
-  compositeName
+  Text.concat
     [ "Tuple3"
     , typeName @a Proxy
     , typeName @b Proxy
@@ -99,7 +102,7 @@ tuple4TypeName ::
   Proxy (a, b, c, d) ->
   Text
 tuple4TypeName _ =
-  compositeName
+  Text.concat
     [ "Tuple4"
     , typeName @a Proxy
     , typeName @b Proxy
@@ -113,7 +116,7 @@ tuple5TypeName ::
   Proxy (a, b, c, d, e) ->
   Text
 tuple5TypeName _ =
-  compositeName
+  Text.concat
     [ "Tuple5"
     , typeName @a Proxy
     , typeName @b Proxy
@@ -128,7 +131,7 @@ tuple6TypeName ::
   Proxy (a, b, c, d, e, f) ->
   Text
 tuple6TypeName _ =
-  compositeName
+  Text.concat
     [ "Tuple6"
     , typeName @a Proxy
     , typeName @b Proxy
@@ -139,10 +142,10 @@ tuple6TypeName _ =
     ]
 
 maybeTypeName :: forall a. FFI a => Proxy (Maybe a) -> Text
-maybeTypeName _ = compositeName ["Maybe", typeName @a Proxy]
+maybeTypeName _ = Text.concat ["Maybe", typeName @a Proxy]
 
 resultTypeName :: forall x a. FFI a => Proxy (Result x a) -> Text
-resultTypeName _ = compositeName ["Result", typeName @a Proxy]
+resultTypeName _ = Text.concat ["Result", typeName @a Proxy]
 
 size :: FFI a => Proxy a -> Int
 size proxy = case representation proxy of

@@ -52,14 +52,11 @@ data MemberFunction value where
     (constraint => a -> b -> c -> d -> value -> result) ->
     MemberFunction value
 
-toSnakeCase :: Text -> Text
-toSnakeCase = Text.replace " " "_"
-
 ffiName :: Text -> MemberFunction value -> Text
 ffiName functionName memberFunction = case memberFunction of
-  M0 N _ -> toSnakeCase functionName
-  M0 F _ -> toSnakeCase functionName
-  M0 L _ -> toSnakeCase functionName
+  M0 N _ -> FFI.toCamelCase functionName
+  M0 F _ -> FFI.toCamelCase functionName
+  M0 L _ -> FFI.toCamelCase functionName
   M1 N _ f -> ffiName1 functionName f
   M1 F _ f -> ffiName1 functionName (Tolerance.exactly f)
   M1 L _ f -> ffiName1 functionName (Tolerance.exactly f)
@@ -80,7 +77,7 @@ ffiName1 ::
   (a -> value -> result) ->
   Text
 ffiName1 functionName _ =
-  toSnakeCase functionName + "__" + FFI.typeName @a Proxy
+  FFI.toCamelCase functionName + "_" + FFI.typeName @a Proxy
 
 ffiName2 ::
   forall a b value result.
@@ -89,12 +86,11 @@ ffiName2 ::
   (a -> b -> value -> result) ->
   Text
 ffiName2 functionName _ =
-  toSnakeCase functionName
-    + "__"
-    + FFI.compositeName
-      [ FFI.typeName @a Proxy
-      , FFI.typeName @b Proxy
-      ]
+  Text.join "_" $
+    [ FFI.toCamelCase functionName
+    , FFI.typeName @a Proxy
+    , FFI.typeName @b Proxy
+    ]
 
 ffiName3 ::
   forall a b c value result.
@@ -103,13 +99,12 @@ ffiName3 ::
   (a -> b -> c -> value -> result) ->
   Text
 ffiName3 functionName _ =
-  toSnakeCase functionName
-    + "__"
-    + FFI.compositeName
-      [ FFI.typeName @a Proxy
-      , FFI.typeName @b Proxy
-      , FFI.typeName @c Proxy
-      ]
+  Text.join "_" $
+    [ FFI.toCamelCase functionName
+    , FFI.typeName @a Proxy
+    , FFI.typeName @b Proxy
+    , FFI.typeName @c Proxy
+    ]
 
 ffiName4 ::
   forall a b c d value result.
@@ -118,14 +113,13 @@ ffiName4 ::
   (a -> b -> c -> d -> value -> result) ->
   Text
 ffiName4 functionName _ =
-  toSnakeCase functionName
-    + "__"
-    + FFI.compositeName
-      [ FFI.typeName @a Proxy
-      , FFI.typeName @b Proxy
-      , FFI.typeName @c Proxy
-      , FFI.typeName @d Proxy
-      ]
+  Text.join "_" $
+    [ FFI.toCamelCase functionName
+    , FFI.typeName @a Proxy
+    , FFI.typeName @b Proxy
+    , FFI.typeName @c Proxy
+    , FFI.typeName @d Proxy
+    ]
 
 invoke :: MemberFunction value -> Ptr () -> Ptr () -> IO ()
 invoke function = case function of
