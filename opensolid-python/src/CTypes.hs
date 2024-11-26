@@ -13,6 +13,7 @@ module CTypes
   )
 where
 
+import Class qualified
 import Data.Proxy (Proxy (Proxy))
 import List qualified
 import OpenSolid
@@ -36,7 +37,7 @@ typeName proxy = case FFI.representation proxy of
   FFI.Tuple6 -> "_" + simpleTypeName proxy
   FFI.Maybe -> "_" + simpleTypeName proxy
   FFI.Result -> "_" + simpleTypeName proxy
-  FFI.Class _ -> "c_void_p"
+  FFI.Class _ _ -> "c_void_p"
 
 simpleTypeName :: forall a. FFI a => Proxy a -> Text
 simpleTypeName proxy = case FFI.representation proxy of
@@ -51,7 +52,7 @@ simpleTypeName proxy = case FFI.representation proxy of
   FFI.Tuple6 -> tuple6TypeName proxy
   FFI.Maybe -> maybeTypeName proxy
   FFI.Result -> resultTypeName proxy
-  FFI.Class _ -> "c_void_p"
+  FFI.Class _ _ -> "c_void_p"
 
 compositeTypeName :: List Text -> Text
 compositeTypeName = Text.join "_"
@@ -128,7 +129,7 @@ dummyFieldValue proxy = case FFI.representation proxy of
   FFI.Tuple6 -> dummyValue proxy
   FFI.Maybe -> dummyValue proxy
   FFI.Result -> dummyValue proxy
-  FFI.Class _ -> dummyValue proxy
+  FFI.Class _ _ -> dummyValue proxy
 
 fieldName :: Int -> Text
 fieldName index = "field" + Text.int index
@@ -155,7 +156,7 @@ outputValue proxy varName = case FFI.representation proxy of
   FFI.Tuple6 -> tuple6OutputValue proxy varName
   FFI.Maybe -> maybeOutputValue proxy varName
   FFI.Result -> resultOutputValue proxy varName
-  FFI.Class className -> className + "(ptr = " + varName + ")"
+  FFI.Class baseName maybeUnits -> Class.name baseName maybeUnits + "(ptr = " + varName + ")"
 
 fieldOutputValue :: forall a. FFI a => Proxy a -> Text -> Text
 fieldOutputValue proxy varName = case FFI.representation proxy of
@@ -170,7 +171,7 @@ fieldOutputValue proxy varName = case FFI.representation proxy of
   FFI.Tuple6 -> tuple6OutputValue proxy varName
   FFI.Maybe -> maybeOutputValue proxy varName
   FFI.Result -> resultOutputValue proxy varName
-  FFI.Class className -> className + "(ptr=c_void_p(" + varName + "))"
+  FFI.Class baseName maybeUnits -> Class.name baseName maybeUnits + "(ptr=c_void_p(" + varName + "))"
 
 tuple2OutputValue :: forall a b. (FFI a, FFI b) => Proxy (a, b) -> Text -> Text
 tuple2OutputValue _ varName =
@@ -253,7 +254,7 @@ argumentValue1 proxy varName = case FFI.representation proxy of
   FFI.Tuple6 -> tuple6ArgumentValue proxy varName
   FFI.Maybe -> maybeArgumentValue proxy varName
   FFI.Result -> internalError "Should never have Result as input argument"
-  FFI.Class _ -> varName + ".__ptr__"
+  FFI.Class _ _ -> varName + ".__ptr__"
 
 fieldArgumentValue :: forall a. FFI a => Proxy a -> Text -> Text
 fieldArgumentValue proxy varName = case FFI.representation proxy of
@@ -268,7 +269,7 @@ fieldArgumentValue proxy varName = case FFI.representation proxy of
   FFI.Tuple6 -> tuple6ArgumentValue proxy varName
   FFI.Maybe -> maybeArgumentValue proxy varName
   FFI.Result -> internalError "Should never have Result as input argument"
-  FFI.Class _ -> varName + ".__ptr__"
+  FFI.Class _ _ -> varName + ".__ptr__"
 
 tuple2ArgumentValue :: forall a b. (FFI a, FFI b) => Proxy (a, b) -> Text -> Text
 tuple2ArgumentValue proxy varName =
@@ -436,7 +437,7 @@ registerType proxy registry = do
       FFI.Tuple6 -> registerTuple6 proxy registry
       FFI.Maybe -> registerMaybe proxy registry
       FFI.Result -> registerResult proxy registry
-      FFI.Class _ -> registry
+      FFI.Class _ _ -> registry
 
 registerList :: forall a. FFI a => Proxy (List a) -> TypeRegistry -> TypeRegistry
 registerList proxy registry = do

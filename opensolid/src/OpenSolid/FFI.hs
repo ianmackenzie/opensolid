@@ -1,6 +1,8 @@
 module OpenSolid.FFI
   ( FFI (representation)
+  , classRepresentation
   , typeName
+  , className
   , toCamelCase
   , size
   , store
@@ -21,7 +23,10 @@ import Foreign.Marshal.Alloc qualified
 import IO qualified
 import Length (Length)
 import List qualified
+import Maybe qualified
 import OpenSolid
+import OpenSolid.API.Name (Name)
+import OpenSolid.API.Name qualified as Name
 import Qty qualified
 import Text qualified
 
@@ -54,7 +59,11 @@ data Representation a where
   -- followed by the representation of the successful value or exception
   Result :: FFI a => Representation (Result x a)
   -- A class containing an opaque pointer to a Haskell value
-  Class :: Text -> Representation a
+  Class :: Name -> Maybe Name -> Representation a
+
+classRepresentation :: Text -> Maybe Text -> Representation a
+classRepresentation name maybeUnits =
+  Class (Name.parse name) (Maybe.map Name.parse maybeUnits)
 
 typeName :: FFI a => Proxy a -> Text
 typeName proxy = case representation proxy of
@@ -69,7 +78,11 @@ typeName proxy = case representation proxy of
   Tuple6 -> tuple6TypeName proxy
   Maybe -> maybeTypeName proxy
   Result -> resultTypeName proxy
-  Class className -> Text.replace "_" "" className
+  Class baseName maybeUnits -> className baseName maybeUnits
+
+className :: Name -> Maybe Name -> Text
+className name maybeUnits =
+  Name.pascalCase name + Maybe.map Name.pascalCase maybeUnits
 
 toCamelCase :: Text -> Text
 toCamelCase name = do
@@ -159,7 +172,7 @@ size proxy = case representation proxy of
   Tuple6 -> tuple6Size proxy
   Maybe -> maybeSize proxy
   Result -> resultSize proxy
-  Class _ -> 8
+  Class _ _ -> 8
 
 tuple2Size :: forall a b. (FFI a, FFI b) => Proxy (a, b) -> Int
 tuple2Size _ = do
@@ -340,7 +353,7 @@ store ptr offset value = do
           -- Set error code and store pointer to string in output
           Foreign.pokeByteOff ptr offset (toInt64 1)
           Foreign.pokeByteOff ptr (offset + 8) messagePtr
-    Class _ -> IO.do
+    Class _ _ -> IO.do
       stablePtr <- Foreign.newStablePtr value
       Foreign.pokeByteOff ptr offset stablePtr
 
@@ -418,7 +431,7 @@ load ptr offset = do
         then IO.map Just (load ptr (offset + 8))
         else IO.succeed Nothing
     Result{} -> internalError "Passing Result values as FFI arguments is not supported"
-    Class _ -> IO.do
+    Class _ _ -> IO.do
       stablePtr <- Foreign.peekByteOff ptr offset
       Foreign.deRefStablePtr stablePtr
 

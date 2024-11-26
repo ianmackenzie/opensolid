@@ -3,11 +3,11 @@
 module Main (main) where
 
 import CTypes qualified
+import Class qualified
 import Data.Proxy (Proxy (Proxy))
 import File qualified
 import Length (Length)
 import List qualified
-import Maybe qualified
 import MemberFunction qualified
 import OpenSolid
 import OpenSolid.API qualified as API
@@ -15,12 +15,11 @@ import OpenSolid.API.Class (Class (Class))
 import OpenSolid.API.Class.MemberFunction (MemberFunction (..))
 import OpenSolid.API.Class.StaticFunction (StaticFunction (..))
 import OpenSolid.API.Constraint (Constraint (..))
-import OpenSolid.API.Name qualified as Name
 import OpenSolid.FFI (FFI)
+import OpenSolid.FFI qualified as FFI
 import Pair qualified
 import Python qualified
 import StaticFunction qualified
-import Text qualified
 import TypeRegistry (TypeRegistry)
 import TypeRegistry qualified
 import Units (Meters)
@@ -133,14 +132,10 @@ preamble =
     ]
 
 classDefinition :: Class -> Text
-classDefinition (Class className classUnits staticFunctions memberFunctions) = do
-  let pascalClassName = Name.pascalCase className
-  let pythonClassName = case classUnits of
-        Just units -> Text.concat [pascalClassName, "_", Name.pascalCase units]
-        Nothing -> pascalClassName
-  let functionPrefix = "opensolid_" + pascalClassName + Maybe.map Name.pascalCase classUnits + "_"
+classDefinition (Class baseName maybeUnits staticFunctions memberFunctions) = do
+  let functionPrefix = "opensolid_" + FFI.className baseName maybeUnits + "_"
   Python.lines
-    [ "class " + pythonClassName + ":"
+    [ "class " + Class.name baseName maybeUnits + ":"
     , "    def __init__(self, *, ptr : c_void_p) -> None:"
     , "        self.__ptr__ = ptr"
     , Python.indent (List.map (StaticFunction.definition functionPrefix) staticFunctions)

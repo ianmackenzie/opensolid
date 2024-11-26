@@ -65,7 +65,7 @@ instance HasUnits (Direction2d space) where
   type UnitsOf (Direction2d space) = Unitless
 
 instance FFI (Direction2d space) where
-  representation _ = FFI.Class "Direction2d"
+  representation _ = FFI.classRepresentation "Direction2d" Nothing
 
 instance space1 ~ space2 => Units.Coercion (Direction2d space1) (Direction2d space2) where
   coerce = identity

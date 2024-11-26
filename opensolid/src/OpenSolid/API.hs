@@ -5,7 +5,6 @@ import Curve1d qualified
 import Direction2d qualified
 import Foreign (Ptr)
 import List qualified
-import Maybe qualified
 import OpenSolid
 import OpenSolid.API.Class (Class (..))
 import OpenSolid.API.Class qualified as Class
@@ -15,6 +14,7 @@ import OpenSolid.API.Class.StaticFunction (StaticFunction (..))
 import OpenSolid.API.Class.StaticFunction qualified as StaticFunction
 import OpenSolid.API.Constraint (Constraint (..))
 import OpenSolid.API.Name qualified as Name
+import OpenSolid.FFI qualified as FFI
 import Pair qualified
 import Point2d (Point2d)
 import Point2d qualified
@@ -207,8 +207,8 @@ prefixWith :: Text -> (Text, a) -> (Text, a)
 prefixWith prefix = Pair.mapFirst (prefix +)
 
 classFunctionPairs :: Class -> List (Text, Ptr () -> Ptr () -> IO ())
-classFunctionPairs (Class name units staticFunctions memberFunctions) = do
-  List.map (prefixWith (Name.pascalCase name + Maybe.map Name.pascalCase units + "_")) $
+classFunctionPairs (Class baseName maybeUnits staticFunctions memberFunctions) = do
+  List.map (prefixWith (FFI.className baseName maybeUnits + "_")) $
     List.concat
       [ List.collect staticFunctionPairs staticFunctions
       , List.collect memberFunctionPairs memberFunctions

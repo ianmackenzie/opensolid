@@ -10,6 +10,7 @@ module Function
   )
 where
 
+import Class qualified
 import Data.Proxy (Proxy (Proxy))
 import OpenSolid
 import OpenSolid.FFI (FFI)
@@ -126,7 +127,7 @@ typePattern proxy = case FFI.representation proxy of
   FFI.Tuple6 -> tuple6Pattern proxy
   FFI.Maybe -> maybePattern proxy
   FFI.Result -> internalError "Should never have Result as input argument"
-  FFI.Class className -> className + "()"
+  FFI.Class baseName maybeUnits -> Class.name baseName maybeUnits + "()"
 
 tuplePattern :: List Text -> Text
 tuplePattern itemPatterns = "(" + Text.join "," itemPatterns + ")"

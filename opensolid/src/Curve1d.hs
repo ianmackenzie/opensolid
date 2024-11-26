@@ -106,10 +106,10 @@ data Curve1d units where
 deriving instance Show (Curve1d units)
 
 instance FFI (Curve1d Unitless) where
-  representation _ = FFI.Class "Curve1d_Unitless"
+  representation _ = FFI.classRepresentation "Curve1d" (Just "Unitless")
 
 instance FFI (Curve1d Meters) where
-  representation _ = FFI.Class "Curve1d_Meters"
+  representation _ = FFI.classRepresentation "Curve1d" (Just "Meters")
 
 instance HasUnits (Curve1d units) where
   type UnitsOf (Curve1d units) = units

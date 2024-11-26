@@ -89,10 +89,10 @@ pattern Range low high <- Range_ low high
     Range a b = if a <= b then Range_ a b else Range_ b a
 
 instance FFI (Range Unitless) where
-  representation _ = FFI.Class "Range_Unitless"
+  representation _ = FFI.classRepresentation "Range" (Just "Unitless")
 
 instance FFI (Range Meters) where
-  representation _ = FFI.Class "Range_Meters"
+  representation _ = FFI.classRepresentation "Range" (Just "Meters")
 
 instance HasUnits (Range units) where
   type UnitsOf (Range units) = units

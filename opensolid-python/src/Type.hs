@@ -1,5 +1,6 @@
 module Type (name) where
 
+import Class qualified
 import Data.Proxy (Proxy (Proxy))
 import OpenSolid
 import OpenSolid.FFI (FFI)
@@ -19,7 +20,7 @@ name proxy = case FFI.representation proxy of
   FFI.Tuple6 -> tuple6Name proxy
   FFI.Maybe -> maybeName proxy
   FFI.Result -> resultName proxy
-  FFI.Class className -> className
+  FFI.Class baseName maybeUnits -> Class.name baseName maybeUnits
 
 listName :: forall a. FFI a => Proxy (List a) -> Text
 listName _ = "list[" + name @a Proxy + "]"

@@ -27,6 +27,7 @@ executable opensolid-python
     opensolid,
 
   other-modules:
+    Class
     CTypes
     Function
     MemberFunction
