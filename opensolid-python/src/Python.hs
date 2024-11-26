@@ -6,7 +6,6 @@ module Python
   , list
   , tuple
   , call
-  , name
   , pattern Name
   )
 where
