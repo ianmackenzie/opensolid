@@ -115,20 +115,6 @@ resultTypeName _ = compositeTypeName ["Result", simpleTypeName @a Proxy]
 dummyValue :: forall a. FFI a => Proxy a -> Text
 dummyValue proxy = typeName proxy + "()"
 
--- case FFI.representation proxy of
---  FFI.Int -> "c_int64()"
---  FFI.Float -> "c_double()"
---  FFI.Qty _ -> "c_double()"
---  FFI.List -> dummyList proxy
---  FFI.Tuple2 -> dummyTuple2 proxy
---  FFI.Tuple3 -> dummyTuple3 proxy
---  FFI.Tuple4 -> dummyTuple4 proxy
---  FFI.Tuple5 -> dummyTuple5 proxy
---  FFI.Tuple6 -> dummyTuple6 proxy
---  FFI.Maybe -> dummyMaybe proxy
---  FFI.Result -> dummyResult proxy
---  FFI.Class _ -> "c_void_p()"
-
 dummyFieldValue :: forall a. FFI a => Proxy a -> Text
 dummyFieldValue proxy = case FFI.representation proxy of
   FFI.Int -> "0"
@@ -143,72 +129,6 @@ dummyFieldValue proxy = case FFI.representation proxy of
   FFI.Maybe -> dummyValue proxy
   FFI.Result -> dummyValue proxy
   FFI.Class _ -> dummyValue proxy
-
--- dummyList :: forall a. FFI a => Proxy (List a) -> Text
--- dummyList proxy =
---   Python.call (typeName proxy) $
---     [ "c_int64()"
---     , "c_void_p()"
---     ]
-
--- dummyTuple2 :: forall a b. (FFI a, FFI b) => Proxy (a, b) -> Text
--- dummyTuple2 proxy =
---   Python.call (typeName proxy) $
---     [ dummyFieldValue @a Proxy
---     , dummyFieldValue @b Proxy
---     ]
-
--- dummyTuple3 :: forall a b c. (FFI a, FFI b, FFI c) => Proxy (a, b, c) -> Text
--- dummyTuple3 proxy =
---   Python.call (typeName proxy) $
---     [ dummyFieldValue @a Proxy
---     , dummyFieldValue @b Proxy
---     , dummyFieldValue @c Proxy
---     ]
-
--- dummyTuple4 :: forall a b c d. (FFI a, FFI b, FFI c, FFI d) => Proxy (a, b, c, d) -> Text
--- dummyTuple4 proxy =
---   Python.call (typeName proxy) $
---     [ dummyFieldValue @a Proxy
---     , dummyFieldValue @b Proxy
---     , dummyFieldValue @c Proxy
---     , dummyFieldValue @d Proxy
---     ]
-
--- dummyTuple5 ::
---   forall a b c d e.
---   (FFI a, FFI b, FFI c, FFI d, FFI e) =>
---   Proxy (a, b, c, d, e) ->
---   Text
--- dummyTuple5 proxy =
---   Python.call (typeName proxy) $
---     [ dummyFieldValue @a Proxy
---     , dummyFieldValue @b Proxy
---     , dummyFieldValue @c Proxy
---     , dummyFieldValue @d Proxy
---     , dummyFieldValue @e Proxy
---     ]
-
--- dummyTuple6 ::
---   forall a b c d e f.
---   (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f) =>
---   Proxy (a, b, c, d, e, f) ->
---   Text
--- dummyTuple6 proxy =
---   Python.call (typeName proxy) $
---     [ dummyFieldValue @a Proxy
---     , dummyFieldValue @b Proxy
---     , dummyFieldValue @c Proxy
---     , dummyFieldValue @d Proxy
---     , dummyFieldValue @e Proxy
---     , dummyFieldValue @f Proxy
---     ]
-
--- dummyMaybe :: forall a. FFI a => Proxy (Maybe a) -> Text
--- dummyMaybe proxy = typeName proxy + "()"
-
--- dummyResult :: forall x a. FFI a => Proxy (Result x a) -> Text
--- dummyResult proxy = typeName proxy + "()"
 
 fieldName :: Int -> Text
 fieldName index = "field" + Text.int index
