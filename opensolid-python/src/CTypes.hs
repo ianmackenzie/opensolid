@@ -1,7 +1,6 @@
 module CTypes
   ( structDeclaration
   , registerType
-  , typeName
   , dummyValue
   , argumentValue1
   , argumentValue2
