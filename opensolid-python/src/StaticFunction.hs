@@ -7,9 +7,9 @@ import Data.Proxy (Proxy (Proxy))
 import Function qualified
 import List qualified
 import OpenSolid
-import OpenSolid.API.Class.StaticFunction (StaticFunction (..))
-import OpenSolid.API.Class.StaticFunction qualified as StaticFunction
 import OpenSolid.API.Constraint (Constraint (..))
+import OpenSolid.API.StaticFunction (StaticFunction (..))
+import OpenSolid.API.StaticFunction qualified as StaticFunction
 import OpenSolid.FFI (FFI)
 import Python (pattern Name)
 import Python qualified

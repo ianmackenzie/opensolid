@@ -8,12 +8,12 @@ import List qualified
 import OpenSolid
 import OpenSolid.API.Class (Class (..))
 import OpenSolid.API.Class qualified as Class
-import OpenSolid.API.Class.MemberFunction (MemberFunction (..))
-import OpenSolid.API.Class.MemberFunction qualified as MemberFunction
-import OpenSolid.API.Class.StaticFunction (StaticFunction (..))
-import OpenSolid.API.Class.StaticFunction qualified as StaticFunction
 import OpenSolid.API.Constraint (Constraint (..))
+import OpenSolid.API.MemberFunction (MemberFunction (..))
+import OpenSolid.API.MemberFunction qualified as MemberFunction
 import OpenSolid.API.Name qualified as Name
+import OpenSolid.API.StaticFunction (StaticFunction (..))
+import OpenSolid.API.StaticFunction qualified as StaticFunction
 import OpenSolid.FFI qualified as FFI
 import Pair qualified
 import Point2d (Point2d)

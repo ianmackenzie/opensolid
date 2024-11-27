@@ -1,4 +1,4 @@
-module OpenSolid.API.Class.MemberFunction
+module OpenSolid.API.MemberFunction
   ( MemberFunction (..)
   , ffiName
   , invoke

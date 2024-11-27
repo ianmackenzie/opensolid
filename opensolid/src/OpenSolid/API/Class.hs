@@ -6,10 +6,10 @@ module OpenSolid.API.Class
 where
 
 import OpenSolid
-import OpenSolid.API.Class.MemberFunction (MemberFunction)
-import OpenSolid.API.Class.StaticFunction (StaticFunction)
+import OpenSolid.API.MemberFunction (MemberFunction)
 import OpenSolid.API.Name (Name)
 import OpenSolid.API.Name qualified as Name
+import OpenSolid.API.StaticFunction (StaticFunction)
 import OpenSolid.FFI (FFI)
 
 data Class where

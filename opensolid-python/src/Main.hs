@@ -12,9 +12,9 @@ import MemberFunction qualified
 import OpenSolid
 import OpenSolid.API qualified as API
 import OpenSolid.API.Class (Class (Class))
-import OpenSolid.API.Class.MemberFunction (MemberFunction (..))
-import OpenSolid.API.Class.StaticFunction (StaticFunction (..))
 import OpenSolid.API.Constraint (Constraint (..))
+import OpenSolid.API.MemberFunction (MemberFunction (..))
+import OpenSolid.API.StaticFunction (StaticFunction (..))
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import Pair qualified

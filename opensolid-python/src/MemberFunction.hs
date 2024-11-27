@@ -6,9 +6,9 @@ import Function qualified
 import Length (Length)
 import List qualified
 import OpenSolid
-import OpenSolid.API.Class.MemberFunction (MemberFunction (..))
-import OpenSolid.API.Class.MemberFunction qualified as MemberFunction
 import OpenSolid.API.Constraint (Constraint (..))
+import OpenSolid.API.MemberFunction (MemberFunction (..))
+import OpenSolid.API.MemberFunction qualified as MemberFunction
 import OpenSolid.FFI (FFI)
 import Python (pattern Name)
 import Python qualified

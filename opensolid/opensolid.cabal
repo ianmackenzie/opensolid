@@ -179,8 +179,8 @@ library
     OpenSolid
     OpenSolid.API
     OpenSolid.API.Class
-    OpenSolid.API.Class.MemberFunction
-    OpenSolid.API.Class.StaticFunction
+    OpenSolid.API.MemberFunction
+    OpenSolid.API.StaticFunction
     OpenSolid.API.Constraint
     OpenSolid.API.Name
     OpenSolid.FFI

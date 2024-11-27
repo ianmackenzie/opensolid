@@ -1,4 +1,4 @@
-module OpenSolid.API.Class.StaticFunction
+module OpenSolid.API.StaticFunction
   ( StaticFunction (..)
   , ffiName
   , invoke
