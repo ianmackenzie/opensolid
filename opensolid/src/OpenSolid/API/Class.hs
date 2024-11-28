@@ -17,21 +17,21 @@ data Class where
     FFI value =>
     { name :: Name
     , units :: Maybe Name
-    , staticFunctions :: List (Text, List StaticFunction)
-    , memberFunctions :: List (Text, List (MemberFunction value))
+    , staticFunctions :: List (Name, List StaticFunction)
+    , memberFunctions :: List (Name, List (MemberFunction value))
     } ->
     Class
 
-abstract :: Text -> List (Text, List StaticFunction) -> Class
+abstract :: Text -> List (Name, List StaticFunction) -> Class
 abstract name staticFunctions =
   Class
     { name = Name.parse name
     , units = Nothing
     , staticFunctions
-    , memberFunctions = [] :: List (Text, List (MemberFunction Int))
+    , memberFunctions = [] :: List (Name, List (MemberFunction Int))
     }
 
-concrete :: FFI value => Text -> Text -> List (Text, List (MemberFunction value)) -> Class
+concrete :: FFI value => Text -> Text -> List (Name, List (MemberFunction value)) -> Class
 concrete name units memberFunctions =
   Class
     { name = Name.parse name

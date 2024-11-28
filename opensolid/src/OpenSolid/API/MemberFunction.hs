@@ -9,85 +9,142 @@ import Data.Proxy (Proxy (Proxy))
 import Foreign (Ptr)
 import IO qualified
 import OpenSolid
-import OpenSolid.API.Constraint (Constraint (..))
+import OpenSolid.API.Name (Name)
+import OpenSolid.API.Name qualified as Name
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import Text qualified
 import Tolerance qualified
+import Units (Meters)
 
 data MemberFunction value where
-  M0 ::
+  MemberFunction0 ::
     (FFI value, FFI result) =>
-    Constraint constraint ->
-    (constraint => value -> result) ->
+    (value -> result) ->
     MemberFunction value
-  M1 ::
+  MemberFunction0U ::
+    (FFI value, FFI result) =>
+    (Tolerance Unitless => value -> result) ->
+    MemberFunction value
+  MemberFunction0M ::
+    (FFI value, FFI result) =>
+    (Tolerance Meters => value -> result) ->
+    MemberFunction value
+  MemberFunction1 ::
     (FFI a, FFI value, FFI result) =>
-    Constraint constraint ->
-    Text ->
-    (constraint => a -> value -> result) ->
+    Name ->
+    (a -> value -> result) ->
     MemberFunction value
-  M2 ::
+  MemberFunction1U ::
+    (FFI a, FFI value, FFI result) =>
+    Name ->
+    (Tolerance Unitless => a -> value -> result) ->
+    MemberFunction value
+  MemberFunction1M ::
+    (FFI a, FFI value, FFI result) =>
+    Name ->
+    (Tolerance Meters => a -> value -> result) ->
+    MemberFunction value
+  MemberFunction2 ::
     (FFI a, FFI b, FFI value, FFI result) =>
-    Constraint constraint ->
-    Text ->
-    Text ->
-    (constraint => a -> b -> value -> result) ->
+    Name ->
+    Name ->
+    (a -> b -> value -> result) ->
     MemberFunction value
-  M3 ::
+  MemberFunction2U ::
+    (FFI a, FFI b, FFI value, FFI result) =>
+    Name ->
+    Name ->
+    (Tolerance Unitless => a -> b -> value -> result) ->
+    MemberFunction value
+  MemberFunction2M ::
+    (FFI a, FFI b, FFI value, FFI result) =>
+    Name ->
+    Name ->
+    (Tolerance Meters => a -> b -> value -> result) ->
+    MemberFunction value
+  MemberFunction3 ::
     (FFI a, FFI b, FFI c, FFI value, FFI result) =>
-    Constraint constraint ->
-    Text ->
-    Text ->
-    Text ->
-    (constraint => a -> b -> c -> value -> result) ->
+    Name ->
+    Name ->
+    Name ->
+    (a -> b -> c -> value -> result) ->
     MemberFunction value
-  M4 ::
+  MemberFunction3U ::
+    (FFI a, FFI b, FFI c, FFI value, FFI result) =>
+    Name ->
+    Name ->
+    Name ->
+    (Tolerance Unitless => a -> b -> c -> value -> result) ->
+    MemberFunction value
+  MemberFunction3M ::
+    (FFI a, FFI b, FFI c, FFI value, FFI result) =>
+    Name ->
+    Name ->
+    Name ->
+    (Tolerance Meters => a -> b -> c -> value -> result) ->
+    MemberFunction value
+  MemberFunction4 ::
     (FFI a, FFI b, FFI c, FFI d, FFI value, FFI result) =>
-    Constraint constraint ->
-    Text ->
-    Text ->
-    Text ->
-    Text ->
-    (constraint => a -> b -> c -> d -> value -> result) ->
+    Name ->
+    Name ->
+    Name ->
+    Name ->
+    (a -> b -> c -> d -> value -> result) ->
+    MemberFunction value
+  MemberFunction4U ::
+    (FFI a, FFI b, FFI c, FFI d, FFI value, FFI result) =>
+    Name ->
+    Name ->
+    Name ->
+    Name ->
+    (Tolerance Unitless => a -> b -> c -> d -> value -> result) ->
+    MemberFunction value
+  MemberFunction4M ::
+    (FFI a, FFI b, FFI c, FFI d, FFI value, FFI result) =>
+    Name ->
+    Name ->
+    Name ->
+    Name ->
+    (Tolerance Meters => a -> b -> c -> d -> value -> result) ->
     MemberFunction value
 
-ffiName :: Text -> MemberFunction value -> Text
+ffiName :: Name -> MemberFunction value -> Text
 ffiName functionName memberFunction = case memberFunction of
-  M0 N _ -> FFI.toCamelCase functionName
-  M0 F _ -> FFI.toCamelCase functionName
-  M0 L _ -> FFI.toCamelCase functionName
-  M1 N _ f -> ffiName1 functionName f
-  M1 F _ f -> ffiName1 functionName (Tolerance.exactly f)
-  M1 L _ f -> ffiName1 functionName (Tolerance.exactly f)
-  M2 N _ _ f -> ffiName2 functionName f
-  M2 F _ _ f -> ffiName2 functionName (Tolerance.exactly f)
-  M2 L _ _ f -> ffiName2 functionName (Tolerance.exactly f)
-  M3 N _ _ _ f -> ffiName3 functionName f
-  M3 F _ _ _ f -> ffiName3 functionName (Tolerance.exactly f)
-  M3 L _ _ _ f -> ffiName3 functionName (Tolerance.exactly f)
-  M4 N _ _ _ _ f -> ffiName4 functionName f
-  M4 F _ _ _ _ f -> ffiName4 functionName (Tolerance.exactly f)
-  M4 L _ _ _ _ f -> ffiName4 functionName (Tolerance.exactly f)
+  MemberFunction0 _ -> Name.camelCase functionName
+  MemberFunction0U _ -> Name.camelCase functionName
+  MemberFunction0M _ -> Name.camelCase functionName
+  MemberFunction1 _ f -> ffiName1 functionName f
+  MemberFunction1U _ f -> ffiName1 functionName (Tolerance.exactly f)
+  MemberFunction1M _ f -> ffiName1 functionName (Tolerance.exactly f)
+  MemberFunction2 _ _ f -> ffiName2 functionName f
+  MemberFunction2U _ _ f -> ffiName2 functionName (Tolerance.exactly f)
+  MemberFunction2M _ _ f -> ffiName2 functionName (Tolerance.exactly f)
+  MemberFunction3 _ _ _ f -> ffiName3 functionName f
+  MemberFunction3U _ _ _ f -> ffiName3 functionName (Tolerance.exactly f)
+  MemberFunction3M _ _ _ f -> ffiName3 functionName (Tolerance.exactly f)
+  MemberFunction4 _ _ _ _ f -> ffiName4 functionName f
+  MemberFunction4U _ _ _ _ f -> ffiName4 functionName (Tolerance.exactly f)
+  MemberFunction4M _ _ _ _ f -> ffiName4 functionName (Tolerance.exactly f)
 
 ffiName1 ::
   forall a value result.
   (FFI a, FFI value, FFI result) =>
-  Text ->
+  Name ->
   (a -> value -> result) ->
   Text
 ffiName1 functionName _ =
-  FFI.toCamelCase functionName + "_" + FFI.typeName @a Proxy
+  Name.camelCase functionName + "_" + FFI.typeName @a Proxy
 
 ffiName2 ::
   forall a b value result.
   (FFI a, FFI b, FFI value, FFI result) =>
-  Text ->
+  Name ->
   (a -> b -> value -> result) ->
   Text
 ffiName2 functionName _ =
   Text.join "_" $
-    [ FFI.toCamelCase functionName
+    [ Name.camelCase functionName
     , FFI.typeName @a Proxy
     , FFI.typeName @b Proxy
     ]
@@ -95,12 +152,12 @@ ffiName2 functionName _ =
 ffiName3 ::
   forall a b c value result.
   (FFI a, FFI b, FFI c, FFI value, FFI result) =>
-  Text ->
+  Name ->
   (a -> b -> c -> value -> result) ->
   Text
 ffiName3 functionName _ =
   Text.join "_" $
-    [ FFI.toCamelCase functionName
+    [ Name.camelCase functionName
     , FFI.typeName @a Proxy
     , FFI.typeName @b Proxy
     , FFI.typeName @c Proxy
@@ -109,12 +166,12 @@ ffiName3 functionName _ =
 ffiName4 ::
   forall a b c d value result.
   (FFI a, FFI b, FFI c, FFI d, FFI value, FFI result) =>
-  Text ->
+  Name ->
   (a -> b -> c -> d -> value -> result) ->
   Text
 ffiName4 functionName _ =
   Text.join "_" $
-    [ FFI.toCamelCase functionName
+    [ Name.camelCase functionName
     , FFI.typeName @a Proxy
     , FFI.typeName @b Proxy
     , FFI.typeName @c Proxy
@@ -123,63 +180,63 @@ ffiName4 functionName _ =
 
 invoke :: MemberFunction value -> Ptr () -> Ptr () -> IO ()
 invoke function = case function of
-  M0 N f ->
+  MemberFunction0 f ->
     \inputPtr outputPtr -> IO.do
       self <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (f self)
-  M0 F f ->
+  MemberFunction0U f ->
     \inputPtr outputPtr -> IO.do
       (tolerance, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f self))
-  M0 L f ->
+  MemberFunction0M f ->
     \inputPtr outputPtr -> IO.do
       (tolerance, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f self))
-  M1 N _ f ->
+  MemberFunction1 _ f ->
     \inputPtr outputPtr -> IO.do
       (arg1, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (f arg1 self)
-  M1 F _ f ->
+  MemberFunction1U _ f ->
     \inputPtr outputPtr -> IO.do
       (tolerance, arg1, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 self))
-  M1 L _ f ->
+  MemberFunction1M _ f ->
     \inputPtr outputPtr -> IO.do
       (tolerance, arg1, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 self))
-  M2 N _ _ f ->
+  MemberFunction2 _ _ f ->
     \inputPtr outputPtr -> IO.do
       (arg1, arg2, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (f arg1 arg2 self)
-  M2 F _ _ f ->
+  MemberFunction2U _ _ f ->
     \inputPtr outputPtr -> IO.do
       (tolerance, arg1, arg2, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 arg2 self))
-  M2 L _ _ f ->
+  MemberFunction2M _ _ f ->
     \inputPtr outputPtr -> IO.do
       (tolerance, arg1, arg2, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 arg2 self))
-  M3 N _ _ _ f ->
+  MemberFunction3 _ _ _ f ->
     \inputPtr outputPtr -> IO.do
       (arg1, arg2, arg3, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (f arg1 arg2 arg3 self)
-  M3 F _ _ _ f ->
+  MemberFunction3U _ _ _ f ->
     \inputPtr outputPtr -> IO.do
       (tolerance, arg1, arg2, arg3, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 arg2 arg3 self))
-  M3 L _ _ _ f ->
+  MemberFunction3M _ _ _ f ->
     \inputPtr outputPtr -> IO.do
       (tolerance, arg1, arg2, arg3, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 arg2 arg3 self))
-  M4 N _ _ _ _ f ->
+  MemberFunction4 _ _ _ _ f ->
     \inputPtr outputPtr -> IO.do
       (arg1, arg2, arg3, arg4, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (f arg1 arg2 arg3 arg4 self)
-  M4 F _ _ _ _ f ->
+  MemberFunction4U _ _ _ _ f ->
     \inputPtr outputPtr -> IO.do
       (tolerance, arg1, arg2, arg3, arg4, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 arg2 arg3 arg4 self))
-  M4 L _ _ _ _ f ->
+  MemberFunction4M _ _ _ _ f ->
     \inputPtr outputPtr -> IO.do
       (tolerance, arg1, arg2, arg3, arg4, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 arg2 arg3 arg4 self))

@@ -6,17 +6,11 @@ module Python
   , list
   , tuple
   , call
-  , pattern Name
   )
 where
 
 import OpenSolid
 import Text qualified
-
-{-# COMPLETE Name #-}
-
-pattern Name :: Text -> Text
-pattern Name converted <- (name -> converted)
 
 lines :: List Text -> Text
 lines = Text.multiline
@@ -40,6 +34,3 @@ tuple entries = "(" + Text.join "," entries + ")"
 
 call :: Text -> List Text -> Text
 call function arguments = function + "(" + Text.join "," arguments + ")"
-
-name :: Text -> Text
-name = Text.replace " " "_"

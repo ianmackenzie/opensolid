@@ -8,12 +8,13 @@ import List qualified
 import OpenSolid
 import OpenSolid.API.Class (Class (..))
 import OpenSolid.API.Class qualified as Class
-import OpenSolid.API.Constraint (Constraint (..))
 import OpenSolid.API.MemberFunction (MemberFunction (..))
 import OpenSolid.API.MemberFunction qualified as MemberFunction
+import OpenSolid.API.Name (Name)
 import OpenSolid.API.Name qualified as Name
 import OpenSolid.API.StaticFunction (StaticFunction (..))
 import OpenSolid.API.StaticFunction qualified as StaticFunction
+import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import Pair qualified
 import Point2d (Point2d)
@@ -38,76 +39,101 @@ classes =
 
 ----- HELPER OPERATORS -----
 
-(.:) :: a -> b -> (a, b)
-(.:) = (,)
+(.:) :: Text -> List a -> (Name, List a)
+(.:) name values = (Name.parse name, values)
 
 infixr 0 .:
 
-(.|) :: a -> b -> (a, List b)
-(.|) a b = (a, [b])
+(.|) :: Text -> a -> (Name, List a)
+(.|) name value = (Name.parse name, [value])
 
 infixr 0 .|
+
+s0 :: FFI a => a -> StaticFunction
+s0 value = StaticFunction0 value
+
+s1 :: (FFI a, FFI b) => Text -> (a -> b) -> StaticFunction
+s1 arg1 function = StaticFunction1 (Name.parse arg1) function
+
+s2 :: (FFI a, FFI b, FFI c) => Text -> Text -> (a -> b -> c) -> StaticFunction
+s2 arg1 arg2 function = StaticFunction2 (Name.parse arg1) (Name.parse arg2) function
+
+s3 :: (FFI a, FFI b, FFI c, FFI d) => Text -> Text -> Text -> (a -> b -> c -> d) -> StaticFunction
+s3 arg1 arg2 arg3 function =
+  StaticFunction3 (Name.parse arg1) (Name.parse arg2) (Name.parse arg3) function
+
+m0 :: (FFI value, FFI result) => (value -> result) -> MemberFunction value
+m0 function = MemberFunction0 function
+
+m0U :: (FFI value, FFI result) => (Tolerance Unitless => value -> result) -> MemberFunction value
+m0U function = MemberFunction0U function
+
+m0M :: (FFI value, FFI result) => (Tolerance Meters => value -> result) -> MemberFunction value
+m0M function = MemberFunction0M function
+
+m1 :: (FFI a, FFI value, FFI result) => Text -> (a -> value -> result) -> MemberFunction value
+m1 arg1 function = MemberFunction1 (Name.parse arg1) function
 
 ----- API DEFINITION -----
 
 range :: List Class
 range =
   [ Class.abstract "Range" $
-      [ "unit" .| S0 N Range.unit
-      , "constant"
-          .: [ S1 N "value" (Range.constant @Unitless)
-             , S1 N "value" (Range.constant @Meters)
+      [ "Unit" .| s0 Range.unit
+      , "Constant"
+          .: [ s1 "Value" (Range.constant @Unitless)
+             , s1 "Value" (Range.constant @Meters)
              ]
-      , "from endpoints"
-          .: [ S2 N "a" "b" (Range.from @Unitless)
-             , S2 N "a" "b" (Range.from @Meters)
+      , "From Endpoints"
+          .: [ s2 "A" "B" (Range.from @Unitless)
+             , s2 "A" "B" (Range.from @Meters)
              ]
-      , "aggregate"
-          .: [ S2 N "a" "b" (Range.aggregate2 @Unitless)
-             , S3 N "a" "b" "c" (Range.aggregate3 @Unitless)
-             , S2 N "a" "b" (Range.aggregate2 @Meters)
-             , S3 N "a" "b" "c" (Range.aggregate3 @Meters)
+      , "Aggregate"
+          .: [ s2 "A" "B" (Range.aggregate2 @Unitless)
+             , s3 "A" "B" "C" (Range.aggregate3 @Unitless)
+             , s2 "A" "B" (Range.aggregate2 @Meters)
+             , s3 "A" "B" "C" (Range.aggregate3 @Meters)
              ]
       ]
   , Class.concrete @(Range Unitless) "Range" "Unitless" $
-      [ "endpoints" .| M0 N Range.endpoints
-      , "intersection" .| M1 N "other" Range.intersection
+      [ "Endpoints" .| m0 Range.endpoints
+      , "Intersection" .| m1 "Other" Range.intersection
       ]
   , Class.concrete @(Range Meters) "Range" "Meters" $
-      [ "endpoints" .| M0 N Range.endpoints
-      , "intersection" .| M1 N "other" Range.intersection
+      [ "Endpoints" .| m0 Range.endpoints
+      , "Intersection" .| m1 "Other" Range.intersection
       ]
   ]
 
 vector2d :: List Class
 vector2d =
   [ Class.abstract "Vector2d" $
-      [ "zero" .| S0 N (Vector2d.zero @Space @Meters)
-      , "unit" .| S1 N "direction" (Vector2d.unit @Space)
-      , "xy"
-          .: [ S2 N "x component" "y component" (Vector2d.xy @Space @Unitless)
-             , S2 N "x component" "y component" (Vector2d.xy @Space @Meters)
+      [ "Zero" .| s0 (Vector2d.zero @Space @Meters)
+      , "Unit" .| s1 "Direction" (Vector2d.unit @Space)
+      , "XY"
+          .: [ s2 "X Component" "Y Component" (Vector2d.xy @Space @Unitless)
+             , s2 "X Component" "Y Component" (Vector2d.xy @Space @Meters)
              ]
-      , "x"
-          .: [ S1 N "x component" (Vector2d.x @Space @Unitless)
-             , S1 N "x component" (Vector2d.x @Space @Meters)
+      , "X"
+          .: [ s1 "X Component" (Vector2d.x @Space @Unitless)
+             , s1 "X Component" (Vector2d.x @Space @Meters)
              ]
-      , "y"
-          .: [ S1 N "y component" (Vector2d.y @Space @Unitless)
-             , S1 N "y component" (Vector2d.y @Space @Meters)
+      , "Y"
+          .: [ s1 "Y Component" (Vector2d.y @Space @Unitless)
+             , s1 "Y Component" (Vector2d.y @Space @Meters)
              ]
-      , "from components"
-          .: [ S1 N "components" (Vector2d.fromComponents @Space @Unitless)
-             , S1 N "components" (Vector2d.fromComponents @Space @Meters)
+      , "From Components"
+          .: [ s1 "Components" (Vector2d.fromComponents @Space @Unitless)
+             , s1 "Components" (Vector2d.fromComponents @Space @Meters)
              ]
       ]
   , Class.concrete @(Vector2d (Space @ Unitless)) "Vector2d" "Unitless" $
-      [ "components" .| M0 N Vector2d.components
-      , "direction" .| M0 F Vector2d.direction
+      [ "Components" .| m0 Vector2d.components
+      , "Direction" .| m0U Vector2d.direction
       ]
   , Class.concrete @(Vector2d (Space @ Meters)) "Vector2d" "Meters" $
-      [ "components" .| M0 N Vector2d.components
-      , "direction" .| M0 L Vector2d.direction
+      [ "Components" .| m0 Vector2d.components
+      , "Direction" .| m0M Vector2d.direction
       ]
   ]
 
@@ -117,16 +143,16 @@ direction2d =
       { name = Name.parse "Direction2d"
       , units = Nothing
       , staticFunctions =
-          [ "x" .| S0 N Direction2d.x
-          , "y" .| S0 N Direction2d.y
-          , "positive x" .| S0 N Direction2d.positiveX
-          , "positive y" .| S0 N Direction2d.positiveY
-          , "negative x" .| S0 N Direction2d.negativeX
-          , "negative y" .| S0 N Direction2d.negativeY
-          , "from angle" .| S1 N "angle" Direction2d.fromAngle
+          [ "X" .| s0 Direction2d.x
+          , "Y" .| s0 Direction2d.y
+          , "Positive X" .| s0 Direction2d.positiveX
+          , "Positive Y" .| s0 Direction2d.positiveY
+          , "Negative X" .| s0 Direction2d.negativeX
+          , "Negative Y" .| s0 Direction2d.negativeY
+          , "From Angle" .| s1 "Angle" Direction2d.fromAngle
           ]
       , memberFunctions =
-          [ "to angle" .| M0 N Direction2d.toAngle
+          [ "To Angle" .| m0 Direction2d.toAngle
           ]
       }
   ]
@@ -134,47 +160,47 @@ direction2d =
 point2d :: List Class
 point2d =
   [ Class.abstract "Point2d" $
-      [ "origin" .| S0 N (Point2d.origin @Space @Meters)
-      , "xy"
-          .: [ S2 N "x coordinate" "y coordinate" (Point2d.xy @Space @Unitless)
-             , S2 N "x coordinate" "y coordinate" (Point2d.xy @Space @Meters)
+      [ "Origin" .| s0 (Point2d.origin @Space @Meters)
+      , "XY"
+          .: [ s2 "X Coordinate" "Y Coordinate" (Point2d.xy @Space @Unitless)
+             , s2 "X Coordinate" "Y Coordinate" (Point2d.xy @Space @Meters)
              ]
-      , "x"
-          .: [ S1 N "x coordinate" (Point2d.x @Space @Unitless)
-             , S1 N "x coordinate" (Point2d.x @Space @Meters)
+      , "X"
+          .: [ s1 "X Coordinate" (Point2d.x @Space @Unitless)
+             , s1 "X Coordinate" (Point2d.x @Space @Meters)
              ]
-      , "y"
-          .: [ S1 N "y coordinate" (Point2d.y @Space @Unitless)
-             , S1 N "y coordinate" (Point2d.y @Space @Meters)
+      , "Y"
+          .: [ s1 "Y Coordinate" (Point2d.y @Space @Unitless)
+             , s1 "Y Coordinate" (Point2d.y @Space @Meters)
              ]
-      , "from coordinates"
-          .: [ S1 N "coordinates" (Point2d.fromCoordinates @Space @Unitless)
-             , S1 N "coordinates" (Point2d.fromCoordinates @Space @Meters)
+      , "From Coordinates"
+          .: [ s1 "Coordinates" (Point2d.fromCoordinates @Space @Unitless)
+             , s1 "Coordinates" (Point2d.fromCoordinates @Space @Meters)
              ]
       ]
   , Class.concrete @(Point2d (Space @ Unitless)) "Point2d" "Unitless" $
-      [ "coordinates" .| M0 N Point2d.coordinates
-      , "distance to" .| M1 N "other" Point2d.distanceFrom
-      , "midpoint" .| M1 N "other" Point2d.midpoint
+      [ "Coordinates" .| m0 Point2d.coordinates
+      , "Distance To" .| m1 "Other" Point2d.distanceFrom
+      , "Midpoint" .| m1 "Other" Point2d.midpoint
       ]
   , Class.concrete @(Point2d (Space @ Meters)) "Point2d" "Meters" $
-      [ "coordinates" .| M0 N Point2d.coordinates
-      , "distance to" .| M1 N "other" Point2d.distanceFrom
-      , "midpoint" .| M1 N "other" Point2d.midpoint
+      [ "Coordinates" .| m0 Point2d.coordinates
+      , "Distance To" .| m1 "Other" Point2d.distanceFrom
+      , "Midpoint" .| m1 "Other" Point2d.midpoint
       ]
   ]
 
 curve1d :: List Class
 curve1d =
   [ Class.abstract "Curve1d" $
-      [ "t" .| S0 N Curve1d.parameter
+      [ "T" .| s0 Curve1d.parameter
       ]
   , Class.concrete @(Curve1d Unitless) "Curve1d" "Unitless" $
-      [ "squared" .| M0 N Curve1d.squared
-      , "evaluate" .| M1 N "parameter value" (\t curve -> Curve1d.evaluate curve t)
+      [ "Squared" .| m0 Curve1d.squared
+      , "Evaluate" .| m1 "Parameter Value" (\t curve -> Curve1d.evaluate curve t)
       ]
   , Class.concrete @(Curve1d Meters) "Curve1d" "Meters" $
-      [ "evaluate" .| M1 N "parameter value" (\t curve -> Curve1d.evaluate curve t)
+      [ "Evaluate" .| m1 "Parameter Value" (\t curve -> Curve1d.evaluate curve t)
       ]
   ]
 
@@ -187,19 +213,19 @@ functions =
   List.map (Pair.mapFirst ("opensolid_" +)) $
     List.collect classFunctionPairs classes
 
-staticFunctionPair :: Text -> StaticFunction -> (Text, ForeignFunction)
+staticFunctionPair :: Name -> StaticFunction -> (Text, ForeignFunction)
 staticFunctionPair functionName staticFunction =
   (StaticFunction.ffiName functionName staticFunction, StaticFunction.invoke staticFunction)
 
-staticFunctionPairs :: (Text, List StaticFunction) -> List (Text, ForeignFunction)
+staticFunctionPairs :: (Name, List StaticFunction) -> List (Text, ForeignFunction)
 staticFunctionPairs (functionName, overloads) =
   List.map (staticFunctionPair functionName) overloads
 
-memberFunctionPair :: Text -> MemberFunction value -> (Text, ForeignFunction)
+memberFunctionPair :: Name -> MemberFunction value -> (Text, ForeignFunction)
 memberFunctionPair functionName memberFunction =
   (MemberFunction.ffiName functionName memberFunction, MemberFunction.invoke memberFunction)
 
-memberFunctionPairs :: (Text, List (MemberFunction value)) -> List (Text, ForeignFunction)
+memberFunctionPairs :: (Name, List (MemberFunction value)) -> List (Text, ForeignFunction)
 memberFunctionPairs (functionName, overloads) =
   List.map (memberFunctionPair functionName) overloads
 

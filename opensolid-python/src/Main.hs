@@ -12,7 +12,6 @@ import MemberFunction qualified
 import OpenSolid
 import OpenSolid.API qualified as API
 import OpenSolid.API.Class (Class (Class))
-import OpenSolid.API.Constraint (Constraint (..))
 import OpenSolid.API.MemberFunction (MemberFunction (..))
 import OpenSolid.API.StaticFunction (StaticFunction (..))
 import OpenSolid.FFI (FFI)
@@ -157,39 +156,39 @@ registerClassTypes (Class _ _ staticFunctions memberFunctions) registry0 = do
 
 registerStaticFunctionTypes :: StaticFunction -> TypeRegistry -> TypeRegistry
 registerStaticFunctionTypes function registry = case function of
-  S0 N v -> register0N v registry
-  S0 F v -> register0F v registry
-  S0 L v -> register0L v registry
-  S1 N _ f -> register1N f registry
-  S1 F _ f -> register1F f registry
-  S1 L _ f -> register1L f registry
-  S2 N _ _ f -> register2N f registry
-  S2 F _ _ f -> register2F f registry
-  S2 L _ _ f -> register2L f registry
-  S3 N _ _ _ f -> register3N f registry
-  S3 F _ _ _ f -> register3F f registry
-  S3 L _ _ _ f -> register3L f registry
-  S4 N _ _ _ _ f -> register4N f registry
-  S4 F _ _ _ _ f -> register4F f registry
-  S4 L _ _ _ _ f -> register4L f registry
+  StaticFunction0 v -> register0N v registry
+  StaticFunction0U v -> register0F v registry
+  StaticFunction0M v -> register0L v registry
+  StaticFunction1 _ f -> register1N f registry
+  StaticFunction1U _ f -> register1F f registry
+  StaticFunction1M _ f -> register1L f registry
+  StaticFunction2 _ _ f -> register2N f registry
+  StaticFunction2U _ _ f -> register2F f registry
+  StaticFunction2M _ _ f -> register2L f registry
+  StaticFunction3 _ _ _ f -> register3N f registry
+  StaticFunction3U _ _ _ f -> register3F f registry
+  StaticFunction3M _ _ _ f -> register3L f registry
+  StaticFunction4 _ _ _ _ f -> register4N f registry
+  StaticFunction4U _ _ _ _ f -> register4F f registry
+  StaticFunction4M _ _ _ _ f -> register4L f registry
 
 registerMemberFunctionTypes :: MemberFunction value -> TypeRegistry -> TypeRegistry
 registerMemberFunctionTypes function registry = case function of
-  M0 N f -> register1N f registry
-  M0 F f -> register1F f registry
-  M0 L f -> register1L f registry
-  M1 N _ f -> register2N f registry
-  M1 F _ f -> register2F f registry
-  M1 L _ f -> register2L f registry
-  M2 N _ _ f -> register3N f registry
-  M2 F _ _ f -> register3F f registry
-  M2 L _ _ f -> register3L f registry
-  M3 N _ _ _ f -> register4N f registry
-  M3 F _ _ _ f -> register4F f registry
-  M3 L _ _ _ f -> register4L f registry
-  M4 N _ _ _ _ f -> register5N f registry
-  M4 F _ _ _ _ f -> register5F f registry
-  M4 L _ _ _ _ f -> register5L f registry
+  MemberFunction0 f -> register1N f registry
+  MemberFunction0U f -> register1F f registry
+  MemberFunction0M f -> register1L f registry
+  MemberFunction1 _ f -> register2N f registry
+  MemberFunction1U _ f -> register2F f registry
+  MemberFunction1M _ f -> register2L f registry
+  MemberFunction2 _ _ f -> register3N f registry
+  MemberFunction2U _ _ f -> register3F f registry
+  MemberFunction2M _ _ f -> register3L f registry
+  MemberFunction3 _ _ _ f -> register4N f registry
+  MemberFunction3U _ _ _ f -> register4F f registry
+  MemberFunction3M _ _ _ f -> register4L f registry
+  MemberFunction4 _ _ _ _ f -> register5N f registry
+  MemberFunction4U _ _ _ _ f -> register5F f registry
+  MemberFunction4M _ _ _ _ f -> register5L f registry
 
 register0N :: forall a. FFI a => a -> TypeRegistry -> TypeRegistry
 register0N _ registry =

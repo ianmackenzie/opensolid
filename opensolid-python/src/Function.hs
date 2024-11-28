@@ -1,6 +1,5 @@
 module Function
-  ( name
-  , overloadDeclaration
+  ( overloadDeclaration
   , overloadCase
   , matchPattern0
   , matchPattern1
@@ -13,13 +12,12 @@ where
 import Class qualified
 import Data.Proxy (Proxy (Proxy))
 import OpenSolid
+import OpenSolid.API.Name (Name)
+import OpenSolid.API.Name qualified as Name
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import Python qualified
 import Text qualified
-
-name :: Text -> Text
-name = Text.replace " " "_"
 
 overloadDeclaration :: Text -> Text
 overloadDeclaration signature =
@@ -36,17 +34,21 @@ overloadCase matchPattern body =
     , Python.indent body
     ]
 
-asPattern :: forall a. FFI a => Proxy a -> Text -> Text
-asPattern _ varName = typePattern @a Proxy + " as " + varName
+asPattern :: forall a. FFI a => Proxy a -> Name -> Text
+asPattern _ argName = typePattern @a Proxy + " as " + Name.snakeCase argName
 
-namedPattern :: forall a. FFI a => Proxy a -> Text -> Text
+namedPattern :: forall a. FFI a => Proxy a -> Name -> Text
 namedPattern _ argName =
-  Python.str argName + ": " + typePattern @a Proxy + " as " + argName
+  Python.str (Name.snakeCase argName)
+    + ": "
+    + typePattern @a Proxy
+    + " as "
+    + Name.snakeCase argName
 
 matchPattern0 :: Text
 matchPattern0 = "([], entries) if not entries"
 
-matchPattern1 :: forall a value. FFI a => Text -> (a -> value) -> Text
+matchPattern1 :: forall a value. FFI a => Name -> (a -> value) -> Text
 matchPattern1 argName1 _ = do
   let asPattern1 = asPattern @a Proxy argName1
   let positionalPattern = "([" + asPattern1 + "],{})"
@@ -57,8 +59,8 @@ matchPattern1 argName1 _ = do
 matchPattern2 ::
   forall a b value.
   (FFI a, FFI b) =>
-  Text ->
-  Text ->
+  Name ->
+  Name ->
   (a -> b -> value) ->
   Text
 matchPattern2 argName1 argName2 _ = do
@@ -73,9 +75,9 @@ matchPattern2 argName1 argName2 _ = do
 matchPattern3 ::
   forall a b c value.
   (FFI a, FFI b, FFI c) =>
-  Text ->
-  Text ->
-  Text ->
+  Name ->
+  Name ->
+  Name ->
   (a -> b -> c -> value) ->
   Text
 matchPattern3 argName1 argName2 argName3 _ = do
@@ -92,10 +94,10 @@ matchPattern3 argName1 argName2 argName3 _ = do
 matchPattern4 ::
   forall a b c d value.
   (FFI a, FFI b, FFI c, FFI d) =>
-  Text ->
-  Text ->
-  Text ->
-  Text ->
+  Name ->
+  Name ->
+  Name ->
+  Name ->
   (a -> b -> c -> d -> value) ->
   Text
 matchPattern4 argName1 argName2 argName3 argName4 _ = do
