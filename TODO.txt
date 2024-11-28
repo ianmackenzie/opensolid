@@ -1,3 +1,11 @@
+Get lists working in Python
+- allocate memory with opensolid_malloc
+- case result to typed pointer with 'ctypes.cast(obj, type)'
+- get/set elements with 'ptr[index]'
+
+Add 'compiled'/'processed' form of API definition for generating bindings?
+- functions represented more dynamically (e.g. lists of argument names/types)
+
 Switch Solve2d.return back to taking a single value instead of a NonEmpty
 
 Move Http module out into separate opensolid-http package
@@ -15,11 +23,7 @@ Improve Python bindings
 - Support 'in' operator?
 - Support static functions that use a tolerance
 - Add docstrings
-- Define class (and quantity) members "in place" in class instance instead of separately?
-
-Add 'compiled'/'processed' form of API definition for generating bindings?
-- indexed functions
-- functions represented more dynamically (e.g. lists of argument names/types)
+- Define class (and quantity) members "in place" in FFI typeclass instance instead of separately?
 
 Sandbox executable to start generating Region2d medial axis curves and points?
 -> need to be able to solve for medial axis of curve and *point* first
