@@ -27,6 +27,8 @@ import Vector2d qualified
 
 data Space
 
+----- API DEFINITION -----
+
 classes :: List Class
 classes =
   List.concat
@@ -36,45 +38,6 @@ classes =
     , point2d
     , curve1d
     ]
-
------ HELPER OPERATORS -----
-
-(.:) :: Text -> List a -> (Name, List a)
-(.:) name values = (Name.parse name, values)
-
-infixr 0 .:
-
-(.|) :: Text -> a -> (Name, List a)
-(.|) name value = (Name.parse name, [value])
-
-infixr 0 .|
-
-s0 :: FFI a => a -> StaticFunction
-s0 value = StaticFunction0 value
-
-s1 :: (FFI a, FFI b) => Text -> (a -> b) -> StaticFunction
-s1 arg1 function = StaticFunction1 (Name.parse arg1) function
-
-s2 :: (FFI a, FFI b, FFI c) => Text -> Text -> (a -> b -> c) -> StaticFunction
-s2 arg1 arg2 function = StaticFunction2 (Name.parse arg1) (Name.parse arg2) function
-
-s3 :: (FFI a, FFI b, FFI c, FFI d) => Text -> Text -> Text -> (a -> b -> c -> d) -> StaticFunction
-s3 arg1 arg2 arg3 function =
-  StaticFunction3 (Name.parse arg1) (Name.parse arg2) (Name.parse arg3) function
-
-m0 :: (FFI value, FFI result) => (value -> result) -> MemberFunction value
-m0 function = MemberFunction0 function
-
-m0U :: (FFI value, FFI result) => (Tolerance Unitless => value -> result) -> MemberFunction value
-m0U function = MemberFunction0U function
-
-m0M :: (FFI value, FFI result) => (Tolerance Meters => value -> result) -> MemberFunction value
-m0M function = MemberFunction0M function
-
-m1 :: (FFI a, FFI value, FFI result) => Text -> (a -> value -> result) -> MemberFunction value
-m1 arg1 function = MemberFunction1 (Name.parse arg1) function
-
------ API DEFINITION -----
 
 range :: List Class
 range =
@@ -203,6 +166,43 @@ curve1d =
       [ "Evaluate" .| m1 "Parameter Value" (\t curve -> Curve1d.evaluate curve t)
       ]
   ]
+
+----- HELPER OPERATORS / FUNCTIONS -----
+
+(.:) :: Text -> List a -> (Name, List a)
+(.:) name values = (Name.parse name, values)
+
+infixr 0 .:
+
+(.|) :: Text -> a -> (Name, List a)
+(.|) name value = (Name.parse name, [value])
+
+infixr 0 .|
+
+s0 :: FFI a => a -> StaticFunction
+s0 value = StaticFunction0 value
+
+s1 :: (FFI a, FFI b) => Text -> (a -> b) -> StaticFunction
+s1 arg1 function = StaticFunction1 (Name.parse arg1) function
+
+s2 :: (FFI a, FFI b, FFI c) => Text -> Text -> (a -> b -> c) -> StaticFunction
+s2 arg1 arg2 function = StaticFunction2 (Name.parse arg1) (Name.parse arg2) function
+
+s3 :: (FFI a, FFI b, FFI c, FFI d) => Text -> Text -> Text -> (a -> b -> c -> d) -> StaticFunction
+s3 arg1 arg2 arg3 function =
+  StaticFunction3 (Name.parse arg1) (Name.parse arg2) (Name.parse arg3) function
+
+m0 :: (FFI value, FFI result) => (value -> result) -> MemberFunction value
+m0 function = MemberFunction0 function
+
+m0U :: (FFI value, FFI result) => (Tolerance Unitless => value -> result) -> MemberFunction value
+m0U function = MemberFunction0U function
+
+m0M :: (FFI value, FFI result) => (Tolerance Meters => value -> result) -> MemberFunction value
+m0M function = MemberFunction0M function
+
+m1 :: (FFI a, FFI value, FFI result) => Text -> (a -> value -> result) -> MemberFunction value
+m1 arg1 function = MemberFunction1 (Name.parse arg1) function
 
 ----- FUNCTION COLLECTION -----
 
