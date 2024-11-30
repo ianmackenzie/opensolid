@@ -21,6 +21,7 @@ lines = do
     , test "Single line" "line" ["line"]
     , test "Two lines" "line1\nline2" ["line1", "line2"]
     , test "Trailing newline" "line1\nline2\n" ["line1", "line2", ""]
+    , test "Two blank lines" "\n" ["", ""]
     ]
 
 multiline :: Test
