@@ -1,7 +1,6 @@
 module Python
   ( lines
   , indent
-  , separate
   , str
   , list
   , tuple
@@ -17,9 +16,6 @@ lines = Text.multiline
 
 indent :: List Text -> Text
 indent = Text.indent "    " . lines
-
-separate :: List Text -> Text
-separate blocks = Text.join "\n\n" blocks
 
 str :: Text -> Text
 str contents = "\"" + contents + "\""

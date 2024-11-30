@@ -31,4 +31,4 @@ add typeName typeDeclaration registry
 
 typeDeclarations :: Registry -> Text
 typeDeclarations (Registry _ tuples) =
-  Python.separate (List.reverseMap Pair.second tuples)
+  Python.lines (List.reverseMap Pair.second tuples)
