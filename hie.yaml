@@ -18,25 +18,28 @@ cradle:
     - path: "opensolid-python/src/Main.hs"
       component: "opensolid-python:exe:opensolid-python"
 
-    - path: "opensolid-python/src/CTypes.hs"
+    - path: "opensolid-python/src/Python/Class.hs"
       component: "opensolid-python:exe:opensolid-python"
 
-    - path: "opensolid-python/src/Function.hs"
+    - path: "opensolid-python/src/Python/FFI.hs"
       component: "opensolid-python:exe:opensolid-python"
 
-    - path: "opensolid-python/src/MemberFunction.hs"
+    - path: "opensolid-python/src/Python/Function.hs"
+      component: "opensolid-python:exe:opensolid-python"
+
+    - path: "opensolid-python/src/Python/MemberFunction.hs"
       component: "opensolid-python:exe:opensolid-python"
 
     - path: "opensolid-python/src/Python.hs"
       component: "opensolid-python:exe:opensolid-python"
 
-    - path: "opensolid-python/src/StaticFunction.hs"
+    - path: "opensolid-python/src/Python/StaticFunction.hs"
       component: "opensolid-python:exe:opensolid-python"
 
-    - path: "opensolid-python/src/Type.hs"
+    - path: "opensolid-python/src/Python/Type.hs"
       component: "opensolid-python:exe:opensolid-python"
 
-    - path: "opensolid-python/src/TypeRegistry.hs"
+    - path: "opensolid-python/src/Python/Type/Registry.hs"
       component: "opensolid-python:exe:opensolid-python"
 
     - path: "opensolid-sandbox/src/Main.hs"

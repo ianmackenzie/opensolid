@@ -161,8 +161,9 @@ class Range:
 
     @staticmethod
     def unit() -> Range_Unitless:
+        inputs = c_void_p()
         output = c_void_p()
-        _lib.opensolid_Range_unit(c_void_p(), ctypes.byref(output))
+        _lib.opensolid_Range_unit(ctypes.byref(inputs), ctypes.byref(output))
         return Range_Unitless(ptr=output)
 
     @overload
@@ -379,8 +380,9 @@ class Vector2d:
 
     @staticmethod
     def zero() -> Vector2d_Meters:
+        inputs = c_void_p()
         output = c_void_p()
-        _lib.opensolid_Vector2d_zero(c_void_p(), ctypes.byref(output))
+        _lib.opensolid_Vector2d_zero(ctypes.byref(inputs), ctypes.byref(output))
         return Vector2d_Meters(ptr=output)
 
     @staticmethod
@@ -568,8 +570,7 @@ class Vector2d_Unitless:
         return (output.field0, output.field1)
 
     def direction(self) -> Direction2d:
-        tolerance = _float_tolerance()
-        inputs = _Tuple2_c_double_c_void_p(tolerance, self.__ptr__)
+        inputs = _Tuple2_c_double_c_void_p(_float_tolerance(), self.__ptr__)
         output = _Result_c_void_p()
         _lib.opensolid_Vector2dUnitless_direction(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -594,8 +595,7 @@ class Vector2d_Meters:
         return (Length(output.field0), Length(output.field1))
 
     def direction(self) -> Direction2d:
-        tolerance = _length_tolerance()
-        inputs = _Tuple2_c_double_c_void_p(tolerance.value, self.__ptr__)
+        inputs = _Tuple2_c_double_c_void_p(_length_tolerance().value, self.__ptr__)
         output = _Result_c_void_p()
         _lib.opensolid_Vector2dMeters_direction(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -613,38 +613,44 @@ class Direction2d:
 
     @staticmethod
     def x() -> Direction2d:
+        inputs = c_void_p()
         output = c_void_p()
-        _lib.opensolid_Direction2d_x(c_void_p(), ctypes.byref(output))
+        _lib.opensolid_Direction2d_x(ctypes.byref(inputs), ctypes.byref(output))
         return Direction2d(ptr=output)
 
     @staticmethod
     def y() -> Direction2d:
+        inputs = c_void_p()
         output = c_void_p()
-        _lib.opensolid_Direction2d_y(c_void_p(), ctypes.byref(output))
+        _lib.opensolid_Direction2d_y(ctypes.byref(inputs), ctypes.byref(output))
         return Direction2d(ptr=output)
 
     @staticmethod
     def positive_x() -> Direction2d:
+        inputs = c_void_p()
         output = c_void_p()
-        _lib.opensolid_Direction2d_positiveX(c_void_p(), ctypes.byref(output))
+        _lib.opensolid_Direction2d_positiveX(ctypes.byref(inputs), ctypes.byref(output))
         return Direction2d(ptr=output)
 
     @staticmethod
     def positive_y() -> Direction2d:
+        inputs = c_void_p()
         output = c_void_p()
-        _lib.opensolid_Direction2d_positiveY(c_void_p(), ctypes.byref(output))
+        _lib.opensolid_Direction2d_positiveY(ctypes.byref(inputs), ctypes.byref(output))
         return Direction2d(ptr=output)
 
     @staticmethod
     def negative_x() -> Direction2d:
+        inputs = c_void_p()
         output = c_void_p()
-        _lib.opensolid_Direction2d_negativeX(c_void_p(), ctypes.byref(output))
+        _lib.opensolid_Direction2d_negativeX(ctypes.byref(inputs), ctypes.byref(output))
         return Direction2d(ptr=output)
 
     @staticmethod
     def negative_y() -> Direction2d:
+        inputs = c_void_p()
         output = c_void_p()
-        _lib.opensolid_Direction2d_negativeY(c_void_p(), ctypes.byref(output))
+        _lib.opensolid_Direction2d_negativeY(ctypes.byref(inputs), ctypes.byref(output))
         return Direction2d(ptr=output)
 
     @staticmethod
@@ -669,8 +675,9 @@ class Point2d:
 
     @staticmethod
     def origin() -> Point2d_Meters:
+        inputs = c_void_p()
         output = c_void_p()
-        _lib.opensolid_Point2d_origin(c_void_p(), ctypes.byref(output))
+        _lib.opensolid_Point2d_origin(ctypes.byref(inputs), ctypes.byref(output))
         return Point2d_Meters(ptr=output)
 
     @overload
@@ -905,8 +912,9 @@ class Curve1d:
 
     @staticmethod
     def t() -> Curve1d_Unitless:
+        inputs = c_void_p()
         output = c_void_p()
-        _lib.opensolid_Curve1d_t(c_void_p(), ctypes.byref(output))
+        _lib.opensolid_Curve1d_t(ctypes.byref(inputs), ctypes.byref(output))
         return Curve1d_Unitless(ptr=output)
 
 

@@ -1,4 +1,4 @@
-module Class (name) where
+module Python.Class (name) where
 
 import OpenSolid
 import OpenSolid.API.Name (Name)

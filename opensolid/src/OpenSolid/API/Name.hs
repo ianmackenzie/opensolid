@@ -7,12 +7,12 @@ module OpenSolid.API.Name
   )
 where
 
-import OpenSolid
-import Text qualified
-import NonEmpty qualified
+import Data.Char qualified
 import Data.Text qualified
 import List qualified
-import Data.Char qualified
+import NonEmpty qualified
+import OpenSolid
+import Text qualified
 
 newtype Name = Name (NonEmpty Text)
 

@@ -1,6 +1,5 @@
 module OpenSolid.API.Constraint (Constraint (..)) where
 
 data Constraint
-  = NoConstraint
-  | ToleranceUnitless
+  = ToleranceUnitless
   | ToleranceMeters

@@ -2,17 +2,21 @@ module OpenSolid.API.MemberFunction
   ( MemberFunction (..)
   , ffiName
   , invoke
+  , signature
   )
 where
 
 import Data.Proxy (Proxy (Proxy))
 import Foreign (Ptr)
 import IO qualified
+import List qualified
 import OpenSolid
+import OpenSolid.API.Constraint (Constraint (..))
 import OpenSolid.API.Name (Name)
 import OpenSolid.API.Name qualified as Name
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
+import Pair qualified
 import Text qualified
 import Tolerance qualified
 import Units (Meters)
@@ -110,73 +114,10 @@ data MemberFunction value where
     MemberFunction value
 
 ffiName :: Name -> MemberFunction value -> Text
-ffiName functionName memberFunction = case memberFunction of
-  MemberFunction0 _ -> Name.camelCase functionName
-  MemberFunction0U _ -> Name.camelCase functionName
-  MemberFunction0M _ -> Name.camelCase functionName
-  MemberFunction1 _ f -> ffiName1 functionName f
-  MemberFunction1U _ f -> ffiName1 functionName (Tolerance.exactly f)
-  MemberFunction1M _ f -> ffiName1 functionName (Tolerance.exactly f)
-  MemberFunction2 _ _ f -> ffiName2 functionName f
-  MemberFunction2U _ _ f -> ffiName2 functionName (Tolerance.exactly f)
-  MemberFunction2M _ _ f -> ffiName2 functionName (Tolerance.exactly f)
-  MemberFunction3 _ _ _ f -> ffiName3 functionName f
-  MemberFunction3U _ _ _ f -> ffiName3 functionName (Tolerance.exactly f)
-  MemberFunction3M _ _ _ f -> ffiName3 functionName (Tolerance.exactly f)
-  MemberFunction4 _ _ _ _ f -> ffiName4 functionName f
-  MemberFunction4U _ _ _ _ f -> ffiName4 functionName (Tolerance.exactly f)
-  MemberFunction4M _ _ _ _ f -> ffiName4 functionName (Tolerance.exactly f)
-
-ffiName1 ::
-  forall a value result.
-  (FFI a, FFI value, FFI result) =>
-  Name ->
-  (a -> value -> result) ->
-  Text
-ffiName1 functionName _ =
-  Name.camelCase functionName + "_" + FFI.typeName @a Proxy
-
-ffiName2 ::
-  forall a b value result.
-  (FFI a, FFI b, FFI value, FFI result) =>
-  Name ->
-  (a -> b -> value -> result) ->
-  Text
-ffiName2 functionName _ =
-  Text.join "_" $
-    [ Name.camelCase functionName
-    , FFI.typeName @a Proxy
-    , FFI.typeName @b Proxy
-    ]
-
-ffiName3 ::
-  forall a b c value result.
-  (FFI a, FFI b, FFI c, FFI value, FFI result) =>
-  Name ->
-  (a -> b -> c -> value -> result) ->
-  Text
-ffiName3 functionName _ =
-  Text.join "_" $
-    [ Name.camelCase functionName
-    , FFI.typeName @a Proxy
-    , FFI.typeName @b Proxy
-    , FFI.typeName @c Proxy
-    ]
-
-ffiName4 ::
-  forall a b c d value result.
-  (FFI a, FFI b, FFI c, FFI d, FFI value, FFI result) =>
-  Name ->
-  (a -> b -> c -> d -> value -> result) ->
-  Text
-ffiName4 functionName _ =
-  Text.join "_" $
-    [ Name.camelCase functionName
-    , FFI.typeName @a Proxy
-    , FFI.typeName @b Proxy
-    , FFI.typeName @c Proxy
-    , FFI.typeName @d Proxy
-    ]
+ffiName functionName memberFunction = do
+  let (_, arguments, _, _) = signature memberFunction
+  let argumentTypes = List.map Pair.second arguments
+  Text.join "_" (Name.camelCase functionName : List.map FFI.typeName argumentTypes)
 
 invoke :: MemberFunction value -> Ptr () -> Ptr () -> IO ()
 invoke function = case function of
@@ -240,3 +181,254 @@ invoke function = case function of
     \inputPtr outputPtr -> IO.do
       (tolerance, arg1, arg2, arg3, arg4, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 arg2 arg3 arg4 self))
+
+type Signature = (Maybe Constraint, List (Name, FFI.Type), FFI.Type, FFI.Type)
+
+signature :: MemberFunction value -> (Maybe Constraint, List (Name, FFI.Type), FFI.Type, FFI.Type)
+signature staticFunction = case staticFunction of
+  MemberFunction0 f -> signature0 f
+  MemberFunction0U f -> signature0U f
+  MemberFunction0M f -> signature0M f
+  MemberFunction1 arg1 f -> signature1 arg1 f
+  MemberFunction1U arg1 f -> signature1U arg1 f
+  MemberFunction1M arg1 f -> signature1M arg1 f
+  MemberFunction2 arg1 arg2 f -> signature2 arg1 arg2 f
+  MemberFunction2U arg1 arg2 f -> signature2U arg1 arg2 f
+  MemberFunction2M arg1 arg2 f -> signature2M arg1 arg2 f
+  MemberFunction3 arg1 arg2 arg3 f -> signature3 arg1 arg2 arg3 f
+  MemberFunction3U arg1 arg2 arg3 f -> signature3U arg1 arg2 arg3 f
+  MemberFunction3M arg1 arg2 arg3 f -> signature3M arg1 arg2 arg3 f
+  MemberFunction4 arg1 arg2 arg3 arg4 f -> signature4 arg1 arg2 arg3 arg4 f
+  MemberFunction4U arg1 arg2 arg3 arg4 f -> signature4U arg1 arg2 arg3 arg4 f
+  MemberFunction4M arg1 arg2 arg3 arg4 f -> signature4M arg1 arg2 arg3 arg4 f
+
+signature0 ::
+  forall value result.
+  (FFI value, FFI result) =>
+  (value -> result) ->
+  Signature
+signature0 _ = (Nothing, [], FFI.typeOf @value Proxy, FFI.typeOf @result Proxy)
+
+signature0U ::
+  forall value result.
+  (FFI value, FFI result) =>
+  (Tolerance Unitless => value -> result) ->
+  Signature
+signature0U _ = (Just ToleranceUnitless, [], FFI.typeOf @value Proxy, FFI.typeOf @result Proxy)
+
+signature0M ::
+  forall value result.
+  (FFI value, FFI result) =>
+  (Tolerance Meters => value -> result) ->
+  Signature
+signature0M _ = (Just ToleranceMeters, [], FFI.typeOf @value Proxy, FFI.typeOf @result Proxy)
+
+signature1 ::
+  forall a value result.
+  (FFI a, FFI value, FFI result) =>
+  Name ->
+  (a -> value -> result) ->
+  Signature
+signature1 arg1 _ =
+  ( Nothing
+  , [(arg1, FFI.typeOf @a Proxy)]
+  , FFI.typeOf @value Proxy
+  , FFI.typeOf @result Proxy
+  )
+
+signature1U ::
+  forall a value result.
+  (FFI a, FFI value, FFI result) =>
+  Name ->
+  (Tolerance Unitless => a -> value -> result) ->
+  Signature
+signature1U arg1 _ =
+  ( Just ToleranceUnitless
+  , [(arg1, FFI.typeOf @a Proxy)]
+  , FFI.typeOf @value Proxy
+  , FFI.typeOf @result Proxy
+  )
+
+signature1M ::
+  forall a value result.
+  (FFI a, FFI value, FFI result) =>
+  Name ->
+  (Tolerance Meters => a -> value -> result) ->
+  Signature
+signature1M arg1 _ =
+  ( Just ToleranceMeters
+  , [(arg1, FFI.typeOf @a Proxy)]
+  , FFI.typeOf @value Proxy
+  , FFI.typeOf @result Proxy
+  )
+
+signature2 ::
+  forall a b value result.
+  (FFI a, FFI b, FFI value, FFI result) =>
+  Name ->
+  Name ->
+  (a -> b -> value -> result) ->
+  Signature
+signature2 arg1 arg2 _ =
+  ( Nothing
+  ,
+    [ (arg1, FFI.typeOf @a Proxy)
+    , (arg2, FFI.typeOf @b Proxy)
+    ]
+  , FFI.typeOf @value Proxy
+  , FFI.typeOf @result Proxy
+  )
+
+signature2U ::
+  forall a b value result.
+  (FFI a, FFI b, FFI value, FFI result) =>
+  Name ->
+  Name ->
+  (Tolerance Unitless => a -> b -> value -> result) ->
+  Signature
+signature2U arg1 arg2 _ =
+  ( Just ToleranceUnitless
+  ,
+    [ (arg1, FFI.typeOf @a Proxy)
+    , (arg2, FFI.typeOf @b Proxy)
+    ]
+  , FFI.typeOf @value Proxy
+  , FFI.typeOf @result Proxy
+  )
+
+signature2M ::
+  forall a b value result.
+  (FFI a, FFI b, FFI value, FFI result) =>
+  Name ->
+  Name ->
+  (Tolerance Meters => a -> b -> value -> result) ->
+  Signature
+signature2M arg1 arg2 _ =
+  ( Just ToleranceMeters
+  ,
+    [ (arg1, FFI.typeOf @a Proxy)
+    , (arg2, FFI.typeOf @b Proxy)
+    ]
+  , FFI.typeOf @value Proxy
+  , FFI.typeOf @result Proxy
+  )
+
+signature3 ::
+  forall a b c value result.
+  (FFI a, FFI b, FFI c, FFI value, FFI result) =>
+  Name ->
+  Name ->
+  Name ->
+  (a -> b -> c -> value -> result) ->
+  Signature
+signature3 arg1 arg2 arg3 _ =
+  ( Nothing
+  ,
+    [ (arg1, FFI.typeOf @a Proxy)
+    , (arg2, FFI.typeOf @b Proxy)
+    , (arg3, FFI.typeOf @c Proxy)
+    ]
+  , FFI.typeOf @value Proxy
+  , FFI.typeOf @result Proxy
+  )
+
+signature3U ::
+  forall a b c value result.
+  (FFI a, FFI b, FFI c, FFI value, FFI result) =>
+  Name ->
+  Name ->
+  Name ->
+  (Tolerance Unitless => a -> b -> c -> value -> result) ->
+  Signature
+signature3U arg1 arg2 arg3 _ =
+  ( Just ToleranceUnitless
+  ,
+    [ (arg1, FFI.typeOf @a Proxy)
+    , (arg2, FFI.typeOf @b Proxy)
+    , (arg3, FFI.typeOf @c Proxy)
+    ]
+  , FFI.typeOf @value Proxy
+  , FFI.typeOf @result Proxy
+  )
+
+signature3M ::
+  forall a b c value result.
+  (FFI a, FFI b, FFI c, FFI value, FFI result) =>
+  Name ->
+  Name ->
+  Name ->
+  (Tolerance Meters => a -> b -> c -> value -> result) ->
+  Signature
+signature3M arg1 arg2 arg3 _ =
+  ( Just ToleranceMeters
+  ,
+    [ (arg1, FFI.typeOf @a Proxy)
+    , (arg2, FFI.typeOf @b Proxy)
+    , (arg3, FFI.typeOf @c Proxy)
+    ]
+  , FFI.typeOf @value Proxy
+  , FFI.typeOf @result Proxy
+  )
+
+signature4 ::
+  forall a b c d value result.
+  (FFI a, FFI b, FFI c, FFI d, FFI value, FFI result) =>
+  Name ->
+  Name ->
+  Name ->
+  Name ->
+  (a -> b -> c -> d -> value -> result) ->
+  Signature
+signature4 arg1 arg2 arg3 arg4 _ =
+  ( Nothing
+  ,
+    [ (arg1, FFI.typeOf @a Proxy)
+    , (arg2, FFI.typeOf @b Proxy)
+    , (arg3, FFI.typeOf @c Proxy)
+    , (arg4, FFI.typeOf @d Proxy)
+    ]
+  , FFI.typeOf @value Proxy
+  , FFI.typeOf @result Proxy
+  )
+
+signature4U ::
+  forall a b c d value result.
+  (FFI a, FFI b, FFI c, FFI d, FFI value, FFI result) =>
+  Name ->
+  Name ->
+  Name ->
+  Name ->
+  (Tolerance Unitless => a -> b -> c -> d -> value -> result) ->
+  Signature
+signature4U arg1 arg2 arg3 arg4 _ =
+  ( Just ToleranceUnitless
+  ,
+    [ (arg1, FFI.typeOf @a Proxy)
+    , (arg2, FFI.typeOf @b Proxy)
+    , (arg3, FFI.typeOf @c Proxy)
+    , (arg4, FFI.typeOf @d Proxy)
+    ]
+  , FFI.typeOf @value Proxy
+  , FFI.typeOf @result Proxy
+  )
+
+signature4M ::
+  forall a b c d value result.
+  (FFI a, FFI b, FFI c, FFI d, FFI value, FFI result) =>
+  Name ->
+  Name ->
+  Name ->
+  Name ->
+  (Tolerance Meters => a -> b -> c -> d -> value -> result) ->
+  Signature
+signature4M arg1 arg2 arg3 arg4 _ =
+  ( Just ToleranceMeters
+  ,
+    [ (arg1, FFI.typeOf @a Proxy)
+    , (arg2, FFI.typeOf @b Proxy)
+    , (arg3, FFI.typeOf @c Proxy)
+    , (arg4, FFI.typeOf @d Proxy)
+    ]
+  , FFI.typeOf @value Proxy
+  , FFI.typeOf @result Proxy
+  )

@@ -27,14 +27,14 @@ executable opensolid-python
     opensolid,
 
   other-modules:
-    Class
-    CTypes
-    Function
-    MemberFunction
+    Python.Class
+    Python.FFI
+    Python.Function
+    Python.MemberFunction
     Python
-    StaticFunction
-    Type
-    TypeRegistry
+    Python.StaticFunction
+    Python.Type
+    Python.Type.Registry
 
   ghc-options:
     -Wall

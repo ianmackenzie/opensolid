@@ -178,7 +178,6 @@ library
     NonEmpty
     OpenSolid
     OpenSolid.API
-    OpenSolid.API.Argument
     OpenSolid.API.Class
     OpenSolid.API.MemberFunction
     OpenSolid.API.StaticFunction

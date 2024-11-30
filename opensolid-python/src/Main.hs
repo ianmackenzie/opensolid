@@ -1,27 +1,26 @@
-{-# OPTIONS_GHC -Wno-unused-binds -Wno-unused-top-binds #-}
-
 module Main (main) where
 
-import CTypes qualified
-import Class qualified
-import Data.Proxy (Proxy (Proxy))
 import File qualified
-import Length (Length)
 import List qualified
-import MemberFunction qualified
+import Maybe qualified
 import OpenSolid
 import OpenSolid.API qualified as API
 import OpenSolid.API.Class (Class (Class))
+import OpenSolid.API.Constraint (Constraint)
 import OpenSolid.API.MemberFunction (MemberFunction (..))
+import OpenSolid.API.MemberFunction qualified as MemberFunction
 import OpenSolid.API.StaticFunction (StaticFunction (..))
-import OpenSolid.FFI (FFI)
+import OpenSolid.API.StaticFunction qualified as StaticFunction
 import OpenSolid.FFI qualified as FFI
 import Pair qualified
 import Python qualified
-import StaticFunction qualified
-import TypeRegistry (TypeRegistry)
-import TypeRegistry qualified
-import Units (Meters)
+import Python.Class qualified
+import Python.FFI qualified
+import Python.Function qualified
+import Python.MemberFunction qualified
+import Python.StaticFunction qualified
+import Python.Type.Registry (Registry)
+import Python.Type.Registry qualified
 
 preamble :: Text
 preamble =
@@ -134,19 +133,19 @@ classDefinition :: Class -> Text
 classDefinition (Class baseName maybeUnits staticFunctions memberFunctions) = do
   let functionPrefix = "opensolid_" + FFI.className baseName maybeUnits + "_"
   Python.lines
-    [ "class " + Class.name baseName maybeUnits + ":"
+    [ "class " + Python.Class.name baseName maybeUnits + ":"
     , "    def __init__(self, *, ptr : c_void_p) -> None:"
     , "        self.__ptr__ = ptr"
-    , Python.indent (List.map (StaticFunction.definition functionPrefix) staticFunctions)
-    , Python.indent (List.map (MemberFunction.definition functionPrefix) memberFunctions)
+    , Python.indent (List.map (Python.StaticFunction.definition functionPrefix) staticFunctions)
+    , Python.indent (List.map (Python.MemberFunction.definition functionPrefix) memberFunctions)
     ]
 
 ffiTypeDeclarations :: Text
 ffiTypeDeclarations = do
-  let registry = List.foldr registerClassTypes TypeRegistry.empty API.classes
-  TypeRegistry.typeDeclarations registry
+  let registry = List.foldr registerClassTypes Python.Type.Registry.empty API.classes
+  Python.Type.Registry.typeDeclarations registry
 
-registerClassTypes :: Class -> TypeRegistry -> TypeRegistry
+registerClassTypes :: Class -> Registry -> Registry
 registerClassTypes (Class _ _ staticFunctions memberFunctions) registry0 = do
   let staticFunctionOverloads = List.collect Pair.second staticFunctions
   let memberFunctionOverloads = List.collect Pair.second memberFunctions
@@ -154,208 +153,30 @@ registerClassTypes (Class _ _ staticFunctions memberFunctions) registry0 = do
   let registry2 = List.foldr registerMemberFunctionTypes registry1 memberFunctionOverloads
   registry2
 
-registerStaticFunctionTypes :: StaticFunction -> TypeRegistry -> TypeRegistry
-registerStaticFunctionTypes function registry = case function of
-  StaticFunction0 v -> register0N v registry
-  StaticFunction0U v -> register0F v registry
-  StaticFunction0M v -> register0L v registry
-  StaticFunction1 _ f -> register1N f registry
-  StaticFunction1U _ f -> register1F f registry
-  StaticFunction1M _ f -> register1L f registry
-  StaticFunction2 _ _ f -> register2N f registry
-  StaticFunction2U _ _ f -> register2F f registry
-  StaticFunction2M _ _ f -> register2L f registry
-  StaticFunction3 _ _ _ f -> register3N f registry
-  StaticFunction3U _ _ _ f -> register3F f registry
-  StaticFunction3M _ _ _ f -> register3L f registry
-  StaticFunction4 _ _ _ _ f -> register4N f registry
-  StaticFunction4U _ _ _ _ f -> register4F f registry
-  StaticFunction4M _ _ _ _ f -> register4L f registry
+registerStaticFunctionTypes :: StaticFunction -> Registry -> Registry
+registerStaticFunctionTypes staticFunction registry = do
+  let (maybeConstraint, arguments, returnType) = StaticFunction.signature staticFunction
+  let argumentTypes = List.map Pair.second arguments
+  List.foldr Python.FFI.registerType registry argumentTypes
+    |> Python.FFI.registerType returnType
+    |> registerArgumentsTupleType maybeConstraint argumentTypes
 
-registerMemberFunctionTypes :: MemberFunction value -> TypeRegistry -> TypeRegistry
-registerMemberFunctionTypes function registry = case function of
-  MemberFunction0 f -> register1N f registry
-  MemberFunction0U f -> register1F f registry
-  MemberFunction0M f -> register1L f registry
-  MemberFunction1 _ f -> register2N f registry
-  MemberFunction1U _ f -> register2F f registry
-  MemberFunction1M _ f -> register2L f registry
-  MemberFunction2 _ _ f -> register3N f registry
-  MemberFunction2U _ _ f -> register3F f registry
-  MemberFunction2M _ _ f -> register3L f registry
-  MemberFunction3 _ _ _ f -> register4N f registry
-  MemberFunction3U _ _ _ f -> register4F f registry
-  MemberFunction3M _ _ _ f -> register4L f registry
-  MemberFunction4 _ _ _ _ f -> register5N f registry
-  MemberFunction4U _ _ _ _ f -> register5F f registry
-  MemberFunction4M _ _ _ _ f -> register5L f registry
+registerMemberFunctionTypes :: MemberFunction value -> Registry -> Registry
+registerMemberFunctionTypes memberFunction registry = do
+  let (maybeConstraint, arguments, selfType, returnType) = MemberFunction.signature memberFunction
+  let argumentTypes = List.map Pair.second arguments + [selfType]
+  List.foldr Python.FFI.registerType registry argumentTypes
+    |> Python.FFI.registerType returnType
+    |> registerArgumentsTupleType maybeConstraint argumentTypes
 
-register0N :: forall a. FFI a => a -> TypeRegistry -> TypeRegistry
-register0N _ registry =
-  registry
-    |> CTypes.registerType @a Proxy
-
-register0F :: forall a. FFI a => (Tolerance Unitless => a) -> TypeRegistry -> TypeRegistry
-register0F _ registry =
-  registry
-    |> CTypes.registerType @Float Proxy
-    |> CTypes.registerType @a Proxy
-
-register0L :: forall a. FFI a => (Tolerance Meters => a) -> TypeRegistry -> TypeRegistry
-register0L _ registry =
-  registry
-    |> CTypes.registerType @Length Proxy
-    |> CTypes.registerType @a Proxy
-
-register1N :: forall a b. (FFI a, FFI b) => (a -> b) -> TypeRegistry -> TypeRegistry
-register1N _ registry =
-  registry
-    |> CTypes.registerType @a Proxy
-    |> CTypes.registerType @b Proxy
-
-register1F :: forall a b. (FFI a, FFI b) => (Tolerance Unitless => a -> b) -> TypeRegistry -> TypeRegistry
-register1F _ registry =
-  registry
-    |> CTypes.registerType @(Float, a) Proxy
-    |> CTypes.registerType @b Proxy
-
-register1L :: forall a b. (FFI a, FFI b) => (Tolerance Meters => a -> b) -> TypeRegistry -> TypeRegistry
-register1L _ registry =
-  registry
-    |> CTypes.registerType @(Length, a) Proxy
-    |> CTypes.registerType @b Proxy
-
-register2N ::
-  forall a b c.
-  (FFI a, FFI b, FFI c) =>
-  (a -> b -> c) ->
-  TypeRegistry ->
-  TypeRegistry
-register2N _ registry =
-  registry
-    |> CTypes.registerType @(a, b) Proxy
-    |> CTypes.registerType @c Proxy
-
-register2F ::
-  forall a b c.
-  (FFI a, FFI b, FFI c) =>
-  (Tolerance Unitless => a -> b -> c) ->
-  TypeRegistry ->
-  TypeRegistry
-register2F _ registry =
-  registry
-    |> CTypes.registerType @(Float, a, b) Proxy
-    |> CTypes.registerType @c Proxy
-
-register2L ::
-  forall a b c.
-  (FFI a, FFI b, FFI c) =>
-  (Tolerance Meters => a -> b -> c) ->
-  TypeRegistry ->
-  TypeRegistry
-register2L _ registry =
-  registry
-    |> CTypes.registerType @(Length, a, b) Proxy
-    |> CTypes.registerType @c Proxy
-
-register3N ::
-  forall a b c d.
-  (FFI a, FFI b, FFI c, FFI d) =>
-  (a -> b -> c -> d) ->
-  TypeRegistry ->
-  TypeRegistry
-register3N _ registry =
-  registry
-    |> CTypes.registerType @(a, b, c) Proxy
-    |> CTypes.registerType @d Proxy
-
-register3F ::
-  forall a b c d.
-  (FFI a, FFI b, FFI c, FFI d) =>
-  (Tolerance Unitless => a -> b -> c -> d) ->
-  TypeRegistry ->
-  TypeRegistry
-register3F _ registry =
-  registry
-    |> CTypes.registerType @(Float, a, b, c) Proxy
-    |> CTypes.registerType @d Proxy
-
-register3L ::
-  forall a b c d.
-  (FFI a, FFI b, FFI c, FFI d) =>
-  (Tolerance Meters => a -> b -> c -> d) ->
-  TypeRegistry ->
-  TypeRegistry
-register3L _ registry =
-  registry
-    |> CTypes.registerType @(Length, a, b, c) Proxy
-    |> CTypes.registerType @d Proxy
-
-register4N ::
-  forall a b c d e.
-  (FFI a, FFI b, FFI c, FFI d, FFI e) =>
-  (a -> b -> c -> d -> e) ->
-  TypeRegistry ->
-  TypeRegistry
-register4N _ registry =
-  registry
-    |> CTypes.registerType @(a, b, c, d) Proxy
-    |> CTypes.registerType @e Proxy
-
-register4F ::
-  forall a b c d e.
-  (FFI a, FFI b, FFI c, FFI d, FFI e) =>
-  (Tolerance Unitless => a -> b -> c -> d -> e) ->
-  TypeRegistry ->
-  TypeRegistry
-register4F _ registry =
-  registry
-    |> CTypes.registerType @(Float, a, b, c, d) Proxy
-    |> CTypes.registerType @e Proxy
-
-register4L ::
-  forall a b c d e.
-  (FFI a, FFI b, FFI c, FFI d, FFI e) =>
-  (Tolerance Meters => a -> b -> c -> d -> e) ->
-  TypeRegistry ->
-  TypeRegistry
-register4L _ registry =
-  registry
-    |> CTypes.registerType @(Length, a, b, c, d) Proxy
-    |> CTypes.registerType @e Proxy
-
-register5N ::
-  forall a b c d e f.
-  (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f) =>
-  (a -> b -> c -> d -> e -> f) ->
-  TypeRegistry ->
-  TypeRegistry
-register5N _ registry =
-  registry
-    |> CTypes.registerType @(a, b, c, d, e) Proxy
-    |> CTypes.registerType @f Proxy
-
-register5F ::
-  forall a b c d e f.
-  (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f) =>
-  (Tolerance Unitless => a -> b -> c -> d -> e -> f) ->
-  TypeRegistry ->
-  TypeRegistry
-register5F _ registry =
-  registry
-    |> CTypes.registerType @(Float, a, b, c, d, e) Proxy
-    |> CTypes.registerType @f Proxy
-
-register5L ::
-  forall a b c d e f.
-  (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f) =>
-  (Tolerance Meters => a -> b -> c -> d -> e -> f) ->
-  TypeRegistry ->
-  TypeRegistry
-register5L _ registry =
-  registry
-    |> CTypes.registerType @(Length, a, b, c, d, e) Proxy
-    |> CTypes.registerType @f Proxy
+registerArgumentsTupleType :: Maybe Constraint -> List FFI.Type -> Registry -> Registry
+registerArgumentsTupleType maybeConstraint argumentTypes registry = do
+  let toleranceType constraint = Pair.second (Python.Function.toleranceArgument constraint)
+  let maybeToleranceType = Maybe.map toleranceType maybeConstraint
+  case maybeToleranceType + argumentTypes of
+    [] -> registry
+    [_] -> registry
+    type1 : type2 : rest -> Python.FFI.registerType (FFI.Tuple type1 type2 rest) registry
 
 classDefinitions :: Text
 classDefinitions = Python.separate (List.map classDefinition API.classes)

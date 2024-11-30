@@ -2,30 +2,53 @@ module OpenSolid.API.StaticFunction
   ( StaticFunction (..)
   , ffiName
   , invoke
-  , arguments
+  , signature
   )
 where
 
 import Data.Proxy (Proxy (Proxy))
 import Foreign (Ptr)
 import IO qualified
+import List qualified
 import OpenSolid
-import OpenSolid.API.Argument (Argument (Argument))
+import OpenSolid.API.Constraint (Constraint (..))
 import OpenSolid.API.Name (Name)
 import OpenSolid.API.Name qualified as Name
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
+import Pair qualified
 import Text qualified
 import Tolerance qualified
 import Units (Meters)
 
 data StaticFunction where
-  StaticFunction0 :: FFI a => a -> StaticFunction
-  StaticFunction0U :: FFI a => (Tolerance Unitless => a) -> StaticFunction
-  StaticFunction0M :: FFI a => (Tolerance Meters => a) -> StaticFunction
-  StaticFunction1 :: (FFI a, FFI b) => Name -> (a -> b) -> StaticFunction
-  StaticFunction1U :: (FFI a, FFI b) => Name -> (Tolerance Unitless => a -> b) -> StaticFunction
-  StaticFunction1M :: (FFI a, FFI b) => Name -> (Tolerance Meters => a -> b) -> StaticFunction
+  StaticFunction0 ::
+    FFI a =>
+    a ->
+    StaticFunction
+  StaticFunction0U ::
+    FFI a =>
+    (Tolerance Unitless => a) ->
+    StaticFunction
+  StaticFunction0M ::
+    FFI a =>
+    (Tolerance Meters => a) ->
+    StaticFunction
+  StaticFunction1 ::
+    (FFI a, FFI b) =>
+    Name ->
+    (a -> b) ->
+    StaticFunction
+  StaticFunction1U ::
+    (FFI a, FFI b) =>
+    Name ->
+    (Tolerance Unitless => a -> b) ->
+    StaticFunction
+  StaticFunction1M ::
+    (FFI a, FFI b) =>
+    Name ->
+    (Tolerance Meters => a -> b) ->
+    StaticFunction
   StaticFunction2 ::
     (FFI a, FFI b, FFI c) =>
     Name ->
@@ -90,65 +113,11 @@ data StaticFunction where
     (Tolerance Meters => a -> b -> c -> d -> e) ->
     StaticFunction
 
--- TODO include e.g. 'ToleranceMeters' in FFI name, for explicitness?
 ffiName :: Name -> StaticFunction -> Text
-ffiName functionName staticFunction = case staticFunction of
-  StaticFunction0 _ -> Name.camelCase functionName
-  StaticFunction0U _ -> Name.camelCase functionName
-  StaticFunction0M _ -> Name.camelCase functionName
-  StaticFunction1 _ f -> ffiName1 functionName f
-  StaticFunction1U _ f -> ffiName1 functionName (Tolerance.exactly f)
-  StaticFunction1M _ f -> ffiName1 functionName (Tolerance.exactly f)
-  StaticFunction2 _ _ f -> ffiName2 functionName f
-  StaticFunction2U _ _ f -> ffiName2 functionName (Tolerance.exactly f)
-  StaticFunction2M _ _ f -> ffiName2 functionName (Tolerance.exactly f)
-  StaticFunction3 _ _ _ f -> ffiName3 functionName f
-  StaticFunction3U _ _ _ f -> ffiName3 functionName (Tolerance.exactly f)
-  StaticFunction3M _ _ _ f -> ffiName3 functionName (Tolerance.exactly f)
-  StaticFunction4 _ _ _ _ f -> ffiName4 functionName f
-  StaticFunction4U _ _ _ _ f -> ffiName4 functionName (Tolerance.exactly f)
-  StaticFunction4M _ _ _ _ f -> ffiName4 functionName (Tolerance.exactly f)
-
-ffiName1 :: forall a value. (FFI a, FFI value) => Name -> (a -> value) -> Text
-ffiName1 functionName _ =
-  Name.camelCase functionName + "_" + FFI.typeName @a Proxy
-
-ffiName2 :: forall a b value. (FFI a, FFI b, FFI value) => Name -> (a -> b -> value) -> Text
-ffiName2 functionName _ =
-  Text.join "_" $
-    [ Name.camelCase functionName
-    , FFI.typeName @a Proxy
-    , FFI.typeName @b Proxy
-    ]
-
-ffiName3 ::
-  forall a b c value.
-  (FFI a, FFI b, FFI c, FFI value) =>
-  Name ->
-  (a -> b -> c -> value) ->
-  Text
-ffiName3 functionName _ =
-  Text.join "_" $
-    [ Name.camelCase functionName
-    , FFI.typeName @a Proxy
-    , FFI.typeName @b Proxy
-    , FFI.typeName @c Proxy
-    ]
-
-ffiName4 ::
-  forall a b c d value.
-  (FFI a, FFI b, FFI c, FFI d, FFI value) =>
-  Name ->
-  (a -> b -> c -> d -> value) ->
-  Text
-ffiName4 functionName _ =
-  Text.join "_" $
-    [ Name.camelCase functionName
-    , FFI.typeName @a Proxy
-    , FFI.typeName @b Proxy
-    , FFI.typeName @c Proxy
-    , FFI.typeName @d Proxy
-    ]
+ffiName functionName memberFunction = do
+  let (_, arguments, _) = signature memberFunction
+  let argumentTypes = List.map Pair.second arguments
+  Text.join "_" (Name.camelCase functionName : List.map FFI.typeName argumentTypes)
 
 invoke :: StaticFunction -> Ptr () -> Ptr () -> IO ()
 invoke function = case function of
@@ -211,128 +180,144 @@ invoke function = case function of
       (tolerance, arg1, arg2, arg3, arg4) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 arg2 arg3 arg4))
 
--- TODO update to return new-style Constraint value
-arguments :: StaticFunction -> List Argument
-arguments staticFunction = case staticFunction of
-  StaticFunction0 v -> arguments0 v
-  StaticFunction0U v -> arguments0U v
-  StaticFunction0M v -> arguments0M v
-  StaticFunction1 arg1 f -> arguments1 arg1 f
-  StaticFunction1U arg1 f -> arguments1U arg1 f
-  StaticFunction1M arg1 f -> arguments1M arg1 f
-  StaticFunction2 arg1 arg2 f -> arguments2 arg1 arg2 f
-  StaticFunction2U arg1 arg2 f -> arguments2U arg1 arg2 f
-  StaticFunction2M arg1 arg2 f -> arguments2M arg1 arg2 f
-  StaticFunction3 arg1 arg2 arg3 f -> arguments3 arg1 arg2 arg3 f
-  StaticFunction3U arg1 arg2 arg3 f -> arguments3U arg1 arg2 arg3 f
-  StaticFunction3M arg1 arg2 arg3 f -> arguments3M arg1 arg2 arg3 f
-  StaticFunction4 arg1 arg2 arg3 arg4 f -> arguments4 arg1 arg2 arg3 arg4 f
-  StaticFunction4U arg1 arg2 arg3 arg4 f -> arguments4U arg1 arg2 arg3 arg4 f
-  StaticFunction4M arg1 arg2 arg3 arg4 f -> arguments4M arg1 arg2 arg3 arg4 f
+type Signature = (Maybe Constraint, List (Name, FFI.Type), FFI.Type)
 
-arguments0 :: forall a. FFI a => a -> List Argument
-arguments0 _ = []
+signature :: StaticFunction -> (Maybe Constraint, List (Name, FFI.Type), FFI.Type)
+signature staticFunction = case staticFunction of
+  StaticFunction0 v -> signature0 v
+  StaticFunction0U v -> signature0U v
+  StaticFunction0M v -> signature0M v
+  StaticFunction1 arg1 f -> signature1 arg1 f
+  StaticFunction1U arg1 f -> signature1U arg1 f
+  StaticFunction1M arg1 f -> signature1M arg1 f
+  StaticFunction2 arg1 arg2 f -> signature2 arg1 arg2 f
+  StaticFunction2U arg1 arg2 f -> signature2U arg1 arg2 f
+  StaticFunction2M arg1 arg2 f -> signature2M arg1 arg2 f
+  StaticFunction3 arg1 arg2 arg3 f -> signature3 arg1 arg2 arg3 f
+  StaticFunction3U arg1 arg2 arg3 f -> signature3U arg1 arg2 arg3 f
+  StaticFunction3M arg1 arg2 arg3 f -> signature3M arg1 arg2 arg3 f
+  StaticFunction4 arg1 arg2 arg3 arg4 f -> signature4 arg1 arg2 arg3 arg4 f
+  StaticFunction4U arg1 arg2 arg3 arg4 f -> signature4U arg1 arg2 arg3 arg4 f
+  StaticFunction4M arg1 arg2 arg3 arg4 f -> signature4M arg1 arg2 arg3 arg4 f
 
-arguments0U :: forall a. FFI a => (Tolerance Unitless => a) -> List Argument
-arguments0U _ = []
+signature0 :: forall a. FFI a => a -> Signature
+signature0 _ = (Nothing, [], FFI.typeOf @a Proxy)
 
-arguments0M :: forall a. FFI a => (Tolerance Meters => a) -> List Argument
-arguments0M _ = []
+signature0U :: forall a. FFI a => (Tolerance Unitless => a) -> Signature
+signature0U _ = (Just ToleranceUnitless, [], FFI.typeOf @a Proxy)
 
-arguments1 ::
+signature0M :: forall a. FFI a => (Tolerance Meters => a) -> Signature
+signature0M _ = (Just ToleranceMeters, [], FFI.typeOf @a Proxy)
+
+signature1 ::
   forall a b.
   (FFI a, FFI b) =>
   Name ->
   (a -> b) ->
-  List Argument
-arguments1 arg1 _ = [Argument @a Proxy arg1]
+  Signature
+signature1 arg1 _ = (Nothing, [(arg1, FFI.typeOf @a Proxy)], FFI.typeOf @b Proxy)
 
-arguments1U ::
+signature1U ::
   forall a b.
   (FFI a, FFI b) =>
   Name ->
   (Tolerance Unitless => a -> b) ->
-  List Argument
-arguments1U arg1 _ = [Argument @a Proxy arg1]
+  Signature
+signature1U arg1 _ = (Just ToleranceUnitless, [(arg1, FFI.typeOf @a Proxy)], FFI.typeOf @b Proxy)
 
-arguments1M ::
+signature1M ::
   forall a b.
   (FFI a, FFI b) =>
   Name ->
   (Tolerance Meters => a -> b) ->
-  List Argument
-arguments1M arg1 _ = [Argument @a Proxy arg1]
+  Signature
+signature1M arg1 _ = (Just ToleranceMeters, [(arg1, FFI.typeOf @a Proxy)], FFI.typeOf @b Proxy)
 
-arguments2 ::
+signature2 ::
   forall a b c.
   (FFI a, FFI b, FFI c) =>
   Name ->
   Name ->
   (a -> b -> c) ->
-  List Argument
-arguments2 arg1 arg2 _ = [Argument @a Proxy arg1, Argument @b Proxy arg2]
+  Signature
+signature2 arg1 arg2 _ =
+  (Nothing, [(arg1, FFI.typeOf @a Proxy), (arg2, FFI.typeOf @b Proxy)], FFI.typeOf @c Proxy)
 
-arguments2U ::
+signature2U ::
   forall a b c.
   (FFI a, FFI b, FFI c) =>
   Name ->
   Name ->
   (Tolerance Unitless => a -> b -> c) ->
-  List Argument
-arguments2U arg1 arg2 _ = [Argument @a Proxy arg1, Argument @b Proxy arg2]
+  Signature
+signature2U arg1 arg2 _ =
+  (Just ToleranceUnitless, [(arg1, FFI.typeOf @a Proxy), (arg2, FFI.typeOf @b Proxy)], FFI.typeOf @c Proxy)
 
-arguments2M ::
+signature2M ::
   forall a b c.
   (FFI a, FFI b, FFI c) =>
   Name ->
   Name ->
   (Tolerance Meters => a -> b -> c) ->
-  List Argument
-arguments2M arg1 arg2 _ = [Argument @a Proxy arg1, Argument @b Proxy arg2]
+  Signature
+signature2M arg1 arg2 _ =
+  (Just ToleranceMeters, [(arg1, FFI.typeOf @a Proxy), (arg2, FFI.typeOf @b Proxy)], FFI.typeOf @c Proxy)
 
-arguments3 ::
+signature3 ::
   forall a b c d.
   (FFI a, FFI b, FFI c, FFI d) =>
   Name ->
   Name ->
   Name ->
   (a -> b -> c -> d) ->
-  List Argument
-arguments3 arg1 arg2 arg3 _ =
-  [ Argument @a Proxy arg1
-  , Argument @b Proxy arg2
-  , Argument @c Proxy arg3
-  ]
+  Signature
+signature3 arg1 arg2 arg3 _ =
+  ( Nothing
+  ,
+    [ (arg1, FFI.typeOf @a Proxy)
+    , (arg2, FFI.typeOf @b Proxy)
+    , (arg3, FFI.typeOf @c Proxy)
+    ]
+  , FFI.typeOf @d Proxy
+  )
 
-arguments3U ::
+signature3U ::
   forall a b c d.
   (FFI a, FFI b, FFI c, FFI d) =>
   Name ->
   Name ->
   Name ->
   (Tolerance Unitless => a -> b -> c -> d) ->
-  List Argument
-arguments3U arg1 arg2 arg3 _ =
-  [ Argument @a Proxy arg1
-  , Argument @b Proxy arg2
-  , Argument @c Proxy arg3
-  ]
+  Signature
+signature3U arg1 arg2 arg3 _ =
+  ( Just ToleranceUnitless
+  ,
+    [ (arg1, FFI.typeOf @a Proxy)
+    , (arg2, FFI.typeOf @b Proxy)
+    , (arg3, FFI.typeOf @c Proxy)
+    ]
+  , FFI.typeOf @d Proxy
+  )
 
-arguments3M ::
+signature3M ::
   forall a b c d.
   (FFI a, FFI b, FFI c, FFI d) =>
   Name ->
   Name ->
   Name ->
   (Tolerance Meters => a -> b -> c -> d) ->
-  List Argument
-arguments3M arg1 arg2 arg3 _ =
-  [ Argument @a Proxy arg1
-  , Argument @b Proxy arg2
-  , Argument @c Proxy arg3
-  ]
+  Signature
+signature3M arg1 arg2 arg3 _ =
+  ( Just ToleranceMeters
+  ,
+    [ (arg1, FFI.typeOf @a Proxy)
+    , (arg2, FFI.typeOf @b Proxy)
+    , (arg3, FFI.typeOf @c Proxy)
+    ]
+  , FFI.typeOf @d Proxy
+  )
 
-arguments4 ::
+signature4 ::
   forall a b c d e.
   (FFI a, FFI b, FFI c, FFI d, FFI e) =>
   Name ->
@@ -340,15 +325,19 @@ arguments4 ::
   Name ->
   Name ->
   (a -> b -> c -> d -> e) ->
-  List Argument
-arguments4 arg1 arg2 arg3 arg4 _ =
-  [ Argument @a Proxy arg1
-  , Argument @b Proxy arg2
-  , Argument @c Proxy arg3
-  , Argument @d Proxy arg4
-  ]
+  Signature
+signature4 arg1 arg2 arg3 arg4 _ =
+  ( Nothing
+  ,
+    [ (arg1, FFI.typeOf @a Proxy)
+    , (arg2, FFI.typeOf @b Proxy)
+    , (arg3, FFI.typeOf @c Proxy)
+    , (arg4, FFI.typeOf @d Proxy)
+    ]
+  , FFI.typeOf @e Proxy
+  )
 
-arguments4U ::
+signature4U ::
   forall a b c d e.
   (FFI a, FFI b, FFI c, FFI d, FFI e) =>
   Name ->
@@ -356,15 +345,19 @@ arguments4U ::
   Name ->
   Name ->
   (Tolerance Unitless => a -> b -> c -> d -> e) ->
-  List Argument
-arguments4U arg1 arg2 arg3 arg4 _ =
-  [ Argument @a Proxy arg1
-  , Argument @b Proxy arg2
-  , Argument @c Proxy arg3
-  , Argument @d Proxy arg4
-  ]
+  Signature
+signature4U arg1 arg2 arg3 arg4 _ =
+  ( Just ToleranceUnitless
+  ,
+    [ (arg1, FFI.typeOf @a Proxy)
+    , (arg2, FFI.typeOf @b Proxy)
+    , (arg3, FFI.typeOf @c Proxy)
+    , (arg4, FFI.typeOf @d Proxy)
+    ]
+  , FFI.typeOf @e Proxy
+  )
 
-arguments4M ::
+signature4M ::
   forall a b c d e.
   (FFI a, FFI b, FFI c, FFI d, FFI e) =>
   Name ->
@@ -372,10 +365,14 @@ arguments4M ::
   Name ->
   Name ->
   (Tolerance Meters => a -> b -> c -> d -> e) ->
-  List Argument
-arguments4M arg1 arg2 arg3 arg4 _ =
-  [ Argument @a Proxy arg1
-  , Argument @b Proxy arg2
-  , Argument @c Proxy arg3
-  , Argument @d Proxy arg4
-  ]
+  Signature
+signature4M arg1 arg2 arg3 arg4 _ =
+  ( Just ToleranceMeters
+  ,
+    [ (arg1, FFI.typeOf @a Proxy)
+    , (arg2, FFI.typeOf @b Proxy)
+    , (arg3, FFI.typeOf @c Proxy)
+    , (arg4, FFI.typeOf @d Proxy)
+    ]
+  , FFI.typeOf @e Proxy
+  )
