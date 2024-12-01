@@ -21,5 +21,5 @@ else:
     print(b.value)
 
 v = Vector2d.xy(1,2)
-with Tolerance(1e-12):
+with Tolerance(1e-9):
     print(v.direction())
