@@ -1,41 +1,73 @@
 module OpenSolid.API.Class
   ( Class (..)
-  , abstract
-  , concrete
+  , unitless
+  , withUnits
+  , nestedUnitless
+  , nestedWithUnits
+  , withStaticFunctions
+  , withMemberFunctions
+  , withNestedClasses
   )
 where
 
 import OpenSolid
 import OpenSolid.API.MemberFunction (MemberFunction)
 import OpenSolid.API.Name (Name)
-import OpenSolid.API.Name qualified as Name
 import OpenSolid.API.StaticFunction (StaticFunction)
 import OpenSolid.FFI (FFI)
+import OpenSolid.FFI qualified as FFI
 
 data Class where
   Class ::
     FFI value =>
-    { name :: Name
-    , units :: Maybe Name
+    { id :: FFI.Id
     , staticFunctions :: List (Name, List StaticFunction)
     , memberFunctions :: List (Name, List (MemberFunction value))
+    , nestedClasses :: List Class
     } ->
     Class
 
-abstract :: Text -> List (Name, List StaticFunction) -> Class
-abstract name staticFunctions =
+unitless :: Text -> Class
+unitless name =
   Class
-    { name = Name.parse name
-    , units = Nothing
-    , staticFunctions
+    { id = FFI.classId name Nothing
+    , staticFunctions = []
     , memberFunctions = [] :: List (Name, List (MemberFunction Int))
+    , nestedClasses = []
     }
 
-concrete :: FFI value => Text -> Text -> List (Name, List (MemberFunction value)) -> Class
-concrete name units memberFunctions =
+withUnits :: Text -> Text -> Class
+withUnits name units =
   Class
-    { name = Name.parse name
-    , units = Just (Name.parse units)
+    { id = FFI.classId name (Just units)
     , staticFunctions = []
-    , memberFunctions
+    , memberFunctions = [] :: List (Name, List (MemberFunction Int))
+    , nestedClasses = []
     }
+
+nestedUnitless :: Text -> Text -> Class
+nestedUnitless parentName childName =
+  Class
+    { id = FFI.nestedClassId parentName childName Nothing
+    , staticFunctions = []
+    , memberFunctions = [] :: List (Name, List (MemberFunction Int))
+    , nestedClasses = []
+    }
+
+nestedWithUnits :: Text -> Text -> Text -> Class
+nestedWithUnits parentName childName units =
+  Class
+    { id = FFI.nestedClassId parentName childName (Just units)
+    , staticFunctions = []
+    , memberFunctions = [] :: List (Name, List (MemberFunction Int))
+    , nestedClasses = []
+    }
+
+withStaticFunctions :: List (Name, List StaticFunction) -> Class -> Class
+withStaticFunctions staticFunctions class_ = class_{staticFunctions = staticFunctions}
+
+withMemberFunctions :: FFI value => List (Name, List (MemberFunction value)) -> Class -> Class
+withMemberFunctions memberFunctions class_ = class_{memberFunctions = memberFunctions}
+
+withNestedClasses :: List Class -> Class -> Class
+withNestedClasses nestedClasses class_ = class_{nestedClasses = nestedClasses}

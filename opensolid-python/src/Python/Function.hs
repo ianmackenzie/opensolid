@@ -64,7 +64,7 @@ typePattern ffiType = case ffiType of
   FFI.Tuple type1 type2 rest -> tuplePattern type1 type2 rest
   FFI.Maybe valueType -> typePattern valueType + " | None"
   FFI.Result{} -> internalError "Should never have Result as input argument"
-  FFI.Class baseName maybeUnits -> Python.Class.name baseName maybeUnits + "()"
+  FFI.Class id -> Python.Class.qualifiedName id + "()"
 
 tuplePattern :: FFI.Type -> FFI.Type -> List FFI.Type -> Text
 tuplePattern type1 type2 rest = do
@@ -75,3 +75,4 @@ toleranceArgument :: Constraint -> (Text, FFI.Type)
 toleranceArgument constraint = case constraint of
   Constraint.ToleranceUnitless -> ("_float_tolerance()", FFI.typeOf @Float Proxy)
   Constraint.ToleranceMeters -> ("_length_tolerance()", FFI.typeOf @Length Proxy)
+  Constraint.ToleranceRadians -> ("_angle_tolerance()", FFI.typeOf @Angle Proxy)

@@ -113,11 +113,15 @@ data StaticFunction where
     (Tolerance Meters => a -> b -> c -> d -> e) ->
     StaticFunction
 
-ffiName :: Name -> StaticFunction -> Text
-ffiName functionName memberFunction = do
+ffiName :: FFI.Id -> Name -> StaticFunction -> Text
+ffiName classId functionName memberFunction = do
   let (_, arguments, _) = signature memberFunction
   let argumentTypes = List.map Pair.second arguments
-  Text.join "_" (Name.camelCase functionName : List.map FFI.typeName argumentTypes)
+  Text.join "_" $
+    "opensolid"
+      : FFI.className classId
+      : Name.camelCase functionName
+      : List.map FFI.typeName argumentTypes
 
 invoke :: StaticFunction -> Ptr () -> Ptr () -> IO ()
 invoke function = case function of

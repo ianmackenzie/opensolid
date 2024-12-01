@@ -16,9 +16,9 @@ import Python.Function qualified
 import Python.Type qualified
 import Text qualified
 
-definition :: Text -> (Name, List (MemberFunction value)) -> Text
-definition functionPrefix (functionName, memberFunctions) = do
-  case List.map (overload functionPrefix functionName) memberFunctions of
+definition :: FFI.Id -> (Name, List (MemberFunction value)) -> Text
+definition classId (functionName, memberFunctions) = do
+  case List.map (overload classId functionName) memberFunctions of
     [(signature, _, body)] -> Python.lines [signature, Python.indent [body]]
     overloads -> do
       let overloadDeclaration (signature, _, _) = Python.Function.overloadDeclaration signature
@@ -39,9 +39,9 @@ definition functionPrefix (functionName, memberFunctions) = do
             ]
         ]
 
-overload :: Text -> Name -> MemberFunction value -> (Text, Text, Text)
-overload functionPrefix functionName memberFunction = do
-  let ffiFunctionName = functionPrefix + MemberFunction.ffiName functionName memberFunction
+overload :: FFI.Id -> Name -> MemberFunction value -> (Text, Text, Text)
+overload classId functionName memberFunction = do
+  let ffiFunctionName = MemberFunction.ffiName classId functionName memberFunction
   let (maybeConstraint, arguments, selfType, returnType) = MemberFunction.signature memberFunction
   let signature = signatureN functionName arguments returnType
   let matchPattern = Python.Function.matchPattern arguments
@@ -50,9 +50,9 @@ overload functionPrefix functionName memberFunction = do
 
 signatureN :: Name -> List (Name, FFI.Type) -> FFI.Type -> Text
 signatureN functionName args returnType = do
-  let functionArgument (argName, argType) = Name.snakeCase argName + ": " + Python.Type.name argType
+  let functionArgument (argName, argType) = Name.snakeCase argName + ": " + Python.Type.qualifiedName argType
   let functionArguments = Text.join "," ("self" : List.map functionArgument args)
-  "def " + Name.snakeCase functionName + "(" + functionArguments + ") -> " + Python.Type.name returnType + ":"
+  "def " + Name.snakeCase functionName + "(" + functionArguments + ") -> " + Python.Type.qualifiedName returnType + ":"
 
 bodyN :: Text -> Maybe Constraint -> List (Name, FFI.Type) -> FFI.Type -> FFI.Type -> Text
 bodyN ffiFunctionName maybeConstraint arguments selfType returnType = do

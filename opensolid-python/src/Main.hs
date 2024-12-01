@@ -31,7 +31,7 @@ preamble =
     , ""
     , "import ctypes"
     , "import platform"
-    , "from ctypes import CDLL, Structure, Union, c_char_p, c_double, c_int64, c_size_t, c_void_p"
+    , "from ctypes import CDLL, POINTER, Structure, Union, c_char_p, c_double, c_int64, c_size_t, c_void_p"
     , "from pathlib import Path"
     , "from typing import Any, overload"
     , ""
@@ -130,14 +130,14 @@ preamble =
     ]
 
 classDefinition :: Class -> Text
-classDefinition (Class baseName maybeUnits staticFunctions memberFunctions) = do
-  let functionPrefix = "opensolid_" + FFI.className baseName maybeUnits + "_"
+classDefinition (Class id staticFunctions memberFunctions nestedClasses) = do
   Python.lines
-    [ "class " + Python.Class.name baseName maybeUnits + ":"
+    [ "class " + Python.Class.unqualifiedName id + ":"
     , "    def __init__(self, *, ptr : c_void_p) -> None:"
     , "        self.__ptr__ = ptr"
-    , Python.indent (List.map (Python.StaticFunction.definition functionPrefix) staticFunctions)
-    , Python.indent (List.map (Python.MemberFunction.definition functionPrefix) memberFunctions)
+    , Python.indent (List.map (Python.StaticFunction.definition id) staticFunctions)
+    , Python.indent (List.map (Python.MemberFunction.definition id) memberFunctions)
+    , Python.indent (List.map classDefinition nestedClasses)
     ]
 
 ffiTypeDeclarations :: Text
@@ -146,12 +146,13 @@ ffiTypeDeclarations = do
   Python.Type.Registry.typeDeclarations registry
 
 registerClassTypes :: Class -> Registry -> Registry
-registerClassTypes (Class _ _ staticFunctions memberFunctions) registry0 = do
+registerClassTypes (Class _ staticFunctions memberFunctions nestedClasses) registry0 = do
   let staticFunctionOverloads = List.collect Pair.second staticFunctions
   let memberFunctionOverloads = List.collect Pair.second memberFunctions
   let registry1 = List.foldr registerStaticFunctionTypes registry0 staticFunctionOverloads
   let registry2 = List.foldr registerMemberFunctionTypes registry1 memberFunctionOverloads
-  registry2
+  let registry3 = List.foldr registerClassTypes registry2 nestedClasses
+  registry3
 
 registerStaticFunctionTypes :: StaticFunction -> Registry -> Registry
 registerStaticFunctionTypes staticFunction registry = do

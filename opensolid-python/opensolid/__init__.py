@@ -6,6 +6,7 @@ import ctypes
 import platform
 from ctypes import (
     CDLL,
+    POINTER,
     Structure,
     Union,
     c_char_p,
@@ -131,28 +132,40 @@ def _angle_tolerance() -> Angle:
     raise TypeError(message)
 
 
+class _List_c_void_p(Structure):
+    _fields_ = [("field0", c_int64), ("field1", POINTER(c_void_p))]
+
+
+class _Result_List_c_void_p(Structure):
+    _fields_ = [
+        ("field0", c_int64),
+        ("field1", _ErrorMessage),
+        ("field2", _List_c_void_p),
+    ]
+
+
 class _Tuple2_c_double_c_void_p(Structure):
-    _fields_ = [("field0", c_double), ("field1", c_void_p)]  # noqa: RUF012
+    _fields_ = [("field0", c_double), ("field1", c_void_p)]
 
 
 class _Tuple2_c_void_p_c_void_p(Structure):
-    _fields_ = [("field0", c_void_p), ("field1", c_void_p)]  # noqa: RUF012
+    _fields_ = [("field0", c_void_p), ("field1", c_void_p)]
 
 
 class _Tuple2_c_double_c_double(Structure):
-    _fields_ = [("field0", c_double), ("field1", c_double)]  # noqa: RUF012
+    _fields_ = [("field0", c_double), ("field1", c_double)]
 
 
 class _Result_c_void_p(Structure):
-    _fields_ = [("field0", c_int64), ("field1", _ErrorMessage), ("field2", c_void_p)]  # noqa: RUF012
+    _fields_ = [("field0", c_int64), ("field1", _ErrorMessage), ("field2", c_void_p)]
 
 
 class _Maybe_c_void_p(Structure):
-    _fields_ = [("field0", c_int64), ("field1", c_void_p)]  # noqa: RUF012
+    _fields_ = [("field0", c_int64), ("field1", c_void_p)]
 
 
 class _Tuple3_c_void_p_c_void_p_c_void_p(Structure):
-    _fields_ = [("field0", c_void_p), ("field1", c_void_p), ("field2", c_void_p)]  # noqa: RUF012
+    _fields_ = [("field0", c_void_p), ("field1", c_void_p), ("field2", c_void_p)]
 
 
 class Range:
@@ -917,6 +930,111 @@ class Curve1d:
         _lib.opensolid_Curve1d_t(ctypes.byref(inputs), ctypes.byref(output))
         return Curve1d_Unitless(ptr=output)
 
+    @overload
+    @staticmethod
+    def sin(curve: Curve1d_Radians) -> Curve1d_Unitless:
+        pass
+
+    @overload
+    @staticmethod
+    def sin(curve: Curve1d_Unitless) -> Curve1d_Unitless:
+        pass
+
+    @staticmethod
+    def sin(*args, **keywords):
+        match (args, keywords):
+            case (
+                ([Curve1d_Radians() as curve], {})
+                | ([], {"curve": Curve1d_Radians() as curve})
+            ):
+                inputs = curve.__ptr__
+                output = c_void_p()
+                _lib.opensolid_Curve1d_sin_Curve1dRadians(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Curve1d_Unitless(ptr=output)
+            case (
+                ([Curve1d_Unitless() as curve], {})
+                | ([], {"curve": Curve1d_Unitless() as curve})
+            ):
+                inputs = curve.__ptr__
+                output = c_void_p()
+                _lib.opensolid_Curve1d_sin_Curve1dUnitless(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Curve1d_Unitless(ptr=output)
+            case _:
+                message = "Unexpected function arguments"
+                raise TypeError(message)
+
+    @overload
+    @staticmethod
+    def cos(curve: Curve1d_Radians) -> Curve1d_Unitless:
+        pass
+
+    @overload
+    @staticmethod
+    def cos(curve: Curve1d_Unitless) -> Curve1d_Unitless:
+        pass
+
+    @staticmethod
+    def cos(*args, **keywords):
+        match (args, keywords):
+            case (
+                ([Curve1d_Radians() as curve], {})
+                | ([], {"curve": Curve1d_Radians() as curve})
+            ):
+                inputs = curve.__ptr__
+                output = c_void_p()
+                _lib.opensolid_Curve1d_cos_Curve1dRadians(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Curve1d_Unitless(ptr=output)
+            case (
+                ([Curve1d_Unitless() as curve], {})
+                | ([], {"curve": Curve1d_Unitless() as curve})
+            ):
+                inputs = curve.__ptr__
+                output = c_void_p()
+                _lib.opensolid_Curve1d_cos_Curve1dUnitless(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Curve1d_Unitless(ptr=output)
+            case _:
+                message = "Unexpected function arguments"
+                raise TypeError(message)
+
+    @staticmethod
+    def sqrt(curve: Curve1d_Unitless) -> Curve1d_Unitless:
+        inputs = curve.__ptr__
+        output = c_void_p()
+        _lib.opensolid_Curve1d_sqrt_Curve1dUnitless(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Curve1d_Unitless(ptr=output)
+
+    class Root:
+        def __init__(self, *, ptr: c_void_p) -> None:
+            self.__ptr__ = ptr
+
+        def value(self) -> float:
+            inputs = self.__ptr__
+            output = c_double()
+            _lib.opensolid_Curve1dRoot_value(ctypes.byref(inputs), ctypes.byref(output))
+            return output.value
+
+        def order(self) -> int:
+            inputs = self.__ptr__
+            output = c_int64()
+            _lib.opensolid_Curve1dRoot_order(ctypes.byref(inputs), ctypes.byref(output))
+            return output.value
+
+        def sign(self) -> int:
+            inputs = self.__ptr__
+            output = c_int64()
+            _lib.opensolid_Curve1dRoot_sign(ctypes.byref(inputs), ctypes.byref(output))
+            return output.value
+
 
 class Curve1d_Unitless:
     def __init__(self, *, ptr: c_void_p) -> None:
@@ -938,6 +1056,49 @@ class Curve1d_Unitless:
         )
         return output.value
 
+    def zeros(self) -> list[Curve1d.Root]:
+        inputs = _Tuple2_c_double_c_void_p(_float_tolerance(), self.__ptr__)
+        output = _Result_List_c_void_p()
+        _lib.opensolid_Curve1dUnitless_zeros(ctypes.byref(inputs), ctypes.byref(output))
+        return (
+            [
+                Curve1d.Root(ptr=c_void_p(item))
+                for item in [
+                    output.field2.field1[index] for index in range(output.field2.field0)
+                ]
+            ]
+            if output.field0 == 0
+            else _error(output)
+        )
+
+
+class Curve1d_Radians:
+    def __init__(self, *, ptr: c_void_p) -> None:
+        self.__ptr__ = ptr
+
+    def evaluate(self, parameter_value: float) -> Angle:
+        inputs = _Tuple2_c_double_c_void_p(parameter_value, self.__ptr__)
+        output = c_double()
+        _lib.opensolid_Curve1dRadians_evaluate_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Angle(output.value)
+
+    def zeros(self) -> list[Curve1d.Root]:
+        inputs = _Tuple2_c_double_c_void_p(_angle_tolerance().value, self.__ptr__)
+        output = _Result_List_c_void_p()
+        _lib.opensolid_Curve1dRadians_zeros(ctypes.byref(inputs), ctypes.byref(output))
+        return (
+            [
+                Curve1d.Root(ptr=c_void_p(item))
+                for item in [
+                    output.field2.field1[index] for index in range(output.field2.field0)
+                ]
+            ]
+            if output.field0 == 0
+            else _error(output)
+        )
+
 
 class Curve1d_Meters:
     def __init__(self, *, ptr: c_void_p) -> None:
@@ -950,3 +1111,18 @@ class Curve1d_Meters:
             ctypes.byref(inputs), ctypes.byref(output)
         )
         return Length(output.value)
+
+    def zeros(self) -> list[Curve1d.Root]:
+        inputs = _Tuple2_c_double_c_void_p(_length_tolerance().value, self.__ptr__)
+        output = _Result_List_c_void_p()
+        _lib.opensolid_Curve1dMeters_zeros(ctypes.byref(inputs), ctypes.byref(output))
+        return (
+            [
+                Curve1d.Root(ptr=c_void_p(item))
+                for item in [
+                    output.field2.field1[index] for index in range(output.field2.field0)
+                ]
+            ]
+            if output.field0 == 0
+            else _error(output)
+        )

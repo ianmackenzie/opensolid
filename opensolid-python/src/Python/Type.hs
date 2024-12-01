@@ -1,4 +1,4 @@
-module Python.Type (name) where
+module Python.Type (qualifiedName) where
 
 import List qualified
 import OpenSolid
@@ -7,15 +7,15 @@ import OpenSolid.FFI qualified as FFI
 import Python.Class qualified
 import Text qualified
 
-name :: FFI.Type -> Text
-name ffiType = case ffiType of
+qualifiedName :: FFI.Type -> Text
+qualifiedName ffiType = case ffiType of
   FFI.Int -> "int"
   FFI.Float -> "float"
   FFI.Qty qtyName -> Name.pascalCase qtyName
-  FFI.List itemType -> "list[" + name itemType + "]"
+  FFI.List itemType -> "list[" + qualifiedName itemType + "]"
   FFI.Tuple first second rest -> do
-    let itemTypeNames = List.map name (first : second : rest)
+    let itemTypeNames = List.map qualifiedName (first : second : rest)
     "tuple[" + Text.join "," itemTypeNames + "]"
-  FFI.Maybe valueType -> name valueType + " | None"
-  FFI.Result valueType -> name valueType
-  FFI.Class baseName maybeUnits -> Python.Class.name baseName maybeUnits
+  FFI.Maybe valueType -> qualifiedName valueType + " | None"
+  FFI.Result valueType -> qualifiedName valueType
+  FFI.Class id -> Python.Class.qualifiedName id

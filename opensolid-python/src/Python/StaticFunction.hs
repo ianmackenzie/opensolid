@@ -16,9 +16,9 @@ import Python.Function qualified
 import Python.Type qualified
 import Text qualified
 
-definition :: Text -> (Name, List StaticFunction) -> Text
-definition functionPrefix (functionName, staticFunctions) = do
-  case List.map (overload functionPrefix functionName) staticFunctions of
+definition :: FFI.Id -> (Name, List StaticFunction) -> Text
+definition classId (functionName, staticFunctions) = do
+  case List.map (overload classId functionName) staticFunctions of
     [(signature, _, body)] -> Python.lines [signature, Python.indent [body]]
     overloads -> do
       let overloadDeclaration (signature, _, _) = Python.Function.overloadDeclaration signature
@@ -41,18 +41,18 @@ definition functionPrefix (functionName, staticFunctions) = do
             ]
         ]
 
-overload :: Text -> Name -> StaticFunction -> (Text, Text, Text)
-overload functionPrefix functionName staticFunction = do
-  let ffiFunctionName = functionPrefix + StaticFunction.ffiName functionName staticFunction
+overload :: FFI.Id -> Name -> StaticFunction -> (Text, Text, Text)
+overload classId functionName staticFunction = do
+  let ffiFunctionName = StaticFunction.ffiName classId functionName staticFunction
   let (maybeConstraint, arguments, returnType) = StaticFunction.signature staticFunction
-  let signature = signatureN functionName arguments (Python.Type.name returnType)
+  let signature = signatureN functionName arguments (Python.Type.qualifiedName returnType)
   let matchPattern = Python.Function.matchPattern arguments
   let body = bodyN ffiFunctionName maybeConstraint arguments returnType
   (signature, matchPattern, body)
 
 signatureN :: Name -> List (Name, FFI.Type) -> Text -> Text
 signatureN functionName args returnType = do
-  let functionArgument (argName, argType) = Name.snakeCase argName + ": " + Python.Type.name argType
+  let functionArgument (argName, argType) = Name.snakeCase argName + ": " + Python.Type.qualifiedName argType
   let functionArguments = Text.join "," (List.map functionArgument args)
   Python.lines
     [ "@staticmethod"

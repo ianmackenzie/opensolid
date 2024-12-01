@@ -1,7 +1,11 @@
 module OpenSolid.FFI
   ( FFI (representation)
+  , classId
+  , nestedClassId
   , classRepresentation
+  , nestedClassRepresentation
   , Type (..)
+  , Id (..)
   , typeOf
   , typeName
   , className
@@ -26,6 +30,7 @@ import Int qualified
 import Length (Length)
 import List qualified
 import Maybe qualified
+import NonEmpty qualified
 import OpenSolid hiding (Type)
 import OpenSolid.API.Name (Name)
 import OpenSolid.API.Name qualified as Name
@@ -61,11 +66,24 @@ data Representation a where
   -- followed by the representation of the successful value or exception
   ResultRep :: FFI a => Representation (Result x a)
   -- A class containing an opaque pointer to a Haskell value
-  ClassRep :: Name -> Maybe Name -> Representation a
+  ClassRep :: Id -> Representation a
+
+classId :: Text -> Maybe Text -> Id
+classId name maybeUnits =
+  Id (NonEmpty.singleton (Name.parse name)) (Maybe.map Name.parse maybeUnits)
+
+nestedClassId :: Text -> Text -> Maybe Text -> Id
+nestedClassId parentName childName maybeUnits = do
+  let classNames = NonEmpty.of2 (Name.parse parentName) (Name.parse childName)
+  Id classNames (Maybe.map Name.parse maybeUnits)
 
 classRepresentation :: Text -> Maybe Text -> Representation a
 classRepresentation name maybeUnits =
-  ClassRep (Name.parse name) (Maybe.map Name.parse maybeUnits)
+  ClassRep (classId name maybeUnits)
+
+nestedClassRepresentation :: Text -> Text -> Maybe Text -> Representation a
+nestedClassRepresentation parentName childName maybeUnits =
+  ClassRep (nestedClassId parentName childName maybeUnits)
 
 data Type
   = Int
@@ -75,7 +93,10 @@ data Type
   | Tuple Type Type (List Type)
   | Maybe Type
   | Result Type
-  | Class Name (Maybe Name)
+  | Class Id
+
+data Id
+  = Id (NonEmpty Name) (Maybe Name)
 
 typeOf :: FFI a => Proxy a -> Type
 typeOf proxy = case representation proxy of
@@ -90,7 +111,7 @@ typeOf proxy = case representation proxy of
   Tuple6Rep -> tuple6Type proxy
   MaybeRep -> maybeType proxy
   ResultRep -> resultType proxy
-  ClassRep baseName maybeUnits -> Class baseName maybeUnits
+  ClassRep id -> Class id
 
 listType :: forall a. FFI a => Proxy (List a) -> Type
 listType _ = List (typeOf @a Proxy)
@@ -151,11 +172,12 @@ typeName ffiType = case ffiType of
     "Tuple" + Text.int tupleSize + Text.concat (List.map typeName itemTypes)
   Maybe valueType -> "Maybe" + typeName valueType
   Result valueType -> "Result" + typeName valueType
-  Class baseName maybeUnits -> className baseName maybeUnits
+  Class id -> className id
 
-className :: Name -> Maybe Name -> Text
-className name maybeUnits =
-  Name.pascalCase name + Maybe.map Name.pascalCase maybeUnits
+className :: Id -> Text
+className (Id classNames maybeUnits) =
+  Text.concat (List.map Name.pascalCase (NonEmpty.toList classNames))
+    + Maybe.map Name.pascalCase maybeUnits
 
 size :: Type -> Int
 size ffiType = case ffiType of
@@ -166,7 +188,7 @@ size ffiType = case ffiType of
   Tuple type1 type2 rest -> Int.sumOf size (type1 : type2 : rest)
   Maybe valueType -> 8 + size valueType
   Result valueType -> 16 + size valueType
-  Class _ _ -> 8
+  Class _ -> 8
 
 instance FFI Float where
   representation _ = FloatRep
@@ -297,7 +319,7 @@ store ptr offset value = do
           -- Set error code and store pointer to string in output
           Foreign.pokeByteOff ptr offset (toInt64 1)
           Foreign.pokeByteOff ptr (offset + 8) messagePtr
-    ClassRep _ _ -> IO.do
+    ClassRep _ -> IO.do
       stablePtr <- Foreign.newStablePtr value
       Foreign.pokeByteOff ptr offset stablePtr
 
@@ -375,7 +397,7 @@ load ptr offset = do
         then IO.map Just (load ptr (offset + 8))
         else IO.succeed Nothing
     ResultRep{} -> internalError "Passing Result values as FFI arguments is not supported"
-    ClassRep _ _ -> IO.do
+    ClassRep _ -> IO.do
       stablePtr <- Foreign.peekByteOff ptr offset
       Foreign.deRefStablePtr stablePtr
 

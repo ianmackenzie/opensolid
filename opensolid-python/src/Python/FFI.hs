@@ -28,14 +28,14 @@ typeName ffiType = case ffiType of
   FFI.Tuple{} -> "_" + typeNameComponent ffiType
   FFI.Maybe{} -> "_" + typeNameComponent ffiType
   FFI.Result{} -> "_" + typeNameComponent ffiType
-  FFI.Class _ _ -> "c_void_p"
+  FFI.Class{} -> "c_void_p"
 
 typeNameComponent :: FFI.Type -> Text
 typeNameComponent ffiType = case ffiType of
   FFI.Int -> "c_int64"
   FFI.Float -> "c_double"
   FFI.Qty{} -> "c_double"
-  FFI.List{} -> "List"
+  FFI.List itemType -> "List_" + typeNameComponent itemType
   FFI.Tuple type1 type2 rest -> do
     let itemTypes = type1 : type2 : rest
     let numItems = List.length itemTypes
@@ -68,7 +68,7 @@ structDeclaration name fieldTypes = do
   let fieldTuples = List.mapWithIndex fieldTuple fieldTypes
   Python.lines
     [ "class " + name + "(Structure):"
-    , Python.indent ["_fields_ = " + Python.list fieldTuples + " # noqa: RUF012"]
+    , Python.indent ["_fields_ = " + Python.list fieldTuples]
     ]
 
 outputValue :: FFI.Type -> Text -> Text
@@ -76,22 +76,26 @@ outputValue ffiType varName = case ffiType of
   FFI.Int -> varName + ".value"
   FFI.Float -> varName + ".value"
   FFI.Qty className -> Python.call (Name.pascalCase className) [varName + ".value"]
-  FFI.List{} -> TODO
+  FFI.List itemType -> listOutputValue itemType varName
   FFI.Tuple type1 type2 rest -> tupleOutputValue varName type1 type2 rest
   FFI.Maybe valueType -> maybeOutputValue valueType varName
   FFI.Result valueType -> resultOutputValue valueType varName
-  FFI.Class baseName maybeUnits -> Python.Class.name baseName maybeUnits + "(ptr = " + varName + ")"
+  FFI.Class id -> Python.Class.qualifiedName id + "(ptr = " + varName + ")"
 
 fieldOutputValue :: FFI.Type -> Text -> Text
 fieldOutputValue ffiType varName = case ffiType of
   FFI.Int -> varName
   FFI.Float -> varName
   FFI.Qty className -> Name.pascalCase className + "(" + varName + ")"
-  FFI.List{} -> TODO
+  FFI.List itemType -> listOutputValue itemType varName
   FFI.Tuple type1 type2 rest -> tupleOutputValue varName type1 type2 rest
   FFI.Maybe valueType -> maybeOutputValue valueType varName
   FFI.Result valueType -> resultOutputValue valueType varName
-  FFI.Class baseName maybeUnits -> Python.Class.name baseName maybeUnits + "(ptr=c_void_p(" + varName + "))"
+  FFI.Class id -> Python.Class.qualifiedName id + "(ptr=c_void_p(" + varName + "))"
+
+listOutputValue :: FFI.Type -> Text -> Text
+listOutputValue itemType varName =
+  "[" + fieldOutputValue itemType "item" + " for item in [" + varName + ".field1[index] for index in range(" + varName + ".field0)]]"
 
 tupleOutputValue :: Text -> FFI.Type -> FFI.Type -> List FFI.Type -> Text
 tupleOutputValue varName type1 type2 rest = do
@@ -125,7 +129,7 @@ singleArgument varName ffiType = case ffiType of
   FFI.Tuple type1 type2 rest -> tupleArgumentValue ffiType type1 type2 rest varName
   FFI.Maybe valueType -> maybeArgumentValue ffiType valueType varName
   FFI.Result{} -> internalError "Should never have Result as input argument"
-  FFI.Class _ _ -> varName + ".__ptr__"
+  FFI.Class{} -> varName + ".__ptr__"
 
 fieldArgumentValue :: Text -> FFI.Type -> Text
 fieldArgumentValue varName ffiType = case ffiType of
@@ -160,16 +164,16 @@ registerType ffiType registry = do
       FFI.Int -> registry
       FFI.Float -> registry
       FFI.Qty _ -> registry
-      FFI.List{} -> registerList ffiType registry
+      FFI.List itemType -> registerList ffiType itemType registry
       FFI.Tuple type1 type2 rest -> registerTuple ffiType type1 type2 rest registry
       FFI.Maybe valueType -> registerMaybe ffiType valueType registry
       FFI.Result valueType -> registerResult ffiType valueType registry
-      FFI.Class _ _ -> registry
+      FFI.Class{} -> registry
 
-registerList :: FFI.Type -> Registry -> Registry
-registerList listType registry = do
+registerList :: FFI.Type -> FFI.Type -> Registry -> Registry
+registerList listType itemType registry = do
   let listTypeName = typeName listType
-  let declaration = structDeclaration listTypeName ["c_int64", "c_void_p"]
+  let declaration = structDeclaration listTypeName ["c_int64", Python.call "POINTER" [typeName itemType]]
   Python.Type.Registry.add listTypeName declaration registry
 
 registerTuple :: FFI.Type -> FFI.Type -> FFI.Type -> List FFI.Type -> Registry -> Registry

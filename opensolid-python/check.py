@@ -23,3 +23,7 @@ else:
 v = Vector2d.xy(1,2)
 with Tolerance(1e-9):
     print(v.direction())
+
+c = Curve1d.sin(Curve1d.t())
+with Tolerance(1e-9):
+    print([root.value() for root in c.zeros()])
