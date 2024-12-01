@@ -239,7 +239,7 @@ invoke function = case function of
 type Signature = (Maybe Constraint, List (Name, FFI.Type), FFI.Type, FFI.Type)
 
 signature :: MemberFunction value -> (Maybe Constraint, List (Name, FFI.Type), FFI.Type, FFI.Type)
-signature staticFunction = case staticFunction of
+signature memberFunction = case memberFunction of
   MemberFunction0 f -> signature0 f
   MemberFunction0U f -> signature0U f
   MemberFunction0R f -> signature0R f
