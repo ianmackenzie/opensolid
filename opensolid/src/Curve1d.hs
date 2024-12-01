@@ -109,6 +109,9 @@ deriving instance Show (Curve1d units)
 instance FFI (Curve1d Unitless) where
   representation _ = FFI.classRepresentation "Curve1d" (Just "Unitless")
 
+instance FFI (Curve1d Radians) where
+  representation _ = FFI.classRepresentation "Curve1d" (Just "Radians")
+
 instance FFI (Curve1d Meters) where
   representation _ = FFI.classRepresentation "Curve1d" (Just "Meters")
 
