@@ -18,7 +18,6 @@ import OpenSolid.API.MemberFunction (MemberFunction (..))
 import OpenSolid.API.MemberFunction qualified as MemberFunction
 import OpenSolid.API.Name (Name)
 import OpenSolid.API.Name qualified as Name
-import OpenSolid.API.NegationOperator (NegationOperator (NegationOperator))
 import OpenSolid.API.NegationOperator qualified as NegationOperator
 import OpenSolid.API.StaticFunction (StaticFunction (..))
 import OpenSolid.API.StaticFunction qualified as StaticFunction
@@ -73,7 +72,7 @@ range =
                  ]
           ]
       , memberFunctions = []
-      , negationOperator = Nothing
+      , negationFunction = Nothing
       , binaryOperators = []
       , nestedClasses = []
       }
@@ -84,7 +83,7 @@ range =
           [ "Endpoints" .| m0 Range.endpoints
           , "Intersection" .| m1 "Other" Range.intersection
           ]
-      , negationOperator = Just (NegationOperator negate)
+      , negationFunction = Just negate
       , binaryOperators =
           [ add
               [ BinaryOperator.Pre ((+) @Float @(Range Unitless))
@@ -118,7 +117,7 @@ range =
           [ "Endpoints" .| m0 Range.endpoints
           , "Intersection" .| m1 "Other" Range.intersection
           ]
-      , negationOperator = Just (NegationOperator negate)
+      , negationFunction = Just negate
       , binaryOperators = []
       , nestedClasses = []
       }
@@ -154,7 +153,7 @@ vector2d =
                  ]
           ]
       , memberFunctions = []
-      , negationOperator = Nothing
+      , negationFunction = Nothing
       , binaryOperators = []
       , nestedClasses = []
       }
@@ -165,7 +164,7 @@ vector2d =
           [ "Components" .| m0 Vector2d.components
           , "Direction" .| m0U Vector2d.direction
           ]
-      , negationOperator = Nothing
+      , negationFunction = Nothing
       , binaryOperators = []
       , nestedClasses = []
       }
@@ -176,7 +175,7 @@ vector2d =
           [ "Components" .| m0 Vector2d.components
           , "Direction" .| m0M Vector2d.direction
           ]
-      , negationOperator = Nothing
+      , negationFunction = Nothing
       , binaryOperators = []
       , nestedClasses = []
       }
@@ -198,7 +197,7 @@ direction2d =
       , memberFunctions =
           [ "To Angle" .| m0 Direction2d.toAngle
           ]
-      , negationOperator = Nothing
+      , negationFunction = Nothing
       , binaryOperators = []
       , nestedClasses = []
       }
@@ -233,7 +232,7 @@ point2d =
                  ]
           ]
       , memberFunctions = []
-      , negationOperator = Nothing
+      , negationFunction = Nothing
       , binaryOperators = []
       , nestedClasses = []
       }
@@ -245,7 +244,7 @@ point2d =
           , "Distance To" .| m1 "Other" Point2d.distanceFrom
           , "Midpoint" .| m1 "Other" Point2d.midpoint
           ]
-      , negationOperator = Nothing
+      , negationFunction = Nothing
       , binaryOperators = []
       , nestedClasses = []
       }
@@ -257,7 +256,7 @@ point2d =
           , "Distance To" .| m1 "Other" Point2d.distanceFrom
           , "Midpoint" .| m1 "Other" Point2d.midpoint
           ]
-      , negationOperator = Nothing
+      , negationFunction = Nothing
       , binaryOperators = []
       , nestedClasses = []
       }
@@ -287,7 +286,7 @@ curve1d =
                  ]
           ]
       , memberFunctions = []
-      , negationOperator = Nothing
+      , negationFunction = Nothing
       , binaryOperators = []
       , nestedClasses =
           [ Class
@@ -298,7 +297,7 @@ curve1d =
                   , "Order" .| m0 Curve1d.Root.order
                   , "Sign" .| m0 (\root -> 1 * Curve1d.Root.sign root) -- TODO return as enum?
                   ]
-              , negationOperator = Nothing
+              , negationFunction = Nothing
               , binaryOperators = []
               , nestedClasses = []
               }
@@ -312,7 +311,7 @@ curve1d =
           , "Evaluate" .| m1 "Parameter Value" (\t curve -> Curve1d.evaluate curve t)
           , "Zeros" .| m0U Curve1d.zeros
           ]
-      , negationOperator = Just (NegationOperator negate)
+      , negationFunction = Just negate
       , binaryOperators =
           [ add
               [ BinaryOperator.Pre ((+) @Float @(Curve1d Unitless))
@@ -344,7 +343,7 @@ curve1d =
           [ "Evaluate" .| m1 "Parameter Value" (\t curve -> Curve1d.evaluate curve t)
           , "Zeros" .| m0R Curve1d.zeros
           ]
-      , negationOperator = Nothing
+      , negationFunction = Nothing
       , binaryOperators = []
       , nestedClasses = []
       }
@@ -355,7 +354,7 @@ curve1d =
           [ "Evaluate" .| m1 "Parameter Value" (\t curve -> Curve1d.evaluate curve t)
           , "Zeros" .| m0M Curve1d.zeros
           ]
-      , negationOperator = Nothing
+      , negationFunction = Nothing
       , binaryOperators = []
       , nestedClasses = []
       }
@@ -448,11 +447,11 @@ memberFunctionPairs :: FFI.Id value -> (Name, List (MemberFunction value)) -> Li
 memberFunctionPairs classId_ (functionName, overloads) =
   List.map (memberFunctionPair classId_ functionName) overloads
 
-negationOperatorPair :: FFI.Id value -> Maybe (NegationOperator value) -> List (Text, ForeignFunction)
-negationOperatorPair classId_ maybeNegationOperator = case maybeNegationOperator of
+negationOperatorPair :: FFI value => FFI.Id value -> Maybe (value -> value) -> List (Text, ForeignFunction)
+negationOperatorPair classId_ maybeNegationFunction = case maybeNegationFunction of
   Nothing -> []
-  Just negationOperator ->
-    [(NegationOperator.ffiName classId_, NegationOperator.invoke negationOperator)]
+  Just negationFunction ->
+    [(NegationOperator.ffiName classId_, NegationOperator.invoke negationFunction)]
 
 binaryOperatorPair :: FFI.Id value -> BinaryOperator.Id -> BinaryOperator value -> (Text, ForeignFunction)
 binaryOperatorPair classId_ operatorId operator =
