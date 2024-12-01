@@ -1,5 +1,6 @@
 module Curve1d
   ( Curve1d (Parametric)
+  , Root
   , Interface (..)
   , evaluate
   , evaluateBounds
