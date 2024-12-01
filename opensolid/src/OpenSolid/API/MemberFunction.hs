@@ -143,7 +143,7 @@ data MemberFunction value where
     (Tolerance Meters => a -> b -> c -> d -> value -> result) ->
     MemberFunction value
 
-ffiName :: FFI.Id -> Name -> MemberFunction value -> Text
+ffiName :: FFI.Id value -> Name -> MemberFunction value -> Text
 ffiName classId functionName memberFunction = do
   let (_, arguments, _, _) = signature memberFunction
   let argumentTypes = List.map Pair.second arguments

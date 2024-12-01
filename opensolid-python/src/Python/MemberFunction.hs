@@ -16,7 +16,7 @@ import Python.Function qualified
 import Python.Type qualified
 import Text qualified
 
-definition :: FFI.Id -> (Name, List (MemberFunction value)) -> Text
+definition :: FFI.Id value -> (Name, List (MemberFunction value)) -> Text
 definition classId (functionName, memberFunctions) = do
   case List.map (overload classId functionName) memberFunctions of
     [(signature, _, body)] -> Python.lines [signature, Python.indent [body]]
@@ -39,7 +39,7 @@ definition classId (functionName, memberFunctions) = do
             ]
         ]
 
-overload :: FFI.Id -> Name -> MemberFunction value -> (Text, Text, Text)
+overload :: FFI.Id value -> Name -> MemberFunction value -> (Text, Text, Text)
 overload classId functionName memberFunction = do
   let ffiFunctionName = MemberFunction.ffiName classId functionName memberFunction
   let (maybeConstraint, arguments, selfType, returnType) = MemberFunction.signature memberFunction

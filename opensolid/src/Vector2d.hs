@@ -90,10 +90,10 @@ deriving instance Eq (Vector2d (space @ units))
 deriving instance Show (Vector2d (space @ units))
 
 instance FFI (Vector2d (space @ Unitless)) where
-  representation _ = FFI.classRepresentation "Vector2d" (Just "Unitless")
+  representation = FFI.classRepresentation "Vector2d" (Just "Unitless")
 
 instance FFI (Vector2d (space @ Meters)) where
-  representation _ = FFI.classRepresentation "Vector2d" (Just "Meters")
+  representation = FFI.classRepresentation "Vector2d" (Just "Meters")
 
 instance HasUnits (Vector2d (space @ units)) where
   type UnitsOf (Vector2d (space @ units)) = units

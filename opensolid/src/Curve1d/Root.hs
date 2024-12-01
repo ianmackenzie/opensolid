@@ -16,4 +16,4 @@ instance ApproximateEquality Root Root Unitless where
     value1 ~= value2 && order1 == order2 && sign1 == sign2
 
 instance FFI Root where
-  representation _ = FFI.nestedClassRepresentation "Curve1d" "Root" Nothing
+  representation = FFI.nestedClassRepresentation "Curve1d" "Root" Nothing

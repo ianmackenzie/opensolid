@@ -16,7 +16,7 @@ import Python.Function qualified
 import Python.Type qualified
 import Text qualified
 
-definition :: FFI.Id -> (Name, List StaticFunction) -> Text
+definition :: FFI.Id a -> (Name, List StaticFunction) -> Text
 definition classId (functionName, staticFunctions) = do
   case List.map (overload classId functionName) staticFunctions of
     [(signature, _, body)] -> Python.lines [signature, Python.indent [body]]
@@ -41,7 +41,7 @@ definition classId (functionName, staticFunctions) = do
             ]
         ]
 
-overload :: FFI.Id -> Name -> StaticFunction -> (Text, Text, Text)
+overload :: FFI.Id a -> Name -> StaticFunction -> (Text, Text, Text)
 overload classId functionName staticFunction = do
   let ffiFunctionName = StaticFunction.ffiName classId functionName staticFunction
   let (maybeConstraint, arguments, returnType) = StaticFunction.signature staticFunction

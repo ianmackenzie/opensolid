@@ -130,13 +130,14 @@ preamble =
     ]
 
 classDefinition :: Class -> Text
-classDefinition (Class id staticFunctions memberFunctions nestedClasses) = do
+classDefinition (Class classId staticFunctions memberFunctions _ _ nestedClasses) = do
+  -- TODO operator definitions
   Python.lines
-    [ "class " + Python.Class.unqualifiedName id + ":"
+    [ "class " + Python.Class.unqualifiedName classId + ":"
     , "    def __init__(self, *, ptr : c_void_p) -> None:"
     , "        self.__ptr__ = ptr"
-    , Python.indent (List.map (Python.StaticFunction.definition id) staticFunctions)
-    , Python.indent (List.map (Python.MemberFunction.definition id) memberFunctions)
+    , Python.indent (List.map (Python.StaticFunction.definition classId) staticFunctions)
+    , Python.indent (List.map (Python.MemberFunction.definition classId) memberFunctions)
     , Python.indent (List.map classDefinition nestedClasses)
     ]
 
@@ -146,7 +147,8 @@ ffiTypeDeclarations = do
   Python.Type.Registry.typeDeclarations registry
 
 registerClassTypes :: Class -> Registry -> Registry
-registerClassTypes (Class _ staticFunctions memberFunctions nestedClasses) registry0 = do
+registerClassTypes (Class _ staticFunctions memberFunctions _ _ nestedClasses) registry0 = do
+  -- TODO register operator types
   let staticFunctionOverloads = List.collect Pair.second staticFunctions
   let memberFunctionOverloads = List.collect Pair.second memberFunctions
   let registry1 = List.foldr registerStaticFunctionTypes registry0 staticFunctionOverloads

@@ -178,11 +178,13 @@ library
     NonEmpty
     OpenSolid
     OpenSolid.API
+    OpenSolid.API.BinaryOperator
     OpenSolid.API.Class
-    OpenSolid.API.MemberFunction
-    OpenSolid.API.StaticFunction
     OpenSolid.API.Constraint
+    OpenSolid.API.MemberFunction
     OpenSolid.API.Name
+    OpenSolid.API.NegationOperator
+    OpenSolid.API.StaticFunction
     OpenSolid.FFI
     OpenSolid.Json
     Pair

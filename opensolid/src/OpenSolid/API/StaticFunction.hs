@@ -113,7 +113,7 @@ data StaticFunction where
     (Tolerance Meters => a -> b -> c -> d -> e) ->
     StaticFunction
 
-ffiName :: FFI.Id -> Name -> StaticFunction -> Text
+ffiName :: FFI.Id a -> Name -> StaticFunction -> Text
 ffiName classId functionName memberFunction = do
   let (_, arguments, _) = signature memberFunction
   let argumentTypes = List.map Pair.second arguments
