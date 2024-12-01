@@ -27,11 +27,11 @@ executable opensolid-python
     opensolid,
 
   other-modules:
+    Python
     Python.Class
     Python.FFI
     Python.Function
     Python.MemberFunction
-    Python
     Python.StaticFunction
     Python.Type
     Python.Type.Registry
@@ -56,7 +56,7 @@ executable opensolid-python
   default-extensions:
     GADTs
     OverloadedStrings
+    PatternSynonyms
     QualifiedDo
     RebindableSyntax
-    PatternSynonyms
     ViewPatterns

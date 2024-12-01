@@ -42,9 +42,9 @@ foreign-library opensolid-ffi
 
   default-extensions:
     OverloadedStrings
+    QualifiedDo
     RebindableSyntax
     TemplateHaskell
-    QualifiedDo
 
 executable generate-def-file
   main-is: Main.hs
@@ -53,12 +53,14 @@ executable generate-def-file
   build-depends:
     base,
     opensolid,
+
   ghc-options:
     -Wall
     -Werror
     -Wcompat
     -Wno-missed-extra-shared-lib
+
   default-extensions:
     OverloadedStrings
-    RebindableSyntax
     QualifiedDo
+    RebindableSyntax
