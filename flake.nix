@@ -47,7 +47,7 @@
               # e.g. when adding a whole new sub-project
               pkgs.haskellPackages.implicit-hie
               # For formatting this file =)
-              pkgs.nixfmt
+              pkgs.nixfmt-classic
               # Language server for Nix files
               pkgs.nixd
               # The Rust compiler, for libopensolidjit
