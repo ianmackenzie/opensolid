@@ -1,10 +1,25 @@
-Get lists working in Python
-- allocate memory with opensolid_malloc
-- case result to typed pointer with 'ctypes.cast(obj, type)'
-- get/set elements with 'ptr[index]'
-
-Add 'compiled'/'processed' form of API definition for generating bindings?
-- functions represented more dynamically (e.g. lists of argument names/types)
+Improve Python bindings
+- Extend API.functions to return function signatures as well?
+  -> add API.Function type (or repurpose the API.ForeignFunction name...)
+  -> might then be able to remove Python-specific type traversal code that generates FFI classes
+- Use simple isinstance checks for binary operator overloads
+  -> there will always be a single positional argument, never a named one...
+- Try switching to pattern matching just on 'shape' of function arguments, with separate 'isinstance' checks
+- Nice __repr__ and/or __str__ for primitive types
+- Add arithmetic operators (including for Qty values)
+- Add consructors/conversions to Qty modules based on conversion factors provided as part of API definition?
+- Support lists
+- Support 'in' operator?
+- Add docstrings
+- Define class (and quantity) members "in place" in FFI typeclass instance instead of separately?
+- Actual error types instead of strings
+- Clean up nested class definition somehow?
+- Add runtime checks that classes defined in OpenSolid.API module have matching names in their types' FFI instances
+- Add _list_decode helper?
+- Get lists arguments working
+  - allocate memory with opensolid_malloc
+  - cast result to typed pointer with 'ctypes.cast(obj, type)'?
+  - get/set elements with 'ptr[index]'
 
 Switch Solve2d.return back to taking a single value instead of a NonEmpty
 
@@ -15,15 +30,12 @@ Try publishing to PyPI
 -> can start with test.pypi.org (using fake package name)
 -> some combination of uv and cibuildwheel?
 
-Improve Python bindings
-- Nice __repr__ and/or __str__ for primitive types
-- Add arithmetic operators (includig for Qty values)
-- Add consructors/conversions to Qty modules based on values provided as part of API definition?
-- Support lists
-- Support 'in' operator?
-- Support static functions that use a tolerance
-- Add docstrings
-- Define class (and quantity) members "in place" in FFI typeclass instance instead of separately?
+Operator overload test suite: for every valid type and units combination, test that e.g. zero vector * zero range = zero vector bounds
+- ensure every valid overload actually exists, and is resolved correctly at runtime
+
+Try generating C# bindings?
+
+Try generating C++ bindings?
 
 Sandbox executable to start generating Region2d medial axis curves and points?
 -> need to be able to solve for medial axis of curve and *point* first
