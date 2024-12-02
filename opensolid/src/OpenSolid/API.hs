@@ -27,6 +27,7 @@ import OpenSolid.API.StaticFunction (StaticFunction (..))
 import OpenSolid.API.StaticFunction qualified as StaticFunction
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
+import Pair qualified
 import Point2d (Point2d)
 import Point2d qualified
 import Range (Range)
@@ -471,8 +472,7 @@ postDiv overloads = (BinaryOperator.Div, overloads)
 data Function = Function
   { ffiName :: Text
   , constraint :: Maybe Constraint
-  , arguments :: List (Name, FFI.Type)
-  , selfType :: Maybe FFI.Type
+  , argumentTypes :: List FFI.Type
   , returnType :: FFI.Type
   , invoke :: Ptr () -> Ptr () -> IO ()
   }
@@ -486,8 +486,7 @@ staticFunctionOverload classId_ functionName staticFunction = do
   Function
     { ffiName = StaticFunction.ffiName classId_ functionName staticFunction
     , constraint
-    , arguments
-    , selfType = Nothing
+    , argumentTypes = List.map Pair.second arguments
     , returnType
     , invoke = StaticFunction.invoke staticFunction
     }
@@ -502,8 +501,7 @@ memberFunctionOverload classId_ functionName memberFunction = do
   Function
     { ffiName = MemberFunction.ffiName classId_ functionName memberFunction
     , constraint
-    , arguments
-    , selfType = Just selfType
+    , argumentTypes = List.map Pair.second arguments + [selfType]
     , returnType
     , invoke = MemberFunction.invoke memberFunction
     }
@@ -521,8 +519,7 @@ negationOperatorInfo classId_ maybeNegationFunction = case maybeNegationFunction
       Function
         { ffiName = NegationOperator.ffiName classId_
         , constraint = Nothing
-        , arguments = []
-        , selfType = Just selfType
+        , argumentTypes = [selfType]
         , returnType = selfType
         , invoke = NegationOperator.invoke negationFunction
         }
@@ -533,8 +530,7 @@ preOperatorOverload classId_ operatorId operator = do
   Function
     { ffiName = PreOperator.ffiName classId_ operatorId operator
     , constraint = Nothing
-    , arguments = [(PreOperator.lhsName, lhsType)]
-    , selfType = Just selfType
+    , argumentTypes = [lhsType, selfType]
     , returnType = returnType
     , invoke = PreOperator.invoke operator
     }
@@ -552,8 +548,7 @@ postOperatorOverload classId_ operatorId operator = do
   Function
     { ffiName = PostOperator.ffiName classId_ operatorId operator
     , constraint = Nothing
-    , arguments = [(PostOperator.rhsName, rhsType)]
-    , selfType = Just selfType
+    , argumentTypes = [selfType, rhsType]
     , returnType = returnType
     , invoke = PostOperator.invoke operator
     }
