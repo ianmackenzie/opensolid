@@ -1,6 +1,5 @@
 module Main (main) where
 
-import Data.Proxy (Proxy (Proxy))
 import File qualified
 import List qualified
 import Maybe qualified
@@ -8,15 +7,6 @@ import OpenSolid
 import OpenSolid.API qualified as API
 import OpenSolid.API.Class (Class (Class))
 import OpenSolid.API.Constraint (Constraint)
-import OpenSolid.API.MemberFunction (MemberFunction (..))
-import OpenSolid.API.MemberFunction qualified as MemberFunction
-import OpenSolid.API.PostOperator (PostOperator)
-import OpenSolid.API.PostOperator qualified as PostOperator
-import OpenSolid.API.PreOperator (PreOperator)
-import OpenSolid.API.PreOperator qualified as PreOperator
-import OpenSolid.API.StaticFunction (StaticFunction (..))
-import OpenSolid.API.StaticFunction qualified as StaticFunction
-import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import Pair qualified
 import Python qualified
@@ -140,7 +130,6 @@ preamble =
 
 classDefinition :: Class -> Text
 classDefinition (Class classId staticFunctions memberFunctions negationFunction preOperators postOperators nestedClasses) = do
-  -- TODO operator definitions
   Python.lines
     [ "class " + Python.Class.unqualifiedName classId + ":"
     , "    def __init__(self, *, ptr : c_void_p) -> None:"
@@ -155,58 +144,14 @@ classDefinition (Class classId staticFunctions memberFunctions negationFunction 
 
 ffiTypeDeclarations :: Text
 ffiTypeDeclarations = do
-  let registry = List.foldr registerClassTypes Python.Type.Registry.empty API.classes
+  let registry = List.foldr registerFunctionTypes Python.Type.Registry.empty API.functions
   Python.Type.Registry.typeDeclarations registry
 
-registerClassTypes :: Class -> Registry -> Registry
-registerClassTypes (Class _ staticFunctions memberFunctions maybeNegationFunction preOperators postOperators nestedClasses) registry0 = do
-  let staticFunctionOverloads = List.collect Pair.second staticFunctions
-  let memberFunctionOverloads = List.collect Pair.second memberFunctions
-  let preOperatorOverloads = List.collect Pair.second preOperators
-  let postOperatorOverloads = List.collect Pair.second postOperators
-  let registry1 = List.foldr registerStaticFunctionTypes registry0 staticFunctionOverloads
-  let registry2 = List.foldr registerMemberFunctionTypes registry1 memberFunctionOverloads
-  let registry3 = registerNegationOperatorTypes maybeNegationFunction registry2
-  let registry4 = List.foldr registerPreOperatorTypes registry3 preOperatorOverloads
-  let registry5 = List.foldr registerPostOperatorTypes registry4 postOperatorOverloads
-  let registry6 = List.foldr registerClassTypes registry5 nestedClasses
-  registry6
-
-registerStaticFunctionTypes :: StaticFunction -> Registry -> Registry
-registerStaticFunctionTypes staticFunction registry = do
-  let (maybeConstraint, arguments, returnType) = StaticFunction.signature staticFunction
-  let argumentTypes = List.map Pair.second arguments
+registerFunctionTypes :: API.Function -> Registry -> Registry
+registerFunctionTypes function registry =
   registry
-    |> registerArgumentTypes maybeConstraint argumentTypes
-    |> Python.FFI.registerType returnType
-
-registerMemberFunctionTypes :: MemberFunction value -> Registry -> Registry
-registerMemberFunctionTypes memberFunction registry = do
-  let (maybeConstraint, arguments, selfType, returnType) = MemberFunction.signature memberFunction
-  let argumentTypes = List.map Pair.second arguments + [selfType]
-  registry
-    |> registerArgumentTypes maybeConstraint argumentTypes
-    |> Python.FFI.registerType returnType
-
-registerNegationOperatorTypes :: forall value. FFI value => Maybe (value -> value) -> Registry -> Registry
-registerNegationOperatorTypes maybeNegationFunction registry =
-  case maybeNegationFunction of
-    Nothing -> registry
-    Just _ -> Python.FFI.registerType (FFI.typeOf @value Proxy) registry
-
-registerPreOperatorTypes :: PreOperator value -> Registry -> Registry
-registerPreOperatorTypes preOperator registry = do
-  let (lhsType, rhsType, returnType) = PreOperator.signature preOperator
-  registry
-    |> registerArgumentTypes Nothing [lhsType, rhsType]
-    |> Python.FFI.registerType returnType
-
-registerPostOperatorTypes :: PostOperator value -> Registry -> Registry
-registerPostOperatorTypes postOperator registry = do
-  let (lhsType, rhsType, returnType) = PostOperator.signature postOperator
-  registry
-    |> registerArgumentTypes Nothing [lhsType, rhsType]
-    |> Python.FFI.registerType returnType
+    |> registerArgumentTypes (API.constraint function) (API.argumentTypes function)
+    |> Python.FFI.registerType (API.returnType function)
 
 registerArgumentTypes :: Maybe Constraint -> List FFI.Type -> Registry -> Registry
 registerArgumentTypes maybeConstraint argumentTypes registry = do
