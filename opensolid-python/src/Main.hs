@@ -159,8 +159,8 @@ registerArgumentTypes maybeConstraint argumentTypes registry = do
   let maybeToleranceType = Maybe.map toleranceType maybeConstraint
   case maybeToleranceType + argumentTypes of
     [] -> registry
-    [_] -> registry
-    type1 : type2 : rest -> Python.FFI.registerType (FFI.Tuple type1 type2 rest) registry
+    List.One type1 -> Python.FFI.registerType type1 registry
+    List.TwoOrMore type1 type2 rest -> Python.FFI.registerType (FFI.Tuple type1 type2 rest) registry
 
 classDefinitions :: Text
 classDefinitions = Python.lines (List.map classDefinition API.classes)
