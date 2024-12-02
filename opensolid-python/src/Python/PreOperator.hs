@@ -42,22 +42,26 @@ functionName operatorId = case operatorId of
 overload :: FFI.Id value -> BinaryOperator.Id -> PreOperator value -> (Text, Text, Text)
 overload classId operatorId memberFunction = do
   let ffiFunctionName = PreOperator.ffiName classId operatorId memberFunction
-  let (otherType, selfType, returnType) = PreOperator.signature memberFunction
-  let signature = signatureN operatorId otherType returnType
-  let matchPattern = Python.Function.matchPattern [(Name.parse "Other", otherType)]
-  let body = bodyN ffiFunctionName selfType otherType returnType
+  let (lhsType, selfType, returnType) = PreOperator.signature memberFunction
+  let signature = signatureN operatorId lhsType returnType
+  let matchPattern = Python.Function.matchPattern [(PreOperator.lhsName, lhsType)]
+  let body = bodyN ffiFunctionName selfType lhsType returnType
   (signature, matchPattern, body)
 
+lhsArgName :: Text
+lhsArgName = Name.snakeCase PreOperator.lhsName
+
 signatureN :: BinaryOperator.Id -> FFI.Type -> FFI.Type -> Text
-signatureN operatorId otherType returnType = do
-  let otherTypeName = Python.Type.qualifiedName otherType
+signatureN operatorId lhsType returnType = do
+  let lhsTypeName = Python.Type.qualifiedName lhsType
   let returnTypeName = Python.Type.qualifiedName returnType
-  "def " + functionName operatorId + "(self, other: " + otherTypeName + ") -> " + returnTypeName + ":"
+  let lhsArgument = lhsArgName + ": " + lhsTypeName
+  "def " + functionName operatorId + "(self, " + lhsArgument + ") -> " + returnTypeName + ":"
 
 bodyN :: Text -> FFI.Type -> FFI.Type -> FFI.Type -> Text
-bodyN ffiFunctionName selfType otherType returnType =
+bodyN ffiFunctionName selfType lhsType returnType =
   Python.lines
-    [ "inputs = " + Python.FFI.argumentValue [("other", otherType), ("self", selfType)]
+    [ "inputs = " + Python.FFI.argumentValue [(lhsArgName, lhsType), ("self", selfType)]
     , "output = " + Python.FFI.dummyValue returnType
     , Python.FFI.invoke ffiFunctionName "ctypes.byref(inputs)" "ctypes.byref(output)"
     , "return " + Python.FFI.outputValue returnType "output"

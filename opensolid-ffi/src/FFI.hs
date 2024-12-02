@@ -11,7 +11,6 @@ import List qualified
 import NonEmpty qualified
 import OpenSolid
 import OpenSolid.API qualified as API
-import Pair qualified
 import Text qualified
 import Prelude qualified
 
@@ -20,7 +19,7 @@ type Function = Ptr () -> Ptr () -> IO ()
 functionArray :: Array Function
 functionArray = case API.functions of
   [] -> internalError "API somehow has no functions"
-  NonEmpty nonEmpty -> Array.fromNonEmpty (NonEmpty.map Pair.second nonEmpty)
+  NonEmpty nonEmpty -> Array.fromNonEmpty (NonEmpty.map API.invoke nonEmpty)
 
 invoke :: Int -> Ptr () -> Ptr () -> IO ()
 invoke functionIndex = Array.get functionIndex functionArray
@@ -28,7 +27,7 @@ invoke functionIndex = Array.get functionIndex functionArray
 generateExports :: TH.Q (List TH.Dec)
 generateExports =
   Prelude.fmap List.concat $
-    Prelude.traverse generateExport (List.indexed (List.map Pair.first API.functions))
+    Prelude.traverse generateExport (List.indexed (List.map API.ffiName API.functions))
 
 generateExport :: (Int, Text) -> TH.Q (List TH.Dec)
 generateExport (index, name) = Prelude.do

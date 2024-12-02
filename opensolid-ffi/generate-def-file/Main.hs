@@ -4,7 +4,6 @@ import File qualified
 import List qualified
 import OpenSolid
 import OpenSolid.API qualified as API
-import Pair qualified
 import Text qualified
 
 main :: IO ()
@@ -16,7 +15,7 @@ main = do
         , "opensolid_free"
         , "opensolid_release"
         ]
-  let functionNames = builtins + List.map Pair.first API.functions
+  let functionNames = builtins + List.map API.ffiName API.functions
   let lines = "EXPORTS" : List.map (Text.indent " ") functionNames
   let contents = Text.join "\r\n" lines
   File.writeTo "opensolid-ffi/opensolid-ffi.def" contents

@@ -1,4 +1,4 @@
-module OpenSolid.API (classes, functions) where
+module OpenSolid.API (classes, functions, Function (..)) where
 
 import Angle qualified
 import Curve1d (Curve1d)
@@ -13,6 +13,7 @@ import List qualified
 import OpenSolid
 import OpenSolid.API.BinaryOperator qualified as BinaryOperator
 import OpenSolid.API.Class (Class (..))
+import OpenSolid.API.Constraint (Constraint)
 import OpenSolid.API.MemberFunction (MemberFunction (..))
 import OpenSolid.API.MemberFunction qualified as MemberFunction
 import OpenSolid.API.Name (Name)
@@ -467,70 +468,110 @@ postDiv overloads = (BinaryOperator.Div, overloads)
 
 ----- FUNCTION COLLECTION -----
 
-type ForeignFunction = Ptr () -> Ptr () -> IO ()
+data Function = Function
+  { ffiName :: Text
+  , constraint :: Maybe Constraint
+  , arguments :: List (Name, FFI.Type)
+  , selfType :: Maybe FFI.Type
+  , returnType :: FFI.Type
+  , invoke :: Ptr () -> Ptr () -> IO ()
+  }
 
-functions :: List (Text, ForeignFunction)
-functions = List.collect classFunctionPairs classes
+functions :: List Function
+functions = List.collect classFunctions classes
 
-staticFunctionPair :: FFI.Id a -> Name -> StaticFunction -> (Text, ForeignFunction)
-staticFunctionPair classId_ functionName staticFunction =
-  ( StaticFunction.ffiName classId_ functionName staticFunction
-  , StaticFunction.invoke staticFunction
-  )
+staticFunctionOverload :: FFI.Id a -> Name -> StaticFunction -> Function
+staticFunctionOverload classId_ functionName staticFunction = do
+  let (constraint, arguments, returnType) = StaticFunction.signature staticFunction
+  Function
+    { ffiName = StaticFunction.ffiName classId_ functionName staticFunction
+    , constraint
+    , arguments
+    , selfType = Nothing
+    , returnType
+    , invoke = StaticFunction.invoke staticFunction
+    }
 
-staticFunctionPairs :: FFI.Id a -> (Name, List StaticFunction) -> List (Text, ForeignFunction)
-staticFunctionPairs classId_ (functionName, overloads) =
-  List.map (staticFunctionPair classId_ functionName) overloads
+staticFunctionOverloads :: FFI.Id a -> (Name, List StaticFunction) -> List Function
+staticFunctionOverloads classId_ (functionName, overloads) =
+  List.map (staticFunctionOverload classId_ functionName) overloads
 
-memberFunctionPair :: FFI.Id value -> Name -> MemberFunction value -> (Text, ForeignFunction)
-memberFunctionPair classId_ functionName memberFunction =
-  ( MemberFunction.ffiName classId_ functionName memberFunction
-  , MemberFunction.invoke memberFunction
-  )
+memberFunctionOverload :: FFI.Id value -> Name -> MemberFunction value -> Function
+memberFunctionOverload classId_ functionName memberFunction = do
+  let (constraint, arguments, selfType, returnType) = MemberFunction.signature memberFunction
+  Function
+    { ffiName = MemberFunction.ffiName classId_ functionName memberFunction
+    , constraint
+    , arguments
+    , selfType = Just selfType
+    , returnType
+    , invoke = MemberFunction.invoke memberFunction
+    }
 
-memberFunctionPairs :: FFI.Id value -> (Name, List (MemberFunction value)) -> List (Text, ForeignFunction)
-memberFunctionPairs classId_ (functionName, overloads) =
-  List.map (memberFunctionPair classId_ functionName) overloads
+memberFunctionOverloads :: FFI.Id value -> (Name, List (MemberFunction value)) -> List Function
+memberFunctionOverloads classId_ (functionName, overloads) =
+  List.map (memberFunctionOverload classId_ functionName) overloads
 
-negationOperatorPair :: FFI value => FFI.Id value -> Maybe (value -> value) -> List (Text, ForeignFunction)
-negationOperatorPair classId_ maybeNegationFunction = case maybeNegationFunction of
+negationOperatorInfo :: forall value. FFI value => FFI.Id value -> Maybe (value -> value) -> List Function
+negationOperatorInfo classId_ maybeNegationFunction = case maybeNegationFunction of
   Nothing -> []
-  Just negationFunction ->
-    [(NegationOperator.ffiName classId_, NegationOperator.invoke negationFunction)]
+  Just negationFunction -> do
+    let selfType = FFI.typeOf @value Proxy
+    List.singleton $
+      Function
+        { ffiName = NegationOperator.ffiName classId_
+        , constraint = Nothing
+        , arguments = []
+        , selfType = Just selfType
+        , returnType = selfType
+        , invoke = NegationOperator.invoke negationFunction
+        }
 
-preOperatorPair :: FFI.Id value -> BinaryOperator.Id -> PreOperator value -> (Text, ForeignFunction)
-preOperatorPair classId_ operatorId operator =
-  ( PreOperator.ffiName classId_ operatorId operator
-  , PreOperator.invoke operator
-  )
+preOperatorOverload :: FFI.Id value -> BinaryOperator.Id -> PreOperator value -> Function
+preOperatorOverload classId_ operatorId operator = do
+  let (lhsType, selfType, returnType) = PreOperator.signature operator
+  Function
+    { ffiName = PreOperator.ffiName classId_ operatorId operator
+    , constraint = Nothing
+    , arguments = [(PreOperator.lhsName, lhsType)]
+    , selfType = Just selfType
+    , returnType = returnType
+    , invoke = PreOperator.invoke operator
+    }
 
-preOperatorPairs ::
+preOperatorOverloads ::
   FFI.Id value ->
   (BinaryOperator.Id, List (PreOperator value)) ->
-  List (Text, ForeignFunction)
-preOperatorPairs classId_ (operatorId, overloads) =
-  List.map (preOperatorPair classId_ operatorId) overloads
+  List Function
+preOperatorOverloads classId_ (operatorId, overloads) =
+  List.map (preOperatorOverload classId_ operatorId) overloads
 
-postOperatorPair :: FFI.Id value -> BinaryOperator.Id -> PostOperator value -> (Text, ForeignFunction)
-postOperatorPair classId_ operatorId operator =
-  ( PostOperator.ffiName classId_ operatorId operator
-  , PostOperator.invoke operator
-  )
+postOperatorOverload :: FFI.Id value -> BinaryOperator.Id -> PostOperator value -> Function
+postOperatorOverload classId_ operatorId operator = do
+  let (selfType, rhsType, returnType) = PostOperator.signature operator
+  Function
+    { ffiName = PostOperator.ffiName classId_ operatorId operator
+    , constraint = Nothing
+    , arguments = [(PostOperator.rhsName, rhsType)]
+    , selfType = Just selfType
+    , returnType = returnType
+    , invoke = PostOperator.invoke operator
+    }
 
-postOperatorPairs ::
+postOperatorOverloads ::
   FFI.Id value ->
   (BinaryOperator.Id, List (PostOperator value)) ->
-  List (Text, ForeignFunction)
-postOperatorPairs classId_ (operatorId, overloads) =
-  List.map (postOperatorPair classId_ operatorId) overloads
+  List Function
+postOperatorOverloads classId_ (operatorId, overloads) =
+  List.map (postOperatorOverload classId_ operatorId) overloads
 
-classFunctionPairs :: Class -> List (Text, Ptr () -> Ptr () -> IO ())
-classFunctionPairs (Class classId_ staticFunctions memberFunctions maybeNegationOperator preOperators postOperators nestedClasses) =
+classFunctions :: Class -> List Function
+classFunctions (Class classId_ staticFunctions memberFunctions maybeNegationOperator preOperators postOperators nestedClasses) =
   List.concat
-    [ List.collect (staticFunctionPairs classId_) staticFunctions
-    , List.collect (memberFunctionPairs classId_) memberFunctions
-    , negationOperatorPair classId_ maybeNegationOperator
-    , List.collect (preOperatorPairs classId_) preOperators
-    , List.collect (postOperatorPairs classId_) postOperators
-    , List.collect classFunctionPairs nestedClasses
+    [ List.collect (staticFunctionOverloads classId_) staticFunctions
+    , List.collect (memberFunctionOverloads classId_) memberFunctions
+    , negationOperatorInfo classId_ maybeNegationOperator
+    , List.collect (preOperatorOverloads classId_) preOperators
+    , List.collect (postOperatorOverloads classId_) postOperators
+    , List.collect classFunctions nestedClasses
     ]
