@@ -14,7 +14,7 @@ import NonEmpty qualified
 import OpenSolid
 import Text qualified
 
-newtype Name = Name (NonEmpty Text)
+newtype Name = Name (NonEmpty Text) deriving (Eq, Ord, Show)
 
 parse :: Text -> Name
 parse input = do
