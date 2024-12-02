@@ -1,5 +1,6 @@
 module Main (main) where
 
+import Data.Proxy (Proxy (Proxy))
 import File qualified
 import List qualified
 import Maybe qualified
@@ -9,8 +10,13 @@ import OpenSolid.API.Class (Class (Class))
 import OpenSolid.API.Constraint (Constraint)
 import OpenSolid.API.MemberFunction (MemberFunction (..))
 import OpenSolid.API.MemberFunction qualified as MemberFunction
+import OpenSolid.API.PostOperator (PostOperator)
+import OpenSolid.API.PostOperator qualified as PostOperator
+import OpenSolid.API.PreOperator (PreOperator)
+import OpenSolid.API.PreOperator qualified as PreOperator
 import OpenSolid.API.StaticFunction (StaticFunction (..))
 import OpenSolid.API.StaticFunction qualified as StaticFunction
+import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import Pair qualified
 import Python qualified
@@ -18,6 +24,9 @@ import Python.Class qualified
 import Python.FFI qualified
 import Python.Function qualified
 import Python.MemberFunction qualified
+import Python.NegationOperator qualified
+import Python.PostOperator qualified
+import Python.PreOperator qualified
 import Python.StaticFunction qualified
 import Python.Type.Registry (Registry)
 import Python.Type.Registry qualified
@@ -130,7 +139,7 @@ preamble =
     ]
 
 classDefinition :: Class -> Text
-classDefinition (Class classId staticFunctions memberFunctions _ _ nestedClasses) = do
+classDefinition (Class classId staticFunctions memberFunctions negationFunction preOperators postOperators nestedClasses) = do
   -- TODO operator definitions
   Python.lines
     [ "class " + Python.Class.unqualifiedName classId + ":"
@@ -138,6 +147,9 @@ classDefinition (Class classId staticFunctions memberFunctions _ _ nestedClasses
     , "        self.__ptr__ = ptr"
     , Python.indent (List.map (Python.StaticFunction.definition classId) staticFunctions)
     , Python.indent (List.map (Python.MemberFunction.definition classId) memberFunctions)
+    , Python.indent [Python.NegationOperator.definition classId negationFunction]
+    , Python.indent (List.map (Python.PostOperator.definition classId) postOperators)
+    , Python.indent (List.map (Python.PreOperator.definition classId) preOperators)
     , Python.indent (List.map classDefinition nestedClasses)
     ]
 
@@ -147,33 +159,57 @@ ffiTypeDeclarations = do
   Python.Type.Registry.typeDeclarations registry
 
 registerClassTypes :: Class -> Registry -> Registry
-registerClassTypes (Class _ staticFunctions memberFunctions _ _ nestedClasses) registry0 = do
-  -- TODO register operator types
+registerClassTypes (Class _ staticFunctions memberFunctions maybeNegationFunction preOperators postOperators nestedClasses) registry0 = do
   let staticFunctionOverloads = List.collect Pair.second staticFunctions
   let memberFunctionOverloads = List.collect Pair.second memberFunctions
+  let preOperatorOverloads = List.collect Pair.second preOperators
+  let postOperatorOverloads = List.collect Pair.second postOperators
   let registry1 = List.foldr registerStaticFunctionTypes registry0 staticFunctionOverloads
   let registry2 = List.foldr registerMemberFunctionTypes registry1 memberFunctionOverloads
-  let registry3 = List.foldr registerClassTypes registry2 nestedClasses
-  registry3
+  let registry3 = registerNegationOperatorTypes maybeNegationFunction registry2
+  let registry4 = List.foldr registerPreOperatorTypes registry3 preOperatorOverloads
+  let registry5 = List.foldr registerPostOperatorTypes registry4 postOperatorOverloads
+  let registry6 = List.foldr registerClassTypes registry5 nestedClasses
+  registry6
 
 registerStaticFunctionTypes :: StaticFunction -> Registry -> Registry
 registerStaticFunctionTypes staticFunction registry = do
   let (maybeConstraint, arguments, returnType) = StaticFunction.signature staticFunction
   let argumentTypes = List.map Pair.second arguments
-  List.foldr Python.FFI.registerType registry argumentTypes
+  registry
+    |> registerArgumentTypes maybeConstraint argumentTypes
     |> Python.FFI.registerType returnType
-    |> registerArgumentsTupleType maybeConstraint argumentTypes
 
 registerMemberFunctionTypes :: MemberFunction value -> Registry -> Registry
 registerMemberFunctionTypes memberFunction registry = do
   let (maybeConstraint, arguments, selfType, returnType) = MemberFunction.signature memberFunction
   let argumentTypes = List.map Pair.second arguments + [selfType]
-  List.foldr Python.FFI.registerType registry argumentTypes
+  registry
+    |> registerArgumentTypes maybeConstraint argumentTypes
     |> Python.FFI.registerType returnType
-    |> registerArgumentsTupleType maybeConstraint argumentTypes
 
-registerArgumentsTupleType :: Maybe Constraint -> List FFI.Type -> Registry -> Registry
-registerArgumentsTupleType maybeConstraint argumentTypes registry = do
+registerNegationOperatorTypes :: forall value. FFI value => Maybe (value -> value) -> Registry -> Registry
+registerNegationOperatorTypes maybeNegationFunction registry =
+  case maybeNegationFunction of
+    Nothing -> registry
+    Just _ -> Python.FFI.registerType (FFI.typeOf @value Proxy) registry
+
+registerPreOperatorTypes :: PreOperator value -> Registry -> Registry
+registerPreOperatorTypes preOperator registry = do
+  let (lhsType, rhsType, returnType) = PreOperator.signature preOperator
+  registry
+    |> registerArgumentTypes Nothing [lhsType, rhsType]
+    |> Python.FFI.registerType returnType
+
+registerPostOperatorTypes :: PostOperator value -> Registry -> Registry
+registerPostOperatorTypes postOperator registry = do
+  let (lhsType, rhsType, returnType) = PostOperator.signature postOperator
+  registry
+    |> registerArgumentTypes Nothing [lhsType, rhsType]
+    |> Python.FFI.registerType returnType
+
+registerArgumentTypes :: Maybe Constraint -> List FFI.Type -> Registry -> Registry
+registerArgumentTypes maybeConstraint argumentTypes registry = do
   let toleranceType constraint = Pair.second (Python.Function.toleranceArgument constraint)
   let maybeToleranceType = Maybe.map toleranceType maybeConstraint
   case maybeToleranceType + argumentTypes of

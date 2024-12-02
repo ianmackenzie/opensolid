@@ -11,7 +11,6 @@ import Foreign (Ptr)
 import Length (Length)
 import List qualified
 import OpenSolid
-import OpenSolid.API.BinaryOperator (BinaryOperator)
 import OpenSolid.API.BinaryOperator qualified as BinaryOperator
 import OpenSolid.API.Class (Class (..))
 import OpenSolid.API.MemberFunction (MemberFunction (..))
@@ -19,6 +18,10 @@ import OpenSolid.API.MemberFunction qualified as MemberFunction
 import OpenSolid.API.Name (Name)
 import OpenSolid.API.Name qualified as Name
 import OpenSolid.API.NegationOperator qualified as NegationOperator
+import OpenSolid.API.PostOperator (PostOperator (PostOperator))
+import OpenSolid.API.PostOperator qualified as PostOperator
+import OpenSolid.API.PreOperator (PreOperator (PreOperator))
+import OpenSolid.API.PreOperator qualified as PreOperator
 import OpenSolid.API.StaticFunction (StaticFunction (..))
 import OpenSolid.API.StaticFunction qualified as StaticFunction
 import OpenSolid.FFI (FFI)
@@ -73,7 +76,8 @@ range =
           ]
       , memberFunctions = []
       , negationFunction = Nothing
-      , binaryOperators = []
+      , preOperators = []
+      , postOperators = []
       , nestedClasses = []
       }
   , Class
@@ -84,28 +88,38 @@ range =
           , "Intersection" .| m1 "Other" Range.intersection
           ]
       , negationFunction = Just negate
-      , binaryOperators =
-          [ add
-              [ BinaryOperator.Pre ((+) @Float @(Range Unitless))
-              , BinaryOperator.Post ((+) @(Range Unitless) @Float)
-              , BinaryOperator.Post ((+) @(Range Unitless) @(Range Unitless))
+      , preOperators =
+          [ preAdd
+              [ PreOperator ((+) @Float @(Range Unitless))
               ]
-          , sub
-              [ BinaryOperator.Pre ((-) @Float @(Range Unitless))
-              , BinaryOperator.Post ((-) @(Range Unitless) @Float)
-              , BinaryOperator.Post ((-) @(Range Unitless) @(Range Unitless))
+          , preSub
+              [ PreOperator ((-) @Float @(Range Unitless))
               ]
-          , mul
-              [ BinaryOperator.Pre ((*) @Float @(Range Unitless))
-              , BinaryOperator.Post ((*) @(Range Unitless) @Float)
-              , BinaryOperator.Post ((*) @(Range Unitless) @(Range Unitless))
-              , BinaryOperator.Pre ((*) @Length @(Range Unitless))
-              , BinaryOperator.Post ((*) @(Range Unitless) @Length)
+          , preMul
+              [ PreOperator ((*) @Float @(Range Unitless))
+              , PreOperator ((*) @Length @(Range Unitless))
               ]
-          , div
-              [ BinaryOperator.Pre ((/) @Float @(Range Unitless))
-              , BinaryOperator.Post ((/) @(Range Unitless) @Float)
-              , BinaryOperator.Post ((/) @(Range Unitless) @(Range Unitless))
+          , preDiv
+              [ PreOperator ((/) @Float @(Range Unitless))
+              ]
+          ]
+      , postOperators =
+          [ postAdd
+              [ PostOperator ((+) @(Range Unitless) @Float)
+              , PostOperator ((+) @(Range Unitless) @(Range Unitless))
+              ]
+          , postSub
+              [ PostOperator ((-) @(Range Unitless) @Float)
+              , PostOperator ((-) @(Range Unitless) @(Range Unitless))
+              ]
+          , postMul
+              [ PostOperator ((*) @(Range Unitless) @Float)
+              , PostOperator ((*) @(Range Unitless) @(Range Unitless))
+              , PostOperator ((*) @(Range Unitless) @Length)
+              ]
+          , postDiv
+              [ PostOperator ((/) @(Range Unitless) @Float)
+              , PostOperator ((/) @(Range Unitless) @(Range Unitless))
               ]
           ]
       , nestedClasses = []
@@ -118,7 +132,8 @@ range =
           , "Intersection" .| m1 "Other" Range.intersection
           ]
       , negationFunction = Just negate
-      , binaryOperators = []
+      , preOperators = []
+      , postOperators = []
       , nestedClasses = []
       }
   ]
@@ -154,7 +169,8 @@ vector2d =
           ]
       , memberFunctions = []
       , negationFunction = Nothing
-      , binaryOperators = []
+      , preOperators = []
+      , postOperators = []
       , nestedClasses = []
       }
   , Class
@@ -165,7 +181,8 @@ vector2d =
           , "Direction" .| m0U Vector2d.direction
           ]
       , negationFunction = Nothing
-      , binaryOperators = []
+      , preOperators = []
+      , postOperators = []
       , nestedClasses = []
       }
   , Class
@@ -176,7 +193,8 @@ vector2d =
           , "Direction" .| m0M Vector2d.direction
           ]
       , negationFunction = Nothing
-      , binaryOperators = []
+      , preOperators = []
+      , postOperators = []
       , nestedClasses = []
       }
   ]
@@ -198,7 +216,8 @@ direction2d =
           [ "To Angle" .| m0 Direction2d.toAngle
           ]
       , negationFunction = Nothing
-      , binaryOperators = []
+      , preOperators = []
+      , postOperators = []
       , nestedClasses = []
       }
   ]
@@ -233,7 +252,8 @@ point2d =
           ]
       , memberFunctions = []
       , negationFunction = Nothing
-      , binaryOperators = []
+      , preOperators = []
+      , postOperators = []
       , nestedClasses = []
       }
   , Class
@@ -245,7 +265,8 @@ point2d =
           , "Midpoint" .| m1 "Other" Point2d.midpoint
           ]
       , negationFunction = Nothing
-      , binaryOperators = []
+      , preOperators = []
+      , postOperators = []
       , nestedClasses = []
       }
   , Class
@@ -257,7 +278,8 @@ point2d =
           , "Midpoint" .| m1 "Other" Point2d.midpoint
           ]
       , negationFunction = Nothing
-      , binaryOperators = []
+      , preOperators = []
+      , postOperators = []
       , nestedClasses = []
       }
   ]
@@ -287,7 +309,8 @@ curve1d =
           ]
       , memberFunctions = []
       , negationFunction = Nothing
-      , binaryOperators = []
+      , preOperators = []
+      , postOperators = []
       , nestedClasses =
           [ Class
               { id = classId @Curve1d.Root Proxy
@@ -298,7 +321,8 @@ curve1d =
                   , "Sign" .| m0 (\root -> 1 * Curve1d.Root.sign root) -- TODO return as enum?
                   ]
               , negationFunction = Nothing
-              , binaryOperators = []
+              , preOperators = []
+              , postOperators = []
               , nestedClasses = []
               }
           ]
@@ -312,26 +336,36 @@ curve1d =
           , "Zeros" .| m0U Curve1d.zeros
           ]
       , negationFunction = Just negate
-      , binaryOperators =
-          [ add
-              [ BinaryOperator.Pre ((+) @Float @(Curve1d Unitless))
-              , BinaryOperator.Post ((+) @(Curve1d Unitless) @Float)
-              , BinaryOperator.Post ((+) @(Curve1d Unitless) @(Curve1d Unitless))
+      , preOperators =
+          [ preAdd
+              [ PreOperator ((+) @Float @(Curve1d Unitless))
               ]
-          , sub
-              [ BinaryOperator.Pre ((-) @Float @(Curve1d Unitless))
-              , BinaryOperator.Post ((-) @(Curve1d Unitless) @Float)
-              , BinaryOperator.Post ((-) @(Curve1d Unitless) @(Curve1d Unitless))
+          , preSub
+              [ PreOperator ((-) @Float @(Curve1d Unitless))
               ]
-          , mul
-              [ BinaryOperator.Pre ((*) @Float @(Curve1d Unitless))
-              , BinaryOperator.Post ((*) @(Curve1d Unitless) @Float)
-              , BinaryOperator.Post ((*) @(Curve1d Unitless) @(Curve1d Unitless))
+          , preMul
+              [ PreOperator ((*) @Float @(Curve1d Unitless))
               ]
-          , div
-              [ BinaryOperator.Pre ((/) @Float @(Curve1d Unitless))
-              , BinaryOperator.Post ((/) @(Curve1d Unitless) @Float)
-              , BinaryOperator.Post ((/) @(Curve1d Unitless) @(Curve1d Unitless))
+          , preDiv
+              [ PreOperator ((/) @Float @(Curve1d Unitless))
+              ]
+          ]
+      , postOperators =
+          [ postAdd
+              [ PostOperator ((+) @(Curve1d Unitless) @Float)
+              , PostOperator ((+) @(Curve1d Unitless) @(Curve1d Unitless))
+              ]
+          , postSub
+              [ PostOperator ((-) @(Curve1d Unitless) @Float)
+              , PostOperator ((-) @(Curve1d Unitless) @(Curve1d Unitless))
+              ]
+          , postMul
+              [ PostOperator ((*) @(Curve1d Unitless) @Float)
+              , PostOperator ((*) @(Curve1d Unitless) @(Curve1d Unitless))
+              ]
+          , postDiv
+              [ PostOperator ((/) @(Curve1d Unitless) @Float)
+              , PostOperator ((/) @(Curve1d Unitless) @(Curve1d Unitless))
               ]
           ]
       , nestedClasses = []
@@ -344,7 +378,8 @@ curve1d =
           , "Zeros" .| m0R Curve1d.zeros
           ]
       , negationFunction = Nothing
-      , binaryOperators = []
+      , preOperators = []
+      , postOperators = []
       , nestedClasses = []
       }
   , Class
@@ -355,7 +390,8 @@ curve1d =
           , "Zeros" .| m0M Curve1d.zeros
           ]
       , negationFunction = Nothing
-      , binaryOperators = []
+      , preOperators = []
+      , postOperators = []
       , nestedClasses = []
       }
   ]
@@ -405,20 +441,29 @@ m0M function = MemberFunction0M function
 m1 :: (FFI a, FFI value, FFI result) => Text -> (a -> value -> result) -> MemberFunction value
 m1 arg1 function = MemberFunction1 (Name.parse arg1) function
 
--- neg :: List (Operator value) -> (Operator.Id, List (Operator value))
--- neg overloads = (Operator.Neg, overloads)
+preAdd :: List (PreOperator value) -> (BinaryOperator.Id, List (PreOperator value))
+preAdd overloads = (BinaryOperator.Add, overloads)
 
-add :: List (BinaryOperator value) -> (BinaryOperator.Id, List (BinaryOperator value))
-add overloads = (BinaryOperator.Add, overloads)
+postAdd :: List (PostOperator value) -> (BinaryOperator.Id, List (PostOperator value))
+postAdd overloads = (BinaryOperator.Add, overloads)
 
-sub :: List (BinaryOperator value) -> (BinaryOperator.Id, List (BinaryOperator value))
-sub overloads = (BinaryOperator.Sub, overloads)
+preSub :: List (PreOperator value) -> (BinaryOperator.Id, List (PreOperator value))
+preSub overloads = (BinaryOperator.Sub, overloads)
 
-mul :: List (BinaryOperator value) -> (BinaryOperator.Id, List (BinaryOperator value))
-mul overloads = (BinaryOperator.Mul, overloads)
+postSub :: List (PostOperator value) -> (BinaryOperator.Id, List (PostOperator value))
+postSub overloads = (BinaryOperator.Sub, overloads)
 
-div :: List (BinaryOperator value) -> (BinaryOperator.Id, List (BinaryOperator value))
-div overloads = (BinaryOperator.Div, overloads)
+preMul :: List (PreOperator value) -> (BinaryOperator.Id, List (PreOperator value))
+preMul overloads = (BinaryOperator.Mul, overloads)
+
+postMul :: List (PostOperator value) -> (BinaryOperator.Id, List (PostOperator value))
+postMul overloads = (BinaryOperator.Mul, overloads)
+
+preDiv :: List (PreOperator value) -> (BinaryOperator.Id, List (PreOperator value))
+preDiv overloads = (BinaryOperator.Div, overloads)
+
+postDiv :: List (PostOperator value) -> (BinaryOperator.Id, List (PostOperator value))
+postDiv overloads = (BinaryOperator.Div, overloads)
 
 ----- FUNCTION COLLECTION -----
 
@@ -453,25 +498,39 @@ negationOperatorPair classId_ maybeNegationFunction = case maybeNegationFunction
   Just negationFunction ->
     [(NegationOperator.ffiName classId_, NegationOperator.invoke negationFunction)]
 
-binaryOperatorPair :: FFI.Id value -> BinaryOperator.Id -> BinaryOperator value -> (Text, ForeignFunction)
-binaryOperatorPair classId_ operatorId operator =
-  ( BinaryOperator.ffiName classId_ operatorId operator
-  , BinaryOperator.invoke operator
+preOperatorPair :: FFI.Id value -> BinaryOperator.Id -> PreOperator value -> (Text, ForeignFunction)
+preOperatorPair classId_ operatorId operator =
+  ( PreOperator.ffiName classId_ operatorId operator
+  , PreOperator.invoke operator
   )
 
-binaryOperatorPairs ::
+preOperatorPairs ::
   FFI.Id value ->
-  (BinaryOperator.Id, List (BinaryOperator value)) ->
+  (BinaryOperator.Id, List (PreOperator value)) ->
   List (Text, ForeignFunction)
-binaryOperatorPairs classId_ (operatorId, overloads) =
-  List.map (binaryOperatorPair classId_ operatorId) overloads
+preOperatorPairs classId_ (operatorId, overloads) =
+  List.map (preOperatorPair classId_ operatorId) overloads
+
+postOperatorPair :: FFI.Id value -> BinaryOperator.Id -> PostOperator value -> (Text, ForeignFunction)
+postOperatorPair classId_ operatorId operator =
+  ( PostOperator.ffiName classId_ operatorId operator
+  , PostOperator.invoke operator
+  )
+
+postOperatorPairs ::
+  FFI.Id value ->
+  (BinaryOperator.Id, List (PostOperator value)) ->
+  List (Text, ForeignFunction)
+postOperatorPairs classId_ (operatorId, overloads) =
+  List.map (postOperatorPair classId_ operatorId) overloads
 
 classFunctionPairs :: Class -> List (Text, Ptr () -> Ptr () -> IO ())
-classFunctionPairs (Class classId_ staticFunctions memberFunctions maybeNegationOperator binaryOperators nestedClasses) =
+classFunctionPairs (Class classId_ staticFunctions memberFunctions maybeNegationOperator preOperators postOperators nestedClasses) =
   List.concat
     [ List.collect (staticFunctionPairs classId_) staticFunctions
     , List.collect (memberFunctionPairs classId_) memberFunctions
     , negationOperatorPair classId_ maybeNegationOperator
-    , List.collect (binaryOperatorPairs classId_) binaryOperators
+    , List.collect (preOperatorPairs classId_) preOperators
+    , List.collect (postOperatorPairs classId_) postOperators
     , List.collect classFunctionPairs nestedClasses
     ]

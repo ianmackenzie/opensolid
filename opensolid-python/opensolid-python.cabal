@@ -32,6 +32,9 @@ executable opensolid-python
     Python.FFI
     Python.Function
     Python.MemberFunction
+    Python.NegationOperator
+    Python.PostOperator
+    Python.PreOperator
     Python.StaticFunction
     Python.Type
     Python.Type.Registry

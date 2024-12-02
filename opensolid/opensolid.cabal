@@ -184,6 +184,8 @@ library
     OpenSolid.API.MemberFunction
     OpenSolid.API.Name
     OpenSolid.API.NegationOperator
+    OpenSolid.API.PostOperator
+    OpenSolid.API.PreOperator
     OpenSolid.API.StaticFunction
     OpenSolid.FFI
     OpenSolid.Json
