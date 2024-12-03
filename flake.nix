@@ -1,5 +1,5 @@
 {
-  inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+  inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-24.11";
   outputs = { nixpkgs, ... }:
     # All supported platforms/architectures
     let
@@ -10,7 +10,12 @@
       devShells = nixpkgs.lib.genAttrs supportedSystems (system:
         # Get the Nix packages for the current platform/architecture
         let
-          pkgs = nixpkgs.legacyPackages.${system};
+          overlay = final: prev: {
+            haskell-language-server = prev.haskell-language-server.override {
+              supportedGhcVersions = [ "910" ];
+            };
+          };
+          pkgs = nixpkgs.legacyPackages.${system}.extend overlay;
           ld_library_path = builtins.concatStringsSep ":" [
             # Allow Haskell to find libopensolid_jit
             "$PWD/opensolid-jit/target/release"
@@ -24,7 +29,7 @@
               # https://discourse.nixos.org/t/non-interactive-bash-errors-from-flake-nix-mkshell/33310
               pkgs.bashInteractive
               # The Haskell compiler itself
-              pkgs.ghc
+              pkgs.haskell.compiler.ghc910
               # The Cabal build tool for Haskell
               pkgs.cabal-install
               # Haskell editor/IDE support
