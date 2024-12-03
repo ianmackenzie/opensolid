@@ -13,13 +13,14 @@ ruff format opensolid-python/opensolid/__init__.py
 #   COM812: conflicts with 'ruff format'
 #   N801: concrete types use underscores in names
 #   RUF012: attempting to annotate _fields_ gets very messy
+#   PLR0911: limitation on number of return statements is silly for generated code
 # Errors to re-enable eventually:
 #   D101: Undocumented public class
 #   D102: Undocumented public method
 #   D105: Undocumented magic method
 #   D106: Undocumented public nested class
 #   D107: Undocumented public __init__
-ruff check --select ALL --ignore D203 --ignore D213 --ignore COM812 --ignore RUF012 --ignore N801 --ignore D101 --ignore D102 --ignore D105 --ignore D106 --ignore D107 opensolid-python/opensolid/__init__.py
+ruff check --select ALL --ignore D203 --ignore D213 --ignore COM812 --ignore RUF012 --ignore PLR0911 --ignore N801 --ignore D101 --ignore D102 --ignore D105 --ignore D106 --ignore D107 opensolid-python/opensolid/__init__.py
 # Generate the opensolid-ffi.def file with all API functions listed
 # (necessary for Windows builds)
 cabal run generate-def-file
