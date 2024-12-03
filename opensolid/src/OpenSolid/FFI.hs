@@ -35,7 +35,6 @@ import NonEmpty qualified
 import OpenSolid hiding (Type)
 import OpenSolid.API.Name (Name)
 import OpenSolid.API.Name qualified as Name
-import Qty qualified
 import Text qualified
 
 class FFI a where
@@ -46,8 +45,6 @@ data Representation a where
   IntRep :: Representation Int
   -- A 64-bit float
   FloatRep :: Representation Float
-  -- A 64-bit float, wrapped inside a target language class
-  QtyRep :: Name -> Representation (Qty units)
   -- A struct with a 64-bit integer size and a pointer to an array of items
   ListRep :: FFI a => Representation (List a)
   -- A struct with the first item and then the second
@@ -107,7 +104,6 @@ typeOf :: FFI a => Proxy a -> Type
 typeOf proxy = case representation proxy of
   IntRep -> Int
   FloatRep -> Float
-  QtyRep qtyName -> Qty qtyName
   ListRep -> listType proxy
   Tuple2Rep -> tuple2Type proxy
   Tuple3Rep -> tuple3Type proxy
@@ -202,10 +198,10 @@ instance FFI Int where
   representation _ = IntRep
 
 instance FFI Length where
-  representation _ = QtyRep (Name.parse "Length")
+  representation = classRepresentation "Length" Nothing
 
 instance FFI Angle where
-  representation _ = QtyRep (Name.parse "Angle")
+  representation = classRepresentation "Angle" Nothing
 
 instance FFI item => FFI (List item) where
   representation _ = ListRep
@@ -237,9 +233,6 @@ store ptr offset value = do
   case representation proxy of
     IntRep -> Foreign.pokeByteOff ptr offset (fromIntegral value :: Int64)
     FloatRep -> Foreign.pokeByteOff ptr offset (Float.toDouble value)
-    QtyRep _ -> do
-      let Qty.Qty double = value
-      Foreign.pokeByteOff ptr offset double
     ListRep -> IO.do
       let numItems = List.length value
       let itemSize = listItemSize proxy
@@ -334,7 +327,6 @@ load ptr offset = do
   case representation proxy of
     IntRep -> IO.map fromInt64 (Foreign.peekByteOff ptr offset)
     FloatRep -> IO.map Float.fromDouble (Foreign.peekByteOff ptr offset)
-    QtyRep _ -> IO.map Qty.Qty (Foreign.peekByteOff ptr offset)
     ListRep -> IO.do
       let itemSize = listItemSize proxy
       numItems <- IO.map fromInt64 (Foreign.peekByteOff ptr offset)

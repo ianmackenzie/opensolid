@@ -57,22 +57,6 @@ def _error(output: Any) -> Any:  # noqa: ANN401
     raise Error(message)
 
 
-class Length:
-    """A length, stored as a value in meters."""
-
-    def __init__(self, value: float) -> None:
-        """Create a Length from a float value in meters."""
-        self.value = value
-
-
-class Angle:
-    """An angle, stored as a value in radians."""
-
-    def __init__(self, value: float) -> None:
-        """Create an Angle from a float value in radians."""
-        self.value = value
-
-
 class Tolerance:
     """Manages a global tolerance value."""
 
@@ -132,8 +116,8 @@ def _angle_tolerance() -> Angle:
     raise TypeError(message)
 
 
-class _Tuple2_c_double_c_void_p(Structure):
-    _fields_ = [("field0", c_double), ("field1", c_void_p)]
+class _Tuple2_c_void_p_c_void_p(Structure):
+    _fields_ = [("field0", c_void_p), ("field1", c_void_p)]
 
 
 class _List_c_void_p(Structure):
@@ -148,8 +132,8 @@ class _Result_List_c_void_p(Structure):
     ]
 
 
-class _Tuple2_c_void_p_c_void_p(Structure):
-    _fields_ = [("field0", c_void_p), ("field1", c_void_p)]
+class _Tuple2_c_double_c_void_p(Structure):
+    _fields_ = [("field0", c_double), ("field1", c_void_p)]
 
 
 class _Tuple2_c_void_p_c_double(Structure):
@@ -170,6 +154,136 @@ class _Maybe_c_void_p(Structure):
 
 class _Tuple3_c_void_p_c_void_p_c_void_p(Structure):
     _fields_ = [("field0", c_void_p), ("field1", c_void_p), ("field2", c_void_p)]
+
+
+class Length:
+    def __init__(self, *, ptr: c_void_p) -> None:
+        self.__ptr__ = ptr
+
+    @staticmethod
+    def zero() -> Length:
+        inputs = c_void_p()
+        output = c_void_p()
+        _lib.opensolid_Length_zero(ctypes.byref(inputs), ctypes.byref(output))
+        return Length(ptr=output)
+
+    @staticmethod
+    def meters(value: float) -> Length:
+        inputs = c_double(value)
+        output = c_void_p()
+        _lib.opensolid_Length_meters_Float(ctypes.byref(inputs), ctypes.byref(output))
+        return Length(ptr=output)
+
+    def in_meters(self) -> float:
+        inputs = self.__ptr__
+        output = c_double()
+        _lib.opensolid_Length_inMeters(ctypes.byref(inputs), ctypes.byref(output))
+        return output.value
+
+    def __neg__(self) -> Length:
+        output = c_void_p()
+        _lib.opensolid_Length_neg(ctypes.byref(self.__ptr__), ctypes.byref(output))
+        return Length(ptr=output)
+
+    def __add__(self, rhs: Length) -> Length:
+        inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+        output = c_void_p()
+        _lib.opensolid_Length_add_Length_Length(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Length(ptr=output)
+
+    def __sub__(self, rhs: Length) -> Length:
+        inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+        output = c_void_p()
+        _lib.opensolid_Length_sub_Length_Length(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Length(ptr=output)
+
+    def __mul__(self, rhs: float) -> Length:
+        inputs = _Tuple2_c_void_p_c_double(self.__ptr__, rhs)
+        output = c_void_p()
+        _lib.opensolid_Length_mul_Length_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Length(ptr=output)
+
+    def __truediv__(self, rhs: float) -> Length:
+        inputs = _Tuple2_c_void_p_c_double(self.__ptr__, rhs)
+        output = c_void_p()
+        _lib.opensolid_Length_div_Length_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Length(ptr=output)
+
+    def __rmul__(self, lhs: float) -> Length:
+        inputs = _Tuple2_c_double_c_void_p(lhs, self.__ptr__)
+        output = c_void_p()
+        _lib.opensolid_Length_mul_Float_Length(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Length(ptr=output)
+
+
+class Angle:
+    def __init__(self, *, ptr: c_void_p) -> None:
+        self.__ptr__ = ptr
+
+    @staticmethod
+    def zero() -> Angle:
+        inputs = c_void_p()
+        output = c_void_p()
+        _lib.opensolid_Angle_zero(ctypes.byref(inputs), ctypes.byref(output))
+        return Angle(ptr=output)
+
+    @staticmethod
+    def radians(value: float) -> Angle:
+        inputs = c_double(value)
+        output = c_void_p()
+        _lib.opensolid_Angle_radians_Float(ctypes.byref(inputs), ctypes.byref(output))
+        return Angle(ptr=output)
+
+    def in_radians(self) -> float:
+        inputs = self.__ptr__
+        output = c_double()
+        _lib.opensolid_Angle_inRadians(ctypes.byref(inputs), ctypes.byref(output))
+        return output.value
+
+    def __neg__(self) -> Angle:
+        output = c_void_p()
+        _lib.opensolid_Angle_neg(ctypes.byref(self.__ptr__), ctypes.byref(output))
+        return Angle(ptr=output)
+
+    def __add__(self, rhs: Angle) -> Angle:
+        inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+        output = c_void_p()
+        _lib.opensolid_Angle_add_Angle_Angle(ctypes.byref(inputs), ctypes.byref(output))
+        return Angle(ptr=output)
+
+    def __sub__(self, rhs: Angle) -> Angle:
+        inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+        output = c_void_p()
+        _lib.opensolid_Angle_sub_Angle_Angle(ctypes.byref(inputs), ctypes.byref(output))
+        return Angle(ptr=output)
+
+    def __mul__(self, rhs: float) -> Angle:
+        inputs = _Tuple2_c_void_p_c_double(self.__ptr__, rhs)
+        output = c_void_p()
+        _lib.opensolid_Angle_mul_Angle_Float(ctypes.byref(inputs), ctypes.byref(output))
+        return Angle(ptr=output)
+
+    def __truediv__(self, rhs: float) -> Angle:
+        inputs = _Tuple2_c_void_p_c_double(self.__ptr__, rhs)
+        output = c_void_p()
+        _lib.opensolid_Angle_div_Angle_Float(ctypes.byref(inputs), ctypes.byref(output))
+        return Angle(ptr=output)
+
+    def __rmul__(self, lhs: float) -> Angle:
+        inputs = _Tuple2_c_double_c_void_p(lhs, self.__ptr__)
+        output = c_void_p()
+        _lib.opensolid_Angle_mul_Float_Angle(ctypes.byref(inputs), ctypes.byref(output))
+        return Angle(ptr=output)
 
 
 class Range:
@@ -207,7 +321,7 @@ class Range:
                 )
                 return Range_Unitless(ptr=output)
             case ([Length() as value], {}) | ([], {"value": Length() as value}):
-                inputs = c_double(value.value)
+                inputs = value.__ptr__
                 output = c_void_p()
                 _lib.opensolid_Range_constant_Length(
                     ctypes.byref(inputs), ctypes.byref(output)
@@ -244,7 +358,7 @@ class Range:
                 ([Length() as a, Length() as b], {})
                 | ([], {"a": Length() as a, "b": Length() as b})
             ):
-                inputs = _Tuple2_c_double_c_double(a.value, b.value)
+                inputs = _Tuple2_c_void_p_c_void_p(a.__ptr__, b.__ptr__)
                 output = c_void_p()
                 _lib.opensolid_Range_fromEndpoints_Length_Length(
                     ctypes.byref(inputs), ctypes.byref(output)
@@ -470,7 +584,7 @@ class Range_Unitless:
                 )
                 return Range_Unitless(ptr=output)
             case ([Length() as rhs], {}) | ([], {"rhs": Length() as rhs}):
-                inputs = _Tuple2_c_void_p_c_double(self.__ptr__, rhs.value)
+                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
                 output = c_void_p()
                 _lib.opensolid_RangeUnitless_mul_RangeUnitless_Length(
                     ctypes.byref(inputs), ctypes.byref(output)
@@ -543,7 +657,7 @@ class Range_Unitless:
                 )
                 return Range_Unitless(ptr=output)
             case ([Length() as lhs], {}) | ([], {"lhs": Length() as lhs}):
-                inputs = _Tuple2_c_double_c_void_p(lhs.value, self.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(lhs.__ptr__, self.__ptr__)
                 output = c_void_p()
                 _lib.opensolid_RangeUnitless_mul_Length_RangeUnitless(
                     ctypes.byref(inputs), ctypes.byref(output)
@@ -567,9 +681,12 @@ class Range_Meters:
 
     def endpoints(self) -> tuple[Length, Length]:
         inputs = self.__ptr__
-        output = _Tuple2_c_double_c_double()
+        output = _Tuple2_c_void_p_c_void_p()
         _lib.opensolid_RangeMeters_endpoints(ctypes.byref(inputs), ctypes.byref(output))
-        return (Length(output.field0), Length(output.field1))
+        return (
+            Length(ptr=c_void_p(output.field0)),
+            Length(ptr=c_void_p(output.field1)),
+        )
 
     def intersection(self, other: Range_Meters) -> Range_Meters | None:
         inputs = _Tuple2_c_void_p_c_void_p(other.__ptr__, self.__ptr__)
@@ -604,6 +721,15 @@ class Vector2d:
             ctypes.byref(inputs), ctypes.byref(output)
         )
         return Vector2d_Unitless(ptr=output)
+
+    @staticmethod
+    def meters(x: float, y: float) -> Vector2d_Meters:
+        inputs = _Tuple2_c_double_c_double(x, y)
+        output = c_void_p()
+        _lib.opensolid_Vector2d_meters_Float_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Vector2d_Meters(ptr=output)
 
     @overload
     @staticmethod
@@ -644,7 +770,9 @@ class Vector2d:
                     },
                 )
             ):
-                inputs = _Tuple2_c_double_c_double(x_component.value, y_component.value)
+                inputs = _Tuple2_c_void_p_c_void_p(
+                    x_component.__ptr__, y_component.__ptr__
+                )
                 output = c_void_p()
                 _lib.opensolid_Vector2d_xy_Length_Length(
                     ctypes.byref(inputs), ctypes.byref(output)
@@ -681,7 +809,7 @@ class Vector2d:
                 ([Length() as x_component], {})
                 | ([], {"x_component": Length() as x_component})
             ):
-                inputs = c_double(x_component.value)
+                inputs = x_component.__ptr__
                 output = c_void_p()
                 _lib.opensolid_Vector2d_x_Length(
                     ctypes.byref(inputs), ctypes.byref(output)
@@ -718,7 +846,7 @@ class Vector2d:
                 ([Length() as y_component], {})
                 | ([], {"y_component": Length() as y_component})
             ):
-                inputs = c_double(y_component.value)
+                inputs = y_component.__ptr__
                 output = c_void_p()
                 _lib.opensolid_Vector2d_y_Length(
                     ctypes.byref(inputs), ctypes.byref(output)
@@ -755,8 +883,8 @@ class Vector2d:
                 ([(Length(), Length()) as components], {})
                 | ([], {"components": (Length(), Length()) as components})
             ):
-                inputs = _Tuple2_c_double_c_double(
-                    components[0].value, components[1].value
+                inputs = _Tuple2_c_void_p_c_void_p(
+                    components[0].__ptr__, components[1].__ptr__
                 )
                 output = c_void_p()
                 _lib.opensolid_Vector2d_fromComponents_Tuple2LengthLength(
@@ -780,6 +908,22 @@ class Vector2d_Unitless:
         )
         return (output.field0, output.field1)
 
+    def x_component(self) -> float:
+        inputs = self.__ptr__
+        output = c_double()
+        _lib.opensolid_Vector2dUnitless_xComponent(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return output.value
+
+    def y_component(self) -> float:
+        inputs = self.__ptr__
+        output = c_double()
+        _lib.opensolid_Vector2dUnitless_yComponent(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return output.value
+
     def direction(self) -> Direction2d:
         inputs = _Tuple2_c_double_c_void_p(_float_tolerance(), self.__ptr__)
         output = _Result_c_void_p()
@@ -799,14 +943,33 @@ class Vector2d_Meters:
 
     def components(self) -> tuple[Length, Length]:
         inputs = self.__ptr__
-        output = _Tuple2_c_double_c_double()
+        output = _Tuple2_c_void_p_c_void_p()
         _lib.opensolid_Vector2dMeters_components(
             ctypes.byref(inputs), ctypes.byref(output)
         )
-        return (Length(output.field0), Length(output.field1))
+        return (
+            Length(ptr=c_void_p(output.field0)),
+            Length(ptr=c_void_p(output.field1)),
+        )
+
+    def x_component(self) -> Length:
+        inputs = self.__ptr__
+        output = c_void_p()
+        _lib.opensolid_Vector2dMeters_xComponent(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Length(ptr=output)
+
+    def y_component(self) -> Length:
+        inputs = self.__ptr__
+        output = c_void_p()
+        _lib.opensolid_Vector2dMeters_yComponent(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Length(ptr=output)
 
     def direction(self) -> Direction2d:
-        inputs = _Tuple2_c_double_c_void_p(_length_tolerance().value, self.__ptr__)
+        inputs = _Tuple2_c_void_p_c_void_p(_length_tolerance().__ptr__, self.__ptr__)
         output = _Result_c_void_p()
         _lib.opensolid_Vector2dMeters_direction(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -866,7 +1029,7 @@ class Direction2d:
 
     @staticmethod
     def from_angle(angle: Angle) -> Direction2d:
-        inputs = c_double(angle.value)
+        inputs = angle.__ptr__
         output = c_void_p()
         _lib.opensolid_Direction2d_fromAngle_Angle(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -875,9 +1038,33 @@ class Direction2d:
 
     def to_angle(self) -> Angle:
         inputs = self.__ptr__
-        output = c_double()
+        output = c_void_p()
         _lib.opensolid_Direction2d_toAngle(ctypes.byref(inputs), ctypes.byref(output))
-        return Angle(output.value)
+        return Angle(ptr=output)
+
+    def components(self) -> tuple[float, float]:
+        inputs = self.__ptr__
+        output = _Tuple2_c_double_c_double()
+        _lib.opensolid_Direction2d_components(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return (output.field0, output.field1)
+
+    def x_component(self) -> float:
+        inputs = self.__ptr__
+        output = c_double()
+        _lib.opensolid_Direction2d_xComponent(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return output.value
+
+    def y_component(self) -> float:
+        inputs = self.__ptr__
+        output = c_double()
+        _lib.opensolid_Direction2d_yComponent(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return output.value
 
 
 class Point2d:
@@ -930,8 +1117,8 @@ class Point2d:
                     },
                 )
             ):
-                inputs = _Tuple2_c_double_c_double(
-                    x_coordinate.value, y_coordinate.value
+                inputs = _Tuple2_c_void_p_c_void_p(
+                    x_coordinate.__ptr__, y_coordinate.__ptr__
                 )
                 output = c_void_p()
                 _lib.opensolid_Point2d_xy_Length_Length(
@@ -969,7 +1156,7 @@ class Point2d:
                 ([Length() as x_coordinate], {})
                 | ([], {"x_coordinate": Length() as x_coordinate})
             ):
-                inputs = c_double(x_coordinate.value)
+                inputs = x_coordinate.__ptr__
                 output = c_void_p()
                 _lib.opensolid_Point2d_x_Length(
                     ctypes.byref(inputs), ctypes.byref(output)
@@ -1006,7 +1193,7 @@ class Point2d:
                 ([Length() as y_coordinate], {})
                 | ([], {"y_coordinate": Length() as y_coordinate})
             ):
-                inputs = c_double(y_coordinate.value)
+                inputs = y_coordinate.__ptr__
                 output = c_void_p()
                 _lib.opensolid_Point2d_y_Length(
                     ctypes.byref(inputs), ctypes.byref(output)
@@ -1046,8 +1233,8 @@ class Point2d:
                 ([(Length(), Length()) as coordinates], {})
                 | ([], {"coordinates": (Length(), Length()) as coordinates})
             ):
-                inputs = _Tuple2_c_double_c_double(
-                    coordinates[0].value, coordinates[1].value
+                inputs = _Tuple2_c_void_p_c_void_p(
+                    coordinates[0].__ptr__, coordinates[1].__ptr__
                 )
                 output = c_void_p()
                 _lib.opensolid_Point2d_fromCoordinates_Tuple2LengthLength(
@@ -1070,6 +1257,22 @@ class Point2d_Unitless:
             ctypes.byref(inputs), ctypes.byref(output)
         )
         return (output.field0, output.field1)
+
+    def x_coordinate(self) -> float:
+        inputs = self.__ptr__
+        output = c_double()
+        _lib.opensolid_Point2dUnitless_xCoordinate(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return output.value
+
+    def y_coordinate(self) -> float:
+        inputs = self.__ptr__
+        output = c_double()
+        _lib.opensolid_Point2dUnitless_yCoordinate(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return output.value
 
     def distance_to(self, other: Point2d_Unitless) -> float:
         inputs = _Tuple2_c_void_p_c_void_p(other.__ptr__, self.__ptr__)
@@ -1094,19 +1297,38 @@ class Point2d_Meters:
 
     def coordinates(self) -> tuple[Length, Length]:
         inputs = self.__ptr__
-        output = _Tuple2_c_double_c_double()
+        output = _Tuple2_c_void_p_c_void_p()
         _lib.opensolid_Point2dMeters_coordinates(
             ctypes.byref(inputs), ctypes.byref(output)
         )
-        return (Length(output.field0), Length(output.field1))
+        return (
+            Length(ptr=c_void_p(output.field0)),
+            Length(ptr=c_void_p(output.field1)),
+        )
+
+    def x_coordinate(self) -> Length:
+        inputs = self.__ptr__
+        output = c_void_p()
+        _lib.opensolid_Point2dMeters_xCoordinate(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Length(ptr=output)
+
+    def y_coordinate(self) -> Length:
+        inputs = self.__ptr__
+        output = c_void_p()
+        _lib.opensolid_Point2dMeters_yCoordinate(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Length(ptr=output)
 
     def distance_to(self, other: Point2d_Meters) -> Length:
         inputs = _Tuple2_c_void_p_c_void_p(other.__ptr__, self.__ptr__)
-        output = c_double()
+        output = c_void_p()
         _lib.opensolid_Point2dMeters_distanceTo_Point2dMeters(
             ctypes.byref(inputs), ctypes.byref(output)
         )
-        return Length(output.value)
+        return Length(ptr=output)
 
     def midpoint(self, other: Point2d_Meters) -> Point2d_Meters:
         inputs = _Tuple2_c_void_p_c_void_p(other.__ptr__, self.__ptr__)
@@ -1341,6 +1563,14 @@ class Curve1d_Unitless:
         pass
 
     @overload
+    def __mul__(self, rhs: Angle) -> Curve1d_Radians:
+        pass
+
+    @overload
+    def __mul__(self, rhs: Length) -> Curve1d_Meters:
+        pass
+
+    @overload
     def __mul__(self, rhs: Curve1d_Unitless) -> Curve1d_Unitless:
         pass
 
@@ -1353,6 +1583,20 @@ class Curve1d_Unitless:
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return Curve1d_Unitless(ptr=output)
+            case ([Angle() as rhs], {}) | ([], {"rhs": Angle() as rhs}):
+                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                output = c_void_p()
+                _lib.opensolid_Curve1dUnitless_mul_Curve1dUnitless_Angle(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Curve1d_Radians(ptr=output)
+            case ([Length() as rhs], {}) | ([], {"rhs": Length() as rhs}):
+                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                output = c_void_p()
+                _lib.opensolid_Curve1dUnitless_mul_Curve1dUnitless_Length(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Curve1d_Meters(ptr=output)
             case (
                 ([Curve1d_Unitless() as rhs], {})
                 | ([], {"rhs": Curve1d_Unitless() as rhs})
@@ -1371,6 +1615,10 @@ class Curve1d_Unitless:
         pass
 
     @overload
+    def __truediv__(self, rhs: Angle) -> Curve1d_Radians:
+        pass
+
+    @overload
     def __truediv__(self, rhs: Curve1d_Unitless) -> Curve1d_Unitless:
         pass
 
@@ -1383,6 +1631,13 @@ class Curve1d_Unitless:
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return Curve1d_Unitless(ptr=output)
+            case ([Angle() as rhs], {}) | ([], {"rhs": Angle() as rhs}):
+                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                output = c_void_p()
+                _lib.opensolid_Curve1dUnitless_div_Curve1dUnitless_Angle(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Curve1d_Radians(ptr=output)
             case (
                 ([Curve1d_Unitless() as rhs], {})
                 | ([], {"rhs": Curve1d_Unitless() as rhs})
@@ -1412,21 +1667,81 @@ class Curve1d_Unitless:
         )
         return Curve1d_Unitless(ptr=output)
 
+    @overload
     def __rmul__(self, lhs: float) -> Curve1d_Unitless:
-        inputs = _Tuple2_c_double_c_void_p(lhs, self.__ptr__)
-        output = c_void_p()
-        _lib.opensolid_Curve1dUnitless_mul_Float_Curve1dUnitless(
-            ctypes.byref(inputs), ctypes.byref(output)
-        )
-        return Curve1d_Unitless(ptr=output)
+        pass
 
+    @overload
+    def __rmul__(self, lhs: Angle) -> Curve1d_Radians:
+        pass
+
+    @overload
+    def __rmul__(self, lhs: Length) -> Curve1d_Meters:
+        pass
+
+    def __rmul__(self, *args, **keywords):
+        match (args, keywords):
+            case ([float() | int() as lhs], {}) | ([], {"lhs": float() | int() as lhs}):
+                inputs = _Tuple2_c_double_c_void_p(lhs, self.__ptr__)
+                output = c_void_p()
+                _lib.opensolid_Curve1dUnitless_mul_Float_Curve1dUnitless(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Curve1d_Unitless(ptr=output)
+            case ([Angle() as lhs], {}) | ([], {"lhs": Angle() as lhs}):
+                inputs = _Tuple2_c_void_p_c_void_p(lhs.__ptr__, self.__ptr__)
+                output = c_void_p()
+                _lib.opensolid_Curve1dUnitless_mul_Angle_Curve1dUnitless(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Curve1d_Radians(ptr=output)
+            case ([Length() as lhs], {}) | ([], {"lhs": Length() as lhs}):
+                inputs = _Tuple2_c_void_p_c_void_p(lhs.__ptr__, self.__ptr__)
+                output = c_void_p()
+                _lib.opensolid_Curve1dUnitless_mul_Length_Curve1dUnitless(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Curve1d_Meters(ptr=output)
+            case _:
+                return NotImplemented
+
+    @overload
     def __rtruediv__(self, lhs: float) -> Curve1d_Unitless:
-        inputs = _Tuple2_c_double_c_void_p(lhs, self.__ptr__)
-        output = c_void_p()
-        _lib.opensolid_Curve1dUnitless_div_Float_Curve1dUnitless(
-            ctypes.byref(inputs), ctypes.byref(output)
-        )
-        return Curve1d_Unitless(ptr=output)
+        pass
+
+    @overload
+    def __rtruediv__(self, lhs: Angle) -> Curve1d_Radians:
+        pass
+
+    @overload
+    def __rtruediv__(self, lhs: Length) -> Curve1d_Meters:
+        pass
+
+    def __rtruediv__(self, *args, **keywords):
+        match (args, keywords):
+            case ([float() | int() as lhs], {}) | ([], {"lhs": float() | int() as lhs}):
+                inputs = _Tuple2_c_double_c_void_p(lhs, self.__ptr__)
+                output = c_void_p()
+                _lib.opensolid_Curve1dUnitless_div_Float_Curve1dUnitless(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Curve1d_Unitless(ptr=output)
+            case ([Angle() as lhs], {}) | ([], {"lhs": Angle() as lhs}):
+                inputs = _Tuple2_c_void_p_c_void_p(lhs.__ptr__, self.__ptr__)
+                output = c_void_p()
+                _lib.opensolid_Curve1dUnitless_div_Angle_Curve1dUnitless(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Curve1d_Radians(ptr=output)
+            case ([Length() as lhs], {}) | ([], {"lhs": Length() as lhs}):
+                inputs = _Tuple2_c_void_p_c_void_p(lhs.__ptr__, self.__ptr__)
+                output = c_void_p()
+                _lib.opensolid_Curve1dUnitless_div_Length_Curve1dUnitless(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Curve1d_Meters(ptr=output)
+            case _:
+                return NotImplemented
 
 
 class Curve1d_Radians:
@@ -1435,14 +1750,14 @@ class Curve1d_Radians:
 
     def evaluate(self, parameter_value: float) -> Angle:
         inputs = _Tuple2_c_double_c_void_p(parameter_value, self.__ptr__)
-        output = c_double()
+        output = c_void_p()
         _lib.opensolid_Curve1dRadians_evaluate_Float(
             ctypes.byref(inputs), ctypes.byref(output)
         )
-        return Angle(output.value)
+        return Angle(ptr=output)
 
     def zeros(self) -> list[Curve1d.Root]:
-        inputs = _Tuple2_c_double_c_void_p(_angle_tolerance().value, self.__ptr__)
+        inputs = _Tuple2_c_void_p_c_void_p(_angle_tolerance().__ptr__, self.__ptr__)
         output = _Result_List_c_void_p()
         _lib.opensolid_Curve1dRadians_zeros(ctypes.byref(inputs), ctypes.byref(output))
         return (
@@ -1463,14 +1778,14 @@ class Curve1d_Meters:
 
     def evaluate(self, parameter_value: float) -> Length:
         inputs = _Tuple2_c_double_c_void_p(parameter_value, self.__ptr__)
-        output = c_double()
+        output = c_void_p()
         _lib.opensolid_Curve1dMeters_evaluate_Float(
             ctypes.byref(inputs), ctypes.byref(output)
         )
-        return Length(output.value)
+        return Length(ptr=output)
 
     def zeros(self) -> list[Curve1d.Root]:
-        inputs = _Tuple2_c_double_c_void_p(_length_tolerance().value, self.__ptr__)
+        inputs = _Tuple2_c_void_p_c_void_p(_length_tolerance().__ptr__, self.__ptr__)
         output = _Result_List_c_void_p()
         _lib.opensolid_Curve1dMeters_zeros(ctypes.byref(inputs), ctypes.byref(output))
         return (

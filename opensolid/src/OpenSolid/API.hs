@@ -9,6 +9,7 @@ import Direction2d (Direction2d)
 import Direction2d qualified
 import Foreign (Ptr)
 import Length (Length)
+import Length qualified
 import List qualified
 import OpenSolid
 import OpenSolid.API.BinaryOperator qualified as BinaryOperator
@@ -43,12 +44,102 @@ data Space
 classes :: List Class
 classes =
   List.concat
-    [ range
+    [ length
+    , angle
+    , range
     , vector2d
     , direction2d
     , point2d
     , curve1d
     ]
+
+length :: List Class
+length =
+  [ Class
+      { id = classId @Length Proxy
+      , staticFunctions =
+          [ "Zero" .| s0 Length.zero
+          , "Meters" .| s1 "Value" Length.meters
+          ]
+      , memberFunctions =
+          [ "In Meters" .| m0 Length.inMeters
+          ]
+      , negationFunction = Just negate
+      , preOperators =
+          [ preMul [PreOperator ((*) @Float @Length)]
+          ]
+      , postOperators =
+          [ postAdd
+              [ PostOperator ((+) @Length @Length)
+              , PostOperator ((+) @Length @(Range Meters))
+              , PostOperator ((+) @Length @(Curve1d Meters))
+              ]
+          , postSub
+              [ PostOperator ((-) @Length @Length)
+              , PostOperator ((-) @Length @(Range Meters))
+              , PostOperator ((-) @Length @(Curve1d Meters))
+              ]
+          , postMul
+              [ PostOperator ((*) @Length @Float)
+              , PostOperator ((*) @Length @(Range Unitless))
+              , PostOperator ((*) @Length @(Curve1d Unitless))
+              ]
+          , postDiv
+              [ PostOperator ((/) @Length @Float)
+              , PostOperator ((/) @Length @Length)
+              , PostOperator ((/) @Length @(Range Unitless))
+              , PostOperator ((/) @Length @(Range Meters))
+              , PostOperator ((/) @Length @(Curve1d Unitless))
+              , PostOperator ((/) @Length @(Curve1d Meters))
+              ]
+          ]
+      , nestedClasses = []
+      }
+  ]
+
+angle :: List Class
+angle =
+  [ Class
+      { id = classId @Angle Proxy
+      , staticFunctions =
+          [ "Zero" .| s0 Angle.zero
+          , "Radians" .| s1 "Value" Angle.radians
+          ]
+      , memberFunctions =
+          [ "In Radians" .| m0 Angle.inRadians
+          ]
+      , negationFunction = Just negate
+      , preOperators =
+          [ preMul [PreOperator ((*) @Float @Angle)]
+          ]
+      , postOperators =
+          [ postAdd
+              [ PostOperator ((+) @Angle @Angle)
+              , PostOperator ((+) @Angle @(Range Radians))
+              , PostOperator ((+) @Angle @(Curve1d Radians))
+              ]
+          , postSub
+              [ PostOperator ((-) @Angle @Angle)
+              , PostOperator ((-) @Angle @(Range Radians))
+              , PostOperator ((-) @Angle @(Curve1d Radians))
+              ]
+          , postMul
+              [ PostOperator ((*) @Angle @Float)
+              , PostOperator ((*) @Angle @(Range Unitless))
+              , PostOperator ((*) @Angle @(Curve1d Unitless))
+              ]
+          , postDiv
+              [ PostOperator ((/) @Angle @Float)
+              , PostOperator ((/) @Angle @Angle)
+              , PostOperator ((/) @Angle @(Range Unitless))
+              , PostOperator ((/) @Angle @(Range Radians))
+              , PostOperator ((/) @Angle @(Curve1d Unitless))
+              , PostOperator ((/) @Angle @(Curve1d Radians))
+              ]
+          ]
+      , nestedClasses = []
+      }
+  ]
 
 data AbstractRange
 
@@ -91,19 +182,10 @@ range =
           ]
       , negationFunction = Just negate
       , preOperators =
-          [ preAdd
-              [ PreOperator ((+) @Float @(Range Unitless))
-              ]
-          , preSub
-              [ PreOperator ((-) @Float @(Range Unitless))
-              ]
-          , preMul
-              [ PreOperator ((*) @Float @(Range Unitless))
-              , PreOperator ((*) @Length @(Range Unitless))
-              ]
-          , preDiv
-              [ PreOperator ((/) @Float @(Range Unitless))
-              ]
+          [ preAdd [PreOperator ((+) @Float @(Range Unitless))]
+          , preSub [PreOperator ((-) @Float @(Range Unitless))]
+          , preMul [PreOperator ((*) @Float @(Range Unitless))]
+          , preDiv [PreOperator ((/) @Float @(Range Unitless))]
           ]
       , postOperators =
           [ postAdd
@@ -118,12 +200,27 @@ range =
               [ PostOperator ((*) @(Range Unitless) @Float)
               , PostOperator ((*) @(Range Unitless) @(Range Unitless))
               , PostOperator ((*) @(Range Unitless) @Length)
+              , PostOperator ((*) @(Range Unitless) @Angle)
               ]
           , postDiv
               [ PostOperator ((/) @(Range Unitless) @Float)
               , PostOperator ((/) @(Range Unitless) @(Range Unitless))
               ]
           ]
+      , nestedClasses = []
+      }
+  , Class
+      { id = classId @(Range Radians) Proxy
+      , staticFunctions = []
+      , memberFunctions =
+          [ "Endpoints" .| m0 Range.endpoints
+          , "Intersection" .| m1 "Other" Range.intersection
+          ]
+      , negationFunction = Just negate
+      , preOperators =
+          [ preMul [PreOperator ((*) @Float @(Range Radians))]
+          ]
+      , postOperators = []
       , nestedClasses = []
       }
   , Class
@@ -134,7 +231,9 @@ range =
           , "Intersection" .| m1 "Other" Range.intersection
           ]
       , negationFunction = Just negate
-      , preOperators = []
+      , preOperators =
+          [ preMul [PreOperator ((*) @Float @(Range Meters))]
+          ]
       , postOperators = []
       , nestedClasses = []
       }
@@ -152,6 +251,7 @@ vector2d =
       , staticFunctions =
           [ "Zero" .| s0 (Vector2d.zero @Space @Meters)
           , "Unit" .| s1 "Direction" (Vector2d.unit @Space)
+          , "Meters" .| s2 "X" "Y" Vector2d.meters
           , "XY"
               .: [ s2 "X Component" "Y Component" (Vector2d.xy @Space @Unitless)
                  , s2 "X Component" "Y Component" (Vector2d.xy @Space @Meters)
@@ -180,6 +280,8 @@ vector2d =
       , staticFunctions = []
       , memberFunctions =
           [ "Components" .| m0 Vector2d.components
+          , "X Component" .| m0 Vector2d.xComponent
+          , "Y Component" .| m0 Vector2d.yComponent
           , "Direction" .| m0U Vector2d.direction
           ]
       , negationFunction = Nothing
@@ -192,6 +294,8 @@ vector2d =
       , staticFunctions = []
       , memberFunctions =
           [ "Components" .| m0 Vector2d.components
+          , "X Component" .| m0 Vector2d.xComponent
+          , "Y Component" .| m0 Vector2d.yComponent
           , "Direction" .| m0M Vector2d.direction
           ]
       , negationFunction = Nothing
@@ -216,6 +320,9 @@ direction2d =
           ]
       , memberFunctions =
           [ "To Angle" .| m0 Direction2d.toAngle
+          , "Components" .| m0 Direction2d.components
+          , "X Component" .| m0 Direction2d.xComponent
+          , "Y Component" .| m0 Direction2d.yComponent
           ]
       , negationFunction = Nothing
       , preOperators = []
@@ -263,6 +370,8 @@ point2d =
       , staticFunctions = []
       , memberFunctions =
           [ "Coordinates" .| m0 Point2d.coordinates
+          , "X Coordinate" .| m0 Point2d.xCoordinate
+          , "Y Coordinate" .| m0 Point2d.yCoordinate
           , "Distance To" .| m1 "Other" Point2d.distanceFrom
           , "Midpoint" .| m1 "Other" Point2d.midpoint
           ]
@@ -276,6 +385,8 @@ point2d =
       , staticFunctions = []
       , memberFunctions =
           [ "Coordinates" .| m0 Point2d.coordinates
+          , "X Coordinate" .| m0 Point2d.xCoordinate
+          , "Y Coordinate" .| m0 Point2d.yCoordinate
           , "Distance To" .| m1 "Other" Point2d.distanceFrom
           , "Midpoint" .| m1 "Other" Point2d.midpoint
           ]
@@ -347,9 +458,13 @@ curve1d =
               ]
           , preMul
               [ PreOperator ((*) @Float @(Curve1d Unitless))
+              , PreOperator ((*) @Angle @(Curve1d Unitless))
+              , PreOperator ((*) @Length @(Curve1d Unitless))
               ]
           , preDiv
               [ PreOperator ((/) @Float @(Curve1d Unitless))
+              , PreOperator ((/) @Angle @(Curve1d Unitless))
+              , PreOperator ((/) @Length @(Curve1d Unitless))
               ]
           ]
       , postOperators =
@@ -363,7 +478,11 @@ curve1d =
               ]
           , postMul
               [ PostOperator ((*) @(Curve1d Unitless) @Float)
+              , PostOperator ((*) @(Curve1d Unitless) @Angle)
+              , PostOperator ((*) @(Curve1d Unitless) @Length)
               , PostOperator ((*) @(Curve1d Unitless) @(Curve1d Unitless))
+              , PostOperator ((*) @(Curve1d Unitless) @(Curve1d Radians))
+              , PostOperator ((*) @(Curve1d Unitless) @(Curve1d Meters))
               ]
           , postDiv
               [ PostOperator ((/) @(Curve1d Unitless) @Float)
