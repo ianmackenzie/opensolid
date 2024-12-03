@@ -4,8 +4,8 @@ import File qualified
 import List qualified
 import Maybe qualified
 import OpenSolid
+import OpenSolid.API (Class (Class))
 import OpenSolid.API qualified as API
-import OpenSolid.API.Class (Class (Class))
 import OpenSolid.API.Constraint (Constraint)
 import OpenSolid.FFI qualified as FFI
 import Pair qualified

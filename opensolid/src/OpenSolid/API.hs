@@ -1,4 +1,4 @@
-module OpenSolid.API (classes, functions, Function (..)) where
+module OpenSolid.API (Class (..), Function (..), classes, functions) where
 
 import Angle qualified
 import Curve1d (Curve1d)
@@ -13,7 +13,6 @@ import Length qualified
 import List qualified
 import OpenSolid
 import OpenSolid.API.BinaryOperator qualified as BinaryOperator
-import OpenSolid.API.Class (Class (..))
 import OpenSolid.API.Constraint (Constraint)
 import OpenSolid.API.MemberFunction (MemberFunction (..))
 import OpenSolid.API.MemberFunction qualified as MemberFunction
@@ -38,6 +37,27 @@ import Vector2d (Vector2d)
 import Vector2d qualified
 
 data Space
+
+data Class where
+  Class ::
+    FFI value =>
+    { id :: FFI.Id value
+    , staticFunctions :: List (Name, List StaticFunction)
+    , memberFunctions :: List (Name, List (MemberFunction value))
+    , negationFunction :: Maybe (value -> value)
+    , preOperators :: List (BinaryOperator.Id, List (PreOperator value))
+    , postOperators :: List (BinaryOperator.Id, List (PostOperator value))
+    , nestedClasses :: List Class
+    } ->
+    Class
+
+data Function = Function
+  { ffiName :: Text
+  , constraint :: Maybe Constraint
+  , argumentTypes :: List FFI.Type
+  , returnType :: FFI.Type
+  , invoke :: Ptr () -> Ptr () -> IO ()
+  }
 
 ----- API DEFINITION -----
 
@@ -587,14 +607,6 @@ postDiv :: List (PostOperator value) -> (BinaryOperator.Id, List (PostOperator v
 postDiv overloads = (BinaryOperator.Div, overloads)
 
 ----- FUNCTION COLLECTION -----
-
-data Function = Function
-  { ffiName :: Text
-  , constraint :: Maybe Constraint
-  , argumentTypes :: List FFI.Type
-  , returnType :: FFI.Type
-  , invoke :: Ptr () -> Ptr () -> IO ()
-  }
 
 functions :: List Function
 functions = List.collect classFunctions classes
