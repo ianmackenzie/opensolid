@@ -8,7 +8,7 @@ module Curve1d
   , new
   , zero
   , constant
-  , parameter
+  , t
   , squared
   , squared'
   , sqrt
@@ -169,8 +169,8 @@ zero = constant Qty.zero
 constant :: Qty units -> Curve1d units
 constant = Parametric . Expression.constant
 
-parameter :: Curve1d Unitless
-parameter = Parametric Expression.t
+t :: Curve1d Unitless
+t = Parametric Expression.t
 
 instance Negation (Curve1d units) where
   negate (Parametric expression) = Parametric -expression

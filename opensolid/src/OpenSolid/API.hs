@@ -427,7 +427,7 @@ curve1d =
   [ Class
       { id = classId @AbstractCurve1d Proxy
       , staticFunctions =
-          [ "T" .| s0 Curve1d.parameter
+          [ "T" .| s0 Curve1d.t
           , "Sin"
               .: [ s1 "Curve" Curve1d.sin
                  , s1 "Curve" (\(floatCurve :: Curve1d Unitless) -> Curve1d.sin (floatCurve * Angle.radian))
