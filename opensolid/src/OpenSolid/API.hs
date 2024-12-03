@@ -525,12 +525,12 @@ classId proxy = case FFI.typeOf proxy of
   _ -> internalError "Attempt to get class ID of a non-class"
 
 (.:) :: Text -> List a -> (Name, List a)
-(.:) name values = (Name.parse name, values)
+(.:) text values = (Name.parse text, values)
 
 infixr 0 .:
 
 (.|) :: Text -> a -> (Name, List a)
-(.|) name value = (Name.parse name, [value])
+(.|) text value = (Name.parse text, [value])
 
 infixr 0 .|
 
