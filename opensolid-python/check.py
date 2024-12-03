@@ -10,19 +10,19 @@ print(c2.evaluate(0.5))
 
 r1 = Range.from_endpoints(1, 5)
 r2 = Range.from_endpoints(3, 7)
-r3 = Range.from_endpoints(Length(1), Length(5))
-r4 = Range.from_endpoints(Length(4), Length(10))
+r3 = Range.from_endpoints(Length.meters(1), Length.meters(5))
+r4 = Range.from_endpoints(Length.meters(4), Length.meters(10))
 r = r3.intersection(r4)
 if r is None:
     print("No intersection!")
 else:
     (a, b) = r.endpoints()
-    print(a.value)
-    print(b.value)
+    print(a.in_meters())
+    print(b.in_meters())
 
 v = Vector2d.xy(1,2)
 with Tolerance(1e-9):
-    print(v.direction())
+    print(v.direction().components())
 
 c = Curve1d.sin(Curve1d.t())
 with Tolerance(1e-9):
