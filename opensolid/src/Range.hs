@@ -91,6 +91,9 @@ pattern Range low high <- Range_ low high
 instance FFI (Range Unitless) where
   representation = FFI.classRepresentation "Range" (Just "Unitless")
 
+instance FFI (Range Radians) where
+  representation = FFI.classRepresentation "Range" (Just "Radians")
+
 instance FFI (Range Meters) where
   representation = FFI.classRepresentation "Range" (Just "Meters")
 
