@@ -6,8 +6,6 @@ module Python.Function
   )
 where
 
-import Data.Proxy (Proxy (Proxy))
-import Length (Length)
 import List qualified
 import OpenSolid hiding (Type)
 import OpenSolid.API.Constraint (Constraint)
@@ -72,7 +70,10 @@ tuplePattern type1 type2 rest = do
   "(" + Text.join "," itemPatterns + ")"
 
 toleranceArgument :: Constraint -> (Text, FFI.Type)
-toleranceArgument constraint = case constraint of
-  Constraint.ToleranceUnitless -> ("_float_tolerance()", FFI.typeOf @Float Proxy)
-  Constraint.ToleranceMeters -> ("_length_tolerance()", FFI.typeOf @Length Proxy)
-  Constraint.ToleranceRadians -> ("_angle_tolerance()", FFI.typeOf @Angle Proxy)
+toleranceArgument constraint = (toleranceFunction constraint, Constraint.toleranceType constraint)
+
+toleranceFunction :: Constraint -> Text
+toleranceFunction constraint = case constraint of
+  Constraint.ToleranceUnitless -> "_float_tolerance()"
+  Constraint.ToleranceMeters -> "_length_tolerance()"
+  Constraint.ToleranceRadians -> "_angle_tolerance()"
