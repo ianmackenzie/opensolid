@@ -5,7 +5,6 @@ Improve Python bindings
 - Allow Python classes to be represented by things other than pointers (e.g. plain float values for quantity types)
 - Rename __ptr__ to just _ptr
 - Nice __repr__ and/or __str__, at least for primitive types
-- Support 'in' operator?
 - Add docstrings
 - Actual error types instead of strings
 - Add _list_decode helper?
@@ -14,7 +13,7 @@ Improve Python bindings
   - cast result to typed pointer with 'ctypes.cast(obj, type)'?
   - get/set elements with 'ptr[index]'
 - Rename MemberFunction and StaticFunction to have U/R/M prefix *before* argument count
-- Add support for // and % (DivMod)
+- Add support for intersection operator (^)
 
 Switch Solve2d.return back to taking a single value instead of a NonEmpty
 
