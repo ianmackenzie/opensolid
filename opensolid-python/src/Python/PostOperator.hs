@@ -21,9 +21,9 @@ definition classId (operatorId, operators) = do
       let overloadCase (_, matchPattern, body) = Python.Function.overloadCase matchPattern [body]
       Python.lines
         [ Python.lines (List.map overloadDeclaration overloads)
-        , "def " + functionName operatorId + "(self, *args, **keywords):"
+        , "def " + functionName operatorId + "(self, " + rhsArgName + "):"
         , Python.indent
-            [ "match (args, keywords):"
+            [ "match " + rhsArgName + ":"
             , Python.indent
                 [ Python.lines (List.map overloadCase overloads)
                 , "case _:"
@@ -44,7 +44,7 @@ overload classId operatorId memberFunction = do
   let ffiFunctionName = PostOperator.ffiName classId operatorId memberFunction
   let (selfType, rhsType, returnType) = PostOperator.signature memberFunction
   let signature = signatureN operatorId rhsType returnType
-  let matchPattern = Python.Function.matchPattern [(PostOperator.rhsName, rhsType)]
+  let matchPattern = Python.Function.typePattern rhsType
   let body = bodyN ffiFunctionName selfType rhsType returnType
   (signature, matchPattern, body)
 

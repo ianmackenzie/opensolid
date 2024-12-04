@@ -3,6 +3,7 @@ module Python.Function
   , overloadCase
   , matchPattern
   , toleranceArgument
+  , typePattern
   )
 where
 
