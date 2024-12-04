@@ -174,10 +174,53 @@ class Length:
         _lib.opensolid_Length_meters_Float(ctypes.byref(inputs), ctypes.byref(output))
         return Length(ptr=output)
 
+    @staticmethod
+    def centimeters(value: float) -> Length:
+        inputs = c_double(value)
+        output = c_void_p()
+        _lib.opensolid_Length_centimeters_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Length(ptr=output)
+
+    @staticmethod
+    def millimeters(value: float) -> Length:
+        inputs = c_double(value)
+        output = c_void_p()
+        _lib.opensolid_Length_millimeters_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Length(ptr=output)
+
+    @staticmethod
+    def inches(value: float) -> Length:
+        inputs = c_double(value)
+        output = c_void_p()
+        _lib.opensolid_Length_inches_Float(ctypes.byref(inputs), ctypes.byref(output))
+        return Length(ptr=output)
+
     def in_meters(self) -> float:
         inputs = self.__ptr__
         output = c_double()
         _lib.opensolid_Length_inMeters(ctypes.byref(inputs), ctypes.byref(output))
+        return output.value
+
+    def in_centimeters(self) -> float:
+        inputs = self.__ptr__
+        output = c_double()
+        _lib.opensolid_Length_inCentimeters(ctypes.byref(inputs), ctypes.byref(output))
+        return output.value
+
+    def in_millimeters(self) -> float:
+        inputs = self.__ptr__
+        output = c_double()
+        _lib.opensolid_Length_inMillimeters(ctypes.byref(inputs), ctypes.byref(output))
+        return output.value
+
+    def in_inches(self) -> float:
+        inputs = self.__ptr__
+        output = c_double()
+        _lib.opensolid_Length_inInches(ctypes.byref(inputs), ctypes.byref(output))
         return output.value
 
     def __eq__(self, other: object) -> bool:
@@ -439,10 +482,36 @@ class Angle:
         _lib.opensolid_Angle_radians_Float(ctypes.byref(inputs), ctypes.byref(output))
         return Angle(ptr=output)
 
+    @staticmethod
+    def degrees(value: float) -> Angle:
+        inputs = c_double(value)
+        output = c_void_p()
+        _lib.opensolid_Angle_degrees_Float(ctypes.byref(inputs), ctypes.byref(output))
+        return Angle(ptr=output)
+
+    @staticmethod
+    def turns(value: float) -> Angle:
+        inputs = c_double(value)
+        output = c_void_p()
+        _lib.opensolid_Angle_turns_Float(ctypes.byref(inputs), ctypes.byref(output))
+        return Angle(ptr=output)
+
     def in_radians(self) -> float:
         inputs = self.__ptr__
         output = c_double()
         _lib.opensolid_Angle_inRadians(ctypes.byref(inputs), ctypes.byref(output))
+        return output.value
+
+    def in_degrees(self) -> float:
+        inputs = self.__ptr__
+        output = c_double()
+        _lib.opensolid_Angle_inDegrees(ctypes.byref(inputs), ctypes.byref(output))
+        return output.value
+
+    def in_turns(self) -> float:
+        inputs = self.__ptr__
+        output = c_double()
+        _lib.opensolid_Angle_inTurns(ctypes.byref(inputs), ctypes.byref(output))
         return output.value
 
     def __eq__(self, other: object) -> bool:
@@ -790,6 +859,42 @@ class Range:
             case _:
                 message = "Unexpected function arguments"
                 raise TypeError(message)
+
+    @staticmethod
+    def meters(a: float, b: float) -> Range_Meters:
+        inputs = _Tuple2_c_double_c_double(a, b)
+        output = c_void_p()
+        _lib.opensolid_Range_meters_Float_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Range_Meters(ptr=output)
+
+    @staticmethod
+    def centimeters(a: float, b: float) -> Range_Meters:
+        inputs = _Tuple2_c_double_c_double(a, b)
+        output = c_void_p()
+        _lib.opensolid_Range_centimeters_Float_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Range_Meters(ptr=output)
+
+    @staticmethod
+    def millimeters(a: float, b: float) -> Range_Meters:
+        inputs = _Tuple2_c_double_c_double(a, b)
+        output = c_void_p()
+        _lib.opensolid_Range_millimeters_Float_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Range_Meters(ptr=output)
+
+    @staticmethod
+    def inches(a: float, b: float) -> Range_Meters:
+        inputs = _Tuple2_c_double_c_double(a, b)
+        output = c_void_p()
+        _lib.opensolid_Range_inches_Float_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Range_Meters(ptr=output)
 
     @overload
     @staticmethod
@@ -1517,6 +1622,33 @@ class Vector2d:
         )
         return Vector2d_Meters(ptr=output)
 
+    @staticmethod
+    def centimeters(x_component: float, y_component: float) -> Vector2d_Meters:
+        inputs = _Tuple2_c_double_c_double(x_component, y_component)
+        output = c_void_p()
+        _lib.opensolid_Vector2d_centimeters_Float_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Vector2d_Meters(ptr=output)
+
+    @staticmethod
+    def millimeters(x_component: float, y_component: float) -> Vector2d_Meters:
+        inputs = _Tuple2_c_double_c_double(x_component, y_component)
+        output = c_void_p()
+        _lib.opensolid_Vector2d_millimeters_Float_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Vector2d_Meters(ptr=output)
+
+    @staticmethod
+    def inches(x_component: float, y_component: float) -> Vector2d_Meters:
+        inputs = _Tuple2_c_double_c_double(x_component, y_component)
+        output = c_void_p()
+        _lib.opensolid_Vector2d_inches_Float_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Vector2d_Meters(ptr=output)
+
     @overload
     @staticmethod
     def xy(x_component: float, y_component: float) -> Vector2d_Unitless:
@@ -2125,6 +2257,42 @@ class Point2d:
             case _:
                 message = "Unexpected function arguments"
                 raise TypeError(message)
+
+    @staticmethod
+    def meters(x_coordinate: float, y_coordinate: float) -> Point2d_Meters:
+        inputs = _Tuple2_c_double_c_double(x_coordinate, y_coordinate)
+        output = c_void_p()
+        _lib.opensolid_Point2d_meters_Float_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Point2d_Meters(ptr=output)
+
+    @staticmethod
+    def centimeters(x_coordinate: float, y_coordinate: float) -> Point2d_Meters:
+        inputs = _Tuple2_c_double_c_double(x_coordinate, y_coordinate)
+        output = c_void_p()
+        _lib.opensolid_Point2d_centimeters_Float_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Point2d_Meters(ptr=output)
+
+    @staticmethod
+    def millimeters(x_coordinate: float, y_coordinate: float) -> Point2d_Meters:
+        inputs = _Tuple2_c_double_c_double(x_coordinate, y_coordinate)
+        output = c_void_p()
+        _lib.opensolid_Point2d_millimeters_Float_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Point2d_Meters(ptr=output)
+
+    @staticmethod
+    def inches(x_coordinate: float, y_coordinate: float) -> Point2d_Meters:
+        inputs = _Tuple2_c_double_c_double(x_coordinate, y_coordinate)
+        output = c_void_p()
+        _lib.opensolid_Point2d_inches_Float_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Point2d_Meters(ptr=output)
 
     @overload
     @staticmethod

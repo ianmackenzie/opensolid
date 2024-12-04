@@ -82,7 +82,13 @@ length =
   [ class_ @Length
       [ static0 "Zero" Length.zero
       , static1 "Meters" "Value" Length.meters
+      , static1 "Centimeters" "Value" Length.centimeters
+      , static1 "Millimeters" "Value" Length.millimeters
+      , static1 "Inches" "Value" Length.inches
       , member0 "In Meters" Length.inMeters
+      , member0 "In Centimeters" Length.inCentimeters
+      , member0 "In Millimeters" Length.inMillimeters
+      , member0 "In Inches" Length.inInches
       , equality
       , comparison
       , negateSelf
@@ -112,7 +118,11 @@ angle =
   [ class_ @Angle
       [ static0 "Zero" Angle.zero
       , static1 "Radians" "Value" Angle.radians
+      , static1 "Degrees" "Value" Angle.degrees
+      , static1 "Turns" "Value" Angle.turns
       , member0 "In Radians" Angle.inRadians
+      , member0 "In Degrees" Angle.inDegrees
+      , member0 "In Turns" Angle.inTurns
       , equality
       , comparison
       , negateSelf
@@ -152,6 +162,10 @@ range =
       , static2 "From Endpoints" "A" "B" (Range.from @Unitless)
       , static2 "From Endpoints" "A" "B" (Range.from @Radians)
       , static2 "From Endpoints" "A" "B" (Range.from @Meters)
+      , static2 "Meters" "A" "B" Range.meters
+      , static2 "Centimeters" "A" "B" Range.centimeters
+      , static2 "Millimeters" "A" "B" Range.millimeters
+      , static2 "Inches" "A" "B" Range.inches
       , static2 "Aggregate" "A" "B" (Range.aggregate2 @Unitless)
       , static2 "Aggregate" "A" "B" (Range.aggregate2 @Radians)
       , static2 "Aggregate" "A" "B" (Range.aggregate2 @Meters)
@@ -225,6 +239,9 @@ vector2d =
       [ static0 "Zero" (Vector2d.zero @Space @Meters)
       , static1 "Unit" "Direction" Vector2d.unit
       , static2 "Meters" "X Component" "Y Component" Vector2d.meters
+      , static2 "Centimeters" "X Component" "Y Component" Vector2d.centimeters
+      , static2 "Millimeters" "X Component" "Y Component" Vector2d.millimeters
+      , static2 "Inches" "X Component" "Y Component" Vector2d.inches
       , static2 "XY" "X Component" "Y Component" (Vector2d.xy @Space @Unitless)
       , static2 "XY" "X Component" "Y Component" (Vector2d.xy @Space @Meters)
       , static1 "X" "X Component" (Vector2d.x @Space @Unitless)
@@ -295,6 +312,10 @@ point2d =
       , static1 "X" "X Coordinate" (Point2d.x @Space @Meters)
       , static1 "Y" "Y Coordinate" (Point2d.y @Space @Unitless)
       , static1 "Y" "Y Coordinate" (Point2d.y @Space @Meters)
+      , static2 "Meters" "X Coordinate" "Y Coordinate" Point2d.meters
+      , static2 "Centimeters" "X Coordinate" "Y Coordinate" Point2d.centimeters
+      , static2 "Millimeters" "X Coordinate" "Y Coordinate" Point2d.millimeters
+      , static2 "Inches" "X Coordinate" "Y Coordinate" Point2d.inches
       , static1 "From Coordinates" "Coordinates" (Point2d.fromCoordinates @Space @Unitless)
       , static1 "From Coordinates" "Coordinates" (Point2d.fromCoordinates @Space @Meters)
       ]
