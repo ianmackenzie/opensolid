@@ -25,7 +25,7 @@ definition classId (functionName, memberFunctions) = do
       let overloadCase (_, matchPattern, body) = Python.Function.overloadCase matchPattern [body]
       Python.lines
         [ Python.lines (List.map overloadDeclaration overloads)
-        , "def " + Name.snakeCase functionName + "(self, *args, **keywords):"
+        , "def " + toPython functionName + "(self, *args, **keywords):"
         , Python.indent
             [ "match (args, keywords):"
             , Python.indent
@@ -38,6 +38,12 @@ definition classId (functionName, memberFunctions) = do
                 ]
             ]
         ]
+
+toPython :: Name -> Text
+toPython functionName =
+  case Name.snakeCase functionName of
+    "contains" -> "__contains__"
+    other -> other
 
 overload :: FFI.Id value -> Name -> MemberFunction value -> (Text, Text, Text)
 overload classId functionName memberFunction = do
@@ -52,7 +58,7 @@ overloadSignature :: Name -> List (Name, FFI.Type) -> FFI.Type -> Text
 overloadSignature functionName args returnType = do
   let functionArgument (argName, argType) = Name.snakeCase argName + ": " + Python.Type.qualifiedName argType
   let functionArguments = Text.join "," ("self" : List.map functionArgument args)
-  "def " + Name.snakeCase functionName + "(" + functionArguments + ") -> " + Python.Type.qualifiedName returnType + ":"
+  "def " + toPython functionName + "(" + functionArguments + ") -> " + Python.Type.qualifiedName returnType + ":"
 
 overloadBody :: Text -> Maybe Constraint -> List (Name, FFI.Type) -> FFI.Type -> FFI.Type -> Text
 overloadBody ffiFunctionName maybeConstraint arguments selfType returnType = do

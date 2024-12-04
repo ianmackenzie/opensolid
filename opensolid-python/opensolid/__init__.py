@@ -867,6 +867,40 @@ class Range_Unitless:
             Range_Unitless(ptr=c_void_p(output.field1)) if output.field0 == 0 else None
         )
 
+    @overload
+    def __contains__(self, value: float) -> bool:
+        pass
+
+    @overload
+    def __contains__(self, other: Range_Unitless) -> bool:
+        pass
+
+    def __contains__(self, *args, **keywords):
+        match (args, keywords):
+            case (
+                ([float() | int() as value], {})
+                | ([], {"value": float() | int() as value})
+            ):
+                inputs = _Tuple2_c_double_c_void_p(value, self.__ptr__)
+                output = c_int64()
+                _lib.opensolid_RangeUnitless_contains_Float(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return bool(output.value)
+            case (
+                ([Range_Unitless() as other], {})
+                | ([], {"other": Range_Unitless() as other})
+            ):
+                inputs = _Tuple2_c_void_p_c_void_p(other.__ptr__, self.__ptr__)
+                output = c_int64()
+                _lib.opensolid_RangeUnitless_contains_RangeUnitless(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return bool(output.value)
+            case _:
+                message = "Unexpected function arguments"
+                raise TypeError(message)
+
     def __neg__(self) -> Range_Unitless:
         output = c_void_p()
         _lib.opensolid_RangeUnitless_neg(
@@ -1059,6 +1093,37 @@ class Range_Radians:
             Range_Radians(ptr=c_void_p(output.field1)) if output.field0 == 0 else None
         )
 
+    @overload
+    def __contains__(self, value: Angle) -> bool:
+        pass
+
+    @overload
+    def __contains__(self, other: Range_Radians) -> bool:
+        pass
+
+    def __contains__(self, *args, **keywords):
+        match (args, keywords):
+            case ([Angle() as value], {}) | ([], {"value": Angle() as value}):
+                inputs = _Tuple2_c_void_p_c_void_p(value.__ptr__, self.__ptr__)
+                output = c_int64()
+                _lib.opensolid_RangeRadians_contains_Angle(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return bool(output.value)
+            case (
+                ([Range_Radians() as other], {})
+                | ([], {"other": Range_Radians() as other})
+            ):
+                inputs = _Tuple2_c_void_p_c_void_p(other.__ptr__, self.__ptr__)
+                output = c_int64()
+                _lib.opensolid_RangeRadians_contains_RangeRadians(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return bool(output.value)
+            case _:
+                message = "Unexpected function arguments"
+                raise TypeError(message)
+
     def __neg__(self) -> Range_Radians:
         output = c_void_p()
         _lib.opensolid_RangeRadians_neg(
@@ -1195,6 +1260,37 @@ class Range_Meters:
             ctypes.byref(inputs), ctypes.byref(output)
         )
         return Range_Meters(ptr=c_void_p(output.field1)) if output.field0 == 0 else None
+
+    @overload
+    def __contains__(self, value: Length) -> bool:
+        pass
+
+    @overload
+    def __contains__(self, other: Range_Meters) -> bool:
+        pass
+
+    def __contains__(self, *args, **keywords):
+        match (args, keywords):
+            case ([Length() as value], {}) | ([], {"value": Length() as value}):
+                inputs = _Tuple2_c_void_p_c_void_p(value.__ptr__, self.__ptr__)
+                output = c_int64()
+                _lib.opensolid_RangeMeters_contains_Length(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return bool(output.value)
+            case (
+                ([Range_Meters() as other], {})
+                | ([], {"other": Range_Meters() as other})
+            ):
+                inputs = _Tuple2_c_void_p_c_void_p(other.__ptr__, self.__ptr__)
+                output = c_int64()
+                _lib.opensolid_RangeMeters_contains_RangeMeters(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return bool(output.value)
+            case _:
+                message = "Unexpected function arguments"
+                raise TypeError(message)
 
     def __neg__(self) -> Range_Meters:
         output = c_void_p()

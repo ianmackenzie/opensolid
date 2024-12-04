@@ -150,6 +150,8 @@ range =
   , class_ @(Range Unitless)
       [ member0 "Endpoints" Range.endpoints
       , member1 "Intersection" "Other" Range.intersection
+      , member1 "Contains" "Value" Range.includes
+      , member1 "Contains" "Other" Range.contains
       , negateSelf
       , floatPlus
       , floatMinus
@@ -169,6 +171,8 @@ range =
   , class_ @(Range Radians)
       [ member0 "Endpoints" Range.endpoints
       , member1 "Intersection" "Other" Range.intersection
+      , member1 "Contains" "Value" Range.includes
+      , member1 "Contains" "Other" Range.contains
       , negateSelf
       , floatTimes
       , plusSelf
@@ -183,6 +187,8 @@ range =
   , class_ @(Range Meters)
       [ member0 "Endpoints" Range.endpoints
       , member1 "Intersection" "Other" Range.intersection
+      , member1 "Contains" "Value" Range.includes
+      , member1 "Contains" "Other" Range.contains
       , negateSelf
       , floatTimes
       , plusSelf
