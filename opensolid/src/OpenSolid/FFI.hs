@@ -237,7 +237,7 @@ store :: forall parent value. FFI value => Ptr parent -> Int -> value -> IO ()
 store ptr offset value = do
   let proxy = Proxy @value
   case representation proxy of
-    IntRep -> Foreign.pokeByteOff ptr offset (fromIntegral value :: Int64)
+    IntRep -> Foreign.pokeByteOff ptr offset (toInt64 value)
     FloatRep -> Foreign.pokeByteOff ptr offset (Float.toDouble value)
     BoolRep -> Foreign.pokeByteOff ptr offset (toInt64 (if value then 1 else 0))
     ListRep -> IO.do
