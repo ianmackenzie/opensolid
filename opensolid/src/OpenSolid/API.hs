@@ -13,7 +13,9 @@ import Length qualified
 import List qualified
 import OpenSolid
 import OpenSolid.API.BinaryOperator qualified as BinaryOperator
+import OpenSolid.API.ComparisonFunction qualified as ComparisonFunction
 import OpenSolid.API.Constraint (Constraint)
+import OpenSolid.API.EqualityFunction qualified as EqualityFunction
 import OpenSolid.API.MemberFunction (MemberFunction (..))
 import OpenSolid.API.MemberFunction qualified as MemberFunction
 import OpenSolid.API.Name (Name)
@@ -44,6 +46,8 @@ data Class where
     { id :: FFI.Id value
     , staticFunctions :: List (Name, List StaticFunction)
     , memberFunctions :: List (Name, List (MemberFunction value))
+    , equalityFunction :: Maybe (value -> value -> Bool)
+    , comparisonFunction :: Maybe (value -> value -> Int)
     , negationFunction :: Maybe (value -> value)
     , preOperators :: List (BinaryOperator.Id, List (PreOperator value))
     , postOperators :: List (BinaryOperator.Id, List (PostOperator value))
@@ -79,6 +83,8 @@ length =
       [ static0 "Zero" Length.zero
       , static1 "Meters" "Value" Length.meters
       , member0 "In Meters" Length.inMeters
+      , equality
+      , comparison
       , negateSelf
       , floatTimes
       , plusSelf
@@ -107,6 +113,8 @@ angle =
       [ static0 "Zero" Angle.zero
       , static1 "Radians" "Value" Angle.radians
       , member0 "In Radians" Angle.inRadians
+      , equality
+      , comparison
       , negateSelf
       , floatTimes
       , plusSelf
@@ -379,7 +387,7 @@ curve1d =
 ----- CLASS MEMBERS -----
 
 class_ :: forall value. FFI value => List (Member value) -> Class
-class_ members = buildClass members [] [] Nothing [] [] []
+class_ members = buildClass members [] [] Nothing Nothing Nothing [] [] []
 
 data Member value where
   Static0 :: FFI result => Text -> result -> Member value
@@ -391,6 +399,8 @@ data Member value where
   MemberR0 :: (FFI value, FFI result) => Text -> (Tolerance Radians => value -> result) -> Member value
   MemberM0 :: (FFI value, FFI result) => Text -> (Tolerance Meters => value -> result) -> Member value
   Member1 :: (FFI a, FFI value, FFI result) => Text -> Text -> (a -> value -> result) -> Member value
+  Equality :: Eq value => Member value
+  Comparison :: Ord value => Member value
   Negate :: Negation value => Member value
   PreOp :: (FFI lhs, FFI result) => BinaryOperator.Id -> (lhs -> value -> result) -> Member value
   PostOp :: (FFI rhs, FFI result) => BinaryOperator.Id -> (value -> rhs -> result) -> Member value
@@ -424,6 +434,18 @@ member1 :: (FFI a, FFI value, FFI result) => Text -> Text -> (a -> value -> resu
 member1 = Member1
 
 data Self a = Self
+
+equality :: Eq value => Member value
+equality = Equality
+
+comparison :: Ord value => Member value
+comparison = Comparison
+
+comparisonImpl :: Ord a => a -> a -> Int
+comparisonImpl lhs rhs = case compare lhs rhs of
+  LT -> -1
+  EQ -> 0
+  GT -> 1
 
 negateSelf :: Negation value => Member value
 negateSelf = Negate
@@ -591,12 +613,14 @@ buildClass ::
   List (Member value) ->
   List (Name, List StaticFunction) ->
   List (Name, List (MemberFunction value)) ->
+  Maybe (value -> value -> Bool) ->
+  Maybe (value -> value -> Int) ->
   Maybe (value -> value) ->
   List (BinaryOperator.Id, List (PreOperator value)) ->
   List (BinaryOperator.Id, List (PostOperator value)) ->
   List Class ->
   Class
-buildClass members staticFunctionsAcc memberFunctionsAcc negationFunctionAcc preOperatorsAcc postOperatorsAcc nestedClassesAcc =
+buildClass members staticFunctionsAcc memberFunctionsAcc equalityFunctionAcc comparisonFunctionAcc negationFunctionAcc preOperatorsAcc postOperatorsAcc nestedClassesAcc =
   case members of
     [] ->
       Class
@@ -605,6 +629,8 @@ buildClass members staticFunctionsAcc memberFunctionsAcc negationFunctionAcc pre
             _ -> internalError "Every class defined in the API must correspond to an FFI type with class representation"
         , staticFunctions = staticFunctionsAcc
         , memberFunctions = memberFunctionsAcc
+        , equalityFunction = equalityFunctionAcc
+        , comparisonFunction = comparisonFunctionAcc
         , negationFunction = negationFunctionAcc
         , preOperators = preOperatorsAcc
         , postOperators = postOperatorsAcc
@@ -616,6 +642,8 @@ buildClass members staticFunctionsAcc memberFunctionsAcc negationFunctionAcc pre
               rest
               (addStaticOverload (Name.parse name) overload staticFunctionsAcc)
               memberFunctionsAcc
+              equalityFunctionAcc
+              comparisonFunctionAcc
               negationFunctionAcc
               preOperatorsAcc
               postOperatorsAcc
@@ -625,6 +653,8 @@ buildClass members staticFunctionsAcc memberFunctionsAcc negationFunctionAcc pre
               rest
               staticFunctionsAcc
               (addMemberOverload (Name.parse name) overload memberFunctionsAcc)
+              equalityFunctionAcc
+              comparisonFunctionAcc
               negationFunctionAcc
               preOperatorsAcc
               postOperatorsAcc
@@ -648,11 +678,35 @@ buildClass members staticFunctionsAcc memberFunctionsAcc negationFunctionAcc pre
           addMember name (MemberFunction0M f)
         Member1 name arg1 f ->
           addMember name (MemberFunction1 (Name.parse arg1) f)
+        Equality ->
+          buildClass
+            rest
+            staticFunctionsAcc
+            memberFunctionsAcc
+            (Just (==))
+            comparisonFunctionAcc
+            negationFunctionAcc
+            preOperatorsAcc
+            postOperatorsAcc
+            nestedClassesAcc
+        Comparison ->
+          buildClass
+            rest
+            staticFunctionsAcc
+            memberFunctionsAcc
+            equalityFunctionAcc
+            (Just comparisonImpl)
+            negationFunctionAcc
+            preOperatorsAcc
+            postOperatorsAcc
+            nestedClassesAcc
         Negate ->
           buildClass
             rest
             staticFunctionsAcc
             memberFunctionsAcc
+            equalityFunctionAcc
+            comparisonFunctionAcc
             (Just negate)
             preOperatorsAcc
             postOperatorsAcc
@@ -662,6 +716,8 @@ buildClass members staticFunctionsAcc memberFunctionsAcc negationFunctionAcc pre
             rest
             staticFunctionsAcc
             memberFunctionsAcc
+            equalityFunctionAcc
+            comparisonFunctionAcc
             negationFunctionAcc
             (addPreOverload operatorId (PreOperator operator) preOperatorsAcc)
             postOperatorsAcc
@@ -671,6 +727,8 @@ buildClass members staticFunctionsAcc memberFunctionsAcc negationFunctionAcc pre
             rest
             staticFunctionsAcc
             memberFunctionsAcc
+            equalityFunctionAcc
+            comparisonFunctionAcc
             negationFunctionAcc
             preOperatorsAcc
             (addPostOverload operatorId (PostOperator operator) postOperatorsAcc)
@@ -680,6 +738,8 @@ buildClass members staticFunctionsAcc memberFunctionsAcc negationFunctionAcc pre
             rest
             staticFunctionsAcc
             memberFunctionsAcc
+            equalityFunctionAcc
+            comparisonFunctionAcc
             negationFunctionAcc
             preOperatorsAcc
             postOperatorsAcc
@@ -734,6 +794,34 @@ negationOperatorInfo classId_ maybeNegationFunction = case maybeNegationFunction
         , invoke = NegationOperator.invoke negationFunction
         }
 
+equalityFunctionInfo :: forall value. FFI value => FFI.Id value -> Maybe (value -> value -> Bool) -> List Function
+equalityFunctionInfo classId_ maybeEqualityFunction = case maybeEqualityFunction of
+  Nothing -> []
+  Just equalityFunction -> do
+    let selfType = FFI.typeOf @value Proxy
+    List.singleton $
+      Function
+        { ffiName = EqualityFunction.ffiName classId_
+        , constraint = Nothing
+        , argumentTypes = [selfType, selfType]
+        , returnType = FFI.typeOf @Bool Proxy
+        , invoke = EqualityFunction.invoke equalityFunction
+        }
+
+comparisonFunctionInfo :: forall value. FFI value => FFI.Id value -> Maybe (value -> value -> Int) -> List Function
+comparisonFunctionInfo classId_ maybeComparisonFunction = case maybeComparisonFunction of
+  Nothing -> []
+  Just comparisonFunction -> do
+    let selfType = FFI.typeOf @value Proxy
+    List.singleton $
+      Function
+        { ffiName = ComparisonFunction.ffiName classId_
+        , constraint = Nothing
+        , argumentTypes = [selfType, selfType]
+        , returnType = FFI.typeOf @Int Proxy
+        , invoke = ComparisonFunction.invoke comparisonFunction
+        }
+
 preOperatorOverload :: FFI.Id value -> BinaryOperator.Id -> PreOperator value -> Function
 preOperatorOverload classId_ operatorId operator = do
   let (lhsType, selfType, returnType) = PreOperator.signature operator
@@ -771,10 +859,12 @@ postOperatorOverloads classId_ (operatorId, overloads) =
   List.map (postOperatorOverload classId_ operatorId) overloads
 
 classFunctions :: Class -> List Function
-classFunctions (Class classId_ staticFunctions memberFunctions maybeNegationOperator preOperators postOperators nestedClasses) =
+classFunctions (Class classId_ staticFunctions memberFunctions maybeEqualityFunction maybeComparisonFunction maybeNegationOperator preOperators postOperators nestedClasses) =
   List.concat
     [ List.collect (staticFunctionOverloads classId_) staticFunctions
     , List.collect (memberFunctionOverloads classId_) memberFunctions
+    , equalityFunctionInfo classId_ maybeEqualityFunction
+    , comparisonFunctionInfo classId_ maybeComparisonFunction
     , negationOperatorInfo classId_ maybeNegationOperator
     , List.collect (preOperatorOverloads classId_) preOperators
     , List.collect (postOperatorOverloads classId_) postOperators

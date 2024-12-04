@@ -11,6 +11,8 @@ import OpenSolid.FFI qualified as FFI
 import Pair qualified
 import Python qualified
 import Python.Class qualified
+import Python.ComparisonFunction qualified
+import Python.EqualityFunction qualified
 import Python.FFI qualified
 import Python.Function qualified
 import Python.MemberFunction qualified
@@ -115,13 +117,15 @@ preamble =
     ]
 
 classDefinition :: Class -> Text
-classDefinition (Class classId staticFunctions memberFunctions negationFunction preOperators postOperators nestedClasses) = do
+classDefinition (Class classId staticFunctions memberFunctions equalityFunction comparisonFunction negationFunction preOperators postOperators nestedClasses) = do
   Python.lines
     [ "class " + Python.Class.unqualifiedName classId + ":"
     , "    def __init__(self, *, ptr : c_void_p) -> None:"
     , "        self.__ptr__ = ptr"
     , Python.indent (List.map (Python.StaticFunction.definition classId) staticFunctions)
     , Python.indent (List.map (Python.MemberFunction.definition classId) memberFunctions)
+    , Python.indent [Python.EqualityFunction.definition classId equalityFunction]
+    , Python.indent [Python.ComparisonFunction.definitions classId comparisonFunction]
     , Python.indent [Python.NegationOperator.definition classId negationFunction]
     , Python.indent (List.map (Python.PostOperator.definition classId) postOperators)
     , Python.indent (List.map (Python.PreOperator.definition classId) preOperators)

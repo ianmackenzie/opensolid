@@ -29,6 +29,8 @@ executable opensolid-python
   other-modules:
     Python
     Python.Class
+    Python.ComparisonFunction
+    Python.EqualityFunction
     Python.FFI
     Python.Function
     Python.MemberFunction

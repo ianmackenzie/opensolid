@@ -180,6 +180,32 @@ class Length:
         _lib.opensolid_Length_inMeters(ctypes.byref(inputs), ctypes.byref(output))
         return output.value
 
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, Length):
+            inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, other.__ptr__)
+            output = c_int64()
+            _lib.opensolid_Length_eq(ctypes.byref(inputs), ctypes.byref(output))
+            return bool(output.value)
+        return False
+
+    def _compare(self, other: Length) -> int:
+        inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, other.__ptr__)
+        output = c_int64()
+        _lib.opensolid_Length_compare(ctypes.byref(inputs), ctypes.byref(output))
+        return output.value
+
+    def __lt__(self, other: Length) -> bool:
+        return self._compare(other) < 0
+
+    def __le__(self, other: Length) -> bool:
+        return self._compare(other) <= 0
+
+    def __ge__(self, other: Length) -> bool:
+        return self._compare(other) >= 0
+
+    def __gt__(self, other: Length) -> bool:
+        return self._compare(other) > 0
+
     def __neg__(self) -> Length:
         output = c_void_p()
         _lib.opensolid_Length_neg(ctypes.byref(self.__ptr__), ctypes.byref(output))
@@ -418,6 +444,32 @@ class Angle:
         output = c_double()
         _lib.opensolid_Angle_inRadians(ctypes.byref(inputs), ctypes.byref(output))
         return output.value
+
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, Angle):
+            inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, other.__ptr__)
+            output = c_int64()
+            _lib.opensolid_Angle_eq(ctypes.byref(inputs), ctypes.byref(output))
+            return bool(output.value)
+        return False
+
+    def _compare(self, other: Angle) -> int:
+        inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, other.__ptr__)
+        output = c_int64()
+        _lib.opensolid_Angle_compare(ctypes.byref(inputs), ctypes.byref(output))
+        return output.value
+
+    def __lt__(self, other: Angle) -> bool:
+        return self._compare(other) < 0
+
+    def __le__(self, other: Angle) -> bool:
+        return self._compare(other) <= 0
+
+    def __ge__(self, other: Angle) -> bool:
+        return self._compare(other) >= 0
+
+    def __gt__(self, other: Angle) -> bool:
+        return self._compare(other) > 0
 
     def __neg__(self) -> Angle:
         output = c_void_p()
