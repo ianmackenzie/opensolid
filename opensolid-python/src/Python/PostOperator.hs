@@ -12,6 +12,9 @@ import Python.FFI qualified
 import Python.Function qualified
 import Python.Type qualified
 
+rhsArgName :: Text
+rhsArgName = Name.snakeCase PostOperator.rhsName
+
 definition :: FFI.Id value -> (BinaryOperator.Id, List (PostOperator value)) -> Text
 definition classId (operatorId, operators) = do
   case List.map (overload classId operatorId) operators of
@@ -43,23 +46,20 @@ overload :: FFI.Id value -> BinaryOperator.Id -> PostOperator value -> (Text, Te
 overload classId operatorId memberFunction = do
   let ffiFunctionName = PostOperator.ffiName classId operatorId memberFunction
   let (selfType, rhsType, returnType) = PostOperator.signature memberFunction
-  let signature = signatureN operatorId rhsType returnType
+  let signature = overloadSignature operatorId rhsType returnType
   let matchPattern = Python.Function.typePattern rhsType
-  let body = bodyN ffiFunctionName selfType rhsType returnType
+  let body = overloadBody ffiFunctionName selfType rhsType returnType
   (signature, matchPattern, body)
 
-rhsArgName :: Text
-rhsArgName = Name.snakeCase PostOperator.rhsName
-
-signatureN :: BinaryOperator.Id -> FFI.Type -> FFI.Type -> Text
-signatureN operatorId rhsType returnType = do
+overloadSignature :: BinaryOperator.Id -> FFI.Type -> FFI.Type -> Text
+overloadSignature operatorId rhsType returnType = do
   let rhsTypeName = Python.Type.qualifiedName rhsType
   let returnTypeName = Python.Type.qualifiedName returnType
   let rhsArgument = rhsArgName + ": " + rhsTypeName
   "def " + functionName operatorId + "(self, " + rhsArgument + ") -> " + returnTypeName + ":"
 
-bodyN :: Text -> FFI.Type -> FFI.Type -> FFI.Type -> Text
-bodyN ffiFunctionName selfType rhsType returnType =
+overloadBody :: Text -> FFI.Type -> FFI.Type -> FFI.Type -> Text
+overloadBody ffiFunctionName selfType rhsType returnType =
   Python.lines
     [ "inputs = " + Python.FFI.argumentValue [("self", selfType), (rhsArgName, rhsType)]
     , "output = " + Python.FFI.dummyValue returnType

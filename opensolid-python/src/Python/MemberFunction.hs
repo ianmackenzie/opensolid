@@ -43,19 +43,19 @@ overload :: FFI.Id value -> Name -> MemberFunction value -> (Text, Text, Text)
 overload classId functionName memberFunction = do
   let ffiFunctionName = MemberFunction.ffiName classId functionName memberFunction
   let (maybeConstraint, arguments, selfType, returnType) = MemberFunction.signature memberFunction
-  let signature = signatureN functionName arguments returnType
+  let signature = overloadSignature functionName arguments returnType
   let matchPattern = Python.Function.matchPattern arguments
-  let body = bodyN ffiFunctionName maybeConstraint arguments selfType returnType
+  let body = overloadBody ffiFunctionName maybeConstraint arguments selfType returnType
   (signature, matchPattern, body)
 
-signatureN :: Name -> List (Name, FFI.Type) -> FFI.Type -> Text
-signatureN functionName args returnType = do
+overloadSignature :: Name -> List (Name, FFI.Type) -> FFI.Type -> Text
+overloadSignature functionName args returnType = do
   let functionArgument (argName, argType) = Name.snakeCase argName + ": " + Python.Type.qualifiedName argType
   let functionArguments = Text.join "," ("self" : List.map functionArgument args)
   "def " + Name.snakeCase functionName + "(" + functionArguments + ") -> " + Python.Type.qualifiedName returnType + ":"
 
-bodyN :: Text -> Maybe Constraint -> List (Name, FFI.Type) -> FFI.Type -> FFI.Type -> Text
-bodyN ffiFunctionName maybeConstraint arguments selfType returnType = do
+overloadBody :: Text -> Maybe Constraint -> List (Name, FFI.Type) -> FFI.Type -> FFI.Type -> Text
+overloadBody ffiFunctionName maybeConstraint arguments selfType returnType = do
   let maybeToleranceArgument = Maybe.map Python.Function.toleranceArgument maybeConstraint
   let normalArguments = List.map (Pair.mapFirst Name.snakeCase) arguments
   let selfArgument = ("self", selfType)

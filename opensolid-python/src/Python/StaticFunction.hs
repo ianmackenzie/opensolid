@@ -45,13 +45,13 @@ overload :: FFI.Id a -> Name -> StaticFunction -> (Text, Text, Text)
 overload classId functionName staticFunction = do
   let ffiFunctionName = StaticFunction.ffiName classId functionName staticFunction
   let (maybeConstraint, arguments, returnType) = StaticFunction.signature staticFunction
-  let signature = signatureN functionName arguments (Python.Type.qualifiedName returnType)
+  let signature = overloadSignature functionName arguments (Python.Type.qualifiedName returnType)
   let matchPattern = Python.Function.matchPattern arguments
-  let body = bodyN ffiFunctionName maybeConstraint arguments returnType
+  let body = overloadBody ffiFunctionName maybeConstraint arguments returnType
   (signature, matchPattern, body)
 
-signatureN :: Name -> List (Name, FFI.Type) -> Text -> Text
-signatureN functionName args returnType = do
+overloadSignature :: Name -> List (Name, FFI.Type) -> Text -> Text
+overloadSignature functionName args returnType = do
   let functionArgument (argName, argType) = Name.snakeCase argName + ": " + Python.Type.qualifiedName argType
   let functionArguments = Text.join "," (List.map functionArgument args)
   Python.lines
@@ -59,8 +59,8 @@ signatureN functionName args returnType = do
     , "def " + Name.snakeCase functionName + "(" + functionArguments + ") -> " + returnType + ":"
     ]
 
-bodyN :: Text -> Maybe Constraint -> List (Name, FFI.Type) -> FFI.Type -> Text
-bodyN ffiFunctionName maybeConstraint arguments returnType = do
+overloadBody :: Text -> Maybe Constraint -> List (Name, FFI.Type) -> FFI.Type -> Text
+overloadBody ffiFunctionName maybeConstraint arguments returnType = do
   let maybeToleranceArgument = Maybe.map Python.Function.toleranceArgument maybeConstraint
   let normalArguments = List.map (Pair.mapFirst Name.snakeCase) arguments
   Python.lines
