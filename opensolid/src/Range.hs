@@ -4,6 +4,10 @@ module Range
   , constant
   , unit
   , from
+  , meters
+  , centimeters
+  , millimeters
+  , inches
   , hull3
   , hull4
   , minValue
@@ -63,6 +67,7 @@ import Data.Coerce qualified
 import Debug qualified
 import Float qualified
 import Fuzzy qualified
+import Length qualified
 import List qualified
 import NonEmpty qualified
 import OpenSolid
@@ -223,6 +228,18 @@ unit = Range_ 0.0 1.0
 {-# INLINE from #-}
 from :: Qty units -> Qty units -> Range units
 from = Range
+
+meters :: Float -> Float -> Range Meters
+meters a b = from (Length.meters a) (Length.meters b)
+
+millimeters :: Float -> Float -> Range Meters
+millimeters a b = from (Length.millimeters a) (Length.millimeters b)
+
+centimeters :: Float -> Float -> Range Meters
+centimeters a b = from (Length.centimeters a) (Length.centimeters b)
+
+inches :: Float -> Float -> Range Meters
+inches a b = from (Length.inches a) (Length.inches b)
 
 aggregate2 :: Range units -> Range units -> Range units
 aggregate2 (Range low1 high1) (Range low2 high2) =
