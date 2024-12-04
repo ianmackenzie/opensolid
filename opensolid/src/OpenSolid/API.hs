@@ -620,130 +620,139 @@ buildClass ::
   List (BinaryOperator.Id, List (PostOperator value)) ->
   List Class ->
   Class
-buildClass members staticFunctionsAcc memberFunctionsAcc equalityFunctionAcc comparisonFunctionAcc negationFunctionAcc preOperatorsAcc postOperatorsAcc nestedClassesAcc =
-  case members of
-    [] ->
-      Class
-        { id = case FFI.typeOf @value Proxy of
-            FFI.Class (FFI.Id Proxy names maybeUnits) -> FFI.Id Proxy names maybeUnits
-            _ -> internalError "Every class defined in the API must correspond to an FFI type with class representation"
-        , staticFunctions = staticFunctionsAcc
-        , memberFunctions = memberFunctionsAcc
-        , equalityFunction = equalityFunctionAcc
-        , comparisonFunction = comparisonFunctionAcc
-        , negationFunction = negationFunctionAcc
-        , preOperators = preOperatorsAcc
-        , postOperators = postOperatorsAcc
-        , nestedClasses = nestedClassesAcc
-        }
-    first : rest -> do
-      let addStatic name overload =
+buildClass
+  members
+  staticFunctionsAcc
+  memberFunctionsAcc
+  equalityFunctionAcc
+  comparisonFunctionAcc
+  negationFunctionAcc
+  preOperatorsAcc
+  postOperatorsAcc
+  nestedClassesAcc =
+    case members of
+      [] ->
+        Class
+          { id = case FFI.typeOf @value Proxy of
+              FFI.Class (FFI.Id Proxy names maybeUnits) -> FFI.Id Proxy names maybeUnits
+              _ -> internalError "Every class defined in the API must correspond to an FFI type with class representation"
+          , staticFunctions = staticFunctionsAcc
+          , memberFunctions = memberFunctionsAcc
+          , equalityFunction = equalityFunctionAcc
+          , comparisonFunction = comparisonFunctionAcc
+          , negationFunction = negationFunctionAcc
+          , preOperators = preOperatorsAcc
+          , postOperators = postOperatorsAcc
+          , nestedClasses = nestedClassesAcc
+          }
+      first : rest -> do
+        let addStatic name overload =
+              buildClass
+                rest
+                (addStaticOverload (Name.parse name) overload staticFunctionsAcc)
+                memberFunctionsAcc
+                equalityFunctionAcc
+                comparisonFunctionAcc
+                negationFunctionAcc
+                preOperatorsAcc
+                postOperatorsAcc
+                nestedClassesAcc
+        let addMember name overload =
+              buildClass
+                rest
+                staticFunctionsAcc
+                (addMemberOverload (Name.parse name) overload memberFunctionsAcc)
+                equalityFunctionAcc
+                comparisonFunctionAcc
+                negationFunctionAcc
+                preOperatorsAcc
+                postOperatorsAcc
+                nestedClassesAcc
+        case first of
+          Static0 name value ->
+            addStatic name (StaticFunction0 value)
+          Static1 name arg1 f ->
+            addStatic name (StaticFunction1 (Name.parse arg1) f)
+          Static2 name arg1 arg2 f ->
+            addStatic name (StaticFunction2 (Name.parse arg1) (Name.parse arg2) f)
+          Static3 name arg1 arg2 arg3 f ->
+            addStatic name (StaticFunction3 (Name.parse arg1) (Name.parse arg2) (Name.parse arg3) f)
+          Member0 name f ->
+            addMember name (MemberFunction0 f)
+          MemberU0 name f ->
+            addMember name (MemberFunction0U f)
+          MemberR0 name f ->
+            addMember name (MemberFunction0R f)
+          MemberM0 name f ->
+            addMember name (MemberFunction0M f)
+          Member1 name arg1 f ->
+            addMember name (MemberFunction1 (Name.parse arg1) f)
+          Equality ->
             buildClass
               rest
-              (addStaticOverload (Name.parse name) overload staticFunctionsAcc)
+              staticFunctionsAcc
+              memberFunctionsAcc
+              (Just (==))
+              comparisonFunctionAcc
+              negationFunctionAcc
+              preOperatorsAcc
+              postOperatorsAcc
+              nestedClassesAcc
+          Comparison ->
+            buildClass
+              rest
+              staticFunctionsAcc
+              memberFunctionsAcc
+              equalityFunctionAcc
+              (Just comparisonImpl)
+              negationFunctionAcc
+              preOperatorsAcc
+              postOperatorsAcc
+              nestedClassesAcc
+          Negate ->
+            buildClass
+              rest
+              staticFunctionsAcc
+              memberFunctionsAcc
+              equalityFunctionAcc
+              comparisonFunctionAcc
+              (Just negate)
+              preOperatorsAcc
+              postOperatorsAcc
+              nestedClassesAcc
+          PreOp operatorId operator ->
+            buildClass
+              rest
+              staticFunctionsAcc
+              memberFunctionsAcc
+              equalityFunctionAcc
+              comparisonFunctionAcc
+              negationFunctionAcc
+              (addPreOverload operatorId (PreOperator operator) preOperatorsAcc)
+              postOperatorsAcc
+              nestedClassesAcc
+          PostOp operatorId operator ->
+            buildClass
+              rest
+              staticFunctionsAcc
+              memberFunctionsAcc
+              equalityFunctionAcc
+              comparisonFunctionAcc
+              negationFunctionAcc
+              preOperatorsAcc
+              (addPostOverload operatorId (PostOperator operator) postOperatorsAcc)
+              nestedClassesAcc
+          Nested nestedMembers ->
+            buildClass
+              rest
+              staticFunctionsAcc
               memberFunctionsAcc
               equalityFunctionAcc
               comparisonFunctionAcc
               negationFunctionAcc
               preOperatorsAcc
               postOperatorsAcc
-              nestedClassesAcc
-      let addMember name overload =
-            buildClass
-              rest
-              staticFunctionsAcc
-              (addMemberOverload (Name.parse name) overload memberFunctionsAcc)
-              equalityFunctionAcc
-              comparisonFunctionAcc
-              negationFunctionAcc
-              preOperatorsAcc
-              postOperatorsAcc
-              nestedClassesAcc
-      case first of
-        Static0 name value ->
-          addStatic name (StaticFunction0 value)
-        Static1 name arg1 f ->
-          addStatic name (StaticFunction1 (Name.parse arg1) f)
-        Static2 name arg1 arg2 f ->
-          addStatic name (StaticFunction2 (Name.parse arg1) (Name.parse arg2) f)
-        Static3 name arg1 arg2 arg3 f ->
-          addStatic name (StaticFunction3 (Name.parse arg1) (Name.parse arg2) (Name.parse arg3) f)
-        Member0 name f ->
-          addMember name (MemberFunction0 f)
-        MemberU0 name f ->
-          addMember name (MemberFunction0U f)
-        MemberR0 name f ->
-          addMember name (MemberFunction0R f)
-        MemberM0 name f ->
-          addMember name (MemberFunction0M f)
-        Member1 name arg1 f ->
-          addMember name (MemberFunction1 (Name.parse arg1) f)
-        Equality ->
-          buildClass
-            rest
-            staticFunctionsAcc
-            memberFunctionsAcc
-            (Just (==))
-            comparisonFunctionAcc
-            negationFunctionAcc
-            preOperatorsAcc
-            postOperatorsAcc
-            nestedClassesAcc
-        Comparison ->
-          buildClass
-            rest
-            staticFunctionsAcc
-            memberFunctionsAcc
-            equalityFunctionAcc
-            (Just comparisonImpl)
-            negationFunctionAcc
-            preOperatorsAcc
-            postOperatorsAcc
-            nestedClassesAcc
-        Negate ->
-          buildClass
-            rest
-            staticFunctionsAcc
-            memberFunctionsAcc
-            equalityFunctionAcc
-            comparisonFunctionAcc
-            (Just negate)
-            preOperatorsAcc
-            postOperatorsAcc
-            nestedClassesAcc
-        PreOp operatorId operator ->
-          buildClass
-            rest
-            staticFunctionsAcc
-            memberFunctionsAcc
-            equalityFunctionAcc
-            comparisonFunctionAcc
-            negationFunctionAcc
-            (addPreOverload operatorId (PreOperator operator) preOperatorsAcc)
-            postOperatorsAcc
-            nestedClassesAcc
-        PostOp operatorId operator ->
-          buildClass
-            rest
-            staticFunctionsAcc
-            memberFunctionsAcc
-            equalityFunctionAcc
-            comparisonFunctionAcc
-            negationFunctionAcc
-            preOperatorsAcc
-            (addPostOverload operatorId (PostOperator operator) postOperatorsAcc)
-            nestedClassesAcc
-        Nested nestedMembers ->
-          buildClass
-            rest
-            staticFunctionsAcc
-            memberFunctionsAcc
-            equalityFunctionAcc
-            comparisonFunctionAcc
-            negationFunctionAcc
-            preOperatorsAcc
-            postOperatorsAcc
-            (nestedClassesAcc + [class_ nestedMembers])
+              (nestedClassesAcc + [class_ nestedMembers])
 
 ----- FUNCTION COLLECTION -----
 
