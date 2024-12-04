@@ -1,9 +1,6 @@
 Improve Python bindings
 - Add constants as well as static functions?
   -> *Not* properties for now, leave those as member functions
-- Use simpler match statement for all single-argument (other than 'self') functions
-  -> can just match on the type of the variable, regardless of how it was passed (positional or named)
-  -> single-argument includes all binary operators!
 - Try switching to pattern matching just on 'shape' of function arguments, with separate 'isinstance' checks
 - Allow Python classes to be represented by things other than pointers (e.g. plain float values for quantity types)
 - Rename __ptr__ to just _ptr
@@ -17,6 +14,7 @@ Improve Python bindings
   - cast result to typed pointer with 'ctypes.cast(obj, type)'?
   - get/set elements with 'ptr[index]'
 - Rename MemberFunction and StaticFunction to have U/R/M prefix *before* argument count
+- Add support for // and % (DivMod)
 
 Switch Solve2d.return back to taking a single value instead of a NonEmpty
 
