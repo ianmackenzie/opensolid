@@ -11,7 +11,7 @@ import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import Text qualified
 
-data Id = Add | Sub | Mul | Div
+data Id = Add | Sub | Mul | Div deriving (Eq)
 
 ffiName :: FFI.Id value -> Id -> (FFI.Type, FFI.Type, FFI.Type) -> Text
 ffiName classId operatorId (lhsType, rhsType, _) =

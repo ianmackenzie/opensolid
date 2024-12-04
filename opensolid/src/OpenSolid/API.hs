@@ -75,536 +75,599 @@ classes =
 
 length :: List Class
 length =
-  [ Class
-      { id = classId @Length Proxy
-      , staticFunctions =
-          [ "Zero" .| s0 Length.zero
-          , "Meters" .| s1 "Value" Length.meters
-          ]
-      , memberFunctions =
-          [ "In Meters" .| m0 Length.inMeters
-          ]
-      , negationFunction = Just negate
-      , preOperators =
-          [ preMul [PreOperator ((*) @Float @Length)]
-          ]
-      , postOperators =
-          [ postAdd
-              [ PostOperator ((+) @Length @Length)
-              , PostOperator ((+) @Length @(Range Meters))
-              , PostOperator ((+) @Length @(Curve1d Meters))
-              ]
-          , postSub
-              [ PostOperator ((-) @Length @Length)
-              , PostOperator ((-) @Length @(Range Meters))
-              , PostOperator ((-) @Length @(Curve1d Meters))
-              ]
-          , postMul
-              [ PostOperator ((*) @Length @Float)
-              , PostOperator ((*) @Length @(Range Unitless))
-              , PostOperator ((*) @Length @(Curve1d Unitless))
-              ]
-          , postDiv
-              [ PostOperator ((/) @Length @Float)
-              , PostOperator ((/) @Length @Length)
-              , PostOperator ((/) @Length @(Range Unitless))
-              , PostOperator ((/) @Length @(Range Meters))
-              , PostOperator ((/) @Length @(Curve1d Unitless))
-              , PostOperator ((/) @Length @(Curve1d Meters))
-              ]
-          ]
-      , nestedClasses = []
-      }
+  [ class_ @Length
+      [ static0 "Zero" Length.zero
+      , static1 "Meters" "Value" Length.meters
+      , member0 "In Meters" Length.inMeters
+      , negateSelf
+      , floatTimes
+      , plusSelf
+      , plus @(Range Meters) Self
+      , plus @(Curve1d Meters) Self
+      , minusSelf
+      , minus @(Range Meters) Self
+      , minus @(Curve1d Meters) Self
+      , timesFloat
+      , times @(Range Unitless) Self
+      , times @(Curve1d Unitless) Self
+      , divByFloat
+      , divBySelf
+      , divBy @(Range Unitless) Self
+      , divBy @(Range Meters) Self
+      , divBy @(Curve1d Unitless) Self
+      , divBy @(Curve1d Meters) Self
+      ]
   ]
 
 angle :: List Class
 angle =
-  [ Class
-      { id = classId @Angle Proxy
-      , staticFunctions =
-          [ "Zero" .| s0 Angle.zero
-          , "Radians" .| s1 "Value" Angle.radians
-          ]
-      , memberFunctions =
-          [ "In Radians" .| m0 Angle.inRadians
-          ]
-      , negationFunction = Just negate
-      , preOperators =
-          [ preMul [PreOperator ((*) @Float @Angle)]
-          ]
-      , postOperators =
-          [ postAdd
-              [ PostOperator ((+) @Angle @Angle)
-              , PostOperator ((+) @Angle @(Range Radians))
-              , PostOperator ((+) @Angle @(Curve1d Radians))
-              ]
-          , postSub
-              [ PostOperator ((-) @Angle @Angle)
-              , PostOperator ((-) @Angle @(Range Radians))
-              , PostOperator ((-) @Angle @(Curve1d Radians))
-              ]
-          , postMul
-              [ PostOperator ((*) @Angle @Float)
-              , PostOperator ((*) @Angle @(Range Unitless))
-              , PostOperator ((*) @Angle @(Curve1d Unitless))
-              ]
-          , postDiv
-              [ PostOperator ((/) @Angle @Float)
-              , PostOperator ((/) @Angle @Angle)
-              , PostOperator ((/) @Angle @(Range Unitless))
-              , PostOperator ((/) @Angle @(Range Radians))
-              , PostOperator ((/) @Angle @(Curve1d Unitless))
-              , PostOperator ((/) @Angle @(Curve1d Radians))
-              ]
-          ]
-      , nestedClasses = []
-      }
+  [ class_ @Angle
+      [ static0 "Zero" Angle.zero
+      , static1 "Radians" "Value" Angle.radians
+      , member0 "In Radians" Angle.inRadians
+      , negateSelf
+      , floatTimes
+      , plusSelf
+      , plus @(Range Radians) Self
+      , plus @(Curve1d Radians) Self
+      , minusSelf
+      , minus @(Range Radians) Self
+      , minus @(Curve1d Radians) Self
+      , timesFloat
+      , times @(Range Unitless) Self
+      , times @(Curve1d Unitless) Self
+      , divByFloat
+      , divBySelf
+      , divBy @(Range Unitless) Self
+      , divBy @(Range Radians) Self
+      , divBy @(Curve1d Unitless) Self
+      , divBy @(Curve1d Radians) Self
+      ]
   ]
 
-data AbstractRange
+data Range_
 
-instance FFI AbstractRange where
+instance FFI Range_ where
   representation = FFI.abstractClassRepresentation "Range"
 
 range :: List Class
 range =
-  [ Class
-      { id = classId @AbstractRange Proxy
-      , staticFunctions =
-          [ "Unit" .| s0 Range.unit
-          , "Constant"
-              .: [ s1 "Value" (Range.constant @Unitless)
-                 , s1 "Value" (Range.constant @Meters)
-                 ]
-          , "From Endpoints"
-              .: [ s2 "A" "B" (Range.from @Unitless)
-                 , s2 "A" "B" (Range.from @Meters)
-                 ]
-          , "Aggregate"
-              .: [ s2 "A" "B" (Range.aggregate2 @Unitless)
-                 , s3 "A" "B" "C" (Range.aggregate3 @Unitless)
-                 , s2 "A" "B" (Range.aggregate2 @Meters)
-                 , s3 "A" "B" "C" (Range.aggregate3 @Meters)
-                 ]
-          ]
-      , memberFunctions = []
-      , negationFunction = Nothing
-      , preOperators = []
-      , postOperators = []
-      , nestedClasses = []
-      }
-  , Class
-      { id = classId @(Range Unitless) Proxy
-      , staticFunctions = []
-      , memberFunctions =
-          [ "Endpoints" .| m0 Range.endpoints
-          , "Intersection" .| m1 "Other" Range.intersection
-          ]
-      , negationFunction = Just negate
-      , preOperators =
-          [ preAdd [PreOperator ((+) @Float @(Range Unitless))]
-          , preSub [PreOperator ((-) @Float @(Range Unitless))]
-          , preMul [PreOperator ((*) @Float @(Range Unitless))]
-          , preDiv [PreOperator ((/) @Float @(Range Unitless))]
-          ]
-      , postOperators =
-          [ postAdd
-              [ PostOperator ((+) @(Range Unitless) @Float)
-              , PostOperator ((+) @(Range Unitless) @(Range Unitless))
-              ]
-          , postSub
-              [ PostOperator ((-) @(Range Unitless) @Float)
-              , PostOperator ((-) @(Range Unitless) @(Range Unitless))
-              ]
-          , postMul
-              [ PostOperator ((*) @(Range Unitless) @Float)
-              , PostOperator ((*) @(Range Unitless) @(Range Unitless))
-              , PostOperator ((*) @(Range Unitless) @Length)
-              , PostOperator ((*) @(Range Unitless) @Angle)
-              ]
-          , postDiv
-              [ PostOperator ((/) @(Range Unitless) @Float)
-              , PostOperator ((/) @(Range Unitless) @(Range Unitless))
-              ]
-          ]
-      , nestedClasses = []
-      }
-  , Class
-      { id = classId @(Range Radians) Proxy
-      , staticFunctions = []
-      , memberFunctions =
-          [ "Endpoints" .| m0 Range.endpoints
-          , "Intersection" .| m1 "Other" Range.intersection
-          ]
-      , negationFunction = Just negate
-      , preOperators =
-          [ preMul [PreOperator ((*) @Float @(Range Radians))]
-          ]
-      , postOperators = []
-      , nestedClasses = []
-      }
-  , Class
-      { id = classId @(Range Meters) Proxy
-      , staticFunctions = []
-      , memberFunctions =
-          [ "Endpoints" .| m0 Range.endpoints
-          , "Intersection" .| m1 "Other" Range.intersection
-          ]
-      , negationFunction = Just negate
-      , preOperators =
-          [ preMul [PreOperator ((*) @Float @(Range Meters))]
-          ]
-      , postOperators = []
-      , nestedClasses = []
-      }
+  [ class_ @Range_
+      [ static0 "Unit" Range.unit
+      , static1 "Constant" "Value" (Range.constant @Unitless)
+      , static1 "Constant" "Value" (Range.constant @Radians)
+      , static1 "Constant" "Value" (Range.constant @Meters)
+      , static2 "From Endpoints" "A" "B" (Range.from @Unitless)
+      , static2 "From Endpoints" "A" "B" (Range.from @Radians)
+      , static2 "From Endpoints" "A" "B" (Range.from @Meters)
+      , static2 "Aggregate" "A" "B" (Range.aggregate2 @Unitless)
+      , static2 "Aggregate" "A" "B" (Range.aggregate2 @Radians)
+      , static2 "Aggregate" "A" "B" (Range.aggregate2 @Meters)
+      , static3 "Aggregate" "A" "B" "C" (Range.aggregate3 @Unitless)
+      , static3 "Aggregate" "A" "B" "C" (Range.aggregate3 @Radians)
+      , static3 "Aggregate" "A" "B" "C" (Range.aggregate3 @Meters)
+      ]
+  , class_ @(Range Unitless)
+      [ member0 "Endpoints" Range.endpoints
+      , member1 "Intersection" "Other" Range.intersection
+      , negateSelf
+      , floatPlus
+      , floatMinus
+      , floatTimes
+      , floatDivBy
+      , plusFloat
+      , plusSelf
+      , minusFloat
+      , minusSelf
+      , timesFloat
+      , timesSelf
+      , times @Length Self
+      , times @Angle Self
+      , divByFloat
+      , divBySelf
+      ]
+  , class_ @(Range Radians)
+      [ member0 "Endpoints" Range.endpoints
+      , member1 "Intersection" "Other" Range.intersection
+      , negateSelf
+      , floatTimes
+      , plusSelf
+      , plus @Angle Self
+      , minusSelf
+      , minus @Angle Self
+      , timesFloat
+      , divByFloat
+      , divBySelf
+      , divBy @(Range Unitless) Self
+      ]
+  , class_ @(Range Meters)
+      [ member0 "Endpoints" Range.endpoints
+      , member1 "Intersection" "Other" Range.intersection
+      , negateSelf
+      , floatTimes
+      , plusSelf
+      , plus @Length Self
+      , minusSelf
+      , minus @Length Self
+      , timesFloat
+      , divByFloat
+      , divBySelf
+      , divBy @(Range Unitless) Self
+      ]
   ]
 
-data AbstractVector2d
+data Vector2d_
 
-instance FFI AbstractVector2d where
+instance FFI Vector2d_ where
   representation = FFI.abstractClassRepresentation "Vector2d"
 
 vector2d :: List Class
 vector2d =
-  [ Class
-      { id = classId @AbstractVector2d Proxy
-      , staticFunctions =
-          [ "Zero" .| s0 (Vector2d.zero @Space @Meters)
-          , "Unit" .| s1 "Direction" (Vector2d.unit @Space)
-          , "Meters" .| s2 "X" "Y" Vector2d.meters
-          , "XY"
-              .: [ s2 "X Component" "Y Component" (Vector2d.xy @Space @Unitless)
-                 , s2 "X Component" "Y Component" (Vector2d.xy @Space @Meters)
-                 ]
-          , "X"
-              .: [ s1 "X Component" (Vector2d.x @Space @Unitless)
-                 , s1 "X Component" (Vector2d.x @Space @Meters)
-                 ]
-          , "Y"
-              .: [ s1 "Y Component" (Vector2d.y @Space @Unitless)
-                 , s1 "Y Component" (Vector2d.y @Space @Meters)
-                 ]
-          , "From Components"
-              .: [ s1 "Components" (Vector2d.fromComponents @Space @Unitless)
-                 , s1 "Components" (Vector2d.fromComponents @Space @Meters)
-                 ]
-          ]
-      , memberFunctions = []
-      , negationFunction = Nothing
-      , preOperators = []
-      , postOperators = []
-      , nestedClasses = []
-      }
-  , Class
-      { id = classId @(Vector2d (Space @ Unitless)) Proxy
-      , staticFunctions = []
-      , memberFunctions =
-          [ "Components" .| m0 Vector2d.components
-          , "X Component" .| m0 Vector2d.xComponent
-          , "Y Component" .| m0 Vector2d.yComponent
-          , "Direction" .| m0U Vector2d.direction
-          ]
-      , negationFunction = Nothing
-      , preOperators = []
-      , postOperators = []
-      , nestedClasses = []
-      }
-  , Class
-      { id = classId @(Vector2d (Space @ Meters)) Proxy
-      , staticFunctions = []
-      , memberFunctions =
-          [ "Components" .| m0 Vector2d.components
-          , "X Component" .| m0 Vector2d.xComponent
-          , "Y Component" .| m0 Vector2d.yComponent
-          , "Direction" .| m0M Vector2d.direction
-          ]
-      , negationFunction = Nothing
-      , preOperators = []
-      , postOperators = []
-      , nestedClasses = []
-      }
+  [ class_ @Vector2d_
+      [ static0 "Zero" (Vector2d.zero @Space @Meters)
+      , static1 "Unit" "Direction" Vector2d.unit
+      , static2 "Meters" "X Component" "Y Component" Vector2d.meters
+      , static2 "XY" "X Component" "Y Component" (Vector2d.xy @Space @Unitless)
+      , static2 "XY" "X Component" "Y Component" (Vector2d.xy @Space @Meters)
+      , static1 "X" "X Component" (Vector2d.x @Space @Unitless)
+      , static1 "X" "X Component" (Vector2d.x @Space @Meters)
+      , static1 "Y" "Y Component" (Vector2d.y @Space @Unitless)
+      , static1 "Y" "Y Component" (Vector2d.y @Space @Meters)
+      , static1 "From Components" "Components" (Vector2d.fromComponents @Space @Unitless)
+      , static1 "From Components" "Components" (Vector2d.fromComponents @Space @Meters)
+      ]
+  , class_ @(Vector2d (Space @ Unitless))
+      [ member0 "Components" Vector2d.components
+      , member0 "X Component" Vector2d.xComponent
+      , member0 "Y Component" Vector2d.yComponent
+      , memberU0 "Direction" Vector2d.direction
+      , negateSelf
+      , floatTimes
+      , plusSelf
+      , minusSelf
+      , timesFloat
+      , times @Length Self
+      , divByFloat
+      ]
+  , class_ @(Vector2d (Space @ Meters))
+      [ member0 "Components" Vector2d.components
+      , member0 "X Component" Vector2d.xComponent
+      , member0 "Y Component" Vector2d.yComponent
+      , memberM0 "Direction" Vector2d.direction
+      , negateSelf
+      , floatTimes
+      , plusSelf
+      , minusSelf
+      , timesFloat
+      , divByFloat
+      , divBy @Length Self
+      ]
   ]
 
 direction2d :: List Class
 direction2d =
-  [ Class
-      { id = classId @(Direction2d Space) Proxy
-      , staticFunctions =
-          [ "X" .| s0 Direction2d.x
-          , "Y" .| s0 Direction2d.y
-          , "Positive X" .| s0 Direction2d.positiveX
-          , "Positive Y" .| s0 Direction2d.positiveY
-          , "Negative X" .| s0 Direction2d.negativeX
-          , "Negative Y" .| s0 Direction2d.negativeY
-          , "From Angle" .| s1 "Angle" Direction2d.fromAngle
-          ]
-      , memberFunctions =
-          [ "To Angle" .| m0 Direction2d.toAngle
-          , "Components" .| m0 Direction2d.components
-          , "X Component" .| m0 Direction2d.xComponent
-          , "Y Component" .| m0 Direction2d.yComponent
-          ]
-      , negationFunction = Nothing
-      , preOperators = []
-      , postOperators = []
-      , nestedClasses = []
-      }
+  [ class_ @(Direction2d Space)
+      [ static0 "X" Direction2d.x
+      , static0 "Y" Direction2d.y
+      , static0 "Positive X" Direction2d.positiveX
+      , static0 "Positive Y" Direction2d.positiveY
+      , static0 "Negative X" Direction2d.negativeX
+      , static0 "Negative Y" Direction2d.negativeY
+      , static1 "From Angle" "Angle" Direction2d.fromAngle
+      , member0 "To Angle" Direction2d.toAngle
+      , member0 "Components" Direction2d.components
+      , member0 "X Component" Direction2d.xComponent
+      , member0 "Y Component" Direction2d.yComponent
+      , negateSelf
+      ]
   ]
 
-data AbstractPoint2d
+data Point2d_
 
-instance FFI AbstractPoint2d where
+instance FFI Point2d_ where
   representation = FFI.abstractClassRepresentation "Point2d"
 
 point2d :: List Class
 point2d =
-  [ Class
-      { id = classId @AbstractPoint2d Proxy
-      , staticFunctions =
-          [ "Origin" .| s0 (Point2d.origin @Space @Meters)
-          , "XY"
-              .: [ s2 "X Coordinate" "Y Coordinate" (Point2d.xy @Space @Unitless)
-                 , s2 "X Coordinate" "Y Coordinate" (Point2d.xy @Space @Meters)
-                 ]
-          , "X"
-              .: [ s1 "X Coordinate" (Point2d.x @Space @Unitless)
-                 , s1 "X Coordinate" (Point2d.x @Space @Meters)
-                 ]
-          , "Y"
-              .: [ s1 "Y Coordinate" (Point2d.y @Space @Unitless)
-                 , s1 "Y Coordinate" (Point2d.y @Space @Meters)
-                 ]
-          , "From Coordinates"
-              .: [ s1 "Coordinates" (Point2d.fromCoordinates @Space @Unitless)
-                 , s1 "Coordinates" (Point2d.fromCoordinates @Space @Meters)
-                 ]
-          ]
-      , memberFunctions = []
-      , negationFunction = Nothing
-      , preOperators = []
-      , postOperators = []
-      , nestedClasses = []
-      }
-  , Class
-      { id = classId @(Point2d (Space @ Unitless)) Proxy
-      , staticFunctions = []
-      , memberFunctions =
-          [ "Coordinates" .| m0 Point2d.coordinates
-          , "X Coordinate" .| m0 Point2d.xCoordinate
-          , "Y Coordinate" .| m0 Point2d.yCoordinate
-          , "Distance To" .| m1 "Other" Point2d.distanceFrom
-          , "Midpoint" .| m1 "Other" Point2d.midpoint
-          ]
-      , negationFunction = Nothing
-      , preOperators = []
-      , postOperators = []
-      , nestedClasses = []
-      }
-  , Class
-      { id = classId @(Point2d (Space @ Meters)) Proxy
-      , staticFunctions = []
-      , memberFunctions =
-          [ "Coordinates" .| m0 Point2d.coordinates
-          , "X Coordinate" .| m0 Point2d.xCoordinate
-          , "Y Coordinate" .| m0 Point2d.yCoordinate
-          , "Distance To" .| m1 "Other" Point2d.distanceFrom
-          , "Midpoint" .| m1 "Other" Point2d.midpoint
-          ]
-      , negationFunction = Nothing
-      , preOperators = []
-      , postOperators = []
-      , nestedClasses = []
-      }
+  [ class_ @Point2d_
+      [ static0 "Origin" (Point2d.origin @Space @Meters)
+      , static2 "XY" "X Coordinate" "Y Coordinate" (Point2d.xy @Space @Unitless)
+      , static2 "XY" "X Coordinate" "Y Coordinate" (Point2d.xy @Space @Meters)
+      , static1 "X" "X Coordinate" (Point2d.x @Space @Unitless)
+      , static1 "X" "X Coordinate" (Point2d.x @Space @Meters)
+      , static1 "Y" "Y Coordinate" (Point2d.y @Space @Unitless)
+      , static1 "Y" "Y Coordinate" (Point2d.y @Space @Meters)
+      , static1 "From Coordinates" "Coordinates" (Point2d.fromCoordinates @Space @Unitless)
+      , static1 "From Coordinates" "Coordinates" (Point2d.fromCoordinates @Space @Meters)
+      ]
+  , class_ @(Point2d (Space @ Unitless))
+      [ member0 "Coordinates" Point2d.coordinates
+      , member0 "X Coordinate" Point2d.xCoordinate
+      , member0 "Y Coordinate" Point2d.yCoordinate
+      , member1 "Distance To" "Other" Point2d.distanceFrom
+      , member1 "Midpoint" "Other" Point2d.midpoint
+      ]
+  , class_ @(Point2d (Space @ Meters))
+      [ member0 "Coordinates" Point2d.coordinates
+      , member0 "X Coordinate" Point2d.xCoordinate
+      , member0 "Y Coordinate" Point2d.yCoordinate
+      , member1 "Distance To" "Other" Point2d.distanceFrom
+      , member1 "Midpoint" "Other" Point2d.midpoint
+      ]
   ]
 
-data AbstractCurve1d
+data Curve1d_
 
-instance FFI AbstractCurve1d where
+instance FFI Curve1d_ where
   representation = FFI.abstractClassRepresentation "Curve1d"
 
 curve1d :: List Class
 curve1d =
-  [ Class
-      { id = classId @AbstractCurve1d Proxy
-      , staticFunctions =
-          [ "T" .| s0 Curve1d.t
-          , "Sin"
-              .: [ s1 "Curve" Curve1d.sin
-                 , s1 "Curve" (\(floatCurve :: Curve1d Unitless) -> Curve1d.sin (floatCurve * Angle.radian))
-                 ]
-          , "Cos"
-              .: [ s1 "Curve" Curve1d.cos
-                 , s1 "Curve" (\(floatCurve :: Curve1d Unitless) -> Curve1d.cos (floatCurve * Angle.radian))
-                 ]
-          , "Sqrt"
-              .: [ s1 "Curve" (Curve1d.sqrt @Unitless)
-                 ]
+  [ class_ @Curve1d_
+      [ static0 "T" Curve1d.t
+      , static1 "Sin" "Curve" Curve1d.sin
+      , static1 "Cos" "Curve" Curve1d.cos
+      , static1 "Sqrt" "Curve" (Curve1d.sqrt @Unitless)
+      , nested @Curve1d.Root
+          [ member0 "Value" Curve1d.Root.value
+          , member0 "Order" Curve1d.Root.order
+          , member0 "Sign" (\root -> 1 * Curve1d.Root.sign root) -- TODO return as enum?
           ]
-      , memberFunctions = []
-      , negationFunction = Nothing
-      , preOperators = []
-      , postOperators = []
-      , nestedClasses =
-          [ Class
-              { id = classId @Curve1d.Root Proxy
-              , staticFunctions = []
-              , memberFunctions =
-                  [ "Value" .| m0 Curve1d.Root.value
-                  , "Order" .| m0 Curve1d.Root.order
-                  , "Sign" .| m0 (\root -> 1 * Curve1d.Root.sign root) -- TODO return as enum?
-                  ]
-              , negationFunction = Nothing
-              , preOperators = []
-              , postOperators = []
-              , nestedClasses = []
-              }
-          ]
-      }
-  , Class
-      { id = classId @(Curve1d Unitless) Proxy
-      , staticFunctions = []
-      , memberFunctions =
-          [ "Squared" .| m0 Curve1d.squared
-          , "Evaluate" .| m1 "Parameter Value" (\t curve -> Curve1d.evaluate curve t)
-          , "Zeros" .| m0U Curve1d.zeros
-          ]
-      , negationFunction = Just negate
-      , preOperators =
-          [ preAdd
-              [ PreOperator ((+) @Float @(Curve1d Unitless))
-              ]
-          , preSub
-              [ PreOperator ((-) @Float @(Curve1d Unitless))
-              ]
-          , preMul
-              [ PreOperator ((*) @Float @(Curve1d Unitless))
-              , PreOperator ((*) @Angle @(Curve1d Unitless))
-              , PreOperator ((*) @Length @(Curve1d Unitless))
-              ]
-          , preDiv
-              [ PreOperator ((/) @Float @(Curve1d Unitless))
-              , PreOperator ((/) @Angle @(Curve1d Unitless))
-              , PreOperator ((/) @Length @(Curve1d Unitless))
-              ]
-          ]
-      , postOperators =
-          [ postAdd
-              [ PostOperator ((+) @(Curve1d Unitless) @Float)
-              , PostOperator ((+) @(Curve1d Unitless) @(Curve1d Unitless))
-              ]
-          , postSub
-              [ PostOperator ((-) @(Curve1d Unitless) @Float)
-              , PostOperator ((-) @(Curve1d Unitless) @(Curve1d Unitless))
-              ]
-          , postMul
-              [ PostOperator ((*) @(Curve1d Unitless) @Float)
-              , PostOperator ((*) @(Curve1d Unitless) @Angle)
-              , PostOperator ((*) @(Curve1d Unitless) @Length)
-              , PostOperator ((*) @(Curve1d Unitless) @(Curve1d Unitless))
-              , PostOperator ((*) @(Curve1d Unitless) @(Curve1d Radians))
-              , PostOperator ((*) @(Curve1d Unitless) @(Curve1d Meters))
-              ]
-          , postDiv
-              [ PostOperator ((/) @(Curve1d Unitless) @Float)
-              , PostOperator ((/) @(Curve1d Unitless) @(Curve1d Unitless))
-              ]
-          ]
-      , nestedClasses = []
-      }
-  , Class
-      { id = classId @(Curve1d Radians) Proxy
-      , staticFunctions = []
-      , memberFunctions =
-          [ "Evaluate" .| m1 "Parameter Value" (\t curve -> Curve1d.evaluate curve t)
-          , "Zeros" .| m0R Curve1d.zeros
-          ]
-      , negationFunction = Nothing
-      , preOperators = []
-      , postOperators = []
-      , nestedClasses = []
-      }
-  , Class
-      { id = classId @(Curve1d Meters) Proxy
-      , staticFunctions = []
-      , memberFunctions =
-          [ "Evaluate" .| m1 "Parameter Value" (\t curve -> Curve1d.evaluate curve t)
-          , "Zeros" .| m0M Curve1d.zeros
-          ]
-      , negationFunction = Nothing
-      , preOperators = []
-      , postOperators = []
-      , nestedClasses = []
-      }
+      ]
+  , class_ @(Curve1d Unitless)
+      [ member0 "Squared" Curve1d.squared
+      , member1 "Evaluate" "Parameter Value" (\t curve -> Curve1d.evaluate curve t)
+      , memberU0 "Zeros" Curve1d.zeros
+      , negateSelf
+      , floatPlus
+      , floatMinus
+      , floatTimes
+      , floatDivBy
+      , plusFloat
+      , plusSelf
+      , minusFloat
+      , minusSelf
+      , timesFloat
+      , timesSelf
+      , times @Length Self
+      , times @Angle Self
+      , times @(Curve1d Meters) Self
+      , times @(Curve1d Radians) Self
+      , divByFloat
+      , divBySelf
+      ]
+  , class_ @(Curve1d Radians)
+      [ member1 "Evaluate" "Parameter Value" (\t curve -> Curve1d.evaluate curve t)
+      , memberR0 "Zeros" Curve1d.zeros
+      , negateSelf
+      , floatTimes
+      , plusSelf
+      , minusSelf
+      , timesFloat
+      , times @(Curve1d Unitless) Self
+      , divByFloat
+      , divBySelf
+      , divBy @Angle Self
+      , divBy @(Curve1d Unitless) Self
+      ]
+  , class_ @(Curve1d Meters)
+      [ member1 "Evaluate" "Parameter Value" (\t curve -> Curve1d.evaluate curve t)
+      , memberM0 "Zeros" Curve1d.zeros
+      , negateSelf
+      , floatTimes
+      , plusSelf
+      , minusSelf
+      , timesFloat
+      , times @(Curve1d Unitless) Self
+      , divByFloat
+      , divBySelf
+      , divBy @Length Self
+      , divBy @(Curve1d Unitless) Self
+      ]
   ]
 
------ HELPER OPERATORS / FUNCTIONS -----
+----- CLASS MEMBERS -----
 
-classId :: forall a. FFI a => Proxy a -> FFI.Id a
-classId proxy = case FFI.typeOf proxy of
-  FFI.Class (FFI.Id Proxy names maybeUnits) -> FFI.Id Proxy names maybeUnits
-  _ -> internalError "Attempt to get class ID of a non-class"
+class_ :: forall value. FFI value => List (Member value) -> Class
+class_ members = buildClass members [] [] Nothing [] [] []
 
-(.:) :: Text -> List a -> (Name, List a)
-(.:) text values = (Name.parse text, values)
+data Member value where
+  Static0 :: FFI result => Text -> result -> Member value
+  Static1 :: (FFI a, FFI result) => Text -> Text -> (a -> result) -> Member value
+  Static2 :: (FFI a, FFI b, FFI result) => Text -> Text -> Text -> (a -> b -> result) -> Member value
+  Static3 :: (FFI a, FFI b, FFI c, FFI result) => Text -> Text -> Text -> Text -> (a -> b -> c -> result) -> Member value
+  Member0 :: (FFI value, FFI result) => Text -> (value -> result) -> Member value
+  MemberU0 :: (FFI value, FFI result) => Text -> (Tolerance Unitless => value -> result) -> Member value
+  MemberR0 :: (FFI value, FFI result) => Text -> (Tolerance Radians => value -> result) -> Member value
+  MemberM0 :: (FFI value, FFI result) => Text -> (Tolerance Meters => value -> result) -> Member value
+  Member1 :: (FFI a, FFI value, FFI result) => Text -> Text -> (a -> value -> result) -> Member value
+  Negate :: Negation value => Member value
+  PreOp :: (FFI lhs, FFI result) => BinaryOperator.Id -> (lhs -> value -> result) -> Member value
+  PostOp :: (FFI rhs, FFI result) => BinaryOperator.Id -> (value -> rhs -> result) -> Member value
+  Nested :: FFI nested => List (Member nested) -> Member value
 
-infixr 0 .:
+static0 :: FFI result => Text -> result -> Member value
+static0 = Static0
 
-(.|) :: Text -> a -> (Name, List a)
-(.|) text value = (Name.parse text, [value])
+static1 :: (FFI a, FFI result) => Text -> Text -> (a -> result) -> Member value
+static1 = Static1
 
-infixr 0 .|
+static2 :: (FFI a, FFI b, FFI result) => Text -> Text -> Text -> (a -> b -> result) -> Member value
+static2 = Static2
 
-s0 :: FFI a => a -> StaticFunction
-s0 value = StaticFunction0 value
+static3 :: (FFI a, FFI b, FFI c, FFI result) => Text -> Text -> Text -> Text -> (a -> b -> c -> result) -> Member value
+static3 = Static3
 
-s1 :: (FFI a, FFI b) => Text -> (a -> b) -> StaticFunction
-s1 arg1 function = StaticFunction1 (Name.parse arg1) function
+member0 :: (FFI value, FFI result) => Text -> (value -> result) -> Member value
+member0 = Member0
 
-s2 :: (FFI a, FFI b, FFI c) => Text -> Text -> (a -> b -> c) -> StaticFunction
-s2 arg1 arg2 function = StaticFunction2 (Name.parse arg1) (Name.parse arg2) function
+memberU0 :: (FFI value, FFI result) => Text -> (Tolerance Unitless => value -> result) -> Member value
+memberU0 = MemberU0
 
-s3 :: (FFI a, FFI b, FFI c, FFI d) => Text -> Text -> Text -> (a -> b -> c -> d) -> StaticFunction
-s3 arg1 arg2 arg3 function =
-  StaticFunction3 (Name.parse arg1) (Name.parse arg2) (Name.parse arg3) function
+memberR0 :: (FFI value, FFI result) => Text -> (Tolerance Radians => value -> result) -> Member value
+memberR0 = MemberR0
 
-m0 :: (FFI value, FFI result) => (value -> result) -> MemberFunction value
-m0 function = MemberFunction0 function
+memberM0 :: (FFI value, FFI result) => Text -> (Tolerance Meters => value -> result) -> Member value
+memberM0 = MemberM0
 
-m0U :: (FFI value, FFI result) => (Tolerance Unitless => value -> result) -> MemberFunction value
-m0U function = MemberFunction0U function
+member1 :: (FFI a, FFI value, FFI result) => Text -> Text -> (a -> value -> result) -> Member value
+member1 = Member1
 
-m0R :: (FFI value, FFI result) => (Tolerance Radians => value -> result) -> MemberFunction value
-m0R function = MemberFunction0R function
+data Self a = Self
 
-m0M :: (FFI value, FFI result) => (Tolerance Meters => value -> result) -> MemberFunction value
-m0M function = MemberFunction0M function
+negateSelf :: Negation value => Member value
+negateSelf = Negate
 
-m1 :: (FFI a, FFI value, FFI result) => Text -> (a -> value -> result) -> MemberFunction value
-m1 arg1 function = MemberFunction1 (Name.parse arg1) function
+floatPlus ::
+  forall value result.
+  (Addition Float value result, FFI value, FFI result) =>
+  Member value
+floatPlus = PreOp BinaryOperator.Add ((+) :: Float -> value -> result)
 
-preAdd :: List (PreOperator value) -> (BinaryOperator.Id, List (PreOperator value))
-preAdd overloads = (BinaryOperator.Add, overloads)
+floatMinus ::
+  forall value result.
+  (Subtraction Float value result, FFI value, FFI result) =>
+  Member value
+floatMinus = PreOp BinaryOperator.Sub ((-) :: Float -> value -> result)
 
-postAdd :: List (PostOperator value) -> (BinaryOperator.Id, List (PostOperator value))
-postAdd overloads = (BinaryOperator.Add, overloads)
+floatTimes ::
+  forall value result.
+  (Multiplication Float value result, FFI value, FFI result) =>
+  Member value
+floatTimes = PreOp BinaryOperator.Mul ((*) :: Float -> value -> result)
 
-preSub :: List (PreOperator value) -> (BinaryOperator.Id, List (PreOperator value))
-preSub overloads = (BinaryOperator.Sub, overloads)
+floatDivBy ::
+  forall value result.
+  (Division Float value result, FFI value, FFI result) =>
+  Member value
+floatDivBy = PreOp BinaryOperator.Div ((/) :: Float -> value -> result)
 
-postSub :: List (PostOperator value) -> (BinaryOperator.Id, List (PostOperator value))
-postSub overloads = (BinaryOperator.Sub, overloads)
+plus ::
+  forall rhs value result.
+  (Addition value rhs result, FFI value, FFI rhs, FFI result) =>
+  Self (value -> rhs -> result) ->
+  Member value
+plus _ = PostOp BinaryOperator.Add ((+) :: value -> rhs -> result)
 
-preMul :: List (PreOperator value) -> (BinaryOperator.Id, List (PreOperator value))
-preMul overloads = (BinaryOperator.Mul, overloads)
+plusFloat ::
+  forall value result.
+  (Addition value Float result, FFI value, FFI result) =>
+  Member value
+plusFloat = plus @Float Self
 
-postMul :: List (PostOperator value) -> (BinaryOperator.Id, List (PostOperator value))
-postMul overloads = (BinaryOperator.Mul, overloads)
+plusSelf ::
+  forall value result.
+  (Addition value value result, FFI value, FFI result) =>
+  Member value
+plusSelf = plus @value Self
 
-preDiv :: List (PreOperator value) -> (BinaryOperator.Id, List (PreOperator value))
-preDiv overloads = (BinaryOperator.Div, overloads)
+minus ::
+  forall rhs value result.
+  (Subtraction value rhs result, FFI value, FFI rhs, FFI result) =>
+  Self (value -> rhs -> result) ->
+  Member value
+minus _ = PostOp BinaryOperator.Sub ((-) :: value -> rhs -> result)
 
-postDiv :: List (PostOperator value) -> (BinaryOperator.Id, List (PostOperator value))
-postDiv overloads = (BinaryOperator.Div, overloads)
+minusFloat ::
+  forall value result.
+  (Subtraction value Float result, FFI value, FFI result) =>
+  Member value
+minusFloat = minus @Float Self
+
+minusSelf ::
+  forall value result.
+  (Subtraction value value result, FFI value, FFI result) =>
+  Member value
+minusSelf = minus @value Self
+
+times ::
+  forall rhs value result.
+  (Multiplication value rhs result, FFI value, FFI rhs, FFI result) =>
+  Self (value -> rhs -> result) ->
+  Member value
+times _ = PostOp BinaryOperator.Mul ((*) :: value -> rhs -> result)
+
+timesFloat ::
+  forall value result.
+  (Multiplication value Float result, FFI value, FFI result) =>
+  Member value
+timesFloat = times @Float Self
+
+timesSelf ::
+  forall value result.
+  (Multiplication value value result, FFI value, FFI result) =>
+  Member value
+timesSelf = times @value Self
+
+divBy ::
+  forall rhs value result.
+  (Division value rhs result, FFI value, FFI rhs, FFI result) =>
+  Self (value -> rhs -> result) ->
+  Member value
+divBy _ = PostOp BinaryOperator.Div ((/) :: value -> rhs -> result)
+
+divByFloat ::
+  forall value result.
+  (Division value Float result, FFI value, FFI result) =>
+  Member value
+divByFloat = divBy @Float Self
+
+divBySelf ::
+  forall value result.
+  (Division value value result, FFI value, FFI result) =>
+  Member value
+divBySelf = divBy @value Self
+
+nested :: FFI nested => List (Member nested) -> Member value
+nested = Nested
+
+addStaticOverload ::
+  Name ->
+  StaticFunction ->
+  List (Name, List StaticFunction) ->
+  List (Name, List StaticFunction)
+addStaticOverload name overload [] = [(name, [overload])]
+addStaticOverload name overload (first : rest) = do
+  let (existingName, existingOverloads) = first
+  if name == existingName
+    then (existingName, existingOverloads + [overload]) : rest
+    else first : addStaticOverload name overload rest
+
+addMemberOverload ::
+  Name ->
+  MemberFunction value ->
+  List (Name, List (MemberFunction value)) ->
+  List (Name, List (MemberFunction value))
+addMemberOverload name overload [] = [(name, [overload])]
+addMemberOverload name overload (first : rest) = do
+  let (existingName, existingOverloads) = first
+  if name == existingName
+    then (existingName, existingOverloads + [overload]) : rest
+    else first : addMemberOverload name overload rest
+
+addPreOverload ::
+  BinaryOperator.Id ->
+  PreOperator value ->
+  List (BinaryOperator.Id, List (PreOperator value)) ->
+  List (BinaryOperator.Id, List (PreOperator value))
+addPreOverload operatorId overload [] = [(operatorId, [overload])]
+addPreOverload operatorId overload (first : rest) = do
+  let (existingId, existingOverloads) = first
+  if operatorId == existingId
+    then (existingId, existingOverloads + [overload]) : rest
+    else first : addPreOverload operatorId overload rest
+
+addPostOverload ::
+  BinaryOperator.Id ->
+  PostOperator value ->
+  List (BinaryOperator.Id, List (PostOperator value)) ->
+  List (BinaryOperator.Id, List (PostOperator value))
+addPostOverload operatorId overload [] = [(operatorId, [overload])]
+addPostOverload operatorId overload (first : rest) = do
+  let (existingId, existingOverloads) = first
+  if operatorId == existingId
+    then (existingId, existingOverloads + [overload]) : rest
+    else first : addPostOverload operatorId overload rest
+
+buildClass ::
+  forall value.
+  FFI value =>
+  List (Member value) ->
+  List (Name, List StaticFunction) ->
+  List (Name, List (MemberFunction value)) ->
+  Maybe (value -> value) ->
+  List (BinaryOperator.Id, List (PreOperator value)) ->
+  List (BinaryOperator.Id, List (PostOperator value)) ->
+  List Class ->
+  Class
+buildClass members staticFunctionsAcc memberFunctionsAcc negationFunctionAcc preOperatorsAcc postOperatorsAcc nestedClassesAcc =
+  case members of
+    [] ->
+      Class
+        { id = case FFI.typeOf @value Proxy of
+            FFI.Class (FFI.Id Proxy names maybeUnits) -> FFI.Id Proxy names maybeUnits
+            _ -> internalError "Every class defined in the API must correspond to an FFI type with class representation"
+        , staticFunctions = staticFunctionsAcc
+        , memberFunctions = memberFunctionsAcc
+        , negationFunction = negationFunctionAcc
+        , preOperators = preOperatorsAcc
+        , postOperators = postOperatorsAcc
+        , nestedClasses = nestedClassesAcc
+        }
+    first : rest -> do
+      let addStatic name overload =
+            buildClass
+              rest
+              (addStaticOverload (Name.parse name) overload staticFunctionsAcc)
+              memberFunctionsAcc
+              negationFunctionAcc
+              preOperatorsAcc
+              postOperatorsAcc
+              nestedClassesAcc
+      let addMember name overload =
+            buildClass
+              rest
+              staticFunctionsAcc
+              (addMemberOverload (Name.parse name) overload memberFunctionsAcc)
+              negationFunctionAcc
+              preOperatorsAcc
+              postOperatorsAcc
+              nestedClassesAcc
+      case first of
+        Static0 name value ->
+          addStatic name (StaticFunction0 value)
+        Static1 name arg1 f ->
+          addStatic name (StaticFunction1 (Name.parse arg1) f)
+        Static2 name arg1 arg2 f ->
+          addStatic name (StaticFunction2 (Name.parse arg1) (Name.parse arg2) f)
+        Static3 name arg1 arg2 arg3 f ->
+          addStatic name (StaticFunction3 (Name.parse arg1) (Name.parse arg2) (Name.parse arg3) f)
+        Member0 name f ->
+          addMember name (MemberFunction0 f)
+        MemberU0 name f ->
+          addMember name (MemberFunction0U f)
+        MemberR0 name f ->
+          addMember name (MemberFunction0R f)
+        MemberM0 name f ->
+          addMember name (MemberFunction0M f)
+        Member1 name arg1 f ->
+          addMember name (MemberFunction1 (Name.parse arg1) f)
+        Negate ->
+          buildClass
+            rest
+            staticFunctionsAcc
+            memberFunctionsAcc
+            (Just negate)
+            preOperatorsAcc
+            postOperatorsAcc
+            nestedClassesAcc
+        PreOp operatorId operator ->
+          buildClass
+            rest
+            staticFunctionsAcc
+            memberFunctionsAcc
+            negationFunctionAcc
+            (addPreOverload operatorId (PreOperator operator) preOperatorsAcc)
+            postOperatorsAcc
+            nestedClassesAcc
+        PostOp operatorId operator ->
+          buildClass
+            rest
+            staticFunctionsAcc
+            memberFunctionsAcc
+            negationFunctionAcc
+            preOperatorsAcc
+            (addPostOverload operatorId (PostOperator operator) postOperatorsAcc)
+            nestedClassesAcc
+        Nested nestedMembers ->
+          buildClass
+            rest
+            staticFunctionsAcc
+            memberFunctionsAcc
+            negationFunctionAcc
+            preOperatorsAcc
+            postOperatorsAcc
+            (nestedClassesAcc + [class_ nestedMembers])
 
 ----- FUNCTION COLLECTION -----
 
