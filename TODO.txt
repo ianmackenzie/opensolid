@@ -1,25 +1,22 @@
 Improve Python bindings
-- Extend API.functions to return function signatures as well?
-  -> add API.Function type (or repurpose the API.ForeignFunction name...)
-  -> might then be able to remove Python-specific type traversal code that generates FFI classes
-- Use simple isinstance checks for binary operator overloads
-  -> there will always be a single positional argument, never a named one...
+- Add constants as well as static functions?
+  -> *Not* properties for now, leave those as member functions
+- Use simpler match statement for all single-argument (other than 'self') functions
+  -> can just match on the type of the variable, regardless of how it was passed (positional or named)
+  -> single-argument includes all binary operators!
 - Try switching to pattern matching just on 'shape' of function arguments, with separate 'isinstance' checks
-- Nice __repr__ and/or __str__ for primitive types
-- Add arithmetic operators (including for Qty values)
-- Add consructors/conversions to Qty modules based on conversion factors provided as part of API definition?
-- Support lists
+- Allow Python classes to be represented by things other than pointers (e.g. plain float values for quantity types)
+- Rename __ptr__ to just _ptr
+- Nice __repr__ and/or __str__, at least for primitive types
 - Support 'in' operator?
 - Add docstrings
-- Define class (and quantity) members "in place" in FFI typeclass instance instead of separately?
 - Actual error types instead of strings
-- Clean up nested class definition somehow?
-- Add runtime checks that classes defined in OpenSolid.API module have matching names in their types' FFI instances
 - Add _list_decode helper?
 - Get lists arguments working
   - allocate memory with opensolid_malloc
   - cast result to typed pointer with 'ctypes.cast(obj, type)'?
   - get/set elements with 'ptr[index]'
+- Rename MemberFunction and StaticFunction to have U/R/M prefix *before* argument count
 
 Switch Solve2d.return back to taking a single value instead of a NonEmpty
 
