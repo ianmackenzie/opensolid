@@ -780,7 +780,12 @@ memberFunctionOverloads :: FFI.Id value -> (Name, List (MemberFunction value)) -
 memberFunctionOverloads classId_ (functionName, overloads) =
   List.map (memberFunctionOverload classId_ functionName) overloads
 
-negationOperatorInfo :: forall value. FFI value => FFI.Id value -> Maybe (value -> value) -> List Function
+negationOperatorInfo ::
+  forall value.
+  FFI value =>
+  FFI.Id value ->
+  Maybe (value -> value) ->
+  List Function
 negationOperatorInfo classId_ maybeNegationFunction = case maybeNegationFunction of
   Nothing -> []
   Just negationFunction -> do
@@ -794,7 +799,12 @@ negationOperatorInfo classId_ maybeNegationFunction = case maybeNegationFunction
         , invoke = NegationOperator.invoke negationFunction
         }
 
-equalityFunctionInfo :: forall value. FFI value => FFI.Id value -> Maybe (value -> value -> Bool) -> List Function
+equalityFunctionInfo ::
+  forall value.
+  FFI value =>
+  FFI.Id value ->
+  Maybe (value -> value -> Bool) ->
+  List Function
 equalityFunctionInfo classId_ maybeEqualityFunction = case maybeEqualityFunction of
   Nothing -> []
   Just equalityFunction -> do
@@ -808,7 +818,12 @@ equalityFunctionInfo classId_ maybeEqualityFunction = case maybeEqualityFunction
         , invoke = EqualityFunction.invoke equalityFunction
         }
 
-comparisonFunctionInfo :: forall value. FFI value => FFI.Id value -> Maybe (value -> value -> Int) -> List Function
+comparisonFunctionInfo ::
+  forall value.
+  FFI value =>
+  FFI.Id value ->
+  Maybe (value -> value -> Int) ->
+  List Function
 comparisonFunctionInfo classId_ maybeComparisonFunction = case maybeComparisonFunction of
   Nothing -> []
   Just comparisonFunction -> do
