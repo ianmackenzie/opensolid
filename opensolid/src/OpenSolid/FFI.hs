@@ -90,7 +90,6 @@ nestedClassRepresentation parentName childName maybeUnits proxy =
 data Type where
   Int :: Type
   Float :: Type
-  Qty :: Name -> Type
   List :: Type -> Type
   Tuple :: Type -> Type -> List Type -> Type
   Maybe :: Type -> Type
@@ -165,7 +164,6 @@ typeName :: Type -> Text
 typeName ffiType = case ffiType of
   Int -> "Int"
   Float -> "Float"
-  Qty qtyName -> Name.pascalCase qtyName
   List itemType -> "List" + typeName itemType
   Tuple type1 type2 rest -> do
     let itemTypes = type1 : type2 : rest
@@ -184,7 +182,6 @@ size :: Type -> Int
 size ffiType = case ffiType of
   Int -> 8
   Float -> 8
-  Qty _ -> 8
   List _ -> 16
   Tuple type1 type2 rest -> Int.sumOf size (type1 : type2 : rest)
   Maybe valueType -> 8 + size valueType
