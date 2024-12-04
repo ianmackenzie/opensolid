@@ -859,14 +859,25 @@ postOperatorOverloads classId_ (operatorId, overloads) =
   List.map (postOperatorOverload classId_ operatorId) overloads
 
 classFunctions :: Class -> List Function
-classFunctions (Class classId_ staticFunctions memberFunctions maybeEqualityFunction maybeComparisonFunction maybeNegationOperator preOperators postOperators nestedClasses) =
-  List.concat
-    [ List.collect (staticFunctionOverloads classId_) staticFunctions
-    , List.collect (memberFunctionOverloads classId_) memberFunctions
-    , equalityFunctionInfo classId_ maybeEqualityFunction
-    , comparisonFunctionInfo classId_ maybeComparisonFunction
-    , negationOperatorInfo classId_ maybeNegationOperator
-    , List.collect (preOperatorOverloads classId_) preOperators
-    , List.collect (postOperatorOverloads classId_) postOperators
-    , List.collect classFunctions nestedClasses
-    ]
+classFunctions
+  ( Class
+      classId_
+      staticFunctions
+      memberFunctions
+      maybeEqualityFunction
+      maybeComparisonFunction
+      maybeNegationOperator
+      preOperators
+      postOperators
+      nestedClasses
+    ) =
+    List.concat
+      [ List.collect (staticFunctionOverloads classId_) staticFunctions
+      , List.collect (memberFunctionOverloads classId_) memberFunctions
+      , equalityFunctionInfo classId_ maybeEqualityFunction
+      , comparisonFunctionInfo classId_ maybeComparisonFunction
+      , negationOperatorInfo classId_ maybeNegationOperator
+      , List.collect (preOperatorOverloads classId_) preOperators
+      , List.collect (postOperatorOverloads classId_) postOperators
+      , List.collect classFunctions nestedClasses
+      ]
