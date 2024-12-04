@@ -45,6 +45,8 @@ data Representation a where
   IntRep :: Representation Int
   -- A 64-bit float
   FloatRep :: Representation Float
+  -- A Boolean value
+  BoolRep :: Representation Bool
   -- A struct with a 64-bit integer size and a pointer to an array of items
   ListRep :: FFI a => Representation (List a)
   -- A struct with the first item and then the second
@@ -90,6 +92,7 @@ nestedClassRepresentation parentName childName maybeUnits proxy =
 data Type where
   Int :: Type
   Float :: Type
+  Bool :: Type
   List :: Type -> Type
   Tuple :: Type -> Type -> List Type -> Type
   Maybe :: Type -> Type
@@ -103,6 +106,7 @@ typeOf :: FFI a => Proxy a -> Type
 typeOf proxy = case representation proxy of
   IntRep -> Int
   FloatRep -> Float
+  BoolRep -> Bool
   ListRep -> listType proxy
   Tuple2Rep -> tuple2Type proxy
   Tuple3Rep -> tuple3Type proxy
@@ -164,6 +168,7 @@ typeName :: Type -> Text
 typeName ffiType = case ffiType of
   Int -> "Int"
   Float -> "Float"
+  Bool -> "Bool"
   List itemType -> "List" + typeName itemType
   Tuple type1 type2 rest -> do
     let itemTypes = type1 : type2 : rest
@@ -182,6 +187,7 @@ size :: Type -> Int
 size ffiType = case ffiType of
   Int -> 8
   Float -> 8
+  Bool -> 8
   List _ -> 16
   Tuple type1 type2 rest -> Int.sumOf size (type1 : type2 : rest)
   Maybe valueType -> 8 + size valueType
@@ -193,6 +199,9 @@ instance FFI Float where
 
 instance FFI Int where
   representation _ = IntRep
+
+instance FFI Bool where
+  representation _ = BoolRep
 
 instance FFI Length where
   representation = classRepresentation "Length" Nothing
@@ -230,6 +239,7 @@ store ptr offset value = do
   case representation proxy of
     IntRep -> Foreign.pokeByteOff ptr offset (fromIntegral value :: Int64)
     FloatRep -> Foreign.pokeByteOff ptr offset (Float.toDouble value)
+    BoolRep -> Foreign.pokeByteOff ptr offset (toInt64 (if value then 1 else 0))
     ListRep -> IO.do
       let numItems = List.length value
       let itemSize = listItemSize proxy
@@ -324,6 +334,7 @@ load ptr offset = do
   case representation proxy of
     IntRep -> IO.map fromInt64 (Foreign.peekByteOff ptr offset)
     FloatRep -> IO.map Float.fromDouble (Foreign.peekByteOff ptr offset)
+    BoolRep -> IO.map ((/=) 0 . fromInt64) (Foreign.peekByteOff ptr offset)
     ListRep -> IO.do
       let itemSize = listItemSize proxy
       numItems <- IO.map fromInt64 (Foreign.peekByteOff ptr offset)

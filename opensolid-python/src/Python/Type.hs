@@ -10,6 +10,7 @@ qualifiedName :: FFI.Type -> Text
 qualifiedName ffiType = case ffiType of
   FFI.Int -> "int"
   FFI.Float -> "float"
+  FFI.Bool -> "bool"
   FFI.List itemType -> "list[" + qualifiedName itemType + "]"
   FFI.Tuple first second rest -> do
     let itemTypeNames = List.map qualifiedName (first : second : rest)

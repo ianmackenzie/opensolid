@@ -22,6 +22,7 @@ typeName :: FFI.Type -> Text
 typeName ffiType = case ffiType of
   FFI.Int -> "c_int64"
   FFI.Float -> "c_double"
+  FFI.Bool -> "c_int64"
   FFI.List{} -> "_" + typeNameComponent ffiType
   FFI.Tuple{} -> "_" + typeNameComponent ffiType
   FFI.Maybe{} -> "_" + typeNameComponent ffiType
@@ -32,6 +33,7 @@ typeNameComponent :: FFI.Type -> Text
 typeNameComponent ffiType = case ffiType of
   FFI.Int -> "c_int64"
   FFI.Float -> "c_double"
+  FFI.Bool -> "c_int64"
   FFI.List itemType -> "List_" + typeNameComponent itemType
   FFI.Tuple type1 type2 rest -> do
     let itemTypes = type1 : type2 : rest
@@ -49,6 +51,7 @@ dummyFieldValue :: FFI.Type -> Text
 dummyFieldValue ffiType = case ffiType of
   FFI.Int -> "0"
   FFI.Float -> "0.0"
+  FFI.Bool -> "0"
   FFI.List{} -> dummyValue ffiType
   FFI.Tuple{} -> dummyValue ffiType
   FFI.Maybe{} -> dummyValue ffiType
@@ -71,6 +74,7 @@ outputValue :: FFI.Type -> Text -> Text
 outputValue ffiType varName = case ffiType of
   FFI.Int -> varName + ".value"
   FFI.Float -> varName + ".value"
+  FFI.Bool -> "bool(" + varName + ".value)"
   FFI.List itemType -> listOutputValue itemType varName
   FFI.Tuple type1 type2 rest -> tupleOutputValue varName type1 type2 rest
   FFI.Maybe valueType -> maybeOutputValue valueType varName
@@ -81,6 +85,7 @@ fieldOutputValue :: FFI.Type -> Text -> Text
 fieldOutputValue ffiType varName = case ffiType of
   FFI.Int -> varName
   FFI.Float -> varName
+  FFI.Bool -> "bool(" + varName + ")"
   FFI.List itemType -> listOutputValue itemType varName
   FFI.Tuple type1 type2 rest -> tupleOutputValue varName type1 type2 rest
   FFI.Maybe valueType -> maybeOutputValue valueType varName
@@ -118,6 +123,7 @@ singleArgument :: Text -> FFI.Type -> Text
 singleArgument varName ffiType = case ffiType of
   FFI.Int -> Python.call "c_int64" [varName]
   FFI.Float -> Python.call "c_double" [varName]
+  FFI.Bool -> Python.call "c_int64" [varName]
   FFI.List{} -> TODO
   FFI.Tuple type1 type2 rest -> tupleArgumentValue ffiType type1 type2 rest varName
   FFI.Maybe valueType -> maybeArgumentValue ffiType valueType varName
@@ -128,6 +134,7 @@ fieldArgumentValue :: Text -> FFI.Type -> Text
 fieldArgumentValue varName ffiType = case ffiType of
   FFI.Int -> varName
   FFI.Float -> varName
+  FFI.Bool -> varName
   FFI.List{} -> TODO
   FFI.Tuple type1 type2 rest -> tupleArgumentValue ffiType type1 type2 rest varName
   FFI.Maybe valueType -> maybeArgumentValue ffiType valueType varName
@@ -155,6 +162,7 @@ registerType ffiType registry = do
     else case ffiType of
       FFI.Int -> registry
       FFI.Float -> registry
+      FFI.Bool -> registry
       FFI.List itemType -> registerList ffiType itemType registry
       FFI.Tuple type1 type2 rest -> registerTuple ffiType type1 type2 rest registry
       FFI.Maybe valueType -> registerMaybe ffiType valueType registry
