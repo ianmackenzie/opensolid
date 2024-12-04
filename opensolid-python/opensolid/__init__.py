@@ -370,6 +370,22 @@ class Length:
             case _:
                 return NotImplemented
 
+    def __floordiv__(self, rhs: Length) -> int:
+        inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+        output = c_int64()
+        _lib.opensolid_Length_floorDiv_Length_Length(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return output.value
+
+    def __mod__(self, rhs: Length) -> Length:
+        inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+        output = c_void_p()
+        _lib.opensolid_Length_mod_Length_Length(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Length(ptr=output)
+
     def __rmul__(self, lhs: float) -> Length:
         inputs = _Tuple2_c_double_c_void_p(lhs, self.__ptr__)
         output = c_void_p()
@@ -592,6 +608,20 @@ class Angle:
                 return Curve1d_Unitless(ptr=output)
             case _:
                 return NotImplemented
+
+    def __floordiv__(self, rhs: Angle) -> int:
+        inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+        output = c_int64()
+        _lib.opensolid_Angle_floorDiv_Angle_Angle(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return output.value
+
+    def __mod__(self, rhs: Angle) -> Angle:
+        inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+        output = c_void_p()
+        _lib.opensolid_Angle_mod_Angle_Angle(ctypes.byref(inputs), ctypes.byref(output))
+        return Angle(ptr=output)
 
     def __rmul__(self, lhs: float) -> Angle:
         inputs = _Tuple2_c_double_c_void_p(lhs, self.__ptr__)

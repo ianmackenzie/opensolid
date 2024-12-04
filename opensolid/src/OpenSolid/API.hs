@@ -96,6 +96,8 @@ length =
       , divBy @(Range Meters) Self
       , divBy @(Curve1d Unitless) Self
       , divBy @(Curve1d Meters) Self
+      , floorDivBySelf
+      , modBySelf
       ]
   ]
 
@@ -122,6 +124,8 @@ angle =
       , divBy @(Range Radians) Self
       , divBy @(Curve1d Unitless) Self
       , divBy @(Curve1d Radians) Self
+      , floorDivBySelf
+      , modBySelf
       ]
   ]
 
@@ -523,6 +527,12 @@ divBySelf ::
   (Division value value result, FFI value, FFI result) =>
   Member value
 divBySelf = divBy @value Self
+
+floorDivBySelf :: forall value. (DivMod value, FFI value) => Member value
+floorDivBySelf = PostOp BinaryOperator.FloorDiv ((//) :: value -> value -> Int)
+
+modBySelf :: forall value. (DivMod value, FFI value) => Member value
+modBySelf = PostOp BinaryOperator.Mod ((%) :: value -> value -> value)
 
 nested :: FFI nested => List (Member nested) -> Member value
 nested = Nested

@@ -41,6 +41,8 @@ functionName operatorId = case operatorId of
   BinaryOperator.Sub -> "__sub__"
   BinaryOperator.Mul -> "__mul__"
   BinaryOperator.Div -> "__truediv__"
+  BinaryOperator.FloorDiv -> "__floordiv__"
+  BinaryOperator.Mod -> "__mod__"
 
 overload :: FFI.Id value -> BinaryOperator.Id -> PostOperator value -> (Text, Text, Text)
 overload classId operatorId memberFunction = do
