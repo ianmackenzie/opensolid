@@ -4,3 +4,6 @@ opensolid/*.so
 
 # PyCharm files
 .idea
+
+# Jupyter Notebook
+.ipynb_checkpoints
