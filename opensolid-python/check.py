@@ -3,10 +3,8 @@ from opensolid import Angle, Curve1d, Point2d, Range, Tolerance, Vector2d
 p1 = Point2d.meters(1, 2)
 p2 = Point2d.meters(3, 4)
 print(p1.distance_to(p2).in_centimeters())
-c1 = Curve1d.t()
-print(c1.evaluate(0.5))
-c2 = c1.squared()
-print(c2.evaluate(0.5))
+print(Curve1d.t.evaluate(0.5))
+print(Curve1d.t.squared().evaluate(0.5))
 
 r1 = Range.meters(1, 5)
 r2 = Range.meters(3, 7)
@@ -24,6 +22,6 @@ v = Vector2d.xy(1,2)
 with Tolerance(1e-9):
     print(v.direction().components())
 
-c = Curve1d.cos(Curve1d.t() * Angle.turns(1))
+c = Curve1d.cos(Curve1d.t * Angle.turns(1))
 with Tolerance(1e-9):
     print([root.value() for root in c.zeros()])

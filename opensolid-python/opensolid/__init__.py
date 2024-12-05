@@ -160,12 +160,7 @@ class Length:
     def __init__(self, *, ptr: c_void_p) -> None:
         self.__ptr__ = ptr
 
-    @staticmethod
-    def zero() -> Length:
-        inputs = c_void_p()
-        output = c_void_p()
-        _lib.opensolid_Length_zero(ctypes.byref(inputs), ctypes.byref(output))
-        return Length(ptr=output)
+    zero: Length = None  # type: ignore[assignment]
 
     @staticmethod
     def meters(value: float) -> Length:
@@ -468,12 +463,7 @@ class Angle:
     def __init__(self, *, ptr: c_void_p) -> None:
         self.__ptr__ = ptr
 
-    @staticmethod
-    def zero() -> Angle:
-        inputs = c_void_p()
-        output = c_void_p()
-        _lib.opensolid_Angle_zero(ctypes.byref(inputs), ctypes.byref(output))
-        return Angle(ptr=output)
+    zero: Angle = None  # type: ignore[assignment]
 
     @staticmethod
     def radians(value: float) -> Angle:
@@ -755,12 +745,7 @@ class Range:
     def __init__(self, *, ptr: c_void_p) -> None:
         self.__ptr__ = ptr
 
-    @staticmethod
-    def unit() -> Range_Unitless:
-        inputs = c_void_p()
-        output = c_void_p()
-        _lib.opensolid_Range_unit(ctypes.byref(inputs), ctypes.byref(output))
-        return Range_Unitless(ptr=output)
+    unit: Range_Unitless = None  # type: ignore[assignment]
 
     @overload
     @staticmethod
@@ -1597,12 +1582,7 @@ class Vector2d:
     def __init__(self, *, ptr: c_void_p) -> None:
         self.__ptr__ = ptr
 
-    @staticmethod
-    def zero() -> Vector2d_Meters:
-        inputs = c_void_p()
-        output = c_void_p()
-        _lib.opensolid_Vector2d_zero(ctypes.byref(inputs), ctypes.byref(output))
-        return Vector2d_Meters(ptr=output)
+    zero: Vector2d_Meters = None  # type: ignore[assignment]
 
     @staticmethod
     def unit(direction: Direction2d) -> Vector2d_Unitless:
@@ -2035,47 +2015,12 @@ class Direction2d:
     def __init__(self, *, ptr: c_void_p) -> None:
         self.__ptr__ = ptr
 
-    @staticmethod
-    def x() -> Direction2d:
-        inputs = c_void_p()
-        output = c_void_p()
-        _lib.opensolid_Direction2d_x(ctypes.byref(inputs), ctypes.byref(output))
-        return Direction2d(ptr=output)
-
-    @staticmethod
-    def y() -> Direction2d:
-        inputs = c_void_p()
-        output = c_void_p()
-        _lib.opensolid_Direction2d_y(ctypes.byref(inputs), ctypes.byref(output))
-        return Direction2d(ptr=output)
-
-    @staticmethod
-    def positive_x() -> Direction2d:
-        inputs = c_void_p()
-        output = c_void_p()
-        _lib.opensolid_Direction2d_positiveX(ctypes.byref(inputs), ctypes.byref(output))
-        return Direction2d(ptr=output)
-
-    @staticmethod
-    def positive_y() -> Direction2d:
-        inputs = c_void_p()
-        output = c_void_p()
-        _lib.opensolid_Direction2d_positiveY(ctypes.byref(inputs), ctypes.byref(output))
-        return Direction2d(ptr=output)
-
-    @staticmethod
-    def negative_x() -> Direction2d:
-        inputs = c_void_p()
-        output = c_void_p()
-        _lib.opensolid_Direction2d_negativeX(ctypes.byref(inputs), ctypes.byref(output))
-        return Direction2d(ptr=output)
-
-    @staticmethod
-    def negative_y() -> Direction2d:
-        inputs = c_void_p()
-        output = c_void_p()
-        _lib.opensolid_Direction2d_negativeY(ctypes.byref(inputs), ctypes.byref(output))
-        return Direction2d(ptr=output)
+    x: Direction2d = None  # type: ignore[assignment]
+    y: Direction2d = None  # type: ignore[assignment]
+    positive_x: Direction2d = None  # type: ignore[assignment]
+    positive_y: Direction2d = None  # type: ignore[assignment]
+    negative_x: Direction2d = None  # type: ignore[assignment]
+    negative_y: Direction2d = None  # type: ignore[assignment]
 
     @staticmethod
     def from_angle(angle: Angle) -> Direction2d:
@@ -2126,12 +2071,7 @@ class Point2d:
     def __init__(self, *, ptr: c_void_p) -> None:
         self.__ptr__ = ptr
 
-    @staticmethod
-    def origin() -> Point2d_Meters:
-        inputs = c_void_p()
-        output = c_void_p()
-        _lib.opensolid_Point2d_origin(ctypes.byref(inputs), ctypes.byref(output))
-        return Point2d_Meters(ptr=output)
+    origin: Point2d_Meters = None  # type: ignore[assignment]
 
     @overload
     @staticmethod
@@ -2434,12 +2374,7 @@ class Curve1d:
     def __init__(self, *, ptr: c_void_p) -> None:
         self.__ptr__ = ptr
 
-    @staticmethod
-    def t() -> Curve1d_Unitless:
-        inputs = c_void_p()
-        output = c_void_p()
-        _lib.opensolid_Curve1d_t(ctypes.byref(inputs), ctypes.byref(output))
-        return Curve1d_Unitless(ptr=output)
+    t: Curve1d_Unitless = None  # type: ignore[assignment]
 
     @staticmethod
     def sin(curve: Curve1d_Radians) -> Curve1d_Unitless:
@@ -2986,3 +2921,111 @@ class Curve1d_Meters:
             ctypes.byref(inputs), ctypes.byref(output)
         )
         return Curve1d_Meters(ptr=output)
+
+
+def _length_zero() -> Length:
+    output = c_void_p()
+    _lib.opensolid_Length_zero(c_void_p(), ctypes.byref(output))
+    return Length(ptr=output)
+
+
+Length.zero = _length_zero()
+
+
+def _angle_zero() -> Angle:
+    output = c_void_p()
+    _lib.opensolid_Angle_zero(c_void_p(), ctypes.byref(output))
+    return Angle(ptr=output)
+
+
+Angle.zero = _angle_zero()
+
+
+def _range_unit() -> Range_Unitless:
+    output = c_void_p()
+    _lib.opensolid_Range_unit(c_void_p(), ctypes.byref(output))
+    return Range_Unitless(ptr=output)
+
+
+Range.unit = _range_unit()
+
+
+def _vector2d_zero() -> Vector2d_Meters:
+    output = c_void_p()
+    _lib.opensolid_Vector2d_zero(c_void_p(), ctypes.byref(output))
+    return Vector2d_Meters(ptr=output)
+
+
+Vector2d.zero = _vector2d_zero()
+
+
+def _direction2d_x() -> Direction2d:
+    output = c_void_p()
+    _lib.opensolid_Direction2d_x(c_void_p(), ctypes.byref(output))
+    return Direction2d(ptr=output)
+
+
+Direction2d.x = _direction2d_x()
+
+
+def _direction2d_y() -> Direction2d:
+    output = c_void_p()
+    _lib.opensolid_Direction2d_y(c_void_p(), ctypes.byref(output))
+    return Direction2d(ptr=output)
+
+
+Direction2d.y = _direction2d_y()
+
+
+def _direction2d_positive_x() -> Direction2d:
+    output = c_void_p()
+    _lib.opensolid_Direction2d_positiveX(c_void_p(), ctypes.byref(output))
+    return Direction2d(ptr=output)
+
+
+Direction2d.positive_x = _direction2d_positive_x()
+
+
+def _direction2d_positive_y() -> Direction2d:
+    output = c_void_p()
+    _lib.opensolid_Direction2d_positiveY(c_void_p(), ctypes.byref(output))
+    return Direction2d(ptr=output)
+
+
+Direction2d.positive_y = _direction2d_positive_y()
+
+
+def _direction2d_negative_x() -> Direction2d:
+    output = c_void_p()
+    _lib.opensolid_Direction2d_negativeX(c_void_p(), ctypes.byref(output))
+    return Direction2d(ptr=output)
+
+
+Direction2d.negative_x = _direction2d_negative_x()
+
+
+def _direction2d_negative_y() -> Direction2d:
+    output = c_void_p()
+    _lib.opensolid_Direction2d_negativeY(c_void_p(), ctypes.byref(output))
+    return Direction2d(ptr=output)
+
+
+Direction2d.negative_y = _direction2d_negative_y()
+
+
+def _point2d_origin() -> Point2d_Meters:
+    output = c_void_p()
+    _lib.opensolid_Point2d_origin(c_void_p(), ctypes.byref(output))
+    return Point2d_Meters(ptr=output)
+
+
+Point2d.origin = _point2d_origin()
+
+
+def _curve1d_t() -> Curve1d_Unitless:
+    output = c_void_p()
+    _lib.opensolid_Curve1d_t(c_void_p(), ctypes.byref(output))
+    return Curve1d_Unitless(ptr=output)
+
+
+Curve1d.t = _curve1d_t()

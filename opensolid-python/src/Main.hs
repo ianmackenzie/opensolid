@@ -12,6 +12,7 @@ import Pair qualified
 import Python qualified
 import Python.Class qualified
 import Python.ComparisonFunction qualified
+import Python.Constant qualified
 import Python.EqualityFunction qualified
 import Python.FFI qualified
 import Python.Function qualified
@@ -116,10 +117,11 @@ preamble =
     , "    raise TypeError(message)"
     ]
 
-classDefinition :: Class -> Text
+classDefinition :: Class -> (Text, Text)
 classDefinition
   ( Class
       classId
+      constants
       staticFunctions
       memberFunctions
       equalityFunction
@@ -129,19 +131,25 @@ classDefinition
       postOperators
       nestedClasses
     ) = do
-    Python.lines
-      [ "class " + Python.Class.unqualifiedName classId + ":"
-      , "    def __init__(self, *, ptr : c_void_p) -> None:"
-      , "        self.__ptr__ = ptr"
-      , Python.indent (List.map (Python.StaticFunction.definition classId) staticFunctions)
-      , Python.indent (List.map (Python.MemberFunction.definition classId) memberFunctions)
-      , Python.indent [Python.EqualityFunction.definition classId equalityFunction]
-      , Python.indent [Python.ComparisonFunction.definitions classId comparisonFunction]
-      , Python.indent [Python.NegationOperator.definition classId negationFunction]
-      , Python.indent (List.map (Python.PostOperator.definition classId) postOperators)
-      , Python.indent (List.map (Python.PreOperator.definition classId) preOperators)
-      , Python.indent (List.map classDefinition nestedClasses)
-      ]
+    let (nestedClassDefinitions, nestedClassConstants) = List.unzip2 (List.map classDefinition nestedClasses)
+    let definition =
+          Python.lines
+            [ "class " + Python.Class.unqualifiedName classId + ":"
+            , "    def __init__(self, *, ptr : c_void_p) -> None:"
+            , "        self.__ptr__ = ptr"
+            , Python.indent (List.map Python.Constant.declaration constants)
+            , Python.indent (List.map (Python.StaticFunction.definition classId) staticFunctions)
+            , Python.indent (List.map (Python.MemberFunction.definition classId) memberFunctions)
+            , Python.indent [Python.EqualityFunction.definition classId equalityFunction]
+            , Python.indent [Python.ComparisonFunction.definitions classId comparisonFunction]
+            , Python.indent [Python.NegationOperator.definition classId negationFunction]
+            , Python.indent (List.map (Python.PostOperator.definition classId) postOperators)
+            , Python.indent (List.map (Python.PreOperator.definition classId) preOperators)
+            , Python.indent nestedClassDefinitions
+            ]
+    let constantDefinitions =
+          Python.lines ((List.map (Python.Constant.definition classId) constants) + nestedClassConstants)
+    (definition, constantDefinitions)
 
 ffiTypeDeclarations :: Text
 ffiTypeDeclarations = do
@@ -163,10 +171,14 @@ registerArgumentTypes maybeConstraint argumentTypes registry = do
     List.One type1 -> Python.FFI.registerType type1 registry
     List.TwoOrMore type1 type2 rest -> Python.FFI.registerType (FFI.Tuple type1 type2 rest) registry
 
-classDefinitions :: Text
-classDefinitions = Python.lines (List.map classDefinition API.classes)
-
 main :: IO ()
 main = IO.do
-  let pythonCode = Python.lines [preamble, ffiTypeDeclarations, classDefinitions]
+  let (classDefinitions, constantDefinitions) = List.unzip2 (List.map classDefinition API.classes)
+  let pythonCode =
+        Python.lines
+          [ preamble
+          , ffiTypeDeclarations
+          , Python.lines classDefinitions
+          , Python.lines constantDefinitions
+          ]
   File.writeTo "opensolid-python/opensolid/__init__.py" pythonCode

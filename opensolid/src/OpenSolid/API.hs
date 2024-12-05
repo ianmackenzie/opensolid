@@ -14,6 +14,8 @@ import List qualified
 import OpenSolid
 import OpenSolid.API.BinaryOperator qualified as BinaryOperator
 import OpenSolid.API.ComparisonFunction qualified as ComparisonFunction
+import OpenSolid.API.Constant (Constant (Constant))
+import OpenSolid.API.Constant qualified as Constant
 import OpenSolid.API.Constraint (Constraint)
 import OpenSolid.API.EqualityFunction qualified as EqualityFunction
 import OpenSolid.API.MemberFunction (MemberFunction (..))
@@ -44,6 +46,7 @@ data Class where
   Class ::
     FFI value =>
     { id :: FFI.Id value
+    , constants :: List (Name, Constant)
     , staticFunctions :: List (Name, List StaticFunction)
     , memberFunctions :: List (Name, List (MemberFunction value))
     , equalityFunction :: Maybe (value -> value -> Bool)
@@ -80,7 +83,7 @@ classes =
 length :: List Class
 length =
   [ class_ @Length
-      [ static0 "Zero" Length.zero
+      [ constant "Zero" Length.zero
       , static1 "Meters" "Value" Length.meters
       , static1 "Centimeters" "Value" Length.centimeters
       , static1 "Millimeters" "Value" Length.millimeters
@@ -116,7 +119,7 @@ length =
 angle :: List Class
 angle =
   [ class_ @Angle
-      [ static0 "Zero" Angle.zero
+      [ constant "Zero" Angle.zero
       , static1 "Radians" "Value" Angle.radians
       , static1 "Degrees" "Value" Angle.degrees
       , static1 "Turns" "Value" Angle.turns
@@ -155,7 +158,7 @@ instance FFI Range_ where
 range :: List Class
 range =
   [ class_ @Range_
-      [ static0 "Unit" Range.unit
+      [ constant "Unit" Range.unit
       , static1 "Constant" "Value" (Range.constant @Unitless)
       , static1 "Constant" "Value" (Range.constant @Radians)
       , static1 "Constant" "Value" (Range.constant @Meters)
@@ -236,7 +239,7 @@ instance FFI Vector2d_ where
 vector2d :: List Class
 vector2d =
   [ class_ @Vector2d_
-      [ static0 "Zero" (Vector2d.zero @Space @Meters)
+      [ constant "Zero" (Vector2d.zero @Space @Meters)
       , static1 "Unit" "Direction" Vector2d.unit
       , static2 "Meters" "X Component" "Y Component" Vector2d.meters
       , static2 "Centimeters" "X Component" "Y Component" Vector2d.centimeters
@@ -282,12 +285,12 @@ vector2d =
 direction2d :: List Class
 direction2d =
   [ class_ @(Direction2d Space)
-      [ static0 "X" Direction2d.x
-      , static0 "Y" Direction2d.y
-      , static0 "Positive X" Direction2d.positiveX
-      , static0 "Positive Y" Direction2d.positiveY
-      , static0 "Negative X" Direction2d.negativeX
-      , static0 "Negative Y" Direction2d.negativeY
+      [ constant "X" Direction2d.x
+      , constant "Y" Direction2d.y
+      , constant "Positive X" Direction2d.positiveX
+      , constant "Positive Y" Direction2d.positiveY
+      , constant "Negative X" Direction2d.negativeX
+      , constant "Negative Y" Direction2d.negativeY
       , static1 "From Angle" "Angle" Direction2d.fromAngle
       , member0 "To Angle" Direction2d.toAngle
       , member0 "Components" Direction2d.components
@@ -305,7 +308,7 @@ instance FFI Point2d_ where
 point2d :: List Class
 point2d =
   [ class_ @Point2d_
-      [ static0 "Origin" (Point2d.origin @Space @Meters)
+      [ constant "Origin" (Point2d.origin @Space @Meters)
       , static2 "XY" "X Coordinate" "Y Coordinate" (Point2d.xy @Space @Unitless)
       , static2 "XY" "X Coordinate" "Y Coordinate" (Point2d.xy @Space @Meters)
       , static1 "X" "X Coordinate" (Point2d.x @Space @Unitless)
@@ -343,7 +346,7 @@ instance FFI Curve1d_ where
 curve1d :: List Class
 curve1d =
   [ class_ @Curve1d_
-      [ static0 "T" Curve1d.t
+      [ constant "T" Curve1d.t
       , static1 "Sin" "Curve" Curve1d.sin
       , static1 "Cos" "Curve" Curve1d.cos
       , static1 "Sqrt" "Curve" (Curve1d.sqrt @Unitless)
@@ -408,10 +411,10 @@ curve1d =
 ----- CLASS MEMBERS -----
 
 class_ :: forall value. FFI value => List (Member value) -> Class
-class_ members = buildClass members [] [] Nothing Nothing Nothing [] [] []
+class_ members = buildClass members [] [] [] Nothing Nothing Nothing [] [] []
 
 data Member value where
-  Static0 :: FFI result => Text -> result -> Member value
+  Const :: FFI result => Text -> result -> Member value
   Static1 :: (FFI a, FFI result) => Text -> Text -> (a -> result) -> Member value
   Static2 :: (FFI a, FFI b, FFI result) => Text -> Text -> Text -> (a -> b -> result) -> Member value
   Static3 :: (FFI a, FFI b, FFI c, FFI result) => Text -> Text -> Text -> Text -> (a -> b -> c -> result) -> Member value
@@ -427,8 +430,8 @@ data Member value where
   PostOp :: (FFI rhs, FFI result) => BinaryOperator.Id -> (value -> rhs -> result) -> Member value
   Nested :: FFI nested => List (Member nested) -> Member value
 
-static0 :: FFI result => Text -> result -> Member value
-static0 = Static0
+constant :: FFI result => Text -> result -> Member value
+constant = Const
 
 static1 :: (FFI a, FFI result) => Text -> Text -> (a -> result) -> Member value
 static1 = Static1
@@ -632,6 +635,7 @@ buildClass ::
   forall value.
   FFI value =>
   List (Member value) ->
+  List (Name, Constant) ->
   List (Name, List StaticFunction) ->
   List (Name, List (MemberFunction value)) ->
   Maybe (value -> value -> Bool) ->
@@ -643,6 +647,7 @@ buildClass ::
   Class
 buildClass
   members
+  constantsAcc
   staticFunctionsAcc
   memberFunctionsAcc
   equalityFunctionAcc
@@ -657,6 +662,7 @@ buildClass
           { id = case FFI.typeOf @value Proxy of
               FFI.Class (FFI.Id Proxy names maybeUnits) -> FFI.Id Proxy names maybeUnits
               _ -> internalError "Every class defined in the API must correspond to an FFI type with class representation"
+          , constants = constantsAcc
           , staticFunctions = staticFunctionsAcc
           , memberFunctions = memberFunctionsAcc
           , equalityFunction = equalityFunctionAcc
@@ -670,6 +676,7 @@ buildClass
         let addStatic name overload =
               buildClass
                 rest
+                constantsAcc
                 (addStaticOverload (Name.parse name) overload staticFunctionsAcc)
                 memberFunctionsAcc
                 equalityFunctionAcc
@@ -681,6 +688,7 @@ buildClass
         let addMember name overload =
               buildClass
                 rest
+                constantsAcc
                 staticFunctionsAcc
                 (addMemberOverload (Name.parse name) overload memberFunctionsAcc)
                 equalityFunctionAcc
@@ -690,8 +698,18 @@ buildClass
                 postOperatorsAcc
                 nestedClassesAcc
         case first of
-          Static0 name value ->
-            addStatic name (StaticFunction0 value)
+          Const name value ->
+            buildClass
+              rest
+              (constantsAcc + [(Name.parse name, Constant value)])
+              staticFunctionsAcc
+              memberFunctionsAcc
+              equalityFunctionAcc
+              comparisonFunctionAcc
+              negationFunctionAcc
+              preOperatorsAcc
+              postOperatorsAcc
+              nestedClassesAcc
           Static1 name arg1 f ->
             addStatic name (StaticFunction1 (Name.parse arg1) f)
           Static2 name arg1 arg2 f ->
@@ -711,6 +729,7 @@ buildClass
           Equality ->
             buildClass
               rest
+              constantsAcc
               staticFunctionsAcc
               memberFunctionsAcc
               (Just (==))
@@ -722,6 +741,7 @@ buildClass
           Comparison ->
             buildClass
               rest
+              constantsAcc
               staticFunctionsAcc
               memberFunctionsAcc
               equalityFunctionAcc
@@ -733,6 +753,7 @@ buildClass
           Negate ->
             buildClass
               rest
+              constantsAcc
               staticFunctionsAcc
               memberFunctionsAcc
               equalityFunctionAcc
@@ -744,6 +765,7 @@ buildClass
           PreOp operatorId operator ->
             buildClass
               rest
+              constantsAcc
               staticFunctionsAcc
               memberFunctionsAcc
               equalityFunctionAcc
@@ -755,6 +777,7 @@ buildClass
           PostOp operatorId operator ->
             buildClass
               rest
+              constantsAcc
               staticFunctionsAcc
               memberFunctionsAcc
               equalityFunctionAcc
@@ -766,6 +789,7 @@ buildClass
           Nested nestedMembers ->
             buildClass
               rest
+              constantsAcc
               staticFunctionsAcc
               memberFunctionsAcc
               equalityFunctionAcc
@@ -779,6 +803,16 @@ buildClass
 
 functions :: List Function
 functions = List.collect classFunctions classes
+
+constantFunction :: FFI.Id a -> (Name, Constant) -> Function
+constantFunction classId_ (constantName, const@(Constant value)) =
+  Function
+    { ffiName = Constant.ffiName classId_ constantName
+    , constraint = Nothing
+    , argumentTypes = []
+    , returnType = Constant.valueType value
+    , invoke = Constant.invoke const
+    }
 
 staticFunctionOverload :: FFI.Id a -> Name -> StaticFunction -> Function
 staticFunctionOverload classId_ functionName staticFunction = do
@@ -907,6 +941,7 @@ classFunctions :: Class -> List Function
 classFunctions
   ( Class
       classId_
+      constants
       staticFunctions
       memberFunctions
       maybeEqualityFunction
@@ -917,7 +952,8 @@ classFunctions
       nestedClasses
     ) =
     List.concat
-      [ List.collect (staticFunctionOverloads classId_) staticFunctions
+      [ List.map (constantFunction classId_) constants
+      , List.collect (staticFunctionOverloads classId_) staticFunctions
       , List.collect (memberFunctionOverloads classId_) memberFunctions
       , equalityFunctionInfo classId_ maybeEqualityFunction
       , comparisonFunctionInfo classId_ maybeComparisonFunction

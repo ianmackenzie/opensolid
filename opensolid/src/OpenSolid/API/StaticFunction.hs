@@ -22,18 +22,6 @@ import Tolerance qualified
 import Units (Meters)
 
 data StaticFunction where
-  StaticFunction0 ::
-    FFI a =>
-    a ->
-    StaticFunction
-  StaticFunction0U ::
-    FFI a =>
-    (Tolerance Unitless => a) ->
-    StaticFunction
-  StaticFunction0M ::
-    FFI a =>
-    (Tolerance Meters => a) ->
-    StaticFunction
   StaticFunction1 ::
     (FFI a, FFI b) =>
     Name ->
@@ -125,16 +113,6 @@ ffiName classId functionName memberFunction = do
 
 invoke :: StaticFunction -> Ptr () -> Ptr () -> IO ()
 invoke function = case function of
-  StaticFunction0 v ->
-    \_ outputPtr -> FFI.store outputPtr 0 v
-  StaticFunction0U v ->
-    \inputPtr outputPtr -> IO.do
-      tolerance <- FFI.load inputPtr 0
-      FFI.store outputPtr 0 (Tolerance.using tolerance v)
-  StaticFunction0M v ->
-    \inputPtr outputPtr -> IO.do
-      tolerance <- FFI.load inputPtr 0
-      FFI.store outputPtr 0 (Tolerance.using tolerance v)
   StaticFunction1 _ f ->
     \inputPtr outputPtr -> IO.do
       arg1 <- FFI.load inputPtr 0
@@ -188,9 +166,6 @@ type Signature = (Maybe Constraint, List (Name, FFI.Type), FFI.Type)
 
 signature :: StaticFunction -> (Maybe Constraint, List (Name, FFI.Type), FFI.Type)
 signature staticFunction = case staticFunction of
-  StaticFunction0 v -> signature0 v
-  StaticFunction0U v -> signature0U v
-  StaticFunction0M v -> signature0M v
   StaticFunction1 arg1 f -> signature1 arg1 f
   StaticFunction1U arg1 f -> signature1U arg1 f
   StaticFunction1M arg1 f -> signature1M arg1 f
@@ -203,15 +178,6 @@ signature staticFunction = case staticFunction of
   StaticFunction4 arg1 arg2 arg3 arg4 f -> signature4 arg1 arg2 arg3 arg4 f
   StaticFunction4U arg1 arg2 arg3 arg4 f -> signature4U arg1 arg2 arg3 arg4 f
   StaticFunction4M arg1 arg2 arg3 arg4 f -> signature4M arg1 arg2 arg3 arg4 f
-
-signature0 :: forall a. FFI a => a -> Signature
-signature0 _ = (Nothing, [], FFI.typeOf @a Proxy)
-
-signature0U :: forall a. FFI a => (Tolerance Unitless => a) -> Signature
-signature0U _ = (Just ToleranceUnitless, [], FFI.typeOf @a Proxy)
-
-signature0M :: forall a. FFI a => (Tolerance Meters => a) -> Signature
-signature0M _ = (Just ToleranceMeters, [], FFI.typeOf @a Proxy)
 
 signature1 ::
   forall a b.

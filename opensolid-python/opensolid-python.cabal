@@ -30,6 +30,7 @@ executable opensolid-python
     Python
     Python.Class
     Python.ComparisonFunction
+    Python.Constant
     Python.EqualityFunction
     Python.FFI
     Python.Function
