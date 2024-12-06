@@ -130,7 +130,7 @@ singleArgument varName ffiType = case ffiType of
   FFI.Float -> "c_double(" + varName + ")"
   FFI.Bool -> "c_int64(" + varName + ")"
   FFI.Text -> "_str_to_text(" + varName + ")"
-  FFI.List{} -> TODO
+  FFI.List itemType -> listArgumentValue ffiType itemType varName
   FFI.Tuple type1 type2 rest -> tupleArgumentValue ffiType type1 type2 rest varName
   FFI.Maybe valueType -> maybeArgumentValue ffiType valueType varName
   FFI.Result{} -> internalError "Should never have Result as input argument"
@@ -142,11 +142,18 @@ fieldArgumentValue varName ffiType = case ffiType of
   FFI.Float -> varName
   FFI.Bool -> varName
   FFI.Text -> "_str_to_text(" + varName + ")"
-  FFI.List{} -> TODO
+  FFI.List itemType -> listArgumentValue ffiType itemType varName
   FFI.Tuple type1 type2 rest -> tupleArgumentValue ffiType type1 type2 rest varName
   FFI.Maybe valueType -> maybeArgumentValue ffiType valueType varName
   FFI.Result{} -> internalError "Should never have Result as input argument"
   FFI.Class{} -> varName + ".__ptr__"
+
+listArgumentValue :: FFI.Type -> FFI.Type -> Text -> Text
+listArgumentValue listType itemType varName = do
+  let arrayType = "(" + typeName itemType + " * len(" + varName + "))"
+  let arrayItems = "[" + singleArgument "item" itemType + " for item in " + varName + "]"
+  let array = arrayType + "(*" + arrayItems + ")"
+  "_list_argument(" + typeName listType + "," + array + ")"
 
 tupleArgumentValue :: FFI.Type -> FFI.Type -> FFI.Type -> List FFI.Type -> Text -> Text
 tupleArgumentValue tupleType type1 type2 rest varName = do
