@@ -21,4 +21,4 @@ data Bounds2d (coordinateSystem :: CoordinateSystem) where
 instance Bounds.Interface (Bounds2d (space @ units))
 
 constant :: Point2d (space @ units) -> Bounds2d (space @ units)
-xy :: Range units -> Range units -> Bounds2d (space @ units)
+xy :: forall space units. Range units -> Range units -> Bounds2d (space @ units)

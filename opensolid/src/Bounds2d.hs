@@ -195,7 +195,7 @@ yCoordinate (Bounds2d _ y) = y
 coordinates :: Bounds2d (space @ units) -> (Range units, Range units)
 coordinates (Bounds2d x y) = (x, y)
 
-xy :: Range units -> Range units -> Bounds2d (space @ units)
+xy :: forall space units. Range units -> Range units -> Bounds2d (space @ units)
 xy = Bounds2d
 
 constant :: Point2d (space @ units) -> Bounds2d (space @ units)
