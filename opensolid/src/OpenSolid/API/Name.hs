@@ -25,7 +25,7 @@ parse input = do
 
 isCapitalized :: Text -> Bool
 isCapitalized component = case Data.Text.uncons component of
-  Just (first, _) -> Data.Char.isUpper first
+  Just (first, _) -> Data.Char.isUpper first || Data.Char.isNumber first
   Nothing -> internalError "API name component should never be empty"
 
 pascalCase :: Name -> Text
