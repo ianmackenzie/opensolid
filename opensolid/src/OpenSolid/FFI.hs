@@ -358,7 +358,9 @@ load ptr offset = do
       numItems <- IO.map fromInt64 (Foreign.peekByteOff ptr offset)
       itemsPtr <- Foreign.peekByteOff ptr (offset + 8)
       let loadItem index = load itemsPtr (index * itemSize)
-      IO.collect loadItem (List.range 0 (numItems - 1))
+      if numItems > 0
+        then IO.collect loadItem (List.range 0 (numItems - 1))
+        else IO.succeed []
     Tuple2Rep -> IO.do
       let (size1, _) = tuple2ItemSizes proxy
       let offset1 = offset
