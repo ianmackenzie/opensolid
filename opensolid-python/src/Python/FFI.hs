@@ -23,6 +23,7 @@ typeName ffiType = case ffiType of
   FFI.Int -> "c_int64"
   FFI.Float -> "c_double"
   FFI.Bool -> "c_int64"
+  FFI.Text -> "_Text"
   FFI.List{} -> "_" + typeNameComponent ffiType
   FFI.Tuple{} -> "_" + typeNameComponent ffiType
   FFI.Maybe{} -> "_" + typeNameComponent ffiType
@@ -34,6 +35,7 @@ typeNameComponent ffiType = case ffiType of
   FFI.Int -> "c_int64"
   FFI.Float -> "c_double"
   FFI.Bool -> "c_int64"
+  FFI.Text -> "Text"
   FFI.List itemType -> "List_" + typeNameComponent itemType
   FFI.Tuple type1 type2 rest -> do
     let itemTypes = type1 : type2 : rest
@@ -52,6 +54,7 @@ dummyFieldValue ffiType = case ffiType of
   FFI.Int -> "0"
   FFI.Float -> "0.0"
   FFI.Bool -> "0"
+  FFI.Text -> dummyValue ffiType
   FFI.List{} -> dummyValue ffiType
   FFI.Tuple{} -> dummyValue ffiType
   FFI.Maybe{} -> dummyValue ffiType
@@ -75,6 +78,7 @@ outputValue ffiType varName = case ffiType of
   FFI.Int -> varName + ".value"
   FFI.Float -> varName + ".value"
   FFI.Bool -> "bool(" + varName + ".value)"
+  FFI.Text -> "_text_to_str(" + varName + ")"
   FFI.List itemType -> listOutputValue itemType varName
   FFI.Tuple type1 type2 rest -> tupleOutputValue varName type1 type2 rest
   FFI.Maybe valueType -> maybeOutputValue valueType varName
@@ -86,6 +90,7 @@ fieldOutputValue ffiType varName = case ffiType of
   FFI.Int -> varName
   FFI.Float -> varName
   FFI.Bool -> "bool(" + varName + ")"
+  FFI.Text -> "_text_to_str(" + varName + ")"
   FFI.List itemType -> listOutputValue itemType varName
   FFI.Tuple type1 type2 rest -> tupleOutputValue varName type1 type2 rest
   FFI.Maybe valueType -> maybeOutputValue valueType varName
@@ -121,9 +126,10 @@ argumentValue arguments@((_, type1) : (_, type2) : rest) = do
 
 singleArgument :: Text -> FFI.Type -> Text
 singleArgument varName ffiType = case ffiType of
-  FFI.Int -> Python.call "c_int64" [varName]
-  FFI.Float -> Python.call "c_double" [varName]
-  FFI.Bool -> Python.call "c_int64" [varName]
+  FFI.Int -> "c_int64(" + varName + ")"
+  FFI.Float -> "c_double(" + varName + ")"
+  FFI.Bool -> "c_int64(" + varName + ")"
+  FFI.Text -> "_str_to_text(" + varName + ")"
   FFI.List{} -> TODO
   FFI.Tuple type1 type2 rest -> tupleArgumentValue ffiType type1 type2 rest varName
   FFI.Maybe valueType -> maybeArgumentValue ffiType valueType varName
@@ -135,6 +141,7 @@ fieldArgumentValue varName ffiType = case ffiType of
   FFI.Int -> varName
   FFI.Float -> varName
   FFI.Bool -> varName
+  FFI.Text -> "_str_to_text(" + varName + ")"
   FFI.List{} -> TODO
   FFI.Tuple type1 type2 rest -> tupleArgumentValue ffiType type1 type2 rest varName
   FFI.Maybe valueType -> maybeArgumentValue ffiType valueType varName
@@ -163,6 +170,7 @@ registerType ffiType registry = do
       FFI.Int -> registry
       FFI.Float -> registry
       FFI.Bool -> registry
+      FFI.Text -> registry
       FFI.List itemType -> registerList ffiType itemType registry
       FFI.Tuple type1 type2 rest -> registerTuple ffiType type1 type2 rest registry
       FFI.Maybe valueType -> registerMaybe ffiType valueType registry
@@ -195,7 +203,7 @@ registerResult :: FFI.Type -> FFI.Type -> Registry -> Registry
 registerResult resultType valueType registry = do
   let resultTypeName = typeName resultType
   let declaration =
-        structDeclaration resultTypeName ["c_int64", "_ErrorMessage", typeName valueType]
+        structDeclaration resultTypeName ["c_int64", "_Text", typeName valueType]
   registry
     |> registerType valueType
     |> Python.Type.Registry.add resultTypeName declaration

@@ -17,8 +17,11 @@ module OpenSolid.FFI
   )
 where
 
+import Colour (Colour)
+import Data.ByteString.Unsafe qualified
 import Data.Int (Int64)
 import Data.Proxy (Proxy (Proxy))
+import Data.Text.Encoding qualified
 import Data.Text.Foreign qualified
 import Data.Word (Word8)
 import Error qualified
@@ -47,6 +50,8 @@ data Representation a where
   FloatRep :: Representation Float
   -- A Boolean value
   BoolRep :: Representation Bool
+  -- UTF-8 text
+  TextRep :: Representation Text
   -- A struct with a 64-bit integer size and a pointer to an array of items
   ListRep :: FFI a => Representation (List a)
   -- A struct with the first item and then the second
@@ -93,6 +98,7 @@ data Type where
   Int :: Type
   Float :: Type
   Bool :: Type
+  Text :: Type
   List :: Type -> Type
   Tuple :: Type -> Type -> List Type -> Type
   Maybe :: Type -> Type
@@ -107,6 +113,7 @@ typeOf proxy = case representation proxy of
   IntRep -> Int
   FloatRep -> Float
   BoolRep -> Bool
+  TextRep -> Text
   ListRep -> listType proxy
   Tuple2Rep -> tuple2Type proxy
   Tuple3Rep -> tuple3Type proxy
@@ -169,6 +176,7 @@ typeName ffiType = case ffiType of
   Int -> "Int"
   Float -> "Float"
   Bool -> "Bool"
+  Text -> "Text"
   List itemType -> "List" + typeName itemType
   Tuple type1 type2 rest -> do
     let itemTypes = type1 : type2 : rest
@@ -188,6 +196,7 @@ size ffiType = case ffiType of
   Int -> 8
   Float -> 8
   Bool -> 8
+  Text -> 8
   List _ -> 16
   Tuple type1 type2 rest -> Int.sumOf size (type1 : type2 : rest)
   Maybe valueType -> 8 + size valueType
@@ -202,6 +211,12 @@ instance FFI Int where
 
 instance FFI Bool where
   representation _ = BoolRep
+
+instance FFI Text where
+  representation _ = TextRep
+
+instance FFI Colour where
+  representation = classRepresentation "Color" Nothing
 
 instance FFI Length where
   representation = classRepresentation "Length" Nothing
@@ -240,6 +255,12 @@ store ptr offset value = do
     IntRep -> Foreign.pokeByteOff ptr offset (toInt64 value)
     FloatRep -> Foreign.pokeByteOff ptr offset (Float.toDouble value)
     BoolRep -> Foreign.pokeByteOff ptr offset (toInt64 (if value then 1 else 0))
+    TextRep -> IO.do
+      let numBytes = Data.Text.Foreign.lengthWord8 value
+      contentsPtr <- Foreign.Marshal.Alloc.mallocBytes (numBytes + 1)
+      Data.Text.Foreign.unsafeCopyToPtr value contentsPtr
+      Foreign.pokeByteOff contentsPtr numBytes (fromIntegral 0 :: Word8)
+      Foreign.pokeByteOff ptr offset contentsPtr
     ListRep -> IO.do
       let numItems = List.length value
       let itemSize = listItemSize proxy
@@ -315,15 +336,8 @@ store ptr offset value = do
           Foreign.pokeByteOff ptr offset (toInt64 0)
           store ptr (offset + 16) successfulValue
         Failure errorValue -> IO.do
-          -- Construct null-terminated string with error message
-          let message = Error.message errorValue
-          let messageBytes = Data.Text.Foreign.lengthWord8 message
-          messagePtr <- Foreign.Marshal.Alloc.mallocBytes (messageBytes + 1)
-          Data.Text.Foreign.unsafeCopyToPtr message messagePtr
-          Foreign.pokeByteOff messagePtr messageBytes (fromIntegral 0 :: Word8)
-          -- Set error code and store pointer to string in output
           Foreign.pokeByteOff ptr offset (toInt64 1)
-          Foreign.pokeByteOff ptr (offset + 8) messagePtr
+          store ptr (offset + 8) (Error.message errorValue)
     ClassRep _ -> IO.do
       stablePtr <- Foreign.newStablePtr value
       Foreign.pokeByteOff ptr offset stablePtr
@@ -335,6 +349,10 @@ load ptr offset = do
     IntRep -> IO.map fromInt64 (Foreign.peekByteOff ptr offset)
     FloatRep -> IO.map Float.fromDouble (Foreign.peekByteOff ptr offset)
     BoolRep -> IO.map ((/=) 0 . fromInt64) (Foreign.peekByteOff ptr offset)
+    TextRep -> IO.do
+      dataPtr <- Foreign.peekByteOff ptr offset
+      byteString <- Data.ByteString.Unsafe.unsafePackCString dataPtr
+      IO.succeed (Data.Text.Encoding.decodeUtf8 byteString)
     ListRep -> IO.do
       let itemSize = listItemSize proxy
       numItems <- IO.map fromInt64 (Foreign.peekByteOff ptr offset)

@@ -1,6 +1,8 @@
 module OpenSolid.API (Class (..), Function (..), classes, functions) where
 
 import Angle qualified
+import Colour (Colour)
+import Colour qualified
 import Curve1d (Curve1d)
 import Curve1d qualified
 import Curve1d.Root qualified
@@ -74,6 +76,7 @@ classes =
     [ length
     , angle
     , range
+    , color
     , vector2d
     , direction2d
     , point2d
@@ -228,6 +231,50 @@ range =
       , divByFloat
       , divBySelf
       , divBy @(Range Unitless) Self
+      ]
+  ]
+
+color :: List Class
+color =
+  [ class_ @Colour
+      [ static3 "RGB" "Red" "Green" "Blue" Colour.rgb
+      , static3 "RGB255" "Red" "Green" "Blue" Colour.rgb255
+      , static3 "HSL" "Hue" "Saturation" "Lightness" Colour.hsl
+      , static1 "From Hex" "Hex String" Colour.fromHex
+      , member0 "To Hex" Colour.toHex
+      , member0 "Components" Colour.components
+      , member0 "Components255" Colour.components255
+      , constant "Red" Colour.red
+      , constant "Dark Red" Colour.darkRed
+      , constant "Light Orange" Colour.lightOrange
+      , constant "Orange" Colour.orange
+      , constant "Dark Orange" Colour.darkOrange
+      , constant "Light Yellow" Colour.lightYellow
+      , constant "Yellow" Colour.yellow
+      , constant "Dark Yellow" Colour.darkYellow
+      , constant "Light Green" Colour.lightGreen
+      , constant "Green" Colour.green
+      , constant "Dark Green" Colour.darkGreen
+      , constant "Light Blue" Colour.lightBlue
+      , constant "Blue" Colour.blue
+      , constant "Dark Blue" Colour.darkBlue
+      , constant "Light Purple" Colour.lightPurple
+      , constant "Purple" Colour.purple
+      , constant "Dark Purple" Colour.darkPurple
+      , constant "Light Brown" Colour.lightBrown
+      , constant "Brown" Colour.brown
+      , constant "Dark Brown" Colour.darkBrown
+      , constant "Black" Colour.black
+      , constant "White" Colour.white
+      , constant "Light Grey" Colour.lightGrey
+      , constant "Grey" Colour.grey
+      , constant "Dark Grey" Colour.darkGrey
+      , constant "Light Gray" Colour.lightGray
+      , constant "Gray" Colour.gray
+      , constant "Dark Gray" Colour.darkGray
+      , constant "Light Charcoal" Colour.lightCharcoal
+      , constant "Charcoal" Colour.charcoal
+      , constant "Dark Charcoal" Colour.darkCharcoal
       ]
   ]
 

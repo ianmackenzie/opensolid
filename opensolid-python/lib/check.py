@@ -1,4 +1,4 @@
-from opensolid import Angle, Curve1d, Point2d, Range, Tolerance, Vector2d
+from opensolid import Angle, Curve1d, Point2d, Range, Tolerance, Vector2d, Color
 
 p1 = Point2d.meters(1, 2)
 p2 = Point2d.meters(3, 4)
@@ -25,3 +25,8 @@ with Tolerance(1e-9):
 c = Curve1d.cos(Curve1d.t * Angle.turns(1))
 with Tolerance(1e-9):
     print([root.value() for root in c.zeros()])
+
+color1 = Color.from_hex("#555555")
+print(color1.components())
+color2 = Color.rgb255(225, 225, 225)
+print(color2.to_hex())

@@ -47,14 +47,24 @@ class Error(Exception):
     pass
 
 
-class _ErrorMessage(Union):
+class _Text(Union):
     _fields_ = (("as_char", c_char_p), ("as_void", c_void_p))
 
 
+def _text_to_str(ptr: _Text) -> str:
+    decoded = ptr.as_char.decode("utf-8")
+    _lib.opensolid_free(ptr.as_void)
+    return decoded
+
+
+def _str_to_text(s: str) -> _Text:
+    encoded = s.encode("utf-8")
+    buffer = ctypes.create_string_buffer(encoded)
+    return _Text(as_char=ctypes.cast(buffer, c_char_p))
+
+
 def _error(output: Any) -> Any:  # noqa: ANN401
-    message = output.field1.as_char.decode("utf-8")
-    _lib.opensolid_free(output.field1.as_void)
-    raise Error(message)
+    raise Error(_text_to_str(output.field1))
 
 
 class Tolerance:
@@ -133,11 +143,7 @@ class _List_c_void_p(Structure):
 
 
 class _Result_List_c_void_p(Structure):
-    _fields_ = [
-        ("field0", c_int64),
-        ("field1", _ErrorMessage),
-        ("field2", _List_c_void_p),
-    ]
+    _fields_ = [("field0", c_int64), ("field1", _Text), ("field2", _List_c_void_p)]
 
 
 class _Tuple2_c_double_c_double(Structure):
@@ -145,7 +151,19 @@ class _Tuple2_c_double_c_double(Structure):
 
 
 class _Result_c_void_p(Structure):
-    _fields_ = [("field0", c_int64), ("field1", _ErrorMessage), ("field2", c_void_p)]
+    _fields_ = [("field0", c_int64), ("field1", _Text), ("field2", c_void_p)]
+
+
+class _Tuple3_c_int64_c_int64_c_int64(Structure):
+    _fields_ = [("field0", c_int64), ("field1", c_int64), ("field2", c_int64)]
+
+
+class _Tuple3_c_double_c_double_c_double(Structure):
+    _fields_ = [("field0", c_double), ("field1", c_double), ("field2", c_double)]
+
+
+class _Tuple3_c_void_p_c_double_c_double(Structure):
+    _fields_ = [("field0", c_void_p), ("field1", c_double), ("field2", c_double)]
 
 
 class _Maybe_c_void_p(Structure):
@@ -1578,6 +1596,95 @@ class Range_Meters:
         return Range_Meters(ptr=output)
 
 
+class Color:
+    def __init__(self, *, ptr: c_void_p) -> None:
+        self.__ptr__ = ptr
+
+    red: Color = None  # type: ignore[assignment]
+    dark_red: Color = None  # type: ignore[assignment]
+    light_orange: Color = None  # type: ignore[assignment]
+    orange: Color = None  # type: ignore[assignment]
+    dark_orange: Color = None  # type: ignore[assignment]
+    light_yellow: Color = None  # type: ignore[assignment]
+    yellow: Color = None  # type: ignore[assignment]
+    dark_yellow: Color = None  # type: ignore[assignment]
+    light_green: Color = None  # type: ignore[assignment]
+    green: Color = None  # type: ignore[assignment]
+    dark_green: Color = None  # type: ignore[assignment]
+    light_blue: Color = None  # type: ignore[assignment]
+    blue: Color = None  # type: ignore[assignment]
+    dark_blue: Color = None  # type: ignore[assignment]
+    light_purple: Color = None  # type: ignore[assignment]
+    purple: Color = None  # type: ignore[assignment]
+    dark_purple: Color = None  # type: ignore[assignment]
+    light_brown: Color = None  # type: ignore[assignment]
+    brown: Color = None  # type: ignore[assignment]
+    dark_brown: Color = None  # type: ignore[assignment]
+    black: Color = None  # type: ignore[assignment]
+    white: Color = None  # type: ignore[assignment]
+    light_grey: Color = None  # type: ignore[assignment]
+    grey: Color = None  # type: ignore[assignment]
+    dark_grey: Color = None  # type: ignore[assignment]
+    light_gray: Color = None  # type: ignore[assignment]
+    gray: Color = None  # type: ignore[assignment]
+    dark_gray: Color = None  # type: ignore[assignment]
+    light_charcoal: Color = None  # type: ignore[assignment]
+    charcoal: Color = None  # type: ignore[assignment]
+    dark_charcoal: Color = None  # type: ignore[assignment]
+
+    @staticmethod
+    def rgb(red: float, green: float, blue: float) -> Color:
+        inputs = _Tuple3_c_double_c_double_c_double(red, green, blue)
+        output = c_void_p()
+        _lib.opensolid_Color_rgb_Float_Float_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Color(ptr=output)
+
+    @staticmethod
+    def rgb255(red: int, green: int, blue: int) -> Color:
+        inputs = _Tuple3_c_int64_c_int64_c_int64(red, green, blue)
+        output = c_void_p()
+        _lib.opensolid_Color_rgb255_Int_Int_Int(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Color(ptr=output)
+
+    @staticmethod
+    def hsl(hue: Angle, saturation: float, lightness: float) -> Color:
+        inputs = _Tuple3_c_void_p_c_double_c_double(hue.__ptr__, saturation, lightness)
+        output = c_void_p()
+        _lib.opensolid_Color_hsl_Angle_Float_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Color(ptr=output)
+
+    @staticmethod
+    def from_hex(hex_string: str) -> Color:
+        inputs = _str_to_text(hex_string)
+        output = c_void_p()
+        _lib.opensolid_Color_fromHex_Text(ctypes.byref(inputs), ctypes.byref(output))
+        return Color(ptr=output)
+
+    def to_hex(self) -> str:
+        inputs = self.__ptr__
+        output = _Text()
+        _lib.opensolid_Color_toHex(ctypes.byref(inputs), ctypes.byref(output))
+        return _text_to_str(output)
+
+    def components(self) -> tuple[float, float, float]:
+        inputs = self.__ptr__
+        output = _Tuple3_c_double_c_double_c_double()
+        _lib.opensolid_Color_components(ctypes.byref(inputs), ctypes.byref(output))
+        return (output.field0, output.field1, output.field2)
+
+    def components255(self) -> tuple[int, int, int]:
+        inputs = self.__ptr__
+        output = _Tuple3_c_int64_c_int64_c_int64()
+        _lib.opensolid_Color_components255(ctypes.byref(inputs), ctypes.byref(output))
+        return (output.field0, output.field1, output.field2)
+
+
 class Vector2d:
     def __init__(self, *, ptr: c_void_p) -> None:
         self.__ptr__ = ptr
@@ -2948,6 +3055,285 @@ def _range_unit() -> Range_Unitless:
 
 
 Range.unit = _range_unit()
+
+
+def _color_red() -> Color:
+    output = c_void_p()
+    _lib.opensolid_Color_red(c_void_p(), ctypes.byref(output))
+    return Color(ptr=output)
+
+
+Color.red = _color_red()
+
+
+def _color_dark_red() -> Color:
+    output = c_void_p()
+    _lib.opensolid_Color_darkRed(c_void_p(), ctypes.byref(output))
+    return Color(ptr=output)
+
+
+Color.dark_red = _color_dark_red()
+
+
+def _color_light_orange() -> Color:
+    output = c_void_p()
+    _lib.opensolid_Color_lightOrange(c_void_p(), ctypes.byref(output))
+    return Color(ptr=output)
+
+
+Color.light_orange = _color_light_orange()
+
+
+def _color_orange() -> Color:
+    output = c_void_p()
+    _lib.opensolid_Color_orange(c_void_p(), ctypes.byref(output))
+    return Color(ptr=output)
+
+
+Color.orange = _color_orange()
+
+
+def _color_dark_orange() -> Color:
+    output = c_void_p()
+    _lib.opensolid_Color_darkOrange(c_void_p(), ctypes.byref(output))
+    return Color(ptr=output)
+
+
+Color.dark_orange = _color_dark_orange()
+
+
+def _color_light_yellow() -> Color:
+    output = c_void_p()
+    _lib.opensolid_Color_lightYellow(c_void_p(), ctypes.byref(output))
+    return Color(ptr=output)
+
+
+Color.light_yellow = _color_light_yellow()
+
+
+def _color_yellow() -> Color:
+    output = c_void_p()
+    _lib.opensolid_Color_yellow(c_void_p(), ctypes.byref(output))
+    return Color(ptr=output)
+
+
+Color.yellow = _color_yellow()
+
+
+def _color_dark_yellow() -> Color:
+    output = c_void_p()
+    _lib.opensolid_Color_darkYellow(c_void_p(), ctypes.byref(output))
+    return Color(ptr=output)
+
+
+Color.dark_yellow = _color_dark_yellow()
+
+
+def _color_light_green() -> Color:
+    output = c_void_p()
+    _lib.opensolid_Color_lightGreen(c_void_p(), ctypes.byref(output))
+    return Color(ptr=output)
+
+
+Color.light_green = _color_light_green()
+
+
+def _color_green() -> Color:
+    output = c_void_p()
+    _lib.opensolid_Color_green(c_void_p(), ctypes.byref(output))
+    return Color(ptr=output)
+
+
+Color.green = _color_green()
+
+
+def _color_dark_green() -> Color:
+    output = c_void_p()
+    _lib.opensolid_Color_darkGreen(c_void_p(), ctypes.byref(output))
+    return Color(ptr=output)
+
+
+Color.dark_green = _color_dark_green()
+
+
+def _color_light_blue() -> Color:
+    output = c_void_p()
+    _lib.opensolid_Color_lightBlue(c_void_p(), ctypes.byref(output))
+    return Color(ptr=output)
+
+
+Color.light_blue = _color_light_blue()
+
+
+def _color_blue() -> Color:
+    output = c_void_p()
+    _lib.opensolid_Color_blue(c_void_p(), ctypes.byref(output))
+    return Color(ptr=output)
+
+
+Color.blue = _color_blue()
+
+
+def _color_dark_blue() -> Color:
+    output = c_void_p()
+    _lib.opensolid_Color_darkBlue(c_void_p(), ctypes.byref(output))
+    return Color(ptr=output)
+
+
+Color.dark_blue = _color_dark_blue()
+
+
+def _color_light_purple() -> Color:
+    output = c_void_p()
+    _lib.opensolid_Color_lightPurple(c_void_p(), ctypes.byref(output))
+    return Color(ptr=output)
+
+
+Color.light_purple = _color_light_purple()
+
+
+def _color_purple() -> Color:
+    output = c_void_p()
+    _lib.opensolid_Color_purple(c_void_p(), ctypes.byref(output))
+    return Color(ptr=output)
+
+
+Color.purple = _color_purple()
+
+
+def _color_dark_purple() -> Color:
+    output = c_void_p()
+    _lib.opensolid_Color_darkPurple(c_void_p(), ctypes.byref(output))
+    return Color(ptr=output)
+
+
+Color.dark_purple = _color_dark_purple()
+
+
+def _color_light_brown() -> Color:
+    output = c_void_p()
+    _lib.opensolid_Color_lightBrown(c_void_p(), ctypes.byref(output))
+    return Color(ptr=output)
+
+
+Color.light_brown = _color_light_brown()
+
+
+def _color_brown() -> Color:
+    output = c_void_p()
+    _lib.opensolid_Color_brown(c_void_p(), ctypes.byref(output))
+    return Color(ptr=output)
+
+
+Color.brown = _color_brown()
+
+
+def _color_dark_brown() -> Color:
+    output = c_void_p()
+    _lib.opensolid_Color_darkBrown(c_void_p(), ctypes.byref(output))
+    return Color(ptr=output)
+
+
+Color.dark_brown = _color_dark_brown()
+
+
+def _color_black() -> Color:
+    output = c_void_p()
+    _lib.opensolid_Color_black(c_void_p(), ctypes.byref(output))
+    return Color(ptr=output)
+
+
+Color.black = _color_black()
+
+
+def _color_white() -> Color:
+    output = c_void_p()
+    _lib.opensolid_Color_white(c_void_p(), ctypes.byref(output))
+    return Color(ptr=output)
+
+
+Color.white = _color_white()
+
+
+def _color_light_grey() -> Color:
+    output = c_void_p()
+    _lib.opensolid_Color_lightGrey(c_void_p(), ctypes.byref(output))
+    return Color(ptr=output)
+
+
+Color.light_grey = _color_light_grey()
+
+
+def _color_grey() -> Color:
+    output = c_void_p()
+    _lib.opensolid_Color_grey(c_void_p(), ctypes.byref(output))
+    return Color(ptr=output)
+
+
+Color.grey = _color_grey()
+
+
+def _color_dark_grey() -> Color:
+    output = c_void_p()
+    _lib.opensolid_Color_darkGrey(c_void_p(), ctypes.byref(output))
+    return Color(ptr=output)
+
+
+Color.dark_grey = _color_dark_grey()
+
+
+def _color_light_gray() -> Color:
+    output = c_void_p()
+    _lib.opensolid_Color_lightGray(c_void_p(), ctypes.byref(output))
+    return Color(ptr=output)
+
+
+Color.light_gray = _color_light_gray()
+
+
+def _color_gray() -> Color:
+    output = c_void_p()
+    _lib.opensolid_Color_gray(c_void_p(), ctypes.byref(output))
+    return Color(ptr=output)
+
+
+Color.gray = _color_gray()
+
+
+def _color_dark_gray() -> Color:
+    output = c_void_p()
+    _lib.opensolid_Color_darkGray(c_void_p(), ctypes.byref(output))
+    return Color(ptr=output)
+
+
+Color.dark_gray = _color_dark_gray()
+
+
+def _color_light_charcoal() -> Color:
+    output = c_void_p()
+    _lib.opensolid_Color_lightCharcoal(c_void_p(), ctypes.byref(output))
+    return Color(ptr=output)
+
+
+Color.light_charcoal = _color_light_charcoal()
+
+
+def _color_charcoal() -> Color:
+    output = c_void_p()
+    _lib.opensolid_Color_charcoal(c_void_p(), ctypes.byref(output))
+    return Color(ptr=output)
+
+
+Color.charcoal = _color_charcoal()
+
+
+def _color_dark_charcoal() -> Color:
+    output = c_void_p()
+    _lib.opensolid_Color_darkCharcoal(c_void_p(), ctypes.byref(output))
+    return Color(ptr=output)
+
+
+Color.dark_charcoal = _color_dark_charcoal()
 
 
 def _vector2d_zero() -> Vector2d_Meters:

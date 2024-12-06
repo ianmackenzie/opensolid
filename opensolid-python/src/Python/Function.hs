@@ -56,6 +56,7 @@ typePattern ffiType = case ffiType of
   FFI.Int -> "int()"
   FFI.Float -> "float() | int()"
   FFI.Bool -> "bool()"
+  FFI.Text -> "str()"
   -- Note that there's no point trying to overload
   -- based on the type of items in the list,
   -- since it might be empty
