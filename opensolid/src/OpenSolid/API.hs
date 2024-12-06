@@ -11,6 +11,7 @@ import Curve1d.Root qualified
 import Data.Proxy (Proxy (Proxy))
 import Direction2d (Direction2d)
 import Direction2d qualified
+import Drawing2d qualified
 import Foreign (Ptr)
 import Length (Length)
 import Length qualified
@@ -84,6 +85,7 @@ classes =
     , point2d
     , bounds2d
     , curve1d
+    , drawing2d
     ]
 
 length :: List Class
@@ -486,6 +488,26 @@ curve1d =
       , divBySelf
       , divBy @Length Self
       , divBy @(Curve1d Unitless) Self
+      ]
+  ]
+
+data Drawing2d_
+
+instance FFI Drawing2d_ where
+  representation = FFI.abstractClassRepresentation "Drawing2d"
+
+drawing2d :: List Class
+drawing2d =
+  [ class_ @Drawing2d_
+      [ static2 "To SVG" "View Box" "Entities" Drawing2d.toSvg
+      , static2 "Polygon" "Attributes" "Vertices" Drawing2d.polygon
+      , static3 "Circle" "Attributes" "Center Point" "Radius" Drawing2d.circle
+      , constant "Black Stroke" Drawing2d.blackStroke
+      , static1 "Stroke Color" "Color" Drawing2d.strokeColour
+      , constant "No Fill" Drawing2d.noFill
+      , static1 "Fill Color" "Color" Drawing2d.fillColour
+      , nested @(Drawing2d.Entity Space) []
+      , nested @(Drawing2d.Attribute Space) []
       ]
   ]
 

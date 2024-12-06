@@ -63,6 +63,10 @@ def _str_to_text(s: str) -> _Text:
     return _Text(as_char=ctypes.cast(buffer, c_char_p))
 
 
+def _list_argument(list_type: Any, array: Any) -> Any:  # noqa: ANN401
+    return list_type(len(array), array)
+
+
 def _error(output: Any) -> Any:  # noqa: ANN401
     raise Error(_text_to_str(output.field1))
 
@@ -126,6 +130,22 @@ def _angle_tolerance() -> Angle:
     raise TypeError(message)
 
 
+class _List_c_void_p(Structure):
+    _fields_ = [("field0", c_int64), ("field1", POINTER(c_void_p))]
+
+
+class _Tuple3_List_c_void_p_c_void_p_c_void_p(Structure):
+    _fields_ = [("field0", _List_c_void_p), ("field1", c_void_p), ("field2", c_void_p)]
+
+
+class _Tuple2_List_c_void_p_List_c_void_p(Structure):
+    _fields_ = [("field0", _List_c_void_p), ("field1", _List_c_void_p)]
+
+
+class _Tuple2_c_void_p_List_c_void_p(Structure):
+    _fields_ = [("field0", c_void_p), ("field1", _List_c_void_p)]
+
+
 class _Tuple2_c_void_p_c_void_p(Structure):
     _fields_ = [("field0", c_void_p), ("field1", c_void_p)]
 
@@ -138,12 +158,21 @@ class _Tuple2_c_double_c_void_p(Structure):
     _fields_ = [("field0", c_double), ("field1", c_void_p)]
 
 
-class _List_c_void_p(Structure):
-    _fields_ = [("field0", c_int64), ("field1", POINTER(c_void_p))]
-
-
 class _Result_List_c_void_p(Structure):
     _fields_ = [("field0", c_int64), ("field1", _Text), ("field2", _List_c_void_p)]
+
+
+class _Tuple4_c_void_p_c_void_p_c_void_p_c_void_p(Structure):
+    _fields_ = [
+        ("field0", c_void_p),
+        ("field1", c_void_p),
+        ("field2", c_void_p),
+        ("field3", c_void_p),
+    ]
+
+
+class _Tuple3_c_void_p_c_void_p_c_void_p(Structure):
+    _fields_ = [("field0", c_void_p), ("field1", c_void_p), ("field2", c_void_p)]
 
 
 class _Tuple2_c_double_c_double(Structure):
@@ -168,10 +197,6 @@ class _Tuple3_c_void_p_c_double_c_double(Structure):
 
 class _Maybe_c_void_p(Structure):
     _fields_ = [("field0", c_int64), ("field1", c_void_p)]
-
-
-class _Tuple3_c_void_p_c_void_p_c_void_p(Structure):
-    _fields_ = [("field0", c_void_p), ("field1", c_void_p), ("field2", c_void_p)]
 
 
 class Length:
@@ -2477,6 +2502,349 @@ class Point2d_Meters:
         return Point2d_Meters(ptr=output)
 
 
+class Bounds2d:
+    def __init__(self, *, ptr: c_void_p) -> None:
+        self.__ptr__ = ptr
+
+    @overload
+    @staticmethod
+    def xy(
+        x_coordinate: Range_Unitless, y_coordinate: Range_Unitless
+    ) -> Bounds2d_Unitless:
+        pass
+
+    @overload
+    @staticmethod
+    def xy(x_coordinate: Range_Meters, y_coordinate: Range_Meters) -> Bounds2d_Meters:
+        pass
+
+    @staticmethod
+    def xy(*args, **keywords):
+        match (args, keywords):
+            case (
+                (
+                    [
+                        Range_Unitless() as x_coordinate,
+                        Range_Unitless() as y_coordinate,
+                    ],
+                    {},
+                )
+                | (
+                    [],
+                    {
+                        "x_coordinate": Range_Unitless() as x_coordinate,
+                        "y_coordinate": Range_Unitless() as y_coordinate,
+                    },
+                )
+            ):
+                inputs = _Tuple2_c_void_p_c_void_p(
+                    x_coordinate.__ptr__, y_coordinate.__ptr__
+                )
+                output = c_void_p()
+                _lib.opensolid_Bounds2d_xy_RangeUnitless_RangeUnitless(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Bounds2d_Unitless(ptr=output)
+            case (
+                ([Range_Meters() as x_coordinate, Range_Meters() as y_coordinate], {})
+                | (
+                    [],
+                    {
+                        "x_coordinate": Range_Meters() as x_coordinate,
+                        "y_coordinate": Range_Meters() as y_coordinate,
+                    },
+                )
+            ):
+                inputs = _Tuple2_c_void_p_c_void_p(
+                    x_coordinate.__ptr__, y_coordinate.__ptr__
+                )
+                output = c_void_p()
+                _lib.opensolid_Bounds2d_xy_RangeMeters_RangeMeters(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Bounds2d_Meters(ptr=output)
+            case _:
+                message = "Unexpected function arguments"
+                raise TypeError(message)
+
+    @overload
+    @staticmethod
+    def constant(point: Point2d_Unitless) -> Bounds2d_Unitless:
+        pass
+
+    @overload
+    @staticmethod
+    def constant(point: Point2d_Meters) -> Bounds2d_Meters:
+        pass
+
+    @staticmethod
+    def constant(*args, **keywords):
+        match (args, keywords):
+            case (
+                ([Point2d_Unitless() as point], {})
+                | ([], {"point": Point2d_Unitless() as point})
+            ):
+                inputs = point.__ptr__
+                output = c_void_p()
+                _lib.opensolid_Bounds2d_constant_Point2dUnitless(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Bounds2d_Unitless(ptr=output)
+            case (
+                ([Point2d_Meters() as point], {})
+                | ([], {"point": Point2d_Meters() as point})
+            ):
+                inputs = point.__ptr__
+                output = c_void_p()
+                _lib.opensolid_Bounds2d_constant_Point2dMeters(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Bounds2d_Meters(ptr=output)
+            case _:
+                message = "Unexpected function arguments"
+                raise TypeError(message)
+
+    @overload
+    @staticmethod
+    def hull(p1: Point2d_Unitless, p2: Point2d_Unitless) -> Bounds2d_Unitless:
+        pass
+
+    @overload
+    @staticmethod
+    def hull(p1: Point2d_Meters, p2: Point2d_Meters) -> Bounds2d_Meters:
+        pass
+
+    @overload
+    @staticmethod
+    def hull(
+        p1: Point2d_Unitless, p2: Point2d_Unitless, p3: Point2d_Unitless
+    ) -> Bounds2d_Unitless:
+        pass
+
+    @overload
+    @staticmethod
+    def hull(
+        p1: Point2d_Meters, p2: Point2d_Meters, p3: Point2d_Meters
+    ) -> Bounds2d_Meters:
+        pass
+
+    @overload
+    @staticmethod
+    def hull(
+        p1: Point2d_Unitless,
+        p2: Point2d_Unitless,
+        p3: Point2d_Unitless,
+        p4: Point2d_Unitless,
+    ) -> Bounds2d_Unitless:
+        pass
+
+    @overload
+    @staticmethod
+    def hull(
+        p1: Point2d_Meters, p2: Point2d_Meters, p3: Point2d_Meters, p4: Point2d_Meters
+    ) -> Bounds2d_Meters:
+        pass
+
+    @staticmethod
+    def hull(*args, **keywords):
+        match (args, keywords):
+            case (
+                ([Point2d_Unitless() as p1, Point2d_Unitless() as p2], {})
+                | ([], {"p1": Point2d_Unitless() as p1, "p2": Point2d_Unitless() as p2})
+            ):
+                inputs = _Tuple2_c_void_p_c_void_p(p1.__ptr__, p2.__ptr__)
+                output = c_void_p()
+                _lib.opensolid_Bounds2d_hull_Point2dUnitless_Point2dUnitless(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Bounds2d_Unitless(ptr=output)
+            case (
+                ([Point2d_Meters() as p1, Point2d_Meters() as p2], {})
+                | ([], {"p1": Point2d_Meters() as p1, "p2": Point2d_Meters() as p2})
+            ):
+                inputs = _Tuple2_c_void_p_c_void_p(p1.__ptr__, p2.__ptr__)
+                output = c_void_p()
+                _lib.opensolid_Bounds2d_hull_Point2dMeters_Point2dMeters(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Bounds2d_Meters(ptr=output)
+            case (
+                (
+                    [
+                        Point2d_Unitless() as p1,
+                        Point2d_Unitless() as p2,
+                        Point2d_Unitless() as p3,
+                    ],
+                    {},
+                )
+                | (
+                    [],
+                    {
+                        "p1": Point2d_Unitless() as p1,
+                        "p2": Point2d_Unitless() as p2,
+                        "p3": Point2d_Unitless() as p3,
+                    },
+                )
+            ):
+                inputs = _Tuple3_c_void_p_c_void_p_c_void_p(
+                    p1.__ptr__, p2.__ptr__, p3.__ptr__
+                )
+                output = c_void_p()
+                _lib.opensolid_Bounds2d_hull_Point2dUnitless_Point2dUnitless_Point2dUnitless(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Bounds2d_Unitless(ptr=output)
+            case (
+                (
+                    [
+                        Point2d_Meters() as p1,
+                        Point2d_Meters() as p2,
+                        Point2d_Meters() as p3,
+                    ],
+                    {},
+                )
+                | (
+                    [],
+                    {
+                        "p1": Point2d_Meters() as p1,
+                        "p2": Point2d_Meters() as p2,
+                        "p3": Point2d_Meters() as p3,
+                    },
+                )
+            ):
+                inputs = _Tuple3_c_void_p_c_void_p_c_void_p(
+                    p1.__ptr__, p2.__ptr__, p3.__ptr__
+                )
+                output = c_void_p()
+                _lib.opensolid_Bounds2d_hull_Point2dMeters_Point2dMeters_Point2dMeters(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Bounds2d_Meters(ptr=output)
+            case (
+                (
+                    [
+                        Point2d_Unitless() as p1,
+                        Point2d_Unitless() as p2,
+                        Point2d_Unitless() as p3,
+                        Point2d_Unitless() as p4,
+                    ],
+                    {},
+                )
+                | (
+                    [],
+                    {
+                        "p1": Point2d_Unitless() as p1,
+                        "p2": Point2d_Unitless() as p2,
+                        "p3": Point2d_Unitless() as p3,
+                        "p4": Point2d_Unitless() as p4,
+                    },
+                )
+            ):
+                inputs = _Tuple4_c_void_p_c_void_p_c_void_p_c_void_p(
+                    p1.__ptr__, p2.__ptr__, p3.__ptr__, p4.__ptr__
+                )
+                output = c_void_p()
+                _lib.opensolid_Bounds2d_hull_Point2dUnitless_Point2dUnitless_Point2dUnitless_Point2dUnitless(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Bounds2d_Unitless(ptr=output)
+            case (
+                (
+                    [
+                        Point2d_Meters() as p1,
+                        Point2d_Meters() as p2,
+                        Point2d_Meters() as p3,
+                        Point2d_Meters() as p4,
+                    ],
+                    {},
+                )
+                | (
+                    [],
+                    {
+                        "p1": Point2d_Meters() as p1,
+                        "p2": Point2d_Meters() as p2,
+                        "p3": Point2d_Meters() as p3,
+                        "p4": Point2d_Meters() as p4,
+                    },
+                )
+            ):
+                inputs = _Tuple4_c_void_p_c_void_p_c_void_p_c_void_p(
+                    p1.__ptr__, p2.__ptr__, p3.__ptr__, p4.__ptr__
+                )
+                output = c_void_p()
+                _lib.opensolid_Bounds2d_hull_Point2dMeters_Point2dMeters_Point2dMeters_Point2dMeters(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Bounds2d_Meters(ptr=output)
+            case _:
+                message = "Unexpected function arguments"
+                raise TypeError(message)
+
+
+class Bounds2d_Unitless:
+    def __init__(self, *, ptr: c_void_p) -> None:
+        self.__ptr__ = ptr
+
+    def coordinates(self) -> tuple[Range_Unitless, Range_Unitless]:
+        inputs = self.__ptr__
+        output = _Tuple2_c_void_p_c_void_p()
+        _lib.opensolid_Bounds2dUnitless_coordinates(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return (
+            Range_Unitless(ptr=c_void_p(output.field0)),
+            Range_Unitless(ptr=c_void_p(output.field1)),
+        )
+
+    def x_coordinate(self) -> Range_Unitless:
+        inputs = self.__ptr__
+        output = c_void_p()
+        _lib.opensolid_Bounds2dUnitless_xCoordinate(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Range_Unitless(ptr=output)
+
+    def y_coordinate(self) -> Range_Unitless:
+        inputs = self.__ptr__
+        output = c_void_p()
+        _lib.opensolid_Bounds2dUnitless_yCoordinate(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Range_Unitless(ptr=output)
+
+
+class Bounds2d_Meters:
+    def __init__(self, *, ptr: c_void_p) -> None:
+        self.__ptr__ = ptr
+
+    def coordinates(self) -> tuple[Range_Meters, Range_Meters]:
+        inputs = self.__ptr__
+        output = _Tuple2_c_void_p_c_void_p()
+        _lib.opensolid_Bounds2dMeters_coordinates(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return (
+            Range_Meters(ptr=c_void_p(output.field0)),
+            Range_Meters(ptr=c_void_p(output.field1)),
+        )
+
+    def x_coordinate(self) -> Range_Meters:
+        inputs = self.__ptr__
+        output = c_void_p()
+        _lib.opensolid_Bounds2dMeters_xCoordinate(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Range_Meters(ptr=output)
+
+    def y_coordinate(self) -> Range_Meters:
+        inputs = self.__ptr__
+        output = c_void_p()
+        _lib.opensolid_Bounds2dMeters_yCoordinate(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Range_Meters(ptr=output)
+
+
 class Curve1d:
     def __init__(self, *, ptr: c_void_p) -> None:
         self.__ptr__ = ptr
@@ -3030,6 +3398,95 @@ class Curve1d_Meters:
         return Curve1d_Meters(ptr=output)
 
 
+class Drawing2d:
+    def __init__(self, *, ptr: c_void_p) -> None:
+        self.__ptr__ = ptr
+
+    black_stroke: Drawing2d.Attribute = None  # type: ignore[assignment]
+    no_fill: Drawing2d.Attribute = None  # type: ignore[assignment]
+
+    @staticmethod
+    def to_svg(view_box: Bounds2d_Meters, entities: list[Drawing2d.Entity]) -> str:
+        inputs = _Tuple2_c_void_p_List_c_void_p(
+            view_box.__ptr__,
+            _list_argument(
+                _List_c_void_p,
+                (c_void_p * len(entities))(*[item.__ptr__ for item in entities]),
+            ),
+        )
+        output = _Text()
+        _lib.opensolid_Drawing2d_toSVG_Bounds2dMeters_ListDrawing2dEntity(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return _text_to_str(output)
+
+    @staticmethod
+    def polygon(
+        attributes: list[Drawing2d.Attribute], vertices: list[Point2d_Meters]
+    ) -> Drawing2d.Entity:
+        inputs = _Tuple2_List_c_void_p_List_c_void_p(
+            _list_argument(
+                _List_c_void_p,
+                (c_void_p * len(attributes))(*[item.__ptr__ for item in attributes]),
+            ),
+            _list_argument(
+                _List_c_void_p,
+                (c_void_p * len(vertices))(*[item.__ptr__ for item in vertices]),
+            ),
+        )
+        output = c_void_p()
+        _lib.opensolid_Drawing2d_polygon_ListDrawing2dAttribute_ListPoint2dMeters(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Drawing2d.Entity(ptr=output)
+
+    @staticmethod
+    def circle(
+        attributes: list[Drawing2d.Attribute],
+        center_point: Point2d_Meters,
+        radius: Length,
+    ) -> Drawing2d.Entity:
+        inputs = _Tuple3_List_c_void_p_c_void_p_c_void_p(
+            _list_argument(
+                _List_c_void_p,
+                (c_void_p * len(attributes))(*[item.__ptr__ for item in attributes]),
+            ),
+            center_point.__ptr__,
+            radius.__ptr__,
+        )
+        output = c_void_p()
+        _lib.opensolid_Drawing2d_circle_ListDrawing2dAttribute_Point2dMeters_Length(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Drawing2d.Entity(ptr=output)
+
+    @staticmethod
+    def stroke_color(color: Color) -> Drawing2d.Attribute:
+        inputs = color.__ptr__
+        output = c_void_p()
+        _lib.opensolid_Drawing2d_strokeColor_Color(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Drawing2d.Attribute(ptr=output)
+
+    @staticmethod
+    def fill_color(color: Color) -> Drawing2d.Attribute:
+        inputs = color.__ptr__
+        output = c_void_p()
+        _lib.opensolid_Drawing2d_fillColor_Color(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Drawing2d.Attribute(ptr=output)
+
+    class Entity:
+        def __init__(self, *, ptr: c_void_p) -> None:
+            self.__ptr__ = ptr
+
+    class Attribute:
+        def __init__(self, *, ptr: c_void_p) -> None:
+            self.__ptr__ = ptr
+
+
 def _length_zero() -> Length:
     output = c_void_p()
     _lib.opensolid_Length_zero(c_void_p(), ctypes.byref(output))
@@ -3415,3 +3872,21 @@ def _curve1d_t() -> Curve1d_Unitless:
 
 
 Curve1d.t = _curve1d_t()
+
+
+def _drawing2d_black_stroke() -> Drawing2d.Attribute:
+    output = c_void_p()
+    _lib.opensolid_Drawing2d_blackStroke(c_void_p(), ctypes.byref(output))
+    return Drawing2d.Attribute(ptr=output)
+
+
+Drawing2d.black_stroke = _drawing2d_black_stroke()
+
+
+def _drawing2d_no_fill() -> Drawing2d.Attribute:
+    output = c_void_p()
+    _lib.opensolid_Drawing2d_noFill(c_void_p(), ctypes.byref(output))
+    return Drawing2d.Attribute(ptr=output)
+
+
+Drawing2d.no_fill = _drawing2d_no_fill()
