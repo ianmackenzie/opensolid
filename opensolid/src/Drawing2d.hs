@@ -35,6 +35,8 @@ import List qualified
 import Maybe qualified
 import NonEmpty qualified
 import OpenSolid
+import OpenSolid.FFI (FFI)
+import OpenSolid.FFI qualified as FFI
 import Point2d (Point2d)
 import Point2d qualified
 import Polyline2d (Polyline2d)
@@ -53,6 +55,12 @@ data Attribute space = Attribute Text Text deriving (Show)
 type Resolution = ?resolution :: Length
 
 type Point space = Point2d (space @ Meters)
+
+instance FFI (Entity space) where
+  representation = FFI.nestedClassRepresentation "Drawing2d" "Entity" Nothing
+
+instance FFI (Attribute space) where
+  representation = FFI.nestedClassRepresentation "Drawing2d" "Attribute" Nothing
 
 entityText :: Text -> Entity space -> Maybe Text
 entityText _ Empty = Nothing
