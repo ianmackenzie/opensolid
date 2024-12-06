@@ -1,6 +1,8 @@
 module OpenSolid.API (Class (..), Function (..), classes, functions) where
 
 import Angle qualified
+import Bounds2d (Bounds2d)
+import Bounds2d qualified
 import Colour (Colour)
 import Colour qualified
 import Curve1d (Curve1d)
@@ -80,6 +82,7 @@ classes =
     , vector2d
     , direction2d
     , point2d
+    , bounds2d
     , curve1d
     ]
 
@@ -385,6 +388,37 @@ point2d =
       ]
   ]
 
+data Bounds2d_
+
+instance FFI Bounds2d_ where
+  representation = FFI.abstractClassRepresentation "Bounds2d"
+
+bounds2d :: List Class
+bounds2d =
+  [ class_ @Bounds2d_
+      [ static2 "XY" "X Coordinate" "Y Coordinate" (Bounds2d.xy @Space @Unitless)
+      , static2 "XY" "X Coordinate" "Y Coordinate" (Bounds2d.xy @Space @Meters)
+      , static1 "Constant" "Point" (Bounds2d.constant @Space @Unitless)
+      , static1 "Constant" "Point" (Bounds2d.constant @Space @Meters)
+      , static2 "Hull" "P1" "P2" (Bounds2d.hull2 @Space @Unitless)
+      , static2 "Hull" "P1" "P2" (Bounds2d.hull2 @Space @Meters)
+      , static3 "Hull" "P1" "P2" "P3" (Bounds2d.hull3 @Space @Unitless)
+      , static3 "Hull" "P1" "P2" "P3" (Bounds2d.hull3 @Space @Meters)
+      , static4 "Hull" "P1" "P2" "P3" "P4" (Bounds2d.hull4 @Space @Unitless)
+      , static4 "Hull" "P1" "P2" "P3" "P4" (Bounds2d.hull4 @Space @Meters)
+      ]
+  , class_ @(Bounds2d (Space @ Unitless))
+      [ member0 "Coordinates" Bounds2d.coordinates
+      , member0 "X Coordinate" Bounds2d.xCoordinate
+      , member0 "Y Coordinate" Bounds2d.yCoordinate
+      ]
+  , class_ @(Bounds2d (Space @ Meters))
+      [ member0 "Coordinates" Bounds2d.coordinates
+      , member0 "X Coordinate" Bounds2d.xCoordinate
+      , member0 "Y Coordinate" Bounds2d.yCoordinate
+      ]
+  ]
+
 data Curve1d_
 
 instance FFI Curve1d_ where
@@ -465,6 +499,7 @@ data Member value where
   Static1 :: (FFI a, FFI result) => Text -> Text -> (a -> result) -> Member value
   Static2 :: (FFI a, FFI b, FFI result) => Text -> Text -> Text -> (a -> b -> result) -> Member value
   Static3 :: (FFI a, FFI b, FFI c, FFI result) => Text -> Text -> Text -> Text -> (a -> b -> c -> result) -> Member value
+  Static4 :: (FFI a, FFI b, FFI c, FFI d, FFI result) => Text -> Text -> Text -> Text -> Text -> (a -> b -> c -> d -> result) -> Member value
   Member0 :: (FFI value, FFI result) => Text -> (value -> result) -> Member value
   MemberU0 :: (FFI value, FFI result) => Text -> (Tolerance Unitless => value -> result) -> Member value
   MemberR0 :: (FFI value, FFI result) => Text -> (Tolerance Radians => value -> result) -> Member value
@@ -488,6 +523,9 @@ static2 = Static2
 
 static3 :: (FFI a, FFI b, FFI c, FFI result) => Text -> Text -> Text -> Text -> (a -> b -> c -> result) -> Member value
 static3 = Static3
+
+static4 :: (FFI a, FFI b, FFI c, FFI d, FFI result) => Text -> Text -> Text -> Text -> Text -> (a -> b -> c -> d -> result) -> Member value
+static4 = Static4
 
 member0 :: (FFI value, FFI result) => Text -> (value -> result) -> Member value
 member0 = Member0
@@ -763,6 +801,8 @@ buildClass
             addStatic name (StaticFunction2 (Name.parse arg1) (Name.parse arg2) f)
           Static3 name arg1 arg2 arg3 f ->
             addStatic name (StaticFunction3 (Name.parse arg1) (Name.parse arg2) (Name.parse arg3) f)
+          Static4 name arg1 arg2 arg3 arg4 f ->
+            addStatic name (StaticFunction4 (Name.parse arg1) (Name.parse arg2) (Name.parse arg3) (Name.parse arg4) f)
           Member0 name f ->
             addMember name (MemberFunction0 f)
           MemberU0 name f ->
