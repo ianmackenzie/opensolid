@@ -48,12 +48,15 @@ import Frame2d qualified
 import Fuzzy qualified
 import Maybe qualified
 import OpenSolid
+import OpenSolid.FFI (FFI)
+import OpenSolid.FFI qualified as FFI
 import Point2d (Point2d (Point2d))
 import Point2d qualified
 import Qty qualified
 import Range (Range)
 import Range qualified
 import Transform2d (Transform2d (Transform2d))
+import Units (Meters)
 import Units qualified
 import Vector2d qualified
 import VectorBounds2d (VectorBounds2d (VectorBounds2d))
@@ -80,6 +83,12 @@ instance
 instance Bounds.Interface (Bounds2d (space @ units)) where
   aggregate2 = aggregate2
   intersection = intersection
+
+instance FFI (Bounds2d (space @ Unitless)) where
+  representation = FFI.classRepresentation "Bounds2d" (Just "Unitless")
+
+instance FFI (Bounds2d (space @ Meters)) where
+  representation = FFI.classRepresentation "Bounds2d" (Just "Meters")
 
 instance
   ( space1 ~ space2
