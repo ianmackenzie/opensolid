@@ -48,7 +48,7 @@ import Vertex2d qualified
 type Entity :: Type -> Type
 data Entity space = Empty | Node Text (List (Attribute space)) (List (Entity space))
 
-data Attribute space = Attribute Text Text
+data Attribute space = Attribute Text Text deriving (Show)
 
 type Resolution = ?resolution :: Length
 
