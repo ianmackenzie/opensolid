@@ -5,6 +5,8 @@ module Colour
   , hsl
   , fromHex
   , toHex
+  , components
+  , components255
   , lightRed
   , red
   , darkRed
@@ -45,6 +47,7 @@ import Data.Colour qualified
 import Data.Colour.RGBSpace qualified
 import Data.Colour.RGBSpace.HSL qualified
 import Data.Colour.SRGB qualified
+import Float qualified
 import OpenSolid
 import Text qualified
 
@@ -66,6 +69,16 @@ fromHex = Text.unpack >> Data.Colour.SRGB.sRGB24read
 
 toHex :: Colour -> Text
 toHex = Data.Colour.SRGB.sRGB24show >> Text.pack
+
+components :: Colour -> (Float, Float, Float)
+components colour = do
+  let (Data.Colour.SRGB.RGB r g b) = Data.Colour.SRGB.toSRGB colour
+  (r, g, b)
+
+components255 :: Colour -> (Int, Int, Int)
+components255 colour = do
+  let (r, g, b) = components colour
+  (Float.round (r * 255.0), Float.round (g * 255.0), Float.round (b * 255.0))
 
 lightRed :: Colour
 lightRed = rgb255 239 41 41
