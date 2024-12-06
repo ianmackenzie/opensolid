@@ -19,6 +19,8 @@
           ld_library_path = builtins.concatStringsSep ":" [
             # Allow Haskell to find libopensolid_jit
             "$PWD/opensolid-jit/target/release"
+            # Allow Python packages to be built against libstdc++.so
+            "${pkgs.lib.makeLibraryPath [ pkgs.stdenv.cc.cc.lib ]}"
           ];
         in {
           # Define the configuration for an OpenSolid development shell
@@ -61,8 +63,6 @@
               pkgs.cargo
               # For formatting Rust files
               pkgs.rustfmt
-              # For testing the Python extension
-              pkgs.python312
               # For formatting/linting Python files
               # (used in the opensolid-python executable
               # for formatting the generated code)

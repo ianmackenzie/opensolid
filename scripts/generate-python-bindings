@@ -5,7 +5,7 @@ set -euo pipefail
 # Run the Python code generator executable to create __init__.py
 cabal run opensolid-python
 # Format __init__.py for readability
-ruff format opensolid-python/opensolid/__init__.py
+ruff format opensolid-python/lib/src/opensolid/__init__.py
 # Check __init__.py for errors
 # Disabled errors:
 #   D203: conflicts with D211, have to choose one
@@ -20,7 +20,7 @@ ruff format opensolid-python/opensolid/__init__.py
 #   D105: Undocumented magic method
 #   D106: Undocumented public nested class
 #   D107: Undocumented public __init__
-ruff check --select ALL --ignore D203 --ignore D213 --ignore COM812 --ignore RUF012 --ignore PLR0911 --ignore N801 --ignore D101 --ignore D102 --ignore D105 --ignore D106 --ignore D107 opensolid-python/opensolid/__init__.py
+ruff check --select ALL --ignore D203 --ignore D213 --ignore COM812 --ignore RUF012 --ignore PLR0911 --ignore N801 --ignore D101 --ignore D102 --ignore D105 --ignore D106 --ignore D107 opensolid-python/lib/src/opensolid/__init__.py
 # Generate the opensolid-ffi.def file with all API functions listed
 # (necessary for Windows builds)
 cabal run generate-def-file
@@ -29,4 +29,4 @@ cabal run generate-def-file
 cabal build opensolid-ffi
 # Copy the native shared library to beside __init__.py
 # so that it can be loaded properly
-cp $(find dist-newstyle -name libopensolid-ffi.so) opensolid-python/opensolid
+cp $(find dist-newstyle -name libopensolid-ffi.so) opensolid-python/lib/src/opensolid

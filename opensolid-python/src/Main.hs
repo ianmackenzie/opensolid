@@ -181,4 +181,4 @@ main = IO.do
           , Python.lines classDefinitions
           , Python.lines constantDefinitions
           ]
-  File.writeTo "opensolid-python/opensolid/__init__.py" pythonCode
+  File.writeTo "opensolid-python/lib/src/opensolid/__init__.py" pythonCode
