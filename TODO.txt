@@ -1,7 +1,5 @@
 Improve Python bindings
-- Add constants as well as static functions?
-  -> *Not* properties for now, leave those as member functions
-- Try switching to pattern matching just on 'shape' of function arguments, with separate 'isinstance' checks
+- Add support for constructors
 - Allow Python classes to be represented by things other than pointers (e.g. plain float values for quantity types)
 - Rename __ptr__ to just _ptr
 - Nice __repr__ and/or __str__, at least for primitive types
@@ -11,6 +9,11 @@ Improve Python bindings
 - Rename MemberFunction and StaticFunction to have U/R/M prefix *before* argument count
 - Add support for 'intersects' operator (^)
   -> Also (&) for *intersection*?
+- Update 'aggregate' and 'hull' functions to take a *non-empty* list
+  -> can overload based on item type
+  -> throw special exception if list is empty
+  -> Add Bounds2d.from_corners for 2-point case
+- Adjust logic so that __contains__ doesn't check for named arguments
 
 Switch Solve2d.return back to taking a single value instead of a NonEmpty
 
