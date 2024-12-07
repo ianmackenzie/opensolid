@@ -1,3 +1,6 @@
 # Shared libraries copied in during build
 src/opensolid/*.dll
 src/opensolid/*.so
+
+# Jupyter Notebooks, used for ad-hoc testing
+*.ipynb
