@@ -13,6 +13,7 @@ qualifiedName ffiType = case ffiType of
   FFI.Bool -> "bool"
   FFI.Text -> "str"
   FFI.List itemType -> "list[" + qualifiedName itemType + "]"
+  FFI.NonEmpty itemType -> "list[" + qualifiedName itemType + "]"
   FFI.Tuple first second rest -> do
     let itemTypeNames = List.map qualifiedName (first : second : rest)
     "tuple[" + Text.join "," itemTypeNames + "]"

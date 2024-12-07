@@ -63,9 +63,11 @@ typePattern ffiType = case ffiType of
   FFI.Bool -> "bool()"
   FFI.Text -> "str()"
   -- Note that there's no point trying to overload
-  -- based on the type of items in the list,
-  -- since it might be empty
+  -- based on the type of items in the list, since it might be empty
   FFI.List{} -> "list()"
+  -- For non-empty lists we _can_ overload
+  -- based on the type of items in the list
+  FFI.NonEmpty itemType -> "[" + typePattern itemType + ", *_]"
   FFI.Tuple type1 type2 rest -> tuplePattern type1 type2 rest
   FFI.Maybe valueType -> typePattern valueType + " | None"
   FFI.Result{} -> internalError "Should never have Result as input argument"

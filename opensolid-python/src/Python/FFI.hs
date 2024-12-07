@@ -25,6 +25,7 @@ typeName ffiType = case ffiType of
   FFI.Bool -> "c_int64"
   FFI.Text -> "_Text"
   FFI.List{} -> "_" + typeNameComponent ffiType
+  FFI.NonEmpty{} -> "_" + typeNameComponent ffiType
   FFI.Tuple{} -> "_" + typeNameComponent ffiType
   FFI.Maybe{} -> "_" + typeNameComponent ffiType
   FFI.Result{} -> "_" + typeNameComponent ffiType
@@ -37,6 +38,7 @@ typeNameComponent ffiType = case ffiType of
   FFI.Bool -> "c_int64"
   FFI.Text -> "Text"
   FFI.List itemType -> "List_" + typeNameComponent itemType
+  FFI.NonEmpty itemType -> "List_" + typeNameComponent itemType
   FFI.Tuple type1 type2 rest -> do
     let itemTypes = type1 : type2 : rest
     let numItems = List.length itemTypes
@@ -56,6 +58,7 @@ dummyFieldValue ffiType = case ffiType of
   FFI.Bool -> "0"
   FFI.Text -> dummyValue ffiType
   FFI.List{} -> dummyValue ffiType
+  FFI.NonEmpty{} -> dummyValue ffiType
   FFI.Tuple{} -> dummyValue ffiType
   FFI.Maybe{} -> dummyValue ffiType
   FFI.Result{} -> dummyValue ffiType
@@ -80,6 +83,7 @@ outputValue ffiType varName = case ffiType of
   FFI.Bool -> "bool(" + varName + ".value)"
   FFI.Text -> "_text_to_str(" + varName + ")"
   FFI.List itemType -> listOutputValue itemType varName
+  FFI.NonEmpty itemType -> listOutputValue itemType varName
   FFI.Tuple type1 type2 rest -> tupleOutputValue varName type1 type2 rest
   FFI.Maybe valueType -> maybeOutputValue valueType varName
   FFI.Result valueType -> resultOutputValue valueType varName
@@ -92,6 +96,7 @@ fieldOutputValue ffiType varName = case ffiType of
   FFI.Bool -> "bool(" + varName + ")"
   FFI.Text -> "_text_to_str(" + varName + ")"
   FFI.List itemType -> listOutputValue itemType varName
+  FFI.NonEmpty itemType -> listOutputValue itemType varName
   FFI.Tuple type1 type2 rest -> tupleOutputValue varName type1 type2 rest
   FFI.Maybe valueType -> maybeOutputValue valueType varName
   FFI.Result valueType -> resultOutputValue valueType varName
@@ -112,8 +117,11 @@ maybeOutputValue valueType varName =
   "(" + fieldOutputValue valueType (varName + ".field1") + " if " + varName + ".field0 == 0 else None)"
 
 resultOutputValue :: FFI.Type -> Text -> Text
-resultOutputValue valueType varName =
-  "(" + fieldOutputValue valueType (varName + ".field2") + " if " + varName + ".field0 == 0 else _error(" + varName + "))"
+resultOutputValue valueType varName = do
+  let isSuccess = varName + ".field0 == 0"
+  let success = fieldOutputValue valueType (varName + ".field2")
+  let failure = "_error(_text_to_str(" + varName + ".field1))"
+  "(" + success + " if " + isSuccess + " else " + failure + ")"
 
 argumentValue :: List (Text, FFI.Type) -> Text
 argumentValue [] = "c_void_p()"
@@ -131,6 +139,7 @@ singleArgument varName ffiType = case ffiType of
   FFI.Bool -> "c_int64(" + varName + ")"
   FFI.Text -> "_str_to_text(" + varName + ")"
   FFI.List itemType -> listArgumentValue ffiType itemType varName
+  FFI.NonEmpty itemType -> nonEmptyArgumentValue itemType varName
   FFI.Tuple type1 type2 rest -> tupleArgumentValue ffiType type1 type2 rest varName
   FFI.Maybe valueType -> maybeArgumentValue ffiType valueType varName
   FFI.Result{} -> internalError "Should never have Result as input argument"
@@ -143,6 +152,7 @@ fieldArgumentValue varName ffiType = case ffiType of
   FFI.Bool -> varName
   FFI.Text -> "_str_to_text(" + varName + ")"
   FFI.List itemType -> listArgumentValue ffiType itemType varName
+  FFI.NonEmpty itemType -> nonEmptyArgumentValue itemType varName
   FFI.Tuple type1 type2 rest -> tupleArgumentValue ffiType type1 type2 rest varName
   FFI.Maybe valueType -> maybeArgumentValue ffiType valueType varName
   FFI.Result{} -> internalError "Should never have Result as input argument"
@@ -154,6 +164,11 @@ listArgumentValue listType itemType varName = do
   let arrayItems = "[" + singleArgument "item" itemType + " for item in " + varName + "]"
   let array = arrayType + "(*" + arrayItems + ")"
   "_list_argument(" + typeName listType + "," + array + ")"
+
+nonEmptyArgumentValue :: FFI.Type -> Text -> Text
+nonEmptyArgumentValue itemType varName = do
+  let listValue = listArgumentValue (FFI.List itemType) itemType varName
+  "(" + listValue + " if " + varName + " else _error('List is empty'))"
 
 tupleArgumentValue :: FFI.Type -> FFI.Type -> FFI.Type -> List FFI.Type -> Text -> Text
 tupleArgumentValue tupleType type1 type2 rest varName = do
@@ -179,6 +194,7 @@ registerType ffiType registry = do
       FFI.Bool -> registry
       FFI.Text -> registry
       FFI.List itemType -> registerList ffiType itemType registry
+      FFI.NonEmpty itemType -> registerList (FFI.List itemType) itemType registry
       FFI.Tuple type1 type2 rest -> registerTuple ffiType type1 type2 rest registry
       FFI.Maybe valueType -> registerMaybe ffiType valueType registry
       FFI.Result valueType -> registerResult ffiType valueType registry

@@ -169,8 +169,8 @@ range =
     [ constant "Unit" Range.unit
     , factory1 "Constant" "Value" Range.constant
     , factory2 "From Endpoints" "A" "B" Range.from
-    , factory2 "Aggregate" "A" "B" Range.aggregate2
-    , factory3 "Aggregate" "A" "B" "C" Range.aggregate3
+    , factory1 "Hull" "Values" Range.hullN
+    , factory1 "Aggregate" "Ranges" Range.aggregateN
     , member0 "Endpoints" Range.endpoints
     , member1 "Intersection" "Other" Range.intersection
     , member1 "Contains" "Value" Range.includes
@@ -201,8 +201,8 @@ lengthRange =
     , factory2 "Centimeters" "A" "B" Range.centimeters
     , factory2 "Millimeters" "A" "B" Range.millimeters
     , factory2 "Inches" "A" "B" Range.inches
-    , factory2 "Aggregate" "A" "B" Range.aggregate2
-    , factory3 "Aggregate" "A" "B" "C" Range.aggregate3
+    , factory1 "Hull" "Values" Range.hullN
+    , factory1 "Aggregate" "Ranges" Range.aggregateN
     , member0 "Endpoints" Range.endpoints
     , member1 "Intersection" "Other" Range.intersection
     , member1 "Contains" "Value" Range.includes
@@ -224,8 +224,8 @@ angleRange =
   class_ @(Range Radians)
     [ factory1 "Constant" "Value" Range.constant
     , factory2 "From Endpoints" "A" "B" Range.from
-    , factory2 "Aggregate" "A" "B" Range.aggregate2
-    , factory3 "Aggregate" "A" "B" "C" Range.aggregate3
+    , factory1 "Hull" "Values" Range.hullN
+    , factory1 "Aggregate" "Ranges" Range.aggregateN
     , member0 "Endpoints" Range.endpoints
     , member1 "Intersection" "Other" Range.intersection
     , member1 "Contains" "Value" Range.includes
@@ -388,9 +388,9 @@ bounds2d =
   class_ @(Bounds2d (Space @ Meters))
     [ factory2 "XY" "X Coordinate" "Y Coordinate" Bounds2d.xy
     , factory1 "Constant" "Point" Bounds2d.constant
-    , factory2 "Hull" "P1" "P2" Bounds2d.hull2
-    , factory3 "Hull" "P1" "P2" "P3" Bounds2d.hull3
-    , factory4 "Hull" "P1" "P2" "P3" "P4" Bounds2d.hull4
+    , factory2 "From Corners" "P1" "P2" Bounds2d.hull2
+    , factory1 "Hull" "Points" Bounds2d.hullN
+    , factory1 "Aggregate" "Bounds" Bounds2d.aggregateN
     , member0 "Coordinates" Bounds2d.coordinates
     , member0 "X Coordinate" Bounds2d.xCoordinate
     , member0 "Y Coordinate" Bounds2d.yCoordinate
@@ -401,9 +401,9 @@ uvBounds =
   class_ @(Bounds2d (Space @ Unitless))
     [ factory2 "UV" "U Coordinate" "V Coordinate" Bounds2d.xy
     , factory1 "Constant" "Point" Bounds2d.constant
-    , factory2 "Hull" "P1" "P2" Bounds2d.hull2
-    , factory3 "Hull" "P1" "P2" "P3" Bounds2d.hull3
-    , factory4 "Hull" "P1" "P2" "P3" "P4" Bounds2d.hull4
+    , factory2 "From Corners" "P1" "P2" Bounds2d.hull2
+    , factory1 "Hull" "Points" Bounds2d.hullN
+    , factory1 "Aggregate" "Bounds" Bounds2d.aggregateN
     , member0 "Coordinates" Bounds2d.coordinates
     , member0 "U Coordinate" Bounds2d.xCoordinate
     , member0 "V Coordinate" Bounds2d.yCoordinate
@@ -533,9 +533,6 @@ factory2 = Static2
 
 factory3 :: (FFI a, FFI b, FFI c, FFI value) => Text -> Text -> Text -> Text -> (a -> b -> c -> value) -> Member value
 factory3 = Static3
-
-factory4 :: (FFI a, FFI b, FFI c, FFI d, FFI value) => Text -> Text -> Text -> Text -> Text -> (a -> b -> c -> d -> value) -> Member value
-factory4 = Static4
 
 static1 :: (FFI a, FFI result) => Text -> Text -> (a -> result) -> Member value
 static1 = Static1

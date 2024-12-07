@@ -67,8 +67,8 @@ def _list_argument(list_type: Any, array: Any) -> Any:  # noqa: ANN401
     return list_type(len(array), array)
 
 
-def _error(output: Any) -> Any:  # noqa: ANN401
-    raise Error(_text_to_str(output.field1))
+def _error(message: str) -> Any:  # noqa: ANN401
+    raise Error(message)
 
 
 class Tolerance:
@@ -162,19 +162,6 @@ class _Result_List_c_void_p(Structure):
     _fields_ = [("field0", c_int64), ("field1", _Text), ("field2", _List_c_void_p)]
 
 
-class _Tuple4_c_void_p_c_void_p_c_void_p_c_void_p(Structure):
-    _fields_ = [
-        ("field0", c_void_p),
-        ("field1", c_void_p),
-        ("field2", c_void_p),
-        ("field3", c_void_p),
-    ]
-
-
-class _Tuple3_c_void_p_c_void_p_c_void_p(Structure):
-    _fields_ = [("field0", c_void_p), ("field1", c_void_p), ("field2", c_void_p)]
-
-
 class _Tuple2_c_double_c_double(Structure):
     _fields_ = [("field0", c_double), ("field1", c_double)]
 
@@ -197,6 +184,10 @@ class _Tuple3_c_void_p_c_double_c_double(Structure):
 
 class _Maybe_c_void_p(Structure):
     _fields_ = [("field0", c_int64), ("field1", c_void_p)]
+
+
+class _List_c_double(Structure):
+    _fields_ = [("field0", c_int64), ("field1", POINTER(c_double))]
 
 
 class Length:
@@ -806,47 +797,37 @@ class Range:
         )
         return Range(ptr=output)
 
-    @overload
     @staticmethod
-    def aggregate(a: Range, b: Range, c: Range) -> Range:
-        pass
+    def hull(values: list[float]) -> Range:
+        inputs = (
+            _list_argument(
+                _List_c_double,
+                (c_double * len(values))(*[c_double(item) for item in values]),
+            )
+            if values
+            else _error("List is empty")
+        )
+        output = c_void_p()
+        _lib.opensolid_Range_hull_NonEmptyFloat(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Range(ptr=output)
 
-    @overload
     @staticmethod
-    def aggregate(a: Range, b: Range) -> Range:
-        pass
-
-    @staticmethod
-    def aggregate(*args, **keywords):
-        match (args, keywords):
-            case (
-                ([Range() as a, Range() as b, Range() as c], {})
-                | ([Range() as a, Range() as b], {"c": Range() as c})
-                | ([Range() as a], {"b": Range() as b, "c": Range() as c})
-                | ([], {"a": Range() as a, "b": Range() as b, "c": Range() as c})
-            ):
-                inputs = _Tuple3_c_void_p_c_void_p_c_void_p(
-                    a.__ptr__, b.__ptr__, c.__ptr__
-                )
-                output = c_void_p()
-                _lib.opensolid_Range_aggregate_Range_Range_Range(
-                    ctypes.byref(inputs), ctypes.byref(output)
-                )
-                return Range(ptr=output)
-            case (
-                ([Range() as a, Range() as b], {})
-                | ([Range() as a], {"b": Range() as b})
-                | ([], {"a": Range() as a, "b": Range() as b})
-            ):
-                inputs = _Tuple2_c_void_p_c_void_p(a.__ptr__, b.__ptr__)
-                output = c_void_p()
-                _lib.opensolid_Range_aggregate_Range_Range(
-                    ctypes.byref(inputs), ctypes.byref(output)
-                )
-                return Range(ptr=output)
-            case _:
-                message = "Unexpected function arguments"
-                raise TypeError(message)
+    def aggregate(ranges: list[Range]) -> Range:
+        inputs = (
+            _list_argument(
+                _List_c_void_p,
+                (c_void_p * len(ranges))(*[item.__ptr__ for item in ranges]),
+            )
+            if ranges
+            else _error("List is empty")
+        )
+        output = c_void_p()
+        _lib.opensolid_Range_aggregate_NonEmptyRange(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Range(ptr=output)
 
     def endpoints(self) -> tuple[float, float]:
         inputs = self.__ptr__
@@ -1111,57 +1092,37 @@ class LengthRange:
         )
         return LengthRange(ptr=output)
 
-    @overload
     @staticmethod
-    def aggregate(a: LengthRange, b: LengthRange, c: LengthRange) -> LengthRange:
-        pass
+    def hull(values: list[Length]) -> LengthRange:
+        inputs = (
+            _list_argument(
+                _List_c_void_p,
+                (c_void_p * len(values))(*[item.__ptr__ for item in values]),
+            )
+            if values
+            else _error("List is empty")
+        )
+        output = c_void_p()
+        _lib.opensolid_LengthRange_hull_NonEmptyLength(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return LengthRange(ptr=output)
 
-    @overload
     @staticmethod
-    def aggregate(a: LengthRange, b: LengthRange) -> LengthRange:
-        pass
-
-    @staticmethod
-    def aggregate(*args, **keywords):
-        match (args, keywords):
-            case (
-                ([LengthRange() as a, LengthRange() as b, LengthRange() as c], {})
-                | ([LengthRange() as a, LengthRange() as b], {"c": LengthRange() as c})
-                | (
-                    [LengthRange() as a],
-                    {"b": LengthRange() as b, "c": LengthRange() as c},
-                )
-                | (
-                    [],
-                    {
-                        "a": LengthRange() as a,
-                        "b": LengthRange() as b,
-                        "c": LengthRange() as c,
-                    },
-                )
-            ):
-                inputs = _Tuple3_c_void_p_c_void_p_c_void_p(
-                    a.__ptr__, b.__ptr__, c.__ptr__
-                )
-                output = c_void_p()
-                _lib.opensolid_LengthRange_aggregate_LengthRange_LengthRange_LengthRange(
-                    ctypes.byref(inputs), ctypes.byref(output)
-                )
-                return LengthRange(ptr=output)
-            case (
-                ([LengthRange() as a, LengthRange() as b], {})
-                | ([LengthRange() as a], {"b": LengthRange() as b})
-                | ([], {"a": LengthRange() as a, "b": LengthRange() as b})
-            ):
-                inputs = _Tuple2_c_void_p_c_void_p(a.__ptr__, b.__ptr__)
-                output = c_void_p()
-                _lib.opensolid_LengthRange_aggregate_LengthRange_LengthRange(
-                    ctypes.byref(inputs), ctypes.byref(output)
-                )
-                return LengthRange(ptr=output)
-            case _:
-                message = "Unexpected function arguments"
-                raise TypeError(message)
+    def aggregate(ranges: list[LengthRange]) -> LengthRange:
+        inputs = (
+            _list_argument(
+                _List_c_void_p,
+                (c_void_p * len(ranges))(*[item.__ptr__ for item in ranges]),
+            )
+            if ranges
+            else _error("List is empty")
+        )
+        output = c_void_p()
+        _lib.opensolid_LengthRange_aggregate_NonEmptyLengthRange(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return LengthRange(ptr=output)
 
     def endpoints(self) -> tuple[Length, Length]:
         inputs = self.__ptr__
@@ -1347,57 +1308,37 @@ class AngleRange:
         )
         return AngleRange(ptr=output)
 
-    @overload
     @staticmethod
-    def aggregate(a: AngleRange, b: AngleRange, c: AngleRange) -> AngleRange:
-        pass
+    def hull(values: list[Angle]) -> AngleRange:
+        inputs = (
+            _list_argument(
+                _List_c_void_p,
+                (c_void_p * len(values))(*[item.__ptr__ for item in values]),
+            )
+            if values
+            else _error("List is empty")
+        )
+        output = c_void_p()
+        _lib.opensolid_AngleRange_hull_NonEmptyAngle(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return AngleRange(ptr=output)
 
-    @overload
     @staticmethod
-    def aggregate(a: AngleRange, b: AngleRange) -> AngleRange:
-        pass
-
-    @staticmethod
-    def aggregate(*args, **keywords):
-        match (args, keywords):
-            case (
-                ([AngleRange() as a, AngleRange() as b, AngleRange() as c], {})
-                | ([AngleRange() as a, AngleRange() as b], {"c": AngleRange() as c})
-                | (
-                    [AngleRange() as a],
-                    {"b": AngleRange() as b, "c": AngleRange() as c},
-                )
-                | (
-                    [],
-                    {
-                        "a": AngleRange() as a,
-                        "b": AngleRange() as b,
-                        "c": AngleRange() as c,
-                    },
-                )
-            ):
-                inputs = _Tuple3_c_void_p_c_void_p_c_void_p(
-                    a.__ptr__, b.__ptr__, c.__ptr__
-                )
-                output = c_void_p()
-                _lib.opensolid_AngleRange_aggregate_AngleRange_AngleRange_AngleRange(
-                    ctypes.byref(inputs), ctypes.byref(output)
-                )
-                return AngleRange(ptr=output)
-            case (
-                ([AngleRange() as a, AngleRange() as b], {})
-                | ([AngleRange() as a], {"b": AngleRange() as b})
-                | ([], {"a": AngleRange() as a, "b": AngleRange() as b})
-            ):
-                inputs = _Tuple2_c_void_p_c_void_p(a.__ptr__, b.__ptr__)
-                output = c_void_p()
-                _lib.opensolid_AngleRange_aggregate_AngleRange_AngleRange(
-                    ctypes.byref(inputs), ctypes.byref(output)
-                )
-                return AngleRange(ptr=output)
-            case _:
-                message = "Unexpected function arguments"
-                raise TypeError(message)
+    def aggregate(ranges: list[AngleRange]) -> AngleRange:
+        inputs = (
+            _list_argument(
+                _List_c_void_p,
+                (c_void_p * len(ranges))(*[item.__ptr__ for item in ranges]),
+            )
+            if ranges
+            else _error("List is empty")
+        )
+        output = c_void_p()
+        _lib.opensolid_AngleRange_aggregate_NonEmptyAngleRange(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return AngleRange(ptr=output)
 
     def endpoints(self) -> tuple[Angle, Angle]:
         inputs = self.__ptr__
@@ -1716,7 +1657,7 @@ class Vector2d:
         return (
             Direction2d(ptr=c_void_p(output.field2))
             if output.field0 == 0
-            else _error(output)
+            else _error(_text_to_str(output.field1))
         )
 
     def __neg__(self) -> Vector2d:
@@ -1898,7 +1839,7 @@ class Displacement2d:
         return (
             Direction2d(ptr=c_void_p(output.field2))
             if output.field0 == 0
-            else _error(output)
+            else _error(_text_to_str(output.field1))
         )
 
     def __neg__(self) -> Displacement2d:
@@ -2233,103 +2174,46 @@ class Bounds2d:
         )
         return Bounds2d(ptr=output)
 
-    @overload
     @staticmethod
-    def hull(p1: Point2d, p2: Point2d, p3: Point2d, p4: Point2d) -> Bounds2d:
-        pass
-
-    @overload
-    @staticmethod
-    def hull(p1: Point2d, p2: Point2d, p3: Point2d) -> Bounds2d:
-        pass
-
-    @overload
-    @staticmethod
-    def hull(p1: Point2d, p2: Point2d) -> Bounds2d:
-        pass
+    def from_corners(p1: Point2d, p2: Point2d) -> Bounds2d:
+        inputs = _Tuple2_c_void_p_c_void_p(p1.__ptr__, p2.__ptr__)
+        output = c_void_p()
+        _lib.opensolid_Bounds2d_fromCorners_Point2d_Point2d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Bounds2d(ptr=output)
 
     @staticmethod
-    def hull(*args, **keywords):
-        match (args, keywords):
-            case (
-                (
-                    [
-                        Point2d() as p1,
-                        Point2d() as p2,
-                        Point2d() as p3,
-                        Point2d() as p4,
-                    ],
-                    {},
-                )
-                | (
-                    [Point2d() as p1, Point2d() as p2, Point2d() as p3],
-                    {"p4": Point2d() as p4},
-                )
-                | (
-                    [Point2d() as p1, Point2d() as p2],
-                    {"p3": Point2d() as p3, "p4": Point2d() as p4},
-                )
-                | (
-                    [Point2d() as p1],
-                    {
-                        "p2": Point2d() as p2,
-                        "p3": Point2d() as p3,
-                        "p4": Point2d() as p4,
-                    },
-                )
-                | (
-                    [],
-                    {
-                        "p1": Point2d() as p1,
-                        "p2": Point2d() as p2,
-                        "p3": Point2d() as p3,
-                        "p4": Point2d() as p4,
-                    },
-                )
-            ):
-                inputs = _Tuple4_c_void_p_c_void_p_c_void_p_c_void_p(
-                    p1.__ptr__, p2.__ptr__, p3.__ptr__, p4.__ptr__
-                )
-                output = c_void_p()
-                _lib.opensolid_Bounds2d_hull_Point2d_Point2d_Point2d_Point2d(
-                    ctypes.byref(inputs), ctypes.byref(output)
-                )
-                return Bounds2d(ptr=output)
-            case (
-                ([Point2d() as p1, Point2d() as p2, Point2d() as p3], {})
-                | ([Point2d() as p1, Point2d() as p2], {"p3": Point2d() as p3})
-                | ([Point2d() as p1], {"p2": Point2d() as p2, "p3": Point2d() as p3})
-                | (
-                    [],
-                    {
-                        "p1": Point2d() as p1,
-                        "p2": Point2d() as p2,
-                        "p3": Point2d() as p3,
-                    },
-                )
-            ):
-                inputs = _Tuple3_c_void_p_c_void_p_c_void_p(
-                    p1.__ptr__, p2.__ptr__, p3.__ptr__
-                )
-                output = c_void_p()
-                _lib.opensolid_Bounds2d_hull_Point2d_Point2d_Point2d(
-                    ctypes.byref(inputs), ctypes.byref(output)
-                )
-                return Bounds2d(ptr=output)
-            case (
-                ([Point2d() as p1, Point2d() as p2], {})
-                | ([Point2d() as p1], {"p2": Point2d() as p2})
-                | ([], {"p1": Point2d() as p1, "p2": Point2d() as p2})
-            ):
-                inputs = _Tuple2_c_void_p_c_void_p(p1.__ptr__, p2.__ptr__)
-                output = c_void_p()
-                _lib.opensolid_Bounds2d_hull_Point2d_Point2d(
-                    ctypes.byref(inputs), ctypes.byref(output)
-                )
-                return Bounds2d(ptr=output)
-            case _:
-                message = "Unexpected function arguments"
-                raise TypeError(message)
+    def hull(points: list[Point2d]) -> Bounds2d:
+        inputs = (
+            _list_argument(
+                _List_c_void_p,
+                (c_void_p * len(points))(*[item.__ptr__ for item in points]),
+            )
+            if points
+            else _error("List is empty")
+        )
+        output = c_void_p()
+        _lib.opensolid_Bounds2d_hull_NonEmptyPoint2d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Bounds2d(ptr=output)
+
+    @staticmethod
+    def aggregate(bounds: list[Bounds2d]) -> Bounds2d:
+        inputs = (
+            _list_argument(
+                _List_c_void_p,
+                (c_void_p * len(bounds))(*[item.__ptr__ for item in bounds]),
+            )
+            if bounds
+            else _error("List is empty")
+        )
+        output = c_void_p()
+        _lib.opensolid_Bounds2d_aggregate_NonEmptyBounds2d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Bounds2d(ptr=output)
 
     def coordinates(self) -> tuple[LengthRange, LengthRange]:
         inputs = self.__ptr__
@@ -2375,103 +2259,46 @@ class UvBounds:
         )
         return UvBounds(ptr=output)
 
-    @overload
     @staticmethod
-    def hull(p1: UvPoint, p2: UvPoint, p3: UvPoint, p4: UvPoint) -> UvBounds:
-        pass
-
-    @overload
-    @staticmethod
-    def hull(p1: UvPoint, p2: UvPoint, p3: UvPoint) -> UvBounds:
-        pass
-
-    @overload
-    @staticmethod
-    def hull(p1: UvPoint, p2: UvPoint) -> UvBounds:
-        pass
+    def from_corners(p1: UvPoint, p2: UvPoint) -> UvBounds:
+        inputs = _Tuple2_c_void_p_c_void_p(p1.__ptr__, p2.__ptr__)
+        output = c_void_p()
+        _lib.opensolid_UvBounds_fromCorners_UvPoint_UvPoint(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return UvBounds(ptr=output)
 
     @staticmethod
-    def hull(*args, **keywords):
-        match (args, keywords):
-            case (
-                (
-                    [
-                        UvPoint() as p1,
-                        UvPoint() as p2,
-                        UvPoint() as p3,
-                        UvPoint() as p4,
-                    ],
-                    {},
-                )
-                | (
-                    [UvPoint() as p1, UvPoint() as p2, UvPoint() as p3],
-                    {"p4": UvPoint() as p4},
-                )
-                | (
-                    [UvPoint() as p1, UvPoint() as p2],
-                    {"p3": UvPoint() as p3, "p4": UvPoint() as p4},
-                )
-                | (
-                    [UvPoint() as p1],
-                    {
-                        "p2": UvPoint() as p2,
-                        "p3": UvPoint() as p3,
-                        "p4": UvPoint() as p4,
-                    },
-                )
-                | (
-                    [],
-                    {
-                        "p1": UvPoint() as p1,
-                        "p2": UvPoint() as p2,
-                        "p3": UvPoint() as p3,
-                        "p4": UvPoint() as p4,
-                    },
-                )
-            ):
-                inputs = _Tuple4_c_void_p_c_void_p_c_void_p_c_void_p(
-                    p1.__ptr__, p2.__ptr__, p3.__ptr__, p4.__ptr__
-                )
-                output = c_void_p()
-                _lib.opensolid_UvBounds_hull_UvPoint_UvPoint_UvPoint_UvPoint(
-                    ctypes.byref(inputs), ctypes.byref(output)
-                )
-                return UvBounds(ptr=output)
-            case (
-                ([UvPoint() as p1, UvPoint() as p2, UvPoint() as p3], {})
-                | ([UvPoint() as p1, UvPoint() as p2], {"p3": UvPoint() as p3})
-                | ([UvPoint() as p1], {"p2": UvPoint() as p2, "p3": UvPoint() as p3})
-                | (
-                    [],
-                    {
-                        "p1": UvPoint() as p1,
-                        "p2": UvPoint() as p2,
-                        "p3": UvPoint() as p3,
-                    },
-                )
-            ):
-                inputs = _Tuple3_c_void_p_c_void_p_c_void_p(
-                    p1.__ptr__, p2.__ptr__, p3.__ptr__
-                )
-                output = c_void_p()
-                _lib.opensolid_UvBounds_hull_UvPoint_UvPoint_UvPoint(
-                    ctypes.byref(inputs), ctypes.byref(output)
-                )
-                return UvBounds(ptr=output)
-            case (
-                ([UvPoint() as p1, UvPoint() as p2], {})
-                | ([UvPoint() as p1], {"p2": UvPoint() as p2})
-                | ([], {"p1": UvPoint() as p1, "p2": UvPoint() as p2})
-            ):
-                inputs = _Tuple2_c_void_p_c_void_p(p1.__ptr__, p2.__ptr__)
-                output = c_void_p()
-                _lib.opensolid_UvBounds_hull_UvPoint_UvPoint(
-                    ctypes.byref(inputs), ctypes.byref(output)
-                )
-                return UvBounds(ptr=output)
-            case _:
-                message = "Unexpected function arguments"
-                raise TypeError(message)
+    def hull(points: list[UvPoint]) -> UvBounds:
+        inputs = (
+            _list_argument(
+                _List_c_void_p,
+                (c_void_p * len(points))(*[item.__ptr__ for item in points]),
+            )
+            if points
+            else _error("List is empty")
+        )
+        output = c_void_p()
+        _lib.opensolid_UvBounds_hull_NonEmptyUvPoint(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return UvBounds(ptr=output)
+
+    @staticmethod
+    def aggregate(bounds: list[UvBounds]) -> UvBounds:
+        inputs = (
+            _list_argument(
+                _List_c_void_p,
+                (c_void_p * len(bounds))(*[item.__ptr__ for item in bounds]),
+            )
+            if bounds
+            else _error("List is empty")
+        )
+        output = c_void_p()
+        _lib.opensolid_UvBounds_aggregate_NonEmptyUvBounds(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return UvBounds(ptr=output)
 
     def coordinates(self) -> tuple[Range, Range]:
         inputs = self.__ptr__
@@ -2528,7 +2355,7 @@ class Curve:
                 ]
             ]
             if output.field0 == 0
-            else _error(output)
+            else _error(_text_to_str(output.field1))
         )
 
     def __neg__(self) -> Curve:
@@ -2760,7 +2587,7 @@ class LengthCurve:
                 ]
             ]
             if output.field0 == 0
-            else _error(output)
+            else _error(_text_to_str(output.field1))
         )
 
     def __neg__(self) -> LengthCurve:
@@ -2905,7 +2732,7 @@ class AngleCurve:
                 ]
             ]
             if output.field0 == 0
-            else _error(output)
+            else _error(_text_to_str(output.field1))
         )
 
     def __neg__(self) -> AngleCurve:
