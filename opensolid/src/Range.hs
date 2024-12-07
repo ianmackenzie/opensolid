@@ -10,6 +10,7 @@ module Range
   , inches
   , hull3
   , hull4
+  , hullN
   , minValue
   , maxValue
   , midpoint
@@ -35,6 +36,7 @@ module Range
   , hypot3
   , aggregate2
   , aggregate3
+  , aggregateN
   , min
   , max
   , minimum
@@ -249,6 +251,13 @@ aggregate3 :: Range units -> Range units -> Range units -> Range units
 aggregate3 (Range low1 high1) (Range low2 high2) (Range low3 high3) =
   Range_ (Qty.min (Qty.min low1 low2) low3) (Qty.max (Qty.max high1 high2) high3)
 
+aggregateN :: NonEmpty (Range units) -> Range units
+aggregateN (Range low1 high1 :| rest) = do
+  let go low high [] = unsafe low high
+      go low high (Range nextLow nextHigh : remaining) =
+        go (Qty.min low nextLow) (Qty.max high nextHigh) remaining
+  go low1 high1 rest
+
 intersection :: Range units -> Range units -> Maybe (Range units)
 intersection (Range low1 high1) (Range low2 high2)
   | high1 < low2 = Nothing
@@ -262,6 +271,12 @@ hull3 a b c = Range_ (Qty.min a (Qty.min b c)) (Qty.max a (Qty.max b c))
 {-# INLINE hull4 #-}
 hull4 :: Qty units -> Qty units -> Qty units -> Qty units -> Range units
 hull4 a b c d = Range_ (Qty.min a (Qty.min b (Qty.min c d))) (Qty.max a (Qty.max b (Qty.max c d)))
+
+hullN :: NonEmpty (Qty units) -> Range units
+hullN (first :| rest) = do
+  let go low high [] = unsafe low high
+      go low high (next : remaining) = go (Qty.min low next) (Qty.max high next) remaining
+  go first first rest
 
 {-# INLINE minValue #-}
 minValue :: Range units -> Qty units
