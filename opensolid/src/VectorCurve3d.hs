@@ -51,7 +51,7 @@ import Composition
 import CoordinateSystem (Space)
 import Curve1d (Curve1d)
 import Curve1d qualified
-import Curve1d.Root qualified
+import Curve1d.Zero qualified
 import Curve1d.Zeros qualified
 import Direction3d (Direction3d)
 import Direction3d qualified
@@ -64,6 +64,7 @@ import Expression.VectorCurve3d qualified
 import Frame3d (Frame3d)
 import Frame3d qualified
 import List qualified
+import NonEmpty qualified
 import OpenSolid
 import Point3d qualified
 import Qty qualified
@@ -753,7 +754,7 @@ hasZero curve = Tolerance.using Tolerance.squared' (squaredMagnitude' curve ^ Qt
 zeros :: Tolerance units => VectorCurve3d (space @ units) -> Result Zeros.Error (List Float)
 zeros curve =
   case Tolerance.using Tolerance.squared' (Curve1d.zeros (squaredMagnitude' curve)) of
-    Success roots -> Success (List.map Curve1d.Root.value roots)
+    Success zeros1d -> Success (List.map Curve1d.Zero.location zeros1d)
     Failure Curve1d.Zeros.ZeroEverywhere -> Failure Zeros.ZeroEverywhere
     Failure Curve1d.Zeros.HigherOrderZero -> Failure Zeros.HigherOrderZero
 
@@ -778,9 +779,9 @@ direction curve =
     -- if it's only zero at one or both endpoints,
     -- and the curve's *derivative* is non-zero at those endpoints,
     -- then it's still possible to uniquely determine a tangent direction everywhere
-    Success roots -> do
+    Success (NonEmpty curveZeros) -> do
       let curveDerivative = derivative curve
-      if List.allSatisfy (isRemovableDegeneracy curveDerivative) roots
+      if NonEmpty.allSatisfy (isRemovableDegeneracy curveDerivative) curveZeros
         then Success (VectorCurve3d.Direction.unsafe curve curveDerivative)
         else Failure HasZero
     -- Definitely can't get the direction of a vector curve

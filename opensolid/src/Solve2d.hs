@@ -202,14 +202,14 @@ solveUnique localBounds fBounds f fu fv globalBounds =
       let pMid = Point2d.xy uMid vMid
       let fMid = f pMid
       -- First, try applying Newton-Raphson starting at the center point of localBounds
-      -- to see if that converges to a root
+      -- to see if that converges to a zero
       case newtonRaphson f fu fv globalBounds pMid fMid of
-        Success point -> Just point -- Newton-Raphson converged to a root, return it
+        Success point -> Just point -- Newton-Raphson converged to a zero, return it
         Failure Divergence -- Newton-Raphson did not converge starting from pMid
           | Range.isAtomic uRange || Range.isAtomic vRange ->
               -- We can't bisect any further
               -- (Newton-Raphson somehow never converged),
-              -- so check if we've found a root by bisection
+              -- so check if we've found a zero by bisection
               if fMid ~= Vector2d.zero then Just pMid else Nothing
           | otherwise -> do
               -- Recurse into subdomains

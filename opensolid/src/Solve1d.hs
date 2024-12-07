@@ -5,7 +5,7 @@ module Solve1d
   ( Neighborhood
   , neighborhood
   , derivativeTolerance
-  , root
+  , zero
   , Cache
   , init
   , SomeExclusions
@@ -21,7 +21,7 @@ module Solve1d
   )
 where
 
-import Curve1d.Root (Root (Root))
+import Curve1d.Zero (Zero (Zero))
 import Domain1d (Domain1d)
 import Domain1d qualified
 import Error qualified
@@ -57,8 +57,8 @@ derivativeTolerance :: Neighborhood units -> Int -> Qty units
 derivativeTolerance (Neighborhood{n, magnitude, radius}) k = do
   magnitude * radius ** (n - k) / Float.int (Int.factorial (n - k))
 
-root :: Float -> Neighborhood units -> Root
-root value (Neighborhood{n, sign}) = Root value (n - 1) sign
+zero :: Float -> Neighborhood units -> Zero
+zero location (Neighborhood{n, sign}) = Zero location (n - 1) sign
 
 data Cache cached
   = Tree Domain1d cached (Node cached)
@@ -202,19 +202,19 @@ solveMonotonic ::
   Float
 solveMonotonic function derivative range sign1 x1 x2 = do
   -- First, try applying Newton-Raphson within [x1,x2]
-  -- to see if that converges to a root
+  -- to see if that converges to a zero
   let xMid = Qty.midpoint x1 x2
   let yMid = function xMid
   case newtonRaphson function derivative range xMid yMid 0 of
-    Success x -> x -- Newton-Raphson converged to a root, return it
+    Success x -> x -- Newton-Raphson converged to a zero, return it
     Failure Divergence -- Newton-Raphson did not converge within [x1, x2]
       | x1 < xMid && xMid < x2 ->
           -- It's possible to bisect further,
-          -- so recurse into whichever subdomain brackets the root
+          -- so recurse into whichever subdomain brackets the zero
           if Qty.sign yMid == sign1
             then solveMonotonic function derivative range sign1 xMid x2
             else solveMonotonic function derivative range sign1 x1 xMid
-      | otherwise -> xMid -- We've converged to a root by bisection
+      | otherwise -> xMid -- We've converged to a zero by bisection
 
 data Divergence = Divergence deriving (Eq, Show, Error.Message)
 

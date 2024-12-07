@@ -3,7 +3,6 @@ module OpenSolid.FFI
   , classId
   , nestedClassId
   , classRepresentation
-  , abstractClassRepresentation
   , nestedClassRepresentation
   , Type (..)
   , Id (..)
@@ -33,7 +32,6 @@ import IO qualified
 import Int qualified
 import Length (Length)
 import List qualified
-import Maybe qualified
 import NonEmpty qualified
 import OpenSolid hiding (Type)
 import OpenSolid.API.Name (Name)
@@ -73,26 +71,21 @@ data Representation a where
   -- A class containing an opaque pointer to a Haskell value
   ClassRep :: FFI a => Id a -> Representation a
 
-classId :: FFI a => Proxy a -> Text -> Maybe Text -> Id a
-classId proxy name maybeUnits =
-  Id proxy (NonEmpty.singleton (Name.parse name)) (Maybe.map Name.parse maybeUnits)
+classId :: FFI a => Proxy a -> Text -> Id a
+classId proxy name =
+  Id proxy (NonEmpty.singleton (Name.parse name))
 
-nestedClassId :: FFI a => Proxy a -> Text -> Text -> Maybe Text -> Id a
-nestedClassId proxy parentName childName maybeUnits = do
-  let classNames = NonEmpty.of2 (Name.parse parentName) (Name.parse childName)
-  Id proxy classNames (Maybe.map Name.parse maybeUnits)
+nestedClassId :: FFI a => Proxy a -> Text -> Text -> Id a
+nestedClassId proxy parentName childName =
+  Id proxy (NonEmpty.of2 (Name.parse parentName) (Name.parse childName))
 
-classRepresentation :: FFI a => Text -> Maybe Text -> Proxy a -> Representation a
-classRepresentation name maybeUnits proxy =
-  ClassRep (classId proxy name maybeUnits)
+classRepresentation :: FFI a => Text -> Proxy a -> Representation a
+classRepresentation name proxy =
+  ClassRep (classId proxy name)
 
-abstractClassRepresentation :: FFI a => Text -> Proxy a -> Representation a
-abstractClassRepresentation name proxy =
-  classRepresentation name Nothing proxy
-
-nestedClassRepresentation :: FFI a => Text -> Text -> Maybe Text -> Proxy a -> Representation a
-nestedClassRepresentation parentName childName maybeUnits proxy =
-  ClassRep (nestedClassId proxy parentName childName maybeUnits)
+nestedClassRepresentation :: FFI a => Text -> Text -> Proxy a -> Representation a
+nestedClassRepresentation parentName childName proxy =
+  ClassRep (nestedClassId proxy parentName childName)
 
 data Type where
   Int :: Type
@@ -106,7 +99,7 @@ data Type where
   Class :: FFI a => Id a -> Type
 
 data Id a where
-  Id :: FFI a => Proxy a -> NonEmpty Name -> Maybe Name -> Id a
+  Id :: FFI a => Proxy a -> NonEmpty Name -> Id a
 
 typeOf :: FFI a => Proxy a -> Type
 typeOf proxy = case representation proxy of
@@ -187,9 +180,8 @@ typeName ffiType = case ffiType of
   Class id -> className id
 
 className :: Id a -> Text
-className (Id _ classNames maybeUnits) =
+className (Id _ classNames) =
   Text.concat (List.map Name.pascalCase (NonEmpty.toList classNames))
-    + Maybe.map Name.pascalCase maybeUnits
 
 size :: Type -> Int
 size ffiType = case ffiType of
@@ -216,13 +208,13 @@ instance FFI Text where
   representation _ = TextRep
 
 instance FFI Colour where
-  representation = classRepresentation "Color" Nothing
+  representation = classRepresentation "Color"
 
 instance FFI Length where
-  representation = classRepresentation "Length" Nothing
+  representation = classRepresentation "Length"
 
 instance FFI Angle where
-  representation = classRepresentation "Angle" Nothing
+  representation = classRepresentation "Angle"
 
 instance FFI item => FFI (List item) where
   representation _ = ListRep

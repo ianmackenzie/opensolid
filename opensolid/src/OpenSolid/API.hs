@@ -7,7 +7,7 @@ import Colour (Colour)
 import Colour qualified
 import Curve1d (Curve1d)
 import Curve1d qualified
-import Curve1d.Root qualified
+import Curve1d.Zero qualified
 import Data.Proxy (Proxy (Proxy))
 import Direction2d (Direction2d)
 import Direction2d qualified
@@ -75,441 +75,429 @@ data Function = Function
 
 classes :: List Class
 classes =
-  List.concat
-    [ length
-    , angle
-    , range
-    , color
-    , vector2d
-    , direction2d
-    , point2d
-    , bounds2d
-    , curve1d
-    , drawing2d
+  [ length
+  , angle
+  , range
+  , lengthRange
+  , angleRange
+  , color
+  , vector2d
+  , displacement2d
+  , direction2d
+  , point2d
+  , uvPoint
+  , bounds2d
+  , uvBounds
+  , curve
+  , curveZero
+  , lengthCurve
+  , angleCurve
+  , drawing2d
+  ]
+
+length :: Class
+length =
+  class_ @Length
+    [ constant "Zero" Length.zero
+    , factory1 "Meters" "Value" Length.meters
+    , factory1 "Centimeters" "Value" Length.centimeters
+    , factory1 "Millimeters" "Value" Length.millimeters
+    , factory1 "Inches" "Value" Length.inches
+    , member0 "In Meters" Length.inMeters
+    , member0 "In Centimeters" Length.inCentimeters
+    , member0 "In Millimeters" Length.inMillimeters
+    , member0 "In Inches" Length.inInches
+    , equality
+    , comparison
+    , negateSelf
+    , floatTimes
+    , plusSelf
+    , plus @(Range Meters) Self
+    , plus @(Curve1d Meters) Self
+    , minusSelf
+    , minus @(Range Meters) Self
+    , minus @(Curve1d Meters) Self
+    , timesFloat
+    , times @(Range Unitless) Self
+    , times @(Curve1d Unitless) Self
+    , divByFloat
+    , divBySelf
+    , divBy @(Range Unitless) Self
+    , divBy @(Range Meters) Self
+    , divBy @(Curve1d Unitless) Self
+    , divBy @(Curve1d Meters) Self
+    , floorDivBySelf
+    , modBySelf
     ]
 
-length :: List Class
-length =
-  [ class_ @Length
-      [ constant "Zero" Length.zero
-      , static1 "Meters" "Value" Length.meters
-      , static1 "Centimeters" "Value" Length.centimeters
-      , static1 "Millimeters" "Value" Length.millimeters
-      , static1 "Inches" "Value" Length.inches
-      , member0 "In Meters" Length.inMeters
-      , member0 "In Centimeters" Length.inCentimeters
-      , member0 "In Millimeters" Length.inMillimeters
-      , member0 "In Inches" Length.inInches
-      , equality
-      , comparison
-      , negateSelf
-      , floatTimes
-      , plusSelf
-      , plus @(Range Meters) Self
-      , plus @(Curve1d Meters) Self
-      , minusSelf
-      , minus @(Range Meters) Self
-      , minus @(Curve1d Meters) Self
-      , timesFloat
-      , times @(Range Unitless) Self
-      , times @(Curve1d Unitless) Self
-      , divByFloat
-      , divBySelf
-      , divBy @(Range Unitless) Self
-      , divBy @(Range Meters) Self
-      , divBy @(Curve1d Unitless) Self
-      , divBy @(Curve1d Meters) Self
-      , floorDivBySelf
-      , modBySelf
-      ]
-  ]
-
-angle :: List Class
+angle :: Class
 angle =
-  [ class_ @Angle
-      [ constant "Zero" Angle.zero
-      , static1 "Radians" "Value" Angle.radians
-      , static1 "Degrees" "Value" Angle.degrees
-      , static1 "Turns" "Value" Angle.turns
-      , member0 "In Radians" Angle.inRadians
-      , member0 "In Degrees" Angle.inDegrees
-      , member0 "In Turns" Angle.inTurns
-      , equality
-      , comparison
-      , negateSelf
-      , floatTimes
-      , plusSelf
-      , plus @(Range Radians) Self
-      , plus @(Curve1d Radians) Self
-      , minusSelf
-      , minus @(Range Radians) Self
-      , minus @(Curve1d Radians) Self
-      , timesFloat
-      , times @(Range Unitless) Self
-      , times @(Curve1d Unitless) Self
-      , divByFloat
-      , divBySelf
-      , divBy @(Range Unitless) Self
-      , divBy @(Range Radians) Self
-      , divBy @(Curve1d Unitless) Self
-      , divBy @(Curve1d Radians) Self
-      , floorDivBySelf
-      , modBySelf
-      ]
-  ]
+  class_ @Angle
+    [ constant "Zero" Angle.zero
+    , factory1 "Radians" "Value" Angle.radians
+    , factory1 "Degrees" "Value" Angle.degrees
+    , factory1 "Turns" "Value" Angle.turns
+    , member0 "In Radians" Angle.inRadians
+    , member0 "In Degrees" Angle.inDegrees
+    , member0 "In Turns" Angle.inTurns
+    , equality
+    , comparison
+    , negateSelf
+    , floatTimes
+    , plusSelf
+    , plus @(Range Radians) Self
+    , plus @(Curve1d Radians) Self
+    , minusSelf
+    , minus @(Range Radians) Self
+    , minus @(Curve1d Radians) Self
+    , timesFloat
+    , times @(Range Unitless) Self
+    , times @(Curve1d Unitless) Self
+    , divByFloat
+    , divBySelf
+    , divBy @(Range Unitless) Self
+    , divBy @(Range Radians) Self
+    , divBy @(Curve1d Unitless) Self
+    , divBy @(Curve1d Radians) Self
+    , floorDivBySelf
+    , modBySelf
+    ]
 
-data Range_
-
-instance FFI Range_ where
-  representation = FFI.abstractClassRepresentation "Range"
-
-range :: List Class
+range :: Class
 range =
-  [ class_ @Range_
-      [ constant "Unit" Range.unit
-      , static1 "Constant" "Value" (Range.constant @Unitless)
-      , static1 "Constant" "Value" (Range.constant @Radians)
-      , static1 "Constant" "Value" (Range.constant @Meters)
-      , static2 "From Endpoints" "A" "B" (Range.from @Unitless)
-      , static2 "From Endpoints" "A" "B" (Range.from @Radians)
-      , static2 "From Endpoints" "A" "B" (Range.from @Meters)
-      , static2 "Meters" "A" "B" Range.meters
-      , static2 "Centimeters" "A" "B" Range.centimeters
-      , static2 "Millimeters" "A" "B" Range.millimeters
-      , static2 "Inches" "A" "B" Range.inches
-      , static2 "Aggregate" "A" "B" (Range.aggregate2 @Unitless)
-      , static2 "Aggregate" "A" "B" (Range.aggregate2 @Radians)
-      , static2 "Aggregate" "A" "B" (Range.aggregate2 @Meters)
-      , static3 "Aggregate" "A" "B" "C" (Range.aggregate3 @Unitless)
-      , static3 "Aggregate" "A" "B" "C" (Range.aggregate3 @Radians)
-      , static3 "Aggregate" "A" "B" "C" (Range.aggregate3 @Meters)
-      ]
-  , class_ @(Range Unitless)
-      [ member0 "Endpoints" Range.endpoints
-      , member1 "Intersection" "Other" Range.intersection
-      , member1 "Contains" "Value" Range.includes
-      , member1 "Contains" "Other" Range.contains
-      , negateSelf
-      , floatPlus
-      , floatMinus
-      , floatTimes
-      , floatDivBy
-      , plusFloat
-      , plusSelf
-      , minusFloat
-      , minusSelf
-      , timesFloat
-      , timesSelf
-      , times @Length Self
-      , times @Angle Self
-      , divByFloat
-      , divBySelf
-      ]
-  , class_ @(Range Radians)
-      [ member0 "Endpoints" Range.endpoints
-      , member1 "Intersection" "Other" Range.intersection
-      , member1 "Contains" "Value" Range.includes
-      , member1 "Contains" "Other" Range.contains
-      , negateSelf
-      , floatTimes
-      , plusSelf
-      , plus @Angle Self
-      , minusSelf
-      , minus @Angle Self
-      , timesFloat
-      , divByFloat
-      , divBySelf
-      , divBy @(Range Unitless) Self
-      ]
-  , class_ @(Range Meters)
-      [ member0 "Endpoints" Range.endpoints
-      , member1 "Intersection" "Other" Range.intersection
-      , member1 "Contains" "Value" Range.includes
-      , member1 "Contains" "Other" Range.contains
-      , negateSelf
-      , floatTimes
-      , plusSelf
-      , plus @Length Self
-      , minusSelf
-      , minus @Length Self
-      , timesFloat
-      , divByFloat
-      , divBySelf
-      , divBy @(Range Unitless) Self
-      ]
-  ]
+  class_ @(Range Unitless)
+    [ constant "Unit" Range.unit
+    , factory1 "Constant" "Value" Range.constant
+    , factory2 "From Endpoints" "A" "B" Range.from
+    , factory2 "Aggregate" "A" "B" Range.aggregate2
+    , factory3 "Aggregate" "A" "B" "C" Range.aggregate3
+    , member0 "Endpoints" Range.endpoints
+    , member1 "Intersection" "Other" Range.intersection
+    , member1 "Contains" "Value" Range.includes
+    , member1 "Contains" "Other" Range.contains
+    , negateSelf
+    , floatPlus
+    , floatMinus
+    , floatTimes
+    , floatDivBy
+    , plusFloat
+    , plusSelf
+    , minusFloat
+    , minusSelf
+    , timesFloat
+    , timesSelf
+    , times @Length Self
+    , times @Angle Self
+    , divByFloat
+    , divBySelf
+    ]
 
-color :: List Class
+lengthRange :: Class
+lengthRange =
+  class_ @(Range Meters)
+    [ factory1 "Constant" "Value" Range.constant
+    , factory2 "From Endpoints" "A" "B" Range.from
+    , factory2 "Meters" "A" "B" Range.meters
+    , factory2 "Centimeters" "A" "B" Range.centimeters
+    , factory2 "Millimeters" "A" "B" Range.millimeters
+    , factory2 "Inches" "A" "B" Range.inches
+    , factory2 "Aggregate" "A" "B" Range.aggregate2
+    , factory3 "Aggregate" "A" "B" "C" Range.aggregate3
+    , member0 "Endpoints" Range.endpoints
+    , member1 "Intersection" "Other" Range.intersection
+    , member1 "Contains" "Value" Range.includes
+    , member1 "Contains" "Other" Range.contains
+    , negateSelf
+    , floatTimes
+    , plusSelf
+    , plus @Length Self
+    , minusSelf
+    , minus @Length Self
+    , timesFloat
+    , divByFloat
+    , divBySelf
+    , divBy @(Range Unitless) Self
+    ]
+
+angleRange :: Class
+angleRange =
+  class_ @(Range Radians)
+    [ factory1 "Constant" "Value" Range.constant
+    , factory2 "From Endpoints" "A" "B" Range.from
+    , factory2 "Aggregate" "A" "B" Range.aggregate2
+    , factory3 "Aggregate" "A" "B" "C" Range.aggregate3
+    , member0 "Endpoints" Range.endpoints
+    , member1 "Intersection" "Other" Range.intersection
+    , member1 "Contains" "Value" Range.includes
+    , member1 "Contains" "Other" Range.contains
+    , negateSelf
+    , floatTimes
+    , plusSelf
+    , plus @Angle Self
+    , minusSelf
+    , minus @Angle Self
+    , timesFloat
+    , divByFloat
+    , divBySelf
+    , divBy @(Range Unitless) Self
+    ]
+
+color :: Class
 color =
-  [ class_ @Colour
-      [ static3 "RGB" "Red" "Green" "Blue" Colour.rgb
-      , static3 "RGB255" "Red" "Green" "Blue" Colour.rgb255
-      , static3 "HSL" "Hue" "Saturation" "Lightness" Colour.hsl
-      , static1 "From Hex" "Hex String" Colour.fromHex
-      , member0 "To Hex" Colour.toHex
-      , member0 "Components" Colour.components
-      , member0 "Components255" Colour.components255
-      , constant "Red" Colour.red
-      , constant "Dark Red" Colour.darkRed
-      , constant "Light Orange" Colour.lightOrange
-      , constant "Orange" Colour.orange
-      , constant "Dark Orange" Colour.darkOrange
-      , constant "Light Yellow" Colour.lightYellow
-      , constant "Yellow" Colour.yellow
-      , constant "Dark Yellow" Colour.darkYellow
-      , constant "Light Green" Colour.lightGreen
-      , constant "Green" Colour.green
-      , constant "Dark Green" Colour.darkGreen
-      , constant "Light Blue" Colour.lightBlue
-      , constant "Blue" Colour.blue
-      , constant "Dark Blue" Colour.darkBlue
-      , constant "Light Purple" Colour.lightPurple
-      , constant "Purple" Colour.purple
-      , constant "Dark Purple" Colour.darkPurple
-      , constant "Light Brown" Colour.lightBrown
-      , constant "Brown" Colour.brown
-      , constant "Dark Brown" Colour.darkBrown
-      , constant "Black" Colour.black
-      , constant "White" Colour.white
-      , constant "Light Grey" Colour.lightGrey
-      , constant "Grey" Colour.grey
-      , constant "Dark Grey" Colour.darkGrey
-      , constant "Light Gray" Colour.lightGray
-      , constant "Gray" Colour.gray
-      , constant "Dark Gray" Colour.darkGray
-      , constant "Light Charcoal" Colour.lightCharcoal
-      , constant "Charcoal" Colour.charcoal
-      , constant "Dark Charcoal" Colour.darkCharcoal
-      ]
-  ]
+  class_ @Colour
+    [ factory3 "RGB" "Red" "Green" "Blue" Colour.rgb
+    , factory3 "RGB255" "Red" "Green" "Blue" Colour.rgb255
+    , factory3 "HSL" "Hue" "Saturation" "Lightness" Colour.hsl
+    , factory1 "From Hex" "Hex String" Colour.fromHex
+    , member0 "To Hex" Colour.toHex
+    , member0 "Components" Colour.components
+    , member0 "Components255" Colour.components255
+    , constant "Red" Colour.red
+    , constant "Dark Red" Colour.darkRed
+    , constant "Light Orange" Colour.lightOrange
+    , constant "Orange" Colour.orange
+    , constant "Dark Orange" Colour.darkOrange
+    , constant "Light Yellow" Colour.lightYellow
+    , constant "Yellow" Colour.yellow
+    , constant "Dark Yellow" Colour.darkYellow
+    , constant "Light Green" Colour.lightGreen
+    , constant "Green" Colour.green
+    , constant "Dark Green" Colour.darkGreen
+    , constant "Light Blue" Colour.lightBlue
+    , constant "Blue" Colour.blue
+    , constant "Dark Blue" Colour.darkBlue
+    , constant "Light Purple" Colour.lightPurple
+    , constant "Purple" Colour.purple
+    , constant "Dark Purple" Colour.darkPurple
+    , constant "Light Brown" Colour.lightBrown
+    , constant "Brown" Colour.brown
+    , constant "Dark Brown" Colour.darkBrown
+    , constant "Black" Colour.black
+    , constant "White" Colour.white
+    , constant "Light Grey" Colour.lightGrey
+    , constant "Grey" Colour.grey
+    , constant "Dark Grey" Colour.darkGrey
+    , constant "Light Gray" Colour.lightGray
+    , constant "Gray" Colour.gray
+    , constant "Dark Gray" Colour.darkGray
+    , constant "Light Charcoal" Colour.lightCharcoal
+    , constant "Charcoal" Colour.charcoal
+    , constant "Dark Charcoal" Colour.darkCharcoal
+    ]
 
-data Vector2d_
-
-instance FFI Vector2d_ where
-  representation = FFI.abstractClassRepresentation "Vector2d"
-
-vector2d :: List Class
+vector2d :: Class
 vector2d =
-  [ class_ @Vector2d_
-      [ constant "Zero" (Vector2d.zero @Space @Meters)
-      , static1 "Unit" "Direction" Vector2d.unit
-      , static2 "Meters" "X Component" "Y Component" Vector2d.meters
-      , static2 "Centimeters" "X Component" "Y Component" Vector2d.centimeters
-      , static2 "Millimeters" "X Component" "Y Component" Vector2d.millimeters
-      , static2 "Inches" "X Component" "Y Component" Vector2d.inches
-      , static2 "XY" "X Component" "Y Component" (Vector2d.xy @Space @Unitless)
-      , static2 "XY" "X Component" "Y Component" (Vector2d.xy @Space @Meters)
-      , static1 "X" "X Component" (Vector2d.x @Space @Unitless)
-      , static1 "X" "X Component" (Vector2d.x @Space @Meters)
-      , static1 "Y" "Y Component" (Vector2d.y @Space @Unitless)
-      , static1 "Y" "Y Component" (Vector2d.y @Space @Meters)
-      , static1 "From Components" "Components" (Vector2d.fromComponents @Space @Unitless)
-      , static1 "From Components" "Components" (Vector2d.fromComponents @Space @Meters)
-      ]
-  , class_ @(Vector2d (Space @ Unitless))
-      [ member0 "Components" Vector2d.components
-      , member0 "X Component" Vector2d.xComponent
-      , member0 "Y Component" Vector2d.yComponent
-      , memberU0 "Direction" Vector2d.direction
-      , negateSelf
-      , floatTimes
-      , plusSelf
-      , minusSelf
-      , timesFloat
-      , times @Length Self
-      , divByFloat
-      ]
-  , class_ @(Vector2d (Space @ Meters))
-      [ member0 "Components" Vector2d.components
-      , member0 "X Component" Vector2d.xComponent
-      , member0 "Y Component" Vector2d.yComponent
-      , memberM0 "Direction" Vector2d.direction
-      , negateSelf
-      , floatTimes
-      , plusSelf
-      , minusSelf
-      , timesFloat
-      , divByFloat
-      , divBy @Length Self
-      ]
-  ]
+  class_ @(Vector2d (Space @ Unitless))
+    [ constant "Zero" (Vector2d.zero @Space @Unitless)
+    , factory1 "Unit" "Direction" Vector2d.unit
+    , factory2 "XY" "X Component" "Y Component" Vector2d.xy
+    , factory1 "Y" "Y Component" Vector2d.y
+    , factory1 "X" "X Component" Vector2d.x
+    , factory1 "From Components" "Components" Vector2d.fromComponents
+    , member0 "Components" Vector2d.components
+    , member0 "X Component" Vector2d.xComponent
+    , member0 "Y Component" Vector2d.yComponent
+    , memberU0 "Direction" Vector2d.direction
+    , negateSelf
+    , floatTimes
+    , plusSelf
+    , minusSelf
+    , timesFloat
+    , times @Length Self
+    , divByFloat
+    ]
 
-direction2d :: List Class
+displacement2d :: Class
+displacement2d =
+  class_ @(Vector2d (Space @ Meters))
+    [ constant "Zero" (Vector2d.zero @Space @Meters)
+    , factory2 "XY" "X Component" "Y Component" Vector2d.xy
+    , factory1 "X" "X Component" Vector2d.x
+    , factory1 "Y" "Y Component" Vector2d.y
+    , factory2 "Meters" "X Component" "Y Component" Vector2d.meters
+    , factory2 "Centimeters" "X Component" "Y Component" Vector2d.centimeters
+    , factory2 "Millimeters" "X Component" "Y Component" Vector2d.millimeters
+    , factory2 "Inches" "X Component" "Y Component" Vector2d.inches
+    , factory1 "From Components" "Components" Vector2d.fromComponents
+    , member0 "Components" Vector2d.components
+    , member0 "X Component" Vector2d.xComponent
+    , member0 "Y Component" Vector2d.yComponent
+    , memberM0 "Direction" Vector2d.direction
+    , negateSelf
+    , floatTimes
+    , plusSelf
+    , minusSelf
+    , timesFloat
+    , divByFloat
+    , divBy @Length Self
+    ]
+
+direction2d :: Class
 direction2d =
-  [ class_ @(Direction2d Space)
-      [ constant "X" Direction2d.x
-      , constant "Y" Direction2d.y
-      , constant "Positive X" Direction2d.positiveX
-      , constant "Positive Y" Direction2d.positiveY
-      , constant "Negative X" Direction2d.negativeX
-      , constant "Negative Y" Direction2d.negativeY
-      , static1 "From Angle" "Angle" Direction2d.fromAngle
-      , member0 "To Angle" Direction2d.toAngle
-      , member0 "Components" Direction2d.components
-      , member0 "X Component" Direction2d.xComponent
-      , member0 "Y Component" Direction2d.yComponent
-      , negateSelf
-      ]
-  ]
+  class_ @(Direction2d Space)
+    [ constant "X" Direction2d.x
+    , constant "Y" Direction2d.y
+    , constant "Positive X" Direction2d.positiveX
+    , constant "Positive Y" Direction2d.positiveY
+    , constant "Negative X" Direction2d.negativeX
+    , constant "Negative Y" Direction2d.negativeY
+    , factory1 "From Angle" "Angle" Direction2d.fromAngle
+    , member0 "To Angle" Direction2d.toAngle
+    , member0 "Components" Direction2d.components
+    , member0 "X Component" Direction2d.xComponent
+    , member0 "Y Component" Direction2d.yComponent
+    , negateSelf
+    ]
 
-data Point2d_
-
-instance FFI Point2d_ where
-  representation = FFI.abstractClassRepresentation "Point2d"
-
-point2d :: List Class
+point2d :: Class
 point2d =
-  [ class_ @Point2d_
-      [ constant "Origin" (Point2d.origin @Space @Meters)
-      , static2 "XY" "X Coordinate" "Y Coordinate" (Point2d.xy @Space @Unitless)
-      , static2 "XY" "X Coordinate" "Y Coordinate" (Point2d.xy @Space @Meters)
-      , static1 "X" "X Coordinate" (Point2d.x @Space @Unitless)
-      , static1 "X" "X Coordinate" (Point2d.x @Space @Meters)
-      , static1 "Y" "Y Coordinate" (Point2d.y @Space @Unitless)
-      , static1 "Y" "Y Coordinate" (Point2d.y @Space @Meters)
-      , static2 "Meters" "X Coordinate" "Y Coordinate" Point2d.meters
-      , static2 "Centimeters" "X Coordinate" "Y Coordinate" Point2d.centimeters
-      , static2 "Millimeters" "X Coordinate" "Y Coordinate" Point2d.millimeters
-      , static2 "Inches" "X Coordinate" "Y Coordinate" Point2d.inches
-      , static1 "From Coordinates" "Coordinates" (Point2d.fromCoordinates @Space @Unitless)
-      , static1 "From Coordinates" "Coordinates" (Point2d.fromCoordinates @Space @Meters)
-      ]
-  , class_ @(Point2d (Space @ Unitless))
-      [ member0 "Coordinates" Point2d.coordinates
-      , member0 "X Coordinate" Point2d.xCoordinate
-      , member0 "Y Coordinate" Point2d.yCoordinate
-      , member1 "Distance To" "Other" Point2d.distanceFrom
-      , member1 "Midpoint" "Other" Point2d.midpoint
-      ]
-  , class_ @(Point2d (Space @ Meters))
-      [ member0 "Coordinates" Point2d.coordinates
-      , member0 "X Coordinate" Point2d.xCoordinate
-      , member0 "Y Coordinate" Point2d.yCoordinate
-      , member1 "Distance To" "Other" Point2d.distanceFrom
-      , member1 "Midpoint" "Other" Point2d.midpoint
-      ]
-  ]
+  class_ @(Point2d (Space @ Meters))
+    [ constant "Origin" (Point2d.origin @Space @Meters)
+    , factory2 "XY" "X Coordinate" "Y Coordinate" Point2d.xy
+    , factory1 "X" "X Coordinate" Point2d.x
+    , factory1 "Y" "Y Coordinate" Point2d.y
+    , factory2 "Meters" "X Coordinate" "Y Coordinate" Point2d.meters
+    , factory2 "Centimeters" "X Coordinate" "Y Coordinate" Point2d.centimeters
+    , factory2 "Millimeters" "X Coordinate" "Y Coordinate" Point2d.millimeters
+    , factory2 "Inches" "X Coordinate" "Y Coordinate" Point2d.inches
+    , factory1 "From Coordinates" "Coordinates" Point2d.fromCoordinates
+    , member0 "Coordinates" Point2d.coordinates
+    , member0 "X Coordinate" Point2d.xCoordinate
+    , member0 "Y Coordinate" Point2d.yCoordinate
+    , member1 "Distance To" "Other" Point2d.distanceFrom
+    , member1 "Midpoint" "Other" Point2d.midpoint
+    ]
 
-data Bounds2d_
+uvPoint :: Class
+uvPoint =
+  class_ @(Point2d (Space @ Unitless))
+    [ constant "Origin" (Point2d.origin @Space @Unitless)
+    , factory2 "UV" "U Coordinate" "V Coordinate" Point2d.xy
+    , factory1 "U" "U Coordinate" Point2d.x
+    , factory1 "V" "V Coordinate" Point2d.y
+    , factory1 "From Coordinates" "Coordinates" Point2d.fromCoordinates
+    , member0 "Coordinates" Point2d.coordinates
+    , member0 "U Coordinate" Point2d.xCoordinate
+    , member0 "V Coordinate" Point2d.yCoordinate
+    , member1 "Distance To" "Other" Point2d.distanceFrom
+    , member1 "Midpoint" "Other" Point2d.midpoint
+    ]
 
-instance FFI Bounds2d_ where
-  representation = FFI.abstractClassRepresentation "Bounds2d"
-
-bounds2d :: List Class
+bounds2d :: Class
 bounds2d =
-  [ class_ @Bounds2d_
-      [ static2 "XY" "X Coordinate" "Y Coordinate" (Bounds2d.xy @Space @Unitless)
-      , static2 "XY" "X Coordinate" "Y Coordinate" (Bounds2d.xy @Space @Meters)
-      , static1 "Constant" "Point" (Bounds2d.constant @Space @Unitless)
-      , static1 "Constant" "Point" (Bounds2d.constant @Space @Meters)
-      , static2 "Hull" "P1" "P2" (Bounds2d.hull2 @Space @Unitless)
-      , static2 "Hull" "P1" "P2" (Bounds2d.hull2 @Space @Meters)
-      , static3 "Hull" "P1" "P2" "P3" (Bounds2d.hull3 @Space @Unitless)
-      , static3 "Hull" "P1" "P2" "P3" (Bounds2d.hull3 @Space @Meters)
-      , static4 "Hull" "P1" "P2" "P3" "P4" (Bounds2d.hull4 @Space @Unitless)
-      , static4 "Hull" "P1" "P2" "P3" "P4" (Bounds2d.hull4 @Space @Meters)
-      ]
-  , class_ @(Bounds2d (Space @ Unitless))
-      [ member0 "Coordinates" Bounds2d.coordinates
-      , member0 "X Coordinate" Bounds2d.xCoordinate
-      , member0 "Y Coordinate" Bounds2d.yCoordinate
-      ]
-  , class_ @(Bounds2d (Space @ Meters))
-      [ member0 "Coordinates" Bounds2d.coordinates
-      , member0 "X Coordinate" Bounds2d.xCoordinate
-      , member0 "Y Coordinate" Bounds2d.yCoordinate
-      ]
-  ]
+  class_ @(Bounds2d (Space @ Meters))
+    [ factory2 "XY" "X Coordinate" "Y Coordinate" Bounds2d.xy
+    , factory1 "Constant" "Point" Bounds2d.constant
+    , factory2 "Hull" "P1" "P2" Bounds2d.hull2
+    , factory3 "Hull" "P1" "P2" "P3" Bounds2d.hull3
+    , factory4 "Hull" "P1" "P2" "P3" "P4" Bounds2d.hull4
+    , member0 "Coordinates" Bounds2d.coordinates
+    , member0 "X Coordinate" Bounds2d.xCoordinate
+    , member0 "Y Coordinate" Bounds2d.yCoordinate
+    ]
 
-data Curve1d_
+uvBounds :: Class
+uvBounds =
+  class_ @(Bounds2d (Space @ Unitless))
+    [ factory2 "UV" "U Coordinate" "V Coordinate" Bounds2d.xy
+    , factory1 "Constant" "Point" Bounds2d.constant
+    , factory2 "Hull" "P1" "P2" Bounds2d.hull2
+    , factory3 "Hull" "P1" "P2" "P3" Bounds2d.hull3
+    , factory4 "Hull" "P1" "P2" "P3" "P4" Bounds2d.hull4
+    , member0 "Coordinates" Bounds2d.coordinates
+    , member0 "U Coordinate" Bounds2d.xCoordinate
+    , member0 "V Coordinate" Bounds2d.yCoordinate
+    ]
 
-instance FFI Curve1d_ where
-  representation = FFI.abstractClassRepresentation "Curve1d"
+curve :: Class
+curve =
+  class_ @(Curve1d Unitless)
+    [ constant "T" Curve1d.t
+    , member0 "Squared" Curve1d.squared
+    , member0 "Sqrt" Curve1d.sqrt
+    , member1 "Evaluate" "Parameter Value" (\t c -> Curve1d.evaluate c t)
+    , memberU0 "Zeros" Curve1d.zeros
+    , negateSelf
+    , floatPlus
+    , floatMinus
+    , floatTimes
+    , floatDivBy
+    , plusFloat
+    , plusSelf
+    , minusFloat
+    , minusSelf
+    , timesFloat
+    , timesSelf
+    , times @Length Self
+    , times @Angle Self
+    , times @(Curve1d Meters) Self
+    , times @(Curve1d Radians) Self
+    , divByFloat
+    , divBySelf
+    ]
 
-curve1d :: List Class
-curve1d =
-  [ class_ @Curve1d_
-      [ constant "T" Curve1d.t
-      , static1 "Sin" "Curve" Curve1d.sin
-      , static1 "Cos" "Curve" Curve1d.cos
-      , static1 "Sqrt" "Curve" (Curve1d.sqrt @Unitless)
-      , nested @Curve1d.Root
-          [ member0 "Value" Curve1d.Root.value
-          , member0 "Order" Curve1d.Root.order
-          , member0 "Sign" (\root -> 1 * Curve1d.Root.sign root) -- TODO return as enum?
-          ]
-      ]
-  , class_ @(Curve1d Unitless)
-      [ member0 "Squared" Curve1d.squared
-      , member1 "Evaluate" "Parameter Value" (\t curve -> Curve1d.evaluate curve t)
-      , memberU0 "Zeros" Curve1d.zeros
-      , negateSelf
-      , floatPlus
-      , floatMinus
-      , floatTimes
-      , floatDivBy
-      , plusFloat
-      , plusSelf
-      , minusFloat
-      , minusSelf
-      , timesFloat
-      , timesSelf
-      , times @Length Self
-      , times @Angle Self
-      , times @(Curve1d Meters) Self
-      , times @(Curve1d Radians) Self
-      , divByFloat
-      , divBySelf
-      ]
-  , class_ @(Curve1d Radians)
-      [ member1 "Evaluate" "Parameter Value" (\t curve -> Curve1d.evaluate curve t)
-      , memberR0 "Zeros" Curve1d.zeros
-      , negateSelf
-      , floatTimes
-      , plusSelf
-      , minusSelf
-      , timesFloat
-      , times @(Curve1d Unitless) Self
-      , divByFloat
-      , divBySelf
-      , divBy @Angle Self
-      , divBy @(Curve1d Unitless) Self
-      ]
-  , class_ @(Curve1d Meters)
-      [ member1 "Evaluate" "Parameter Value" (\t curve -> Curve1d.evaluate curve t)
-      , memberM0 "Zeros" Curve1d.zeros
-      , negateSelf
-      , floatTimes
-      , plusSelf
-      , minusSelf
-      , timesFloat
-      , times @(Curve1d Unitless) Self
-      , divByFloat
-      , divBySelf
-      , divBy @Length Self
-      , divBy @(Curve1d Unitless) Self
-      ]
-  ]
+angleCurve :: Class
+angleCurve =
+  class_ @(Curve1d Radians)
+    [ member0 "Sin" Curve1d.sin
+    , member0 "Cos" Curve1d.cos
+    , member1 "Evaluate" "Parameter Value" (\t c -> Curve1d.evaluate c t)
+    , memberR0 "Zeros" Curve1d.zeros
+    , negateSelf
+    , floatTimes
+    , plusSelf
+    , minusSelf
+    , timesFloat
+    , times @(Curve1d Unitless) Self
+    , divByFloat
+    , divBySelf
+    , divBy @Angle Self
+    , divBy @(Curve1d Unitless) Self
+    ]
+
+lengthCurve :: Class
+lengthCurve =
+  class_ @(Curve1d Meters)
+    [ member1 "Evaluate" "Parameter Value" (\t c -> Curve1d.evaluate c t)
+    , memberM0 "Zeros" Curve1d.zeros
+    , negateSelf
+    , floatTimes
+    , plusSelf
+    , minusSelf
+    , timesFloat
+    , times @(Curve1d Unitless) Self
+    , divByFloat
+    , divBySelf
+    , divBy @Length Self
+    , divBy @(Curve1d Unitless) Self
+    ]
+
+curveZero :: Class
+curveZero =
+  class_ @Curve1d.Zero
+    [ member0 "Location" Curve1d.Zero.location
+    , member0 "Order" Curve1d.Zero.order
+    , member0 "Sign" ((1 *) . Curve1d.Zero.sign) -- TODO return as enum?
+    ]
 
 data Drawing2d_
 
 instance FFI Drawing2d_ where
-  representation = FFI.abstractClassRepresentation "Drawing2d"
+  representation = FFI.classRepresentation "Drawing2d"
 
-drawing2d :: List Class
+drawing2d :: Class
 drawing2d =
-  [ class_ @Drawing2d_
-      [ static2 "To SVG" "View Box" "Entities" Drawing2d.toSvg
-      , static2 "Polygon" "Attributes" "Vertices" Drawing2d.polygon
-      , static3 "Circle" "Attributes" "Center Point" "Radius" Drawing2d.circle
-      , constant "Black Stroke" Drawing2d.blackStroke
-      , static1 "Stroke Color" "Color" Drawing2d.strokeColour
-      , constant "No Fill" Drawing2d.noFill
-      , static1 "Fill Color" "Color" Drawing2d.fillColour
-      , nested @(Drawing2d.Entity Space) []
-      , nested @(Drawing2d.Attribute Space) []
-      ]
-  ]
+  class_ @Drawing2d_
+    [ static2 "To SVG" "View Box" "Entities" Drawing2d.toSvg
+    , static2 "Polygon" "Attributes" "Vertices" Drawing2d.polygon
+    , static3 "Circle" "Attributes" "Center Point" "Radius" Drawing2d.circle
+    , constant "Black Stroke" Drawing2d.blackStroke
+    , static1 "Stroke Color" "Color" Drawing2d.strokeColour
+    , constant "No Fill" Drawing2d.noFill
+    , static1 "Fill Color" "Color" Drawing2d.fillColour
+    , nested @(Drawing2d.Entity Space) []
+    , nested @(Drawing2d.Attribute Space) []
+    ]
 
 ----- CLASS MEMBERS -----
 
@@ -537,6 +525,18 @@ data Member value where
 constant :: FFI result => Text -> result -> Member value
 constant = Const
 
+factory1 :: (FFI a, FFI value) => Text -> Text -> (a -> value) -> Member value
+factory1 = Static1
+
+factory2 :: (FFI a, FFI b, FFI value) => Text -> Text -> Text -> (a -> b -> value) -> Member value
+factory2 = Static2
+
+factory3 :: (FFI a, FFI b, FFI c, FFI value) => Text -> Text -> Text -> Text -> (a -> b -> c -> value) -> Member value
+factory3 = Static3
+
+factory4 :: (FFI a, FFI b, FFI c, FFI d, FFI value) => Text -> Text -> Text -> Text -> Text -> (a -> b -> c -> d -> value) -> Member value
+factory4 = Static4
+
 static1 :: (FFI a, FFI result) => Text -> Text -> (a -> result) -> Member value
 static1 = Static1
 
@@ -545,9 +545,6 @@ static2 = Static2
 
 static3 :: (FFI a, FFI b, FFI c, FFI result) => Text -> Text -> Text -> Text -> (a -> b -> c -> result) -> Member value
 static3 = Static3
-
-static4 :: (FFI a, FFI b, FFI c, FFI d, FFI result) => Text -> Text -> Text -> Text -> Text -> (a -> b -> c -> d -> result) -> Member value
-static4 = Static4
 
 member0 :: (FFI value, FFI result) => Text -> (value -> result) -> Member value
 member0 = Member0
@@ -767,7 +764,7 @@ buildClass
       [] ->
         Class
           { id = case FFI.typeOf @value Proxy of
-              FFI.Class (FFI.Id Proxy names maybeUnits) -> FFI.Id Proxy names maybeUnits
+              FFI.Class (FFI.Id Proxy names) -> FFI.Id Proxy names
               _ -> internalError "Every class defined in the API must correspond to an FFI type with class representation"
           , constants = constantsAcc
           , staticFunctions = staticFunctionsAcc

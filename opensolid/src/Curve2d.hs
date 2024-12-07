@@ -439,13 +439,13 @@ isOverlappingSegment curve1 curve2 (OverlappingSegment{t1}) = do
   let segment1LiesOnSegment2 = List.allSatisfy (^ curve2) curve1TestPoints
   segment1IsNondegenerate && segment1LiesOnSegment2
 
-findEndpointRoots ::
+findEndpointZeros ::
   Tolerance units =>
   Point2d (space @ units) ->
   Curve2d (space @ units) ->
   Intersections.Error ->
   Result Intersections.Error (List Float)
-findEndpointRoots endpoint curve curveIsPointError =
+findEndpointZeros endpoint curve curveIsPointError =
   case findPoint endpoint curve of
     Success parameterValues -> Success parameterValues
     Failure FindPoint.HigherOrderSolution -> Failure Intersections.HigherOrderIntersection
@@ -457,17 +457,17 @@ findEndpointIntersections ::
   Curve2d (space @ units) ->
   Result Intersections.Error (List UvPoint)
 findEndpointIntersections curve1 curve2 = Result.do
-  start1Roots <- findEndpointRoots (startPoint curve1) curve2 Intersections.SecondCurveIsPoint
-  end1Roots <- findEndpointRoots (endPoint curve1) curve2 Intersections.SecondCurveIsPoint
-  start2Roots <- findEndpointRoots (startPoint curve2) curve1 Intersections.FirstCurveIsPoint
-  end2Roots <- findEndpointRoots (endPoint curve2) curve1 Intersections.FirstCurveIsPoint
+  start1Zeros <- findEndpointZeros (startPoint curve1) curve2 Intersections.SecondCurveIsPoint
+  end1Zeros <- findEndpointZeros (endPoint curve1) curve2 Intersections.SecondCurveIsPoint
+  start2Zeros <- findEndpointZeros (startPoint curve2) curve1 Intersections.FirstCurveIsPoint
+  end2Zeros <- findEndpointZeros (endPoint curve2) curve1 Intersections.FirstCurveIsPoint
   Success $
     List.sortAndDeduplicate $
       List.concat $
-        [ List.map (\t2 -> Point2d 0.0 t2) start1Roots
-        , List.map (\t2 -> Point2d 1.0 t2) end1Roots
-        , List.map (\t1 -> Point2d t1 0.0) start2Roots
-        , List.map (\t1 -> Point2d t1 1.0) end2Roots
+        [ List.map (\t2 -> Point2d 0.0 t2) start1Zeros
+        , List.map (\t2 -> Point2d 1.0 t2) end1Zeros
+        , List.map (\t1 -> Point2d t1 0.0) start2Zeros
+        , List.map (\t1 -> Point2d t1 1.0) end2Zeros
         ]
 
 data Intersections

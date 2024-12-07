@@ -1,6 +1,6 @@
 module Curve1d
   ( Curve1d (Parametric)
-  , Root
+  , Zero
   , Interface (..)
   , evaluate
   , evaluateBounds
@@ -24,8 +24,8 @@ where
 import Angle qualified
 import Composition
 import Curve1d.Integral (Integral (Integral))
-import Curve1d.Root (Root)
-import Curve1d.Root qualified as Root
+import Curve1d.Zero (Zero)
+import Curve1d.Zero qualified as Zero
 import Curve1d.Zeros qualified as Zeros
 import Domain1d (Domain1d)
 import Domain1d qualified
@@ -107,13 +107,13 @@ data Curve1d units where
 deriving instance Show (Curve1d units)
 
 instance FFI (Curve1d Unitless) where
-  representation = FFI.classRepresentation "Curve1d" (Just "Unitless")
-
-instance FFI (Curve1d Radians) where
-  representation = FFI.classRepresentation "Curve1d" (Just "Radians")
+  representation = FFI.classRepresentation "Curve"
 
 instance FFI (Curve1d Meters) where
-  representation = FFI.classRepresentation "Curve1d" (Just "Meters")
+  representation = FFI.classRepresentation "Length Curve"
+
+instance FFI (Curve1d Radians) where
+  representation = FFI.classRepresentation "Angle Curve"
 
 instance HasUnits (Curve1d units) where
   type UnitsOf (Curve1d units) = units
@@ -362,9 +362,9 @@ cos curve = Cos curve
 integral :: Curve1d units -> Estimate units
 integral curve = Estimate.new (Integral curve (derivative curve) Range.unit)
 
------ ROOT FINDING -----
+----- ZERO FINDING -----
 
-zeros :: Tolerance units => Curve1d units -> Result Zeros.Error (List Root)
+zeros :: Tolerance units => Curve1d units -> Result Zeros.Error (List Zero)
 zeros curve
   | curve ~= Qty.zero = Failure Zeros.ZeroEverywhere
   | otherwise = Result.do
@@ -372,7 +372,7 @@ zeros curve
       let derivativeBounds tRange = Stream.map (\f -> evaluateBounds f tRange) derivatives
       let cache = Solve1d.init derivativeBounds
       case Solve1d.search (findZeros derivatives) cache of
-        Success roots -> Success (List.sortBy Root.value roots)
+        Success foundZeros -> Success (List.sortBy Zero.location foundZeros)
         Failure Solve1d.InfiniteRecursion -> Failure Zeros.HigherOrderZero
 
 findZeros ::
@@ -381,7 +381,7 @@ findZeros ::
   Domain1d ->
   Stream (Range units) ->
   Solve1d.Exclusions exclusions ->
-  Solve1d.Action exclusions Root
+  Solve1d.Action exclusions Zero
 findZeros derivatives subdomain derivativeBounds exclusions
   -- Skip the subdomain entirely if the curve itself is non-zero everywhere
   | not (Stream.head derivativeBounds ^ Qty.zero) = Solve1d.pass
@@ -398,14 +398,14 @@ findZeros derivatives subdomain derivativeBounds exclusions
           Resolved (NonEmpty subdomainZeros) -> do
             let subdomainInterior = Domain1d.interior subdomain
             if NonEmpty.allSatisfy (\(t0, _) -> Range.includes t0 subdomainInterior) subdomainZeros
-              then Solve1d.return (NonEmpty.map toRoot subdomainZeros)
+              then Solve1d.return (NonEmpty.map toZero subdomainZeros)
               else Solve1d.recurse
 
-toRoot :: (Float, Solve1d.Neighborhood units) -> Root
-toRoot (t0, neighborhood) = Solve1d.root t0 neighborhood
+toZero :: (Float, Solve1d.Neighborhood units) -> Zero
+toZero (t0, neighborhood) = Solve1d.zero t0 neighborhood
 
-maxRootOrder :: Int
-maxRootOrder = 3
+maxZeroOrder :: Int
+maxZeroOrder = 3
 
 findZerosOrder ::
   Tolerance units =>
@@ -415,13 +415,13 @@ findZerosOrder ::
   Stream (Range units) ->
   Fuzzy (List (Float, Solve1d.Neighborhood units))
 findZerosOrder k derivatives subdomain derivativeBounds
-  -- The function itself is non-zero, so no roots
+  -- The function itself is non-zero, so no zeros
   | k == 0 && not (Stream.head derivativeBounds ^ Qty.zero) = Resolved []
   -- A derivative is resolved, so it has no zeros
   | k > 0 && Range.isResolved (Stream.head derivativeBounds) = Resolved []
-  -- We've exceeded the maximum root order without finding a non-zero derivative
-  | k > maxRootOrder = Unresolved
-  -- Otherwise, find higher-order roots and then search in between them
+  -- We've exceeded the maximum zero order without finding a non-zero derivative
+  | k > maxZeroOrder = Unresolved
+  -- Otherwise, find higher-order zeros and then search in between them
   | otherwise = Fuzzy.do
       let higherDerivatives = Stream.tail derivatives
       let higherDerivativeBounds = Stream.tail derivativeBounds

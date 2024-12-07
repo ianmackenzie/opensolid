@@ -57,10 +57,10 @@ type Resolution = ?resolution :: Length
 type Point space = Point2d (space @ Meters)
 
 instance FFI (Entity space) where
-  representation = FFI.nestedClassRepresentation "Drawing2d" "Entity" Nothing
+  representation = FFI.nestedClassRepresentation "Drawing2d" "Entity"
 
 instance FFI (Attribute space) where
-  representation = FFI.nestedClassRepresentation "Drawing2d" "Attribute" Nothing
+  representation = FFI.nestedClassRepresentation "Drawing2d" "Attribute"
 
 entityText :: Text -> Entity space -> Maybe Text
 entityText _ Empty = Nothing

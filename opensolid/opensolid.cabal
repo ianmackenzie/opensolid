@@ -125,7 +125,7 @@ library
     CoordinateSystem
     CubicSpline2d
     Curve1d
-    Curve1d.Root
+    Curve1d.Zero
     Curve1d.Zeros
     Curve2d
     Curve2d.FindPoint

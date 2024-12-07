@@ -3,7 +3,7 @@ module Tests.Curve1d (tests) where
 import Angle qualified
 import Curve1d ()
 import Curve1d qualified
-import Curve1d.Root (Root (Root))
+import Curve1d.Zero (Zero (Zero))
 import OpenSolid
 import Test (Test)
 import Test qualified
@@ -12,30 +12,30 @@ import Tolerance qualified
 tests :: List Test
 tests =
   Tolerance.using 1e-12 $
-    [ crossingRoots
-    , tangentRoots
+    [ crossingZeros
+    , tangentZeros
     , approximateEquality
     ]
 
-crossingRoots :: Tolerance Unitless => Test
-crossingRoots = Test.verify "crossingRoots" Test.do
+crossingZeros :: Tolerance Unitless => Test
+crossingZeros = Test.verify "crossingZeros" Test.do
   let x = 3.0 * Curve1d.t
   let y = (x - 1.0) * (x - 1.0) * (x - 1.0) - (x - 1.0)
-  let expectedRoots = [Root 0.0 0 Positive, Root (1 / 3) 0 Negative, Root (2 / 3) 0 Positive]
-  roots <- Curve1d.zeros y
-  Test.expect (roots ~= expectedRoots)
-    |> Test.output "roots" roots
-    |> Test.output "expectedRoots" expectedRoots
+  let expectedZeros = [Zero 0.0 0 Positive, Zero (1 / 3) 0 Negative, Zero (2 / 3) 0 Positive]
+  zeros <- Curve1d.zeros y
+  Test.expect (zeros ~= expectedZeros)
+    |> Test.output "zeros" zeros
+    |> Test.output "expectedZeros" expectedZeros
 
-tangentRoots :: Tolerance Unitless => Test
-tangentRoots = Test.verify "tangentRoots" Test.do
+tangentZeros :: Tolerance Unitless => Test
+tangentZeros = Test.verify "tangentZeros" Test.do
   let theta = Angle.twoPi * Curve1d.t
   let expression = Curve1d.squared (Curve1d.sin theta)
-  let expectedRoots = [Root t 1 Positive | t <- [0.0, 0.5, 1.0]]
-  roots <- Curve1d.zeros expression
-  Test.expect (roots ~= expectedRoots)
-    |> Test.output "roots" roots
-    |> Test.output "expectedRoots" expectedRoots
+  let expectedZeros = [Zero t 1 Positive | t <- [0.0, 0.5, 1.0]]
+  zeros <- Curve1d.zeros expression
+  Test.expect (zeros ~= expectedZeros)
+    |> Test.output "zeros" zeros
+    |> Test.output "expectedZeros" expectedZeros
 
 approximateEquality :: Tolerance Unitless => Test
 approximateEquality = Test.verify "approximateEquality" Test.do

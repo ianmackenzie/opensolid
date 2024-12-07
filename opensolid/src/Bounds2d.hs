@@ -84,11 +84,11 @@ instance Bounds.Interface (Bounds2d (space @ units)) where
   aggregate2 = aggregate2
   intersection = intersection
 
-instance FFI (Bounds2d (space @ Unitless)) where
-  representation = FFI.classRepresentation "Bounds2d" (Just "Unitless")
-
 instance FFI (Bounds2d (space @ Meters)) where
-  representation = FFI.classRepresentation "Bounds2d" (Just "Meters")
+  representation = FFI.classRepresentation "Bounds2d"
+
+instance FFI (Bounds2d (space @ Unitless)) where
+  representation = FFI.classRepresentation "UvBounds"
 
 instance
   ( space1 ~ space2

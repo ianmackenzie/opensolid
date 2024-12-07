@@ -76,11 +76,11 @@ deriving instance Ord (Point2d (space @ units))
 
 deriving instance Show (Point2d (space @ units))
 
-instance FFI (Point2d (space @ Unitless)) where
-  representation = FFI.classRepresentation "Point2d" (Just "Unitless")
-
 instance FFI (Point2d (space @ Meters)) where
-  representation = FFI.classRepresentation "Point2d" (Just "Meters")
+  representation = FFI.classRepresentation "Point2d"
+
+instance FFI (Point2d (space @ Unitless)) where
+  representation = FFI.classRepresentation "UvPoint"
 
 instance HasUnits (Point2d (space @ units)) where
   type UnitsOf (Point2d (space @ units)) = units

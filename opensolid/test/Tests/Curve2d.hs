@@ -9,7 +9,7 @@ import Angle qualified
 import Arc2d qualified
 import CubicSpline2d qualified
 import Curve1d qualified
-import Curve1d.Root qualified
+import Curve1d.Zero qualified
 import Curve2d (Curve2d)
 import Curve2d qualified
 import Curve2d.IntersectionPoint (IntersectionPoint (IntersectionPoint))
@@ -169,12 +169,12 @@ solving = Test.verify "solving" Test.do
   let arc = Arc2d.from (Point2d.meters 0.0 1.0) (Point2d.meters 1.0 0.0) Angle.quarterTurn
   let squaredDistanceFromOrigin = VectorCurve2d.squaredMagnitude (arc - Point2d.origin)
   let desiredDistance = Length.meters 0.5
-  roots <-
+  zeros <-
     Tolerance.using (Tolerance.ofSquared desiredDistance) do
       Curve1d.zeros (squaredDistanceFromOrigin - Qty.squared desiredDistance)
   let distances =
-        roots
-          |> List.map Curve1d.Root.value
+        zeros
+          |> List.map Curve1d.Zero.location
           |> List.map (Curve2d.evaluate arc)
           |> List.map (Point2d.distanceFrom Point2d.origin)
   Test.expect (distances ~= [desiredDistance, desiredDistance])
