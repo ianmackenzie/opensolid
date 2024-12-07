@@ -14,6 +14,7 @@ import OpenSolid.API.Constraint qualified as Constraint
 import OpenSolid.API.Name (Name)
 import OpenSolid.API.Name qualified as Name
 import OpenSolid.FFI qualified as FFI
+import Pair qualified
 import Python qualified
 import Python.Class qualified
 import Text qualified
@@ -33,12 +34,19 @@ overloadCase givenMatchPattern body =
     , Python.indent body
     ]
 
+splits :: List a -> List (List a, List a)
+splits [] = [([], [])]
+splits list@(first : rest) = ([], list) : List.map (Pair.mapFirst (first :)) (splits rest)
+
+singlePattern :: (List (Name, FFI.Type), List (Name, FFI.Type)) -> Text
+singlePattern (positionalArguments, namedArguments) = do
+  let positionalPattern = "[" + Text.join "," (List.map asPattern positionalArguments) + "]"
+  let keywordPattern = "{" + Text.join "," (List.map namedPattern namedArguments) + "}"
+  "(" + positionalPattern + ", " + keywordPattern + ")"
+
 matchPattern :: List (Name, FFI.Type) -> Text
-matchPattern [] = "([], entries) if not entries"
-matchPattern arguments = do
-  let positionalPattern = "([" + Text.join "," (List.map asPattern arguments) + "],{})"
-  let keywordPattern = "([], {" + Text.join "," (List.map namedPattern arguments) + "})"
-  positionalPattern + " | " + keywordPattern
+matchPattern arguments =
+  Text.join " | " (List.map singlePattern (List.reverse (splits arguments)))
 
 asPattern :: (Name, FFI.Type) -> Text
 asPattern (argName, argType) = typePattern argType + " as " + Name.snakeCase argName

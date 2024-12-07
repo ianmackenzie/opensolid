@@ -16,9 +16,15 @@ import Python.Function qualified
 import Python.Type qualified
 import Text qualified
 
+argumentCount :: StaticFunction -> Int
+argumentCount staticFunction = do
+  let (_, arguments, _) = StaticFunction.signature staticFunction
+  List.length arguments
+
 definition :: FFI.Id a -> (Name, List StaticFunction) -> Text
 definition classId (functionName, staticFunctions) = do
-  case List.map (overload classId functionName) staticFunctions of
+  let sortedFunctions = List.reverse (List.sortBy argumentCount staticFunctions)
+  case List.map (overload classId functionName) sortedFunctions of
     [(signature, _, body)] -> Python.lines [signature, Python.indent [body]]
     overloads -> do
       let overloadDeclaration (signature, _, _) = Python.Function.overloadDeclaration signature
