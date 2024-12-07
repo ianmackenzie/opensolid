@@ -147,7 +147,7 @@ classDefinition
           Python.lines
             [ "class " + Python.Class.unqualifiedName classId + ":"
             , "    def __init__(self, *, ptr : c_void_p) -> None:"
-            , "        self.__ptr__ = ptr"
+            , "        self._ptr = ptr"
             , Python.indent (List.map Python.Constant.declaration constants)
             , Python.indent (List.map (Python.StaticFunction.definition classId) staticFunctions)
             , Python.indent (List.map (Python.MemberFunction.definition classId) memberFunctions)

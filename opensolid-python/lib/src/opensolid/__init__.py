@@ -192,7 +192,7 @@ class _List_c_double(Structure):
 
 class Length:
     def __init__(self, *, ptr: c_void_p) -> None:
-        self.__ptr__ = ptr
+        self._ptr = ptr
 
     zero: Length = None  # type: ignore[assignment]
 
@@ -229,39 +229,39 @@ class Length:
         return Length(ptr=output)
 
     def in_meters(self) -> float:
-        inputs = self.__ptr__
+        inputs = self._ptr
         output = c_double()
         _lib.opensolid_Length_inMeters(ctypes.byref(inputs), ctypes.byref(output))
         return output.value
 
     def in_centimeters(self) -> float:
-        inputs = self.__ptr__
+        inputs = self._ptr
         output = c_double()
         _lib.opensolid_Length_inCentimeters(ctypes.byref(inputs), ctypes.byref(output))
         return output.value
 
     def in_millimeters(self) -> float:
-        inputs = self.__ptr__
+        inputs = self._ptr
         output = c_double()
         _lib.opensolid_Length_inMillimeters(ctypes.byref(inputs), ctypes.byref(output))
         return output.value
 
     def in_inches(self) -> float:
-        inputs = self.__ptr__
+        inputs = self._ptr
         output = c_double()
         _lib.opensolid_Length_inInches(ctypes.byref(inputs), ctypes.byref(output))
         return output.value
 
     def __eq__(self, other: object) -> bool:
         if isinstance(other, Length):
-            inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, other.__ptr__)
+            inputs = _Tuple2_c_void_p_c_void_p(self._ptr, other._ptr)
             output = c_int64()
             _lib.opensolid_Length_eq(ctypes.byref(inputs), ctypes.byref(output))
             return bool(output.value)
         return False
 
     def _compare(self, other: Length) -> int:
-        inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, other.__ptr__)
+        inputs = _Tuple2_c_void_p_c_void_p(self._ptr, other._ptr)
         output = c_int64()
         _lib.opensolid_Length_compare(ctypes.byref(inputs), ctypes.byref(output))
         return output.value
@@ -280,7 +280,7 @@ class Length:
 
     def __neg__(self) -> Length:
         output = c_void_p()
-        _lib.opensolid_Length_neg(ctypes.byref(self.__ptr__), ctypes.byref(output))
+        _lib.opensolid_Length_neg(ctypes.byref(self._ptr), ctypes.byref(output))
         return Length(ptr=output)
 
     @overload
@@ -298,21 +298,21 @@ class Length:
     def __add__(self, rhs):
         match rhs:
             case Length():
-                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
                 _lib.opensolid_Length_add_Length_Length(
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return Length(ptr=output)
             case LengthRange():
-                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
                 _lib.opensolid_Length_add_Length_LengthRange(
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return LengthRange(ptr=output)
             case LengthCurve():
-                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
                 _lib.opensolid_Length_add_Length_LengthCurve(
                     ctypes.byref(inputs), ctypes.byref(output)
@@ -336,21 +336,21 @@ class Length:
     def __sub__(self, rhs):
         match rhs:
             case Length():
-                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
                 _lib.opensolid_Length_sub_Length_Length(
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return Length(ptr=output)
             case LengthRange():
-                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
                 _lib.opensolid_Length_sub_Length_LengthRange(
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return LengthRange(ptr=output)
             case LengthCurve():
-                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
                 _lib.opensolid_Length_sub_Length_LengthCurve(
                     ctypes.byref(inputs), ctypes.byref(output)
@@ -374,21 +374,21 @@ class Length:
     def __mul__(self, rhs):
         match rhs:
             case float() | int():
-                inputs = _Tuple2_c_void_p_c_double(self.__ptr__, rhs)
+                inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
                 output = c_void_p()
                 _lib.opensolid_Length_mul_Length_Float(
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return Length(ptr=output)
             case Range():
-                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
                 _lib.opensolid_Length_mul_Length_Range(
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return LengthRange(ptr=output)
             case Curve():
-                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
                 _lib.opensolid_Length_mul_Length_Curve(
                     ctypes.byref(inputs), ctypes.byref(output)
@@ -424,42 +424,42 @@ class Length:
     def __truediv__(self, rhs):
         match rhs:
             case float() | int():
-                inputs = _Tuple2_c_void_p_c_double(self.__ptr__, rhs)
+                inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
                 output = c_void_p()
                 _lib.opensolid_Length_div_Length_Float(
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return Length(ptr=output)
             case Length():
-                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_double()
                 _lib.opensolid_Length_div_Length_Length(
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return output.value
             case Range():
-                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
                 _lib.opensolid_Length_div_Length_Range(
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return LengthRange(ptr=output)
             case LengthRange():
-                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
                 _lib.opensolid_Length_div_Length_LengthRange(
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return Range(ptr=output)
             case Curve():
-                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
                 _lib.opensolid_Length_div_Length_Curve(
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return LengthCurve(ptr=output)
             case LengthCurve():
-                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
                 _lib.opensolid_Length_div_Length_LengthCurve(
                     ctypes.byref(inputs), ctypes.byref(output)
@@ -469,7 +469,7 @@ class Length:
                 return NotImplemented
 
     def __floordiv__(self, rhs: Length) -> int:
-        inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+        inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
         output = c_int64()
         _lib.opensolid_Length_floorDiv_Length_Length(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -477,7 +477,7 @@ class Length:
         return output.value
 
     def __mod__(self, rhs: Length) -> Length:
-        inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+        inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
         output = c_void_p()
         _lib.opensolid_Length_mod_Length_Length(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -485,7 +485,7 @@ class Length:
         return Length(ptr=output)
 
     def __rmul__(self, lhs: float) -> Length:
-        inputs = _Tuple2_c_double_c_void_p(lhs, self.__ptr__)
+        inputs = _Tuple2_c_double_c_void_p(lhs, self._ptr)
         output = c_void_p()
         _lib.opensolid_Length_mul_Float_Length(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -495,7 +495,7 @@ class Length:
 
 class Angle:
     def __init__(self, *, ptr: c_void_p) -> None:
-        self.__ptr__ = ptr
+        self._ptr = ptr
 
     zero: Angle = None  # type: ignore[assignment]
 
@@ -521,33 +521,33 @@ class Angle:
         return Angle(ptr=output)
 
     def in_radians(self) -> float:
-        inputs = self.__ptr__
+        inputs = self._ptr
         output = c_double()
         _lib.opensolid_Angle_inRadians(ctypes.byref(inputs), ctypes.byref(output))
         return output.value
 
     def in_degrees(self) -> float:
-        inputs = self.__ptr__
+        inputs = self._ptr
         output = c_double()
         _lib.opensolid_Angle_inDegrees(ctypes.byref(inputs), ctypes.byref(output))
         return output.value
 
     def in_turns(self) -> float:
-        inputs = self.__ptr__
+        inputs = self._ptr
         output = c_double()
         _lib.opensolid_Angle_inTurns(ctypes.byref(inputs), ctypes.byref(output))
         return output.value
 
     def __eq__(self, other: object) -> bool:
         if isinstance(other, Angle):
-            inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, other.__ptr__)
+            inputs = _Tuple2_c_void_p_c_void_p(self._ptr, other._ptr)
             output = c_int64()
             _lib.opensolid_Angle_eq(ctypes.byref(inputs), ctypes.byref(output))
             return bool(output.value)
         return False
 
     def _compare(self, other: Angle) -> int:
-        inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, other.__ptr__)
+        inputs = _Tuple2_c_void_p_c_void_p(self._ptr, other._ptr)
         output = c_int64()
         _lib.opensolid_Angle_compare(ctypes.byref(inputs), ctypes.byref(output))
         return output.value
@@ -566,7 +566,7 @@ class Angle:
 
     def __neg__(self) -> Angle:
         output = c_void_p()
-        _lib.opensolid_Angle_neg(ctypes.byref(self.__ptr__), ctypes.byref(output))
+        _lib.opensolid_Angle_neg(ctypes.byref(self._ptr), ctypes.byref(output))
         return Angle(ptr=output)
 
     @overload
@@ -584,21 +584,21 @@ class Angle:
     def __add__(self, rhs):
         match rhs:
             case Angle():
-                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
                 _lib.opensolid_Angle_add_Angle_Angle(
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return Angle(ptr=output)
             case AngleRange():
-                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
                 _lib.opensolid_Angle_add_Angle_AngleRange(
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return AngleRange(ptr=output)
             case AngleCurve():
-                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
                 _lib.opensolid_Angle_add_Angle_AngleCurve(
                     ctypes.byref(inputs), ctypes.byref(output)
@@ -622,21 +622,21 @@ class Angle:
     def __sub__(self, rhs):
         match rhs:
             case Angle():
-                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
                 _lib.opensolid_Angle_sub_Angle_Angle(
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return Angle(ptr=output)
             case AngleRange():
-                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
                 _lib.opensolid_Angle_sub_Angle_AngleRange(
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return AngleRange(ptr=output)
             case AngleCurve():
-                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
                 _lib.opensolid_Angle_sub_Angle_AngleCurve(
                     ctypes.byref(inputs), ctypes.byref(output)
@@ -660,21 +660,21 @@ class Angle:
     def __mul__(self, rhs):
         match rhs:
             case float() | int():
-                inputs = _Tuple2_c_void_p_c_double(self.__ptr__, rhs)
+                inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
                 output = c_void_p()
                 _lib.opensolid_Angle_mul_Angle_Float(
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return Angle(ptr=output)
             case Range():
-                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
                 _lib.opensolid_Angle_mul_Angle_Range(
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return AngleRange(ptr=output)
             case Curve():
-                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
                 _lib.opensolid_Angle_mul_Angle_Curve(
                     ctypes.byref(inputs), ctypes.byref(output)
@@ -710,42 +710,42 @@ class Angle:
     def __truediv__(self, rhs):
         match rhs:
             case float() | int():
-                inputs = _Tuple2_c_void_p_c_double(self.__ptr__, rhs)
+                inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
                 output = c_void_p()
                 _lib.opensolid_Angle_div_Angle_Float(
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return Angle(ptr=output)
             case Angle():
-                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_double()
                 _lib.opensolid_Angle_div_Angle_Angle(
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return output.value
             case Range():
-                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
                 _lib.opensolid_Angle_div_Angle_Range(
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return AngleRange(ptr=output)
             case AngleRange():
-                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
                 _lib.opensolid_Angle_div_Angle_AngleRange(
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return Range(ptr=output)
             case Curve():
-                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
                 _lib.opensolid_Angle_div_Angle_Curve(
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return AngleCurve(ptr=output)
             case AngleCurve():
-                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
                 _lib.opensolid_Angle_div_Angle_AngleCurve(
                     ctypes.byref(inputs), ctypes.byref(output)
@@ -755,7 +755,7 @@ class Angle:
                 return NotImplemented
 
     def __floordiv__(self, rhs: Angle) -> int:
-        inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+        inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
         output = c_int64()
         _lib.opensolid_Angle_floorDiv_Angle_Angle(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -763,13 +763,13 @@ class Angle:
         return output.value
 
     def __mod__(self, rhs: Angle) -> Angle:
-        inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+        inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
         output = c_void_p()
         _lib.opensolid_Angle_mod_Angle_Angle(ctypes.byref(inputs), ctypes.byref(output))
         return Angle(ptr=output)
 
     def __rmul__(self, lhs: float) -> Angle:
-        inputs = _Tuple2_c_double_c_void_p(lhs, self.__ptr__)
+        inputs = _Tuple2_c_double_c_void_p(lhs, self._ptr)
         output = c_void_p()
         _lib.opensolid_Angle_mul_Float_Angle(ctypes.byref(inputs), ctypes.byref(output))
         return Angle(ptr=output)
@@ -777,7 +777,7 @@ class Angle:
 
 class Range:
     def __init__(self, *, ptr: c_void_p) -> None:
-        self.__ptr__ = ptr
+        self._ptr = ptr
 
     unit: Range = None  # type: ignore[assignment]
 
@@ -818,7 +818,7 @@ class Range:
         inputs = (
             _list_argument(
                 _List_c_void_p,
-                (c_void_p * len(ranges))(*[item.__ptr__ for item in ranges]),
+                (c_void_p * len(ranges))(*[item._ptr for item in ranges]),
             )
             if ranges
             else _error("List is empty")
@@ -830,13 +830,13 @@ class Range:
         return Range(ptr=output)
 
     def endpoints(self) -> tuple[float, float]:
-        inputs = self.__ptr__
+        inputs = self._ptr
         output = _Tuple2_c_double_c_double()
         _lib.opensolid_Range_endpoints(ctypes.byref(inputs), ctypes.byref(output))
         return (output.field0, output.field1)
 
     def intersection(self, other: Range) -> Range | None:
-        inputs = _Tuple2_c_void_p_c_void_p(other.__ptr__, self.__ptr__)
+        inputs = _Tuple2_c_void_p_c_void_p(other._ptr, self._ptr)
         output = _Maybe_c_void_p()
         _lib.opensolid_Range_intersection_Range(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -854,7 +854,7 @@ class Range:
     def __contains__(self, *args, **keywords):
         match (args, keywords):
             case ([Range() as other], {}) | ([], {"other": Range() as other}):
-                inputs = _Tuple2_c_void_p_c_void_p(other.__ptr__, self.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(other._ptr, self._ptr)
                 output = c_int64()
                 _lib.opensolid_Range_contains_Range(
                     ctypes.byref(inputs), ctypes.byref(output)
@@ -864,7 +864,7 @@ class Range:
                 ([float() | int() as value], {})
                 | ([], {"value": float() | int() as value})
             ):
-                inputs = _Tuple2_c_double_c_void_p(value, self.__ptr__)
+                inputs = _Tuple2_c_double_c_void_p(value, self._ptr)
                 output = c_int64()
                 _lib.opensolid_Range_contains_Float(
                     ctypes.byref(inputs), ctypes.byref(output)
@@ -876,7 +876,7 @@ class Range:
 
     def __neg__(self) -> Range:
         output = c_void_p()
-        _lib.opensolid_Range_neg(ctypes.byref(self.__ptr__), ctypes.byref(output))
+        _lib.opensolid_Range_neg(ctypes.byref(self._ptr), ctypes.byref(output))
         return Range(ptr=output)
 
     @overload
@@ -890,14 +890,14 @@ class Range:
     def __add__(self, rhs):
         match rhs:
             case float() | int():
-                inputs = _Tuple2_c_void_p_c_double(self.__ptr__, rhs)
+                inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
                 output = c_void_p()
                 _lib.opensolid_Range_add_Range_Float(
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return Range(ptr=output)
             case Range():
-                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
                 _lib.opensolid_Range_add_Range_Range(
                     ctypes.byref(inputs), ctypes.byref(output)
@@ -917,14 +917,14 @@ class Range:
     def __sub__(self, rhs):
         match rhs:
             case float() | int():
-                inputs = _Tuple2_c_void_p_c_double(self.__ptr__, rhs)
+                inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
                 output = c_void_p()
                 _lib.opensolid_Range_sub_Range_Float(
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return Range(ptr=output)
             case Range():
-                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
                 _lib.opensolid_Range_sub_Range_Range(
                     ctypes.byref(inputs), ctypes.byref(output)
@@ -952,28 +952,28 @@ class Range:
     def __mul__(self, rhs):
         match rhs:
             case float() | int():
-                inputs = _Tuple2_c_void_p_c_double(self.__ptr__, rhs)
+                inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
                 output = c_void_p()
                 _lib.opensolid_Range_mul_Range_Float(
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return Range(ptr=output)
             case Range():
-                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
                 _lib.opensolid_Range_mul_Range_Range(
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return Range(ptr=output)
             case Length():
-                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
                 _lib.opensolid_Range_mul_Range_Length(
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return LengthRange(ptr=output)
             case Angle():
-                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
                 _lib.opensolid_Range_mul_Range_Angle(
                     ctypes.byref(inputs), ctypes.byref(output)
@@ -993,14 +993,14 @@ class Range:
     def __truediv__(self, rhs):
         match rhs:
             case float() | int():
-                inputs = _Tuple2_c_void_p_c_double(self.__ptr__, rhs)
+                inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
                 output = c_void_p()
                 _lib.opensolid_Range_div_Range_Float(
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return Range(ptr=output)
             case Range():
-                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
                 _lib.opensolid_Range_div_Range_Range(
                     ctypes.byref(inputs), ctypes.byref(output)
@@ -1010,25 +1010,25 @@ class Range:
                 return NotImplemented
 
     def __radd__(self, lhs: float) -> Range:
-        inputs = _Tuple2_c_double_c_void_p(lhs, self.__ptr__)
+        inputs = _Tuple2_c_double_c_void_p(lhs, self._ptr)
         output = c_void_p()
         _lib.opensolid_Range_add_Float_Range(ctypes.byref(inputs), ctypes.byref(output))
         return Range(ptr=output)
 
     def __rsub__(self, lhs: float) -> Range:
-        inputs = _Tuple2_c_double_c_void_p(lhs, self.__ptr__)
+        inputs = _Tuple2_c_double_c_void_p(lhs, self._ptr)
         output = c_void_p()
         _lib.opensolid_Range_sub_Float_Range(ctypes.byref(inputs), ctypes.byref(output))
         return Range(ptr=output)
 
     def __rmul__(self, lhs: float) -> Range:
-        inputs = _Tuple2_c_double_c_void_p(lhs, self.__ptr__)
+        inputs = _Tuple2_c_double_c_void_p(lhs, self._ptr)
         output = c_void_p()
         _lib.opensolid_Range_mul_Float_Range(ctypes.byref(inputs), ctypes.byref(output))
         return Range(ptr=output)
 
     def __rtruediv__(self, lhs: float) -> Range:
-        inputs = _Tuple2_c_double_c_void_p(lhs, self.__ptr__)
+        inputs = _Tuple2_c_double_c_void_p(lhs, self._ptr)
         output = c_void_p()
         _lib.opensolid_Range_div_Float_Range(ctypes.byref(inputs), ctypes.byref(output))
         return Range(ptr=output)
@@ -1036,11 +1036,11 @@ class Range:
 
 class LengthRange:
     def __init__(self, *, ptr: c_void_p) -> None:
-        self.__ptr__ = ptr
+        self._ptr = ptr
 
     @staticmethod
     def constant(value: Length) -> LengthRange:
-        inputs = value.__ptr__
+        inputs = value._ptr
         output = c_void_p()
         _lib.opensolid_LengthRange_constant_Length(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -1049,7 +1049,7 @@ class LengthRange:
 
     @staticmethod
     def from_endpoints(a: Length, b: Length) -> LengthRange:
-        inputs = _Tuple2_c_void_p_c_void_p(a.__ptr__, b.__ptr__)
+        inputs = _Tuple2_c_void_p_c_void_p(a._ptr, b._ptr)
         output = c_void_p()
         _lib.opensolid_LengthRange_fromEndpoints_Length_Length(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -1097,7 +1097,7 @@ class LengthRange:
         inputs = (
             _list_argument(
                 _List_c_void_p,
-                (c_void_p * len(values))(*[item.__ptr__ for item in values]),
+                (c_void_p * len(values))(*[item._ptr for item in values]),
             )
             if values
             else _error("List is empty")
@@ -1113,7 +1113,7 @@ class LengthRange:
         inputs = (
             _list_argument(
                 _List_c_void_p,
-                (c_void_p * len(ranges))(*[item.__ptr__ for item in ranges]),
+                (c_void_p * len(ranges))(*[item._ptr for item in ranges]),
             )
             if ranges
             else _error("List is empty")
@@ -1125,7 +1125,7 @@ class LengthRange:
         return LengthRange(ptr=output)
 
     def endpoints(self) -> tuple[Length, Length]:
-        inputs = self.__ptr__
+        inputs = self._ptr
         output = _Tuple2_c_void_p_c_void_p()
         _lib.opensolid_LengthRange_endpoints(ctypes.byref(inputs), ctypes.byref(output))
         return (
@@ -1134,7 +1134,7 @@ class LengthRange:
         )
 
     def intersection(self, other: LengthRange) -> LengthRange | None:
-        inputs = _Tuple2_c_void_p_c_void_p(other.__ptr__, self.__ptr__)
+        inputs = _Tuple2_c_void_p_c_void_p(other._ptr, self._ptr)
         output = _Maybe_c_void_p()
         _lib.opensolid_LengthRange_intersection_LengthRange(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -1155,14 +1155,14 @@ class LengthRange:
                 ([LengthRange() as other], {})
                 | ([], {"other": LengthRange() as other})
             ):
-                inputs = _Tuple2_c_void_p_c_void_p(other.__ptr__, self.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(other._ptr, self._ptr)
                 output = c_int64()
                 _lib.opensolid_LengthRange_contains_LengthRange(
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return bool(output.value)
             case ([Length() as value], {}) | ([], {"value": Length() as value}):
-                inputs = _Tuple2_c_void_p_c_void_p(value.__ptr__, self.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(value._ptr, self._ptr)
                 output = c_int64()
                 _lib.opensolid_LengthRange_contains_Length(
                     ctypes.byref(inputs), ctypes.byref(output)
@@ -1174,7 +1174,7 @@ class LengthRange:
 
     def __neg__(self) -> LengthRange:
         output = c_void_p()
-        _lib.opensolid_LengthRange_neg(ctypes.byref(self.__ptr__), ctypes.byref(output))
+        _lib.opensolid_LengthRange_neg(ctypes.byref(self._ptr), ctypes.byref(output))
         return LengthRange(ptr=output)
 
     @overload
@@ -1188,14 +1188,14 @@ class LengthRange:
     def __add__(self, rhs):
         match rhs:
             case LengthRange():
-                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
                 _lib.opensolid_LengthRange_add_LengthRange_LengthRange(
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return LengthRange(ptr=output)
             case Length():
-                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
                 _lib.opensolid_LengthRange_add_LengthRange_Length(
                     ctypes.byref(inputs), ctypes.byref(output)
@@ -1215,14 +1215,14 @@ class LengthRange:
     def __sub__(self, rhs):
         match rhs:
             case LengthRange():
-                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
                 _lib.opensolid_LengthRange_sub_LengthRange_LengthRange(
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return LengthRange(ptr=output)
             case Length():
-                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
                 _lib.opensolid_LengthRange_sub_LengthRange_Length(
                     ctypes.byref(inputs), ctypes.byref(output)
@@ -1232,7 +1232,7 @@ class LengthRange:
                 return NotImplemented
 
     def __mul__(self, rhs: float) -> LengthRange:
-        inputs = _Tuple2_c_void_p_c_double(self.__ptr__, rhs)
+        inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
         output = c_void_p()
         _lib.opensolid_LengthRange_mul_LengthRange_Float(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -1254,21 +1254,21 @@ class LengthRange:
     def __truediv__(self, rhs):
         match rhs:
             case float() | int():
-                inputs = _Tuple2_c_void_p_c_double(self.__ptr__, rhs)
+                inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
                 output = c_void_p()
                 _lib.opensolid_LengthRange_div_LengthRange_Float(
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return LengthRange(ptr=output)
             case LengthRange():
-                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
                 _lib.opensolid_LengthRange_div_LengthRange_LengthRange(
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return Range(ptr=output)
             case Range():
-                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
                 _lib.opensolid_LengthRange_div_LengthRange_Range(
                     ctypes.byref(inputs), ctypes.byref(output)
@@ -1278,7 +1278,7 @@ class LengthRange:
                 return NotImplemented
 
     def __rmul__(self, lhs: float) -> LengthRange:
-        inputs = _Tuple2_c_double_c_void_p(lhs, self.__ptr__)
+        inputs = _Tuple2_c_double_c_void_p(lhs, self._ptr)
         output = c_void_p()
         _lib.opensolid_LengthRange_mul_Float_LengthRange(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -1288,11 +1288,11 @@ class LengthRange:
 
 class AngleRange:
     def __init__(self, *, ptr: c_void_p) -> None:
-        self.__ptr__ = ptr
+        self._ptr = ptr
 
     @staticmethod
     def constant(value: Angle) -> AngleRange:
-        inputs = value.__ptr__
+        inputs = value._ptr
         output = c_void_p()
         _lib.opensolid_AngleRange_constant_Angle(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -1301,7 +1301,7 @@ class AngleRange:
 
     @staticmethod
     def from_endpoints(a: Angle, b: Angle) -> AngleRange:
-        inputs = _Tuple2_c_void_p_c_void_p(a.__ptr__, b.__ptr__)
+        inputs = _Tuple2_c_void_p_c_void_p(a._ptr, b._ptr)
         output = c_void_p()
         _lib.opensolid_AngleRange_fromEndpoints_Angle_Angle(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -1313,7 +1313,7 @@ class AngleRange:
         inputs = (
             _list_argument(
                 _List_c_void_p,
-                (c_void_p * len(values))(*[item.__ptr__ for item in values]),
+                (c_void_p * len(values))(*[item._ptr for item in values]),
             )
             if values
             else _error("List is empty")
@@ -1329,7 +1329,7 @@ class AngleRange:
         inputs = (
             _list_argument(
                 _List_c_void_p,
-                (c_void_p * len(ranges))(*[item.__ptr__ for item in ranges]),
+                (c_void_p * len(ranges))(*[item._ptr for item in ranges]),
             )
             if ranges
             else _error("List is empty")
@@ -1341,13 +1341,13 @@ class AngleRange:
         return AngleRange(ptr=output)
 
     def endpoints(self) -> tuple[Angle, Angle]:
-        inputs = self.__ptr__
+        inputs = self._ptr
         output = _Tuple2_c_void_p_c_void_p()
         _lib.opensolid_AngleRange_endpoints(ctypes.byref(inputs), ctypes.byref(output))
         return (Angle(ptr=c_void_p(output.field0)), Angle(ptr=c_void_p(output.field1)))
 
     def intersection(self, other: AngleRange) -> AngleRange | None:
-        inputs = _Tuple2_c_void_p_c_void_p(other.__ptr__, self.__ptr__)
+        inputs = _Tuple2_c_void_p_c_void_p(other._ptr, self._ptr)
         output = _Maybe_c_void_p()
         _lib.opensolid_AngleRange_intersection_AngleRange(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -1365,14 +1365,14 @@ class AngleRange:
     def __contains__(self, *args, **keywords):
         match (args, keywords):
             case ([AngleRange() as other], {}) | ([], {"other": AngleRange() as other}):
-                inputs = _Tuple2_c_void_p_c_void_p(other.__ptr__, self.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(other._ptr, self._ptr)
                 output = c_int64()
                 _lib.opensolid_AngleRange_contains_AngleRange(
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return bool(output.value)
             case ([Angle() as value], {}) | ([], {"value": Angle() as value}):
-                inputs = _Tuple2_c_void_p_c_void_p(value.__ptr__, self.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(value._ptr, self._ptr)
                 output = c_int64()
                 _lib.opensolid_AngleRange_contains_Angle(
                     ctypes.byref(inputs), ctypes.byref(output)
@@ -1384,7 +1384,7 @@ class AngleRange:
 
     def __neg__(self) -> AngleRange:
         output = c_void_p()
-        _lib.opensolid_AngleRange_neg(ctypes.byref(self.__ptr__), ctypes.byref(output))
+        _lib.opensolid_AngleRange_neg(ctypes.byref(self._ptr), ctypes.byref(output))
         return AngleRange(ptr=output)
 
     @overload
@@ -1398,14 +1398,14 @@ class AngleRange:
     def __add__(self, rhs):
         match rhs:
             case AngleRange():
-                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
                 _lib.opensolid_AngleRange_add_AngleRange_AngleRange(
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return AngleRange(ptr=output)
             case Angle():
-                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
                 _lib.opensolid_AngleRange_add_AngleRange_Angle(
                     ctypes.byref(inputs), ctypes.byref(output)
@@ -1425,14 +1425,14 @@ class AngleRange:
     def __sub__(self, rhs):
         match rhs:
             case AngleRange():
-                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
                 _lib.opensolid_AngleRange_sub_AngleRange_AngleRange(
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return AngleRange(ptr=output)
             case Angle():
-                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
                 _lib.opensolid_AngleRange_sub_AngleRange_Angle(
                     ctypes.byref(inputs), ctypes.byref(output)
@@ -1442,7 +1442,7 @@ class AngleRange:
                 return NotImplemented
 
     def __mul__(self, rhs: float) -> AngleRange:
-        inputs = _Tuple2_c_void_p_c_double(self.__ptr__, rhs)
+        inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
         output = c_void_p()
         _lib.opensolid_AngleRange_mul_AngleRange_Float(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -1464,21 +1464,21 @@ class AngleRange:
     def __truediv__(self, rhs):
         match rhs:
             case float() | int():
-                inputs = _Tuple2_c_void_p_c_double(self.__ptr__, rhs)
+                inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
                 output = c_void_p()
                 _lib.opensolid_AngleRange_div_AngleRange_Float(
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return AngleRange(ptr=output)
             case AngleRange():
-                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
                 _lib.opensolid_AngleRange_div_AngleRange_AngleRange(
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return Range(ptr=output)
             case Range():
-                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
                 _lib.opensolid_AngleRange_div_AngleRange_Range(
                     ctypes.byref(inputs), ctypes.byref(output)
@@ -1488,7 +1488,7 @@ class AngleRange:
                 return NotImplemented
 
     def __rmul__(self, lhs: float) -> AngleRange:
-        inputs = _Tuple2_c_double_c_void_p(lhs, self.__ptr__)
+        inputs = _Tuple2_c_double_c_void_p(lhs, self._ptr)
         output = c_void_p()
         _lib.opensolid_AngleRange_mul_Float_AngleRange(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -1498,7 +1498,7 @@ class AngleRange:
 
 class Color:
     def __init__(self, *, ptr: c_void_p) -> None:
-        self.__ptr__ = ptr
+        self._ptr = ptr
 
     red: Color = None  # type: ignore[assignment]
     dark_red: Color = None  # type: ignore[assignment]
@@ -1552,7 +1552,7 @@ class Color:
 
     @staticmethod
     def hsl(hue: Angle, saturation: float, lightness: float) -> Color:
-        inputs = _Tuple3_c_void_p_c_double_c_double(hue.__ptr__, saturation, lightness)
+        inputs = _Tuple3_c_void_p_c_double_c_double(hue._ptr, saturation, lightness)
         output = c_void_p()
         _lib.opensolid_Color_hsl_Angle_Float_Float(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -1567,19 +1567,19 @@ class Color:
         return Color(ptr=output)
 
     def to_hex(self) -> str:
-        inputs = self.__ptr__
+        inputs = self._ptr
         output = _Text()
         _lib.opensolid_Color_toHex(ctypes.byref(inputs), ctypes.byref(output))
         return _text_to_str(output)
 
     def components(self) -> tuple[float, float, float]:
-        inputs = self.__ptr__
+        inputs = self._ptr
         output = _Tuple3_c_double_c_double_c_double()
         _lib.opensolid_Color_components(ctypes.byref(inputs), ctypes.byref(output))
         return (output.field0, output.field1, output.field2)
 
     def components255(self) -> tuple[int, int, int]:
-        inputs = self.__ptr__
+        inputs = self._ptr
         output = _Tuple3_c_int64_c_int64_c_int64()
         _lib.opensolid_Color_components255(ctypes.byref(inputs), ctypes.byref(output))
         return (output.field0, output.field1, output.field2)
@@ -1587,13 +1587,13 @@ class Color:
 
 class Vector2d:
     def __init__(self, *, ptr: c_void_p) -> None:
-        self.__ptr__ = ptr
+        self._ptr = ptr
 
     zero: Vector2d = None  # type: ignore[assignment]
 
     @staticmethod
     def unit(direction: Direction2d) -> Vector2d:
-        inputs = direction.__ptr__
+        inputs = direction._ptr
         output = c_void_p()
         _lib.opensolid_Vector2d_unit_Direction2d(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -1633,25 +1633,25 @@ class Vector2d:
         return Vector2d(ptr=output)
 
     def components(self) -> tuple[float, float]:
-        inputs = self.__ptr__
+        inputs = self._ptr
         output = _Tuple2_c_double_c_double()
         _lib.opensolid_Vector2d_components(ctypes.byref(inputs), ctypes.byref(output))
         return (output.field0, output.field1)
 
     def x_component(self) -> float:
-        inputs = self.__ptr__
+        inputs = self._ptr
         output = c_double()
         _lib.opensolid_Vector2d_xComponent(ctypes.byref(inputs), ctypes.byref(output))
         return output.value
 
     def y_component(self) -> float:
-        inputs = self.__ptr__
+        inputs = self._ptr
         output = c_double()
         _lib.opensolid_Vector2d_yComponent(ctypes.byref(inputs), ctypes.byref(output))
         return output.value
 
     def direction(self) -> Direction2d:
-        inputs = _Tuple2_c_double_c_void_p(_float_tolerance(), self.__ptr__)
+        inputs = _Tuple2_c_double_c_void_p(_float_tolerance(), self._ptr)
         output = _Result_c_void_p()
         _lib.opensolid_Vector2d_direction(ctypes.byref(inputs), ctypes.byref(output))
         return (
@@ -1662,11 +1662,11 @@ class Vector2d:
 
     def __neg__(self) -> Vector2d:
         output = c_void_p()
-        _lib.opensolid_Vector2d_neg(ctypes.byref(self.__ptr__), ctypes.byref(output))
+        _lib.opensolid_Vector2d_neg(ctypes.byref(self._ptr), ctypes.byref(output))
         return Vector2d(ptr=output)
 
     def __add__(self, rhs: Vector2d) -> Vector2d:
-        inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+        inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
         output = c_void_p()
         _lib.opensolid_Vector2d_add_Vector2d_Vector2d(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -1674,7 +1674,7 @@ class Vector2d:
         return Vector2d(ptr=output)
 
     def __sub__(self, rhs: Vector2d) -> Vector2d:
-        inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+        inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
         output = c_void_p()
         _lib.opensolid_Vector2d_sub_Vector2d_Vector2d(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -1692,14 +1692,14 @@ class Vector2d:
     def __mul__(self, rhs):
         match rhs:
             case float() | int():
-                inputs = _Tuple2_c_void_p_c_double(self.__ptr__, rhs)
+                inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
                 output = c_void_p()
                 _lib.opensolid_Vector2d_mul_Vector2d_Float(
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return Vector2d(ptr=output)
             case Length():
-                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
                 _lib.opensolid_Vector2d_mul_Vector2d_Length(
                     ctypes.byref(inputs), ctypes.byref(output)
@@ -1709,7 +1709,7 @@ class Vector2d:
                 return NotImplemented
 
     def __truediv__(self, rhs: float) -> Vector2d:
-        inputs = _Tuple2_c_void_p_c_double(self.__ptr__, rhs)
+        inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
         output = c_void_p()
         _lib.opensolid_Vector2d_div_Vector2d_Float(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -1717,7 +1717,7 @@ class Vector2d:
         return Vector2d(ptr=output)
 
     def __rmul__(self, lhs: float) -> Vector2d:
-        inputs = _Tuple2_c_double_c_void_p(lhs, self.__ptr__)
+        inputs = _Tuple2_c_double_c_void_p(lhs, self._ptr)
         output = c_void_p()
         _lib.opensolid_Vector2d_mul_Float_Vector2d(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -1727,13 +1727,13 @@ class Vector2d:
 
 class Displacement2d:
     def __init__(self, *, ptr: c_void_p) -> None:
-        self.__ptr__ = ptr
+        self._ptr = ptr
 
     zero: Displacement2d = None  # type: ignore[assignment]
 
     @staticmethod
     def xy(x_component: Length, y_component: Length) -> Displacement2d:
-        inputs = _Tuple2_c_void_p_c_void_p(x_component.__ptr__, y_component.__ptr__)
+        inputs = _Tuple2_c_void_p_c_void_p(x_component._ptr, y_component._ptr)
         output = c_void_p()
         _lib.opensolid_Displacement2d_xy_Length_Length(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -1742,7 +1742,7 @@ class Displacement2d:
 
     @staticmethod
     def x(x_component: Length) -> Displacement2d:
-        inputs = x_component.__ptr__
+        inputs = x_component._ptr
         output = c_void_p()
         _lib.opensolid_Displacement2d_x_Length(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -1751,7 +1751,7 @@ class Displacement2d:
 
     @staticmethod
     def y(y_component: Length) -> Displacement2d:
-        inputs = y_component.__ptr__
+        inputs = y_component._ptr
         output = c_void_p()
         _lib.opensolid_Displacement2d_y_Length(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -1796,7 +1796,7 @@ class Displacement2d:
 
     @staticmethod
     def from_components(components: tuple[Length, Length]) -> Displacement2d:
-        inputs = _Tuple2_c_void_p_c_void_p(components[0].__ptr__, components[1].__ptr__)
+        inputs = _Tuple2_c_void_p_c_void_p(components[0]._ptr, components[1]._ptr)
         output = c_void_p()
         _lib.opensolid_Displacement2d_fromComponents_Tuple2LengthLength(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -1804,7 +1804,7 @@ class Displacement2d:
         return Displacement2d(ptr=output)
 
     def components(self) -> tuple[Length, Length]:
-        inputs = self.__ptr__
+        inputs = self._ptr
         output = _Tuple2_c_void_p_c_void_p()
         _lib.opensolid_Displacement2d_components(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -1815,7 +1815,7 @@ class Displacement2d:
         )
 
     def x_component(self) -> Length:
-        inputs = self.__ptr__
+        inputs = self._ptr
         output = c_void_p()
         _lib.opensolid_Displacement2d_xComponent(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -1823,7 +1823,7 @@ class Displacement2d:
         return Length(ptr=output)
 
     def y_component(self) -> Length:
-        inputs = self.__ptr__
+        inputs = self._ptr
         output = c_void_p()
         _lib.opensolid_Displacement2d_yComponent(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -1831,7 +1831,7 @@ class Displacement2d:
         return Length(ptr=output)
 
     def direction(self) -> Direction2d:
-        inputs = _Tuple2_c_void_p_c_void_p(_length_tolerance().__ptr__, self.__ptr__)
+        inputs = _Tuple2_c_void_p_c_void_p(_length_tolerance()._ptr, self._ptr)
         output = _Result_c_void_p()
         _lib.opensolid_Displacement2d_direction(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -1844,13 +1844,11 @@ class Displacement2d:
 
     def __neg__(self) -> Displacement2d:
         output = c_void_p()
-        _lib.opensolid_Displacement2d_neg(
-            ctypes.byref(self.__ptr__), ctypes.byref(output)
-        )
+        _lib.opensolid_Displacement2d_neg(ctypes.byref(self._ptr), ctypes.byref(output))
         return Displacement2d(ptr=output)
 
     def __add__(self, rhs: Displacement2d) -> Displacement2d:
-        inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+        inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
         output = c_void_p()
         _lib.opensolid_Displacement2d_add_Displacement2d_Displacement2d(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -1858,7 +1856,7 @@ class Displacement2d:
         return Displacement2d(ptr=output)
 
     def __sub__(self, rhs: Displacement2d) -> Displacement2d:
-        inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+        inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
         output = c_void_p()
         _lib.opensolid_Displacement2d_sub_Displacement2d_Displacement2d(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -1866,7 +1864,7 @@ class Displacement2d:
         return Displacement2d(ptr=output)
 
     def __mul__(self, rhs: float) -> Displacement2d:
-        inputs = _Tuple2_c_void_p_c_double(self.__ptr__, rhs)
+        inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
         output = c_void_p()
         _lib.opensolid_Displacement2d_mul_Displacement2d_Float(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -1884,14 +1882,14 @@ class Displacement2d:
     def __truediv__(self, rhs):
         match rhs:
             case float() | int():
-                inputs = _Tuple2_c_void_p_c_double(self.__ptr__, rhs)
+                inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
                 output = c_void_p()
                 _lib.opensolid_Displacement2d_div_Displacement2d_Float(
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return Displacement2d(ptr=output)
             case Length():
-                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
                 _lib.opensolid_Displacement2d_div_Displacement2d_Length(
                     ctypes.byref(inputs), ctypes.byref(output)
@@ -1901,7 +1899,7 @@ class Displacement2d:
                 return NotImplemented
 
     def __rmul__(self, lhs: float) -> Displacement2d:
-        inputs = _Tuple2_c_double_c_void_p(lhs, self.__ptr__)
+        inputs = _Tuple2_c_double_c_void_p(lhs, self._ptr)
         output = c_void_p()
         _lib.opensolid_Displacement2d_mul_Float_Displacement2d(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -1911,7 +1909,7 @@ class Displacement2d:
 
 class Direction2d:
     def __init__(self, *, ptr: c_void_p) -> None:
-        self.__ptr__ = ptr
+        self._ptr = ptr
 
     x: Direction2d = None  # type: ignore[assignment]
     y: Direction2d = None  # type: ignore[assignment]
@@ -1922,7 +1920,7 @@ class Direction2d:
 
     @staticmethod
     def from_angle(angle: Angle) -> Direction2d:
-        inputs = angle.__ptr__
+        inputs = angle._ptr
         output = c_void_p()
         _lib.opensolid_Direction2d_fromAngle_Angle(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -1930,13 +1928,13 @@ class Direction2d:
         return Direction2d(ptr=output)
 
     def to_angle(self) -> Angle:
-        inputs = self.__ptr__
+        inputs = self._ptr
         output = c_void_p()
         _lib.opensolid_Direction2d_toAngle(ctypes.byref(inputs), ctypes.byref(output))
         return Angle(ptr=output)
 
     def components(self) -> tuple[float, float]:
-        inputs = self.__ptr__
+        inputs = self._ptr
         output = _Tuple2_c_double_c_double()
         _lib.opensolid_Direction2d_components(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -1944,7 +1942,7 @@ class Direction2d:
         return (output.field0, output.field1)
 
     def x_component(self) -> float:
-        inputs = self.__ptr__
+        inputs = self._ptr
         output = c_double()
         _lib.opensolid_Direction2d_xComponent(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -1952,7 +1950,7 @@ class Direction2d:
         return output.value
 
     def y_component(self) -> float:
-        inputs = self.__ptr__
+        inputs = self._ptr
         output = c_double()
         _lib.opensolid_Direction2d_yComponent(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -1961,19 +1959,19 @@ class Direction2d:
 
     def __neg__(self) -> Direction2d:
         output = c_void_p()
-        _lib.opensolid_Direction2d_neg(ctypes.byref(self.__ptr__), ctypes.byref(output))
+        _lib.opensolid_Direction2d_neg(ctypes.byref(self._ptr), ctypes.byref(output))
         return Direction2d(ptr=output)
 
 
 class Point2d:
     def __init__(self, *, ptr: c_void_p) -> None:
-        self.__ptr__ = ptr
+        self._ptr = ptr
 
     origin: Point2d = None  # type: ignore[assignment]
 
     @staticmethod
     def xy(x_coordinate: Length, y_coordinate: Length) -> Point2d:
-        inputs = _Tuple2_c_void_p_c_void_p(x_coordinate.__ptr__, y_coordinate.__ptr__)
+        inputs = _Tuple2_c_void_p_c_void_p(x_coordinate._ptr, y_coordinate._ptr)
         output = c_void_p()
         _lib.opensolid_Point2d_xy_Length_Length(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -1982,14 +1980,14 @@ class Point2d:
 
     @staticmethod
     def x(x_coordinate: Length) -> Point2d:
-        inputs = x_coordinate.__ptr__
+        inputs = x_coordinate._ptr
         output = c_void_p()
         _lib.opensolid_Point2d_x_Length(ctypes.byref(inputs), ctypes.byref(output))
         return Point2d(ptr=output)
 
     @staticmethod
     def y(y_coordinate: Length) -> Point2d:
-        inputs = y_coordinate.__ptr__
+        inputs = y_coordinate._ptr
         output = c_void_p()
         _lib.opensolid_Point2d_y_Length(ctypes.byref(inputs), ctypes.byref(output))
         return Point2d(ptr=output)
@@ -2032,9 +2030,7 @@ class Point2d:
 
     @staticmethod
     def from_coordinates(coordinates: tuple[Length, Length]) -> Point2d:
-        inputs = _Tuple2_c_void_p_c_void_p(
-            coordinates[0].__ptr__, coordinates[1].__ptr__
-        )
+        inputs = _Tuple2_c_void_p_c_void_p(coordinates[0]._ptr, coordinates[1]._ptr)
         output = c_void_p()
         _lib.opensolid_Point2d_fromCoordinates_Tuple2LengthLength(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -2042,7 +2038,7 @@ class Point2d:
         return Point2d(ptr=output)
 
     def coordinates(self) -> tuple[Length, Length]:
-        inputs = self.__ptr__
+        inputs = self._ptr
         output = _Tuple2_c_void_p_c_void_p()
         _lib.opensolid_Point2d_coordinates(ctypes.byref(inputs), ctypes.byref(output))
         return (
@@ -2051,19 +2047,19 @@ class Point2d:
         )
 
     def x_coordinate(self) -> Length:
-        inputs = self.__ptr__
+        inputs = self._ptr
         output = c_void_p()
         _lib.opensolid_Point2d_xCoordinate(ctypes.byref(inputs), ctypes.byref(output))
         return Length(ptr=output)
 
     def y_coordinate(self) -> Length:
-        inputs = self.__ptr__
+        inputs = self._ptr
         output = c_void_p()
         _lib.opensolid_Point2d_yCoordinate(ctypes.byref(inputs), ctypes.byref(output))
         return Length(ptr=output)
 
     def distance_to(self, other: Point2d) -> Length:
-        inputs = _Tuple2_c_void_p_c_void_p(other.__ptr__, self.__ptr__)
+        inputs = _Tuple2_c_void_p_c_void_p(other._ptr, self._ptr)
         output = c_void_p()
         _lib.opensolid_Point2d_distanceTo_Point2d(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -2071,7 +2067,7 @@ class Point2d:
         return Length(ptr=output)
 
     def midpoint(self, other: Point2d) -> Point2d:
-        inputs = _Tuple2_c_void_p_c_void_p(other.__ptr__, self.__ptr__)
+        inputs = _Tuple2_c_void_p_c_void_p(other._ptr, self._ptr)
         output = c_void_p()
         _lib.opensolid_Point2d_midpoint_Point2d(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -2081,7 +2077,7 @@ class Point2d:
 
 class UvPoint:
     def __init__(self, *, ptr: c_void_p) -> None:
-        self.__ptr__ = ptr
+        self._ptr = ptr
 
     origin: UvPoint = None  # type: ignore[assignment]
 
@@ -2118,25 +2114,25 @@ class UvPoint:
         return UvPoint(ptr=output)
 
     def coordinates(self) -> tuple[float, float]:
-        inputs = self.__ptr__
+        inputs = self._ptr
         output = _Tuple2_c_double_c_double()
         _lib.opensolid_UvPoint_coordinates(ctypes.byref(inputs), ctypes.byref(output))
         return (output.field0, output.field1)
 
     def u_coordinate(self) -> float:
-        inputs = self.__ptr__
+        inputs = self._ptr
         output = c_double()
         _lib.opensolid_UvPoint_uCoordinate(ctypes.byref(inputs), ctypes.byref(output))
         return output.value
 
     def v_coordinate(self) -> float:
-        inputs = self.__ptr__
+        inputs = self._ptr
         output = c_double()
         _lib.opensolid_UvPoint_vCoordinate(ctypes.byref(inputs), ctypes.byref(output))
         return output.value
 
     def distance_to(self, other: UvPoint) -> float:
-        inputs = _Tuple2_c_void_p_c_void_p(other.__ptr__, self.__ptr__)
+        inputs = _Tuple2_c_void_p_c_void_p(other._ptr, self._ptr)
         output = c_double()
         _lib.opensolid_UvPoint_distanceTo_UvPoint(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -2144,7 +2140,7 @@ class UvPoint:
         return output.value
 
     def midpoint(self, other: UvPoint) -> UvPoint:
-        inputs = _Tuple2_c_void_p_c_void_p(other.__ptr__, self.__ptr__)
+        inputs = _Tuple2_c_void_p_c_void_p(other._ptr, self._ptr)
         output = c_void_p()
         _lib.opensolid_UvPoint_midpoint_UvPoint(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -2154,11 +2150,11 @@ class UvPoint:
 
 class Bounds2d:
     def __init__(self, *, ptr: c_void_p) -> None:
-        self.__ptr__ = ptr
+        self._ptr = ptr
 
     @staticmethod
     def xy(x_coordinate: LengthRange, y_coordinate: LengthRange) -> Bounds2d:
-        inputs = _Tuple2_c_void_p_c_void_p(x_coordinate.__ptr__, y_coordinate.__ptr__)
+        inputs = _Tuple2_c_void_p_c_void_p(x_coordinate._ptr, y_coordinate._ptr)
         output = c_void_p()
         _lib.opensolid_Bounds2d_xy_LengthRange_LengthRange(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -2167,7 +2163,7 @@ class Bounds2d:
 
     @staticmethod
     def constant(point: Point2d) -> Bounds2d:
-        inputs = point.__ptr__
+        inputs = point._ptr
         output = c_void_p()
         _lib.opensolid_Bounds2d_constant_Point2d(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -2176,7 +2172,7 @@ class Bounds2d:
 
     @staticmethod
     def from_corners(p1: Point2d, p2: Point2d) -> Bounds2d:
-        inputs = _Tuple2_c_void_p_c_void_p(p1.__ptr__, p2.__ptr__)
+        inputs = _Tuple2_c_void_p_c_void_p(p1._ptr, p2._ptr)
         output = c_void_p()
         _lib.opensolid_Bounds2d_fromCorners_Point2d_Point2d(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -2188,7 +2184,7 @@ class Bounds2d:
         inputs = (
             _list_argument(
                 _List_c_void_p,
-                (c_void_p * len(points))(*[item.__ptr__ for item in points]),
+                (c_void_p * len(points))(*[item._ptr for item in points]),
             )
             if points
             else _error("List is empty")
@@ -2204,7 +2200,7 @@ class Bounds2d:
         inputs = (
             _list_argument(
                 _List_c_void_p,
-                (c_void_p * len(bounds))(*[item.__ptr__ for item in bounds]),
+                (c_void_p * len(bounds))(*[item._ptr for item in bounds]),
             )
             if bounds
             else _error("List is empty")
@@ -2216,7 +2212,7 @@ class Bounds2d:
         return Bounds2d(ptr=output)
 
     def coordinates(self) -> tuple[LengthRange, LengthRange]:
-        inputs = self.__ptr__
+        inputs = self._ptr
         output = _Tuple2_c_void_p_c_void_p()
         _lib.opensolid_Bounds2d_coordinates(ctypes.byref(inputs), ctypes.byref(output))
         return (
@@ -2225,13 +2221,13 @@ class Bounds2d:
         )
 
     def x_coordinate(self) -> LengthRange:
-        inputs = self.__ptr__
+        inputs = self._ptr
         output = c_void_p()
         _lib.opensolid_Bounds2d_xCoordinate(ctypes.byref(inputs), ctypes.byref(output))
         return LengthRange(ptr=output)
 
     def y_coordinate(self) -> LengthRange:
-        inputs = self.__ptr__
+        inputs = self._ptr
         output = c_void_p()
         _lib.opensolid_Bounds2d_yCoordinate(ctypes.byref(inputs), ctypes.byref(output))
         return LengthRange(ptr=output)
@@ -2239,11 +2235,11 @@ class Bounds2d:
 
 class UvBounds:
     def __init__(self, *, ptr: c_void_p) -> None:
-        self.__ptr__ = ptr
+        self._ptr = ptr
 
     @staticmethod
     def uv(u_coordinate: Range, v_coordinate: Range) -> UvBounds:
-        inputs = _Tuple2_c_void_p_c_void_p(u_coordinate.__ptr__, v_coordinate.__ptr__)
+        inputs = _Tuple2_c_void_p_c_void_p(u_coordinate._ptr, v_coordinate._ptr)
         output = c_void_p()
         _lib.opensolid_UvBounds_uv_Range_Range(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -2252,7 +2248,7 @@ class UvBounds:
 
     @staticmethod
     def constant(point: UvPoint) -> UvBounds:
-        inputs = point.__ptr__
+        inputs = point._ptr
         output = c_void_p()
         _lib.opensolid_UvBounds_constant_UvPoint(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -2261,7 +2257,7 @@ class UvBounds:
 
     @staticmethod
     def from_corners(p1: UvPoint, p2: UvPoint) -> UvBounds:
-        inputs = _Tuple2_c_void_p_c_void_p(p1.__ptr__, p2.__ptr__)
+        inputs = _Tuple2_c_void_p_c_void_p(p1._ptr, p2._ptr)
         output = c_void_p()
         _lib.opensolid_UvBounds_fromCorners_UvPoint_UvPoint(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -2273,7 +2269,7 @@ class UvBounds:
         inputs = (
             _list_argument(
                 _List_c_void_p,
-                (c_void_p * len(points))(*[item.__ptr__ for item in points]),
+                (c_void_p * len(points))(*[item._ptr for item in points]),
             )
             if points
             else _error("List is empty")
@@ -2289,7 +2285,7 @@ class UvBounds:
         inputs = (
             _list_argument(
                 _List_c_void_p,
-                (c_void_p * len(bounds))(*[item.__ptr__ for item in bounds]),
+                (c_void_p * len(bounds))(*[item._ptr for item in bounds]),
             )
             if bounds
             else _error("List is empty")
@@ -2301,19 +2297,19 @@ class UvBounds:
         return UvBounds(ptr=output)
 
     def coordinates(self) -> tuple[Range, Range]:
-        inputs = self.__ptr__
+        inputs = self._ptr
         output = _Tuple2_c_void_p_c_void_p()
         _lib.opensolid_UvBounds_coordinates(ctypes.byref(inputs), ctypes.byref(output))
         return (Range(ptr=c_void_p(output.field0)), Range(ptr=c_void_p(output.field1)))
 
     def u_coordinate(self) -> Range:
-        inputs = self.__ptr__
+        inputs = self._ptr
         output = c_void_p()
         _lib.opensolid_UvBounds_uCoordinate(ctypes.byref(inputs), ctypes.byref(output))
         return Range(ptr=output)
 
     def v_coordinate(self) -> Range:
-        inputs = self.__ptr__
+        inputs = self._ptr
         output = c_void_p()
         _lib.opensolid_UvBounds_vCoordinate(ctypes.byref(inputs), ctypes.byref(output))
         return Range(ptr=output)
@@ -2321,30 +2317,30 @@ class UvBounds:
 
 class Curve:
     def __init__(self, *, ptr: c_void_p) -> None:
-        self.__ptr__ = ptr
+        self._ptr = ptr
 
     t: Curve = None  # type: ignore[assignment]
 
     def squared(self) -> Curve:
-        inputs = self.__ptr__
+        inputs = self._ptr
         output = c_void_p()
         _lib.opensolid_Curve_squared(ctypes.byref(inputs), ctypes.byref(output))
         return Curve(ptr=output)
 
     def sqrt(self) -> Curve:
-        inputs = self.__ptr__
+        inputs = self._ptr
         output = c_void_p()
         _lib.opensolid_Curve_sqrt(ctypes.byref(inputs), ctypes.byref(output))
         return Curve(ptr=output)
 
     def evaluate(self, parameter_value: float) -> float:
-        inputs = _Tuple2_c_double_c_void_p(parameter_value, self.__ptr__)
+        inputs = _Tuple2_c_double_c_void_p(parameter_value, self._ptr)
         output = c_double()
         _lib.opensolid_Curve_evaluate_Float(ctypes.byref(inputs), ctypes.byref(output))
         return output.value
 
     def zeros(self) -> list[CurveZero]:
-        inputs = _Tuple2_c_double_c_void_p(_float_tolerance(), self.__ptr__)
+        inputs = _Tuple2_c_double_c_void_p(_float_tolerance(), self._ptr)
         output = _Result_List_c_void_p()
         _lib.opensolid_Curve_zeros(ctypes.byref(inputs), ctypes.byref(output))
         return (
@@ -2360,7 +2356,7 @@ class Curve:
 
     def __neg__(self) -> Curve:
         output = c_void_p()
-        _lib.opensolid_Curve_neg(ctypes.byref(self.__ptr__), ctypes.byref(output))
+        _lib.opensolid_Curve_neg(ctypes.byref(self._ptr), ctypes.byref(output))
         return Curve(ptr=output)
 
     @overload
@@ -2374,14 +2370,14 @@ class Curve:
     def __add__(self, rhs):
         match rhs:
             case float() | int():
-                inputs = _Tuple2_c_void_p_c_double(self.__ptr__, rhs)
+                inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
                 output = c_void_p()
                 _lib.opensolid_Curve_add_Curve_Float(
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return Curve(ptr=output)
             case Curve():
-                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
                 _lib.opensolid_Curve_add_Curve_Curve(
                     ctypes.byref(inputs), ctypes.byref(output)
@@ -2401,14 +2397,14 @@ class Curve:
     def __sub__(self, rhs):
         match rhs:
             case float() | int():
-                inputs = _Tuple2_c_void_p_c_double(self.__ptr__, rhs)
+                inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
                 output = c_void_p()
                 _lib.opensolid_Curve_sub_Curve_Float(
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return Curve(ptr=output)
             case Curve():
-                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
                 _lib.opensolid_Curve_sub_Curve_Curve(
                     ctypes.byref(inputs), ctypes.byref(output)
@@ -2444,42 +2440,42 @@ class Curve:
     def __mul__(self, rhs):
         match rhs:
             case float() | int():
-                inputs = _Tuple2_c_void_p_c_double(self.__ptr__, rhs)
+                inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
                 output = c_void_p()
                 _lib.opensolid_Curve_mul_Curve_Float(
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return Curve(ptr=output)
             case Curve():
-                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
                 _lib.opensolid_Curve_mul_Curve_Curve(
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return Curve(ptr=output)
             case Length():
-                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
                 _lib.opensolid_Curve_mul_Curve_Length(
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return LengthCurve(ptr=output)
             case Angle():
-                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
                 _lib.opensolid_Curve_mul_Curve_Angle(
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return AngleCurve(ptr=output)
             case LengthCurve():
-                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
                 _lib.opensolid_Curve_mul_Curve_LengthCurve(
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return LengthCurve(ptr=output)
             case AngleCurve():
-                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
                 _lib.opensolid_Curve_mul_Curve_AngleCurve(
                     ctypes.byref(inputs), ctypes.byref(output)
@@ -2499,14 +2495,14 @@ class Curve:
     def __truediv__(self, rhs):
         match rhs:
             case float() | int():
-                inputs = _Tuple2_c_void_p_c_double(self.__ptr__, rhs)
+                inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
                 output = c_void_p()
                 _lib.opensolid_Curve_div_Curve_Float(
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return Curve(ptr=output)
             case Curve():
-                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
                 _lib.opensolid_Curve_div_Curve_Curve(
                     ctypes.byref(inputs), ctypes.byref(output)
@@ -2516,25 +2512,25 @@ class Curve:
                 return NotImplemented
 
     def __radd__(self, lhs: float) -> Curve:
-        inputs = _Tuple2_c_double_c_void_p(lhs, self.__ptr__)
+        inputs = _Tuple2_c_double_c_void_p(lhs, self._ptr)
         output = c_void_p()
         _lib.opensolid_Curve_add_Float_Curve(ctypes.byref(inputs), ctypes.byref(output))
         return Curve(ptr=output)
 
     def __rsub__(self, lhs: float) -> Curve:
-        inputs = _Tuple2_c_double_c_void_p(lhs, self.__ptr__)
+        inputs = _Tuple2_c_double_c_void_p(lhs, self._ptr)
         output = c_void_p()
         _lib.opensolid_Curve_sub_Float_Curve(ctypes.byref(inputs), ctypes.byref(output))
         return Curve(ptr=output)
 
     def __rmul__(self, lhs: float) -> Curve:
-        inputs = _Tuple2_c_double_c_void_p(lhs, self.__ptr__)
+        inputs = _Tuple2_c_double_c_void_p(lhs, self._ptr)
         output = c_void_p()
         _lib.opensolid_Curve_mul_Float_Curve(ctypes.byref(inputs), ctypes.byref(output))
         return Curve(ptr=output)
 
     def __rtruediv__(self, lhs: float) -> Curve:
-        inputs = _Tuple2_c_double_c_void_p(lhs, self.__ptr__)
+        inputs = _Tuple2_c_double_c_void_p(lhs, self._ptr)
         output = c_void_p()
         _lib.opensolid_Curve_div_Float_Curve(ctypes.byref(inputs), ctypes.byref(output))
         return Curve(ptr=output)
@@ -2542,22 +2538,22 @@ class Curve:
 
 class CurveZero:
     def __init__(self, *, ptr: c_void_p) -> None:
-        self.__ptr__ = ptr
+        self._ptr = ptr
 
     def location(self) -> float:
-        inputs = self.__ptr__
+        inputs = self._ptr
         output = c_double()
         _lib.opensolid_CurveZero_location(ctypes.byref(inputs), ctypes.byref(output))
         return output.value
 
     def order(self) -> int:
-        inputs = self.__ptr__
+        inputs = self._ptr
         output = c_int64()
         _lib.opensolid_CurveZero_order(ctypes.byref(inputs), ctypes.byref(output))
         return output.value
 
     def sign(self) -> int:
-        inputs = self.__ptr__
+        inputs = self._ptr
         output = c_int64()
         _lib.opensolid_CurveZero_sign(ctypes.byref(inputs), ctypes.byref(output))
         return output.value
@@ -2565,10 +2561,10 @@ class CurveZero:
 
 class LengthCurve:
     def __init__(self, *, ptr: c_void_p) -> None:
-        self.__ptr__ = ptr
+        self._ptr = ptr
 
     def evaluate(self, parameter_value: float) -> Length:
-        inputs = _Tuple2_c_double_c_void_p(parameter_value, self.__ptr__)
+        inputs = _Tuple2_c_double_c_void_p(parameter_value, self._ptr)
         output = c_void_p()
         _lib.opensolid_LengthCurve_evaluate_Float(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -2576,7 +2572,7 @@ class LengthCurve:
         return Length(ptr=output)
 
     def zeros(self) -> list[CurveZero]:
-        inputs = _Tuple2_c_void_p_c_void_p(_length_tolerance().__ptr__, self.__ptr__)
+        inputs = _Tuple2_c_void_p_c_void_p(_length_tolerance()._ptr, self._ptr)
         output = _Result_List_c_void_p()
         _lib.opensolid_LengthCurve_zeros(ctypes.byref(inputs), ctypes.byref(output))
         return (
@@ -2592,11 +2588,11 @@ class LengthCurve:
 
     def __neg__(self) -> LengthCurve:
         output = c_void_p()
-        _lib.opensolid_LengthCurve_neg(ctypes.byref(self.__ptr__), ctypes.byref(output))
+        _lib.opensolid_LengthCurve_neg(ctypes.byref(self._ptr), ctypes.byref(output))
         return LengthCurve(ptr=output)
 
     def __add__(self, rhs: LengthCurve) -> LengthCurve:
-        inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+        inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
         output = c_void_p()
         _lib.opensolid_LengthCurve_add_LengthCurve_LengthCurve(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -2604,7 +2600,7 @@ class LengthCurve:
         return LengthCurve(ptr=output)
 
     def __sub__(self, rhs: LengthCurve) -> LengthCurve:
-        inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+        inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
         output = c_void_p()
         _lib.opensolid_LengthCurve_sub_LengthCurve_LengthCurve(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -2622,14 +2618,14 @@ class LengthCurve:
     def __mul__(self, rhs):
         match rhs:
             case float() | int():
-                inputs = _Tuple2_c_void_p_c_double(self.__ptr__, rhs)
+                inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
                 output = c_void_p()
                 _lib.opensolid_LengthCurve_mul_LengthCurve_Float(
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return LengthCurve(ptr=output)
             case Curve():
-                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
                 _lib.opensolid_LengthCurve_mul_LengthCurve_Curve(
                     ctypes.byref(inputs), ctypes.byref(output)
@@ -2657,28 +2653,28 @@ class LengthCurve:
     def __truediv__(self, rhs):
         match rhs:
             case float() | int():
-                inputs = _Tuple2_c_void_p_c_double(self.__ptr__, rhs)
+                inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
                 output = c_void_p()
                 _lib.opensolid_LengthCurve_div_LengthCurve_Float(
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return LengthCurve(ptr=output)
             case LengthCurve():
-                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
                 _lib.opensolid_LengthCurve_div_LengthCurve_LengthCurve(
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return Curve(ptr=output)
             case Length():
-                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
                 _lib.opensolid_LengthCurve_div_LengthCurve_Length(
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return Curve(ptr=output)
             case Curve():
-                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
                 _lib.opensolid_LengthCurve_div_LengthCurve_Curve(
                     ctypes.byref(inputs), ctypes.byref(output)
@@ -2688,7 +2684,7 @@ class LengthCurve:
                 return NotImplemented
 
     def __rmul__(self, lhs: float) -> LengthCurve:
-        inputs = _Tuple2_c_double_c_void_p(lhs, self.__ptr__)
+        inputs = _Tuple2_c_double_c_void_p(lhs, self._ptr)
         output = c_void_p()
         _lib.opensolid_LengthCurve_mul_Float_LengthCurve(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -2698,22 +2694,22 @@ class LengthCurve:
 
 class AngleCurve:
     def __init__(self, *, ptr: c_void_p) -> None:
-        self.__ptr__ = ptr
+        self._ptr = ptr
 
     def sin(self) -> Curve:
-        inputs = self.__ptr__
+        inputs = self._ptr
         output = c_void_p()
         _lib.opensolid_AngleCurve_sin(ctypes.byref(inputs), ctypes.byref(output))
         return Curve(ptr=output)
 
     def cos(self) -> Curve:
-        inputs = self.__ptr__
+        inputs = self._ptr
         output = c_void_p()
         _lib.opensolid_AngleCurve_cos(ctypes.byref(inputs), ctypes.byref(output))
         return Curve(ptr=output)
 
     def evaluate(self, parameter_value: float) -> Angle:
-        inputs = _Tuple2_c_double_c_void_p(parameter_value, self.__ptr__)
+        inputs = _Tuple2_c_double_c_void_p(parameter_value, self._ptr)
         output = c_void_p()
         _lib.opensolid_AngleCurve_evaluate_Float(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -2721,7 +2717,7 @@ class AngleCurve:
         return Angle(ptr=output)
 
     def zeros(self) -> list[CurveZero]:
-        inputs = _Tuple2_c_void_p_c_void_p(_angle_tolerance().__ptr__, self.__ptr__)
+        inputs = _Tuple2_c_void_p_c_void_p(_angle_tolerance()._ptr, self._ptr)
         output = _Result_List_c_void_p()
         _lib.opensolid_AngleCurve_zeros(ctypes.byref(inputs), ctypes.byref(output))
         return (
@@ -2737,11 +2733,11 @@ class AngleCurve:
 
     def __neg__(self) -> AngleCurve:
         output = c_void_p()
-        _lib.opensolid_AngleCurve_neg(ctypes.byref(self.__ptr__), ctypes.byref(output))
+        _lib.opensolid_AngleCurve_neg(ctypes.byref(self._ptr), ctypes.byref(output))
         return AngleCurve(ptr=output)
 
     def __add__(self, rhs: AngleCurve) -> AngleCurve:
-        inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+        inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
         output = c_void_p()
         _lib.opensolid_AngleCurve_add_AngleCurve_AngleCurve(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -2749,7 +2745,7 @@ class AngleCurve:
         return AngleCurve(ptr=output)
 
     def __sub__(self, rhs: AngleCurve) -> AngleCurve:
-        inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+        inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
         output = c_void_p()
         _lib.opensolid_AngleCurve_sub_AngleCurve_AngleCurve(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -2767,14 +2763,14 @@ class AngleCurve:
     def __mul__(self, rhs):
         match rhs:
             case float() | int():
-                inputs = _Tuple2_c_void_p_c_double(self.__ptr__, rhs)
+                inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
                 output = c_void_p()
                 _lib.opensolid_AngleCurve_mul_AngleCurve_Float(
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return AngleCurve(ptr=output)
             case Curve():
-                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
                 _lib.opensolid_AngleCurve_mul_AngleCurve_Curve(
                     ctypes.byref(inputs), ctypes.byref(output)
@@ -2802,28 +2798,28 @@ class AngleCurve:
     def __truediv__(self, rhs):
         match rhs:
             case float() | int():
-                inputs = _Tuple2_c_void_p_c_double(self.__ptr__, rhs)
+                inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
                 output = c_void_p()
                 _lib.opensolid_AngleCurve_div_AngleCurve_Float(
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return AngleCurve(ptr=output)
             case AngleCurve():
-                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
                 _lib.opensolid_AngleCurve_div_AngleCurve_AngleCurve(
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return Curve(ptr=output)
             case Angle():
-                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
                 _lib.opensolid_AngleCurve_div_AngleCurve_Angle(
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return Curve(ptr=output)
             case Curve():
-                inputs = _Tuple2_c_void_p_c_void_p(self.__ptr__, rhs.__ptr__)
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
                 _lib.opensolid_AngleCurve_div_AngleCurve_Curve(
                     ctypes.byref(inputs), ctypes.byref(output)
@@ -2833,7 +2829,7 @@ class AngleCurve:
                 return NotImplemented
 
     def __rmul__(self, lhs: float) -> AngleCurve:
-        inputs = _Tuple2_c_double_c_void_p(lhs, self.__ptr__)
+        inputs = _Tuple2_c_double_c_void_p(lhs, self._ptr)
         output = c_void_p()
         _lib.opensolid_AngleCurve_mul_Float_AngleCurve(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -2843,7 +2839,7 @@ class AngleCurve:
 
 class Drawing2d:
     def __init__(self, *, ptr: c_void_p) -> None:
-        self.__ptr__ = ptr
+        self._ptr = ptr
 
     black_stroke: Drawing2d.Attribute = None  # type: ignore[assignment]
     no_fill: Drawing2d.Attribute = None  # type: ignore[assignment]
@@ -2851,10 +2847,10 @@ class Drawing2d:
     @staticmethod
     def to_svg(view_box: Bounds2d, entities: list[Drawing2d.Entity]) -> str:
         inputs = _Tuple2_c_void_p_List_c_void_p(
-            view_box.__ptr__,
+            view_box._ptr,
             _list_argument(
                 _List_c_void_p,
-                (c_void_p * len(entities))(*[item.__ptr__ for item in entities]),
+                (c_void_p * len(entities))(*[item._ptr for item in entities]),
             ),
         )
         output = _Text()
@@ -2870,11 +2866,11 @@ class Drawing2d:
         inputs = _Tuple2_List_c_void_p_List_c_void_p(
             _list_argument(
                 _List_c_void_p,
-                (c_void_p * len(attributes))(*[item.__ptr__ for item in attributes]),
+                (c_void_p * len(attributes))(*[item._ptr for item in attributes]),
             ),
             _list_argument(
                 _List_c_void_p,
-                (c_void_p * len(vertices))(*[item.__ptr__ for item in vertices]),
+                (c_void_p * len(vertices))(*[item._ptr for item in vertices]),
             ),
         )
         output = c_void_p()
@@ -2890,10 +2886,10 @@ class Drawing2d:
         inputs = _Tuple3_List_c_void_p_c_void_p_c_void_p(
             _list_argument(
                 _List_c_void_p,
-                (c_void_p * len(attributes))(*[item.__ptr__ for item in attributes]),
+                (c_void_p * len(attributes))(*[item._ptr for item in attributes]),
             ),
-            center_point.__ptr__,
-            radius.__ptr__,
+            center_point._ptr,
+            radius._ptr,
         )
         output = c_void_p()
         _lib.opensolid_Drawing2d_circle_ListDrawing2dAttribute_Point2d_Length(
@@ -2903,7 +2899,7 @@ class Drawing2d:
 
     @staticmethod
     def stroke_color(color: Color) -> Drawing2d.Attribute:
-        inputs = color.__ptr__
+        inputs = color._ptr
         output = c_void_p()
         _lib.opensolid_Drawing2d_strokeColor_Color(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -2912,7 +2908,7 @@ class Drawing2d:
 
     @staticmethod
     def fill_color(color: Color) -> Drawing2d.Attribute:
-        inputs = color.__ptr__
+        inputs = color._ptr
         output = c_void_p()
         _lib.opensolid_Drawing2d_fillColor_Color(
             ctypes.byref(inputs), ctypes.byref(output)
@@ -2921,11 +2917,11 @@ class Drawing2d:
 
     class Entity:
         def __init__(self, *, ptr: c_void_p) -> None:
-            self.__ptr__ = ptr
+            self._ptr = ptr
 
     class Attribute:
         def __init__(self, *, ptr: c_void_p) -> None:
-            self.__ptr__ = ptr
+            self._ptr = ptr
 
 
 def _length_zero() -> Length:

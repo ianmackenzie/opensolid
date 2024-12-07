@@ -143,7 +143,7 @@ singleArgument varName ffiType = case ffiType of
   FFI.Tuple type1 type2 rest -> tupleArgumentValue ffiType type1 type2 rest varName
   FFI.Maybe valueType -> maybeArgumentValue ffiType valueType varName
   FFI.Result{} -> internalError "Should never have Result as input argument"
-  FFI.Class{} -> varName + ".__ptr__"
+  FFI.Class{} -> varName + "._ptr"
 
 fieldArgumentValue :: Text -> FFI.Type -> Text
 fieldArgumentValue varName ffiType = case ffiType of
@@ -156,7 +156,7 @@ fieldArgumentValue varName ffiType = case ffiType of
   FFI.Tuple type1 type2 rest -> tupleArgumentValue ffiType type1 type2 rest varName
   FFI.Maybe valueType -> maybeArgumentValue ffiType valueType varName
   FFI.Result{} -> internalError "Should never have Result as input argument"
-  FFI.Class{} -> varName + ".__ptr__"
+  FFI.Class{} -> varName + "._ptr"
 
 listArgumentValue :: FFI.Type -> FFI.Type -> Text -> Text
 listArgumentValue listType itemType varName = do
