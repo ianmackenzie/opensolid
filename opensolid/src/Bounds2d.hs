@@ -10,6 +10,7 @@ module Bounds2d
   , hull4
   , hullN
   , aggregate2
+  , aggregateN
   , exclusion
   , inclusion
   , includes
@@ -53,7 +54,7 @@ import OpenSolid.FFI qualified as FFI
 import Point2d (Point2d (Point2d))
 import Point2d qualified
 import Qty qualified
-import Range (Range)
+import Range (Range (Range))
 import Range qualified
 import Transform2d (Transform2d (Transform2d))
 import Units (Meters)
@@ -206,6 +207,19 @@ constant point = do
 aggregate2 :: Bounds2d (space @ units) -> Bounds2d (space @ units) -> Bounds2d (space @ units)
 aggregate2 (Bounds2d x1 y1) (Bounds2d x2 y2) =
   Bounds2d (Range.aggregate2 x1 x2) (Range.aggregate2 y1 y2)
+
+aggregateN :: NonEmpty (Bounds2d (space @ units)) -> Bounds2d (space @ units)
+aggregateN (Bounds2d (Range xLow0 xHigh0) (Range yLow0 yHigh0) :| rest) = do
+  let go xLow xHigh yLow yHigh [] = Bounds2d (Range.unsafe xLow xHigh) (Range.unsafe yLow yHigh)
+      go xLow xHigh yLow yHigh (next : remaining) = do
+        let Bounds2d (Range xLowNext xHighNext) (Range yLowNext yHighNext) = next
+        go
+          (Qty.min xLow xLowNext)
+          (Qty.max xHigh xHighNext)
+          (Qty.min yLow yLowNext)
+          (Qty.max yHigh yHighNext)
+          remaining
+  go xLow0 xHigh0 yLow0 yHigh0 rest
 
 exclusion :: Point2d (space @ units) -> Bounds2d (space @ units) -> Qty units
 exclusion point bounds = do
