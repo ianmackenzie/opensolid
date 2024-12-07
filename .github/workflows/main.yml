@@ -63,11 +63,11 @@ jobs:
           cabal build opensolid-ffi
       - name: Build Python bindings
         run: |
-          Copy-Item -Path .\opensolid-jit\target\release\opensolid_jit.dll -Destination .\opensolid-python\opensolid\
-          Get-ChildItem -Path dist-newstyle -Filter opensolid-ffi.dll -Recurse | Copy-Item -Destination .\opensolid-python\opensolid\
+          Copy-Item -Path .\opensolid-jit\target\release\opensolid_jit.dll -Destination .\opensolid-python\lib\src\opensolid\
+          Get-ChildItem -Path dist-newstyle -Filter opensolid-ffi.dll -Recurse | Copy-Item -Destination .\opensolid-python\lib\src\opensolid\
           cabal run opensolid-python
       - name: Run test Python script
-        working-directory: opensolid-python
+        working-directory: opensolid-python/lib
         run: |
           python check.py
 
