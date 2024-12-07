@@ -44,12 +44,9 @@ asPattern :: (Name, FFI.Type) -> Text
 asPattern (argName, argType) = typePattern argType + " as " + Name.snakeCase argName
 
 namedPattern :: (Name, FFI.Type) -> Text
-namedPattern (argName, argType) =
-  Python.str (Name.snakeCase argName)
-    + ": "
-    + typePattern argType
-    + " as "
-    + Name.snakeCase argName
+namedPattern (argName, argType) = do
+  let name = Name.snakeCase argName
+  Python.str name + ": " + typePattern argType + " as " + name
 
 typePattern :: FFI.Type -> Text
 typePattern ffiType = case ffiType of
