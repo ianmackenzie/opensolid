@@ -8,12 +8,9 @@ Improve Python bindings
 - Add docstrings
 - Actual error types instead of strings
 - Add _list_decode helper?
-- Get lists arguments working
-  - allocate memory with opensolid_malloc
-  - cast result to typed pointer with 'ctypes.cast(obj, type)'?
-  - get/set elements with 'ptr[index]'
 - Rename MemberFunction and StaticFunction to have U/R/M prefix *before* argument count
-- Add support for intersection operator (^)
+- Add support for 'intersects' operator (^)
+  -> Also (&) for *intersection*?
 
 Switch Solve2d.return back to taking a single value instead of a NonEmpty
 
