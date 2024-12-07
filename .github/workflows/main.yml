@@ -40,10 +40,9 @@ jobs:
       - name: Update Cabal package index
         run: |
           cabal update
-      - name: Install Python 3.12
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
+      - name: Install uv
+        run: |
+          pipx install uv
       # Build and test
       - name: Build opensolid-jit library
         working-directory: opensolid-jit
@@ -69,7 +68,7 @@ jobs:
       - name: Run test Python script
         working-directory: opensolid-python/lib
         run: |
-          python check.py
+          uv run check.py
 
 # jobs:
 #   test:
