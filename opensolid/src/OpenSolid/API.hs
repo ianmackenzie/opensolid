@@ -224,6 +224,9 @@ angleRange =
   class_ @(Range Radians)
     [ factory1 "Constant" "Value" Range.constant
     , factory2 "From Endpoints" "A" "B" Range.from
+    , factory2 "Radians" "A" "B" Range.radians
+    , factory2 "Degrees" "A" "B" Range.degrees
+    , factory2 "Turns" "A" "B" Range.turns
     , factory1 "Hull" "Values" Range.hullN
     , factory1 "Aggregate" "Ranges" Range.aggregateN
     , member0 "Endpoints" Range.endpoints
