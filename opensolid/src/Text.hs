@@ -119,7 +119,7 @@ capitalize :: Text -> Text
 capitalize text =
   case Data.Text.uncons text of
     Just (first, rest) -> Data.Text.cons (Data.Char.toUpper first) rest
-    Nothing -> ""
+    Nothing -> text
 
 encodeUtf8 :: Text -> ByteString
 encodeUtf8 = Data.Text.Encoding.encodeUtf8
