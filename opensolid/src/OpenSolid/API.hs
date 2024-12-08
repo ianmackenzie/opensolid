@@ -120,6 +120,8 @@ length =
     , timesFloat
     , times @(Range Unitless) Self
     , times @(Curve1d Unitless) Self
+    , times @(Direction2d Space) Self
+    , times @(Vector2d (Space @ Unitless)) Self
     , divByFloat
     , divBySelf
     , divBy @(Range Unitless) Self
@@ -352,6 +354,9 @@ direction2d =
     , member0 "X Component" Direction2d.xComponent
     , member0 "Y Component" Direction2d.yComponent
     , negateSelf
+    , floatTimes
+    , timesFloat
+    , times @Length Self
     ]
 
 point2d :: Class
@@ -371,6 +376,9 @@ point2d =
     , member0 "Y Coordinate" Point2d.yCoordinate
     , member1 "Distance To" "Other" Point2d.distanceFrom
     , member1 "Midpoint" "Other" Point2d.midpoint
+    , minusSelf
+    , minus @(Vector2d (Space @ Meters)) Self
+    , plus @(Vector2d (Space @ Meters)) Self
     ]
 
 uvPoint :: Class
@@ -386,6 +394,9 @@ uvPoint =
     , member0 "V Coordinate" Point2d.yCoordinate
     , member1 "Distance To" "Other" Point2d.distanceFrom
     , member1 "Midpoint" "Other" Point2d.midpoint
+    , minusSelf
+    , minus @(Vector2d (Space @ Unitless)) Self
+    , plus @(Vector2d (Space @ Unitless)) Self
     ]
 
 bounds2d :: Class
