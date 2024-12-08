@@ -2469,7 +2469,7 @@ class Bounds2d:
 
     def __repr__(self) -> str:
         x, y = self.coordinates()
-        return Bounds2d.xy(" + repr(x) + ", " + repr(y) + ")
+        return "Bounds2d.xy(" + repr(x) + "," + repr(y) + ")"
 
 
 class UvBounds:
@@ -2555,7 +2555,7 @@ class UvBounds:
 
     def __repr__(self) -> str:
         u, v = self.coordinates()
-        return UvBounds.uv(" + repr(u) + ", " + repr(v) + ")
+        return "UvBounds.uv(" + repr(u) + "," + repr(v) + ")"
 
 
 class Curve:

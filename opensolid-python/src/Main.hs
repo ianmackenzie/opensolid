@@ -224,12 +224,12 @@ extraMemberFunctions className = case className of
   "Bounds2d" ->
     [ "def __repr__(self) -> str:"
     , "    x, y = self.coordinates()"
-    , "    return Bounds2d.xy(' + repr(x) + ',' + repr(y) + ')"
+    , "    return 'Bounds2d.xy(' + repr(x) + ',' + repr(y) + ')'"
     ]
   "UvBounds" ->
     [ "def __repr__(self) -> str:"
     , "    u, v = self.coordinates()"
-    , "    return UvBounds.uv(' + repr(u) + ',' + repr(v) + ')"
+    , "    return 'UvBounds.uv(' + repr(u) + ',' + repr(v) + ')'"
     ]
   _ -> []
 
