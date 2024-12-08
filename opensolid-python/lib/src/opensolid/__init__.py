@@ -492,6 +492,11 @@ class Length:
         )
         return Length(ptr=output)
 
+    def __repr__(self) -> str:
+        if self == Length.zero:
+            return "Length.zero"
+        return "Length.meters(" + str(self.in_meters()) + ")"
+
 
 class Angle:
     def __init__(self, *, ptr: c_void_p) -> None:
@@ -774,6 +779,11 @@ class Angle:
         _lib.opensolid_Angle_mul_Float_Angle(ctypes.byref(inputs), ctypes.byref(output))
         return Angle(ptr=output)
 
+    def __repr__(self) -> str:
+        if self == Angle.zero:
+            return "Angle.zero"
+        return "Angle.degrees(" + str(self.in_degrees()) + ")"
+
 
 class Range:
     def __init__(self, *, ptr: c_void_p) -> None:
@@ -1033,6 +1043,10 @@ class Range:
         _lib.opensolid_Range_div_Float_Range(ctypes.byref(inputs), ctypes.byref(output))
         return Range(ptr=output)
 
+    def __repr__(self) -> str:
+        low, high = self.endpoints()
+        return "Range.from_endpoints(" + str(low) + "," + str(high) + ")"
+
 
 class LengthRange:
     def __init__(self, *, ptr: c_void_p) -> None:
@@ -1285,6 +1299,16 @@ class LengthRange:
         )
         return LengthRange(ptr=output)
 
+    def __repr__(self) -> str:
+        low, high = self.endpoints()
+        return (
+            "LengthRange.meters("
+            + str(low.in_meters())
+            + ","
+            + str(high.in_meters())
+            + ")"
+        )
+
 
 class AngleRange:
     def __init__(self, *, ptr: c_void_p) -> None:
@@ -1304,6 +1328,33 @@ class AngleRange:
         inputs = _Tuple2_c_void_p_c_void_p(a._ptr, b._ptr)
         output = c_void_p()
         _lib.opensolid_AngleRange_fromEndpoints_Angle_Angle(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return AngleRange(ptr=output)
+
+    @staticmethod
+    def radians(a: float, b: float) -> AngleRange:
+        inputs = _Tuple2_c_double_c_double(a, b)
+        output = c_void_p()
+        _lib.opensolid_AngleRange_radians_Float_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return AngleRange(ptr=output)
+
+    @staticmethod
+    def degrees(a: float, b: float) -> AngleRange:
+        inputs = _Tuple2_c_double_c_double(a, b)
+        output = c_void_p()
+        _lib.opensolid_AngleRange_degrees_Float_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return AngleRange(ptr=output)
+
+    @staticmethod
+    def turns(a: float, b: float) -> AngleRange:
+        inputs = _Tuple2_c_double_c_double(a, b)
+        output = c_void_p()
+        _lib.opensolid_AngleRange_turns_Float_Float(
             ctypes.byref(inputs), ctypes.byref(output)
         )
         return AngleRange(ptr=output)
@@ -1495,6 +1546,16 @@ class AngleRange:
         )
         return AngleRange(ptr=output)
 
+    def __repr__(self) -> str:
+        low, high = self.endpoints()
+        return (
+            "AngleRange.degrees("
+            + str(low.in_degrees())
+            + ","
+            + str(high.in_degrees())
+            + ")"
+        )
+
 
 class Color:
     def __init__(self, *, ptr: c_void_p) -> None:
@@ -1542,7 +1603,7 @@ class Color:
         return Color(ptr=output)
 
     @staticmethod
-    def rgb255(red: int, green: int, blue: int) -> Color:
+    def rgb_255(red: int, green: int, blue: int) -> Color:
         inputs = _Tuple3_c_int64_c_int64_c_int64(red, green, blue)
         output = c_void_p()
         _lib.opensolid_Color_rgb255_Int_Int_Int(
@@ -1578,11 +1639,15 @@ class Color:
         _lib.opensolid_Color_components(ctypes.byref(inputs), ctypes.byref(output))
         return (output.field0, output.field1, output.field2)
 
-    def components255(self) -> tuple[int, int, int]:
+    def components_255(self) -> tuple[int, int, int]:
         inputs = self._ptr
         output = _Tuple3_c_int64_c_int64_c_int64()
         _lib.opensolid_Color_components255(ctypes.byref(inputs), ctypes.byref(output))
         return (output.field0, output.field1, output.field2)
+
+    def __repr__(self) -> str:
+        r, g, b = self.components_255()
+        return "Color.rgb_255(" + str(r) + "," + str(g) + "," + str(b) + ")"
 
 
 class Vector2d:

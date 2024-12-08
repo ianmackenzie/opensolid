@@ -156,11 +156,48 @@ classDefinition
             , Python.indent [Python.NegationOperator.definition classId negationFunction]
             , Python.indent (List.map (Python.PostOperator.definition classId) postOperators)
             , Python.indent (List.map (Python.PreOperator.definition classId) preOperators)
+            , Python.indent (extraMemberFunctions (Python.Class.qualifiedName classId))
             , Python.indent nestedClassDefinitions
             ]
     let constantDefinitions =
           Python.lines ((List.map (Python.Constant.definition classId) constants) + nestedClassConstants)
     (definition, constantDefinitions)
+
+extraMemberFunctions :: Text -> List Text
+extraMemberFunctions className = case className of
+  "Length" ->
+    [ "def __repr__(self) -> str:"
+    , "    if self == Length.zero:"
+    , "        return 'Length.zero'"
+    , "    return 'Length.meters(' + str(self.in_meters()) + ')'"
+    ]
+  "Angle" ->
+    [ "def __repr__(self) -> str:"
+    , "    if self == Angle.zero:"
+    , "        return 'Angle.zero'"
+    , "    return 'Angle.degrees(' + str(self.in_degrees()) + ')'"
+    ]
+  "Range" ->
+    [ "def __repr__(self) -> str:"
+    , "    low, high = self.endpoints()"
+    , "    return 'Range.from_endpoints(' + str(low) + ',' + str(high) + ')'"
+    ]
+  "LengthRange" ->
+    [ "def __repr__(self) -> str:"
+    , "    low, high = self.endpoints()"
+    , "    return 'LengthRange.meters(' + str(low.in_meters()) + ',' + str(high.in_meters()) + ')'"
+    ]
+  "AngleRange" ->
+    [ "def __repr__(self) -> str:"
+    , "    low, high = self.endpoints()"
+    , "    return 'AngleRange.degrees(' + str(low.in_degrees()) + ',' + str(high.in_degrees()) + ')'"
+    ]
+  "Color" ->
+    [ "def __repr__(self) -> str:"
+    , "    r, g, b = self.components_255()"
+    , "    return 'Color.rgb_255(' + str(r) + ',' + str(g) + ',' + str(b) + ')'"
+    ]
+  _ -> []
 
 ffiTypeDeclarations :: Text
 ffiTypeDeclarations = do
