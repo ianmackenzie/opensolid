@@ -18,18 +18,24 @@ from ctypes import (
 from pathlib import Path
 from typing import Any, overload
 
-# Load the native library, assuming it's located in the same directory as __init__.py
-_lib_dir = Path(__file__).parent
-match platform.system():
-    case "Windows":
-        _load_path = _lib_dir / "opensolid-ffi.dll"
-    case "Darwin":
-        _load_path = _lib_dir / "libopensolid-ffi.dylib"
-    case "Linux":
-        _load_path = _lib_dir / "libopensolid-ffi.so"
-    case unsupported_system:
-        raise OSError(unsupported_system + " is not yet supported")
-_lib: CDLL = ctypes.cdll.LoadLibrary(str(_load_path))
+
+def _load_library() -> CDLL:
+    """Load the native library from the same directory as __init__.py."""
+    match platform.system():
+        case "Windows":
+            lib_file_name = "opensolid-ffi.dll"
+        case "Darwin":
+            lib_file_name = "libopensolid-ffi.dylib"
+        case "Linux":
+            lib_file_name = "libopensolid-ffi.so"
+        case unsupported_system:
+            raise OSError(unsupported_system + " is not yet supported")
+    self_dir = Path(__file__).parent
+    lib_path = self_dir / lib_file_name
+    return ctypes.cdll.LoadLibrary(str(lib_path))
+
+
+_lib: CDLL = _load_library()
 
 # Define the signatures of the C API functions
 # (also an early sanity check to make sure the library has been loaded OK)
@@ -95,7 +101,7 @@ def _float_tolerance() -> float:
     if isinstance(Tolerance.current, float):
         return Tolerance.current
     if Tolerance.current is None:
-        message = "No float tolerance set, please set one using 'with Tolerance(...)'"
+        message = 'No float tolerance set, please set one using "with Tolerance(...)"'
         raise TypeError(message)
     message = (
         "Expected a tolerance of type float but current tolerance is of type "
@@ -108,7 +114,7 @@ def _length_tolerance() -> Length:
     if isinstance(Tolerance.current, Length):
         return Tolerance.current
     if Tolerance.current is None:
-        message = "No length tolerance set, please set one using 'with Tolerance(...)'"
+        message = 'No length tolerance set, please set one using "with Tolerance(...)"'
         raise TypeError(message)
     message = (
         "Expected a tolerance of type Length but current tolerance is of type "
@@ -121,7 +127,7 @@ def _angle_tolerance() -> Angle:
     if isinstance(Tolerance.current, Angle):
         return Tolerance.current
     if Tolerance.current is None:
-        message = "No angle tolerance set, please set one using 'with Tolerance(...)'"
+        message = 'No angle tolerance set, please set one using "with Tolerance(...)"'
         raise TypeError(message)
     message = (
         "Expected a tolerance of type Angle but current tolerance is of type "

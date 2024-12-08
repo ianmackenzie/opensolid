@@ -38,7 +38,7 @@ definition classId (functionName, memberFunctions) = do
                 [ Python.lines (List.map overloadCase overloads)
                 , "case _:"
                 , Python.indent
-                    [ "message = \"Unexpected function arguments\""
+                    [ "message = 'Unexpected function arguments'"
                     , "raise TypeError(message)"
                     ]
                 ]
