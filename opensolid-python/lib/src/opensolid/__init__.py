@@ -371,6 +371,14 @@ class Length:
     def __mul__(self, rhs: Curve) -> LengthCurve:
         pass
 
+    @overload
+    def __mul__(self, rhs: Direction2d) -> Displacement2d:
+        pass
+
+    @overload
+    def __mul__(self, rhs: Vector2d) -> Displacement2d:
+        pass
+
     def __mul__(self, rhs):
         match rhs:
             case float() | int():
@@ -394,6 +402,20 @@ class Length:
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return LengthCurve(ptr=output)
+            case Direction2d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Length_mul_Length_Direction2d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Displacement2d(ptr=output)
+            case Vector2d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Length_mul_Length_Vector2d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Displacement2d(ptr=output)
             case _:
                 return NotImplemented
 
@@ -1789,6 +1811,10 @@ class Vector2d:
         )
         return Vector2d(ptr=output)
 
+    def __repr__(self) -> str:
+        x, y = self.components()
+        return "Vector2d.xy(" + str(x) + "," + str(y) + ")"
+
 
 class Displacement2d:
     def __init__(self, *, ptr: c_void_p) -> None:
@@ -1971,6 +1997,16 @@ class Displacement2d:
         )
         return Displacement2d(ptr=output)
 
+    def __repr__(self) -> str:
+        x, y = self.components()
+        return (
+            "Displacement2d.meters("
+            + str(x.in_meters())
+            + ","
+            + str(y.in_meters())
+            + ")"
+        )
+
 
 class Direction2d:
     def __init__(self, *, ptr: c_void_p) -> None:
@@ -1988,6 +2024,24 @@ class Direction2d:
         inputs = angle._ptr
         output = c_void_p()
         _lib.opensolid_Direction2d_fromAngle_Angle(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Direction2d(ptr=output)
+
+    @staticmethod
+    def degrees(value: float) -> Direction2d:
+        inputs = c_double(value)
+        output = c_void_p()
+        _lib.opensolid_Direction2d_degrees_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Direction2d(ptr=output)
+
+    @staticmethod
+    def radians(value: float) -> Direction2d:
+        inputs = c_double(value)
+        output = c_void_p()
+        _lib.opensolid_Direction2d_radians_Float(
             ctypes.byref(inputs), ctypes.byref(output)
         )
         return Direction2d(ptr=output)
@@ -2026,6 +2080,44 @@ class Direction2d:
         output = c_void_p()
         _lib.opensolid_Direction2d_neg(ctypes.byref(self._ptr), ctypes.byref(output))
         return Direction2d(ptr=output)
+
+    @overload
+    def __mul__(self, rhs: float) -> Vector2d:
+        pass
+
+    @overload
+    def __mul__(self, rhs: Length) -> Displacement2d:
+        pass
+
+    def __mul__(self, rhs):
+        match rhs:
+            case float() | int():
+                inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
+                output = c_void_p()
+                _lib.opensolid_Direction2d_mul_Direction2d_Float(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Vector2d(ptr=output)
+            case Length():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Direction2d_mul_Direction2d_Length(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Displacement2d(ptr=output)
+            case _:
+                return NotImplemented
+
+    def __rmul__(self, lhs: float) -> Vector2d:
+        inputs = _Tuple2_c_double_c_void_p(lhs, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Direction2d_mul_Float_Direction2d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Vector2d(ptr=output)
+
+    def __repr__(self) -> str:
+        return "Direction2d.degrees(" + str(self.to_angle().in_degrees()) + ")"
 
 
 class Point2d:
@@ -2139,6 +2231,45 @@ class Point2d:
         )
         return Point2d(ptr=output)
 
+    @overload
+    def __sub__(self, rhs: Point2d) -> Displacement2d:
+        pass
+
+    @overload
+    def __sub__(self, rhs: Displacement2d) -> Point2d:
+        pass
+
+    def __sub__(self, rhs):
+        match rhs:
+            case Point2d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Point2d_sub_Point2d_Point2d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Displacement2d(ptr=output)
+            case Displacement2d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Point2d_sub_Point2d_Displacement2d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Point2d(ptr=output)
+            case _:
+                return NotImplemented
+
+    def __add__(self, rhs: Displacement2d) -> Point2d:
+        inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+        output = c_void_p()
+        _lib.opensolid_Point2d_add_Point2d_Displacement2d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Point2d(ptr=output)
+
+    def __repr__(self) -> str:
+        x, y = self.coordinates()
+        return "Point2d.meters(" + str(x.in_meters()) + "," + str(y.in_meters()) + ")"
+
 
 class UvPoint:
     def __init__(self, *, ptr: c_void_p) -> None:
@@ -2211,6 +2342,45 @@ class UvPoint:
             ctypes.byref(inputs), ctypes.byref(output)
         )
         return UvPoint(ptr=output)
+
+    @overload
+    def __sub__(self, rhs: UvPoint) -> Vector2d:
+        pass
+
+    @overload
+    def __sub__(self, rhs: Vector2d) -> UvPoint:
+        pass
+
+    def __sub__(self, rhs):
+        match rhs:
+            case UvPoint():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_UvPoint_sub_UvPoint_UvPoint(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Vector2d(ptr=output)
+            case Vector2d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_UvPoint_sub_UvPoint_Vector2d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return UvPoint(ptr=output)
+            case _:
+                return NotImplemented
+
+    def __add__(self, rhs: Vector2d) -> UvPoint:
+        inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+        output = c_void_p()
+        _lib.opensolid_UvPoint_add_UvPoint_Vector2d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return UvPoint(ptr=output)
+
+    def __repr__(self) -> str:
+        x, y = self.coordinates()
+        return "UvPoint.uv(" + str(x) + "," + str(y) + ")"
 
 
 class Bounds2d:
@@ -2297,6 +2467,10 @@ class Bounds2d:
         _lib.opensolid_Bounds2d_yCoordinate(ctypes.byref(inputs), ctypes.byref(output))
         return LengthRange(ptr=output)
 
+    def __repr__(self) -> str:
+        x, y = self.coordinates()
+        return Bounds2d.xy(" + repr(x) + ", " + repr(y) + ")
+
 
 class UvBounds:
     def __init__(self, *, ptr: c_void_p) -> None:
@@ -2378,6 +2552,10 @@ class UvBounds:
         output = c_void_p()
         _lib.opensolid_UvBounds_vCoordinate(ctypes.byref(inputs), ctypes.byref(output))
         return Range(ptr=output)
+
+    def __repr__(self) -> str:
+        u, v = self.coordinates()
+        return UvBounds.uv(" + repr(u) + ", " + repr(v) + ")
 
 
 class Curve:
