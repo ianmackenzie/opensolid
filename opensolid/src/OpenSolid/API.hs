@@ -345,6 +345,8 @@ direction2d =
     , constant "Negative X" Direction2d.negativeX
     , constant "Negative Y" Direction2d.negativeY
     , factory1 "From Angle" "Angle" Direction2d.fromAngle
+    , factory1 "Degrees" "Value" Direction2d.degrees
+    , factory1 "Radians" "Value" Direction2d.radians
     , member0 "To Angle" Direction2d.toAngle
     , member0 "Components" Direction2d.components
     , member0 "X Component" Direction2d.xComponent
