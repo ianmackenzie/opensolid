@@ -197,6 +197,40 @@ extraMemberFunctions className = case className of
     , "    r, g, b = self.components_255()"
     , "    return 'Color.rgb_255(' + str(r) + ',' + str(g) + ',' + str(b) + ')'"
     ]
+  "Vector2d" ->
+    [ "def __repr__(self) -> str:"
+    , "    x, y = self.components()"
+    , "    return 'Vector2d.xy(' + str(x) + ',' + str(y) + ')'"
+    ]
+  "Displacement2d" ->
+    [ "def __repr__(self) -> str:"
+    , "    x, y = self.components()"
+    , "    return 'Displacement2d.meters(' + str(x.in_meters()) + ',' + str(y.in_meters()) + ')'"
+    ]
+  "Direction2d" ->
+    [ "def __repr__(self) -> str:"
+    , "    return 'Direction2d.degrees(' + str(self.to_angle().in_degrees()) + ')'"
+    ]
+  "Point2d" ->
+    [ "def __repr__(self) -> str:"
+    , "    x, y = self.coordinates()"
+    , "    return 'Point2d.meters(' + str(x.in_meters()) + ',' + str(y.in_meters()) + ')'"
+    ]
+  "UvPoint" ->
+    [ "def __repr__(self) -> str:"
+    , "    x, y = self.coordinates()"
+    , "    return 'UvPoint.uv(' + str(x) + ',' + str(y) + ')'"
+    ]
+  "Bounds2d" ->
+    [ "def __repr__(self) -> str:"
+    , "    x, y = self.coordinates()"
+    , "    return Bounds2d.xy(' + repr(x) + ',' + repr(y) + ')"
+    ]
+  "UvBounds" ->
+    [ "def __repr__(self) -> str:"
+    , "    u, v = self.coordinates()"
+    , "    return UvBounds.uv(' + repr(u) + ',' + repr(v) + ')"
+    ]
   _ -> []
 
 ffiTypeDeclarations :: Text
