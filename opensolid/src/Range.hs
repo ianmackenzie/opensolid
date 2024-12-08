@@ -4,6 +4,9 @@ module Range
   , constant
   , unit
   , from
+  , radians
+  , degrees
+  , turns
   , meters
   , centimeters
   , millimeters
@@ -230,6 +233,15 @@ unit = Range_ 0.0 1.0
 {-# INLINE from #-}
 from :: Qty units -> Qty units -> Range units
 from = Range
+
+radians :: Float -> Float -> Range Radians
+radians a b = from (Angle.radians a) (Angle.radians b)
+
+degrees :: Float -> Float -> Range Radians
+degrees a b = from (Angle.degrees a) (Angle.degrees b)
+
+turns :: Float -> Float -> Range Radians
+turns a b = from (Angle.turns a) (Angle.turns b)
 
 meters :: Float -> Float -> Range Meters
 meters a b = from (Length.meters a) (Length.meters b)
