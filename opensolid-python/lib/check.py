@@ -29,7 +29,7 @@ with Tolerance(1e-9):
 
 color1 = Color.from_hex("#555555")
 print(color1.components())
-color2 = Color.rgb255(225, 225, 225)
+color2 = Color.rgb_255(225, 225, 225)
 print(color2.to_hex())
 
 bounds = Bounds2d.from_corners(Point2d.origin, Point2d.centimeters(30, 20))

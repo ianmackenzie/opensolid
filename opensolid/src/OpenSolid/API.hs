@@ -249,12 +249,12 @@ color :: Class
 color =
   class_ @Colour
     [ factory3 "RGB" "Red" "Green" "Blue" Colour.rgb
-    , factory3 "RGB255" "Red" "Green" "Blue" Colour.rgb255
+    , factory3 "RGB 255" "Red" "Green" "Blue" Colour.rgb255
     , factory3 "HSL" "Hue" "Saturation" "Lightness" Colour.hsl
     , factory1 "From Hex" "Hex String" Colour.fromHex
     , member0 "To Hex" Colour.toHex
     , member0 "Components" Colour.components
-    , member0 "Components255" Colour.components255
+    , member0 "Components 255" Colour.components255
     , constant "Red" Colour.red
     , constant "Dark Red" Colour.darkRed
     , constant "Light Orange" Colour.lightOrange
