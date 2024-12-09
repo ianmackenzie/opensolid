@@ -4,3 +4,6 @@ src/opensolid/*.so
 
 # Jupyter Notebooks, used for ad-hoc testing
 *.ipynb
+
+# Generated Python egg-info directories
+*.egg-info
