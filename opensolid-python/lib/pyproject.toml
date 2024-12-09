@@ -1,15 +1,6 @@
-[project]
-name = "opensolid"
-version = "0.1.0"
-description = "A collection of classes for 2D/3D geometric modelling"
-readme = "README.md"
-authors = [{ name = "Ian Mackenzie", email = "ian.e.mackenzie@gmail.com" }]
-requires-python = ">=3.12"
-dependencies = []
-
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
 
 [dependency-groups]
-dev = ["ipykernel>=6.29.5"]
+dev = ["ipykernel>=6.29.5", "setuptools>=75.6.0"]
