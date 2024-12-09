@@ -7,3 +7,9 @@ src/opensolid/*.so
 
 # Generated Python egg-info directories
 *.egg-info
+
+# Output directory of 'uv build'
+build
+
+# Output directory of auditwheel
+wheelhouse
