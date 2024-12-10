@@ -104,14 +104,17 @@ length =
     , constant "Centimeter" Length.centimeter
     , constant "Millimeter" Length.millimeter
     , constant "Inch" Length.inch
+    , constant "Pixel" Length.pixel
     , factory1 "Meters" "Value" Length.meters
     , factory1 "Centimeters" "Value" Length.centimeters
     , factory1 "Millimeters" "Value" Length.millimeters
     , factory1 "Inches" "Value" Length.inches
+    , factory1 "Pixels" "Value" Length.pixels
     , member0 "In Meters" Length.inMeters
     , member0 "In Centimeters" Length.inCentimeters
     , member0 "In Millimeters" Length.inMillimeters
     , member0 "In Inches" Length.inInches
+    , member0 "In Pixels" Length.inPixels
     , equality
     , comparison
     , negateSelf
