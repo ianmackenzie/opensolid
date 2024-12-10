@@ -24,6 +24,10 @@ import Qty qualified
 import Units (Meters)
 import Units qualified
 
+{-| A length in millimeters, meters, inches etc.
+
+Represented internally as a value in meters.
+-}
 type Length = Qty Meters
 
 zero :: Length

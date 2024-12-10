@@ -136,6 +136,7 @@ classDefinition :: Class -> (Text, Text)
 classDefinition
   ( Class
       classId
+      docstring
       constants
       staticFunctions
       memberFunctions
@@ -150,6 +151,7 @@ classDefinition
     let definition =
           Python.lines
             [ "class " + Python.Class.unqualifiedName classId + ":"
+            , Python.indent [Python.docstring docstring]
             , "    def __init__(self, *, ptr : c_void_p) -> None:"
             , "        self._ptr = ptr"
             , Python.indent (List.map Python.Constant.declaration constants)

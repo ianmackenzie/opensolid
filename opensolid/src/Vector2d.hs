@@ -75,6 +75,7 @@ import Vector2d.CoordinateTransformation qualified
 
 type role Vector2d phantom
 
+-- | A vector in 2D, represented by its X and Y components.
 data Vector2d (coordinateSystem :: CoordinateSystem) = Vector2d# Double# Double#
 
 {-# COMPLETE Vector2d #-}

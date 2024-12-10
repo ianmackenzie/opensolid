@@ -197,6 +197,11 @@ class _List_c_double(Structure):
 
 
 class Length:
+    """A length in millimeters, meters, inches etc.
+
+    Represented internally as a value in meters.
+    """
+
     def __init__(self, *, ptr: c_void_p) -> None:
         self._ptr = ptr
 
@@ -527,6 +532,11 @@ class Length:
 
 
 class Angle:
+    """An angle in degrees, radians, turns etc.
+
+    Represented internally as a value in radians.
+    """
+
     def __init__(self, *, ptr: c_void_p) -> None:
         self._ptr = ptr
 
@@ -814,6 +824,8 @@ class Angle:
 
 
 class Range:
+    """A range of unitless values, with a lower bound and upper bound."""
+
     def __init__(self, *, ptr: c_void_p) -> None:
         self._ptr = ptr
 
@@ -1077,6 +1089,8 @@ class Range:
 
 
 class LengthRange:
+    """A range of length values, with a lower bound and upper bound."""
+
     def __init__(self, *, ptr: c_void_p) -> None:
         self._ptr = ptr
 
@@ -1339,6 +1353,8 @@ class LengthRange:
 
 
 class AngleRange:
+    """A range of angle values, with a lower bound and upper bound."""
+
     def __init__(self, *, ptr: c_void_p) -> None:
         self._ptr = ptr
 
@@ -1586,6 +1602,8 @@ class AngleRange:
 
 
 class Color:
+    """An RGB color value."""
+
     def __init__(self, *, ptr: c_void_p) -> None:
         self._ptr = ptr
 
@@ -1679,6 +1697,8 @@ class Color:
 
 
 class Vector2d:
+    """A unitless vector in 2D."""
+
     def __init__(self, *, ptr: c_void_p) -> None:
         self._ptr = ptr
 
@@ -1823,6 +1843,8 @@ class Vector2d:
 
 
 class Displacement2d:
+    """A displacement vector in 2D."""
+
     def __init__(self, *, ptr: c_void_p) -> None:
         self._ptr = ptr
 
@@ -2015,6 +2037,11 @@ class Displacement2d:
 
 
 class Direction2d:
+    """A direction in 2D.
+
+    This is effectively a type-safe unit vector.
+    """
+
     def __init__(self, *, ptr: c_void_p) -> None:
         self._ptr = ptr
 
@@ -2127,6 +2154,8 @@ class Direction2d:
 
 
 class Point2d:
+    """A point in 2D, defined by its X and Y coordinates."""
+
     def __init__(self, *, ptr: c_void_p) -> None:
         self._ptr = ptr
 
@@ -2278,6 +2307,8 @@ class Point2d:
 
 
 class UvPoint:
+    """A point in UV parameter space."""
+
     def __init__(self, *, ptr: c_void_p) -> None:
         self._ptr = ptr
 
@@ -2390,6 +2421,8 @@ class UvPoint:
 
 
 class Bounds2d:
+    """A bounding box in 2D."""
+
     def __init__(self, *, ptr: c_void_p) -> None:
         self._ptr = ptr
 
@@ -2479,6 +2512,8 @@ class Bounds2d:
 
 
 class UvBounds:
+    """A bounding box in UV parameter space."""
+
     def __init__(self, *, ptr: c_void_p) -> None:
         self._ptr = ptr
 
@@ -2565,6 +2600,8 @@ class UvBounds:
 
 
 class Curve:
+    """A parametric curve definining a unitless value in terms of a parameter value."""
+
     def __init__(self, *, ptr: c_void_p) -> None:
         self._ptr = ptr
 
@@ -2786,6 +2823,8 @@ class Curve:
 
 
 class CurveZero:
+    """A point where a given curve is equal to zero."""
+
     def __init__(self, *, ptr: c_void_p) -> None:
         self._ptr = ptr
 
@@ -2809,6 +2848,8 @@ class CurveZero:
 
 
 class LengthCurve:
+    """A parametric curve definining a length in terms of a parameter value."""
+
     def __init__(self, *, ptr: c_void_p) -> None:
         self._ptr = ptr
 
@@ -2942,6 +2983,8 @@ class LengthCurve:
 
 
 class AngleCurve:
+    """A parametric curve definining an angle in terms of a parameter value."""
+
     def __init__(self, *, ptr: c_void_p) -> None:
         self._ptr = ptr
 
@@ -3087,6 +3130,8 @@ class AngleCurve:
 
 
 class Drawing2d:
+    """A set of functions for constructing 2D drawings."""
+
     def __init__(self, *, ptr: c_void_p) -> None:
         self._ptr = ptr
 
@@ -3165,10 +3210,14 @@ class Drawing2d:
         return Drawing2d.Attribute(ptr=output)
 
     class Entity:
+        """A drawing entity such as a shape or group."""
+
         def __init__(self, *, ptr: c_void_p) -> None:
             self._ptr = ptr
 
     class Attribute:
+        """A drawing attribute such as fill color or stroke width."""
+
         def __init__(self, *, ptr: c_void_p) -> None:
             self._ptr = ptr
 

@@ -34,6 +34,10 @@ import Units (Radians)
 import Units qualified
 import Prelude qualified
 
+{-|  An angle in degrees, radians, turns etc.
+
+Represented internally as a value in radians.
+-}
 type Angle = Qty Radians
 
 zero :: Angle

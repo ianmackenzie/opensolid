@@ -5,6 +5,7 @@ module Python
   , list
   , tuple
   , call
+  , docstring
   )
 where
 
@@ -30,3 +31,6 @@ tuple entries = "(" + Text.join "," entries + ")"
 
 call :: Text -> List Text -> Text
 call function arguments = function + "(" + Text.join "," arguments + ")"
+
+docstring :: Text -> Text
+docstring text = "\"\"\"" + text + "\"\"\""

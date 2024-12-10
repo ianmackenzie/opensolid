@@ -5,6 +5,7 @@ import API.ComparisonFunction qualified as ComparisonFunction
 import API.Constant (Constant (Constant))
 import API.Constant qualified as Constant
 import API.Constraint (Constraint)
+import API.Docs (docs)
 import API.EqualityFunction qualified as EqualityFunction
 import API.MemberFunction (MemberFunction (..))
 import API.MemberFunction qualified as MemberFunction
@@ -49,6 +50,7 @@ data Class where
   Class ::
     FFI value =>
     { id :: FFI.Id value
+    , docstring :: Text
     , constants :: List (Name, Constant)
     , staticFunctions :: List (Name, List StaticFunction)
     , memberFunctions :: List (Name, List (MemberFunction value))
@@ -96,6 +98,7 @@ classes =
 length :: Class
 length =
   class_ @Length
+    $(docs ''Length)
     [ constant "Zero" Length.zero
     , factory1 "Meters" "Value" Length.meters
     , factory1 "Centimeters" "Value" Length.centimeters
@@ -133,6 +136,7 @@ length =
 angle :: Class
 angle =
   class_ @Angle
+    $(docs ''Angle)
     [ constant "Zero" Angle.zero
     , factory1 "Radians" "Value" Angle.radians
     , factory1 "Degrees" "Value" Angle.degrees
@@ -166,6 +170,7 @@ angle =
 range :: Class
 range =
   class_ @(Range Unitless)
+    "A range of unitless values, with a lower bound and upper bound."
     [ constant "Unit" Range.unit
     , factory1 "Constant" "Value" Range.constant
     , factory2 "From Endpoints" "A" "B" Range.from
@@ -195,6 +200,7 @@ range =
 lengthRange :: Class
 lengthRange =
   class_ @(Range Meters)
+    "A range of length values, with a lower bound and upper bound."
     [ factory1 "Constant" "Value" Range.constant
     , factory2 "From Endpoints" "A" "B" Range.from
     , factory2 "Meters" "A" "B" Range.meters
@@ -222,6 +228,7 @@ lengthRange =
 angleRange :: Class
 angleRange =
   class_ @(Range Radians)
+    "A range of angle values, with a lower bound and upper bound."
     [ factory1 "Constant" "Value" Range.constant
     , factory2 "From Endpoints" "A" "B" Range.from
     , factory2 "Radians" "A" "B" Range.radians
@@ -248,6 +255,7 @@ angleRange =
 color :: Class
 color =
   class_ @Colour
+    $(docs ''Colour)
     [ factory3 "RGB" "Red" "Green" "Blue" Colour.rgb
     , factory3 "RGB 255" "Red" "Green" "Blue" Colour.rgb255
     , factory3 "HSL" "Hue" "Saturation" "Lightness" Colour.hsl
@@ -291,6 +299,7 @@ color =
 vector2d :: Class
 vector2d =
   class_ @(Vector2d (Space @ Unitless))
+    "A unitless vector in 2D."
     [ constant "Zero" (Vector2d.zero @Space @Unitless)
     , factory1 "Unit" "Direction" Vector2d.unit
     , factory2 "XY" "X Component" "Y Component" Vector2d.xy
@@ -313,6 +322,7 @@ vector2d =
 displacement2d :: Class
 displacement2d =
   class_ @(Vector2d (Space @ Meters))
+    "A displacement vector in 2D."
     [ constant "Zero" (Vector2d.zero @Space @Meters)
     , factory2 "XY" "X Component" "Y Component" Vector2d.xy
     , factory1 "X" "X Component" Vector2d.x
@@ -338,6 +348,7 @@ displacement2d =
 direction2d :: Class
 direction2d =
   class_ @(Direction2d Space)
+    $(docs ''Direction2d)
     [ constant "X" Direction2d.x
     , constant "Y" Direction2d.y
     , constant "Positive X" Direction2d.positiveX
@@ -360,6 +371,7 @@ direction2d =
 point2d :: Class
 point2d =
   class_ @(Point2d (Space @ Meters))
+    "A point in 2D, defined by its X and Y coordinates."
     [ constant "Origin" (Point2d.origin @Space @Meters)
     , factory2 "XY" "X Coordinate" "Y Coordinate" Point2d.xy
     , factory1 "X" "X Coordinate" Point2d.x
@@ -382,6 +394,7 @@ point2d =
 uvPoint :: Class
 uvPoint =
   class_ @(Point2d (Space @ Unitless))
+    "A point in UV parameter space."
     [ constant "Origin" (Point2d.origin @Space @Unitless)
     , factory2 "UV" "U Coordinate" "V Coordinate" Point2d.xy
     , factory1 "U" "U Coordinate" Point2d.x
@@ -400,6 +413,7 @@ uvPoint =
 bounds2d :: Class
 bounds2d =
   class_ @(Bounds2d (Space @ Meters))
+    "A bounding box in 2D."
     [ factory2 "XY" "X Coordinate" "Y Coordinate" Bounds2d.xy
     , factory1 "Constant" "Point" Bounds2d.constant
     , factory2 "From Corners" "P1" "P2" Bounds2d.hull2
@@ -413,6 +427,7 @@ bounds2d =
 uvBounds :: Class
 uvBounds =
   class_ @(Bounds2d (Space @ Unitless))
+    "A bounding box in UV parameter space."
     [ factory2 "UV" "U Coordinate" "V Coordinate" Bounds2d.xy
     , factory1 "Constant" "Point" Bounds2d.constant
     , factory2 "From Corners" "P1" "P2" Bounds2d.hull2
@@ -426,6 +441,7 @@ uvBounds =
 curve :: Class
 curve =
   class_ @(Curve1d Unitless)
+    "A parametric curve definining a unitless value in terms of a parameter value."
     [ constant "T" Curve1d.t
     , member0 "Squared" Curve1d.squared
     , member0 "Sqrt" Curve1d.sqrt
@@ -453,6 +469,7 @@ curve =
 angleCurve :: Class
 angleCurve =
   class_ @(Curve1d Radians)
+    "A parametric curve definining an angle in terms of a parameter value."
     [ member0 "Sin" Curve1d.sin
     , member0 "Cos" Curve1d.cos
     , member1 "Evaluate" "Parameter Value" (\t c -> Curve1d.evaluate c t)
@@ -472,6 +489,7 @@ angleCurve =
 lengthCurve :: Class
 lengthCurve =
   class_ @(Curve1d Meters)
+    "A parametric curve definining a length in terms of a parameter value."
     [ member1 "Evaluate" "Parameter Value" (\t c -> Curve1d.evaluate c t)
     , memberM0 "Zeros" Curve1d.zeros
     , negateSelf
@@ -489,6 +507,7 @@ lengthCurve =
 curveZero :: Class
 curveZero =
   class_ @Curve1d.Zero
+    "A point where a given curve is equal to zero."
     [ member0 "Location" Curve1d.Zero.location
     , member0 "Order" Curve1d.Zero.order
     , member0 "Sign" ((1 *) . Curve1d.Zero.sign) -- TODO return as enum?
@@ -502,6 +521,7 @@ instance FFI Drawing2d_ where
 drawing2d :: Class
 drawing2d =
   class_ @Drawing2d_
+    "A set of functions for constructing 2D drawings."
     [ static2 "To SVG" "View Box" "Entities" Drawing2d.toSvg
     , static2 "Polygon" "Attributes" "Vertices" Drawing2d.polygon
     , static3 "Circle" "Attributes" "Center Point" "Radius" Drawing2d.circle
@@ -509,14 +529,14 @@ drawing2d =
     , static1 "Stroke Color" "Color" Drawing2d.strokeColour
     , constant "No Fill" Drawing2d.noFill
     , static1 "Fill Color" "Color" Drawing2d.fillColour
-    , nested @(Drawing2d.Entity Space) []
-    , nested @(Drawing2d.Attribute Space) []
+    , nested @(Drawing2d.Entity Space) "A drawing entity such as a shape or group." []
+    , nested @(Drawing2d.Attribute Space) "A drawing attribute such as fill color or stroke width." []
     ]
 
 ----- CLASS MEMBERS -----
 
-class_ :: forall value. FFI value => List (Member value) -> Class
-class_ members = buildClass members [] [] [] Nothing Nothing Nothing [] [] []
+class_ :: forall value. FFI value => Text -> List (Member value) -> Class
+class_ docstring members = buildClass docstring members [] [] [] Nothing Nothing Nothing [] [] []
 
 data Member value where
   Const :: FFI result => Text -> result -> Member value
@@ -534,7 +554,7 @@ data Member value where
   Negate :: Negation value => Member value
   PreOp :: (FFI lhs, FFI result) => BinaryOperator.Id -> (lhs -> value -> result) -> Member value
   PostOp :: (FFI rhs, FFI result) => BinaryOperator.Id -> (value -> rhs -> result) -> Member value
-  Nested :: FFI nested => List (Member nested) -> Member value
+  Nested :: FFI nested => Text -> List (Member nested) -> Member value
 
 constant :: FFI result => Text -> result -> Member value
 constant = Const
@@ -695,7 +715,7 @@ floorDivBySelf = PostOp BinaryOperator.FloorDiv ((//) :: value -> value -> Int)
 modBySelf :: forall value. (DivMod value, FFI value) => Member value
 modBySelf = PostOp BinaryOperator.Mod ((%) :: value -> value -> value)
 
-nested :: FFI nested => List (Member nested) -> Member value
+nested :: FFI nested => Text -> List (Member nested) -> Member value
 nested = Nested
 
 addStaticOverload ::
@@ -749,6 +769,7 @@ addPostOverload operatorId overload (first : rest) = do
 buildClass ::
   forall value.
   FFI value =>
+  Text ->
   List (Member value) ->
   List (Name, Constant) ->
   List (Name, List StaticFunction) ->
@@ -761,6 +782,7 @@ buildClass ::
   List Class ->
   Class
 buildClass
+  docstring
   members
   constantsAcc
   staticFunctionsAcc
@@ -777,6 +799,7 @@ buildClass
           { id = case FFI.typeOf @value Proxy of
               FFI.Class (FFI.Id Proxy names) -> FFI.Id Proxy names
               _ -> internalError "Every class defined in the API must correspond to an FFI type with class representation"
+          , docstring
           , constants = constantsAcc
           , staticFunctions = staticFunctionsAcc
           , memberFunctions = memberFunctionsAcc
@@ -790,6 +813,7 @@ buildClass
       first : rest -> do
         let addStatic name overload =
               buildClass
+                docstring
                 rest
                 constantsAcc
                 (addStaticOverload (FFI.name name) overload staticFunctionsAcc)
@@ -802,6 +826,7 @@ buildClass
                 nestedClassesAcc
         let addMember name overload =
               buildClass
+                docstring
                 rest
                 constantsAcc
                 staticFunctionsAcc
@@ -815,6 +840,7 @@ buildClass
         case first of
           Const name value ->
             buildClass
+              docstring
               rest
               (constantsAcc + [(FFI.name name, Constant value)])
               staticFunctionsAcc
@@ -845,6 +871,7 @@ buildClass
             addMember name (MemberFunction1 (FFI.name arg1) f)
           Equality ->
             buildClass
+              docstring
               rest
               constantsAcc
               staticFunctionsAcc
@@ -857,6 +884,7 @@ buildClass
               nestedClassesAcc
           Comparison ->
             buildClass
+              docstring
               rest
               constantsAcc
               staticFunctionsAcc
@@ -869,6 +897,7 @@ buildClass
               nestedClassesAcc
           Negate ->
             buildClass
+              docstring
               rest
               constantsAcc
               staticFunctionsAcc
@@ -881,6 +910,7 @@ buildClass
               nestedClassesAcc
           PreOp operatorId operator ->
             buildClass
+              docstring
               rest
               constantsAcc
               staticFunctionsAcc
@@ -893,6 +923,7 @@ buildClass
               nestedClassesAcc
           PostOp operatorId operator ->
             buildClass
+              docstring
               rest
               constantsAcc
               staticFunctionsAcc
@@ -903,8 +934,9 @@ buildClass
               preOperatorsAcc
               (addPostOverload operatorId (PostOperator operator) postOperatorsAcc)
               nestedClassesAcc
-          Nested nestedMembers ->
+          Nested nestedDocstring nestedMembers ->
             buildClass
+              docstring
               rest
               constantsAcc
               staticFunctionsAcc
@@ -914,7 +946,7 @@ buildClass
               negationFunctionAcc
               preOperatorsAcc
               postOperatorsAcc
-              (nestedClassesAcc + [class_ nestedMembers])
+              (nestedClassesAcc + [class_ nestedDocstring nestedMembers])
 
 ----- FUNCTION COLLECTION -----
 
@@ -1058,6 +1090,7 @@ classFunctions :: Class -> List Function
 classFunctions
   ( Class
       classId_
+      _
       constants
       staticFunctions
       memberFunctions

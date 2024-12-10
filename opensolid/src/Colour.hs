@@ -51,6 +51,7 @@ import Float qualified
 import OpenSolid
 import Text qualified
 
+-- | An RGB color value.
 type Colour = Data.Colour.Colour Float
 
 rgb :: Float -> Float -> Float -> Colour

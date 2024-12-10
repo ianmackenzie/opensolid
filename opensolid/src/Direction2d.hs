@@ -52,6 +52,10 @@ import Vector2d qualified
 
 type role Direction2d phantom
 
+{-| A direction in 2D.
+
+This is effectively a type-safe unit vector.
+-}
 newtype Direction2d (space :: Type) = Unit (Vector2d (space @ Unitless))
   deriving (Eq, Show)
 

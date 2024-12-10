@@ -58,6 +58,7 @@ common config
     -Wno-missed-extra-shared-lib
     -fwrite-ide-info
     -hiedir=.hie
+    -haddock
 
   if impl(ghc >=9.10)
     ghc-options:

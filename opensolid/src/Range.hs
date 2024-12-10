@@ -87,6 +87,8 @@ import Units qualified
 type role Range phantom
 
 type Range :: Type -> Type
+
+-- | A range of possible values, with a lower bound and upper bound.
 data Range units = Range_ (Qty units) (Qty units)
   deriving (Eq, Show)
 

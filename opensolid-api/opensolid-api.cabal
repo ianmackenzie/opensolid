@@ -38,6 +38,9 @@ library
     API.PreOperator
     API.StaticFunction
 
+  other-modules:
+    API.Docs
+
   default-extensions:
     DisambiguateRecordFields
     GADTs
