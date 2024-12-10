@@ -1,4 +1,14 @@
-from opensolid import Angle, Curve, Point2d, LengthRange, Tolerance, Vector2d, Color, Bounds2d, Drawing2d
+from opensolid import (
+    Angle,
+    Curve,
+    Point2d,
+    LengthRange,
+    Tolerance,
+    Vector2d,
+    Color,
+    Bounds2d,
+    Drawing2d,
+)
 
 p1 = Point2d.meters(1, 2)
 p2 = Point2d.meters(3, 4)
@@ -16,7 +26,7 @@ if r is None:
 else:
     print("Intersection:", r)
 
-v = Vector2d.xy(1,2)
+v = Vector2d.xy(1, 2)
 with Tolerance(1e-9):
     print(v.direction().components())
 
@@ -32,6 +42,10 @@ print(color2.to_hex())
 
 bounds = Bounds2d.from_corners(Point2d.origin, Point2d.centimeters(30, 20))
 print(bounds.x_coordinate())
-vertices = [Point2d.centimeters(5, 5), Point2d.centimeters(25, 5), Point2d.centimeters(25, 15)]
+vertices = [
+    Point2d.centimeters(5, 5),
+    Point2d.centimeters(25, 5),
+    Point2d.centimeters(25, 15),
+]
 triangle = Drawing2d.polygon([], vertices)
 print(Drawing2d.to_svg(bounds, [triangle]))
