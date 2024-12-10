@@ -30,7 +30,8 @@ v = Vector2d.xy(1, 2)
 with Tolerance(1e-9):
     print(v.direction().components())
 
-c = (Curve.t * Angle.turns(1)).cos()
+theta = Angle.two_pi * Curve.t
+c = theta.cos()
 with Tolerance(1e-9):
     roots = [zero.location() for zero in c.zeros()]
     print(roots)
