@@ -25,6 +25,7 @@ executable opensolid-python
     base,
     containers,
     opensolid,
+    opensolid-api,
 
   other-modules:
     Python

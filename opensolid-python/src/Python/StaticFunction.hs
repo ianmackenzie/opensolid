@@ -1,13 +1,12 @@
 module Python.StaticFunction (definition) where
 
+import API.Constraint (Constraint)
+import API.StaticFunction (StaticFunction (..))
+import API.StaticFunction qualified as StaticFunction
 import List qualified
 import Maybe qualified
 import OpenSolid
-import OpenSolid.API.Constraint (Constraint)
-import OpenSolid.API.Name (Name)
-import OpenSolid.API.Name qualified as Name
-import OpenSolid.API.StaticFunction (StaticFunction (..))
-import OpenSolid.API.StaticFunction qualified as StaticFunction
+import OpenSolid.FFI (Name)
 import OpenSolid.FFI qualified as FFI
 import Pair qualified
 import Python qualified
@@ -33,7 +32,7 @@ definition classId (functionName, staticFunctions) = do
         [ Python.lines (List.map overloadDeclaration overloads)
         , ""
         , "@staticmethod"
-        , "def " + Name.snakeCase functionName + "(*args, **keywords):"
+        , "def " + FFI.snakeCase functionName + "(*args, **keywords):"
         , Python.indent
             [ "match (args, keywords):"
             , Python.indent
@@ -58,17 +57,17 @@ overload classId functionName staticFunction = do
 
 overloadSignature :: Name -> List (Name, FFI.Type) -> Text -> Text
 overloadSignature functionName args returnType = do
-  let functionArgument (argName, argType) = Name.snakeCase argName + ": " + Python.Type.qualifiedName argType
+  let functionArgument (argName, argType) = FFI.snakeCase argName + ": " + Python.Type.qualifiedName argType
   let functionArguments = Text.join "," (List.map functionArgument args)
   Python.lines
     [ "@staticmethod"
-    , "def " + Name.snakeCase functionName + "(" + functionArguments + ") -> " + returnType + ":"
+    , "def " + FFI.snakeCase functionName + "(" + functionArguments + ") -> " + returnType + ":"
     ]
 
 overloadBody :: Text -> Maybe Constraint -> List (Name, FFI.Type) -> FFI.Type -> Text
 overloadBody ffiFunctionName maybeConstraint arguments returnType = do
   let maybeToleranceArgument = Maybe.map Python.Function.toleranceArgument maybeConstraint
-  let normalArguments = List.map (Pair.mapFirst Name.snakeCase) arguments
+  let normalArguments = List.map (Pair.mapFirst FFI.snakeCase) arguments
   Python.lines
     [ "inputs = " + Python.FFI.argumentValue (maybeToleranceArgument + normalArguments)
     , "output = " + Python.FFI.dummyValue returnType

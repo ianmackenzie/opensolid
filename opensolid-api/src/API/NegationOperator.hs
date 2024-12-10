@@ -1,4 +1,4 @@
-module OpenSolid.API.NegationOperator
+module API.NegationOperator
   ( invoke
   , ffiName
   , valueType

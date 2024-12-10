@@ -1,5 +1,10 @@
 module OpenSolid.FFI
   ( FFI (representation)
+  , Name
+  , name
+  , pascalCase
+  , camelCase
+  , snakeCase
   , classId
   , nestedClassId
   , classRepresentation
@@ -34,12 +39,31 @@ import Length (Length)
 import List qualified
 import NonEmpty qualified
 import OpenSolid hiding (Type, pattern NonEmpty)
-import OpenSolid.API.Name (Name)
-import OpenSolid.API.Name qualified as Name
 import Text qualified
 
 class FFI a where
   representation :: Proxy a -> Representation a
+
+newtype Name = Name (NonEmpty Text) deriving (Eq, Ord, Show)
+
+name :: Text -> Name
+name input = do
+  let components = Text.split " " input
+  if NonEmpty.allSatisfy isCapitalized components
+    then Name components
+    else internalError ("API name has non-capitalized component: " + input)
+
+isCapitalized :: Text -> Bool
+isCapitalized component = Text.capitalize component == component
+
+pascalCase :: Name -> Text
+pascalCase (Name components) = Text.concat (NonEmpty.toList components)
+
+camelCase :: Name -> Text
+camelCase (Name (first :| rest)) = Text.toLower first + Text.concat rest
+
+snakeCase :: Name -> Text
+snakeCase (Name components) = Text.join "_" (List.map Text.toLower (NonEmpty.toList components))
 
 data Representation a where
   -- A 64-bit integer
@@ -74,16 +98,16 @@ data Representation a where
   ClassRep :: FFI a => Id a -> Representation a
 
 classId :: FFI a => Proxy a -> Text -> Id a
-classId proxy name =
-  Id proxy (NonEmpty.singleton (Name.parse name))
+classId proxy givenName =
+  Id proxy (NonEmpty.singleton (name givenName))
 
 nestedClassId :: FFI a => Proxy a -> Text -> Text -> Id a
 nestedClassId proxy parentName childName =
-  Id proxy (NonEmpty.of2 (Name.parse parentName) (Name.parse childName))
+  Id proxy (NonEmpty.of2 (name parentName) (name childName))
 
 classRepresentation :: FFI a => Text -> Proxy a -> Representation a
-classRepresentation name proxy =
-  ClassRep (classId proxy name)
+classRepresentation givenName proxy =
+  ClassRep (classId proxy givenName)
 
 nestedClassRepresentation :: FFI a => Text -> Text -> Proxy a -> Representation a
 nestedClassRepresentation parentName childName proxy =
@@ -189,7 +213,7 @@ typeName ffiType = case ffiType of
 
 className :: Id a -> Text
 className (Id _ classNames) =
-  Text.concat (List.map Name.pascalCase (NonEmpty.toList classNames))
+  Text.concat (List.map pascalCase (NonEmpty.toList classNames))
 
 size :: Type -> Int
 size ffiType = case ffiType of

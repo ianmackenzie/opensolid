@@ -1,4 +1,4 @@
-module OpenSolid.API.ComparisonFunction
+module API.EqualityFunction
   ( invoke
   , ffiName
   , valueType
@@ -16,15 +16,15 @@ import Text qualified
 
 ffiName :: FFI.Id a -> Text
 ffiName classId =
-  Text.join "_" ["opensolid", FFI.className classId, "compare"]
+  Text.join "_" ["opensolid", FFI.className classId, "eq"]
 
-invoke :: FFI value => (value -> value -> Int) -> Ptr () -> Ptr () -> IO ()
+invoke :: FFI value => (value -> value -> Bool) -> Ptr () -> Ptr () -> IO ()
 invoke f inputPtr outputPtr = IO.do
   (lhs, rhs) <- FFI.load inputPtr 0
   FFI.store outputPtr 0 (f lhs rhs)
 
-valueType :: forall value. FFI value => (value -> value -> Int) -> FFI.Type
+valueType :: forall value. FFI value => (value -> value -> Bool) -> FFI.Type
 valueType _ = FFI.typeOf @value Proxy
 
 returnType :: FFI.Type
-returnType = FFI.typeOf @Int Proxy
+returnType = FFI.typeOf @Bool Proxy

@@ -1,4 +1,4 @@
-module OpenSolid.API.PreOperator
+module API.PreOperator
   ( PreOperator (..)
   , signature
   , lhsName
@@ -7,13 +7,11 @@ module OpenSolid.API.PreOperator
   )
 where
 
+import API.BinaryOperator qualified as BinaryOperator
 import Foreign (Ptr)
 import IO qualified
 import OpenSolid
-import OpenSolid.API.BinaryOperator qualified as BinaryOperator
-import OpenSolid.API.Name (Name)
-import OpenSolid.API.Name qualified as Name
-import OpenSolid.FFI (FFI)
+import OpenSolid.FFI (FFI, Name)
 import OpenSolid.FFI qualified as FFI
 
 data PreOperator value where
@@ -30,7 +28,7 @@ signature :: PreOperator value -> (FFI.Type, FFI.Type, FFI.Type)
 signature (PreOperator f) = BinaryOperator.functionSignature f
 
 lhsName :: Name
-lhsName = Name.parse "Lhs"
+lhsName = FFI.name "Lhs"
 
 invoke :: PreOperator value -> Ptr () -> Ptr () -> IO ()
 invoke (PreOperator f) inputPtr outputPtr = IO.do

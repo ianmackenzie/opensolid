@@ -26,21 +26,17 @@ library
 
   hs-source-dirs: src
   exposed-modules:
-    OpenSolidAPI
-
-  other-modules:
-    All
-    Api
-    Internal
-    OpenSolidAPI.Axis2d
-    OpenSolidAPI.Basis2d
-    OpenSolidAPI.Bounds2d
-    OpenSolidAPI.Direction2d
-    OpenSolidAPI.Frame2d
-    OpenSolidAPI.Point2d
-    OpenSolidAPI.Range
-    OpenSolidAPI.Vector2d
-    Pointers
+    API
+    API.BinaryOperator
+    API.ComparisonFunction
+    API.Constant
+    API.Constraint
+    API.EqualityFunction
+    API.MemberFunction
+    API.NegationOperator
+    API.PostOperator
+    API.PreOperator
+    API.StaticFunction
 
   default-extensions:
     DisambiguateRecordFields

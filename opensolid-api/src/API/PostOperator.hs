@@ -1,4 +1,4 @@
-module OpenSolid.API.PostOperator
+module API.PostOperator
   ( PostOperator (..)
   , signature
   , rhsName
@@ -7,13 +7,11 @@ module OpenSolid.API.PostOperator
   )
 where
 
+import API.BinaryOperator qualified as BinaryOperator
 import Foreign (Ptr)
 import IO qualified
 import OpenSolid
-import OpenSolid.API.BinaryOperator qualified as BinaryOperator
-import OpenSolid.API.Name (Name)
-import OpenSolid.API.Name qualified as Name
-import OpenSolid.FFI (FFI)
+import OpenSolid.FFI (FFI, Name)
 import OpenSolid.FFI qualified as FFI
 
 data PostOperator value where
@@ -30,7 +28,7 @@ signature :: PostOperator value -> (FFI.Type, FFI.Type, FFI.Type)
 signature (PostOperator f) = BinaryOperator.functionSignature f
 
 rhsName :: Name
-rhsName = Name.parse "Rhs"
+rhsName = FFI.name "Rhs"
 
 invoke :: PostOperator value -> Ptr () -> Ptr () -> IO ()
 invoke (PostOperator f) inputPtr outputPtr = IO.do

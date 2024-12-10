@@ -1,4 +1,4 @@
-module OpenSolid.API.Constraint
+module API.Constraint
   ( Constraint (..)
   , toleranceType
   )

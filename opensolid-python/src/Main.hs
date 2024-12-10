@@ -1,12 +1,12 @@
 module Main (main) where
 
+import API (Class (Class))
+import API qualified
+import API.Constraint (Constraint)
 import File qualified
 import List qualified
 import Maybe qualified
 import OpenSolid
-import OpenSolid.API (Class (Class))
-import OpenSolid.API qualified as API
-import OpenSolid.API.Constraint (Constraint)
 import OpenSolid.FFI qualified as FFI
 import Pair qualified
 import Python qualified

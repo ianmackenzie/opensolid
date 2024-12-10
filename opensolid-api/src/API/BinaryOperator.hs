@@ -1,4 +1,4 @@
-module OpenSolid.API.BinaryOperator
+module API.BinaryOperator
   ( Id (..)
   , ffiName
   , functionSignature

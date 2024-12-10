@@ -177,18 +177,6 @@ library
     Maybe
     NonEmpty
     OpenSolid
-    OpenSolid.API
-    OpenSolid.API.BinaryOperator
-    OpenSolid.API.ComparisonFunction
-    OpenSolid.API.Constant
-    OpenSolid.API.Constraint
-    OpenSolid.API.EqualityFunction
-    OpenSolid.API.MemberFunction
-    OpenSolid.API.Name
-    OpenSolid.API.NegationOperator
-    OpenSolid.API.PostOperator
-    OpenSolid.API.PreOperator
-    OpenSolid.API.StaticFunction
     OpenSolid.FFI
     OpenSolid.Json
     Pair

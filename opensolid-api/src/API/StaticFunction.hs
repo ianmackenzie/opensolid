@@ -1,4 +1,4 @@
-module OpenSolid.API.StaticFunction
+module API.StaticFunction
   ( StaticFunction (..)
   , ffiName
   , invoke
@@ -6,15 +6,13 @@ module OpenSolid.API.StaticFunction
   )
 where
 
+import API.Constraint (Constraint (..))
 import Data.Proxy (Proxy (Proxy))
 import Foreign (Ptr)
 import IO qualified
 import List qualified
 import OpenSolid
-import OpenSolid.API.Constraint (Constraint (..))
-import OpenSolid.API.Name (Name)
-import OpenSolid.API.Name qualified as Name
-import OpenSolid.FFI (FFI)
+import OpenSolid.FFI (FFI, Name)
 import OpenSolid.FFI qualified as FFI
 import Pair qualified
 import Text qualified
@@ -108,7 +106,7 @@ ffiName classId functionName memberFunction = do
   Text.join "_" $
     "opensolid"
       : FFI.className classId
-      : Name.camelCase functionName
+      : FFI.camelCase functionName
       : List.map FFI.typeName argumentTypes
 
 invoke :: StaticFunction -> Ptr () -> Ptr () -> IO ()

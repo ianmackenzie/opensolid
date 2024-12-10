@@ -1,5 +1,20 @@
-module OpenSolid.API (Class (..), Function (..), classes, functions) where
+module API (Class (..), Function (..), classes, functions) where
 
+import API.BinaryOperator qualified as BinaryOperator
+import API.ComparisonFunction qualified as ComparisonFunction
+import API.Constant (Constant (Constant))
+import API.Constant qualified as Constant
+import API.Constraint (Constraint)
+import API.EqualityFunction qualified as EqualityFunction
+import API.MemberFunction (MemberFunction (..))
+import API.MemberFunction qualified as MemberFunction
+import API.NegationOperator qualified as NegationOperator
+import API.PostOperator (PostOperator (PostOperator))
+import API.PostOperator qualified as PostOperator
+import API.PreOperator (PreOperator (PreOperator))
+import API.PreOperator qualified as PreOperator
+import API.StaticFunction (StaticFunction (..))
+import API.StaticFunction qualified as StaticFunction
 import Angle qualified
 import Bounds2d (Bounds2d)
 import Bounds2d qualified
@@ -17,24 +32,7 @@ import Length (Length)
 import Length qualified
 import List qualified
 import OpenSolid
-import OpenSolid.API.BinaryOperator qualified as BinaryOperator
-import OpenSolid.API.ComparisonFunction qualified as ComparisonFunction
-import OpenSolid.API.Constant (Constant (Constant))
-import OpenSolid.API.Constant qualified as Constant
-import OpenSolid.API.Constraint (Constraint)
-import OpenSolid.API.EqualityFunction qualified as EqualityFunction
-import OpenSolid.API.MemberFunction (MemberFunction (..))
-import OpenSolid.API.MemberFunction qualified as MemberFunction
-import OpenSolid.API.Name (Name)
-import OpenSolid.API.Name qualified as Name
-import OpenSolid.API.NegationOperator qualified as NegationOperator
-import OpenSolid.API.PostOperator (PostOperator (PostOperator))
-import OpenSolid.API.PostOperator qualified as PostOperator
-import OpenSolid.API.PreOperator (PreOperator (PreOperator))
-import OpenSolid.API.PreOperator qualified as PreOperator
-import OpenSolid.API.StaticFunction (StaticFunction (..))
-import OpenSolid.API.StaticFunction qualified as StaticFunction
-import OpenSolid.FFI (FFI)
+import OpenSolid.FFI (FFI, Name)
 import OpenSolid.FFI qualified as FFI
 import Pair qualified
 import Point2d (Point2d)
@@ -794,7 +792,7 @@ buildClass
               buildClass
                 rest
                 constantsAcc
-                (addStaticOverload (Name.parse name) overload staticFunctionsAcc)
+                (addStaticOverload (FFI.name name) overload staticFunctionsAcc)
                 memberFunctionsAcc
                 equalityFunctionAcc
                 comparisonFunctionAcc
@@ -807,7 +805,7 @@ buildClass
                 rest
                 constantsAcc
                 staticFunctionsAcc
-                (addMemberOverload (Name.parse name) overload memberFunctionsAcc)
+                (addMemberOverload (FFI.name name) overload memberFunctionsAcc)
                 equalityFunctionAcc
                 comparisonFunctionAcc
                 negationFunctionAcc
@@ -818,7 +816,7 @@ buildClass
           Const name value ->
             buildClass
               rest
-              (constantsAcc + [(Name.parse name, Constant value)])
+              (constantsAcc + [(FFI.name name, Constant value)])
               staticFunctionsAcc
               memberFunctionsAcc
               equalityFunctionAcc
@@ -828,13 +826,13 @@ buildClass
               postOperatorsAcc
               nestedClassesAcc
           Static1 name arg1 f ->
-            addStatic name (StaticFunction1 (Name.parse arg1) f)
+            addStatic name (StaticFunction1 (FFI.name arg1) f)
           Static2 name arg1 arg2 f ->
-            addStatic name (StaticFunction2 (Name.parse arg1) (Name.parse arg2) f)
+            addStatic name (StaticFunction2 (FFI.name arg1) (FFI.name arg2) f)
           Static3 name arg1 arg2 arg3 f ->
-            addStatic name (StaticFunction3 (Name.parse arg1) (Name.parse arg2) (Name.parse arg3) f)
+            addStatic name (StaticFunction3 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) f)
           Static4 name arg1 arg2 arg3 arg4 f ->
-            addStatic name (StaticFunction4 (Name.parse arg1) (Name.parse arg2) (Name.parse arg3) (Name.parse arg4) f)
+            addStatic name (StaticFunction4 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) (FFI.name arg4) f)
           Member0 name f ->
             addMember name (MemberFunction0 f)
           MemberU0 name f ->
@@ -844,7 +842,7 @@ buildClass
           MemberM0 name f ->
             addMember name (MemberFunction0M f)
           Member1 name arg1 f ->
-            addMember name (MemberFunction1 (Name.parse arg1) f)
+            addMember name (MemberFunction1 (FFI.name arg1) f)
           Equality ->
             buildClass
               rest

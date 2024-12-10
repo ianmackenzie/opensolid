@@ -1,9 +1,9 @@
 module Main (main) where
 
+import API qualified
 import File qualified
 import List qualified
 import OpenSolid
-import OpenSolid.API qualified as API
 import Text qualified
 
 main :: IO ()

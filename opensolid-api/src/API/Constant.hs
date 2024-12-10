@@ -1,4 +1,4 @@
-module OpenSolid.API.Constant
+module API.Constant
   ( Constant (Constant)
   , ffiName
   , invoke
@@ -9,9 +9,7 @@ where
 import Data.Proxy (Proxy (Proxy))
 import Foreign (Ptr)
 import OpenSolid
-import OpenSolid.API.Name (Name)
-import OpenSolid.API.Name qualified as Name
-import OpenSolid.FFI (FFI)
+import OpenSolid.FFI (FFI, Name)
 import OpenSolid.FFI qualified as FFI
 import Text qualified
 
@@ -20,7 +18,7 @@ data Constant where
 
 ffiName :: FFI.Id a -> Name -> Text
 ffiName classId constantName = do
-  Text.join "_" ["opensolid", FFI.className classId, Name.camelCase constantName]
+  Text.join "_" ["opensolid", FFI.className classId, FFI.camelCase constantName]
 
 invoke :: Constant -> Ptr () -> Ptr () -> IO ()
 invoke (Constant value) _ outputPtr = FFI.store outputPtr 0 value

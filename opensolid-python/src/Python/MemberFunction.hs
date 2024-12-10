@@ -1,13 +1,12 @@
 module Python.MemberFunction (definition) where
 
+import API.Constraint (Constraint)
+import API.MemberFunction (MemberFunction (..))
+import API.MemberFunction qualified as MemberFunction
 import List qualified
 import Maybe qualified
 import OpenSolid
-import OpenSolid.API.Constraint (Constraint)
-import OpenSolid.API.MemberFunction (MemberFunction (..))
-import OpenSolid.API.MemberFunction qualified as MemberFunction
-import OpenSolid.API.Name (Name)
-import OpenSolid.API.Name qualified as Name
+import OpenSolid.FFI (Name)
 import OpenSolid.FFI qualified as FFI
 import Pair qualified
 import Python qualified
@@ -47,7 +46,7 @@ definition classId (functionName, memberFunctions) = do
 
 toPython :: Name -> Text
 toPython functionName =
-  case Name.snakeCase functionName of
+  case FFI.snakeCase functionName of
     "contains" -> "__contains__"
     other -> other
 
@@ -62,14 +61,14 @@ overload classId functionName memberFunction = do
 
 overloadSignature :: Name -> List (Name, FFI.Type) -> FFI.Type -> Text
 overloadSignature functionName args returnType = do
-  let functionArgument (argName, argType) = Name.snakeCase argName + ": " + Python.Type.qualifiedName argType
+  let functionArgument (argName, argType) = FFI.snakeCase argName + ": " + Python.Type.qualifiedName argType
   let functionArguments = Text.join "," ("self" : List.map functionArgument args)
   "def " + toPython functionName + "(" + functionArguments + ") -> " + Python.Type.qualifiedName returnType + ":"
 
 overloadBody :: Text -> Maybe Constraint -> List (Name, FFI.Type) -> FFI.Type -> FFI.Type -> Text
 overloadBody ffiFunctionName maybeConstraint arguments selfType returnType = do
   let maybeToleranceArgument = Maybe.map Python.Function.toleranceArgument maybeConstraint
-  let normalArguments = List.map (Pair.mapFirst Name.snakeCase) arguments
+  let normalArguments = List.map (Pair.mapFirst FFI.snakeCase) arguments
   let selfArgument = ("self", selfType)
   Python.lines
     [ "inputs = " + Python.FFI.argumentValue (maybeToleranceArgument + normalArguments + [selfArgument])

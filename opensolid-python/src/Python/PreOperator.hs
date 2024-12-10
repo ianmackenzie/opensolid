@@ -1,11 +1,10 @@
 module Python.PreOperator (definition) where
 
+import API.BinaryOperator qualified as BinaryOperator
+import API.PreOperator (PreOperator (..))
+import API.PreOperator qualified as PreOperator
 import List qualified
 import OpenSolid
-import OpenSolid.API.BinaryOperator qualified as BinaryOperator
-import OpenSolid.API.Name qualified as Name
-import OpenSolid.API.PreOperator (PreOperator (..))
-import OpenSolid.API.PreOperator qualified as PreOperator
 import OpenSolid.FFI qualified as FFI
 import Python qualified
 import Python.FFI qualified
@@ -13,7 +12,7 @@ import Python.Function qualified
 import Python.Type qualified
 
 lhsArgName :: Text
-lhsArgName = Name.snakeCase PreOperator.lhsName
+lhsArgName = FFI.snakeCase PreOperator.lhsName
 
 definition :: FFI.Id value -> (BinaryOperator.Id, List (PreOperator value)) -> Text
 definition classId (operatorId, operators) = do

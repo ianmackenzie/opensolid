@@ -3,6 +3,7 @@
 
 module FFI (generateExports) where
 
+import API qualified
 import Array (Array)
 import Array qualified
 import Foreign (Ptr)
@@ -10,7 +11,6 @@ import Language.Haskell.TH qualified as TH
 import List qualified
 import NonEmpty qualified
 import OpenSolid
-import OpenSolid.API qualified as API
 import Text qualified
 import Prelude qualified
 

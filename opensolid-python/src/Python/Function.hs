@@ -7,12 +7,11 @@ module Python.Function
   )
 where
 
+import API.Constraint (Constraint)
+import API.Constraint qualified as Constraint
 import List qualified
 import OpenSolid hiding (Type)
-import OpenSolid.API.Constraint (Constraint)
-import OpenSolid.API.Constraint qualified as Constraint
-import OpenSolid.API.Name (Name)
-import OpenSolid.API.Name qualified as Name
+import OpenSolid.FFI (Name)
 import OpenSolid.FFI qualified as FFI
 import Pair qualified
 import Python qualified
@@ -49,11 +48,11 @@ matchPattern arguments =
   Text.join " | " (List.map singlePattern (List.reverse (splits arguments)))
 
 asPattern :: (Name, FFI.Type) -> Text
-asPattern (argName, argType) = typePattern argType + " as " + Name.snakeCase argName
+asPattern (argName, argType) = typePattern argType + " as " + FFI.snakeCase argName
 
 namedPattern :: (Name, FFI.Type) -> Text
 namedPattern (argName, argType) = do
-  let name = Name.snakeCase argName
+  let name = FFI.snakeCase argName
   Python.str name + ": " + typePattern argType + " as " + name
 
 typePattern :: FFI.Type -> Text

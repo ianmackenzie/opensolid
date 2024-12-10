@@ -1,11 +1,10 @@
 module Python.PostOperator (definition) where
 
+import API.BinaryOperator qualified as BinaryOperator
+import API.PostOperator (PostOperator (..))
+import API.PostOperator qualified as PostOperator
 import List qualified
 import OpenSolid
-import OpenSolid.API.BinaryOperator qualified as BinaryOperator
-import OpenSolid.API.Name qualified as Name
-import OpenSolid.API.PostOperator (PostOperator (..))
-import OpenSolid.API.PostOperator qualified as PostOperator
 import OpenSolid.FFI qualified as FFI
 import Python qualified
 import Python.FFI qualified
@@ -13,7 +12,7 @@ import Python.Function qualified
 import Python.Type qualified
 
 rhsArgName :: Text
-rhsArgName = Name.snakeCase PostOperator.rhsName
+rhsArgName = FFI.snakeCase PostOperator.rhsName
 
 definition :: FFI.Id value -> (BinaryOperator.Id, List (PostOperator value)) -> Text
 definition classId (operatorId, operators) = do
