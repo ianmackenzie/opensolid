@@ -5,7 +5,7 @@ import-export-style: leading
 indent-wheres: false
 record-brace-space: false
 newlines-between-decls: 1
-haddock-style: multi-line
+haddock-style: multi-line-compact
 respectful: false
 fixities:
   # Built-in operators
