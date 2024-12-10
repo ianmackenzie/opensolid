@@ -14,13 +14,6 @@ class bdist_wheel(_bdist_wheel):
 
 
 setup(
-    name="opensolid",
-    version="0.1.0",
-    author="Ian Mackenzie",
-    author_email="ian.e.mackenzie@gmail.com",
-    description="A collection of classes for 2D/3D geometric modelling",
-    python_requires=">=3.12",
-    project_urls={"source": "https://github.com/ianmackenzie/opensolid"},
     package_dir={"": "src"},
     packages=["opensolid"],
     package_data={
