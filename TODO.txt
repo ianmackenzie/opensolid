@@ -1,7 +1,28 @@
+Make GitHub repo public
+-> add minimal README
+
+Add Python docstrings
+
+Try using Pandoc to convert from Haddock to reStructuredText?
+-> or just write all doc comments in plain text...
+
+Add Python package README
+
+Generate Python API docs
+
+Add __abs__ support
+
+Build out publishing workflow
+- Build manylinux wheel in CI
+  -> start locally?
+- Build Mac x86-64 and ARM wheels in CI
+- Build Windows wheel in CI
+- Collect wheels and publish combined package
+
 Improve Python bindings
 - Allow Python classes to be represented by things other than pointers (e.g. plain float values for quantity types)
-- Nice __repr__ and/or __str__, at least for primitive types
-- Add docstrings
+- Add magic IPython display functions to Curve2d, Drawing2d.Entity etc.
+  -> using to-SVG (and eventually to-glTF) Haskell functions under the hood? ('display' functions?)
 - Actual error types instead of strings
 - Add _list_decode helper?
 - Rename MemberFunction and StaticFunction to have U/R/M prefix *before* argument count
@@ -14,12 +35,10 @@ Switch Solve2d.return back to taking a single value instead of a NonEmpty
 Move Http module out into separate opensolid-http package
 -> reduce dependencies of libopensolid-ffi.so
 
-Try publishing to PyPI
--> can start with test.pypi.org (using fake package name)
--> some combination of uv and cibuildwheel?
-
 Operator overload test suite: for every valid type and units combination, test that e.g. zero vector * zero range = zero vector bounds
 - ensure every valid overload actually exists, and is resolved correctly at runtime
+
+Support spaces / coordinate systems in bindings
 
 Try generating C# bindings?
 
