@@ -206,6 +206,11 @@ class Length:
         self._ptr = ptr
 
     zero: Length = None  # type: ignore[assignment]
+    meter: Length = None  # type: ignore[assignment]
+    centimeter: Length = None  # type: ignore[assignment]
+    millimeter: Length = None  # type: ignore[assignment]
+    inch: Length = None  # type: ignore[assignment]
+    pixel: Length = None  # type: ignore[assignment]
 
     @staticmethod
     def meters(value: float) -> Length:
@@ -239,6 +244,13 @@ class Length:
         _lib.opensolid_Length_inches_Float(ctypes.byref(inputs), ctypes.byref(output))
         return Length(ptr=output)
 
+    @staticmethod
+    def pixels(value: float) -> Length:
+        inputs = c_double(value)
+        output = c_void_p()
+        _lib.opensolid_Length_pixels_Float(ctypes.byref(inputs), ctypes.byref(output))
+        return Length(ptr=output)
+
     def in_meters(self) -> float:
         inputs = self._ptr
         output = c_double()
@@ -261,6 +273,12 @@ class Length:
         inputs = self._ptr
         output = c_double()
         _lib.opensolid_Length_inInches(ctypes.byref(inputs), ctypes.byref(output))
+        return output.value
+
+    def in_pixels(self) -> float:
+        inputs = self._ptr
+        output = c_double()
+        _lib.opensolid_Length_inPixels(ctypes.byref(inputs), ctypes.byref(output))
         return output.value
 
     def __eq__(self, other: object) -> bool:
@@ -541,6 +559,14 @@ class Angle:
         self._ptr = ptr
 
     zero: Angle = None  # type: ignore[assignment]
+    golden_angle: Angle = None  # type: ignore[assignment]
+    radian: Angle = None  # type: ignore[assignment]
+    degree: Angle = None  # type: ignore[assignment]
+    full_turn: Angle = None  # type: ignore[assignment]
+    half_turn: Angle = None  # type: ignore[assignment]
+    quarter_turn: Angle = None  # type: ignore[assignment]
+    pi: Angle = None  # type: ignore[assignment]
+    two_pi: Angle = None  # type: ignore[assignment]
 
     @staticmethod
     def radians(value: float) -> Angle:
@@ -3231,6 +3257,51 @@ def _length_zero() -> Length:
 Length.zero = _length_zero()
 
 
+def _length_meter() -> Length:
+    output = c_void_p()
+    _lib.opensolid_Length_meter(c_void_p(), ctypes.byref(output))
+    return Length(ptr=output)
+
+
+Length.meter = _length_meter()
+
+
+def _length_centimeter() -> Length:
+    output = c_void_p()
+    _lib.opensolid_Length_centimeter(c_void_p(), ctypes.byref(output))
+    return Length(ptr=output)
+
+
+Length.centimeter = _length_centimeter()
+
+
+def _length_millimeter() -> Length:
+    output = c_void_p()
+    _lib.opensolid_Length_millimeter(c_void_p(), ctypes.byref(output))
+    return Length(ptr=output)
+
+
+Length.millimeter = _length_millimeter()
+
+
+def _length_inch() -> Length:
+    output = c_void_p()
+    _lib.opensolid_Length_inch(c_void_p(), ctypes.byref(output))
+    return Length(ptr=output)
+
+
+Length.inch = _length_inch()
+
+
+def _length_pixel() -> Length:
+    output = c_void_p()
+    _lib.opensolid_Length_pixel(c_void_p(), ctypes.byref(output))
+    return Length(ptr=output)
+
+
+Length.pixel = _length_pixel()
+
+
 def _angle_zero() -> Angle:
     output = c_void_p()
     _lib.opensolid_Angle_zero(c_void_p(), ctypes.byref(output))
@@ -3238,6 +3309,78 @@ def _angle_zero() -> Angle:
 
 
 Angle.zero = _angle_zero()
+
+
+def _angle_golden_angle() -> Angle:
+    output = c_void_p()
+    _lib.opensolid_Angle_goldenAngle(c_void_p(), ctypes.byref(output))
+    return Angle(ptr=output)
+
+
+Angle.golden_angle = _angle_golden_angle()
+
+
+def _angle_radian() -> Angle:
+    output = c_void_p()
+    _lib.opensolid_Angle_radian(c_void_p(), ctypes.byref(output))
+    return Angle(ptr=output)
+
+
+Angle.radian = _angle_radian()
+
+
+def _angle_degree() -> Angle:
+    output = c_void_p()
+    _lib.opensolid_Angle_degree(c_void_p(), ctypes.byref(output))
+    return Angle(ptr=output)
+
+
+Angle.degree = _angle_degree()
+
+
+def _angle_full_turn() -> Angle:
+    output = c_void_p()
+    _lib.opensolid_Angle_fullTurn(c_void_p(), ctypes.byref(output))
+    return Angle(ptr=output)
+
+
+Angle.full_turn = _angle_full_turn()
+
+
+def _angle_half_turn() -> Angle:
+    output = c_void_p()
+    _lib.opensolid_Angle_halfTurn(c_void_p(), ctypes.byref(output))
+    return Angle(ptr=output)
+
+
+Angle.half_turn = _angle_half_turn()
+
+
+def _angle_quarter_turn() -> Angle:
+    output = c_void_p()
+    _lib.opensolid_Angle_quarterTurn(c_void_p(), ctypes.byref(output))
+    return Angle(ptr=output)
+
+
+Angle.quarter_turn = _angle_quarter_turn()
+
+
+def _angle_pi() -> Angle:
+    output = c_void_p()
+    _lib.opensolid_Angle_pi(c_void_p(), ctypes.byref(output))
+    return Angle(ptr=output)
+
+
+Angle.pi = _angle_pi()
+
+
+def _angle_two_pi() -> Angle:
+    output = c_void_p()
+    _lib.opensolid_Angle_twoPi(c_void_p(), ctypes.byref(output))
+    return Angle(ptr=output)
+
+
+Angle.two_pi = _angle_two_pi()
 
 
 def _range_unit() -> Range:

@@ -100,6 +100,10 @@ length =
   class_ @Length
     $(docs ''Length)
     [ constant "Zero" Length.zero
+    , constant "Meter" Length.meter
+    , constant "Centimeter" Length.centimeter
+    , constant "Millimeter" Length.millimeter
+    , constant "Inch" Length.inch
     , factory1 "Meters" "Value" Length.meters
     , factory1 "Centimeters" "Value" Length.centimeters
     , factory1 "Millimeters" "Value" Length.millimeters
@@ -138,6 +142,14 @@ angle =
   class_ @Angle
     $(docs ''Angle)
     [ constant "Zero" Angle.zero
+    , constant "Golden Angle" Angle.goldenAngle
+    , constant "Radian" Angle.radian
+    , constant "Degree" Angle.degree
+    , constant "Full Turn" Angle.fullTurn
+    , constant "Half Turn" Angle.halfTurn
+    , constant "Quarter Turn" Angle.quarterTurn
+    , constant "Pi" Angle.pi
+    , constant "Two Pi" Angle.twoPi
     , factory1 "Radians" "Value" Angle.radians
     , factory1 "Degrees" "Value" Angle.degrees
     , factory1 "Turns" "Value" Angle.turns
