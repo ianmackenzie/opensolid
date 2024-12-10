@@ -323,16 +323,16 @@ hullN (p0 :| rest) = do
   go x0 x0 y0 y0 rest
 
 lowerLeftCorner :: Bounds2d (space @ units) -> Point2d (space @ units)
-lowerLeftCorner (Bounds2d x y) = Point2d.xy (Range.minValue x) (Range.minValue y)
+lowerLeftCorner (Bounds2d x y) = Point2d.xy (Range.lowerBound x) (Range.lowerBound y)
 
 lowerRightCorner :: Bounds2d (space @ units) -> Point2d (space @ units)
-lowerRightCorner (Bounds2d x y) = Point2d.xy (Range.maxValue x) (Range.minValue y)
+lowerRightCorner (Bounds2d x y) = Point2d.xy (Range.upperBound x) (Range.lowerBound y)
 
 upperLeftCorner :: Bounds2d (space @ units) -> Point2d (space @ units)
-upperLeftCorner (Bounds2d x y) = Point2d.xy (Range.minValue x) (Range.maxValue y)
+upperLeftCorner (Bounds2d x y) = Point2d.xy (Range.lowerBound x) (Range.upperBound y)
 
 upperRightCorner :: Bounds2d (space @ units) -> Point2d (space @ units)
-upperRightCorner (Bounds2d x y) = Point2d.xy (Range.maxValue x) (Range.maxValue y)
+upperRightCorner (Bounds2d x y) = Point2d.xy (Range.upperBound x) (Range.upperBound y)
 
 corners :: Bounds2d (space @ units) -> List (Point2d (space @ units))
 corners bounds =

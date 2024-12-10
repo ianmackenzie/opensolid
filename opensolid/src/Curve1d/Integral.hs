@@ -18,8 +18,8 @@ instance Estimate.Interface (Integral units) units where
     let dx = Range.width domain
     let derivativeBounds = Curve1d.evaluateBounds derivative domain
     let estimate0 = dx * Curve1d.evaluateBounds curve domain
-    let y1 = Curve1d.evaluate curve (Range.minValue domain)
-    let y2 = Curve1d.evaluate curve (Range.maxValue domain)
+    let y1 = Curve1d.evaluate curve (Range.lowerBound domain)
+    let y2 = Curve1d.evaluate curve (Range.upperBound domain)
     let m = Range.width derivativeBounds
     let error1 = 0.125 * m * dx * dx
     let estimate1 = dx * Qty.midpoint y1 y2 + Range.from -error1 error1

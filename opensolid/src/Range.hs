@@ -14,8 +14,8 @@ module Range
   , hull3
   , hull4
   , hullN
-  , minValue
-  , maxValue
+  , lowerBound
+  , upperBound
   , midpoint
   , endpoints
   , width
@@ -290,13 +290,13 @@ hullN (first :| rest) = do
       go low high (next : remaining) = go (Qty.min low next) (Qty.max high next) remaining
   go first first rest
 
-{-# INLINE minValue #-}
-minValue :: Range units -> Qty units
-minValue (Range low _) = low
+{-# INLINE lowerBound #-}
+lowerBound :: Range units -> Qty units
+lowerBound (Range low _) = low
 
-{-# INLINE maxValue #-}
-maxValue :: Range units -> Qty units
-maxValue (Range _ high) = high
+{-# INLINE upperBound #-}
+upperBound :: Range units -> Qty units
+upperBound (Range _ high) = high
 
 {-# INLINE midpoint #-}
 midpoint :: Range units -> Qty units

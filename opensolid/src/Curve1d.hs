@@ -435,8 +435,8 @@ findZerosOrder k derivatives subdomain derivativeBounds
           if Qty.abs (evaluate currentDerivative t0) <= Solve1d.derivativeTolerance neighborhood k
             then Resolved [(t0, neighborhood)]
             else Fuzzy.do
-              let leftRange = Range.from (Range.minValue tRange) t0
-              let rightRange = Range.from t0 (Range.maxValue tRange)
+              let leftRange = Range.from (Range.lowerBound tRange) t0
+              let rightRange = Range.from t0 (Range.upperBound tRange)
               leftZeros <- solveMonotonic k currentDerivative nextDerivative leftRange
               rightZeros <- solveMonotonic k currentDerivative nextDerivative rightRange
               Resolved (leftZeros + rightZeros)

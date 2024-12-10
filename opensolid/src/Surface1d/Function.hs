@@ -474,7 +474,7 @@ findTangentSolutions subproblem = do
                 -- Note that fuu and fvv must be either both positive or both negative
                 -- to reach this code path, so we can take the sign of either one
                 -- to determine the sign of the tangent point
-                let sign = Qty.sign (Range.minValue fuuBounds)
+                let sign = Qty.sign (Range.lowerBound fuuBounds)
                 Solve2d.return (NonEmpty.singleton (TangentPointSolution (point, sign, uvBounds)))
               Negative -> do
                 -- Saddle region

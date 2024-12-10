@@ -433,7 +433,7 @@ isOverlappingSegment ::
   OverlappingSegment ->
   Bool
 isOverlappingSegment curve1 curve2 (OverlappingSegment{t1}) = do
-  let segmentStartPoint = evaluate curve1 (Range.minValue t1)
+  let segmentStartPoint = evaluate curve1 (Range.lowerBound t1)
   let curve1TestPoints = List.map (evaluate curve1) (Range.samples t1)
   let segment1IsNondegenerate = List.anySatisfy (!= segmentStartPoint) curve1TestPoints
   let segment1LiesOnSegment2 = List.allSatisfy (^ curve2) curve1TestPoints
@@ -560,7 +560,7 @@ findIntersectionPoints f fu fv g gu gv endpointIntersections () subdomain exclus
                   Just point -> validate point IntersectionPoint.tangent sign
                   Nothing -> do
                     let gBounds = VectorSurface2d.Function.evaluateBounds g uvBounds
-                    let convergenceTolerance = 1e-9 * Range.maxValue (VectorBounds2d.magnitude gBounds)
+                    let convergenceTolerance = 1e-9 * Range.upperBound (VectorBounds2d.magnitude gBounds)
                     let solution =
                           Tolerance.using convergenceTolerance $
                             Solve2d.unique
@@ -850,7 +850,7 @@ toPolyline maxError function curve = do
   let predicate subdomain = do
         let secondDerivativeBounds = VectorCurve2d.evaluateBounds secondDerivative subdomain
         let secondDerivativeMagnitude = VectorBounds2d.magnitude secondDerivativeBounds
-        let maxSecondDerivativeMagnitude = Range.maxValue secondDerivativeMagnitude
+        let maxSecondDerivativeMagnitude = Range.upperBound secondDerivativeMagnitude
         maxSecondDerivativeMagnitude == Qty.zero
           || Range.width subdomain <= Float.sqrt (8.0 * epsilon / maxSecondDerivativeMagnitude)
   Polyline2d (function 0.0 :| collectVertices predicate function Range.unit [function 1.0])

@@ -343,13 +343,13 @@ largest estimates =
   new (Largest estimates (Range.largest (NonEmpty.map bounds estimates)))
 
 estimateUpperBound :: (a, Estimate units) -> Qty units
-estimateUpperBound (_, estimate) = Range.maxValue (bounds estimate)
+estimateUpperBound (_, estimate) = Range.upperBound (bounds estimate)
 
 estimateUpperBoundAtLeast :: Qty units -> (a, Estimate units) -> Bool
 estimateUpperBoundAtLeast cutoff pair = estimateUpperBound pair >= cutoff
 
 estimateLowerBound :: (a, Estimate units) -> Qty units
-estimateLowerBound (_, estimate) = Range.minValue (bounds estimate)
+estimateLowerBound (_, estimate) = Range.lowerBound (bounds estimate)
 
 estimateLowerBoundAtMost :: Qty units -> (a, Estimate units) -> Bool
 estimateLowerBoundAtMost cutoff pair = estimateLowerBound pair <= cutoff
@@ -432,7 +432,7 @@ pickLargestBy function items = pickMaximumBy (abs . function) items
 
 sign :: Tolerance units => Estimate units -> Sign
 sign estimate
-  | Range.minValue (bounds estimate) > ?tolerance = Positive
-  | Range.maxValue (bounds estimate) < negate ?tolerance = Negative
+  | Range.lowerBound (bounds estimate) > ?tolerance = Positive
+  | Range.upperBound (bounds estimate) < negate ?tolerance = Negative
   | Range.width (bounds estimate) ~= Qty.zero = Positive
   | otherwise = sign (refine estimate)
