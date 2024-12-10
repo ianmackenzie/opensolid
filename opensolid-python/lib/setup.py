@@ -15,7 +15,7 @@ class bdist_wheel(_bdist_wheel):
 
 setup(
     packages=["opensolid"],
-    package_dir={"opensolid": "src"},
+    package_dir={"": "src"},
     package_data={
         "opensolid": ["*.so", "*.dylib", "*.dll"],
     },
