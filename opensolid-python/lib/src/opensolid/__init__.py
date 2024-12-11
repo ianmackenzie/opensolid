@@ -50,7 +50,7 @@ _lib.opensolid_init()
 
 
 class Error(Exception):
-    pass
+    """An error that may be thrown by OpenSolid functions."""
 
 
 class _Text(Union):
@@ -206,11 +206,22 @@ class Length:
         self._ptr = ptr
 
     zero: Length = None  # type: ignore[assignment]
+    """The zero value."""
+
     meter: Length = None  # type: ignore[assignment]
+    """One meter."""
+
     centimeter: Length = None  # type: ignore[assignment]
+    """One centimeter."""
+
     millimeter: Length = None  # type: ignore[assignment]
+    """One millimeter."""
+
     inch: Length = None  # type: ignore[assignment]
+    """One inch."""
+
     pixel: Length = None  # type: ignore[assignment]
+    """One CSS pixel, equal to 1/96 of an inch."""
 
     @staticmethod
     def meters(value: float) -> Length:
@@ -252,30 +263,35 @@ class Length:
         return Length(ptr=output)
 
     def in_meters(self) -> float:
+        """Convert a length to a number of meters."""
         inputs = self._ptr
         output = c_double()
         _lib.opensolid_Length_inMeters(ctypes.byref(inputs), ctypes.byref(output))
         return output.value
 
     def in_centimeters(self) -> float:
+        """Convert a length to a number of centimeters."""
         inputs = self._ptr
         output = c_double()
         _lib.opensolid_Length_inCentimeters(ctypes.byref(inputs), ctypes.byref(output))
         return output.value
 
     def in_millimeters(self) -> float:
+        """Convert a length to a number of millimeters."""
         inputs = self._ptr
         output = c_double()
         _lib.opensolid_Length_inMillimeters(ctypes.byref(inputs), ctypes.byref(output))
         return output.value
 
     def in_inches(self) -> float:
+        """Convert a length to a number of inches."""
         inputs = self._ptr
         output = c_double()
         _lib.opensolid_Length_inInches(ctypes.byref(inputs), ctypes.byref(output))
         return output.value
 
     def in_pixels(self) -> float:
+        """Convert a length into a number of CSS pixels."""
         inputs = self._ptr
         output = c_double()
         _lib.opensolid_Length_inPixels(ctypes.byref(inputs), ctypes.byref(output))
@@ -559,14 +575,31 @@ class Angle:
         self._ptr = ptr
 
     zero: Angle = None  # type: ignore[assignment]
+    """The zero value."""
+
     golden_angle: Angle = None  # type: ignore[assignment]
+    """The [golden angle](https://en.wikipedia.org/wiki/Golden_angle)."""
+
     radian: Angle = None  # type: ignore[assignment]
+    """One radian."""
+
     degree: Angle = None  # type: ignore[assignment]
+    """One degree."""
+
     full_turn: Angle = None  # type: ignore[assignment]
+    """One full turn, or 360 degrees."""
+
     half_turn: Angle = None  # type: ignore[assignment]
+    """One half turn, or 180 degrees."""
+
     quarter_turn: Angle = None  # type: ignore[assignment]
+    """One quarter turn, or 90 degrees."""
+
     pi: Angle = None  # type: ignore[assignment]
+    """π radians, or 180 degrees."""
+
     two_pi: Angle = None  # type: ignore[assignment]
+    """2π radians, or 360 degrees."""
 
     @staticmethod
     def radians(value: float) -> Angle:
@@ -589,22 +622,109 @@ class Angle:
         _lib.opensolid_Angle_turns_Float(ctypes.byref(inputs), ctypes.byref(output))
         return Angle(ptr=output)
 
+    @staticmethod
+    def acos(value: float) -> Angle:
+        inputs = c_double(value)
+        output = c_void_p()
+        _lib.opensolid_Angle_acos_Float(ctypes.byref(inputs), ctypes.byref(output))
+        return Angle(ptr=output)
+
+    @staticmethod
+    def asin(value: float) -> Angle:
+        inputs = c_double(value)
+        output = c_void_p()
+        _lib.opensolid_Angle_asin_Float(ctypes.byref(inputs), ctypes.byref(output))
+        return Angle(ptr=output)
+
+    @staticmethod
+    def atan(value: float) -> Angle:
+        inputs = c_double(value)
+        output = c_void_p()
+        _lib.opensolid_Angle_atan_Float(ctypes.byref(inputs), ctypes.byref(output))
+        return Angle(ptr=output)
+
+    @overload
+    @staticmethod
+    def atan2(y: Length, x: Length) -> Angle:
+        pass
+
+    @overload
+    @staticmethod
+    def atan2(y: float, x: float) -> Angle:
+        pass
+
+    @staticmethod
+    def atan2(*args, **keywords):
+        match (args, keywords):
+            case (
+                ([Length() as y, Length() as x], {})
+                | ([Length() as y], {"x": Length() as x})
+                | ([], {"y": Length() as y, "x": Length() as x})
+            ):
+                inputs = _Tuple2_c_void_p_c_void_p(y._ptr, x._ptr)
+                output = c_void_p()
+                _lib.opensolid_Angle_atan2_Length_Length(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Angle(ptr=output)
+            case (
+                ([float() | int() as y, float() | int() as x], {})
+                | ([float() | int() as y], {"x": float() | int() as x})
+                | ([], {"y": float() | int() as y, "x": float() | int() as x})
+            ):
+                inputs = _Tuple2_c_double_c_double(y, x)
+                output = c_void_p()
+                _lib.opensolid_Angle_atan2_Float_Float(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Angle(ptr=output)
+            case _:
+                message = "Unexpected function arguments"
+                raise TypeError(message)
+
     def in_radians(self) -> float:
+        """Convert an angle to a number of radians."""
         inputs = self._ptr
         output = c_double()
         _lib.opensolid_Angle_inRadians(ctypes.byref(inputs), ctypes.byref(output))
         return output.value
 
     def in_degrees(self) -> float:
+        """Convert an angle to a number of degrees."""
         inputs = self._ptr
         output = c_double()
         _lib.opensolid_Angle_inDegrees(ctypes.byref(inputs), ctypes.byref(output))
         return output.value
 
     def in_turns(self) -> float:
+        """Convert an angle to a number of turns.
+
+        One turn is equal to 360 degrees.
+        """
         inputs = self._ptr
         output = c_double()
         _lib.opensolid_Angle_inTurns(ctypes.byref(inputs), ctypes.byref(output))
+        return output.value
+
+    def sin(self) -> float:
+        """Compute the sine of an angle."""
+        inputs = self._ptr
+        output = c_double()
+        _lib.opensolid_Angle_sin(ctypes.byref(inputs), ctypes.byref(output))
+        return output.value
+
+    def cos(self) -> float:
+        """Compute the cosine of an angle."""
+        inputs = self._ptr
+        output = c_double()
+        _lib.opensolid_Angle_cos(ctypes.byref(inputs), ctypes.byref(output))
+        return output.value
+
+    def tan(self) -> float:
+        """Compute the tangent of an angle."""
+        inputs = self._ptr
+        output = c_double()
+        _lib.opensolid_Angle_tan(ctypes.byref(inputs), ctypes.byref(output))
         return output.value
 
     def __eq__(self, other: object) -> bool:
@@ -856,6 +976,7 @@ class Range:
         self._ptr = ptr
 
     unit: Range = None  # type: ignore[assignment]
+    """The range with endoints [0,1]."""
 
     @staticmethod
     def constant(value: float) -> Range:
@@ -906,12 +1027,28 @@ class Range:
         return Range(ptr=output)
 
     def endpoints(self) -> tuple[float, float]:
+        """Get the lower and upper bounds of a range."""
         inputs = self._ptr
         output = _Tuple2_c_double_c_double()
         _lib.opensolid_Range_endpoints(ctypes.byref(inputs), ctypes.byref(output))
         return (output.field0, output.field1)
 
+    def lower_bound(self) -> float:
+        """Get the lower bound of a range."""
+        inputs = self._ptr
+        output = c_double()
+        _lib.opensolid_Range_lowerBound(ctypes.byref(inputs), ctypes.byref(output))
+        return output.value
+
+    def upper_bound(self) -> float:
+        """Get the upper bound of a range."""
+        inputs = self._ptr
+        output = c_double()
+        _lib.opensolid_Range_upperBound(ctypes.byref(inputs), ctypes.byref(output))
+        return output.value
+
     def intersection(self, other: Range) -> Range | None:
+        """Attempt to find the intersection of two ranges."""
         inputs = _Tuple2_c_void_p_c_void_p(other._ptr, self._ptr)
         output = _Maybe_c_void_p()
         _lib.opensolid_Range_intersection_Range(
@@ -919,36 +1056,29 @@ class Range:
         )
         return Range(ptr=c_void_p(output.field1)) if output.field0 == 0 else None
 
-    @overload
-    def __contains__(self, other: Range) -> bool:
-        pass
+    def includes(self, value: float) -> bool:
+        """Check if a given value is included in a range.
 
-    @overload
-    def __contains__(self, value: float) -> bool:
-        pass
+        Note that this does *not* use a tolerance, so use with care -
+        for example, a value *just* outside the range (due to numerical roundoff)
+        will be reported as not included.
+        """
+        inputs = _Tuple2_c_double_c_void_p(value, self._ptr)
+        output = c_int64()
+        _lib.opensolid_Range_includes_Float(ctypes.byref(inputs), ctypes.byref(output))
+        return bool(output.value)
 
-    def __contains__(self, *args, **keywords):
-        match (args, keywords):
-            case ([Range() as other], {}) | ([], {"other": Range() as other}):
-                inputs = _Tuple2_c_void_p_c_void_p(other._ptr, self._ptr)
-                output = c_int64()
-                _lib.opensolid_Range_contains_Range(
-                    ctypes.byref(inputs), ctypes.byref(output)
-                )
-                return bool(output.value)
-            case (
-                ([float() | int() as value], {})
-                | ([], {"value": float() | int() as value})
-            ):
-                inputs = _Tuple2_c_double_c_void_p(value, self._ptr)
-                output = c_int64()
-                _lib.opensolid_Range_contains_Float(
-                    ctypes.byref(inputs), ctypes.byref(output)
-                )
-                return bool(output.value)
-            case _:
-                message = "Unexpected function arguments"
-                raise TypeError(message)
+    def contains(self, other: Range) -> bool:
+        """Check if one range contains another.
+
+        Note that this does *not* use a tolerance, so use with care -
+        for example, a range that extends *just* outside another range (due to numerical
+        roundoff) will be reported as not contained by that range.
+        """
+        inputs = _Tuple2_c_void_p_c_void_p(other._ptr, self._ptr)
+        output = c_int64()
+        _lib.opensolid_Range_contains_Range(ctypes.byref(inputs), ctypes.byref(output))
+        return bool(output.value)
 
     def __neg__(self) -> Range:
         output = c_void_p()
@@ -1207,6 +1337,7 @@ class LengthRange:
         return LengthRange(ptr=output)
 
     def endpoints(self) -> tuple[Length, Length]:
+        """Get the lower and upper bounds of a range."""
         inputs = self._ptr
         output = _Tuple2_c_void_p_c_void_p()
         _lib.opensolid_LengthRange_endpoints(ctypes.byref(inputs), ctypes.byref(output))
@@ -1216,6 +1347,7 @@ class LengthRange:
         )
 
     def intersection(self, other: LengthRange) -> LengthRange | None:
+        """Attempt to find the intersection of two ranges."""
         inputs = _Tuple2_c_void_p_c_void_p(other._ptr, self._ptr)
         output = _Maybe_c_void_p()
         _lib.opensolid_LengthRange_intersection_LengthRange(
@@ -1223,36 +1355,33 @@ class LengthRange:
         )
         return LengthRange(ptr=c_void_p(output.field1)) if output.field0 == 0 else None
 
-    @overload
-    def __contains__(self, other: LengthRange) -> bool:
-        pass
+    def includes(self, value: Length) -> bool:
+        """Check if a given value is included in a range.
 
-    @overload
-    def __contains__(self, value: Length) -> bool:
-        pass
+        Note that this does *not* use a tolerance, so use with care -
+        for example, a value *just* outside the range (due to numerical roundoff)
+        will be reported as not included.
+        """
+        inputs = _Tuple2_c_void_p_c_void_p(value._ptr, self._ptr)
+        output = c_int64()
+        _lib.opensolid_LengthRange_includes_Length(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return bool(output.value)
 
-    def __contains__(self, *args, **keywords):
-        match (args, keywords):
-            case (
-                ([LengthRange() as other], {})
-                | ([], {"other": LengthRange() as other})
-            ):
-                inputs = _Tuple2_c_void_p_c_void_p(other._ptr, self._ptr)
-                output = c_int64()
-                _lib.opensolid_LengthRange_contains_LengthRange(
-                    ctypes.byref(inputs), ctypes.byref(output)
-                )
-                return bool(output.value)
-            case ([Length() as value], {}) | ([], {"value": Length() as value}):
-                inputs = _Tuple2_c_void_p_c_void_p(value._ptr, self._ptr)
-                output = c_int64()
-                _lib.opensolid_LengthRange_contains_Length(
-                    ctypes.byref(inputs), ctypes.byref(output)
-                )
-                return bool(output.value)
-            case _:
-                message = "Unexpected function arguments"
-                raise TypeError(message)
+    def contains(self, other: LengthRange) -> bool:
+        """Check if one range contains another.
+
+        Note that this does *not* use a tolerance, so use with care -
+        for example, a range that extends *just* outside another range (due to numerical
+        roundoff) will be reported as not contained by that range.
+        """
+        inputs = _Tuple2_c_void_p_c_void_p(other._ptr, self._ptr)
+        output = c_int64()
+        _lib.opensolid_LengthRange_contains_LengthRange(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return bool(output.value)
 
     def __neg__(self) -> LengthRange:
         output = c_void_p()
@@ -1462,12 +1591,14 @@ class AngleRange:
         return AngleRange(ptr=output)
 
     def endpoints(self) -> tuple[Angle, Angle]:
+        """Get the lower and upper bounds of a range."""
         inputs = self._ptr
         output = _Tuple2_c_void_p_c_void_p()
         _lib.opensolid_AngleRange_endpoints(ctypes.byref(inputs), ctypes.byref(output))
         return (Angle(ptr=c_void_p(output.field0)), Angle(ptr=c_void_p(output.field1)))
 
     def intersection(self, other: AngleRange) -> AngleRange | None:
+        """Attempt to find the intersection of two ranges."""
         inputs = _Tuple2_c_void_p_c_void_p(other._ptr, self._ptr)
         output = _Maybe_c_void_p()
         _lib.opensolid_AngleRange_intersection_AngleRange(
@@ -1475,33 +1606,33 @@ class AngleRange:
         )
         return AngleRange(ptr=c_void_p(output.field1)) if output.field0 == 0 else None
 
-    @overload
-    def __contains__(self, other: AngleRange) -> bool:
-        pass
+    def includes(self, value: Angle) -> bool:
+        """Check if a given value is included in a range.
 
-    @overload
-    def __contains__(self, value: Angle) -> bool:
-        pass
+        Note that this does *not* use a tolerance, so use with care -
+        for example, a value *just* outside the range (due to numerical roundoff)
+        will be reported as not included.
+        """
+        inputs = _Tuple2_c_void_p_c_void_p(value._ptr, self._ptr)
+        output = c_int64()
+        _lib.opensolid_AngleRange_includes_Angle(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return bool(output.value)
 
-    def __contains__(self, *args, **keywords):
-        match (args, keywords):
-            case ([AngleRange() as other], {}) | ([], {"other": AngleRange() as other}):
-                inputs = _Tuple2_c_void_p_c_void_p(other._ptr, self._ptr)
-                output = c_int64()
-                _lib.opensolid_AngleRange_contains_AngleRange(
-                    ctypes.byref(inputs), ctypes.byref(output)
-                )
-                return bool(output.value)
-            case ([Angle() as value], {}) | ([], {"value": Angle() as value}):
-                inputs = _Tuple2_c_void_p_c_void_p(value._ptr, self._ptr)
-                output = c_int64()
-                _lib.opensolid_AngleRange_contains_Angle(
-                    ctypes.byref(inputs), ctypes.byref(output)
-                )
-                return bool(output.value)
-            case _:
-                message = "Unexpected function arguments"
-                raise TypeError(message)
+    def contains(self, other: AngleRange) -> bool:
+        """Check if one range contains another.
+
+        Note that this does *not* use a tolerance, so use with care -
+        for example, a range that extends *just* outside another range (due to numerical
+        roundoff) will be reported as not contained by that range.
+        """
+        inputs = _Tuple2_c_void_p_c_void_p(other._ptr, self._ptr)
+        output = c_int64()
+        _lib.opensolid_AngleRange_contains_AngleRange(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return bool(output.value)
 
     def __neg__(self) -> AngleRange:
         output = c_void_p()
@@ -1634,36 +1765,97 @@ class Color:
         self._ptr = ptr
 
     red: Color = None  # type: ignore[assignment]
+    """Scarlet Red from the Tango icon theme."""
+
     dark_red: Color = None  # type: ignore[assignment]
+    """Dark Scarlet Red from the Tango icon theme."""
+
     light_orange: Color = None  # type: ignore[assignment]
+    """Light Orange from the Tango icon theme."""
+
     orange: Color = None  # type: ignore[assignment]
+    """Orange from the Tango icon theme."""
+
     dark_orange: Color = None  # type: ignore[assignment]
+    """Dark Orange from the Tango icon theme."""
+
     light_yellow: Color = None  # type: ignore[assignment]
+    """Light Butter from the Tango icon theme."""
+
     yellow: Color = None  # type: ignore[assignment]
+    """Butter from the Tango icon theme."""
+
     dark_yellow: Color = None  # type: ignore[assignment]
+    """Dark Butter from the Tango icon theme."""
+
     light_green: Color = None  # type: ignore[assignment]
+    """Light Chameleon from the Tango icon theme."""
+
     green: Color = None  # type: ignore[assignment]
+    """Chameleon from the Tango icon theme."""
+
     dark_green: Color = None  # type: ignore[assignment]
+    """Dark Chameleon from the Tango icon theme."""
+
     light_blue: Color = None  # type: ignore[assignment]
+    """Light Sky Blue from the Tango icon theme."""
+
     blue: Color = None  # type: ignore[assignment]
+    """Sky Blue from the Tango icon theme."""
+
     dark_blue: Color = None  # type: ignore[assignment]
+    """Dark Sky Blue from the Tango icon theme."""
+
     light_purple: Color = None  # type: ignore[assignment]
+    """Light Plum from the Tango icon theme."""
+
     purple: Color = None  # type: ignore[assignment]
+    """Plum from the Tango icon theme."""
+
     dark_purple: Color = None  # type: ignore[assignment]
+    """Dark Plum from the Tango icon theme."""
+
     light_brown: Color = None  # type: ignore[assignment]
+    """Light Chocolate from the Tango icon theme."""
+
     brown: Color = None  # type: ignore[assignment]
+    """Chocolate from the Tango icon theme."""
+
     dark_brown: Color = None  # type: ignore[assignment]
+    """Dark Chocolate from the Tango icon theme."""
+
     black: Color = None  # type: ignore[assignment]
+    """Black."""
+
     white: Color = None  # type: ignore[assignment]
+    """White."""
+
     light_grey: Color = None  # type: ignore[assignment]
+    """Aluminium 1/6  from the Tango icon theme."""
+
     grey: Color = None  # type: ignore[assignment]
+    """Aluminium 2/6  from the Tango icon theme."""
+
     dark_grey: Color = None  # type: ignore[assignment]
+    """Aluminium 3/6  from the Tango icon theme."""
+
     light_gray: Color = None  # type: ignore[assignment]
+    """Aluminium 1/6  from the Tango icon theme."""
+
     gray: Color = None  # type: ignore[assignment]
+    """Aluminium 2/6  from the Tango icon theme."""
+
     dark_gray: Color = None  # type: ignore[assignment]
+    """Aluminium 3/6  from the Tango icon theme."""
+
     light_charcoal: Color = None  # type: ignore[assignment]
+    """Aluminium 4/6  from the Tango icon theme."""
+
     charcoal: Color = None  # type: ignore[assignment]
+    """Aluminium 5/6  from the Tango icon theme."""
+
     dark_charcoal: Color = None  # type: ignore[assignment]
+    """Aluminium 6/6  from the Tango icon theme."""
 
     @staticmethod
     def rgb(red: float, green: float, blue: float) -> Color:
@@ -1700,18 +1892,21 @@ class Color:
         return Color(ptr=output)
 
     def to_hex(self) -> str:
+        """Convert a color to a hex string such as '#f3f3f3'."""
         inputs = self._ptr
         output = _Text()
         _lib.opensolid_Color_toHex(ctypes.byref(inputs), ctypes.byref(output))
         return _text_to_str(output)
 
     def components(self) -> tuple[float, float, float]:
+        """Get the RGB components of a color as values in the range [0,1]."""
         inputs = self._ptr
         output = _Tuple3_c_double_c_double_c_double()
         _lib.opensolid_Color_components(ctypes.byref(inputs), ctypes.byref(output))
         return (output.field0, output.field1, output.field2)
 
     def components_255(self) -> tuple[int, int, int]:
+        """Get the RGB components of a color as values in the range [0,255]."""
         inputs = self._ptr
         output = _Tuple3_c_int64_c_int64_c_int64()
         _lib.opensolid_Color_components255(ctypes.byref(inputs), ctypes.byref(output))
@@ -1729,6 +1924,7 @@ class Vector2d:
         self._ptr = ptr
 
     zero: Vector2d = None  # type: ignore[assignment]
+    """The zero vector."""
 
     @staticmethod
     def unit(direction: Direction2d) -> Vector2d:
@@ -1763,6 +1959,15 @@ class Vector2d:
         return Vector2d(ptr=output)
 
     @staticmethod
+    def polar(magnitude: float, angle: Angle) -> Vector2d:
+        inputs = _Tuple2_c_double_c_void_p(magnitude, angle._ptr)
+        output = c_void_p()
+        _lib.opensolid_Vector2d_polar_Float_Angle(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Vector2d(ptr=output)
+
+    @staticmethod
     def from_components(components: tuple[float, float]) -> Vector2d:
         inputs = _Tuple2_c_double_c_double(components[0], components[1])
         output = c_void_p()
@@ -1772,24 +1977,32 @@ class Vector2d:
         return Vector2d(ptr=output)
 
     def components(self) -> tuple[float, float]:
+        """Get the X and Y components of a vector."""
         inputs = self._ptr
         output = _Tuple2_c_double_c_double()
         _lib.opensolid_Vector2d_components(ctypes.byref(inputs), ctypes.byref(output))
         return (output.field0, output.field1)
 
     def x_component(self) -> float:
+        """Get the X component of a vector."""
         inputs = self._ptr
         output = c_double()
         _lib.opensolid_Vector2d_xComponent(ctypes.byref(inputs), ctypes.byref(output))
         return output.value
 
     def y_component(self) -> float:
+        """Get the Y component of a vector."""
         inputs = self._ptr
         output = c_double()
         _lib.opensolid_Vector2d_yComponent(ctypes.byref(inputs), ctypes.byref(output))
         return output.value
 
     def direction(self) -> Direction2d:
+        """Attempt to get the direction of a vector.
+
+        The current tolerance will be used to check if the vector is zero
+        (and therefore does not have a direction).
+        """
         inputs = _Tuple2_c_double_c_void_p(_float_tolerance(), self._ptr)
         output = _Result_c_void_p()
         _lib.opensolid_Vector2d_direction(ctypes.byref(inputs), ctypes.byref(output))
@@ -1875,6 +2088,7 @@ class Displacement2d:
         self._ptr = ptr
 
     zero: Displacement2d = None  # type: ignore[assignment]
+    """The zero vector."""
 
     @staticmethod
     def xy(x_component: Length, y_component: Length) -> Displacement2d:
@@ -1899,6 +2113,15 @@ class Displacement2d:
         inputs = y_component._ptr
         output = c_void_p()
         _lib.opensolid_Displacement2d_y_Length(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Displacement2d(ptr=output)
+
+    @staticmethod
+    def polar(magnitude: Length, angle: Angle) -> Displacement2d:
+        inputs = _Tuple2_c_void_p_c_void_p(magnitude._ptr, angle._ptr)
+        output = c_void_p()
+        _lib.opensolid_Displacement2d_polar_Length_Angle(
             ctypes.byref(inputs), ctypes.byref(output)
         )
         return Displacement2d(ptr=output)
@@ -1949,6 +2172,7 @@ class Displacement2d:
         return Displacement2d(ptr=output)
 
     def components(self) -> tuple[Length, Length]:
+        """Get the X and Y components of a vector."""
         inputs = self._ptr
         output = _Tuple2_c_void_p_c_void_p()
         _lib.opensolid_Displacement2d_components(
@@ -1960,6 +2184,7 @@ class Displacement2d:
         )
 
     def x_component(self) -> Length:
+        """Get the X component of a vector."""
         inputs = self._ptr
         output = c_void_p()
         _lib.opensolid_Displacement2d_xComponent(
@@ -1968,6 +2193,7 @@ class Displacement2d:
         return Length(ptr=output)
 
     def y_component(self) -> Length:
+        """Get the Y component of a vector."""
         inputs = self._ptr
         output = c_void_p()
         _lib.opensolid_Displacement2d_yComponent(
@@ -1976,6 +2202,11 @@ class Displacement2d:
         return Length(ptr=output)
 
     def direction(self) -> Direction2d:
+        """Attempt to get the direction of a vector.
+
+        The current tolerance will be used to check if the vector is zero
+        (and therefore does not have a direction).
+        """
         inputs = _Tuple2_c_void_p_c_void_p(_length_tolerance()._ptr, self._ptr)
         output = _Result_c_void_p()
         _lib.opensolid_Displacement2d_direction(
@@ -2072,11 +2303,22 @@ class Direction2d:
         self._ptr = ptr
 
     x: Direction2d = None  # type: ignore[assignment]
+    """Alias for 'positiveX'."""
+
     y: Direction2d = None  # type: ignore[assignment]
+    """Alias for 'positiveY'."""
+
     positive_x: Direction2d = None  # type: ignore[assignment]
+    """The positive X direction."""
+
     positive_y: Direction2d = None  # type: ignore[assignment]
+    """The positive Y direction."""
+
     negative_x: Direction2d = None  # type: ignore[assignment]
+    """The negative X direction."""
+
     negative_y: Direction2d = None  # type: ignore[assignment]
+    """The negative Y direction."""
 
     @staticmethod
     def from_angle(angle: Angle) -> Direction2d:
@@ -2106,12 +2348,26 @@ class Direction2d:
         return Direction2d(ptr=output)
 
     def to_angle(self) -> Angle:
+        """Convert a direction to an angle.
+
+        The angle is measured counterclockwise from the positive X direction, so:
+
+          * The positive X direction has an angle of zero
+          * The positive Y direction has an angle of 90 degrees
+          * The negative Y direction has an angle of -90 degrees
+          * It is not defined whether the negative X direction has an angle of -180 or
+            +180 degrees. (Currently it is reported as having an angle of -180 degrees,
+            but this should not be relied upon.)
+
+        The returned angle will be between -180 and +180 degrees.
+        """
         inputs = self._ptr
         output = c_void_p()
         _lib.opensolid_Direction2d_toAngle(ctypes.byref(inputs), ctypes.byref(output))
         return Angle(ptr=output)
 
     def components(self) -> tuple[float, float]:
+        """Get the X and Y components of a direction."""
         inputs = self._ptr
         output = _Tuple2_c_double_c_double()
         _lib.opensolid_Direction2d_components(
@@ -2120,6 +2376,7 @@ class Direction2d:
         return (output.field0, output.field1)
 
     def x_component(self) -> float:
+        """Get the X component of a direction."""
         inputs = self._ptr
         output = c_double()
         _lib.opensolid_Direction2d_xComponent(
@@ -2128,6 +2385,7 @@ class Direction2d:
         return output.value
 
     def y_component(self) -> float:
+        """Get the Y component of a direction."""
         inputs = self._ptr
         output = c_double()
         _lib.opensolid_Direction2d_yComponent(
@@ -2186,6 +2444,7 @@ class Point2d:
         self._ptr = ptr
 
     origin: Point2d = None  # type: ignore[assignment]
+    """The point with coordinates (0,0)."""
 
     @staticmethod
     def xy(x_coordinate: Length, y_coordinate: Length) -> Point2d:
@@ -2256,6 +2515,7 @@ class Point2d:
         return Point2d(ptr=output)
 
     def coordinates(self) -> tuple[Length, Length]:
+        """Get the X and Y coordinates of a point."""
         inputs = self._ptr
         output = _Tuple2_c_void_p_c_void_p()
         _lib.opensolid_Point2d_coordinates(ctypes.byref(inputs), ctypes.byref(output))
@@ -2265,18 +2525,21 @@ class Point2d:
         )
 
     def x_coordinate(self) -> Length:
+        """Get the X coordinate of a point."""
         inputs = self._ptr
         output = c_void_p()
         _lib.opensolid_Point2d_xCoordinate(ctypes.byref(inputs), ctypes.byref(output))
         return Length(ptr=output)
 
     def y_coordinate(self) -> Length:
+        """Get the Y coordinate of a point."""
         inputs = self._ptr
         output = c_void_p()
         _lib.opensolid_Point2d_yCoordinate(ctypes.byref(inputs), ctypes.byref(output))
         return Length(ptr=output)
 
     def distance_to(self, other: Point2d) -> Length:
+        """Compute the distance from one point to another."""
         inputs = _Tuple2_c_void_p_c_void_p(other._ptr, self._ptr)
         output = c_void_p()
         _lib.opensolid_Point2d_distanceTo_Point2d(
@@ -2285,6 +2548,7 @@ class Point2d:
         return Length(ptr=output)
 
     def midpoint(self, other: Point2d) -> Point2d:
+        """Find the midpoint between two points."""
         inputs = _Tuple2_c_void_p_c_void_p(other._ptr, self._ptr)
         output = c_void_p()
         _lib.opensolid_Point2d_midpoint_Point2d(
@@ -2339,6 +2603,7 @@ class UvPoint:
         self._ptr = ptr
 
     origin: UvPoint = None  # type: ignore[assignment]
+    """The point with coordinates (0,0)."""
 
     @staticmethod
     def uv(u_coordinate: float, v_coordinate: float) -> UvPoint:
@@ -2373,24 +2638,28 @@ class UvPoint:
         return UvPoint(ptr=output)
 
     def coordinates(self) -> tuple[float, float]:
+        """Get the U and V coordinates of a point."""
         inputs = self._ptr
         output = _Tuple2_c_double_c_double()
         _lib.opensolid_UvPoint_coordinates(ctypes.byref(inputs), ctypes.byref(output))
         return (output.field0, output.field1)
 
     def u_coordinate(self) -> float:
+        """Get the U coordinate of a point."""
         inputs = self._ptr
         output = c_double()
         _lib.opensolid_UvPoint_uCoordinate(ctypes.byref(inputs), ctypes.byref(output))
         return output.value
 
     def v_coordinate(self) -> float:
+        """Get the V coordinate of a point."""
         inputs = self._ptr
         output = c_double()
         _lib.opensolid_UvPoint_vCoordinate(ctypes.byref(inputs), ctypes.byref(output))
         return output.value
 
     def distance_to(self, other: UvPoint) -> float:
+        """Compute the distance from one point to another."""
         inputs = _Tuple2_c_void_p_c_void_p(other._ptr, self._ptr)
         output = c_double()
         _lib.opensolid_UvPoint_distanceTo_UvPoint(
@@ -2399,6 +2668,7 @@ class UvPoint:
         return output.value
 
     def midpoint(self, other: UvPoint) -> UvPoint:
+        """Find the midpoint between two points."""
         inputs = _Tuple2_c_void_p_c_void_p(other._ptr, self._ptr)
         output = c_void_p()
         _lib.opensolid_UvPoint_midpoint_UvPoint(
@@ -2512,6 +2782,7 @@ class Bounds2d:
         return Bounds2d(ptr=output)
 
     def coordinates(self) -> tuple[LengthRange, LengthRange]:
+        """Get the X and Y coordinate ranges of a bounding box."""
         inputs = self._ptr
         output = _Tuple2_c_void_p_c_void_p()
         _lib.opensolid_Bounds2d_coordinates(ctypes.byref(inputs), ctypes.byref(output))
@@ -2521,12 +2792,14 @@ class Bounds2d:
         )
 
     def x_coordinate(self) -> LengthRange:
+        """Get the X coordinate range of a bounding box."""
         inputs = self._ptr
         output = c_void_p()
         _lib.opensolid_Bounds2d_xCoordinate(ctypes.byref(inputs), ctypes.byref(output))
         return LengthRange(ptr=output)
 
     def y_coordinate(self) -> LengthRange:
+        """Get the Y coordinate range of a bounding box."""
         inputs = self._ptr
         output = c_void_p()
         _lib.opensolid_Bounds2d_yCoordinate(ctypes.byref(inputs), ctypes.byref(output))
@@ -2603,18 +2876,21 @@ class UvBounds:
         return UvBounds(ptr=output)
 
     def coordinates(self) -> tuple[Range, Range]:
+        """Get the X and Y coordinate ranges of a bounding box."""
         inputs = self._ptr
         output = _Tuple2_c_void_p_c_void_p()
         _lib.opensolid_UvBounds_coordinates(ctypes.byref(inputs), ctypes.byref(output))
         return (Range(ptr=c_void_p(output.field0)), Range(ptr=c_void_p(output.field1)))
 
     def u_coordinate(self) -> Range:
+        """Get the X coordinate range of a bounding box."""
         inputs = self._ptr
         output = c_void_p()
         _lib.opensolid_UvBounds_uCoordinate(ctypes.byref(inputs), ctypes.byref(output))
         return Range(ptr=output)
 
     def v_coordinate(self) -> Range:
+        """Get the Y coordinate range of a bounding box."""
         inputs = self._ptr
         output = c_void_p()
         _lib.opensolid_UvBounds_vCoordinate(ctypes.byref(inputs), ctypes.byref(output))
@@ -2632,26 +2908,74 @@ class Curve:
         self._ptr = ptr
 
     t: Curve = None  # type: ignore[assignment]
+    """A curve parameter.
+
+    In other words, a curve whose value is equal to its input parameter.
+    When defining parametric curves, you will typically start with 'Curve.t'
+    and then use arithmetic operators etc. to build up more complex curves.
+    """
 
     def squared(self) -> Curve:
+        """Compute the square of a curve."""
         inputs = self._ptr
         output = c_void_p()
         _lib.opensolid_Curve_squared(ctypes.byref(inputs), ctypes.byref(output))
         return Curve(ptr=output)
 
     def sqrt(self) -> Curve:
+        """Compute the square root of a curve."""
         inputs = self._ptr
         output = c_void_p()
         _lib.opensolid_Curve_sqrt(ctypes.byref(inputs), ctypes.byref(output))
         return Curve(ptr=output)
 
     def evaluate(self, parameter_value: float) -> float:
+        """Evaluate a curve at a given parameter value.
+
+        The parameter value should be between 0 and 1.
+        """
         inputs = _Tuple2_c_double_c_void_p(parameter_value, self._ptr)
         output = c_double()
         _lib.opensolid_Curve_evaluate_Float(ctypes.byref(inputs), ctypes.byref(output))
         return output.value
 
     def zeros(self) -> list[CurveZero]:
+        """Find all points at which the given curve is zero.
+
+        This includes not only points where the curve *crosses* zero,
+        but also where it is *tangent* to zero.
+        For example, y=x-3 crosses zero at x=3,
+        while y=(x-3)^2 is tangent to zero at x=3.
+
+        We define y=x-3 as having a zero of order 0 at x=3,
+        since only the "derivative of order zero" (the curve itself)
+        is zero at that point.
+        Similarly, y=(x-3)^2 has a zero of order 1 at x=3,
+        since the first derivative (but not the second derivative)
+        is zero at that point.
+
+        Currently, this function up to third-order zeros
+        (e.g. y=x^4 has a third-order zero at x=0,
+        since everything up to the third derivative is zero at x=0).
+
+        The current tolerance is used to determine
+        whether a given point should be considered a zero,
+        and of what order.
+        For example, the curve y=x^2-0.0001 is *exactly* zero at x=0.01 and x=-0.01.
+        However, note that the curve is also very close to zero at x=0,
+        and at that point the first derivative is *also* zero.
+        In many cases, it is reasonable to assume that
+        the 0.0001 is an artifact of numerical roundoff,
+        and the curve actually has a single zero of order 1 at x=0.
+        The current tolerance is used to choose which case to report.
+        In this example, a tolerance of 0.000001
+        would mean that we consider 0.0001 a meaningful value (not just roundoff),
+        so we would end up reporting two order-0 zeros at x=0.01 and x=-0.01.
+        On the other hand, a tolerance of 0.01 would mean that
+        we consider 0.0001 as just roundoff error,
+        so we would end up reporting a single order-1 zero at x=0
+        (the point at which the *first derivative* is zero).
+        """
         inputs = _Tuple2_c_double_c_void_p(_float_tolerance(), self._ptr)
         output = _Result_List_c_void_p()
         _lib.opensolid_Curve_zeros(ctypes.byref(inputs), ctypes.byref(output))
@@ -2855,18 +3179,37 @@ class CurveZero:
         self._ptr = ptr
 
     def location(self) -> float:
+        """Get the parameter value at which the curve is zero."""
         inputs = self._ptr
         output = c_double()
         _lib.opensolid_CurveZero_location(ctypes.byref(inputs), ctypes.byref(output))
         return output.value
 
     def order(self) -> int:
+        """Check whether the zero is a crossing zero, a tangent zero etc.
+
+        * An order 0 zero means the curve crosses zero at the given location,
+          with a non-zero first derivative.
+        * An order 1 zero means the first derivative is also zero at the given
+          location, but the second derivative is not (that is, the curve just
+          'touches' zero at that point).
+        * An order 2 zero means the first and second derivatives are zero at the
+          given location, etc.
+        """
         inputs = self._ptr
         output = c_int64()
         _lib.opensolid_CurveZero_order(ctypes.byref(inputs), ctypes.byref(output))
         return output.value
 
     def sign(self) -> int:
+        """Check whether the curve 'curves up' or 'curves down' at the zero.
+
+        A positive sign means that the curve is positive to the right of the zero
+        (for a crossing zero, that means the curve will be negative to the left,
+        but for an order 1 tangent zero, that means the curve will also be positive
+        to the left!). Similarly, a negative sign means that the curve is negative
+        to the right of the zero.
+        """
         inputs = self._ptr
         output = c_int64()
         _lib.opensolid_CurveZero_sign(ctypes.byref(inputs), ctypes.byref(output))
@@ -2880,6 +3223,10 @@ class LengthCurve:
         self._ptr = ptr
 
     def evaluate(self, parameter_value: float) -> Length:
+        """Evaluate a curve at a given parameter value.
+
+        The parameter value should be between 0 and 1.
+        """
         inputs = _Tuple2_c_double_c_void_p(parameter_value, self._ptr)
         output = c_void_p()
         _lib.opensolid_LengthCurve_evaluate_Float(
@@ -2888,6 +3235,42 @@ class LengthCurve:
         return Length(ptr=output)
 
     def zeros(self) -> list[CurveZero]:
+        """Find all points at which the given curve is zero.
+
+        This includes not only points where the curve *crosses* zero,
+        but also where it is *tangent* to zero.
+        For example, y=x-3 crosses zero at x=3,
+        while y=(x-3)^2 is tangent to zero at x=3.
+
+        We define y=x-3 as having a zero of order 0 at x=3,
+        since only the "derivative of order zero" (the curve itself)
+        is zero at that point.
+        Similarly, y=(x-3)^2 has a zero of order 1 at x=3,
+        since the first derivative (but not the second derivative)
+        is zero at that point.
+
+        Currently, this function up to third-order zeros
+        (e.g. y=x^4 has a third-order zero at x=0,
+        since everything up to the third derivative is zero at x=0).
+
+        The current tolerance is used to determine
+        whether a given point should be considered a zero,
+        and of what order.
+        For example, the curve y=x^2-0.0001 is *exactly* zero at x=0.01 and x=-0.01.
+        However, note that the curve is also very close to zero at x=0,
+        and at that point the first derivative is *also* zero.
+        In many cases, it is reasonable to assume that
+        the 0.0001 is an artifact of numerical roundoff,
+        and the curve actually has a single zero of order 1 at x=0.
+        The current tolerance is used to choose which case to report.
+        In this example, a tolerance of 0.000001
+        would mean that we consider 0.0001 a meaningful value (not just roundoff),
+        so we would end up reporting two order-0 zeros at x=0.01 and x=-0.01.
+        On the other hand, a tolerance of 0.01 would mean that
+        we consider 0.0001 as just roundoff error,
+        so we would end up reporting a single order-1 zero at x=0
+        (the point at which the *first derivative* is zero).
+        """
         inputs = _Tuple2_c_void_p_c_void_p(_length_tolerance()._ptr, self._ptr)
         output = _Result_List_c_void_p()
         _lib.opensolid_LengthCurve_zeros(ctypes.byref(inputs), ctypes.byref(output))
@@ -3015,18 +3398,24 @@ class AngleCurve:
         self._ptr = ptr
 
     def sin(self) -> Curve:
+        """Compute the sine of a curve."""
         inputs = self._ptr
         output = c_void_p()
         _lib.opensolid_AngleCurve_sin(ctypes.byref(inputs), ctypes.byref(output))
         return Curve(ptr=output)
 
     def cos(self) -> Curve:
+        """Compute the cosine of a curve."""
         inputs = self._ptr
         output = c_void_p()
         _lib.opensolid_AngleCurve_cos(ctypes.byref(inputs), ctypes.byref(output))
         return Curve(ptr=output)
 
     def evaluate(self, parameter_value: float) -> Angle:
+        """Evaluate a curve at a given parameter value.
+
+        The parameter value should be between 0 and 1.
+        """
         inputs = _Tuple2_c_double_c_void_p(parameter_value, self._ptr)
         output = c_void_p()
         _lib.opensolid_AngleCurve_evaluate_Float(
@@ -3035,6 +3424,42 @@ class AngleCurve:
         return Angle(ptr=output)
 
     def zeros(self) -> list[CurveZero]:
+        """Find all points at which the given curve is zero.
+
+        This includes not only points where the curve *crosses* zero,
+        but also where it is *tangent* to zero.
+        For example, y=x-3 crosses zero at x=3,
+        while y=(x-3)^2 is tangent to zero at x=3.
+
+        We define y=x-3 as having a zero of order 0 at x=3,
+        since only the "derivative of order zero" (the curve itself)
+        is zero at that point.
+        Similarly, y=(x-3)^2 has a zero of order 1 at x=3,
+        since the first derivative (but not the second derivative)
+        is zero at that point.
+
+        Currently, this function up to third-order zeros
+        (e.g. y=x^4 has a third-order zero at x=0,
+        since everything up to the third derivative is zero at x=0).
+
+        The current tolerance is used to determine
+        whether a given point should be considered a zero,
+        and of what order.
+        For example, the curve y=x^2-0.0001 is *exactly* zero at x=0.01 and x=-0.01.
+        However, note that the curve is also very close to zero at x=0,
+        and at that point the first derivative is *also* zero.
+        In many cases, it is reasonable to assume that
+        the 0.0001 is an artifact of numerical roundoff,
+        and the curve actually has a single zero of order 1 at x=0.
+        The current tolerance is used to choose which case to report.
+        In this example, a tolerance of 0.000001
+        would mean that we consider 0.0001 a meaningful value (not just roundoff),
+        so we would end up reporting two order-0 zeros at x=0.01 and x=-0.01.
+        On the other hand, a tolerance of 0.01 would mean that
+        we consider 0.0001 as just roundoff error,
+        so we would end up reporting a single order-1 zero at x=0
+        (the point at which the *first derivative* is zero).
+        """
         inputs = _Tuple2_c_void_p_c_void_p(_angle_tolerance()._ptr, self._ptr)
         output = _Result_List_c_void_p()
         _lib.opensolid_AngleCurve_zeros(ctypes.byref(inputs), ctypes.byref(output))
@@ -3162,7 +3587,10 @@ class Drawing2d:
         self._ptr = ptr
 
     black_stroke: Drawing2d.Attribute = None  # type: ignore[assignment]
+    """Black stroke for curves and borders."""
+
     no_fill: Drawing2d.Attribute = None  # type: ignore[assignment]
+    """Set shapes to have no fill."""
 
     @staticmethod
     def to_svg(view_box: Bounds2d, entities: list[Drawing2d.Entity]) -> str:

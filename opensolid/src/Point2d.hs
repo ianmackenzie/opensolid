@@ -157,18 +157,22 @@ instance
 instance Bounded.Interface (Point2d (space @ units)) (Bounds2d (space @ units)) where
   bounds = Bounds2d.constant
 
+-- | The point with coordinates (0,0).
 origin :: Point2d (space @ units)
 origin = Point2d# 0.0## 0.0##
 
+-- | Construct a point along the X axis, with the given X coordinate.
 x :: forall space units. Qty units -> Point2d (space @ units)
 x (Qty# px#) = Point2d# px# 0.0##
 
+-- | Construct a point along the Y axis, with the given Y coordinate.
 y :: forall space units. Qty units -> Point2d (space @ units)
 y (Qty# py#) = Point2d# 0.0## py#
 
 along :: Axis2d (space @ units) -> Qty units -> Point2d (space @ units)
 along axis distance = Axis2d.originPoint axis + distance * Axis2d.direction axis
 
+-- | Construct a point from its X and Y coordinates.
 xy :: forall space units. Qty units -> Qty units -> Point2d (space @ units)
 xy (Qty# px#) (Qty# py#) = Point2d# px# py#
 
@@ -185,24 +189,31 @@ apply units fx fy = do
   let !(Qty# py#) = units fy
   Point2d# px# py#
 
+-- | Construct a point from its X and Y coordinates given in meters.
 meters :: Float -> Float -> Point2d (space @ Meters)
 meters = apply Length.meters
 
+-- | Construct a point from its X and Y coordinates given in centimeters.
 centimeters :: Float -> Float -> Point2d (space @ Meters)
 centimeters = apply Length.centimeters
 
+-- | Construct a point from its X and Y coordinates given in millimeters.
 millimeters :: Float -> Float -> Point2d (space @ Meters)
 millimeters = apply Length.millimeters
 
+-- | Construct a point from its X and Y coordinates given in inches.
 inches :: Float -> Float -> Point2d (space @ Meters)
 inches = apply Length.inches
 
+-- | Get the X coordinate of a point.
 xCoordinate :: Point2d (space @ units) -> Qty units
 xCoordinate (Point2d# px# _) = Qty# px#
 
+-- | Get the Y coordinate of a point.
 yCoordinate :: Point2d (space @ units) -> Qty units
 yCoordinate (Point2d# _ py#) = Qty# py#
 
+-- | Get the X and Y coordinates of a point.
 {-# INLINE coordinates #-}
 coordinates :: Point2d (space @ units) -> (Qty units, Qty units)
 coordinates (Point2d# px# py#) = (Qty# px#, Qty# py#)
@@ -219,10 +230,12 @@ interpolateFrom ::
 interpolateFrom (Point2d# x1# y1#) (Point2d# x2# y2#) (Qty# t#) =
   Point2d# (x1# +# t# *# (x2# -# x1#)) (y1# +# t# *# (y2# -# y1#))
 
+-- | Find the midpoint between two points.
 midpoint :: Point2d (space @ units) -> Point2d (space @ units) -> Point2d (space @ units)
 midpoint (Point2d# x1# y1#) (Point2d# x2# y2#) =
   Point2d# (0.5## *# (x1# +# x2#)) (0.5## *# (y1# +# y2#))
 
+-- | Compute the distance from one point to another.
 distanceFrom :: Point2d (space @ units) -> Point2d (space @ units) -> Qty units
 distanceFrom p1 p2 = Vector2d.magnitude (p2 - p1)
 

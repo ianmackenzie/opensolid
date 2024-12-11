@@ -225,35 +225,50 @@ instance Bounds.Interface (Range units) where
 unsafe :: Qty units -> Qty units -> Range units
 unsafe = Range_
 
+-- | Construct a zero-width range containing a single value.
 {-# INLINE constant #-}
 constant :: Qty units -> Range units
 constant value = Range_ value value
 
+-- | The range with endoints [0,1].
 unit :: Range Unitless
 unit = Range_ 0.0 1.0
 
+{-| Construct a range from its lower and upper bounds.
+
+The order of the two arguments does not matter;
+the minimum of the two will be used as the lower bound of the range
+and the maximum will be used as the upper bound.
+-}
 {-# INLINE from #-}
 from :: Qty units -> Qty units -> Range units
 from = Range
 
+-- | Construct an angle range from lower and upper bounds given in radians.
 radians :: Float -> Float -> Range Radians
 radians a b = from (Angle.radians a) (Angle.radians b)
 
+-- | Construct an angle range from lower and upper bounds given in degrees.
 degrees :: Float -> Float -> Range Radians
 degrees a b = from (Angle.degrees a) (Angle.degrees b)
 
+-- | Construct an angle range from lower and upper bounds given in turns.
 turns :: Float -> Float -> Range Radians
 turns a b = from (Angle.turns a) (Angle.turns b)
 
+-- | Construct a length range from lower and upper bounds given in meters.
 meters :: Float -> Float -> Range Meters
 meters a b = from (Length.meters a) (Length.meters b)
 
+-- | Construct a length range from lower and upper bounds given in millimeters.
 millimeters :: Float -> Float -> Range Meters
 millimeters a b = from (Length.millimeters a) (Length.millimeters b)
 
+-- | Construct a length range from lower and upper bounds given in centimeters.
 centimeters :: Float -> Float -> Range Meters
 centimeters a b = from (Length.centimeters a) (Length.centimeters b)
 
+-- | Construct a length range from lower and upper bounds given in inches.
 inches :: Float -> Float -> Range Meters
 inches a b = from (Length.inches a) (Length.inches b)
 
@@ -265,6 +280,7 @@ aggregate3 :: Range units -> Range units -> Range units -> Range units
 aggregate3 (Range low1 high1) (Range low2 high2) (Range low3 high3) =
   Range_ (Qty.min (Qty.min low1 low2) low3) (Qty.max (Qty.max high1 high2) high3)
 
+-- | Build a range containing all ranges in the given non-empty list.
 aggregateN :: NonEmpty (Range units) -> Range units
 aggregateN (Range low1 high1 :| rest) = do
   let go low high [] = unsafe low high
@@ -272,6 +288,7 @@ aggregateN (Range low1 high1 :| rest) = do
         go (Qty.min low nextLow) (Qty.max high nextHigh) remaining
   go low1 high1 rest
 
+-- | Attempt to find the intersection of two ranges.
 intersection :: Range units -> Range units -> Maybe (Range units)
 intersection (Range low1 high1) (Range low2 high2)
   | high1 < low2 = Nothing
@@ -286,16 +303,19 @@ hull3 a b c = Range_ (Qty.min a (Qty.min b c)) (Qty.max a (Qty.max b c))
 hull4 :: Qty units -> Qty units -> Qty units -> Qty units -> Range units
 hull4 a b c d = Range_ (Qty.min a (Qty.min b (Qty.min c d))) (Qty.max a (Qty.max b (Qty.max c d)))
 
+-- | Build a range containing all values in the given non-empty list.
 hullN :: NonEmpty (Qty units) -> Range units
 hullN (first :| rest) = do
   let go low high [] = unsafe low high
       go low high (next : remaining) = go (Qty.min low next) (Qty.max high next) remaining
   go first first rest
 
+-- | Get the lower bound of a range.
 {-# INLINE lowerBound #-}
 lowerBound :: Range units -> Qty units
 lowerBound (Range low _) = low
 
+-- | Get the upper bound of a range.
 {-# INLINE upperBound #-}
 upperBound :: Range units -> Qty units
 upperBound (Range _ high) = high
@@ -304,6 +324,7 @@ upperBound (Range _ high) = high
 midpoint :: Range units -> Qty units
 midpoint (Range low high) = Qty.midpoint low high
 
+-- | Get the lower and upper bounds of a range.
 endpoints :: Range units -> (Qty units, Qty units)
 endpoints (Range low high) = (low, high)
 
@@ -405,6 +426,12 @@ hypot3 (Range xMin xMax) (Range yMin yMax) (Range zMin zMax) = do
 clampTo :: Range units -> Qty units -> Qty units
 clampTo (Range low high) value = Qty.clamp low high value
 
+{-| Check if a given value is included in a range.
+
+Note that this does *not* use a tolerance, so use with care -
+for example, a value *just* outside the range (due to numerical roundoff)
+will be reported as not included.
+-}
 includes :: Qty units -> Range units -> Bool
 includes value (Range low high) = low <= value && value <= high
 
@@ -414,6 +441,12 @@ exclusion value (Range low high) = Qty.max (low - value) (value - high)
 inclusion :: Qty units -> Range units -> Qty units
 inclusion value range = -(exclusion value range)
 
+{-| Check if one range contains another.
+
+Note that this does *not* use a tolerance, so use with care -
+for example, a range that extends *just* outside another range (due to numerical
+roundoff) will be reported as not contained by that range.
+-}
 contains :: Range units -> Range units -> Bool
 contains (Range low2 high2) (Range low1 high1) = low1 <= low2 && high2 <= high1
 

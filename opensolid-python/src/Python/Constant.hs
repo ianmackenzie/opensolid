@@ -12,12 +12,16 @@ import Python.Type qualified
 import Text qualified
 
 declaration :: (Name, Constant) -> Text
-declaration (name, (Constant value)) = do
+declaration (name, (Constant value documentation)) = do
   let typeName = Python.Type.qualifiedName (Constant.valueType value)
-  FFI.snakeCase name + ": " + typeName + " = None # type: ignore[assignment]"
+  Python.lines
+    [ FFI.snakeCase name + ": " + typeName + " = None # type: ignore[assignment]"
+    , Python.docstring documentation
+    , ""
+    ]
 
 definition :: FFI.Id a -> (Name, Constant) -> Text
-definition classId (name, (Constant value)) = do
+definition classId (name, (Constant value _)) = do
   let valueType = Constant.valueType value
   let ffiFunctionName = Constant.ffiName classId name
   let constantName = FFI.snakeCase name

@@ -169,6 +169,12 @@ zero = constant Qty.zero
 constant :: Qty units -> Curve1d units
 constant = Parametric . Expression.constant
 
+{-| A curve parameter.
+
+In other words, a curve whose value is equal to its input parameter.
+When defining parametric curves, you will typically start with 'Curve.t'
+and then use arithmetic operators etc. to build up more complex curves.
+-}
 t :: Curve1d Unitless
 t = Parametric Expression.t
 
@@ -284,6 +290,10 @@ instance Interface (Curve1d units :.: Curve1d Unitless) units where
   derivativeImpl (outer :.: inner) =
     (derivative outer . inner) * derivative inner
 
+{-| Evaluate a curve at a given parameter value.
+
+The parameter value should be between 0 and 1.
+-}
 evaluate :: Curve1d units -> Float -> Qty units
 evaluate curve tValue = case curve of
   Curve1d c -> evaluateImpl c tValue
@@ -336,6 +346,7 @@ reverse :: Curve1d units -> Curve1d units
 reverse (Parametric expression) = Parametric (expression . Expression.r)
 reverse curve = Curve1d (Reversed curve)
 
+-- | Compute the square of a curve.
 squared :: Units.Squared units1 units2 => Curve1d units1 -> Curve1d units2
 squared curve = Units.specialize (squared' curve)
 
@@ -344,6 +355,7 @@ squared' (Parametric expression) = Parametric (Expression.squared' expression)
 squared' (Negated c) = squared' c
 squared' curve = Squared' curve
 
+-- | Compute the square root of a curve.
 sqrt :: Units.Squared units1 units2 => Curve1d units2 -> Curve1d units1
 sqrt curve = sqrt' (Units.unspecialize curve)
 
@@ -351,10 +363,12 @@ sqrt' :: Curve1d (units :*: units) -> Curve1d units
 sqrt' (Parametric expression) = Parametric (Expression.sqrt' expression)
 sqrt' curve = SquareRoot' curve
 
+-- | Compute the sine of a curve.
 sin :: Curve1d Radians -> Curve1d Unitless
 sin (Parametric expression) = Parametric (Expression.sin expression)
 sin curve = Sin curve
 
+-- | Compute the cosine of a curve.
 cos :: Curve1d Radians -> Curve1d Unitless
 cos (Parametric expression) = Parametric (Expression.cos expression)
 cos curve = Cos curve
@@ -364,6 +378,42 @@ integral curve = Estimate.new (Integral curve (derivative curve) Range.unit)
 
 ----- ZERO FINDING -----
 
+{-| Find all points at which the given curve is zero.
+
+This includes not only points where the curve *crosses* zero,
+but also where it is *tangent* to zero.
+For example, y=x-3 crosses zero at x=3,
+while y=(x-3)^2 is tangent to zero at x=3.
+
+We define y=x-3 as having a zero of order 0 at x=3,
+since only the "derivative of order zero" (the curve itself)
+is zero at that point.
+Similarly, y=(x-3)^2 has a zero of order 1 at x=3,
+since the first derivative (but not the second derivative)
+is zero at that point.
+
+Currently, this function up to third-order zeros
+(e.g. y=x^4 has a third-order zero at x=0,
+since everything up to the third derivative is zero at x=0).
+
+The current tolerance is used to determine
+whether a given point should be considered a zero,
+and of what order.
+For example, the curve y=x^2-0.0001 is *exactly* zero at x=0.01 and x=-0.01.
+However, note that the curve is also very close to zero at x=0,
+and at that point the first derivative is *also* zero.
+In many cases, it is reasonable to assume that
+the 0.0001 is an artifact of numerical roundoff,
+and the curve actually has a single zero of order 1 at x=0.
+The current tolerance is used to choose which case to report.
+In this example, a tolerance of 0.000001
+would mean that we consider 0.0001 a meaningful value (not just roundoff),
+so we would end up reporting two order-0 zeros at x=0.01 and x=-0.01.
+On the other hand, a tolerance of 0.01 would mean that
+we consider 0.0001 as just roundoff error,
+so we would end up reporting a single order-1 zero at x=0
+(the point at which the *first derivative* is zero).
+-}
 zeros :: Tolerance units => Curve1d units -> Result Zeros.Error (List Zero)
 zeros curve
   | curve ~= Qty.zero = Failure Zeros.ZeroEverywhere

@@ -47,11 +47,13 @@ class FFI a where
 newtype Name = Name (NonEmpty Text) deriving (Eq, Ord, Show)
 
 name :: Text -> Name
-name input = do
-  let components = Text.split " " input
-  if NonEmpty.allSatisfy isCapitalized components
-    then Name components
-    else internalError ("API name has non-capitalized component: " + input)
+name input =
+  case Text.split " " input of
+    first : rest ->
+      if NonEmpty.allSatisfy isCapitalized (first :| rest)
+        then Name (first :| rest)
+        else internalError ("API name has non-capitalized component: " + input)
+    _ -> internalError "Text.split should always return at least one component"
 
 isCapitalized :: Text -> Bool
 isCapitalized component = Text.capitalize component == component

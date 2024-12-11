@@ -74,6 +74,12 @@ entityText indent (Node name attributes children) = do
 attributeText :: Text -> Attribute space -> Text
 attributeText indent (Attribute name value) = Text.concat [indent, name, "=\"", value, "\""]
 
+{-| Render some entities to SVG.
+
+The given bounding box defines the overall size of the drawing,
+and in general should contain all the drawing entities
+(unless you *want* to crop some of them).
+-}
 toSvg :: Bounds2d (space @ Meters) -> List (Entity space) -> Text
 toSvg viewBox entities = do
   let (xRange, yRange) = Bounds2d.coordinates viewBox
@@ -133,10 +139,12 @@ polyline attributes givenPolyline = do
   let vertices = List.map Vertex2d.position (NonEmpty.toList (Polyline2d.vertices givenPolyline))
   Node "polyline" (noFill : pointsAttribute vertices : attributes) []
 
+-- | Create a polygon with the given attributes and vertices.
 polygon :: List (Attribute space) -> List (Point space) -> Entity space
 polygon attributes vertices =
   Node "polygon" (pointsAttribute vertices : attributes) []
 
+-- | Create a circle with the given attributes, center point and radius.
 circle :: List (Attribute space) -> Point space -> Length -> Entity space
 circle attributes centerPoint radius = do
   let (cx, cy) = Point2d.coordinates centerPoint
@@ -166,18 +174,22 @@ coordinatesText point = do
 lengthText :: Length -> Text
 lengthText givenLength = Text.float (Length.inMillimeters givenLength)
 
+-- | Black stroke for curves and borders.
 blackStroke :: Attribute space
 blackStroke = Attribute "stroke" "black"
 
+-- | Set the stroke colour for curves and borders.
 strokeColour :: Colour -> Attribute space
 strokeColour colour = Attribute "stroke" (Colour.toHex colour)
 
 strokeWidth :: Length -> Attribute space
 strokeWidth givenWidth = Attribute "stroke-width" (lengthText givenWidth)
 
+-- | Set shapes to have no fill.
 noFill :: Attribute space
 noFill = Attribute "fill" "none"
 
+-- | Set the fill color for shapes.
 fillColour :: Colour -> Attribute space
 fillColour colour = Attribute "fill" (Colour.toHex colour)
 

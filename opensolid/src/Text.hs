@@ -22,6 +22,7 @@ module Text
   , toLower
   , toUpper
   , capitalize
+  , strip
   , encodeUtf8
   , InvalidUtf8 (InvalidUtf8)
   , decodeUtf8
@@ -34,8 +35,6 @@ import Basics
 import Composition
 import Data.ByteString (ByteString)
 import Data.Char qualified
-import Data.List.NonEmpty (NonEmpty ((:|)))
-import Data.List.NonEmpty qualified
 import Data.Text qualified
 import Data.Text.Encoding qualified
 import Error qualified
@@ -75,12 +74,10 @@ isEmpty = Data.Text.null
 replace :: Text -> Text -> Text -> Text
 replace = Data.Text.replace
 
-split :: Text -> Text -> NonEmpty Text
-split separator text = case Data.Text.splitOn separator text of
-  first : rest -> first :| rest
-  [] -> internalError "Splitting text should never give an empty list"
+split :: Text -> Text -> List Text
+split = Data.Text.splitOn
 
-lines :: Text -> NonEmpty Text
+lines :: Text -> List Text
 lines = replace "\r\n" "\n" >> split "\n"
 
 multiline :: List Text -> Text
@@ -90,7 +87,6 @@ indent :: Text -> Text -> Text
 indent indentation paragraph =
   paragraph
     |> lines
-    |> Data.List.NonEmpty.toList
     |> List.map (indentation +)
     |> multiline
 
@@ -120,6 +116,9 @@ capitalize text =
   case Data.Text.uncons text of
     Just (first, rest) -> Data.Text.cons (Data.Char.toUpper first) rest
     Nothing -> text
+
+strip :: Text -> Text
+strip = Data.Text.strip
 
 encodeUtf8 :: Text -> ByteString
 encodeUtf8 = Data.Text.Encoding.encodeUtf8

@@ -244,18 +244,29 @@ instance
   space ~ space_ =>
   CrossMultiplication (Direction2d space) (Vector2d (space_ @ units)) (Qty units)
 
+-- | The zero vector.
 zero :: Vector2d (space @ units)
 zero = Vector2d# 0.0## 0.0##
 
+-- | The unit vector in a given direction.
 unit :: Direction2d space -> Vector2d (space @ Unitless)
 unit = Direction2d.unwrap
 
+{-| Construct a vector from just an X component.
+
+The Y component will be set to zero.
+-}
 x :: forall space units. Qty units -> Vector2d (space @ units)
 x (Qty# vx#) = Vector2d# vx# 0.0##
 
+{-| Construct a vector from just a Y component.
+
+The X component will be set to zero.
+-}
 y :: forall space units. Qty units -> Vector2d (space @ units)
 y (Qty# vy#) = Vector2d# 0.0## vy#
 
+-- | Construct a vector from its X and Y components.
 xy :: forall space units. Qty units -> Qty units -> Vector2d (space @ units)
 xy = Vector2d
 
@@ -265,6 +276,7 @@ xyIn frame = xyInBasis (Frame2d.basis frame)
 xyInBasis :: Basis2d space defines -> Qty units -> Qty units -> Vector2d (space @ units)
 xyInBasis basis vx vy = vx * Basis2d.xDirection basis + vy * Basis2d.yDirection basis
 
+-- | Construct a vector from a pair of X and Y components.
 fromComponents :: forall space units. (Qty units, Qty units) -> Vector2d (space @ units)
 fromComponents (vx, vy) = Vector2d vx vy
 
@@ -274,27 +286,34 @@ from p1 p2 = p2 - p1
 apply :: (Float -> Qty units) -> Float -> Float -> Vector2d (space @ units)
 apply units px py = Vector2d (units px) (units py)
 
+-- | Construct a vector from its X and Y components given in meters.
 meters :: Float -> Float -> Vector2d (space @ Meters)
 meters = apply Length.meters
 
+-- | Construct a vector from its X and Y components given in centimeters.
 centimeters :: Float -> Float -> Vector2d (space @ Meters)
 centimeters = apply Length.centimeters
 
+-- | Construct a vector from its X and Y components given in millimeters.
 millimeters :: Float -> Float -> Vector2d (space @ Meters)
 millimeters = apply Length.millimeters
 
+-- | Construct a vector from its X and Y components given in inches.
 inches :: Float -> Float -> Vector2d (space @ Meters)
 inches = apply Length.inches
 
 squareMeters :: Float -> Float -> Vector2d (space @ SquareMeters)
 squareMeters = apply Area.squareMeters
 
+-- | Construct a vector from its magnitude (length) and angle.
 polar :: Qty units -> Angle -> Vector2d (space @ units)
 polar (Qty# r#) (Qty# theta#) = Vector2d# (r# *# cos# theta#) (r# *# sin# theta#)
 
+-- | Get the X component of a vector.
 xComponent :: Vector2d (space @ units) -> Qty units
 xComponent (Vector2d# vx# _) = Qty# vx#
 
+-- | Get the Y component of a vector.
 yComponent :: Vector2d (space @ units) -> Qty units
 yComponent (Vector2d# _ vy#) = Qty# vy#
 
@@ -304,6 +323,7 @@ componentIn = (<>)
 projectionIn :: Direction2d space -> Vector2d (space @ units) -> Vector2d (space @ units)
 projectionIn givenDirection vector = givenDirection * componentIn givenDirection vector
 
+-- | Get the X and Y components of a vector.
 {-# INLINE components #-}
 components :: Vector2d (space @ units) -> (Qty units, Qty units)
 components (Vector2d# vx# vy#) = (Qty# vx#, Qty# vy#)
@@ -341,6 +361,11 @@ data IsZero = IsZero deriving (Eq, Show)
 instance Error.Message IsZero where
   message IsZero = "Vector is zero"
 
+{-| Attempt to get the direction of a vector.
+
+The current tolerance will be used to check if the vector is zero
+(and therefore does not have a direction).
+-}
 direction :: Tolerance units => Vector2d (space @ units) -> Result IsZero (Direction2d space)
 direction vector = do
   let vm = magnitude vector

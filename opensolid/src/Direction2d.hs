@@ -125,12 +125,15 @@ instance space1 ~ space2 => CrossMultiplication (Direction2d space1) (Direction2
 unwrap :: Direction2d space -> Vector2d (space @ Unitless)
 unwrap (Unit v) = v
 
+-- | Get the X component of a direction.
 xComponent :: Direction2d space -> Float
 xComponent direction = Vector2d.xComponent (unwrap direction)
 
+-- | Get the Y component of a direction.
 yComponent :: Direction2d space -> Float
 yComponent direction = Vector2d.yComponent (unwrap direction)
 
+-- | Get the X and Y components of a direction.
 {-# INLINE components #-}
 components :: Direction2d space -> (Float, Float)
 components direction = Vector2d.components (unwrap direction)
@@ -146,21 +149,27 @@ lift ::
   Direction2d spaceB
 lift function (Unit vector) = Unit (function vector)
 
+-- | The positive X direction.
 positiveX :: Direction2d space
 positiveX = unsafe (Vector2d# 1.0## 0.0##)
 
+-- | The negative X direction.
 negativeX :: Direction2d space
 negativeX = -positiveX
 
+-- | The positive Y direction.
 positiveY :: Direction2d space
 positiveY = unsafe (Vector2d# 0.0## 1.0##)
 
+-- | The negative Y direction.
 negativeY :: Direction2d space
 negativeY = -positiveY
 
+-- | Alias for 'positiveX'.
 x :: Direction2d space
 x = positiveX
 
+-- | Alias for 'positiveY'.
 y :: Direction2d space
 y = positiveY
 
@@ -176,15 +185,44 @@ from p1 p2 =
     Success direction -> Success direction
     Failure Vector2d.IsZero -> Failure PointsAreCoincident
 
+{-| Construct a direction from an angle.
+
+The angle is measured counterclockwise from the positive X direction, so:
+
+  * An angle of zero corresponds to the positive X direction
+  * An angle of 90 degrees corresponds to the positive Y direction
+  * An angle of 180 degrees (or -180 degrees) corresponds to the negative X direction
+-}
 fromAngle :: Angle -> Direction2d space
 fromAngle angle = unsafe (Vector2d.polar 1.0 angle)
 
+{-| Convert a direction to an angle.
+
+The angle is measured counterclockwise from the positive X direction, so:
+
+  * The positive X direction has an angle of zero
+  * The positive Y direction has an angle of 90 degrees
+  * The negative Y direction has an angle of -90 degrees
+  * It is not defined whether the negative X direction has an angle of -180 or
+    +180 degrees. (Currently it is reported as having an angle of -180 degrees,
+    but this should not be relied upon.)
+
+The returned angle will be between -180 and +180 degrees.
+-}
 toAngle :: Direction2d space -> Angle
 toAngle (Unit vector) = Vector2d.angle vector
 
+{-| Construct a direction from an angle given in degrees.
+
+See 'fromAngle' for details.
+-}
 degrees :: Float -> Direction2d space
 degrees value = fromAngle (Angle.degrees value)
 
+{-| Construct a direction from an angle given in radians.
+
+See 'fromAngle' for details.
+-}
 radians :: Float -> Direction2d space
 radians value = fromAngle (Angle.radians value)
 

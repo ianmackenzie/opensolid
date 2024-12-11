@@ -186,19 +186,24 @@ instance
   where
   Bounds2d x1 y1 ^ Bounds2d x2 y2 = x1 ^ x2 && y1 ^ y2
 
+-- | Get the X coordinate range of a bounding box.
 xCoordinate :: Bounds2d (space @ units) -> Range units
 xCoordinate (Bounds2d x _) = x
 
+-- | Get the Y coordinate range of a bounding box.
 yCoordinate :: Bounds2d (space @ units) -> Range units
 yCoordinate (Bounds2d _ y) = y
 
+-- | Get the X and Y coordinate ranges of a bounding box.
 {-# INLINE coordinates #-}
 coordinates :: Bounds2d (space @ units) -> (Range units, Range units)
 coordinates (Bounds2d x y) = (x, y)
 
+-- | Construct a bounding box from its X and Y coordinate ranges.
 xy :: forall space units. Range units -> Range units -> Bounds2d (space @ units)
 xy = Bounds2d
 
+-- | Construct a zero-size bounding box containing a single point.
 constant :: Point2d (space @ units) -> Bounds2d (space @ units)
 constant point = do
   let (x, y) = Point2d.coordinates point
@@ -208,6 +213,7 @@ aggregate2 :: Bounds2d (space @ units) -> Bounds2d (space @ units) -> Bounds2d (
 aggregate2 (Bounds2d x1 y1) (Bounds2d x2 y2) =
   Bounds2d (Range.aggregate2 x1 x2) (Range.aggregate2 y1 y2)
 
+-- | Construct a bounding box containing all bounding boxes in the given non-empty list.
 aggregateN :: NonEmpty (Bounds2d (space @ units)) -> Bounds2d (space @ units)
 aggregateN (Bounds2d (Range xLow0 xHigh0) (Range yLow0 yHigh0) :| rest) = do
   let go xLow xHigh yLow yHigh [] = Bounds2d (Range.unsafe xLow xHigh) (Range.unsafe yLow yHigh)
@@ -272,6 +278,7 @@ intersection (Bounds2d x1 y1) (Bounds2d x2 y2) = Maybe.do
   y <- Range.intersection y1 y2
   Just (Bounds2d x y)
 
+-- | Construct a bounding box from two corner points.
 hull2 ::
   Point2d (space @ units) ->
   Point2d (space @ units) ->
@@ -313,6 +320,7 @@ hull4 p1 p2 p3 p4 = do
   let maxY = Qty.max (Qty.max (Qty.max y1 y2) y3) y4
   Bounds2d (Range.unsafe minX maxX) (Range.unsafe minY maxY)
 
+-- | Construct a bounding box containing all points in the given non-empty list.
 hullN :: NonEmpty (Point2d (space @ units)) -> Bounds2d (space @ units)
 hullN (p0 :| rest) = do
   let (x0, y0) = Point2d.coordinates p0

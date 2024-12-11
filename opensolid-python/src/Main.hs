@@ -66,7 +66,7 @@ preamble =
     , "_lib.opensolid_init()"
     , ""
     , "class Error(Exception):"
-    , "    pass"
+    , "    \"\"\"An error that may be thrown by OpenSolid functions.\"\"\""
     , ""
     , "class _Text(Union):"
     , "    _fields_ = (('as_char', c_char_p), ('as_void', c_void_p))"
@@ -136,7 +136,7 @@ classDefinition :: Class -> (Text, Text)
 classDefinition
   ( Class
       classId
-      docstring
+      documentation
       constants
       staticFunctions
       memberFunctions
@@ -151,7 +151,7 @@ classDefinition
     let definition =
           Python.lines
             [ "class " + Python.Class.unqualifiedName classId + ":"
-            , Python.indent [Python.docstring docstring]
+            , Python.indent [Python.docstring documentation]
             , "    def __init__(self, *, ptr : c_void_p) -> None:"
             , "        self._ptr = ptr"
             , Python.indent (List.map Python.Constant.declaration constants)

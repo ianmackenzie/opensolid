@@ -9,6 +9,7 @@ module Python
   )
 where
 
+import List qualified
 import OpenSolid
 import Text qualified
 
@@ -16,7 +17,10 @@ lines :: List Text -> Text
 lines = Text.multiline
 
 indent :: List Text -> Text
-indent = Text.indent "    " . lines
+indent = Text.multiline . List.map stripBlank . Text.lines . Text.indent "    " . lines
+
+stripBlank :: Text -> Text
+stripBlank text = if Text.strip text == "" then "" else text
 
 str :: Text -> Text
 str contents = "\"" + contents + "\""
@@ -33,4 +37,10 @@ call :: Text -> List Text -> Text
 call function arguments = function + "(" + Text.join "," arguments + ")"
 
 docstring :: Text -> Text
-docstring text = "\"\"\"" + text + "\"\"\""
+docstring text = do
+  let stripped = if Text.startsWith " " text then Text.drop 1 text else text
+  let padded =
+        if Text.contains "\n" stripped && not (Text.endsWith "\n" stripped)
+          then stripped + "\n"
+          else stripped
+  "\"\"\"" + padded + "\"\"\""
