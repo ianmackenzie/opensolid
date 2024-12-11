@@ -2,6 +2,9 @@ Make GitHub repo public
 -> add minimal README
 
 Add Python docstrings
+-> add extra line mentioning tolerance if one is required
+
+Rename Colour to Color
 
 Try using Pandoc to convert from Haddock to reStructuredText?
 -> or just write all doc comments in plain text...
