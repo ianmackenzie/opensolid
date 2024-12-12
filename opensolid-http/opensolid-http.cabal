@@ -1,0 +1,88 @@
+cabal-version: 2.2
+name: opensolid-http
+version: 0.1.0.0
+synopsis: Simple HTTP server for OpenSolid
+description:
+  Please see the README on GitHub at <https://github.com/ianmackenzie/opensolid#readme>
+
+category: Geometry
+homepage: https://github.com/ianmackenzie/opensolid#readme
+bug-reports: https://github.com/ianmackenzie/opensolid/issues
+author: Ian Mackenzie
+maintainer: ian.e.mackenzie@gmail.com
+copyright: 2023 Ian Mackenzie
+license: MPL-2.0
+license-file: LICENSE
+extra-source-files: README.md
+
+source-repository head
+  type: git
+  location: https://github.com/ianmackenzie/opensolid
+
+common config
+  default-language: GHC2021
+  build-depends:
+    base,
+    bytestring,
+    case-insensitive,
+    http-types,
+    opensolid,
+    text,
+    wai,
+    warp,
+
+  ghc-options:
+    -Wall
+    -Werror
+    -Wcompat
+    -Widentities
+    -Wincomplete-record-updates
+    -Wincomplete-uni-patterns
+    -Wmissing-signatures
+    -Wmissing-exported-signatures
+    -Wmissing-home-modules
+    -Wpartial-fields
+    -Wsafe
+    -Wno-missed-extra-shared-lib
+    -fwrite-ide-info
+    -hiedir=.hie
+
+  if impl(ghc >=9.10)
+    ghc-options:
+      -Wno-x-data-list-nonempty-unzip
+  default-extensions:
+    BlockArguments
+    DataKinds
+    DeriveAnyClass
+    DerivingStrategies
+    DisambiguateRecordFields
+    ExplicitNamespaces
+    FunctionalDependencies
+    GADTs
+    ImplicitParams
+    LambdaCase
+    LexicalNegation
+    MagicHash
+    MultiWayIf
+    OverloadedStrings
+    PatternSynonyms
+    QualifiedDo
+    RebindableSyntax
+    RoleAnnotations
+    StrictData
+    TypeFamilies
+    TypeFamilyDependencies
+    UnboxedTuples
+    UndecidableInstances
+    UndecidableSuperClasses
+    UnliftedFFITypes
+    ViewPatterns
+
+library
+  import: config
+  exposed-modules:
+    Http.Server
+    Http.Server.Request
+    Http.Server.Response
+
+  hs-source-dirs: src

@@ -23,25 +23,19 @@ common config
   default-language: GHC2021
   build-depends:
     aeson,
-    ansi-terminal,
     array,
     async,
     base,
     bytestring,
-    case-insensitive,
     colour,
     containers,
     deque,
     directory,
-    http-types,
     random,
     scientific,
     text,
     time,
-    type-errors,
     vector,
-    wai,
-    warp,
 
   ghc-options:
     -Wall
@@ -161,9 +155,6 @@ library
     Frame2d
     Frame3d
     Fuzzy
-    Http.Server
-    Http.Server.Request
-    Http.Server.Response
     IO
     Int
     Intersects
@@ -272,7 +263,10 @@ test-suite opensolid-test
     -rtsopts
     -with-rtsopts=-N
 
-  build-depends: opensolid
+  build-depends:
+    ansi-terminal,
+    opensolid,
+
   other-modules:
     Test
     Tests.Arc2d

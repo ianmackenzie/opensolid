@@ -26,6 +26,7 @@ executable test-server
     base,
     containers,
     opensolid,
+    opensolid-http,
     random,
 
   ghc-options:
