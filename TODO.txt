@@ -4,8 +4,6 @@ Make GitHub repo public
 Add Python docstrings
 -> add extra line mentioning tolerance if one is required
 
-Rename Colour to Color
-
 Try using Pandoc to convert from Haddock to reStructuredText?
 -> or just write all doc comments in plain text...
 
@@ -13,7 +11,11 @@ Add Python package README
 
 Generate Python API docs
 
-Add __abs__ support
+Add __abs__ support to API
+
+C API: generate structs with *named* fields
+-> have the struct be named as function_name_inputs, function_name_outputs etc.
+-> can use this in Python too, to have named fields instead of 'field0' etc.
 
 Build out publishing workflow
 - Build manylinux wheel in CI
@@ -31,9 +33,6 @@ Improve Python bindings
 - Rename MemberFunction and StaticFunction to have U/R/M prefix *before* argument count
 - Add support for 'intersects' operator (^)
   -> Also (&) for *intersection*?
-- Adjust logic so that __contains__ doesn't check for named arguments
-
-Switch Solve2d.return back to taking a single value instead of a NonEmpty
 
 Move Http module out into separate opensolid-http package
 -> reduce dependencies of libopensolid-ffi.so
@@ -46,6 +45,10 @@ Support spaces / coordinate systems in bindings
 Try generating C# bindings?
 
 Try generating C++ bindings?
+
+Add OpenSolid prefix to *all* modules?
+-> easier to use from other Haskell code, without naming conflicts
+-> more consistent, no weird 'special' modules like OpenSolid.Json
 
 Sandbox executable to start generating Region2d medial axis curves and points?
 -> need to be able to solve for medial axis of curve and *point* first
