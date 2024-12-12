@@ -1,6 +1,5 @@
 module Tests.Text (tests) where
 
-import NonEmpty qualified
 import OpenSolid
 import Test (Test)
 import Test qualified
@@ -15,7 +14,7 @@ tests =
 lines :: Test
 lines = do
   let test label text expected =
-        Test.verify label (Test.expect (NonEmpty.toList (Text.lines text) == expected))
+        Test.verify label (Test.expect (Text.lines text == expected))
   Test.group "lines" $
     [ test "Empty" "" [""]
     , test "Single line" "line" ["line"]
