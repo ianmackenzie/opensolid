@@ -121,7 +121,7 @@ library
     Bounds2d
     Bounds3d
     Coalesce
-    Colour
+    Color
     Composition
     CoordinateSystem
     CubicSpline2d

@@ -9,8 +9,8 @@ import Axis2d qualified
 import BezierCurve2d qualified
 import Bounds2d (Bounds2d)
 import Bounds2d qualified
-import Colour (Colour)
-import Colour qualified
+import Color (Color)
+import Color qualified
 import CubicSpline2d qualified
 import Curve1d qualified
 import Curve2d (Curve2d)
@@ -266,13 +266,13 @@ drawBounds attributes bounds = do
 drawCrossingCurve :: Int -> NonEmpty (Curve2d UvCoordinates, UvBounds) -> Drawing2d.Entity UvSpace
 drawCrossingCurve index segments = do
   let hue = (Float.int index * Angle.goldenAngle) % Angle.twoPi
-  let colour = Colour.hsl hue 0.5 0.5
+  let color = Color.hsl hue 0.5 0.5
   let (curves, bounds) = List.unzip2 (NonEmpty.toList segments)
   Drawing2d.group
-    [ Drawing2d.with [Drawing2d.strokeColour colour, Drawing2d.opacity 0.3] $
+    [ Drawing2d.with [Drawing2d.strokeColor color, Drawing2d.opacity 0.3] $
         List.map drawUvCurve curves
     , Drawing2d.with
-        [ Drawing2d.strokeColour Colour.gray
+        [ Drawing2d.strokeColor Color.gray
         , Drawing2d.strokeWidth (Length.millimeters 0.05)
         ]
         (List.map (drawBounds [] . Bounds2d.convert toDrawing) bounds)
@@ -281,9 +281,9 @@ drawCrossingCurve index segments = do
 drawSaddlePoint :: (UvPoint, UvBounds) -> Drawing2d.Entity UvSpace
 drawSaddlePoint (point, bounds) =
   Drawing2d.group
-    [ drawDot Colour.orange point
+    [ drawDot Color.orange point
     , drawBounds
-        [ Drawing2d.strokeColour Colour.gray
+        [ Drawing2d.strokeColor Color.gray
         , Drawing2d.strokeWidth (Length.millimeters 0.05)
         ]
         (Bounds2d.convert toDrawing bounds)
@@ -297,10 +297,10 @@ drawUvCurve curve = do
   let polyline = Curve2d.toPolyline 0.001 (Curve2d.evaluate curve) curve
   Drawing2d.polyline [] (Polyline2d.map (Point2d.convert toDrawing) polyline)
 
-drawDot :: Colour -> UvPoint -> Drawing2d.Entity UvSpace
-drawDot colour point =
+drawDot :: Color -> UvPoint -> Drawing2d.Entity UvSpace
+drawDot color point =
   Drawing2d.circle
-    [Drawing2d.fillColour colour]
+    [Drawing2d.fillColor color]
     (Point2d.convert toDrawing point)
     (Length.millimeters 0.5)
 
@@ -357,12 +357,12 @@ testParallelComputation = IO.do
 
 drawBezier ::
   Tolerance Meters =>
-  Colour ->
+  Color ->
   Point2d (space @ Unitless) ->
   List (Point2d (space @ Unitless)) ->
   Point2d (space @ Unitless) ->
   Drawing2d.Entity space
-drawBezier colour startPoint innerControlPoints endPoint = do
+drawBezier color startPoint innerControlPoints endPoint = do
   let drawingStartPoint = Point2d.convert toDrawing startPoint
   let drawingEndPoint = Point2d.convert toDrawing endPoint
   let drawingInnerControlPoints = List.map (Point2d.convert toDrawing) innerControlPoints
@@ -370,10 +370,10 @@ drawBezier colour startPoint innerControlPoints endPoint = do
   let curve = BezierCurve2d.fromControlPoints drawingControlPoints
   let drawSegmentBounds tRange = drawBounds [] (Curve2d.evaluateBounds curve tRange)
   Drawing2d.with
-    [Drawing2d.strokeColour colour, Drawing2d.strokeWidth (Length.millimeters 1.0)]
+    [Drawing2d.strokeColor color, Drawing2d.strokeWidth (Length.millimeters 1.0)]
     [ Drawing2d.with [Drawing2d.opacity 0.3] $
         [ Drawing2d.polyline [] (Polyline2d drawingControlPoints)
-        , Drawing2d.with [Drawing2d.fillColour colour] $
+        , Drawing2d.with [Drawing2d.fillColor color] $
             [ Drawing2d.circle [] point (Length.millimeters 5.0)
             | point <- NonEmpty.toList drawingControlPoints
             ]
@@ -393,7 +393,7 @@ testBezierSegment = IO.do
   let p6 = Point2d.xy 10.0 10.0
   let coordinateRange = Range.convert toDrawing (Range.from -1.0 11.0)
   let drawingBounds = Bounds2d.xy coordinateRange coordinateRange
-  let curveEntity = drawBezier Colour.blue p1 [p2, p3, p4, p5] p6
+  let curveEntity = drawBezier Color.blue p1 [p2, p3, p4, p5] p6
   Drawing2d.writeTo "opensolid-sandbox/test-bezier-segment.svg" drawingBounds [curveEntity]
 
 testHermiteBezier :: IO ()
@@ -414,7 +414,7 @@ testHermiteBezier = IO.do
   log "End second derivative" (VectorCurve2d.endValue curveSecondDerivative)
   log "End third derivative" (VectorCurve2d.endValue curveThirdDerivative)
   let curveAttributes =
-        [ Drawing2d.strokeColour Colour.blue
+        [ Drawing2d.strokeColor Color.blue
         , Drawing2d.strokeWidth (Length.centimeters 3.0)
         ]
   let curveEntity = Drawing2d.curve curveAttributes Length.millimeter curve
@@ -525,7 +525,7 @@ testCurveMedialAxis = IO.do
               let p0 = p1 + normalDirection1 * r
               let tangentCircle =
                     Drawing2d.circle
-                      [ Drawing2d.strokeColour Colour.gray
+                      [ Drawing2d.strokeColor Color.gray
                       , Drawing2d.strokeWidth (Length.millimeters 0.2)
                       ]
                       p0

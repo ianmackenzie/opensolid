@@ -21,7 +21,7 @@ module OpenSolid.FFI
   )
 where
 
-import Colour (Colour)
+import Color (Color)
 import Data.ByteString.Unsafe qualified
 import Data.Int (Int64)
 import Data.Proxy (Proxy (Proxy))
@@ -242,7 +242,7 @@ instance FFI Bool where
 instance FFI Text where
   representation _ = TextRep
 
-instance FFI Colour where
+instance FFI Color where
   representation = classRepresentation "Color"
 
 instance FFI Length where

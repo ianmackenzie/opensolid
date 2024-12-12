@@ -14,18 +14,18 @@ module Drawing2d
   , circle
   , curve
   , blackStroke
-  , strokeColour
+  , strokeColor
   , strokeWidth
   , noFill
-  , fillColour
+  , fillColor
   , opacity
   )
 where
 
 import Bounds2d (Bounds2d)
 import Bounds2d qualified
-import Colour (Colour)
-import Colour qualified
+import Color (Color)
+import Color qualified
 import Curve2d (Curve2d)
 import Curve2d qualified
 import File qualified
@@ -178,9 +178,9 @@ lengthText givenLength = Text.float (Length.inMillimeters givenLength)
 blackStroke :: Attribute space
 blackStroke = Attribute "stroke" "black"
 
--- | Set the stroke colour for curves and borders.
-strokeColour :: Colour -> Attribute space
-strokeColour colour = Attribute "stroke" (Colour.toHex colour)
+-- | Set the stroke color for curves and borders.
+strokeColor :: Color -> Attribute space
+strokeColor color = Attribute "stroke" (Color.toHex color)
 
 strokeWidth :: Length -> Attribute space
 strokeWidth givenWidth = Attribute "stroke-width" (lengthText givenWidth)
@@ -190,8 +190,8 @@ noFill :: Attribute space
 noFill = Attribute "fill" "none"
 
 -- | Set the fill color for shapes.
-fillColour :: Colour -> Attribute space
-fillColour colour = Attribute "fill" (Colour.toHex colour)
+fillColor :: Color -> Attribute space
+fillColor color = Attribute "fill" (Color.toHex color)
 
 opacity :: Float -> Attribute space
 opacity value = Attribute "opacity" (Text.float value)

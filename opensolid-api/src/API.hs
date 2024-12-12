@@ -19,8 +19,8 @@ import API.StaticFunction qualified as StaticFunction
 import Angle qualified
 import Bounds2d (Bounds2d)
 import Bounds2d qualified
-import Colour (Colour)
-import Colour qualified
+import Color (Color)
+import Color qualified
 import Curve1d (Curve1d)
 import Curve1d qualified
 import Curve1d.Zero qualified
@@ -279,46 +279,46 @@ angleRange =
 
 color :: Class
 color =
-  class_ @Colour
-    $(docs ''Colour)
-    [ factory3 "RGB" "Red" "Green" "Blue" Colour.rgb
-    , factory3 "RGB 255" "Red" "Green" "Blue" Colour.rgb255
-    , factory3 "HSL" "Hue" "Saturation" "Lightness" Colour.hsl
-    , factory1 "From Hex" "Hex String" Colour.fromHex
-    , member0 "To Hex" Colour.toHex $(docs 'Colour.toHex)
-    , member0 "Components" Colour.components $(docs 'Colour.components)
-    , member0 "Components 255" Colour.components255 $(docs 'Colour.components255)
-    , constant "Red" Colour.red $(docs 'Colour.red)
-    , constant "Dark Red" Colour.darkRed $(docs 'Colour.darkRed)
-    , constant "Light Orange" Colour.lightOrange $(docs 'Colour.lightOrange)
-    , constant "Orange" Colour.orange $(docs 'Colour.orange)
-    , constant "Dark Orange" Colour.darkOrange $(docs 'Colour.darkOrange)
-    , constant "Light Yellow" Colour.lightYellow $(docs 'Colour.lightYellow)
-    , constant "Yellow" Colour.yellow $(docs 'Colour.yellow)
-    , constant "Dark Yellow" Colour.darkYellow $(docs 'Colour.darkYellow)
-    , constant "Light Green" Colour.lightGreen $(docs 'Colour.lightGreen)
-    , constant "Green" Colour.green $(docs 'Colour.green)
-    , constant "Dark Green" Colour.darkGreen $(docs 'Colour.darkGreen)
-    , constant "Light Blue" Colour.lightBlue $(docs 'Colour.lightBlue)
-    , constant "Blue" Colour.blue $(docs 'Colour.blue)
-    , constant "Dark Blue" Colour.darkBlue $(docs 'Colour.darkBlue)
-    , constant "Light Purple" Colour.lightPurple $(docs 'Colour.lightPurple)
-    , constant "Purple" Colour.purple $(docs 'Colour.purple)
-    , constant "Dark Purple" Colour.darkPurple $(docs 'Colour.darkPurple)
-    , constant "Light Brown" Colour.lightBrown $(docs 'Colour.lightBrown)
-    , constant "Brown" Colour.brown $(docs 'Colour.brown)
-    , constant "Dark Brown" Colour.darkBrown $(docs 'Colour.darkBrown)
-    , constant "Black" Colour.black $(docs 'Colour.black)
-    , constant "White" Colour.white $(docs 'Colour.white)
-    , constant "Light Grey" Colour.lightGrey $(docs 'Colour.lightGrey)
-    , constant "Grey" Colour.grey $(docs 'Colour.grey)
-    , constant "Dark Grey" Colour.darkGrey $(docs 'Colour.darkGrey)
-    , constant "Light Gray" Colour.lightGray $(docs 'Colour.lightGray)
-    , constant "Gray" Colour.gray $(docs 'Colour.gray)
-    , constant "Dark Gray" Colour.darkGray $(docs 'Colour.darkGray)
-    , constant "Light Charcoal" Colour.lightCharcoal $(docs 'Colour.lightCharcoal)
-    , constant "Charcoal" Colour.charcoal $(docs 'Colour.charcoal)
-    , constant "Dark Charcoal" Colour.darkCharcoal $(docs 'Colour.darkCharcoal)
+  class_ @Color
+    $(docs ''Color)
+    [ factory3 "RGB" "Red" "Green" "Blue" Color.rgb
+    , factory3 "RGB 255" "Red" "Green" "Blue" Color.rgb255
+    , factory3 "HSL" "Hue" "Saturation" "Lightness" Color.hsl
+    , factory1 "From Hex" "Hex String" Color.fromHex
+    , member0 "To Hex" Color.toHex $(docs 'Color.toHex)
+    , member0 "Components" Color.components $(docs 'Color.components)
+    , member0 "Components 255" Color.components255 $(docs 'Color.components255)
+    , constant "Red" Color.red $(docs 'Color.red)
+    , constant "Dark Red" Color.darkRed $(docs 'Color.darkRed)
+    , constant "Light Orange" Color.lightOrange $(docs 'Color.lightOrange)
+    , constant "Orange" Color.orange $(docs 'Color.orange)
+    , constant "Dark Orange" Color.darkOrange $(docs 'Color.darkOrange)
+    , constant "Light Yellow" Color.lightYellow $(docs 'Color.lightYellow)
+    , constant "Yellow" Color.yellow $(docs 'Color.yellow)
+    , constant "Dark Yellow" Color.darkYellow $(docs 'Color.darkYellow)
+    , constant "Light Green" Color.lightGreen $(docs 'Color.lightGreen)
+    , constant "Green" Color.green $(docs 'Color.green)
+    , constant "Dark Green" Color.darkGreen $(docs 'Color.darkGreen)
+    , constant "Light Blue" Color.lightBlue $(docs 'Color.lightBlue)
+    , constant "Blue" Color.blue $(docs 'Color.blue)
+    , constant "Dark Blue" Color.darkBlue $(docs 'Color.darkBlue)
+    , constant "Light Purple" Color.lightPurple $(docs 'Color.lightPurple)
+    , constant "Purple" Color.purple $(docs 'Color.purple)
+    , constant "Dark Purple" Color.darkPurple $(docs 'Color.darkPurple)
+    , constant "Light Brown" Color.lightBrown $(docs 'Color.lightBrown)
+    , constant "Brown" Color.brown $(docs 'Color.brown)
+    , constant "Dark Brown" Color.darkBrown $(docs 'Color.darkBrown)
+    , constant "Black" Color.black $(docs 'Color.black)
+    , constant "White" Color.white $(docs 'Color.white)
+    , constant "Light Grey" Color.lightGrey $(docs 'Color.lightGrey)
+    , constant "Grey" Color.grey $(docs 'Color.grey)
+    , constant "Dark Grey" Color.darkGrey $(docs 'Color.darkGrey)
+    , constant "Light Gray" Color.lightGray $(docs 'Color.lightGray)
+    , constant "Gray" Color.gray $(docs 'Color.gray)
+    , constant "Dark Gray" Color.darkGray $(docs 'Color.darkGray)
+    , constant "Light Charcoal" Color.lightCharcoal $(docs 'Color.lightCharcoal)
+    , constant "Charcoal" Color.charcoal $(docs 'Color.charcoal)
+    , constant "Dark Charcoal" Color.darkCharcoal $(docs 'Color.darkCharcoal)
     ]
 
 vector2d :: Class
@@ -553,9 +553,9 @@ drawing2d =
     , static2 "Polygon" "Attributes" "Vertices" Drawing2d.polygon
     , static3 "Circle" "Attributes" "Center Point" "Radius" Drawing2d.circle
     , constant "Black Stroke" Drawing2d.blackStroke $(docs 'Drawing2d.blackStroke)
-    , static1 "Stroke Color" "Color" Drawing2d.strokeColour
+    , static1 "Stroke Color" "Color" Drawing2d.strokeColor
     , constant "No Fill" Drawing2d.noFill $(docs 'Drawing2d.noFill)
-    , static1 "Fill Color" "Color" Drawing2d.fillColour
+    , static1 "Fill Color" "Color" Drawing2d.fillColor
     , nested @(Drawing2d.Entity Space) "A drawing entity such as a shape or group." []
     , nested @(Drawing2d.Attribute Space) "A drawing attribute such as fill color or stroke width." []
     ]
