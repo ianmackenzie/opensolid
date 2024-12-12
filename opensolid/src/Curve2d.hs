@@ -75,7 +75,6 @@ import Float qualified
 import Frame2d (Frame2d)
 import Frame2d qualified
 import List qualified
-import NonEmpty qualified
 import OpenSolid
 import Parameter qualified
 import Point2d (Point2d (Point2d))
@@ -534,7 +533,7 @@ findIntersectionPoints f fu fv g gu gv endpointIntersections () subdomain exclus
               if Bounds2d.includes point domainInterior
                 then do
                   let Point2d t1 t2 = point
-                  Solve2d.return (NonEmpty.singleton (constructor t1 t2 sign))
+                  Solve2d.return (constructor t1 t2 sign)
                 else Solve2d.recurse ()
         case Range.resolvedSign (fvBounds .><. fuBounds) of
           Resolved sign -> do

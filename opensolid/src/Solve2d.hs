@@ -22,7 +22,6 @@ import Domain2d qualified
 import Error qualified
 import List qualified
 import Maybe qualified
-import NonEmpty qualified
 import OpenSolid
 import Pair qualified
 import Point2d (Point2d (Point2d#))
@@ -92,8 +91,8 @@ process callback queue solutions exclusions =
               Recurse updatedContext -> Result.do
                 children <- recurseInto subdomain updatedContext recursionType
                 process callback (remaining + children) solutions exclusions
-              Return newSolutions -> do
-                let updatedSolutions = NonEmpty.toList newSolutions + solutions
+              Return newSolution -> do
+                let updatedSolutions = newSolution : solutions
                 let updatedExclusions = subdomain : exclusions
                 process callback remaining updatedSolutions updatedExclusions
             List.OneOrMore -> case callback context subdomain SomeExclusions of
@@ -159,11 +158,11 @@ recurseInto subdomain context recursionType
         [lBot, cBot, rBot, lMid, cMid, rMid, lTop, cTop, rTop]
 
 data Action exclusions context solution where
-  Return :: NonEmpty solution -> Action NoExclusions context solution
+  Return :: solution -> Action NoExclusions context solution
   Recurse :: context -> Action exclusions context solution
   Pass :: Action exclusions context solution
 
-return :: NonEmpty solution -> Action NoExclusions context solution
+return :: solution -> Action NoExclusions context solution
 return = Return
 
 recurse :: context -> Action exclusions context solution

@@ -43,7 +43,6 @@ import Expression qualified
 import Float qualified
 import Fuzzy qualified
 import List qualified
-import NonEmpty qualified
 import OpenSolid
 import Point2d qualified
 import Qty qualified
@@ -475,11 +474,11 @@ findTangentSolutions subproblem = do
                 -- to reach this code path, so we can take the sign of either one
                 -- to determine the sign of the tangent point
                 let sign = Qty.sign (Range.lowerBound fuuBounds)
-                Solve2d.return (NonEmpty.singleton (TangentPointSolution (point, sign, uvBounds)))
+                Solve2d.return (TangentPointSolution (point, sign, uvBounds))
               Negative -> do
                 -- Saddle region
                 let saddleRegion = SaddleRegion.quadratic subproblem point
-                Solve2d.return (NonEmpty.singleton (SaddleRegionSolution saddleRegion))
+                Solve2d.return (SaddleRegionSolution saddleRegion)
             else do
               Solve2d.recurse CrossingCurvesOnly
     Unresolved -> do
@@ -494,7 +493,7 @@ findCrossingCurves subproblem =
   case crossingCurve subproblem of
     Unresolved -> Solve2d.recurse CrossingCurvesOnly
     Resolved Nothing -> Solve2d.pass
-    Resolved (Just curve) -> Solve2d.return (NonEmpty.singleton (CrossingCurveSolution curve))
+    Resolved (Just curve) -> Solve2d.return (CrossingCurveSolution curve)
 
 crossingCurve ::
   Tolerance units =>
