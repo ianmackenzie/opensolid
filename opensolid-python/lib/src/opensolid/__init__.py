@@ -1831,31 +1831,31 @@ class Color:
     """White."""
 
     light_grey: Color = None  # type: ignore[assignment]
-    """Aluminium 1/6  from the Tango icon theme."""
+    """Aluminium 1/6 from the Tango icon theme."""
 
     grey: Color = None  # type: ignore[assignment]
-    """Aluminium 2/6  from the Tango icon theme."""
+    """Aluminium 2/6 from the Tango icon theme."""
 
     dark_grey: Color = None  # type: ignore[assignment]
-    """Aluminium 3/6  from the Tango icon theme."""
+    """Aluminium 3/6 from the Tango icon theme."""
 
     light_gray: Color = None  # type: ignore[assignment]
-    """Aluminium 1/6  from the Tango icon theme."""
+    """Aluminium 1/6 from the Tango icon theme."""
 
     gray: Color = None  # type: ignore[assignment]
-    """Aluminium 2/6  from the Tango icon theme."""
+    """Aluminium 2/6 from the Tango icon theme."""
 
     dark_gray: Color = None  # type: ignore[assignment]
-    """Aluminium 3/6  from the Tango icon theme."""
+    """Aluminium 3/6 from the Tango icon theme."""
 
     light_charcoal: Color = None  # type: ignore[assignment]
-    """Aluminium 4/6  from the Tango icon theme."""
+    """Aluminium 4/6 from the Tango icon theme."""
 
     charcoal: Color = None  # type: ignore[assignment]
-    """Aluminium 5/6  from the Tango icon theme."""
+    """Aluminium 5/6 from the Tango icon theme."""
 
     dark_charcoal: Color = None  # type: ignore[assignment]
-    """Aluminium 6/6  from the Tango icon theme."""
+    """Aluminium 6/6 from the Tango icon theme."""
 
     @staticmethod
     def rgb(red: float, green: float, blue: float) -> Color:
