@@ -6,10 +6,12 @@ Add Python docstrings
 
 Try using Pandoc to convert from Haddock to reStructuredText?
 -> or just write all doc comments in plain text...
+-> or use specialized direct Haddock conversion - most flexible
+   -> e.g. convert type/function names to correct target language casing
 
 Add Python package README
 
-Generate Python API docs
+Generate Python API docs (Sphinx or similar)
 
 Add __abs__ support to API
 
@@ -33,9 +35,6 @@ Improve Python bindings
 - Rename MemberFunction and StaticFunction to have U/R/M prefix *before* argument count
 - Add support for 'intersects' operator (^)
   -> Also (&) for *intersection*?
-
-Move Http module out into separate opensolid-http package
--> reduce dependencies of libopensolid-ffi.so
 
 Operator overload test suite: for every valid type and units combination, test that e.g. zero vector * zero range = zero vector bounds
 - ensure every valid overload actually exists, and is resolved correctly at runtime
