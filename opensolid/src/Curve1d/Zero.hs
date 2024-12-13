@@ -34,4 +34,4 @@ instance ApproximateEquality Zero Zero Unitless where
     location1 ~= location2 && order1 == order2 && sign1 == sign2
 
 instance FFI Zero where
-  representation = FFI.classRepresentation "CurveZero"
+  representation = FFI.nestedClassRepresentation "Curve" "Zero"

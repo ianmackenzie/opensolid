@@ -3308,7 +3308,7 @@ class Curve:
         _lib.opensolid_Curve_evaluate_Float(ctypes.byref(inputs), ctypes.byref(output))
         return output.value
 
-    def zeros(self) -> list[CurveZero]:
+    def zeros(self) -> list[Curve.Zero]:
         """Find all points at which the given curve is zero.
 
         This includes not only points where the curve *crosses* zero,
@@ -3350,7 +3350,7 @@ class Curve:
         _lib.opensolid_Curve_zeros(ctypes.byref(inputs), ctypes.byref(output))
         return (
             [
-                CurveZero(ptr=c_void_p(item))
+                Curve.Zero(ptr=c_void_p(item))
                 for item in [
                     output.field2.field1[index] for index in range(output.field2.field0)
                 ]
@@ -3547,49 +3547,50 @@ class Curve:
         _lib.opensolid_Curve_div_Float_Curve(ctypes.byref(inputs), ctypes.byref(output))
         return Curve(ptr=output)
 
+    class Zero:
+        """A point where a given curve is equal to zero."""
 
-class CurveZero:
-    """A point where a given curve is equal to zero."""
+        def __init__(self, *, ptr: c_void_p) -> None:
+            self._ptr = ptr
 
-    def __init__(self, *, ptr: c_void_p) -> None:
-        self._ptr = ptr
+        def location(self) -> float:
+            """Get the parameter value at which the curve is zero."""
+            inputs = self._ptr
+            output = c_double()
+            _lib.opensolid_CurveZero_location(
+                ctypes.byref(inputs), ctypes.byref(output)
+            )
+            return output.value
 
-    def location(self) -> float:
-        """Get the parameter value at which the curve is zero."""
-        inputs = self._ptr
-        output = c_double()
-        _lib.opensolid_CurveZero_location(ctypes.byref(inputs), ctypes.byref(output))
-        return output.value
+        def order(self) -> int:
+            """Check whether the zero is a crossing zero, a tangent zero etc.
 
-    def order(self) -> int:
-        """Check whether the zero is a crossing zero, a tangent zero etc.
+            * An order 0 zero means the curve crosses zero at the given location,
+              with a non-zero first derivative.
+            * An order 1 zero means the first derivative is also zero at the given
+              location, but the second derivative is not (that is, the curve just
+              'touches' zero at that point).
+            * An order 2 zero means the first and second derivatives are zero at the
+              given location, etc.
+            """
+            inputs = self._ptr
+            output = c_int64()
+            _lib.opensolid_CurveZero_order(ctypes.byref(inputs), ctypes.byref(output))
+            return output.value
 
-        * An order 0 zero means the curve crosses zero at the given location,
-          with a non-zero first derivative.
-        * An order 1 zero means the first derivative is also zero at the given
-          location, but the second derivative is not (that is, the curve just
-          'touches' zero at that point).
-        * An order 2 zero means the first and second derivatives are zero at the
-          given location, etc.
-        """
-        inputs = self._ptr
-        output = c_int64()
-        _lib.opensolid_CurveZero_order(ctypes.byref(inputs), ctypes.byref(output))
-        return output.value
+        def sign(self) -> int:
+            """Check whether the curve 'curves up' or 'curves down' at the zero.
 
-    def sign(self) -> int:
-        """Check whether the curve 'curves up' or 'curves down' at the zero.
-
-        A positive sign means that the curve is positive to the right of the zero
-        (for a crossing zero, that means the curve will be negative to the left,
-        but for an order 1 tangent zero, that means the curve will also be positive
-        to the left!). Similarly, a negative sign means that the curve is negative
-        to the right of the zero.
-        """
-        inputs = self._ptr
-        output = c_int64()
-        _lib.opensolid_CurveZero_sign(ctypes.byref(inputs), ctypes.byref(output))
-        return output.value
+            A positive sign means that the curve is positive to the right of the zero
+            (for a crossing zero, that means the curve will be negative to the left,
+            but for an order 1 tangent zero, that means the curve will also be positive
+            to the left!). Similarly, a negative sign means that the curve is negative
+            to the right of the zero.
+            """
+            inputs = self._ptr
+            output = c_int64()
+            _lib.opensolid_CurveZero_sign(ctypes.byref(inputs), ctypes.byref(output))
+            return output.value
 
 
 class LengthCurve:
@@ -3610,7 +3611,7 @@ class LengthCurve:
         )
         return Length(ptr=output)
 
-    def zeros(self) -> list[CurveZero]:
+    def zeros(self) -> list[Curve.Zero]:
         """Find all points at which the given curve is zero.
 
         This includes not only points where the curve *crosses* zero,
@@ -3652,7 +3653,7 @@ class LengthCurve:
         _lib.opensolid_LengthCurve_zeros(ctypes.byref(inputs), ctypes.byref(output))
         return (
             [
-                CurveZero(ptr=c_void_p(item))
+                Curve.Zero(ptr=c_void_p(item))
                 for item in [
                     output.field2.field1[index] for index in range(output.field2.field0)
                 ]
@@ -3806,7 +3807,7 @@ class AngleCurve:
         )
         return Angle(ptr=output)
 
-    def zeros(self) -> list[CurveZero]:
+    def zeros(self) -> list[Curve.Zero]:
         """Find all points at which the given curve is zero.
 
         This includes not only points where the curve *crosses* zero,
@@ -3848,7 +3849,7 @@ class AngleCurve:
         _lib.opensolid_AngleCurve_zeros(ctypes.byref(inputs), ctypes.byref(output))
         return (
             [
-                CurveZero(ptr=c_void_p(item))
+                Curve.Zero(ptr=c_void_p(item))
                 for item in [
                     output.field2.field1[index] for index in range(output.field2.field0)
                 ]
@@ -4631,7 +4632,6 @@ __all__ = [
     "Bounds2d",
     "UvBounds",
     "Curve",
-    "CurveZero",
     "LengthCurve",
     "AngleCurve",
     "Drawing2d",

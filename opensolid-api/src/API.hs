@@ -89,7 +89,6 @@ classes =
   , bounds2d
   , uvBounds
   , curve
-  , curveZero
   , lengthCurve
   , angleCurve
   , drawing2d
@@ -513,6 +512,12 @@ curve =
     , times @(Curve1d Radians) Self
     , divByFloat
     , divBySelf
+    , nested @Curve1d.Zero
+        "A point where a given curve is equal to zero."
+        [ member0 "Location" Curve1d.Zero.location $(docs 'Curve1d.Zero.location)
+        , member0 "Order" Curve1d.Zero.order $(docs 'Curve1d.Zero.order)
+        , member0 "Sign" ((1 *) . Curve1d.Zero.sign) $(docs 'Curve1d.Zero.sign)
+        ]
     ]
 
 angleCurve :: Class
@@ -553,15 +558,6 @@ lengthCurve =
     , divBySelf
     , divBy @Length Self
     , divBy @(Curve1d Unitless) Self
-    ]
-
-curveZero :: Class
-curveZero =
-  class_ @Curve1d.Zero
-    "A point where a given curve is equal to zero."
-    [ member0 "Location" Curve1d.Zero.location $(docs 'Curve1d.Zero.location)
-    , member0 "Order" Curve1d.Zero.order $(docs 'Curve1d.Zero.order)
-    , member0 "Sign" ((1 *) . Curve1d.Zero.sign) $(docs 'Curve1d.Zero.sign)
     ]
 
 data Drawing2d_
