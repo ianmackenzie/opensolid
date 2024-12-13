@@ -159,8 +159,6 @@ angle =
     , factory1 "Acos" "Value" Angle.acos
     , factory1 "Asin" "Value" Angle.asin
     , factory1 "Atan" "Value" Angle.atan
-    , factory2 "Atan2" "Y" "X" (Angle.atan2 @Unitless)
-    , factory2 "Atan2" "Y" "X" (Angle.atan2 @Meters)
     , member0 "In Radians" Angle.inRadians $(docs 'Angle.inRadians)
     , member0 "In Degrees" Angle.inDegrees $(docs 'Angle.inDegrees)
     , member0 "In Turns" Angle.inTurns $(docs 'Angle.inTurns)
