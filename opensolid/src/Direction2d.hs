@@ -155,7 +155,7 @@ positiveX = unsafe (Vector2d# 1.0## 0.0##)
 
 -- | The negative X direction.
 negativeX :: Direction2d space
-negativeX = -positiveX
+negativeX = unsafe (Vector2d# -1.0## 0.0##)
 
 -- | The positive Y direction.
 positiveY :: Direction2d space
@@ -163,7 +163,7 @@ positiveY = unsafe (Vector2d# 0.0## 1.0##)
 
 -- | The negative Y direction.
 negativeY :: Direction2d space
-negativeY = -positiveY
+negativeY = unsafe (Vector2d# 0.0## -1.0##)
 
 -- | Alias for 'positiveX'.
 x :: Direction2d space
@@ -204,7 +204,7 @@ The angle is measured counterclockwise from the positive X direction, so:
   * The positive Y direction has an angle of 90 degrees.
   * The negative Y direction has an angle of -90 degrees.
   * It is not defined whether the negative X direction has an angle of -180 or
-    +180 degrees. (Currently it is reported as having an angle of -180 degrees,
+    +180 degrees. (Currently it is reported as having an angle of +180 degrees,
     but this should not be relied upon.)
 
 The returned angle will be between -180 and +180 degrees.
