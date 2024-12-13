@@ -113,14 +113,14 @@ pattern Four first second third fourth = [first, second, third, fourth]
 pattern OneOrMore :: List a
 pattern OneOrMore <- _ : _
 
-pattern TwoOrMore :: a -> a -> List a -> List a
-pattern TwoOrMore first second rest = first : second : rest
+pattern TwoOrMore :: List a
+pattern TwoOrMore <- _ : _ : _
 
-pattern ThreeOrMore :: a -> a -> a -> List a -> List a
-pattern ThreeOrMore first second third rest = first : second : third : rest
+pattern ThreeOrMore :: List a
+pattern ThreeOrMore <- _ : _ : _ : _
 
-pattern FourOrMore :: a -> a -> a -> a -> List a -> List a
-pattern FourOrMore first second third fourth rest = first : second : third : fourth : rest
+pattern FourOrMore :: List a
+pattern FourOrMore <- _ : _ : _ : _ : _
 
 pattern FiveOrMore :: a -> a -> a -> a -> a -> List a -> List a
 pattern FiveOrMore first second third fourth fifth rest =
