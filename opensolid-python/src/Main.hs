@@ -244,6 +244,20 @@ ffiTypeDeclarations = do
   let registry = List.foldr registerFunctionTypes Python.Type.Registry.empty API.functions
   Python.Type.Registry.typeDeclarations registry
 
+topLevelClassName :: Class -> Maybe Text
+topLevelClassName Class{API.id = FFI.Id _ (topLevelName :| nestedNames)} =
+  case nestedNames of
+    [] -> Just (Python.str (FFI.pascalCase topLevelName) + ",")
+    List.OneOrMore -> Nothing
+
+allExportsDefinition :: Text
+allExportsDefinition =
+  Python.lines
+    [ "__all__ = ["
+    , Python.indent (Maybe.collect topLevelClassName API.classes)
+    , "]"
+    ]
+
 registerFunctionTypes :: API.Function -> Registry -> Registry
 registerFunctionTypes function registry =
   registry
@@ -268,5 +282,6 @@ main = IO.do
           , ffiTypeDeclarations
           , Python.lines classDefinitions
           , Python.lines constantDefinitions
+          , allExportsDefinition
           ]
   File.writeTo "opensolid-python/lib/src/opensolid/__init__.py" pythonCode
