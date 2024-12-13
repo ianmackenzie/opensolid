@@ -15,10 +15,25 @@ cradle:
     - path: "opensolid-ffi/generate-def-file/Main.hs"
       component: "opensolid-ffi:exe:generate-def-file"
 
+    - path: "opensolid-http/src"
+      component: "lib:opensolid-http"
+
     - path: "opensolid-python/src/Main.hs"
       component: "opensolid-python:exe:opensolid-python"
 
+    - path: "opensolid-python/src/Python.hs"
+      component: "opensolid-python:exe:opensolid-python"
+
     - path: "opensolid-python/src/Python/Class.hs"
+      component: "opensolid-python:exe:opensolid-python"
+
+    - path: "opensolid-python/src/Python/ComparisonFunction.hs"
+      component: "opensolid-python:exe:opensolid-python"
+
+    - path: "opensolid-python/src/Python/Constant.hs"
+      component: "opensolid-python:exe:opensolid-python"
+
+    - path: "opensolid-python/src/Python/EqualityFunction.hs"
       component: "opensolid-python:exe:opensolid-python"
 
     - path: "opensolid-python/src/Python/FFI.hs"
@@ -30,7 +45,13 @@ cradle:
     - path: "opensolid-python/src/Python/MemberFunction.hs"
       component: "opensolid-python:exe:opensolid-python"
 
-    - path: "opensolid-python/src/Python.hs"
+    - path: "opensolid-python/src/Python/NegationOperator.hs"
+      component: "opensolid-python:exe:opensolid-python"
+
+    - path: "opensolid-python/src/Python/PostOperator.hs"
+      component: "opensolid-python:exe:opensolid-python"
+
+    - path: "opensolid-python/src/Python/PreOperator.hs"
       component: "opensolid-python:exe:opensolid-python"
 
     - path: "opensolid-python/src/Python/StaticFunction.hs"
