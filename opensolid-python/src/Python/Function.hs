@@ -4,6 +4,8 @@ module Python.Function
   , matchPattern
   , toleranceArgument
   , typePattern
+  , argument
+  , body
   )
 where
 
@@ -16,6 +18,8 @@ import OpenSolid.FFI qualified as FFI
 import Pair qualified
 import Python qualified
 import Python.Class qualified
+import Python.FFI qualified
+import Python.Type qualified
 import Text qualified
 
 overloadDeclaration :: Text -> Text
@@ -27,10 +31,10 @@ overloadDeclaration signature =
     ]
 
 overloadCase :: Text -> List Text -> Text
-overloadCase givenMatchPattern body =
+overloadCase givenMatchPattern caseBody =
   Python.lines
     [ "case " + givenMatchPattern + ":"
-    , Python.indent body
+    , Python.indent caseBody
     ]
 
 splits :: List a -> List (List a, List a)
@@ -85,3 +89,15 @@ toleranceFunction constraint = case constraint of
   Constraint.ToleranceUnitless -> "_float_tolerance()"
   Constraint.ToleranceMeters -> "_length_tolerance()"
   Constraint.ToleranceRadians -> "_angle_tolerance()"
+
+argument :: (Name, FFI.Type) -> Text
+argument (argName, argType) = FFI.snakeCase argName + ": " + Python.Type.qualifiedName argType
+
+body :: Text -> List (Text, FFI.Type) -> FFI.Type -> Text
+body ffiFunctionName arguments returnType =
+  Python.lines
+    [ "inputs = " + Python.FFI.argumentValue arguments
+    , "output = " + Python.FFI.dummyValue returnType
+    , Python.FFI.invoke ffiFunctionName "ctypes.byref(inputs)" "ctypes.byref(output)"
+    , "return " + Python.FFI.outputValue returnType "output"
+    ]
