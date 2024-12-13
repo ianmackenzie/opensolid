@@ -1,6 +1,6 @@
-module Python.NegationOperator (definition) where
+module Python.NegationFunction (definition) where
 
-import API.NegationOperator qualified as NegationOperator
+import API.NegationFunction qualified as NegationFunction
 import OpenSolid
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
@@ -12,9 +12,9 @@ definition :: forall value. FFI value => FFI.Id value -> Maybe (value -> value) 
 definition classId maybeFunction = case maybeFunction of
   Nothing -> ""
   Just function -> do
-    let valueType = NegationOperator.valueType function
+    let valueType = NegationFunction.valueType function
     let valueTypeName = Python.Type.qualifiedName valueType
-    let ffiFunctionName = NegationOperator.ffiName classId
+    let ffiFunctionName = NegationFunction.ffiName classId
     Python.lines
       [ "def __neg__(self) -> " + valueTypeName + ":"
       , Python.indent

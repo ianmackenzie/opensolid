@@ -29,6 +29,7 @@ executable opensolid-python
 
   other-modules:
     Python
+    Python.AbsFunction
     Python.Class
     Python.ComparisonFunction
     Python.Constant
@@ -36,7 +37,7 @@ executable opensolid-python
     Python.FFI
     Python.Function
     Python.MemberFunction
-    Python.NegationOperator
+    Python.NegationFunction
     Python.PostOperator
     Python.PreOperator
     Python.StaticFunction

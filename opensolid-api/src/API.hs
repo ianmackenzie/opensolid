@@ -1,5 +1,6 @@
 module API (Class (..), Function (..), classes, functions) where
 
+import API.AbsFunction qualified as AbsFunction
 import API.BinaryOperator qualified as BinaryOperator
 import API.ComparisonFunction qualified as ComparisonFunction
 import API.Constant (Constant (Constant))
@@ -9,7 +10,7 @@ import API.Docs (docs)
 import API.EqualityFunction qualified as EqualityFunction
 import API.MemberFunction (MemberFunction (..))
 import API.MemberFunction qualified as MemberFunction
-import API.NegationOperator qualified as NegationOperator
+import API.NegationFunction qualified as NegationFunction
 import API.PostOperator (PostOperator (PostOperator))
 import API.PostOperator qualified as PostOperator
 import API.PreOperator (PreOperator (PreOperator))
@@ -38,6 +39,7 @@ import OpenSolid.FFI qualified as FFI
 import Pair qualified
 import Point2d (Point2d)
 import Point2d qualified
+import Qty qualified
 import Range (Range)
 import Range qualified
 import Units (Meters)
@@ -57,6 +59,7 @@ data Class where
     , equalityFunction :: Maybe (value -> value -> Bool)
     , comparisonFunction :: Maybe (value -> value -> Int)
     , negationFunction :: Maybe (value -> value)
+    , absFunction :: Maybe (value -> value)
     , preOperators :: List (BinaryOperator.Id, List (PreOperator value))
     , postOperators :: List (BinaryOperator.Id, List (PostOperator value))
     , nestedClasses :: List Class
@@ -118,6 +121,7 @@ length =
     , equality
     , comparison
     , negateSelf
+    , absSelf Qty.abs
     , floatTimes
     , plusSelf
     , plus @(Range Meters) Self
@@ -169,6 +173,7 @@ angle =
     , equality
     , comparison
     , negateSelf
+    , absSelf Qty.abs
     , floatTimes
     , plusSelf
     , plus @(Range Radians) Self
@@ -205,6 +210,7 @@ range =
     , member1 "Includes" "Value" Range.includes $(docs 'Range.includes)
     , member1 "Contains" "Other" Range.contains $(docs 'Range.contains)
     , negateSelf
+    , absSelf Range.abs
     , floatPlus
     , floatMinus
     , floatTimes
@@ -238,6 +244,7 @@ lengthRange =
     , member1 "Includes" "Value" Range.includes $(docs 'Range.includes)
     , member1 "Contains" "Other" Range.contains $(docs 'Range.contains)
     , negateSelf
+    , absSelf Range.abs
     , floatTimes
     , plusSelf
     , plus @Length Self
@@ -265,6 +272,7 @@ angleRange =
     , member1 "Includes" "Value" Range.includes $(docs 'Range.includes)
     , member1 "Contains" "Other" Range.contains $(docs 'Range.contains)
     , negateSelf
+    , absSelf Range.abs
     , floatTimes
     , plusSelf
     , plus @Angle Self
@@ -583,7 +591,7 @@ drawing2d =
 ----- CLASS MEMBERS -----
 
 class_ :: forall value. FFI value => Text -> List (Member value) -> Class
-class_ classDocs members = buildClass classDocs members [] [] [] Nothing Nothing Nothing [] [] []
+class_ classDocs members = buildClass classDocs members [] [] [] Nothing Nothing Nothing Nothing [] [] []
 
 data Member value where
   Const :: FFI result => Text -> result -> Text -> Member value
@@ -599,6 +607,7 @@ data Member value where
   Equality :: Eq value => Member value
   Comparison :: Ord value => Member value
   Negate :: Negation value => Member value
+  Abs :: (value -> value) -> Member value
   PreOp :: (FFI lhs, FFI result) => BinaryOperator.Id -> (lhs -> value -> result) -> Member value
   PostOp :: (FFI rhs, FFI result) => BinaryOperator.Id -> (value -> rhs -> result) -> Member value
   Nested :: FFI nested => Text -> List (Member nested) -> Member value
@@ -655,6 +664,9 @@ comparisonImpl lhs rhs = case compare lhs rhs of
 
 negateSelf :: Negation value => Member value
 negateSelf = Negate
+
+absSelf :: (value -> value) -> Member value
+absSelf = Abs
 
 floatPlus ::
   forall value result.
@@ -850,6 +862,7 @@ buildClass ::
   Maybe (value -> value -> Bool) ->
   Maybe (value -> value -> Int) ->
   Maybe (value -> value) ->
+  Maybe (value -> value) ->
   List (BinaryOperator.Id, List (PreOperator value)) ->
   List (BinaryOperator.Id, List (PostOperator value)) ->
   List Class ->
@@ -863,6 +876,7 @@ buildClass
   equalityFunctionAcc
   comparisonFunctionAcc
   negationFunctionAcc
+  absFunctionAcc
   preOperatorsAcc
   postOperatorsAcc
   nestedClassesAcc =
@@ -879,6 +893,7 @@ buildClass
           , equalityFunction = equalityFunctionAcc
           , comparisonFunction = comparisonFunctionAcc
           , negationFunction = negationFunctionAcc
+          , absFunction = absFunctionAcc
           , preOperators = preOperatorsAcc
           , postOperators = postOperatorsAcc
           , nestedClasses = nestedClassesAcc
@@ -894,6 +909,7 @@ buildClass
                 equalityFunctionAcc
                 comparisonFunctionAcc
                 negationFunctionAcc
+                absFunctionAcc
                 preOperatorsAcc
                 postOperatorsAcc
                 nestedClassesAcc
@@ -907,6 +923,7 @@ buildClass
                 equalityFunctionAcc
                 comparisonFunctionAcc
                 negationFunctionAcc
+                absFunctionAcc
                 preOperatorsAcc
                 postOperatorsAcc
                 nestedClassesAcc
@@ -921,6 +938,7 @@ buildClass
               equalityFunctionAcc
               comparisonFunctionAcc
               negationFunctionAcc
+              absFunctionAcc
               preOperatorsAcc
               postOperatorsAcc
               nestedClassesAcc
@@ -952,6 +970,7 @@ buildClass
               (Just (==))
               comparisonFunctionAcc
               negationFunctionAcc
+              absFunctionAcc
               preOperatorsAcc
               postOperatorsAcc
               nestedClassesAcc
@@ -965,6 +984,7 @@ buildClass
               equalityFunctionAcc
               (Just comparisonImpl)
               negationFunctionAcc
+              absFunctionAcc
               preOperatorsAcc
               postOperatorsAcc
               nestedClassesAcc
@@ -978,6 +998,21 @@ buildClass
               equalityFunctionAcc
               comparisonFunctionAcc
               (Just negate)
+              absFunctionAcc
+              preOperatorsAcc
+              postOperatorsAcc
+              nestedClassesAcc
+          Abs function ->
+            buildClass
+              classDocs
+              rest
+              constantsAcc
+              staticFunctionsAcc
+              memberFunctionsAcc
+              equalityFunctionAcc
+              comparisonFunctionAcc
+              negationFunctionAcc
+              (Just function)
               preOperatorsAcc
               postOperatorsAcc
               nestedClassesAcc
@@ -991,6 +1026,7 @@ buildClass
               equalityFunctionAcc
               comparisonFunctionAcc
               negationFunctionAcc
+              absFunctionAcc
               (addPreOverload operatorId (PreOperator operator) preOperatorsAcc)
               postOperatorsAcc
               nestedClassesAcc
@@ -1004,6 +1040,7 @@ buildClass
               equalityFunctionAcc
               comparisonFunctionAcc
               negationFunctionAcc
+              absFunctionAcc
               preOperatorsAcc
               (addPostOverload operatorId (PostOperator operator) postOperatorsAcc)
               nestedClassesAcc
@@ -1017,6 +1054,7 @@ buildClass
               equalityFunctionAcc
               comparisonFunctionAcc
               negationFunctionAcc
+              absFunctionAcc
               preOperatorsAcc
               postOperatorsAcc
               (nestedClassesAcc + [class_ nestedDocstring nestedMembers])
@@ -1066,23 +1104,42 @@ memberFunctionOverloads :: FFI.Id value -> (Name, List (MemberFunction value)) -
 memberFunctionOverloads classId_ (functionName, overloads) =
   List.map (memberFunctionOverload classId_ functionName) overloads
 
-negationOperatorInfo ::
+negationFunctionInfo ::
   forall value.
   FFI value =>
   FFI.Id value ->
   Maybe (value -> value) ->
   List Function
-negationOperatorInfo classId_ maybeNegationFunction = case maybeNegationFunction of
+negationFunctionInfo classId_ maybeNegationFunction = case maybeNegationFunction of
   Nothing -> []
   Just negationFunction -> do
     let selfType = FFI.typeOf @value Proxy
     List.singleton $
       Function
-        { ffiName = NegationOperator.ffiName classId_
+        { ffiName = NegationFunction.ffiName classId_
         , constraint = Nothing
         , argumentTypes = [selfType]
         , returnType = selfType
-        , invoke = NegationOperator.invoke negationFunction
+        , invoke = NegationFunction.invoke negationFunction
+        }
+
+absFunctionInfo ::
+  forall value.
+  FFI value =>
+  FFI.Id value ->
+  Maybe (value -> value) ->
+  List Function
+absFunctionInfo classId_ maybeAbsFunction = case maybeAbsFunction of
+  Nothing -> []
+  Just absFunction -> do
+    let selfType = FFI.typeOf @value Proxy
+    List.singleton $
+      Function
+        { ffiName = AbsFunction.ffiName classId_
+        , constraint = Nothing
+        , argumentTypes = [selfType]
+        , returnType = selfType
+        , invoke = AbsFunction.invoke absFunction
         }
 
 equalityFunctionInfo ::
@@ -1169,7 +1226,8 @@ classFunctions
       memberFunctions
       maybeEqualityFunction
       maybeComparisonFunction
-      maybeNegationOperator
+      maybeNegationFunction
+      maybeAbsFunction
       preOperators
       postOperators
       nestedClasses
@@ -1180,7 +1238,8 @@ classFunctions
       , List.collect (memberFunctionOverloads classId_) memberFunctions
       , equalityFunctionInfo classId_ maybeEqualityFunction
       , comparisonFunctionInfo classId_ maybeComparisonFunction
-      , negationOperatorInfo classId_ maybeNegationOperator
+      , negationFunctionInfo classId_ maybeNegationFunction
+      , absFunctionInfo classId_ maybeAbsFunction
       , List.collect (preOperatorOverloads classId_) preOperators
       , List.collect (postOperatorOverloads classId_) postOperators
       , List.collect classFunctions nestedClasses

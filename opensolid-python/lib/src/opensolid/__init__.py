@@ -340,6 +340,11 @@ class Length:
         _lib.opensolid_Length_neg(ctypes.byref(self._ptr), ctypes.byref(output))
         return Length(ptr=output)
 
+    def __abs__(self) -> Length:
+        output = c_void_p()
+        _lib.opensolid_Length_abs(ctypes.byref(self._ptr), ctypes.byref(output))
+        return Length(ptr=output)
+
     @overload
     def __add__(self, rhs: Length) -> Length:
         pass
@@ -747,6 +752,11 @@ class Angle:
         _lib.opensolid_Angle_neg(ctypes.byref(self._ptr), ctypes.byref(output))
         return Angle(ptr=output)
 
+    def __abs__(self) -> Angle:
+        output = c_void_p()
+        _lib.opensolid_Angle_abs(ctypes.byref(self._ptr), ctypes.byref(output))
+        return Angle(ptr=output)
+
     @overload
     def __add__(self, rhs: Angle) -> Angle:
         pass
@@ -1083,6 +1093,11 @@ class Range:
         _lib.opensolid_Range_neg(ctypes.byref(self._ptr), ctypes.byref(output))
         return Range(ptr=output)
 
+    def __abs__(self) -> Range:
+        output = c_void_p()
+        _lib.opensolid_Range_abs(ctypes.byref(self._ptr), ctypes.byref(output))
+        return Range(ptr=output)
+
     @overload
     def __add__(self, rhs: float) -> Range:
         pass
@@ -1399,6 +1414,11 @@ class LengthRange:
         _lib.opensolid_LengthRange_neg(ctypes.byref(self._ptr), ctypes.byref(output))
         return LengthRange(ptr=output)
 
+    def __abs__(self) -> LengthRange:
+        output = c_void_p()
+        _lib.opensolid_LengthRange_abs(ctypes.byref(self._ptr), ctypes.byref(output))
+        return LengthRange(ptr=output)
+
     @overload
     def __add__(self, rhs: LengthRange) -> LengthRange:
         pass
@@ -1660,6 +1680,11 @@ class AngleRange:
     def __neg__(self) -> AngleRange:
         output = c_void_p()
         _lib.opensolid_AngleRange_neg(ctypes.byref(self._ptr), ctypes.byref(output))
+        return AngleRange(ptr=output)
+
+    def __abs__(self) -> AngleRange:
+        output = c_void_p()
+        _lib.opensolid_AngleRange_abs(ctypes.byref(self._ptr), ctypes.byref(output))
         return AngleRange(ptr=output)
 
     @overload

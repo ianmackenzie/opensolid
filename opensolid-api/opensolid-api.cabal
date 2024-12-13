@@ -27,13 +27,14 @@ library
   hs-source-dirs: src
   exposed-modules:
     API
+    API.AbsFunction
     API.BinaryOperator
     API.ComparisonFunction
     API.Constant
     API.Constraint
     API.EqualityFunction
     API.MemberFunction
-    API.NegationOperator
+    API.NegationFunction
     API.PostOperator
     API.PreOperator
     API.StaticFunction

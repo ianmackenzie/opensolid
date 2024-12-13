@@ -1,4 +1,4 @@
-module API.NegationOperator
+module API.NegationFunction
   ( invoke
   , ffiName
   , valueType

@@ -10,6 +10,7 @@ import OpenSolid
 import OpenSolid.FFI qualified as FFI
 import Pair qualified
 import Python qualified
+import Python.AbsFunction qualified
 import Python.Class qualified
 import Python.ComparisonFunction qualified
 import Python.Constant qualified
@@ -17,7 +18,7 @@ import Python.EqualityFunction qualified
 import Python.FFI qualified
 import Python.Function qualified
 import Python.MemberFunction qualified
-import Python.NegationOperator qualified
+import Python.NegationFunction qualified
 import Python.PostOperator qualified
 import Python.PreOperator qualified
 import Python.StaticFunction qualified
@@ -142,7 +143,8 @@ classDefinition
       memberFunctions
       equalityFunction
       comparisonFunction
-      negationFunction
+      maybeNegationFunction
+      maybeAbsFunction
       preOperators
       postOperators
       nestedClasses
@@ -159,7 +161,8 @@ classDefinition
             , Python.indent (List.map (Python.MemberFunction.definition classId) memberFunctions)
             , Python.indent [Python.EqualityFunction.definition classId equalityFunction]
             , Python.indent [Python.ComparisonFunction.definitions classId comparisonFunction]
-            , Python.indent [Python.NegationOperator.definition classId negationFunction]
+            , Python.indent [Python.NegationFunction.definition classId maybeNegationFunction]
+            , Python.indent [Python.AbsFunction.definition classId maybeAbsFunction]
             , Python.indent (List.map (Python.PostOperator.definition classId) postOperators)
             , Python.indent (List.map (Python.PreOperator.definition classId) preOperators)
             , Python.indent (extraMemberFunctions (Python.Class.qualifiedName classId))

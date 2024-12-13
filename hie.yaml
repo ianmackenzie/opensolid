@@ -45,7 +45,7 @@ cradle:
     - path: "opensolid-python/src/Python/MemberFunction.hs"
       component: "opensolid-python:exe:opensolid-python"
 
-    - path: "opensolid-python/src/Python/NegationOperator.hs"
+    - path: "opensolid-python/src/Python/NegationFunction.hs"
       component: "opensolid-python:exe:opensolid-python"
 
     - path: "opensolid-python/src/Python/PostOperator.hs"
