@@ -336,6 +336,7 @@ vector2d =
     , member0 "X Component" Vector2d.xComponent $(docs 'Vector2d.xComponent)
     , member0 "Y Component" Vector2d.yComponent $(docs 'Vector2d.yComponent)
     , memberU0 "Direction" Vector2d.direction $(docs 'Vector2d.direction)
+    , member0 "Angle" Vector2d.angle $(docs 'Vector2d.angle)
     , negateSelf
     , floatTimes
     , plusSelf
@@ -363,6 +364,7 @@ displacement2d =
     , member0 "X Component" Vector2d.xComponent $(docs 'Vector2d.xComponent)
     , member0 "Y Component" Vector2d.yComponent $(docs 'Vector2d.yComponent)
     , memberM0 "Direction" Vector2d.direction $(docs 'Vector2d.direction)
+    , member0 "Angle" Vector2d.angle $(docs 'Vector2d.angle)
     , negateSelf
     , floatTimes
     , plusSelf
