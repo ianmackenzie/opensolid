@@ -2133,6 +2133,84 @@ class Vector2d:
         )
         return Vector2d(ptr=output)
 
+    @overload
+    def dot(self, rhs: Vector2d) -> float:
+        pass
+
+    @overload
+    def dot(self, rhs: Displacement2d) -> Length:
+        pass
+
+    @overload
+    def dot(self, rhs: Direction2d) -> float:
+        pass
+
+    def dot(self, rhs):
+        """Compute the dot product of two vector-like values."""
+        match rhs:
+            case Vector2d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_double()
+                _lib.opensolid_Vector2d_dot_Vector2d_Vector2d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return output.value
+            case Displacement2d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Vector2d_dot_Vector2d_Displacement2d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Length(ptr=output)
+            case Direction2d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_double()
+                _lib.opensolid_Vector2d_dot_Vector2d_Direction2d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return output.value
+            case _:
+                return NotImplemented
+
+    @overload
+    def cross(self, rhs: Vector2d) -> float:
+        pass
+
+    @overload
+    def cross(self, rhs: Displacement2d) -> Length:
+        pass
+
+    @overload
+    def cross(self, rhs: Direction2d) -> float:
+        pass
+
+    def cross(self, rhs):
+        """Compute the cross product of two vector-like values."""
+        match rhs:
+            case Vector2d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_double()
+                _lib.opensolid_Vector2d_cross_Vector2d_Vector2d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return output.value
+            case Displacement2d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Vector2d_cross_Vector2d_Displacement2d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Length(ptr=output)
+            case Direction2d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_double()
+                _lib.opensolid_Vector2d_cross_Vector2d_Direction2d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return output.value
+            case _:
+                return NotImplemented
+
     def __rmul__(self, lhs: float) -> Vector2d:
         inputs = _Tuple2_c_double_c_void_p(lhs, self._ptr)
         output = c_void_p()
@@ -2380,6 +2458,62 @@ class Displacement2d:
             case _:
                 return NotImplemented
 
+    @overload
+    def dot(self, rhs: Vector2d) -> Length:
+        pass
+
+    @overload
+    def dot(self, rhs: Direction2d) -> Length:
+        pass
+
+    def dot(self, rhs):
+        """Compute the dot product of two vector-like values."""
+        match rhs:
+            case Vector2d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Displacement2d_dot_Displacement2d_Vector2d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Length(ptr=output)
+            case Direction2d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Displacement2d_dot_Displacement2d_Direction2d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Length(ptr=output)
+            case _:
+                return NotImplemented
+
+    @overload
+    def cross(self, rhs: Vector2d) -> Length:
+        pass
+
+    @overload
+    def cross(self, rhs: Direction2d) -> Length:
+        pass
+
+    def cross(self, rhs):
+        """Compute the cross product of two vector-like values."""
+        match rhs:
+            case Vector2d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Displacement2d_cross_Displacement2d_Vector2d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Length(ptr=output)
+            case Direction2d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Displacement2d_cross_Displacement2d_Direction2d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Length(ptr=output)
+            case _:
+                return NotImplemented
+
     def __rmul__(self, lhs: float) -> Displacement2d:
         inputs = _Tuple2_c_double_c_void_p(lhs, self._ptr)
         output = c_void_p()
@@ -2557,6 +2691,84 @@ class Direction2d:
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return Displacement2d(ptr=output)
+            case _:
+                return NotImplemented
+
+    @overload
+    def dot(self, rhs: Direction2d) -> float:
+        pass
+
+    @overload
+    def dot(self, rhs: Vector2d) -> float:
+        pass
+
+    @overload
+    def dot(self, rhs: Displacement2d) -> Length:
+        pass
+
+    def dot(self, rhs):
+        """Compute the dot product of two vector-like values."""
+        match rhs:
+            case Direction2d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_double()
+                _lib.opensolid_Direction2d_dot_Direction2d_Direction2d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return output.value
+            case Vector2d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_double()
+                _lib.opensolid_Direction2d_dot_Direction2d_Vector2d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return output.value
+            case Displacement2d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Direction2d_dot_Direction2d_Displacement2d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Length(ptr=output)
+            case _:
+                return NotImplemented
+
+    @overload
+    def cross(self, rhs: Direction2d) -> float:
+        pass
+
+    @overload
+    def cross(self, rhs: Vector2d) -> float:
+        pass
+
+    @overload
+    def cross(self, rhs: Displacement2d) -> Length:
+        pass
+
+    def cross(self, rhs):
+        """Compute the cross product of two vector-like values."""
+        match rhs:
+            case Direction2d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_double()
+                _lib.opensolid_Direction2d_cross_Direction2d_Direction2d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return output.value
+            case Vector2d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_double()
+                _lib.opensolid_Direction2d_cross_Direction2d_Vector2d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return output.value
+            case Displacement2d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Direction2d_cross_Direction2d_Displacement2d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Length(ptr=output)
             case _:
                 return NotImplemented
 

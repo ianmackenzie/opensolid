@@ -345,6 +345,12 @@ vector2d =
     , timesFloat
     , times @Length Self
     , divByFloat
+    , dotSelf
+    , dot @(Vector2d (Space @ Meters)) Self
+    , dot @(Direction2d Space) Self
+    , crossSelf
+    , cross @(Vector2d (Space @ Meters)) Self
+    , cross @(Direction2d Space) Self
     ]
 
 displacement2d :: Class
@@ -374,6 +380,10 @@ displacement2d =
     , timesFloat
     , divByFloat
     , divBy @Length Self
+    , dot @(Vector2d (Space @ Unitless)) Self
+    , dot @(Direction2d Space) Self
+    , cross @(Vector2d (Space @ Unitless)) Self
+    , cross @(Direction2d Space) Self
     ]
 
 direction2d :: Class
@@ -398,6 +408,12 @@ direction2d =
     , floatTimes
     , timesFloat
     , times @Length Self
+    , dotSelf
+    , dot @(Vector2d (Space @ Unitless)) Self
+    , dot @(Vector2d (Space @ Meters)) Self
+    , crossSelf
+    , cross @(Vector2d (Space @ Unitless)) Self
+    , cross @(Vector2d (Space @ Meters)) Self
     ]
 
 point2d :: Class
@@ -749,6 +765,32 @@ floorDivBySelf = PostOp BinaryOperator.FloorDiv ((//) :: value -> value -> Int)
 
 modBySelf :: forall value. (DivMod value, FFI value) => Member value
 modBySelf = PostOp BinaryOperator.Mod ((%) :: value -> value -> value)
+
+dot ::
+  forall rhs value result.
+  (DotMultiplication value rhs result, FFI value, FFI rhs, FFI result) =>
+  Self (value -> rhs -> result) ->
+  Member value
+dot _ = PostOp BinaryOperator.Dot ((<>) :: value -> rhs -> result)
+
+dotSelf ::
+  forall value result.
+  (DotMultiplication value value result, FFI value, FFI result) =>
+  Member value
+dotSelf = dot @value Self
+
+cross ::
+  forall rhs value result.
+  (CrossMultiplication value rhs result, FFI value, FFI rhs, FFI result) =>
+  Self (value -> rhs -> result) ->
+  Member value
+cross _ = PostOp BinaryOperator.Cross ((><) :: value -> rhs -> result)
+
+crossSelf ::
+  forall value result.
+  (CrossMultiplication value value result, FFI value, FFI result) =>
+  Member value
+crossSelf = cross @value Self
 
 nested :: FFI nested => Text -> List (Member nested) -> Member value
 nested = Nested

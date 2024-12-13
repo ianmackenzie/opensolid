@@ -25,7 +25,8 @@ definition classId (operatorId, operators) = do
         [ Python.lines (List.map overloadDeclaration overloads)
         , "def " + functionName operatorId + "(self, " + rhsArgName + "):"
         , Python.indent
-            [ "match " + rhsArgName + ":"
+            [ documentation operatorId
+            , "match " + rhsArgName + ":"
             , Python.indent
                 [ Python.lines (List.map overloadCase overloads)
                 , "case _:"
@@ -33,6 +34,12 @@ definition classId (operatorId, operators) = do
                 ]
             ]
         ]
+
+documentation :: BinaryOperator.Id -> Text
+documentation operatorId = case operatorId of
+  BinaryOperator.Dot -> "\"\"\"Compute the dot product of two vector-like values.\"\"\""
+  BinaryOperator.Cross -> "\"\"\"Compute the cross product of two vector-like values.\"\"\""
+  _ -> ""
 
 functionName :: BinaryOperator.Id -> Text
 functionName operatorId = case operatorId of
@@ -42,6 +49,8 @@ functionName operatorId = case operatorId of
   BinaryOperator.Div -> "__truediv__"
   BinaryOperator.FloorDiv -> "__floordiv__"
   BinaryOperator.Mod -> "__mod__"
+  BinaryOperator.Dot -> "dot"
+  BinaryOperator.Cross -> "cross"
 
 overload :: FFI.Id value -> BinaryOperator.Id -> PostOperator value -> (Text, Text, Text)
 overload classId operatorId memberFunction = do

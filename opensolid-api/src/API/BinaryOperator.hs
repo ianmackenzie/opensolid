@@ -11,7 +11,7 @@ import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import Text qualified
 
-data Id = Add | Sub | Mul | Div | FloorDiv | Mod deriving (Eq)
+data Id = Add | Sub | Mul | Div | FloorDiv | Mod | Dot | Cross deriving (Eq)
 
 ffiName :: FFI.Id value -> Id -> (FFI.Type, FFI.Type, FFI.Type) -> Text
 ffiName classId operatorId (lhsType, rhsType, _) =
@@ -31,6 +31,8 @@ functionName id = case id of
   Div -> "div"
   FloorDiv -> "floorDiv"
   Mod -> "mod"
+  Dot -> "dot"
+  Cross -> "cross"
 
 functionSignature ::
   forall a b c.

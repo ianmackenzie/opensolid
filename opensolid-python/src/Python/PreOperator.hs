@@ -42,6 +42,8 @@ functionName operatorId = case operatorId of
   BinaryOperator.Div -> "__rtruediv__"
   BinaryOperator.FloorDiv -> "__rfloordiv__"
   BinaryOperator.Mod -> "__rmod__"
+  BinaryOperator.Dot -> internalError "Dot product should never be a pre-operator"
+  BinaryOperator.Cross -> internalError "Cross product should never be a pre-operator"
 
 overload :: FFI.Id value -> BinaryOperator.Id -> PreOperator value -> (Text, Text, Text)
 overload classId operatorId memberFunction = do
