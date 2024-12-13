@@ -953,11 +953,11 @@ buildClass
           Member0 name f memberDocs ->
             addMember name (MemberFunction0 f memberDocs)
           MemberU0 name f memberDocs ->
-            addMember name (MemberFunction0U f memberDocs)
+            addMember name (MemberFunctionU0 f memberDocs)
           MemberR0 name f memberDocs ->
-            addMember name (MemberFunction0R f memberDocs)
+            addMember name (MemberFunctionR0 f memberDocs)
           MemberM0 name f memberDocs ->
-            addMember name (MemberFunction0M f memberDocs)
+            addMember name (MemberFunctionM0 f memberDocs)
           Member1 name arg1 f memberDocs ->
             addMember name (MemberFunction1 (FFI.name arg1) f memberDocs)
           Equality ->

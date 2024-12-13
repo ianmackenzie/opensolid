@@ -26,17 +26,17 @@ data MemberFunction value where
     (value -> result) ->
     Text ->
     MemberFunction value
-  MemberFunction0U ::
+  MemberFunctionU0 ::
     (FFI value, FFI result) =>
     (Tolerance Unitless => value -> result) ->
     Text ->
     MemberFunction value
-  MemberFunction0R ::
+  MemberFunctionR0 ::
     (FFI value, FFI result) =>
     (Tolerance Radians => value -> result) ->
     Text ->
     MemberFunction value
-  MemberFunction0M ::
+  MemberFunctionM0 ::
     (FFI value, FFI result) =>
     (Tolerance Meters => value -> result) ->
     Text ->
@@ -47,19 +47,19 @@ data MemberFunction value where
     (a -> value -> result) ->
     Text ->
     MemberFunction value
-  MemberFunction1U ::
+  MemberFunctionU1 ::
     (FFI a, FFI value, FFI result) =>
     Name ->
     (Tolerance Unitless => a -> value -> result) ->
     Text ->
     MemberFunction value
-  MemberFunction1R ::
+  MemberFunctionR1 ::
     (FFI a, FFI value, FFI result) =>
     Name ->
     (Tolerance Radians => a -> value -> result) ->
     Text ->
     MemberFunction value
-  MemberFunction1M ::
+  MemberFunctionM1 ::
     (FFI a, FFI value, FFI result) =>
     Name ->
     (Tolerance Meters => a -> value -> result) ->
@@ -72,21 +72,21 @@ data MemberFunction value where
     (a -> b -> value -> result) ->
     Text ->
     MemberFunction value
-  MemberFunction2U ::
+  MemberFunctionU2 ::
     (FFI a, FFI b, FFI value, FFI result) =>
     Name ->
     Name ->
     (Tolerance Unitless => a -> b -> value -> result) ->
     Text ->
     MemberFunction value
-  MemberFunction2R ::
+  MemberFunctionR2 ::
     (FFI a, FFI b, FFI value, FFI result) =>
     Name ->
     Name ->
     (Tolerance Radians => a -> b -> value -> result) ->
     Text ->
     MemberFunction value
-  MemberFunction2M ::
+  MemberFunctionM2 ::
     (FFI a, FFI b, FFI value, FFI result) =>
     Name ->
     Name ->
@@ -101,7 +101,7 @@ data MemberFunction value where
     (a -> b -> c -> value -> result) ->
     Text ->
     MemberFunction value
-  MemberFunction3U ::
+  MemberFunctionU3 ::
     (FFI a, FFI b, FFI c, FFI value, FFI result) =>
     Name ->
     Name ->
@@ -109,7 +109,7 @@ data MemberFunction value where
     (Tolerance Unitless => a -> b -> c -> value -> result) ->
     Text ->
     MemberFunction value
-  MemberFunction3R ::
+  MemberFunctionR3 ::
     (FFI a, FFI b, FFI c, FFI value, FFI result) =>
     Name ->
     Name ->
@@ -117,7 +117,7 @@ data MemberFunction value where
     (Tolerance Radians => a -> b -> c -> value -> result) ->
     Text ->
     MemberFunction value
-  MemberFunction3M ::
+  MemberFunctionM3 ::
     (FFI a, FFI b, FFI c, FFI value, FFI result) =>
     Name ->
     Name ->
@@ -134,7 +134,7 @@ data MemberFunction value where
     (a -> b -> c -> d -> value -> result) ->
     Text ->
     MemberFunction value
-  MemberFunction4U ::
+  MemberFunctionU4 ::
     (FFI a, FFI b, FFI c, FFI d, FFI value, FFI result) =>
     Name ->
     Name ->
@@ -143,7 +143,7 @@ data MemberFunction value where
     (Tolerance Unitless => a -> b -> c -> d -> value -> result) ->
     Text ->
     MemberFunction value
-  MemberFunction4R ::
+  MemberFunctionR4 ::
     (FFI a, FFI b, FFI c, FFI d, FFI value, FFI result) =>
     Name ->
     Name ->
@@ -152,7 +152,7 @@ data MemberFunction value where
     (Tolerance Radians => a -> b -> c -> d -> value -> result) ->
     Text ->
     MemberFunction value
-  MemberFunction4M ::
+  MemberFunctionM4 ::
     (FFI a, FFI b, FFI c, FFI d, FFI value, FFI result) =>
     Name ->
     Name ->
@@ -178,15 +178,15 @@ invoke function = case function of
     \inputPtr outputPtr -> IO.do
       self <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (f self)
-  MemberFunction0U f _ ->
+  MemberFunctionU0 f _ ->
     \inputPtr outputPtr -> IO.do
       (tolerance, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f self))
-  MemberFunction0R f _ ->
+  MemberFunctionR0 f _ ->
     \inputPtr outputPtr -> IO.do
       (tolerance, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f self))
-  MemberFunction0M f _ ->
+  MemberFunctionM0 f _ ->
     \inputPtr outputPtr -> IO.do
       (tolerance, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f self))
@@ -194,15 +194,15 @@ invoke function = case function of
     \inputPtr outputPtr -> IO.do
       (arg1, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (f arg1 self)
-  MemberFunction1U _ f _ ->
+  MemberFunctionU1 _ f _ ->
     \inputPtr outputPtr -> IO.do
       (tolerance, arg1, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 self))
-  MemberFunction1R _ f _ ->
+  MemberFunctionR1 _ f _ ->
     \inputPtr outputPtr -> IO.do
       (tolerance, arg1, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 self))
-  MemberFunction1M _ f _ ->
+  MemberFunctionM1 _ f _ ->
     \inputPtr outputPtr -> IO.do
       (tolerance, arg1, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 self))
@@ -210,15 +210,15 @@ invoke function = case function of
     \inputPtr outputPtr -> IO.do
       (arg1, arg2, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (f arg1 arg2 self)
-  MemberFunction2U _ _ f _ ->
+  MemberFunctionU2 _ _ f _ ->
     \inputPtr outputPtr -> IO.do
       (tolerance, arg1, arg2, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 arg2 self))
-  MemberFunction2R _ _ f _ ->
+  MemberFunctionR2 _ _ f _ ->
     \inputPtr outputPtr -> IO.do
       (tolerance, arg1, arg2, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 arg2 self))
-  MemberFunction2M _ _ f _ ->
+  MemberFunctionM2 _ _ f _ ->
     \inputPtr outputPtr -> IO.do
       (tolerance, arg1, arg2, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 arg2 self))
@@ -226,15 +226,15 @@ invoke function = case function of
     \inputPtr outputPtr -> IO.do
       (arg1, arg2, arg3, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (f arg1 arg2 arg3 self)
-  MemberFunction3U _ _ _ f _ ->
+  MemberFunctionU3 _ _ _ f _ ->
     \inputPtr outputPtr -> IO.do
       (tolerance, arg1, arg2, arg3, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 arg2 arg3 self))
-  MemberFunction3R _ _ _ f _ ->
+  MemberFunctionR3 _ _ _ f _ ->
     \inputPtr outputPtr -> IO.do
       (tolerance, arg1, arg2, arg3, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 arg2 arg3 self))
-  MemberFunction3M _ _ _ f _ ->
+  MemberFunctionM3 _ _ _ f _ ->
     \inputPtr outputPtr -> IO.do
       (tolerance, arg1, arg2, arg3, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 arg2 arg3 self))
@@ -242,15 +242,15 @@ invoke function = case function of
     \inputPtr outputPtr -> IO.do
       (arg1, arg2, arg3, arg4, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (f arg1 arg2 arg3 arg4 self)
-  MemberFunction4U _ _ _ _ f _ ->
+  MemberFunctionU4 _ _ _ _ f _ ->
     \inputPtr outputPtr -> IO.do
       (tolerance, arg1, arg2, arg3, arg4, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 arg2 arg3 arg4 self))
-  MemberFunction4R _ _ _ _ f _ ->
+  MemberFunctionR4 _ _ _ _ f _ ->
     \inputPtr outputPtr -> IO.do
       (tolerance, arg1, arg2, arg3, arg4, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 arg2 arg3 arg4 self))
-  MemberFunction4M _ _ _ _ f _ ->
+  MemberFunctionM4 _ _ _ _ f _ ->
     \inputPtr outputPtr -> IO.do
       (tolerance, arg1, arg2, arg3, arg4, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 arg2 arg3 arg4 self))
@@ -260,25 +260,25 @@ type Signature = (Maybe Constraint, List (Name, FFI.Type), FFI.Type, FFI.Type)
 signature :: MemberFunction value -> (Maybe Constraint, List (Name, FFI.Type), FFI.Type, FFI.Type)
 signature memberFunction = case memberFunction of
   MemberFunction0 f _ -> signature0 f
-  MemberFunction0U f _ -> signature0U f
-  MemberFunction0R f _ -> signature0R f
-  MemberFunction0M f _ -> signature0M f
+  MemberFunctionU0 f _ -> signatureU0 f
+  MemberFunctionR0 f _ -> signatureR0 f
+  MemberFunctionM0 f _ -> signatureM0 f
   MemberFunction1 arg1 f _ -> signature1 arg1 f
-  MemberFunction1U arg1 f _ -> signature1U arg1 f
-  MemberFunction1R arg1 f _ -> signature1R arg1 f
-  MemberFunction1M arg1 f _ -> signature1M arg1 f
+  MemberFunctionU1 arg1 f _ -> signatureU1 arg1 f
+  MemberFunctionR1 arg1 f _ -> signatureR1 arg1 f
+  MemberFunctionM1 arg1 f _ -> signatureM1 arg1 f
   MemberFunction2 arg1 arg2 f _ -> signature2 arg1 arg2 f
-  MemberFunction2U arg1 arg2 f _ -> signature2U arg1 arg2 f
-  MemberFunction2R arg1 arg2 f _ -> signature2R arg1 arg2 f
-  MemberFunction2M arg1 arg2 f _ -> signature2M arg1 arg2 f
+  MemberFunctionU2 arg1 arg2 f _ -> signatureU2 arg1 arg2 f
+  MemberFunctionR2 arg1 arg2 f _ -> signatureR2 arg1 arg2 f
+  MemberFunctionM2 arg1 arg2 f _ -> signatureM2 arg1 arg2 f
   MemberFunction3 arg1 arg2 arg3 f _ -> signature3 arg1 arg2 arg3 f
-  MemberFunction3U arg1 arg2 arg3 f _ -> signature3U arg1 arg2 arg3 f
-  MemberFunction3R arg1 arg2 arg3 f _ -> signature3R arg1 arg2 arg3 f
-  MemberFunction3M arg1 arg2 arg3 f _ -> signature3M arg1 arg2 arg3 f
+  MemberFunctionU3 arg1 arg2 arg3 f _ -> signatureU3 arg1 arg2 arg3 f
+  MemberFunctionR3 arg1 arg2 arg3 f _ -> signatureR3 arg1 arg2 arg3 f
+  MemberFunctionM3 arg1 arg2 arg3 f _ -> signatureM3 arg1 arg2 arg3 f
   MemberFunction4 arg1 arg2 arg3 arg4 f _ -> signature4 arg1 arg2 arg3 arg4 f
-  MemberFunction4U arg1 arg2 arg3 arg4 f _ -> signature4U arg1 arg2 arg3 arg4 f
-  MemberFunction4R arg1 arg2 arg3 arg4 f _ -> signature4R arg1 arg2 arg3 arg4 f
-  MemberFunction4M arg1 arg2 arg3 arg4 f _ -> signature4M arg1 arg2 arg3 arg4 f
+  MemberFunctionU4 arg1 arg2 arg3 arg4 f _ -> signatureU4 arg1 arg2 arg3 arg4 f
+  MemberFunctionR4 arg1 arg2 arg3 arg4 f _ -> signatureR4 arg1 arg2 arg3 arg4 f
+  MemberFunctionM4 arg1 arg2 arg3 arg4 f _ -> signatureM4 arg1 arg2 arg3 arg4 f
 
 signature0 ::
   forall value result.
@@ -287,26 +287,26 @@ signature0 ::
   Signature
 signature0 _ = (Nothing, [], FFI.typeOf @value Proxy, FFI.typeOf @result Proxy)
 
-signature0U ::
+signatureU0 ::
   forall value result.
   (FFI value, FFI result) =>
   (Tolerance Unitless => value -> result) ->
   Signature
-signature0U _ = (Just ToleranceUnitless, [], FFI.typeOf @value Proxy, FFI.typeOf @result Proxy)
+signatureU0 _ = (Just ToleranceUnitless, [], FFI.typeOf @value Proxy, FFI.typeOf @result Proxy)
 
-signature0R ::
+signatureR0 ::
   forall value result.
   (FFI value, FFI result) =>
   (Tolerance Radians => value -> result) ->
   Signature
-signature0R _ = (Just ToleranceRadians, [], FFI.typeOf @value Proxy, FFI.typeOf @result Proxy)
+signatureR0 _ = (Just ToleranceRadians, [], FFI.typeOf @value Proxy, FFI.typeOf @result Proxy)
 
-signature0M ::
+signatureM0 ::
   forall value result.
   (FFI value, FFI result) =>
   (Tolerance Meters => value -> result) ->
   Signature
-signature0M _ = (Just ToleranceMeters, [], FFI.typeOf @value Proxy, FFI.typeOf @result Proxy)
+signatureM0 _ = (Just ToleranceMeters, [], FFI.typeOf @value Proxy, FFI.typeOf @result Proxy)
 
 signature1 ::
   forall a value result.
@@ -321,39 +321,39 @@ signature1 arg1 _ =
   , FFI.typeOf @result Proxy
   )
 
-signature1U ::
+signatureU1 ::
   forall a value result.
   (FFI a, FFI value, FFI result) =>
   Name ->
   (Tolerance Unitless => a -> value -> result) ->
   Signature
-signature1U arg1 _ =
+signatureU1 arg1 _ =
   ( Just ToleranceUnitless
   , [(arg1, FFI.typeOf @a Proxy)]
   , FFI.typeOf @value Proxy
   , FFI.typeOf @result Proxy
   )
 
-signature1R ::
+signatureR1 ::
   forall a value result.
   (FFI a, FFI value, FFI result) =>
   Name ->
   (Tolerance Radians => a -> value -> result) ->
   Signature
-signature1R arg1 _ =
+signatureR1 arg1 _ =
   ( Just ToleranceRadians
   , [(arg1, FFI.typeOf @a Proxy)]
   , FFI.typeOf @value Proxy
   , FFI.typeOf @result Proxy
   )
 
-signature1M ::
+signatureM1 ::
   forall a value result.
   (FFI a, FFI value, FFI result) =>
   Name ->
   (Tolerance Meters => a -> value -> result) ->
   Signature
-signature1M arg1 _ =
+signatureM1 arg1 _ =
   ( Just ToleranceMeters
   , [(arg1, FFI.typeOf @a Proxy)]
   , FFI.typeOf @value Proxy
@@ -377,14 +377,14 @@ signature2 arg1 arg2 _ =
   , FFI.typeOf @result Proxy
   )
 
-signature2U ::
+signatureU2 ::
   forall a b value result.
   (FFI a, FFI b, FFI value, FFI result) =>
   Name ->
   Name ->
   (Tolerance Unitless => a -> b -> value -> result) ->
   Signature
-signature2U arg1 arg2 _ =
+signatureU2 arg1 arg2 _ =
   ( Just ToleranceUnitless
   ,
     [ (arg1, FFI.typeOf @a Proxy)
@@ -394,14 +394,14 @@ signature2U arg1 arg2 _ =
   , FFI.typeOf @result Proxy
   )
 
-signature2R ::
+signatureR2 ::
   forall a b value result.
   (FFI a, FFI b, FFI value, FFI result) =>
   Name ->
   Name ->
   (Tolerance Radians => a -> b -> value -> result) ->
   Signature
-signature2R arg1 arg2 _ =
+signatureR2 arg1 arg2 _ =
   ( Just ToleranceRadians
   ,
     [ (arg1, FFI.typeOf @a Proxy)
@@ -411,14 +411,14 @@ signature2R arg1 arg2 _ =
   , FFI.typeOf @result Proxy
   )
 
-signature2M ::
+signatureM2 ::
   forall a b value result.
   (FFI a, FFI b, FFI value, FFI result) =>
   Name ->
   Name ->
   (Tolerance Meters => a -> b -> value -> result) ->
   Signature
-signature2M arg1 arg2 _ =
+signatureM2 arg1 arg2 _ =
   ( Just ToleranceMeters
   ,
     [ (arg1, FFI.typeOf @a Proxy)
@@ -447,7 +447,7 @@ signature3 arg1 arg2 arg3 _ =
   , FFI.typeOf @result Proxy
   )
 
-signature3U ::
+signatureU3 ::
   forall a b c value result.
   (FFI a, FFI b, FFI c, FFI value, FFI result) =>
   Name ->
@@ -455,7 +455,7 @@ signature3U ::
   Name ->
   (Tolerance Unitless => a -> b -> c -> value -> result) ->
   Signature
-signature3U arg1 arg2 arg3 _ =
+signatureU3 arg1 arg2 arg3 _ =
   ( Just ToleranceUnitless
   ,
     [ (arg1, FFI.typeOf @a Proxy)
@@ -466,7 +466,7 @@ signature3U arg1 arg2 arg3 _ =
   , FFI.typeOf @result Proxy
   )
 
-signature3R ::
+signatureR3 ::
   forall a b c value result.
   (FFI a, FFI b, FFI c, FFI value, FFI result) =>
   Name ->
@@ -474,7 +474,7 @@ signature3R ::
   Name ->
   (Tolerance Radians => a -> b -> c -> value -> result) ->
   Signature
-signature3R arg1 arg2 arg3 _ =
+signatureR3 arg1 arg2 arg3 _ =
   ( Just ToleranceRadians
   ,
     [ (arg1, FFI.typeOf @a Proxy)
@@ -485,7 +485,7 @@ signature3R arg1 arg2 arg3 _ =
   , FFI.typeOf @result Proxy
   )
 
-signature3M ::
+signatureM3 ::
   forall a b c value result.
   (FFI a, FFI b, FFI c, FFI value, FFI result) =>
   Name ->
@@ -493,7 +493,7 @@ signature3M ::
   Name ->
   (Tolerance Meters => a -> b -> c -> value -> result) ->
   Signature
-signature3M arg1 arg2 arg3 _ =
+signatureM3 arg1 arg2 arg3 _ =
   ( Just ToleranceMeters
   ,
     [ (arg1, FFI.typeOf @a Proxy)
@@ -525,7 +525,7 @@ signature4 arg1 arg2 arg3 arg4 _ =
   , FFI.typeOf @result Proxy
   )
 
-signature4U ::
+signatureU4 ::
   forall a b c d value result.
   (FFI a, FFI b, FFI c, FFI d, FFI value, FFI result) =>
   Name ->
@@ -534,7 +534,7 @@ signature4U ::
   Name ->
   (Tolerance Unitless => a -> b -> c -> d -> value -> result) ->
   Signature
-signature4U arg1 arg2 arg3 arg4 _ =
+signatureU4 arg1 arg2 arg3 arg4 _ =
   ( Just ToleranceUnitless
   ,
     [ (arg1, FFI.typeOf @a Proxy)
@@ -546,7 +546,7 @@ signature4U arg1 arg2 arg3 arg4 _ =
   , FFI.typeOf @result Proxy
   )
 
-signature4R ::
+signatureR4 ::
   forall a b c d value result.
   (FFI a, FFI b, FFI c, FFI d, FFI value, FFI result) =>
   Name ->
@@ -555,7 +555,7 @@ signature4R ::
   Name ->
   (Tolerance Radians => a -> b -> c -> d -> value -> result) ->
   Signature
-signature4R arg1 arg2 arg3 arg4 _ =
+signatureR4 arg1 arg2 arg3 arg4 _ =
   ( Just ToleranceRadians
   ,
     [ (arg1, FFI.typeOf @a Proxy)
@@ -567,7 +567,7 @@ signature4R arg1 arg2 arg3 arg4 _ =
   , FFI.typeOf @result Proxy
   )
 
-signature4M ::
+signatureM4 ::
   forall a b c d value result.
   (FFI a, FFI b, FFI c, FFI d, FFI value, FFI result) =>
   Name ->
@@ -576,7 +576,7 @@ signature4M ::
   Name ->
   (Tolerance Meters => a -> b -> c -> d -> value -> result) ->
   Signature
-signature4M arg1 arg2 arg3 arg4 _ =
+signatureM4 arg1 arg2 arg3 arg4 _ =
   ( Just ToleranceMeters
   ,
     [ (arg1, FFI.typeOf @a Proxy)
@@ -591,22 +591,22 @@ signature4M arg1 arg2 arg3 arg4 _ =
 documentation :: MemberFunction a -> Text
 documentation memberFunction = case memberFunction of
   MemberFunction0 _ docs -> docs
-  MemberFunction0U _ docs -> docs
-  MemberFunction0R _ docs -> docs
-  MemberFunction0M _ docs -> docs
+  MemberFunctionU0 _ docs -> docs
+  MemberFunctionR0 _ docs -> docs
+  MemberFunctionM0 _ docs -> docs
   MemberFunction1 _ _ docs -> docs
-  MemberFunction1U _ _ docs -> docs
-  MemberFunction1R _ _ docs -> docs
-  MemberFunction1M _ _ docs -> docs
+  MemberFunctionU1 _ _ docs -> docs
+  MemberFunctionR1 _ _ docs -> docs
+  MemberFunctionM1 _ _ docs -> docs
   MemberFunction2 _ _ _ docs -> docs
-  MemberFunction2U _ _ _ docs -> docs
-  MemberFunction2R _ _ _ docs -> docs
-  MemberFunction2M _ _ _ docs -> docs
+  MemberFunctionU2 _ _ _ docs -> docs
+  MemberFunctionR2 _ _ _ docs -> docs
+  MemberFunctionM2 _ _ _ docs -> docs
   MemberFunction3 _ _ _ _ docs -> docs
-  MemberFunction3U _ _ _ _ docs -> docs
-  MemberFunction3R _ _ _ _ docs -> docs
-  MemberFunction3M _ _ _ _ docs -> docs
+  MemberFunctionU3 _ _ _ _ docs -> docs
+  MemberFunctionR3 _ _ _ _ docs -> docs
+  MemberFunctionM3 _ _ _ _ docs -> docs
   MemberFunction4 _ _ _ _ _ docs -> docs
-  MemberFunction4U _ _ _ _ _ docs -> docs
-  MemberFunction4R _ _ _ _ _ docs -> docs
-  MemberFunction4M _ _ _ _ _ docs -> docs
+  MemberFunctionU4 _ _ _ _ _ docs -> docs
+  MemberFunctionR4 _ _ _ _ _ docs -> docs
+  MemberFunctionM4 _ _ _ _ _ docs -> docs
