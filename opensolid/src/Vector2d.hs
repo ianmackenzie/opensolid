@@ -353,6 +353,19 @@ squaredMagnitude = Units.specialize . squaredMagnitude'
 squaredMagnitude' :: Vector2d (space @ units) -> Qty (units :*: units)
 squaredMagnitude' (Vector2d# vx# vy#) = Qty# (vx# *# vx# +# vy# *# vy#)
 
+{-| Get the angle of a vector.
+
+The angle is measured counterclockwise from the positive X axis, so:
+
+  * A vector in the positive X direction has an angle of zero.
+  * A vector in the positive Y direction has an angle of 90 degrees.
+  * A vector in the negative Y direction has an angle of -90 degrees.
+  * It is not defined whether a vector exactly in the negative X direction has
+    an angle of -180 or +180 degrees. (Currently it is reported as having an
+    angle of +180 degrees, but this should not be relied upon.)
+
+The returned angle will be between -180 and +180 degrees.
+-}
 angle :: Vector2d (space @ units) -> Angle
 angle (Vector2d vx vy) = Angle.atan2 vy vx
 
