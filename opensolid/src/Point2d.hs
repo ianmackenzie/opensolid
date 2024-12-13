@@ -180,6 +180,7 @@ xyIn :: Frame2d (space @ units) defines -> Qty units -> Qty units -> Point2d (sp
 xyIn frame px py =
   Frame2d.originPoint frame + px * Frame2d.xDirection frame + py * Frame2d.yDirection frame
 
+-- | Construct a point from a pair of X and Y coordinates.
 fromCoordinates :: forall space units. (Qty units, Qty units) -> Point2d (space @ units)
 fromCoordinates (px, py) = Point2d px py
 
