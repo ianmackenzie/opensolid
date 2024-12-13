@@ -248,7 +248,7 @@ instance
 zero :: Vector2d (space @ units)
 zero = Vector2d# 0.0## 0.0##
 
--- | The unit vector in a given direction.
+-- | Construct a unit vector in the given direction.
 unit :: Direction2d space -> Vector2d (space @ Unitless)
 unit = Direction2d.unwrap
 
