@@ -226,6 +226,11 @@ See 'fromAngle' for details.
 radians :: Float -> Direction2d space
 radians value = fromAngle (Angle.radians value)
 
+{-| Measure the signed angle from one direction to another.
+
+The angle will be measured counterclockwise from the first direction to the
+second, and will always be between -180 and +180 degrees.
+-}
 angleFrom :: Direction2d space -> Direction2d space -> Angle
 angleFrom d1 d2 = Angle.atan2 (d1 >< d2) (d1 <> d2)
 
