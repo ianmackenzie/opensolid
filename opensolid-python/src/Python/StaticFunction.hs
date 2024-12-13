@@ -24,10 +24,17 @@ definition :: FFI.Id a -> (Name, List StaticFunction) -> Text
 definition classId (functionName, staticFunctions) = do
   let sortedFunctions = List.reverse (List.sortBy argumentCount staticFunctions)
   case List.map (overload classId functionName) sortedFunctions of
-    [(signature, _, body)] -> Python.lines [signature, Python.indent [body]]
+    [(signature, _, body, documentation)] ->
+      Python.lines
+        [ signature
+        , Python.indent
+            [ Python.docstring documentation
+            , body
+            ]
+        ]
     overloads -> do
-      let overloadDeclaration (signature, _, _) = Python.Function.overloadDeclaration signature
-      let overloadCase (_, matchPattern, body) = Python.Function.overloadCase matchPattern [body]
+      let overloadDeclaration (signature, _, _, _) = Python.Function.overloadDeclaration signature
+      let overloadCase (_, matchPattern, body, _) = Python.Function.overloadCase matchPattern [body]
       Python.lines
         [ Python.lines (List.map overloadDeclaration overloads)
         , ""
@@ -46,14 +53,14 @@ definition classId (functionName, staticFunctions) = do
             ]
         ]
 
-overload :: FFI.Id a -> Name -> StaticFunction -> (Text, Text, Text)
+overload :: FFI.Id a -> Name -> StaticFunction -> (Text, Text, Text, Text)
 overload classId functionName staticFunction = do
   let ffiFunctionName = StaticFunction.ffiName classId functionName staticFunction
   let (maybeConstraint, arguments, returnType) = StaticFunction.signature staticFunction
   let signature = overloadSignature functionName arguments (Python.Type.qualifiedName returnType)
   let matchPattern = Python.Function.matchPattern arguments
   let body = overloadBody ffiFunctionName maybeConstraint arguments returnType
-  (signature, matchPattern, body)
+  (signature, matchPattern, body, StaticFunction.documentation staticFunction)
 
 overloadSignature :: Name -> List (Name, FFI.Type) -> Text -> Text
 overloadSignature functionName args returnType = do

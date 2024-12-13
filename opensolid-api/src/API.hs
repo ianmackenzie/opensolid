@@ -105,11 +105,11 @@ length =
     , constant "Millimeter" Length.millimeter $(docs 'Length.millimeter)
     , constant "Inch" Length.inch $(docs 'Length.inch)
     , constant "Pixel" Length.pixel $(docs 'Length.pixel)
-    , factory1 "Meters" "Value" Length.meters
-    , factory1 "Centimeters" "Value" Length.centimeters
-    , factory1 "Millimeters" "Value" Length.millimeters
-    , factory1 "Inches" "Value" Length.inches
-    , factory1 "Pixels" "Value" Length.pixels
+    , factory1 "Meters" "Value" Length.meters $(docs 'Length.meters)
+    , factory1 "Centimeters" "Value" Length.centimeters $(docs 'Length.centimeters)
+    , factory1 "Millimeters" "Value" Length.millimeters $(docs 'Length.millimeters)
+    , factory1 "Inches" "Value" Length.inches $(docs 'Length.inches)
+    , factory1 "Pixels" "Value" Length.pixels $(docs 'Length.pixels)
     , member0 "In Meters" Length.inMeters $(docs 'Length.inMeters)
     , member0 "In Centimeters" Length.inCentimeters $(docs 'Length.inCentimeters)
     , member0 "In Millimeters" Length.inMillimeters $(docs 'Length.inMillimeters)
@@ -153,12 +153,12 @@ angle =
     , constant "Quarter Turn" Angle.quarterTurn $(docs 'Angle.quarterTurn)
     , constant "Pi" Angle.pi $(docs 'Angle.pi)
     , constant "Two Pi" Angle.twoPi $(docs 'Angle.twoPi)
-    , factory1 "Radians" "Value" Angle.radians
-    , factory1 "Degrees" "Value" Angle.degrees
-    , factory1 "Turns" "Value" Angle.turns
-    , factory1 "Acos" "Value" Angle.acos
-    , factory1 "Asin" "Value" Angle.asin
-    , factory1 "Atan" "Value" Angle.atan
+    , factory1 "Radians" "Value" Angle.radians $(docs 'Angle.radians)
+    , factory1 "Degrees" "Value" Angle.degrees $(docs 'Angle.degrees)
+    , factory1 "Turns" "Value" Angle.turns $(docs 'Angle.turns)
+    , factory1 "Acos" "Value" Angle.acos $(docs 'Angle.acos)
+    , factory1 "Asin" "Value" Angle.asin $(docs 'Angle.asin)
+    , factory1 "Atan" "Value" Angle.atan $(docs 'Angle.atan)
     , member0 "In Radians" Angle.inRadians $(docs 'Angle.inRadians)
     , member0 "In Degrees" Angle.inDegrees $(docs 'Angle.inDegrees)
     , member0 "In Turns" Angle.inTurns $(docs 'Angle.inTurns)
@@ -193,10 +193,10 @@ range =
   class_ @(Range Unitless)
     "A range of unitless values, with a lower bound and upper bound."
     [ constant "Unit" Range.unit $(docs 'Range.unit)
-    , factory1 "Constant" "Value" Range.constant
-    , factory2 "From Endpoints" "A" "B" Range.from
-    , factory1 "Hull" "Values" Range.hullN
-    , factory1 "Aggregate" "Ranges" Range.aggregateN
+    , factory1 "Constant" "Value" Range.constant $(docs 'Range.constant)
+    , factory2 "From Endpoints" "A" "B" Range.from $(docs 'Range.from)
+    , factory1 "Hull" "Values" Range.hullN $(docs 'Range.hullN)
+    , factory1 "Aggregate" "Ranges" Range.aggregateN $(docs 'Range.aggregateN)
     , member0 "Endpoints" Range.endpoints $(docs 'Range.endpoints)
     , member0 "Lower Bound" Range.lowerBound $(docs 'Range.lowerBound)
     , member0 "Upper Bound" Range.upperBound $(docs 'Range.upperBound)
@@ -224,14 +224,14 @@ lengthRange :: Class
 lengthRange =
   class_ @(Range Meters)
     "A range of length values, with a lower bound and upper bound."
-    [ factory1 "Constant" "Value" Range.constant
-    , factory2 "From Endpoints" "A" "B" Range.from
-    , factory2 "Meters" "A" "B" Range.meters
-    , factory2 "Centimeters" "A" "B" Range.centimeters
-    , factory2 "Millimeters" "A" "B" Range.millimeters
-    , factory2 "Inches" "A" "B" Range.inches
-    , factory1 "Hull" "Values" Range.hullN
-    , factory1 "Aggregate" "Ranges" Range.aggregateN
+    [ factory1 "Constant" "Value" Range.constant $(docs 'Range.constant)
+    , factory2 "From Endpoints" "A" "B" Range.from $(docs 'Range.from)
+    , factory2 "Meters" "A" "B" Range.meters $(docs 'Range.meters)
+    , factory2 "Centimeters" "A" "B" Range.centimeters $(docs 'Range.centimeters)
+    , factory2 "Millimeters" "A" "B" Range.millimeters $(docs 'Range.millimeters)
+    , factory2 "Inches" "A" "B" Range.inches $(docs 'Range.inches)
+    , factory1 "Hull" "Values" Range.hullN $(docs 'Range.hullN)
+    , factory1 "Aggregate" "Ranges" Range.aggregateN $(docs 'Range.aggregateN)
     , member0 "Endpoints" Range.endpoints $(docs 'Range.endpoints)
     , member1 "Intersection" "Other" Range.intersection $(docs 'Range.intersection)
     , member1 "Includes" "Value" Range.includes $(docs 'Range.includes)
@@ -252,13 +252,13 @@ angleRange :: Class
 angleRange =
   class_ @(Range Radians)
     "A range of angle values, with a lower bound and upper bound."
-    [ factory1 "Constant" "Value" Range.constant
-    , factory2 "From Endpoints" "A" "B" Range.from
-    , factory2 "Radians" "A" "B" Range.radians
-    , factory2 "Degrees" "A" "B" Range.degrees
-    , factory2 "Turns" "A" "B" Range.turns
-    , factory1 "Hull" "Values" Range.hullN
-    , factory1 "Aggregate" "Ranges" Range.aggregateN
+    [ factory1 "Constant" "Value" Range.constant $(docs 'Range.constant)
+    , factory2 "From Endpoints" "A" "B" Range.from $(docs 'Range.from)
+    , factory2 "Radians" "A" "B" Range.radians $(docs 'Range.radians)
+    , factory2 "Degrees" "A" "B" Range.degrees $(docs 'Range.degrees)
+    , factory2 "Turns" "A" "B" Range.turns $(docs 'Range.turns)
+    , factory1 "Hull" "Values" Range.hullN $(docs 'Range.hullN)
+    , factory1 "Aggregate" "Ranges" Range.aggregateN $(docs 'Range.aggregateN)
     , member0 "Endpoints" Range.endpoints $(docs 'Range.endpoints)
     , member1 "Intersection" "Other" Range.intersection $(docs 'Range.intersection)
     , member1 "Includes" "Value" Range.includes $(docs 'Range.includes)
@@ -279,10 +279,10 @@ color :: Class
 color =
   class_ @Color
     $(docs ''Color)
-    [ factory3 "RGB" "Red" "Green" "Blue" Color.rgb
-    , factory3 "RGB 255" "Red" "Green" "Blue" Color.rgb255
-    , factory3 "HSL" "Hue" "Saturation" "Lightness" Color.hsl
-    , factory1 "From Hex" "Hex String" Color.fromHex
+    [ factory3 "RGB" "Red" "Green" "Blue" Color.rgb $(docs 'Color.rgb)
+    , factory3 "RGB 255" "Red" "Green" "Blue" Color.rgb255 $(docs 'Color.rgb255)
+    , factory3 "HSL" "Hue" "Saturation" "Lightness" Color.hsl $(docs 'Color.hsl)
+    , factory1 "From Hex" "Hex String" Color.fromHex $(docs 'Color.fromHex)
     , member0 "To Hex" Color.toHex $(docs 'Color.toHex)
     , member0 "Components" Color.components $(docs 'Color.components)
     , member0 "Components 255" Color.components255 $(docs 'Color.components255)
@@ -324,12 +324,12 @@ vector2d =
   class_ @(Vector2d (Space @ Unitless))
     "A unitless vector in 2D."
     [ constant "Zero" (Vector2d.zero @Space @Unitless) $(docs 'Vector2d.zero)
-    , factory1 "Unit" "Direction" Vector2d.unit
-    , factory2 "XY" "X Component" "Y Component" Vector2d.xy
-    , factory1 "Y" "Y Component" Vector2d.y
-    , factory1 "X" "X Component" Vector2d.x
-    , factory2 "Polar" "Magnitude" "Angle" Vector2d.polar
-    , factory1 "From Components" "Components" Vector2d.fromComponents
+    , factory1 "Unit" "Direction" Vector2d.unit $(docs 'Vector2d.unit)
+    , factory2 "XY" "X Component" "Y Component" Vector2d.xy $(docs 'Vector2d.xy)
+    , factory1 "Y" "Y Component" Vector2d.y $(docs 'Vector2d.y)
+    , factory1 "X" "X Component" Vector2d.x $(docs 'Vector2d.x)
+    , factory2 "Polar" "Magnitude" "Angle" Vector2d.polar $(docs 'Vector2d.polar)
+    , factory1 "From Components" "Components" Vector2d.fromComponents $(docs 'Vector2d.fromComponents)
     , member0 "Components" Vector2d.components $(docs 'Vector2d.components)
     , member0 "X Component" Vector2d.xComponent $(docs 'Vector2d.xComponent)
     , member0 "Y Component" Vector2d.yComponent $(docs 'Vector2d.yComponent)
@@ -349,15 +349,15 @@ displacement2d =
   class_ @(Vector2d (Space @ Meters))
     "A displacement vector in 2D."
     [ constant "Zero" (Vector2d.zero @Space @Meters) $(docs 'Vector2d.zero)
-    , factory2 "XY" "X Component" "Y Component" Vector2d.xy
-    , factory1 "X" "X Component" Vector2d.x
-    , factory1 "Y" "Y Component" Vector2d.y
-    , factory2 "Polar" "Magnitude" "Angle" Vector2d.polar
-    , factory2 "Meters" "X Component" "Y Component" Vector2d.meters
-    , factory2 "Centimeters" "X Component" "Y Component" Vector2d.centimeters
-    , factory2 "Millimeters" "X Component" "Y Component" Vector2d.millimeters
-    , factory2 "Inches" "X Component" "Y Component" Vector2d.inches
-    , factory1 "From Components" "Components" Vector2d.fromComponents
+    , factory2 "XY" "X Component" "Y Component" Vector2d.xy $(docs 'Vector2d.xy)
+    , factory1 "X" "X Component" Vector2d.x $(docs 'Vector2d.x)
+    , factory1 "Y" "Y Component" Vector2d.y $(docs 'Vector2d.y)
+    , factory2 "Polar" "Magnitude" "Angle" Vector2d.polar $(docs 'Vector2d.polar)
+    , factory2 "Meters" "X Component" "Y Component" Vector2d.meters $(docs 'Vector2d.meters)
+    , factory2 "Centimeters" "X Component" "Y Component" Vector2d.centimeters $(docs 'Vector2d.centimeters)
+    , factory2 "Millimeters" "X Component" "Y Component" Vector2d.millimeters $(docs 'Vector2d.millimeters)
+    , factory2 "Inches" "X Component" "Y Component" Vector2d.inches $(docs 'Vector2d.inches)
+    , factory1 "From Components" "Components" Vector2d.fromComponents $(docs 'Vector2d.fromComponents)
     , member0 "Components" Vector2d.components $(docs 'Vector2d.components)
     , member0 "X Component" Vector2d.xComponent $(docs 'Vector2d.xComponent)
     , member0 "Y Component" Vector2d.yComponent $(docs 'Vector2d.yComponent)
@@ -382,9 +382,9 @@ direction2d =
     , constant "Positive Y" Direction2d.positiveY $(docs 'Direction2d.positiveY)
     , constant "Negative X" Direction2d.negativeX $(docs 'Direction2d.negativeX)
     , constant "Negative Y" Direction2d.negativeY $(docs 'Direction2d.negativeY)
-    , factory1 "From Angle" "Angle" Direction2d.fromAngle
-    , factory1 "Degrees" "Value" Direction2d.degrees
-    , factory1 "Radians" "Value" Direction2d.radians
+    , factory1 "From Angle" "Angle" Direction2d.fromAngle $(docs 'Direction2d.fromAngle)
+    , factory1 "Degrees" "Value" Direction2d.degrees $(docs 'Direction2d.degrees)
+    , factory1 "Radians" "Value" Direction2d.radians $(docs 'Direction2d.radians)
     , member0 "To Angle" Direction2d.toAngle $(docs 'Direction2d.toAngle)
     , member1 "Angle To" "Other" Direction2d.angleFrom $(docs 'Direction2d.angleFrom)
     , member0 "Components" Direction2d.components $(docs 'Direction2d.components)
@@ -401,14 +401,14 @@ point2d =
   class_ @(Point2d (Space @ Meters))
     "A point in 2D, defined by its X and Y coordinates."
     [ constant "Origin" (Point2d.origin @Space @Meters) $(docs 'Point2d.origin)
-    , factory2 "XY" "X Coordinate" "Y Coordinate" Point2d.xy
-    , factory1 "X" "X Coordinate" Point2d.x
-    , factory1 "Y" "Y Coordinate" Point2d.y
-    , factory2 "Meters" "X Coordinate" "Y Coordinate" Point2d.meters
-    , factory2 "Centimeters" "X Coordinate" "Y Coordinate" Point2d.centimeters
-    , factory2 "Millimeters" "X Coordinate" "Y Coordinate" Point2d.millimeters
-    , factory2 "Inches" "X Coordinate" "Y Coordinate" Point2d.inches
-    , factory1 "From Coordinates" "Coordinates" Point2d.fromCoordinates
+    , factory2 "XY" "X Coordinate" "Y Coordinate" Point2d.xy $(docs 'Point2d.xy)
+    , factory1 "X" "X Coordinate" Point2d.x $(docs 'Point2d.x)
+    , factory1 "Y" "Y Coordinate" Point2d.y $(docs 'Point2d.y)
+    , factory2 "Meters" "X Coordinate" "Y Coordinate" Point2d.meters $(docs 'Point2d.meters)
+    , factory2 "Centimeters" "X Coordinate" "Y Coordinate" Point2d.centimeters $(docs 'Point2d.centimeters)
+    , factory2 "Millimeters" "X Coordinate" "Y Coordinate" Point2d.millimeters $(docs 'Point2d.millimeters)
+    , factory2 "Inches" "X Coordinate" "Y Coordinate" Point2d.inches $(docs 'Point2d.inches)
+    , factory1 "From Coordinates" "Coordinates" Point2d.fromCoordinates $(docs 'Point2d.fromCoordinates)
     , member0 "Coordinates" Point2d.coordinates $(docs 'Point2d.coordinates)
     , member0 "X Coordinate" Point2d.xCoordinate $(docs 'Point2d.xCoordinate)
     , member0 "Y Coordinate" Point2d.yCoordinate $(docs 'Point2d.yCoordinate)
@@ -424,10 +424,10 @@ uvPoint =
   class_ @(Point2d (Space @ Unitless))
     "A point in UV parameter space."
     [ constant "Origin" (Point2d.origin @Space @Unitless) $(docs 'Point2d.origin)
-    , factory2 "UV" "U Coordinate" "V Coordinate" Point2d.xy
-    , factory1 "U" "U Coordinate" Point2d.x
-    , factory1 "V" "V Coordinate" Point2d.y
-    , factory1 "From Coordinates" "Coordinates" Point2d.fromCoordinates
+    , factory2 "UV" "U Coordinate" "V Coordinate" Point2d.xy $(docs 'Point2d.xy)
+    , factory1 "U" "U Coordinate" Point2d.x $(docs 'Point2d.x)
+    , factory1 "V" "V Coordinate" Point2d.y $(docs 'Point2d.y)
+    , factory1 "From Coordinates" "Coordinates" Point2d.fromCoordinates $(docs 'Point2d.fromCoordinates)
     , member0 "Coordinates" Point2d.coordinates "Get the U and V coordinates of a point."
     , member0 "U Coordinate" Point2d.xCoordinate "Get the U coordinate of a point."
     , member0 "V Coordinate" Point2d.yCoordinate "Get the V coordinate of a point."
@@ -442,11 +442,11 @@ bounds2d :: Class
 bounds2d =
   class_ @(Bounds2d (Space @ Meters))
     "A bounding box in 2D."
-    [ factory2 "XY" "X Coordinate" "Y Coordinate" Bounds2d.xy
-    , factory1 "Constant" "Point" Bounds2d.constant
-    , factory2 "From Corners" "P1" "P2" Bounds2d.hull2
-    , factory1 "Hull" "Points" Bounds2d.hullN
-    , factory1 "Aggregate" "Bounds" Bounds2d.aggregateN
+    [ factory2 "XY" "X Coordinate" "Y Coordinate" Bounds2d.xy $(docs 'Bounds2d.xy)
+    , factory1 "Constant" "Point" Bounds2d.constant $(docs 'Bounds2d.constant)
+    , factory2 "From Corners" "P1" "P2" Bounds2d.hull2 $(docs 'Bounds2d.hull2)
+    , factory1 "Hull" "Points" Bounds2d.hullN $(docs 'Bounds2d.hullN)
+    , factory1 "Aggregate" "Bounds" Bounds2d.aggregateN $(docs 'Bounds2d.aggregateN)
     , member0 "Coordinates" Bounds2d.coordinates $(docs 'Bounds2d.coordinates)
     , member0 "X Coordinate" Bounds2d.xCoordinate $(docs 'Bounds2d.xCoordinate)
     , member0 "Y Coordinate" Bounds2d.yCoordinate $(docs 'Bounds2d.yCoordinate)
@@ -456,11 +456,11 @@ uvBounds :: Class
 uvBounds =
   class_ @(Bounds2d (Space @ Unitless))
     "A bounding box in UV parameter space."
-    [ factory2 "UV" "U Coordinate" "V Coordinate" Bounds2d.xy
-    , factory1 "Constant" "Point" Bounds2d.constant
-    , factory2 "From Corners" "P1" "P2" Bounds2d.hull2
-    , factory1 "Hull" "Points" Bounds2d.hullN
-    , factory1 "Aggregate" "Bounds" Bounds2d.aggregateN
+    [ factory2 "UV" "U Coordinate" "V Coordinate" Bounds2d.xy $(docs 'Bounds2d.xy)
+    , factory1 "Constant" "Point" Bounds2d.constant $(docs 'Bounds2d.constant)
+    , factory2 "From Corners" "P1" "P2" Bounds2d.hull2 $(docs 'Bounds2d.hull2)
+    , factory1 "Hull" "Points" Bounds2d.hullN $(docs 'Bounds2d.hullN)
+    , factory1 "Aggregate" "Bounds" Bounds2d.aggregateN $(docs 'Bounds2d.aggregateN)
     , member0 "Coordinates" Bounds2d.coordinates $(docs 'Bounds2d.coordinates)
     , member0 "U Coordinate" Bounds2d.xCoordinate $(docs 'Bounds2d.xCoordinate)
     , member0 "V Coordinate" Bounds2d.yCoordinate $(docs 'Bounds2d.yCoordinate)
@@ -550,13 +550,13 @@ drawing2d :: Class
 drawing2d =
   class_ @Drawing2d_
     "A set of functions for constructing 2D drawings."
-    [ static2 "To SVG" "View Box" "Entities" Drawing2d.toSvg
-    , static2 "Polygon" "Attributes" "Vertices" Drawing2d.polygon
-    , static3 "Circle" "Attributes" "Center Point" "Radius" Drawing2d.circle
+    [ static2 "To SVG" "View Box" "Entities" Drawing2d.toSvg $(docs 'Drawing2d.toSvg)
+    , static2 "Polygon" "Attributes" "Vertices" Drawing2d.polygon $(docs 'Drawing2d.polygon)
+    , static3 "Circle" "Attributes" "Center Point" "Radius" Drawing2d.circle $(docs 'Drawing2d.circle)
     , constant "Black Stroke" Drawing2d.blackStroke $(docs 'Drawing2d.blackStroke)
-    , static1 "Stroke Color" "Color" Drawing2d.strokeColor
+    , static1 "Stroke Color" "Color" Drawing2d.strokeColor $(docs 'Drawing2d.strokeColor)
     , constant "No Fill" Drawing2d.noFill $(docs 'Drawing2d.noFill)
-    , static1 "Fill Color" "Color" Drawing2d.fillColor
+    , static1 "Fill Color" "Color" Drawing2d.fillColor $(docs 'Drawing2d.fillColor)
     , nested @(Drawing2d.Entity Space) "A drawing entity such as a shape or group." []
     , nested @(Drawing2d.Attribute Space) "A drawing attribute such as fill color or stroke width." []
     ]
@@ -568,10 +568,10 @@ class_ classDocs members = buildClass classDocs members [] [] [] Nothing Nothing
 
 data Member value where
   Const :: FFI result => Text -> result -> Text -> Member value
-  Static1 :: (FFI a, FFI result) => Text -> Text -> (a -> result) -> Member value
-  Static2 :: (FFI a, FFI b, FFI result) => Text -> Text -> Text -> (a -> b -> result) -> Member value
-  Static3 :: (FFI a, FFI b, FFI c, FFI result) => Text -> Text -> Text -> Text -> (a -> b -> c -> result) -> Member value
-  Static4 :: (FFI a, FFI b, FFI c, FFI d, FFI result) => Text -> Text -> Text -> Text -> Text -> (a -> b -> c -> d -> result) -> Member value
+  Static1 :: (FFI a, FFI result) => Text -> Text -> (a -> result) -> Text -> Member value
+  Static2 :: (FFI a, FFI b, FFI result) => Text -> Text -> Text -> (a -> b -> result) -> Text -> Member value
+  Static3 :: (FFI a, FFI b, FFI c, FFI result) => Text -> Text -> Text -> Text -> (a -> b -> c -> result) -> Text -> Member value
+  Static4 :: (FFI a, FFI b, FFI c, FFI d, FFI result) => Text -> Text -> Text -> Text -> Text -> (a -> b -> c -> d -> result) -> Text -> Member value
   Member0 :: (FFI value, FFI result) => Text -> (value -> result) -> Text -> Member value
   MemberU0 :: (FFI value, FFI result) => Text -> (Tolerance Unitless => value -> result) -> Text -> Member value
   MemberR0 :: (FFI value, FFI result) => Text -> (Tolerance Radians => value -> result) -> Text -> Member value
@@ -587,22 +587,22 @@ data Member value where
 constant :: FFI result => Text -> result -> Text -> Member value
 constant = Const
 
-factory1 :: (FFI a, FFI value) => Text -> Text -> (a -> value) -> Member value
+factory1 :: (FFI a, FFI value) => Text -> Text -> (a -> value) -> Text -> Member value
 factory1 = Static1
 
-factory2 :: (FFI a, FFI b, FFI value) => Text -> Text -> Text -> (a -> b -> value) -> Member value
+factory2 :: (FFI a, FFI b, FFI value) => Text -> Text -> Text -> (a -> b -> value) -> Text -> Member value
 factory2 = Static2
 
-factory3 :: (FFI a, FFI b, FFI c, FFI value) => Text -> Text -> Text -> Text -> (a -> b -> c -> value) -> Member value
+factory3 :: (FFI a, FFI b, FFI c, FFI value) => Text -> Text -> Text -> Text -> (a -> b -> c -> value) -> Text -> Member value
 factory3 = Static3
 
-static1 :: (FFI a, FFI result) => Text -> Text -> (a -> result) -> Member value
+static1 :: (FFI a, FFI result) => Text -> Text -> (a -> result) -> Text -> Member value
 static1 = Static1
 
-static2 :: (FFI a, FFI b, FFI result) => Text -> Text -> Text -> (a -> b -> result) -> Member value
+static2 :: (FFI a, FFI b, FFI result) => Text -> Text -> Text -> (a -> b -> result) -> Text -> Member value
 static2 = Static2
 
-static3 :: (FFI a, FFI b, FFI c, FFI result) => Text -> Text -> Text -> Text -> (a -> b -> c -> result) -> Member value
+static3 :: (FFI a, FFI b, FFI c, FFI result) => Text -> Text -> Text -> Text -> (a -> b -> c -> result) -> Text -> Member value
 static3 = Static3
 
 member0 :: (FFI value, FFI result) => Text -> (value -> result) -> Text -> Member value
@@ -879,14 +879,14 @@ buildClass
               preOperatorsAcc
               postOperatorsAcc
               nestedClassesAcc
-          Static1 name arg1 f ->
-            addStatic name (StaticFunction1 (FFI.name arg1) f)
-          Static2 name arg1 arg2 f ->
-            addStatic name (StaticFunction2 (FFI.name arg1) (FFI.name arg2) f)
-          Static3 name arg1 arg2 arg3 f ->
-            addStatic name (StaticFunction3 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) f)
-          Static4 name arg1 arg2 arg3 arg4 f ->
-            addStatic name (StaticFunction4 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) (FFI.name arg4) f)
+          Static1 name arg1 f staticDocs ->
+            addStatic name (StaticFunction1 (FFI.name arg1) f staticDocs)
+          Static2 name arg1 arg2 f staticDocs ->
+            addStatic name (StaticFunction2 (FFI.name arg1) (FFI.name arg2) f staticDocs)
+          Static3 name arg1 arg2 arg3 f staticDocs ->
+            addStatic name (StaticFunction3 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) f staticDocs)
+          Static4 name arg1 arg2 arg3 arg4 f staticDocs ->
+            addStatic name (StaticFunction4 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) (FFI.name arg4) f staticDocs)
           Member0 name f memberDocs ->
             addMember name (MemberFunction0 f memberDocs)
           MemberU0 name f memberDocs ->
