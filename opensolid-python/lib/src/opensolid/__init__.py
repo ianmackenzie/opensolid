@@ -225,6 +225,7 @@ class Length:
 
     @staticmethod
     def meters(value: float) -> Length:
+        """Construct a length from a number of meters."""
         inputs = c_double(value)
         output = c_void_p()
         _lib.opensolid_Length_meters_Float(ctypes.byref(inputs), ctypes.byref(output))
@@ -232,6 +233,7 @@ class Length:
 
     @staticmethod
     def centimeters(value: float) -> Length:
+        """Construct a length from a number of centimeters."""
         inputs = c_double(value)
         output = c_void_p()
         _lib.opensolid_Length_centimeters_Float(
@@ -241,6 +243,7 @@ class Length:
 
     @staticmethod
     def millimeters(value: float) -> Length:
+        """Construct a length value from a number of millimeters."""
         inputs = c_double(value)
         output = c_void_p()
         _lib.opensolid_Length_millimeters_Float(
@@ -250,6 +253,7 @@ class Length:
 
     @staticmethod
     def inches(value: float) -> Length:
+        """Construct a length from a number of inches."""
         inputs = c_double(value)
         output = c_void_p()
         _lib.opensolid_Length_inches_Float(ctypes.byref(inputs), ctypes.byref(output))
@@ -257,6 +261,7 @@ class Length:
 
     @staticmethod
     def pixels(value: float) -> Length:
+        """Construct a length from a number of CSS pixels."""
         inputs = c_double(value)
         output = c_void_p()
         _lib.opensolid_Length_pixels_Float(ctypes.byref(inputs), ctypes.byref(output))
@@ -603,6 +608,7 @@ class Angle:
 
     @staticmethod
     def radians(value: float) -> Angle:
+        """Construct an angle from a number of radians."""
         inputs = c_double(value)
         output = c_void_p()
         _lib.opensolid_Angle_radians_Float(ctypes.byref(inputs), ctypes.byref(output))
@@ -610,6 +616,7 @@ class Angle:
 
     @staticmethod
     def degrees(value: float) -> Angle:
+        """Construct an angle from a number of degrees."""
         inputs = c_double(value)
         output = c_void_p()
         _lib.opensolid_Angle_degrees_Float(ctypes.byref(inputs), ctypes.byref(output))
@@ -617,6 +624,10 @@ class Angle:
 
     @staticmethod
     def turns(value: float) -> Angle:
+        """Construct an angle from a number of turns.
+
+        One turn is equal to 360 degrees.
+        """
         inputs = c_double(value)
         output = c_void_p()
         _lib.opensolid_Angle_turns_Float(ctypes.byref(inputs), ctypes.byref(output))
@@ -624,6 +635,7 @@ class Angle:
 
     @staticmethod
     def acos(value: float) -> Angle:
+        """Compute the inverse cosine of a value."""
         inputs = c_double(value)
         output = c_void_p()
         _lib.opensolid_Angle_acos_Float(ctypes.byref(inputs), ctypes.byref(output))
@@ -631,6 +643,7 @@ class Angle:
 
     @staticmethod
     def asin(value: float) -> Angle:
+        """Compute the inverse sine of a value."""
         inputs = c_double(value)
         output = c_void_p()
         _lib.opensolid_Angle_asin_Float(ctypes.byref(inputs), ctypes.byref(output))
@@ -638,49 +651,11 @@ class Angle:
 
     @staticmethod
     def atan(value: float) -> Angle:
+        """Compute the inverse tangent of a value."""
         inputs = c_double(value)
         output = c_void_p()
         _lib.opensolid_Angle_atan_Float(ctypes.byref(inputs), ctypes.byref(output))
         return Angle(ptr=output)
-
-    @overload
-    @staticmethod
-    def atan2(y: Length, x: Length) -> Angle:
-        pass
-
-    @overload
-    @staticmethod
-    def atan2(y: float, x: float) -> Angle:
-        pass
-
-    @staticmethod
-    def atan2(*args, **keywords):
-        match (args, keywords):
-            case (
-                ([Length() as y, Length() as x], {})
-                | ([Length() as y], {"x": Length() as x})
-                | ([], {"y": Length() as y, "x": Length() as x})
-            ):
-                inputs = _Tuple2_c_void_p_c_void_p(y._ptr, x._ptr)
-                output = c_void_p()
-                _lib.opensolid_Angle_atan2_Length_Length(
-                    ctypes.byref(inputs), ctypes.byref(output)
-                )
-                return Angle(ptr=output)
-            case (
-                ([float() | int() as y, float() | int() as x], {})
-                | ([float() | int() as y], {"x": float() | int() as x})
-                | ([], {"y": float() | int() as y, "x": float() | int() as x})
-            ):
-                inputs = _Tuple2_c_double_c_double(y, x)
-                output = c_void_p()
-                _lib.opensolid_Angle_atan2_Float_Float(
-                    ctypes.byref(inputs), ctypes.byref(output)
-                )
-                return Angle(ptr=output)
-            case _:
-                message = "Unexpected function arguments"
-                raise TypeError(message)
 
     def in_radians(self) -> float:
         """Convert an angle to a number of radians."""
@@ -980,6 +955,7 @@ class Range:
 
     @staticmethod
     def constant(value: float) -> Range:
+        """Construct a zero-width range containing a single value."""
         inputs = c_double(value)
         output = c_void_p()
         _lib.opensolid_Range_constant_Float(ctypes.byref(inputs), ctypes.byref(output))
@@ -987,6 +963,12 @@ class Range:
 
     @staticmethod
     def from_endpoints(a: float, b: float) -> Range:
+        """Construct a range from its lower and upper bounds.
+
+        The order of the two arguments does not matter;
+        the minimum of the two will be used as the lower bound of the range
+        and the maximum will be used as the upper bound.
+        """
         inputs = _Tuple2_c_double_c_double(a, b)
         output = c_void_p()
         _lib.opensolid_Range_fromEndpoints_Float_Float(
@@ -996,6 +978,7 @@ class Range:
 
     @staticmethod
     def hull(values: list[float]) -> Range:
+        """Build a range containing all values in the given non-empty list."""
         inputs = (
             _list_argument(
                 _List_c_double,
@@ -1012,6 +995,7 @@ class Range:
 
     @staticmethod
     def aggregate(ranges: list[Range]) -> Range:
+        """Build a range containing all ranges in the given non-empty list."""
         inputs = (
             _list_argument(
                 _List_c_void_p,
@@ -1252,6 +1236,7 @@ class LengthRange:
 
     @staticmethod
     def constant(value: Length) -> LengthRange:
+        """Construct a zero-width range containing a single value."""
         inputs = value._ptr
         output = c_void_p()
         _lib.opensolid_LengthRange_constant_Length(
@@ -1261,6 +1246,12 @@ class LengthRange:
 
     @staticmethod
     def from_endpoints(a: Length, b: Length) -> LengthRange:
+        """Construct a range from its lower and upper bounds.
+
+        The order of the two arguments does not matter;
+        the minimum of the two will be used as the lower bound of the range
+        and the maximum will be used as the upper bound.
+        """
         inputs = _Tuple2_c_void_p_c_void_p(a._ptr, b._ptr)
         output = c_void_p()
         _lib.opensolid_LengthRange_fromEndpoints_Length_Length(
@@ -1270,6 +1261,7 @@ class LengthRange:
 
     @staticmethod
     def meters(a: float, b: float) -> LengthRange:
+        """Construct a length range from lower and upper bounds given in meters."""
         inputs = _Tuple2_c_double_c_double(a, b)
         output = c_void_p()
         _lib.opensolid_LengthRange_meters_Float_Float(
@@ -1279,6 +1271,7 @@ class LengthRange:
 
     @staticmethod
     def centimeters(a: float, b: float) -> LengthRange:
+        """Construct a length range from lower and upper bounds given in centimeters."""
         inputs = _Tuple2_c_double_c_double(a, b)
         output = c_void_p()
         _lib.opensolid_LengthRange_centimeters_Float_Float(
@@ -1288,6 +1281,7 @@ class LengthRange:
 
     @staticmethod
     def millimeters(a: float, b: float) -> LengthRange:
+        """Construct a length range from lower and upper bounds given in millimeters."""
         inputs = _Tuple2_c_double_c_double(a, b)
         output = c_void_p()
         _lib.opensolid_LengthRange_millimeters_Float_Float(
@@ -1297,6 +1291,7 @@ class LengthRange:
 
     @staticmethod
     def inches(a: float, b: float) -> LengthRange:
+        """Construct a length range from lower and upper bounds given in inches."""
         inputs = _Tuple2_c_double_c_double(a, b)
         output = c_void_p()
         _lib.opensolid_LengthRange_inches_Float_Float(
@@ -1306,6 +1301,7 @@ class LengthRange:
 
     @staticmethod
     def hull(values: list[Length]) -> LengthRange:
+        """Build a range containing all values in the given non-empty list."""
         inputs = (
             _list_argument(
                 _List_c_void_p,
@@ -1322,6 +1318,7 @@ class LengthRange:
 
     @staticmethod
     def aggregate(ranges: list[LengthRange]) -> LengthRange:
+        """Build a range containing all ranges in the given non-empty list."""
         inputs = (
             _list_argument(
                 _List_c_void_p,
@@ -1515,6 +1512,7 @@ class AngleRange:
 
     @staticmethod
     def constant(value: Angle) -> AngleRange:
+        """Construct a zero-width range containing a single value."""
         inputs = value._ptr
         output = c_void_p()
         _lib.opensolid_AngleRange_constant_Angle(
@@ -1524,6 +1522,12 @@ class AngleRange:
 
     @staticmethod
     def from_endpoints(a: Angle, b: Angle) -> AngleRange:
+        """Construct a range from its lower and upper bounds.
+
+        The order of the two arguments does not matter;
+        the minimum of the two will be used as the lower bound of the range
+        and the maximum will be used as the upper bound.
+        """
         inputs = _Tuple2_c_void_p_c_void_p(a._ptr, b._ptr)
         output = c_void_p()
         _lib.opensolid_AngleRange_fromEndpoints_Angle_Angle(
@@ -1533,6 +1537,7 @@ class AngleRange:
 
     @staticmethod
     def radians(a: float, b: float) -> AngleRange:
+        """Construct an angle range from lower and upper bounds given in radians."""
         inputs = _Tuple2_c_double_c_double(a, b)
         output = c_void_p()
         _lib.opensolid_AngleRange_radians_Float_Float(
@@ -1542,6 +1547,7 @@ class AngleRange:
 
     @staticmethod
     def degrees(a: float, b: float) -> AngleRange:
+        """Construct an angle range from lower and upper bounds given in degrees."""
         inputs = _Tuple2_c_double_c_double(a, b)
         output = c_void_p()
         _lib.opensolid_AngleRange_degrees_Float_Float(
@@ -1551,6 +1557,7 @@ class AngleRange:
 
     @staticmethod
     def turns(a: float, b: float) -> AngleRange:
+        """Construct an angle range from lower and upper bounds given in turns."""
         inputs = _Tuple2_c_double_c_double(a, b)
         output = c_void_p()
         _lib.opensolid_AngleRange_turns_Float_Float(
@@ -1560,6 +1567,7 @@ class AngleRange:
 
     @staticmethod
     def hull(values: list[Angle]) -> AngleRange:
+        """Build a range containing all values in the given non-empty list."""
         inputs = (
             _list_argument(
                 _List_c_void_p,
@@ -1576,6 +1584,7 @@ class AngleRange:
 
     @staticmethod
     def aggregate(ranges: list[AngleRange]) -> AngleRange:
+        """Build a range containing all ranges in the given non-empty list."""
         inputs = (
             _list_argument(
                 _List_c_void_p,
@@ -1859,6 +1868,7 @@ class Color:
 
     @staticmethod
     def rgb(red: float, green: float, blue: float) -> Color:
+        """Construct a color from its RGB components, in the range [0,1]."""
         inputs = _Tuple3_c_double_c_double_c_double(red, green, blue)
         output = c_void_p()
         _lib.opensolid_Color_rgb_Float_Float_Float(
@@ -1868,6 +1878,7 @@ class Color:
 
     @staticmethod
     def rgb_255(red: int, green: int, blue: int) -> Color:
+        """Construct a color from its RGB components, in the range [0,255]."""
         inputs = _Tuple3_c_int64_c_int64_c_int64(red, green, blue)
         output = c_void_p()
         _lib.opensolid_Color_rgb255_Int_Int_Int(
@@ -1877,6 +1888,7 @@ class Color:
 
     @staticmethod
     def hsl(hue: Angle, saturation: float, lightness: float) -> Color:
+        """Construct a color from its hue, saturation and lightness values."""
         inputs = _Tuple3_c_void_p_c_double_c_double(hue._ptr, saturation, lightness)
         output = c_void_p()
         _lib.opensolid_Color_hsl_Angle_Float_Float(
@@ -1886,6 +1898,7 @@ class Color:
 
     @staticmethod
     def from_hex(hex_string: str) -> Color:
+        """Construct a color from a hex string such as '#f3f3f3' or 'f3f3f3'."""
         inputs = _str_to_text(hex_string)
         output = c_void_p()
         _lib.opensolid_Color_fromHex_Text(ctypes.byref(inputs), ctypes.byref(output))
@@ -1928,6 +1941,7 @@ class Vector2d:
 
     @staticmethod
     def unit(direction: Direction2d) -> Vector2d:
+        """Construct a unit vector in the given direction."""
         inputs = direction._ptr
         output = c_void_p()
         _lib.opensolid_Vector2d_unit_Direction2d(
@@ -1937,6 +1951,7 @@ class Vector2d:
 
     @staticmethod
     def xy(x_component: float, y_component: float) -> Vector2d:
+        """Construct a vector from its X and Y components."""
         inputs = _Tuple2_c_double_c_double(x_component, y_component)
         output = c_void_p()
         _lib.opensolid_Vector2d_xy_Float_Float(
@@ -1946,6 +1961,10 @@ class Vector2d:
 
     @staticmethod
     def y(y_component: float) -> Vector2d:
+        """Construct a vector from just a Y component.
+
+        The X component will be set to zero.
+        """
         inputs = c_double(y_component)
         output = c_void_p()
         _lib.opensolid_Vector2d_y_Float(ctypes.byref(inputs), ctypes.byref(output))
@@ -1953,6 +1972,10 @@ class Vector2d:
 
     @staticmethod
     def x(x_component: float) -> Vector2d:
+        """Construct a vector from just an X component.
+
+        The Y component will be set to zero.
+        """
         inputs = c_double(x_component)
         output = c_void_p()
         _lib.opensolid_Vector2d_x_Float(ctypes.byref(inputs), ctypes.byref(output))
@@ -1960,6 +1983,7 @@ class Vector2d:
 
     @staticmethod
     def polar(magnitude: float, angle: Angle) -> Vector2d:
+        """Construct a vector from its magnitude (length) and angle."""
         inputs = _Tuple2_c_double_c_void_p(magnitude, angle._ptr)
         output = c_void_p()
         _lib.opensolid_Vector2d_polar_Float_Angle(
@@ -1969,6 +1993,7 @@ class Vector2d:
 
     @staticmethod
     def from_components(components: tuple[float, float]) -> Vector2d:
+        """Construct a vector from a pair of X and Y components."""
         inputs = _Tuple2_c_double_c_double(components[0], components[1])
         output = c_void_p()
         _lib.opensolid_Vector2d_fromComponents_Tuple2FloatFloat(
@@ -2011,6 +2036,25 @@ class Vector2d:
             if output.field0 == 0
             else _error(_text_to_str(output.field1))
         )
+
+    def angle(self) -> Angle:
+        """Get the angle of a vector.
+
+        The angle is measured counterclockwise from the positive X axis, so:
+
+          * A vector in the positive X direction has an angle of zero.
+          * A vector in the positive Y direction has an angle of 90 degrees.
+          * A vector in the negative Y direction has an angle of -90 degrees.
+          * It is not defined whether a vector exactly in the negative X direction has
+            an angle of -180 or +180 degrees. (Currently it is reported as having an
+            angle of +180 degrees, but this should not be relied upon.)
+
+        The returned angle will be between -180 and +180 degrees.
+        """
+        inputs = self._ptr
+        output = c_void_p()
+        _lib.opensolid_Vector2d_angle(ctypes.byref(inputs), ctypes.byref(output))
+        return Angle(ptr=output)
 
     def __neg__(self) -> Vector2d:
         output = c_void_p()
@@ -2092,6 +2136,7 @@ class Displacement2d:
 
     @staticmethod
     def xy(x_component: Length, y_component: Length) -> Displacement2d:
+        """Construct a vector from its X and Y components."""
         inputs = _Tuple2_c_void_p_c_void_p(x_component._ptr, y_component._ptr)
         output = c_void_p()
         _lib.opensolid_Displacement2d_xy_Length_Length(
@@ -2101,6 +2146,10 @@ class Displacement2d:
 
     @staticmethod
     def x(x_component: Length) -> Displacement2d:
+        """Construct a vector from just an X component.
+
+        The Y component will be set to zero.
+        """
         inputs = x_component._ptr
         output = c_void_p()
         _lib.opensolid_Displacement2d_x_Length(
@@ -2110,6 +2159,10 @@ class Displacement2d:
 
     @staticmethod
     def y(y_component: Length) -> Displacement2d:
+        """Construct a vector from just a Y component.
+
+        The X component will be set to zero.
+        """
         inputs = y_component._ptr
         output = c_void_p()
         _lib.opensolid_Displacement2d_y_Length(
@@ -2119,6 +2172,7 @@ class Displacement2d:
 
     @staticmethod
     def polar(magnitude: Length, angle: Angle) -> Displacement2d:
+        """Construct a vector from its magnitude (length) and angle."""
         inputs = _Tuple2_c_void_p_c_void_p(magnitude._ptr, angle._ptr)
         output = c_void_p()
         _lib.opensolid_Displacement2d_polar_Length_Angle(
@@ -2128,6 +2182,7 @@ class Displacement2d:
 
     @staticmethod
     def meters(x_component: float, y_component: float) -> Displacement2d:
+        """Construct a vector from its X and Y components given in meters."""
         inputs = _Tuple2_c_double_c_double(x_component, y_component)
         output = c_void_p()
         _lib.opensolid_Displacement2d_meters_Float_Float(
@@ -2137,6 +2192,7 @@ class Displacement2d:
 
     @staticmethod
     def centimeters(x_component: float, y_component: float) -> Displacement2d:
+        """Construct a vector from its X and Y components given in centimeters."""
         inputs = _Tuple2_c_double_c_double(x_component, y_component)
         output = c_void_p()
         _lib.opensolid_Displacement2d_centimeters_Float_Float(
@@ -2146,6 +2202,7 @@ class Displacement2d:
 
     @staticmethod
     def millimeters(x_component: float, y_component: float) -> Displacement2d:
+        """Construct a vector from its X and Y components given in millimeters."""
         inputs = _Tuple2_c_double_c_double(x_component, y_component)
         output = c_void_p()
         _lib.opensolid_Displacement2d_millimeters_Float_Float(
@@ -2155,6 +2212,7 @@ class Displacement2d:
 
     @staticmethod
     def inches(x_component: float, y_component: float) -> Displacement2d:
+        """Construct a vector from its X and Y components given in inches."""
         inputs = _Tuple2_c_double_c_double(x_component, y_component)
         output = c_void_p()
         _lib.opensolid_Displacement2d_inches_Float_Float(
@@ -2164,6 +2222,7 @@ class Displacement2d:
 
     @staticmethod
     def from_components(components: tuple[Length, Length]) -> Displacement2d:
+        """Construct a vector from a pair of X and Y components."""
         inputs = _Tuple2_c_void_p_c_void_p(components[0]._ptr, components[1]._ptr)
         output = c_void_p()
         _lib.opensolid_Displacement2d_fromComponents_Tuple2LengthLength(
@@ -2217,6 +2276,25 @@ class Displacement2d:
             if output.field0 == 0
             else _error(_text_to_str(output.field1))
         )
+
+    def angle(self) -> Angle:
+        """Get the angle of a vector.
+
+        The angle is measured counterclockwise from the positive X axis, so:
+
+          * A vector in the positive X direction has an angle of zero.
+          * A vector in the positive Y direction has an angle of 90 degrees.
+          * A vector in the negative Y direction has an angle of -90 degrees.
+          * It is not defined whether a vector exactly in the negative X direction has
+            an angle of -180 or +180 degrees. (Currently it is reported as having an
+            angle of +180 degrees, but this should not be relied upon.)
+
+        The returned angle will be between -180 and +180 degrees.
+        """
+        inputs = self._ptr
+        output = c_void_p()
+        _lib.opensolid_Displacement2d_angle(ctypes.byref(inputs), ctypes.byref(output))
+        return Angle(ptr=output)
 
     def __neg__(self) -> Displacement2d:
         output = c_void_p()
@@ -2322,6 +2400,14 @@ class Direction2d:
 
     @staticmethod
     def from_angle(angle: Angle) -> Direction2d:
+        """Construct a direction from an angle.
+
+        The angle is measured counterclockwise from the positive X direction, so:
+
+          * An angle of zero corresponds to the positive X direction
+          * An angle of 90 degrees corresponds to the positive Y direction
+          * An angle of 180 degrees (or -180 degrees) corresponds to the negative X direction
+        """
         inputs = angle._ptr
         output = c_void_p()
         _lib.opensolid_Direction2d_fromAngle_Angle(
@@ -2331,6 +2417,10 @@ class Direction2d:
 
     @staticmethod
     def degrees(value: float) -> Direction2d:
+        """Construct a direction from an angle given in degrees.
+
+        See 'fromAngle' for details.
+        """
         inputs = c_double(value)
         output = c_void_p()
         _lib.opensolid_Direction2d_degrees_Float(
@@ -2340,6 +2430,10 @@ class Direction2d:
 
     @staticmethod
     def radians(value: float) -> Direction2d:
+        """Construct a direction from an angle given in radians.
+
+        See 'fromAngle' for details.
+        """
         inputs = c_double(value)
         output = c_void_p()
         _lib.opensolid_Direction2d_radians_Float(
@@ -2352,11 +2446,11 @@ class Direction2d:
 
         The angle is measured counterclockwise from the positive X direction, so:
 
-          * The positive X direction has an angle of zero
-          * The positive Y direction has an angle of 90 degrees
-          * The negative Y direction has an angle of -90 degrees
+          * The positive X direction has an angle of zero.
+          * The positive Y direction has an angle of 90 degrees.
+          * The negative Y direction has an angle of -90 degrees.
           * It is not defined whether the negative X direction has an angle of -180 or
-            +180 degrees. (Currently it is reported as having an angle of -180 degrees,
+            +180 degrees. (Currently it is reported as having an angle of +180 degrees,
             but this should not be relied upon.)
 
         The returned angle will be between -180 and +180 degrees.
@@ -2364,6 +2458,19 @@ class Direction2d:
         inputs = self._ptr
         output = c_void_p()
         _lib.opensolid_Direction2d_toAngle(ctypes.byref(inputs), ctypes.byref(output))
+        return Angle(ptr=output)
+
+    def angle_to(self, other: Direction2d) -> Angle:
+        """Measure the signed angle from one direction to another.
+
+        The angle will be measured counterclockwise from the first direction to the
+        second, and will always be between -180 and +180 degrees.
+        """
+        inputs = _Tuple2_c_void_p_c_void_p(other._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Direction2d_angleTo_Direction2d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
         return Angle(ptr=output)
 
     def components(self) -> tuple[float, float]:
@@ -2448,6 +2555,7 @@ class Point2d:
 
     @staticmethod
     def xy(x_coordinate: Length, y_coordinate: Length) -> Point2d:
+        """Construct a point from its X and Y coordinates."""
         inputs = _Tuple2_c_void_p_c_void_p(x_coordinate._ptr, y_coordinate._ptr)
         output = c_void_p()
         _lib.opensolid_Point2d_xy_Length_Length(
@@ -2457,6 +2565,7 @@ class Point2d:
 
     @staticmethod
     def x(x_coordinate: Length) -> Point2d:
+        """Construct a point along the X axis, with the given X coordinate."""
         inputs = x_coordinate._ptr
         output = c_void_p()
         _lib.opensolid_Point2d_x_Length(ctypes.byref(inputs), ctypes.byref(output))
@@ -2464,6 +2573,7 @@ class Point2d:
 
     @staticmethod
     def y(y_coordinate: Length) -> Point2d:
+        """Construct a point along the Y axis, with the given Y coordinate."""
         inputs = y_coordinate._ptr
         output = c_void_p()
         _lib.opensolid_Point2d_y_Length(ctypes.byref(inputs), ctypes.byref(output))
@@ -2471,6 +2581,7 @@ class Point2d:
 
     @staticmethod
     def meters(x_coordinate: float, y_coordinate: float) -> Point2d:
+        """Construct a point from its X and Y coordinates given in meters."""
         inputs = _Tuple2_c_double_c_double(x_coordinate, y_coordinate)
         output = c_void_p()
         _lib.opensolid_Point2d_meters_Float_Float(
@@ -2480,6 +2591,7 @@ class Point2d:
 
     @staticmethod
     def centimeters(x_coordinate: float, y_coordinate: float) -> Point2d:
+        """Construct a point from its X and Y coordinates given in centimeters."""
         inputs = _Tuple2_c_double_c_double(x_coordinate, y_coordinate)
         output = c_void_p()
         _lib.opensolid_Point2d_centimeters_Float_Float(
@@ -2489,6 +2601,7 @@ class Point2d:
 
     @staticmethod
     def millimeters(x_coordinate: float, y_coordinate: float) -> Point2d:
+        """Construct a point from its X and Y coordinates given in millimeters."""
         inputs = _Tuple2_c_double_c_double(x_coordinate, y_coordinate)
         output = c_void_p()
         _lib.opensolid_Point2d_millimeters_Float_Float(
@@ -2498,6 +2611,7 @@ class Point2d:
 
     @staticmethod
     def inches(x_coordinate: float, y_coordinate: float) -> Point2d:
+        """Construct a point from its X and Y coordinates given in inches."""
         inputs = _Tuple2_c_double_c_double(x_coordinate, y_coordinate)
         output = c_void_p()
         _lib.opensolid_Point2d_inches_Float_Float(
@@ -2507,6 +2621,7 @@ class Point2d:
 
     @staticmethod
     def from_coordinates(coordinates: tuple[Length, Length]) -> Point2d:
+        """Construct a point from a pair of X and Y coordinates."""
         inputs = _Tuple2_c_void_p_c_void_p(coordinates[0]._ptr, coordinates[1]._ptr)
         output = c_void_p()
         _lib.opensolid_Point2d_fromCoordinates_Tuple2LengthLength(
@@ -2607,6 +2722,7 @@ class UvPoint:
 
     @staticmethod
     def uv(u_coordinate: float, v_coordinate: float) -> UvPoint:
+        """Construct a point from its X and Y coordinates."""
         inputs = _Tuple2_c_double_c_double(u_coordinate, v_coordinate)
         output = c_void_p()
         _lib.opensolid_UvPoint_uv_Float_Float(
@@ -2616,6 +2732,7 @@ class UvPoint:
 
     @staticmethod
     def u(u_coordinate: float) -> UvPoint:
+        """Construct a point along the X axis, with the given X coordinate."""
         inputs = c_double(u_coordinate)
         output = c_void_p()
         _lib.opensolid_UvPoint_u_Float(ctypes.byref(inputs), ctypes.byref(output))
@@ -2623,6 +2740,7 @@ class UvPoint:
 
     @staticmethod
     def v(v_coordinate: float) -> UvPoint:
+        """Construct a point along the Y axis, with the given Y coordinate."""
         inputs = c_double(v_coordinate)
         output = c_void_p()
         _lib.opensolid_UvPoint_v_Float(ctypes.byref(inputs), ctypes.byref(output))
@@ -2630,6 +2748,7 @@ class UvPoint:
 
     @staticmethod
     def from_coordinates(coordinates: tuple[float, float]) -> UvPoint:
+        """Construct a point from a pair of X and Y coordinates."""
         inputs = _Tuple2_c_double_c_double(coordinates[0], coordinates[1])
         output = c_void_p()
         _lib.opensolid_UvPoint_fromCoordinates_Tuple2FloatFloat(
@@ -2724,6 +2843,7 @@ class Bounds2d:
 
     @staticmethod
     def xy(x_coordinate: LengthRange, y_coordinate: LengthRange) -> Bounds2d:
+        """Construct a bounding box from its X and Y coordinate ranges."""
         inputs = _Tuple2_c_void_p_c_void_p(x_coordinate._ptr, y_coordinate._ptr)
         output = c_void_p()
         _lib.opensolid_Bounds2d_xy_LengthRange_LengthRange(
@@ -2733,6 +2853,7 @@ class Bounds2d:
 
     @staticmethod
     def constant(point: Point2d) -> Bounds2d:
+        """Construct a zero-size bounding box containing a single point."""
         inputs = point._ptr
         output = c_void_p()
         _lib.opensolid_Bounds2d_constant_Point2d(
@@ -2742,6 +2863,7 @@ class Bounds2d:
 
     @staticmethod
     def from_corners(p1: Point2d, p2: Point2d) -> Bounds2d:
+        """Construct a bounding box from two corner points."""
         inputs = _Tuple2_c_void_p_c_void_p(p1._ptr, p2._ptr)
         output = c_void_p()
         _lib.opensolid_Bounds2d_fromCorners_Point2d_Point2d(
@@ -2751,6 +2873,7 @@ class Bounds2d:
 
     @staticmethod
     def hull(points: list[Point2d]) -> Bounds2d:
+        """Construct a bounding box containing all points in the given non-empty list."""
         inputs = (
             _list_argument(
                 _List_c_void_p,
@@ -2767,6 +2890,7 @@ class Bounds2d:
 
     @staticmethod
     def aggregate(bounds: list[Bounds2d]) -> Bounds2d:
+        """Construct a bounding box containing all bounding boxes in the given non-empty list."""
         inputs = (
             _list_argument(
                 _List_c_void_p,
@@ -2818,6 +2942,7 @@ class UvBounds:
 
     @staticmethod
     def uv(u_coordinate: Range, v_coordinate: Range) -> UvBounds:
+        """Construct a bounding box from its X and Y coordinate ranges."""
         inputs = _Tuple2_c_void_p_c_void_p(u_coordinate._ptr, v_coordinate._ptr)
         output = c_void_p()
         _lib.opensolid_UvBounds_uv_Range_Range(
@@ -2827,6 +2952,7 @@ class UvBounds:
 
     @staticmethod
     def constant(point: UvPoint) -> UvBounds:
+        """Construct a zero-size bounding box containing a single point."""
         inputs = point._ptr
         output = c_void_p()
         _lib.opensolid_UvBounds_constant_UvPoint(
@@ -2836,6 +2962,7 @@ class UvBounds:
 
     @staticmethod
     def from_corners(p1: UvPoint, p2: UvPoint) -> UvBounds:
+        """Construct a bounding box from two corner points."""
         inputs = _Tuple2_c_void_p_c_void_p(p1._ptr, p2._ptr)
         output = c_void_p()
         _lib.opensolid_UvBounds_fromCorners_UvPoint_UvPoint(
@@ -2845,6 +2972,7 @@ class UvBounds:
 
     @staticmethod
     def hull(points: list[UvPoint]) -> UvBounds:
+        """Construct a bounding box containing all points in the given non-empty list."""
         inputs = (
             _list_argument(
                 _List_c_void_p,
@@ -2861,6 +2989,7 @@ class UvBounds:
 
     @staticmethod
     def aggregate(bounds: list[UvBounds]) -> UvBounds:
+        """Construct a bounding box containing all bounding boxes in the given non-empty list."""
         inputs = (
             _list_argument(
                 _List_c_void_p,
@@ -3594,6 +3723,12 @@ class Drawing2d:
 
     @staticmethod
     def to_svg(view_box: Bounds2d, entities: list[Drawing2d.Entity]) -> str:
+        """Render some entities to SVG.
+
+        The given bounding box defines the overall size of the drawing,
+        and in general should contain all the drawing entities
+        (unless you *want* to crop some of them).
+        """
         inputs = _Tuple2_c_void_p_List_c_void_p(
             view_box._ptr,
             _list_argument(
@@ -3611,6 +3746,7 @@ class Drawing2d:
     def polygon(
         attributes: list[Drawing2d.Attribute], vertices: list[Point2d]
     ) -> Drawing2d.Entity:
+        """Create a polygon with the given attributes and vertices."""
         inputs = _Tuple2_List_c_void_p_List_c_void_p(
             _list_argument(
                 _List_c_void_p,
@@ -3631,6 +3767,7 @@ class Drawing2d:
     def circle(
         attributes: list[Drawing2d.Attribute], center_point: Point2d, radius: Length
     ) -> Drawing2d.Entity:
+        """Create a circle with the given attributes, center point and radius."""
         inputs = _Tuple3_List_c_void_p_c_void_p_c_void_p(
             _list_argument(
                 _List_c_void_p,
@@ -3647,6 +3784,7 @@ class Drawing2d:
 
     @staticmethod
     def stroke_color(color: Color) -> Drawing2d.Attribute:
+        """Set the stroke color for curves and borders."""
         inputs = color._ptr
         output = c_void_p()
         _lib.opensolid_Drawing2d_strokeColor_Color(
@@ -3656,6 +3794,7 @@ class Drawing2d:
 
     @staticmethod
     def fill_color(color: Color) -> Drawing2d.Attribute:
+        """Set the fill color for shapes."""
         inputs = color._ptr
         output = c_void_p()
         _lib.opensolid_Drawing2d_fillColor_Color(
