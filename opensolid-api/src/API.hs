@@ -115,6 +115,7 @@ length =
     , member0 "In Millimeters" Length.inMillimeters $(docs 'Length.inMillimeters)
     , member0 "In Inches" Length.inInches $(docs 'Length.inInches)
     , member0 "In Pixels" Length.inPixels $(docs 'Length.inPixels)
+    , memberM0 "Is Zero" (~= Length.zero) "Check if a length is zero, within the current tolerance."
     , equality
     , comparison
     , negateSelf
@@ -162,6 +163,7 @@ angle =
     , member0 "In Radians" Angle.inRadians $(docs 'Angle.inRadians)
     , member0 "In Degrees" Angle.inDegrees $(docs 'Angle.inDegrees)
     , member0 "In Turns" Angle.inTurns $(docs 'Angle.inTurns)
+    , memberR0 "Is Zero" (~= Angle.zero) "Check if an angle is zero, within the current tolerance."
     , member0 "Sin" Angle.sin $(docs 'Angle.sin)
     , member0 "Cos" Angle.cos $(docs 'Angle.cos)
     , member0 "Tan" Angle.tan $(docs 'Angle.tan)
@@ -335,6 +337,7 @@ vector2d =
     , member0 "Y Component" Vector2d.yComponent $(docs 'Vector2d.yComponent)
     , memberU0 "Direction" Vector2d.direction $(docs 'Vector2d.direction)
     , member0 "Angle" Vector2d.angle $(docs 'Vector2d.angle)
+    , memberU0 "Is Zero" (~= Vector2d.zero) "Check if a vector is zero, within the current tolerance."
     , negateSelf
     , floatTimes
     , plusSelf
@@ -363,6 +366,7 @@ displacement2d =
     , member0 "Y Component" Vector2d.yComponent $(docs 'Vector2d.yComponent)
     , memberM0 "Direction" Vector2d.direction $(docs 'Vector2d.direction)
     , member0 "Angle" Vector2d.angle $(docs 'Vector2d.angle)
+    , memberM0 "Is Zero" (~= Vector2d.zero) "Check if a displacement is zero, within the current tolerance."
     , negateSelf
     , floatTimes
     , plusSelf
@@ -475,6 +479,7 @@ curve =
     , member0 "Sqrt" Curve1d.sqrt $(docs 'Curve1d.sqrt)
     , member1 "Evaluate" "Parameter Value" (\t c -> Curve1d.evaluate c t) $(docs 'Curve1d.evaluate)
     , memberU0 "Zeros" Curve1d.zeros $(docs 'Curve1d.zeros)
+    , memberU0 "Is Zero" (~= 0.0) "Check if a curve is zero everywhere, within the current tolerance."
     , negateSelf
     , floatPlus
     , floatMinus
@@ -502,6 +507,7 @@ angleCurve =
     , member0 "Cos" Curve1d.cos $(docs 'Curve1d.cos)
     , member1 "Evaluate" "Parameter Value" (\t c -> Curve1d.evaluate c t) $(docs 'Curve1d.evaluate)
     , memberR0 "Zeros" Curve1d.zeros $(docs 'Curve1d.zeros)
+    , memberR0 "Is Zero" (~= Angle.zero) "Check if a curve is zero everywhere, within the current tolerance."
     , negateSelf
     , floatTimes
     , plusSelf
@@ -520,6 +526,7 @@ lengthCurve =
     "A parametric curve definining a length in terms of a parameter value."
     [ member1 "Evaluate" "Parameter Value" (\t c -> Curve1d.evaluate c t) $(docs 'Curve1d.evaluate)
     , memberM0 "Zeros" Curve1d.zeros $(docs 'Curve1d.zeros)
+    , memberM0 "Is Zero" (~= Length.zero) "Check if a curve is zero everywhere, within the current tolerance."
     , negateSelf
     , floatTimes
     , plusSelf

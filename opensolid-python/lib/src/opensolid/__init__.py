@@ -302,6 +302,13 @@ class Length:
         _lib.opensolid_Length_inPixels(ctypes.byref(inputs), ctypes.byref(output))
         return output.value
 
+    def is_zero(self) -> bool:
+        """Check if a length is zero, within the current tolerance."""
+        inputs = _Tuple2_c_void_p_c_void_p(_length_tolerance()._ptr, self._ptr)
+        output = c_int64()
+        _lib.opensolid_Length_isZero(ctypes.byref(inputs), ctypes.byref(output))
+        return bool(output.value)
+
     def __eq__(self, other: object) -> bool:
         if isinstance(other, Length):
             inputs = _Tuple2_c_void_p_c_void_p(self._ptr, other._ptr)
@@ -680,6 +687,13 @@ class Angle:
         output = c_double()
         _lib.opensolid_Angle_inTurns(ctypes.byref(inputs), ctypes.byref(output))
         return output.value
+
+    def is_zero(self) -> bool:
+        """Check if an angle is zero, within the current tolerance."""
+        inputs = _Tuple2_c_void_p_c_void_p(_angle_tolerance()._ptr, self._ptr)
+        output = c_int64()
+        _lib.opensolid_Angle_isZero(ctypes.byref(inputs), ctypes.byref(output))
+        return bool(output.value)
 
     def sin(self) -> float:
         """Compute the sine of an angle."""
@@ -2056,6 +2070,13 @@ class Vector2d:
         _lib.opensolid_Vector2d_angle(ctypes.byref(inputs), ctypes.byref(output))
         return Angle(ptr=output)
 
+    def is_zero(self) -> bool:
+        """Check if a vector is zero, within the current tolerance."""
+        inputs = _Tuple2_c_double_c_void_p(_float_tolerance(), self._ptr)
+        output = c_int64()
+        _lib.opensolid_Vector2d_isZero(ctypes.byref(inputs), ctypes.byref(output))
+        return bool(output.value)
+
     def __neg__(self) -> Vector2d:
         output = c_void_p()
         _lib.opensolid_Vector2d_neg(ctypes.byref(self._ptr), ctypes.byref(output))
@@ -2295,6 +2316,13 @@ class Displacement2d:
         output = c_void_p()
         _lib.opensolid_Displacement2d_angle(ctypes.byref(inputs), ctypes.byref(output))
         return Angle(ptr=output)
+
+    def is_zero(self) -> bool:
+        """Check if a displacement is zero, within the current tolerance."""
+        inputs = _Tuple2_c_void_p_c_void_p(_length_tolerance()._ptr, self._ptr)
+        output = c_int64()
+        _lib.opensolid_Displacement2d_isZero(ctypes.byref(inputs), ctypes.byref(output))
+        return bool(output.value)
 
     def __neg__(self) -> Displacement2d:
         output = c_void_p()
@@ -3119,6 +3147,13 @@ class Curve:
             else _error(_text_to_str(output.field1))
         )
 
+    def is_zero(self) -> bool:
+        """Check if a curve is zero everywhere, within the current tolerance."""
+        inputs = _Tuple2_c_double_c_void_p(_float_tolerance(), self._ptr)
+        output = c_int64()
+        _lib.opensolid_Curve_isZero(ctypes.byref(inputs), ctypes.byref(output))
+        return bool(output.value)
+
     def __neg__(self) -> Curve:
         output = c_void_p()
         _lib.opensolid_Curve_neg(ctypes.byref(self._ptr), ctypes.byref(output))
@@ -3414,6 +3449,13 @@ class LengthCurve:
             else _error(_text_to_str(output.field1))
         )
 
+    def is_zero(self) -> bool:
+        """Check if a curve is zero everywhere, within the current tolerance."""
+        inputs = _Tuple2_c_void_p_c_void_p(_length_tolerance()._ptr, self._ptr)
+        output = c_int64()
+        _lib.opensolid_LengthCurve_isZero(ctypes.byref(inputs), ctypes.byref(output))
+        return bool(output.value)
+
     def __neg__(self) -> LengthCurve:
         output = c_void_p()
         _lib.opensolid_LengthCurve_neg(ctypes.byref(self._ptr), ctypes.byref(output))
@@ -3602,6 +3644,13 @@ class AngleCurve:
             if output.field0 == 0
             else _error(_text_to_str(output.field1))
         )
+
+    def is_zero(self) -> bool:
+        """Check if a curve is zero everywhere, within the current tolerance."""
+        inputs = _Tuple2_c_void_p_c_void_p(_angle_tolerance()._ptr, self._ptr)
+        output = c_int64()
+        _lib.opensolid_AngleCurve_isZero(ctypes.byref(inputs), ctypes.byref(output))
+        return bool(output.value)
 
     def __neg__(self) -> AngleCurve:
         output = c_void_p()
