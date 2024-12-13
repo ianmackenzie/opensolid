@@ -200,9 +200,9 @@ fromAngle angle = unsafe (Vector2d.polar 1.0 angle)
 
 The angle is measured counterclockwise from the positive X direction, so:
 
-  * The positive X direction has an angle of zero
-  * The positive Y direction has an angle of 90 degrees
-  * The negative Y direction has an angle of -90 degrees
+  * The positive X direction has an angle of zero.
+  * The positive Y direction has an angle of 90 degrees.
+  * The negative Y direction has an angle of -90 degrees.
   * It is not defined whether the negative X direction has an angle of -180 or
     +180 degrees. (Currently it is reported as having an angle of -180 degrees,
     but this should not be relied upon.)
