@@ -54,8 +54,8 @@ data Class where
     { id :: FFI.Id value
     , documentation :: Text
     , constants :: List (Name, Constant)
-    , staticFunctions :: List (Name, List StaticFunction)
-    , memberFunctions :: List (Name, List (MemberFunction value))
+    , staticFunctions :: List (Name, StaticFunction)
+    , memberFunctions :: List (Name, MemberFunction value)
     , equalityFunction :: Maybe (value -> value -> Bool)
     , comparisonFunction :: Maybe (value -> value -> Int)
     , negationFunction :: Maybe (value -> value)
@@ -803,30 +803,6 @@ crossSelf = cross @value Self
 nested :: FFI nested => Text -> List (Member nested) -> Member value
 nested = Nested
 
-addStaticOverload ::
-  Name ->
-  StaticFunction ->
-  List (Name, List StaticFunction) ->
-  List (Name, List StaticFunction)
-addStaticOverload name overload [] = [(name, [overload])]
-addStaticOverload name overload (first : rest) = do
-  let (existingName, existingOverloads) = first
-  if name == existingName
-    then (existingName, existingOverloads + [overload]) : rest
-    else first : addStaticOverload name overload rest
-
-addMemberOverload ::
-  Name ->
-  MemberFunction value ->
-  List (Name, List (MemberFunction value)) ->
-  List (Name, List (MemberFunction value))
-addMemberOverload name overload [] = [(name, [overload])]
-addMemberOverload name overload (first : rest) = do
-  let (existingName, existingOverloads) = first
-  if name == existingName
-    then (existingName, existingOverloads + [overload]) : rest
-    else first : addMemberOverload name overload rest
-
 addPreOverload ::
   BinaryOperator.Id ->
   PreOperator value ->
@@ -857,8 +833,8 @@ buildClass ::
   Text ->
   List (Member value) ->
   List (Name, Constant) ->
-  List (Name, List StaticFunction) ->
-  List (Name, List (MemberFunction value)) ->
+  List (Name, StaticFunction) ->
+  List (Name, MemberFunction value) ->
   Maybe (value -> value -> Bool) ->
   Maybe (value -> value -> Int) ->
   Maybe (value -> value) ->
@@ -899,12 +875,12 @@ buildClass
           , nestedClasses = nestedClassesAcc
           }
       first : rest -> do
-        let addStatic name overload =
+        let addStatic name staticFunction =
               buildClass
                 classDocs
                 rest
                 constantsAcc
-                (addStaticOverload (FFI.name name) overload staticFunctionsAcc)
+                (staticFunctionsAcc + [(FFI.name name, staticFunction)])
                 memberFunctionsAcc
                 equalityFunctionAcc
                 comparisonFunctionAcc
@@ -913,13 +889,13 @@ buildClass
                 preOperatorsAcc
                 postOperatorsAcc
                 nestedClassesAcc
-        let addMember name overload =
+        let addMember name memberFunction =
               buildClass
                 classDocs
                 rest
                 constantsAcc
                 staticFunctionsAcc
-                (addMemberOverload (FFI.name name) overload memberFunctionsAcc)
+                (memberFunctionsAcc + [(FFI.name name, memberFunction)])
                 equalityFunctionAcc
                 comparisonFunctionAcc
                 negationFunctionAcc
@@ -1064,8 +1040,8 @@ buildClass
 functions :: List Function
 functions = List.collect classFunctions classes
 
-constantFunction :: FFI.Id a -> (Name, Constant) -> Function
-constantFunction classId_ (constantName, const@(Constant value _)) =
+constantFunctionInfo :: FFI.Id a -> (Name, Constant) -> Function
+constantFunctionInfo classId_ (constantName, const@(Constant value _)) =
   Function
     { ffiName = Constant.ffiName classId_ constantName
     , constraint = Nothing
@@ -1074,8 +1050,8 @@ constantFunction classId_ (constantName, const@(Constant value _)) =
     , invoke = Constant.invoke const
     }
 
-staticFunctionOverload :: FFI.Id a -> Name -> StaticFunction -> Function
-staticFunctionOverload classId_ functionName staticFunction = do
+staticFunctionInfo :: FFI.Id a -> (Name, StaticFunction) -> Function
+staticFunctionInfo classId_ (functionName, staticFunction) = do
   let (constraint, arguments, returnType) = StaticFunction.signature staticFunction
   Function
     { ffiName = StaticFunction.ffiName classId_ functionName staticFunction
@@ -1085,12 +1061,8 @@ staticFunctionOverload classId_ functionName staticFunction = do
     , invoke = StaticFunction.invoke staticFunction
     }
 
-staticFunctionOverloads :: FFI.Id a -> (Name, List StaticFunction) -> List Function
-staticFunctionOverloads classId_ (functionName, overloads) =
-  List.map (staticFunctionOverload classId_ functionName) overloads
-
-memberFunctionOverload :: FFI.Id value -> Name -> MemberFunction value -> Function
-memberFunctionOverload classId_ functionName memberFunction = do
+memberFunctionInfo :: FFI.Id value -> (Name, MemberFunction value) -> Function
+memberFunctionInfo classId_ (functionName, memberFunction) = do
   let (constraint, arguments, selfType, returnType) = MemberFunction.signature memberFunction
   Function
     { ffiName = MemberFunction.ffiName classId_ functionName memberFunction
@@ -1099,10 +1071,6 @@ memberFunctionOverload classId_ functionName memberFunction = do
     , returnType
     , invoke = MemberFunction.invoke memberFunction
     }
-
-memberFunctionOverloads :: FFI.Id value -> (Name, List (MemberFunction value)) -> List Function
-memberFunctionOverloads classId_ (functionName, overloads) =
-  List.map (memberFunctionOverload classId_ functionName) overloads
 
 negationFunctionInfo ::
   forall value.
@@ -1233,9 +1201,9 @@ classFunctions
       nestedClasses
     ) =
     List.concat
-      [ List.map (constantFunction classId_) constants
-      , List.collect (staticFunctionOverloads classId_) staticFunctions
-      , List.collect (memberFunctionOverloads classId_) memberFunctions
+      [ List.map (constantFunctionInfo classId_) constants
+      , List.map (staticFunctionInfo classId_) staticFunctions
+      , List.map (memberFunctionInfo classId_) memberFunctions
       , equalityFunctionInfo classId_ maybeEqualityFunction
       , comparisonFunctionInfo classId_ maybeComparisonFunction
       , negationFunctionInfo classId_ maybeNegationFunction
