@@ -388,6 +388,7 @@ direction2d =
     , factory1 "Degrees" "Value" Direction2d.degrees
     , factory1 "Radians" "Value" Direction2d.radians
     , member0 "To Angle" Direction2d.toAngle $(docs 'Direction2d.toAngle)
+    , member1 "Angle To" "Other" Direction2d.angleFrom $(docs 'Direction2d.angleFrom)
     , member0 "Components" Direction2d.components $(docs 'Direction2d.components)
     , member0 "X Component" Direction2d.xComponent $(docs 'Direction2d.xComponent)
     , member0 "Y Component" Direction2d.yComponent $(docs 'Direction2d.yComponent)
