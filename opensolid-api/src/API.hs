@@ -497,7 +497,9 @@ curve :: Class
 curve =
   class_ @(Curve1d Unitless)
     "A parametric curve definining a unitless value in terms of a parameter value."
-    [ constant "T" Curve1d.t $(docs 'Curve1d.t)
+    [ constant "Zero" (Curve1d.zero @Unitless) $(docs 'Curve1d.zero)
+    , constant "T" Curve1d.t $(docs 'Curve1d.t)
+    , factory1 "Constant" "Value" Curve1d.constant $(docs 'Curve1d.constant)
     , member0 "Squared" Curve1d.squared $(docs 'Curve1d.squared)
     , member0 "Sqrt" Curve1d.sqrt $(docs 'Curve1d.sqrt)
     , member1 "Evaluate" "Parameter Value" (\t c -> Curve1d.evaluate c t) $(docs 'Curve1d.evaluate)
@@ -532,7 +534,9 @@ angleCurve :: Class
 angleCurve =
   class_ @(Curve1d Radians)
     "A parametric curve definining an angle in terms of a parameter value."
-    [ member0 "Sin" Curve1d.sin $(docs 'Curve1d.sin)
+    [ constant "Zero" (Curve1d.zero @Radians) $(docs 'Curve1d.zero)
+    , factory1 "Constant" "Value" Curve1d.constant $(docs 'Curve1d.constant)
+    , member0 "Sin" Curve1d.sin $(docs 'Curve1d.sin)
     , member0 "Cos" Curve1d.cos $(docs 'Curve1d.cos)
     , member1 "Evaluate" "Parameter Value" (\t c -> Curve1d.evaluate c t) $(docs 'Curve1d.evaluate)
     , memberR0 "Zeros" Curve1d.zeros $(docs 'Curve1d.zeros)
@@ -553,7 +557,9 @@ lengthCurve :: Class
 lengthCurve =
   class_ @(Curve1d Meters)
     "A parametric curve definining a length in terms of a parameter value."
-    [ member1 "Evaluate" "Parameter Value" (\t c -> Curve1d.evaluate c t) $(docs 'Curve1d.evaluate)
+    [ constant "Zero" (Curve1d.zero @Meters) $(docs 'Curve1d.zero)
+    , factory1 "Constant" "Value" Curve1d.constant $(docs 'Curve1d.constant)
+    , member1 "Evaluate" "Parameter Value" (\t c -> Curve1d.evaluate c t) $(docs 'Curve1d.evaluate)
     , memberM0 "Zeros" Curve1d.zeros $(docs 'Curve1d.zeros)
     , memberM0 "Is Zero" (~= Length.zero) "Check if a curve is zero everywhere, within the current tolerance."
     , negateSelf

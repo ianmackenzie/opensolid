@@ -163,9 +163,11 @@ instance Interface (Curve1d units) units where
 new :: Interface curve units => curve -> Curve1d units
 new = Curve1d
 
+-- | A curve equal to zero everywhere.
 zero :: Curve1d units
 zero = constant Qty.zero
 
+-- | Create a curve with the given constant value.
 constant :: Qty units -> Curve1d units
 constant = Parametric . Expression.constant
 
