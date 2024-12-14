@@ -203,6 +203,12 @@ extraMemberFunctions className = case className of
     , "        return 'Length.zero'"
     , "    return 'Length.meters(' + str(self.in_meters()) + ')'"
     ]
+  "Area" ->
+    [ "def __repr__(self) -> str:"
+    , "    if self == Area.zero:"
+    , "        return 'Area.zero'"
+    , "    return 'Area.square_meters(' + str(self.in_square_meters()) + ')'"
+    ]
   "Angle" ->
     [ "def __repr__(self) -> str:"
     , "    if self == Angle.zero:"
@@ -218,6 +224,11 @@ extraMemberFunctions className = case className of
     [ "def __repr__(self) -> str:"
     , "    low, high = self.endpoints()"
     , "    return 'LengthRange.meters(' + str(low.in_meters()) + ',' + str(high.in_meters()) + ')'"
+    ]
+  "AreaRange" ->
+    [ "def __repr__(self) -> str:"
+    , "    low, high = self.endpoints()"
+    , "    return 'AreaRange.square_meters(' + str(low.in_square_meters()) + ',' + str(high.in_square_meters()) + ')'"
     ]
   "AngleRange" ->
     [ "def __repr__(self) -> str:"
@@ -238,6 +249,11 @@ extraMemberFunctions className = case className of
     [ "def __repr__(self) -> str:"
     , "    x, y = self.components()"
     , "    return 'Displacement2d.meters(' + str(x.in_meters()) + ',' + str(y.in_meters()) + ')'"
+    ]
+  "AreaVector2d" ->
+    [ "def __repr__(self) -> str:"
+    , "    x, y = self.components()"
+    , "    return 'AreaVector2d.square_meters(' + str(x.in_square_meters()) + ',' + str(y.in_square_meters()) + ')'"
     ]
   "Direction2d" ->
     [ "def __repr__(self) -> str:"

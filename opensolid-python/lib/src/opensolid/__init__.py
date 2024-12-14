@@ -1013,6 +1013,11 @@ class Area:
         _lib.opensolid_Area_mul_Float_Area(ctypes.byref(inputs), ctypes.byref(output))
         return Area(ptr=output)
 
+    def __repr__(self) -> str:
+        if self == Area.zero:
+            return "Area.zero"
+        return "Area.square_meters(" + str(self.in_square_meters()) + ")"
+
 
 class Angle:
     """An angle in degrees, radians, turns etc.
@@ -2344,6 +2349,16 @@ class AreaRange:
             ctypes.byref(inputs), ctypes.byref(output)
         )
         return AreaRange(ptr=output)
+
+    def __repr__(self) -> str:
+        low, high = self.endpoints()
+        return (
+            "AreaRange.square_meters("
+            + str(low.in_square_meters())
+            + ","
+            + str(high.in_square_meters())
+            + ")"
+        )
 
 
 class AngleRange:
@@ -3726,6 +3741,16 @@ class AreaVector2d:
             ctypes.byref(inputs), ctypes.byref(output)
         )
         return AreaVector2d(ptr=output)
+
+    def __repr__(self) -> str:
+        x, y = self.components()
+        return (
+            "AreaVector2d.square_meters("
+            + str(x.in_square_meters())
+            + ","
+            + str(y.in_square_meters())
+            + ")"
+        )
 
 
 class Direction2d:
