@@ -104,10 +104,10 @@ instance FFI (Range Unitless) where
   representation = FFI.classRepresentation "Range"
 
 instance FFI (Range Radians) where
-  representation = FFI.classRepresentation "Angle Range"
+  representation = FFI.classRepresentation "AngleRange"
 
 instance FFI (Range Meters) where
-  representation = FFI.classRepresentation "Length Range"
+  representation = FFI.classRepresentation "LengthRange"
 
 instance HasUnits (Range units) where
   type UnitsOf (Range units) = units

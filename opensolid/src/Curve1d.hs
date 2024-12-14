@@ -110,10 +110,10 @@ instance FFI (Curve1d Unitless) where
   representation = FFI.classRepresentation "Curve"
 
 instance FFI (Curve1d Meters) where
-  representation = FFI.classRepresentation "Length Curve"
+  representation = FFI.classRepresentation "LengthCurve"
 
 instance FFI (Curve1d Radians) where
-  representation = FFI.classRepresentation "Angle Curve"
+  representation = FFI.classRepresentation "AngleCurve"
 
 instance HasUnits (Curve1d units) where
   type UnitsOf (Curve1d units) = units
