@@ -1,19 +1,13 @@
 Make GitHub repo public
 -> add minimal README
 
-Add Python docstrings
--> add extra line mentioning tolerance if one is required
-
-Try using Pandoc to convert from Haddock to reStructuredText?
--> or just write all doc comments in plain text...
--> or use specialized direct Haddock conversion - most flexible
-   -> e.g. convert type/function names to correct target language casing
-
 Add Python package README
 
 Generate Python API docs (Sphinx or similar)
 
-Add __abs__ support to API
+Remove timesSelf?
+
+Use Python.Function.body from NegationFunction, AbsFunction, EqualityFunction, ComparisonFunction, PreOperator and PostOperator modules
 
 C API: generate structs with *named* fields
 -> have the struct be named as function_name_inputs, function_name_outputs etc.
@@ -32,9 +26,15 @@ Improve Python bindings
   -> using to-SVG (and eventually to-glTF) Haskell functions under the hood? ('display' functions?)
 - Actual error types instead of strings
 - Add _list_decode helper?
-- Rename MemberFunction and StaticFunction to have U/R/M prefix *before* argument count
 - Add support for 'intersects' operator (^)
   -> Also (&) for *intersection*?
+- Add extra line to docstring mentioning tolerance, if one is required
+- Remove leading underscores from helper functions, now that we have __all__ to control exports?
+
+Try using Pandoc to convert from Haddock to reStructuredText?
+-> or just write all doc comments in plain text...
+-> or use specialized direct Haddock conversion - most flexible
+   -> e.g. convert type/function names to correct target language casing
 
 Operator overload test suite: for every valid type and units combination, test that e.g. zero vector * zero range = zero vector bounds
 - ensure every valid overload actually exists, and is resolved correctly at runtime
