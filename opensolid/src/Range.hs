@@ -11,6 +11,7 @@ module Range
   , centimeters
   , millimeters
   , inches
+  , squareMeters
   , hull3
   , hull4
   , hullN
@@ -67,6 +68,7 @@ module Range
 where
 
 import Angle qualified
+import Area qualified
 import Bounds qualified
 import Data.Coerce qualified
 import Debug qualified
@@ -274,6 +276,10 @@ centimeters a b = from (Length.centimeters a) (Length.centimeters b)
 -- | Construct a length range from lower and upper bounds given in inches.
 inches :: Float -> Float -> Range Meters
 inches a b = from (Length.inches a) (Length.inches b)
+
+-- | Construct an area range from lower and upper bounds given in square meters.
+squareMeters :: Float -> Float -> Range SquareMeters
+squareMeters a b = from (Area.squareMeters a) (Area.squareMeters b)
 
 aggregate2 :: Range units -> Range units -> Range units
 aggregate2 (Range low1 high1) (Range low2 high2) =

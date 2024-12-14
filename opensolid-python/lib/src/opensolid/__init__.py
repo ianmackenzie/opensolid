@@ -2073,6 +2073,16 @@ class AreaRange:
         return AreaRange(ptr=output)
 
     @staticmethod
+    def square_meters(a: float, b: float) -> AreaRange:
+        """Construct an area range from lower and upper bounds given in square meters."""
+        inputs = _Tuple2_c_double_c_double(a, b)
+        output = c_void_p()
+        _lib.opensolid_AreaRange_squareMeters_Float_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return AreaRange(ptr=output)
+
+    @staticmethod
     def from_endpoints(a: Area, b: Area) -> AreaRange:
         """Construct a range from its lower and upper bounds.
 

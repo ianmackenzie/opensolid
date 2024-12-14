@@ -319,6 +319,7 @@ areaRange =
   class_ @(Range SquareMeters)
     "A range of area values, with a lower bound and upper bound."
     [ factory1 "Constant" "Value" Range.constant $(docs 'Range.constant)
+    , factory2 "Square Meters" "A" "B" Range.squareMeters $(docs 'Range.squareMeters)
     , factory2 "From Endpoints" "A" "B" Range.from $(docs 'Range.from)
     , factory1 "Hull" "Values" Range.hullN $(docs 'Range.hullN)
     , factory1 "Aggregate" "Ranges" Range.aggregateN $(docs 'Range.aggregateN)
