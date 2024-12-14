@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import ctypes
 import platform
+import threading
 from ctypes import (
     CDLL,
     POINTER,
@@ -77,74 +78,85 @@ def _error(message: str) -> Any:  # noqa: ANN401
     raise Error(message)
 
 
+type ToleranceValue = float | Length | Area | Angle
+
+
+class _Tolerance(threading.local):
+    value: ToleranceValue | None = None
+
+
 class Tolerance:
-    """Manages a global tolerance value."""
+    """Manages a thread-local tolerance value."""
 
-    current: float | Length | Area | Angle | None = None
+    _value: ToleranceValue | None = None
+    _saved: ToleranceValue | None = None
 
-    def __init__(self, value: float | Length | Area | Angle | None) -> None:
-        self.value = value
-        self.saved = None
+    def __init__(self, value: ToleranceValue | None) -> None:
+        self._value = value
 
     def __enter__(self) -> None:
-        self.saved = Tolerance.current
-        Tolerance.current = self.value
+        self._saved = _Tolerance.value
+        _Tolerance.value = self._value
 
     def __exit__(
         self, _exception_type: object, _exception_value: object, _traceback: object
     ) -> None:
-        Tolerance.current = self.saved
-        self.saved = None
+        _Tolerance.value = self._saved
+        self._saved = None
+
+    @staticmethod
+    def current() -> ToleranceValue | None:
+        return _Tolerance.value
 
 
 def _float_tolerance() -> float:
-    if isinstance(Tolerance.current, float):
-        return Tolerance.current
-    if Tolerance.current is None:
+    if isinstance(_Tolerance.value, float):
+        return _Tolerance.value
+    if _Tolerance.value is None:
         message = 'No float tolerance set, please set one using "with Tolerance(...)"'
         raise TypeError(message)
     message = (
         "Expected a tolerance of type float but current tolerance is of type "
-        + type(Tolerance.current).__name__
+        + type(_Tolerance.value).__name__
     )
     raise TypeError(message)
 
 
 def _length_tolerance() -> Length:
-    if isinstance(Tolerance.current, Length):
-        return Tolerance.current
-    if Tolerance.current is None:
+    if isinstance(_Tolerance.value, Length):
+        return _Tolerance.value
+    if _Tolerance.value is None:
         message = 'No length tolerance set, please set one using "with Tolerance(...)"'
         raise TypeError(message)
     message = (
         "Expected a tolerance of type Length but current tolerance is of type "
-        + type(Tolerance.current).__name__
+        + type(_Tolerance.value).__name__
     )
     raise TypeError(message)
 
 
 def _area_tolerance() -> Area:
-    if isinstance(Tolerance.current, Area):
-        return Tolerance.current
-    if Tolerance.current is None:
+    if isinstance(_Tolerance.value, Area):
+        return _Tolerance.value
+    if _Tolerance.value is None:
         message = 'No area tolerance set, please set one using "with Tolerance(...)"'
         raise TypeError(message)
     message = (
         "Expected a tolerance of type Area but current tolerance is of type "
-        + type(Tolerance.current).__name__
+        + type(_Tolerance.value).__name__
     )
     raise TypeError(message)
 
 
 def _angle_tolerance() -> Angle:
-    if isinstance(Tolerance.current, Angle):
-        return Tolerance.current
-    if Tolerance.current is None:
+    if isinstance(_Tolerance.value, Angle):
+        return _Tolerance.value
+    if _Tolerance.value is None:
         message = 'No angle tolerance set, please set one using "with Tolerance(...)"'
         raise TypeError(message)
     message = (
         "Expected a tolerance of type Angle but current tolerance is of type "
-        + type(Tolerance.current).__name__
+        + type(_Tolerance.value).__name__
     )
     raise TypeError(message)
 
