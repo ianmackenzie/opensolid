@@ -106,6 +106,7 @@ class Tolerance:
 
     @staticmethod
     def current() -> ToleranceValue | None:
+        """Get the current tolerance value."""
         return _Tolerance.value
 
 
