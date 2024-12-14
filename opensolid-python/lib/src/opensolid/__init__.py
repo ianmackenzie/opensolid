@@ -6228,6 +6228,7 @@ Drawing2d.no_fill = _drawing2d_no_fill()
 
 
 __all__ = [
+    "Tolerance",
     "Length",
     "Area",
     "Angle",

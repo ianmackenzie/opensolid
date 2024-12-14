@@ -24,6 +24,7 @@ import Python.PreOperator qualified
 import Python.StaticFunction qualified
 import Python.Type.Registry (Registry)
 import Python.Type.Registry qualified
+import Text qualified
 
 preamble :: Text
 preamble =
@@ -270,14 +271,15 @@ ffiTypeDeclarations = do
 topLevelClassName :: Class -> Maybe Text
 topLevelClassName Class{API.id = FFI.Id _ (topLevelName :| nestedNames)} =
   case nestedNames of
-    [] -> Just (Python.str (FFI.pascalCase topLevelName) + ",")
+    [] -> Just (Python.str (FFI.pascalCase topLevelName))
     List.OneOrMore -> Nothing
 
 allExportsDefinition :: Text
 allExportsDefinition =
   Python.lines
     [ "__all__ = ["
-    , Python.indent (Maybe.collect topLevelClassName API.classes)
+    , Python.indent
+        [Text.join "," (Python.str "Tolerance" : Maybe.collect topLevelClassName API.classes)]
     , "]"
     ]
 
