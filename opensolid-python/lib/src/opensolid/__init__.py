@@ -80,9 +80,9 @@ def _error(message: str) -> Any:  # noqa: ANN401
 class Tolerance:
     """Manages a global tolerance value."""
 
-    current: float | Length | Angle | None = None
+    current: float | Length | Area | Angle | None = None
 
-    def __init__(self, value: float | Length | Angle | None) -> None:
+    def __init__(self, value: float | Length | Area | Angle | None) -> None:
         self.value = value
         self.saved = None
 
@@ -118,6 +118,19 @@ def _length_tolerance() -> Length:
         raise TypeError(message)
     message = (
         "Expected a tolerance of type Length but current tolerance is of type "
+        + type(Tolerance.current).__name__
+    )
+    raise TypeError(message)
+
+
+def _area_tolerance() -> Area:
+    if isinstance(Tolerance.current, Area):
+        return Tolerance.current
+    if Tolerance.current is None:
+        message = 'No area tolerance set, please set one using "with Tolerance(...)"'
+        raise TypeError(message)
+    message = (
+        "Expected a tolerance of type Area but current tolerance is of type "
         + type(Tolerance.current).__name__
     )
     raise TypeError(message)
@@ -426,11 +439,23 @@ class Length:
         pass
 
     @overload
+    def __mul__(self, rhs: Length) -> Area:
+        pass
+
+    @overload
     def __mul__(self, rhs: Range) -> LengthRange:
         pass
 
     @overload
+    def __mul__(self, rhs: LengthRange) -> AreaRange:
+        pass
+
+    @overload
     def __mul__(self, rhs: Curve) -> LengthCurve:
+        pass
+
+    @overload
+    def __mul__(self, rhs: LengthCurve) -> AreaCurve:
         pass
 
     @overload
@@ -439,6 +464,10 @@ class Length:
 
     @overload
     def __mul__(self, rhs: Vector2d) -> Displacement2d:
+        pass
+
+    @overload
+    def __mul__(self, rhs: Displacement2d) -> AreaVector2d:
         pass
 
     def __mul__(self, rhs):
@@ -450,6 +479,13 @@ class Length:
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return Length(ptr=output)
+            case Length():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Length_mul_Length_Length(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Area(ptr=output)
             case Range():
                 inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
@@ -457,6 +493,13 @@ class Length:
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return LengthRange(ptr=output)
+            case LengthRange():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Length_mul_Length_LengthRange(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return AreaRange(ptr=output)
             case Curve():
                 inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
@@ -464,6 +507,13 @@ class Length:
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return LengthCurve(ptr=output)
+            case LengthCurve():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Length_mul_Length_LengthCurve(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return AreaCurve(ptr=output)
             case Direction2d():
                 inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
@@ -478,6 +528,13 @@ class Length:
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return Displacement2d(ptr=output)
+            case Displacement2d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Length_mul_Length_Displacement2d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return AreaVector2d(ptr=output)
             case _:
                 return NotImplemented
 
@@ -580,6 +637,362 @@ class Length:
         if self == Length.zero:
             return "Length.zero"
         return "Length.meters(" + str(self.in_meters()) + ")"
+
+
+class Area:
+    """An area in square meters, square inches etc.
+
+    Represented internally as a value in square meters.
+    """
+
+    def __init__(self, *, ptr: c_void_p) -> None:
+        self._ptr = ptr
+
+    zero: Area = None  # type: ignore[assignment]
+    """The zero value."""
+
+    square_meter: Area = None  # type: ignore[assignment]
+    """One square meter."""
+
+    square_inch: Area = None  # type: ignore[assignment]
+    """One square inch."""
+
+    @staticmethod
+    def square_meters(value: float) -> Area:
+        """Construct an area from a number of square meters."""
+        inputs = c_double(value)
+        output = c_void_p()
+        _lib.opensolid_Area_squareMeters_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Area(ptr=output)
+
+    @staticmethod
+    def square_inches(value: float) -> Area:
+        """Construct an area from a number of square inches."""
+        inputs = c_double(value)
+        output = c_void_p()
+        _lib.opensolid_Area_squareInches_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Area(ptr=output)
+
+    def in_square_meters(self) -> float:
+        """Convert an area to a number of square meters."""
+        inputs = self._ptr
+        output = c_double()
+        _lib.opensolid_Area_inSquareMeters(ctypes.byref(inputs), ctypes.byref(output))
+        return output.value
+
+    def in_square_inches(self) -> float:
+        """Convert an area to a number of square inches."""
+        inputs = self._ptr
+        output = c_double()
+        _lib.opensolid_Area_inSquareInches(ctypes.byref(inputs), ctypes.byref(output))
+        return output.value
+
+    def is_zero(self) -> bool:
+        """Check if an area is zero, within the current tolerance."""
+        inputs = _Tuple2_c_void_p_c_void_p(_area_tolerance()._ptr, self._ptr)
+        output = c_int64()
+        _lib.opensolid_Area_isZero(ctypes.byref(inputs), ctypes.byref(output))
+        return bool(output.value)
+
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, Area):
+            inputs = _Tuple2_c_void_p_c_void_p(self._ptr, other._ptr)
+            output = c_int64()
+            _lib.opensolid_Area_eq(ctypes.byref(inputs), ctypes.byref(output))
+            return bool(output.value)
+        return False
+
+    def _compare(self, other: Area) -> int:
+        inputs = _Tuple2_c_void_p_c_void_p(self._ptr, other._ptr)
+        output = c_int64()
+        _lib.opensolid_Area_compare(ctypes.byref(inputs), ctypes.byref(output))
+        return output.value
+
+    def __lt__(self, other: Area) -> bool:
+        return self._compare(other) < 0
+
+    def __le__(self, other: Area) -> bool:
+        return self._compare(other) <= 0
+
+    def __ge__(self, other: Area) -> bool:
+        return self._compare(other) >= 0
+
+    def __gt__(self, other: Area) -> bool:
+        return self._compare(other) > 0
+
+    def __neg__(self) -> Area:
+        output = c_void_p()
+        _lib.opensolid_Area_neg(ctypes.byref(self._ptr), ctypes.byref(output))
+        return Area(ptr=output)
+
+    def __abs__(self) -> Area:
+        output = c_void_p()
+        _lib.opensolid_Area_abs(ctypes.byref(self._ptr), ctypes.byref(output))
+        return Area(ptr=output)
+
+    @overload
+    def __add__(self, rhs: Area) -> Area:
+        pass
+
+    @overload
+    def __add__(self, rhs: AreaRange) -> AreaRange:
+        pass
+
+    @overload
+    def __add__(self, rhs: AreaCurve) -> AreaCurve:
+        pass
+
+    def __add__(self, rhs):
+        match rhs:
+            case Area():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Area_add_Area_Area(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Area(ptr=output)
+            case AreaRange():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Area_add_Area_AreaRange(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return AreaRange(ptr=output)
+            case AreaCurve():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Area_add_Area_AreaCurve(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return AreaCurve(ptr=output)
+            case _:
+                return NotImplemented
+
+    @overload
+    def __sub__(self, rhs: Area) -> Area:
+        pass
+
+    @overload
+    def __sub__(self, rhs: AreaRange) -> AreaRange:
+        pass
+
+    @overload
+    def __sub__(self, rhs: AreaCurve) -> AreaCurve:
+        pass
+
+    def __sub__(self, rhs):
+        match rhs:
+            case Area():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Area_sub_Area_Area(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Area(ptr=output)
+            case AreaRange():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Area_sub_Area_AreaRange(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return AreaRange(ptr=output)
+            case AreaCurve():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Area_sub_Area_AreaCurve(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return AreaCurve(ptr=output)
+            case _:
+                return NotImplemented
+
+    @overload
+    def __mul__(self, rhs: float) -> Area:
+        pass
+
+    @overload
+    def __mul__(self, rhs: Range) -> AreaRange:
+        pass
+
+    @overload
+    def __mul__(self, rhs: Curve) -> AreaCurve:
+        pass
+
+    @overload
+    def __mul__(self, rhs: Direction2d) -> AreaVector2d:
+        pass
+
+    @overload
+    def __mul__(self, rhs: Vector2d) -> AreaVector2d:
+        pass
+
+    def __mul__(self, rhs):
+        match rhs:
+            case float() | int():
+                inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
+                output = c_void_p()
+                _lib.opensolid_Area_mul_Area_Float(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Area(ptr=output)
+            case Range():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Area_mul_Area_Range(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return AreaRange(ptr=output)
+            case Curve():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Area_mul_Area_Curve(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return AreaCurve(ptr=output)
+            case Direction2d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Area_mul_Area_Direction2d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return AreaVector2d(ptr=output)
+            case Vector2d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Area_mul_Area_Vector2d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return AreaVector2d(ptr=output)
+            case _:
+                return NotImplemented
+
+    @overload
+    def __truediv__(self, rhs: float) -> Area:
+        pass
+
+    @overload
+    def __truediv__(self, rhs: Area) -> float:
+        pass
+
+    @overload
+    def __truediv__(self, rhs: Length) -> Length:
+        pass
+
+    @overload
+    def __truediv__(self, rhs: Range) -> AreaRange:
+        pass
+
+    @overload
+    def __truediv__(self, rhs: LengthRange) -> LengthRange:
+        pass
+
+    @overload
+    def __truediv__(self, rhs: AreaRange) -> Range:
+        pass
+
+    @overload
+    def __truediv__(self, rhs: Curve) -> AreaCurve:
+        pass
+
+    @overload
+    def __truediv__(self, rhs: LengthCurve) -> LengthCurve:
+        pass
+
+    @overload
+    def __truediv__(self, rhs: AreaCurve) -> Curve:
+        pass
+
+    def __truediv__(self, rhs):
+        match rhs:
+            case float() | int():
+                inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
+                output = c_void_p()
+                _lib.opensolid_Area_div_Area_Float(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Area(ptr=output)
+            case Area():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_double()
+                _lib.opensolid_Area_div_Area_Area(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return output.value
+            case Length():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Area_div_Area_Length(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Length(ptr=output)
+            case Range():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Area_div_Area_Range(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return AreaRange(ptr=output)
+            case LengthRange():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Area_div_Area_LengthRange(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return LengthRange(ptr=output)
+            case AreaRange():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Area_div_Area_AreaRange(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Range(ptr=output)
+            case Curve():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Area_div_Area_Curve(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return AreaCurve(ptr=output)
+            case LengthCurve():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Area_div_Area_LengthCurve(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return LengthCurve(ptr=output)
+            case AreaCurve():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Area_div_Area_AreaCurve(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Curve(ptr=output)
+            case _:
+                return NotImplemented
+
+    def __floordiv__(self, rhs: Area) -> int:
+        inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+        output = c_int64()
+        _lib.opensolid_Area_floorDiv_Area_Area(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return output.value
+
+    def __mod__(self, rhs: Area) -> Area:
+        inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+        output = c_void_p()
+        _lib.opensolid_Area_mod_Area_Area(ctypes.byref(inputs), ctypes.byref(output))
+        return Area(ptr=output)
+
+    def __rmul__(self, lhs: float) -> Area:
+        inputs = _Tuple2_c_double_c_void_p(lhs, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Area_mul_Float_Area(ctypes.byref(inputs), ctypes.byref(output))
+        return Area(ptr=output)
 
 
 class Angle:
@@ -1168,6 +1581,14 @@ class Range:
     def __mul__(self, rhs: Angle) -> AngleRange:
         pass
 
+    @overload
+    def __mul__(self, rhs: LengthRange) -> LengthRange:
+        pass
+
+    @overload
+    def __mul__(self, rhs: AreaRange) -> AreaRange:
+        pass
+
     def __mul__(self, rhs):
         match rhs:
             case float() | int():
@@ -1198,6 +1619,20 @@ class Range:
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return AngleRange(ptr=output)
+            case LengthRange():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Range_mul_Range_LengthRange(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return LengthRange(ptr=output)
+            case AreaRange():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Range_mul_Range_AreaRange(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return AreaRange(ptr=output)
             case _:
                 return NotImplemented
 
@@ -1473,13 +1908,54 @@ class LengthRange:
             case _:
                 return NotImplemented
 
+    @overload
     def __mul__(self, rhs: float) -> LengthRange:
-        inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
-        output = c_void_p()
-        _lib.opensolid_LengthRange_mul_LengthRange_Float(
-            ctypes.byref(inputs), ctypes.byref(output)
-        )
-        return LengthRange(ptr=output)
+        pass
+
+    @overload
+    def __mul__(self, rhs: LengthRange) -> AreaRange:
+        pass
+
+    @overload
+    def __mul__(self, rhs: Length) -> AreaRange:
+        pass
+
+    @overload
+    def __mul__(self, rhs: Range) -> LengthRange:
+        pass
+
+    def __mul__(self, rhs):
+        match rhs:
+            case float() | int():
+                inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
+                output = c_void_p()
+                _lib.opensolid_LengthRange_mul_LengthRange_Float(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return LengthRange(ptr=output)
+            case LengthRange():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_LengthRange_mul_LengthRange_LengthRange(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return AreaRange(ptr=output)
+            case Length():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_LengthRange_mul_LengthRange_Length(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return AreaRange(ptr=output)
+            case Range():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_LengthRange_mul_LengthRange_Range(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return LengthRange(ptr=output)
+            case _:
+                return NotImplemented
 
     @overload
     def __truediv__(self, rhs: float) -> LengthRange:
@@ -1487,6 +1963,10 @@ class LengthRange:
 
     @overload
     def __truediv__(self, rhs: LengthRange) -> Range:
+        pass
+
+    @overload
+    def __truediv__(self, rhs: Length) -> Range:
         pass
 
     @overload
@@ -1506,6 +1986,13 @@ class LengthRange:
                 inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
                 _lib.opensolid_LengthRange_div_LengthRange_LengthRange(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Range(ptr=output)
+            case Length():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_LengthRange_div_LengthRange_Length(
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return Range(ptr=output)
@@ -1536,6 +2023,286 @@ class LengthRange:
             + str(high.in_meters())
             + ")"
         )
+
+
+class AreaRange:
+    """A range of area values, with a lower bound and upper bound."""
+
+    def __init__(self, *, ptr: c_void_p) -> None:
+        self._ptr = ptr
+
+    @staticmethod
+    def constant(value: Area) -> AreaRange:
+        """Construct a zero-width range containing a single value."""
+        inputs = value._ptr
+        output = c_void_p()
+        _lib.opensolid_AreaRange_constant_Area(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return AreaRange(ptr=output)
+
+    @staticmethod
+    def from_endpoints(a: Area, b: Area) -> AreaRange:
+        """Construct a range from its lower and upper bounds.
+
+        The order of the two arguments does not matter;
+        the minimum of the two will be used as the lower bound of the range
+        and the maximum will be used as the upper bound.
+        """
+        inputs = _Tuple2_c_void_p_c_void_p(a._ptr, b._ptr)
+        output = c_void_p()
+        _lib.opensolid_AreaRange_fromEndpoints_Area_Area(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return AreaRange(ptr=output)
+
+    @staticmethod
+    def hull(values: list[Area]) -> AreaRange:
+        """Build a range containing all values in the given non-empty list."""
+        inputs = (
+            _list_argument(
+                _List_c_void_p,
+                (c_void_p * len(values))(*[item._ptr for item in values]),
+            )
+            if values
+            else _error("List is empty")
+        )
+        output = c_void_p()
+        _lib.opensolid_AreaRange_hull_NonEmptyArea(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return AreaRange(ptr=output)
+
+    @staticmethod
+    def aggregate(ranges: list[AreaRange]) -> AreaRange:
+        """Build a range containing all ranges in the given non-empty list."""
+        inputs = (
+            _list_argument(
+                _List_c_void_p,
+                (c_void_p * len(ranges))(*[item._ptr for item in ranges]),
+            )
+            if ranges
+            else _error("List is empty")
+        )
+        output = c_void_p()
+        _lib.opensolid_AreaRange_aggregate_NonEmptyAreaRange(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return AreaRange(ptr=output)
+
+    def endpoints(self) -> tuple[Area, Area]:
+        """Get the lower and upper bounds of a range."""
+        inputs = self._ptr
+        output = _Tuple2_c_void_p_c_void_p()
+        _lib.opensolid_AreaRange_endpoints(ctypes.byref(inputs), ctypes.byref(output))
+        return (Area(ptr=c_void_p(output.field0)), Area(ptr=c_void_p(output.field1)))
+
+    def intersection(self, other: AreaRange) -> AreaRange | None:
+        """Attempt to find the intersection of two ranges."""
+        inputs = _Tuple2_c_void_p_c_void_p(other._ptr, self._ptr)
+        output = _Maybe_c_void_p()
+        _lib.opensolid_AreaRange_intersection_AreaRange(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return AreaRange(ptr=c_void_p(output.field1)) if output.field0 == 0 else None
+
+    def includes(self, value: Area) -> bool:
+        """Check if a given value is included in a range.
+
+        Note that this does *not* use a tolerance, so use with care -
+        for example, a value *just* outside the range (due to numerical roundoff)
+        will be reported as not included.
+        """
+        inputs = _Tuple2_c_void_p_c_void_p(value._ptr, self._ptr)
+        output = c_int64()
+        _lib.opensolid_AreaRange_includes_Area(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return bool(output.value)
+
+    def contains(self, other: AreaRange) -> bool:
+        """Check if one range contains another.
+
+        Note that this does *not* use a tolerance, so use with care -
+        for example, a range that extends *just* outside another range (due to numerical
+        roundoff) will be reported as not contained by that range.
+        """
+        inputs = _Tuple2_c_void_p_c_void_p(other._ptr, self._ptr)
+        output = c_int64()
+        _lib.opensolid_AreaRange_contains_AreaRange(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return bool(output.value)
+
+    def __neg__(self) -> AreaRange:
+        output = c_void_p()
+        _lib.opensolid_AreaRange_neg(ctypes.byref(self._ptr), ctypes.byref(output))
+        return AreaRange(ptr=output)
+
+    def __abs__(self) -> AreaRange:
+        output = c_void_p()
+        _lib.opensolid_AreaRange_abs(ctypes.byref(self._ptr), ctypes.byref(output))
+        return AreaRange(ptr=output)
+
+    @overload
+    def __add__(self, rhs: AreaRange) -> AreaRange:
+        pass
+
+    @overload
+    def __add__(self, rhs: Area) -> AreaRange:
+        pass
+
+    def __add__(self, rhs):
+        match rhs:
+            case AreaRange():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_AreaRange_add_AreaRange_AreaRange(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return AreaRange(ptr=output)
+            case Area():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_AreaRange_add_AreaRange_Area(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return AreaRange(ptr=output)
+            case _:
+                return NotImplemented
+
+    @overload
+    def __sub__(self, rhs: AreaRange) -> AreaRange:
+        pass
+
+    @overload
+    def __sub__(self, rhs: Area) -> AreaRange:
+        pass
+
+    def __sub__(self, rhs):
+        match rhs:
+            case AreaRange():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_AreaRange_sub_AreaRange_AreaRange(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return AreaRange(ptr=output)
+            case Area():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_AreaRange_sub_AreaRange_Area(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return AreaRange(ptr=output)
+            case _:
+                return NotImplemented
+
+    @overload
+    def __mul__(self, rhs: float) -> AreaRange:
+        pass
+
+    @overload
+    def __mul__(self, rhs: Range) -> AreaRange:
+        pass
+
+    def __mul__(self, rhs):
+        match rhs:
+            case float() | int():
+                inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
+                output = c_void_p()
+                _lib.opensolid_AreaRange_mul_AreaRange_Float(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return AreaRange(ptr=output)
+            case Range():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_AreaRange_mul_AreaRange_Range(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return AreaRange(ptr=output)
+            case _:
+                return NotImplemented
+
+    @overload
+    def __truediv__(self, rhs: float) -> AreaRange:
+        pass
+
+    @overload
+    def __truediv__(self, rhs: AreaRange) -> Range:
+        pass
+
+    @overload
+    def __truediv__(self, rhs: Length) -> LengthRange:
+        pass
+
+    @overload
+    def __truediv__(self, rhs: Area) -> Range:
+        pass
+
+    @overload
+    def __truediv__(self, rhs: Range) -> AreaRange:
+        pass
+
+    @overload
+    def __truediv__(self, rhs: LengthRange) -> LengthRange:
+        pass
+
+    def __truediv__(self, rhs):
+        match rhs:
+            case float() | int():
+                inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
+                output = c_void_p()
+                _lib.opensolid_AreaRange_div_AreaRange_Float(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return AreaRange(ptr=output)
+            case AreaRange():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_AreaRange_div_AreaRange_AreaRange(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Range(ptr=output)
+            case Length():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_AreaRange_div_AreaRange_Length(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return LengthRange(ptr=output)
+            case Area():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_AreaRange_div_AreaRange_Area(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Range(ptr=output)
+            case Range():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_AreaRange_div_AreaRange_Range(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return AreaRange(ptr=output)
+            case LengthRange():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_AreaRange_div_AreaRange_LengthRange(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return LengthRange(ptr=output)
+            case _:
+                return NotImplemented
+
+    def __rmul__(self, lhs: float) -> AreaRange:
+        inputs = _Tuple2_c_double_c_void_p(lhs, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_AreaRange_mul_Float_AreaRange(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return AreaRange(ptr=output)
 
 
 class AngleRange:
@@ -2131,6 +2898,10 @@ class Vector2d:
     def __mul__(self, rhs: Length) -> Displacement2d:
         pass
 
+    @overload
+    def __mul__(self, rhs: Area) -> AreaVector2d:
+        pass
+
     def __mul__(self, rhs):
         match rhs:
             case float() | int():
@@ -2147,6 +2918,13 @@ class Vector2d:
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return Displacement2d(ptr=output)
+            case Area():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Vector2d_mul_Vector2d_Area(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return AreaVector2d(ptr=output)
             case _:
                 return NotImplemented
 
@@ -2164,6 +2942,10 @@ class Vector2d:
 
     @overload
     def dot(self, rhs: Displacement2d) -> Length:
+        pass
+
+    @overload
+    def dot(self, rhs: AreaVector2d) -> Area:
         pass
 
     @overload
@@ -2187,6 +2969,13 @@ class Vector2d:
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return Length(ptr=output)
+            case AreaVector2d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Vector2d_dot_Vector2d_AreaVector2d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Area(ptr=output)
             case Direction2d():
                 inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_double()
@@ -2203,6 +2992,10 @@ class Vector2d:
 
     @overload
     def cross(self, rhs: Displacement2d) -> Length:
+        pass
+
+    @overload
+    def cross(self, rhs: AreaVector2d) -> Area:
         pass
 
     @overload
@@ -2226,6 +3019,13 @@ class Vector2d:
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return Length(ptr=output)
+            case AreaVector2d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Vector2d_cross_Vector2d_AreaVector2d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Area(ptr=output)
             case Direction2d():
                 inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_double()
@@ -2448,13 +3248,32 @@ class Displacement2d:
         )
         return Displacement2d(ptr=output)
 
+    @overload
     def __mul__(self, rhs: float) -> Displacement2d:
-        inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
-        output = c_void_p()
-        _lib.opensolid_Displacement2d_mul_Displacement2d_Float(
-            ctypes.byref(inputs), ctypes.byref(output)
-        )
-        return Displacement2d(ptr=output)
+        pass
+
+    @overload
+    def __mul__(self, rhs: Length) -> AreaVector2d:
+        pass
+
+    def __mul__(self, rhs):
+        match rhs:
+            case float() | int():
+                inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
+                output = c_void_p()
+                _lib.opensolid_Displacement2d_mul_Displacement2d_Float(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Displacement2d(ptr=output)
+            case Length():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Displacement2d_mul_Displacement2d_Length(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return AreaVector2d(ptr=output)
+            case _:
+                return NotImplemented
 
     @overload
     def __truediv__(self, rhs: float) -> Displacement2d:
@@ -2484,6 +3303,10 @@ class Displacement2d:
                 return NotImplemented
 
     @overload
+    def dot(self, rhs: Displacement2d) -> Area:
+        pass
+
+    @overload
     def dot(self, rhs: Vector2d) -> Length:
         pass
 
@@ -2494,6 +3317,13 @@ class Displacement2d:
     def dot(self, rhs):
         """Compute the dot product of two vector-like values."""
         match rhs:
+            case Displacement2d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Displacement2d_dot_Displacement2d_Displacement2d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Area(ptr=output)
             case Vector2d():
                 inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
@@ -2512,6 +3342,10 @@ class Displacement2d:
                 return NotImplemented
 
     @overload
+    def cross(self, rhs: Displacement2d) -> Area:
+        pass
+
+    @overload
     def cross(self, rhs: Vector2d) -> Length:
         pass
 
@@ -2522,6 +3356,13 @@ class Displacement2d:
     def cross(self, rhs):
         """Compute the cross product of two vector-like values."""
         match rhs:
+            case Displacement2d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Displacement2d_cross_Displacement2d_Displacement2d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Area(ptr=output)
             case Vector2d():
                 inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
@@ -2556,6 +3397,269 @@ class Displacement2d:
             + str(y.in_meters())
             + ")"
         )
+
+
+class AreaVector2d:
+    """A vector in 2D with units of area."""
+
+    def __init__(self, *, ptr: c_void_p) -> None:
+        self._ptr = ptr
+
+    zero: AreaVector2d = None  # type: ignore[assignment]
+    """The zero vector."""
+
+    @staticmethod
+    def xy(x_component: Area, y_component: Area) -> AreaVector2d:
+        """Construct a vector from its X and Y components."""
+        inputs = _Tuple2_c_void_p_c_void_p(x_component._ptr, y_component._ptr)
+        output = c_void_p()
+        _lib.opensolid_AreaVector2d_xy_Area_Area(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return AreaVector2d(ptr=output)
+
+    @staticmethod
+    def x(x_component: Area) -> AreaVector2d:
+        """Construct a vector from just an X component.
+
+        The Y component will be set to zero.
+        """
+        inputs = x_component._ptr
+        output = c_void_p()
+        _lib.opensolid_AreaVector2d_x_Area(ctypes.byref(inputs), ctypes.byref(output))
+        return AreaVector2d(ptr=output)
+
+    @staticmethod
+    def y(y_component: Area) -> AreaVector2d:
+        """Construct a vector from just a Y component.
+
+        The X component will be set to zero.
+        """
+        inputs = y_component._ptr
+        output = c_void_p()
+        _lib.opensolid_AreaVector2d_y_Area(ctypes.byref(inputs), ctypes.byref(output))
+        return AreaVector2d(ptr=output)
+
+    @staticmethod
+    def polar(magnitude: Area, angle: Angle) -> AreaVector2d:
+        """Construct a vector from its magnitude (length) and angle."""
+        inputs = _Tuple2_c_void_p_c_void_p(magnitude._ptr, angle._ptr)
+        output = c_void_p()
+        _lib.opensolid_AreaVector2d_polar_Area_Angle(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return AreaVector2d(ptr=output)
+
+    @staticmethod
+    def from_components(components: tuple[Area, Area]) -> AreaVector2d:
+        """Construct a vector from a pair of X and Y components."""
+        inputs = _Tuple2_c_void_p_c_void_p(components[0]._ptr, components[1]._ptr)
+        output = c_void_p()
+        _lib.opensolid_AreaVector2d_fromComponents_Tuple2AreaArea(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return AreaVector2d(ptr=output)
+
+    def components(self) -> tuple[Area, Area]:
+        """Get the X and Y components of a vector."""
+        inputs = self._ptr
+        output = _Tuple2_c_void_p_c_void_p()
+        _lib.opensolid_AreaVector2d_components(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return (Area(ptr=c_void_p(output.field0)), Area(ptr=c_void_p(output.field1)))
+
+    def x_component(self) -> Area:
+        """Get the X component of a vector."""
+        inputs = self._ptr
+        output = c_void_p()
+        _lib.opensolid_AreaVector2d_xComponent(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Area(ptr=output)
+
+    def y_component(self) -> Area:
+        """Get the Y component of a vector."""
+        inputs = self._ptr
+        output = c_void_p()
+        _lib.opensolid_AreaVector2d_yComponent(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Area(ptr=output)
+
+    def direction(self) -> Direction2d:
+        """Attempt to get the direction of a vector.
+
+        The current tolerance will be used to check if the vector is zero
+        (and therefore does not have a direction).
+        """
+        inputs = _Tuple2_c_void_p_c_void_p(_area_tolerance()._ptr, self._ptr)
+        output = _Result_c_void_p()
+        _lib.opensolid_AreaVector2d_direction(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return (
+            Direction2d(ptr=c_void_p(output.field2))
+            if output.field0 == 0
+            else _error(_text_to_str(output.field1))
+        )
+
+    def angle(self) -> Angle:
+        """Get the angle of a vector.
+
+        The angle is measured counterclockwise from the positive X axis, so:
+
+          * A vector in the positive X direction has an angle of zero.
+          * A vector in the positive Y direction has an angle of 90 degrees.
+          * A vector in the negative Y direction has an angle of -90 degrees.
+          * It is not defined whether a vector exactly in the negative X direction has
+            an angle of -180 or +180 degrees. (Currently it is reported as having an
+            angle of +180 degrees, but this should not be relied upon.)
+
+        The returned angle will be between -180 and +180 degrees.
+        """
+        inputs = self._ptr
+        output = c_void_p()
+        _lib.opensolid_AreaVector2d_angle(ctypes.byref(inputs), ctypes.byref(output))
+        return Angle(ptr=output)
+
+    def is_zero(self) -> bool:
+        """Check if an area vector is zero, within the current tolerance."""
+        inputs = _Tuple2_c_void_p_c_void_p(_area_tolerance()._ptr, self._ptr)
+        output = c_int64()
+        _lib.opensolid_AreaVector2d_isZero(ctypes.byref(inputs), ctypes.byref(output))
+        return bool(output.value)
+
+    def __neg__(self) -> AreaVector2d:
+        output = c_void_p()
+        _lib.opensolid_AreaVector2d_neg(ctypes.byref(self._ptr), ctypes.byref(output))
+        return AreaVector2d(ptr=output)
+
+    def __add__(self, rhs: AreaVector2d) -> AreaVector2d:
+        inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+        output = c_void_p()
+        _lib.opensolid_AreaVector2d_add_AreaVector2d_AreaVector2d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return AreaVector2d(ptr=output)
+
+    def __sub__(self, rhs: AreaVector2d) -> AreaVector2d:
+        inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+        output = c_void_p()
+        _lib.opensolid_AreaVector2d_sub_AreaVector2d_AreaVector2d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return AreaVector2d(ptr=output)
+
+    def __mul__(self, rhs: float) -> AreaVector2d:
+        inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
+        output = c_void_p()
+        _lib.opensolid_AreaVector2d_mul_AreaVector2d_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return AreaVector2d(ptr=output)
+
+    @overload
+    def __truediv__(self, rhs: float) -> AreaVector2d:
+        pass
+
+    @overload
+    def __truediv__(self, rhs: Length) -> Displacement2d:
+        pass
+
+    @overload
+    def __truediv__(self, rhs: Area) -> Vector2d:
+        pass
+
+    def __truediv__(self, rhs):
+        match rhs:
+            case float() | int():
+                inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
+                output = c_void_p()
+                _lib.opensolid_AreaVector2d_div_AreaVector2d_Float(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return AreaVector2d(ptr=output)
+            case Length():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_AreaVector2d_div_AreaVector2d_Length(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Displacement2d(ptr=output)
+            case Area():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_AreaVector2d_div_AreaVector2d_Area(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Vector2d(ptr=output)
+            case _:
+                return NotImplemented
+
+    @overload
+    def dot(self, rhs: Vector2d) -> Area:
+        pass
+
+    @overload
+    def dot(self, rhs: Direction2d) -> Area:
+        pass
+
+    def dot(self, rhs):
+        """Compute the dot product of two vector-like values."""
+        match rhs:
+            case Vector2d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_AreaVector2d_dot_AreaVector2d_Vector2d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Area(ptr=output)
+            case Direction2d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_AreaVector2d_dot_AreaVector2d_Direction2d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Area(ptr=output)
+            case _:
+                return NotImplemented
+
+    @overload
+    def cross(self, rhs: Vector2d) -> Area:
+        pass
+
+    @overload
+    def cross(self, rhs: Direction2d) -> Area:
+        pass
+
+    def cross(self, rhs):
+        """Compute the cross product of two vector-like values."""
+        match rhs:
+            case Vector2d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_AreaVector2d_cross_AreaVector2d_Vector2d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Area(ptr=output)
+            case Direction2d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_AreaVector2d_cross_AreaVector2d_Direction2d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Area(ptr=output)
+            case _:
+                return NotImplemented
+
+    def __rmul__(self, lhs: float) -> AreaVector2d:
+        inputs = _Tuple2_c_double_c_void_p(lhs, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_AreaVector2d_mul_Float_AreaVector2d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return AreaVector2d(ptr=output)
 
 
 class Direction2d:
@@ -2700,6 +3804,10 @@ class Direction2d:
     def __mul__(self, rhs: Length) -> Displacement2d:
         pass
 
+    @overload
+    def __mul__(self, rhs: Area) -> AreaVector2d:
+        pass
+
     def __mul__(self, rhs):
         match rhs:
             case float() | int():
@@ -2716,6 +3824,13 @@ class Direction2d:
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return Displacement2d(ptr=output)
+            case Area():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Direction2d_mul_Direction2d_Area(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return AreaVector2d(ptr=output)
             case _:
                 return NotImplemented
 
@@ -2729,6 +3844,10 @@ class Direction2d:
 
     @overload
     def dot(self, rhs: Displacement2d) -> Length:
+        pass
+
+    @overload
+    def dot(self, rhs: AreaVector2d) -> Area:
         pass
 
     def dot(self, rhs):
@@ -2755,6 +3874,13 @@ class Direction2d:
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return Length(ptr=output)
+            case AreaVector2d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Direction2d_dot_Direction2d_AreaVector2d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Area(ptr=output)
             case _:
                 return NotImplemented
 
@@ -2768,6 +3894,10 @@ class Direction2d:
 
     @overload
     def cross(self, rhs: Displacement2d) -> Length:
+        pass
+
+    @overload
+    def cross(self, rhs: AreaVector2d) -> Area:
         pass
 
     def cross(self, rhs):
@@ -2794,6 +3924,13 @@ class Direction2d:
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return Length(ptr=output)
+            case AreaVector2d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Direction2d_cross_Direction2d_AreaVector2d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Area(ptr=output)
             case _:
                 return NotImplemented
 
@@ -3301,6 +4438,9 @@ class Curve:
     def __init__(self, *, ptr: c_void_p) -> None:
         self._ptr = ptr
 
+    zero: Curve = None  # type: ignore[assignment]
+    """A curve equal to zero everywhere."""
+
     t: Curve = None  # type: ignore[assignment]
     """A curve parameter.
 
@@ -3308,6 +4448,14 @@ class Curve:
     When defining parametric curves, you will typically start with 'Curve.t'
     and then use arithmetic operators etc. to build up more complex curves.
     """
+
+    @staticmethod
+    def constant(value: float) -> Curve:
+        """Create a curve with the given constant value."""
+        inputs = c_double(value)
+        output = c_void_p()
+        _lib.opensolid_Curve_constant_Float(ctypes.byref(inputs), ctypes.byref(output))
+        return Curve(ptr=output)
 
     def squared(self) -> Curve:
         """Compute the square of a curve."""
@@ -3463,6 +4611,10 @@ class Curve:
         pass
 
     @overload
+    def __mul__(self, rhs: Area) -> AreaCurve:
+        pass
+
+    @overload
     def __mul__(self, rhs: Angle) -> AngleCurve:
         pass
 
@@ -3497,6 +4649,13 @@ class Curve:
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return LengthCurve(ptr=output)
+            case Area():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Curve_mul_Curve_Area(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return AreaCurve(ptr=output)
             case Angle():
                 inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
@@ -3624,6 +4783,19 @@ class LengthCurve:
     def __init__(self, *, ptr: c_void_p) -> None:
         self._ptr = ptr
 
+    zero: LengthCurve = None  # type: ignore[assignment]
+    """A curve equal to zero everywhere."""
+
+    @staticmethod
+    def constant(value: Length) -> LengthCurve:
+        """Create a curve with the given constant value."""
+        inputs = value._ptr
+        output = c_void_p()
+        _lib.opensolid_LengthCurve_constant_Length(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return LengthCurve(ptr=output)
+
     def evaluate(self, parameter_value: float) -> Length:
         """Evaluate a curve at a given parameter value.
 
@@ -3699,24 +4871,70 @@ class LengthCurve:
         _lib.opensolid_LengthCurve_neg(ctypes.byref(self._ptr), ctypes.byref(output))
         return LengthCurve(ptr=output)
 
+    @overload
     def __add__(self, rhs: LengthCurve) -> LengthCurve:
-        inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
-        output = c_void_p()
-        _lib.opensolid_LengthCurve_add_LengthCurve_LengthCurve(
-            ctypes.byref(inputs), ctypes.byref(output)
-        )
-        return LengthCurve(ptr=output)
+        pass
 
+    @overload
+    def __add__(self, rhs: Length) -> LengthCurve:
+        pass
+
+    def __add__(self, rhs):
+        match rhs:
+            case LengthCurve():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_LengthCurve_add_LengthCurve_LengthCurve(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return LengthCurve(ptr=output)
+            case Length():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_LengthCurve_add_LengthCurve_Length(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return LengthCurve(ptr=output)
+            case _:
+                return NotImplemented
+
+    @overload
     def __sub__(self, rhs: LengthCurve) -> LengthCurve:
-        inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
-        output = c_void_p()
-        _lib.opensolid_LengthCurve_sub_LengthCurve_LengthCurve(
-            ctypes.byref(inputs), ctypes.byref(output)
-        )
-        return LengthCurve(ptr=output)
+        pass
+
+    @overload
+    def __sub__(self, rhs: Length) -> LengthCurve:
+        pass
+
+    def __sub__(self, rhs):
+        match rhs:
+            case LengthCurve():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_LengthCurve_sub_LengthCurve_LengthCurve(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return LengthCurve(ptr=output)
+            case Length():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_LengthCurve_sub_LengthCurve_Length(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return LengthCurve(ptr=output)
+            case _:
+                return NotImplemented
 
     @overload
     def __mul__(self, rhs: float) -> LengthCurve:
+        pass
+
+    @overload
+    def __mul__(self, rhs: LengthCurve) -> AreaCurve:
+        pass
+
+    @overload
+    def __mul__(self, rhs: Length) -> AreaCurve:
         pass
 
     @overload
@@ -3732,6 +4950,20 @@ class LengthCurve:
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return LengthCurve(ptr=output)
+            case LengthCurve():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_LengthCurve_mul_LengthCurve_LengthCurve(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return AreaCurve(ptr=output)
+            case Length():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_LengthCurve_mul_LengthCurve_Length(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return AreaCurve(ptr=output)
             case Curve():
                 inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
@@ -3800,11 +5032,241 @@ class LengthCurve:
         return LengthCurve(ptr=output)
 
 
+class AreaCurve:
+    """A parametric curve definining an area in terms of a parameter value."""
+
+    def __init__(self, *, ptr: c_void_p) -> None:
+        self._ptr = ptr
+
+    zero: AreaCurve = None  # type: ignore[assignment]
+    """A curve equal to zero everywhere."""
+
+    @staticmethod
+    def constant(value: Area) -> AreaCurve:
+        """Create a curve with the given constant value."""
+        inputs = value._ptr
+        output = c_void_p()
+        _lib.opensolid_AreaCurve_constant_Area(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return AreaCurve(ptr=output)
+
+    def evaluate(self, parameter_value: float) -> Area:
+        """Evaluate a curve at a given parameter value.
+
+        The parameter value should be between 0 and 1.
+        """
+        inputs = _Tuple2_c_double_c_void_p(parameter_value, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_AreaCurve_evaluate_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Area(ptr=output)
+
+    def zeros(self) -> list[Curve.Zero]:
+        """Find all points at which the given curve is zero.
+
+        This includes not only points where the curve *crosses* zero,
+        but also where it is *tangent* to zero.
+        For example, y=x-3 crosses zero at x=3,
+        while y=(x-3)^2 is tangent to zero at x=3.
+
+        We define y=x-3 as having a zero of order 0 at x=3,
+        since only the "derivative of order zero" (the curve itself)
+        is zero at that point.
+        Similarly, y=(x-3)^2 has a zero of order 1 at x=3,
+        since the first derivative (but not the second derivative)
+        is zero at that point.
+
+        Currently, this function up to third-order zeros
+        (e.g. y=x^4 has a third-order zero at x=0,
+        since everything up to the third derivative is zero at x=0).
+
+        The current tolerance is used to determine
+        whether a given point should be considered a zero,
+        and of what order.
+        For example, the curve y=x^2-0.0001 is *exactly* zero at x=0.01 and x=-0.01.
+        However, note that the curve is also very close to zero at x=0,
+        and at that point the first derivative is *also* zero.
+        In many cases, it is reasonable to assume that
+        the 0.0001 is an artifact of numerical roundoff,
+        and the curve actually has a single zero of order 1 at x=0.
+        The current tolerance is used to choose which case to report.
+        In this example, a tolerance of 0.000001
+        would mean that we consider 0.0001 a meaningful value (not just roundoff),
+        so we would end up reporting two order-0 zeros at x=0.01 and x=-0.01.
+        On the other hand, a tolerance of 0.01 would mean that
+        we consider 0.0001 as just roundoff error,
+        so we would end up reporting a single order-1 zero at x=0
+        (the point at which the *first derivative* is zero).
+        """
+        inputs = _Tuple2_c_void_p_c_void_p(_area_tolerance()._ptr, self._ptr)
+        output = _Result_List_c_void_p()
+        _lib.opensolid_AreaCurve_zeros(ctypes.byref(inputs), ctypes.byref(output))
+        return (
+            [
+                Curve.Zero(ptr=c_void_p(item))
+                for item in [
+                    output.field2.field1[index] for index in range(output.field2.field0)
+                ]
+            ]
+            if output.field0 == 0
+            else _error(_text_to_str(output.field1))
+        )
+
+    def is_zero(self) -> bool:
+        """Check if a curve is zero everywhere, within the current tolerance."""
+        inputs = _Tuple2_c_void_p_c_void_p(_area_tolerance()._ptr, self._ptr)
+        output = c_int64()
+        _lib.opensolid_AreaCurve_isZero(ctypes.byref(inputs), ctypes.byref(output))
+        return bool(output.value)
+
+    def __neg__(self) -> AreaCurve:
+        output = c_void_p()
+        _lib.opensolid_AreaCurve_neg(ctypes.byref(self._ptr), ctypes.byref(output))
+        return AreaCurve(ptr=output)
+
+    def __add__(self, rhs: AreaCurve) -> AreaCurve:
+        inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+        output = c_void_p()
+        _lib.opensolid_AreaCurve_add_AreaCurve_AreaCurve(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return AreaCurve(ptr=output)
+
+    def __sub__(self, rhs: AreaCurve) -> AreaCurve:
+        inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+        output = c_void_p()
+        _lib.opensolid_AreaCurve_sub_AreaCurve_AreaCurve(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return AreaCurve(ptr=output)
+
+    @overload
+    def __mul__(self, rhs: float) -> AreaCurve:
+        pass
+
+    @overload
+    def __mul__(self, rhs: Curve) -> AreaCurve:
+        pass
+
+    def __mul__(self, rhs):
+        match rhs:
+            case float() | int():
+                inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
+                output = c_void_p()
+                _lib.opensolid_AreaCurve_mul_AreaCurve_Float(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return AreaCurve(ptr=output)
+            case Curve():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_AreaCurve_mul_AreaCurve_Curve(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return AreaCurve(ptr=output)
+            case _:
+                return NotImplemented
+
+    @overload
+    def __truediv__(self, rhs: float) -> AreaCurve:
+        pass
+
+    @overload
+    def __truediv__(self, rhs: AreaCurve) -> Curve:
+        pass
+
+    @overload
+    def __truediv__(self, rhs: Length) -> LengthCurve:
+        pass
+
+    @overload
+    def __truediv__(self, rhs: Area) -> Curve:
+        pass
+
+    @overload
+    def __truediv__(self, rhs: Curve) -> AreaCurve:
+        pass
+
+    @overload
+    def __truediv__(self, rhs: LengthCurve) -> LengthCurve:
+        pass
+
+    def __truediv__(self, rhs):
+        match rhs:
+            case float() | int():
+                inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
+                output = c_void_p()
+                _lib.opensolid_AreaCurve_div_AreaCurve_Float(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return AreaCurve(ptr=output)
+            case AreaCurve():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_AreaCurve_div_AreaCurve_AreaCurve(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Curve(ptr=output)
+            case Length():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_AreaCurve_div_AreaCurve_Length(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return LengthCurve(ptr=output)
+            case Area():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_AreaCurve_div_AreaCurve_Area(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Curve(ptr=output)
+            case Curve():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_AreaCurve_div_AreaCurve_Curve(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return AreaCurve(ptr=output)
+            case LengthCurve():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_AreaCurve_div_AreaCurve_LengthCurve(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return LengthCurve(ptr=output)
+            case _:
+                return NotImplemented
+
+    def __rmul__(self, lhs: float) -> AreaCurve:
+        inputs = _Tuple2_c_double_c_void_p(lhs, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_AreaCurve_mul_Float_AreaCurve(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return AreaCurve(ptr=output)
+
+
 class AngleCurve:
     """A parametric curve definining an angle in terms of a parameter value."""
 
     def __init__(self, *, ptr: c_void_p) -> None:
         self._ptr = ptr
+
+    zero: AngleCurve = None  # type: ignore[assignment]
+    """A curve equal to zero everywhere."""
+
+    @staticmethod
+    def constant(value: Angle) -> AngleCurve:
+        """Create a curve with the given constant value."""
+        inputs = value._ptr
+        output = c_void_p()
+        _lib.opensolid_AngleCurve_constant_Angle(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return AngleCurve(ptr=output)
 
     def sin(self) -> Curve:
         """Compute the sine of a curve."""
@@ -3895,21 +5357,59 @@ class AngleCurve:
         _lib.opensolid_AngleCurve_neg(ctypes.byref(self._ptr), ctypes.byref(output))
         return AngleCurve(ptr=output)
 
+    @overload
     def __add__(self, rhs: AngleCurve) -> AngleCurve:
-        inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
-        output = c_void_p()
-        _lib.opensolid_AngleCurve_add_AngleCurve_AngleCurve(
-            ctypes.byref(inputs), ctypes.byref(output)
-        )
-        return AngleCurve(ptr=output)
+        pass
 
+    @overload
+    def __add__(self, rhs: Angle) -> AngleCurve:
+        pass
+
+    def __add__(self, rhs):
+        match rhs:
+            case AngleCurve():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_AngleCurve_add_AngleCurve_AngleCurve(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return AngleCurve(ptr=output)
+            case Angle():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_AngleCurve_add_AngleCurve_Angle(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return AngleCurve(ptr=output)
+            case _:
+                return NotImplemented
+
+    @overload
     def __sub__(self, rhs: AngleCurve) -> AngleCurve:
-        inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
-        output = c_void_p()
-        _lib.opensolid_AngleCurve_sub_AngleCurve_AngleCurve(
-            ctypes.byref(inputs), ctypes.byref(output)
-        )
-        return AngleCurve(ptr=output)
+        pass
+
+    @overload
+    def __sub__(self, rhs: Angle) -> AngleCurve:
+        pass
+
+    def __sub__(self, rhs):
+        match rhs:
+            case AngleCurve():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_AngleCurve_sub_AngleCurve_AngleCurve(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return AngleCurve(ptr=output)
+            case Angle():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_AngleCurve_sub_AngleCurve_Angle(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return AngleCurve(ptr=output)
+            case _:
+                return NotImplemented
 
     @overload
     def __mul__(self, rhs: float) -> AngleCurve:
@@ -4154,6 +5654,33 @@ def _length_pixel() -> Length:
 
 
 Length.pixel = _length_pixel()
+
+
+def _area_zero() -> Area:
+    output = c_void_p()
+    _lib.opensolid_Area_zero(c_void_p(), ctypes.byref(output))
+    return Area(ptr=output)
+
+
+Area.zero = _area_zero()
+
+
+def _area_square_meter() -> Area:
+    output = c_void_p()
+    _lib.opensolid_Area_squareMeter(c_void_p(), ctypes.byref(output))
+    return Area(ptr=output)
+
+
+Area.square_meter = _area_square_meter()
+
+
+def _area_square_inch() -> Area:
+    output = c_void_p()
+    _lib.opensolid_Area_squareInch(c_void_p(), ctypes.byref(output))
+    return Area(ptr=output)
+
+
+Area.square_inch = _area_square_inch()
 
 
 def _angle_zero() -> Angle:
@@ -4543,6 +6070,15 @@ def _displacement2d_zero() -> Displacement2d:
 Displacement2d.zero = _displacement2d_zero()
 
 
+def _areavector2d_zero() -> AreaVector2d:
+    output = c_void_p()
+    _lib.opensolid_AreaVector2d_zero(c_void_p(), ctypes.byref(output))
+    return AreaVector2d(ptr=output)
+
+
+AreaVector2d.zero = _areavector2d_zero()
+
+
 def _direction2d_x() -> Direction2d:
     output = c_void_p()
     _lib.opensolid_Direction2d_x(c_void_p(), ctypes.byref(output))
@@ -4615,6 +6151,15 @@ def _uvpoint_origin() -> UvPoint:
 UvPoint.origin = _uvpoint_origin()
 
 
+def _curve_zero() -> Curve:
+    output = c_void_p()
+    _lib.opensolid_Curve_zero(c_void_p(), ctypes.byref(output))
+    return Curve(ptr=output)
+
+
+Curve.zero = _curve_zero()
+
+
 def _curve_t() -> Curve:
     output = c_void_p()
     _lib.opensolid_Curve_t(c_void_p(), ctypes.byref(output))
@@ -4622,6 +6167,33 @@ def _curve_t() -> Curve:
 
 
 Curve.t = _curve_t()
+
+
+def _lengthcurve_zero() -> LengthCurve:
+    output = c_void_p()
+    _lib.opensolid_LengthCurve_zero(c_void_p(), ctypes.byref(output))
+    return LengthCurve(ptr=output)
+
+
+LengthCurve.zero = _lengthcurve_zero()
+
+
+def _areacurve_zero() -> AreaCurve:
+    output = c_void_p()
+    _lib.opensolid_AreaCurve_zero(c_void_p(), ctypes.byref(output))
+    return AreaCurve(ptr=output)
+
+
+AreaCurve.zero = _areacurve_zero()
+
+
+def _anglecurve_zero() -> AngleCurve:
+    output = c_void_p()
+    _lib.opensolid_AngleCurve_zero(c_void_p(), ctypes.byref(output))
+    return AngleCurve(ptr=output)
+
+
+AngleCurve.zero = _anglecurve_zero()
 
 
 def _drawing2d_black_stroke() -> Drawing2d.Attribute:
@@ -4644,13 +6216,16 @@ Drawing2d.no_fill = _drawing2d_no_fill()
 
 __all__ = [
     "Length",
+    "Area",
     "Angle",
     "Range",
     "LengthRange",
+    "AreaRange",
     "AngleRange",
     "Color",
     "Vector2d",
     "Displacement2d",
+    "AreaVector2d",
     "Direction2d",
     "Point2d",
     "UvPoint",
@@ -4658,6 +6233,7 @@ __all__ = [
     "UvBounds",
     "Curve",
     "LengthCurve",
+    "AreaCurve",
     "AngleCurve",
     "Drawing2d",
 ]
