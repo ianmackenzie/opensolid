@@ -496,6 +496,7 @@ areaVector2d =
     , factory1 "X" "X Component" Vector2d.x $(docs 'Vector2d.x)
     , factory1 "Y" "Y Component" Vector2d.y $(docs 'Vector2d.y)
     , factory2 "Polar" "Magnitude" "Angle" Vector2d.polar $(docs 'Vector2d.polar)
+    , factory2 "Square Meters" "X Component" "Y Component" Vector2d.squareMeters $(docs 'Vector2d.squareMeters)
     , factory1 "From Components" "Components" Vector2d.fromComponents $(docs 'Vector2d.fromComponents)
     , member0 "Components" Vector2d.components $(docs 'Vector2d.components)
     , member0 "X Component" Vector2d.xComponent $(docs 'Vector2d.xComponent)

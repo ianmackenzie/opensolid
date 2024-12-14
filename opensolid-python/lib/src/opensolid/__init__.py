@@ -3507,6 +3507,16 @@ class AreaVector2d:
         return AreaVector2d(ptr=output)
 
     @staticmethod
+    def square_meters(x_component: float, y_component: float) -> AreaVector2d:
+        """Construct a vector from its X and Y components given in square meters."""
+        inputs = _Tuple2_c_double_c_double(x_component, y_component)
+        output = c_void_p()
+        _lib.opensolid_AreaVector2d_squareMeters_Float_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return AreaVector2d(ptr=output)
+
+    @staticmethod
     def from_components(components: tuple[Area, Area]) -> AreaVector2d:
         """Construct a vector from a pair of X and Y components."""
         inputs = _Tuple2_c_void_p_c_void_p(components[0]._ptr, components[1]._ptr)

@@ -306,6 +306,7 @@ millimeters = apply Length.millimeters
 inches :: Float -> Float -> Vector2d (space @ Meters)
 inches = apply Length.inches
 
+-- | Construct a vector from its X and Y components given in square meters.
 squareMeters :: Float -> Float -> Vector2d (space @ SquareMeters)
 squareMeters = apply Area.squareMeters
 
