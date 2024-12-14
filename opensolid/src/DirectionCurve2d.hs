@@ -19,6 +19,7 @@ module DirectionCurve2d
   )
 where
 
+import Angle (Angle)
 import Basis2d (Basis2d)
 import Basis2d qualified
 import Curve1d (Curve1d)

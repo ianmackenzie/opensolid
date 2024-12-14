@@ -46,7 +46,7 @@ import Range qualified
 import Solve1d qualified
 import Stream (Stream)
 import Stream qualified
-import Units (Meters, SquareMeters)
+import Units (Meters, Radians, SquareMeters)
 import Units qualified
 
 class

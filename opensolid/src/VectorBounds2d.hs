@@ -48,6 +48,7 @@ import Qty qualified
 import Range (Range (Range))
 import Range qualified
 import Transform2d (Transform2d (Transform2d))
+import Units (Radians)
 import Units qualified
 import Vector2d (Vector2d (Vector2d))
 import Vector2d qualified

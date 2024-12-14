@@ -18,7 +18,7 @@ import OpenSolid.FFI qualified as FFI
 import Pair qualified
 import Text qualified
 import Tolerance qualified
-import Units (Meters, SquareMeters)
+import Units (Meters, Radians, SquareMeters)
 
 data MemberFunction value where
   MemberFunction0 ::

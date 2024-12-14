@@ -4,6 +4,7 @@ module API.Constraint
   )
 where
 
+import Angle (Angle)
 import Area (Area)
 import Data.Proxy (Proxy (Proxy))
 import Length (Length)

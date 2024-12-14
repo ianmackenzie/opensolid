@@ -21,6 +21,7 @@ module OpenSolid.FFI
   )
 where
 
+import Angle (Angle)
 import Area (Area)
 import Color (Color)
 import Data.ByteString.Unsafe qualified

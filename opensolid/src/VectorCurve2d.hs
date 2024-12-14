@@ -44,6 +44,7 @@ module VectorCurve2d
   )
 where
 
+import Angle (Angle)
 import Angle qualified
 import Basis2d (Basis2d)
 import Basis2d qualified

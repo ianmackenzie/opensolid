@@ -34,6 +34,7 @@ module Transform3d
   )
 where
 
+import Angle (Angle)
 import Angle qualified
 import {-# SOURCE #-} Axis3d (Axis3d)
 import {-# SOURCE #-} Axis3d qualified

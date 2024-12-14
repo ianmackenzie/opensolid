@@ -35,6 +35,7 @@ module Point2d
   )
 where
 
+import Angle (Angle)
 import Arithmetic.Unboxed
 import {-# SOURCE #-} Axis2d (Axis2d)
 import {-# SOURCE #-} Axis2d qualified

@@ -32,6 +32,7 @@ module Expression
   )
 where
 
+import Angle (Angle)
 import Bounds2d (Bounds2d (Bounds2d))
 import Bounds3d (Bounds3d (Bounds3d))
 import Expression.Scalar (Scalar)

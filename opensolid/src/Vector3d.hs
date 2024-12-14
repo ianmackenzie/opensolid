@@ -43,6 +43,7 @@ module Vector3d
   )
 where
 
+import Angle (Angle)
 import Area qualified
 import Arithmetic.Unboxed
 import {-# SOURCE #-} Axis3d (Axis3d)

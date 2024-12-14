@@ -45,6 +45,7 @@ module Vector2d
   )
 where
 
+import Angle (Angle)
 import Angle qualified
 import Area qualified
 import Arithmetic.Unboxed

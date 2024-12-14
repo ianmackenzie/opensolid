@@ -23,6 +23,7 @@ module Axis2d
   )
 where
 
+import Angle (Angle)
 import Direction2d (Direction2d)
 import Direction2d qualified
 import OpenSolid

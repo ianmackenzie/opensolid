@@ -7,6 +7,7 @@ module OpenSolid.Json
   )
 where
 
+import Angle (Angle)
 import Angle qualified
 import Direction2d (Direction2d)
 import Direction2d qualified

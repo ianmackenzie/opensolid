@@ -42,6 +42,7 @@ module Color
   )
 where
 
+import Angle (Angle)
 import Angle qualified
 import Data.Colour qualified
 import Data.Colour.RGBSpace qualified

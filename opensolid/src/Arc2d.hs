@@ -17,6 +17,7 @@ module Arc2d
   )
 where
 
+import Angle (Angle)
 import Angle qualified
 import Curve2d (Curve2d)
 import Curve2d qualified

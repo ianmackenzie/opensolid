@@ -61,6 +61,7 @@ import Surface1d.Function.Zeros (Zeros (..))
 import Surface1d.Function.Zeros qualified as Zeros
 import SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvCoordinates, UvDirection, UvPoint)
 import SurfaceParameter qualified
+import Units (Radians)
 import Units qualified
 import Uv.Derivatives (Derivatives)
 import Uv.Derivatives qualified as Derivatives

@@ -17,6 +17,7 @@ import API.PreOperator (PreOperator (PreOperator))
 import API.PreOperator qualified as PreOperator
 import API.StaticFunction (StaticFunction (..))
 import API.StaticFunction qualified as StaticFunction
+import Angle (Angle)
 import Angle qualified
 import Area (Area)
 import Area qualified
@@ -44,7 +45,7 @@ import Point2d qualified
 import Qty qualified
 import Range (Range)
 import Range qualified
-import Units (Meters, SquareMeters)
+import Units (Meters, Radians, SquareMeters)
 import Vector2d (Vector2d)
 import Vector2d qualified
 

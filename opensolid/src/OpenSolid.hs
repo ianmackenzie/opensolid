@@ -12,12 +12,10 @@ module OpenSolid
   , module Tolerance
   , module Fuzzy
   , module Units
-  , module Angle
   , module Intersects
   )
 where
 
-import Angle (Angle)
 import Arithmetic hiding
   ( CrossProduct (CrossProduct)
   , Difference (Difference)
@@ -38,4 +36,4 @@ import Qty (Qty)
 import Result (Result (Failure, Success))
 import Sign (Sign (Negative, Positive))
 import Tolerance (ApproximateEquality ((~=)), Tolerance, (!=))
-import Units (HasUnits (UnitsOf), Radians, Unitless, (:*:), (:/:))
+import Units (HasUnits (UnitsOf), Unitless, (:*:), (:/:))

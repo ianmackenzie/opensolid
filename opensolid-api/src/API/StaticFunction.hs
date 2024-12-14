@@ -18,7 +18,7 @@ import OpenSolid.FFI qualified as FFI
 import Pair qualified
 import Text qualified
 import Tolerance qualified
-import Units (Meters)
+import Units (Meters, Radians)
 
 data StaticFunction where
   StaticFunction1 ::

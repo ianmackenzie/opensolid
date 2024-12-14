@@ -33,6 +33,7 @@ module Direction2d
   )
 where
 
+import Angle (Angle)
 import Angle qualified
 import {-# SOURCE #-} Axis2d (Axis2d)
 import {-# SOURCE #-} Basis2d (Basis2d)
@@ -46,6 +47,7 @@ import Qty qualified
 import Random qualified
 import Transform qualified
 import Transform2d (Transform2d)
+import Units (Radians)
 import Units qualified
 import Vector2d (Vector2d (Vector2d, Vector2d#))
 import Vector2d qualified

@@ -81,7 +81,7 @@ import OpenSolid.FFI qualified as FFI
 import Parameter qualified
 import Qty qualified
 import Random qualified
-import Units (Meters, SquareMeters)
+import Units (Meters, Radians, SquareMeters)
 import Units qualified
 
 type role Range phantom

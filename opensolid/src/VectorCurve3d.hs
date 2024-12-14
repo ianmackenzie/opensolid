@@ -44,6 +44,7 @@ module VectorCurve3d
   )
 where
 
+import Angle (Angle)
 import Angle qualified
 import Basis3d (Basis3d)
 import Basis3d qualified
