@@ -18,6 +18,8 @@ import API.PreOperator qualified as PreOperator
 import API.StaticFunction (StaticFunction (..))
 import API.StaticFunction qualified as StaticFunction
 import Angle qualified
+import Area (Area)
+import Area qualified
 import Bounds2d (Bounds2d)
 import Bounds2d qualified
 import Color (Color)
@@ -42,7 +44,7 @@ import Point2d qualified
 import Qty qualified
 import Range (Range)
 import Range qualified
-import Units (Meters)
+import Units (Meters, SquareMeters)
 import Vector2d (Vector2d)
 import Vector2d qualified
 
@@ -79,13 +81,16 @@ data Function = Function
 classes :: List Class
 classes =
   [ length
+  , area
   , angle
   , range
   , lengthRange
+  , areaRange
   , angleRange
   , color
   , vector2d
   , displacement2d
+  , areaVector2d
   , direction2d
   , point2d
   , uvPoint
@@ -93,6 +98,7 @@ classes =
   , uvBounds
   , curve
   , lengthCurve
+  , areaCurve
   , angleCurve
   , drawing2d
   ]
@@ -130,16 +136,61 @@ length =
     , minus @(Range Meters) Self
     , minus @(Curve1d Meters) Self
     , timesFloat
+    , timesSelf
     , times @(Range Unitless) Self
+    , times @(Range Meters) Self
     , times @(Curve1d Unitless) Self
+    , times @(Curve1d Meters) Self
     , times @(Direction2d Space) Self
     , times @(Vector2d (Space @ Unitless)) Self
+    , times @(Vector2d (Space @ Meters)) Self
     , divByFloat
     , divBySelf
     , divBy @(Range Unitless) Self
     , divBy @(Range Meters) Self
     , divBy @(Curve1d Unitless) Self
     , divBy @(Curve1d Meters) Self
+    , floorDivBySelf
+    , modBySelf
+    ]
+
+area :: Class
+area =
+  class_ @Area
+    $(docs ''Area)
+    [ constant "Zero" Area.zero $(docs 'Area.zero)
+    , constant "Square Meter" Area.squareMeter $(docs 'Area.squareMeter)
+    , constant "Square Inch" Area.squareInch $(docs 'Area.squareInch)
+    , factory1 "Square Meters" "Value" Area.squareMeters $(docs 'Area.squareMeters)
+    , factory1 "Square Inches" "Value" Area.squareInches $(docs 'Area.squareInches)
+    , member0 "In Square Meters" Area.inSquareMeters $(docs 'Area.inSquareMeters)
+    , member0 "In Square Inches" Area.inSquareInches $(docs 'Area.inSquareInches)
+    , memberSM0 "Is Zero" (~= Area.zero) "Check if an area is zero, within the current tolerance."
+    , equality
+    , comparison
+    , negateSelf
+    , absSelf Qty.abs
+    , floatTimes
+    , plusSelf
+    , plus @(Range SquareMeters) Self
+    , plus @(Curve1d SquareMeters) Self
+    , minusSelf
+    , minus @(Range SquareMeters) Self
+    , minus @(Curve1d SquareMeters) Self
+    , timesFloat
+    , times @(Range Unitless) Self
+    , times @(Curve1d Unitless) Self
+    , times @(Direction2d Space) Self
+    , times @(Vector2d (Space @ Unitless)) Self
+    , divByFloat
+    , divBySelf
+    , divBy @Length Self
+    , divBy @(Range Unitless) Self
+    , divBy @(Range Meters) Self
+    , divBy @(Range SquareMeters) Self
+    , divBy @(Curve1d Unitless) Self
+    , divBy @(Curve1d Meters) Self
+    , divBy @(Curve1d SquareMeters) Self
     , floorDivBySelf
     , modBySelf
     ]
@@ -223,6 +274,8 @@ range =
     , timesSelf
     , times @Length Self
     , times @Angle Self
+    , times @(Range Meters) Self
+    , times @(Range SquareMeters) Self
     , divByFloat
     , divBySelf
     ]
@@ -251,9 +304,42 @@ lengthRange =
     , minusSelf
     , minus @Length Self
     , timesFloat
+    , timesSelf
+    , times @Length Self
+    , times @(Range Unitless) Self
     , divByFloat
     , divBySelf
+    , divBy @Length Self
     , divBy @(Range Unitless) Self
+    ]
+
+areaRange :: Class
+areaRange =
+  class_ @(Range SquareMeters)
+    "A range of area values, with a lower bound and upper bound."
+    [ factory1 "Constant" "Value" Range.constant $(docs 'Range.constant)
+    , factory2 "From Endpoints" "A" "B" Range.from $(docs 'Range.from)
+    , factory1 "Hull" "Values" Range.hullN $(docs 'Range.hullN)
+    , factory1 "Aggregate" "Ranges" Range.aggregateN $(docs 'Range.aggregateN)
+    , member0 "Endpoints" Range.endpoints $(docs 'Range.endpoints)
+    , member1 "Intersection" "Other" Range.intersection $(docs 'Range.intersection)
+    , member1 "Includes" "Value" Range.includes $(docs 'Range.includes)
+    , member1 "Contains" "Other" Range.contains $(docs 'Range.contains)
+    , negateSelf
+    , absSelf Range.abs
+    , floatTimes
+    , plusSelf
+    , plus @Area Self
+    , minusSelf
+    , minus @Area Self
+    , timesFloat
+    , times @(Range Unitless) Self
+    , divByFloat
+    , divBySelf
+    , divBy @Length Self
+    , divBy @Area Self
+    , divBy @(Range Unitless) Self
+    , divBy @(Range Meters) Self
     ]
 
 angleRange :: Class
@@ -351,12 +437,15 @@ vector2d =
     , minusSelf
     , timesFloat
     , times @Length Self
+    , times @Area Self
     , divByFloat
     , dotSelf
     , dot @(Vector2d (Space @ Meters)) Self
+    , dot @(Vector2d (Space @ SquareMeters)) Self
     , dot @(Direction2d Space) Self
     , crossSelf
     , cross @(Vector2d (Space @ Meters)) Self
+    , cross @(Vector2d (Space @ SquareMeters)) Self
     , cross @(Direction2d Space) Self
     ]
 
@@ -385,8 +474,41 @@ displacement2d =
     , plusSelf
     , minusSelf
     , timesFloat
+    , times @Length Self
     , divByFloat
     , divBy @Length Self
+    , dotSelf
+    , dot @(Vector2d (Space @ Unitless)) Self
+    , dot @(Direction2d Space) Self
+    , crossSelf
+    , cross @(Vector2d (Space @ Unitless)) Self
+    , cross @(Direction2d Space) Self
+    ]
+
+areaVector2d :: Class
+areaVector2d =
+  class_ @(Vector2d (Space @ SquareMeters))
+    "A vector in 2D with units of area."
+    [ constant "Zero" (Vector2d.zero @Space @SquareMeters) $(docs 'Vector2d.zero)
+    , factory2 "XY" "X Component" "Y Component" Vector2d.xy $(docs 'Vector2d.xy)
+    , factory1 "X" "X Component" Vector2d.x $(docs 'Vector2d.x)
+    , factory1 "Y" "Y Component" Vector2d.y $(docs 'Vector2d.y)
+    , factory2 "Polar" "Magnitude" "Angle" Vector2d.polar $(docs 'Vector2d.polar)
+    , factory1 "From Components" "Components" Vector2d.fromComponents $(docs 'Vector2d.fromComponents)
+    , member0 "Components" Vector2d.components $(docs 'Vector2d.components)
+    , member0 "X Component" Vector2d.xComponent $(docs 'Vector2d.xComponent)
+    , member0 "Y Component" Vector2d.yComponent $(docs 'Vector2d.yComponent)
+    , memberSM0 "Direction" Vector2d.direction $(docs 'Vector2d.direction)
+    , member0 "Angle" Vector2d.angle $(docs 'Vector2d.angle)
+    , memberSM0 "Is Zero" (~= Vector2d.zero) "Check if an area vector is zero, within the current tolerance."
+    , negateSelf
+    , floatTimes
+    , plusSelf
+    , minusSelf
+    , timesFloat
+    , divByFloat
+    , divBy @Length Self
+    , divBy @Area Self
     , dot @(Vector2d (Space @ Unitless)) Self
     , dot @(Direction2d Space) Self
     , cross @(Vector2d (Space @ Unitless)) Self
@@ -415,12 +537,15 @@ direction2d =
     , floatTimes
     , timesFloat
     , times @Length Self
+    , times @Area Self
     , dotSelf
     , dot @(Vector2d (Space @ Unitless)) Self
     , dot @(Vector2d (Space @ Meters)) Self
+    , dot @(Vector2d (Space @ SquareMeters)) Self
     , crossSelf
     , cross @(Vector2d (Space @ Unitless)) Self
     , cross @(Vector2d (Space @ Meters)) Self
+    , cross @(Vector2d (Space @ SquareMeters)) Self
     ]
 
 point2d :: Class
@@ -517,6 +642,7 @@ curve =
     , timesFloat
     , timesSelf
     , times @Length Self
+    , times @Area Self
     , times @Angle Self
     , times @(Curve1d Meters) Self
     , times @(Curve1d Radians) Self
@@ -544,7 +670,9 @@ angleCurve =
     , negateSelf
     , floatTimes
     , plusSelf
+    , plus @Angle Self
     , minusSelf
+    , minus @Angle Self
     , timesFloat
     , times @(Curve1d Unitless) Self
     , divByFloat
@@ -565,13 +693,40 @@ lengthCurve =
     , negateSelf
     , floatTimes
     , plusSelf
+    , plus @Length Self
+    , minusSelf
+    , minus @Length Self
+    , timesFloat
+    , timesSelf
+    , times @Length Self
+    , times @(Curve1d Unitless) Self
+    , divByFloat
+    , divBySelf
+    , divBy @Length Self
+    , divBy @(Curve1d Unitless) Self
+    ]
+
+areaCurve :: Class
+areaCurve =
+  class_ @(Curve1d SquareMeters)
+    "A parametric curve definining an area in terms of a parameter value."
+    [ constant "Zero" (Curve1d.zero @SquareMeters) $(docs 'Curve1d.zero)
+    , factory1 "Constant" "Value" Curve1d.constant $(docs 'Curve1d.constant)
+    , member1 "Evaluate" "Parameter Value" (\t c -> Curve1d.evaluate c t) $(docs 'Curve1d.evaluate)
+    , memberSM0 "Zeros" Curve1d.zeros $(docs 'Curve1d.zeros)
+    , memberSM0 "Is Zero" (~= Area.zero) "Check if a curve is zero everywhere, within the current tolerance."
+    , negateSelf
+    , floatTimes
+    , plusSelf
     , minusSelf
     , timesFloat
     , times @(Curve1d Unitless) Self
     , divByFloat
     , divBySelf
     , divBy @Length Self
+    , divBy @Area Self
     , divBy @(Curve1d Unitless) Self
+    , divBy @(Curve1d Meters) Self
     ]
 
 data Drawing2d_
@@ -609,6 +764,7 @@ data Member value where
   MemberU0 :: (FFI value, FFI result) => Text -> (Tolerance Unitless => value -> result) -> Text -> Member value
   MemberR0 :: (FFI value, FFI result) => Text -> (Tolerance Radians => value -> result) -> Text -> Member value
   MemberM0 :: (FFI value, FFI result) => Text -> (Tolerance Meters => value -> result) -> Text -> Member value
+  MemberSM0 :: (FFI value, FFI result) => Text -> (Tolerance SquareMeters => value -> result) -> Text -> Member value
   Member1 :: (FFI a, FFI value, FFI result) => Text -> Text -> (a -> value -> result) -> Text -> Member value
   Equality :: Eq value => Member value
   Comparison :: Ord value => Member value
@@ -650,6 +806,9 @@ memberR0 = MemberR0
 
 memberM0 :: (FFI value, FFI result) => Text -> (Tolerance Meters => value -> result) -> Text -> Member value
 memberM0 = MemberM0
+
+memberSM0 :: (FFI value, FFI result) => Text -> (Tolerance SquareMeters => value -> result) -> Text -> Member value
+memberSM0 = MemberSM0
 
 member1 :: (FFI a, FFI value, FFI result) => Text -> Text -> (a -> value -> result) -> Text -> Member value
 member1 = Member1
@@ -940,6 +1099,8 @@ buildClass
             addMember name (MemberFunctionR0 f memberDocs)
           MemberM0 name f memberDocs ->
             addMember name (MemberFunctionM0 f memberDocs)
+          MemberSM0 name f memberDocs ->
+            addMember name (MemberFunctionSM0 f memberDocs)
           Member1 name arg1 f memberDocs ->
             addMember name (MemberFunction1 (FFI.name arg1) f memberDocs)
           Equality ->

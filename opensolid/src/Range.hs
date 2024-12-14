@@ -81,7 +81,7 @@ import OpenSolid.FFI qualified as FFI
 import Parameter qualified
 import Qty qualified
 import Random qualified
-import Units (Meters)
+import Units (Meters, SquareMeters)
 import Units qualified
 
 type role Range phantom
@@ -108,6 +108,9 @@ instance FFI (Range Radians) where
 
 instance FFI (Range Meters) where
   representation = FFI.classRepresentation "LengthRange"
+
+instance FFI (Range SquareMeters) where
+  representation = FFI.classRepresentation "AreaRange"
 
 instance HasUnits (Range units) where
   type UnitsOf (Range units) = units

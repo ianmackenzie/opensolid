@@ -21,6 +21,7 @@ module OpenSolid.FFI
   )
 where
 
+import Area (Area)
 import Color (Color)
 import Data.ByteString.Unsafe qualified
 import Data.Int (Int64)
@@ -247,6 +248,9 @@ instance FFI Color where
 
 instance FFI Length where
   representation = classRepresentation "Length"
+
+instance FFI Area where
+  representation = classRepresentation "Area"
 
 instance FFI Angle where
   representation = classRepresentation "Angle"

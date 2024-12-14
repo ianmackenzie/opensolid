@@ -96,6 +96,9 @@ instance FFI (Vector2d (space @ Unitless)) where
 instance FFI (Vector2d (space @ Meters)) where
   representation = FFI.classRepresentation "Displacement2d"
 
+instance FFI (Vector2d (space @ SquareMeters)) where
+  representation = FFI.classRepresentation "AreaVector2d"
+
 instance HasUnits (Vector2d (space @ units)) where
   type UnitsOf (Vector2d (space @ units)) = units
 

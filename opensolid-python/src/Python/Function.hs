@@ -88,6 +88,7 @@ toleranceFunction :: Constraint -> Text
 toleranceFunction constraint = case constraint of
   Constraint.ToleranceUnitless -> "_float_tolerance()"
   Constraint.ToleranceMeters -> "_length_tolerance()"
+  Constraint.ToleranceSquareMeters -> "_area_tolerance()"
   Constraint.ToleranceRadians -> "_angle_tolerance()"
 
 argument :: (Name, FFI.Type) -> Text

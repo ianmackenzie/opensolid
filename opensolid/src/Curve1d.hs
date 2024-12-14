@@ -46,7 +46,7 @@ import Range qualified
 import Solve1d qualified
 import Stream (Stream)
 import Stream qualified
-import Units (Meters)
+import Units (Meters, SquareMeters)
 import Units qualified
 
 class
@@ -111,6 +111,9 @@ instance FFI (Curve1d Unitless) where
 
 instance FFI (Curve1d Meters) where
   representation = FFI.classRepresentation "LengthCurve"
+
+instance FFI (Curve1d SquareMeters) where
+  representation = FFI.classRepresentation "AreaCurve"
 
 instance FFI (Curve1d Radians) where
   representation = FFI.classRepresentation "AngleCurve"
