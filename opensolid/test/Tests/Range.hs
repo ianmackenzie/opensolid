@@ -118,7 +118,7 @@ rangeQtyDivision = Test.check 1000 "rangeQtyDivision" Test.do
     |> Test.output "quotient" quotient
     |> Test.output "rangeQuotient" rangeQuotient
 
-{- | TODO: have test helper for generally testing compatibility of
+{-| TODO: have test helper for generally testing compatibility of
 Range function with corresponding Qty function
 -}
 rangeRangeDivision :: Test
