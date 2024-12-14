@@ -231,6 +231,9 @@ class Length:
     def __init__(self, *, ptr: c_void_p) -> None:
         self._ptr = ptr
 
+    def __del__(self) -> None:
+        _lib.opensolid_release(self._ptr)
+
     zero: Length = None  # type: ignore[assignment]
     """The zero value."""
 
@@ -661,6 +664,9 @@ class Area:
     def __init__(self, *, ptr: c_void_p) -> None:
         self._ptr = ptr
 
+    def __del__(self) -> None:
+        _lib.opensolid_release(self._ptr)
+
     zero: Area = None  # type: ignore[assignment]
     """The zero value."""
 
@@ -1016,6 +1022,9 @@ class Angle:
 
     def __init__(self, *, ptr: c_void_p) -> None:
         self._ptr = ptr
+
+    def __del__(self) -> None:
+        _lib.opensolid_release(self._ptr)
 
     zero: Angle = None  # type: ignore[assignment]
     """The zero value."""
@@ -1400,6 +1409,9 @@ class Range:
     def __init__(self, *, ptr: c_void_p) -> None:
         self._ptr = ptr
 
+    def __del__(self) -> None:
+        _lib.opensolid_release(self._ptr)
+
     unit: Range = None  # type: ignore[assignment]
     """The range with endoints [0,1]."""
 
@@ -1710,6 +1722,9 @@ class LengthRange:
 
     def __init__(self, *, ptr: c_void_p) -> None:
         self._ptr = ptr
+
+    def __del__(self) -> None:
+        _lib.opensolid_release(self._ptr)
 
     @staticmethod
     def constant(value: Length) -> LengthRange:
@@ -2044,6 +2059,9 @@ class AreaRange:
     def __init__(self, *, ptr: c_void_p) -> None:
         self._ptr = ptr
 
+    def __del__(self) -> None:
+        _lib.opensolid_release(self._ptr)
+
     @staticmethod
     def constant(value: Area) -> AreaRange:
         """Construct a zero-width range containing a single value."""
@@ -2324,6 +2342,9 @@ class AngleRange:
     def __init__(self, *, ptr: c_void_p) -> None:
         self._ptr = ptr
 
+    def __del__(self) -> None:
+        _lib.opensolid_release(self._ptr)
+
     @staticmethod
     def constant(value: Angle) -> AngleRange:
         """Construct a zero-width range containing a single value."""
@@ -2592,6 +2613,9 @@ class Color:
     def __init__(self, *, ptr: c_void_p) -> None:
         self._ptr = ptr
 
+    def __del__(self) -> None:
+        _lib.opensolid_release(self._ptr)
+
     red: Color = None  # type: ignore[assignment]
     """Scarlet Red from the Tango icon theme."""
 
@@ -2754,6 +2778,9 @@ class Vector2d:
 
     def __init__(self, *, ptr: c_void_p) -> None:
         self._ptr = ptr
+
+    def __del__(self) -> None:
+        _lib.opensolid_release(self._ptr)
 
     zero: Vector2d = None  # type: ignore[assignment]
     """The zero vector."""
@@ -3067,6 +3094,9 @@ class Displacement2d:
 
     def __init__(self, *, ptr: c_void_p) -> None:
         self._ptr = ptr
+
+    def __del__(self) -> None:
+        _lib.opensolid_release(self._ptr)
 
     zero: Displacement2d = None  # type: ignore[assignment]
     """The zero vector."""
@@ -3418,6 +3448,9 @@ class AreaVector2d:
     def __init__(self, *, ptr: c_void_p) -> None:
         self._ptr = ptr
 
+    def __del__(self) -> None:
+        _lib.opensolid_release(self._ptr)
+
     zero: AreaVector2d = None  # type: ignore[assignment]
     """The zero vector."""
 
@@ -3683,6 +3716,9 @@ class Direction2d:
 
     def __init__(self, *, ptr: c_void_p) -> None:
         self._ptr = ptr
+
+    def __del__(self) -> None:
+        _lib.opensolid_release(self._ptr)
 
     x: Direction2d = None  # type: ignore[assignment]
     """Alias for 'positiveX'."""
@@ -3965,6 +4001,9 @@ class Point2d:
     def __init__(self, *, ptr: c_void_p) -> None:
         self._ptr = ptr
 
+    def __del__(self) -> None:
+        _lib.opensolid_release(self._ptr)
+
     origin: Point2d = None  # type: ignore[assignment]
     """The point with coordinates (0,0)."""
 
@@ -4132,6 +4171,9 @@ class UvPoint:
     def __init__(self, *, ptr: c_void_p) -> None:
         self._ptr = ptr
 
+    def __del__(self) -> None:
+        _lib.opensolid_release(self._ptr)
+
     origin: UvPoint = None  # type: ignore[assignment]
     """The point with coordinates (0,0)."""
 
@@ -4256,6 +4298,9 @@ class Bounds2d:
     def __init__(self, *, ptr: c_void_p) -> None:
         self._ptr = ptr
 
+    def __del__(self) -> None:
+        _lib.opensolid_release(self._ptr)
+
     @staticmethod
     def xy(x_coordinate: LengthRange, y_coordinate: LengthRange) -> Bounds2d:
         """Construct a bounding box from its X and Y coordinate ranges."""
@@ -4355,6 +4400,9 @@ class UvBounds:
     def __init__(self, *, ptr: c_void_p) -> None:
         self._ptr = ptr
 
+    def __del__(self) -> None:
+        _lib.opensolid_release(self._ptr)
+
     @staticmethod
     def uv(u_coordinate: Range, v_coordinate: Range) -> UvBounds:
         """Construct a bounding box from its X and Y coordinate ranges."""
@@ -4450,6 +4498,9 @@ class Curve:
 
     def __init__(self, *, ptr: c_void_p) -> None:
         self._ptr = ptr
+
+    def __del__(self) -> None:
+        _lib.opensolid_release(self._ptr)
 
     zero: Curve = None  # type: ignore[assignment]
     """A curve equal to zero everywhere."""
@@ -4750,6 +4801,9 @@ class Curve:
         def __init__(self, *, ptr: c_void_p) -> None:
             self._ptr = ptr
 
+        def __del__(self) -> None:
+            _lib.opensolid_release(self._ptr)
+
         def location(self) -> float:
             """Get the parameter value at which the curve is zero."""
             inputs = self._ptr
@@ -4795,6 +4849,9 @@ class LengthCurve:
 
     def __init__(self, *, ptr: c_void_p) -> None:
         self._ptr = ptr
+
+    def __del__(self) -> None:
+        _lib.opensolid_release(self._ptr)
 
     zero: LengthCurve = None  # type: ignore[assignment]
     """A curve equal to zero everywhere."""
@@ -5051,6 +5108,9 @@ class AreaCurve:
     def __init__(self, *, ptr: c_void_p) -> None:
         self._ptr = ptr
 
+    def __del__(self) -> None:
+        _lib.opensolid_release(self._ptr)
+
     zero: AreaCurve = None  # type: ignore[assignment]
     """A curve equal to zero everywhere."""
 
@@ -5267,6 +5327,9 @@ class AngleCurve:
 
     def __init__(self, *, ptr: c_void_p) -> None:
         self._ptr = ptr
+
+    def __del__(self) -> None:
+        _lib.opensolid_release(self._ptr)
 
     zero: AngleCurve = None  # type: ignore[assignment]
     """A curve equal to zero everywhere."""
@@ -5515,6 +5578,9 @@ class Drawing2d:
     def __init__(self, *, ptr: c_void_p) -> None:
         self._ptr = ptr
 
+    def __del__(self) -> None:
+        _lib.opensolid_release(self._ptr)
+
     black_stroke: Drawing2d.Attribute = None  # type: ignore[assignment]
     """Black stroke for curves and borders."""
 
@@ -5608,11 +5674,17 @@ class Drawing2d:
         def __init__(self, *, ptr: c_void_p) -> None:
             self._ptr = ptr
 
+        def __del__(self) -> None:
+            _lib.opensolid_release(self._ptr)
+
     class Attribute:
         """A drawing attribute such as fill color or stroke width."""
 
         def __init__(self, *, ptr: c_void_p) -> None:
             self._ptr = ptr
+
+        def __del__(self) -> None:
+            _lib.opensolid_release(self._ptr)
 
 
 def _length_zero() -> Length:

@@ -177,6 +177,8 @@ classDefinition
             , Python.indent [Python.docstring documentation]
             , "    def __init__(self, *, ptr : c_void_p) -> None:"
             , "        self._ptr = ptr"
+            , "    def __del__(self) -> None:"
+            , "        _lib.opensolid_release(self._ptr)"
             , Python.indent (List.map Python.Constant.declaration constants)
             , Python.indent (List.map (Python.StaticFunction.definition classId) staticFunctions)
             , Python.indent (List.map (Python.MemberFunction.definition classId) memberFunctions)
