@@ -15,9 +15,8 @@ ruff format opensolid-python/lib/src/opensolid/__init__.py
 #   PLR0911: limitation on number of return statements is silly for generated code
 #   SLF001: often need to access private _ptr variable
 #   N801: concrete types use underscores in names
-#   D105: doesn't seem that useful to document 'magic' methods with docstrings
 #   D107: constructors are not meant for public use
-ruff check --config "line-length = 100" --select ALL --ignore D203 --ignore D213 --ignore COM812 --ignore RUF012 --ignore PLR0911 --ignore SLF001 --ignore N801 --ignore D105 --ignore D107 opensolid-python/lib/src/opensolid/__init__.py
+ruff check --config "line-length = 100" --select ALL --ignore D203 --ignore D213 --ignore COM812 --ignore RUF012 --ignore PLR0911 --ignore SLF001 --ignore N801 --ignore D107 opensolid-python/lib/src/opensolid/__init__.py
 # Generate the opensolid-ffi.def file with all API functions listed
 # (necessary for Windows builds)
 cabal run generate-def-file
