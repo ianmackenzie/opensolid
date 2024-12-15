@@ -17,7 +17,14 @@ lhsArgName = FFI.snakeCase PreOperator.lhsName
 definition :: FFI.Id value -> (BinaryOperator.Id, List (PreOperator value)) -> Text
 definition classId (operatorId, operators) = do
   case List.map (overload classId operatorId) operators of
-    [(signature, _, body)] -> Python.lines [signature, Python.indent [body]]
+    [(signature, _, body)] ->
+      Python.lines
+        [ signature
+        , Python.indent
+            [ documentation operatorId
+            , body
+            ]
+        ]
     overloads -> do
       let overloadDeclaration (signature, _, _) = Python.Function.overloadDeclaration signature
       let overloadCase (_, matchPattern, body) = Python.Function.overloadCase matchPattern [body]
@@ -25,7 +32,8 @@ definition classId (operatorId, operators) = do
         [ Python.lines (List.map overloadDeclaration overloads)
         , "def " + functionName operatorId + "(self, " + lhsArgName + "):"
         , Python.indent
-            [ "match " + lhsArgName + ":"
+            [ documentation operatorId
+            , "match " + lhsArgName + ":"
             , Python.indent
                 [ Python.lines (List.map overloadCase overloads)
                 , "case _:"
@@ -33,6 +41,19 @@ definition classId (operatorId, operators) = do
                 ]
             ]
         ]
+
+documentation :: BinaryOperator.Id -> Text
+documentation operatorId =
+  Python.docstring $
+    case operatorId of
+      BinaryOperator.Add -> "Return ``" + lhsArgName + " + self``."
+      BinaryOperator.Sub -> "Return ``" + lhsArgName + " - self``."
+      BinaryOperator.Mul -> "Return ``" + lhsArgName + " * self``."
+      BinaryOperator.Div -> "Return ``" + lhsArgName + " / self``."
+      BinaryOperator.FloorDiv -> "Return ``" + lhsArgName + " // self``."
+      BinaryOperator.Mod -> "Return ``" + lhsArgName + " % self``."
+      BinaryOperator.Dot -> internalError "Dot product should never be a pre-operator"
+      BinaryOperator.Cross -> internalError "Cross product should never be a pre-operator"
 
 functionName :: BinaryOperator.Id -> Text
 functionName operatorId = case operatorId of

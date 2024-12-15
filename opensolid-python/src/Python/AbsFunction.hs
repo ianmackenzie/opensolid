@@ -18,7 +18,8 @@ definition classId maybeFunction = case maybeFunction of
     Python.lines
       [ "def __abs__(self) -> " + valueTypeName + ":"
       , Python.indent
-          [ "output = " + Python.FFI.dummyValue valueType
+          [ Python.docstring "Return ``abs(self)``."
+          , "output = " + Python.FFI.dummyValue valueType
           , Python.FFI.invoke ffiFunctionName "ctypes.byref(self._ptr)" "ctypes.byref(output)"
           , "return " + Python.FFI.outputValue valueType "output"
           ]

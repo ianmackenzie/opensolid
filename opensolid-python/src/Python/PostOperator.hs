@@ -17,7 +17,14 @@ rhsArgName = FFI.snakeCase PostOperator.rhsName
 definition :: FFI.Id value -> (BinaryOperator.Id, List (PostOperator value)) -> Text
 definition classId (operatorId, operators) = do
   case List.map (overload classId operatorId) operators of
-    [(signature, _, body)] -> Python.lines [signature, Python.indent [body]]
+    [(signature, _, body)] ->
+      Python.lines
+        [ signature
+        , Python.indent
+            [ documentation operatorId
+            , body
+            ]
+        ]
     overloads -> do
       let overloadDeclaration (signature, _, _) = Python.Function.overloadDeclaration signature
       let overloadCase (_, matchPattern, body) = Python.Function.overloadCase matchPattern [body]
@@ -36,10 +43,17 @@ definition classId (operatorId, operators) = do
         ]
 
 documentation :: BinaryOperator.Id -> Text
-documentation operatorId = case operatorId of
-  BinaryOperator.Dot -> "\"\"\"Compute the dot product of two vector-like values.\"\"\""
-  BinaryOperator.Cross -> "\"\"\"Compute the cross product of two vector-like values.\"\"\""
-  _ -> ""
+documentation operatorId =
+  Python.docstring $
+    case operatorId of
+      BinaryOperator.Add -> "Return ``self + " + rhsArgName + "``."
+      BinaryOperator.Sub -> "Return ``self - " + rhsArgName + "``."
+      BinaryOperator.Mul -> "Return ``self * " + rhsArgName + "``."
+      BinaryOperator.Div -> "Return ``self / " + rhsArgName + "``."
+      BinaryOperator.FloorDiv -> "Return ``self // " + rhsArgName + "``."
+      BinaryOperator.Mod -> "Return ``self % " + rhsArgName + "``."
+      BinaryOperator.Dot -> "Compute the dot product of two vector-like values."
+      BinaryOperator.Cross -> "Compute the cross product of two vector-like values."
 
 functionName :: BinaryOperator.Id -> Text
 functionName operatorId = case operatorId of

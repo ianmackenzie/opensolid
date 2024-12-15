@@ -18,7 +18,13 @@ definition classId maybeFunction = case maybeFunction of
     Python.lines
       [ "def __eq__(self, other: object) -> bool:"
       , Python.indent
-          [ "if isinstance(other, " + valueTypeName + "):"
+          [ "\"\"\"Return ``self == other``."
+          , ""
+          , "Note that this is an *exact* comparison; for a tolerant comparison"
+          , "(one which will return true if two values are *almost* equal)"
+          , "you'll likely want to use an ``is_zero()`` method instead."
+          , "\"\"\""
+          , "if isinstance(other, " + valueTypeName + "):"
           , Python.indent
               [ "inputs = " + Python.FFI.argumentValue [("self", valueType), ("other", valueType)]
               , "output = " + Python.FFI.dummyValue EqualityFunction.returnType

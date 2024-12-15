@@ -78,34 +78,62 @@ def _error(message: str) -> Any:  # noqa: ANN401
     raise Error(message)
 
 
-type ToleranceValue = float | Length | Area | Angle
-
-
 class _Tolerance(threading.local):
-    value: ToleranceValue | None = None
+    value: float | Length | Area | Angle | None = None
 
 
 class Tolerance:
-    """Manages a thread-local tolerance value."""
+    """Manages a thread-local tolerance value.
 
-    _value: ToleranceValue | None = None
-    _saved: ToleranceValue | None = None
+    Many functions in OpenSolid require a tolerance to be set.
+    You should generally choose a value that is
+    much smaller than any meaningful size/dimension in the geometry you're modelling,
+    but significantly *larger* than any expected numerical roundoff that might occur.
+    A good default choice is roughly one-billionth of the overall size of your geometry;
+    for 'human-scale' things (say, from an earring up to a house)
+    that means that one nanometer is a reasonable value to use.
 
-    def __init__(self, value: ToleranceValue | None) -> None:
+    Passing a tolerance into every function that needed one would get very verbose,
+    and it's very common to choose a single tolerance value and use it throughout a project.
+    However, it's also occasionally necessary to set a different tolerance for some code.
+    This class allows managing tolerances using Python's ``with`` statement, e.g.::
+
+        with Tolerance(Length.nanometer):
+            do_something()
+            do_something_else()
+            with Tolerance(Angle.degrees(0.001)):
+                compare_two_angles()
+            do_more_things()
+
+    In the above code, the ``Length.nanometer`` tolerance value
+    will be used for ``do_something()`` and ``do_something_else()``
+    (and any functions they call).
+    The ``Angle.degrees(0.001))`` tolerance value
+    will then be used for ``compare_two_angles()``,
+    and then the ``Length.nanometer`` tolerance value will be restored
+    and used for ``do_more_things()``.
+    """
+
+    _value: float | Length | Area | Angle | None = None
+    _saved: float | Length | Area | Angle | None = None
+
+    def __init__(self, value: float | Length | Area | Angle | None) -> None:
         self._value = value
 
     def __enter__(self) -> None:
+        """Set the given tolerance as the currently active one."""
         self._saved = _Tolerance.value
         _Tolerance.value = self._value
 
     def __exit__(
         self, _exception_type: object, _exception_value: object, _traceback: object
     ) -> None:
+        """Restore the previous tolerance as the currently active one."""
         _Tolerance.value = self._saved
         self._saved = None
 
     @staticmethod
-    def current() -> ToleranceValue | None:
+    def current() -> float | Length | Area | Angle | None:
         """Get the current tolerance value."""
         return _Tolerance.value
 
@@ -232,6 +260,7 @@ class Length:
         self._ptr = ptr
 
     def __del__(self) -> None:
+        """Free the underlying Haskell value."""
         _lib.opensolid_release(self._ptr)
 
     zero: Length = None  # type: ignore[assignment]
@@ -245,6 +274,12 @@ class Length:
 
     millimeter: Length = None  # type: ignore[assignment]
     """One millimeter."""
+
+    micrometer: Length = None  # type: ignore[assignment]
+    """One micrometer."""
+
+    nanometer: Length = None  # type: ignore[assignment]
+    """One nanometer."""
 
     inch: Length = None  # type: ignore[assignment]
     """One inch."""
@@ -276,6 +311,26 @@ class Length:
         inputs = c_double(value)
         output = c_void_p()
         _lib.opensolid_Length_millimeters_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Length(ptr=output)
+
+    @staticmethod
+    def micrometers(value: float) -> Length:
+        """Construct a length from a number of micrometers."""
+        inputs = c_double(value)
+        output = c_void_p()
+        _lib.opensolid_Length_micrometers_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Length(ptr=output)
+
+    @staticmethod
+    def nanometers(value: float) -> Length:
+        """Construct a length from a number of nanometers."""
+        inputs = c_double(value)
+        output = c_void_p()
+        _lib.opensolid_Length_nanometers_Float(
             ctypes.byref(inputs), ctypes.byref(output)
         )
         return Length(ptr=output)
@@ -317,6 +372,20 @@ class Length:
         _lib.opensolid_Length_inMillimeters(ctypes.byref(inputs), ctypes.byref(output))
         return output.value
 
+    def in_micrometers(self) -> float:
+        """Convert a length to a number of micrometers."""
+        inputs = self._ptr
+        output = c_double()
+        _lib.opensolid_Length_inMicrometers(ctypes.byref(inputs), ctypes.byref(output))
+        return output.value
+
+    def in_nanometers(self) -> float:
+        """Convert a length to a number of nanometers."""
+        inputs = self._ptr
+        output = c_double()
+        _lib.opensolid_Length_inNanometers(ctypes.byref(inputs), ctypes.byref(output))
+        return output.value
+
     def in_inches(self) -> float:
         """Convert a length to a number of inches."""
         inputs = self._ptr
@@ -339,6 +408,12 @@ class Length:
         return bool(output.value)
 
     def __eq__(self, other: object) -> bool:
+        """Return ``self == other``.
+
+        Note that this is an *exact* comparison; for a tolerant comparison
+        (one which will return true if two values are *almost* equal)
+        you'll likely want to use an ``is_zero()`` method instead.
+        """
         if isinstance(other, Length):
             inputs = _Tuple2_c_void_p_c_void_p(self._ptr, other._ptr)
             output = c_int64()
@@ -353,23 +428,29 @@ class Length:
         return output.value
 
     def __lt__(self, other: Length) -> bool:
+        """Return ``self < other``."""
         return self._compare(other) < 0
 
     def __le__(self, other: Length) -> bool:
+        """Return ``self <= other``."""
         return self._compare(other) <= 0
 
     def __ge__(self, other: Length) -> bool:
+        """Return ``self >= other``."""
         return self._compare(other) >= 0
 
     def __gt__(self, other: Length) -> bool:
+        """Return ``self > other``."""
         return self._compare(other) > 0
 
     def __neg__(self) -> Length:
+        """Return ``-self``."""
         output = c_void_p()
         _lib.opensolid_Length_neg(ctypes.byref(self._ptr), ctypes.byref(output))
         return Length(ptr=output)
 
     def __abs__(self) -> Length:
+        """Return ``abs(self)``."""
         output = c_void_p()
         _lib.opensolid_Length_abs(ctypes.byref(self._ptr), ctypes.byref(output))
         return Length(ptr=output)
@@ -387,6 +468,7 @@ class Length:
         pass
 
     def __add__(self, rhs):
+        """Return ``self + rhs``."""
         match rhs:
             case Length():
                 inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
@@ -425,6 +507,7 @@ class Length:
         pass
 
     def __sub__(self, rhs):
+        """Return ``self - rhs``."""
         match rhs:
             case Length():
                 inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
@@ -487,6 +570,7 @@ class Length:
         pass
 
     def __mul__(self, rhs):
+        """Return ``self * rhs``."""
         match rhs:
             case float() | int():
                 inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
@@ -579,6 +663,7 @@ class Length:
         pass
 
     def __truediv__(self, rhs):
+        """Return ``self / rhs``."""
         match rhs:
             case float() | int():
                 inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
@@ -626,6 +711,7 @@ class Length:
                 return NotImplemented
 
     def __floordiv__(self, rhs: Length) -> int:
+        """Return ``self // rhs``."""
         inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
         output = c_int64()
         _lib.opensolid_Length_floorDiv_Length_Length(
@@ -634,6 +720,7 @@ class Length:
         return output.value
 
     def __mod__(self, rhs: Length) -> Length:
+        """Return ``self % rhs``."""
         inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
         output = c_void_p()
         _lib.opensolid_Length_mod_Length_Length(
@@ -642,6 +729,7 @@ class Length:
         return Length(ptr=output)
 
     def __rmul__(self, lhs: float) -> Length:
+        """Return ``lhs * self``."""
         inputs = _Tuple2_c_double_c_void_p(lhs, self._ptr)
         output = c_void_p()
         _lib.opensolid_Length_mul_Float_Length(
@@ -650,8 +738,7 @@ class Length:
         return Length(ptr=output)
 
     def __repr__(self) -> str:
-        if self == Length.zero:
-            return "Length.zero"
+        """Return a human-readable representation of this value."""
         return "Length.meters(" + str(self.in_meters()) + ")"
 
 
@@ -665,6 +752,7 @@ class Area:
         self._ptr = ptr
 
     def __del__(self) -> None:
+        """Free the underlying Haskell value."""
         _lib.opensolid_release(self._ptr)
 
     zero: Area = None  # type: ignore[assignment]
@@ -718,6 +806,12 @@ class Area:
         return bool(output.value)
 
     def __eq__(self, other: object) -> bool:
+        """Return ``self == other``.
+
+        Note that this is an *exact* comparison; for a tolerant comparison
+        (one which will return true if two values are *almost* equal)
+        you'll likely want to use an ``is_zero()`` method instead.
+        """
         if isinstance(other, Area):
             inputs = _Tuple2_c_void_p_c_void_p(self._ptr, other._ptr)
             output = c_int64()
@@ -732,23 +826,29 @@ class Area:
         return output.value
 
     def __lt__(self, other: Area) -> bool:
+        """Return ``self < other``."""
         return self._compare(other) < 0
 
     def __le__(self, other: Area) -> bool:
+        """Return ``self <= other``."""
         return self._compare(other) <= 0
 
     def __ge__(self, other: Area) -> bool:
+        """Return ``self >= other``."""
         return self._compare(other) >= 0
 
     def __gt__(self, other: Area) -> bool:
+        """Return ``self > other``."""
         return self._compare(other) > 0
 
     def __neg__(self) -> Area:
+        """Return ``-self``."""
         output = c_void_p()
         _lib.opensolid_Area_neg(ctypes.byref(self._ptr), ctypes.byref(output))
         return Area(ptr=output)
 
     def __abs__(self) -> Area:
+        """Return ``abs(self)``."""
         output = c_void_p()
         _lib.opensolid_Area_abs(ctypes.byref(self._ptr), ctypes.byref(output))
         return Area(ptr=output)
@@ -766,6 +866,7 @@ class Area:
         pass
 
     def __add__(self, rhs):
+        """Return ``self + rhs``."""
         match rhs:
             case Area():
                 inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
@@ -804,6 +905,7 @@ class Area:
         pass
 
     def __sub__(self, rhs):
+        """Return ``self - rhs``."""
         match rhs:
             case Area():
                 inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
@@ -850,6 +952,7 @@ class Area:
         pass
 
     def __mul__(self, rhs):
+        """Return ``self * rhs``."""
         match rhs:
             case float() | int():
                 inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
@@ -926,6 +1029,7 @@ class Area:
         pass
 
     def __truediv__(self, rhs):
+        """Return ``self / rhs``."""
         match rhs:
             case float() | int():
                 inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
@@ -994,6 +1098,7 @@ class Area:
                 return NotImplemented
 
     def __floordiv__(self, rhs: Area) -> int:
+        """Return ``self // rhs``."""
         inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
         output = c_int64()
         _lib.opensolid_Area_floorDiv_Area_Area(
@@ -1002,20 +1107,21 @@ class Area:
         return output.value
 
     def __mod__(self, rhs: Area) -> Area:
+        """Return ``self % rhs``."""
         inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
         output = c_void_p()
         _lib.opensolid_Area_mod_Area_Area(ctypes.byref(inputs), ctypes.byref(output))
         return Area(ptr=output)
 
     def __rmul__(self, lhs: float) -> Area:
+        """Return ``lhs * self``."""
         inputs = _Tuple2_c_double_c_void_p(lhs, self._ptr)
         output = c_void_p()
         _lib.opensolid_Area_mul_Float_Area(ctypes.byref(inputs), ctypes.byref(output))
         return Area(ptr=output)
 
     def __repr__(self) -> str:
-        if self == Area.zero:
-            return "Area.zero"
+        """Return a human-readable representation of this value."""
         return "Area.square_meters(" + str(self.in_square_meters()) + ")"
 
 
@@ -1029,6 +1135,7 @@ class Angle:
         self._ptr = ptr
 
     def __del__(self) -> None:
+        """Free the underlying Haskell value."""
         _lib.opensolid_release(self._ptr)
 
     zero: Angle = None  # type: ignore[assignment]
@@ -1162,6 +1269,12 @@ class Angle:
         return output.value
 
     def __eq__(self, other: object) -> bool:
+        """Return ``self == other``.
+
+        Note that this is an *exact* comparison; for a tolerant comparison
+        (one which will return true if two values are *almost* equal)
+        you'll likely want to use an ``is_zero()`` method instead.
+        """
         if isinstance(other, Angle):
             inputs = _Tuple2_c_void_p_c_void_p(self._ptr, other._ptr)
             output = c_int64()
@@ -1176,23 +1289,29 @@ class Angle:
         return output.value
 
     def __lt__(self, other: Angle) -> bool:
+        """Return ``self < other``."""
         return self._compare(other) < 0
 
     def __le__(self, other: Angle) -> bool:
+        """Return ``self <= other``."""
         return self._compare(other) <= 0
 
     def __ge__(self, other: Angle) -> bool:
+        """Return ``self >= other``."""
         return self._compare(other) >= 0
 
     def __gt__(self, other: Angle) -> bool:
+        """Return ``self > other``."""
         return self._compare(other) > 0
 
     def __neg__(self) -> Angle:
+        """Return ``-self``."""
         output = c_void_p()
         _lib.opensolid_Angle_neg(ctypes.byref(self._ptr), ctypes.byref(output))
         return Angle(ptr=output)
 
     def __abs__(self) -> Angle:
+        """Return ``abs(self)``."""
         output = c_void_p()
         _lib.opensolid_Angle_abs(ctypes.byref(self._ptr), ctypes.byref(output))
         return Angle(ptr=output)
@@ -1210,6 +1329,7 @@ class Angle:
         pass
 
     def __add__(self, rhs):
+        """Return ``self + rhs``."""
         match rhs:
             case Angle():
                 inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
@@ -1248,6 +1368,7 @@ class Angle:
         pass
 
     def __sub__(self, rhs):
+        """Return ``self - rhs``."""
         match rhs:
             case Angle():
                 inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
@@ -1286,6 +1407,7 @@ class Angle:
         pass
 
     def __mul__(self, rhs):
+        """Return ``self * rhs``."""
         match rhs:
             case float() | int():
                 inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
@@ -1336,6 +1458,7 @@ class Angle:
         pass
 
     def __truediv__(self, rhs):
+        """Return ``self / rhs``."""
         match rhs:
             case float() | int():
                 inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
@@ -1383,6 +1506,7 @@ class Angle:
                 return NotImplemented
 
     def __floordiv__(self, rhs: Angle) -> int:
+        """Return ``self // rhs``."""
         inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
         output = c_int64()
         _lib.opensolid_Angle_floorDiv_Angle_Angle(
@@ -1391,20 +1515,21 @@ class Angle:
         return output.value
 
     def __mod__(self, rhs: Angle) -> Angle:
+        """Return ``self % rhs``."""
         inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
         output = c_void_p()
         _lib.opensolid_Angle_mod_Angle_Angle(ctypes.byref(inputs), ctypes.byref(output))
         return Angle(ptr=output)
 
     def __rmul__(self, lhs: float) -> Angle:
+        """Return ``lhs * self``."""
         inputs = _Tuple2_c_double_c_void_p(lhs, self._ptr)
         output = c_void_p()
         _lib.opensolid_Angle_mul_Float_Angle(ctypes.byref(inputs), ctypes.byref(output))
         return Angle(ptr=output)
 
     def __repr__(self) -> str:
-        if self == Angle.zero:
-            return "Angle.zero"
+        """Return a human-readable representation of this value."""
         return "Angle.degrees(" + str(self.in_degrees()) + ")"
 
 
@@ -1415,6 +1540,7 @@ class Range:
         self._ptr = ptr
 
     def __del__(self) -> None:
+        """Free the underlying Haskell value."""
         _lib.opensolid_release(self._ptr)
 
     unit: Range = None  # type: ignore[assignment]
@@ -1532,11 +1658,13 @@ class Range:
         return bool(output.value)
 
     def __neg__(self) -> Range:
+        """Return ``-self``."""
         output = c_void_p()
         _lib.opensolid_Range_neg(ctypes.byref(self._ptr), ctypes.byref(output))
         return Range(ptr=output)
 
     def __abs__(self) -> Range:
+        """Return ``abs(self)``."""
         output = c_void_p()
         _lib.opensolid_Range_abs(ctypes.byref(self._ptr), ctypes.byref(output))
         return Range(ptr=output)
@@ -1550,6 +1678,7 @@ class Range:
         pass
 
     def __add__(self, rhs):
+        """Return ``self + rhs``."""
         match rhs:
             case float() | int():
                 inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
@@ -1577,6 +1706,7 @@ class Range:
         pass
 
     def __sub__(self, rhs):
+        """Return ``self - rhs``."""
         match rhs:
             case float() | int():
                 inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
@@ -1620,6 +1750,7 @@ class Range:
         pass
 
     def __mul__(self, rhs):
+        """Return ``self * rhs``."""
         match rhs:
             case float() | int():
                 inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
@@ -1675,6 +1806,7 @@ class Range:
         pass
 
     def __truediv__(self, rhs):
+        """Return ``self / rhs``."""
         match rhs:
             case float() | int():
                 inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
@@ -1694,30 +1826,35 @@ class Range:
                 return NotImplemented
 
     def __radd__(self, lhs: float) -> Range:
+        """Return ``lhs + self``."""
         inputs = _Tuple2_c_double_c_void_p(lhs, self._ptr)
         output = c_void_p()
         _lib.opensolid_Range_add_Float_Range(ctypes.byref(inputs), ctypes.byref(output))
         return Range(ptr=output)
 
     def __rsub__(self, lhs: float) -> Range:
+        """Return ``lhs - self``."""
         inputs = _Tuple2_c_double_c_void_p(lhs, self._ptr)
         output = c_void_p()
         _lib.opensolid_Range_sub_Float_Range(ctypes.byref(inputs), ctypes.byref(output))
         return Range(ptr=output)
 
     def __rmul__(self, lhs: float) -> Range:
+        """Return ``lhs * self``."""
         inputs = _Tuple2_c_double_c_void_p(lhs, self._ptr)
         output = c_void_p()
         _lib.opensolid_Range_mul_Float_Range(ctypes.byref(inputs), ctypes.byref(output))
         return Range(ptr=output)
 
     def __rtruediv__(self, lhs: float) -> Range:
+        """Return ``lhs / self``."""
         inputs = _Tuple2_c_double_c_void_p(lhs, self._ptr)
         output = c_void_p()
         _lib.opensolid_Range_div_Float_Range(ctypes.byref(inputs), ctypes.byref(output))
         return Range(ptr=output)
 
     def __repr__(self) -> str:
+        """Return a human-readable representation of this value."""
         low, high = self.endpoints()
         return "Range.from_endpoints(" + str(low) + "," + str(high) + ")"
 
@@ -1729,6 +1866,7 @@ class LengthRange:
         self._ptr = ptr
 
     def __del__(self) -> None:
+        """Free the underlying Haskell value."""
         _lib.opensolid_release(self._ptr)
 
     @staticmethod
@@ -1878,11 +2016,13 @@ class LengthRange:
         return bool(output.value)
 
     def __neg__(self) -> LengthRange:
+        """Return ``-self``."""
         output = c_void_p()
         _lib.opensolid_LengthRange_neg(ctypes.byref(self._ptr), ctypes.byref(output))
         return LengthRange(ptr=output)
 
     def __abs__(self) -> LengthRange:
+        """Return ``abs(self)``."""
         output = c_void_p()
         _lib.opensolid_LengthRange_abs(ctypes.byref(self._ptr), ctypes.byref(output))
         return LengthRange(ptr=output)
@@ -1896,6 +2036,7 @@ class LengthRange:
         pass
 
     def __add__(self, rhs):
+        """Return ``self + rhs``."""
         match rhs:
             case LengthRange():
                 inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
@@ -1923,6 +2064,7 @@ class LengthRange:
         pass
 
     def __sub__(self, rhs):
+        """Return ``self - rhs``."""
         match rhs:
             case LengthRange():
                 inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
@@ -1958,6 +2100,7 @@ class LengthRange:
         pass
 
     def __mul__(self, rhs):
+        """Return ``self * rhs``."""
         match rhs:
             case float() | int():
                 inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
@@ -2007,6 +2150,7 @@ class LengthRange:
         pass
 
     def __truediv__(self, rhs):
+        """Return ``self / rhs``."""
         match rhs:
             case float() | int():
                 inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
@@ -2040,6 +2184,7 @@ class LengthRange:
                 return NotImplemented
 
     def __rmul__(self, lhs: float) -> LengthRange:
+        """Return ``lhs * self``."""
         inputs = _Tuple2_c_double_c_void_p(lhs, self._ptr)
         output = c_void_p()
         _lib.opensolid_LengthRange_mul_Float_LengthRange(
@@ -2048,6 +2193,7 @@ class LengthRange:
         return LengthRange(ptr=output)
 
     def __repr__(self) -> str:
+        """Return a human-readable representation of this value."""
         low, high = self.endpoints()
         return (
             "LengthRange.meters("
@@ -2065,6 +2211,7 @@ class AreaRange:
         self._ptr = ptr
 
     def __del__(self) -> None:
+        """Free the underlying Haskell value."""
         _lib.opensolid_release(self._ptr)
 
     @staticmethod
@@ -2181,11 +2328,13 @@ class AreaRange:
         return bool(output.value)
 
     def __neg__(self) -> AreaRange:
+        """Return ``-self``."""
         output = c_void_p()
         _lib.opensolid_AreaRange_neg(ctypes.byref(self._ptr), ctypes.byref(output))
         return AreaRange(ptr=output)
 
     def __abs__(self) -> AreaRange:
+        """Return ``abs(self)``."""
         output = c_void_p()
         _lib.opensolid_AreaRange_abs(ctypes.byref(self._ptr), ctypes.byref(output))
         return AreaRange(ptr=output)
@@ -2199,6 +2348,7 @@ class AreaRange:
         pass
 
     def __add__(self, rhs):
+        """Return ``self + rhs``."""
         match rhs:
             case AreaRange():
                 inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
@@ -2226,6 +2376,7 @@ class AreaRange:
         pass
 
     def __sub__(self, rhs):
+        """Return ``self - rhs``."""
         match rhs:
             case AreaRange():
                 inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
@@ -2253,6 +2404,7 @@ class AreaRange:
         pass
 
     def __mul__(self, rhs):
+        """Return ``self * rhs``."""
         match rhs:
             case float() | int():
                 inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
@@ -2296,6 +2448,7 @@ class AreaRange:
         pass
 
     def __truediv__(self, rhs):
+        """Return ``self / rhs``."""
         match rhs:
             case float() | int():
                 inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
@@ -2343,6 +2496,7 @@ class AreaRange:
                 return NotImplemented
 
     def __rmul__(self, lhs: float) -> AreaRange:
+        """Return ``lhs * self``."""
         inputs = _Tuple2_c_double_c_void_p(lhs, self._ptr)
         output = c_void_p()
         _lib.opensolid_AreaRange_mul_Float_AreaRange(
@@ -2351,6 +2505,7 @@ class AreaRange:
         return AreaRange(ptr=output)
 
     def __repr__(self) -> str:
+        """Return a human-readable representation of this value."""
         low, high = self.endpoints()
         return (
             "AreaRange.square_meters("
@@ -2368,6 +2523,7 @@ class AngleRange:
         self._ptr = ptr
 
     def __del__(self) -> None:
+        """Free the underlying Haskell value."""
         _lib.opensolid_release(self._ptr)
 
     @staticmethod
@@ -2504,11 +2660,13 @@ class AngleRange:
         return bool(output.value)
 
     def __neg__(self) -> AngleRange:
+        """Return ``-self``."""
         output = c_void_p()
         _lib.opensolid_AngleRange_neg(ctypes.byref(self._ptr), ctypes.byref(output))
         return AngleRange(ptr=output)
 
     def __abs__(self) -> AngleRange:
+        """Return ``abs(self)``."""
         output = c_void_p()
         _lib.opensolid_AngleRange_abs(ctypes.byref(self._ptr), ctypes.byref(output))
         return AngleRange(ptr=output)
@@ -2522,6 +2680,7 @@ class AngleRange:
         pass
 
     def __add__(self, rhs):
+        """Return ``self + rhs``."""
         match rhs:
             case AngleRange():
                 inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
@@ -2549,6 +2708,7 @@ class AngleRange:
         pass
 
     def __sub__(self, rhs):
+        """Return ``self - rhs``."""
         match rhs:
             case AngleRange():
                 inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
@@ -2568,6 +2728,7 @@ class AngleRange:
                 return NotImplemented
 
     def __mul__(self, rhs: float) -> AngleRange:
+        """Return ``self * rhs``."""
         inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
         output = c_void_p()
         _lib.opensolid_AngleRange_mul_AngleRange_Float(
@@ -2588,6 +2749,7 @@ class AngleRange:
         pass
 
     def __truediv__(self, rhs):
+        """Return ``self / rhs``."""
         match rhs:
             case float() | int():
                 inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
@@ -2614,6 +2776,7 @@ class AngleRange:
                 return NotImplemented
 
     def __rmul__(self, lhs: float) -> AngleRange:
+        """Return ``lhs * self``."""
         inputs = _Tuple2_c_double_c_void_p(lhs, self._ptr)
         output = c_void_p()
         _lib.opensolid_AngleRange_mul_Float_AngleRange(
@@ -2622,6 +2785,7 @@ class AngleRange:
         return AngleRange(ptr=output)
 
     def __repr__(self) -> str:
+        """Return a human-readable representation of this value."""
         low, high = self.endpoints()
         return (
             "AngleRange.degrees("
@@ -2639,6 +2803,7 @@ class Color:
         self._ptr = ptr
 
     def __del__(self) -> None:
+        """Free the underlying Haskell value."""
         _lib.opensolid_release(self._ptr)
 
     red: Color = None  # type: ignore[assignment]
@@ -2794,6 +2959,7 @@ class Color:
         return (output.field0, output.field1, output.field2)
 
     def __repr__(self) -> str:
+        """Return a human-readable representation of this value."""
         r, g, b = self.components_255()
         return "Color.rgb_255(" + str(r) + "," + str(g) + "," + str(b) + ")"
 
@@ -2805,6 +2971,7 @@ class Vector2d:
         self._ptr = ptr
 
     def __del__(self) -> None:
+        """Free the underlying Haskell value."""
         _lib.opensolid_release(self._ptr)
 
     zero: Vector2d = None  # type: ignore[assignment]
@@ -2935,11 +3102,13 @@ class Vector2d:
         return bool(output.value)
 
     def __neg__(self) -> Vector2d:
+        """Return ``-self``."""
         output = c_void_p()
         _lib.opensolid_Vector2d_neg(ctypes.byref(self._ptr), ctypes.byref(output))
         return Vector2d(ptr=output)
 
     def __add__(self, rhs: Vector2d) -> Vector2d:
+        """Return ``self + rhs``."""
         inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
         output = c_void_p()
         _lib.opensolid_Vector2d_add_Vector2d_Vector2d(
@@ -2948,6 +3117,7 @@ class Vector2d:
         return Vector2d(ptr=output)
 
     def __sub__(self, rhs: Vector2d) -> Vector2d:
+        """Return ``self - rhs``."""
         inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
         output = c_void_p()
         _lib.opensolid_Vector2d_sub_Vector2d_Vector2d(
@@ -2968,6 +3138,7 @@ class Vector2d:
         pass
 
     def __mul__(self, rhs):
+        """Return ``self * rhs``."""
         match rhs:
             case float() | int():
                 inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
@@ -2994,6 +3165,7 @@ class Vector2d:
                 return NotImplemented
 
     def __truediv__(self, rhs: float) -> Vector2d:
+        """Return ``self / rhs``."""
         inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
         output = c_void_p()
         _lib.opensolid_Vector2d_div_Vector2d_Float(
@@ -3102,6 +3274,7 @@ class Vector2d:
                 return NotImplemented
 
     def __rmul__(self, lhs: float) -> Vector2d:
+        """Return ``lhs * self``."""
         inputs = _Tuple2_c_double_c_void_p(lhs, self._ptr)
         output = c_void_p()
         _lib.opensolid_Vector2d_mul_Float_Vector2d(
@@ -3110,6 +3283,7 @@ class Vector2d:
         return Vector2d(ptr=output)
 
     def __repr__(self) -> str:
+        """Return a human-readable representation of this value."""
         x, y = self.components()
         return "Vector2d.xy(" + str(x) + "," + str(y) + ")"
 
@@ -3121,6 +3295,7 @@ class Displacement2d:
         self._ptr = ptr
 
     def __del__(self) -> None:
+        """Free the underlying Haskell value."""
         _lib.opensolid_release(self._ptr)
 
     zero: Displacement2d = None  # type: ignore[assignment]
@@ -3296,11 +3471,13 @@ class Displacement2d:
         return bool(output.value)
 
     def __neg__(self) -> Displacement2d:
+        """Return ``-self``."""
         output = c_void_p()
         _lib.opensolid_Displacement2d_neg(ctypes.byref(self._ptr), ctypes.byref(output))
         return Displacement2d(ptr=output)
 
     def __add__(self, rhs: Displacement2d) -> Displacement2d:
+        """Return ``self + rhs``."""
         inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
         output = c_void_p()
         _lib.opensolid_Displacement2d_add_Displacement2d_Displacement2d(
@@ -3309,6 +3486,7 @@ class Displacement2d:
         return Displacement2d(ptr=output)
 
     def __sub__(self, rhs: Displacement2d) -> Displacement2d:
+        """Return ``self - rhs``."""
         inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
         output = c_void_p()
         _lib.opensolid_Displacement2d_sub_Displacement2d_Displacement2d(
@@ -3325,6 +3503,7 @@ class Displacement2d:
         pass
 
     def __mul__(self, rhs):
+        """Return ``self * rhs``."""
         match rhs:
             case float() | int():
                 inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
@@ -3352,6 +3531,7 @@ class Displacement2d:
         pass
 
     def __truediv__(self, rhs):
+        """Return ``self / rhs``."""
         match rhs:
             case float() | int():
                 inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
@@ -3449,6 +3629,7 @@ class Displacement2d:
                 return NotImplemented
 
     def __rmul__(self, lhs: float) -> Displacement2d:
+        """Return ``lhs * self``."""
         inputs = _Tuple2_c_double_c_void_p(lhs, self._ptr)
         output = c_void_p()
         _lib.opensolid_Displacement2d_mul_Float_Displacement2d(
@@ -3457,6 +3638,7 @@ class Displacement2d:
         return Displacement2d(ptr=output)
 
     def __repr__(self) -> str:
+        """Return a human-readable representation of this value."""
         x, y = self.components()
         return (
             "Displacement2d.meters("
@@ -3474,6 +3656,7 @@ class AreaVector2d:
         self._ptr = ptr
 
     def __del__(self) -> None:
+        """Free the underlying Haskell value."""
         _lib.opensolid_release(self._ptr)
 
     zero: AreaVector2d = None  # type: ignore[assignment]
@@ -3612,11 +3795,13 @@ class AreaVector2d:
         return bool(output.value)
 
     def __neg__(self) -> AreaVector2d:
+        """Return ``-self``."""
         output = c_void_p()
         _lib.opensolid_AreaVector2d_neg(ctypes.byref(self._ptr), ctypes.byref(output))
         return AreaVector2d(ptr=output)
 
     def __add__(self, rhs: AreaVector2d) -> AreaVector2d:
+        """Return ``self + rhs``."""
         inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
         output = c_void_p()
         _lib.opensolid_AreaVector2d_add_AreaVector2d_AreaVector2d(
@@ -3625,6 +3810,7 @@ class AreaVector2d:
         return AreaVector2d(ptr=output)
 
     def __sub__(self, rhs: AreaVector2d) -> AreaVector2d:
+        """Return ``self - rhs``."""
         inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
         output = c_void_p()
         _lib.opensolid_AreaVector2d_sub_AreaVector2d_AreaVector2d(
@@ -3633,6 +3819,7 @@ class AreaVector2d:
         return AreaVector2d(ptr=output)
 
     def __mul__(self, rhs: float) -> AreaVector2d:
+        """Return ``self * rhs``."""
         inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
         output = c_void_p()
         _lib.opensolid_AreaVector2d_mul_AreaVector2d_Float(
@@ -3653,6 +3840,7 @@ class AreaVector2d:
         pass
 
     def __truediv__(self, rhs):
+        """Return ``self / rhs``."""
         match rhs:
             case float() | int():
                 inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
@@ -3735,6 +3923,7 @@ class AreaVector2d:
                 return NotImplemented
 
     def __rmul__(self, lhs: float) -> AreaVector2d:
+        """Return ``lhs * self``."""
         inputs = _Tuple2_c_double_c_void_p(lhs, self._ptr)
         output = c_void_p()
         _lib.opensolid_AreaVector2d_mul_Float_AreaVector2d(
@@ -3743,6 +3932,7 @@ class AreaVector2d:
         return AreaVector2d(ptr=output)
 
     def __repr__(self) -> str:
+        """Return a human-readable representation of this value."""
         x, y = self.components()
         return (
             "AreaVector2d.square_meters("
@@ -3763,6 +3953,7 @@ class Direction2d:
         self._ptr = ptr
 
     def __del__(self) -> None:
+        """Free the underlying Haskell value."""
         _lib.opensolid_release(self._ptr)
 
     x: Direction2d = None  # type: ignore[assignment]
@@ -3886,6 +4077,7 @@ class Direction2d:
         return output.value
 
     def __neg__(self) -> Direction2d:
+        """Return ``-self``."""
         output = c_void_p()
         _lib.opensolid_Direction2d_neg(ctypes.byref(self._ptr), ctypes.byref(output))
         return Direction2d(ptr=output)
@@ -3903,6 +4095,7 @@ class Direction2d:
         pass
 
     def __mul__(self, rhs):
+        """Return ``self * rhs``."""
         match rhs:
             case float() | int():
                 inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
@@ -4029,6 +4222,7 @@ class Direction2d:
                 return NotImplemented
 
     def __rmul__(self, lhs: float) -> Vector2d:
+        """Return ``lhs * self``."""
         inputs = _Tuple2_c_double_c_void_p(lhs, self._ptr)
         output = c_void_p()
         _lib.opensolid_Direction2d_mul_Float_Direction2d(
@@ -4037,6 +4231,7 @@ class Direction2d:
         return Vector2d(ptr=output)
 
     def __repr__(self) -> str:
+        """Return a human-readable representation of this value."""
         return "Direction2d.degrees(" + str(self.to_angle().in_degrees()) + ")"
 
 
@@ -4047,6 +4242,7 @@ class Point2d:
         self._ptr = ptr
 
     def __del__(self) -> None:
+        """Free the underlying Haskell value."""
         _lib.opensolid_release(self._ptr)
 
     origin: Point2d = None  # type: ignore[assignment]
@@ -4179,6 +4375,7 @@ class Point2d:
         pass
 
     def __sub__(self, rhs):
+        """Return ``self - rhs``."""
         match rhs:
             case Point2d():
                 inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
@@ -4198,6 +4395,7 @@ class Point2d:
                 return NotImplemented
 
     def __add__(self, rhs: Displacement2d) -> Point2d:
+        """Return ``self + rhs``."""
         inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
         output = c_void_p()
         _lib.opensolid_Point2d_add_Point2d_Displacement2d(
@@ -4206,6 +4404,7 @@ class Point2d:
         return Point2d(ptr=output)
 
     def __repr__(self) -> str:
+        """Return a human-readable representation of this value."""
         x, y = self.coordinates()
         return "Point2d.meters(" + str(x.in_meters()) + "," + str(y.in_meters()) + ")"
 
@@ -4217,6 +4416,7 @@ class UvPoint:
         self._ptr = ptr
 
     def __del__(self) -> None:
+        """Free the underlying Haskell value."""
         _lib.opensolid_release(self._ptr)
 
     origin: UvPoint = None  # type: ignore[assignment]
@@ -4306,6 +4506,7 @@ class UvPoint:
         pass
 
     def __sub__(self, rhs):
+        """Return ``self - rhs``."""
         match rhs:
             case UvPoint():
                 inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
@@ -4325,6 +4526,7 @@ class UvPoint:
                 return NotImplemented
 
     def __add__(self, rhs: Vector2d) -> UvPoint:
+        """Return ``self + rhs``."""
         inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
         output = c_void_p()
         _lib.opensolid_UvPoint_add_UvPoint_Vector2d(
@@ -4333,6 +4535,7 @@ class UvPoint:
         return UvPoint(ptr=output)
 
     def __repr__(self) -> str:
+        """Return a human-readable representation of this value."""
         x, y = self.coordinates()
         return "UvPoint.uv(" + str(x) + "," + str(y) + ")"
 
@@ -4344,6 +4547,7 @@ class Bounds2d:
         self._ptr = ptr
 
     def __del__(self) -> None:
+        """Free the underlying Haskell value."""
         _lib.opensolid_release(self._ptr)
 
     @staticmethod
@@ -4435,6 +4639,7 @@ class Bounds2d:
         return LengthRange(ptr=output)
 
     def __repr__(self) -> str:
+        """Return a human-readable representation of this value."""
         x, y = self.coordinates()
         return "Bounds2d.xy(" + repr(x) + "," + repr(y) + ")"
 
@@ -4446,6 +4651,7 @@ class UvBounds:
         self._ptr = ptr
 
     def __del__(self) -> None:
+        """Free the underlying Haskell value."""
         _lib.opensolid_release(self._ptr)
 
     @staticmethod
@@ -4534,6 +4740,7 @@ class UvBounds:
         return Range(ptr=output)
 
     def __repr__(self) -> str:
+        """Return a human-readable representation of this value."""
         u, v = self.coordinates()
         return "UvBounds.uv(" + repr(u) + "," + repr(v) + ")"
 
@@ -4545,6 +4752,7 @@ class Curve:
         self._ptr = ptr
 
     def __del__(self) -> None:
+        """Free the underlying Haskell value."""
         _lib.opensolid_release(self._ptr)
 
     zero: Curve = None  # type: ignore[assignment]
@@ -4649,6 +4857,7 @@ class Curve:
         return bool(output.value)
 
     def __neg__(self) -> Curve:
+        """Return ``-self``."""
         output = c_void_p()
         _lib.opensolid_Curve_neg(ctypes.byref(self._ptr), ctypes.byref(output))
         return Curve(ptr=output)
@@ -4662,6 +4871,7 @@ class Curve:
         pass
 
     def __add__(self, rhs):
+        """Return ``self + rhs``."""
         match rhs:
             case float() | int():
                 inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
@@ -4689,6 +4899,7 @@ class Curve:
         pass
 
     def __sub__(self, rhs):
+        """Return ``self - rhs``."""
         match rhs:
             case float() | int():
                 inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
@@ -4736,6 +4947,7 @@ class Curve:
         pass
 
     def __mul__(self, rhs):
+        """Return ``self * rhs``."""
         match rhs:
             case float() | int():
                 inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
@@ -4798,6 +5010,7 @@ class Curve:
         pass
 
     def __truediv__(self, rhs):
+        """Return ``self / rhs``."""
         match rhs:
             case float() | int():
                 inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
@@ -4817,24 +5030,28 @@ class Curve:
                 return NotImplemented
 
     def __radd__(self, lhs: float) -> Curve:
+        """Return ``lhs + self``."""
         inputs = _Tuple2_c_double_c_void_p(lhs, self._ptr)
         output = c_void_p()
         _lib.opensolid_Curve_add_Float_Curve(ctypes.byref(inputs), ctypes.byref(output))
         return Curve(ptr=output)
 
     def __rsub__(self, lhs: float) -> Curve:
+        """Return ``lhs - self``."""
         inputs = _Tuple2_c_double_c_void_p(lhs, self._ptr)
         output = c_void_p()
         _lib.opensolid_Curve_sub_Float_Curve(ctypes.byref(inputs), ctypes.byref(output))
         return Curve(ptr=output)
 
     def __rmul__(self, lhs: float) -> Curve:
+        """Return ``lhs * self``."""
         inputs = _Tuple2_c_double_c_void_p(lhs, self._ptr)
         output = c_void_p()
         _lib.opensolid_Curve_mul_Float_Curve(ctypes.byref(inputs), ctypes.byref(output))
         return Curve(ptr=output)
 
     def __rtruediv__(self, lhs: float) -> Curve:
+        """Return ``lhs / self``."""
         inputs = _Tuple2_c_double_c_void_p(lhs, self._ptr)
         output = c_void_p()
         _lib.opensolid_Curve_div_Float_Curve(ctypes.byref(inputs), ctypes.byref(output))
@@ -4847,6 +5064,7 @@ class Curve:
             self._ptr = ptr
 
         def __del__(self) -> None:
+            """Free the underlying Haskell value."""
             _lib.opensolid_release(self._ptr)
 
         def location(self) -> float:
@@ -4896,6 +5114,7 @@ class LengthCurve:
         self._ptr = ptr
 
     def __del__(self) -> None:
+        """Free the underlying Haskell value."""
         _lib.opensolid_release(self._ptr)
 
     zero: LengthCurve = None  # type: ignore[assignment]
@@ -4982,6 +5201,7 @@ class LengthCurve:
         return bool(output.value)
 
     def __neg__(self) -> LengthCurve:
+        """Return ``-self``."""
         output = c_void_p()
         _lib.opensolid_LengthCurve_neg(ctypes.byref(self._ptr), ctypes.byref(output))
         return LengthCurve(ptr=output)
@@ -4995,6 +5215,7 @@ class LengthCurve:
         pass
 
     def __add__(self, rhs):
+        """Return ``self + rhs``."""
         match rhs:
             case LengthCurve():
                 inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
@@ -5022,6 +5243,7 @@ class LengthCurve:
         pass
 
     def __sub__(self, rhs):
+        """Return ``self - rhs``."""
         match rhs:
             case LengthCurve():
                 inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
@@ -5057,6 +5279,7 @@ class LengthCurve:
         pass
 
     def __mul__(self, rhs):
+        """Return ``self * rhs``."""
         match rhs:
             case float() | int():
                 inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
@@ -5106,6 +5329,7 @@ class LengthCurve:
         pass
 
     def __truediv__(self, rhs):
+        """Return ``self / rhs``."""
         match rhs:
             case float() | int():
                 inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
@@ -5139,6 +5363,7 @@ class LengthCurve:
                 return NotImplemented
 
     def __rmul__(self, lhs: float) -> LengthCurve:
+        """Return ``lhs * self``."""
         inputs = _Tuple2_c_double_c_void_p(lhs, self._ptr)
         output = c_void_p()
         _lib.opensolid_LengthCurve_mul_Float_LengthCurve(
@@ -5154,6 +5379,7 @@ class AreaCurve:
         self._ptr = ptr
 
     def __del__(self) -> None:
+        """Free the underlying Haskell value."""
         _lib.opensolid_release(self._ptr)
 
     zero: AreaCurve = None  # type: ignore[assignment]
@@ -5240,11 +5466,13 @@ class AreaCurve:
         return bool(output.value)
 
     def __neg__(self) -> AreaCurve:
+        """Return ``-self``."""
         output = c_void_p()
         _lib.opensolid_AreaCurve_neg(ctypes.byref(self._ptr), ctypes.byref(output))
         return AreaCurve(ptr=output)
 
     def __add__(self, rhs: AreaCurve) -> AreaCurve:
+        """Return ``self + rhs``."""
         inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
         output = c_void_p()
         _lib.opensolid_AreaCurve_add_AreaCurve_AreaCurve(
@@ -5253,6 +5481,7 @@ class AreaCurve:
         return AreaCurve(ptr=output)
 
     def __sub__(self, rhs: AreaCurve) -> AreaCurve:
+        """Return ``self - rhs``."""
         inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
         output = c_void_p()
         _lib.opensolid_AreaCurve_sub_AreaCurve_AreaCurve(
@@ -5269,6 +5498,7 @@ class AreaCurve:
         pass
 
     def __mul__(self, rhs):
+        """Return ``self * rhs``."""
         match rhs:
             case float() | int():
                 inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
@@ -5312,6 +5542,7 @@ class AreaCurve:
         pass
 
     def __truediv__(self, rhs):
+        """Return ``self / rhs``."""
         match rhs:
             case float() | int():
                 inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
@@ -5359,6 +5590,7 @@ class AreaCurve:
                 return NotImplemented
 
     def __rmul__(self, lhs: float) -> AreaCurve:
+        """Return ``lhs * self``."""
         inputs = _Tuple2_c_double_c_void_p(lhs, self._ptr)
         output = c_void_p()
         _lib.opensolid_AreaCurve_mul_Float_AreaCurve(
@@ -5374,6 +5606,7 @@ class AngleCurve:
         self._ptr = ptr
 
     def __del__(self) -> None:
+        """Free the underlying Haskell value."""
         _lib.opensolid_release(self._ptr)
 
     zero: AngleCurve = None  # type: ignore[assignment]
@@ -5474,6 +5707,7 @@ class AngleCurve:
         return bool(output.value)
 
     def __neg__(self) -> AngleCurve:
+        """Return ``-self``."""
         output = c_void_p()
         _lib.opensolid_AngleCurve_neg(ctypes.byref(self._ptr), ctypes.byref(output))
         return AngleCurve(ptr=output)
@@ -5487,6 +5721,7 @@ class AngleCurve:
         pass
 
     def __add__(self, rhs):
+        """Return ``self + rhs``."""
         match rhs:
             case AngleCurve():
                 inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
@@ -5514,6 +5749,7 @@ class AngleCurve:
         pass
 
     def __sub__(self, rhs):
+        """Return ``self - rhs``."""
         match rhs:
             case AngleCurve():
                 inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
@@ -5541,6 +5777,7 @@ class AngleCurve:
         pass
 
     def __mul__(self, rhs):
+        """Return ``self * rhs``."""
         match rhs:
             case float() | int():
                 inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
@@ -5576,6 +5813,7 @@ class AngleCurve:
         pass
 
     def __truediv__(self, rhs):
+        """Return ``self / rhs``."""
         match rhs:
             case float() | int():
                 inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
@@ -5609,6 +5847,7 @@ class AngleCurve:
                 return NotImplemented
 
     def __rmul__(self, lhs: float) -> AngleCurve:
+        """Return ``lhs * self``."""
         inputs = _Tuple2_c_double_c_void_p(lhs, self._ptr)
         output = c_void_p()
         _lib.opensolid_AngleCurve_mul_Float_AngleCurve(
@@ -5624,6 +5863,7 @@ class Drawing2d:
         self._ptr = ptr
 
     def __del__(self) -> None:
+        """Free the underlying Haskell value."""
         _lib.opensolid_release(self._ptr)
 
     black_stroke: Drawing2d.Attribute = None  # type: ignore[assignment]
@@ -5720,6 +5960,7 @@ class Drawing2d:
             self._ptr = ptr
 
         def __del__(self) -> None:
+            """Free the underlying Haskell value."""
             _lib.opensolid_release(self._ptr)
 
     class Attribute:
@@ -5729,6 +5970,7 @@ class Drawing2d:
             self._ptr = ptr
 
         def __del__(self) -> None:
+            """Free the underlying Haskell value."""
             _lib.opensolid_release(self._ptr)
 
 
@@ -5766,6 +6008,24 @@ def _length_millimeter() -> Length:
 
 
 Length.millimeter = _length_millimeter()
+
+
+def _length_micrometer() -> Length:
+    output = c_void_p()
+    _lib.opensolid_Length_micrometer(c_void_p(), ctypes.byref(output))
+    return Length(ptr=output)
+
+
+Length.micrometer = _length_micrometer()
+
+
+def _length_nanometer() -> Length:
+    output = c_void_p()
+    _lib.opensolid_Length_nanometer(c_void_p(), ctypes.byref(output))
+    return Length(ptr=output)
+
+
+Length.nanometer = _length_nanometer()
 
 
 def _length_inch() -> Length:

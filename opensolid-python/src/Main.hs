@@ -90,30 +90,59 @@ preamble =
     , "def _error(message: str) -> Any: # noqa: ANN401"
     , "    raise Error(message)"
     , ""
-    , "type ToleranceValue = float | Length | Area | Angle"
-    , ""
     , "class _Tolerance(threading.local):"
-    , "    value : ToleranceValue | None = None"
+    , "    value : float | Length | Area | Angle | None = None"
     , ""
     , "class Tolerance:"
-    , "    \"\"\"Manages a thread-local tolerance value.\"\"\""
+    , "    \"\"\"Manages a thread-local tolerance value."
     , ""
-    , "    _value: ToleranceValue | None = None"
-    , "    _saved: ToleranceValue | None = None"
+    , "    Many functions in OpenSolid require a tolerance to be set."
+    , "    You should generally choose a value that is"
+    , "    much smaller than any meaningful size/dimension in the geometry you're modelling,"
+    , "    but significantly *larger* than any expected numerical roundoff that might occur."
+    , "    A good default choice is roughly one-billionth of the overall size of your geometry;"
+    , "    for 'human-scale' things (say, from an earring up to a house)"
+    , "    that means that one nanometer is a reasonable value to use."
     , ""
-    , "    def __init__(self, value: ToleranceValue | None) -> None:"
+    , "    Passing a tolerance into every function that needed one would get very verbose,"
+    , "    and it's very common to choose a single tolerance value and use it throughout a project."
+    , "    However, it's also occasionally necessary to set a different tolerance for some code."
+    , "    This class allows managing tolerances using Python's ``with`` statement, e.g.::"
+    , ""
+    , "        with Tolerance(Length.nanometer):"
+    , "            do_something()"
+    , "            do_something_else()"
+    , "            with Tolerance(Angle.degrees(0.001)):"
+    , "                compare_two_angles()"
+    , "            do_more_things()"
+    , ""
+    , "    In the above code, the ``Length.nanometer`` tolerance value"
+    , "    will be used for ``do_something()`` and ``do_something_else()``"
+    , "    (and any functions they call)."
+    , "    The ``Angle.degrees(0.001))`` tolerance value"
+    , "    will then be used for ``compare_two_angles()``,"
+    , "    and then the ``Length.nanometer`` tolerance value will be restored"
+    , "    and used for ``do_more_things()``."
+    , "    \"\"\""
+    , ""
+    , "    _value: float | Length | Area | Angle | None = None"
+    , "    _saved: float | Length | Area | Angle | None = None"
+    , ""
+    , "    def __init__(self, value: float | Length | Area | Angle | None) -> None:"
     , "        self._value = value"
     , ""
     , "    def __enter__(self) -> None:"
+    , "        \"\"\"Set the given tolerance as the currently active one.\"\"\""
     , "        self._saved = _Tolerance.value"
     , "        _Tolerance.value = self._value"
     , ""
     , "    def __exit__(self, _exception_type: object, _exception_value: object, _traceback: object) -> None:"
+    , "        \"\"\"Restore the previous tolerance as the currently active one.\"\"\""
     , "        _Tolerance.value = self._saved"
     , "        self._saved = None"
     , ""
     , "    @staticmethod"
-    , "    def current() -> ToleranceValue | None:"
+    , "    def current() -> float | Length | Area | Angle | None:"
     , "        \"\"\"Get the current tolerance value.\"\"\""
     , "        return _Tolerance.value"
     , ""
@@ -178,6 +207,7 @@ classDefinition
             , "    def __init__(self, *, ptr : c_void_p) -> None:"
             , "        self._ptr = ptr"
             , "    def __del__(self) -> None:"
+            , "        \"\"\"Free the underlying Haskell value.\"\"\""
             , "        _lib.opensolid_release(self._ptr)"
             , Python.indent (List.map Python.Constant.declaration constants)
             , Python.indent (List.map (Python.StaticFunction.definition classId) staticFunctions)
@@ -188,98 +218,92 @@ classDefinition
             , Python.indent [Python.AbsFunction.definition classId maybeAbsFunction]
             , Python.indent (List.map (Python.PostOperator.definition classId) postOperators)
             , Python.indent (List.map (Python.PreOperator.definition classId) preOperators)
-            , Python.indent (extraMemberFunctions (Python.Class.qualifiedName classId))
+            , Python.indent [extraMemberFunctions (Python.Class.qualifiedName classId)]
             , Python.indent nestedClassDefinitions
             ]
     let constantDefinitions =
           Python.lines ((List.map (Python.Constant.definition classId) constants) + nestedClassConstants)
     (definition, constantDefinitions)
 
-extraMemberFunctions :: Text -> List Text
-extraMemberFunctions className = case className of
-  "Length" ->
-    [ "def __repr__(self) -> str:"
-    , "    if self == Length.zero:"
-    , "        return 'Length.zero'"
-    , "    return 'Length.meters(' + str(self.in_meters()) + ')'"
-    ]
-  "Area" ->
-    [ "def __repr__(self) -> str:"
-    , "    if self == Area.zero:"
-    , "        return 'Area.zero'"
-    , "    return 'Area.square_meters(' + str(self.in_square_meters()) + ')'"
-    ]
-  "Angle" ->
-    [ "def __repr__(self) -> str:"
-    , "    if self == Angle.zero:"
-    , "        return 'Angle.zero'"
-    , "    return 'Angle.degrees(' + str(self.in_degrees()) + ')'"
-    ]
-  "Range" ->
-    [ "def __repr__(self) -> str:"
-    , "    low, high = self.endpoints()"
-    , "    return 'Range.from_endpoints(' + str(low) + ',' + str(high) + ')'"
-    ]
-  "LengthRange" ->
-    [ "def __repr__(self) -> str:"
-    , "    low, high = self.endpoints()"
-    , "    return 'LengthRange.meters(' + str(low.in_meters()) + ',' + str(high.in_meters()) + ')'"
-    ]
-  "AreaRange" ->
-    [ "def __repr__(self) -> str:"
-    , "    low, high = self.endpoints()"
-    , "    return 'AreaRange.square_meters(' + str(low.in_square_meters()) + ',' + str(high.in_square_meters()) + ')'"
-    ]
-  "AngleRange" ->
-    [ "def __repr__(self) -> str:"
-    , "    low, high = self.endpoints()"
-    , "    return 'AngleRange.degrees(' + str(low.in_degrees()) + ',' + str(high.in_degrees()) + ')'"
-    ]
-  "Color" ->
-    [ "def __repr__(self) -> str:"
-    , "    r, g, b = self.components_255()"
-    , "    return 'Color.rgb_255(' + str(r) + ',' + str(g) + ',' + str(b) + ')'"
-    ]
-  "Vector2d" ->
-    [ "def __repr__(self) -> str:"
-    , "    x, y = self.components()"
-    , "    return 'Vector2d.xy(' + str(x) + ',' + str(y) + ')'"
-    ]
-  "Displacement2d" ->
-    [ "def __repr__(self) -> str:"
-    , "    x, y = self.components()"
-    , "    return 'Displacement2d.meters(' + str(x.in_meters()) + ',' + str(y.in_meters()) + ')'"
-    ]
-  "AreaVector2d" ->
-    [ "def __repr__(self) -> str:"
-    , "    x, y = self.components()"
-    , "    return 'AreaVector2d.square_meters(' + str(x.in_square_meters()) + ',' + str(y.in_square_meters()) + ')'"
-    ]
-  "Direction2d" ->
-    [ "def __repr__(self) -> str:"
-    , "    return 'Direction2d.degrees(' + str(self.to_angle().in_degrees()) + ')'"
-    ]
-  "Point2d" ->
-    [ "def __repr__(self) -> str:"
-    , "    x, y = self.coordinates()"
-    , "    return 'Point2d.meters(' + str(x.in_meters()) + ',' + str(y.in_meters()) + ')'"
-    ]
-  "UvPoint" ->
-    [ "def __repr__(self) -> str:"
-    , "    x, y = self.coordinates()"
-    , "    return 'UvPoint.uv(' + str(x) + ',' + str(y) + ')'"
-    ]
-  "Bounds2d" ->
-    [ "def __repr__(self) -> str:"
-    , "    x, y = self.coordinates()"
-    , "    return 'Bounds2d.xy(' + repr(x) + ',' + repr(y) + ')'"
-    ]
-  "UvBounds" ->
-    [ "def __repr__(self) -> str:"
-    , "    u, v = self.coordinates()"
-    , "    return 'UvBounds.uv(' + repr(u) + ',' + repr(v) + ')'"
-    ]
-  _ -> []
+extraMemberFunctions :: Text -> Text
+extraMemberFunctions className = do
+  let repr body =
+        Python.lines
+          [ "def __repr__(self) -> str:"
+          , Python.indent
+              [ Python.docstring "Return a human-readable representation of this value."
+              , Python.lines body
+              ]
+          ]
+  case className of
+    "Length" -> repr ["return 'Length.meters(' + str(self.in_meters()) + ')'"]
+    "Area" -> repr ["return 'Area.square_meters(' + str(self.in_square_meters()) + ')'"]
+    "Angle" -> repr ["return 'Angle.degrees(' + str(self.in_degrees()) + ')'"]
+    "Range" ->
+      repr
+        [ "low, high = self.endpoints()"
+        , "return 'Range.from_endpoints(' + str(low) + ',' + str(high) + ')'"
+        ]
+    "LengthRange" ->
+      repr
+        [ "low, high = self.endpoints()"
+        , "return 'LengthRange.meters(' + str(low.in_meters()) + ',' + str(high.in_meters()) + ')'"
+        ]
+    "AreaRange" ->
+      repr
+        [ "low, high = self.endpoints()"
+        , "return 'AreaRange.square_meters(' + str(low.in_square_meters()) + ',' + str(high.in_square_meters()) + ')'"
+        ]
+    "AngleRange" ->
+      repr
+        [ "low, high = self.endpoints()"
+        , "return 'AngleRange.degrees(' + str(low.in_degrees()) + ',' + str(high.in_degrees()) + ')'"
+        ]
+    "Color" ->
+      repr
+        [ "r, g, b = self.components_255()"
+        , "return 'Color.rgb_255(' + str(r) + ',' + str(g) + ',' + str(b) + ')'"
+        ]
+    "Vector2d" ->
+      repr
+        [ "x, y = self.components()"
+        , "return 'Vector2d.xy(' + str(x) + ',' + str(y) + ')'"
+        ]
+    "Displacement2d" ->
+      repr
+        [ "x, y = self.components()"
+        , "return 'Displacement2d.meters(' + str(x.in_meters()) + ',' + str(y.in_meters()) + ')'"
+        ]
+    "AreaVector2d" ->
+      repr
+        [ "x, y = self.components()"
+        , "return 'AreaVector2d.square_meters(' + str(x.in_square_meters()) + ',' + str(y.in_square_meters()) + ')'"
+        ]
+    "Direction2d" ->
+      repr
+        [ "return 'Direction2d.degrees(' + str(self.to_angle().in_degrees()) + ')'"
+        ]
+    "Point2d" ->
+      repr
+        [ "x, y = self.coordinates()"
+        , "return 'Point2d.meters(' + str(x.in_meters()) + ',' + str(y.in_meters()) + ')'"
+        ]
+    "UvPoint" ->
+      repr
+        [ "x, y = self.coordinates()"
+        , "return 'UvPoint.uv(' + str(x) + ',' + str(y) + ')'"
+        ]
+    "Bounds2d" ->
+      repr
+        [ "x, y = self.coordinates()"
+        , "return 'Bounds2d.xy(' + repr(x) + ',' + repr(y) + ')'"
+        ]
+    "UvBounds" ->
+      repr
+        [ "u, v = self.coordinates()"
+        , "return 'UvBounds.uv(' + repr(u) + ',' + repr(v) + ')'"
+        ]
+    _ -> ""
 
 ffiTypeDeclarations :: Text
 ffiTypeDeclarations = do

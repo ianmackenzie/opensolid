@@ -25,15 +25,16 @@ definitions classId maybeFunction = case maybeFunction of
                 , "return " + Python.FFI.outputValue ComparisonFunction.returnType "output"
                 ]
             ]
-    let operatorDefinition name condition =
+    let operatorDefinition name symbol =
           Python.lines
             [ "def " + name + "(self, other: " + valueTypeName + ") -> bool:"
-            , "    return self._compare(other) " + condition
+            , "    \"\"\"Return ``self " + symbol + " other``.\"\"\""
+            , "    return self._compare(other) " + symbol + " 0"
             ]
     Python.lines
       [ helperDefinition
-      , operatorDefinition "__lt__" "< 0"
-      , operatorDefinition "__le__" "<= 0"
-      , operatorDefinition "__ge__" ">= 0"
-      , operatorDefinition "__gt__" "> 0"
+      , operatorDefinition "__lt__" "<"
+      , operatorDefinition "__le__" "<="
+      , operatorDefinition "__ge__" ">="
+      , operatorDefinition "__gt__" ">"
       ]
