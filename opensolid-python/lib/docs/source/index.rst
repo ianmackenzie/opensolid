@@ -1,5 +1,4 @@
-OpenSolid
-=========
+.. include:: ../../README.rst
 
 .. toctree::
    :hidden:
