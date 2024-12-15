@@ -8,6 +8,7 @@ readme = "README.rst"
 
 [project.urls]
 source = "https://github.com/ianmackenzie/opensolid"
+documentation = "https://opensolid.github.io/docs/0.1.1"
 
 [build-system]
 requires = ["setuptools"]
