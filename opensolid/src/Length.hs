@@ -4,12 +4,18 @@ module Length
   , meter
   , millimeter
   , centimeter
+  , micrometer
+  , nanometer
   , meters
   , inMeters
   , millimeters
   , inMillimeters
   , centimeters
   , inCentimeters
+  , micrometers
+  , inMicrometers
+  , nanometers
+  , inNanometers
   , inch
   , inches
   , inInches
@@ -69,6 +75,30 @@ centimeters = (* centimeter)
 -- | Convert a length to a number of centimeters.
 inCentimeters :: Length -> Float
 inCentimeters = (/ centimeter)
+
+-- | One micrometer.
+micrometer :: Length
+micrometer = meters 1e-6
+
+-- | Construct a length from a number of micrometers.
+micrometers :: Float -> Length
+micrometers = (* micrometer)
+
+-- | Convert a length to a number of micrometers.
+inMicrometers :: Length -> Float
+inMicrometers = (/ micrometer)
+
+-- | One nanometer.
+nanometer :: Length
+nanometer = meters 1e-9
+
+-- | Construct a length from a number of nanometers.
+nanometers :: Float -> Length
+nanometers = (* nanometer)
+
+-- | Convert a length to a number of nanometers.
+inNanometers :: Length -> Float
+inNanometers = (/ nanometer)
 
 -- | One inch.
 inch :: Length
