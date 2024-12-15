@@ -29,18 +29,18 @@ OpenSolid is an under-development 2D/3D CAD library aiming to be:
 
 It's not really ready to be used yet, but current rough roadmap is:
 
-  [ ] Set up automated publishing of Python bindings pre-built for Linux, macOS and Windows
-  [ ] Fill out Python bindings with existing 2D geometry functionality already implemented in
-      Haskell, so it's possible to at least make interesting 2D drawings
-  [ ] Add some additional 2D geometry functionality related to 2D CNC toolpath planning, so that
-      it's possible to use OpenSolid for cutting out simple objects on a CNC mill/router
-  [ ] Add enough initial 3D modelling functionality to be able to generate simple models for 3D
-      printing or visualization
-  [ ] Add support for more complex 3D operations like tricky Boolean operations, rounds/fillets,
-      shelling etc.
-  [ ] Add support exporting to (and hopefully importing from) STEP files
-  [ ] Add ability to generate input files for finite element analysis or ray-traced rendering
-      software
+  - [ ] Set up automated publishing of Python bindings pre-built for Linux, macOS and Windows
+  - [ ] Fill out Python bindings with existing 2D geometry functionality already implemented in
+        Haskell, so it's possible to at least make interesting 2D drawings
+  - [ ] Add some additional 2D geometry functionality related to 2D CNC toolpath planning, so that
+        it's possible to use OpenSolid for cutting out simple objects on a CNC mill/router
+  - [ ] Add enough initial 3D modelling functionality to be able to generate simple models for 3D
+        printing or visualization
+  - [ ] Add support for more complex 3D operations like tricky Boolean operations, rounds/fillets,
+        shelling etc.
+  - [ ] Add support exporting to (and hopefully importing from) STEP files
+  - [ ] Add ability to generate input files for finite element analysis or ray-traced rendering
+        software
 
 The first 3-4 items above should be pretty doable in the short term (next few months); the others
 will take some more thought and design work so may not be ready for a while longer.
