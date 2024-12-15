@@ -10,11 +10,11 @@ OpenSolid is an under-development 2D/3D CAD library aiming to be:
   * **Multi-language**: OpenSolid is implemented primarily in Haskell (with some bits of Rust and
     [Cranelift][cranelift] for performance), but is designed to have first-class support in a
     variety of other languages via language bindings. Python is
-    [currently supported](python-bindings) (it seemed like the obvious first choice), but the
+    [currently supported][python-bindings] (it seemed like the obvious first choice), but the
     infrastructure is in place to support a variety of other languages as well. C# and perhaps C++
     seem like likely candidates since both are popular in engineering applications, but other
-    languages like Java or TypeScript should also be doable; please reach out if you're interested
-    in seeing support added for a particular language!
+    languages like Java or TypeScript or Ruby should also be doable; please reach out if you're
+    interested in seeing support added for a particular language!
   * **Safe**: OpenSolid uses the type-checking functionality in each target language to try to
     prevent common errors like mixing up units; units conversions are handled automatically and
     you'll get a type error if you e.g. attempt to add a `Length` to an `Area`. In addition, where
@@ -27,7 +27,7 @@ OpenSolid is an under-development 2D/3D CAD library aiming to be:
     making OpenSolid as pleasant to use as possible, via careful API design and (reasonably)
     comprehensive documentation.
 
-It's not really ready to be used yet, but current rough roadmap is:
+It's not really ready to be used yet, but the current rough roadmap is:
 
   - [ ] Set up automated publishing of Python bindings pre-built for Linux, macOS and Windows
   - [ ] Fill out Python bindings with existing 2D geometry functionality already implemented in
@@ -77,3 +77,7 @@ Running `nix develop` in a checkout of this repository will give you a developme
 [nix-flake]: https://nixos.wiki/wiki/Flakes
 [ghcup]: https://www.haskell.org/ghcup/
 [uv]: https://docs.astral.sh/uv/
+
+## Questions? Comments? Want to get involved?
+
+Please [reach out](https://github.com/ianmackenzie/), I'd love to hear from you!
