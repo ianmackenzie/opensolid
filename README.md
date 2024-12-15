@@ -9,8 +9,8 @@ OpenSolid is an under-development 2D/3D CAD library aiming to be:
     is greater than a given value."
   * **Multi-language**: OpenSolid is implemented primarily in Haskell (with some bits of Rust and
     [Cranelift][cranelift] for performance), but is designed to have first-class support in a
-    variety of other languages via language bindings. Python is
-    [currently supported][python-bindings] (it seemed like the obvious first choice), but the
+    variety of other languages via language bindings. Python bindings are
+    [currently implemented][python-bindings] (Python seemed like the obvious first choice), but the
     infrastructure is in place to support a variety of other languages as well. C# and perhaps C++
     seem like likely candidates since both are popular in engineering applications, but other
     languages like Java or TypeScript or Ruby should also be doable; please reach out if you're
