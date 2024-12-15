@@ -1,0 +1,7 @@
+OpenSolid
+=========
+
+.. toctree::
+   :hidden:
+
+   api

@@ -1,0 +1,5 @@
+#!/bin/bash
+
+set -euo pipefail
+
+LC_ALL=C.UTF-8 uv --project opensolid-python/lib run sphinx-build --fail-on-warning opensolid-python/lib/docs/source/ opensolid-python/lib/docs/build/
