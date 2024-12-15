@@ -5,8 +5,8 @@ OpenSolid is an under-development 2D/3D CAD library aiming to be:
   * **Powerful**: The goal is to eventually support complex 3D operations like booleans,
     rounds/fillets, shells etc. that are common in existing CAD kernels, but also difficult
     operations such as finding the [medial axis][medial-axis] of a 2D shape or, being able to set up
-    and solve solve problems like "find all segments of a curve where its [curvature][curvature]
-    is greater than a given value."
+    and solve problems like "find all segments of a curve where its [curvature][curvature] is
+    greater than a given value."
   * **Multi-language**: OpenSolid is implemented primarily in Haskell (with some bits of Rust and
     [Cranelift][cranelift] for performance), but is designed to have first-class support in a
     variety of other languages via language bindings. Python bindings are
