@@ -5,7 +5,7 @@ import OpenSolid
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import Python qualified
-import Python.FFI qualified
+import Python.Function qualified
 import Python.Type qualified
 
 definition :: forall value. FFI value => FFI.Id value -> Maybe (value -> value) -> Text
@@ -19,8 +19,6 @@ definition classId maybeFunction = case maybeFunction of
       [ "def __neg__(self) -> " + valueTypeName + ":"
       , Python.indent
           [ Python.docstring "Return ``-self``."
-          , "output = " + Python.FFI.dummyValue valueType
-          , Python.FFI.invoke ffiFunctionName "ctypes.byref(self._ptr)" "ctypes.byref(output)"
-          , "return " + Python.FFI.outputValue valueType "output"
+          , Python.Function.body ffiFunctionName [("self", valueType)] valueType
           ]
       ]

@@ -5,7 +5,7 @@ import OpenSolid
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import Python qualified
-import Python.FFI qualified
+import Python.Function qualified
 import Python.Type qualified
 
 definitions :: forall value. FFI value => FFI.Id value -> Maybe (value -> value -> Int) -> Text
@@ -19,10 +19,10 @@ definitions classId maybeFunction = case maybeFunction of
           Python.lines
             [ "def _compare(self, other: " + valueTypeName + ") -> int:"
             , Python.indent
-                [ "inputs = " + Python.FFI.argumentValue [("self", valueType), ("other", valueType)]
-                , "output = " + Python.FFI.dummyValue ComparisonFunction.returnType
-                , Python.FFI.invoke ffiFunctionName "ctypes.byref(inputs)" "ctypes.byref(output)"
-                , "return " + Python.FFI.outputValue ComparisonFunction.returnType "output"
+                [ Python.Function.body
+                    ffiFunctionName
+                    [("self", valueType), ("other", valueType)]
+                    ComparisonFunction.returnType
                 ]
             ]
     let operatorDefinition name symbol =

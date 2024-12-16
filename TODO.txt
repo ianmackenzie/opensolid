@@ -1,5 +1,3 @@
-Use Python.Function.body from NegationFunction, AbsFunction, EqualityFunction, ComparisonFunction, PreOperator and PostOperator modules
-
 C API: generate structs with *named* fields
 -> have the struct be named as function_name_inputs, function_name_outputs etc.
 -> can use this in Python too, to have named fields instead of 'field0' etc.

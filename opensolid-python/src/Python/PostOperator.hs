@@ -7,7 +7,6 @@ import List qualified
 import OpenSolid
 import OpenSolid.FFI qualified as FFI
 import Python qualified
-import Python.FFI qualified
 import Python.Function qualified
 import Python.Type qualified
 
@@ -84,9 +83,4 @@ overloadSignature operatorId rhsType returnType = do
 
 overloadBody :: Text -> FFI.Type -> FFI.Type -> FFI.Type -> Text
 overloadBody ffiFunctionName selfType rhsType returnType =
-  Python.lines
-    [ "inputs = " + Python.FFI.argumentValue [("self", selfType), (rhsArgName, rhsType)]
-    , "output = " + Python.FFI.dummyValue returnType
-    , Python.FFI.invoke ffiFunctionName "ctypes.byref(inputs)" "ctypes.byref(output)"
-    , "return " + Python.FFI.outputValue returnType "output"
-    ]
+  Python.Function.body ffiFunctionName [("self", selfType), (rhsArgName, rhsType)] returnType

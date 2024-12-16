@@ -414,12 +414,12 @@ class Length:
         (one which will return true if two values are *almost* equal)
         you'll likely want to use an ``is_zero()`` method instead.
         """
-        if isinstance(other, Length):
-            inputs = _Tuple2_c_void_p_c_void_p(self._ptr, other._ptr)
-            output = c_int64()
-            _lib.opensolid_Length_eq(ctypes.byref(inputs), ctypes.byref(output))
-            return bool(output.value)
-        return False
+        if not isinstance(other, Length):
+            return False
+        inputs = _Tuple2_c_void_p_c_void_p(self._ptr, other._ptr)
+        output = c_int64()
+        _lib.opensolid_Length_eq(ctypes.byref(inputs), ctypes.byref(output))
+        return bool(output.value)
 
     def _compare(self, other: Length) -> int:
         inputs = _Tuple2_c_void_p_c_void_p(self._ptr, other._ptr)
@@ -445,14 +445,16 @@ class Length:
 
     def __neg__(self) -> Length:
         """Return ``-self``."""
+        inputs = self._ptr
         output = c_void_p()
-        _lib.opensolid_Length_neg(ctypes.byref(self._ptr), ctypes.byref(output))
+        _lib.opensolid_Length_neg(ctypes.byref(inputs), ctypes.byref(output))
         return Length(ptr=output)
 
     def __abs__(self) -> Length:
         """Return ``abs(self)``."""
+        inputs = self._ptr
         output = c_void_p()
-        _lib.opensolid_Length_abs(ctypes.byref(self._ptr), ctypes.byref(output))
+        _lib.opensolid_Length_abs(ctypes.byref(inputs), ctypes.byref(output))
         return Length(ptr=output)
 
     @overload
@@ -812,12 +814,12 @@ class Area:
         (one which will return true if two values are *almost* equal)
         you'll likely want to use an ``is_zero()`` method instead.
         """
-        if isinstance(other, Area):
-            inputs = _Tuple2_c_void_p_c_void_p(self._ptr, other._ptr)
-            output = c_int64()
-            _lib.opensolid_Area_eq(ctypes.byref(inputs), ctypes.byref(output))
-            return bool(output.value)
-        return False
+        if not isinstance(other, Area):
+            return False
+        inputs = _Tuple2_c_void_p_c_void_p(self._ptr, other._ptr)
+        output = c_int64()
+        _lib.opensolid_Area_eq(ctypes.byref(inputs), ctypes.byref(output))
+        return bool(output.value)
 
     def _compare(self, other: Area) -> int:
         inputs = _Tuple2_c_void_p_c_void_p(self._ptr, other._ptr)
@@ -843,14 +845,16 @@ class Area:
 
     def __neg__(self) -> Area:
         """Return ``-self``."""
+        inputs = self._ptr
         output = c_void_p()
-        _lib.opensolid_Area_neg(ctypes.byref(self._ptr), ctypes.byref(output))
+        _lib.opensolid_Area_neg(ctypes.byref(inputs), ctypes.byref(output))
         return Area(ptr=output)
 
     def __abs__(self) -> Area:
         """Return ``abs(self)``."""
+        inputs = self._ptr
         output = c_void_p()
-        _lib.opensolid_Area_abs(ctypes.byref(self._ptr), ctypes.byref(output))
+        _lib.opensolid_Area_abs(ctypes.byref(inputs), ctypes.byref(output))
         return Area(ptr=output)
 
     @overload
@@ -1275,12 +1279,12 @@ class Angle:
         (one which will return true if two values are *almost* equal)
         you'll likely want to use an ``is_zero()`` method instead.
         """
-        if isinstance(other, Angle):
-            inputs = _Tuple2_c_void_p_c_void_p(self._ptr, other._ptr)
-            output = c_int64()
-            _lib.opensolid_Angle_eq(ctypes.byref(inputs), ctypes.byref(output))
-            return bool(output.value)
-        return False
+        if not isinstance(other, Angle):
+            return False
+        inputs = _Tuple2_c_void_p_c_void_p(self._ptr, other._ptr)
+        output = c_int64()
+        _lib.opensolid_Angle_eq(ctypes.byref(inputs), ctypes.byref(output))
+        return bool(output.value)
 
     def _compare(self, other: Angle) -> int:
         inputs = _Tuple2_c_void_p_c_void_p(self._ptr, other._ptr)
@@ -1306,14 +1310,16 @@ class Angle:
 
     def __neg__(self) -> Angle:
         """Return ``-self``."""
+        inputs = self._ptr
         output = c_void_p()
-        _lib.opensolid_Angle_neg(ctypes.byref(self._ptr), ctypes.byref(output))
+        _lib.opensolid_Angle_neg(ctypes.byref(inputs), ctypes.byref(output))
         return Angle(ptr=output)
 
     def __abs__(self) -> Angle:
         """Return ``abs(self)``."""
+        inputs = self._ptr
         output = c_void_p()
-        _lib.opensolid_Angle_abs(ctypes.byref(self._ptr), ctypes.byref(output))
+        _lib.opensolid_Angle_abs(ctypes.byref(inputs), ctypes.byref(output))
         return Angle(ptr=output)
 
     @overload
@@ -1659,14 +1665,16 @@ class Range:
 
     def __neg__(self) -> Range:
         """Return ``-self``."""
+        inputs = self._ptr
         output = c_void_p()
-        _lib.opensolid_Range_neg(ctypes.byref(self._ptr), ctypes.byref(output))
+        _lib.opensolid_Range_neg(ctypes.byref(inputs), ctypes.byref(output))
         return Range(ptr=output)
 
     def __abs__(self) -> Range:
         """Return ``abs(self)``."""
+        inputs = self._ptr
         output = c_void_p()
-        _lib.opensolid_Range_abs(ctypes.byref(self._ptr), ctypes.byref(output))
+        _lib.opensolid_Range_abs(ctypes.byref(inputs), ctypes.byref(output))
         return Range(ptr=output)
 
     @overload
@@ -2039,14 +2047,16 @@ class LengthRange:
 
     def __neg__(self) -> LengthRange:
         """Return ``-self``."""
+        inputs = self._ptr
         output = c_void_p()
-        _lib.opensolid_LengthRange_neg(ctypes.byref(self._ptr), ctypes.byref(output))
+        _lib.opensolid_LengthRange_neg(ctypes.byref(inputs), ctypes.byref(output))
         return LengthRange(ptr=output)
 
     def __abs__(self) -> LengthRange:
         """Return ``abs(self)``."""
+        inputs = self._ptr
         output = c_void_p()
-        _lib.opensolid_LengthRange_abs(ctypes.byref(self._ptr), ctypes.byref(output))
+        _lib.opensolid_LengthRange_abs(ctypes.byref(inputs), ctypes.byref(output))
         return LengthRange(ptr=output)
 
     @overload
@@ -2351,14 +2361,16 @@ class AreaRange:
 
     def __neg__(self) -> AreaRange:
         """Return ``-self``."""
+        inputs = self._ptr
         output = c_void_p()
-        _lib.opensolid_AreaRange_neg(ctypes.byref(self._ptr), ctypes.byref(output))
+        _lib.opensolid_AreaRange_neg(ctypes.byref(inputs), ctypes.byref(output))
         return AreaRange(ptr=output)
 
     def __abs__(self) -> AreaRange:
         """Return ``abs(self)``."""
+        inputs = self._ptr
         output = c_void_p()
-        _lib.opensolid_AreaRange_abs(ctypes.byref(self._ptr), ctypes.byref(output))
+        _lib.opensolid_AreaRange_abs(ctypes.byref(inputs), ctypes.byref(output))
         return AreaRange(ptr=output)
 
     @overload
@@ -2683,14 +2695,16 @@ class AngleRange:
 
     def __neg__(self) -> AngleRange:
         """Return ``-self``."""
+        inputs = self._ptr
         output = c_void_p()
-        _lib.opensolid_AngleRange_neg(ctypes.byref(self._ptr), ctypes.byref(output))
+        _lib.opensolid_AngleRange_neg(ctypes.byref(inputs), ctypes.byref(output))
         return AngleRange(ptr=output)
 
     def __abs__(self) -> AngleRange:
         """Return ``abs(self)``."""
+        inputs = self._ptr
         output = c_void_p()
-        _lib.opensolid_AngleRange_abs(ctypes.byref(self._ptr), ctypes.byref(output))
+        _lib.opensolid_AngleRange_abs(ctypes.byref(inputs), ctypes.byref(output))
         return AngleRange(ptr=output)
 
     @overload
@@ -3155,8 +3169,9 @@ class Vector2d:
 
     def __neg__(self) -> Vector2d:
         """Return ``-self``."""
+        inputs = self._ptr
         output = c_void_p()
-        _lib.opensolid_Vector2d_neg(ctypes.byref(self._ptr), ctypes.byref(output))
+        _lib.opensolid_Vector2d_neg(ctypes.byref(inputs), ctypes.byref(output))
         return Vector2d(ptr=output)
 
     def __add__(self, rhs: Vector2d) -> Vector2d:
@@ -3524,8 +3539,9 @@ class Displacement2d:
 
     def __neg__(self) -> Displacement2d:
         """Return ``-self``."""
+        inputs = self._ptr
         output = c_void_p()
-        _lib.opensolid_Displacement2d_neg(ctypes.byref(self._ptr), ctypes.byref(output))
+        _lib.opensolid_Displacement2d_neg(ctypes.byref(inputs), ctypes.byref(output))
         return Displacement2d(ptr=output)
 
     def __add__(self, rhs: Displacement2d) -> Displacement2d:
@@ -3848,8 +3864,9 @@ class AreaVector2d:
 
     def __neg__(self) -> AreaVector2d:
         """Return ``-self``."""
+        inputs = self._ptr
         output = c_void_p()
-        _lib.opensolid_AreaVector2d_neg(ctypes.byref(self._ptr), ctypes.byref(output))
+        _lib.opensolid_AreaVector2d_neg(ctypes.byref(inputs), ctypes.byref(output))
         return AreaVector2d(ptr=output)
 
     def __add__(self, rhs: AreaVector2d) -> AreaVector2d:
@@ -4130,8 +4147,9 @@ class Direction2d:
 
     def __neg__(self) -> Direction2d:
         """Return ``-self``."""
+        inputs = self._ptr
         output = c_void_p()
-        _lib.opensolid_Direction2d_neg(ctypes.byref(self._ptr), ctypes.byref(output))
+        _lib.opensolid_Direction2d_neg(ctypes.byref(inputs), ctypes.byref(output))
         return Direction2d(ptr=output)
 
     @overload
@@ -4946,8 +4964,9 @@ class Curve:
 
     def __neg__(self) -> Curve:
         """Return ``-self``."""
+        inputs = self._ptr
         output = c_void_p()
-        _lib.opensolid_Curve_neg(ctypes.byref(self._ptr), ctypes.byref(output))
+        _lib.opensolid_Curve_neg(ctypes.byref(inputs), ctypes.byref(output))
         return Curve(ptr=output)
 
     @overload
@@ -5301,8 +5320,9 @@ class LengthCurve:
 
     def __neg__(self) -> LengthCurve:
         """Return ``-self``."""
+        inputs = self._ptr
         output = c_void_p()
-        _lib.opensolid_LengthCurve_neg(ctypes.byref(self._ptr), ctypes.byref(output))
+        _lib.opensolid_LengthCurve_neg(ctypes.byref(inputs), ctypes.byref(output))
         return LengthCurve(ptr=output)
 
     @overload
@@ -5566,8 +5586,9 @@ class AreaCurve:
 
     def __neg__(self) -> AreaCurve:
         """Return ``-self``."""
+        inputs = self._ptr
         output = c_void_p()
-        _lib.opensolid_AreaCurve_neg(ctypes.byref(self._ptr), ctypes.byref(output))
+        _lib.opensolid_AreaCurve_neg(ctypes.byref(inputs), ctypes.byref(output))
         return AreaCurve(ptr=output)
 
     def __add__(self, rhs: AreaCurve) -> AreaCurve:
@@ -5807,8 +5828,9 @@ class AngleCurve:
 
     def __neg__(self) -> AngleCurve:
         """Return ``-self``."""
+        inputs = self._ptr
         output = c_void_p()
-        _lib.opensolid_AngleCurve_neg(ctypes.byref(self._ptr), ctypes.byref(output))
+        _lib.opensolid_AngleCurve_neg(ctypes.byref(inputs), ctypes.byref(output))
         return AngleCurve(ptr=output)
 
     @overload
