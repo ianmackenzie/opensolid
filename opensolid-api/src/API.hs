@@ -280,9 +280,11 @@ range =
     , timesFloat
     , timesSelf
     , times @Length Self
+    , times @Area Self
     , times @Angle Self
     , times @(Range Meters) Self
     , times @(Range SquareMeters) Self
+    , times @(Range Radians) Self
     , divByFloat
     , divBySelf
     ]
@@ -373,8 +375,10 @@ angleRange =
     , minusSelf
     , minus @Angle Self
     , timesFloat
+    , times @(Range Unitless) Self
     , divByFloat
     , divBySelf
+    , divBy @Angle Self
     , divBy @(Range Unitless) Self
     ]
 
@@ -611,6 +615,8 @@ bounds2d =
     , member0 "Coordinates" Bounds2d.coordinates $(docs 'Bounds2d.coordinates)
     , member0 "X Coordinate" Bounds2d.xCoordinate $(docs 'Bounds2d.xCoordinate)
     , member0 "Y Coordinate" Bounds2d.yCoordinate $(docs 'Bounds2d.yCoordinate)
+    , plus @(Vector2d (Space @ Meters)) Self
+    , minus @(Vector2d (Space @ Meters)) Self
     ]
 
 uvBounds :: Class
@@ -625,6 +631,8 @@ uvBounds =
     , member0 "Coordinates" Bounds2d.coordinates $(docs 'Bounds2d.coordinates)
     , member0 "U Coordinate" Bounds2d.xCoordinate $(docs 'Bounds2d.xCoordinate)
     , member0 "V Coordinate" Bounds2d.yCoordinate $(docs 'Bounds2d.yCoordinate)
+    , plus @(Vector2d (Space @ Unitless)) Self
+    , minus @(Vector2d (Space @ Unitless)) Self
     ]
 
 curve :: Class
@@ -654,6 +662,7 @@ curve =
     , times @Area Self
     , times @Angle Self
     , times @(Curve1d Meters) Self
+    , times @(Curve1d SquareMeters) Self
     , times @(Curve1d Radians) Self
     , divByFloat
     , divBySelf

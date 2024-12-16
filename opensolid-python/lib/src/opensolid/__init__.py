@@ -1738,6 +1738,10 @@ class Range:
         pass
 
     @overload
+    def __mul__(self, rhs: Area) -> AreaRange:
+        pass
+
+    @overload
     def __mul__(self, rhs: Angle) -> AngleRange:
         pass
 
@@ -1747,6 +1751,10 @@ class Range:
 
     @overload
     def __mul__(self, rhs: AreaRange) -> AreaRange:
+        pass
+
+    @overload
+    def __mul__(self, rhs: AngleRange) -> AngleRange:
         pass
 
     def __mul__(self, rhs):
@@ -1773,6 +1781,13 @@ class Range:
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return LengthRange(ptr=output)
+            case Area():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Range_mul_Range_Area(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return AreaRange(ptr=output)
             case Angle():
                 inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
@@ -1794,6 +1809,13 @@ class Range:
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return AreaRange(ptr=output)
+            case AngleRange():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Range_mul_Range_AngleRange(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return AngleRange(ptr=output)
             case _:
                 return NotImplemented
 
@@ -2727,14 +2749,33 @@ class AngleRange:
             case _:
                 return NotImplemented
 
+    @overload
     def __mul__(self, rhs: float) -> AngleRange:
+        pass
+
+    @overload
+    def __mul__(self, rhs: Range) -> AngleRange:
+        pass
+
+    def __mul__(self, rhs):
         """Return ``self * rhs``."""
-        inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
-        output = c_void_p()
-        _lib.opensolid_AngleRange_mul_AngleRange_Float(
-            ctypes.byref(inputs), ctypes.byref(output)
-        )
-        return AngleRange(ptr=output)
+        match rhs:
+            case float() | int():
+                inputs = _Tuple2_c_void_p_c_double(self._ptr, rhs)
+                output = c_void_p()
+                _lib.opensolid_AngleRange_mul_AngleRange_Float(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return AngleRange(ptr=output)
+            case Range():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_AngleRange_mul_AngleRange_Range(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return AngleRange(ptr=output)
+            case _:
+                return NotImplemented
 
     @overload
     def __truediv__(self, rhs: float) -> AngleRange:
@@ -2742,6 +2783,10 @@ class AngleRange:
 
     @overload
     def __truediv__(self, rhs: AngleRange) -> Range:
+        pass
+
+    @overload
+    def __truediv__(self, rhs: Angle) -> Range:
         pass
 
     @overload
@@ -2762,6 +2807,13 @@ class AngleRange:
                 inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()
                 _lib.opensolid_AngleRange_div_AngleRange_AngleRange(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Range(ptr=output)
+            case Angle():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_AngleRange_div_AngleRange_Angle(
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return Range(ptr=output)
@@ -4638,6 +4690,24 @@ class Bounds2d:
         _lib.opensolid_Bounds2d_yCoordinate(ctypes.byref(inputs), ctypes.byref(output))
         return LengthRange(ptr=output)
 
+    def __add__(self, rhs: Displacement2d) -> Bounds2d:
+        """Return ``self + rhs``."""
+        inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+        output = c_void_p()
+        _lib.opensolid_Bounds2d_add_Bounds2d_Displacement2d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Bounds2d(ptr=output)
+
+    def __sub__(self, rhs: Displacement2d) -> Bounds2d:
+        """Return ``self - rhs``."""
+        inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+        output = c_void_p()
+        _lib.opensolid_Bounds2d_sub_Bounds2d_Displacement2d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Bounds2d(ptr=output)
+
     def __repr__(self) -> str:
         """Return a human-readable representation of this value."""
         x, y = self.coordinates()
@@ -4738,6 +4808,24 @@ class UvBounds:
         output = c_void_p()
         _lib.opensolid_UvBounds_vCoordinate(ctypes.byref(inputs), ctypes.byref(output))
         return Range(ptr=output)
+
+    def __add__(self, rhs: Vector2d) -> UvBounds:
+        """Return ``self + rhs``."""
+        inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+        output = c_void_p()
+        _lib.opensolid_UvBounds_add_UvBounds_Vector2d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return UvBounds(ptr=output)
+
+    def __sub__(self, rhs: Vector2d) -> UvBounds:
+        """Return ``self - rhs``."""
+        inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+        output = c_void_p()
+        _lib.opensolid_UvBounds_sub_UvBounds_Vector2d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return UvBounds(ptr=output)
 
     def __repr__(self) -> str:
         """Return a human-readable representation of this value."""
@@ -4943,6 +5031,10 @@ class Curve:
         pass
 
     @overload
+    def __mul__(self, rhs: AreaCurve) -> AreaCurve:
+        pass
+
+    @overload
     def __mul__(self, rhs: AngleCurve) -> AngleCurve:
         pass
 
@@ -4991,6 +5083,13 @@ class Curve:
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return LengthCurve(ptr=output)
+            case AreaCurve():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Curve_mul_Curve_AreaCurve(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return AreaCurve(ptr=output)
             case AngleCurve():
                 inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
                 output = c_void_p()

@@ -59,6 +59,7 @@ import Range qualified
 import Transform2d (Transform2d (Transform2d))
 import Units (Meters)
 import Units qualified
+import Vector2d (Vector2d (Vector2d))
 import Vector2d qualified
 import VectorBounds2d (VectorBounds2d (VectorBounds2d))
 
@@ -130,10 +131,32 @@ instance
   ) =>
   Addition
     (Bounds2d (space1 @ units1))
+    (Vector2d (space2 @ units2))
+    (Bounds2d (space1 @ units1))
+  where
+  Bounds2d x1 y1 + Vector2d x2 y2 = Bounds2d (x1 + x2) (y1 + y2)
+
+instance
+  ( space1 ~ space2
+  , units1 ~ units2
+  ) =>
+  Addition
+    (Bounds2d (space1 @ units1))
     (VectorBounds2d (space2 @ units2))
     (Bounds2d (space1 @ units1))
   where
   Bounds2d x1 y1 + VectorBounds2d x2 y2 = Bounds2d (x1 + x2) (y1 + y2)
+
+instance
+  ( space1 ~ space2
+  , units1 ~ units2
+  ) =>
+  Subtraction
+    (Bounds2d (space1 @ units1))
+    (Vector2d (space2 @ units2))
+    (Bounds2d (space1 @ units1))
+  where
+  Bounds2d x1 y1 - Vector2d x2 y2 = Bounds2d (x1 - x2) (y1 - y2)
 
 instance
   ( space1 ~ space2
