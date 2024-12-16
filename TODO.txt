@@ -1,12 +1,3 @@
-Make GitHub repo public
--> add minimal README
-
-Add Python package README
-
-Generate Python API docs (Sphinx or similar)
-
-Remove timesSelf?
-
 Use Python.Function.body from NegationFunction, AbsFunction, EqualityFunction, ComparisonFunction, PreOperator and PostOperator modules
 
 C API: generate structs with *named* fields
@@ -19,6 +10,12 @@ Build out publishing workflow
 - Build Mac x86-64 and ARM wheels in CI
 - Build Windows wheel in CI
 - Collect wheels and publish combined package
+- Docs publishing: generate-python-docs then e.g. 'cp -r opensolid-python/lib/docs/build ../../opensolid/opensolid.github.io/docs/0.1.1'
+- Wheel publishing:
+  - generate-python-bindings
+  - uv build --wheel
+  - uvx auditwheel
+  - uvx twine upload wheelhouse/*
 
 Improve Python bindings
 - Allow Python classes to be represented by things other than pointers (e.g. plain float values for quantity types)
@@ -35,9 +32,6 @@ Try using Pandoc to convert from Haddock to reStructuredText?
 -> or just write all doc comments in plain text...
 -> or use specialized direct Haddock conversion - most flexible
    -> e.g. convert type/function names to correct target language casing
-
-Operator overload test suite: for every valid type and units combination, test that e.g. zero vector * zero range = zero vector bounds
-- ensure every valid overload actually exists, and is resolved correctly at runtime
 
 Support spaces / coordinate systems in bindings
 
