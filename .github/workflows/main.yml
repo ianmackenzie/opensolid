@@ -113,8 +113,7 @@ jobs:
           cargo --version
           rustc --version
           cargo build --release
-          echo $LD_LIBRARY_PATH
-          echo "LD_LIBRARY_PATH=$GITHUB_WORKSPACE\opensolid-jit\target\release" >> $GITHUB_ENV
+          echo "LD_LIBRARY_PATH=$GITHUB_WORKSPACE/opensolid-jit/target/release" >> $GITHUB_ENV
       - name: Build opensolid library
         run: |
           cabal --version
@@ -123,7 +122,6 @@ jobs:
           cabal build opensolid
       - name: Run tests
         run: |
-          echo $LD_LIBRARY_PATH
           cabal run sandbox
           cabal test opensolid
 
