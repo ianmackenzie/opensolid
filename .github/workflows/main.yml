@@ -108,9 +108,10 @@ jobs:
             opensolid-jit/target
           key: linux-cargo-${{ hashFiles('opensolid-jit/Cargo.*') }}# Install tooling
       # Install uv
-      - name: Install uv
+      - name: Install Python tooling
         run: |
           pipx install uv
+          pipx install ruff
       # Update Cabal index
       - name: Update Cabal index
         run: |
