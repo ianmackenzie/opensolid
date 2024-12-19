@@ -106,25 +106,50 @@ jobs:
             ~/.cargo/git/db
             opensolid-jit/target
           key: linux-cargo-${{ hashFiles('opensolid-jit/Cargo.*') }}# Install tooling
+      # Install uv
+      - name: Install uv
+        run: |
+          pipx install uv
+      # Update Cabal index
+      - name: Update Cabal index
+        run: |
+          cabal update
+      # Check tool versions
+      - name: Check tool versions
+        run: |
+          cargo --version
+          rustc --version
+          cabal --version
+          ghc --version
       # Build and test
       - name: Build opensolid-jit library
         working-directory: opensolid-jit
         run: |
-          cargo --version
-          rustc --version
           cargo build --release
           echo "LD_LIBRARY_PATH=$GITHUB_WORKSPACE/opensolid-jit/target/release" >> $GITHUB_ENV
       - name: Build opensolid library
         run: |
-          cabal --version
-          ghc --version
-          cabal update
           cabal build opensolid
       - name: Run tests
         run: |
           cabal run sandbox
           cabal test opensolid
-
+      - name: Build Python bindings
+        run: |
+          scripts/generate-python-bindings
+      - name: Run test Python script
+        run: |
+          cd opensolid-python/lib
+          uv run check.py
+      - name: Build and fix wheel
+        run: |
+          cd opensolid-python/lib
+          uv build --wheel
+          uvx auditwheel repair --plat manylinux_2_31_x86_64 dist/*.whl
+      - name: Save wheel as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          path: opensolid-python/lib/wheelhouse/*.whl
 # jobs:
 #   test:
 #     runs-on: ${{ matrix.os }}
