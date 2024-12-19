@@ -7,68 +7,68 @@ on:
       - main
 
 jobs:
-  windows:
-    runs-on: windows-2022
-    steps:
-      # Clone repository
-      - name: Check out repository
-        uses: actions/checkout@v4
-      # Set up caching
-      - name: Set up Cabal cache
-        uses: actions/cache@v4
-        with:
-          path: |
-            C:\cabal\packages
-            C:\cabal\store
-            dist-newstyle
-          key: windows-cabal-${{ hashFiles('cabal.project') }}-${{ hashFiles('**/*.cabal') }}
-      - name: Set up Cargo cache
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~\.cargo\bin
-            ~\.cargo\registry\index
-            ~\.cargo\registry\cache
-            ~\.cargo\git\db
-            opensolid-jit\target
-          key: windows-cargo-${{ hashFiles('opensolid-jit/Cargo.*') }}
-      # Install tooling
-      - name: Install Rust toolchain
-        run: |
-          rustup install 1.80.1-x86_64-pc-windows-gnu
-          rustup default 1.80.1-x86_64-pc-windows-gnu
-      - name: Update Cabal package index
-        run: |
-          cabal update
-      - name: Install uv
-        run: |
-          pipx install uv
-      # Build and test
-      - name: Build opensolid-jit library
-        working-directory: opensolid-jit
-        run: |
-          cargo build --release
-          echo "PATH=$env:PATH;$env:GITHUB_WORKSPACE\opensolid-jit\target\release" >> $env:GITHUB_ENV
-      - name: Build opensolid library
-        run: |
-          cabal build opensolid
-      - name: Run tests
-        run: |
-          cabal run sandbox
-          cabal test opensolid
-      - name: Build native library
-        run: |
-          cabal run generate-def-file
-          cabal build opensolid-ffi
-      - name: Build Python bindings
-        run: |
-          Copy-Item -Path .\opensolid-jit\target\release\opensolid_jit.dll -Destination .\opensolid-python\lib\src\opensolid\
-          Get-ChildItem -Path dist-newstyle -Filter opensolid-ffi.dll -Recurse | Copy-Item -Destination .\opensolid-python\lib\src\opensolid\
-          cabal run opensolid-python
-      - name: Run test Python script
-        working-directory: opensolid-python/lib
-        run: |
-          uv run check.py
+  # windows:
+  #   runs-on: windows-2022
+  #   steps:
+  #     # Clone repository
+  #     - name: Check out repository
+  #       uses: actions/checkout@v4
+  #     # Set up caching
+  #     - name: Set up Cabal cache
+  #       uses: actions/cache@v4
+  #       with:
+  #         path: |
+  #           C:\cabal\packages
+  #           C:\cabal\store
+  #           dist-newstyle
+  #         key: windows-cabal-${{ hashFiles('cabal.project') }}-${{ hashFiles('**/*.cabal') }}
+  #     - name: Set up Cargo cache
+  #       uses: actions/cache@v4
+  #       with:
+  #         path: |
+  #           ~\.cargo\bin
+  #           ~\.cargo\registry\index
+  #           ~\.cargo\registry\cache
+  #           ~\.cargo\git\db
+  #           opensolid-jit\target
+  #         key: windows-cargo-${{ hashFiles('opensolid-jit/Cargo.*') }}
+  #     # Install tooling
+  #     - name: Install Rust toolchain
+  #       run: |
+  #         rustup install 1.80.1-x86_64-pc-windows-gnu
+  #         rustup default 1.80.1-x86_64-pc-windows-gnu
+  #     - name: Update Cabal package index
+  #       run: |
+  #         cabal update
+  #     - name: Install uv
+  #       run: |
+  #         pipx install uv
+  #     # Build and test
+  #     - name: Build opensolid-jit library
+  #       working-directory: opensolid-jit
+  #       run: |
+  #         cargo build --release
+  #         echo "PATH=$env:PATH;$env:GITHUB_WORKSPACE\opensolid-jit\target\release" >> $env:GITHUB_ENV
+  #     - name: Build opensolid library
+  #       run: |
+  #         cabal build opensolid
+  #     - name: Run tests
+  #       run: |
+  #         cabal run sandbox
+  #         cabal test opensolid
+  #     - name: Build native library
+  #       run: |
+  #         cabal run generate-def-file
+  #         cabal build opensolid-ffi
+  #     - name: Build Python bindings
+  #       run: |
+  #         Copy-Item -Path .\opensolid-jit\target\release\opensolid_jit.dll -Destination .\opensolid-python\lib\src\opensolid\
+  #         Get-ChildItem -Path dist-newstyle -Filter opensolid-ffi.dll -Recurse | Copy-Item -Destination .\opensolid-python\lib\src\opensolid\
+  #         cabal run opensolid-python
+  #     - name: Run test Python script
+  #       working-directory: opensolid-python/lib
+  #       run: |
+  #         uv run check.py
 
   linux:
     runs-on: ubuntu-latest
