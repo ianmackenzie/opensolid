@@ -1,9 +1,9 @@
 Build out publishing workflow
-- Build manylinux wheel in CI
-  -> start locally?
+- Fix Cabal caching on Linux
 - Build Mac x86-64 and ARM wheels in CI
 - Build Windows wheel in CI
 - Collect wheels and publish combined package
+  - might need intermediate step to merge Mac wheels into universal one, or just build universal one to start with?
 - Docs publishing: generate-python-docs then e.g. 'cp -r opensolid-python/lib/docs/build ../../opensolid/opensolid.github.io/docs/0.1.1'
 - Wheel publishing:
   - generate-python-bindings
