@@ -73,8 +73,8 @@ jobs:
   linux:
     runs-on: ubuntu-latest
     container:
-      # Build in manylinux image so that built Python bindings are reasonablye portable
-      image: quay.io/pypa/manylinux_2_34_x86_64
+      # Build in custom manylinux image with Rust and Haskell toolchains preinstalled
+      image: ghcr.io/ianmackenzie/opensolid-manylinux:2024.12.05.21.24
     steps:
       # Clone repository
       - name: Check out repository
@@ -100,13 +100,6 @@ jobs:
             ~/.cargo/git/db
             opensolid-jit/target
           key: linux-cargo-${{ hashFiles('opensolid-jit/Cargo.*') }}# Install tooling
-      # Set up Rust toolchain
-      - uses: dtolnay/rust-toolchain@1.82.0
-      # Set up Haskell toolchain
-      - uses: haskell-actions/setup@v2
-        with:
-          ghc-version: "9.10.1" # Resolves to the latest point release of GHC 8.8
-          cabal-version: "3.12.1.0" # Exact version of Cabal
       # Build and test
       - name: Build opensolid-jit library
         working-directory: opensolid-jit
