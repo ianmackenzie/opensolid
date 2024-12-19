@@ -112,7 +112,7 @@ jobs:
         run: |
           pipx install uv==0.5.6
           pipx install ruff==0.7.3
-          pipx install auditwheel=6.1.0
+          pipx install auditwheel==6.1.0
       # Update Cabal index
       - name: Update Cabal index
         run: |
