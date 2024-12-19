@@ -118,6 +118,7 @@ jobs:
         run: |
           cabal --version
           ghc --version
+          cabal update
           cabal build opensolid
       - name: Run tests
         run: |
