@@ -112,6 +112,8 @@ jobs:
           echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$GITHUB_WORKSPACE\opensolid-jit\target\release" >> $GITHUB_ENV
       - name: Build opensolid library
         run: |
+          ghcup set ghc 9.10.1
+          cabal --version
           cabal build opensolid
       - name: Run tests
         run: |
