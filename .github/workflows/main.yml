@@ -74,7 +74,10 @@ jobs:
     runs-on: ubuntu-latest
     container:
       # Build in custom manylinux image with Rust and Haskell toolchains preinstalled
-      image: ghcr.io/ianmackenzie/opensolid-manylinux:2024.12.05.21.24
+      image: ghcr.io/ianmackenzie/opensolid-manylinux:2024.12.05.22.12
+      # Run as the container root user,
+      # since that's the user that installed the Rust and Haskell toolchains
+      options: --user root
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
@@ -107,13 +110,14 @@ jobs:
       - name: Build opensolid-jit library
         working-directory: opensolid-jit
         run: |
-          rustup default 1.80.1
+          cargo --version
+          rustc --version
           cargo build --release
           echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$GITHUB_WORKSPACE\opensolid-jit\target\release" >> $GITHUB_ENV
       - name: Build opensolid library
         run: |
-          ghcup set ghc 9.10.1
           cabal --version
+          ghc --version
           cabal build opensolid
       - name: Run tests
         run: |
