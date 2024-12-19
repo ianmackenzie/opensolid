@@ -71,7 +71,7 @@ jobs:
   #         uv run check.py
 
   linux:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     # container:
     #   # Build in custom manylinux image with Rust and Haskell toolchains preinstalled
     #   image: ghcr.io/ianmackenzie/opensolid-manylinux:2024.12.05.22.12
@@ -112,6 +112,7 @@ jobs:
         run: |
           pipx install uv==0.5.6
           pipx install ruff==0.7.3
+          pipx install auditwheel=6.1.0
       # Update Cabal index
       - name: Update Cabal index
         run: |
@@ -147,7 +148,7 @@ jobs:
         run: |
           cd opensolid-python/lib
           uv build --wheel
-          uvx auditwheel repair --plat manylinux_2_31_x86_64 dist/*.whl
+          auditwheel repair --plat manylinux_2_35_x86_64 dist/*.whl
       - name: Save wheel as artifact
         uses: actions/upload-artifact@v4
         with:
