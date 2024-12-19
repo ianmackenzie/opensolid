@@ -95,6 +95,7 @@ jobs:
             ~/.cache/cabal/packages
             ~/.cache/cabal/store
             dist-newstyle
+            opensolid/.hie
           key: linux-cabal-${{ hashFiles('cabal.project') }}-${{ hashFiles('**/*.cabal') }}
       - name: Set up Cargo cache
         uses: actions/cache@v4
