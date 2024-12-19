@@ -1,7 +1,3 @@
-C API: generate structs with *named* fields
--> have the struct be named as function_name_inputs, function_name_outputs etc.
--> can use this in Python too, to have named fields instead of 'field0' etc.
-
 Build out publishing workflow
 - Build manylinux wheel in CI
   -> start locally?
@@ -14,6 +10,10 @@ Build out publishing workflow
   - uv build --wheel
   - uvx auditwheel
   - uvx twine upload wheelhouse/*
+
+C API: generate structs with *named* fields
+-> have the struct be named as function_name_inputs, function_name_outputs etc.
+-> can use this in Python too, to have named fields instead of 'field0' etc.
 
 Improve Python bindings
 - Allow Python classes to be represented by things other than pointers (e.g. plain float values for quantity types)
