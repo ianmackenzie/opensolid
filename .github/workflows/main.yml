@@ -100,17 +100,13 @@ jobs:
             ~/.cargo/git/db
             opensolid-jit/target
           key: linux-cargo-${{ hashFiles('opensolid-jit/Cargo.*') }}# Install tooling
-      - name: Install Rust toolchain
-        run: |
-          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-      - name: Install Haskell toolchain
-        run: |
-          curl --proto '=https' --tlsv1.2 -sSf https://get-ghcup.haskell.org | BOOTSTRAP_HASKELL_NONINTERACTIVE=1 BOOTSTRAP_HASKELL_MINIMAL=1 sh
-          ghcup install ghc 9.10.1
-          ghcup install cabal 3.12.1.0
-      - name: Update Cabal package index
-        run: |
-          cabal update
+      # Set up Rust toolchain
+      - uses: dtolnay/rust-toolchain@1.82.0
+      # Set up Haskell toolchain
+      - uses: haskell-actions/setup@v2
+        with:
+          ghc-version: "9.10.1" # Resolves to the latest point release of GHC 8.8
+          cabal-version: "3.12.1.0" # Exact version of Cabal
       # Build and test
       - name: Build opensolid-jit library
         working-directory: opensolid-jit
