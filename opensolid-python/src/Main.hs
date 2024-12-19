@@ -313,15 +313,16 @@ ffiTypeDeclarations = do
 topLevelClassName :: Class -> Maybe Text
 topLevelClassName Class{API.id = FFI.Id _ (topLevelName :| nestedNames)} =
   case nestedNames of
-    [] -> Just (Python.str (FFI.pascalCase topLevelName))
+    [] -> Just (FFI.pascalCase topLevelName)
     List.OneOrMore -> Nothing
 
 allExportsDefinition :: Text
-allExportsDefinition =
+allExportsDefinition = do
+  let names = List.sort ("Tolerance" : Maybe.collect topLevelClassName API.classes)
   Python.lines
     [ "__all__ = ["
     , Python.indent
-        [Text.join "," (Python.str "Tolerance" : Maybe.collect topLevelClassName API.classes)]
+        [Text.join "," (List.map Python.str names)]
     , "]"
     ]
 
