@@ -107,8 +107,8 @@ jobs:
       - name: Build opensolid-jit library
         working-directory: opensolid-jit
         run: |
+          rustup default 1.80.1
           cargo build --release
-          echo "
           echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$GITHUB_WORKSPACE\opensolid-jit\target\release" >> $GITHUB_ENV
       - name: Build opensolid library
         run: |
