@@ -106,7 +106,7 @@ jobs:
             ~/.cargo/registry/cache
             ~/.cargo/git/db
             opensolid-jit/target
-          key: linux-cargo-${{ hashFiles('opensolid-jit/Cargo.*') }}# Install tooling
+          key: linux-cargo-${{ hashFiles('opensolid-jit/Cargo.*') }}
       # Install uv
       - name: Install Python tooling
         run: |
