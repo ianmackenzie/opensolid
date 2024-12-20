@@ -72,15 +72,6 @@ jobs:
 
   linux:
     runs-on: ubuntu-22.04
-    # container:
-    #   # Build in custom manylinux image with Rust and Haskell toolchains preinstalled
-    #   image: ghcr.io/ianmackenzie/opensolid-manylinux:2024.12.05.22.12
-    #   # Run as the container root user,
-    #   # since that's the user that installed the Rust and Haskell toolchains
-    #   options: --user root
-    #   credentials:
-    #     username: ${{ github.actor }}
-    #     password: ${{ secrets.GITHUB_TOKEN }}
     steps:
       # Clone repository
       - name: Check out repository
