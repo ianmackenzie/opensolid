@@ -107,6 +107,12 @@ jobs:
             ~/.cargo/git/db
             opensolid-jit/target
           key: linux-cargo-${{ hashFiles('opensolid-jit/Cargo.*') }}
+      - name: List Cabal cache before build
+        run: |
+          ls -l ~/.cabal/packages/hackage.haskell.org/
+          ls -l ~/.cabal/store/
+          ls -l ~/.cache/cabal/packages/hackage.haskell.org/
+          ls -l ~/.cache/cabal/store/
       # Install uv
       - name: Install Python tooling
         run: |
@@ -153,6 +159,13 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           path: opensolid-python/lib/wheelhouse/*.whl
+      - name: List Cabal cache after build
+        run: |
+          ls -l ~/.cabal/packages/hackage.haskell.org/
+          ls -l ~/.cabal/store/
+          ls -l ~/.cache/cabal/packages/hackage.haskell.org/
+          ls -l ~/.cache/cabal/store/
+
 # jobs:
 #   test:
 #     runs-on: ${{ matrix.os }}
