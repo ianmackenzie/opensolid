@@ -109,10 +109,10 @@ jobs:
           key: linux-cargo-${{ hashFiles('opensolid-jit/Cargo.*') }}
       - name: List Cabal cache before build
         run: |
-          ls -l ~/.cabal/packages/hackage.haskell.org/
-          ls -l ~/.cabal/store/
-          ls -l ~/.cache/cabal/packages/hackage.haskell.org/
-          ls -l ~/.cache/cabal/store/
+          ls -l ~/.cabal/packages/hackage.haskell.org/ || echo "Nothing there"
+          ls -l ~/.cabal/store/ || echo "Nothing there"
+          ls -l ~/.cache/cabal/packages/hackage.haskell.org/ || echo "Nothing there"
+          ls -l ~/.cache/cabal/store/ || echo "Nothing there"
       # Install uv
       - name: Install Python tooling
         run: |
@@ -161,10 +161,10 @@ jobs:
           path: opensolid-python/lib/wheelhouse/*.whl
       - name: List Cabal cache after build
         run: |
-          ls -l ~/.cabal/packages/hackage.haskell.org/
-          ls -l ~/.cabal/store/
-          ls -l ~/.cache/cabal/packages/hackage.haskell.org/
-          ls -l ~/.cache/cabal/store/
+          ls -l ~/.cabal/packages/hackage.haskell.org/ || echo "Nothing there"
+          ls -l ~/.cabal/store/ || echo "Nothing there"
+          ls -l ~/.cache/cabal/packages/hackage.haskell.org/ || echo "Nothing there"
+          ls -l ~/.cache/cabal/store/ || echo "Nothing there"
 
 # jobs:
 #   test:
