@@ -81,10 +81,8 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            ~/.cabal/packages
-            ~/.cabal/store
             ~/.cache/cabal/packages
-            ~/.cache/cabal/store
+            ~/.local/state/cabal/store
             dist-newstyle
             opensolid/.hie
           key: linux-cabal-${{ hashFiles('cabal.project') }}-${{ hashFiles('**/*.cabal') }}
@@ -98,13 +96,6 @@ jobs:
             ~/.cargo/git/db
             opensolid-jit/target
           key: linux-cargo-${{ hashFiles('opensolid-jit/Cargo.*') }}
-      # Debug Cabal cache
-      - name: List Cabal cache before build
-        run: |
-          ls -l ~/.cabal/packages/hackage.haskell.org/ || echo "Nothing there"
-          ls -l ~/.cabal/store/ || echo "Nothing there"
-          ls -l ~/.cache/cabal/packages/hackage.haskell.org/ || echo "Nothing there"
-          ls -l ~/.cache/cabal/store/ || echo "Nothing there"
       # Install uv
       - name: Install Python tooling
         run: |
@@ -151,14 +142,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           path: opensolid-python/lib/wheelhouse/*.whl
-      # Debug Cabal cache
-      - name: List Cabal cache after build
-        run: |
-          ls -l ~/.cabal/packages/hackage.haskell.org/ || echo "Nothing there"
-          ls -l ~/.cabal/store/ || echo "Nothing there"
-          ls -l ~/.cache/cabal/packages/hackage.haskell.org/ || echo "Nothing there"
-          ls -l ~/.cache/cabal/store/ || echo "Nothing there"
-
 # jobs:
 #   test:
 #     runs-on: ${{ matrix.os }}
