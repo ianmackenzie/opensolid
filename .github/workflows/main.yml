@@ -187,3 +187,10 @@ jobs:
         run: |
           cabal run sandbox
           cabal test opensolid
+      - name: Build Python bindings
+        run: |
+          scripts/generate-python-bindings
+      - name: Run test Python script
+        run: |
+          cd opensolid-python/lib
+          uv run check.py
