@@ -130,3 +130,48 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           path: opensolid-python/lib/wheelhouse/*.whl
+
+  macos-x86:
+    runs-on: macos-13
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v4
+      - name: Set up Cabal cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/cabal/packages
+            ~/.local/state/cabal/store
+            dist-newstyle
+            opensolid/.hie
+          key: ${{ github.job }}-cabal-${{ hashFiles('cabal.project') }}-${{ hashFiles('**/*.cabal') }}
+      - name: Set up Cargo cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin
+            ~/.cargo/registry/index
+            ~/.cargo/registry/cache
+            ~/.cargo/git/db
+            opensolid-jit/target
+          key: linux-cargo-${{ hashFiles('opensolid-jit/Cargo.*') }}
+      - name: Install Python tooling
+        run: |
+          pipx install uv==0.5.6
+          pipx install ruff==0.7.3
+          pipx install delocate==0.12.0
+      - name: Update Cabal index
+        run: |
+          cabal update
+      - name: Build opensolid-jit library
+        working-directory: opensolid-jit
+        run: |
+          cargo build --release
+          echo "LD_LIBRARY_PATH=$GITHUB_WORKSPACE/opensolid-jit/target/release" >> $GITHUB_ENV
+      - name: Build opensolid library
+        run: |
+          cabal build opensolid
+      - name: Run tests
+        run: |
+          cabal run sandbox
+          cabal test opensolid
