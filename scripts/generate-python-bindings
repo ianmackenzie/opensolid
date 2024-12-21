@@ -25,4 +25,4 @@ cabal run generate-def-file
 cabal build opensolid-ffi
 # Copy the native shared library to beside __init__.py
 # so that it can be loaded properly
-cp $(find dist-newstyle -name libopensolid-ffi.so) opensolid-python/lib/src/opensolid
+cp $(find dist-newstyle -name "libopensolid-ffi.*") opensolid-python/lib/src/opensolid
