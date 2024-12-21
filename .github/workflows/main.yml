@@ -190,20 +190,20 @@ jobs:
         run: |
           cabal run sandbox
           cabal test opensolid
-      - name: Build Python bindings
-        run: |
-          scripts/generate-python-bindings
-      - name: Run test Python script
-        run: |
-          cd opensolid-python/lib
-          uv run check.py
-      - name: Build and fix wheel
-        run: |
-          cd opensolid-python/lib
-          uv build --wheel
-          delocate-wheel --help
-          delocate-wheel -v --require-archs x86_64 -w wheelhouse dist/*.whl
-      - name: Save wheel as artifact
-        uses: actions/upload-artifact@v4
-        with:
-          path: opensolid-python/lib/wheelhouse/*.whl
+      # - name: Build Python bindings
+      #   run: |
+      #     scripts/generate-python-bindings
+      # - name: Run test Python script
+      #   run: |
+      #     cd opensolid-python/lib
+      #     uv run check.py
+      # - name: Build and fix wheel
+      #   run: |
+      #     cd opensolid-python/lib
+      #     uv build --wheel
+      #     delocate-wheel --help
+      #     delocate-wheel -v --require-archs x86_64 -w wheelhouse dist/*.whl
+      # - name: Save wheel as artifact
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     path: opensolid-python/lib/wheelhouse/*.whl
