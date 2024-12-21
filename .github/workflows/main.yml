@@ -203,7 +203,7 @@ jobs:
           cd opensolid-python/lib
           uv build --wheel
           delocate-wheel --help
-          delocate-wheel -v --require-archs x86_64 -w wheelhouse dist/*.whl
+          delocate-wheel --require-archs x86_64 -w wheelhouse dist/*.whl
       - name: Save wheel as artifact
         uses: actions/upload-artifact@v4
         with:
