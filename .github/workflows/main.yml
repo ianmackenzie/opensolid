@@ -50,7 +50,7 @@ jobs:
       - name: Build opensolid-jit library
         working-directory: opensolid-jit
         run: |
-          cargo build --release
+          cargo build -v --release
           echo "PATH=$env:PATH;$env:GITHUB_WORKSPACE\opensolid-jit\target\release" >> $env:GITHUB_ENV
       - name: Build opensolid library
         run: |
