@@ -76,7 +76,8 @@ jobs:
         run: |
           cd opensolid-python\lib
           uv build --wheel
-          delvewheel repair dist\*.whl
+          $WheelPath = Get-ChildItem -Path .\dist -Filter *.whl
+          delvewheel repair $WheelPath
       - name: Save wheel as artifact
         uses: actions/upload-artifact@v4
         with:
