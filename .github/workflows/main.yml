@@ -133,6 +133,9 @@ jobs:
 
   macos-x86:
     runs-on: macos-13
+    env:
+      _PYTHON_HOST_PLATFORM: macosx-13.0-x86_64
+      ARCHFLAGS: -arch x86_64
     steps:
       - name: Clone repository
         uses: actions/checkout@v4
@@ -198,7 +201,8 @@ jobs:
         run: |
           cd opensolid-python/lib
           uv build --wheel
-          delocate-wheel -v -w wheelhouse dist/*.whl
+          delocate-wheel --help
+          delocate-wheel -v --require-archs x86_64 -w wheelhouse dist/*.whl
       - name: Save wheel as artifact
         uses: actions/upload-artifact@v4
         with:
