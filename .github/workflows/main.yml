@@ -182,7 +182,7 @@ jobs:
           echo "LD_LIBRARY_PATH=$GITHUB_WORKSPACE/opensolid-jit/target/release" >> $GITHUB_ENV
       - name: Build opensolid library
         run: |
-          cabal build opensolid
+          cabal build -v opensolid
       - name: Run tests
         run: |
           cabal run sandbox
