@@ -73,10 +73,8 @@ jobs:
   linux:
     runs-on: ubuntu-22.04
     steps:
-      # Clone repository
       - name: Check out repository
         uses: actions/checkout@v4
-      # Set up caching
       - name: Set up Cabal cache
         uses: actions/cache@v4
         with:
@@ -96,17 +94,14 @@ jobs:
             ~/.cargo/git/db
             opensolid-jit/target
           key: linux-cargo-${{ hashFiles('opensolid-jit/Cargo.*') }}
-      # Install uv
       - name: Install Python tooling
         run: |
           pipx install uv==0.5.6
           pipx install ruff==0.7.3
           pipx install auditwheel==6.1.0
-      # Update Cabal index
       - name: Update Cabal index
         run: |
           cabal update
-      # Build and test
       - name: Build opensolid-jit library
         working-directory: opensolid-jit
         run: |
@@ -119,7 +114,6 @@ jobs:
         run: |
           cabal run sandbox
           cabal test opensolid
-      # Build Python package
       - name: Build Python bindings
         run: |
           scripts/generate-python-bindings
