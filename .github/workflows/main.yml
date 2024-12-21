@@ -129,6 +129,7 @@ jobs:
       - name: Save wheel as artifact
         uses: actions/upload-artifact@v4
         with:
+          name: ${{ github.job }}-wheel
           path: opensolid-python/lib/wheelhouse/*.whl
 
   macos-x86:
@@ -206,4 +207,5 @@ jobs:
       - name: Save wheel as artifact
         uses: actions/upload-artifact@v4
         with:
+          name: ${{ github.job }}-wheel
           path: opensolid-python/lib/wheelhouse/*.whl
