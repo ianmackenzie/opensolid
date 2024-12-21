@@ -126,6 +126,7 @@ jobs:
         run: |
           cabal run sandbox
           cabal test opensolid
+      # Build Python package
       - name: Build Python bindings
         run: |
           scripts/generate-python-bindings
