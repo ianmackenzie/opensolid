@@ -157,8 +157,8 @@ jobs:
           key: ${{ github.job }}-cargo-${{ hashFiles('opensolid-jit/Cargo.*') }}
       - name: Install Haskell tooling
         run: |
-          brew install ghc@9.10.1
-          brew install cabal-install@3.12.1.0
+          brew install ghc@9.10
+          brew install cabal-install
       - name: Install Rust tooling
         uses: dtolnay/rust-toolchain@1.82.0
       - name: Install Python tooling
