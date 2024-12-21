@@ -148,8 +148,8 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            ~/.cache/cabal/packages
-            ~/.local/state/cabal/store
+            ~/.cabal/packages
+            ~/.cabal/store
             dist-newstyle
             opensolid/.hie
           key: ${{ github.job }}-cabal-${{ hashFiles('cabal.project') }}-${{ hashFiles('**/*.cabal') }}
@@ -185,7 +185,7 @@ jobs:
           echo "LD_LIBRARY_PATH=$GITHUB_WORKSPACE/opensolid-jit/target/release" >> $GITHUB_ENV
       - name: Build opensolid library
         run: |
-          cabal build -v opensolid
+          cabal build opensolid
       - name: Run tests
         run: |
           cabal run sandbox
