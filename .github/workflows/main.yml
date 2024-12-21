@@ -194,3 +194,12 @@ jobs:
         run: |
           cd opensolid-python/lib
           uv run check.py
+      - name: Build and fix wheel
+        run: |
+          cd opensolid-python/lib
+          uv build --wheel
+          delocate-wheel -v -w wheelhouse dist/*.whl
+      - name: Save wheel as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          path: opensolid-python/lib/wheelhouse/*.whl
