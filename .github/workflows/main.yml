@@ -156,7 +156,7 @@ jobs:
             opensolid-jit/target
           key: ${{ github.job }}-cargo-${{ hashFiles('opensolid-jit/Cargo.*') }}
       - name: Install Haskell tooling
-      - uses: haskell-actions/setup@v2
+        uses: haskell-actions/setup@v2
         with:
           ghc-version: 9.10.1
           cabal-version: 3.12.1.0
