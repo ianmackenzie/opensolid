@@ -54,7 +54,6 @@ jobs:
   #         cabal build opensolid
   #     - name: Run tests
   #       run: |
-  #         cabal run sandbox
   #         cabal test opensolid
   #     - name: Build native library
   #       run: |
@@ -112,7 +111,6 @@ jobs:
           cabal build opensolid
       - name: Run tests
         run: |
-          cabal run sandbox
           cabal test opensolid
       - name: Build Python bindings
         run: |
@@ -189,7 +187,6 @@ jobs:
           cabal build opensolid
       - name: Run tests
         run: |
-          cabal run sandbox
           cabal test opensolid
       - name: Build Python bindings
         run: |
