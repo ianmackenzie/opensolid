@@ -21,7 +21,7 @@ jobs:
   #           C:\cabal\packages
   #           C:\cabal\store
   #           dist-newstyle
-  #         key: windows-cabal-${{ hashFiles('cabal.project') }}-${{ hashFiles('**/*.cabal') }}
+  #         key: ${{ github.job }}-cabal-${{ hashFiles('cabal.project') }}-${{ hashFiles('**/*.cabal') }}
   #     - name: Set up Cargo cache
   #       uses: actions/cache@v4
   #       with:
@@ -31,7 +31,7 @@ jobs:
   #           ~\.cargo\registry\cache
   #           ~\.cargo\git\db
   #           opensolid-jit\target
-  #         key: windows-cargo-${{ hashFiles('opensolid-jit/Cargo.*') }}
+  #         key: ${{ github.job }}-cargo-${{ hashFiles('opensolid-jit/Cargo.*') }}
   #     # Install tooling
   #     - name: Install Rust toolchain
   #       run: |
@@ -83,7 +83,7 @@ jobs:
             ~/.local/state/cabal/store
             dist-newstyle
             opensolid/.hie
-          key: linux-cabal-${{ hashFiles('cabal.project') }}-${{ hashFiles('**/*.cabal') }}
+          key: ${{ github.job }}-cabal-${{ hashFiles('cabal.project') }}-${{ hashFiles('**/*.cabal') }}
       - name: Set up Cargo cache
         uses: actions/cache@v4
         with:
@@ -93,7 +93,7 @@ jobs:
             ~/.cargo/registry/cache
             ~/.cargo/git/db
             opensolid-jit/target
-          key: linux-cargo-${{ hashFiles('opensolid-jit/Cargo.*') }}
+          key: ${{ github.job }}-cargo-${{ hashFiles('opensolid-jit/Cargo.*') }}
       - name: Install Python tooling
         run: |
           pipx install uv==0.5.6
