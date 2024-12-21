@@ -35,8 +35,8 @@ jobs:
   #     # Install tooling
   #     - name: Install Rust toolchain
   #       run: |
-  #         rustup install 1.80.1-x86_64-pc-windows-gnu
-  #         rustup default 1.80.1-x86_64-pc-windows-gnu
+  #         rustup install 1.82.0-x86_64-pc-windows-gnu
+  #         rustup default 1.82.0-x86_64-pc-windows-gnu
   #     - name: Update Cabal package index
   #       run: |
   #         cabal update
