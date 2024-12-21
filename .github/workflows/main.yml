@@ -106,13 +106,6 @@ jobs:
       - name: Update Cabal index
         run: |
           cabal update
-      # Check tool versions
-      - name: Check tool versions
-        run: |
-          cargo --version
-          rustc --version
-          cabal --version
-          ghc --version
       # Build and test
       - name: Build opensolid-jit library
         working-directory: opensolid-jit
