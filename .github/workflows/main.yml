@@ -136,6 +136,11 @@ jobs:
     steps:
       - name: Clone repository
         uses: actions/checkout@v4
+      - name: Set up GHCup cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.ghcup
+          key: ${{ github.job }}-ghcup
       - name: Set up Cabal cache
         uses: actions/cache@v4
         with:
@@ -156,9 +161,10 @@ jobs:
             opensolid-jit/target
           key: ${{ github.job }}-cargo-${{ hashFiles('opensolid-jit/Cargo.*') }}
       - name: Install Haskell tooling
-        run: |
-          brew install ghc@9.10
-          brew install cabal-install
+        uses: haskell-actions/setup@v2
+        with:
+          ghc-version: 9.10.1
+          cabal-version: 3.12.1.0
       - name: Install Rust tooling
         uses: dtolnay/rust-toolchain@1.82.0
       - name: Install Python tooling
