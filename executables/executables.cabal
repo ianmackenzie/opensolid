@@ -1,5 +1,5 @@
 cabal-version: 2.2
-name: opensolid-sandbox
+name: executables
 version: 0.1.0.0
 synopsis: Open-source geometric modelling framework
 description: Please see the README on GitHub at <https://github.com/ianmackenzie/opensolid#readme>
@@ -19,7 +19,7 @@ source-repository head
 
 executable sandbox
   main-is: Main.hs
-  hs-source-dirs: src
+  hs-source-dirs: sandbox
   default-language: GHC2021
   build-depends:
     array,
@@ -55,3 +55,42 @@ executable sandbox
     QualifiedDo
     RebindableSyntax
     TypeApplications
+
+executable test-server
+  main-is: Main.hs
+  hs-source-dirs: test-server
+  default-language: GHC2021
+  build-depends:
+    array,
+    base,
+    containers,
+    opensolid,
+    opensolid-http,
+    random,
+
+  ghc-options:
+    -Wall
+    -Werror
+    -Wcompat
+    -Widentities
+    -Wincomplete-record-updates
+    -Wincomplete-uni-patterns
+    -Wmissing-signatures
+    -Wmissing-exported-signatures
+    -Wmissing-export-lists
+    -Wmissing-home-modules
+    -Wpartial-fields
+    -Wsafe
+    -threaded
+    -rtsopts
+    -with-rtsopts=-N
+
+  default-extensions:
+    BlockArguments
+    DisambiguateRecordFields
+    GADTs
+    LambdaCase
+    LexicalNegation
+    OverloadedStrings
+    QualifiedDo
+    RebindableSyntax

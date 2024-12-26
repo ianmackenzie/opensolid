@@ -220,7 +220,7 @@ testPlaneTorusIntersection = IO.do
   -- let v = Surface1d.Function.v
   -- let f = (Surface1d.Function.squared (u - 0.5) - Surface1d.Function.squared (v - 0.5)) * Length.meter
   zeros <- Surface1d.Function.zeros f
-  drawZeros "opensolid-sandbox/test-plane-torus-intersection.svg" zeros
+  drawZeros "executables/sandbox/test-plane-torus-intersection.svg" zeros
   IO.printLine "Plane torus intersection solutions:"
   log "  Crossing curves" (List.length (Surface1d.Function.Zeros.crossingCurves zeros))
   log "  Saddle points" (List.length (Surface1d.Function.Zeros.saddlePoints zeros))
@@ -231,7 +231,7 @@ testPlaneParaboloidIntersection = Tolerance.using 1e-9 IO.do
   let v = Surface1d.Function.v
   let f = Surface1d.Function.squared u + Surface1d.Function.squared v - 0.5
   zeros <- Surface1d.Function.zeros f
-  drawZeros "opensolid-sandbox/test-plane-paraboloid-intersection.svg" zeros
+  drawZeros "executables/sandbox/test-plane-paraboloid-intersection.svg" zeros
   IO.printLine "Plane paraboloid intersection solutions:"
   log "  Crossing curves" (List.length (Surface1d.Function.Zeros.crossingCurves zeros))
   log "  Saddle points" (List.length (Surface1d.Function.Zeros.saddlePoints zeros))
@@ -394,7 +394,7 @@ testBezierSegment = IO.do
   let coordinateRange = Range.convert toDrawing (Range.from -1.0 11.0)
   let drawingBounds = Bounds2d.xy coordinateRange coordinateRange
   let curveEntity = drawBezier Color.blue p1 [p2, p3, p4, p5] p6
-  Drawing2d.writeTo "opensolid-sandbox/test-bezier-segment.svg" drawingBounds [curveEntity]
+  Drawing2d.writeTo "executables/sandbox/test-bezier-segment.svg" drawingBounds [curveEntity]
 
 testHermiteBezier :: IO ()
 testHermiteBezier = IO.do
@@ -420,7 +420,7 @@ testHermiteBezier = IO.do
   let curveEntity = Drawing2d.curve curveAttributes Length.millimeter curve
   let coordinateRange = Range.from (Length.meters -1.0) (Length.meters 11.0)
   let drawingBounds = Bounds2d.xy coordinateRange coordinateRange
-  Drawing2d.writeTo "opensolid-sandbox/test-hermite-bezier.svg" drawingBounds [curveEntity]
+  Drawing2d.writeTo "executables/sandbox/test-hermite-bezier.svg" drawingBounds [curveEntity]
 
 testExplicitRandomStep :: IO ()
 testExplicitRandomStep = IO.do
@@ -533,7 +533,7 @@ testCurveMedialAxis = IO.do
               tangentCircle
         List.map drawTangentCircle (Parameter.steps 2)
   let tangentCircles = List.collect drawCircles segments
-  Drawing2d.writeTo "opensolid-sandbox/curve-medial-axis.svg" drawingBounds $
+  Drawing2d.writeTo "executables/sandbox/curve-medial-axis.svg" drawingBounds $
     [ Drawing2d.group tangentCircles
     , drawCurve curve1
     , drawCurve curve2

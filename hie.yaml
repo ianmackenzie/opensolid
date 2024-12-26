@@ -1,5 +1,11 @@
 cradle:
   cabal:
+    - path: "executables/sandbox/Main.hs"
+      component: "executables:exe:sandbox"
+
+    - path: "executables/test-server/Main.hs"
+      component: "executables:exe:test-server"
+
     - path: "opensolid/src"
       component: "lib:opensolid"
 
@@ -22,6 +28,9 @@ cradle:
       component: "opensolid-python:exe:opensolid-python"
 
     - path: "opensolid-python/src/Python.hs"
+      component: "opensolid-python:exe:opensolid-python"
+
+    - path: "opensolid-python/src/Python/AbsFunction.hs"
       component: "opensolid-python:exe:opensolid-python"
 
     - path: "opensolid-python/src/Python/Class.hs"
@@ -62,9 +71,3 @@ cradle:
 
     - path: "opensolid-python/src/Python/Type/Registry.hs"
       component: "opensolid-python:exe:opensolid-python"
-
-    - path: "opensolid-sandbox/src/Main.hs"
-      component: "opensolid-sandbox:exe:sandbox"
-
-    - path: "opensolid-test-server/src/Main.hs"
-      component: "opensolid-test-server:exe:test-server"
