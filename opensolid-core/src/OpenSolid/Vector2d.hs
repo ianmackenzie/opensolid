@@ -145,7 +145,7 @@ instance
     (Vector2d (space_ @ units_))
     (Vector2d (space @ units))
   where
-  Vector2d# x1 y1 + Vector2d# x2 y2 = Vector2d# (x1 +# x2) (y1 +# y2)
+  Vector2d# x1# y1# + Vector2d# x2# y2# = Vector2d# (x1# +# x2#) (y1# +# y2#)
 
 instance
   ( space ~ space_
@@ -156,7 +156,7 @@ instance
     (Vector2d (space_ @ units_))
     (Vector2d (space @ units))
   where
-  Vector2d# x1 y1 - Vector2d# x2 y2 = Vector2d# (x1 -# x2) (y1 -# y2)
+  Vector2d# x1# y1# - Vector2d# x2# y2# = Vector2d# (x1# -# x2#) (y1# -# y2#)
 
 instance Multiplication' (Qty units1) (Vector2d (space @ units2)) where
   type Qty units1 .*. Vector2d (space @ units2) = Vector2d (space @ (units1 :*: units2))
