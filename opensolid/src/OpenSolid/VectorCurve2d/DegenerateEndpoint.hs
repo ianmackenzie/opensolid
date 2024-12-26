@@ -12,9 +12,9 @@ where
 import OpenSolid.Float qualified as Float
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
-import OpenSolid.Vector2d (Vector2d)
 import OpenSolid.Range (Range (Range))
 import OpenSolid.Transform2d (Transform2d)
+import OpenSolid.Vector2d (Vector2d)
 import OpenSolid.Vector2d qualified as Vector2d
 import OpenSolid.VectorBounds2d (VectorBounds2d)
 import OpenSolid.VectorBounds2d qualified as VectorBounds2d

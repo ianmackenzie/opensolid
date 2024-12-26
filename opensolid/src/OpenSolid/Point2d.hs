@@ -35,30 +35,30 @@ module OpenSolid.Point2d
   )
 where
 
-import OpenSolid.Angle (Angle)
-import OpenSolid.Bounded qualified as Bounded
-import {-# SOURCE #-} OpenSolid.Bounds2d (Bounds2d)
-import {-# SOURCE #-} OpenSolid.Bounds2d qualified as Bounds2d
 import Data.Coerce qualified
-import OpenSolid.Direction2d (Direction2d)
-import {-# SOURCE #-} OpenSolid.Frame2d (Frame2d)
-import {-# SOURCE #-} OpenSolid.Frame2d qualified as Frame2d
-import OpenSolid.Length qualified as Length
-import OpenSolid.Prelude
+import OpenSolid.Angle (Angle)
 import OpenSolid.Arithmetic.Unboxed
 import {-# SOURCE #-} OpenSolid.Axis2d (Axis2d)
 import {-# SOURCE #-} OpenSolid.Axis2d qualified as Axis2d
+import OpenSolid.Bounded qualified as Bounded
+import {-# SOURCE #-} OpenSolid.Bounds2d (Bounds2d)
+import {-# SOURCE #-} OpenSolid.Bounds2d qualified as Bounds2d
+import OpenSolid.Direction2d (Direction2d)
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
+import {-# SOURCE #-} OpenSolid.Frame2d (Frame2d)
+import {-# SOURCE #-} OpenSolid.Frame2d qualified as Frame2d
+import OpenSolid.Length qualified as Length
 import OpenSolid.Point2d.CoordinateTransformation qualified as Point2d.CoordinateTransformation
+import OpenSolid.Prelude
 import OpenSolid.Qty (Qty (Qty#))
 import OpenSolid.Qty qualified as Qty
-import OpenSolid.Vector2d (Vector2d (Vector2d#))
-import OpenSolid.Vector2d qualified as Vector2d
 import OpenSolid.Transform2d (Transform2d (Transform2d))
 import OpenSolid.Transform2d qualified as Transform2d
 import OpenSolid.Units (Meters)
 import OpenSolid.Units qualified as Units
+import OpenSolid.Vector2d (Vector2d (Vector2d#))
+import OpenSolid.Vector2d qualified as Vector2d
 import OpenSolid.VectorBounds2d (VectorBounds2d (VectorBounds2d))
 
 type role Point2d phantom

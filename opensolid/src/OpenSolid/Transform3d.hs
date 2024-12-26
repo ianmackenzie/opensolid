@@ -34,11 +34,11 @@ module OpenSolid.Transform3d
   )
 where
 
+import Data.Coerce qualified
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
 import {-# SOURCE #-} OpenSolid.Axis3d (Axis3d)
 import {-# SOURCE #-} OpenSolid.Axis3d qualified as Axis3d
-import Data.Coerce qualified
 import {-# SOURCE #-} OpenSolid.Direction3d (Direction3d)
 import {-# SOURCE #-} OpenSolid.Direction3d qualified as Direction3d
 import {-# SOURCE #-} OpenSolid.Frame3d (Frame3d)
@@ -46,11 +46,11 @@ import {-# SOURCE #-} OpenSolid.Point3d (Point3d)
 import {-# SOURCE #-} OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Point3d.CoordinateTransformation qualified as Point3d
 import OpenSolid.Prelude hiding (identity)
+import OpenSolid.Transform qualified as Transform
+import OpenSolid.Units qualified as Units
 import {-# SOURCE #-} OpenSolid.Vector3d (Vector3d)
 import {-# SOURCE #-} OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.Vector3d.CoordinateTransformation qualified as Vector3d
-import OpenSolid.Transform qualified as Transform
-import OpenSolid.Units qualified as Units
 
 type role Transform3d phantom nominal
 

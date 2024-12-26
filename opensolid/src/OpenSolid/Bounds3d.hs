@@ -21,12 +21,12 @@ module OpenSolid.Bounds3d
   )
 where
 
-import OpenSolid.Bounds qualified as Bounds
 import Data.Coerce qualified
+import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Maybe qualified as Maybe
+import OpenSolid.Point3d (Point3d (Point3d))
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
-import OpenSolid.Point3d (Point3d (Point3d))
 import OpenSolid.Range (Range)
 import OpenSolid.Range qualified as Range
 import OpenSolid.Units qualified as Units

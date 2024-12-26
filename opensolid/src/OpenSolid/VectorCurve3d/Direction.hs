@@ -4,14 +4,14 @@ import {-# SOURCE #-} OpenSolid.DirectionCurve3d (DirectionCurve3d)
 import {-# SOURCE #-} OpenSolid.DirectionCurve3d qualified as DirectionCurve3d
 import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Prelude
+import OpenSolid.Range (Range (Range))
+import OpenSolid.Range qualified as Range
 import OpenSolid.Vector3d qualified as Vector3d
+import OpenSolid.VectorBounds3d qualified as VectorBounds3d
 import {-# SOURCE #-} OpenSolid.VectorCurve3d (VectorCurve3d)
 import {-# SOURCE #-} OpenSolid.VectorCurve3d qualified as VectorCurve3d
 import OpenSolid.VectorCurve3d.DegenerateEndpoint (DegenerateEndpoint)
 import OpenSolid.VectorCurve3d.DegenerateEndpoint qualified as DegenerateEndpoint
-import OpenSolid.Range (Range (Range))
-import OpenSolid.Range qualified as Range
-import OpenSolid.VectorBounds3d qualified as VectorBounds3d
 
 data PiecewiseCurve space
   = PiecewiseCurve

@@ -19,21 +19,21 @@ where
 
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
-import OpenSolid.Direction2d (Direction2d)
-import OpenSolid.Direction2d qualified as Direction2d
-import OpenSolid.Float qualified as Float
-import OpenSolid.Frame2d (Frame2d)
-import OpenSolid.Frame2d qualified as Frame2d
-import OpenSolid.Line2d qualified as Line2d
-import OpenSolid.Prelude
 import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Curve2d qualified as Curve2d
+import OpenSolid.Direction2d (Direction2d)
+import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Expression.Curve1d qualified as Expression.Curve1d
 import OpenSolid.Expression.Curve2d qualified as Expression.Curve2d
 import OpenSolid.Expression.VectorCurve2d qualified as Expression.VectorCurve2d
+import OpenSolid.Float qualified as Float
+import OpenSolid.Frame2d (Frame2d)
+import OpenSolid.Frame2d qualified as Frame2d
+import OpenSolid.Line2d qualified as Line2d
 import OpenSolid.Point2d (Point2d)
 import OpenSolid.Point2d qualified as Point2d
+import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Vector2d (Vector2d)
 import OpenSolid.Vector2d qualified as Vector2d

@@ -13,9 +13,9 @@ where
 import OpenSolid.Bounds2d (Bounds2d)
 import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.Direction2d (Direction2d)
-import OpenSolid.Prelude
-import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Point2d (Point2d)
+import OpenSolid.Point2d qualified as Point2d
+import OpenSolid.Prelude
 import OpenSolid.Quadrature qualified as Quadrature
 import OpenSolid.Range qualified as Range
 

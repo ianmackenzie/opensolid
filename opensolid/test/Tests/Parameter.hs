@@ -1,10 +1,10 @@
 module Tests.Parameter (tests) where
 
-import OpenSolid.Prelude
 import OpenSolid.Parameter qualified as Parameter
+import OpenSolid.Prelude
+import OpenSolid.Text qualified as Text
 import Test (Test)
 import Test qualified
-import OpenSolid.Text qualified as Text
 
 tests :: List Test
 tests =

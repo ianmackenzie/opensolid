@@ -2,14 +2,14 @@ module Python.Constant (declaration, definition) where
 
 import API.Constant (Constant (..))
 import API.Constant qualified as Constant
-import OpenSolid.Prelude
 import OpenSolid.FFI (Name)
 import OpenSolid.FFI qualified as FFI
+import OpenSolid.Prelude
+import OpenSolid.Text qualified as Text
 import Python qualified
 import Python.Class qualified
 import Python.FFI qualified
 import Python.Type qualified
-import OpenSolid.Text qualified as Text
 
 declaration :: (Name, Constant) -> Text
 declaration (name, (Constant value documentation)) = do

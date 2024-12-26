@@ -30,9 +30,9 @@ module OpenSolid.Map
   )
 where
 
-import OpenSolid.Bootstrap
 import Data.Map.Strict (Map)
 import Data.Map.Strict qualified
+import OpenSolid.Bootstrap
 import OpenSolid.Pair qualified as Pair
 import Prelude qualified
 

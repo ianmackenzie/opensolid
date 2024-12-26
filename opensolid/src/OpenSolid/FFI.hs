@@ -21,20 +21,20 @@ module OpenSolid.FFI
   )
 where
 
-import OpenSolid.Angle (Angle)
-import OpenSolid.Area (Area)
-import OpenSolid.Color (Color)
 import Data.ByteString.Unsafe qualified
 import Data.Int (Int64)
 import Data.Proxy (Proxy (Proxy))
 import Data.Text.Encoding qualified
 import Data.Text.Foreign qualified
 import Data.Word (Word8)
-import OpenSolid.Error qualified as Error
-import OpenSolid.Float qualified as Float
 import Foreign (Ptr)
 import Foreign qualified
 import Foreign.Marshal.Alloc qualified
+import OpenSolid.Angle (Angle)
+import OpenSolid.Area (Area)
+import OpenSolid.Color (Color)
+import OpenSolid.Error qualified as Error
+import OpenSolid.Float qualified as Float
 import OpenSolid.IO qualified as IO
 import OpenSolid.Int qualified as Int
 import OpenSolid.Length (Length)

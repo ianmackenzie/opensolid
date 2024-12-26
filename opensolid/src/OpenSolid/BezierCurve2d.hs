@@ -4,14 +4,14 @@ module OpenSolid.BezierCurve2d
   )
 where
 
-import OpenSolid.Float qualified as Float
-import OpenSolid.Int qualified as Int
-import OpenSolid.List qualified as List
-import OpenSolid.Prelude
 import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Expression qualified as Expression
+import OpenSolid.Float qualified as Float
+import OpenSolid.Int qualified as Int
+import OpenSolid.List qualified as List
 import OpenSolid.Point2d (Point2d)
+import OpenSolid.Prelude
 import OpenSolid.Vector2d (Vector2d)
 import OpenSolid.Vector2d qualified as Vector2d
 

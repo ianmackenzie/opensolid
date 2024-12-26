@@ -34,23 +34,23 @@ module OpenSolid.Transform2d
   )
 where
 
+import Data.Coerce qualified
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
-import Data.Coerce qualified
+import {-# SOURCE #-} OpenSolid.Axis2d (Axis2d)
+import {-# SOURCE #-} OpenSolid.Axis2d qualified as Axis2d
 import {-# SOURCE #-} OpenSolid.Direction2d (Direction2d)
 import {-# SOURCE #-} OpenSolid.Direction2d qualified as Direction2d
 import {-# SOURCE #-} OpenSolid.Frame2d (Frame2d)
-import {-# SOURCE #-} OpenSolid.Axis2d (Axis2d)
-import {-# SOURCE #-} OpenSolid.Axis2d qualified as Axis2d
 import {-# SOURCE #-} OpenSolid.Point2d (Point2d)
 import {-# SOURCE #-} OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Point2d.CoordinateTransformation qualified as Point2d
 import OpenSolid.Prelude hiding (identity)
+import OpenSolid.Transform qualified as Transform
+import OpenSolid.Units qualified as Units
 import {-# SOURCE #-} OpenSolid.Vector2d (Vector2d)
 import {-# SOURCE #-} OpenSolid.Vector2d qualified as Vector2d
 import OpenSolid.Vector2d.CoordinateTransformation qualified as Vector2d
-import OpenSolid.Transform qualified as Transform
-import OpenSolid.Units qualified as Units
 
 type role Transform2d phantom nominal
 

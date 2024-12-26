@@ -17,14 +17,14 @@ module OpenSolid.Frame2d
   )
 where
 
+import OpenSolid.Axis2d (Axis2d)
+import OpenSolid.Axis2d qualified as Axis2d
 import OpenSolid.Basis2d (Basis2d)
 import OpenSolid.Basis2d qualified as Basis2d
 import OpenSolid.Direction2d (Direction2d)
-import OpenSolid.Prelude
-import OpenSolid.Axis2d (Axis2d)
-import OpenSolid.Axis2d qualified as Axis2d
 import OpenSolid.Point2d (Point2d)
 import OpenSolid.Point2d qualified as Point2d
+import OpenSolid.Prelude
 
 type role Frame2d nominal nominal
 

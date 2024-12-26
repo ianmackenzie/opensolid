@@ -50,36 +50,36 @@ import OpenSolid.Basis3d (Basis3d)
 import OpenSolid.Basis3d qualified as Basis3d
 import OpenSolid.Composition
 import OpenSolid.CoordinateSystem (Space)
-import OpenSolid.Direction3d (Direction3d)
-import OpenSolid.Direction3d qualified as Direction3d
-import {-# SOURCE #-} OpenSolid.DirectionCurve3d (DirectionCurve3d)
-import OpenSolid.Error qualified as Error
-import OpenSolid.Frame3d (Frame3d)
-import OpenSolid.Frame3d qualified as Frame3d
-import OpenSolid.List qualified as List
-import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Prelude
 import OpenSolid.Curve1d (Curve1d)
 import OpenSolid.Curve1d qualified as Curve1d
 import OpenSolid.Curve1d.Zero qualified as Curve1d.Zero
 import OpenSolid.Curve1d.Zeros qualified as Curve1d.Zeros
+import OpenSolid.Direction3d (Direction3d)
+import OpenSolid.Direction3d qualified as Direction3d
+import {-# SOURCE #-} OpenSolid.DirectionCurve3d (DirectionCurve3d)
+import OpenSolid.Error qualified as Error
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Expression.Curve1d qualified as Expression.Curve1d
 import OpenSolid.Expression.VectorCurve3d qualified as Expression.VectorCurve3d
+import OpenSolid.Frame3d (Frame3d)
+import OpenSolid.Frame3d qualified as Frame3d
+import OpenSolid.List qualified as List
+import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Point3d qualified as Point3d
+import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
-import OpenSolid.Vector3d (Vector3d)
-import OpenSolid.Vector3d qualified as Vector3d
-import OpenSolid.VectorCurve3d.Direction qualified as VectorCurve3d.Direction
-import OpenSolid.VectorCurve3d.Zeros qualified as Zeros
 import OpenSolid.Range (Range)
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform3d (Transform3d)
 import OpenSolid.Transform3d qualified as Transform3d
 import OpenSolid.Units qualified as Units
+import OpenSolid.Vector3d (Vector3d)
+import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.VectorBounds3d (VectorBounds3d (VectorBounds3d))
 import OpenSolid.VectorBounds3d qualified as VectorBounds3d
+import OpenSolid.VectorCurve3d.Direction qualified as VectorCurve3d.Direction
+import OpenSolid.VectorCurve3d.Zeros qualified as Zeros
 
 class
   Show curve =>

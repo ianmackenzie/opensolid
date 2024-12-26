@@ -8,13 +8,6 @@ where
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Arc2d qualified as Arc2d
 import OpenSolid.CubicSpline2d qualified as CubicSpline2d
-import OpenSolid.Direction2d qualified as Direction2d
-import OpenSolid.DirectionCurve2d qualified as DirectionCurve2d
-import OpenSolid.Error qualified as Error
-import OpenSolid.Length qualified as Length
-import OpenSolid.List qualified as List
-import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Prelude
 import OpenSolid.Curve1d qualified as Curve1d
 import OpenSolid.Curve1d.Zero qualified as Curve1d.Zero
 import OpenSolid.Curve2d (Curve2d)
@@ -22,22 +15,29 @@ import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Curve2d.IntersectionPoint (IntersectionPoint (IntersectionPoint))
 import OpenSolid.Curve2d.IntersectionPoint qualified as IntersectionPoint
 import OpenSolid.Curve2d.OverlappingSegment (OverlappingSegment (OverlappingSegment))
+import OpenSolid.Direction2d qualified as Direction2d
+import OpenSolid.DirectionCurve2d qualified as DirectionCurve2d
+import OpenSolid.Error qualified as Error
+import OpenSolid.Length qualified as Length
+import OpenSolid.List qualified as List
+import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2d qualified as Point2d
+import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
+import OpenSolid.QuadraticSpline2d qualified as QuadraticSpline2d
 import OpenSolid.Random (Generator)
 import OpenSolid.Random qualified as Random
-import OpenSolid.Vector2d qualified as Vector2d
-import OpenSolid.VectorCurve2d qualified as VectorCurve2d
-import OpenSolid.Parameter qualified as Parameter
-import OpenSolid.QuadraticSpline2d qualified as QuadraticSpline2d
 import OpenSolid.Range (Range (Range))
 import OpenSolid.Range qualified as Range
 import OpenSolid.Sign qualified as Sign
+import OpenSolid.Tolerance qualified as Tolerance
+import OpenSolid.Units (Meters)
+import OpenSolid.Vector2d qualified as Vector2d
+import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 import Test (Expectation, Test)
 import Test qualified
 import Tests.Random qualified as Random
-import OpenSolid.Tolerance qualified as Tolerance
-import OpenSolid.Units (Meters)
 
 curveGenerators :: Tolerance Meters => List (Text, Generator (Curve2d (space @ Meters)))
 curveGenerators =

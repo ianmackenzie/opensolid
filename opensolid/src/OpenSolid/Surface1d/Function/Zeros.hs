@@ -5,8 +5,8 @@ module OpenSolid.Surface1d.Function.Zeros
   )
 where
 
-import OpenSolid.Error qualified as Error
 import {-# SOURCE #-} OpenSolid.Curve2d (Curve2d)
+import OpenSolid.Error qualified as Error
 import OpenSolid.Prelude
 import OpenSolid.SurfaceParameter (UvBounds, UvCoordinates, UvPoint)
 

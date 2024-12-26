@@ -3,9 +3,9 @@ module OpenSolid.Point3d.CoordinateTransformation (placeIn, relativeTo) where
 import {-# SOURCE #-} OpenSolid.Direction3d qualified as Direction3d
 import {-# SOURCE #-} OpenSolid.Frame3d (Frame3d)
 import {-# SOURCE #-} OpenSolid.Frame3d qualified as Frame3d
-import OpenSolid.Prelude
 import {-# SOURCE #-} OpenSolid.Point3d (Point3d)
 import {-# SOURCE #-} OpenSolid.Point3d qualified as Point3d
+import OpenSolid.Prelude
 
 placeIn ::
   Frame3d (global @ units) (Defines local) ->

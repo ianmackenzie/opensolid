@@ -21,6 +21,7 @@ module OpenSolid.Solve1d
   )
 where
 
+import OpenSolid.Curve1d.Zero (Zero (Zero))
 import OpenSolid.Domain1d (Domain1d)
 import OpenSolid.Domain1d qualified as Domain1d
 import OpenSolid.Error qualified as Error
@@ -28,10 +29,9 @@ import OpenSolid.Float qualified as Float
 import OpenSolid.Int qualified as Int
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Curve1d.Zero (Zero (Zero))
+import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
-import OpenSolid.Pair qualified as Pair
 import OpenSolid.Queue (Queue)
 import OpenSolid.Queue qualified as Queue
 import OpenSolid.Range (Range (Range))

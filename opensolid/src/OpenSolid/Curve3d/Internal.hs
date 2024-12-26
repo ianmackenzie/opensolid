@@ -12,15 +12,15 @@ module OpenSolid.Curve3d.Internal
 where
 
 import OpenSolid.Bounds3d (Bounds3d)
-import OpenSolid.Prelude
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Point3d (Point3d)
-import OpenSolid.VectorCurve3d (VectorCurve3d)
-import OpenSolid.VectorCurve3d qualified as VectorCurve3d
+import OpenSolid.Prelude
 import OpenSolid.Range (Range)
 import OpenSolid.Range qualified as Range
 import OpenSolid.Units qualified as Units
+import OpenSolid.VectorCurve3d (VectorCurve3d)
+import OpenSolid.VectorCurve3d qualified as VectorCurve3d
 
 data Curve3d (coordinateSystem :: CoordinateSystem) where
   Parametric ::

@@ -14,30 +14,30 @@ where
 
 import OpenSolid.Bounds2d (Bounds2d)
 import OpenSolid.Bounds2d qualified as Bounds2d
-import OpenSolid.Estimate (Estimate)
-import OpenSolid.Estimate qualified as Estimate
-import OpenSolid.Float qualified as Float
-import OpenSolid.List qualified as List
-import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Prelude
 import OpenSolid.Curve1d qualified as Curve1d
 import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Curve2d.IntersectionPoint (IntersectionPoint (IntersectionPoint))
 import OpenSolid.Curve2d.IntersectionPoint qualified as Curve2d.IntersectionPoint
 import OpenSolid.Curve2d.Intersections qualified as Curve2d.Intersections
+import OpenSolid.Estimate (Estimate)
+import OpenSolid.Estimate qualified as Estimate
+import OpenSolid.Float qualified as Float
+import OpenSolid.List qualified as List
+import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Point2d (Point2d)
-import OpenSolid.Qty qualified as Qty
-import OpenSolid.Region2d.BoundedBy qualified as BoundedBy
-import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 import OpenSolid.Polygon2d (Polygon2d)
 import OpenSolid.Polygon2d qualified as Polygon2d
 import OpenSolid.Polyline2d qualified as Polyline2d
+import OpenSolid.Prelude
+import OpenSolid.Qty qualified as Qty
 import OpenSolid.Range (Range)
 import OpenSolid.Range qualified as Range
+import OpenSolid.Region2d.BoundedBy qualified as BoundedBy
 import OpenSolid.Result qualified as Result
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Units qualified as Units
+import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 import OpenSolid.Vertex2d (Vertex2d)
 
 type role Region2d nominal

@@ -3,10 +3,10 @@ module OpenSolid.Curve1d.Integral
   )
 where
 
-import OpenSolid.Estimate qualified as Estimate
-import OpenSolid.Prelude
 import {-# SOURCE #-} OpenSolid.Curve1d (Curve1d)
 import {-# SOURCE #-} OpenSolid.Curve1d qualified as Curve1d
+import OpenSolid.Estimate qualified as Estimate
+import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Range (Range)
 import OpenSolid.Range qualified as Range

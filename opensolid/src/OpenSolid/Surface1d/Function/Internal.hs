@@ -6,14 +6,14 @@ module OpenSolid.Surface1d.Function.Internal
   )
 where
 
-import OpenSolid.Prelude
 import OpenSolid.Point2d qualified as Point2d
+import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
-import {-# SOURCE #-} OpenSolid.Surface1d.Function (Function)
-import {-# SOURCE #-} OpenSolid.Surface1d.Function qualified as Function
 import OpenSolid.Range (Range (Range))
 import OpenSolid.Range qualified as Range
 import OpenSolid.Solve1d qualified as Solve1d
+import {-# SOURCE #-} OpenSolid.Surface1d.Function (Function)
+import {-# SOURCE #-} OpenSolid.Surface1d.Function qualified as Function
 
 solveForU ::
   Tolerance units =>

@@ -17,14 +17,14 @@ where
 
 import OpenSolid.Basis2d (Basis2d)
 import OpenSolid.Basis2d qualified as Basis2d
+import OpenSolid.Expression (Expression)
+import OpenSolid.Expression qualified as Expression
 import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Frame2d qualified as Frame2d
 import OpenSolid.Prelude
-import OpenSolid.Expression (Expression)
-import OpenSolid.Expression qualified as Expression
-import OpenSolid.Vector2d (Vector2d)
 import OpenSolid.Transform2d (Transform2d (Transform2d))
 import OpenSolid.Units qualified as Units
+import OpenSolid.Vector2d (Vector2d)
 import OpenSolid.Vector2d qualified as Vector2d
 
 constant :: Vector2d (space @ units) -> Expression Float (Vector2d (space @ units))

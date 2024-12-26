@@ -1,13 +1,13 @@
 module Tests.Curve1d (tests) where
 
 import OpenSolid.Angle qualified as Angle
-import OpenSolid.Prelude
 import OpenSolid.Curve1d ()
 import OpenSolid.Curve1d qualified as Curve1d
 import OpenSolid.Curve1d.Zero (Zero (Zero))
+import OpenSolid.Prelude
+import OpenSolid.Tolerance qualified as Tolerance
 import Test (Test)
 import Test qualified
-import OpenSolid.Tolerance qualified as Tolerance
 
 tests :: List Test
 tests =

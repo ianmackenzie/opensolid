@@ -38,17 +38,17 @@ module OpenSolid.Float
   )
 where
 
-import OpenSolid.Bootstrap
 import Data.Coerce qualified
+import OpenSolid.Arithmetic
+import OpenSolid.Bootstrap
 import OpenSolid.NonEmpty (NonEmpty)
 import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Arithmetic
 import OpenSolid.Qty (Qty (Qty))
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Random.Internal qualified as Random
-import OpenSolid.Text.Parse qualified as Text.Parse
 import {-# SOURCE #-} OpenSolid.Result (Result)
 import OpenSolid.Sign (Sign)
+import OpenSolid.Text.Parse qualified as Text.Parse
 import OpenSolid.Units (Unitless)
 import Prelude qualified
 

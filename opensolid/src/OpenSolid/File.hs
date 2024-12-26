@@ -8,8 +8,8 @@ where
 import Data.ByteString qualified
 import OpenSolid.IO qualified as IO
 import OpenSolid.Prelude
-import System.Directory
 import OpenSolid.Text qualified as Text
+import System.Directory
 
 readFrom :: Text -> IO Text
 readFrom path = IO.do

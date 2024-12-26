@@ -35,9 +35,9 @@ module OpenSolid.VectorBounds3d
   )
 where
 
+import Data.Coerce qualified
 import OpenSolid.Basis3d (Basis3d)
 import OpenSolid.Basis3d qualified as Basis3d
-import Data.Coerce qualified
 import OpenSolid.Direction3d (Direction3d)
 import OpenSolid.Direction3d qualified as Direction3d
 import OpenSolid.Float qualified as Float
@@ -45,12 +45,12 @@ import {-# SOURCE #-} OpenSolid.Frame3d (Frame3d)
 import {-# SOURCE #-} OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
-import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.Range (Range (Range))
 import OpenSolid.Range qualified as Range
 import OpenSolid.Transform3d (Transform3d (Transform3d))
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector3d (Vector3d (Vector3d))
+import OpenSolid.Vector3d qualified as Vector3d
 
 type role VectorBounds3d phantom
 

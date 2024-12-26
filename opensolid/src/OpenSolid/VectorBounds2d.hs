@@ -35,9 +35,9 @@ module OpenSolid.VectorBounds2d
   )
 where
 
+import Data.Coerce qualified
 import OpenSolid.Basis2d (Basis2d)
 import OpenSolid.Basis2d qualified as Basis2d
-import Data.Coerce qualified
 import OpenSolid.Direction2d (Direction2d)
 import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.Float qualified as Float
@@ -45,13 +45,13 @@ import {-# SOURCE #-} OpenSolid.Frame2d (Frame2d)
 import {-# SOURCE #-} OpenSolid.Frame2d qualified as Frame2d
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
-import OpenSolid.Vector2d (Vector2d (Vector2d))
-import OpenSolid.Vector2d qualified as Vector2d
 import OpenSolid.Range (Range (Range))
 import OpenSolid.Range qualified as Range
 import OpenSolid.Transform2d (Transform2d (Transform2d))
 import OpenSolid.Units (Radians)
 import OpenSolid.Units qualified as Units
+import OpenSolid.Vector2d (Vector2d (Vector2d))
+import OpenSolid.Vector2d qualified as Vector2d
 
 type role VectorBounds2d phantom
 

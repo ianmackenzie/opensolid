@@ -2,16 +2,16 @@ module Tests.Arc2d (tests) where
 
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Arc2d qualified as Arc2d
-import OpenSolid.Float qualified as Float
-import OpenSolid.Prelude
 import OpenSolid.Curve2d qualified as Curve2d
+import OpenSolid.Float qualified as Float
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2d qualified as Point2d
+import OpenSolid.Prelude
+import OpenSolid.Text qualified as Text
+import OpenSolid.Units (Meters)
 import Test (Test)
 import Test qualified
 import Tests.Random qualified as Random
-import OpenSolid.Text qualified as Text
-import OpenSolid.Units (Meters)
 
 tests :: Tolerance Meters => List Test
 tests =

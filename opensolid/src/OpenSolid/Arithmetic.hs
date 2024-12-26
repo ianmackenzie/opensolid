@@ -36,8 +36,8 @@ module OpenSolid.Arithmetic
 where
 
 import Data.List.NonEmpty (NonEmpty ((:|)))
-import {-# SOURCE #-} OpenSolid.Float (Float)
 import OpenSolid.Bootstrap
+import {-# SOURCE #-} OpenSolid.Float (Float)
 import {-# SOURCE #-} OpenSolid.Qty (Qty (Qty))
 import {-# SOURCE #-} OpenSolid.Sign (Sign (Negative, Positive))
 import OpenSolid.Units (Unitless, UnitsOf, (:*:), (:/:))

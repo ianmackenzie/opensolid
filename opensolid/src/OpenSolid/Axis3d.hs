@@ -14,9 +14,9 @@ where
 
 import OpenSolid.Direction3d (Direction3d)
 import OpenSolid.Direction3d qualified as Direction3d
-import OpenSolid.Prelude
-import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Point3d (Point3d)
+import OpenSolid.Point3d qualified as Point3d
+import OpenSolid.Prelude
 import OpenSolid.Transform qualified as Transform
 import OpenSolid.Transform3d (Transform3d)
 

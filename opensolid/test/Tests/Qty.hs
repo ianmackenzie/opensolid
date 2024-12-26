@@ -1,15 +1,15 @@
 module Tests.Qty (tests) where
 
 import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Prelude
-import OpenSolid.Qty qualified as Qty
 import OpenSolid.Point2d (Point2d)
 import OpenSolid.Point2d qualified as Point2d
+import OpenSolid.Prelude
+import OpenSolid.Qty qualified as Qty
 import OpenSolid.Random (Generator)
+import OpenSolid.Units (Meters)
 import Test (Test)
 import Test qualified
 import Tests.Random qualified as Random
-import OpenSolid.Units (Meters)
 
 tests :: List Test
 tests =

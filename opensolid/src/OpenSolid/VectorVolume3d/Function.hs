@@ -11,16 +11,16 @@ module OpenSolid.VectorVolume3d.Function
   )
 where
 
-import OpenSolid.Prelude
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
+import OpenSolid.Prelude
+import OpenSolid.Units qualified as Units
 import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.Vector3d qualified as Vector3d
-import OpenSolid.Volume1d qualified as Volume1d
-import OpenSolid.Volume1d.Function qualified as Volume1d.Function
-import OpenSolid.Units qualified as Units
 import OpenSolid.VectorBounds3d (VectorBounds3d)
 import OpenSolid.VectorBounds3d qualified as VectorBounds3d
+import OpenSolid.Volume1d qualified as Volume1d
+import OpenSolid.Volume1d.Function qualified as Volume1d.Function
 import OpenSolid.VolumeParameter (UvwBounds, UvwPoint, VolumeParameter)
 
 class

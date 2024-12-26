@@ -7,13 +7,13 @@ module OpenSolid.Line2d
 where
 
 import Data.Coerce qualified
-import OpenSolid.Prelude
 import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Expression.Curve2d qualified as Expression.Curve2d
 import OpenSolid.Expression.VectorCurve2d qualified as Expression.VectorCurve2d
 import OpenSolid.Point2d (Point2d)
+import OpenSolid.Prelude
 import OpenSolid.Units qualified as Units
 
 from ::

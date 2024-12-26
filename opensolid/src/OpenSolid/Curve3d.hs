@@ -15,14 +15,14 @@ module OpenSolid.Curve3d
 where
 
 import OpenSolid.Bounds3d (Bounds3d)
-import OpenSolid.Error qualified as Error
-import OpenSolid.Prelude
 import OpenSolid.Curve3d.Internal (Curve3d (Parametric), Interface (..))
 import OpenSolid.Curve3d.Internal qualified as Internal
+import OpenSolid.Error qualified as Error
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Point3d (Point3d)
-import OpenSolid.VectorCurve3d (VectorCurve3d)
+import OpenSolid.Prelude
 import OpenSolid.Range (Range)
+import OpenSolid.VectorCurve3d (VectorCurve3d)
 
 data DegenerateCurve = DegenerateCurve deriving (Eq, Show, Error.Message)
 

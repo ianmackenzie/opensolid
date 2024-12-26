@@ -2,6 +2,7 @@ module Main (main) where
 
 import OpenSolid.Length qualified as Length
 import OpenSolid.Prelude
+import OpenSolid.Tolerance qualified as Tolerance
 import Test (Test)
 import Test qualified
 import Tests.Arc2d qualified
@@ -23,7 +24,6 @@ import Tests.Stream qualified
 import Tests.Text qualified
 import Tests.VectorBounds2d qualified
 import Tests.VectorBounds3d qualified
-import OpenSolid.Tolerance qualified as Tolerance
 
 tests :: List Test
 tests =

@@ -8,16 +8,16 @@ import OpenSolid.Estimate qualified as Estimate
 import OpenSolid.Float qualified as Float
 import OpenSolid.Length qualified as Length
 import OpenSolid.Line2d qualified as Line2d
+import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Qty (zero)
-import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Range qualified as Range
 import OpenSolid.Region2d (Region2d)
 import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Region2d.BoundedBy qualified as Region2d.BoundedBy
+import OpenSolid.Units (Meters)
 import Test (Test)
 import Test qualified
-import OpenSolid.Units (Meters)
 
 tests :: Tolerance Meters => List Test
 tests =

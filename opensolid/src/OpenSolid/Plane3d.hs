@@ -17,9 +17,9 @@ where
 import OpenSolid.Basis3d (Basis3d)
 import OpenSolid.Basis3d qualified as Basis3d
 import OpenSolid.Direction3d (Direction3d)
-import OpenSolid.Prelude
-import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Point3d (Point3d)
+import OpenSolid.Point3d qualified as Point3d
+import OpenSolid.Prelude
 
 type Plane3d :: CoordinateSystem -> LocalSpace -> Type
 data Plane3d coordinateSystem defines where

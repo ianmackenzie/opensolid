@@ -12,10 +12,10 @@ where
 import OpenSolid.Float qualified as Float
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
-import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.Range (Range (Range))
 import OpenSolid.Transform3d (Transform3d)
 import OpenSolid.Vector3d (Vector3d)
+import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.VectorBounds3d (VectorBounds3d)
 import OpenSolid.VectorBounds3d qualified as VectorBounds3d
 import {-# SOURCE #-} OpenSolid.VectorCurve3d (VectorCurve3d)

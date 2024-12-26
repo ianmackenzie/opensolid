@@ -10,9 +10,9 @@ where
 
 import OpenSolid.Direction2d (Direction2d)
 import OpenSolid.Prelude
-import OpenSolid.Vector2d (Vector2d)
 import OpenSolid.Range (Range)
 import OpenSolid.Units qualified as Units
+import OpenSolid.Vector2d (Vector2d)
 import OpenSolid.Vector2d qualified as Vector2d
 import OpenSolid.VectorBounds2d (VectorBounds2d)
 import OpenSolid.VectorBounds2d qualified as VectorBounds2d

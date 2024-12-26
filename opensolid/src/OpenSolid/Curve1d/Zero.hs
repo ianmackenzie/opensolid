@@ -1,8 +1,8 @@
 module OpenSolid.Curve1d.Zero (Zero (Zero, location, order, sign)) where
 
-import OpenSolid.Prelude
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
+import OpenSolid.Prelude
 
 -- | Contains details about a single point where a curve is zero.
 data Zero = Zero

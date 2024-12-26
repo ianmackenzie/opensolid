@@ -42,12 +42,12 @@ module OpenSolid.Color
   )
 where
 
-import OpenSolid.Angle (Angle)
-import OpenSolid.Angle qualified as Angle
 import Data.Colour qualified
 import Data.Colour.RGBSpace qualified
 import Data.Colour.RGBSpace.HSL qualified
 import Data.Colour.SRGB qualified
+import OpenSolid.Angle (Angle)
+import OpenSolid.Angle qualified as Angle
 import OpenSolid.Float qualified as Float
 import OpenSolid.Prelude
 import OpenSolid.Text qualified as Text

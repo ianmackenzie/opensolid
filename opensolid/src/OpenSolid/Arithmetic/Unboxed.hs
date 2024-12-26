@@ -22,9 +22,9 @@ module OpenSolid.Arithmetic.Unboxed
   )
 where
 
-import OpenSolid.Bootstrap
 import GHC.Exts (Double#)
 import GHC.Exts qualified
+import OpenSolid.Bootstrap
 
 {-# INLINE negate# #-}
 negate# :: Double# -> Double#

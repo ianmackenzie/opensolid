@@ -26,31 +26,31 @@ module OpenSolid.Json.Format
   )
 where
 
-import OpenSolid.Angle (Angle)
-import OpenSolid.Angle qualified as Angle
 import Data.Coerce (Coercible)
 import Data.Coerce qualified
+import OpenSolid.Angle (Angle)
+import OpenSolid.Angle qualified as Angle
 import OpenSolid.Direction2d (Direction2d)
 import OpenSolid.Direction2d qualified as Direction2d
+import OpenSolid.Json (Json)
+import OpenSolid.Json qualified as Json
+import OpenSolid.Json.FieldSchema (FieldSchema (FieldSchema))
+import OpenSolid.Json.FieldSchema qualified as FieldSchema
+import OpenSolid.Json.Schema qualified as Json.Schema
 import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
 import OpenSolid.Map (Map)
 import OpenSolid.Map qualified as Map
 import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Prelude
-import OpenSolid.Json (Json)
-import OpenSolid.Json qualified as Json
-import OpenSolid.Json.FieldSchema (FieldSchema (FieldSchema))
-import OpenSolid.Json.FieldSchema qualified as FieldSchema
-import OpenSolid.Json.Schema qualified as Json.Schema
 import OpenSolid.Point2d (Point2d)
 import OpenSolid.Point2d qualified as Point2d
-import OpenSolid.Vector2d (Vector2d)
-import OpenSolid.Vector2d qualified as Vector2d
+import OpenSolid.Prelude
 import OpenSolid.Result qualified as Result
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Units (Meters)
+import OpenSolid.Vector2d (Vector2d)
+import OpenSolid.Vector2d qualified as Vector2d
 
 data Format a = Format
   { encode :: a -> Json

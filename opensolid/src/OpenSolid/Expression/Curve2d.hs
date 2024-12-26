@@ -10,13 +10,13 @@ module OpenSolid.Expression.Curve2d
   )
 where
 
-import OpenSolid.Frame2d (Frame2d)
-import OpenSolid.Frame2d qualified as Frame2d
-import OpenSolid.Prelude
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Expression.VectorCurve2d qualified as Expression.VectorCurve2d
+import OpenSolid.Frame2d (Frame2d)
+import OpenSolid.Frame2d qualified as Frame2d
 import OpenSolid.Point2d (Point2d)
+import OpenSolid.Prelude
 import OpenSolid.Transform2d (Transform2d (Transform2d))
 import OpenSolid.Vector2d qualified as Vector2d
 

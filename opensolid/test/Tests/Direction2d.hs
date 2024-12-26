@@ -3,9 +3,9 @@ module Tests.Direction2d (tests) where
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.Prelude
+import OpenSolid.Tolerance qualified as Tolerance
 import Test (Test)
 import Test qualified
-import OpenSolid.Tolerance qualified as Tolerance
 
 tests :: List Test
 tests =

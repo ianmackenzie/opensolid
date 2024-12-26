@@ -9,27 +9,27 @@ module OpenSolid.Surface1d.Function.SaddleRegion
   )
 where
 
+import OpenSolid.Axis2d (Axis2d)
+import OpenSolid.Axis2d qualified as Axis2d
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
+import {-# SOURCE #-} OpenSolid.Curve2d (Curve2d)
+import {-# SOURCE #-} OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.Domain2d (Domain2d)
 import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Frame2d qualified as Frame2d
 import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Prelude
-import OpenSolid.Axis2d (Axis2d)
-import OpenSolid.Axis2d qualified as Axis2d
-import {-# SOURCE #-} OpenSolid.Curve2d (Curve2d)
-import {-# SOURCE #-} OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Point2d qualified as Point2d
+import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
 import {-# SOURCE #-} OpenSolid.Surface1d.Function qualified as Function
 import OpenSolid.Surface1d.Function.HorizontalCurve qualified as HorizontalCurve
 import OpenSolid.Surface1d.Function.Subproblem (Subproblem (Subproblem))
 import OpenSolid.Surface1d.Function.Subproblem qualified as Subproblem
 import OpenSolid.Surface1d.Function.VerticalCurve qualified as VerticalCurve
+import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvCoordinates, UvDirection, UvPoint)
 import OpenSolid.Uv.Derivatives qualified as Derivatives
 import OpenSolid.Vector2d qualified as Vector2d
-import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvCoordinates, UvDirection, UvPoint)
 
 data SaddleRegion units = SaddleRegion
   { subproblem :: Subproblem units

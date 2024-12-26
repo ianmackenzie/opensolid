@@ -21,9 +21,9 @@ module OpenSolid.Volume1d.Function
 where
 
 import OpenSolid.Angle qualified as Angle
-import OpenSolid.Prelude
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
+import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Range (Range)
 import OpenSolid.Range qualified as Range

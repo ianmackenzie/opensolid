@@ -3,9 +3,9 @@ module Tests.Stream (tests) where
 import OpenSolid.Float qualified as Float
 import OpenSolid.Prelude
 import OpenSolid.Stream qualified as Stream
+import OpenSolid.Tolerance qualified as Tolerance
 import Test (Test)
 import Test qualified
-import OpenSolid.Tolerance qualified as Tolerance
 
 tests :: List Test
 tests =

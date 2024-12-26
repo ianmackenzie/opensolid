@@ -25,10 +25,10 @@ module OpenSolid.Units
   )
 where
 
-import OpenSolid.Bootstrap
 import Data.Coerce qualified
 import Data.Kind (Constraint)
 import Data.List.NonEmpty (NonEmpty)
+import OpenSolid.Bootstrap
 import {-# SOURCE #-} OpenSolid.Qty (Qty)
 import {-# SOURCE #-} OpenSolid.Result (Result (Failure, Success))
 import {-# SOURCE #-} OpenSolid.Sign (Sign)

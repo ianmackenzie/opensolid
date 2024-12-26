@@ -1,10 +1,10 @@
 module OpenSolid.CubicSpline2d (fromControlPoints) where
 
-import OpenSolid.Prelude
 import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Point2d (Point2d)
+import OpenSolid.Prelude
 
 fromControlPoints ::
   Point2d (space @ units) ->

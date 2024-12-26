@@ -25,9 +25,9 @@ import OpenSolid.List qualified as List
 import OpenSolid.Prelude
 import OpenSolid.Random (Generator)
 import OpenSolid.Random qualified as Random
+import OpenSolid.Text qualified as Text
 import System.Console.ANSI qualified
 import System.Environment
-import OpenSolid.Text qualified as Text
 import Text.Printf qualified
 import Prelude qualified
 

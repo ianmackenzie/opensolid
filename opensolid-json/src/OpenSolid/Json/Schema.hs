@@ -9,10 +9,10 @@ module OpenSolid.Json.Schema
   )
 where
 
+import OpenSolid.Json (Json)
 import OpenSolid.Map (Map)
 import OpenSolid.Map qualified as Map
 import OpenSolid.Prelude
-import OpenSolid.Json (Json)
 
 data Schema = Schema
   { title :: Maybe Text

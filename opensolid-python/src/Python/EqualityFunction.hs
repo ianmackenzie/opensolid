@@ -1,9 +1,9 @@
 module Python.EqualityFunction (definition) where
 
 import API.EqualityFunction qualified as EqualityFunction
-import OpenSolid.Prelude
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
+import OpenSolid.Prelude
 import Python qualified
 import Python.Function qualified
 import Python.Type qualified

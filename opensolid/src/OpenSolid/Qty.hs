@@ -32,22 +32,22 @@ module OpenSolid.Qty
   )
 where
 
-import OpenSolid.Bootstrap
 import Data.Coerce qualified
 import Data.List.NonEmpty (NonEmpty ((:|)))
-import {-# SOURCE #-} OpenSolid.Float (Float, fromRational)
-import {-# SOURCE #-} OpenSolid.Float qualified as Float
 import Foreign.Storable (Storable)
 import GHC.Exts (Double (D#))
-import OpenSolid.List qualified as List
-import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Arithmetic
 import OpenSolid.Arithmetic.Unboxed
+import OpenSolid.Bootstrap
+import {-# SOURCE #-} OpenSolid.Float (Float, fromRational)
+import {-# SOURCE #-} OpenSolid.Float qualified as Float
+import OpenSolid.List qualified as List
+import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Random.Internal qualified as Random
 import OpenSolid.Sign (Sign (Negative, Positive))
-import System.Random qualified
 import OpenSolid.Units (Unitless, (:*:), (:/:))
 import OpenSolid.Units qualified as Units
+import System.Random qualified
 import Prelude qualified
 
 type role Qty phantom

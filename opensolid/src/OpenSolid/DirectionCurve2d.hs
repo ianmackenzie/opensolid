@@ -22,6 +22,7 @@ where
 import OpenSolid.Angle (Angle)
 import OpenSolid.Basis2d (Basis2d)
 import OpenSolid.Basis2d qualified as Basis2d
+import OpenSolid.Curve1d (Curve1d)
 import OpenSolid.Direction2d (Direction2d)
 import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.DirectionBounds2d (DirectionBounds2d)
@@ -29,13 +30,12 @@ import OpenSolid.DirectionBounds2d qualified as DirectionBounds2d
 import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Frame2d qualified as Frame2d
 import OpenSolid.Prelude
-import OpenSolid.Curve1d (Curve1d)
+import OpenSolid.Range (Range)
+import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2d (Vector2d)
 import OpenSolid.Vector2d qualified as Vector2d
 import OpenSolid.VectorCurve2d (VectorCurve2d)
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
-import OpenSolid.Range (Range)
-import OpenSolid.Units qualified as Units
 
 newtype DirectionCurve2d space = DirectionCurve2d (VectorCurve2d (space @ Unitless))
   deriving (Show)

@@ -8,9 +8,9 @@ module OpenSolid.Polyline2d
 where
 
 import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
-import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Vertex2d (Vertex2d)
 import OpenSolid.Vertex2d qualified as Vertex2d
 

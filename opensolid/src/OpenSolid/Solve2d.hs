@@ -13,6 +13,7 @@ module OpenSolid.Solve2d
   )
 where
 
+import OpenSolid.Arithmetic.Unboxed
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.Domain1d qualified as Domain1d
@@ -21,20 +22,19 @@ import OpenSolid.Domain2d qualified as Domain2d
 import OpenSolid.Error qualified as Error
 import OpenSolid.List qualified as List
 import OpenSolid.Maybe qualified as Maybe
-import OpenSolid.Prelude
-import OpenSolid.Arithmetic.Unboxed
+import OpenSolid.Pair qualified as Pair
 import OpenSolid.Point2d (Point2d (Point2d#))
 import OpenSolid.Point2d qualified as Point2d
+import OpenSolid.Prelude
 import OpenSolid.Qty (Qty (Qty#))
 import OpenSolid.Qty qualified as Qty
-import OpenSolid.Vector2d (Vector2d (Vector2d))
-import OpenSolid.Vector2d qualified as Vector2d
-import OpenSolid.Pair qualified as Pair
 import OpenSolid.Queue (Queue)
 import OpenSolid.Queue qualified as Queue
 import OpenSolid.Range qualified as Range
 import OpenSolid.Result qualified as Result
 import OpenSolid.SurfaceParameter (UvBounds, UvPoint)
+import OpenSolid.Vector2d (Vector2d (Vector2d))
+import OpenSolid.Vector2d qualified as Vector2d
 import OpenSolid.VectorBounds2d (VectorBounds2d)
 
 data RecursionType

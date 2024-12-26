@@ -43,13 +43,14 @@ module OpenSolid.Vector3d
   )
 where
 
+import Data.Coerce qualified
 import OpenSolid.Angle (Angle)
 import OpenSolid.Area qualified as Area
+import OpenSolid.Arithmetic.Unboxed
 import {-# SOURCE #-} OpenSolid.Axis3d (Axis3d)
 import {-# SOURCE #-} OpenSolid.Axis3d qualified as Axis3d
 import {-# SOURCE #-} OpenSolid.Basis3d (Basis3d)
 import {-# SOURCE #-} OpenSolid.Basis3d qualified as Basis3d
-import Data.Coerce qualified
 import {-# SOURCE #-} OpenSolid.Direction3d (Direction3d)
 import {-# SOURCE #-} OpenSolid.Direction3d qualified as Direction3d
 import OpenSolid.Error qualified as Error
@@ -57,10 +58,9 @@ import {-# SOURCE #-} OpenSolid.Frame3d (Frame3d)
 import {-# SOURCE #-} OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
-import OpenSolid.Prelude
-import OpenSolid.Arithmetic.Unboxed
 import {-# SOURCE #-} OpenSolid.Point3d (Point3d)
 import {-# SOURCE #-} OpenSolid.Point3d qualified as Point3d
+import OpenSolid.Prelude
 import OpenSolid.Qty (Qty (Qty#))
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Transform3d (Transform3d (Transform3d))

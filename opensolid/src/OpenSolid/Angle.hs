@@ -25,9 +25,9 @@ module OpenSolid.Angle
   )
 where
 
+import OpenSolid.Arithmetic
 import OpenSolid.Float (Float, fromRational)
 import OpenSolid.Float qualified as Float
-import OpenSolid.Arithmetic
 import OpenSolid.Qty (Qty (Qty))
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Units (Radians)

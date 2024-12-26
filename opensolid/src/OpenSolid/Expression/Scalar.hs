@@ -28,9 +28,9 @@ module OpenSolid.Expression.Scalar
 where
 
 import Data.Int (Int64)
-import OpenSolid.Float qualified as Float
 import Foreign qualified
 import Foreign.Marshal.Array qualified
+import OpenSolid.Float qualified as Float
 import OpenSolid.IO qualified as IO
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
@@ -38,11 +38,11 @@ import OpenSolid.Prelude
 import OpenSolid.Qty (Qty (Qty))
 import OpenSolid.SurfaceParameter (SurfaceParameter, UvPoint)
 import OpenSolid.SurfaceParameter qualified as SurfaceParameter
-import System.IO.Unsafe (unsafeDupablePerformIO)
 import OpenSolid.Text qualified as Text
 import OpenSolid.Units qualified as Units
 import OpenSolid.VolumeParameter (UvwPoint, VolumeParameter)
 import OpenSolid.VolumeParameter qualified as VolumeParameter
+import System.IO.Unsafe (unsafeDupablePerformIO)
 import Prelude (Double)
 
 data Scalar input where

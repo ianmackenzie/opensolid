@@ -7,8 +7,8 @@ module OpenSolid.Uv.Derivatives
 where
 
 import OpenSolid.Prelude
-import OpenSolid.Text qualified as Text
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
+import OpenSolid.Text qualified as Text
 import Prelude qualified
 
 data Derivatives a

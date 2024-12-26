@@ -14,18 +14,18 @@ module OpenSolid.Surface1d.Function.PartialZeros
   )
 where
 
+import {-# SOURCE #-} OpenSolid.Curve2d (Curve2d)
+import {-# SOURCE #-} OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Domain2d qualified as Domain2d
 import OpenSolid.List qualified as List
 import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude
-import {-# SOURCE #-} OpenSolid.Curve2d (Curve2d)
-import {-# SOURCE #-} OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Surface1d.Function.SaddleRegion (SaddleRegion)
 import OpenSolid.Surface1d.Function.SaddleRegion qualified as SaddleRegion
 import OpenSolid.Surface1d.Function.Zeros (Zeros (..))
 import OpenSolid.Surface1d.Function.Zeros qualified as Zeros
-import OpenSolid.Pair qualified as Pair
 import OpenSolid.SurfaceParameter (UvBounds, UvCoordinates, UvPoint)
 
 data PartialZeros units = PartialZeros
