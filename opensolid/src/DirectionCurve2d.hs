@@ -22,20 +22,20 @@ where
 import Angle (Angle)
 import Basis2d (Basis2d)
 import Basis2d qualified
-import Curve1d (Curve1d)
 import Direction2d (Direction2d)
 import Direction2d qualified
 import DirectionBounds2d (DirectionBounds2d)
 import DirectionBounds2d qualified
 import Frame2d (Frame2d)
 import Frame2d qualified
-import OpenSolid
+import OpenSolid.Prelude
+import OpenSolid.Curve1d (Curve1d)
+import OpenSolid.Vector2d (Vector2d)
+import OpenSolid.Vector2d qualified as Vector2d
+import OpenSolid.VectorCurve2d (VectorCurve2d)
+import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 import Range (Range)
 import Units qualified
-import Vector2d (Vector2d)
-import Vector2d qualified
-import VectorCurve2d (VectorCurve2d)
-import VectorCurve2d qualified
 
 newtype DirectionCurve2d space = DirectionCurve2d (VectorCurve2d (space @ Unitless))
   deriving (Show)

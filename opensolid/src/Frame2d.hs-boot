@@ -9,8 +9,8 @@ where
 
 import {-# SOURCE #-} Basis2d (Basis2d)
 import {-# SOURCE #-} Direction2d (Direction2d)
-import OpenSolid
-import {-# SOURCE #-} Point2d (Point2d)
+import OpenSolid.Prelude
+import {-# SOURCE #-} OpenSolid.Point2d (Point2d)
 
 type role Frame2d nominal nominal
 

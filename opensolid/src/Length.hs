@@ -25,8 +25,8 @@ module Length
   )
 where
 
-import OpenSolid
-import Qty qualified
+import OpenSolid.Prelude
+import OpenSolid.Qty qualified as Qty
 import Units (Meters)
 import Units qualified
 

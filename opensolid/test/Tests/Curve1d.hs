@@ -1,10 +1,10 @@
 module Tests.Curve1d (tests) where
 
 import Angle qualified
-import Curve1d ()
-import Curve1d qualified
-import Curve1d.Zero (Zero (Zero))
-import OpenSolid
+import OpenSolid.Prelude
+import OpenSolid.Curve1d ()
+import OpenSolid.Curve1d qualified as Curve1d
+import OpenSolid.Curve1d.Zero (Zero (Zero))
 import Test (Test)
 import Test qualified
 import Tolerance qualified

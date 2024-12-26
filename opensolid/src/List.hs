@@ -62,11 +62,11 @@ module List
   )
 where
 
-import Arithmetic
-import Basics
 import Data.List qualified
+import OpenSolid.Arithmetic
+import OpenSolid.Bootstrap
+import OpenSolid.Random.Internal qualified as Random
 import Pair qualified
-import Random.Internal qualified as Random
 import System.Random qualified
 import Prelude qualified
 

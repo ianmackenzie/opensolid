@@ -12,11 +12,11 @@ import Data.Proxy (Proxy (Proxy))
 import Foreign (Ptr)
 import IO qualified
 import List qualified
-import OpenSolid
+import OpenSolid.Prelude
 import OpenSolid.FFI (FFI, Name)
 import OpenSolid.FFI qualified as FFI
+import OpenSolid.Text qualified as Text
 import Pair qualified
-import Text qualified
 import Tolerance qualified
 import Units (Meters, Radians)
 

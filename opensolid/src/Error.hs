@@ -4,9 +4,9 @@ module Error
   )
 where
 
-import Arithmetic
-import Basics
-import {-# SOURCE #-} Text qualified
+import OpenSolid.Arithmetic
+import OpenSolid.Bootstrap
+import {-# SOURCE #-} OpenSolid.Text qualified as Text
 
 class (Eq error, Show error) => Message error where
   message :: error -> Text

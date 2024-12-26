@@ -9,14 +9,14 @@ module Debug
   )
 where
 
-import Arithmetic
-import Basics
 import Composition
 import Control.Exception qualified
 import Data.Text qualified
 import Debug.Trace qualified
 import GHC.Stack qualified
-import Text qualified
+import OpenSolid.Arithmetic
+import OpenSolid.Bootstrap
+import OpenSolid.Text qualified as Text
 import Prelude qualified
 
 newtype Debug = Debug (() -> ())

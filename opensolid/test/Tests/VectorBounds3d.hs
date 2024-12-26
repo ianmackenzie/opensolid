@@ -1,12 +1,12 @@
 module Tests.VectorBounds3d (tests) where
 
-import OpenSolid
+import OpenSolid.Prelude
+import OpenSolid.Vector3d qualified as Vector3d
 import Parameter qualified
 import Test (Test)
 import Test qualified
 import Tests.Random qualified
 import Units (Meters)
-import Vector3d qualified
 import VectorBounds3d qualified
 
 tests :: Tolerance Meters => List Test

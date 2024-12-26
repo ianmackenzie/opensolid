@@ -9,14 +9,14 @@ module Python.FFI
 where
 
 import List qualified
-import OpenSolid
+import OpenSolid.Prelude
 import OpenSolid.FFI qualified as FFI
 import Pair qualified
 import Python qualified
 import Python.Class qualified
 import Python.Type.Registry (Registry)
 import Python.Type.Registry qualified
-import Text qualified
+import OpenSolid.Text qualified as Text
 
 typeName :: FFI.Type -> Text
 typeName ffiType = case ffiType of

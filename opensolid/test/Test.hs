@@ -22,12 +22,12 @@ import Error qualified
 import Float qualified
 import IO qualified
 import List qualified
-import OpenSolid
-import Random (Generator)
-import Random qualified
+import OpenSolid.Prelude
+import OpenSolid.Random (Generator)
+import OpenSolid.Random qualified as Random
 import System.Console.ANSI qualified
 import System.Environment
-import Text qualified
+import OpenSolid.Text qualified as Text
 import Text.Printf qualified
 import Prelude qualified
 

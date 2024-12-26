@@ -6,7 +6,7 @@ import API.Constraint (Constraint)
 import File qualified
 import List qualified
 import Maybe qualified
-import OpenSolid
+import OpenSolid.Prelude
 import OpenSolid.FFI qualified as FFI
 import Pair qualified
 import Python qualified
@@ -24,7 +24,7 @@ import Python.PreOperator qualified
 import Python.StaticFunction qualified
 import Python.Type.Registry (Registry)
 import Python.Type.Registry qualified
-import Text qualified
+import OpenSolid.Text qualified as Text
 
 preamble :: Text
 preamble =

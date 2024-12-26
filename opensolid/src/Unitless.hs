@@ -1,5 +1,5 @@
 module Unitless (Unitless) where
 
-import Basics
+import OpenSolid.Bootstrap
 
 data Unitless deriving (Eq, Show)

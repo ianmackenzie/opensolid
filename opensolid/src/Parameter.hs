@@ -12,9 +12,9 @@ where
 
 import Float qualified
 import List qualified
-import OpenSolid
+import OpenSolid.Prelude
 import Quadrature qualified
-import Random qualified
+import OpenSolid.Random qualified as Random
 import {-# SOURCE #-} Range (Range)
 import {-# SOURCE #-} Range qualified
 

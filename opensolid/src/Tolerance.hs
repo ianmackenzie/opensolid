@@ -13,13 +13,13 @@ module Tolerance
   )
 where
 
-import Arithmetic
-import Basics
 import Composition
 import Float (fromRational)
 import NonEmpty (NonEmpty ((:|)), pattern NonEmpty)
-import Qty (Qty)
-import Qty qualified
+import OpenSolid.Arithmetic
+import OpenSolid.Bootstrap
+import OpenSolid.Qty (Qty)
+import OpenSolid.Qty qualified as Qty
 import Units ((:*:))
 import Units qualified
 
@@ -86,7 +86,7 @@ instance
 
 infix 4 !=
 
-{- | Take an expression which would normally require a tolerance,
+{-| Take an expression which would normally require a tolerance,
 and evaluate it using a tolerance of zero. For example, the expression
 
   value ^ range

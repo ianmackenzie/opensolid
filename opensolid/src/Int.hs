@@ -19,10 +19,10 @@ where
 
 import List qualified
 import NonEmpty qualified
-import OpenSolid
-import Random.Internal (Generator (Generator))
+import OpenSolid.Prelude
+import OpenSolid.Random.Internal (Generator (Generator))
+import OpenSolid.Text.Parse qualified as Text.Parse
 import System.Random qualified
-import Text.Parse qualified
 import Prelude qualified
 
 parse :: Text -> Result Text Int

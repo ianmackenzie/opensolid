@@ -3,8 +3,8 @@ module Main (main) where
 import API qualified
 import File qualified
 import List qualified
-import OpenSolid
-import Text qualified
+import OpenSolid.Prelude
+import OpenSolid.Text qualified as Text
 
 main :: IO ()
 main = do

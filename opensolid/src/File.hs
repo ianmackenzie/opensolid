@@ -7,9 +7,9 @@ where
 
 import Data.ByteString qualified
 import IO qualified
-import OpenSolid
+import OpenSolid.Prelude
 import System.Directory
-import Text qualified
+import OpenSolid.Text qualified as Text
 
 readFrom :: Text -> IO Text
 readFrom path = IO.do

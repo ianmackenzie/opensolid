@@ -15,16 +15,16 @@ where
 import Data.ByteString (ByteString)
 import Data.ByteString qualified
 import Data.CaseInsensitive qualified
-import Json qualified
-import Json.Format qualified
 import List qualified
 import Network.HTTP.Types (Status)
 import Network.HTTP.Types qualified
 import Network.HTTP.Types.Status qualified as Status
 import Network.Wai (Response)
 import Network.Wai qualified
-import OpenSolid
-import Text qualified
+import OpenSolid.Prelude
+import OpenSolid.Json qualified as Json
+import OpenSolid.Json.Format qualified as Json.Format
+import OpenSolid.Text qualified as Text
 
 custom :: Status -> List (Text, Text) -> ByteString -> Response
 custom status headers bytes =

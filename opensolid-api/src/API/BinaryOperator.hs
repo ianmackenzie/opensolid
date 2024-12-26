@@ -6,10 +6,10 @@ module API.BinaryOperator
 where
 
 import Data.Proxy (Proxy (Proxy))
-import OpenSolid
+import OpenSolid.Prelude
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
-import Text qualified
+import OpenSolid.Text qualified as Text
 
 data Id = Add | Sub | Mul | Div | FloorDiv | Mod | Dot | Cross deriving (Eq)
 

@@ -1,6 +1,6 @@
 module Range (Range, from) where
 
-import OpenSolid
+import OpenSolid.Prelude
 
 type role Range phantom
 

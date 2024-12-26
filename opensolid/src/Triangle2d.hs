@@ -6,7 +6,7 @@ module Triangle2d
   )
 where
 
-import OpenSolid
+import OpenSolid.Prelude
 import Units qualified
 import Vertex2d (Vertex2d)
 import Vertex2d qualified

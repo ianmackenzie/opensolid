@@ -38,8 +38,6 @@ module Bounds2d
   )
 where
 
-import Axis2d (Axis2d)
-import Axis2d qualified
 import Bounds qualified
 import Data.Coerce qualified
 import Direction2d qualified
@@ -48,19 +46,21 @@ import Frame2d (Frame2d)
 import Frame2d qualified
 import Fuzzy qualified
 import Maybe qualified
-import OpenSolid
+import OpenSolid.Prelude
+import OpenSolid.Axis2d (Axis2d)
+import OpenSolid.Axis2d qualified as Axis2d
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
-import Point2d (Point2d (Point2d))
-import Point2d qualified
-import Qty qualified
+import OpenSolid.Point2d (Point2d (Point2d))
+import OpenSolid.Point2d qualified as Point2d
+import OpenSolid.Qty qualified as Qty
+import OpenSolid.Vector2d (Vector2d (Vector2d))
+import OpenSolid.Vector2d qualified as Vector2d
 import Range (Range (Range))
 import Range qualified
 import Transform2d (Transform2d (Transform2d))
 import Units (Meters)
 import Units qualified
-import Vector2d (Vector2d (Vector2d))
-import Vector2d qualified
 import VectorBounds2d (VectorBounds2d (VectorBounds2d))
 
 type role Bounds2d phantom

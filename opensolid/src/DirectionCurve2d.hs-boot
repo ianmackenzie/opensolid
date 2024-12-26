@@ -5,8 +5,8 @@ module DirectionCurve2d
   )
 where
 
-import OpenSolid
-import {-# SOURCE #-} VectorCurve2d (VectorCurve2d)
+import OpenSolid.Prelude
+import {-# SOURCE #-} OpenSolid.VectorCurve2d (VectorCurve2d)
 
 newtype DirectionCurve2d space = DirectionCurve2d (VectorCurve2d (space @ Unitless))
 

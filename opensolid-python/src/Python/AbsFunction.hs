@@ -1,7 +1,7 @@
 module Python.AbsFunction (definition) where
 
 import API.AbsFunction qualified as AbsFunction
-import OpenSolid
+import OpenSolid.Prelude
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import Python qualified

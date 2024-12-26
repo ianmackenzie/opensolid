@@ -8,13 +8,13 @@ import Estimate qualified
 import Float qualified
 import Length qualified
 import Line2d qualified
-import OpenSolid
-import Point2d qualified
-import Qty (zero)
+import OpenSolid.Prelude
+import OpenSolid.Qty (zero)
+import OpenSolid.Point2d qualified as Point2d
 import Range qualified
-import Region2d (Region2d)
-import Region2d qualified
-import Region2d.BoundedBy qualified
+import OpenSolid.Region2d (Region2d)
+import OpenSolid.Region2d qualified as Region2d
+import OpenSolid.Region2d.BoundedBy qualified as Region2d.BoundedBy
 import Test (Test)
 import Test qualified
 import Units (Meters)

@@ -1,8 +1,8 @@
 module API.Docs (docs) where
 
 import Language.Haskell.TH qualified as TH
-import OpenSolid
-import Text qualified
+import OpenSolid.Prelude
+import OpenSolid.Text qualified as Text
 import Prelude qualified
 
 docs :: TH.Name -> TH.Q TH.Exp

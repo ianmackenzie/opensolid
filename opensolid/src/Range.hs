@@ -77,12 +77,12 @@ import Fuzzy qualified
 import Length qualified
 import List qualified
 import NonEmpty qualified
-import OpenSolid
+import OpenSolid.Prelude
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
+import OpenSolid.Qty qualified as Qty
+import OpenSolid.Random qualified as Random
 import Parameter qualified
-import Qty qualified
-import Random qualified
 import Units (Meters, Radians, SquareMeters)
 import Units qualified
 

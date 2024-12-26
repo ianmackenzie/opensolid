@@ -1,7 +1,7 @@
 module Error (Message) where
 
-import Basics
 import Data.Kind (Constraint)
+import OpenSolid.Bootstrap
 
 type Message :: Type -> Constraint
 class Message error

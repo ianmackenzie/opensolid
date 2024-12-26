@@ -9,10 +9,10 @@ where
 
 import Data.Proxy (Proxy (Proxy))
 import Foreign (Ptr)
-import OpenSolid
+import OpenSolid.Prelude
 import OpenSolid.FFI (FFI, Name)
 import OpenSolid.FFI qualified as FFI
-import Text qualified
+import OpenSolid.Text qualified as Text
 
 data Constant where
   Constant :: FFI a => a -> Text -> Constant

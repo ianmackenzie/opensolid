@@ -9,7 +9,7 @@ module Transform
   )
 where
 
-import OpenSolid
+import OpenSolid.Prelude
 
 data Rigid = Rigid deriving (Eq, Show)
 

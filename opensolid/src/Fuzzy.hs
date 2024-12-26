@@ -10,8 +10,8 @@ module Fuzzy
   )
 where
 
-import Basics
 import Composition
+import OpenSolid.Bootstrap
 import Prelude (Applicative, Functor, Monad)
 import Prelude qualified
 

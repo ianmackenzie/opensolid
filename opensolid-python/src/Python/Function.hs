@@ -12,15 +12,15 @@ where
 import API.Constraint (Constraint)
 import API.Constraint qualified as Constraint
 import List qualified
-import OpenSolid hiding (Type)
 import OpenSolid.FFI (Name)
 import OpenSolid.FFI qualified as FFI
+import OpenSolid.Prelude hiding (Type)
+import OpenSolid.Text qualified as Text
 import Pair qualified
 import Python qualified
 import Python.Class qualified
 import Python.FFI qualified
 import Python.Type qualified
-import Text qualified
 
 overloadDeclaration :: Text -> Text
 overloadDeclaration signature =

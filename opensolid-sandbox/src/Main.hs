@@ -5,17 +5,12 @@ module Main (main) where
 import Angle qualified
 import Arc2d qualified
 import Area qualified
-import Axis2d qualified
 import BezierCurve2d qualified
 import Bounds2d (Bounds2d)
 import Bounds2d qualified
 import Color (Color)
 import Color qualified
 import CubicSpline2d qualified
-import Curve1d qualified
-import Curve2d (Curve2d)
-import Curve2d qualified
-import Curve2d.MedialAxis qualified
 import Debug qualified
 import Direction2d qualified
 import Direction3d ()
@@ -23,9 +18,6 @@ import DirectionCurve2d qualified
 import Drawing2d qualified
 import Duration (Duration)
 import Duration qualified
-import Expression (Expression)
-import Expression qualified
-import Expression.Curve1d qualified
 import Float qualified
 import IO qualified
 import Int qualified
@@ -33,29 +25,37 @@ import Length (Length)
 import Length qualified
 import List qualified
 import NonEmpty qualified
-import OpenSolid
+import OpenSolid.Prelude
+import OpenSolid.Axis2d qualified as Axis2d
+import OpenSolid.Curve1d qualified as Curve1d
+import OpenSolid.Curve2d (Curve2d)
+import OpenSolid.Curve2d qualified as Curve2d
+import OpenSolid.Curve2d.MedialAxis qualified as Curve2d.MedialAxis
+import OpenSolid.Expression (Expression)
+import OpenSolid.Expression qualified as Expression
+import OpenSolid.Expression.Curve1d qualified as Expression.Curve1d
+import OpenSolid.Point2d (Point2d)
+import OpenSolid.Point2d qualified as Point2d
+import OpenSolid.Qty qualified as Qty
+import OpenSolid.Random qualified as Random
+import OpenSolid.Surface1d.Function qualified as Surface1d.Function
+import OpenSolid.Surface1d.Function.Zeros qualified as Surface1d.Function.Zeros
+import OpenSolid.Text qualified as Text
+import OpenSolid.Vector2d qualified as Vector2d
+import OpenSolid.Vector3d qualified as Vector3d
+import OpenSolid.VectorCurve2d qualified as VectorCurve2d
+import OpenSolid.VectorSurface2d.Function qualified as VectorSurface2d.Function
 import Parameter qualified
-import Point2d (Point2d)
-import Point2d qualified
 import Polyline2d (Polyline2d (Polyline2d))
 import Polyline2d qualified
-import Qty qualified
 import QuadraticSpline2d qualified
-import Random qualified
 import Range qualified
 import Result qualified
 import Solve2d qualified
-import Surface1d.Function qualified
-import Surface1d.Function.Zeros qualified
 import SurfaceParameter (UvBounds, UvCoordinates, UvPoint, UvSpace)
 import SurfaceParameter qualified
-import Text qualified
 import Tolerance qualified
 import Units (Meters)
-import Vector2d qualified
-import Vector3d qualified
-import VectorCurve2d qualified
-import VectorSurface2d.Function qualified
 import Volume qualified
 
 data Global deriving (Eq, Show)

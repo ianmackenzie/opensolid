@@ -1,10 +1,10 @@
 module Python.Type (qualifiedName) where
 
 import List qualified
-import OpenSolid
+import OpenSolid.Prelude
 import OpenSolid.FFI qualified as FFI
 import Python.Class qualified
-import Text qualified
+import OpenSolid.Text qualified as Text
 
 qualifiedName :: FFI.Type -> Text
 qualifiedName ffiType = case ffiType of

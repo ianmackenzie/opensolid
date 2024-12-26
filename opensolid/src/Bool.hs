@@ -1,7 +1,7 @@
 module Bool (random) where
 
-import Basics
-import Random.Internal (Generator (Generator))
+import OpenSolid.Bootstrap
+import OpenSolid.Random.Internal (Generator (Generator))
 import System.Random qualified
 
 random :: Generator Bool

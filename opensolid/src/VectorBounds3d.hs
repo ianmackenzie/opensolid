@@ -43,14 +43,14 @@ import Direction3d qualified
 import Float qualified
 import {-# SOURCE #-} Frame3d (Frame3d)
 import {-# SOURCE #-} Frame3d qualified
-import OpenSolid
-import Qty qualified
+import OpenSolid.Prelude
+import OpenSolid.Qty qualified as Qty
+import OpenSolid.Vector3d qualified as Vector3d
 import Range (Range (Range))
 import Range qualified
 import Transform3d (Transform3d (Transform3d))
 import Units qualified
-import Vector3d (Vector3d (Vector3d))
-import Vector3d qualified
+import OpenSolid.Vector3d (Vector3d (Vector3d))
 
 type role VectorBounds3d phantom
 

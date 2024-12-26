@@ -30,9 +30,9 @@ where
 
 import List qualified
 import NonEmpty qualified
-import OpenSolid
+import OpenSolid.Prelude
+import OpenSolid.Qty qualified as Qty
 import Pair qualified
-import Qty qualified
 import Range (Range (Range))
 import Range qualified
 import Units qualified

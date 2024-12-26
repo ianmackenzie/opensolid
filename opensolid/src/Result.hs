@@ -14,12 +14,10 @@ module Result
   )
 where
 
-import Basics
-import Coalesce (Coalesce ((??)))
 import Composition
 import Error qualified
-import System.IO.Error
-import {-# SOURCE #-} Text qualified
+import OpenSolid.Bootstrap
+import {-# SOURCE #-} OpenSolid.Text qualified as Text
 import Prelude (Applicative, Functor, Monad, MonadFail)
 import Prelude qualified
 
@@ -58,17 +56,6 @@ instance Composition (IO ()) (Result x a) (IO a) where
 
 instance Composition (Result x ()) (IO a) (IO a) where
   result >> io = toIO result >> io
-
-instance a1 ~ a2 => Coalesce (Maybe a1) (Result x a2) (Result x a1) where
-  Just value ?? _ = Success value
-  Nothing ?? fallback = fallback
-
-instance a1 ~ a2 => Coalesce (IO a1) (Result x a2) (IO a1) where
-  io ?? fallback =
-    System.IO.Error.catchIOError io $
-      \_ -> case fallback of
-        Success value -> Prelude.return value
-        Failure error -> Prelude.fail (Text.unpack (Error.message error))
 
 (>>=) :: Result x a -> (a -> Result x b) -> Result x b
 Success value >>= function = function value

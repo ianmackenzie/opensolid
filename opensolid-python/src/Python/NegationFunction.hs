@@ -1,7 +1,7 @@
 module Python.NegationFunction (definition) where
 
 import API.NegationFunction qualified as NegationFunction
-import OpenSolid
+import OpenSolid.Prelude
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import Python qualified

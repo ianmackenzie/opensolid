@@ -1,7 +1,7 @@
 module Tests.Stream (tests) where
 
 import Float qualified
-import OpenSolid
+import OpenSolid.Prelude
 import Stream qualified
 import Test (Test)
 import Test qualified

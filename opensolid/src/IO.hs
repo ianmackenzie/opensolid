@@ -21,7 +21,6 @@ module IO
   )
 where
 
-import Basics
 import Composition
 import Control.Concurrent
 import Control.Concurrent.Async qualified as Async
@@ -32,10 +31,11 @@ import Duration qualified
 import Error qualified
 import Float qualified
 import List qualified
+import OpenSolid.Bootstrap
+import OpenSolid.Text qualified as Text
 import Result (Result (Failure, Success))
 import Result qualified
 import System.IO.Error qualified
-import Text qualified
 import Prelude qualified
 
 fail :: Error.Message x => x -> IO a

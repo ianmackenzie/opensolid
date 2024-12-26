@@ -16,8 +16,8 @@ import Maybe qualified
 import Network.HTTP.Types qualified
 import Network.Wai (Request)
 import Network.Wai qualified
-import OpenSolid
-import Text qualified
+import OpenSolid.Prelude
+import OpenSolid.Text qualified as Text
 
 method :: Request -> Text
 method = Network.Wai.requestMethod >> Text.assumeUtf8 >> Text.toUpper

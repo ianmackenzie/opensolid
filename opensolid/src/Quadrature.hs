@@ -10,7 +10,7 @@ module Quadrature
   )
 where
 
-import OpenSolid
+import OpenSolid.Prelude
 
 -- Values are adapted from https://pomax.github.io/bezierinfo/legendre-gauss.html
 -- with abscissae converted to cover the range [0, 1] and weights halved as a result

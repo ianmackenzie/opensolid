@@ -38,17 +38,17 @@ module Float
   )
 where
 
-import Arithmetic
-import Basics
+import OpenSolid.Bootstrap
 import Data.Coerce qualified
 import NonEmpty (NonEmpty)
 import NonEmpty qualified
-import Qty (Qty (Qty))
-import Qty qualified
-import Random.Internal qualified as Random
+import OpenSolid.Arithmetic
+import OpenSolid.Qty (Qty (Qty))
+import OpenSolid.Qty qualified as Qty
+import OpenSolid.Random.Internal qualified as Random
+import OpenSolid.Text.Parse qualified as Text.Parse
 import {-# SOURCE #-} Result (Result)
 import Sign (Sign)
-import Text.Parse qualified
 import Units (Unitless)
 import Prelude qualified
 

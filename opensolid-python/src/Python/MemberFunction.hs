@@ -4,14 +4,14 @@ import API.MemberFunction (MemberFunction (..))
 import API.MemberFunction qualified as MemberFunction
 import List qualified
 import Maybe qualified
-import OpenSolid
+import OpenSolid.Prelude
 import OpenSolid.FFI (Name)
 import OpenSolid.FFI qualified as FFI
 import Pair qualified
 import Python qualified
 import Python.Function qualified
 import Python.Type qualified
-import Text qualified
+import OpenSolid.Text qualified as Text
 
 definition :: FFI.Id value -> (Name, MemberFunction value) -> Text
 definition classId (functionName, memberFunction) = do

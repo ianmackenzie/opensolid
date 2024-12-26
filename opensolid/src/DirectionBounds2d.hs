@@ -9,11 +9,11 @@ module DirectionBounds2d
 where
 
 import Direction2d (Direction2d)
-import OpenSolid
+import OpenSolid.Prelude
+import OpenSolid.Vector2d (Vector2d)
 import Range (Range)
 import Units qualified
-import Vector2d (Vector2d)
-import Vector2d qualified
+import OpenSolid.Vector2d qualified as Vector2d
 import VectorBounds2d (VectorBounds2d)
 import VectorBounds2d qualified
 

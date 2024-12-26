@@ -30,7 +30,7 @@ module Map
   )
 where
 
-import Basics
+import OpenSolid.Bootstrap
 import Data.Map.Strict (Map)
 import Data.Map.Strict qualified
 import Pair qualified

@@ -10,7 +10,7 @@ where
 import Data.Set (Set)
 import Data.Set qualified as Set
 import List qualified
-import OpenSolid
+import OpenSolid.Prelude
 import Pair qualified
 import Python qualified
 

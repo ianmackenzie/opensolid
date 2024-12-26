@@ -14,7 +14,7 @@ import Deque.Strict (Deque)
 import Deque.Strict qualified as Deque
 import List qualified
 import Maybe qualified
-import OpenSolid
+import OpenSolid.Prelude
 import Prelude qualified
 
 data Queue a = Queue Int (Deque a) deriving (Eq, Show)

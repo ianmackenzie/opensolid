@@ -12,7 +12,7 @@ module Stream
   )
 where
 
-import OpenSolid
+import OpenSolid.Prelude
 import Prelude qualified
 
 data Stream a = Stream a ~(Stream a)

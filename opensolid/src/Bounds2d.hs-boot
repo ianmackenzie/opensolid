@@ -6,8 +6,8 @@ module Bounds2d
 where
 
 import Bounds qualified
-import OpenSolid
-import {-# SOURCE #-} Point2d (Point2d)
+import OpenSolid.Prelude
+import {-# SOURCE #-} OpenSolid.Point2d (Point2d)
 import Range (Range)
 
 type role Bounds2d phantom

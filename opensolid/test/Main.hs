@@ -1,7 +1,7 @@
 module Main (main) where
 
 import Length qualified
-import OpenSolid
+import OpenSolid.Prelude
 import Test (Test)
 import Test qualified
 import Tests.Arc2d qualified

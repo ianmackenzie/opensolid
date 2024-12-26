@@ -29,8 +29,8 @@ import Direction3d qualified
 import Float qualified
 import {-# SOURCE #-} Frame3d (Frame3d)
 import {-# SOURCE #-} Frame3d qualified
-import OpenSolid
-import Vector3d qualified
+import OpenSolid.Prelude
+import OpenSolid.Vector3d qualified as Vector3d
 
 type role Basis3d nominal nominal
 

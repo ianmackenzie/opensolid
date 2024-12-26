@@ -1,9 +1,9 @@
 module Tests.Text (tests) where
 
-import OpenSolid
+import OpenSolid.Prelude
+import OpenSolid.Text qualified as Text
 import Test (Test)
 import Test qualified
-import Text qualified
 
 tests :: List Test
 tests =

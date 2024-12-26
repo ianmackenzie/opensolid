@@ -1,6 +1,6 @@
 module Intersects (Intersects ((^))) where
 
-import Basics
+import OpenSolid.Bootstrap
 import Tolerance (Tolerance)
 
 class Intersects b a units => Intersects a b units | a b -> units where

@@ -2,7 +2,7 @@ module Tests.Map (tests) where
 
 import Map (Map)
 import Map qualified
-import OpenSolid
+import OpenSolid.Prelude
 import Test (Test)
 import Test qualified
 

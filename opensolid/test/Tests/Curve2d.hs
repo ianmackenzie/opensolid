@@ -8,26 +8,28 @@ where
 import Angle qualified
 import Arc2d qualified
 import CubicSpline2d qualified
-import Curve1d qualified
-import Curve1d.Zero qualified
-import Curve2d (Curve2d)
-import Curve2d qualified
-import Curve2d.IntersectionPoint (IntersectionPoint (IntersectionPoint))
-import Curve2d.IntersectionPoint qualified as IntersectionPoint
-import Curve2d.OverlappingSegment (OverlappingSegment (OverlappingSegment))
 import Direction2d qualified
 import DirectionCurve2d qualified
 import Error qualified
 import Length qualified
 import List qualified
 import NonEmpty qualified
-import OpenSolid
+import OpenSolid.Prelude
+import OpenSolid.Curve1d qualified as Curve1d
+import OpenSolid.Curve1d.Zero qualified as Curve1d.Zero
+import OpenSolid.Curve2d (Curve2d)
+import OpenSolid.Curve2d qualified as Curve2d
+import OpenSolid.Curve2d.IntersectionPoint (IntersectionPoint (IntersectionPoint))
+import OpenSolid.Curve2d.IntersectionPoint qualified as IntersectionPoint
+import OpenSolid.Curve2d.OverlappingSegment (OverlappingSegment (OverlappingSegment))
+import OpenSolid.Point2d qualified as Point2d
+import OpenSolid.Qty qualified as Qty
+import OpenSolid.Random (Generator)
+import OpenSolid.Random qualified as Random
+import OpenSolid.Vector2d qualified as Vector2d
+import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 import Parameter qualified
-import Point2d qualified
-import Qty qualified
 import QuadraticSpline2d qualified
-import Random (Generator)
-import Random qualified
 import Range (Range (Range))
 import Range qualified
 import Sign qualified
@@ -36,8 +38,6 @@ import Test qualified
 import Tests.Random qualified as Random
 import Tolerance qualified
 import Units (Meters)
-import Vector2d qualified
-import VectorCurve2d qualified
 
 curveGenerators :: Tolerance Meters => List (Text, Generator (Curve2d (space @ Meters)))
 curveGenerators =

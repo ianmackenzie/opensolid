@@ -10,7 +10,7 @@ where
 import API.BinaryOperator qualified as BinaryOperator
 import Foreign (Ptr)
 import IO qualified
-import OpenSolid
+import OpenSolid.Prelude
 import OpenSolid.FFI (FFI, Name)
 import OpenSolid.FFI qualified as FFI
 

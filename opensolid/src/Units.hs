@@ -25,11 +25,11 @@ module Units
   )
 where
 
-import Basics
+import OpenSolid.Bootstrap
 import Data.Coerce qualified
 import Data.Kind (Constraint)
 import Data.List.NonEmpty (NonEmpty)
-import {-# SOURCE #-} Qty (Qty)
+import {-# SOURCE #-} OpenSolid.Qty (Qty)
 import {-# SOURCE #-} Result (Result (Failure, Success))
 import {-# SOURCE #-} Sign (Sign)
 import Unitless (Unitless)

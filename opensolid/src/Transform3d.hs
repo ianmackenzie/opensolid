@@ -42,15 +42,15 @@ import Data.Coerce qualified
 import {-# SOURCE #-} Direction3d (Direction3d)
 import {-# SOURCE #-} Direction3d qualified
 import {-# SOURCE #-} Frame3d (Frame3d)
-import OpenSolid hiding (identity)
-import {-# SOURCE #-} Point3d (Point3d)
-import {-# SOURCE #-} Point3d qualified
-import Point3d.CoordinateTransformation qualified as Point3d
+import {-# SOURCE #-} OpenSolid.Point3d (Point3d)
+import {-# SOURCE #-} OpenSolid.Point3d qualified as Point3d
+import OpenSolid.Point3d.CoordinateTransformation qualified as Point3d
+import OpenSolid.Prelude hiding (identity)
+import {-# SOURCE #-} OpenSolid.Vector3d (Vector3d)
+import {-# SOURCE #-} OpenSolid.Vector3d qualified as Vector3d
+import OpenSolid.Vector3d.CoordinateTransformation qualified as Vector3d
 import Transform qualified
 import Units qualified
-import {-# SOURCE #-} Vector3d (Vector3d)
-import {-# SOURCE #-} Vector3d qualified
-import Vector3d.CoordinateTransformation qualified as Vector3d
 
 type role Transform3d phantom nominal
 

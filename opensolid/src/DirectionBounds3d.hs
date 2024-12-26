@@ -10,11 +10,11 @@ module DirectionBounds3d
 where
 
 import Direction3d (Direction3d)
-import OpenSolid
+import OpenSolid.Prelude
 import Range (Range)
 import Units qualified
-import Vector3d (Vector3d)
-import Vector3d qualified
+import OpenSolid.Vector3d (Vector3d)
+import OpenSolid.Vector3d qualified as Vector3d
 import VectorBounds3d (VectorBounds3d)
 import VectorBounds3d qualified
 

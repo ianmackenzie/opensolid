@@ -8,7 +8,7 @@ import Angle (Angle)
 import Area (Area)
 import Data.Proxy (Proxy (Proxy))
 import Length (Length)
-import OpenSolid
+import OpenSolid.Prelude
 import OpenSolid.FFI qualified as FFI
 
 data Constraint

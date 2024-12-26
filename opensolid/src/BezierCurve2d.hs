@@ -4,18 +4,18 @@ module BezierCurve2d
   )
 where
 
-import Curve2d (Curve2d)
-import Curve2d qualified
-import Expression qualified
 import Float qualified
 import Int qualified
 import List qualified
-import OpenSolid
-import Point2d (Point2d)
-import Vector2d (Vector2d)
-import Vector2d qualified
+import OpenSolid.Prelude
+import OpenSolid.Curve2d (Curve2d)
+import OpenSolid.Curve2d qualified as Curve2d
+import OpenSolid.Expression qualified as Expression
+import OpenSolid.Point2d (Point2d)
+import OpenSolid.Vector2d (Vector2d)
+import OpenSolid.Vector2d qualified as Vector2d
 
-{- | Construct a Bezier curve from its start point (first control point), inner control points and
+{-| Construct a Bezier curve from its start point (first control point), inner control points and
 end point (last control point). For example,
 
 > BezierCurve2d.fromControlPoints p1 [ p2, p3 ] p4
@@ -25,7 +25,7 @@ will return a cubic spline with the given four control points.
 fromControlPoints :: NonEmpty (Point2d (space @ units)) -> Curve2d (space @ units)
 fromControlPoints = Curve2d.Parametric . Expression.bezierCurve
 
-{- | Construct a Bezier curve with the given start point, start derivatives, end point and end
+{-| Construct a Bezier curve with the given start point, start derivatives, end point and end
 derivatives. For example,
 
 > BezierCurve2d.hermite (p1, [v1]) (p2, [v2])

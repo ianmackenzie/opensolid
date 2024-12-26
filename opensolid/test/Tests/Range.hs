@@ -2,11 +2,11 @@ module Tests.Range (tests) where
 
 import Length (Length)
 import NonEmpty qualified
-import OpenSolid
+import OpenSolid.Prelude
+import OpenSolid.Qty qualified as Qty
 import Parameter qualified
-import Qty qualified
-import Random (Generator)
-import Random qualified
+import OpenSolid.Random (Generator)
+import OpenSolid.Random qualified as Random
 import Range (Range)
 import Range qualified
 import Test (Test)

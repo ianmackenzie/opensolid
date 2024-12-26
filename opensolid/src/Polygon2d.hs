@@ -9,8 +9,8 @@ where
 
 import List qualified
 import NonEmpty qualified
-import OpenSolid
-import Qty qualified
+import OpenSolid.Prelude
+import OpenSolid.Qty qualified as Qty
 import Triangle2d (Triangle2d (Triangle2d))
 import Triangle2d qualified
 import Vertex2d (Vertex2d)

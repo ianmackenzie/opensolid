@@ -21,20 +21,20 @@ where
 
 import Basis3d (Basis3d)
 import Basis3d qualified
-import Curve1d (Curve1d)
 import Direction3d (Direction3d)
 import Direction3d qualified
 import DirectionBounds3d (DirectionBounds3d)
 import DirectionBounds3d qualified
 import Frame3d (Frame3d)
 import Frame3d qualified
-import OpenSolid
+import OpenSolid.Curve1d (Curve1d)
+import OpenSolid.Prelude
+import OpenSolid.Vector3d (Vector3d)
+import OpenSolid.Vector3d qualified as Vector3d
+import OpenSolid.VectorCurve3d (VectorCurve3d)
+import OpenSolid.VectorCurve3d qualified as VectorCurve3d
 import Range (Range)
 import Units qualified
-import Vector3d (Vector3d)
-import Vector3d qualified
-import VectorCurve3d (VectorCurve3d)
-import VectorCurve3d qualified
 
 newtype DirectionCurve3d space = DirectionCurve3d (VectorCurve3d (space @ Unitless))
   deriving (Show)

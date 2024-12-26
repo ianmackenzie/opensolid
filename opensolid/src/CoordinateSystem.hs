@@ -7,7 +7,7 @@ module CoordinateSystem
   )
 where
 
-import Basics
+import OpenSolid.Bootstrap
 import Units (HasUnits)
 import Units qualified
 

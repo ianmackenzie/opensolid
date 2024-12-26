@@ -35,22 +35,22 @@ where
 
 import Angle (Angle)
 import Angle qualified
-import {-# SOURCE #-} Axis2d (Axis2d)
 import {-# SOURCE #-} Basis2d (Basis2d)
 import Error qualified
 import {-# SOURCE #-} Frame2d (Frame2d)
-import OpenSolid
+import OpenSolid.Prelude
+import {-# SOURCE #-} OpenSolid.Axis2d (Axis2d)
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
-import {-# SOURCE #-} Point2d (Point2d)
-import Qty qualified
-import Random qualified
+import {-# SOURCE #-} OpenSolid.Point2d (Point2d)
+import OpenSolid.Qty qualified as Qty
+import OpenSolid.Random qualified as Random
+import OpenSolid.Vector2d (Vector2d (Vector2d, Vector2d#))
+import OpenSolid.Vector2d qualified as Vector2d
 import Transform qualified
 import Transform2d (Transform2d)
 import Units (Radians)
 import Units qualified
-import Vector2d (Vector2d (Vector2d, Vector2d#))
-import Vector2d qualified
 
 type role Direction2d phantom
 

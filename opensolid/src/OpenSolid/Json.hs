@@ -1,65 +1,108 @@
 module OpenSolid.Json
-  ( angle
-  , length
-  , direction2d
-  , vector2d
-  , point2d
+  ( Json (.., OpenSolid.Json.Int, Object)
+  , Format
+  , Schema
+  , object
+  , text
+  , int
+  , float
+  , bool
+  , list
+  , map
+  , encode
+  , decode
   )
 where
 
-import Angle (Angle)
-import Angle qualified
-import Direction2d (Direction2d)
-import Direction2d qualified
-import Json qualified
-import Json.Format qualified
-import Length (Length)
-import Length qualified
-import OpenSolid
-import Point2d (Point2d)
-import Point2d qualified
-import Tolerance qualified
-import Units (Meters)
-import Vector2d (Vector2d)
-import Vector2d qualified
+import Composition
+import Data.Aeson qualified
+import Data.Aeson.KeyMap qualified
+import Data.ByteString (ByteString)
+import Data.ByteString qualified
+import Data.Scientific
+import Data.Vector qualified
+import Float qualified
+import List qualified
+import Map (Map)
+import Map qualified
+import OpenSolid.Prelude
+import {-# SOURCE #-} OpenSolid.Json.Format (Format)
+import {-# SOURCE #-} OpenSolid.Json.Schema (Schema)
+import OpenSolid.Text qualified as Text
+import Prelude qualified
 
-angle :: Json.Format Angle
-angle =
-  Json.Format.title "Angle" $
-    Json.Format.description "Units: radians" $
-      Json.Format.convert Angle.radians Angle.inRadians Json.Format.float
+data Json
+  = Null
+  | Bool Bool
+  | Float Float
+  | Text Text
+  | List (List Json)
+  | Map (Map Text Json)
+  deriving (Eq, Show)
 
-length :: Json.Format Length
-length =
-  Json.Format.title "Length" $
-    Json.Format.description "Units: meters" $
-      Json.Format.convert Length.meters Length.inMeters Json.Format.float
+pattern Int :: Int -> Json
+pattern Int n <- (toInt -> Just n)
 
-direction2d :: Json.Format (Direction2d space)
-direction2d =
-  Json.Format.title "Direction2d" $
-    Json.Format.description "A direction (unit vector) in 2D space, given by its X and Y components" $
-      Json.Format.examples [Direction2d.x] $
-        Tolerance.exactly $
-          Json.Format.lift Vector2d.direction Vector2d.unit $
-            Json.Format.object Vector2d.xy do
-              Json.Format.requiredField "x" Vector2d.xComponent Json.Format.float
-              Json.Format.requiredField "y" Vector2d.yComponent Json.Format.float
+toInt :: Json -> Maybe Int
+toInt (Float value) = do
+  let rounded = Float.round value
+  if Float.int rounded == value then Just rounded else Nothing
+toInt _ = Nothing
 
-vector2d :: Json.Format (Vector2d (space @ Meters))
-vector2d =
-  Json.Format.title "Vector2d" $
-    Json.Format.description "A displacement vector in 2D space, given by its X and Y components" $
-      Json.Format.examples [Vector2d.zero] $
-        Json.Format.object Vector2d.xy do
-          Json.Format.requiredField "x" Vector2d.xComponent length
-          Json.Format.requiredField "y" Vector2d.yComponent length
+pattern Object :: List (Text, Json) -> Json
+pattern Object fields <- (getFields -> Just fields)
 
-point2d :: Json.Format (Point2d (space @ Meters))
-point2d =
-  Json.Format.title "Point2d" $
-    Json.Format.description "A position in 2D space, given by its X and Y coordinates" $
-      Json.Format.examples [Point2d.origin] $
-        Json.Format.object Point2d.xy do
-          Json.Format.requiredField "x" Point2d.xCoordinate length
-          Json.Format.requiredField "y" Point2d.yCoordinate length
+getFields :: Json -> Maybe (List (Text, Json))
+getFields (Map fields) = Just (Map.toList fields)
+getFields _ = Nothing
+
+int :: Int -> Json
+int = Float.int >> Float
+
+float :: Float -> Json
+float = Float
+
+bool :: Bool -> Json
+bool = Bool
+
+text :: Text -> Json
+text = Text
+
+list :: (a -> Json) -> List a -> Json
+list encodeItem items = List (List.map encodeItem items)
+
+object :: List (Text, Json) -> Json
+object fields = Map (Map.fromKeyValuePairs fields)
+
+map :: Map Text Json -> Json
+map = Map
+
+instance Data.Aeson.ToJSON Json where
+  toJSON json = case json of
+    Null -> Data.Aeson.Null
+    Bool value -> Data.Aeson.toJSON value
+    Float value -> Data.Aeson.toJSON (Float.toDouble value)
+    Text value -> Data.Aeson.toJSON value
+    List values -> Data.Aeson.toJSON values
+    Map fields -> Data.Aeson.toJSON fields
+
+instance Data.Aeson.FromJSON Json where
+  parseJSON = fromAeson >> Prelude.return
+
+fromAeson :: Data.Aeson.Value -> Json
+fromAeson aesonValue = case aesonValue of
+  Data.Aeson.Null -> Null
+  Data.Aeson.Bool value -> Bool value
+  Data.Aeson.Number value -> Float (Data.Scientific.toRealFloat value)
+  Data.Aeson.String value -> Text value
+  Data.Aeson.Array values -> List (List.map fromAeson (Data.Vector.toList values))
+  Data.Aeson.Object values -> Map (Map.map fromAeson (Data.Aeson.KeyMap.toMapText values))
+
+encode :: Json -> ByteString
+encode = Data.Aeson.encode >> Data.ByteString.toStrict
+
+decode :: ByteString -> Result Text Json
+decode byteString =
+  case Data.Aeson.eitherDecodeStrict byteString of
+    Prelude.Right json -> Success json
+    Prelude.Left error -> Failure (Text.pack error)

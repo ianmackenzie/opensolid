@@ -7,7 +7,7 @@ module Basis3d
 where
 
 import {-# SOURCE #-} Direction3d (Direction3d)
-import OpenSolid
+import OpenSolid.Prelude
 
 type role Basis3d nominal nominal
 

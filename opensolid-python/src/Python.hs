@@ -10,8 +10,8 @@ module Python
 where
 
 import List qualified
-import OpenSolid
-import Text qualified
+import OpenSolid.Prelude
+import OpenSolid.Text qualified as Text
 
 lines :: List Text -> Text
 lines = Text.multiline

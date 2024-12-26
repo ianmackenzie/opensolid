@@ -4,7 +4,7 @@ import API.BinaryOperator qualified as BinaryOperator
 import API.PostOperator (PostOperator (..))
 import API.PostOperator qualified as PostOperator
 import List qualified
-import OpenSolid
+import OpenSolid.Prelude
 import OpenSolid.FFI qualified as FFI
 import Python qualified
 import Python.Function qualified

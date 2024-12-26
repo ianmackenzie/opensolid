@@ -2,7 +2,7 @@ module Tests.Direction2d (tests) where
 
 import Angle qualified
 import Direction2d qualified
-import OpenSolid
+import OpenSolid.Prelude
 import Test (Test)
 import Test qualified
 import Tolerance qualified

@@ -1,6 +1,6 @@
 module Tests.Float (tests) where
 
-import OpenSolid
+import OpenSolid.Prelude
 import Test (Test)
 import Test qualified
 import Tolerance qualified

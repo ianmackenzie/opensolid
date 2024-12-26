@@ -1,6 +1,6 @@
 module Transform3d (Transform3d) where
 
-import OpenSolid
+import OpenSolid.Prelude
 
 type role Transform3d phantom nominal
 

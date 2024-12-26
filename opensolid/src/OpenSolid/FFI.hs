@@ -40,8 +40,8 @@ import Int qualified
 import Length (Length)
 import List qualified
 import NonEmpty qualified
-import OpenSolid hiding (Type, pattern NonEmpty)
-import Text qualified
+import OpenSolid.Prelude hiding (Type, pattern NonEmpty)
+import OpenSolid.Text qualified as Text
 
 class FFI a where
   representation :: Proxy a -> Representation a

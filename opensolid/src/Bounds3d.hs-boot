@@ -6,8 +6,8 @@ module Bounds3d
 where
 
 import Bounds qualified
-import OpenSolid
-import {-# SOURCE #-} Point3d (Point3d)
+import {-# SOURCE #-} OpenSolid.Point3d (Point3d)
+import OpenSolid.Prelude
 import Range (Range)
 
 type role Bounds3d phantom

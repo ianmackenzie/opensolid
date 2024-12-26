@@ -10,8 +10,8 @@ where
 
 import {-# SOURCE #-} Basis3d (Basis3d)
 import {-# SOURCE #-} Direction3d (Direction3d)
-import OpenSolid
-import {-# SOURCE #-} Point3d (Point3d)
+import {-# SOURCE #-} OpenSolid.Point3d (Point3d)
+import OpenSolid.Prelude
 
 type role Frame3d nominal nominal
 

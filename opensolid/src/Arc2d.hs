@@ -19,24 +19,24 @@ where
 
 import Angle (Angle)
 import Angle qualified
-import Curve2d (Curve2d)
-import Curve2d qualified
 import Direction2d (Direction2d)
 import Direction2d qualified
-import Expression qualified
-import Expression.Curve1d qualified
-import Expression.Curve2d qualified
-import Expression.VectorCurve2d qualified
 import Float qualified
 import Frame2d (Frame2d)
 import Frame2d qualified
 import Line2d qualified
-import OpenSolid
-import Point2d (Point2d)
-import Point2d qualified
-import Qty qualified
-import Vector2d (Vector2d)
-import Vector2d qualified
+import OpenSolid.Prelude
+import OpenSolid.Curve2d (Curve2d)
+import OpenSolid.Curve2d qualified as Curve2d
+import OpenSolid.Expression qualified as Expression
+import OpenSolid.Expression.Curve1d qualified as Expression.Curve1d
+import OpenSolid.Expression.Curve2d qualified as Expression.Curve2d
+import OpenSolid.Expression.VectorCurve2d qualified as Expression.VectorCurve2d
+import OpenSolid.Point2d (Point2d)
+import OpenSolid.Point2d qualified as Point2d
+import OpenSolid.Qty qualified as Qty
+import OpenSolid.Vector2d (Vector2d)
+import OpenSolid.Vector2d qualified as Vector2d
 
 from ::
   Tolerance units =>

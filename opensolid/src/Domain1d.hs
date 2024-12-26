@@ -25,7 +25,7 @@ module Domain1d
 where
 
 import Float qualified
-import OpenSolid
+import OpenSolid.Prelude
 import Range (Range)
 import Range qualified
 

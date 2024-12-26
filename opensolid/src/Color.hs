@@ -49,8 +49,8 @@ import Data.Colour.RGBSpace qualified
 import Data.Colour.RGBSpace.HSL qualified
 import Data.Colour.SRGB qualified
 import Float qualified
-import OpenSolid
-import Text qualified
+import OpenSolid.Prelude
+import OpenSolid.Text qualified as Text
 
 -- | An RGB color value.
 type Color = Data.Colour.Colour Float

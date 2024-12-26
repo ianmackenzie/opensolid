@@ -36,21 +36,21 @@ where
 
 import Angle (Angle)
 import Angle qualified
-import {-# SOURCE #-} Axis2d (Axis2d)
-import {-# SOURCE #-} Axis2d qualified
 import Data.Coerce qualified
 import {-# SOURCE #-} Direction2d (Direction2d)
 import {-# SOURCE #-} Direction2d qualified
 import {-# SOURCE #-} Frame2d (Frame2d)
-import OpenSolid hiding (identity)
-import {-# SOURCE #-} Point2d (Point2d)
-import {-# SOURCE #-} Point2d qualified
-import Point2d.CoordinateTransformation qualified as Point2d
+import {-# SOURCE #-} OpenSolid.Axis2d (Axis2d)
+import {-# SOURCE #-} OpenSolid.Axis2d qualified as Axis2d
+import {-# SOURCE #-} OpenSolid.Point2d (Point2d)
+import {-# SOURCE #-} OpenSolid.Point2d qualified as Point2d
+import OpenSolid.Point2d.CoordinateTransformation qualified as Point2d
+import OpenSolid.Prelude hiding (identity)
+import {-# SOURCE #-} OpenSolid.Vector2d (Vector2d)
+import {-# SOURCE #-} OpenSolid.Vector2d qualified as Vector2d
+import OpenSolid.Vector2d.CoordinateTransformation qualified as Vector2d
 import Transform qualified
 import Units qualified
-import {-# SOURCE #-} Vector2d (Vector2d)
-import {-# SOURCE #-} Vector2d qualified
-import Vector2d.CoordinateTransformation qualified as Vector2d
 
 type role Transform2d phantom nominal
 

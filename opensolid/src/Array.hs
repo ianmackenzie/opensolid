@@ -14,7 +14,7 @@ import Data.Array ((!))
 import Data.Array qualified
 import Data.Foldable qualified
 import NonEmpty qualified
-import OpenSolid
+import OpenSolid.Prelude
 import Prelude qualified
 
 data Array a = Array Int (Data.Array.Array Int a)

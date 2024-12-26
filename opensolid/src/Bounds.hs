@@ -1,6 +1,6 @@
 module Bounds (Interface (..)) where
 
-import OpenSolid
+import OpenSolid.Prelude
 
 class Interface b where
   aggregate2 :: b -> b -> b

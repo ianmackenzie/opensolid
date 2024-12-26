@@ -10,8 +10,8 @@ import Foreign (Ptr)
 import Language.Haskell.TH qualified as TH
 import List qualified
 import NonEmpty qualified
-import OpenSolid
-import Text qualified
+import OpenSolid.Prelude
+import OpenSolid.Text qualified as Text
 import Prelude qualified
 
 type Function = Ptr () -> Ptr () -> IO ()

@@ -21,7 +21,7 @@ import Direction2d (Direction2d)
 import Direction2d qualified
 import {-# SOURCE #-} Frame2d (Frame2d)
 import {-# SOURCE #-} Frame2d qualified
-import OpenSolid
+import OpenSolid.Prelude
 
 type role Basis2d nominal nominal
 

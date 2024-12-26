@@ -26,23 +26,23 @@ import Bounds2d (Bounds2d)
 import Bounds2d qualified
 import Color (Color)
 import Color qualified
-import Curve2d (Curve2d)
-import Curve2d qualified
 import File qualified
 import Length (Length)
 import Length qualified
 import List qualified
 import Maybe qualified
 import NonEmpty qualified
-import OpenSolid
+import OpenSolid.Prelude
+import OpenSolid.Curve2d (Curve2d)
+import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
-import Point2d (Point2d)
-import Point2d qualified
+import OpenSolid.Point2d (Point2d)
+import OpenSolid.Point2d qualified as Point2d
 import Polyline2d (Polyline2d)
 import Polyline2d qualified
 import Range qualified
-import Text qualified
+import OpenSolid.Text qualified as Text
 import Units (Meters)
 import Vertex2d (Vertex2d)
 import Vertex2d qualified

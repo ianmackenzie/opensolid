@@ -27,7 +27,7 @@ where
 import Bounds2d qualified
 import Domain1d (Domain1d)
 import Domain1d qualified
-import OpenSolid
+import OpenSolid.Prelude
 import SurfaceParameter (UvBounds)
 
 data Domain2d = Domain2d Domain1d Domain1d deriving (Show)

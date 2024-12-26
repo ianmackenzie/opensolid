@@ -43,15 +43,15 @@ import Direction2d qualified
 import Float qualified
 import {-# SOURCE #-} Frame2d (Frame2d)
 import {-# SOURCE #-} Frame2d qualified
-import OpenSolid
-import Qty qualified
+import OpenSolid.Prelude
+import OpenSolid.Qty qualified as Qty
+import OpenSolid.Vector2d (Vector2d (Vector2d))
+import OpenSolid.Vector2d qualified as Vector2d
 import Range (Range (Range))
 import Range qualified
 import Transform2d (Transform2d (Transform2d))
 import Units (Radians)
 import Units qualified
-import Vector2d (Vector2d (Vector2d))
-import Vector2d qualified
 
 type role VectorBounds2d phantom
 

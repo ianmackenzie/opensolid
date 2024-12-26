@@ -4,7 +4,7 @@ import API.BinaryOperator qualified as BinaryOperator
 import API.PreOperator (PreOperator (..))
 import API.PreOperator qualified as PreOperator
 import List qualified
-import OpenSolid
+import OpenSolid.Prelude
 import OpenSolid.FFI qualified as FFI
 import Python qualified
 import Python.Function qualified

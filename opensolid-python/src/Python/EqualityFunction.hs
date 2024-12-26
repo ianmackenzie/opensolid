@@ -1,7 +1,7 @@
 module Python.EqualityFunction (definition) where
 
 import API.EqualityFunction qualified as EqualityFunction
-import OpenSolid
+import OpenSolid.Prelude
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import Python qualified

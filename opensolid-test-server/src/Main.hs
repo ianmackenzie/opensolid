@@ -4,7 +4,7 @@ import Http.Server (Request, Response, ResponseReceived)
 import Http.Server qualified as Server
 import Http.Server.Request qualified as Request
 import Http.Server.Response qualified as Response
-import OpenSolid
+import OpenSolid.Prelude
 
 sayHello :: Request -> (Response -> IO ResponseReceived) -> IO ResponseReceived
 sayHello request respond = respond $

@@ -24,9 +24,9 @@ where
 import Bounds qualified
 import Data.Coerce qualified
 import Maybe qualified
-import OpenSolid
-import Point3d (Point3d (Point3d))
-import Qty qualified
+import OpenSolid.Prelude
+import OpenSolid.Qty qualified as Qty
+import OpenSolid.Point3d (Point3d (Point3d))
 import Range (Range)
 import Range qualified
 import Units qualified

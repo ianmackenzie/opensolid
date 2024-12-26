@@ -4,9 +4,9 @@ module Sign
   )
 where
 
-import Arithmetic
-import Basics
-import Random.Internal qualified as Random
+import OpenSolid.Arithmetic
+import OpenSolid.Bootstrap
+import OpenSolid.Random.Internal qualified as Random
 import System.Random qualified
 import System.Random.Stateful qualified
 import Prelude qualified

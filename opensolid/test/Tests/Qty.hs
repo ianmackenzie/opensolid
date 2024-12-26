@@ -1,11 +1,11 @@
 module Tests.Qty (tests) where
 
 import NonEmpty qualified
-import OpenSolid
-import Point2d (Point2d)
-import Point2d qualified
-import Qty qualified
-import Random (Generator)
+import OpenSolid.Prelude
+import OpenSolid.Qty qualified as Qty
+import OpenSolid.Point2d (Point2d)
+import OpenSolid.Point2d qualified as Point2d
+import OpenSolid.Random (Generator)
 import Test (Test)
 import Test qualified
 import Tests.Random qualified as Random

@@ -100,12 +100,8 @@ library
     Angle
     Arc2d
     Area
-    Arithmetic
-    Arithmetic.Unboxed
     Array
-    Axis2d
     Axis3d
-    Basics
     Basis2d
     Basis3d
     BezierCurve2d
@@ -114,21 +110,10 @@ library
     Bounds
     Bounds2d
     Bounds3d
-    Coalesce
     Color
     Composition
     CoordinateSystem
     CubicSpline2d
-    Curve1d
-    Curve1d.Zero
-    Curve1d.Zeros
-    Curve2d
-    Curve2d.FindPoint
-    Curve2d.IntersectionPoint
-    Curve2d.Intersections
-    Curve2d.MedialAxis
-    Curve2d.OverlappingSegment
-    Curve3d
     Debug
     Direction2d
     Direction3d
@@ -142,14 +127,6 @@ library
     Duration
     Error
     Estimate
-    Expression
-    Expression.Curve1d
-    Expression.Curve2d
-    Expression.Curve3d
-    Expression.Surface2d
-    Expression.VectorCurve2d
-    Expression.VectorCurve3d
-    Expression.VectorSurface2d
     File
     Float
     Frame2d
@@ -158,9 +135,6 @@ library
     IO
     Int
     Intersects
-    Json
-    Json.Format
-    Json.Schema
     Length
     Line2d
     Line3d
@@ -168,43 +142,82 @@ library
     Map
     Maybe
     NonEmpty
-    OpenSolid
+    OpenSolid.Prelude
+    OpenSolid.Arithmetic
+    OpenSolid.Arithmetic.Unboxed
+    OpenSolid.Axis2d
+    OpenSolid.Curve1d
+    OpenSolid.Curve1d.Zero
+    OpenSolid.Curve1d.Zeros
+    OpenSolid.Curve2d
+    OpenSolid.Curve2d.FindPoint
+    OpenSolid.Curve2d.IntersectionPoint
+    OpenSolid.Curve2d.Intersections
+    OpenSolid.Curve2d.MedialAxis
+    OpenSolid.Curve2d.OverlappingSegment
+    OpenSolid.Curve3d
+    OpenSolid.Expression
+    OpenSolid.Expression.Curve1d
+    OpenSolid.Expression.Curve2d
+    OpenSolid.Expression.Curve3d
+    OpenSolid.Expression.Surface2d
+    OpenSolid.Expression.VectorCurve2d
+    OpenSolid.Expression.VectorCurve3d
+    OpenSolid.Expression.VectorSurface2d
     OpenSolid.FFI
     OpenSolid.Json
+    OpenSolid.Json.Format
+    OpenSolid.Json.Schema
+    OpenSolid.Point2d
+    OpenSolid.Point3d
+    OpenSolid.Qty
+    OpenSolid.Random
+    OpenSolid.Region2d
+    OpenSolid.Region2d.BoundedBy
+    OpenSolid.Surface1d
+    OpenSolid.Surface1d.Function
+    OpenSolid.Surface1d.Function.HorizontalCurve
+    OpenSolid.Surface1d.Function.Subproblem
+    OpenSolid.Surface1d.Function.VerticalCurve
+    OpenSolid.Surface1d.Function.Zeros
+    OpenSolid.Surface2d
+    OpenSolid.Surface2d.Function
+    OpenSolid.Surface3d
+    OpenSolid.Surface3d.Function
+    OpenSolid.Text
+    OpenSolid.Uv.Derivatives
+    OpenSolid.Vector2d
+    OpenSolid.Vector3d
+    OpenSolid.VectorCurve2d
+    OpenSolid.VectorCurve2d.DegenerateEndpoint
+    OpenSolid.VectorCurve2d.Direction
+    OpenSolid.VectorCurve2d.Zeros
+    OpenSolid.VectorCurve3d
+    OpenSolid.VectorCurve3d.DegenerateEndpoint
+    OpenSolid.VectorCurve3d.Direction
+    OpenSolid.VectorCurve3d.Zeros
+    OpenSolid.VectorSurface2d
+    OpenSolid.VectorSurface2d.Function
+    OpenSolid.VectorSurface3d
+    OpenSolid.VectorSurface3d.Function
+    OpenSolid.VectorVolume3d.Function
+    OpenSolid.Volume1d
+    OpenSolid.Volume1d.Function
     Pair
     Parameter
     Plane3d
-    Point2d
-    Point3d
     Polygon2d
     Polyline2d
-    Qty
     QuadraticSpline2d
     QuadraticSpline3d
     Queue
-    Random
-    Random.Internal
     Range
-    Region2d
-    Region2d.BoundedBy
     Result
     Sign
     Solve1d
     Solve2d
     Stream
-    Surface1d
-    Surface1d.Function
-    Surface1d.Function.HorizontalCurve
-    Surface1d.Function.Internal
-    Surface1d.Function.Subproblem
-    Surface1d.Function.VerticalCurve
-    Surface1d.Function.Zeros
-    Surface2d
-    Surface2d.Function
-    Surface3d
-    Surface3d.Function
     SurfaceParameter
-    Text
     Tolerance
     Transform
     Transform2d
@@ -212,43 +225,28 @@ library
     Triangle2d
     Unitless
     Units
-    Uv.Derivatives
-    Vector2d
-    Vector3d
     VectorBounds2d
     VectorBounds3d
-    VectorCurve2d
-    VectorCurve2d.DegenerateEndpoint
-    VectorCurve2d.Direction
-    VectorCurve2d.Zeros
-    VectorCurve3d
-    VectorCurve3d.DegenerateEndpoint
-    VectorCurve3d.Direction
-    VectorCurve3d.Zeros
-    VectorSurface2d
-    VectorSurface2d.Function
-    VectorSurface3d
-    VectorSurface3d.Function
-    VectorVolume3d.Function
     Vertex2d
     Volume
-    Volume1d
-    Volume1d.Function
     VolumeParameter
 
   other-modules:
-    Curve1d.Integral
-    Curve3d.Internal
-    Expression.Scalar
-    Json.FieldSchema
-    Point2d.CoordinateTransformation
-    Point3d.CoordinateTransformation
+    OpenSolid.Bootstrap
+    OpenSolid.Curve1d.Integral
+    OpenSolid.Curve3d.Internal
+    OpenSolid.Expression.Scalar
+    OpenSolid.Json.FieldSchema
+    OpenSolid.Point2d.CoordinateTransformation
+    OpenSolid.Point3d.CoordinateTransformation
+    OpenSolid.Random.Internal
+    OpenSolid.Surface1d.Function.Internal
+    OpenSolid.Surface1d.Function.PartialZeros
+    OpenSolid.Surface1d.Function.SaddleRegion
+    OpenSolid.Text.Parse
+    OpenSolid.Vector2d.CoordinateTransformation
+    OpenSolid.Vector3d.CoordinateTransformation
     Quadrature
-    Surface1d.Function.PartialZeros
-    Surface1d.Function.SaddleRegion
-    Text.Parse
-    Vector2d.CoordinateTransformation
-    Vector3d.CoordinateTransformation
 
   hs-source-dirs: src
   extra-libraries:

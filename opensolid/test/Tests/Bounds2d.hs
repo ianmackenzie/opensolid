@@ -1,9 +1,9 @@
 module Tests.Bounds2d (tests) where
 
 import Bounds2d qualified
-import OpenSolid
+import OpenSolid.Prelude
 import Parameter qualified
-import Point2d qualified
+import OpenSolid.Point2d qualified as Point2d
 import Test (Test)
 import Test qualified
 import Tests.Random qualified as Random

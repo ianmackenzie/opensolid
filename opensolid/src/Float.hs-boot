@@ -7,8 +7,8 @@ module Float
   )
 where
 
-import Basics
-import {-# SOURCE #-} Qty (Qty)
+import OpenSolid.Bootstrap
+import {-# SOURCE #-} OpenSolid.Qty (Qty)
 import Unitless (Unitless)
 import Prelude qualified
 

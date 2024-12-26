@@ -6,7 +6,7 @@ module Basis2d
 where
 
 import {-# SOURCE #-} Direction2d (Direction2d)
-import OpenSolid
+import OpenSolid.Prelude
 
 type role Basis2d nominal nominal
 

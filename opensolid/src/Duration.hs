@@ -22,8 +22,8 @@ where
 
 import Data.Time.Clock (UTCTime)
 import Data.Time.Clock qualified
-import OpenSolid
-import Qty qualified
+import OpenSolid.Prelude
+import OpenSolid.Qty qualified as Qty
 import Units (Seconds)
 import Units qualified
 import Prelude qualified

@@ -11,8 +11,8 @@ module Area
 where
 
 import Length qualified
-import OpenSolid
-import Qty qualified
+import OpenSolid.Prelude
+import OpenSolid.Qty qualified as Qty
 import Units (SquareMeters)
 import Units qualified
 

@@ -25,11 +25,11 @@ module Angle
   )
 where
 
-import Arithmetic
 import Float (Float, fromRational)
 import Float qualified
-import Qty (Qty (Qty))
-import Qty qualified
+import OpenSolid.Arithmetic
+import OpenSolid.Qty (Qty (Qty))
+import OpenSolid.Qty qualified as Qty
 import Units (Radians)
 import Units qualified
 import Prelude qualified

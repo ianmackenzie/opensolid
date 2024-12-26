@@ -18,11 +18,11 @@ module Maybe
   )
 where
 
-import Basics
+import OpenSolid.Bootstrap
 import Bool qualified
 import Composition
 import Data.Maybe qualified
-import Random qualified
+import OpenSolid.Random qualified as Random
 
 map :: (a -> b) -> Maybe a -> Maybe b
 map function (Just value) = Just (function value)

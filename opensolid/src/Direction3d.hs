@@ -28,13 +28,13 @@ import Angle (Angle)
 import Angle qualified
 import {-# SOURCE #-} Basis3d (Basis3d)
 import {-# SOURCE #-} Frame3d (Frame3d)
-import OpenSolid
+import OpenSolid.Prelude
+import OpenSolid.Vector3d (Vector3d (Vector3d))
+import OpenSolid.Vector3d qualified as Vector3d
 import Transform qualified
 import Transform3d (Transform3d)
 import Units (Radians)
 import Units qualified
-import Vector3d (Vector3d (Vector3d))
-import Vector3d qualified
 
 type role Direction3d phantom
 

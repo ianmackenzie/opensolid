@@ -7,8 +7,8 @@ module Axis3d
 where
 
 import {-# SOURCE #-} Direction3d (Direction3d)
-import OpenSolid
-import {-# SOURCE #-} Point3d (Point3d)
+import OpenSolid.Prelude
+import {-# SOURCE #-} OpenSolid.Point3d (Point3d)
 
 type role Axis3d nominal
 

@@ -20,12 +20,9 @@ where
 
 import Angle qualified
 import Arc2d qualified
-import Axis2d (Axis2d)
-import Axis2d qualified
 import Bounds2d (Bounds2d)
 import Bounds2d qualified
 import CubicSpline2d qualified
-import Curve2d (Curve2d)
 import Direction2d qualified
 import Float qualified
 import Frame2d (Frame2d)
@@ -34,20 +31,23 @@ import Length (Length)
 import Length qualified
 import Line2d qualified
 import NonEmpty qualified
-import OpenSolid
-import Point2d (Point2d)
-import Point2d qualified
-import Qty qualified
+import OpenSolid.Prelude
+import OpenSolid.Axis2d (Axis2d)
+import OpenSolid.Axis2d qualified as Axis2d
+import OpenSolid.Curve2d (Curve2d)
+import OpenSolid.Point2d (Point2d)
+import OpenSolid.Point2d qualified as Point2d
+import OpenSolid.Qty qualified as Qty
+import OpenSolid.Random (Generator)
+import OpenSolid.Random qualified as Random
+import OpenSolid.Vector2d (Vector2d)
+import OpenSolid.Vector2d qualified as Vector2d
 import QuadraticSpline2d qualified
-import Random (Generator)
-import Random qualified
 import Range (Range)
 import Range qualified
 import Sign qualified
 import Transform2d qualified
 import Units (Meters)
-import Vector2d (Vector2d)
-import Vector2d qualified
 import VectorBounds2d (VectorBounds2d (VectorBounds2d))
 import VectorBounds3d (VectorBounds3d (VectorBounds3d))
 

@@ -25,9 +25,6 @@ import Bounds2d (Bounds2d)
 import Bounds2d qualified
 import Color (Color)
 import Color qualified
-import Curve1d (Curve1d)
-import Curve1d qualified
-import Curve1d.Zero qualified
 import Data.Proxy (Proxy (Proxy))
 import Direction2d (Direction2d)
 import Direction2d qualified
@@ -36,18 +33,21 @@ import Foreign (Ptr)
 import Length (Length)
 import Length qualified
 import List qualified
-import OpenSolid
+import OpenSolid.Prelude
+import OpenSolid.Curve1d (Curve1d)
+import OpenSolid.Curve1d qualified as Curve1d
+import OpenSolid.Curve1d.Zero qualified as Curve1d.Zero
 import OpenSolid.FFI (FFI, Name)
 import OpenSolid.FFI qualified as FFI
+import OpenSolid.Point2d qualified as Point2d
+import OpenSolid.Qty qualified as Qty
 import Pair qualified
-import Point2d (Point2d)
-import Point2d qualified
-import Qty qualified
+import OpenSolid.Point2d (Point2d)
 import Range (Range)
 import Range qualified
 import Units (Meters, Radians, SquareMeters)
-import Vector2d (Vector2d)
-import Vector2d qualified
+import OpenSolid.Vector2d (Vector2d)
+import OpenSolid.Vector2d qualified as Vector2d
 
 data Space
 
