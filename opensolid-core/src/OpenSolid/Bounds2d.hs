@@ -38,7 +38,6 @@ module OpenSolid.Bounds2d
   )
 where
 
-import Data.Coerce qualified
 import OpenSolid.Axis2d (Axis2d)
 import OpenSolid.Axis2d qualified as Axis2d
 import OpenSolid.Bounds qualified as Bounds
@@ -64,13 +63,13 @@ import OpenSolid.Vector2d (Vector2d (Vector2d))
 import OpenSolid.Vector2d qualified as Vector2d
 import OpenSolid.VectorBounds2d (VectorBounds2d (VectorBounds2d))
 
-type role Bounds2d phantom
+type role Bounds2d nominal
 
 data Bounds2d (coordinateSystem :: CoordinateSystem) where
   Bounds2d ::
-    Range (UnitsOf coordinateSystem) ->
-    Range (UnitsOf coordinateSystem) ->
-    Bounds2d coordinateSystem
+    Range units ->
+    Range units ->
+    Bounds2d (space @ units)
 
 deriving instance Show (Bounds2d (space @ units))
 
@@ -81,7 +80,7 @@ instance
   space1 ~ space2 =>
   Units.Coercion (Bounds2d (space1 @ unitsA)) (Bounds2d (space2 @ unitsB))
   where
-  coerce = Data.Coerce.coerce
+  coerce (Bounds2d x y) = Bounds2d (Units.coerce x) (Units.coerce y)
 
 instance Bounds.Interface (Bounds2d (space @ units)) where
   aggregate2 = aggregate2
@@ -239,17 +238,19 @@ aggregate2 (Bounds2d x1 y1) (Bounds2d x2 y2) =
 
 -- | Construct a bounding box containing all bounding boxes in the given non-empty list.
 aggregateN :: NonEmpty (Bounds2d (space @ units)) -> Bounds2d (space @ units)
-aggregateN (Bounds2d (Range xLow0 xHigh0) (Range yLow0 yHigh0) :| rest) = do
-  let go xLow xHigh yLow yHigh [] = Bounds2d (Range.unsafe xLow xHigh) (Range.unsafe yLow yHigh)
-      go xLow xHigh yLow yHigh (next : remaining) = do
-        let Bounds2d (Range xLowNext xHighNext) (Range yLowNext yHighNext) = next
-        go
-          (Qty.min xLow xLowNext)
-          (Qty.max xHigh xHighNext)
-          (Qty.min yLow yLowNext)
-          (Qty.max yHigh yHighNext)
-          remaining
-  go xLow0 xHigh0 yLow0 yHigh0 rest
+aggregateN (Bounds2d (Range xLow0 xHigh0) (Range yLow0 yHigh0) :| rest) =
+  aggregateImpl xLow0 xHigh0 yLow0 yHigh0 rest
+
+aggregateImpl :: Qty units -> Qty units -> Qty units -> Qty units -> List (Bounds2d (space @ units)) -> Bounds2d (space @ units)
+aggregateImpl xLow xHigh yLow yHigh [] = Bounds2d (Range.unsafe xLow xHigh) (Range.unsafe yLow yHigh)
+aggregateImpl xLow xHigh yLow yHigh (next : remaining) = do
+  let Bounds2d (Range xLowNext xHighNext) (Range yLowNext yHighNext) = next
+  aggregateImpl
+    (Qty.min xLow xLowNext)
+    (Qty.max xHigh xHighNext)
+    (Qty.min yLow yLowNext)
+    (Qty.max yHigh yHighNext)
+    remaining
 
 exclusion :: Point2d (space @ units) -> Bounds2d (space @ units) -> Qty units
 exclusion point bounds = do

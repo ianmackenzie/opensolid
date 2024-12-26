@@ -35,7 +35,6 @@ module OpenSolid.VectorBounds2d
   )
 where
 
-import Data.Coerce qualified
 import OpenSolid.Basis2d (Basis2d)
 import OpenSolid.Basis2d qualified as Basis2d
 import OpenSolid.Direction2d (Direction2d)
@@ -53,13 +52,13 @@ import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2d (Vector2d (Vector2d))
 import OpenSolid.Vector2d qualified as Vector2d
 
-type role VectorBounds2d phantom
+type role VectorBounds2d nominal
 
 data VectorBounds2d (coordinateSystem :: CoordinateSystem) where
   VectorBounds2d ::
-    Range (UnitsOf coordinateSystem) ->
-    Range (UnitsOf coordinateSystem) ->
-    VectorBounds2d coordinateSystem
+    Range units ->
+    Range units ->
+    VectorBounds2d (space @ units)
 
 deriving instance Show (VectorBounds2d (space @ units))
 
@@ -70,7 +69,7 @@ instance
   space1 ~ space2 =>
   Units.Coercion (VectorBounds2d (space1 @ unitsA)) (VectorBounds2d (space2 @ unitsB))
   where
-  coerce = Data.Coerce.coerce
+  coerce (VectorBounds2d x y) = VectorBounds2d (Units.coerce x) (Units.coerce y)
 
 instance
   ( space1 ~ space2

@@ -6,7 +6,6 @@ module OpenSolid.Line3d
   )
 where
 
-import Data.Coerce qualified
 import OpenSolid.Curve3d (Curve3d)
 import OpenSolid.Curve3d qualified as Curve3d
 import OpenSolid.Expression qualified as Expression
@@ -24,12 +23,14 @@ from p1 p2 =
   Curve3d.Parametric $
     Expression.Curve3d.constant p1 + Expression.t * Expression.VectorCurve3d.constant (p2 - p1)
 
-type role Line3d phantom
+type role Line3d nominal
 
-data Line3d (coordinateSystem :: CoordinateSystem) = Line3d
-  { startPoint :: Point3d coordinateSystem
-  , endPoint :: Point3d coordinateSystem
-  }
+data Line3d (coordinateSystem :: CoordinateSystem) where
+  Line3d ::
+    { startPoint :: Point3d (space @ units)
+    , endPoint :: Point3d (space @ units)
+    } ->
+    Line3d (space @ units)
 
 deriving instance Show (Line3d (space @ units))
 
@@ -40,4 +41,5 @@ instance
   space1 ~ space2 =>
   Units.Coercion (Line3d (space1 @ unitsA)) (Line3d (space2 @ unitsB))
   where
-  coerce = Data.Coerce.coerce
+  coerce Line3d{startPoint, endPoint} =
+    Line3d{startPoint = Units.coerce startPoint, endPoint = Units.coerce endPoint}

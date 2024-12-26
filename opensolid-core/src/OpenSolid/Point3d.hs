@@ -27,7 +27,6 @@ module OpenSolid.Point3d
   )
 where
 
-import Data.Coerce qualified
 import OpenSolid.Bounded qualified as Bounded
 import {-# SOURCE #-} OpenSolid.Bounds3d (Bounds3d)
 import {-# SOURCE #-} OpenSolid.Bounds3d qualified as Bounds3d
@@ -43,14 +42,14 @@ import OpenSolid.Vector3d (Vector3d (Vector3d))
 import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.VectorBounds3d (VectorBounds3d (VectorBounds3d))
 
-type role Point3d phantom
+type role Point3d nominal
 
 data Point3d (coordinateSystem :: CoordinateSystem) where
   Point3d ::
-    Qty (UnitsOf coordinateSystem) ->
-    Qty (UnitsOf coordinateSystem) ->
-    Qty (UnitsOf coordinateSystem) ->
-    Point3d coordinateSystem
+    Qty units ->
+    Qty units ->
+    Qty units ->
+    Point3d (space @ units)
 
 deriving instance Eq (Point3d (space @ units))
 
@@ -63,7 +62,7 @@ instance
   space1 ~ space2 =>
   Units.Coercion (Point3d (space1 @ unitsA)) (Point3d (space2 @ unitsB))
   where
-  coerce = Data.Coerce.coerce
+  coerce (Point3d px py pz) = Point3d (Units.coerce px) (Units.coerce py) (Units.coerce pz)
 
 instance
   ( space1 ~ space2

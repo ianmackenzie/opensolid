@@ -6,17 +6,17 @@ module OpenSolid.Bounds2d
 where
 
 import OpenSolid.Bounds qualified as Bounds
-import OpenSolid.Prelude
 import {-# SOURCE #-} OpenSolid.Point2d (Point2d)
+import OpenSolid.Prelude
 import OpenSolid.Range (Range)
 
-type role Bounds2d phantom
+type role Bounds2d nominal
 
 data Bounds2d (coordinateSystem :: CoordinateSystem) where
   Bounds2d ::
-    Range (UnitsOf coordinateSystem) ->
-    Range (UnitsOf coordinateSystem) ->
-    Bounds2d coordinateSystem
+    Range units ->
+    Range units ->
+    Bounds2d (space @ units)
 
 instance Bounds.Interface (Bounds2d (space @ units))
 

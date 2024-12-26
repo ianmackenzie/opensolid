@@ -35,7 +35,6 @@ module OpenSolid.VectorBounds3d
   )
 where
 
-import Data.Coerce qualified
 import OpenSolid.Basis3d (Basis3d)
 import OpenSolid.Basis3d qualified as Basis3d
 import OpenSolid.Direction3d (Direction3d)
@@ -52,14 +51,14 @@ import OpenSolid.Units qualified as Units
 import OpenSolid.Vector3d (Vector3d (Vector3d))
 import OpenSolid.Vector3d qualified as Vector3d
 
-type role VectorBounds3d phantom
+type role VectorBounds3d nominal
 
 data VectorBounds3d (coordinateSystem :: CoordinateSystem) where
   VectorBounds3d ::
-    Range (UnitsOf coordinateSystem) ->
-    Range (UnitsOf coordinateSystem) ->
-    Range (UnitsOf coordinateSystem) ->
-    VectorBounds3d coordinateSystem
+    Range units ->
+    Range units ->
+    Range units ->
+    VectorBounds3d (space @ units)
 
 deriving instance Show (VectorBounds3d (space @ units))
 
@@ -70,7 +69,7 @@ instance
   space1 ~ space2 =>
   Units.Coercion (VectorBounds3d (space1 @ unitsA)) (VectorBounds3d (space2 @ unitsB))
   where
-  coerce = Data.Coerce.coerce
+  coerce (VectorBounds3d x y z) = VectorBounds3d (Units.coerce x) (Units.coerce y) (Units.coerce z)
 
 instance Negation (VectorBounds3d (space @ units)) where
   negate (VectorBounds3d x y z) = VectorBounds3d (negate x) (negate y) (negate z)

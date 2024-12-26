@@ -21,7 +21,6 @@ module OpenSolid.Bounds3d
   )
 where
 
-import Data.Coerce qualified
 import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Point3d (Point3d (Point3d))
@@ -32,14 +31,14 @@ import OpenSolid.Range qualified as Range
 import OpenSolid.Units qualified as Units
 import OpenSolid.VectorBounds3d (VectorBounds3d (VectorBounds3d))
 
-type role Bounds3d phantom
+type role Bounds3d nominal
 
 data Bounds3d (coordinateSystem :: CoordinateSystem) where
   Bounds3d ::
-    Range (UnitsOf coordinateSystem) ->
-    Range (UnitsOf coordinateSystem) ->
-    Range (UnitsOf coordinateSystem) ->
-    Bounds3d coordinateSystem
+    Range units ->
+    Range units ->
+    Range units ->
+    Bounds3d (space @ units)
 
 deriving instance Show (Bounds3d (space @ units))
 
@@ -54,7 +53,7 @@ instance
   space1 ~ space2 =>
   Units.Coercion (Bounds3d (space1 @ unitsA)) (Bounds3d (space2 @ unitsB))
   where
-  coerce = Data.Coerce.coerce
+  coerce (Bounds3d x y z) = Bounds3d (Units.coerce x) (Units.coerce y) (Units.coerce z)
 
 instance
   ( space1 ~ space2

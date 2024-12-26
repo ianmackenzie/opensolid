@@ -10,14 +10,14 @@ import {-# SOURCE #-} OpenSolid.Point3d (Point3d)
 import OpenSolid.Prelude
 import OpenSolid.Range (Range)
 
-type role Bounds3d phantom
+type role Bounds3d nominal
 
 data Bounds3d (coordinateSystem :: CoordinateSystem) where
   Bounds3d ::
-    Range (UnitsOf coordinateSystem) ->
-    Range (UnitsOf coordinateSystem) ->
-    Range (UnitsOf coordinateSystem) ->
-    Bounds3d coordinateSystem
+    Range units ->
+    Range units ->
+    Range units ->
+    Bounds3d (space @ units)
 
 instance Bounds.Interface (Bounds3d (space @ units))
 
