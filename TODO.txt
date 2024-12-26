@@ -1,15 +1,12 @@
+Rewrite scripts in Haskell?
+
+Merge File module into IO?
+
 Build out publishing workflow
-- Fix Cabal caching on Linux
-- Build Mac x86-64 and ARM wheels in CI
-- Build Windows wheel in CI
 - Collect wheels and publish combined package
   - might need intermediate step to merge Mac wheels into universal one, or just build universal one to start with?
 - Docs publishing: generate-python-docs then e.g. 'cp -r opensolid-python/lib/docs/build ../../opensolid/opensolid.github.io/docs/0.1.1'
-- Wheel publishing:
-  - generate-python-bindings
-  - uv build --wheel
-  - uvx auditwheel
-  - uvx twine upload wheelhouse/*
+- Wheel publishing: uvx twine upload wheelhouse/*
 
 C API: generate structs with *named* fields
 -> have the struct be named as function_name_inputs, function_name_outputs etc.
@@ -37,17 +34,10 @@ Try generating C# bindings?
 
 Try generating C++ bindings?
 
-Add OpenSolid prefix to *all* modules?
--> easier to use from other Haskell code, without naming conflicts
--> more consistent, no weird 'special' modules like OpenSolid.Json
-
 Sandbox executable to start generating Region2d medial axis curves and points?
 -> need to be able to solve for medial axis of curve and *point* first
 
 Introduce curve function types and properly support piecewise curves
-
-Switch types back to 'space @ units' instead of 'coordinateSystem' where possible?
--> if that makes coercion more expensive, specialize arithmetic operators instead
 
 Implement 1D monotonic solving in Rust
 
@@ -58,9 +48,6 @@ Move primitives to Primitives.hs
 Use space1 ~ space2 instead of space ~ space_ everywhere
 
 Refactor Estimate to return an error if convergence fails/stalls
-
-Specialize Multiplication for primitive types, for performance
--> avoid units coercion and extra typeclass lookup
 
 Optimizations to try:
 - cache expressions on Rust side (per thread?)
