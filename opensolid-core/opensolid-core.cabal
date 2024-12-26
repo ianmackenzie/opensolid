@@ -47,13 +47,11 @@ common config
     -Wpartial-fields
     -Wsafe
     -Wno-missed-extra-shared-lib
+    -Wno-x-data-list-nonempty-unzip
     -fwrite-ide-info
     -hiedir=.hie
     -haddock
 
-  if impl(ghc >=9.10)
-    ghc-options:
-      -Wno-x-data-list-nonempty-unzip
   default-extensions:
     BlockArguments
     DataKinds
