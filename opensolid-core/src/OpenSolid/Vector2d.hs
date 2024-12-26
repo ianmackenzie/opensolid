@@ -127,14 +127,18 @@ instance Multiplication' Sign (Vector2d (space @ units)) where
   Positive .*. vector = Units.coerce vector
   Negative .*. vector = Units.coerce -vector
 
-instance Multiplication Sign (Vector2d (space @ units)) (Vector2d (space @ units))
+instance Multiplication Sign (Vector2d (space @ units)) (Vector2d (space @ units)) where
+  Positive * vector = vector
+  Negative * vector = -vector
 
 instance Multiplication' (Vector2d (space @ units)) Sign where
   type Vector2d (space @ units) .*. Sign = Vector2d (space @ (units :*: Unitless))
   vector .*. Positive = Units.coerce vector
   vector .*. Negative = Units.coerce -vector
 
-instance Multiplication (Vector2d (space @ units)) Sign (Vector2d (space @ units))
+instance Multiplication (Vector2d (space @ units)) Sign (Vector2d (space @ units)) where
+  vector * Positive = vector
+  vector * Negative = -vector
 
 instance
   ( space ~ space_
@@ -165,6 +169,8 @@ instance Multiplication' (Qty units1) (Vector2d (space @ units2)) where
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Qty units1) (Vector2d (space @ units2)) (Vector2d (space @ units3))
+  where
+  Qty# scale# * Vector2d# vx# vy# = Vector2d# (scale# *# vx#) (scale# *# vy#)
 
 instance Multiplication' (Vector2d (space @ units1)) (Qty units2) where
   type Vector2d (space @ units1) .*. Qty units2 = Vector2d (space @ (units1 :*: units2))
@@ -173,6 +179,8 @@ instance Multiplication' (Vector2d (space @ units1)) (Qty units2) where
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Vector2d (space @ units1)) (Qty units2) (Vector2d (space @ units3))
+  where
+  Vector2d# vx# vy# * Qty# scale# = Vector2d# (vx# *# scale#) (vy# *# scale#)
 
 instance Division' (Vector2d (space @ units1)) (Qty units2) where
   type Vector2d (space @ units1) ./. Qty units2 = Vector2d (space @ (units1 :/: units2))
@@ -181,6 +189,8 @@ instance Division' (Vector2d (space @ units1)) (Qty units2) where
 instance
   Units.Quotient units1 units2 units3 =>
   Division (Vector2d (space @ units1)) (Qty units2) (Vector2d (space @ units3))
+  where
+  Vector2d# vx# vy# / Qty# scale# = Vector2d# (vx# /# scale#) (vy# /# scale#)
 
 instance
   space ~ space_ =>

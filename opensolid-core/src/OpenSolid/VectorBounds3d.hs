@@ -79,14 +79,18 @@ instance Multiplication' Sign (VectorBounds3d (space @ units)) where
   Positive .*. vectorBounds = Units.coerce vectorBounds
   Negative .*. vectorBounds = Units.coerce -vectorBounds
 
-instance Multiplication Sign (VectorBounds3d (space @ units)) (VectorBounds3d (space @ units))
+instance Multiplication Sign (VectorBounds3d (space @ units)) (VectorBounds3d (space @ units)) where
+  Positive * vectorBounds = vectorBounds
+  Negative * vectorBounds = -vectorBounds
 
 instance Multiplication' (VectorBounds3d (space @ units)) Sign where
   type VectorBounds3d (space @ units) .*. Sign = VectorBounds3d (space @ (units :*: Unitless))
   vectorBounds .*. Positive = Units.coerce vectorBounds
   vectorBounds .*. Negative = Units.coerce -vectorBounds
 
-instance Multiplication (VectorBounds3d (space @ units)) Sign (VectorBounds3d (space @ units))
+instance Multiplication (VectorBounds3d (space @ units)) Sign (VectorBounds3d (space @ units)) where
+  vectorBounds * Positive = vectorBounds
+  vectorBounds * Negative = -vectorBounds
 
 instance
   ( space ~ space_
@@ -163,6 +167,8 @@ instance Multiplication' (Qty units1) (VectorBounds3d (space @ units2)) where
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Qty units1) (VectorBounds3d (space @ units2)) (VectorBounds3d (space @ units3))
+  where
+  value * VectorBounds3d x y z = VectorBounds3d (value * x) (value * y) (value * z)
 
 instance Multiplication' (VectorBounds3d (space @ units1)) (Qty units2) where
   type
@@ -173,6 +179,8 @@ instance Multiplication' (VectorBounds3d (space @ units1)) (Qty units2) where
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (VectorBounds3d (space @ units1)) (Qty units2) (VectorBounds3d (space @ units3))
+  where
+  VectorBounds3d x y z * value = VectorBounds3d (x * value) (y * value) (z * value)
 
 instance Multiplication' (Range units1) (Vector3d (space @ units2)) where
   type Range units1 .*. Vector3d (space @ units2) = VectorBounds3d (space @ (units1 :*: units2))
@@ -181,6 +189,8 @@ instance Multiplication' (Range units1) (Vector3d (space @ units2)) where
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Range units1) (Vector3d (space @ units2)) (VectorBounds3d (space @ units3))
+  where
+  range * Vector3d x y z = VectorBounds3d (range * x) (range * y) (range * z)
 
 instance Multiplication' (Vector3d (space @ units1)) (Range units2) where
   type Vector3d (space @ units1) .*. Range units2 = VectorBounds3d (space @ (units1 :*: units2))
@@ -189,6 +199,8 @@ instance Multiplication' (Vector3d (space @ units1)) (Range units2) where
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Vector3d (space @ units1)) (Range units2) (VectorBounds3d (space @ units3))
+  where
+  Vector3d x y z * range = VectorBounds3d (x * range) (y * range) (z * range)
 
 instance Multiplication' (Range units1) (VectorBounds3d (space @ units2)) where
   type
@@ -199,6 +211,8 @@ instance Multiplication' (Range units1) (VectorBounds3d (space @ units2)) where
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Range units1) (VectorBounds3d (space @ units2)) (VectorBounds3d (space @ units3))
+  where
+  range * VectorBounds3d x y z = VectorBounds3d (range * x) (range * y) (range * z)
 
 instance Multiplication' (VectorBounds3d (space @ units1)) (Range units2) where
   type
@@ -209,6 +223,8 @@ instance Multiplication' (VectorBounds3d (space @ units1)) (Range units2) where
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (VectorBounds3d (space @ units1)) (Range units2) (VectorBounds3d (space @ units3))
+  where
+  VectorBounds3d x y z * range = VectorBounds3d (x * range) (y * range) (z * range)
 
 instance Division' (VectorBounds3d (space @ units1)) (Qty units2) where
   type
@@ -219,6 +235,8 @@ instance Division' (VectorBounds3d (space @ units1)) (Qty units2) where
 instance
   Units.Quotient units1 units2 units3 =>
   Division (VectorBounds3d (space @ units1)) (Qty units2) (VectorBounds3d (space @ units3))
+  where
+  VectorBounds3d x y z / value = VectorBounds3d (x / value) (y / value) (z / value)
 
 instance Division' (VectorBounds3d (space @ units1)) (Range units2) where
   type
@@ -229,6 +247,8 @@ instance Division' (VectorBounds3d (space @ units1)) (Range units2) where
 instance
   Units.Quotient units1 units2 units3 =>
   Division (VectorBounds3d (space @ units1)) (Range units2) (VectorBounds3d (space @ units3))
+  where
+  VectorBounds3d x y z / range = VectorBounds3d (x / range) (y / range) (z / range)
 
 instance
   (Units.Product units1 units2 units3, space ~ space_) =>
