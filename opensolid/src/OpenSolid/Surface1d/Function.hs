@@ -30,22 +30,26 @@ import OpenSolid.Angle qualified as Angle
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.Composition
-import OpenSolid.Direction2d qualified as Direction2d
-import OpenSolid.Domain1d qualified as Domain1d
-import OpenSolid.Domain2d (Domain2d (Domain2d))
-import OpenSolid.Domain2d qualified as Domain2d
-import OpenSolid.Float qualified as Float
-import OpenSolid.Fuzzy qualified as Fuzzy
-import OpenSolid.List qualified as List
-import OpenSolid.Prelude
 import OpenSolid.Curve1d (Curve1d)
 import OpenSolid.Curve1d qualified as Curve1d
 import {-# SOURCE #-} OpenSolid.Curve2d (Curve2d)
 import {-# SOURCE #-} OpenSolid.Curve2d qualified as Curve2d
+import OpenSolid.Direction2d qualified as Direction2d
+import OpenSolid.Domain1d qualified as Domain1d
+import OpenSolid.Domain2d (Domain2d (Domain2d))
+import OpenSolid.Domain2d qualified as Domain2d
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
+import OpenSolid.Float qualified as Float
+import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
+import OpenSolid.Fuzzy qualified as Fuzzy
+import OpenSolid.List qualified as List
 import OpenSolid.Point2d qualified as Point2d
+import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
+import OpenSolid.Range (Range (Range))
+import OpenSolid.Range qualified as Range
+import OpenSolid.Solve2d qualified as Solve2d
 import OpenSolid.Surface1d.Function.HorizontalCurve qualified as HorizontalCurve
 import OpenSolid.Surface1d.Function.PartialZeros (PartialZeros)
 import OpenSolid.Surface1d.Function.PartialZeros qualified as PartialZeros
@@ -56,18 +60,15 @@ import OpenSolid.Surface1d.Function.Subproblem qualified as Subproblem
 import OpenSolid.Surface1d.Function.VerticalCurve qualified as VerticalCurve
 import OpenSolid.Surface1d.Function.Zeros (Zeros (..))
 import OpenSolid.Surface1d.Function.Zeros qualified as Zeros
-import OpenSolid.Uv.Derivatives (Derivatives)
-import OpenSolid.Uv.Derivatives qualified as Derivatives
-import OpenSolid.Vector2d (Vector2d (Vector2d))
-import OpenSolid.VectorCurve2d qualified as VectorCurve2d
-import OpenSolid.Range (Range (Range))
-import OpenSolid.Range qualified as Range
-import OpenSolid.Solve2d qualified as Solve2d
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvCoordinates, UvDirection, UvPoint)
 import OpenSolid.SurfaceParameter qualified as SurfaceParameter
 import OpenSolid.Units (Radians)
 import OpenSolid.Units qualified as Units
+import OpenSolid.Uv.Derivatives (Derivatives)
+import OpenSolid.Uv.Derivatives qualified as Derivatives
+import OpenSolid.Vector2d (Vector2d (Vector2d))
 import OpenSolid.VectorBounds2d (VectorBounds2d (VectorBounds2d))
+import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 
 data Function units where
   Function ::

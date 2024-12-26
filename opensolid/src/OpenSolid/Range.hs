@@ -67,22 +67,23 @@ module OpenSolid.Range
   )
 where
 
+import Data.Coerce qualified
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Area qualified as Area
 import OpenSolid.Bounds qualified as Bounds
-import Data.Coerce qualified
 import OpenSolid.Debug qualified as Debug
+import OpenSolid.FFI (FFI)
+import OpenSolid.FFI qualified as FFI
 import OpenSolid.Float qualified as Float
+import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.Fuzzy qualified as Fuzzy
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Prelude
-import OpenSolid.FFI (FFI)
-import OpenSolid.FFI qualified as FFI
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Random qualified as Random
-import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Units (Meters, Radians, SquareMeters)
 import OpenSolid.Units qualified as Units
 

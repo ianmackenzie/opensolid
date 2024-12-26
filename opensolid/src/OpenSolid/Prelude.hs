@@ -9,7 +9,6 @@ module OpenSolid.Prelude
   , module OpenSolid.Sign
   , module OpenSolid.CoordinateSystem
   , module OpenSolid.Tolerance
-  , module OpenSolid.Fuzzy
   , module OpenSolid.Units
   , module OpenSolid.Intersects
   )
@@ -27,7 +26,6 @@ import OpenSolid.Bootstrap
 import OpenSolid.Composition (Composition ((>>)), (.))
 import OpenSolid.CoordinateSystem (CoordinateSystem, Defines, LocalSpace, type (@))
 import OpenSolid.Float (Float, fromRational)
-import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.Intersects (Intersects ((^)))
 import OpenSolid.NonEmpty (NonEmpty ((:|)), (|:), pattern NonEmpty)
 import OpenSolid.Qty (Qty)
