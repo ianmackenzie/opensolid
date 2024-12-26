@@ -1,7 +1,7 @@
 cabal-version: 2.2
-name: opensolid-http
+name: opensolid-json
 version: 0.1.0.0
-synopsis: Simple HTTP server for OpenSolid
+synopsis: JSON serialization for OpenSolid types
 description:
   Please see the README on GitHub at <https://github.com/ianmackenzie/opensolid#readme>
 
@@ -19,18 +19,16 @@ source-repository head
   type: git
   location: https://github.com/ianmackenzie/opensolid
 
-common config
+library
   default-language: GHC2021
   build-depends:
+    aeson,
     base,
     bytestring,
-    case-insensitive,
-    http-types,
     opensolid,
-    opensolid-json,
+    scientific,
     text,
-    wai,
-    warp,
+    vector,
 
   ghc-options:
     -Wall
@@ -47,43 +45,25 @@ common config
     -Wno-missed-extra-shared-lib
     -fwrite-ide-info
     -hiedir=.hie
+    -haddock
 
-  if impl(ghc >=9.10)
-    ghc-options:
-      -Wno-x-data-list-nonempty-unzip
   default-extensions:
     BlockArguments
-    DataKinds
-    DeriveAnyClass
-    DerivingStrategies
     DisambiguateRecordFields
-    ExplicitNamespaces
-    FunctionalDependencies
-    GADTs
-    ImplicitParams
-    LambdaCase
     LexicalNegation
-    MagicHash
-    MultiWayIf
     OverloadedStrings
     PatternSynonyms
     QualifiedDo
     RebindableSyntax
-    RoleAnnotations
     StrictData
-    TypeFamilies
-    TypeFamilyDependencies
-    UnboxedTuples
-    UndecidableInstances
-    UndecidableSuperClasses
-    UnliftedFFITypes
     ViewPatterns
 
-library
-  import: config
   exposed-modules:
-    Http.Server
-    Http.Server.Request
-    Http.Server.Response
+    OpenSolid.Json
+    OpenSolid.Json.Format
+    OpenSolid.Json.Schema
+
+  other-modules:
+    OpenSolid.Json.FieldSchema
 
   hs-source-dirs: src

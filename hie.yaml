@@ -24,6 +24,9 @@ cradle:
     - path: "opensolid-http/src"
       component: "lib:opensolid-http"
 
+    - path: "opensolid-json/src"
+      component: "lib:opensolid-json"
+
     - path: "opensolid-python/src/Main.hs"
       component: "opensolid-python:exe:opensolid-python"
 

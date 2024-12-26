@@ -22,7 +22,6 @@ source-repository head
 common config
   default-language: GHC2021
   build-depends:
-    aeson,
     array,
     async,
     base,
@@ -32,10 +31,8 @@ common config
     deque,
     directory,
     random,
-    scientific,
     text,
     time,
-    vector,
 
   ghc-options:
     -Wall
@@ -157,9 +154,6 @@ library
     OpenSolid.IO
     OpenSolid.Int
     OpenSolid.Intersects
-    OpenSolid.Json
-    OpenSolid.Json.Format
-    OpenSolid.Json.Schema
     OpenSolid.Length
     OpenSolid.Line2d
     OpenSolid.Line3d
@@ -236,7 +230,6 @@ library
     OpenSolid.Curve1d.Integral
     OpenSolid.Curve3d.Internal
     OpenSolid.Expression.Scalar
-    OpenSolid.Json.FieldSchema
     OpenSolid.Point2d.CoordinateTransformation
     OpenSolid.Point3d.CoordinateTransformation
     OpenSolid.Quadrature
