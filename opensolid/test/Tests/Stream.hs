@@ -1,11 +1,11 @@
 module Tests.Stream (tests) where
 
-import Float qualified
+import OpenSolid.Float qualified as Float
 import OpenSolid.Prelude
-import Stream qualified
+import OpenSolid.Stream qualified as Stream
 import Test (Test)
 import Test qualified
-import Tolerance qualified
+import OpenSolid.Tolerance qualified as Tolerance
 
 tests :: List Test
 tests =

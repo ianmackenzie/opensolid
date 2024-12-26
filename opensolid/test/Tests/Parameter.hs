@@ -1,7 +1,7 @@
 module Tests.Parameter (tests) where
 
 import OpenSolid.Prelude
-import Parameter qualified
+import OpenSolid.Parameter qualified as Parameter
 import Test (Test)
 import Test qualified
 import OpenSolid.Text qualified as Text

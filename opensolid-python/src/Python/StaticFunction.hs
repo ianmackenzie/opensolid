@@ -2,13 +2,13 @@ module Python.StaticFunction (definition) where
 
 import API.StaticFunction (StaticFunction (..))
 import API.StaticFunction qualified as StaticFunction
-import List qualified
-import Maybe qualified
-import OpenSolid.Prelude
 import OpenSolid.FFI (Name)
 import OpenSolid.FFI qualified as FFI
+import OpenSolid.List qualified as List
+import OpenSolid.Maybe qualified as Maybe
+import OpenSolid.Pair qualified as Pair
+import OpenSolid.Prelude
 import OpenSolid.Text qualified as Text
-import Pair qualified
 import Python qualified
 import Python.Function qualified
 import Python.Type qualified

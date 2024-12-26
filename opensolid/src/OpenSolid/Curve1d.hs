@@ -21,33 +21,33 @@ module OpenSolid.Curve1d
   )
 where
 
-import Angle qualified
-import Composition
-import Domain1d (Domain1d)
-import Domain1d qualified
-import Estimate (Estimate)
-import Estimate qualified
-import Fuzzy qualified
-import List qualified
-import NonEmpty qualified
-import OpenSolid.Prelude
+import OpenSolid.Angle qualified as Angle
+import OpenSolid.Composition
 import OpenSolid.Curve1d.Integral (Integral (Integral))
 import OpenSolid.Curve1d.Zero (Zero)
 import OpenSolid.Curve1d.Zero qualified as Zero
 import OpenSolid.Curve1d.Zeros qualified as Zeros
+import OpenSolid.Domain1d (Domain1d)
+import OpenSolid.Domain1d qualified as Domain1d
+import OpenSolid.Estimate (Estimate)
+import OpenSolid.Estimate qualified as Estimate
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
+import OpenSolid.Fuzzy qualified as Fuzzy
+import OpenSolid.List qualified as List
+import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.Parameter qualified as Parameter
+import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
-import Parameter qualified
-import Range (Range)
-import Range qualified
-import Solve1d qualified
-import Stream (Stream)
-import Stream qualified
-import Units (Meters, Radians, SquareMeters)
-import Units qualified
+import OpenSolid.Range (Range)
+import OpenSolid.Range qualified as Range
+import OpenSolid.Solve1d qualified as Solve1d
+import OpenSolid.Stream (Stream)
+import OpenSolid.Stream qualified as Stream
+import OpenSolid.Units (Meters, Radians, SquareMeters)
+import OpenSolid.Units qualified as Units
 
 class
   Show curve =>

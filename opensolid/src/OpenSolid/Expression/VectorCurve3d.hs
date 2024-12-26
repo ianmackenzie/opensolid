@@ -16,17 +16,17 @@ module OpenSolid.Expression.VectorCurve3d
   )
 where
 
-import Basis3d (Basis3d)
-import Basis3d qualified
-import Frame3d (Frame3d)
-import Frame3d qualified
+import OpenSolid.Basis3d (Basis3d)
+import OpenSolid.Basis3d qualified as Basis3d
+import OpenSolid.Frame3d (Frame3d)
+import OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.Prelude
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.Vector3d qualified as Vector3d
-import Transform3d (Transform3d (Transform3d))
-import Units qualified
+import OpenSolid.Transform3d (Transform3d (Transform3d))
+import OpenSolid.Units qualified as Units
 
 constant :: Vector3d (space @ units) -> Expression Float (Vector3d (space @ units))
 constant = Expression.constant

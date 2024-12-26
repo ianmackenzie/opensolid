@@ -19,10 +19,10 @@ module OpenSolid.Surface1d.Function.Subproblem
   )
 where
 
-import Bounds2d (Bounds2d (Bounds2d))
-import Debug qualified
-import Domain2d (Domain2d)
-import Domain2d qualified
+import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
+import OpenSolid.Debug qualified as Debug
+import OpenSolid.Domain2d (Domain2d)
+import OpenSolid.Domain2d qualified as Domain2d
 import OpenSolid.Prelude
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Qty qualified as Qty
@@ -31,9 +31,9 @@ import {-# SOURCE #-} OpenSolid.Surface1d.Function qualified as Function
 import OpenSolid.Surface1d.Function.Internal qualified as Internal
 import OpenSolid.Uv.Derivatives (Derivatives)
 import OpenSolid.Uv.Derivatives qualified as Derivatives
-import Range (Range (Range))
-import Range qualified
-import SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvPoint)
+import OpenSolid.Range (Range (Range))
+import OpenSolid.Range qualified as Range
+import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvPoint)
 
 data Subproblem units = Subproblem
   { derivatives :: Derivatives (Function units)

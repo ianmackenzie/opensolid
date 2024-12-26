@@ -10,10 +10,10 @@ where
 
 import Data.ByteString (ByteString)
 import Data.ByteString qualified
-import IO qualified
 import Network.Wai (Application, Request, Response, ResponseReceived)
 import Network.Wai qualified
 import Network.Wai.Handler.Warp qualified as Warp
+import OpenSolid.IO qualified as IO
 import OpenSolid.Prelude
 import OpenSolid.Text qualified as Text
 

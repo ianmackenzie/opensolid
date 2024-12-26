@@ -1,17 +1,17 @@
 module OpenSolid.VectorCurve3d.Direction (unsafe) where
 
-import {-# SOURCE #-} DirectionCurve3d (DirectionCurve3d)
-import {-# SOURCE #-} DirectionCurve3d qualified
-import Maybe qualified
+import {-# SOURCE #-} OpenSolid.DirectionCurve3d (DirectionCurve3d)
+import {-# SOURCE #-} OpenSolid.DirectionCurve3d qualified as DirectionCurve3d
+import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Prelude
 import OpenSolid.Vector3d qualified as Vector3d
 import {-# SOURCE #-} OpenSolid.VectorCurve3d (VectorCurve3d)
 import {-# SOURCE #-} OpenSolid.VectorCurve3d qualified as VectorCurve3d
 import OpenSolid.VectorCurve3d.DegenerateEndpoint (DegenerateEndpoint)
 import OpenSolid.VectorCurve3d.DegenerateEndpoint qualified as DegenerateEndpoint
-import Range (Range (Range))
-import Range qualified
-import VectorBounds3d qualified
+import OpenSolid.Range (Range (Range))
+import OpenSolid.Range qualified as Range
+import OpenSolid.VectorBounds3d qualified as VectorBounds3d
 
 data PiecewiseCurve space
   = PiecewiseCurve

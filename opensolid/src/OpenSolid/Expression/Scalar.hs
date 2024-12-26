@@ -28,21 +28,21 @@ module OpenSolid.Expression.Scalar
 where
 
 import Data.Int (Int64)
-import Float qualified
+import OpenSolid.Float qualified as Float
 import Foreign qualified
 import Foreign.Marshal.Array qualified
-import IO qualified
-import List qualified
-import NonEmpty qualified
+import OpenSolid.IO qualified as IO
+import OpenSolid.List qualified as List
+import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Prelude
 import OpenSolid.Qty (Qty (Qty))
-import SurfaceParameter (SurfaceParameter, UvPoint)
-import SurfaceParameter qualified
+import OpenSolid.SurfaceParameter (SurfaceParameter, UvPoint)
+import OpenSolid.SurfaceParameter qualified as SurfaceParameter
 import System.IO.Unsafe (unsafeDupablePerformIO)
 import OpenSolid.Text qualified as Text
-import Units qualified
-import VolumeParameter (UvwPoint, VolumeParameter)
-import VolumeParameter qualified
+import OpenSolid.Units qualified as Units
+import OpenSolid.VolumeParameter (UvwPoint, VolumeParameter)
+import OpenSolid.VolumeParameter qualified as VolumeParameter
 import Prelude (Double)
 
 data Scalar input where

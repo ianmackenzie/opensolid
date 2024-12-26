@@ -13,11 +13,10 @@ module OpenSolid.Surface2d.Function
   )
 where
 
-import Bounds2d (Bounds2d)
-import Bounds2d qualified
-import Composition
-import OpenSolid.Prelude
 import OpenSolid.Arithmetic qualified as Arithmetic
+import OpenSolid.Bounds2d (Bounds2d)
+import OpenSolid.Bounds2d qualified as Bounds2d
+import OpenSolid.Composition
 import {-# SOURCE #-} OpenSolid.Curve2d (Curve2d)
 import {-# SOURCE #-} OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Expression (Expression)
@@ -25,14 +24,15 @@ import OpenSolid.Expression qualified as Expression
 import OpenSolid.Expression.Surface2d qualified as Expression.Surface2d
 import OpenSolid.Point2d (Point2d)
 import OpenSolid.Point2d qualified as Point2d
+import OpenSolid.Prelude
 import OpenSolid.Surface1d.Function qualified as Surface1d.Function
+import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvCoordinates, UvPoint)
+import OpenSolid.Transform2d (Transform2d)
+import OpenSolid.Transform2d qualified as Transform2d
+import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2d (Vector2d)
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 import OpenSolid.VectorSurface2d.Function qualified as VectorSurface2d.Function
-import SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvCoordinates, UvPoint)
-import Transform2d (Transform2d)
-import Transform2d qualified
-import Units qualified
 
 class
   Show function =>

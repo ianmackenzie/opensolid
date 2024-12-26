@@ -1,6 +1,6 @@
 module Main (main) where
 
-import Length qualified
+import OpenSolid.Length qualified as Length
 import OpenSolid.Prelude
 import Test (Test)
 import Test qualified
@@ -23,7 +23,7 @@ import Tests.Stream qualified
 import Tests.Text qualified
 import Tests.VectorBounds2d qualified
 import Tests.VectorBounds3d qualified
-import Tolerance qualified
+import OpenSolid.Tolerance qualified as Tolerance
 
 tests :: List Test
 tests =

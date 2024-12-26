@@ -4,12 +4,12 @@ module API.Constraint
   )
 where
 
-import Angle (Angle)
-import Area (Area)
 import Data.Proxy (Proxy (Proxy))
-import Length (Length)
-import OpenSolid.Prelude
+import OpenSolid.Angle (Angle)
+import OpenSolid.Area (Area)
 import OpenSolid.FFI qualified as FFI
+import OpenSolid.Length (Length)
+import OpenSolid.Prelude
 
 data Constraint
   = ToleranceUnitless

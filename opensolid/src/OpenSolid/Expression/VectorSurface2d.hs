@@ -15,18 +15,18 @@ module OpenSolid.Expression.VectorSurface2d
   )
 where
 
-import Basis2d (Basis2d)
-import Basis2d qualified
-import Frame2d (Frame2d)
-import Frame2d qualified
+import OpenSolid.Basis2d (Basis2d)
+import OpenSolid.Basis2d qualified as Basis2d
+import OpenSolid.Frame2d (Frame2d)
+import OpenSolid.Frame2d qualified as Frame2d
 import OpenSolid.Prelude
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Vector2d (Vector2d)
 import OpenSolid.Vector2d qualified as Vector2d
-import SurfaceParameter (UvPoint)
-import Transform2d (Transform2d (Transform2d))
-import Units qualified
+import OpenSolid.SurfaceParameter (UvPoint)
+import OpenSolid.Transform2d (Transform2d (Transform2d))
+import OpenSolid.Units qualified as Units
 
 constant :: Vector2d (space @ units) -> Expression UvPoint (Vector2d (space @ units))
 constant = Expression.constant

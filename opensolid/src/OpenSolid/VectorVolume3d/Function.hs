@@ -18,10 +18,10 @@ import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.Volume1d qualified as Volume1d
 import OpenSolid.Volume1d.Function qualified as Volume1d.Function
-import Units qualified
-import VectorBounds3d (VectorBounds3d)
-import VectorBounds3d qualified
-import VolumeParameter (UvwBounds, UvwPoint, VolumeParameter)
+import OpenSolid.Units qualified as Units
+import OpenSolid.VectorBounds3d (VectorBounds3d)
+import OpenSolid.VectorBounds3d qualified as VectorBounds3d
+import OpenSolid.VolumeParameter (UvwBounds, UvwPoint, VolumeParameter)
 
 class
   Show function =>

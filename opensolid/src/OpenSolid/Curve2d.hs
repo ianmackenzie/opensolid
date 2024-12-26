@@ -47,24 +47,14 @@ module OpenSolid.Curve2d
   )
 where
 
-import Angle (Angle)
-import {-# SOURCE #-} BezierCurve2d qualified
-import Bounds2d (Bounds2d)
-import Bounds2d qualified
-import Composition
-import Direction2d (Direction2d)
-import DirectionCurve2d (DirectionCurve2d)
-import Domain2d (Domain2d)
-import Domain2d qualified
-import Error qualified
-import Float qualified
-import Frame2d (Frame2d)
-import Frame2d qualified
-import List qualified
-import OpenSolid.Prelude
+import OpenSolid.Angle (Angle)
 import OpenSolid.Arithmetic qualified as Arithmetic
 import OpenSolid.Axis2d (Axis2d)
 import OpenSolid.Axis2d qualified as Axis2d
+import {-# SOURCE #-} OpenSolid.BezierCurve2d qualified as BezierCurve2d
+import OpenSolid.Bounds2d (Bounds2d)
+import OpenSolid.Bounds2d qualified as Bounds2d
+import OpenSolid.Composition
 import OpenSolid.Curve1d (Curve1d)
 import OpenSolid.Curve1d qualified as Curve1d
 import OpenSolid.Curve2d.FindPoint qualified as FindPoint
@@ -74,34 +64,44 @@ import OpenSolid.Curve2d.Intersections qualified as Intersections
 import {-# SOURCE #-} OpenSolid.Curve2d.MedialAxis qualified as MedialAxis
 import OpenSolid.Curve2d.OverlappingSegment (OverlappingSegment (OverlappingSegment))
 import OpenSolid.Curve2d.OverlappingSegment qualified as OverlappingSegment
+import OpenSolid.Direction2d (Direction2d)
+import OpenSolid.DirectionCurve2d (DirectionCurve2d)
+import OpenSolid.Domain2d (Domain2d)
+import OpenSolid.Domain2d qualified as Domain2d
+import OpenSolid.Error qualified as Error
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Expression.Curve2d qualified as Expression.Curve2d
+import OpenSolid.Float qualified as Float
+import OpenSolid.Frame2d (Frame2d)
+import OpenSolid.Frame2d qualified as Frame2d
+import OpenSolid.List qualified as List
+import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
+import OpenSolid.Polyline2d (Polyline2d (Polyline2d))
+import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
+import OpenSolid.Range (Range)
+import OpenSolid.Range qualified as Range
+import OpenSolid.Result qualified as Result
+import OpenSolid.Solve2d qualified as Solve2d
+import OpenSolid.Stream qualified as Stream
 import OpenSolid.Surface1d.Function qualified as Surface1d.Function
 import OpenSolid.Surface2d.Function ()
+import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvPoint)
 import OpenSolid.Text qualified as Text
+import OpenSolid.Tolerance qualified as Tolerance
+import OpenSolid.Transform2d (Transform2d)
+import OpenSolid.Transform2d qualified as Transform2d
+import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2d (Vector2d)
 import OpenSolid.Vector2d qualified as Vector2d
+import OpenSolid.VectorBounds2d qualified as VectorBounds2d
 import OpenSolid.VectorCurve2d (VectorCurve2d)
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 import OpenSolid.VectorCurve2d.Zeros qualified as VectorCurve2d.Zeros
 import OpenSolid.VectorSurface2d.Function qualified as VectorSurface2d.Function
-import Parameter qualified
-import Polyline2d (Polyline2d (Polyline2d))
-import Range (Range)
-import Range qualified
-import Result qualified
-import Solve2d qualified
-import Stream qualified
-import SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvPoint)
-import Tolerance qualified
-import Transform2d (Transform2d)
-import Transform2d qualified
-import Units qualified
-import VectorBounds2d qualified
 import Prelude qualified
 
 type role Curve2d nominal

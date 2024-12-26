@@ -3,7 +3,7 @@ module Tests.Float (tests) where
 import OpenSolid.Prelude
 import Test (Test)
 import Test qualified
-import Tolerance qualified
+import OpenSolid.Tolerance qualified as Tolerance
 
 tests :: List Test
 tests =

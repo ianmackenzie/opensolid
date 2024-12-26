@@ -1,8 +1,8 @@
 module Main (main) where
 
 import API qualified
-import File qualified
-import List qualified
+import OpenSolid.File qualified as File
+import OpenSolid.List qualified as List
 import OpenSolid.Prelude
 import OpenSolid.Text qualified as Text
 

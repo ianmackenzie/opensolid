@@ -8,10 +8,10 @@ where
 
 import Data.Proxy (Proxy (Proxy))
 import Foreign (Ptr)
-import IO qualified
-import OpenSolid.Prelude
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
+import OpenSolid.IO qualified as IO
+import OpenSolid.Prelude
 import OpenSolid.Text qualified as Text
 
 ffiName :: FFI.Id a -> Text

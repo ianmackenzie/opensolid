@@ -1,7 +1,7 @@
 module OpenSolid.Qty (Qty (Qty)) where
 
 import Data.Kind (Type)
-import Unitless (Unitless)
+import OpenSolid.Unitless (Unitless)
 import Prelude qualified
 
 type role Qty phantom

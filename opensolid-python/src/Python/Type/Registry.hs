@@ -9,9 +9,9 @@ where
 
 import Data.Set (Set)
 import Data.Set qualified as Set
-import List qualified
+import OpenSolid.List qualified as List
+import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude
-import Pair qualified
 import Python qualified
 
 data Registry = Registry (Set Text) (List (Text, Text))

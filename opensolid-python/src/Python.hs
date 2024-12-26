@@ -9,7 +9,7 @@ module Python
   )
 where
 
-import List qualified
+import OpenSolid.List qualified as List
 import OpenSolid.Prelude
 import OpenSolid.Text qualified as Text
 

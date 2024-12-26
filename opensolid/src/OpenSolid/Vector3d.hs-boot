@@ -10,8 +10,8 @@ module OpenSolid.Vector3d
 where
 
 import OpenSolid.Prelude
-import {-# SOURCE #-} Transform3d (Transform3d)
-import Units qualified
+import {-# SOURCE #-} OpenSolid.Transform3d (Transform3d)
+import OpenSolid.Units qualified as Units
 
 type role Vector3d phantom
 

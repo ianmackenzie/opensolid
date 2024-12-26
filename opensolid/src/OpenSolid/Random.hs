@@ -18,16 +18,16 @@ module OpenSolid.Random
   )
 where
 
-import Array qualified
-import Composition
+import OpenSolid.Array qualified as Array
+import OpenSolid.Composition
 import Data.List.NonEmpty (NonEmpty)
-import Int qualified
+import OpenSolid.Int qualified as Int
 import OpenSolid.Arithmetic
 import OpenSolid.Bootstrap
 import OpenSolid.Random.Internal hiding ((>>=))
 import OpenSolid.Random.Internal qualified as Internal
-import Pair qualified
-import Result (Result (Failure, Success))
+import OpenSolid.Pair qualified as Pair
+import OpenSolid.Result (Result (Failure, Success))
 import System.Random (StdGen)
 import System.Random qualified
 import System.Random.Stateful qualified

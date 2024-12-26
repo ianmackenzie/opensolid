@@ -20,16 +20,16 @@ module OpenSolid.Volume1d.Function
   )
 where
 
-import Angle qualified
+import OpenSolid.Angle qualified as Angle
 import OpenSolid.Prelude
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Qty qualified as Qty
-import Range (Range)
-import Range qualified
-import Units (Radians)
-import Units qualified
-import VolumeParameter (UvwBounds, UvwPoint, VolumeParameter (U, V, W))
+import OpenSolid.Range (Range)
+import OpenSolid.Range qualified as Range
+import OpenSolid.Units (Radians)
+import OpenSolid.Units qualified as Units
+import OpenSolid.VolumeParameter (UvwBounds, UvwPoint, VolumeParameter (U, V, W))
 
 class Show function => Interface function units | function -> units where
   evaluateImpl :: function -> UvwPoint -> Qty units

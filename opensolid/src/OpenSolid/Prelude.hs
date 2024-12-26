@@ -1,26 +1,20 @@
 module OpenSolid.Prelude
   ( module OpenSolid.Bootstrap
-  , module Composition
+  , module OpenSolid.Composition
   , module OpenSolid.Arithmetic
-  , module Result
+  , module OpenSolid.Result
   , module OpenSolid.Qty
-  , module Float
-  , module NonEmpty
-  , module Sign
-  , module CoordinateSystem
-  , module Tolerance
-  , module Fuzzy
-  , module Units
-  , module Intersects
+  , module OpenSolid.Float
+  , module OpenSolid.NonEmpty
+  , module OpenSolid.Sign
+  , module OpenSolid.CoordinateSystem
+  , module OpenSolid.Tolerance
+  , module OpenSolid.Fuzzy
+  , module OpenSolid.Units
+  , module OpenSolid.Intersects
   )
 where
 
-import Composition (Composition ((>>)), (.))
-import CoordinateSystem (CoordinateSystem, Defines, LocalSpace, type (@))
-import Float (Float, fromRational)
-import Fuzzy (Fuzzy (Resolved, Unresolved))
-import Intersects (Intersects ((^)))
-import NonEmpty (NonEmpty ((:|)), (|:), pattern NonEmpty)
 import OpenSolid.Arithmetic hiding
   ( CrossProduct (CrossProduct)
   , Difference (Difference)
@@ -30,8 +24,14 @@ import OpenSolid.Arithmetic hiding
   , Sum (Sum)
   )
 import OpenSolid.Bootstrap
+import OpenSolid.Composition (Composition ((>>)), (.))
+import OpenSolid.CoordinateSystem (CoordinateSystem, Defines, LocalSpace, type (@))
+import OpenSolid.Float (Float, fromRational)
+import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
+import OpenSolid.Intersects (Intersects ((^)))
+import OpenSolid.NonEmpty (NonEmpty ((:|)), (|:), pattern NonEmpty)
 import OpenSolid.Qty (Qty)
-import Result (Result (Failure, Success))
-import Sign (Sign (Negative, Positive))
-import Tolerance (ApproximateEquality ((~=)), Tolerance, (!=))
-import Units (HasUnits (UnitsOf), Unitless, (:*:), (:/:))
+import OpenSolid.Result (Result (Failure, Success))
+import OpenSolid.Sign (Sign (Negative, Positive))
+import OpenSolid.Tolerance (ApproximateEquality ((~=)), Tolerance, (!=))
+import OpenSolid.Units (HasUnits (UnitsOf), Unitless, (:*:), (:/:))

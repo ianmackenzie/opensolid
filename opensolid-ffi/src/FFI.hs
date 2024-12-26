@@ -4,12 +4,12 @@
 module FFI (generateExports) where
 
 import API qualified
-import Array (Array)
-import Array qualified
 import Foreign (Ptr)
 import Language.Haskell.TH qualified as TH
-import List qualified
-import NonEmpty qualified
+import OpenSolid.Array (Array)
+import OpenSolid.Array qualified as Array
+import OpenSolid.List qualified as List
+import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Prelude
 import OpenSolid.Text qualified as Text
 import Prelude qualified

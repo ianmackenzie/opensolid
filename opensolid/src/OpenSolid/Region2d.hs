@@ -12,13 +12,13 @@ module OpenSolid.Region2d
   )
 where
 
-import Bounds2d (Bounds2d)
-import Bounds2d qualified
-import Estimate (Estimate)
-import Estimate qualified
-import Float qualified
-import List qualified
-import NonEmpty qualified
+import OpenSolid.Bounds2d (Bounds2d)
+import OpenSolid.Bounds2d qualified as Bounds2d
+import OpenSolid.Estimate (Estimate)
+import OpenSolid.Estimate qualified as Estimate
+import OpenSolid.Float qualified as Float
+import OpenSolid.List qualified as List
+import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Prelude
 import OpenSolid.Curve1d qualified as Curve1d
 import OpenSolid.Curve2d (Curve2d)
@@ -30,15 +30,15 @@ import OpenSolid.Point2d (Point2d)
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Region2d.BoundedBy qualified as BoundedBy
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
-import Polygon2d (Polygon2d)
-import Polygon2d qualified
-import Polyline2d qualified
-import Range (Range)
-import Range qualified
-import Result qualified
-import Tolerance qualified
-import Units qualified
-import Vertex2d (Vertex2d)
+import OpenSolid.Polygon2d (Polygon2d)
+import OpenSolid.Polygon2d qualified as Polygon2d
+import OpenSolid.Polyline2d qualified as Polyline2d
+import OpenSolid.Range (Range)
+import OpenSolid.Range qualified as Range
+import OpenSolid.Result qualified as Result
+import OpenSolid.Tolerance qualified as Tolerance
+import OpenSolid.Units qualified as Units
+import OpenSolid.Vertex2d (Vertex2d)
 
 type role Region2d nominal
 

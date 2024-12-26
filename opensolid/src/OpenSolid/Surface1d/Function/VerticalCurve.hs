@@ -6,34 +6,34 @@ module OpenSolid.Surface1d.Function.VerticalCurve
   )
 where
 
-import Bounds2d qualified
-import Direction2d qualified
-import Float qualified
-import Frame2d (Frame2d)
-import Frame2d qualified
-import List qualified
-import OpenSolid.Prelude
 import OpenSolid.Arithmetic.Unboxed
 import OpenSolid.Axis2d (Axis2d)
 import OpenSolid.Axis2d qualified as Axis2d
+import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.Curve1d qualified as Curve1d
 import {-# SOURCE #-} OpenSolid.Curve2d (Curve2d)
 import {-# SOURCE #-} OpenSolid.Curve2d qualified as Curve2d
+import OpenSolid.Direction2d qualified as Direction2d
+import OpenSolid.Float qualified as Float
+import OpenSolid.Frame2d (Frame2d)
+import OpenSolid.Frame2d qualified as Frame2d
+import OpenSolid.List qualified as List
 import OpenSolid.Point2d (Point2d (Point2d#))
 import OpenSolid.Point2d qualified as Point2d
+import OpenSolid.Prelude
 import OpenSolid.Qty (Qty (Qty#))
 import OpenSolid.Qty qualified as Qty
+import OpenSolid.Range (Range (Range))
+import OpenSolid.Range qualified as Range
 import {-# SOURCE #-} OpenSolid.Surface1d.Function (Function)
 import {-# SOURCE #-} OpenSolid.Surface1d.Function qualified as Function
 import OpenSolid.Surface1d.Function.Internal qualified as Internal
+import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvCoordinates)
+import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Uv.Derivatives (Derivatives)
 import OpenSolid.Uv.Derivatives qualified as Derivatives
 import OpenSolid.Vector2d (Vector2d (Vector2d#))
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
-import Range (Range (Range))
-import Range qualified
-import SurfaceParameter (SurfaceParameter (U, V), UvCoordinates)
-import Tolerance
 
 data VerticalCurve units = VerticalCurve
   { f :: Function units

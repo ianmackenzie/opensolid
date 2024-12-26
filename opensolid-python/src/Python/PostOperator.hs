@@ -3,9 +3,9 @@ module Python.PostOperator (definition) where
 import API.BinaryOperator qualified as BinaryOperator
 import API.PostOperator (PostOperator (..))
 import API.PostOperator qualified as PostOperator
-import List qualified
-import OpenSolid.Prelude
 import OpenSolid.FFI qualified as FFI
+import OpenSolid.List qualified as List
+import OpenSolid.Prelude
 import Python qualified
 import Python.Function qualified
 import Python.Type qualified

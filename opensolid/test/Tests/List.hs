@@ -1,7 +1,7 @@
 module Tests.List (tests) where
 
-import Int qualified
-import List qualified
+import OpenSolid.Int qualified as Int
+import OpenSolid.List qualified as List
 import OpenSolid.Prelude
 import Test (Test)
 import Test qualified

@@ -17,11 +17,11 @@ module Test
 where
 
 import Data.Foldable qualified
-import Duration qualified
-import Error qualified
-import Float qualified
-import IO qualified
-import List qualified
+import OpenSolid.Duration qualified as Duration
+import OpenSolid.Error qualified as Error
+import OpenSolid.Float qualified as Float
+import OpenSolid.IO qualified as IO
+import OpenSolid.List qualified as List
 import OpenSolid.Prelude
 import OpenSolid.Random (Generator)
 import OpenSolid.Random qualified as Random

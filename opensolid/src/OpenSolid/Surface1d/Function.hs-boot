@@ -3,9 +3,9 @@ module OpenSolid.Surface1d.Function (Interface (..), Function, evaluate, evaluat
 import OpenSolid.Prelude
 import OpenSolid.Curve1d (Curve1d)
 import {-# SOURCE #-} OpenSolid.Curve2d (Curve2d)
-import Range (Range)
-import SurfaceParameter (SurfaceParameter, UvBounds, UvCoordinates, UvPoint)
-import Units qualified
+import OpenSolid.Range (Range)
+import OpenSolid.SurfaceParameter (SurfaceParameter, UvBounds, UvCoordinates, UvPoint)
+import OpenSolid.Units qualified as Units
 
 class
   Show function =>

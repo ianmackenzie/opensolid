@@ -6,11 +6,11 @@ module OpenSolid.Vector3d.CoordinateTransformation
   )
 where
 
-import {-# SOURCE #-} Basis3d (Basis3d)
-import {-# SOURCE #-} Basis3d qualified
-import {-# SOURCE #-} Direction3d qualified
-import {-# SOURCE #-} Frame3d (Frame3d)
-import {-# SOURCE #-} Frame3d qualified
+import {-# SOURCE #-} OpenSolid.Basis3d (Basis3d)
+import {-# SOURCE #-} OpenSolid.Basis3d qualified as Basis3d
+import {-# SOURCE #-} OpenSolid.Direction3d qualified as Direction3d
+import {-# SOURCE #-} OpenSolid.Frame3d (Frame3d)
+import {-# SOURCE #-} OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.Prelude
 import {-# SOURCE #-} OpenSolid.Vector3d (Vector3d)
 import {-# SOURCE #-} OpenSolid.Vector3d qualified as Vector3d

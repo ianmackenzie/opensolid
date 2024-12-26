@@ -45,19 +45,19 @@ module OpenSolid.Vector2d
   )
 where
 
-import Angle (Angle)
-import Angle qualified
-import Area qualified
-import {-# SOURCE #-} Basis2d (Basis2d)
-import {-# SOURCE #-} Basis2d qualified
+import OpenSolid.Angle (Angle)
+import OpenSolid.Angle qualified as Angle
+import OpenSolid.Area qualified as Area
+import {-# SOURCE #-} OpenSolid.Basis2d (Basis2d)
+import {-# SOURCE #-} OpenSolid.Basis2d qualified as Basis2d
 import Data.Coerce qualified
-import {-# SOURCE #-} Direction2d (Direction2d)
-import {-# SOURCE #-} Direction2d qualified
-import Error qualified
-import {-# SOURCE #-} Frame2d (Frame2d)
-import {-# SOURCE #-} Frame2d qualified
-import Length qualified
-import List qualified
+import {-# SOURCE #-} OpenSolid.Direction2d (Direction2d)
+import {-# SOURCE #-} OpenSolid.Direction2d qualified as Direction2d
+import OpenSolid.Error qualified as Error
+import {-# SOURCE #-} OpenSolid.Frame2d (Frame2d)
+import {-# SOURCE #-} OpenSolid.Frame2d qualified as Frame2d
+import OpenSolid.Length qualified as Length
+import OpenSolid.List qualified as List
 import OpenSolid.Prelude
 import OpenSolid.Arithmetic.Unboxed
 import {-# SOURCE #-} OpenSolid.Axis2d (Axis2d)
@@ -69,10 +69,10 @@ import {-# SOURCE #-} OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Qty (Qty (Qty#))
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Vector2d.CoordinateTransformation qualified as Vector2d.CoordinateTransformation
-import Transform2d (Transform2d (Transform2d))
-import Transform2d qualified
-import Units (Meters, SquareMeters)
-import Units qualified
+import OpenSolid.Transform2d (Transform2d (Transform2d))
+import OpenSolid.Transform2d qualified as Transform2d
+import OpenSolid.Units (Meters, SquareMeters)
+import OpenSolid.Units qualified as Units
 
 type role Vector2d phantom
 

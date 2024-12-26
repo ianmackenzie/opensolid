@@ -1,18 +1,18 @@
 module Tests.Range (tests) where
 
-import Length (Length)
-import NonEmpty qualified
+import OpenSolid.Length (Length)
+import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
-import Parameter qualified
+import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Random (Generator)
 import OpenSolid.Random qualified as Random
-import Range (Range)
-import Range qualified
+import OpenSolid.Range (Range)
+import OpenSolid.Range qualified as Range
 import Test (Test)
 import Test qualified
 import Tests.Random qualified as Random
-import Units (Meters)
+import OpenSolid.Units (Meters)
 
 tests :: List Test
 tests =

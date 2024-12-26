@@ -27,21 +27,21 @@ module OpenSolid.Point3d
   )
 where
 
-import Bounded qualified
-import {-# SOURCE #-} Bounds3d (Bounds3d)
-import {-# SOURCE #-} Bounds3d qualified
+import OpenSolid.Bounded qualified as Bounded
+import {-# SOURCE #-} OpenSolid.Bounds3d (Bounds3d)
+import {-# SOURCE #-} OpenSolid.Bounds3d qualified as Bounds3d
 import Data.Coerce qualified
-import {-# SOURCE #-} Frame3d (Frame3d)
-import Length qualified
+import {-# SOURCE #-} OpenSolid.Frame3d (Frame3d)
+import OpenSolid.Length qualified as Length
 import OpenSolid.Prelude
 import OpenSolid.Point3d.CoordinateTransformation qualified as Point3d.CoordinateTransformation
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Vector3d qualified as Vector3d
-import Transform3d (Transform3d (Transform3d))
-import Units (Meters)
-import Units qualified
+import OpenSolid.Transform3d (Transform3d (Transform3d))
+import OpenSolid.Units (Meters)
+import OpenSolid.Units qualified as Units
 import OpenSolid.Vector3d (Vector3d (Vector3d))
-import VectorBounds3d (VectorBounds3d (VectorBounds3d))
+import OpenSolid.VectorBounds3d (VectorBounds3d (VectorBounds3d))
 
 type role Point3d phantom
 

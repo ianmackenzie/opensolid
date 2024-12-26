@@ -1,8 +1,8 @@
 module OpenSolid.Point3d.CoordinateTransformation (placeIn, relativeTo) where
 
-import {-# SOURCE #-} Direction3d qualified
-import {-# SOURCE #-} Frame3d (Frame3d)
-import {-# SOURCE #-} Frame3d qualified
+import {-# SOURCE #-} OpenSolid.Direction3d qualified as Direction3d
+import {-# SOURCE #-} OpenSolid.Frame3d (Frame3d)
+import {-# SOURCE #-} OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.Prelude
 import {-# SOURCE #-} OpenSolid.Point3d (Point3d)
 import {-# SOURCE #-} OpenSolid.Point3d qualified as Point3d

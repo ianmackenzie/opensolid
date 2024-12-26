@@ -11,9 +11,9 @@ import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Qty qualified as Qty
 import {-# SOURCE #-} OpenSolid.Surface1d.Function (Function)
 import {-# SOURCE #-} OpenSolid.Surface1d.Function qualified as Function
-import Range (Range (Range))
-import Range qualified
-import Solve1d qualified
+import OpenSolid.Range (Range (Range))
+import OpenSolid.Range qualified as Range
+import OpenSolid.Solve1d qualified as Solve1d
 
 solveForU ::
   Tolerance units =>

@@ -1,8 +1,8 @@
 module Tests.Bounds2d (tests) where
 
-import Bounds2d qualified
+import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.Prelude
-import Parameter qualified
+import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2d qualified as Point2d
 import Test (Test)
 import Test qualified

@@ -10,14 +10,14 @@ module OpenSolid.Expression.Curve2d
   )
 where
 
-import Frame2d (Frame2d)
-import Frame2d qualified
+import OpenSolid.Frame2d (Frame2d)
+import OpenSolid.Frame2d qualified as Frame2d
 import OpenSolid.Prelude
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Expression.VectorCurve2d qualified as Expression.VectorCurve2d
 import OpenSolid.Point2d (Point2d)
-import Transform2d (Transform2d (Transform2d))
+import OpenSolid.Transform2d (Transform2d (Transform2d))
 import OpenSolid.Vector2d qualified as Vector2d
 
 constant :: Point2d (space @ units) -> Expression Float (Point2d (space @ units))

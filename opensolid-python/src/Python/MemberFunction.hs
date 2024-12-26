@@ -2,16 +2,16 @@ module Python.MemberFunction (definition) where
 
 import API.MemberFunction (MemberFunction (..))
 import API.MemberFunction qualified as MemberFunction
-import List qualified
-import Maybe qualified
-import OpenSolid.Prelude
 import OpenSolid.FFI (Name)
 import OpenSolid.FFI qualified as FFI
-import Pair qualified
+import OpenSolid.List qualified as List
+import OpenSolid.Maybe qualified as Maybe
+import OpenSolid.Pair qualified as Pair
+import OpenSolid.Prelude
+import OpenSolid.Text qualified as Text
 import Python qualified
 import Python.Function qualified
 import Python.Type qualified
-import OpenSolid.Text qualified as Text
 
 definition :: FFI.Id value -> (Name, MemberFunction value) -> Text
 definition classId (functionName, memberFunction) = do

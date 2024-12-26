@@ -10,15 +10,15 @@ where
 import API.Constraint (Constraint (..))
 import Data.Proxy (Proxy (Proxy))
 import Foreign (Ptr)
-import IO qualified
-import List qualified
-import OpenSolid.Prelude
 import OpenSolid.FFI (FFI, Name)
 import OpenSolid.FFI qualified as FFI
+import OpenSolid.IO qualified as IO
+import OpenSolid.List qualified as List
+import OpenSolid.Pair qualified as Pair
+import OpenSolid.Prelude
 import OpenSolid.Text qualified as Text
-import Pair qualified
-import Tolerance qualified
-import Units (Meters, Radians)
+import OpenSolid.Tolerance qualified as Tolerance
+import OpenSolid.Units (Meters, Radians)
 
 data StaticFunction where
   StaticFunction1 ::

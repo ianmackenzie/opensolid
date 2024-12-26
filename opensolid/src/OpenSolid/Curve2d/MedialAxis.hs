@@ -5,10 +5,10 @@ module OpenSolid.Curve2d.MedialAxis
   )
 where
 
-import Debug qualified
-import Error qualified
-import List qualified
-import NonEmpty qualified
+import OpenSolid.Debug qualified as Debug
+import OpenSolid.Error qualified as Error
+import OpenSolid.List qualified as List
+import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Prelude
 import OpenSolid.Curve1d (Curve1d)
 import {-# SOURCE #-} OpenSolid.Curve2d (Curve2d)
@@ -16,8 +16,8 @@ import {-# SOURCE #-} OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Surface1d.Function qualified as Surface1d.Function
 import OpenSolid.Surface1d.Function.Zeros qualified as Surface1d.Function.Zeros
 import OpenSolid.Surface2d.Function ()
-import SurfaceParameter (UvCoordinates)
-import Tolerance qualified
+import OpenSolid.SurfaceParameter (UvCoordinates)
+import OpenSolid.Tolerance qualified as Tolerance
 
 data Error
   = HigherOrderSolution

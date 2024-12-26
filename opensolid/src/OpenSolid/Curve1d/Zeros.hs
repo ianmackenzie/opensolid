@@ -1,6 +1,6 @@
 module OpenSolid.Curve1d.Zeros (Error (..)) where
 
-import Error qualified
+import OpenSolid.Error qualified as Error
 import OpenSolid.Prelude
 
 data Error

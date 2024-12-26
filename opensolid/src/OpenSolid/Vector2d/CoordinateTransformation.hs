@@ -6,11 +6,11 @@ module OpenSolid.Vector2d.CoordinateTransformation
   )
 where
 
-import {-# SOURCE #-} Basis2d (Basis2d)
-import {-# SOURCE #-} Basis2d qualified
-import {-# SOURCE #-} Direction2d qualified
-import {-# SOURCE #-} Frame2d (Frame2d)
-import {-# SOURCE #-} Frame2d qualified
+import {-# SOURCE #-} OpenSolid.Basis2d (Basis2d)
+import {-# SOURCE #-} OpenSolid.Basis2d qualified as Basis2d
+import {-# SOURCE #-} OpenSolid.Direction2d qualified as Direction2d
+import {-# SOURCE #-} OpenSolid.Frame2d (Frame2d)
+import {-# SOURCE #-} OpenSolid.Frame2d qualified as Frame2d
 import OpenSolid.Prelude
 import {-# SOURCE #-} OpenSolid.Vector2d (Vector2d)
 import {-# SOURCE #-} OpenSolid.Vector2d qualified as Vector2d

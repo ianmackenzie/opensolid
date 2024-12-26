@@ -1,23 +1,23 @@
 module Tests.Region2d (tests) where
 
-import Angle qualified
-import Arc2d qualified
-import Area (Area)
-import Area qualified
-import Estimate qualified
-import Float qualified
-import Length qualified
-import Line2d qualified
+import OpenSolid.Angle qualified as Angle
+import OpenSolid.Arc2d qualified as Arc2d
+import OpenSolid.Area (Area)
+import OpenSolid.Area qualified as Area
+import OpenSolid.Estimate qualified as Estimate
+import OpenSolid.Float qualified as Float
+import OpenSolid.Length qualified as Length
+import OpenSolid.Line2d qualified as Line2d
 import OpenSolid.Prelude
 import OpenSolid.Qty (zero)
 import OpenSolid.Point2d qualified as Point2d
-import Range qualified
+import OpenSolid.Range qualified as Range
 import OpenSolid.Region2d (Region2d)
 import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Region2d.BoundedBy qualified as Region2d.BoundedBy
 import Test (Test)
 import Test qualified
-import Units (Meters)
+import OpenSolid.Units (Meters)
 
 tests :: Tolerance Meters => List Test
 tests =

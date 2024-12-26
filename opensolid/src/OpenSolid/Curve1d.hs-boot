@@ -7,7 +7,7 @@ module OpenSolid.Curve1d
 where
 
 import OpenSolid.Prelude
-import Range (Range)
+import OpenSolid.Range (Range)
 
 type role Curve1d nominal
 

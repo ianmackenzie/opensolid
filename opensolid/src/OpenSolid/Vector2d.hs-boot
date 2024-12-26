@@ -9,8 +9,8 @@ module OpenSolid.Vector2d
 where
 
 import OpenSolid.Prelude
-import {-# SOURCE #-} Transform2d (Transform2d)
-import Units qualified
+import {-# SOURCE #-} OpenSolid.Transform2d (Transform2d)
+import OpenSolid.Units qualified as Units
 
 type role Vector2d phantom
 

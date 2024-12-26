@@ -8,7 +8,7 @@ where
 
 import OpenSolid.Region2d (Region2d)
 import OpenSolid.VectorSurface2d.Function (Function)
-import SurfaceParameter (UvCoordinates)
+import OpenSolid.SurfaceParameter (UvCoordinates)
 
 data VectorSurface2d units where
   Parametric :: Function units -> Region2d UvCoordinates -> VectorSurface2d units

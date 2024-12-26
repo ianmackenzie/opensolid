@@ -30,18 +30,18 @@ module OpenSolid.Text
   )
 where
 
-import Composition
 import Data.ByteString (ByteString)
 import Data.Char qualified
 import Data.Text qualified
 import Data.Text.Encoding qualified
-import Error qualified
-import Float (Float)
-import Float qualified
-import List qualified
 import OpenSolid.Arithmetic
 import OpenSolid.Bootstrap
-import Result (Result (Failure, Success))
+import OpenSolid.Composition
+import OpenSolid.Error qualified as Error
+import OpenSolid.Float (Float)
+import OpenSolid.Float qualified as Float
+import OpenSolid.List qualified as List
+import OpenSolid.Result (Result (Failure, Success))
 import Prelude qualified
 
 concat :: List Text -> Text

@@ -9,15 +9,15 @@ module OpenSolid.VectorCurve2d.DegenerateEndpoint
   )
 where
 
-import Float qualified
+import OpenSolid.Float qualified as Float
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Vector2d (Vector2d)
-import Range (Range (Range))
-import Transform2d (Transform2d)
+import OpenSolid.Range (Range (Range))
+import OpenSolid.Transform2d (Transform2d)
 import OpenSolid.Vector2d qualified as Vector2d
-import VectorBounds2d (VectorBounds2d)
-import VectorBounds2d qualified
+import OpenSolid.VectorBounds2d (VectorBounds2d)
+import OpenSolid.VectorBounds2d qualified as VectorBounds2d
 import {-# SOURCE #-} OpenSolid.VectorCurve2d (VectorCurve2d)
 import {-# SOURCE #-} OpenSolid.VectorCurve2d qualified as VectorCurve2d
 

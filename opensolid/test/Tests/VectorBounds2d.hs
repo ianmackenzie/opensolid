@@ -2,11 +2,11 @@ module Tests.VectorBounds2d (tests) where
 
 import OpenSolid.Prelude
 import OpenSolid.Vector2d qualified as Vector2d
-import Parameter qualified
+import OpenSolid.Parameter qualified as Parameter
 import Test (Test)
 import Test qualified
 import Tests.Random qualified as Random
-import VectorBounds2d qualified
+import OpenSolid.VectorBounds2d qualified as VectorBounds2d
 
 tests :: List Test
 tests =

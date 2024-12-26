@@ -18,19 +18,19 @@ module Tests.Random
   )
 where
 
-import Angle qualified
-import Arc2d qualified
-import Bounds2d (Bounds2d)
-import Bounds2d qualified
-import CubicSpline2d qualified
-import Direction2d qualified
-import Float qualified
-import Frame2d (Frame2d)
-import Frame2d qualified
-import Length (Length)
-import Length qualified
-import Line2d qualified
-import NonEmpty qualified
+import OpenSolid.Angle qualified as Angle
+import OpenSolid.Arc2d qualified as Arc2d
+import OpenSolid.Bounds2d (Bounds2d)
+import OpenSolid.Bounds2d qualified as Bounds2d
+import OpenSolid.CubicSpline2d qualified as CubicSpline2d
+import OpenSolid.Direction2d qualified as Direction2d
+import OpenSolid.Float qualified as Float
+import OpenSolid.Frame2d (Frame2d)
+import OpenSolid.Frame2d qualified as Frame2d
+import OpenSolid.Length (Length)
+import OpenSolid.Length qualified as Length
+import OpenSolid.Line2d qualified as Line2d
+import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Prelude
 import OpenSolid.Axis2d (Axis2d)
 import OpenSolid.Axis2d qualified as Axis2d
@@ -42,14 +42,14 @@ import OpenSolid.Random (Generator)
 import OpenSolid.Random qualified as Random
 import OpenSolid.Vector2d (Vector2d)
 import OpenSolid.Vector2d qualified as Vector2d
-import QuadraticSpline2d qualified
-import Range (Range)
-import Range qualified
-import Sign qualified
-import Transform2d qualified
-import Units (Meters)
-import VectorBounds2d (VectorBounds2d (VectorBounds2d))
-import VectorBounds3d (VectorBounds3d (VectorBounds3d))
+import OpenSolid.QuadraticSpline2d qualified as QuadraticSpline2d
+import OpenSolid.Range (Range)
+import OpenSolid.Range qualified as Range
+import OpenSolid.Sign qualified as Sign
+import OpenSolid.Transform2d qualified as Transform2d
+import OpenSolid.Units (Meters)
+import OpenSolid.VectorBounds2d (VectorBounds2d (VectorBounds2d))
+import OpenSolid.VectorBounds3d (VectorBounds3d (VectorBounds3d))
 
 length :: Generator Length
 length = Qty.random (Length.meters -10.0) (Length.meters 10.0)

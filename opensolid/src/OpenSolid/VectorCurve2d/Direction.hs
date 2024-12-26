@@ -1,13 +1,13 @@
 module OpenSolid.VectorCurve2d.Direction (unsafe) where
 
-import {-# SOURCE #-} DirectionCurve2d (DirectionCurve2d)
-import {-# SOURCE #-} DirectionCurve2d qualified
-import Maybe qualified
+import {-# SOURCE #-} OpenSolid.DirectionCurve2d (DirectionCurve2d)
+import {-# SOURCE #-} OpenSolid.DirectionCurve2d qualified as DirectionCurve2d
+import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Prelude
-import Range (Range (Range))
-import Range qualified
+import OpenSolid.Range (Range (Range))
+import OpenSolid.Range qualified as Range
 import OpenSolid.Vector2d qualified as Vector2d
-import VectorBounds2d qualified
+import OpenSolid.VectorBounds2d qualified as VectorBounds2d
 import {-# SOURCE #-} OpenSolid.VectorCurve2d (VectorCurve2d)
 import {-# SOURCE #-} OpenSolid.VectorCurve2d qualified as VectorCurve2d
 import OpenSolid.VectorCurve2d.DegenerateEndpoint (DegenerateEndpoint)

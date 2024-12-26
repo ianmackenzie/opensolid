@@ -97,55 +97,26 @@ custom-setup
 library
   import: config
   exposed-modules:
-    Angle
-    Arc2d
-    Area
-    Array
-    Axis3d
-    Basis2d
-    Basis3d
-    BezierCurve2d
-    Bool
-    Bounded
-    Bounds
-    Bounds2d
-    Bounds3d
-    Color
-    Composition
-    CoordinateSystem
-    CubicSpline2d
-    Debug
-    Direction2d
-    Direction3d
-    DirectionBounds2d
-    DirectionBounds3d
-    DirectionCurve2d
-    DirectionCurve3d
-    Domain1d
-    Domain2d
-    Drawing2d
-    Duration
-    Error
-    Estimate
-    File
-    Float
-    Frame2d
-    Frame3d
-    Fuzzy
-    IO
-    Int
-    Intersects
-    Length
-    Line2d
-    Line3d
-    List
-    Map
-    Maybe
-    NonEmpty
-    OpenSolid.Prelude
+    OpenSolid.Angle
+    OpenSolid.Arc2d
+    OpenSolid.Area
     OpenSolid.Arithmetic
     OpenSolid.Arithmetic.Unboxed
+    OpenSolid.Array
     OpenSolid.Axis2d
+    OpenSolid.Axis3d
+    OpenSolid.Basis2d
+    OpenSolid.Basis3d
+    OpenSolid.BezierCurve2d
+    OpenSolid.Bool
+    OpenSolid.Bounded
+    OpenSolid.Bounds
+    OpenSolid.Bounds2d
+    OpenSolid.Bounds3d
+    OpenSolid.Color
+    OpenSolid.Composition
+    OpenSolid.CoordinateSystem
+    OpenSolid.CubicSpline2d
     OpenSolid.Curve1d
     OpenSolid.Curve1d.Zero
     OpenSolid.Curve1d.Zeros
@@ -156,6 +127,19 @@ library
     OpenSolid.Curve2d.MedialAxis
     OpenSolid.Curve2d.OverlappingSegment
     OpenSolid.Curve3d
+    OpenSolid.Debug
+    OpenSolid.Direction2d
+    OpenSolid.Direction3d
+    OpenSolid.DirectionBounds2d
+    OpenSolid.DirectionBounds3d
+    OpenSolid.DirectionCurve2d
+    OpenSolid.DirectionCurve3d
+    OpenSolid.Domain1d
+    OpenSolid.Domain2d
+    OpenSolid.Drawing2d
+    OpenSolid.Duration
+    OpenSolid.Error
+    OpenSolid.Estimate
     OpenSolid.Expression
     OpenSolid.Expression.Curve1d
     OpenSolid.Expression.Curve2d
@@ -165,15 +149,45 @@ library
     OpenSolid.Expression.VectorCurve3d
     OpenSolid.Expression.VectorSurface2d
     OpenSolid.FFI
+    OpenSolid.File
+    OpenSolid.Float
+    OpenSolid.Frame2d
+    OpenSolid.Frame3d
+    OpenSolid.Fuzzy
+    OpenSolid.IO
+    OpenSolid.Int
+    OpenSolid.Intersects
     OpenSolid.Json
     OpenSolid.Json.Format
     OpenSolid.Json.Schema
+    OpenSolid.Length
+    OpenSolid.Line2d
+    OpenSolid.Line3d
+    OpenSolid.List
+    OpenSolid.Map
+    OpenSolid.Maybe
+    OpenSolid.NonEmpty
+    OpenSolid.Pair
+    OpenSolid.Parameter
+    OpenSolid.Plane3d
     OpenSolid.Point2d
     OpenSolid.Point3d
+    OpenSolid.Polygon2d
+    OpenSolid.Polyline2d
+    OpenSolid.Prelude
     OpenSolid.Qty
+    OpenSolid.QuadraticSpline2d
+    OpenSolid.QuadraticSpline3d
+    OpenSolid.Queue
     OpenSolid.Random
+    OpenSolid.Range
     OpenSolid.Region2d
     OpenSolid.Region2d.BoundedBy
+    OpenSolid.Result
+    OpenSolid.Sign
+    OpenSolid.Solve1d
+    OpenSolid.Solve2d
+    OpenSolid.Stream
     OpenSolid.Surface1d
     OpenSolid.Surface1d.Function
     OpenSolid.Surface1d.Function.HorizontalCurve
@@ -184,10 +198,20 @@ library
     OpenSolid.Surface2d.Function
     OpenSolid.Surface3d
     OpenSolid.Surface3d.Function
+    OpenSolid.SurfaceParameter
     OpenSolid.Text
+    OpenSolid.Tolerance
+    OpenSolid.Transform
+    OpenSolid.Transform2d
+    OpenSolid.Transform3d
+    OpenSolid.Triangle2d
+    OpenSolid.Unitless
+    OpenSolid.Units
     OpenSolid.Uv.Derivatives
     OpenSolid.Vector2d
     OpenSolid.Vector3d
+    OpenSolid.VectorBounds2d
+    OpenSolid.VectorBounds3d
     OpenSolid.VectorCurve2d
     OpenSolid.VectorCurve2d.DegenerateEndpoint
     OpenSolid.VectorCurve2d.Direction
@@ -201,35 +225,11 @@ library
     OpenSolid.VectorSurface3d
     OpenSolid.VectorSurface3d.Function
     OpenSolid.VectorVolume3d.Function
+    OpenSolid.Vertex2d
+    OpenSolid.Volume
     OpenSolid.Volume1d
     OpenSolid.Volume1d.Function
-    Pair
-    Parameter
-    Plane3d
-    Polygon2d
-    Polyline2d
-    QuadraticSpline2d
-    QuadraticSpline3d
-    Queue
-    Range
-    Result
-    Sign
-    Solve1d
-    Solve2d
-    Stream
-    SurfaceParameter
-    Tolerance
-    Transform
-    Transform2d
-    Transform3d
-    Triangle2d
-    Unitless
-    Units
-    VectorBounds2d
-    VectorBounds3d
-    Vertex2d
-    Volume
-    VolumeParameter
+    OpenSolid.VolumeParameter
 
   other-modules:
     OpenSolid.Bootstrap
@@ -239,6 +239,7 @@ library
     OpenSolid.Json.FieldSchema
     OpenSolid.Point2d.CoordinateTransformation
     OpenSolid.Point3d.CoordinateTransformation
+    OpenSolid.Quadrature
     OpenSolid.Random.Internal
     OpenSolid.Surface1d.Function.Internal
     OpenSolid.Surface1d.Function.PartialZeros
@@ -246,7 +247,6 @@ library
     OpenSolid.Text.Parse
     OpenSolid.Vector2d.CoordinateTransformation
     OpenSolid.Vector3d.CoordinateTransformation
-    Quadrature
 
   hs-source-dirs: src
   extra-libraries:

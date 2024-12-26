@@ -9,10 +9,10 @@ where
 
 import API.BinaryOperator qualified as BinaryOperator
 import Foreign (Ptr)
-import IO qualified
-import OpenSolid.Prelude
 import OpenSolid.FFI (FFI, Name)
 import OpenSolid.FFI qualified as FFI
+import OpenSolid.IO qualified as IO
+import OpenSolid.Prelude
 
 data PreOperator value where
   PreOperator ::

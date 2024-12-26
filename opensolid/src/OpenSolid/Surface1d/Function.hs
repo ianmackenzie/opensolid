@@ -26,17 +26,17 @@ module OpenSolid.Surface1d.Function
   )
 where
 
-import Angle qualified
-import Bounds2d (Bounds2d (Bounds2d))
-import Bounds2d qualified
-import Composition
-import Direction2d qualified
-import Domain1d qualified
-import Domain2d (Domain2d (Domain2d))
-import Domain2d qualified
-import Float qualified
-import Fuzzy qualified
-import List qualified
+import OpenSolid.Angle qualified as Angle
+import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
+import OpenSolid.Bounds2d qualified as Bounds2d
+import OpenSolid.Composition
+import OpenSolid.Direction2d qualified as Direction2d
+import OpenSolid.Domain1d qualified as Domain1d
+import OpenSolid.Domain2d (Domain2d (Domain2d))
+import OpenSolid.Domain2d qualified as Domain2d
+import OpenSolid.Float qualified as Float
+import OpenSolid.Fuzzy qualified as Fuzzy
+import OpenSolid.List qualified as List
 import OpenSolid.Prelude
 import OpenSolid.Curve1d (Curve1d)
 import OpenSolid.Curve1d qualified as Curve1d
@@ -60,14 +60,14 @@ import OpenSolid.Uv.Derivatives (Derivatives)
 import OpenSolid.Uv.Derivatives qualified as Derivatives
 import OpenSolid.Vector2d (Vector2d (Vector2d))
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
-import Range (Range (Range))
-import Range qualified
-import Solve2d qualified
-import SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvCoordinates, UvDirection, UvPoint)
-import SurfaceParameter qualified
-import Units (Radians)
-import Units qualified
-import VectorBounds2d (VectorBounds2d (VectorBounds2d))
+import OpenSolid.Range (Range (Range))
+import OpenSolid.Range qualified as Range
+import OpenSolid.Solve2d qualified as Solve2d
+import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvCoordinates, UvDirection, UvPoint)
+import OpenSolid.SurfaceParameter qualified as SurfaceParameter
+import OpenSolid.Units (Radians)
+import OpenSolid.Units qualified as Units
+import OpenSolid.VectorBounds2d (VectorBounds2d (VectorBounds2d))
 
 data Function units where
   Function ::

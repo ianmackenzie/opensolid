@@ -2,61 +2,61 @@
 
 module Main (main) where
 
-import Angle qualified
-import Arc2d qualified
-import Area qualified
-import BezierCurve2d qualified
-import Bounds2d (Bounds2d)
-import Bounds2d qualified
-import Color (Color)
-import Color qualified
-import CubicSpline2d qualified
-import Debug qualified
-import Direction2d qualified
-import Direction3d ()
-import DirectionCurve2d qualified
-import Drawing2d qualified
-import Duration (Duration)
-import Duration qualified
-import Float qualified
-import IO qualified
-import Int qualified
-import Length (Length)
-import Length qualified
-import List qualified
-import NonEmpty qualified
-import OpenSolid.Prelude
+import OpenSolid.Angle qualified as Angle
+import OpenSolid.Arc2d qualified as Arc2d
+import OpenSolid.Area qualified as Area
 import OpenSolid.Axis2d qualified as Axis2d
+import OpenSolid.BezierCurve2d qualified as BezierCurve2d
+import OpenSolid.Bounds2d (Bounds2d)
+import OpenSolid.Bounds2d qualified as Bounds2d
+import OpenSolid.Color (Color)
+import OpenSolid.Color qualified as Color
+import OpenSolid.CubicSpline2d qualified as CubicSpline2d
 import OpenSolid.Curve1d qualified as Curve1d
 import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Curve2d.MedialAxis qualified as Curve2d.MedialAxis
+import OpenSolid.Debug qualified as Debug
+import OpenSolid.Direction2d qualified as Direction2d
+import OpenSolid.Direction3d ()
+import OpenSolid.DirectionCurve2d qualified as DirectionCurve2d
+import OpenSolid.Drawing2d qualified as Drawing2d
+import OpenSolid.Duration (Duration)
+import OpenSolid.Duration qualified as Duration
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Expression.Curve1d qualified as Expression.Curve1d
+import OpenSolid.Float qualified as Float
+import OpenSolid.IO qualified as IO
+import OpenSolid.Int qualified as Int
+import OpenSolid.Length (Length)
+import OpenSolid.Length qualified as Length
+import OpenSolid.List qualified as List
+import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2d (Point2d)
 import OpenSolid.Point2d qualified as Point2d
+import OpenSolid.Polyline2d (Polyline2d (Polyline2d))
+import OpenSolid.Polyline2d qualified as Polyline2d
+import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
+import OpenSolid.QuadraticSpline2d qualified as QuadraticSpline2d
 import OpenSolid.Random qualified as Random
+import OpenSolid.Range qualified as Range
+import OpenSolid.Result qualified as Result
+import OpenSolid.Solve2d qualified as Solve2d
 import OpenSolid.Surface1d.Function qualified as Surface1d.Function
 import OpenSolid.Surface1d.Function.Zeros qualified as Surface1d.Function.Zeros
+import OpenSolid.SurfaceParameter (UvBounds, UvCoordinates, UvPoint, UvSpace)
+import OpenSolid.SurfaceParameter qualified as SurfaceParameter
 import OpenSolid.Text qualified as Text
+import OpenSolid.Tolerance qualified as Tolerance
+import OpenSolid.Units (Meters)
 import OpenSolid.Vector2d qualified as Vector2d
 import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 import OpenSolid.VectorSurface2d.Function qualified as VectorSurface2d.Function
-import Parameter qualified
-import Polyline2d (Polyline2d (Polyline2d))
-import Polyline2d qualified
-import QuadraticSpline2d qualified
-import Range qualified
-import Result qualified
-import Solve2d qualified
-import SurfaceParameter (UvBounds, UvCoordinates, UvPoint, UvSpace)
-import SurfaceParameter qualified
-import Tolerance qualified
-import Units (Meters)
-import Volume qualified
+import OpenSolid.Volume qualified as Volume
 
 data Global deriving (Eq, Show)
 

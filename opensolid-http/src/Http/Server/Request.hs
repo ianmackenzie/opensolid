@@ -11,11 +11,11 @@ where
 
 import Data.ByteString (ByteString)
 import Data.CaseInsensitive qualified
-import List qualified
-import Maybe qualified
 import Network.HTTP.Types qualified
 import Network.Wai (Request)
 import Network.Wai qualified
+import OpenSolid.List qualified as List
+import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Prelude
 import OpenSolid.Text qualified as Text
 

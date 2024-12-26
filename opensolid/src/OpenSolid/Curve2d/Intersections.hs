@@ -1,6 +1,6 @@
 module OpenSolid.Curve2d.Intersections (Error (..)) where
 
-import Error qualified
+import OpenSolid.Error qualified as Error
 import OpenSolid.Prelude
 
 data Error

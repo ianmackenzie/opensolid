@@ -44,20 +44,20 @@ module OpenSolid.VectorCurve3d
   )
 where
 
-import Angle (Angle)
-import Angle qualified
-import Basis3d (Basis3d)
-import Basis3d qualified
-import Composition
-import CoordinateSystem (Space)
-import Direction3d (Direction3d)
-import Direction3d qualified
-import {-# SOURCE #-} DirectionCurve3d (DirectionCurve3d)
-import Error qualified
-import Frame3d (Frame3d)
-import Frame3d qualified
-import List qualified
-import NonEmpty qualified
+import OpenSolid.Angle (Angle)
+import OpenSolid.Angle qualified as Angle
+import OpenSolid.Basis3d (Basis3d)
+import OpenSolid.Basis3d qualified as Basis3d
+import OpenSolid.Composition
+import OpenSolid.CoordinateSystem (Space)
+import OpenSolid.Direction3d (Direction3d)
+import OpenSolid.Direction3d qualified as Direction3d
+import {-# SOURCE #-} OpenSolid.DirectionCurve3d (DirectionCurve3d)
+import OpenSolid.Error qualified as Error
+import OpenSolid.Frame3d (Frame3d)
+import OpenSolid.Frame3d qualified as Frame3d
+import OpenSolid.List qualified as List
+import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Prelude
 import OpenSolid.Curve1d (Curve1d)
 import OpenSolid.Curve1d qualified as Curve1d
@@ -73,13 +73,13 @@ import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.VectorCurve3d.Direction qualified as VectorCurve3d.Direction
 import OpenSolid.VectorCurve3d.Zeros qualified as Zeros
-import Range (Range)
-import Tolerance qualified
-import Transform3d (Transform3d)
-import Transform3d qualified
-import Units qualified
-import VectorBounds3d (VectorBounds3d (VectorBounds3d))
-import VectorBounds3d qualified
+import OpenSolid.Range (Range)
+import OpenSolid.Tolerance qualified as Tolerance
+import OpenSolid.Transform3d (Transform3d)
+import OpenSolid.Transform3d qualified as Transform3d
+import OpenSolid.Units qualified as Units
+import OpenSolid.VectorBounds3d (VectorBounds3d (VectorBounds3d))
+import OpenSolid.VectorBounds3d qualified as VectorBounds3d
 
 class
   Show curve =>

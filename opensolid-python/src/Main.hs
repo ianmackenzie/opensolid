@@ -3,12 +3,13 @@ module Main (main) where
 import API (Class (Class))
 import API qualified
 import API.Constraint (Constraint)
-import File qualified
-import List qualified
-import Maybe qualified
-import OpenSolid.Prelude
 import OpenSolid.FFI qualified as FFI
-import Pair qualified
+import OpenSolid.File qualified as File
+import OpenSolid.List qualified as List
+import OpenSolid.Maybe qualified as Maybe
+import OpenSolid.Pair qualified as Pair
+import OpenSolid.Prelude
+import OpenSolid.Text qualified as Text
 import Python qualified
 import Python.AbsFunction qualified
 import Python.Class qualified
@@ -24,7 +25,6 @@ import Python.PreOperator qualified
 import Python.StaticFunction qualified
 import Python.Type.Registry (Registry)
 import Python.Type.Registry qualified
-import OpenSolid.Text qualified as Text
 
 preamble :: Text
 preamble =

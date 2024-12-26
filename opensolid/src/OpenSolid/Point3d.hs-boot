@@ -8,8 +8,8 @@ module OpenSolid.Point3d
 where
 
 import OpenSolid.Prelude
-import {-# SOURCE #-} Transform3d (Transform3d)
-import Units qualified
+import {-# SOURCE #-} OpenSolid.Transform3d (Transform3d)
+import OpenSolid.Units qualified as Units
 import {-# SOURCE #-} OpenSolid.Vector3d (Vector3d)
 
 type role Point3d phantom

@@ -11,14 +11,14 @@ module OpenSolid.VectorCurve2d
   )
 where
 
-import CoordinateSystem (Space)
+import OpenSolid.CoordinateSystem (Space)
 import OpenSolid.Prelude
 import {-# SOURCE #-} OpenSolid.Curve1d (Curve1d)
 import OpenSolid.Vector2d (Vector2d)
-import Range (Range)
-import Transform2d (Transform2d)
-import Units qualified
-import VectorBounds2d (VectorBounds2d)
+import OpenSolid.Range (Range)
+import OpenSolid.Transform2d (Transform2d)
+import OpenSolid.Units qualified as Units
+import OpenSolid.VectorBounds2d (VectorBounds2d)
 
 class
   Show curve =>

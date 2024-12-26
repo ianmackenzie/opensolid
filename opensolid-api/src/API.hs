@@ -17,35 +17,35 @@ import API.PreOperator (PreOperator (PreOperator))
 import API.PreOperator qualified as PreOperator
 import API.StaticFunction (StaticFunction (..))
 import API.StaticFunction qualified as StaticFunction
-import Angle (Angle)
-import Angle qualified
-import Area (Area)
-import Area qualified
-import Bounds2d (Bounds2d)
-import Bounds2d qualified
-import Color (Color)
-import Color qualified
 import Data.Proxy (Proxy (Proxy))
-import Direction2d (Direction2d)
-import Direction2d qualified
-import Drawing2d qualified
 import Foreign (Ptr)
-import Length (Length)
-import Length qualified
-import List qualified
-import OpenSolid.Prelude
+import OpenSolid.Angle (Angle)
+import OpenSolid.Angle qualified as Angle
+import OpenSolid.Area (Area)
+import OpenSolid.Area qualified as Area
+import OpenSolid.Bounds2d (Bounds2d)
+import OpenSolid.Bounds2d qualified as Bounds2d
+import OpenSolid.Color (Color)
+import OpenSolid.Color qualified as Color
 import OpenSolid.Curve1d (Curve1d)
 import OpenSolid.Curve1d qualified as Curve1d
 import OpenSolid.Curve1d.Zero qualified as Curve1d.Zero
+import OpenSolid.Direction2d (Direction2d)
+import OpenSolid.Direction2d qualified as Direction2d
+import OpenSolid.Drawing2d qualified as Drawing2d
 import OpenSolid.FFI (FFI, Name)
 import OpenSolid.FFI qualified as FFI
-import OpenSolid.Point2d qualified as Point2d
-import OpenSolid.Qty qualified as Qty
-import Pair qualified
+import OpenSolid.Length (Length)
+import OpenSolid.Length qualified as Length
+import OpenSolid.List qualified as List
+import OpenSolid.Pair qualified as Pair
 import OpenSolid.Point2d (Point2d)
-import Range (Range)
-import Range qualified
-import Units (Meters, Radians, SquareMeters)
+import OpenSolid.Point2d qualified as Point2d
+import OpenSolid.Prelude
+import OpenSolid.Qty qualified as Qty
+import OpenSolid.Range (Range)
+import OpenSolid.Range qualified as Range
+import OpenSolid.Units (Meters, Radians, SquareMeters)
 import OpenSolid.Vector2d (Vector2d)
 import OpenSolid.Vector2d qualified as Vector2d
 

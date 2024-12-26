@@ -9,8 +9,8 @@ module OpenSolid.Json.Schema
   )
 where
 
-import Map (Map)
-import Map qualified
+import OpenSolid.Map (Map)
+import OpenSolid.Map qualified as Map
 import OpenSolid.Prelude
 import OpenSolid.Json (Json)
 

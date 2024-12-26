@@ -5,10 +5,10 @@ module OpenSolid.Surface1d.Function.Zeros
   )
 where
 
-import Error qualified
+import OpenSolid.Error qualified as Error
 import {-# SOURCE #-} OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Prelude
-import SurfaceParameter (UvBounds, UvCoordinates, UvPoint)
+import OpenSolid.SurfaceParameter (UvBounds, UvCoordinates, UvPoint)
 
 data Zeros = Zeros
   { crossingCurves :: List (NonEmpty (Curve2d UvCoordinates, UvBounds))

@@ -13,23 +13,23 @@ module OpenSolid.Surface3d.Function
   )
 where
 
-import Bounds3d (Bounds3d)
-import Bounds3d qualified
-import Composition
-import OpenSolid.Prelude
+import OpenSolid.Bounds3d (Bounds3d)
+import OpenSolid.Bounds3d qualified as Bounds3d
+import OpenSolid.Composition
 import OpenSolid.Curve3d (Curve3d)
 import OpenSolid.Curve3d qualified as Curve3d
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Point3d (Point3d)
 import OpenSolid.Point3d qualified as Point3d
+import OpenSolid.Prelude
 import OpenSolid.Surface1d qualified as Surface1d
 import OpenSolid.Surface1d.Function qualified as Surface1d.Function
+import OpenSolid.SurfaceParameter (SurfaceParameter, UvBounds, UvPoint)
+import OpenSolid.Units qualified as Units
 import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.VectorSurface3d qualified as VectorSurface3d
 import OpenSolid.VectorSurface3d.Function qualified as VectorSurface3d.Function
-import SurfaceParameter (SurfaceParameter, UvBounds, UvPoint)
-import Units qualified
 
 class
   Show function =>

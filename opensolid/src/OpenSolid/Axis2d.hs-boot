@@ -7,7 +7,7 @@ module OpenSolid.Axis2d
   )
 where
 
-import {-# SOURCE #-} Direction2d (Direction2d)
+import {-# SOURCE #-} OpenSolid.Direction2d (Direction2d)
 import OpenSolid.Prelude
 import {-# SOURCE #-} OpenSolid.Point2d (Point2d)
 

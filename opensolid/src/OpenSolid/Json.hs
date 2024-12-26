@@ -14,20 +14,20 @@ module OpenSolid.Json
   )
 where
 
-import Composition
 import Data.Aeson qualified
 import Data.Aeson.KeyMap qualified
 import Data.ByteString (ByteString)
 import Data.ByteString qualified
 import Data.Scientific
 import Data.Vector qualified
-import Float qualified
-import List qualified
-import Map (Map)
-import Map qualified
-import OpenSolid.Prelude
+import OpenSolid.Composition
+import OpenSolid.Float qualified as Float
 import {-# SOURCE #-} OpenSolid.Json.Format (Format)
 import {-# SOURCE #-} OpenSolid.Json.Schema (Schema)
+import OpenSolid.List qualified as List
+import OpenSolid.Map (Map)
+import OpenSolid.Map qualified as Map
+import OpenSolid.Prelude
 import OpenSolid.Text qualified as Text
 import Prelude qualified
 

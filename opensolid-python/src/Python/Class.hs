@@ -1,9 +1,9 @@
 module Python.Class (qualifiedName, unqualifiedName) where
 
-import List qualified
-import NonEmpty qualified
-import OpenSolid.Prelude
 import OpenSolid.FFI qualified as FFI
+import OpenSolid.List qualified as List
+import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.Prelude
 import OpenSolid.Text qualified as Text
 
 qualifiedName :: FFI.Id a -> Text

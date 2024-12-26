@@ -32,15 +32,15 @@ module OpenSolid.Expression
   )
 where
 
-import Angle (Angle)
-import Bounds2d (Bounds2d (Bounds2d))
-import Bounds3d (Bounds3d (Bounds3d))
-import Float qualified
+import OpenSolid.Angle (Angle)
+import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
+import OpenSolid.Bounds3d (Bounds3d (Bounds3d))
+import OpenSolid.Float qualified as Float
 import Foreign (FunPtr, Ptr)
 import Foreign qualified
 import Foreign.Marshal.Alloc qualified as Alloc
-import IO qualified
-import NonEmpty qualified
+import OpenSolid.IO qualified as IO
+import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Expression.Scalar (Scalar)
 import OpenSolid.Expression.Scalar qualified as Scalar
 import OpenSolid.Point2d (Point2d (Point2d))
@@ -55,15 +55,15 @@ import OpenSolid.Vector2d (Vector2d (Vector2d))
 import OpenSolid.Vector2d qualified as Vector2d
 import OpenSolid.Vector3d (Vector3d (Vector3d))
 import OpenSolid.Vector3d qualified as Vector3d
-import Range (Range (Range))
-import SurfaceParameter (SurfaceParameter, UvBounds, UvPoint)
-import SurfaceParameter qualified
+import OpenSolid.Range (Range (Range))
+import OpenSolid.SurfaceParameter (SurfaceParameter, UvBounds, UvPoint)
+import OpenSolid.SurfaceParameter qualified as SurfaceParameter
 import System.IO.Unsafe (unsafeDupablePerformIO)
-import Units qualified
-import VectorBounds2d (VectorBounds2d (VectorBounds2d))
-import VectorBounds3d (VectorBounds3d (VectorBounds3d))
-import VolumeParameter (UvwBounds, UvwPoint, VolumeParameter)
-import VolumeParameter qualified
+import OpenSolid.Units qualified as Units
+import OpenSolid.VectorBounds2d (VectorBounds2d (VectorBounds2d))
+import OpenSolid.VectorBounds3d (VectorBounds3d (VectorBounds3d))
+import OpenSolid.VolumeParameter (UvwBounds, UvwPoint, VolumeParameter)
+import OpenSolid.VolumeParameter qualified as VolumeParameter
 import Prelude (Double)
 import Prelude qualified
 

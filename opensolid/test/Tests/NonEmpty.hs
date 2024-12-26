@@ -1,9 +1,9 @@
 module Tests.NonEmpty (tests) where
 
 import Data.List qualified
-import Int qualified
-import List qualified
-import NonEmpty qualified
+import OpenSolid.Int qualified as Int
+import OpenSolid.List qualified as List
+import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Prelude
 import Test (Test)
 import Test qualified

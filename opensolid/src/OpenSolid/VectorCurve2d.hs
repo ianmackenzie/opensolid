@@ -44,42 +44,42 @@ module OpenSolid.VectorCurve2d
   )
 where
 
-import Angle (Angle)
-import Angle qualified
-import Basis2d (Basis2d)
-import Basis2d qualified
-import Composition
-import CoordinateSystem (Space)
-import Direction2d (Direction2d)
-import Direction2d qualified
-import {-# SOURCE #-} DirectionCurve2d (DirectionCurve2d)
-import Error qualified
-import Frame2d (Frame2d)
-import Frame2d qualified
-import List qualified
-import NonEmpty qualified
-import OpenSolid.Prelude
+import OpenSolid.Angle (Angle)
+import OpenSolid.Angle qualified as Angle
+import OpenSolid.Basis2d (Basis2d)
+import OpenSolid.Basis2d qualified as Basis2d
+import OpenSolid.Composition
+import OpenSolid.CoordinateSystem (Space)
 import OpenSolid.Curve1d (Curve1d)
 import OpenSolid.Curve1d qualified as Curve1d
 import OpenSolid.Curve1d.Zero qualified as Curve1d.Zero
 import OpenSolid.Curve1d.Zeros qualified as Curve1d.Zeros
+import OpenSolid.Direction2d (Direction2d)
+import OpenSolid.Direction2d qualified as Direction2d
+import {-# SOURCE #-} OpenSolid.DirectionCurve2d (DirectionCurve2d)
+import OpenSolid.Error qualified as Error
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Expression.Curve1d qualified as Expression.Curve1d
 import OpenSolid.Expression.VectorCurve2d qualified as Expression.VectorCurve2d
+import OpenSolid.Frame2d (Frame2d)
+import OpenSolid.Frame2d qualified as Frame2d
+import OpenSolid.List qualified as List
+import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Point2d qualified as Point2d
+import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
+import OpenSolid.Range (Range)
+import OpenSolid.Tolerance qualified as Tolerance
+import OpenSolid.Transform2d (Transform2d)
+import OpenSolid.Transform2d qualified as Transform2d
+import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2d (Vector2d)
 import OpenSolid.Vector2d qualified as Vector2d
+import OpenSolid.VectorBounds2d (VectorBounds2d (VectorBounds2d))
+import OpenSolid.VectorBounds2d qualified as VectorBounds2d
 import OpenSolid.VectorCurve2d.Direction qualified as VectorCurve2d.Direction
 import OpenSolid.VectorCurve2d.Zeros qualified as Zeros
-import Range (Range)
-import Tolerance qualified
-import Transform2d (Transform2d)
-import Transform2d qualified
-import Units qualified
-import VectorBounds2d (VectorBounds2d (VectorBounds2d))
-import VectorBounds2d qualified
 
 class
   Show curve =>

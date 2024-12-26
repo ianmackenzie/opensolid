@@ -5,15 +5,15 @@ module Tests.Curve2d
   )
 where
 
-import Angle qualified
-import Arc2d qualified
-import CubicSpline2d qualified
-import Direction2d qualified
-import DirectionCurve2d qualified
-import Error qualified
-import Length qualified
-import List qualified
-import NonEmpty qualified
+import OpenSolid.Angle qualified as Angle
+import OpenSolid.Arc2d qualified as Arc2d
+import OpenSolid.CubicSpline2d qualified as CubicSpline2d
+import OpenSolid.Direction2d qualified as Direction2d
+import OpenSolid.DirectionCurve2d qualified as DirectionCurve2d
+import OpenSolid.Error qualified as Error
+import OpenSolid.Length qualified as Length
+import OpenSolid.List qualified as List
+import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Prelude
 import OpenSolid.Curve1d qualified as Curve1d
 import OpenSolid.Curve1d.Zero qualified as Curve1d.Zero
@@ -28,16 +28,16 @@ import OpenSolid.Random (Generator)
 import OpenSolid.Random qualified as Random
 import OpenSolid.Vector2d qualified as Vector2d
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
-import Parameter qualified
-import QuadraticSpline2d qualified
-import Range (Range (Range))
-import Range qualified
-import Sign qualified
+import OpenSolid.Parameter qualified as Parameter
+import OpenSolid.QuadraticSpline2d qualified as QuadraticSpline2d
+import OpenSolid.Range (Range (Range))
+import OpenSolid.Range qualified as Range
+import OpenSolid.Sign qualified as Sign
 import Test (Expectation, Test)
 import Test qualified
 import Tests.Random qualified as Random
-import Tolerance qualified
-import Units (Meters)
+import OpenSolid.Tolerance qualified as Tolerance
+import OpenSolid.Units (Meters)
 
 curveGenerators :: Tolerance Meters => List (Text, Generator (Curve2d (space @ Meters)))
 curveGenerators =

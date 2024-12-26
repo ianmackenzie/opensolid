@@ -35,19 +35,19 @@ where
 import OpenSolid.Bootstrap
 import Data.Coerce qualified
 import Data.List.NonEmpty (NonEmpty ((:|)))
-import {-# SOURCE #-} Float (Float, fromRational)
-import {-# SOURCE #-} Float qualified
+import {-# SOURCE #-} OpenSolid.Float (Float, fromRational)
+import {-# SOURCE #-} OpenSolid.Float qualified as Float
 import Foreign.Storable (Storable)
 import GHC.Exts (Double (D#))
-import List qualified
-import NonEmpty qualified
+import OpenSolid.List qualified as List
+import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Arithmetic
 import OpenSolid.Arithmetic.Unboxed
 import OpenSolid.Random.Internal qualified as Random
-import Sign (Sign (Negative, Positive))
+import OpenSolid.Sign (Sign (Negative, Positive))
 import System.Random qualified
-import Units (Unitless, (:*:), (:/:))
-import Units qualified
+import OpenSolid.Units (Unitless, (:*:), (:/:))
+import OpenSolid.Units qualified as Units
 import Prelude qualified
 
 type role Qty phantom

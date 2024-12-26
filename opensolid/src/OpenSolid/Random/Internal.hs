@@ -1,8 +1,8 @@
 module OpenSolid.Random.Internal where
 
-import Composition
 import OpenSolid.Bootstrap
-import Pair qualified
+import OpenSolid.Composition
+import OpenSolid.Pair qualified as Pair
 import System.Random (StdGen)
 import Prelude (Applicative, Functor, Monad)
 import Prelude qualified

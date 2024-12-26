@@ -11,14 +11,14 @@ module OpenSolid.VectorCurve3d
   )
 where
 
-import CoordinateSystem (Space)
+import OpenSolid.CoordinateSystem (Space)
 import OpenSolid.Prelude
 import {-# SOURCE #-} OpenSolid.Curve1d (Curve1d)
 import OpenSolid.Vector3d (Vector3d)
-import Range (Range)
-import Transform3d (Transform3d)
-import Units qualified
-import VectorBounds3d (VectorBounds3d)
+import OpenSolid.Range (Range)
+import OpenSolid.Transform3d (Transform3d)
+import OpenSolid.Units qualified as Units
+import OpenSolid.VectorBounds3d (VectorBounds3d)
 
 class
   Show curve =>

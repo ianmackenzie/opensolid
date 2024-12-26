@@ -3,13 +3,13 @@ module OpenSolid.Curve1d.Integral
   )
 where
 
-import Estimate qualified
+import OpenSolid.Estimate qualified as Estimate
 import OpenSolid.Prelude
 import {-# SOURCE #-} OpenSolid.Curve1d (Curve1d)
 import {-# SOURCE #-} OpenSolid.Curve1d qualified as Curve1d
 import OpenSolid.Qty qualified as Qty
-import Range (Range)
-import Range qualified
+import OpenSolid.Range (Range)
+import OpenSolid.Range qualified as Range
 
 data Integral units = Integral (Curve1d units) (Curve1d units) (Range Unitless)
 

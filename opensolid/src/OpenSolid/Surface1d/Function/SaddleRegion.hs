@@ -9,12 +9,12 @@ module OpenSolid.Surface1d.Function.SaddleRegion
   )
 where
 
-import Bounds2d (Bounds2d (Bounds2d))
-import Direction2d qualified
-import Domain2d (Domain2d)
-import Frame2d (Frame2d)
-import Frame2d qualified
-import NonEmpty qualified
+import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
+import OpenSolid.Direction2d qualified as Direction2d
+import OpenSolid.Domain2d (Domain2d)
+import OpenSolid.Frame2d (Frame2d)
+import OpenSolid.Frame2d qualified as Frame2d
+import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Prelude
 import OpenSolid.Axis2d (Axis2d)
 import OpenSolid.Axis2d qualified as Axis2d
@@ -29,7 +29,7 @@ import OpenSolid.Surface1d.Function.Subproblem qualified as Subproblem
 import OpenSolid.Surface1d.Function.VerticalCurve qualified as VerticalCurve
 import OpenSolid.Uv.Derivatives qualified as Derivatives
 import OpenSolid.Vector2d qualified as Vector2d
-import SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvCoordinates, UvDirection, UvPoint)
+import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvCoordinates, UvDirection, UvPoint)
 
 data SaddleRegion units = SaddleRegion
   { subproblem :: Subproblem units

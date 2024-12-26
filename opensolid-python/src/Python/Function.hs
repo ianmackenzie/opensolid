@@ -11,12 +11,12 @@ where
 
 import API.Constraint (Constraint)
 import API.Constraint qualified as Constraint
-import List qualified
 import OpenSolid.FFI (Name)
 import OpenSolid.FFI qualified as FFI
+import OpenSolid.List qualified as List
+import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude hiding (Type)
 import OpenSolid.Text qualified as Text
-import Pair qualified
 import Python qualified
 import Python.Class qualified
 import Python.FFI qualified

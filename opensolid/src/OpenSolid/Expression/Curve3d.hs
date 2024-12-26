@@ -11,14 +11,14 @@ module OpenSolid.Expression.Curve3d
   )
 where
 
-import Frame3d (Frame3d)
-import Frame3d qualified
+import OpenSolid.Frame3d (Frame3d)
+import OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.Prelude
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Expression.VectorCurve3d qualified as Expression.VectorCurve3d
 import OpenSolid.Point3d (Point3d)
-import Transform3d (Transform3d (Transform3d))
+import OpenSolid.Transform3d (Transform3d (Transform3d))
 import OpenSolid.Vector3d qualified as Vector3d
 
 constant :: Point3d (space @ units) -> Expression Float (Point3d (space @ units))

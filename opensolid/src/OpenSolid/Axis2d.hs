@@ -23,15 +23,15 @@ module OpenSolid.Axis2d
   )
 where
 
-import Angle (Angle)
-import Direction2d (Direction2d)
-import Direction2d qualified
+import OpenSolid.Angle (Angle)
+import OpenSolid.Direction2d (Direction2d)
+import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.Prelude
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Point2d (Point2d)
-import Transform qualified
-import Transform2d (Transform2d)
-import Transform2d qualified
+import OpenSolid.Transform qualified as Transform
+import OpenSolid.Transform2d (Transform2d)
+import OpenSolid.Transform2d qualified as Transform2d
 import OpenSolid.Vector2d (Vector2d)
 
 data Axis2d (coordinateSystem :: CoordinateSystem) where

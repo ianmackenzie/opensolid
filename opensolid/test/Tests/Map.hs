@@ -1,7 +1,7 @@
 module Tests.Map (tests) where
 
-import Map (Map)
-import Map qualified
+import OpenSolid.Map (Map)
+import OpenSolid.Map qualified as Map
 import OpenSolid.Prelude
 import Test (Test)
 import Test qualified

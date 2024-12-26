@@ -8,7 +8,7 @@ where
 
 import OpenSolid.Prelude
 import OpenSolid.Text qualified as Text
-import SurfaceParameter (SurfaceParameter (U, V))
+import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import Prelude qualified
 
 data Derivatives a

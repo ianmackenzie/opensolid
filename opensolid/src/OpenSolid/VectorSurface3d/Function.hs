@@ -19,21 +19,21 @@ module OpenSolid.VectorSurface3d.Function
   )
 where
 
-import Composition
-import Direction3d (Direction3d)
-import OpenSolid.Prelude
+import OpenSolid.Composition
+import OpenSolid.Direction3d (Direction3d)
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
+import OpenSolid.Prelude
 import OpenSolid.Surface1d qualified as Surface1d
 import OpenSolid.Surface1d.Function qualified as Surface1d.Function
+import OpenSolid.SurfaceParameter (SurfaceParameter, UvBounds, UvPoint)
+import OpenSolid.Units qualified as Units
 import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.Vector3d qualified as Vector3d
+import OpenSolid.VectorBounds3d (VectorBounds3d)
+import OpenSolid.VectorBounds3d qualified as VectorBounds3d
 import OpenSolid.VectorCurve3d (VectorCurve3d)
 import OpenSolid.VectorCurve3d qualified as VectorCurve3d
-import SurfaceParameter (SurfaceParameter, UvBounds, UvPoint)
-import Units qualified
-import VectorBounds3d (VectorBounds3d)
-import VectorBounds3d qualified
 
 class
   Show function =>
