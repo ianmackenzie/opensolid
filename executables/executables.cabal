@@ -25,7 +25,7 @@ executable sandbox
     array,
     base,
     containers,
-    opensolid,
+    opensolid-core,
     random,
 
   ghc-options:
@@ -64,7 +64,7 @@ executable test-server
     array,
     base,
     containers,
-    opensolid,
+    opensolid-core,
     opensolid-http,
     random,
 

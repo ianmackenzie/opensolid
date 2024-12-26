@@ -1,5 +1,5 @@
 cabal-version: 2.2
-name: opensolid
+name: opensolid-core
 version: 0.1.0.0
 synopsis: Open-source geometric modelling framework
 description:
@@ -245,7 +245,7 @@ library
   extra-libraries:
     opensolid_jit
 
-test-suite opensolid-test
+test-suite opensolid-core-test
   import: config
   type: exitcode-stdio-1.0
   main-is: Main.hs
@@ -256,7 +256,7 @@ test-suite opensolid-test
 
   build-depends:
     ansi-terminal,
-    opensolid,
+    opensolid-core,
 
   other-modules:
     Test

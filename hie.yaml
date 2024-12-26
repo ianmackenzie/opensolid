@@ -6,14 +6,14 @@ cradle:
     - path: "executables/test-server/Main.hs"
       component: "executables:exe:test-server"
 
-    - path: "opensolid/src"
-      component: "lib:opensolid"
-
-    - path: "opensolid/test"
-      component: "opensolid:test:opensolid-test"
-
     - path: "opensolid-api/src"
       component: "lib:opensolid-api"
+
+    - path: "opensolid-core/src"
+      component: "lib:opensolid-core"
+
+    - path: "opensolid-core/test"
+      component: "opensolid-core:test:opensolid-test"
 
     - path: "opensolid-ffi/src"
       component: "opensolid-ffi:flib:opensolid-ffi"

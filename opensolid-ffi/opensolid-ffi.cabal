@@ -24,8 +24,8 @@ foreign-library opensolid-ffi
   default-language: GHC2021
   build-depends:
     base,
-    opensolid,
     opensolid-api,
+    opensolid-core,
     template-haskell,
 
   type: native-shared
@@ -53,8 +53,8 @@ executable generate-def-file
   default-language: GHC2021
   build-depends:
     base,
-    opensolid,
     opensolid-api,
+    opensolid-core,
 
   ghc-options:
     -Wall

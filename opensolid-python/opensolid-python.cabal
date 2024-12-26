@@ -24,8 +24,8 @@ executable opensolid-python
   build-depends:
     base,
     containers,
-    opensolid,
     opensolid-api,
+    opensolid-core,
 
   other-modules:
     Python
