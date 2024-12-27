@@ -21,7 +21,7 @@ jobs:
             C:\cabal\packages
             C:\cabal\store
             dist-newstyle
-            opensolid\.hie
+            opensolid-core\.hie
           key: ${{ github.job }}-cabal-${{ hashFiles('cabal.project') }}-${{ hashFiles('**/*.cabal') }}
       - name: Set up Cargo cache
         uses: actions/cache@v4
@@ -52,12 +52,12 @@ jobs:
         run: |
           cargo build -v --release
           echo "PATH=$env:PATH;$env:GITHUB_WORKSPACE\opensolid-jit\target\release" >> $env:GITHUB_ENV
-      - name: Build opensolid library
+      - name: Build opensolid-core library
         run: |
-          cabal build opensolid
+          cabal build opensolid-core
       - name: Run tests
         run: |
-          cabal test opensolid
+          cabal test opensolid-core
       - name: Build native library
         run: |
           cabal run generate-def-file
@@ -96,7 +96,7 @@ jobs:
             ~/.cache/cabal/packages
             ~/.local/state/cabal/store
             dist-newstyle
-            opensolid/.hie
+            opensolid-core/.hie
           key: ${{ github.job }}-cabal-${{ hashFiles('cabal.project') }}-${{ hashFiles('**/*.cabal') }}
       - name: Set up Cargo cache
         uses: actions/cache@v4
@@ -121,12 +121,12 @@ jobs:
         run: |
           cargo build --release
           echo "LD_LIBRARY_PATH=$GITHUB_WORKSPACE/opensolid-jit/target/release" >> $GITHUB_ENV
-      - name: Build opensolid library
+      - name: Build opensolid-core library
         run: |
-          cabal build opensolid
+          cabal build opensolid-core
       - name: Run tests
         run: |
-          cabal test opensolid
+          cabal test opensolid-core
       - name: Build Python bindings
         run: |
           scripts/generate-python-bindings
@@ -165,7 +165,7 @@ jobs:
             ~/.cabal/packages
             ~/.cabal/store
             dist-newstyle
-            opensolid/.hie
+            opensolid-core/.hie
           key: ${{ github.job }}-cabal-${{ hashFiles('cabal.project') }}-${{ hashFiles('**/*.cabal') }}
       - name: Set up Cargo cache
         uses: actions/cache@v4
@@ -197,12 +197,12 @@ jobs:
         run: |
           cargo build --release
           echo "LD_LIBRARY_PATH=$GITHUB_WORKSPACE/opensolid-jit/target/release" >> $GITHUB_ENV
-      - name: Build opensolid library
+      - name: Build opensolid-core library
         run: |
-          cabal build opensolid
+          cabal build opensolid-core
       - name: Run tests
         run: |
-          cabal test opensolid
+          cabal test opensolid-core
       - name: Build Python bindings
         run: |
           scripts/generate-python-bindings
@@ -241,7 +241,7 @@ jobs:
             ~/.cabal/packages
             ~/.cabal/store
             dist-newstyle
-            opensolid/.hie
+            opensolid-core/.hie
           key: ${{ github.job }}-cabal-${{ hashFiles('cabal.project') }}-${{ hashFiles('**/*.cabal') }}
       - name: Set up Cargo cache
         uses: actions/cache@v4
@@ -273,12 +273,12 @@ jobs:
         run: |
           cargo build --release
           echo "LD_LIBRARY_PATH=$GITHUB_WORKSPACE/opensolid-jit/target/release" >> $GITHUB_ENV
-      - name: Build opensolid library
+      - name: Build opensolid-core library
         run: |
-          cabal build opensolid
+          cabal build opensolid-core
       - name: Run tests
         run: |
-          cabal test opensolid
+          cabal test opensolid-core
       - name: Build Python bindings
         run: |
           scripts/generate-python-bindings
