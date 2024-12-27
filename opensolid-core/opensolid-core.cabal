@@ -113,6 +113,8 @@ library
     OpenSolid.CoordinateSystem
     OpenSolid.CubicSpline2d
     OpenSolid.Curve1d
+    OpenSolid.Curve1d.Function
+    OpenSolid.Curve1d.Function.Integral
     OpenSolid.Curve1d.Zero
     OpenSolid.Curve1d.Zeros
     OpenSolid.Curve2d
@@ -128,6 +130,7 @@ library
     OpenSolid.DirectionBounds2d
     OpenSolid.DirectionBounds3d
     OpenSolid.DirectionCurve2d
+    OpenSolid.DirectionCurve2d.Function
     OpenSolid.DirectionCurve3d
     OpenSolid.Domain1d
     OpenSolid.Domain2d
@@ -205,6 +208,7 @@ library
     OpenSolid.VectorBounds2d
     OpenSolid.VectorBounds3d
     OpenSolid.VectorCurve2d
+    OpenSolid.VectorCurve2d.Function
     OpenSolid.VectorCurve2d.DegenerateEndpoint
     OpenSolid.VectorCurve2d.Direction
     OpenSolid.VectorCurve2d.Zeros
