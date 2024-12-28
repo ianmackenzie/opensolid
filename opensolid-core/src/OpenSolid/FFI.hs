@@ -394,9 +394,7 @@ load ptr offset = do
       numItems <- IO.map fromInt64 (Foreign.peekByteOff ptr offset)
       itemsPtr <- Foreign.peekByteOff ptr (offset + 8)
       let loadItem index = load itemsPtr (index * itemSize)
-      if numItems > 0
-        then IO.collect loadItem (List.range 0 (numItems - 1))
-        else IO.succeed []
+      IO.collect loadItem (List.indices numItems)
     NonEmptyRep -> IO.do
       list <- load ptr offset
       case list of
