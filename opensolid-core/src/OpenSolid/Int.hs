@@ -56,6 +56,7 @@ min = Prelude.min
 max :: Int -> Int -> Int
 max = Prelude.max
 
+{-# INLINE clampTo #-}
 clampTo :: (Int, Int) -> Int -> Int
 clampTo = Data.Ord.clamp
 
