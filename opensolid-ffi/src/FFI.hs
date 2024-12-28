@@ -19,7 +19,7 @@ type Function = Ptr () -> Ptr () -> IO ()
 functionArray :: Array Function
 functionArray = case API.functions of
   [] -> internalError "API somehow has no functions"
-  NonEmpty nonEmpty -> Array.fromNonEmpty (NonEmpty.map API.invoke nonEmpty)
+  NonEmpty nonEmpty -> Array.new (NonEmpty.map API.invoke nonEmpty)
 
 invoke :: Int -> Ptr () -> Ptr () -> IO ()
 invoke functionIndex = Array.get functionIndex functionArray
