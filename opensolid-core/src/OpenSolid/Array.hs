@@ -18,7 +18,7 @@ import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Prelude
 import Prelude qualified
 
-data Array a = Array Int (Data.Array.Array Int a)
+data Array a = Array Int (Data.Array.Array Int a) deriving (Show)
 
 singleton :: a -> Array a
 singleton = new . NonEmpty.singleton
