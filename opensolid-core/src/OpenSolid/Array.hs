@@ -1,7 +1,8 @@
 module OpenSolid.Array
   ( Array
-  , fromNonEmpty
-  , toNonEmpty
+  , singleton
+  , new
+  , items
   , length
   , get
   , map
@@ -19,15 +20,18 @@ import Prelude qualified
 
 data Array a = Array Int (Data.Array.Array Int a)
 
-fromNonEmpty :: NonEmpty a -> Array a
-fromNonEmpty items = do
-  let n = NonEmpty.length items
-  Array n (Data.Array.listArray (0, n - 1) (NonEmpty.toList items))
+singleton :: a -> Array a
+singleton = new . NonEmpty.singleton
 
-toNonEmpty :: Array a -> NonEmpty a
-toNonEmpty (Array _ array) =
+new :: NonEmpty a -> Array a
+new givenItems = do
+  let n = NonEmpty.length givenItems
+  Array n (Data.Array.listArray (0, n - 1) (NonEmpty.toList givenItems))
+
+items :: Array a -> NonEmpty a
+items (Array _ array) =
   case Data.Array.elems array of
-    NonEmpty items -> items
+    NonEmpty arrayItems -> arrayItems
     [] -> internalError "Array should never be empty"
 
 {-# INLINE length #-}
