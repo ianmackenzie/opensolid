@@ -8,6 +8,8 @@ module OpenSolid.Array
   , first
   , last
   , map
+  , reverse
+  , reverseMap
   , foldl
   , foldr
   )
@@ -52,6 +54,18 @@ last (Array n array) = array ! (n - 1)
 
 map :: (a -> b) -> Array a -> Array b
 map f (Array n array) = Array n (Prelude.fmap f array)
+
+reverse :: Array a -> Array a
+reverse array = do
+  let n = length array
+  let reversedItems = foldl (\acc item -> item : acc) [] array
+  Array n (Data.Array.listArray (0, n - 1) reversedItems)
+
+reverseMap :: (a -> b) -> Array a -> Array b
+reverseMap f array = do
+  let n = length array
+  let newItems = foldl (\acc item -> f item : acc) [] array
+  Array n (Data.Array.listArray (0, n - 1) newItems)
 
 foldl :: (b -> a -> b) -> b -> Array a -> b
 foldl f init (Array _ array) = Data.Foldable.foldl' f init array
