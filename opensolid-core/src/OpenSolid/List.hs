@@ -11,8 +11,6 @@ module OpenSolid.List
   , pattern FiveOrMore
   , singleton
   , maybe
-  , range
-  , indices
   , isEmpty
   , length
   , map
@@ -77,15 +75,6 @@ singleton = Data.List.singleton
 maybe :: Maybe a -> List a
 maybe (Just value) = [value]
 maybe Nothing = []
-
-range :: Int -> Int -> List Int
-range a b = case compare a b of
-  LT -> [a, a + 1 .. b]
-  GT -> [a, a - 1 .. b]
-  EQ -> [a]
-
-indices :: Int -> List Int
-indices n = [0 .. n - 1]
 
 isEmpty :: List a -> Bool
 isEmpty = Prelude.null

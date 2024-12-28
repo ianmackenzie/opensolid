@@ -11,7 +11,6 @@ module OpenSolid.NonEmpty
   , pattern FiveOrMore
   , (|:)
   , singleton
-  , range
   , of2
   , of3
   , of4
@@ -133,12 +132,6 @@ infixl 5 |:
 
 singleton :: a -> NonEmpty a
 singleton value = value :| []
-
-range :: Int -> Int -> NonEmpty Int
-range a b = case compare a b of
-  LT -> a :| List.range (a + 1) b
-  GT -> a :| List.range (a - 1) b
-  EQ -> a :| []
 
 of2 :: a -> a -> NonEmpty a
 of2 a1 a2 = a1 :| [a2]
