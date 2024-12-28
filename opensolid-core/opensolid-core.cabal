@@ -133,6 +133,7 @@ library
     OpenSolid.DirectionCurve2d
     OpenSolid.DirectionCurve2d.Function
     OpenSolid.DirectionCurve3d
+    OpenSolid.DirectionCurve3d.Function
     OpenSolid.Domain1d
     OpenSolid.Domain2d
     OpenSolid.Drawing2d
@@ -216,6 +217,7 @@ library
     OpenSolid.VectorCurve3d
     OpenSolid.VectorCurve3d.DegenerateEndpoint
     OpenSolid.VectorCurve3d.Direction
+    OpenSolid.VectorCurve3d.Function
     OpenSolid.VectorCurve3d.Zeros
     OpenSolid.VectorSurface2d
     OpenSolid.VectorSurface2d.Function
