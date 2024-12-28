@@ -5,6 +5,8 @@ module OpenSolid.Array
   , items
   , length
   , get
+  , first
+  , last
   , map
   , foldl
   , foldr
@@ -41,6 +43,12 @@ length (Array n _) = n
 {-# INLINE get #-}
 get :: Int -> Array a -> a
 get index (Array n array) = array ! (index % n)
+
+first :: Array a -> a
+first (Array _ array) = array ! 0
+
+last :: Array a -> a
+last (Array n array) = array ! (n - 1)
 
 map :: (a -> b) -> Array a -> Array b
 map f (Array n array) = Array n (Prelude.fmap f array)
