@@ -1,5 +1,6 @@
 module OpenSolid.Curve3d
   ( Curve3d
+  , segments
   , constant
   , parametric
   , startPoint
@@ -23,7 +24,7 @@ import OpenSolid.Range (Range)
 import OpenSolid.Range qualified as Range
 
 type Curve3d :: CoordinateSystem -> Type
-newtype Curve3d coordinateSystem = Curve3d (Array (Function coordinateSystem))
+newtype Curve3d coordinateSystem = Curve3d {segments :: Array (Function coordinateSystem)}
 
 constant :: Point3d (space @ units) -> Curve3d (space @ units)
 constant = Curve3d . Array.singleton . Function.constant
