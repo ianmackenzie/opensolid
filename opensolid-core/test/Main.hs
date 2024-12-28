@@ -6,6 +6,7 @@ import OpenSolid.Tolerance qualified as Tolerance
 import Test (Test)
 import Test qualified
 import Tests.Arc2d qualified
+import Tests.Array qualified
 import Tests.Bounds2d qualified
 import Tests.Curve1d qualified
 import Tests.Curve2d qualified
@@ -47,6 +48,7 @@ tests =
     , Test.group "Tests.Text" Tests.Text.tests
     , Test.group "Tests.Bounds2d" Tests.Bounds2d.tests
     , Test.group "Tests.VectorBounds2d" Tests.VectorBounds2d.tests
+    , Test.group "Tests.Array" Tests.Array.tests
     ]
 
 main :: IO ()
