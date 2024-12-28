@@ -20,7 +20,7 @@ from ::
   Point3d (space @ units) ->
   Curve3d (space @ units)
 from p1 p2 =
-  Curve3d.Parametric $
+  Curve3d.parametric $
     Expression.Curve3d.constant p1 + Expression.t * Expression.VectorCurve3d.constant (p2 - p1)
 
 type role Line3d nominal

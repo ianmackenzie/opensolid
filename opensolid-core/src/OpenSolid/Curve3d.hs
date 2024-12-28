@@ -1,54 +1,50 @@
 module OpenSolid.Curve3d
-  ( Curve3d (Parametric)
-  , Interface (..)
-  , DegenerateCurve (DegenerateCurve)
-  , new
+  ( Curve3d
   , constant
+  , parametric
   , startPoint
   , endPoint
   , evaluate
   , evaluateBounds
-  , derivative
   , reverse
   , bounds
   )
 where
 
+import OpenSolid.Array (Array)
+import OpenSolid.Array qualified as Array
 import OpenSolid.Bounds3d (Bounds3d)
-import OpenSolid.Curve3d.Internal (Curve3d (Parametric), Interface (..))
-import OpenSolid.Curve3d.Internal qualified as Internal
-import OpenSolid.Error qualified as Error
-import OpenSolid.Expression qualified as Expression
+import OpenSolid.Curve3d.Function (Function)
+import OpenSolid.Curve3d.Function qualified as Function
+import OpenSolid.Expression (Expression)
 import OpenSolid.Point3d (Point3d)
 import OpenSolid.Prelude
 import OpenSolid.Range (Range)
-import OpenSolid.VectorCurve3d (VectorCurve3d)
+import OpenSolid.Range qualified as Range
 
-data DegenerateCurve = DegenerateCurve deriving (Eq, Show, Error.Message)
-
-new :: Interface curve (space @ units) => curve -> Curve3d (space @ units)
-new = Internal.Curve
+type Curve3d :: CoordinateSystem -> Type
+newtype Curve3d coordinateSystem = Curve3d (Array (Function coordinateSystem))
 
 constant :: Point3d (space @ units) -> Curve3d (space @ units)
-constant = Internal.Parametric . Expression.constant
+constant = Curve3d . Array.singleton . Function.constant
+
+parametric :: Expression Float (Point3d (space @ units)) -> Curve3d (space @ units)
+parametric = Curve3d . Array.singleton . Function.parametric
 
 startPoint :: Curve3d (space @ units) -> Point3d (space @ units)
-startPoint = Internal.startPoint
+startPoint (Curve3d segments) = Function.evaluate (Array.first segments) 0.0
 
 endPoint :: Curve3d (space @ units) -> Point3d (space @ units)
-endPoint = Internal.endPoint
+endPoint (Curve3d segments) = Function.evaluate (Array.last segments) 1.0
 
 evaluate :: Curve3d (space @ units) -> Float -> Point3d (space @ units)
-evaluate = Internal.evaluate
+evaluate (Curve3d segments) t = Array.interpolate Function.evaluate segments t
 
 evaluateBounds :: Curve3d (space @ units) -> Range Unitless -> Bounds3d (space @ units)
-evaluateBounds = Internal.evaluateBounds
-
-derivative :: Curve3d (space @ units) -> VectorCurve3d (space @ units)
-derivative = Internal.derivative
+evaluateBounds (Curve3d segments) t = Array.aggregate Function.evaluateBounds segments t
 
 reverse :: Curve3d (space @ units) -> Curve3d (space @ units)
-reverse = Internal.reverse
+reverse (Curve3d segments) = Curve3d (Array.reverseMap Function.reverse segments)
 
 bounds :: Curve3d (space @ units) -> Bounds3d (space @ units)
-bounds = Internal.bounds
+bounds curve = evaluateBounds curve Range.unit

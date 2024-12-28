@@ -12,4 +12,4 @@ fromControlPoints ::
   Point3d (space @ units) ->
   Curve3d (space @ units)
 fromControlPoints p1 p2 p3 =
-  Curve3d.Parametric (Expression.quadraticSpline p1 p2 p3)
+  Curve3d.parametric (Expression.quadraticSpline p1 p2 p3)
