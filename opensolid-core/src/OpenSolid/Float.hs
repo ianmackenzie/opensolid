@@ -67,6 +67,7 @@ fromDouble = Data.Coerce.coerce
 toDouble :: Float -> Prelude.Double
 toDouble = Data.Coerce.coerce
 
+{-# INLINE int #-}
 int :: Int -> Float
 int = fromIntegral
 
