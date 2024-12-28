@@ -118,6 +118,7 @@ library
     OpenSolid.Curve1d.Zero
     OpenSolid.Curve1d.Zeros
     OpenSolid.Curve2d
+    OpenSolid.Curve2d.Function
     OpenSolid.Curve2d.FindPoint
     OpenSolid.Curve2d.IntersectionPoint
     OpenSolid.Curve2d.Intersections
