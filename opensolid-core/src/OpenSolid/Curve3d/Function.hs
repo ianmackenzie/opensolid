@@ -3,6 +3,7 @@ module OpenSolid.Curve3d.Function
   , Interface (..)
   , new
   , constant
+  , parametric
   , evaluate
   , evaluateBounds
   , derivative
@@ -60,6 +61,9 @@ new = Function
 
 constant :: Point3d (space @ units) -> Function (space @ units)
 constant = Parametric . Expression.constant
+
+parametric :: Expression Float (Point3d (space @ units)) -> Function (space @ units)
+parametric = Parametric
 
 evaluate :: Function (space @ units) -> Float -> Point3d (space @ units)
 evaluate f tValue = case f of
