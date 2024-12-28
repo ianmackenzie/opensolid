@@ -78,9 +78,10 @@ maybe (Just value) = [value]
 maybe Nothing = []
 
 range :: Int -> Int -> List Int
-range a b
-  | b >= a = [a .. b]
-  | otherwise = [a, a - 1 .. b]
+range a b = case compare a b of
+  LT -> [a, a + 1 .. b]
+  GT -> [a, a - 1 .. b]
+  EQ -> [a]
 
 isEmpty :: List a -> Bool
 isEmpty = Prelude.null
