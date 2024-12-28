@@ -125,6 +125,7 @@ library
     OpenSolid.Curve2d.MedialAxis
     OpenSolid.Curve2d.OverlappingSegment
     OpenSolid.Curve3d
+    OpenSolid.Curve3d.Function
     OpenSolid.Debug
     OpenSolid.Direction2d
     OpenSolid.Direction3d
