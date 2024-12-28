@@ -8,6 +8,7 @@ module OpenSolid.Int
   , abs
   , min
   , max
+  , clampTo
   , factorial
   , choose
   , sum
@@ -17,6 +18,7 @@ module OpenSolid.Int
   )
 where
 
+import Data.Ord qualified
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Prelude
@@ -53,6 +55,9 @@ min = Prelude.min
 
 max :: Int -> Int -> Int
 max = Prelude.max
+
+clampTo :: (Int, Int) -> Int -> Int
+clampTo = Data.Ord.clamp
 
 factorial :: Int -> Int
 factorial n = prod 1 2 n
