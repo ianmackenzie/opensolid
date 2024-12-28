@@ -27,7 +27,7 @@ module OpenSolid.Float
   , isNaN
   , squared
   , abs
-  , clamp
+  , clampTo
   , interpolateFrom
   , midpoint
   , goldenRatio
@@ -46,6 +46,7 @@ import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Qty (Qty (Qty))
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Random.Internal qualified as Random
+import {-# SOURCE #-} OpenSolid.Range (Range)
 import {-# SOURCE #-} OpenSolid.Result (Result)
 import OpenSolid.Sign (Sign)
 import OpenSolid.Text.Parse qualified as Text.Parse
@@ -99,8 +100,8 @@ squared = Qty.squared
 abs :: Float -> Float
 abs = Qty.abs
 
-clamp :: Float -> Float -> Float -> Float
-clamp = Qty.clamp
+clampTo :: Range Unitless -> Float -> Float
+clampTo = Qty.clampTo
 
 interpolateFrom :: Float -> Float -> Float -> Float
 interpolateFrom = Qty.interpolateFrom

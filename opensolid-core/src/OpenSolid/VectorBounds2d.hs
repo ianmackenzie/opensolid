@@ -469,11 +469,12 @@ normalize vectorBounds = do
   let ny = clampNormalized y
   VectorBounds2d nx ny
 
+normalizedRange :: Range Unitless
+normalizedRange = Range.from -1.0 1.0
+
 clampNormalized :: Range Unitless -> Range Unitless
 clampNormalized (Range low high) =
-  Range.unsafe
-    (Qty.clamp -1.0 1.0 low)
-    (Qty.clamp -1.0 1.0 high)
+  Range.unsafe (Qty.clampTo normalizedRange low) (Qty.clampTo normalizedRange high)
 
 includes :: Vector2d (space @ units) -> VectorBounds2d (space @ units) -> Bool
 includes (Vector2d vx vy) (VectorBounds2d x y) = Range.includes vx x && Range.includes vy y

@@ -22,6 +22,7 @@ import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
+import OpenSolid.Range qualified as Range
 import {-# SOURCE #-} OpenSolid.Surface1d.Function qualified as Function
 import OpenSolid.Surface1d.Function.HorizontalCurve qualified as HorizontalCurve
 import OpenSolid.Surface1d.Function.Subproblem (Subproblem (Subproblem))
@@ -135,7 +136,7 @@ connect subproblem frame startDirection endPoint boundingAxes = do
   let (du, dv) = Direction2d.components startDirection
   if Qty.abs du >= Qty.abs dv
     then do
-      let uMid = u1 + 1e-3 * Qty.sign (u2 - u1) |> Qty.clamp u1 u2
+      let uMid = u1 + 1e-3 * Qty.sign (u2 - u1) |> Qty.clampTo (Range.from u1 u2)
       let startDerivative = Vector2d.xy (uMid - u1) ((uMid - u1) * (dv / du))
       let interpolatingCurve =
             HorizontalCurve.bounded derivatives dvdu u1 uMid vBounds frame boundingAxes
@@ -146,7 +147,7 @@ connect subproblem frame startDirection endPoint boundingAxes = do
           let implicitCurve = HorizontalCurve.bounded derivatives dvdu uMid u2 vBounds frame boundingAxes
           NonEmpty.of2 interpolatingCurve implicitCurve
     else do
-      let vMid = v1 + 1e-3 * Qty.sign (v2 - v1) |> Qty.clamp v1 v2
+      let vMid = v1 + 1e-3 * Qty.sign (v2 - v1) |> Qty.clampTo (Range.from v1 v2)
       let startDerivative = Vector2d.xy ((vMid - v1) * (du / dv)) (vMid - v1)
       let interpolatingCurve =
             VerticalCurve.bounded derivatives dudv uBounds v1 vMid frame boundingAxes

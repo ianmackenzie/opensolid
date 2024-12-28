@@ -35,7 +35,6 @@ import OpenSolid.Qty qualified as Qty
 import OpenSolid.Queue (Queue)
 import OpenSolid.Queue qualified as Queue
 import OpenSolid.Range (Range (Range))
-import OpenSolid.Range qualified as Range
 import OpenSolid.Result qualified as Result
 
 data Neighborhood units = Neighborhood
@@ -235,7 +234,7 @@ newtonRaphson function derivative range x y iterations =
       if dy == Qty.zero -- Can't take Newton step if derivative is zero
         then Failure Divergence
         else do
-          let x2 = Range.clampTo range (x - y / dy) -- Apply (bounded) Newton step
+          let x2 = Qty.clampTo range (x - y / dy) -- Apply (bounded) Newton step
           let y2 = function x2
           if Qty.abs y2 >= Qty.abs y
             then -- We've stopped converging, check if we're actually at a root

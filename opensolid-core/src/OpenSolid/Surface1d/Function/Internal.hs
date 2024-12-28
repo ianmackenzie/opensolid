@@ -47,8 +47,8 @@ curveBounds x1 x2 y1 y2 (Range mLow mHigh)
   | otherwise = do
       let dX = x2 - x1
       let dY = y2 - y1
-      let dXValley = Qty.clamp 0.0 dX ((mHigh * dX - dY) / (mHigh - mLow))
-      let dXPeak = Qty.clamp 0.0 dX ((dY - mLow * dX) / (mHigh - mLow))
+      let dXValley = Qty.clampTo (Range.from 0.0 dX) ((mHigh * dX - dY) / (mHigh - mLow))
+      let dXPeak = Qty.clampTo (Range.from 0.0 dX) ((dY - mLow * dX) / (mHigh - mLow))
       let yValley = y1 + mLow * dXValley
       let yPeak = y1 + mHigh * dXPeak
       Range.from yValley yPeak
@@ -62,8 +62,8 @@ curveRangeBounds x1 x2 y1 y2 (Range mLow mHigh)
       let Range low2 high2 = y2
       let dYLow = low2 - low1
       let dYHigh = high2 - high1
-      let dXValley = Qty.clamp 0.0 dX ((mHigh * dX - dYLow) / (mHigh - mLow))
-      let dXPeak = Qty.clamp 0.0 dX ((dYHigh - mLow * dX) / (mHigh - mLow))
+      let dXValley = Qty.clampTo (Range.from 0.0 dX) ((mHigh * dX - dYLow) / (mHigh - mLow))
+      let dXPeak = Qty.clampTo (Range.from 0.0 dX) ((dYHigh - mLow * dX) / (mHigh - mLow))
       let yValley = low1 + mLow * dXValley
       let yPeak = high1 + mHigh * dXPeak
       Range.from yValley yPeak

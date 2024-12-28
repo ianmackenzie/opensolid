@@ -507,11 +507,12 @@ normalize vectorBounds = do
   let nz = clampNormalized z
   VectorBounds3d nx ny nz
 
+normalizedRange :: Range Unitless
+normalizedRange = Range.from -1.0 1.0
+
 clampNormalized :: Range Unitless -> Range Unitless
 clampNormalized (Range low high) =
-  Range.unsafe
-    (Qty.clamp -1.0 1.0 low)
-    (Qty.clamp -1.0 1.0 high)
+  Range.unsafe (Qty.clampTo normalizedRange low) (Qty.clampTo normalizedRange high)
 
 includes :: Vector3d (space @ units) -> VectorBounds3d (space @ units) -> Bool
 includes (Vector3d vx vy vz) (VectorBounds3d x y z) =

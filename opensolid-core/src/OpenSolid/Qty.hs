@@ -24,7 +24,7 @@ module OpenSolid.Qty
   , largest
   , smallestBy
   , largestBy
-  , clamp
+  , clampTo
   , convert
   , unconvert
   , sum
@@ -44,6 +44,8 @@ import {-# SOURCE #-} OpenSolid.Float qualified as Float
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Random.Internal qualified as Random
+import {-# SOURCE #-} OpenSolid.Range (Range)
+import {-# SOURCE #-} OpenSolid.Range qualified as Range
 import OpenSolid.Sign (Sign (Negative, Positive))
 import OpenSolid.Units (Unitless, (:*:), (:/:))
 import OpenSolid.Units qualified as Units
@@ -178,14 +180,8 @@ hypot3 x y z = sqrt' (squared' x + squared' y + squared' z)
 abs :: Qty units -> Qty units
 abs (Qty x) = Qty (Prelude.abs x)
 
-clamp :: Qty units -> Qty units -> Qty units -> Qty units
-clamp a b value = do
-  let low = min a b
-  let high = max a b
-  if
-    | value < low -> low
-    | value > high -> high
-    | otherwise -> value
+clampTo :: Range units -> Qty units -> Qty units
+clampTo range value = min (max (Range.lowerBound range) value) (Range.upperBound range)
 
 {-# INLINE min #-}
 min :: Qty units -> Qty units -> Qty units
