@@ -2057,104 +2057,104 @@ instance Constant UvPoint (Point3d (space @ units)) where
   constant (Point3d x y z) =
     surface3d (Scalar.constant x) (Scalar.constant y) (Scalar.constant z)
 
-class XY input output where
+class XY input output units | output -> units where
   xy ::
-    Expression input (Qty (UnitsOf output)) ->
-    Expression input (Qty (UnitsOf output)) ->
+    Expression input (Qty units) ->
+    Expression input (Qty units) ->
     Expression input output
 
-instance XY Float (Vector2d (space @ units)) where
+instance XY Float (Vector2d (space @ units)) units where
   xy Curve1d{c1x = x} Curve1d{c1x = y} = vectorCurve2d x y
 
-instance XY UvPoint (Vector2d (space @ units)) where
+instance XY UvPoint (Vector2d (space @ units)) units where
   xy Surface1d{s1x = x} Surface1d{s1x = y} = vectorSurface2d x y
 
-instance XY Float (Point2d (space @ units)) where
+instance XY Float (Point2d (space @ units)) units where
   xy Curve1d{c1x = x} Curve1d{c1x = y} = curve2d x y
 
-instance XY UvPoint (Point2d (space @ units)) where
+instance XY UvPoint (Point2d (space @ units)) units where
   xy Surface1d{s1x = x} Surface1d{s1x = y} = surface2d x y
 
-class XYZ input output where
+class XYZ input output units | output -> units where
   xyz ::
-    Expression input (Qty (UnitsOf output)) ->
-    Expression input (Qty (UnitsOf output)) ->
-    Expression input (Qty (UnitsOf output)) ->
+    Expression input (Qty units) ->
+    Expression input (Qty units) ->
+    Expression input (Qty units) ->
     Expression input output
 
-instance XYZ Float (Vector3d (space @ units)) where
+instance XYZ Float (Vector3d (space @ units)) units where
   xyz Curve1d{c1x = x} Curve1d{c1x = y} Curve1d{c1x = z} = vectorCurve3d x y z
 
-instance XYZ UvPoint (Vector3d (space @ units)) where
+instance XYZ UvPoint (Vector3d (space @ units)) units where
   xyz Surface1d{s1x = x} Surface1d{s1x = y} Surface1d{s1x = z} = vectorSurface3d x y z
 
-instance XYZ UvwPoint (Vector3d (space @ units)) where
+instance XYZ UvwPoint (Vector3d (space @ units)) units where
   xyz Volume1d{v1x = x} Volume1d{v1x = y} Volume1d{v1x = z} = vectorVolume3d x y z
 
-instance XYZ Float (Point3d (space @ units)) where
+instance XYZ Float (Point3d (space @ units)) units where
   xyz Curve1d{c1x = x} Curve1d{c1x = y} Curve1d{c1x = z} = curve3d x y z
 
-instance XYZ UvPoint (Point3d (space @ units)) where
+instance XYZ UvPoint (Point3d (space @ units)) units where
   xyz Surface1d{s1x = x} Surface1d{s1x = y} Surface1d{s1x = z} = surface3d x y z
 
-class XComponent input output where
-  xComponent :: Expression input output -> Expression input (Qty (UnitsOf output))
+class XComponent input output units | output -> units where
+  xComponent :: Expression input output -> Expression input (Qty units)
 
-class YComponent input output where
-  yComponent :: Expression input output -> Expression input (Qty (UnitsOf output))
+class YComponent input output units | output -> units where
+  yComponent :: Expression input output -> Expression input (Qty units)
 
-class ZComponent input output where
-  zComponent :: Expression input output -> Expression input (Qty (UnitsOf output))
+class ZComponent input output units | output -> units where
+  zComponent :: Expression input output -> Expression input (Qty units)
 
-instance XComponent input (Vector2d (space @ units)) where
+instance XComponent input (Vector2d (space @ units)) units where
   xComponent VectorCurve2d{vc2x} = curve1d vc2x
   xComponent VectorSurface2d{vs2x} = surface1d vs2x
 
-instance XComponent input (Vector3d (space @ units)) where
+instance XComponent input (Vector3d (space @ units)) units where
   xComponent VectorCurve3d{vc3x} = curve1d vc3x
   xComponent VectorSurface3d{vs3x} = surface1d vs3x
   xComponent VectorVolume3d{vv3x} = volume1d vv3x
 
-instance YComponent input (Vector2d (space @ units)) where
+instance YComponent input (Vector2d (space @ units)) units where
   yComponent VectorCurve2d{vc2y} = curve1d vc2y
   yComponent VectorSurface2d{vs2y} = surface1d vs2y
 
-instance YComponent input (Vector3d (space @ units)) where
+instance YComponent input (Vector3d (space @ units)) units where
   yComponent VectorCurve3d{vc3y} = curve1d vc3y
   yComponent VectorSurface3d{vs3y} = surface1d vs3y
   yComponent VectorVolume3d{vv3y} = volume1d vv3y
 
-instance ZComponent input (Vector3d (space @ units)) where
+instance ZComponent input (Vector3d (space @ units)) units where
   zComponent VectorCurve3d{vc3z} = curve1d vc3z
   zComponent VectorSurface3d{vs3z} = surface1d vs3z
   zComponent VectorVolume3d{vv3z} = volume1d vv3z
 
-class XCoordinate input output where
-  xCoordinate :: Expression input output -> Expression input (Qty (UnitsOf output))
+class XCoordinate input output units | output -> units where
+  xCoordinate :: Expression input output -> Expression input (Qty units)
 
-class YCoordinate input output where
-  yCoordinate :: Expression input output -> Expression input (Qty (UnitsOf output))
+class YCoordinate input output units | output -> units where
+  yCoordinate :: Expression input output -> Expression input (Qty units)
 
-class ZCoordinate input output where
-  zCoordinate :: Expression input output -> Expression input (Qty (UnitsOf output))
+class ZCoordinate input output units | output -> units where
+  zCoordinate :: Expression input output -> Expression input (Qty units)
 
-instance XCoordinate input (Point2d (space @ units)) where
+instance XCoordinate input (Point2d (space @ units)) units where
   xCoordinate Curve2d{c2x} = curve1d c2x
   xCoordinate Surface2d{s2x} = surface1d s2x
 
-instance XCoordinate input (Point3d (space @ units)) where
+instance XCoordinate input (Point3d (space @ units)) units where
   xCoordinate Curve3d{c3x} = curve1d c3x
   xCoordinate Surface3d{s3x} = surface1d s3x
 
-instance YCoordinate input (Point2d (space @ units)) where
+instance YCoordinate input (Point2d (space @ units)) units where
   yCoordinate Curve2d{c2y} = curve1d c2y
   yCoordinate Surface2d{s2y} = surface1d s2y
 
-instance YCoordinate input (Point3d (space @ units)) where
+instance YCoordinate input (Point3d (space @ units)) units where
   yCoordinate Curve3d{c3y} = curve1d c3y
   yCoordinate Surface3d{s3y} = surface1d s3y
 
-instance ZCoordinate input (Point3d (space @ units)) where
+instance ZCoordinate input (Point3d (space @ units)) units where
   zCoordinate Curve3d{c3z} = curve1d c3z
   zCoordinate Surface3d{s3z} = surface1d s3z
 
