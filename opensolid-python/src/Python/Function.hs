@@ -71,6 +71,8 @@ typePattern ffiType = case ffiType of
   -- For non-empty lists we _can_ overload
   -- based on the type of items in the list
   FFI.NonEmpty itemType -> "[" + typePattern itemType + ", *_]"
+  -- Arrays are also non-empty
+  FFI.Array itemType -> "[" + typePattern itemType + ", *_]"
   FFI.Tuple type1 type2 rest -> tuplePattern type1 type2 rest
   FFI.Maybe valueType -> typePattern valueType + " | None"
   FFI.Result{} -> internalError "Should never have Result as input argument"

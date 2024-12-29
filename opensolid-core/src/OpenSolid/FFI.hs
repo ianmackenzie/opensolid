@@ -32,6 +32,8 @@ import Foreign qualified
 import Foreign.Marshal.Alloc qualified
 import OpenSolid.Angle (Angle)
 import OpenSolid.Area (Area)
+import OpenSolid.Array (Array)
+import OpenSolid.Array qualified as Array
 import OpenSolid.Color (Color)
 import OpenSolid.Error qualified as Error
 import OpenSolid.Float qualified as Float
@@ -82,6 +84,8 @@ data Representation a where
   ListRep :: FFI a => Representation (List a)
   -- Same representation as a list, but with a runtime check for emptiness
   NonEmptyRep :: FFI a => Representation (NonEmpty a)
+  -- Same representation as a list, but with a runtime check for emptiness
+  ArrayRep :: FFI a => Representation (Array a)
   -- A struct with the first item and then the second
   Tuple2Rep :: (FFI a, FFI b) => Representation (a, b)
   -- A struct with the three items in order
@@ -124,6 +128,7 @@ data Type where
   Text :: Type
   List :: Type -> Type
   NonEmpty :: Type -> Type
+  Array :: Type -> Type
   Tuple :: Type -> Type -> List Type -> Type
   Maybe :: Type -> Type
   Result :: Type -> Type
@@ -140,6 +145,7 @@ typeOf proxy = case representation proxy of
   TextRep -> Text
   ListRep -> listType proxy
   NonEmptyRep -> nonEmptyType proxy
+  ArrayRep -> arrayType proxy
   Tuple2Rep -> tuple2Type proxy
   Tuple3Rep -> tuple3Type proxy
   Tuple4Rep -> tuple4Type proxy
@@ -154,6 +160,9 @@ listType _ = List (typeOf @a Proxy)
 
 nonEmptyType :: forall a. FFI a => Proxy (NonEmpty a) -> Type
 nonEmptyType _ = NonEmpty (typeOf @a Proxy)
+
+arrayType :: forall a. FFI a => Proxy (Array a) -> Type
+arrayType _ = Array (typeOf @a Proxy)
 
 tuple2Type :: forall a b. (FFI a, FFI b) => Proxy (a, b) -> Type
 tuple2Type _ = Tuple (typeOf @a Proxy) (typeOf @b Proxy) []
@@ -207,6 +216,7 @@ typeName ffiType = case ffiType of
   Text -> "Text"
   List itemType -> "List" + typeName itemType
   NonEmpty itemType -> "NonEmpty" + typeName itemType
+  Array itemType -> "Array" + typeName itemType
   Tuple type1 type2 rest -> do
     let itemTypes = type1 : type2 : rest
     let tupleSize = List.length itemTypes
@@ -227,6 +237,7 @@ size ffiType = case ffiType of
   Text -> 8
   List _ -> 16
   NonEmpty _ -> 16
+  Array _ -> 16
   Tuple type1 type2 rest -> Int.sumOf size (type1 : type2 : rest)
   Maybe valueType -> 8 + size valueType
   Result valueType -> 16 + size valueType
@@ -261,6 +272,9 @@ instance FFI item => FFI (List item) where
 
 instance FFI item => FFI (NonEmpty item) where
   representation _ = NonEmptyRep
+
+instance FFI item => FFI (Array item) where
+  representation _ = ArrayRep
 
 instance (FFI a, FFI b) => FFI (a, b) where
   representation _ = Tuple2Rep
@@ -305,6 +319,7 @@ store ptr offset value = do
       Foreign.pokeByteOff ptr offset (toInt64 numItems)
       Foreign.pokeByteOff ptr (offset + 8) itemsPtr
     NonEmptyRep -> store ptr offset (NonEmpty.toList value)
+    ArrayRep -> store ptr offset (Array.items value)
     Tuple2Rep -> IO.do
       let (value1, value2) = value
       let (size1, _) = tuple2ItemSizes proxy
@@ -400,6 +415,7 @@ load ptr offset = do
       case list of
         [] -> internalError "Empty list passed to FFI function expecting a non-empty list"
         first : rest -> IO.succeed (first :| rest)
+    ArrayRep -> IO.map Array.new (load ptr offset)
     Tuple2Rep -> IO.do
       let (size1, _) = tuple2ItemSizes proxy
       let offset1 = offset

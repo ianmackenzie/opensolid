@@ -26,6 +26,7 @@ typeName ffiType = case ffiType of
   FFI.Text -> "_Text"
   FFI.List{} -> "_" + typeNameComponent ffiType
   FFI.NonEmpty{} -> "_" + typeNameComponent ffiType
+  FFI.Array{} -> "_" + typeNameComponent ffiType
   FFI.Tuple{} -> "_" + typeNameComponent ffiType
   FFI.Maybe{} -> "_" + typeNameComponent ffiType
   FFI.Result{} -> "_" + typeNameComponent ffiType
@@ -39,6 +40,7 @@ typeNameComponent ffiType = case ffiType of
   FFI.Text -> "Text"
   FFI.List itemType -> "List_" + typeNameComponent itemType
   FFI.NonEmpty itemType -> "List_" + typeNameComponent itemType
+  FFI.Array itemType -> "List_" + typeNameComponent itemType
   FFI.Tuple type1 type2 rest -> do
     let itemTypes = type1 : type2 : rest
     let numItems = List.length itemTypes
@@ -59,6 +61,7 @@ dummyFieldValue ffiType = case ffiType of
   FFI.Text -> dummyValue ffiType
   FFI.List{} -> dummyValue ffiType
   FFI.NonEmpty{} -> dummyValue ffiType
+  FFI.Array{} -> dummyValue ffiType
   FFI.Tuple{} -> dummyValue ffiType
   FFI.Maybe{} -> dummyValue ffiType
   FFI.Result{} -> dummyValue ffiType
@@ -84,6 +87,7 @@ outputValue ffiType varName = case ffiType of
   FFI.Text -> "_text_to_str(" + varName + ")"
   FFI.List itemType -> listOutputValue itemType varName
   FFI.NonEmpty itemType -> listOutputValue itemType varName
+  FFI.Array itemType -> listOutputValue itemType varName
   FFI.Tuple type1 type2 rest -> tupleOutputValue varName type1 type2 rest
   FFI.Maybe valueType -> maybeOutputValue valueType varName
   FFI.Result valueType -> resultOutputValue valueType varName
@@ -97,6 +101,7 @@ fieldOutputValue ffiType varName = case ffiType of
   FFI.Text -> "_text_to_str(" + varName + ")"
   FFI.List itemType -> listOutputValue itemType varName
   FFI.NonEmpty itemType -> listOutputValue itemType varName
+  FFI.Array itemType -> listOutputValue itemType varName
   FFI.Tuple type1 type2 rest -> tupleOutputValue varName type1 type2 rest
   FFI.Maybe valueType -> maybeOutputValue valueType varName
   FFI.Result valueType -> resultOutputValue valueType varName
@@ -140,6 +145,7 @@ singleArgument varName ffiType = case ffiType of
   FFI.Text -> "_str_to_text(" + varName + ")"
   FFI.List itemType -> listArgumentValue ffiType itemType varName
   FFI.NonEmpty itemType -> nonEmptyArgumentValue itemType varName
+  FFI.Array itemType -> nonEmptyArgumentValue itemType varName
   FFI.Tuple type1 type2 rest -> tupleArgumentValue ffiType type1 type2 rest varName
   FFI.Maybe valueType -> maybeArgumentValue ffiType valueType varName
   FFI.Result{} -> internalError "Should never have Result as input argument"
@@ -153,6 +159,7 @@ fieldArgumentValue varName ffiType = case ffiType of
   FFI.Text -> "_str_to_text(" + varName + ")"
   FFI.List itemType -> listArgumentValue ffiType itemType varName
   FFI.NonEmpty itemType -> nonEmptyArgumentValue itemType varName
+  FFI.Array itemType -> nonEmptyArgumentValue itemType varName
   FFI.Tuple type1 type2 rest -> tupleArgumentValue ffiType type1 type2 rest varName
   FFI.Maybe valueType -> maybeArgumentValue ffiType valueType varName
   FFI.Result{} -> internalError "Should never have Result as input argument"
@@ -195,6 +202,7 @@ registerType ffiType registry = do
       FFI.Text -> registry
       FFI.List itemType -> registerList ffiType itemType registry
       FFI.NonEmpty itemType -> registerList (FFI.List itemType) itemType registry
+      FFI.Array itemType -> registerList (FFI.List itemType) itemType registry
       FFI.Tuple type1 type2 rest -> registerTuple ffiType type1 type2 rest registry
       FFI.Maybe valueType -> registerMaybe ffiType valueType registry
       FFI.Result valueType -> registerResult ffiType valueType registry
