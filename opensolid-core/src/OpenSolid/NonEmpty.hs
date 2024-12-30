@@ -40,6 +40,7 @@ module OpenSolid.NonEmpty
   , filter
   , find
   , concat
+  , collect
   , foldl
   , foldr
   , reduce
@@ -232,6 +233,9 @@ find = Data.Foldable.find
 
 concat :: NonEmpty (NonEmpty a) -> NonEmpty a
 concat = Data.Semigroup.sconcat
+
+collect :: (a -> NonEmpty b) -> NonEmpty a -> NonEmpty b
+collect f nonEmpty = concat (map f nonEmpty)
 
 foldl :: (b -> a -> b) -> b -> NonEmpty a -> b
 foldl = Data.Foldable.foldl'
