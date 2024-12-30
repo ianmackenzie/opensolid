@@ -26,7 +26,9 @@ solveForU f fu uBounds vValue = do
   let uvPoint uValue = Point2d.xy uValue vValue
   let fValue uValue = Function.evaluate f (uvPoint uValue)
   let fuValue uValue = Function.evaluate fu (uvPoint uValue)
-  Solve1d.monotonic fValue fuValue uBounds
+  case Solve1d.monotonic fValue fuValue uBounds of
+    Solve1d.Exact uValue -> uValue
+    Solve1d.Closest uValue -> uValue
 
 solveForV ::
   Tolerance units =>
@@ -39,7 +41,9 @@ solveForV f fv uValue vBounds = do
   let uvPoint vValue = Point2d.xy uValue vValue
   let fValue vValue = Function.evaluate f (uvPoint vValue)
   let fvValue vValue = Function.evaluate fv (uvPoint vValue)
-  Solve1d.monotonic fValue fvValue vBounds
+  case Solve1d.monotonic fValue fvValue vBounds of
+    Solve1d.Exact vValue -> vValue
+    Solve1d.Closest vValue -> vValue
 
 curveBounds :: Float -> Float -> Qty units -> Qty units -> Range units -> Range units
 curveBounds x1 x2 y1 y2 (Range mLow mHigh)

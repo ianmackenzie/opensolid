@@ -1,3 +1,5 @@
+Fix logic in Solve1d.zeros: 'Stream.head derivativeBounds' will not in general refer to the actual function (order 0 derivative)
+
 Rewrite scripts in Haskell?
 
 Merge File module into IO?

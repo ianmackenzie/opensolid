@@ -17,6 +17,7 @@ module OpenSolid.Solve1d
   , return
   , recurse
   , pass
+  , Root (Exact, Closest)
   , monotonic
   )
 where
@@ -35,6 +36,7 @@ import OpenSolid.Qty qualified as Qty
 import OpenSolid.Queue (Queue)
 import OpenSolid.Queue qualified as Queue
 import OpenSolid.Range (Range (Range))
+import OpenSolid.Range qualified as Range
 import OpenSolid.Result qualified as Result
 
 data Neighborhood units = Neighborhood
@@ -174,20 +176,22 @@ recurse = Recurse
 pass :: Action exclusions solution
 pass = Pass
 
+data Root = Exact Float | Closest Float
+
 monotonic ::
   Tolerance units =>
   (Float -> Qty units) ->
   (Float -> Qty units) ->
   Range Unitless ->
-  Float
+  Root
 monotonic function derivative range = do
   let Range x1 x2 = range
   let y1 = function x1
   let y2 = function x2
   if
-    | y1 == Qty.zero -> x1
-    | y2 == Qty.zero -> x2
-    | Qty.sign y1 == Qty.sign y2 -> if Qty.abs y1 <= Qty.abs y2 then x1 else x2
+    | y1 == Qty.zero -> Exact x1
+    | y2 == Qty.zero -> Exact x2
+    | Qty.sign y1 == Qty.sign y2 -> if Qty.abs y1 <= Qty.abs y2 then Closest x1 else Closest x2
     | otherwise -> solveMonotonic function derivative range (Qty.sign y1) x1 x2
 
 solveMonotonic ::
@@ -198,22 +202,24 @@ solveMonotonic ::
   Sign ->
   Float ->
   Float ->
-  Float
+  Root
 solveMonotonic function derivative range sign1 x1 x2 = do
   -- First, try applying Newton-Raphson within [x1,x2]
   -- to see if that converges to a zero
   let xMid = Qty.midpoint x1 x2
   let yMid = function xMid
-  case newtonRaphson function derivative range xMid yMid 0 of
-    Success x -> x -- Newton-Raphson converged to a zero, return it
-    Failure Divergence -- Newton-Raphson did not converge within [x1, x2]
-      | x1 < xMid && xMid < x2 ->
-          -- It's possible to bisect further,
-          -- so recurse into whichever subdomain brackets the zero
-          if Qty.sign yMid == sign1
-            then solveMonotonic function derivative range sign1 xMid x2
-            else solveMonotonic function derivative range sign1 x1 xMid
-      | otherwise -> xMid -- We've converged to a zero by bisection
+  if yMid == Qty.zero
+    then Exact xMid
+    else case newtonRaphson function derivative range xMid yMid 0 of
+      Success root -> Exact root -- Newton-Raphson converged to a zero, return it
+      Failure Divergence -- Newton-Raphson did not converge within [x1, x2]
+        | x1 < xMid && xMid < x2 ->
+            -- It's possible to bisect further,
+            -- so recurse into whichever subdomain brackets the zero
+            if Qty.sign yMid == sign1
+              then solveMonotonic function derivative range sign1 xMid x2
+              else solveMonotonic function derivative range sign1 x1 xMid
+        | otherwise -> Exact xMid -- We've converged to a zero by bisection
 
 data Divergence = Divergence deriving (Eq, Show, Error.Message)
 
@@ -233,8 +239,25 @@ newtonRaphson function derivative range x y iterations =
       let dy = derivative x
       if dy == Qty.zero -- Can't take Newton step if derivative is zero
         then Failure Divergence
-        else do
-          let x2 = Qty.clampTo range (x - y / dy) -- Apply (bounded) Newton step
+        else Result.do
+          let xStepped = x - y / dy
+          x2 <-
+            if Range.includes xStepped range
+              then Success xStepped -- Newton step stayed within range
+              else do
+                -- Newton step went outside range,
+                -- attempt to recover by making another step
+                -- starting at the range boundary
+                let xClamped = Qty.clampTo range xStepped
+                let yClamped = function xClamped
+                let dyClamped = derivative xClamped
+                if dyClamped == Qty.zero
+                  then Failure Divergence
+                  else do
+                    let xStepped2 = xClamped - yClamped / dyClamped
+                    if Range.includes xStepped2 range
+                      then Success xStepped2
+                      else Failure Divergence
           let y2 = function x2
           if Qty.abs y2 >= Qty.abs y
             then -- We've stopped converging, check if we're actually at a root

@@ -516,7 +516,6 @@ solveMonotonic m fm fn tRange = do
       if Qty.abs (evaluate fm tHigh) <= Solve1d.derivativeTolerance endNeighborhood m
         then if tHigh == 1.0 then Resolved [(1.0, endNeighborhood)] else Unresolved
         else do
-          let t0 = Solve1d.monotonic (evaluate fm) (evaluate fn) tRange
-          if t0 == tLow || t0 == tHigh
-            then Unresolved
-            else Resolved [(t0, Solve1d.neighborhood n (evaluate fn t0))]
+          case Solve1d.monotonic (evaluate fm) (evaluate fn) tRange of
+            Solve1d.Exact t0 -> Resolved [(t0, Solve1d.neighborhood n (evaluate fn t0))]
+            Solve1d.Closest _ -> Unresolved
