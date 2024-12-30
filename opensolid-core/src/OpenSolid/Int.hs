@@ -15,6 +15,8 @@ module OpenSolid.Int
   , sumOf
   , product
   , random
+  , gcd
+  , lcm
   )
 where
 
@@ -91,3 +93,9 @@ product = NonEmpty.reduce (*)
 
 random :: Int -> Int -> Generator Int
 random low high = Generator (System.Random.uniformR (low, high))
+
+gcd :: Int -> Int -> Int
+gcd = Prelude.gcd
+
+lcm :: Int -> Int -> Int
+lcm = Prelude.lcm
