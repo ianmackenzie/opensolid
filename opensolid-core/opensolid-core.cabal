@@ -167,7 +167,7 @@ library
     OpenSolid.NonEmpty
     OpenSolid.Pair
     OpenSolid.Parameter
-    OpenSolid.Piecewise
+    OpenSolid.PiecewiseCurve
     OpenSolid.Plane3d
     OpenSolid.Point2d
     OpenSolid.Point3d
@@ -279,7 +279,7 @@ test-suite opensolid-core-test
     Tests.Map
     Tests.NonEmpty
     Tests.Parameter
-    Tests.Piecewise
+    Tests.PiecewiseCurve
     Tests.Qty
     Tests.Random
     Tests.Range

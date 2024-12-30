@@ -18,7 +18,7 @@ import Tests.List qualified
 import Tests.Map qualified
 import Tests.NonEmpty qualified
 import Tests.Parameter qualified
-import Tests.Piecewise qualified
+import Tests.PiecewiseCurve qualified
 import Tests.Qty qualified
 import Tests.Range qualified
 import Tests.Region2d qualified
@@ -50,7 +50,7 @@ tests =
     , Test.group "Tests.Bounds2d" Tests.Bounds2d.tests
     , Test.group "Tests.VectorBounds2d" Tests.VectorBounds2d.tests
     , Test.group "Tests.Array" Tests.Array.tests
-    , Test.group "Tests.Piecewise" Tests.Piecewise.tests
+    , Test.group "Tests.PiecewiseCurve" Tests.PiecewiseCurve.tests
     ]
 
 main :: IO ()

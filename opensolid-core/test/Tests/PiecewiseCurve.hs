@@ -1,9 +1,9 @@
-module Tests.Piecewise (tests) where
+module Tests.PiecewiseCurve (tests) where
 
 import OpenSolid.Array (Array)
 import OpenSolid.Array qualified as Array
 import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Piecewise qualified as Piecewise
+import OpenSolid.PiecewiseCurve qualified as PiecewiseCurve
 import OpenSolid.Prelude
 import OpenSolid.Range (Range)
 import OpenSolid.Range qualified as Range
@@ -30,7 +30,7 @@ interpolate =
   Tolerance.using 1e-12 $
     Test.verify "interpolate" Test.do
       let check t expected = do
-            let actual = Piecewise.interpolate Range.interpolate ranges t
+            let actual = PiecewiseCurve.interpolate Range.interpolate ranges t
             Test.expect (actual ~= expected)
               |> Test.output "t" t
               |> Test.output "expected" expected
@@ -55,7 +55,7 @@ aggregate =
   Tolerance.using 1e-12 $
     Test.verify "interpolate" Test.do
       let check t expected = do
-            let actual = Piecewise.aggregate Range.aggregate2 interpolateBounds ranges t
+            let actual = PiecewiseCurve.aggregate Range.aggregate2 interpolateBounds ranges t
             Test.expect (Range.endpoints actual ~= Range.endpoints expected)
               |> Test.output "t" t
               |> Test.output "expected" expected
