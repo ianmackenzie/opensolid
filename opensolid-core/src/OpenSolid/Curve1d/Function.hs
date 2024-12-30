@@ -8,6 +8,7 @@ module OpenSolid.Curve1d.Function
   , new
   , zero
   , constant
+  , parametric
   , t
   , squared
   , squared'
@@ -143,6 +144,9 @@ zero = constant Qty.zero
 -- | Create a function with the given constant value.
 constant :: Qty units -> Function units
 constant = Parametric . Expression.constant
+
+parametric :: Expression Float (Qty units) -> Function units
+parametric = Parametric
 
 {-| A function parameter.
 
