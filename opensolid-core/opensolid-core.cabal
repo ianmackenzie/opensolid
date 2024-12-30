@@ -114,7 +114,6 @@ library
     OpenSolid.CubicSpline2d
     OpenSolid.Curve1d
     OpenSolid.Curve1d.Function
-    OpenSolid.Curve1d.Function.Integral
     OpenSolid.Curve1d.Zero
     OpenSolid.Curve1d.Zeros
     OpenSolid.Curve2d
