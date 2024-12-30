@@ -15,6 +15,7 @@ module OpenSolid.VectorCurve3d.Function
   , derivative
   , zero
   , constant
+  , parametric
   , xyz
   , line
   , arc
@@ -558,6 +559,9 @@ zero = constant Vector3d.zero
 
 constant :: Vector3d (space @ units) -> Function (space @ units)
 constant = Parametric . Expression.constant
+
+parametric :: Expression Float (Vector3d (space @ units)) -> Function (space @ units)
+parametric = Parametric
 
 xyz ::
   Curve1d.Function.Function units ->
