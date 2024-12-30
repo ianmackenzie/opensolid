@@ -24,9 +24,21 @@ import OpenSolid.Point3d (Point3d)
 import OpenSolid.Prelude
 import OpenSolid.Range (Range)
 import OpenSolid.Range qualified as Range
+import OpenSolid.Units qualified as Units
 
 type Curve3d :: CoordinateSystem -> Type
 newtype Curve3d coordinateSystem = Curve3d {segments :: Array (Function coordinateSystem)}
+
+deriving instance Show (Curve3d (space @ units))
+
+instance HasUnits (Curve3d (space @ units)) where
+  type UnitsOf (Curve3d (space @ units)) = units
+
+instance
+  space1 ~ space2 =>
+  Units.Coercion (Curve3d (space1 @ units1)) (Curve3d (space2 @ units2))
+  where
+  coerce (Curve3d segments) = Curve3d (Array.map Units.coerce segments)
 
 constant :: Point3d (space @ units) -> Curve3d (space @ units)
 constant = Curve3d . Array.singleton . Function.constant
