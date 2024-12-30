@@ -98,6 +98,7 @@ library
     OpenSolid.Arithmetic
     OpenSolid.Arithmetic.Unboxed
     OpenSolid.Array
+    OpenSolid.Array2d
     OpenSolid.Axis2d
     OpenSolid.Axis3d
     OpenSolid.Basis2d
