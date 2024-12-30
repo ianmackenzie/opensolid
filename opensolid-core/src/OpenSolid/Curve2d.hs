@@ -765,7 +765,7 @@ removeStartDegeneracy ::
   Curve2d (space @ units) ->
   Curve2d (space @ units)
 removeStartDegeneracy continuity startCondition curve = Result.do
-  let curveDerivatives = Stream.iterate (derivative curve) VectorCurve2d.derivative
+  let curveDerivatives = Stream.iterate VectorCurve2d.derivative (derivative curve)
   let endDerivativeValues = Stream.map VectorCurve2d.endValue curveDerivatives
   let endCondition endDegree = (endPoint curve, Stream.take endDegree endDerivativeValues)
   let baseCurve endDegree = BezierCurve2d.hermite startCondition (endCondition endDegree)

@@ -22,8 +22,8 @@ instance Prelude.Functor Stream where fmap = map
 repeat :: a -> Stream a
 repeat value = Stream value (repeat value)
 
-iterate :: a -> (a -> a) -> Stream a
-iterate first function = Stream first (iterate (function first) function)
+iterate :: (a -> a) -> a -> Stream a
+iterate function first = Stream first (iterate function (function first))
 
 {-# INLINE head #-}
 head :: Stream a -> a

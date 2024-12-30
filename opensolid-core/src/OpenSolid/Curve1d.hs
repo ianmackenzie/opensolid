@@ -424,7 +424,7 @@ zeros :: Tolerance units => Curve1d units -> Result Zeros.Error (List Zero)
 zeros curve
   | curve ~= Qty.zero = Failure Zeros.ZeroEverywhere
   | otherwise = Result.do
-      let derivatives = Stream.iterate curve derivative
+      let derivatives = Stream.iterate derivative curve
       let derivativeBounds tRange = Stream.map (\f -> evaluateBounds f tRange) derivatives
       let cache = Solve1d.init derivativeBounds
       case Solve1d.search (findZeros derivatives) cache of
