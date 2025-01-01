@@ -226,7 +226,6 @@ library
 
   other-modules:
     OpenSolid.Bootstrap
-    OpenSolid.Curve1d.Integral
     OpenSolid.Expression.Scalar
     OpenSolid.Point2d.CoordinateTransformation
     OpenSolid.Point3d.CoordinateTransformation

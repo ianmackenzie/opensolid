@@ -23,7 +23,6 @@ where
 
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Composition
-import OpenSolid.Curve1d.Integral (Integral (Integral))
 import OpenSolid.Curve1d.Zero (Zero)
 import OpenSolid.Curve1d.Zero qualified as Zero
 import OpenSolid.Curve1d.Zeros qualified as Zeros
@@ -381,6 +380,28 @@ cos curve = Cos curve
 
 integral :: Curve1d units -> Estimate units
 integral curve = Estimate.new (Integral curve (derivative curve) Range.unit)
+
+data Integral units = Integral (Curve1d units) (Curve1d units) (Range Unitless)
+
+instance Estimate.Interface (Integral units) units where
+  boundsImpl (Integral curve curveDerivative domain) = do
+    let dx = Range.width domain
+    let derivativeBounds = evaluateBounds curveDerivative domain
+    let estimate0 = dx * evaluateBounds curve domain
+    let y1 = evaluate curve (Range.lowerBound domain)
+    let y2 = evaluate curve (Range.upperBound domain)
+    let m = Range.width derivativeBounds
+    let error1 = 0.125 * m * dx * dx
+    let estimate1 = dx * Qty.midpoint y1 y2 + Range.from -error1 error1
+    case Range.intersection estimate0 estimate1 of
+      Just intersection -> intersection
+      Nothing -> estimate0 -- Shouldn't happen if bounds are correct
+
+  refineImpl (Integral curve curveDerivative domain) = do
+    let (leftDomain, rightDomain) = Range.bisect domain
+    let leftIntegral = Integral curve curveDerivative leftDomain
+    let rightIntegral = Integral curve curveDerivative rightDomain
+    Estimate.new leftIntegral + Estimate.new rightIntegral
 
 ----- ZERO FINDING -----
 
