@@ -32,7 +32,8 @@ import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.VectorBounds3d (VectorBounds3d)
 import OpenSolid.VectorBounds3d qualified as VectorBounds3d
-import OpenSolid.VectorCurve3d.Function qualified as VectorCurve3d.Function
+import OpenSolid.VectorCurve3d (VectorCurve3d)
+import OpenSolid.VectorCurve3d qualified as VectorCurve3d
 
 class
   Show function =>
@@ -414,22 +415,22 @@ instance
 instance
   Composition
     (Surface1d.Function Unitless)
-    (VectorCurve3d.Function.Function (space @ units))
+    (VectorCurve3d (space @ units))
     (Function (space @ units))
   where
   curve . function = new (curve :.: function)
 
-instance Interface (VectorCurve3d.Function.Function (space @ units) :.: Surface1d.Function Unitless) (space @ units) where
+instance Interface (VectorCurve3d (space @ units) :.: Surface1d.Function Unitless) (space @ units) where
   evaluateImpl (curveFunction :.: surfaceFunction) uvPoint =
-    VectorCurve3d.Function.evaluate curveFunction $
+    VectorCurve3d.evaluate curveFunction $
       Surface1d.Function.evaluate surfaceFunction uvPoint
 
   evaluateBoundsImpl (curveFunction :.: surfaceFunction) uvBounds =
-    VectorCurve3d.Function.evaluateBounds curveFunction $
+    VectorCurve3d.evaluateBounds curveFunction $
       Surface1d.Function.evaluateBounds surfaceFunction uvBounds
 
   derivativeImpl parameter (curveFunction :.: surfaceFunction) =
-    (VectorCurve3d.Function.derivative curveFunction . surfaceFunction)
+    (VectorCurve3d.derivative curveFunction . surfaceFunction)
       * Surface1d.Function.derivative parameter surfaceFunction
 
 new :: Interface function (space @ units) => function -> Function (space @ units)

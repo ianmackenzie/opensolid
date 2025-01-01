@@ -16,7 +16,8 @@ where
 import OpenSolid.Bounds3d (Bounds3d)
 import OpenSolid.Bounds3d qualified as Bounds3d
 import OpenSolid.Composition
-import OpenSolid.Curve3d.Function qualified as Curve3d.Function
+import OpenSolid.Curve3d (Curve3d)
+import OpenSolid.Curve3d qualified as Curve3d
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Point3d (Point3d)
@@ -190,7 +191,7 @@ derivative parameter function = case function of
 data SurfaceCurveComposition (coordinateSystem :: CoordinateSystem) where
   SurfaceCurveComposition ::
     Surface1d.Function Unitless ->
-    Curve3d.Function.Function (space @ units) ->
+    Curve3d (space @ units) ->
     SurfaceCurveComposition (space @ units)
 
 deriving instance Show (SurfaceCurveComposition coordinateSystem)
@@ -198,22 +199,22 @@ deriving instance Show (SurfaceCurveComposition coordinateSystem)
 instance
   Composition
     (Surface1d.Function Unitless)
-    (Curve3d.Function.Function (space @ units))
+    (Curve3d (space @ units))
     (Function (space @ units))
   where
-  Curve3d.Function.Parametric curve . Surface1d.Function.Parametric function =
+  Curve3d.Parametric curve . Surface1d.Function.Parametric function =
     Parametric (curve . function)
   curveFunction . surfaceFunction = new (curveFunction :.: surfaceFunction)
 
-instance Interface (Curve3d.Function.Function (space @ units) :.: Surface1d.Function Unitless) (space @ units) where
+instance Interface (Curve3d (space @ units) :.: Surface1d.Function Unitless) (space @ units) where
   evaluateImpl (curveFunction :.: surfaceFunction) uvPoint =
-    Curve3d.Function.evaluate curveFunction $
+    Curve3d.evaluate curveFunction $
       Surface1d.Function.evaluate surfaceFunction uvPoint
 
   evaluateBoundsImpl (curveFunction :.: surfaceFunction) uvBounds =
-    Curve3d.Function.evaluateBounds curveFunction $
+    Curve3d.evaluateBounds curveFunction $
       Surface1d.Function.evaluateBounds surfaceFunction uvBounds
 
   derivativeImpl parameter (curveFunction :.: surfaceFunction) =
-    (Curve3d.Function.derivative curveFunction . surfaceFunction)
+    (Curve3d.derivative curveFunction . surfaceFunction)
       * Surface1d.Function.derivative parameter surfaceFunction

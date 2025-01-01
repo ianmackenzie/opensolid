@@ -1,33 +1,47 @@
 module OpenSolid.Curve3d
-  ( Curve3d
-  , segments
+  ( Curve3d (Parametric)
+  , Interface (..)
+  , new
   , constant
   , parametric
-  , startPoint
-  , endPoint
   , evaluate
   , evaluateBounds
+  , derivative
   , reverse
-  , bounds
   )
 where
 
-import OpenSolid.Array (Array)
-import OpenSolid.Array qualified as Array
 import OpenSolid.Bounds3d (Bounds3d)
-import OpenSolid.Bounds3d qualified as Bounds3d
-import OpenSolid.Curve3d.Function (Function)
-import OpenSolid.Curve3d.Function qualified as Function
 import OpenSolid.Expression (Expression)
-import OpenSolid.PiecewiseCurve qualified as PiecewiseCurve
+import OpenSolid.Expression qualified as Expression
 import OpenSolid.Point3d (Point3d)
 import OpenSolid.Prelude
 import OpenSolid.Range (Range)
-import OpenSolid.Range qualified as Range
 import OpenSolid.Units qualified as Units
+import OpenSolid.VectorCurve3d (VectorCurve3d)
+import OpenSolid.VectorCurve3d qualified as VectorCurve3d
 
-type Curve3d :: CoordinateSystem -> Type
-newtype Curve3d coordinateSystem = Curve3d {segments :: Array (Function coordinateSystem)}
+class
+  Show function =>
+  Interface function (coordinateSystem :: CoordinateSystem)
+    | function -> coordinateSystem
+  where
+  evaluateImpl :: function -> Float -> Point3d coordinateSystem
+  evaluateBoundsImpl :: function -> Range Unitless -> Bounds3d coordinateSystem
+  derivativeImpl :: function -> VectorCurve3d coordinateSystem
+  reverseImpl :: function -> function
+
+data Curve3d (coordinateSystem :: CoordinateSystem) where
+  Curve3d ::
+    Interface function (space @ units) =>
+    function ->
+    Curve3d (space @ units)
+  Parametric ::
+    Expression Float (Point3d (space @ units)) ->
+    Curve3d (space @ units)
+  Coerce ::
+    Curve3d (space @ units1) ->
+    Curve3d (space @ units2)
 
 deriving instance Show (Curve3d (space @ units))
 
@@ -36,31 +50,42 @@ instance HasUnits (Curve3d (space @ units)) where
 
 instance
   space1 ~ space2 =>
-  Units.Coercion (Curve3d (space1 @ units1)) (Curve3d (space2 @ units2))
+  Units.Coercion (Curve3d (space1 @ unitsA)) (Curve3d (space2 @ unitsB))
   where
-  coerce (Curve3d segments) = Curve3d (Array.map Units.coerce segments)
+  coerce f = case f of
+    Parametric expression -> Parametric (Units.coerce expression)
+    Coerce function -> Coerce function
+    function -> Coerce function
+
+new :: Interface function (space @ units) => function -> Curve3d (space @ units)
+new = Curve3d
 
 constant :: Point3d (space @ units) -> Curve3d (space @ units)
-constant = Curve3d . Array.singleton . Function.constant
+constant = Parametric . Expression.constant
 
 parametric :: Expression Float (Point3d (space @ units)) -> Curve3d (space @ units)
-parametric = Curve3d . Array.singleton . Function.parametric
-
-startPoint :: Curve3d (space @ units) -> Point3d (space @ units)
-startPoint (Curve3d segments) = Function.evaluate (Array.first segments) 0.0
-
-endPoint :: Curve3d (space @ units) -> Point3d (space @ units)
-endPoint (Curve3d segments) = Function.evaluate (Array.last segments) 1.0
+parametric = Parametric
 
 evaluate :: Curve3d (space @ units) -> Float -> Point3d (space @ units)
-evaluate (Curve3d segments) t = PiecewiseCurve.interpolate Function.evaluate segments t
+evaluate f tValue = case f of
+  Parametric expression -> Expression.evaluate expression tValue
+  Curve3d curve -> evaluateImpl curve tValue
+  Coerce curve -> Units.coerce (evaluate curve tValue)
 
 evaluateBounds :: Curve3d (space @ units) -> Range Unitless -> Bounds3d (space @ units)
-evaluateBounds (Curve3d segments) t =
-  PiecewiseCurve.aggregate Bounds3d.aggregate2 Function.evaluateBounds segments t
+evaluateBounds f tRange = case f of
+  Parametric expression -> Expression.evaluateBounds expression tRange
+  Curve3d curve -> evaluateBoundsImpl curve tRange
+  Coerce curve -> Units.coerce (evaluateBounds curve tRange)
+
+derivative :: Curve3d (space @ units) -> VectorCurve3d (space @ units)
+derivative f = case f of
+  Parametric expression -> VectorCurve3d.Parametric (Expression.curveDerivative expression)
+  Curve3d curve -> derivativeImpl curve
+  Coerce curve -> Units.coerce (derivative curve)
 
 reverse :: Curve3d (space @ units) -> Curve3d (space @ units)
-reverse (Curve3d segments) = Curve3d (Array.reverseMap Function.reverse segments)
-
-bounds :: Curve3d (space @ units) -> Bounds3d (space @ units)
-bounds curve = evaluateBounds curve Range.unit
+reverse f = case f of
+  Parametric expression -> Parametric (expression . Expression.r)
+  Curve3d curve -> Curve3d (reverseImpl curve)
+  Coerce curve -> Units.coerce (reverse curve)

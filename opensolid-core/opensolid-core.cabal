@@ -114,27 +114,22 @@ library
     OpenSolid.CoordinateSystem
     OpenSolid.CubicSpline2d
     OpenSolid.Curve1d
-    OpenSolid.Curve1d.Function
     OpenSolid.Curve1d.Zero
     OpenSolid.Curve1d.Zeros
     OpenSolid.Curve2d
     OpenSolid.Curve2d.FindPoint
-    OpenSolid.Curve2d.Function
     OpenSolid.Curve2d.IntersectionPoint
     OpenSolid.Curve2d.Intersections
     OpenSolid.Curve2d.MedialAxis
     OpenSolid.Curve2d.OverlappingSegment
     OpenSolid.Curve3d
-    OpenSolid.Curve3d.Function
     OpenSolid.Debug
     OpenSolid.Direction2d
     OpenSolid.Direction3d
     OpenSolid.DirectionBounds2d
     OpenSolid.DirectionBounds3d
     OpenSolid.DirectionCurve2d
-    OpenSolid.DirectionCurve2d.Function
     OpenSolid.DirectionCurve3d
-    OpenSolid.DirectionCurve3d.Function
     OpenSolid.Domain1d
     OpenSolid.Domain2d
     OpenSolid.Drawing2d
@@ -167,7 +162,6 @@ library
     OpenSolid.NonEmpty
     OpenSolid.Pair
     OpenSolid.Parameter
-    OpenSolid.PiecewiseCurve
     OpenSolid.Plane3d
     OpenSolid.Point2d
     OpenSolid.Point3d
@@ -214,12 +208,10 @@ library
     OpenSolid.VectorCurve2d
     OpenSolid.VectorCurve2d.DegenerateEndpoint
     OpenSolid.VectorCurve2d.Direction
-    OpenSolid.VectorCurve2d.Function
     OpenSolid.VectorCurve2d.Zeros
     OpenSolid.VectorCurve3d
     OpenSolid.VectorCurve3d.DegenerateEndpoint
     OpenSolid.VectorCurve3d.Direction
-    OpenSolid.VectorCurve3d.Function
     OpenSolid.VectorCurve3d.Zeros
     OpenSolid.VectorSurface2d
     OpenSolid.VectorSurface2d.Function
@@ -279,7 +271,6 @@ test-suite opensolid-core-test
     Tests.Map
     Tests.NonEmpty
     Tests.Parameter
-    Tests.PiecewiseCurve
     Tests.Qty
     Tests.Random
     Tests.Range
