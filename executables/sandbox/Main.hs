@@ -18,7 +18,6 @@ import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Curve2d.MedialAxis qualified as Curve2d.MedialAxis
 import OpenSolid.Debug qualified as Debug
 import OpenSolid.Direction2d qualified as Direction2d
-import OpenSolid.Direction3d ()
 import OpenSolid.DirectionCurve2d qualified as DirectionCurve2d
 import OpenSolid.Drawing2d qualified as Drawing2d
 import OpenSolid.Duration (Duration)
