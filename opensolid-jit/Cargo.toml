@@ -4,11 +4,11 @@ name = "opensolid-jit"
 version = "0.1.0"
 
 [dependencies]
-cranelift = "0.113.0"
-cranelift-codegen = "0.113.0"
-cranelift-jit = "0.113.0"
-cranelift-module = "0.113.0"
-cranelift-native = "0.113.0"
+cranelift = "0.115.0"
+cranelift-codegen = "0.115.0"
+cranelift-jit = "0.115.0"
+cranelift-module = "0.115.0"
+cranelift-native = "0.115.0"
 
 [lib]
 crate-type = ["cdylib"]
