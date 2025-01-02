@@ -49,8 +49,11 @@ import OpenSolid.Stream qualified as Stream
 import OpenSolid.Units (Meters, Radians, SquareMeters)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2d (Vector2d)
+import OpenSolid.Vector3d (Vector3d)
 import {-# SOURCE #-} OpenSolid.VectorCurve2d (VectorCurve2d)
 import {-# SOURCE #-} OpenSolid.VectorCurve2d qualified as VectorCurve2d
+import {-# SOURCE #-} OpenSolid.VectorCurve3d (VectorCurve3d)
+import {-# SOURCE #-} OpenSolid.VectorCurve3d qualified as VectorCurve3d
 
 class
   Show curve =>
@@ -292,6 +295,34 @@ instance
     (VectorCurve2d (space @ (units1 :*: units2)))
   where
   vector .*. curve = VectorCurve2d.constant vector .*. curve
+
+instance
+  Units.Product units1 units2 units3 =>
+  Multiplication (Curve1d units1) (Vector3d (space @ units2)) (VectorCurve3d (space @ units3))
+  where
+  lhs * rhs = Units.specialize (lhs .*. rhs)
+
+instance
+  Multiplication'
+    (Curve1d units1)
+    (Vector3d (space @ units2))
+    (VectorCurve3d (space @ (units1 :*: units2)))
+  where
+  curve .*. vector = curve .*. VectorCurve3d.constant vector
+
+instance
+  Units.Product units1 units2 units3 =>
+  Multiplication (Vector3d (space @ units1)) (Curve1d units2) (VectorCurve3d (space @ units3))
+  where
+  lhs * rhs = Units.specialize (lhs .*. rhs)
+
+instance
+  Multiplication'
+    (Vector3d (space @ units1))
+    (Curve1d units2)
+    (VectorCurve3d (space @ (units1 :*: units2)))
+  where
+  vector .*. curve = VectorCurve3d.constant vector .*. curve
 
 instance
   Units.Quotient units1 units2 units3 =>

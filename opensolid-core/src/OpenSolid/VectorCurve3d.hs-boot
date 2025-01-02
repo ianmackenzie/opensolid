@@ -37,6 +37,8 @@ type role VectorCurve3d nominal
 
 data VectorCurve3d (coordinateSystem :: CoordinateSystem)
 
+instance HasUnits (VectorCurve3d (space @ units)) units
+
 instance Show (VectorCurve3d (space @ units))
 
 instance Negation (VectorCurve3d (space @ units))
