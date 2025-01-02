@@ -96,6 +96,7 @@ instance
   DotMultiplication'
     (VectorCurve3d (space1 @ units1))
     (VectorCurve3d (space2 @ units2))
+    (Curve1d (units1 :*: units2))
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>

@@ -94,18 +94,31 @@ instance
   where
   Direction3d vector .*. scale = vector .*. scale
 
-instance space1 ~ space2 => DotMultiplication (Direction3d space1) (Direction3d space2) Float
+instance space1 ~ space2 => DotMultiplication (Direction3d space1) (Direction3d space2) Float where
+  Direction3d vector1 <> Direction3d vector2 = vector1 <> vector2
 
-instance space1 ~ space2 => DotMultiplication' (Direction3d space1) (Direction3d space2) where
-  type Direction3d space1 .<>. Direction3d space2 = Qty (Unitless :*: Unitless)
+instance
+  space1 ~ space2 =>
+  DotMultiplication'
+    (Direction3d space1)
+    (Direction3d space2)
+    (Qty (Unitless :*: Unitless))
+  where
   Direction3d vector1 .<>. Direction3d vector2 = vector1 .<>. vector2
 
 instance
   space1 ~ space2 =>
   CrossMultiplication (Direction3d space1) (Direction3d space2) (Vector3d (space1 @ Unitless))
+  where
+  Direction3d vector1 >< Direction3d vector2 = vector1 >< vector2
 
-instance space1 ~ space2 => CrossMultiplication' (Direction3d space1) (Direction3d space2) where
-  type Direction3d space1 .><. Direction3d space2 = Vector3d (space1 @ (Unitless :*: Unitless))
+instance
+  space1 ~ space2 =>
+  CrossMultiplication'
+    (Direction3d space1)
+    (Direction3d space2)
+    (Vector3d (space1 @ (Unitless :*: Unitless)))
+  where
   Direction3d vector1 .><. Direction3d vector2 = vector1 .><. vector2
 
 xComponent :: Direction3d space -> Float

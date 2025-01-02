@@ -199,42 +199,50 @@ instance
 
 instance
   space ~ space_ =>
-  DotMultiplication' (Vector3d (space @ units1)) (Vector3d (space_ @ units2))
+  DotMultiplication'
+    (Vector3d (space @ units1))
+    (Vector3d (space_ @ units2))
+    (Qty (units1 :*: units2))
   where
-  type Vector3d (space @ units1) .<>. Vector3d (space_ @ units2) = Qty (units1 :*: units2)
   Vector3d# x1# y1# z1# .<>. Vector3d# x2# y2# z2# = Qty# (x1# *# x2# +# y1# *# y2# +# z1# *# z2#)
 
 instance
   (Units.Product units1 units2 units3, space ~ space_) =>
   DotMultiplication (Vector3d (space @ units1)) (Vector3d (space_ @ units2)) (Qty units3)
+  where
+  Vector3d# x1# y1# z1# <> Vector3d# x2# y2# z2# = Qty# (x1# *# x2# +# y1# *# y2# +# z1# *# z2#)
 
 instance
   space ~ space_ =>
-  DotMultiplication' (Vector3d (space @ units)) (Direction3d space_)
+  DotMultiplication' (Vector3d (space @ units)) (Direction3d space_) (Qty (units :*: Unitless))
   where
-  type Vector3d (space @ units) .<>. Direction3d space_ = Qty (units :*: Unitless)
   v .<>. d = v .<>. unit d
 
 instance
   space ~ space_ =>
   DotMultiplication (Vector3d (space @ units)) (Direction3d space_) (Qty units)
+  where
+  v <> d = v <> unit d
 
 instance
   space ~ space_ =>
-  DotMultiplication' (Direction3d space) (Vector3d (space_ @ units))
+  DotMultiplication' (Direction3d space) (Vector3d (space_ @ units)) (Qty (Unitless :*: units))
   where
-  type Direction3d space .<>. Vector3d (space_ @ units) = Qty (Unitless :*: units)
   d .<>. v = unit d .<>. v
 
 instance
   space ~ space_ =>
   DotMultiplication (Direction3d space) (Vector3d (space_ @ units)) (Qty units)
+  where
+  d <> v = unit d <> v
 
 instance
   space ~ space_ =>
-  CrossMultiplication' (Vector3d (space @ units1)) (Vector3d (space_ @ units2))
+  CrossMultiplication'
+    (Vector3d (space @ units1))
+    (Vector3d (space_ @ units2))
+    (Vector3d (space @ (units1 :*: units2)))
   where
-  type Vector3d (space @ units1) .><. Vector3d (space_ @ units2) = Vector3d (space @ (units1 :*: units2))
   Vector3d# x1# y1# z1# .><. Vector3d# x2# y2# z2# =
     Vector3d#
       (y1# *# z2# -# z1# *# y2#)
@@ -243,29 +251,46 @@ instance
 
 instance
   (Units.Product units1 units2 units3, space ~ space_) =>
-  CrossMultiplication (Vector3d (space @ units1)) (Vector3d (space_ @ units2)) (Vector3d (space @ units3))
+  CrossMultiplication
+    (Vector3d (space @ units1))
+    (Vector3d (space_ @ units2))
+    (Vector3d (space @ units3))
+  where
+  Vector3d# x1# y1# z1# >< Vector3d# x2# y2# z2# =
+    Vector3d#
+      (y1# *# z2# -# z1# *# y2#)
+      (z1# *# x2# -# x1# *# z2#)
+      (x1# *# y2# -# y1# *# x2#)
 
 instance
   space ~ space_ =>
-  CrossMultiplication' (Vector3d (space @ units)) (Direction3d space_)
+  CrossMultiplication'
+    (Vector3d (space @ units))
+    (Direction3d space_)
+    (Vector3d (space @ (units :*: Unitless)))
   where
-  type Vector3d (space @ units) .><. Direction3d space_ = Vector3d (space @ (units :*: Unitless))
   v .><. d = v .><. unit d
 
 instance
   space ~ space_ =>
   CrossMultiplication (Vector3d (space @ units)) (Direction3d space_) (Vector3d (space @ units))
+  where
+  v >< d = v >< unit d
 
 instance
   space ~ space_ =>
-  CrossMultiplication' (Direction3d space) (Vector3d (space_ @ units))
+  CrossMultiplication'
+    (Direction3d space)
+    (Vector3d (space_ @ units))
+    (Vector3d (space @ (Unitless :*: units)))
   where
-  type Direction3d space .><. Vector3d (space_ @ units) = Vector3d (space @ (Unitless :*: units))
   d .><. v = unit d .><. v
 
 instance
   space ~ space_ =>
   CrossMultiplication (Direction3d space) (Vector3d (space_ @ units)) (Vector3d (space @ units))
+  where
+  d >< v = unit d >< v
 
 zero :: Vector3d (space @ units)
 zero = Vector3d# 0.0## 0.0## 0.0##

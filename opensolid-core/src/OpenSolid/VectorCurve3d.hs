@@ -408,63 +408,77 @@ instance
     (VectorCurve3d (space1 @ units1))
     (VectorCurve3d (space2 @ units2))
     (Curve1d units3)
+  where
+  lhs <> rhs = Units.specialize (lhs .<>. rhs)
 
 instance
   space1 ~ space2 =>
-  DotMultiplication' (VectorCurve3d (space1 @ units1)) (VectorCurve3d (space2 @ units2))
+  DotMultiplication'
+    (VectorCurve3d (space1 @ units1))
+    (VectorCurve3d (space2 @ units2))
+    (Curve1d (units1 :*: units2))
   where
-  type
-    VectorCurve3d (space1 @ units1) .<>. VectorCurve3d (space2 @ units2) =
-      Curve1d (units1 :*: units2)
   Parametric lhs .<>. Parametric rhs = Curve1d.Parametric (lhs .<>. rhs)
   lhs .<>. rhs = Curve1d.new (DotProductOf lhs rhs)
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
   DotMultiplication (VectorCurve3d (space1 @ units1)) (Vector3d (space2 @ units2)) (Curve1d units3)
+  where
+  lhs <> rhs = Units.specialize (lhs .<>. rhs)
 
 instance
   space1 ~ space2 =>
-  DotMultiplication' (VectorCurve3d (space1 @ units1)) (Vector3d (space2 @ units2))
+  DotMultiplication'
+    (VectorCurve3d (space1 @ units1))
+    (Vector3d (space2 @ units2))
+    (Curve1d (units1 :*: units2))
   where
-  type
-    VectorCurve3d (space1 @ units1) .<>. Vector3d (space2 @ units2) =
-      Curve1d (units1 :*: units2)
   curve .<>. vector = curve .<>. constant vector
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
   DotMultiplication (Vector3d (space1 @ units1)) (VectorCurve3d (space2 @ units2)) (Curve1d units3)
+  where
+  lhs <> rhs = Units.specialize (lhs .<>. rhs)
 
 instance
   space1 ~ space2 =>
-  DotMultiplication' (Vector3d (space1 @ units1)) (VectorCurve3d (space2 @ units2))
+  DotMultiplication'
+    (Vector3d (space1 @ units1))
+    (VectorCurve3d (space2 @ units2))
+    (Curve1d (units1 :*: units2))
   where
-  type
-    Vector3d (space1 @ units1) .<>. VectorCurve3d (space2 @ units2) =
-      Curve1d (units1 :*: units2)
   vector .<>. curve = constant vector .<>. curve
 
 instance
   space1 ~ space2 =>
   DotMultiplication (VectorCurve3d (space1 @ units)) (Direction3d space2) (Curve1d units)
+  where
+  lhs <> rhs = Units.specialize (lhs .<>. rhs)
 
 instance
   space1 ~ space2 =>
-  DotMultiplication' (VectorCurve3d (space1 @ units)) (Direction3d space2)
+  DotMultiplication'
+    (VectorCurve3d (space1 @ units))
+    (Direction3d space2)
+    (Curve1d (units :*: Unitless))
   where
-  type VectorCurve3d (space1 @ units) .<>. Direction3d space2 = Curve1d (units :*: Unitless)
   curve .<>. direction3d = curve .<>. Vector3d.unit direction3d
 
 instance
   space1 ~ space2 =>
   DotMultiplication (Direction3d space1) (VectorCurve3d (space2 @ units)) (Curve1d units)
+  where
+  lhs <> rhs = Units.specialize (lhs .<>. rhs)
 
 instance
   space1 ~ space2 =>
-  DotMultiplication' (Direction3d space1) (VectorCurve3d (space2 @ units))
+  DotMultiplication'
+    (Direction3d space1)
+    (VectorCurve3d (space2 @ units))
+    (Curve1d (Unitless :*: units))
   where
-  type Direction3d space1 .<>. VectorCurve3d (space2 @ units) = Curve1d (Unitless :*: units)
   direction3d .<>. curve = Vector3d.unit direction3d .<>. curve
 
 instance
@@ -473,14 +487,16 @@ instance
     (VectorCurve3d (space1 @ units1))
     (VectorCurve3d (space2 @ units2))
     (VectorCurve3d (space1 @ units3))
+  where
+  lhs >< rhs = Units.specialize (lhs .><. rhs)
 
 instance
   space1 ~ space2 =>
-  CrossMultiplication' (VectorCurve3d (space1 @ units1)) (VectorCurve3d (space2 @ units2))
+  CrossMultiplication'
+    (VectorCurve3d (space1 @ units1))
+    (VectorCurve3d (space2 @ units2))
+    (VectorCurve3d (space1 @ (units1 :*: units2)))
   where
-  type
-    VectorCurve3d (space1 @ units1) .><. VectorCurve3d (space2 @ units2) =
-      VectorCurve3d (space1 @ (units1 :*: units2))
   Parametric lhs .><. Parametric rhs = Parametric (lhs .><. rhs)
   lhs .><. rhs = CrossProduct' lhs rhs
 
@@ -490,14 +506,16 @@ instance
     (VectorCurve3d (space1 @ units1))
     (Vector3d (space2 @ units2))
     (VectorCurve3d (space1 @ units3))
+  where
+  lhs >< rhs = Units.specialize (lhs .><. rhs)
 
 instance
   space1 ~ space2 =>
-  CrossMultiplication' (VectorCurve3d (space1 @ units1)) (Vector3d (space2 @ units2))
+  CrossMultiplication'
+    (VectorCurve3d (space1 @ units1))
+    (Vector3d (space2 @ units2))
+    (VectorCurve3d (space1 @ (units1 :*: units2)))
   where
-  type
-    VectorCurve3d (space1 @ units1) .><. Vector3d (space2 @ units2) =
-      VectorCurve3d (space1 @ (units1 :*: units2))
   curve .><. vector = curve .><. constant vector
 
 instance
@@ -506,14 +524,16 @@ instance
     (Vector3d (space1 @ units1))
     (VectorCurve3d (space2 @ units2))
     (VectorCurve3d (space1 @ units3))
+  where
+  lhs >< rhs = Units.specialize (lhs .><. rhs)
 
 instance
   space1 ~ space2 =>
-  CrossMultiplication' (Vector3d (space1 @ units1)) (VectorCurve3d (space2 @ units2))
+  CrossMultiplication'
+    (Vector3d (space1 @ units1))
+    (VectorCurve3d (space2 @ units2))
+    (VectorCurve3d (space1 @ (units1 :*: units2)))
   where
-  type
-    Vector3d (space1 @ units1) .><. VectorCurve3d (space2 @ units2) =
-      VectorCurve3d (space1 @ (units1 :*: units2))
   vector .><. curve = constant vector .><. curve
 
 instance
@@ -522,14 +542,16 @@ instance
     (VectorCurve3d (space1 @ units))
     (Direction3d space2)
     (VectorCurve3d (space1 @ units))
+  where
+  lhs >< rhs = Units.specialize (lhs .><. rhs)
 
 instance
   space1 ~ space2 =>
-  CrossMultiplication' (VectorCurve3d (space1 @ units)) (Direction3d space2)
+  CrossMultiplication'
+    (VectorCurve3d (space1 @ units))
+    (Direction3d space2)
+    (VectorCurve3d (space1 @ (units :*: Unitless)))
   where
-  type
-    VectorCurve3d (space1 @ units) .><. Direction3d space2 =
-      VectorCurve3d (space1 @ (units :*: Unitless))
   curve .><. direction3d = curve .><. Vector3d.unit direction3d
 
 instance
@@ -538,14 +560,16 @@ instance
     (Direction3d space1)
     (VectorCurve3d (space2 @ units))
     (VectorCurve3d (space1 @ units))
+  where
+  lhs >< rhs = Units.specialize (lhs .><. rhs)
 
 instance
   space1 ~ space2 =>
-  CrossMultiplication' (Direction3d space1) (VectorCurve3d (space2 @ units))
+  CrossMultiplication'
+    (Direction3d space1)
+    (VectorCurve3d (space2 @ units))
+    (VectorCurve3d (space1 @ (Unitless :*: units)))
   where
-  type
-    Direction3d space1 .><. VectorCurve3d (space2 @ units) =
-      VectorCurve3d (space1 @ (Unitless :*: units))
   direction3d .><. curve = Vector3d.unit direction3d .><. curve
 
 instance

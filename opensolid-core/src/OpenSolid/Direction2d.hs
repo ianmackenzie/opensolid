@@ -123,17 +123,26 @@ instance
 instance Multiplication (Direction2d space) (Qty units) (Vector2d (space @ units)) where
   direction * scale = unwrap direction * scale
 
-instance space1 ~ space2 => DotMultiplication' (Direction2d space1) (Direction2d space2) where
-  type Direction2d space1 .<>. Direction2d space2 = Float
-  Unit v1 .<>. Unit v2 = v1 <> v2
+instance
+  space1 ~ space2 =>
+  DotMultiplication' (Direction2d space1) (Direction2d space2) (Qty (Unitless :*: Unitless))
+  where
+  Unit v1 .<>. Unit v2 = v1 .<>. v2
 
-instance space1 ~ space2 => DotMultiplication (Direction2d space1) (Direction2d space2) Float
+instance space1 ~ space2 => DotMultiplication (Direction2d space1) (Direction2d space2) Float where
+  Unit v1 <> Unit v2 = v1 <> v2
 
-instance space1 ~ space2 => CrossMultiplication' (Direction2d space1) (Direction2d space2) where
-  type Direction2d space1 .><. Direction2d space2 = Float
-  Unit v1 .><. Unit v2 = v1 >< v2
+instance
+  space1 ~ space2 =>
+  CrossMultiplication' (Direction2d space1) (Direction2d space2) (Qty (Unitless :*: Unitless))
+  where
+  Unit v1 .><. Unit v2 = v1 .><. v2
 
-instance space1 ~ space2 => CrossMultiplication (Direction2d space1) (Direction2d space2) Float
+instance
+  space1 ~ space2 =>
+  CrossMultiplication (Direction2d space1) (Direction2d space2) Float
+  where
+  Unit v1 >< Unit v2 = v1 >< v2
 
 {-# INLINE unwrap #-}
 unwrap :: Direction2d space -> Vector2d (space @ Unitless)

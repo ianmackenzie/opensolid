@@ -157,155 +157,211 @@ instance
 instance
   space1 ~ space2 =>
   DotMultiplication (DirectionCurve2d space1) (DirectionCurve2d space2) (Curve1d Unitless)
+  where
+  lhs <> rhs = Units.specialize (lhs .<>. rhs)
 
 instance
   space1 ~ space2 =>
-  DotMultiplication' (DirectionCurve2d space1) (DirectionCurve2d space2)
+  DotMultiplication'
+    (DirectionCurve2d space1)
+    (DirectionCurve2d space2)
+    (Curve1d (Unitless :*: Unitless))
   where
-  type DirectionCurve2d space1 .<>. DirectionCurve2d space2 = Curve1d (Unitless :*: Unitless)
   DirectionCurve2d curve1 .<>. DirectionCurve2d curve2 = curve1 .<>. curve2
 
 instance
   space1 ~ space2 =>
   DotMultiplication (DirectionCurve2d space1) (VectorCurve2d (space2 @ units)) (Curve1d units)
+  where
+  lhs <> rhs = Units.specialize (lhs .<>. rhs)
 
 instance
   space1 ~ space2 =>
-  DotMultiplication' (DirectionCurve2d space1) (VectorCurve2d (space2 @ units))
+  DotMultiplication'
+    (DirectionCurve2d space1)
+    (VectorCurve2d (space2 @ units))
+    (Curve1d (Unitless :*: units))
   where
-  type DirectionCurve2d space1 .<>. VectorCurve2d (space2 @ units) = Curve1d (Unitless :*: units)
   DirectionCurve2d curve1 .<>. curve2 = curve1 .<>. curve2
 
 instance
   space1 ~ space2 =>
   DotMultiplication (VectorCurve2d (space1 @ units)) (DirectionCurve2d space2) (Curve1d units)
+  where
+  lhs <> rhs = Units.specialize (lhs .<>. rhs)
 
 instance
   space1 ~ space2 =>
-  DotMultiplication' (VectorCurve2d (space1 @ units)) (DirectionCurve2d space2)
+  DotMultiplication'
+    (VectorCurve2d (space1 @ units))
+    (DirectionCurve2d space2)
+    (Curve1d (units :*: Unitless))
   where
-  type VectorCurve2d (space1 @ units) .<>. DirectionCurve2d space2 = Curve1d (units :*: Unitless)
   curve1 .<>. DirectionCurve2d curve2 = curve1 .<>. curve2
 
 instance
   space1 ~ space2 =>
   DotMultiplication (DirectionCurve2d space1) (Direction2d space2) (Curve1d Unitless)
+  where
+  lhs <> rhs = Units.specialize (lhs .<>. rhs)
 
 instance
   space1 ~ space2 =>
-  DotMultiplication' (DirectionCurve2d space1) (Direction2d space2)
+  DotMultiplication'
+    (DirectionCurve2d space1)
+    (Direction2d space2)
+    (Curve1d (Unitless :*: Unitless))
   where
-  type DirectionCurve2d space1 .<>. Direction2d space2 = Curve1d (Unitless :*: Unitless)
   DirectionCurve2d curve .<>. direction = curve .<>. direction
 
 instance
   space1 ~ space2 =>
   DotMultiplication (Direction2d space1) (DirectionCurve2d space2) (Curve1d Unitless)
+  where
+  lhs <> rhs = Units.specialize (lhs .<>. rhs)
 
 instance
   space1 ~ space2 =>
-  DotMultiplication' (Direction2d space1) (DirectionCurve2d space2)
+  DotMultiplication'
+    (Direction2d space1)
+    (DirectionCurve2d space2)
+    (Curve1d (Unitless :*: Unitless))
   where
-  type Direction2d space1 .<>. DirectionCurve2d space2 = Curve1d (Unitless :*: Unitless)
   direction .<>. DirectionCurve2d curve = direction .<>. curve
 
 instance
   space1 ~ space2 =>
   DotMultiplication (DirectionCurve2d space1) (Vector2d (space2 @ units)) (Curve1d units)
+  where
+  lhs <> rhs = Units.specialize (lhs .<>. rhs)
 
 instance
   space1 ~ space2 =>
-  DotMultiplication' (DirectionCurve2d space1) (Vector2d (space2 @ units))
+  DotMultiplication'
+    (DirectionCurve2d space1)
+    (Vector2d (space2 @ units))
+    (Curve1d (Unitless :*: units))
   where
-  type DirectionCurve2d space1 .<>. Vector2d (space2 @ units) = Curve1d (Unitless :*: units)
   DirectionCurve2d curve .<>. vector = curve .<>. vector
 
 instance
   space1 ~ space2 =>
   DotMultiplication (Vector2d (space1 @ units)) (DirectionCurve2d space2) (Curve1d units)
+  where
+  lhs <> rhs = Units.specialize (lhs .<>. rhs)
 
 instance
   space1 ~ space2 =>
-  DotMultiplication' (Vector2d (space1 @ units)) (DirectionCurve2d space2)
+  DotMultiplication'
+    (Vector2d (space1 @ units))
+    (DirectionCurve2d space2)
+    (Curve1d (units :*: Unitless))
   where
-  type Vector2d (space1 @ units) .<>. DirectionCurve2d space2 = Curve1d (units :*: Unitless)
   vector .<>. DirectionCurve2d curve = vector .<>. curve
 
 instance
   space1 ~ space2 =>
   CrossMultiplication (DirectionCurve2d space1) (DirectionCurve2d space2) (Curve1d Unitless)
+  where
+  lhs >< rhs = Units.specialize (lhs .><. rhs)
 
 instance
   space1 ~ space2 =>
-  CrossMultiplication' (DirectionCurve2d space1) (DirectionCurve2d space2)
+  CrossMultiplication'
+    (DirectionCurve2d space1)
+    (DirectionCurve2d space2)
+    (Curve1d (Unitless :*: Unitless))
   where
-  type DirectionCurve2d space1 .><. DirectionCurve2d space2 = Curve1d (Unitless :*: Unitless)
   DirectionCurve2d curve1 .><. DirectionCurve2d curve2 = curve1 .><. curve2
 
 instance
   space1 ~ space2 =>
   CrossMultiplication (DirectionCurve2d space1) (VectorCurve2d (space2 @ units)) (Curve1d units)
+  where
+  lhs >< rhs = Units.specialize (lhs .><. rhs)
 
 instance
   space1 ~ space2 =>
-  CrossMultiplication' (DirectionCurve2d space1) (VectorCurve2d (space2 @ units))
+  CrossMultiplication'
+    (DirectionCurve2d space1)
+    (VectorCurve2d (space2 @ units))
+    (Curve1d (Unitless :*: units))
   where
-  type DirectionCurve2d space1 .><. VectorCurve2d (space2 @ units) = Curve1d (Unitless :*: units)
   DirectionCurve2d curve1 .><. curve2 = curve1 .><. curve2
 
 instance
   space1 ~ space2 =>
   CrossMultiplication (VectorCurve2d (space1 @ units)) (DirectionCurve2d space2) (Curve1d units)
+  where
+  lhs >< rhs = Units.specialize (lhs .><. rhs)
 
 instance
   space1 ~ space2 =>
-  CrossMultiplication' (VectorCurve2d (space1 @ units)) (DirectionCurve2d space2)
+  CrossMultiplication'
+    (VectorCurve2d (space1 @ units))
+    (DirectionCurve2d space2)
+    (Curve1d (units :*: Unitless))
   where
-  type VectorCurve2d (space1 @ units) .><. DirectionCurve2d space2 = Curve1d (units :*: Unitless)
   curve1 .><. DirectionCurve2d curve2 = curve1 .><. curve2
 
 instance
   space1 ~ space2 =>
   CrossMultiplication (DirectionCurve2d space1) (Direction2d space2) (Curve1d Unitless)
+  where
+  lhs >< rhs = Units.specialize (lhs .><. rhs)
 
 instance
   space1 ~ space2 =>
-  CrossMultiplication' (DirectionCurve2d space1) (Direction2d space2)
+  CrossMultiplication'
+    (DirectionCurve2d space1)
+    (Direction2d space2)
+    (Curve1d (Unitless :*: Unitless))
   where
-  type DirectionCurve2d space1 .><. Direction2d space2 = Curve1d (Unitless :*: Unitless)
   DirectionCurve2d curve .><. direction = curve .><. direction
 
 instance
   space1 ~ space2 =>
   CrossMultiplication (Direction2d space1) (DirectionCurve2d space2) (Curve1d Unitless)
+  where
+  lhs >< rhs = Units.specialize (lhs .><. rhs)
 
 instance
   space1 ~ space2 =>
-  CrossMultiplication' (Direction2d space1) (DirectionCurve2d space2)
+  CrossMultiplication'
+    (Direction2d space1)
+    (DirectionCurve2d space2)
+    (Curve1d (Unitless :*: Unitless))
   where
-  type Direction2d space1 .><. DirectionCurve2d space2 = Curve1d (Unitless :*: Unitless)
   direction .><. DirectionCurve2d curve = direction .><. curve
 
 instance
   space1 ~ space2 =>
   CrossMultiplication (DirectionCurve2d space1) (Vector2d (space2 @ units)) (Curve1d units)
+  where
+  lhs >< rhs = Units.specialize (lhs .><. rhs)
 
 instance
   space1 ~ space2 =>
-  CrossMultiplication' (DirectionCurve2d space1) (Vector2d (space2 @ units))
+  CrossMultiplication'
+    (DirectionCurve2d space1)
+    (Vector2d (space2 @ units))
+    (Curve1d (Unitless :*: units))
   where
-  type DirectionCurve2d space1 .><. Vector2d (space2 @ units) = Curve1d (Unitless :*: units)
   DirectionCurve2d curve .><. vector = curve .><. vector
 
 instance
   space1 ~ space2 =>
   CrossMultiplication (Vector2d (space1 @ units)) (DirectionCurve2d space2) (Curve1d units)
+  where
+  lhs >< rhs = Units.specialize (lhs .><. rhs)
 
 instance
   space1 ~ space2 =>
-  CrossMultiplication' (Vector2d (space1 @ units)) (DirectionCurve2d space2)
+  CrossMultiplication'
+    (Vector2d (space1 @ units))
+    (DirectionCurve2d space2)
+    (Curve1d (units :*: Unitless))
   where
-  type Vector2d (space1 @ units) .><. DirectionCurve2d space2 = Curve1d (units :*: Unitless)
   vector .><. DirectionCurve2d curve = vector .><. curve
 
 instance Composition (Curve1d Unitless) (DirectionCurve2d space) (DirectionCurve2d space) where

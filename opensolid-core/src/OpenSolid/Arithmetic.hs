@@ -12,10 +12,10 @@ module OpenSolid.Arithmetic
   , Division ((/))
   , Quotient (Quotient)
   , DivMod ((//), (%))
-  , DotMultiplication' (type (.<>.), (.<>.))
+  , DotMultiplication' ((.<>.))
   , DotMultiplication ((<>))
   , DotProduct (DotProduct)
-  , CrossMultiplication' (type (.><.), (.><.))
+  , CrossMultiplication' ((.><.))
   , CrossMultiplication ((><))
   , CrossProduct (CrossProduct)
   , Exponentiation ((**))
@@ -88,47 +88,25 @@ infixl 7 /
 
 data Quotient a b = Quotient a b deriving (Eq, Show)
 
-class DotMultiplication' a b where
-  type a .<>. b
-  (.<>.) :: a -> b -> a .<>. b
+class DotMultiplication' a b c | a b -> c where
+  (.<>.) :: a -> b -> c
 
 infixl 7 .<>.
 
-class
-  ( DotMultiplication' a b
-  , Units.Coercion (a .<>. b) c
-  , Units.Specialize (UnitsOf (a .<>. b)) (UnitsOf c)
-  , DotMultiplication b a c
-  ) =>
-  DotMultiplication a b c
-    | a b -> c
-  where
-  {-# INLINEABLE (<>) #-}
+class DotMultiplication b a c => DotMultiplication a b c | a b -> c where
   (<>) :: a -> b -> c
-  a <> b = Units.specialize (a .<>. b)
 
 infixl 7 <>
 
 data DotProduct a b = DotProduct a b deriving (Show)
 
-class CrossMultiplication' a b where
-  type a .><. b
-  (.><.) :: a -> b -> a .><. b
+class CrossMultiplication' a b c | a b -> c where
+  (.><.) :: a -> b -> c
 
 infixl 7 .><.
 
-class
-  ( CrossMultiplication' a b
-  , Units.Coercion (a .><. b) c
-  , Units.Specialize (UnitsOf (a .><. b)) (UnitsOf c)
-  , CrossMultiplication b a c
-  ) =>
-  CrossMultiplication a b c
-    | a b -> c
-  where
-  {-# INLINEABLE (><) #-}
+class CrossMultiplication b a c => CrossMultiplication a b c | a b -> c where
   (><) :: a -> b -> c
-  a >< b = Units.specialize (a .><. b)
 
 infixl 7 ><
 

@@ -358,14 +358,16 @@ instance
     (Function (space1 @ units1))
     (Function (space2 @ units2))
     (Surface1d.Function.Function units3)
+  where
+  lhs >< rhs = Units.specialize (lhs .><. rhs)
 
 instance
   space1 ~ space2 =>
-  CrossMultiplication' (Function (space1 @ units1)) (Function (space2 @ units2))
+  CrossMultiplication'
+    (Function (space1 @ units1))
+    (Function (space2 @ units2))
+    (Surface1d.Function.Function (units1 :*: units2))
   where
-  type
-    Function (space1 @ units1) .><. Function (space2 @ units2) =
-      Surface1d.Function.Function (units1 :*: units2)
   Parametric lhs .><. Parametric rhs = Surface1d.Function.Parametric (lhs .><. rhs)
   lhs .><. rhs = Surface1d.Function.new (CrossProduct' lhs rhs)
 
@@ -375,14 +377,16 @@ instance
     (Function (space1 @ units1))
     (Vector2d (space2 @ units2))
     (Surface1d.Function.Function units3)
+  where
+  lhs >< rhs = Units.specialize (lhs .><. rhs)
 
 instance
   space1 ~ space2 =>
-  CrossMultiplication' (Function (space1 @ units1)) (Vector2d (space2 @ units2))
+  CrossMultiplication'
+    (Function (space1 @ units1))
+    (Vector2d (space2 @ units2))
+    (Surface1d.Function.Function (units1 :*: units2))
   where
-  type
-    Function (space1 @ units1) .><. Vector2d (space2 @ units2) =
-      Surface1d.Function.Function (units1 :*: units2)
   function .><. vector = function .><. constant vector
 
 instance
@@ -391,36 +395,52 @@ instance
     (Vector2d (space1 @ units1))
     (Function (space2 @ units2))
     (Surface1d.Function.Function units3)
+  where
+  lhs >< rhs = Units.specialize (lhs .><. rhs)
 
 instance
   space1 ~ space2 =>
-  CrossMultiplication' (Vector2d (space1 @ units1)) (Function (space2 @ units2))
+  CrossMultiplication'
+    (Vector2d (space1 @ units1))
+    (Function (space2 @ units2))
+    (Surface1d.Function.Function (units1 :*: units2))
   where
-  type
-    Vector2d (space1 @ units1) .><. Function (space2 @ units2) =
-      Surface1d.Function.Function (units1 :*: units2)
   vector .><. function = constant vector .><. function
 
 instance
   space1 ~ space2 =>
-  CrossMultiplication (Function (space1 @ units)) (Direction2d space2) (Surface1d.Function.Function units)
+  CrossMultiplication
+    (Function (space1 @ units))
+    (Direction2d space2)
+    (Surface1d.Function.Function units)
+  where
+  lhs >< rhs = Units.specialize (lhs .><. rhs)
 
 instance
   space1 ~ space2 =>
-  CrossMultiplication' (Function (space1 @ units)) (Direction2d space2)
+  CrossMultiplication'
+    (Function (space1 @ units))
+    (Direction2d space2)
+    (Surface1d.Function.Function (units :*: Unitless))
   where
-  type Function (space1 @ units) .><. Direction2d space2 = Surface1d.Function.Function (units :*: Unitless)
   function .><. direction = function .><. Vector2d.unit direction
 
 instance
   space1 ~ space2 =>
-  CrossMultiplication (Direction2d space1) (Function (space2 @ units)) (Surface1d.Function.Function units)
+  CrossMultiplication
+    (Direction2d space1)
+    (Function (space2 @ units))
+    (Surface1d.Function.Function units)
+  where
+  lhs >< rhs = Units.specialize (lhs .><. rhs)
 
 instance
   space1 ~ space2 =>
-  CrossMultiplication' (Direction2d space1) (Function (space2 @ units))
+  CrossMultiplication'
+    (Direction2d space1)
+    (Function (space2 @ units))
+    (Surface1d.Function.Function (Unitless :*: units))
   where
-  type Direction2d space1 .><. Function (space2 @ units) = Surface1d.Function.Function (Unitless :*: units)
   direction .><. function = Vector2d.unit direction .<>. function
 
 data DotProduct' space units1 units2
@@ -444,14 +464,16 @@ instance
     (Function (space1 @ units1))
     (Function (space2 @ units2))
     (Surface1d.Function.Function units3)
+  where
+  lhs <> rhs = Units.specialize (lhs .<>. rhs)
 
 instance
   space1 ~ space2 =>
-  DotMultiplication' (Function (space1 @ units1)) (Function (space2 @ units2))
+  DotMultiplication'
+    (Function (space1 @ units1))
+    (Function (space2 @ units2))
+    (Surface1d.Function.Function (units1 :*: units2))
   where
-  type
-    Function (space1 @ units1) .<>. Function (space2 @ units2) =
-      Surface1d.Function.Function (units1 :*: units2)
   Parametric lhs .<>. Parametric rhs = Surface1d.Function.Parametric (lhs .<>. rhs)
   lhs .<>. rhs = Surface1d.Function.new (DotProduct' lhs rhs)
 
@@ -461,14 +483,16 @@ instance
     (Function (space1 @ units1))
     (Vector2d (space2 @ units2))
     (Surface1d.Function.Function units3)
+  where
+  lhs <> rhs = Units.specialize (lhs .<>. rhs)
 
 instance
   space1 ~ space2 =>
-  DotMultiplication' (Function (space1 @ units1)) (Vector2d (space2 @ units2))
+  DotMultiplication'
+    (Function (space1 @ units1))
+    (Vector2d (space2 @ units2))
+    (Surface1d.Function.Function (units1 :*: units2))
   where
-  type
-    Function (space1 @ units1) .<>. Vector2d (space2 @ units2) =
-      Surface1d.Function.Function (units1 :*: units2)
   function .<>. vector = function .<>. constant vector
 
 instance
@@ -477,36 +501,52 @@ instance
     (Vector2d (space1 @ units1))
     (Function (space2 @ units2))
     (Surface1d.Function.Function units3)
+  where
+  lhs <> rhs = Units.specialize (lhs .<>. rhs)
 
 instance
   space1 ~ space2 =>
-  DotMultiplication' (Vector2d (space1 @ units1)) (Function (space2 @ units2))
+  DotMultiplication'
+    (Vector2d (space1 @ units1))
+    (Function (space2 @ units2))
+    (Surface1d.Function.Function (units1 :*: units2))
   where
-  type
-    Vector2d (space1 @ units1) .<>. Function (space2 @ units2) =
-      Surface1d.Function.Function (units1 :*: units2)
   vector .<>. function = constant vector .<>. function
 
 instance
   space1 ~ space2 =>
-  DotMultiplication (Function (space1 @ units)) (Direction2d space2) (Surface1d.Function.Function units)
+  DotMultiplication
+    (Function (space1 @ units))
+    (Direction2d space2)
+    (Surface1d.Function.Function units)
+  where
+  lhs <> rhs = Units.specialize (lhs .<>. rhs)
 
 instance
   space1 ~ space2 =>
-  DotMultiplication' (Function (space1 @ units)) (Direction2d space2)
+  DotMultiplication'
+    (Function (space1 @ units))
+    (Direction2d space2)
+    (Surface1d.Function.Function (units :*: Unitless))
   where
-  type Function (space1 @ units) .<>. Direction2d space2 = Surface1d.Function.Function (units :*: Unitless)
   function .<>. direction = function .<>. Vector2d.unit direction
 
 instance
   space1 ~ space2 =>
-  DotMultiplication (Direction2d space1) (Function (space2 @ units)) (Surface1d.Function.Function units)
+  DotMultiplication
+    (Direction2d space1)
+    (Function (space2 @ units))
+    (Surface1d.Function.Function units)
+  where
+  lhs <> rhs = Units.specialize (lhs .<>. rhs)
 
 instance
   space1 ~ space2 =>
-  DotMultiplication' (Direction2d space1) (Function (space2 @ units))
+  DotMultiplication'
+    (Direction2d space1)
+    (Function (space2 @ units))
+    (Surface1d.Function.Function (Unitless :*: units))
   where
-  type Direction2d space1 .<>. Function (space2 @ units) = Surface1d.Function.Function (Unitless :*: units)
   direction .<>. function = Vector2d.unit direction .<>. function
 
 instance
