@@ -5,10 +5,10 @@ module OpenSolid.Curve2d.MedialAxis
   )
 where
 
-import OpenSolid.Error qualified as Error
-import OpenSolid.Prelude
 import OpenSolid.Curve1d (Curve1d)
 import {-# SOURCE #-} OpenSolid.Curve2d (Curve2d)
+import OpenSolid.Error qualified as Error
+import OpenSolid.Prelude
 import OpenSolid.SurfaceParameter (UvCoordinates)
 
 data Error

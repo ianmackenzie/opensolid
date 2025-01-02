@@ -19,15 +19,15 @@ where
 
 import OpenSolid.Bounds2d (Bounds2d)
 import OpenSolid.DirectionCurve2d (DirectionCurve2d)
-import OpenSolid.Frame2d (Frame2d)
-import OpenSolid.Prelude
 import OpenSolid.Expression (Expression)
+import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Point2d (Point2d)
-import OpenSolid.Vector2d (Vector2d)
-import OpenSolid.VectorCurve2d (VectorCurve2d)
+import OpenSolid.Prelude
 import OpenSolid.Range (Range)
 import OpenSolid.Range qualified as Range
 import OpenSolid.Transform2d (Transform2d)
+import OpenSolid.Vector2d (Vector2d)
+import OpenSolid.VectorCurve2d (VectorCurve2d)
 
 type role Curve2d nominal
 
