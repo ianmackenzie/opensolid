@@ -1,7 +1,6 @@
 module Tests.Curve1d (tests) where
 
 import OpenSolid.Angle qualified as Angle
-import OpenSolid.Curve1d ()
 import OpenSolid.Curve1d qualified as Curve1d
 import OpenSolid.Curve1d.Zero (Zero (Zero))
 import OpenSolid.Prelude
