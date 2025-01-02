@@ -22,6 +22,8 @@ module OpenSolid.Float
   , acos
   , atan
   , atan2
+  , log
+  , logBase
   , infinity
   , sign
   , isNaN
@@ -154,6 +156,12 @@ atan (Qty x) = Qty (Prelude.atan x)
 
 atan2 :: Qty units -> Qty units -> Float
 atan2 (Qty y) (Qty x) = Qty (Prelude.atan2 y x)
+
+log :: Float -> Float
+log (Qty x) = Qty (Prelude.log x)
+
+logBase :: Float -> Float -> Float
+logBase (Qty base) (Qty x) = Qty (Prelude.logBase base x)
 
 sum :: List Float -> Float
 sum = Qty.sum
