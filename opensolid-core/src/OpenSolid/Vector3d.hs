@@ -63,11 +63,13 @@ import {-# SOURCE #-} OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
 import OpenSolid.Qty (Qty (Qty#))
 import OpenSolid.Qty qualified as Qty
+import OpenSolid.Range (Range)
 import OpenSolid.Transform3d (Transform3d (Transform3d))
 import OpenSolid.Transform3d qualified as Transform3d
 import OpenSolid.Units (Meters, SquareMeters)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector3d.CoordinateTransformation qualified as Vector3d.CoordinateTransformation
+import {-# SOURCE #-} OpenSolid.VectorBounds3d (VectorBounds3d (VectorBounds3d))
 
 type role Vector3d phantom
 
@@ -181,6 +183,34 @@ instance
   Multiplication (Vector3d (space @ units1)) (Qty units2) (Vector3d (space @ units3))
   where
   Vector3d# vx# vy# vz# * Qty# scale# = Vector3d# (vx# *# scale#) (vy# *# scale#) (vz# *# scale#)
+
+instance
+  Multiplication'
+    (Range units1)
+    (Vector3d (space @ units2))
+    (VectorBounds3d (space @ (units1 :*: units2)))
+  where
+  range .*. Vector3d vx vy vz = VectorBounds3d (range .*. vx) (range .*. vy) (range .*. vz)
+
+instance
+  Units.Product units1 units2 units3 =>
+  Multiplication (Range units1) (Vector3d (space @ units2)) (VectorBounds3d (space @ units3))
+  where
+  range * Vector3d vx vy vz = VectorBounds3d (range * vx) (range * vy) (range * vz)
+
+instance
+  Multiplication'
+    (Vector3d (space @ units1))
+    (Range units2)
+    (VectorBounds3d (space @ (units1 :*: units2)))
+  where
+  Vector3d vx vy vz .*. range = VectorBounds3d (vx .*. range) (vy .*. range) (vz .*. range)
+
+instance
+  Units.Product units1 units2 units3 =>
+  Multiplication (Vector3d (space @ units1)) (Range units2) (VectorBounds3d (space @ units3))
+  where
+  Vector3d vx vy vz * range = VectorBounds3d (vx * range) (vy * range) (vz * range)
 
 instance
   Division'

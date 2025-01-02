@@ -1,7 +1,3 @@
--- Needed for 'Range * Vector3d = VectorBounds3d'
--- and 'Vector3d * Range = VectorBounds3d' instances
-{-# OPTIONS_GHC -Wno-orphans #-}
-
 module OpenSolid.VectorBounds3d
   ( VectorBounds3d (VectorBounds3d)
   , constant
@@ -192,34 +188,6 @@ instance
   Multiplication (VectorBounds3d (space @ units1)) (Qty units2) (VectorBounds3d (space @ units3))
   where
   VectorBounds3d x y z * value = VectorBounds3d (x * value) (y * value) (z * value)
-
-instance
-  Multiplication'
-    (Range units1)
-    (Vector3d (space @ units2))
-    (VectorBounds3d (space @ (units1 :*: units2)))
-  where
-  range .*. Vector3d x y z = VectorBounds3d (range .*. x) (range .*. y) (range .*. z)
-
-instance
-  Units.Product units1 units2 units3 =>
-  Multiplication (Range units1) (Vector3d (space @ units2)) (VectorBounds3d (space @ units3))
-  where
-  range * Vector3d x y z = VectorBounds3d (range * x) (range * y) (range * z)
-
-instance
-  Multiplication'
-    (Vector3d (space @ units1))
-    (Range units2)
-    (VectorBounds3d (space @ (units1 :*: units2)))
-  where
-  Vector3d x y z .*. range = VectorBounds3d (x .*. range) (y .*. range) (z .*. range)
-
-instance
-  Units.Product units1 units2 units3 =>
-  Multiplication (Vector3d (space @ units1)) (Range units2) (VectorBounds3d (space @ units3))
-  where
-  Vector3d x y z * range = VectorBounds3d (x * range) (y * range) (z * range)
 
 instance
   Multiplication'
