@@ -38,8 +38,14 @@ import OpenSolid.Vector3d qualified as Vector3d
 
 type role Direction3d phantom
 
-newtype Direction3d (space :: Type) = Direction3d (Vector3d (space @ Unitless))
+newtype Direction3d (space :: Type) = Unit (Vector3d (space @ Unitless))
   deriving (Eq, Show)
+
+{-# COMPLETE Direction3d #-}
+
+{-# INLINE Direction3d #-}
+pattern Direction3d :: Float -> Float -> Float -> Direction3d space
+pattern Direction3d dx dy dz <- Unit (Vector3d dx dy dz)
 
 instance HasUnits (Direction3d space) where
   type UnitsOf (Direction3d space) = Unitless
@@ -54,7 +60,7 @@ instance
   d1 ~= d2 = angleFrom d1 d2 ~= Angle.zero
 
 instance Negation (Direction3d space) where
-  negate (Direction3d vector) = unsafe (negate vector)
+  negate (Unit vector) = unsafe (negate vector)
 
 instance Multiplication Sign (Direction3d space) (Direction3d space) where
   Positive * direction = direction
@@ -73,7 +79,7 @@ instance Multiplication' (Direction3d space) Sign (Direction3d space) where
   direction .*. Negative = -direction
 
 instance Multiplication (Qty units) (Direction3d space) (Vector3d (space @ units)) where
-  scale * Direction3d vector = scale * vector
+  scale * Unit vector = scale * vector
 
 instance
   Multiplication'
@@ -81,10 +87,10 @@ instance
     (Direction3d space)
     (Vector3d (space @ (units :*: Unitless)))
   where
-  scale .*. Direction3d vector = scale .*. vector
+  scale .*. Unit vector = scale .*. vector
 
 instance Multiplication (Direction3d space) (Qty units) (Vector3d (space @ units)) where
-  Direction3d vector * scale = vector * scale
+  Unit vector * scale = vector * scale
 
 instance
   Multiplication'
@@ -92,10 +98,10 @@ instance
     (Qty units)
     (Vector3d (space @ (Unitless :*: units)))
   where
-  Direction3d vector .*. scale = vector .*. scale
+  Unit vector .*. scale = vector .*. scale
 
 instance space1 ~ space2 => DotMultiplication (Direction3d space1) (Direction3d space2) Float where
-  Direction3d vector1 <> Direction3d vector2 = vector1 <> vector2
+  Unit vector1 <> Unit vector2 = vector1 <> vector2
 
 instance
   space1 ~ space2 =>
@@ -104,13 +110,13 @@ instance
     (Direction3d space2)
     (Qty (Unitless :*: Unitless))
   where
-  Direction3d vector1 .<>. Direction3d vector2 = vector1 .<>. vector2
+  Unit vector1 .<>. Unit vector2 = vector1 .<>. vector2
 
 instance
   space1 ~ space2 =>
   CrossMultiplication (Direction3d space1) (Direction3d space2) (Vector3d (space1 @ Unitless))
   where
-  Direction3d vector1 >< Direction3d vector2 = vector1 >< vector2
+  Unit vector1 >< Unit vector2 = vector1 >< vector2
 
 instance
   space1 ~ space2 =>
@@ -119,33 +125,33 @@ instance
     (Direction3d space2)
     (Vector3d (space1 @ (Unitless :*: Unitless)))
   where
-  Direction3d vector1 .><. Direction3d vector2 = vector1 .><. vector2
+  Unit vector1 .><. Unit vector2 = vector1 .><. vector2
 
 xComponent :: Direction3d space -> Float
-xComponent (Direction3d vector) = Vector3d.xComponent vector
+xComponent (Unit vector) = Vector3d.xComponent vector
 
 yComponent :: Direction3d space -> Float
-yComponent (Direction3d vector) = Vector3d.yComponent vector
+yComponent (Unit vector) = Vector3d.yComponent vector
 
 zComponent :: Direction3d space -> Float
-zComponent (Direction3d vector) = Vector3d.zComponent vector
+zComponent (Unit vector) = Vector3d.zComponent vector
 
 {-# INLINE components #-}
 components :: Direction3d space -> (Float, Float, Float)
 components direction = Vector3d.components (unwrap direction)
 
 unsafe :: Vector3d (space @ Unitless) -> Direction3d space
-unsafe = Direction3d
+unsafe = Unit
 
 unwrap :: Direction3d space -> Vector3d (space @ Unitless)
-unwrap (Direction3d vector) = vector
+unwrap (Unit vector) = vector
 
 {-# INLINE lift #-}
 lift ::
   (Vector3d (spaceA @ Unitless) -> Vector3d (spaceB @ Unitless)) ->
   Direction3d spaceA ->
   Direction3d spaceB
-lift function (Direction3d vector) = Direction3d (function vector)
+lift function (Unit vector) = Unit (function vector)
 
 positiveX :: Direction3d space
 positiveX = unsafe (Vector3d 1.0 0.0 0.0)

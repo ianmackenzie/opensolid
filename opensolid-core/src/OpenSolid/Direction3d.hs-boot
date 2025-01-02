@@ -14,7 +14,7 @@ import {-# SOURCE #-} OpenSolid.Vector3d (Vector3d)
 
 type role Direction3d phantom
 
-newtype Direction3d (space :: Type) = Direction3d (Vector3d (space @ Unitless))
+newtype Direction3d (space :: Type) = Unit (Vector3d (space @ Unitless))
 
 unsafe :: Vector3d (space @ Unitless) -> Direction3d space
 unwrap :: Direction3d space -> Vector3d (space @ Unitless)
