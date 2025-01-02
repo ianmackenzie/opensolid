@@ -1,7 +1,6 @@
 module OpenSolid.Curve2d.MedialAxis
   ( Error (..)
   , Segment (..)
-  , solve
   )
 where
 
@@ -28,10 +27,3 @@ data Segment (coordinateSystem :: CoordinateSystem) where
     , t12 :: Curve2d UvCoordinates
     } ->
     Segment (space @ units)
-
-solve ::
-  forall space units.
-  Tolerance units =>
-  Curve2d (space @ units) ->
-  Curve2d (space @ units) ->
-  Result Error (List (Segment (space @ units)))

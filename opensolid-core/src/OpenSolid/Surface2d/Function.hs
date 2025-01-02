@@ -1,6 +1,3 @@
--- Needed for CurveSurfaceComposition
-{-# OPTIONS_GHC -Wno-orphans #-}
-
 module OpenSolid.Surface2d.Function
   ( Function (Parametric)
   , Interface (..)
@@ -235,32 +232,6 @@ transformBy transform function = case function of
   Addition f1 f2 -> transformBy transform f1 + VectorSurface2d.Function.transformBy transform f2
   Subtraction c v -> transformBy transform c - VectorSurface2d.Function.transformBy transform v
   Transformed current f -> Transformed (Transform2d.toAffine transform . current) f
-
-instance
-  Composition
-    (Surface1d.Function.Function Unitless)
-    (Curve2d (space @ units))
-    (Function (space @ units))
-  where
-  Curve2d.Parametric outer . Surface1d.Function.Parametric inner = Parametric (outer . inner)
-  curve . function = new (curve :.: function)
-
-instance
-  Interface
-    (Curve2d (space @ units) :.: Surface1d.Function.Function Unitless)
-    (space @ units)
-  where
-  evaluateImpl (curve :.: function) uvPoint =
-    Curve2d.evaluate curve (Surface1d.Function.evaluate function uvPoint)
-
-  evaluateBoundsImpl (curve :.: function) uvBounds =
-    Curve2d.evaluateBounds curve (Surface1d.Function.evaluateBounds function uvBounds)
-
-  derivativeImpl parameter (curve :.: function) =
-    (Curve2d.derivative curve . function) * Surface1d.Function.derivative parameter function
-
-  transformByImpl transform (curve :.: function) =
-    Curve2d.transformBy transform curve . function
 
 instance
   Composition

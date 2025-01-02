@@ -24,10 +24,10 @@ import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Range qualified as Range
 import {-# SOURCE #-} OpenSolid.Surface1d.Function qualified as Function
-import OpenSolid.Surface1d.Function.HorizontalCurve qualified as HorizontalCurve
+import {-# SOURCE #-} OpenSolid.Surface1d.Function.HorizontalCurve qualified as HorizontalCurve
 import OpenSolid.Surface1d.Function.Subproblem (Subproblem (Subproblem))
 import OpenSolid.Surface1d.Function.Subproblem qualified as Subproblem
-import OpenSolid.Surface1d.Function.VerticalCurve qualified as VerticalCurve
+import {-# SOURCE #-} OpenSolid.Surface1d.Function.VerticalCurve qualified as VerticalCurve
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvCoordinates, UvDirection, UvPoint)
 import OpenSolid.Uv.Derivatives qualified as Derivatives
 import OpenSolid.Vector2d qualified as Vector2d

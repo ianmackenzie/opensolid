@@ -30,9 +30,6 @@ import OpenSolid.Angle qualified as Angle
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.Composition
-import OpenSolid.Curve1d (Curve1d)
-import OpenSolid.Curve1d qualified as Curve1d
-import {-# SOURCE #-} OpenSolid.Curve2d (Curve2d)
 import {-# SOURCE #-} OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.Domain1d qualified as Domain1d
@@ -50,17 +47,17 @@ import OpenSolid.Qty qualified as Qty
 import OpenSolid.Range (Range (Range))
 import OpenSolid.Range qualified as Range
 import OpenSolid.Solve2d qualified as Solve2d
-import OpenSolid.Surface1d.Function.HorizontalCurve qualified as HorizontalCurve
+import {-# SOURCE #-} OpenSolid.Surface1d.Function.HorizontalCurve qualified as HorizontalCurve
 import OpenSolid.Surface1d.Function.PartialZeros (PartialZeros)
 import OpenSolid.Surface1d.Function.PartialZeros qualified as PartialZeros
 import OpenSolid.Surface1d.Function.SaddleRegion (SaddleRegion)
 import OpenSolid.Surface1d.Function.SaddleRegion qualified as SaddleRegion
 import OpenSolid.Surface1d.Function.Subproblem (CornerValues (..), Subproblem (..))
 import OpenSolid.Surface1d.Function.Subproblem qualified as Subproblem
-import OpenSolid.Surface1d.Function.VerticalCurve qualified as VerticalCurve
+import {-# SOURCE #-} OpenSolid.Surface1d.Function.VerticalCurve qualified as VerticalCurve
 import OpenSolid.Surface1d.Function.Zeros (Zeros (..))
 import OpenSolid.Surface1d.Function.Zeros qualified as Zeros
-import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvCoordinates, UvDirection, UvPoint)
+import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvDirection, UvPoint)
 import OpenSolid.SurfaceParameter qualified as SurfaceParameter
 import OpenSolid.Units (Radians)
 import OpenSolid.Units qualified as Units
@@ -69,7 +66,6 @@ import OpenSolid.Uv.Derivatives qualified as Derivatives
 import OpenSolid.Vector2d (Vector2d (Vector2d))
 import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.VectorBounds2d (VectorBounds2d (VectorBounds2d))
-import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 import {-# SOURCE #-} OpenSolid.VectorSurface3d.Function qualified as VectorSurface3d.Function
 
 data Function units where
@@ -403,25 +399,6 @@ sin function = Sin function
 cos :: Function Radians -> Function Unitless
 cos (Parametric expression) = Parametric (Expression.cos expression)
 cos function = Cos function
-
-instance Composition (Curve2d UvCoordinates) (Function units) (Curve1d units) where
-  Parametric outer . Curve2d.Parametric inner = Curve1d.Parametric (outer . inner)
-  outer . inner = Curve1d.new (outer :.: inner)
-
-instance Curve1d.Interface (Function units :.: Curve2d UvCoordinates) units where
-  evaluateImpl (function :.: uvCurve) t =
-    evaluate function (Curve2d.evaluate uvCurve t)
-
-  evaluateBoundsImpl (function :.: uvCurve) t =
-    evaluateBounds function (Curve2d.evaluateBounds uvCurve t)
-
-  derivativeImpl (function :.: uvCurve) = do
-    let fU = derivative U function
-    let fV = derivative V function
-    let uvT = Curve2d.derivative uvCurve
-    let uT = VectorCurve2d.xComponent uvT
-    let vT = VectorCurve2d.yComponent uvT
-    fU . uvCurve * uT + fV . uvCurve * vT
 
 zeros :: Tolerance units => Function units -> Result Zeros.Error Zeros
 zeros function

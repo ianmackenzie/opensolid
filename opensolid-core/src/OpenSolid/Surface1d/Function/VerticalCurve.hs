@@ -11,8 +11,8 @@ import OpenSolid.Axis2d (Axis2d)
 import OpenSolid.Axis2d qualified as Axis2d
 import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.Curve1d qualified as Curve1d
-import {-# SOURCE #-} OpenSolid.Curve2d (Curve2d)
-import {-# SOURCE #-} OpenSolid.Curve2d qualified as Curve2d
+import OpenSolid.Curve2d (Curve2d)
+import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.Float qualified as Float
 import OpenSolid.Frame2d (Frame2d)

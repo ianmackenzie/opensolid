@@ -65,6 +65,7 @@ import OpenSolid.Curve2d.Intersections qualified as Intersections
 import {-# SOURCE #-} OpenSolid.Curve2d.MedialAxis qualified as MedialAxis
 import OpenSolid.Curve2d.OverlappingSegment (OverlappingSegment (OverlappingSegment))
 import OpenSolid.Curve2d.OverlappingSegment qualified as OverlappingSegment
+import OpenSolid.Debug qualified as Debug
 import OpenSolid.Direction2d (Direction2d)
 import OpenSolid.DirectionCurve2d (DirectionCurve2d)
 import OpenSolid.Domain2d (Domain2d)
@@ -79,6 +80,7 @@ import OpenSolid.Frame2d qualified as Frame2d
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.List qualified as List
 import OpenSolid.Lobatto qualified as Lobatto
+import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
@@ -91,8 +93,10 @@ import OpenSolid.Result qualified as Result
 import OpenSolid.Solve2d qualified as Solve2d
 import OpenSolid.Stream qualified as Stream
 import OpenSolid.Surface1d.Function qualified as Surface1d.Function
-import OpenSolid.Surface2d.Function ()
-import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvPoint)
+import OpenSolid.Surface1d.Function.Zeros qualified as Surface1d.Function.Zeros
+import OpenSolid.Surface2d.Function qualified
+import {-# SOURCE #-} OpenSolid.Surface2d.Function qualified as Surface2d.Function
+import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvCoordinates, UvPoint)
 import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform2d (Transform2d)
@@ -306,6 +310,56 @@ instance Interface (Curve2d (space @ units) :.: Curve1d Unitless) (space @ units
 
   transformByImpl transform (curve2d :.: curve1d) =
     new (transformBy transform curve2d . curve1d)
+
+instance
+  Composition
+    (Surface1d.Function.Function Unitless)
+    (Curve2d (space @ units))
+    (Surface2d.Function.Function (space @ units))
+  where
+  Parametric outer . Surface1d.Function.Parametric inner = Surface2d.Function.Parametric (outer . inner)
+  curve . function = Surface2d.Function.new (curve :.: function)
+
+instance
+  Surface2d.Function.Interface
+    (Curve2d (space @ units) :.: Surface1d.Function.Function Unitless)
+    (space @ units)
+  where
+  evaluateImpl (curve :.: function) uvPoint =
+    evaluate curve (Surface1d.Function.evaluate function uvPoint)
+
+  evaluateBoundsImpl (curve :.: function) uvBounds =
+    evaluateBounds curve (Surface1d.Function.evaluateBounds function uvBounds)
+
+  derivativeImpl parameter (curve :.: function) =
+    (derivative curve . function) * Surface1d.Function.derivative parameter function
+
+  transformByImpl transform (curve :.: function) =
+    transformBy transform curve . function
+
+instance
+  Composition
+    (Curve2d UvCoordinates)
+    (Surface1d.Function.Function units)
+    (Curve1d units)
+  where
+  Surface1d.Function.Parametric outer . Parametric inner = Curve1d.Parametric (outer . inner)
+  outer . inner = Curve1d.new (outer :.: inner)
+
+instance Curve1d.Interface (Surface1d.Function.Function units :.: Curve2d UvCoordinates) units where
+  evaluateImpl (function :.: uvCurve) t =
+    Surface1d.Function.evaluate function (evaluate uvCurve t)
+
+  evaluateBoundsImpl (function :.: uvCurve) t =
+    Surface1d.Function.evaluateBounds function (evaluateBounds uvCurve t)
+
+  derivativeImpl (function :.: uvCurve) = do
+    let fU = Surface1d.Function.derivative U function
+    let fV = Surface1d.Function.derivative V function
+    let uvT = derivative uvCurve
+    let uT = VectorCurve2d.xComponent uvT
+    let vT = VectorCurve2d.yComponent uvT
+    fU . uvCurve * uT + fV . uvCurve * vT
 
 new :: Interface curve (space @ units) => curve -> Curve2d (space @ units)
 new = Curve
@@ -882,7 +936,28 @@ medialAxis ::
   Curve2d (space @ units) ->
   Curve2d (space @ units) ->
   Result MedialAxis.Error (List (MedialAxis.Segment (space @ units)))
-medialAxis = MedialAxis.solve
+medialAxis curve1 curve2 = do
+  let p1 = curve1 . Surface1d.Function.u
+  let p2 = curve2 . Surface1d.Function.v
+  let v1 = derivative curve1 . Surface1d.Function.u
+  let v2 = derivative curve2 . Surface1d.Function.v
+  let d = p2 - p1
+  let target = v2 .><. (2.0 * (v1 .<>. d) .*. d - d .<>. d .*. v1)
+  let targetTolerance = ?tolerance .*. ((?tolerance .*. ?tolerance) .*. ?tolerance)
+  case Tolerance.using targetTolerance (Surface1d.Function.zeros target) of
+    Failure Surface1d.Function.Zeros.HigherOrderZero -> Failure MedialAxis.HigherOrderSolution
+    Failure Surface1d.Function.Zeros.ZeroEverywhere -> TODO -- curves are identical arcs?
+    Success zeros -> do
+      Debug.assert (List.isEmpty (Surface1d.Function.Zeros.crossingLoops zeros))
+      Debug.assert (List.isEmpty (Surface1d.Function.Zeros.tangentPoints zeros))
+      let allCrossingCurves = List.collect NonEmpty.toList (Surface1d.Function.Zeros.crossingCurves zeros)
+      let toSegment (solutionCurve, _) =
+            MedialAxis.Segment
+              { t1 = Surface1d.Function.u . solutionCurve
+              , t2 = Surface1d.Function.v . solutionCurve
+              , t12 = solutionCurve
+              }
+      Success (List.map toSegment allCrossingCurves)
 
 arcLength :: Tolerance units => Curve2d (space @ units) -> Result HasDegeneracy (Qty units)
 arcLength curve = do
