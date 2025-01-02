@@ -13,7 +13,7 @@ cradle:
       component: "lib:opensolid-core"
 
     - path: "opensolid-core/test"
-      component: "opensolid-core:test:opensolid-test"
+      component: "opensolid-core:test:opensolid-core-test"
 
     - path: "opensolid-ffi/src"
       component: "opensolid-ffi:flib:opensolid-ffi"
