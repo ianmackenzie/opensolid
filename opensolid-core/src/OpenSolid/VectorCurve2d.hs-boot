@@ -37,6 +37,8 @@ type role VectorCurve2d nominal
 
 data VectorCurve2d (coordinateSystem :: CoordinateSystem)
 
+instance HasUnits (VectorCurve2d (space @ units)) units
+
 instance Show (VectorCurve2d (space @ units))
 
 instance Negation (VectorCurve2d (space @ units))

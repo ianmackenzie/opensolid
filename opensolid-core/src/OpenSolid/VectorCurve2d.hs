@@ -1,11 +1,3 @@
--- Needed for 'Curve1d * Vector2d = VectorCurve2d'
--- and 'Vector2d * Curve1d = VectorCurve2d' instances,
--- which lead to unresolvable circular dependencies
--- if they're defined in the Curve1d or Vector2d modules
--- and really conceptually make more sense
--- to define in this module anyways
-{-# OPTIONS_GHC -Wno-orphans #-}
-
 module OpenSolid.VectorCurve2d
   ( VectorCurve2d (Parametric)
   , Interface (..)
@@ -301,20 +293,6 @@ instance
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (Curve1d units1) (Vector2d (space @ units2)) (VectorCurve2d (space @ units3))
-  where
-  lhs * rhs = Units.specialize (lhs .*. rhs)
-
-instance
-  Multiplication'
-    (Curve1d units1)
-    (Vector2d (space @ units2))
-    (VectorCurve2d (space @ (units1 :*: units2)))
-  where
-  curve .*. vector = curve .*. constant vector
-
-instance
-  Units.Product units1 units2 units3 =>
   Multiplication (VectorCurve2d (space @ units1)) (Curve1d units2) (VectorCurve2d (space @ units3))
   where
   lhs * rhs = Units.specialize (lhs .*. rhs)
@@ -341,21 +319,6 @@ instance
     (VectorCurve2d (space @ (units1 :*: units2)))
   where
   curve .*. value = curve .*. Curve1d.constant value
-
-instance
-  Units.Product units1 units2 units3 =>
-  Multiplication (Vector2d (space @ units1)) (Curve1d units2) (VectorCurve2d (space @ units3))
-  where
-  lhs * rhs = Units.specialize (lhs .*. rhs)
-
-instance
-  Multiplication'
-    (Vector2d (space @ units1))
-    (Curve1d units2)
-    ( VectorCurve2d (space @ (units1 :*: units2))
-    )
-  where
-  vector .*. curve = constant vector .*. curve
 
 instance
   Units.Quotient units1 units2 units3 =>
