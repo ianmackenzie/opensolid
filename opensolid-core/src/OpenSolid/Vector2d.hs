@@ -68,11 +68,13 @@ import {-# SOURCE #-} OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Qty (Qty (Qty#))
 import OpenSolid.Qty qualified as Qty
+import OpenSolid.Range (Range)
 import OpenSolid.Transform2d (Transform2d (Transform2d))
 import OpenSolid.Transform2d qualified as Transform2d
 import OpenSolid.Units (Meters, SquareMeters)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2d.CoordinateTransformation qualified as Vector2d.CoordinateTransformation
+import {-# SOURCE #-} OpenSolid.VectorBounds2d (VectorBounds2d (VectorBounds2d))
 
 type role Vector2d phantom
 
@@ -196,6 +198,34 @@ instance
   Multiplication (Vector2d (space @ units1)) (Qty units2) (Vector2d (space @ units3))
   where
   Vector2d# vx# vy# * Qty# scale# = Vector2d# (vx# *# scale#) (vy# *# scale#)
+
+instance
+  Multiplication'
+    (Range units1)
+    (Vector2d (space @ units2))
+    (VectorBounds2d (space @ (units1 :*: units2)))
+  where
+  range .*. Vector2d vx vy = VectorBounds2d (range .*. vx) (range .*. vy)
+
+instance
+  Units.Product units1 units2 units3 =>
+  Multiplication (Range units1) (Vector2d (space @ units2)) (VectorBounds2d (space @ units3))
+  where
+  range * Vector2d vx vy = VectorBounds2d (range * vx) (range * vy)
+
+instance
+  Multiplication'
+    (Vector2d (space @ units1))
+    (Range units2)
+    (VectorBounds2d (space @ (units1 :*: units2)))
+  where
+  Vector2d vx vy .*. range = VectorBounds2d (vx .*. range) (vy .*. range)
+
+instance
+  Units.Product units1 units2 units3 =>
+  Multiplication (Vector2d (space @ units1)) (Range units2) (VectorBounds2d (space @ units3))
+  where
+  Vector2d vx vy * range = VectorBounds2d (vx * range) (vy * range)
 
 instance
   Division'

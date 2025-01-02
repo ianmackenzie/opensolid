@@ -1,7 +1,3 @@
--- Needed for 'Range * Vector2d = VectorBounds2d'
--- and 'Vector2d * Range = VectorBounds2d' instances
-{-# OPTIONS_GHC -Wno-orphans #-}
-
 module OpenSolid.VectorBounds2d
   ( VectorBounds2d (VectorBounds2d)
   , constant
@@ -213,34 +209,6 @@ instance
   Multiplication (VectorBounds2d (space @ units1)) (Qty units2) (VectorBounds2d (space @ units3))
   where
   VectorBounds2d x y * value = VectorBounds2d (x * value) (y * value)
-
-instance
-  Multiplication'
-    (Range units1)
-    (Vector2d (space @ units2))
-    (VectorBounds2d (space @ (units1 :*: units2)))
-  where
-  range .*. Vector2d x y = VectorBounds2d (range .*. x) (range .*. y)
-
-instance
-  Units.Product units1 units2 units3 =>
-  Multiplication (Range units1) (Vector2d (space @ units2)) (VectorBounds2d (space @ units3))
-  where
-  range * Vector2d x y = VectorBounds2d (range * x) (range * y)
-
-instance
-  Multiplication'
-    (Vector2d (space @ units1))
-    (Range units2)
-    (VectorBounds2d (space @ (units1 :*: units2)))
-  where
-  Vector2d x y .*. range = VectorBounds2d (x .*. range) (y .*. range)
-
-instance
-  Units.Product units1 units2 units3 =>
-  Multiplication (Vector2d (space @ units1)) (Range units2) (VectorBounds2d (space @ units3))
-  where
-  Vector2d x y * range = VectorBounds2d (x * range) (y * range)
 
 instance
   Multiplication'
