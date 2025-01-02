@@ -1,8 +1,8 @@
 module OpenSolid.Surface1d.Function (Interface (..), Function, evaluate, evaluateBounds) where
 
-import OpenSolid.Prelude
 import OpenSolid.Curve1d (Curve1d)
 import {-# SOURCE #-} OpenSolid.Curve2d (Curve2d)
+import OpenSolid.Prelude
 import OpenSolid.Range (Range)
 import OpenSolid.SurfaceParameter (SurfaceParameter, UvBounds, UvCoordinates, UvPoint)
 import OpenSolid.Units qualified as Units

@@ -8,9 +8,9 @@ module OpenSolid.Direction3d
 where
 
 import OpenSolid.Prelude
-import {-# SOURCE #-} OpenSolid.Vector3d (Vector3d)
 import OpenSolid.Transform qualified as Transform
 import {-# SOURCE #-} OpenSolid.Transform3d (Transform3d)
+import {-# SOURCE #-} OpenSolid.Vector3d (Vector3d)
 
 type role Direction3d phantom
 
