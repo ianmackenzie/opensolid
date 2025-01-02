@@ -55,10 +55,7 @@ import OpenSolid.Vector2d qualified as Vector2d
 type role VectorBounds2d nominal
 
 data VectorBounds2d (coordinateSystem :: CoordinateSystem) where
-  VectorBounds2d ::
-    Range units ->
-    Range units ->
-    VectorBounds2d (space @ units)
+  VectorBounds2d :: Range units -> Range units -> VectorBounds2d (space @ units)
 
 deriving instance Show (VectorBounds2d (space @ units))
 
