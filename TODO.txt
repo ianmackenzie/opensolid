@@ -1,5 +1,3 @@
-Fix logic in Solve1d.zeros: 'Stream.head derivativeBounds' will not in general refer to the actual function (order 0 derivative)
-
 Rewrite scripts in Haskell?
 
 Merge File module into IO?
@@ -38,8 +36,6 @@ Try generating C++ bindings?
 
 Sandbox executable to start generating Region2d medial axis curves and points?
 -> need to be able to solve for medial axis of curve and *point* first
-
-Introduce curve function types and properly support piecewise curves
 
 Implement 1D monotonic solving in Rust
 
