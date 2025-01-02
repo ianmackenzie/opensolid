@@ -22,8 +22,7 @@ newtype DirectionBounds3d space
   = DirectionBounds3d (VectorBounds3d (space @ Unitless))
   deriving (Show)
 
-instance HasUnits (DirectionBounds3d space) where
-  type UnitsOf (DirectionBounds3d space) = Unitless
+instance HasUnits (DirectionBounds3d space) Unitless
 
 instance
   space1 ~ space2 =>

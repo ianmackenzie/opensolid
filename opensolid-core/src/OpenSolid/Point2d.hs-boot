@@ -8,9 +8,9 @@ module OpenSolid.Point2d
 where
 
 import OpenSolid.Prelude
-import {-# SOURCE #-} OpenSolid.Vector2d (Vector2d)
 import {-# SOURCE #-} OpenSolid.Transform2d (Transform2d)
 import OpenSolid.Units qualified as Units
+import {-# SOURCE #-} OpenSolid.Vector2d (Vector2d)
 
 type role Point2d phantom
 
@@ -20,7 +20,7 @@ instance Eq (Point2d (space @ units))
 
 instance Show (Point2d (space @ units))
 
-instance HasUnits (Point2d (space @ units))
+instance HasUnits (Point2d (space @ units)) units
 
 instance space1 ~ space2 => Units.Coercion (Point2d (space1 @ unitsA)) (Point2d (space2 @ unitsB))
 

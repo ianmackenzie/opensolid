@@ -632,20 +632,15 @@ vectorVolume3dw du dv xwScalar ywScalar zwScalar = do
 --- UNITS ---
 -------------
 
-instance HasUnits (Expression input (Qty units)) where
-  type UnitsOf (Expression input (Qty units)) = units
+instance HasUnits (Expression input (Qty units)) units
 
-instance HasUnits (Expression input (Vector2d (space @ units))) where
-  type UnitsOf (Expression input (Vector2d (space @ units))) = units
+instance HasUnits (Expression input (Vector2d (space @ units))) units
 
-instance HasUnits (Expression input (Vector3d (space @ units))) where
-  type UnitsOf (Expression input (Vector3d (space @ units))) = units
+instance HasUnits (Expression input (Vector3d (space @ units))) units
 
-instance HasUnits (Expression input (Point2d (space @ units))) where
-  type UnitsOf (Expression input (Point2d (space @ units))) = units
+instance HasUnits (Expression input (Point2d (space @ units))) units
 
-instance HasUnits (Expression input (Point3d (space @ units))) where
-  type UnitsOf (Expression input (Point3d (space @ units))) = units
+instance HasUnits (Expression input (Point3d (space @ units))) units
 
 instance
   input1 ~ input2 =>

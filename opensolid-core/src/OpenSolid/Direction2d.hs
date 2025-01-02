@@ -67,8 +67,7 @@ newtype Direction2d (space :: Type) = Unit (Vector2d (space @ Unitless))
 pattern Direction2d :: Float -> Float -> Direction2d space
 pattern Direction2d dx dy <- Unit (Vector2d dx dy)
 
-instance HasUnits (Direction2d space) where
-  type UnitsOf (Direction2d space) = Unitless
+instance HasUnits (Direction2d space) Unitless
 
 instance FFI (Direction2d space) where
   representation = FFI.classRepresentation "Direction2d"

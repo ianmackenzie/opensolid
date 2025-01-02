@@ -33,8 +33,7 @@ data Line2d (coordinateSystem :: CoordinateSystem) = Line2d
 
 deriving instance Show (Line2d (space @ units))
 
-instance HasUnits (Line2d (space @ units)) where
-  type UnitsOf (Line2d (space @ units)) = units
+instance HasUnits (Line2d (space @ units)) units
 
 instance
   space1 ~ space2 =>

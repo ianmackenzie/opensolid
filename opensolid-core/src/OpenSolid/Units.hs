@@ -1,5 +1,5 @@
 module OpenSolid.Units
-  ( HasUnits (..)
+  ( HasUnits
   , Coercion (coerce)
   , erase
   , type (:*:)
@@ -35,29 +35,21 @@ import {-# SOURCE #-} OpenSolid.Result (Result (Failure, Success))
 import {-# SOURCE #-} OpenSolid.Sign (Sign)
 import OpenSolid.Unitless (Unitless)
 
-class HasUnits (a :: k) where
-  type UnitsOf a
+class HasUnits (a :: k) units | a -> units
 
-instance HasUnits Int where
-  type UnitsOf Int = Unitless
+instance HasUnits Int Unitless
 
-instance HasUnits (Qty units) where
-  type UnitsOf (Qty units) = units
+instance HasUnits (Qty units) units
 
-instance HasUnits Sign where
-  type UnitsOf Sign = Unitless
+instance HasUnits Sign Unitless
 
-instance HasUnits a => HasUnits (Maybe a) where
-  type UnitsOf (Maybe a) = UnitsOf a
+instance HasUnits a units => HasUnits (Maybe a) units
 
-instance HasUnits a => HasUnits (Result x a) where
-  type UnitsOf (Result x a) = UnitsOf a
+instance HasUnits a units => HasUnits (Result x a) units
 
-instance HasUnits a => HasUnits (List a) where
-  type UnitsOf (List a) = UnitsOf a
+instance HasUnits a units => HasUnits (List a) units
 
-instance HasUnits a => HasUnits (NonEmpty a) where
-  type UnitsOf (NonEmpty a) = UnitsOf a
+instance HasUnits a units => HasUnits (NonEmpty a) units
 
 type Coercion :: Type -> Type -> Constraint
 class Coercion b a => Coercion a b where
@@ -102,21 +94,37 @@ data units1 :/: units2 deriving (Eq, Show)
 infixl 7 :/:
 
 {-# INLINE erase #-}
-erase :: (Coercion a b, UnitsOf b ~ Unitless) => a -> b
+erase :: (Coercion a b, HasUnits b Unitless) => a -> b
 erase = coerce
 
 {-# INLINE specialize #-}
-specialize :: (Coercion a b, Specialize (UnitsOf a) (UnitsOf b)) => a -> b
+specialize ::
+  ( Coercion a b
+  , HasUnits a unitsA
+  , HasUnits b unitsB
+  , Specialize unitsA unitsB
+  ) =>
+  a ->
+  b
 specialize = coerce
 
 {-# INLINE unspecialize #-}
-unspecialize :: (Coercion a b, Specialize (UnitsOf a) (UnitsOf b)) => b -> a
+unspecialize ::
+  ( Coercion a b
+  , HasUnits a unitsA
+  , HasUnits b unitsB
+  , Specialize unitsA unitsB
+  ) =>
+  b ->
+  a
 unspecialize = coerce
 
 commute ::
   ( Coercion a b
-  , UnitsOf a ~ units1 :*: units2
-  , UnitsOf b ~ units2 :*: units1
+  , HasUnits a unitsA
+  , HasUnits b unitsB
+  , unitsA ~ units1 :*: units2
+  , unitsB ~ units2 :*: units1
   ) =>
   a ->
   b
@@ -124,8 +132,10 @@ commute = coerce
 
 leftAssociate ::
   ( Coercion a b
-  , UnitsOf a ~ units1 :*: (units2 :*: units3)
-  , UnitsOf b ~ (units1 :*: units2) :*: units3
+  , HasUnits a unitsA
+  , HasUnits b unitsB
+  , unitsA ~ units1 :*: (units2 :*: units3)
+  , unitsB ~ (units1 :*: units2) :*: units3
   ) =>
   a ->
   b
@@ -133,8 +143,10 @@ leftAssociate = coerce
 
 rightAssociate ::
   ( Coercion a b
-  , UnitsOf a ~ (units1 :*: units2) :*: units3
-  , UnitsOf b ~ units1 :*: (units2 :*: units3)
+  , HasUnits a unitsA
+  , HasUnits b unitsB
+  , unitsA ~ (units1 :*: units2) :*: units3
+  , unitsB ~ units1 :*: (units2 :*: units3)
   ) =>
   a ->
   b

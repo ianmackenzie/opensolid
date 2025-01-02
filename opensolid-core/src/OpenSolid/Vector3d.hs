@@ -85,8 +85,7 @@ deriving instance Eq (Vector3d (space @ units))
 
 deriving instance Show (Vector3d (space @ units))
 
-instance HasUnits (Vector3d (space @ units)) where
-  type UnitsOf (Vector3d (space @ units)) = units
+instance HasUnits (Vector3d (space @ units)) units
 
 instance
   space1 ~ space2 =>

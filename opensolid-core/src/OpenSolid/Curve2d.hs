@@ -135,8 +135,7 @@ data Curve2d (coordinateSystem :: CoordinateSystem) where
 
 deriving instance Show (Curve2d (space @ units))
 
-instance HasUnits (Curve2d (space @ units)) where
-  type UnitsOf (Curve2d (space @ units)) = units
+instance HasUnits (Curve2d (space @ units)) units
 
 instance
   space1 ~ space2 =>

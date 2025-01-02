@@ -47,8 +47,7 @@ newtype Direction3d (space :: Type) = Unit (Vector3d (space @ Unitless))
 pattern Direction3d :: Float -> Float -> Float -> Direction3d space
 pattern Direction3d dx dy dz <- Unit (Vector3d dx dy dz)
 
-instance HasUnits (Direction3d space) where
-  type UnitsOf (Direction3d space) = Unitless
+instance HasUnits (Direction3d space) Unitless
 
 instance space1 ~ space2 => Units.Coercion (Direction3d space1) (Direction3d space2) where
   coerce = identity

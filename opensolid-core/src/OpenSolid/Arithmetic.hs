@@ -40,7 +40,7 @@ import OpenSolid.Bootstrap
 import {-# SOURCE #-} OpenSolid.Float (Float)
 import {-# SOURCE #-} OpenSolid.Qty (Qty (Qty))
 import {-# SOURCE #-} OpenSolid.Sign (Sign (Negative, Positive))
-import OpenSolid.Units (Unitless, UnitsOf, (:*:), (:/:))
+import OpenSolid.Units (HasUnits, Unitless, (:*:), (:/:))
 import OpenSolid.Units qualified as Units
 import Prelude qualified
 
@@ -236,9 +236,12 @@ instance
 (*!) ::
   ( Multiplication' a b c'
   , Units.Coercion c' c
-  , UnitsOf a ~ units1 :/: units2
-  , UnitsOf b ~ units2
-  , UnitsOf c ~ units1
+  , HasUnits a unitsA
+  , HasUnits b unitsB
+  , HasUnits c unitsC
+  , unitsA ~ units1 :/: units2
+  , unitsB ~ units2
+  , unitsC ~ units1
   ) =>
   a ->
   b ->
@@ -250,9 +253,12 @@ infixl 7 *!
 (!*) ::
   ( Multiplication' a b c'
   , Units.Coercion c' c
-  , UnitsOf a ~ units2
-  , UnitsOf b ~ units1 :/: units2
-  , UnitsOf c ~ units1
+  , HasUnits a unitsA
+  , HasUnits b unitsB
+  , HasUnits c unitsC
+  , unitsA ~ units2
+  , unitsB ~ units1 :/: units2
+  , unitsC ~ units1
   ) =>
   a ->
   b ->
@@ -264,9 +270,12 @@ infixl 7 !*
 (^*.) ::
   ( Multiplication' a b c'
   , Units.Coercion c' c
-  , UnitsOf a ~ units1
-  , UnitsOf b ~ Unitless :/: units2
-  , UnitsOf c ~ units1 :/: units2
+  , HasUnits a unitsA
+  , HasUnits b unitsB
+  , HasUnits c unitsC
+  , unitsA ~ units1
+  , unitsB ~ Unitless :/: units2
+  , unitsC ~ units1 :/: units2
   ) =>
   a ->
   b ->
@@ -278,9 +287,12 @@ infixl 7 ^*.
 (.*^) ::
   ( Multiplication' a b c'
   , Units.Coercion c' c
-  , UnitsOf a ~ Unitless :/: units2
-  , UnitsOf b ~ units1
-  , UnitsOf c ~ units1 :/: units2
+  , HasUnits a unitsA
+  , HasUnits b unitsB
+  , HasUnits c unitsC
+  , unitsA ~ Unitless :/: units2
+  , unitsB ~ units1
+  , unitsC ~ units1 :/: units2
   ) =>
   a ->
   b ->
@@ -292,9 +304,12 @@ infixl 7 .*^
 (/%) ::
   ( Division' a b c'
   , Units.Coercion c' c
-  , UnitsOf a ~ Unitless
-  , UnitsOf b ~ units1 :/: units2
-  , UnitsOf c ~ units2 :/: units1
+  , HasUnits a unitsA
+  , HasUnits b unitsB
+  , HasUnits c unitsC
+  , unitsA ~ Unitless
+  , unitsB ~ units1 :/: units2
+  , unitsC ~ units2 :/: units1
   ) =>
   a ->
   b ->
@@ -306,9 +321,12 @@ infixl 7 /%
 (!/) ::
   ( Division' a b c'
   , Units.Coercion c' c
-  , UnitsOf a ~ units1
-  , UnitsOf b ~ units1 :/: units2
-  , UnitsOf c ~ units2
+  , HasUnits a unitsA
+  , HasUnits b unitsB
+  , HasUnits c unitsC
+  , unitsA ~ units1
+  , unitsB ~ units1 :/: units2
+  , unitsC ~ units2
   ) =>
   a ->
   b ->
@@ -320,9 +338,12 @@ infixl 7 !/
 (.!/!) ::
   ( Division' a b c'
   , Units.Coercion c' c
-  , UnitsOf a ~ units1 :*: units2
-  , UnitsOf b ~ units2
-  , UnitsOf c ~ units1
+  , HasUnits a unitsA
+  , HasUnits b unitsB
+  , HasUnits c unitsC
+  , unitsA ~ units1 :*: units2
+  , unitsB ~ units2
+  , unitsC ~ units1
   ) =>
   a ->
   b ->
@@ -334,9 +355,12 @@ infixl 7 .!/!
 (!./!) ::
   ( Division' a b c'
   , Units.Coercion c' c
-  , UnitsOf a ~ units1 :*: units2
-  , UnitsOf b ~ units1
-  , UnitsOf c ~ units2
+  , HasUnits a unitsA
+  , HasUnits b unitsB
+  , HasUnits c unitsC
+  , unitsA ~ units1 :*: units2
+  , unitsB ~ units1
+  , unitsC ~ units2
   ) =>
   a ->
   b ->
@@ -348,9 +372,12 @@ infixl 7 !./!
 (!/!.) ::
   ( Division' a b c'
   , Units.Coercion c' c
-  , UnitsOf a ~ units1
-  , UnitsOf b ~ units1 :*: units2
-  , UnitsOf c ~ Unitless :/: units2
+  , HasUnits a unitsA
+  , HasUnits b unitsB
+  , HasUnits c unitsC
+  , unitsA ~ units1
+  , unitsB ~ units1 :*: units2
+  , unitsC ~ Unitless :/: units2
   ) =>
   a ->
   b ->
@@ -362,9 +389,12 @@ infixl 7 !/!.
 (!/.!) ::
   ( Division' a b c'
   , Units.Coercion c' c
-  , UnitsOf a ~ units2
-  , UnitsOf b ~ units1 :*: units2
-  , UnitsOf c ~ Unitless :/: units1
+  , HasUnits a unitsA
+  , HasUnits b unitsB
+  , HasUnits c unitsC
+  , unitsA ~ units2
+  , unitsB ~ units1 :*: units2
+  , unitsC ~ Unitless :/: units1
   ) =>
   a ->
   b ->
@@ -376,9 +406,12 @@ infixl 7 !/.!
 (.!/.!) ::
   ( Division' a b c'
   , Units.Coercion c' c
-  , UnitsOf a ~ units1 :*: units3
-  , UnitsOf b ~ units2 :*: units3
-  , UnitsOf c ~ units1 :/: units2
+  , HasUnits a unitsA
+  , HasUnits b unitsB
+  , HasUnits c unitsC
+  , unitsA ~ units1 :*: units3
+  , unitsB ~ units2 :*: units3
+  , unitsC ~ units1 :/: units2
   ) =>
   a ->
   b ->
@@ -390,9 +423,12 @@ infixl 7 .!/.!
 (./^) ::
   ( Division' a b c'
   , Units.Coercion c' c
-  , UnitsOf a ~ units1
-  , UnitsOf b ~ Unitless :/: units2
-  , UnitsOf c ~ units1 :*: units2
+  , HasUnits a unitsA
+  , HasUnits b unitsB
+  , HasUnits c unitsC
+  , unitsA ~ units1
+  , unitsB ~ Unitless :/: units2
+  , unitsC ~ units1 :*: units2
   ) =>
   a ->
   b ->
@@ -404,9 +440,12 @@ infixl 7 ./^
 (!?/.!?) ::
   ( Division' a b c'
   , Units.Coercion c' c
-  , UnitsOf a ~ units1 :*: units2
-  , UnitsOf b ~ units1 :*: units2 :*: units3
-  , UnitsOf c ~ Unitless :/: units3
+  , HasUnits a unitsA
+  , HasUnits b unitsB
+  , HasUnits c unitsC
+  , unitsA ~ units1 :*: units2
+  , unitsB ~ units1 :*: units2 :*: units3
+  , unitsC ~ Unitless :/: units3
   ) =>
   a ->
   b ->

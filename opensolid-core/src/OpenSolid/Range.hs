@@ -114,8 +114,7 @@ instance FFI (Range Meters) where
 instance FFI (Range SquareMeters) where
   representation = FFI.classRepresentation "AreaRange"
 
-instance HasUnits (Range units) where
-  type UnitsOf (Range units) = units
+instance HasUnits (Range units) units
 
 instance Units.Coercion (Range unitsA) (Range unitsB) where
   coerce = Data.Coerce.coerce

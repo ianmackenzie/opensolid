@@ -20,7 +20,7 @@ instance Eq (Point3d (space @ units))
 
 instance Show (Point3d (space @ units))
 
-instance HasUnits (Point3d (space @ units))
+instance HasUnits (Point3d (space @ units)) units
 
 instance
   space1 ~ space2 =>

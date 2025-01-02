@@ -100,8 +100,7 @@ instance FFI (Vector2d (space @ Meters)) where
 instance FFI (Vector2d (space @ SquareMeters)) where
   representation = FFI.classRepresentation "AreaVector2d"
 
-instance HasUnits (Vector2d (space @ units)) where
-  type UnitsOf (Vector2d (space @ units)) = units
+instance HasUnits (Vector2d (space @ units)) units
 
 instance
   space1 ~ space2 =>

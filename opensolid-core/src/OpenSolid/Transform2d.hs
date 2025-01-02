@@ -76,8 +76,7 @@ pattern Transform2d ::
   Transform2d tag (space @ units)
 pattern Transform2d p0 vx vy <- Transform2d_ p0 vx vy
 
-instance HasUnits (Transform2d tag (space @ units)) where
-  type UnitsOf (Transform2d tag (space @ units)) = units
+instance HasUnits (Transform2d tag (space @ units)) units
 
 instance
   (tag1 ~ tag2, space1 ~ space2) =>

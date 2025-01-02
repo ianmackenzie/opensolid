@@ -83,8 +83,7 @@ instance FFI (Point2d (space @ Meters)) where
 instance FFI (Point2d (space @ Unitless)) where
   representation = FFI.classRepresentation "UvPoint"
 
-instance HasUnits (Point2d (space @ units)) where
-  type UnitsOf (Point2d (space @ units)) = units
+instance HasUnits (Point2d (space @ units)) units
 
 instance
   space1 ~ space2 =>

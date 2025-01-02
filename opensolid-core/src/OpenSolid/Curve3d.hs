@@ -45,8 +45,7 @@ data Curve3d (coordinateSystem :: CoordinateSystem) where
 
 deriving instance Show (Curve3d (space @ units))
 
-instance HasUnits (Curve3d (space @ units)) where
-  type UnitsOf (Curve3d (space @ units)) = units
+instance HasUnits (Curve3d (space @ units)) units
 
 instance
   space1 ~ space2 =>

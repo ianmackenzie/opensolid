@@ -46,8 +46,7 @@ instance Bounds.Interface (Bounds3d (space @ units)) where
   aggregate2 = aggregate2
   intersection = intersection
 
-instance HasUnits (Bounds3d (space @ units)) where
-  type UnitsOf (Bounds3d (space @ units)) = units
+instance HasUnits (Bounds3d (space @ units)) units
 
 instance
   space1 ~ space2 =>

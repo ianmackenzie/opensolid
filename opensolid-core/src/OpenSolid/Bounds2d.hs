@@ -73,8 +73,7 @@ data Bounds2d (coordinateSystem :: CoordinateSystem) where
 
 deriving instance Show (Bounds2d (space @ units))
 
-instance HasUnits (Bounds2d (space @ units)) where
-  type UnitsOf (Bounds2d (space @ units)) = units
+instance HasUnits (Bounds2d (space @ units)) units
 
 instance
   space1 ~ space2 =>

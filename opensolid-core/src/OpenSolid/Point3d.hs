@@ -55,8 +55,7 @@ deriving instance Eq (Point3d (space @ units))
 
 deriving instance Show (Point3d (space @ units))
 
-instance HasUnits (Point3d (space @ units)) where
-  type UnitsOf (Point3d (space @ units)) = units
+instance HasUnits (Point3d (space @ units)) units
 
 instance
   space1 ~ space2 =>
