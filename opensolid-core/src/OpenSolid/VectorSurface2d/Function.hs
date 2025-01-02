@@ -207,7 +207,7 @@ instance
   v - f = constant v - f
 
 instance
-  (space1 ~ space2, Units.Product units1 units2 units3) =>
+  Units.Product units1 units2 units3 =>
   Multiplication
     (Surface1d.Function.Function units1)
     (Function (space @ units2))
@@ -256,7 +256,7 @@ instance
   function .*. vector = function .*. constant vector
 
 instance
-  (space1 ~ space2, Units.Product units1 units2 units3) =>
+  Units.Product units1 units2 units3 =>
   Multiplication
     (Function (space @ units1))
     (Surface1d.Function.Function units2)
