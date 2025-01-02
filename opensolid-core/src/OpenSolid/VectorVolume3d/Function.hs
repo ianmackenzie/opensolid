@@ -93,17 +93,29 @@ instance Negation (Function (space @ units)) where
   negate (Product3d1d f1 f2) = f1 .*. negate f2
   negate function = Negated function
 
-instance Multiplication Sign (Function (space @ units)) (Function (space @ units))
+instance Multiplication Sign (Function (space @ units)) (Function (space @ units)) where
+  Positive * function = function
+  Negative * function = -function
 
-instance Multiplication' Sign (Function (space @ units)) where
-  type Sign .*. Function (space @ units) = Function (space @ (Unitless :*: units))
+instance
+  Multiplication'
+    Sign
+    (Function (space @ units))
+    (Function (space @ (Unitless :*: units)))
+  where
   Positive .*. function = Units.coerce function
   Negative .*. function = Units.coerce -function
 
-instance Multiplication (Function (space @ units)) Sign (Function (space @ units))
+instance Multiplication (Function (space @ units)) Sign (Function (space @ units)) where
+  function * Positive = function
+  function * Negative = -function
 
-instance Multiplication' (Function (space @ units)) Sign where
-  type Function (space @ units) .*. Sign = Function (space @ (units :*: Unitless))
+instance
+  Multiplication'
+    (Function (space @ units))
+    Sign
+    (Function (space @ (units :*: Unitless)))
+  where
   function .*. Positive = Units.coerce function
   function .*. Negative = Units.coerce -function
 
@@ -178,58 +190,88 @@ instance
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Volume1d.Function units1) (Function (space @ units2)) (Function (space @ units3))
+  where
+  lhs * rhs = Units.specialize (lhs .*. rhs)
 
-instance Multiplication' (Volume1d.Function units1) (Function (space @ units2)) where
-  type
-    Volume1d.Function units1 .*. Function (space @ units2) =
-      Function (space @ (units1 :*: units2))
+instance
+  Multiplication'
+    (Volume1d.Function units1)
+    (Function (space @ units2))
+    (Function (space @ (units1 :*: units2)))
+  where
   Volume1d.Function.Parametric lhs .*. Parametric rhs = Parametric (lhs .*. rhs)
   lhs .*. rhs = Product1d3d lhs rhs
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Function (space @ units1)) (Volume1d.Function units2) (Function (space @ units3))
+  where
+  lhs * rhs = Units.specialize (lhs .*. rhs)
 
-instance Multiplication' (Function (space @ units1)) (Volume1d.Function units2) where
-  type
-    Function (space @ units1) .*. Volume1d.Function units2 =
-      Function (space @ (units1 :*: units2))
+instance
+  Multiplication'
+    (Function (space @ units1))
+    (Volume1d.Function units2)
+    (Function (space @ (units1 :*: units2)))
+  where
   Parametric lhs .*. Volume1d.Function.Parametric rhs = Parametric (lhs .*. rhs)
   lhs .*. rhs = Product3d1d lhs rhs
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Function (space @ units1)) (Qty units2) (Function (space @ units3))
+  where
+  lhs * rhs = Units.specialize (lhs .*. rhs)
 
-instance Multiplication' (Function (space @ units1)) (Qty units2) where
-  type Function (space @ units1) .*. Qty units2 = Function (space @ (units1 :*: units2))
+instance
+  Multiplication'
+    (Function (space @ units1))
+    (Qty units2)
+    (Function (space @ (units1 :*: units2)))
+  where
   function .*. value = function .*. Volume1d.Function.constant value
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Qty units1) (Function (space @ units2)) (Function (space @ units3))
+  where
+  lhs * rhs = Units.specialize (lhs .*. rhs)
 
-instance Multiplication' (Qty units1) (Function (space @ units2)) where
-  type Qty units1 .*. Function (space @ units2) = Function (space @ (units1 :*: units2))
+instance
+  Multiplication'
+    (Qty units1)
+    (Function (space @ units2))
+    (Function (space @ (units1 :*: units2)))
+  where
   value .*. function = Volume1d.Function.constant value .*. function
 
 instance
   Units.Quotient units1 units2 units3 =>
   Division (Function (space @ units1)) (Volume1d.Function units2) (Function (space @ units3))
+  where
+  lhs / rhs = Units.specialize (lhs ./. rhs)
 
-instance Division' (Function (space @ units1)) (Volume1d.Function units2) where
-  type
-    Function (space @ units1) ./. Volume1d.Function units2 =
-      Function (space @ (units1 :/: units2))
+instance
+  Division'
+    (Function (space @ units1))
+    (Volume1d.Function units2)
+    (Function (space @ (units1 :/: units2)))
+  where
   Parametric lhs ./. Volume1d.Function.Parametric rhs = Parametric (lhs ./. rhs)
   lhs ./. rhs = Quotient lhs rhs
 
 instance
   Units.Quotient units1 units2 units3 =>
   Division (Function (space @ units1)) (Qty units2) (Function (space @ units3))
+  where
+  lhs / rhs = Units.specialize (lhs ./. rhs)
 
-instance Division' (Function (space @ units1)) (Qty units2) where
-  type Function (space @ units1) ./. Qty units2 = Function (space @ (units1 :/: units2))
+instance
+  Division'
+    (Function (space @ units1))
+    (Qty units2)
+    (Function (space @ (units1 :/: units2)))
+  where
   function ./. value = function ./. Volume1d.Function.constant value
 
 evaluate :: Function (space @ units) -> UvwPoint -> Vector3d (space @ units)

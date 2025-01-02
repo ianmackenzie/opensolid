@@ -179,17 +179,29 @@ instance Negation (VectorCurve3d (space @ units)) where
     Product3d1d' c1 c2 -> Product3d1d' c1 -c2
     _ -> Negated curve
 
-instance Multiplication Sign (VectorCurve3d (space @ units)) (VectorCurve3d (space @ units))
+instance Multiplication Sign (VectorCurve3d (space @ units)) (VectorCurve3d (space @ units)) where
+  Positive * curve = curve
+  Negative * curve = -curve
 
-instance Multiplication' Sign (VectorCurve3d (space @ units)) where
-  type Sign .*. VectorCurve3d (space @ units) = VectorCurve3d (space @ (Unitless :*: units))
+instance
+  Multiplication'
+    Sign
+    (VectorCurve3d (space @ units))
+    (VectorCurve3d (space @ (Unitless :*: units)))
+  where
   Positive .*. curve = Units.coerce curve
   Negative .*. curve = Units.coerce -curve
 
-instance Multiplication (VectorCurve3d (space @ units)) Sign (VectorCurve3d (space @ units))
+instance Multiplication (VectorCurve3d (space @ units)) Sign (VectorCurve3d (space @ units)) where
+  curve * Positive = curve
+  curve * Negative = -curve
 
-instance Multiplication' (VectorCurve3d (space @ units)) Sign where
-  type VectorCurve3d (space @ units) .*. Sign = VectorCurve3d (space @ (units :*: Unitless))
+instance
+  Multiplication'
+    (VectorCurve3d (space @ units))
+    Sign
+    (VectorCurve3d (space @ (units :*: Unitless)))
+  where
   curve .*. Positive = Units.coerce curve
   curve .*. Negative = Units.coerce -curve
 
@@ -264,84 +276,116 @@ instance
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Curve1d units1) (VectorCurve3d (space @ units2)) (VectorCurve3d (space @ units3))
+  where
+  lhs * rhs = Units.specialize (lhs .*. rhs)
 
-instance Multiplication' (Curve1d units1) (VectorCurve3d (space @ units2)) where
-  type
-    Curve1d units1 .*. VectorCurve3d (space @ units2) =
-      VectorCurve3d (space @ (units1 :*: units2))
+instance
+  Multiplication'
+    (Curve1d units1)
+    (VectorCurve3d (space @ units2))
+    (VectorCurve3d (space @ (units1 :*: units2)))
+  where
   Curve1d.Parametric lhs .*. Parametric rhs = Parametric (lhs .*. rhs)
   lhs .*. rhs = Product1d3d' lhs rhs
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Qty units1) (VectorCurve3d (space @ units2)) (VectorCurve3d (space @ units3))
+  where
+  lhs * rhs = Units.specialize (lhs .*. rhs)
 
-instance Multiplication' (Qty units1) (VectorCurve3d (space @ units2)) where
-  type
-    Qty units1 .*. VectorCurve3d (space @ units2) =
-      VectorCurve3d (space @ (units1 :*: units2))
+instance
+  Multiplication'
+    (Qty units1)
+    (VectorCurve3d (space @ units2))
+    (VectorCurve3d (space @ (units1 :*: units2)))
+  where
   c1 .*. c2 = Curve1d.constant c1 .*. c2
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Curve1d units1) (Vector3d (space @ units2)) (VectorCurve3d (space @ units3))
+  where
+  lhs * rhs = Units.specialize (lhs .*. rhs)
 
-instance Multiplication' (Curve1d units1) (Vector3d (space @ units2)) where
-  type
-    Curve1d units1 .*. Vector3d (space @ units2) =
-      VectorCurve3d (space @ (units1 :*: units2))
+instance
+  Multiplication'
+    (Curve1d units1)
+    (Vector3d (space @ units2))
+    (VectorCurve3d (space @ (units1 :*: units2)))
+  where
   curve .*. vector = curve .*. constant vector
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (VectorCurve3d (space @ units1)) (Curve1d units2) (VectorCurve3d (space @ units3))
+  where
+  lhs * rhs = Units.specialize (lhs .*. rhs)
 
-instance Multiplication' (VectorCurve3d (space @ units1)) (Curve1d units2) where
-  type
-    VectorCurve3d (space @ units1) .*. Curve1d units2 =
-      VectorCurve3d (space @ (units1 :*: units2))
+instance
+  Multiplication'
+    (VectorCurve3d (space @ units1))
+    (Curve1d units2)
+    (VectorCurve3d (space @ (units1 :*: units2)))
+  where
   Parametric lhs .*. Curve1d.Parametric rhs = Parametric (lhs .*. rhs)
   lhs .*. rhs = Product3d1d' lhs rhs
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (VectorCurve3d (space @ units1)) (Qty units2) (VectorCurve3d (space @ units3))
+  where
+  lhs * rhs = Units.specialize (lhs .*. rhs)
 
-instance Multiplication' (VectorCurve3d (space @ units1)) (Qty units2) where
-  type
-    VectorCurve3d (space @ units1) .*. Qty units2 =
-      VectorCurve3d (space @ (units1 :*: units2))
+instance
+  Multiplication'
+    (VectorCurve3d (space @ units1))
+    (Qty units2)
+    (VectorCurve3d (space @ (units1 :*: units2)))
+  where
   curve .*. value = curve .*. Curve1d.constant value
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Vector3d (space @ units1)) (Curve1d units2) (VectorCurve3d (space @ units3))
+  where
+  lhs * rhs = Units.specialize (lhs .*. rhs)
 
-instance Multiplication' (Vector3d (space @ units1)) (Curve1d units2) where
-  type
-    Vector3d (space @ units1) .*. Curve1d units2 =
-      VectorCurve3d (space @ (units1 :*: units2))
+instance
+  Multiplication'
+    (Vector3d (space @ units1))
+    (Curve1d units2)
+    (VectorCurve3d (space @ (units1 :*: units2)))
+  where
   vector .*. curve = constant vector .*. curve
 
 instance
   Units.Quotient units1 units2 units3 =>
   Division (VectorCurve3d (space @ units1)) (Curve1d units2) (VectorCurve3d (space @ units3))
+  where
+  lhs / rhs = Units.specialize (lhs ./. rhs)
 
-instance Division' (VectorCurve3d (space @ units1)) (Curve1d units2) where
-  type
-    VectorCurve3d (space @ units1) ./. Curve1d units2 =
-      VectorCurve3d (space @ (units1 :/: units2))
+instance
+  Division'
+    (VectorCurve3d (space @ units1))
+    (Curve1d units2)
+    (VectorCurve3d (space @ (units1 :/: units2)))
+  where
   Parametric lhs ./. Curve1d.Parametric rhs = Parametric (lhs ./. rhs)
   lhs ./. rhs = Quotient' lhs rhs
 
 instance
   Units.Quotient units1 units2 units3 =>
   Division (VectorCurve3d (space @ units1)) (Qty units2) (VectorCurve3d (space @ units3))
+  where
+  lhs / rhs = Units.specialize (lhs ./. rhs)
 
-instance Division' (VectorCurve3d (space @ units1)) (Qty units2) where
-  type
-    VectorCurve3d (space @ units1) ./. Qty units2 =
-      VectorCurve3d (space @ (units1 :/: units2))
+instance
+  Division'
+    (VectorCurve3d (space @ units1))
+    (Qty units2)
+    (VectorCurve3d (space @ (units1 :/: units2)))
+  where
   curve ./. value = curve ./. Curve1d.constant value
 
 data DotProductOf space units1 units2

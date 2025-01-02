@@ -5,10 +5,10 @@ module OpenSolid.Arithmetic
   , Subtraction ((-))
   , subtract
   , Difference (Difference)
-  , Multiplication' (type (.*.), (.*.))
+  , Multiplication' ((.*.))
   , Multiplication ((*))
   , Product (Product)
-  , Division' (type (./.), (./.))
+  , Division' ((./.))
   , Division ((/))
   , Quotient (Quotient)
   , DivMod ((//), (%))
@@ -64,46 +64,25 @@ subtract b a = a - b
 
 data Difference a b = Difference a b deriving (Eq, Show)
 
-class Multiplication' b a => Multiplication' a b where
-  type a .*. b
-  (.*.) :: a -> b -> a .*. b
+class Multiplication' a b c | a b -> c where
+  (.*.) :: a -> b -> c
 
 infixl 7 .*.
 
-class
-  ( Multiplication' a b
-  , Units.Coercion (a .*. b) c
-  , Units.Specialize (UnitsOf (a .*. b)) (UnitsOf c)
-  , Multiplication b a c
-  ) =>
-  Multiplication a b c
-    | a b -> c
-  where
-  {-# INLINEABLE (*) #-}
+class Multiplication b a c => Multiplication a b c | a b -> c where
   (*) :: a -> b -> c
-  a * b = Units.specialize (a .*. b)
 
 infixl 7 *
 
 data Product a b = Product a b deriving (Eq, Show)
 
-class Division' a b where
-  type a ./. b
-  (./.) :: a -> b -> a ./. b
+class Division' a b c | a b -> c where
+  (./.) :: a -> b -> c
 
 infixl 7 ./.
 
-class
-  ( Division' a b
-  , Units.Coercion (a ./. b) c
-  , Units.Specialize (UnitsOf (a ./. b)) (UnitsOf c)
-  ) =>
-  Division a b c
-    | a b -> c
-  where
-  {-# INLINEABLE (/) #-}
+class Division a b c | a b -> c where
   (/) :: a -> b -> c
-  a / b = Units.specialize (a ./. b)
 
 infixl 7 /
 
@@ -170,21 +149,25 @@ instance DivMod Int where
 instance Negation Int where
   negate = Prelude.negate
 
-instance Multiplication' Sign Int where
-  type Sign .*. Int = Int
+instance Multiplication' Sign Int Int where
   {-# INLINEABLE (.*.) #-}
   Positive .*. n = n
   Negative .*. n = -n
 
-instance Multiplication Sign Int Int
+instance Multiplication Sign Int Int where
+  {-# INLINEABLE (*) #-}
+  Positive * n = n
+  Negative * n = -n
 
-instance Multiplication' Int Sign where
-  type Int .*. Sign = Int
+instance Multiplication' Int Sign Int where
   {-# INLINEABLE (.*.) #-}
   n .*. Positive = n
   n .*. Negative = -n
 
-instance Multiplication Int Sign Int
+instance Multiplication Int Sign Int where
+  {-# INLINEABLE (*) #-}
+  n * Positive = n
+  n * Negative = -n
 
 instance Addition Int Int Int where
   {-# INLINEABLE (+) #-}
@@ -241,17 +224,17 @@ instance a ~ a' => Addition (NonEmpty a) (Maybe a') (NonEmpty a) where
 instance Subtraction Int Int Int where
   (-) = (Prelude.-)
 
-instance Multiplication' Int Int where
-  type Int .*. Int = Int
+instance Multiplication' Int Int Int where
   (.*.) = (Prelude.*)
 
-instance Multiplication Int Int Int
+instance Multiplication Int Int Int where
+  (*) = (Prelude.*)
 
-instance Division' Int Int where
-  type Int ./. Int = Float
+instance Division' Int Int Float where
   n ./. m = Qty (fromIntegral n Prelude./ fromIntegral m)
 
-instance Division Int Int Float
+instance Division Int Int Float where
+  n / m = Qty (fromIntegral n Prelude./ fromIntegral m)
 
 class Exponentiation a b where
   (**) :: a -> b -> a
@@ -273,8 +256,8 @@ instance
 -- GENERIC UNITS MANIPULATION
 
 (*!) ::
-  ( Multiplication' a b
-  , Units.Coercion (a .*. b) c
+  ( Multiplication' a b c'
+  , Units.Coercion c' c
   , UnitsOf a ~ units1 :/: units2
   , UnitsOf b ~ units2
   , UnitsOf c ~ units1
@@ -287,8 +270,8 @@ a *! b = Units.coerce (a .*. b)
 infixl 7 *!
 
 (!*) ::
-  ( Multiplication' a b
-  , Units.Coercion (a .*. b) c
+  ( Multiplication' a b c'
+  , Units.Coercion c' c
   , UnitsOf a ~ units2
   , UnitsOf b ~ units1 :/: units2
   , UnitsOf c ~ units1
@@ -301,8 +284,8 @@ a !* b = Units.coerce (a .*. b)
 infixl 7 !*
 
 (^*.) ::
-  ( Multiplication' a b
-  , Units.Coercion (a .*. b) c
+  ( Multiplication' a b c'
+  , Units.Coercion c' c
   , UnitsOf a ~ units1
   , UnitsOf b ~ Unitless :/: units2
   , UnitsOf c ~ units1 :/: units2
@@ -315,8 +298,8 @@ a ^*. b = Units.coerce (a .*. b)
 infixl 7 ^*.
 
 (.*^) ::
-  ( Multiplication' a b
-  , Units.Coercion (a .*. b) c
+  ( Multiplication' a b c'
+  , Units.Coercion c' c
   , UnitsOf a ~ Unitless :/: units2
   , UnitsOf b ~ units1
   , UnitsOf c ~ units1 :/: units2
@@ -329,8 +312,8 @@ a .*^ b = Units.coerce (a .*. b)
 infixl 7 .*^
 
 (/%) ::
-  ( Division' a b
-  , Units.Coercion (a ./. b) c
+  ( Division' a b c'
+  , Units.Coercion c' c
   , UnitsOf a ~ Unitless
   , UnitsOf b ~ units1 :/: units2
   , UnitsOf c ~ units2 :/: units1
@@ -343,8 +326,8 @@ a /% b = Units.coerce (a ./. b)
 infixl 7 /%
 
 (!/) ::
-  ( Division' a b
-  , Units.Coercion (a ./. b) c
+  ( Division' a b c'
+  , Units.Coercion c' c
   , UnitsOf a ~ units1
   , UnitsOf b ~ units1 :/: units2
   , UnitsOf c ~ units2
@@ -357,8 +340,8 @@ a !/ b = Units.coerce (a ./. b)
 infixl 7 !/
 
 (.!/!) ::
-  ( Division' a b
-  , Units.Coercion (a ./. b) c
+  ( Division' a b c'
+  , Units.Coercion c' c
   , UnitsOf a ~ units1 :*: units2
   , UnitsOf b ~ units2
   , UnitsOf c ~ units1
@@ -371,8 +354,8 @@ a .!/! b = Units.coerce (a ./. b)
 infixl 7 .!/!
 
 (!./!) ::
-  ( Division' a b
-  , Units.Coercion (a ./. b) c
+  ( Division' a b c'
+  , Units.Coercion c' c
   , UnitsOf a ~ units1 :*: units2
   , UnitsOf b ~ units1
   , UnitsOf c ~ units2
@@ -385,8 +368,8 @@ a !./! b = Units.coerce (a ./. b)
 infixl 7 !./!
 
 (!/!.) ::
-  ( Division' a b
-  , Units.Coercion (a ./. b) c
+  ( Division' a b c'
+  , Units.Coercion c' c
   , UnitsOf a ~ units1
   , UnitsOf b ~ units1 :*: units2
   , UnitsOf c ~ Unitless :/: units2
@@ -399,8 +382,8 @@ a !/!. b = Units.coerce (a ./. b)
 infixl 7 !/!.
 
 (!/.!) ::
-  ( Division' a b
-  , Units.Coercion (a ./. b) c
+  ( Division' a b c'
+  , Units.Coercion c' c
   , UnitsOf a ~ units2
   , UnitsOf b ~ units1 :*: units2
   , UnitsOf c ~ Unitless :/: units1
@@ -413,8 +396,8 @@ a !/.! b = Units.coerce (a ./. b)
 infixl 7 !/.!
 
 (.!/.!) ::
-  ( Division' a b
-  , Units.Coercion (a ./. b) c
+  ( Division' a b c'
+  , Units.Coercion c' c
   , UnitsOf a ~ units1 :*: units3
   , UnitsOf b ~ units2 :*: units3
   , UnitsOf c ~ units1 :/: units2
@@ -427,8 +410,8 @@ a .!/.! b = Units.coerce (a ./. b)
 infixl 7 .!/.!
 
 (./^) ::
-  ( Division' a b
-  , Units.Coercion (a ./. b) c
+  ( Division' a b c'
+  , Units.Coercion c' c
   , UnitsOf a ~ units1
   , UnitsOf b ~ Unitless :/: units2
   , UnitsOf c ~ units1 :*: units2
@@ -441,8 +424,8 @@ a ./^ b = Units.coerce (a ./. b)
 infixl 7 ./^
 
 (!?/.!?) ::
-  ( Division' a b
-  , Units.Coercion (a ./. b) c
+  ( Division' a b c'
+  , Units.Coercion c' c
   , UnitsOf a ~ units1 :*: units2
   , UnitsOf b ~ units1 :*: units2 :*: units3
   , UnitsOf c ~ Unitless :/: units3

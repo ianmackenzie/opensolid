@@ -94,19 +94,21 @@ instance Interface (Negate units) units where
 instance Negation (Estimate units) where
   negate estimate = new (Negate estimate)
 
-instance Multiplication' Sign (Estimate units) where
-  type Sign .*. Estimate units = Estimate (Unitless :*: units)
+instance Multiplication' Sign (Estimate units) (Estimate (Unitless :*: units)) where
   Positive .*. estimate = Units.coerce estimate
   Negative .*. estimate = Units.coerce -estimate
 
-instance Multiplication Sign (Estimate units) (Estimate units)
+instance Multiplication Sign (Estimate units) (Estimate units) where
+  Positive * estimate = estimate
+  Negative * estimate = -estimate
 
-instance Multiplication' (Estimate units) Sign where
-  type Estimate units .*. Sign = Estimate (units :*: Unitless)
+instance Multiplication' (Estimate units) Sign (Estimate (units :*: Unitless)) where
   estimate .*. Positive = Units.coerce estimate
   estimate .*. Negative = Units.coerce -estimate
 
-instance Multiplication (Estimate units) Sign (Estimate units)
+instance Multiplication (Estimate units) Sign (Estimate units) where
+  estimate * Positive = estimate
+  estimate * Negative = -estimate
 
 data Add units = Add (Estimate units) (Estimate units)
 
@@ -168,16 +170,13 @@ instance Interface (Product units1 units2) (units1 :*: units2) where
           | otherwise = Product (refine first) (refine second)
     new refinedProduct
 
-instance Multiplication' (Estimate units1) (Estimate units2) where
-  type Estimate units1 .*. Estimate units2 = Estimate (units1 :*: units2)
+instance Multiplication' (Estimate units1) (Estimate units2) (Estimate (units1 :*: units2)) where
   first .*. second = new (Product first second)
 
-instance Multiplication' (Estimate units1) (Qty units2) where
-  type Estimate units1 .*. Qty units2 = Estimate (units1 :*: units2)
+instance Multiplication' (Estimate units1) (Qty units2) (Estimate (units1 :*: units2)) where
   estimate .*. value = new (Product estimate (exact value))
 
-instance Multiplication' (Qty units1) (Estimate units2) where
-  type Qty units1 .*. Estimate units2 = Estimate (units1 :*: units2)
+instance Multiplication' (Qty units1) (Estimate units2) (Estimate (units1 :*: units2)) where
   value .*. estimate = new (Product (exact value) estimate)
 
 instance
@@ -186,6 +185,8 @@ instance
     (Estimate units1)
     (Estimate units2)
     (Estimate units3)
+  where
+  first * second = Units.specialize (first .*. second)
 
 instance
   Units.Product units1 units2 units3 =>
@@ -193,6 +194,8 @@ instance
     (Estimate units1)
     (Qty units2)
     (Estimate units3)
+  where
+  estimate * value = estimate * exact value
 
 instance
   Units.Product units1 units2 units3 =>
@@ -200,9 +203,10 @@ instance
     (Qty units1)
     (Estimate units2)
     (Estimate units3)
+  where
+  value * estimate = exact value * estimate
 
-instance Division' (Estimate units1) (Qty units2) where
-  type Estimate units1 ./. Qty units2 = Estimate (units1 :/: units2)
+instance Division' (Estimate units1) (Qty units2) (Estimate (units1 :/: units2)) where
   estimate ./. value = estimate ^*. (1.0 ./. value)
 
 instance
@@ -211,6 +215,8 @@ instance
     (Estimate units1)
     (Qty units2)
     (Estimate units3)
+  where
+  estimate / value = Units.specialize (estimate ./. value)
 
 newtype Sum units = Sum (NonEmpty (Estimate units))
 

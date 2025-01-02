@@ -26,13 +26,21 @@ instance
   ) =>
   Addition (Vector2d (space @ units)) (Vector2d (space_ @ units_)) (Vector2d (space @ units))
 
-instance Multiplication' (Qty units1) (Vector2d (space @ units2))
+instance
+  Multiplication'
+    (Qty units1)
+    (Vector2d (space @ units2))
+    (Vector2d (space @ (units1 :*: units2)))
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Qty units1) (Vector2d (space @ units2)) (Vector2d (space @ units3))
 
-instance Multiplication' (Vector2d (space @ units1)) (Qty units2)
+instance
+  Multiplication'
+    (Vector2d (space @ units1))
+    (Qty units2)
+    (Vector2d (space @ (units1 :*: units2)))
 
 instance
   Units.Product units1 units2 units3 =>

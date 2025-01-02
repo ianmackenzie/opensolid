@@ -56,30 +56,42 @@ instance
 instance Negation (Direction3d space) where
   negate (Direction3d vector) = unsafe (negate vector)
 
-instance Multiplication Sign (Direction3d space) (Direction3d space)
+instance Multiplication Sign (Direction3d space) (Direction3d space) where
+  Positive * direction = direction
+  Negative * direction = -direction
 
-instance Multiplication' Sign (Direction3d space) where
-  type Sign .*. Direction3d space = Direction3d space
+instance Multiplication' Sign (Direction3d space) (Direction3d space) where
   Positive .*. direction = direction
   Negative .*. direction = -direction
 
-instance Multiplication (Direction3d space) Sign (Direction3d space)
+instance Multiplication (Direction3d space) Sign (Direction3d space) where
+  direction * Positive = direction
+  direction * Negative = -direction
 
-instance Multiplication' (Direction3d space) Sign where
-  type Direction3d space .*. Sign = Direction3d space
+instance Multiplication' (Direction3d space) Sign (Direction3d space) where
   direction .*. Positive = direction
   direction .*. Negative = -direction
 
-instance Multiplication (Qty units) (Direction3d space) (Vector3d (space @ units))
+instance Multiplication (Qty units) (Direction3d space) (Vector3d (space @ units)) where
+  scale * Direction3d vector = scale * vector
 
-instance Multiplication' (Qty units) (Direction3d space) where
-  type Qty units .*. Direction3d space = Vector3d (space @ (units :*: Unitless))
+instance
+  Multiplication'
+    (Qty units)
+    (Direction3d space)
+    (Vector3d (space @ (units :*: Unitless)))
+  where
   scale .*. Direction3d vector = scale .*. vector
 
-instance Multiplication (Direction3d space) (Qty units) (Vector3d (space @ units))
+instance Multiplication (Direction3d space) (Qty units) (Vector3d (space @ units)) where
+  Direction3d vector * scale = vector * scale
 
-instance Multiplication' (Direction3d space) (Qty units) where
-  type Direction3d space .*. Qty units = Vector3d (space @ (Unitless :*: units))
+instance
+  Multiplication'
+    (Direction3d space)
+    (Qty units)
+    (Vector3d (space @ (Unitless :*: units)))
+  where
   Direction3d vector .*. scale = vector .*. scale
 
 instance space1 ~ space2 => DotMultiplication (Direction3d space1) (Direction3d space2) Float

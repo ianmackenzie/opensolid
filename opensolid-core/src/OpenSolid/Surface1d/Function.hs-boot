@@ -25,7 +25,7 @@ instance Show (Function units)
 
 instance Negation (Function units)
 
-instance Division' (Function units1) (Function units2)
+instance Division' (Function units1) (Function units2) (Function (units1 :/: units2))
 
 instance
   Units.Quotient units1 units2 units3 =>

@@ -25,10 +25,10 @@ transformBy ::
   Direction2d space ->
   Direction2d space
 
-instance Multiplication' (Qty units) (Direction2d space)
+instance Multiplication' (Qty units) (Direction2d space) (Vector2d (space @ (units :*: Unitless)))
 
 instance Multiplication (Qty units) (Direction2d space) (Vector2d (space @ units))
 
-instance Multiplication' (Direction2d space) (Qty units)
+instance Multiplication' (Direction2d space) (Qty units) (Vector2d (space @ (Unitless :*: units)))
 
 instance Multiplication (Direction2d space) (Qty units) (Vector2d (space @ units))

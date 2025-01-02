@@ -85,31 +85,43 @@ instance
 instance Negation (Direction2d space) where
   negate direction = Unit -(unwrap direction)
 
-instance Multiplication' Sign (Direction2d space) where
-  type Sign .*. Direction2d space = Direction2d space
+instance Multiplication' Sign (Direction2d space) (Direction2d space) where
   Positive .*. direction = direction
   Negative .*. direction = -direction
 
-instance Multiplication Sign (Direction2d space) (Direction2d space)
+instance Multiplication Sign (Direction2d space) (Direction2d space) where
+  Positive * direction = direction
+  Negative * direction = -direction
 
-instance Multiplication' (Direction2d space) Sign where
-  type Direction2d space .*. Sign = Direction2d space
+instance Multiplication' (Direction2d space) Sign (Direction2d space) where
   direction .*. Positive = direction
   direction .*. Negative = -direction
 
-instance Multiplication (Direction2d space) Sign (Direction2d space)
+instance Multiplication (Direction2d space) Sign (Direction2d space) where
+  direction * Positive = direction
+  direction * Negative = -direction
 
-instance Multiplication' (Qty units) (Direction2d space) where
-  type Qty units .*. Direction2d space = Vector2d (space @ (units :*: Unitless))
+instance
+  Multiplication'
+    (Qty units)
+    (Direction2d space)
+    (Vector2d (space @ (units :*: Unitless)))
+  where
   scale .*. direction = scale .*. unwrap direction
 
-instance Multiplication (Qty units) (Direction2d space) (Vector2d (space @ units))
+instance Multiplication (Qty units) (Direction2d space) (Vector2d (space @ units)) where
+  scale * direction = scale * unwrap direction
 
-instance Multiplication' (Direction2d space) (Qty units) where
-  type Direction2d space .*. Qty units = Vector2d (space @ (Unitless :*: units))
+instance
+  Multiplication'
+    (Direction2d space)
+    (Qty units)
+    (Vector2d (space @ (Unitless :*: units)))
+  where
   direction .*. scale = unwrap direction .*. scale
 
-instance Multiplication (Direction2d space) (Qty units) (Vector2d (space @ units))
+instance Multiplication (Direction2d space) (Qty units) (Vector2d (space @ units)) where
+  direction * scale = unwrap direction * scale
 
 instance space1 ~ space2 => DotMultiplication' (Direction2d space1) (Direction2d space2) where
   type Direction2d space1 .<>. Direction2d space2 = Float

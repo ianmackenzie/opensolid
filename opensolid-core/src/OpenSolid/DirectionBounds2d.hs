@@ -33,42 +33,84 @@ instance
 instance Negation (DirectionBounds2d space) where
   negate (DirectionBounds2d vectorBounds) = DirectionBounds2d (negate vectorBounds)
 
-instance Multiplication Sign (DirectionBounds2d space) (DirectionBounds2d space)
+instance Multiplication Sign (DirectionBounds2d space) (DirectionBounds2d space) where
+  Positive * directionBounds = directionBounds
+  Negative * directionBounds = -directionBounds
 
-instance Multiplication' Sign (DirectionBounds2d space) where
-  type Sign .*. DirectionBounds2d space = DirectionBounds2d space
+instance Multiplication' Sign (DirectionBounds2d space) (DirectionBounds2d space) where
   Positive .*. directionBounds = directionBounds
   Negative .*. directionBounds = -directionBounds
 
-instance Multiplication (DirectionBounds2d space) Sign (DirectionBounds2d space)
+instance Multiplication (DirectionBounds2d space) Sign (DirectionBounds2d space) where
+  directionBounds * Positive = directionBounds
+  directionBounds * Negative = -directionBounds
 
-instance Multiplication' (DirectionBounds2d space) Sign where
-  type DirectionBounds2d space .*. Sign = DirectionBounds2d space
+instance Multiplication' (DirectionBounds2d space) Sign (DirectionBounds2d space) where
   directionBounds .*. Positive = directionBounds
   directionBounds .*. Negative = -directionBounds
 
-instance Multiplication (Qty units) (DirectionBounds2d space) (VectorBounds2d (space @ units))
+instance
+  Multiplication
+    (Qty units)
+    (DirectionBounds2d space)
+    (VectorBounds2d (space @ units))
+  where
+  value * DirectionBounds2d vectorBounds = value * vectorBounds
 
-instance Multiplication' (Qty units) (DirectionBounds2d space) where
-  type Qty units .*. DirectionBounds2d space = VectorBounds2d (space @ (units :*: Unitless))
+instance
+  Multiplication'
+    (Qty units)
+    (DirectionBounds2d space)
+    (VectorBounds2d (space @ (units :*: Unitless)))
+  where
   value .*. DirectionBounds2d vectorBounds = value .*. vectorBounds
 
-instance Multiplication (DirectionBounds2d space) (Qty units) (VectorBounds2d (space @ units))
+instance
+  Multiplication
+    (DirectionBounds2d space)
+    (Qty units)
+    (VectorBounds2d (space @ units))
+  where
+  DirectionBounds2d vectorBounds * value = vectorBounds * value
 
-instance Multiplication' (DirectionBounds2d space) (Qty units) where
-  type DirectionBounds2d space .*. Qty units = VectorBounds2d (space @ (Unitless :*: units))
+instance
+  Multiplication'
+    (DirectionBounds2d space)
+    (Qty units)
+    (VectorBounds2d (space @ (Unitless :*: units)))
+  where
   DirectionBounds2d vectorBounds .*. value = vectorBounds .*. value
 
-instance Multiplication (Range units) (DirectionBounds2d space) (VectorBounds2d (space @ units))
+instance
+  Multiplication
+    (Range units)
+    (DirectionBounds2d space)
+    (VectorBounds2d (space @ units))
+  where
+  range * DirectionBounds2d vectorBounds = range * vectorBounds
 
-instance Multiplication' (Range units) (DirectionBounds2d space) where
-  type Range units .*. DirectionBounds2d space = VectorBounds2d (space @ (units :*: Unitless))
+instance
+  Multiplication'
+    (Range units)
+    (DirectionBounds2d space)
+    (VectorBounds2d (space @ (units :*: Unitless)))
+  where
   range .*. DirectionBounds2d vectorBounds = range .*. vectorBounds
 
-instance Multiplication (DirectionBounds2d space) (Range units) (VectorBounds2d (space @ units))
+instance
+  Multiplication
+    (DirectionBounds2d space)
+    (Range units)
+    (VectorBounds2d (space @ units))
+  where
+  DirectionBounds2d vectorBounds * range = vectorBounds * range
 
-instance Multiplication' (DirectionBounds2d space) (Range units) where
-  type DirectionBounds2d space .*. Range units = VectorBounds2d (space @ (Unitless :*: units))
+instance
+  Multiplication'
+    (DirectionBounds2d space)
+    (Range units)
+    (VectorBounds2d (space @ (Unitless :*: units)))
+  where
   DirectionBounds2d vectorBounds .*. range = vectorBounds .*. range
 
 instance

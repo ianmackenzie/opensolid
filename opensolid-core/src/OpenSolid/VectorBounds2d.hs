@@ -98,8 +98,12 @@ instance
 instance Negation (VectorBounds2d (space @ units)) where
   negate (VectorBounds2d x y) = VectorBounds2d (negate x) (negate y)
 
-instance Multiplication' Sign (VectorBounds2d (space @ units)) where
-  type Sign .*. VectorBounds2d (space @ units) = VectorBounds2d (space @ (Unitless :*: units))
+instance
+  Multiplication'
+    Sign
+    (VectorBounds2d (space @ units))
+    (VectorBounds2d (space @ (Unitless :*: units)))
+  where
   Positive .*. vectorBounds = Units.coerce vectorBounds
   Negative .*. vectorBounds = Units.coerce -vectorBounds
 
@@ -107,8 +111,12 @@ instance Multiplication Sign (VectorBounds2d (space @ units)) (VectorBounds2d (s
   Positive * vectorBounds = vectorBounds
   Negative * vectorBounds = -vectorBounds
 
-instance Multiplication' (VectorBounds2d (space @ units)) Sign where
-  type VectorBounds2d (space @ units) .*. Sign = VectorBounds2d (space @ (units :*: Unitless))
+instance
+  Multiplication'
+    (VectorBounds2d (space @ units))
+    Sign
+    (VectorBounds2d (space @ (units :*: Unitless)))
+  where
   vectorBounds .*. Positive = Units.coerce vectorBounds
   vectorBounds .*. Negative = Units.coerce -vectorBounds
 
@@ -182,8 +190,12 @@ instance
   where
   Vector2d x1 y1 - VectorBounds2d x2 y2 = VectorBounds2d (x1 - x2) (y1 - y2)
 
-instance Multiplication' (Qty units1) (VectorBounds2d (space @ units2)) where
-  type Qty units1 .*. VectorBounds2d (space @ units2) = VectorBounds2d (space @ (units1 :*: units2))
+instance
+  Multiplication'
+    (Qty units1)
+    (VectorBounds2d (space @ units2))
+    (VectorBounds2d (space @ (units1 :*: units2)))
+  where
   value .*. VectorBounds2d x y = VectorBounds2d (value .*. x) (value .*. y)
 
 instance
@@ -192,8 +204,12 @@ instance
   where
   value * VectorBounds2d x y = VectorBounds2d (value * x) (value * y)
 
-instance Multiplication' (VectorBounds2d (space @ units1)) (Qty units2) where
-  type VectorBounds2d (space @ units1) .*. Qty units2 = VectorBounds2d (space @ (units1 :*: units2))
+instance
+  Multiplication'
+    (VectorBounds2d (space @ units1))
+    (Qty units2)
+    (VectorBounds2d (space @ (units1 :*: units2)))
+  where
   VectorBounds2d x y .*. value = VectorBounds2d (x .*. value) (y .*. value)
 
 instance
@@ -202,8 +218,12 @@ instance
   where
   VectorBounds2d x y * value = VectorBounds2d (x * value) (y * value)
 
-instance Multiplication' (Range units1) (Vector2d (space @ units2)) where
-  type Range units1 .*. Vector2d (space @ units2) = VectorBounds2d (space @ (units1 :*: units2))
+instance
+  Multiplication'
+    (Range units1)
+    (Vector2d (space @ units2))
+    (VectorBounds2d (space @ (units1 :*: units2)))
+  where
   range .*. Vector2d x y = VectorBounds2d (range .*. x) (range .*. y)
 
 instance
@@ -212,8 +232,12 @@ instance
   where
   range * Vector2d x y = VectorBounds2d (range * x) (range * y)
 
-instance Multiplication' (Vector2d (space @ units1)) (Range units2) where
-  type Vector2d (space @ units1) .*. Range units2 = VectorBounds2d (space @ (units1 :*: units2))
+instance
+  Multiplication'
+    (Vector2d (space @ units1))
+    (Range units2)
+    (VectorBounds2d (space @ (units1 :*: units2)))
+  where
   Vector2d x y .*. range = VectorBounds2d (x .*. range) (y .*. range)
 
 instance
@@ -222,8 +246,12 @@ instance
   where
   Vector2d x y * range = VectorBounds2d (x * range) (y * range)
 
-instance Multiplication' (Range units1) (VectorBounds2d (space @ units2)) where
-  type Range units1 .*. VectorBounds2d (space @ units2) = VectorBounds2d (space @ (units1 :*: units2))
+instance
+  Multiplication'
+    (Range units1)
+    (VectorBounds2d (space @ units2))
+    (VectorBounds2d (space @ (units1 :*: units2)))
+  where
   range .*. VectorBounds2d x y = VectorBounds2d (range .*. x) (range .*. y)
 
 instance
@@ -232,8 +260,12 @@ instance
   where
   range * VectorBounds2d x y = VectorBounds2d (range * x) (range * y)
 
-instance Multiplication' (VectorBounds2d (space @ units1)) (Range units2) where
-  type VectorBounds2d (space @ units1) .*. Range units2 = VectorBounds2d (space @ (units1 :*: units2))
+instance
+  Multiplication'
+    (VectorBounds2d (space @ units1))
+    (Range units2)
+    (VectorBounds2d (space @ (units1 :*: units2)))
+  where
   VectorBounds2d x y .*. range = VectorBounds2d (x .*. range) (y .*. range)
 
 instance
@@ -242,8 +274,12 @@ instance
   where
   VectorBounds2d x y * range = VectorBounds2d (x * range) (y * range)
 
-instance Division' (VectorBounds2d (space @ units1)) (Qty units2) where
-  type VectorBounds2d (space @ units1) ./. Qty units2 = VectorBounds2d (space @ (units1 :/: units2))
+instance
+  Division'
+    (VectorBounds2d (space @ units1))
+    (Qty units2)
+    (VectorBounds2d (space @ (units1 :/: units2)))
+  where
   VectorBounds2d x y ./. value = VectorBounds2d (x ./. value) (y ./. value)
 
 instance
@@ -252,8 +288,12 @@ instance
   where
   VectorBounds2d x y / value = VectorBounds2d (x / value) (y / value)
 
-instance Division' (VectorBounds2d (space @ units1)) (Range units2) where
-  type VectorBounds2d (space @ units1) ./. Range units2 = VectorBounds2d (space @ (units1 :/: units2))
+instance
+  Division'
+    (VectorBounds2d (space @ units1))
+    (Range units2)
+    (VectorBounds2d (space @ (units1 :/: units2)))
+  where
   VectorBounds2d x y ./. range = VectorBounds2d (x ./. range) (y ./. range)
 
 instance

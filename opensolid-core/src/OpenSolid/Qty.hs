@@ -83,21 +83,25 @@ instance Negation (Qty units) where
   {-# INLINE negate #-}
   negate (Qty x) = Qty (Prelude.negate x)
 
-instance Multiplication' Sign (Qty units) where
-  type Sign .*. Qty units = Qty (Unitless :*: units)
+instance Multiplication' Sign (Qty units) (Qty (Unitless :*: units)) where
   {-# INLINEABLE (.*.) #-}
   Positive .*. value = Units.coerce value
   Negative .*. value = Units.coerce -value
 
-instance Multiplication Sign (Qty units) (Qty units)
+instance Multiplication Sign (Qty units) (Qty units) where
+  {-# INLINEABLE (*) #-}
+  Positive * value = value
+  Negative * value = -value
 
-instance Multiplication' (Qty units) Sign where
-  type Qty units .*. Sign = Qty (units :*: Unitless)
+instance Multiplication' (Qty units) Sign (Qty (units :*: Unitless)) where
   {-# INLINEABLE (.*.) #-}
   value .*. Positive = Units.coerce value
   value .*. Negative = Units.coerce -value
 
-instance Multiplication (Qty units) Sign (Qty units)
+instance Multiplication (Qty units) Sign (Qty units) where
+  {-# INLINEABLE (*) #-}
+  value * Positive = value
+  value * Negative = -value
 
 instance units ~ units_ => Addition (Qty units) (Qty units_) (Qty units) where
   {-# INLINE (+) #-}
@@ -107,8 +111,7 @@ instance units ~ units_ => Subtraction (Qty units) (Qty units_) (Qty units) wher
   {-# INLINE (-) #-}
   Qty x - Qty y = Qty (x Prelude.- y)
 
-instance Multiplication' (Qty units1) (Qty units2) where
-  type Qty units1 .*. Qty units2 = Qty (units1 :*: units2)
+instance Multiplication' (Qty units1) (Qty units2) (Qty (units1 :*: units2)) where
   {-# INLINE (.*.) #-}
   Qty x .*. Qty y = Qty (x Prelude.* y)
 
@@ -119,8 +122,7 @@ instance
   {-# INLINEABLE (*) #-}
   Qty x * Qty y = Qty (x Prelude.* y)
 
-instance Division' (Qty units1) (Qty units2) where
-  type Qty units1 ./. Qty units2 = Qty (units1 :/: units2)
+instance Division' (Qty units1) (Qty units2) (Qty (units1 :/: units2)) where
   {-# INLINE (./.) #-}
   Qty x ./. Qty y = Qty (x Prelude./ y)
 

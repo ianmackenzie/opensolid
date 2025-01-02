@@ -27,13 +27,24 @@ instance
   ) =>
   Addition (Vector3d (space @ units)) (Vector3d (space_ @ units_)) (Vector3d (space @ units))
 
-instance Multiplication' (Qty units1) (Vector3d (space @ units2))
+instance
+  Multiplication'
+    (Qty units1)
+    (Vector3d (space @ units2))
+    (Vector3d (space @ (units1 :*: units2)))
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (Qty units1) (Vector3d (space @ units2)) (Vector3d (space @ units3))
+  Multiplication
+    (Qty units1)
+    (Vector3d (space @ units2))
+    (Vector3d (space @ units3))
 
-instance Multiplication' (Vector3d (space @ units1)) (Qty units2)
+instance
+  Multiplication'
+    (Vector3d (space @ units1))
+    (Qty units2)
+    (Vector3d (space @ (units1 :*: units2)))
 
 instance
   Units.Product units1 units2 units3 =>

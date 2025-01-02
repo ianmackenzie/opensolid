@@ -190,17 +190,19 @@ instance Negation (Curve1d units) where
   negate (Product' c1 c2) = negate c1 .*. c2
   negate curve = Negated curve
 
-instance Multiplication Sign (Curve1d units) (Curve1d units)
+instance Multiplication Sign (Curve1d units) (Curve1d units) where
+  Positive * curve = curve
+  Negative * curve = -curve
 
-instance Multiplication' Sign (Curve1d units) where
-  type Sign .*. Curve1d units = Curve1d (Unitless :*: units)
+instance Multiplication' Sign (Curve1d units) (Curve1d (Unitless :*: units)) where
   Positive .*. curve = Units.coerce curve
   Negative .*. curve = Units.coerce -curve
 
-instance Multiplication (Curve1d units) Sign (Curve1d units)
+instance Multiplication (Curve1d units) Sign (Curve1d units) where
+  curve * Positive = curve
+  curve * Negative = -curve
 
-instance Multiplication' (Curve1d units) Sign where
-  type Curve1d units .*. Sign = Curve1d (units :*: Unitless)
+instance Multiplication' (Curve1d units) Sign (Curve1d (units :*: Unitless)) where
   curve .*. Positive = Units.coerce curve
   curve .*. Negative = Units.coerce -curve
 
@@ -236,51 +238,57 @@ instance
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Curve1d units1) (Curve1d units2) (Curve1d units3)
+  where
+  lhs * rhs = Units.specialize (lhs .*. rhs)
 
-instance Multiplication' (Curve1d units1) (Curve1d units2) where
-  type Curve1d units1 .*. Curve1d units2 = Curve1d (units1 :*: units2)
+instance Multiplication' (Curve1d units1) (Curve1d units2) (Curve1d (units1 :*: units2)) where
   Parametric lhs .*. Parametric rhs = Parametric (lhs .*. rhs)
   lhs .*. rhs = Product' lhs rhs
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Curve1d units1) (Qty units2) (Curve1d units3)
+  where
+  lhs * rhs = Units.specialize (lhs .*. rhs)
 
-instance Multiplication' (Curve1d units1) (Qty units2) where
-  type Curve1d units1 .*. Qty units2 = Curve1d (units1 :*: units2)
+instance Multiplication' (Curve1d units1) (Qty units2) (Curve1d (units1 :*: units2)) where
   curve .*. value = curve .*. constant value
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Qty units1) (Curve1d units2) (Curve1d units3)
+  where
+  lhs * rhs = Units.specialize (lhs .*. rhs)
 
-instance Multiplication' (Qty units1) (Curve1d units2) where
-  type Qty units1 .*. Curve1d units2 = Curve1d (units1 :*: units2)
+instance Multiplication' (Qty units1) (Curve1d units2) (Curve1d (units1 :*: units2)) where
   value .*. curve = constant value .*. curve
 
 instance
   Units.Quotient units1 units2 units3 =>
   Division (Curve1d units1) (Curve1d units2) (Curve1d units3)
+  where
+  lhs / rhs = Units.specialize (lhs ./. rhs)
 
-instance Division' (Curve1d units1) (Curve1d units2) where
-  type Curve1d units1 ./. Curve1d units2 = Curve1d (units1 :/: units2)
+instance Division' (Curve1d units1) (Curve1d units2) (Curve1d (units1 :/: units2)) where
   Parametric lhs ./. Parametric rhs = Parametric (lhs ./. rhs)
   lhs ./. rhs = Quotient' lhs rhs
 
 instance
   Units.Quotient units1 units2 units3 =>
   Division (Curve1d units1) (Qty units2) (Curve1d units3)
+  where
+  lhs / rhs = Units.specialize (lhs ./. rhs)
 
-instance Division' (Curve1d units1) (Qty units2) where
-  type Curve1d units1 ./. Qty units2 = Curve1d (units1 :/: units2)
+instance Division' (Curve1d units1) (Qty units2) (Curve1d (units1 :/: units2)) where
   curve ./. value = curve ./. constant value
 
 instance
   Units.Quotient units1 units2 units3 =>
   Division (Qty units1) (Curve1d units2) (Curve1d units3)
+  where
+  lhs / rhs = Units.specialize (lhs ./. rhs)
 
-instance Division' (Qty units1) (Curve1d units2) where
-  type Qty units1 ./. Curve1d units2 = Curve1d (units1 :/: units2)
+instance Division' (Qty units1) (Curve1d units2) (Curve1d (units1 :/: units2)) where
   value ./. curve = constant value ./. curve
 
 instance Composition (Curve1d Unitless) (Curve1d units) (Curve1d units) where

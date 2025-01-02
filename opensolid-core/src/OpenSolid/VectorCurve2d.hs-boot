@@ -41,11 +41,19 @@ instance Show (VectorCurve2d (space @ units))
 
 instance Negation (VectorCurve2d (space @ units))
 
-instance Multiplication' Sign (VectorCurve2d (space @ units))
+instance
+  Multiplication'
+    Sign
+    (VectorCurve2d (space @ units))
+    (VectorCurve2d (space @ (Unitless :*: units)))
 
 instance Multiplication Sign (VectorCurve2d (space @ units)) (VectorCurve2d (space @ units))
 
-instance Multiplication' (VectorCurve2d (space @ units)) Sign
+instance
+  Multiplication'
+    (VectorCurve2d (space @ units))
+    Sign
+    (VectorCurve2d (space @ (units :*: Unitless)))
 
 instance Multiplication (VectorCurve2d (space @ units)) Sign (VectorCurve2d (space @ units))
 
@@ -53,19 +61,31 @@ instance
   space1 ~ space2 =>
   Units.Coercion (VectorCurve2d (space1 @ unitsA)) (VectorCurve2d (space2 @ unitsB))
 
-instance Multiplication' (Curve1d units1) (VectorCurve2d (space @ units2))
+instance
+  Multiplication'
+    (Curve1d units1)
+    (VectorCurve2d (space @ units2))
+    (VectorCurve2d (space @ (units1 :*: units2)))
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Curve1d units1) (VectorCurve2d (space @ units2)) (VectorCurve2d (space @ units3))
 
-instance Multiplication' (VectorCurve2d (space @ units1)) (Curve1d units2)
+instance
+  Multiplication'
+    (VectorCurve2d (space @ units1))
+    (Curve1d units2)
+    (VectorCurve2d (space @ (units1 :*: units2)))
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (VectorCurve2d (space @ units1)) (Curve1d units2) (VectorCurve2d (space @ units3))
 
-instance Division' (VectorCurve2d (space @ units1)) (Curve1d units2)
+instance
+  Division'
+    (VectorCurve2d (space @ units1))
+    (Curve1d units2)
+    (VectorCurve2d (space @ (units1 :/: units2)))
 
 instance
   Units.Quotient units1 units2 units3 =>

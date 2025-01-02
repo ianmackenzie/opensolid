@@ -80,42 +80,74 @@ reverse (DirectionCurve3d vectorCurve) = DirectionCurve3d (VectorCurve3d.reverse
 instance Negation (DirectionCurve3d space) where
   negate (DirectionCurve3d vectorCurve) = DirectionCurve3d (negate vectorCurve)
 
-instance Multiplication Sign (DirectionCurve3d space) (DirectionCurve3d space)
+instance Multiplication Sign (DirectionCurve3d space) (DirectionCurve3d space) where
+  Positive * curve = curve
+  Negative * curve = -curve
 
-instance Multiplication' Sign (DirectionCurve3d space) where
-  type Sign .*. DirectionCurve3d space = DirectionCurve3d space
+instance Multiplication' Sign (DirectionCurve3d space) (DirectionCurve3d space) where
   Positive .*. curve = curve
   Negative .*. curve = -curve
 
-instance Multiplication (DirectionCurve3d space) Sign (DirectionCurve3d space)
+instance Multiplication (DirectionCurve3d space) Sign (DirectionCurve3d space) where
+  curve * Positive = curve
+  curve * Negative = -curve
 
-instance Multiplication' (DirectionCurve3d space) Sign where
-  type DirectionCurve3d space .*. Sign = DirectionCurve3d space
+instance Multiplication' (DirectionCurve3d space) Sign (DirectionCurve3d space) where
   curve .*. Positive = curve
   curve .*. Negative = -curve
 
-instance Multiplication (Qty units) (DirectionCurve3d space) (VectorCurve3d (space @ units))
+instance Multiplication (Qty units) (DirectionCurve3d space) (VectorCurve3d (space @ units)) where
+  value * DirectionCurve3d vectorCurve = value * vectorCurve
 
-instance Multiplication' (Qty units) (DirectionCurve3d space) where
-  type Qty units .*. DirectionCurve3d space = VectorCurve3d (space @ (units :*: Unitless))
+instance
+  Multiplication'
+    (Qty units)
+    (DirectionCurve3d space)
+    (VectorCurve3d (space @ (units :*: Unitless)))
+  where
   value .*. DirectionCurve3d vectorCurve = value .*. vectorCurve
 
-instance Multiplication (DirectionCurve3d space) (Qty units) (VectorCurve3d (space @ units))
+instance Multiplication (DirectionCurve3d space) (Qty units) (VectorCurve3d (space @ units)) where
+  DirectionCurve3d vectorCurve * value = vectorCurve * value
 
-instance Multiplication' (DirectionCurve3d space) (Qty units) where
-  type DirectionCurve3d space .*. Qty units = VectorCurve3d (space @ (Unitless :*: units))
+instance
+  Multiplication'
+    (DirectionCurve3d space)
+    (Qty units)
+    (VectorCurve3d (space @ (Unitless :*: units)))
+  where
   DirectionCurve3d vectorCurve .*. value = vectorCurve .*. value
 
-instance Multiplication (Curve1d units) (DirectionCurve3d space) (VectorCurve3d (space @ units))
+instance
+  Multiplication
+    (Curve1d units)
+    (DirectionCurve3d space)
+    (VectorCurve3d (space @ units))
+  where
+  scalarCurve * DirectionCurve3d vectorCurve = scalarCurve * vectorCurve
 
-instance Multiplication' (Curve1d units) (DirectionCurve3d space) where
-  type Curve1d units .*. DirectionCurve3d space = VectorCurve3d (space @ (units :*: Unitless))
+instance
+  Multiplication'
+    (Curve1d units)
+    (DirectionCurve3d space)
+    (VectorCurve3d (space @ (units :*: Unitless)))
+  where
   scalarCurve .*. DirectionCurve3d vectorCurve = scalarCurve .*. vectorCurve
 
-instance Multiplication (DirectionCurve3d space) (Curve1d units) (VectorCurve3d (space @ units))
+instance
+  Multiplication
+    (DirectionCurve3d space)
+    (Curve1d units)
+    (VectorCurve3d (space @ units))
+  where
+  DirectionCurve3d vectorCurve * scalarCurve = vectorCurve * scalarCurve
 
-instance Multiplication' (DirectionCurve3d space) (Curve1d units) where
-  type DirectionCurve3d space .*. Curve1d units = VectorCurve3d (space @ (Unitless :*: units))
+instance
+  Multiplication'
+    (DirectionCurve3d space)
+    (Curve1d units)
+    (VectorCurve3d (space @ (Unitless :*: units)))
+  where
   DirectionCurve3d vectorCurve .*. scalarCurve = vectorCurve .*. scalarCurve
 
 instance

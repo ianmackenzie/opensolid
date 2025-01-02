@@ -122,8 +122,12 @@ instance
 instance Negation (Vector2d (space @ units)) where
   negate (Vector2d# vx# vy#) = Vector2d# (negate# vx#) (negate# vy#)
 
-instance Multiplication' Sign (Vector2d (space @ units)) where
-  type Sign .*. Vector2d (space @ units) = Vector2d (space @ (Unitless :*: units))
+instance
+  Multiplication'
+    Sign
+    (Vector2d (space @ units))
+    (Vector2d (space @ (Unitless :*: units)))
+  where
   Positive .*. vector = Units.coerce vector
   Negative .*. vector = Units.coerce -vector
 
@@ -131,8 +135,12 @@ instance Multiplication Sign (Vector2d (space @ units)) (Vector2d (space @ units
   Positive * vector = vector
   Negative * vector = -vector
 
-instance Multiplication' (Vector2d (space @ units)) Sign where
-  type Vector2d (space @ units) .*. Sign = Vector2d (space @ (units :*: Unitless))
+instance
+  Multiplication'
+    (Vector2d (space @ units))
+    Sign
+    (Vector2d (space @ (units :*: Unitless)))
+  where
   vector .*. Positive = Units.coerce vector
   vector .*. Negative = Units.coerce -vector
 
@@ -162,8 +170,12 @@ instance
   where
   Vector2d# x1# y1# - Vector2d# x2# y2# = Vector2d# (x1# -# x2#) (y1# -# y2#)
 
-instance Multiplication' (Qty units1) (Vector2d (space @ units2)) where
-  type Qty units1 .*. Vector2d (space @ units2) = Vector2d (space @ (units1 :*: units2))
+instance
+  Multiplication'
+    (Qty units1)
+    (Vector2d (space @ units2))
+    (Vector2d (space @ (units1 :*: units2)))
+  where
   Qty# scale# .*. Vector2d# vx# vy# = Vector2d# (scale# *# vx#) (scale# *# vy#)
 
 instance
@@ -172,8 +184,12 @@ instance
   where
   Qty# scale# * Vector2d# vx# vy# = Vector2d# (scale# *# vx#) (scale# *# vy#)
 
-instance Multiplication' (Vector2d (space @ units1)) (Qty units2) where
-  type Vector2d (space @ units1) .*. Qty units2 = Vector2d (space @ (units1 :*: units2))
+instance
+  Multiplication'
+    (Vector2d (space @ units1))
+    (Qty units2)
+    (Vector2d (space @ (units1 :*: units2)))
+  where
   Vector2d# vx# vy# .*. Qty# scale# = Vector2d# (vx# *# scale#) (vy# *# scale#)
 
 instance
@@ -182,8 +198,12 @@ instance
   where
   Vector2d# vx# vy# * Qty# scale# = Vector2d# (vx# *# scale#) (vy# *# scale#)
 
-instance Division' (Vector2d (space @ units1)) (Qty units2) where
-  type Vector2d (space @ units1) ./. Qty units2 = Vector2d (space @ (units1 :/: units2))
+instance
+  Division'
+    (Vector2d (space @ units1))
+    (Qty units2)
+    (Vector2d (space @ (units1 :/: units2)))
+  where
   Vector2d# vx# vy# ./. Qty# scale# = Vector2d# (vx# /# scale#) (vy# /# scale#)
 
 instance

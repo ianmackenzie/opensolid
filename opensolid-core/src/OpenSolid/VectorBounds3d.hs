@@ -74,8 +74,12 @@ instance
 instance Negation (VectorBounds3d (space @ units)) where
   negate (VectorBounds3d x y z) = VectorBounds3d (negate x) (negate y) (negate z)
 
-instance Multiplication' Sign (VectorBounds3d (space @ units)) where
-  type Sign .*. VectorBounds3d (space @ units) = VectorBounds3d (space @ (Unitless :*: units))
+instance
+  Multiplication'
+    Sign
+    (VectorBounds3d (space @ units))
+    (VectorBounds3d (space @ (Unitless :*: units)))
+  where
   Positive .*. vectorBounds = Units.coerce vectorBounds
   Negative .*. vectorBounds = Units.coerce -vectorBounds
 
@@ -83,8 +87,12 @@ instance Multiplication Sign (VectorBounds3d (space @ units)) (VectorBounds3d (s
   Positive * vectorBounds = vectorBounds
   Negative * vectorBounds = -vectorBounds
 
-instance Multiplication' (VectorBounds3d (space @ units)) Sign where
-  type VectorBounds3d (space @ units) .*. Sign = VectorBounds3d (space @ (units :*: Unitless))
+instance
+  Multiplication'
+    (VectorBounds3d (space @ units))
+    Sign
+    (VectorBounds3d (space @ (units :*: Unitless)))
+  where
   vectorBounds .*. Positive = Units.coerce vectorBounds
   vectorBounds .*. Negative = Units.coerce -vectorBounds
 
@@ -158,10 +166,12 @@ instance
   where
   Vector3d x1 y1 z1 - VectorBounds3d x2 y2 z2 = VectorBounds3d (x1 - x2) (y1 - y2) (z1 - z2)
 
-instance Multiplication' (Qty units1) (VectorBounds3d (space @ units2)) where
-  type
-    Qty units1 .*. VectorBounds3d (space @ units2) =
-      VectorBounds3d (space @ (units1 :*: units2))
+instance
+  Multiplication'
+    (Qty units1)
+    (VectorBounds3d (space @ units2))
+    (VectorBounds3d (space @ (units1 :*: units2)))
+  where
   value .*. VectorBounds3d x y z = VectorBounds3d (value .*. x) (value .*. y) (value .*. z)
 
 instance
@@ -170,10 +180,12 @@ instance
   where
   value * VectorBounds3d x y z = VectorBounds3d (value * x) (value * y) (value * z)
 
-instance Multiplication' (VectorBounds3d (space @ units1)) (Qty units2) where
-  type
-    VectorBounds3d (space @ units1) .*. Qty units2 =
-      VectorBounds3d (space @ (units1 :*: units2))
+instance
+  Multiplication'
+    (VectorBounds3d (space @ units1))
+    (Qty units2)
+    (VectorBounds3d (space @ (units1 :*: units2)))
+  where
   VectorBounds3d x y z .*. value = VectorBounds3d (x .*. value) (y .*. value) (z .*. value)
 
 instance
@@ -182,8 +194,12 @@ instance
   where
   VectorBounds3d x y z * value = VectorBounds3d (x * value) (y * value) (z * value)
 
-instance Multiplication' (Range units1) (Vector3d (space @ units2)) where
-  type Range units1 .*. Vector3d (space @ units2) = VectorBounds3d (space @ (units1 :*: units2))
+instance
+  Multiplication'
+    (Range units1)
+    (Vector3d (space @ units2))
+    (VectorBounds3d (space @ (units1 :*: units2)))
+  where
   range .*. Vector3d x y z = VectorBounds3d (range .*. x) (range .*. y) (range .*. z)
 
 instance
@@ -192,8 +208,12 @@ instance
   where
   range * Vector3d x y z = VectorBounds3d (range * x) (range * y) (range * z)
 
-instance Multiplication' (Vector3d (space @ units1)) (Range units2) where
-  type Vector3d (space @ units1) .*. Range units2 = VectorBounds3d (space @ (units1 :*: units2))
+instance
+  Multiplication'
+    (Vector3d (space @ units1))
+    (Range units2)
+    (VectorBounds3d (space @ (units1 :*: units2)))
+  where
   Vector3d x y z .*. range = VectorBounds3d (x .*. range) (y .*. range) (z .*. range)
 
 instance
@@ -202,10 +222,12 @@ instance
   where
   Vector3d x y z * range = VectorBounds3d (x * range) (y * range) (z * range)
 
-instance Multiplication' (Range units1) (VectorBounds3d (space @ units2)) where
-  type
-    Range units1 .*. VectorBounds3d (space @ units2) =
-      VectorBounds3d (space @ (units1 :*: units2))
+instance
+  Multiplication'
+    (Range units1)
+    (VectorBounds3d (space @ units2))
+    (VectorBounds3d (space @ (units1 :*: units2)))
+  where
   range .*. VectorBounds3d x y z = VectorBounds3d (range .*. x) (range .*. y) (range .*. z)
 
 instance
@@ -214,10 +236,12 @@ instance
   where
   range * VectorBounds3d x y z = VectorBounds3d (range * x) (range * y) (range * z)
 
-instance Multiplication' (VectorBounds3d (space @ units1)) (Range units2) where
-  type
-    VectorBounds3d (space @ units1) .*. Range units2 =
-      VectorBounds3d (space @ (units1 :*: units2))
+instance
+  Multiplication'
+    (VectorBounds3d (space @ units1))
+    (Range units2)
+    (VectorBounds3d (space @ (units1 :*: units2)))
+  where
   VectorBounds3d x y z .*. range = VectorBounds3d (x .*. range) (y .*. range) (z .*. range)
 
 instance
@@ -226,10 +250,12 @@ instance
   where
   VectorBounds3d x y z * range = VectorBounds3d (x * range) (y * range) (z * range)
 
-instance Division' (VectorBounds3d (space @ units1)) (Qty units2) where
-  type
-    VectorBounds3d (space @ units1) ./. Qty units2 =
-      VectorBounds3d (space @ (units1 :/: units2))
+instance
+  Division'
+    (VectorBounds3d (space @ units1))
+    (Qty units2)
+    (VectorBounds3d (space @ (units1 :/: units2)))
+  where
   VectorBounds3d x y z ./. value = VectorBounds3d (x ./. value) (y ./. value) (z ./. value)
 
 instance
@@ -238,10 +264,12 @@ instance
   where
   VectorBounds3d x y z / value = VectorBounds3d (x / value) (y / value) (z / value)
 
-instance Division' (VectorBounds3d (space @ units1)) (Range units2) where
-  type
-    VectorBounds3d (space @ units1) ./. Range units2 =
-      VectorBounds3d (space @ (units1 :/: units2))
+instance
+  Division'
+    (VectorBounds3d (space @ units1))
+    (Range units2)
+    (VectorBounds3d (space @ (units1 :/: units2)))
+  where
   VectorBounds3d x y z ./. range = VectorBounds3d (x ./. range) (y ./. range) (z ./. range)
 
 instance

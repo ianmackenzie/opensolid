@@ -764,103 +764,147 @@ instance Negation (Expression UvwPoint (Vector3d (space @ units))) where
   negate VectorVolume3d{vv3x, vv3y, vv3z} =
     vectorVolume3d (Scalar.negated vv3x) (Scalar.negated vv3y) (Scalar.negated vv3z)
 
-instance Multiplication' Sign (Expression Float (Qty units)) where
-  type Sign .*. Expression Float (Qty units) = Expression Float (Qty (Unitless :*: units))
+instance
+  Multiplication'
+    Sign
+    (Expression Float (Qty units))
+    (Expression Float (Qty (Unitless :*: units)))
+  where
   Positive .*. expression = Units.coerce expression
   Negative .*. expression = Units.coerce -expression
 
-instance Multiplication' Sign (Expression UvPoint (Qty units)) where
-  type Sign .*. Expression UvPoint (Qty units) = Expression UvPoint (Qty (Unitless :*: units))
+instance
+  Multiplication'
+    Sign
+    (Expression UvPoint (Qty units))
+    (Expression UvPoint (Qty (Unitless :*: units)))
+  where
   Positive .*. expression = Units.coerce expression
   Negative .*. expression = Units.coerce -expression
 
-instance Multiplication' Sign (Expression UvwPoint (Qty units)) where
-  type Sign .*. Expression UvwPoint (Qty units) = Expression UvwPoint (Qty (Unitless :*: units))
+instance
+  Multiplication'
+    Sign
+    (Expression UvwPoint (Qty units))
+    (Expression UvwPoint (Qty (Unitless :*: units)))
+  where
   Positive .*. expression = Units.coerce expression
   Negative .*. expression = Units.coerce -expression
 
-instance Multiplication' (Expression Float (Qty units)) Sign where
-  type Expression Float (Qty units) .*. Sign = Expression Float (Qty (units :*: Unitless))
+instance
+  Multiplication'
+    (Expression Float (Qty units))
+    Sign
+    (Expression Float (Qty (units :*: Unitless)))
+  where
   expression .*. Positive = Units.coerce expression
   expression .*. Negative = Units.coerce -expression
 
-instance Multiplication' (Expression UvPoint (Qty units)) Sign where
-  type Expression UvPoint (Qty units) .*. Sign = Expression UvPoint (Qty (units :*: Unitless))
+instance
+  Multiplication'
+    (Expression UvPoint (Qty units))
+    Sign
+    (Expression UvPoint (Qty (units :*: Unitless)))
+  where
   expression .*. Positive = Units.coerce expression
   expression .*. Negative = Units.coerce -expression
 
-instance Multiplication' (Expression UvwPoint (Qty units)) Sign where
-  type Expression UvwPoint (Qty units) .*. Sign = Expression UvwPoint (Qty (units :*: Unitless))
+instance
+  Multiplication'
+    (Expression UvwPoint (Qty units))
+    Sign
+    (Expression UvwPoint (Qty (units :*: Unitless)))
+  where
   expression .*. Positive = Units.coerce expression
   expression .*. Negative = Units.coerce -expression
 
-instance Multiplication' Sign (Expression Float (Vector2d (space @ units))) where
-  type
-    Sign .*. Expression Float (Vector2d (space @ units)) =
-      Expression Float (Vector2d (space @ (Unitless :*: units)))
+instance
+  Multiplication'
+    Sign
+    (Expression Float (Vector2d (space @ units)))
+    (Expression Float (Vector2d (space @ (Unitless :*: units))))
+  where
   Positive .*. expression = Units.coerce expression
   Negative .*. expression = Units.coerce -expression
 
-instance Multiplication' Sign (Expression UvPoint (Vector2d (space @ units))) where
-  type
-    Sign .*. Expression UvPoint (Vector2d (space @ units)) =
-      Expression UvPoint (Vector2d (space @ (Unitless :*: units)))
+instance
+  Multiplication'
+    Sign
+    (Expression UvPoint (Vector2d (space @ units)))
+    (Expression UvPoint (Vector2d (space @ (Unitless :*: units))))
+  where
   Positive .*. expression = Units.coerce expression
   Negative .*. expression = Units.coerce -expression
 
-instance Multiplication' (Expression Float (Vector2d (space @ units))) Sign where
-  type
-    Expression Float (Vector2d (space @ units)) .*. Sign =
-      Expression Float (Vector2d (space @ (units :*: Unitless)))
+instance
+  Multiplication'
+    (Expression Float (Vector2d (space @ units)))
+    Sign
+    (Expression Float (Vector2d (space @ (units :*: Unitless))))
+  where
   expression .*. Positive = Units.coerce expression
   expression .*. Negative = Units.coerce -expression
 
-instance Multiplication' (Expression UvPoint (Vector2d (space @ units))) Sign where
-  type
-    Expression UvPoint (Vector2d (space @ units)) .*. Sign =
-      Expression UvPoint (Vector2d (space @ (units :*: Unitless)))
+instance
+  Multiplication'
+    (Expression UvPoint (Vector2d (space @ units)))
+    Sign
+    (Expression UvPoint (Vector2d (space @ (units :*: Unitless))))
+  where
   expression .*. Positive = Units.coerce expression
   expression .*. Negative = Units.coerce -expression
 
-instance Multiplication' Sign (Expression Float (Vector3d (space @ units))) where
-  type
-    Sign .*. Expression Float (Vector3d (space @ units)) =
-      Expression Float (Vector3d (space @ (Unitless :*: units)))
+instance
+  Multiplication'
+    Sign
+    (Expression Float (Vector3d (space @ units)))
+    (Expression Float (Vector3d (space @ (Unitless :*: units))))
+  where
   Positive .*. expression = Units.coerce expression
   Negative .*. expression = Units.coerce -expression
 
-instance Multiplication' Sign (Expression UvPoint (Vector3d (space @ units))) where
-  type
-    Sign .*. Expression UvPoint (Vector3d (space @ units)) =
-      Expression UvPoint (Vector3d (space @ (Unitless :*: units)))
+instance
+  Multiplication'
+    Sign
+    (Expression UvPoint (Vector3d (space @ units)))
+    (Expression UvPoint (Vector3d (space @ (Unitless :*: units))))
+  where
   Positive .*. expression = Units.coerce expression
   Negative .*. expression = Units.coerce -expression
 
-instance Multiplication' Sign (Expression UvwPoint (Vector3d (space @ units))) where
-  type
-    Sign .*. Expression UvwPoint (Vector3d (space @ units)) =
-      Expression UvwPoint (Vector3d (space @ (Unitless :*: units)))
+instance
+  Multiplication'
+    Sign
+    (Expression UvwPoint (Vector3d (space @ units)))
+    (Expression UvwPoint (Vector3d (space @ (Unitless :*: units))))
+  where
   Positive .*. expression = Units.coerce expression
   Negative .*. expression = Units.coerce -expression
 
-instance Multiplication' (Expression Float (Vector3d (space @ units))) Sign where
-  type
-    Expression Float (Vector3d (space @ units)) .*. Sign =
-      Expression Float (Vector3d (space @ (units :*: Unitless)))
+instance
+  Multiplication'
+    (Expression Float (Vector3d (space @ units)))
+    Sign
+    (Expression Float (Vector3d (space @ (units :*: Unitless))))
+  where
   expression .*. Positive = Units.coerce expression
   expression .*. Negative = Units.coerce -expression
 
-instance Multiplication' (Expression UvPoint (Vector3d (space @ units))) Sign where
-  type
-    Expression UvPoint (Vector3d (space @ units)) .*. Sign =
-      Expression UvPoint (Vector3d (space @ (units :*: Unitless)))
+instance
+  Multiplication'
+    (Expression UvPoint (Vector3d (space @ units)))
+    Sign
+    (Expression UvPoint (Vector3d (space @ (units :*: Unitless))))
+  where
   expression .*. Positive = Units.coerce expression
   expression .*. Negative = Units.coerce -expression
 
-instance Multiplication' (Expression UvwPoint (Vector3d (space @ units))) Sign where
-  type
-    Expression UvwPoint (Vector3d (space @ units)) .*. Sign =
-      Expression UvwPoint (Vector3d (space @ (units :*: Unitless)))
+instance
+  Multiplication'
+    (Expression UvwPoint (Vector3d (space @ units)))
+    Sign
+    (Expression UvwPoint (Vector3d (space @ (units :*: Unitless))))
+  where
   expression .*. Positive = Units.coerce expression
   expression .*. Negative = Units.coerce -expression
 
@@ -869,96 +913,144 @@ instance
     Sign
     (Expression Float (Qty units))
     (Expression Float (Qty units))
+  where
+  Positive * expression = expression
+  Negative * expression = -expression
 
 instance
   Multiplication
     Sign
     (Expression UvPoint (Qty units))
     (Expression UvPoint (Qty units))
+  where
+  Positive * expression = expression
+  Negative * expression = -expression
 
 instance
   Multiplication
     Sign
     (Expression UvwPoint (Qty units))
     (Expression UvwPoint (Qty units))
+  where
+  Positive * expression = expression
+  Negative * expression = -expression
 
 instance
   Multiplication
     (Expression Float (Qty units))
     Sign
     (Expression Float (Qty units))
+  where
+  expression * Positive = expression
+  expression * Negative = -expression
 
 instance
   Multiplication
     (Expression UvPoint (Qty units))
     Sign
     (Expression UvPoint (Qty units))
+  where
+  expression * Positive = expression
+  expression * Negative = -expression
 
 instance
   Multiplication
     (Expression UvwPoint (Qty units))
     Sign
     (Expression UvwPoint (Qty units))
+  where
+  expression * Positive = expression
+  expression * Negative = -expression
 
 instance
   Multiplication
     Sign
     (Expression Float (Vector2d (space @ units)))
     (Expression Float (Vector2d (space @ units)))
+  where
+  Positive * expression = expression
+  Negative * expression = -expression
 
 instance
   Multiplication
     Sign
     (Expression UvPoint (Vector2d (space @ units)))
     (Expression UvPoint (Vector2d (space @ units)))
+  where
+  Positive * expression = expression
+  Negative * expression = -expression
 
 instance
   Multiplication
     (Expression Float (Vector2d (space @ units)))
     Sign
     (Expression Float (Vector2d (space @ units)))
+  where
+  expression * Positive = expression
+  expression * Negative = -expression
 
 instance
   Multiplication
     (Expression UvPoint (Vector2d (space @ units)))
     Sign
     (Expression UvPoint (Vector2d (space @ units)))
+  where
+  expression * Positive = expression
+  expression * Negative = -expression
 
 instance
   Multiplication
     Sign
     (Expression Float (Vector3d (space @ units)))
     (Expression Float (Vector3d (space @ units)))
+  where
+  Positive * expression = expression
+  Negative * expression = -expression
 
 instance
   Multiplication
     Sign
     (Expression UvPoint (Vector3d (space @ units)))
     (Expression UvPoint (Vector3d (space @ units)))
+  where
+  Positive * expression = expression
+  Negative * expression = -expression
 
 instance
   Multiplication
     Sign
     (Expression UvwPoint (Vector3d (space @ units)))
     (Expression UvwPoint (Vector3d (space @ units)))
+  where
+  Positive * expression = expression
+  Negative * expression = -expression
 
 instance
   Multiplication
     (Expression Float (Vector3d (space @ units)))
     Sign
     (Expression Float (Vector3d (space @ units)))
+  where
+  expression * Positive = expression
+  expression * Negative = -expression
 
 instance
   Multiplication
     (Expression UvPoint (Vector3d (space @ units)))
     Sign
     (Expression UvPoint (Vector3d (space @ units)))
+  where
+  expression * Positive = expression
+  expression * Negative = -expression
 
 instance
   Multiplication
     (Expression UvwPoint (Vector3d (space @ units)))
     Sign
     (Expression UvwPoint (Vector3d (space @ units)))
+  where
+  expression * Positive = expression
+  expression * Negative = -expression
 
 ----------------
 --- ADDITION ---
@@ -1285,6 +1377,8 @@ instance
     (Expression Float (Qty units1))
     (Expression Float (Qty units2))
     (Expression Float (Qty units3))
+  where
+  lhs * rhs = Units.specialize (lhs .*. rhs)
 
 instance
   Units.Product units1 units2 units3 =>
@@ -1292,6 +1386,8 @@ instance
     (Expression UvPoint (Qty units1))
     (Expression UvPoint (Qty units2))
     (Expression UvPoint (Qty units3))
+  where
+  lhs * rhs = Units.specialize (lhs .*. rhs)
 
 instance
   Units.Product units1 units2 units3 =>
@@ -1299,6 +1395,8 @@ instance
     (Expression UvwPoint (Qty units1))
     (Expression UvwPoint (Qty units2))
     (Expression UvwPoint (Qty units3))
+  where
+  lhs * rhs = Units.specialize (lhs .*. rhs)
 
 --- Qty-Vector2d ---
 --------------------
@@ -1309,6 +1407,8 @@ instance
     (Expression Float (Qty units1))
     (Expression Float (Vector2d (space @ units2)))
     (Expression Float (Vector2d (space @ units3)))
+  where
+  lhs * rhs = Units.specialize (lhs .*. rhs)
 
 instance
   Units.Product units1 units2 units3 =>
@@ -1316,6 +1416,8 @@ instance
     (Expression UvPoint (Qty units1))
     (Expression UvPoint (Vector2d (space @ units2)))
     (Expression UvPoint (Vector2d (space @ units3)))
+  where
+  lhs * rhs = Units.specialize (lhs .*. rhs)
 
 --- Vector2d-Qty ---
 --------------------
@@ -1326,6 +1428,8 @@ instance
     (Expression Float (Vector2d (space @ units1)))
     (Expression Float (Qty units2))
     (Expression Float (Vector2d (space @ units3)))
+  where
+  lhs * rhs = Units.specialize (lhs .*. rhs)
 
 instance
   Units.Product units1 units2 units3 =>
@@ -1333,6 +1437,8 @@ instance
     (Expression UvPoint (Vector2d (space @ units1)))
     (Expression UvPoint (Qty units2))
     (Expression UvPoint (Vector2d (space @ units3)))
+  where
+  lhs * rhs = Units.specialize (lhs .*. rhs)
 
 --- Qty-Vector3d ---
 --------------------
@@ -1343,6 +1449,8 @@ instance
     (Expression Float (Qty units1))
     (Expression Float (Vector3d (space @ units2)))
     (Expression Float (Vector3d (space @ units3)))
+  where
+  lhs * rhs = Units.specialize (lhs .*. rhs)
 
 instance
   Units.Product units1 units2 units3 =>
@@ -1350,6 +1458,8 @@ instance
     (Expression UvPoint (Qty units1))
     (Expression UvPoint (Vector3d (space @ units2)))
     (Expression UvPoint (Vector3d (space @ units3)))
+  where
+  lhs * rhs = Units.specialize (lhs .*. rhs)
 
 instance
   Units.Product units1 units2 units3 =>
@@ -1357,6 +1467,8 @@ instance
     (Expression UvwPoint (Qty units1))
     (Expression UvwPoint (Vector3d (space @ units2)))
     (Expression UvwPoint (Vector3d (space @ units3)))
+  where
+  lhs * rhs = Units.specialize (lhs .*. rhs)
 
 --- Vector3d-Qty ---
 --------------------
@@ -1367,6 +1479,8 @@ instance
     (Expression Float (Vector3d (space @ units1)))
     (Expression Float (Qty units2))
     (Expression Float (Vector3d (space @ units3)))
+  where
+  lhs * rhs = Units.specialize (lhs .*. rhs)
 
 instance
   Units.Product units1 units2 units3 =>
@@ -1374,6 +1488,8 @@ instance
     (Expression UvPoint (Vector3d (space @ units1)))
     (Expression UvPoint (Qty units2))
     (Expression UvPoint (Vector3d (space @ units3)))
+  where
+  lhs * rhs = Units.specialize (lhs .*. rhs)
 
 instance
   Units.Product units1 units2 units3 =>
@@ -1381,6 +1497,8 @@ instance
     (Expression UvwPoint (Vector3d (space @ units1)))
     (Expression UvwPoint (Qty units2))
     (Expression UvwPoint (Vector3d (space @ units3)))
+  where
+  lhs * rhs = Units.specialize (lhs .*. rhs)
 
 ---------------------------------
 --- Multiplication' instances ---
@@ -1389,85 +1507,105 @@ instance
 --- Qty-Qty ---
 ---------------
 
-instance Multiplication' (Expression Float (Qty units1)) (Expression Float (Qty units2)) where
-  type
-    Expression Float (Qty units1) .*. Expression Float (Qty units2) =
-      Expression Float (Qty (units1 :*: units2))
+instance
+  Multiplication'
+    (Expression Float (Qty units1))
+    (Expression Float (Qty units2))
+    (Expression Float (Qty (units1 :*: units2)))
+  where
   Curve1d{c1x = lhs} .*. Curve1d{c1x = rhs} = curve1d (Scalar.product lhs rhs)
 
-instance Multiplication' (Expression UvPoint (Qty units1)) (Expression UvPoint (Qty units2)) where
-  type
-    Expression UvPoint (Qty units1) .*. Expression UvPoint (Qty units2) =
-      Expression UvPoint (Qty (units1 :*: units2))
+instance
+  Multiplication'
+    (Expression UvPoint (Qty units1))
+    (Expression UvPoint (Qty units2))
+    (Expression UvPoint (Qty (units1 :*: units2)))
+  where
   Surface1d{s1x = lhs} .*. Surface1d{s1x = rhs} = surface1d (Scalar.product lhs rhs)
 
-instance Multiplication' (Expression UvwPoint (Qty units1)) (Expression UvwPoint (Qty units2)) where
-  type
-    Expression UvwPoint (Qty units1) .*. Expression UvwPoint (Qty units2) =
-      Expression UvwPoint (Qty (units1 :*: units2))
+instance
+  Multiplication'
+    (Expression UvwPoint (Qty units1))
+    (Expression UvwPoint (Qty units2))
+    (Expression UvwPoint (Qty (units1 :*: units2)))
+  where
   Volume1d{v1x = lhs} .*. Volume1d{v1x = rhs} = volume1d (Scalar.product lhs rhs)
 
 --- Qty-Vector2d ---
 --------------------
 
-instance Multiplication' (Expression Float (Qty units1)) (Expression Float (Vector2d (space @ units2))) where
-  type
-    Expression Float (Qty units1) .*. Expression Float (Vector2d (space @ units2)) =
-      Expression Float (Vector2d (space @ (units1 :*: units2)))
+instance
+  Multiplication'
+    (Expression Float (Qty units1))
+    (Expression Float (Vector2d (space @ units2)))
+    (Expression Float (Vector2d (space @ (units1 :*: units2))))
+  where
   Curve1d{c1x = scale} .*. VectorCurve2d{vc2x, vc2y} =
     vectorCurve2d (Scalar.product scale vc2x) (Scalar.product scale vc2y)
 
-instance Multiplication' (Expression UvPoint (Qty units1)) (Expression UvPoint (Vector2d (space @ units2))) where
-  type
-    Expression UvPoint (Qty units1) .*. Expression UvPoint (Vector2d (space @ units2)) =
-      Expression UvPoint (Vector2d (space @ (units1 :*: units2)))
+instance
+  Multiplication'
+    (Expression UvPoint (Qty units1))
+    (Expression UvPoint (Vector2d (space @ units2)))
+    (Expression UvPoint (Vector2d (space @ (units1 :*: units2))))
+  where
   Surface1d{s1x = scale} .*. VectorSurface2d{vs2x, vs2y} =
     vectorSurface2d (Scalar.product scale vs2x) (Scalar.product scale vs2y)
 
 --- Vector2d-Qty ---
 --------------------
 
-instance Multiplication' (Expression Float (Vector2d (space @ units1))) (Expression Float (Qty units2)) where
-  type
-    Expression Float (Vector2d (space @ units1)) .*. Expression Float (Qty units2) =
-      Expression Float (Vector2d (space @ (units1 :*: units2)))
+instance
+  Multiplication'
+    (Expression Float (Vector2d (space @ units1)))
+    (Expression Float (Qty units2))
+    (Expression Float (Vector2d (space @ (units1 :*: units2))))
+  where
   VectorCurve2d{vc2x, vc2y} .*. Curve1d{c1x = scale} =
     vectorCurve2d (Scalar.product vc2x scale) (Scalar.product vc2y scale)
 
-instance Multiplication' (Expression UvPoint (Vector2d (space @ units1))) (Expression UvPoint (Qty units2)) where
-  type
-    Expression UvPoint (Vector2d (space @ units1)) .*. Expression UvPoint (Qty units2) =
-      Expression UvPoint (Vector2d (space @ (units1 :*: units2)))
+instance
+  Multiplication'
+    (Expression UvPoint (Vector2d (space @ units1)))
+    (Expression UvPoint (Qty units2))
+    (Expression UvPoint (Vector2d (space @ (units1 :*: units2))))
+  where
   VectorSurface2d{vs2x, vs2y} .*. Surface1d{s1x = scale} =
     vectorSurface2d (Scalar.product vs2x scale) (Scalar.product vs2y scale)
 
 --- Qty-Vector3d ---
 --------------------
 
-instance Multiplication' (Expression Float (Qty units1)) (Expression Float (Vector3d (space @ units2))) where
-  type
-    Expression Float (Qty units1) .*. Expression Float (Vector3d (space @ units2)) =
-      Expression Float (Vector3d (space @ (units1 :*: units2)))
+instance
+  Multiplication'
+    (Expression Float (Qty units1))
+    (Expression Float (Vector3d (space @ units2)))
+    (Expression Float (Vector3d (space @ (units1 :*: units2))))
+  where
   Curve1d{c1x = scale} .*. VectorCurve3d{vc3x, vc3y, vc3z} =
     vectorCurve3d
       (Scalar.product scale vc3x)
       (Scalar.product scale vc3y)
       (Scalar.product scale vc3z)
 
-instance Multiplication' (Expression UvPoint (Qty units1)) (Expression UvPoint (Vector3d (space @ units2))) where
-  type
-    Expression UvPoint (Qty units1) .*. Expression UvPoint (Vector3d (space @ units2)) =
-      Expression UvPoint (Vector3d (space @ (units1 :*: units2)))
+instance
+  Multiplication'
+    (Expression UvPoint (Qty units1))
+    (Expression UvPoint (Vector3d (space @ units2)))
+    (Expression UvPoint (Vector3d (space @ (units1 :*: units2))))
+  where
   Surface1d{s1x = scale} .*. VectorSurface3d{vs3x, vs3y, vs3z} =
     vectorSurface3d
       (Scalar.product scale vs3x)
       (Scalar.product scale vs3y)
       (Scalar.product scale vs3z)
 
-instance Multiplication' (Expression UvwPoint (Qty units1)) (Expression UvwPoint (Vector3d (space @ units2))) where
-  type
-    Expression UvwPoint (Qty units1) .*. Expression UvwPoint (Vector3d (space @ units2)) =
-      Expression UvwPoint (Vector3d (space @ (units1 :*: units2)))
+instance
+  Multiplication'
+    (Expression UvwPoint (Qty units1))
+    (Expression UvwPoint (Vector3d (space @ units2)))
+    (Expression UvwPoint (Vector3d (space @ (units1 :*: units2))))
+  where
   Volume1d{v1x = scale} .*. VectorVolume3d{vv3x, vv3y, vv3z} =
     vectorVolume3d
       (Scalar.product scale vv3x)
@@ -1477,30 +1615,36 @@ instance Multiplication' (Expression UvwPoint (Qty units1)) (Expression UvwPoint
 --- Vector3d-Qty ---
 --------------------
 
-instance Multiplication' (Expression Float (Vector3d (space @ units1))) (Expression Float (Qty units2)) where
-  type
-    Expression Float (Vector3d (space @ units1)) .*. Expression Float (Qty units2) =
-      Expression Float (Vector3d (space @ (units1 :*: units2)))
+instance
+  Multiplication'
+    (Expression Float (Vector3d (space @ units1)))
+    (Expression Float (Qty units2))
+    (Expression Float (Vector3d (space @ (units1 :*: units2))))
+  where
   VectorCurve3d{vc3x, vc3y, vc3z} .*. Curve1d{c1x = scale} =
     vectorCurve3d
       (Scalar.product vc3x scale)
       (Scalar.product vc3y scale)
       (Scalar.product vc3z scale)
 
-instance Multiplication' (Expression UvPoint (Vector3d (space @ units1))) (Expression UvPoint (Qty units2)) where
-  type
-    Expression UvPoint (Vector3d (space @ units1)) .*. Expression UvPoint (Qty units2) =
-      Expression UvPoint (Vector3d (space @ (units1 :*: units2)))
+instance
+  Multiplication'
+    (Expression UvPoint (Vector3d (space @ units1)))
+    (Expression UvPoint (Qty units2))
+    (Expression UvPoint (Vector3d (space @ (units1 :*: units2))))
+  where
   VectorSurface3d{vs3x, vs3y, vs3z} .*. Surface1d{s1x = scale} =
     vectorSurface3d
       (Scalar.product vs3x scale)
       (Scalar.product vs3y scale)
       (Scalar.product vs3z scale)
 
-instance Multiplication' (Expression UvwPoint (Vector3d (space @ units1))) (Expression UvwPoint (Qty units2)) where
-  type
-    Expression UvwPoint (Vector3d (space @ units1)) .*. Expression UvwPoint (Qty units2) =
-      Expression UvwPoint (Vector3d (space @ (units1 :*: units2)))
+instance
+  Multiplication'
+    (Expression UvwPoint (Vector3d (space @ units1)))
+    (Expression UvwPoint (Qty units2))
+    (Expression UvwPoint (Vector3d (space @ (units1 :*: units2))))
+  where
   VectorVolume3d{vv3x, vv3y, vv3z} .*. Volume1d{v1x = scale} =
     vectorVolume3d
       (Scalar.product vv3x scale)
@@ -1523,6 +1667,8 @@ instance
     (Expression Float (Qty units1))
     (Expression Float (Qty units2))
     (Expression Float (Qty units3))
+  where
+  lhs / rhs = Units.specialize (lhs ./. rhs)
 
 instance
   Units.Quotient units1 units2 units3 =>
@@ -1530,6 +1676,8 @@ instance
     (Expression UvPoint (Qty units1))
     (Expression UvPoint (Qty units2))
     (Expression UvPoint (Qty units3))
+  where
+  lhs / rhs = Units.specialize (lhs ./. rhs)
 
 instance
   Units.Quotient units1 units2 units3 =>
@@ -1537,6 +1685,8 @@ instance
     (Expression UvwPoint (Qty units1))
     (Expression UvwPoint (Qty units2))
     (Expression UvwPoint (Qty units3))
+  where
+  lhs / rhs = Units.specialize (lhs ./. rhs)
 
 --- Vector2d-Qty ---
 --------------------
@@ -1547,6 +1697,8 @@ instance
     (Expression Float (Vector2d (space @ units1)))
     (Expression Float (Qty units2))
     (Expression Float (Vector2d (space @ units3)))
+  where
+  lhs / rhs = Units.specialize (lhs ./. rhs)
 
 instance
   Units.Quotient units1 units2 units3 =>
@@ -1554,6 +1706,8 @@ instance
     (Expression UvPoint (Vector2d (space @ units1)))
     (Expression UvPoint (Qty units2))
     (Expression UvPoint (Vector2d (space @ units3)))
+  where
+  lhs / rhs = Units.specialize (lhs ./. rhs)
 
 --- Vector3d-Qty ---
 --------------------
@@ -1564,6 +1718,8 @@ instance
     (Expression Float (Vector3d (space @ units1)))
     (Expression Float (Qty units2))
     (Expression Float (Vector3d (space @ units3)))
+  where
+  lhs / rhs = Units.specialize (lhs ./. rhs)
 
 instance
   Units.Quotient units1 units2 units3 =>
@@ -1571,6 +1727,8 @@ instance
     (Expression UvPoint (Vector3d (space @ units1)))
     (Expression UvPoint (Qty units2))
     (Expression UvPoint (Vector3d (space @ units3)))
+  where
+  lhs / rhs = Units.specialize (lhs ./. rhs)
 
 instance
   Units.Quotient units1 units2 units3 =>
@@ -1578,6 +1736,8 @@ instance
     (Expression UvwPoint (Vector3d (space @ units1)))
     (Expression UvwPoint (Qty units2))
     (Expression UvwPoint (Vector3d (space @ units3)))
+  where
+  lhs / rhs = Units.specialize (lhs ./. rhs)
 
 ---------------------------
 --- Division' instances ---
@@ -1586,68 +1746,84 @@ instance
 --- Qty-Qty ---
 ---------------
 
-instance Division' (Expression Float (Qty units1)) (Expression Float (Qty units2)) where
-  type
-    Expression Float (Qty units1) ./. Expression Float (Qty units2) =
-      Expression Float (Qty (units1 :/: units2))
+instance
+  Division'
+    (Expression Float (Qty units1))
+    (Expression Float (Qty units2))
+    (Expression Float (Qty (units1 :/: units2)))
+  where
   Curve1d{c1x = lhs} ./. Curve1d{c1x = rhs} = curve1d (Scalar.quotient lhs rhs)
 
-instance Division' (Expression UvPoint (Qty units1)) (Expression UvPoint (Qty units2)) where
-  type
-    Expression UvPoint (Qty units1) ./. Expression UvPoint (Qty units2) =
-      Expression UvPoint (Qty (units1 :/: units2))
+instance
+  Division'
+    (Expression UvPoint (Qty units1))
+    (Expression UvPoint (Qty units2))
+    (Expression UvPoint (Qty (units1 :/: units2)))
+  where
   Surface1d{s1x = lhs} ./. Surface1d{s1x = rhs} = surface1d (Scalar.quotient lhs rhs)
 
-instance Division' (Expression UvwPoint (Qty units1)) (Expression UvwPoint (Qty units2)) where
-  type
-    Expression UvwPoint (Qty units1) ./. Expression UvwPoint (Qty units2) =
-      Expression UvwPoint (Qty (units1 :/: units2))
+instance
+  Division'
+    (Expression UvwPoint (Qty units1))
+    (Expression UvwPoint (Qty units2))
+    (Expression UvwPoint (Qty (units1 :/: units2)))
+  where
   Volume1d{v1x = lhs} ./. Volume1d{v1x = rhs} = volume1d (Scalar.quotient lhs rhs)
 
 --- Vector2d-Qty ---
 --------------------
 
-instance Division' (Expression Float (Vector2d (space @ units1))) (Expression Float (Qty units2)) where
-  type
-    Expression Float (Vector2d (space @ units1)) ./. Expression Float (Qty units2) =
-      Expression Float (Vector2d (space @ (units1 :/: units2)))
+instance
+  Division'
+    (Expression Float (Vector2d (space @ units1)))
+    (Expression Float (Qty units2))
+    (Expression Float (Vector2d (space @ (units1 :/: units2))))
+  where
   VectorCurve2d{vc2x, vc2y} ./. Curve1d{c1x = scale} =
     vectorCurve2d (Scalar.quotient vc2x scale) (Scalar.quotient vc2y scale)
 
-instance Division' (Expression UvPoint (Vector2d (space @ units1))) (Expression UvPoint (Qty units2)) where
-  type
-    Expression UvPoint (Vector2d (space @ units1)) ./. Expression UvPoint (Qty units2) =
-      Expression UvPoint (Vector2d (space @ (units1 :/: units2)))
+instance
+  Division'
+    (Expression UvPoint (Vector2d (space @ units1)))
+    (Expression UvPoint (Qty units2))
+    (Expression UvPoint (Vector2d (space @ (units1 :/: units2))))
+  where
   VectorSurface2d{vs2x, vs2y} ./. Surface1d{s1x = scale} =
     vectorSurface2d (Scalar.quotient vs2x scale) (Scalar.quotient vs2y scale)
 
 --- Vector3d-Qty ---
 --------------------
 
-instance Division' (Expression Float (Vector3d (space @ units1))) (Expression Float (Qty units2)) where
-  type
-    Expression Float (Vector3d (space @ units1)) ./. Expression Float (Qty units2) =
-      Expression Float (Vector3d (space @ (units1 :/: units2)))
+instance
+  Division'
+    (Expression Float (Vector3d (space @ units1)))
+    (Expression Float (Qty units2))
+    (Expression Float (Vector3d (space @ (units1 :/: units2))))
+  where
   VectorCurve3d{vc3x, vc3y, vc3z} ./. Curve1d{c1x = scale} =
     vectorCurve3d
       (Scalar.quotient vc3x scale)
       (Scalar.quotient vc3y scale)
       (Scalar.quotient vc3z scale)
 
-instance Division' (Expression UvPoint (Vector3d (space @ units1))) (Expression UvPoint (Qty units2)) where
-  type
-    Expression UvPoint (Vector3d (space @ units1)) ./. Expression UvPoint (Qty units2) =
-      Expression UvPoint (Vector3d (space @ (units1 :/: units2)))
+instance
+  Division'
+    (Expression UvPoint (Vector3d (space @ units1)))
+    (Expression UvPoint (Qty units2))
+    (Expression UvPoint (Vector3d (space @ (units1 :/: units2))))
+  where
   VectorSurface3d{vs3x, vs3y, vs3z} ./. Surface1d{s1x = scale} =
     vectorSurface3d
       (Scalar.quotient vs3x scale)
       (Scalar.quotient vs3y scale)
       (Scalar.quotient vs3z scale)
 
-instance Division' (Expression UvwPoint (Vector3d (space @ units1))) (Expression UvwPoint (Qty units2)) where
-  type
-    Expression UvwPoint (Vector3d (space @ units1)) ./. Expression UvwPoint (Qty units2) =
-      Expression UvwPoint (Vector3d (space @ (units1 :/: units2)))
+instance
+  Division'
+    (Expression UvwPoint (Vector3d (space @ units1)))
+    (Expression UvwPoint (Qty units2))
+    (Expression UvwPoint (Vector3d (space @ (units1 :/: units2))))
+  where
   VectorVolume3d{vv3x, vv3y, vv3z} ./. Volume1d{v1x = scale} =
     vectorVolume3d
       (Scalar.quotient vv3x scale)

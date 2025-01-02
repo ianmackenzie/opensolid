@@ -174,17 +174,19 @@ instance Negation (Function units) where
   negate (Quotient' f1 f2) = negate f1 ./. f2
   negate function = Negated function
 
-instance Multiplication Sign (Function units) (Function units)
+instance Multiplication Sign (Function units) (Function units) where
+  Positive * function = function
+  Negative * function = -function
 
-instance Multiplication' Sign (Function units) where
-  type Sign .*. Function units = Function (Unitless :*: units)
+instance Multiplication' Sign (Function units) (Function (Unitless :*: units)) where
   Positive .*. function = Units.coerce function
   Negative .*. function = Units.coerce -function
 
-instance Multiplication (Function units) Sign (Function units)
+instance Multiplication (Function units) Sign (Function units) where
+  function * Positive = function
+  function * Negative = -function
 
-instance Multiplication' (Function units) Sign where
-  type Function units .*. Sign = Function (units :*: Unitless)
+instance Multiplication' (Function units) Sign (Function (units :*: Unitless)) where
   function .*. Positive = Units.coerce function
   function .*. Negative = Units.coerce -function
 
@@ -220,51 +222,57 @@ instance
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Function units1) (Function units2) (Function units3)
+  where
+  lhs * rhs = Units.specialize (lhs .*. rhs)
 
-instance Multiplication' (Function units1) (Function units2) where
-  type Function units1 .*. Function units2 = Function (units1 :*: units2)
+instance Multiplication' (Function units1) (Function units2) (Function (units1 :*: units2)) where
   Parametric lhs .*. Parametric rhs = Parametric (lhs .*. rhs)
   lhs .*. rhs = Product' lhs rhs
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Function units1) (Qty units2) (Function units3)
+  where
+  lhs * rhs = Units.specialize (lhs .*. rhs)
 
-instance Multiplication' (Function units1) (Qty units2) where
-  type Function units1 .*. Qty units2 = Function (units1 :*: units2)
+instance Multiplication' (Function units1) (Qty units2) (Function (units1 :*: units2)) where
   function .*. value = function .*. constant value
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Qty units1) (Function units2) (Function units3)
+  where
+  lhs * rhs = Units.specialize (lhs .*. rhs)
 
-instance Multiplication' (Qty units1) (Function units2) where
-  type Qty units1 .*. Function units2 = Function (units1 :*: units2)
+instance Multiplication' (Qty units1) (Function units2) (Function (units1 :*: units2)) where
   value .*. function = constant value .*. function
 
 instance
   Units.Quotient units1 units2 units3 =>
   Division (Function units1) (Function units2) (Function units3)
+  where
+  lhs / rhs = Units.specialize (lhs ./. rhs)
 
-instance Division' (Function units1) (Function units2) where
-  type Function units1 ./. Function units2 = Function (units1 :/: units2)
+instance Division' (Function units1) (Function units2) (Function (units1 :/: units2)) where
   Parametric lhs ./. Parametric rhs = Parametric (lhs ./. rhs)
   lhs ./. rhs = Quotient' lhs rhs
 
 instance
   Units.Quotient units1 units2 units3 =>
   Division (Function units1) (Qty units2) (Function units3)
+  where
+  lhs / rhs = Units.specialize (lhs ./. rhs)
 
-instance Division' (Function units1) (Qty units2) where
-  type Function units1 ./. Qty units2 = Function (units1 :/: units2)
+instance Division' (Function units1) (Qty units2) (Function (units1 :/: units2)) where
   function ./. value = function ./. constant value
 
 instance
   Units.Quotient units1 units2 units3 =>
   Division (Qty units1) (Function units2) (Function units3)
+  where
+  lhs / rhs = Units.specialize (lhs ./. rhs)
 
-instance Division' (Qty units1) (Function units2) where
-  type Qty units1 ./. Function units2 = Function (units1 :/: units2)
+instance Division' (Qty units1) (Function units2) (Function (units1 :/: units2)) where
   value ./. function = constant value ./. function
 
 evaluate :: Function units -> UvPoint -> Qty units

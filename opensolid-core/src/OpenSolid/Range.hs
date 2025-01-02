@@ -138,8 +138,7 @@ instance units ~ units_ => Intersects (Range units) (Range units_) units where
 instance Negation (Range units) where
   negate (Range low high) = Range_ (negate high) (negate low)
 
-instance Multiplication' Sign (Range units) where
-  type Sign .*. Range units = Range (Unitless :*: units)
+instance Multiplication' Sign (Range units) (Range (Unitless :*: units)) where
   Positive .*. range = Units.coerce range
   Negative .*. range = Units.coerce -range
 
@@ -147,8 +146,7 @@ instance Multiplication Sign (Range units) (Range units) where
   Positive * range = range
   Negative * range = -range
 
-instance Multiplication' (Range units) Sign where
-  type Range units .*. Sign = Range (units :*: Unitless)
+instance Multiplication' (Range units) Sign (Range (units :*: Unitless)) where
   range .*. Positive = Units.coerce range
   range .*. Negative = Units.coerce -range
 
@@ -174,8 +172,7 @@ instance units ~ units_ => Subtraction (Range units) (Qty units_) (Range units) 
 instance units ~ units_ => Subtraction (Qty units) (Range units_) (Range units) where
   value - Range low high = Range_ (value - high) (value - low)
 
-instance Multiplication' (Qty units1) (Range units2) where
-  type Qty units1 .*. Range units2 = Range (units1 :*: units2)
+instance Multiplication' (Qty units1) (Range units2) (Range (units1 :*: units2)) where
   value .*. Range low high = from (value .*. low) (value .*. high)
 
 instance
@@ -184,8 +181,7 @@ instance
   where
   value * Range low high = from (value * low) (value * high)
 
-instance Multiplication' (Range units1) (Qty units2) where
-  type Range units1 .*. Qty units2 = Range (units1 :*: units2)
+instance Multiplication' (Range units1) (Qty units2) (Range (units1 :*: units2)) where
   Range low high .*. value = from (low .*. value) (high .*. value)
 
 instance
@@ -194,8 +190,7 @@ instance
   where
   Range low high * value = from (low * value) (high * value)
 
-instance Multiplication' (Range units1) (Range units2) where
-  type Range units1 .*. Range units2 = Range (units1 :*: units2)
+instance Multiplication' (Range units1) (Range units2) (Range (units1 :*: units2)) where
   Range low1 high1 .*. Range low2 high2 =
     hull4 (low1 .*. low2) (low1 .*. high2) (high1 .*. low2) (high1 .*. high2)
 
@@ -206,8 +201,7 @@ instance
   Range low1 high1 * Range low2 high2 =
     hull4 (low1 * low2) (low1 * high2) (high1 * low2) (high1 * high2)
 
-instance Division' (Qty units1) (Range units2) where
-  type Qty units1 ./. Range units2 = Range (units1 :/: units2)
+instance Division' (Qty units1) (Range units2) (Range (units1 :/: units2)) where
   n ./. Range dl dh =
     if dl > Qty.zero || dh < Qty.zero
       then from (n ./. dl) (n ./. dh)
@@ -222,8 +216,7 @@ instance
       then from (n / dl) (n / dh)
       else Range_ -Qty.infinity Qty.infinity
 
-instance Division' (Range units1) (Qty units2) where
-  type Range units1 ./. Qty units2 = Range (units1 :/: units2)
+instance Division' (Range units1) (Qty units2) (Range (units1 :/: units2)) where
   Range nl nh ./. d =
     if d /= Qty.zero
       then from (nl ./. d) (nh ./. d)
@@ -238,8 +231,7 @@ instance
       then from (nl / d) (nh / d)
       else Range_ -Qty.infinity Qty.infinity
 
-instance Division' (Range units1) (Range units2) where
-  type Range units1 ./. Range units2 = Range (units1 :/: units2)
+instance Division' (Range units1) (Range units2) (Range (units1 :/: units2)) where
   Range nl nh ./. Range dl dh =
     if dl > Qty.zero || dh < Qty.zero
       then hull4 (nl ./. dl) (nl ./. dh) (nh ./. dl) (nh ./. dh)

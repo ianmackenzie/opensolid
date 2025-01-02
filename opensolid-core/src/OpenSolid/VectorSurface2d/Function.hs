@@ -122,17 +122,29 @@ instance Negation (Function (space @ units)) where
     Product2d1d' f1 f2 -> Product2d1d' f1 -f2
     _ -> Negated function
 
-instance Multiplication Sign (Function (space @ units)) (Function (space @ units))
+instance Multiplication Sign (Function (space @ units)) (Function (space @ units)) where
+  Positive * function = function
+  Negative * function = -function
 
-instance Multiplication' Sign (Function (space @ units)) where
-  type Sign .*. Function (space @ units) = Function (space @ (Unitless :*: units))
+instance
+  Multiplication'
+    Sign
+    (Function (space @ units))
+    (Function (space @ (Unitless :*: units)))
+  where
   Positive .*. function = Units.coerce function
   Negative .*. function = Units.coerce -function
 
-instance Multiplication (Function (space @ units)) Sign (Function (space @ units))
+instance Multiplication (Function (space @ units)) Sign (Function (space @ units)) where
+  function * Positive = function
+  function * Negative = -function
 
-instance Multiplication' (Function (space @ units)) Sign where
-  type Function (space @ units) .*. Sign = Function (space @ (units :*: Unitless))
+instance
+  Multiplication'
+    (Function (space @ units))
+    Sign
+    (Function (space @ (units :*: Unitless)))
+  where
   function .*. Positive = Units.coerce function
   function .*. Negative = Units.coerce -function
 
@@ -197,81 +209,132 @@ instance
 
 instance
   (space1 ~ space2, Units.Product units1 units2 units3) =>
-  Multiplication (Surface1d.Function.Function units1) (Function (space @ units2)) (Function (space @ units3))
+  Multiplication
+    (Surface1d.Function.Function units1)
+    (Function (space @ units2))
+    (Function (space @ units3))
+  where
+  lhs * rhs = Units.specialize (lhs .*. rhs)
 
-instance Multiplication' (Surface1d.Function.Function units1) (Function (space @ units2)) where
-  type
-    Surface1d.Function.Function units1 .*. Function (space @ units2) =
-      Function (space @ (units1 :*: units2))
+instance
+  Multiplication'
+    (Surface1d.Function.Function units1)
+    (Function (space @ units2))
+    (Function (space @ (units1 :*: units2)))
+  where
   Surface1d.Function.Parametric lhs .*. Parametric rhs = Parametric (lhs .*. rhs)
   lhs .*. rhs = Product1d2d' lhs rhs
 
 instance
   (space1 ~ space2, Units.Product units1 units2 units3) =>
   Multiplication (Qty units1) (Function (space @ units2)) (Function (space @ units3))
+  where
+  lhs * rhs = Units.specialize (lhs .*. rhs)
 
-instance Multiplication' (Qty units1) (Function (space @ units2)) where
-  type Qty units1 .*. Function (space @ units2) = Function (space @ (units1 :*: units2))
+instance
+  Multiplication'
+    (Qty units1)
+    (Function (space @ units2))
+    (Function (space @ (units1 :*: units2)))
+  where
   f1 .*. f2 = Surface1d.Function.constant f1 .*. f2
 
 instance
   (space1 ~ space2, Units.Product units1 units2 units3) =>
-  Multiplication (Surface1d.Function.Function units1) (Vector2d (space @ units2)) (Function (space @ units3))
+  Multiplication
+    (Surface1d.Function.Function units1)
+    (Vector2d (space @ units2))
+    (Function (space @ units3))
+  where
+  lhs * rhs = Units.specialize (lhs .*. rhs)
 
-instance Multiplication' (Surface1d.Function.Function units1) (Vector2d (space @ units2)) where
-  type
-    Surface1d.Function.Function units1 .*. Vector2d (space @ units2) =
-      Function (space @ (units1 :*: units2))
+instance
+  Multiplication'
+    (Surface1d.Function.Function units1)
+    (Vector2d (space @ units2))
+    (Function (space @ (units1 :*: units2)))
+  where
   function .*. vector = function .*. constant vector
 
 instance
   (space1 ~ space2, Units.Product units1 units2 units3) =>
-  Multiplication (Function (space @ units1)) (Surface1d.Function.Function units2) (Function (space @ units3))
+  Multiplication
+    (Function (space @ units1))
+    (Surface1d.Function.Function units2)
+    (Function (space @ units3))
+  where
+  lhs * rhs = Units.specialize (lhs .*. rhs)
 
-instance Multiplication' (Function (space @ units1)) (Surface1d.Function.Function units2) where
-  type
-    Function (space @ units1) .*. Surface1d.Function.Function units2 =
-      Function (space @ (units1 :*: units2))
+instance
+  Multiplication'
+    (Function (space @ units1))
+    (Surface1d.Function.Function units2)
+    (Function (space @ (units1 :*: units2)))
+  where
   Parametric lhs .*. Surface1d.Function.Parametric rhs = Parametric (lhs .*. rhs)
   lhs .*. rhs = Product2d1d' lhs rhs
 
 instance
   (space1 ~ space2, Units.Product units1 units2 units3) =>
   Multiplication (Function (space @ units1)) (Qty units2) (Function (space @ units3))
+  where
+  lhs * rhs = Units.specialize (lhs .*. rhs)
 
-instance Multiplication' (Function (space @ units1)) (Qty units2) where
-  type Function (space @ units1) .*. Qty units2 = Function (space @ (units1 :*: units2))
+instance
+  Multiplication'
+    (Function (space @ units1))
+    (Qty units2)
+    (Function (space @ (units1 :*: units2)))
+  where
   function .*. value = function .*. Surface1d.Function.constant value
 
 instance
   (space1 ~ space2, Units.Product units1 units2 units3) =>
-  Multiplication (Vector2d (space @ units1)) (Surface1d.Function.Function units2) (Function (space @ units3))
+  Multiplication
+    (Vector2d (space @ units1))
+    (Surface1d.Function.Function units2)
+    (Function (space @ units3))
+  where
+  lhs * rhs = Units.specialize (lhs .*. rhs)
 
-instance Multiplication' (Vector2d (space @ units1)) (Surface1d.Function.Function units2) where
-  type
-    Vector2d (space @ units1) .*. Surface1d.Function.Function units2 =
-      Function (space @ (units1 :*: units2))
+instance
+  Multiplication'
+    (Vector2d (space @ units1))
+    (Surface1d.Function.Function units2)
+    (Function (space @ (units1 :*: units2)))
+  where
   vector .*. function = constant vector .*. function
 
 instance
   (space1 ~ space2, Units.Quotient units1 units2 units3) =>
-  Division (Function (space @ units1)) (Surface1d.Function.Function units2) (Function (space @ units3))
+  Division
+    (Function (space @ units1))
+    (Surface1d.Function.Function units2)
+    (Function (space @ units3))
+  where
+  lhs / rhs = Units.specialize (lhs ./. rhs)
 
-instance Division' (Function (space @ units1)) (Surface1d.Function.Function units2) where
-  type
-    Function (space @ units1) ./. Surface1d.Function.Function units2 =
-      Function (space @ (units1 :/: units2))
+instance
+  Division'
+    (Function (space @ units1))
+    (Surface1d.Function.Function units2)
+    (Function (space @ (units1 :/: units2)))
+  where
   Parametric lhs ./. Surface1d.Function.Parametric rhs = Parametric (lhs ./. rhs)
   lhs ./. rhs = Quotient' lhs rhs
 
 instance
   (space1 ~ space2, Units.Quotient units1 units2 units3) =>
   Division (Function (space @ units1)) (Qty units2) (Function (space @ units3))
+  where
+  lhs / rhs = Units.specialize (lhs ./. rhs)
 
-instance Division' (Function (space @ units1)) (Qty units2) where
-  type
-    Function (space @ units1) ./. Qty units2 =
-      Function (space @ (units1 :/: units2))
+instance
+  Division'
+    (Function (space @ units1))
+    (Qty units2)
+    (Function (space @ (units1 :/: units2)))
+  where
   function ./. value = function ./. Surface1d.Function.constant value
 
 data CrossProduct' space units1 units2

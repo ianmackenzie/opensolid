@@ -107,8 +107,12 @@ instance
 instance Negation (Vector3d (space @ units)) where
   negate (Vector3d# vx# vy# vz#) = Vector3d# (negate# vx#) (negate# vy#) (negate# vz#)
 
-instance Multiplication' Sign (Vector3d (space @ units)) where
-  type Sign .*. Vector3d (space @ units) = Vector3d (space @ (Unitless :*: units))
+instance
+  Multiplication'
+    Sign
+    (Vector3d (space @ units))
+    (Vector3d (space @ (Unitless :*: units)))
+  where
   Positive .*. vector = Units.coerce vector
   Negative .*. vector = Units.coerce -vector
 
@@ -116,8 +120,12 @@ instance Multiplication Sign (Vector3d (space @ units)) (Vector3d (space @ units
   Positive * vector = vector
   Negative * vector = -vector
 
-instance Multiplication' (Vector3d (space @ units)) Sign where
-  type Vector3d (space @ units) .*. Sign = Vector3d (space @ (units :*: Unitless))
+instance
+  Multiplication'
+    (Vector3d (space @ units))
+    Sign
+    (Vector3d (space @ (units :*: Unitless)))
+  where
   vector .*. Positive = Units.coerce vector
   vector .*. Negative = Units.coerce -vector
 
@@ -147,8 +155,12 @@ instance
   where
   Vector3d# x1# y1# z1# - Vector3d# x2# y2# z2# = Vector3d# (x1# -# x2#) (y1# -# y2#) (z1# -# z2#)
 
-instance Multiplication' (Qty units1) (Vector3d (space @ units2)) where
-  type Qty units1 .*. Vector3d (space @ units2) = Vector3d (space @ (units1 :*: units2))
+instance
+  Multiplication'
+    (Qty units1)
+    (Vector3d (space @ units2))
+    (Vector3d (space @ (units1 :*: units2)))
+  where
   Qty# scale# .*. Vector3d# vx# vy# vz# = Vector3d# (scale# *# vx#) (scale# *# vy#) (scale# *# vz#)
 
 instance
@@ -157,8 +169,12 @@ instance
   where
   Qty# scale# * Vector3d# vx# vy# vz# = Vector3d# (scale# *# vx#) (scale# *# vy#) (scale# *# vz#)
 
-instance Multiplication' (Vector3d (space @ units1)) (Qty units2) where
-  type Vector3d (space @ units1) .*. Qty units2 = Vector3d (space @ (units1 :*: units2))
+instance
+  Multiplication'
+    (Vector3d (space @ units1))
+    (Qty units2)
+    (Vector3d (space @ (units1 :*: units2)))
+  where
   Vector3d# vx# vy# vz# .*. Qty# scale# = Vector3d# (vx# *# scale#) (vy# *# scale#) (vz# *# scale#)
 
 instance
@@ -167,8 +183,12 @@ instance
   where
   Vector3d# vx# vy# vz# * Qty# scale# = Vector3d# (vx# *# scale#) (vy# *# scale#) (vz# *# scale#)
 
-instance Division' (Vector3d (space @ units1)) (Qty units2) where
-  type Vector3d (space @ units1) ./. Qty units2 = Vector3d (space @ (units1 :/: units2))
+instance
+  Division'
+    (Vector3d (space @ units1))
+    (Qty units2)
+    (Vector3d (space @ (units1 :/: units2)))
+  where
   Vector3d# vx# vy# vz# ./. Qty# scale# = Vector3d# (vx# /# scale#) (vy# /# scale#) (vz# /# scale#)
 
 instance
