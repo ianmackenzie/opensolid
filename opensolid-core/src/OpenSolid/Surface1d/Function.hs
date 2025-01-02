@@ -66,6 +66,7 @@ import OpenSolid.Uv.Derivatives qualified as Derivatives
 import OpenSolid.Vector2d (Vector2d (Vector2d))
 import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.VectorBounds2d (VectorBounds2d (VectorBounds2d))
+import {-# SOURCE #-} OpenSolid.VectorSurface2d.Function qualified as VectorSurface2d.Function
 import {-# SOURCE #-} OpenSolid.VectorSurface3d.Function qualified as VectorSurface3d.Function
 
 data Function units where
@@ -243,6 +244,40 @@ instance
 
 instance Multiplication' (Qty units1) (Function units2) (Function (units1 :*: units2)) where
   value .*. function = constant value .*. function
+
+instance
+  Units.Product units1 units2 units3 =>
+  Multiplication
+    (Function units1)
+    (Vector2d (space @ units2))
+    (VectorSurface2d.Function.Function (space @ units3))
+  where
+  lhs * rhs = Units.specialize (lhs .*. rhs)
+
+instance
+  Multiplication'
+    (Function units1)
+    (Vector2d (space @ units2))
+    (VectorSurface2d.Function.Function (space @ (units1 :*: units2)))
+  where
+  function .*. vector = function .*. VectorSurface2d.Function.constant vector
+
+instance
+  Units.Product units1 units2 units3 =>
+  Multiplication
+    (Vector2d (space @ units1))
+    (Function units2)
+    (VectorSurface2d.Function.Function (space @ units3))
+  where
+  lhs * rhs = Units.specialize (lhs .*. rhs)
+
+instance
+  Multiplication'
+    (Vector2d (space @ units1))
+    (Function units2)
+    (VectorSurface2d.Function.Function (space @ (units1 :*: units2)))
+  where
+  vector .*. function = VectorSurface2d.Function.constant vector .*. function
 
 instance
   Units.Product units1 units2 units3 =>

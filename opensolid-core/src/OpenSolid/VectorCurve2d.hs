@@ -62,6 +62,7 @@ import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Range (Range)
+import {-# SOURCE #-} OpenSolid.Surface1d.Function qualified as Surface1d.Function
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform2d (Transform2d)
 import OpenSolid.Transform2d qualified as Transform2d
@@ -72,6 +73,7 @@ import OpenSolid.VectorBounds2d (VectorBounds2d (VectorBounds2d))
 import OpenSolid.VectorBounds2d qualified as VectorBounds2d
 import OpenSolid.VectorCurve2d.Direction qualified as VectorCurve2d.Direction
 import OpenSolid.VectorCurve2d.Zeros qualified as Zeros
+import {-# SOURCE #-} OpenSolid.VectorSurface2d.Function qualified as VectorSurface2d.Function
 
 class
   Show curve =>
@@ -566,6 +568,33 @@ instance
 
   transformByImpl transform (vectorCurve2d :.: curve1d) =
     new (transformBy transform vectorCurve2d :.: curve1d)
+
+instance
+  Composition
+    (Surface1d.Function.Function Unitless)
+    (VectorCurve2d (space @ units))
+    (VectorSurface2d.Function.Function (space @ units))
+  where
+  Parametric curve . Surface1d.Function.Parametric function =
+    VectorSurface2d.Function.Parametric (curve . function)
+  curve . function = VectorSurface2d.Function.new (curve :.: function)
+
+instance
+  VectorSurface2d.Function.Interface
+    (VectorCurve2d (space @ units) :.: Surface1d.Function.Function Unitless)
+    (space @ units)
+  where
+  evaluateImpl (curve :.: function) uvPoint =
+    evaluate curve (Surface1d.Function.evaluate function uvPoint)
+
+  evaluateBoundsImpl (curve :.: function) uvBounds =
+    evaluateBounds curve (Surface1d.Function.evaluateBounds function uvBounds)
+
+  derivativeImpl parameter (curve :.: function) =
+    (derivative curve . function) * Surface1d.Function.derivative parameter function
+
+  transformByImpl transform (curve :.: function) =
+    transformBy transform curve . function
 
 transformBy ::
   Transform2d tag (space @ translationUnits) ->

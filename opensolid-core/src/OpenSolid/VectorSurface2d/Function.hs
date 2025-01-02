@@ -1,11 +1,3 @@
--- Needed for 'Surface1d.Function * Vector2d = Function'
--- and 'Vector2d * Surface1d.Function = Function' instances,
--- which lead to unresolvable circular dependencies
--- if they're defined in the Surface1d.Function or Vector2d modules
--- and really conceptually make more sense
--- to define in this module anyways
-{-# OPTIONS_GHC -Wno-orphans #-}
-
 module OpenSolid.VectorSurface2d.Function
   ( Function (Parametric)
   , Interface (..)
@@ -239,23 +231,6 @@ instance
   f1 .*. f2 = Surface1d.Function.constant f1 .*. f2
 
 instance
-  (space1 ~ space2, Units.Product units1 units2 units3) =>
-  Multiplication
-    (Surface1d.Function.Function units1)
-    (Vector2d (space @ units2))
-    (Function (space @ units3))
-  where
-  lhs * rhs = Units.specialize (lhs .*. rhs)
-
-instance
-  Multiplication'
-    (Surface1d.Function.Function units1)
-    (Vector2d (space @ units2))
-    (Function (space @ (units1 :*: units2)))
-  where
-  function .*. vector = function .*. constant vector
-
-instance
   Units.Product units1 units2 units3 =>
   Multiplication
     (Function (space @ units1))
@@ -286,23 +261,6 @@ instance
     (Function (space @ (units1 :*: units2)))
   where
   function .*. value = function .*. Surface1d.Function.constant value
-
-instance
-  (space1 ~ space2, Units.Product units1 units2 units3) =>
-  Multiplication
-    (Vector2d (space @ units1))
-    (Surface1d.Function.Function units2)
-    (Function (space @ units3))
-  where
-  lhs * rhs = Units.specialize (lhs .*. rhs)
-
-instance
-  Multiplication'
-    (Vector2d (space @ units1))
-    (Surface1d.Function.Function units2)
-    (Function (space @ (units1 :*: units2)))
-  where
-  vector .*. function = constant vector .*. function
 
 instance
   (space1 ~ space2, Units.Quotient units1 units2 units3) =>
@@ -547,33 +505,6 @@ instance
     (Surface1d.Function.Function (Unitless :*: units))
   where
   direction .<>. function = Vector2d.unit direction .<>. function
-
-instance
-  Composition
-    (Surface1d.Function.Function Unitless)
-    (VectorCurve2d (space @ units))
-    (Function (space @ units))
-  where
-  VectorCurve2d.Parametric curve . Surface1d.Function.Parametric function =
-    Parametric (curve . function)
-  curve . function = new (curve :.: function)
-
-instance
-  Interface
-    (VectorCurve2d (space @ units) :.: Surface1d.Function.Function Unitless)
-    (space @ units)
-  where
-  evaluateImpl (curve :.: function) uvPoint =
-    VectorCurve2d.evaluate curve (Surface1d.Function.evaluate function uvPoint)
-
-  evaluateBoundsImpl (curve :.: function) uvBounds =
-    VectorCurve2d.evaluateBounds curve (Surface1d.Function.evaluateBounds function uvBounds)
-
-  derivativeImpl parameter (curve :.: function) =
-    (VectorCurve2d.derivative curve . function) * Surface1d.Function.derivative parameter function
-
-  transformByImpl transform (curve :.: function) =
-    VectorCurve2d.transformBy transform curve . function
 
 instance
   Composition

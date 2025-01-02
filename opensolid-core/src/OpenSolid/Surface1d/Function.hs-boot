@@ -1,15 +1,17 @@
 module OpenSolid.Surface1d.Function
   ( Interface (..)
-  , Function
+  , Function (Parametric)
   , evaluate
   , evaluateBounds
   , derivative
   )
 where
 
+import OpenSolid.Expression (Expression)
 import OpenSolid.Prelude
 import OpenSolid.Range (Range)
 import OpenSolid.SurfaceParameter (SurfaceParameter, UvBounds, UvPoint)
+import OpenSolid.Units (Radians)
 import OpenSolid.Units qualified as Units
 
 class
@@ -23,8 +25,48 @@ class
 
 type role Function nominal
 
-type Function :: Type -> Type
-data Function units
+data Function units where
+  Function ::
+    Interface function units =>
+    function ->
+    Function units
+  Parametric ::
+    Expression UvPoint (Qty units) ->
+    Function units
+  Negated ::
+    Function units ->
+    Function units
+  Sum ::
+    Function units ->
+    Function units ->
+    Function units
+  Difference ::
+    Function units ->
+    Function units ->
+    Function units
+  Product' ::
+    Function units1 ->
+    Function units2 ->
+    Function (units1 :*: units2)
+  Quotient' ::
+    Function units1 ->
+    Function units2 ->
+    Function (units1 :/: units2)
+  Squared' ::
+    Function units ->
+    Function (units :*: units)
+  SquareRoot' ::
+    Function (units :*: units) ->
+    Function units
+  Sin ::
+    Function Radians ->
+    Function Unitless
+  Cos ::
+    Function Radians ->
+    Function Unitless
+  Coerce ::
+    Function units1 ->
+    Function units2
 
 instance Show (Function units)
 
