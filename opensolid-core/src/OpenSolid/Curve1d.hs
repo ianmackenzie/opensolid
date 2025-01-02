@@ -500,9 +500,8 @@ findZerosOrder ::
   Stream (Range units) ->
   Fuzzy (List (Float, Solve1d.Neighborhood units))
 findZerosOrder k derivatives subdomain derivativeBounds
-  -- The function itself is non-zero, so no zeros
-  | k == 0 && not (Stream.head derivativeBounds ^ Qty.zero) = Resolved []
   -- A derivative is resolved, so it has no zeros
+  -- (note that if k == 0, we already checked for the curve being non-zero in findZeros above)
   | k > 0 && Range.isResolved (Stream.head derivativeBounds) = Resolved []
   -- We've exceeded the maximum zero order without finding a non-zero derivative
   | k > maxZeroOrder = Unresolved
