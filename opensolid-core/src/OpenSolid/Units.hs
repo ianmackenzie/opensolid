@@ -22,6 +22,7 @@ module OpenSolid.Units
   , MetersPerSecondSquared
   , SquareMeters
   , CubicMeters
+  , MetersToTheFourthPower
   )
 where
 
@@ -153,6 +154,8 @@ data SquareMeters deriving (Eq, Show)
 
 data CubicMeters deriving (Eq, Show)
 
+data MetersToTheFourthPower deriving (Eq, Show)
+
 type family a .*. b where
   Unitless .*. Unitless = Unitless
   Unitless .*. units = units
@@ -160,6 +163,9 @@ type family a .*. b where
   Meters .*. Meters = SquareMeters
   Meters .*. SquareMeters = CubicMeters
   SquareMeters .*. Meters = CubicMeters
+  Meters .*. CubicMeters = MetersToTheFourthPower
+  CubicMeters .*. Meters = MetersToTheFourthPower
+  SquareMeters .*. SquareMeters = MetersToTheFourthPower
   Seconds .*. MetersPerSecond = Meters
   MetersPerSecond .*. Seconds = Meters
   Seconds .*. MetersPerSecondSquared = MetersPerSecond
@@ -174,6 +180,9 @@ type family a ./. b where
   SquareMeters ./. Meters = Meters
   CubicMeters ./. Meters = SquareMeters
   CubicMeters ./. SquareMeters = Meters
+  MetersToTheFourthPower ./. Meters = CubicMeters
+  MetersToTheFourthPower ./. SquareMeters = SquareMeters
+  MetersToTheFourthPower ./. CubicMeters = Meters
   Meters ./. Seconds = MetersPerSecond
   Meters ./. MetersPerSecond = Seconds
   MetersPerSecond ./. Seconds = MetersPerSecondSquared
