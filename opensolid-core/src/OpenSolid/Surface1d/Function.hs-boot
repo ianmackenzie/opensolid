@@ -1,4 +1,11 @@
-module OpenSolid.Surface1d.Function (Interface (..), Function, evaluate, evaluateBounds) where
+module OpenSolid.Surface1d.Function
+  ( Interface (..)
+  , Function
+  , evaluate
+  , evaluateBounds
+  , derivative
+  )
+where
 
 import OpenSolid.Curve1d (Curve1d)
 import {-# SOURCE #-} OpenSolid.Curve2d (Curve2d)
@@ -35,3 +42,4 @@ instance Composition (Curve2d UvCoordinates) (Function units) (Curve1d units)
 
 evaluate :: Function units -> UvPoint -> Qty units
 evaluateBounds :: Function units -> UvBounds -> Range units
+derivative :: SurfaceParameter -> Function units -> Function units

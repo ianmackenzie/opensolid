@@ -1,11 +1,3 @@
--- Needed for 'Surface1d.Function * Vector3d = Function'
--- and 'Vector3d * Surface1d.Function = Function' instances,
--- which lead to unresolvable circular dependencies
--- if they're defined in the Surface1d.Function or Vector3d modules
--- and really conceptually make more sense
--- to define in this module anyways
-{-# OPTIONS_GHC -Wno-orphans #-}
-
 module OpenSolid.VectorSurface3d.Function
   ( Function (Parametric)
   , Interface (..)
@@ -32,8 +24,6 @@ import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.VectorBounds3d (VectorBounds3d)
 import OpenSolid.VectorBounds3d qualified as VectorBounds3d
-import OpenSolid.VectorCurve3d (VectorCurve3d)
-import OpenSolid.VectorCurve3d qualified as VectorCurve3d
 
 class
   Show function =>
@@ -240,20 +230,6 @@ instance
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (Surface1d.Function units1) (Vector3d (space @ units2)) (Function (space @ units3))
-  where
-  lhs * rhs = Units.specialize (lhs .*. rhs)
-
-instance
-  Multiplication'
-    (Surface1d.Function units1)
-    (Vector3d (space @ units2))
-    (Function (space @ (units1 :*: units2)))
-  where
-  function .*. vector = function .*. constant vector
-
-instance
-  Units.Product units1 units2 units3 =>
   Multiplication (Function (space @ units1)) (Surface1d.Function units2) (Function (space @ units3))
   where
   lhs * rhs = Units.specialize (lhs .*. rhs)
@@ -280,20 +256,6 @@ instance
     (Function (space @ (units1 :*: units2)))
   where
   function .*. value = function .*. Surface1d.Function.constant value
-
-instance
-  Units.Product units1 units2 units3 =>
-  Multiplication (Vector3d (space @ units1)) (Surface1d.Function units2) (Function (space @ units3))
-  where
-  lhs * rhs = Units.specialize (lhs .*. rhs)
-
-instance
-  Multiplication'
-    (Vector3d (space @ units1))
-    (Surface1d.Function units2)
-    (Function (space @ (units1 :*: units2)))
-  where
-  vector .*. function = constant vector .*. function
 
 instance
   Units.Quotient units1 units2 units3 =>
@@ -478,27 +440,6 @@ instance
     (Surface1d.Function (Unitless :*: units))
   where
   direction .<>. function = Vector3d.unit direction .<>. function
-
-instance
-  Composition
-    (Surface1d.Function Unitless)
-    (VectorCurve3d (space @ units))
-    (Function (space @ units))
-  where
-  curve . function = new (curve :.: function)
-
-instance Interface (VectorCurve3d (space @ units) :.: Surface1d.Function Unitless) (space @ units) where
-  evaluateImpl (curveFunction :.: surfaceFunction) uvPoint =
-    VectorCurve3d.evaluate curveFunction $
-      Surface1d.Function.evaluate surfaceFunction uvPoint
-
-  evaluateBoundsImpl (curveFunction :.: surfaceFunction) uvBounds =
-    VectorCurve3d.evaluateBounds curveFunction $
-      Surface1d.Function.evaluateBounds surfaceFunction uvBounds
-
-  derivativeImpl parameter (curveFunction :.: surfaceFunction) =
-    (VectorCurve3d.derivative curveFunction . surfaceFunction)
-      * Surface1d.Function.derivative parameter surfaceFunction
 
 new :: Interface function (space @ units) => function -> Function (space @ units)
 new = Function
