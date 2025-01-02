@@ -17,17 +17,8 @@ source-repository head
   type: git
   location: https://github.com/ianmackenzie/opensolid
 
-executable sandbox
-  main-is: Main.hs
-  hs-source-dirs: sandbox
+common config
   default-language: GHC2021
-  build-depends:
-    array,
-    base,
-    containers,
-    opensolid-core,
-    random,
-
   ghc-options:
     -Wall
     -Werror
@@ -56,10 +47,21 @@ executable sandbox
     RebindableSyntax
     TypeApplications
 
+executable sandbox
+  import: config
+  main-is: Main.hs
+  hs-source-dirs: sandbox
+  build-depends:
+    array,
+    base,
+    containers,
+    opensolid-core,
+    random,
+
 executable test-server
+  import: config
   main-is: Main.hs
   hs-source-dirs: test-server
-  default-language: GHC2021
   build-depends:
     array,
     base,
@@ -67,30 +69,3 @@ executable test-server
     opensolid-core,
     opensolid-http,
     random,
-
-  ghc-options:
-    -Wall
-    -Werror
-    -Wcompat
-    -Widentities
-    -Wincomplete-record-updates
-    -Wincomplete-uni-patterns
-    -Wmissing-signatures
-    -Wmissing-exported-signatures
-    -Wmissing-export-lists
-    -Wmissing-home-modules
-    -Wpartial-fields
-    -Wsafe
-    -threaded
-    -rtsopts
-    -with-rtsopts=-N
-
-  default-extensions:
-    BlockArguments
-    DisambiguateRecordFields
-    GADTs
-    LambdaCase
-    LexicalNegation
-    OverloadedStrings
-    QualifiedDo
-    RebindableSyntax
