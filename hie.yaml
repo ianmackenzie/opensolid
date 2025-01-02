@@ -6,6 +6,9 @@ cradle:
     - path: "executables/test-server/Main.hs"
       component: "executables:exe:test-server"
 
+    - path: "executables/arc-length/Main.hs"
+      component: "executables:exe:arc-length"
+
     - path: "opensolid-api/src"
       component: "lib:opensolid-api"
 

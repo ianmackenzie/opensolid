@@ -69,3 +69,10 @@ executable test-server
     opensolid-core,
     opensolid-http,
     random,
+
+executable arc-length
+  import: config
+  main-is: Main.hs
+  hs-source-dirs: arc-length
+  build-depends:
+    opensolid-core,
