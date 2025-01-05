@@ -166,6 +166,36 @@ impl<'a> ValueFunctionCompiler<'a> {
                     let spline_value = self.function_builder.inst_results(function_call)[0];
                     self.define_value(expression, spline_value)
                 }
+                Expression::QuarticSpline(p1, p2, p3, p4, p5, t) => {
+                    let p1_value = self.constant_float(p1.value);
+                    let p2_value = self.constant_float(p2.value);
+                    let p3_value = self.constant_float(p3.value);
+                    let p4_value = self.constant_float(p4.value);
+                    let p5_value = self.constant_float(p5.value);
+                    let t_value = self.compute_value(t);
+                    let function_arguments =
+                        [p1_value, p2_value, p3_value, p4_value, p5_value, t_value];
+                    let function_call =
+                        self.call(self.builtins.quartic_spline, &function_arguments);
+                    let spline_value = self.function_builder.inst_results(function_call)[0];
+                    self.define_value(expression, spline_value)
+                }
+                Expression::QuinticSpline(p1, p2, p3, p4, p5, p6, t) => {
+                    let p1_value = self.constant_float(p1.value);
+                    let p2_value = self.constant_float(p2.value);
+                    let p3_value = self.constant_float(p3.value);
+                    let p4_value = self.constant_float(p4.value);
+                    let p5_value = self.constant_float(p5.value);
+                    let p6_value = self.constant_float(p6.value);
+                    let t_value = self.compute_value(t);
+                    let function_arguments = [
+                        p1_value, p2_value, p3_value, p4_value, p5_value, p6_value, t_value,
+                    ];
+                    let function_call =
+                        self.call(self.builtins.quintic_spline, &function_arguments);
+                    let spline_value = self.function_builder.inst_results(function_call)[0];
+                    self.define_value(expression, spline_value)
+                }
                 Expression::BezierCurve(control_points, t) => {
                     let t_value = self.compute_value(t);
                     let num_control_points = control_points.len();

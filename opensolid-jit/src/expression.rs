@@ -50,6 +50,23 @@ pub enum Expression {
     Cosine(Box<Expression>),
     QuadraticSpline(Constant, Constant, Constant, Box<Expression>),
     CubicSpline(Constant, Constant, Constant, Constant, Box<Expression>),
+    QuarticSpline(
+        Constant,
+        Constant,
+        Constant,
+        Constant,
+        Constant,
+        Box<Expression>,
+    ),
+    QuinticSpline(
+        Constant,
+        Constant,
+        Constant,
+        Constant,
+        Constant,
+        Constant,
+        Box<Expression>,
+    ),
     BezierCurve(Vec<Constant>, Box<Expression>),
 }
 
@@ -181,6 +198,48 @@ pub extern "C" fn opensolid_expression_cubic_spline(
         Constant::new(p2),
         Constant::new(p3),
         Constant::new(p4),
+        Expression::from_c(t),
+    )
+    .to_c()
+}
+
+#[no_mangle]
+pub extern "C" fn opensolid_expression_quartic_spline(
+    p1: f64,
+    p2: f64,
+    p3: f64,
+    p4: f64,
+    p5: f64,
+    t: *mut Expression,
+) -> *mut Expression {
+    Expression::QuarticSpline(
+        Constant::new(p1),
+        Constant::new(p2),
+        Constant::new(p3),
+        Constant::new(p4),
+        Constant::new(p5),
+        Expression::from_c(t),
+    )
+    .to_c()
+}
+
+#[no_mangle]
+pub extern "C" fn opensolid_expression_quintic_spline(
+    p1: f64,
+    p2: f64,
+    p3: f64,
+    p4: f64,
+    p5: f64,
+    p6: f64,
+    t: *mut Expression,
+) -> *mut Expression {
+    Expression::QuinticSpline(
+        Constant::new(p1),
+        Constant::new(p2),
+        Constant::new(p3),
+        Constant::new(p4),
+        Constant::new(p5),
+        Constant::new(p6),
         Expression::from_c(t),
     )
     .to_c()

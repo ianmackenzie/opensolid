@@ -16,8 +16,12 @@ pub struct Builtins {
     pub cos_bounds: FuncRef,
     pub quadratic_spline: FuncRef,
     pub cubic_spline: FuncRef,
+    pub quartic_spline: FuncRef,
+    pub quintic_spline: FuncRef,
     pub quadratic_spline_bounds: FuncRef,
     pub cubic_spline_bounds: FuncRef,
+    pub quartic_spline_bounds: FuncRef,
+    pub quintic_spline_bounds: FuncRef,
     pub bezier: FuncRef,
     pub bezier_bounds: FuncRef,
 }
@@ -41,6 +45,22 @@ impl Builtins {
         jit_builder.symbol(
             "opensolid_cubic_spline_bounds",
             opensolid_cubic_spline_bounds as *const u8,
+        );
+        jit_builder.symbol(
+            "opensolid_quartic_spline",
+            opensolid_quartic_spline as *const u8,
+        );
+        jit_builder.symbol(
+            "opensolid_quartic_spline_bounds",
+            opensolid_quartic_spline_bounds as *const u8,
+        );
+        jit_builder.symbol(
+            "opensolid_quintic_spline",
+            opensolid_quintic_spline as *const u8,
+        );
+        jit_builder.symbol(
+            "opensolid_quintic_spline_bounds",
+            opensolid_quintic_spline_bounds as *const u8,
         );
         jit_builder.symbol("opensolid_bezier", opensolid_bezier as *const u8);
         jit_builder.symbol(
@@ -78,6 +98,18 @@ impl Builtins {
             ),
             cubic_spline: Builtins::declare_cubic_spline(module, function),
             cubic_spline_bounds: Builtins::declare_cubic_spline_bounds(
+                module,
+                function,
+                pointer_type,
+            ),
+            quartic_spline: Builtins::declare_quartic_spline(module, function),
+            quartic_spline_bounds: Builtins::declare_quartic_spline_bounds(
+                module,
+                function,
+                pointer_type,
+            ),
+            quintic_spline: Builtins::declare_quintic_spline(module, function),
+            quintic_spline_bounds: Builtins::declare_quintic_spline_bounds(
                 module,
                 function,
                 pointer_type,
@@ -141,6 +173,37 @@ impl Builtins {
         module.declare_func_in_func(func_id, function)
     }
 
+    fn declare_quartic_spline(module: &mut JITModule, function: &mut Function) -> FuncRef {
+        let mut signature = module.make_signature();
+        signature.params.push(AbiParam::new(F64)); // p1
+        signature.params.push(AbiParam::new(F64)); // p2
+        signature.params.push(AbiParam::new(F64)); // p3
+        signature.params.push(AbiParam::new(F64)); // p4
+        signature.params.push(AbiParam::new(F64)); // p5
+        signature.params.push(AbiParam::new(F64)); // t
+        signature.returns.push(AbiParam::new(F64));
+        let func_id = module
+            .declare_function("opensolid_quartic_spline", Linkage::Import, &signature)
+            .unwrap();
+        module.declare_func_in_func(func_id, function)
+    }
+
+    fn declare_quintic_spline(module: &mut JITModule, function: &mut Function) -> FuncRef {
+        let mut signature = module.make_signature();
+        signature.params.push(AbiParam::new(F64)); // p1
+        signature.params.push(AbiParam::new(F64)); // p2
+        signature.params.push(AbiParam::new(F64)); // p3
+        signature.params.push(AbiParam::new(F64)); // p4
+        signature.params.push(AbiParam::new(F64)); // p5
+        signature.params.push(AbiParam::new(F64)); // p6
+        signature.params.push(AbiParam::new(F64)); // t
+        signature.returns.push(AbiParam::new(F64));
+        let func_id = module
+            .declare_function("opensolid_quintic_spline", Linkage::Import, &signature)
+            .unwrap();
+        module.declare_func_in_func(func_id, function)
+    }
+
     fn declare_quadratic_spline_bounds(
         module: &mut JITModule,
         function: &mut Function,
@@ -180,6 +243,57 @@ impl Builtins {
         signature.params.push(AbiParam::new(pointer_type)); // out_high
         let func_id = module
             .declare_function("opensolid_cubic_spline_bounds", Linkage::Import, &signature)
+            .unwrap();
+        module.declare_func_in_func(func_id, function)
+    }
+
+    fn declare_quartic_spline_bounds(
+        module: &mut JITModule,
+        function: &mut Function,
+        pointer_type: Type,
+    ) -> FuncRef {
+        let mut signature = module.make_signature();
+        signature.params.push(AbiParam::new(F64)); // p1
+        signature.params.push(AbiParam::new(F64)); // p2
+        signature.params.push(AbiParam::new(F64)); // p3
+        signature.params.push(AbiParam::new(F64)); // p4
+        signature.params.push(AbiParam::new(F64)); // p5
+        signature.params.push(AbiParam::new(F64)); // t_low
+        signature.params.push(AbiParam::new(F64)); // t_high
+        signature.params.push(AbiParam::new(pointer_type)); // out_low
+        signature.params.push(AbiParam::new(pointer_type)); // out_high
+        let func_id = module
+            .declare_function(
+                "opensolid_quartic_spline_bounds",
+                Linkage::Import,
+                &signature,
+            )
+            .unwrap();
+        module.declare_func_in_func(func_id, function)
+    }
+
+    fn declare_quintic_spline_bounds(
+        module: &mut JITModule,
+        function: &mut Function,
+        pointer_type: Type,
+    ) -> FuncRef {
+        let mut signature = module.make_signature();
+        signature.params.push(AbiParam::new(F64)); // p1
+        signature.params.push(AbiParam::new(F64)); // p2
+        signature.params.push(AbiParam::new(F64)); // p3
+        signature.params.push(AbiParam::new(F64)); // p4
+        signature.params.push(AbiParam::new(F64)); // p5
+        signature.params.push(AbiParam::new(F64)); // p6
+        signature.params.push(AbiParam::new(F64)); // t_low
+        signature.params.push(AbiParam::new(F64)); // t_high
+        signature.params.push(AbiParam::new(pointer_type)); // out_low
+        signature.params.push(AbiParam::new(pointer_type)); // out_high
+        let func_id = module
+            .declare_function(
+                "opensolid_quintic_spline_bounds",
+                Linkage::Import,
+                &signature,
+            )
             .unwrap();
         module.declare_func_in_func(func_id, function)
     }
@@ -234,6 +348,47 @@ fn cubic_blossom(p1: f64, p2: f64, p3: f64, p4: f64, t1: f64, t2: f64, t3: f64) 
     quadratic_blossom(q1, q2, q3, t2, t3)
 }
 
+#[inline]
+fn quartic_blossom(
+    p1: f64,
+    p2: f64,
+    p3: f64,
+    p4: f64,
+    p5: f64,
+    t1: f64,
+    t2: f64,
+    t3: f64,
+    t4: f64,
+) -> f64 {
+    let q1 = p1 + t1 * (p2 - p1);
+    let q2 = p2 + t1 * (p3 - p2);
+    let q3 = p3 + t1 * (p4 - p3);
+    let q4 = p4 + t1 * (p5 - p4);
+    cubic_blossom(q1, q2, q3, q4, t2, t3, t4)
+}
+
+#[inline]
+fn quintic_blossom(
+    p1: f64,
+    p2: f64,
+    p3: f64,
+    p4: f64,
+    p5: f64,
+    p6: f64,
+    t1: f64,
+    t2: f64,
+    t3: f64,
+    t4: f64,
+    t5: f64,
+) -> f64 {
+    let q1 = p1 + t1 * (p2 - p1);
+    let q2 = p2 + t1 * (p3 - p2);
+    let q3 = p3 + t1 * (p4 - p3);
+    let q4 = p4 + t1 * (p5 - p4);
+    let q5 = p5 + t1 * (p6 - p5);
+    quartic_blossom(q1, q2, q3, q4, q5, t2, t3, t4, t5)
+}
+
 #[no_mangle]
 pub extern "C" fn opensolid_quadratic_spline(p1: f64, p2: f64, p3: f64, t: f64) -> f64 {
     quadratic_blossom(p1, p2, p3, t, t)
@@ -242,6 +397,31 @@ pub extern "C" fn opensolid_quadratic_spline(p1: f64, p2: f64, p3: f64, t: f64) 
 #[no_mangle]
 pub extern "C" fn opensolid_cubic_spline(p1: f64, p2: f64, p3: f64, p4: f64, t: f64) -> f64 {
     cubic_blossom(p1, p2, p3, p4, t, t, t)
+}
+
+#[no_mangle]
+pub extern "C" fn opensolid_quartic_spline(
+    p1: f64,
+    p2: f64,
+    p3: f64,
+    p4: f64,
+    p5: f64,
+    t: f64,
+) -> f64 {
+    quartic_blossom(p1, p2, p3, p4, p5, t, t, t, t)
+}
+
+#[no_mangle]
+pub extern "C" fn opensolid_quintic_spline(
+    p1: f64,
+    p2: f64,
+    p3: f64,
+    p4: f64,
+    p5: f64,
+    p6: f64,
+    t: f64,
+) -> f64 {
+    quintic_blossom(p1, p2, p3, p4, p5, p6, t, t, t, t, t)
 }
 
 #[no_mangle]
@@ -282,6 +462,62 @@ pub extern "C" fn opensolid_cubic_spline_bounds(
     let q4 = cubic_blossom(p1, p2, p3, p4, t_high, t_high, t_high);
     let low = q1.min(q2).min(q3).min(q4);
     let high = q1.max(q2).max(q3).max(q4);
+    unsafe {
+        *out_low = low;
+        *out_high = high;
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn opensolid_quartic_spline_bounds(
+    p1: f64,
+    p2: f64,
+    p3: f64,
+    p4: f64,
+    p5: f64,
+    t_low: f64,
+    t_high: f64,
+    out_low: *mut f64,
+    out_high: *mut f64,
+) {
+    let q1 = quartic_blossom(p1, p2, p3, p4, p5, t_low, t_low, t_low, t_low);
+    let q2 = quartic_blossom(p1, p2, p3, p4, p5, t_low, t_low, t_low, t_high);
+    let q3 = quartic_blossom(p1, p2, p3, p4, p5, t_low, t_low, t_high, t_high);
+    let q4 = quartic_blossom(p1, p2, p3, p4, p5, t_low, t_high, t_high, t_high);
+    let q5 = quartic_blossom(p1, p2, p3, p4, p5, t_high, t_high, t_high, t_high);
+    let low = q1.min(q2).min(q3).min(q4).min(q5);
+    let high = q1.max(q2).max(q3).max(q4).max(q5);
+    unsafe {
+        *out_low = low;
+        *out_high = high;
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn opensolid_quintic_spline_bounds(
+    p1: f64,
+    p2: f64,
+    p3: f64,
+    p4: f64,
+    p5: f64,
+    p6: f64,
+    t_low: f64,
+    t_high: f64,
+    out_low: *mut f64,
+    out_high: *mut f64,
+) {
+    let q1 = quintic_blossom(p1, p2, p3, p4, p5, p6, t_low, t_low, t_low, t_low, t_low);
+    let q2 = quintic_blossom(p1, p2, p3, p4, p5, p6, t_low, t_low, t_low, t_low, t_high);
+    let q3 = quintic_blossom(p1, p2, p3, p4, p5, p6, t_low, t_low, t_low, t_high, t_high);
+    let q4 = quintic_blossom(p1, p2, p3, p4, p5, p6, t_low, t_low, t_high, t_high, t_high);
+    let q5 = quintic_blossom(
+        p1, p2, p3, p4, p5, p6, t_low, t_high, t_high, t_high, t_high,
+    );
+    let q6 = quintic_blossom(
+        p1, p2, p3, p4, p5, p6, t_high, t_high, t_high, t_high, t_high,
+    );
+    let low = q1.min(q2).min(q3).min(q4).min(q5).min(q6);
+    let high = q1.max(q2).max(q3).max(q4).max(q5).max(q6);
     unsafe {
         *out_low = low;
         *out_high = high;

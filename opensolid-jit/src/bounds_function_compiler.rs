@@ -364,6 +364,54 @@ impl<'a> BoundsFunctionCompiler<'a> {
                     let upper = self.load_upper();
                     self.define_bounds(expression, lower, upper)
                 }
+                Expression::QuarticSpline(p1, p2, p3, p4, p5, t) => {
+                    let p1_value = self.function_builder.ins().f64const(p1.value);
+                    let p2_value = self.function_builder.ins().f64const(p2.value);
+                    let p3_value = self.function_builder.ins().f64const(p3.value);
+                    let p4_value = self.function_builder.ins().f64const(p4.value);
+                    let p5_value = self.function_builder.ins().f64const(p5.value);
+                    let (t_lower, t_upper) = self.compute_bounds(t);
+                    let function_args = [
+                        p1_value,
+                        p2_value,
+                        p3_value,
+                        p4_value,
+                        p5_value,
+                        t_lower,
+                        t_upper,
+                        self.lower_address(),
+                        self.upper_address(),
+                    ];
+                    self.call(self.builtins.quartic_spline_bounds, &function_args);
+                    let lower = self.load_lower();
+                    let upper = self.load_upper();
+                    self.define_bounds(expression, lower, upper)
+                }
+                Expression::QuinticSpline(p1, p2, p3, p4, p5, p6, t) => {
+                    let p1_value = self.function_builder.ins().f64const(p1.value);
+                    let p2_value = self.function_builder.ins().f64const(p2.value);
+                    let p3_value = self.function_builder.ins().f64const(p3.value);
+                    let p4_value = self.function_builder.ins().f64const(p4.value);
+                    let p5_value = self.function_builder.ins().f64const(p5.value);
+                    let p6_value = self.function_builder.ins().f64const(p6.value);
+                    let (t_lower, t_upper) = self.compute_bounds(t);
+                    let function_args = [
+                        p1_value,
+                        p2_value,
+                        p3_value,
+                        p4_value,
+                        p5_value,
+                        p6_value,
+                        t_lower,
+                        t_upper,
+                        self.lower_address(),
+                        self.upper_address(),
+                    ];
+                    self.call(self.builtins.quintic_spline_bounds, &function_args);
+                    let lower = self.load_lower();
+                    let upper = self.load_upper();
+                    self.define_bounds(expression, lower, upper)
+                }
                 Expression::BezierCurve(control_points, t) => {
                     let (t_lower, t_upper) = self.compute_bounds(t);
                     let num_control_points = control_points.len();
