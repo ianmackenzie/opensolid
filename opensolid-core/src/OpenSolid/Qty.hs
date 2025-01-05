@@ -42,7 +42,6 @@ import OpenSolid.Bootstrap
 import {-# SOURCE #-} OpenSolid.Float (Float, fromRational)
 import {-# SOURCE #-} OpenSolid.Float qualified as Float
 import OpenSolid.List qualified as List
-import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Random.Internal qualified as Random
 import {-# SOURCE #-} OpenSolid.Range (Range)
 import {-# SOURCE #-} OpenSolid.Range qualified as Range
@@ -214,7 +213,7 @@ largest :: NonEmpty (Qty units) -> Qty units
 largest (x :| xs) = List.foldl larger x xs
 
 smallestBy :: (a -> Qty units) -> NonEmpty a -> a
-smallestBy _ (NonEmpty.One x) = x
+smallestBy _ (x :| []) = x
 smallestBy function (x :| xs) = go x (abs (function x)) xs
  where
   go current _ [] = current
@@ -225,7 +224,7 @@ smallestBy function (x :| xs) = go x (abs (function x)) xs
       else go current currentAbsValue remaining
 
 largestBy :: (a -> Qty units) -> NonEmpty a -> a
-largestBy _ (NonEmpty.One x) = x
+largestBy _ (x :| []) = x
 largestBy function (x :| xs) = go x (abs (function x)) xs
  where
   go current _ [] = current
