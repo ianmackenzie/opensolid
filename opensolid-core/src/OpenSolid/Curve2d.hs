@@ -45,11 +45,13 @@ module OpenSolid.Curve2d
   , removeStartDegeneracy
   , toPolyline
   , medialAxis
-  , arcLength
+  , arcLengthParameterization
+  , parameterizeByArcLength
   )
 where
 
 import OpenSolid.Angle (Angle)
+import OpenSolid.ArcLength qualified as ArcLength
 import OpenSolid.Arithmetic qualified as Arithmetic
 import OpenSolid.Axis2d (Axis2d)
 import OpenSolid.Axis2d qualified as Axis2d
@@ -80,7 +82,6 @@ import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Frame2d qualified as Frame2d
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.List qualified as List
-import OpenSolid.Lobatto qualified as Lobatto
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2d (Point2d (Point2d))
@@ -976,46 +977,19 @@ medialAxis curve1 curve2 = do
               }
       Success (List.map toSegment allCrossingCurves)
 
-arcLength :: Tolerance units => Curve2d (space @ units) -> Result HasDegeneracy (Qty units)
-arcLength curve = do
+arcLengthParameterization ::
+  Tolerance units =>
+  Curve2d (space @ units) ->
+  Result HasDegeneracy (Curve1d Unitless, Qty units)
+arcLengthParameterization curve =
   case VectorCurve2d.magnitude (derivative curve) of
     Failure VectorCurve2d.HasZero -> Failure HasDegeneracy
-    Success dsdt -> do
-      let dsdt1 = Curve1d.evaluate dsdt 0.0
-      let dsdt2 = Curve1d.evaluate dsdt Lobatto.p2
-      let dsdt3 = Curve1d.evaluate dsdt Lobatto.p3
-      let dsdt4 = Curve1d.evaluate dsdt 1.0
-      let coarseEstimate = Lobatto.estimate dsdt1 dsdt2 dsdt3 dsdt4
-      Success (computeArcLength ?tolerance dsdt 0.0 1.0 dsdt1 dsdt4 coarseEstimate)
+    Success derivativeMagnitude -> Success (ArcLength.parameterization derivativeMagnitude)
 
-computeArcLength ::
-  Qty units ->
-  Curve1d units ->
-  Float ->
-  Float ->
-  Qty units ->
-  Qty units ->
-  Qty units ->
-  Qty units
-computeArcLength target dsdt tStart tEnd dsdtStart dsdtEnd coarseEstimate = do
-  let tWidth = 0.5 * (tEnd - tStart)
-  let tMid = Float.midpoint tStart tEnd
-  let dsdtMid = Curve1d.evaluate dsdt tMid
-  let dsdtLeft2 = Curve1d.evaluate dsdt (Qty.interpolateFrom tStart tMid Lobatto.p2)
-  let dsdtLeft3 = Curve1d.evaluate dsdt (Qty.interpolateFrom tStart tMid Lobatto.p3)
-  let dsdtRight2 = Curve1d.evaluate dsdt (Qty.interpolateFrom tMid tEnd Lobatto.p2)
-  let dsdtRight3 = Curve1d.evaluate dsdt (Qty.interpolateFrom tMid tEnd Lobatto.p3)
-  let leftEstimate = tWidth * Lobatto.estimate dsdtStart dsdtLeft2 dsdtLeft3 dsdtMid
-  let rightEstimate = tWidth * Lobatto.estimate dsdtMid dsdtRight2 dsdtRight3 dsdtEnd
-  let fineEstimate = leftEstimate + rightEstimate
-  if Qty.abs (fineEstimate - coarseEstimate) <= target
-    then fineEstimate
-    else do
-      -- TODO try more sophisticated allocation of target approximation error when recursing,
-      -- e.g. based on relative magnitudes of leftEstimate and rightEstimate?
-      -- Might be better but might also backfire in some situations
-      let leftTarget = 0.5 * target
-      let rightTarget = 0.5 * target
-      let leftLength = computeArcLength leftTarget dsdt tStart tMid dsdtStart dsdtMid leftEstimate
-      let rightLength = computeArcLength rightTarget dsdt tMid tEnd dsdtMid dsdtEnd rightEstimate
-      leftLength + rightLength
+parameterizeByArcLength ::
+  Tolerance units =>
+  Curve2d (space @ units) ->
+  Result HasDegeneracy (Curve2d (space @ units), Qty units)
+parameterizeByArcLength curve = Result.do
+  (parameterization, length) <- arcLengthParameterization curve
+  Success (curve . parameterization, length)

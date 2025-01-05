@@ -26,7 +26,7 @@ formatLength length =
 
 testCurve :: Text -> Curve2d (Space @ Meters) -> IO ()
 testCurve label curve = Tolerance.using (Length.meters 1e-12) IO.do
-  length <- Curve2d.arcLength curve
+  (_, length) <- Curve2d.arcLengthParameterization curve
   IO.printLine (label + ": " + formatLength length)
 
 testLine :: IO ()
