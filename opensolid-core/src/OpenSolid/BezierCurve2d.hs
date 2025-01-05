@@ -4,13 +4,13 @@ module OpenSolid.BezierCurve2d
   )
 where
 
+import OpenSolid.Curve1d qualified as Curve1d
 import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Curve2d qualified as Curve2d
-import OpenSolid.Expression qualified as Expression
-import OpenSolid.Float qualified as Float
-import OpenSolid.Int qualified as Int
 import OpenSolid.List qualified as List
-import OpenSolid.Point2d (Point2d)
+import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.Point2d (Point2d (Point2d))
+import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Vector2d (Vector2d)
 import OpenSolid.Vector2d qualified as Vector2d
@@ -23,7 +23,10 @@ end point (last control point). For example,
 will return a cubic spline with the given four control points.
 -}
 fromControlPoints :: NonEmpty (Point2d (space @ units)) -> Curve2d (space @ units)
-fromControlPoints = Curve2d.Parametric . Expression.bezierCurve
+fromControlPoints controlPoints =
+  Curve2d.xy
+    (Curve1d.bezier (NonEmpty.map Point2d.xCoordinate controlPoints))
+    (Curve1d.bezier (NonEmpty.map Point2d.yCoordinate controlPoints))
 
 {-| Construct a Bezier curve with the given start point, start derivatives, end point and end
 derivatives. For example,
@@ -47,45 +50,12 @@ hermite ::
   (Point2d (space @ units), List (Vector2d (space @ units))) ->
   Curve2d (space @ units)
 hermite (startPoint, startDerivatives) (endPoint, endDerivatives) = do
-  let numStartDerivatives = List.length startDerivatives
-  let numEndDerivatives = List.length endDerivatives
-  let curveDegree = 1 + numStartDerivatives + numEndDerivatives
-  let scaledStartDerivatives =
-        scaleDerivatives Positive 1.0 (Float.int curveDegree) startDerivatives
-  let scaledEndDerivatives =
-        scaleDerivatives Negative 1.0 (Float.int curveDegree) endDerivatives
-  let startControlPoints =
-        derivedControlPoints startPoint 1 (numStartDerivatives + 1) scaledStartDerivatives
-  let endControlPoints =
-        List.reverse (derivedControlPoints endPoint 1 (numEndDerivatives + 1) scaledEndDerivatives)
-  let controlPoints = startPoint :| (startControlPoints + endControlPoints + [endPoint])
-  fromControlPoints controlPoints
-
-scaleDerivatives ::
-  Sign ->
-  Float ->
-  Float ->
-  List (Vector2d (space @ units)) ->
-  List (Vector2d (space @ units))
-scaleDerivatives _ _ _ [] = []
-scaleDerivatives sign scale n (first : rest) = do
-  let updatedScale = sign * scale / n
-  updatedScale * first : scaleDerivatives sign updatedScale (n - 1.0) rest
-
-offset :: Int -> List (Vector2d (space @ units)) -> Vector2d (space @ units)
-offset i scaledDerivatives =
-  List.take i scaledDerivatives
-    |> List.mapWithIndex (\j q -> Float.int (Int.choose (i - 1) j) * q)
-    |> Vector2d.sum
-
-derivedControlPoints ::
-  Point2d (space @ units) ->
-  Int ->
-  Int ->
-  List (Vector2d (space @ units)) ->
-  List (Point2d (space @ units))
-derivedControlPoints previousPoint i n qs
-  | i < n = do
-      let newPoint = previousPoint + offset i qs
-      newPoint : derivedControlPoints newPoint (i + 1) n qs
-  | otherwise = []
+  let Point2d xStart yStart = startPoint
+  let Point2d xEnd yEnd = endPoint
+  let xStartDerivatives = List.map Vector2d.xComponent startDerivatives
+  let yStartDerivatives = List.map Vector2d.yComponent startDerivatives
+  let xEndDerivatives = List.map Vector2d.xComponent endDerivatives
+  let yEndDerivatives = List.map Vector2d.yComponent endDerivatives
+  let x = Curve1d.hermite (xStart, xStartDerivatives) (xEnd, xEndDerivatives)
+  let y = Curve1d.hermite (yStart, yStartDerivatives) (yEnd, yEndDerivatives)
+  Curve2d.xy x y
