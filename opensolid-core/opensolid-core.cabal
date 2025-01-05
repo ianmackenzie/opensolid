@@ -94,6 +94,7 @@ library
   exposed-modules:
     OpenSolid.Angle
     OpenSolid.Arc2d
+    OpenSolid.ArcLength
     OpenSolid.Area
     OpenSolid.Arithmetic
     OpenSolid.Arithmetic.Unboxed
