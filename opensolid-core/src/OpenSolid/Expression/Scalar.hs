@@ -16,6 +16,8 @@ module OpenSolid.Expression.Scalar
   , cos
   , quadraticSpline
   , cubicSpline
+  , quarticSpline
+  , quinticSpline
   , bezierCurve
   , curveDerivative
   , surfaceDerivative
@@ -61,6 +63,8 @@ data Scalar input where
   Cos :: Scalar input -> Scalar input
   QuadraticSpline :: Float -> Float -> Float -> Scalar input -> Scalar input
   CubicSpline :: Float -> Float -> Float -> Float -> Scalar input -> Scalar input
+  QuarticSpline :: Float -> Float -> Float -> Float -> Float -> Scalar input -> Scalar input
+  QuinticSpline :: Float -> Float -> Float -> Float -> Float -> Float -> Scalar input -> Scalar input
   BezierCurve :: NonEmpty Float -> Scalar input -> Scalar input
 
 deriving instance Eq (Scalar input)
@@ -81,6 +85,8 @@ instance Composition (Scalar input) (Scalar Float) (Scalar input) where
   Cos arg . input = cos (arg . input)
   QuadraticSpline p1 p2 p3 param . input = QuadraticSpline p1 p2 p3 (param . input)
   CubicSpline p1 p2 p3 p4 param . input = CubicSpline p1 p2 p3 p4 (param . input)
+  QuarticSpline p1 p2 p3 p4 p5 param . input = QuarticSpline p1 p2 p3 p4 p5 (param . input)
+  QuinticSpline p1 p2 p3 p4 p5 p6 param . input = QuinticSpline p1 p2 p3 p4 p5 p6 (param . input)
   BezierCurve controlPoints param . input = BezierCurve controlPoints (param . input)
 
 instance
@@ -104,6 +110,8 @@ instance
   Cos arg . inputs = cos (arg . inputs)
   QuadraticSpline p1 p2 p3 param . inputs = QuadraticSpline p1 p2 p3 (param . inputs)
   CubicSpline p1 p2 p3 p4 param . inputs = CubicSpline p1 p2 p3 p4 (param . inputs)
+  QuarticSpline p1 p2 p3 p4 p5 param . inputs = QuarticSpline p1 p2 p3 p4 p5 (param . inputs)
+  QuinticSpline p1 p2 p3 p4 p5 p6 param . inputs = QuinticSpline p1 p2 p3 p4 p5 p6 (param . inputs)
   BezierCurve controlPoints param . inputs = BezierCurve controlPoints (param . inputs)
 
 instance
@@ -128,6 +136,8 @@ instance
   Cos arg . inputs = cos (arg . inputs)
   QuadraticSpline p1 p2 p3 param . inputs = QuadraticSpline p1 p2 p3 (param . inputs)
   CubicSpline p1 p2 p3 p4 param . inputs = CubicSpline p1 p2 p3 p4 (param . inputs)
+  QuarticSpline p1 p2 p3 p4 p5 param . inputs = QuarticSpline p1 p2 p3 p4 p5 (param . inputs)
+  QuinticSpline p1 p2 p3 p4 p5 p6 param . inputs = QuinticSpline p1 p2 p3 p4 p5 p6 (param . inputs)
   BezierCurve controlPoints param . inputs = BezierCurve controlPoints (param . inputs)
 
 zero :: Scalar input
@@ -241,12 +251,51 @@ cubicSpline :: Qty units -> Qty units -> Qty units -> Qty units -> Scalar input 
 cubicSpline p1 p2 p3 p4 param =
   CubicSpline (Units.coerce p1) (Units.coerce p2) (Units.coerce p3) (Units.coerce p4) param
 
+quarticSpline ::
+  Qty units ->
+  Qty units ->
+  Qty units ->
+  Qty units ->
+  Qty units ->
+  Scalar input ->
+  Scalar input
+quarticSpline p1 p2 p3 p4 p5 param =
+  QuarticSpline
+    (Units.coerce p1)
+    (Units.coerce p2)
+    (Units.coerce p3)
+    (Units.coerce p4)
+    (Units.coerce p5)
+    param
+
+quinticSpline ::
+  Qty units ->
+  Qty units ->
+  Qty units ->
+  Qty units ->
+  Qty units ->
+  Qty units ->
+  Scalar input ->
+  Scalar input
+quinticSpline p1 p2 p3 p4 p5 p6 param =
+  QuinticSpline
+    (Units.coerce p1)
+    (Units.coerce p2)
+    (Units.coerce p3)
+    (Units.coerce p4)
+    (Units.coerce p5)
+    (Units.coerce p6)
+    param
+
 bezierCurve :: NonEmpty (Qty units) -> Scalar input -> Scalar input
-bezierCurve (NonEmpty.One value) _ = constant value
-bezierCurve (NonEmpty.Two p1 p2) param = sum (constant p1) (product param (constant (p2 - p1)))
-bezierCurve (NonEmpty.Three p1 p2 p3) param = quadraticSpline p1 p2 p3 param
-bezierCurve (NonEmpty.Four p1 p2 p3 p4) param = cubicSpline p1 p2 p3 p4 param
-bezierCurve controlPoints param = BezierCurve (NonEmpty.map Units.coerce controlPoints) param
+bezierCurve controlPoints param = case controlPoints of
+  NonEmpty.One value -> constant value
+  NonEmpty.Two p1 p2 -> sum (constant p1) (product param (constant (p2 - p1)))
+  NonEmpty.Three p1 p2 p3 -> quadraticSpline p1 p2 p3 param
+  NonEmpty.Four p1 p2 p3 p4 -> cubicSpline p1 p2 p3 p4 param
+  NonEmpty.Five p1 p2 p3 p4 p5 -> quarticSpline p1 p2 p3 p4 p5 param
+  NonEmpty.Six p1 p2 p3 p4 p5 p6 -> quinticSpline p1 p2 p3 p4 p5 p6 param
+  NonEmpty.SevenOrMore -> BezierCurve (NonEmpty.map Units.coerce controlPoints) param
 
 curveDerivative :: Scalar Float -> Scalar Float
 curveDerivative expression = case expression of
@@ -273,6 +322,19 @@ curveDerivative expression = case expression of
     let d2 = 3.0 * (p3 - p2)
     let d3 = 3.0 * (p4 - p3)
     product (quadraticSpline d1 d2 d3 param) (curveDerivative param)
+  QuarticSpline p1 p2 p3 p4 p5 param -> do
+    let d1 = 4.0 * (p2 - p1)
+    let d2 = 4.0 * (p3 - p2)
+    let d3 = 4.0 * (p4 - p3)
+    let d4 = 4.0 * (p5 - p4)
+    product (cubicSpline d1 d2 d3 d4 param) (curveDerivative param)
+  QuinticSpline p1 p2 p3 p4 p5 p6 param -> do
+    let d1 = 5.0 * (p2 - p1)
+    let d2 = 5.0 * (p3 - p2)
+    let d3 = 5.0 * (p4 - p3)
+    let d4 = 5.0 * (p5 - p4)
+    let d5 = 5.0 * (p6 - p5)
+    product (quarticSpline d1 d2 d3 d4 d5 param) (curveDerivative param)
   BezierCurve controlPoints param -> do
     let scale = Float.int (NonEmpty.length controlPoints - 1)
     let scaledDifference p1 p2 = scale * (p2 - p1)
@@ -315,6 +377,19 @@ surfaceDerivative varyingParameter expression = case expression of
     let d2 = 3.0 * (p3 - p2)
     let d3 = 3.0 * (p4 - p3)
     product (quadraticSpline d1 d2 d3 param) (surfaceDerivative varyingParameter param)
+  QuarticSpline p1 p2 p3 p4 p5 param -> do
+    let d1 = 4.0 * (p2 - p1)
+    let d2 = 4.0 * (p3 - p2)
+    let d3 = 4.0 * (p4 - p3)
+    let d4 = 4.0 * (p5 - p4)
+    product (cubicSpline d1 d2 d3 d4 param) (surfaceDerivative varyingParameter param)
+  QuinticSpline p1 p2 p3 p4 p5 p6 param -> do
+    let d1 = 5.0 * (p2 - p1)
+    let d2 = 5.0 * (p3 - p2)
+    let d3 = 5.0 * (p4 - p3)
+    let d4 = 5.0 * (p5 - p4)
+    let d5 = 5.0 * (p6 - p5)
+    product (quarticSpline d1 d2 d3 d4 d5 param) (surfaceDerivative varyingParameter param)
   BezierCurve controlPoints param -> do
     let scale = Float.int (NonEmpty.length controlPoints - 1)
     let scaledDifference p1 p2 = scale * (p2 - p1)
@@ -359,6 +434,19 @@ volumeDerivative varyingParameter expression = case expression of
     let d2 = 3.0 * (p3 - p2)
     let d3 = 3.0 * (p4 - p3)
     product (quadraticSpline d1 d2 d3 param) (volumeDerivative varyingParameter param)
+  QuarticSpline p1 p2 p3 p4 p5 param -> do
+    let d1 = 4.0 * (p2 - p1)
+    let d2 = 4.0 * (p3 - p2)
+    let d3 = 4.0 * (p4 - p3)
+    let d4 = 4.0 * (p5 - p4)
+    product (cubicSpline d1 d2 d3 d4 param) (volumeDerivative varyingParameter param)
+  QuinticSpline p1 p2 p3 p4 p5 p6 param -> do
+    let d1 = 5.0 * (p2 - p1)
+    let d2 = 5.0 * (p3 - p2)
+    let d3 = 5.0 * (p4 - p3)
+    let d4 = 5.0 * (p5 - p4)
+    let d5 = 5.0 * (p6 - p5)
+    product (quarticSpline d1 d2 d3 d4 d5 param) (volumeDerivative varyingParameter param)
   BezierCurve controlPoints param -> do
     let scale = Float.int (NonEmpty.length controlPoints - 1)
     let scaledDifference p1 p2 = scale * (p2 - p1)
@@ -397,6 +485,12 @@ showWithPrecedence precedence expression = case expression of
   CubicSpline p1 p2 p3 p4 param -> do
     let args = [constant p1, constant p2, constant p3, constant p4, param]
     showFunctionCall precedence "cubicSpline" args
+  QuarticSpline p1 p2 p3 p4 p5 param -> do
+    let args = [constant p1, constant p2, constant p3, constant p4, constant p5, param]
+    showFunctionCall precedence "quarticSpline" args
+  QuinticSpline p1 p2 p3 p4 p5 p6 param -> do
+    let args = [constant p1, constant p2, constant p3, constant p4, constant p5, constant p6, param]
+    showFunctionCall precedence "quinticSpline" args
   BezierCurve controlPoints param ->
     showParenthesized (precedence >= 10) $
       "bezierCurve " + Text.show (NonEmpty.toList controlPoints) + " " + showWithPrecedence 10 param
@@ -453,6 +547,27 @@ foreign import ccall unsafe "opensolid_expression_quadratic_spline"
 foreign import ccall unsafe "opensolid_expression_cubic_spline"
   opensolid_expression_cubic_spline :: Double -> Double -> Double -> Double -> Ptr -> Ptr
 
+foreign import ccall unsafe "opensolid_expression_quartic_spline"
+  opensolid_expression_quartic_spline ::
+    Double ->
+    Double ->
+    Double ->
+    Double ->
+    Double ->
+    Ptr ->
+    Ptr
+
+foreign import ccall unsafe "opensolid_expression_quintic_spline"
+  opensolid_expression_quintic_spline ::
+    Double ->
+    Double ->
+    Double ->
+    Double ->
+    Double ->
+    Double ->
+    Ptr ->
+    Ptr
+
 foreign import ccall unsafe "opensolid_expression_bezier_curve"
   opensolid_expression_bezier_curve :: Int64 -> Foreign.Ptr (Qty units) -> Ptr -> Ptr
 
@@ -480,6 +595,10 @@ ptr expression = case expression of
     opensolid_expression_quadratic_spline p1 p2 p3 (ptr param)
   CubicSpline (Qty p1) (Qty p2) (Qty p3) (Qty p4) param ->
     opensolid_expression_cubic_spline p1 p2 p3 p4 (ptr param)
+  QuarticSpline (Qty p1) (Qty p2) (Qty p3) (Qty p4) (Qty p5) param ->
+    opensolid_expression_quartic_spline p1 p2 p3 p4 p5 (ptr param)
+  QuinticSpline (Qty p1) (Qty p2) (Qty p3) (Qty p4) (Qty p5) (Qty p6) param ->
+    opensolid_expression_quintic_spline p1 p2 p3 p4 p5 p6 (ptr param)
   BezierCurve controlPoints param -> unsafeDupablePerformIO $ IO.do
     let numControlPoints = fromIntegral (NonEmpty.length controlPoints)
     Foreign.Marshal.Array.withArray (NonEmpty.toList controlPoints) $ \arrayPtr ->
