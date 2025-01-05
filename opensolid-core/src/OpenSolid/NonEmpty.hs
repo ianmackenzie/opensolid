@@ -5,10 +5,18 @@ module OpenSolid.NonEmpty
   , pattern Two
   , pattern Three
   , pattern Four
+  , pattern Five
+  , pattern Six
+  , pattern Seven
+  , pattern Eight
   , pattern TwoOrMore
   , pattern ThreeOrMore
   , pattern FourOrMore
   , pattern FiveOrMore
+  , pattern SixOrMore
+  , pattern SevenOrMore
+  , pattern EightOrMore
+  , pattern NineOrMore
   , (|:)
   , singleton
   , of2
@@ -97,6 +105,14 @@ import Prelude qualified
 
 {-# COMPLETE One, Two, Three, Four, FiveOrMore #-}
 
+{-# COMPLETE One, Two, Three, Four, Five, SixOrMore #-}
+
+{-# COMPLETE One, Two, Three, Four, Five, Six, SevenOrMore #-}
+
+{-# COMPLETE One, Two, Three, Four, Five, Six, Seven, EightOrMore #-}
+
+{-# COMPLETE One, Two, Three, Four, Five, Six, Seven, Eight, NineOrMore #-}
+
 pattern NonEmpty :: NonEmpty a -> List a
 pattern NonEmpty nonEmpty <- (Data.List.NonEmpty.nonEmpty -> Just nonEmpty)
 
@@ -112,6 +128,20 @@ pattern Three first second third = first :| [second, third]
 pattern Four :: a -> a -> a -> a -> NonEmpty a
 pattern Four first second third fourth = first :| [second, third, fourth]
 
+pattern Five :: a -> a -> a -> a -> a -> NonEmpty a
+pattern Five first second third fourth fifth = first :| [second, third, fourth, fifth]
+
+pattern Six :: a -> a -> a -> a -> a -> a -> NonEmpty a
+pattern Six first second third fourth fifth sixth = first :| [second, third, fourth, fifth, sixth]
+
+pattern Seven :: a -> a -> a -> a -> a -> a -> a -> NonEmpty a
+pattern Seven first second third fourth fifth sixth seventh =
+  first :| [second, third, fourth, fifth, sixth, seventh]
+
+pattern Eight :: a -> a -> a -> a -> a -> a -> a -> a -> NonEmpty a
+pattern Eight first second third fourth fifth sixth seventh eigth =
+  first :| [second, third, fourth, fifth, sixth, seventh, eigth]
+
 pattern TwoOrMore :: a -> a -> List a -> NonEmpty a
 pattern TwoOrMore first second rest = first :| (second : rest)
 
@@ -124,6 +154,22 @@ pattern FourOrMore first second third fourth rest = first :| (second : third : f
 pattern FiveOrMore :: a -> a -> a -> a -> a -> List a -> NonEmpty a
 pattern FiveOrMore first second third fourth fifth rest =
   first :| (second : third : fourth : fifth : rest)
+
+pattern SixOrMore :: a -> a -> a -> a -> a -> a -> List a -> NonEmpty a
+pattern SixOrMore first second third fourth fifth sixth rest =
+  first :| (second : third : fourth : fifth : sixth : rest)
+
+pattern SevenOrMore :: a -> a -> a -> a -> a -> a -> a -> List a -> NonEmpty a
+pattern SevenOrMore first second third fourth fifth sixth seventh rest =
+  first :| (second : third : fourth : fifth : sixth : seventh : rest)
+
+pattern EightOrMore :: a -> a -> a -> a -> a -> a -> a -> a -> List a -> NonEmpty a
+pattern EightOrMore first second third fourth fifth sixth seventh eigth rest =
+  first :| (second : third : fourth : fifth : sixth : seventh : eigth : rest)
+
+pattern NineOrMore :: a -> a -> a -> a -> a -> a -> a -> a -> a -> List a -> NonEmpty a
+pattern NineOrMore first second third fourth fifth sixth seventh eigth ninth rest =
+  first :| (second : third : fourth : fifth : sixth : seventh : eigth : ninth : rest)
 
 (|:) :: List a -> a -> NonEmpty a
 [] |: item = singleton item
