@@ -142,34 +142,29 @@ pattern Eight :: a -> a -> a -> a -> a -> a -> a -> a -> NonEmpty a
 pattern Eight first second third fourth fifth sixth seventh eigth =
   first :| [second, third, fourth, fifth, sixth, seventh, eigth]
 
-pattern TwoOrMore :: a -> a -> List a -> NonEmpty a
-pattern TwoOrMore first second rest = first :| (second : rest)
+pattern TwoOrMore :: NonEmpty a
+pattern TwoOrMore <- _ :| (_ : _)
 
-pattern ThreeOrMore :: a -> a -> a -> List a -> NonEmpty a
-pattern ThreeOrMore first second third rest = first :| (second : third : rest)
+pattern ThreeOrMore :: NonEmpty a
+pattern ThreeOrMore <- _ :| (_ : _ : _)
 
-pattern FourOrMore :: a -> a -> a -> a -> List a -> NonEmpty a
-pattern FourOrMore first second third fourth rest = first :| (second : third : fourth : rest)
+pattern FourOrMore :: NonEmpty a
+pattern FourOrMore <- _ :| (_ : _ : _ : _)
 
-pattern FiveOrMore :: a -> a -> a -> a -> a -> List a -> NonEmpty a
-pattern FiveOrMore first second third fourth fifth rest =
-  first :| (second : third : fourth : fifth : rest)
+pattern FiveOrMore :: NonEmpty a
+pattern FiveOrMore <- _ :| (_ : _ : _ : _ : _)
 
-pattern SixOrMore :: a -> a -> a -> a -> a -> a -> List a -> NonEmpty a
-pattern SixOrMore first second third fourth fifth sixth rest =
-  first :| (second : third : fourth : fifth : sixth : rest)
+pattern SixOrMore :: NonEmpty a
+pattern SixOrMore <- _ :| (_ : _ : _ : _ : _ : _)
 
-pattern SevenOrMore :: a -> a -> a -> a -> a -> a -> a -> List a -> NonEmpty a
-pattern SevenOrMore first second third fourth fifth sixth seventh rest =
-  first :| (second : third : fourth : fifth : sixth : seventh : rest)
+pattern SevenOrMore :: NonEmpty a
+pattern SevenOrMore <- _ :| (_ : _ : _ : _ : _ : _ : _)
 
-pattern EightOrMore :: a -> a -> a -> a -> a -> a -> a -> a -> List a -> NonEmpty a
-pattern EightOrMore first second third fourth fifth sixth seventh eigth rest =
-  first :| (second : third : fourth : fifth : sixth : seventh : eigth : rest)
+pattern EightOrMore :: NonEmpty a
+pattern EightOrMore <- _ :| (_ : _ : _ : _ : _ : _ : _ : _)
 
-pattern NineOrMore :: a -> a -> a -> a -> a -> a -> a -> a -> a -> List a -> NonEmpty a
-pattern NineOrMore first second third fourth fifth sixth seventh eigth ninth rest =
-  first :| (second : third : fourth : fifth : sixth : seventh : eigth : ninth : rest)
+pattern NineOrMore :: NonEmpty a
+pattern NineOrMore <- _ :| (_ : _ : _ : _ : _ : _ : _ : _ : _)
 
 (|:) :: List a -> a -> NonEmpty a
 [] |: item = singleton item
