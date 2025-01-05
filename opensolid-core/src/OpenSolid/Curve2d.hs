@@ -6,6 +6,7 @@ module OpenSolid.Curve2d
   , TransformBy (TransformBy)
   , new
   , constant
+  , xy
   , startPoint
   , endPoint
   , evaluate
@@ -124,6 +125,10 @@ data Curve2d (coordinateSystem :: CoordinateSystem) where
   Coerce ::
     Curve2d (space @ units1) ->
     Curve2d (space @ units2)
+  XY ::
+    Curve1d units ->
+    Curve1d units ->
+    Curve2d (space @ units)
   PlaceIn ::
     Frame2d (global @ units) (Defines local) ->
     Curve2d (local @ units) ->
@@ -367,11 +372,16 @@ new = Curve
 constant :: Point2d (space @ units) -> Curve2d (space @ units)
 constant = Parametric . Expression.constant
 
+xy :: Curve1d units -> Curve1d units -> Curve2d (space @ units)
+xy (Curve1d.Parametric x) (Curve1d.Parametric y) = Parametric (Expression.xy x y)
+xy x y = XY x y
+
 startPoint :: Curve2d (space @ units) -> Point2d (space @ units)
 startPoint curve = case curve of
   Curve c -> startPointImpl c
   Parametric expresssion -> Expression.evaluate expresssion 0.0
   Coerce c -> Units.coerce (startPoint c)
+  XY x y -> Point2d.xy (Curve1d.evaluate x 0.0) (Curve1d.evaluate y 0.0)
   PlaceIn frame c -> Point2d.placeIn frame (startPoint c)
   Addition c v -> startPoint c + VectorCurve2d.startValue v
   Subtraction c v -> startPoint c - VectorCurve2d.startValue v
@@ -381,6 +391,7 @@ endPoint curve = case curve of
   Curve c -> endPointImpl c
   Parametric expresssion -> Expression.evaluate expresssion 1.0
   Coerce c -> Units.coerce (endPoint c)
+  XY x y -> Point2d.xy (Curve1d.evaluate x 1.0) (Curve1d.evaluate y 1.0)
   PlaceIn frame c -> Point2d.placeIn frame (endPoint c)
   Addition c v -> endPoint c + VectorCurve2d.endValue v
   Subtraction c v -> endPoint c - VectorCurve2d.endValue v
@@ -390,6 +401,7 @@ evaluate curve tValue = case curve of
   Curve c -> evaluateImpl c tValue
   Parametric expresssion -> Expression.evaluate expresssion tValue
   Coerce c -> Units.coerce (evaluate c tValue)
+  XY x y -> Point2d.xy (Curve1d.evaluate x tValue) (Curve1d.evaluate y tValue)
   PlaceIn frame c -> Point2d.placeIn frame (evaluate c tValue)
   Addition c v -> evaluate c tValue + VectorCurve2d.evaluate v tValue
   Subtraction c v -> evaluate c tValue - VectorCurve2d.evaluate v tValue
@@ -399,6 +411,7 @@ evaluateBounds curve tRange = case curve of
   Curve c -> evaluateBoundsImpl c tRange
   Parametric expresssion -> Expression.evaluateBounds expresssion tRange
   Coerce c -> Units.coerce (evaluateBounds c tRange)
+  XY x y -> Bounds2d.xy (Curve1d.evaluateBounds x tRange) (Curve1d.evaluateBounds y tRange)
   PlaceIn frame c -> Bounds2d.placeIn frame (evaluateBounds c tRange)
   Addition c v -> evaluateBounds c tRange + VectorCurve2d.evaluateBounds v tRange
   Subtraction c v -> evaluateBounds c tRange - VectorCurve2d.evaluateBounds v tRange
@@ -407,6 +420,7 @@ derivative :: Curve2d (space @ units) -> VectorCurve2d (space @ units)
 derivative curve = case curve of
   Curve c -> derivativeImpl c
   Parametric expresssion -> VectorCurve2d.Parametric (Expression.curveDerivative expresssion)
+  XY x y -> VectorCurve2d.xy (Curve1d.derivative x) (Curve1d.derivative y)
   Coerce c -> Units.coerce (derivative c)
   PlaceIn frame c -> VectorCurve2d.placeIn frame (derivative c)
   Addition c v -> derivative c + VectorCurve2d.derivative v
@@ -416,6 +430,7 @@ reverse :: Curve2d (space @ units) -> Curve2d (space @ units)
 reverse curve = case curve of
   Curve c -> Curve (reverseImpl c)
   Parametric expression -> Parametric (expression . Expression.r)
+  XY x y -> XY (Curve1d.reverse x) (Curve1d.reverse y)
   Coerce c -> Units.coerce (reverse c)
   PlaceIn frame c -> PlaceIn frame (reverse c)
   Addition c v -> reverse c + VectorCurve2d.reverse v
@@ -426,6 +441,7 @@ bounds curve = case curve of
   Curve c -> boundsImpl c
   Parametric expression -> Expression.evaluateBounds expression Range.unit
   Coerce c -> Units.coerce (bounds c)
+  XY x y -> Bounds2d.xy (Curve1d.evaluateBounds x Range.unit) (Curve1d.evaluateBounds y Range.unit)
   PlaceIn frame c -> Bounds2d.placeIn frame (bounds c)
   Addition c v -> bounds c + VectorCurve2d.evaluateBounds v Range.unit
   Subtraction c v -> bounds c - VectorCurve2d.evaluateBounds v Range.unit
@@ -652,6 +668,7 @@ transformBy transform curve = case curve of
   Curve c -> Curve (transformByImpl transform c)
   Parametric expression -> Parametric (Expression.Curve2d.transformBy transform expression)
   Coerce c -> Units.coerce (transformBy (Units.coerce transform) c)
+  XY{} -> new (TransformBy transform curve)
   PlaceIn frame c -> PlaceIn frame (transformBy (Transform2d.relativeTo frame transform) c)
   Addition c v -> transformBy transform c + VectorCurve2d.transformBy transform v
   Subtraction c v -> transformBy transform c - VectorCurve2d.transformBy transform v
