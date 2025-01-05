@@ -75,4 +75,4 @@ executable arc-length
   main-is: Main.hs
   hs-source-dirs: arc-length
   build-depends:
-    opensolid-core,
+    opensolid-core
