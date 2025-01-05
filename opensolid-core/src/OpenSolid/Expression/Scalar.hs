@@ -148,6 +148,7 @@ surfaceParameter = SurfaceParameter
 volumeParameter :: VolumeParameter -> Scalar UvwPoint
 volumeParameter = VolumeParameter
 
+-- TODO special cases for spline types
 negated :: Scalar input -> Scalar input
 negated (Constant value) = Constant (negate value)
 negated (Negated expression) = expression
