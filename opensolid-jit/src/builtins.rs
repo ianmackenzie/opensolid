@@ -116,10 +116,10 @@ impl Builtins {
 
     fn declare_quadratic_spline(module: &mut JITModule, function: &mut Function) -> FuncRef {
         let mut signature = module.make_signature();
-        signature.params.push(AbiParam::new(F64));
-        signature.params.push(AbiParam::new(F64));
-        signature.params.push(AbiParam::new(F64));
-        signature.params.push(AbiParam::new(F64));
+        signature.params.push(AbiParam::new(F64)); // p1
+        signature.params.push(AbiParam::new(F64)); // p2
+        signature.params.push(AbiParam::new(F64)); // p3
+        signature.params.push(AbiParam::new(F64)); // t
         signature.returns.push(AbiParam::new(F64));
         let func_id = module
             .declare_function("opensolid_quadratic_spline", Linkage::Import, &signature)
@@ -129,11 +129,11 @@ impl Builtins {
 
     fn declare_cubic_spline(module: &mut JITModule, function: &mut Function) -> FuncRef {
         let mut signature = module.make_signature();
-        signature.params.push(AbiParam::new(F64));
-        signature.params.push(AbiParam::new(F64));
-        signature.params.push(AbiParam::new(F64));
-        signature.params.push(AbiParam::new(F64));
-        signature.params.push(AbiParam::new(F64));
+        signature.params.push(AbiParam::new(F64)); // p1
+        signature.params.push(AbiParam::new(F64)); // p2
+        signature.params.push(AbiParam::new(F64)); // p3
+        signature.params.push(AbiParam::new(F64)); // p4
+        signature.params.push(AbiParam::new(F64)); // t
         signature.returns.push(AbiParam::new(F64));
         let func_id = module
             .declare_function("opensolid_cubic_spline", Linkage::Import, &signature)
@@ -147,13 +147,13 @@ impl Builtins {
         pointer_type: Type,
     ) -> FuncRef {
         let mut signature = module.make_signature();
-        signature.params.push(AbiParam::new(F64));
-        signature.params.push(AbiParam::new(F64));
-        signature.params.push(AbiParam::new(F64));
-        signature.params.push(AbiParam::new(F64));
-        signature.params.push(AbiParam::new(F64));
-        signature.params.push(AbiParam::new(pointer_type));
-        signature.params.push(AbiParam::new(pointer_type));
+        signature.params.push(AbiParam::new(F64)); // p1
+        signature.params.push(AbiParam::new(F64)); // p2
+        signature.params.push(AbiParam::new(F64)); // p3
+        signature.params.push(AbiParam::new(F64)); // t_low
+        signature.params.push(AbiParam::new(F64)); // t_high
+        signature.params.push(AbiParam::new(pointer_type)); // out_low
+        signature.params.push(AbiParam::new(pointer_type)); // out_high
         let func_id = module
             .declare_function(
                 "opensolid_quadratic_spline_bounds",
@@ -170,14 +170,14 @@ impl Builtins {
         pointer_type: Type,
     ) -> FuncRef {
         let mut signature = module.make_signature();
-        signature.params.push(AbiParam::new(F64));
-        signature.params.push(AbiParam::new(F64));
-        signature.params.push(AbiParam::new(F64));
-        signature.params.push(AbiParam::new(F64));
-        signature.params.push(AbiParam::new(F64));
-        signature.params.push(AbiParam::new(F64));
-        signature.params.push(AbiParam::new(pointer_type));
-        signature.params.push(AbiParam::new(pointer_type));
+        signature.params.push(AbiParam::new(F64)); // p1
+        signature.params.push(AbiParam::new(F64)); // p2
+        signature.params.push(AbiParam::new(F64)); // p3
+        signature.params.push(AbiParam::new(F64)); // p4
+        signature.params.push(AbiParam::new(F64)); // t_low
+        signature.params.push(AbiParam::new(F64)); // t_high
+        signature.params.push(AbiParam::new(pointer_type)); // out_low
+        signature.params.push(AbiParam::new(pointer_type)); // out_high
         let func_id = module
             .declare_function("opensolid_cubic_spline_bounds", Linkage::Import, &signature)
             .unwrap();
