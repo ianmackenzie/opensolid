@@ -9,6 +9,8 @@ module OpenSolid.Curve1d
   , zero
   , constant
   , t
+  , bezier
+  , hermite
   , squared
   , squared'
   , sqrt
@@ -34,8 +36,10 @@ import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
+import OpenSolid.Float qualified as Float
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.Fuzzy qualified as Fuzzy
+import OpenSolid.Int qualified as Int
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Parameter qualified as Parameter
@@ -419,6 +423,43 @@ derivative curve = case curve of
 reverse :: Curve1d units -> Curve1d units
 reverse (Parametric expression) = Parametric (expression . Expression.r)
 reverse curve = Curve1d (Reversed curve)
+
+bezier :: NonEmpty (Qty units) -> Curve1d units
+bezier = Parametric . Expression.bezierCurve
+
+hermite :: (Qty units, List (Qty units)) -> (Qty units, List (Qty units)) -> Curve1d units
+hermite (startValue, startDerivatives) (endValue, endDerivatives) = do
+  let numStartDerivatives = List.length startDerivatives
+  let numEndDerivatives = List.length endDerivatives
+  let curveDegree = Float.int (1 + numStartDerivatives + numEndDerivatives)
+  let scaledStartDerivatives = scaleDerivatives Positive 1.0 curveDegree startDerivatives
+  let scaledEndDerivatives = scaleDerivatives Negative 1.0 curveDegree endDerivatives
+  let startControlPoints =
+        derivedControlPoints startValue 1 (numStartDerivatives + 1) scaledStartDerivatives
+  let endControlPoints =
+        List.reverse $
+          derivedControlPoints endValue 1 (numEndDerivatives + 1) scaledEndDerivatives
+  let controlPoints = startValue :| (startControlPoints + endControlPoints + [endValue])
+  bezier controlPoints
+
+scaleDerivatives :: Sign -> Float -> Float -> List (Qty units) -> List (Qty units)
+scaleDerivatives _ _ _ [] = []
+scaleDerivatives sign scale n (first : rest) = do
+  let updatedScale = sign * scale / n
+  updatedScale * first : scaleDerivatives sign updatedScale (n - 1.0) rest
+
+offset :: Int -> List (Qty units) -> Qty units
+offset i scaledDerivatives =
+  Qty.sum $
+    List.mapWithIndex (\j q -> Float.int (Int.choose (i - 1) j) * q) $
+      List.take i scaledDerivatives
+
+derivedControlPoints :: Qty units -> Int -> Int -> List (Qty units) -> List (Qty units)
+derivedControlPoints previousPoint i n qs
+  | i < n = do
+      let newPoint = previousPoint + offset i qs
+      newPoint : derivedControlPoints newPoint (i + 1) n qs
+  | otherwise = []
 
 -- | Compute the square of a curve.
 squared :: Units.Squared units1 units2 => Curve1d units1 -> Curve1d units2
