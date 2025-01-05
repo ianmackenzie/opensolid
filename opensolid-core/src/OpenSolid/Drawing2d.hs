@@ -17,6 +17,7 @@ module OpenSolid.Drawing2d
   , strokeColor
   , strokeWidth
   , noFill
+  , whiteFill
   , fillColor
   , opacity
   )
@@ -188,6 +189,10 @@ strokeWidth givenWidth = Attribute "stroke-width" (lengthText givenWidth)
 -- | Set shapes to have no fill.
 noFill :: Attribute space
 noFill = Attribute "fill" "none"
+
+-- | Set shapes to have white fill.
+whiteFill :: Attribute space
+whiteFill = Attribute "fill" "white"
 
 -- | Set the fill color for shapes.
 fillColor :: Color -> Attribute space
