@@ -1030,8 +1030,7 @@ unsafePiecewise segments = do
 data Piecewise (coordinateSystem :: CoordinateSystem) where
   Piecewise :: PiecewiseTree (space @ units) -> Qty units -> Piecewise (space @ units)
 
-instance Show (Piecewise (space @ units)) where
-  show _ = Text.unpack "Curve2d.Piecewise"
+deriving instance Show (Piecewise (space @ units))
 
 instance Interface (Piecewise (space @ units)) (space @ units) where
   evaluateImpl (Piecewise tree length) tValue =
@@ -1080,6 +1079,8 @@ data PiecewiseTree (coordinateSystem :: CoordinateSystem) where
     Qty units ->
     PiecewiseTree (space @ units)
 
+deriving instance Show (PiecewiseTree (space @ units))
+
 evaluatePiecewise :: PiecewiseTree (space @ units) -> Qty units -> Point2d (space @ units)
 evaluatePiecewise tree length = case tree of
   PiecewiseNode leftTree leftLength rightTree
@@ -1119,8 +1120,7 @@ data PiecewiseDerivative (coordinateSystem :: CoordinateSystem) where
     Qty units ->
     PiecewiseDerivative (space @ units)
 
-instance Show (PiecewiseDerivative (space @ units)) where
-  show _ = Text.unpack "Curve2d.PiecewiseDerivative"
+deriving instance Show (PiecewiseDerivative (space @ units))
 
 instance VectorCurve2d.Interface (PiecewiseDerivative (space @ units)) (space @ units) where
   evaluateImpl (PiecewiseDerivative tree length) tValue =
@@ -1147,6 +1147,8 @@ data PiecewiseDerivativeTree (coordinateSystem :: CoordinateSystem) where
     VectorCurve2d (space @ units) ->
     Qty units ->
     PiecewiseDerivativeTree (space @ units)
+
+deriving instance Show (PiecewiseDerivativeTree (space @ units))
 
 piecewiseTreeDerivative ::
   PiecewiseTree (space @ units) ->
