@@ -185,6 +185,7 @@ library
     OpenSolid.Surface1d
     OpenSolid.Surface1d.Function
     OpenSolid.Surface1d.Function.HorizontalCurve
+    OpenSolid.Surface1d.Function.ImplicitCurveBounds
     OpenSolid.Surface1d.Function.Subproblem
     OpenSolid.Surface1d.Function.VerticalCurve
     OpenSolid.Surface1d.Function.Zeros

@@ -975,14 +975,13 @@ medialAxis curve1 curve2 = do
     Success zeros -> do
       Debug.assert (List.isEmpty (Surface1d.Function.Zeros.crossingLoops zeros))
       Debug.assert (List.isEmpty (Surface1d.Function.Zeros.tangentPoints zeros))
-      let allCrossingCurves = List.collect NonEmpty.toList (Surface1d.Function.Zeros.crossingCurves zeros)
-      let toSegment (solutionCurve, _) =
+      let toSegment solutionCurve =
             MedialAxis.Segment
               { t1 = Surface1d.Function.u . solutionCurve
               , t2 = Surface1d.Function.v . solutionCurve
               , t12 = solutionCurve
               }
-      Success (List.map toSegment allCrossingCurves)
+      Success (List.map toSegment (Surface1d.Function.Zeros.crossingCurves zeros))
 
 arcLengthParameterization ::
   Tolerance units =>

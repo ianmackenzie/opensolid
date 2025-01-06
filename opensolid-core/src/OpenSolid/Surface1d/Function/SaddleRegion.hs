@@ -138,22 +138,28 @@ connect subproblem frame startDirection endPoint boundingAxes = do
     then do
       let uMid = u1 + 1e-3 * Qty.sign (u2 - u1) |> Qty.clampTo (Range.from u1 u2)
       let startDerivative = Vector2d.xy (uMid - u1) ((uMid - u1) * (dv / du))
+      let interpolatingBounds = NonEmpty.one (Bounds2d (Range.from u1 uMid) vBounds)
       let interpolatingCurve =
-            HorizontalCurve.bounded derivatives dvdu u1 uMid vBounds frame boundingAxes
+            HorizontalCurve.bounded derivatives dvdu u1 uMid interpolatingBounds frame boundingAxes
               |> Curve2d.removeStartDegeneracy 2 (startPoint, [startDerivative])
       if uMid == u2
         then NonEmpty.one interpolatingCurve
         else do
-          let implicitCurve = HorizontalCurve.bounded derivatives dvdu uMid u2 vBounds frame boundingAxes
+          let implicitBounds = NonEmpty.one (Bounds2d (Range.from uMid u2) vBounds)
+          let implicitCurve =
+                HorizontalCurve.bounded derivatives dvdu uMid u2 implicitBounds frame boundingAxes
           NonEmpty.two interpolatingCurve implicitCurve
     else do
       let vMid = v1 + 1e-3 * Qty.sign (v2 - v1) |> Qty.clampTo (Range.from v1 v2)
       let startDerivative = Vector2d.xy ((vMid - v1) * (du / dv)) (vMid - v1)
+      let interpolatingBounds = NonEmpty.one (Bounds2d uBounds (Range.from v1 vMid))
       let interpolatingCurve =
-            VerticalCurve.bounded derivatives dudv uBounds v1 vMid frame boundingAxes
+            VerticalCurve.bounded derivatives dudv v1 vMid interpolatingBounds frame boundingAxes
               |> Curve2d.removeStartDegeneracy 2 (startPoint, [startDerivative])
       if vMid == v2
         then NonEmpty.one interpolatingCurve
         else do
-          let implicitCurve = VerticalCurve.bounded derivatives dudv uBounds vMid v2 frame boundingAxes
+          let implicitBounds = NonEmpty.one (Bounds2d uBounds (Range.from vMid v2))
+          let implicitCurve =
+                VerticalCurve.bounded derivatives dudv vMid v2 implicitBounds frame boundingAxes
           NonEmpty.two interpolatingCurve implicitCurve

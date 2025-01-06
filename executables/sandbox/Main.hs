@@ -41,7 +41,7 @@ import OpenSolid.Result qualified as Result
 import OpenSolid.Solve2d qualified as Solve2d
 import OpenSolid.Surface1d.Function qualified as Surface1d.Function
 import OpenSolid.Surface1d.Function.Zeros qualified as Surface1d.Function.Zeros
-import OpenSolid.SurfaceParameter (UvBounds, UvCoordinates, UvPoint, UvSpace)
+import OpenSolid.SurfaceParameter (UvCoordinates, UvPoint, UvSpace)
 import OpenSolid.SurfaceParameter qualified as SurfaceParameter
 import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
@@ -242,7 +242,7 @@ drawZeros path zeros = IO.do
     [ Drawing2d.with [Drawing2d.strokeWidth strokeWidth] $
         [ drawBounds [] (Bounds2d.convert toDrawing SurfaceParameter.domain)
         , Drawing2d.group (List.mapWithIndex drawCrossingCurve crossingCurves)
-        , Drawing2d.group (List.map drawSaddlePoint saddlePoints)
+        , Drawing2d.group (List.map (drawDot Color.orange) saddlePoints)
         ]
     ]
 
@@ -256,39 +256,19 @@ drawBounds attributes bounds = do
     , point 0.0 1.0
     ]
 
-drawCrossingCurve :: Int -> NonEmpty (Curve2d UvCoordinates, UvBounds) -> Drawing2d.Entity UvSpace
-drawCrossingCurve index segments = do
+drawCrossingCurve :: Int -> Curve2d UvCoordinates -> Drawing2d.Entity UvSpace
+drawCrossingCurve index curve = do
   let hue = (Float.int index * Angle.goldenAngle) % Angle.twoPi
   let color = Color.hsl hue 0.5 0.5
-  let (curves, bounds) = List.unzip2 (NonEmpty.toList segments)
-  Drawing2d.group
-    [ Drawing2d.with [Drawing2d.strokeColor color, Drawing2d.opacity 0.3] $
-        List.map drawUvCurve curves
-    , Drawing2d.with
-        [ Drawing2d.strokeColor Color.gray
-        , Drawing2d.strokeWidth (Length.millimeters 0.05)
-        ]
-        (List.map (drawBounds [] . Bounds2d.convert toDrawing) bounds)
-    ]
-
-drawSaddlePoint :: (UvPoint, UvBounds) -> Drawing2d.Entity UvSpace
-drawSaddlePoint (point, bounds) =
-  Drawing2d.group
-    [ drawDot Color.orange point
-    , drawBounds
-        [ Drawing2d.strokeColor Color.gray
-        , Drawing2d.strokeWidth (Length.millimeters 0.05)
-        ]
-        (Bounds2d.convert toDrawing bounds)
-    ]
+  drawUvCurve [Drawing2d.strokeColor color] curve
 
 toDrawing :: Qty (Meters :/: Unitless)
 toDrawing = Length.centimeters 10.0 ./. 1.0
 
-drawUvCurve :: Curve2d UvCoordinates -> Drawing2d.Entity UvSpace
-drawUvCurve curve = do
+drawUvCurve :: List (Drawing2d.Attribute UvSpace) -> Curve2d UvCoordinates -> Drawing2d.Entity UvSpace
+drawUvCurve attributes curve = do
   let polyline = Curve2d.toPolyline 0.001 (Curve2d.evaluate curve) curve
-  Drawing2d.polyline [] (Polyline2d.map (Point2d.convert toDrawing) polyline)
+  Drawing2d.polyline attributes (Polyline2d.map (Point2d.convert toDrawing) polyline)
 
 drawDot :: Color -> UvPoint -> Drawing2d.Entity UvSpace
 drawDot color point =

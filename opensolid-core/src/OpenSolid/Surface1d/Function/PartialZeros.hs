@@ -1,13 +1,12 @@
-{-# LANGUAGE DuplicateRecordFields #-}
-{-# LANGUAGE NoFieldSelectors #-}
-{-# OPTIONS_GHC -Wno-partial-fields #-}
-
 module OpenSolid.Surface1d.Function.PartialZeros
   ( PartialZeros (..)
-  , CrossingCurve (..)
+  , Parameterization (..)
+  , CrossingSegment (..)
   , empty
-  , crossingCurve
-  , addCrossingCurve
+  , diagonalSegment
+  , horizontalSegment
+  , verticalSegment
+  , addCrossingSegment
   , addTangentPoint
   , addSaddleRegion
   , finalize
@@ -21,139 +20,198 @@ import OpenSolid.List qualified as List
 import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Pair qualified as Pair
+import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Prelude
 import OpenSolid.Surface1d.Function.SaddleRegion (SaddleRegion)
 import OpenSolid.Surface1d.Function.SaddleRegion qualified as SaddleRegion
-import OpenSolid.Surface1d.Function.Zeros (Zeros (..))
+import OpenSolid.Surface1d.Function.Zeros (Zeros (Zeros))
 import OpenSolid.Surface1d.Function.Zeros qualified as Zeros
 import OpenSolid.SurfaceParameter (UvBounds, UvCoordinates, UvPoint)
 
 data PartialZeros units = PartialZeros
-  { crossingCurves :: List CrossingCurve
-  , crossingLoops :: List CrossingLoop
-  , tangentPoints :: List (UvPoint, Sign, UvBounds)
+  { crossingSegments :: List CrossingSegment
+  , tangentPoints :: List (UvPoint, Sign)
   , saddleRegions :: List (SaddleRegion units)
   }
 
-data CrossingCurve
-  = CrossingCurve Domain2d.Boundary Domain2d.Boundary (NonEmpty (Curve2d UvCoordinates, UvBounds))
+data Parameterization = Horizontal | Vertical | Diagonal
 
-crossingCurve ::
-  Domain2d.Boundary ->
-  Domain2d.Boundary ->
+data CrossingSegment
+  = CrossingSegment
+      Parameterization
+      (UvPoint, Domain2d.Boundary)
+      (UvPoint, Domain2d.Boundary)
+      (NonEmpty UvBounds)
+
+diagonalSegment ::
+  (UvPoint, Domain2d.Boundary) ->
+  (UvPoint, Domain2d.Boundary) ->
   UvBounds ->
-  Curve2d UvCoordinates ->
-  CrossingCurve
-crossingCurve startBoundary endBoundary uvBounds curve =
-  CrossingCurve startBoundary endBoundary (NonEmpty.one (curve, uvBounds))
+  CrossingSegment
+diagonalSegment start end uvBounds = CrossingSegment Diagonal start end (NonEmpty.one uvBounds)
 
-type CrossingLoop = NonEmpty (Curve2d UvCoordinates, UvBounds)
+horizontalSegment ::
+  (UvPoint, Domain2d.Boundary) ->
+  (UvPoint, Domain2d.Boundary) ->
+  UvBounds ->
+  CrossingSegment
+horizontalSegment start end uvBounds = CrossingSegment Horizontal start end (NonEmpty.one uvBounds)
+
+verticalSegment ::
+  (UvPoint, Domain2d.Boundary) ->
+  (UvPoint, Domain2d.Boundary) ->
+  UvBounds ->
+  CrossingSegment
+verticalSegment start end uvBounds = CrossingSegment Vertical start end (NonEmpty.one uvBounds)
 
 empty :: PartialZeros units
 empty =
   PartialZeros
-    { crossingCurves = []
-    , crossingLoops = []
+    { crossingSegments = []
     , tangentPoints = []
     , saddleRegions = []
     }
 
-addCrossingCurve :: CrossingCurve -> PartialZeros units -> PartialZeros units
-addCrossingCurve newCrossingCurve partialZeros = do
-  let PartialZeros{crossingCurves, crossingLoops} = partialZeros
-  let (updatedCrossingCurves, updatedCrossingLoops) =
-        insertCrossingCurve newCrossingCurve crossingCurves crossingLoops
-  partialZeros
-    { OpenSolid.Surface1d.Function.PartialZeros.crossingCurves = updatedCrossingCurves
-    , OpenSolid.Surface1d.Function.PartialZeros.crossingLoops = updatedCrossingLoops
-    }
+addCrossingSegment :: CrossingSegment -> PartialZeros units -> PartialZeros units
+addCrossingSegment newCrossingSegment partialZeros = do
+  let PartialZeros{crossingSegments} = partialZeros
+  let updatedCrossingSegments = insertCrossingSegment newCrossingSegment crossingSegments
+  partialZeros{crossingSegments = updatedCrossingSegments}
 
-insertCrossingCurve ::
-  CrossingCurve ->
-  List CrossingCurve ->
-  List CrossingLoop ->
-  (List CrossingCurve, List CrossingLoop)
-insertCrossingCurve newCrossingCurve crossingCurves crossingLoops =
-  case crossingCurves of
-    [] -> ([newCrossingCurve], crossingLoops)
-    firstCrossingCurve : remainingCrossingCurves ->
-      case joinCrossingCurves newCrossingCurve firstCrossingCurve of
-        Just (JoinedCrossingCurve joinedCrossingCurve) ->
-          insertCrossingCurve joinedCrossingCurve remainingCrossingCurves crossingLoops
-        Just (NewCrossingLoop newCrossingLoop) ->
-          (remainingCrossingCurves, newCrossingLoop : crossingLoops)
+insertCrossingSegment ::
+  CrossingSegment ->
+  List CrossingSegment ->
+  List CrossingSegment
+insertCrossingSegment newCrossingSegment crossingSegments =
+  case crossingSegments of
+    [] -> [newCrossingSegment]
+    firstCrossingSegment : remainingCrossingSegments ->
+      case joinCrossingSegments newCrossingSegment firstCrossingSegment of
+        Just joinedCrossingSegment ->
+          insertCrossingSegment joinedCrossingSegment remainingCrossingSegments
         Nothing ->
-          Pair.mapFirst (firstCrossingCurve :) $
-            insertCrossingCurve newCrossingCurve remainingCrossingCurves crossingLoops
+          firstCrossingSegment : insertCrossingSegment newCrossingSegment remainingCrossingSegments
 
-data JoinCrossingCurveResult
-  = JoinedCrossingCurve CrossingCurve
-  | NewCrossingLoop CrossingLoop
+joinCrossingSegments :: CrossingSegment -> CrossingSegment -> Maybe CrossingSegment
+joinCrossingSegments segment1 segment2 = Maybe.do
+  let CrossingSegment parameterization1 start1 end1 boxes1 = segment1
+  let (_, startBoundary1) = start1
+  let (_, endBoundary1) = end1
+  let CrossingSegment parameterization2 start2 end2 boxes2 = segment2
+  let (_, startBoundary2) = start2
+  let (_, endBoundary2) = end2
+  parameterization <- jointParameterization parameterization1 parameterization2
+  if
+    | Domain2d.adjacent endBoundary1 startBoundary2 ->
+        Just (CrossingSegment parameterization start1 end2 (boxes1 + boxes2))
+    | Domain2d.adjacent endBoundary2 startBoundary1 ->
+        Just (CrossingSegment parameterization start2 end1 (boxes2 + boxes1))
+    | otherwise -> Nothing
 
-joinCrossingCurves :: CrossingCurve -> CrossingCurve -> Maybe JoinCrossingCurveResult
-joinCrossingCurves (CrossingCurve start1 end1 segments1) (CrossingCurve start2 end2 segments2)
-  | Domain2d.adjacent end1 start2 && Domain2d.adjacent end2 start1 =
-      Just (NewCrossingLoop (segments1 + segments2))
-  | Domain2d.adjacent end1 start2 =
-      Just (JoinedCrossingCurve (CrossingCurve start1 end2 (segments1 + segments2)))
-  | Domain2d.adjacent end2 start1 =
-      Just (JoinedCrossingCurve (CrossingCurve start2 end1 (segments2 + segments1)))
-  | otherwise = Nothing
+jointParameterization :: Parameterization -> Parameterization -> Maybe Parameterization
+jointParameterization Horizontal Horizontal = Just Horizontal
+jointParameterization Vertical Vertical = Just Vertical
+jointParameterization Diagonal Diagonal = Just Diagonal
+jointParameterization Horizontal Diagonal = Just Horizontal
+jointParameterization Diagonal Horizontal = Just Horizontal
+jointParameterization Vertical Diagonal = Just Vertical
+jointParameterization Diagonal Vertical = Just Vertical
+jointParameterization Horizontal Vertical = Nothing
+jointParameterization Vertical Horizontal = Nothing
 
-addTangentPoint :: (UvPoint, Sign, UvBounds) -> PartialZeros units -> PartialZeros units
+addTangentPoint :: (UvPoint, Sign) -> PartialZeros units -> PartialZeros units
 addTangentPoint tangentPoint partialZeros = do
   let PartialZeros{tangentPoints} = partialZeros
-  partialZeros
-    { OpenSolid.Surface1d.Function.PartialZeros.tangentPoints = tangentPoint : tangentPoints
-    }
+  partialZeros{tangentPoints = tangentPoint : tangentPoints}
 
 addSaddleRegion :: SaddleRegion units -> PartialZeros units -> PartialZeros units
 addSaddleRegion saddleRegion partialZeros = do
   let PartialZeros{saddleRegions} = partialZeros
   partialZeros{saddleRegions = saddleRegion : saddleRegions}
 
-finalize :: Tolerance units => PartialZeros units -> Zeros
-finalize partialZeros = do
-  let PartialZeros{crossingCurves, crossingLoops, tangentPoints, saddleRegions} = partialZeros
-  let extendedCrossingCurves =
-        List.map (\initialCurve -> List.foldl extend initialCurve saddleRegions) crossingCurves
-  -- TODO add logic to check for saddle regions that touch a UV domain boundary,
-  -- and then add connecting curves to zeros found on that boundary
-  -- (because there will be no crossing curve to connect to in that case)
+data PiecewiseCurve
+  = PiecewiseCurve Domain2d.Boundary Domain2d.Boundary (NonEmpty (Curve2d UvCoordinates))
+
+piecewiseCurve ::
+  (Float -> Float -> NonEmpty UvBounds -> Curve2d UvCoordinates) ->
+  (Float -> Float -> NonEmpty UvBounds -> Curve2d UvCoordinates) ->
+  CrossingSegment ->
+  PiecewiseCurve
+piecewiseCurve horizontalCurve verticalCurve (CrossingSegment parameterization start end boxes) = do
+  let (Point2d uStart vStart, startBoundary) = start
+  let (Point2d uEnd vEnd, endBoundary) = end
+  let curve = case parameterization of
+        Horizontal -> horizontalCurve uStart uEnd boxes
+        Vertical -> verticalCurve vStart vEnd boxes
+        Diagonal -> horizontalCurve uStart uEnd boxes
+  PiecewiseCurve startBoundary endBoundary (NonEmpty.one curve)
+
+type PartialCurves = (List PiecewiseCurve, List (NonEmpty (Curve2d UvCoordinates)))
+
+insertPiecewiseCurve :: PiecewiseCurve -> PartialCurves -> PartialCurves
+insertPiecewiseCurve newPiecewiseCurve (piecewiseCurves, crossingLoops) =
+  case piecewiseCurves of
+    [] -> ([newPiecewiseCurve], crossingLoops)
+    firstPiecewiseCurve : remainingPiecewiseCurves ->
+      case joinPiecewiseCurves newPiecewiseCurve firstPiecewiseCurve of
+        Just (JoinedPiecewiseCurve joinedPiecewiseCurve) ->
+          insertPiecewiseCurve joinedPiecewiseCurve (remainingPiecewiseCurves, crossingLoops)
+        Just (NewCrossingLoop newCrossingLoop) ->
+          (remainingPiecewiseCurves, newCrossingLoop : crossingLoops)
+        Nothing ->
+          Pair.mapFirst (firstPiecewiseCurve :) $
+            insertPiecewiseCurve newPiecewiseCurve (remainingPiecewiseCurves, crossingLoops)
+
+data JoinPiecewiseCurveResult
+  = JoinedPiecewiseCurve PiecewiseCurve
+  | NewCrossingLoop (NonEmpty (Curve2d UvCoordinates))
+
+joinPiecewiseCurves :: PiecewiseCurve -> PiecewiseCurve -> Maybe JoinPiecewiseCurveResult
+joinPiecewiseCurves (PiecewiseCurve start1 end1 segments1) (PiecewiseCurve start2 end2 segments2)
+  | Domain2d.adjacent end1 start2 && Domain2d.adjacent end2 start1 =
+      Just (NewCrossingLoop (segments1 + segments2))
+  | Domain2d.adjacent end1 start2 =
+      Just (JoinedPiecewiseCurve (PiecewiseCurve start1 end2 (segments1 + segments2)))
+  | Domain2d.adjacent end2 start1 =
+      Just (JoinedPiecewiseCurve (PiecewiseCurve start2 end1 (segments2 + segments1)))
+  | otherwise = Nothing
+
+finalize ::
+  Tolerance units =>
+  (Float -> Float -> NonEmpty UvBounds -> Curve2d UvCoordinates) ->
+  (Float -> Float -> NonEmpty UvBounds -> Curve2d UvCoordinates) ->
+  PartialZeros units ->
   Zeros
-    { Zeros.crossingCurves = Maybe.collect filterDegenerateCurves extendedCrossingCurves
-    , Zeros.crossingLoops = crossingLoops
-    , Zeros.tangentPoints = tangentPoints
-    , Zeros.saddlePoints =
-        saddleRegions
-          |> List.map
-            ( \saddleRegion ->
-                (SaddleRegion.point saddleRegion, SaddleRegion.bounds saddleRegion)
-            )
+finalize horizontalCurve verticalCurve partialZeros = do
+  let PartialZeros{crossingSegments, tangentPoints, saddleRegions} = partialZeros
+  let piecewiseCurveSegments =
+        List.map (piecewiseCurve horizontalCurve verticalCurve) crossingSegments
+  let (piecewiseCurves, crossingLoopSegments) =
+        List.foldr insertPiecewiseCurve ([], []) piecewiseCurveSegments
+  let extendedPiecewiseCurves =
+        List.map (\initialCurve -> List.foldl extend initialCurve saddleRegions) piecewiseCurves
+  let crossingCurveSegments =
+        List.map (\(PiecewiseCurve _ _ segments) -> segments) extendedPiecewiseCurves
+  Zeros
+    { tangentPoints
+    , saddlePoints = List.map SaddleRegion.point saddleRegions
+    , crossingCurves = List.map Curve2d.unsafePiecewise crossingCurveSegments
+    , crossingLoops = List.map Curve2d.unsafePiecewise crossingLoopSegments
     }
 
-filterDegenerateCurves :: CrossingCurve -> Maybe (NonEmpty (Curve2d UvCoordinates, UvBounds))
-filterDegenerateCurves (CrossingCurve _ _ segments) = do
-  let isNondegenerate (curve, _) = Curve2d.startPoint curve /= Curve2d.endPoint curve
-  case NonEmpty.filter isNondegenerate segments of
-    NonEmpty filtered -> Just filtered
-    [] -> Nothing
-
-extend :: Tolerance units => CrossingCurve -> SaddleRegion units -> CrossingCurve
+extend :: Tolerance units => PiecewiseCurve -> SaddleRegion units -> PiecewiseCurve
 extend curve saddleRegion = do
-  let (CrossingCurve start end segments) = curve
+  let (PiecewiseCurve start end segments) = curve
   let subdomain = SaddleRegion.subdomain saddleRegion
-  let uvBounds = Domain2d.bounds subdomain
   let extendStart = Domain2d.contacts subdomain start
   let extendEnd = Domain2d.contacts subdomain end
   let startExtension =
-        SaddleRegion.connectingCurves (Curve2d.startPoint (Pair.first (NonEmpty.first segments))) saddleRegion
-          |> NonEmpty.map (,uvBounds)
+        SaddleRegion.connectingCurves (Curve2d.startPoint (NonEmpty.first segments)) saddleRegion
   let endExtension =
-        SaddleRegion.connectingCurves (Curve2d.endPoint (Pair.first (NonEmpty.last segments))) saddleRegion
-          |> NonEmpty.reverseMap (Curve2d.reverse >> (,uvBounds))
+        SaddleRegion.connectingCurves (Curve2d.endPoint (NonEmpty.last segments)) saddleRegion
+          |> NonEmpty.reverseMap Curve2d.reverse
   case (extendStart, extendEnd) of
     (False, False) -> curve
-    (True, False) -> CrossingCurve start end (startExtension + segments)
-    (False, True) -> CrossingCurve start end (segments + endExtension)
-    (True, True) -> CrossingCurve start end (startExtension + segments + endExtension)
+    (True, False) -> PiecewiseCurve start end (startExtension + segments)
+    (False, True) -> PiecewiseCurve start end (segments + endExtension)
+    (True, True) -> PiecewiseCurve start end (startExtension + segments + endExtension)

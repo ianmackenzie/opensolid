@@ -10,6 +10,7 @@ where
 import OpenSolid.Arithmetic.Unboxed
 import OpenSolid.Axis2d (Axis2d)
 import OpenSolid.Axis2d qualified as Axis2d
+import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.Curve1d qualified as Curve1d
 import OpenSolid.Curve2d (Curve2d)
@@ -19,6 +20,7 @@ import OpenSolid.Float qualified as Float
 import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Frame2d qualified as Frame2d
 import OpenSolid.List qualified as List
+import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Point2d (Point2d (Point2d#))
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
@@ -28,8 +30,10 @@ import OpenSolid.Range (Range (Range))
 import OpenSolid.Range qualified as Range
 import {-# SOURCE #-} OpenSolid.Surface1d.Function (Function)
 import {-# SOURCE #-} OpenSolid.Surface1d.Function qualified as Function
+import OpenSolid.Surface1d.Function.ImplicitCurveBounds (ImplicitCurveBounds)
+import OpenSolid.Surface1d.Function.ImplicitCurveBounds qualified as ImplicitCurveBounds
 import OpenSolid.Surface1d.Function.Internal qualified as Internal
-import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvCoordinates)
+import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvCoordinates)
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Uv.Derivatives (Derivatives)
 import OpenSolid.Uv.Derivatives qualified as Derivatives
@@ -43,7 +47,7 @@ data HorizontalCurve units = HorizontalCurve
   , dvdu :: Function Unitless
   , uStart :: Float
   , uEnd :: Float
-  , vBounds :: Range Unitless
+  , bounds :: ImplicitCurveBounds
   , monotonicity :: Monotonicity
   , boundingAxes :: List (Axis2d UvCoordinates)
   , tolerance :: Qty units
@@ -58,15 +62,19 @@ data Monotonicity
   | NotMonotonic
   deriving (Eq, Show)
 
+implicitCurveBounds :: NonEmpty UvBounds -> ImplicitCurveBounds
+implicitCurveBounds boxes =
+  ImplicitCurveBounds.build (NonEmpty.map (\(Bounds2d u v) -> (u, v)) boxes)
+
 new ::
   Tolerance units =>
   Derivatives (Function units) ->
   Function Unitless ->
   Float ->
   Float ->
-  Range Unitless ->
+  NonEmpty UvBounds ->
   Curve2d UvCoordinates
-new derivatives dvdu uStart uEnd vBounds = do
+new derivatives dvdu uStart uEnd boxes = do
   let f = Derivatives.get derivatives
   let fu = Derivatives.get (derivatives >> U)
   let fv = Derivatives.get (derivatives >> V)
@@ -78,7 +86,7 @@ new derivatives dvdu uStart uEnd vBounds = do
       , dvdu
       , uStart
       , uEnd
-      , vBounds
+      , bounds = implicitCurveBounds boxes
       , monotonicity = NotMonotonic
       , boundingAxes = []
       , tolerance = ?tolerance
@@ -90,9 +98,9 @@ monotonic ::
   Function Unitless ->
   Float ->
   Float ->
-  Range Unitless ->
+  NonEmpty UvBounds ->
   Curve2d UvCoordinates
-monotonic derivatives dvdu uStart uEnd vBounds = do
+monotonic derivatives dvdu uStart uEnd boxes = do
   let f = Derivatives.get derivatives
   let fu = Derivatives.get (derivatives >> U)
   let fv = Derivatives.get (derivatives >> V)
@@ -104,7 +112,7 @@ monotonic derivatives dvdu uStart uEnd vBounds = do
       , dvdu
       , uStart
       , uEnd
-      , vBounds
+      , bounds = implicitCurveBounds boxes
       , monotonicity = Monotonic
       , boundingAxes = []
       , tolerance = ?tolerance
@@ -116,11 +124,11 @@ bounded ::
   Function Unitless ->
   Float ->
   Float ->
-  Range Unitless ->
+  NonEmpty UvBounds ->
   Frame2d UvCoordinates defines ->
   List (Axis2d UvCoordinates) ->
   Curve2d UvCoordinates
-bounded derivatives dvdu uStart uEnd vBounds monotonicFrame boundingAxes = do
+bounded derivatives dvdu uStart uEnd boxes monotonicFrame boundingAxes = do
   let f = Derivatives.get derivatives
   let fu = Derivatives.get (derivatives >> U)
   let fv = Derivatives.get (derivatives >> V)
@@ -132,7 +140,7 @@ bounded derivatives dvdu uStart uEnd vBounds monotonicFrame boundingAxes = do
       , dvdu
       , uStart
       , uEnd
-      , vBounds
+      , bounds = implicitCurveBounds boxes
       , monotonicity = MonotonicIn (Frame2d.coerce monotonicFrame)
       , boundingAxes
       , tolerance = ?tolerance
@@ -146,7 +154,7 @@ instance Curve2d.Interface (HorizontalCurve units) UvCoordinates where
     Point2d.xy uValue vValue
 
   evaluateBoundsImpl curve tRange = do
-    let HorizontalCurve{dvdu, uStart, uEnd, vBounds, monotonicity} = curve
+    let HorizontalCurve{dvdu, uStart, uEnd, bounds, monotonicity} = curve
     let Range t1 t2 = tRange
     let u1 = Float.interpolateFrom uStart uEnd t1
     let u2 = Float.interpolateFrom uStart uEnd t2
@@ -160,7 +168,8 @@ instance Curve2d.Interface (HorizontalCurve units) UvCoordinates where
         Bounds2d.hull2 (Point2d.relativeTo frame p1) (Point2d.relativeTo frame p2)
           |> Bounds2d.placeIn frame
       NotMonotonic -> do
-        let slopeBounds = Function.evaluateBounds dvdu (Bounds2d.xy (Range.from u1 u2) vBounds)
+        let vRange = ImplicitCurveBounds.evaluateBounds bounds (Range.from u1 u2)
+        let slopeBounds = Function.evaluateBounds dvdu (Bounds2d.xy (Range.from u1 u2) vRange)
         let segmentVBounds = Internal.curveBounds u1 u2 v1 v2 slopeBounds
         Bounds2d.xy (Range.from u1 u2) segmentVBounds
 
@@ -178,7 +187,7 @@ instance Curve2d.Interface (HorizontalCurve units) UvCoordinates where
       , dvdu
       , uStart
       , uEnd
-      , vBounds
+      , bounds
       , monotonicity
       , boundingAxes
       , tolerance
@@ -190,7 +199,7 @@ instance Curve2d.Interface (HorizontalCurve units) UvCoordinates where
         , dvdu
         , uStart = uEnd
         , uEnd = uStart
-        , vBounds
+        , bounds
         , monotonicity
         , boundingAxes
         , tolerance
@@ -200,8 +209,9 @@ instance Curve2d.Interface (HorizontalCurve units) UvCoordinates where
     Curve2d.new (Curve2d.TransformBy transform curve)
 
 solveForV :: HorizontalCurve units -> Float -> Float
-solveForV (HorizontalCurve{f, fv, vBounds, boundingAxes, tolerance}) uValue = do
-  let clampedBounds = List.foldl (clamp uValue) vBounds boundingAxes
+solveForV (HorizontalCurve{f, fv, bounds, boundingAxes, tolerance}) uValue = do
+  let vRange = ImplicitCurveBounds.evaluate bounds uValue
+  let clampedBounds = List.foldl (clamp uValue) vRange boundingAxes
   Tolerance.using tolerance (Internal.solveForV f fv uValue clampedBounds)
 
 clamp :: Float -> Range Unitless -> Axis2d UvCoordinates -> Range Unitless

@@ -9,9 +9,8 @@ import OpenSolid.Axis2d (Axis2d)
 import {-# SOURCE #-} OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Prelude
-import OpenSolid.Range (Range)
 import {-# SOURCE #-} OpenSolid.Surface1d.Function (Function)
-import OpenSolid.SurfaceParameter (UvCoordinates)
+import OpenSolid.SurfaceParameter (UvBounds, UvCoordinates)
 import OpenSolid.Uv.Derivatives (Derivatives)
 
 new ::
@@ -20,7 +19,7 @@ new ::
   Function Unitless ->
   Float ->
   Float ->
-  Range Unitless ->
+  NonEmpty UvBounds ->
   Curve2d UvCoordinates
 monotonic ::
   Tolerance units =>
@@ -28,7 +27,7 @@ monotonic ::
   Function Unitless ->
   Float ->
   Float ->
-  Range Unitless ->
+  NonEmpty UvBounds ->
   Curve2d UvCoordinates
 bounded ::
   Tolerance units =>
@@ -36,7 +35,7 @@ bounded ::
   Function Unitless ->
   Float ->
   Float ->
-  Range Unitless ->
+  NonEmpty UvBounds ->
   Frame2d UvCoordinates defines ->
   List (Axis2d UvCoordinates) ->
   Curve2d UvCoordinates
