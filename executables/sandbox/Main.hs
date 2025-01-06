@@ -3,7 +3,6 @@
 module Main (main) where
 
 import OpenSolid.Angle qualified as Angle
-import OpenSolid.Arc2d qualified as Arc2d
 import OpenSolid.Area qualified as Area
 import OpenSolid.Axis2d qualified as Axis2d
 import OpenSolid.BezierCurve2d qualified as BezierCurve2d
@@ -11,14 +10,10 @@ import OpenSolid.Bounds2d (Bounds2d)
 import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.Color (Color)
 import OpenSolid.Color qualified as Color
-import OpenSolid.CubicSpline2d qualified as CubicSpline2d
-import OpenSolid.Curve1d qualified as Curve1d
 import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Curve2d qualified as Curve2d
-import OpenSolid.Curve2d.MedialAxis qualified as Curve2d.MedialAxis
 import OpenSolid.Debug qualified as Debug
 import OpenSolid.Direction2d qualified as Direction2d
-import OpenSolid.DirectionCurve2d qualified as DirectionCurve2d
 import OpenSolid.Drawing2d qualified as Drawing2d
 import OpenSolid.Duration (Duration)
 import OpenSolid.Duration qualified as Duration
@@ -53,7 +48,6 @@ import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Units (Meters)
 import OpenSolid.Vector2d qualified as Vector2d
 import OpenSolid.Vector3d qualified as Vector3d
-import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 import OpenSolid.VectorSurface2d.Function qualified as VectorSurface2d.Function
 import OpenSolid.Volume qualified as Volume
 
@@ -466,70 +460,6 @@ testNewtonRaphson2d = Tolerance.using 1e-9 do
           bounds
   log "Solve2d.unique solution" solution
 
-timeCurveMedialAxis :: Tolerance Meters => IO ()
-timeCurveMedialAxis = IO.do
-  ((), elapsed) <- IO.time testCurveMedialAxis
-  IO.printLine ("Medial axis computation time: " + Text.int (Float.round (Duration.inMilliseconds elapsed)) + " ms")
-
-testCurveMedialAxis :: Tolerance Meters => IO ()
-testCurveMedialAxis = IO.do
-  let curve1 =
-        CubicSpline2d.fromControlPoints
-          (Point2d.centimeters @Global 0.0 10.0)
-          (Point2d.centimeters @Global 5.0 6.0)
-          (Point2d.centimeters @Global 10.0 9.0)
-          (Point2d.centimeters @Global 15.0 7.0)
-  let curve2 =
-        Arc2d.from (Point2d.centimeters 15.0 0.0) Point2d.origin (Angle.degrees 20.0)
-  -- let curve1 =
-  --       CubicSpline2d.fromControlPoints
-  --         (Point2d.centimeters 15.0 15.0)
-  --         (Point2d.centimeters 10.0 10.0)
-  --         (Point2d.centimeters 10.0 10.0)
-  --         (Point2d.centimeters 5.0 15.0)
-  -- let curve2 = Line2d.from Point2d.origin (Point2d.centimeters 20.0 0.0)
-  tangent1 <- Curve2d.tangentDirection curve1
-  let normal1 = DirectionCurve2d.unwrap tangent1 |> VectorCurve2d.rotateBy Angle.quarterTurn
-  let displacement = curve2 . Surface1d.Function.v - curve1 . Surface1d.Function.u
-  let radius = (displacement <> displacement) / (2.0 * (DirectionCurve2d.unwrap tangent1 . Surface1d.Function.u) >< displacement)
-  let magic = (curve1 . Surface1d.Function.u) + radius * (normal1 . Surface1d.Function.u)
-  let drawingBounds = Bounds2d.hull2 (Point2d.centimeters -10.0 -10.0) (Point2d.centimeters 30.0 20.0)
-  segments <- Curve2d.medialAxis curve1 curve2
-  let drawCurve = Drawing2d.curve [] (Length.millimeters 0.1)
-  let drawSegment segment = do
-        let t12Curve = Curve2d.MedialAxis.t12 segment
-        let segmentMedialAxis = magic . t12Curve
-        drawCurve segmentMedialAxis
-  let drawCircles segment = do
-        let t1Curve = Curve2d.MedialAxis.t1 segment
-        let t2Curve = Curve2d.MedialAxis.t2 segment
-        let drawTangentCircle t = do
-              let t1 = Curve1d.evaluate t1Curve t
-              let t2 = Curve1d.evaluate t2Curve t
-              let p1 = Curve2d.evaluate curve1 t1
-              let p2 = Curve2d.evaluate curve2 t2
-              let tangentDirection1 = DirectionCurve2d.evaluate tangent1 t1
-              let normalDirection1 = Direction2d.rotateLeft tangentDirection1
-              let d = p2 - p1
-              let r = (d <> d) / (2.0 * (tangentDirection1 >< d))
-              let p0 = p1 + normalDirection1 * r
-              let tangentCircle =
-                    Drawing2d.circle
-                      [ Drawing2d.strokeColor Color.gray
-                      , Drawing2d.strokeWidth (Length.millimeters 0.2)
-                      ]
-                      (Qty.abs r)
-                      p0
-              tangentCircle
-        List.map drawTangentCircle (Parameter.steps 2)
-  let tangentCircles = List.collect drawCircles segments
-  Drawing2d.writeTo "executables/sandbox/curve-medial-axis.svg" drawingBounds $
-    [ Drawing2d.group tangentCircles
-    , drawCurve curve1
-    , drawCurve curve2
-    , Drawing2d.group (List.map drawSegment segments)
-    ]
-
 testJit :: IO ()
 testJit = IO.do
   let x = Expression.t
@@ -574,7 +504,6 @@ main = Tolerance.using (Length.meters 1e-9) IO.do
   testJitCurve2d
   testPlaneParaboloidIntersection
   testPlaneTorusIntersection
-  timeCurveMedialAxis
   testExplicitRandomStep
   testConcurrency
   testIOParallel
