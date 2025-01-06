@@ -1,5 +1,5 @@
 module OpenSolid.VectorCurve2d
-  ( VectorCurve2d (Parametric)
+  ( VectorCurve2d (Parametric, Transformed)
   , Interface (..)
   , new
   , startValue
