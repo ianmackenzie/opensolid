@@ -152,6 +152,7 @@ infinity = Data.Coerce.coerce (1.0 / 0.0)
 sign :: Qty units -> Sign
 sign value = if value >= zero then Positive else Negative
 
+{-# INLINE isNaN #-}
 isNaN :: Qty units -> Bool
 isNaN (Qty x) = Prelude.isNaN x
 
