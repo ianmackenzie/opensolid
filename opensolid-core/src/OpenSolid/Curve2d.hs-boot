@@ -14,6 +14,7 @@ module OpenSolid.Curve2d
   , removeStartDegeneracy
   , transformBy
   , TransformBy (TransformBy)
+  , piecewise
   )
 where
 
@@ -123,3 +124,8 @@ data TransformBy curve coordinateSystem where
 instance Show (TransformBy curve (space @ units))
 
 instance Interface (TransformBy curve (space @ units)) (space @ units)
+
+piecewise ::
+  Tolerance units =>
+  NonEmpty (Curve2d (space @ units)) ->
+  Result HasDegeneracy (Curve2d (space @ units))
