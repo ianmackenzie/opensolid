@@ -12,6 +12,9 @@ cradle:
     - path: "executables/piecewise-curve/Main.hs"
       component: "executables:exe:piecewise-curve"
 
+    - path: "executables/medial-axis/Main.hs"
+      component: "executables:exe:medial-axis"
+
     - path: "opensolid-api/src"
       component: "lib:opensolid-api"
 

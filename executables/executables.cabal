@@ -83,3 +83,11 @@ executable piecewise-curve
   hs-source-dirs: piecewise-curve
   build-depends:
     opensolid-core
+
+executable medial-axis
+  import: config
+  main-is: Main.hs
+  hs-source-dirs: medial-axis
+  build-depends:
+    opensolid-core,
+    time,
