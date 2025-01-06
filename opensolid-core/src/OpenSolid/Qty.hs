@@ -5,6 +5,7 @@ module OpenSolid.Qty
   , infinity
   , sign
   , isNaN
+  , isInfinite
   , interpolateFrom
   , midpoint
   , squared
@@ -155,6 +156,10 @@ sign value = if value >= zero then Positive else Negative
 {-# INLINE isNaN #-}
 isNaN :: Qty units -> Bool
 isNaN (Qty x) = Prelude.isNaN x
+
+{-# INLINE isInfinite #-}
+isInfinite :: Qty units -> Bool
+isInfinite (Qty x) = Prelude.isInfinite x
 
 {-# INLINE squared #-}
 squared :: Units.Squared units1 units2 => Qty units1 -> Qty units2
