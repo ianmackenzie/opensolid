@@ -920,12 +920,7 @@ instance VectorCurve2d.Interface (SyntheticDerivative (space @ units)) (space @ 
         (VectorCurve2d.transformBy transform current)
         (VectorCurve2d.transformBy transform next)
 
-toPolyline ::
-  HasCallStack =>
-  Qty units ->
-  (Float -> vertex) ->
-  Curve2d (space @ units) ->
-  Polyline2d vertex
+toPolyline :: Qty units -> (Float -> vertex) -> Curve2d (space @ units) -> Polyline2d vertex
 toPolyline maxError function curve = do
   let secondDerivative = VectorCurve2d.derivative (derivative curve)
   let epsilon = Qty.abs maxError
@@ -938,7 +933,6 @@ toPolyline maxError function curve = do
   Polyline2d (function 0.0 :| collectVertices predicate function Range.unit [function 1.0])
 
 collectVertices ::
-  HasCallStack =>
   (Range Unitless -> Bool) ->
   (Float -> vertex) ->
   Range Unitless ->
