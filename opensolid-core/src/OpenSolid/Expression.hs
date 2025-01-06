@@ -29,6 +29,7 @@ module OpenSolid.Expression
   , SurfaceDerivative (surfaceDerivative)
   , VolumeDerivative (volumeDerivative)
   , Evaluation (evaluate, evaluateBounds)
+  , show
   )
 where
 
@@ -179,33 +180,41 @@ data Expression input output where
     Expression UvwPoint (Vector3d (space @ units))
 
 instance Show (Expression input output) where
-  showsPrec precedence expression suffix = do
-    let prefix = Text.unpack $ case expression of
-          Curve1d{c1x} ->
-            Scalar.showWithPrecedence precedence c1x
-          Surface1d{s1x} ->
-            Scalar.showWithPrecedence precedence s1x
-          Volume1d{v1x} ->
-            Scalar.showWithPrecedence precedence v1x
-          Curve2d{c2x, c2y} ->
-            "(" + Scalar.show c2x + "," + Scalar.show c2y + ")"
-          Surface2d{s2x, s2y} ->
-            "(" + Scalar.show s2x + "," + Scalar.show s2y + ")"
-          VectorCurve2d{vc2x, vc2y} ->
-            "(" + Scalar.show vc2x + "," + Scalar.show vc2y + ")"
-          VectorSurface2d{vs2x, vs2y} ->
-            "(" + Scalar.show vs2x + "," + Scalar.show vs2y + ")"
-          Curve3d{c3x, c3y, c3z} ->
-            "(" + Scalar.show c3x + "," + Scalar.show c3y + "," + Scalar.show c3z + ")"
-          Surface3d{s3x, s3y, s3z} ->
-            "(" + Scalar.show s3x + "," + Scalar.show s3y + "," + Scalar.show s3z + ")"
-          VectorCurve3d{vc3x, vc3y, vc3z} ->
-            "(" + Scalar.show vc3x + "," + Scalar.show vc3y + "," + Scalar.show vc3z + ")"
-          VectorSurface3d{vs3x, vs3y, vs3z} ->
-            "(" + Scalar.show vs3x + "," + Scalar.show vs3y + "," + Scalar.show vs3z + ")"
-          VectorVolume3d{vv3x, vv3y, vv3z} ->
-            "(" + Scalar.show vv3x + "," + Scalar.show vv3y + "," + Scalar.show vv3z + ")"
-    prefix + suffix
+  show expression = do
+    let constructorName :: Text = case expression of
+          Curve1d{} -> "Curve1d"
+          Surface1d{} -> "Surface1d"
+          Volume1d{} -> "Volume1d"
+          Curve2d{} -> "Curve2d"
+          Surface2d{} -> "Surface2d"
+          VectorCurve2d{} -> "VectorCurve2d"
+          VectorSurface2d{} -> "VectorSurface2d"
+          Curve3d{} -> "Curve3d"
+          Surface3d{} -> "Surface3d"
+          VectorCurve3d{} -> "VectorCurve3d"
+          VectorSurface3d{} -> "VectorSurface3d"
+          VectorVolume3d{} -> "VectorVolume3d"
+    Text.unpack ("Expression." + constructorName)
+
+show :: Expression input output -> Text
+show expression = case expression of
+  Curve1d{c1x} -> Scalar.show c1x
+  Surface1d{s1x} -> Scalar.show s1x
+  Volume1d{v1x} -> Scalar.show v1x
+  Curve2d{c2x, c2y} -> "(" + Scalar.show c2x + "," + Scalar.show c2y + ")"
+  Surface2d{s2x, s2y} -> "(" + Scalar.show s2x + "," + Scalar.show s2y + ")"
+  VectorCurve2d{vc2x, vc2y} -> "(" + Scalar.show vc2x + "," + Scalar.show vc2y + ")"
+  VectorSurface2d{vs2x, vs2y} -> "(" + Scalar.show vs2x + "," + Scalar.show vs2y + ")"
+  Curve3d{c3x, c3y, c3z} ->
+    "(" + Scalar.show c3x + "," + Scalar.show c3y + "," + Scalar.show c3z + ")"
+  Surface3d{s3x, s3y, s3z} ->
+    "(" + Scalar.show s3x + "," + Scalar.show s3y + "," + Scalar.show s3z + ")"
+  VectorCurve3d{vc3x, vc3y, vc3z} ->
+    "(" + Scalar.show vc3x + "," + Scalar.show vc3y + "," + Scalar.show vc3z + ")"
+  VectorSurface3d{vs3x, vs3y, vs3z} ->
+    "(" + Scalar.show vs3x + "," + Scalar.show vs3y + "," + Scalar.show vs3z + ")"
+  VectorVolume3d{vv3x, vv3y, vv3z} ->
+    "(" + Scalar.show vv3x + "," + Scalar.show vv3y + "," + Scalar.show vv3z + ")"
 
 -- TODO special-case compiling of very simple expressions (constants or parameter values)
 -- to pure Haskell functions, to avoid FFI overhead when the expression itself is trivial
