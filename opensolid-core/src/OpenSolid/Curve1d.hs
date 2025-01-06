@@ -11,6 +11,11 @@ module OpenSolid.Curve1d
   , t
   , bezier
   , hermite
+  , quadraticSpline
+  , cubicSpline
+  , rationalBezier
+  , rationalQuadraticSpline
+  , rationalCubicSpline
   , squared
   , squared'
   , sqrt
@@ -42,6 +47,7 @@ import OpenSolid.Fuzzy qualified as Fuzzy
 import OpenSolid.Int qualified as Int
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.Pair qualified as Pair
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
@@ -441,6 +447,33 @@ hermite (startValue, startDerivatives) (endValue, endDerivatives) = do
           derivedControlPoints endValue 1 (numEndDerivatives + 1) scaledEndDerivatives
   let controlPoints = startValue :| (startControlPoints + endControlPoints + [endValue])
   bezier controlPoints
+
+quadraticSpline :: Qty units -> Qty units -> Qty units -> Curve1d units
+quadraticSpline p1 p2 p3 = bezier (NonEmpty.Three p1 p2 p3)
+
+cubicSpline :: Qty units -> Qty units -> Qty units -> Qty units -> Curve1d units
+cubicSpline p1 p2 p3 p4 = bezier (NonEmpty.Four p1 p2 p3 p4)
+
+rationalBezier :: NonEmpty (Qty units, Float) -> Curve1d units
+rationalBezier pointsAndWeights = do
+  let scaledPoint (point, weight) = point * weight
+  bezier (NonEmpty.map scaledPoint pointsAndWeights)
+    / bezier (NonEmpty.map Pair.second pointsAndWeights)
+
+rationalQuadraticSpline ::
+  (Qty units, Float) ->
+  (Qty units, Float) ->
+  (Qty units, Float) ->
+  Curve1d units
+rationalQuadraticSpline pw1 pw2 pw3 = rationalBezier (NonEmpty.Three pw1 pw2 pw3)
+
+rationalCubicSpline ::
+  (Qty units, Float) ->
+  (Qty units, Float) ->
+  (Qty units, Float) ->
+  (Qty units, Float) ->
+  Curve1d units
+rationalCubicSpline pw1 pw2 pw3 pw4 = rationalBezier (NonEmpty.Four pw1 pw2 pw3 pw4)
 
 scaleDerivatives :: Sign -> Float -> Float -> List (Qty units) -> List (Qty units)
 scaleDerivatives _ _ _ [] = []
