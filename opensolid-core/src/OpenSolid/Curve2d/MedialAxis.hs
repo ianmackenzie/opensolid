@@ -17,8 +17,10 @@ data Error
 
 data Segment (coordinateSystem :: CoordinateSystem) where
   Segment ::
-    { t1 :: Curve1d Unitless
-    , t2 :: Curve1d Unitless
-    , t12 :: Curve2d UvCoordinates
+    { t1 :: ~(Curve1d Unitless)
+    , t2 :: ~(Curve1d Unitless)
+    , t12 :: ~(Curve2d UvCoordinates)
+    , curve :: ~(Curve2d (space @ units))
+    , radius :: ~(Curve1d units)
     } ->
     Segment (space @ units)

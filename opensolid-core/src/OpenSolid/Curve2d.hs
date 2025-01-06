@@ -55,6 +55,7 @@ module OpenSolid.Curve2d
 where
 
 import OpenSolid.Angle (Angle)
+import OpenSolid.Angle qualified as Angle
 import OpenSolid.ArcLength qualified as ArcLength
 import OpenSolid.Arithmetic qualified as Arithmetic
 import OpenSolid.Array (Array)
@@ -77,6 +78,7 @@ import OpenSolid.Curve2d.OverlappingSegment qualified as OverlappingSegment
 import OpenSolid.Debug qualified as Debug
 import OpenSolid.Direction2d (Direction2d)
 import OpenSolid.DirectionCurve2d (DirectionCurve2d)
+import OpenSolid.DirectionCurve2d qualified as DirectionCurve2d
 import OpenSolid.Domain2d (Domain2d)
 import OpenSolid.Domain2d qualified as Domain2d
 import OpenSolid.Error qualified as Error
@@ -975,13 +977,23 @@ medialAxis curve1 curve2 = do
     Success zeros -> do
       Debug.assert (List.isEmpty (Surface1d.Function.Zeros.crossingLoops zeros))
       Debug.assert (List.isEmpty (Surface1d.Function.Zeros.tangentPoints zeros))
-      let toSegment solutionCurve =
-            MedialAxis.Segment
-              { t1 = Surface1d.Function.u . solutionCurve
-              , t2 = Surface1d.Function.v . solutionCurve
-              , t12 = solutionCurve
-              }
-      Success (List.map toSegment (Surface1d.Function.Zeros.crossingCurves zeros))
+      case Result.map DirectionCurve2d.unwrap (tangentDirection curve1) of
+        Success tangent1 -> do
+          let normal1 = VectorCurve2d.rotateBy Angle.quarterTurn tangent1
+          let radius :: Surface1d.Function.Function units =
+                (d .<>. d) .!/! (2.0 * (tangent1 . Surface1d.Function.u) >< d)
+          let curve :: Surface2d.Function.Function (space @ units) =
+                (curve1 . Surface1d.Function.u) + radius * (normal1 . Surface1d.Function.u)
+          let toSegment solutionCurve =
+                MedialAxis.Segment
+                  { t1 = Surface1d.Function.u . solutionCurve
+                  , t2 = Surface1d.Function.v . solutionCurve
+                  , t12 = solutionCurve
+                  , curve = curve . solutionCurve
+                  , radius = radius . solutionCurve
+                  }
+          Success (List.map toSegment (Surface1d.Function.Zeros.crossingCurves zeros))
+        Failure HasDegeneracy -> Failure MedialAxis.DegenerateCurve
 
 arcLengthParameterization ::
   Tolerance units =>
