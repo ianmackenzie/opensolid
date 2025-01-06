@@ -605,10 +605,10 @@ findZeros ::
 findZeros derivatives subdomain derivativeBounds exclusions
   -- Skip the subdomain entirely if the curve itself is non-zero everywhere
   | not (Stream.head derivativeBounds ^ Qty.zero) = Solve1d.pass
-  -- Optimization heuristic: bisect down to "smallish" domains first,
+  -- Optimization heuristic: bisect down to small subdomains first,
   -- to quickly eliminate most of the curve based on simple value bounds
   -- before attempting more complex/sophisticated solving
-  | Range.width (Domain1d.bounds subdomain) > 1 / 16 = Solve1d.recurse
+  | Range.width (Domain1d.bounds subdomain) > 1 / 1024 = Solve1d.recurse
   | otherwise = case exclusions of
       Solve1d.SomeExclusions -> Solve1d.recurse
       Solve1d.NoExclusions ->
