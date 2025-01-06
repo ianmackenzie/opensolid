@@ -76,3 +76,10 @@ executable arc-length
   hs-source-dirs: arc-length
   build-depends:
     opensolid-core
+
+executable piecewise-curve
+  import: config
+  main-is: Main.hs
+  hs-source-dirs: piecewise-curve
+  build-depends:
+    opensolid-core
