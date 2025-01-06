@@ -686,10 +686,8 @@ horizontalCrossingCurve subproblem = Fuzzy.do
       case (bottomEdgeSign, topEdgeSign) of
         (Negative, Negative) -> Resolved Nothing
         (Positive, Positive) -> Resolved Nothing
-        (Negative, Positive) ->
-          Fuzzy.map Just (westCrossingCurve subproblem)
-        (Positive, Negative) ->
-          Fuzzy.map Just (eastCrossingCurve subproblem)
+        (Negative, Positive) -> Fuzzy.map Just (westCrossingCurve subproblem)
+        (Positive, Negative) -> Fuzzy.map Just (eastCrossingCurve subproblem)
     else Unresolved
 
 eastCrossingCurve :: Tolerance units => Subproblem units -> Fuzzy PartialZeros.CrossingCurve
@@ -739,10 +737,8 @@ verticalCrossingCurve subproblem = Fuzzy.do
       case (leftEdgeSign, rightEdgeSign) of
         (Negative, Negative) -> Resolved Nothing
         (Positive, Positive) -> Resolved Nothing
-        (Negative, Positive) ->
-          Fuzzy.map Just (northCrossingCurve subproblem)
-        (Positive, Negative) ->
-          Fuzzy.map Just (southCrossingCurve subproblem)
+        (Negative, Positive) -> Fuzzy.map Just (northCrossingCurve subproblem)
+        (Positive, Negative) -> Fuzzy.map Just (southCrossingCurve subproblem)
     else Unresolved
 
 southCrossingCurve :: Tolerance units => Subproblem units -> Fuzzy PartialZeros.CrossingCurve
