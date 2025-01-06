@@ -157,7 +157,7 @@ hasEndpoint point curve =
 
 startLoop :: Curve2d (space @ units) -> PartialLoop (space @ units)
 startLoop curve =
-  PartialLoop (Curve2d.startPoint curve) (NonEmpty.singleton curve) (Curve2d.endPoint curve)
+  PartialLoop (Curve2d.startPoint curve) (NonEmpty.one curve) (Curve2d.endPoint curve)
 
 outerLoop :: Region2d (space @ units) -> NonEmpty (Curve2d (space @ units))
 outerLoop (Region2d loop _) = loop

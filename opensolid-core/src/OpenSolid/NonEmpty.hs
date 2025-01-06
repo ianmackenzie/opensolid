@@ -18,14 +18,14 @@ module OpenSolid.NonEmpty
   , pattern EightOrMore
   , pattern NineOrMore
   , (|:)
-  , singleton
-  , of2
-  , of3
-  , of4
-  , of5
-  , of6
-  , of7
-  , of8
+  , one
+  , two
+  , three
+  , four
+  , five
+  , six
+  , seven
+  , eight
   , first
   , rest
   , last
@@ -117,29 +117,29 @@ pattern NonEmpty :: NonEmpty a -> List a
 pattern NonEmpty nonEmpty <- (Data.List.NonEmpty.nonEmpty -> Just nonEmpty)
 
 pattern One :: a -> NonEmpty a
-pattern One item = item :| []
+pattern One item <- item :| []
 
 pattern Two :: a -> a -> NonEmpty a
-pattern Two first second = first :| [second]
+pattern Two first second <- first :| [second]
 
 pattern Three :: a -> a -> a -> NonEmpty a
-pattern Three first second third = first :| [second, third]
+pattern Three first second third <- first :| [second, third]
 
 pattern Four :: a -> a -> a -> a -> NonEmpty a
-pattern Four first second third fourth = first :| [second, third, fourth]
+pattern Four first second third fourth <- first :| [second, third, fourth]
 
 pattern Five :: a -> a -> a -> a -> a -> NonEmpty a
-pattern Five first second third fourth fifth = first :| [second, third, fourth, fifth]
+pattern Five first second third fourth fifth <- first :| [second, third, fourth, fifth]
 
 pattern Six :: a -> a -> a -> a -> a -> a -> NonEmpty a
-pattern Six first second third fourth fifth sixth = first :| [second, third, fourth, fifth, sixth]
+pattern Six first second third fourth fifth sixth <- first :| [second, third, fourth, fifth, sixth]
 
 pattern Seven :: a -> a -> a -> a -> a -> a -> a -> NonEmpty a
-pattern Seven first second third fourth fifth sixth seventh =
+pattern Seven first second third fourth fifth sixth seventh <-
   first :| [second, third, fourth, fifth, sixth, seventh]
 
 pattern Eight :: a -> a -> a -> a -> a -> a -> a -> a -> NonEmpty a
-pattern Eight first second third fourth fifth sixth seventh eigth =
+pattern Eight first second third fourth fifth sixth seventh eigth <-
   first :| [second, third, fourth, fifth, sixth, seventh, eigth]
 
 pattern TwoOrMore :: NonEmpty a
@@ -167,34 +167,34 @@ pattern NineOrMore :: NonEmpty a
 pattern NineOrMore <- _ :| (_ : _ : _ : _ : _ : _ : _ : _ : _)
 
 (|:) :: List a -> a -> NonEmpty a
-[] |: item = singleton item
+[] |: item = item :| []
 (x : xs) |: item = x :| Prelude.mappend xs [item]
 
 infixl 5 |:
 
-singleton :: a -> NonEmpty a
-singleton value = value :| []
+one :: a -> NonEmpty a
+one value = value :| []
 
-of2 :: a -> a -> NonEmpty a
-of2 a1 a2 = a1 :| [a2]
+two :: a -> a -> NonEmpty a
+two a1 a2 = a1 :| [a2]
 
-of3 :: a -> a -> a -> NonEmpty a
-of3 a1 a2 a3 = a1 :| [a2, a3]
+three :: a -> a -> a -> NonEmpty a
+three a1 a2 a3 = a1 :| [a2, a3]
 
-of4 :: a -> a -> a -> a -> NonEmpty a
-of4 a1 a2 a3 a4 = a1 :| [a2, a3, a4]
+four :: a -> a -> a -> a -> NonEmpty a
+four a1 a2 a3 a4 = a1 :| [a2, a3, a4]
 
-of5 :: a -> a -> a -> a -> a -> NonEmpty a
-of5 a1 a2 a3 a4 a5 = a1 :| [a2, a3, a4, a5]
+five :: a -> a -> a -> a -> a -> NonEmpty a
+five a1 a2 a3 a4 a5 = a1 :| [a2, a3, a4, a5]
 
-of6 :: a -> a -> a -> a -> a -> a -> NonEmpty a
-of6 a1 a2 a3 a4 a5 a6 = a1 :| [a2, a3, a4, a5, a6]
+six :: a -> a -> a -> a -> a -> a -> NonEmpty a
+six a1 a2 a3 a4 a5 a6 = a1 :| [a2, a3, a4, a5, a6]
 
-of7 :: a -> a -> a -> a -> a -> a -> a -> NonEmpty a
-of7 a1 a2 a3 a4 a5 a6 a7 = a1 :| [a2, a3, a4, a5, a6, a7]
+seven :: a -> a -> a -> a -> a -> a -> a -> NonEmpty a
+seven a1 a2 a3 a4 a5 a6 a7 = a1 :| [a2, a3, a4, a5, a6, a7]
 
-of8 :: a -> a -> a -> a -> a -> a -> a -> a -> NonEmpty a
-of8 a1 a2 a3 a4 a5 a6 a7 a8 = a1 :| [a2, a3, a4, a5, a6, a7, a8]
+eight :: a -> a -> a -> a -> a -> a -> a -> a -> NonEmpty a
+eight a1 a2 a3 a4 a5 a6 a7 a8 = a1 :| [a2, a3, a4, a5, a6, a7, a8]
 
 first :: NonEmpty a -> a
 first = Data.List.NonEmpty.head

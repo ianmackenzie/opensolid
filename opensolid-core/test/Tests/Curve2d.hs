@@ -117,7 +117,7 @@ curveOverlap1 = Test.verify "curveOverlap1" Test.do
   let arc2 = Arc2d.from (Point2d.meters 0.0 -1.0) (Point2d.meters 0.0 1.0) Angle.halfTurn
   actualSegments <- overlappingSegments arc1 arc2
   let expectedSegments =
-        NonEmpty.singleton (OverlappingSegment (Range.from 0.0 0.5) (Range.from 0.5 1.0) Positive)
+        NonEmpty.one (OverlappingSegment (Range.from 0.0 0.5) (Range.from 0.5 1.0) Positive)
   Test.expect (equalOverlapSegmentLists actualSegments expectedSegments)
 
 curveOverlap2 :: Tolerance Meters => Test
@@ -126,7 +126,7 @@ curveOverlap2 = Test.verify "curveOverlap2" Test.do
   let arc2 = Arc2d.polar Point2d.origin Length.meter (Angle.degrees -45.0) (Angle.degrees 225.0)
   segments <- overlappingSegments arc1 arc2
   let expectedSegments =
-        NonEmpty.of2
+        NonEmpty.two
           (OverlappingSegment (Range.from 0.0 (1 / 4)) (Range.from 0.0 (1 / 6)) Negative)
           (OverlappingSegment (Range.from (3 / 4) 1.0) (Range.from (5 / 6) 1.0) Negative)
   Test.expect (equalOverlapSegmentLists segments expectedSegments)
@@ -137,7 +137,7 @@ crossingIntersection = Test.verify "crossingIntersection" Test.do
   let arc2 = Arc2d.from Point2d.origin (Point2d.meters 1.0 0.0) -Angle.halfTurn
   intersections <- Curve2d.intersections arc1 arc2
   let expectedIntersectionPoints =
-        NonEmpty.of2
+        NonEmpty.two
           (IntersectionPoint 0.0 0.0 IntersectionPoint.Crossing Positive)
           (IntersectionPoint 0.5 0.5 IntersectionPoint.Crossing Negative)
   case intersections of
@@ -153,7 +153,7 @@ tangentIntersection = Test.verify "tangentIntersection" Test.do
   let arc2 = Arc2d.polar (Point2d.meters 0.0 1.5) (Length.meters 0.5) -Angle.pi Angle.zero
   intersections <- Curve2d.intersections arc1 arc2
   let expectedIntersectionPoints =
-        NonEmpty.singleton (IntersectionPoint 0.5 0.5 IntersectionPoint.Tangent Positive)
+        NonEmpty.one (IntersectionPoint 0.5 0.5 IntersectionPoint.Tangent Positive)
   case intersections of
     Nothing -> Test.fail "Should have found some intersection points"
     Just (Curve2d.IntersectionPoints actualIntersectionPoints) ->

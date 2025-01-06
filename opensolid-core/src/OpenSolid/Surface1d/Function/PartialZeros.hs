@@ -45,7 +45,7 @@ crossingCurve ::
   Curve2d UvCoordinates ->
   CrossingCurve
 crossingCurve startBoundary endBoundary uvBounds curve =
-  CrossingCurve startBoundary endBoundary (NonEmpty.singleton (curve, uvBounds))
+  CrossingCurve startBoundary endBoundary (NonEmpty.one (curve, uvBounds))
 
 type CrossingLoop = NonEmpty (Curve2d UvCoordinates, UvBounds)
 

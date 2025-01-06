@@ -16,13 +16,13 @@ tests =
 reverse :: Test
 reverse =
   Test.verify "reverse" Test.do
-    let array = Array.new (NonEmpty.of3 1 2 3)
+    let array = Array.new (NonEmpty.three 1 2 3)
     let reversed = Array.reverse array
     Test.expect (NonEmpty.toList (Array.items reversed) == [3, 2, 1])
 
 reverseMap :: Test
 reverseMap =
   Test.verify "reverse" Test.do
-    let array = Array.new (NonEmpty.of3 1 2 3)
+    let array = Array.new (NonEmpty.three 1 2 3)
     let reversed = Array.reverseMap Text.int array
     Test.expect (NonEmpty.toList (Array.items reversed) == ["3", "2", "1"])

@@ -107,11 +107,11 @@ data Representation a where
 
 classId :: FFI a => Proxy a -> Text -> Id a
 classId proxy givenName =
-  Id proxy (NonEmpty.singleton (name givenName))
+  Id proxy (NonEmpty.one (name givenName))
 
 nestedClassId :: FFI a => Proxy a -> Text -> Text -> Id a
 nestedClassId proxy parentName childName =
-  Id proxy (NonEmpty.of2 (name parentName) (name childName))
+  Id proxy (NonEmpty.two (name parentName) (name childName))
 
 classRepresentation :: FFI a => Text -> Proxy a -> Representation a
 classRepresentation givenName proxy =

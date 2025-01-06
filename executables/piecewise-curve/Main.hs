@@ -32,7 +32,7 @@ main = Tolerance.using Length.nanometer IO.do
   let arc2 = Curve2d.constant Point2d.origin + radius * VectorCurve2d.quadraticSpline vN vNW vW / weightCurve
   let arc3 = Curve2d.constant Point2d.origin + radius * VectorCurve2d.quadraticSpline vW vSW vS / weightCurve
   let arc4 = Curve2d.constant Point2d.origin + radius * VectorCurve2d.quadraticSpline vS vSE vE / weightCurve
-  circle <- Curve2d.piecewise (NonEmpty.of4 arc1 arc2 arc3 arc4)
+  circle <- Curve2d.piecewise (NonEmpty.four arc1 arc2 arc3 arc4)
   let drawCurve n curve =
         Drawing2d.group
           [ Drawing2d.curve [] Length.micrometer curve

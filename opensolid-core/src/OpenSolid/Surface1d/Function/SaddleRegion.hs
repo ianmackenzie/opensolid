@@ -58,7 +58,7 @@ quadratic subproblem saddlePoint = do
   let fuu = Function.evaluate (Derivatives.get (derivatives >> U >> U)) saddlePoint
   let fuv = Function.evaluate (Derivatives.get (derivatives >> U >> V)) saddlePoint
   let fvv = Function.evaluate (Derivatives.get (derivatives >> V >> V)) saddlePoint
-  let bDirectionCandidates = NonEmpty.of3 Direction2d.x Direction2d.y (Direction2d.degrees 45.0)
+  let bDirectionCandidates = NonEmpty.three Direction2d.x Direction2d.y (Direction2d.degrees 45.0)
   let directionalSecondDerivative = secondDerivative fuu fuv fvv
   let dB = NonEmpty.maximumBy (Qty.abs . directionalSecondDerivative) bDirectionCandidates
   let dA = Direction2d.rotateRight dB
@@ -142,10 +142,10 @@ connect subproblem frame startDirection endPoint boundingAxes = do
             HorizontalCurve.bounded derivatives dvdu u1 uMid vBounds frame boundingAxes
               |> Curve2d.removeStartDegeneracy 2 (startPoint, [startDerivative])
       if uMid == u2
-        then NonEmpty.singleton interpolatingCurve
+        then NonEmpty.one interpolatingCurve
         else do
           let implicitCurve = HorizontalCurve.bounded derivatives dvdu uMid u2 vBounds frame boundingAxes
-          NonEmpty.of2 interpolatingCurve implicitCurve
+          NonEmpty.two interpolatingCurve implicitCurve
     else do
       let vMid = v1 + 1e-3 * Qty.sign (v2 - v1) |> Qty.clampTo (Range.from v1 v2)
       let startDerivative = Vector2d.xy ((vMid - v1) * (du / dv)) (vMid - v1)
@@ -153,7 +153,7 @@ connect subproblem frame startDirection endPoint boundingAxes = do
             VerticalCurve.bounded derivatives dudv uBounds v1 vMid frame boundingAxes
               |> Curve2d.removeStartDegeneracy 2 (startPoint, [startDerivative])
       if vMid == v2
-        then NonEmpty.singleton interpolatingCurve
+        then NonEmpty.one interpolatingCurve
         else do
           let implicitCurve = VerticalCurve.bounded derivatives dudv uBounds vMid v2 frame boundingAxes
-          NonEmpty.of2 interpolatingCurve implicitCurve
+          NonEmpty.two interpolatingCurve implicitCurve

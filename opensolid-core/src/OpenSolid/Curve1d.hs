@@ -449,10 +449,10 @@ hermite (startValue, startDerivatives) (endValue, endDerivatives) = do
   bezier controlPoints
 
 quadraticSpline :: Qty units -> Qty units -> Qty units -> Curve1d units
-quadraticSpline p1 p2 p3 = bezier (NonEmpty.Three p1 p2 p3)
+quadraticSpline p1 p2 p3 = bezier (NonEmpty.three p1 p2 p3)
 
 cubicSpline :: Qty units -> Qty units -> Qty units -> Qty units -> Curve1d units
-cubicSpline p1 p2 p3 p4 = bezier (NonEmpty.Four p1 p2 p3 p4)
+cubicSpline p1 p2 p3 p4 = bezier (NonEmpty.four p1 p2 p3 p4)
 
 rationalBezier :: NonEmpty (Qty units, Float) -> Curve1d units
 rationalBezier pointsAndWeights = do
@@ -465,7 +465,7 @@ rationalQuadraticSpline ::
   (Qty units, Float) ->
   (Qty units, Float) ->
   Curve1d units
-rationalQuadraticSpline pw1 pw2 pw3 = rationalBezier (NonEmpty.Three pw1 pw2 pw3)
+rationalQuadraticSpline pw1 pw2 pw3 = rationalBezier (NonEmpty.three pw1 pw2 pw3)
 
 rationalCubicSpline ::
   (Qty units, Float) ->
@@ -473,7 +473,7 @@ rationalCubicSpline ::
   (Qty units, Float) ->
   (Qty units, Float) ->
   Curve1d units
-rationalCubicSpline pw1 pw2 pw3 pw4 = rationalBezier (NonEmpty.Four pw1 pw2 pw3 pw4)
+rationalCubicSpline pw1 pw2 pw3 pw4 = rationalBezier (NonEmpty.four pw1 pw2 pw3 pw4)
 
 scaleDerivatives :: Sign -> Float -> Float -> List (Qty units) -> List (Qty units)
 scaleDerivatives _ _ _ [] = []

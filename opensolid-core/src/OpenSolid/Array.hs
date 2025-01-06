@@ -30,7 +30,7 @@ import Prelude qualified
 data Array a = Array Int (Data.Array.Array Int a) deriving (Show)
 
 singleton :: a -> Array a
-singleton = new . NonEmpty.singleton
+singleton = new . NonEmpty.one
 
 new :: NonEmpty a -> Array a
 new givenItems = do
