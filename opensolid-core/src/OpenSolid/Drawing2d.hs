@@ -146,8 +146,8 @@ polygon attributes vertices =
   Node "polygon" (pointsAttribute vertices : attributes) []
 
 -- | Create a circle with the given attributes, center point and radius.
-circle :: List (Attribute space) -> Point space -> Length -> Entity space
-circle attributes centerPoint radius = do
+circle :: List (Attribute space) -> Length -> Point space -> Entity space
+circle attributes radius centerPoint = do
   let (cx, cy) = Point2d.coordinates centerPoint
   let cxAttribute = Attribute "cx" (lengthText cx)
   let cyAttribute = Attribute "cy" (lengthText -cy)

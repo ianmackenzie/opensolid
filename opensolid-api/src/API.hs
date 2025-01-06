@@ -758,7 +758,7 @@ drawing2d =
     "A set of functions for constructing 2D drawings."
     [ static2 "To SVG" "View Box" "Entities" Drawing2d.toSvg $(docs 'Drawing2d.toSvg)
     , static2 "Polygon" "Attributes" "Vertices" Drawing2d.polygon $(docs 'Drawing2d.polygon)
-    , static3 "Circle" "Attributes" "Center Point" "Radius" Drawing2d.circle $(docs 'Drawing2d.circle)
+    , static3 "Circle" "Attributes" "Radius" "Center Point" Drawing2d.circle $(docs 'Drawing2d.circle)
     , constant "Black Stroke" Drawing2d.blackStroke $(docs 'Drawing2d.blackStroke)
     , static1 "Stroke Color" "Color" Drawing2d.strokeColor $(docs 'Drawing2d.strokeColor)
     , constant "No Fill" Drawing2d.noFill $(docs 'Drawing2d.noFill)

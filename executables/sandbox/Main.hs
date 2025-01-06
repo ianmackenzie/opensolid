@@ -300,8 +300,8 @@ drawDot :: Color -> UvPoint -> Drawing2d.Entity UvSpace
 drawDot color point =
   Drawing2d.circle
     [Drawing2d.fillColor color]
-    (Point2d.convert toDrawing point)
     (Length.millimeters 0.5)
+    (Point2d.convert toDrawing point)
 
 delayedPrint :: Int -> Duration -> IO ()
 delayedPrint number delay = IO.do
@@ -373,7 +373,7 @@ drawBezier color startPoint innerControlPoints endPoint = do
     [ Drawing2d.with [Drawing2d.opacity 0.3] $
         [ Drawing2d.polyline [] (Polyline2d drawingControlPoints)
         , Drawing2d.with [Drawing2d.fillColor color] $
-            [ Drawing2d.circle [] point (Length.millimeters 5.0)
+            [ Drawing2d.circle [] (Length.millimeters 5.0) point
             | point <- NonEmpty.toList drawingControlPoints
             ]
         ]
@@ -518,8 +518,8 @@ testCurveMedialAxis = IO.do
                       [ Drawing2d.strokeColor Color.gray
                       , Drawing2d.strokeWidth (Length.millimeters 0.2)
                       ]
-                      p0
                       (Qty.abs r)
+                      p0
               tangentCircle
         List.map drawTangentCircle (Parameter.steps 2)
   let tangentCircles = List.collect drawCircles segments

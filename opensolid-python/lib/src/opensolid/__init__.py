@@ -6037,7 +6037,7 @@ class Drawing2d:
 
     @staticmethod
     def circle(
-        attributes: list[Drawing2d.Attribute], center_point: Point2d, radius: Length
+        attributes: list[Drawing2d.Attribute], radius: Length, center_point: Point2d
     ) -> Drawing2d.Entity:
         """Create a circle with the given attributes, center point and radius."""
         inputs = _Tuple3_List_c_void_p_c_void_p_c_void_p(
@@ -6045,11 +6045,11 @@ class Drawing2d:
                 _List_c_void_p,
                 (c_void_p * len(attributes))(*[item._ptr for item in attributes]),
             ),
-            center_point._ptr,
             radius._ptr,
+            center_point._ptr,
         )
         output = c_void_p()
-        _lib.opensolid_Drawing2d_circle_ListDrawing2dAttribute_Point2d_Length(
+        _lib.opensolid_Drawing2d_circle_ListDrawing2dAttribute_Length_Point2d(
             ctypes.byref(inputs), ctypes.byref(output)
         )
         return Drawing2d.Entity(ptr=output)
