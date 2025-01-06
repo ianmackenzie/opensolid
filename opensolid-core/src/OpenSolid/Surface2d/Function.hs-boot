@@ -6,11 +6,12 @@ module OpenSolid.Surface2d.Function
 where
 
 import OpenSolid.Bounds2d (Bounds2d)
+import {-# SOURCE #-} OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Expression (Expression)
 import OpenSolid.Point2d (Point2d)
 import OpenSolid.Prelude
 import {-# SOURCE #-} OpenSolid.Surface1d.Function qualified as Surface1d.Function
-import OpenSolid.SurfaceParameter (SurfaceParameter, UvBounds, UvPoint)
+import OpenSolid.SurfaceParameter (SurfaceParameter, UvBounds, UvCoordinates, UvPoint)
 import OpenSolid.Transform2d (Transform2d)
 import OpenSolid.Transform2d qualified as Transform2d
 import {-# SOURCE #-} OpenSolid.VectorSurface2d.Function qualified as VectorSurface2d.Function
@@ -55,9 +56,22 @@ data Function (coordinateSystem :: CoordinateSystem) where
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
+  Addition
+    (Function (space1 @ units1))
+    (VectorSurface2d.Function.Function (space2 @ units2))
+    (Function (space1 @ units1))
+
+instance
+  (space1 ~ space2, units1 ~ units2) =>
   Subtraction
     (Function (space1 @ units1))
     (Function (space2 @ units2))
     (VectorSurface2d.Function.Function (space1 @ units1))
+
+instance
+  Composition
+    (Curve2d UvCoordinates)
+    (Function (space @ units))
+    (Curve2d (space @ units))
 
 new :: Interface function (space @ units) => function -> Function (space @ units)
