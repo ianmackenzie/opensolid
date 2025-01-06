@@ -53,8 +53,8 @@ curveBounds x1 x2 y1 y2 (Range mLow mHigh)
       let dY = y2 - y1
       let dXValley = Qty.clampTo (Range.from 0.0 dX) ((mHigh * dX - dY) / (mHigh - mLow))
       let dXPeak = Qty.clampTo (Range.from 0.0 dX) ((dY - mLow * dX) / (mHigh - mLow))
-      let yValley = y1 + mLow * dXValley
-      let yPeak = y1 + mHigh * dXPeak
+      let yValley = if Qty.isInfinite mLow then -Qty.infinity else y1 + mLow * dXValley
+      let yPeak = if Qty.isInfinite mHigh then Qty.infinity else y1 + mHigh * dXPeak
       Range.from yValley yPeak
 
 curveRangeBounds :: Float -> Float -> Range units -> Range units -> Range units -> Range units
@@ -68,6 +68,6 @@ curveRangeBounds x1 x2 y1 y2 (Range mLow mHigh)
       let dYHigh = high2 - high1
       let dXValley = Qty.clampTo (Range.from 0.0 dX) ((mHigh * dX - dYLow) / (mHigh - mLow))
       let dXPeak = Qty.clampTo (Range.from 0.0 dX) ((dYHigh - mLow * dX) / (mHigh - mLow))
-      let yValley = low1 + mLow * dXValley
-      let yPeak = high1 + mHigh * dXPeak
+      let yValley = if Qty.isInfinite mLow then -Qty.infinity else low1 + mLow * dXValley
+      let yPeak = if Qty.isInfinite mHigh then Qty.infinity else high1 + mHigh * dXPeak
       Range.from yValley yPeak
