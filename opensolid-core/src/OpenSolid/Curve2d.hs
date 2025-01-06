@@ -46,8 +46,11 @@ module OpenSolid.Curve2d
   , toPolyline
   , medialAxis
   , arcLengthParameterization
+  , unsafeArcLengthParameterization
   , parameterizeByArcLength
+  , unsafeParameterizeByArcLength
   , piecewise
+  , unsafePiecewise
   )
 where
 
@@ -990,6 +993,10 @@ arcLengthParameterization curve =
     Failure VectorCurve2d.HasZero -> Failure HasDegeneracy
     Success derivativeMagnitude -> Success (ArcLength.parameterization derivativeMagnitude)
 
+unsafeArcLengthParameterization :: Curve2d (space @ units) -> (Curve1d Unitless, Qty units)
+unsafeArcLengthParameterization curve =
+  ArcLength.parameterization (VectorCurve2d.unsafeMagnitude (derivative curve))
+
 parameterizeByArcLength ::
   Tolerance units =>
   Curve2d (space @ units) ->
@@ -997,6 +1004,11 @@ parameterizeByArcLength ::
 parameterizeByArcLength curve = Result.do
   (parameterization, length) <- arcLengthParameterization curve
   Success (curve . parameterization, length)
+
+unsafeParameterizeByArcLength :: Curve2d (space @ units) -> (Curve2d (space @ units), Qty units)
+unsafeParameterizeByArcLength curve = do
+  let (parameterization, length) = unsafeArcLengthParameterization curve
+  (curve . parameterization, length)
 
 piecewise ::
   Tolerance units =>
@@ -1008,6 +1020,12 @@ piecewise (first :| rest) = Result.do
   let segmentArray = Array.new (parameterizedFirst :| parameterizedRest)
   let (tree, arcLength) = buildPiecewiseTree segmentArray 0 (Array.length segmentArray)
   Success (new (Piecewise tree arcLength))
+
+unsafePiecewise :: NonEmpty (Curve2d (space @ units)) -> Curve2d (space @ units)
+unsafePiecewise segments = do
+  let segmentArray = Array.new (NonEmpty.map unsafeParameterizeByArcLength segments)
+  let (tree, arcLength) = buildPiecewiseTree segmentArray 0 (Array.length segmentArray)
+  new (Piecewise tree arcLength)
 
 data Piecewise (coordinateSystem :: CoordinateSystem) where
   Piecewise :: PiecewiseTree (space @ units) -> Qty units -> Piecewise (space @ units)

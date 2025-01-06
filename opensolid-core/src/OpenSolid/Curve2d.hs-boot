@@ -15,6 +15,7 @@ module OpenSolid.Curve2d
   , transformBy
   , TransformBy (TransformBy)
   , piecewise
+  , unsafePiecewise
   )
 where
 
@@ -129,3 +130,4 @@ piecewise ::
   Tolerance units =>
   NonEmpty (Curve2d (space @ units)) ->
   Result HasDegeneracy (Curve2d (space @ units))
+unsafePiecewise :: NonEmpty (Curve2d (space @ units)) -> Curve2d (space @ units)
