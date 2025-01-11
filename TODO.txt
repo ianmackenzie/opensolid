@@ -1,6 +1,31 @@
+Move most curve constructors into Curve2d module itself?
+-> remove Line#d, QuadraticSpline#d, CubicSpline#d, BezierCurve#d modules in favour of just Curve2d.line, Curve2d.cubicSpline, Curve2d.bezier etc.
+-> maybe move Arc2d.from -> Curve2d.arc, but leave other arc constructors in Arc2d module
+  -> or even just move all arc constructors also into Curve2d:
+    - Arc2d.from -> Curve2d.arc
+    - Arc2d.polar -> Curve2d.polarArc
+    - Arc2d.swept -> Curve2d.sweptArc
+    - Arc2d.corner -> Curve2d.cornerArc
+    - Arc2d.withRadius -> Curve2d.arcWithRadius
+    - Arc2d.elliptical -> Curve2d.ellipticalArc
+    - Arc2d.circle -> Curve2d.circle
+    - Arc2d.ellipse -> Curve2d.ellipse
+    - Arc2d.new -> Curve2d.customArc
+
+Clean up 'Transformed' vs 'TransformBy' curve constructors/implementations
+
+Rename Curve1d, Surface1d to Curve and Surface?
+
+Rename e.g. Surface2d.Function to SurfaceFunction2d, Surface1d.Function to SurfaceFunction?
+-> flatter is often better, would give better type errors/hints instead of everything being shown as 'Function'
+
+Support Point2d + VectorCurve2d
+
 Rewrite scripts in Haskell?
 
 Merge File module into IO?
+-> IO.writeFile, IO.readFile, IO.deleteFile
+-> Maybe also IO.listFiles, IO.listDirectories
 
 Build out publishing workflow
 - Collect wheels and publish combined package
