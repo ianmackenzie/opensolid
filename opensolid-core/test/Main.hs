@@ -21,6 +21,7 @@ import Tests.Parameter qualified
 import Tests.Qty qualified
 import Tests.Range qualified
 import Tests.Region2d qualified
+import Tests.Set2d qualified
 import Tests.Stream qualified
 import Tests.Text qualified
 import Tests.VectorBounds2d qualified
@@ -49,6 +50,7 @@ tests =
     , Test.group "Tests.Bounds2d" Tests.Bounds2d.tests
     , Test.group "Tests.VectorBounds2d" Tests.VectorBounds2d.tests
     , Test.group "Tests.Array" Tests.Array.tests
+    , Test.group "Tests.Set2d" Tests.Set2d.tests
     ]
 
 main :: IO ()

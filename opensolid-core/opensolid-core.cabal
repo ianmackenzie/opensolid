@@ -178,6 +178,7 @@ library
     OpenSolid.Region2d
     OpenSolid.Region2d.BoundedBy
     OpenSolid.Result
+    OpenSolid.Set2d
     OpenSolid.Sign
     OpenSolid.Solve1d
     OpenSolid.Solve2d
@@ -277,6 +278,7 @@ test-suite opensolid-core-test
     Tests.Random
     Tests.Range
     Tests.Region2d
+    Tests.Set2d
     Tests.Stream
     Tests.Text
     Tests.VectorBounds2d
