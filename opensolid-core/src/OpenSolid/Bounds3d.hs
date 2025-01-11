@@ -21,6 +21,9 @@ module OpenSolid.Bounds3d
   )
 where
 
+import OpenSolid.Bounded (Bounded)
+import OpenSolid.Bounded qualified as Bounded
+import OpenSolid.Bounds (Bounds)
 import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Point3d (Point3d (Point3d))
@@ -42,9 +45,12 @@ data Bounds3d (coordinateSystem :: CoordinateSystem) where
 
 deriving instance Show (Bounds3d (space @ units))
 
-instance Bounds.Interface (Bounds3d (space @ units)) where
+instance Bounds (Bounds3d (space @ units)) where
   aggregate2 = aggregate2
   intersection = intersection
+
+instance Bounded (Bounds3d (space @ units)) (Bounds3d (space @ units)) where
+  bounds = identity
 
 instance HasUnits (Bounds3d (space @ units)) units
 

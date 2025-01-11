@@ -1,6 +1,9 @@
-module OpenSolid.Bounded (Interface (..)) where
+module OpenSolid.Bounded (Bounded (..)) where
 
-import OpenSolid.Bounds qualified as Bounds
+import Data.Kind (Constraint)
+import OpenSolid.Bounds (Bounds)
+import OpenSolid.Prelude
 
-class Bounds.Interface b => Interface a b | a -> b where
+type Bounded :: Type -> Type -> Constraint
+class Bounds b => Bounded a b | a -> b where
   bounds :: a -> b

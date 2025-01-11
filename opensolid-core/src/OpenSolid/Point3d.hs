@@ -27,6 +27,7 @@ module OpenSolid.Point3d
   )
 where
 
+import OpenSolid.Bounded (Bounded)
 import OpenSolid.Bounded qualified as Bounded
 import {-# SOURCE #-} OpenSolid.Bounds3d (Bounds3d)
 import {-# SOURCE #-} OpenSolid.Bounds3d qualified as Bounds3d
@@ -126,7 +127,7 @@ instance
   where
   p1 ~= p2 = distanceFrom p1 p2 ~= Qty.zero
 
-instance Bounded.Interface (Point3d (space @ units)) (Bounds3d (space @ units)) where
+instance Bounded (Point3d (space @ units)) (Bounds3d (space @ units)) where
   bounds = Bounds3d.constant
 
 xCoordinate :: Point3d (space @ units) -> Qty units

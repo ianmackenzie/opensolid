@@ -1,7 +1,8 @@
-module OpenSolid.Bounds (Interface (..)) where
+module OpenSolid.Bounds (Bounds (..)) where
 
+import {-# SOURCE #-} OpenSolid.Bounded (Bounded)
 import OpenSolid.Prelude
 
-class Interface b where
+class Bounded b b => Bounds b where
   aggregate2 :: b -> b -> b
   intersection :: b -> b -> Maybe b

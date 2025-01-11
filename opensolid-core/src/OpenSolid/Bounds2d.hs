@@ -40,6 +40,9 @@ where
 
 import OpenSolid.Axis2d (Axis2d)
 import OpenSolid.Axis2d qualified as Axis2d
+import OpenSolid.Bounded (Bounded)
+import OpenSolid.Bounded qualified as Bounded
+import OpenSolid.Bounds (Bounds)
 import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.FFI (FFI)
@@ -81,9 +84,12 @@ instance
   where
   coerce (Bounds2d x y) = Bounds2d (Units.coerce x) (Units.coerce y)
 
-instance Bounds.Interface (Bounds2d (space @ units)) where
+instance Bounds (Bounds2d (space @ units)) where
   aggregate2 = aggregate2
   intersection = intersection
+
+instance Bounded (Bounds2d (space @ units)) (Bounds2d (space @ units)) where
+  bounds = identity
 
 instance FFI (Bounds2d (space @ Meters)) where
   representation = FFI.classRepresentation "Bounds2d"

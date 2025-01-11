@@ -40,6 +40,7 @@ import OpenSolid.Angle (Angle)
 import OpenSolid.Arithmetic.Unboxed
 import {-# SOURCE #-} OpenSolid.Axis2d (Axis2d)
 import {-# SOURCE #-} OpenSolid.Axis2d qualified as Axis2d
+import OpenSolid.Bounded (Bounded)
 import OpenSolid.Bounded qualified as Bounded
 import {-# SOURCE #-} OpenSolid.Bounds2d (Bounds2d)
 import {-# SOURCE #-} OpenSolid.Bounds2d qualified as Bounds2d
@@ -154,7 +155,7 @@ instance
   where
   p1 ~= p2 = distanceFrom p1 p2 ~= Qty.zero
 
-instance Bounded.Interface (Point2d (space @ units)) (Bounds2d (space @ units)) where
+instance Bounded (Point2d (space @ units)) (Bounds2d (space @ units)) where
   bounds = Bounds2d.constant
 
 -- | The point with coordinates (0,0).
