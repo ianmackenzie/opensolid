@@ -1022,13 +1022,13 @@ piecewise ::
 piecewise (first :| rest) = Result.do
   parameterizedFirst <- parameterizeByArcLength first
   parameterizedRest <- Result.collect parameterizeByArcLength rest
-  let segmentArray = Array.new (parameterizedFirst :| parameterizedRest)
+  let segmentArray = Array.fromNonEmpty (parameterizedFirst :| parameterizedRest)
   let (tree, arcLength) = buildPiecewiseTree segmentArray 0 (Array.length segmentArray)
   Success (new (Piecewise tree arcLength))
 
 unsafePiecewise :: NonEmpty (Curve2d (space @ units)) -> Curve2d (space @ units)
 unsafePiecewise segments = do
-  let segmentArray = Array.new (NonEmpty.map unsafeParameterizeByArcLength segments)
+  let segmentArray = Array.fromNonEmpty (NonEmpty.map unsafeParameterizeByArcLength segments)
   let (tree, arcLength) = buildPiecewiseTree segmentArray 0 (Array.length segmentArray)
   new (Piecewise tree arcLength)
 

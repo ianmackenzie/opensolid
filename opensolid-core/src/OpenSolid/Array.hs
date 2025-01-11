@@ -1,8 +1,9 @@
 module OpenSolid.Array
   ( Array
   , singleton
-  , new
-  , items
+  , fromNonEmpty
+  , toNonEmpty
+  , toList
   , length
   , get
   , first
@@ -30,18 +31,20 @@ import Prelude qualified
 data Array a = Array Int (Data.Array.Array Int a) deriving (Show)
 
 singleton :: a -> Array a
-singleton = new . NonEmpty.one
+singleton = fromNonEmpty . NonEmpty.one
 
-new :: NonEmpty a -> Array a
-new givenItems = do
+fromNonEmpty :: NonEmpty a -> Array a
+fromNonEmpty givenItems = do
   let n = NonEmpty.length givenItems
   Array n (Data.Array.listArray (0, n - 1) (NonEmpty.toList givenItems))
 
-items :: Array a -> NonEmpty a
-items (Array _ array) =
-  case Data.Array.elems array of
-    NonEmpty arrayItems -> arrayItems
-    [] -> internalError "Array should never be empty"
+toNonEmpty :: Array a -> NonEmpty a
+toNonEmpty array = case toList array of
+  NonEmpty nonEmpty -> nonEmpty
+  [] -> internalError "Array should never be empty"
+
+toList :: Array a -> List a
+toList (Array _ array) = Data.Array.elems array
 
 {-# INLINE length #-}
 length :: Array a -> Int

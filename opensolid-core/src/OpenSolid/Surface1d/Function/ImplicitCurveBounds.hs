@@ -26,7 +26,7 @@ instance Show ImplicitCurveBounds where
 
 build :: NonEmpty (Range Unitless, Range Unitless) -> ImplicitCurveBounds
 build boxes = do
-  let array = Array.new (NonEmpty.sortBy (Range.lowerBound . Pair.first) boxes)
+  let array = Array.fromNonEmpty (NonEmpty.sortBy (Range.lowerBound . Pair.first) boxes)
   subtree array 0 (Array.length array)
 
 subtree :: Array (Range Unitless, Range Unitless) -> Int -> Int -> ImplicitCurveBounds

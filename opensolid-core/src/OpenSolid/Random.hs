@@ -80,7 +80,7 @@ either firstGenerator secondGenerator = OpenSolid.Random.do
 
 oneOf :: NonEmpty (Generator a) -> Generator a
 oneOf generators = do
-  let generatorArray = Array.new generators
+  let generatorArray = Array.fromNonEmpty generators
   let indexGenerator = Int.random 0 (Array.length generatorArray - 1)
   OpenSolid.Random.do
     index <- indexGenerator
