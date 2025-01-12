@@ -1,7 +1,6 @@
 module Tests.Estimate (tests) where
 
 import OpenSolid.Angle qualified as Angle
-import OpenSolid.Arc2d qualified as Arc2d
 import OpenSolid.Area qualified as Area
 import OpenSolid.Curve1d qualified as Curve1d
 import OpenSolid.Curve2d qualified as Curve2d
@@ -119,7 +118,7 @@ resolvesTo value estimate
 
 area :: Tolerance Meters => Test
 area = Test.verify "area" Test.do
-  let curve = Arc2d.polar Point2d.origin Length.meter Angle.pi Angle.zero
+  let curve = Curve2d.polarArc Point2d.origin Length.meter Angle.pi Angle.zero
   let dAdt = Curve2d.yCoordinate curve * VectorCurve2d.xComponent (Curve2d.derivative curve)
   let areaEstimate = Curve1d.integral dAdt
   let expectedArea = Area.squareMeters (Float.pi / 2.0)

@@ -2,7 +2,6 @@ module Main (main) where
 
 import Data.Time.Clock qualified
 import OpenSolid.Angle qualified as Angle
-import OpenSolid.Arc2d qualified as Arc2d
 import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.Color qualified as Color
 import OpenSolid.CubicSpline2d qualified as CubicSpline2d
@@ -40,7 +39,7 @@ testSplineAndArc = do
           (Point2d.centimeters @Global 5.0 6.0)
           (Point2d.centimeters @Global 10.0 9.0)
           (Point2d.centimeters @Global 15.0 7.0)
-  let arc = Arc2d.from (Point2d.centimeters 15.0 0.0) Point2d.origin (Angle.degrees 20.0)
+  let arc = Curve2d.arc (Point2d.centimeters 15.0 0.0) Point2d.origin (Angle.degrees 20.0)
   testCurveMedialAxis "testSplineAndArc" spline arc
 
 testSplineAndLine :: Tolerance Meters => IO ()

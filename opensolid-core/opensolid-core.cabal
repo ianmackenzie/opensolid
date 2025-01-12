@@ -93,7 +93,6 @@ library
   import: config
   exposed-modules:
     OpenSolid.Angle
-    OpenSolid.Arc2d
     OpenSolid.ArcLength
     OpenSolid.Area
     OpenSolid.Arithmetic
@@ -258,7 +257,6 @@ test-suite opensolid-core-test
 
   other-modules:
     Test
-    Tests.Arc2d
     Tests.Array
     Tests.Bounds2d
     Tests.Curve1d

@@ -19,7 +19,6 @@ module Tests.Random
 where
 
 import OpenSolid.Angle qualified as Angle
-import OpenSolid.Arc2d qualified as Arc2d
 import OpenSolid.Axis2d (Axis2d)
 import OpenSolid.Axis2d qualified as Axis2d
 import OpenSolid.Bounds2d (Bounds2d)
@@ -88,7 +87,7 @@ arc2d = Random.do
   angleSign <- Sign.random
   angleMagnitude <- Qty.random (Angle.degrees 5.0) (Angle.degrees 355.0)
   let sweptAngle = angleSign * angleMagnitude
-  Random.return (Arc2d.from startPoint endPoint sweptAngle)
+  Random.return (Curve2d.arc startPoint endPoint sweptAngle)
 
 quadraticSpline2d :: Tolerance Meters => Generator (Curve2d (space @ Meters))
 quadraticSpline2d = Random.map3 QuadraticSpline2d.fromControlPoints point2d point2d point2d

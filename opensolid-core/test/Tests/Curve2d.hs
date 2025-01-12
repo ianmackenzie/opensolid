@@ -6,7 +6,6 @@ module Tests.Curve2d
 where
 
 import OpenSolid.Angle qualified as Angle
-import OpenSolid.Arc2d qualified as Arc2d
 import OpenSolid.CubicSpline2d qualified as CubicSpline2d
 import OpenSolid.Curve1d qualified as Curve1d
 import OpenSolid.Curve1d.Zero qualified as Curve1d.Zero
@@ -18,6 +17,7 @@ import OpenSolid.Curve2d.OverlappingSegment (OverlappingSegment (OverlappingSegm
 import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.DirectionCurve2d qualified as DirectionCurve2d
 import OpenSolid.Error qualified as Error
+import OpenSolid.Float qualified as Float
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
@@ -31,6 +31,7 @@ import OpenSolid.Random qualified as Random
 import OpenSolid.Range (Range (Range))
 import OpenSolid.Range qualified as Range
 import OpenSolid.Sign qualified as Sign
+import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Units (Meters)
 import OpenSolid.Vector2d qualified as Vector2d
@@ -63,6 +64,8 @@ tests =
   , derivativeConsistency
   , reversalConsistency
   , degeneracyRemoval
+  , arcConstruction
+  , arcDeformation
   ]
 
 findPoint :: Tolerance Meters => Test
@@ -113,8 +116,8 @@ equalOverlapSegmentLists actualSegments expectedSegments =
 
 curveOverlap1 :: Tolerance Meters => Test
 curveOverlap1 = Test.verify "curveOverlap1" Test.do
-  let arc1 = Arc2d.from (Point2d.meters 1.0 0.0) (Point2d.meters -1.0 0.0) Angle.halfTurn
-  let arc2 = Arc2d.from (Point2d.meters 0.0 -1.0) (Point2d.meters 0.0 1.0) Angle.halfTurn
+  let arc1 = Curve2d.arc (Point2d.meters 1.0 0.0) (Point2d.meters -1.0 0.0) Angle.halfTurn
+  let arc2 = Curve2d.arc (Point2d.meters 0.0 -1.0) (Point2d.meters 0.0 1.0) Angle.halfTurn
   actualSegments <- overlappingSegments arc1 arc2
   let expectedSegments =
         NonEmpty.one (OverlappingSegment (Range.from 0.0 0.5) (Range.from 0.5 1.0) Positive)
@@ -122,8 +125,8 @@ curveOverlap1 = Test.verify "curveOverlap1" Test.do
 
 curveOverlap2 :: Tolerance Meters => Test
 curveOverlap2 = Test.verify "curveOverlap2" Test.do
-  let arc1 = Arc2d.polar Point2d.origin Length.meter Angle.zero -Angle.pi
-  let arc2 = Arc2d.polar Point2d.origin Length.meter (Angle.degrees -45.0) (Angle.degrees 225.0)
+  let arc1 = Curve2d.polarArc Point2d.origin Length.meter Angle.zero -Angle.pi
+  let arc2 = Curve2d.polarArc Point2d.origin Length.meter (Angle.degrees -45.0) (Angle.degrees 225.0)
   segments <- overlappingSegments arc1 arc2
   let expectedSegments =
         NonEmpty.two
@@ -133,8 +136,8 @@ curveOverlap2 = Test.verify "curveOverlap2" Test.do
 
 crossingIntersection :: Tolerance Meters => Test
 crossingIntersection = Test.verify "crossingIntersection" Test.do
-  let arc1 = Arc2d.from Point2d.origin (Point2d.meters 0.0 1.0) Angle.halfTurn
-  let arc2 = Arc2d.from Point2d.origin (Point2d.meters 1.0 0.0) -Angle.halfTurn
+  let arc1 = Curve2d.arc Point2d.origin (Point2d.meters 0.0 1.0) Angle.halfTurn
+  let arc2 = Curve2d.arc Point2d.origin (Point2d.meters 1.0 0.0) -Angle.halfTurn
   intersections <- Curve2d.intersections arc1 arc2
   let expectedIntersectionPoints =
         NonEmpty.two
@@ -149,8 +152,8 @@ crossingIntersection = Test.verify "crossingIntersection" Test.do
 
 tangentIntersection :: Tolerance Meters => Test
 tangentIntersection = Test.verify "tangentIntersection" Test.do
-  let arc1 = Arc2d.polar Point2d.origin Length.meter Angle.zero Angle.pi
-  let arc2 = Arc2d.polar (Point2d.meters 0.0 1.5) (Length.meters 0.5) -Angle.pi Angle.zero
+  let arc1 = Curve2d.polarArc Point2d.origin Length.meter Angle.zero Angle.pi
+  let arc2 = Curve2d.polarArc (Point2d.meters 0.0 1.5) (Length.meters 0.5) -Angle.pi Angle.zero
   intersections <- Curve2d.intersections arc1 arc2
   let expectedIntersectionPoints =
         NonEmpty.one (IntersectionPoint 0.5 0.5 IntersectionPoint.Tangent Positive)
@@ -166,7 +169,7 @@ tangentIntersection = Test.verify "tangentIntersection" Test.do
 
 solving :: Tolerance Meters => Test
 solving = Test.verify "solving" Test.do
-  let arc = Arc2d.from (Point2d.meters 0.0 1.0) (Point2d.meters 1.0 0.0) Angle.quarterTurn
+  let arc = Curve2d.arc (Point2d.meters 0.0 1.0) (Point2d.meters 1.0 0.0) Angle.quarterTurn
   let squaredDistanceFromOrigin = VectorCurve2d.squaredMagnitude (arc - Point2d.origin)
   let desiredDistance = Length.meters 0.5
   zeros <-
@@ -340,7 +343,7 @@ degeneracyRemoval = Test.check 100 "degeneracyRemoval" Test.do
   let arcEndAngle = arcStartAngle + arcSweptAngle
   t <- Parameter.random
 
-  let arc = Arc2d.polar arcCenter arcRadius arcStartAngle arcEndAngle
+  let arc = Curve2d.polarArc arcCenter arcRadius arcStartAngle arcEndAngle
   let arcFirstDerivative = Curve2d.derivative arc
   let arcSecondDerivative = VectorCurve2d.derivative arcFirstDerivative
   let arcThirdDerivative = VectorCurve2d.derivative arcSecondDerivative
@@ -375,4 +378,41 @@ degeneracyRemoval = Test.check 100 "degeneracyRemoval" Test.do
     , expectEqualDerivatives 1 arcFirstDerivative interpolatedFirstDerivative
     , expectEqualDerivatives 2 arcSecondDerivative interpolatedSecondDerivative
     , expectEqualDerivatives 3 arcThirdDerivative interpolatedThirdDerivative
+    ]
+
+arcConstruction :: Tolerance Meters => Test
+arcConstruction = do
+  let testArcMidpoint numDegrees (expectedX, expectedY) = do
+        let label = Text.int numDegrees + " degrees"
+        let sweptAngle = Angle.degrees (Float.int numDegrees)
+        let expectedPoint = Point2d.meters expectedX expectedY
+        Test.verify label Test.do
+          let arc = Curve2d.arc Point2d.origin (Point2d.meters 1.0 1.0) sweptAngle
+          Test.expect (Curve2d.evaluate arc 0.5 ~= expectedPoint)
+  let invSqrt2 = 1.0 / Float.sqrt 2.0
+  Test.group "from" $
+    [ testArcMidpoint 90 (invSqrt2, 1.0 - invSqrt2)
+    , testArcMidpoint -90 (1.0 - invSqrt2, invSqrt2)
+    , testArcMidpoint 180 (1.0, 0.0)
+    , testArcMidpoint -180 (0.0, 1.0)
+    ]
+
+arcDeformation :: Tolerance Meters => Test
+arcDeformation = Test.check 100 "deformation" Test.do
+  initialArc <- Random.arc2d
+  transform <- Random.affineTransform2d
+  t <- Parameter.random
+  let transformedArc = Curve2d.transformBy transform initialArc
+  let startOfTransformed = Curve2d.startPoint transformedArc
+  let endOfTransformed = Curve2d.endPoint transformedArc
+  let pointOnTransformed = Curve2d.evaluate transformedArc t
+  let transformOfStart = Point2d.transformBy transform (Curve2d.startPoint initialArc)
+  let transformOfEnd = Point2d.transformBy transform (Curve2d.endPoint initialArc)
+  let transformOfPoint = Point2d.transformBy transform (Curve2d.evaluate initialArc t)
+  Test.all
+    [ Test.expect (startOfTransformed ~= transformOfStart)
+        |> Test.output "startOfTransformed" startOfTransformed
+        |> Test.output "transformOfStart" transformOfStart
+    , Test.expect (endOfTransformed ~= transformOfEnd)
+    , Test.expect (pointOnTransformed ~= transformOfPoint)
     ]

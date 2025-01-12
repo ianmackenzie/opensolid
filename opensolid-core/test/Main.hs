@@ -5,7 +5,6 @@ import OpenSolid.Prelude
 import OpenSolid.Tolerance qualified as Tolerance
 import Test (Test)
 import Test qualified
-import Tests.Arc2d qualified
 import Tests.Array qualified
 import Tests.Bounds2d qualified
 import Tests.Curve1d qualified
@@ -41,7 +40,6 @@ tests =
     , Test.group "Tests.NonEmpty" Tests.NonEmpty.tests
     , Test.group "Tests.Region2d" Tests.Region2d.tests
     , Test.group "Tests.Direction2d" Tests.Direction2d.tests
-    , Test.group "Tests.Arc2d" Tests.Arc2d.tests
     , Test.group "Tests.Map" Tests.Map.tests
     , Test.group "Tests.DivMod" Tests.DivMod.tests
     , Test.group "Tests.Float" Tests.Float.tests

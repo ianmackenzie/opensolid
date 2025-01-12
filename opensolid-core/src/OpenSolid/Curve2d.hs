@@ -7,6 +7,16 @@ module OpenSolid.Curve2d
   , constant
   , xy
   , line
+  , arc
+  , polarArc
+  , sweptArc
+  , cornerArc
+  , WhichArc (..)
+  , radiusArc
+  , ellipticalArc
+  , customArc
+  , circle
+  , ellipse
   , startPoint
   , endPoint
   , evaluate
@@ -77,6 +87,7 @@ import OpenSolid.Curve2d.OverlappingSegment (OverlappingSegment (OverlappingSegm
 import OpenSolid.Curve2d.OverlappingSegment qualified as OverlappingSegment
 import OpenSolid.Debug qualified as Debug
 import OpenSolid.Direction2d (Direction2d)
+import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.DirectionCurve2d (DirectionCurve2d)
 import OpenSolid.DirectionCurve2d qualified as DirectionCurve2d
 import OpenSolid.Domain2d (Domain2d)
@@ -392,6 +403,128 @@ xy x y = XY x y
 
 line :: Point2d (space @ units) -> Point2d (space @ units) -> Curve2d (space @ units)
 line p1 p2 = constant p1 + Curve1d.t * (p2 - p1)
+
+arc ::
+  Tolerance units =>
+  Point2d (space @ units) ->
+  Point2d (space @ units) ->
+  Angle ->
+  Curve2d (space @ units)
+arc givenStartPoint givenEndPoint sweptAngle =
+  case Vector2d.magnitudeAndDirection (givenEndPoint - givenStartPoint) of
+    Failure Vector2d.IsZero -> line givenStartPoint givenEndPoint
+    Success (distanceBetweenPoints, directionBetweenPoints) -> do
+      let halfDistance = 0.5 * distanceBetweenPoints
+      let tanHalfAngle = Angle.tan (0.5 * sweptAngle)
+      let linearDeviation = halfDistance * tanHalfAngle
+      if linearDeviation ~= Qty.zero
+        then line givenStartPoint givenEndPoint
+        else do
+          let offset = (halfDistance / tanHalfAngle) * Direction2d.rotateLeft directionBetweenPoints
+          let centerPoint = Point2d.midpoint givenStartPoint givenEndPoint + offset
+          let radius = Point2d.distanceFrom centerPoint givenStartPoint
+          let xVector = Vector2d.x radius
+          let yVector = Vector2d.y radius
+          let startAngle = Point2d.angleFrom centerPoint givenStartPoint
+          let endAngle = startAngle + sweptAngle
+          customArc centerPoint xVector yVector startAngle endAngle
+
+polarArc :: Point2d (space @ units) -> Qty units -> Angle -> Angle -> Curve2d (space @ units)
+polarArc centerPoint radius startAngle endAngle =
+  customArc centerPoint (Vector2d.x radius) (Vector2d.y radius) startAngle endAngle
+
+sweptArc :: Point2d (space @ units) -> Point2d (space @ units) -> Angle -> Curve2d (space @ units)
+sweptArc centerPoint givenStartPoint sweptAngle = do
+  let radius = Point2d.distanceFrom centerPoint givenStartPoint
+  let startAngle = Point2d.angleFrom centerPoint givenStartPoint
+  polarArc centerPoint radius startAngle (startAngle + sweptAngle)
+
+cornerArc ::
+  Tolerance units =>
+  Point2d (space @ units) ->
+  Direction2d space ->
+  Direction2d space ->
+  Qty units ->
+  Curve2d (space @ units)
+cornerArc cornerPoint incomingDirection outgoingDirection givenRadius = do
+  let radius = Qty.abs givenRadius
+  let sweptAngle = Direction2d.angleFrom incomingDirection outgoingDirection
+  if radius * Float.squared (Angle.inRadians sweptAngle) / 4.0 ~= Qty.zero
+    then line cornerPoint cornerPoint
+    else do
+      let offset = radius * Qty.abs (Angle.tan (0.5 * sweptAngle))
+      let computedStartPoint = cornerPoint - offset * incomingDirection
+      let computedEndPoint = cornerPoint + offset * outgoingDirection
+      arc computedStartPoint computedEndPoint sweptAngle
+
+data WhichArc
+  = SmallCounterclockwise
+  | SmallClockwise
+  | LargeCounterclockwise
+  | LargeClockwise
+
+radiusArc ::
+  Tolerance units =>
+  Qty units ->
+  Point2d (space @ units) ->
+  Point2d (space @ units) ->
+  WhichArc ->
+  Curve2d (space @ units)
+radiusArc givenRadius givenStartPoint givenEndPoint whichArc =
+  case Direction2d.from givenStartPoint givenEndPoint of
+    Success chordDirection -> do
+      let halfDistance = 0.5 * Point2d.distanceFrom givenStartPoint givenEndPoint
+      let radius = Qty.max (Qty.abs givenRadius) halfDistance
+      let offsetMagnitude = Qty.sqrt' (Qty.squared' radius - Qty.squared' halfDistance)
+      let offsetDirection = Direction2d.rotateLeft chordDirection
+      let offsetDistance =
+            case whichArc of
+              SmallCounterclockwise -> offsetMagnitude
+              SmallClockwise -> -offsetMagnitude
+              LargeClockwise -> offsetMagnitude
+              LargeCounterclockwise -> -offsetMagnitude
+      let offset = offsetDirection * offsetDistance
+      let centerPoint = Point2d.midpoint givenStartPoint givenEndPoint + offset
+      let shortAngle = 2.0 * Angle.asin (halfDistance / givenRadius)
+      let sweptAngle =
+            case whichArc of
+              SmallCounterclockwise -> shortAngle
+              SmallClockwise -> -shortAngle
+              LargeClockwise -> shortAngle - Angle.fullTurn
+              LargeCounterclockwise -> Angle.fullTurn - shortAngle
+      sweptArc centerPoint givenStartPoint sweptAngle
+    Failure Direction2d.PointsAreCoincident ->
+      line givenStartPoint givenEndPoint
+
+ellipticalArc ::
+  Frame2d (space @ units) defines ->
+  Qty units ->
+  Qty units ->
+  Angle ->
+  Angle ->
+  Curve2d (space @ units)
+ellipticalArc axes xRadius yRadius startAngle endAngle = do
+  let centerPoint = Frame2d.originPoint axes
+  let xVector = xRadius * Frame2d.xDirection axes
+  let yVector = yRadius * Frame2d.yDirection axes
+  customArc centerPoint xVector yVector startAngle endAngle
+
+customArc ::
+  Point2d (space @ units) ->
+  Vector2d (space @ units) ->
+  Vector2d (space @ units) ->
+  Angle ->
+  Angle ->
+  Curve2d (space @ units)
+customArc p0 v1 v2 a b = do
+  let angle = Curve1d.line a b
+  constant p0 + v1 * Curve1d.cos angle + v2 * Curve1d.sin angle
+
+circle :: Point2d (space @ units) -> Qty units -> Curve2d (space @ units)
+circle centerPoint radius = polarArc centerPoint radius Angle.zero Angle.twoPi
+
+ellipse :: Frame2d (space @ units) defines -> Qty units -> Qty units -> Curve2d (space @ units)
+ellipse axes xRadius yRadius = ellipticalArc axes xRadius yRadius Angle.zero Angle.twoPi
 
 startPoint :: Curve2d (space @ units) -> Point2d (space @ units)
 startPoint curve = case curve of
