@@ -52,14 +52,6 @@ data Curve2d (coordinateSystem :: CoordinateSystem) where
     Frame2d (global @ units) (Defines local) ->
     Curve2d (local @ units) ->
     Curve2d (global @ units)
-  Addition ::
-    Curve2d (space @ units) ->
-    VectorCurve2d (space @ units) ->
-    Curve2d (space @ units)
-  Subtraction ::
-    Curve2d (space @ units) ->
-    VectorCurve2d (space @ units) ->
-    Curve2d (space @ units)
   Transformed ::
     Transform2d tag (space @ units) ->
     Curve2d (space @ units) ->
@@ -77,7 +69,7 @@ class
   evaluateImpl :: curve -> Float -> Point2d coordinateSystem
   evaluateBoundsImpl :: curve -> Range Unitless -> Bounds2d coordinateSystem
   derivativeImpl :: curve -> VectorCurve2d coordinateSystem
-  reverseImpl :: curve -> curve
+  reverseImpl :: curve -> Curve2d coordinateSystem
   boundsImpl :: curve -> Bounds2d coordinateSystem
   transformByImpl :: Transform2d tag coordinateSystem -> curve -> Curve2d coordinateSystem
 

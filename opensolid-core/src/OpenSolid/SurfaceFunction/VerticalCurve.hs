@@ -191,18 +191,19 @@ instance Curve2d.Interface (VerticalCurve units) UvCoordinates where
       , boundingAxes
       , tolerance
       } =
-      VerticalCurve
-        { f
-        , fu
-        , fv
-        , dudv
-        , bounds
-        , vStart = vEnd
-        , vEnd = vStart
-        , monotonicity
-        , boundingAxes
-        , tolerance
-        }
+      Curve2d.new $
+        VerticalCurve
+          { f
+          , fu
+          , fv
+          , dudv
+          , bounds
+          , vStart = vEnd
+          , vEnd = vStart
+          , monotonicity
+          , boundingAxes
+          , tolerance
+          }
 
   transformByImpl transform curve =
     Curve2d.Transformed transform (Curve2d.new curve)

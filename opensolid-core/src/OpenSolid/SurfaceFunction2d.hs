@@ -271,7 +271,7 @@ instance
     (derivative U function . curve) * dudt + (derivative V function . curve) * dvdt
 
   reverseImpl (function :.: curve) =
-    function :.: Curve2d.reverse curve
+    Curve2d.new (function :.: Curve2d.reverse curve)
 
   transformByImpl transform (function :.: curve) =
     transformBy transform function . curve
