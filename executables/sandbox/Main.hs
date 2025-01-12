@@ -5,7 +5,6 @@ module Main (main) where
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Area qualified as Area
 import OpenSolid.Axis2d qualified as Axis2d
-import OpenSolid.BezierCurve2d qualified as BezierCurve2d
 import OpenSolid.Bounds2d (Bounds2d)
 import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.Color (Color)
@@ -340,7 +339,7 @@ drawBezier color startPoint innerControlPoints endPoint = do
   let drawingEndPoint = Point2d.convert toDrawing endPoint
   let drawingInnerControlPoints = List.map (Point2d.convert toDrawing) innerControlPoints
   let drawingControlPoints = drawingStartPoint :| (drawingInnerControlPoints + [drawingEndPoint])
-  let curve = BezierCurve2d.fromControlPoints drawingControlPoints
+  let curve = Curve2d.bezier drawingControlPoints
   let drawSegmentBounds tRange = drawBounds [] (Curve2d.evaluateBounds curve tRange)
   Drawing2d.with
     [Drawing2d.strokeColor color, Drawing2d.strokeWidth (Length.millimeters 1.0)]
@@ -375,7 +374,7 @@ testHermiteBezier = IO.do
   let startDerivatives = [Vector2d.meters 10.0 10.0]
   let endDerivatives = [Vector2d.meters 0.0 -10.0, Vector2d.zero]
   let endPoint = Point2d.meters 10.0 0.0
-  let curve = BezierCurve2d.hermite (startPoint, startDerivatives) (endPoint, endDerivatives)
+  let curve = Curve2d.hermite (startPoint, startDerivatives) (endPoint, endDerivatives)
   log "Hermite Bezier curve" curve
   let curveAttributes =
         [ Drawing2d.strokeColor Color.blue

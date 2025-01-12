@@ -17,6 +17,8 @@ module OpenSolid.Curve2d
   , customArc
   , circle
   , ellipse
+  , bezier
+  , hermite
   , startPoint
   , endPoint
   , evaluate
@@ -72,7 +74,6 @@ import OpenSolid.Array (Array)
 import OpenSolid.Array qualified as Array
 import OpenSolid.Axis2d (Axis2d)
 import OpenSolid.Axis2d qualified as Axis2d
-import {-# SOURCE #-} OpenSolid.BezierCurve2d qualified as BezierCurve2d
 import OpenSolid.Bounds2d (Bounds2d)
 import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.Composition
@@ -526,6 +527,48 @@ circle centerPoint radius = polarArc centerPoint radius Angle.zero Angle.twoPi
 ellipse :: Frame2d (space @ units) defines -> Qty units -> Qty units -> Curve2d (space @ units)
 ellipse axes xRadius yRadius = ellipticalArc axes xRadius yRadius Angle.zero Angle.twoPi
 
+{-| Construct a Bezier curve from its control points. For example,
+
+> Curve2d.bezier (NonEmpty.four p1 p2 p3 p4))
+
+will return a cubic Bezier curve with the given four control points.
+-}
+bezier :: NonEmpty (Point2d (space @ units)) -> Curve2d (space @ units)
+bezier controlPoints = do
+  let x = Curve1d.bezier (NonEmpty.map Point2d.xCoordinate controlPoints)
+  let y = Curve1d.bezier (NonEmpty.map Point2d.yCoordinate controlPoints)
+  XY x y
+
+{-| Construct a Bezier curve with the given start point, start derivatives, end point and end
+derivatives. For example,
+
+> Curve2d.hermite (p1, [v1]) (p2, [v2])
+
+will result in a cubic spline from @p1@ to @p2@ with first derivative equal to @v1@ at @p1@ and
+first derivative equal to @v2@ at @p2@.
+
+The numbers of derivatives at each endpoint do not have to be equal; for example,
+
+> Curve2d.hermite (p1, [v1]) (p2, [])
+
+will result in a quadratic spline from @p1@ to @p2@ with first derivative at @p1@ equal to @v1@.
+
+In general, the degree of the resulting spline will be equal to 1 plus the total number of
+derivatives given.
+-}
+hermite ::
+  (Point2d (space @ units), List (Vector2d (space @ units))) ->
+  (Point2d (space @ units), List (Vector2d (space @ units))) ->
+  Curve2d (space @ units)
+hermite (Point2d xStart yStart, startDerivatives) (Point2d xEnd yEnd, endDerivatives) = do
+  let xStartDerivatives = List.map Vector2d.xComponent startDerivatives
+  let yStartDerivatives = List.map Vector2d.yComponent startDerivatives
+  let xEndDerivatives = List.map Vector2d.xComponent endDerivatives
+  let yEndDerivatives = List.map Vector2d.yComponent endDerivatives
+  let x = Curve1d.hermite (xStart, xStartDerivatives) (xEnd, xEndDerivatives)
+  let y = Curve1d.hermite (yStart, yStartDerivatives) (yEnd, yEndDerivatives)
+  XY x y
+
 startPoint :: Curve2d (space @ units) -> Point2d (space @ units)
 startPoint curve = case curve of
   Curve c -> startPointImpl c
@@ -965,7 +1008,7 @@ removeStartDegeneracy continuity startCondition curve = Result.do
   let curveDerivatives = Stream.iterate VectorCurve2d.derivative (derivative curve)
   let endDerivativeValues = Stream.map VectorCurve2d.endValue curveDerivatives
   let endCondition endDegree = (endPoint curve, Stream.take endDegree endDerivativeValues)
-  let baseCurve endDegree = BezierCurve2d.hermite startCondition (endCondition endDegree)
+  let baseCurve endDegree = hermite startCondition (endCondition endDegree)
   let curveDerivative n =
         VectorCurve2d.new $
           SyntheticDerivative
