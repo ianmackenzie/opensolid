@@ -1,4 +1,4 @@
-module OpenSolid.Surface1d.Function.HorizontalCurve
+module OpenSolid.Surface.Function.HorizontalCurve
   ( new
   , monotonic
   , bounded
@@ -9,7 +9,7 @@ import OpenSolid.Axis2d (Axis2d)
 import {-# SOURCE #-} OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Prelude
-import {-# SOURCE #-} OpenSolid.Surface1d.Function (Function)
+import {-# SOURCE #-} OpenSolid.Surface.Function (Function)
 import OpenSolid.SurfaceParameter (UvBounds, UvCoordinates)
 import OpenSolid.Uv.Derivatives (Derivatives)
 

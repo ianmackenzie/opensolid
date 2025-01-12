@@ -1,4 +1,4 @@
-module OpenSolid.Surface1d.Function.Zeros
+module OpenSolid.Surface.Function.Zeros
   ( Zeros (..)
   , empty
   , Error (..)

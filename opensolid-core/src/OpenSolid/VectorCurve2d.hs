@@ -61,7 +61,7 @@ import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Range (Range)
-import {-# SOURCE #-} OpenSolid.Surface1d.Function qualified as Surface1d.Function
+import {-# SOURCE #-} OpenSolid.Surface.Function qualified as Surface.Function
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform2d (Transform2d)
 import OpenSolid.Transform2d qualified as Transform2d
@@ -570,27 +570,27 @@ instance
 
 instance
   Composition
-    (Surface1d.Function.Function Unitless)
+    (Surface.Function.Function Unitless)
     (VectorCurve2d (space @ units))
     (VectorSurface2d.Function.Function (space @ units))
   where
-  Parametric curve . Surface1d.Function.Parametric function =
+  Parametric curve . Surface.Function.Parametric function =
     VectorSurface2d.Function.Parametric (curve . function)
   curve . function = VectorSurface2d.Function.new (curve :.: function)
 
 instance
   VectorSurface2d.Function.Interface
-    (VectorCurve2d (space @ units) :.: Surface1d.Function.Function Unitless)
+    (VectorCurve2d (space @ units) :.: Surface.Function.Function Unitless)
     (space @ units)
   where
   evaluateImpl (curve :.: function) uvPoint =
-    evaluate curve (Surface1d.Function.evaluate function uvPoint)
+    evaluate curve (Surface.Function.evaluate function uvPoint)
 
   evaluateBoundsImpl (curve :.: function) uvBounds =
-    evaluateBounds curve (Surface1d.Function.evaluateBounds function uvBounds)
+    evaluateBounds curve (Surface.Function.evaluateBounds function uvBounds)
 
   derivativeImpl parameter (curve :.: function) =
-    (derivative curve . function) * Surface1d.Function.derivative parameter function
+    (derivative curve . function) * Surface.Function.derivative parameter function
 
   transformByImpl transform (curve :.: function) =
     transformBy transform curve . function

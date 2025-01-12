@@ -1,4 +1,4 @@
-module OpenSolid.Surface1d.Function.VerticalCurve
+module OpenSolid.Surface.Function.VerticalCurve
   ( VerticalCurve
   , new
   , monotonic
@@ -27,11 +27,11 @@ import OpenSolid.Qty (Qty (Qty#))
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Range (Range (Range))
 import OpenSolid.Range qualified as Range
-import {-# SOURCE #-} OpenSolid.Surface1d.Function (Function)
-import {-# SOURCE #-} OpenSolid.Surface1d.Function qualified as Function
-import OpenSolid.Surface1d.Function.ImplicitCurveBounds (ImplicitCurveBounds)
-import OpenSolid.Surface1d.Function.ImplicitCurveBounds qualified as ImplicitCurveBounds
-import OpenSolid.Surface1d.Function.Internal qualified as Internal
+import {-# SOURCE #-} OpenSolid.Surface.Function (Function)
+import {-# SOURCE #-} OpenSolid.Surface.Function qualified as Function
+import OpenSolid.Surface.Function.ImplicitCurveBounds (ImplicitCurveBounds)
+import OpenSolid.Surface.Function.ImplicitCurveBounds qualified as ImplicitCurveBounds
+import OpenSolid.Surface.Function.Internal qualified as Internal
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvCoordinates)
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Uv.Derivatives (Derivatives)

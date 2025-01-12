@@ -21,7 +21,7 @@ import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Expression.VectorSurface2d qualified as Expression.VectorSurface2d
 import OpenSolid.Prelude
-import OpenSolid.Surface1d.Function qualified as Surface1d.Function
+import OpenSolid.Surface.Function qualified as Surface.Function
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvCoordinates, UvPoint)
 import OpenSolid.Transform2d (Transform2d)
 import OpenSolid.Transform2d qualified as Transform2d
@@ -58,8 +58,8 @@ data Function (coordinateSystem :: CoordinateSystem) where
     Expression UvPoint (Vector2d (space @ units)) ->
     Function (space @ units)
   XY ::
-    Surface1d.Function.Function units ->
-    Surface1d.Function.Function units ->
+    Surface.Function.Function units ->
+    Surface.Function.Function units ->
     Function (space @ units)
   Negated ::
     Function (space @ units) ->
@@ -73,16 +73,16 @@ data Function (coordinateSystem :: CoordinateSystem) where
     Function (space @ units) ->
     Function (space @ units)
   Product1d2d' ::
-    Surface1d.Function.Function units1 ->
+    Surface.Function.Function units1 ->
     Function (space @ units2) ->
     Function (space @ (units1 :*: units2))
   Product2d1d' ::
     Function (space @ units1) ->
-    Surface1d.Function.Function units2 ->
+    Surface.Function.Function units2 ->
     Function (space @ (units1 :*: units2))
   Quotient' ::
     Function (space @ units1) ->
-    Surface1d.Function.Function units2 ->
+    Surface.Function.Function units2 ->
     Function (space @ (units1 :/: units2))
   Transformed ::
     Transform2d.Affine (space @ Unitless) ->
@@ -201,7 +201,7 @@ instance
 instance
   Units.Product units1 units2 units3 =>
   Multiplication
-    (Surface1d.Function.Function units1)
+    (Surface.Function.Function units1)
     (Function (space @ units2))
     (Function (space @ units3))
   where
@@ -209,11 +209,11 @@ instance
 
 instance
   Multiplication'
-    (Surface1d.Function.Function units1)
+    (Surface.Function.Function units1)
     (Function (space @ units2))
     (Function (space @ (units1 :*: units2)))
   where
-  Surface1d.Function.Parametric lhs .*. Parametric rhs = Parametric (lhs .*. rhs)
+  Surface.Function.Parametric lhs .*. Parametric rhs = Parametric (lhs .*. rhs)
   lhs .*. rhs = Product1d2d' lhs rhs
 
 instance
@@ -228,13 +228,13 @@ instance
     (Function (space @ units2))
     (Function (space @ (units1 :*: units2)))
   where
-  f1 .*. f2 = Surface1d.Function.constant f1 .*. f2
+  f1 .*. f2 = Surface.Function.constant f1 .*. f2
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication
     (Function (space @ units1))
-    (Surface1d.Function.Function units2)
+    (Surface.Function.Function units2)
     (Function (space @ units3))
   where
   lhs * rhs = Units.specialize (lhs .*. rhs)
@@ -242,10 +242,10 @@ instance
 instance
   Multiplication'
     (Function (space @ units1))
-    (Surface1d.Function.Function units2)
+    (Surface.Function.Function units2)
     (Function (space @ (units1 :*: units2)))
   where
-  Parametric lhs .*. Surface1d.Function.Parametric rhs = Parametric (lhs .*. rhs)
+  Parametric lhs .*. Surface.Function.Parametric rhs = Parametric (lhs .*. rhs)
   lhs .*. rhs = Product2d1d' lhs rhs
 
 instance
@@ -260,13 +260,13 @@ instance
     (Qty units2)
     (Function (space @ (units1 :*: units2)))
   where
-  function .*. value = function .*. Surface1d.Function.constant value
+  function .*. value = function .*. Surface.Function.constant value
 
 instance
   (space1 ~ space2, Units.Quotient units1 units2 units3) =>
   Division
     (Function (space @ units1))
-    (Surface1d.Function.Function units2)
+    (Surface.Function.Function units2)
     (Function (space @ units3))
   where
   lhs / rhs = Units.specialize (lhs ./. rhs)
@@ -274,10 +274,10 @@ instance
 instance
   Division'
     (Function (space @ units1))
-    (Surface1d.Function.Function units2)
+    (Surface.Function.Function units2)
     (Function (space @ (units1 :/: units2)))
   where
-  Parametric lhs ./. Surface1d.Function.Parametric rhs = Parametric (lhs ./. rhs)
+  Parametric lhs ./. Surface.Function.Parametric rhs = Parametric (lhs ./. rhs)
   lhs ./. rhs = Quotient' lhs rhs
 
 instance
@@ -292,14 +292,14 @@ instance
     (Qty units2)
     (Function (space @ (units1 :/: units2)))
   where
-  function ./. value = function ./. Surface1d.Function.constant value
+  function ./. value = function ./. Surface.Function.constant value
 
 data CrossProduct' space units1 units2
   = CrossProduct' (Function (space @ units1)) (Function (space @ units2))
 
 deriving instance Show (CrossProduct' space units1 units2)
 
-instance Surface1d.Function.Interface (CrossProduct' space units1 units2) (units1 :*: units2) where
+instance Surface.Function.Interface (CrossProduct' space units1 units2) (units1 :*: units2) where
   evaluateImpl (CrossProduct' f1 f2) tValue =
     evaluate f1 tValue .><. evaluate f2 tValue
 
@@ -314,7 +314,7 @@ instance
   CrossMultiplication
     (Function (space1 @ units1))
     (Function (space2 @ units2))
-    (Surface1d.Function.Function units3)
+    (Surface.Function.Function units3)
   where
   lhs >< rhs = Units.specialize (lhs .><. rhs)
 
@@ -323,17 +323,17 @@ instance
   CrossMultiplication'
     (Function (space1 @ units1))
     (Function (space2 @ units2))
-    (Surface1d.Function.Function (units1 :*: units2))
+    (Surface.Function.Function (units1 :*: units2))
   where
-  Parametric lhs .><. Parametric rhs = Surface1d.Function.Parametric (lhs .><. rhs)
-  lhs .><. rhs = Surface1d.Function.new (CrossProduct' lhs rhs)
+  Parametric lhs .><. Parametric rhs = Surface.Function.Parametric (lhs .><. rhs)
+  lhs .><. rhs = Surface.Function.new (CrossProduct' lhs rhs)
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
   CrossMultiplication
     (Function (space1 @ units1))
     (Vector2d (space2 @ units2))
-    (Surface1d.Function.Function units3)
+    (Surface.Function.Function units3)
   where
   lhs >< rhs = Units.specialize (lhs .><. rhs)
 
@@ -342,7 +342,7 @@ instance
   CrossMultiplication'
     (Function (space1 @ units1))
     (Vector2d (space2 @ units2))
-    (Surface1d.Function.Function (units1 :*: units2))
+    (Surface.Function.Function (units1 :*: units2))
   where
   function .><. vector = function .><. constant vector
 
@@ -351,7 +351,7 @@ instance
   CrossMultiplication
     (Vector2d (space1 @ units1))
     (Function (space2 @ units2))
-    (Surface1d.Function.Function units3)
+    (Surface.Function.Function units3)
   where
   lhs >< rhs = Units.specialize (lhs .><. rhs)
 
@@ -360,7 +360,7 @@ instance
   CrossMultiplication'
     (Vector2d (space1 @ units1))
     (Function (space2 @ units2))
-    (Surface1d.Function.Function (units1 :*: units2))
+    (Surface.Function.Function (units1 :*: units2))
   where
   vector .><. function = constant vector .><. function
 
@@ -369,7 +369,7 @@ instance
   CrossMultiplication
     (Function (space1 @ units))
     (Direction2d space2)
-    (Surface1d.Function.Function units)
+    (Surface.Function.Function units)
   where
   lhs >< rhs = Units.specialize (lhs .><. rhs)
 
@@ -378,7 +378,7 @@ instance
   CrossMultiplication'
     (Function (space1 @ units))
     (Direction2d space2)
-    (Surface1d.Function.Function (units :*: Unitless))
+    (Surface.Function.Function (units :*: Unitless))
   where
   function .><. direction = function .><. Vector2d.unit direction
 
@@ -387,7 +387,7 @@ instance
   CrossMultiplication
     (Direction2d space1)
     (Function (space2 @ units))
-    (Surface1d.Function.Function units)
+    (Surface.Function.Function units)
   where
   lhs >< rhs = Units.specialize (lhs .><. rhs)
 
@@ -396,7 +396,7 @@ instance
   CrossMultiplication'
     (Direction2d space1)
     (Function (space2 @ units))
-    (Surface1d.Function.Function (Unitless :*: units))
+    (Surface.Function.Function (Unitless :*: units))
   where
   direction .><. function = Vector2d.unit direction .<>. function
 
@@ -405,7 +405,7 @@ data DotProduct' space units1 units2
 
 deriving instance Show (DotProduct' space units1 units2)
 
-instance Surface1d.Function.Interface (DotProduct' space units1 units2) (units1 :*: units2) where
+instance Surface.Function.Interface (DotProduct' space units1 units2) (units1 :*: units2) where
   evaluateImpl (DotProduct' f1 f2) tValue =
     evaluate f1 tValue .<>. evaluate f2 tValue
 
@@ -420,7 +420,7 @@ instance
   DotMultiplication
     (Function (space1 @ units1))
     (Function (space2 @ units2))
-    (Surface1d.Function.Function units3)
+    (Surface.Function.Function units3)
   where
   lhs <> rhs = Units.specialize (lhs .<>. rhs)
 
@@ -429,17 +429,17 @@ instance
   DotMultiplication'
     (Function (space1 @ units1))
     (Function (space2 @ units2))
-    (Surface1d.Function.Function (units1 :*: units2))
+    (Surface.Function.Function (units1 :*: units2))
   where
-  Parametric lhs .<>. Parametric rhs = Surface1d.Function.Parametric (lhs .<>. rhs)
-  lhs .<>. rhs = Surface1d.Function.new (DotProduct' lhs rhs)
+  Parametric lhs .<>. Parametric rhs = Surface.Function.Parametric (lhs .<>. rhs)
+  lhs .<>. rhs = Surface.Function.new (DotProduct' lhs rhs)
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
   DotMultiplication
     (Function (space1 @ units1))
     (Vector2d (space2 @ units2))
-    (Surface1d.Function.Function units3)
+    (Surface.Function.Function units3)
   where
   lhs <> rhs = Units.specialize (lhs .<>. rhs)
 
@@ -448,7 +448,7 @@ instance
   DotMultiplication'
     (Function (space1 @ units1))
     (Vector2d (space2 @ units2))
-    (Surface1d.Function.Function (units1 :*: units2))
+    (Surface.Function.Function (units1 :*: units2))
   where
   function .<>. vector = function .<>. constant vector
 
@@ -457,7 +457,7 @@ instance
   DotMultiplication
     (Vector2d (space1 @ units1))
     (Function (space2 @ units2))
-    (Surface1d.Function.Function units3)
+    (Surface.Function.Function units3)
   where
   lhs <> rhs = Units.specialize (lhs .<>. rhs)
 
@@ -466,7 +466,7 @@ instance
   DotMultiplication'
     (Vector2d (space1 @ units1))
     (Function (space2 @ units2))
-    (Surface1d.Function.Function (units1 :*: units2))
+    (Surface.Function.Function (units1 :*: units2))
   where
   vector .<>. function = constant vector .<>. function
 
@@ -475,7 +475,7 @@ instance
   DotMultiplication
     (Function (space1 @ units))
     (Direction2d space2)
-    (Surface1d.Function.Function units)
+    (Surface.Function.Function units)
   where
   lhs <> rhs = Units.specialize (lhs .<>. rhs)
 
@@ -484,7 +484,7 @@ instance
   DotMultiplication'
     (Function (space1 @ units))
     (Direction2d space2)
-    (Surface1d.Function.Function (units :*: Unitless))
+    (Surface.Function.Function (units :*: Unitless))
   where
   function .<>. direction = function .<>. Vector2d.unit direction
 
@@ -493,7 +493,7 @@ instance
   DotMultiplication
     (Direction2d space1)
     (Function (space2 @ units))
-    (Surface1d.Function.Function units)
+    (Surface.Function.Function units)
   where
   lhs <> rhs = Units.specialize (lhs .<>. rhs)
 
@@ -502,7 +502,7 @@ instance
   DotMultiplication'
     (Direction2d space1)
     (Function (space2 @ units))
-    (Surface1d.Function.Function (Unitless :*: units))
+    (Surface.Function.Function (Unitless :*: units))
   where
   direction .<>. function = Vector2d.unit direction .<>. function
 
@@ -544,10 +544,10 @@ constant :: Vector2d (space @ units) -> Function (space @ units)
 constant = Parametric . Expression.constant
 
 xy ::
-  Surface1d.Function.Function units ->
-  Surface1d.Function.Function units ->
+  Surface.Function.Function units ->
+  Surface.Function.Function units ->
   Function (space @ units)
-xy (Surface1d.Function.Parametric x) (Surface1d.Function.Parametric y) =
+xy (Surface.Function.Parametric x) (Surface.Function.Parametric y) =
   Parametric (Expression.xy x y)
 xy x y = XY x y
 
@@ -577,14 +577,14 @@ evaluate function uvPoint = case function of
   Parametric expression -> Expression.evaluate expression uvPoint
   XY x y ->
     Vector2d.xy
-      (Surface1d.Function.evaluate x uvPoint)
-      (Surface1d.Function.evaluate y uvPoint)
+      (Surface.Function.evaluate x uvPoint)
+      (Surface.Function.evaluate y uvPoint)
   Negated f -> negate (evaluate f uvPoint)
   Sum f1 f2 -> evaluate f1 uvPoint + evaluate f2 uvPoint
   Difference f1 f2 -> evaluate f1 uvPoint - evaluate f2 uvPoint
-  Product1d2d' f1 f2 -> Surface1d.Function.evaluate f1 uvPoint .*. evaluate f2 uvPoint
-  Product2d1d' f1 f2 -> evaluate f1 uvPoint .*. Surface1d.Function.evaluate f2 uvPoint
-  Quotient' f1 f2 -> evaluate f1 uvPoint ./. Surface1d.Function.evaluate f2 uvPoint
+  Product1d2d' f1 f2 -> Surface.Function.evaluate f1 uvPoint .*. evaluate f2 uvPoint
+  Product2d1d' f1 f2 -> evaluate f1 uvPoint .*. Surface.Function.evaluate f2 uvPoint
+  Quotient' f1 f2 -> evaluate f1 uvPoint ./. Surface.Function.evaluate f2 uvPoint
   Transformed transform f -> Vector2d.transformBy transform (evaluate f uvPoint)
 
 evaluateBounds :: Function (space @ units) -> UvBounds -> VectorBounds2d (space @ units)
@@ -594,14 +594,14 @@ evaluateBounds function uvBounds = case function of
   Parametric expression -> Expression.evaluateBounds expression uvBounds
   XY x y ->
     VectorBounds2d.xy
-      (Surface1d.Function.evaluateBounds x uvBounds)
-      (Surface1d.Function.evaluateBounds y uvBounds)
+      (Surface.Function.evaluateBounds x uvBounds)
+      (Surface.Function.evaluateBounds y uvBounds)
   Negated f -> negate (evaluateBounds f uvBounds)
   Sum f1 f2 -> evaluateBounds f1 uvBounds + evaluateBounds f2 uvBounds
   Difference f1 f2 -> evaluateBounds f1 uvBounds - evaluateBounds f2 uvBounds
-  Product1d2d' f1 f2 -> Surface1d.Function.evaluateBounds f1 uvBounds .*. evaluateBounds f2 uvBounds
-  Product2d1d' f1 f2 -> evaluateBounds f1 uvBounds .*. Surface1d.Function.evaluateBounds f2 uvBounds
-  Quotient' f1 f2 -> evaluateBounds f1 uvBounds ./. Surface1d.Function.evaluateBounds f2 uvBounds
+  Product1d2d' f1 f2 -> Surface.Function.evaluateBounds f1 uvBounds .*. evaluateBounds f2 uvBounds
+  Product2d1d' f1 f2 -> evaluateBounds f1 uvBounds .*. Surface.Function.evaluateBounds f2 uvBounds
+  Quotient' f1 f2 -> evaluateBounds f1 uvBounds ./. Surface.Function.evaluateBounds f2 uvBounds
   Transformed transform f -> VectorBounds2d.transformBy transform (evaluateBounds f uvBounds)
 
 derivative :: SurfaceParameter -> Function (space @ units) -> Function (space @ units)
@@ -611,21 +611,21 @@ derivative varyingParameter function = case function of
   Parametric expression -> Parametric (Expression.surfaceDerivative varyingParameter expression)
   XY x y ->
     XY
-      (Surface1d.Function.derivative varyingParameter x)
-      (Surface1d.Function.derivative varyingParameter y)
+      (Surface.Function.derivative varyingParameter x)
+      (Surface.Function.derivative varyingParameter y)
   Negated f -> -(derivative varyingParameter f)
   Sum f1 f2 -> derivative varyingParameter f1 + derivative varyingParameter f2
   Difference f1 f2 -> derivative varyingParameter f1 - derivative varyingParameter f2
   Product1d2d' f1 f2 ->
-    Surface1d.Function.derivative varyingParameter f1 .*. f2
+    Surface.Function.derivative varyingParameter f1 .*. f2
       + f1 .*. derivative varyingParameter f2
   Product2d1d' f1 f2 ->
     derivative varyingParameter f1 .*. f2
-      + f1 .*. Surface1d.Function.derivative varyingParameter f2
+      + f1 .*. Surface.Function.derivative varyingParameter f2
   Quotient' f1 f2 -> do
     let numerator =
           derivative varyingParameter f1 .*. f2
-            - f1 .*. Surface1d.Function.derivative varyingParameter f2
-    let denominator = Surface1d.Function.squared' f2
+            - f1 .*. Surface.Function.derivative varyingParameter f2
+    let denominator = Surface.Function.squared' f2
     numerator .!/.! denominator
   Transformed transform f -> transformBy transform (derivative varyingParameter f)

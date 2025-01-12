@@ -18,8 +18,8 @@ import OpenSolid.Expression qualified as Expression
 import OpenSolid.Point3d (Point3d)
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
-import OpenSolid.Surface1d qualified as Surface1d
-import OpenSolid.Surface1d.Function qualified as Surface1d.Function
+import OpenSolid.Surface qualified as Surface
+import OpenSolid.Surface.Function qualified as Surface.Function
 import OpenSolid.SurfaceParameter (SurfaceParameter, UvBounds, UvPoint)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector3d (Vector3d)
@@ -47,9 +47,9 @@ data Function (coordinateSystem :: CoordinateSystem) where
     Expression UvPoint (Point3d (space @ units)) ->
     Function (space @ units)
   XYZ ::
-    Surface1d.Function units ->
-    Surface1d.Function units ->
-    Surface1d.Function units ->
+    Surface.Function units ->
+    Surface.Function units ->
+    Surface.Function units ->
     Function (space @ units)
   Sum ::
     Function (space @ units) ->
@@ -126,14 +126,14 @@ constant :: Point3d (space @ units) -> Function (space @ units)
 constant = Parametric . Expression.constant
 
 xyz ::
-  Surface1d.Function units ->
-  Surface1d.Function units ->
-  Surface1d.Function units ->
+  Surface.Function units ->
+  Surface.Function units ->
+  Surface.Function units ->
   Function (space @ units)
 xyz
-  (Surface1d.Function.Parametric x)
-  (Surface1d.Function.Parametric y)
-  (Surface1d.Function.Parametric z) =
+  (Surface.Function.Parametric x)
+  (Surface.Function.Parametric y)
+  (Surface.Function.Parametric z) =
     Parametric (Expression.xyz x y z)
 xyz x y z = XYZ x y z
 
@@ -144,9 +144,9 @@ evaluate function uvPoint = case function of
   Parametric expression -> Expression.evaluate expression uvPoint
   XYZ x y z ->
     Point3d.xyz
-      (Surface1d.Function.evaluate x uvPoint)
-      (Surface1d.Function.evaluate y uvPoint)
-      (Surface1d.Function.evaluate z uvPoint)
+      (Surface.Function.evaluate x uvPoint)
+      (Surface.Function.evaluate y uvPoint)
+      (Surface.Function.evaluate z uvPoint)
   Sum f1 f2 -> evaluate f1 uvPoint + VectorSurface3d.Function.evaluate f2 uvPoint
   Difference f1 f2 -> evaluate f1 uvPoint - VectorSurface3d.Function.evaluate f2 uvPoint
 
@@ -157,9 +157,9 @@ evaluateBounds function uvBounds = case function of
   Parametric expression -> Expression.evaluateBounds expression uvBounds
   XYZ x y z ->
     Bounds3d.xyz
-      (Surface1d.Function.evaluateBounds x uvBounds)
-      (Surface1d.Function.evaluateBounds y uvBounds)
-      (Surface1d.Function.evaluateBounds z uvBounds)
+      (Surface.Function.evaluateBounds x uvBounds)
+      (Surface.Function.evaluateBounds y uvBounds)
+      (Surface.Function.evaluateBounds z uvBounds)
   Sum f1 f2 ->
     evaluateBounds f1 uvBounds + VectorSurface3d.Function.evaluateBounds f2 uvBounds
   Difference f1 f2 ->
@@ -176,8 +176,8 @@ derivative parameter function = case function of
     VectorSurface3d.Function.Parametric (Expression.surfaceDerivative parameter expression)
   XYZ x y z ->
     VectorSurface3d.Function.xyz
-      (Surface1d.Function.derivative parameter x)
-      (Surface1d.Function.derivative parameter y)
-      (Surface1d.Function.derivative parameter z)
+      (Surface.Function.derivative parameter x)
+      (Surface.Function.derivative parameter y)
+      (Surface.Function.derivative parameter z)
   Sum f1 f2 -> derivative parameter f1 + VectorSurface3d.Function.derivative parameter f2
   Difference f1 f2 -> derivative parameter f1 - VectorSurface3d.Function.derivative parameter f2

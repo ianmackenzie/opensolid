@@ -1,6 +1,6 @@
 Rename Curve1d, Surface1d to Curve and Surface?
 
-Rename e.g. Surface2d.Function to SurfaceFunction2d, Surface1d.Function to SurfaceFunction?
+Rename e.g. Surface2d.Function to SurfaceFunction2d, Surface.Function to SurfaceFunction?
 -> flatter is often better, would give better type errors/hints instead of everything being shown as 'Function'
 
 Support Point2d + VectorCurve2d

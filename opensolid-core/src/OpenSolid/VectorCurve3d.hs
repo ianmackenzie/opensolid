@@ -61,7 +61,7 @@ import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Range (Range)
-import OpenSolid.Surface1d.Function qualified as Surface1d.Function
+import OpenSolid.Surface.Function qualified as Surface.Function
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform3d (Transform3d)
 import OpenSolid.Transform3d qualified as Transform3d
@@ -564,7 +564,7 @@ instance
 
 instance
   Composition
-    (Surface1d.Function.Function Unitless)
+    (Surface.Function.Function Unitless)
     (VectorCurve3d (space @ units))
     (VectorSurface3d.Function.Function (space @ units))
   where
@@ -572,20 +572,20 @@ instance
 
 instance
   VectorSurface3d.Function.Interface
-    (VectorCurve3d (space @ units) :.: Surface1d.Function.Function Unitless)
+    (VectorCurve3d (space @ units) :.: Surface.Function.Function Unitless)
     (space @ units)
   where
   evaluateImpl (curveFunction :.: surfaceFunction) uvPoint =
     evaluate curveFunction $
-      Surface1d.Function.evaluate surfaceFunction uvPoint
+      Surface.Function.evaluate surfaceFunction uvPoint
 
   evaluateBoundsImpl (curveFunction :.: surfaceFunction) uvBounds =
     evaluateBounds curveFunction $
-      Surface1d.Function.evaluateBounds surfaceFunction uvBounds
+      Surface.Function.evaluateBounds surfaceFunction uvBounds
 
   derivativeImpl parameter (curveFunction :.: surfaceFunction) =
     (derivative curveFunction . surfaceFunction)
-      * Surface1d.Function.derivative parameter surfaceFunction
+      * Surface.Function.derivative parameter surfaceFunction
 
 transformBy ::
   Transform3d tag (space @ translationUnits) ->

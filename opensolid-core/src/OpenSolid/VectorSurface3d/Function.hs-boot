@@ -7,7 +7,7 @@ module OpenSolid.VectorSurface3d.Function
 where
 
 import OpenSolid.Prelude
-import {-# SOURCE #-} OpenSolid.Surface1d.Function qualified as Surface1d.Function
+import {-# SOURCE #-} OpenSolid.Surface.Function qualified as Surface.Function
 import OpenSolid.SurfaceParameter (SurfaceParameter, UvBounds, UvPoint)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector3d (Vector3d)
@@ -37,20 +37,20 @@ constant :: Vector3d (space @ units) -> Function (space @ units)
 
 instance
   Multiplication'
-    (Surface1d.Function.Function units1)
+    (Surface.Function.Function units1)
     (Function (space @ units2))
     (Function (space @ (units1 :*: units2)))
 
 instance
   Multiplication'
     (Function (space @ units1))
-    (Surface1d.Function.Function units2)
+    (Surface.Function.Function units2)
     (Function (space @ (units1 :*: units2)))
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication
-    (Surface1d.Function.Function units1)
+    (Surface.Function.Function units1)
     (Function (space @ units2))
     (Function (space @ units3))
 
@@ -58,5 +58,5 @@ instance
   Units.Product units1 units2 units3 =>
   Multiplication
     (Function (space @ units1))
-    (Surface1d.Function.Function units2)
+    (Surface.Function.Function units2)
     (Function (space @ units3))

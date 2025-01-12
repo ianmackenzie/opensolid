@@ -37,8 +37,8 @@ import OpenSolid.Random qualified as Random
 import OpenSolid.Range qualified as Range
 import OpenSolid.Result qualified as Result
 import OpenSolid.Solve2d qualified as Solve2d
-import OpenSolid.Surface1d.Function qualified as Surface1d.Function
-import OpenSolid.Surface1d.Function.Zeros qualified as Surface1d.Function.Zeros
+import OpenSolid.Surface.Function qualified as Surface.Function
+import OpenSolid.Surface.Function.Zeros qualified as Surface.Function.Zeros
 import OpenSolid.SurfaceParameter (UvCoordinates, UvPoint, UvSpace)
 import OpenSolid.SurfaceParameter qualified as SurfaceParameter
 import OpenSolid.Text qualified as Text
@@ -188,14 +188,14 @@ testNonEmpty = IO.do
 
 testPlaneTorusIntersection :: Tolerance Meters => IO ()
 testPlaneTorusIntersection = IO.do
-  let theta = Angle.twoPi * Surface1d.Function.u
-  let phi = Angle.twoPi * Surface1d.Function.v
+  let theta = Angle.twoPi * Surface.Function.u
+  let phi = Angle.twoPi * Surface.Function.v
   let minorRadius = Length.centimeters 1.0
   let majorRadius = Length.centimeters 2.0
-  let r = majorRadius + minorRadius * Surface1d.Function.cos phi
-  let x = r * Surface1d.Function.cos theta
-  let y = r * Surface1d.Function.sin theta
-  let z = minorRadius * Surface1d.Function.sin phi
+  let r = majorRadius + minorRadius * Surface.Function.cos phi
+  let x = r * Surface.Function.cos theta
+  let y = r * Surface.Function.sin theta
+  let z = minorRadius * Surface.Function.sin phi
   let alpha = Angle.asin (minorRadius / majorRadius)
   let nx = -(Angle.sin alpha)
   let ny = 0.0
@@ -207,35 +207,35 @@ testPlaneTorusIntersection = IO.do
   -- let ny = 0.0
   -- let nz = 1.0
   let f = x * nx + y * ny + z * nz
-  -- let u = Surface1d.Function.u
-  -- let v = Surface1d.Function.v
-  -- let f = (Surface1d.Function.squared (u - 0.5) - Surface1d.Function.squared (v - 0.5)) * Length.meter
-  zeros <- Surface1d.Function.zeros f
+  -- let u = Surface.Function.u
+  -- let v = Surface.Function.v
+  -- let f = (Surface.Function.squared (u - 0.5) - Surface.Function.squared (v - 0.5)) * Length.meter
+  zeros <- Surface.Function.zeros f
   drawZeros "executables/sandbox/test-plane-torus-intersection.svg" zeros
   IO.printLine "Plane torus intersection solutions:"
-  log "  Crossing curves" (List.length (Surface1d.Function.Zeros.crossingCurves zeros))
-  log "  Saddle points" (List.length (Surface1d.Function.Zeros.saddlePoints zeros))
+  log "  Crossing curves" (List.length (Surface.Function.Zeros.crossingCurves zeros))
+  log "  Saddle points" (List.length (Surface.Function.Zeros.saddlePoints zeros))
 
 testPlaneParaboloidIntersection :: IO ()
 testPlaneParaboloidIntersection = Tolerance.using 1e-9 IO.do
-  let u = Surface1d.Function.u
-  let v = Surface1d.Function.v
-  let f = Surface1d.Function.squared u + Surface1d.Function.squared v - 0.5
-  zeros <- Surface1d.Function.zeros f
+  let u = Surface.Function.u
+  let v = Surface.Function.v
+  let f = Surface.Function.squared u + Surface.Function.squared v - 0.5
+  zeros <- Surface.Function.zeros f
   drawZeros "executables/sandbox/test-plane-paraboloid-intersection.svg" zeros
   IO.printLine "Plane paraboloid intersection solutions:"
-  log "  Crossing curves" (List.length (Surface1d.Function.Zeros.crossingCurves zeros))
-  log "  Saddle points" (List.length (Surface1d.Function.Zeros.saddlePoints zeros))
+  log "  Crossing curves" (List.length (Surface.Function.Zeros.crossingCurves zeros))
+  log "  Saddle points" (List.length (Surface.Function.Zeros.saddlePoints zeros))
 
 strokeWidth :: Length
 strokeWidth = Length.millimeters 0.1
 
-drawZeros :: Text -> Surface1d.Function.Zeros -> IO ()
+drawZeros :: Text -> Surface.Function.Zeros -> IO ()
 drawZeros path zeros = IO.do
   let uvRange = Range.convert toDrawing (Range.from -0.05 1.05)
   let viewBox = Bounds2d.xy uvRange uvRange
-  let crossingCurves = Surface1d.Function.Zeros.crossingCurves zeros
-  let saddlePoints = Surface1d.Function.Zeros.saddlePoints zeros
+  let crossingCurves = Surface.Function.Zeros.crossingCurves zeros
+  let saddlePoints = Surface.Function.Zeros.saddlePoints zeros
   Drawing2d.writeTo path viewBox $
     [ Drawing2d.with [Drawing2d.strokeWidth strokeWidth] $
         [ drawBounds [] (Bounds2d.convert toDrawing SurfaceParameter.domain)
@@ -423,9 +423,9 @@ testTextSum = IO.do
 
 testNewtonRaphson2d :: IO ()
 testNewtonRaphson2d = Tolerance.using 1e-9 do
-  let u = Surface1d.Function.u
-  let v = Surface1d.Function.v
-  let f = Surface1d.Function.squared u + Surface1d.Function.squared v - 4.0
+  let u = Surface.Function.u
+  let v = Surface.Function.v
+  let f = Surface.Function.squared u + Surface.Function.squared v - 4.0
   let g = u - v
   let bounds = Bounds2d.xy (Range.from 0.0 2.0) (Range.from 0.0 2.0)
   let function = VectorSurface2d.Function.xy f g

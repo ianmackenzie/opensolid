@@ -2,7 +2,7 @@
 {-# LANGUAGE NoFieldSelectors #-}
 {-# OPTIONS_GHC -Wno-partial-fields #-}
 
-module OpenSolid.Surface1d.Function
+module OpenSolid.Surface.Function
   ( Function (Parametric)
   , Interface (..)
   , evaluate
@@ -48,16 +48,16 @@ import OpenSolid.Qty qualified as Qty
 import OpenSolid.Range (Range)
 import OpenSolid.Range qualified as Range
 import OpenSolid.Solve2d qualified as Solve2d
-import {-# SOURCE #-} OpenSolid.Surface1d.Function.HorizontalCurve qualified as HorizontalCurve
-import OpenSolid.Surface1d.Function.PartialZeros (PartialZeros)
-import OpenSolid.Surface1d.Function.PartialZeros qualified as PartialZeros
-import OpenSolid.Surface1d.Function.SaddleRegion (SaddleRegion)
-import OpenSolid.Surface1d.Function.SaddleRegion qualified as SaddleRegion
-import OpenSolid.Surface1d.Function.Subproblem (CornerValues (..), Subproblem (..))
-import OpenSolid.Surface1d.Function.Subproblem qualified as Subproblem
-import {-# SOURCE #-} OpenSolid.Surface1d.Function.VerticalCurve qualified as VerticalCurve
-import OpenSolid.Surface1d.Function.Zeros (Zeros (..))
-import OpenSolid.Surface1d.Function.Zeros qualified as Zeros
+import {-# SOURCE #-} OpenSolid.Surface.Function.HorizontalCurve qualified as HorizontalCurve
+import OpenSolid.Surface.Function.PartialZeros (PartialZeros)
+import OpenSolid.Surface.Function.PartialZeros qualified as PartialZeros
+import OpenSolid.Surface.Function.SaddleRegion (SaddleRegion)
+import OpenSolid.Surface.Function.SaddleRegion qualified as SaddleRegion
+import OpenSolid.Surface.Function.Subproblem (CornerValues (..), Subproblem (..))
+import OpenSolid.Surface.Function.Subproblem qualified as Subproblem
+import {-# SOURCE #-} OpenSolid.Surface.Function.VerticalCurve qualified as VerticalCurve
+import OpenSolid.Surface.Function.Zeros (Zeros (..))
+import OpenSolid.Surface.Function.Zeros qualified as Zeros
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvDirection, UvPoint)
 import OpenSolid.SurfaceParameter qualified as SurfaceParameter
 import OpenSolid.Units (Radians)

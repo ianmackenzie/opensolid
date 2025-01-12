@@ -116,8 +116,8 @@ import OpenSolid.Range qualified as Range
 import OpenSolid.Result qualified as Result
 import OpenSolid.Solve2d qualified as Solve2d
 import OpenSolid.Stream qualified as Stream
-import OpenSolid.Surface1d.Function qualified as Surface1d.Function
-import OpenSolid.Surface1d.Function.Zeros qualified as Surface1d.Function.Zeros
+import OpenSolid.Surface.Function qualified as Surface.Function
+import OpenSolid.Surface.Function.Zeros qualified as Surface.Function.Zeros
 import OpenSolid.Surface2d.Function qualified
 import {-# SOURCE #-} OpenSolid.Surface2d.Function qualified as Surface2d.Function
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvCoordinates, UvPoint)
@@ -346,26 +346,26 @@ instance Interface (Curve2d (space @ units) :.: Curve Unitless) (space @ units) 
 
 instance
   Composition
-    (Surface1d.Function.Function Unitless)
+    (Surface.Function.Function Unitless)
     (Curve2d (space @ units))
     (Surface2d.Function.Function (space @ units))
   where
-  Parametric outer . Surface1d.Function.Parametric inner = Surface2d.Function.Parametric (outer . inner)
+  Parametric outer . Surface.Function.Parametric inner = Surface2d.Function.Parametric (outer . inner)
   curve . function = Surface2d.Function.new (curve :.: function)
 
 instance
   Surface2d.Function.Interface
-    (Curve2d (space @ units) :.: Surface1d.Function.Function Unitless)
+    (Curve2d (space @ units) :.: Surface.Function.Function Unitless)
     (space @ units)
   where
   evaluateImpl (curve :.: function) uvPoint =
-    evaluate curve (Surface1d.Function.evaluate function uvPoint)
+    evaluate curve (Surface.Function.evaluate function uvPoint)
 
   evaluateBoundsImpl (curve :.: function) uvBounds =
-    evaluateBounds curve (Surface1d.Function.evaluateBounds function uvBounds)
+    evaluateBounds curve (Surface.Function.evaluateBounds function uvBounds)
 
   derivativeImpl parameter (curve :.: function) =
-    (derivative curve . function) * Surface1d.Function.derivative parameter function
+    (derivative curve . function) * Surface.Function.derivative parameter function
 
   transformByImpl transform (curve :.: function) =
     transformBy transform curve . function
@@ -373,22 +373,22 @@ instance
 instance
   Composition
     (Curve2d UvCoordinates)
-    (Surface1d.Function.Function units)
+    (Surface.Function.Function units)
     (Curve units)
   where
-  Surface1d.Function.Parametric outer . Parametric inner = Curve.Parametric (outer . inner)
+  Surface.Function.Parametric outer . Parametric inner = Curve.Parametric (outer . inner)
   outer . inner = Curve.new (outer :.: inner)
 
-instance Curve.Interface (Surface1d.Function.Function units :.: Curve2d UvCoordinates) units where
+instance Curve.Interface (Surface.Function.Function units :.: Curve2d UvCoordinates) units where
   evaluateImpl (function :.: uvCurve) t =
-    Surface1d.Function.evaluate function (evaluate uvCurve t)
+    Surface.Function.evaluate function (evaluate uvCurve t)
 
   evaluateBoundsImpl (function :.: uvCurve) t =
-    Surface1d.Function.evaluateBounds function (evaluateBounds uvCurve t)
+    Surface.Function.evaluateBounds function (evaluateBounds uvCurve t)
 
   derivativeImpl (function :.: uvCurve) = do
-    let fU = Surface1d.Function.derivative U function
-    let fV = Surface1d.Function.derivative V function
+    let fU = Surface.Function.derivative U function
+    let fV = Surface.Function.derivative V function
     let uvT = derivative uvCurve
     let uT = VectorCurve2d.xComponent uvT
     let vT = VectorCurve2d.yComponent uvT
@@ -780,8 +780,8 @@ intersections curve1 curve2 = Result.do
       if VectorCurve2d.hasZero derivative1 || VectorCurve2d.hasZero derivative2
         then Failure Intersections.CurveHasDegeneracy
         else do
-          let u = Surface1d.Function.u
-          let v = Surface1d.Function.v
+          let u = Surface.Function.u
+          let v = Surface.Function.v
           let f = curve1 . u - curve2 . v
           let fu = VectorSurface2d.Function.derivative U f
           let fv = VectorSurface2d.Function.derivative V f
@@ -1135,35 +1135,35 @@ medialAxis ::
   Curve2d (space @ units) ->
   Result MedialAxis.Error (List (MedialAxis.Segment (space @ units)))
 medialAxis curve1 curve2 = do
-  let p1 = curve1 . Surface1d.Function.u
-  let p2 = curve2 . Surface1d.Function.v
-  let v1 = derivative curve1 . Surface1d.Function.u
-  let v2 = derivative curve2 . Surface1d.Function.v
+  let p1 = curve1 . Surface.Function.u
+  let p2 = curve2 . Surface.Function.v
+  let v1 = derivative curve1 . Surface.Function.u
+  let v2 = derivative curve2 . Surface.Function.v
   let d = p2 - p1
   let target = v2 .><. (2.0 * (v1 .<>. d) .*. d - d .<>. d .*. v1)
   let targetTolerance = ?tolerance .*. ((?tolerance .*. ?tolerance) .*. ?tolerance)
-  case Tolerance.using targetTolerance (Surface1d.Function.zeros target) of
-    Failure Surface1d.Function.Zeros.HigherOrderZero -> Failure MedialAxis.HigherOrderSolution
-    Failure Surface1d.Function.Zeros.ZeroEverywhere -> TODO -- curves are identical arcs?
+  case Tolerance.using targetTolerance (Surface.Function.zeros target) of
+    Failure Surface.Function.Zeros.HigherOrderZero -> Failure MedialAxis.HigherOrderSolution
+    Failure Surface.Function.Zeros.ZeroEverywhere -> TODO -- curves are identical arcs?
     Success zeros -> do
-      Debug.assert (List.isEmpty (Surface1d.Function.Zeros.crossingLoops zeros))
-      Debug.assert (List.isEmpty (Surface1d.Function.Zeros.tangentPoints zeros))
+      Debug.assert (List.isEmpty (Surface.Function.Zeros.crossingLoops zeros))
+      Debug.assert (List.isEmpty (Surface.Function.Zeros.tangentPoints zeros))
       case Result.map DirectionCurve2d.unwrap (tangentDirection curve1) of
         Success tangent1 -> do
           let normal1 = VectorCurve2d.rotateBy Angle.quarterTurn tangent1
-          let radius :: Surface1d.Function.Function units =
-                (d .<>. d) .!/! (2.0 * (tangent1 . Surface1d.Function.u) >< d)
+          let radius :: Surface.Function.Function units =
+                (d .<>. d) .!/! (2.0 * (tangent1 . Surface.Function.u) >< d)
           let curve :: Surface2d.Function.Function (space @ units) =
-                (curve1 . Surface1d.Function.u) + radius * (normal1 . Surface1d.Function.u)
+                (curve1 . Surface.Function.u) + radius * (normal1 . Surface.Function.u)
           let toSegment solutionCurve =
                 MedialAxis.Segment
-                  { t1 = Surface1d.Function.u . solutionCurve
-                  , t2 = Surface1d.Function.v . solutionCurve
+                  { t1 = Surface.Function.u . solutionCurve
+                  , t2 = Surface.Function.v . solutionCurve
                   , t12 = solutionCurve
                   , curve = curve . solutionCurve
                   , radius = radius . solutionCurve
                   }
-          Success (List.map toSegment (Surface1d.Function.Zeros.crossingCurves zeros))
+          Success (List.map toSegment (Surface.Function.Zeros.crossingCurves zeros))
         Failure HasDegeneracy -> Failure MedialAxis.DegenerateCurve
 
 arcLengthParameterization ::

@@ -1,4 +1,4 @@
-module OpenSolid.Surface1d.Function.Subproblem
+module OpenSolid.Surface.Function.Subproblem
   ( Subproblem (..)
   , CornerValues (..)
   , new
@@ -28,9 +28,9 @@ import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Range (Range (Range))
 import OpenSolid.Range qualified as Range
-import {-# SOURCE #-} OpenSolid.Surface1d.Function (Function)
-import {-# SOURCE #-} OpenSolid.Surface1d.Function qualified as Function
-import OpenSolid.Surface1d.Function.Internal qualified as Internal
+import {-# SOURCE #-} OpenSolid.Surface.Function (Function)
+import {-# SOURCE #-} OpenSolid.Surface.Function qualified as Function
+import OpenSolid.Surface.Function.Internal qualified as Internal
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvPoint)
 import OpenSolid.Uv.Derivatives (Derivatives)
 import OpenSolid.Uv.Derivatives qualified as Derivatives

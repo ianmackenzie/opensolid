@@ -175,13 +175,13 @@ library
     OpenSolid.Solve1d
     OpenSolid.Solve2d
     OpenSolid.Stream
-    OpenSolid.Surface1d
-    OpenSolid.Surface1d.Function
-    OpenSolid.Surface1d.Function.HorizontalCurve
-    OpenSolid.Surface1d.Function.ImplicitCurveBounds
-    OpenSolid.Surface1d.Function.Subproblem
-    OpenSolid.Surface1d.Function.VerticalCurve
-    OpenSolid.Surface1d.Function.Zeros
+    OpenSolid.Surface
+    OpenSolid.Surface.Function
+    OpenSolid.Surface.Function.HorizontalCurve
+    OpenSolid.Surface.Function.ImplicitCurveBounds
+    OpenSolid.Surface.Function.Subproblem
+    OpenSolid.Surface.Function.VerticalCurve
+    OpenSolid.Surface.Function.Zeros
     OpenSolid.Surface2d
     OpenSolid.Surface2d.Function
     OpenSolid.Surface3d
@@ -227,9 +227,9 @@ library
     OpenSolid.Point3d.CoordinateTransformation
     OpenSolid.Quadrature
     OpenSolid.Random.Internal
-    OpenSolid.Surface1d.Function.Internal
-    OpenSolid.Surface1d.Function.PartialZeros
-    OpenSolid.Surface1d.Function.SaddleRegion
+    OpenSolid.Surface.Function.Internal
+    OpenSolid.Surface.Function.PartialZeros
+    OpenSolid.Surface.Function.SaddleRegion
     OpenSolid.Text.Parse
     OpenSolid.Vector2d.CoordinateTransformation
     OpenSolid.Vector3d.CoordinateTransformation

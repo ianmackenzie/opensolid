@@ -9,7 +9,7 @@ where
 import OpenSolid.CoordinateSystem (Space)
 import OpenSolid.Expression (Expression)
 import OpenSolid.Prelude
-import {-# SOURCE #-} OpenSolid.Surface1d.Function qualified as Surface1d.Function
+import {-# SOURCE #-} OpenSolid.Surface.Function qualified as Surface.Function
 import OpenSolid.SurfaceParameter (SurfaceParameter, UvBounds, UvPoint)
 import OpenSolid.Transform2d (Transform2d)
 import OpenSolid.Transform2d qualified as Transform2d
@@ -44,8 +44,8 @@ data Function (coordinateSystem :: CoordinateSystem) where
     Expression UvPoint (Vector2d (space @ units)) ->
     Function (space @ units)
   XY ::
-    Surface1d.Function.Function units ->
-    Surface1d.Function.Function units ->
+    Surface.Function.Function units ->
+    Surface.Function.Function units ->
     Function (space @ units)
   Negated ::
     Function (space @ units) ->
@@ -59,16 +59,16 @@ data Function (coordinateSystem :: CoordinateSystem) where
     Function (space @ units) ->
     Function (space @ units)
   Product1d2d' ::
-    Surface1d.Function.Function units1 ->
+    Surface.Function.Function units1 ->
     Function (space @ units2) ->
     Function (space @ (units1 :*: units2))
   Product2d1d' ::
     Function (space @ units1) ->
-    Surface1d.Function.Function units2 ->
+    Surface.Function.Function units2 ->
     Function (space @ (units1 :*: units2))
   Quotient' ::
     Function (space @ units1) ->
-    Surface1d.Function.Function units2 ->
+    Surface.Function.Function units2 ->
     Function (space @ (units1 :/: units2))
   Transformed ::
     Transform2d.Affine (space @ Unitless) ->
@@ -84,7 +84,7 @@ instance
 instance
   Units.Product units1 units2 units3 =>
   Multiplication
-    (Surface1d.Function.Function units1)
+    (Surface.Function.Function units1)
     (Function (space @ units2))
     (Function (space @ units3))
 
@@ -92,19 +92,19 @@ instance
   Units.Product units1 units2 units3 =>
   Multiplication
     (Function (space @ units1))
-    (Surface1d.Function.Function units2)
+    (Surface.Function.Function units2)
     (Function (space @ units3))
 
 instance
   Multiplication'
-    (Surface1d.Function.Function units1)
+    (Surface.Function.Function units1)
     (Function (space @ units2))
     (Function (space @ (units1 :*: units2)))
 
 instance
   Multiplication'
     (Function (space @ units1))
-    (Surface1d.Function.Function units2)
+    (Surface.Function.Function units2)
     (Function (space @ (units1 :*: units2)))
 
 new :: Interface function (space @ units) => function -> Function (space @ units)

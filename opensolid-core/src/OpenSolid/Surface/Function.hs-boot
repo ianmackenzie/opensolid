@@ -1,4 +1,4 @@
-module OpenSolid.Surface1d.Function
+module OpenSolid.Surface.Function
   ( Interface (..)
   , Function (Parametric)
   , evaluate

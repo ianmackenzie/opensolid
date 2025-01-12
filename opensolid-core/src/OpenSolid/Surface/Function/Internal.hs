@@ -1,4 +1,4 @@
-module OpenSolid.Surface1d.Function.Internal
+module OpenSolid.Surface.Function.Internal
   ( solveForU
   , solveForV
   , curveBounds
@@ -12,8 +12,8 @@ import OpenSolid.Qty qualified as Qty
 import OpenSolid.Range (Range (Range))
 import OpenSolid.Range qualified as Range
 import OpenSolid.Solve1d qualified as Solve1d
-import {-# SOURCE #-} OpenSolid.Surface1d.Function (Function)
-import {-# SOURCE #-} OpenSolid.Surface1d.Function qualified as Function
+import {-# SOURCE #-} OpenSolid.Surface.Function (Function)
+import {-# SOURCE #-} OpenSolid.Surface.Function qualified as Function
 
 solveForU ::
   Tolerance units =>

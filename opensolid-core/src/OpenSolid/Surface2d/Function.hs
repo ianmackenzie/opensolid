@@ -22,7 +22,7 @@ import OpenSolid.Expression.Surface2d qualified as Expression.Surface2d
 import OpenSolid.Point2d (Point2d)
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
-import OpenSolid.Surface1d.Function qualified as Surface1d.Function
+import OpenSolid.Surface.Function qualified as Surface.Function
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvCoordinates, UvPoint)
 import OpenSolid.Transform2d (Transform2d)
 import OpenSolid.Transform2d qualified as Transform2d
@@ -53,8 +53,8 @@ data Function (coordinateSystem :: CoordinateSystem) where
     Expression UvPoint (Point2d (space @ units)) ->
     Function (space @ units)
   XY ::
-    Surface1d.Function.Function units ->
-    Surface1d.Function.Function units ->
+    Surface.Function.Function units ->
+    Surface.Function.Function units ->
     Function (space @ units)
   Addition ::
     Function (space @ units) ->
@@ -173,10 +173,10 @@ constant :: Point2d (space @ units) -> Function (space @ units)
 constant = Parametric . Expression.constant
 
 xy ::
-  Surface1d.Function.Function units ->
-  Surface1d.Function.Function units ->
+  Surface.Function.Function units ->
+  Surface.Function.Function units ->
   Function (space @ units)
-xy (Surface1d.Function.Parametric x) (Surface1d.Function.Parametric y) =
+xy (Surface.Function.Parametric x) (Surface.Function.Parametric y) =
   Parametric (Expression.xy x y)
 xy x y = XY x y
 
@@ -187,8 +187,8 @@ evaluate function uv = case function of
   Parametric expression -> Expression.evaluate expression uv
   XY x y ->
     Point2d.xy
-      (Surface1d.Function.evaluate x uv)
-      (Surface1d.Function.evaluate y uv)
+      (Surface.Function.evaluate x uv)
+      (Surface.Function.evaluate y uv)
   Addition f1 f2 -> evaluate f1 uv + VectorSurface2d.Function.evaluate f2 uv
   Subtraction f1 f2 -> evaluate f1 uv - VectorSurface2d.Function.evaluate f2 uv
   Transformed transform f -> Point2d.transformBy transform (evaluate f uv)
@@ -200,8 +200,8 @@ evaluateBounds function uv = case function of
   Parametric expression -> Expression.evaluateBounds expression uv
   XY x y ->
     Bounds2d.xy
-      (Surface1d.Function.evaluateBounds x uv)
-      (Surface1d.Function.evaluateBounds y uv)
+      (Surface.Function.evaluateBounds x uv)
+      (Surface.Function.evaluateBounds y uv)
   Addition f1 f2 -> evaluateBounds f1 uv + VectorSurface2d.Function.evaluateBounds f2 uv
   Subtraction f1 f2 -> evaluateBounds f1 uv - VectorSurface2d.Function.evaluateBounds f2 uv
   Transformed transform f -> Bounds2d.transformBy transform (evaluateBounds f uv)
@@ -214,8 +214,8 @@ derivative parameter function = case function of
     VectorSurface2d.Function.Parametric (Expression.surfaceDerivative parameter expression)
   XY x y ->
     VectorSurface2d.Function.xy
-      (Surface1d.Function.derivative parameter x)
-      (Surface1d.Function.derivative parameter y)
+      (Surface.Function.derivative parameter x)
+      (Surface.Function.derivative parameter y)
   Addition f1 f2 -> derivative parameter f1 + VectorSurface2d.Function.derivative parameter f2
   Subtraction f1 f2 -> derivative parameter f1 - VectorSurface2d.Function.derivative parameter f2
   Transformed transform f -> VectorSurface2d.Function.transformBy transform (derivative parameter f)

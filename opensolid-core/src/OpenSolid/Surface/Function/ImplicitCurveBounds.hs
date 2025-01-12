@@ -1,4 +1,4 @@
-module OpenSolid.Surface1d.Function.ImplicitCurveBounds
+module OpenSolid.Surface.Function.ImplicitCurveBounds
   ( ImplicitCurveBounds
   , build
   , evaluate
