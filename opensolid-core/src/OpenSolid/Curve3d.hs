@@ -45,6 +45,14 @@ data Curve3d (coordinateSystem :: CoordinateSystem) where
   Coerce ::
     Curve3d (space @ units1) ->
     Curve3d (space @ units2)
+  Addition ::
+    Curve3d (space @ units) ->
+    VectorCurve3d (space @ units) ->
+    Curve3d (space @ units)
+  Subtraction ::
+    Curve3d (space @ units) ->
+    VectorCurve3d (space @ units) ->
+    Curve3d (space @ units)
 
 deriving instance Show (Curve3d (space @ units))
 
@@ -58,6 +66,26 @@ instance
     Parametric expression -> Parametric (Units.coerce expression)
     Coerce function -> Coerce function
     function -> Coerce function
+
+instance
+  (space1 ~ space2, units1 ~ units2) =>
+  Addition
+    (Curve3d (space1 @ units1))
+    (VectorCurve3d (space2 @ units2))
+    (Curve3d (space1 @ units1))
+  where
+  Parametric lhs + VectorCurve3d.Parametric rhs = Parametric (lhs + rhs)
+  lhs + rhs = Addition lhs rhs
+
+instance
+  (space1 ~ space2, units1 ~ units2) =>
+  Subtraction
+    (Curve3d (space1 @ units1))
+    (VectorCurve3d (space2 @ units2))
+    (Curve3d (space1 @ units1))
+  where
+  Parametric lhs - VectorCurve3d.Parametric rhs = Parametric (lhs - rhs)
+  lhs - rhs = Subtraction lhs rhs
 
 instance
   Composition
@@ -100,21 +128,29 @@ evaluate f tValue = case f of
   Parametric expression -> Expression.evaluate expression tValue
   Curve3d curve -> evaluateImpl curve tValue
   Coerce curve -> Units.coerce (evaluate curve tValue)
+  Addition c v -> evaluate c tValue + VectorCurve3d.evaluate v tValue
+  Subtraction c v -> evaluate c tValue - VectorCurve3d.evaluate v tValue
 
 evaluateBounds :: Curve3d (space @ units) -> Range Unitless -> Bounds3d (space @ units)
 evaluateBounds f tRange = case f of
   Parametric expression -> Expression.evaluateBounds expression tRange
   Curve3d curve -> evaluateBoundsImpl curve tRange
   Coerce curve -> Units.coerce (evaluateBounds curve tRange)
+  Addition c v -> evaluateBounds c tRange + VectorCurve3d.evaluateBounds v tRange
+  Subtraction c v -> evaluateBounds c tRange - VectorCurve3d.evaluateBounds v tRange
 
 derivative :: Curve3d (space @ units) -> VectorCurve3d (space @ units)
 derivative f = case f of
   Parametric expression -> VectorCurve3d.Parametric (Expression.curveDerivative expression)
   Curve3d curve -> derivativeImpl curve
   Coerce curve -> Units.coerce (derivative curve)
+  Addition c v -> derivative c + VectorCurve3d.derivative v
+  Subtraction c v -> derivative c - VectorCurve3d.derivative v
 
 reverse :: Curve3d (space @ units) -> Curve3d (space @ units)
 reverse f = case f of
   Parametric expression -> Parametric (expression . Expression.r)
   Curve3d curve -> Curve3d (reverseImpl curve)
   Coerce curve -> Units.coerce (reverse curve)
+  Addition c v -> reverse c + VectorCurve3d.reverse v
+  Subtraction c v -> reverse c - VectorCurve3d.reverse v
