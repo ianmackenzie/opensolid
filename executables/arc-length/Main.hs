@@ -10,7 +10,6 @@ import OpenSolid.Float qualified as Float
 import OpenSolid.IO qualified as IO
 import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
-import OpenSolid.Line2d qualified as Line2d
 import OpenSolid.List qualified as List
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2d (Point2d)
@@ -36,7 +35,7 @@ testCurve label curve = Tolerance.using (Length.meters 1e-12) IO.do
 
 testLineLength :: IO ()
 testLineLength = Tolerance.using (Length.meters 1e-6) IO.do
-  testCurve "Line" (Line2d.from Point2d.origin (Point2d.centimeters 30.0 40.0))
+  testCurve "Line" (Curve2d.line Point2d.origin (Point2d.centimeters 30.0 40.0))
 
 testQuadraticSplineLength :: IO ()
 testQuadraticSplineLength = IO.do

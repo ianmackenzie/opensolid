@@ -6,6 +6,7 @@ module OpenSolid.Curve2d
   , new
   , constant
   , xy
+  , line
   , startPoint
   , endPoint
   , evaluate
@@ -388,6 +389,9 @@ constant = Parametric . Expression.constant
 xy :: Curve1d units -> Curve1d units -> Curve2d (space @ units)
 xy (Curve1d.Parametric x) (Curve1d.Parametric y) = Parametric (Expression.xy x y)
 xy x y = XY x y
+
+line :: Point2d (space @ units) -> Point2d (space @ units) -> Curve2d (space @ units)
+line p1 p2 = constant p1 + Curve1d.t * (p2 - p1)
 
 startPoint :: Curve2d (space @ units) -> Point2d (space @ units)
 startPoint curve = case curve of

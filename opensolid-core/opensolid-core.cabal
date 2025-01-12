@@ -154,8 +154,6 @@ library
     OpenSolid.Int
     OpenSolid.Intersects
     OpenSolid.Length
-    OpenSolid.Line2d
-    OpenSolid.Line3d
     OpenSolid.List
     OpenSolid.Map
     OpenSolid.Maybe

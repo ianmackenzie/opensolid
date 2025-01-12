@@ -15,7 +15,6 @@ import OpenSolid.Duration qualified as Duration
 import OpenSolid.Float qualified as Float
 import OpenSolid.IO qualified as IO
 import OpenSolid.Length qualified as Length
-import OpenSolid.Line2d qualified as Line2d
 import OpenSolid.List qualified as List
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2d qualified as Point2d
@@ -52,7 +51,7 @@ testSplineAndLine = do
           (Point2d.centimeters 10.0 10.0)
           (Point2d.centimeters 10.0 10.0)
           (Point2d.centimeters 5.0 15.0)
-  let line = Line2d.from Point2d.origin (Point2d.centimeters 20.0 0.0)
+  let line = Curve2d.line Point2d.origin (Point2d.centimeters 20.0 0.0)
   testCurveMedialAxis "testSplineAndLine" spline line
 
 testCurveMedialAxis :: Tolerance Meters => Text -> Curve2d (Global @ Meters) -> Curve2d (Global @ Meters) -> IO ()

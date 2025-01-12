@@ -26,13 +26,13 @@ import OpenSolid.Bounds2d (Bounds2d)
 import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.CubicSpline2d qualified as CubicSpline2d
 import OpenSolid.Curve2d (Curve2d)
+import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.Float qualified as Float
 import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Frame2d qualified as Frame2d
 import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
-import OpenSolid.Line2d qualified as Line2d
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Point2d (Point2d)
 import OpenSolid.Point2d qualified as Point2d
@@ -79,7 +79,7 @@ vectorBounds2d :: Generator (VectorBounds2d (space @ Meters))
 vectorBounds2d = Random.map2 VectorBounds2d lengthRange lengthRange
 
 line2d :: Tolerance Meters => Generator (Curve2d (space @ Meters))
-line2d = Random.map2 Line2d.from point2d point2d
+line2d = Random.map2 Curve2d.line point2d point2d
 
 arc2d :: Tolerance Meters => Generator (Curve2d (space @ Meters))
 arc2d = Random.do

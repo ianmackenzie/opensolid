@@ -30,7 +30,6 @@ import OpenSolid.Expression.VectorCurve2d qualified as Expression.VectorCurve2d
 import OpenSolid.Float qualified as Float
 import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Frame2d qualified as Frame2d
-import OpenSolid.Line2d qualified as Line2d
 import OpenSolid.Point2d (Point2d)
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
@@ -46,13 +45,13 @@ from ::
   Curve2d (space @ units)
 from startPoint endPoint sweptAngle =
   case Vector2d.magnitudeAndDirection (endPoint - startPoint) of
-    Failure Vector2d.IsZero -> Line2d.from startPoint endPoint
+    Failure Vector2d.IsZero -> Curve2d.line startPoint endPoint
     Success (distanceBetweenPoints, directionBetweenPoints) -> do
       let halfDistance = 0.5 * distanceBetweenPoints
       let tanHalfAngle = Angle.tan (0.5 * sweptAngle)
       let linearDeviation = halfDistance * tanHalfAngle
       if linearDeviation ~= Qty.zero
-        then Line2d.from startPoint endPoint
+        then Curve2d.line startPoint endPoint
         else do
           let offset = (halfDistance / tanHalfAngle) * Direction2d.rotateLeft directionBetweenPoints
           let centerPoint = Point2d.midpoint startPoint endPoint + offset
@@ -87,7 +86,7 @@ corner cornerPoint incomingDirection outgoingDirection givenRadius = do
   let radius = Qty.abs givenRadius
   let sweptAngle = Direction2d.angleFrom incomingDirection outgoingDirection
   if radius * Float.squared (Angle.inRadians sweptAngle) / 4.0 ~= Qty.zero
-    then Line2d.from cornerPoint cornerPoint
+    then Curve2d.line cornerPoint cornerPoint
     else do
       let offset = radius * Qty.abs (Angle.tan (0.5 * sweptAngle))
       let startPoint = cornerPoint - offset * incomingDirection
@@ -126,7 +125,7 @@ withRadius givenRadius startPoint endPoint direction size =
               (Counterclockwise, Large) -> Angle.fullTurn - shortAngle
       swept centerPoint startPoint sweptAngle
     Failure Direction2d.PointsAreCoincident ->
-      Line2d.from startPoint endPoint
+      Curve2d.line startPoint endPoint
 
 data Direction = Clockwise | Counterclockwise
 

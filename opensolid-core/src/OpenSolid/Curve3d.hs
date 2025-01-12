@@ -3,6 +3,7 @@ module OpenSolid.Curve3d
   , Interface (..)
   , new
   , constant
+  , line
   , parametric
   , evaluate
   , evaluateBounds
@@ -13,6 +14,7 @@ where
 
 import OpenSolid.Bounds3d (Bounds3d)
 import OpenSolid.Composition
+import OpenSolid.Curve1d qualified as Curve1d
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Point3d (Point3d)
@@ -122,6 +124,9 @@ constant = Parametric . Expression.constant
 
 parametric :: Expression Float (Point3d (space @ units)) -> Curve3d (space @ units)
 parametric = Parametric
+
+line :: Point3d (space @ units) -> Point3d (space @ units) -> Curve3d (space @ units)
+line p1 p2 = constant p1 + Curve1d.t * (p2 - p1)
 
 evaluate :: Curve3d (space @ units) -> Float -> Point3d (space @ units)
 evaluate f tValue = case f of

@@ -4,10 +4,10 @@ import OpenSolid.Angle qualified as Angle
 import OpenSolid.Arc2d qualified as Arc2d
 import OpenSolid.Area (Area)
 import OpenSolid.Area qualified as Area
+import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Estimate qualified as Estimate
 import OpenSolid.Float qualified as Float
 import OpenSolid.Length qualified as Length
-import OpenSolid.Line2d qualified as Line2d
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Qty (zero)
@@ -41,10 +41,10 @@ square = Test.verify "square" Test.do
   let p2 = Point2d.xy width zero
   let p3 = Point2d.xy width width
   let p4 = Point2d.xy zero width
-  let line1 = Line2d.from p1 p2
-  let line2 = Line2d.from p2 p3
-  let line3 = Line2d.from p4 p3
-  let line4 = Line2d.from p4 p1
+  let line1 = Curve2d.line p1 p2
+  let line2 = Curve2d.line p2 p3
+  let line3 = Curve2d.line p4 p3
+  let line4 = Curve2d.line p4 p1
   region <- Region2d.boundedBy [line1, line3, line2, line4]
   Test.expect (areaIsApproximately (width * width) region)
 
@@ -54,8 +54,8 @@ quarterCircle = Test.verify "quarterCircle" Test.do
   let p1 = Point2d.origin
   let p2 = Point2d.xy radius zero
   let p3 = Point2d.xy zero radius
-  let line1 = Line2d.from p1 p2
-  let line2 = Line2d.from p1 p3
+  let line1 = Curve2d.line p1 p2
+  let line2 = Curve2d.line p1 p3
   let arc = Arc2d.from p2 p3 Angle.quarterTurn
   region <- Region2d.boundedBy [line1, line2, arc]
   let expectedArea = 0.25 * Float.pi * radius * radius
@@ -68,10 +68,10 @@ squareWithHole = Test.verify "squareWithHole" Test.do
   let p2 = Point2d.xy width zero
   let p3 = Point2d.xy width width
   let p4 = Point2d.xy zero width
-  let line1 = Line2d.from p1 p2
-  let line2 = Line2d.from p2 p3
-  let line3 = Line2d.from p4 p3
-  let line4 = Line2d.from p4 p1
+  let line1 = Curve2d.line p1 p2
+  let line2 = Curve2d.line p2 p3
+  let line3 = Curve2d.line p4 p3
+  let line4 = Curve2d.line p4 p1
   let centerPoint = Point2d.xy (0.5 * width) (0.5 * width)
   let holeRadius = 0.25 * width
   let hole = Arc2d.circle centerPoint holeRadius
@@ -86,9 +86,9 @@ incompleteSquare = Test.verify "incompleteSquare" Test.do
   let p2 = Point2d.xy width zero
   let p3 = Point2d.xy width width
   let p4 = Point2d.xy zero width
-  let line1 = Line2d.from p1 p2
-  let line2 = Line2d.from p2 p3
-  let line3 = Line2d.from p4 p3
+  let line1 = Curve2d.line p1 p2
+  let line2 = Curve2d.line p2 p3
+  let line3 = Curve2d.line p4 p3
   case Region2d.boundedBy [line1, line2, line3] of
     Success _ -> Test.fail "Expected region construction to fail on incomplete boundary"
     Failure error -> Test.expect (error == Region2d.BoundedBy.BoundaryHasGaps)
@@ -100,10 +100,10 @@ squareWithTangentHole = Test.verify "squareWithTangentHole" Test.do
   let p2 = Point2d.xy width zero
   let p3 = Point2d.xy width width
   let p4 = Point2d.xy zero width
-  let line1 = Line2d.from p1 p2
-  let line2 = Line2d.from p2 p3
-  let line3 = Line2d.from p4 p3
-  let line4 = Line2d.from p4 p1
+  let line1 = Curve2d.line p1 p2
+  let line2 = Curve2d.line p2 p3
+  let line3 = Curve2d.line p4 p3
+  let line4 = Curve2d.line p4 p1
   let centerPoint = Point2d.xy (0.5 * width) (0.5 * width)
   let holeRadius = 0.5 * width
   let hole = Arc2d.circle centerPoint holeRadius
