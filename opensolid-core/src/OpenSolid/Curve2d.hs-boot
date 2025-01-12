@@ -1,5 +1,5 @@
 module OpenSolid.Curve2d
-  ( Curve2d (Parametric)
+  ( Curve2d (Parametric, Transformed)
   , Interface (..)
   , HasDegeneracy (HasDegeneracy)
   , new
@@ -13,7 +13,6 @@ module OpenSolid.Curve2d
   , reverse
   , removeStartDegeneracy
   , transformBy
-  , TransformBy (TransformBy)
   , piecewise
   , unsafePiecewise
   )
@@ -60,6 +59,10 @@ data Curve2d (coordinateSystem :: CoordinateSystem) where
   Subtraction ::
     Curve2d (space @ units) ->
     VectorCurve2d (space @ units) ->
+    Curve2d (space @ units)
+  Transformed ::
+    Transform2d tag (space @ units) ->
+    Curve2d (space @ units) ->
     Curve2d (space @ units)
 
 instance Show (Curve2d (space @ units))
@@ -114,18 +117,6 @@ transformBy ::
   Transform2d tag (space @ units) ->
   Curve2d (space @ units) ->
   Curve2d (space @ units)
-
-data TransformBy curve coordinateSystem where
-  TransformBy ::
-    Interface curve (space @ units) =>
-    Transform2d tag (space @ units) ->
-    curve ->
-    TransformBy curve (space @ units)
-
-instance Show (TransformBy curve (space @ units))
-
-instance Interface (TransformBy curve (space @ units)) (space @ units)
-
 piecewise ::
   Tolerance units =>
   NonEmpty (Curve2d (space @ units)) ->

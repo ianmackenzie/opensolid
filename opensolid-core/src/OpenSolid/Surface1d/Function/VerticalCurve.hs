@@ -205,7 +205,7 @@ instance Curve2d.Interface (VerticalCurve units) UvCoordinates where
         }
 
   transformByImpl transform curve =
-    Curve2d.new (Curve2d.TransformBy transform curve)
+    Curve2d.Transformed transform (Curve2d.new curve)
 
 solveForU :: VerticalCurve units -> Float -> Float
 solveForU (VerticalCurve{f, fu, bounds, boundingAxes, tolerance}) vValue = do
