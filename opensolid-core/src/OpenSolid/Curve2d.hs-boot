@@ -2,6 +2,7 @@ module OpenSolid.Curve2d
   ( Curve2d (Parametric, Transformed)
   , Interface (..)
   , HasDegeneracy (HasDegeneracy)
+  , constant
   , new
   , startPoint
   , endPoint
@@ -20,7 +21,7 @@ where
 
 import OpenSolid.Bounds2d (Bounds2d)
 import OpenSolid.Curve (Curve)
-import OpenSolid.DirectionCurve2d (DirectionCurve2d)
+import {-# SOURCE #-} OpenSolid.DirectionCurve2d (DirectionCurve2d)
 import OpenSolid.Expression (Expression)
 import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Point2d (Point2d)
@@ -29,7 +30,7 @@ import OpenSolid.Range (Range)
 import OpenSolid.Range qualified as Range
 import OpenSolid.Transform2d (Transform2d)
 import OpenSolid.Vector2d (Vector2d)
-import OpenSolid.VectorCurve2d (VectorCurve2d)
+import {-# SOURCE #-} OpenSolid.VectorCurve2d (VectorCurve2d)
 
 type role Curve2d nominal
 
@@ -80,14 +81,20 @@ class
 data HasDegeneracy = HasDegeneracy
 
 instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
+  (space1 ~ space2, units1 ~ units2) =>
   Addition
     (Curve2d (space1 @ units1))
     (VectorCurve2d (space2 @ units2))
     (Curve2d (space1 @ units1))
 
+instance
+  (space1 ~ space2, units1 ~ units2) =>
+  Subtraction
+    (Curve2d (space1 @ units1))
+    (VectorCurve2d (space2 @ units2))
+    (Curve2d (space1 @ units1))
+
+constant :: Point2d (space @ units) -> Curve2d (space @ units)
 new :: Interface curve (space @ units) => curve -> Curve2d (space @ units)
 startPoint :: Curve2d (space @ units) -> Point2d (space @ units)
 endPoint :: Curve2d (space @ units) -> Point2d (space @ units)

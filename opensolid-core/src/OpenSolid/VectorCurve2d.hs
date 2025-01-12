@@ -46,6 +46,8 @@ import OpenSolid.Curve (Curve)
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve.Zero qualified as Curve.Zero
 import OpenSolid.Curve.Zeros qualified as Curve.Zeros
+import {-# SOURCE #-} OpenSolid.Curve2d (Curve2d)
+import {-# SOURCE #-} OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Direction2d (Direction2d)
 import OpenSolid.Direction2d qualified as Direction2d
 import {-# SOURCE #-} OpenSolid.DirectionCurve2d (DirectionCurve2d)
@@ -57,6 +59,7 @@ import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Frame2d qualified as Frame2d
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.Point2d (Point2d)
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
@@ -543,6 +546,22 @@ instance
     (Curve (Unitless :*: units))
   where
   direction2d .><. curve = Vector2d.unit direction2d .><. curve
+
+instance
+  Addition
+    (Point2d (space @ units))
+    (VectorCurve2d (space @ units))
+    (Curve2d (space @ units))
+  where
+  point + curve = Curve2d.constant point + curve
+
+instance
+  Subtraction
+    (Point2d (space @ units))
+    (VectorCurve2d (space @ units))
+    (Curve2d (space @ units))
+  where
+  point - curve = Curve2d.constant point - curve
 
 instance
   Composition

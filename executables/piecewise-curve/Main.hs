@@ -28,10 +28,10 @@ main = Tolerance.using Length.nanometer IO.do
   let vS = Vector2d.xy 0.0 -1.0
   let vSE = Vector2d.xy 1.0 -1.0 / Float.sqrt 2.0
   let radius = Length.centimeters 10.0
-  let arc1 = Curve2d.constant Point2d.origin + radius * VectorCurve2d.quadraticSpline vE vNE vN / weightCurve
-  let arc2 = Curve2d.constant Point2d.origin + radius * VectorCurve2d.quadraticSpline vN vNW vW / weightCurve
-  let arc3 = Curve2d.constant Point2d.origin + radius * VectorCurve2d.quadraticSpline vW vSW vS / weightCurve
-  let arc4 = Curve2d.constant Point2d.origin + radius * VectorCurve2d.quadraticSpline vS vSE vE / weightCurve
+  let arc1 = Point2d.origin + radius * VectorCurve2d.quadraticSpline vE vNE vN / weightCurve
+  let arc2 = Point2d.origin + radius * VectorCurve2d.quadraticSpline vN vNW vW / weightCurve
+  let arc3 = Point2d.origin + radius * VectorCurve2d.quadraticSpline vW vSW vS / weightCurve
+  let arc4 = Point2d.origin + radius * VectorCurve2d.quadraticSpline vS vSE vE / weightCurve
   circle <- Curve2d.piecewise (NonEmpty.four arc1 arc2 arc3 arc4)
   let drawCurve n curve =
         Drawing2d.group

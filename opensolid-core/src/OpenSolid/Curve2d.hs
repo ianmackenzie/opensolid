@@ -441,7 +441,7 @@ xy (Curve.Parametric x) (Curve.Parametric y) = Parametric (Expression.xy x y)
 xy x y = XY x y
 
 line :: Point2d (space @ units) -> Point2d (space @ units) -> Curve2d (space @ units)
-line p1 p2 = constant p1 + Curve.t * (p2 - p1)
+line p1 p2 = p1 + Curve.t * (p2 - p1)
 
 arc ::
   Tolerance units =>
@@ -557,7 +557,7 @@ customArc ::
   Curve2d (space @ units)
 customArc p0 v1 v2 a b = do
   let angle = Curve.line a b
-  constant p0 + v1 * Curve.cos angle + v2 * Curve.sin angle
+  p0 + v1 * Curve.cos angle + v2 * Curve.sin angle
 
 circle :: Point2d (space @ units) -> Qty units -> Curve2d (space @ units)
 circle centerPoint radius = polarArc centerPoint radius Angle.zero Angle.twoPi
