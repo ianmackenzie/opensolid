@@ -30,7 +30,6 @@ module OpenSolid.Text
   )
 where
 
-import Data.ByteString (ByteString)
 import Data.Char qualified
 import Data.Text qualified
 import Data.Text.Encoding qualified

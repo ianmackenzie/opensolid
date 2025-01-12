@@ -12,7 +12,6 @@ module Http.Server.Response
   )
 where
 
-import Data.ByteString (ByteString)
 import Data.ByteString qualified
 import Data.CaseInsensitive qualified
 import Network.HTTP.Types (Status)

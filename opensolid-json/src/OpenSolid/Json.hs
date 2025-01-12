@@ -16,7 +16,6 @@ where
 
 import Data.Aeson qualified
 import Data.Aeson.KeyMap qualified
-import Data.ByteString (ByteString)
 import Data.ByteString qualified
 import Data.Scientific
 import Data.Vector qualified

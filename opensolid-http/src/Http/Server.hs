@@ -8,7 +8,6 @@ module Http.Server
   )
 where
 
-import Data.ByteString (ByteString)
 import Data.ByteString qualified
 import Network.Wai (Application, Request, Response, ResponseReceived)
 import Network.Wai qualified

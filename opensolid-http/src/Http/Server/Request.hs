@@ -9,7 +9,6 @@ module Http.Server.Request
   )
 where
 
-import Data.ByteString (ByteString)
 import Data.CaseInsensitive qualified
 import Network.HTTP.Types qualified
 import Network.Wai (Request)
