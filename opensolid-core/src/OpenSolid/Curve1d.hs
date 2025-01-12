@@ -9,6 +9,7 @@ module OpenSolid.Curve1d
   , zero
   , constant
   , t
+  , line
   , bezier
   , hermite
   , quadraticSpline
@@ -197,6 +198,9 @@ and then use arithmetic operators etc. to build up more complex curves.
 -}
 t :: Curve1d Unitless
 t = Parametric Expression.t
+
+line :: Qty units -> Qty units -> Curve1d units
+line a b = a + t * (b - a)
 
 instance Negation (Curve1d units) where
   negate (Parametric expression) = Parametric -expression
