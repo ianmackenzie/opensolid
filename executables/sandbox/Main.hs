@@ -33,7 +33,6 @@ import OpenSolid.Polyline2d (Polyline2d (Polyline2d))
 import OpenSolid.Polyline2d qualified as Polyline2d
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
-import OpenSolid.QuadraticSpline2d qualified as QuadraticSpline2d
 import OpenSolid.Random qualified as Random
 import OpenSolid.Range qualified as Range
 import OpenSolid.Result qualified as Result
@@ -459,7 +458,7 @@ testQuadraticSplineExpression = IO.do
   let p1 = Point2d.meters 1.0 2.0
   let p2 = Point2d.meters 3.0 4.0
   let p3 = Point2d.meters 5.0 6.0
-  let spline = QuadraticSpline2d.fromControlPoints p1 p2 p3
+  let spline = Curve2d.quadraticBezier p1 p2 p3
   log "spline" spline
   log "spline.x" (Curve2d.xCoordinate spline)
 

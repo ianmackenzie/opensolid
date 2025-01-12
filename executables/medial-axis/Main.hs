@@ -4,7 +4,6 @@ import Data.Time.Clock qualified
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.Color qualified as Color
-import OpenSolid.CubicSpline2d qualified as CubicSpline2d
 import OpenSolid.Curve1d qualified as Curve1d
 import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Curve2d qualified as Curve2d
@@ -34,7 +33,7 @@ main = Tolerance.using Length.micrometer IO.do
 testSplineAndArc :: Tolerance Meters => IO ()
 testSplineAndArc = do
   let spline =
-        CubicSpline2d.fromControlPoints
+        Curve2d.cubicBezier
           (Point2d.centimeters @Global 0.0 10.0)
           (Point2d.centimeters @Global 5.0 6.0)
           (Point2d.centimeters @Global 10.0 9.0)
@@ -45,7 +44,7 @@ testSplineAndArc = do
 testSplineAndLine :: Tolerance Meters => IO ()
 testSplineAndLine = do
   let spline =
-        CubicSpline2d.fromControlPoints
+        Curve2d.cubicBezier
           (Point2d.centimeters 15.0 15.0)
           (Point2d.centimeters 10.0 10.0)
           (Point2d.centimeters 10.0 10.0)

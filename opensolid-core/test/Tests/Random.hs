@@ -23,7 +23,6 @@ import OpenSolid.Axis2d (Axis2d)
 import OpenSolid.Axis2d qualified as Axis2d
 import OpenSolid.Bounds2d (Bounds2d)
 import OpenSolid.Bounds2d qualified as Bounds2d
-import OpenSolid.CubicSpline2d qualified as CubicSpline2d
 import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Direction2d qualified as Direction2d
@@ -37,7 +36,6 @@ import OpenSolid.Point2d (Point2d)
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
-import OpenSolid.QuadraticSpline2d qualified as QuadraticSpline2d
 import OpenSolid.Random (Generator)
 import OpenSolid.Random qualified as Random
 import OpenSolid.Range (Range)
@@ -90,10 +88,10 @@ arc2d = Random.do
   Random.return (Curve2d.arc startPoint endPoint sweptAngle)
 
 quadraticSpline2d :: Tolerance Meters => Generator (Curve2d (space @ Meters))
-quadraticSpline2d = Random.map3 QuadraticSpline2d.fromControlPoints point2d point2d point2d
+quadraticSpline2d = Random.map3 Curve2d.quadraticBezier point2d point2d point2d
 
 cubicSpline2d :: Tolerance Meters => Generator (Curve2d (space @ Meters))
-cubicSpline2d = Random.map4 CubicSpline2d.fromControlPoints point2d point2d point2d point2d
+cubicSpline2d = Random.map4 Curve2d.cubicBezier point2d point2d point2d point2d
 
 translation2d :: Generator (Transform2d.Rigid (space @ Meters))
 translation2d = Random.map Transform2d.translateBy vector2d

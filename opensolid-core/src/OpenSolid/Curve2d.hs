@@ -18,6 +18,8 @@ module OpenSolid.Curve2d
   , circle
   , ellipse
   , bezier
+  , quadraticBezier
+  , cubicBezier
   , hermite
   , startPoint
   , endPoint
@@ -538,6 +540,23 @@ bezier controlPoints = do
   let x = Curve1d.bezier (NonEmpty.map Point2d.xCoordinate controlPoints)
   let y = Curve1d.bezier (NonEmpty.map Point2d.yCoordinate controlPoints)
   XY x y
+
+-- | Construct a quadratic Bezier curve from the given control points.
+quadraticBezier ::
+  Point2d (space @ units) ->
+  Point2d (space @ units) ->
+  Point2d (space @ units) ->
+  Curve2d (space @ units)
+quadraticBezier p1 p2 p3 = bezier (NonEmpty.three p1 p2 p3)
+
+-- | Construct a cubic Bezier curve from the given control points.
+cubicBezier ::
+  Point2d (space @ units) ->
+  Point2d (space @ units) ->
+  Point2d (space @ units) ->
+  Point2d (space @ units) ->
+  Curve2d (space @ units)
+cubicBezier p1 p2 p3 p4 = bezier (NonEmpty.four p1 p2 p3 p4)
 
 {-| Construct a Bezier curve with the given start point, start derivatives, end point and end
 derivatives. For example,

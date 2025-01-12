@@ -6,7 +6,6 @@ module Tests.Curve2d
 where
 
 import OpenSolid.Angle qualified as Angle
-import OpenSolid.CubicSpline2d qualified as CubicSpline2d
 import OpenSolid.Curve1d qualified as Curve1d
 import OpenSolid.Curve1d.Zero qualified as Curve1d.Zero
 import OpenSolid.Curve2d (Curve2d)
@@ -25,7 +24,6 @@ import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
-import OpenSolid.QuadraticSpline2d qualified as QuadraticSpline2d
 import OpenSolid.Random (Generator)
 import OpenSolid.Random qualified as Random
 import OpenSolid.Range (Range (Range))
@@ -73,7 +71,7 @@ findPoint = Test.verify "findPoint" Test.do
   let p1 = Point2d.meters 0.0 0.0
   let p2 = Point2d.meters 1.0 2.0
   let p3 = Point2d.meters 2.0 0.0
-  let testSpline = QuadraticSpline2d.fromControlPoints p1 p2 p3
+  let testSpline = Curve2d.quadraticBezier p1 p2 p3
   startParameterValues <- Curve2d.findPoint Point2d.origin testSpline
   endParameterValues <- Curve2d.findPoint (Point2d.meters 2.0 0.0) testSpline
   midParameterValues <- Curve2d.findPoint (Point2d.meters 1.0 1.0) testSpline
@@ -187,7 +185,7 @@ degenerateStartPointTangent = Test.check 100 "degenerateStartPointTangent" Test.
   p0 <- Random.point2d
   p1 <- Random.point2d
   p2 <- Random.point2d
-  let curve = CubicSpline2d.fromControlPoints p0 p0 p1 p2
+  let curve = Curve2d.cubicBezier p0 p0 p1 p2
   let decreasingTValues = [2.0 ** -n | n <- [8 .. 16]]
   tangentDirection <- Curve2d.tangentDirection curve
   let startTangent = DirectionCurve2d.startValue tangentDirection
@@ -201,7 +199,7 @@ degenerateEndPointTangent = Test.check 100 "degenerateEndPointTangent" Test.do
   p0 <- Random.point2d
   p1 <- Random.point2d
   p2 <- Random.point2d
-  let curve = CubicSpline2d.fromControlPoints p0 p1 p2 p2
+  let curve = Curve2d.cubicBezier p0 p1 p2 p2
   let increasingTValues = [1.0 - 2.0 ** -n | n <- [8 .. 16]]
   tangentDirection <- Curve2d.tangentDirection curve
   let endTangent = DirectionCurve2d.endValue tangentDirection
@@ -217,7 +215,7 @@ tangentDerivativeIsPerpendicularToTangent =
     p1 <- Random.point2d
     p2 <- Random.point2d
     p3 <- Random.point2d
-    let curve = CubicSpline2d.fromControlPoints p0 p1 p2 p3
+    let curve = Curve2d.cubicBezier p0 p1 p2 p3
     tangentDirection <- Curve2d.tangentDirection curve
     let tangentDerivative = DirectionCurve2d.derivative tangentDirection
     tValue <- Parameter.random
@@ -235,7 +233,7 @@ degenerateStartPointTangentDerivative =
     p0 <- Random.point2d
     p1 <- Random.point2d
     p2 <- Random.point2d
-    let curve = CubicSpline2d.fromControlPoints p0 p0 p1 p2
+    let curve = Curve2d.cubicBezier p0 p0 p1 p2
     let decreasingTValues = [2.0 ** -n | n <- [8 .. 16]]
     tangentDirection <- Curve2d.tangentDirection curve
     let tangentDerivative = DirectionCurve2d.derivative tangentDirection
@@ -256,7 +254,7 @@ degenerateEndPointTangentDerivative =
     p0 <- Random.point2d
     p1 <- Random.point2d
     p2 <- Random.point2d
-    let curve = CubicSpline2d.fromControlPoints p0 p1 p2 p2
+    let curve = Curve2d.cubicBezier p0 p1 p2 p2
     let increasingTValues = [1.0 - 2.0 ** -n | n <- [8 .. 16]]
     tangentDirection <- Curve2d.tangentDirection curve
     let tangentDerivative = DirectionCurve2d.derivative tangentDirection

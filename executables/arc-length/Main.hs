@@ -2,7 +2,6 @@ module Main (main) where
 
 import OpenSolid.Area (Area)
 import OpenSolid.Bounds2d qualified as Bounds2d
-import OpenSolid.CubicSpline2d qualified as CubicSpline2d
 import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Drawing2d qualified as Drawing2d
@@ -16,7 +15,6 @@ import OpenSolid.Point2d (Point2d)
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
-import OpenSolid.QuadraticSpline2d qualified as QuadraticSpline2d
 import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Units (Meters)
@@ -42,7 +40,7 @@ testQuadraticSplineLength = IO.do
   let p1 = Point2d.origin
   let p2 = Point2d.centimeters 20.0 30.0
   let p3 = Point2d.centimeters 40.0 0.0
-  let spline = QuadraticSpline2d.fromControlPoints p1 p2 p3
+  let spline = Curve2d.quadraticBezier p1 p2 p3
   testCurve "Quadratic spline" spline
   IO.printLine ("Analytical value: " + formatLength (analyticalLength p1 p2 p3))
 
@@ -75,7 +73,7 @@ testCubicSplineParameterization = Tolerance.using Length.nanometer IO.do
   let p2 = Point2d.centimeters 14.0 15.0
   let p3 = Point2d.centimeters 16.0 15.0
   let p4 = Point2d.centimeters 25.0 5.0
-  let spline = CubicSpline2d.fromControlPoints p1 p2 p3 p4
+  let spline = Curve2d.cubicBezier p1 p2 p3 p4
   (parameterized, length) <- Curve2d.parameterizeByArcLength spline
   IO.printLine ("Cubic spline: " + formatLength length)
   let drawCurve fileName curve = IO.do
