@@ -54,6 +54,8 @@ jobs:
           echo "PATH=$env:PATH;$env:GITHUB_WORKSPACE\opensolid-jit\target\release" >> $env:GITHUB_ENV
       - name: Build opensolid-core library
         run: |
+          ghc --version
+          cabal --version
           cabal build opensolid-core
       - name: Run tests
         run: |
@@ -123,6 +125,8 @@ jobs:
           echo "LD_LIBRARY_PATH=$GITHUB_WORKSPACE/opensolid-jit/target/release" >> $GITHUB_ENV
       - name: Build opensolid-core library
         run: |
+          ghc --version
+          cabal --version
           cabal build opensolid-core
       - name: Run tests
         run: |
