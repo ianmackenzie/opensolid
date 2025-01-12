@@ -1,27 +1,13 @@
-Move most curve constructors into Curve2d module itself?
--> remove Line#d, QuadraticSpline#d, CubicSpline#d, BezierCurve#d modules in favour of just Curve2d.line, Curve2d.cubicSpline, Curve2d.bezier etc.
--> maybe move Arc2d.from -> Curve2d.arc, but leave other arc constructors in Arc2d module
-  -> or even just move all arc constructors also into Curve2d:
-    - Arc2d.from -> Curve2d.arc
-    - Arc2d.polar -> Curve2d.polarArc
-    - Arc2d.swept -> Curve2d.sweptArc
-    - Arc2d.corner -> Curve2d.cornerArc
-    - Arc2d.withRadius -> Curve2d.arcWithRadius
-    - Arc2d.elliptical -> Curve2d.ellipticalArc
-    - Arc2d.circle -> Curve2d.circle
-    - Arc2d.ellipse -> Curve2d.ellipse
-    - Arc2d.new -> Curve2d.customArc
-
-Clean up 'Transformed' vs 'TransformBy' curve constructors/implementations
-
 Rename Curve1d, Surface1d to Curve and Surface?
 
 Rename e.g. Surface2d.Function to SurfaceFunction2d, Surface1d.Function to SurfaceFunction?
 -> flatter is often better, would give better type errors/hints instead of everything being shown as 'Function'
 
 Support Point2d + VectorCurve2d
+-> search for use cases of Curve2d.constant, including inside Curve2d module itself
 
 Rewrite scripts in Haskell?
+-> or Python?
 
 Build out publishing workflow
 - Collect wheels and publish combined package
@@ -43,6 +29,7 @@ Improve Python bindings
   -> Also (&) for *intersection*?
 - Add extra line to docstring mentioning tolerance, if one is required
 - Remove leading underscores from helper functions, now that we have __all__ to control exports?
+- Add support for enums (new Winding type?)
 
 Try using Pandoc to convert from Haddock to reStructuredText?
 -> or just write all doc comments in plain text...
