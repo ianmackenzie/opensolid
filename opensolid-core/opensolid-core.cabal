@@ -164,7 +164,6 @@ library
     OpenSolid.Polyline2d
     OpenSolid.Prelude
     OpenSolid.Qty
-    OpenSolid.QuadraticSpline3d
     OpenSolid.Queue
     OpenSolid.Random
     OpenSolid.Range

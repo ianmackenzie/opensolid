@@ -4,6 +4,10 @@ module OpenSolid.Curve3d
   , new
   , constant
   , line
+  , bezier
+  , quadraticBezier
+  , cubicBezier
+  , hermite
   , parametric
   , xyz
   , evaluate
@@ -20,13 +24,17 @@ import OpenSolid.Curve1d (Curve1d)
 import OpenSolid.Curve1d qualified as Curve1d
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
-import OpenSolid.Point3d (Point3d)
+import OpenSolid.List qualified as List
+import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.Point3d (Point3d (Point3d))
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
 import OpenSolid.Range (Range)
 import OpenSolid.Surface1d.Function qualified as Surface1d.Function
 import OpenSolid.Surface3d.Function qualified as Surface3d.Function
 import OpenSolid.Units qualified as Units
+import OpenSolid.Vector3d (Vector3d)
+import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.VectorCurve3d (VectorCurve3d)
 import OpenSolid.VectorCurve3d qualified as VectorCurve3d
 
@@ -141,6 +149,69 @@ xyz x y z = XYZ x y z
 
 line :: Point3d (space @ units) -> Point3d (space @ units) -> Curve3d (space @ units)
 line p1 p2 = constant p1 + Curve1d.t * (p2 - p1)
+
+{-| Construct a Bezier curve from its control points. For example,
+
+> Curve2d.bezier (NonEmpty.four p1 p2 p3 p4))
+
+will return a cubic Bezier curve with the given four control points.
+-}
+bezier :: NonEmpty (Point3d (space @ units)) -> Curve3d (space @ units)
+bezier controlPoints = do
+  let x = Curve1d.bezier (NonEmpty.map Point3d.xCoordinate controlPoints)
+  let y = Curve1d.bezier (NonEmpty.map Point3d.yCoordinate controlPoints)
+  let z = Curve1d.bezier (NonEmpty.map Point3d.zCoordinate controlPoints)
+  XYZ x y z
+
+-- | Construct a quadratic Bezier curve from the given control points.
+quadraticBezier ::
+  Point3d (space @ units) ->
+  Point3d (space @ units) ->
+  Point3d (space @ units) ->
+  Curve3d (space @ units)
+quadraticBezier p1 p2 p3 = bezier (NonEmpty.three p1 p2 p3)
+
+-- | Construct a cubic Bezier curve from the given control points.
+cubicBezier ::
+  Point3d (space @ units) ->
+  Point3d (space @ units) ->
+  Point3d (space @ units) ->
+  Point3d (space @ units) ->
+  Curve3d (space @ units)
+cubicBezier p1 p2 p3 p4 = bezier (NonEmpty.four p1 p2 p3 p4)
+
+{-| Construct a Bezier curve with the given start point, start derivatives, end point and end
+derivatives. For example,
+
+> Curve3d.hermite (p1, [v1]) (p2, [v2])
+
+will result in a cubic spline from @p1@ to @p2@ with first derivative equal to @v1@ at @p1@ and
+first derivative equal to @v2@ at @p2@.
+
+The numbers of derivatives at each endpoint do not have to be equal; for example,
+
+> Curve3d.hermite (p1, [v1]) (p2, [])
+
+will result in a quadratic spline from @p1@ to @p2@ with first derivative at @p1@ equal to @v1@.
+
+In general, the degree of the resulting spline will be equal to 1 plus the total number of
+derivatives given.
+-}
+hermite ::
+  (Point3d (space @ units), List (Vector3d (space @ units))) ->
+  (Point3d (space @ units), List (Vector3d (space @ units))) ->
+  Curve3d (space @ units)
+hermite (Point3d x1 y1 z1, derivatives1) (Point3d x2 y2 z2, derivatives2) = do
+  let xDerivatives1 = List.map Vector3d.xComponent derivatives1
+  let yDerivatives1 = List.map Vector3d.yComponent derivatives1
+  let zDerivatives1 = List.map Vector3d.zComponent derivatives1
+  let xDerivatives2 = List.map Vector3d.xComponent derivatives2
+  let yDerivatives2 = List.map Vector3d.yComponent derivatives2
+  let zDerivatives2 = List.map Vector3d.zComponent derivatives2
+  let x = Curve1d.hermite (x1, xDerivatives1) (x2, xDerivatives2)
+  let y = Curve1d.hermite (y1, yDerivatives1) (y2, yDerivatives2)
+  let z = Curve1d.hermite (z1, zDerivatives1) (z2, zDerivatives2)
+  XYZ x y z
 
 evaluate :: Curve3d (space @ units) -> Float -> Point3d (space @ units)
 evaluate f tValue = case f of
