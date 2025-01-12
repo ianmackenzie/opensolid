@@ -1,7 +1,7 @@
 module Main (main) where
 
 import OpenSolid.Bounds2d qualified as Bounds2d
-import OpenSolid.Curve1d qualified as Curve1d
+import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Drawing2d qualified as Drawing2d
 import OpenSolid.Float qualified as Float
@@ -18,7 +18,7 @@ import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 
 main :: IO ()
 main = Tolerance.using Length.nanometer IO.do
-  let weightCurve = Curve1d.quadraticSpline 1.0 (1.0 / Float.sqrt 2.0) 1.0
+  let weightCurve = Curve.quadraticSpline 1.0 (1.0 / Float.sqrt 2.0) 1.0
   let vE = Vector2d.xy 1.0 0.0
   let vNE = Vector2d.xy 1.0 1.0 / Float.sqrt 2.0
   let vN = Vector2d.xy 0.0 1.0

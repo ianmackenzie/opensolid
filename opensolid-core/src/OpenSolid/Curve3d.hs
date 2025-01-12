@@ -20,8 +20,8 @@ where
 import OpenSolid.Bounds3d (Bounds3d)
 import OpenSolid.Bounds3d qualified as Bounds3d
 import OpenSolid.Composition
-import OpenSolid.Curve1d (Curve1d)
-import OpenSolid.Curve1d qualified as Curve1d
+import OpenSolid.Curve (Curve)
+import OpenSolid.Curve qualified as Curve
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.List qualified as List
@@ -60,9 +60,9 @@ data Curve3d (coordinateSystem :: CoordinateSystem) where
     Curve3d (space @ units1) ->
     Curve3d (space @ units2)
   XYZ ::
-    Curve1d units ->
-    Curve1d units ->
-    Curve1d units ->
+    Curve units ->
+    Curve units ->
+    Curve units ->
     Curve3d (space @ units)
   Addition ::
     Curve3d (space @ units) ->
@@ -142,13 +142,13 @@ constant = Parametric . Expression.constant
 parametric :: Expression Float (Point3d (space @ units)) -> Curve3d (space @ units)
 parametric = Parametric
 
-xyz :: Curve1d units -> Curve1d units -> Curve1d units -> Curve3d (space @ units)
-xyz (Curve1d.Parametric x) (Curve1d.Parametric y) (Curve1d.Parametric z) =
+xyz :: Curve units -> Curve units -> Curve units -> Curve3d (space @ units)
+xyz (Curve.Parametric x) (Curve.Parametric y) (Curve.Parametric z) =
   Parametric (Expression.xyz x y z)
 xyz x y z = XYZ x y z
 
 line :: Point3d (space @ units) -> Point3d (space @ units) -> Curve3d (space @ units)
-line p1 p2 = constant p1 + Curve1d.t * (p2 - p1)
+line p1 p2 = constant p1 + Curve.t * (p2 - p1)
 
 {-| Construct a Bezier curve from its control points. For example,
 
@@ -158,9 +158,9 @@ will return a cubic Bezier curve with the given four control points.
 -}
 bezier :: NonEmpty (Point3d (space @ units)) -> Curve3d (space @ units)
 bezier controlPoints = do
-  let x = Curve1d.bezier (NonEmpty.map Point3d.xCoordinate controlPoints)
-  let y = Curve1d.bezier (NonEmpty.map Point3d.yCoordinate controlPoints)
-  let z = Curve1d.bezier (NonEmpty.map Point3d.zCoordinate controlPoints)
+  let x = Curve.bezier (NonEmpty.map Point3d.xCoordinate controlPoints)
+  let y = Curve.bezier (NonEmpty.map Point3d.yCoordinate controlPoints)
+  let z = Curve.bezier (NonEmpty.map Point3d.zCoordinate controlPoints)
   XYZ x y z
 
 -- | Construct a quadratic Bezier curve from the given control points.
@@ -208,9 +208,9 @@ hermite (Point3d x1 y1 z1, derivatives1) (Point3d x2 y2 z2, derivatives2) = do
   let xDerivatives2 = List.map Vector3d.xComponent derivatives2
   let yDerivatives2 = List.map Vector3d.yComponent derivatives2
   let zDerivatives2 = List.map Vector3d.zComponent derivatives2
-  let x = Curve1d.hermite (x1, xDerivatives1) (x2, xDerivatives2)
-  let y = Curve1d.hermite (y1, yDerivatives1) (y2, yDerivatives2)
-  let z = Curve1d.hermite (z1, zDerivatives1) (z2, zDerivatives2)
+  let x = Curve.hermite (x1, xDerivatives1) (x2, xDerivatives2)
+  let y = Curve.hermite (y1, yDerivatives1) (y2, yDerivatives2)
+  let z = Curve.hermite (z1, zDerivatives1) (z2, zDerivatives2)
   XYZ x y z
 
 evaluate :: Curve3d (space @ units) -> Float -> Point3d (space @ units)
@@ -219,7 +219,7 @@ evaluate f tValue = case f of
   Curve3d curve -> evaluateImpl curve tValue
   Coerce curve -> Units.coerce (evaluate curve tValue)
   XYZ x y z ->
-    Point3d.xyz (Curve1d.evaluate x tValue) (Curve1d.evaluate y tValue) (Curve1d.evaluate z tValue)
+    Point3d.xyz (Curve.evaluate x tValue) (Curve.evaluate y tValue) (Curve.evaluate z tValue)
   Addition c v -> evaluate c tValue + VectorCurve3d.evaluate v tValue
   Subtraction c v -> evaluate c tValue - VectorCurve3d.evaluate v tValue
 
@@ -230,9 +230,9 @@ evaluateBounds f tRange = case f of
   Coerce curve -> Units.coerce (evaluateBounds curve tRange)
   XYZ x y z ->
     Bounds3d.xyz
-      (Curve1d.evaluateBounds x tRange)
-      (Curve1d.evaluateBounds y tRange)
-      (Curve1d.evaluateBounds z tRange)
+      (Curve.evaluateBounds x tRange)
+      (Curve.evaluateBounds y tRange)
+      (Curve.evaluateBounds z tRange)
   Addition c v -> evaluateBounds c tRange + VectorCurve3d.evaluateBounds v tRange
   Subtraction c v -> evaluateBounds c tRange - VectorCurve3d.evaluateBounds v tRange
 
@@ -242,7 +242,7 @@ derivative f = case f of
   Curve3d curve -> derivativeImpl curve
   Coerce curve -> Units.coerce (derivative curve)
   XYZ x y z ->
-    VectorCurve3d.xyz (Curve1d.derivative x) (Curve1d.derivative y) (Curve1d.derivative z)
+    VectorCurve3d.xyz (Curve.derivative x) (Curve.derivative y) (Curve.derivative z)
   Addition c v -> derivative c + VectorCurve3d.derivative v
   Subtraction c v -> derivative c - VectorCurve3d.derivative v
 
@@ -251,6 +251,6 @@ reverse f = case f of
   Parametric expression -> Parametric (expression . Expression.r)
   Curve3d curve -> Curve3d (reverseImpl curve)
   Coerce curve -> Units.coerce (reverse curve)
-  XYZ x y z -> XYZ (Curve1d.reverse x) (Curve1d.reverse y) (Curve1d.reverse z)
+  XYZ x y z -> XYZ (Curve.reverse x) (Curve.reverse y) (Curve.reverse z)
   Addition c v -> reverse c + VectorCurve3d.reverse v
   Subtraction c v -> reverse c - VectorCurve3d.reverse v

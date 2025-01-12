@@ -4,7 +4,7 @@ import Data.Time.Clock qualified
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.Color qualified as Color
-import OpenSolid.Curve1d qualified as Curve1d
+import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Curve2d.MedialAxis qualified as Curve2d.MedialAxis
@@ -60,13 +60,13 @@ testCurveMedialAxis label curve1 curve2 = IO.do
         let curve = Curve2d.MedialAxis.curve segment
         (parameterization, _) <- Curve2d.arcLengthParameterization curve
         let drawTangentCircle u = do
-              let t = Curve1d.evaluate parameterization u
+              let t = Curve.evaluate parameterization u
               let tangentCircle =
                     Drawing2d.circle
                       [ Drawing2d.strokeColor Color.gray
                       , Drawing2d.strokeWidth (Length.millimeters 0.2)
                       ]
-                      (Qty.abs (Curve1d.evaluate (Curve2d.MedialAxis.radius segment) t))
+                      (Qty.abs (Curve.evaluate (Curve2d.MedialAxis.radius segment) t))
                       (Curve2d.evaluate curve t)
               tangentCircle
         Success (List.map drawTangentCircle (Parameter.steps 50))

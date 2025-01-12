@@ -19,7 +19,7 @@ module OpenSolid.Curve2d
 where
 
 import OpenSolid.Bounds2d (Bounds2d)
-import OpenSolid.Curve1d (Curve1d)
+import OpenSolid.Curve (Curve)
 import OpenSolid.DirectionCurve2d (DirectionCurve2d)
 import OpenSolid.Expression (Expression)
 import OpenSolid.Frame2d (Frame2d)
@@ -45,8 +45,8 @@ data Curve2d (coordinateSystem :: CoordinateSystem) where
     Curve2d (space @ units1) ->
     Curve2d (space @ units2)
   XY ::
-    Curve1d units ->
-    Curve1d units ->
+    Curve units ->
+    Curve units ->
     Curve2d (space @ units)
   PlaceIn ::
     Frame2d (global @ units) (Defines local) ->

@@ -111,9 +111,9 @@ library
     OpenSolid.Color
     OpenSolid.Composition
     OpenSolid.CoordinateSystem
-    OpenSolid.Curve1d
-    OpenSolid.Curve1d.Zero
-    OpenSolid.Curve1d.Zeros
+    OpenSolid.Curve
+    OpenSolid.Curve.Zero
+    OpenSolid.Curve.Zeros
     OpenSolid.Curve2d
     OpenSolid.Curve2d.FindPoint
     OpenSolid.Curve2d.IntersectionPoint
@@ -255,7 +255,7 @@ test-suite opensolid-core-test
     Test
     Tests.Array
     Tests.Bounds2d
-    Tests.Curve1d
+    Tests.Curve
     Tests.Curve2d
     Tests.Direction2d
     Tests.DivMod

@@ -11,7 +11,7 @@ import OpenSolid.Axis2d (Axis2d)
 import OpenSolid.Axis2d qualified as Axis2d
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.Bounds2d qualified as Bounds2d
-import OpenSolid.Curve1d qualified as Curve1d
+import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Direction2d qualified as Direction2d
@@ -174,7 +174,7 @@ instance Curve2d.Interface (VerticalCurve units) UvCoordinates where
 
   derivativeImpl curve@(VerticalCurve{dudv, vStart, vEnd}) = do
     let deltaV = vEnd - vStart
-    let dvdt = Curve1d.constant deltaV
+    let dvdt = Curve.constant deltaV
     let dudt = dvdt * dudv . Curve2d.new curve
     VectorCurve2d.xy dudt dvdt
 

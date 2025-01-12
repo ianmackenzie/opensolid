@@ -22,7 +22,7 @@ module OpenSolid.Solve1d
   )
 where
 
-import OpenSolid.Curve1d.Zero (Zero (Zero))
+import OpenSolid.Curve.Zero (Zero (Zero))
 import OpenSolid.Domain1d (Domain1d)
 import OpenSolid.Domain1d qualified as Domain1d
 import OpenSolid.Error qualified as Error

@@ -12,7 +12,7 @@ module OpenSolid.VectorCurve2d
 where
 
 import OpenSolid.CoordinateSystem (Space)
-import {-# SOURCE #-} OpenSolid.Curve1d (Curve1d)
+import {-# SOURCE #-} OpenSolid.Curve (Curve)
 import OpenSolid.Prelude
 import OpenSolid.Range (Range)
 import OpenSolid.Transform2d (Transform2d)
@@ -65,54 +65,54 @@ instance
 
 instance
   Multiplication'
-    (Curve1d units1)
+    (Curve units1)
     (VectorCurve2d (space @ units2))
     (VectorCurve2d (space @ (units1 :*: units2)))
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (Curve1d units1) (VectorCurve2d (space @ units2)) (VectorCurve2d (space @ units3))
+  Multiplication (Curve units1) (VectorCurve2d (space @ units2)) (VectorCurve2d (space @ units3))
 
 instance
   Multiplication'
     (VectorCurve2d (space @ units1))
-    (Curve1d units2)
+    (Curve units2)
     (VectorCurve2d (space @ (units1 :*: units2)))
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (VectorCurve2d (space @ units1)) (Curve1d units2) (VectorCurve2d (space @ units3))
+  Multiplication (VectorCurve2d (space @ units1)) (Curve units2) (VectorCurve2d (space @ units3))
 
 instance
   Division'
     (VectorCurve2d (space @ units1))
-    (Curve1d units2)
+    (Curve units2)
     (VectorCurve2d (space @ (units1 :/: units2)))
 
 instance
   Units.Quotient units1 units2 units3 =>
-  Division (VectorCurve2d (space @ units1)) (Curve1d units2) (VectorCurve2d (space @ units3))
+  Division (VectorCurve2d (space @ units1)) (Curve units2) (VectorCurve2d (space @ units3))
 
 instance
   space1 ~ space2 =>
   DotMultiplication'
     (VectorCurve2d (space1 @ units1))
     (VectorCurve2d (space2 @ units2))
-    (Curve1d (units1 :*: units2))
+    (Curve (units1 :*: units2))
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
   DotMultiplication
     (VectorCurve2d (space1 @ units1))
     (VectorCurve2d (space2 @ units2))
-    (Curve1d units3)
+    (Curve units3)
 
 constant :: Vector2d (space @ units) -> VectorCurve2d (space @ units)
 new :: Interface curve (space @ units) => curve -> VectorCurve2d (space @ units)
 evaluate :: VectorCurve2d (space @ units) -> Float -> Vector2d (space @ units)
 evaluateBounds :: VectorCurve2d (space @ units) -> Range Unitless -> VectorBounds2d (space @ units)
 derivative :: VectorCurve2d (space @ units) -> VectorCurve2d (space @ units)
-unsafeMagnitude :: VectorCurve2d (space @ units) -> Curve1d units
+unsafeMagnitude :: VectorCurve2d (space @ units) -> Curve units
 transformBy ::
   Transform2d tag (space @ translationUnits) ->
   VectorCurve2d (space @ units) ->

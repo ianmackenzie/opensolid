@@ -79,8 +79,8 @@ import OpenSolid.Axis2d qualified as Axis2d
 import OpenSolid.Bounds2d (Bounds2d)
 import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.Composition
-import OpenSolid.Curve1d (Curve1d)
-import OpenSolid.Curve1d qualified as Curve1d
+import OpenSolid.Curve (Curve)
+import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve2d.FindPoint qualified as FindPoint
 import OpenSolid.Curve2d.IntersectionPoint (IntersectionPoint)
 import OpenSolid.Curve2d.IntersectionPoint qualified as IntersectionPoint
@@ -150,8 +150,8 @@ data Curve2d (coordinateSystem :: CoordinateSystem) where
     Curve2d (space @ units1) ->
     Curve2d (space @ units2)
   XY ::
-    Curve1d units ->
-    Curve1d units ->
+    Curve units ->
+    Curve units ->
     Curve2d (space @ units)
   PlaceIn ::
     Frame2d (global @ units) (Defines local) ->
@@ -324,22 +324,22 @@ instance
   where
   point - curve = constant point - curve
 
-instance Composition (Curve1d Unitless) (Curve2d (space @ units)) (Curve2d (space @ units)) where
-  Parametric outer . Curve1d.Parametric inner = Parametric (outer . inner)
+instance Composition (Curve Unitless) (Curve2d (space @ units)) (Curve2d (space @ units)) where
+  Parametric outer . Curve.Parametric inner = Parametric (outer . inner)
   outer . inner = new (outer :.: inner)
 
-instance Interface (Curve2d (space @ units) :.: Curve1d Unitless) (space @ units) where
+instance Interface (Curve2d (space @ units) :.: Curve Unitless) (space @ units) where
   evaluateImpl (curve2d :.: curve1d) tRange =
-    evaluate curve2d (Curve1d.evaluate curve1d tRange)
+    evaluate curve2d (Curve.evaluate curve1d tRange)
 
   evaluateBoundsImpl (curve2d :.: curve1d) tRange =
-    evaluateBounds curve2d (Curve1d.evaluateBounds curve1d tRange)
+    evaluateBounds curve2d (Curve.evaluateBounds curve1d tRange)
 
   derivativeImpl (curve2d :.: curve1d) =
-    (derivative curve2d . curve1d) * Curve1d.derivative curve1d
+    (derivative curve2d . curve1d) * Curve.derivative curve1d
 
   reverseImpl (curve2d :.: curve1d) =
-    curve2d :.: Curve1d.reverse curve1d
+    curve2d :.: Curve.reverse curve1d
 
   transformByImpl transform (curve2d :.: curve1d) =
     new (transformBy transform curve2d . curve1d)
@@ -374,12 +374,12 @@ instance
   Composition
     (Curve2d UvCoordinates)
     (Surface1d.Function.Function units)
-    (Curve1d units)
+    (Curve units)
   where
-  Surface1d.Function.Parametric outer . Parametric inner = Curve1d.Parametric (outer . inner)
-  outer . inner = Curve1d.new (outer :.: inner)
+  Surface1d.Function.Parametric outer . Parametric inner = Curve.Parametric (outer . inner)
+  outer . inner = Curve.new (outer :.: inner)
 
-instance Curve1d.Interface (Surface1d.Function.Function units :.: Curve2d UvCoordinates) units where
+instance Curve.Interface (Surface1d.Function.Function units :.: Curve2d UvCoordinates) units where
   evaluateImpl (function :.: uvCurve) t =
     Surface1d.Function.evaluate function (evaluate uvCurve t)
 
@@ -400,12 +400,12 @@ new = Curve
 constant :: Point2d (space @ units) -> Curve2d (space @ units)
 constant = Parametric . Expression.constant
 
-xy :: Curve1d units -> Curve1d units -> Curve2d (space @ units)
-xy (Curve1d.Parametric x) (Curve1d.Parametric y) = Parametric (Expression.xy x y)
+xy :: Curve units -> Curve units -> Curve2d (space @ units)
+xy (Curve.Parametric x) (Curve.Parametric y) = Parametric (Expression.xy x y)
 xy x y = XY x y
 
 line :: Point2d (space @ units) -> Point2d (space @ units) -> Curve2d (space @ units)
-line p1 p2 = constant p1 + Curve1d.t * (p2 - p1)
+line p1 p2 = constant p1 + Curve.t * (p2 - p1)
 
 arc ::
   Tolerance units =>
@@ -520,8 +520,8 @@ customArc ::
   Angle ->
   Curve2d (space @ units)
 customArc p0 v1 v2 a b = do
-  let angle = Curve1d.line a b
-  constant p0 + v1 * Curve1d.cos angle + v2 * Curve1d.sin angle
+  let angle = Curve.line a b
+  constant p0 + v1 * Curve.cos angle + v2 * Curve.sin angle
 
 circle :: Point2d (space @ units) -> Qty units -> Curve2d (space @ units)
 circle centerPoint radius = polarArc centerPoint radius Angle.zero Angle.twoPi
@@ -537,8 +537,8 @@ will return a cubic Bezier curve with the given four control points.
 -}
 bezier :: NonEmpty (Point2d (space @ units)) -> Curve2d (space @ units)
 bezier controlPoints = do
-  let x = Curve1d.bezier (NonEmpty.map Point2d.xCoordinate controlPoints)
-  let y = Curve1d.bezier (NonEmpty.map Point2d.yCoordinate controlPoints)
+  let x = Curve.bezier (NonEmpty.map Point2d.xCoordinate controlPoints)
+  let y = Curve.bezier (NonEmpty.map Point2d.yCoordinate controlPoints)
   XY x y
 
 -- | Construct a quadratic Bezier curve from the given control points.
@@ -584,8 +584,8 @@ hermite (Point2d xStart yStart, startDerivatives) (Point2d xEnd yEnd, endDerivat
   let yStartDerivatives = List.map Vector2d.yComponent startDerivatives
   let xEndDerivatives = List.map Vector2d.xComponent endDerivatives
   let yEndDerivatives = List.map Vector2d.yComponent endDerivatives
-  let x = Curve1d.hermite (xStart, xStartDerivatives) (xEnd, xEndDerivatives)
-  let y = Curve1d.hermite (yStart, yStartDerivatives) (yEnd, yEndDerivatives)
+  let x = Curve.hermite (xStart, xStartDerivatives) (xEnd, xEndDerivatives)
+  let y = Curve.hermite (yStart, yStartDerivatives) (yEnd, yEndDerivatives)
   XY x y
 
 startPoint :: Curve2d (space @ units) -> Point2d (space @ units)
@@ -593,7 +593,7 @@ startPoint curve = case curve of
   Curve c -> startPointImpl c
   Parametric expresssion -> Expression.evaluate expresssion 0.0
   Coerce c -> Units.coerce (startPoint c)
-  XY x y -> Point2d.xy (Curve1d.evaluate x 0.0) (Curve1d.evaluate y 0.0)
+  XY x y -> Point2d.xy (Curve.evaluate x 0.0) (Curve.evaluate y 0.0)
   PlaceIn frame c -> Point2d.placeIn frame (startPoint c)
   Addition c v -> startPoint c + VectorCurve2d.startValue v
   Subtraction c v -> startPoint c - VectorCurve2d.startValue v
@@ -604,7 +604,7 @@ endPoint curve = case curve of
   Curve c -> endPointImpl c
   Parametric expresssion -> Expression.evaluate expresssion 1.0
   Coerce c -> Units.coerce (endPoint c)
-  XY x y -> Point2d.xy (Curve1d.evaluate x 1.0) (Curve1d.evaluate y 1.0)
+  XY x y -> Point2d.xy (Curve.evaluate x 1.0) (Curve.evaluate y 1.0)
   PlaceIn frame c -> Point2d.placeIn frame (endPoint c)
   Addition c v -> endPoint c + VectorCurve2d.endValue v
   Subtraction c v -> endPoint c - VectorCurve2d.endValue v
@@ -615,7 +615,7 @@ evaluate curve tValue = case curve of
   Curve c -> evaluateImpl c tValue
   Parametric expresssion -> Expression.evaluate expresssion tValue
   Coerce c -> Units.coerce (evaluate c tValue)
-  XY x y -> Point2d.xy (Curve1d.evaluate x tValue) (Curve1d.evaluate y tValue)
+  XY x y -> Point2d.xy (Curve.evaluate x tValue) (Curve.evaluate y tValue)
   PlaceIn frame c -> Point2d.placeIn frame (evaluate c tValue)
   Addition c v -> evaluate c tValue + VectorCurve2d.evaluate v tValue
   Subtraction c v -> evaluate c tValue - VectorCurve2d.evaluate v tValue
@@ -626,7 +626,7 @@ evaluateBounds curve tRange = case curve of
   Curve c -> evaluateBoundsImpl c tRange
   Parametric expresssion -> Expression.evaluateBounds expresssion tRange
   Coerce c -> Units.coerce (evaluateBounds c tRange)
-  XY x y -> Bounds2d.xy (Curve1d.evaluateBounds x tRange) (Curve1d.evaluateBounds y tRange)
+  XY x y -> Bounds2d.xy (Curve.evaluateBounds x tRange) (Curve.evaluateBounds y tRange)
   PlaceIn frame c -> Bounds2d.placeIn frame (evaluateBounds c tRange)
   Addition c v -> evaluateBounds c tRange + VectorCurve2d.evaluateBounds v tRange
   Subtraction c v -> evaluateBounds c tRange - VectorCurve2d.evaluateBounds v tRange
@@ -636,7 +636,7 @@ derivative :: Curve2d (space @ units) -> VectorCurve2d (space @ units)
 derivative curve = case curve of
   Curve c -> derivativeImpl c
   Parametric expresssion -> VectorCurve2d.Parametric (Expression.curveDerivative expresssion)
-  XY x y -> VectorCurve2d.xy (Curve1d.derivative x) (Curve1d.derivative y)
+  XY x y -> VectorCurve2d.xy (Curve.derivative x) (Curve.derivative y)
   Coerce c -> Units.coerce (derivative c)
   PlaceIn frame c -> VectorCurve2d.placeIn frame (derivative c)
   Addition c v -> derivative c + VectorCurve2d.derivative v
@@ -647,7 +647,7 @@ reverse :: Curve2d (space @ units) -> Curve2d (space @ units)
 reverse curve = case curve of
   Curve c -> Curve (reverseImpl c)
   Parametric expression -> Parametric (expression . Expression.r)
-  XY x y -> XY (Curve1d.reverse x) (Curve1d.reverse y)
+  XY x y -> XY (Curve.reverse x) (Curve.reverse y)
   Coerce c -> Units.coerce (reverse c)
   PlaceIn frame c -> PlaceIn frame (reverse c)
   Addition c v -> reverse c + VectorCurve2d.reverse v
@@ -659,7 +659,7 @@ bounds curve = case curve of
   Curve c -> boundsImpl c
   Parametric expression -> Expression.evaluateBounds expression Range.unit
   Coerce c -> Units.coerce (bounds c)
-  XY x y -> Bounds2d.xy (Curve1d.evaluateBounds x Range.unit) (Curve1d.evaluateBounds y Range.unit)
+  XY x y -> Bounds2d.xy (Curve.evaluateBounds x Range.unit) (Curve.evaluateBounds y Range.unit)
   PlaceIn frame c -> Bounds2d.placeIn frame (bounds c)
   Addition c v -> bounds c + VectorCurve2d.evaluateBounds v Range.unit
   Subtraction c v -> bounds c - VectorCurve2d.evaluateBounds v Range.unit
@@ -680,13 +680,13 @@ tangentDirection curve =
     Success directionCurve -> Success directionCurve
     Failure VectorCurve2d.HasZero -> Failure HasDegeneracy
 
-signedDistanceAlong :: Axis2d (space @ units) -> Curve2d (space @ units) -> Curve1d units
+signedDistanceAlong :: Axis2d (space @ units) -> Curve2d (space @ units) -> Curve units
 signedDistanceAlong axis curve = (curve - Axis2d.originPoint axis) <> Axis2d.direction axis
 
-xCoordinate :: Curve2d (space @ units) -> Curve1d units
+xCoordinate :: Curve2d (space @ units) -> Curve units
 xCoordinate = signedDistanceAlong Axis2d.x
 
-yCoordinate :: Curve2d (space @ units) -> Curve1d units
+yCoordinate :: Curve2d (space @ units) -> Curve units
 yCoordinate = signedDistanceAlong Axis2d.y
 
 findPoint ::
@@ -1005,7 +1005,7 @@ scaleAlongOwn = Transform2d.scaleAlongOwnImpl transformBy
 curvature' ::
   Tolerance units =>
   Curve2d (space @ units) ->
-  Result HasDegeneracy (Curve1d (Unitless :/: units))
+  Result HasDegeneracy (Curve (Unitless :/: units))
 curvature' curve = Result.do
   let firstDerivative = derivative curve
   let secondDerivative = VectorCurve2d.derivative firstDerivative
@@ -1015,7 +1015,7 @@ curvature' curve = Result.do
 curvature ::
   (Tolerance units1, Units.Inverse units1 units2) =>
   Curve2d (space @ units1) ->
-  Result HasDegeneracy (Curve1d units2)
+  Result HasDegeneracy (Curve units2)
 curvature curve = Result.map Units.specialize (curvature' curve)
 
 removeStartDegeneracy ::
@@ -1169,13 +1169,13 @@ medialAxis curve1 curve2 = do
 arcLengthParameterization ::
   Tolerance units =>
   Curve2d (space @ units) ->
-  Result HasDegeneracy (Curve1d Unitless, Qty units)
+  Result HasDegeneracy (Curve Unitless, Qty units)
 arcLengthParameterization curve =
   case VectorCurve2d.magnitude (derivative curve) of
     Failure VectorCurve2d.HasZero -> Failure HasDegeneracy
     Success derivativeMagnitude -> Success (ArcLength.parameterization derivativeMagnitude)
 
-unsafeArcLengthParameterization :: Curve2d (space @ units) -> (Curve1d Unitless, Qty units)
+unsafeArcLengthParameterization :: Curve2d (space @ units) -> (Curve Unitless, Qty units)
 unsafeArcLengthParameterization curve =
   ArcLength.parameterization (VectorCurve2d.unsafeMagnitude (derivative curve))
 

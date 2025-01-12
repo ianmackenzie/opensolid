@@ -42,17 +42,16 @@ import OpenSolid.Basis3d (Basis3d)
 import OpenSolid.Basis3d qualified as Basis3d
 import OpenSolid.Composition
 import OpenSolid.CoordinateSystem (Space)
-import OpenSolid.Curve1d (Curve1d)
-import OpenSolid.Curve1d qualified as Curve1d
-import OpenSolid.Curve1d.Zero qualified as Curve1d.Zero
-import OpenSolid.Curve1d.Zeros qualified as Curve1d.Zeros
+import OpenSolid.Curve (Curve)
+import OpenSolid.Curve qualified as Curve
+import OpenSolid.Curve.Zero qualified as Curve.Zero
+import OpenSolid.Curve.Zeros qualified as Curve.Zeros
 import OpenSolid.Direction3d (Direction3d)
 import OpenSolid.Direction3d qualified as Direction3d
 import {-# SOURCE #-} OpenSolid.DirectionCurve3d (DirectionCurve3d)
 import OpenSolid.Error qualified as Error
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
-import OpenSolid.Expression.Curve1d qualified as Expression.Curve1d
 import OpenSolid.Expression.VectorCurve3d qualified as Expression.VectorCurve3d
 import OpenSolid.Frame3d (Frame3d)
 import OpenSolid.Frame3d qualified as Frame3d
@@ -103,9 +102,9 @@ data VectorCurve3d (coordinateSystem :: CoordinateSystem) where
     VectorCurve3d (space @ units) ->
     VectorCurve3d (space @ units)
   XYZ ::
-    Curve1d units ->
-    Curve1d units ->
-    Curve1d units ->
+    Curve units ->
+    Curve units ->
+    Curve units ->
     VectorCurve3d (space @ units)
   Negated ::
     VectorCurve3d (space @ units) ->
@@ -119,16 +118,16 @@ data VectorCurve3d (coordinateSystem :: CoordinateSystem) where
     VectorCurve3d (space @ units) ->
     VectorCurve3d (space @ units)
   Product1d3d' ::
-    Curve1d units1 ->
+    Curve units1 ->
     VectorCurve3d (space @ units2) ->
     VectorCurve3d (space @ (units1 :*: units2))
   Product3d1d' ::
     VectorCurve3d (space @ units1) ->
-    Curve1d units2 ->
+    Curve units2 ->
     VectorCurve3d (space @ (units1 :*: units2))
   Quotient' ::
     VectorCurve3d (space @ units1) ->
-    Curve1d units2 ->
+    Curve units2 ->
     VectorCurve3d (space @ (units1 :/: units2))
   CrossProduct' ::
     VectorCurve3d (space @ units1) ->
@@ -268,17 +267,17 @@ instance
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (Curve1d units1) (VectorCurve3d (space @ units2)) (VectorCurve3d (space @ units3))
+  Multiplication (Curve units1) (VectorCurve3d (space @ units2)) (VectorCurve3d (space @ units3))
   where
   lhs * rhs = Units.specialize (lhs .*. rhs)
 
 instance
   Multiplication'
-    (Curve1d units1)
+    (Curve units1)
     (VectorCurve3d (space @ units2))
     (VectorCurve3d (space @ (units1 :*: units2)))
   where
-  Curve1d.Parametric lhs .*. Parametric rhs = Parametric (lhs .*. rhs)
+  Curve.Parametric lhs .*. Parametric rhs = Parametric (lhs .*. rhs)
   lhs .*. rhs = Product1d3d' lhs rhs
 
 instance
@@ -293,21 +292,21 @@ instance
     (VectorCurve3d (space @ units2))
     (VectorCurve3d (space @ (units1 :*: units2)))
   where
-  c1 .*. c2 = Curve1d.constant c1 .*. c2
+  c1 .*. c2 = Curve.constant c1 .*. c2
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (VectorCurve3d (space @ units1)) (Curve1d units2) (VectorCurve3d (space @ units3))
+  Multiplication (VectorCurve3d (space @ units1)) (Curve units2) (VectorCurve3d (space @ units3))
   where
   lhs * rhs = Units.specialize (lhs .*. rhs)
 
 instance
   Multiplication'
     (VectorCurve3d (space @ units1))
-    (Curve1d units2)
+    (Curve units2)
     (VectorCurve3d (space @ (units1 :*: units2)))
   where
-  Parametric lhs .*. Curve1d.Parametric rhs = Parametric (lhs .*. rhs)
+  Parametric lhs .*. Curve.Parametric rhs = Parametric (lhs .*. rhs)
   lhs .*. rhs = Product3d1d' lhs rhs
 
 instance
@@ -322,21 +321,21 @@ instance
     (Qty units2)
     (VectorCurve3d (space @ (units1 :*: units2)))
   where
-  curve .*. value = curve .*. Curve1d.constant value
+  curve .*. value = curve .*. Curve.constant value
 
 instance
   Units.Quotient units1 units2 units3 =>
-  Division (VectorCurve3d (space @ units1)) (Curve1d units2) (VectorCurve3d (space @ units3))
+  Division (VectorCurve3d (space @ units1)) (Curve units2) (VectorCurve3d (space @ units3))
   where
   lhs / rhs = Units.specialize (lhs ./. rhs)
 
 instance
   Division'
     (VectorCurve3d (space @ units1))
-    (Curve1d units2)
+    (Curve units2)
     (VectorCurve3d (space @ (units1 :/: units2)))
   where
-  Parametric lhs ./. Curve1d.Parametric rhs = Parametric (lhs ./. rhs)
+  Parametric lhs ./. Curve.Parametric rhs = Parametric (lhs ./. rhs)
   lhs ./. rhs = Quotient' lhs rhs
 
 instance
@@ -351,13 +350,13 @@ instance
     (Qty units2)
     (VectorCurve3d (space @ (units1 :/: units2)))
   where
-  curve ./. value = curve ./. Curve1d.constant value
+  curve ./. value = curve ./. Curve.constant value
 
 data DotProductOf space units1 units2
   = DotProductOf (VectorCurve3d (space @ units1)) (VectorCurve3d (space @ units2))
   deriving (Show)
 
-instance Curve1d.Interface (DotProductOf space units1 units2) (units1 :*: units2) where
+instance Curve.Interface (DotProductOf space units1 units2) (units1 :*: units2) where
   evaluateImpl (DotProductOf c1 c2) tValue =
     evaluate c1 tValue .<>. evaluate c2 tValue
 
@@ -372,7 +371,7 @@ instance
   DotMultiplication
     (VectorCurve3d (space1 @ units1))
     (VectorCurve3d (space2 @ units2))
-    (Curve1d units3)
+    (Curve units3)
   where
   lhs <> rhs = Units.specialize (lhs .<>. rhs)
 
@@ -381,14 +380,14 @@ instance
   DotMultiplication'
     (VectorCurve3d (space1 @ units1))
     (VectorCurve3d (space2 @ units2))
-    (Curve1d (units1 :*: units2))
+    (Curve (units1 :*: units2))
   where
-  Parametric lhs .<>. Parametric rhs = Curve1d.Parametric (lhs .<>. rhs)
-  lhs .<>. rhs = Curve1d.new (DotProductOf lhs rhs)
+  Parametric lhs .<>. Parametric rhs = Curve.Parametric (lhs .<>. rhs)
+  lhs .<>. rhs = Curve.new (DotProductOf lhs rhs)
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
-  DotMultiplication (VectorCurve3d (space1 @ units1)) (Vector3d (space2 @ units2)) (Curve1d units3)
+  DotMultiplication (VectorCurve3d (space1 @ units1)) (Vector3d (space2 @ units2)) (Curve units3)
   where
   lhs <> rhs = Units.specialize (lhs .<>. rhs)
 
@@ -397,13 +396,13 @@ instance
   DotMultiplication'
     (VectorCurve3d (space1 @ units1))
     (Vector3d (space2 @ units2))
-    (Curve1d (units1 :*: units2))
+    (Curve (units1 :*: units2))
   where
   curve .<>. vector = curve .<>. constant vector
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
-  DotMultiplication (Vector3d (space1 @ units1)) (VectorCurve3d (space2 @ units2)) (Curve1d units3)
+  DotMultiplication (Vector3d (space1 @ units1)) (VectorCurve3d (space2 @ units2)) (Curve units3)
   where
   lhs <> rhs = Units.specialize (lhs .<>. rhs)
 
@@ -412,13 +411,13 @@ instance
   DotMultiplication'
     (Vector3d (space1 @ units1))
     (VectorCurve3d (space2 @ units2))
-    (Curve1d (units1 :*: units2))
+    (Curve (units1 :*: units2))
   where
   vector .<>. curve = constant vector .<>. curve
 
 instance
   space1 ~ space2 =>
-  DotMultiplication (VectorCurve3d (space1 @ units)) (Direction3d space2) (Curve1d units)
+  DotMultiplication (VectorCurve3d (space1 @ units)) (Direction3d space2) (Curve units)
   where
   lhs <> rhs = Units.specialize (lhs .<>. rhs)
 
@@ -427,13 +426,13 @@ instance
   DotMultiplication'
     (VectorCurve3d (space1 @ units))
     (Direction3d space2)
-    (Curve1d (units :*: Unitless))
+    (Curve (units :*: Unitless))
   where
   curve .<>. direction3d = curve .<>. Vector3d.unit direction3d
 
 instance
   space1 ~ space2 =>
-  DotMultiplication (Direction3d space1) (VectorCurve3d (space2 @ units)) (Curve1d units)
+  DotMultiplication (Direction3d space1) (VectorCurve3d (space2 @ units)) (Curve units)
   where
   lhs <> rhs = Units.specialize (lhs .<>. rhs)
 
@@ -442,7 +441,7 @@ instance
   DotMultiplication'
     (Direction3d space1)
     (VectorCurve3d (space2 @ units))
-    (Curve1d (Unitless :*: units))
+    (Curve (Unitless :*: units))
   where
   direction3d .<>. curve = Vector3d.unit direction3d .<>. curve
 
@@ -539,26 +538,26 @@ instance
 
 instance
   Composition
-    (Curve1d Unitless)
+    (Curve Unitless)
     (VectorCurve3d (space @ units))
     (VectorCurve3d (space @ units))
   where
-  Parametric outer . Curve1d.Parametric inner = Parametric (outer . inner)
+  Parametric outer . Curve.Parametric inner = Parametric (outer . inner)
   outer . inner = new (outer :.: inner)
 
 instance
   Interface
-    (VectorCurve3d (space @ units) :.: Curve1d Unitless)
+    (VectorCurve3d (space @ units) :.: Curve Unitless)
     (space @ units)
   where
   evaluateImpl (vectorCurve3d :.: curve1d) tValue =
-    evaluate vectorCurve3d (Curve1d.evaluate curve1d tValue)
+    evaluate vectorCurve3d (Curve.evaluate curve1d tValue)
 
   evaluateBoundsImpl (vectorCurve3d :.: curve1d) tRange =
-    evaluateBounds vectorCurve3d (Curve1d.evaluateBounds curve1d tRange)
+    evaluateBounds vectorCurve3d (Curve.evaluateBounds curve1d tRange)
 
   derivativeImpl (vectorCurve3d :.: curve1d) =
-    (derivative vectorCurve3d . curve1d) * Curve1d.derivative curve1d
+    (derivative vectorCurve3d . curve1d) * Curve.derivative curve1d
 
   transformByImpl transform (vectorCurve3d :.: curve1d) =
     new (transformBy transform vectorCurve3d :.: curve1d)
@@ -621,8 +620,8 @@ zero = constant Vector3d.zero
 constant :: Vector3d (space @ units) -> VectorCurve3d (space @ units)
 constant = Parametric . Expression.constant
 
-xyz :: Curve1d units -> Curve1d units -> Curve1d units -> VectorCurve3d (space @ units)
-xyz (Curve1d.Parametric x) (Curve1d.Parametric y) (Curve1d.Parametric z) =
+xyz :: Curve units -> Curve units -> Curve units -> VectorCurve3d (space @ units)
+xyz (Curve.Parametric x) (Curve.Parametric y) (Curve.Parametric z) =
   Parametric (Expression.xyz x y z)
 xyz x y z = XYZ x y z
 
@@ -642,10 +641,8 @@ arc v1 v2 a b
   | v1 == Vector3d.zero && v2 == Vector3d.zero = zero
   | a == b = constant (Angle.cos a * v1 + Angle.sin a * v2)
   | otherwise = do
-      let angle = Expression.Curve1d.constant a + Expression.t * Expression.Curve1d.constant (b - a)
-      Parametric $
-        Expression.VectorCurve3d.constant v1 * Expression.cos angle
-          + Expression.VectorCurve3d.constant v2 * Expression.sin angle
+      let angle = Curve.line a b
+      v1 * Curve.cos angle + v2 * Curve.sin angle
 
 quadraticSpline ::
   Vector3d (space @ units) ->
@@ -680,13 +677,13 @@ evaluate curve tValue = case curve of
   Coerce c -> Units.coerce (evaluate c tValue)
   Reversed c -> evaluate c (1.0 - tValue)
   XYZ x y z ->
-    Vector3d.xyz (Curve1d.evaluate x tValue) (Curve1d.evaluate y tValue) (Curve1d.evaluate z tValue)
+    Vector3d.xyz (Curve.evaluate x tValue) (Curve.evaluate y tValue) (Curve.evaluate z tValue)
   Negated c -> negate (evaluate c tValue)
   Sum c1 c2 -> evaluate c1 tValue + evaluate c2 tValue
   Difference c1 c2 -> evaluate c1 tValue - evaluate c2 tValue
-  Product1d3d' c1 c2 -> Curve1d.evaluate c1 tValue .*. evaluate c2 tValue
-  Product3d1d' c1 c2 -> evaluate c1 tValue .*. Curve1d.evaluate c2 tValue
-  Quotient' c1 c2 -> evaluate c1 tValue ./. Curve1d.evaluate c2 tValue
+  Product1d3d' c1 c2 -> Curve.evaluate c1 tValue .*. evaluate c2 tValue
+  Product3d1d' c1 c2 -> evaluate c1 tValue .*. Curve.evaluate c2 tValue
+  Quotient' c1 c2 -> evaluate c1 tValue ./. Curve.evaluate c2 tValue
   CrossProduct' c1 c2 -> evaluate c1 tValue .><. evaluate c2 tValue
   PlaceInBasis basis c -> Vector3d.placeInBasis basis (evaluate c tValue)
   Transformed transform c -> Vector3d.transformBy transform (evaluate c tValue)
@@ -699,15 +696,15 @@ evaluateBounds curve tRange = case curve of
   Reversed c -> evaluateBounds c (1.0 - tRange)
   XYZ x y z ->
     VectorBounds3d
-      (Curve1d.evaluateBounds x tRange)
-      (Curve1d.evaluateBounds y tRange)
-      (Curve1d.evaluateBounds z tRange)
+      (Curve.evaluateBounds x tRange)
+      (Curve.evaluateBounds y tRange)
+      (Curve.evaluateBounds z tRange)
   Negated c -> negate (evaluateBounds c tRange)
   Sum c1 c2 -> evaluateBounds c1 tRange + evaluateBounds c2 tRange
   Difference c1 c2 -> evaluateBounds c1 tRange - evaluateBounds c2 tRange
-  Product1d3d' c1 c2 -> Curve1d.evaluateBounds c1 tRange .*. evaluateBounds c2 tRange
-  Product3d1d' c1 c2 -> evaluateBounds c1 tRange .*. Curve1d.evaluateBounds c2 tRange
-  Quotient' c1 c2 -> evaluateBounds c1 tRange ./. Curve1d.evaluateBounds c2 tRange
+  Product1d3d' c1 c2 -> Curve.evaluateBounds c1 tRange .*. evaluateBounds c2 tRange
+  Product3d1d' c1 c2 -> evaluateBounds c1 tRange .*. Curve.evaluateBounds c2 tRange
+  Quotient' c1 c2 -> evaluateBounds c1 tRange ./. Curve.evaluateBounds c2 tRange
   CrossProduct' c1 c2 -> evaluateBounds c1 tRange .><. evaluateBounds c2 tRange
   PlaceInBasis basis c -> VectorBounds3d.placeInBasis basis (evaluateBounds c tRange)
   Transformed transform c -> VectorBounds3d.transformBy transform (evaluateBounds c tRange)
@@ -720,14 +717,14 @@ derivative curve = case curve of
   Parametric expression -> Parametric (Expression.curveDerivative expression)
   Coerce c -> Units.coerce (derivative c)
   Reversed c -> negate (reverse (derivative c))
-  XYZ x y z -> XYZ (Curve1d.derivative x) (Curve1d.derivative y) (Curve1d.derivative z)
+  XYZ x y z -> XYZ (Curve.derivative x) (Curve.derivative y) (Curve.derivative z)
   Negated c -> -(derivative c)
   Sum c1 c2 -> derivative c1 + derivative c2
   Difference c1 c2 -> derivative c1 - derivative c2
-  Product1d3d' c1 c2 -> Curve1d.derivative c1 .*. c2 + c1 .*. derivative c2
-  Product3d1d' c1 c2 -> derivative c1 .*. c2 + c1 .*. Curve1d.derivative c2
+  Product1d3d' c1 c2 -> Curve.derivative c1 .*. c2 + c1 .*. derivative c2
+  Product3d1d' c1 c2 -> derivative c1 .*. c2 + c1 .*. Curve.derivative c2
   Quotient' c1 c2 ->
-    (derivative c1 .*. c2 - c1 .*. Curve1d.derivative c2) .!/.! Curve1d.squared' c2
+    (derivative c1 .*. c2 - c1 .*. Curve.derivative c2) .!/.! Curve.squared' c2
   CrossProduct' c1 c2 -> derivative c1 .><. c2 + c1 .><. derivative c2
   PlaceInBasis basis c -> PlaceInBasis basis (derivative c)
   Transformed transform c -> transformBy transform (derivative c)
@@ -740,13 +737,13 @@ reverse curve = case curve of
   Parametric expression -> Parametric (expression . Expression.r)
   Coerce c -> Units.coerce (reverse c)
   Reversed c -> c
-  XYZ x y z -> XYZ (Curve1d.reverse x) (Curve1d.reverse y) (Curve1d.reverse z)
+  XYZ x y z -> XYZ (Curve.reverse x) (Curve.reverse y) (Curve.reverse z)
   Negated c -> Negated (reverse c)
   Sum c1 c2 -> Sum (reverse c1) (reverse c2)
   Difference c1 c2 -> Difference (reverse c1) (reverse c2)
-  Product1d3d' c1 c2 -> Product1d3d' (Curve1d.reverse c1) (reverse c2)
-  Product3d1d' c1 c2 -> Product3d1d' (reverse c1) (Curve1d.reverse c2)
-  Quotient' c1 c2 -> Quotient' (reverse c1) (Curve1d.reverse c2)
+  Product1d3d' c1 c2 -> Product1d3d' (Curve.reverse c1) (reverse c2)
+  Product3d1d' c1 c2 -> Product3d1d' (reverse c1) (Curve.reverse c2)
+  Quotient' c1 c2 -> Quotient' (reverse c1) (Curve.reverse c2)
   CrossProduct' c1 c2 -> CrossProduct' (reverse c1) (reverse c2)
   PlaceInBasis basis c -> PlaceInBasis basis (reverse c)
   Transformed transform c -> Transformed transform (reverse c)
@@ -756,7 +753,7 @@ newtype SquaredMagnitude' (coordinateSystem :: CoordinateSystem)
 
 deriving instance Show (SquaredMagnitude' (space @ units))
 
-instance Curve1d.Interface (SquaredMagnitude' (space @ units)) (units :*: units) where
+instance Curve.Interface (SquaredMagnitude' (space @ units)) (units :*: units) where
   evaluateImpl (SquaredMagnitude' curve) tValue =
     Vector3d.squaredMagnitude' (evaluate curve tValue)
 
@@ -766,20 +763,20 @@ instance Curve1d.Interface (SquaredMagnitude' (space @ units)) (units :*: units)
   derivativeImpl (SquaredMagnitude' curve) =
     2.0 * curve .<>. derivative curve
 
-squaredMagnitude :: Units.Squared units1 units2 => VectorCurve3d (space @ units1) -> Curve1d units2
+squaredMagnitude :: Units.Squared units1 units2 => VectorCurve3d (space @ units1) -> Curve units2
 squaredMagnitude curve = Units.specialize (squaredMagnitude' curve)
 
-squaredMagnitude' :: VectorCurve3d (space @ units) -> Curve1d (units :*: units)
+squaredMagnitude' :: VectorCurve3d (space @ units) -> Curve (units :*: units)
 squaredMagnitude' (Parametric expression) =
-  Curve1d.Parametric (Expression.VectorCurve3d.squaredMagnitude' expression)
-squaredMagnitude' curve = Curve1d.new (SquaredMagnitude' curve)
+  Curve.Parametric (Expression.VectorCurve3d.squaredMagnitude' expression)
+squaredMagnitude' curve = Curve.new (SquaredMagnitude' curve)
 
 newtype NonZeroMagnitude (coordinateSystem :: CoordinateSystem)
   = NonZeroMagnitude (VectorCurve3d coordinateSystem)
 
 deriving instance Show (NonZeroMagnitude (space @ units))
 
-instance Curve1d.Interface (NonZeroMagnitude (space @ units)) units where
+instance Curve.Interface (NonZeroMagnitude (space @ units)) units where
   evaluateImpl (NonZeroMagnitude curve) tValue =
     Vector3d.magnitude (evaluate curve tValue)
 
@@ -787,16 +784,16 @@ instance Curve1d.Interface (NonZeroMagnitude (space @ units)) units where
     VectorBounds3d.magnitude (evaluateBounds curve tRange)
 
   derivativeImpl (NonZeroMagnitude curve) =
-    (derivative curve .<>. curve) .!/! Curve1d.new (NonZeroMagnitude curve)
+    (derivative curve .<>. curve) .!/! Curve.new (NonZeroMagnitude curve)
 
-unsafeMagnitude :: VectorCurve3d (space @ units) -> Curve1d units
+unsafeMagnitude :: VectorCurve3d (space @ units) -> Curve units
 unsafeMagnitude (Parametric expression) =
-  Curve1d.Parametric (Expression.VectorCurve3d.magnitude expression)
-unsafeMagnitude curve = Curve1d.new (NonZeroMagnitude curve)
+  Curve.Parametric (Expression.VectorCurve3d.magnitude expression)
+unsafeMagnitude curve = Curve.new (NonZeroMagnitude curve)
 
 data HasZero = HasZero deriving (Eq, Show, Error.Message)
 
-magnitude :: Tolerance units => VectorCurve3d (space @ units) -> Result HasZero (Curve1d units)
+magnitude :: Tolerance units => VectorCurve3d (space @ units) -> Result HasZero (Curve units)
 magnitude curve =
   case zeros curve of
     Success [] -> Success (unsafeMagnitude curve)
@@ -812,18 +809,18 @@ hasZero curve = Tolerance.using Tolerance.squared' (squaredMagnitude' curve ^ Qt
 
 zeros :: Tolerance units => VectorCurve3d (space @ units) -> Result Zeros.Error (List Float)
 zeros curve =
-  case Tolerance.using Tolerance.squared' (Curve1d.zeros (squaredMagnitude' curve)) of
-    Success zeros1d -> Success (List.map Curve1d.Zero.location zeros1d)
-    Failure Curve1d.Zeros.ZeroEverywhere -> Failure Zeros.ZeroEverywhere
-    Failure Curve1d.Zeros.HigherOrderZero -> Failure Zeros.HigherOrderZero
+  case Tolerance.using Tolerance.squared' (Curve.zeros (squaredMagnitude' curve)) of
+    Success zeros1d -> Success (List.map Curve.Zero.location zeros1d)
+    Failure Curve.Zeros.ZeroEverywhere -> Failure Zeros.ZeroEverywhere
+    Failure Curve.Zeros.HigherOrderZero -> Failure Zeros.HigherOrderZero
 
-xComponent :: VectorCurve3d (space @ units) -> Curve1d units
+xComponent :: VectorCurve3d (space @ units) -> Curve units
 xComponent curve = curve <> Direction3d.x
 
-yComponent :: VectorCurve3d (space @ units) -> Curve1d units
+yComponent :: VectorCurve3d (space @ units) -> Curve units
 yComponent curve = curve <> Direction3d.y
 
-zComponent :: VectorCurve3d (space @ units) -> Curve1d units
+zComponent :: VectorCurve3d (space @ units) -> Curve units
 zComponent curve = curve <> Direction3d.z
 
 direction ::

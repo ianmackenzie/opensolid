@@ -21,7 +21,7 @@ where
 
 import OpenSolid.Basis3d (Basis3d)
 import OpenSolid.Basis3d qualified as Basis3d
-import OpenSolid.Curve1d (Curve1d)
+import OpenSolid.Curve (Curve)
 import OpenSolid.Direction3d (Direction3d)
 import OpenSolid.Direction3d qualified as Direction3d
 import OpenSolid.DirectionBounds3d (DirectionBounds3d)
@@ -119,7 +119,7 @@ instance
 
 instance
   Multiplication
-    (Curve1d units)
+    (Curve units)
     (DirectionCurve3d space)
     (VectorCurve3d (space @ units))
   where
@@ -127,7 +127,7 @@ instance
 
 instance
   Multiplication'
-    (Curve1d units)
+    (Curve units)
     (DirectionCurve3d space)
     (VectorCurve3d (space @ (units :*: Unitless)))
   where
@@ -136,7 +136,7 @@ instance
 instance
   Multiplication
     (DirectionCurve3d space)
-    (Curve1d units)
+    (Curve units)
     (VectorCurve3d (space @ units))
   where
   DirectionCurve3d vectorCurve * scalarCurve = vectorCurve * scalarCurve
@@ -144,14 +144,14 @@ instance
 instance
   Multiplication'
     (DirectionCurve3d space)
-    (Curve1d units)
+    (Curve units)
     (VectorCurve3d (space @ (Unitless :*: units)))
   where
   DirectionCurve3d vectorCurve .*. scalarCurve = vectorCurve .*. scalarCurve
 
 instance
   space1 ~ space2 =>
-  DotMultiplication (DirectionCurve3d space1) (DirectionCurve3d space2) (Curve1d Unitless)
+  DotMultiplication (DirectionCurve3d space1) (DirectionCurve3d space2) (Curve Unitless)
   where
   lhs <> rhs = Units.specialize (lhs .<>. rhs)
 
@@ -160,13 +160,13 @@ instance
   DotMultiplication'
     (DirectionCurve3d space1)
     (DirectionCurve3d space2)
-    (Curve1d (Unitless :*: Unitless))
+    (Curve (Unitless :*: Unitless))
   where
   DirectionCurve3d curve1 .<>. DirectionCurve3d curve2 = curve1 .<>. curve2
 
 instance
   space1 ~ space2 =>
-  DotMultiplication (DirectionCurve3d space1) (VectorCurve3d (space2 @ units)) (Curve1d units)
+  DotMultiplication (DirectionCurve3d space1) (VectorCurve3d (space2 @ units)) (Curve units)
   where
   lhs <> rhs = Units.specialize (lhs .<>. rhs)
 
@@ -175,13 +175,13 @@ instance
   DotMultiplication'
     (DirectionCurve3d space1)
     (VectorCurve3d (space2 @ units))
-    (Curve1d (Unitless :*: units))
+    (Curve (Unitless :*: units))
   where
   DirectionCurve3d curve1 .<>. curve2 = curve1 .<>. curve2
 
 instance
   space1 ~ space2 =>
-  DotMultiplication (VectorCurve3d (space1 @ units)) (DirectionCurve3d space2) (Curve1d units)
+  DotMultiplication (VectorCurve3d (space1 @ units)) (DirectionCurve3d space2) (Curve units)
   where
   lhs <> rhs = Units.specialize (lhs .<>. rhs)
 
@@ -190,13 +190,13 @@ instance
   DotMultiplication'
     (VectorCurve3d (space1 @ units))
     (DirectionCurve3d space2)
-    (Curve1d (units :*: Unitless))
+    (Curve (units :*: Unitless))
   where
   curve1 .<>. DirectionCurve3d curve2 = curve1 .<>. curve2
 
 instance
   space1 ~ space2 =>
-  DotMultiplication (DirectionCurve3d space1) (Direction3d space2) (Curve1d Unitless)
+  DotMultiplication (DirectionCurve3d space1) (Direction3d space2) (Curve Unitless)
   where
   lhs <> rhs = Units.specialize (lhs .<>. rhs)
 
@@ -205,13 +205,13 @@ instance
   DotMultiplication'
     (DirectionCurve3d space1)
     (Direction3d space2)
-    (Curve1d (Unitless :*: Unitless))
+    (Curve (Unitless :*: Unitless))
   where
   DirectionCurve3d curve .<>. direction = curve .<>. direction
 
 instance
   space1 ~ space2 =>
-  DotMultiplication (Direction3d space1) (DirectionCurve3d space2) (Curve1d Unitless)
+  DotMultiplication (Direction3d space1) (DirectionCurve3d space2) (Curve Unitless)
   where
   lhs <> rhs = Units.specialize (lhs .<>. rhs)
 
@@ -220,13 +220,13 @@ instance
   DotMultiplication'
     (Direction3d space1)
     (DirectionCurve3d space2)
-    (Curve1d (Unitless :*: Unitless))
+    (Curve (Unitless :*: Unitless))
   where
   direction .<>. DirectionCurve3d curve = direction .<>. curve
 
 instance
   space1 ~ space2 =>
-  DotMultiplication (DirectionCurve3d space1) (Vector3d (space2 @ units)) (Curve1d units)
+  DotMultiplication (DirectionCurve3d space1) (Vector3d (space2 @ units)) (Curve units)
   where
   lhs <> rhs = Units.specialize (lhs .<>. rhs)
 
@@ -235,13 +235,13 @@ instance
   DotMultiplication'
     (DirectionCurve3d space1)
     (Vector3d (space2 @ units))
-    (Curve1d (Unitless :*: units))
+    (Curve (Unitless :*: units))
   where
   DirectionCurve3d curve .<>. vector = curve .<>. vector
 
 instance
   space1 ~ space2 =>
-  DotMultiplication (Vector3d (space1 @ units)) (DirectionCurve3d space2) (Curve1d units)
+  DotMultiplication (Vector3d (space1 @ units)) (DirectionCurve3d space2) (Curve units)
   where
   lhs <> rhs = Units.specialize (lhs .<>. rhs)
 
@@ -250,7 +250,7 @@ instance
   DotMultiplication'
     (Vector3d (space1 @ units))
     (DirectionCurve3d space2)
-    (Curve1d (units :*: Unitless))
+    (Curve (units :*: Unitless))
   where
   vector .<>. DirectionCurve3d curve = vector .<>. curve
 
@@ -380,16 +380,16 @@ instance
   where
   vector .><. DirectionCurve3d curve = vector .><. curve
 
-instance Composition (Curve1d Unitless) (DirectionCurve3d space) (DirectionCurve3d space) where
+instance Composition (Curve Unitless) (DirectionCurve3d space) (DirectionCurve3d space) where
   curve1d >> DirectionCurve3d curve = DirectionCurve3d (curve1d >> curve)
 
-xComponent :: DirectionCurve3d space -> Curve1d Unitless
+xComponent :: DirectionCurve3d space -> Curve Unitless
 xComponent curve = curve <> Direction3d.x
 
-yComponent :: DirectionCurve3d space -> Curve1d Unitless
+yComponent :: DirectionCurve3d space -> Curve Unitless
 yComponent curve = curve <> Direction3d.y
 
-zComponent :: DirectionCurve3d space -> Curve1d Unitless
+zComponent :: DirectionCurve3d space -> Curve Unitless
 zComponent curve = curve <> Direction3d.z
 
 placeIn ::

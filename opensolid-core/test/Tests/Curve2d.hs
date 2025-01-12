@@ -6,8 +6,8 @@ module Tests.Curve2d
 where
 
 import OpenSolid.Angle qualified as Angle
-import OpenSolid.Curve1d qualified as Curve1d
-import OpenSolid.Curve1d.Zero qualified as Curve1d.Zero
+import OpenSolid.Curve qualified as Curve
+import OpenSolid.Curve.Zero qualified as Curve.Zero
 import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Curve2d.IntersectionPoint (IntersectionPoint (IntersectionPoint))
@@ -172,10 +172,10 @@ solving = Test.verify "solving" Test.do
   let desiredDistance = Length.meters 0.5
   zeros <-
     Tolerance.using (Tolerance.ofSquared desiredDistance) do
-      Curve1d.zeros (squaredDistanceFromOrigin - Qty.squared desiredDistance)
+      Curve.zeros (squaredDistanceFromOrigin - Qty.squared desiredDistance)
   let distances =
         zeros
-          |> List.map Curve1d.Zero.location
+          |> List.map Curve.Zero.location
           |> List.map (Curve2d.evaluate arc)
           |> List.map (Point2d.distanceFrom Point2d.origin)
   Test.expect (distances ~= [desiredDistance, desiredDistance])

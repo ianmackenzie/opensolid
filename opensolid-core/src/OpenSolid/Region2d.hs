@@ -14,7 +14,7 @@ where
 
 import OpenSolid.Bounds2d (Bounds2d)
 import OpenSolid.Bounds2d qualified as Bounds2d
-import OpenSolid.Curve1d qualified as Curve1d
+import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Curve2d.IntersectionPoint (IntersectionPoint (IntersectionPoint))
@@ -193,7 +193,7 @@ fluxIntegral point curve = do
   let displacement = point - curve
   let firstDerivative = Curve2d.derivative curve
   let integrand = (firstDerivative .><. displacement) / VectorCurve2d.squaredMagnitude' displacement
-  Curve1d.integral integrand
+  Curve.integral integrand
 
 totalFlux ::
   Point2d (space @ units) ->
@@ -261,8 +261,8 @@ areaIntegral' :: Point2d (space @ units) -> Curve2d (space @ units) -> Estimate 
 areaIntegral' referencePoint curve = do
   let displacement = curve - referencePoint
   let y = VectorCurve2d.yComponent displacement
-  let dx = Curve1d.derivative (VectorCurve2d.xComponent displacement)
-  -(Curve1d.integral (y .*. dx))
+  let dx = Curve.derivative (VectorCurve2d.xComponent displacement)
+  -(Curve.integral (y .*. dx))
 
 loopIsInside :: Tolerance units => Loop (space @ units) -> Loop (space @ units) -> Bool
 loopIsInside outer inner = do

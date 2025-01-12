@@ -27,9 +27,9 @@ import OpenSolid.Bounds2d (Bounds2d)
 import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.Color (Color)
 import OpenSolid.Color qualified as Color
-import OpenSolid.Curve1d (Curve1d)
-import OpenSolid.Curve1d qualified as Curve1d
-import OpenSolid.Curve1d.Zero qualified as Curve1d.Zero
+import OpenSolid.Curve (Curve)
+import OpenSolid.Curve qualified as Curve
+import OpenSolid.Curve.Zero qualified as Curve.Zero
 import OpenSolid.Direction2d (Direction2d)
 import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.Drawing2d qualified as Drawing2d
@@ -138,16 +138,16 @@ length =
     , floatTimes
     , plusSelf
     , plus @(Range Meters) Self
-    , plus @(Curve1d Meters) Self
+    , plus @(Curve Meters) Self
     , minusSelf
     , minus @(Range Meters) Self
-    , minus @(Curve1d Meters) Self
+    , minus @(Curve Meters) Self
     , timesFloat
     , timesSelf
     , times @(Range Unitless) Self
     , times @(Range Meters) Self
-    , times @(Curve1d Unitless) Self
-    , times @(Curve1d Meters) Self
+    , times @(Curve Unitless) Self
+    , times @(Curve Meters) Self
     , times @(Direction2d Space) Self
     , times @(Vector2d (Space @ Unitless)) Self
     , times @(Vector2d (Space @ Meters)) Self
@@ -155,8 +155,8 @@ length =
     , divBySelf
     , divBy @(Range Unitless) Self
     , divBy @(Range Meters) Self
-    , divBy @(Curve1d Unitless) Self
-    , divBy @(Curve1d Meters) Self
+    , divBy @(Curve Unitless) Self
+    , divBy @(Curve Meters) Self
     , floorDivBySelf
     , modBySelf
     ]
@@ -180,13 +180,13 @@ area =
     , floatTimes
     , plusSelf
     , plus @(Range SquareMeters) Self
-    , plus @(Curve1d SquareMeters) Self
+    , plus @(Curve SquareMeters) Self
     , minusSelf
     , minus @(Range SquareMeters) Self
-    , minus @(Curve1d SquareMeters) Self
+    , minus @(Curve SquareMeters) Self
     , timesFloat
     , times @(Range Unitless) Self
-    , times @(Curve1d Unitless) Self
+    , times @(Curve Unitless) Self
     , times @(Direction2d Space) Self
     , times @(Vector2d (Space @ Unitless)) Self
     , divByFloat
@@ -195,9 +195,9 @@ area =
     , divBy @(Range Unitless) Self
     , divBy @(Range Meters) Self
     , divBy @(Range SquareMeters) Self
-    , divBy @(Curve1d Unitless) Self
-    , divBy @(Curve1d Meters) Self
-    , divBy @(Curve1d SquareMeters) Self
+    , divBy @(Curve Unitless) Self
+    , divBy @(Curve Meters) Self
+    , divBy @(Curve SquareMeters) Self
     , floorDivBySelf
     , modBySelf
     ]
@@ -235,19 +235,19 @@ angle =
     , floatTimes
     , plusSelf
     , plus @(Range Radians) Self
-    , plus @(Curve1d Radians) Self
+    , plus @(Curve Radians) Self
     , minusSelf
     , minus @(Range Radians) Self
-    , minus @(Curve1d Radians) Self
+    , minus @(Curve Radians) Self
     , timesFloat
     , times @(Range Unitless) Self
-    , times @(Curve1d Unitless) Self
+    , times @(Curve Unitless) Self
     , divByFloat
     , divBySelf
     , divBy @(Range Unitless) Self
     , divBy @(Range Radians) Self
-    , divBy @(Curve1d Unitless) Self
-    , divBy @(Curve1d Radians) Self
+    , divBy @(Curve Unitless) Self
+    , divBy @(Curve Radians) Self
     , floorDivBySelf
     , modBySelf
     ]
@@ -637,15 +637,15 @@ uvBounds =
 
 curve :: Class
 curve =
-  class_ @(Curve1d Unitless)
+  class_ @(Curve Unitless)
     "A parametric curve definining a unitless value in terms of a parameter value."
-    [ constant "Zero" (Curve1d.zero @Unitless) $(docs 'Curve1d.zero)
-    , constant "T" Curve1d.t $(docs 'Curve1d.t)
-    , factory1 "Constant" "Value" Curve1d.constant $(docs 'Curve1d.constant)
-    , member0 "Squared" Curve1d.squared $(docs 'Curve1d.squared)
-    , member0 "Sqrt" Curve1d.sqrt $(docs 'Curve1d.sqrt)
-    , member1 "Evaluate" "Parameter Value" (\t c -> Curve1d.evaluate c t) $(docs 'Curve1d.evaluate)
-    , memberU0 "Zeros" Curve1d.zeros $(docs 'Curve1d.zeros)
+    [ constant "Zero" (Curve.zero @Unitless) $(docs 'Curve.zero)
+    , constant "T" Curve.t $(docs 'Curve.t)
+    , factory1 "Constant" "Value" Curve.constant $(docs 'Curve.constant)
+    , member0 "Squared" Curve.squared $(docs 'Curve.squared)
+    , member0 "Sqrt" Curve.sqrt $(docs 'Curve.sqrt)
+    , member1 "Evaluate" "Parameter Value" (\t c -> Curve.evaluate c t) $(docs 'Curve.evaluate)
+    , memberU0 "Zeros" Curve.zeros $(docs 'Curve.zeros)
     , memberU0 "Is Zero" (~= 0.0) "Check if a curve is zero everywhere, within the current tolerance."
     , negateSelf
     , floatPlus
@@ -661,29 +661,29 @@ curve =
     , times @Length Self
     , times @Area Self
     , times @Angle Self
-    , times @(Curve1d Meters) Self
-    , times @(Curve1d SquareMeters) Self
-    , times @(Curve1d Radians) Self
+    , times @(Curve Meters) Self
+    , times @(Curve SquareMeters) Self
+    , times @(Curve Radians) Self
     , divByFloat
     , divBySelf
-    , nested @Curve1d.Zero
+    , nested @Curve.Zero
         "A point where a given curve is equal to zero."
-        [ member0 "Location" Curve1d.Zero.location $(docs 'Curve1d.Zero.location)
-        , member0 "Order" Curve1d.Zero.order $(docs 'Curve1d.Zero.order)
-        , member0 "Sign" ((1 *) . Curve1d.Zero.sign) $(docs 'Curve1d.Zero.sign)
+        [ member0 "Location" Curve.Zero.location $(docs 'Curve.Zero.location)
+        , member0 "Order" Curve.Zero.order $(docs 'Curve.Zero.order)
+        , member0 "Sign" ((1 *) . Curve.Zero.sign) $(docs 'Curve.Zero.sign)
         ]
     ]
 
 angleCurve :: Class
 angleCurve =
-  class_ @(Curve1d Radians)
+  class_ @(Curve Radians)
     "A parametric curve definining an angle in terms of a parameter value."
-    [ constant "Zero" (Curve1d.zero @Radians) $(docs 'Curve1d.zero)
-    , factory1 "Constant" "Value" Curve1d.constant $(docs 'Curve1d.constant)
-    , member0 "Sin" Curve1d.sin $(docs 'Curve1d.sin)
-    , member0 "Cos" Curve1d.cos $(docs 'Curve1d.cos)
-    , member1 "Evaluate" "Parameter Value" (\t c -> Curve1d.evaluate c t) $(docs 'Curve1d.evaluate)
-    , memberR0 "Zeros" Curve1d.zeros $(docs 'Curve1d.zeros)
+    [ constant "Zero" (Curve.zero @Radians) $(docs 'Curve.zero)
+    , factory1 "Constant" "Value" Curve.constant $(docs 'Curve.constant)
+    , member0 "Sin" Curve.sin $(docs 'Curve.sin)
+    , member0 "Cos" Curve.cos $(docs 'Curve.cos)
+    , member1 "Evaluate" "Parameter Value" (\t c -> Curve.evaluate c t) $(docs 'Curve.evaluate)
+    , memberR0 "Zeros" Curve.zeros $(docs 'Curve.zeros)
     , memberR0 "Is Zero" (~= Angle.zero) "Check if a curve is zero everywhere, within the current tolerance."
     , negateSelf
     , floatTimes
@@ -692,21 +692,21 @@ angleCurve =
     , minusSelf
     , minus @Angle Self
     , timesFloat
-    , times @(Curve1d Unitless) Self
+    , times @(Curve Unitless) Self
     , divByFloat
     , divBySelf
     , divBy @Angle Self
-    , divBy @(Curve1d Unitless) Self
+    , divBy @(Curve Unitless) Self
     ]
 
 lengthCurve :: Class
 lengthCurve =
-  class_ @(Curve1d Meters)
+  class_ @(Curve Meters)
     "A parametric curve definining a length in terms of a parameter value."
-    [ constant "Zero" (Curve1d.zero @Meters) $(docs 'Curve1d.zero)
-    , factory1 "Constant" "Value" Curve1d.constant $(docs 'Curve1d.constant)
-    , member1 "Evaluate" "Parameter Value" (\t c -> Curve1d.evaluate c t) $(docs 'Curve1d.evaluate)
-    , memberM0 "Zeros" Curve1d.zeros $(docs 'Curve1d.zeros)
+    [ constant "Zero" (Curve.zero @Meters) $(docs 'Curve.zero)
+    , factory1 "Constant" "Value" Curve.constant $(docs 'Curve.constant)
+    , member1 "Evaluate" "Parameter Value" (\t c -> Curve.evaluate c t) $(docs 'Curve.evaluate)
+    , memberM0 "Zeros" Curve.zeros $(docs 'Curve.zeros)
     , memberM0 "Is Zero" (~= Length.zero) "Check if a curve is zero everywhere, within the current tolerance."
     , negateSelf
     , floatTimes
@@ -717,34 +717,34 @@ lengthCurve =
     , timesFloat
     , timesSelf
     , times @Length Self
-    , times @(Curve1d Unitless) Self
+    , times @(Curve Unitless) Self
     , divByFloat
     , divBySelf
     , divBy @Length Self
-    , divBy @(Curve1d Unitless) Self
+    , divBy @(Curve Unitless) Self
     ]
 
 areaCurve :: Class
 areaCurve =
-  class_ @(Curve1d SquareMeters)
+  class_ @(Curve SquareMeters)
     "A parametric curve definining an area in terms of a parameter value."
-    [ constant "Zero" (Curve1d.zero @SquareMeters) $(docs 'Curve1d.zero)
-    , factory1 "Constant" "Value" Curve1d.constant $(docs 'Curve1d.constant)
-    , member1 "Evaluate" "Parameter Value" (\t c -> Curve1d.evaluate c t) $(docs 'Curve1d.evaluate)
-    , memberSM0 "Zeros" Curve1d.zeros $(docs 'Curve1d.zeros)
+    [ constant "Zero" (Curve.zero @SquareMeters) $(docs 'Curve.zero)
+    , factory1 "Constant" "Value" Curve.constant $(docs 'Curve.constant)
+    , member1 "Evaluate" "Parameter Value" (\t c -> Curve.evaluate c t) $(docs 'Curve.evaluate)
+    , memberSM0 "Zeros" Curve.zeros $(docs 'Curve.zeros)
     , memberSM0 "Is Zero" (~= Area.zero) "Check if a curve is zero everywhere, within the current tolerance."
     , negateSelf
     , floatTimes
     , plusSelf
     , minusSelf
     , timesFloat
-    , times @(Curve1d Unitless) Self
+    , times @(Curve Unitless) Self
     , divByFloat
     , divBySelf
     , divBy @Length Self
     , divBy @Area Self
-    , divBy @(Curve1d Unitless) Self
-    , divBy @(Curve1d Meters) Self
+    , divBy @(Curve Unitless) Self
+    , divBy @(Curve Meters) Self
     ]
 
 data Drawing2d_

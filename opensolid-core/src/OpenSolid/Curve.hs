@@ -1,5 +1,5 @@
-module OpenSolid.Curve1d
-  ( Curve1d (Parametric)
+module OpenSolid.Curve
+  ( Curve (Parametric)
   , Zero
   , Interface (..)
   , evaluate
@@ -31,9 +31,9 @@ where
 
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Composition
-import OpenSolid.Curve1d.Zero (Zero)
-import OpenSolid.Curve1d.Zero qualified as Zero
-import OpenSolid.Curve1d.Zeros qualified as Zeros
+import OpenSolid.Curve.Zero (Zero)
+import OpenSolid.Curve.Zero qualified as Zero
+import OpenSolid.Curve.Zeros qualified as Zeros
 import OpenSolid.Domain1d (Domain1d)
 import OpenSolid.Domain1d qualified as Domain1d
 import OpenSolid.Estimate (Estimate)
@@ -73,90 +73,90 @@ class
   where
   evaluateImpl :: curve -> Float -> Qty units
   evaluateBoundsImpl :: curve -> Range Unitless -> Range units
-  derivativeImpl :: curve -> Curve1d units
+  derivativeImpl :: curve -> Curve units
 
-data Curve1d units where
-  Curve1d ::
+data Curve units where
+  Curve ::
     Interface curve units =>
     curve ->
-    Curve1d units
+    Curve units
   Parametric ::
     Expression Float (Qty units) ->
-    Curve1d units
+    Curve units
   Negated ::
-    Curve1d units ->
-    Curve1d units
+    Curve units ->
+    Curve units
   Sum ::
-    Curve1d units ->
-    Curve1d units ->
-    Curve1d units
+    Curve units ->
+    Curve units ->
+    Curve units
   Difference ::
-    Curve1d units ->
-    Curve1d units ->
-    Curve1d units
+    Curve units ->
+    Curve units ->
+    Curve units
   Product' ::
-    Curve1d units1 ->
-    Curve1d units2 ->
-    Curve1d (units1 :*: units2)
+    Curve units1 ->
+    Curve units2 ->
+    Curve (units1 :*: units2)
   Quotient' ::
-    Curve1d units1 ->
-    Curve1d units2 ->
-    Curve1d (units1 :/: units2)
+    Curve units1 ->
+    Curve units2 ->
+    Curve (units1 :/: units2)
   Squared' ::
-    Curve1d units ->
-    Curve1d (units :*: units)
+    Curve units ->
+    Curve (units :*: units)
   SquareRoot' ::
-    Curve1d (units :*: units) ->
-    Curve1d units
+    Curve (units :*: units) ->
+    Curve units
   Sin ::
-    Curve1d Radians ->
-    Curve1d Unitless
+    Curve Radians ->
+    Curve Unitless
   Cos ::
-    Curve1d Radians ->
-    Curve1d Unitless
+    Curve Radians ->
+    Curve Unitless
   Coerce ::
-    Curve1d units1 ->
-    Curve1d units2
+    Curve units1 ->
+    Curve units2
   Reversed ::
-    Curve1d units ->
-    Curve1d units
+    Curve units ->
+    Curve units
 
-deriving instance Show (Curve1d units)
+deriving instance Show (Curve units)
 
-instance FFI (Curve1d Unitless) where
+instance FFI (Curve Unitless) where
   representation = FFI.classRepresentation "Curve"
 
-instance FFI (Curve1d Meters) where
+instance FFI (Curve Meters) where
   representation = FFI.classRepresentation "LengthCurve"
 
-instance FFI (Curve1d SquareMeters) where
+instance FFI (Curve SquareMeters) where
   representation = FFI.classRepresentation "AreaCurve"
 
-instance FFI (Curve1d Radians) where
+instance FFI (Curve Radians) where
   representation = FFI.classRepresentation "AngleCurve"
 
-instance HasUnits (Curve1d units) units
+instance HasUnits (Curve units) units
 
-instance Units.Coercion (Curve1d unitsA) (Curve1d unitsB) where
+instance Units.Coercion (Curve unitsA) (Curve unitsB) where
   coerce (Parametric expression) = Parametric (Units.coerce expression)
   coerce (Coerce curve) = Coerce curve
   coerce curve = Coerce curve
 
 instance
   units1 ~ units2 =>
-  ApproximateEquality (Curve1d units1) (Curve1d units2) units1
+  ApproximateEquality (Curve units1) (Curve units2) units1
   where
   curve1 ~= curve2 = curve1 - curve2 ~= Qty.zero
 
 instance
   units1 ~ units2 =>
-  ApproximateEquality (Curve1d units1) (Qty units2) units1
+  ApproximateEquality (Curve units1) (Qty units2) units1
   where
   curve ~= value = List.allTrue [evaluate curve tValue ~= value | tValue <- Parameter.samples]
 
 instance
   units1 ~ units2 =>
-  Intersects (Curve1d units1) (Qty units2) units1
+  Intersects (Curve units1) (Qty units2) units1
   where
   curve ^ value =
     -- TODO optimize this to use a special Solve1d.find or similar
@@ -170,24 +170,24 @@ instance
 
 instance
   units1 ~ units2 =>
-  Intersects (Qty units1) (Curve1d units2) units1
+  Intersects (Qty units1) (Curve units2) units1
   where
   value ^ curve = curve ^ value
 
-instance Interface (Curve1d units) units where
+instance Interface (Curve units) units where
   evaluateImpl = evaluate
   evaluateBoundsImpl = evaluateBounds
   derivativeImpl = derivative
 
-new :: Interface curve units => curve -> Curve1d units
-new = Curve1d
+new :: Interface curve units => curve -> Curve units
+new = Curve
 
 -- | A curve equal to zero everywhere.
-zero :: Curve1d units
+zero :: Curve units
 zero = constant Qty.zero
 
 -- | Create a curve with the given constant value.
-constant :: Qty units -> Curve1d units
+constant :: Qty units -> Curve units
 constant = Parametric . Expression.constant
 
 {-| A curve parameter.
@@ -196,101 +196,101 @@ In other words, a curve whose value is equal to its input parameter.
 When defining parametric curves, you will typically start with 'Curve.t'
 and then use arithmetic operators etc. to build up more complex curves.
 -}
-t :: Curve1d Unitless
+t :: Curve Unitless
 t = Parametric Expression.t
 
-line :: Qty units -> Qty units -> Curve1d units
+line :: Qty units -> Qty units -> Curve units
 line a b = a + t * (b - a)
 
-instance Negation (Curve1d units) where
+instance Negation (Curve units) where
   negate (Parametric expression) = Parametric -expression
   negate (Negated curve) = curve
   negate (Difference c1 c2) = Difference c2 c1
   negate (Product' c1 c2) = negate c1 .*. c2
   negate curve = Negated curve
 
-instance Multiplication Sign (Curve1d units) (Curve1d units) where
+instance Multiplication Sign (Curve units) (Curve units) where
   Positive * curve = curve
   Negative * curve = -curve
 
-instance Multiplication' Sign (Curve1d units) (Curve1d (Unitless :*: units)) where
+instance Multiplication' Sign (Curve units) (Curve (Unitless :*: units)) where
   Positive .*. curve = Units.coerce curve
   Negative .*. curve = Units.coerce -curve
 
-instance Multiplication (Curve1d units) Sign (Curve1d units) where
+instance Multiplication (Curve units) Sign (Curve units) where
   curve * Positive = curve
   curve * Negative = -curve
 
-instance Multiplication' (Curve1d units) Sign (Curve1d (units :*: Unitless)) where
+instance Multiplication' (Curve units) Sign (Curve (units :*: Unitless)) where
   curve .*. Positive = Units.coerce curve
   curve .*. Negative = Units.coerce -curve
 
-instance units ~ units_ => Addition (Curve1d units) (Curve1d units_) (Curve1d units) where
+instance units ~ units_ => Addition (Curve units) (Curve units_) (Curve units) where
   Parametric lhs + Parametric rhs = Parametric (lhs + rhs)
   lhs + rhs = Sum lhs rhs
 
-instance units ~ units_ => Addition (Curve1d units) (Qty units_) (Curve1d units) where
+instance units ~ units_ => Addition (Curve units) (Qty units_) (Curve units) where
   curve + value = curve + constant value
 
-instance units ~ units_ => Addition (Qty units) (Curve1d units_) (Curve1d units) where
+instance units ~ units_ => Addition (Qty units) (Curve units_) (Curve units) where
   value + curve = constant value + curve
 
 instance
   units1 ~ units2 =>
-  Subtraction (Curve1d units1) (Curve1d units2) (Curve1d units1)
+  Subtraction (Curve units1) (Curve units2) (Curve units1)
   where
   Parametric lhs - Parametric rhs = Parametric (lhs - rhs)
   lhs - rhs = Difference lhs rhs
 
 instance
   units1 ~ units2 =>
-  Subtraction (Curve1d units1) (Qty units2) (Curve1d units1)
+  Subtraction (Curve units1) (Qty units2) (Curve units1)
   where
   curve - value = curve - constant value
 
 instance
   units1 ~ units2 =>
-  Subtraction (Qty units1) (Curve1d units2) (Curve1d units1)
+  Subtraction (Qty units1) (Curve units2) (Curve units1)
   where
   value - curve = constant value - curve
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (Curve1d units1) (Curve1d units2) (Curve1d units3)
+  Multiplication (Curve units1) (Curve units2) (Curve units3)
   where
   lhs * rhs = Units.specialize (lhs .*. rhs)
 
-instance Multiplication' (Curve1d units1) (Curve1d units2) (Curve1d (units1 :*: units2)) where
+instance Multiplication' (Curve units1) (Curve units2) (Curve (units1 :*: units2)) where
   Parametric lhs .*. Parametric rhs = Parametric (lhs .*. rhs)
   lhs .*. rhs = Product' lhs rhs
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (Curve1d units1) (Qty units2) (Curve1d units3)
+  Multiplication (Curve units1) (Qty units2) (Curve units3)
   where
   lhs * rhs = Units.specialize (lhs .*. rhs)
 
-instance Multiplication' (Curve1d units1) (Qty units2) (Curve1d (units1 :*: units2)) where
+instance Multiplication' (Curve units1) (Qty units2) (Curve (units1 :*: units2)) where
   curve .*. value = curve .*. constant value
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (Qty units1) (Curve1d units2) (Curve1d units3)
+  Multiplication (Qty units1) (Curve units2) (Curve units3)
   where
   lhs * rhs = Units.specialize (lhs .*. rhs)
 
-instance Multiplication' (Qty units1) (Curve1d units2) (Curve1d (units1 :*: units2)) where
+instance Multiplication' (Qty units1) (Curve units2) (Curve (units1 :*: units2)) where
   value .*. curve = constant value .*. curve
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (Curve1d units1) (Vector2d (space @ units2)) (VectorCurve2d (space @ units3))
+  Multiplication (Curve units1) (Vector2d (space @ units2)) (VectorCurve2d (space @ units3))
   where
   lhs * rhs = Units.specialize (lhs .*. rhs)
 
 instance
   Multiplication'
-    (Curve1d units1)
+    (Curve units1)
     (Vector2d (space @ units2))
     (VectorCurve2d (space @ (units1 :*: units2)))
   where
@@ -298,27 +298,27 @@ instance
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (Vector2d (space @ units1)) (Curve1d units2) (VectorCurve2d (space @ units3))
+  Multiplication (Vector2d (space @ units1)) (Curve units2) (VectorCurve2d (space @ units3))
   where
   lhs * rhs = Units.specialize (lhs .*. rhs)
 
 instance
   Multiplication'
     (Vector2d (space @ units1))
-    (Curve1d units2)
+    (Curve units2)
     (VectorCurve2d (space @ (units1 :*: units2)))
   where
   vector .*. curve = VectorCurve2d.constant vector .*. curve
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (Curve1d units1) (Vector3d (space @ units2)) (VectorCurve3d (space @ units3))
+  Multiplication (Curve units1) (Vector3d (space @ units2)) (VectorCurve3d (space @ units3))
   where
   lhs * rhs = Units.specialize (lhs .*. rhs)
 
 instance
   Multiplication'
-    (Curve1d units1)
+    (Curve units1)
     (Vector3d (space @ units2))
     (VectorCurve3d (space @ (units1 :*: units2)))
   where
@@ -326,51 +326,51 @@ instance
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (Vector3d (space @ units1)) (Curve1d units2) (VectorCurve3d (space @ units3))
+  Multiplication (Vector3d (space @ units1)) (Curve units2) (VectorCurve3d (space @ units3))
   where
   lhs * rhs = Units.specialize (lhs .*. rhs)
 
 instance
   Multiplication'
     (Vector3d (space @ units1))
-    (Curve1d units2)
+    (Curve units2)
     (VectorCurve3d (space @ (units1 :*: units2)))
   where
   vector .*. curve = VectorCurve3d.constant vector .*. curve
 
 instance
   Units.Quotient units1 units2 units3 =>
-  Division (Curve1d units1) (Curve1d units2) (Curve1d units3)
+  Division (Curve units1) (Curve units2) (Curve units3)
   where
   lhs / rhs = Units.specialize (lhs ./. rhs)
 
-instance Division' (Curve1d units1) (Curve1d units2) (Curve1d (units1 :/: units2)) where
+instance Division' (Curve units1) (Curve units2) (Curve (units1 :/: units2)) where
   Parametric lhs ./. Parametric rhs = Parametric (lhs ./. rhs)
   lhs ./. rhs = Quotient' lhs rhs
 
 instance
   Units.Quotient units1 units2 units3 =>
-  Division (Curve1d units1) (Qty units2) (Curve1d units3)
+  Division (Curve units1) (Qty units2) (Curve units3)
   where
   lhs / rhs = Units.specialize (lhs ./. rhs)
 
-instance Division' (Curve1d units1) (Qty units2) (Curve1d (units1 :/: units2)) where
+instance Division' (Curve units1) (Qty units2) (Curve (units1 :/: units2)) where
   curve ./. value = curve ./. constant value
 
 instance
   Units.Quotient units1 units2 units3 =>
-  Division (Qty units1) (Curve1d units2) (Curve1d units3)
+  Division (Qty units1) (Curve units2) (Curve units3)
   where
   lhs / rhs = Units.specialize (lhs ./. rhs)
 
-instance Division' (Qty units1) (Curve1d units2) (Curve1d (units1 :/: units2)) where
+instance Division' (Qty units1) (Curve units2) (Curve (units1 :/: units2)) where
   value ./. curve = constant value ./. curve
 
-instance Composition (Curve1d Unitless) (Curve1d units) (Curve1d units) where
+instance Composition (Curve Unitless) (Curve units) (Curve units) where
   Parametric outer . Parametric inner = Parametric (outer . inner)
   outer . inner = new (outer :.: inner)
 
-instance Interface (Curve1d units :.: Curve1d Unitless) units where
+instance Interface (Curve units :.: Curve Unitless) units where
   evaluateImpl (outer :.: inner) tValue =
     evaluate outer (evaluate inner tValue)
   evaluateBoundsImpl (outer :.: inner) tRange =
@@ -382,9 +382,9 @@ instance Interface (Curve1d units :.: Curve1d Unitless) units where
 
 The parameter value should be between 0 and 1.
 -}
-evaluate :: Curve1d units -> Float -> Qty units
+evaluate :: Curve units -> Float -> Qty units
 evaluate curve tValue = case curve of
-  Curve1d c -> evaluateImpl c tValue
+  Curve c -> evaluateImpl c tValue
   Parametric expression -> Expression.evaluate expression tValue
   Negated c -> negate (evaluate c tValue)
   Sum c1 c2 -> evaluate c1 tValue + evaluate c2 tValue
@@ -398,9 +398,9 @@ evaluate curve tValue = case curve of
   Coerce c -> Units.coerce (evaluate c tValue)
   Reversed c -> evaluate c (1.0 - tValue)
 
-evaluateBounds :: Curve1d units -> Range Unitless -> Range units
+evaluateBounds :: Curve units -> Range Unitless -> Range units
 evaluateBounds curve tRange = case curve of
-  Curve1d c -> evaluateBoundsImpl c tRange
+  Curve c -> evaluateBoundsImpl c tRange
   Parametric expression -> Expression.evaluateBounds expression tRange
   Negated c -> negate (evaluateBounds c tRange)
   Sum c1 c2 -> evaluateBounds c1 tRange + evaluateBounds c2 tRange
@@ -414,9 +414,9 @@ evaluateBounds curve tRange = case curve of
   Coerce c -> Units.coerce (evaluateBounds c tRange)
   Reversed c -> evaluateBounds c (1.0 - tRange)
 
-derivative :: Curve1d units -> Curve1d units
+derivative :: Curve units -> Curve units
 derivative curve = case curve of
-  Curve1d c -> derivativeImpl c
+  Curve c -> derivativeImpl c
   Parametric expression -> Parametric (Expression.curveDerivative expression)
   Negated c -> negate (derivative c)
   Sum c1 c2 -> derivative c1 + derivative c2
@@ -430,14 +430,14 @@ derivative curve = case curve of
   Coerce c -> Units.coerce (derivative c)
   Reversed c -> -(reverse (derivative c))
 
-reverse :: Curve1d units -> Curve1d units
+reverse :: Curve units -> Curve units
 reverse (Parametric expression) = Parametric (expression . Expression.r)
-reverse curve = Curve1d (Reversed curve)
+reverse curve = Curve (Reversed curve)
 
-bezier :: NonEmpty (Qty units) -> Curve1d units
+bezier :: NonEmpty (Qty units) -> Curve units
 bezier = Parametric . Expression.bezierCurve
 
-hermite :: (Qty units, List (Qty units)) -> (Qty units, List (Qty units)) -> Curve1d units
+hermite :: (Qty units, List (Qty units)) -> (Qty units, List (Qty units)) -> Curve units
 hermite (startValue, startDerivatives) (endValue, endDerivatives) = do
   let numStartDerivatives = List.length startDerivatives
   let numEndDerivatives = List.length endDerivatives
@@ -452,13 +452,13 @@ hermite (startValue, startDerivatives) (endValue, endDerivatives) = do
   let controlPoints = startValue :| (startControlPoints + endControlPoints + [endValue])
   bezier controlPoints
 
-quadraticSpline :: Qty units -> Qty units -> Qty units -> Curve1d units
+quadraticSpline :: Qty units -> Qty units -> Qty units -> Curve units
 quadraticSpline p1 p2 p3 = bezier (NonEmpty.three p1 p2 p3)
 
-cubicSpline :: Qty units -> Qty units -> Qty units -> Qty units -> Curve1d units
+cubicSpline :: Qty units -> Qty units -> Qty units -> Qty units -> Curve units
 cubicSpline p1 p2 p3 p4 = bezier (NonEmpty.four p1 p2 p3 p4)
 
-rationalBezier :: NonEmpty (Qty units, Float) -> Curve1d units
+rationalBezier :: NonEmpty (Qty units, Float) -> Curve units
 rationalBezier pointsAndWeights = do
   let scaledPoint (point, weight) = point * weight
   bezier (NonEmpty.map scaledPoint pointsAndWeights)
@@ -468,7 +468,7 @@ rationalQuadraticSpline ::
   (Qty units, Float) ->
   (Qty units, Float) ->
   (Qty units, Float) ->
-  Curve1d units
+  Curve units
 rationalQuadraticSpline pw1 pw2 pw3 = rationalBezier (NonEmpty.three pw1 pw2 pw3)
 
 rationalCubicSpline ::
@@ -476,7 +476,7 @@ rationalCubicSpline ::
   (Qty units, Float) ->
   (Qty units, Float) ->
   (Qty units, Float) ->
-  Curve1d units
+  Curve units
 rationalCubicSpline pw1 pw2 pw3 pw4 = rationalBezier (NonEmpty.four pw1 pw2 pw3 pw4)
 
 scaleDerivatives :: Sign -> Float -> Float -> List (Qty units) -> List (Qty units)
@@ -499,36 +499,36 @@ derivedControlPoints previousPoint i n qs
   | otherwise = []
 
 -- | Compute the square of a curve.
-squared :: Units.Squared units1 units2 => Curve1d units1 -> Curve1d units2
+squared :: Units.Squared units1 units2 => Curve units1 -> Curve units2
 squared curve = Units.specialize (squared' curve)
 
-squared' :: Curve1d units -> Curve1d (units :*: units)
+squared' :: Curve units -> Curve (units :*: units)
 squared' (Parametric expression) = Parametric (Expression.squared' expression)
 squared' (Negated c) = squared' c
 squared' curve = Squared' curve
 
 -- | Compute the square root of a curve.
-sqrt :: Units.Squared units1 units2 => Curve1d units2 -> Curve1d units1
+sqrt :: Units.Squared units1 units2 => Curve units2 -> Curve units1
 sqrt curve = sqrt' (Units.unspecialize curve)
 
-sqrt' :: Curve1d (units :*: units) -> Curve1d units
+sqrt' :: Curve (units :*: units) -> Curve units
 sqrt' (Parametric expression) = Parametric (Expression.sqrt' expression)
 sqrt' curve = SquareRoot' curve
 
 -- | Compute the sine of a curve.
-sin :: Curve1d Radians -> Curve1d Unitless
+sin :: Curve Radians -> Curve Unitless
 sin (Parametric expression) = Parametric (Expression.sin expression)
 sin curve = Sin curve
 
 -- | Compute the cosine of a curve.
-cos :: Curve1d Radians -> Curve1d Unitless
+cos :: Curve Radians -> Curve Unitless
 cos (Parametric expression) = Parametric (Expression.cos expression)
 cos curve = Cos curve
 
-integral :: Curve1d units -> Estimate units
+integral :: Curve units -> Estimate units
 integral curve = Estimate.new (Integral curve (derivative curve) Range.unit)
 
-data Integral units = Integral (Curve1d units) (Curve1d units) (Range Unitless)
+data Integral units = Integral (Curve units) (Curve units) (Range Unitless)
 
 instance Estimate.Interface (Integral units) units where
   boundsImpl (Integral curve curveDerivative domain) = do
@@ -588,7 +588,7 @@ we consider 0.0001 as just roundoff error,
 so we would end up reporting a single order-1 zero at x=0
 (the point at which the *first derivative* is zero).
 -}
-zeros :: Tolerance units => Curve1d units -> Result Zeros.Error (List Zero)
+zeros :: Tolerance units => Curve units -> Result Zeros.Error (List Zero)
 zeros curve
   | curve ~= Qty.zero = Failure Zeros.ZeroEverywhere
   | otherwise = Result.do
@@ -601,7 +601,7 @@ zeros curve
 
 findZeros ::
   Tolerance units =>
-  Stream (Curve1d units) ->
+  Stream (Curve units) ->
   Domain1d ->
   Stream (Range units) ->
   Solve1d.Exclusions exclusions ->
@@ -634,7 +634,7 @@ maxZeroOrder = 3
 findZerosOrder ::
   Tolerance units =>
   Int ->
-  Stream (Curve1d units) ->
+  Stream (Curve units) ->
   Domain1d ->
   Stream (Range units) ->
   Fuzzy (List (Float, Solve1d.Neighborhood units))
@@ -668,8 +668,8 @@ findZerosOrder k derivatives subdomain derivativeBounds
 solveMonotonic ::
   Tolerance units =>
   Int ->
-  Curve1d units ->
-  Curve1d units ->
+  Curve units ->
+  Curve units ->
   Range Unitless ->
   Fuzzy (List (Float, Solve1d.Neighborhood units))
 solveMonotonic m fm fn tRange = do

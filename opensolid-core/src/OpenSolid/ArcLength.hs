@@ -1,7 +1,7 @@
 module OpenSolid.ArcLength (parameterization) where
 
-import OpenSolid.Curve1d (Curve1d)
-import OpenSolid.Curve1d qualified as Curve1d
+import OpenSolid.Curve (Curve)
+import OpenSolid.Curve qualified as Curve
 import OpenSolid.Float qualified as Float
 import OpenSolid.Lobatto qualified as Lobatto
 import OpenSolid.Prelude
@@ -13,19 +13,19 @@ import Prelude qualified
 
 data Tree units
   = Node (Tree units) (Qty units) (Tree units)
-  | Leaf (Qty units) (Curve1d Unitless)
+  | Leaf (Qty units) (Curve Unitless)
 
-parameterization :: Curve1d units -> (Curve1d Unitless, Qty units)
+parameterization :: Curve units -> (Curve Unitless, Qty units)
 parameterization derivativeMagnitude = do
-  let dsdt = Curve1d.evaluate derivativeMagnitude
-  let d2sdt2 = Curve1d.evaluate (Curve1d.derivative derivativeMagnitude)
+  let dsdt = Curve.evaluate derivativeMagnitude
+  let d2sdt2 = Curve.evaluate (Curve.derivative derivativeMagnitude)
   let dsdt1 = dsdt 0.0
   let dsdt2 = dsdt Lobatto.p2
   let dsdt3 = dsdt Lobatto.p3
   let dsdt4 = dsdt 1.0
   let coarseEstimate = Lobatto.estimate dsdt1 dsdt2 dsdt3 dsdt4
   let (tree, length) = buildTree 1 dsdt d2sdt2 0.0 1.0 dsdt1 dsdt4 coarseEstimate
-  let curve = Curve1d.new (Parameterization derivativeMagnitude tree length)
+  let curve = Curve.new (Parameterization derivativeMagnitude tree length)
   (curve, length)
 
 buildTree ::
@@ -56,7 +56,7 @@ buildTree level dsdt d2sdt2 tStart tEnd dsdtStart dsdtEnd coarseEstimate = do
       let dtduEnd = deltaS / dsdtEnd
       let d2tdu2Start = -deltaS .*. d2sdt2 tStart * dtduStart / Qty.squared' dsdtStart
       let d2tdu2End = -deltaS .*. d2sdt2 tEnd * dtduEnd / Qty.squared' dsdtEnd
-      let tCurve = Curve1d.hermite (tStart, [dtduStart, d2tdu2Start]) (tEnd, [dtduEnd, d2tdu2End])
+      let tCurve = Curve.hermite (tStart, [dtduStart, d2tdu2Start]) (tEnd, [dtduEnd, d2tdu2End])
       (Leaf deltaS tCurve, fineEstimate)
     else do
       let (leftTree, leftLength) =
@@ -66,22 +66,22 @@ buildTree level dsdt d2sdt2 tStart tEnd dsdtStart dsdtEnd coarseEstimate = do
       (Node leftTree leftLength rightTree, leftLength + rightLength)
 
 data Parameterization where
-  Parameterization :: Curve1d units -> Tree units -> Qty units -> Parameterization
+  Parameterization :: Curve units -> Tree units -> Qty units -> Parameterization
 
 instance Show Parameterization where
   show _ = Text.unpack "ArcLength.Parameterization"
 
-instance Curve1d.Interface Parameterization Unitless where
+instance Curve.Interface Parameterization Unitless where
   evaluateImpl (Parameterization _ tree length) uValue = lookup tree (uValue * length)
 
   evaluateBoundsImpl curve (Range uLow uHigh) =
-    Range.from (Curve1d.evaluateImpl curve uLow) (Curve1d.evaluateImpl curve uHigh)
+    Range.from (Curve.evaluateImpl curve uLow) (Curve.evaluateImpl curve uHigh)
 
-  derivativeImpl tCurve@(Parameterization dsdt _ length) = length / (dsdt . Curve1d.new tCurve)
+  derivativeImpl tCurve@(Parameterization dsdt _ length) = length / (dsdt . Curve.new tCurve)
 
 lookup :: Tree units -> Qty units -> Float
 lookup tree length = case tree of
   Node leftTree leftLength rightTree
     | length < leftLength -> lookup leftTree length
     | otherwise -> lookup rightTree (length - leftLength)
-  Leaf segmentLength curve -> Curve1d.evaluate curve (length / segmentLength)
+  Leaf segmentLength curve -> Curve.evaluate curve (length / segmentLength)
