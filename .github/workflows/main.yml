@@ -14,6 +14,11 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
       # Set up caching
+      - name: Set up GHCup cache
+        uses: actions/cache@v4
+        with:
+          path: C:\ghcup
+          key: ${{ github.job }}-ghcup
       - name: Set up Cabal cache
         uses: actions/cache@v4
         with:
@@ -34,6 +39,11 @@ jobs:
             opensolid-jit\target
           key: ${{ github.job }}-cargo-${{ hashFiles('opensolid-jit/Cargo.*') }}
       # Install tooling
+      - name: Install Haskell tooling
+        uses: haskell-actions/setup@v2
+        with:
+          ghc-version: 9.10.1
+          cabal-version: 3.12.1.0
       - name: Install Rust toolchain
         run: |
           rustup install 1.82.0-x86_64-pc-windows-gnu
@@ -91,6 +101,11 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+      - name: Set up GHCup cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.ghcup
+          key: ${{ github.job }}-ghcup
       - name: Set up Cabal cache
         uses: actions/cache@v4
         with:
@@ -110,6 +125,11 @@ jobs:
             ~/.cargo/git/db
             opensolid-jit/target
           key: ${{ github.job }}-cargo-${{ hashFiles('opensolid-jit/Cargo.*') }}
+      - name: Install Haskell tooling
+        uses: haskell-actions/setup@v2
+        with:
+          ghc-version: 9.10.1
+          cabal-version: 3.12.1.0
       - name: Install Python tooling
         run: |
           pipx install uv==0.5.6
