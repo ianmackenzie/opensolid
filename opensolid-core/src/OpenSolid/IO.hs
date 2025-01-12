@@ -18,11 +18,15 @@ module OpenSolid.IO
   , addContext
   , printLine
   , time
+  , readFile
+  , writeFile
+  , deleteFile
   )
 where
 
 import Control.Concurrent
 import Control.Concurrent.Async qualified as Async
+import Data.ByteString qualified
 import Data.ByteString.Char8 qualified
 import Data.Time.Clock qualified
 import OpenSolid.Bootstrap
@@ -35,6 +39,7 @@ import OpenSolid.List qualified as List
 import OpenSolid.Result (Result (Failure, Success))
 import OpenSolid.Result qualified as Result
 import OpenSolid.Text qualified as Text
+import System.Directory
 import System.IO.Error qualified
 import Prelude qualified
 
@@ -114,3 +119,16 @@ time io = OpenSolid.IO.do
   result <- io
   endTime <- Data.Time.Clock.getCurrentTime
   succeed (result, Duration.from startTime endTime)
+
+readFile :: Text -> IO Text
+readFile path = OpenSolid.IO.do
+  bytes <- Data.ByteString.readFile (Text.unpack path)
+  Text.decodeUtf8 bytes
+
+writeFile :: Text -> Text -> IO ()
+writeFile path contents = do
+  let bytes = Text.encodeUtf8 contents
+  Data.ByteString.writeFile (Text.unpack path) bytes
+
+deleteFile :: Text -> IO ()
+deleteFile path = System.Directory.removeFile (Text.unpack path)

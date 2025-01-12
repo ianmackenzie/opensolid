@@ -4,7 +4,7 @@ import API (Class (Class))
 import API qualified
 import API.Constraint (Constraint)
 import OpenSolid.FFI qualified as FFI
-import OpenSolid.File qualified as File
+import OpenSolid.IO qualified as IO
 import OpenSolid.List qualified as List
 import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Pair qualified as Pair
@@ -352,4 +352,4 @@ main = IO.do
           , Python.lines constantDefinitions
           , allExportsDefinition
           ]
-  File.writeTo "opensolid-python/lib/src/opensolid/__init__.py" pythonCode
+  IO.writeFile "opensolid-python/lib/src/opensolid/__init__.py" pythonCode

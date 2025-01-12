@@ -31,7 +31,7 @@ import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
-import OpenSolid.File qualified as File
+import OpenSolid.IO qualified as IO
 import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
@@ -110,7 +110,7 @@ toSvg viewBox entities = do
     ]
 
 writeTo :: Text -> Bounds2d (space @ Meters) -> List (Entity space) -> IO ()
-writeTo path viewBox entities = File.writeTo path (toSvg viewBox entities)
+writeTo path viewBox entities = IO.writeFile path (toSvg viewBox entities)
 
 nothing :: Entity space
 nothing = Empty

@@ -146,7 +146,6 @@ library
     OpenSolid.Expression.VectorCurve3d
     OpenSolid.Expression.VectorSurface2d
     OpenSolid.FFI
-    OpenSolid.File
     OpenSolid.Float
     OpenSolid.Frame2d
     OpenSolid.Frame3d
