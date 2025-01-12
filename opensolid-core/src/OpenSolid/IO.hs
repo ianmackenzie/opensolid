@@ -20,6 +20,8 @@ module OpenSolid.IO
   , time
   , readFile
   , writeFile
+  , readBinaryFile
+  , writeBinaryFile
   , deleteFile
   )
 where
@@ -120,15 +122,17 @@ time io = OpenSolid.IO.do
   endTime <- Data.Time.Clock.getCurrentTime
   succeed (result, Duration.from startTime endTime)
 
+readBinaryFile :: Text -> IO ByteString
+readBinaryFile path = Data.ByteString.readFile (Text.unpack path)
+
+writeBinaryFile :: Text -> ByteString -> IO ()
+writeBinaryFile path bytes = Data.ByteString.writeFile (Text.unpack path) bytes
+
 readFile :: Text -> IO Text
-readFile path = OpenSolid.IO.do
-  bytes <- Data.ByteString.readFile (Text.unpack path)
-  Text.decodeUtf8 bytes
+readFile path = readBinaryFile path >>= Text.decodeUtf8
 
 writeFile :: Text -> Text -> IO ()
-writeFile path contents = do
-  let bytes = Text.encodeUtf8 contents
-  Data.ByteString.writeFile (Text.unpack path) bytes
+writeFile path contents = writeBinaryFile path (Text.encodeUtf8 contents)
 
 deleteFile :: Text -> IO ()
 deleteFile path = System.Directory.removeFile (Text.unpack path)
