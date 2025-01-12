@@ -5,6 +5,7 @@ module OpenSolid.Curve3d
   , constant
   , line
   , parametric
+  , xyz
   , evaluate
   , evaluateBounds
   , derivative
@@ -13,11 +14,14 @@ module OpenSolid.Curve3d
 where
 
 import OpenSolid.Bounds3d (Bounds3d)
+import OpenSolid.Bounds3d qualified as Bounds3d
 import OpenSolid.Composition
+import OpenSolid.Curve1d (Curve1d)
 import OpenSolid.Curve1d qualified as Curve1d
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Point3d (Point3d)
+import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
 import OpenSolid.Range (Range)
 import OpenSolid.Surface1d.Function qualified as Surface1d.Function
@@ -47,6 +51,11 @@ data Curve3d (coordinateSystem :: CoordinateSystem) where
   Coerce ::
     Curve3d (space @ units1) ->
     Curve3d (space @ units2)
+  XYZ ::
+    Curve1d units ->
+    Curve1d units ->
+    Curve1d units ->
+    Curve3d (space @ units)
   Addition ::
     Curve3d (space @ units) ->
     VectorCurve3d (space @ units) ->
@@ -125,6 +134,11 @@ constant = Parametric . Expression.constant
 parametric :: Expression Float (Point3d (space @ units)) -> Curve3d (space @ units)
 parametric = Parametric
 
+xyz :: Curve1d units -> Curve1d units -> Curve1d units -> Curve3d (space @ units)
+xyz (Curve1d.Parametric x) (Curve1d.Parametric y) (Curve1d.Parametric z) =
+  Parametric (Expression.xyz x y z)
+xyz x y z = XYZ x y z
+
 line :: Point3d (space @ units) -> Point3d (space @ units) -> Curve3d (space @ units)
 line p1 p2 = constant p1 + Curve1d.t * (p2 - p1)
 
@@ -133,6 +147,8 @@ evaluate f tValue = case f of
   Parametric expression -> Expression.evaluate expression tValue
   Curve3d curve -> evaluateImpl curve tValue
   Coerce curve -> Units.coerce (evaluate curve tValue)
+  XYZ x y z ->
+    Point3d.xyz (Curve1d.evaluate x tValue) (Curve1d.evaluate y tValue) (Curve1d.evaluate z tValue)
   Addition c v -> evaluate c tValue + VectorCurve3d.evaluate v tValue
   Subtraction c v -> evaluate c tValue - VectorCurve3d.evaluate v tValue
 
@@ -141,6 +157,11 @@ evaluateBounds f tRange = case f of
   Parametric expression -> Expression.evaluateBounds expression tRange
   Curve3d curve -> evaluateBoundsImpl curve tRange
   Coerce curve -> Units.coerce (evaluateBounds curve tRange)
+  XYZ x y z ->
+    Bounds3d.xyz
+      (Curve1d.evaluateBounds x tRange)
+      (Curve1d.evaluateBounds y tRange)
+      (Curve1d.evaluateBounds z tRange)
   Addition c v -> evaluateBounds c tRange + VectorCurve3d.evaluateBounds v tRange
   Subtraction c v -> evaluateBounds c tRange - VectorCurve3d.evaluateBounds v tRange
 
@@ -149,6 +170,8 @@ derivative f = case f of
   Parametric expression -> VectorCurve3d.Parametric (Expression.curveDerivative expression)
   Curve3d curve -> derivativeImpl curve
   Coerce curve -> Units.coerce (derivative curve)
+  XYZ x y z ->
+    VectorCurve3d.xyz (Curve1d.derivative x) (Curve1d.derivative y) (Curve1d.derivative z)
   Addition c v -> derivative c + VectorCurve3d.derivative v
   Subtraction c v -> derivative c - VectorCurve3d.derivative v
 
@@ -157,5 +180,6 @@ reverse f = case f of
   Parametric expression -> Parametric (expression . Expression.r)
   Curve3d curve -> Curve3d (reverseImpl curve)
   Coerce curve -> Units.coerce (reverse curve)
+  XYZ x y z -> XYZ (Curve1d.reverse x) (Curve1d.reverse y) (Curve1d.reverse z)
   Addition c v -> reverse c + VectorCurve3d.reverse v
   Subtraction c v -> reverse c - VectorCurve3d.reverse v
