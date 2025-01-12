@@ -548,18 +548,20 @@ instance
   direction2d .><. curve = Vector2d.unit direction2d .><. curve
 
 instance
+  (space1 ~ space2, units1 ~ units2) =>
   Addition
-    (Point2d (space @ units))
-    (VectorCurve2d (space @ units))
-    (Curve2d (space @ units))
+    (Point2d (space1 @ units1))
+    (VectorCurve2d (space2 @ units2))
+    (Curve2d (space1 @ units1))
   where
   point + curve = Curve2d.constant point + curve
 
 instance
+  (space1 ~ space2, units1 ~ units2) =>
   Subtraction
-    (Point2d (space @ units))
-    (VectorCurve2d (space @ units))
-    (Curve2d (space @ units))
+    (Point2d (space1 @ units1))
+    (VectorCurve2d (space2 @ units2))
+    (Curve2d (space1 @ units1))
   where
   point - curve = Curve2d.constant point - curve
 
