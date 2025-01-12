@@ -1,4 +1,4 @@
-module OpenSolid.Surface.Function.SaddleRegion
+module OpenSolid.SurfaceFunction.SaddleRegion
   ( SaddleRegion
   , Frame
   , point
@@ -23,11 +23,11 @@ import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Range qualified as Range
-import {-# SOURCE #-} OpenSolid.Surface.Function qualified as Function
-import {-# SOURCE #-} OpenSolid.Surface.Function.HorizontalCurve qualified as HorizontalCurve
-import OpenSolid.Surface.Function.Subproblem (Subproblem (Subproblem))
-import OpenSolid.Surface.Function.Subproblem qualified as Subproblem
-import {-# SOURCE #-} OpenSolid.Surface.Function.VerticalCurve qualified as VerticalCurve
+import {-# SOURCE #-} OpenSolid.SurfaceFunction qualified as SurfaceFunction
+import {-# SOURCE #-} OpenSolid.SurfaceFunction.HorizontalCurve qualified as HorizontalCurve
+import OpenSolid.SurfaceFunction.Subproblem (Subproblem (Subproblem))
+import OpenSolid.SurfaceFunction.Subproblem qualified as Subproblem
+import {-# SOURCE #-} OpenSolid.SurfaceFunction.VerticalCurve qualified as VerticalCurve
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvCoordinates, UvDirection, UvPoint)
 import OpenSolid.Uv.Derivatives qualified as Derivatives
 import OpenSolid.Vector2d qualified as Vector2d
@@ -55,9 +55,9 @@ bounds SaddleRegion{subproblem} = Subproblem.uvBounds subproblem
 quadratic :: Subproblem units -> UvPoint -> SaddleRegion units
 quadratic subproblem saddlePoint = do
   let Subproblem{derivatives} = subproblem
-  let fuu = Function.evaluate (Derivatives.get (derivatives >> U >> U)) saddlePoint
-  let fuv = Function.evaluate (Derivatives.get (derivatives >> U >> V)) saddlePoint
-  let fvv = Function.evaluate (Derivatives.get (derivatives >> V >> V)) saddlePoint
+  let fuu = SurfaceFunction.evaluate (Derivatives.get (derivatives >> U >> U)) saddlePoint
+  let fuv = SurfaceFunction.evaluate (Derivatives.get (derivatives >> U >> V)) saddlePoint
+  let fvv = SurfaceFunction.evaluate (Derivatives.get (derivatives >> V >> V)) saddlePoint
   let bDirectionCandidates = NonEmpty.three Direction2d.x Direction2d.y (Direction2d.degrees 45.0)
   let directionalSecondDerivative = secondDerivative fuu fuv fvv
   let dB = NonEmpty.maximumBy (Qty.abs . directionalSecondDerivative) bDirectionCandidates

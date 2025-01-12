@@ -1,4 +1,4 @@
-module OpenSolid.Surface.Function.Internal
+module OpenSolid.SurfaceFunction.Internal
   ( solveForU
   , solveForV
   , curveBounds
@@ -12,35 +12,35 @@ import OpenSolid.Qty qualified as Qty
 import OpenSolid.Range (Range (Range))
 import OpenSolid.Range qualified as Range
 import OpenSolid.Solve1d qualified as Solve1d
-import {-# SOURCE #-} OpenSolid.Surface.Function (Function)
-import {-# SOURCE #-} OpenSolid.Surface.Function qualified as Function
+import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
+import {-# SOURCE #-} OpenSolid.SurfaceFunction qualified as SurfaceFunction
 
 solveForU ::
   Tolerance units =>
-  Function units ->
-  Function units ->
+  SurfaceFunction units ->
+  SurfaceFunction units ->
   Range Unitless ->
   Float ->
   Float
 solveForU f fu uBounds vValue = do
   let uvPoint uValue = Point2d.xy uValue vValue
-  let fValue uValue = Function.evaluate f (uvPoint uValue)
-  let fuValue uValue = Function.evaluate fu (uvPoint uValue)
+  let fValue uValue = SurfaceFunction.evaluate f (uvPoint uValue)
+  let fuValue uValue = SurfaceFunction.evaluate fu (uvPoint uValue)
   case Solve1d.monotonic fValue fuValue uBounds of
     Solve1d.Exact uValue -> uValue
     Solve1d.Closest uValue -> uValue
 
 solveForV ::
   Tolerance units =>
-  Function units ->
-  Function units ->
+  SurfaceFunction units ->
+  SurfaceFunction units ->
   Float ->
   Range Unitless ->
   Float
 solveForV f fv uValue vBounds = do
   let uvPoint vValue = Point2d.xy uValue vValue
-  let fValue vValue = Function.evaluate f (uvPoint vValue)
-  let fvValue vValue = Function.evaluate fv (uvPoint vValue)
+  let fValue vValue = SurfaceFunction.evaluate f (uvPoint vValue)
+  let fvValue vValue = SurfaceFunction.evaluate fv (uvPoint vValue)
   case Solve1d.monotonic fValue fvValue vBounds of
     Solve1d.Exact vValue -> vValue
     Solve1d.Closest vValue -> vValue

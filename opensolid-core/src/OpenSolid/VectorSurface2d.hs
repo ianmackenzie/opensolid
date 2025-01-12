@@ -1,6 +1,5 @@
 module OpenSolid.VectorSurface2d
   ( VectorSurface2d
-  , Function
   , parametric
   , function
   )
@@ -8,13 +7,13 @@ where
 
 import OpenSolid.Region2d (Region2d)
 import OpenSolid.SurfaceParameter (UvCoordinates)
-import OpenSolid.VectorSurface2d.Function (Function)
+import OpenSolid.VectorSurfaceFunction2d (VectorSurfaceFunction2d)
 
 data VectorSurface2d units where
-  Parametric :: Function units -> Region2d UvCoordinates -> VectorSurface2d units
+  Parametric :: VectorSurfaceFunction2d units -> Region2d UvCoordinates -> VectorSurface2d units
 
-parametric :: Function units -> Region2d UvCoordinates -> VectorSurface2d units
+parametric :: VectorSurfaceFunction2d units -> Region2d UvCoordinates -> VectorSurface2d units
 parametric = Parametric
 
-function :: VectorSurface2d units -> Function units
+function :: VectorSurface2d units -> VectorSurfaceFunction2d units
 function (Parametric f _) = f

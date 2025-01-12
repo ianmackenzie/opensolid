@@ -176,16 +176,16 @@ library
     OpenSolid.Solve2d
     OpenSolid.Stream
     OpenSolid.Surface
-    OpenSolid.Surface.Function
-    OpenSolid.Surface.Function.HorizontalCurve
-    OpenSolid.Surface.Function.ImplicitCurveBounds
-    OpenSolid.Surface.Function.Subproblem
-    OpenSolid.Surface.Function.VerticalCurve
-    OpenSolid.Surface.Function.Zeros
     OpenSolid.Surface2d
-    OpenSolid.Surface2d.Function
     OpenSolid.Surface3d
-    OpenSolid.Surface3d.Function
+    OpenSolid.SurfaceFunction
+    OpenSolid.SurfaceFunction.HorizontalCurve
+    OpenSolid.SurfaceFunction.ImplicitCurveBounds
+    OpenSolid.SurfaceFunction.Subproblem
+    OpenSolid.SurfaceFunction.VerticalCurve
+    OpenSolid.SurfaceFunction.Zeros
+    OpenSolid.SurfaceFunction2d
+    OpenSolid.SurfaceFunction3d
     OpenSolid.SurfaceParameter
     OpenSolid.Text
     OpenSolid.Tolerance
@@ -209,9 +209,9 @@ library
     OpenSolid.VectorCurve3d.Direction
     OpenSolid.VectorCurve3d.Zeros
     OpenSolid.VectorSurface2d
-    OpenSolid.VectorSurface2d.Function
     OpenSolid.VectorSurface3d
-    OpenSolid.VectorSurface3d.Function
+    OpenSolid.VectorSurfaceFunction2d
+    OpenSolid.VectorSurfaceFunction3d
     OpenSolid.Vertex2d
     OpenSolid.Volume
 
@@ -223,9 +223,9 @@ library
     OpenSolid.Point3d.CoordinateTransformation
     OpenSolid.Quadrature
     OpenSolid.Random.Internal
-    OpenSolid.Surface.Function.Internal
-    OpenSolid.Surface.Function.PartialZeros
-    OpenSolid.Surface.Function.SaddleRegion
+    OpenSolid.SurfaceFunction.Internal
+    OpenSolid.SurfaceFunction.PartialZeros
+    OpenSolid.SurfaceFunction.SaddleRegion
     OpenSolid.Text.Parse
     OpenSolid.Vector2d.CoordinateTransformation
     OpenSolid.Vector3d.CoordinateTransformation

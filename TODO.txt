@@ -1,6 +1,3 @@
-Rename e.g. Surface2d.Function to SurfaceFunction2d, Surface.Function to SurfaceFunction?
--> flatter is often better, would give better type errors/hints instead of everything being shown as 'Function'
-
 Support Point2d + VectorCurve2d
 -> search for use cases of Curve2d.constant, including inside Curve2d module itself
 

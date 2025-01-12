@@ -116,10 +116,11 @@ import OpenSolid.Range qualified as Range
 import OpenSolid.Result qualified as Result
 import OpenSolid.Solve2d qualified as Solve2d
 import OpenSolid.Stream qualified as Stream
-import OpenSolid.Surface.Function qualified as Surface.Function
-import OpenSolid.Surface.Function.Zeros qualified as Surface.Function.Zeros
-import OpenSolid.Surface2d.Function qualified
-import {-# SOURCE #-} OpenSolid.Surface2d.Function qualified as Surface2d.Function
+import OpenSolid.SurfaceFunction (SurfaceFunction)
+import OpenSolid.SurfaceFunction qualified as SurfaceFunction
+import OpenSolid.SurfaceFunction.Zeros qualified as SurfaceFunction.Zeros
+import {-# SOURCE #-} OpenSolid.SurfaceFunction2d (SurfaceFunction2d)
+import {-# SOURCE #-} OpenSolid.SurfaceFunction2d qualified as SurfaceFunction2d
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvCoordinates, UvPoint)
 import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
@@ -133,7 +134,8 @@ import OpenSolid.VectorBounds2d qualified as VectorBounds2d
 import OpenSolid.VectorCurve2d (VectorCurve2d)
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 import OpenSolid.VectorCurve2d.Zeros qualified as VectorCurve2d.Zeros
-import OpenSolid.VectorSurface2d.Function qualified as VectorSurface2d.Function
+import OpenSolid.VectorSurfaceFunction2d (VectorSurfaceFunction2d)
+import OpenSolid.VectorSurfaceFunction2d qualified as VectorSurfaceFunction2d
 import Prelude qualified
 
 type role Curve2d nominal
@@ -346,26 +348,26 @@ instance Interface (Curve2d (space @ units) :.: Curve Unitless) (space @ units) 
 
 instance
   Composition
-    (Surface.Function.Function Unitless)
+    (SurfaceFunction Unitless)
     (Curve2d (space @ units))
-    (Surface2d.Function.Function (space @ units))
+    (SurfaceFunction2d (space @ units))
   where
-  Parametric outer . Surface.Function.Parametric inner = Surface2d.Function.Parametric (outer . inner)
-  curve . function = Surface2d.Function.new (curve :.: function)
+  Parametric outer . SurfaceFunction.Parametric inner = SurfaceFunction2d.Parametric (outer . inner)
+  curve . function = SurfaceFunction2d.new (curve :.: function)
 
 instance
-  Surface2d.Function.Interface
-    (Curve2d (space @ units) :.: Surface.Function.Function Unitless)
+  SurfaceFunction2d.Interface
+    (Curve2d (space @ units) :.: SurfaceFunction Unitless)
     (space @ units)
   where
   evaluateImpl (curve :.: function) uvPoint =
-    evaluate curve (Surface.Function.evaluate function uvPoint)
+    evaluate curve (SurfaceFunction.evaluate function uvPoint)
 
   evaluateBoundsImpl (curve :.: function) uvBounds =
-    evaluateBounds curve (Surface.Function.evaluateBounds function uvBounds)
+    evaluateBounds curve (SurfaceFunction.evaluateBounds function uvBounds)
 
   derivativeImpl parameter (curve :.: function) =
-    (derivative curve . function) * Surface.Function.derivative parameter function
+    (derivative curve . function) * SurfaceFunction.derivative parameter function
 
   transformByImpl transform (curve :.: function) =
     transformBy transform curve . function
@@ -373,22 +375,22 @@ instance
 instance
   Composition
     (Curve2d UvCoordinates)
-    (Surface.Function.Function units)
+    (SurfaceFunction units)
     (Curve units)
   where
-  Surface.Function.Parametric outer . Parametric inner = Curve.Parametric (outer . inner)
+  SurfaceFunction.Parametric outer . Parametric inner = Curve.Parametric (outer . inner)
   outer . inner = Curve.new (outer :.: inner)
 
-instance Curve.Interface (Surface.Function.Function units :.: Curve2d UvCoordinates) units where
+instance Curve.Interface (SurfaceFunction units :.: Curve2d UvCoordinates) units where
   evaluateImpl (function :.: uvCurve) t =
-    Surface.Function.evaluate function (evaluate uvCurve t)
+    SurfaceFunction.evaluate function (evaluate uvCurve t)
 
   evaluateBoundsImpl (function :.: uvCurve) t =
-    Surface.Function.evaluateBounds function (evaluateBounds uvCurve t)
+    SurfaceFunction.evaluateBounds function (evaluateBounds uvCurve t)
 
   derivativeImpl (function :.: uvCurve) = do
-    let fU = Surface.Function.derivative U function
-    let fV = Surface.Function.derivative V function
+    let fU = SurfaceFunction.derivative U function
+    let fV = SurfaceFunction.derivative V function
     let uvT = derivative uvCurve
     let uT = VectorCurve2d.xComponent uvT
     let vT = VectorCurve2d.yComponent uvT
@@ -780,14 +782,14 @@ intersections curve1 curve2 = Result.do
       if VectorCurve2d.hasZero derivative1 || VectorCurve2d.hasZero derivative2
         then Failure Intersections.CurveHasDegeneracy
         else do
-          let u = Surface.Function.u
-          let v = Surface.Function.v
+          let u = SurfaceFunction.u
+          let v = SurfaceFunction.v
           let f = curve1 . u - curve2 . v
-          let fu = VectorSurface2d.Function.derivative U f
-          let fv = VectorSurface2d.Function.derivative V f
-          let g = VectorSurface2d.Function.xy (fu .><. fv) ((derivative1 . u) .<>. f)
-          let gu = VectorSurface2d.Function.derivative U g
-          let gv = VectorSurface2d.Function.derivative V g
+          let fu = VectorSurfaceFunction2d.derivative U f
+          let fv = VectorSurfaceFunction2d.derivative V f
+          let g = VectorSurfaceFunction2d.xy (fu .><. fv) ((derivative1 . u) .<>. f)
+          let gu = VectorSurfaceFunction2d.derivative U g
+          let gv = VectorSurfaceFunction2d.derivative V g
           case Solve2d.search (findIntersectionPoints f fu fv g gu gv endpointIntersections) () of
             Success (NonEmpty points) -> Success (Just (IntersectionPoints points))
             Success [] -> Success Nothing
@@ -800,12 +802,12 @@ endpointIntersection uvPoints uvBounds =
 
 findIntersectionPoints ::
   Tolerance units =>
-  VectorSurface2d.Function.Function (space @ units) ->
-  VectorSurface2d.Function.Function (space @ units) ->
-  VectorSurface2d.Function.Function (space @ units) ->
-  VectorSurface2d.Function.Function (space @ (units :*: units)) ->
-  VectorSurface2d.Function.Function (space @ (units :*: units)) ->
-  VectorSurface2d.Function.Function (space @ (units :*: units)) ->
+  VectorSurfaceFunction2d (space @ units) ->
+  VectorSurfaceFunction2d (space @ units) ->
+  VectorSurfaceFunction2d (space @ units) ->
+  VectorSurfaceFunction2d (space @ (units :*: units)) ->
+  VectorSurfaceFunction2d (space @ (units :*: units)) ->
+  VectorSurfaceFunction2d (space @ (units :*: units)) ->
   List UvPoint ->
   () ->
   Domain2d ->
@@ -813,13 +815,13 @@ findIntersectionPoints ::
   Solve2d.Action exclusions () IntersectionPoint
 findIntersectionPoints f fu fv g gu gv endpointIntersections () subdomain exclusions = do
   let uvBounds = Domain2d.bounds subdomain
-  if not (VectorSurface2d.Function.evaluateBounds f uvBounds ^ Vector2d.zero)
+  if not (VectorSurfaceFunction2d.evaluateBounds f uvBounds ^ Vector2d.zero)
     then Solve2d.pass
     else case exclusions of
       Solve2d.SomeExclusions -> Solve2d.recurse ()
       Solve2d.NoExclusions -> do
-        let fuBounds = VectorSurface2d.Function.evaluateBounds fu uvBounds
-        let fvBounds = VectorSurface2d.Function.evaluateBounds fv uvBounds
+        let fuBounds = VectorSurfaceFunction2d.evaluateBounds fu uvBounds
+        let fvBounds = VectorSurfaceFunction2d.evaluateBounds fv uvBounds
         let domainInterior = Domain2d.interior subdomain
         let validate point constructor sign =
               if Bounds2d.includes point domainInterior
@@ -834,31 +836,31 @@ findIntersectionPoints f fu fv g gu gv endpointIntersections () subdomain exclus
               Nothing -> do
                 let solution =
                       Solve2d.unique
-                        (VectorSurface2d.Function.evaluateBounds f)
-                        (VectorSurface2d.Function.evaluate f)
-                        (VectorSurface2d.Function.evaluate fu)
-                        (VectorSurface2d.Function.evaluate fv)
+                        (VectorSurfaceFunction2d.evaluateBounds f)
+                        (VectorSurfaceFunction2d.evaluate f)
+                        (VectorSurfaceFunction2d.evaluate fu)
+                        (VectorSurfaceFunction2d.evaluate fv)
                         uvBounds
                 case solution of
                   Just point -> validate point IntersectionPoint.crossing sign
                   Nothing -> Solve2d.pass
           Unresolved -> do
-            let guBounds = VectorSurface2d.Function.evaluateBounds gu uvBounds
-            let gvBounds = VectorSurface2d.Function.evaluateBounds gv uvBounds
+            let guBounds = VectorSurfaceFunction2d.evaluateBounds gu uvBounds
+            let gvBounds = VectorSurfaceFunction2d.evaluateBounds gv uvBounds
             case Range.resolvedSign (gvBounds .><. guBounds) of
               Resolved sign -> do
                 case endpointIntersection endpointIntersections uvBounds of
                   Just point -> validate point IntersectionPoint.tangent sign
                   Nothing -> do
-                    let gBounds = VectorSurface2d.Function.evaluateBounds g uvBounds
+                    let gBounds = VectorSurfaceFunction2d.evaluateBounds g uvBounds
                     let convergenceTolerance = 1e-9 * Range.upperBound (VectorBounds2d.magnitude gBounds)
                     let solution =
                           Tolerance.using convergenceTolerance $
                             Solve2d.unique
-                              (VectorSurface2d.Function.evaluateBounds g)
-                              (VectorSurface2d.Function.evaluate g)
-                              (VectorSurface2d.Function.evaluate gu)
-                              (VectorSurface2d.Function.evaluate gv)
+                              (VectorSurfaceFunction2d.evaluateBounds g)
+                              (VectorSurfaceFunction2d.evaluate g)
+                              (VectorSurfaceFunction2d.evaluate gu)
+                              (VectorSurfaceFunction2d.evaluate gv)
                               uvBounds
                     case solution of
                       Just point -> validate point IntersectionPoint.tangent sign
@@ -1135,35 +1137,35 @@ medialAxis ::
   Curve2d (space @ units) ->
   Result MedialAxis.Error (List (MedialAxis.Segment (space @ units)))
 medialAxis curve1 curve2 = do
-  let p1 = curve1 . Surface.Function.u
-  let p2 = curve2 . Surface.Function.v
-  let v1 = derivative curve1 . Surface.Function.u
-  let v2 = derivative curve2 . Surface.Function.v
+  let p1 = curve1 . SurfaceFunction.u
+  let p2 = curve2 . SurfaceFunction.v
+  let v1 = derivative curve1 . SurfaceFunction.u
+  let v2 = derivative curve2 . SurfaceFunction.v
   let d = p2 - p1
   let target = v2 .><. (2.0 * (v1 .<>. d) .*. d - d .<>. d .*. v1)
   let targetTolerance = ?tolerance .*. ((?tolerance .*. ?tolerance) .*. ?tolerance)
-  case Tolerance.using targetTolerance (Surface.Function.zeros target) of
-    Failure Surface.Function.Zeros.HigherOrderZero -> Failure MedialAxis.HigherOrderSolution
-    Failure Surface.Function.Zeros.ZeroEverywhere -> TODO -- curves are identical arcs?
+  case Tolerance.using targetTolerance (SurfaceFunction.zeros target) of
+    Failure SurfaceFunction.Zeros.HigherOrderZero -> Failure MedialAxis.HigherOrderSolution
+    Failure SurfaceFunction.Zeros.ZeroEverywhere -> TODO -- curves are identical arcs?
     Success zeros -> do
-      Debug.assert (List.isEmpty (Surface.Function.Zeros.crossingLoops zeros))
-      Debug.assert (List.isEmpty (Surface.Function.Zeros.tangentPoints zeros))
+      Debug.assert (List.isEmpty (SurfaceFunction.Zeros.crossingLoops zeros))
+      Debug.assert (List.isEmpty (SurfaceFunction.Zeros.tangentPoints zeros))
       case Result.map DirectionCurve2d.unwrap (tangentDirection curve1) of
         Success tangent1 -> do
           let normal1 = VectorCurve2d.rotateBy Angle.quarterTurn tangent1
-          let radius :: Surface.Function.Function units =
-                (d .<>. d) .!/! (2.0 * (tangent1 . Surface.Function.u) >< d)
-          let curve :: Surface2d.Function.Function (space @ units) =
-                (curve1 . Surface.Function.u) + radius * (normal1 . Surface.Function.u)
+          let radius :: SurfaceFunction units =
+                (d .<>. d) .!/! (2.0 * (tangent1 . SurfaceFunction.u) >< d)
+          let curve :: SurfaceFunction2d (space @ units) =
+                (curve1 . SurfaceFunction.u) + radius * (normal1 . SurfaceFunction.u)
           let toSegment solutionCurve =
                 MedialAxis.Segment
-                  { t1 = Surface.Function.u . solutionCurve
-                  , t2 = Surface.Function.v . solutionCurve
+                  { t1 = SurfaceFunction.u . solutionCurve
+                  , t2 = SurfaceFunction.v . solutionCurve
                   , t12 = solutionCurve
                   , curve = curve . solutionCurve
                   , radius = radius . solutionCurve
                   }
-          Success (List.map toSegment (Surface.Function.Zeros.crossingCurves zeros))
+          Success (List.map toSegment (SurfaceFunction.Zeros.crossingCurves zeros))
         Failure HasDegeneracy -> Failure MedialAxis.DegenerateCurve
 
 arcLengthParameterization ::

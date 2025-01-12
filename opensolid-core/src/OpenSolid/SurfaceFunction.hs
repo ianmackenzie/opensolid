@@ -2,8 +2,8 @@
 {-# LANGUAGE NoFieldSelectors #-}
 {-# OPTIONS_GHC -Wno-partial-fields #-}
 
-module OpenSolid.Surface.Function
-  ( Function (Parametric)
+module OpenSolid.SurfaceFunction
+  ( SurfaceFunction (Parametric)
   , Interface (..)
   , evaluate
   , evaluateBounds
@@ -48,16 +48,16 @@ import OpenSolid.Qty qualified as Qty
 import OpenSolid.Range (Range)
 import OpenSolid.Range qualified as Range
 import OpenSolid.Solve2d qualified as Solve2d
-import {-# SOURCE #-} OpenSolid.Surface.Function.HorizontalCurve qualified as HorizontalCurve
-import OpenSolid.Surface.Function.PartialZeros (PartialZeros)
-import OpenSolid.Surface.Function.PartialZeros qualified as PartialZeros
-import OpenSolid.Surface.Function.SaddleRegion (SaddleRegion)
-import OpenSolid.Surface.Function.SaddleRegion qualified as SaddleRegion
-import OpenSolid.Surface.Function.Subproblem (CornerValues (..), Subproblem (..))
-import OpenSolid.Surface.Function.Subproblem qualified as Subproblem
-import {-# SOURCE #-} OpenSolid.Surface.Function.VerticalCurve qualified as VerticalCurve
-import OpenSolid.Surface.Function.Zeros (Zeros (..))
-import OpenSolid.Surface.Function.Zeros qualified as Zeros
+import {-# SOURCE #-} OpenSolid.SurfaceFunction.HorizontalCurve qualified as HorizontalCurve
+import OpenSolid.SurfaceFunction.PartialZeros (PartialZeros)
+import OpenSolid.SurfaceFunction.PartialZeros qualified as PartialZeros
+import OpenSolid.SurfaceFunction.SaddleRegion (SaddleRegion)
+import OpenSolid.SurfaceFunction.SaddleRegion qualified as SaddleRegion
+import OpenSolid.SurfaceFunction.Subproblem (CornerValues (..), Subproblem (..))
+import OpenSolid.SurfaceFunction.Subproblem qualified as Subproblem
+import {-# SOURCE #-} OpenSolid.SurfaceFunction.VerticalCurve qualified as VerticalCurve
+import OpenSolid.SurfaceFunction.Zeros (Zeros (..))
+import OpenSolid.SurfaceFunction.Zeros qualified as Zeros
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvDirection, UvPoint)
 import OpenSolid.SurfaceParameter qualified as SurfaceParameter
 import OpenSolid.Units (Radians)
@@ -67,53 +67,55 @@ import OpenSolid.Uv.Derivatives qualified as Derivatives
 import OpenSolid.Vector2d (Vector2d (Vector2d))
 import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.VectorBounds2d (VectorBounds2d (VectorBounds2d))
-import {-# SOURCE #-} OpenSolid.VectorSurface2d.Function qualified as VectorSurface2d.Function
-import {-# SOURCE #-} OpenSolid.VectorSurface3d.Function qualified as VectorSurface3d.Function
+import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction2d (VectorSurfaceFunction2d)
+import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction2d qualified as VectorSurfaceFunction2d
+import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction3d (VectorSurfaceFunction3d)
+import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction3d qualified as VectorSurfaceFunction3d
 
-data Function units where
-  Function ::
+data SurfaceFunction units where
+  SurfaceFunction ::
     Interface function units =>
     function ->
-    Function units
+    SurfaceFunction units
   Parametric ::
     Expression UvPoint (Qty units) ->
-    Function units
+    SurfaceFunction units
   Negated ::
-    Function units ->
-    Function units
+    SurfaceFunction units ->
+    SurfaceFunction units
   Sum ::
-    Function units ->
-    Function units ->
-    Function units
+    SurfaceFunction units ->
+    SurfaceFunction units ->
+    SurfaceFunction units
   Difference ::
-    Function units ->
-    Function units ->
-    Function units
+    SurfaceFunction units ->
+    SurfaceFunction units ->
+    SurfaceFunction units
   Product' ::
-    Function units1 ->
-    Function units2 ->
-    Function (units1 :*: units2)
+    SurfaceFunction units1 ->
+    SurfaceFunction units2 ->
+    SurfaceFunction (units1 :*: units2)
   Quotient' ::
-    Function units1 ->
-    Function units2 ->
-    Function (units1 :/: units2)
+    SurfaceFunction units1 ->
+    SurfaceFunction units2 ->
+    SurfaceFunction (units1 :/: units2)
   Squared' ::
-    Function units ->
-    Function (units :*: units)
+    SurfaceFunction units ->
+    SurfaceFunction (units :*: units)
   SquareRoot' ::
-    Function (units :*: units) ->
-    Function units
+    SurfaceFunction (units :*: units) ->
+    SurfaceFunction units
   Sin ::
-    Function Radians ->
-    Function Unitless
+    SurfaceFunction Radians ->
+    SurfaceFunction Unitless
   Cos ::
-    Function Radians ->
-    Function Unitless
+    SurfaceFunction Radians ->
+    SurfaceFunction Unitless
   Coerce ::
-    Function units1 ->
-    Function units2
+    SurfaceFunction units1 ->
+    SurfaceFunction units2
 
-deriving instance Show (Function units)
+deriving instance Show (SurfaceFunction units)
 
 class
   Show function =>
@@ -122,31 +124,31 @@ class
   where
   evaluateImpl :: function -> UvPoint -> Qty units
   evaluateBoundsImpl :: function -> UvBounds -> Range units
-  derivativeImpl :: SurfaceParameter -> function -> Function units
+  derivativeImpl :: SurfaceParameter -> function -> SurfaceFunction units
 
-instance HasUnits (Function units) units
+instance HasUnits (SurfaceFunction units) units
 
-instance Units.Coercion (Function unitsA) (Function unitsB) where
+instance Units.Coercion (SurfaceFunction unitsA) (SurfaceFunction unitsB) where
   coerce (Parametric expression) = Parametric (Units.coerce expression)
   coerce (Coerce function) = Coerce function
   coerce function = Coerce function
 
 instance
   units1 ~ units2 =>
-  ApproximateEquality (Function units1) (Function units2) units1
+  ApproximateEquality (SurfaceFunction units1) (SurfaceFunction units2) units1
   where
   function1 ~= function2 = function1 - function2 ~= Qty.zero
 
 instance
   units1 ~ units2 =>
-  ApproximateEquality (Function units1) (Qty units2) units1
+  ApproximateEquality (SurfaceFunction units1) (Qty units2) units1
   where
   function ~= value =
     List.allTrue [evaluate function uvPoint ~= value | uvPoint <- SurfaceParameter.samples]
 
 instance
   units1 ~ units2 =>
-  Intersects (Function units1) (Qty units2) units1
+  Intersects (SurfaceFunction units1) (Qty units2) units1
   where
   function ^ value =
     -- TODO optimize this to use a special Solve2d.find or similar
@@ -160,11 +162,11 @@ instance
 
 instance
   units1 ~ units2 =>
-  Intersects (Qty units1) (Function units2) units1
+  Intersects (Qty units1) (SurfaceFunction units2) units1
   where
   value ^ function = function ^ value
 
-instance Negation (Function units) where
+instance Negation (SurfaceFunction units) where
   negate (Parametric expression) = Parametric (negate expression)
   negate (Coerce function) = Coerce (negate function)
   negate (Negated function) = function
@@ -173,178 +175,226 @@ instance Negation (Function units) where
   negate (Quotient' f1 f2) = negate f1 ./. f2
   negate function = Negated function
 
-instance Multiplication Sign (Function units) (Function units) where
+instance Multiplication Sign (SurfaceFunction units) (SurfaceFunction units) where
   Positive * function = function
   Negative * function = -function
 
-instance Multiplication' Sign (Function units) (Function (Unitless :*: units)) where
+instance Multiplication' Sign (SurfaceFunction units) (SurfaceFunction (Unitless :*: units)) where
   Positive .*. function = Units.coerce function
   Negative .*. function = Units.coerce -function
 
-instance Multiplication (Function units) Sign (Function units) where
+instance Multiplication (SurfaceFunction units) Sign (SurfaceFunction units) where
   function * Positive = function
   function * Negative = -function
 
-instance Multiplication' (Function units) Sign (Function (units :*: Unitless)) where
+instance Multiplication' (SurfaceFunction units) Sign (SurfaceFunction (units :*: Unitless)) where
   function .*. Positive = Units.coerce function
   function .*. Negative = Units.coerce -function
 
-instance units ~ units_ => Addition (Function units) (Function units_) (Function units) where
+instance
+  units ~ units_ =>
+  Addition
+    (SurfaceFunction units)
+    (SurfaceFunction units_)
+    (SurfaceFunction units)
+  where
   Parametric lhs + Parametric rhs = Parametric (lhs + rhs)
   function1 + function2 = Sum function1 function2
 
-instance units ~ units_ => Addition (Function units) (Qty units_) (Function units) where
+instance
+  units ~ units_ =>
+  Addition
+    (SurfaceFunction units)
+    (Qty units_)
+    (SurfaceFunction units)
+  where
   function + value = function + constant value
 
-instance units ~ units_ => Addition (Qty units) (Function units_) (Function units) where
+instance
+  units ~ units_ =>
+  Addition
+    (Qty units)
+    (SurfaceFunction units_)
+    (SurfaceFunction units)
+  where
   value + function = constant value + function
 
 instance
   units1 ~ units2 =>
-  Subtraction (Function units1) (Function units2) (Function units1)
+  Subtraction (SurfaceFunction units1) (SurfaceFunction units2) (SurfaceFunction units1)
   where
   Parametric lhs - Parametric rhs = Parametric (lhs - rhs)
   function1 - function2 = Difference function1 function2
 
 instance
   units1 ~ units2 =>
-  Subtraction (Function units1) (Qty units2) (Function units1)
+  Subtraction (SurfaceFunction units1) (Qty units2) (SurfaceFunction units1)
   where
   function - value = function - constant value
 
 instance
   units1 ~ units2 =>
-  Subtraction (Qty units1) (Function units2) (Function units1)
+  Subtraction (Qty units1) (SurfaceFunction units2) (SurfaceFunction units1)
   where
   value - function = constant value - function
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (Function units1) (Function units2) (Function units3)
+  Multiplication (SurfaceFunction units1) (SurfaceFunction units2) (SurfaceFunction units3)
   where
   lhs * rhs = Units.specialize (lhs .*. rhs)
 
-instance Multiplication' (Function units1) (Function units2) (Function (units1 :*: units2)) where
+instance
+  Multiplication'
+    (SurfaceFunction units1)
+    (SurfaceFunction units2)
+    (SurfaceFunction (units1 :*: units2))
+  where
   Parametric lhs .*. Parametric rhs = Parametric (lhs .*. rhs)
   lhs .*. rhs = Product' lhs rhs
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (Function units1) (Qty units2) (Function units3)
+  Multiplication (SurfaceFunction units1) (Qty units2) (SurfaceFunction units3)
   where
   lhs * rhs = Units.specialize (lhs .*. rhs)
 
-instance Multiplication' (Function units1) (Qty units2) (Function (units1 :*: units2)) where
+instance
+  Multiplication'
+    (SurfaceFunction units1)
+    (Qty units2)
+    (SurfaceFunction (units1 :*: units2))
+  where
   function .*. value = function .*. constant value
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (Qty units1) (Function units2) (Function units3)
+  Multiplication (Qty units1) (SurfaceFunction units2) (SurfaceFunction units3)
   where
   lhs * rhs = Units.specialize (lhs .*. rhs)
 
-instance Multiplication' (Qty units1) (Function units2) (Function (units1 :*: units2)) where
+instance
+  Multiplication'
+    (Qty units1)
+    (SurfaceFunction units2)
+    (SurfaceFunction (units1 :*: units2))
+  where
   value .*. function = constant value .*. function
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication
-    (Function units1)
+    (SurfaceFunction units1)
     (Vector2d (space @ units2))
-    (VectorSurface2d.Function.Function (space @ units3))
+    (VectorSurfaceFunction2d (space @ units3))
   where
   lhs * rhs = Units.specialize (lhs .*. rhs)
 
 instance
   Multiplication'
-    (Function units1)
+    (SurfaceFunction units1)
     (Vector2d (space @ units2))
-    (VectorSurface2d.Function.Function (space @ (units1 :*: units2)))
+    (VectorSurfaceFunction2d (space @ (units1 :*: units2)))
   where
-  function .*. vector = function .*. VectorSurface2d.Function.constant vector
+  function .*. vector = function .*. VectorSurfaceFunction2d.constant vector
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication
     (Vector2d (space @ units1))
-    (Function units2)
-    (VectorSurface2d.Function.Function (space @ units3))
+    (SurfaceFunction units2)
+    (VectorSurfaceFunction2d (space @ units3))
   where
   lhs * rhs = Units.specialize (lhs .*. rhs)
 
 instance
   Multiplication'
     (Vector2d (space @ units1))
-    (Function units2)
-    (VectorSurface2d.Function.Function (space @ (units1 :*: units2)))
+    (SurfaceFunction units2)
+    (VectorSurfaceFunction2d (space @ (units1 :*: units2)))
   where
-  vector .*. function = VectorSurface2d.Function.constant vector .*. function
+  vector .*. function = VectorSurfaceFunction2d.constant vector .*. function
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication
-    (Function units1)
+    (SurfaceFunction units1)
     (Vector3d (space @ units2))
-    (VectorSurface3d.Function.Function (space @ units3))
+    (VectorSurfaceFunction3d (space @ units3))
   where
   lhs * rhs = Units.specialize (lhs .*. rhs)
 
 instance
   Multiplication'
-    (Function units1)
+    (SurfaceFunction units1)
     (Vector3d (space @ units2))
-    (VectorSurface3d.Function.Function (space @ (units1 :*: units2)))
+    (VectorSurfaceFunction3d (space @ (units1 :*: units2)))
   where
-  function .*. vector = function .*. VectorSurface3d.Function.constant vector
+  function .*. vector = function .*. VectorSurfaceFunction3d.constant vector
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication
     (Vector3d (space @ units1))
-    (Function units2)
-    (VectorSurface3d.Function.Function (space @ units3))
+    (SurfaceFunction units2)
+    (VectorSurfaceFunction3d (space @ units3))
   where
   lhs * rhs = Units.specialize (lhs .*. rhs)
 
 instance
   Multiplication'
     (Vector3d (space @ units1))
-    (Function units2)
-    (VectorSurface3d.Function.Function (space @ (units1 :*: units2)))
+    (SurfaceFunction units2)
+    (VectorSurfaceFunction3d (space @ (units1 :*: units2)))
   where
-  vector .*. function = VectorSurface3d.Function.constant vector .*. function
+  vector .*. function = VectorSurfaceFunction3d.constant vector .*. function
 
 instance
   Units.Quotient units1 units2 units3 =>
-  Division (Function units1) (Function units2) (Function units3)
+  Division (SurfaceFunction units1) (SurfaceFunction units2) (SurfaceFunction units3)
   where
   lhs / rhs = Units.specialize (lhs ./. rhs)
 
-instance Division' (Function units1) (Function units2) (Function (units1 :/: units2)) where
+instance
+  Division'
+    (SurfaceFunction units1)
+    (SurfaceFunction units2)
+    (SurfaceFunction (units1 :/: units2))
+  where
   Parametric lhs ./. Parametric rhs = Parametric (lhs ./. rhs)
   lhs ./. rhs = Quotient' lhs rhs
 
 instance
   Units.Quotient units1 units2 units3 =>
-  Division (Function units1) (Qty units2) (Function units3)
+  Division (SurfaceFunction units1) (Qty units2) (SurfaceFunction units3)
   where
   lhs / rhs = Units.specialize (lhs ./. rhs)
 
-instance Division' (Function units1) (Qty units2) (Function (units1 :/: units2)) where
+instance
+  Division'
+    (SurfaceFunction units1)
+    (Qty units2)
+    (SurfaceFunction (units1 :/: units2))
+  where
   function ./. value = function ./. constant value
 
 instance
   Units.Quotient units1 units2 units3 =>
-  Division (Qty units1) (Function units2) (Function units3)
+  Division (Qty units1) (SurfaceFunction units2) (SurfaceFunction units3)
   where
   lhs / rhs = Units.specialize (lhs ./. rhs)
 
-instance Division' (Qty units1) (Function units2) (Function (units1 :/: units2)) where
+instance
+  Division'
+    (Qty units1)
+    (SurfaceFunction units2)
+    (SurfaceFunction (units1 :/: units2))
+  where
   value ./. function = constant value ./. function
 
-evaluate :: Function units -> UvPoint -> Qty units
+evaluate :: SurfaceFunction units -> UvPoint -> Qty units
 evaluate function uv = case function of
-  Function f -> evaluateImpl f uv
+  SurfaceFunction f -> evaluateImpl f uv
   Parametric x -> Expression.evaluate x uv
   Coerce f -> Units.coerce (evaluate f uv)
   Negated f -> negate (evaluate f uv)
@@ -357,9 +407,9 @@ evaluate function uv = case function of
   Sin f -> Angle.sin (evaluate f uv)
   Cos f -> Angle.cos (evaluate f uv)
 
-evaluateBounds :: Function units -> UvBounds -> Range units
+evaluateBounds :: SurfaceFunction units -> UvBounds -> Range units
 evaluateBounds function uv = case function of
-  Function f -> evaluateBoundsImpl f uv
+  SurfaceFunction f -> evaluateBoundsImpl f uv
   Parametric expression -> Expression.evaluateBounds expression uv
   Coerce f -> Units.coerce (evaluateBounds f uv)
   Negated f -> negate (evaluateBounds f uv)
@@ -372,9 +422,9 @@ evaluateBounds function uv = case function of
   Sin f -> Range.sin (evaluateBounds f uv)
   Cos f -> Range.cos (evaluateBounds f uv)
 
-derivative :: SurfaceParameter -> Function units -> Function units
+derivative :: SurfaceParameter -> SurfaceFunction units -> SurfaceFunction units
 derivative varyingParameter function = case function of
-  Function f -> derivativeImpl varyingParameter f
+  SurfaceFunction f -> derivativeImpl varyingParameter f
   Parametric expression -> Parametric (Expression.surfaceDerivative varyingParameter expression)
   Coerce f -> Units.coerce (derivative varyingParameter f)
   Negated f -> negate (derivative varyingParameter f)
@@ -389,54 +439,54 @@ derivative varyingParameter function = case function of
   Sin f -> cos f * (derivative varyingParameter f / Angle.radian)
   Cos f -> negate (sin f) * (derivative varyingParameter f / Angle.radian)
 
-derivativeIn :: UvDirection -> Function units -> Function units
+derivativeIn :: UvDirection -> SurfaceFunction units -> SurfaceFunction units
 derivativeIn direction function =
   Direction2d.xComponent direction * derivative U function
     + Direction2d.yComponent direction * derivative V function
 
-zero :: Function units
+zero :: SurfaceFunction units
 zero = constant Qty.zero
 
-constant :: Qty units -> Function units
+constant :: Qty units -> SurfaceFunction units
 constant = Parametric . Expression.constant
 
-u :: Function Unitless
+u :: SurfaceFunction Unitless
 u = Parametric Expression.u
 
-v :: Function Unitless
+v :: SurfaceFunction Unitless
 v = Parametric Expression.v
 
-parameter :: SurfaceParameter -> Function Unitless
+parameter :: SurfaceParameter -> SurfaceFunction Unitless
 parameter U = u
 parameter V = v
 
-new :: Interface function units => function -> Function units
-new = Function
+new :: Interface function units => function -> SurfaceFunction units
+new = SurfaceFunction
 
-squared :: Units.Squared units1 units2 => Function units1 -> Function units2
+squared :: Units.Squared units1 units2 => SurfaceFunction units1 -> SurfaceFunction units2
 squared function = Units.specialize (squared' function)
 
-squared' :: Function units -> Function (units :*: units)
+squared' :: SurfaceFunction units -> SurfaceFunction (units :*: units)
 squared' (Parametric expression) = Parametric (Expression.squared' expression)
 squared' (Negated f) = squared' f
 squared' function = Squared' function
 
-sqrt :: Units.Squared units1 units2 => Function units2 -> Function units1
+sqrt :: Units.Squared units1 units2 => SurfaceFunction units2 -> SurfaceFunction units1
 sqrt function = sqrt' (Units.unspecialize function)
 
-sqrt' :: Function (units :*: units) -> Function units
+sqrt' :: SurfaceFunction (units :*: units) -> SurfaceFunction units
 sqrt' (Parametric expression) = Parametric (Expression.sqrt' expression)
 sqrt' function = SquareRoot' function
 
-sin :: Function Radians -> Function Unitless
+sin :: SurfaceFunction Radians -> SurfaceFunction Unitless
 sin (Parametric expression) = Parametric (Expression.sin expression)
 sin function = Sin function
 
-cos :: Function Radians -> Function Unitless
+cos :: SurfaceFunction Radians -> SurfaceFunction Unitless
 cos (Parametric expression) = Parametric (Expression.cos expression)
 cos function = Cos function
 
-zeros :: Tolerance units => Function units -> Result Zeros.Error Zeros
+zeros :: Tolerance units => SurfaceFunction units -> Result Zeros.Error Zeros
 zeros function
   | function ~= Qty.zero = Failure Zeros.ZeroEverywhere
   | otherwise = Result.do
@@ -473,9 +523,9 @@ data Solution units
 
 findZeros ::
   Tolerance units =>
-  Derivatives (Function units) ->
-  Function Unitless ->
-  Function Unitless ->
+  Derivatives (SurfaceFunction units) ->
+  SurfaceFunction Unitless ->
+  SurfaceFunction Unitless ->
   FindZerosContext ->
   Domain2d ->
   Solve2d.Exclusions exclusions ->

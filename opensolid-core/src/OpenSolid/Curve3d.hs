@@ -30,8 +30,10 @@ import OpenSolid.Point3d (Point3d (Point3d))
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
 import OpenSolid.Range (Range)
-import OpenSolid.Surface.Function qualified as Surface.Function
-import OpenSolid.Surface3d.Function qualified as Surface3d.Function
+import OpenSolid.SurfaceFunction (SurfaceFunction)
+import OpenSolid.SurfaceFunction qualified as SurfaceFunction
+import OpenSolid.SurfaceFunction3d (SurfaceFunction3d)
+import OpenSolid.SurfaceFunction3d qualified as SurfaceFunction3d
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.Vector3d qualified as Vector3d
@@ -108,30 +110,30 @@ instance
 
 instance
   Composition
-    (Surface.Function.Function Unitless)
+    (SurfaceFunction Unitless)
     (Curve3d (space @ units))
-    (Surface3d.Function.Function (space @ units))
+    (SurfaceFunction3d (space @ units))
   where
-  Parametric curve . Surface.Function.Parametric function =
-    Surface3d.Function.Parametric (curve . function)
-  curveFunction . surfaceFunction = Surface3d.Function.new (curveFunction :.: surfaceFunction)
+  Parametric curve . SurfaceFunction.Parametric function =
+    SurfaceFunction3d.Parametric (curve . function)
+  curveFunction . surfaceFunction = SurfaceFunction3d.new (curveFunction :.: surfaceFunction)
 
 instance
-  Surface3d.Function.Interface
-    (Curve3d (space @ units) :.: Surface.Function.Function Unitless)
+  SurfaceFunction3d.Interface
+    (Curve3d (space @ units) :.: SurfaceFunction Unitless)
     (space @ units)
   where
   evaluateImpl (curveFunction :.: surfaceFunction) uvPoint =
     evaluate curveFunction $
-      Surface.Function.evaluate surfaceFunction uvPoint
+      SurfaceFunction.evaluate surfaceFunction uvPoint
 
   evaluateBoundsImpl (curveFunction :.: surfaceFunction) uvBounds =
     evaluateBounds curveFunction $
-      Surface.Function.evaluateBounds surfaceFunction uvBounds
+      SurfaceFunction.evaluateBounds surfaceFunction uvBounds
 
   derivativeImpl parameter (curveFunction :.: surfaceFunction) =
     (derivative curveFunction . surfaceFunction)
-      * Surface.Function.derivative parameter surfaceFunction
+      * SurfaceFunction.derivative parameter surfaceFunction
 
 new :: Interface function (space @ units) => function -> Curve3d (space @ units)
 new = Curve3d

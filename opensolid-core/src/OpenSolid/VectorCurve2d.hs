@@ -61,7 +61,8 @@ import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Range (Range)
-import {-# SOURCE #-} OpenSolid.Surface.Function qualified as Surface.Function
+import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
+import {-# SOURCE #-} OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform2d (Transform2d)
 import OpenSolid.Transform2d qualified as Transform2d
@@ -72,7 +73,8 @@ import OpenSolid.VectorBounds2d (VectorBounds2d (VectorBounds2d))
 import OpenSolid.VectorBounds2d qualified as VectorBounds2d
 import OpenSolid.VectorCurve2d.Direction qualified as VectorCurve2d.Direction
 import OpenSolid.VectorCurve2d.Zeros qualified as Zeros
-import {-# SOURCE #-} OpenSolid.VectorSurface2d.Function qualified as VectorSurface2d.Function
+import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction2d (VectorSurfaceFunction2d)
+import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction2d qualified as VectorSurfaceFunction2d
 
 class
   Show curve =>
@@ -570,27 +572,27 @@ instance
 
 instance
   Composition
-    (Surface.Function.Function Unitless)
+    (SurfaceFunction Unitless)
     (VectorCurve2d (space @ units))
-    (VectorSurface2d.Function.Function (space @ units))
+    (VectorSurfaceFunction2d (space @ units))
   where
-  Parametric curve . Surface.Function.Parametric function =
-    VectorSurface2d.Function.Parametric (curve . function)
-  curve . function = VectorSurface2d.Function.new (curve :.: function)
+  Parametric curve . SurfaceFunction.Parametric function =
+    VectorSurfaceFunction2d.Parametric (curve . function)
+  curve . function = VectorSurfaceFunction2d.new (curve :.: function)
 
 instance
-  VectorSurface2d.Function.Interface
-    (VectorCurve2d (space @ units) :.: Surface.Function.Function Unitless)
+  VectorSurfaceFunction2d.Interface
+    (VectorCurve2d (space @ units) :.: SurfaceFunction Unitless)
     (space @ units)
   where
   evaluateImpl (curve :.: function) uvPoint =
-    evaluate curve (Surface.Function.evaluate function uvPoint)
+    evaluate curve (SurfaceFunction.evaluate function uvPoint)
 
   evaluateBoundsImpl (curve :.: function) uvBounds =
-    evaluateBounds curve (Surface.Function.evaluateBounds function uvBounds)
+    evaluateBounds curve (SurfaceFunction.evaluateBounds function uvBounds)
 
   derivativeImpl parameter (curve :.: function) =
-    (derivative curve . function) * Surface.Function.derivative parameter function
+    (derivative curve . function) * SurfaceFunction.derivative parameter function
 
   transformByImpl transform (curve :.: function) =
     transformBy transform curve . function

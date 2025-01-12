@@ -8,13 +8,15 @@ where
 
 import OpenSolid.Region2d (Region2d)
 import OpenSolid.SurfaceParameter (UvCoordinates)
-import OpenSolid.VectorSurface3d.Function (Function)
+import OpenSolid.VectorSurfaceFunction3d (VectorSurfaceFunction3d)
+
+type Function = VectorSurfaceFunction3d
 
 data VectorSurface3d units where
-  Parametric :: Function units -> Region2d UvCoordinates -> VectorSurface3d units
+  Parametric :: VectorSurfaceFunction3d units -> Region2d UvCoordinates -> VectorSurface3d units
 
-parametric :: Function units -> Region2d UvCoordinates -> VectorSurface3d units
+parametric :: VectorSurfaceFunction3d units -> Region2d UvCoordinates -> VectorSurface3d units
 parametric = Parametric
 
-function :: VectorSurface3d units -> Function units
+function :: VectorSurface3d units -> VectorSurfaceFunction3d units
 function (Parametric f _) = f

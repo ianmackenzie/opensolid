@@ -1,4 +1,4 @@
-module OpenSolid.Surface.Function.PartialZeros
+module OpenSolid.SurfaceFunction.PartialZeros
   ( PartialZeros (..)
   , Parameterization (..)
   , CrossingSegment (..)
@@ -22,10 +22,10 @@ import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Prelude
-import OpenSolid.Surface.Function.SaddleRegion (SaddleRegion)
-import OpenSolid.Surface.Function.SaddleRegion qualified as SaddleRegion
-import OpenSolid.Surface.Function.Zeros (Zeros (Zeros))
-import OpenSolid.Surface.Function.Zeros qualified as Zeros
+import OpenSolid.SurfaceFunction.SaddleRegion (SaddleRegion)
+import OpenSolid.SurfaceFunction.SaddleRegion qualified as SaddleRegion
+import OpenSolid.SurfaceFunction.Zeros (Zeros (Zeros))
+import OpenSolid.SurfaceFunction.Zeros qualified as Zeros
 import OpenSolid.SurfaceParameter (UvBounds, UvCoordinates, UvPoint)
 
 data PartialZeros units = PartialZeros

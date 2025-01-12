@@ -1,4 +1,4 @@
-module OpenSolid.Surface.Function.VerticalCurve
+module OpenSolid.SurfaceFunction.VerticalCurve
   ( VerticalCurve
   , new
   , monotonic
@@ -27,11 +27,11 @@ import OpenSolid.Qty (Qty (Qty#))
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Range (Range (Range))
 import OpenSolid.Range qualified as Range
-import {-# SOURCE #-} OpenSolid.Surface.Function (Function)
-import {-# SOURCE #-} OpenSolid.Surface.Function qualified as Function
-import OpenSolid.Surface.Function.ImplicitCurveBounds (ImplicitCurveBounds)
-import OpenSolid.Surface.Function.ImplicitCurveBounds qualified as ImplicitCurveBounds
-import OpenSolid.Surface.Function.Internal qualified as Internal
+import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
+import {-# SOURCE #-} OpenSolid.SurfaceFunction qualified as SurfaceFunction
+import OpenSolid.SurfaceFunction.ImplicitCurveBounds (ImplicitCurveBounds)
+import OpenSolid.SurfaceFunction.ImplicitCurveBounds qualified as ImplicitCurveBounds
+import OpenSolid.SurfaceFunction.Internal qualified as Internal
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvCoordinates)
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Uv.Derivatives (Derivatives)
@@ -40,10 +40,10 @@ import OpenSolid.Vector2d (Vector2d (Vector2d#))
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 
 data VerticalCurve units = VerticalCurve
-  { f :: Function units
-  , fu :: Function units
-  , fv :: Function units
-  , dudv :: Function Unitless
+  { f :: SurfaceFunction units
+  , fu :: SurfaceFunction units
+  , fv :: SurfaceFunction units
+  , dudv :: SurfaceFunction Unitless
   , bounds :: ImplicitCurveBounds
   , vStart :: Float
   , vEnd :: Float
@@ -67,8 +67,8 @@ implicitCurveBounds boxes =
 
 new ::
   Tolerance units =>
-  Derivatives (Function units) ->
-  Function Unitless ->
+  Derivatives (SurfaceFunction units) ->
+  SurfaceFunction Unitless ->
   Float ->
   Float ->
   NonEmpty UvBounds ->
@@ -93,8 +93,8 @@ new derivatives dudv vStart vEnd boxes = do
 
 monotonic ::
   Tolerance units =>
-  Derivatives (Function units) ->
-  Function Unitless ->
+  Derivatives (SurfaceFunction units) ->
+  SurfaceFunction Unitless ->
   Float ->
   Float ->
   NonEmpty UvBounds ->
@@ -119,8 +119,8 @@ monotonic derivatives dudv vStart vEnd boxes = do
 
 bounded ::
   Tolerance units =>
-  Derivatives (Function units) ->
-  Function Unitless ->
+  Derivatives (SurfaceFunction units) ->
+  SurfaceFunction Unitless ->
   Float ->
   Float ->
   NonEmpty UvBounds ->
@@ -168,7 +168,7 @@ instance Curve2d.Interface (VerticalCurve units) UvCoordinates where
           |> Bounds2d.placeIn frame
       NotMonotonic -> do
         let uRange = ImplicitCurveBounds.evaluateBounds bounds (Range.from v1 v2)
-        let slopeBounds = Function.evaluateBounds dudv (Bounds2d.xy uRange (Range.from v1 v2))
+        let slopeBounds = SurfaceFunction.evaluateBounds dudv (Bounds2d.xy uRange (Range.from v1 v2))
         let segmentUBounds = Internal.curveBounds v1 v2 u1 u2 slopeBounds
         Bounds2d.xy segmentUBounds (Range.from v1 v2)
 
