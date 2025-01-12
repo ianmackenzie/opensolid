@@ -30,16 +30,6 @@ pub extern "C" fn opensolid_surface1d_bounds_function(ptr: *mut Expression) -> *
 }
 
 #[no_mangle]
-pub extern "C" fn opensolid_volume1d_value_function(ptr: *mut Expression) -> *const u8 {
-    value_function(3, unsafe { &[&*ptr] })
-}
-
-#[no_mangle]
-pub extern "C" fn opensolid_volume1d_bounds_function(ptr: *mut Expression) -> *const u8 {
-    bounds_function(3, unsafe { &[&*ptr] })
-}
-
-#[no_mangle]
 pub extern "C" fn opensolid_curve2d_value_function(
     px: *mut Expression,
     py: *mut Expression,
@@ -69,22 +59,6 @@ pub extern "C" fn opensolid_surface2d_bounds_function(
     py: *mut Expression,
 ) -> *const u8 {
     bounds_function(2, unsafe { &[&*px, &*py] })
-}
-
-#[no_mangle]
-pub extern "C" fn opensolid_volume2d_value_function(
-    px: *mut Expression,
-    py: *mut Expression,
-) -> *const u8 {
-    value_function(3, unsafe { &[&*px, &*py] })
-}
-
-#[no_mangle]
-pub extern "C" fn opensolid_volume2d_bounds_function(
-    px: *mut Expression,
-    py: *mut Expression,
-) -> *const u8 {
-    bounds_function(3, unsafe { &[&*px, &*py] })
 }
 
 #[no_mangle]
@@ -121,22 +95,4 @@ pub extern "C" fn opensolid_surface3d_bounds_function(
     pz: *mut Expression,
 ) -> *const u8 {
     bounds_function(2, unsafe { &[&*px, &*py, &*pz] })
-}
-
-#[no_mangle]
-pub extern "C" fn opensolid_volume3d_value_function(
-    px: *mut Expression,
-    py: *mut Expression,
-    pz: *mut Expression,
-) -> *const u8 {
-    value_function(3, unsafe { &[&*px, &*py, &*pz] })
-}
-
-#[no_mangle]
-pub extern "C" fn opensolid_volume3d_bounds_function(
-    px: *mut Expression,
-    py: *mut Expression,
-    pz: *mut Expression,
-) -> *const u8 {
-    bounds_function(3, unsafe { &[&*px, &*py, &*pz] })
 }

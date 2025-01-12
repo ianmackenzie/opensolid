@@ -4,7 +4,6 @@ module OpenSolid.Expression.Scalar
   , constant
   , curveParameter
   , surfaceParameter
-  , volumeParameter
   , negated
   , sum
   , difference
@@ -21,7 +20,6 @@ module OpenSolid.Expression.Scalar
   , bezierCurve
   , curveDerivative
   , surfaceDerivative
-  , volumeDerivative
   , show
   , showWithPrecedence
   , Ptr
@@ -42,8 +40,6 @@ import OpenSolid.SurfaceParameter (SurfaceParameter, UvPoint)
 import OpenSolid.SurfaceParameter qualified as SurfaceParameter
 import OpenSolid.Text qualified as Text
 import OpenSolid.Units qualified as Units
-import OpenSolid.VolumeParameter (UvwPoint, VolumeParameter)
-import OpenSolid.VolumeParameter qualified as VolumeParameter
 import System.IO.Unsafe (unsafeDupablePerformIO)
 import Prelude (Double)
 
@@ -51,7 +47,6 @@ data Scalar input where
   Constant :: Float -> Scalar input
   CurveParameter :: Scalar Float
   SurfaceParameter :: SurfaceParameter -> Scalar UvPoint
-  VolumeParameter :: VolumeParameter -> Scalar UvwPoint
   Negated :: Scalar input -> Scalar input
   Sum :: Scalar input -> Scalar input -> Scalar input
   Difference :: Scalar input -> Scalar input -> Scalar input
@@ -114,32 +109,6 @@ instance
   QuinticSpline p1 p2 p3 p4 p5 p6 param . inputs = QuinticSpline p1 p2 p3 p4 p5 p6 (param . inputs)
   BezierCurve controlPoints param . inputs = BezierCurve controlPoints (param . inputs)
 
-instance
-  (input1 ~ input2, input1 ~ input3) =>
-  Composition
-    (Scalar input1, Scalar input2, Scalar input3)
-    (Scalar UvwPoint)
-    (Scalar input1)
-  where
-  Constant value . _ = constant value
-  VolumeParameter VolumeParameter.U . (input, _, _) = input
-  VolumeParameter VolumeParameter.V . (_, input, _) = input
-  VolumeParameter VolumeParameter.W . (_, _, input) = input
-  Negated arg . inputs = negated (arg . inputs)
-  Sum lhs rhs . inputs = sum (lhs . inputs) (rhs . inputs)
-  Difference lhs rhs . inputs = difference (lhs . inputs) (rhs . inputs)
-  Product lhs rhs . inputs = product (lhs . inputs) (rhs . inputs)
-  Quotient lhs rhs . inputs = quotient (lhs . inputs) (rhs . inputs)
-  Squared arg . inputs = squared (arg . inputs)
-  Sqrt arg . inputs = sqrt (arg . inputs)
-  Sin arg . inputs = sin (arg . inputs)
-  Cos arg . inputs = cos (arg . inputs)
-  QuadraticSpline p1 p2 p3 param . inputs = QuadraticSpline p1 p2 p3 (param . inputs)
-  CubicSpline p1 p2 p3 p4 param . inputs = CubicSpline p1 p2 p3 p4 (param . inputs)
-  QuarticSpline p1 p2 p3 p4 p5 param . inputs = QuarticSpline p1 p2 p3 p4 p5 (param . inputs)
-  QuinticSpline p1 p2 p3 p4 p5 p6 param . inputs = QuinticSpline p1 p2 p3 p4 p5 p6 (param . inputs)
-  BezierCurve controlPoints param . inputs = BezierCurve controlPoints (param . inputs)
-
 zero :: Scalar input
 zero = constant 0.0
 
@@ -154,9 +123,6 @@ curveParameter = CurveParameter
 
 surfaceParameter :: SurfaceParameter -> Scalar UvPoint
 surfaceParameter = SurfaceParameter
-
-volumeParameter :: VolumeParameter -> Scalar UvwPoint
-volumeParameter = VolumeParameter
 
 -- TODO special cases for spline types
 negated :: Scalar input -> Scalar input
@@ -401,63 +367,6 @@ surfaceDerivative varyingParameter expression = case expression of
           (bezierCurve derivativeControlPoints param)
           (surfaceDerivative varyingParameter param)
 
-volumeDerivative :: VolumeParameter -> Scalar UvwPoint -> Scalar UvwPoint
-volumeDerivative varyingParameter expression = case expression of
-  Constant _ -> zero
-  VolumeParameter parameter -> if parameter == varyingParameter then one else zero
-  Negated arg -> negated (volumeDerivative varyingParameter arg)
-  Sum lhs rhs ->
-    sum (volumeDerivative varyingParameter lhs) (volumeDerivative varyingParameter rhs)
-  Difference lhs rhs ->
-    difference (volumeDerivative varyingParameter lhs) (volumeDerivative varyingParameter rhs)
-  Squared arg -> twice (product (volumeDerivative varyingParameter arg) arg)
-  Product lhs rhs ->
-    sum
-      (product (volumeDerivative varyingParameter lhs) rhs)
-      (product lhs (volumeDerivative varyingParameter rhs))
-  Quotient lhs rhs ->
-    quotient
-      ( difference
-          (product (volumeDerivative varyingParameter lhs) rhs)
-          (product lhs (volumeDerivative varyingParameter rhs))
-      )
-      (squared rhs)
-  Sqrt arg -> quotient (half (volumeDerivative varyingParameter arg)) expression
-  Sin arg -> product (volumeDerivative varyingParameter arg) (cos arg)
-  Cos arg -> product (negated (volumeDerivative varyingParameter arg)) (sin arg)
-  QuadraticSpline p1 p2 p3 param -> do
-    let d1 = 2.0 * (p2 - p1)
-    let d2 = 2.0 * (p3 - p2)
-    product (line d1 d2 param) (volumeDerivative varyingParameter param)
-  CubicSpline p1 p2 p3 p4 param -> do
-    let d1 = 3.0 * (p2 - p1)
-    let d2 = 3.0 * (p3 - p2)
-    let d3 = 3.0 * (p4 - p3)
-    product (quadraticSpline d1 d2 d3 param) (volumeDerivative varyingParameter param)
-  QuarticSpline p1 p2 p3 p4 p5 param -> do
-    let d1 = 4.0 * (p2 - p1)
-    let d2 = 4.0 * (p3 - p2)
-    let d3 = 4.0 * (p4 - p3)
-    let d4 = 4.0 * (p5 - p4)
-    product (cubicSpline d1 d2 d3 d4 param) (volumeDerivative varyingParameter param)
-  QuinticSpline p1 p2 p3 p4 p5 p6 param -> do
-    let d1 = 5.0 * (p2 - p1)
-    let d2 = 5.0 * (p3 - p2)
-    let d3 = 5.0 * (p4 - p3)
-    let d4 = 5.0 * (p5 - p4)
-    let d5 = 5.0 * (p6 - p5)
-    product (quarticSpline d1 d2 d3 d4 d5 param) (volumeDerivative varyingParameter param)
-  BezierCurve controlPoints param -> do
-    let scale = Float.int (NonEmpty.length controlPoints - 1)
-    let scaledDifference p1 p2 = scale * (p2 - p1)
-    let scaledDifferences = NonEmpty.successive scaledDifference controlPoints
-    case scaledDifferences of
-      [] -> zero
-      NonEmpty derivativeControlPoints ->
-        product
-          (bezierCurve derivativeControlPoints param)
-          (volumeDerivative varyingParameter param)
-
 show :: Scalar input -> Text
 show = showWithPrecedence 0
 
@@ -466,9 +375,6 @@ showWithPrecedence precedence expression = case expression of
   CurveParameter -> "t"
   SurfaceParameter SurfaceParameter.U -> "u"
   SurfaceParameter SurfaceParameter.V -> "v"
-  VolumeParameter VolumeParameter.U -> "u"
-  VolumeParameter VolumeParameter.V -> "v"
-  VolumeParameter VolumeParameter.W -> "w"
   Constant value -> Text.float value
   Negated arg -> showParenthesized (precedence >= 6) ("-" + showWithPrecedence 6 arg)
   Sum lhs rhs -> showParenthesized (precedence >= 6) (showWithPrecedence 6 lhs + " + " + showWithPrecedence 6 rhs)
@@ -578,9 +484,6 @@ ptr expression = case expression of
   CurveParameter -> opensolid_expression_argument (fromIntegral 0)
   SurfaceParameter SurfaceParameter.U -> opensolid_expression_argument (fromIntegral 0)
   SurfaceParameter SurfaceParameter.V -> opensolid_expression_argument (fromIntegral 1)
-  VolumeParameter VolumeParameter.U -> opensolid_expression_argument (fromIntegral 0)
-  VolumeParameter VolumeParameter.V -> opensolid_expression_argument (fromIntegral 1)
-  VolumeParameter VolumeParameter.W -> opensolid_expression_argument (fromIntegral 2)
   Constant (Qty value) -> opensolid_expression_constant value
   Negated arg -> opensolid_expression_negate (ptr arg)
   Sum lhs rhs -> opensolid_expression_sum (ptr lhs) (ptr rhs)

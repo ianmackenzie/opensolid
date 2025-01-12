@@ -212,12 +212,8 @@ library
     OpenSolid.VectorSurface2d.Function
     OpenSolid.VectorSurface3d
     OpenSolid.VectorSurface3d.Function
-    OpenSolid.VectorVolume3d.Function
     OpenSolid.Vertex2d
     OpenSolid.Volume
-    OpenSolid.Volume1d
-    OpenSolid.Volume1d.Function
-    OpenSolid.VolumeParameter
 
   other-modules:
     OpenSolid.Bootstrap
