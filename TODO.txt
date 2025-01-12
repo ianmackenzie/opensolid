@@ -1,6 +1,3 @@
-Support Point2d + VectorCurve2d
--> search for use cases of Curve2d.constant, including inside Curve2d module itself
-
 Rewrite scripts in Haskell?
 -> or Python?
 
