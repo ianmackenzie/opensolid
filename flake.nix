@@ -17,8 +17,8 @@
           };
           pkgs = nixpkgs.legacyPackages.${system}.extend overlay;
           ld_library_path = builtins.concatStringsSep ":" [
-            # Allow Haskell to find libopensolid_jit
-            "$PWD/opensolid-jit/target/release"
+            # Allow Haskell to find libopensolid_rs
+            "$PWD/opensolid-rs/target/release"
             # Allow Python packages to be built against libstdc++.so
             "${pkgs.lib.makeLibraryPath [ pkgs.stdenv.cc.cc.lib ]}"
           ];

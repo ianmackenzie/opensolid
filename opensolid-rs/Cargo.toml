@@ -1,6 +1,6 @@
 [package]
 edition = "2021"
-name = "opensolid-jit"
+name = "opensolid-rs"
 version = "0.1.0"
 
 [dependencies]

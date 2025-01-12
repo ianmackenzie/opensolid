@@ -232,7 +232,7 @@ library
 
   hs-source-dirs: src
   extra-libraries:
-    opensolid_jit
+    opensolid_rs
 
 test-suite opensolid-core-test
   import: config

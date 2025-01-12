@@ -36,8 +36,8 @@ jobs:
             ~\.cargo\registry\index
             ~\.cargo\registry\cache
             ~\.cargo\git\db
-            opensolid-jit\target
-          key: ${{ github.job }}-cargo-${{ hashFiles('opensolid-jit/Cargo.*') }}
+            opensolid-rs\target
+          key: ${{ github.job }}-cargo-${{ hashFiles('opensolid-rs/Cargo.*') }}
       # Install tooling
       - name: Install Haskell tooling
         uses: haskell-actions/setup@v2
@@ -57,11 +57,11 @@ jobs:
         run: |
           cabal update
       # Build and test
-      - name: Build opensolid-jit library
-        working-directory: opensolid-jit
+      - name: Build opensolid-rs library
+        working-directory: opensolid-rs
         run: |
           cargo build -v --release
-          echo "PATH=$env:PATH;$env:GITHUB_WORKSPACE\opensolid-jit\target\release" >> $env:GITHUB_ENV
+          echo "PATH=$env:PATH;$env:GITHUB_WORKSPACE\opensolid-rs\target\release" >> $env:GITHUB_ENV
       - name: Build opensolid-core library
         run: |
           ghc --version
@@ -76,7 +76,7 @@ jobs:
           cabal build opensolid-ffi
       - name: Build Python bindings
         run: |
-          Copy-Item -Path .\opensolid-jit\target\release\opensolid_jit.dll -Destination .\opensolid-python\lib\src\opensolid\
+          Copy-Item -Path .\opensolid-rs\target\release\opensolid_rs.dll -Destination .\opensolid-python\lib\src\opensolid\
           Get-ChildItem -Path dist-newstyle -Filter opensolid-ffi.dll -Recurse | Copy-Item -Destination .\opensolid-python\lib\src\opensolid\
           cabal run opensolid-python
           ruff format opensolid-python\lib\src\opensolid\__init__.py
@@ -123,8 +123,8 @@ jobs:
             ~/.cargo/registry/index
             ~/.cargo/registry/cache
             ~/.cargo/git/db
-            opensolid-jit/target
-          key: ${{ github.job }}-cargo-${{ hashFiles('opensolid-jit/Cargo.*') }}
+            opensolid-rs/target
+          key: ${{ github.job }}-cargo-${{ hashFiles('opensolid-rs/Cargo.*') }}
       - name: Install Haskell tooling
         uses: haskell-actions/setup@v2
         with:
@@ -138,11 +138,11 @@ jobs:
       - name: Update Cabal index
         run: |
           cabal update
-      - name: Build opensolid-jit library
-        working-directory: opensolid-jit
+      - name: Build opensolid-rs library
+      working-directory: opensolid-rs
         run: |
           cargo build --release
-          echo "LD_LIBRARY_PATH=$GITHUB_WORKSPACE/opensolid-jit/target/release" >> $GITHUB_ENV
+          echo "LD_LIBRARY_PATH=$GITHUB_WORKSPACE/opensolid-rs/target/release" >> $GITHUB_ENV
       - name: Build opensolid-core library
         run: |
           ghc --version
@@ -199,8 +199,8 @@ jobs:
             ~/.cargo/registry/index
             ~/.cargo/registry/cache
             ~/.cargo/git/db
-            opensolid-jit/target
-          key: ${{ github.job }}-cargo-${{ hashFiles('opensolid-jit/Cargo.*') }}
+            opensolid-rs/target
+          key: ${{ github.job }}-cargo-${{ hashFiles('opensolid-rs/Cargo.*') }}
       - name: Install Haskell tooling
         uses: haskell-actions/setup@v2
         with:
@@ -216,11 +216,11 @@ jobs:
       - name: Update Cabal index
         run: |
           cabal update
-      - name: Build opensolid-jit library
-        working-directory: opensolid-jit
+      - name: Build opensolid-rs library
+      working-directory: opensolid-rs
         run: |
           cargo build --release
-          echo "LD_LIBRARY_PATH=$GITHUB_WORKSPACE/opensolid-jit/target/release" >> $GITHUB_ENV
+          echo "LD_LIBRARY_PATH=$GITHUB_WORKSPACE/opensolid-rs/target/release" >> $GITHUB_ENV
       - name: Build opensolid-core library
         run: |
           cabal build opensolid-core
@@ -275,8 +275,8 @@ jobs:
             ~/.cargo/registry/index
             ~/.cargo/registry/cache
             ~/.cargo/git/db
-            opensolid-jit/target
-          key: ${{ github.job }}-cargo-${{ hashFiles('opensolid-jit/Cargo.*') }}
+            opensolid-rs/target
+          key: ${{ github.job }}-cargo-${{ hashFiles('opensolid-rs/Cargo.*') }}
       - name: Install Haskell tooling
         uses: haskell-actions/setup@v2
         with:
@@ -292,11 +292,11 @@ jobs:
       - name: Update Cabal index
         run: |
           cabal update
-      - name: Build opensolid-jit library
-        working-directory: opensolid-jit
+      - name: Build opensolid-rs library
+      working-directory: opensolid-rs
         run: |
           cargo build --release
-          echo "LD_LIBRARY_PATH=$GITHUB_WORKSPACE/opensolid-jit/target/release" >> $GITHUB_ENV
+          echo "LD_LIBRARY_PATH=$GITHUB_WORKSPACE/opensolid-rs/target/release" >> $GITHUB_ENV
       - name: Build opensolid-core library
         run: |
           cabal build opensolid-core
