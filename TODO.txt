@@ -23,10 +23,6 @@ Support Point2d + VectorCurve2d
 
 Rewrite scripts in Haskell?
 
-Merge File module into IO?
--> IO.writeFile, IO.readFile, IO.deleteFile
--> Maybe also IO.listFiles, IO.listDirectories
-
 Build out publishing workflow
 - Collect wheels and publish combined package
   - might need intermediate step to merge Mac wheels into universal one, or just build universal one to start with?
@@ -76,3 +72,6 @@ Optimizations to try:
 - cache expressions on Rust side (per thread?)
 - refactor JIT code to directly generate 'primop' style code directly callable from Haskell
 - add CMM wrappers around C functions so they can be directly used as primops
+
+Implement Subtraction for UTCTime instead of having Duration.from function
+-> also allow adding or subtracting Duration from a UTCTime to get another UTCTime
