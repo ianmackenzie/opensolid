@@ -22,7 +22,6 @@ module OpenSolid.FFI
 where
 
 import Data.ByteString.Unsafe qualified
-import Data.Int (Int64)
 import Data.Proxy (Proxy (Proxy))
 import Data.Text.Encoding qualified
 import Data.Text.Foreign qualified
@@ -301,9 +300,9 @@ store :: forall parent value. FFI value => Ptr parent -> Int -> value -> IO ()
 store ptr offset value = do
   let proxy = Proxy @value
   case representation proxy of
-    IntRep -> Foreign.pokeByteOff ptr offset (toInt64 value)
+    IntRep -> Foreign.pokeByteOff ptr offset (Int.toInt64 value)
     FloatRep -> Foreign.pokeByteOff ptr offset (Float.toDouble value)
-    BoolRep -> Foreign.pokeByteOff ptr offset (toInt64 (if value then 1 else 0))
+    BoolRep -> Foreign.pokeByteOff ptr offset (Int.toInt64 (if value then 1 else 0))
     TextRep -> IO.do
       let numBytes = Data.Text.Foreign.lengthWord8 value
       contentsPtr <- Foreign.Marshal.Alloc.mallocBytes (numBytes + 1)
@@ -316,7 +315,7 @@ store ptr offset value = do
       itemsPtr <- Foreign.Marshal.Alloc.callocBytes (numItems * itemSize)
       let storeItem index item = store itemsPtr (index * itemSize) item
       IO.forEachWithIndex value storeItem
-      Foreign.pokeByteOff ptr offset (toInt64 numItems)
+      Foreign.pokeByteOff ptr offset (Int.toInt64 numItems)
       Foreign.pokeByteOff ptr (offset + 8) itemsPtr
     NonEmptyRep -> store ptr offset (NonEmpty.toList value)
     ArrayRep -> store ptr offset (Array.toNonEmpty value)
@@ -377,17 +376,17 @@ store ptr offset value = do
       store ptr offset6 value6
     MaybeRep -> IO.do
       let tag = case value of Just _ -> 0; Nothing -> 1
-      Foreign.pokeByteOff ptr offset (toInt64 tag)
+      Foreign.pokeByteOff ptr offset (Int.toInt64 tag)
       case value of
         Just actualValue -> store ptr (offset + 8) actualValue
         Nothing -> IO.succeed ()
     ResultRep ->
       case value of
         Success successfulValue -> IO.do
-          Foreign.pokeByteOff ptr offset (toInt64 0)
+          Foreign.pokeByteOff ptr offset (Int.toInt64 0)
           store ptr (offset + 16) successfulValue
         Failure errorValue -> IO.do
-          Foreign.pokeByteOff ptr offset (toInt64 1)
+          Foreign.pokeByteOff ptr offset (Int.toInt64 1)
           store ptr (offset + 8) (Error.message errorValue)
     ClassRep _ -> IO.do
       stablePtr <- Foreign.newStablePtr value
@@ -397,16 +396,16 @@ load :: forall parent value. FFI value => Ptr parent -> Int -> IO value
 load ptr offset = do
   let proxy = Proxy @value
   case representation proxy of
-    IntRep -> IO.map fromInt64 (Foreign.peekByteOff ptr offset)
+    IntRep -> IO.map Int.fromInt64 (Foreign.peekByteOff ptr offset)
     FloatRep -> IO.map Float.fromDouble (Foreign.peekByteOff ptr offset)
-    BoolRep -> IO.map ((/=) 0 . fromInt64) (Foreign.peekByteOff ptr offset)
+    BoolRep -> IO.map ((/=) 0 . Int.fromInt64) (Foreign.peekByteOff ptr offset)
     TextRep -> IO.do
       dataPtr <- Foreign.peekByteOff ptr offset
       byteString <- Data.ByteString.Unsafe.unsafePackCString dataPtr
       IO.succeed (Data.Text.Encoding.decodeUtf8 byteString)
     ListRep -> IO.do
       let itemSize = listItemSize proxy
-      numItems <- IO.map fromInt64 (Foreign.peekByteOff ptr offset)
+      numItems <- IO.map Int.fromInt64 (Foreign.peekByteOff ptr offset)
       itemsPtr <- Foreign.peekByteOff ptr (offset + 8)
       let loadItem index = load itemsPtr (index * itemSize)
       IO.collect loadItem [0 .. numItems - 1]
@@ -472,7 +471,7 @@ load ptr offset = do
       value6 <- load ptr offset6
       IO.succeed (value1, value2, value3, value4, value5, value6)
     MaybeRep -> IO.do
-      tag <- IO.map fromInt64 (Foreign.peekByteOff ptr offset)
+      tag <- IO.map Int.fromInt64 (Foreign.peekByteOff ptr offset)
       if tag == 0
         then IO.map Just (load ptr (offset + 8))
         else IO.succeed Nothing
@@ -535,9 +534,3 @@ tuple6ItemSizes _ =
   , size (typeOf @e Proxy)
   , size (typeOf @f Proxy)
   )
-
-toInt64 :: Int -> Int64
-toInt64 = fromIntegral
-
-fromInt64 :: Int64 -> Int
-fromInt64 = fromIntegral
