@@ -63,19 +63,21 @@ triangulate (Polygon2d outerLoop innerLoops) = do
   let allVertices = NonEmpty.concat (outerLoop :| innerLoops)
   let numVertices = NonEmpty.length allVertices
   let vertexCoordinates = NonEmpty.foldr prependCoordinates [] allVertices
-  let holeIndices = collectHoleIndices (NonEmpty.length outerLoop) innerLoops
-  let numHoles = List.length holeIndices
-  let numFaces = numVertices + 2 * numHoles - 2
+  let innerIndices = collectInnerIndices (NonEmpty.length outerLoop) innerLoops
+  let numHoles = List.count isHole innerLoops
+  let numExternalEdges = loopExternalEdges outerLoop + Int.sumOf loopExternalEdges innerLoops
+  let numFaces = 2 * numVertices - numExternalEdges + 2 * numHoles - 2
   let faceIndices = unsafeDupablePerformIO $ IO.do
         Foreign.Marshal.Array.withArray vertexCoordinates $ \vertexPtr ->
-          Foreign.Marshal.Array.withArray holeIndices $ \holesPtr ->
+          Foreign.Marshal.Array.withArray innerIndices $ \innerIndicesPtr ->
             Foreign.Marshal.Array.allocaArray (3 * numFaces) $ \faceIndicesPtr -> IO.do
               let numFacesReturned =
                     opensolid_polygon2d_triangulate
                       (Int.toCSize numVertices)
                       vertexPtr
-                      (Int.toCSize numHoles)
-                      holesPtr
+                      (Int.toCSize (List.length innerLoops))
+                      innerIndicesPtr
+                      (Int.toCSize numFaces)
                       faceIndicesPtr
               if Int.fromCSize numFacesReturned == numFaces
                 then IO.do
@@ -86,10 +88,20 @@ triangulate (Polygon2d outerLoop innerLoops) = do
                   IO.succeed []
   Mesh.indexed (Array.fromNonEmpty allVertices) faceIndices
 
-collectHoleIndices :: Vertex2d vertex (space @ units) => Int -> List (NonEmpty vertex) -> List CSize
-collectHoleIndices _ [] = []
-collectHoleIndices current (first : rest) =
-  Int.toCSize current : collectHoleIndices (current + NonEmpty.length first) rest
+isHole :: NonEmpty vertex -> Bool
+isHole loop = case loop of
+  NonEmpty.One{} -> False
+  NonEmpty.TwoOrMore -> True
+
+loopExternalEdges :: NonEmpty vertex -> Int
+loopExternalEdges loop = case NonEmpty.length loop of
+  1 -> 0
+  n -> n
+
+collectInnerIndices :: Vertex2d vertex (space @ units) => Int -> List (NonEmpty vertex) -> List CSize
+collectInnerIndices _ [] = []
+collectInnerIndices current (first : rest) =
+  Int.toCSize current : collectInnerIndices (current + NonEmpty.length first) rest
 
 collectTriangleIndices :: List CSize -> List (Int, Int, Int)
 collectTriangleIndices rawIndices = case rawIndices of
@@ -103,5 +115,6 @@ foreign import ccall unsafe "opensolid_polygon2d_triangulate"
     Foreign.Ptr (Qty units) -> -- Vertex data
     CSize -> -- Hole count (including Steiner points)
     Foreign.Ptr CSize -> -- Hole start indices
+    CSize -> -- Expected number of output faces
     Foreign.Ptr CSize -> -- Output triangle indices
     CSize
