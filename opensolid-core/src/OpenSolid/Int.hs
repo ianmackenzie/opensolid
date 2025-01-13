@@ -21,12 +21,15 @@ module OpenSolid.Int
   , fromInt64
   , toWord64
   , fromWord64
+  , toCSize
+  , fromCSize
   )
 where
 
 import Data.Int (Int64)
 import Data.Ord qualified
 import Data.Word (Word64)
+import Foreign.C.Types (CSize)
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Prelude
@@ -117,3 +120,9 @@ toWord64 = fromIntegral
 
 fromWord64 :: Word64 -> Int
 fromWord64 = fromIntegral
+
+toCSize :: Int -> CSize
+toCSize = fromIntegral
+
+fromCSize :: CSize -> Int
+fromCSize = fromIntegral
