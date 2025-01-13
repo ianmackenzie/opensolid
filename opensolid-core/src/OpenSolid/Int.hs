@@ -17,10 +17,16 @@ module OpenSolid.Int
   , random
   , gcd
   , lcm
+  , toInt64
+  , fromInt64
+  , toWord64
+  , fromWord64
   )
 where
 
+import Data.Int (Int64)
 import Data.Ord qualified
+import Data.Word (Word64)
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Prelude
@@ -99,3 +105,15 @@ gcd = Prelude.gcd
 
 lcm :: Int -> Int -> Int
 lcm = Prelude.lcm
+
+toInt64 :: Int -> Int64
+toInt64 = fromIntegral
+
+fromInt64 :: Int64 -> Int
+fromInt64 = fromIntegral
+
+toWord64 :: Int -> Word64
+toWord64 = fromIntegral
+
+fromWord64 :: Word64 -> Int
+fromWord64 = fromIntegral
