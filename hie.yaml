@@ -15,6 +15,9 @@ cradle:
     - path: "executables/medial-axis/Main.hs"
       component: "executables:exe:medial-axis"
 
+    - path: "executables/region-triangulation/Main.hs"
+      component: "executables:exe:region-triangulation"
+
     - path: "opensolid-api/src"
       component: "lib:opensolid-api"
 

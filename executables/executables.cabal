@@ -91,3 +91,11 @@ executable medial-axis
   build-depends:
     opensolid-core,
     time,
+
+executable region-triangulation
+  import: config
+  main-is: Main.hs
+  hs-source-dirs: region-triangulation
+  build-depends:
+    opensolid-core,
+    time,
