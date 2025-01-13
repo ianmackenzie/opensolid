@@ -4,6 +4,7 @@ mod builtins;
 mod expression;
 mod jit;
 mod module_compiler;
+mod triangulate;
 mod value_function_compiler;
 
 #[cfg(test)]

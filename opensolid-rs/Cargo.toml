@@ -9,6 +9,7 @@ cranelift-codegen = "0.115.0"
 cranelift-jit = "0.115.0"
 cranelift-module = "0.115.0"
 cranelift-native = "0.115.0"
+earcutr = "0.4.3"
 
 [lib]
 crate-type = ["cdylib"]
