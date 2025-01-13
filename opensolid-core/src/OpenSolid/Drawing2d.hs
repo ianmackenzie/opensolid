@@ -20,6 +20,12 @@ module OpenSolid.Drawing2d
   , whiteFill
   , fillColor
   , opacity
+  , miterStrokeJoins
+  , roundStrokeJoins
+  , bevelStrokeJoins
+  , noStrokeCaps
+  , roundStrokeCaps
+  , squareStrokeCaps
   )
 where
 
@@ -200,3 +206,21 @@ fillColor color = Attribute "fill" (Color.toHex color)
 
 opacity :: Float -> Attribute space
 opacity value = Attribute "opacity" (Text.float value)
+
+miterStrokeJoins :: Attribute space
+miterStrokeJoins = Attribute "stroke-linejoin" "miter"
+
+roundStrokeJoins :: Attribute space
+roundStrokeJoins = Attribute "stroke-linejoin" "round"
+
+bevelStrokeJoins :: Attribute space
+bevelStrokeJoins = Attribute "stroke-linejoin" "bevel"
+
+noStrokeCaps :: Attribute space
+noStrokeCaps = Attribute "stroke-linecap" "butt"
+
+roundStrokeCaps :: Attribute space
+roundStrokeCaps = Attribute "stroke-linecap" "round"
+
+squareStrokeCaps :: Attribute space
+squareStrokeCaps = Attribute "stroke-linecap" "square"
