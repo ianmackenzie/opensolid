@@ -154,6 +154,7 @@ library
     OpenSolid.List
     OpenSolid.Map
     OpenSolid.Maybe
+    OpenSolid.Mesh
     OpenSolid.NonEmpty
     OpenSolid.Pair
     OpenSolid.Parameter
