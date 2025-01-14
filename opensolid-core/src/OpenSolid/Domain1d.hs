@@ -21,6 +21,7 @@ module OpenSolid.Domain1d
   , contains
   , adjacent
   , intersectionWidth
+  , samplingPoints
   )
 where
 
@@ -123,3 +124,19 @@ intersectionWidth (Domain1d n1 i1 j1) (Domain1d n2 i2 j2) = do
   let low = Float.max (i1 / n1) (i2 / n2)
   let high = Float.min (j1 / n1) (j2 / n2)
   Float.max (high - low) 0.0
+
+samplingPoints :: (Range Unitless -> Bool) -> NonEmpty Float
+samplingPoints predicate = 0.0 :| collectSamplingPoints predicate Range.unit [1.0]
+
+collectSamplingPoints :: (Range Unitless -> Bool) -> Range Unitless -> List Float -> List Float
+collectSamplingPoints predicate subdomain accumulated = do
+  if predicate subdomain
+    then accumulated
+    else
+      if Range.isAtomic subdomain
+        then internalError "Infinite recursion in Domain1d.samplingPoints"
+        else do
+          let (left, right) = Range.bisect subdomain
+          let subdomainMidpoint = Range.midpoint subdomain
+          let rightAccumulated = collectSamplingPoints predicate right accumulated
+          collectSamplingPoints predicate left (subdomainMidpoint : rightAccumulated)

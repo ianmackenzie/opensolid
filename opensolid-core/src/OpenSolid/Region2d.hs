@@ -38,7 +38,6 @@ import OpenSolid.Result qualified as Result
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Units qualified as Units
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
-import OpenSolid.Vertex2d (Vertex2d)
 
 type role Region2d nominal
 
@@ -282,27 +281,18 @@ area region = do
   let referencePoint = Curve2d.startPoint (NonEmpty.first (outerLoop region))
   Estimate.sum (List.map (areaIntegral referencePoint) (NonEmpty.toList (boundaryCurves region)))
 
-toPolygon ::
-  Vertex2d vertex (space @ units) =>
-  Qty units ->
-  (Curve2d (space @ units) -> Float -> vertex) ->
-  Region2d (space @ units) ->
-  Polygon2d vertex
-toPolygon maxError function region =
+toPolygon :: Qty units -> Region2d (space @ units) -> Polygon2d (Point2d (space @ units))
+toPolygon maxError region =
   Polygon2d.withHoles
-    (List.map (toPolygonLoop maxError function) (innerLoops region))
-    (toPolygonLoop maxError function (outerLoop region))
+    (List.map (toPolygonLoop maxError) (innerLoops region))
+    (toPolygonLoop maxError (outerLoop region))
 
 toPolygonLoop ::
   Qty units ->
-  (Curve2d (space @ units) -> Float -> vertex) ->
   NonEmpty (Curve2d (space @ units)) ->
-  NonEmpty vertex
-toPolygonLoop maxError function loop = do
-  let curveVertices curve =
-        Curve2d.toPolyline maxError (function curve) curve
-          |> Polyline2d.vertices
-          |> NonEmpty.rest
+  NonEmpty (Point2d (space @ units))
+toPolygonLoop maxError loop = do
+  let curveVertices curve = NonEmpty.rest (Polyline2d.vertices (Curve2d.toPolyline maxError curve))
   let allVertices = List.collect curveVertices (NonEmpty.toList loop)
   case allVertices of
     NonEmpty vertices -> vertices

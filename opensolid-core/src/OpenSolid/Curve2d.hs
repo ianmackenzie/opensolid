@@ -58,6 +58,7 @@ module OpenSolid.Curve2d
   , curvature'
   , removeStartDegeneracy
   , toPolyline
+  , samplingPoints
   , medialAxis
   , arcLengthParameterization
   , unsafeArcLengthParameterization
@@ -93,6 +94,7 @@ import OpenSolid.Direction2d (Direction2d)
 import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.DirectionCurve2d (DirectionCurve2d)
 import OpenSolid.DirectionCurve2d qualified as DirectionCurve2d
+import OpenSolid.Domain1d qualified as Domain1d
 import OpenSolid.Domain2d (Domain2d)
 import OpenSolid.Domain2d qualified as Domain2d
 import OpenSolid.Error qualified as Error
@@ -103,6 +105,7 @@ import OpenSolid.Float qualified as Float
 import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Frame2d qualified as Frame2d
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
+import OpenSolid.Linearization qualified as Linearization
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Parameter qualified as Parameter
@@ -1117,36 +1120,18 @@ instance VectorCurve2d.Interface (SyntheticDerivative (space @ units)) (space @ 
         (VectorCurve2d.transformBy transform current)
         (VectorCurve2d.transformBy transform next)
 
-toPolyline :: Qty units -> (Float -> vertex) -> Curve2d (space @ units) -> Polyline2d vertex
-toPolyline maxError function curve = do
+toPolyline :: Qty units -> Curve2d (space @ units) -> Polyline2d (Point2d (space @ units))
+toPolyline maxError curve =
+  Polyline2d (NonEmpty.map (evaluate curve) (samplingPoints maxError curve))
+
+samplingPoints :: Qty units -> Curve2d (space @ units) -> NonEmpty Float
+samplingPoints maxError curve = do
   let secondDerivative = VectorCurve2d.derivative (derivative curve)
-  let epsilon = Qty.abs maxError
   let predicate subdomain = do
         let secondDerivativeBounds = VectorCurve2d.evaluateBounds secondDerivative subdomain
         let secondDerivativeMagnitude = VectorBounds2d.magnitude secondDerivativeBounds
-        let maxSecondDerivativeMagnitude = Range.upperBound secondDerivativeMagnitude
-        maxSecondDerivativeMagnitude == Qty.zero
-          || Range.width subdomain <= Float.sqrt (8.0 * epsilon / maxSecondDerivativeMagnitude)
-  Polyline2d (function 0.0 :| collectVertices predicate function Range.unit [function 1.0])
-
-collectVertices ::
-  (Range Unitless -> Bool) ->
-  (Float -> vertex) ->
-  Range Unitless ->
-  List vertex ->
-  List vertex
-collectVertices predicate function subdomain accumulated = do
-  if predicate subdomain
-    then accumulated
-    else
-      if Range.isAtomic subdomain
-        then internalError "Infinite recursion in Curve2d.toPolyline"
-        else do
-          let (left, right) = Range.bisect subdomain
-          let midpoint = Range.midpoint subdomain
-          let rightAccumulated = collectVertices predicate function right accumulated
-          withFrozenCallStack $
-            collectVertices predicate function left (function midpoint : rightAccumulated)
+        Linearization.error subdomain secondDerivativeMagnitude <= Qty.abs maxError
+  Domain1d.samplingPoints predicate
 
 medialAxis ::
   forall space units.

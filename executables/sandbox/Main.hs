@@ -265,7 +265,7 @@ toDrawing = Length.centimeters 10.0 ./. 1.0
 
 drawUvCurve :: List (Drawing2d.Attribute UvSpace) -> Curve2d UvCoordinates -> Drawing2d.Entity UvSpace
 drawUvCurve attributes curve = do
-  let polyline = Curve2d.toPolyline 0.001 (Curve2d.evaluate curve) curve
+  let polyline = Curve2d.toPolyline 0.001 curve
   Drawing2d.polyline attributes (Polyline2d.map (Point2d.convert toDrawing) polyline)
 
 drawDot :: Color -> UvPoint -> Drawing2d.Entity UvSpace

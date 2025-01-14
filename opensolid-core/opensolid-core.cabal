@@ -219,6 +219,7 @@ library
   other-modules:
     OpenSolid.Bootstrap
     OpenSolid.Expression.Scalar
+    OpenSolid.Linearization
     OpenSolid.Lobatto
     OpenSolid.Point2d.CoordinateTransformation
     OpenSolid.Point3d.CoordinateTransformation

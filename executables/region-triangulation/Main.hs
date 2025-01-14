@@ -37,7 +37,7 @@ main = Tolerance.using Length.nanometer IO.do
       , Curve2d.line p4 p0
       , Curve2d.circle holeCenter holeRadius
       ]
-  let polygon = Region2d.toPolygon (Length.millimeters 1.0) Curve2d.evaluate region
+  let polygon = Region2d.toPolygon (Length.millimeters 1.0) region
   let outerLoop = Polygon2d.outerLoop polygon
   let innerLoops = Polygon2d.innerLoops polygon
   let steinerPoints =
