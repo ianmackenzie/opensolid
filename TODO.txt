@@ -28,6 +28,9 @@ Try using Pandoc to convert from Haddock to reStructuredText?
 -> or use specialized direct Haddock conversion - most flexible
    -> e.g. convert type/function names to correct target language casing
 
+Add support for Drawing2d.auto or similar, that computes an appropriate bounding box?
+-> or perhaps a few different options for specifying canvas: Drawing2d.bounds, Drawing2d.padding etc.
+
 Support spaces / coordinate systems in bindings
 
 Try generating C# bindings?
