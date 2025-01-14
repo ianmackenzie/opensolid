@@ -42,9 +42,7 @@ main = Tolerance.using Length.nanometer IO.do
   let innerLoops = Polygon2d.innerLoops polygon
   let steinerPoints =
         [ NonEmpty.one (Point2d.centimeters 3.0 3.0)
-        , NonEmpty.one (Point2d.centimeters 6.0 3.0)
         , NonEmpty.one (Point2d.centimeters 3.0 9.0)
-        , NonEmpty.one (Point2d.centimeters 6.0 9.0)
         ]
   let modifiedPolygon = Polygon2d.withHoles (innerLoops + steinerPoints) outerLoop
   let mesh = Polygon2d.triangulate modifiedPolygon
