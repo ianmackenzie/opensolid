@@ -18,9 +18,12 @@ import OpenSolid.Expression qualified as Expression
 import OpenSolid.Point3d (Point3d)
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
+import OpenSolid.Region2d (Region2d)
+import {-# SOURCE #-} OpenSolid.Surface3d (Surface3d)
+import {-# SOURCE #-} OpenSolid.Surface3d qualified as Surface3d
 import OpenSolid.SurfaceFunction (SurfaceFunction)
 import OpenSolid.SurfaceFunction qualified as SurfaceFunction
-import OpenSolid.SurfaceParameter (SurfaceParameter, UvBounds, UvPoint)
+import OpenSolid.SurfaceParameter (SurfaceParameter, UvBounds, UvCoordinates, UvPoint)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.VectorSurfaceFunction3d (VectorSurfaceFunction3d)
@@ -181,3 +184,11 @@ derivative parameter function = case function of
       (SurfaceFunction.derivative parameter z)
   Sum f1 f2 -> derivative parameter f1 + VectorSurfaceFunction3d.derivative parameter f2
   Difference f1 f2 -> derivative parameter f1 - VectorSurfaceFunction3d.derivative parameter f2
+
+instance
+  Composition
+    (Region2d UvCoordinates)
+    (SurfaceFunction3d (space @ units))
+    (Surface3d (space @ units))
+  where
+  function . domain = Surface3d.parametric function domain
