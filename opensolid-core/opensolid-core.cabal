@@ -220,6 +220,7 @@ library
     OpenSolid.Bootstrap
     OpenSolid.Expression.Scalar
     OpenSolid.Linearization
+    OpenSolid.SurfaceLinearization
     OpenSolid.Lobatto
     OpenSolid.Point2d.CoordinateTransformation
     OpenSolid.Point3d.CoordinateTransformation
