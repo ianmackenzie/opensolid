@@ -77,48 +77,40 @@ instance
     _ -> Coerce function
 
 instance
-  ( space ~ space_
-  , units ~ units_
-  ) =>
+  (space1 ~ space2, units1 ~ units2) =>
   Addition
-    (SurfaceFunction3d (space @ units))
-    (VectorSurfaceFunction3d (space_ @ units_))
-    (SurfaceFunction3d (space @ units))
+    (SurfaceFunction3d (space1 @ units1))
+    (VectorSurfaceFunction3d (space2 @ units2))
+    (SurfaceFunction3d (space1 @ units1))
   where
   Parametric lhs + VectorSurfaceFunction3d.Parametric rhs = Parametric (lhs + rhs)
   lhs + rhs = Sum lhs rhs
 
 instance
-  ( space ~ space_
-  , units ~ units_
-  ) =>
+  (space1 ~ space2, units1 ~ units2) =>
   Addition
-    (SurfaceFunction3d (space @ units))
-    (Vector3d (space_ @ units_))
-    (SurfaceFunction3d (space @ units))
+    (SurfaceFunction3d (space1 @ units1))
+    (Vector3d (space2 @ units2))
+    (SurfaceFunction3d (space1 @ units1))
   where
   f + v = f + VectorSurfaceFunction3d.constant v
 
 instance
-  ( space ~ space_
-  , units ~ units_
-  ) =>
+  (space1 ~ space2, units1 ~ units2) =>
   Subtraction
-    (SurfaceFunction3d (space @ units))
-    (VectorSurfaceFunction3d (space_ @ units_))
-    (SurfaceFunction3d (space @ units))
+    (SurfaceFunction3d (space1 @ units1))
+    (VectorSurfaceFunction3d (space2 @ units2))
+    (SurfaceFunction3d (space1 @ units1))
   where
   Parametric lhs - VectorSurfaceFunction3d.Parametric rhs = Parametric (lhs - rhs)
   lhs - rhs = Difference lhs rhs
 
 instance
-  ( space ~ space_
-  , units ~ units_
-  ) =>
+  (space1 ~ space2, units1 ~ units2) =>
   Subtraction
-    (SurfaceFunction3d (space @ units))
-    (Vector3d (space_ @ units_))
-    (SurfaceFunction3d (space @ units))
+    (SurfaceFunction3d (space1 @ units1))
+    (Vector3d (space2 @ units2))
+    (SurfaceFunction3d (space1 @ units1))
   where
   f - v = f - VectorSurfaceFunction3d.constant v
 

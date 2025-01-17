@@ -21,10 +21,8 @@ instance Eq (Vector2d (space @ units))
 instance Show (Vector2d (space @ units))
 
 instance
-  ( space ~ space_
-  , units ~ units_
-  ) =>
-  Addition (Vector2d (space @ units)) (Vector2d (space_ @ units_)) (Vector2d (space @ units))
+  (space1 ~ space2, units1 ~ units2) =>
+  Addition (Vector2d (space1 @ units1)) (Vector2d (space2 @ units2)) (Vector2d (space1 @ units1))
 
 instance
   Multiplication'
