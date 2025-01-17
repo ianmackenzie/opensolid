@@ -48,6 +48,9 @@ Move primitives to Primitives.hs
 
 Use space1 ~ space2 instead of space ~ space_ everywhere
 
+Remove explicit use of unboxed Double# etc.?
+- Just use {-# UNPACK #-} where necessary
+
 Refactor Estimate to return an error if convergence fails/stalls
 
 Optimizations to try:
