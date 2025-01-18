@@ -29,6 +29,7 @@ module OpenSolid.Qty
   , convert
   , unconvert
   , sum
+  , sumOf
   , random
   )
 where
@@ -250,6 +251,9 @@ midpoint a b = 0.5 * (a + b)
 
 sum :: List (Qty units) -> Qty units
 sum = List.foldl (+) zero
+
+sumOf :: (a -> Qty units) -> List a -> Qty units
+sumOf f list = sum (List.map f list)
 
 convert :: Qty (units2 :/: units1) -> Qty units1 -> Qty units2
 convert factor value = value !* factor
