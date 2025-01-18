@@ -4,15 +4,16 @@ module OpenSolid.Polyline2d
   , start
   , end
   , length
+  , segments
   )
 where
 
+import OpenSolid.LineSegment2d (LineSegment2d (LineSegment2d))
+import OpenSolid.LineSegment2d qualified as LineSegment2d
 import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Vertex2d (Vertex2d)
-import OpenSolid.Vertex2d qualified as Vertex2d
 
 newtype Polyline2d vertex = Polyline2d {vertices :: NonEmpty vertex}
 
@@ -25,8 +26,8 @@ start polyline = NonEmpty.first (vertices polyline)
 end :: Polyline2d vertex -> vertex
 end polyline = NonEmpty.last (vertices polyline)
 
-length :: Vertex2d vertex (space @ units) => Polyline2d vertex -> Qty units
-length polyline = Qty.sum (NonEmpty.successive segmentLength (vertices polyline))
+segments :: Polyline2d vertex -> List (LineSegment2d vertex)
+segments polyline = NonEmpty.successive LineSegment2d (vertices polyline)
 
-segmentLength :: Vertex2d vertex (space @ units) => vertex -> vertex -> Qty units
-segmentLength v1 v2 = Point2d.distanceFrom (Vertex2d.position v1) (Vertex2d.position v2)
+length :: Vertex2d vertex (space @ units) => Polyline2d vertex -> Qty units
+length polyline = Qty.sumOf LineSegment2d.length (segments polyline)
