@@ -9,9 +9,7 @@ import OpenSolid.IO qualified as IO
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
 import OpenSolid.Mesh qualified as Mesh
-import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Point2d qualified as Point2d
-import OpenSolid.Polygon2d qualified as Polygon2d
 import OpenSolid.Prelude
 import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Tolerance qualified as Tolerance
@@ -37,15 +35,7 @@ main = Tolerance.using Length.nanometer IO.do
       , Curve2d.line p4 p0
       , Curve2d.circle holeCenter holeRadius
       ]
-  let polygon = Region2d.toPolygon (Length.millimeters 1.0) region
-  let outerLoop = Polygon2d.outerLoop polygon
-  let innerLoops = Polygon2d.innerLoops polygon
-  let steinerPoints =
-        [ NonEmpty.one (Point2d.centimeters 3.0 3.0)
-        , NonEmpty.one (Point2d.centimeters 3.0 9.0)
-        ]
-  let modifiedPolygon = Polygon2d.withHoles (innerLoops + steinerPoints) outerLoop
-  let mesh = Polygon2d.triangulate modifiedPolygon
+  let mesh = Region2d.toMesh (Length.millimeters 1.0) region
   let triangles = Mesh.faceVertices mesh
   let drawingBounds = Bounds2d.hull2 (Point2d.centimeters -3.0 -3.0) (Point2d.centimeters 21.0 15.0)
   let drawTriangle (a, b, c) =

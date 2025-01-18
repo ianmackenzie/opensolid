@@ -218,6 +218,7 @@ library
 
   other-modules:
     OpenSolid.Bootstrap
+    OpenSolid.ConstrainedDelaunayTriangulation
     OpenSolid.Expression.Scalar
     OpenSolid.Linearization
     OpenSolid.SurfaceLinearization

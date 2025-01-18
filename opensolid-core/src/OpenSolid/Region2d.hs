@@ -8,12 +8,13 @@ module OpenSolid.Region2d
   , contains
   , bounds
   , area
-  , toPolygon
+  , toMesh
   )
 where
 
 import OpenSolid.Bounds2d (Bounds2d)
 import OpenSolid.Bounds2d qualified as Bounds2d
+import OpenSolid.ConstrainedDelaunayTriangulation qualified as CDT
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Curve2d qualified as Curve2d
@@ -24,10 +25,9 @@ import OpenSolid.Estimate (Estimate)
 import OpenSolid.Estimate qualified as Estimate
 import OpenSolid.Float qualified as Float
 import OpenSolid.List qualified as List
+import OpenSolid.Mesh (Mesh)
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Point2d (Point2d)
-import OpenSolid.Polygon2d (Polygon2d)
-import OpenSolid.Polygon2d qualified as Polygon2d
 import OpenSolid.Polyline2d qualified as Polyline2d
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
@@ -281,17 +281,15 @@ area region = do
   let referencePoint = Curve2d.startPoint (NonEmpty.first (outerLoop region))
   Estimate.sum (List.map (areaIntegral referencePoint) (NonEmpty.toList (boundaryCurves region)))
 
-toPolygon :: Qty units -> Region2d (space @ units) -> Polygon2d (Point2d (space @ units))
-toPolygon maxError region =
-  Polygon2d.withHoles
-    (List.map (toPolygonLoop maxError) (innerLoops region))
-    (toPolygonLoop maxError (outerLoop region))
+toMesh :: Qty units -> Region2d (space @ units) -> Mesh (Point2d (space @ units))
+toMesh maxError region =
+  CDT.unsafe [] (NonEmpty.map (toVertexLoop maxError) (outerLoop region :| innerLoops region))
 
-toPolygonLoop ::
+toVertexLoop ::
   Qty units ->
   NonEmpty (Curve2d (space @ units)) ->
   NonEmpty (Point2d (space @ units))
-toPolygonLoop maxError loop = do
+toVertexLoop maxError loop = do
   let curveVertices curve = NonEmpty.rest (Polyline2d.vertices (Curve2d.toPolyline maxError curve))
   let allVertices = List.collect curveVertices (NonEmpty.toList loop)
   case allVertices of

@@ -9,7 +9,7 @@ cranelift-codegen = "0.115.0"
 cranelift-jit = "0.115.0"
 cranelift-module = "0.115.0"
 cranelift-native = "0.115.0"
-poly2tri-rs = "0.1.2"
+spade = "2.12.1"
 
 [lib]
 crate-type = ["cdylib"]

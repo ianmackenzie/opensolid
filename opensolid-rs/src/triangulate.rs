@@ -1,75 +1,72 @@
-use poly2tri_rs::{Point, SweeperBuilder};
-use std::cmp::{Eq, PartialEq};
-use std::{collections::HashMap, hash::Hash};
+use spade::{
+    handles::FixedFaceHandle, ConstrainedDelaunayTriangulation, Point2, RefinementParameters,
+    Triangulation,
+};
+use std::collections::{HashMap, HashSet};
 
-struct HashablePoint(Point);
+type Point = Point2<f64>;
 
-impl PartialEq for HashablePoint {
-    fn eq(&self, other: &Self) -> bool {
-        self.0.eq(&(*other).0)
-    }
-}
-
-impl Eq for HashablePoint {}
-
-impl Hash for HashablePoint {
-    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        self.0.x.to_bits().hash(state);
-        self.0.y.to_bits().hash(state);
-    }
+unsafe fn make_vec<T: Clone>(count: usize, data: *mut T) -> Vec<T> {
+    Vec::from(std::slice::from_raw_parts(data, count))
 }
 
 #[no_mangle]
-pub extern "C" fn opensolid_polygon2d_triangulate(
-    point_count: usize,
-    point_data: *mut Point,
-    hole_count: usize,
-    hole_data: *mut usize,
-    triangle_count: usize,
-    triangle_data: *mut usize,
-) -> usize {
-    let points = unsafe { std::slice::from_raw_parts(point_data, point_count) };
-    let hole_indices = unsafe { std::slice::from_raw_parts(hole_data, hole_count) };
-    let outer_loop_end_index = if hole_count == 0 {
-        point_count
-    } else {
-        hole_indices[0]
-    };
-    let outer_loop_points = Vec::from(&points[0..outer_loop_end_index]);
-    let mut builder = SweeperBuilder::new(outer_loop_points);
-
-    for i in 0..hole_count {
-        let hole_index = hole_indices[i];
-        let hole_end_index = if i < hole_count - 1 {
-            hole_indices[i + 1]
-        } else {
-            point_count
-        };
-        if hole_end_index == hole_index + 1 {
-            builder = builder.add_steiner_point(points[hole_index]);
-        } else {
-            let hole_vertices = Vec::from(&points[hole_index..hole_end_index]);
-            builder = builder.add_hole(hole_vertices);
+pub extern "C" fn opensolid_cdt(
+    input_point_count: usize,
+    input_point_data: *mut Point,
+    input_edge_count: usize,
+    input_edge_data: *mut [usize; 2],
+    max_refinement_points: usize,
+    output_point_count: *mut usize,
+    output_point_data: *mut Point,
+    output_triangle_count: *mut usize,
+    output_triangle_data: *mut [usize; 3],
+) {
+    let input_points = unsafe { make_vec(input_point_count, input_point_data) };
+    let input_edges = unsafe { make_vec(input_edge_count, input_edge_data) };
+    match ConstrainedDelaunayTriangulation::<Point>::bulk_load_cdt(input_points, input_edges) {
+        Ok(mut cdt) => {
+            let refinement_parameters = RefinementParameters::<f64>::new()
+                .exclude_outer_faces(true)
+                .keep_constraint_edges()
+                .with_max_additional_vertices(max_refinement_points);
+            let refinement_result = cdt.refine(refinement_parameters);
+            let excluded_face_ids: HashSet<usize> = refinement_result
+                .excluded_faces
+                .iter()
+                .map(FixedFaceHandle::index)
+                .collect();
+            let mut triangle_count: usize = 0;
+            let mut point_count: usize = 0;
+            let mut point_indices: HashMap<usize, usize> = HashMap::new();
+            for face_handle in cdt.inner_faces() {
+                if excluded_face_ids.contains(&face_handle.index()) {
+                    continue;
+                };
+                let triangle_data = unsafe { output_triangle_data.offset(triangle_count as isize) };
+                for (i, vertex_handle) in face_handle.vertices().iter().enumerate() {
+                    let vertex_index = vertex_handle.index();
+                    let point_index = match point_indices.get(&vertex_index) {
+                        Some(existing_index) => *existing_index,
+                        None => {
+                            let new_index = point_count;
+                            point_indices.insert(vertex_index, new_index);
+                            let point = cdt.vertex(vertex_handle.fix()).position();
+                            unsafe { *output_point_data.offset(new_index as isize) = point };
+                            point_count += 1;
+                            new_index
+                        }
+                    };
+                    unsafe { (*triangle_data)[i] = point_index };
+                }
+                triangle_count += 1;
+            }
+            unsafe { *output_point_count = point_count };
+            unsafe { *output_triangle_count = triangle_count };
+        }
+        Err(_) => {
+            unsafe { *output_point_count = 0 };
+            unsafe { *output_triangle_count = 0 };
         }
     }
-
-    let sweeper = builder.build();
-    let triangulation = sweeper.triangulate();
-    let mut index_map = HashMap::new();
-    for i in 0..point_count {
-        index_map.insert(HashablePoint(points[i]), i);
-    }
-    let triangle_indices =
-        unsafe { std::slice::from_raw_parts_mut(triangle_data, 3 * triangle_count) };
-    let mut triangle_index = 0;
-    for triangle in triangulation {
-        assert!(triangle_index < triangle_count);
-        for i in 0..3 {
-            triangle_indices[3 * triangle_index + i] =
-                index_map[&HashablePoint(triangle.points[i])];
-        }
-        triangle_index += 1;
-    }
-    assert!(triangle_index == triangle_count);
-    triangle_count
 }
