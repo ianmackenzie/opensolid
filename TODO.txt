@@ -1,3 +1,5 @@
+Refactor CDT to support arbitrary vertex types
+
 Rewrite scripts in Haskell?
 -> or Python?
 
