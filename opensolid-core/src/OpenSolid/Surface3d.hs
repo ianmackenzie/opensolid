@@ -21,8 +21,8 @@ parametric ::
   Surface3d (space @ units)
 parametric = Surface3d
 
-function :: Surface3d units -> SurfaceFunction3d units
+function :: Surface3d (space @ units) -> SurfaceFunction3d (space @ units)
 function (Surface3d f _) = f
 
-domain :: Surface3d units -> Region2d UvCoordinates
+domain :: Surface3d (space @ units) -> Region2d UvCoordinates
 domain (Surface3d _ d) = d
