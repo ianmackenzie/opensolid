@@ -8,7 +8,7 @@ module OpenSolid.CoordinateSystem
 where
 
 import OpenSolid.Bootstrap
-import OpenSolid.Units (HasUnits)
+import OpenSolid.Units (HasUnits, Unitless)
 
 data CoordinateSystem = CoordinateSystem Type Type
 
@@ -18,7 +18,7 @@ newtype LocalSpace = LocalSpace Type
 
 type Defines space = 'LocalSpace space
 
-instance HasUnits (space @ units) units
+instance HasUnits (space @ units) units (space @ Unitless)
 
 type Space :: CoordinateSystem -> Type
 type family Space coordinateSystem where

@@ -87,7 +87,7 @@ deriving instance Eq (Vector3d (space @ units))
 
 deriving instance Show (Vector3d (space @ units))
 
-instance HasUnits (Vector3d (space @ units)) units
+instance HasUnits (Vector3d (space @ units)) units (Vector3d (space @ Unitless))
 
 instance
   space1 ~ space2 =>

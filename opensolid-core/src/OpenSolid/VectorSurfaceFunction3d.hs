@@ -80,7 +80,11 @@ data VectorSurfaceFunction3d (coordinateSystem :: CoordinateSystem) where
 
 deriving instance Show (VectorSurfaceFunction3d (space @ units))
 
-instance HasUnits (VectorSurfaceFunction3d (space @ units)) units
+instance
+  HasUnits
+    (VectorSurfaceFunction3d (space @ units))
+    units
+    (VectorSurfaceFunction3d (space @ Unitless))
 
 instance
   space1 ~ space2 =>

@@ -26,7 +26,11 @@ type role VectorSurfaceFunction3d nominal
 
 data VectorSurfaceFunction3d (coordinateSystem :: CoordinateSystem)
 
-instance HasUnits (VectorSurfaceFunction3d (space @ units)) units
+instance
+  HasUnits
+    (VectorSurfaceFunction3d (space @ units))
+    units
+    (VectorSurfaceFunction3d (space @ Unitless))
 
 instance
   space1 ~ space2 =>

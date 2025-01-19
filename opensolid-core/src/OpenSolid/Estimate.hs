@@ -50,7 +50,7 @@ data Estimate units where
   Estimate :: Interface a units => a -> Range units -> Estimate units
   Coerce :: Estimate units1 -> Estimate units2
 
-instance HasUnits (Estimate units) units
+instance HasUnits (Estimate units) units (Estimate Unitless)
 
 instance Units.Coercion (Estimate unitsA) (Estimate unitsB) where
   coerce (Coerce estimate) = Coerce estimate

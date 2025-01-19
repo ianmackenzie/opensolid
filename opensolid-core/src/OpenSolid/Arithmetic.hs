@@ -236,9 +236,9 @@ instance
 (*!) ::
   ( Multiplication' a b c'
   , Units.Coercion c' c
-  , HasUnits a unitsA
-  , HasUnits b unitsB
-  , HasUnits c unitsC
+  , HasUnits a unitsA erasedA
+  , HasUnits b unitsB erasedB
+  , HasUnits c unitsC erasedC
   , unitsA ~ units1 :/: units2
   , unitsB ~ units2
   , unitsC ~ units1
@@ -253,9 +253,9 @@ infixl 7 *!
 (!*) ::
   ( Multiplication' a b c'
   , Units.Coercion c' c
-  , HasUnits a unitsA
-  , HasUnits b unitsB
-  , HasUnits c unitsC
+  , HasUnits a unitsA erasedA
+  , HasUnits b unitsB erasedB
+  , HasUnits c unitsC erasedC
   , unitsA ~ units2
   , unitsB ~ units1 :/: units2
   , unitsC ~ units1
@@ -270,9 +270,9 @@ infixl 7 !*
 (^*.) ::
   ( Multiplication' a b c'
   , Units.Coercion c' c
-  , HasUnits a unitsA
-  , HasUnits b unitsB
-  , HasUnits c unitsC
+  , HasUnits a unitsA erasedA
+  , HasUnits b unitsB erasedB
+  , HasUnits c unitsC erasedC
   , unitsA ~ units1
   , unitsB ~ Unitless :/: units2
   , unitsC ~ units1 :/: units2
@@ -287,9 +287,9 @@ infixl 7 ^*.
 (.*^) ::
   ( Multiplication' a b c'
   , Units.Coercion c' c
-  , HasUnits a unitsA
-  , HasUnits b unitsB
-  , HasUnits c unitsC
+  , HasUnits a unitsA erasedA
+  , HasUnits b unitsB erasedB
+  , HasUnits c unitsC erasedC
   , unitsA ~ Unitless :/: units2
   , unitsB ~ units1
   , unitsC ~ units1 :/: units2
@@ -304,9 +304,9 @@ infixl 7 .*^
 (/%) ::
   ( Division' a b c'
   , Units.Coercion c' c
-  , HasUnits a unitsA
-  , HasUnits b unitsB
-  , HasUnits c unitsC
+  , HasUnits a unitsA erasedA
+  , HasUnits b unitsB erasedB
+  , HasUnits c unitsC erasedC
   , unitsA ~ Unitless
   , unitsB ~ units1 :/: units2
   , unitsC ~ units2 :/: units1
@@ -321,9 +321,9 @@ infixl 7 /%
 (!/) ::
   ( Division' a b c'
   , Units.Coercion c' c
-  , HasUnits a unitsA
-  , HasUnits b unitsB
-  , HasUnits c unitsC
+  , HasUnits a unitsA erasedA
+  , HasUnits b unitsB erasedB
+  , HasUnits c unitsC erasedC
   , unitsA ~ units1
   , unitsB ~ units1 :/: units2
   , unitsC ~ units2
@@ -338,9 +338,9 @@ infixl 7 !/
 (.!/!) ::
   ( Division' a b c'
   , Units.Coercion c' c
-  , HasUnits a unitsA
-  , HasUnits b unitsB
-  , HasUnits c unitsC
+  , HasUnits a unitsA erasedA
+  , HasUnits b unitsB erasedB
+  , HasUnits c unitsC erasedC
   , unitsA ~ units1 :*: units2
   , unitsB ~ units2
   , unitsC ~ units1
@@ -355,9 +355,9 @@ infixl 7 .!/!
 (!./!) ::
   ( Division' a b c'
   , Units.Coercion c' c
-  , HasUnits a unitsA
-  , HasUnits b unitsB
-  , HasUnits c unitsC
+  , HasUnits a unitsA erasedA
+  , HasUnits b unitsB erasedB
+  , HasUnits c unitsC erasedC
   , unitsA ~ units1 :*: units2
   , unitsB ~ units1
   , unitsC ~ units2
@@ -372,9 +372,9 @@ infixl 7 !./!
 (!/!.) ::
   ( Division' a b c'
   , Units.Coercion c' c
-  , HasUnits a unitsA
-  , HasUnits b unitsB
-  , HasUnits c unitsC
+  , HasUnits a unitsA erasedA
+  , HasUnits b unitsB erasedB
+  , HasUnits c unitsC erasedC
   , unitsA ~ units1
   , unitsB ~ units1 :*: units2
   , unitsC ~ Unitless :/: units2
@@ -389,9 +389,9 @@ infixl 7 !/!.
 (!/.!) ::
   ( Division' a b c'
   , Units.Coercion c' c
-  , HasUnits a unitsA
-  , HasUnits b unitsB
-  , HasUnits c unitsC
+  , HasUnits a unitsA erasedA
+  , HasUnits b unitsB erasedB
+  , HasUnits c unitsC erasedC
   , unitsA ~ units2
   , unitsB ~ units1 :*: units2
   , unitsC ~ Unitless :/: units1
@@ -406,9 +406,9 @@ infixl 7 !/.!
 (.!/.!) ::
   ( Division' a b c'
   , Units.Coercion c' c
-  , HasUnits a unitsA
-  , HasUnits b unitsB
-  , HasUnits c unitsC
+  , HasUnits a unitsA erasedA
+  , HasUnits b unitsB erasedB
+  , HasUnits c unitsC erasedC
   , unitsA ~ units1 :*: units3
   , unitsB ~ units2 :*: units3
   , unitsC ~ units1 :/: units2
@@ -423,9 +423,9 @@ infixl 7 .!/.!
 (./^) ::
   ( Division' a b c'
   , Units.Coercion c' c
-  , HasUnits a unitsA
-  , HasUnits b unitsB
-  , HasUnits c unitsC
+  , HasUnits a unitsA erasedA
+  , HasUnits b unitsB erasedB
+  , HasUnits c unitsC erasedC
   , unitsA ~ units1
   , unitsB ~ Unitless :/: units2
   , unitsC ~ units1 :*: units2
@@ -440,9 +440,9 @@ infixl 7 ./^
 (!?/.!?) ::
   ( Division' a b c'
   , Units.Coercion c' c
-  , HasUnits a unitsA
-  , HasUnits b unitsB
-  , HasUnits c unitsC
+  , HasUnits a unitsA erasedA
+  , HasUnits b unitsB erasedB
+  , HasUnits c unitsC erasedC
   , unitsA ~ units1 :*: units2
   , unitsB ~ units1 :*: units2 :*: units3
   , unitsC ~ Unitless :/: units3

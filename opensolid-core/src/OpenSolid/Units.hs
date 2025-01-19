@@ -35,21 +35,21 @@ import {-# SOURCE #-} OpenSolid.Result (Result (Failure, Success))
 import {-# SOURCE #-} OpenSolid.Sign (Sign)
 import OpenSolid.Unitless (Unitless)
 
-class HasUnits (a :: k) units | a -> units
+class HasUnits erased Unitless erased => HasUnits (a :: k) units erased | a -> units, a -> erased
 
-instance HasUnits Int Unitless
+instance HasUnits Int Unitless Int
 
-instance HasUnits (Qty units) units
+instance HasUnits (Qty units) units (Qty Unitless)
 
-instance HasUnits Sign Unitless
+instance HasUnits Sign Unitless Sign
 
-instance HasUnits a units => HasUnits (Maybe a) units
+instance HasUnits a units erased => HasUnits (Maybe a) units (Maybe erased)
 
-instance HasUnits a units => HasUnits (Result x a) units
+instance HasUnits a units erased => HasUnits (Result x a) units (Result x erased)
 
-instance HasUnits a units => HasUnits (List a) units
+instance HasUnits a units erased => HasUnits (List a) units (List erased)
 
-instance HasUnits a units => HasUnits (NonEmpty a) units
+instance HasUnits a units erased => HasUnits (NonEmpty a) units (NonEmpty erased)
 
 type Coercion :: Type -> Type -> Constraint
 class Coercion b a => Coercion a b where
@@ -94,14 +94,14 @@ data units1 :/: units2 deriving (Eq, Show)
 infixl 7 :/:
 
 {-# INLINE erase #-}
-erase :: (Coercion a b, HasUnits b Unitless) => a -> b
+erase :: (Coercion a erased, HasUnits a units erased) => a -> erased
 erase = coerce
 
 {-# INLINE specialize #-}
 specialize ::
   ( Coercion a b
-  , HasUnits a unitsA
-  , HasUnits b unitsB
+  , HasUnits a unitsA erasedA
+  , HasUnits b unitsB erasedB
   , Specialize unitsA unitsB
   ) =>
   a ->
@@ -111,8 +111,8 @@ specialize = coerce
 {-# INLINE unspecialize #-}
 unspecialize ::
   ( Coercion a b
-  , HasUnits a unitsA
-  , HasUnits b unitsB
+  , HasUnits a unitsA erasedA
+  , HasUnits b unitsB erasedB
   , Specialize unitsA unitsB
   ) =>
   b ->
@@ -121,8 +121,8 @@ unspecialize = coerce
 
 commute ::
   ( Coercion a b
-  , HasUnits a unitsA
-  , HasUnits b unitsB
+  , HasUnits a unitsA erasedA
+  , HasUnits b unitsB erasedB
   , unitsA ~ units1 :*: units2
   , unitsB ~ units2 :*: units1
   ) =>
@@ -132,8 +132,8 @@ commute = coerce
 
 leftAssociate ::
   ( Coercion a b
-  , HasUnits a unitsA
-  , HasUnits b unitsB
+  , HasUnits a unitsA erasedA
+  , HasUnits b unitsB erasedB
   , unitsA ~ units1 :*: (units2 :*: units3)
   , unitsB ~ (units1 :*: units2) :*: units3
   ) =>
@@ -143,8 +143,8 @@ leftAssociate = coerce
 
 rightAssociate ::
   ( Coercion a b
-  , HasUnits a unitsA
-  , HasUnits b unitsB
+  , HasUnits a unitsA erasedA
+  , HasUnits b unitsB erasedB
   , unitsA ~ (units1 :*: units2) :*: units3
   , unitsB ~ units1 :*: (units2 :*: units3)
   ) =>

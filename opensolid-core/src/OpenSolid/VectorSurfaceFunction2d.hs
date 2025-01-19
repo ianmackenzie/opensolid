@@ -92,7 +92,11 @@ data VectorSurfaceFunction2d (coordinateSystem :: CoordinateSystem) where
 
 deriving instance Show (VectorSurfaceFunction2d (space @ units))
 
-instance HasUnits (VectorSurfaceFunction2d (space @ units)) units
+instance
+  HasUnits
+    (VectorSurfaceFunction2d (space @ units))
+    units
+    (VectorSurfaceFunction2d (space @ Unitless))
 
 instance
   space1 ~ space2 =>

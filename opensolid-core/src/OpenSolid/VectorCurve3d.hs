@@ -146,7 +146,7 @@ data VectorCurve3d (coordinateSystem :: CoordinateSystem) where
 
 deriving instance Show (VectorCurve3d (space @ units))
 
-instance HasUnits (VectorCurve3d (space @ units)) units
+instance HasUnits (VectorCurve3d (space @ units)) units (VectorCurve3d (space @ Unitless))
 
 instance
   space1 ~ space2 =>
@@ -609,19 +609,10 @@ transformBy transform c = case c of
   PlaceInBasis basis localCurve -> do
     let localTransform = Transform3d.relativeTo (Frame3d.at Point3d.origin basis) transform
     PlaceInBasis basis (transformBy localTransform localCurve)
-  Transformed existing curve -> Transformed (compositeTransform existing transform) curve
-
-compositeTransform ::
-  forall space tag1 translationUnits1 tag2 translationUnits2.
-  Transform3d tag1 (space @ translationUnits1) ->
-  Transform3d tag2 (space @ translationUnits2) ->
-  Transform3d.Affine (space @ Unitless)
-compositeTransform first second = do
-  let affineFirst = Transform3d.toAffine first
-  let affineSecond = Transform3d.toAffine second
-  let erasedFirst :: Transform3d.Affine (space @ Unitless) = Units.erase affineFirst
-  let erasedSecond :: Transform3d.Affine (space @ Unitless) = Units.erase affineSecond
-  erasedFirst >> erasedSecond
+  Transformed existing curve -> do
+    let transform1 = Units.erase (Transform3d.toAffine existing)
+    let transform2 = Units.erase (Transform3d.toAffine transform)
+    Transformed (transform1 >> transform2) curve
 
 new :: Interface curve (space @ units) => curve -> VectorCurve3d (space @ units)
 new = VectorCurve3d

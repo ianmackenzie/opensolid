@@ -52,7 +52,7 @@ instance Bounds (Bounds3d (space @ units)) where
 instance Bounded (Bounds3d (space @ units)) (Bounds3d (space @ units)) where
   bounds = identity
 
-instance HasUnits (Bounds3d (space @ units)) units
+instance HasUnits (Bounds3d (space @ units)) units (Bounds3d (space @ Unitless))
 
 instance
   space1 ~ space2 =>

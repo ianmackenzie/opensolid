@@ -135,7 +135,7 @@ instance FFI (Curve SquareMeters) where
 instance FFI (Curve Radians) where
   representation = FFI.classRepresentation "AngleCurve"
 
-instance HasUnits (Curve units) units
+instance HasUnits (Curve units) units (Curve Unitless)
 
 instance Units.Coercion (Curve unitsA) (Curve unitsB) where
   coerce (Parametric expression) = Parametric (Units.coerce expression)

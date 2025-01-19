@@ -92,7 +92,7 @@ data VectorCurve3d (coordinateSystem :: CoordinateSystem) where
     VectorCurve3d (space @ units) ->
     VectorCurve3d (space @ units)
 
-instance HasUnits (VectorCurve3d (space @ units)) units
+instance HasUnits (VectorCurve3d (space @ units)) units (VectorCurve3d (space @ Unitless))
 
 instance Show (VectorCurve3d (space @ units))
 

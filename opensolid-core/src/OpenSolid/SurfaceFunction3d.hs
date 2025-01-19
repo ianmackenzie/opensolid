@@ -65,7 +65,7 @@ data SurfaceFunction3d (coordinateSystem :: CoordinateSystem) where
 
 deriving instance Show (SurfaceFunction3d (space @ units))
 
-instance HasUnits (SurfaceFunction3d (space @ units)) units
+instance HasUnits (SurfaceFunction3d (space @ units)) units (SurfaceFunction3d (space @ Unitless))
 
 instance
   space1 ~ space2 =>

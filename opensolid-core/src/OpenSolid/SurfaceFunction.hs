@@ -126,7 +126,7 @@ class
   evaluateBoundsImpl :: function -> UvBounds -> Range units
   derivativeImpl :: SurfaceParameter -> function -> SurfaceFunction units
 
-instance HasUnits (SurfaceFunction units) units
+instance HasUnits (SurfaceFunction units) units (SurfaceFunction Unitless)
 
 instance Units.Coercion (SurfaceFunction unitsA) (SurfaceFunction unitsB) where
   coerce (Parametric expression) = Parametric (Units.coerce expression)

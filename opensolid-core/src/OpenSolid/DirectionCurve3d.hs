@@ -39,7 +39,7 @@ import OpenSolid.VectorCurve3d qualified as VectorCurve3d
 newtype DirectionCurve3d space = DirectionCurve3d (VectorCurve3d (space @ Unitless))
   deriving (Show)
 
-instance HasUnits (DirectionCurve3d space) Unitless
+instance HasUnits (DirectionCurve3d space) Unitless (DirectionCurve3d space)
 
 instance
   space1 ~ space2 =>

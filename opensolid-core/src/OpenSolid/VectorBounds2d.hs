@@ -55,7 +55,7 @@ data VectorBounds2d (coordinateSystem :: CoordinateSystem) where
 
 deriving instance Show (VectorBounds2d (space @ units))
 
-instance HasUnits (VectorBounds2d (space @ units)) units
+instance HasUnits (VectorBounds2d (space @ units)) units (VectorBounds2d (space @ Unitless))
 
 instance
   space1 ~ space2 =>

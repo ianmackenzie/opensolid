@@ -20,7 +20,7 @@ instance Eq (Point2d (space @ units))
 
 instance Show (Point2d (space @ units))
 
-instance HasUnits (Point2d (space @ units)) units
+instance HasUnits (Point2d (space @ units)) units (Point2d (space @ Unitless))
 
 instance space1 ~ space2 => Units.Coercion (Point2d (space1 @ unitsA)) (Point2d (space2 @ unitsB))
 
