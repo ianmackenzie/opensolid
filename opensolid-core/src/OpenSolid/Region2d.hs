@@ -285,7 +285,7 @@ toMesh :: Qty units -> Region2d (space @ units) -> Mesh (Point2d (space @ units)
 toMesh accuracy region = do
   let allLoops = outerLoop region :| innerLoops region
   let vertexLoops = NonEmpty.map (toVertexLoop accuracy) allLoops
-  CDT.unsafe [] vertexLoops
+  CDT.unsafe vertexLoops [] Nothing
 
 toVertexLoop ::
   Qty units ->

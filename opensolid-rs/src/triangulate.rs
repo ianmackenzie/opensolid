@@ -1,8 +1,8 @@
 use spade::{
-    handles::FixedFaceHandle, ConstrainedDelaunayTriangulation, Point2, RefinementParameters,
-    Triangulation,
+    handles::{FixedFaceHandle, FixedVertexHandle},
+    ConstrainedDelaunayTriangulation, Point2, RefinementParameters, Triangulation,
 };
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 
 type Point = Point2<f64>;
 
@@ -16,56 +16,51 @@ pub extern "C" fn opensolid_cdt(
     input_point_data: *mut Point,
     input_edge_count: usize,
     input_edge_data: *mut [usize; 2],
-    max_refinement_points: usize,
-    output_point_count: *mut usize,
-    output_point_data: *mut Point,
+    input_max_refinement_point_count: usize,
+    output_refinement_point_count: *mut usize,
+    output_refinement_point_data: *mut Point,
     output_triangle_count: *mut usize,
     output_triangle_data: *mut [usize; 3],
 ) {
     let input_points = unsafe { make_vec(input_point_count, input_point_data) };
     let input_edges = unsafe { make_vec(input_edge_count, input_edge_data) };
-    match ConstrainedDelaunayTriangulation::<Point>::bulk_load_cdt(input_points, input_edges) {
+    match ConstrainedDelaunayTriangulation::<Point>::bulk_load_cdt_stable(input_points, input_edges)
+    {
         Ok(mut cdt) => {
             let refinement_parameters = RefinementParameters::<f64>::new()
                 .exclude_outer_faces(true)
                 .keep_constraint_edges()
-                .with_max_additional_vertices(max_refinement_points);
-            let refinement_result = cdt.refine(refinement_parameters);
-            let excluded_face_ids: HashSet<usize> = refinement_result
+                .with_max_additional_vertices(input_max_refinement_point_count);
+            let excluded_face_ids: HashSet<usize> = cdt
+                .refine(refinement_parameters)
                 .excluded_faces
                 .iter()
                 .map(FixedFaceHandle::index)
                 .collect();
             let mut triangle_count: usize = 0;
-            let mut point_count: usize = 0;
-            let mut point_indices: HashMap<usize, usize> = HashMap::new();
-            for face_handle in cdt.inner_faces() {
-                if excluded_face_ids.contains(&face_handle.index()) {
-                    continue;
-                };
-                let triangle_data = unsafe { output_triangle_data.offset(triangle_count as isize) };
-                for (i, vertex_handle) in face_handle.vertices().iter().enumerate() {
-                    let vertex_index = vertex_handle.index();
-                    let point_index = match point_indices.get(&vertex_index) {
-                        Some(existing_index) => *existing_index,
-                        None => {
-                            let new_index = point_count;
-                            point_indices.insert(vertex_index, new_index);
-                            let point = cdt.vertex(vertex_handle.fix()).position();
-                            unsafe { *output_point_data.offset(new_index as isize) = point };
-                            point_count += 1;
-                            new_index
-                        }
-                    };
-                    unsafe { (*triangle_data)[i] = point_index };
+            for face_handle in cdt
+                .inner_faces()
+                .filter(|handle| !(excluded_face_ids.contains(&handle.index())))
+            {
+                let triangle_ptr = unsafe { output_triangle_data.offset(triangle_count as isize) };
+                let vertex_handles = face_handle.vertices();
+                for i in 0..3 {
+                    unsafe { (*triangle_ptr)[i] = vertex_handles[i].index() };
                 }
                 triangle_count += 1;
             }
-            unsafe { *output_point_count = point_count };
             unsafe { *output_triangle_count = triangle_count };
+            for i in input_point_count..cdt.num_vertices() {
+                let vertex_handle = FixedVertexHandle::from_index(i);
+                let point = cdt.vertex(vertex_handle).position();
+                let output_offset = (i - input_point_count) as isize;
+                let output_ptr = unsafe { output_refinement_point_data.offset(output_offset) };
+                unsafe { *output_ptr = point };
+            }
+            unsafe { *output_refinement_point_count = cdt.num_vertices() - input_point_count };
         }
         Err(_) => {
-            unsafe { *output_point_count = 0 };
+            unsafe { *output_refinement_point_count = 0 };
             unsafe { *output_triangle_count = 0 };
         }
     }
