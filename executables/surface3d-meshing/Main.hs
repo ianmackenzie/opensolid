@@ -29,6 +29,6 @@ main = IO.do
   let domainCircle = Curve2d.circle (Point2d.xy 0.5 0.5) (1 / 3)
   domain <- Tolerance.using 1e-9 (Region2d.boundedBy [domainCircle])
   let surface = Surface3d.parametric surfaceFunction domain
-  let mesh = Surface3d.toMesh (Length.millimeters 5.0) surface
+  let mesh = Surface3d.toMesh (Length.millimeters 2.0) surface
   IO.printLine ("Num faces: " + Text.int (List.length (Mesh.faceIndices mesh)))
   IO.writeFile "executables/surface3d-meshing/mesh.stl" (Stl.text Length.inMillimeters mesh)
