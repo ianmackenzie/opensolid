@@ -176,6 +176,7 @@ library
     OpenSolid.Sign
     OpenSolid.Solve1d
     OpenSolid.Solve2d
+    OpenSolid.Stl
     OpenSolid.Stream
     OpenSolid.Surface
     OpenSolid.Surface2d
