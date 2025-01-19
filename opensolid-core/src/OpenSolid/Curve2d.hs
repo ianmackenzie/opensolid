@@ -1121,16 +1121,16 @@ instance VectorCurve2d.Interface (SyntheticDerivative (space @ units)) (space @ 
         (VectorCurve2d.transformBy transform next)
 
 toPolyline :: Qty units -> Curve2d (space @ units) -> Polyline2d (Point2d (space @ units))
-toPolyline maxError curve =
-  Polyline2d (NonEmpty.map (evaluate curve) (samplingPoints maxError curve))
+toPolyline accuracy curve =
+  Polyline2d (NonEmpty.map (evaluate curve) (samplingPoints accuracy curve))
 
 samplingPoints :: Qty units -> Curve2d (space @ units) -> NonEmpty Float
-samplingPoints maxError curve = do
+samplingPoints accuracy curve = do
   let secondDerivative = VectorCurve2d.derivative (derivative curve)
   let predicate subdomain = do
         let secondDerivativeBounds = VectorCurve2d.evaluateBounds secondDerivative subdomain
         let secondDerivativeMagnitude = VectorBounds2d.magnitude secondDerivativeBounds
-        Linearization.error subdomain secondDerivativeMagnitude <= Qty.abs maxError
+        Linearization.error subdomain secondDerivativeMagnitude <= Qty.abs accuracy
   Domain1d.samplingPoints predicate
 
 medialAxis ::
