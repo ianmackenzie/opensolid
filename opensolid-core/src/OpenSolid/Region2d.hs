@@ -282,17 +282,17 @@ area region = do
   Estimate.sum (List.map (areaIntegral referencePoint) (NonEmpty.toList (boundaryCurves region)))
 
 toMesh :: Qty units -> Region2d (space @ units) -> Mesh (Point2d (space @ units))
-toMesh maxError region = do
+toMesh accuracy region = do
   let allLoops = outerLoop region :| innerLoops region
-  let vertexLoops = NonEmpty.map (toVertexLoop maxError) allLoops
+  let vertexLoops = NonEmpty.map (toVertexLoop accuracy) allLoops
   CDT.unsafe [] vertexLoops
 
 toVertexLoop ::
   Qty units ->
   NonEmpty (Curve2d (space @ units)) ->
   NonEmpty (Point2d (space @ units))
-toVertexLoop maxError loop = do
-  let curveVertices curve = NonEmpty.rest (Polyline2d.vertices (Curve2d.toPolyline maxError curve))
+toVertexLoop accuracy loop = do
+  let curveVertices curve = NonEmpty.rest (Polyline2d.vertices (Curve2d.toPolyline accuracy curve))
   let allVertices = List.collect curveVertices (NonEmpty.toList loop)
   case allVertices of
     NonEmpty vertices -> vertices
