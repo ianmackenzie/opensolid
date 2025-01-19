@@ -22,6 +22,7 @@ module OpenSolid.Domain1d
   , adjacent
   , intersectionWidth
   , samplingPoints
+  , leadingSamplingPoints
   )
 where
 
@@ -127,6 +128,9 @@ intersectionWidth (Domain1d n1 i1 j1) (Domain1d n2 i2 j2) = do
 
 samplingPoints :: (Range Unitless -> Bool) -> NonEmpty Float
 samplingPoints predicate = 0.0 :| collectSamplingPoints predicate Range.unit [1.0]
+
+leadingSamplingPoints :: (Range Unitless -> Bool) -> NonEmpty Float
+leadingSamplingPoints predicate = 0.0 :| collectSamplingPoints predicate Range.unit []
 
 collectSamplingPoints :: (Range Unitless -> Bool) -> Range Unitless -> List Float -> List Float
 collectSamplingPoints predicate subdomain accumulated = do
