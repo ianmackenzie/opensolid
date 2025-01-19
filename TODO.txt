@@ -1,4 +1,11 @@
-Refactor CDT to support arbitrary vertex types
+Add transformBy to all curve, surface and surface function types
+-> then search for transformByImpl instances to see if they can be updated to use transformBy instead of Transformed constructors
+
+Optimize Set2d to use 'nth element' algorithm?
+- recursively search for bisection value to balance two sub-lists?
+
+Add 'erased' type parameter to HasUnits typeclass?
+-> see if then that avoids the need for type annotations in Transform3d.compositeTransform
 
 Rewrite scripts in Haskell?
 -> or Python?
