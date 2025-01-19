@@ -18,7 +18,7 @@ import OpenSolid.Expression qualified as Expression
 import OpenSolid.Point3d (Point3d)
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
-import OpenSolid.Region2d (Region2d)
+import {-# SOURCE #-} OpenSolid.Region2d (Region2d)
 import {-# SOURCE #-} OpenSolid.Surface3d (Surface3d)
 import {-# SOURCE #-} OpenSolid.Surface3d qualified as Surface3d
 import OpenSolid.SurfaceFunction (SurfaceFunction)
