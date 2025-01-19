@@ -4,6 +4,7 @@ module OpenSolid.Mesh
   , vertices
   , faceIndices
   , faceVertices
+  , map
   )
 where
 
@@ -24,3 +25,6 @@ faceVertices :: Mesh vertex -> List (vertex, vertex, vertex)
 faceVertices (Mesh vertices faceIndices) = do
   let toVertices (i, j, k) = (Array.get i vertices, Array.get j vertices, Array.get k vertices)
   List.map toVertices faceIndices
+
+map :: (a -> b) -> Mesh a -> Mesh b
+map f (Mesh vertices faceIndices) = Mesh (Array.map f vertices) faceIndices
