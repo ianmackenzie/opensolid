@@ -139,7 +139,7 @@ jobs:
         run: |
           cabal update
       - name: Build opensolid-rs library
-      working-directory: opensolid-rs
+        working-directory: opensolid-rs
         run: |
           cargo build --release
           echo "LD_LIBRARY_PATH=$GITHUB_WORKSPACE/opensolid-rs/target/release" >> $GITHUB_ENV
@@ -217,7 +217,7 @@ jobs:
         run: |
           cabal update
       - name: Build opensolid-rs library
-      working-directory: opensolid-rs
+        working-directory: opensolid-rs
         run: |
           cargo build --release
           echo "LD_LIBRARY_PATH=$GITHUB_WORKSPACE/opensolid-rs/target/release" >> $GITHUB_ENV
@@ -293,7 +293,7 @@ jobs:
         run: |
           cabal update
       - name: Build opensolid-rs library
-      working-directory: opensolid-rs
+        working-directory: opensolid-rs
         run: |
           cargo build --release
           echo "LD_LIBRARY_PATH=$GITHUB_WORKSPACE/opensolid-rs/target/release" >> $GITHUB_ENV
