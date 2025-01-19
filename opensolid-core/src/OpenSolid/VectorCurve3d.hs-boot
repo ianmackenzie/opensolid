@@ -1,6 +1,6 @@
 module OpenSolid.VectorCurve3d
   ( Interface (..)
-  , VectorCurve3d
+  , VectorCurve3d (Parametric, Transformed)
   , constant
   , new
   , evaluate
@@ -11,8 +11,10 @@ module OpenSolid.VectorCurve3d
   )
 where
 
+import OpenSolid.Basis3d (Basis3d)
 import OpenSolid.CoordinateSystem (Space)
 import {-# SOURCE #-} OpenSolid.Curve (Curve)
+import OpenSolid.Expression (Expression)
 import OpenSolid.Prelude
 import OpenSolid.Range (Range)
 import OpenSolid.Transform3d (Transform3d)
@@ -35,7 +37,60 @@ class
 
 type role VectorCurve3d nominal
 
-data VectorCurve3d (coordinateSystem :: CoordinateSystem)
+data VectorCurve3d (coordinateSystem :: CoordinateSystem) where
+  VectorCurve3d ::
+    Interface curve (space @ units) =>
+    curve ->
+    VectorCurve3d (space @ units)
+  Parametric ::
+    Expression Float (Vector3d (space @ units)) ->
+    VectorCurve3d (space @ units)
+  Coerce ::
+    VectorCurve3d (space @ units1) ->
+    VectorCurve3d (space @ units2)
+  Reversed ::
+    VectorCurve3d (space @ units) ->
+    VectorCurve3d (space @ units)
+  XYZ ::
+    Curve units ->
+    Curve units ->
+    Curve units ->
+    VectorCurve3d (space @ units)
+  Negated ::
+    VectorCurve3d (space @ units) ->
+    VectorCurve3d (space @ units)
+  Sum ::
+    VectorCurve3d (space @ units) ->
+    VectorCurve3d (space @ units) ->
+    VectorCurve3d (space @ units)
+  Difference ::
+    VectorCurve3d (space @ units) ->
+    VectorCurve3d (space @ units) ->
+    VectorCurve3d (space @ units)
+  Product1d3d' ::
+    Curve units1 ->
+    VectorCurve3d (space @ units2) ->
+    VectorCurve3d (space @ (units1 :*: units2))
+  Product3d1d' ::
+    VectorCurve3d (space @ units1) ->
+    Curve units2 ->
+    VectorCurve3d (space @ (units1 :*: units2))
+  Quotient' ::
+    VectorCurve3d (space @ units1) ->
+    Curve units2 ->
+    VectorCurve3d (space @ (units1 :/: units2))
+  CrossProduct' ::
+    VectorCurve3d (space @ units1) ->
+    VectorCurve3d (space @ units2) ->
+    VectorCurve3d (space @ (units1 :*: units2))
+  PlaceInBasis ::
+    Basis3d global (Defines local) ->
+    VectorCurve3d (local @ units) ->
+    VectorCurve3d (global @ units)
+  Transformed ::
+    Transform3d tag (space @ translationUnits) ->
+    VectorCurve3d (space @ units) ->
+    VectorCurve3d (space @ units)
 
 instance HasUnits (VectorCurve3d (space @ units)) units
 

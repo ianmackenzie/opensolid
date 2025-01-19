@@ -1,5 +1,5 @@
 module OpenSolid.VectorCurve3d
-  ( VectorCurve3d (Parametric)
+  ( VectorCurve3d (Parametric, Transformed)
   , Interface (..)
   , new
   , startValue
@@ -140,7 +140,7 @@ data VectorCurve3d (coordinateSystem :: CoordinateSystem) where
     VectorCurve3d (local @ units) ->
     VectorCurve3d (global @ units)
   Transformed ::
-    Transform3d.Affine (space @ Unitless) ->
+    Transform3d tag (space @ translationUnits) ->
     VectorCurve3d (space @ units) ->
     VectorCurve3d (space @ units)
 
@@ -593,25 +593,35 @@ transformBy ::
   Transform3d tag (space @ translationUnits) ->
   VectorCurve3d (space @ units) ->
   VectorCurve3d (space @ units)
-transformBy transform curve = do
-  let t = Units.erase (Transform3d.toAffine transform)
-  case curve of
-    VectorCurve3d c -> transformByImpl transform c
-    Parametric expression -> Parametric (Expression.VectorCurve3d.transformBy t expression)
-    Coerce c -> Coerce (transformBy transform c)
-    Reversed c -> Reversed (transformBy transform c)
-    XYZ{} -> Transformed t curve
-    Negated c -> Negated (transformBy transform c)
-    Sum c1 c2 -> Sum (transformBy transform c1) (transformBy transform c2)
-    Difference c1 c2 -> Difference (transformBy transform c1) (transformBy transform c2)
-    Product1d3d' curve1d curve3d -> Product1d3d' curve1d (transformBy transform curve3d)
-    Product3d1d' curve3d curve1d -> Product3d1d' (transformBy transform curve3d) curve1d
-    Quotient' curve3d curve1d -> Quotient' (transformBy transform curve3d) curve1d
-    CrossProduct' c1 c2 -> CrossProduct' (transformBy transform c1) (transformBy transform c2)
-    PlaceInBasis basis c -> do
-      let localTransform = Transform3d.relativeTo (Frame3d.at Point3d.origin basis) transform
-      PlaceInBasis basis (transformBy localTransform c)
-    Transformed existing c -> Transformed (existing >> t) c
+transformBy transform c = case c of
+  VectorCurve3d curve -> transformByImpl transform curve
+  Parametric expression -> Parametric (Expression.VectorCurve3d.transformBy transform expression)
+  Coerce curve -> Coerce (transformBy transform curve)
+  Reversed curve -> Reversed (transformBy transform curve)
+  XYZ{} -> Transformed transform c
+  Negated curve -> Negated (transformBy transform curve)
+  Sum lhs rhs -> Sum (transformBy transform lhs) (transformBy transform rhs)
+  Difference lhs rhs -> Difference (transformBy transform lhs) (transformBy transform rhs)
+  Product1d3d' curve1d curve3d -> Product1d3d' curve1d (transformBy transform curve3d)
+  Product3d1d' curve3d curve1d -> Product3d1d' (transformBy transform curve3d) curve1d
+  Quotient' curve3d curve1d -> Quotient' (transformBy transform curve3d) curve1d
+  CrossProduct' lhs rhs -> CrossProduct' (transformBy transform lhs) (transformBy transform rhs)
+  PlaceInBasis basis localCurve -> do
+    let localTransform = Transform3d.relativeTo (Frame3d.at Point3d.origin basis) transform
+    PlaceInBasis basis (transformBy localTransform localCurve)
+  Transformed existing curve -> Transformed (compositeTransform existing transform) curve
+
+compositeTransform ::
+  forall space tag1 translationUnits1 tag2 translationUnits2.
+  Transform3d tag1 (space @ translationUnits1) ->
+  Transform3d tag2 (space @ translationUnits2) ->
+  Transform3d.Affine (space @ Unitless)
+compositeTransform first second = do
+  let affineFirst = Transform3d.toAffine first
+  let affineSecond = Transform3d.toAffine second
+  let erasedFirst :: Transform3d.Affine (space @ Unitless) = Units.erase affineFirst
+  let erasedSecond :: Transform3d.Affine (space @ Unitless) = Units.erase affineSecond
+  erasedFirst >> erasedSecond
 
 new :: Interface curve (space @ units) => curve -> VectorCurve3d (space @ units)
 new = VectorCurve3d
