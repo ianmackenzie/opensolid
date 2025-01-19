@@ -89,6 +89,8 @@ import OpenSolid.Curve2d.Intersections qualified as Intersections
 import {-# SOURCE #-} OpenSolid.Curve2d.MedialAxis qualified as MedialAxis
 import OpenSolid.Curve2d.OverlappingSegment (OverlappingSegment (OverlappingSegment))
 import OpenSolid.Curve2d.OverlappingSegment qualified as OverlappingSegment
+import {-# SOURCE #-} OpenSolid.Curve3d (Curve3d)
+import {-# SOURCE #-} OpenSolid.Curve3d qualified as Curve3d
 import OpenSolid.Debug qualified as Debug
 import OpenSolid.Direction2d (Direction2d)
 import OpenSolid.Direction2d qualified as Direction2d
@@ -124,6 +126,8 @@ import OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.SurfaceFunction.Zeros qualified as SurfaceFunction.Zeros
 import {-# SOURCE #-} OpenSolid.SurfaceFunction2d (SurfaceFunction2d)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction2d qualified as SurfaceFunction2d
+import {-# SOURCE #-} OpenSolid.SurfaceFunction3d (SurfaceFunction3d)
+import {-# SOURCE #-} OpenSolid.SurfaceFunction3d qualified as SurfaceFunction3d
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvCoordinates, UvPoint)
 import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
@@ -137,8 +141,12 @@ import OpenSolid.VectorBounds2d qualified as VectorBounds2d
 import OpenSolid.VectorCurve2d (VectorCurve2d)
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 import OpenSolid.VectorCurve2d.Zeros qualified as VectorCurve2d.Zeros
+import OpenSolid.VectorCurve3d (VectorCurve3d)
+import OpenSolid.VectorCurve3d qualified as VectorCurve3d
 import OpenSolid.VectorSurfaceFunction2d (VectorSurfaceFunction2d)
 import OpenSolid.VectorSurfaceFunction2d qualified as VectorSurfaceFunction2d
+import OpenSolid.VectorSurfaceFunction3d (VectorSurfaceFunction3d)
+import OpenSolid.VectorSurfaceFunction3d qualified as VectorSurfaceFunction3d
 import Prelude qualified
 
 type role Curve2d nominal
@@ -432,6 +440,69 @@ instance Curve.Interface (SurfaceFunction units :.: Curve2d UvCoordinates) units
     let uT = VectorCurve2d.xComponent uvT
     let vT = VectorCurve2d.yComponent uvT
     fU . uvCurve * uT + fV . uvCurve * vT
+
+instance
+  Composition
+    (Curve2d UvCoordinates)
+    (VectorSurfaceFunction3d (space @ units))
+    (VectorCurve3d (space @ units))
+  where
+  VectorSurfaceFunction3d.Parametric outer . Parametric inner =
+    VectorCurve3d.Parametric (outer . inner)
+  outer . inner = VectorCurve3d.new (outer :.: inner)
+
+instance
+  VectorCurve3d.Interface
+    (VectorSurfaceFunction3d (space @ units) :.: Curve2d UvCoordinates)
+    (space @ units)
+  where
+  evaluateImpl (function :.: uvCurve) tValue =
+    VectorSurfaceFunction3d.evaluate function (evaluate uvCurve tValue)
+
+  evaluateBoundsImpl (function :.: uvCurve) tRange =
+    VectorSurfaceFunction3d.evaluateBounds function (evaluateBounds uvCurve tRange)
+
+  derivativeImpl (function :.: uvCurve) = do
+    let fU = VectorSurfaceFunction3d.derivative U function
+    let fV = VectorSurfaceFunction3d.derivative V function
+    let uvT = derivative uvCurve
+    let uT = VectorCurve2d.xComponent uvT
+    let vT = VectorCurve2d.yComponent uvT
+    fU . uvCurve * uT + fV . uvCurve * vT
+
+  transformByImpl transform curve =
+    VectorCurve3d.Transformed transform (VectorCurve3d.new curve)
+
+instance
+  Composition
+    (Curve2d UvCoordinates)
+    (SurfaceFunction3d (space @ units))
+    (Curve3d (space @ units))
+  where
+  SurfaceFunction3d.Parametric outer . Parametric inner = Curve3d.Parametric (outer . inner)
+  outer . inner = Curve3d.new (outer :.: inner)
+
+instance
+  Curve3d.Interface
+    (SurfaceFunction3d (space @ units) :.: Curve2d UvCoordinates)
+    (space @ units)
+  where
+  evaluateImpl (function :.: uvCurve) tValue =
+    SurfaceFunction3d.evaluate function (evaluate uvCurve tValue)
+
+  evaluateBoundsImpl (function :.: uvCurve) tRange =
+    SurfaceFunction3d.evaluateBounds function (evaluateBounds uvCurve tRange)
+
+  derivativeImpl (function :.: uvCurve) = do
+    let fU = SurfaceFunction3d.derivative U function
+    let fV = SurfaceFunction3d.derivative V function
+    let uvT = derivative uvCurve
+    let uT = VectorCurve2d.xComponent uvT
+    let vT = VectorCurve2d.yComponent uvT
+    fU . uvCurve * uT + fV . uvCurve * vT
+
+  reverseImpl (function :.: uvCurve) =
+    function . reverse uvCurve
 
 new :: Interface curve (space @ units) => curve -> Curve2d (space @ units)
 new = Curve
