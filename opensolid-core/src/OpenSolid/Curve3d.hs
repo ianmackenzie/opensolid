@@ -48,7 +48,7 @@ class
   evaluateImpl :: function -> Float -> Point3d coordinateSystem
   evaluateBoundsImpl :: function -> Range Unitless -> Bounds3d coordinateSystem
   derivativeImpl :: function -> VectorCurve3d coordinateSystem
-  reverseImpl :: function -> function
+  reverseImpl :: function -> Curve3d coordinateSystem
 
 data Curve3d (coordinateSystem :: CoordinateSystem) where
   Curve3d ::
@@ -251,7 +251,7 @@ derivative f = case f of
 reverse :: Curve3d (space @ units) -> Curve3d (space @ units)
 reverse f = case f of
   Parametric expression -> Parametric (expression . Expression.r)
-  Curve3d curve -> Curve3d (reverseImpl curve)
+  Curve3d curve -> reverseImpl curve
   Coerce curve -> Units.coerce (reverse curve)
   XYZ x y z -> XYZ (Curve.reverse x) (Curve.reverse y) (Curve.reverse z)
   Addition c v -> reverse c + VectorCurve3d.reverse v
