@@ -1,9 +1,9 @@
 module OpenSolid.Bounds3d
   ( Bounds3d (Bounds3d)
-  , xRange
-  , yRange
-  , zRange
-  , xyzRanges
+  , xCoordinate
+  , yCoordinate
+  , zCoordinate
+  , coordinates
   , xyz
   , constant
   , hull2
@@ -115,18 +115,18 @@ instance
   where
   Bounds3d x1 y1 z1 - Bounds3d x2 y2 z2 = VectorBounds3d (x1 - x2) (y1 - y2) (z1 - z2)
 
-xRange :: Bounds3d (space @ units) -> Range units
-xRange (Bounds3d x _ _) = x
+xCoordinate :: Bounds3d (space @ units) -> Range units
+xCoordinate (Bounds3d x _ _) = x
 
-yRange :: Bounds3d (space @ units) -> Range units
-yRange (Bounds3d _ y _) = y
+yCoordinate :: Bounds3d (space @ units) -> Range units
+yCoordinate (Bounds3d _ y _) = y
 
-zRange :: Bounds3d (space @ units) -> Range units
-zRange (Bounds3d _ _ z) = z
+zCoordinate :: Bounds3d (space @ units) -> Range units
+zCoordinate (Bounds3d _ _ z) = z
 
-{-# INLINE xyzRanges #-}
-xyzRanges :: Bounds3d (space @ units) -> (Range units, Range units, Range units)
-xyzRanges (Bounds3d x y z) = (x, y, z)
+{-# INLINE coordinates #-}
+coordinates :: Bounds3d (space @ units) -> (Range units, Range units, Range units)
+coordinates (Bounds3d x y z) = (x, y, z)
 
 xyz :: Range units -> Range units -> Range units -> Bounds3d (space @ units)
 xyz = Bounds3d
