@@ -107,3 +107,11 @@ executable surface3d-meshing
   build-depends:
     opensolid-core,
     time,
+
+executable body3d-meshing
+  import: config
+  main-is: Main.hs
+  hs-source-dirs: body3d-meshing
+  build-depends:
+    opensolid-core,
+    time,
