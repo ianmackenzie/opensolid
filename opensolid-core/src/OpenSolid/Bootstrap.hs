@@ -11,6 +11,7 @@ module OpenSolid.Bootstrap
   , Ord ((<), (<=), (>=), (>), compare)
   , Ordering (EQ, GT, LT)
   , Show
+  , Traversable
   , Bool (True, False)
   , Char
   , not
@@ -50,6 +51,7 @@ import Prelude
   , Ord (compare, (<), (<=), (>), (>=))
   , Ordering (EQ, GT, LT)
   , Show
+  , Traversable
   , fromIntegral
   , not
   , otherwise

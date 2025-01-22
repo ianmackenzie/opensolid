@@ -75,12 +75,8 @@ forEachWithIndex :: List a -> (Int -> a -> IO ()) -> IO ()
 forEachWithIndex list function =
   forEach (List.indexed list) (\(index, item) -> function index item)
 
-collect :: (a -> IO b) -> List a -> IO (List b)
-collect _ [] = succeed []
-collect function (first : rest) = OpenSolid.IO.do
-  firstValue <- function first
-  restValues <- collect function rest
-  succeed (firstValue : restValues)
+collect :: Traversable list => (a -> IO b) -> list a -> IO (list b)
+collect = Prelude.mapM
 
 collectWithIndex :: (Int -> a -> IO b) -> List a -> IO (List b)
 collectWithIndex function list =

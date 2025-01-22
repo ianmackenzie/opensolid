@@ -92,7 +92,7 @@ try result = case result of
   Success value -> Success value
   Failure error -> Failure (Error.message error)
 
-collect :: (a -> Result x b) -> List a -> Result x (List b)
+collect :: Traversable list => (a -> Result x b) -> list a -> Result x (list b)
 collect = Prelude.mapM
 
 combine :: List (Result x a) -> Result x (List a)

@@ -47,7 +47,7 @@ map :: (a -> b) -> Fuzzy a -> Fuzzy b
 map f (Resolved value) = Resolved (f value)
 map _ Unresolved = Unresolved
 
-collect :: (a -> Fuzzy b) -> List a -> Fuzzy (List b)
+collect :: Traversable list => (a -> Fuzzy b) -> list a -> Fuzzy (list b)
 collect = Prelude.mapM
 
 oneOf :: List (Fuzzy a) -> Fuzzy a
