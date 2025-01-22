@@ -1,6 +1,7 @@
 module OpenSolid.Region2d
   ( Region2d
   , boundedBy
+  , unit
   , outerLoop
   , innerLoops
   , boundaryCurves
@@ -27,7 +28,7 @@ import OpenSolid.Float qualified as Float
 import OpenSolid.List qualified as List
 import OpenSolid.Mesh (Mesh)
 import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Point2d (Point2d)
+import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Polyline2d qualified as Polyline2d
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
@@ -35,6 +36,7 @@ import OpenSolid.Range (Range)
 import OpenSolid.Range qualified as Range
 import OpenSolid.Region2d.BoundedBy qualified as BoundedBy
 import OpenSolid.Result qualified as Result
+import OpenSolid.SurfaceParameter (UvCoordinates)
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Units qualified as Units
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
@@ -55,6 +57,20 @@ boundedBy curves = Result.do
   checkForInnerIntersection curves
   loops <- connect curves
   classifyLoops loops
+
+unit :: Region2d UvCoordinates
+unit = do
+  let p00 = Point2d 0.0 0.0
+  let p01 = Point2d 0.0 1.0
+  let p10 = Point2d 1.0 0.0
+  let p11 = Point2d 1.0 1.0
+  let boundaries =
+        NonEmpty.four
+          (Curve2d.line p00 p10)
+          (Curve2d.line p10 p11)
+          (Curve2d.line p11 p01)
+          (Curve2d.line p01 p00)
+  Region2d boundaries []
 
 checkForInnerIntersection ::
   Tolerance units =>
