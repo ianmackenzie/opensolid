@@ -17,11 +17,9 @@ import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Curve3d (Curve3d)
 import OpenSolid.Curve3d qualified as Curve3d
-import OpenSolid.Debug qualified as Debug
 import OpenSolid.Domain1d qualified as Domain1d
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.Fuzzy qualified as Fuzzy
-import OpenSolid.Int qualified as Int
 import OpenSolid.LineSegment2d (LineSegment2d)
 import OpenSolid.Linearization qualified as Linearization
 import OpenSolid.List qualified as List
@@ -98,8 +96,6 @@ toMesh accuracy surface = do
   let edgeSet = Set2d.fromNonEmpty boundaryEdges
   let steinerPoints = generateSteinerPoints accuracy SurfaceParameter.domain edgeSet fuu fuv fvv []
   let boundaryVertexLoops = NonEmpty.map Polygon2d.vertices boundaryPolygons
-  Debug.log "Boundary vertices" (Int.sumOf NonEmpty.length (NonEmpty.toList boundaryVertexLoops))
-  Debug.log "Steiner points" (List.length steinerPoints)
   let maxRefinementPoints = NonEmpty.length boundaryEdges
   let uvMesh = CDT.unsafe boundaryVertexLoops steinerPoints (Just (maxRefinementPoints, identity))
   Mesh.map (SurfaceFunction3d.evaluate surfaceFunction) uvMesh
