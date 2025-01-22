@@ -173,6 +173,7 @@ library
     OpenSolid.Region2d.BoundedBy
     OpenSolid.Result
     OpenSolid.Set2d
+    OpenSolid.Set3d
     OpenSolid.Sign
     OpenSolid.Solve1d
     OpenSolid.Solve2d
