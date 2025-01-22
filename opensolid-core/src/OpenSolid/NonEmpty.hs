@@ -35,6 +35,7 @@ module OpenSolid.NonEmpty
   , length
   , map
   , mapWithIndex
+  , indexed
   , reverseMap
   , map2
   , map3
@@ -222,6 +223,9 @@ map = Data.List.NonEmpty.map
 
 mapWithIndex :: (Int -> a -> b) -> NonEmpty a -> NonEmpty b
 mapWithIndex function (x :| xs) = function 0 x :| List.map2 function [1 ..] xs
+
+indexed :: NonEmpty a -> NonEmpty (Int, a)
+indexed = mapWithIndex (,)
 
 reverseMap :: (a -> b) -> NonEmpty a -> NonEmpty b
 reverseMap function (x :| xs) = go x xs []
