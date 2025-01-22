@@ -3,6 +3,9 @@ module OpenSolid.Surface3d
   , parametric
   , function
   , domain
+  , outerLoop
+  , innerLoops
+  , boundaryCurves
   , toMesh
   )
 where
@@ -12,6 +15,7 @@ import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.ConstrainedDelaunayTriangulation qualified as CDT
 import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Curve2d qualified as Curve2d
+import OpenSolid.Curve3d (Curve3d)
 import OpenSolid.Curve3d qualified as Curve3d
 import OpenSolid.Debug qualified as Debug
 import OpenSolid.Domain1d qualified as Domain1d
@@ -62,6 +66,22 @@ function (Surface3d f _) = f
 
 domain :: Surface3d (space @ units) -> Region2d UvCoordinates
 domain (Surface3d _ d) = d
+
+outerLoop :: Surface3d (space @ units) -> NonEmpty (Curve3d (space @ units))
+outerLoop surface = boundaryLoop (function surface) (Region2d.outerLoop (domain surface))
+
+innerLoops :: Surface3d (space @ units) -> List (NonEmpty (Curve3d (space @ units)))
+innerLoops surface =
+  List.map (boundaryLoop (function surface)) (Region2d.innerLoops (domain surface))
+
+boundaryLoop ::
+  SurfaceFunction3d (space @ units) ->
+  NonEmpty (Curve2d UvCoordinates) ->
+  NonEmpty (Curve3d (space @ units))
+boundaryLoop surfaceFunction domainLoop = NonEmpty.map (surfaceFunction .) domainLoop
+
+boundaryCurves :: Surface3d (space @ units) -> NonEmpty (Curve3d (space @ units))
+boundaryCurves surface = NonEmpty.concat (outerLoop surface :| innerLoops surface)
 
 toMesh :: Qty units -> Surface3d (space @ units) -> Mesh (Point3d (space @ units))
 toMesh accuracy surface = do
