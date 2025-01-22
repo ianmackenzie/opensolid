@@ -154,7 +154,7 @@ line p1 p2 = constant p1 + Curve.t * (p2 - p1)
 
 {-| Construct a Bezier curve from its control points. For example,
 
-> Curve2d.bezier (NonEmpty.four p1 p2 p3 p4))
+> Curve3d.bezier (NonEmpty.four p1 p2 p3 p4))
 
 will return a cubic Bezier curve with the given four control points.
 -}
