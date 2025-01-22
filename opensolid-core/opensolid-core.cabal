@@ -103,6 +103,8 @@ library
     OpenSolid.Axis3d
     OpenSolid.Basis2d
     OpenSolid.Basis3d
+    OpenSolid.Body3d
+    OpenSolid.Body3d.BoundedBy
     OpenSolid.Bool
     OpenSolid.Bounded
     OpenSolid.Bounds
