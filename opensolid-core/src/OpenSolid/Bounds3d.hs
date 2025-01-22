@@ -115,6 +115,30 @@ instance
   where
   Bounds3d x1 y1 z1 - Bounds3d x2 y2 z2 = VectorBounds3d (x1 - x2) (y1 - y2) (z1 - z2)
 
+instance
+  ( space1 ~ space2
+  , units1 ~ units2
+  ) =>
+  Intersects (Point3d (space1 @ units1)) (Bounds3d (space2 @ units2)) units1
+  where
+  Point3d px py pz ^ Bounds3d bx by bz = px ^ bx && py ^ by && pz ^ bz
+
+instance
+  ( space1 ~ space2
+  , units1 ~ units2
+  ) =>
+  Intersects (Bounds3d (space1 @ units1)) (Point3d (space2 @ units2)) units1
+  where
+  bounds ^ point = point ^ bounds
+
+instance
+  ( space1 ~ space2
+  , units1 ~ units2
+  ) =>
+  Intersects (Bounds3d (space1 @ units1)) (Bounds3d (space2 @ units2)) units1
+  where
+  Bounds3d x1 y1 z1 ^ Bounds3d x2 y2 z2 = x1 ^ x2 && y1 ^ y2 && z1 ^ z2
+
 xCoordinate :: Bounds3d (space @ units) -> Range units
 xCoordinate (Bounds3d x _ _) = x
 
