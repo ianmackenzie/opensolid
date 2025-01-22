@@ -1,6 +1,7 @@
 module OpenSolid.Curve3d
   ( Curve3d (Parametric)
   , Interface (..)
+  , HasDegeneracy (HasDegeneracy)
   , new
   , constant
   , line
@@ -10,26 +11,40 @@ module OpenSolid.Curve3d
   , hermite
   , parametric
   , xyz
+  , startPoint
+  , endPoint
   , evaluate
   , evaluateBounds
+  , bounds
   , derivative
   , reverse
+  , arcLengthParameterization
+  , unsafeArcLengthParameterization
+  , parameterizeByArcLength
+  , unsafeParameterizeByArcLength
   )
 where
 
+import OpenSolid.ArcLength qualified as ArcLength
+import OpenSolid.Bounded (Bounded)
+import OpenSolid.Bounded qualified as Bounded
 import OpenSolid.Bounds3d (Bounds3d)
 import OpenSolid.Bounds3d qualified as Bounds3d
 import OpenSolid.Composition
 import OpenSolid.Curve (Curve)
 import OpenSolid.Curve qualified as Curve
+import OpenSolid.Error qualified as Error
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point3d (Point3d (Point3d))
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
 import OpenSolid.Range (Range)
+import OpenSolid.Range qualified as Range
+import OpenSolid.Result qualified as Result
 import OpenSolid.SurfaceFunction (SurfaceFunction)
 import OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.SurfaceFunction3d (SurfaceFunction3d)
@@ -88,6 +103,11 @@ instance
     Coerce function -> Coerce function
     function -> Coerce function
 
+instance Bounded (Curve3d (space @ units)) (Bounds3d (space @ units)) where
+  bounds = bounds
+
+data HasDegeneracy = HasDegeneracy deriving (Eq, Show, Error.Message)
+
 instance
   (space1 ~ space2, units1 ~ units2) =>
   Addition
@@ -107,6 +127,23 @@ instance
   where
   Parametric lhs - VectorCurve3d.Parametric rhs = Parametric (lhs - rhs)
   lhs - rhs = Subtraction lhs rhs
+
+instance Composition (Curve Unitless) (Curve3d (space @ units)) (Curve3d (space @ units)) where
+  Parametric outer . Curve.Parametric inner = Parametric (outer . inner)
+  outer . inner = new (outer :.: inner)
+
+instance Interface (Curve3d (space @ units) :.: Curve Unitless) (space @ units) where
+  evaluateImpl (curve3d :.: curve1d) tRange =
+    evaluate curve3d (Curve.evaluate curve1d tRange)
+
+  evaluateBoundsImpl (curve3d :.: curve1d) tRange =
+    evaluateBounds curve3d (Curve.evaluateBounds curve1d tRange)
+
+  derivativeImpl (curve3d :.: curve1d) =
+    (derivative curve3d . curve1d) * Curve.derivative curve1d
+
+  reverseImpl (curve3d :.: curve1d) =
+    new (curve3d :.: Curve.reverse curve1d)
 
 instance
   Composition
@@ -134,6 +171,18 @@ instance
   derivativeImpl parameter (curveFunction :.: surfaceFunction) =
     (derivative curveFunction . surfaceFunction)
       * SurfaceFunction.derivative parameter surfaceFunction
+
+instance
+  (space1 ~ space2, units1 ~ units2) =>
+  ApproximateEquality (Curve3d (space1 @ units1)) (Curve3d (space2 @ units2)) units1
+  where
+  curve1 ~= curve2 = List.allTrue [evaluate curve1 t ~= evaluate curve2 t | t <- Parameter.samples]
+
+instance
+  (space1 ~ space2, units1 ~ units2) =>
+  ApproximateEquality (Curve3d (space1 @ units1)) (Point3d (space2 @ units2)) units1
+  where
+  curve ~= point = List.allTrue [evaluate curve t ~= point | t <- Parameter.samples]
 
 new :: Interface function (space @ units) => function -> Curve3d (space @ units)
 new = Curve3d
@@ -215,6 +264,12 @@ hermite (Point3d x1 y1 z1, derivatives1) (Point3d x2 y2 z2, derivatives2) = do
   let z = Curve.hermite (z1, zDerivatives1) (z2, zDerivatives2)
   XYZ x y z
 
+startPoint :: Curve3d (space @ units) -> Point3d (space @ units)
+startPoint curve = evaluate curve 0.0
+
+endPoint :: Curve3d (space @ units) -> Point3d (space @ units)
+endPoint curve = evaluate curve 1.0
+
 evaluate :: Curve3d (space @ units) -> Float -> Point3d (space @ units)
 evaluate f tValue = case f of
   Parametric expression -> Expression.evaluate expression tValue
@@ -238,6 +293,9 @@ evaluateBounds f tRange = case f of
   Addition c v -> evaluateBounds c tRange + VectorCurve3d.evaluateBounds v tRange
   Subtraction c v -> evaluateBounds c tRange - VectorCurve3d.evaluateBounds v tRange
 
+bounds :: Curve3d (space @ units) -> Bounds3d (space @ units)
+bounds curve = evaluateBounds curve Range.unit
+
 derivative :: Curve3d (space @ units) -> VectorCurve3d (space @ units)
 derivative f = case f of
   Parametric expression -> VectorCurve3d.Parametric (Expression.curveDerivative expression)
@@ -256,3 +314,29 @@ reverse f = case f of
   XYZ x y z -> XYZ (Curve.reverse x) (Curve.reverse y) (Curve.reverse z)
   Addition c v -> reverse c + VectorCurve3d.reverse v
   Subtraction c v -> reverse c - VectorCurve3d.reverse v
+
+arcLengthParameterization ::
+  Tolerance units =>
+  Curve3d (space @ units) ->
+  Result HasDegeneracy (Curve Unitless, Qty units)
+arcLengthParameterization curve =
+  case VectorCurve3d.magnitude (derivative curve) of
+    Failure VectorCurve3d.HasZero -> Failure HasDegeneracy
+    Success derivativeMagnitude -> Success (ArcLength.parameterization derivativeMagnitude)
+
+unsafeArcLengthParameterization :: Curve3d (space @ units) -> (Curve Unitless, Qty units)
+unsafeArcLengthParameterization curve =
+  ArcLength.parameterization (VectorCurve3d.unsafeMagnitude (derivative curve))
+
+parameterizeByArcLength ::
+  Tolerance units =>
+  Curve3d (space @ units) ->
+  Result HasDegeneracy (Curve3d (space @ units), Qty units)
+parameterizeByArcLength curve = Result.do
+  (parameterization, length) <- arcLengthParameterization curve
+  Success (curve . parameterization, length)
+
+unsafeParameterizeByArcLength :: Curve3d (space @ units) -> (Curve3d (space @ units), Qty units)
+unsafeParameterizeByArcLength curve = do
+  let (parameterization, length) = unsafeArcLengthParameterization curve
+  (curve . parameterization, length)
