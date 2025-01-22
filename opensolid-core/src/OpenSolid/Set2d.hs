@@ -5,6 +5,7 @@ module OpenSolid.Set2d
   , fromNonEmpty
   , toNonEmpty
   , toList
+  , bounds
   , union
   , find
   , filter
