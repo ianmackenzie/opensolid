@@ -1201,7 +1201,7 @@ samplingPoints accuracy curve = do
   let predicate subdomain = do
         let secondDerivativeBounds = VectorCurve2d.evaluateBounds secondDerivative subdomain
         let secondDerivativeMagnitude = VectorBounds2d.magnitude secondDerivativeBounds
-        Linearization.error subdomain secondDerivativeMagnitude <= Qty.abs accuracy
+        Range.width subdomain <= Linearization.maxDomainSize accuracy secondDerivativeMagnitude
   Domain1d.samplingPoints predicate
 
 medialAxis ::
