@@ -41,7 +41,6 @@ import OpenSolid.SurfaceFunction3d (SurfaceFunction3d)
 import OpenSolid.SurfaceFunction3d qualified as SurfaceFunction3d
 import OpenSolid.SurfaceLinearization qualified as SurfaceLinearization
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvCoordinates, UvPoint)
-import OpenSolid.SurfaceParameter qualified as SurfaceParameter
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.VectorBounds3d qualified as VectorBounds3d
 import OpenSolid.VectorCurve3d (VectorCurve3d)
@@ -94,7 +93,7 @@ toMesh accuracy surface = do
   let boundaryPolygons = NonEmpty.map (toPolygon accuracy surfaceFunction fuu fuv fvv) boundaryLoops
   let boundaryEdges = NonEmpty.collect Polygon2d.edges boundaryPolygons
   let edgeSet = Set2d.fromNonEmpty boundaryEdges
-  let steinerPoints = generateSteinerPoints accuracy SurfaceParameter.domain edgeSet fuu fuv fvv []
+  let steinerPoints = generateSteinerPoints accuracy (Region2d.bounds surfaceDomain) edgeSet fuu fuv fvv []
   let boundaryVertexLoops = NonEmpty.map Polygon2d.vertices boundaryPolygons
   let maxRefinementPoints = NonEmpty.length boundaryEdges
   let uvMesh = CDT.unsafe boundaryVertexLoops steinerPoints (Just (maxRefinementPoints, identity))
