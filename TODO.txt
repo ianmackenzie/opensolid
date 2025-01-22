@@ -1,3 +1,13 @@
+Add HasCoordinateSystem typeclass and use that to avoid need for second Set#d type parameter
+-> maybe also try getting rid of second Bounded type parameter, or perhaps in Bounded2d and Bounded3d type classes?
+
+   class HasCoordinateSystem a coordinateSystem => Bounded2d a where
+     bounds :: a -> Bounds2d coordinateSystem
+
+Support Point3d + VectorSurfaceFunction3d -> SurfaceFunction3d
+
+Have single Linearization module with curveError and surfaceError functions?
+
 Add transformBy to all curve, surface and surface function types
 -> then search for transformByImpl instances to see if they can be updated to use transformBy instead of Transformed constructors
 
