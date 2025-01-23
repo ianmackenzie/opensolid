@@ -17,6 +17,7 @@ module OpenSolid.Bounds3d
   , separation
   , overlap
   , intersection
+  , diameter
   , interpolate
   )
 where
@@ -254,6 +255,9 @@ hull4 (Point3d x1 y1 z1) (Point3d x2 y2 z2) (Point3d x3 y3 z3) (Point3d x4 y4 z4
   let minZ = Qty.min (Qty.min (Qty.min z1 z2) z3) z4
   let maxZ = Qty.max (Qty.max (Qty.max z1 z2) z3) z4
   Bounds3d (Range.unsafe minX maxX) (Range.unsafe minY maxY) (Range.unsafe minZ maxZ)
+
+diameter :: Bounds3d (space @ units) -> Qty units
+diameter (Bounds3d x y z) = Qty.hypot3 (Range.width x) (Range.width y) (Range.width z)
 
 interpolate :: Bounds3d (space @ units) -> Float -> Float -> Float -> Point3d (space @ units)
 interpolate (Bounds3d x y z) u v w =
