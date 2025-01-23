@@ -130,6 +130,11 @@ search :: Tolerance units => Bounds2d (space @ units) -> Set2d a (space @ units)
 search searchBounds set accumulated = case set of
   Node nodeBounds leftChild rightChild
     | not (nodeBounds ^ searchBounds) -> accumulated
-    | Bounds2d.contains nodeBounds searchBounds -> NonEmpty.toList (toNonEmpty set)
+    | Bounds2d.contains nodeBounds searchBounds -> returnAll set accumulated
     | otherwise -> search searchBounds leftChild (search searchBounds rightChild accumulated)
   Leaf itemBounds item -> if searchBounds ^ itemBounds then item : accumulated else accumulated
+
+returnAll :: Set2d a (space @ units) -> List a -> List a
+returnAll set accumulated = case set of
+  Node _ leftChild rightChild -> returnAll leftChild (returnAll rightChild accumulated)
+  Leaf _ item -> item : accumulated
