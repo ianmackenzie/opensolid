@@ -1,6 +1,7 @@
 module OpenSolid.LineSegment2d
   ( LineSegment2d (..)
   , length
+  , distanceTo
   )
 where
 
@@ -8,8 +9,11 @@ import OpenSolid.Bounded (Bounded)
 import OpenSolid.Bounded qualified as Bounded
 import OpenSolid.Bounds2d (Bounds2d)
 import OpenSolid.Bounds2d qualified as Bounds2d
+import OpenSolid.Point2d (Point2d)
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
+import OpenSolid.Qty qualified as Qty
+import OpenSolid.Vector2d qualified as Vector2d
 import OpenSolid.Vertex2d (Vertex2d, pattern Vertex2d)
 
 data LineSegment2d vertex = LineSegment2d
@@ -27,3 +31,18 @@ instance
 length :: Vertex2d vertex (space @ units) => LineSegment2d vertex -> Qty units
 length (LineSegment2d (Vertex2d startPoint) (Vertex2d endPoint)) =
   Point2d.distanceFrom startPoint endPoint
+
+distanceTo ::
+  Vertex2d vertex (space @ units) =>
+  Point2d (space @ units) ->
+  LineSegment2d vertex ->
+  Qty units
+distanceTo p0 LineSegment2d{start = Vertex2d p1, end = Vertex2d p2} = do
+  let v = p2 - p1
+  let u = p0 - p1
+  let dSquared' = Vector2d.squaredMagnitude' v
+  let dotProduct' = u .<>. v
+  if
+    | dotProduct' <= Qty.zero -> Point2d.distanceFrom p1 p0
+    | dotProduct' >= dSquared' -> Point2d.distanceFrom p2 p0
+    | otherwise -> Qty.abs (u .><. v .!/! Qty.sqrt' dSquared')
