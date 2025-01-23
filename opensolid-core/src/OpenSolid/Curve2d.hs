@@ -1246,10 +1246,13 @@ arcLengthParameterization ::
   Tolerance units =>
   Curve2d (space @ units) ->
   Result HasDegeneracy (Curve Unitless, Qty units)
-arcLengthParameterization curve =
-  case VectorCurve2d.magnitude (derivative curve) of
-    Failure VectorCurve2d.HasZero -> Failure HasDegeneracy
-    Success derivativeMagnitude -> Success (ArcLength.parameterization derivativeMagnitude)
+arcLengthParameterization curve = do
+  let curveDerivative = derivative curve
+  if VectorCurve2d.isZero curveDerivative
+    then Success (Curve.t, Qty.zero) -- Curve is a constant point
+    else case VectorCurve2d.magnitude (derivative curve) of
+      Failure VectorCurve2d.HasZero -> Failure HasDegeneracy
+      Success derivativeMagnitude -> Success (ArcLength.parameterization derivativeMagnitude)
 
 unsafeArcLengthParameterization :: Curve2d (space @ units) -> (Curve Unitless, Qty units)
 unsafeArcLengthParameterization curve =

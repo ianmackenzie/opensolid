@@ -42,6 +42,7 @@ import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point3d (Point3d (Point3d))
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
+import OpenSolid.Qty qualified as Qty
 import OpenSolid.Range (Range)
 import OpenSolid.Range qualified as Range
 import OpenSolid.Result qualified as Result
@@ -319,10 +320,13 @@ arcLengthParameterization ::
   Tolerance units =>
   Curve3d (space @ units) ->
   Result HasDegeneracy (Curve Unitless, Qty units)
-arcLengthParameterization curve =
-  case VectorCurve3d.magnitude (derivative curve) of
-    Failure VectorCurve3d.HasZero -> Failure HasDegeneracy
-    Success derivativeMagnitude -> Success (ArcLength.parameterization derivativeMagnitude)
+arcLengthParameterization curve = do
+  let curveDerivative = derivative curve
+  if VectorCurve3d.isZero curveDerivative
+    then Success (Curve.t, Qty.zero) -- Curve is a constant point
+    else case VectorCurve3d.magnitude (derivative curve) of
+      Failure VectorCurve3d.HasZero -> Failure HasDegeneracy
+      Success derivativeMagnitude -> Success (ArcLength.parameterization derivativeMagnitude)
 
 unsafeArcLengthParameterization :: Curve3d (space @ units) -> (Curve Unitless, Qty units)
 unsafeArcLengthParameterization curve =
