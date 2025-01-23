@@ -7,10 +7,15 @@ module OpenSolid.SurfaceFunction2d
   , evaluate
   , evaluateBounds
   , derivative
+  , signedDistanceAlong
+  , xCoordinate
+  , yCoordinate
   )
 where
 
 import OpenSolid.Arithmetic qualified as Arithmetic
+import OpenSolid.Axis2d (Axis2d)
+import OpenSolid.Axis2d qualified as Axis2d
 import OpenSolid.Bounds2d (Bounds2d)
 import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.Composition
@@ -275,3 +280,16 @@ instance
 
   transformByImpl transform (function :.: curve) =
     transformBy transform function . curve
+
+signedDistanceAlong ::
+  Axis2d (space @ units) ->
+  SurfaceFunction2d (space @ units) ->
+  SurfaceFunction units
+signedDistanceAlong axis function =
+  (function - constant (Axis2d.originPoint axis)) <> Axis2d.direction axis
+
+xCoordinate :: SurfaceFunction2d (space @ units) -> SurfaceFunction units
+xCoordinate = signedDistanceAlong Axis2d.x
+
+yCoordinate :: SurfaceFunction2d (space @ units) -> SurfaceFunction units
+yCoordinate = signedDistanceAlong Axis2d.y
