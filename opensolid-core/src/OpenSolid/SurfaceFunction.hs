@@ -30,6 +30,8 @@ import OpenSolid.Angle qualified as Angle
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.Composition
+import OpenSolid.Curve (Curve)
+import OpenSolid.Curve qualified as Curve
 import {-# SOURCE #-} OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.Domain1d qualified as Domain1d
@@ -391,6 +393,20 @@ instance
     (SurfaceFunction (units1 :/: units2))
   where
   value ./. function = constant value ./. function
+
+instance Composition (SurfaceFunction Unitless) (Curve units) (SurfaceFunction units) where
+  Curve.Parametric outer . Parametric inner = Parametric (outer . inner)
+  outer . inner = new (outer :.: inner)
+
+instance Interface (Curve units :.: SurfaceFunction Unitless) units where
+  evaluateImpl (curve :.: function) uvPoint =
+    Curve.evaluate curve (evaluate function uvPoint)
+
+  evaluateBoundsImpl (curve :.: function) uvPoint =
+    Curve.evaluateBounds curve (evaluateBounds function uvPoint)
+
+  derivativeImpl varyingParameter (curve :.: function) =
+    Curve.derivative curve . function * derivative varyingParameter function
 
 evaluate :: SurfaceFunction units -> UvPoint -> Qty units
 evaluate function uv = case function of
