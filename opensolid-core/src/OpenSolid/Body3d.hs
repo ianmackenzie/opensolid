@@ -24,6 +24,7 @@ import OpenSolid.List qualified as List
 import OpenSolid.Mesh (Mesh)
 import OpenSolid.Mesh qualified as Mesh
 import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point3d (Point3d)
 import OpenSolid.Polygon2d (Polygon2d (Polygon2d))
@@ -209,15 +210,13 @@ toEdge cornerSet halfEdgeSet halfEdge = Result.do
   let matingEdgeCandidates = Set3d.filter (Bounded.bounds halfEdge) halfEdgeSet
   case List.filter (isMatingEdge halfEdge) matingEdgeCandidates of
     [] -> Failure BoundedBy.BoundaryHasGaps
-    List.One matingEdge -> Success (Edge startPoint halfEdge (reverseHalfEdge matingEdge))
+    List.One matingEdge -> Success (Edge startPoint halfEdge matingEdge)
     List.TwoOrMore -> Failure BoundedBy.BoundaryIntersectsItself
 
-reverseHalfEdge :: HalfEdge (space @ units) -> HalfEdge (space @ units)
-reverseHalfEdge (HalfEdge surfaceId surfaceFunctions uvCurve curve3d bounds3d) =
-  HalfEdge surfaceId surfaceFunctions (Curve2d.reverse uvCurve) (Curve3d.reverse curve3d) bounds3d
-
 isMatingEdge :: Tolerance units => HalfEdge (space @ units) -> HalfEdge (space @ units) -> Bool
-isMatingEdge HalfEdge{curve3d = left} HalfEdge{curve3d = right} = Curve3d.reverse right ~= left
+isMatingEdge HalfEdge{curve3d = curve1} HalfEdge{curve3d = curve2} = do
+  let matchingPoints t1 = Curve3d.evaluate curve1 t1 ~= Curve3d.evaluate curve2 (1.0 - t1)
+  List.allTrue [matchingPoints t | t <- Parameter.samples]
 
 data Vertex (coordinateSystem :: CoordinateSystem) where
   Vertex :: UvPoint -> Point3d (space @ units) -> Vertex (space @ units)
@@ -253,7 +252,7 @@ linearizationPredicate accuracy halfEdge1 halfEdge2 secondDerivative3d subdomain
   let curveMaxDomainSize = Linearization.maxDomainSize accuracy curveSecondDerivativeMagnitude
   let uvBounds1 = Curve2d.evaluateBounds uvCurve1 subdomain
   let surfaceMaxDomainSize1 = surfaceMaxDomainSize accuracy surfaceFunctions1 uvBounds1
-  let uvBounds2 = Curve2d.evaluateBounds uvCurve2 subdomain
+  let uvBounds2 = Curve2d.evaluateBounds uvCurve2 (1.0 - subdomain)
   let surfaceMaxDomainSize2 = surfaceMaxDomainSize accuracy surfaceFunctions2 uvBounds2
   Range.width subdomain <= curveMaxDomainSize
     && Bounds2d.diameter uvBounds1 <= surfaceMaxDomainSize1
