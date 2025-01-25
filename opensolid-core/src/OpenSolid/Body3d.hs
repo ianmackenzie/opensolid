@@ -4,11 +4,9 @@
 module OpenSolid.Body3d (Body3d, boundedBy, toMesh) where
 
 import OpenSolid.Body3d.BoundedBy qualified as BoundedBy
-import OpenSolid.Bounded (Bounded)
-import OpenSolid.Bounded qualified as Bounded
-import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
+import OpenSolid.Bounds2d (Bounded2d, Bounds2d (Bounds2d))
 import OpenSolid.Bounds2d qualified as Bounds2d
-import OpenSolid.Bounds3d (Bounds3d)
+import OpenSolid.Bounds3d (Bounded3d, Bounds3d)
 import OpenSolid.Bounds3d qualified as Bounds3d
 import OpenSolid.ConstrainedDelaunayTriangulation qualified as CDT
 import OpenSolid.Curve2d (Curve2d)
@@ -90,8 +88,8 @@ data Corner (coordinateSystem :: CoordinateSystem) where
     } ->
     Corner (space @ units)
 
-instance Bounded (Corner (space @ units)) (Bounds3d (space @ units)) where
-  bounds (Corner _ point) = Bounded.bounds point
+instance Bounded3d (Corner (space @ units)) (space @ units) where
+  bounds (Corner _ point) = Bounds3d.constant point
 
 data HalfEdge (coordinateSystem :: CoordinateSystem) where
   HalfEdge ::
@@ -103,7 +101,7 @@ data HalfEdge (coordinateSystem :: CoordinateSystem) where
     } ->
     HalfEdge (space @ units)
 
-instance Bounded (HalfEdge (space @ units)) (Bounds3d (space @ units)) where
+instance Bounded3d (HalfEdge (space @ units)) (space @ units) where
   bounds HalfEdge{bounds} = bounds
 
 data Edge (coordinateSystem :: CoordinateSystem) where
@@ -207,7 +205,7 @@ toEdge ::
 toEdge cornerSet halfEdgeSet halfEdge = Result.do
   let HalfEdge{curve3d} = halfEdge
   startPoint <- getCornerPoint (Curve3d.startPoint curve3d) cornerSet
-  let matingEdgeCandidates = Set3d.filter (Bounded.bounds halfEdge) halfEdgeSet
+  let matingEdgeCandidates = Set3d.filter (Bounds3d.bounds halfEdge) halfEdgeSet
   case List.filter (isMatingEdge halfEdge) matingEdgeCandidates of
     [] -> Failure BoundedBy.BoundaryHasGaps
     List.One matingEdge -> Success (Edge startPoint halfEdge matingEdge)
@@ -221,7 +219,7 @@ isMatingEdge HalfEdge{curve3d = curve1} HalfEdge{curve3d = curve2} = do
 data Vertex (coordinateSystem :: CoordinateSystem) where
   Vertex :: UvPoint -> Point3d (space @ units) -> Vertex (space @ units)
 
-instance Bounded (Vertex (space @ units)) UvBounds where
+instance Bounded2d (Vertex (space @ units)) UvCoordinates where
   bounds (Vertex uvPoint _) = Bounds2d.constant uvPoint
 
 instance Vertex2d (Vertex (space @ units)) UvCoordinates where

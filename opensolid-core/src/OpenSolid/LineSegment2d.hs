@@ -5,9 +5,7 @@ module OpenSolid.LineSegment2d
   )
 where
 
-import OpenSolid.Bounded (Bounded)
-import OpenSolid.Bounded qualified as Bounded
-import OpenSolid.Bounds2d (Bounds2d)
+import OpenSolid.Bounds2d (Bounded2d)
 import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.Point2d (Point2d)
 import OpenSolid.Point2d qualified as Point2d
@@ -23,7 +21,7 @@ data LineSegment2d vertex = LineSegment2d
 
 instance
   Vertex2d vertex (space @ units) =>
-  Bounded (LineSegment2d vertex) (Bounds2d (space @ units))
+  Bounded2d (LineSegment2d vertex) (space @ units)
   where
   bounds (LineSegment2d (Vertex2d startPoint) (Vertex2d endPoint)) =
     Bounds2d.hull2 startPoint endPoint

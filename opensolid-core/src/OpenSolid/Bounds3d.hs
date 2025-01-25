@@ -1,5 +1,6 @@
 module OpenSolid.Bounds3d
   ( Bounds3d (Bounds3d)
+  , Bounded3d (bounds)
   , xCoordinate
   , yCoordinate
   , zCoordinate
@@ -22,10 +23,6 @@ module OpenSolid.Bounds3d
   )
 where
 
-import OpenSolid.Bounded (Bounded)
-import OpenSolid.Bounded qualified as Bounded
-import OpenSolid.Bounds (Bounds)
-import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Point3d (Point3d (Point3d))
 import OpenSolid.Prelude
@@ -46,20 +43,22 @@ data Bounds3d (coordinateSystem :: CoordinateSystem) where
 
 deriving instance Show (Bounds3d (space @ units))
 
-instance Bounds (Bounds3d (space @ units)) where
-  aggregate2 = aggregate2
-  intersection = intersection
-
-instance Bounded (Bounds3d (space @ units)) (Bounds3d (space @ units)) where
-  bounds = identity
-
 instance HasUnits (Bounds3d (space @ units)) units (Bounds3d (space @ Unitless))
+
+class Bounded3d a (coordinateSystem :: CoordinateSystem) | a -> coordinateSystem where
+  bounds :: a -> Bounds3d coordinateSystem
 
 instance
   space1 ~ space2 =>
   Units.Coercion (Bounds3d (space1 @ unitsA)) (Bounds3d (space2 @ unitsB))
   where
   coerce (Bounds3d x y z) = Bounds3d (Units.coerce x) (Units.coerce y) (Units.coerce z)
+
+instance Bounded3d (Point3d (space @ units)) (space @ units) where
+  bounds = constant
+
+instance Bounded3d (Bounds3d (space @ units)) (space @ units) where
+  bounds = identity
 
 instance
   ( space1 ~ space2
@@ -130,7 +129,7 @@ instance
   ) =>
   Intersects (Bounds3d (space1 @ units1)) (Point3d (space2 @ units2)) units1
   where
-  bounds ^ point = point ^ bounds
+  box ^ point = point ^ box
 
 instance
   ( space1 ~ space2
@@ -183,7 +182,7 @@ exclusion (Point3d x y z) (Bounds3d bx by bz) = do
     | otherwise -> Qty.max (Qty.max dx dy) dz
 
 inclusion :: Point3d (space @ units) -> Bounds3d (space @ units) -> Qty units
-inclusion point bounds = -(exclusion point bounds)
+inclusion point box = -(exclusion point box)
 
 contains :: Bounds3d (space @ units) -> Bounds3d (space @ units) -> Bool
 contains (Bounds3d x2 y2 z2) (Bounds3d x1 y1 z1) =

@@ -69,10 +69,6 @@ where
 import Data.Coerce qualified
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Area qualified as Area
-import OpenSolid.Bounded (Bounded)
-import OpenSolid.Bounded qualified as Bounded
-import OpenSolid.Bounds (Bounds)
-import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Debug qualified as Debug
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
@@ -247,13 +243,6 @@ instance
     if dl > Qty.zero || dh < Qty.zero
       then hull4 (nl / dl) (nl / dh) (nh / dl) (nh / dh)
       else Range_ -Qty.infinity Qty.infinity
-
-instance Bounds (Range units) where
-  aggregate2 = aggregate2
-  intersection = intersection
-
-instance Bounded (Range units) (Range units) where
-  bounds = identity
 
 {-# INLINE unsafe #-}
 unsafe :: Qty units -> Qty units -> Range units

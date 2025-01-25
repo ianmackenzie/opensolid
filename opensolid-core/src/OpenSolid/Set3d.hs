@@ -11,9 +11,7 @@ module OpenSolid.Set3d
   )
 where
 
-import OpenSolid.Bounded (Bounded)
-import OpenSolid.Bounded qualified as Bounded
-import OpenSolid.Bounds3d (Bounds3d)
+import OpenSolid.Bounds3d (Bounded3d, Bounds3d)
 import OpenSolid.Bounds3d qualified as Bounds3d
 import OpenSolid.Debug qualified as Debug
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
@@ -34,26 +32,26 @@ data Set3d a (coordinateSystem :: CoordinateSystem) where
     a ->
     Set3d a (space @ units)
 
-instance Bounded (Set3d a (space @ units)) (Bounds3d (space @ units)) where
+instance Bounded3d (Set3d a (space @ units)) (space @ units) where
   bounds = bounds
 
 bounds :: Set3d a (space @ units) -> Bounds3d (space @ units)
 bounds (Node nodeBounds _ _) = nodeBounds
 bounds (Leaf leafBounds _) = leafBounds
 
-one :: Bounded a (Bounds3d (space @ units)) => a -> Set3d a (space @ units)
-one item = Leaf (Bounded.bounds item) item
+one :: Bounded3d a (space @ units) => a -> Set3d a (space @ units)
+one item = Leaf (Bounds3d.bounds item) item
 
-two :: Bounded a (Bounds3d (space @ units)) => a -> a -> Set3d a (space @ units)
+two :: Bounded3d a (space @ units) => a -> a -> Set3d a (space @ units)
 two firstItem secondItem = do
-  let firstBounds = Bounded.bounds firstItem
-  let secondBounds = Bounded.bounds secondItem
+  let firstBounds = Bounds3d.bounds firstItem
+  let secondBounds = Bounds3d.bounds secondItem
   let nodeBounds = Bounds3d.aggregate2 firstBounds secondBounds
   Node nodeBounds (Leaf firstBounds firstItem) (Leaf secondBounds secondItem)
 
-fromNonEmpty :: Bounded a (Bounds3d (space @ units)) => NonEmpty a -> Set3d a (space @ units)
+fromNonEmpty :: Bounded3d a (space @ units) => NonEmpty a -> Set3d a (space @ units)
 fromNonEmpty givenItems = do
-  let boundedItem item = (Bounded.bounds item, item)
+  let boundedItem item = (Bounds3d.bounds item, item)
   let boundedItems = NonEmpty.map boundedItem givenItems
   buildX (NonEmpty.length boundedItems) boundedItems
 

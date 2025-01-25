@@ -26,9 +26,7 @@ module OpenSolid.Curve3d
 where
 
 import OpenSolid.ArcLength qualified as ArcLength
-import OpenSolid.Bounded (Bounded)
-import OpenSolid.Bounded qualified as Bounded
-import OpenSolid.Bounds3d (Bounds3d)
+import OpenSolid.Bounds3d (Bounded3d, Bounds3d)
 import OpenSolid.Bounds3d qualified as Bounds3d
 import OpenSolid.Composition
 import OpenSolid.Curve (Curve)
@@ -104,7 +102,7 @@ instance
     Coerce function -> Coerce function
     function -> Coerce function
 
-instance Bounded (Curve3d (space @ units)) (Bounds3d (space @ units)) where
+instance Bounded3d (Curve3d (space @ units)) (space @ units) where
   bounds = bounds
 
 data HasDegeneracy = HasDegeneracy deriving (Eq, Show, Error.Message)

@@ -106,8 +106,6 @@ library
     OpenSolid.Body3d
     OpenSolid.Body3d.BoundedBy
     OpenSolid.Bool
-    OpenSolid.Bounded
-    OpenSolid.Bounds
     OpenSolid.Bounds2d
     OpenSolid.Bounds3d
     OpenSolid.Color

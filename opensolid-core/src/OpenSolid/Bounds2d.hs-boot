@@ -5,8 +5,6 @@ module OpenSolid.Bounds2d
   )
 where
 
-import OpenSolid.Bounded (Bounded)
-import OpenSolid.Bounds (Bounds)
 import {-# SOURCE #-} OpenSolid.Point2d (Point2d)
 import OpenSolid.Prelude
 import OpenSolid.Range (Range)
@@ -18,10 +16,6 @@ data Bounds2d (coordinateSystem :: CoordinateSystem) where
     Range units ->
     Range units ->
     Bounds2d (space @ units)
-
-instance Bounds (Bounds2d (space @ units))
-
-instance Bounded (Bounds2d (space @ units)) (Bounds2d (space @ units))
 
 constant :: Point2d (space @ units) -> Bounds2d (space @ units)
 xy :: forall space units. Range units -> Range units -> Bounds2d (space @ units)

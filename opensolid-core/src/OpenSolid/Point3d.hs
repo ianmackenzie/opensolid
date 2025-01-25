@@ -27,8 +27,6 @@ module OpenSolid.Point3d
   )
 where
 
-import OpenSolid.Bounded (Bounded)
-import OpenSolid.Bounded qualified as Bounded
 import {-# SOURCE #-} OpenSolid.Bounds3d (Bounds3d)
 import {-# SOURCE #-} OpenSolid.Bounds3d qualified as Bounds3d
 import {-# SOURCE #-} OpenSolid.Frame3d (Frame3d)
@@ -126,9 +124,6 @@ instance
   ApproximateEquality (Point3d (space1 @ units1)) (Point3d (space2 @ units2)) units1
   where
   p1 ~= p2 = distanceFrom p1 p2 ~= Qty.zero
-
-instance Bounded (Point3d (space @ units)) (Bounds3d (space @ units)) where
-  bounds = Bounds3d.constant
 
 xCoordinate :: Point3d (space @ units) -> Qty units
 xCoordinate (Point3d px _ _) = px

@@ -1,5 +1,6 @@
 module OpenSolid.Bounds2d
   ( Bounds2d (Bounds2d)
+  , Bounded2d (..)
   , xCoordinate
   , yCoordinate
   , coordinates
@@ -40,10 +41,6 @@ where
 
 import OpenSolid.Axis2d (Axis2d)
 import OpenSolid.Axis2d qualified as Axis2d
-import OpenSolid.Bounded (Bounded)
-import OpenSolid.Bounded qualified as Bounded
-import OpenSolid.Bounds (Bounds)
-import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
@@ -78,17 +75,19 @@ deriving instance Show (Bounds2d (space @ units))
 
 instance HasUnits (Bounds2d (space @ units)) units (Bounds2d (space @ Unitless))
 
+class Bounded2d a (coordinateSystem :: CoordinateSystem) | a -> coordinateSystem where
+  bounds :: a -> Bounds2d coordinateSystem
+
 instance
   space1 ~ space2 =>
   Units.Coercion (Bounds2d (space1 @ unitsA)) (Bounds2d (space2 @ unitsB))
   where
   coerce (Bounds2d x y) = Bounds2d (Units.coerce x) (Units.coerce y)
 
-instance Bounds (Bounds2d (space @ units)) where
-  aggregate2 = aggregate2
-  intersection = intersection
+instance Bounded2d (Point2d (space @ units)) (space @ units) where
+  bounds = constant
 
-instance Bounded (Bounds2d (space @ units)) (Bounds2d (space @ units)) where
+instance Bounded2d (Bounds2d (space @ units)) (space @ units) where
   bounds = identity
 
 instance FFI (Bounds2d (space @ Meters)) where
@@ -188,7 +187,7 @@ instance
   ) =>
   ApproximateEquality (Bounds2d (space1 @ units1)) (Point2d (space2 @ units2)) units1
   where
-  bounds ~= point = point ~= bounds
+  box ~= point = point ~= box
 
 instance
   ( space1 ~ space2
@@ -204,7 +203,7 @@ instance
   ) =>
   Intersects (Bounds2d (space1 @ units1)) (Point2d (space2 @ units2)) units1
   where
-  bounds ^ point = point ^ bounds
+  box ^ point = point ^ box
 
 instance
   ( space1 ~ space2
@@ -258,9 +257,9 @@ aggregateImpl xLow xHigh yLow yHigh (next : remaining) = do
     remaining
 
 exclusion :: Point2d (space @ units) -> Bounds2d (space @ units) -> Qty units
-exclusion point bounds = do
+exclusion point box = do
   let (x, y) = Point2d.coordinates point
-  let (bx, by) = coordinates bounds
+  let (bx, by) = coordinates box
   let dx = Range.exclusion x bx
   let dy = Range.exclusion y by
   let px = dx >= Qty.zero
@@ -272,12 +271,12 @@ exclusion point bounds = do
     | otherwise -> Qty.max dx dy
 
 inclusion :: Point2d (space @ units) -> Bounds2d (space @ units) -> Qty units
-inclusion point bounds = -(exclusion point bounds)
+inclusion point box = -(exclusion point box)
 
 includes :: Point2d (space @ units) -> Bounds2d (space @ units) -> Bool
-includes point bounds = do
+includes point box = do
   let (px, py) = Point2d.coordinates point
-  let (bx, by) = coordinates bounds
+  let (bx, by) = coordinates box
   Range.includes px bx && Range.includes py by
 
 contains :: Bounds2d (space @ units) -> Bounds2d (space @ units) -> Bool
@@ -373,11 +372,11 @@ upperRightCorner :: Bounds2d (space @ units) -> Point2d (space @ units)
 upperRightCorner (Bounds2d x y) = Point2d.xy (Range.upperBound x) (Range.upperBound y)
 
 corners :: Bounds2d (space @ units) -> List (Point2d (space @ units))
-corners bounds =
-  [ lowerLeftCorner bounds
-  , lowerRightCorner bounds
-  , upperRightCorner bounds
-  , upperLeftCorner bounds
+corners box =
+  [ lowerLeftCorner box
+  , lowerRightCorner box
+  , upperRightCorner box
+  , upperLeftCorner box
   ]
 
 diameter :: Bounds2d (space @ units) -> Qty units
@@ -388,8 +387,8 @@ interpolate (Bounds2d x y) u v =
   Point2d.xy (Range.interpolate x u) (Range.interpolate y v)
 
 any :: (Bounds2d (space @ units) -> Fuzzy Bool) -> Bounds2d (space @ units) -> Bool
-any assess bounds@(Bounds2d x y) =
-  case assess bounds of
+any assess box@(Bounds2d x y) =
+  case assess box of
     Resolved assessment -> assessment
     Unresolved
       | Range.isAtomic x && Range.isAtomic y -> False
@@ -408,8 +407,8 @@ any assess bounds@(Bounds2d x y) =
             || any assess (Bounds2d x2 y2)
 
 all :: (Bounds2d (space @ units) -> Fuzzy Bool) -> Bounds2d (space @ units) -> Bool
-all assess bounds@(Bounds2d x y) =
-  case assess bounds of
+all assess box@(Bounds2d x y) =
+  case assess box of
     Resolved assessment -> assessment
     Unresolved
       | Range.isAtomic x && Range.isAtomic y -> True
@@ -428,8 +427,8 @@ all assess bounds@(Bounds2d x y) =
             && all assess (Bounds2d x2 y2)
 
 resolve :: Eq a => (Bounds2d (space @ units) -> Fuzzy a) -> Bounds2d (space @ units) -> Fuzzy a
-resolve assess bounds@(Bounds2d x y) =
-  case assess bounds of
+resolve assess box@(Bounds2d x y) =
+  case assess box of
     Resolved value -> Resolved value
     Unresolved
       | Range.isAtomic x && Range.isAtomic y -> Unresolved
