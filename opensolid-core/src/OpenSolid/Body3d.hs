@@ -1,7 +1,12 @@
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE NoFieldSelectors #-}
 
-module OpenSolid.Body3d (Body3d, boundedBy, toMesh) where
+module OpenSolid.Body3d
+  ( Body3d
+  , boundedBy
+  , toMesh
+  )
+where
 
 import OpenSolid.Body3d.BoundedBy qualified as BoundedBy
 import OpenSolid.Bounds2d (Bounded2d, Bounds2d (Bounds2d))
@@ -56,14 +61,6 @@ type role Body3d nominal
 newtype Body3d (coordinateSystem :: CoordinateSystem)
   = Body3d (NonEmpty (BoundarySurface coordinateSystem))
 
-data SurfaceWithHalfEdges (coordinateSystem :: CoordinateSystem) where
-  SurfaceWithHalfEdges ::
-    { surfaceId :: Int
-    , surfaceFunctions :: SurfaceFunctions (space @ units)
-    , halfEdgeLoops :: NonEmpty (NonEmpty (HalfEdge (space @ units)))
-    } ->
-    SurfaceWithHalfEdges (space @ units)
-
 data BoundarySurface (coordinateSystem :: CoordinateSystem) where
   BoundarySurface ::
     { surfaceId :: Int
@@ -71,6 +68,27 @@ data BoundarySurface (coordinateSystem :: CoordinateSystem) where
     , edgeLoops :: NonEmpty (NonEmpty (Edge (space @ units)))
     } ->
     BoundarySurface (space @ units)
+
+data Edge (coordinateSystem :: CoordinateSystem) where
+  Edge ::
+    { startPoint :: Point3d (space @ units)
+    , halfEdge :: HalfEdge (space @ units)
+    , matingEdge :: HalfEdge (space @ units)
+    } ->
+    Edge (space @ units)
+
+data HalfEdge (coordinateSystem :: CoordinateSystem) where
+  HalfEdge ::
+    { surfaceId :: Int
+    , surfaceFunctions :: SurfaceFunctions (space @ units)
+    , uvCurve :: Curve2d UvCoordinates -- UV curve parameterized by 3D arc length
+    , curve3d :: Curve3d (space @ units) -- Arc length parameterized 3D curve
+    , bounds :: Bounds3d (space @ units) -- Bounds on 3D curve
+    } ->
+    HalfEdge (space @ units)
+
+instance Bounded3d (HalfEdge (space @ units)) (space @ units) where
+  bounds HalfEdge{bounds} = bounds
 
 data SurfaceFunctions (coordinateSystem :: CoordinateSystem) where
   SurfaceFunctions ::
@@ -81,36 +99,19 @@ data SurfaceFunctions (coordinateSystem :: CoordinateSystem) where
     } ->
     SurfaceFunctions (space @ units)
 
-data Corner (coordinateSystem :: CoordinateSystem) where
-  Corner ::
-    { surfaceId :: Int
-    , point :: Point3d (space @ units)
-    } ->
-    Corner (space @ units)
-
-instance Bounded3d (Corner (space @ units)) (space @ units) where
-  bounds (Corner _ point) = Bounds3d.constant point
-
-data HalfEdge (coordinateSystem :: CoordinateSystem) where
-  HalfEdge ::
+data SurfaceWithHalfEdges (coordinateSystem :: CoordinateSystem) where
+  SurfaceWithHalfEdges ::
     { surfaceId :: Int
     , surfaceFunctions :: SurfaceFunctions (space @ units)
-    , uvCurve :: Curve2d UvCoordinates
-    , curve3d :: Curve3d (space @ units) -- Arc length parameterized 3D curve
-    , bounds :: Bounds3d (space @ units) -- Bounds on 3D curve
+    , halfEdgeLoops :: NonEmpty (NonEmpty (HalfEdge (space @ units)))
     } ->
-    HalfEdge (space @ units)
+    SurfaceWithHalfEdges (space @ units)
 
-instance Bounded3d (HalfEdge (space @ units)) (space @ units) where
-  bounds HalfEdge{bounds} = bounds
+data Corner (coordinateSystem :: CoordinateSystem) where
+  Corner :: {surfaceId :: Int, point :: Point3d (space @ units)} -> Corner (space @ units)
 
-data Edge (coordinateSystem :: CoordinateSystem) where
-  Edge ::
-    { startPoint :: Point3d (space @ units)
-    , halfEdge :: HalfEdge (space @ units)
-    , matingEdge :: HalfEdge (space @ units)
-    } ->
-    Edge (space @ units)
+instance Bounded3d (Corner (space @ units)) (space @ units) where
+  bounds Corner{point} = Bounds3d.constant point
 
 boundedBy ::
   Tolerance units =>
