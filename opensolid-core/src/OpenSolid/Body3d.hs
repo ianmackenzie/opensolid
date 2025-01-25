@@ -138,7 +138,7 @@ toSurfaceWithHalfEdges ::
   (Int, Surface3d (space @ units)) ->
   Result BoundedBy.Error (SurfaceWithHalfEdges (space @ units))
 toSurfaceWithHalfEdges (surfaceId, surface) = do
-  let surfaceFunctions = computeSecondDerivatives (Surface3d.function surface)
+  let surfaceFunctions = toSurfaceFunctions (Surface3d.function surface)
   let surfaceDomain = Surface3d.domain surface
   let loops = Region2d.outerLoop surfaceDomain :| Region2d.innerLoops surfaceDomain
   Result.map (SurfaceWithHalfEdges surfaceId surfaceFunctions) $
@@ -176,8 +176,8 @@ toBoundarySurface cornerSet halfEdgeSet surfaceWithHalfEdges = Result.do
   edgeLoops <- Result.collect (Result.collect (toEdge cornerSet halfEdgeSet)) halfEdgeLoops
   Success BoundarySurface{surfaceId, surfaceFunctions, edgeLoops}
 
-computeSecondDerivatives :: SurfaceFunction3d (space @ units) -> SurfaceFunctions (space @ units)
-computeSecondDerivatives f = do
+toSurfaceFunctions :: SurfaceFunction3d (space @ units) -> SurfaceFunctions (space @ units)
+toSurfaceFunctions f = do
   let fu = SurfaceFunction3d.derivative U f
   let fv = SurfaceFunction3d.derivative V f
   let fuu = VectorSurfaceFunction3d.derivative U fu
