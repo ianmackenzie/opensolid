@@ -26,12 +26,12 @@ import OpenSolid.Range qualified as Range
 
 data Set2d a (coordinateSystem :: CoordinateSystem) where
   Node ::
-    (Bounds2d (space @ units)) ->
+    Bounds2d (space @ units) ->
     Set2d a (space @ units) ->
     Set2d a (space @ units) ->
     Set2d a (space @ units)
   Leaf ::
-    (Bounds2d (space @ units)) ->
+    Bounds2d (space @ units) ->
     a ->
     Set2d a (space @ units)
 

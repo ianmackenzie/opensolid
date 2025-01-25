@@ -25,12 +25,12 @@ import OpenSolid.Range qualified as Range
 
 data Set3d a (coordinateSystem :: CoordinateSystem) where
   Node ::
-    (Bounds3d (space @ units)) ->
+    Bounds3d (space @ units) ->
     Set3d a (space @ units) ->
     Set3d a (space @ units) ->
     Set3d a (space @ units)
   Leaf ::
-    (Bounds3d (space @ units)) ->
+    Bounds3d (space @ units) ->
     a ->
     Set3d a (space @ units)
 
