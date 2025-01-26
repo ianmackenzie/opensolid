@@ -4,6 +4,7 @@ module OpenSolid.Range
   , constant
   , unit
   , from
+  , unbounded
   , radians
   , degrees
   , turns
@@ -204,7 +205,7 @@ instance Division' (Qty units1) (Range units2) (Range (units1 :/: units2)) where
   n ./. Range dl dh =
     if dl > Qty.zero || dh < Qty.zero
       then from (n ./. dl) (n ./. dh)
-      else Range_ -Qty.infinity Qty.infinity
+      else unbounded
 
 instance
   Units.Quotient units1 units2 units3 =>
@@ -213,13 +214,13 @@ instance
   n / Range dl dh =
     if dl > Qty.zero || dh < Qty.zero
       then from (n / dl) (n / dh)
-      else Range_ -Qty.infinity Qty.infinity
+      else unbounded
 
 instance Division' (Range units1) (Qty units2) (Range (units1 :/: units2)) where
   Range nl nh ./. d =
     if d /= Qty.zero
       then from (nl ./. d) (nh ./. d)
-      else Range_ -Qty.infinity Qty.infinity
+      else unbounded
 
 instance
   Units.Quotient units1 units2 units3 =>
@@ -228,13 +229,13 @@ instance
   Range nl nh / d =
     if d /= Qty.zero
       then from (nl / d) (nh / d)
-      else Range_ -Qty.infinity Qty.infinity
+      else unbounded
 
 instance Division' (Range units1) (Range units2) (Range (units1 :/: units2)) where
   Range nl nh ./. Range dl dh =
     if dl > Qty.zero || dh < Qty.zero
       then hull4 (nl ./. dl) (nl ./. dh) (nh ./. dl) (nh ./. dh)
-      else Range_ -Qty.infinity Qty.infinity
+      else unbounded
 
 instance
   Units.Quotient units1 units2 units3 =>
@@ -243,7 +244,7 @@ instance
   Range nl nh / Range dl dh =
     if dl > Qty.zero || dh < Qty.zero
       then hull4 (nl / dl) (nl / dh) (nh / dl) (nh / dh)
-      else Range_ -Qty.infinity Qty.infinity
+      else unbounded
 
 {-# INLINE unsafe #-}
 unsafe :: Qty units -> Qty units -> Range units
@@ -267,6 +268,9 @@ and the maximum will be used as the upper bound.
 {-# INLINE from #-}
 from :: Qty units -> Qty units -> Range units
 from = Range
+
+unbounded :: Range units
+unbounded = Range_ -Qty.infinity Qty.infinity
 
 -- | Construct an angle range from lower and upper bounds given in radians.
 radians :: Float -> Float -> Range Radians
