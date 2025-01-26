@@ -1,8 +1,11 @@
-Add HasCoordinateSystem typeclass and use that to avoid need for second Set#d type parameter
--> maybe also try getting rid of second Bounded type parameter, or perhaps in Bounded2d and Bounded3d type classes?
+Refactor Surface3d.toMesh to match Body3d
 
-   class HasCoordinateSystem a coordinateSystem => Bounded2d a where
-     bounds :: a -> Bounds2d coordinateSystem
+Meshing improvements:
+- Scale UV domain based on relative fuu and fvv magnitudes, so that e.g. cylinder gets triangulated as strip
+- Or perhaps better: scale UV domain domain based on relative fu and fv magnitudes, to get better triangle aspect ratios?
+- Properly handle UV domains with extreme aspect ratios: take overall bounds and have initial step that splits into square-ish segments?
+- Add support for max size? (Conflicts with UV domain scaling above?)
+  -> only enable scaling if no max size given?
 
 Support Point3d + VectorSurfaceFunction3d -> SurfaceFunction3d
 
@@ -16,6 +19,8 @@ Optimize Set2d to use 'nth element' algorithm?
 
 Rewrite scripts in Haskell?
 -> or Python?
+-> first up: regenerating hie.yaml to use 'flib' for opensolid-ffi
+  -> perhaps also combined script to add a new test executable and update hie.yaml
 
 Build out publishing workflow
 - Collect wheels and publish combined package
