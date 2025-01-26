@@ -404,14 +404,14 @@ edgeLinearizationPredicate
       && validEdge matingUvBounds matingEdgeSize matingSurfaceSegments
 
 validEdge :: UvBounds -> Float -> Set2d UvBounds UvCoordinates -> Bool
-validEdge uvBounds edgeLength surfaceSegments = Tolerance.exactly
+validEdge edgeBounds edgeLength surfaceSegments = Tolerance.exactly
   case surfaceSegments of
     Set2d.Node nodeBounds left right ->
-      not (uvBounds ^ nodeBounds)
-        || (validEdge uvBounds edgeLength left && validEdge uvBounds edgeLength right)
+      not (edgeBounds ^ nodeBounds)
+        || (validEdge edgeBounds edgeLength left && validEdge edgeBounds edgeLength right)
     Set2d.Leaf leafBounds _ ->
-      not (uvBounds ^ leafBounds)
-        || edgeLength <= Float.sqrt 2.0 * Bounds2d.diameter uvBounds
+      not (edgeBounds ^ leafBounds)
+        || edgeLength <= Float.sqrt 2.0 * Bounds2d.diameter leafBounds
 
 boundarySurfaceMesh ::
   Map SurfaceId (Set2d UvBounds UvCoordinates) ->
