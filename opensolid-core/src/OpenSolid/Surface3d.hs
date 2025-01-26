@@ -124,21 +124,17 @@ boundaryPoints accuracy surfaceFunction fuu fuv fvv uvCurve = do
   let parameterValues = Domain1d.leadingSamplingPoints predicate
   NonEmpty.map (Curve2d.evaluate uvCurve) parameterValues
 
-maxDomainSize ::
-  Qty units ->
+surfaceError ::
   VectorSurfaceFunction3d (space @ units) ->
   VectorSurfaceFunction3d (space @ units) ->
   VectorSurfaceFunction3d (space @ units) ->
   UvBounds ->
-  Float
-maxDomainSize accuracy fuu fuv fvv uvBounds = do
+  Qty units
+surfaceError fuu fuv fvv uvBounds = do
   let fuuBounds = VectorSurfaceFunction3d.evaluateBounds fuu uvBounds
   let fuvBounds = VectorSurfaceFunction3d.evaluateBounds fuv uvBounds
   let fvvBounds = VectorSurfaceFunction3d.evaluateBounds fvv uvBounds
-  let fuuMagnitude = VectorBounds3d.magnitude fuuBounds
-  let fuvMagnitude = VectorBounds3d.magnitude fuvBounds
-  let fvvMagnitude = VectorBounds3d.magnitude fvvBounds
-  SurfaceLinearization.maxDomainSize accuracy fuuMagnitude fuvMagnitude fvvMagnitude
+  SurfaceLinearization.error fuuBounds fuvBounds fvvBounds uvBounds
 
 linearizationPredicate ::
   Qty units ->
@@ -152,10 +148,9 @@ linearizationPredicate ::
 linearizationPredicate accuracy fuu fuv fvv curve2d secondDerivative3d subdomain = do
   let curveSecondDerivativeBounds = VectorCurve3d.evaluateBounds secondDerivative3d subdomain
   let curveSecondDerivativeMagnitude = VectorBounds3d.magnitude curveSecondDerivativeBounds
-  let curveMaxDomainSize = Linearization.maxDomainSize accuracy curveSecondDerivativeMagnitude
   let uvBounds = Curve2d.evaluateBounds curve2d subdomain
-  let surfaceMaxDomainSize = maxDomainSize accuracy fuu fuv fvv uvBounds
-  Range.width subdomain <= curveMaxDomainSize && Bounds2d.diameter uvBounds <= surfaceMaxDomainSize
+  Linearization.error curveSecondDerivativeMagnitude subdomain <= accuracy
+    && surfaceError fuu fuv fvv uvBounds <= accuracy
 
 generateSteinerPoints ::
   Qty units ->
@@ -181,10 +176,9 @@ generateSteinerPoints accuracy uvBounds edgeSet fuu fuv fvv accumulated = do
           |> generateSteinerPoints accuracy bounds21 edgeSet fuu fuv fvv
           |> generateSteinerPoints accuracy bounds22 edgeSet fuu fuv fvv
   let return = Point2d (Range.midpoint uRange) (Range.midpoint vRange) : accumulated
-  let accurate = Bounds2d.diameter uvBounds <= maxDomainSize accuracy fuu fuv fvv uvBounds
   case includeSubdomain uvBounds edgeSet of
     Resolved False -> accumulated
-    Resolved True -> if accurate then return else recurse
+    Resolved True -> if surfaceError fuu fuv fvv uvBounds <= accuracy then return else recurse
     Unresolved -> recurse
 
 includeSubdomain :: UvBounds -> Set2d (LineSegment2d UvPoint) UvCoordinates -> Fuzzy Bool

@@ -288,7 +288,7 @@ boundarySurfaceSegmentSet ::
   UvBounds ->
   Set2d UvBounds UvCoordinates
 boundarySurfaceSegmentSet accuracy surfaceFunctions uvBounds =
-  if Bounds2d.diameter uvBounds <= surfaceMaxDomainSize accuracy surfaceFunctions uvBounds
+  if surfaceError surfaceFunctions uvBounds <= accuracy
     then Set2d.Leaf uvBounds uvBounds
     else do
       let Bounds2d uRange vRange = uvBounds
@@ -302,15 +302,12 @@ boundarySurfaceSegmentSet accuracy surfaceFunctions uvBounds =
       let set2 = Set2d.Node (Bounds2d u2 vRange) set21 set22
       Set2d.Node uvBounds set1 set2
 
-surfaceMaxDomainSize :: Qty units -> SurfaceFunctions (space @ units) -> UvBounds -> Float
-surfaceMaxDomainSize accuracy SurfaceFunctions{fuu, fuv, fvv} uvBounds = do
+surfaceError :: SurfaceFunctions (space @ units) -> UvBounds -> Qty units
+surfaceError SurfaceFunctions{fuu, fuv, fvv} uvBounds = do
   let fuuBounds = VectorSurfaceFunction3d.evaluateBounds fuu uvBounds
   let fuvBounds = VectorSurfaceFunction3d.evaluateBounds fuv uvBounds
   let fvvBounds = VectorSurfaceFunction3d.evaluateBounds fvv uvBounds
-  let fuuMagnitude = VectorBounds3d.magnitude fuuBounds
-  let fuvMagnitude = VectorBounds3d.magnitude fuvBounds
-  let fvvMagnitude = VectorBounds3d.magnitude fvvBounds
-  SurfaceLinearization.maxDomainSize accuracy fuuMagnitude fuvMagnitude fvvMagnitude
+  SurfaceLinearization.error fuuBounds fuvBounds fvvBounds uvBounds
 
 addBoundaryVertices ::
   Qty units ->
@@ -398,8 +395,7 @@ edgeLinearizationPredicate
     let matingEdgeSize = Point2d.distanceFrom matingUvStart matingUvEnd
     let edgeSecondDerivativeBounds = VectorCurve3d.evaluateBounds edgeSecondDerivative tRange
     let edgeSecondDerivativeMagnitude = VectorBounds3d.magnitude edgeSecondDerivativeBounds
-    let edgeMaxDomainSize = Linearization.maxDomainSize accuracy edgeSecondDerivativeMagnitude
-    Range.width tRange <= edgeMaxDomainSize
+    Linearization.error edgeSecondDerivativeMagnitude tRange <= accuracy
       && validEdge uvBounds edgeSize surfaceSegments
       && validEdge matingUvBounds matingEdgeSize matingSurfaceSegments
 
