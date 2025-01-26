@@ -4,6 +4,7 @@ module OpenSolid.Map
   , isEmpty
   , size
   , singleton
+  , fromList
   , fromKeyValuePairs
   , toList
   , get
@@ -33,6 +34,7 @@ where
 import Data.Map.Strict (Map)
 import Data.Map.Strict qualified
 import OpenSolid.Bootstrap
+import OpenSolid.List qualified as List
 import OpenSolid.Pair qualified as Pair
 import Prelude qualified
 
@@ -47,6 +49,9 @@ size = Data.Map.Strict.size
 
 singleton :: k -> v -> Map k v
 singleton = Data.Map.Strict.singleton
+
+fromList :: Ord k => (a -> (k, v)) -> List a -> Map k v
+fromList toKeyValuePair list = fromKeyValuePairs (List.map toKeyValuePair list)
 
 fromKeyValuePairs :: Ord k => List (k, v) -> Map k v
 fromKeyValuePairs = Data.Map.Strict.fromList
