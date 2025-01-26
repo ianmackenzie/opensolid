@@ -315,7 +315,7 @@ aggregate3 (Range low1 high1) (Range low2 high2) (Range low3 high3) =
 -- | Build a range containing all ranges in the given non-empty list.
 aggregateN :: NonEmpty (Range units) -> Range units
 aggregateN (Range low1 high1 :| rest) = do
-  let go low high [] = unsafe low high
+  let go low high [] = Range_ low high
       go low high (Range nextLow nextHigh : remaining) =
         go (Qty.min low nextLow) (Qty.max high nextHigh) remaining
   go low1 high1 rest
@@ -338,7 +338,7 @@ hull4 a b c d = Range_ (Qty.min a (Qty.min b (Qty.min c d))) (Qty.max a (Qty.max
 -- | Build a range containing all values in the given non-empty list.
 hullN :: NonEmpty (Qty units) -> Range units
 hullN (first :| rest) = do
-  let go low high [] = unsafe low high
+  let go low high [] = Range_ low high
       go low high (next : remaining) = go (Qty.min low next) (Qty.max high next) remaining
   go first first rest
 
