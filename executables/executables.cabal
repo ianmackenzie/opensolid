@@ -97,21 +97,18 @@ executable region-triangulation
   main-is: Main.hs
   hs-source-dirs: region-triangulation
   build-depends:
-    opensolid-core,
-    time,
+    opensolid-core
 
 executable surface3d-meshing
   import: config
   main-is: Main.hs
   hs-source-dirs: surface3d-meshing
   build-depends:
-    opensolid-core,
-    time,
+    opensolid-core
 
 executable body3d-meshing
   import: config
   main-is: Main.hs
   hs-source-dirs: body3d-meshing
   build-depends:
-    opensolid-core,
-    time,
+    opensolid-core
