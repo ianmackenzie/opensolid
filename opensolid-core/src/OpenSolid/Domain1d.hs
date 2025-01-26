@@ -29,7 +29,7 @@ where
 
 import OpenSolid.Float qualified as Float
 import OpenSolid.Prelude
-import OpenSolid.Range (Range)
+import OpenSolid.Range (Range (Range))
 import OpenSolid.Range qualified as Range
 
 data Domain1d = Domain1d
@@ -95,15 +95,15 @@ half (Domain1d{n, i, j}) = do
   Domain1d (4.0 * n) (4.0 * i + delta) (4.0 * j - delta)
 
 bounds :: Domain1d -> Range Unitless
-bounds (Domain1d{n, i, j}) = Range.unsafe (i / n) (j / n)
+bounds (Domain1d{n, i, j}) = Range (i / n) (j / n)
 
 interior :: Domain1d -> Range Unitless
 interior (Domain1d{n, i, j}) = do
   let n8 = 8.0 * n
   let delta = j - i
-  Range.unsafe
-    (if i == 0.0 then 0.0 else (8.0 * i + delta) / n8)
-    (if j == n then 1.0 else (8.0 * j - delta) / n8)
+  let low = if i == 0.0 then 0.0 else (8.0 * i + delta) / n8
+  let high = if j == n then 1.0 else (8.0 * j - delta) / n8
+  Range low high
 
 overlaps :: Domain1d -> Domain1d -> Bool
 overlaps (Domain1d n2 i2 j2) (Domain1d n1 i1 j1) =

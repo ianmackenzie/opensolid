@@ -1,6 +1,5 @@
 module OpenSolid.Range
   ( Range (Range)
-  , unsafe
   , constant
   , unit
   , from
@@ -101,7 +100,10 @@ data Range units = Range_ (Qty units) (Qty units)
 pattern Range :: Qty units -> Qty units -> Range units
 pattern Range low high <- Range_ low high
   where
-    Range a b = if a <= b then Range_ a b else Range_ b a
+    Range a b
+      | a <= b = Range_ a b
+      | b <= a = Range_ b a
+      | otherwise = unbounded
 
 instance FFI (Range Unitless) where
   representation = FFI.classRepresentation "Range"
@@ -245,10 +247,6 @@ instance
     if dl > Qty.zero || dh < Qty.zero
       then hull4 (nl / dl) (nl / dh) (nh / dl) (nh / dh)
       else unbounded
-
-{-# INLINE unsafe #-}
-unsafe :: Qty units -> Qty units -> Range units
-unsafe = Range_
 
 -- | Construct a zero-width range containing a single value.
 {-# INLINE constant #-}

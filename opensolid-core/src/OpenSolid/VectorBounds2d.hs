@@ -442,7 +442,7 @@ hull3 (Vector2d x1 y1) (Vector2d x2 y2) (Vector2d x3 y3) = do
   let maxX = Qty.max (Qty.max x1 x2) x3
   let minY = Qty.min (Qty.min y1 y2) y3
   let maxY = Qty.max (Qty.max y1 y2) y3
-  VectorBounds2d (Range.unsafe minX maxX) (Range.unsafe minY maxY)
+  VectorBounds2d (Range minX maxX) (Range minY maxY)
 
 hull4 ::
   Vector2d (space @ units) ->
@@ -455,13 +455,13 @@ hull4 (Vector2d x1 y1) (Vector2d x2 y2) (Vector2d x3 y3) (Vector2d x4 y4) = do
   let maxX = Qty.max (Qty.max (Qty.max x1 x2) x3) x4
   let minY = Qty.min (Qty.min (Qty.min y1 y2) y3) y4
   let maxY = Qty.max (Qty.max (Qty.max y1 y2) y3) y4
-  VectorBounds2d (Range.unsafe minX maxX) (Range.unsafe minY maxY)
+  VectorBounds2d (Range minX maxX) (Range minY maxY)
 
 hullN :: NonEmpty (Vector2d (space @ units)) -> VectorBounds2d (space @ units)
 hullN (Vector2d x0 y0 :| rest) = go x0 x0 y0 y0 rest
  where
   go :: Qty units -> Qty units -> Qty units -> Qty units -> List (Vector2d (space @ units)) -> VectorBounds2d (space @ units)
-  go xLow xHigh yLow yHigh [] = VectorBounds2d (Range.unsafe xLow xHigh) (Range.unsafe yLow yHigh)
+  go xLow xHigh yLow yHigh [] = VectorBounds2d (Range xLow xHigh) (Range yLow yHigh)
   go xLow xHigh yLow yHigh (Vector2d x y : remaining) =
     go (Qty.min xLow x) (Qty.max xHigh x) (Qty.min yLow y) (Qty.max yHigh y) remaining
 
@@ -528,7 +528,7 @@ normalizedRange = Range.from -1.0 1.0
 
 clampNormalized :: Range Unitless -> Range Unitless
 clampNormalized (Range low high) =
-  Range.unsafe (Qty.clampTo normalizedRange low) (Qty.clampTo normalizedRange high)
+  Range (Qty.clampTo normalizedRange low) (Qty.clampTo normalizedRange high)
 
 includes :: Vector2d (space @ units) -> VectorBounds2d (space @ units) -> Bool
 includes (Vector2d vx vy) (VectorBounds2d x y) = Range.includes vx x && Range.includes vy y

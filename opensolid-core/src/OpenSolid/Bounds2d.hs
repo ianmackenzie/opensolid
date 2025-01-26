@@ -246,7 +246,7 @@ aggregateN (Bounds2d (Range xLow0 xHigh0) (Range yLow0 yHigh0) :| rest) =
   aggregateImpl xLow0 xHigh0 yLow0 yHigh0 rest
 
 aggregateImpl :: Qty units -> Qty units -> Qty units -> Qty units -> List (Bounds2d (space @ units)) -> Bounds2d (space @ units)
-aggregateImpl xLow xHigh yLow yHigh [] = Bounds2d (Range.unsafe xLow xHigh) (Range.unsafe yLow yHigh)
+aggregateImpl xLow xHigh yLow yHigh [] = Bounds2d (Range xLow xHigh) (Range yLow yHigh)
 aggregateImpl xLow xHigh yLow yHigh (next : remaining) = do
   let Bounds2d (Range xLowNext xHighNext) (Range yLowNext yHighNext) = next
   aggregateImpl
@@ -330,7 +330,7 @@ hull3 p1 p2 p3 = do
   let maxX = Qty.max (Qty.max x1 x2) x3
   let minY = Qty.min (Qty.min y1 y2) y3
   let maxY = Qty.max (Qty.max y1 y2) y3
-  Bounds2d (Range.unsafe minX maxX) (Range.unsafe minY maxY)
+  Bounds2d (Range minX maxX) (Range minY maxY)
 
 hull4 ::
   Point2d (space @ units) ->
@@ -347,13 +347,13 @@ hull4 p1 p2 p3 p4 = do
   let maxX = Qty.max (Qty.max (Qty.max x1 x2) x3) x4
   let minY = Qty.min (Qty.min (Qty.min y1 y2) y3) y4
   let maxY = Qty.max (Qty.max (Qty.max y1 y2) y3) y4
-  Bounds2d (Range.unsafe minX maxX) (Range.unsafe minY maxY)
+  Bounds2d (Range minX maxX) (Range minY maxY)
 
 -- | Construct a bounding box containing all points in the given non-empty list.
 hullN :: NonEmpty (Point2d (space @ units)) -> Bounds2d (space @ units)
 hullN (p0 :| rest) = do
   let (x0, y0) = Point2d.coordinates p0
-  let go xLow xHigh yLow yHigh [] = Bounds2d (Range.unsafe xLow xHigh) (Range.unsafe yLow yHigh)
+  let go xLow xHigh yLow yHigh [] = Bounds2d (Range xLow xHigh) (Range yLow yHigh)
       go xLow xHigh yLow yHigh (point : remaining) = do
         let (x, y) = Point2d.coordinates point
         go (Qty.min xLow x) (Qty.max xHigh x) (Qty.min yLow y) (Qty.max yHigh y) remaining

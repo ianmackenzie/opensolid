@@ -459,7 +459,7 @@ hull3 (Vector3d x1 y1 z1) (Vector3d x2 y2 z2) (Vector3d x3 y3 z3) = do
   let maxY = Qty.max (Qty.max y1 y2) y3
   let minZ = Qty.min (Qty.min z1 z2) z3
   let maxZ = Qty.max (Qty.max z1 z2) z3
-  VectorBounds3d (Range.unsafe minX maxX) (Range.unsafe minY maxY) (Range.unsafe minZ maxZ)
+  VectorBounds3d (Range minX maxX) (Range minY maxY) (Range minZ maxZ)
 
 hull4 ::
   Vector3d (space @ units) ->
@@ -474,13 +474,13 @@ hull4 (Vector3d x1 y1 z1) (Vector3d x2 y2 z2) (Vector3d x3 y3 z3) (Vector3d x4 y
   let maxY = Qty.max (Qty.max (Qty.max y1 y2) y3) y4
   let minZ = Qty.min (Qty.min (Qty.min z1 z2) z3) z4
   let maxZ = Qty.max (Qty.max (Qty.max z1 z2) z3) z4
-  VectorBounds3d (Range.unsafe minX maxX) (Range.unsafe minY maxY) (Range.unsafe minZ maxZ)
+  VectorBounds3d (Range minX maxX) (Range minY maxY) (Range minZ maxZ)
 
 hullN :: NonEmpty (Vector3d (space @ units)) -> VectorBounds3d (space @ units)
 hullN (Vector3d x0 y0 z0 :| rest) = go x0 x0 y0 y0 z0 z0 rest
  where
   go :: Qty units -> Qty units -> Qty units -> Qty units -> Qty units -> Qty units -> List (Vector3d (space @ units)) -> VectorBounds3d (space @ units)
-  go xLow xHigh yLow yHigh zLow zHigh [] = VectorBounds3d (Range.unsafe xLow xHigh) (Range.unsafe yLow yHigh) (Range.unsafe zLow zHigh)
+  go xLow xHigh yLow yHigh zLow zHigh [] = VectorBounds3d (Range xLow xHigh) (Range yLow yHigh) (Range zLow zHigh)
   go xLow xHigh yLow yHigh zLow zHigh (Vector3d x y z : remaining) =
     go (Qty.min xLow x) (Qty.max xHigh x) (Qty.min yLow y) (Qty.max yHigh y) (Qty.min zLow z) (Qty.max zHigh z) remaining
 
@@ -550,7 +550,7 @@ normalizedRange = Range.from -1.0 1.0
 
 clampNormalized :: Range Unitless -> Range Unitless
 clampNormalized (Range low high) =
-  Range.unsafe (Qty.clampTo normalizedRange low) (Qty.clampTo normalizedRange high)
+  Range (Qty.clampTo normalizedRange low) (Qty.clampTo normalizedRange high)
 
 includes :: Vector3d (space @ units) -> VectorBounds3d (space @ units) -> Bool
 includes (Vector3d vx vy vz) (VectorBounds3d x y z) =

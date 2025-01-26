@@ -27,7 +27,7 @@ import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Point3d (Point3d (Point3d))
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
-import OpenSolid.Range (Range)
+import OpenSolid.Range (Range (Range))
 import OpenSolid.Range qualified as Range
 import OpenSolid.Units qualified as Units
 import OpenSolid.VectorBounds3d (VectorBounds3d (VectorBounds3d))
@@ -238,7 +238,7 @@ hull3 (Point3d x1 y1 z1) (Point3d x2 y2 z2) (Point3d x3 y3 z3) = do
   let maxY = Qty.max (Qty.max y1 y2) y3
   let minZ = Qty.min (Qty.min z1 z2) z3
   let maxZ = Qty.max (Qty.max z1 z2) z3
-  Bounds3d (Range.unsafe minX maxX) (Range.unsafe minY maxY) (Range.unsafe minZ maxZ)
+  Bounds3d (Range minX maxX) (Range minY maxY) (Range minZ maxZ)
 
 hull4 ::
   Point3d (space @ units) ->
@@ -253,7 +253,7 @@ hull4 (Point3d x1 y1 z1) (Point3d x2 y2 z2) (Point3d x3 y3 z3) (Point3d x4 y4 z4
   let maxY = Qty.max (Qty.max (Qty.max y1 y2) y3) y4
   let minZ = Qty.min (Qty.min (Qty.min z1 z2) z3) z4
   let maxZ = Qty.max (Qty.max (Qty.max z1 z2) z3) z4
-  Bounds3d (Range.unsafe minX maxX) (Range.unsafe minY maxY) (Range.unsafe minZ maxZ)
+  Bounds3d (Range minX maxX) (Range minY maxY) (Range minZ maxZ)
 
 diameter :: Bounds3d (space @ units) -> Qty units
 diameter (Bounds3d x y z) = Qty.hypot3 (Range.width x) (Range.width y) (Range.width z)
