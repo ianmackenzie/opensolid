@@ -494,6 +494,7 @@ boundarySurfaceMesh surfaceSegmentsById innerEdgeVerticesById boundarySurface = 
       let steinerVertex uvPoint = Vertex uvPoint (SurfaceFunction3d.evaluate f uvPoint)
       let steinerVertices = List.map steinerVertex steinerPoints
       let boundaryVertexLoops = NonEmpty.map Polygon2d.vertices boundaryPolygons
+      -- Decent refinement option: (Just (List.length steinerPoints, steinerVertex))
       let vertexMesh = CDT.unsafe boundaryVertexLoops steinerVertices Nothing
       Mesh.map Vertex3d.position vertexMesh
 
