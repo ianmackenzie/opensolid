@@ -490,7 +490,14 @@ overlap first second = -(separation first second)
 
 bisect :: Range units -> (Range units, Range units)
 bisect (Range low high) = do
-  let mid = Qty.midpoint low high
+  let mid
+        | low > -Qty.infinity && high < Qty.infinity = Qty.midpoint low high
+        | low < Qty.zero && high > Qty.zero = Qty.zero
+        | low == Qty.zero = Units.coerce 1.0
+        | high == Qty.zero = Units.coerce -1.0
+        | low > Qty.zero = 2.0 * low
+        | high < Qty.zero = 2.0 * high
+        | otherwise = internalError "'Impossible' case hit in Range.bisect"
   Debug.assert (low < mid)
   Debug.assert (mid < high)
   (Range_ low mid, Range_ mid high)
