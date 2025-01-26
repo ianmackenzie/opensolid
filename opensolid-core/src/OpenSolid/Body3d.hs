@@ -488,18 +488,21 @@ edgeVertices ::
   Edge (space @ units) ->
   NonEmpty (Vertex (space @ units))
 edgeVertices innerEdgeVerticesById edge = case edge of
-  -- TODO reduce code duplication here a bit
-  DegenerateEdge{edgeId, uvCurve, point} -> do
-    let startVertex = Vertex (Curve2d.startPoint uvCurve) point
-    case Map.get edgeId innerEdgeVerticesById of
-      Just innerEdgeVertices -> startVertex :| innerEdgeVertices
-      Nothing -> internalError "Should always be able to look up internal edge vertices by ID"
-  Edge{startPoint, halfEdge} -> do
-    let HalfEdge{edgeId, uvCurve} = halfEdge
-    let startVertex = Vertex (Curve2d.startPoint uvCurve) startPoint
-    case Map.get edgeId innerEdgeVerticesById of
-      Just innerEdgeVertices -> startVertex :| innerEdgeVertices
-      Nothing -> internalError "Should always be able to look up internal edge vertices by ID"
+  DegenerateEdge{edgeId, uvCurve, point} ->
+    edgeVerticesImpl innerEdgeVerticesById edgeId point uvCurve
+  Edge{startPoint, halfEdge = HalfEdge{edgeId, uvCurve}} ->
+    edgeVerticesImpl innerEdgeVerticesById edgeId startPoint uvCurve
+
+edgeVerticesImpl ::
+  Map EdgeId (List (Vertex (space @ units))) ->
+  EdgeId ->
+  Point3d (space @ units) ->
+  Curve2d UvCoordinates ->
+  NonEmpty (Vertex (space @ units))
+edgeVerticesImpl innerEdgeVerticesById edgeId startPoint uvCurve =
+  case Map.get edgeId innerEdgeVerticesById of
+    Just innerEdgeVertices -> Vertex (Curve2d.startPoint uvCurve) startPoint :| innerEdgeVertices
+    Nothing -> internalError "Should always be able to look up internal edge vertices by ID"
 
 steinerPoint ::
   Set2d (LineSegment2d (Vertex (space @ units))) UvCoordinates ->
