@@ -1,5 +1,6 @@
 module OpenSolid.Mesh
   ( Mesh
+  , Quality (..)
   , indexed
   , vertices
   , faceIndices
@@ -19,6 +20,11 @@ import OpenSolid.Prelude
 data Mesh vertex = Mesh
   { vertices :: Array vertex
   , faceIndices :: List (Int, Int, Int)
+  }
+
+data Quality units = Quality
+  { maxError :: Qty units
+  , maxSize :: Qty units
   }
 
 indexed :: Array vertex -> List (Int, Int, Int) -> Mesh vertex

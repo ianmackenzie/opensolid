@@ -8,10 +8,12 @@ import OpenSolid.Direction3d qualified as Direction3d
 import OpenSolid.IO qualified as IO
 import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
+import OpenSolid.Mesh qualified as Mesh
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Point3d (Point3d)
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
+import OpenSolid.Qty qualified as Qty
 import OpenSolid.Region2d (Region2d)
 import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Result qualified as Result
@@ -84,13 +86,9 @@ bottom = do
 
 main :: IO ()
 main = Tolerance.using Length.nanometer $ IO.do
-  let accuracy = Length.millimeters 5.0
   startCap <- makeStartCap
   endCap <- makeEndCap
-  IO.writeFile "executables/body3d-meshing/startCap.stl" (Stl.text Length.inMillimeters (Surface3d.toMesh accuracy startCap))
-  IO.writeFile "executables/body3d-meshing/endCap.stl" (Stl.text Length.inMillimeters (Surface3d.toMesh accuracy endCap))
-  IO.writeFile "executables/body3d-meshing/cylindricalSurface.stl" (Stl.text Length.inMillimeters (Surface3d.toMesh accuracy cylindricalSurface))
-  IO.writeFile "executables/body3d-meshing/bottom.stl" (Stl.text Length.inMillimeters (Surface3d.toMesh accuracy bottom))
   body <- Body3d.boundedBy [cylindricalSurface, startCap, endCap, bottom]
-  let mesh = Body3d.toMesh accuracy body
+  let quality = Mesh.Quality{maxError = Qty.infinity, maxSize = Length.centimeters 20.0}
+  let mesh = Body3d.toMesh quality body
   IO.writeFile "executables/body3d-meshing/mesh.stl" (Stl.text Length.inMillimeters mesh)

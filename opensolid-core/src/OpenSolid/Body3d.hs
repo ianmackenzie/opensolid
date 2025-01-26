@@ -35,6 +35,7 @@ import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Point3d (Point3d)
+import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Polygon2d (Polygon2d (Polygon2d))
 import OpenSolid.Polygon2d qualified as Polygon2d
 import OpenSolid.Prelude
@@ -280,40 +281,55 @@ instance Vertex3d (Vertex (space @ units)) (space @ units) where
 instance Bounded2d (Vertex (space @ units)) UvCoordinates where
   bounds (Vertex uvPoint _) = Bounds2d.constant uvPoint
 
-toMesh :: Tolerance units => Qty units -> Body3d (space @ units) -> Mesh (Point3d (space @ units))
-toMesh accuracy (Body3d boundarySurfaces) = do
+toMesh :: Tolerance units => Mesh.Quality units -> Body3d (space @ units) -> Mesh (Point3d (space @ units))
+toMesh quality (Body3d boundarySurfaces) = do
   let boundarySurfaceList = NonEmpty.toList boundarySurfaces
-  let surfaceSegmentsById = Map.fromList (boundarySurfaceSegments accuracy) boundarySurfaceList
+  let surfaceSegmentsById = Map.fromList (boundarySurfaceSegments quality) boundarySurfaceList
   let innerEdgeVerticesById =
-        NonEmpty.foldr (addBoundaryVertices accuracy surfaceSegmentsById) Map.empty boundarySurfaces
+        NonEmpty.foldr (addBoundaryVertices quality surfaceSegmentsById) Map.empty boundarySurfaces
   Mesh.collect (boundarySurfaceMesh surfaceSegmentsById innerEdgeVerticesById) boundarySurfaces
 
 boundarySurfaceSegments ::
-  Qty units ->
+  Mesh.Quality units ->
   BoundarySurface (space @ units) ->
   (SurfaceId, Set2d UvBounds UvCoordinates)
-boundarySurfaceSegments accuracy BoundarySurface{surfaceId, surfaceFunctions, uvBounds} =
-  (surfaceId, boundarySurfaceSegmentSet accuracy surfaceFunctions uvBounds)
+boundarySurfaceSegments quality BoundarySurface{surfaceId, surfaceFunctions, uvBounds} =
+  (surfaceId, boundarySurfaceSegmentSet quality surfaceFunctions uvBounds)
 
 boundarySurfaceSegmentSet ::
-  Qty units ->
+  Mesh.Quality units ->
   SurfaceFunctions (space @ units) ->
   UvBounds ->
   Set2d UvBounds UvCoordinates
-boundarySurfaceSegmentSet accuracy surfaceFunctions uvBounds =
-  if surfaceError surfaceFunctions uvBounds <= accuracy
+boundarySurfaceSegmentSet quality surfaceFunctions uvBounds = do
+  let Mesh.Quality{maxError, maxSize} = quality
+  if surfaceSize surfaceFunctions uvBounds <= maxSize
+    && surfaceError surfaceFunctions uvBounds <= maxError
     then Set2d.Leaf uvBounds uvBounds
     else do
       let Bounds2d uRange vRange = uvBounds
       let (u1, u2) = Range.bisect uRange
       let (v1, v2) = Range.bisect vRange
-      let set11 = boundarySurfaceSegmentSet accuracy surfaceFunctions (Bounds2d u1 v1)
-      let set12 = boundarySurfaceSegmentSet accuracy surfaceFunctions (Bounds2d u1 v2)
-      let set21 = boundarySurfaceSegmentSet accuracy surfaceFunctions (Bounds2d u2 v1)
-      let set22 = boundarySurfaceSegmentSet accuracy surfaceFunctions (Bounds2d u2 v2)
+      let set11 = boundarySurfaceSegmentSet quality surfaceFunctions (Bounds2d u1 v1)
+      let set12 = boundarySurfaceSegmentSet quality surfaceFunctions (Bounds2d u1 v2)
+      let set21 = boundarySurfaceSegmentSet quality surfaceFunctions (Bounds2d u2 v1)
+      let set22 = boundarySurfaceSegmentSet quality surfaceFunctions (Bounds2d u2 v2)
       let set1 = Set2d.Node (Bounds2d u1 vRange) set11 set12
       let set2 = Set2d.Node (Bounds2d u2 vRange) set21 set22
       Set2d.Node uvBounds set1 set2
+
+surfaceSize :: SurfaceFunctions (space @ units) -> UvBounds -> Qty units
+surfaceSize SurfaceFunctions{f} uvBounds = do
+  let p00 = SurfaceFunction3d.evaluate f (Bounds2d.lowerLeftCorner uvBounds)
+  let p10 = SurfaceFunction3d.evaluate f (Bounds2d.lowerRightCorner uvBounds)
+  let p01 = SurfaceFunction3d.evaluate f (Bounds2d.upperLeftCorner uvBounds)
+  let p11 = SurfaceFunction3d.evaluate f (Bounds2d.upperRightCorner uvBounds)
+  Point3d.distanceFrom p00 p10
+    |> Qty.max (Point3d.distanceFrom p10 p11)
+    |> Qty.max (Point3d.distanceFrom p11 p01)
+    |> Qty.max (Point3d.distanceFrom p01 p00)
+    |> Qty.max (Point3d.distanceFrom p00 p11)
+    |> Qty.max (Point3d.distanceFrom p10 p01)
 
 surfaceError :: SurfaceFunctions (space @ units) -> UvBounds -> Qty units
 surfaceError SurfaceFunctions{fuu, fuv, fvv} uvBounds = do
@@ -323,31 +339,31 @@ surfaceError SurfaceFunctions{fuu, fuv, fvv} uvBounds = do
   SurfaceLinearization.error fuuBounds fuvBounds fvvBounds uvBounds
 
 addBoundaryVertices ::
-  Qty units ->
+  Mesh.Quality units ->
   Map SurfaceId (Set2d UvBounds UvCoordinates) ->
   BoundarySurface (space @ units) ->
   Map EdgeId (List (Vertex (space @ units))) ->
   Map EdgeId (List (Vertex (space @ units)))
-addBoundaryVertices accuracy surfaceSegmentsById boundarySurface accumulated = do
+addBoundaryVertices quality surfaceSegmentsById boundarySurface accumulated = do
   let BoundarySurface{edgeLoops} = boundarySurface
-  NonEmpty.foldr (addLoopVertices accuracy surfaceSegmentsById) accumulated edgeLoops
+  NonEmpty.foldr (addLoopVertices quality surfaceSegmentsById) accumulated edgeLoops
 
 addLoopVertices ::
-  Qty units ->
+  Mesh.Quality units ->
   Map SurfaceId (Set2d UvBounds UvCoordinates) ->
   NonEmpty (Edge (space @ units)) ->
   Map EdgeId (List (Vertex (space @ units))) ->
   Map EdgeId (List (Vertex (space @ units)))
-addLoopVertices accuracy surfaceSegmentsById loop accumulated =
-  NonEmpty.foldr (addEdgeVertices accuracy surfaceSegmentsById) accumulated loop
+addLoopVertices quality surfaceSegmentsById loop accumulated =
+  NonEmpty.foldr (addEdgeVertices quality surfaceSegmentsById) accumulated loop
 
 addEdgeVertices ::
-  Qty units ->
+  Mesh.Quality units ->
   Map SurfaceId (Set2d UvBounds UvCoordinates) ->
   Edge (space @ units) ->
   Map EdgeId (List (Vertex (space @ units))) ->
   Map EdgeId (List (Vertex (space @ units)))
-addEdgeVertices accuracy surfaceSegmentsById edge accumulated = do
+addEdgeVertices quality surfaceSegmentsById edge accumulated = do
   case edge of
     DegenerateEdge{edgeId, uvCurve, point} -> do
       let EdgeId{surfaceId} = edgeId
@@ -370,7 +386,7 @@ addEdgeVertices accuracy surfaceSegmentsById edge accumulated = do
             (Just surfaceSegments, Just matingSurfaceSegments) -> do
               let edgePredicate =
                     edgeLinearizationPredicate
-                      accuracy
+                      quality
                       halfEdge
                       matingEdge
                       surfaceSegments
@@ -390,7 +406,7 @@ addEdgeVertices accuracy surfaceSegmentsById edge accumulated = do
         else accumulated
 
 edgeLinearizationPredicate ::
-  Qty units ->
+  Mesh.Quality units ->
   HalfEdge (space @ units) ->
   HalfEdge (space @ units) ->
   Set2d UvBounds UvCoordinates ->
@@ -399,14 +415,14 @@ edgeLinearizationPredicate ::
   Range Unitless ->
   Bool
 edgeLinearizationPredicate
-  accuracy
+  quality
   halfEdge
   matingEdge
   surfaceSegments
   matingSurfaceSegments
   edgeSecondDerivative
   tRange = do
-    let HalfEdge{uvCurve} = halfEdge
+    let HalfEdge{uvCurve, curve3d} = halfEdge
     let HalfEdge{uvCurve = matingUvCurve} = matingEdge
     let Range tStart tEnd = tRange
     let uvStart = Curve2d.evaluate uvCurve tStart
@@ -417,9 +433,14 @@ edgeLinearizationPredicate
     let matingUvBounds = Bounds2d.hull2 matingUvStart matingUvEnd
     let edgeSize = Point2d.distanceFrom uvStart uvEnd
     let matingEdgeSize = Point2d.distanceFrom matingUvStart matingUvEnd
+    let startPoint = Curve3d.evaluate curve3d tStart
+    let endPoint = Curve3d.evaluate curve3d tEnd
+    let edgeLength = Point3d.distanceFrom startPoint endPoint
     let edgeSecondDerivativeBounds = VectorCurve3d.evaluateBounds edgeSecondDerivative tRange
     let edgeSecondDerivativeMagnitude = VectorBounds3d.magnitude edgeSecondDerivativeBounds
-    Linearization.error edgeSecondDerivativeMagnitude tRange <= accuracy
+    let Mesh.Quality{maxError, maxSize} = quality
+    edgeLength <= maxSize
+      && Linearization.error edgeSecondDerivativeMagnitude tRange <= maxError
       && validEdge uvBounds edgeSize surfaceSegments
       && validEdge matingUvBounds matingEdgeSize matingSurfaceSegments
 
