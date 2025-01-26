@@ -600,7 +600,8 @@ cosIncludesMinMax range =
 
 cosIncludesMax :: Range Radians -> Bool
 cosIncludesMax (Range low high) =
-  Float.floor (low / Angle.fullTurn) /= Float.floor (high / Angle.fullTurn)
+  (Qty.isInfinite low || Qty.isInfinite high)
+    || Float.floor (low / Angle.fullTurn) /= Float.floor (high / Angle.fullTurn)
 
 interpolate :: Range units -> Float -> Qty units
 interpolate (Range low high) t =
