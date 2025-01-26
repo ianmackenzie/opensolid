@@ -32,6 +32,7 @@ module OpenSolid.Range
   , isContainedIn
   , bisect
   , isAtomic
+  , isFinite
   , abs
   , sqrt
   , sqrt'
@@ -495,6 +496,10 @@ isAtomic :: Range units -> Bool
 isAtomic (Range low high) = do
   let mid = Qty.midpoint low high
   mid == low || mid == high
+
+{-# INLINE isFinite #-}
+isFinite :: Range units -> Bool
+isFinite (Range low high) = -Qty.infinity < low && high < Qty.infinity
 
 abs :: Range units -> Range units
 abs range@(Range low high)
