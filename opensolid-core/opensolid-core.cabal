@@ -225,7 +225,6 @@ library
     OpenSolid.ConstrainedDelaunayTriangulation
     OpenSolid.Expression.Scalar
     OpenSolid.Linearization
-    OpenSolid.SurfaceLinearization
     OpenSolid.Lobatto
     OpenSolid.Point2d.CoordinateTransformation
     OpenSolid.Point3d.CoordinateTransformation
@@ -234,6 +233,7 @@ library
     OpenSolid.SurfaceFunction.Internal
     OpenSolid.SurfaceFunction.PartialZeros
     OpenSolid.SurfaceFunction.SaddleRegion
+    OpenSolid.SurfaceLinearization
     OpenSolid.Text.Parse
     OpenSolid.Vector2d.CoordinateTransformation
     OpenSolid.Vector3d.CoordinateTransformation
