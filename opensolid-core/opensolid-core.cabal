@@ -217,6 +217,7 @@ library
     OpenSolid.VectorSurfaceFunction2d
     OpenSolid.VectorSurfaceFunction3d
     OpenSolid.Vertex2d
+    OpenSolid.Vertex3d
     OpenSolid.Volume
 
   other-modules:
