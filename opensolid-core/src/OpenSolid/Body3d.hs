@@ -19,21 +19,25 @@ import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Curve3d (Curve3d)
 import OpenSolid.Curve3d qualified as Curve3d
 import OpenSolid.Domain1d qualified as Domain1d
-import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
-import OpenSolid.Fuzzy qualified as Fuzzy
+import OpenSolid.Float qualified as Float
 import OpenSolid.LineSegment2d (LineSegment2d)
+import OpenSolid.LineSegment2d qualified as LineSegment2d
 import OpenSolid.Linearization qualified as Linearization
 import OpenSolid.List qualified as List
+import OpenSolid.Map (Map)
+import OpenSolid.Map qualified as Map
+import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Mesh (Mesh)
 import OpenSolid.Mesh qualified as Mesh
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2d (Point2d (Point2d))
+import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Point3d (Point3d)
 import OpenSolid.Polygon2d (Polygon2d (Polygon2d))
 import OpenSolid.Polygon2d qualified as Polygon2d
 import OpenSolid.Prelude
-import OpenSolid.Range (Range)
+import OpenSolid.Range (Range (Range))
 import OpenSolid.Range qualified as Range
 import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Result qualified as Result
@@ -48,6 +52,7 @@ import OpenSolid.SurfaceFunction3d qualified as SurfaceFunction3d
 import OpenSolid.SurfaceLinearization qualified as SurfaceLinearization
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvCoordinates, UvPoint)
 import OpenSolid.Tolerance qualified as Tolerance
+import OpenSolid.VectorBounds2d qualified as VectorBounds2d
 import OpenSolid.VectorBounds3d qualified as VectorBounds3d
 import OpenSolid.VectorCurve3d (VectorCurve3d)
 import OpenSolid.VectorCurve3d qualified as VectorCurve3d
@@ -55,6 +60,8 @@ import OpenSolid.VectorSurfaceFunction3d (VectorSurfaceFunction3d)
 import OpenSolid.VectorSurfaceFunction3d qualified as VectorSurfaceFunction3d
 import OpenSolid.Vertex2d (Vertex2d)
 import OpenSolid.Vertex2d qualified as Vertex2d
+import OpenSolid.Vertex3d (Vertex3d)
+import OpenSolid.Vertex3d qualified as Vertex3d
 
 type role Body3d nominal
 
@@ -63,11 +70,25 @@ newtype Body3d (coordinateSystem :: CoordinateSystem)
 
 data BoundarySurface (coordinateSystem :: CoordinateSystem) where
   BoundarySurface ::
-    { surfaceId :: Int
+    { surfaceId :: SurfaceId
     , surfaceFunctions :: SurfaceFunctions (space @ units)
+    , uvBounds :: UvBounds
     , edgeLoops :: NonEmpty (NonEmpty (Edge (space @ units)))
     } ->
     BoundarySurface (space @ units)
+
+newtype SurfaceId = SurfaceId Int deriving (Eq, Ord, Show)
+
+newtype LoopId = LoopId Int deriving (Eq, Ord, Show)
+
+newtype HalfEdgeId = HalfEdgeId Int deriving (Eq, Ord, Show)
+
+data EdgeId = EdgeId
+  { surfaceId :: SurfaceId
+  , loopId :: LoopId
+  , halfEdgeId :: HalfEdgeId
+  }
+  deriving (Eq, Ord, Show)
 
 data Edge (coordinateSystem :: CoordinateSystem) where
   Edge ::
@@ -79,8 +100,7 @@ data Edge (coordinateSystem :: CoordinateSystem) where
 
 data HalfEdge (coordinateSystem :: CoordinateSystem) where
   HalfEdge ::
-    { surfaceId :: Int
-    , surfaceFunctions :: SurfaceFunctions (space @ units)
+    { edgeId :: EdgeId
     , uvCurve :: Curve2d UvCoordinates -- UV curve parameterized by 3D arc length
     , curve3d :: Curve3d (space @ units) -- Arc length parameterized 3D curve
     , bounds :: Bounds3d (space @ units) -- Bounds on 3D curve
@@ -99,16 +119,19 @@ data SurfaceFunctions (coordinateSystem :: CoordinateSystem) where
     } ->
     SurfaceFunctions (space @ units)
 
+----- CONSTRUCTION -----
+
 data SurfaceWithHalfEdges (coordinateSystem :: CoordinateSystem) where
   SurfaceWithHalfEdges ::
-    { surfaceId :: Int
+    { surfaceId :: SurfaceId
     , surfaceFunctions :: SurfaceFunctions (space @ units)
+    , uvBounds :: UvBounds
     , halfEdgeLoops :: NonEmpty (NonEmpty (HalfEdge (space @ units)))
     } ->
     SurfaceWithHalfEdges (space @ units)
 
 data Corner (coordinateSystem :: CoordinateSystem) where
-  Corner :: {surfaceId :: Int, point :: Point3d (space @ units)} -> Corner (space @ units)
+  Corner :: {surfaceId :: SurfaceId, point :: Point3d (space @ units)} -> Corner (space @ units)
 
 instance Bounded3d (Corner (space @ units)) (space @ units) where
   bounds Corner{point} = Bounds3d.constant point
@@ -127,54 +150,17 @@ boundedBy (NonEmpty surfaces) = Result.do
   boundarySurfaces <- Result.collect (toBoundarySurface cornerSet halfEdgeSet) surfacesWithHalfEdges
   Success (Body3d boundarySurfaces)
 
-getAllHalfEdges :: SurfaceWithHalfEdges (space @ units) -> NonEmpty (HalfEdge (space @ units))
-getAllHalfEdges SurfaceWithHalfEdges{halfEdgeLoops} = NonEmpty.concat halfEdgeLoops
-
-halfEdgeStartPoint :: HalfEdge (space @ units) -> Corner (space @ units)
-halfEdgeStartPoint HalfEdge{surfaceId, curve3d} = Corner surfaceId (Curve3d.startPoint curve3d)
-
 toSurfaceWithHalfEdges ::
   Tolerance units =>
   (Int, Surface3d (space @ units)) ->
   Result BoundedBy.Error (SurfaceWithHalfEdges (space @ units))
-toSurfaceWithHalfEdges (surfaceId, surface) = do
+toSurfaceWithHalfEdges (surfaceIndex, surface) = do
   let surfaceFunctions = toSurfaceFunctions (Surface3d.function surface)
   let surfaceDomain = Surface3d.domain surface
   let loops = Region2d.outerLoop surfaceDomain :| Region2d.innerLoops surfaceDomain
-  Result.map (SurfaceWithHalfEdges surfaceId surfaceFunctions) $
-    Result.collect (Result.collect (surfaceHalfEdge surfaceId surfaceFunctions)) loops
-
-surfaceHalfEdge ::
-  Tolerance units =>
-  Int ->
-  SurfaceFunctions (space @ units) ->
-  Curve2d UvCoordinates ->
-  Result BoundedBy.Error (HalfEdge (space @ units))
-surfaceHalfEdge surfaceId surfaceFunctions uvCurve = do
-  let SurfaceFunctions{f} = surfaceFunctions
-  let curve3d = f . uvCurve
-  case Curve3d.arcLengthParameterization curve3d of
-    Success (parameterization, _) ->
-      Success $
-        HalfEdge
-          surfaceId
-          surfaceFunctions
-          (uvCurve . parameterization)
-          (curve3d . parameterization)
-          (Curve3d.bounds curve3d)
-    Failure Curve3d.HasDegeneracy ->
-      Failure BoundedBy.BoundaryCurveHasDegeneracy
-
-toBoundarySurface ::
-  Tolerance units =>
-  Set3d (Corner (space @ units)) (space @ units) ->
-  Set3d (HalfEdge (space @ units)) (space @ units) ->
-  SurfaceWithHalfEdges (space @ units) ->
-  Result BoundedBy.Error (BoundarySurface (space @ units))
-toBoundarySurface cornerSet halfEdgeSet surfaceWithHalfEdges = Result.do
-  let SurfaceWithHalfEdges{surfaceId, surfaceFunctions, halfEdgeLoops} = surfaceWithHalfEdges
-  edgeLoops <- Result.collect (Result.collect (toEdge cornerSet halfEdgeSet)) halfEdgeLoops
-  Success BoundarySurface{surfaceId, surfaceFunctions, edgeLoops}
+  let surfaceId = SurfaceId surfaceIndex
+  Result.map (SurfaceWithHalfEdges surfaceId surfaceFunctions (Region2d.bounds surfaceDomain)) $
+    Result.collect (loopHalfEdges surfaceId surfaceFunctions) (NonEmpty.indexed loops)
 
 toSurfaceFunctions :: SurfaceFunction3d (space @ units) -> SurfaceFunctions (space @ units)
 toSurfaceFunctions f = do
@@ -185,17 +171,55 @@ toSurfaceFunctions f = do
   let fvv = VectorSurfaceFunction3d.derivative V fv
   SurfaceFunctions{f, fuu, fuv, fvv}
 
-getCornerPoint ::
+loopHalfEdges ::
   Tolerance units =>
-  Point3d (space @ units) ->
+  SurfaceId ->
+  SurfaceFunctions (space @ units) ->
+  (Int, NonEmpty (Curve2d UvCoordinates)) ->
+  Result BoundedBy.Error (NonEmpty (HalfEdge (space @ units)))
+loopHalfEdges surfaceId surfaceFunctions (loopId, loop) = do
+  Result.collect (toHalfEdge surfaceId (LoopId loopId) surfaceFunctions) (NonEmpty.indexed loop)
+
+toHalfEdge ::
+  Tolerance units =>
+  SurfaceId ->
+  LoopId ->
+  SurfaceFunctions (space @ units) ->
+  (Int, Curve2d UvCoordinates) ->
+  Result BoundedBy.Error (HalfEdge (space @ units))
+toHalfEdge surfaceId loopId surfaceFunctions (halfEdgeIndex, uvCurve) = do
+  let SurfaceFunctions{f} = surfaceFunctions
+  let curve3d = f . uvCurve
+  let halfEdgeId = HalfEdgeId halfEdgeIndex
+  case Curve3d.arcLengthParameterization curve3d of
+    Success (parameterization, _) ->
+      Success $
+        HalfEdge
+          EdgeId{surfaceId, loopId, halfEdgeId}
+          (uvCurve . parameterization)
+          (curve3d . parameterization)
+          (Curve3d.bounds curve3d)
+    Failure Curve3d.HasDegeneracy ->
+      Failure BoundedBy.BoundaryCurveHasDegeneracy
+
+getAllHalfEdges :: SurfaceWithHalfEdges (space @ units) -> NonEmpty (HalfEdge (space @ units))
+getAllHalfEdges SurfaceWithHalfEdges{halfEdgeLoops} = NonEmpty.concat halfEdgeLoops
+
+halfEdgeStartPoint :: HalfEdge (space @ units) -> Corner (space @ units)
+halfEdgeStartPoint HalfEdge{edgeId = EdgeId{surfaceId}, curve3d} =
+  Corner surfaceId (Curve3d.startPoint curve3d)
+
+toBoundarySurface ::
+  Tolerance units =>
   Set3d (Corner (space @ units)) (space @ units) ->
-  Result BoundedBy.Error (Point3d (space @ units))
-getCornerPoint searchPoint cornerSet =
-  case Set3d.filter (Bounds3d.constant searchPoint) cornerSet of
-    [] -> internalError "getCorner should always find at least one corner (the given point itself)"
-    NonEmpty candidates -> do
-      let Corner{point} = NonEmpty.minimumBy (\Corner{surfaceId} -> surfaceId) candidates
-      Success point
+  Set3d (HalfEdge (space @ units)) (space @ units) ->
+  SurfaceWithHalfEdges (space @ units) ->
+  Result BoundedBy.Error (BoundarySurface (space @ units))
+toBoundarySurface cornerSet halfEdgeSet surfaceWithHalfEdges = Result.do
+  let SurfaceWithHalfEdges{surfaceId, surfaceFunctions, uvBounds, halfEdgeLoops} =
+        surfaceWithHalfEdges
+  edgeLoops <- Result.collect (Result.collect (toEdge cornerSet halfEdgeSet)) halfEdgeLoops
+  Success BoundarySurface{surfaceId, surfaceFunctions, uvBounds, edgeLoops}
 
 toEdge ::
   Tolerance units =>
@@ -212,50 +236,71 @@ toEdge cornerSet halfEdgeSet halfEdge = Result.do
     List.One matingEdge -> Success (Edge startPoint halfEdge matingEdge)
     List.TwoOrMore -> Failure BoundedBy.BoundaryIntersectsItself
 
+getCornerPoint ::
+  Tolerance units =>
+  Point3d (space @ units) ->
+  Set3d (Corner (space @ units)) (space @ units) ->
+  Result BoundedBy.Error (Point3d (space @ units))
+getCornerPoint searchPoint cornerSet =
+  case Set3d.filter (Bounds3d.constant searchPoint) cornerSet of
+    [] -> internalError "getCorner should always find at least one corner (the given point itself)"
+    NonEmpty candidates -> do
+      let Corner{point} = NonEmpty.minimumBy (\Corner{surfaceId} -> surfaceId) candidates
+      Success point
+
 isMatingEdge :: Tolerance units => HalfEdge (space @ units) -> HalfEdge (space @ units) -> Bool
 isMatingEdge HalfEdge{curve3d = curve1} HalfEdge{curve3d = curve2} = do
-  let matchingPoints t1 = Curve3d.evaluate curve1 t1 ~= Curve3d.evaluate curve2 (1.0 - t1)
-  List.allTrue [matchingPoints t | t <- Parameter.samples]
+  let pointsMatchAt t1 = Curve3d.evaluate curve1 t1 ~= Curve3d.evaluate curve2 (1.0 - t1)
+  List.allSatisfy pointsMatchAt Parameter.samples
+
+----- MESHING -----
 
 data Vertex (coordinateSystem :: CoordinateSystem) where
   Vertex :: UvPoint -> Point3d (space @ units) -> Vertex (space @ units)
 
-instance Bounded2d (Vertex (space @ units)) UvCoordinates where
-  bounds (Vertex uvPoint _) = Bounds2d.constant uvPoint
-
 instance Vertex2d (Vertex (space @ units)) UvCoordinates where
   position (Vertex uvPoint _) = uvPoint
 
-edgeVertices :: Qty units -> Edge (space @ units) -> NonEmpty (Vertex (space @ units))
-edgeVertices accuracy Edge{startPoint, halfEdge, matingEdge} = do
-  let HalfEdge{uvCurve, curve3d} = halfEdge
-  let secondDerivative3d = VectorCurve3d.derivative (Curve3d.derivative curve3d)
-  let predicate = linearizationPredicate accuracy halfEdge matingEdge secondDerivative3d
-  let innerParameterValues = Domain1d.innerSamplingPoints predicate
-  let startVertex = Vertex (Curve2d.startPoint uvCurve) startPoint
-  let toVertex tValue = Vertex (Curve2d.evaluate uvCurve tValue) (Curve3d.evaluate curve3d tValue)
-  startVertex :| List.map toVertex innerParameterValues
+instance Vertex3d (Vertex (space @ units)) (space @ units) where
+  position (Vertex _ point) = point
 
-linearizationPredicate ::
+instance Bounded2d (Vertex (space @ units)) UvCoordinates where
+  bounds (Vertex uvPoint _) = Bounds2d.constant uvPoint
+
+toMesh :: Tolerance units => Qty units -> Body3d (space @ units) -> Mesh (Point3d (space @ units))
+toMesh accuracy (Body3d boundarySurfaces) = do
+  let boundarySurfaceList = NonEmpty.toList boundarySurfaces
+  let surfaceSegmentsById = Map.fromList (boundarySurfaceSegments accuracy) boundarySurfaceList
+  let innerEdgeVerticesById =
+        NonEmpty.foldr (addBoundaryVertices accuracy surfaceSegmentsById) Map.empty boundarySurfaces
+  Mesh.collect (boundarySurfaceMesh surfaceSegmentsById innerEdgeVerticesById) boundarySurfaces
+
+boundarySurfaceSegments ::
   Qty units ->
-  HalfEdge (space @ units) ->
-  HalfEdge (space @ units) ->
-  VectorCurve3d (space @ units) ->
-  Range Unitless ->
-  Bool
-linearizationPredicate accuracy halfEdge1 halfEdge2 secondDerivative3d subdomain = do
-  let HalfEdge{surfaceFunctions = surfaceFunctions1, uvCurve = uvCurve1} = halfEdge1
-  let HalfEdge{surfaceFunctions = surfaceFunctions2, uvCurve = uvCurve2} = halfEdge2
-  let curveSecondDerivativeBounds = VectorCurve3d.evaluateBounds secondDerivative3d subdomain
-  let curveSecondDerivativeMagnitude = VectorBounds3d.magnitude curveSecondDerivativeBounds
-  let curveMaxDomainSize = Linearization.maxDomainSize accuracy curveSecondDerivativeMagnitude
-  let uvBounds1 = Curve2d.evaluateBounds uvCurve1 subdomain
-  let surfaceMaxDomainSize1 = surfaceMaxDomainSize accuracy surfaceFunctions1 uvBounds1
-  let uvBounds2 = Curve2d.evaluateBounds uvCurve2 (1.0 - subdomain)
-  let surfaceMaxDomainSize2 = surfaceMaxDomainSize accuracy surfaceFunctions2 uvBounds2
-  Range.width subdomain <= curveMaxDomainSize
-    && Bounds2d.diameter uvBounds1 <= surfaceMaxDomainSize1
-    && Bounds2d.diameter uvBounds2 <= surfaceMaxDomainSize2
+  BoundarySurface (space @ units) ->
+  (SurfaceId, Set2d UvBounds UvCoordinates)
+boundarySurfaceSegments accuracy BoundarySurface{surfaceId, surfaceFunctions, uvBounds} = do
+  (surfaceId, boundarySurfaceSegmentSet accuracy surfaceFunctions uvBounds)
+
+boundarySurfaceSegmentSet ::
+  Qty units ->
+  SurfaceFunctions (space @ units) ->
+  UvBounds ->
+  Set2d UvBounds UvCoordinates
+boundarySurfaceSegmentSet accuracy surfaceFunctions uvBounds =
+  if Bounds2d.diameter uvBounds <= surfaceMaxDomainSize accuracy surfaceFunctions uvBounds
+    then Set2d.Leaf uvBounds uvBounds
+    else do
+      let Bounds2d uRange vRange = uvBounds
+      let (u1, u2) = Range.bisect uRange
+      let (v1, v2) = Range.bisect vRange
+      let set11 = boundarySurfaceSegmentSet accuracy surfaceFunctions (Bounds2d u1 v1)
+      let set12 = boundarySurfaceSegmentSet accuracy surfaceFunctions (Bounds2d u1 v2)
+      let set21 = boundarySurfaceSegmentSet accuracy surfaceFunctions (Bounds2d u2 v1)
+      let set22 = boundarySurfaceSegmentSet accuracy surfaceFunctions (Bounds2d u2 v2)
+      let set1 = Set2d.Node (Bounds2d u1 vRange) set11 set12
+      let set2 = Set2d.Node (Bounds2d u2 vRange) set21 set22
+      Set2d.Node uvBounds set1 set2
 
 surfaceMaxDomainSize :: Qty units -> SurfaceFunctions (space @ units) -> UvBounds -> Float
 surfaceMaxDomainSize accuracy SurfaceFunctions{fuu, fuv, fvv} uvBounds = do
@@ -267,79 +312,171 @@ surfaceMaxDomainSize accuracy SurfaceFunctions{fuu, fuv, fvv} uvBounds = do
   let fvvMagnitude = VectorBounds3d.magnitude fvvBounds
   SurfaceLinearization.maxDomainSize accuracy fuuMagnitude fuvMagnitude fvvMagnitude
 
-boundarySurfaceMesh ::
+addBoundaryVertices ::
   Qty units ->
+  Map SurfaceId (Set2d UvBounds UvCoordinates) ->
+  BoundarySurface (space @ units) ->
+  Map EdgeId (List (Vertex (space @ units))) ->
+  Map EdgeId (List (Vertex (space @ units)))
+addBoundaryVertices accuracy surfaceSegmentsById boundarySurface accumulated = do
+  let BoundarySurface{edgeLoops} = boundarySurface
+  NonEmpty.foldr (addLoopVertices accuracy surfaceSegmentsById) accumulated edgeLoops
+
+addLoopVertices ::
+  Qty units ->
+  Map SurfaceId (Set2d UvBounds UvCoordinates) ->
+  NonEmpty (Edge (space @ units)) ->
+  Map EdgeId (List (Vertex (space @ units))) ->
+  Map EdgeId (List (Vertex (space @ units)))
+addLoopVertices accuracy surfaceSegmentsById loop accumulated =
+  NonEmpty.foldr (addEdgeVertices accuracy surfaceSegmentsById) accumulated loop
+
+addEdgeVertices ::
+  Qty units ->
+  Map SurfaceId (Set2d UvBounds UvCoordinates) ->
+  Edge (space @ units) ->
+  Map EdgeId (List (Vertex (space @ units))) ->
+  Map EdgeId (List (Vertex (space @ units)))
+addEdgeVertices accuracy surfaceSegmentsById edge accumulated = do
+  let Edge{halfEdge, matingEdge} = edge
+  let HalfEdge{edgeId, uvCurve, curve3d} = halfEdge
+  let HalfEdge{edgeId = matingEdgeId, uvCurve = matingUvCurve} = matingEdge
+  if edgeId < matingEdgeId
+    then do
+      let EdgeId{surfaceId} = edgeId
+      let EdgeId{surfaceId = matingSurfaceId} = matingEdgeId
+      case (Map.get surfaceId surfaceSegmentsById, Map.get matingSurfaceId surfaceSegmentsById) of
+        (Just surfaceSegments, Just matingSurfaceSegments) -> do
+          let edgePredicate =
+                edgeLinearizationPredicate
+                  accuracy
+                  halfEdge
+                  matingEdge
+                  surfaceSegments
+                  matingSurfaceSegments
+                  (VectorCurve3d.derivative (Curve3d.derivative curve3d))
+          let tValues = Domain1d.innerSamplingPoints edgePredicate
+          let vertexPair tValue = do
+                let point = Curve3d.evaluate curve3d tValue
+                let uvPoint = Curve2d.evaluate uvCurve tValue
+                let matingUvPoint = Curve2d.evaluate matingUvCurve (1.0 - tValue)
+                (Vertex uvPoint point, Vertex matingUvPoint point)
+          let (vertices, matingVertices) = List.unzip2 (List.map vertexPair tValues)
+          accumulated
+            |> Map.set edgeId vertices
+            |> Map.set matingEdgeId (List.reverse matingVertices)
+        _ -> internalError "Should always be able to look up surface segments for a given edge"
+    else accumulated
+
+edgeLinearizationPredicate ::
+  Qty units ->
+  HalfEdge (space @ units) ->
+  HalfEdge (space @ units) ->
+  Set2d UvBounds UvCoordinates ->
+  Set2d UvBounds UvCoordinates ->
+  VectorCurve3d (space @ units) ->
+  Range Unitless ->
+  Bool
+edgeLinearizationPredicate
+  accuracy
+  halfEdge
+  matingEdge
+  surfaceSegments
+  matingSurfaceSegments
+  edgeSecondDerivative
+  tRange = do
+    let HalfEdge{uvCurve} = halfEdge
+    let HalfEdge{uvCurve = matingUvCurve} = matingEdge
+    let Range tStart tEnd = tRange
+    let uvStart = Curve2d.evaluate uvCurve tStart
+    let uvEnd = Curve2d.evaluate uvCurve tEnd
+    let matingUvStart = Curve2d.evaluate matingUvCurve (1.0 - tStart)
+    let matingUvEnd = Curve2d.evaluate matingUvCurve (1.0 - tEnd)
+    let uvBounds = Bounds2d.hull2 uvStart uvEnd
+    let matingUvBounds = Bounds2d.hull2 matingUvStart matingUvEnd
+    let edgeSize = Point2d.distanceFrom uvStart uvEnd
+    let matingEdgeSize = Point2d.distanceFrom matingUvStart matingUvEnd
+    let edgeSecondDerivativeBounds = VectorCurve3d.evaluateBounds edgeSecondDerivative tRange
+    let edgeSecondDerivativeMagnitude = VectorBounds3d.magnitude edgeSecondDerivativeBounds
+    let edgeMaxDomainSize = Linearization.maxDomainSize accuracy edgeSecondDerivativeMagnitude
+    Range.width tRange <= edgeMaxDomainSize
+      && validEdge uvBounds edgeSize surfaceSegments
+      && validEdge matingUvBounds matingEdgeSize matingSurfaceSegments
+
+validEdge :: UvBounds -> Float -> Set2d UvBounds UvCoordinates -> Bool
+validEdge uvBounds edgeLength surfaceSegments = Tolerance.exactly
+  case surfaceSegments of
+    Set2d.Node nodeBounds left right ->
+      not (uvBounds ^ nodeBounds)
+        || (validEdge uvBounds edgeLength left && validEdge uvBounds edgeLength right)
+    Set2d.Leaf leafBounds _ ->
+      not (uvBounds ^ leafBounds)
+        || edgeLength <= Float.sqrt 2.0 * Bounds2d.diameter uvBounds
+
+boundarySurfaceMesh ::
+  Map SurfaceId (Set2d UvBounds UvCoordinates) ->
+  Map EdgeId (List (Vertex (space @ units))) ->
   BoundarySurface (space @ units) ->
   Mesh (Point3d (space @ units))
-boundarySurfaceMesh accuracy boundarySurface = do
-  let BoundarySurface{surfaceFunctions, edgeLoops} = boundarySurface
-  let boundaryPolygons = NonEmpty.map (toPolygon accuracy) edgeLoops
-  let boundaryEdges = NonEmpty.collect Polygon2d.edges boundaryPolygons
-  let edgeSet = Set2d.fromNonEmpty boundaryEdges
-  let steinerPoints =
-        generateSteinerPoints accuracy (Set2d.bounds edgeSet) edgeSet surfaceFunctions []
-  let boundaryVertexLoops = NonEmpty.map Polygon2d.vertices boundaryPolygons
-  let vertexMesh = CDT.unsafe boundaryVertexLoops steinerPoints Nothing
-  Mesh.map vertexPosition vertexMesh
+boundarySurfaceMesh surfaceSegmentsById innerEdgeVerticesById boundarySurface = do
+  let BoundarySurface{surfaceId, surfaceFunctions, edgeLoops} = boundarySurface
+  let boundaryPolygons = NonEmpty.map (toPolygon innerEdgeVerticesById) edgeLoops
+  let boundarySegments = NonEmpty.collect Polygon2d.edges boundaryPolygons
+  let boundarySegmentSet = Set2d.fromNonEmpty boundarySegments
+  case Map.get surfaceId surfaceSegmentsById of
+    Nothing -> internalError "Should always be able to look up surface segments by ID"
+    Just surfaceSegments -> do
+      let steinerPoints =
+            case surfaceSegments of
+              Set2d.Leaf{} ->
+                -- Special case, if the surface as a whole is sufficiently linear
+                -- (only needs a single segment to approximate it)
+                -- then we don't need any interior points at all
+                -- (sufficient to just use the boundary points)
+                []
+              Set2d.Node{} ->
+                Maybe.collect (steinerPoint boundarySegmentSet) (Set2d.toList surfaceSegments)
+      let SurfaceFunctions{f} = surfaceFunctions
+      let steinerVertex uvPoint = Vertex uvPoint (SurfaceFunction3d.evaluate f uvPoint)
+      let steinerVertices = List.map steinerVertex steinerPoints
+      let boundaryVertexLoops = NonEmpty.map Polygon2d.vertices boundaryPolygons
+      let vertexMesh = CDT.unsafe boundaryVertexLoops steinerVertices Nothing
+      Mesh.map Vertex3d.position vertexMesh
 
-vertexPosition :: Vertex (space @ units) -> Point3d (space @ units)
-vertexPosition (Vertex _ point) = point
+toPolygon ::
+  Map EdgeId (List (Vertex (space @ units))) ->
+  NonEmpty (Edge (space @ units)) ->
+  Polygon2d (Vertex (space @ units))
+toPolygon innerEdgeVerticesById loop =
+  Polygon2d (NonEmpty.collect (edgeVertices innerEdgeVerticesById) loop)
 
-toPolygon :: Qty units -> NonEmpty (Edge (space @ units)) -> Polygon2d (Vertex (space @ units))
-toPolygon accuracy edgeLoop = Polygon2d (NonEmpty.collect (edgeVertices accuracy) edgeLoop)
+edgeVertices ::
+  Map EdgeId (List (Vertex (space @ units))) ->
+  Edge (space @ units) ->
+  NonEmpty (Vertex (space @ units))
+edgeVertices innerEdgeVerticesById Edge{startPoint, halfEdge} = do
+  let HalfEdge{edgeId, uvCurve} = halfEdge
+  let startVertex = Vertex (Curve2d.startPoint uvCurve) startPoint
+  case Map.get edgeId innerEdgeVerticesById of
+    Just innerEdgeVertices -> startVertex :| innerEdgeVertices
+    Nothing -> internalError "Should always be able to look up internal edge vertices by ID"
 
-generateSteinerPoints ::
-  Qty units ->
-  UvBounds ->
+steinerPoint ::
   Set2d (LineSegment2d (Vertex (space @ units))) UvCoordinates ->
-  SurfaceFunctions (space @ units) ->
-  List (Vertex (space @ units)) ->
-  List (Vertex (space @ units))
-generateSteinerPoints accuracy uvBounds edgeSet surfaceFunctions accumulated = do
+  UvBounds ->
+  Maybe UvPoint
+steinerPoint boundarySegmentSet uvBounds = do
   let Bounds2d uRange vRange = uvBounds
-  let recurse = do
-        let (u1, u2) = Range.bisect uRange
-        let (v1, v2) = Range.bisect vRange
-        let bounds11 = Bounds2d u1 v1
-        let bounds12 = Bounds2d u1 v2
-        let bounds21 = Bounds2d u2 v1
-        let bounds22 = Bounds2d u2 v2
-        accumulated
-          |> generateSteinerPoints accuracy bounds11 edgeSet surfaceFunctions
-          |> generateSteinerPoints accuracy bounds12 edgeSet surfaceFunctions
-          |> generateSteinerPoints accuracy bounds21 edgeSet surfaceFunctions
-          |> generateSteinerPoints accuracy bounds22 edgeSet surfaceFunctions
-  let SurfaceFunctions{f} = surfaceFunctions
   let uvPoint = Point2d (Range.midpoint uRange) (Range.midpoint vRange)
-  let return = Vertex uvPoint (SurfaceFunction3d.evaluate f uvPoint) : accumulated
-  let maxDomainSize = surfaceMaxDomainSize accuracy surfaceFunctions uvBounds
-  let accurate = Bounds2d.diameter uvBounds <= maxDomainSize
-  case includeSubdomain uvBounds edgeSet of
-    Resolved False -> accumulated
-    Resolved True -> if accurate then return else recurse
-    Unresolved -> recurse
+  if isValidSteinerPoint boundarySegmentSet uvPoint then Just uvPoint else Nothing
 
-includeSubdomain ::
-  UvBounds ->
+isValidSteinerPoint ::
   Set2d (LineSegment2d (Vertex (space @ units))) UvCoordinates ->
-  Fuzzy Bool
-includeSubdomain subdomain edgeSet = Tolerance.exactly $
-  case edgeSet of
-    Set2d.Node nodeBounds leftChild rightChild
-      | not (subdomain ^ nodeBounds) -> Resolved True
-      | smallerThan nodeBounds subdomain -> Fuzzy.do
-          includeLeft <- includeSubdomain subdomain leftChild
-          includeRight <- includeSubdomain subdomain rightChild
-          Resolved (includeLeft && includeRight)
-      | otherwise -> Unresolved
-    Set2d.Leaf edgeBounds _
-      | not (subdomain ^ edgeBounds) -> Resolved True
-      | smallerThan edgeBounds subdomain -> Resolved False
-      | otherwise -> Unresolved
-
-smallerThan :: Bounds2d (space @ units) -> Bounds2d (space @ units) -> Bool
-smallerThan bounds1 bounds2 = Bounds2d.diameter bounds2 <= Bounds2d.diameter bounds1
-
-toMesh :: Tolerance units => Qty units -> Body3d (space @ units) -> Mesh (Point3d (space @ units))
-toMesh accuracy (Body3d boundarySurfaces) =
-  Mesh.collect (boundarySurfaceMesh accuracy) boundarySurfaces
+  UvPoint ->
+  Bool
+isValidSteinerPoint edgeSet uvPoint = case edgeSet of
+  Set2d.Node nodeBounds left right -> do
+    let distance = VectorBounds2d.magnitude (uvPoint - nodeBounds)
+    Range.lowerBound distance >= 0.5 * Bounds2d.diameter nodeBounds
+      || (isValidSteinerPoint left uvPoint && isValidSteinerPoint right uvPoint)
+  Set2d.Leaf _ edge -> LineSegment2d.distanceTo uvPoint edge >= 0.5 * LineSegment2d.length edge
