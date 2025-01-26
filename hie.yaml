@@ -24,6 +24,12 @@ cradle:
     - path: "executables/body3d-meshing/Main.hs"
       component: "executables:exe:body3d-meshing"
 
+    - path: "executables/raindrop/Main.hs"
+      component: "executables:exe:raindrop"
+
+    - path: "executables/croissant/Main.hs"
+      component: "executables:exe:croissant"
+
     - path: "opensolid-api/src"
       component: "lib:opensolid-api"
 

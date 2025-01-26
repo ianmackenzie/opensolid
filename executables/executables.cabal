@@ -112,3 +112,17 @@ executable body3d-meshing
   hs-source-dirs: body3d-meshing
   build-depends:
     opensolid-core
+
+executable raindrop
+  import: config
+  main-is: Main.hs
+  hs-source-dirs: raindrop
+  build-depends:
+    opensolid-core
+
+executable croissant
+  import: config
+  main-is: Main.hs
+  hs-source-dirs: croissant
+  build-depends:
+    opensolid-core
