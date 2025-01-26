@@ -279,7 +279,7 @@ boundarySurfaceSegments ::
   Qty units ->
   BoundarySurface (space @ units) ->
   (SurfaceId, Set2d UvBounds UvCoordinates)
-boundarySurfaceSegments accuracy BoundarySurface{surfaceId, surfaceFunctions, uvBounds} = do
+boundarySurfaceSegments accuracy BoundarySurface{surfaceId, surfaceFunctions, uvBounds} =
   (surfaceId, boundarySurfaceSegmentSet accuracy surfaceFunctions uvBounds)
 
 boundarySurfaceSegmentSet ::
