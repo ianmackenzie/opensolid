@@ -1,3 +1,8 @@
+Add support for extruded and revolved surfaces
+
+Add support for extruded and revolved bodies
+-> need Plane3d...
+
 Refactor Surface3d.toMesh to match Body3d
 
 Meshing improvements:
