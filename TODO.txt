@@ -1,7 +1,14 @@
+Refactor Solve2d searching to use 'cross product' of Solve1d?
+
+Verify behaviour of Curve2d intersection when curves are extensions of each other and meet only at an endpoint
+-> rework overlap detection to be based on G2 continuity?
+
+Export to glTF
+
 Add support for extruded and revolved surfaces
 
 Add support for extruded and revolved bodies
--> need Plane3d...
+-> need Plane3d... ,
 
 Refactor Surface3d.toMesh to match Body3d
 
@@ -9,8 +16,6 @@ Meshing improvements:
 - Scale UV domain based on relative fuu and fvv magnitudes, so that e.g. cylinder gets triangulated as strip
 - Or perhaps better: scale UV domain domain based on relative fu and fv magnitudes, to get better triangle aspect ratios?
 - Properly handle UV domains with extreme aspect ratios: take overall bounds and have initial step that splits into square-ish segments?
-- Add support for max size? (Conflicts with UV domain scaling above?)
-  -> only enable scaling if no max size given?
 
 Support Point3d + VectorSurfaceFunction3d -> SurfaceFunction3d
 
@@ -24,6 +29,7 @@ Optimize Set2d to use 'nth element' algorithm?
 
 Rewrite scripts in Haskell?
 -> or Python?
+  -> Haskell better, might have multiple target languages but Haskell will still be primary for a long time...
 -> first up: regenerating hie.yaml to use 'flib' for opensolid-ffi
   -> perhaps also combined script to add a new test executable and update hie.yaml
 
