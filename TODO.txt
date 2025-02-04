@@ -3,6 +3,7 @@ Refactor Solve2d searching to use 'cross product' of Solve1d?
 Verify behaviour of Curve2d intersection when curves are extensions of each other and meet only at an endpoint
 -> rework overlap detection to be based on G2 continuity?
 
+Have Domain.samplingPoints etc. return a 'Result InfiniteRecursion (NonEmpty Float)'?
 Export to glTF
 
 Add support for extruded and revolved surfaces
