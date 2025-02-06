@@ -49,6 +49,17 @@ data Region2d (coordinateSystem :: CoordinateSystem)
 type Loop (coordinateSystem :: CoordinateSystem) =
   NonEmpty (Curve2d coordinateSystem)
 
+instance HasUnits (Region2d (space @ units)) units (Region2d (space @ Unitless))
+
+instance
+  space1 ~ space2 =>
+  Units.Coercion (Region2d (space1 @ unitsA)) (Region2d (space2 @ unitsB))
+  where
+  coerce (Region2d outer inners) =
+    Region2d
+      (NonEmpty.map Units.coerce outer)
+      (List.map (NonEmpty.map Units.coerce) inners)
+
 boundedBy ::
   Tolerance units =>
   List (Curve2d (space @ units)) ->
