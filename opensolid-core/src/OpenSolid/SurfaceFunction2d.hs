@@ -191,30 +191,32 @@ xy (SurfaceFunction.Parametric x) (SurfaceFunction.Parametric y) =
 xy x y = XY x y
 
 evaluate :: SurfaceFunction2d (space @ units) -> UvPoint -> Point2d (space @ units)
-evaluate function uv = case function of
-  SurfaceFunction2d f -> evaluateImpl f uv
-  Coerce f -> Units.coerce (evaluate f uv)
-  Parametric expression -> Expression.evaluate expression uv
+evaluate function uvPoint = case function of
+  SurfaceFunction2d f -> evaluateImpl f uvPoint
+  Coerce f -> Units.coerce (evaluate f uvPoint)
+  Parametric expression -> Expression.evaluate expression uvPoint
   XY x y ->
     Point2d.xy
-      (SurfaceFunction.evaluate x uv)
-      (SurfaceFunction.evaluate y uv)
-  Addition f1 f2 -> evaluate f1 uv + VectorSurfaceFunction2d.evaluate f2 uv
-  Subtraction f1 f2 -> evaluate f1 uv - VectorSurfaceFunction2d.evaluate f2 uv
-  Transformed transform f -> Point2d.transformBy transform (evaluate f uv)
+      (SurfaceFunction.evaluate x uvPoint)
+      (SurfaceFunction.evaluate y uvPoint)
+  Addition f1 f2 -> evaluate f1 uvPoint + VectorSurfaceFunction2d.evaluate f2 uvPoint
+  Subtraction f1 f2 -> evaluate f1 uvPoint - VectorSurfaceFunction2d.evaluate f2 uvPoint
+  Transformed transform f -> Point2d.transformBy transform (evaluate f uvPoint)
 
 evaluateBounds :: SurfaceFunction2d (space @ units) -> UvBounds -> Bounds2d (space @ units)
-evaluateBounds function uv = case function of
-  SurfaceFunction2d f -> evaluateBoundsImpl f uv
-  Coerce f -> Units.coerce (evaluateBounds f uv)
-  Parametric expression -> Expression.evaluateBounds expression uv
+evaluateBounds function uvBounds = case function of
+  SurfaceFunction2d f -> evaluateBoundsImpl f uvBounds
+  Coerce f -> Units.coerce (evaluateBounds f uvBounds)
+  Parametric expression -> Expression.evaluateBounds expression uvBounds
   XY x y ->
     Bounds2d.xy
-      (SurfaceFunction.evaluateBounds x uv)
-      (SurfaceFunction.evaluateBounds y uv)
-  Addition f1 f2 -> evaluateBounds f1 uv + VectorSurfaceFunction2d.evaluateBounds f2 uv
-  Subtraction f1 f2 -> evaluateBounds f1 uv - VectorSurfaceFunction2d.evaluateBounds f2 uv
-  Transformed transform f -> Bounds2d.transformBy transform (evaluateBounds f uv)
+      (SurfaceFunction.evaluateBounds x uvBounds)
+      (SurfaceFunction.evaluateBounds y uvBounds)
+  Addition f1 f2 ->
+    evaluateBounds f1 uvBounds + VectorSurfaceFunction2d.evaluateBounds f2 uvBounds
+  Subtraction f1 f2 ->
+    evaluateBounds f1 uvBounds - VectorSurfaceFunction2d.evaluateBounds f2 uvBounds
+  Transformed transform f -> Bounds2d.transformBy transform (evaluateBounds f uvBounds)
 
 derivative ::
   SurfaceParameter ->
