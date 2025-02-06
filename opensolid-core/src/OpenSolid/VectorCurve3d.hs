@@ -609,7 +609,7 @@ transformBy transform c = case c of
   Product1d3d' curve1d curve3d -> Product1d3d' curve1d (transformBy transform curve3d)
   Product3d1d' curve3d curve1d -> Product3d1d' (transformBy transform curve3d) curve1d
   Quotient' curve3d curve1d -> Quotient' (transformBy transform curve3d) curve1d
-  CrossProduct' lhs rhs -> CrossProduct' (transformBy transform lhs) (transformBy transform rhs)
+  CrossProduct'{} -> Transformed transform c
   PlaceInBasis basis localCurve -> do
     let localTransform = Transform3d.relativeTo (Frame3d Point3d.origin basis) transform
     PlaceInBasis basis (transformBy localTransform localCurve)
