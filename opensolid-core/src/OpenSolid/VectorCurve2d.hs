@@ -33,6 +33,8 @@ module OpenSolid.VectorCurve2d
   , relativeToBasis
   , transformBy
   , rotateBy
+  , convert
+  , unconvert
   )
 where
 
@@ -902,3 +904,15 @@ relativeToBasis ::
   VectorCurve2d (global @ units) ->
   VectorCurve2d (local @ units)
 relativeToBasis basis = placeInBasis (Basis2d.inverse basis)
+
+convert ::
+  Qty (units2 :/: units1) ->
+  VectorCurve2d (space @ units1) ->
+  VectorCurve2d (space @ units2)
+convert factor curve = curve !* factor
+
+unconvert ::
+  Qty (units2 :/: units1) ->
+  VectorCurve2d (space @ units2) ->
+  VectorCurve2d (space @ units1)
+unconvert factor curve = curve !/ factor
