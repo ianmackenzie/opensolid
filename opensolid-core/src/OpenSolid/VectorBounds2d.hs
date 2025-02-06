@@ -27,6 +27,7 @@ module OpenSolid.VectorBounds2d
   , placeIn
   , placeInBasis
   , relativeToBasis
+  , placeOn
   , convert
   , unconvert
   , transformBy
@@ -37,9 +38,12 @@ import OpenSolid.Float qualified as Float
 import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Basis2d (Basis2d)
+  , Basis3d (Basis3d)
   , Direction2d (Unit2d)
   , Frame2d (Frame2d)
+  , Plane3d (Plane3d)
   , VectorBounds2d (VectorBounds2d)
+  , VectorBounds3d
   )
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Range (Range (Range))
@@ -217,6 +221,12 @@ relativeToBasis basis (VectorBounds2d x y) = do
   let rx = 0.5 * xWidth * Float.abs ix + 0.5 * yWidth * Float.abs iy
   let ry = 0.5 * xWidth * Float.abs jx + 0.5 * yWidth * Float.abs jy
   VectorBounds2d (Range.from (x0 - rx) (x0 + rx)) (Range.from (y0 - ry) (y0 + ry))
+
+placeOn ::
+  Plane3d (space @ originPointUnits) (Defines local) ->
+  VectorBounds2d (local @ units) ->
+  VectorBounds3d (space @ units)
+placeOn (Plane3d _ (Basis3d i j _)) (VectorBounds2d x y) = x * i + y * j
 
 convert ::
   Qty (units2 :/: units1) ->
