@@ -5,6 +5,8 @@ module OpenSolid.Region2d
   , outerLoop
   , innerLoops
   , boundaryCurves
+  , placeIn
+  , relativeTo
   , convert
   , unconvert
   , classify
@@ -27,6 +29,8 @@ import OpenSolid.Curve2d.Intersections qualified as Curve2d.Intersections
 import OpenSolid.Estimate (Estimate)
 import OpenSolid.Estimate qualified as Estimate
 import OpenSolid.Float qualified as Float
+import OpenSolid.Frame2d (Frame2d)
+import OpenSolid.Frame2d qualified as Frame2d
 import OpenSolid.List qualified as List
 import OpenSolid.Mesh (Mesh)
 import OpenSolid.NonEmpty qualified as NonEmpty
@@ -195,6 +199,23 @@ innerLoops (Region2d _ loops) = loops
 
 boundaryCurves :: Region2d (space @ units) -> NonEmpty (Curve2d (space @ units))
 boundaryCurves region = NonEmpty.concat (outerLoop region :| innerLoops region)
+
+placeIn ::
+  Frame2d (global @ units) (Defines local) ->
+  Region2d (local @ units) ->
+  Region2d (global @ units)
+placeIn frame (Region2d outer inners) = do
+  let transform =
+        case Frame2d.handedness frame of
+          Positive -> NonEmpty.map (Curve2d.placeIn frame)
+          Negative -> NonEmpty.reverseMap (Curve2d.reverse . Curve2d.placeIn frame)
+  Region2d (transform outer) (List.map transform inners)
+
+relativeTo ::
+  Frame2d (global @ units) (Defines local) ->
+  Region2d (global @ units) ->
+  Region2d (local @ units)
+relativeTo frame region = placeIn (Frame2d.inverse frame) region
 
 convert ::
   Qty (units2 :/: units1) ->
