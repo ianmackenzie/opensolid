@@ -1,6 +1,27 @@
+Remove Multiplication' instances for direction-related types
+-> shouldn't ever actually be needed...
+-> in general should ideally never need 'units :*: Unitless' or 'Unitless :*: units'
+
+Search for Vector#d.unit calls and implement direct operations on Direction#d values directly where possible
+
+Switch parametric types to only specialize for Parametric and Coerce
+
+Implement curve reversal as composition with (1 - t)?
+-> still efficient for parametric curves, which is the critical case
+-> most curves that have an optimized reverse implementation are parametric anyways...
+
 Enforce frames to always be right-handed
 
+Switch Plane3d to only store X and Y directions
+-> create PlanarBasis3d type
+
+Refactor vector and direction types to have placeIn/relativeTo *only* support Basis#d?
+-> not a big deal to have to call e.g. Frame3d.basis sometimes...and pretty explicit/clean
+-> also removes ugliness with originPointUnits type parameter
+
 Replace Range.from with just Range pattern?
+
+Create monolithic OpenSolid.Functions module
 
 Refactor Solve2d searching to use 'cross product' of Solve1d?
 
