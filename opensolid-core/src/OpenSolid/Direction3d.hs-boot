@@ -12,7 +12,7 @@ import OpenSolid.Transform qualified as Transform
 import {-# SOURCE #-} OpenSolid.Transform3d (Transform3d)
 import {-# SOURCE #-} OpenSolid.Vector3d (Vector3d)
 
-type role Direction3d phantom
+type role Direction3d nominal
 
 newtype Direction3d (space :: Type) = Unit (Vector3d (space @ Unitless))
 

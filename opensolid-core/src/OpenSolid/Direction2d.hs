@@ -35,157 +35,71 @@ where
 
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
-import {-# SOURCE #-} OpenSolid.Axis2d (Axis2d)
-import {-# SOURCE #-} OpenSolid.Basis2d (Basis2d)
 import OpenSolid.Error qualified as Error
-import OpenSolid.FFI (FFI)
-import OpenSolid.FFI qualified as FFI
-import {-# SOURCE #-} OpenSolid.Frame2d (Frame2d)
-import {-# SOURCE #-} OpenSolid.Point2d (Point2d)
 import OpenSolid.Prelude
+import OpenSolid.Primitives
+  ( Axis2d
+  , Basis2d
+  , Direction2d (Unit2d)
+  , Frame2d
+  , Point2d
+  , Transform2d
+  , Vector2d (Vector2d)
+  )
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Random qualified as Random
 import OpenSolid.Transform qualified as Transform
-import OpenSolid.Transform2d (Transform2d)
-import OpenSolid.Units (Radians)
-import OpenSolid.Units qualified as Units
-import OpenSolid.Vector2d (Vector2d (Vector2d, Vector2d#))
 import OpenSolid.Vector2d qualified as Vector2d
-
-type role Direction2d phantom
-
-{-| A direction in 2D.
-
-This is effectively a type-safe unit vector.
--}
-newtype Direction2d (space :: Type) = Unit (Vector2d (space @ Unitless))
-  deriving (Eq, Show)
 
 {-# COMPLETE Direction2d #-}
 
 {-# INLINE Direction2d #-}
 pattern Direction2d :: Float -> Float -> Direction2d space
-pattern Direction2d dx dy <- Unit (Vector2d dx dy)
-
-instance HasUnits (Direction2d space) Unitless (Direction2d space)
-
-instance FFI (Direction2d space) where
-  representation = FFI.classRepresentation "Direction2d"
-
-instance space1 ~ space2 => Units.Coercion (Direction2d space1) (Direction2d space2) where
-  coerce = identity
-
-instance
-  space1 ~ space2 =>
-  ApproximateEquality (Direction2d space1) (Direction2d space2) Radians
-  where
-  d1 ~= d2 = angleFrom d1 d2 ~= Angle.zero
-
-instance Negation (Direction2d space) where
-  negate direction = Unit -(unwrap direction)
-
-instance Multiplication' Sign (Direction2d space) (Direction2d space) where
-  Positive .*. direction = direction
-  Negative .*. direction = -direction
-
-instance Multiplication Sign (Direction2d space) (Direction2d space) where
-  Positive * direction = direction
-  Negative * direction = -direction
-
-instance Multiplication' (Direction2d space) Sign (Direction2d space) where
-  direction .*. Positive = direction
-  direction .*. Negative = -direction
-
-instance Multiplication (Direction2d space) Sign (Direction2d space) where
-  direction * Positive = direction
-  direction * Negative = -direction
-
-instance
-  Multiplication'
-    (Qty units)
-    (Direction2d space)
-    (Vector2d (space @ (units :*: Unitless)))
-  where
-  scale .*. direction = scale .*. unwrap direction
-
-instance Multiplication (Qty units) (Direction2d space) (Vector2d (space @ units)) where
-  scale * direction = scale * unwrap direction
-
-instance
-  Multiplication'
-    (Direction2d space)
-    (Qty units)
-    (Vector2d (space @ (Unitless :*: units)))
-  where
-  direction .*. scale = unwrap direction .*. scale
-
-instance Multiplication (Direction2d space) (Qty units) (Vector2d (space @ units)) where
-  direction * scale = unwrap direction * scale
-
-instance
-  space1 ~ space2 =>
-  DotMultiplication' (Direction2d space1) (Direction2d space2) (Qty (Unitless :*: Unitless))
-  where
-  Unit v1 .<>. Unit v2 = v1 .<>. v2
-
-instance space1 ~ space2 => DotMultiplication (Direction2d space1) (Direction2d space2) Float where
-  Unit v1 <> Unit v2 = v1 <> v2
-
-instance
-  space1 ~ space2 =>
-  CrossMultiplication' (Direction2d space1) (Direction2d space2) (Qty (Unitless :*: Unitless))
-  where
-  Unit v1 .><. Unit v2 = v1 .><. v2
-
-instance
-  space1 ~ space2 =>
-  CrossMultiplication (Direction2d space1) (Direction2d space2) Float
-  where
-  Unit v1 >< Unit v2 = v1 >< v2
+pattern Direction2d dx dy <- Unit2d (Vector2d dx dy)
 
 {-# INLINE unwrap #-}
 unwrap :: Direction2d space -> Vector2d (space @ Unitless)
-unwrap (Unit v) = v
+unwrap (Unit2d v) = v
 
 -- | Get the X component of a direction.
 xComponent :: Direction2d space -> Float
-xComponent direction = Vector2d.xComponent (unwrap direction)
+xComponent (Unit2d vector) = Vector2d.xComponent vector
 
 -- | Get the Y component of a direction.
 yComponent :: Direction2d space -> Float
-yComponent direction = Vector2d.yComponent (unwrap direction)
+yComponent (Unit2d vector) = Vector2d.yComponent vector
 
 -- | Get the X and Y components of a direction.
 {-# INLINE components #-}
 components :: Direction2d space -> (Float, Float)
-components direction = Vector2d.components (unwrap direction)
+components (Unit2d vector) = Vector2d.components vector
 
 {-# INLINE unsafe #-}
 unsafe :: Vector2d (space @ Unitless) -> Direction2d space
-unsafe = Unit
+unsafe = Unit2d
 
 {-# INLINE lift #-}
 lift ::
-  (Vector2d (spaceA @ Unitless) -> Vector2d (spaceB @ Unitless)) ->
-  Direction2d spaceA ->
-  Direction2d spaceB
-lift function (Unit vector) = Unit (function vector)
+  (Vector2d (space1 @ Unitless) -> Vector2d (space2 @ Unitless)) ->
+  Direction2d space1 ->
+  Direction2d space2
+lift function (Unit2d vector) = Unit2d (function vector)
 
 -- | The positive X direction.
 positiveX :: Direction2d space
-positiveX = unsafe (Vector2d# 1.0## 0.0##)
+positiveX = Unit2d (Vector2d 1.0 0.0)
 
 -- | The negative X direction.
 negativeX :: Direction2d space
-negativeX = unsafe (Vector2d# -1.0## 0.0##)
+negativeX = Unit2d (Vector2d -1.0 0.0)
 
 -- | The positive Y direction.
 positiveY :: Direction2d space
-positiveY = unsafe (Vector2d# 0.0## 1.0##)
+positiveY = Unit2d (Vector2d 0.0 1.0)
 
 -- | The negative Y direction.
 negativeY :: Direction2d space
-negativeY = unsafe (Vector2d# 0.0## -1.0##)
+negativeY = Unit2d (Vector2d 0.0 -1.0)
 
 -- | Alias for 'positiveX'.
 x :: Direction2d space
@@ -202,7 +116,7 @@ from ::
   Point2d (space @ units) ->
   Point2d (space @ units) ->
   Result PointsAreCoincident (Direction2d space)
-from p1 p2 =
+from p1 p2 = do
   case Vector2d.direction (p2 - p1) of
     Success direction -> Success direction
     Failure Vector2d.IsZero -> Failure PointsAreCoincident
@@ -216,7 +130,7 @@ The angle is measured counterclockwise from the positive X direction, so:
   * An angle of 180 degrees (or -180 degrees) corresponds to the negative X direction
 -}
 fromAngle :: Angle -> Direction2d space
-fromAngle angle = unsafe (Vector2d.polar 1.0 angle)
+fromAngle angle = Unit2d (Vector2d (Angle.cos angle) (Angle.sin angle))
 
 {-| Convert a direction to an angle.
 
@@ -232,7 +146,7 @@ The angle is measured counterclockwise from the positive X direction, so:
 The returned angle will be between -180 and +180 degrees.
 -}
 toAngle :: Direction2d space -> Angle
-toAngle (Unit vector) = Vector2d.angle vector
+toAngle (Unit2d vector) = Vector2d.angle vector
 
 {-| Construct a direction from an angle given in degrees.
 

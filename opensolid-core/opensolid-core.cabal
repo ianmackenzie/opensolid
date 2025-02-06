@@ -74,7 +74,6 @@ common config
     StrictData
     TypeFamilies
     TypeFamilyDependencies
-    UnboxedTuples
     UndecidableInstances
     UndecidableSuperClasses
     UnliftedFFITypes
@@ -96,7 +95,6 @@ library
     OpenSolid.ArcLength
     OpenSolid.Area
     OpenSolid.Arithmetic
-    OpenSolid.Arithmetic.Unboxed
     OpenSolid.Array
     OpenSolid.Array2d
     OpenSolid.Axis2d
@@ -226,8 +224,8 @@ library
     OpenSolid.Expression.Scalar
     OpenSolid.Linearization
     OpenSolid.Lobatto
-    OpenSolid.Point2d.CoordinateTransformation
     OpenSolid.Point3d.CoordinateTransformation
+    OpenSolid.Primitives
     OpenSolid.Quadrature
     OpenSolid.Random.Internal
     OpenSolid.SurfaceFunction.Internal
@@ -235,7 +233,6 @@ library
     OpenSolid.SurfaceFunction.SaddleRegion
     OpenSolid.SurfaceLinearization
     OpenSolid.Text.Parse
-    OpenSolid.Vector2d.CoordinateTransformation
     OpenSolid.Vector3d.CoordinateTransformation
 
   hs-source-dirs: src

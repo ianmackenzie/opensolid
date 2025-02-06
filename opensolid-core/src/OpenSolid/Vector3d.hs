@@ -43,10 +43,8 @@ module OpenSolid.Vector3d
   )
 where
 
-import Data.Coerce qualified
 import OpenSolid.Angle (Angle)
 import OpenSolid.Area qualified as Area
-import OpenSolid.Arithmetic.Unboxed
 import {-# SOURCE #-} OpenSolid.Axis3d (Axis3d)
 import {-# SOURCE #-} OpenSolid.Axis3d qualified as Axis3d
 import {-# SOURCE #-} OpenSolid.Basis3d (Basis3d)
@@ -61,7 +59,6 @@ import OpenSolid.List qualified as List
 import {-# SOURCE #-} OpenSolid.Point3d (Point3d)
 import {-# SOURCE #-} OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
-import OpenSolid.Qty (Qty (Qty#))
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Range (Range)
 import OpenSolid.Transform3d (Transform3d (Transform3d))
@@ -71,17 +68,10 @@ import OpenSolid.Units qualified as Units
 import OpenSolid.Vector3d.CoordinateTransformation qualified as Vector3d.CoordinateTransformation
 import {-# SOURCE #-} OpenSolid.VectorBounds3d (VectorBounds3d (VectorBounds3d))
 
-type role Vector3d phantom
+type role Vector3d nominal
 
-data Vector3d (coordinateSystem :: CoordinateSystem) = Vector3d# Double# Double# Double#
-
-{-# COMPLETE Vector3d #-}
-
-{-# INLINE Vector3d #-}
-pattern Vector3d :: Qty units -> Qty units -> Qty units -> Vector3d (space @ units)
-pattern Vector3d vx vy vz <- (components# -> (# vx, vy, vz #))
-  where
-    Vector3d (Qty# vx#) (Qty# vy#) (Qty# vz#) = Vector3d# vx# vy# vz#
+data Vector3d (coordinateSystem :: CoordinateSystem) where
+  Vector3d :: Qty units -> Qty units -> Qty units -> Vector3d (space @ units)
 
 deriving instance Eq (Vector3d (space @ units))
 
@@ -95,7 +85,7 @@ instance
     (Vector3d (space1 @ unitsA))
     (Vector3d (space2 @ unitsB))
   where
-  coerce = Data.Coerce.coerce
+  coerce (Vector3d vx vy vz) = Vector3d (Units.coerce vx) (Units.coerce vy) (Units.coerce vz)
 
 instance
   ( space ~ space_
@@ -106,7 +96,7 @@ instance
   v1 ~= v2 = magnitude (v1 - v2) ~= Qty.zero
 
 instance Negation (Vector3d (space @ units)) where
-  negate (Vector3d# vx# vy# vz#) = Vector3d# (negate# vx#) (negate# vy#) (negate# vz#)
+  negate (Vector3d vx vy vz) = Vector3d (negate vx) (negate vy) (negate vz)
 
 instance
   Multiplication'
@@ -143,7 +133,7 @@ instance
     (Vector3d (space_ @ units_))
     (Vector3d (space @ units))
   where
-  Vector3d# x1# y1# z1# + Vector3d# x2# y2# z2# = Vector3d# (x1# +# x2#) (y1# +# y2#) (z1# +# z2#)
+  Vector3d x1 y1 z1 + Vector3d x2 y2 z2 = Vector3d (x1 + x2) (y1 + y2) (z1 + z2)
 
 instance
   ( space ~ space_
@@ -154,7 +144,7 @@ instance
     (Vector3d (space_ @ units_))
     (Vector3d (space @ units))
   where
-  Vector3d# x1# y1# z1# - Vector3d# x2# y2# z2# = Vector3d# (x1# -# x2#) (y1# -# y2#) (z1# -# z2#)
+  Vector3d x1 y1 z1 - Vector3d x2 y2 z2 = Vector3d (x1 - x2) (y1 - y2) (z1 - z2)
 
 instance
   Multiplication'
@@ -162,13 +152,13 @@ instance
     (Vector3d (space @ units2))
     (Vector3d (space @ (units1 :*: units2)))
   where
-  Qty# scale# .*. Vector3d# vx# vy# vz# = Vector3d# (scale# *# vx#) (scale# *# vy#) (scale# *# vz#)
+  scale .*. Vector3d vx vy vz = Vector3d (scale .*. vx) (scale .*. vy) (scale .*. vz)
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Qty units1) (Vector3d (space @ units2)) (Vector3d (space @ units3))
   where
-  Qty# scale# * Vector3d# vx# vy# vz# = Vector3d# (scale# *# vx#) (scale# *# vy#) (scale# *# vz#)
+  scale * Vector3d vx vy vz = Vector3d (scale * vx) (scale * vy) (scale * vz)
 
 instance
   Multiplication'
@@ -176,13 +166,13 @@ instance
     (Qty units2)
     (Vector3d (space @ (units1 :*: units2)))
   where
-  Vector3d# vx# vy# vz# .*. Qty# scale# = Vector3d# (vx# *# scale#) (vy# *# scale#) (vz# *# scale#)
+  Vector3d vx vy vz .*. scale = Vector3d (vx .*. scale) (vy .*. scale) (vz .*. scale)
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Vector3d (space @ units1)) (Qty units2) (Vector3d (space @ units3))
   where
-  Vector3d# vx# vy# vz# * Qty# scale# = Vector3d# (vx# *# scale#) (vy# *# scale#) (vz# *# scale#)
+  Vector3d vx vy vz * scale = Vector3d (vx * scale) (vy * scale) (vz * scale)
 
 instance
   Multiplication'
@@ -218,13 +208,13 @@ instance
     (Qty units2)
     (Vector3d (space @ (units1 :/: units2)))
   where
-  Vector3d# vx# vy# vz# ./. Qty# scale# = Vector3d# (vx# /# scale#) (vy# /# scale#) (vz# /# scale#)
+  Vector3d vx vy vz ./. scale = Vector3d (vx ./. scale) (vy ./. scale) (vz ./. scale)
 
 instance
   Units.Quotient units1 units2 units3 =>
   Division (Vector3d (space @ units1)) (Qty units2) (Vector3d (space @ units3))
   where
-  Vector3d# vx# vy# vz# / Qty# scale# = Vector3d# (vx# /# scale#) (vy# /# scale#) (vz# /# scale#)
+  Vector3d vx vy vz / scale = Vector3d (vx / scale) (vy / scale) (vz / scale)
 
 instance
   space ~ space_ =>
@@ -233,13 +223,13 @@ instance
     (Vector3d (space_ @ units2))
     (Qty (units1 :*: units2))
   where
-  Vector3d# x1# y1# z1# .<>. Vector3d# x2# y2# z2# = Qty# (x1# *# x2# +# y1# *# y2# +# z1# *# z2#)
+  Vector3d x1 y1 z1 .<>. Vector3d x2 y2 z2 = x1 .*. x2 + y1 .*. y2 + z1 .*. z2
 
 instance
   (Units.Product units1 units2 units3, space ~ space_) =>
   DotMultiplication (Vector3d (space @ units1)) (Vector3d (space_ @ units2)) (Qty units3)
   where
-  Vector3d# x1# y1# z1# <> Vector3d# x2# y2# z2# = Qty# (x1# *# x2# +# y1# *# y2# +# z1# *# z2#)
+  Vector3d x1 y1 z1 <> Vector3d x2 y2 z2 = x1 * x2 + y1 * y2 + z1 * z2
 
 instance
   space ~ space_ =>
@@ -272,11 +262,11 @@ instance
     (Vector3d (space_ @ units2))
     (Vector3d (space @ (units1 :*: units2)))
   where
-  Vector3d# x1# y1# z1# .><. Vector3d# x2# y2# z2# =
-    Vector3d#
-      (y1# *# z2# -# z1# *# y2#)
-      (z1# *# x2# -# x1# *# z2#)
-      (x1# *# y2# -# y1# *# x2#)
+  Vector3d x1 y1 z1 .><. Vector3d x2 y2 z2 =
+    Vector3d
+      (y1 .*. z2 - z1 .*. y2)
+      (z1 .*. x2 - x1 .*. z2)
+      (x1 .*. y2 - y1 .*. x2)
 
 instance
   (Units.Product units1 units2 units3, space ~ space_) =>
@@ -285,11 +275,11 @@ instance
     (Vector3d (space_ @ units2))
     (Vector3d (space @ units3))
   where
-  Vector3d# x1# y1# z1# >< Vector3d# x2# y2# z2# =
-    Vector3d#
-      (y1# *# z2# -# z1# *# y2#)
-      (z1# *# x2# -# x1# *# z2#)
-      (x1# *# y2# -# y1# *# x2#)
+  Vector3d x1 y1 z1 >< Vector3d x2 y2 z2 =
+    Vector3d
+      (y1 * z2 - z1 * y2)
+      (z1 * x2 - x1 * z2)
+      (x1 * y2 - y1 * x2)
 
 instance
   space ~ space_ =>
@@ -322,28 +312,28 @@ instance
   d >< v = unit d >< v
 
 zero :: Vector3d (space @ units)
-zero = Vector3d# 0.0## 0.0## 0.0##
+zero = Vector3d Qty.zero Qty.zero Qty.zero
 
 unit :: Direction3d space -> Vector3d (space @ Unitless)
 unit = Direction3d.unwrap
 
 x :: Qty units -> Vector3d (space @ units)
-x (Qty# vx#) = Vector3d# vx# 0.0## 0.0##
+x vx = Vector3d vx Qty.zero Qty.zero
 
 y :: Qty units -> Vector3d (space @ units)
-y (Qty# vy#) = Vector3d# 0.0## vy# 0.0##
+y vy = Vector3d Qty.zero vy Qty.zero
 
 z :: Qty units -> Vector3d (space @ units)
-z (Qty# vz#) = Vector3d# 0.0## 0.0## vz#
+z vz = Vector3d Qty.zero Qty.zero vz
 
 xy :: Qty units -> Qty units -> Vector3d (space @ units)
-xy (Qty# vx#) (Qty# vz#) = Vector3d# vx# vz# 0.0##
+xy vx vz = Vector3d vx vz Qty.zero
 
 xz :: Qty units -> Qty units -> Vector3d (space @ units)
-xz (Qty# vx#) (Qty# vz#) = Vector3d# vx# 0.0## vz#
+xz vx vz = Vector3d vx Qty.zero vz
 
 yz :: Qty units -> Qty units -> Vector3d (space @ units)
-yz (Qty# vy#) (Qty# vz#) = Vector3d# 0.0## vy# vz#
+yz vy vz = Vector3d Qty.zero vy vz
 
 xyz :: Qty units -> Qty units -> Qty units -> Vector3d (space @ units)
 xyz = Vector3d
@@ -385,13 +375,13 @@ squareMeters vx vy vz =
   Vector3d (Area.squareMeters vx) (Area.squareMeters vy) (Area.squareMeters vz)
 
 xComponent :: Vector3d (space @ units) -> Qty units
-xComponent (Vector3d# vx# _ _) = Qty# vx#
+xComponent (Vector3d vx _ _) = vx
 
 yComponent :: Vector3d (space @ units) -> Qty units
-yComponent (Vector3d# _ vy# _) = Qty# vy#
+yComponent (Vector3d _ vy _) = vy
 
 zComponent :: Vector3d (space @ units) -> Qty units
-zComponent (Vector3d# _ _ vz#) = Qty# vz#
+zComponent (Vector3d _ _ vz) = vz
 
 componentIn :: Direction3d space -> Vector3d (space @ units) -> Qty units
 componentIn = (<>)
@@ -403,33 +393,29 @@ projectionIn givenDirection vector = givenDirection * componentIn givenDirection
 components :: Vector3d (space @ units) -> (Qty units, Qty units, Qty units)
 components (Vector3d vx vy vz) = (vx, vy, vz)
 
-{-# INLINE components# #-}
-components# :: Vector3d (space @ units) -> (# Qty units, Qty units, Qty units #)
-components# (Vector3d# vx# vy# vz#) = (# Qty# vx#, Qty# vy#, Qty# vz# #)
-
 interpolateFrom ::
   Vector3d (space @ units) ->
   Vector3d (space @ units) ->
   Float ->
   Vector3d (space @ units)
-interpolateFrom (Vector3d# x1# y1# z1#) (Vector3d# x2# y2# z2#) (Qty# t#) =
-  Vector3d#
-    (x1# +# t# *# (x2# -# x1#))
-    (y1# +# t# *# (y2# -# y1#))
-    (z1# +# t# *# (z2# -# z1#))
+interpolateFrom (Vector3d x1 y1 z1) (Vector3d x2 y2 z2) t =
+  Vector3d
+    (x1 + t * (x2 - x1))
+    (y1 + t * (y2 - y1))
+    (z1 + t * (z2 - z1))
 
 midpoint :: Vector3d (space @ units) -> Vector3d (space @ units) -> Vector3d (space @ units)
-midpoint (Vector3d# x1# y1# z1#) (Vector3d# x2# y2# z2#) =
-  Vector3d# (0.5## *# (x1# +# x2#)) (0.5## *# (y1# +# y2#)) (0.5## *# (z1# +# z2#))
+midpoint (Vector3d x1 y1 z1) (Vector3d x2 y2 z2) =
+  Vector3d (0.5 * (x1 + x2)) (0.5 * (y1 + y2)) (0.5 * (z1 + z2))
 
 magnitude :: Vector3d (space @ units) -> Qty units
-magnitude (Vector3d# vx# vy# vz#) = Qty# (sqrt# (vx# *# vx# +# vy# *# vy# +# vz# *# vz#))
+magnitude (Vector3d vx vy vz) = Qty.hypot3 vx vy vz
 
 squaredMagnitude :: Units.Squared units1 units2 => Vector3d (space @ units1) -> Qty units2
 squaredMagnitude = Units.specialize . squaredMagnitude'
 
 squaredMagnitude' :: Vector3d (space @ units) -> Qty (units :*: units)
-squaredMagnitude' (Vector3d# vx# vy# vz#) = Qty# (vx# *# vx# +# vy# *# vy# +# vz# *# vz#)
+squaredMagnitude' (Vector3d vx vy vz) = vx .*. vx + vy .*. vy + vz .*. vz
 
 data IsZero = IsZero deriving (Eq, Show, Error.Message)
 

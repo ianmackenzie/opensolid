@@ -36,7 +36,7 @@ import OpenSolid.Units qualified as Units
 import OpenSolid.Vector3d (Vector3d (Vector3d))
 import OpenSolid.Vector3d qualified as Vector3d
 
-type role Direction3d phantom
+type role Direction3d nominal
 
 newtype Direction3d (space :: Type) = Unit (Vector3d (space @ Unitless))
   deriving (Eq, Show)

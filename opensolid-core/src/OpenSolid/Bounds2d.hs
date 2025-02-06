@@ -1,6 +1,6 @@
 module OpenSolid.Bounds2d
   ( Bounds2d (Bounds2d)
-  , Bounded2d (..)
+  , Bounded2d (bounds)
   , xCoordinate
   , yCoordinate
   , coordinates
@@ -42,176 +42,21 @@ where
 import OpenSolid.Axis2d (Axis2d)
 import OpenSolid.Axis2d qualified as Axis2d
 import OpenSolid.Direction2d qualified as Direction2d
-import OpenSolid.FFI (FFI)
-import OpenSolid.FFI qualified as FFI
 import OpenSolid.Float qualified as Float
 import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Frame2d qualified as Frame2d
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.Fuzzy qualified as Fuzzy
 import OpenSolid.Maybe qualified as Maybe
-import OpenSolid.Point2d (Point2d (Point2d))
+import OpenSolid.Point2d (Point2d)
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
+import OpenSolid.Primitives (Bounded2d (bounds), Bounds2d (Bounds2d))
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Range (Range (Range))
 import OpenSolid.Range qualified as Range
 import OpenSolid.Transform2d (Transform2d (Transform2d))
-import OpenSolid.Units (Meters)
-import OpenSolid.Units qualified as Units
-import OpenSolid.Vector2d (Vector2d (Vector2d))
 import OpenSolid.Vector2d qualified as Vector2d
-import OpenSolid.VectorBounds2d (VectorBounds2d (VectorBounds2d))
-
-type role Bounds2d nominal
-
-data Bounds2d (coordinateSystem :: CoordinateSystem) where
-  Bounds2d ::
-    Range units ->
-    Range units ->
-    Bounds2d (space @ units)
-
-deriving instance Show (Bounds2d (space @ units))
-
-instance HasUnits (Bounds2d (space @ units)) units (Bounds2d (space @ Unitless))
-
-class Bounded2d a (coordinateSystem :: CoordinateSystem) | a -> coordinateSystem where
-  bounds :: a -> Bounds2d coordinateSystem
-
-instance
-  space1 ~ space2 =>
-  Units.Coercion (Bounds2d (space1 @ unitsA)) (Bounds2d (space2 @ unitsB))
-  where
-  coerce (Bounds2d x y) = Bounds2d (Units.coerce x) (Units.coerce y)
-
-instance Bounded2d (Point2d (space @ units)) (space @ units) where
-  bounds = constant
-
-instance Bounded2d (Bounds2d (space @ units)) (space @ units) where
-  bounds = identity
-
-instance FFI (Bounds2d (space @ Meters)) where
-  representation = FFI.classRepresentation "Bounds2d"
-
-instance FFI (Bounds2d (space @ Unitless)) where
-  representation = FFI.classRepresentation "UvBounds"
-
-instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
-  Subtraction
-    (Point2d (space1 @ units1))
-    (Bounds2d (space2 @ units2))
-    (VectorBounds2d (space1 @ units1))
-  where
-  Point2d px py - Bounds2d bx by = VectorBounds2d (px - bx) (py - by)
-
-instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
-  Subtraction
-    (Bounds2d (space1 @ units1))
-    (Point2d (space2 @ units2))
-    (VectorBounds2d (space1 @ units1))
-  where
-  Bounds2d bx by - Point2d px py = VectorBounds2d (bx - px) (by - py)
-
-instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
-  Subtraction
-    (Bounds2d (space1 @ units1))
-    (Bounds2d (space2 @ units2))
-    (VectorBounds2d (space1 @ units1))
-  where
-  Bounds2d x1 y1 - Bounds2d x2 y2 = VectorBounds2d (x1 - x2) (y1 - y2)
-
-instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
-  Addition
-    (Bounds2d (space1 @ units1))
-    (Vector2d (space2 @ units2))
-    (Bounds2d (space1 @ units1))
-  where
-  Bounds2d x1 y1 + Vector2d x2 y2 = Bounds2d (x1 + x2) (y1 + y2)
-
-instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
-  Addition
-    (Bounds2d (space1 @ units1))
-    (VectorBounds2d (space2 @ units2))
-    (Bounds2d (space1 @ units1))
-  where
-  Bounds2d x1 y1 + VectorBounds2d x2 y2 = Bounds2d (x1 + x2) (y1 + y2)
-
-instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
-  Subtraction
-    (Bounds2d (space1 @ units1))
-    (Vector2d (space2 @ units2))
-    (Bounds2d (space1 @ units1))
-  where
-  Bounds2d x1 y1 - Vector2d x2 y2 = Bounds2d (x1 - x2) (y1 - y2)
-
-instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
-  Subtraction
-    (Bounds2d (space1 @ units1))
-    (VectorBounds2d (space2 @ units2))
-    (Bounds2d (space1 @ units1))
-  where
-  Bounds2d x1 y1 - VectorBounds2d x2 y2 = Bounds2d (x1 - x2) (y1 - y2)
-
-instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
-  ApproximateEquality (Point2d (space1 @ units1)) (Bounds2d (space2 @ units2)) units1
-  where
-  Point2d px py ~= Bounds2d bx by = px ~= bx && py ~= by
-
-instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
-  ApproximateEquality (Bounds2d (space1 @ units1)) (Point2d (space2 @ units2)) units1
-  where
-  box ~= point = point ~= box
-
-instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
-  Intersects (Point2d (space1 @ units1)) (Bounds2d (space2 @ units2)) units1
-  where
-  Point2d px py ^ Bounds2d bx by = px ^ bx && py ^ by
-
-instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
-  Intersects (Bounds2d (space1 @ units1)) (Point2d (space2 @ units2)) units1
-  where
-  box ^ point = point ^ box
-
-instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
-  Intersects (Bounds2d (space1 @ units1)) (Bounds2d (space2 @ units2)) units1
-  where
-  Bounds2d x1 y1 ^ Bounds2d x2 y2 = x1 ^ x2 && y1 ^ y2
 
 -- | Get the X coordinate range of a bounding box.
 xCoordinate :: Bounds2d (space @ units) -> Range units

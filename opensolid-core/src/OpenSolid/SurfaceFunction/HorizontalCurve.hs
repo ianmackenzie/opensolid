@@ -7,7 +7,6 @@ module OpenSolid.SurfaceFunction.HorizontalCurve
   )
 where
 
-import OpenSolid.Arithmetic.Unboxed
 import OpenSolid.Axis2d (Axis2d)
 import OpenSolid.Axis2d qualified as Axis2d
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
@@ -21,10 +20,9 @@ import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Frame2d qualified as Frame2d
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Point2d (Point2d (Point2d#))
+import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
-import OpenSolid.Qty (Qty (Qty#))
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Range (Range (Range))
 import OpenSolid.Range qualified as Range
@@ -37,7 +35,7 @@ import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvCoordina
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Uv.Derivatives (Derivatives)
 import OpenSolid.Uv.Derivatives qualified as Derivatives
-import OpenSolid.Vector2d (Vector2d (Vector2d#))
+import OpenSolid.Vector2d (Vector2d (Vector2d))
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 
 data HorizontalCurve units = HorizontalCurve
@@ -216,11 +214,11 @@ solveForV (HorizontalCurve{f, fv, bounds, boundingAxes, tolerance}) uValue = do
   Tolerance.using tolerance (Internal.solveForV f fv uValue clampedBounds)
 
 clamp :: Float -> Range Unitless -> Axis2d UvCoordinates -> Range Unitless
-clamp (Qty# u#) (Range vLow vHigh) axis = do
-  let !(Point2d# u0# v0#) = Axis2d.originPoint axis
-  let !(Vector2d# du# dv#) = Direction2d.unwrap (Axis2d.direction axis)
-  let v = Qty# (v0# +# (u# -# u0#) *# dv# /# du#)
+clamp u (Range vLow vHigh) axis = do
+  let Point2d u0 v0 = Axis2d.originPoint axis
+  let Vector2d du dv = Direction2d.unwrap (Axis2d.direction axis)
+  let v = v0 + (u - u0) * dv / du
   if
-    | du# ># 0.0## -> Range (Qty.max vLow v) vHigh
-    | du# <# 0.0## -> Range vLow (Qty.min vHigh v)
+    | du > 0.0 -> Range (Qty.max vLow v) vHigh
+    | du < 0.0 -> Range vLow (Qty.min vHigh v)
     | otherwise -> Range vLow vHigh

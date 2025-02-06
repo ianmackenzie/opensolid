@@ -13,9 +13,10 @@ import OpenSolid.Prelude
 import {-# SOURCE #-} OpenSolid.Transform3d (Transform3d)
 import OpenSolid.Units qualified as Units
 
-type role Vector3d phantom
+type role Vector3d nominal
 
-data Vector3d (coordinateSystem :: CoordinateSystem)
+data Vector3d (coordinateSystem :: CoordinateSystem) -- where
+-- Vector3d :: Qty units -> Qty units -> Qty units -> Vector3d (space @ units)
 
 instance Eq (Vector3d (space @ units))
 

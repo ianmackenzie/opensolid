@@ -31,14 +31,14 @@ module OpenSolid.VectorBounds2d
   )
 where
 
-import OpenSolid.Basis2d (Basis2d)
-import OpenSolid.Basis2d qualified as Basis2d
-import OpenSolid.Direction2d (Direction2d)
-import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.Float qualified as Float
-import {-# SOURCE #-} OpenSolid.Frame2d (Frame2d)
-import {-# SOURCE #-} OpenSolid.Frame2d qualified as Frame2d
 import OpenSolid.Prelude
+import OpenSolid.Primitives
+  ( Basis2d (Basis2d)
+  , Direction2d (Unit2d)
+  , Frame2d (Frame2d)
+  , VectorBounds2d (VectorBounds2d)
+  )
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Range (Range (Range))
 import OpenSolid.Range qualified as Range
@@ -47,380 +47,6 @@ import OpenSolid.Units (Radians)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2d (Vector2d (Vector2d))
 import OpenSolid.Vector2d qualified as Vector2d
-
-type role VectorBounds2d nominal
-
-data VectorBounds2d (coordinateSystem :: CoordinateSystem) where
-  VectorBounds2d :: Range units -> Range units -> VectorBounds2d (space @ units)
-
-deriving instance Show (VectorBounds2d (space @ units))
-
-instance HasUnits (VectorBounds2d (space @ units)) units (VectorBounds2d (space @ Unitless))
-
-instance
-  space1 ~ space2 =>
-  Units.Coercion (VectorBounds2d (space1 @ unitsA)) (VectorBounds2d (space2 @ unitsB))
-  where
-  coerce (VectorBounds2d x y) = VectorBounds2d (Units.coerce x) (Units.coerce y)
-
-instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
-  Intersects (Vector2d (space1 @ units1)) (VectorBounds2d (space2 @ units2)) units1
-  where
-  Vector2d vx vy ^ VectorBounds2d bx by = vx ^ bx && vy ^ by
-
-instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
-  Intersects (VectorBounds2d (space1 @ units1)) (Vector2d (space2 @ units2)) units1
-  where
-  bounds ^ point = point ^ bounds
-
-instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
-  Intersects (VectorBounds2d (space1 @ units1)) (VectorBounds2d (space2 @ units2)) units1
-  where
-  VectorBounds2d x1 y1 ^ VectorBounds2d x2 y2 = x1 ^ x2 && y1 ^ y2
-
-instance Negation (VectorBounds2d (space @ units)) where
-  negate (VectorBounds2d x y) = VectorBounds2d (negate x) (negate y)
-
-instance
-  Multiplication'
-    Sign
-    (VectorBounds2d (space @ units))
-    (VectorBounds2d (space @ (Unitless :*: units)))
-  where
-  Positive .*. vectorBounds = Units.coerce vectorBounds
-  Negative .*. vectorBounds = Units.coerce -vectorBounds
-
-instance Multiplication Sign (VectorBounds2d (space @ units)) (VectorBounds2d (space @ units)) where
-  Positive * vectorBounds = vectorBounds
-  Negative * vectorBounds = -vectorBounds
-
-instance
-  Multiplication'
-    (VectorBounds2d (space @ units))
-    Sign
-    (VectorBounds2d (space @ (units :*: Unitless)))
-  where
-  vectorBounds .*. Positive = Units.coerce vectorBounds
-  vectorBounds .*. Negative = Units.coerce -vectorBounds
-
-instance Multiplication (VectorBounds2d (space @ units)) Sign (VectorBounds2d (space @ units)) where
-  vectorBounds * Positive = vectorBounds
-  vectorBounds * Negative = -vectorBounds
-
-instance
-  ( space ~ space_
-  , units ~ units_
-  ) =>
-  Addition
-    (VectorBounds2d (space @ units))
-    (VectorBounds2d (space_ @ units_))
-    (VectorBounds2d (space @ units))
-  where
-  VectorBounds2d x1 y1 + VectorBounds2d x2 y2 = VectorBounds2d (x1 + x2) (y1 + y2)
-
-instance
-  ( space ~ space_
-  , units ~ units_
-  ) =>
-  Addition
-    (VectorBounds2d (space @ units))
-    (Vector2d (space_ @ units_))
-    (VectorBounds2d (space @ units))
-  where
-  VectorBounds2d x1 y1 + Vector2d x2 y2 = VectorBounds2d (x1 + x2) (y1 + y2)
-
-instance
-  ( space ~ space_
-  , units ~ units_
-  ) =>
-  Addition
-    (Vector2d (space @ units))
-    (VectorBounds2d (space_ @ units_))
-    (VectorBounds2d (space @ units))
-  where
-  Vector2d x1 y1 + VectorBounds2d x2 y2 = VectorBounds2d (x1 + x2) (y1 + y2)
-
-instance
-  ( space ~ space_
-  , units ~ units_
-  ) =>
-  Subtraction
-    (VectorBounds2d (space @ units))
-    (VectorBounds2d (space_ @ units_))
-    (VectorBounds2d (space @ units))
-  where
-  VectorBounds2d x1 y1 - VectorBounds2d x2 y2 = VectorBounds2d (x1 - x2) (y1 - y2)
-
-instance
-  ( space ~ space_
-  , units ~ units_
-  ) =>
-  Subtraction
-    (VectorBounds2d (space @ units))
-    (Vector2d (space_ @ units_))
-    (VectorBounds2d (space @ units))
-  where
-  VectorBounds2d x1 y1 - Vector2d x2 y2 = VectorBounds2d (x1 - x2) (y1 - y2)
-
-instance
-  ( space ~ space_
-  , units ~ units_
-  ) =>
-  Subtraction
-    (Vector2d (space @ units))
-    (VectorBounds2d (space_ @ units_))
-    (VectorBounds2d (space @ units))
-  where
-  Vector2d x1 y1 - VectorBounds2d x2 y2 = VectorBounds2d (x1 - x2) (y1 - y2)
-
-instance
-  Multiplication'
-    (Qty units1)
-    (VectorBounds2d (space @ units2))
-    (VectorBounds2d (space @ (units1 :*: units2)))
-  where
-  value .*. VectorBounds2d x y = VectorBounds2d (value .*. x) (value .*. y)
-
-instance
-  Units.Product units1 units2 units3 =>
-  Multiplication (Qty units1) (VectorBounds2d (space @ units2)) (VectorBounds2d (space @ units3))
-  where
-  value * VectorBounds2d x y = VectorBounds2d (value * x) (value * y)
-
-instance
-  Multiplication'
-    (VectorBounds2d (space @ units1))
-    (Qty units2)
-    (VectorBounds2d (space @ (units1 :*: units2)))
-  where
-  VectorBounds2d x y .*. value = VectorBounds2d (x .*. value) (y .*. value)
-
-instance
-  Units.Product units1 units2 units3 =>
-  Multiplication (VectorBounds2d (space @ units1)) (Qty units2) (VectorBounds2d (space @ units3))
-  where
-  VectorBounds2d x y * value = VectorBounds2d (x * value) (y * value)
-
-instance
-  Multiplication'
-    (Range units1)
-    (VectorBounds2d (space @ units2))
-    (VectorBounds2d (space @ (units1 :*: units2)))
-  where
-  range .*. VectorBounds2d x y = VectorBounds2d (range .*. x) (range .*. y)
-
-instance
-  Units.Product units1 units2 units3 =>
-  Multiplication (Range units1) (VectorBounds2d (space @ units2)) (VectorBounds2d (space @ units3))
-  where
-  range * VectorBounds2d x y = VectorBounds2d (range * x) (range * y)
-
-instance
-  Multiplication'
-    (VectorBounds2d (space @ units1))
-    (Range units2)
-    (VectorBounds2d (space @ (units1 :*: units2)))
-  where
-  VectorBounds2d x y .*. range = VectorBounds2d (x .*. range) (y .*. range)
-
-instance
-  Units.Product units1 units2 units3 =>
-  Multiplication (VectorBounds2d (space @ units1)) (Range units2) (VectorBounds2d (space @ units3))
-  where
-  VectorBounds2d x y * range = VectorBounds2d (x * range) (y * range)
-
-instance
-  Division'
-    (VectorBounds2d (space @ units1))
-    (Qty units2)
-    (VectorBounds2d (space @ (units1 :/: units2)))
-  where
-  VectorBounds2d x y ./. value = VectorBounds2d (x ./. value) (y ./. value)
-
-instance
-  Units.Quotient units1 units2 units3 =>
-  Division (VectorBounds2d (space @ units1)) (Qty units2) (VectorBounds2d (space @ units3))
-  where
-  VectorBounds2d x y / value = VectorBounds2d (x / value) (y / value)
-
-instance
-  Division'
-    (VectorBounds2d (space @ units1))
-    (Range units2)
-    (VectorBounds2d (space @ (units1 :/: units2)))
-  where
-  VectorBounds2d x y ./. range = VectorBounds2d (x ./. range) (y ./. range)
-
-instance
-  Units.Quotient units1 units2 units3 =>
-  Division (VectorBounds2d (space @ units1)) (Range units2) (VectorBounds2d (space @ units3))
-  where
-  VectorBounds2d x y / range = VectorBounds2d (x / range) (y / range)
-
-instance
-  (Units.Product units1 units2 units3, space ~ space_) =>
-  DotMultiplication (Vector2d (space @ units1)) (VectorBounds2d (space_ @ units2)) (Range units3)
-  where
-  Vector2d x1 y1 <> VectorBounds2d x2 y2 = x1 * x2 + y1 * y2
-
-instance
-  space ~ space_ =>
-  DotMultiplication'
-    (Vector2d (space @ units1))
-    (VectorBounds2d (space_ @ units2))
-    (Range (units1 :*: units2))
-  where
-  Vector2d x1 y1 .<>. VectorBounds2d x2 y2 = x1 .*. x2 + y1 .*. y2
-
-instance
-  (Units.Product units1 units2 units3, space ~ space_) =>
-  DotMultiplication (VectorBounds2d (space @ units1)) (Vector2d (space_ @ units2)) (Range units3)
-  where
-  VectorBounds2d x1 y1 <> Vector2d x2 y2 = x1 * x2 + y1 * y2
-
-instance
-  space ~ space_ =>
-  DotMultiplication'
-    (VectorBounds2d (space @ units1))
-    (Vector2d (space_ @ units2))
-    (Range (units1 :*: units2))
-  where
-  VectorBounds2d x1 y1 .<>. Vector2d x2 y2 = x1 .*. x2 + y1 .*. y2
-
-instance
-  space ~ space_ =>
-  DotMultiplication (Direction2d space) (VectorBounds2d (space_ @ units)) (Range units)
-  where
-  direction <> vectorBounds = Vector2d.unit direction <> vectorBounds
-
-instance
-  space ~ space_ =>
-  DotMultiplication'
-    (Direction2d space)
-    (VectorBounds2d (space_ @ units))
-    (Range (Unitless :*: units))
-  where
-  direction .<>. vectorBounds = Vector2d.unit direction .<>. vectorBounds
-
-instance
-  space ~ space_ =>
-  DotMultiplication (VectorBounds2d (space @ units)) (Direction2d space_) (Range units)
-  where
-  vectorBounds <> direction = vectorBounds <> Vector2d.unit direction
-
-instance
-  space ~ space_ =>
-  DotMultiplication'
-    (VectorBounds2d (space @ units))
-    (Direction2d space_)
-    (Range (units :*: Unitless))
-  where
-  vectorBounds .<>. direction = vectorBounds .<>. Vector2d.unit direction
-
-instance
-  (Units.Product units1 units2 units3, space ~ space_) =>
-  DotMultiplication
-    (VectorBounds2d (space @ units1))
-    (VectorBounds2d (space_ @ units2))
-    (Range units3)
-  where
-  VectorBounds2d x1 y1 <> VectorBounds2d x2 y2 = x1 * x2 + y1 * y2
-
-instance
-  space ~ space_ =>
-  DotMultiplication'
-    (VectorBounds2d (space @ units1))
-    (VectorBounds2d (space_ @ units2))
-    (Range (units1 :*: units2))
-  where
-  VectorBounds2d x1 y1 .<>. VectorBounds2d x2 y2 = x1 .*. x2 + y1 .*. y2
-
-instance
-  (Units.Product units1 units2 units3, space ~ space_) =>
-  CrossMultiplication (Vector2d (space @ units1)) (VectorBounds2d (space_ @ units2)) (Range units3)
-  where
-  Vector2d x1 y1 >< VectorBounds2d x2 y2 = x1 * y2 - y1 * x2
-
-instance
-  space ~ space_ =>
-  CrossMultiplication'
-    (Vector2d (space @ units1))
-    (VectorBounds2d (space_ @ units2))
-    (Range (units1 :*: units2))
-  where
-  Vector2d x1 y1 .><. VectorBounds2d x2 y2 = x1 .*. y2 - y1 .*. x2
-
-instance
-  (Units.Product units1 units2 units3, space ~ space_) =>
-  CrossMultiplication
-    (VectorBounds2d (space @ units1))
-    (Vector2d (space_ @ units2))
-    (Range units3)
-  where
-  VectorBounds2d x1 y1 >< Vector2d x2 y2 = x1 * y2 - y1 * x2
-
-instance
-  space ~ space_ =>
-  CrossMultiplication'
-    (VectorBounds2d (space @ units1))
-    (Vector2d (space_ @ units2))
-    (Range (units1 :*: units2))
-  where
-  VectorBounds2d x1 y1 .><. Vector2d x2 y2 = x1 .*. y2 - y1 .*. x2
-
-instance
-  space ~ space_ =>
-  CrossMultiplication (Direction2d space) (VectorBounds2d (space_ @ units)) (Range units)
-  where
-  direction >< vectorBounds = Vector2d.unit direction >< vectorBounds
-
-instance
-  space ~ space_ =>
-  CrossMultiplication'
-    (Direction2d space)
-    (VectorBounds2d (space_ @ units))
-    (Range (Unitless :*: units))
-  where
-  direction .><. vectorBounds = Vector2d.unit direction .><. vectorBounds
-
-instance
-  space ~ space_ =>
-  CrossMultiplication (VectorBounds2d (space @ units)) (Direction2d space_) (Range units)
-  where
-  vectorBounds >< direction = vectorBounds >< Vector2d.unit direction
-
-instance
-  space ~ space_ =>
-  CrossMultiplication'
-    (VectorBounds2d (space @ units))
-    (Direction2d space_)
-    (Range (units :*: Unitless))
-  where
-  vectorBounds .><. direction = vectorBounds .><. Vector2d.unit direction
-
-instance
-  (Units.Product units1 units2 units3, space ~ space_) =>
-  CrossMultiplication (VectorBounds2d (space @ units1)) (VectorBounds2d (space_ @ units2)) (Range units3)
-  where
-  VectorBounds2d x1 y1 >< VectorBounds2d x2 y2 = x1 * y2 - y1 * x2
-
-instance
-  space ~ space_ =>
-  CrossMultiplication'
-    (VectorBounds2d (space @ units1))
-    (VectorBounds2d (space_ @ units2))
-    (Range (units1 :*: units2))
-  where
-  VectorBounds2d x1 y1 .><. VectorBounds2d x2 y2 = x1 .*. y2 - y1 .*. x2
 
 constant :: Vector2d (space @ units) -> VectorBounds2d (space @ units)
 constant (Vector2d x y) = VectorBounds2d (Range.constant x) (Range.constant y)
@@ -548,13 +174,13 @@ placeIn ::
   Frame2d (global @ originUnits) (Defines local) ->
   VectorBounds2d (local @ units) ->
   VectorBounds2d (global @ units)
-placeIn frame = placeInBasis (Frame2d.basis frame)
+placeIn (Frame2d _ basis) = placeInBasis basis
 
 relativeTo ::
   Frame2d (global @ originUnits) (Defines local) ->
   VectorBounds2d (global @ units) ->
   VectorBounds2d (local @ units)
-relativeTo frame = relativeToBasis (Frame2d.basis frame)
+relativeTo (Frame2d _ basis) = relativeToBasis basis
 
 placeInBasis ::
   Basis2d global (Defines local) ->
@@ -566,8 +192,9 @@ placeInBasis basis (VectorBounds2d x y) = do
   let xWidth = Range.width x
   let yWidth = Range.width y
   let Vector2d x0 y0 = Vector2d.xyInBasis basis xMid yMid
-  let (ix, iy) = Direction2d.components (Basis2d.xDirection basis)
-  let (jx, jy) = Direction2d.components (Basis2d.yDirection basis)
+  let Basis2d i j = basis
+  let Unit2d (Vector2d ix iy) = i
+  let Unit2d (Vector2d jx jy) = j
   let rx = 0.5 * xWidth * Float.abs ix + 0.5 * yWidth * Float.abs jx
   let ry = 0.5 * xWidth * Float.abs iy + 0.5 * yWidth * Float.abs jy
   VectorBounds2d (Range.from (x0 - rx) (x0 + rx)) (Range.from (y0 - ry) (y0 + ry))
@@ -582,8 +209,9 @@ relativeToBasis basis (VectorBounds2d x y) = do
   let xWidth = Range.width x
   let yWidth = Range.width y
   let Vector2d x0 y0 = Vector2d.relativeToBasis basis (Vector2d xMid yMid)
-  let (ix, iy) = Direction2d.components (Basis2d.xDirection basis)
-  let (jx, jy) = Direction2d.components (Basis2d.yDirection basis)
+  let Basis2d i j = basis
+  let Unit2d (Vector2d ix iy) = i
+  let Unit2d (Vector2d jx jy) = j
   let rx = 0.5 * xWidth * Float.abs ix + 0.5 * yWidth * Float.abs iy
   let ry = 0.5 * xWidth * Float.abs jx + 0.5 * yWidth * Float.abs jy
   VectorBounds2d (Range.from (x0 - rx) (x0 + rx)) (Range.from (y0 - ry) (y0 + ry))

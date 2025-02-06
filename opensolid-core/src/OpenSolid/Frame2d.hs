@@ -1,5 +1,5 @@
 module OpenSolid.Frame2d
-  ( Frame2d
+  ( Frame2d (Frame2d)
   , coerce
   , xy
   , at
@@ -25,23 +25,16 @@ import OpenSolid.Direction2d (Direction2d)
 import OpenSolid.Point2d (Point2d)
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
+import OpenSolid.Primitives (Frame2d (Frame2d))
 
-type role Frame2d nominal nominal
+originPoint :: Frame2d (space @ units) defines -> Point2d (space @ units)
+originPoint (Frame2d p0 _) = p0
 
-type Frame2d :: CoordinateSystem -> LocalSpace -> Type
-data Frame2d coordinateSystem defines where
-  Frame2d ::
-    { originPoint :: Point2d (space @ units)
-    , basis :: Basis2d space defines
-    } ->
-    Frame2d (space @ units) defines
-
-deriving instance Eq (Frame2d (space @ units) defines)
-
-deriving instance Show (Frame2d (space @ units) defines)
+basis :: Frame2d (space @ units) defines -> Basis2d space defines
+basis (Frame2d _ b) = b
 
 coerce :: Frame2d (space @ units) defines1 -> Frame2d (space @ units) defines2
-coerce Frame2d{originPoint, basis} = Frame2d{originPoint, basis = Basis2d.coerce basis}
+coerce (Frame2d p0 b) = Frame2d p0 (Basis2d.coerce b)
 
 xDirection :: Frame2d (space @ units) defines -> Direction2d space
 xDirection frame = Basis2d.xDirection (basis frame)
@@ -53,7 +46,7 @@ xy :: Frame2d (space @ units) defines
 xy = Frame2d Point2d.origin Basis2d.xy
 
 at :: Point2d (space @ units) -> Basis2d space defines -> Frame2d (space @ units) defines
-at point basis = Frame2d point basis
+at = Frame2d
 
 fromXAxis :: Axis2d (space @ units) -> Frame2d (space @ units) defines
 fromXAxis axis = Frame2d (Axis2d.originPoint axis) (Basis2d.fromXDirection (Axis2d.direction axis))
@@ -73,9 +66,8 @@ placeIn ::
   Frame2d (global @ units) (Defines local)
 placeIn globalFrame frame =
   Frame2d
-    { originPoint = Point2d.placeIn globalFrame (originPoint frame)
-    , basis = Basis2d.placeIn globalFrame (basis frame)
-    }
+    (Point2d.placeIn globalFrame (originPoint frame))
+    (Basis2d.placeIn globalFrame (basis frame))
 
 relativeTo ::
   Frame2d (global @ units) (Defines space) ->
@@ -83,9 +75,8 @@ relativeTo ::
   Frame2d (space @ units) (Defines local)
 relativeTo globalFrame frame =
   Frame2d
-    { originPoint = Point2d.relativeTo globalFrame (originPoint frame)
-    , basis = Basis2d.relativeTo globalFrame (basis frame)
-    }
+    (Point2d.relativeTo globalFrame (originPoint frame))
+    (Basis2d.relativeTo globalFrame (basis frame))
 
 inverse :: Frame2d (global @ units) (Defines local) -> Frame2d (local @ units) (Defines global)
 inverse frame = xy |> relativeTo frame

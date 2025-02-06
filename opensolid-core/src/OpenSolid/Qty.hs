@@ -1,5 +1,5 @@
 module OpenSolid.Qty
-  ( Qty (Qty, Qty#)
+  ( Qty (Qty)
   , zero
   , unit
   , infinity
@@ -37,9 +37,7 @@ where
 import Data.Coerce qualified
 import Data.List.NonEmpty (NonEmpty ((:|)))
 import Foreign.Storable (Storable)
-import GHC.Exts (Double (D#))
 import OpenSolid.Arithmetic
-import OpenSolid.Arithmetic.Unboxed
 import OpenSolid.Bootstrap
 import {-# SOURCE #-} OpenSolid.Float (Float, fromRational)
 import {-# SOURCE #-} OpenSolid.Float qualified as Float
@@ -57,12 +55,6 @@ type role Qty phantom
 
 type Qty :: Type -> Type
 newtype Qty units = Qty Prelude.Double deriving (Eq, Ord, Show)
-
-{-# COMPLETE Qty# #-}
-
-{-# INLINE Qty# #-}
-pattern Qty# :: Double# -> Qty units
-pattern Qty# x# <- Qty (D# x#) where Qty# x# = Qty (D# x#)
 
 deriving newtype instance Prelude.Num Float
 
