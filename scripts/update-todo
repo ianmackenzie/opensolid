@@ -1,0 +1,5 @@
+#!/bin/bash
+
+set -euo pipefail
+
+jj commit -m "Update TODO.txt" TODO.txt
