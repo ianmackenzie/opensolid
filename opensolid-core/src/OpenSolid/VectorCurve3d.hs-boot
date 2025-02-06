@@ -3,6 +3,7 @@ module OpenSolid.VectorCurve3d
   , VectorCurve3d (Parametric, Transformed)
   , constant
   , new
+  , planar
   , evaluate
   , evaluateBounds
   , derivative
@@ -15,12 +16,14 @@ import OpenSolid.Basis3d (Basis3d)
 import OpenSolid.CoordinateSystem (Space)
 import {-# SOURCE #-} OpenSolid.Curve (Curve)
 import OpenSolid.Expression (Expression)
+import OpenSolid.Plane3d (Plane3d)
 import OpenSolid.Prelude
 import OpenSolid.Range (Range)
 import OpenSolid.Transform3d (Transform3d)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.VectorBounds3d (VectorBounds3d)
+import {-# SOURCE #-} OpenSolid.VectorCurve2d (VectorCurve2d)
 
 class
   Show curve =>
@@ -90,6 +93,10 @@ data VectorCurve3d (coordinateSystem :: CoordinateSystem) where
   Transformed ::
     Transform3d tag (space @ translationUnits) ->
     VectorCurve3d (space @ units) ->
+    VectorCurve3d (space @ units)
+  Planar ::
+    Plane3d (space @ originPointUnits) (Defines local) ->
+    VectorCurve2d (local @ units) ->
     VectorCurve3d (space @ units)
 
 instance HasUnits (VectorCurve3d (space @ units)) units (VectorCurve3d (space @ Unitless))
@@ -164,6 +171,10 @@ instance
 
 constant :: Vector3d (space @ units) -> VectorCurve3d (space @ units)
 new :: Interface curve (space @ units) => curve -> VectorCurve3d (space @ units)
+planar ::
+  Plane3d (space @ originPointUnits) (Defines local) ->
+  VectorCurve2d (local @ units) ->
+  VectorCurve3d (space @ units)
 evaluate :: VectorCurve3d (space @ units) -> Float -> Vector3d (space @ units)
 evaluateBounds :: VectorCurve3d (space @ units) -> Range Unitless -> VectorBounds3d (space @ units)
 derivative :: VectorCurve3d (space @ units) -> VectorCurve3d (space @ units)

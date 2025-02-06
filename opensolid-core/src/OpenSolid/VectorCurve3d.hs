@@ -10,6 +10,7 @@ module OpenSolid.VectorCurve3d
   , zero
   , constant
   , xyz
+  , planar
   , line
   , arc
   , quadraticSpline
@@ -57,6 +58,7 @@ import OpenSolid.Frame3d (Frame3d (Frame3d))
 import OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.Plane3d (Plane3d)
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
@@ -67,10 +69,14 @@ import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform3d (Transform3d)
 import OpenSolid.Transform3d qualified as Transform3d
 import OpenSolid.Units qualified as Units
+import OpenSolid.Vector2d qualified as Vector2d
 import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.Vector3d qualified as Vector3d
+import OpenSolid.VectorBounds2d qualified as VectorBounds2d
 import OpenSolid.VectorBounds3d (VectorBounds3d (VectorBounds3d))
 import OpenSolid.VectorBounds3d qualified as VectorBounds3d
+import OpenSolid.VectorCurve2d (VectorCurve2d)
+import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 import OpenSolid.VectorCurve3d.Direction qualified as VectorCurve3d.Direction
 import OpenSolid.VectorCurve3d.Zeros qualified as Zeros
 import OpenSolid.VectorSurfaceFunction3d (VectorSurfaceFunction3d)
@@ -142,6 +148,10 @@ data VectorCurve3d (coordinateSystem :: CoordinateSystem) where
   Transformed ::
     Transform3d tag (space @ translationUnits) ->
     VectorCurve3d (space @ units) ->
+    VectorCurve3d (space @ units)
+  Planar ::
+    Plane3d (space @ originPointUnits) (Defines local) ->
+    VectorCurve2d (local @ units) ->
     VectorCurve3d (space @ units)
 
 deriving instance Show (VectorCurve3d (space @ units))
@@ -620,6 +630,7 @@ transformBy transform c = case c of
     let transform1 = Units.erase (Transform3d.toAffine existing)
     let transform2 = Units.erase (Transform3d.toAffine transform)
     Transformed (transform1 >> transform2) curve
+  Planar{} -> Transformed transform c
 
 new :: Interface curve (space @ units) => curve -> VectorCurve3d (space @ units)
 new = VectorCurve3d
@@ -634,6 +645,12 @@ xyz :: Curve units -> Curve units -> Curve units -> VectorCurve3d (space @ units
 xyz (Curve.Parametric x) (Curve.Parametric y) (Curve.Parametric z) =
   Parametric (Expression.xyz x y z)
 xyz x y z = XYZ x y z
+
+planar ::
+  Plane3d (space @ originPointUnits) (Defines local) ->
+  VectorCurve2d (local @ units) ->
+  VectorCurve3d (space @ units)
+planar = Planar
 
 line :: Vector3d (space @ units) -> Vector3d (space @ units) -> VectorCurve3d (space @ units)
 line v1 v2 =
@@ -697,6 +714,7 @@ evaluate curve tValue = case curve of
   CrossProduct' c1 c2 -> evaluate c1 tValue .><. evaluate c2 tValue
   PlaceInBasis basis c -> Vector3d.placeInBasis basis (evaluate c tValue)
   Transformed transform c -> Vector3d.transformBy transform (evaluate c tValue)
+  Planar plane curve2d -> Vector2d.placeOn plane (VectorCurve2d.evaluate curve2d tValue)
 
 evaluateBounds :: VectorCurve3d (space @ units) -> Range Unitless -> VectorBounds3d (space @ units)
 evaluateBounds curve tRange = case curve of
@@ -718,6 +736,7 @@ evaluateBounds curve tRange = case curve of
   CrossProduct' c1 c2 -> evaluateBounds c1 tRange .><. evaluateBounds c2 tRange
   PlaceInBasis basis c -> VectorBounds3d.placeInBasis basis (evaluateBounds c tRange)
   Transformed transform c -> VectorBounds3d.transformBy transform (evaluateBounds c tRange)
+  Planar plane curve2d -> VectorBounds2d.placeOn plane (VectorCurve2d.evaluateBounds curve2d tRange)
 
 derivative ::
   VectorCurve3d (space @ units) ->
@@ -738,6 +757,7 @@ derivative curve = case curve of
   CrossProduct' c1 c2 -> derivative c1 .><. c2 + c1 .><. derivative c2
   PlaceInBasis basis c -> PlaceInBasis basis (derivative c)
   Transformed transform c -> transformBy transform (derivative c)
+  Planar plane curve2d -> Planar plane (VectorCurve2d.derivative curve2d)
 
 reverse ::
   VectorCurve3d (space @ units) ->
@@ -757,6 +777,7 @@ reverse curve = case curve of
   CrossProduct' c1 c2 -> CrossProduct' (reverse c1) (reverse c2)
   PlaceInBasis basis c -> PlaceInBasis basis (reverse c)
   Transformed transform c -> Transformed transform (reverse c)
+  Planar plane curve2d -> Planar plane (VectorCurve2d.reverse curve2d)
 
 newtype SquaredMagnitude' (coordinateSystem :: CoordinateSystem)
   = SquaredMagnitude' (VectorCurve3d coordinateSystem)
