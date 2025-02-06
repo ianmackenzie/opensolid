@@ -1959,6 +1959,10 @@ data Plane3d coordinateSystem defines where
     Basis3d space defines ->
     Plane3d (space @ units) defines
 
+deriving instance Eq (Plane3d (space @ units) defines)
+
+deriving instance Show (Plane3d (space @ units) defines)
+
 ----- Frame3d -----
 
 type Frame3d :: CoordinateSystem -> LocalSpace -> Type
