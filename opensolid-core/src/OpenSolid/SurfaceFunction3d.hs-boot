@@ -1,6 +1,7 @@
 module OpenSolid.SurfaceFunction3d
   ( SurfaceFunction3d (Parametric)
   , Interface (..)
+  , constant
   , evaluate
   , evaluateBounds
   , derivative
@@ -60,6 +61,14 @@ instance
   space1 ~ space2 =>
   Units.Coercion (SurfaceFunction3d (space1 @ unitsA)) (SurfaceFunction3d (space2 @ unitsB))
 
+instance
+  (space1 ~ space2, units1 ~ units2) =>
+  Addition
+    (SurfaceFunction3d (space1 @ units1))
+    (VectorSurfaceFunction3d (space2 @ units2))
+    (SurfaceFunction3d (space1 @ units1))
+
+constant :: Point3d (space @ units) -> SurfaceFunction3d (space @ units)
 evaluate :: SurfaceFunction3d (space @ units) -> UvPoint -> Point3d (space @ units)
 evaluateBounds :: SurfaceFunction3d (space @ units) -> UvBounds -> Bounds3d (space @ units)
 derivative ::

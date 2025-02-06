@@ -15,9 +15,12 @@ import OpenSolid.Composition
 import OpenSolid.Direction3d (Direction3d)
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
+import OpenSolid.Point3d (Point3d)
 import OpenSolid.Prelude
 import OpenSolid.SurfaceFunction (SurfaceFunction)
 import OpenSolid.SurfaceFunction qualified as SurfaceFunction
+import {-# SOURCE #-} OpenSolid.SurfaceFunction3d (SurfaceFunction3d)
+import {-# SOURCE #-} OpenSolid.SurfaceFunction3d qualified as SurfaceFunction3d
 import OpenSolid.SurfaceParameter (SurfaceParameter, UvBounds, UvPoint)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector3d (Vector3d)
@@ -214,6 +217,15 @@ instance
     (VectorSurfaceFunction3d (space @ units))
   where
   v - f = constant v - f
+
+instance
+  (space1 ~ space2, units1 ~ units2) =>
+  Addition
+    (Point3d (space1 @ units1))
+    (VectorSurfaceFunction3d (space2 @ units2))
+    (SurfaceFunction3d (space1 @ units1))
+  where
+  point + function = SurfaceFunction3d.constant point + function
 
 instance
   Units.Product units1 units2 units3 =>
