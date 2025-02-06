@@ -159,10 +159,10 @@ placeOn ::
 placeOn (Plane3d originPoint (Basis3d i j _)) (Point2d px py) = originPoint + px * i + py * j
 
 convert :: Qty (units2 :/: units1) -> Point2d (space @ units1) -> Point2d (space @ units2)
-convert factor (Point2d px py) = Point2d (factor *! px) (factor *! py)
+convert factor (Point2d px py) = Point2d (Qty.convert factor px) (Qty.convert factor py)
 
 unconvert :: Qty (units2 :/: units1) -> Point2d (space @ units2) -> Point2d (space @ units1)
-unconvert factor (Point2d px py) = Point2d (px !/ factor) (py !/ factor)
+unconvert factor (Point2d px py) = Point2d (Qty.unconvert factor px) (Qty.unconvert factor py)
 
 transformBy :: Transform2d tag (space @ units) -> Point2d (space @ units) -> Point2d (space @ units)
 transformBy transform point = do
