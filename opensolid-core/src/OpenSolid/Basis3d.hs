@@ -25,12 +25,16 @@ module OpenSolid.Basis3d
   )
 where
 
-import OpenSolid.Direction3d (Direction3d)
+import OpenSolid.Direction3d (Direction3d (Direction3d))
 import OpenSolid.Direction3d qualified as Direction3d
 import OpenSolid.Float qualified as Float
 import OpenSolid.Prelude
-import OpenSolid.Primitives (Basis3d (Basis3d), Frame3d (Frame3d))
-import OpenSolid.Vector3d qualified as Vector3d
+import OpenSolid.Primitives
+  ( Basis3d (Basis3d)
+  , Direction3d (Unit3d)
+  , Frame3d (Frame3d)
+  , Vector3d (Vector3d)
+  )
 
 coerce :: Basis3d space defines1 -> Basis3d space defines2
 coerce (Basis3d i j k) = Basis3d i j k
@@ -73,7 +77,7 @@ flipZ (Basis3d dx dy dz) = Basis3d dx dy -dz
 
 perpendicularDirections :: Direction3d space -> (Direction3d space, Direction3d space)
 perpendicularDirections direction = do
-  let (dx, dy, dz) = Direction3d.components direction
+  let Direction3d dx dy dz = direction
   let absX = Float.abs dx
   let absY = Float.abs dy
   let absZ = Float.abs dz
@@ -81,15 +85,15 @@ perpendicularDirections direction = do
         if
           | absX <= absY && absX <= absZ -> do
               let scale = Float.hypot2 dy dz
-              Vector3d.xyz 0.0 (-dz / scale) (dy / scale)
+              Vector3d 0.0 (-dz / scale) (dy / scale)
           | absY <= absX && absY <= absZ -> do
               let scale = Float.hypot2 dx dz
-              Vector3d.xyz (dz / scale) 0.0 (-dx / scale)
+              Vector3d (dz / scale) 0.0 (-dx / scale)
           | otherwise -> do
               let scale = Float.hypot2 dx dy
-              Vector3d.xyz (-dy / scale) (dx / scale) 0.0
+              Vector3d (-dy / scale) (dx / scale) 0.0
   let v2 = direction >< v1
-  (Direction3d.unsafe v1, Direction3d.unsafe v2)
+  (Unit3d v1, Unit3d v2)
 
 fromXDirection :: Direction3d space -> Basis3d space defines
 fromXDirection dx = do
@@ -108,6 +112,7 @@ fromZDirection dz = do
 
 handedness :: Basis3d space defines -> Sign
 handedness (Basis3d i j k) = Float.sign ((i >< j) <> k)
+
 placeIn ::
   Frame3d (global @ units) (Defines space) ->
   Basis3d space (Defines local) ->
