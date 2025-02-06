@@ -822,9 +822,7 @@ instance FFI (Bounds2d (space @ Unitless)) where
   representation = FFI.classRepresentation "UvBounds"
 
 instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
+  (space1 ~ space2, units1 ~ units2) =>
   Subtraction
     (Point2d (space1 @ units1))
     (Bounds2d (space2 @ units2))
@@ -833,9 +831,7 @@ instance
   Point2d px py - Bounds2d bx by = VectorBounds2d (px - bx) (py - by)
 
 instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
+  (space1 ~ space2, units1 ~ units2) =>
   Subtraction
     (Bounds2d (space1 @ units1))
     (Point2d (space2 @ units2))
@@ -844,9 +840,7 @@ instance
   Bounds2d bx by - Point2d px py = VectorBounds2d (bx - px) (by - py)
 
 instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
+  (space1 ~ space2, units1 ~ units2) =>
   Subtraction
     (Bounds2d (space1 @ units1))
     (Bounds2d (space2 @ units2))
@@ -855,9 +849,7 @@ instance
   Bounds2d x1 y1 - Bounds2d x2 y2 = VectorBounds2d (x1 - x2) (y1 - y2)
 
 instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
+  (space1 ~ space2, units1 ~ units2) =>
   Addition
     (Bounds2d (space1 @ units1))
     (Vector2d (space2 @ units2))
@@ -866,9 +858,7 @@ instance
   Bounds2d x1 y1 + Vector2d x2 y2 = Bounds2d (x1 + x2) (y1 + y2)
 
 instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
+  (space1 ~ space2, units1 ~ units2) =>
   Addition
     (Bounds2d (space1 @ units1))
     (VectorBounds2d (space2 @ units2))
@@ -877,9 +867,7 @@ instance
   Bounds2d x1 y1 + VectorBounds2d x2 y2 = Bounds2d (x1 + x2) (y1 + y2)
 
 instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
+  (space1 ~ space2, units1 ~ units2) =>
   Subtraction
     (Bounds2d (space1 @ units1))
     (Vector2d (space2 @ units2))
@@ -888,9 +876,7 @@ instance
   Bounds2d x1 y1 - Vector2d x2 y2 = Bounds2d (x1 - x2) (y1 - y2)
 
 instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
+  (space1 ~ space2, units1 ~ units2) =>
   Subtraction
     (Bounds2d (space1 @ units1))
     (VectorBounds2d (space2 @ units2))
@@ -899,41 +885,31 @@ instance
   Bounds2d x1 y1 - VectorBounds2d x2 y2 = Bounds2d (x1 - x2) (y1 - y2)
 
 instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
+  (space1 ~ space2, units1 ~ units2) =>
   ApproximateEquality (Point2d (space1 @ units1)) (Bounds2d (space2 @ units2)) units1
   where
   Point2d px py ~= Bounds2d bx by = px ~= bx && py ~= by
 
 instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
+  (space1 ~ space2, units1 ~ units2) =>
   ApproximateEquality (Bounds2d (space1 @ units1)) (Point2d (space2 @ units2)) units1
   where
   box ~= point = point ~= box
 
 instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
+  (space1 ~ space2, units1 ~ units2) =>
   Intersects (Point2d (space1 @ units1)) (Bounds2d (space2 @ units2)) units1
   where
   Point2d px py ^ Bounds2d bx by = px ^ bx && py ^ by
 
 instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
+  (space1 ~ space2, units1 ~ units2) =>
   Intersects (Bounds2d (space1 @ units1)) (Point2d (space2 @ units2)) units1
   where
   box ^ point = point ^ box
 
 instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
+  (space1 ~ space2, units1 ~ units2) =>
   Intersects (Bounds2d (space1 @ units1)) (Bounds2d (space2 @ units2)) units1
   where
   Bounds2d x1 y1 ^ Bounds2d x2 y2 = x1 ^ x2 && y1 ^ y2
@@ -1026,10 +1002,7 @@ instance
   transform * point = point * transform
 
 instance
-  ( Composition tag1 tag2 tag3
-  , space1 ~ space2
-  , units1 ~ units2
-  ) =>
+  (Composition tag1 tag2 tag3, space1 ~ space2, units1 ~ units2) =>
   Composition
     (Transform2d tag1 (space1 @ units1))
     (Transform2d tag2 (space2 @ units2))
@@ -1061,10 +1034,8 @@ instance
   coerce (Vector3d vx vy vz) = Vector3d (Units.coerce vx) (Units.coerce vy) (Units.coerce vz)
 
 instance
-  ( space ~ space_
-  , units ~ units_
-  ) =>
-  ApproximateEquality (Vector3d (space @ units)) (Vector3d (space_ @ units_)) units
+  (space1 ~ space2, units1 ~ units2) =>
+  ApproximateEquality (Vector3d (space1 @ units1)) (Vector3d (space2 @ units2)) units1
   where
   Vector3d x1 y1 z1 ~= Vector3d x2 y2 z2 = Qty.hypot3 (x2 - x1) (y2 - y1) (z2 - z1) ~= Qty.zero
 
