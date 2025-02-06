@@ -205,11 +205,11 @@ placeIn ::
   Region2d (local @ units) ->
   Region2d (global @ units)
 placeIn frame (Region2d outer inners) = do
-  let transform =
+  let transformLoop =
         case Frame2d.handedness frame of
           Positive -> NonEmpty.map (Curve2d.placeIn frame)
           Negative -> NonEmpty.reverseMap (Curve2d.reverse . Curve2d.placeIn frame)
-  Region2d (transform outer) (List.map transform inners)
+  Region2d (transformLoop outer) (List.map transformLoop inners)
 
 relativeTo ::
   Frame2d (global @ units) (Defines local) ->
