@@ -128,21 +128,21 @@ transformBy transform (Basis3d i j k) =
     (Direction3d.transformBy transform k)
 
 placeIn ::
-  Frame3d (global @ units) (Defines space) ->
-  Basis3d space (Defines local) ->
-  Basis3d global (Defines local)
+  Frame3d (global @ units) (Defines local) ->
+  Basis3d local defines ->
+  Basis3d global defines
 placeIn (Frame3d _ basis) = placeInBasis basis
 
 relativeTo ::
-  Frame3d (global @ units) (Defines space) ->
-  Basis3d global (Defines local) ->
-  Basis3d space (Defines local)
+  Frame3d (global @ units) (Defines local) ->
+  Basis3d global defines ->
+  Basis3d local defines
 relativeTo (Frame3d _ basis) = relativeToBasis basis
 
 placeInBasis ::
-  Basis3d global (Defines space) ->
-  Basis3d space (Defines local) ->
-  Basis3d global (Defines local)
+  Basis3d global (Defines local) ->
+  Basis3d local defines ->
+  Basis3d global defines
 placeInBasis globalBasis (Basis3d i j k) =
   Basis3d
     (Direction3d.placeInBasis globalBasis i)
@@ -150,9 +150,9 @@ placeInBasis globalBasis (Basis3d i j k) =
     (Direction3d.placeInBasis globalBasis k)
 
 relativeToBasis ::
-  Basis3d global (Defines space) ->
   Basis3d global (Defines local) ->
-  Basis3d space (Defines local)
+  Basis3d global defines ->
+  Basis3d local defines
 relativeToBasis globalBasis (Basis3d i j k) =
   Basis3d
     (Direction3d.relativeToBasis globalBasis i)
