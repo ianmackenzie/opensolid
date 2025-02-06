@@ -13,6 +13,7 @@ module OpenSolid.Result
   , (>>=)
   , (>>)
   , toIO
+  , fail
   )
 where
 
@@ -47,7 +48,7 @@ instance Monad (Result x) where
   (>>=) = (>>=)
 
 instance MonadFail (Result Text) where
-  fail = Text.pack >> Failure
+  fail = fail
 
 instance Composition (Result x ()) (Result x a) (Result x a) where
   Success () >> result = result
@@ -117,3 +118,6 @@ combine = Prelude.sequence
 toIO :: Result x a -> IO a
 toIO (Success value) = Prelude.return value
 toIO (Failure error) = Prelude.fail (Text.unpack (Error.message error))
+
+fail :: List Char -> Result Text a
+fail = Text.pack >> Failure
