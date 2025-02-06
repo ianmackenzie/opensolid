@@ -80,8 +80,6 @@ Implement 1D monotonic solving in Rust
 
 Specialize xComponent etc. for Parametric cases
 
-Move primitives to Primitives.hs
-
 Use space1 ~ space2 instead of space ~ space_ everywhere
 
 Remove explicit use of unboxed Double# etc.?
@@ -96,3 +94,6 @@ Optimizations to try:
 
 Implement Subtraction for UTCTime instead of having Duration.from function
 -> also allow adding or subtracting Duration from a UTCTime to get another UTCTime
+
+Add specialized Region2d constructors for basic shapes
+-> rectangle (Bounds2d), triangle, maybe circle?
