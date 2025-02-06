@@ -1863,17 +1863,11 @@ t = curve1d Scalar.curveParameter
 r :: Expression Float Float
 r = constant @Float 1.0 - t
 
-class U input where
-  u :: Expression input Float
+u :: Expression UvPoint Float
+u = surface1d (Scalar.surfaceParameter SurfaceParameter.U)
 
-class V input where
-  v :: Expression input Float
-
-instance U UvPoint where
-  u = surface1d (Scalar.surfaceParameter SurfaceParameter.U)
-
-instance V UvPoint where
-  v = surface1d (Scalar.surfaceParameter SurfaceParameter.V)
+v :: Expression UvPoint Float
+v = surface1d (Scalar.surfaceParameter SurfaceParameter.V)
 
 squared' :: Expression input (Qty units) -> Expression input (Qty (units :*: units))
 squared' Curve1d{c1x} = curve1d (Scalar.squared c1x)
