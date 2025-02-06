@@ -373,11 +373,17 @@ instance
   where
   point - curve = constant point - curve
 
-instance Composition (Curve Unitless) (Curve2d (space @ units)) (Curve2d (space @ units)) where
+instance
+  unitless ~ Unitless =>
+  Composition (Curve unitless) (Curve2d (space @ units)) (Curve2d (space @ units))
+  where
   Parametric outer . Curve.Parametric inner = Parametric (outer . inner)
   outer . inner = new (outer :.: inner)
 
-instance Interface (Curve2d (space @ units) :.: Curve Unitless) (space @ units) where
+instance
+  unitless ~ Unitless =>
+  Interface (Curve2d (space @ units) :.: Curve unitless) (space @ units)
+  where
   evaluateImpl (curve2d :.: curve1d) tRange =
     evaluate curve2d (Curve.evaluate curve1d tRange)
 
@@ -394,8 +400,9 @@ instance Interface (Curve2d (space @ units) :.: Curve Unitless) (space @ units) 
     new (transformBy transform curve2d . curve1d)
 
 instance
+  unitless ~ Unitless =>
   Composition
-    (SurfaceFunction Unitless)
+    (SurfaceFunction unitless)
     (Curve2d (space @ units))
     (SurfaceFunction2d (space @ units))
   where
@@ -403,8 +410,9 @@ instance
   curve . function = SurfaceFunction2d.new (curve :.: function)
 
 instance
+  unitless ~ Unitless =>
   SurfaceFunction2d.Interface
-    (Curve2d (space @ units) :.: SurfaceFunction Unitless)
+    (Curve2d (space @ units) :.: SurfaceFunction unitless)
     (space @ units)
   where
   evaluateImpl (curve :.: function) uvPoint =
@@ -420,15 +428,19 @@ instance
     transformBy transform curve . function
 
 instance
+  uvCoordinates ~ UvCoordinates =>
   Composition
-    (Curve2d UvCoordinates)
+    (Curve2d uvCoordinates)
     (SurfaceFunction units)
     (Curve units)
   where
   SurfaceFunction.Parametric outer . Parametric inner = Curve.Parametric (outer . inner)
   outer . inner = Curve.new (outer :.: inner)
 
-instance Curve.Interface (SurfaceFunction units :.: Curve2d UvCoordinates) units where
+instance
+  uvCoordinates ~ UvCoordinates =>
+  Curve.Interface (SurfaceFunction units :.: Curve2d uvCoordinates) units
+  where
   evaluateImpl (function :.: uvCurve) t =
     SurfaceFunction.evaluate function (evaluate uvCurve t)
 
@@ -444,8 +456,9 @@ instance Curve.Interface (SurfaceFunction units :.: Curve2d UvCoordinates) units
     fU . uvCurve * uT + fV . uvCurve * vT
 
 instance
+  uvCoordinates ~ UvCoordinates =>
   Composition
-    (Curve2d UvCoordinates)
+    (Curve2d uvCoordinates)
     (VectorSurfaceFunction3d (space @ units))
     (VectorCurve3d (space @ units))
   where
@@ -454,8 +467,9 @@ instance
   outer . inner = VectorCurve3d.new (outer :.: inner)
 
 instance
+  uvCoordinates ~ UvCoordinates =>
   VectorCurve3d.Interface
-    (VectorSurfaceFunction3d (space @ units) :.: Curve2d UvCoordinates)
+    (VectorSurfaceFunction3d (space @ units) :.: Curve2d uvCoordinates)
     (space @ units)
   where
   evaluateImpl (function :.: uvCurve) tValue =
@@ -476,8 +490,9 @@ instance
     VectorCurve3d.Transformed transform (VectorCurve3d.new curve)
 
 instance
+  uvCoordinates ~ UvCoordinates =>
   Composition
-    (Curve2d UvCoordinates)
+    (Curve2d uvCoordinates)
     (SurfaceFunction3d (space @ units))
     (Curve3d (space @ units))
   where
@@ -485,8 +500,9 @@ instance
   outer . inner = Curve3d.new (outer :.: inner)
 
 instance
+  uvCoordinates ~ UvCoordinates =>
   Curve3d.Interface
-    (SurfaceFunction3d (space @ units) :.: Curve2d UvCoordinates)
+    (SurfaceFunction3d (space @ units) :.: Curve2d uvCoordinates)
     (space @ units)
   where
   evaluateImpl (function :.: uvCurve) tValue =

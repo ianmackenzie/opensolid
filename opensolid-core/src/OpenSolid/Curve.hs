@@ -366,11 +366,11 @@ instance
 instance Division' (Qty units1) (Curve units2) (Curve (units1 :/: units2)) where
   value ./. curve = constant value ./. curve
 
-instance Composition (Curve Unitless) (Curve units) (Curve units) where
+instance unitless ~ Unitless => Composition (Curve unitless) (Curve units) (Curve units) where
   Parametric outer . Parametric inner = Parametric (outer . inner)
   outer . inner = new (outer :.: inner)
 
-instance Interface (Curve units :.: Curve Unitless) units where
+instance unitless ~ Unitless => Interface (Curve units :.: Curve unitless) units where
   evaluateImpl (outer :.: inner) tValue =
     evaluate outer (evaluate inner tValue)
   evaluateBoundsImpl (outer :.: inner) tRange =
