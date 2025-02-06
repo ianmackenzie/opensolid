@@ -137,9 +137,11 @@ library
     OpenSolid.Expression.Curve2d
     OpenSolid.Expression.Curve3d
     OpenSolid.Expression.Surface2d
+    OpenSolid.Expression.Surface3d
     OpenSolid.Expression.VectorCurve2d
     OpenSolid.Expression.VectorCurve3d
     OpenSolid.Expression.VectorSurface2d
+    OpenSolid.Expression.VectorSurface3d
     OpenSolid.FFI
     OpenSolid.Float
     OpenSolid.Frame2d
