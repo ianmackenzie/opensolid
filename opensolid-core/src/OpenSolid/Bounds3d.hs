@@ -20,16 +20,21 @@ module OpenSolid.Bounds3d
   , intersection
   , diameter
   , interpolate
+  , transformBy
   )
 where
 
+import OpenSolid.Float qualified as Float
 import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Point3d (Point3d (Point3d))
+import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Bounds3d (Bounds3d))
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Range (Range (Range))
 import OpenSolid.Range qualified as Range
+import OpenSolid.Transform3d (Transform3d (Transform3d))
+import OpenSolid.Vector3d (Vector3d (Vector3d))
 
 class Bounded3d a (coordinateSystem :: CoordinateSystem) | a -> coordinateSystem where
   bounds :: a -> Bounds3d coordinateSystem
@@ -162,3 +167,24 @@ diameter (Bounds3d x y z) = Qty.hypot3 (Range.width x) (Range.width y) (Range.wi
 interpolate :: Bounds3d (space @ units) -> Float -> Float -> Float -> Point3d (space @ units)
 interpolate (Bounds3d x y z) u v w =
   Point3d (Range.interpolate x u) (Range.interpolate y v) (Range.interpolate z w)
+
+transformBy ::
+  Transform3d tag (space @ units) ->
+  Bounds3d (space @ units) ->
+  Bounds3d (space @ units)
+transformBy transform (Bounds3d x y z) = do
+  let xMid = Range.midpoint x
+  let yMid = Range.midpoint y
+  let zMid = Range.midpoint z
+  let xWidth = Range.width x
+  let yWidth = Range.width y
+  let zWidth = Range.width z
+  let Point3d x0 y0 z0 = Point3d.transformBy transform (Point3d xMid yMid zMid)
+  let Transform3d _ i j k = transform
+  let Vector3d ix iy iz = i
+  let Vector3d jx jy jz = j
+  let Vector3d kx ky kz = k
+  let rx = 0.5 * xWidth * Float.abs ix + 0.5 * yWidth * Float.abs jx + 0.5 * zWidth * Float.abs kx
+  let ry = 0.5 * xWidth * Float.abs iy + 0.5 * yWidth * Float.abs jy + 0.5 * zWidth * Float.abs ky
+  let rz = 0.5 * xWidth * Float.abs iz + 0.5 * yWidth * Float.abs jz + 0.5 * zWidth * Float.abs kz
+  Bounds3d (Range (x0 - rx) (x0 + rx)) (Range (y0 - ry) (y0 + ry)) (Range (z0 - rz) (z0 + rz))
