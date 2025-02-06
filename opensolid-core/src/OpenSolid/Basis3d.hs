@@ -16,6 +16,7 @@ module OpenSolid.Basis3d
   , xDirection
   , yDirection
   , zDirection
+  , handedness
   , placeIn
   , relativeTo
   , placeInBasis
@@ -105,6 +106,8 @@ fromZDirection dz = do
   let (dx, dy) = perpendicularDirections dz
   Basis3d dx dy dz
 
+handedness :: Basis3d space defines -> Sign
+handedness (Basis3d i j k) = Float.sign ((i >< j) <> k)
 placeIn ::
   Frame3d (global @ units) (Defines space) ->
   Basis3d space (Defines local) ->

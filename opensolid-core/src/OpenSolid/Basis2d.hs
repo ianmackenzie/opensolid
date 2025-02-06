@@ -9,6 +9,7 @@ module OpenSolid.Basis2d
   , fromYDirection
   , xDirection
   , yDirection
+  , handedness
   , placeIn
   , relativeTo
   , placeInBasis
@@ -19,6 +20,7 @@ where
 
 import OpenSolid.Direction2d (Direction2d)
 import OpenSolid.Direction2d qualified as Direction2d
+import OpenSolid.Float qualified as Float
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Basis2d (Basis2d), Frame2d (Frame2d))
 
@@ -48,6 +50,9 @@ fromXDirection i = Basis2d i (Direction2d.rotateLeft i)
 
 fromYDirection :: Direction2d space -> Basis2d space defines
 fromYDirection j = Basis2d (Direction2d.rotateRight j) j
+
+handedness :: Basis2d space defines -> Sign
+handedness (Basis2d i j) = Float.sign (i >< j)
 
 placeIn ::
   Frame2d (global @ units) (Defines space) ->

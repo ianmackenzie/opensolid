@@ -11,6 +11,7 @@ module OpenSolid.Frame3d
   , xAxis
   , yAxis
   , zAxis
+  , handedness
   , placeIn
   , relativeTo
   , inverse
@@ -59,6 +60,9 @@ yAxis frame = Axis3d.through (originPoint frame) (yDirection frame)
 
 zAxis :: Frame3d (space @ units) defines -> Axis3d (space @ units)
 zAxis frame = Axis3d.through (originPoint frame) (zDirection frame)
+
+handedness :: Frame3d (space @ units) defines -> Sign
+handedness frame = Basis3d.handedness (basis frame)
 
 placeIn ::
   Frame3d (global @ units) (Defines space) ->
