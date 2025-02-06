@@ -127,11 +127,17 @@ instance
   Parametric lhs - VectorCurve3d.Parametric rhs = Parametric (lhs - rhs)
   lhs - rhs = Subtraction lhs rhs
 
-instance Composition (Curve Unitless) (Curve3d (space @ units)) (Curve3d (space @ units)) where
+instance
+  unitless ~ Unitless =>
+  Composition (Curve unitless) (Curve3d (space @ units)) (Curve3d (space @ units))
+  where
   Parametric outer . Curve.Parametric inner = Parametric (outer . inner)
   outer . inner = new (outer :.: inner)
 
-instance Interface (Curve3d (space @ units) :.: Curve Unitless) (space @ units) where
+instance
+  unitless ~ Unitless =>
+  Interface (Curve3d (space @ units) :.: Curve unitless) (space @ units)
+  where
   evaluateImpl (curve3d :.: curve1d) tRange =
     evaluate curve3d (Curve.evaluate curve1d tRange)
 
@@ -145,8 +151,9 @@ instance Interface (Curve3d (space @ units) :.: Curve Unitless) (space @ units) 
     new (curve3d :.: Curve.reverse curve1d)
 
 instance
+  unitless ~ Unitless =>
   Composition
-    (SurfaceFunction Unitless)
+    (SurfaceFunction unitless)
     (Curve3d (space @ units))
     (SurfaceFunction3d (space @ units))
   where
@@ -155,8 +162,9 @@ instance
   curveFunction . surfaceFunction = SurfaceFunction3d.new (curveFunction :.: surfaceFunction)
 
 instance
+  unitless ~ Unitless =>
   SurfaceFunction3d.Interface
-    (Curve3d (space @ units) :.: SurfaceFunction Unitless)
+    (Curve3d (space @ units) :.: SurfaceFunction unitless)
     (space @ units)
   where
   evaluateImpl (curveFunction :.: surfaceFunction) uvPoint =
