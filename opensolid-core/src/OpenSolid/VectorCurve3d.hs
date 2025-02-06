@@ -539,8 +539,9 @@ instance
   direction3d .><. curve = Vector3d.unit direction3d .><. curve
 
 instance
+  unitless ~ Unitless =>
   Composition
-    (Curve Unitless)
+    (Curve unitless)
     (VectorCurve3d (space @ units))
     (VectorCurve3d (space @ units))
   where
@@ -548,8 +549,9 @@ instance
   outer . inner = new (outer :.: inner)
 
 instance
+  unitless ~ Unitless =>
   Interface
-    (VectorCurve3d (space @ units) :.: Curve Unitless)
+    (VectorCurve3d (space @ units) :.: Curve unitless)
     (space @ units)
   where
   evaluateImpl (vectorCurve3d :.: curve1d) tValue =
@@ -565,16 +567,18 @@ instance
     new (transformBy transform vectorCurve3d :.: curve1d)
 
 instance
+  unitless ~ Unitless =>
   Composition
-    (SurfaceFunction Unitless)
+    (SurfaceFunction unitless)
     (VectorCurve3d (space @ units))
     (VectorSurfaceFunction3d (space @ units))
   where
   curve . function = VectorSurfaceFunction3d.new (curve :.: function)
 
 instance
+  unitless ~ Unitless =>
   VectorSurfaceFunction3d.Interface
-    (VectorCurve3d (space @ units) :.: SurfaceFunction Unitless)
+    (VectorCurve3d (space @ units) :.: SurfaceFunction unitless)
     (space @ units)
   where
   evaluateImpl (curveFunction :.: surfaceFunction) uvPoint =
