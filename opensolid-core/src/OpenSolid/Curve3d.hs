@@ -66,8 +66,8 @@ class
 
 data Curve3d (coordinateSystem :: CoordinateSystem) where
   Curve ::
-    Interface function (space @ units) =>
-    function ->
+    Interface curve (space @ units) =>
+    curve ->
     Curve3d (space @ units)
   Parametric ::
     Expression Float (Point3d (space @ units)) ->
