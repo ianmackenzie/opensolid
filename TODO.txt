@@ -1,3 +1,5 @@
+Replace Range.from with just Range pattern?
+
 Refactor Solve2d searching to use 'cross product' of Solve1d?
 
 Verify behaviour of Curve2d intersection when curves are extensions of each other and meet only at an endpoint
@@ -45,6 +47,7 @@ C API: generate structs with *named* fields
 -> can use this in Python too, to have named fields instead of 'field0' etc.
 
 Improve Python bindings
+- Implement constructors?
 - Allow Python classes to be represented by things other than pointers (e.g. plain float values for quantity types)
 - Add magic IPython display functions to Curve2d, Drawing2d.Entity etc.
   -> using to-SVG (and eventually to-glTF) Haskell functions under the hood? ('display' functions?)
