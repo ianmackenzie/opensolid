@@ -31,6 +31,7 @@ module OpenSolid.VectorCurve2d
   , relativeTo
   , placeInBasis
   , relativeToBasis
+  , placeOn
   , transformBy
   , rotateBy
   , convert
@@ -61,6 +62,7 @@ import OpenSolid.Frame2d (Frame2d (Frame2d))
 import OpenSolid.Frame2d qualified as Frame2d
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.Plane3d (Plane3d)
 import OpenSolid.Point2d (Point2d)
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
@@ -78,6 +80,8 @@ import OpenSolid.VectorBounds2d (VectorBounds2d (VectorBounds2d))
 import OpenSolid.VectorBounds2d qualified as VectorBounds2d
 import OpenSolid.VectorCurve2d.Direction qualified as VectorCurve2d.Direction
 import OpenSolid.VectorCurve2d.Zeros qualified as Zeros
+import {-# SOURCE #-} OpenSolid.VectorCurve3d (VectorCurve3d)
+import {-# SOURCE #-} OpenSolid.VectorCurve3d qualified as VectorCurve3d
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction2d (VectorSurfaceFunction2d)
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction2d qualified as VectorSurfaceFunction2d
 
@@ -908,6 +912,12 @@ relativeToBasis ::
   VectorCurve2d (global @ units) ->
   VectorCurve2d (local @ units)
 relativeToBasis basis = placeInBasis (Basis2d.inverse basis)
+
+placeOn ::
+  Plane3d (space @ planeUnits) (Defines local) ->
+  VectorCurve2d (local @ units) ->
+  VectorCurve3d (space @ units)
+placeOn plane curve = VectorCurve3d.planar plane curve
 
 convert ::
   Qty (units2 :/: units1) ->
