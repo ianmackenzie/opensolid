@@ -7,6 +7,5 @@ data Error
   = EmptyBody
   | BoundaryHasGaps
   | BoundaryIntersectsItself
-  | MultipleDisjointBodies
   | BoundaryCurveHasDegeneracy
   deriving (Eq, Show, Error.Message)
