@@ -25,11 +25,14 @@ import {-# SOURCE #-} OpenSolid.Surface3d (Surface3d)
 import {-# SOURCE #-} OpenSolid.Surface3d qualified as Surface3d
 import OpenSolid.SurfaceFunction (SurfaceFunction)
 import OpenSolid.SurfaceFunction qualified as SurfaceFunction
-import OpenSolid.SurfaceParameter (SurfaceParameter, UvBounds, UvCoordinates, UvPoint)
+import OpenSolid.SurfaceFunction2d (SurfaceFunction2d)
+import OpenSolid.SurfaceFunction2d qualified as SurfaceFunction2d
+import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvCoordinates, UvPoint)
 import OpenSolid.Transform3d (Transform3d)
 import OpenSolid.Transform3d qualified as Transform3d
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector3d (Vector3d)
+import OpenSolid.VectorSurfaceFunction2d qualified as VectorSurfaceFunction2d
 import OpenSolid.VectorSurfaceFunction3d (VectorSurfaceFunction3d)
 import OpenSolid.VectorSurfaceFunction3d qualified as VectorSurfaceFunction3d
 
@@ -131,6 +134,37 @@ instance
     (Surface3d (space @ units))
   where
   function . domain = Surface3d.parametric function domain
+
+instance
+  uvCoordinates ~ UvCoordinates =>
+  Composition
+    (SurfaceFunction2d uvCoordinates)
+    (SurfaceFunction3d (space @ units))
+    (SurfaceFunction3d (space @ units))
+  where
+  Parametric outer . SurfaceFunction2d.Parametric inner = Parametric (outer . inner)
+  outer . inner = new (outer :.: inner)
+
+instance
+  uvCoordinates ~ UvCoordinates =>
+  Interface
+    (SurfaceFunction3d (space @ units) :.: SurfaceFunction2d uvCoordinates)
+    (space @ units)
+  where
+  evaluateImpl (outer :.: inner) uvValue =
+    evaluate outer (SurfaceFunction2d.evaluate inner uvValue)
+
+  evaluateBoundsImpl (outer :.: inner) uvBounds =
+    evaluateBounds outer (SurfaceFunction2d.evaluateBounds inner uvBounds)
+
+  derivativeImpl varyingParameter (outer :.: inner) = do
+    let duOuter = derivative U outer . inner
+    let dvOuter = derivative V outer . inner
+    let dInner = SurfaceFunction2d.derivative varyingParameter inner
+    duOuter * VectorSurfaceFunction2d.xComponent dInner + dvOuter * VectorSurfaceFunction2d.yComponent dInner
+
+  transformByImpl transform (outer :.: inner) =
+    transformBy transform outer . inner
 
 new :: Interface function (space @ units) => function -> SurfaceFunction3d (space @ units)
 new = SurfaceFunction3d
