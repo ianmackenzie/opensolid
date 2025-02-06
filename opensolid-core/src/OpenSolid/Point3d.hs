@@ -12,6 +12,7 @@ module OpenSolid.Point3d
   , xz
   , yz
   , xyz
+  , xyOn
   , meters
   , centimeters
   , millimeters
@@ -78,6 +79,9 @@ yz py pz = Point3d Qty.zero py pz
 
 xyz :: Qty units -> Qty units -> Qty units -> Point3d (space @ units)
 xyz = Point3d
+
+xyOn :: Plane3d (space @ units) (Defines local) -> Qty units -> Qty units -> Point3d (space @ units)
+xyOn (Plane3d p0 (Basis3d i j _)) px py = p0 + px * i + py * j
 
 apply :: (Float -> Qty units) -> Float -> Float -> Float -> Point3d (space @ units)
 apply units px py pz = Point3d (units px) (units py) (units pz)
