@@ -65,7 +65,7 @@ class
   reverseImpl :: curve -> Curve3d coordinateSystem
 
 data Curve3d (coordinateSystem :: CoordinateSystem) where
-  Curve3d ::
+  Curve ::
     Interface function (space @ units) =>
     function ->
     Curve3d (space @ units)
@@ -192,7 +192,7 @@ instance
   curve ~= point = List.allTrue [evaluate curve t ~= point | t <- Parameter.samples]
 
 new :: Interface function (space @ units) => function -> Curve3d (space @ units)
-new = Curve3d
+new = Curve
 
 constant :: Point3d (space @ units) -> Curve3d (space @ units)
 constant = Parametric . Expression.constant
@@ -280,7 +280,7 @@ endPoint curve = evaluate curve 1.0
 evaluate :: Curve3d (space @ units) -> Float -> Point3d (space @ units)
 evaluate f tValue = case f of
   Parametric expression -> Expression.evaluate expression tValue
-  Curve3d curve -> evaluateImpl curve tValue
+  Curve curve -> evaluateImpl curve tValue
   Coerce curve -> Units.coerce (evaluate curve tValue)
   XYZ x y z ->
     Point3d.xyz (Curve.evaluate x tValue) (Curve.evaluate y tValue) (Curve.evaluate z tValue)
@@ -290,7 +290,7 @@ evaluate f tValue = case f of
 evaluateBounds :: Curve3d (space @ units) -> Range Unitless -> Bounds3d (space @ units)
 evaluateBounds f tRange = case f of
   Parametric expression -> Expression.evaluateBounds expression tRange
-  Curve3d curve -> evaluateBoundsImpl curve tRange
+  Curve curve -> evaluateBoundsImpl curve tRange
   Coerce curve -> Units.coerce (evaluateBounds curve tRange)
   XYZ x y z ->
     Bounds3d.xyz
@@ -306,7 +306,7 @@ bounds curve = evaluateBounds curve Range.unit
 derivative :: Curve3d (space @ units) -> VectorCurve3d (space @ units)
 derivative f = case f of
   Parametric expression -> VectorCurve3d.Parametric (Expression.curveDerivative expression)
-  Curve3d curve -> derivativeImpl curve
+  Curve curve -> derivativeImpl curve
   Coerce curve -> Units.coerce (derivative curve)
   XYZ x y z ->
     VectorCurve3d.xyz (Curve.derivative x) (Curve.derivative y) (Curve.derivative z)
@@ -316,7 +316,7 @@ derivative f = case f of
 reverse :: Curve3d (space @ units) -> Curve3d (space @ units)
 reverse f = case f of
   Parametric expression -> Parametric (expression . Expression.r)
-  Curve3d curve -> reverseImpl curve
+  Curve curve -> reverseImpl curve
   Coerce curve -> Units.coerce (reverse curve)
   XYZ x y z -> XYZ (Curve.reverse x) (Curve.reverse y) (Curve.reverse z)
   Addition c v -> reverse c + VectorCurve3d.reverse v

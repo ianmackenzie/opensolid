@@ -21,7 +21,7 @@ import {-# SOURCE #-} OpenSolid.VectorCurve3d (VectorCurve3d)
 type role Curve3d nominal
 
 data Curve3d (coordinateSystem :: CoordinateSystem) where
-  Curve3d ::
+  Curve ::
     Interface function (space @ units) =>
     function ->
     Curve3d (space @ units)
