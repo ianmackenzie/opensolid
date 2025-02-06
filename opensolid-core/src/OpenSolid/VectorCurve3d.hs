@@ -593,6 +593,9 @@ instance
     (derivative curveFunction . surfaceFunction)
       * SurfaceFunction.derivative parameter surfaceFunction
 
+  transformByImpl transform (curveFunction :.: surfaceFunction) =
+    transformBy transform curveFunction . surfaceFunction
+
 transformBy ::
   Transform3d tag (space @ translationUnits) ->
   VectorCurve3d (space @ units) ->

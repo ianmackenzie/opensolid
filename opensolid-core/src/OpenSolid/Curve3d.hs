@@ -22,6 +22,7 @@ module OpenSolid.Curve3d
   , unsafeArcLengthParameterization
   , parameterizeByArcLength
   , unsafeParameterizeByArcLength
+  , transformBy
   )
 where
 
@@ -34,6 +35,7 @@ import OpenSolid.Curve qualified as Curve
 import OpenSolid.Error qualified as Error
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
+import OpenSolid.Expression.Curve3d qualified as Expression.Curve3d
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Parameter qualified as Parameter
@@ -48,6 +50,8 @@ import OpenSolid.SurfaceFunction (SurfaceFunction)
 import OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.SurfaceFunction3d (SurfaceFunction3d)
 import OpenSolid.SurfaceFunction3d qualified as SurfaceFunction3d
+import OpenSolid.Transform3d (Transform3d)
+import OpenSolid.Transform3d qualified as Transform3d
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.Vector3d qualified as Vector3d
@@ -63,6 +67,7 @@ class
   evaluateBoundsImpl :: curve -> Range Unitless -> Bounds3d coordinateSystem
   derivativeImpl :: curve -> VectorCurve3d coordinateSystem
   reverseImpl :: curve -> Curve3d coordinateSystem
+  transformByImpl :: Transform3d tag coordinateSystem -> curve -> Curve3d coordinateSystem
 
 data Curve3d (coordinateSystem :: CoordinateSystem) where
   Curve ::
@@ -87,6 +92,10 @@ data Curve3d (coordinateSystem :: CoordinateSystem) where
   Subtraction ::
     Curve3d (space @ units) ->
     VectorCurve3d (space @ units) ->
+    Curve3d (space @ units)
+  Transformed ::
+    Transform3d tag (space @ units) ->
+    Curve3d (space @ units) ->
     Curve3d (space @ units)
 
 deriving instance Show (Curve3d (space @ units))
@@ -150,6 +159,9 @@ instance
   reverseImpl (curve3d :.: curve1d) =
     new (curve3d :.: Curve.reverse curve1d)
 
+  transformByImpl transform (curve3d :.: curve1d) =
+    new (transformBy transform curve3d :.: curve1d)
+
 instance
   unitless ~ Unitless =>
   Composition
@@ -178,6 +190,9 @@ instance
   derivativeImpl parameter (curve :.: surfaceFunction) =
     (derivative curve . surfaceFunction)
       * SurfaceFunction.derivative parameter surfaceFunction
+
+  transformByImpl transform (curve :.: surfaceFunction) =
+    transformBy transform curve . surfaceFunction
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -286,6 +301,7 @@ evaluate f tValue = case f of
     Point3d.xyz (Curve.evaluate x tValue) (Curve.evaluate y tValue) (Curve.evaluate z tValue)
   Addition c v -> evaluate c tValue + VectorCurve3d.evaluate v tValue
   Subtraction c v -> evaluate c tValue - VectorCurve3d.evaluate v tValue
+  Transformed transform c -> Point3d.transformBy transform (evaluate c tValue)
 
 evaluateBounds :: Curve3d (space @ units) -> Range Unitless -> Bounds3d (space @ units)
 evaluateBounds f tRange = case f of
@@ -299,6 +315,7 @@ evaluateBounds f tRange = case f of
       (Curve.evaluateBounds z tRange)
   Addition c v -> evaluateBounds c tRange + VectorCurve3d.evaluateBounds v tRange
   Subtraction c v -> evaluateBounds c tRange - VectorCurve3d.evaluateBounds v tRange
+  Transformed transform c -> Bounds3d.transformBy transform (evaluateBounds c tRange)
 
 bounds :: Curve3d (space @ units) -> Bounds3d (space @ units)
 bounds curve = evaluateBounds curve Range.unit
@@ -312,6 +329,7 @@ derivative f = case f of
     VectorCurve3d.xyz (Curve.derivative x) (Curve.derivative y) (Curve.derivative z)
   Addition c v -> derivative c + VectorCurve3d.derivative v
   Subtraction c v -> derivative c - VectorCurve3d.derivative v
+  Transformed transform c -> VectorCurve3d.transformBy transform (derivative c)
 
 reverse :: Curve3d (space @ units) -> Curve3d (space @ units)
 reverse f = case f of
@@ -321,6 +339,7 @@ reverse f = case f of
   XYZ x y z -> XYZ (Curve.reverse x) (Curve.reverse y) (Curve.reverse z)
   Addition c v -> reverse c + VectorCurve3d.reverse v
   Subtraction c v -> reverse c - VectorCurve3d.reverse v
+  Transformed transform c -> Transformed transform (reverse c)
 
 arcLengthParameterization ::
   Tolerance units =>
@@ -350,3 +369,17 @@ unsafeParameterizeByArcLength :: Curve3d (space @ units) -> (Curve3d (space @ un
 unsafeParameterizeByArcLength curve = do
   let (parameterization, length) = unsafeArcLengthParameterization curve
   (curve . parameterization, length)
+
+transformBy ::
+  Transform3d tag (space @ units) ->
+  Curve3d (space @ units) ->
+  Curve3d (space @ units)
+transformBy transform curve = case curve of
+  Curve c -> transformByImpl transform c
+  Parametric expression -> Parametric (Expression.Curve3d.transformBy transform expression)
+  Coerce c -> Units.coerce (transformBy (Units.coerce transform) c)
+  XYZ{} -> Transformed transform curve
+  Addition c1 c2 -> transformBy transform c1 + VectorCurve3d.transformBy transform c2
+  Subtraction c1 c2 -> transformBy transform c1 - VectorCurve3d.transformBy transform c2
+  Transformed existing c ->
+    Transformed (Transform3d.toAffine transform . Transform3d.toAffine existing) c

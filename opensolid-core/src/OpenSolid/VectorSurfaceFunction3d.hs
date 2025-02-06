@@ -8,13 +8,16 @@ module OpenSolid.VectorSurfaceFunction3d
   , evaluate
   , evaluateBounds
   , derivative
+  , transformBy
   )
 where
 
 import OpenSolid.Composition
+import OpenSolid.CoordinateSystem (Space)
 import OpenSolid.Direction3d (Direction3d)
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
+import OpenSolid.Expression.VectorSurface3d qualified as Expression.VectorSurface3d
 import OpenSolid.Point3d (Point3d)
 import OpenSolid.Prelude
 import OpenSolid.SurfaceFunction (SurfaceFunction)
@@ -22,6 +25,8 @@ import OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import {-# SOURCE #-} OpenSolid.SurfaceFunction3d (SurfaceFunction3d)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction3d qualified as SurfaceFunction3d
 import OpenSolid.SurfaceParameter (SurfaceParameter, UvBounds, UvPoint)
+import OpenSolid.Transform3d (Transform3d)
+import OpenSolid.Transform3d qualified as Transform3d
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.Vector3d qualified as Vector3d
@@ -36,6 +41,10 @@ class
   evaluateImpl :: function -> UvPoint -> Vector3d coordinateSystem
   evaluateBoundsImpl :: function -> UvBounds -> VectorBounds3d coordinateSystem
   derivativeImpl :: SurfaceParameter -> function -> VectorSurfaceFunction3d coordinateSystem
+  transformByImpl ::
+    Transform3d tag (Space coordinateSystem @ translationUnits) ->
+    function ->
+    VectorSurfaceFunction3d coordinateSystem
 
 data VectorSurfaceFunction3d (coordinateSystem :: CoordinateSystem) where
   VectorSurfaceFunction3d ::
@@ -80,6 +89,10 @@ data VectorSurfaceFunction3d (coordinateSystem :: CoordinateSystem) where
     VectorSurfaceFunction3d (space @ units1) ->
     VectorSurfaceFunction3d (space @ units2) ->
     VectorSurfaceFunction3d (space @ (units1 :*: units2))
+  Transformed ::
+    Transform3d tag (space @ translationUnits) ->
+    VectorSurfaceFunction3d (space @ units) ->
+    VectorSurfaceFunction3d (space @ units)
 
 deriving instance Show (VectorSurfaceFunction3d (space @ units))
 
@@ -505,6 +518,7 @@ evaluate function uvPoint = case function of
   Product3d1d' f1 f2 -> evaluate f1 uvPoint .*. SurfaceFunction.evaluate f2 uvPoint
   Quotient' f1 f2 -> evaluate f1 uvPoint ./. SurfaceFunction.evaluate f2 uvPoint
   CrossProduct' f1 f2 -> evaluate f1 uvPoint .><. evaluate f2 uvPoint
+  Transformed transform f -> Vector3d.transformBy transform (evaluate f uvPoint)
 
 evaluateBounds :: VectorSurfaceFunction3d (space @ units) -> UvBounds -> VectorBounds3d (space @ units)
 evaluateBounds function uvBounds = case function of
@@ -523,6 +537,7 @@ evaluateBounds function uvBounds = case function of
   Product3d1d' f1 f2 -> evaluateBounds f1 uvBounds .*. SurfaceFunction.evaluateBounds f2 uvBounds
   Quotient' f1 f2 -> evaluateBounds f1 uvBounds ./. SurfaceFunction.evaluateBounds f2 uvBounds
   CrossProduct' f1 f2 -> evaluateBounds f1 uvBounds .><. evaluateBounds f2 uvBounds
+  Transformed transform f -> VectorBounds3d.transformBy transform (evaluateBounds f uvBounds)
 
 derivative :: SurfaceParameter -> VectorSurfaceFunction3d (space @ units) -> VectorSurfaceFunction3d (space @ units)
 derivative parameter function = case function of
@@ -545,3 +560,25 @@ derivative parameter function = case function of
     (derivative parameter f1 .*. f2 - f1 .*. SurfaceFunction.derivative parameter f2)
       .!/.! SurfaceFunction.squared' f2
   CrossProduct' f1 f2 -> derivative parameter f1 .><. f2 + f1 .><. derivative parameter f2
+  Transformed transform f -> transformBy transform (derivative parameter f)
+
+transformBy ::
+  Transform3d tag (space @ translationUnits) ->
+  VectorSurfaceFunction3d (space @ units) ->
+  VectorSurfaceFunction3d (space @ units)
+transformBy transform function = case function of
+  VectorSurfaceFunction3d f -> transformByImpl transform f
+  Coerce f -> Coerce (transformBy transform f)
+  Parametric expression -> Parametric (Expression.VectorSurface3d.transformBy transform expression)
+  XYZ{} -> Transformed transform function
+  Negated f -> Negated (transformBy transform f)
+  Sum f1 f2 -> Sum (transformBy transform f1) (transformBy transform f2)
+  Difference f1 f2 -> Difference (transformBy transform f1) (transformBy transform f2)
+  Product1d3d' f1 f2 -> Product1d3d' f1 (transformBy transform f2)
+  Product3d1d' f1 f2 -> Product3d1d' (transformBy transform f1) f2
+  Quotient' f1 f2 -> Quotient' (transformBy transform f1) f2
+  CrossProduct'{} -> Transformed transform function
+  Transformed existing f -> do
+    let transform1 = Units.erase (Transform3d.toAffine existing)
+    let transform2 = Units.erase (Transform3d.toAffine transform)
+    Transformed (transform1 >> transform2) f

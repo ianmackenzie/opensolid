@@ -16,6 +16,7 @@ import OpenSolid.Expression (Expression)
 import OpenSolid.Point3d (Point3d)
 import OpenSolid.Prelude
 import OpenSolid.Range (Range)
+import OpenSolid.Transform3d (Transform3d)
 import {-# SOURCE #-} OpenSolid.VectorCurve3d (VectorCurve3d)
 
 type role Curve3d nominal
@@ -44,6 +45,10 @@ data Curve3d (coordinateSystem :: CoordinateSystem) where
     Curve3d (space @ units) ->
     VectorCurve3d (space @ units) ->
     Curve3d (space @ units)
+  Transformed ::
+    Transform3d tag (space @ units) ->
+    Curve3d (space @ units) ->
+    Curve3d (space @ units)
 
 instance Show (Curve3d (space @ units))
 
@@ -56,6 +61,7 @@ class
   evaluateBoundsImpl :: curve -> Range Unitless -> Bounds3d coordinateSystem
   derivativeImpl :: curve -> VectorCurve3d coordinateSystem
   reverseImpl :: curve -> Curve3d coordinateSystem
+  transformByImpl :: Transform3d tag coordinateSystem -> curve -> Curve3d coordinateSystem
 
 instance
   (space1 ~ space2, units1 ~ units2) =>

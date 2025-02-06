@@ -522,6 +522,9 @@ instance
   reverseImpl (function :.: uvCurve) =
     function . reverse uvCurve
 
+  transformByImpl transform (function :.: uvCurve) =
+    SurfaceFunction3d.transformBy transform function . uvCurve
+
 new :: Interface curve (space @ units) => curve -> Curve2d (space @ units)
 new = Curve
 

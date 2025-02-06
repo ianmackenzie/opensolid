@@ -5,6 +5,7 @@ module OpenSolid.SurfaceFunction3d
   , evaluate
   , evaluateBounds
   , derivative
+  , transformBy
   )
 where
 
@@ -14,6 +15,7 @@ import OpenSolid.Point3d (Point3d)
 import OpenSolid.Prelude
 import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
 import OpenSolid.SurfaceParameter (SurfaceParameter, UvBounds, UvPoint)
+import OpenSolid.Transform3d (Transform3d)
 import OpenSolid.Units qualified as Units
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction3d (VectorSurfaceFunction3d)
 
@@ -25,6 +27,7 @@ class
   evaluateImpl :: function -> UvPoint -> Point3d coordinateSystem
   evaluateBoundsImpl :: function -> UvBounds -> Bounds3d coordinateSystem
   derivativeImpl :: SurfaceParameter -> function -> VectorSurfaceFunction3d coordinateSystem
+  transformByImpl :: Transform3d tag coordinateSystem -> function -> SurfaceFunction3d coordinateSystem
 
 type role SurfaceFunction3d nominal
 
@@ -52,6 +55,10 @@ data SurfaceFunction3d (coordinateSystem :: CoordinateSystem) where
     SurfaceFunction3d (space @ units) ->
     VectorSurfaceFunction3d (space @ units) ->
     SurfaceFunction3d (space @ units)
+  Transformed ::
+    Transform3d tag (space @ units) ->
+    SurfaceFunction3d (space @ units) ->
+    SurfaceFunction3d (space @ units)
 
 instance Show (SurfaceFunction3d (space @ units))
 
@@ -75,3 +82,7 @@ derivative ::
   SurfaceParameter ->
   SurfaceFunction3d (space @ units) ->
   VectorSurfaceFunction3d (space @ units)
+transformBy ::
+  Transform3d tag (space @ units) ->
+  SurfaceFunction3d (space @ units) ->
+  SurfaceFunction3d (space @ units)
