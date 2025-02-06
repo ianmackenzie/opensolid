@@ -48,14 +48,14 @@ data Curve3d (coordinateSystem :: CoordinateSystem) where
 instance Show (Curve3d (space @ units))
 
 class
-  Show function =>
-  Interface function (coordinateSystem :: CoordinateSystem)
-    | function -> coordinateSystem
+  Show curve =>
+  Interface curve (coordinateSystem :: CoordinateSystem)
+    | curve -> coordinateSystem
   where
-  evaluateImpl :: function -> Float -> Point3d coordinateSystem
-  evaluateBoundsImpl :: function -> Range Unitless -> Bounds3d coordinateSystem
-  derivativeImpl :: function -> VectorCurve3d coordinateSystem
-  reverseImpl :: function -> Curve3d coordinateSystem
+  evaluateImpl :: curve -> Float -> Point3d coordinateSystem
+  evaluateBoundsImpl :: curve -> Range Unitless -> Bounds3d coordinateSystem
+  derivativeImpl :: curve -> VectorCurve3d coordinateSystem
+  reverseImpl :: curve -> Curve3d coordinateSystem
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
