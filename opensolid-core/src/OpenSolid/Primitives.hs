@@ -1322,6 +1322,12 @@ instance
   where
   Unit3d vector .*. scale = vector .*. scale
 
+instance Multiplication (Range units) (Direction3d space) (VectorBounds3d (space @ units)) where
+  range * Unit3d vector = range * vector
+
+instance Multiplication (Direction3d space) (Range units) (VectorBounds3d (space @ units)) where
+  Unit3d vector * range = vector * range
+
 instance space1 ~ space2 => DotMultiplication (Direction3d space1) (Direction3d space2) Float where
   Unit3d vector1 <> Unit3d vector2 = vector1 <> vector2
 
