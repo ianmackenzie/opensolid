@@ -12,6 +12,7 @@ module OpenSolid.Expression.VectorCurve2d
   , placeInBasis
   , relativeToBasis
   , transformBy
+  , placeOn
   )
 where
 
@@ -21,11 +22,15 @@ import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Frame2d qualified as Frame2d
+import OpenSolid.Plane3d (Plane3d)
+import OpenSolid.Plane3d qualified as Plane3d
 import OpenSolid.Prelude
 import OpenSolid.Transform2d (Transform2d (Transform2d))
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2d (Vector2d)
 import OpenSolid.Vector2d qualified as Vector2d
+import OpenSolid.Vector3d (Vector3d)
+import OpenSolid.Vector3d qualified as Vector3d
 
 constant :: Vector2d (space @ units) -> Expression Float (Vector2d (space @ units))
 constant = Expression.constant
@@ -100,3 +105,16 @@ transformBy ::
   Expression Float (Vector2d (space @ units))
 transformBy (Transform2d _ i j) vector =
   xComponent vector * constant i + yComponent vector * constant j
+
+placeOn ::
+  forall space units local originPointUnits.
+  Plane3d (space @ originPointUnits) (Defines local) ->
+  Expression Float (Vector2d (local @ units)) ->
+  Expression Float (Vector3d (space @ units))
+placeOn plane vector = do
+  let i = Vector3d.unit (Plane3d.xDirection plane)
+  let j = Vector3d.unit (Plane3d.yDirection plane)
+  xComponent vector * constant3d i + yComponent vector * constant3d j
+
+constant3d :: Vector3d (space @ units) -> Expression Float (Vector3d (space @ units))
+constant3d = Expression.constant
