@@ -1,8 +1,8 @@
 module OpenSolid.Frame3d
-  ( Frame3d
+  ( Frame3d (Frame3d)
   , coerce
   , xyz
-  , at
+  , atPoint
   , originPoint
   , basis
   , xDirection
@@ -47,10 +47,10 @@ zDirection :: Frame3d (space @ units) defines -> Direction3d space
 zDirection frame = Basis3d.zDirection (basis frame)
 
 xyz :: Frame3d (space @ units) defines
-xyz = Frame3d Point3d.origin Basis3d.xyz
+xyz = atPoint Point3d.origin
 
-at :: Point3d (space @ units) -> Basis3d space defines -> Frame3d (space @ units) defines
-at = Frame3d
+atPoint :: Point3d (space @ units) -> Frame3d (space @ units) defines
+atPoint p0 = Frame3d p0 Basis3d.xyz
 
 xAxis :: Frame3d (space @ units) defines -> Axis3d (space @ units)
 xAxis frame = Axis3d.through (originPoint frame) (xDirection frame)

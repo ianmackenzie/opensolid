@@ -57,7 +57,7 @@ import OpenSolid.Error qualified as Error
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Expression.VectorCurve2d qualified as Expression.VectorCurve2d
-import OpenSolid.Frame2d (Frame2d)
+import OpenSolid.Frame2d (Frame2d (Frame2d))
 import OpenSolid.Frame2d qualified as Frame2d
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
@@ -639,7 +639,7 @@ transformBy transform curve = do
     Product2d1d' curve2d curve1d -> Product2d1d' (transformBy transform curve2d) curve1d
     Quotient' curve2d curve1d -> Quotient' (transformBy transform curve2d) curve1d
     PlaceInBasis basis c -> do
-      let localTransform = Transform2d.relativeTo (Frame2d.at Point2d.origin basis) transform
+      let localTransform = Transform2d.relativeTo (Frame2d Point2d.origin basis) transform
       PlaceInBasis basis (transformBy localTransform c)
     Transformed existing c -> Transformed (existing >> t) c
 

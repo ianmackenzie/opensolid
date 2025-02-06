@@ -53,7 +53,7 @@ import OpenSolid.Error qualified as Error
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Expression.VectorCurve3d qualified as Expression.VectorCurve3d
-import OpenSolid.Frame3d (Frame3d)
+import OpenSolid.Frame3d (Frame3d (Frame3d))
 import OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
@@ -607,7 +607,7 @@ transformBy transform c = case c of
   Quotient' curve3d curve1d -> Quotient' (transformBy transform curve3d) curve1d
   CrossProduct' lhs rhs -> CrossProduct' (transformBy transform lhs) (transformBy transform rhs)
   PlaceInBasis basis localCurve -> do
-    let localTransform = Transform3d.relativeTo (Frame3d.at Point3d.origin basis) transform
+    let localTransform = Transform3d.relativeTo (Frame3d Point3d.origin basis) transform
     PlaceInBasis basis (transformBy localTransform localCurve)
   Transformed existing curve -> do
     let transform1 = Units.erase (Transform3d.toAffine existing)

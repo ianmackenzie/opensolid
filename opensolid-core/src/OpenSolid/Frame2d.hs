@@ -2,7 +2,7 @@ module OpenSolid.Frame2d
   ( Frame2d (Frame2d)
   , coerce
   , xy
-  , at
+  , atPoint
   , originPoint
   , basis
   , xDirection
@@ -44,10 +44,10 @@ yDirection :: Frame2d (space @ units) defines -> Direction2d space
 yDirection frame = Basis2d.yDirection (basis frame)
 
 xy :: Frame2d (space @ units) defines
-xy = Frame2d Point2d.origin Basis2d.xy
+xy = atPoint Point2d.origin
 
-at :: Point2d (space @ units) -> Basis2d space defines -> Frame2d (space @ units) defines
-at = Frame2d
+atPoint :: Point2d (space @ units) -> Frame2d (space @ units) defines
+atPoint p0 = Frame2d p0 Basis2d.xy
 
 fromXAxis :: Axis2d (space @ units) -> Frame2d (space @ units) defines
 fromXAxis axis = Frame2d (Axis2d.originPoint axis) (Basis2d.fromXDirection (Axis2d.direction axis))
