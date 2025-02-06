@@ -114,6 +114,14 @@ instance
   where
   f - v = f - VectorSurfaceFunction3d.constant v
 
+instance
+  Composition
+    (Region2d UvCoordinates)
+    (SurfaceFunction3d (space @ units))
+    (Surface3d (space @ units))
+  where
+  function . domain = Surface3d.parametric function domain
+
 new :: Interface function (space @ units) => function -> SurfaceFunction3d (space @ units)
 new = SurfaceFunction3d
 
@@ -176,11 +184,3 @@ derivative parameter function = case function of
       (SurfaceFunction.derivative parameter z)
   Sum f1 f2 -> derivative parameter f1 + VectorSurfaceFunction3d.derivative parameter f2
   Difference f1 f2 -> derivative parameter f1 - VectorSurfaceFunction3d.derivative parameter f2
-
-instance
-  Composition
-    (Region2d UvCoordinates)
-    (SurfaceFunction3d (space @ units))
-    (Surface3d (space @ units))
-  where
-  function . domain = Surface3d.parametric function domain
