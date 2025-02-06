@@ -7,6 +7,21 @@ module OpenSolid.Region2d
   , boundaryCurves
   , placeIn
   , relativeTo
+  , transformBy
+  , translateBy
+  , translateIn
+  , translateAlong
+  , rotateAround
+  , mirrorAcross
+  , scaleAbout
+  , scaleAlong
+  , translateByOwn
+  , translateInOwn
+  , translateAlongOwn
+  , rotateAroundOwn
+  , mirrorAcrossOwn
+  , scaleAboutOwn
+  , scaleAlongOwn
   , convert
   , unconvert
   , classify
@@ -17,6 +32,8 @@ module OpenSolid.Region2d
   )
 where
 
+import OpenSolid.Angle (Angle)
+import OpenSolid.Axis2d (Axis2d)
 import OpenSolid.Bounds2d (Bounds2d)
 import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.ConstrainedDelaunayTriangulation qualified as CDT
@@ -26,6 +43,7 @@ import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Curve2d.IntersectionPoint (IntersectionPoint (IntersectionPoint))
 import OpenSolid.Curve2d.IntersectionPoint qualified as Curve2d.IntersectionPoint
 import OpenSolid.Curve2d.Intersections qualified as Curve2d.Intersections
+import OpenSolid.Direction2d (Direction2d)
 import OpenSolid.Estimate (Estimate)
 import OpenSolid.Estimate qualified as Estimate
 import OpenSolid.Float qualified as Float
@@ -44,7 +62,10 @@ import OpenSolid.Region2d.BoundedBy qualified as BoundedBy
 import OpenSolid.Result qualified as Result
 import OpenSolid.SurfaceParameter (UvCoordinates)
 import OpenSolid.Tolerance qualified as Tolerance
+import OpenSolid.Transform2d (Transform2d)
+import OpenSolid.Transform2d qualified as Transform2d
 import OpenSolid.Units qualified as Units
+import OpenSolid.Vector2d (Vector2d)
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 
 type role Region2d nominal
@@ -216,6 +237,111 @@ relativeTo ::
   Region2d (global @ units) ->
   Region2d (local @ units)
 relativeTo frame region = placeIn (Frame2d.inverse frame) region
+
+transformBy ::
+  Transform2d tag (space @ units) ->
+  Region2d (space @ units) ->
+  Region2d (space @ units)
+transformBy transform (Region2d outer inners) = do
+  let transformLoop =
+        case Transform2d.handedness transform of
+          Positive -> NonEmpty.map (Curve2d.transformBy transform)
+          Negative -> NonEmpty.reverseMap (Curve2d.transformBy transform >> Curve2d.reverse)
+  Region2d (transformLoop outer) (List.map transformLoop inners)
+
+translateBy ::
+  Vector2d (space @ units) ->
+  Region2d (space @ units) ->
+  Region2d (space @ units)
+translateBy = Transform2d.translateByImpl transformBy
+
+translateIn ::
+  Direction2d space ->
+  Qty units ->
+  Region2d (space @ units) ->
+  Region2d (space @ units)
+translateIn = Transform2d.translateInImpl transformBy
+
+translateAlong ::
+  Axis2d (space @ units) ->
+  Qty units ->
+  Region2d (space @ units) ->
+  Region2d (space @ units)
+translateAlong = Transform2d.translateAlongImpl transformBy
+
+rotateAround ::
+  Point2d (space @ units) ->
+  Angle ->
+  Region2d (space @ units) ->
+  Region2d (space @ units)
+rotateAround = Transform2d.rotateAroundImpl transformBy
+
+mirrorAcross ::
+  Axis2d (space @ units) ->
+  Region2d (space @ units) ->
+  Region2d (space @ units)
+mirrorAcross = Transform2d.mirrorAcrossImpl transformBy
+
+scaleAbout ::
+  Point2d (space @ units) ->
+  Float ->
+  Region2d (space @ units) ->
+  Region2d (space @ units)
+scaleAbout = Transform2d.scaleAboutImpl transformBy
+
+scaleAlong ::
+  Axis2d (space @ units) ->
+  Float ->
+  Region2d (space @ units) ->
+  Region2d (space @ units)
+scaleAlong = Transform2d.scaleAlongImpl transformBy
+
+translateByOwn ::
+  (Region2d (space @ units) -> Vector2d (space @ units)) ->
+  Region2d (space @ units) ->
+  Region2d (space @ units)
+translateByOwn = Transform2d.translateByOwnImpl transformBy
+
+translateInOwn ::
+  (Region2d (space @ units) -> Direction2d space) ->
+  Qty units ->
+  Region2d (space @ units) ->
+  Region2d (space @ units)
+translateInOwn = Transform2d.translateInOwnImpl transformBy
+
+translateAlongOwn ::
+  (Region2d (space @ units) -> Axis2d (space @ units)) ->
+  Qty units ->
+  Region2d (space @ units) ->
+  Region2d (space @ units)
+translateAlongOwn = Transform2d.translateAlongOwnImpl transformBy
+
+rotateAroundOwn ::
+  (Region2d (space @ units) -> Point2d (space @ units)) ->
+  Angle ->
+  Region2d (space @ units) ->
+  Region2d (space @ units)
+rotateAroundOwn = Transform2d.rotateAroundOwnImpl transformBy
+
+mirrorAcrossOwn ::
+  (Region2d (space @ units) -> Axis2d (space @ units)) ->
+  Region2d (space @ units) ->
+  Region2d (space @ units)
+mirrorAcrossOwn = Transform2d.mirrorAcrossOwnImpl transformBy
+
+scaleAboutOwn ::
+  (Region2d (space @ units) -> Point2d (space @ units)) ->
+  Float ->
+  Region2d (space @ units) ->
+  Region2d (space @ units)
+scaleAboutOwn = Transform2d.scaleAboutOwnImpl transformBy
+
+scaleAlongOwn ::
+  (Region2d (space @ units) -> Axis2d (space @ units)) ->
+  Float ->
+  Region2d (space @ units) ->
+  Region2d (space @ units)
+scaleAlongOwn = Transform2d.scaleAlongOwnImpl transformBy
 
 convert ::
   Qty (units2 :/: units1) ->
