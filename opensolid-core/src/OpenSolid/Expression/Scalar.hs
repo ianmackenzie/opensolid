@@ -66,7 +66,7 @@ deriving instance Eq (Scalar input)
 
 deriving instance Ord (Scalar input)
 
-instance Composition (Scalar input) (Scalar Float) (Scalar input) where
+instance float ~ Float => Composition (Scalar input) (Scalar float) (Scalar input) where
   Constant value . _ = constant value
   CurveParameter . input = input
   Negated arg . input = negated (arg . input)
@@ -85,10 +85,10 @@ instance Composition (Scalar input) (Scalar Float) (Scalar input) where
   BezierCurve controlPoints param . input = BezierCurve controlPoints (param . input)
 
 instance
-  input1 ~ input2 =>
+  (input1 ~ input2, uvPoint ~ UvPoint) =>
   Composition
     (Scalar input1, Scalar input2)
-    (Scalar UvPoint)
+    (Scalar uvPoint)
     (Scalar input1)
   where
   Constant value . _ = constant value
