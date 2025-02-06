@@ -70,7 +70,6 @@ common config
     StrictData
     TypeFamilies
     TypeFamilyDependencies
-    UnboxedTuples
     UndecidableInstances
     UndecidableSuperClasses
     UnliftedFFITypes
