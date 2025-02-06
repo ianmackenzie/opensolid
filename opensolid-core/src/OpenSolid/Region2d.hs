@@ -5,6 +5,8 @@ module OpenSolid.Region2d
   , outerLoop
   , innerLoops
   , boundaryCurves
+  , convert
+  , unconvert
   , classify
   , contains
   , bounds
@@ -193,6 +195,23 @@ innerLoops (Region2d _ loops) = loops
 
 boundaryCurves :: Region2d (space @ units) -> NonEmpty (Curve2d (space @ units))
 boundaryCurves region = NonEmpty.concat (outerLoop region :| innerLoops region)
+
+convert ::
+  Qty (units2 :/: units1) ->
+  Region2d (space @ units1) ->
+  Region2d (space @ units2)
+convert factor (Region2d outer inners) = do
+  let transform =
+        case Qty.sign factor of
+          Positive -> NonEmpty.map (Curve2d.convert factor)
+          Negative -> NonEmpty.reverseMap (Curve2d.reverse . Curve2d.convert factor)
+  Region2d (transform outer) (List.map transform inners)
+
+unconvert ::
+  Qty (units2 :/: units1) ->
+  Region2d (space @ units2) ->
+  Region2d (space @ units1)
+unconvert factor region = convert (1.0 /% factor) region
 
 contains :: Tolerance units => Point2d (space @ units) -> Region2d (space @ units) -> Bool
 contains point region =
