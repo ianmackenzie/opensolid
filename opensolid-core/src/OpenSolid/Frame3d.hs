@@ -25,23 +25,16 @@ import OpenSolid.Direction3d (Direction3d)
 import OpenSolid.Point3d (Point3d)
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
+import OpenSolid.Primitives (Frame3d (Frame3d))
 
-type role Frame3d nominal nominal
+originPoint :: Frame3d (space @ units) defines -> Point3d (space @ units)
+originPoint (Frame3d p0 _) = p0
 
-type Frame3d :: CoordinateSystem -> LocalSpace -> Type
-data Frame3d coordinateSystem defines where
-  Frame3d ::
-    { originPoint :: Point3d (space @ units)
-    , basis :: Basis3d space defines
-    } ->
-    Frame3d (space @ units) defines
-
-deriving instance Eq (Frame3d (space @ units) defines)
-
-deriving instance Show (Frame3d (space @ units) defines)
+basis :: Frame3d (space @ units) defines -> Basis3d space defines
+basis (Frame3d _ b) = b
 
 coerce :: Frame3d (space @ units) defines1 -> Frame3d (space @ units) defines2
-coerce Frame3d{originPoint, basis} = Frame3d{originPoint, basis = Basis3d.coerce basis}
+coerce (Frame3d p0 b) = Frame3d p0 (Basis3d.coerce b)
 
 xDirection :: Frame3d (space @ units) defines -> Direction3d space
 xDirection frame = Basis3d.xDirection (basis frame)
@@ -56,7 +49,7 @@ xyz :: Frame3d (space @ units) defines
 xyz = Frame3d Point3d.origin Basis3d.xyz
 
 at :: Point3d (space @ units) -> Basis3d space defines -> Frame3d (space @ units) defines
-at point basis = Frame3d point basis
+at = Frame3d
 
 xAxis :: Frame3d (space @ units) defines -> Axis3d (space @ units)
 xAxis frame = Axis3d.through (originPoint frame) (xDirection frame)
@@ -73,9 +66,8 @@ placeIn ::
   Frame3d (global @ units) (Defines local)
 placeIn globalFrame frame =
   Frame3d
-    { originPoint = Point3d.placeIn globalFrame (originPoint frame)
-    , basis = Basis3d.placeIn globalFrame (basis frame)
-    }
+    (Point3d.placeIn globalFrame (originPoint frame))
+    (Basis3d.placeIn globalFrame (basis frame))
 
 relativeTo ::
   Frame3d (global @ units) (Defines space) ->
@@ -83,9 +75,8 @@ relativeTo ::
   Frame3d (space @ units) (Defines local)
 relativeTo globalFrame frame =
   Frame3d
-    { originPoint = Point3d.relativeTo globalFrame (originPoint frame)
-    , basis = Basis3d.relativeTo globalFrame (basis frame)
-    }
+    (Point3d.relativeTo globalFrame (originPoint frame))
+    (Basis3d.relativeTo globalFrame (basis frame))
 
 inverse :: Frame3d (global @ units) (Defines local) -> Frame3d (local @ units) (Defines global)
 inverse frame = xyz |> relativeTo frame

@@ -22,6 +22,7 @@ module OpenSolid.Point2d
   , signedDistanceFrom
   , placeIn
   , relativeTo
+  , placeOn
   , convert
   , unconvert
   , transformBy
@@ -42,8 +43,11 @@ import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Axis2d (Axis2d)
   , Basis2d (Basis2d)
+  , Basis3d (Basis3d)
   , Frame2d (Frame2d)
+  , Plane3d (Plane3d)
   , Point2d (Point2d)
+  , Point3d
   , Transform2d (Transform2d)
   )
 import OpenSolid.Qty qualified as Qty
@@ -146,7 +150,13 @@ relativeTo ::
   Frame2d (global @ units) (Defines local) ->
   Point2d (global @ units) ->
   Point2d (local @ units)
-relativeTo (Frame2d p0 (Basis2d i j)) point = let d = point - p0 in Point2d (d <> i) (d <> j)
+relativeTo (Frame2d p0 (Basis2d i j)) p = let d = p - p0 in Point2d (d <> i) (d <> j)
+
+placeOn ::
+  Plane3d (space @ units) (Defines localSpace) ->
+  Point2d (localSpace @ units) ->
+  Point3d (space @ units)
+placeOn (Plane3d originPoint (Basis3d i j _)) (Point2d px py) = originPoint + px * i + py * j
 
 convert :: Qty (units2 :/: units1) -> Point2d (space @ units1) -> Point2d (space @ units2)
 convert factor (Point2d px py) = Point2d (factor *! px) (factor *! py)

@@ -51,12 +51,21 @@ import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Point2d (Point2d)
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
-import OpenSolid.Primitives (Bounded2d (bounds), Bounds2d (Bounds2d))
+import OpenSolid.Primitives (Bounds2d (Bounds2d))
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Range (Range (Range))
 import OpenSolid.Range qualified as Range
 import OpenSolid.Transform2d (Transform2d (Transform2d))
 import OpenSolid.Vector2d qualified as Vector2d
+
+class Bounded2d a (coordinateSystem :: CoordinateSystem) | a -> coordinateSystem where
+  bounds :: a -> Bounds2d coordinateSystem
+
+instance Bounded2d (Bounds2d (space @ units)) (space @ units) where
+  bounds = identity
+
+instance Bounded2d (Point2d (space @ units)) (space @ units) where
+  bounds = constant
 
 -- | Get the X coordinate range of a bounding box.
 xCoordinate :: Bounds2d (space @ units) -> Range units

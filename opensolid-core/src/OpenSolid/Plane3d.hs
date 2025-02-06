@@ -1,5 +1,5 @@
 module OpenSolid.Plane3d
-  ( Plane3d
+  ( Plane3d (Plane3d)
   , through
   , xy
   , yx
@@ -14,19 +14,12 @@ module OpenSolid.Plane3d
   )
 where
 
-import OpenSolid.Basis3d (Basis3d)
 import OpenSolid.Basis3d qualified as Basis3d
 import OpenSolid.Direction3d (Direction3d)
 import OpenSolid.Point3d (Point3d)
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
-
-type Plane3d :: CoordinateSystem -> LocalSpace -> Type
-data Plane3d coordinateSystem defines where
-  Plane3d ::
-    Point3d (space @ units) ->
-    Basis3d space (Defines local) ->
-    Plane3d (space @ units) (Defines local)
+import OpenSolid.Primitives (Plane3d (Plane3d))
 
 through :: Point3d (space @ units) -> Direction3d space -> Plane3d (space @ units) (Defines local)
 through p0 n = Plane3d p0 (Basis3d.fromZDirection n)

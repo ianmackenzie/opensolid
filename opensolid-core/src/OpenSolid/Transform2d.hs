@@ -38,13 +38,13 @@ import Data.Coerce qualified
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Direction2d (Direction2d)
-import OpenSolid.Point2d qualified as Point2d
+import {-# SOURCE #-} OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude hiding (identity)
 import OpenSolid.Primitives
   ( Axis2d (Axis2d)
   , Direction2d (Unit2d)
   , Frame2d
-  , Point2d
+  , Point2d (Point2d)
   , Transform2d (Transform2d)
   , Vector2d (Vector2d)
   )
@@ -60,10 +60,10 @@ type Uniform coordinateSystem = Transform2d Transform.Uniform coordinateSystem
 type Affine coordinateSystem = Transform2d Transform.Affine coordinateSystem
 
 unitX :: Vector2d (space @ Unitless)
-unitX = Vector2d.xy 1.0 0.0
+unitX = Vector2d 1.0 0.0
 
 unitY :: Vector2d (space @ Unitless)
-unitY = Vector2d.xy 0.0 1.0
+unitY = Vector2d 0.0 1.0
 
 identity :: Rigid (space @ units)
 identity = Transform2d Point2d.origin unitX unitY
@@ -74,7 +74,7 @@ withFixedPoint ::
   Vector2d (space @ Unitless) ->
   Transform2d tag (space @ units)
 withFixedPoint fixedPoint vx vy = do
-  let (fixedX, fixedY) = Point2d.coordinates fixedPoint
+  let Point2d fixedX fixedY = fixedPoint
   Transform2d (fixedPoint - fixedX * vx - fixedY * vy) vx vy
 
 translateBy :: Vector2d (space @ units) -> Rigid (space @ units)
@@ -90,21 +90,21 @@ rotateAround :: Point2d (space @ units) -> Angle -> Rigid (space @ units)
 rotateAround centerPoint angle = do
   let cos = Angle.cos angle
   let sin = Angle.sin angle
-  let vx = Vector2d.xy cos sin
-  let vy = Vector2d.xy -sin cos
+  let vx = Vector2d cos sin
+  let vy = Vector2d -sin cos
   withFixedPoint centerPoint vx vy
 
 mirrorAcross :: Axis2d (space @ units) -> Orthonormal (space @ units)
 mirrorAcross (Axis2d originPoint direction) = do
   let Unit2d (Vector2d dx dy) = direction
-  let vx = Vector2d.xy (1.0 - 2.0 * dy * dy) (2.0 * dx * dy)
-  let vy = Vector2d.xy (2.0 * dx * dy) (1.0 - 2.0 * dx * dx)
+  let vx = Vector2d (1.0 - 2.0 * dy * dy) (2.0 * dx * dy)
+  let vy = Vector2d (2.0 * dx * dy) (1.0 - 2.0 * dx * dx)
   withFixedPoint originPoint vx vy
 
 scaleAbout :: Point2d (space @ units) -> Float -> Uniform (space @ units)
 scaleAbout point scale = do
-  let vx = Vector2d.xy scale 0.0
-  let vy = Vector2d.xy 0.0 scale
+  let vx = Vector2d scale 0.0
+  let vy = Vector2d 0.0 scale
   withFixedPoint point vx vy
 
 scaleAlong :: Axis2d (space @ units) -> Float -> Affine (space @ units)
@@ -113,8 +113,8 @@ scaleAlong (Axis2d originPoint direction) scale = do
   let dx2 = dx * dx
   let dy2 = dy * dy
   let xy = (scale - 1.0) * dx * dy
-  let vx = Vector2d.xy (scale * dx2 + dy2) xy
-  let vy = Vector2d.xy xy (scale * dy2 + dx2)
+  let vx = Vector2d (scale * dx2 + dy2) xy
+  let vy = Vector2d xy (scale * dy2 + dx2)
   withFixedPoint originPoint vx vy
 
 placeIn ::

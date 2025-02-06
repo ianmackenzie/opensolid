@@ -13,7 +13,7 @@ import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Curve2d qualified as Curve2d
-import OpenSolid.Direction2d qualified as Direction2d
+import OpenSolid.Direction2d (Direction2d (Direction2d))
 import OpenSolid.Float qualified as Float
 import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Frame2d qualified as Frame2d
@@ -34,7 +34,6 @@ import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvCoordina
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Uv.Derivatives (Derivatives)
 import OpenSolid.Uv.Derivatives qualified as Derivatives
-import OpenSolid.Vector2d (Vector2d (Vector2d))
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
 
 data VerticalCurve units = VerticalCurve
@@ -215,7 +214,7 @@ solveForU (VerticalCurve{f, fu, bounds, boundingAxes, tolerance}) vValue = do
 clamp :: Float -> Range Unitless -> Axis2d UvCoordinates -> Range Unitless
 clamp v (Range uLow uHigh) axis = do
   let Point2d u0 v0 = Axis2d.originPoint axis
-  let Vector2d du dv = Direction2d.unwrap (Axis2d.direction axis)
+  let Direction2d du dv = Axis2d.direction axis
   let u = u0 + (v - v0) * du / dv
   if
     | dv > 0.0 -> Range uLow (Qty.min uHigh u)

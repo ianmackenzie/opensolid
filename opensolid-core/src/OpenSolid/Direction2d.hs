@@ -1,6 +1,5 @@
 module OpenSolid.Direction2d
   ( Direction2d (Direction2d)
-  , unwrap
   , xComponent
   , yComponent
   , components
@@ -57,22 +56,18 @@ import OpenSolid.Vector2d qualified as Vector2d
 pattern Direction2d :: Float -> Float -> Direction2d space
 pattern Direction2d dx dy <- Unit2d (Vector2d dx dy)
 
-{-# INLINE unwrap #-}
-unwrap :: Direction2d space -> Vector2d (space @ Unitless)
-unwrap (Unit2d v) = v
-
 -- | Get the X component of a direction.
 xComponent :: Direction2d space -> Float
-xComponent (Unit2d vector) = Vector2d.xComponent vector
+xComponent (Direction2d dx _) = dx
 
 -- | Get the Y component of a direction.
 yComponent :: Direction2d space -> Float
-yComponent (Unit2d vector) = Vector2d.yComponent vector
+yComponent (Direction2d _ dy) = dy
 
 -- | Get the X and Y components of a direction.
 {-# INLINE components #-}
 components :: Direction2d space -> (Float, Float)
-components (Unit2d vector) = Vector2d.components vector
+components (Direction2d dx dy) = (dx, dy)
 
 {-# INLINE unsafe #-}
 unsafe :: Vector2d (space @ Unitless) -> Direction2d space
@@ -179,10 +174,16 @@ rotateLeft = lift Vector2d.rotateLeft
 rotateRight :: Direction2d space -> Direction2d space
 rotateRight = lift Vector2d.rotateRight
 
-placeIn :: Frame2d (global @ originUnits) (Defines local) -> Direction2d local -> Direction2d global
+placeIn ::
+  Frame2d (global @ originUnits) (Defines local) ->
+  Direction2d local ->
+  Direction2d global
 placeIn frame = lift (Vector2d.placeIn frame)
 
-relativeTo :: Frame2d (global @ originUnits) (Defines local) -> Direction2d global -> Direction2d local
+relativeTo ::
+  Frame2d (global @ originUnits) (Defines local) ->
+  Direction2d global ->
+  Direction2d local
 relativeTo frame = lift (Vector2d.relativeTo frame)
 
 placeInBasis :: Basis2d global (Defines local) -> Direction2d local -> Direction2d global

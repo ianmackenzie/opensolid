@@ -224,7 +224,6 @@ library
     OpenSolid.Expression.Scalar
     OpenSolid.Linearization
     OpenSolid.Lobatto
-    OpenSolid.Point3d.CoordinateTransformation
     OpenSolid.Primitives
     OpenSolid.Quadrature
     OpenSolid.Random.Internal
@@ -233,7 +232,6 @@ library
     OpenSolid.SurfaceFunction.SaddleRegion
     OpenSolid.SurfaceLinearization
     OpenSolid.Text.Parse
-    OpenSolid.Vector3d.CoordinateTransformation
 
   hs-source-dirs: src
   extra-libraries:

@@ -1,5 +1,5 @@
 module OpenSolid.Axis3d
-  ( Axis3d
+  ( Axis3d (Axis3d)
   , originPoint
   , direction
   , x
@@ -17,18 +17,9 @@ import OpenSolid.Direction3d qualified as Direction3d
 import OpenSolid.Point3d (Point3d)
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
+import OpenSolid.Primitives (Axis3d (Axis3d))
 import OpenSolid.Transform qualified as Transform
 import OpenSolid.Transform3d (Transform3d)
-
-data Axis3d (coordinateSystem :: CoordinateSystem) where
-  Axis3d ::
-    Point3d (space @ units) ->
-    Direction3d space ->
-    Axis3d (space @ units)
-
-deriving instance Eq (Axis3d (space @ units))
-
-deriving instance Show (Axis3d (space @ units))
 
 originPoint :: Axis3d (space @ units) -> Point3d (space @ units)
 originPoint (Axis3d p0 _) = p0

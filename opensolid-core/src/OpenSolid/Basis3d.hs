@@ -27,28 +27,21 @@ where
 import OpenSolid.Direction3d (Direction3d)
 import OpenSolid.Direction3d qualified as Direction3d
 import OpenSolid.Float qualified as Float
-import {-# SOURCE #-} OpenSolid.Frame3d (Frame3d)
-import {-# SOURCE #-} OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.Prelude
+import OpenSolid.Primitives (Basis3d (Basis3d), Frame3d (Frame3d))
 import OpenSolid.Vector3d qualified as Vector3d
 
-type role Basis3d nominal nominal
-
-type Basis3d :: Type -> LocalSpace -> Type
-data Basis3d space defines where
-  Basis3d ::
-    { xDirection :: Direction3d space
-    , yDirection :: Direction3d space
-    , zDirection :: Direction3d space
-    } ->
-    Basis3d space defines
-
-deriving instance Eq (Basis3d space defines)
-
-deriving instance Show (Basis3d space defines)
-
 coerce :: Basis3d space defines1 -> Basis3d space defines2
-coerce Basis3d{xDirection, yDirection, zDirection} = Basis3d{xDirection, yDirection, zDirection}
+coerce (Basis3d i j k) = Basis3d i j k
+
+xDirection :: Basis3d space defines -> Direction3d space
+xDirection (Basis3d i _ _) = i
+
+yDirection :: Basis3d space defines -> Direction3d space
+yDirection (Basis3d _ j _) = j
+
+zDirection :: Basis3d space defines -> Direction3d space
+zDirection (Basis3d _ _ k) = k
 
 xyz :: Basis3d space defines
 xyz = Basis3d Direction3d.x Direction3d.y Direction3d.z
@@ -116,35 +109,33 @@ placeIn ::
   Frame3d (global @ units) (Defines space) ->
   Basis3d space (Defines local) ->
   Basis3d global (Defines local)
-placeIn frame = placeInBasis (Frame3d.basis frame)
+placeIn (Frame3d _ basis) = placeInBasis basis
 
 relativeTo ::
   Frame3d (global @ units) (Defines space) ->
   Basis3d global (Defines local) ->
   Basis3d space (Defines local)
-relativeTo frame = relativeToBasis (Frame3d.basis frame)
+relativeTo (Frame3d _ basis) = relativeToBasis basis
 
 placeInBasis ::
   Basis3d global (Defines space) ->
   Basis3d space (Defines local) ->
   Basis3d global (Defines local)
-placeInBasis globalBasis basis =
+placeInBasis globalBasis (Basis3d i j k) =
   Basis3d
-    { xDirection = Direction3d.placeInBasis globalBasis (xDirection basis)
-    , yDirection = Direction3d.placeInBasis globalBasis (yDirection basis)
-    , zDirection = Direction3d.placeInBasis globalBasis (zDirection basis)
-    }
+    (Direction3d.placeInBasis globalBasis i)
+    (Direction3d.placeInBasis globalBasis j)
+    (Direction3d.placeInBasis globalBasis k)
 
 relativeToBasis ::
   Basis3d global (Defines space) ->
   Basis3d global (Defines local) ->
   Basis3d space (Defines local)
-relativeToBasis globalBasis basis =
+relativeToBasis globalBasis (Basis3d i j k) =
   Basis3d
-    { xDirection = Direction3d.relativeToBasis globalBasis (xDirection basis)
-    , yDirection = Direction3d.relativeToBasis globalBasis (yDirection basis)
-    , zDirection = Direction3d.relativeToBasis globalBasis (zDirection basis)
-    }
+    (Direction3d.relativeToBasis globalBasis i)
+    (Direction3d.relativeToBasis globalBasis j)
+    (Direction3d.relativeToBasis globalBasis k)
 
 inverse :: Basis3d global (Defines local) -> Basis3d local (Defines global)
 inverse basis = xyz |> relativeToBasis basis

@@ -21,109 +21,26 @@ module OpenSolid.Point3d
   , distanceFrom
   , placeIn
   , relativeTo
+  , projectInto
   , convert
   , unconvert
   , transformBy
   )
 where
 
-import {-# SOURCE #-} OpenSolid.Bounds3d (Bounds3d)
-import {-# SOURCE #-} OpenSolid.Bounds3d qualified as Bounds3d
-import {-# SOURCE #-} OpenSolid.Frame3d (Frame3d)
 import OpenSolid.Length qualified as Length
-import OpenSolid.Point3d.CoordinateTransformation qualified as Point3d.CoordinateTransformation
 import OpenSolid.Prelude
+import OpenSolid.Primitives
+  ( Basis3d (Basis3d)
+  , Frame3d (Frame3d)
+  , Plane3d (Plane3d)
+  , Point2d (Point2d)
+  , Point3d (Point3d)
+  , Transform3d (Transform3d)
+  )
 import OpenSolid.Qty qualified as Qty
-import OpenSolid.Transform3d (Transform3d (Transform3d))
 import OpenSolid.Units (Meters)
-import OpenSolid.Units qualified as Units
-import OpenSolid.Vector3d (Vector3d (Vector3d))
 import OpenSolid.Vector3d qualified as Vector3d
-import OpenSolid.VectorBounds3d (VectorBounds3d (VectorBounds3d))
-
-type role Point3d nominal
-
-data Point3d (coordinateSystem :: CoordinateSystem) where
-  Point3d ::
-    Qty units ->
-    Qty units ->
-    Qty units ->
-    Point3d (space @ units)
-
-deriving instance Eq (Point3d (space @ units))
-
-deriving instance Show (Point3d (space @ units))
-
-instance HasUnits (Point3d (space @ units)) units (Point3d (space @ Unitless))
-
-instance
-  space1 ~ space2 =>
-  Units.Coercion (Point3d (space1 @ unitsA)) (Point3d (space2 @ unitsB))
-  where
-  coerce (Point3d px py pz) = Point3d (Units.coerce px) (Units.coerce py) (Units.coerce pz)
-
-instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
-  Addition
-    (Point3d (space1 @ units1))
-    (Vector3d (space2 @ units2))
-    (Point3d (space1 @ units1))
-  where
-  Point3d px py pz + Vector3d vx vy vz = Point3d (px + vx) (py + vy) (pz + vz)
-
-instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
-  Subtraction
-    (Point3d (space1 @ units1))
-    (Vector3d (space2 @ units2))
-    (Point3d (space1 @ units1))
-  where
-  Point3d px py pz - Vector3d vx vy vz = Point3d (px - vx) (py - vy) (pz - vz)
-
-instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
-  Subtraction
-    (Point3d (space1 @ units1))
-    (Point3d (space2 @ units2))
-    (Vector3d (space1 @ units1))
-  where
-  Point3d x1 y1 z1 - Point3d x2 y2 z2 = Vector3d (x1 - x2) (y1 - y2) (z1 - z2)
-
-instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
-  Addition
-    (Point3d (space1 @ units1))
-    (VectorBounds3d (space2 @ units2))
-    (Bounds3d (space1 @ units1))
-  where
-  Point3d px py pz + VectorBounds3d vx vy vz = Bounds3d.xyz (px + vx) (py + vy) (pz + vz)
-
-instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
-  Subtraction
-    (Point3d (space1 @ units1))
-    (VectorBounds3d (space2 @ units2))
-    (Bounds3d (space1 @ units1))
-  where
-  Point3d px py pz - VectorBounds3d vx vy vz = Bounds3d.xyz (px - vx) (py - vy) (pz - vz)
-
-instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
-  ApproximateEquality (Point3d (space1 @ units1)) (Point3d (space2 @ units2)) units1
-  where
-  p1 ~= p2 = distanceFrom p1 p2 ~= Qty.zero
 
 xCoordinate :: Point3d (space @ units) -> Qty units
 xCoordinate (Point3d px _ _) = px
@@ -199,13 +116,19 @@ placeIn ::
   Frame3d (global @ units) (Defines local) ->
   Point3d (local @ units) ->
   Point3d (global @ units)
-placeIn = Point3d.CoordinateTransformation.placeIn
+placeIn (Frame3d p0 (Basis3d i j k)) (Point3d px py pz) = p0 + px * i + py * j + pz * k
 
 relativeTo ::
   Frame3d (global @ units) (Defines local) ->
   Point3d (global @ units) ->
   Point3d (local @ units)
-relativeTo = Point3d.CoordinateTransformation.relativeTo
+relativeTo (Frame3d p0 (Basis3d i j k)) p = let d = p - p0 in Point3d (d <> i) (d <> j) (d <> k)
+
+projectInto ::
+  Plane3d (space @ units) (Defines localSpace) ->
+  Point3d (space @ units) ->
+  Point2d (localSpace @ units)
+projectInto (Plane3d p0 (Basis3d i j _)) p = let d = p - p0 in Point2d (d <> i) (d <> j)
 
 convert :: Qty (units2 :/: units1) -> Point3d (space @ units1) -> Point3d (space @ units2)
 convert conversion (Point3d px py pz) =

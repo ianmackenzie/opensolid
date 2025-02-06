@@ -37,56 +37,18 @@ where
 import Data.Coerce qualified
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
-import {-# SOURCE #-} OpenSolid.Axis3d (Axis3d)
-import {-# SOURCE #-} OpenSolid.Axis3d qualified as Axis3d
-import {-# SOURCE #-} OpenSolid.Direction3d (Direction3d)
-import {-# SOURCE #-} OpenSolid.Direction3d qualified as Direction3d
-import {-# SOURCE #-} OpenSolid.Frame3d (Frame3d)
-import {-# SOURCE #-} OpenSolid.Point3d (Point3d)
 import {-# SOURCE #-} OpenSolid.Point3d qualified as Point3d
-import OpenSolid.Point3d.CoordinateTransformation qualified as Point3d
 import OpenSolid.Prelude hiding (identity)
+import OpenSolid.Primitives
+  ( Axis3d (Axis3d)
+  , Direction3d (Unit3d)
+  , Frame3d
+  , Point3d (Point3d)
+  , Transform3d (Transform3d)
+  , Vector3d (Vector3d)
+  )
 import OpenSolid.Transform qualified as Transform
-import OpenSolid.Units qualified as Units
-import {-# SOURCE #-} OpenSolid.Vector3d (Vector3d)
 import {-# SOURCE #-} OpenSolid.Vector3d qualified as Vector3d
-import OpenSolid.Vector3d.CoordinateTransformation qualified as Vector3d
-
-type role Transform3d phantom nominal
-
-type Transform3d :: Type -> CoordinateSystem -> Type
-data Transform3d tag (coordinateSystem :: CoordinateSystem) where
-  Transform3d_ ::
-    Point3d (space @ units) ->
-    Vector3d (space @ Unitless) ->
-    Vector3d (space @ Unitless) ->
-    Vector3d (space @ Unitless) ->
-    Transform3d tag (space @ units)
-
-deriving instance Eq (Transform3d tag (space @ units))
-
-deriving instance Show (Transform3d tag (space @ units))
-
-{-# COMPLETE Transform3d #-}
-
-{-# INLINE Transform3d #-}
-pattern Transform3d ::
-  Point3d (space @ units) ->
-  Vector3d (space @ Unitless) ->
-  Vector3d (space @ Unitless) ->
-  Vector3d (space @ Unitless) ->
-  Transform3d tag (space @ units)
-pattern Transform3d p0 vx vy vz <- Transform3d_ p0 vx vy vz
-
-instance HasUnits (Transform3d tag (space @ units)) units (Transform3d tag (space @ Unitless))
-
-instance
-  (tag1 ~ tag2, space1 ~ space2) =>
-  Units.Coercion
-    (Transform3d tag1 (space1 @ unitsA))
-    (Transform3d tag2 (space2 @ unitsB))
-  where
-  coerce (Transform3d p0 vx vy vz) = Transform3d_ (Units.coerce p0) vx vy vz
 
 type Rigid coordinateSystem = Transform3d Transform.Rigid coordinateSystem
 
@@ -96,34 +58,17 @@ type Uniform coordinateSystem = Transform3d Transform.Uniform coordinateSystem
 
 type Affine coordinateSystem = Transform3d Transform.Affine coordinateSystem
 
-instance
-  ( Composition tag1 tag2 tag3
-  , space1 ~ space2
-  , units1 ~ units2
-  ) =>
-  Composition
-    (Transform3d tag1 (space1 @ units1))
-    (Transform3d tag2 (space2 @ units2))
-    (Transform3d tag3 (space1 @ units1))
-  where
-  transform1 >> transform2 =
-    Transform3d_
-      (Point3d.origin |> Point3d.transformBy transform1 |> Point3d.transformBy transform2)
-      (unitX |> Vector3d.transformBy transform1 |> Vector3d.transformBy transform2)
-      (unitY |> Vector3d.transformBy transform1 |> Vector3d.transformBy transform2)
-      (unitZ |> Vector3d.transformBy transform1 |> Vector3d.transformBy transform2)
-
 unitX :: Vector3d (space @ Unitless)
-unitX = Vector3d.xyz 1.0 0.0 0.0
+unitX = Vector3d 1.0 0.0 0.0
 
 unitY :: Vector3d (space @ Unitless)
-unitY = Vector3d.xyz 0.0 1.0 0.0
+unitY = Vector3d 0.0 1.0 0.0
 
 unitZ :: Vector3d (space @ Unitless)
-unitZ = Vector3d.xyz 0.0 0.0 1.0
+unitZ = Vector3d 0.0 0.0 1.0
 
 identity :: Rigid (space @ units)
-identity = Transform3d_ Point3d.origin unitX unitY unitZ
+identity = Transform3d Point3d.origin unitX unitY unitZ
 
 withFixedPoint ::
   Point3d (space @ units) ->
@@ -132,21 +77,21 @@ withFixedPoint ::
   Vector3d (space @ Unitless) ->
   Transform3d tag (space @ units)
 withFixedPoint fixedPoint vx vy vz = do
-  let (x0, y0, z0) = Point3d.coordinates fixedPoint
-  Transform3d_ (fixedPoint - x0 * vx - y0 * vy - z0 * vz) vx vy vz
+  let Point3d x0 y0 z0 = fixedPoint
+  Transform3d (fixedPoint - x0 * vx - y0 * vy - z0 * vz) vx vy vz
 
 translateBy :: Vector3d (space @ units) -> Rigid (space @ units)
-translateBy vector = Transform3d_ (Point3d.origin + vector) unitX unitY unitZ
+translateBy vector = Transform3d (Point3d.origin + vector) unitX unitY unitZ
 
 translateIn :: Direction3d space -> Qty units -> Rigid (space @ units)
 translateIn direction distance = translateBy (direction * distance)
 
 translateAlong :: Axis3d (space @ units) -> Qty units -> Rigid (space @ units)
-translateAlong axis distance = translateIn (Axis3d.direction axis) distance
+translateAlong (Axis3d _ direction) distance = translateIn direction distance
 
 rotateAround :: Axis3d (space @ units) -> Angle -> Rigid (space @ units)
-rotateAround axis angle = do
-  let (dx, dy, dz) = Direction3d.components (Axis3d.direction axis)
+rotateAround (Axis3d originPoint direction) angle = do
+  let Unit3d (Vector3d dx dy dz) = direction
   let halfAngle = 0.5 * angle
   let sinHalfAngle = Angle.sin halfAngle
   let qx = dx * sinHalfAngle
@@ -162,27 +107,26 @@ rotateAround axis angle = do
   let yy = qy * qy
   let yz = qy * qz
   let zz = qz * qz
-  let vx = Vector3d.xyz (1.0 - 2.0 * (yy + zz)) (2.0 * (xy + wz)) (2.0 * (xz - wy))
-  let vy = Vector3d.xyz (2.0 * (xy - wz)) (1.0 - 2.0 * (xx + zz)) (2.0 * (yz + wx))
-  let vz = Vector3d.xyz (2.0 * (xz + wy)) (2.0 * (yz - wx)) (1.0 - 2.0 * (xx + yy))
-  withFixedPoint (Axis3d.originPoint axis) vx vy vz
+  let vx = Vector3d (1.0 - 2.0 * (yy + zz)) (2.0 * (xy + wz)) (2.0 * (xz - wy))
+  let vy = Vector3d (2.0 * (xy - wz)) (1.0 - 2.0 * (xx + zz)) (2.0 * (yz + wx))
+  let vz = Vector3d (2.0 * (xz + wy)) (2.0 * (yz - wx)) (1.0 - 2.0 * (xx + yy))
+  withFixedPoint originPoint vx vy vz
 
 scaleAbout :: Point3d (space @ units) -> Float -> Uniform (space @ units)
 scaleAbout point scale = do
-  let vx = Vector3d.xyz scale 0.0 0.0
-  let vy = Vector3d.xyz 0.0 scale 0.0
-  let vz = Vector3d.xyz 0.0 0.0 scale
+  let vx = Vector3d scale 0.0 0.0
+  let vy = Vector3d 0.0 scale 0.0
+  let vz = Vector3d 0.0 0.0 scale
   withFixedPoint point vx vy vz
 
 scaleAlong :: Axis3d (space @ units) -> Float -> Affine (space @ units)
-scaleAlong axis scale = do
-  let d = Axis3d.direction axis
-  let (dx, dy, dz) = Direction3d.components d
+scaleAlong (Axis3d originPoint direction) scale = do
+  let Unit3d (Vector3d dx dy dz) = direction
   -- TODO refactor to use Vector3d.scaleIn?
-  let vx = unitX + (scale - 1.0) * dx * d
-  let vy = unitY + (scale - 1.0) * dy * d
-  let vz = unitZ + (scale - 1.0) * dz * d
-  withFixedPoint (Axis3d.originPoint axis) vx vy vz
+  let vx = unitX + (scale - 1.0) * dx * direction
+  let vy = unitY + (scale - 1.0) * dy * direction
+  let vz = unitZ + (scale - 1.0) * dz * direction
+  withFixedPoint originPoint vx vy vz
 
 placeIn ::
   Frame3d (global @ units) (Defines local) ->
@@ -193,7 +137,7 @@ placeIn frame transform = do
   let vx = unitX |> Vector3d.relativeTo frame |> Vector3d.transformBy transform |> Vector3d.placeIn frame
   let vy = unitY |> Vector3d.relativeTo frame |> Vector3d.transformBy transform |> Vector3d.placeIn frame
   let vz = unitZ |> Vector3d.relativeTo frame |> Vector3d.transformBy transform |> Vector3d.placeIn frame
-  Transform3d_ p0 vx vy vz
+  Transform3d p0 vx vy vz
 
 relativeTo ::
   Frame3d (global @ units) (Defines local) ->
@@ -204,7 +148,7 @@ relativeTo frame transform = do
   let vx = unitX |> Vector3d.placeIn frame |> Vector3d.transformBy transform |> Vector3d.relativeTo frame
   let vy = unitY |> Vector3d.placeIn frame |> Vector3d.transformBy transform |> Vector3d.relativeTo frame
   let vz = unitZ |> Vector3d.placeIn frame |> Vector3d.transformBy transform |> Vector3d.relativeTo frame
-  Transform3d_ p0 vx vy vz
+  Transform3d p0 vx vy vz
 
 toOrthonormal :: Transform.IsOrthonormal tag => Transform3d tag (space @ units) -> Orthonormal (space @ units)
 toOrthonormal = Data.Coerce.coerce

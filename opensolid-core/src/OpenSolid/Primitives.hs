@@ -6,7 +6,6 @@ import OpenSolid.FFI qualified as FFI
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Range (Range)
-import OpenSolid.Range qualified as Range
 import OpenSolid.Units (Meters, Radians, SquareMeters)
 import OpenSolid.Units qualified as Units
 
@@ -810,20 +809,11 @@ deriving instance Show (Bounds2d (space @ units))
 
 instance HasUnits (Bounds2d (space @ units)) units (Bounds2d (space @ Unitless))
 
-class Bounded2d a (coordinateSystem :: CoordinateSystem) | a -> coordinateSystem where
-  bounds :: a -> Bounds2d coordinateSystem
-
 instance
   space1 ~ space2 =>
   Units.Coercion (Bounds2d (space1 @ unitsA)) (Bounds2d (space2 @ unitsB))
   where
   coerce (Bounds2d x y) = Bounds2d (Units.coerce x) (Units.coerce y)
-
-instance Bounded2d (Point2d (space @ units)) (space @ units) where
-  bounds (Point2d px py) = Bounds2d (Range.constant px) (Range.constant py)
-
-instance Bounded2d (Bounds2d (space @ units)) (space @ units) where
-  bounds = identity
 
 instance FFI (Bounds2d (space @ Meters)) where
   representation = FFI.classRepresentation "Bounds2d"
@@ -1050,3 +1040,1032 @@ instance
       (Point2d Qty.zero Qty.zero * transform1 * transform2)
       (Vector2d 1.0 0.0 * transform1 * transform2)
       (Vector2d 0.0 1.0 * transform1 * transform2)
+
+----- Vector3d -----
+
+data Vector3d (coordinateSystem :: CoordinateSystem) where
+  Vector3d :: Qty units -> Qty units -> Qty units -> Vector3d (space @ units)
+
+deriving instance Eq (Vector3d (space @ units))
+
+deriving instance Show (Vector3d (space @ units))
+
+instance HasUnits (Vector3d (space @ units)) units (Vector3d (space @ Unitless))
+
+instance
+  space1 ~ space2 =>
+  Units.Coercion
+    (Vector3d (space1 @ unitsA))
+    (Vector3d (space2 @ unitsB))
+  where
+  coerce (Vector3d vx vy vz) = Vector3d (Units.coerce vx) (Units.coerce vy) (Units.coerce vz)
+
+instance
+  ( space ~ space_
+  , units ~ units_
+  ) =>
+  ApproximateEquality (Vector3d (space @ units)) (Vector3d (space_ @ units_)) units
+  where
+  Vector3d x1 y1 z1 ~= Vector3d x2 y2 z2 = Qty.hypot3 (x2 - x1) (y2 - y1) (z2 - z1) ~= Qty.zero
+
+instance Negation (Vector3d (space @ units)) where
+  negate (Vector3d vx vy vz) = Vector3d (negate vx) (negate vy) (negate vz)
+
+instance
+  Multiplication'
+    Sign
+    (Vector3d (space @ units))
+    (Vector3d (space @ (Unitless :*: units)))
+  where
+  Positive .*. vector = Units.coerce vector
+  Negative .*. vector = Units.coerce -vector
+
+instance Multiplication Sign (Vector3d (space @ units)) (Vector3d (space @ units)) where
+  Positive * vector = vector
+  Negative * vector = -vector
+
+instance
+  Multiplication'
+    (Vector3d (space @ units))
+    Sign
+    (Vector3d (space @ (units :*: Unitless)))
+  where
+  vector .*. Positive = Units.coerce vector
+  vector .*. Negative = Units.coerce -vector
+
+instance Multiplication (Vector3d (space @ units)) Sign (Vector3d (space @ units)) where
+  vector * Positive = vector
+  vector * Negative = -vector
+
+instance
+  ( space ~ space_
+  , units ~ units_
+  ) =>
+  Addition
+    (Vector3d (space @ units))
+    (Vector3d (space_ @ units_))
+    (Vector3d (space @ units))
+  where
+  Vector3d x1 y1 z1 + Vector3d x2 y2 z2 = Vector3d (x1 + x2) (y1 + y2) (z1 + z2)
+
+instance
+  ( space ~ space_
+  , units ~ units_
+  ) =>
+  Subtraction
+    (Vector3d (space @ units))
+    (Vector3d (space_ @ units_))
+    (Vector3d (space @ units))
+  where
+  Vector3d x1 y1 z1 - Vector3d x2 y2 z2 = Vector3d (x1 - x2) (y1 - y2) (z1 - z2)
+
+instance
+  Multiplication'
+    (Qty units1)
+    (Vector3d (space @ units2))
+    (Vector3d (space @ (units1 :*: units2)))
+  where
+  scale .*. Vector3d vx vy vz = Vector3d (scale .*. vx) (scale .*. vy) (scale .*. vz)
+
+instance
+  Units.Product units1 units2 units3 =>
+  Multiplication (Qty units1) (Vector3d (space @ units2)) (Vector3d (space @ units3))
+  where
+  scale * Vector3d vx vy vz = Vector3d (scale * vx) (scale * vy) (scale * vz)
+
+instance
+  Multiplication'
+    (Vector3d (space @ units1))
+    (Qty units2)
+    (Vector3d (space @ (units1 :*: units2)))
+  where
+  Vector3d vx vy vz .*. scale = Vector3d (vx .*. scale) (vy .*. scale) (vz .*. scale)
+
+instance
+  Units.Product units1 units2 units3 =>
+  Multiplication (Vector3d (space @ units1)) (Qty units2) (Vector3d (space @ units3))
+  where
+  Vector3d vx vy vz * scale = Vector3d (vx * scale) (vy * scale) (vz * scale)
+
+instance
+  Multiplication'
+    (Range units1)
+    (Vector3d (space @ units2))
+    (VectorBounds3d (space @ (units1 :*: units2)))
+  where
+  range .*. Vector3d vx vy vz = VectorBounds3d (range .*. vx) (range .*. vy) (range .*. vz)
+
+instance
+  Units.Product units1 units2 units3 =>
+  Multiplication (Range units1) (Vector3d (space @ units2)) (VectorBounds3d (space @ units3))
+  where
+  range * Vector3d vx vy vz = VectorBounds3d (range * vx) (range * vy) (range * vz)
+
+instance
+  Multiplication'
+    (Vector3d (space @ units1))
+    (Range units2)
+    (VectorBounds3d (space @ (units1 :*: units2)))
+  where
+  Vector3d vx vy vz .*. range = VectorBounds3d (vx .*. range) (vy .*. range) (vz .*. range)
+
+instance
+  Units.Product units1 units2 units3 =>
+  Multiplication (Vector3d (space @ units1)) (Range units2) (VectorBounds3d (space @ units3))
+  where
+  Vector3d vx vy vz * range = VectorBounds3d (vx * range) (vy * range) (vz * range)
+
+instance
+  Division'
+    (Vector3d (space @ units1))
+    (Qty units2)
+    (Vector3d (space @ (units1 :/: units2)))
+  where
+  Vector3d vx vy vz ./. scale = Vector3d (vx ./. scale) (vy ./. scale) (vz ./. scale)
+
+instance
+  Units.Quotient units1 units2 units3 =>
+  Division (Vector3d (space @ units1)) (Qty units2) (Vector3d (space @ units3))
+  where
+  Vector3d vx vy vz / scale = Vector3d (vx / scale) (vy / scale) (vz / scale)
+
+instance
+  space ~ space_ =>
+  DotMultiplication'
+    (Vector3d (space @ units1))
+    (Vector3d (space_ @ units2))
+    (Qty (units1 :*: units2))
+  where
+  Vector3d x1 y1 z1 .<>. Vector3d x2 y2 z2 = x1 .*. x2 + y1 .*. y2 + z1 .*. z2
+
+instance
+  (Units.Product units1 units2 units3, space ~ space_) =>
+  DotMultiplication (Vector3d (space @ units1)) (Vector3d (space_ @ units2)) (Qty units3)
+  where
+  Vector3d x1 y1 z1 <> Vector3d x2 y2 z2 = x1 * x2 + y1 * y2 + z1 * z2
+
+instance
+  space ~ space_ =>
+  DotMultiplication' (Vector3d (space @ units)) (Direction3d space_) (Qty (units :*: Unitless))
+  where
+  v1 .<>. Unit3d v2 = v1 .<>. v2
+
+instance
+  space ~ space_ =>
+  DotMultiplication (Vector3d (space @ units)) (Direction3d space_) (Qty units)
+  where
+  v1 <> Unit3d v2 = v1 <> v2
+
+instance
+  space ~ space_ =>
+  DotMultiplication' (Direction3d space) (Vector3d (space_ @ units)) (Qty (Unitless :*: units))
+  where
+  Unit3d v1 .<>. v2 = v1 .<>. v2
+
+instance
+  space ~ space_ =>
+  DotMultiplication (Direction3d space) (Vector3d (space_ @ units)) (Qty units)
+  where
+  Unit3d v1 <> v2 = v1 <> v2
+
+instance
+  space ~ space_ =>
+  CrossMultiplication'
+    (Vector3d (space @ units1))
+    (Vector3d (space_ @ units2))
+    (Vector3d (space @ (units1 :*: units2)))
+  where
+  Vector3d x1 y1 z1 .><. Vector3d x2 y2 z2 =
+    Vector3d
+      (y1 .*. z2 - z1 .*. y2)
+      (z1 .*. x2 - x1 .*. z2)
+      (x1 .*. y2 - y1 .*. x2)
+
+instance
+  (Units.Product units1 units2 units3, space ~ space_) =>
+  CrossMultiplication
+    (Vector3d (space @ units1))
+    (Vector3d (space_ @ units2))
+    (Vector3d (space @ units3))
+  where
+  Vector3d x1 y1 z1 >< Vector3d x2 y2 z2 =
+    Vector3d
+      (y1 * z2 - z1 * y2)
+      (z1 * x2 - x1 * z2)
+      (x1 * y2 - y1 * x2)
+
+instance
+  space ~ space_ =>
+  CrossMultiplication'
+    (Vector3d (space @ units))
+    (Direction3d space_)
+    (Vector3d (space @ (units :*: Unitless)))
+  where
+  v1 .><. Unit3d v2 = v1 .><. v2
+
+instance
+  space ~ space_ =>
+  CrossMultiplication (Vector3d (space @ units)) (Direction3d space_) (Vector3d (space @ units))
+  where
+  v1 >< Unit3d v2 = v1 >< v2
+
+instance
+  space ~ space_ =>
+  CrossMultiplication'
+    (Direction3d space)
+    (Vector3d (space_ @ units))
+    (Vector3d (space @ (Unitless :*: units)))
+  where
+  Unit3d v1 .><. v2 = v1 .><. v2
+
+instance
+  space ~ space_ =>
+  CrossMultiplication (Direction3d space) (Vector3d (space_ @ units)) (Vector3d (space @ units))
+  where
+  Unit3d v1 >< v2 = v1 >< v2
+
+----- Direction3d -----
+
+newtype Direction3d (space :: Type) = Unit3d (Vector3d (space @ Unitless))
+  deriving (Eq, Show)
+
+{-# COMPLETE Direction3d #-}
+
+{-# INLINE Direction3d #-}
+pattern Direction3d :: Float -> Float -> Float -> Direction3d space
+pattern Direction3d dx dy dz <- Unit3d (Vector3d dx dy dz)
+
+instance HasUnits (Direction3d space) Unitless (Direction3d space)
+
+instance space1 ~ space2 => Units.Coercion (Direction3d space1) (Direction3d space2) where
+  coerce = identity
+
+instance
+  space1 ~ space2 =>
+  ApproximateEquality (Direction3d space1) (Direction3d space2) Radians
+  where
+  d1 ~= d2 = do
+    let parallel = d1 <> d2
+    let Vector3d cx cy cz = d1 >< d2
+    let perpendicular = Qty.hypot3 cx cy cz
+    Angle.atan2 perpendicular parallel ~= Qty.zero
+
+instance Negation (Direction3d space) where
+  negate (Unit3d vector) = Unit3d (negate vector)
+
+instance Multiplication Sign (Direction3d space) (Direction3d space) where
+  Positive * direction = direction
+  Negative * direction = -direction
+
+instance Multiplication' Sign (Direction3d space) (Direction3d space) where
+  Positive .*. direction = direction
+  Negative .*. direction = -direction
+
+instance Multiplication (Direction3d space) Sign (Direction3d space) where
+  direction * Positive = direction
+  direction * Negative = -direction
+
+instance Multiplication' (Direction3d space) Sign (Direction3d space) where
+  direction .*. Positive = direction
+  direction .*. Negative = -direction
+
+instance Multiplication (Qty units) (Direction3d space) (Vector3d (space @ units)) where
+  scale * Unit3d vector = scale * vector
+
+instance
+  Multiplication'
+    (Qty units)
+    (Direction3d space)
+    (Vector3d (space @ (units :*: Unitless)))
+  where
+  scale .*. Unit3d vector = scale .*. vector
+
+instance Multiplication (Direction3d space) (Qty units) (Vector3d (space @ units)) where
+  Unit3d vector * scale = vector * scale
+
+instance
+  Multiplication'
+    (Direction3d space)
+    (Qty units)
+    (Vector3d (space @ (Unitless :*: units)))
+  where
+  Unit3d vector .*. scale = vector .*. scale
+
+instance space1 ~ space2 => DotMultiplication (Direction3d space1) (Direction3d space2) Float where
+  Unit3d vector1 <> Unit3d vector2 = vector1 <> vector2
+
+instance
+  space1 ~ space2 =>
+  DotMultiplication'
+    (Direction3d space1)
+    (Direction3d space2)
+    (Qty (Unitless :*: Unitless))
+  where
+  Unit3d vector1 .<>. Unit3d vector2 = vector1 .<>. vector2
+
+instance
+  space1 ~ space2 =>
+  CrossMultiplication (Direction3d space1) (Direction3d space2) (Vector3d (space1 @ Unitless))
+  where
+  Unit3d vector1 >< Unit3d vector2 = vector1 >< vector2
+
+instance
+  space1 ~ space2 =>
+  CrossMultiplication'
+    (Direction3d space1)
+    (Direction3d space2)
+    (Vector3d (space1 @ (Unitless :*: Unitless)))
+  where
+  Unit3d vector1 .><. Unit3d vector2 = vector1 .><. vector2
+
+----- Basis3d -----
+
+type Basis3d :: Type -> LocalSpace -> Type
+data Basis3d space defines where
+  Basis3d :: Direction3d space -> Direction3d space -> Direction3d space -> Basis3d space defines
+
+deriving instance Eq (Basis3d space defines)
+
+deriving instance Show (Basis3d space defines)
+
+----- Point3d -----
+
+data Point3d (coordinateSystem :: CoordinateSystem) where
+  Point3d :: Qty units -> Qty units -> Qty units -> Point3d (space @ units)
+
+deriving instance Eq (Point3d (space @ units))
+
+deriving instance Show (Point3d (space @ units))
+
+instance HasUnits (Point3d (space @ units)) units (Point3d (space @ Unitless))
+
+instance
+  space1 ~ space2 =>
+  Units.Coercion (Point3d (space1 @ unitsA)) (Point3d (space2 @ unitsB))
+  where
+  coerce (Point3d px py pz) = Point3d (Units.coerce px) (Units.coerce py) (Units.coerce pz)
+
+instance
+  ( space1 ~ space2
+  , units1 ~ units2
+  ) =>
+  Addition
+    (Point3d (space1 @ units1))
+    (Vector3d (space2 @ units2))
+    (Point3d (space1 @ units1))
+  where
+  Point3d px py pz + Vector3d vx vy vz = Point3d (px + vx) (py + vy) (pz + vz)
+
+instance
+  ( space1 ~ space2
+  , units1 ~ units2
+  ) =>
+  Subtraction
+    (Point3d (space1 @ units1))
+    (Vector3d (space2 @ units2))
+    (Point3d (space1 @ units1))
+  where
+  Point3d px py pz - Vector3d vx vy vz = Point3d (px - vx) (py - vy) (pz - vz)
+
+instance
+  ( space1 ~ space2
+  , units1 ~ units2
+  ) =>
+  Subtraction
+    (Point3d (space1 @ units1))
+    (Point3d (space2 @ units2))
+    (Vector3d (space1 @ units1))
+  where
+  Point3d x1 y1 z1 - Point3d x2 y2 z2 = Vector3d (x1 - x2) (y1 - y2) (z1 - z2)
+
+instance
+  ( space1 ~ space2
+  , units1 ~ units2
+  ) =>
+  Addition
+    (Point3d (space1 @ units1))
+    (VectorBounds3d (space2 @ units2))
+    (Bounds3d (space1 @ units1))
+  where
+  Point3d px py pz + VectorBounds3d vx vy vz = Bounds3d (px + vx) (py + vy) (pz + vz)
+
+instance
+  ( space1 ~ space2
+  , units1 ~ units2
+  ) =>
+  Subtraction
+    (Point3d (space1 @ units1))
+    (VectorBounds3d (space2 @ units2))
+    (Bounds3d (space1 @ units1))
+  where
+  Point3d px py pz - VectorBounds3d vx vy vz = Bounds3d (px - vx) (py - vy) (pz - vz)
+
+instance
+  ( space1 ~ space2
+  , units1 ~ units2
+  ) =>
+  ApproximateEquality (Point3d (space1 @ units1)) (Point3d (space2 @ units2)) units1
+  where
+  Point3d x1 y1 z1 ~= Point3d x2 y2 z2 = Qty.hypot3 (x2 - x1) (y2 - y1) (z2 - z1) ~= Qty.zero
+
+----- VectorBounds3d -----
+
+data VectorBounds3d (coordinateSystem :: CoordinateSystem) where
+  VectorBounds3d ::
+    Range units ->
+    Range units ->
+    Range units ->
+    VectorBounds3d (space @ units)
+
+deriving instance Show (VectorBounds3d (space @ units))
+
+instance HasUnits (VectorBounds3d (space @ units)) units (VectorBounds3d (space @ Unitless))
+
+instance
+  space1 ~ space2 =>
+  Units.Coercion (VectorBounds3d (space1 @ unitsA)) (VectorBounds3d (space2 @ unitsB))
+  where
+  coerce (VectorBounds3d x y z) = VectorBounds3d (Units.coerce x) (Units.coerce y) (Units.coerce z)
+
+instance Negation (VectorBounds3d (space @ units)) where
+  negate (VectorBounds3d x y z) = VectorBounds3d (negate x) (negate y) (negate z)
+
+instance
+  Multiplication'
+    Sign
+    (VectorBounds3d (space @ units))
+    (VectorBounds3d (space @ (Unitless :*: units)))
+  where
+  Positive .*. vectorBounds = Units.coerce vectorBounds
+  Negative .*. vectorBounds = Units.coerce -vectorBounds
+
+instance Multiplication Sign (VectorBounds3d (space @ units)) (VectorBounds3d (space @ units)) where
+  Positive * vectorBounds = vectorBounds
+  Negative * vectorBounds = -vectorBounds
+
+instance
+  Multiplication'
+    (VectorBounds3d (space @ units))
+    Sign
+    (VectorBounds3d (space @ (units :*: Unitless)))
+  where
+  vectorBounds .*. Positive = Units.coerce vectorBounds
+  vectorBounds .*. Negative = Units.coerce -vectorBounds
+
+instance Multiplication (VectorBounds3d (space @ units)) Sign (VectorBounds3d (space @ units)) where
+  vectorBounds * Positive = vectorBounds
+  vectorBounds * Negative = -vectorBounds
+
+instance
+  ( space ~ space_
+  , units ~ units_
+  ) =>
+  Addition
+    (VectorBounds3d (space @ units))
+    (VectorBounds3d (space_ @ units_))
+    (VectorBounds3d (space @ units))
+  where
+  VectorBounds3d x1 y1 z1 + VectorBounds3d x2 y2 z2 = VectorBounds3d (x1 + x2) (y1 + y2) (z1 + z2)
+
+instance
+  ( space ~ space_
+  , units ~ units_
+  ) =>
+  Addition
+    (VectorBounds3d (space @ units))
+    (Vector3d (space_ @ units_))
+    (VectorBounds3d (space @ units))
+  where
+  VectorBounds3d x1 y1 z1 + Vector3d x2 y2 z2 = VectorBounds3d (x1 + x2) (y1 + y2) (z1 + z2)
+
+instance
+  ( space ~ space_
+  , units ~ units_
+  ) =>
+  Addition
+    (Vector3d (space @ units))
+    (VectorBounds3d (space_ @ units_))
+    (VectorBounds3d (space @ units))
+  where
+  Vector3d x1 y1 z1 + VectorBounds3d x2 y2 z2 = VectorBounds3d (x1 + x2) (y1 + y2) (z1 + z2)
+
+instance
+  ( space ~ space_
+  , units ~ units_
+  ) =>
+  Subtraction
+    (VectorBounds3d (space @ units))
+    (VectorBounds3d (space_ @ units_))
+    (VectorBounds3d (space @ units))
+  where
+  VectorBounds3d x1 y1 z1 - VectorBounds3d x2 y2 z2 = VectorBounds3d (x1 - x2) (y1 - y2) (z1 - z2)
+
+instance
+  ( space ~ space_
+  , units ~ units_
+  ) =>
+  Subtraction
+    (VectorBounds3d (space @ units))
+    (Vector3d (space_ @ units_))
+    (VectorBounds3d (space @ units))
+  where
+  VectorBounds3d x1 y1 z1 - Vector3d x2 y2 z2 = VectorBounds3d (x1 - x2) (y1 - y2) (z1 - z2)
+
+instance
+  ( space ~ space_
+  , units ~ units_
+  ) =>
+  Subtraction
+    (Vector3d (space @ units))
+    (VectorBounds3d (space_ @ units_))
+    (VectorBounds3d (space @ units))
+  where
+  Vector3d x1 y1 z1 - VectorBounds3d x2 y2 z2 = VectorBounds3d (x1 - x2) (y1 - y2) (z1 - z2)
+
+instance
+  Multiplication'
+    (Qty units1)
+    (VectorBounds3d (space @ units2))
+    (VectorBounds3d (space @ (units1 :*: units2)))
+  where
+  value .*. VectorBounds3d x y z = VectorBounds3d (value .*. x) (value .*. y) (value .*. z)
+
+instance
+  Units.Product units1 units2 units3 =>
+  Multiplication (Qty units1) (VectorBounds3d (space @ units2)) (VectorBounds3d (space @ units3))
+  where
+  value * VectorBounds3d x y z = VectorBounds3d (value * x) (value * y) (value * z)
+
+instance
+  Multiplication'
+    (VectorBounds3d (space @ units1))
+    (Qty units2)
+    (VectorBounds3d (space @ (units1 :*: units2)))
+  where
+  VectorBounds3d x y z .*. value = VectorBounds3d (x .*. value) (y .*. value) (z .*. value)
+
+instance
+  Units.Product units1 units2 units3 =>
+  Multiplication (VectorBounds3d (space @ units1)) (Qty units2) (VectorBounds3d (space @ units3))
+  where
+  VectorBounds3d x y z * value = VectorBounds3d (x * value) (y * value) (z * value)
+
+instance
+  Multiplication'
+    (Range units1)
+    (VectorBounds3d (space @ units2))
+    (VectorBounds3d (space @ (units1 :*: units2)))
+  where
+  range .*. VectorBounds3d x y z = VectorBounds3d (range .*. x) (range .*. y) (range .*. z)
+
+instance
+  Units.Product units1 units2 units3 =>
+  Multiplication (Range units1) (VectorBounds3d (space @ units2)) (VectorBounds3d (space @ units3))
+  where
+  range * VectorBounds3d x y z = VectorBounds3d (range * x) (range * y) (range * z)
+
+instance
+  Multiplication'
+    (VectorBounds3d (space @ units1))
+    (Range units2)
+    (VectorBounds3d (space @ (units1 :*: units2)))
+  where
+  VectorBounds3d x y z .*. range = VectorBounds3d (x .*. range) (y .*. range) (z .*. range)
+
+instance
+  Units.Product units1 units2 units3 =>
+  Multiplication (VectorBounds3d (space @ units1)) (Range units2) (VectorBounds3d (space @ units3))
+  where
+  VectorBounds3d x y z * range = VectorBounds3d (x * range) (y * range) (z * range)
+
+instance
+  Division'
+    (VectorBounds3d (space @ units1))
+    (Qty units2)
+    (VectorBounds3d (space @ (units1 :/: units2)))
+  where
+  VectorBounds3d x y z ./. value = VectorBounds3d (x ./. value) (y ./. value) (z ./. value)
+
+instance
+  Units.Quotient units1 units2 units3 =>
+  Division (VectorBounds3d (space @ units1)) (Qty units2) (VectorBounds3d (space @ units3))
+  where
+  VectorBounds3d x y z / value = VectorBounds3d (x / value) (y / value) (z / value)
+
+instance
+  Division'
+    (VectorBounds3d (space @ units1))
+    (Range units2)
+    (VectorBounds3d (space @ (units1 :/: units2)))
+  where
+  VectorBounds3d x y z ./. range = VectorBounds3d (x ./. range) (y ./. range) (z ./. range)
+
+instance
+  Units.Quotient units1 units2 units3 =>
+  Division (VectorBounds3d (space @ units1)) (Range units2) (VectorBounds3d (space @ units3))
+  where
+  VectorBounds3d x y z / range = VectorBounds3d (x / range) (y / range) (z / range)
+
+instance
+  (Units.Product units1 units2 units3, space ~ space_) =>
+  DotMultiplication (Vector3d (space @ units1)) (VectorBounds3d (space_ @ units2)) (Range units3)
+  where
+  Vector3d x1 y1 z1 <> VectorBounds3d x2 y2 z2 = x1 * x2 + y1 * y2 + z1 * z2
+
+instance
+  space ~ space_ =>
+  DotMultiplication'
+    (Vector3d (space @ units1))
+    (VectorBounds3d (space_ @ units2))
+    (Range (units1 :*: units2))
+  where
+  Vector3d x1 y1 z1 .<>. VectorBounds3d x2 y2 z2 = x1 .*. x2 + y1 .*. y2 + z1 .*. z2
+
+instance
+  (Units.Product units1 units2 units3, space ~ space_) =>
+  DotMultiplication (VectorBounds3d (space @ units1)) (Vector3d (space_ @ units2)) (Range units3)
+  where
+  VectorBounds3d x1 y1 z1 <> Vector3d x2 y2 z2 = x1 * x2 + y1 * y2 + z1 * z2
+
+instance
+  space ~ space_ =>
+  DotMultiplication'
+    (VectorBounds3d (space @ units1))
+    (Vector3d (space_ @ units2))
+    (Range (units1 :*: units2))
+  where
+  VectorBounds3d x1 y1 z1 .<>. Vector3d x2 y2 z2 = x1 .*. x2 + y1 .*. y2 + z1 .*. z2
+
+instance
+  space ~ space_ =>
+  DotMultiplication (Direction3d space) (VectorBounds3d (space_ @ units)) (Range units)
+  where
+  Unit3d vector <> vectorBounds = vector <> vectorBounds
+
+instance
+  space ~ space_ =>
+  DotMultiplication'
+    (Direction3d space)
+    (VectorBounds3d (space_ @ units))
+    (Range (Unitless :*: units))
+  where
+  Unit3d vector .<>. vectorBounds = vector .<>. vectorBounds
+
+instance
+  space ~ space_ =>
+  DotMultiplication (VectorBounds3d (space @ units)) (Direction3d space_) (Range units)
+  where
+  vectorBounds <> Unit3d vector = vectorBounds <> vector
+
+instance
+  space ~ space_ =>
+  DotMultiplication'
+    (VectorBounds3d (space @ units))
+    (Direction3d space_)
+    (Range (units :*: Unitless))
+  where
+  vectorBounds .<>. Unit3d vector = vectorBounds .<>. vector
+
+instance
+  (Units.Product units1 units2 units3, space ~ space_) =>
+  DotMultiplication
+    (VectorBounds3d (space @ units1))
+    (VectorBounds3d (space_ @ units2))
+    (Range units3)
+  where
+  VectorBounds3d x1 y1 z1 <> VectorBounds3d x2 y2 z2 = x1 * x2 + y1 * y2 + z1 * z2
+
+instance
+  space ~ space_ =>
+  DotMultiplication'
+    (VectorBounds3d (space @ units1))
+    (VectorBounds3d (space_ @ units2))
+    (Range (units1 :*: units2))
+  where
+  VectorBounds3d x1 y1 z1 .<>. VectorBounds3d x2 y2 z2 = x1 .*. x2 + y1 .*. y2 + z1 .*. z2
+
+instance
+  (Units.Product units1 units2 units3, space ~ space_) =>
+  CrossMultiplication
+    (Vector3d (space @ units1))
+    (VectorBounds3d (space_ @ units2))
+    (VectorBounds3d (space @ units3))
+  where
+  Vector3d x1 y1 z1 >< VectorBounds3d x2 y2 z2 =
+    VectorBounds3d
+      (y1 * z2 - z1 * y2)
+      (z1 * x2 - x1 * z2)
+      (x1 * y2 - y1 * x2)
+
+instance
+  space ~ space_ =>
+  CrossMultiplication'
+    (Vector3d (space @ units1))
+    (VectorBounds3d (space_ @ units2))
+    (VectorBounds3d (space @ (units1 :*: units2)))
+  where
+  Vector3d x1 y1 z1 .><. VectorBounds3d x2 y2 z2 =
+    VectorBounds3d
+      (y1 .*. z2 - z1 .*. y2)
+      (z1 .*. x2 - x1 .*. z2)
+      (x1 .*. y2 - y1 .*. x2)
+
+instance
+  (Units.Product units1 units2 units3, space ~ space_) =>
+  CrossMultiplication
+    (VectorBounds3d (space @ units1))
+    (Vector3d (space_ @ units2))
+    (VectorBounds3d (space @ units3))
+  where
+  VectorBounds3d x1 y1 z1 >< Vector3d x2 y2 z2 =
+    VectorBounds3d
+      (y1 * z2 - z1 * y2)
+      (z1 * x2 - x1 * z2)
+      (x1 * y2 - y1 * x2)
+
+instance
+  space ~ space_ =>
+  CrossMultiplication'
+    (VectorBounds3d (space @ units1))
+    (Vector3d (space_ @ units2))
+    (VectorBounds3d (space @ (units1 :*: units2)))
+  where
+  VectorBounds3d x1 y1 z1 .><. Vector3d x2 y2 z2 =
+    VectorBounds3d
+      (y1 .*. z2 - z1 .*. y2)
+      (z1 .*. x2 - x1 .*. z2)
+      (x1 .*. y2 - y1 .*. x2)
+
+instance
+  space1 ~ space2 =>
+  CrossMultiplication
+    (Direction3d space1)
+    (VectorBounds3d (space2 @ units))
+    (VectorBounds3d (space1 @ units))
+  where
+  Unit3d vector >< vectorBounds = vector >< vectorBounds
+
+instance
+  space1 ~ space2 =>
+  CrossMultiplication'
+    (Direction3d space1)
+    (VectorBounds3d (space2 @ units))
+    (VectorBounds3d (space1 @ (Unitless :*: units)))
+  where
+  Unit3d vector .><. vectorBounds = vector .><. vectorBounds
+
+instance
+  space1 ~ space2 =>
+  CrossMultiplication
+    (VectorBounds3d (space1 @ units))
+    (Direction3d space2)
+    (VectorBounds3d (space1 @ units))
+  where
+  vectorBounds >< Unit3d vector = vectorBounds >< vector
+
+instance
+  space1 ~ space2 =>
+  CrossMultiplication'
+    (VectorBounds3d (space1 @ units))
+    (Direction3d space2)
+    (VectorBounds3d (space1 @ (units :*: Unitless)))
+  where
+  vectorBounds .><. Unit3d vector = vectorBounds .><. vector
+
+instance
+  (Units.Product units1 units2 units3, space ~ space_) =>
+  CrossMultiplication
+    (VectorBounds3d (space @ units1))
+    (VectorBounds3d (space_ @ units2))
+    (VectorBounds3d (space @ units3))
+  where
+  VectorBounds3d x1 y1 z1 >< VectorBounds3d x2 y2 z2 =
+    VectorBounds3d
+      (y1 * z2 - z1 * y2)
+      (z1 * x2 - x1 * z2)
+      (x1 * y2 - y1 * x2)
+
+instance
+  space ~ space_ =>
+  CrossMultiplication'
+    (VectorBounds3d (space @ units1))
+    (VectorBounds3d (space_ @ units2))
+    (VectorBounds3d (space @ (units1 :*: units2)))
+  where
+  VectorBounds3d x1 y1 z1 .><. VectorBounds3d x2 y2 z2 =
+    VectorBounds3d
+      (y1 .*. z2 - z1 .*. y2)
+      (z1 .*. x2 - x1 .*. z2)
+      (x1 .*. y2 - y1 .*. x2)
+
+----- Bounds3d -----
+
+data Bounds3d (coordinateSystem :: CoordinateSystem) where
+  Bounds3d ::
+    Range units ->
+    Range units ->
+    Range units ->
+    Bounds3d (space @ units)
+
+deriving instance Show (Bounds3d (space @ units))
+
+instance HasUnits (Bounds3d (space @ units)) units (Bounds3d (space @ Unitless))
+
+class Bounded3d a (coordinateSystem :: CoordinateSystem) | a -> coordinateSystem where
+  bounds :: a -> Bounds3d coordinateSystem
+
+instance
+  space1 ~ space2 =>
+  Units.Coercion (Bounds3d (space1 @ unitsA)) (Bounds3d (space2 @ unitsB))
+  where
+  coerce (Bounds3d x y z) = Bounds3d (Units.coerce x) (Units.coerce y) (Units.coerce z)
+
+instance
+  ( space1 ~ space2
+  , units1 ~ units2
+  ) =>
+  Addition
+    (Bounds3d (space1 @ units1))
+    (VectorBounds3d (space2 @ units2))
+    (Bounds3d (space1 @ units1))
+  where
+  Bounds3d x1 y1 z1 + VectorBounds3d x2 y2 z2 = Bounds3d (x1 + x2) (y1 + y2) (z1 + z2)
+
+instance
+  ( space1 ~ space2
+  , units1 ~ units2
+  ) =>
+  Subtraction
+    (Bounds3d (space1 @ units1))
+    (VectorBounds3d (space2 @ units2))
+    (Bounds3d (space1 @ units1))
+  where
+  Bounds3d x1 y1 z1 - VectorBounds3d x2 y2 z2 = Bounds3d (x1 - x2) (y1 - y2) (z1 - z2)
+
+instance
+  ( space1 ~ space2
+  , units1 ~ units2
+  ) =>
+  Subtraction
+    (Point3d (space1 @ units1))
+    (Bounds3d (space2 @ units2))
+    (VectorBounds3d (space1 @ units1))
+  where
+  Point3d px py pz - Bounds3d bx by bz = VectorBounds3d (px - bx) (py - by) (pz - bz)
+
+instance
+  ( space1 ~ space2
+  , units1 ~ units2
+  ) =>
+  Subtraction
+    (Bounds3d (space1 @ units1))
+    (Point3d (space2 @ units2))
+    (VectorBounds3d (space1 @ units1))
+  where
+  Bounds3d bx by bz - Point3d px py pz = VectorBounds3d (bx - px) (by - py) (bz - pz)
+
+instance
+  ( space1 ~ space2
+  , units1 ~ units2
+  ) =>
+  Subtraction
+    (Bounds3d (space1 @ units1))
+    (Bounds3d (space2 @ units2))
+    (VectorBounds3d (space1 @ units1))
+  where
+  Bounds3d x1 y1 z1 - Bounds3d x2 y2 z2 = VectorBounds3d (x1 - x2) (y1 - y2) (z1 - z2)
+
+instance
+  ( space1 ~ space2
+  , units1 ~ units2
+  ) =>
+  Intersects (Point3d (space1 @ units1)) (Bounds3d (space2 @ units2)) units1
+  where
+  Point3d px py pz ^ Bounds3d bx by bz = px ^ bx && py ^ by && pz ^ bz
+
+instance
+  ( space1 ~ space2
+  , units1 ~ units2
+  ) =>
+  Intersects (Bounds3d (space1 @ units1)) (Point3d (space2 @ units2)) units1
+  where
+  box ^ point = point ^ box
+
+instance
+  ( space1 ~ space2
+  , units1 ~ units2
+  ) =>
+  Intersects (Bounds3d (space1 @ units1)) (Bounds3d (space2 @ units2)) units1
+  where
+  Bounds3d x1 y1 z1 ^ Bounds3d x2 y2 z2 = x1 ^ x2 && y1 ^ y2 && z1 ^ z2
+
+----- Axis3d -----
+
+data Axis3d (coordinateSystem :: CoordinateSystem) where
+  Axis3d ::
+    Point3d (space @ units) ->
+    Direction3d space ->
+    Axis3d (space @ units)
+
+deriving instance Eq (Axis3d (space @ units))
+
+deriving instance Show (Axis3d (space @ units))
+
+----- Plane3d -----
+
+type role Plane3d nominal nominal
+
+type Plane3d :: CoordinateSystem -> LocalSpace -> Type
+data Plane3d coordinateSystem defines where
+  Plane3d ::
+    Point3d (space @ units) ->
+    Basis3d space (Defines local) ->
+    Plane3d (space @ units) (Defines local)
+
+----- Frame3d -----
+
+type Frame3d :: CoordinateSystem -> LocalSpace -> Type
+data Frame3d coordinateSystem defines where
+  Frame3d :: Point3d (space @ units) -> Basis3d space defines -> Frame3d (space @ units) defines
+
+deriving instance Eq (Frame3d (space @ units) defines)
+
+deriving instance Show (Frame3d (space @ units) defines)
+
+----- Transform3d -----
+
+type Transform3d :: Type -> CoordinateSystem -> Type
+data Transform3d tag (coordinateSystem :: CoordinateSystem) where
+  Transform3d ::
+    Point3d (space @ units) ->
+    Vector3d (space @ Unitless) ->
+    Vector3d (space @ Unitless) ->
+    Vector3d (space @ Unitless) ->
+    Transform3d tag (space @ units)
+
+deriving instance Eq (Transform3d tag (space @ units))
+
+deriving instance Show (Transform3d tag (space @ units))
+
+instance HasUnits (Transform3d tag (space @ units)) units (Transform3d tag (space @ Unitless))
+
+instance
+  (tag1 ~ tag2, space1 ~ space2) =>
+  Units.Coercion
+    (Transform3d tag1 (space1 @ unitsA))
+    (Transform3d tag2 (space2 @ unitsB))
+  where
+  coerce (Transform3d p0 vx vy vz) = Transform3d (Units.coerce p0) vx vy vz
+
+instance
+  space1 ~ space2 =>
+  Multiplication
+    (Transform3d tag (space1 @ translationUnits))
+    (Vector3d (space2 @ units))
+    (Vector3d (space1 @ units))
+  where
+  transform * vector = vector * transform
+
+instance
+  space1 ~ space2 =>
+  Multiplication
+    (Vector3d (space1 @ units))
+    (Transform3d tag (space2 @ translationUnits))
+    (Vector3d (space1 @ units))
+  where
+  Vector3d vx vy vz * Transform3d _ i j k = vx * i + vy * j + vz * k
+
+instance
+  (space1 ~ space2, units1 ~ units2) =>
+  Multiplication
+    (Point3d (space1 @ units1))
+    (Transform3d tag (space2 @ units2))
+    (Point3d (space1 @ units1))
+  where
+  Point3d px py pz * Transform3d p0 i j k = p0 + px * i + py * j + pz * k
+
+instance
+  (space1 ~ space2, units1 ~ units2) =>
+  Multiplication
+    (Transform3d tag (space1 @ units1))
+    (Point3d (space2 @ units2))
+    (Point3d (space1 @ units1))
+  where
+  transform * point = point * transform
+
+instance
+  ( Composition tag1 tag2 tag3
+  , space1 ~ space2
+  , units1 ~ units2
+  ) =>
+  Composition
+    (Transform3d tag1 (space1 @ units1))
+    (Transform3d tag2 (space2 @ units2))
+    (Transform3d tag3 (space1 @ units1))
+  where
+  transform1 >> transform2 =
+    Transform3d
+      (Point3d Qty.zero Qty.zero Qty.zero * transform1 * transform2)
+      (Vector3d 1.0 0.0 0.0 * transform1 * transform2)
+      (Vector3d 0.0 1.0 0.0 * transform1 * transform2)
+      (Vector3d 0.0 0.0 1.0 * transform1 * transform2)

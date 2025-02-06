@@ -26,118 +26,19 @@ where
 import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Point3d (Point3d (Point3d))
 import OpenSolid.Prelude
+import OpenSolid.Primitives (Bounds3d (Bounds3d))
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Range (Range (Range))
 import OpenSolid.Range qualified as Range
-import OpenSolid.Units qualified as Units
-import OpenSolid.VectorBounds3d (VectorBounds3d (VectorBounds3d))
-
-type role Bounds3d nominal
-
-data Bounds3d (coordinateSystem :: CoordinateSystem) where
-  Bounds3d ::
-    Range units ->
-    Range units ->
-    Range units ->
-    Bounds3d (space @ units)
-
-deriving instance Show (Bounds3d (space @ units))
-
-instance HasUnits (Bounds3d (space @ units)) units (Bounds3d (space @ Unitless))
 
 class Bounded3d a (coordinateSystem :: CoordinateSystem) | a -> coordinateSystem where
   bounds :: a -> Bounds3d coordinateSystem
-
-instance
-  space1 ~ space2 =>
-  Units.Coercion (Bounds3d (space1 @ unitsA)) (Bounds3d (space2 @ unitsB))
-  where
-  coerce (Bounds3d x y z) = Bounds3d (Units.coerce x) (Units.coerce y) (Units.coerce z)
 
 instance Bounded3d (Point3d (space @ units)) (space @ units) where
   bounds = constant
 
 instance Bounded3d (Bounds3d (space @ units)) (space @ units) where
   bounds = identity
-
-instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
-  Addition
-    (Bounds3d (space1 @ units1))
-    (VectorBounds3d (space2 @ units2))
-    (Bounds3d (space1 @ units1))
-  where
-  Bounds3d x1 y1 z1 + VectorBounds3d x2 y2 z2 = Bounds3d (x1 + x2) (y1 + y2) (z1 + z2)
-
-instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
-  Subtraction
-    (Bounds3d (space1 @ units1))
-    (VectorBounds3d (space2 @ units2))
-    (Bounds3d (space1 @ units1))
-  where
-  Bounds3d x1 y1 z1 - VectorBounds3d x2 y2 z2 = Bounds3d (x1 - x2) (y1 - y2) (z1 - z2)
-
-instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
-  Subtraction
-    (Point3d (space1 @ units1))
-    (Bounds3d (space2 @ units2))
-    (VectorBounds3d (space1 @ units1))
-  where
-  Point3d px py pz - Bounds3d bx by bz = VectorBounds3d (px - bx) (py - by) (pz - bz)
-
-instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
-  Subtraction
-    (Bounds3d (space1 @ units1))
-    (Point3d (space2 @ units2))
-    (VectorBounds3d (space1 @ units1))
-  where
-  Bounds3d bx by bz - Point3d px py pz = VectorBounds3d (bx - px) (by - py) (bz - pz)
-
-instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
-  Subtraction
-    (Bounds3d (space1 @ units1))
-    (Bounds3d (space2 @ units2))
-    (VectorBounds3d (space1 @ units1))
-  where
-  Bounds3d x1 y1 z1 - Bounds3d x2 y2 z2 = VectorBounds3d (x1 - x2) (y1 - y2) (z1 - z2)
-
-instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
-  Intersects (Point3d (space1 @ units1)) (Bounds3d (space2 @ units2)) units1
-  where
-  Point3d px py pz ^ Bounds3d bx by bz = px ^ bx && py ^ by && pz ^ bz
-
-instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
-  Intersects (Bounds3d (space1 @ units1)) (Point3d (space2 @ units2)) units1
-  where
-  box ^ point = point ^ box
-
-instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
-  Intersects (Bounds3d (space1 @ units1)) (Bounds3d (space2 @ units2)) units1
-  where
-  Bounds3d x1 y1 z1 ^ Bounds3d x2 y2 z2 = x1 ^ x2 && y1 ^ y2 && z1 ^ z2
 
 xCoordinate :: Bounds3d (space @ units) -> Range units
 xCoordinate (Bounds3d x _ _) = x
