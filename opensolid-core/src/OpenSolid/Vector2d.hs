@@ -36,6 +36,8 @@ module OpenSolid.Vector2d
   , relativeTo
   , placeInBasis
   , relativeToBasis
+  , convert
+  , unconvert
   , sum
   , transformBy
   , rotateBy
@@ -246,6 +248,12 @@ relativeToBasis ::
   Vector2d (global @ units) ->
   Vector2d (local @ units)
 relativeToBasis (Basis2d i j) vector = Vector2d (vector <> i) (vector <> j)
+
+convert :: Qty (units2 :/: units1) -> Vector2d (space @ units1) -> Vector2d (space @ units2)
+convert factor vector = vector !* factor
+
+unconvert :: Qty (units2 :/: units1) -> Vector2d (space @ units2) -> Vector2d (space @ units1)
+unconvert factor vector = vector !/ factor
 
 sum :: List (Vector2d (space @ units)) -> Vector2d (space @ units)
 sum = List.foldl (+) zero
