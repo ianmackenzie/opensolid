@@ -380,7 +380,10 @@ instance
   where
   vector .><. DirectionCurve3d curve = vector .><. curve
 
-instance Composition (Curve Unitless) (DirectionCurve3d space) (DirectionCurve3d space) where
+instance
+  unitless ~ Unitless =>
+  Composition (Curve unitless) (DirectionCurve3d space) (DirectionCurve3d space)
+  where
   curve1d >> DirectionCurve3d curve = DirectionCurve3d (curve1d >> curve)
 
 xComponent :: DirectionCurve3d space -> Curve Unitless
