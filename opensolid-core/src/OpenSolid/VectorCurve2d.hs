@@ -568,8 +568,9 @@ instance
   point - curve = Curve2d.constant point - curve
 
 instance
+  unitless ~ Unitless =>
   Composition
-    (Curve Unitless)
+    (Curve unitless)
     (VectorCurve2d (space @ units))
     (VectorCurve2d (space @ units))
   where
@@ -577,8 +578,9 @@ instance
   outer . inner = new (outer :.: inner)
 
 instance
+  unitless ~ Unitless =>
   Interface
-    (VectorCurve2d (space @ units) :.: Curve Unitless)
+    (VectorCurve2d (space @ units) :.: Curve unitless)
     (space @ units)
   where
   evaluateImpl (vectorCurve2d :.: curve1d) tValue =
@@ -594,8 +596,9 @@ instance
     new (transformBy transform vectorCurve2d :.: curve1d)
 
 instance
+  unitless ~ Unitless =>
   Composition
-    (SurfaceFunction Unitless)
+    (SurfaceFunction unitless)
     (VectorCurve2d (space @ units))
     (VectorSurfaceFunction2d (space @ units))
   where
@@ -604,8 +607,9 @@ instance
   curve . function = VectorSurfaceFunction2d.new (curve :.: function)
 
 instance
+  unitless ~ Unitless =>
   VectorSurfaceFunction2d.Interface
-    (VectorCurve2d (space @ units) :.: SurfaceFunction Unitless)
+    (VectorCurve2d (space @ units) :.: SurfaceFunction unitless)
     (space @ units)
   where
   evaluateImpl (curve :.: function) uvPoint =
