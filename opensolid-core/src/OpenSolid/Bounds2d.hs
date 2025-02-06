@@ -4,6 +4,8 @@ module OpenSolid.Bounds2d
   , xCoordinate
   , yCoordinate
   , coordinates
+  , dimensions
+  , centerPoint
   , xy
   , constant
   , hull2
@@ -48,7 +50,7 @@ import OpenSolid.Frame2d qualified as Frame2d
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.Fuzzy qualified as Fuzzy
 import OpenSolid.Maybe qualified as Maybe
-import OpenSolid.Point2d (Point2d)
+import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Bounds2d (Bounds2d))
@@ -79,6 +81,12 @@ yCoordinate (Bounds2d _ y) = y
 {-# INLINE coordinates #-}
 coordinates :: Bounds2d (space @ units) -> (Range units, Range units)
 coordinates (Bounds2d x y) = (x, y)
+
+dimensions :: Bounds2d (space @ units) -> (Qty units, Qty units)
+dimensions (Bounds2d x y) = (Range.width x, Range.width y)
+
+centerPoint :: Bounds2d (space @ units) -> Point2d (space @ units)
+centerPoint (Bounds2d x y) = Point2d (Range.midpoint x) (Range.midpoint y)
 
 -- | Construct a bounding box from its X and Y coordinate ranges.
 xy :: forall space units. Range units -> Range units -> Bounds2d (space @ units)
