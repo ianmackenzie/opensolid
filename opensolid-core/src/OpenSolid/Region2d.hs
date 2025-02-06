@@ -240,12 +240,8 @@ fluxIntegral point curve = do
   let integrand = (firstDerivative .><. displacement) / VectorCurve2d.squaredMagnitude' displacement
   Curve.integral integrand
 
-totalFlux ::
-  Point2d (space @ units) ->
-  Loop (space @ units) ->
-  Estimate Unitless
-totalFlux point loop =
-  Estimate.sum (List.map (fluxIntegral point) (NonEmpty.toList loop))
+totalFlux :: Point2d (space @ units) -> Loop (space @ units) -> Estimate Unitless
+totalFlux point loop = Estimate.sum (List.map (fluxIntegral point) (NonEmpty.toList loop))
 
 classifyNonBoundary :: Tolerance units => Point2d (space @ units) -> Loop (space @ units) -> Sign
 classifyNonBoundary point loop = do
