@@ -43,6 +43,7 @@ where
 
 import OpenSolid.Axis2d (Axis2d)
 import OpenSolid.Axis2d qualified as Axis2d
+import OpenSolid.Direction2d (Direction2d (Direction2d))
 import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.Float qualified as Float
 import OpenSolid.Frame2d (Frame2d)
@@ -58,7 +59,7 @@ import OpenSolid.Qty qualified as Qty
 import OpenSolid.Range (Range (Range))
 import OpenSolid.Range qualified as Range
 import OpenSolid.Transform2d (Transform2d (Transform2d))
-import OpenSolid.Vector2d qualified as Vector2d
+import OpenSolid.Vector2d (Vector2d (Vector2d))
 
 class Bounded2d a (coordinateSystem :: CoordinateSystem) | a -> coordinateSystem where
   bounds :: a -> Bounds2d coordinateSystem
@@ -356,13 +357,13 @@ transformBy transform (Bounds2d x y) = do
   let yMid = Range.midpoint y
   let xWidth = Range.width x
   let yWidth = Range.width y
-  let (x0, y0) = Point2d.coordinates (Point2d.transformBy transform (Point2d.xy xMid yMid))
-  let (Transform2d _ i j) = transform
-  let (ix, iy) = Vector2d.components i
-  let (jx, jy) = Vector2d.components j
+  let Point2d x0 y0 = Point2d.transformBy transform (Point2d.xy xMid yMid)
+  let Transform2d _ i j = transform
+  let Vector2d ix iy = i
+  let Vector2d jx jy = j
   let rx = 0.5 * xWidth * Float.abs ix + 0.5 * yWidth * Float.abs jx
   let ry = 0.5 * xWidth * Float.abs iy + 0.5 * yWidth * Float.abs jy
-  Bounds2d (Range.from (x0 - rx) (x0 + rx)) (Range.from (y0 - ry) (y0 + ry))
+  Bounds2d (Range (x0 - rx) (x0 + rx)) (Range (y0 - ry) (y0 + ry))
 
 signedDistanceAlong :: Axis2d (space @ units) -> Bounds2d (space @ units) -> Range units
 signedDistanceAlong axis (Bounds2d x y) = do
@@ -371,9 +372,9 @@ signedDistanceAlong axis (Bounds2d x y) = do
   let xWidth = Range.width x
   let yWidth = Range.width y
   let d0 = Point2d.signedDistanceAlong axis (Point2d.xy xMid yMid)
-  let (ax, ay) = Direction2d.components (Axis2d.direction axis)
+  let Direction2d ax ay = Axis2d.direction axis
   let r = 0.5 * xWidth * Float.abs ax + 0.5 * yWidth * Float.abs ay
-  Range.from (d0 - r) (d0 + r)
+  Range (d0 - r) (d0 + r)
 
 convert :: Qty (units2 :/: units1) -> Bounds2d (space @ units1) -> Bounds2d (space @ units2)
 convert factor (Bounds2d x y) = Bounds2d (x !* factor) (y !* factor)
