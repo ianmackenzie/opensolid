@@ -966,6 +966,7 @@ placeIn ::
   Curve2d (local @ units) ->
   Curve2d (global @ units)
 placeIn globalFrame curve = case curve of
+  Parametric expression -> Parametric (Expression.Curve2d.placeIn globalFrame expression)
   PlaceIn frame localCurve -> PlaceIn (Frame2d.placeIn globalFrame frame) localCurve
   _ -> PlaceIn globalFrame curve
 
