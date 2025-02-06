@@ -9,6 +9,7 @@ module OpenSolid.Body3d
   )
 where
 
+import OpenSolid.Array qualified as Array
 import OpenSolid.Body3d.BoundedBy qualified as BoundedBy
 import OpenSolid.Bounds2d (Bounded2d, Bounds2d (Bounds2d))
 import OpenSolid.Bounds2d qualified as Bounds2d
@@ -61,20 +62,19 @@ import OpenSolid.VectorCurve3d (VectorCurve3d)
 import OpenSolid.VectorCurve3d qualified as VectorCurve3d
 import OpenSolid.VectorSurfaceFunction3d (VectorSurfaceFunction3d)
 import OpenSolid.VectorSurfaceFunction3d qualified as VectorSurfaceFunction3d
-import OpenSolid.Vertex2d (Vertex2d)
+import OpenSolid.Vertex2d as Vertex2d (Vertex2d)
 import OpenSolid.Vertex2d qualified as Vertex2d
 import OpenSolid.Vertex3d (Vertex3d)
 import OpenSolid.Vertex3d qualified as Vertex3d
-
-type role Body3d nominal
 
 newtype Body3d (coordinateSystem :: CoordinateSystem)
   = Body3d (NonEmpty (BoundarySurface coordinateSystem))
 
 data BoundarySurface (coordinateSystem :: CoordinateSystem) where
   BoundarySurface ::
-    { surfaceId :: SurfaceId
+    { id :: SurfaceId
     , surfaceFunctions :: SurfaceFunctions (space @ units)
+    , handedness :: Sign
     , uvBounds :: UvBounds
     , edgeLoops :: NonEmpty (NonEmpty (Edge (space @ units)))
     } ->
@@ -82,21 +82,14 @@ data BoundarySurface (coordinateSystem :: CoordinateSystem) where
 
 newtype SurfaceId = SurfaceId Int deriving (Eq, Ord, Show)
 
-newtype LoopId = LoopId Int deriving (Eq, Ord, Show)
-
-newtype CurveId = CurveId Int deriving (Eq, Ord, Show)
-
-data HalfEdgeId = HalfEdgeId
-  { surfaceId :: SurfaceId
-  , loopId :: LoopId
-  , curveId :: CurveId
-  }
-  deriving (Eq, Ord, Show)
-
-data MatingEdge = MatingEdge
-  { id :: HalfEdgeId
-  , uvCurve :: Curve2d UvCoordinates
-  }
+data SurfaceFunctions (coordinateSystem :: CoordinateSystem) where
+  SurfaceFunctions ::
+    { f :: SurfaceFunction3d (space @ units)
+    , fuu :: VectorSurfaceFunction3d (space @ units)
+    , fuv :: VectorSurfaceFunction3d (space @ units)
+    , fvv :: VectorSurfaceFunction3d (space @ units)
+    } ->
+    SurfaceFunctions (space @ units)
 
 data Edge (coordinateSystem :: CoordinateSystem) where
   PrimaryEdge ::
@@ -106,12 +99,13 @@ data Edge (coordinateSystem :: CoordinateSystem) where
     , curve3d :: Curve3d (space @ units)
     , matingId :: HalfEdgeId
     , matingUvCurve :: Curve2d UvCoordinates
+    , correctlyAligned :: Bool
     } ->
     Edge (space @ units)
   SecondaryEdge ::
     { id :: HalfEdgeId
     , startPoint :: Point3d (space @ units)
-    , uvCurve :: Curve2d UvCoordinates
+    , uvStartPoint :: UvPoint
     } ->
     Edge (space @ units)
   DegenerateEdge ::
@@ -120,6 +114,28 @@ data Edge (coordinateSystem :: CoordinateSystem) where
     , uvCurve :: Curve2d UvCoordinates
     } ->
     Edge (space @ units)
+
+data HalfEdgeId = HalfEdgeId
+  { surfaceId :: SurfaceId
+  , loopId :: LoopId
+  , curveId :: CurveId
+  }
+  deriving (Eq, Ord, Show)
+
+newtype LoopId = LoopId Int deriving (Eq, Ord, Show)
+
+newtype CurveId = CurveId Int deriving (Eq, Ord, Show)
+
+----- CONSTRUCTION -----
+
+data SurfaceWithHalfEdges (coordinateSystem :: CoordinateSystem) where
+  SurfaceWithHalfEdges ::
+    { id :: SurfaceId
+    , surface :: Surface3d (space @ units)
+    , handedness :: Sign
+    , halfEdgeLoops :: NonEmpty (NonEmpty (HalfEdge (space @ units)))
+    } ->
+    SurfaceWithHalfEdges (space @ units)
 
 data HalfEdge (coordinateSystem :: CoordinateSystem) where
   HalfEdge ::
@@ -141,27 +157,26 @@ instance Bounded3d (HalfEdge (space @ units)) (space @ units) where
   bounds HalfEdge{bounds} = bounds
   bounds DegenerateHalfEdge{point} = Bounds3d.constant point
 
-data SurfaceFunctions (coordinateSystem :: CoordinateSystem) where
-  SurfaceFunctions ::
-    { f :: SurfaceFunction3d (space @ units)
-    , fuu :: VectorSurfaceFunction3d (space @ units)
-    , fuv :: VectorSurfaceFunction3d (space @ units)
-    , fvv :: VectorSurfaceFunction3d (space @ units)
-    } ->
-    SurfaceFunctions (space @ units)
+data MatingEdge = MatingEdge
+  { id :: HalfEdgeId
+  , uvCurve :: Curve2d UvCoordinates
+  , correctlyAligned :: Bool
+  }
 
------ CONSTRUCTION -----
-
-data SurfaceWithHalfEdges (coordinateSystem :: CoordinateSystem) where
-  SurfaceWithHalfEdges ::
-    { surfaceId :: SurfaceId
-    , surface :: Surface3d (space @ units)
-    , halfEdgeLoops :: NonEmpty (NonEmpty (HalfEdge (space @ units)))
+data SurfaceRegistry (coordinateSystem :: CoordinateSystem) where
+  SurfaceRegistry ::
+    { unprocessed :: Map SurfaceId (SurfaceWithHalfEdges (space @ units))
+    , processed :: Map SurfaceId (SurfaceWithHalfEdges (space @ units))
+    , edges :: Map HalfEdgeId (Edge (space @ units))
     } ->
-    SurfaceWithHalfEdges (space @ units)
+    SurfaceRegistry (space @ units)
 
 data Corner (coordinateSystem :: CoordinateSystem) where
-  Corner :: {surfaceId :: SurfaceId, point :: Point3d (space @ units)} -> Corner (space @ units)
+  Corner ::
+    { surfaceId :: SurfaceId
+    , point :: Point3d (space @ units)
+    } ->
+    Corner (space @ units)
 
 instance Bounded3d (Corner (space @ units)) (space @ units) where
   bounds Corner{point} = Bounds3d.constant point
@@ -173,32 +188,50 @@ boundedBy ::
 boundedBy [] = Failure BoundedBy.EmptyBody
 boundedBy (NonEmpty surfaces) = Result.do
   surfacesWithHalfEdges <- Result.collect toSurfaceWithHalfEdges (NonEmpty.indexed surfaces)
+  let firstSurfaceWithHalfEdges = NonEmpty.first surfacesWithHalfEdges
   let halfEdges = NonEmpty.collect getAllHalfEdges surfacesWithHalfEdges
   let halfEdgeSet = Set3d.fromNonEmpty halfEdges
   let corners = NonEmpty.map halfEdgeStartPoint halfEdges
   let cornerSet = Set3d.fromNonEmpty corners
-  boundarySurfaces <- Result.collect (toBoundarySurface cornerSet halfEdgeSet) surfacesWithHalfEdges
-  Success (Body3d boundarySurfaces)
+  let initialSurfaceRegistry =
+        SurfaceRegistry
+          { unprocessed =
+              Map.fromList surfaceWithHalfEdgesMapEntry $
+                NonEmpty.toList surfacesWithHalfEdges
+          , processed = Map.empty
+          , edges = Map.empty
+          }
+  finalSurfaceRegistry <-
+    registerSurfaceWithHalfEdges
+      cornerSet
+      halfEdgeSet
+      initialSurfaceRegistry
+      firstSurfaceWithHalfEdges
+  let SurfaceRegistry{unprocessed, processed, edges} = finalSurfaceRegistry
+  case (Map.values unprocessed, Map.values processed) of
+    (NonEmpty _, _) -> Failure BoundedBy.BoundaryHasGaps
+    ([], []) -> internalError "Should always have at least one processed surface"
+    ([], NonEmpty processedSurfaces) ->
+      Success (Body3d (NonEmpty.map (toBoundarySurface edges) processedSurfaces))
+
+surfaceWithHalfEdgesMapEntry ::
+  SurfaceWithHalfEdges (space @ units) ->
+  (SurfaceId, SurfaceWithHalfEdges (space @ units))
+surfaceWithHalfEdgesMapEntry surfaceWithHalfEdges = do
+  let SurfaceWithHalfEdges{id} = surfaceWithHalfEdges
+  (id, surfaceWithHalfEdges)
 
 toSurfaceWithHalfEdges ::
   Tolerance units =>
   (Int, Surface3d (space @ units)) ->
   Result BoundedBy.Error (SurfaceWithHalfEdges (space @ units))
 toSurfaceWithHalfEdges (surfaceIndex, surface) = do
+  let surfaceFunction = Surface3d.function surface
   let surfaceDomain = Surface3d.domain surface
   let loops = Region2d.outerLoop surfaceDomain :| Region2d.innerLoops surfaceDomain
   let surfaceId = SurfaceId surfaceIndex
-  Result.map (SurfaceWithHalfEdges surfaceId surface) $
-    Result.collect (loopHalfEdges surfaceId (Surface3d.function surface)) (NonEmpty.indexed loops)
-
-toSurfaceFunctions :: SurfaceFunction3d (space @ units) -> SurfaceFunctions (space @ units)
-toSurfaceFunctions f = do
-  let fu = SurfaceFunction3d.derivative U f
-  let fv = SurfaceFunction3d.derivative V f
-  let fuu = VectorSurfaceFunction3d.derivative U fu
-  let fuv = VectorSurfaceFunction3d.derivative V fu
-  let fvv = VectorSurfaceFunction3d.derivative V fv
-  SurfaceFunctions{f, fuu, fuv, fvv}
+  Result.map (SurfaceWithHalfEdges surfaceId surface Positive) $
+    Result.collect (loopHalfEdges surfaceId surfaceFunction) (NonEmpty.indexed loops)
 
 loopHalfEdges ::
   Tolerance units =>
@@ -206,8 +239,9 @@ loopHalfEdges ::
   SurfaceFunction3d (space @ units) ->
   (Int, NonEmpty (Curve2d UvCoordinates)) ->
   Result BoundedBy.Error (NonEmpty (HalfEdge (space @ units)))
-loopHalfEdges surfaceId surfaceFunction (loopId, loop) = do
-  Result.collect (toHalfEdge surfaceId (LoopId loopId) surfaceFunction) (NonEmpty.indexed loop)
+loopHalfEdges surfaceId surfaceFunction (loopIndex, loop) =
+  NonEmpty.indexed loop
+    |> Result.collect (toHalfEdge surfaceId (LoopId loopIndex) surfaceFunction)
 
 toHalfEdge ::
   Tolerance units =>
@@ -223,8 +257,9 @@ toHalfEdge surfaceId loopId surfaceFunction (curveIndex, uvCurve) = do
   case Curve3d.arcLengthParameterization curve3d of
     Success (parameterization, length) -> do
       Success
-        if length > Qty.zero
-          then
+        if length == Qty.zero
+          then DegenerateHalfEdge{id, uvCurve, point = Curve3d.startPoint curve3d}
+          else
             HalfEdge
               { id
               , uvCurve = uvCurve . parameterization
@@ -232,7 +267,6 @@ toHalfEdge surfaceId loopId surfaceFunction (curveIndex, uvCurve) = do
               , length
               , bounds = Curve3d.bounds curve3d
               }
-          else DegenerateHalfEdge{id, uvCurve, point = Curve3d.startPoint curve3d}
     Failure Curve3d.HasDegeneracy ->
       Failure BoundedBy.BoundaryCurveHasDegeneracy
 
@@ -244,40 +278,113 @@ halfEdgeStartPoint halfEdge = case halfEdge of
   HalfEdge{id = HalfEdgeId{surfaceId}, curve3d} -> Corner surfaceId (Curve3d.startPoint curve3d)
   DegenerateHalfEdge{id = HalfEdgeId{surfaceId}, point} -> Corner surfaceId point
 
-toBoundarySurface ::
+registerSurfaceWithHalfEdges ::
   Tolerance units =>
   Set3d (Corner (space @ units)) (space @ units) ->
   Set3d (HalfEdge (space @ units)) (space @ units) ->
+  SurfaceRegistry (space @ units) ->
   SurfaceWithHalfEdges (space @ units) ->
-  Result BoundedBy.Error (BoundarySurface (space @ units))
-toBoundarySurface cornerSet halfEdgeSet surfaceWithHalfEdges = Result.do
-  let SurfaceWithHalfEdges{surfaceId, surface, halfEdgeLoops} = surfaceWithHalfEdges
-  edgeLoops <- Result.collect (Result.collect (toEdge cornerSet halfEdgeSet)) halfEdgeLoops
-  let surfaceFunctions = toSurfaceFunctions (Surface3d.function surface)
-  let uvBounds = Region2d.bounds (Surface3d.domain surface)
-  Success BoundarySurface{surfaceId, surfaceFunctions, uvBounds, edgeLoops}
+  Result BoundedBy.Error (SurfaceRegistry (space @ units))
+registerSurfaceWithHalfEdges cornerSet halfEdgeSet surfaceRegistry surfaceWithHalfEdges = do
+  let SurfaceWithHalfEdges{id, handedness} = surfaceWithHalfEdges
+  let SurfaceRegistry{unprocessed, processed, edges} = surfaceRegistry
+  let updatedRegistry =
+        SurfaceRegistry
+          { unprocessed = unprocessed |> Map.remove id
+          , processed = processed |> Map.set id surfaceWithHalfEdges
+          , edges
+          }
+  let halfEdges = NonEmpty.toList (getAllHalfEdges surfaceWithHalfEdges)
+  Result.foldl (registerHalfEdge handedness cornerSet halfEdgeSet) updatedRegistry halfEdges
 
-toEdge ::
+registerHalfEdge ::
   Tolerance units =>
+  Sign ->
   Set3d (Corner (space @ units)) (space @ units) ->
   Set3d (HalfEdge (space @ units)) (space @ units) ->
+  SurfaceRegistry (space @ units) ->
   HalfEdge (space @ units) ->
-  Result BoundedBy.Error (Edge (space @ units))
-toEdge cornerSet halfEdgeSet halfEdge = case halfEdge of
-  DegenerateHalfEdge{id, uvCurve, point} -> Result.do
-    canonicalPoint <- getCornerPoint point cornerSet
-    Success DegenerateEdge{id, uvCurve, point = canonicalPoint}
-  HalfEdge{curve3d} -> Result.do
-    startPoint <- getCornerPoint (Curve3d.startPoint curve3d) cornerSet
-    let matingEdgeCandidates = Set3d.filter (Bounds3d.bounds halfEdge) halfEdgeSet
-    case Maybe.collect (matingEdge curve3d) matingEdgeCandidates of
-      [] -> Failure BoundedBy.BoundaryHasGaps
-      List.One MatingEdge{id = matingId, uvCurve = matingUvCurve} -> do
-        let HalfEdge{id, uvCurve} = halfEdge
-        if id < matingId
-          then Success PrimaryEdge{id, startPoint, uvCurve, curve3d, matingId, matingUvCurve}
-          else Success SecondaryEdge{id, startPoint, uvCurve}
-      List.TwoOrMore -> Failure BoundedBy.BoundaryIntersectsItself
+  Result BoundedBy.Error (SurfaceRegistry (space @ units))
+registerHalfEdge parentHandedness cornerSet halfEdgeSet surfaceRegistry halfEdge = do
+  let SurfaceRegistry{unprocessed, processed, edges} = surfaceRegistry
+  case halfEdge of
+    DegenerateHalfEdge{id, uvCurve, point} -> Result.do
+      canonicalPoint <- getCornerPoint point cornerSet
+      let edge = DegenerateEdge{id, uvCurve, point = canonicalPoint}
+      Success SurfaceRegistry{unprocessed, processed, edges = Map.set id edge edges}
+    HalfEdge{id, uvCurve, curve3d} -> do
+      let matingEdgeCandidates = Set3d.filter (Bounds3d.bounds halfEdge) halfEdgeSet
+      case Maybe.collect (toMatingEdge id curve3d) matingEdgeCandidates of
+        [] -> Failure BoundedBy.BoundaryHasGaps
+        List.TwoOrMore -> Failure BoundedBy.BoundaryIntersectsItself
+        List.One MatingEdge{id = matingId, uvCurve = matingUvCurve, correctlyAligned} -> Result.do
+          let HalfEdgeId{surfaceId = matingSurfaceId} = matingId
+          startPoint <- getCornerPoint (Curve3d.startPoint curve3d) cornerSet
+          let edge =
+                if id < matingId
+                  then
+                    PrimaryEdge
+                      { id
+                      , startPoint
+                      , uvCurve
+                      , curve3d
+                      , matingId
+                      , matingUvCurve
+                      , correctlyAligned
+                      }
+                  else SecondaryEdge{id, startPoint, uvStartPoint = Curve2d.startPoint uvCurve}
+          let updatedRegistry =
+                SurfaceRegistry{unprocessed, processed, edges = edges |> Map.set id edge}
+          let matingHandedness = if correctlyAligned then parentHandedness else -parentHandedness
+          case (Map.get matingSurfaceId unprocessed, Map.get matingSurfaceId processed) of
+            (Nothing, Nothing) -> internalError "No surface found for half-edge"
+            (Just _, Just _) -> internalError "Multiple surfaces found for half-edge"
+            (Nothing, Just SurfaceWithHalfEdges{handedness}) ->
+              if handedness == matingHandedness
+                then Success updatedRegistry
+                else Failure BoundedBy.BoundaryIntersectsItself
+            (Just unprocessedSurface, Nothing) -> do
+              let processedSurface = setHandedness matingHandedness unprocessedSurface
+              registerSurfaceWithHalfEdges cornerSet halfEdgeSet updatedRegistry processedSurface
+
+setHandedness ::
+  Sign ->
+  SurfaceWithHalfEdges (space @ units) ->
+  SurfaceWithHalfEdges (space @ units)
+setHandedness handedness SurfaceWithHalfEdges{id, surface, halfEdgeLoops} =
+  SurfaceWithHalfEdges{handedness, id, surface, halfEdgeLoops}
+
+toBoundarySurface ::
+  Map HalfEdgeId (Edge (space @ units)) ->
+  SurfaceWithHalfEdges (space @ units) ->
+  BoundarySurface (space @ units)
+toBoundarySurface edges SurfaceWithHalfEdges{id, surface, handedness, halfEdgeLoops} =
+  BoundarySurface
+    { id
+    , surfaceFunctions = toSurfaceFunctions (Surface3d.function surface)
+    , handedness
+    , uvBounds = Region2d.bounds (Surface3d.domain surface)
+    , edgeLoops = NonEmpty.map (NonEmpty.map (toEdge edges)) halfEdgeLoops
+    }
+
+toEdge :: Map HalfEdgeId (Edge (space @ units)) -> HalfEdge (space @ units) -> Edge (space @ units)
+toEdge edges halfEdge =
+  case Map.get (halfEdgeId halfEdge) edges of
+    Just edge -> edge
+    Nothing -> internalError "Should always be able to find edge for processed half-edge"
+
+halfEdgeId :: HalfEdge (space @ units) -> HalfEdgeId
+halfEdgeId HalfEdge{id} = id
+halfEdgeId DegenerateHalfEdge{id} = id
+
+toSurfaceFunctions :: SurfaceFunction3d (space @ units) -> SurfaceFunctions (space @ units)
+toSurfaceFunctions f = do
+  let fu = SurfaceFunction3d.derivative U f
+  let fv = SurfaceFunction3d.derivative V f
+  let fuu = VectorSurfaceFunction3d.derivative U fu
+  let fuv = VectorSurfaceFunction3d.derivative V fu
+  let fvv = VectorSurfaceFunction3d.derivative V fv
+  SurfaceFunctions{f, fuu, fuv, fvv}
 
 cornerSurfaceId :: Corner (space @ units) -> SurfaceId
 cornerSurfaceId Corner{surfaceId} = surfaceId
@@ -295,17 +402,22 @@ getCornerPoint searchPoint cornerSet =
     [] -> internalError "getCorner should always find at least one corner (the given point itself)"
     NonEmpty candidates -> Success (cornerPoint (NonEmpty.minimumBy cornerSurfaceId candidates))
 
-matingEdge ::
+toMatingEdge ::
   Tolerance units =>
+  HalfEdgeId ->
   Curve3d (space @ units) ->
   HalfEdge (space @ units) ->
   Maybe MatingEdge
-matingEdge _ DegenerateHalfEdge{} = Nothing
-matingEdge curve1 HalfEdge{id, curve3d = curve2, uvCurve} = do
-  let pointsMatchAt t1 = Curve3d.evaluate curve1 t1 ~= Curve3d.evaluate curve2 (1.0 - t1)
-  if List.allSatisfy pointsMatchAt Parameter.samples
-    then Just MatingEdge{id, uvCurve}
-    else Nothing
+toMatingEdge _ _ DegenerateHalfEdge{} = Nothing
+toMatingEdge id1 curve1 HalfEdge{id = id2, curve3d = curve2, uvCurve}
+  | id1 == id2 = Nothing
+  | otherwise = do
+      let points1 = List.map (Curve3d.evaluate curve1) Parameter.samples
+      let points2 = List.map (Curve3d.evaluate curve2) Parameter.samples
+      if
+        | points1 ~= points2 -> Just MatingEdge{id = id2, uvCurve, correctlyAligned = False}
+        | points1 ~= List.reverse points2 -> Just MatingEdge{id = id2, uvCurve, correctlyAligned = True}
+        | otherwise -> Nothing
 
 ----- MESHING -----
 
@@ -326,15 +438,18 @@ toMesh quality (Body3d boundarySurfaces) = do
   let boundarySurfaceList = NonEmpty.toList boundarySurfaces
   let surfaceSegmentsById = Map.fromList (boundarySurfaceSegments quality) boundarySurfaceList
   let innerEdgeVerticesById =
-        NonEmpty.foldr (addBoundaryVertices quality surfaceSegmentsById) Map.empty boundarySurfaces
+        NonEmpty.foldr
+          (addBoundaryInnerEdgeVertices quality surfaceSegmentsById)
+          Map.empty
+          boundarySurfaces
   Mesh.collect (boundarySurfaceMesh surfaceSegmentsById innerEdgeVerticesById) boundarySurfaces
 
 boundarySurfaceSegments ::
   Mesh.Quality units ->
   BoundarySurface (space @ units) ->
   (SurfaceId, Set2d UvBounds UvCoordinates)
-boundarySurfaceSegments quality BoundarySurface{surfaceId, surfaceFunctions, uvBounds} =
-  (surfaceId, boundarySurfaceSegmentSet quality surfaceFunctions uvBounds)
+boundarySurfaceSegments quality BoundarySurface{id, surfaceFunctions, uvBounds} =
+  (id, boundarySurfaceSegmentSet quality surfaceFunctions uvBounds)
 
 boundarySurfaceSegmentSet ::
   Mesh.Quality units ->
@@ -378,32 +493,32 @@ surfaceError SurfaceFunctions{fuu, fuv, fvv} uvBounds = do
   let fvvBounds = VectorSurfaceFunction3d.evaluateBounds fvv uvBounds
   SurfaceLinearization.error fuuBounds fuvBounds fvvBounds uvBounds
 
-addBoundaryVertices ::
+addBoundaryInnerEdgeVertices ::
   Mesh.Quality units ->
   Map SurfaceId (Set2d UvBounds UvCoordinates) ->
   BoundarySurface (space @ units) ->
   Map HalfEdgeId (List (Vertex (space @ units))) ->
   Map HalfEdgeId (List (Vertex (space @ units)))
-addBoundaryVertices quality surfaceSegmentsById boundarySurface accumulated = do
+addBoundaryInnerEdgeVertices quality surfaceSegmentsById boundarySurface accumulated = do
   let BoundarySurface{edgeLoops} = boundarySurface
-  NonEmpty.foldr (addLoopVertices quality surfaceSegmentsById) accumulated edgeLoops
+  NonEmpty.foldr (addLoopInnerEdgeVertices quality surfaceSegmentsById) accumulated edgeLoops
 
-addLoopVertices ::
+addLoopInnerEdgeVertices ::
   Mesh.Quality units ->
   Map SurfaceId (Set2d UvBounds UvCoordinates) ->
   NonEmpty (Edge (space @ units)) ->
   Map HalfEdgeId (List (Vertex (space @ units))) ->
   Map HalfEdgeId (List (Vertex (space @ units)))
-addLoopVertices quality surfaceSegmentsById loop accumulated =
-  NonEmpty.foldr (addEdgeVertices quality surfaceSegmentsById) accumulated loop
+addLoopInnerEdgeVertices quality surfaceSegmentsById loop accumulated =
+  NonEmpty.foldr (addInnerEdgeVertices quality surfaceSegmentsById) accumulated loop
 
-addEdgeVertices ::
+addInnerEdgeVertices ::
   Mesh.Quality units ->
   Map SurfaceId (Set2d UvBounds UvCoordinates) ->
   Edge (space @ units) ->
   Map HalfEdgeId (List (Vertex (space @ units))) ->
   Map HalfEdgeId (List (Vertex (space @ units)))
-addEdgeVertices quality surfaceSegmentsById edge accumulated = do
+addInnerEdgeVertices quality surfaceSegmentsById edge accumulated = do
   case edge of
     DegenerateEdge{id, uvCurve, point} -> do
       let HalfEdgeId{surfaceId} = id
@@ -415,7 +530,7 @@ addEdgeVertices quality surfaceSegmentsById edge accumulated = do
           Map.set id (List.map vertex tValues) accumulated
         Nothing ->
           internalError "Should always be able to look up surface segments for a given edge"
-    PrimaryEdge{id, matingId, curve3d, uvCurve, matingUvCurve} -> do
+    PrimaryEdge{id, matingId, curve3d, uvCurve, matingUvCurve, correctlyAligned} -> do
       let HalfEdgeId{surfaceId} = id
       let HalfEdgeId{surfaceId = matingSurfaceId} = matingId
       case (Map.get surfaceId surfaceSegmentsById, Map.get matingSurfaceId surfaceSegmentsById) of
@@ -426,6 +541,7 @@ addEdgeVertices quality surfaceSegmentsById edge accumulated = do
                   curve3d
                   uvCurve
                   matingUvCurve
+                  correctlyAligned
                   surfaceSegments
                   matingSurfaceSegments
                   (VectorCurve3d.derivative (Curve3d.derivative curve3d))
@@ -433,12 +549,13 @@ addEdgeVertices quality surfaceSegmentsById edge accumulated = do
           let vertexPair tValue = do
                 let point = Curve3d.evaluate curve3d tValue
                 let uvPoint = Curve2d.evaluate uvCurve tValue
-                let matingUvPoint = Curve2d.evaluate matingUvCurve (1.0 - tValue)
+                let matingTValue = if correctlyAligned then 1.0 - tValue else tValue
+                let matingUvPoint = Curve2d.evaluate matingUvCurve matingTValue
                 (Vertex uvPoint point, Vertex matingUvPoint point)
           let (vertices, matingVertices) = List.unzip2 (List.map vertexPair tValues)
           accumulated
             |> Map.set id vertices
-            |> Map.set matingId (List.reverse matingVertices)
+            |> Map.set matingId (if correctlyAligned then List.reverse matingVertices else matingVertices)
         _ -> internalError "Should always be able to look up surface segments for a given edge"
     SecondaryEdge{} -> accumulated
 
@@ -447,6 +564,7 @@ edgeLinearizationPredicate ::
   Curve3d (space @ units) ->
   Curve2d UvCoordinates ->
   Curve2d UvCoordinates ->
+  Bool ->
   Set2d UvBounds UvCoordinates ->
   Set2d UvBounds UvCoordinates ->
   VectorCurve3d (space @ units) ->
@@ -457,6 +575,7 @@ edgeLinearizationPredicate
   curve3d
   uvCurve
   matingUvCurve
+  correctlyAligned
   surfaceSegments
   matingSurfaceSegments
   edgeSecondDerivative
@@ -464,8 +583,10 @@ edgeLinearizationPredicate
     let Range tStart tEnd = tRange
     let uvStart = Curve2d.evaluate uvCurve tStart
     let uvEnd = Curve2d.evaluate uvCurve tEnd
-    let matingUvStart = Curve2d.evaluate matingUvCurve (1.0 - tStart)
-    let matingUvEnd = Curve2d.evaluate matingUvCurve (1.0 - tEnd)
+    let matingTStart = if correctlyAligned then 1.0 - tStart else tStart
+    let matingTEnd = if correctlyAligned then 1.0 - tEnd else tEnd
+    let matingUvStart = Curve2d.evaluate matingUvCurve matingTStart
+    let matingUvEnd = Curve2d.evaluate matingUvCurve matingTEnd
     let uvBounds = Bounds2d.hull2 uvStart uvEnd
     let matingUvBounds = Bounds2d.hull2 matingUvStart matingUvEnd
     let edgeSize = Point2d.distanceFrom uvStart uvEnd
@@ -510,11 +631,11 @@ boundarySurfaceMesh ::
   BoundarySurface (space @ units) ->
   Mesh (Point3d (space @ units))
 boundarySurfaceMesh surfaceSegmentsById innerEdgeVerticesById boundarySurface = do
-  let BoundarySurface{surfaceId, surfaceFunctions, edgeLoops} = boundarySurface
+  let BoundarySurface{id, surfaceFunctions, handedness, edgeLoops} = boundarySurface
   let boundaryPolygons = NonEmpty.map (toPolygon innerEdgeVerticesById) edgeLoops
   let boundarySegments = NonEmpty.collect Polygon2d.edges boundaryPolygons
   let boundarySegmentSet = Set2d.fromNonEmpty boundarySegments
-  case Map.get surfaceId surfaceSegmentsById of
+  case Map.get id surfaceSegmentsById of
     Nothing -> internalError "Should always be able to look up surface segments by ID"
     Just surfaceSegments -> do
       let steinerPoints =
@@ -533,36 +654,41 @@ boundarySurfaceMesh surfaceSegmentsById innerEdgeVerticesById boundarySurface = 
       let boundaryVertexLoops = NonEmpty.map Polygon2d.vertices boundaryPolygons
       -- Decent refinement option: (Just (List.length steinerPoints, steinerVertex))
       let vertexMesh = CDT.unsafe boundaryVertexLoops steinerVertices Nothing
-      Mesh.map Vertex3d.position vertexMesh
+      let points = Array.map Vertex3d.position (Mesh.vertices vertexMesh)
+      let faceIndices =
+            case handedness of
+              Positive -> Mesh.faceIndices vertexMesh
+              Negative -> List.map (\(i, j, k) -> (k, j, i)) (Mesh.faceIndices vertexMesh)
+      Mesh.indexed points faceIndices
 
 toPolygon ::
   Map HalfEdgeId (List (Vertex (space @ units))) ->
   NonEmpty (Edge (space @ units)) ->
   Polygon2d (Vertex (space @ units))
 toPolygon innerEdgeVerticesById loop =
-  Polygon2d (NonEmpty.collect (edgeVertices innerEdgeVerticesById) loop)
+  Polygon2d (NonEmpty.collect (leadingEdgeVertices innerEdgeVerticesById) loop)
 
-edgeVertices ::
+leadingEdgeVertices ::
   Map HalfEdgeId (List (Vertex (space @ units))) ->
   Edge (space @ units) ->
   NonEmpty (Vertex (space @ units))
-edgeVertices innerEdgeVerticesById edge = case edge of
+leadingEdgeVertices innerEdgeVerticesById edge = case edge of
   DegenerateEdge{id, uvCurve, point} ->
-    edgeVerticesImpl innerEdgeVerticesById id point uvCurve
+    leadingEdgeVerticesImpl innerEdgeVerticesById id point (Curve2d.startPoint uvCurve)
   PrimaryEdge{id, uvCurve, startPoint} ->
-    edgeVerticesImpl innerEdgeVerticesById id startPoint uvCurve
-  SecondaryEdge{id, uvCurve, startPoint} ->
-    edgeVerticesImpl innerEdgeVerticesById id startPoint uvCurve
+    leadingEdgeVerticesImpl innerEdgeVerticesById id startPoint (Curve2d.startPoint uvCurve)
+  SecondaryEdge{id, uvStartPoint, startPoint} ->
+    leadingEdgeVerticesImpl innerEdgeVerticesById id startPoint uvStartPoint
 
-edgeVerticesImpl ::
+leadingEdgeVerticesImpl ::
   Map HalfEdgeId (List (Vertex (space @ units))) ->
   HalfEdgeId ->
   Point3d (space @ units) ->
-  Curve2d UvCoordinates ->
+  UvPoint ->
   NonEmpty (Vertex (space @ units))
-edgeVerticesImpl innerEdgeVerticesById edgeId startPoint uvCurve =
+leadingEdgeVerticesImpl innerEdgeVerticesById edgeId startPoint uvStartPoint =
   case Map.get edgeId innerEdgeVerticesById of
-    Just innerEdgeVertices -> Vertex (Curve2d.startPoint uvCurve) startPoint :| innerEdgeVertices
+    Just innerEdgeVertices -> Vertex uvStartPoint startPoint :| innerEdgeVertices
     Nothing -> internalError "Should always be able to look up internal edge vertices by ID"
 
 steinerPoint ::
