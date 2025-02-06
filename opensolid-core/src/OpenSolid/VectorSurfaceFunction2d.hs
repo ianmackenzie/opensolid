@@ -9,6 +9,8 @@ module OpenSolid.VectorSurfaceFunction2d
   , evaluateBounds
   , derivative
   , transformBy
+  , xComponent
+  , yComponent
   )
 where
 
@@ -17,6 +19,7 @@ import OpenSolid.CoordinateSystem (Space)
 import {-# SOURCE #-} OpenSolid.Curve2d (Curve2d)
 import {-# SOURCE #-} OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Direction2d (Direction2d)
+import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Expression.VectorSurface2d qualified as Expression.VectorSurface2d
@@ -667,3 +670,9 @@ derivative varyingParameter function = case function of
     let denominator = SurfaceFunction.squared' f2
     numerator .!/.! denominator
   Transformed transform f -> transformBy transform (derivative varyingParameter f)
+
+xComponent :: VectorSurfaceFunction2d (space @ units) -> SurfaceFunction units
+xComponent function = function <> Direction2d.x
+
+yComponent :: VectorSurfaceFunction2d (space @ units) -> SurfaceFunction units
+yComponent function = function <> Direction2d.y
