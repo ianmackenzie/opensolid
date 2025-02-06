@@ -131,12 +131,10 @@ projectInto ::
 projectInto (Plane3d p0 (Basis3d i j _)) p = let d = p - p0 in Point2d (d <> i) (d <> j)
 
 convert :: Qty (units2 :/: units1) -> Point3d (space @ units1) -> Point3d (space @ units2)
-convert conversion (Point3d px py pz) =
-  Point3d (Qty.convert conversion px) (Qty.convert conversion py) (Qty.convert conversion pz)
+convert factor (Point3d px py pz) = Point3d (px !* factor) (py !* factor) (pz !* factor)
 
 unconvert :: Qty (units2 :/: units1) -> Point3d (space @ units2) -> Point3d (space @ units1)
-unconvert conversion (Point3d px py pz) =
-  Point3d (Qty.unconvert conversion px) (Qty.unconvert conversion py) (Qty.unconvert conversion pz)
+unconvert factor (Point3d px py pz) = Point3d (px !/ factor) (py !/ factor) (pz !/ factor)
 
 transformBy :: Transform3d tag (space @ units) -> Point3d (space @ units) -> Point3d (space @ units)
 transformBy transform point = do

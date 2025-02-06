@@ -673,7 +673,7 @@ samples :: Range units -> List (Qty units)
 samples range = List.map (interpolate range) Parameter.samples
 
 convert :: Qty (units2 :/: units1) -> Range units1 -> Range units2
-convert conversion (Range low high) = from (Qty.convert conversion low) (Qty.convert conversion high)
+convert factor range = range !* factor
 
 unconvert :: Qty (units2 :/: units1) -> Range units2 -> Range units1
-unconvert conversion (Range low high) = from (Qty.unconvert conversion low) (Qty.unconvert conversion high)
+unconvert factor range = range !/ factor

@@ -376,9 +376,7 @@ signedDistanceAlong axis (Bounds2d x y) = do
   Range.from (d0 - r) (d0 + r)
 
 convert :: Qty (units2 :/: units1) -> Bounds2d (space @ units1) -> Bounds2d (space @ units2)
-convert conversion (Bounds2d x y) =
-  Bounds2d (Range.convert conversion x) (Range.convert conversion y)
+convert factor (Bounds2d x y) = Bounds2d (x !* factor) (y !* factor)
 
 unconvert :: Qty (units2 :/: units1) -> Bounds2d (space @ units2) -> Bounds2d (space @ units1)
-unconvert conversion (Bounds2d x y) =
-  Bounds2d (Range.unconvert conversion x) (Range.unconvert conversion y)
+unconvert factor (Bounds2d x y) = Bounds2d (x !/ factor) (y !/ factor)
