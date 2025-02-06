@@ -5,6 +5,7 @@ module OpenSolid.Transform2d
   , Uniform
   , Affine
   , identity
+  , handedness
   , translateBy
   , translateIn
   , translateAlong
@@ -38,6 +39,7 @@ import Data.Coerce qualified
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Direction2d (Direction2d)
+import OpenSolid.Float qualified as Float
 import {-# SOURCE #-} OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude hiding (identity)
 import OpenSolid.Primitives
@@ -68,6 +70,8 @@ unitY = Vector2d 0.0 1.0
 identity :: Rigid (space @ units)
 identity = Transform2d Point2d.origin unitX unitY
 
+handedness :: Transform2d tag (space @ units) -> Sign
+handedness (Transform2d _ vx vy) = Float.sign (vx >< vy)
 withFixedPoint ::
   Point2d (space @ units) ->
   Vector2d (space @ Unitless) ->
