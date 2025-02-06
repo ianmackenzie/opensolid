@@ -3,6 +3,7 @@ module OpenSolid.SurfaceFunction2d
   , Interface (..)
   , new
   , constant
+  , uv
   , xy
   , evaluate
   , evaluateBounds
@@ -181,6 +182,9 @@ new = SurfaceFunction2d
 
 constant :: Point2d (space @ units) -> SurfaceFunction2d (space @ units)
 constant = Parametric . Expression.constant
+
+uv :: SurfaceFunction2d UvCoordinates
+uv = xy SurfaceFunction.u SurfaceFunction.v
 
 xy ::
   SurfaceFunction units ->
