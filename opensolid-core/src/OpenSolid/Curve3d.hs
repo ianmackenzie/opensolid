@@ -167,16 +167,16 @@ instance
     (Curve3d (space @ units) :.: SurfaceFunction unitless)
     (space @ units)
   where
-  evaluateImpl (curveFunction :.: surfaceFunction) uvPoint =
-    evaluate curveFunction $
+  evaluateImpl (curve :.: surfaceFunction) uvPoint =
+    evaluate curve $
       SurfaceFunction.evaluate surfaceFunction uvPoint
 
-  evaluateBoundsImpl (curveFunction :.: surfaceFunction) uvBounds =
-    evaluateBounds curveFunction $
+  evaluateBoundsImpl (curve :.: surfaceFunction) uvBounds =
+    evaluateBounds curve $
       SurfaceFunction.evaluateBounds surfaceFunction uvBounds
 
-  derivativeImpl parameter (curveFunction :.: surfaceFunction) =
-    (derivative curveFunction . surfaceFunction)
+  derivativeImpl parameter (curve :.: surfaceFunction) =
+    (derivative curve . surfaceFunction)
       * SurfaceFunction.derivative parameter surfaceFunction
 
 instance
