@@ -72,8 +72,9 @@ instance
     (VectorSurfaceFunction2d (space1 @ units1))
 
 instance
+  uvCoordinates ~ UvCoordinates =>
   Composition
-    (Curve2d UvCoordinates)
+    (Curve2d uvCoordinates)
     (SurfaceFunction2d (space @ units))
     (Curve2d (space @ units))
 

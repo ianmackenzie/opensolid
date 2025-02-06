@@ -394,11 +394,14 @@ instance
   where
   value ./. function = constant value ./. function
 
-instance Composition (SurfaceFunction Unitless) (Curve units) (SurfaceFunction units) where
+instance
+  unitless ~ Unitless =>
+  Composition (SurfaceFunction unitless) (Curve units) (SurfaceFunction units)
+  where
   Curve.Parametric outer . Parametric inner = Parametric (outer . inner)
   outer . inner = new (outer :.: inner)
 
-instance Interface (Curve units :.: SurfaceFunction Unitless) units where
+instance unitless ~ Unitless => Interface (Curve units :.: SurfaceFunction unitless) units where
   evaluateImpl (curve :.: function) uvPoint =
     Curve.evaluate curve (evaluate function uvPoint)
 

@@ -247,8 +247,9 @@ transformBy transform function = case function of
   Transformed current f -> Transformed (Transform2d.toAffine transform . current) f
 
 instance
+  uvCoordinates ~ UvCoordinates =>
   Composition
-    (Curve2d UvCoordinates)
+    (Curve2d uvCoordinates)
     (SurfaceFunction2d (space @ units))
     (Curve2d (space @ units))
   where
@@ -256,8 +257,9 @@ instance
   function . curve = Curve2d.new (function :.: curve)
 
 instance
+  uvCoordinates ~ UvCoordinates =>
   Curve2d.Interface
-    (SurfaceFunction2d (space @ units) :.: Curve2d UvCoordinates)
+    (SurfaceFunction2d (space @ units) :.: Curve2d uvCoordinates)
     (space @ units)
   where
   evaluateImpl (function :.: curve) tValue =

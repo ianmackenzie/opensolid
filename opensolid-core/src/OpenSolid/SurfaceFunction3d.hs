@@ -115,8 +115,9 @@ instance
   f - v = f - VectorSurfaceFunction3d.constant v
 
 instance
+  uvCoordinates ~ UvCoordinates =>
   Composition
-    (Region2d UvCoordinates)
+    (Region2d uvCoordinates)
     (SurfaceFunction3d (space @ units))
     (Surface3d (space @ units))
   where
