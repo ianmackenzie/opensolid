@@ -6,10 +6,12 @@ module OpenSolid.Surface3d
   , outerLoop
   , innerLoops
   , boundaryCurves
+  , flip
   , toMesh
   )
 where
 
+import OpenSolid.Axis2d qualified as Axis2d
 import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
 import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.ConstrainedDelaunayTriangulation qualified as CDT
@@ -37,6 +39,8 @@ import OpenSolid.Region2d (Region2d)
 import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Set2d (Set2d)
 import OpenSolid.Set2d qualified as Set2d
+import OpenSolid.SurfaceFunction qualified as SurfaceFunction
+import OpenSolid.SurfaceFunction2d qualified as SurfaceFunction2d
 import OpenSolid.SurfaceFunction3d (SurfaceFunction3d)
 import OpenSolid.SurfaceFunction3d qualified as SurfaceFunction3d
 import OpenSolid.SurfaceLinearization qualified as SurfaceLinearization
@@ -79,6 +83,12 @@ boundaryLoop surfaceFunction domainLoop = NonEmpty.map (surfaceFunction .) domai
 
 boundaryCurves :: Surface3d (space @ units) -> NonEmpty (Curve3d (space @ units))
 boundaryCurves surface = NonEmpty.concat (outerLoop surface :| innerLoops surface)
+
+flip :: Surface3d (space @ units) -> Surface3d (space @ units)
+flip (Surface3d f d) =
+  Surface3d
+    (f . SurfaceFunction2d.xy (1.0 - SurfaceFunction.u) SurfaceFunction.v)
+    (Region2d.mirrorAcross Axis2d.y d)
 
 toMesh :: Qty units -> Surface3d (space @ units) -> Mesh (Point3d (space @ units))
 toMesh accuracy surface = do
