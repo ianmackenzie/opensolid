@@ -21,7 +21,7 @@ import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Plane3d (Plane3d))
 
-through :: Point3d (space @ units) -> Direction3d space -> Plane3d (space @ units) (Defines local)
+through :: Point3d (space @ units) -> Direction3d space -> Plane3d (space @ units) defines
 through p0 n = Plane3d p0 (Basis3d.fromZDirection n)
 
 xy :: Plane3d (space @ units) (Defines local)

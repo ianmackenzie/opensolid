@@ -1979,8 +1979,8 @@ type Plane3d :: CoordinateSystem -> LocalSpace -> Type
 data Plane3d coordinateSystem defines where
   Plane3d ::
     Point3d (space @ units) ->
-    Basis3d space (Defines local) ->
-    Plane3d (space @ units) (Defines local)
+    Basis3d space defines ->
+    Plane3d (space @ units) defines
 
 ----- Frame3d -----
 
