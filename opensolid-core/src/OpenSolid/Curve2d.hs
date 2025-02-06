@@ -54,6 +54,8 @@ module OpenSolid.Curve2d
   , mirrorAcrossOwn
   , scaleAboutOwn
   , scaleAlongOwn
+  , convert
+  , unconvert
   , curvature
   , curvature'
   , removeStartDegeneracy
@@ -1096,6 +1098,18 @@ scaleAlongOwn ::
   Curve2d (space @ units) ->
   Curve2d (space @ units)
 scaleAlongOwn = Transform2d.scaleAlongOwnImpl transformBy
+
+convert ::
+  Qty (units2 :/: units1) ->
+  Curve2d (space @ units1) ->
+  Curve2d (space @ units2)
+convert factor curve = Units.coerce (scaleAbout Point2d.origin (Units.erase factor) curve)
+
+unconvert ::
+  Qty (units2 :/: units1) ->
+  Curve2d (space @ units2) ->
+  Curve2d (space @ units1)
+unconvert factor curve = convert (1.0 /% factor) curve
 
 curvature' ::
   Tolerance units =>
