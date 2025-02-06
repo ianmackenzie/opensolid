@@ -537,8 +537,9 @@ instance
   direction .<>. function = Vector2d.unit direction .<>. function
 
 instance
+  uvCoordinates ~ UvCoordinates =>
   Composition
-    (Curve2d UvCoordinates)
+    (Curve2d uvCoordinates)
     (VectorSurfaceFunction2d (space @ units))
     (VectorCurve2d (space @ units))
   where
@@ -546,8 +547,9 @@ instance
   function . curve = VectorCurve2d.new (function :.: curve)
 
 instance
+  uvCoordinates ~ UvCoordinates =>
   VectorCurve2d.Interface
-    (VectorSurfaceFunction2d (space @ units) :.: Curve2d UvCoordinates)
+    (VectorSurfaceFunction2d (space @ units) :.: Curve2d uvCoordinates)
     (space @ units)
   where
   evaluateImpl (function :.: curve) tValue =
