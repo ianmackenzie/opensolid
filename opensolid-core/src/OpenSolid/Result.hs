@@ -7,6 +7,8 @@ module OpenSolid.Result
   , onError
   , try
   , collect
+  , foldl
+  , foldr
   , combine
   , (>>=)
   , (>>)
@@ -94,6 +96,20 @@ try result = case result of
 
 collect :: Traversable list => (a -> Result x b) -> list a -> Result x (list b)
 collect = Prelude.mapM
+
+foldl :: (b -> a -> Result x b) -> b -> List a -> Result x b
+foldl _ accumulated [] = Success accumulated
+foldl function accumulated (first : rest) =
+  case function accumulated first of
+    Success updated -> foldl function updated rest
+    failure -> failure
+
+foldr :: (a -> b -> Result x b) -> b -> List a -> Result x b
+foldr _ accumulated [] = Success accumulated
+foldr function accumulated (first : rest) =
+  case foldr function accumulated rest of
+    Success updated -> function first updated
+    failure -> failure
 
 combine :: List (Result x a) -> Result x (List a)
 combine = Prelude.sequence
