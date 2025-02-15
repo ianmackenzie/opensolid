@@ -1,3 +1,6 @@
+Have one generic Error type for Body3d construction?
+-> or have separate error types, and e.g. map BoundedBy.Error to Extruded.Error by calling internalError for 'impossible' errors
+
 Remove Multiplication' instances for direction-related types
 -> shouldn't ever actually be needed...
 -> in general should ideally never need 'units :*: Unitless' or 'Unitless :*: units'
@@ -15,13 +18,16 @@ Enforce frames to always be right-handed
 Switch Plane3d to only store X and Y directions
 -> create PlanarBasis3d type
 
-Add 'centeredOn' constructor to Range and bounding box types
-
 Refactor vector and direction types to have placeIn/relativeTo *only* support Basis#d?
 -> not a big deal to have to call e.g. Frame3d.basis sometimes...and pretty explicit/clean
 -> also removes ugliness with originPointUnits type parameter
 
 Replace Range.from with just Range pattern?
+
+Use direct constructors for primitives in more places
+-> search for 'let (' to find places where coordinates/components are being used (or unnecessary parentheses in general)
+
+General pass to make sure transformation functions are complete and consistent
 
 Create monolithic OpenSolid.Functions module
 
@@ -32,11 +38,6 @@ Verify behaviour of Curve2d intersection when curves are extensions of each othe
 
 Have Domain.samplingPoints etc. return a 'Result InfiniteRecursion (NonEmpty Float)'?
 Export to glTF
-
-Add support for extruded and revolved surfaces
-
-Add support for extruded and revolved bodies
--> need Plane3d... ,
 
 Refactor Surface3d.toMesh to match Body3d
 
