@@ -34,6 +34,7 @@ module OpenSolid.Bounds2d
   , resolve
   , placeIn
   , relativeTo
+  , placeOn
   , transformBy
   , signedDistanceAlong
   , convert
@@ -45,6 +46,7 @@ import OpenSolid.Axis2d (Axis2d)
 import OpenSolid.Axis2d qualified as Axis2d
 import OpenSolid.Direction2d (Direction2d (Direction2d))
 import OpenSolid.Direction2d qualified as Direction2d
+import OpenSolid.Direction3d (Direction3d (Direction3d))
 import OpenSolid.Float qualified as Float
 import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Frame2d qualified as Frame2d
@@ -53,8 +55,15 @@ import OpenSolid.Fuzzy qualified as Fuzzy
 import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
+import OpenSolid.Point3d (Point3d (Point3d))
+import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
-import OpenSolid.Primitives (Bounds2d (Bounds2d))
+import OpenSolid.Primitives
+  ( Basis3d (Basis3d)
+  , Bounds2d (Bounds2d)
+  , Bounds3d (Bounds3d)
+  , Plane3d (Plane3d)
+  )
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Range (Range (Range))
 import OpenSolid.Range qualified as Range
@@ -347,6 +356,24 @@ relativeTo frame (Bounds2d x y) = do
   let rx = 0.5 * xWidth * Float.abs ix + 0.5 * yWidth * Float.abs iy
   let ry = 0.5 * xWidth * Float.abs jx + 0.5 * yWidth * Float.abs jy
   Bounds2d (Range.from (x0 - rx) (x0 + rx)) (Range.from (y0 - ry) (y0 + ry))
+
+placeOn ::
+  Plane3d (space @ units) (Defines local) ->
+  Bounds2d (local @ units) ->
+  Bounds3d (space @ units)
+placeOn plane (Bounds2d x y) = do
+  let Plane3d _ (Basis3d i j _) = plane
+  let Direction3d ix iy iz = i
+  let Direction3d jx jy jz = j
+  let xMid = Range.midpoint x
+  let yMid = Range.midpoint y
+  let xWidth = Range.width x
+  let yWidth = Range.width y
+  let Point3d x0 y0 z0 = Point3d.xyOn plane xMid yMid
+  let rx = 0.5 * xWidth * Float.abs ix + 0.5 * yWidth * Float.abs jx
+  let ry = 0.5 * xWidth * Float.abs iy + 0.5 * yWidth * Float.abs jy
+  let rz = 0.5 * xWidth * Float.abs iz + 0.5 * yWidth * Float.abs jz
+  Bounds3d (Range (x0 - rx) (x0 + rx)) (Range (y0 - ry) (y0 + ry)) (Range (z0 - rz) (z0 + rz))
 
 transformBy ::
   Transform2d tag (space @ units) ->
