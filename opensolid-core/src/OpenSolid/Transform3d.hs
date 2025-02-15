@@ -9,7 +9,7 @@ module OpenSolid.Transform3d
   , translateIn
   , translateAlong
   , rotateAround
-  -- , mirrorAcross
+  , mirrorAcross
   , scaleAbout
   , scaleAlong
   , placeIn
@@ -21,14 +21,14 @@ module OpenSolid.Transform3d
   , translateInImpl
   , translateAlongImpl
   , rotateAroundImpl
-  -- , mirrorAcrossImpl
+  , mirrorAcrossImpl
   , scaleAboutImpl
   , scaleAlongImpl
   , translateByOwnImpl
   , translateInOwnImpl
   , translateAlongOwnImpl
   , rotateAroundOwnImpl
-  -- , mirrorAcrossOwnImpl
+  , mirrorAcrossOwnImpl
   , scaleAboutOwnImpl
   , scaleAlongOwnImpl
   )
@@ -41,8 +41,10 @@ import {-# SOURCE #-} OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude hiding (identity)
 import OpenSolid.Primitives
   ( Axis3d (Axis3d)
+  , Basis3d (Basis3d)
   , Direction3d (Unit3d)
   , Frame3d
+  , Plane3d (Plane3d)
   , Point3d (Point3d)
   , Transform3d (Transform3d)
   , Vector3d (Vector3d)
@@ -128,6 +130,19 @@ scaleAlong (Axis3d originPoint direction) scale = do
   let vz = unitZ + (scale - 1.0) * dz * direction
   withFixedPoint originPoint vx vy vz
 
+mirrorAcross :: Plane3d (space @ units) defines -> Orthonormal (space @ units)
+mirrorAcross (Plane3d p0 (Basis3d _ _ (Unit3d (Vector3d nx ny nz)))) = do
+  let axx = 1.0 - 2.0 * nx * nx
+  let ayy = 1.0 - 2.0 * ny * ny
+  let azz = 1.0 - 2.0 * nz * nz
+  let ayz = -2.0 * ny * nz
+  let axz = -2.0 * nx * nz
+  let axy = -2.0 * nx * ny
+  let vx = Vector3d axx axy axz
+  let vy = Vector3d axy ayy ayz
+  let vz = Vector3d axz ayz azz
+  withFixedPoint p0 vx vy vz
+
 placeIn ::
   Frame3d (global @ units) (Defines local) ->
   Transform3d tag (local @ units) ->
@@ -164,47 +179,47 @@ toAffine = Data.Coerce.coerce
 translateByImpl :: (Rigid (space @ units) -> a -> b) -> Vector3d (space @ units) -> a -> b
 translateByImpl transformBy vector = transformBy (translateBy vector)
 
+translateInImpl :: (Rigid (space @ units) -> a -> b) -> Direction3d space -> Qty units -> a -> b
+translateInImpl transformBy direction distance = transformBy (translateIn direction distance)
+
+translateAlongImpl :: (Rigid (space @ units) -> a -> b) -> Axis3d (space @ units) -> Qty units -> a -> b
+translateAlongImpl transformBy axis distance = transformBy (translateAlong axis distance)
+
+rotateAroundImpl :: (Rigid (space @ units) -> a -> b) -> Axis3d (space @ units) -> Angle -> a -> b
+rotateAroundImpl transformBy axis angle = transformBy (rotateAround axis angle)
+
+mirrorAcrossImpl :: (Orthonormal (space @ units) -> a -> b) -> Plane3d (space @ units) defines -> a -> b
+mirrorAcrossImpl transformBy plane = transformBy (mirrorAcross plane)
+
+scaleAboutImpl :: (Uniform (space @ units) -> a -> b) -> Point3d (space @ units) -> Float -> a -> b
+scaleAboutImpl transformBy centerPoint scale = transformBy (scaleAbout centerPoint scale)
+
+scaleAlongImpl :: (Affine (space @ units) -> a -> b) -> Axis3d (space @ units) -> Float -> a -> b
+scaleAlongImpl transformBy axis scale = transformBy (scaleAlong axis scale)
+
 translateByOwnImpl :: (Rigid (space @ units) -> a -> b) -> (a -> Vector3d (space @ units)) -> a -> b
 translateByOwnImpl transformBy getVector argument =
   transformBy (translateBy (getVector argument)) argument
-
-translateInImpl :: (Rigid (space @ units) -> a -> b) -> Direction3d space -> Qty units -> a -> b
-translateInImpl transformBy direction distance = transformBy (translateIn direction distance)
 
 translateInOwnImpl :: (Rigid (space @ units) -> a -> b) -> (a -> Direction3d space) -> Qty units -> a -> b
 translateInOwnImpl transformBy getDirection distance argument =
   transformBy (translateIn (getDirection argument) distance) argument
 
-translateAlongImpl :: (Rigid (space @ units) -> a -> b) -> Axis3d (space @ units) -> Qty units -> a -> b
-translateAlongImpl transformBy axis distance = transformBy (translateAlong axis distance)
-
 translateAlongOwnImpl :: (Rigid (space @ units) -> a -> b) -> (a -> Axis3d (space @ units)) -> Qty units -> a -> b
 translateAlongOwnImpl transformBy getAxis distance argument =
   transformBy (translateAlong (getAxis argument) distance) argument
-
-rotateAroundImpl :: (Rigid (space @ units) -> a -> b) -> Axis3d (space @ units) -> Angle -> a -> b
-rotateAroundImpl transformBy axis angle = transformBy (rotateAround axis angle)
 
 rotateAroundOwnImpl :: (Rigid (space @ units) -> a -> b) -> (a -> Axis3d (space @ units)) -> Angle -> a -> b
 rotateAroundOwnImpl transformBy getAxis angle argument =
   transformBy (rotateAround (getAxis argument) angle) argument
 
--- mirrorAcrossImpl :: (Orthonormal (space @ units) -> a -> b) -> Axis3d (space @ units) -> a -> b
--- mirrorAcrossImpl transformBy axis = transformBy (mirrorAcross axis)
-
--- mirrorAcrossOwnImpl :: (Orthonormal (space @ units) -> a -> b) -> (a -> Axis3d (space @ units)) -> a -> b
--- mirrorAcrossOwnImpl transformBy getAxis argument =
---   transformBy (mirrorAcross (getAxis argument)) argument
-
-scaleAboutImpl :: (Uniform (space @ units) -> a -> b) -> Point3d (space @ units) -> Float -> a -> b
-scaleAboutImpl transformBy centerPoint scale = transformBy (scaleAbout centerPoint scale)
+mirrorAcrossOwnImpl :: (Orthonormal (space @ units) -> a -> b) -> (a -> Plane3d (space @ units) defines) -> a -> b
+mirrorAcrossOwnImpl transformBy getPlane argument =
+  transformBy (mirrorAcross (getPlane argument)) argument
 
 scaleAboutOwnImpl :: (Uniform (space @ units) -> a -> b) -> (a -> Point3d (space @ units)) -> Float -> a -> b
 scaleAboutOwnImpl transformBy getCenterPoint scale argument =
   transformBy (scaleAbout (getCenterPoint argument) scale) argument
-
-scaleAlongImpl :: (Affine (space @ units) -> a -> b) -> Axis3d (space @ units) -> Float -> a -> b
-scaleAlongImpl transformBy axis scale = transformBy (scaleAlong axis scale)
 
 scaleAlongOwnImpl :: (Affine (space @ units) -> a -> b) -> (a -> Axis3d (space @ units)) -> Float -> a -> b
 scaleAlongOwnImpl transformBy getAxis scale argument =
