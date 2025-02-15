@@ -39,6 +39,7 @@ module OpenSolid.Curve2d
   , yCoordinate
   , placeIn
   , relativeTo
+  , placeOn
   , transformBy
   , translateBy
   , translateIn
@@ -113,6 +114,7 @@ import OpenSolid.Linearization qualified as Linearization
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Parameter qualified as Parameter
+import OpenSolid.Plane3d (Plane3d)
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Polyline2d (Polyline2d (Polyline2d))
@@ -996,6 +998,12 @@ relativeTo ::
   Curve2d (global @ units) ->
   Curve2d (local @ units)
 relativeTo frame = placeIn (Frame2d.inverse frame)
+
+placeOn ::
+  Plane3d (space @ units) (Defines local) ->
+  Curve2d (local @ units) ->
+  Curve3d (space @ units)
+placeOn plane curve = Curve3d.planar plane curve
 
 transformBy ::
   Transform2d tag (space @ units) ->

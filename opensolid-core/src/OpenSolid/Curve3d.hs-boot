@@ -3,6 +3,7 @@ module OpenSolid.Curve3d
   , Interface (..)
   , constant
   , new
+  , planar
   , evaluate
   , evaluateBounds
   , derivative
@@ -85,6 +86,10 @@ instance
 
 constant :: Point3d (space @ units) -> Curve3d (space @ units)
 new :: Interface curve (space @ units) => curve -> Curve3d (space @ units)
+planar ::
+  Plane3d (space @ units) (Defines local) ->
+  Curve2d (local @ units) ->
+  Curve3d (space @ units)
 evaluate :: Curve3d (space @ units) -> Float -> Point3d (space @ units)
 evaluateBounds :: Curve3d (space @ units) -> Range Unitless -> Bounds3d (space @ units)
 derivative :: Curve3d (space @ units) -> VectorCurve3d (space @ units)
