@@ -210,7 +210,7 @@ placeInBasis basis (VectorBounds3d x y z) = do
   let (kx, ky, kz) = Direction3d.components (Basis3d.zDirection basis)
   let rx = 0.5 * xWidth * Float.abs ix + 0.5 * yWidth * Float.abs jx + 0.5 * zWidth * Float.abs kx
   let ry = 0.5 * xWidth * Float.abs iy + 0.5 * yWidth * Float.abs jy + 0.5 * zWidth * Float.abs ky
-  let rz = 0.5 * xWidth * Float.abs iz + 0.5 * zWidth * Float.abs jz + 0.5 * zWidth * Float.abs kz
+  let rz = 0.5 * xWidth * Float.abs iz + 0.5 * yWidth * Float.abs jz + 0.5 * zWidth * Float.abs kz
   VectorBounds3d
     (Range.from (x0 - rx) (x0 + rx))
     (Range.from (y0 - ry) (y0 + ry))
