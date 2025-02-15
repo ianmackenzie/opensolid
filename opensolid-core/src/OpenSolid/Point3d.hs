@@ -26,20 +26,39 @@ module OpenSolid.Point3d
   , convert
   , unconvert
   , transformBy
+  , translateBy
+  , translateIn
+  , translateAlong
+  , rotateAround
+  , mirrorAcross
+  , scaleAbout
+  , scaleAlong
+  , translateByOwn
+  , translateInOwn
+  , translateAlongOwn
+  , rotateAroundOwn
+  , mirrorAcrossOwn
+  , scaleAboutOwn
+  , scaleAlongOwn
   )
 where
 
+import OpenSolid.Angle (Angle)
 import OpenSolid.Length qualified as Length
 import OpenSolid.Prelude
 import OpenSolid.Primitives
-  ( Basis3d (Basis3d)
+  ( Axis3d
+  , Basis3d (Basis3d)
+  , Direction3d
   , Frame3d (Frame3d)
   , Plane3d (Plane3d)
   , Point2d (Point2d)
   , Point3d (Point3d)
   , Transform3d (Transform3d)
+  , Vector3d
   )
 import OpenSolid.Qty qualified as Qty
+import OpenSolid.Transform3d qualified as Transform3d
 import OpenSolid.Units (Meters)
 import OpenSolid.Vector3d qualified as Vector3d
 
@@ -145,3 +164,45 @@ transformBy transform point = do
   let (Transform3d p0 vx vy vz) = transform
   let (px, py, pz) = coordinates point
   p0 + px * vx + py * vy + pz * vz
+
+translateBy :: Vector3d (space @ units) -> Point3d (space @ units) -> Point3d (space @ units)
+translateBy = Transform3d.translateByImpl transformBy
+
+translateIn :: Direction3d space -> Qty units -> Point3d (space @ units) -> Point3d (space @ units)
+translateIn = Transform3d.translateInImpl transformBy
+
+translateAlong :: Axis3d (space @ units) -> Qty units -> Point3d (space @ units) -> Point3d (space @ units)
+translateAlong = Transform3d.translateAlongImpl transformBy
+
+rotateAround :: Axis3d (space @ units) -> Angle -> Point3d (space @ units) -> Point3d (space @ units)
+rotateAround = Transform3d.rotateAroundImpl transformBy
+
+mirrorAcross :: Plane3d (space @ units) defines -> Point3d (space @ units) -> Point3d (space @ units)
+mirrorAcross = Transform3d.mirrorAcrossImpl transformBy
+
+scaleAbout :: Point3d (space @ units) -> Float -> Point3d (space @ units) -> Point3d (space @ units)
+scaleAbout = Transform3d.scaleAboutImpl transformBy
+
+scaleAlong :: Axis3d (space @ units) -> Float -> Point3d (space @ units) -> Point3d (space @ units)
+scaleAlong = Transform3d.scaleAlongImpl transformBy
+
+translateByOwn :: (Point3d (space @ units) -> Vector3d (space @ units)) -> Point3d (space @ units) -> Point3d (space @ units)
+translateByOwn = Transform3d.translateByOwnImpl transformBy
+
+translateInOwn :: (Point3d (space @ units) -> Direction3d space) -> Qty units -> Point3d (space @ units) -> Point3d (space @ units)
+translateInOwn = Transform3d.translateInOwnImpl transformBy
+
+translateAlongOwn :: (Point3d (space @ units) -> Axis3d (space @ units)) -> Qty units -> Point3d (space @ units) -> Point3d (space @ units)
+translateAlongOwn = Transform3d.translateAlongOwnImpl transformBy
+
+rotateAroundOwn :: (Point3d (space @ units) -> Axis3d (space @ units)) -> Angle -> Point3d (space @ units) -> Point3d (space @ units)
+rotateAroundOwn = Transform3d.rotateAroundOwnImpl transformBy
+
+mirrorAcrossOwn :: (Point3d (space @ units) -> Plane3d (space @ units) defines) -> Point3d (space @ units) -> Point3d (space @ units)
+mirrorAcrossOwn = Transform3d.mirrorAcrossOwnImpl transformBy
+
+scaleAboutOwn :: (Point3d (space @ units) -> Point3d (space @ units)) -> Float -> Point3d (space @ units) -> Point3d (space @ units)
+scaleAboutOwn = Transform3d.scaleAboutOwnImpl transformBy
+
+scaleAlongOwn :: (Point3d (space @ units) -> Axis3d (space @ units)) -> Float -> Point3d (space @ units) -> Point3d (space @ units)
+scaleAlongOwn = Transform3d.scaleAlongOwnImpl transformBy
