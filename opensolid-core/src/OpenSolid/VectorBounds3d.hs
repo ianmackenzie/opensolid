@@ -28,19 +28,25 @@ module OpenSolid.VectorBounds3d
   , placeInBasis
   , relativeToBasis
   , transformBy
+  , rotateIn
+  , rotateAround
   )
 where
 
+import OpenSolid.Angle (Angle)
 import OpenSolid.Basis3d (Basis3d)
 import OpenSolid.Basis3d qualified as Basis3d
+import OpenSolid.Direction3d (Direction3d)
 import OpenSolid.Direction3d qualified as Direction3d
 import OpenSolid.Float qualified as Float
+import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
-import OpenSolid.Primitives (Frame3d (Frame3d), VectorBounds3d (VectorBounds3d))
+import OpenSolid.Primitives (Axis3d (Axis3d), Frame3d (Frame3d), VectorBounds3d (VectorBounds3d))
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Range (Range (Range))
 import OpenSolid.Range qualified as Range
 import OpenSolid.Transform3d (Transform3d (Transform3d))
+import OpenSolid.Transform3d qualified as Transform3d
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector3d (Vector3d (Vector3d))
 import OpenSolid.Vector3d qualified as Vector3d
@@ -256,3 +262,17 @@ transformBy transform (VectorBounds3d x y z) = do
     (Range.from (x0 - rx) (x0 + rx))
     (Range.from (y0 - ry) (y0 + ry))
     (Range.from (z0 - rz) (z0 + rz))
+
+rotateIn ::
+  Direction3d space ->
+  Angle ->
+  VectorBounds3d (space @ units) ->
+  VectorBounds3d (space @ units)
+rotateIn axisDirection = rotateAround (Axis3d Point3d.origin axisDirection)
+
+rotateAround ::
+  Axis3d (space @ axisUnits) ->
+  Angle ->
+  VectorBounds3d (space @ units) ->
+  VectorBounds3d (space @ units)
+rotateAround = Transform3d.rotateAroundImpl transformBy
