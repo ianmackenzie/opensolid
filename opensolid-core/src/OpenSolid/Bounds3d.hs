@@ -20,16 +20,20 @@ module OpenSolid.Bounds3d
   , intersection
   , diameter
   , interpolate
+  , placeIn
+  , relativeTo
   , transformBy
   )
 where
 
+import OpenSolid.Direction3d (Direction3d (Direction3d))
 import OpenSolid.Float qualified as Float
+import OpenSolid.Frame3d (Frame3d)
 import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Point3d (Point3d (Point3d))
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
-import OpenSolid.Primitives (Bounds3d (Bounds3d))
+import OpenSolid.Primitives (Basis3d (Basis3d), Bounds3d (Bounds3d), Frame3d (Frame3d))
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Range (Range (Range))
 import OpenSolid.Range qualified as Range
@@ -167,6 +171,48 @@ diameter (Bounds3d x y z) = Qty.hypot3 (Range.width x) (Range.width y) (Range.wi
 interpolate :: Bounds3d (space @ units) -> Float -> Float -> Float -> Point3d (space @ units)
 interpolate (Bounds3d x y z) u v w =
   Point3d (Range.interpolate x u) (Range.interpolate y v) (Range.interpolate z w)
+
+placeIn ::
+  Frame3d (global @ units) (Defines local) ->
+  Bounds3d (local @ units) ->
+  Bounds3d (global @ units)
+placeIn frame (Bounds3d x y z) = do
+  let Frame3d _ (Basis3d i j k) = frame
+  let Direction3d ix iy iz = i
+  let Direction3d jx jy jz = j
+  let Direction3d kx ky kz = k
+  let xMid = Range.midpoint x
+  let yMid = Range.midpoint y
+  let zMid = Range.midpoint z
+  let xWidth = Range.width x
+  let yWidth = Range.width y
+  let zWidth = Range.width z
+  let Point3d x0 y0 z0 = Point3d.placeIn frame (Point3d xMid yMid zMid)
+  let rx = 0.5 * xWidth * Float.abs ix + 0.5 * yWidth * Float.abs jx + 0.5 * zWidth * Float.abs kx
+  let ry = 0.5 * xWidth * Float.abs iy + 0.5 * yWidth * Float.abs jy + 0.5 * zWidth * Float.abs ky
+  let rz = 0.5 * xWidth * Float.abs iz + 0.5 * yWidth * Float.abs jz + 0.5 * zWidth * Float.abs kz
+  Bounds3d (Range (x0 - rx) (x0 + rx)) (Range (y0 - ry) (y0 + ry)) (Range (z0 - rz) (z0 + rz))
+
+relativeTo ::
+  Frame3d (global @ units) (Defines local) ->
+  Bounds3d (global @ units) ->
+  Bounds3d (local @ units)
+relativeTo frame (Bounds3d x y z) = do
+  let Frame3d _ (Basis3d i j k) = frame
+  let Direction3d ix iy iz = i
+  let Direction3d jx jy jz = j
+  let Direction3d kx ky kz = k
+  let xMid = Range.midpoint x
+  let yMid = Range.midpoint y
+  let zMid = Range.midpoint z
+  let xWidth = Range.width x
+  let yWidth = Range.width y
+  let zWidth = Range.width z
+  let Point3d x0 y0 z0 = Point3d.relativeTo frame (Point3d xMid yMid zMid)
+  let rx = 0.5 * xWidth * Float.abs ix + 0.5 * yWidth * Float.abs iy + 0.5 * zWidth * Float.abs iz
+  let ry = 0.5 * xWidth * Float.abs jx + 0.5 * yWidth * Float.abs jy + 0.5 * zWidth * Float.abs jz
+  let rz = 0.5 * xWidth * Float.abs kx + 0.5 * yWidth * Float.abs ky + 0.5 * zWidth * Float.abs kz
+  Bounds3d (Range (x0 - rx) (x0 + rx)) (Range (y0 - ry) (y0 + ry)) (Range (z0 - rz) (z0 + rz))
 
 transformBy ::
   Transform3d tag (space @ units) ->
