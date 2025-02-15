@@ -14,6 +14,7 @@ module OpenSolid.Frame2d
   , fromYAxis
   , placeIn
   , relativeTo
+  , placeOn
   , inverse
   )
 where
@@ -23,10 +24,17 @@ import OpenSolid.Axis2d qualified as Axis2d
 import OpenSolid.Basis2d (Basis2d)
 import OpenSolid.Basis2d qualified as Basis2d
 import OpenSolid.Direction2d (Direction2d)
+import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.Point2d (Point2d)
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
-import OpenSolid.Primitives (Frame2d (Frame2d))
+import OpenSolid.Primitives
+  ( Basis2d (Basis2d)
+  , Basis3d (Basis3d)
+  , Frame2d (Frame2d)
+  , Plane3d (Plane3d)
+  )
+import OpenSolid.Qty qualified as Qty
 
 originPoint :: Frame2d (space @ units) defines -> Point2d (space @ units)
 originPoint (Frame2d p0 _) = p0
@@ -81,6 +89,18 @@ relativeTo globalFrame frame =
   Frame2d
     (Point2d.relativeTo globalFrame (originPoint frame))
     (Basis2d.relativeTo globalFrame (basis frame))
+
+placeOn ::
+  Plane3d (space @ units) (Defines local) ->
+  Frame2d (local @ units) defines ->
+  Plane3d (space @ units) defines
+placeOn plane (Frame2d p0 (Basis2d i j)) = do
+  let Plane3d _ (Basis3d _ _ k) = plane
+  Plane3d (Point2d.placeOn plane p0) $
+    Basis3d
+      (Direction2d.placeOn plane i)
+      (Direction2d.placeOn plane j)
+      (Qty.sign (i >< j) * k)
 
 inverse :: Frame2d (global @ units) (Defines local) -> Frame2d (local @ units) (Defines global)
 inverse frame = xy |> relativeTo frame
