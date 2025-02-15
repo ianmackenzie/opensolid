@@ -14,9 +14,21 @@ module OpenSolid.Plane3d
   , placeIn
   , relativeTo
   , transformBy
+  , translateBy
+  , translateIn
+  , translateAlong
+  , rotateAround
+  , mirrorAcross
+  , translateByOwn
+  , translateInOwn
+  , translateAlongOwn
+  , rotateAroundOwn
+  , mirrorAcrossOwn
   )
 where
 
+import OpenSolid.Angle (Angle)
+import OpenSolid.Axis3d (Axis3d)
 import OpenSolid.Basis3d qualified as Basis3d
 import OpenSolid.Direction3d (Direction3d)
 import OpenSolid.Point3d (Point3d)
@@ -24,6 +36,8 @@ import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Frame3d, Plane3d (Plane3d), Transform3d)
 import OpenSolid.Transform qualified as Transform
+import OpenSolid.Transform3d qualified as Transform3d
+import OpenSolid.Vector3d (Vector3d)
 
 through :: Point3d (space @ units) -> Direction3d space -> Plane3d (space @ units) defines
 through p0 n = Plane3d p0 (Basis3d.fromZDirection n)
@@ -85,3 +99,33 @@ transformBy transform (Plane3d p0 basis) =
   Plane3d
     (Point3d.transformBy transform p0)
     (Basis3d.transformBy transform basis)
+
+translateBy :: Vector3d (space @ units) -> Plane3d (space @ units) defines -> Plane3d (space @ units) defines
+translateBy = Transform3d.translateByImpl transformBy
+
+translateIn :: Direction3d space -> Qty units -> Plane3d (space @ units) defines -> Plane3d (space @ units) defines
+translateIn = Transform3d.translateInImpl transformBy
+
+translateAlong :: Axis3d (space @ units) -> Qty units -> Plane3d (space @ units) defines -> Plane3d (space @ units) defines
+translateAlong = Transform3d.translateAlongImpl transformBy
+
+rotateAround :: Axis3d (space @ units) -> Angle -> Plane3d (space @ units) defines -> Plane3d (space @ units) defines
+rotateAround = Transform3d.rotateAroundImpl transformBy
+
+mirrorAcross :: Plane3d (space @ units) defines -> Plane3d (space @ units) defines -> Plane3d (space @ units) defines
+mirrorAcross = Transform3d.mirrorAcrossImpl transformBy
+
+translateByOwn :: (Plane3d (space @ units) defines -> Vector3d (space @ units)) -> Plane3d (space @ units) defines -> Plane3d (space @ units) defines
+translateByOwn = Transform3d.translateByOwnImpl transformBy
+
+translateInOwn :: (Plane3d (space @ units) defines -> Direction3d space) -> Qty units -> Plane3d (space @ units) defines -> Plane3d (space @ units) defines
+translateInOwn = Transform3d.translateInOwnImpl transformBy
+
+translateAlongOwn :: (Plane3d (space @ units) defines -> Axis3d (space @ units)) -> Qty units -> Plane3d (space @ units) defines -> Plane3d (space @ units) defines
+translateAlongOwn = Transform3d.translateAlongOwnImpl transformBy
+
+rotateAroundOwn :: (Plane3d (space @ units) defines -> Axis3d (space @ units)) -> Angle -> Plane3d (space @ units) defines -> Plane3d (space @ units) defines
+rotateAroundOwn = Transform3d.rotateAroundOwnImpl transformBy
+
+mirrorAcrossOwn :: (Plane3d (space @ units) defines -> Plane3d (space @ units) defines) -> Plane3d (space @ units) defines -> Plane3d (space @ units) defines
+mirrorAcrossOwn = Transform3d.mirrorAcrossOwnImpl transformBy
