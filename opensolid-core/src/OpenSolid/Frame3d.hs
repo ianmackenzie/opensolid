@@ -17,6 +17,15 @@ module OpenSolid.Frame3d
   , xzPlane
   , yzPlane
   , zyPlane
+  , fromXAxis
+  , fromYAxis
+  , fromZAxis
+  , fromXyPlane
+  , fromYxPlane
+  , fromZxPlane
+  , fromXzPlane
+  , fromYzPlane
+  , fromZyPlane
   , handedness
   , placeIn
   , relativeTo
@@ -24,7 +33,7 @@ module OpenSolid.Frame3d
   )
 where
 
-import OpenSolid.Axis3d (Axis3d)
+import OpenSolid.Axis3d (Axis3d (Axis3d))
 import OpenSolid.Axis3d qualified as Axis3d
 import OpenSolid.Basis3d (Basis3d)
 import OpenSolid.Basis3d qualified as Basis3d
@@ -84,6 +93,33 @@ yzPlane (Frame3d p0 (Basis3d i j k)) = Plane3d p0 (Basis3d j k i)
 
 zyPlane :: Frame3d (space @ units) defines1 -> Plane3d (space @ units) defines2
 zyPlane (Frame3d p0 (Basis3d i j k)) = Plane3d p0 (Basis3d k j -i)
+
+fromXAxis :: Axis3d (space @ units) -> Frame3d (space @ units) defines
+fromXAxis (Axis3d p0 d) = Frame3d p0 (Basis3d.fromXDirection d)
+
+fromYAxis :: Axis3d (space @ units) -> Frame3d (space @ units) defines
+fromYAxis (Axis3d p0 d) = Frame3d p0 (Basis3d.fromYDirection d)
+
+fromZAxis :: Axis3d (space @ units) -> Frame3d (space @ units) defines
+fromZAxis (Axis3d p0 d) = Frame3d p0 (Basis3d.fromZDirection d)
+
+fromXyPlane :: Plane3d (space @ units) defines1 -> Frame3d (space @ units) defines2
+fromXyPlane (Plane3d p0 (Basis3d i j k)) = Frame3d p0 (Basis3d i j k)
+
+fromYxPlane :: Plane3d (space @ units) defines1 -> Frame3d (space @ units) defines2
+fromYxPlane (Plane3d p0 (Basis3d i j k)) = Frame3d p0 (Basis3d j i -k)
+
+fromZxPlane :: Plane3d (space @ units) defines1 -> Frame3d (space @ units) defines2
+fromZxPlane (Plane3d p0 (Basis3d i j k)) = Frame3d p0 (Basis3d j k i)
+
+fromXzPlane :: Plane3d (space @ units) defines1 -> Frame3d (space @ units) defines2
+fromXzPlane (Plane3d p0 (Basis3d i j k)) = Frame3d p0 (Basis3d i -k j)
+
+fromYzPlane :: Plane3d (space @ units) defines1 -> Frame3d (space @ units) defines2
+fromYzPlane (Plane3d p0 (Basis3d i j k)) = Frame3d p0 (Basis3d k i j)
+
+fromZyPlane :: Plane3d (space @ units) defines1 -> Frame3d (space @ units) defines2
+fromZyPlane (Plane3d p0 (Basis3d i j k)) = Frame3d p0 (Basis3d -k j i)
 
 handedness :: Frame3d (space @ units) defines -> Sign
 handedness frame = Basis3d.handedness (basis frame)
