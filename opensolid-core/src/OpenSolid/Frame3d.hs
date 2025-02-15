@@ -11,6 +11,12 @@ module OpenSolid.Frame3d
   , xAxis
   , yAxis
   , zAxis
+  , xyPlane
+  , yxPlane
+  , zxPlane
+  , xzPlane
+  , yzPlane
+  , zyPlane
   , handedness
   , placeIn
   , relativeTo
@@ -26,7 +32,7 @@ import OpenSolid.Direction3d (Direction3d)
 import OpenSolid.Point3d (Point3d)
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
-import OpenSolid.Primitives (Frame3d (Frame3d))
+import OpenSolid.Primitives (Basis3d (Basis3d), Frame3d (Frame3d), Plane3d (Plane3d))
 
 originPoint :: Frame3d (space @ units) defines -> Point3d (space @ units)
 originPoint (Frame3d p0 _) = p0
@@ -60,6 +66,24 @@ yAxis frame = Axis3d.through (originPoint frame) (yDirection frame)
 
 zAxis :: Frame3d (space @ units) defines -> Axis3d (space @ units)
 zAxis frame = Axis3d.through (originPoint frame) (zDirection frame)
+
+xyPlane :: Frame3d (space @ units) defines1 -> Plane3d (space @ units) defines2
+xyPlane (Frame3d p0 (Basis3d i j k)) = Plane3d p0 (Basis3d i j k)
+
+yxPlane :: Frame3d (space @ units) defines1 -> Plane3d (space @ units) defines2
+yxPlane (Frame3d p0 (Basis3d i j k)) = Plane3d p0 (Basis3d j i -k)
+
+zxPlane :: Frame3d (space @ units) defines1 -> Plane3d (space @ units) defines2
+zxPlane (Frame3d p0 (Basis3d i j k)) = Plane3d p0 (Basis3d k i j)
+
+xzPlane :: Frame3d (space @ units) defines1 -> Plane3d (space @ units) defines2
+xzPlane (Frame3d p0 (Basis3d i j k)) = Plane3d p0 (Basis3d i k -j)
+
+yzPlane :: Frame3d (space @ units) defines1 -> Plane3d (space @ units) defines2
+yzPlane (Frame3d p0 (Basis3d i j k)) = Plane3d p0 (Basis3d j k i)
+
+zyPlane :: Frame3d (space @ units) defines1 -> Plane3d (space @ units) defines2
+zyPlane (Frame3d p0 (Basis3d i j k)) = Plane3d p0 (Basis3d k j -i)
 
 handedness :: Frame3d (space @ units) defines -> Sign
 handedness frame = Basis3d.handedness (basis frame)
