@@ -4,6 +4,7 @@ module OpenSolid.Curve3d
   , HasDegeneracy (HasDegeneracy)
   , new
   , constant
+  , planar
   , line
   , bezier
   , quadraticBezier
@@ -28,11 +29,14 @@ where
 
 import OpenSolid.ArcLength qualified as ArcLength
 import OpenSolid.Arithmetic qualified as Arithmetic
+import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.Bounds3d (Bounded3d, Bounds3d)
 import OpenSolid.Bounds3d qualified as Bounds3d
 import OpenSolid.Composition
 import OpenSolid.Curve (Curve)
 import OpenSolid.Curve qualified as Curve
+import OpenSolid.Curve2d (Curve2d)
+import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Error qualified as Error
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
@@ -40,6 +44,8 @@ import OpenSolid.Expression.Curve3d qualified as Expression.Curve3d
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Parameter qualified as Parameter
+import OpenSolid.Plane3d (Plane3d)
+import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Point3d (Point3d (Point3d))
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
@@ -97,6 +103,10 @@ data Curve3d (coordinateSystem :: CoordinateSystem) where
   Transformed ::
     Transform3d tag (space @ units) ->
     Curve3d (space @ units) ->
+    Curve3d (space @ units)
+  Planar ::
+    Plane3d (space @ units) (Defines local) ->
+    Curve2d (local @ units) ->
     Curve3d (space @ units)
 
 deriving instance Show (Curve3d (space @ units))
@@ -260,6 +270,12 @@ xyz (Curve.Parametric x) (Curve.Parametric y) (Curve.Parametric z) =
   Parametric (Expression.xyz x y z)
 xyz x y z = XYZ x y z
 
+planar ::
+  Plane3d (space @ units) (Defines local) ->
+  Curve2d (local @ units) ->
+  Curve3d (space @ units)
+planar = Planar
+
 line :: Point3d (space @ units) -> Point3d (space @ units) -> Curve3d (space @ units)
 line p1 p2 = constant p1 + Curve.t * (p2 - p1)
 
@@ -342,6 +358,7 @@ evaluate f tValue = case f of
   Addition c v -> evaluate c tValue + VectorCurve3d.evaluate v tValue
   Subtraction c v -> evaluate c tValue - VectorCurve3d.evaluate v tValue
   Transformed transform c -> Point3d.transformBy transform (evaluate c tValue)
+  Planar plane curve2d -> Point2d.placeOn plane (Curve2d.evaluate curve2d tValue)
 
 evaluateBounds :: Curve3d (space @ units) -> Range Unitless -> Bounds3d (space @ units)
 evaluateBounds f tRange = case f of
@@ -356,6 +373,7 @@ evaluateBounds f tRange = case f of
   Addition c v -> evaluateBounds c tRange + VectorCurve3d.evaluateBounds v tRange
   Subtraction c v -> evaluateBounds c tRange - VectorCurve3d.evaluateBounds v tRange
   Transformed transform c -> Bounds3d.transformBy transform (evaluateBounds c tRange)
+  Planar plane curve2d -> Bounds2d.placeOn plane (Curve2d.evaluateBounds curve2d tRange)
 
 bounds :: Curve3d (space @ units) -> Bounds3d (space @ units)
 bounds curve = evaluateBounds curve Range.unit
@@ -370,6 +388,7 @@ derivative f = case f of
   Addition c v -> derivative c + VectorCurve3d.derivative v
   Subtraction c v -> derivative c - VectorCurve3d.derivative v
   Transformed transform c -> VectorCurve3d.transformBy transform (derivative c)
+  Planar plane curve2d -> VectorCurve3d.planar plane (Curve2d.derivative curve2d)
 
 reverse :: Curve3d (space @ units) -> Curve3d (space @ units)
 reverse f = case f of
@@ -380,6 +399,7 @@ reverse f = case f of
   Addition c v -> reverse c + VectorCurve3d.reverse v
   Subtraction c v -> reverse c - VectorCurve3d.reverse v
   Transformed transform c -> Transformed transform (reverse c)
+  Planar plane curve2d -> Planar plane (Curve2d.reverse curve2d)
 
 arcLengthParameterization ::
   Tolerance units =>
@@ -423,3 +443,4 @@ transformBy transform curve = case curve of
   Subtraction c1 c2 -> transformBy transform c1 - VectorCurve3d.transformBy transform c2
   Transformed existing c ->
     Transformed (Transform3d.toAffine transform . Transform3d.toAffine existing) c
+  Planar{} -> Transformed transform curve

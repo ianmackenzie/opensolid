@@ -12,7 +12,9 @@ where
 
 import OpenSolid.Bounds3d (Bounds3d)
 import OpenSolid.Curve (Curve)
+import {-# SOURCE #-} OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Expression (Expression)
+import OpenSolid.Plane3d (Plane3d)
 import OpenSolid.Point3d (Point3d)
 import OpenSolid.Prelude
 import OpenSolid.Range (Range)
@@ -48,6 +50,10 @@ data Curve3d (coordinateSystem :: CoordinateSystem) where
   Transformed ::
     Transform3d tag (space @ units) ->
     Curve3d (space @ units) ->
+    Curve3d (space @ units)
+  Planar ::
+    Plane3d (space @ units) (Defines local) ->
+    Curve2d (local @ units) ->
     Curve3d (space @ units)
 
 instance Show (Curve3d (space @ units))
