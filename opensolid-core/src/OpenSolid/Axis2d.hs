@@ -8,6 +8,7 @@ module OpenSolid.Axis2d
   , through
   , moveTo
   , reverse
+  , placeOn
   , transformBy
   , translateBy
   , translateByOwn
@@ -29,7 +30,7 @@ import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.Point2d (Point2d)
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
-import OpenSolid.Primitives (Axis2d (Axis2d), Transform2d)
+import OpenSolid.Primitives (Axis2d (Axis2d), Axis3d (Axis3d), Plane3d, Transform2d)
 import OpenSolid.Transform qualified as Transform
 import OpenSolid.Transform2d qualified as Transform2d
 import OpenSolid.Vector2d (Vector2d)
@@ -57,6 +58,12 @@ moveTo newOriginPoint axis = Axis2d newOriginPoint (direction axis)
 
 reverse :: Axis2d (space @ units) -> Axis2d (space @ units)
 reverse (Axis2d p0 d) = Axis2d p0 -d
+
+placeOn ::
+  Plane3d (space @ units) (Defines local) ->
+  Axis2d (local @ units) ->
+  Axis3d (space @ units)
+placeOn plane (Axis2d p0 d) = Axis3d (Point2d.placeOn plane p0) (Direction2d.placeOn plane d)
 
 transformBy ::
   Transform.IsOrthonormal tag =>
