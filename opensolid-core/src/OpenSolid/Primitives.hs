@@ -1973,6 +1973,12 @@ deriving instance Eq (Frame3d (space @ units) defines)
 
 deriving instance Show (Frame3d (space @ units) defines)
 
+instance
+  (space1 ~ space2, defines1 ~ defines2) =>
+  Units.Coercion (Frame3d (space1 @ units1) defines1) (Frame3d (space2 @ units2) defines2)
+  where
+  coerce (Frame3d p0 b) = Frame3d (Units.coerce p0) b
+
 ----- Transform3d -----
 
 type Transform3d :: Type -> CoordinateSystem -> Type
