@@ -803,6 +803,8 @@ deriving instance Eq (Axis2d (space @ units))
 
 deriving instance Show (Axis2d (space @ units))
 
+instance HasUnits (Axis2d (space @ units)) units (Axis2d (space @ Unitless))
+
 instance FFI (Axis2d (space @ Meters)) where
   representation = FFI.classRepresentation "Axis2d"
 
