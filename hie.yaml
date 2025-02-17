@@ -30,6 +30,9 @@ cradle:
     - path: "executables/croissant/Main.hs"
       component: "executables:exe:croissant"
 
+    - path: "executables/funky-moulding/Main.hs"
+      component: "executables:exe:funky-moulding"
+
     - path: "opensolid-api/src"
       component: "lib:opensolid-api"
 

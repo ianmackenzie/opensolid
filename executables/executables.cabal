@@ -126,3 +126,10 @@ executable croissant
   hs-source-dirs: croissant
   build-depends:
     opensolid-core
+
+executable funky-moulding
+  import: config
+  main-is: Main.hs
+  hs-source-dirs: funky-moulding
+  build-depends:
+    opensolid-core
