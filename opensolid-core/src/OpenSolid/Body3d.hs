@@ -4,12 +4,18 @@
 
 module OpenSolid.Body3d
   ( Body3d
+  , extruded
+  , translational
+  , revolved
   , boundedBy
   , toMesh
   )
 where
 
+import OpenSolid.Angle (Angle)
+import OpenSolid.Angle qualified as Angle
 import OpenSolid.Array qualified as Array
+import OpenSolid.Axis2d (Axis2d)
 import OpenSolid.Body3d.BoundedBy qualified as BoundedBy
 import OpenSolid.Bounds2d (Bounded2d, Bounds2d (Bounds2d))
 import OpenSolid.Bounds2d qualified as Bounds2d
@@ -22,6 +28,8 @@ import OpenSolid.Curve3d (Curve3d)
 import OpenSolid.Curve3d qualified as Curve3d
 import OpenSolid.Domain1d qualified as Domain1d
 import OpenSolid.Float qualified as Float
+import OpenSolid.Frame2d qualified as Frame2d
+import OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.LineSegment2d (LineSegment2d)
 import OpenSolid.LineSegment2d qualified as LineSegment2d
 import OpenSolid.Linearization qualified as Linearization
@@ -33,6 +41,8 @@ import OpenSolid.Mesh (Mesh)
 import OpenSolid.Mesh qualified as Mesh
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Parameter qualified as Parameter
+import OpenSolid.Plane3d (Plane3d)
+import OpenSolid.Plane3d qualified as Plane3d
 import OpenSolid.Point2d (Point2d (Point2d))
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Point3d (Point3d)
@@ -43,6 +53,7 @@ import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Range (Range (Range))
 import OpenSolid.Range qualified as Range
+import OpenSolid.Region2d (Region2d)
 import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Result qualified as Result
 import OpenSolid.Set2d (Set2d)
@@ -51,6 +62,7 @@ import OpenSolid.Set3d (Set3d)
 import OpenSolid.Set3d qualified as Set3d
 import OpenSolid.Surface3d (Surface3d)
 import OpenSolid.Surface3d qualified as Surface3d
+import OpenSolid.SurfaceFunction qualified as SurfaceFunction
 import OpenSolid.SurfaceFunction3d (SurfaceFunction3d)
 import OpenSolid.SurfaceFunction3d qualified as SurfaceFunction3d
 import OpenSolid.SurfaceLinearization qualified as SurfaceLinearization
@@ -180,6 +192,76 @@ data Corner (coordinateSystem :: CoordinateSystem) where
 
 instance Bounded3d (Corner (space @ units)) (space @ units) where
   bounds Corner{point} = Bounds3d.constant point
+
+extruded ::
+  Tolerance units =>
+  Plane3d (space @ units) (Defines local) ->
+  Region2d (local @ units) ->
+  Range units ->
+  Result BoundedBy.Error (Body3d (space @ units))
+extruded sketchPlane profile (Range d1 d2) = do
+  let normal = Plane3d.normalDirection sketchPlane
+  let v1 = d1 * normal
+  let v2 = d2 * normal
+  translational sketchPlane profile (VectorCurve3d.line v1 v2)
+
+translational ::
+  Tolerance units =>
+  Plane3d (space @ units) (Defines local) ->
+  Region2d (local @ units) ->
+  VectorCurve3d (space @ units) ->
+  Result BoundedBy.Error (Body3d (space @ units))
+translational sketchPlane profile displacement = do
+  let v0 = VectorCurve3d.startValue displacement
+  let v1 = VectorCurve3d.endValue displacement
+  let startPlane = Plane3d.translateBy v0 sketchPlane
+  let endPlane = Plane3d.translateBy v1 sketchPlane
+  let startCap = Surface3d.planar startPlane profile
+  let endCap = Surface3d.planar endPlane profile
+  let sideSurface curve = Surface3d.translational (Curve2d.placeOn sketchPlane curve) displacement
+  let sideSurfaces = List.map sideSurface (NonEmpty.toList (Region2d.boundaryCurves profile))
+  let initialDerivative = VectorCurve3d.startValue (VectorCurve3d.derivative displacement)
+  case Qty.sign (initialDerivative <> Plane3d.normalDirection sketchPlane) of
+    Positive -> boundedBy (endCap : startCap : sideSurfaces)
+    Negative -> boundedBy (startCap : endCap : sideSurfaces)
+
+revolved ::
+  Tolerance units =>
+  Plane3d (space @ units) (Defines local) ->
+  Region2d (local @ units) ->
+  Axis2d (local @ units) ->
+  Angle ->
+  Result BoundedBy.Error (Body3d (space @ units))
+revolved sketchPlane profile axis givenAngle = do
+  let frame2d = Frame2d.fromYAxis axis
+  let frame3d = Frame3d.fromXzPlane (Frame2d.placeOn sketchPlane frame2d)
+  let axis3d = Frame3d.zAxis frame3d
+  let endPlane = Plane3d.rotateAround axis3d givenAngle sketchPlane
+  let startCap = Surface3d.planar sketchPlane profile
+  let endCap = Surface3d.planar endPlane profile
+  let testPoint = Curve2d.startPoint (NonEmpty.first (Region2d.outerLoop profile))
+  let testPointSign = Qty.sign (Point2d.signedDistanceFrom axis testPoint)
+  let localProfile = Region2d.relativeTo frame2d profile
+  let maxRadius = Range.maxAbs (Bounds2d.xCoordinate (Region2d.bounds localProfile))
+  let angleTolerance = Angle.radians (?tolerance / maxRadius)
+  let isFullRevolution = Tolerance.using angleTolerance (Qty.abs givenAngle ~= Angle.fullTurn)
+  let normalizedAngle = if isFullRevolution then testPointSign * Angle.fullTurn else givenAngle
+  let sideSurface localCurve = do
+        let r = Curve2d.xCoordinate localCurve . SurfaceFunction.u
+        let h = Curve2d.yCoordinate localCurve . SurfaceFunction.u
+        let theta = SurfaceFunction.v * normalizedAngle
+        let xLocal = r * SurfaceFunction.cos theta
+        let yLocal = r * SurfaceFunction.sin theta
+        let zLocal = h
+        let localFunction = SurfaceFunction3d.xyz xLocal yLocal zLocal
+        let globalFunction = SurfaceFunction3d.placeIn frame3d localFunction
+        Surface3d.parametric globalFunction Region2d.unit
+  let sideSurfaces = List.map sideSurface (NonEmpty.toList (Region2d.boundaryCurves localProfile))
+  if isFullRevolution
+    then boundedBy sideSurfaces
+    else case Qty.sign givenAngle * testPointSign of
+      Positive -> boundedBy (endCap : startCap : sideSurfaces)
+      Negative -> boundedBy (startCap : endCap : sideSurfaces)
 
 boundedBy ::
   Tolerance units =>
