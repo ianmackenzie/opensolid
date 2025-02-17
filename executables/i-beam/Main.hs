@@ -16,7 +16,6 @@ import OpenSolid.Prelude
 import OpenSolid.Range (Range (Range))
 import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Scene3d qualified as Scene3d
-import OpenSolid.Scene3d.Material qualified as Material
 import OpenSolid.Tolerance qualified as Tolerance
 
 main :: IO ()
@@ -45,7 +44,6 @@ main = Tolerance.using Length.nanometer IO.do
   body <- Body3d.extruded Plane3d.yz profile (Range (-0.5 * length) (0.5 * length))
   let meshConstraints = NonEmpty.one (Mesh.maxError (Length.millimeters 1.0))
   let mesh = Body3d.toMesh meshConstraints body
-  let color = Color.rgb 0.913 0.921 0.925
-  let material = Material.metal color 0.3
-  let entity = Scene3d.mesh mesh material
+  let material = Scene3d.metal (Color.rgb 0.913 0.921 0.925) 0.3
+  let entity = Scene3d.mesh material mesh
   Scene3d.writeGlb "executables/i-beam/mesh.glb" Plane3d.xy [entity]

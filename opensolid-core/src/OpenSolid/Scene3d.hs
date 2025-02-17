@@ -1,10 +1,13 @@
 module OpenSolid.Scene3d
   ( Entity
+  , Material
   , mesh
   , group
   , transformBy
   , placeIn
   , relativeTo
+  , metal
+  , nonmetal
   , toGlb
   , writeGlb
   )
@@ -16,6 +19,7 @@ import Data.Monoid qualified
 import OpenSolid.Array qualified as Array
 import OpenSolid.Bounds3d (Bounds3d (Bounds3d))
 import OpenSolid.Bounds3d qualified as Bounds3d
+import OpenSolid.Color (Color)
 import OpenSolid.Frame3d (Frame3d)
 import OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.Int qualified as Int
@@ -29,18 +33,16 @@ import OpenSolid.Plane3d (Plane3d)
 import OpenSolid.Prelude
 import OpenSolid.Range (Range (Range))
 import OpenSolid.Scene3d.Gltf qualified as Gltf
-import OpenSolid.Scene3d.Material (Material)
-import OpenSolid.Scene3d.Material qualified as Material
 import OpenSolid.Text qualified as Text
 import OpenSolid.Transform3d qualified as Transform3d
 import OpenSolid.Units (Meters)
-import OpenSolid.Vertex3d (Vertex3d)
+import OpenSolid.Vertex3d qualified as Vertex3d
 
 data Entity space where
   Mesh ::
-    Vertex3d vertex (space @ Meters) =>
+    Vertex3d.HasNormal vertex (space @ Meters) =>
+    Material ->
     Mesh vertex ->
-    Material vertex ->
     Entity space
   Group ::
     List (Entity space) ->
@@ -50,9 +52,15 @@ data Entity space where
     Entity local ->
     Entity global
 
+data Material = Material
+  { baseColor :: Color
+  , roughness :: Float
+  , metallic :: Float
+  }
+
 data Ground
 
-mesh :: Vertex3d vertex (space @ Meters) => Mesh vertex -> Material vertex -> Entity space
+mesh :: Vertex3d.HasNormal vertex (space @ Meters) => Material -> Mesh vertex -> Entity space
 mesh = Mesh
 
 group :: List (Entity space) -> Entity space
@@ -68,6 +76,12 @@ placeIn frame entity = Placed frame entity
 
 relativeTo :: Frame3d (global @ Meters) (Defines local) -> Entity global -> Entity local
 relativeTo frame = placeIn (Frame3d.inverse frame)
+
+metal :: Color -> Float -> Material
+metal baseColor roughness = Material{baseColor, roughness, metallic = 1.0}
+
+nonmetal :: Color -> Float -> Material
+nonmetal baseColor roughness = Material{baseColor, roughness, metallic = 0.0}
 
 toGlb :: Plane3d (space @ Meters) (Defines Ground) -> List (Entity space) -> Builder
 toGlb groundPlane givenEntities = do
@@ -212,7 +226,7 @@ gltfMeshes ::
   Entity space ->
   List (GltfMesh global)
 gltfMeshes parentFrame entity = case entity of
-  Mesh smoothMesh Material.Pbr{baseColor, roughness, metallic} -> do
+  Mesh Material{baseColor, roughness, metallic} smoothMesh -> do
     let vertices = Mesh.vertices smoothMesh
     let numVertices = Array.length vertices
     let faceIndices = Mesh.faceIndices smoothMesh

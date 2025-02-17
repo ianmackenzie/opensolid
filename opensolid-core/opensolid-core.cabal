@@ -182,7 +182,6 @@ library
     OpenSolid.Result
     OpenSolid.Scene3d
     OpenSolid.Scene3d.Gltf
-    OpenSolid.Scene3d.Material
     OpenSolid.Set2d
     OpenSolid.Set3d
     OpenSolid.Sign
