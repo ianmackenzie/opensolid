@@ -61,6 +61,7 @@ namedPattern (argName, argType) = do
 
 typePattern :: FFI.Type -> Text
 typePattern ffiType = case ffiType of
+  FFI.Unit -> "None"
   FFI.Int -> "int()"
   FFI.Float -> "float() | int()"
   FFI.Bool -> "bool()"

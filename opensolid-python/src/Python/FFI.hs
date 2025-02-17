@@ -20,6 +20,7 @@ import Python.Type.Registry qualified
 
 typeName :: FFI.Type -> Text
 typeName ffiType = case ffiType of
+  FFI.Unit -> "c_int64"
   FFI.Int -> "c_int64"
   FFI.Float -> "c_double"
   FFI.Bool -> "c_int64"
@@ -34,6 +35,7 @@ typeName ffiType = case ffiType of
 
 typeNameComponent :: FFI.Type -> Text
 typeNameComponent ffiType = case ffiType of
+  FFI.Unit -> "c_int64"
   FFI.Int -> "c_int64"
   FFI.Float -> "c_double"
   FFI.Bool -> "c_int64"
@@ -55,6 +57,7 @@ dummyValue ffiType = typeName ffiType + "()"
 
 dummyFieldValue :: FFI.Type -> Text
 dummyFieldValue ffiType = case ffiType of
+  FFI.Unit -> "0"
   FFI.Int -> "0"
   FFI.Float -> "0.0"
   FFI.Bool -> "0"
@@ -81,6 +84,7 @@ structDeclaration name fieldTypes = do
 
 outputValue :: FFI.Type -> Text -> Text
 outputValue ffiType varName = case ffiType of
+  FFI.Unit -> "None"
   FFI.Int -> varName + ".value"
   FFI.Float -> varName + ".value"
   FFI.Bool -> "bool(" + varName + ".value)"
@@ -95,6 +99,7 @@ outputValue ffiType varName = case ffiType of
 
 fieldOutputValue :: FFI.Type -> Text -> Text
 fieldOutputValue ffiType varName = case ffiType of
+  FFI.Unit -> "None"
   FFI.Int -> varName
   FFI.Float -> varName
   FFI.Bool -> "bool(" + varName + ")"
@@ -139,6 +144,7 @@ argumentValue arguments@((_, type1) : (_, type2) : rest) = do
 
 singleArgument :: Text -> FFI.Type -> Text
 singleArgument varName ffiType = case ffiType of
+  FFI.Unit -> "c_int64()"
   FFI.Int -> "c_int64(" + varName + ")"
   FFI.Float -> "c_double(" + varName + ")"
   FFI.Bool -> "c_int64(" + varName + ")"
@@ -153,6 +159,7 @@ singleArgument varName ffiType = case ffiType of
 
 fieldArgumentValue :: Text -> FFI.Type -> Text
 fieldArgumentValue varName ffiType = case ffiType of
+  FFI.Unit -> "0"
   FFI.Int -> varName
   FFI.Float -> varName
   FFI.Bool -> varName
@@ -196,6 +203,7 @@ registerType ffiType registry = do
   if Python.Type.Registry.contains name registry
     then registry
     else case ffiType of
+      FFI.Unit -> registry
       FFI.Int -> registry
       FFI.Float -> registry
       FFI.Bool -> registry

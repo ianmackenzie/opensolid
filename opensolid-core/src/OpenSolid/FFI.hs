@@ -71,6 +71,8 @@ snakeCase :: Name -> Text
 snakeCase (Name components) = Text.join "_" (List.map Text.toLower (NonEmpty.toList components))
 
 data Representation a where
+  -- The unit value, always encoded as a 64-bit signed integer zero
+  UnitRep :: Representation ()
   -- A 64-bit integer
   IntRep :: Representation Int
   -- A 64-bit float
@@ -103,6 +105,8 @@ data Representation a where
   ResultRep :: FFI a => Representation (Result x a)
   -- A class containing an opaque pointer to a Haskell value
   ClassRep :: FFI a => Id a -> Representation a
+  -- Some IO that returns a representable value
+  IORep :: FFI a => Representation (IO a)
 
 classId :: FFI a => Proxy a -> Text -> Id a
 classId proxy givenName =
@@ -121,6 +125,7 @@ nestedClassRepresentation parentName childName proxy =
   ClassRep (nestedClassId proxy parentName childName)
 
 data Type where
+  Unit :: Type
   Int :: Type
   Float :: Type
   Bool :: Type
@@ -138,6 +143,7 @@ data Id a where
 
 typeOf :: FFI a => Proxy a -> Type
 typeOf proxy = case representation proxy of
+  UnitRep -> Unit
   IntRep -> Int
   FloatRep -> Float
   BoolRep -> Bool
@@ -153,6 +159,7 @@ typeOf proxy = case representation proxy of
   MaybeRep -> maybeType proxy
   ResultRep -> resultType proxy
   ClassRep id -> Class id
+  IORep -> ioResultType proxy
 
 listType :: forall a. FFI a => Proxy (List a) -> Type
 listType _ = List (typeOf @a Proxy)
@@ -207,8 +214,12 @@ maybeType _ = Maybe (typeOf @a Proxy)
 resultType :: forall x a. FFI a => Proxy (Result x a) -> Type
 resultType _ = Result (typeOf @a Proxy)
 
+ioResultType :: forall a. FFI a => Proxy (IO a) -> Type
+ioResultType _ = Result (typeOf @a Proxy)
+
 typeName :: Type -> Text
 typeName ffiType = case ffiType of
+  Unit -> "Unit"
   Int -> "Int"
   Float -> "Float"
   Bool -> "Bool"
@@ -230,6 +241,7 @@ className (Id _ classNames) =
 
 size :: Type -> Int
 size ffiType = case ffiType of
+  Unit -> 8
   Int -> 8
   Float -> 8
   Bool -> 8
@@ -241,6 +253,9 @@ size ffiType = case ffiType of
   Maybe valueType -> 8 + size valueType
   Result valueType -> 16 + size valueType
   Class _ -> 8
+
+instance FFI () where
+  representation _ = UnitRep
 
 instance FFI Float where
   representation _ = FloatRep
@@ -296,10 +311,14 @@ instance FFI a => FFI (Maybe a) where
 instance FFI a => FFI (Result x a) where
   representation _ = ResultRep
 
+instance FFI a => FFI (IO a) where
+  representation _ = IORep
+
 store :: forall parent value. FFI value => Ptr parent -> Int -> value -> IO ()
 store ptr offset value = do
   let proxy = Proxy @value
   case representation proxy of
+    UnitRep -> Foreign.pokeByteOff ptr offset (Int.toInt64 0)
     IntRep -> Foreign.pokeByteOff ptr offset (Int.toInt64 value)
     FloatRep -> Foreign.pokeByteOff ptr offset (Float.toDouble value)
     BoolRep -> Foreign.pokeByteOff ptr offset (Int.toInt64 (if value then 1 else 0))
@@ -391,11 +410,15 @@ store ptr offset value = do
     ClassRep _ -> IO.do
       stablePtr <- Foreign.newStablePtr value
       Foreign.pokeByteOff ptr offset stablePtr
+    IORep -> IO.do
+      result <- IO.attempt value
+      store ptr offset result
 
 load :: forall parent value. FFI value => Ptr parent -> Int -> IO value
 load ptr offset = do
   let proxy = Proxy @value
   case representation proxy of
+    UnitRep -> IO.succeed ()
     IntRep -> IO.map Int.fromInt64 (Foreign.peekByteOff ptr offset)
     FloatRep -> IO.map Float.fromDouble (Foreign.peekByteOff ptr offset)
     BoolRep -> IO.map ((/=) 0 . Int.fromInt64) (Foreign.peekByteOff ptr offset)
@@ -479,6 +502,7 @@ load ptr offset = do
     ClassRep _ -> IO.do
       stablePtr <- Foreign.peekByteOff ptr offset
       Foreign.deRefStablePtr stablePtr
+    IORep -> internalError "Passing IO values as FFI arguments is not supported"
 
 listItemSize :: forall item. FFI item => Proxy (List item) -> Int
 listItemSize _ = size (typeOf @item Proxy)
