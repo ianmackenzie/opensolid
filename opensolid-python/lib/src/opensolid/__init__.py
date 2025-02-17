@@ -194,6 +194,115 @@ class _List_c_void_p(Structure):
     _fields_ = [("field0", c_int64), ("field1", POINTER(c_void_p))]
 
 
+class _Tuple3_Text_c_void_p_List_c_void_p(Structure):
+    _fields_ = [("field0", _Text), ("field1", c_void_p), ("field2", _List_c_void_p)]
+
+
+class _Result_c_int64(Structure):
+    _fields_ = [("field0", c_int64), ("field1", _Text), ("field2", c_int64)]
+
+
+class _Tuple2_c_void_p_c_double(Structure):
+    _fields_ = [("field0", c_void_p), ("field1", c_double)]
+
+
+class _Tuple4_c_void_p_List_c_void_p_c_void_p_c_void_p(Structure):
+    _fields_ = [
+        ("field0", c_void_p),
+        ("field1", _List_c_void_p),
+        ("field2", c_void_p),
+        ("field3", c_void_p),
+    ]
+
+
+class _Tuple5_c_void_p_c_void_p_c_void_p_c_void_p_c_void_p(Structure):
+    _fields_ = [
+        ("field0", c_void_p),
+        ("field1", c_void_p),
+        ("field2", c_void_p),
+        ("field3", c_void_p),
+        ("field4", c_void_p),
+    ]
+
+
+class _Result_c_void_p(Structure):
+    _fields_ = [("field0", c_int64), ("field1", _Text), ("field2", c_void_p)]
+
+
+class _Tuple4_c_void_p_c_void_p_c_void_p_c_void_p(Structure):
+    _fields_ = [
+        ("field0", c_void_p),
+        ("field1", c_void_p),
+        ("field2", c_void_p),
+        ("field3", c_void_p),
+    ]
+
+
+class _Tuple3_c_void_p_c_void_p_c_void_p(Structure):
+    _fields_ = [("field0", c_void_p), ("field1", c_void_p), ("field2", c_void_p)]
+
+
+class _Tuple3_c_void_p_c_double_c_void_p(Structure):
+    _fields_ = [("field0", c_void_p), ("field1", c_double), ("field2", c_void_p)]
+
+
+class _Tuple2_c_void_p_c_void_p(Structure):
+    _fields_ = [("field0", c_void_p), ("field1", c_void_p)]
+
+
+class _List_List_c_void_p(Structure):
+    _fields_ = [("field0", c_int64), ("field1", POINTER(_List_c_void_p))]
+
+
+class _Tuple2_c_double_List_c_void_p(Structure):
+    _fields_ = [("field0", c_double), ("field1", _List_c_void_p)]
+
+
+class _Tuple2_c_void_p_List_c_void_p(Structure):
+    _fields_ = [("field0", c_void_p), ("field1", _List_c_void_p)]
+
+
+class _Tuple2_c_double_c_void_p(Structure):
+    _fields_ = [("field0", c_double), ("field1", c_void_p)]
+
+
+class _Tuple4_c_void_p_List_c_void_p_c_void_p_List_c_void_p(Structure):
+    _fields_ = [
+        ("field0", c_void_p),
+        ("field1", _List_c_void_p),
+        ("field2", c_void_p),
+        ("field3", _List_c_void_p),
+    ]
+
+
+class _Tuple5_c_double_c_void_p_c_void_p_c_void_p_c_double(Structure):
+    _fields_ = [
+        ("field0", c_double),
+        ("field1", c_void_p),
+        ("field2", c_void_p),
+        ("field3", c_void_p),
+        ("field4", c_double),
+    ]
+
+
+class _Tuple4_c_void_p_c_double_c_void_p_c_void_p(Structure):
+    _fields_ = [
+        ("field0", c_void_p),
+        ("field1", c_double),
+        ("field2", c_void_p),
+        ("field3", c_void_p),
+    ]
+
+
+class _Tuple4_c_double_c_void_p_c_void_p_c_void_p(Structure):
+    _fields_ = [
+        ("field0", c_double),
+        ("field1", c_void_p),
+        ("field2", c_void_p),
+        ("field3", c_void_p),
+    ]
+
+
 class _Tuple3_List_c_void_p_c_void_p_c_void_p(Structure):
     _fields_ = [("field0", _List_c_void_p), ("field1", c_void_p), ("field2", c_void_p)]
 
@@ -202,32 +311,12 @@ class _Tuple2_List_c_void_p_List_c_void_p(Structure):
     _fields_ = [("field0", _List_c_void_p), ("field1", _List_c_void_p)]
 
 
-class _Tuple2_c_void_p_List_c_void_p(Structure):
-    _fields_ = [("field0", c_void_p), ("field1", _List_c_void_p)]
-
-
-class _Tuple2_c_void_p_c_void_p(Structure):
-    _fields_ = [("field0", c_void_p), ("field1", c_void_p)]
-
-
-class _Tuple2_c_void_p_c_double(Structure):
-    _fields_ = [("field0", c_void_p), ("field1", c_double)]
-
-
-class _Tuple2_c_double_c_void_p(Structure):
-    _fields_ = [("field0", c_double), ("field1", c_void_p)]
-
-
 class _Result_List_c_void_p(Structure):
     _fields_ = [("field0", c_int64), ("field1", _Text), ("field2", _List_c_void_p)]
 
 
 class _Tuple2_c_double_c_double(Structure):
     _fields_ = [("field0", c_double), ("field1", c_double)]
-
-
-class _Result_c_void_p(Structure):
-    _fields_ = [("field0", c_int64), ("field1", _Text), ("field2", c_void_p)]
 
 
 class _Tuple3_c_int64_c_int64_c_int64(Structure):
@@ -4444,6 +4533,10 @@ class Point2d:
     def __sub__(self, rhs: Displacement2d) -> Point2d:
         pass
 
+    @overload
+    def __sub__(self, rhs: Curve2d) -> DisplacementCurve2d:
+        pass
+
     def __sub__(self, rhs):
         """Return ``self - rhs``."""
         match rhs:
@@ -4461,6 +4554,13 @@ class Point2d:
                     ctypes.byref(inputs), ctypes.byref(output)
                 )
                 return Point2d(ptr=output)
+            case Curve2d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Point2d_sub_Point2d_Curve2d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return DisplacementCurve2d(ptr=output)
             case _:
                 return NotImplemented
 
@@ -6055,6 +6155,25 @@ class Drawing2d:
         return Drawing2d.Entity(ptr=output)
 
     @staticmethod
+    def curve(
+        attributes: list[Drawing2d.Attribute], max_error: Length, curve: Curve2d
+    ) -> Drawing2d.Entity:
+        """Draw a curve with the given attributes and accuracy."""
+        inputs = _Tuple3_List_c_void_p_c_void_p_c_void_p(
+            _list_argument(
+                _List_c_void_p,
+                (c_void_p * len(attributes))(*[item._ptr for item in attributes]),
+            ),
+            max_error._ptr,
+            curve._ptr,
+        )
+        output = c_void_p()
+        _lib.opensolid_Drawing2d_curve_ListDrawing2dAttribute_Length_Curve2d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Drawing2d.Entity(ptr=output)
+
+    @staticmethod
     def stroke_color(color: Color) -> Drawing2d.Attribute:
         """Set the stroke color for curves and borders."""
         inputs = color._ptr
@@ -6086,6 +6205,1447 @@ class Drawing2d:
 
     class Attribute:
         """A drawing attribute such as fill color or stroke width."""
+
+        def __init__(self, *, ptr: c_void_p) -> None:
+            self._ptr = ptr
+
+        def __del__(self) -> None:
+            """Free the underlying Haskell value."""
+            _lib.opensolid_release(self._ptr)
+
+
+class Axis2d:
+    """An axis in 2D, defined by an origin point and direction."""
+
+    def __init__(self, *, ptr: c_void_p) -> None:
+        self._ptr = ptr
+
+    def __del__(self) -> None:
+        """Free the underlying Haskell value."""
+        _lib.opensolid_release(self._ptr)
+
+    x: Axis2d = None  # type: ignore[assignment]
+    """The X axis."""
+
+    y: Axis2d = None  # type: ignore[assignment]
+    """The Y axis."""
+
+    def mirror_across(self, axis: Axis2d) -> Axis2d:
+        """Mirror across the given axis."""
+        inputs = _Tuple2_c_void_p_c_void_p(axis._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Axis2d_mirrorAcross_Axis2d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Axis2d(ptr=output)
+
+    def translate_by(self, displacement: Displacement2d) -> Axis2d:
+        """Translate by the given displacement."""
+        inputs = _Tuple2_c_void_p_c_void_p(displacement._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Axis2d_translateBy_Displacement2d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Axis2d(ptr=output)
+
+    def translate_in(self, direction: Direction2d, distance: Length) -> Axis2d:
+        """Translate in the given direction by the given distance."""
+        inputs = _Tuple3_c_void_p_c_void_p_c_void_p(
+            direction._ptr, distance._ptr, self._ptr
+        )
+        output = c_void_p()
+        _lib.opensolid_Axis2d_translateIn_Direction2d_Length(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Axis2d(ptr=output)
+
+    def translate_along(self, axis: Axis2d, distance: Length) -> Axis2d:
+        """Translate along the given axis by the given distance."""
+        inputs = _Tuple3_c_void_p_c_void_p_c_void_p(axis._ptr, distance._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Axis2d_translateAlong_Axis2d_Length(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Axis2d(ptr=output)
+
+    def rotate_around(self, point: Point2d, angle: Angle) -> Axis2d:
+        """Rotate around the given point by the given angle."""
+        inputs = _Tuple3_c_void_p_c_void_p_c_void_p(point._ptr, angle._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Axis2d_rotateAround_Point2d_Angle(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Axis2d(ptr=output)
+
+
+class UvAxis:
+    """An axis in 2D, defined by an origin point and direction."""
+
+    def __init__(self, *, ptr: c_void_p) -> None:
+        self._ptr = ptr
+
+    def __del__(self) -> None:
+        """Free the underlying Haskell value."""
+        _lib.opensolid_release(self._ptr)
+
+    u: Axis2d = None  # type: ignore[assignment]
+    """The U axis."""
+
+    v: Axis2d = None  # type: ignore[assignment]
+    """The V axis."""
+
+
+class Plane3d:
+    """A plane in 3D, defined by an origin point and two perpendicular X and Y directions.
+
+    The normal direction  of the plane is then defined as
+    the cross product of its X and Y directions.
+    """
+
+    def __init__(self, *, ptr: c_void_p) -> None:
+        self._ptr = ptr
+
+    def __del__(self) -> None:
+        """Free the underlying Haskell value."""
+        _lib.opensolid_release(self._ptr)
+
+    xy: Plane3d = None  # type: ignore[assignment]
+    """The XY plane.
+
+    A plane whose X direction is the global X direction
+    and whose Y direction is the global Y direction.
+    """
+
+    yx: Plane3d = None  # type: ignore[assignment]
+    """The YX plane.
+
+    A plane whose X direction is the global Y direction
+    and whose Y direction is the global X direction.
+    """
+
+    zx: Plane3d = None  # type: ignore[assignment]
+    """The ZX plane.
+
+    A plane whose X direction is the global Z direction
+    and whose Y direction is the global X direction.
+    """
+
+    xz: Plane3d = None  # type: ignore[assignment]
+    """The XZ plane.
+
+    A plane whose X direction is the global X direction
+    and whose Y direction is the global Z direction.
+    """
+
+    yz: Plane3d = None  # type: ignore[assignment]
+    """The YZ plane.
+
+    A plane whose X direction is the global Y direction
+    and whose Y direction is the global Z direction.
+    """
+
+    zy: Plane3d = None  # type: ignore[assignment]
+    """The ZY plane.
+
+    A plane whose X direction is the global Z direction
+    and whose Y direction is the global Y direction.
+    """
+
+
+class VectorCurve2d:
+    """A parametric curve defining a 2D unitless vector in terms of a parameter value."""
+
+    def __init__(self, *, ptr: c_void_p) -> None:
+        self._ptr = ptr
+
+    def __del__(self) -> None:
+        """Free the underlying Haskell value."""
+        _lib.opensolid_release(self._ptr)
+
+    zero: VectorCurve2d = None  # type: ignore[assignment]
+    """The constant zero vector."""
+
+    @staticmethod
+    def constant(value: Vector2d) -> VectorCurve2d:
+        """Create a curve with a constant value."""
+        inputs = value._ptr
+        output = c_void_p()
+        _lib.opensolid_VectorCurve2d_constant_Vector2d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return VectorCurve2d(ptr=output)
+
+    @staticmethod
+    def xy(x_component: Curve, y_component: Curve) -> VectorCurve2d:
+        """Create a curve from its X and Y component curves."""
+        inputs = _Tuple2_c_void_p_c_void_p(x_component._ptr, y_component._ptr)
+        output = c_void_p()
+        _lib.opensolid_VectorCurve2d_xy_Curve_Curve(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return VectorCurve2d(ptr=output)
+
+    def evaluate(self, parameter_value: float) -> Vector2d:
+        """Evaluate a curve at a given parameter value.
+
+        The parameter value should be between 0 and 1.
+        """
+        inputs = _Tuple2_c_double_c_void_p(parameter_value, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_VectorCurve2d_evaluate_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Vector2d(ptr=output)
+
+
+class DisplacementCurve2d:
+    """A parametric curve defining a 2D displacement vector in terms of a parameter value."""
+
+    def __init__(self, *, ptr: c_void_p) -> None:
+        self._ptr = ptr
+
+    def __del__(self) -> None:
+        """Free the underlying Haskell value."""
+        _lib.opensolid_release(self._ptr)
+
+    zero: DisplacementCurve2d = None  # type: ignore[assignment]
+    """The constant zero vector."""
+
+    @staticmethod
+    def constant(value: Displacement2d) -> DisplacementCurve2d:
+        """Create a curve with a constant value."""
+        inputs = value._ptr
+        output = c_void_p()
+        _lib.opensolid_DisplacementCurve2d_constant_Displacement2d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return DisplacementCurve2d(ptr=output)
+
+    @staticmethod
+    def xy(x_component: LengthCurve, y_component: LengthCurve) -> DisplacementCurve2d:
+        """Create a curve from its X and Y component curves."""
+        inputs = _Tuple2_c_void_p_c_void_p(x_component._ptr, y_component._ptr)
+        output = c_void_p()
+        _lib.opensolid_DisplacementCurve2d_xy_LengthCurve_LengthCurve(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return DisplacementCurve2d(ptr=output)
+
+    def evaluate(self, parameter_value: float) -> Displacement2d:
+        """Evaluate a curve at a given parameter value.
+
+        The parameter value should be between 0 and 1.
+        """
+        inputs = _Tuple2_c_double_c_void_p(parameter_value, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_DisplacementCurve2d_evaluate_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Displacement2d(ptr=output)
+
+
+class Curve2d:
+    """A parametric curve in 2D space."""
+
+    def __init__(self, *, ptr: c_void_p) -> None:
+        self._ptr = ptr
+
+    def __del__(self) -> None:
+        """Free the underlying Haskell value."""
+        _lib.opensolid_release(self._ptr)
+
+    @staticmethod
+    def constant(point: Point2d) -> Curve2d:
+        """Create a degenerate curve that is actually just a single point."""
+        inputs = point._ptr
+        output = c_void_p()
+        _lib.opensolid_Curve2d_constant_Point2d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Curve2d(ptr=output)
+
+    @staticmethod
+    def xy(x_coordinate: LengthCurve, y_coordinate: LengthCurve) -> Curve2d:
+        """Create a curve from its X and Y coordinate curves."""
+        inputs = _Tuple2_c_void_p_c_void_p(x_coordinate._ptr, y_coordinate._ptr)
+        output = c_void_p()
+        _lib.opensolid_Curve2d_xy_LengthCurve_LengthCurve(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Curve2d(ptr=output)
+
+    @staticmethod
+    def line(start_point: Point2d, end_point: Point2d) -> Curve2d:
+        """Create a line between two points."""
+        inputs = _Tuple2_c_void_p_c_void_p(start_point._ptr, end_point._ptr)
+        output = c_void_p()
+        _lib.opensolid_Curve2d_line_Point2d_Point2d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Curve2d(ptr=output)
+
+    @staticmethod
+    def arc(start_point: Point2d, end_point: Point2d, swept_angle: Angle) -> Curve2d:
+        """Create an arc with the given start point, end point and swept angle.
+
+        A positive swept angle means the arc turns counterclockwise (turns to the left),
+        and a negative swept angle means it turns clockwise (turns to the right).
+        For example, an arc with a swept angle of positive 90 degrees
+        is quarter circle that turns to the left.
+        """
+        inputs = _Tuple4_c_void_p_c_void_p_c_void_p_c_void_p(
+            _length_tolerance()._ptr, start_point._ptr, end_point._ptr, swept_angle._ptr
+        )
+        output = c_void_p()
+        _lib.opensolid_Curve2d_arc_Point2d_Point2d_Angle(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Curve2d(ptr=output)
+
+    @staticmethod
+    def polar_arc(
+        center_point: Point2d, radius: Length, start_angle: Angle, end_angle: Angle
+    ) -> Curve2d:
+        """Create an arc with the given center point, radius, start angle and end angle."""
+        inputs = _Tuple4_c_void_p_c_void_p_c_void_p_c_void_p(
+            center_point._ptr, radius._ptr, start_angle._ptr, end_angle._ptr
+        )
+        output = c_void_p()
+        _lib.opensolid_Curve2d_polarArc_Point2d_Length_Angle_Angle(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Curve2d(ptr=output)
+
+    @staticmethod
+    def swept_arc(
+        center_point: Point2d, start_point: Point2d, swept_angle: Angle
+    ) -> Curve2d:
+        """Create an arc with the given center point, start point and swept angle.
+
+        The start point will be swept around the center point by the given angle.
+        """
+        inputs = _Tuple3_c_void_p_c_void_p_c_void_p(
+            center_point._ptr, start_point._ptr, swept_angle._ptr
+        )
+        output = c_void_p()
+        _lib.opensolid_Curve2d_sweptArc_Point2d_Point2d_Angle(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Curve2d(ptr=output)
+
+    @staticmethod
+    def corner_arc(
+        corner_point: Point2d,
+        incoming_direction: Direction2d,
+        outgoing_direction: Direction2d,
+        radius: Length,
+    ) -> Curve2d:
+        """Create an arc for rounding off the corner between two straight lines."""
+        inputs = _Tuple5_c_void_p_c_void_p_c_void_p_c_void_p_c_void_p(
+            _length_tolerance()._ptr,
+            corner_point._ptr,
+            incoming_direction._ptr,
+            outgoing_direction._ptr,
+            radius._ptr,
+        )
+        output = c_void_p()
+        _lib.opensolid_Curve2d_cornerArc_Point2d_Direction2d_Direction2d_Length(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Curve2d(ptr=output)
+
+    @staticmethod
+    def bezier(control_points: list[Point2d]) -> Curve2d:
+        """Construct a Bezier curve from its control points.
+
+        For example,
+
+        > Curve2d.bezier (NonEmpty.four p1 p2 p3 p4))
+
+        will return a cubic Bezier curve with the given four control points.
+        """
+        inputs = (
+            _list_argument(
+                _List_c_void_p,
+                (c_void_p * len(control_points))(
+                    *[item._ptr for item in control_points]
+                ),
+            )
+            if control_points
+            else _error("List is empty")
+        )
+        output = c_void_p()
+        _lib.opensolid_Curve2d_bezier_NonEmptyPoint2d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Curve2d(ptr=output)
+
+    @staticmethod
+    def hermite(
+        start_point: Point2d,
+        start_derivatives: list[Displacement2d],
+        end_point: Point2d,
+        end_derivatives: list[Displacement2d],
+    ) -> Curve2d:
+        """Construct a Bezier curve with the given endpoints and derivatives at those endpoints.
+
+        For example,
+
+        > Curve2d.hermite p1 [v1] p2 [v2]
+
+        will result in a cubic spline from @p1@ to @p2@ with first derivative equal to @v1@ at @p1@ and
+        first derivative equal to @v2@ at @p2@.
+
+        The numbers of derivatives at each endpoint do not have to be equal; for example,
+
+        > Curve2d.hermite p1 [v1] p2 []
+
+        will result in a quadratic spline from @p1@ to @p2@ with first derivative at @p1@ equal to @v1@.
+
+        In general, the degree of the resulting spline will be equal to 1 plus the total number of
+        derivatives given.
+        """
+        inputs = _Tuple4_c_void_p_List_c_void_p_c_void_p_List_c_void_p(
+            start_point._ptr,
+            _list_argument(
+                _List_c_void_p,
+                (c_void_p * len(start_derivatives))(
+                    *[item._ptr for item in start_derivatives]
+                ),
+            ),
+            end_point._ptr,
+            _list_argument(
+                _List_c_void_p,
+                (c_void_p * len(end_derivatives))(
+                    *[item._ptr for item in end_derivatives]
+                ),
+            ),
+        )
+        output = c_void_p()
+        _lib.opensolid_Curve2d_hermite_Point2d_ListDisplacement2d_Point2d_ListDisplacement2d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Curve2d(ptr=output)
+
+    def start_point(self) -> Point2d:
+        """Get the start point of a curve."""
+        inputs = self._ptr
+        output = c_void_p()
+        _lib.opensolid_Curve2d_startPoint(ctypes.byref(inputs), ctypes.byref(output))
+        return Point2d(ptr=output)
+
+    def end_point(self) -> Point2d:
+        """Get the end point of a curve."""
+        inputs = self._ptr
+        output = c_void_p()
+        _lib.opensolid_Curve2d_endPoint(ctypes.byref(inputs), ctypes.byref(output))
+        return Point2d(ptr=output)
+
+    def evaluate(self, parameter_value: float) -> Point2d:
+        """Evaluate a curve at a given parameter value.
+
+        The parameter value should be between 0 and 1.
+        """
+        inputs = _Tuple2_c_double_c_void_p(parameter_value, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Curve2d_evaluate_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Point2d(ptr=output)
+
+    def derivative(self) -> DisplacementCurve2d:
+        """Get the derivative of a curve."""
+        inputs = self._ptr
+        output = c_void_p()
+        _lib.opensolid_Curve2d_derivative(ctypes.byref(inputs), ctypes.byref(output))
+        return DisplacementCurve2d(ptr=output)
+
+    def reverse(self) -> Curve2d:
+        """Reverse a curve, so that the start point is the end point and vice versa."""
+        inputs = self._ptr
+        output = c_void_p()
+        _lib.opensolid_Curve2d_reverse(ctypes.byref(inputs), ctypes.byref(output))
+        return Curve2d(ptr=output)
+
+    def x_coordinate(self) -> LengthCurve:
+        """Get the X coordinate of a 2D curve as a scalar curve."""
+        inputs = self._ptr
+        output = c_void_p()
+        _lib.opensolid_Curve2d_xCoordinate(ctypes.byref(inputs), ctypes.byref(output))
+        return LengthCurve(ptr=output)
+
+    def y_coordinate(self) -> LengthCurve:
+        """Get the Y coordinate of a 2D curve as a scalar curve."""
+        inputs = self._ptr
+        output = c_void_p()
+        _lib.opensolid_Curve2d_yCoordinate(ctypes.byref(inputs), ctypes.byref(output))
+        return LengthCurve(ptr=output)
+
+    def scale_along(self, axis: Axis2d, scale: float) -> Curve2d:
+        """Scale (stretch) along the given axis by the given scaling factor."""
+        inputs = _Tuple3_c_void_p_c_double_c_void_p(axis._ptr, scale, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Curve2d_scaleAlong_Axis2d_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Curve2d(ptr=output)
+
+    def scale_about(self, point: Point2d, scale: float) -> Curve2d:
+        """Scale uniformly about the given point by the given scaling factor."""
+        inputs = _Tuple3_c_void_p_c_double_c_void_p(point._ptr, scale, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Curve2d_scaleAbout_Point2d_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Curve2d(ptr=output)
+
+    def mirror_across(self, axis: Axis2d) -> Curve2d:
+        """Mirror across the given axis."""
+        inputs = _Tuple2_c_void_p_c_void_p(axis._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Curve2d_mirrorAcross_Axis2d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Curve2d(ptr=output)
+
+    def translate_by(self, displacement: Displacement2d) -> Curve2d:
+        """Translate by the given displacement."""
+        inputs = _Tuple2_c_void_p_c_void_p(displacement._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Curve2d_translateBy_Displacement2d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Curve2d(ptr=output)
+
+    def translate_in(self, direction: Direction2d, distance: Length) -> Curve2d:
+        """Translate in the given direction by the given distance."""
+        inputs = _Tuple3_c_void_p_c_void_p_c_void_p(
+            direction._ptr, distance._ptr, self._ptr
+        )
+        output = c_void_p()
+        _lib.opensolid_Curve2d_translateIn_Direction2d_Length(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Curve2d(ptr=output)
+
+    def translate_along(self, axis: Axis2d, distance: Length) -> Curve2d:
+        """Translate along the given axis by the given distance."""
+        inputs = _Tuple3_c_void_p_c_void_p_c_void_p(axis._ptr, distance._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Curve2d_translateAlong_Axis2d_Length(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Curve2d(ptr=output)
+
+    def rotate_around(self, point: Point2d, angle: Angle) -> Curve2d:
+        """Rotate around the given point by the given angle."""
+        inputs = _Tuple3_c_void_p_c_void_p_c_void_p(point._ptr, angle._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Curve2d_rotateAround_Point2d_Angle(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Curve2d(ptr=output)
+
+    def __add__(self, rhs: DisplacementCurve2d) -> Curve2d:
+        """Return ``self + rhs``."""
+        inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+        output = c_void_p()
+        _lib.opensolid_Curve2d_add_Curve2d_DisplacementCurve2d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Curve2d(ptr=output)
+
+    @overload
+    def __sub__(self, rhs: DisplacementCurve2d) -> Curve2d:
+        pass
+
+    @overload
+    def __sub__(self, rhs: Curve2d) -> DisplacementCurve2d:
+        pass
+
+    @overload
+    def __sub__(self, rhs: Point2d) -> DisplacementCurve2d:
+        pass
+
+    def __sub__(self, rhs):
+        """Return ``self - rhs``."""
+        match rhs:
+            case DisplacementCurve2d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Curve2d_sub_Curve2d_DisplacementCurve2d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return Curve2d(ptr=output)
+            case Curve2d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Curve2d_sub_Curve2d_Curve2d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return DisplacementCurve2d(ptr=output)
+            case Point2d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_Curve2d_sub_Curve2d_Point2d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return DisplacementCurve2d(ptr=output)
+            case _:
+                return NotImplemented
+
+
+class UvCurve:
+    """A parametric curve in 2D space."""
+
+    def __init__(self, *, ptr: c_void_p) -> None:
+        self._ptr = ptr
+
+    def __del__(self) -> None:
+        """Free the underlying Haskell value."""
+        _lib.opensolid_release(self._ptr)
+
+    @staticmethod
+    def constant(point: UvPoint) -> UvCurve:
+        """Create a degenerate curve that is actually just a single point."""
+        inputs = point._ptr
+        output = c_void_p()
+        _lib.opensolid_UvCurve_constant_UvPoint(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return UvCurve(ptr=output)
+
+    @staticmethod
+    def uv(u_coordinate: Curve, v_coordinate: Curve) -> UvCurve:
+        """Create a curve from its X and Y coordinate curves."""
+        inputs = _Tuple2_c_void_p_c_void_p(u_coordinate._ptr, v_coordinate._ptr)
+        output = c_void_p()
+        _lib.opensolid_UvCurve_uv_Curve_Curve(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return UvCurve(ptr=output)
+
+    @staticmethod
+    def line(start_point: UvPoint, end_point: UvPoint) -> UvCurve:
+        """Create a line between two points."""
+        inputs = _Tuple2_c_void_p_c_void_p(start_point._ptr, end_point._ptr)
+        output = c_void_p()
+        _lib.opensolid_UvCurve_line_UvPoint_UvPoint(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return UvCurve(ptr=output)
+
+    @staticmethod
+    def arc(start_point: UvPoint, end_point: UvPoint, swept_angle: Angle) -> UvCurve:
+        """Create an arc with the given start point, end point and swept angle.
+
+        A positive swept angle means the arc turns counterclockwise (turns to the left),
+        and a negative swept angle means it turns clockwise (turns to the right).
+        For example, an arc with a swept angle of positive 90 degrees
+        is quarter circle that turns to the left.
+        """
+        inputs = _Tuple4_c_double_c_void_p_c_void_p_c_void_p(
+            _float_tolerance(), start_point._ptr, end_point._ptr, swept_angle._ptr
+        )
+        output = c_void_p()
+        _lib.opensolid_UvCurve_arc_UvPoint_UvPoint_Angle(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return UvCurve(ptr=output)
+
+    @staticmethod
+    def polar_arc(
+        center_point: UvPoint, radius: float, start_angle: Angle, end_angle: Angle
+    ) -> UvCurve:
+        """Create an arc with the given center point, radius, start angle and end angle."""
+        inputs = _Tuple4_c_void_p_c_double_c_void_p_c_void_p(
+            center_point._ptr, radius, start_angle._ptr, end_angle._ptr
+        )
+        output = c_void_p()
+        _lib.opensolid_UvCurve_polarArc_UvPoint_Float_Angle_Angle(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return UvCurve(ptr=output)
+
+    @staticmethod
+    def swept_arc(
+        center_point: UvPoint, start_point: UvPoint, swept_angle: Angle
+    ) -> UvCurve:
+        """Create an arc with the given center point, start point and swept angle.
+
+        The start point will be swept around the center point by the given angle.
+        """
+        inputs = _Tuple3_c_void_p_c_void_p_c_void_p(
+            center_point._ptr, start_point._ptr, swept_angle._ptr
+        )
+        output = c_void_p()
+        _lib.opensolid_UvCurve_sweptArc_UvPoint_UvPoint_Angle(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return UvCurve(ptr=output)
+
+    @staticmethod
+    def corner_arc(
+        corner_point: UvPoint,
+        incoming_direction: Direction2d,
+        outgoing_direction: Direction2d,
+        radius: float,
+    ) -> UvCurve:
+        """Create an arc for rounding off the corner between two straight lines."""
+        inputs = _Tuple5_c_double_c_void_p_c_void_p_c_void_p_c_double(
+            _float_tolerance(),
+            corner_point._ptr,
+            incoming_direction._ptr,
+            outgoing_direction._ptr,
+            radius,
+        )
+        output = c_void_p()
+        _lib.opensolid_UvCurve_cornerArc_UvPoint_Direction2d_Direction2d_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return UvCurve(ptr=output)
+
+    @staticmethod
+    def bezier(control_points: list[UvPoint]) -> UvCurve:
+        """Construct a Bezier curve from its control points.
+
+        For example,
+
+        > Curve2d.bezier (NonEmpty.four p1 p2 p3 p4))
+
+        will return a cubic Bezier curve with the given four control points.
+        """
+        inputs = (
+            _list_argument(
+                _List_c_void_p,
+                (c_void_p * len(control_points))(
+                    *[item._ptr for item in control_points]
+                ),
+            )
+            if control_points
+            else _error("List is empty")
+        )
+        output = c_void_p()
+        _lib.opensolid_UvCurve_bezier_NonEmptyUvPoint(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return UvCurve(ptr=output)
+
+    @staticmethod
+    def hermite(
+        start_point: UvPoint,
+        start_derivatives: list[Vector2d],
+        end_point: UvPoint,
+        end_derivatives: list[Vector2d],
+    ) -> UvCurve:
+        """Construct a Bezier curve with the given endpoints and derivatives at those endpoints.
+
+        For example,
+
+        > Curve2d.hermite p1 [v1] p2 [v2]
+
+        will result in a cubic spline from @p1@ to @p2@ with first derivative equal to @v1@ at @p1@ and
+        first derivative equal to @v2@ at @p2@.
+
+        The numbers of derivatives at each endpoint do not have to be equal; for example,
+
+        > Curve2d.hermite p1 [v1] p2 []
+
+        will result in a quadratic spline from @p1@ to @p2@ with first derivative at @p1@ equal to @v1@.
+
+        In general, the degree of the resulting spline will be equal to 1 plus the total number of
+        derivatives given.
+        """
+        inputs = _Tuple4_c_void_p_List_c_void_p_c_void_p_List_c_void_p(
+            start_point._ptr,
+            _list_argument(
+                _List_c_void_p,
+                (c_void_p * len(start_derivatives))(
+                    *[item._ptr for item in start_derivatives]
+                ),
+            ),
+            end_point._ptr,
+            _list_argument(
+                _List_c_void_p,
+                (c_void_p * len(end_derivatives))(
+                    *[item._ptr for item in end_derivatives]
+                ),
+            ),
+        )
+        output = c_void_p()
+        _lib.opensolid_UvCurve_hermite_UvPoint_ListVector2d_UvPoint_ListVector2d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return UvCurve(ptr=output)
+
+    def start_point(self) -> UvPoint:
+        """Get the start point of a curve."""
+        inputs = self._ptr
+        output = c_void_p()
+        _lib.opensolid_UvCurve_startPoint(ctypes.byref(inputs), ctypes.byref(output))
+        return UvPoint(ptr=output)
+
+    def end_point(self) -> UvPoint:
+        """Get the end point of a curve."""
+        inputs = self._ptr
+        output = c_void_p()
+        _lib.opensolid_UvCurve_endPoint(ctypes.byref(inputs), ctypes.byref(output))
+        return UvPoint(ptr=output)
+
+    def evaluate(self, parameter_value: float) -> UvPoint:
+        """Evaluate a curve at a given parameter value.
+
+        The parameter value should be between 0 and 1.
+        """
+        inputs = _Tuple2_c_double_c_void_p(parameter_value, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_UvCurve_evaluate_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return UvPoint(ptr=output)
+
+    def derivative(self) -> VectorCurve2d:
+        """Get the derivative of a curve."""
+        inputs = self._ptr
+        output = c_void_p()
+        _lib.opensolid_UvCurve_derivative(ctypes.byref(inputs), ctypes.byref(output))
+        return VectorCurve2d(ptr=output)
+
+    def reverse(self) -> UvCurve:
+        """Reverse a curve, so that the start point is the end point and vice versa."""
+        inputs = self._ptr
+        output = c_void_p()
+        _lib.opensolid_UvCurve_reverse(ctypes.byref(inputs), ctypes.byref(output))
+        return UvCurve(ptr=output)
+
+    def u_coordinate(self) -> Curve:
+        """Get the X coordinate of a 2D curve as a scalar curve."""
+        inputs = self._ptr
+        output = c_void_p()
+        _lib.opensolid_UvCurve_uCoordinate(ctypes.byref(inputs), ctypes.byref(output))
+        return Curve(ptr=output)
+
+    def v_coordinate(self) -> Curve:
+        """Get the Y coordinate of a 2D curve as a scalar curve."""
+        inputs = self._ptr
+        output = c_void_p()
+        _lib.opensolid_UvCurve_vCoordinate(ctypes.byref(inputs), ctypes.byref(output))
+        return Curve(ptr=output)
+
+    def scale_along(self, axis: UvAxis, scale: float) -> UvCurve:
+        """Scale (stretch) along the given axis by the given scaling factor."""
+        inputs = _Tuple3_c_void_p_c_double_c_void_p(axis._ptr, scale, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_UvCurve_scaleAlong_UvAxis_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return UvCurve(ptr=output)
+
+    def scale_about(self, point: UvPoint, scale: float) -> UvCurve:
+        """Scale uniformly about the given point by the given scaling factor."""
+        inputs = _Tuple3_c_void_p_c_double_c_void_p(point._ptr, scale, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_UvCurve_scaleAbout_UvPoint_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return UvCurve(ptr=output)
+
+    def mirror_across(self, axis: UvAxis) -> UvCurve:
+        """Mirror across the given axis."""
+        inputs = _Tuple2_c_void_p_c_void_p(axis._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_UvCurve_mirrorAcross_UvAxis(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return UvCurve(ptr=output)
+
+    def translate_by(self, displacement: Vector2d) -> UvCurve:
+        """Translate by the given displacement."""
+        inputs = _Tuple2_c_void_p_c_void_p(displacement._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_UvCurve_translateBy_Vector2d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return UvCurve(ptr=output)
+
+    def translate_in(self, direction: Direction2d, distance: float) -> UvCurve:
+        """Translate in the given direction by the given distance."""
+        inputs = _Tuple3_c_void_p_c_double_c_void_p(direction._ptr, distance, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_UvCurve_translateIn_Direction2d_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return UvCurve(ptr=output)
+
+    def translate_along(self, axis: UvAxis, distance: float) -> UvCurve:
+        """Translate along the given axis by the given distance."""
+        inputs = _Tuple3_c_void_p_c_double_c_void_p(axis._ptr, distance, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_UvCurve_translateAlong_UvAxis_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return UvCurve(ptr=output)
+
+    def rotate_around(self, point: UvPoint, angle: Angle) -> UvCurve:
+        """Rotate around the given point by the given angle."""
+        inputs = _Tuple3_c_void_p_c_void_p_c_void_p(point._ptr, angle._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_UvCurve_rotateAround_UvPoint_Angle(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return UvCurve(ptr=output)
+
+    def __add__(self, rhs: VectorCurve2d) -> UvCurve:
+        """Return ``self + rhs``."""
+        inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+        output = c_void_p()
+        _lib.opensolid_UvCurve_add_UvCurve_VectorCurve2d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return UvCurve(ptr=output)
+
+    @overload
+    def __sub__(self, rhs: VectorCurve2d) -> UvCurve:
+        pass
+
+    @overload
+    def __sub__(self, rhs: UvCurve) -> VectorCurve2d:
+        pass
+
+    @overload
+    def __sub__(self, rhs: UvPoint) -> VectorCurve2d:
+        pass
+
+    def __sub__(self, rhs):
+        """Return ``self - rhs``."""
+        match rhs:
+            case VectorCurve2d():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_UvCurve_sub_UvCurve_VectorCurve2d(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return UvCurve(ptr=output)
+            case UvCurve():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_UvCurve_sub_UvCurve_UvCurve(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return VectorCurve2d(ptr=output)
+            case UvPoint():
+                inputs = _Tuple2_c_void_p_c_void_p(self._ptr, rhs._ptr)
+                output = c_void_p()
+                _lib.opensolid_UvCurve_sub_UvCurve_UvPoint(
+                    ctypes.byref(inputs), ctypes.byref(output)
+                )
+                return VectorCurve2d(ptr=output)
+            case _:
+                return NotImplemented
+
+
+class Region2d:
+    """A closed 2D region (possibly with holes), defined by a set of boundary curves."""
+
+    def __init__(self, *, ptr: c_void_p) -> None:
+        self._ptr = ptr
+
+    def __del__(self) -> None:
+        """Free the underlying Haskell value."""
+        _lib.opensolid_release(self._ptr)
+
+    @staticmethod
+    def bounded_by(curves: list[Curve2d]) -> Region2d:
+        """Create a region bounded by the given curves.
+
+        The curves may be given in any order,
+        do not need to have consistent directions
+        and can form multiple separate loops if the region has holes.
+        However, the curves must not overlap or intersect (other than at endpoints)
+        and there must not be any gaps between them.
+        """
+        inputs = _Tuple2_c_void_p_List_c_void_p(
+            _length_tolerance()._ptr,
+            _list_argument(
+                _List_c_void_p,
+                (c_void_p * len(curves))(*[item._ptr for item in curves]),
+            ),
+        )
+        output = _Result_c_void_p()
+        _lib.opensolid_Region2d_boundedBy_ListCurve2d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return (
+            Region2d(ptr=c_void_p(output.field2))
+            if output.field0 == 0
+            else _error(_text_to_str(output.field1))
+        )
+
+    def outer_loop(self) -> list[Curve2d]:
+        """Get the list of curves forming the outer boundary of the region.
+
+        The curves will be in counterclockwise order around the region,
+        and will each be in the counterclockwise direction.
+        """
+        inputs = self._ptr
+        output = _List_c_void_p()
+        _lib.opensolid_Region2d_outerLoop(ctypes.byref(inputs), ctypes.byref(output))
+        return [
+            Curve2d(ptr=c_void_p(item))
+            for item in [output.field1[index] for index in range(output.field0)]
+        ]
+
+    def inner_loops(self) -> list[list[Curve2d]]:
+        """Get the lists of curves (if any) forming the holes within the region.
+
+        The curves will be in clockwise order around each hole,
+        and each curve will be in the clockwise direction.
+        """
+        inputs = self._ptr
+        output = _List_List_c_void_p()
+        _lib.opensolid_Region2d_innerLoops(ctypes.byref(inputs), ctypes.byref(output))
+        return [
+            [
+                Curve2d(ptr=c_void_p(item))
+                for item in [item.field1[index] for index in range(item.field0)]
+            ]
+            for item in [output.field1[index] for index in range(output.field0)]
+        ]
+
+    def boundary_curves(self) -> list[Curve2d]:
+        """Get all boundary curves (outer boundary plus any holes) of the given region."""
+        inputs = self._ptr
+        output = _List_c_void_p()
+        _lib.opensolid_Region2d_boundaryCurves(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return [
+            Curve2d(ptr=c_void_p(item))
+            for item in [output.field1[index] for index in range(output.field0)]
+        ]
+
+    def scale_along(self, axis: Axis2d, scale: float) -> Region2d:
+        """Scale (stretch) along the given axis by the given scaling factor."""
+        inputs = _Tuple3_c_void_p_c_double_c_void_p(axis._ptr, scale, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Region2d_scaleAlong_Axis2d_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Region2d(ptr=output)
+
+    def scale_about(self, point: Point2d, scale: float) -> Region2d:
+        """Scale uniformly about the given point by the given scaling factor."""
+        inputs = _Tuple3_c_void_p_c_double_c_void_p(point._ptr, scale, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Region2d_scaleAbout_Point2d_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Region2d(ptr=output)
+
+    def mirror_across(self, axis: Axis2d) -> Region2d:
+        """Mirror across the given axis."""
+        inputs = _Tuple2_c_void_p_c_void_p(axis._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Region2d_mirrorAcross_Axis2d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Region2d(ptr=output)
+
+    def translate_by(self, displacement: Displacement2d) -> Region2d:
+        """Translate by the given displacement."""
+        inputs = _Tuple2_c_void_p_c_void_p(displacement._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Region2d_translateBy_Displacement2d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Region2d(ptr=output)
+
+    def translate_in(self, direction: Direction2d, distance: Length) -> Region2d:
+        """Translate in the given direction by the given distance."""
+        inputs = _Tuple3_c_void_p_c_void_p_c_void_p(
+            direction._ptr, distance._ptr, self._ptr
+        )
+        output = c_void_p()
+        _lib.opensolid_Region2d_translateIn_Direction2d_Length(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Region2d(ptr=output)
+
+    def translate_along(self, axis: Axis2d, distance: Length) -> Region2d:
+        """Translate along the given axis by the given distance."""
+        inputs = _Tuple3_c_void_p_c_void_p_c_void_p(axis._ptr, distance._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Region2d_translateAlong_Axis2d_Length(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Region2d(ptr=output)
+
+    def rotate_around(self, point: Point2d, angle: Angle) -> Region2d:
+        """Rotate around the given point by the given angle."""
+        inputs = _Tuple3_c_void_p_c_void_p_c_void_p(point._ptr, angle._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_Region2d_rotateAround_Point2d_Angle(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Region2d(ptr=output)
+
+
+class UvRegion:
+    """A closed 2D region (possibly with holes), defined by a set of boundary curves."""
+
+    def __init__(self, *, ptr: c_void_p) -> None:
+        self._ptr = ptr
+
+    def __del__(self) -> None:
+        """Free the underlying Haskell value."""
+        _lib.opensolid_release(self._ptr)
+
+    unit: UvRegion = None  # type: ignore[assignment]
+    """The unit square in UV space."""
+
+    @staticmethod
+    def bounded_by(curves: list[UvCurve]) -> UvRegion:
+        """Create a region bounded by the given curves.
+
+        The curves may be given in any order,
+        do not need to have consistent directions
+        and can form multiple separate loops if the region has holes.
+        However, the curves must not overlap or intersect (other than at endpoints)
+        and there must not be any gaps between them.
+        """
+        inputs = _Tuple2_c_double_List_c_void_p(
+            _float_tolerance(),
+            _list_argument(
+                _List_c_void_p,
+                (c_void_p * len(curves))(*[item._ptr for item in curves]),
+            ),
+        )
+        output = _Result_c_void_p()
+        _lib.opensolid_UvRegion_boundedBy_ListUvCurve(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return (
+            UvRegion(ptr=c_void_p(output.field2))
+            if output.field0 == 0
+            else _error(_text_to_str(output.field1))
+        )
+
+    def outer_loop(self) -> list[UvCurve]:
+        """Get the list of curves forming the outer boundary of the region.
+
+        The curves will be in counterclockwise order around the region,
+        and will each be in the counterclockwise direction.
+        """
+        inputs = self._ptr
+        output = _List_c_void_p()
+        _lib.opensolid_UvRegion_outerLoop(ctypes.byref(inputs), ctypes.byref(output))
+        return [
+            UvCurve(ptr=c_void_p(item))
+            for item in [output.field1[index] for index in range(output.field0)]
+        ]
+
+    def inner_loops(self) -> list[list[UvCurve]]:
+        """Get the lists of curves (if any) forming the holes within the region.
+
+        The curves will be in clockwise order around each hole,
+        and each curve will be in the clockwise direction.
+        """
+        inputs = self._ptr
+        output = _List_List_c_void_p()
+        _lib.opensolid_UvRegion_innerLoops(ctypes.byref(inputs), ctypes.byref(output))
+        return [
+            [
+                UvCurve(ptr=c_void_p(item))
+                for item in [item.field1[index] for index in range(item.field0)]
+            ]
+            for item in [output.field1[index] for index in range(output.field0)]
+        ]
+
+    def boundary_curves(self) -> list[UvCurve]:
+        """Get all boundary curves (outer boundary plus any holes) of the given region."""
+        inputs = self._ptr
+        output = _List_c_void_p()
+        _lib.opensolid_UvRegion_boundaryCurves(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return [
+            UvCurve(ptr=c_void_p(item))
+            for item in [output.field1[index] for index in range(output.field0)]
+        ]
+
+    def scale_along(self, axis: UvAxis, scale: float) -> UvRegion:
+        """Scale (stretch) along the given axis by the given scaling factor."""
+        inputs = _Tuple3_c_void_p_c_double_c_void_p(axis._ptr, scale, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_UvRegion_scaleAlong_UvAxis_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return UvRegion(ptr=output)
+
+    def scale_about(self, point: UvPoint, scale: float) -> UvRegion:
+        """Scale uniformly about the given point by the given scaling factor."""
+        inputs = _Tuple3_c_void_p_c_double_c_void_p(point._ptr, scale, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_UvRegion_scaleAbout_UvPoint_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return UvRegion(ptr=output)
+
+    def mirror_across(self, axis: UvAxis) -> UvRegion:
+        """Mirror across the given axis."""
+        inputs = _Tuple2_c_void_p_c_void_p(axis._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_UvRegion_mirrorAcross_UvAxis(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return UvRegion(ptr=output)
+
+    def translate_by(self, displacement: Vector2d) -> UvRegion:
+        """Translate by the given displacement."""
+        inputs = _Tuple2_c_void_p_c_void_p(displacement._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_UvRegion_translateBy_Vector2d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return UvRegion(ptr=output)
+
+    def translate_in(self, direction: Direction2d, distance: float) -> UvRegion:
+        """Translate in the given direction by the given distance."""
+        inputs = _Tuple3_c_void_p_c_double_c_void_p(direction._ptr, distance, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_UvRegion_translateIn_Direction2d_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return UvRegion(ptr=output)
+
+    def translate_along(self, axis: UvAxis, distance: float) -> UvRegion:
+        """Translate along the given axis by the given distance."""
+        inputs = _Tuple3_c_void_p_c_double_c_void_p(axis._ptr, distance, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_UvRegion_translateAlong_UvAxis_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return UvRegion(ptr=output)
+
+    def rotate_around(self, point: UvPoint, angle: Angle) -> UvRegion:
+        """Rotate around the given point by the given angle."""
+        inputs = _Tuple3_c_void_p_c_void_p_c_void_p(point._ptr, angle._ptr, self._ptr)
+        output = c_void_p()
+        _lib.opensolid_UvRegion_rotateAround_UvPoint_Angle(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return UvRegion(ptr=output)
+
+
+class Body3d:
+    """A solid body in 3D, defined by a set of boundary surfaces."""
+
+    def __init__(self, *, ptr: c_void_p) -> None:
+        self._ptr = ptr
+
+    def __del__(self) -> None:
+        """Free the underlying Haskell value."""
+        _lib.opensolid_release(self._ptr)
+
+    @staticmethod
+    def extruded(
+        sketch_plane: Plane3d, profile: Region2d, distance: LengthRange
+    ) -> Body3d:
+        """Create an extruded body from a sketch plane and profile."""
+        inputs = _Tuple4_c_void_p_c_void_p_c_void_p_c_void_p(
+            _length_tolerance()._ptr, sketch_plane._ptr, profile._ptr, distance._ptr
+        )
+        output = _Result_c_void_p()
+        _lib.opensolid_Body3d_extruded_Plane3d_Region2d_LengthRange(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return (
+            Body3d(ptr=c_void_p(output.field2))
+            if output.field0 == 0
+            else _error(_text_to_str(output.field1))
+        )
+
+    @staticmethod
+    def revolved(
+        sketch_plane: Plane3d, profile: Region2d, axis: Axis2d, angle: Angle
+    ) -> Body3d:
+        """Create a revolved body from a sketch plane and profile.
+
+        Note that the revolution profile and revolution axis
+        are both defined within the given sketch plane.
+
+        A positive angle will result in a counterclockwise revolution around the axis,
+        and a negative angle will result in a clockwise revolution.
+        """
+        inputs = _Tuple5_c_void_p_c_void_p_c_void_p_c_void_p_c_void_p(
+            _length_tolerance()._ptr,
+            sketch_plane._ptr,
+            profile._ptr,
+            axis._ptr,
+            angle._ptr,
+        )
+        output = _Result_c_void_p()
+        _lib.opensolid_Body3d_revolved_Plane3d_Region2d_Axis2d_Angle(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return (
+            Body3d(ptr=c_void_p(output.field2))
+            if output.field0 == 0
+            else _error(_text_to_str(output.field1))
+        )
+
+
+class Mesh:
+    """Meshing-related functionality."""
+
+    def __init__(self, *, ptr: c_void_p) -> None:
+        self._ptr = ptr
+
+    def __del__(self) -> None:
+        """Free the underlying Haskell value."""
+        _lib.opensolid_release(self._ptr)
+
+    @staticmethod
+    def max_error(error: Length) -> Mesh.Constraint:
+        """Specify the maximum error/deviation of the mesh from the actual shape."""
+        inputs = error._ptr
+        output = c_void_p()
+        _lib.opensolid_Mesh_maxError_Length(ctypes.byref(inputs), ctypes.byref(output))
+        return Mesh.Constraint(ptr=output)
+
+    @staticmethod
+    def max_size(size: Length) -> Mesh.Constraint:
+        """Specify the maximum size of any triangle in the mesh."""
+        inputs = size._ptr
+        output = c_void_p()
+        _lib.opensolid_Mesh_maxSize_Length(ctypes.byref(inputs), ctypes.byref(output))
+        return Mesh.Constraint(ptr=output)
+
+    class Constraint:
+        """A constraint on the quality of some mesh to be produced."""
+
+        def __init__(self, *, ptr: c_void_p) -> None:
+            self._ptr = ptr
+
+        def __del__(self) -> None:
+            """Free the underlying Haskell value."""
+            _lib.opensolid_release(self._ptr)
+
+
+class Scene3d:
+    """A set of functions for constructing 3D scenes."""
+
+    def __init__(self, *, ptr: c_void_p) -> None:
+        self._ptr = ptr
+
+    def __del__(self) -> None:
+        """Free the underlying Haskell value."""
+        _lib.opensolid_release(self._ptr)
+
+    @staticmethod
+    def body(
+        mesh_constraints: list[Mesh.Constraint],
+        material: Scene3d.Material,
+        body: Body3d,
+    ) -> Scene3d.Entity:
+        """Render the given body with the given material.
+
+        The body will first be converted to a mesh using the given constraints.
+        """
+        inputs = _Tuple4_c_void_p_List_c_void_p_c_void_p_c_void_p(
+            _length_tolerance()._ptr,
+            (
+                _list_argument(
+                    _List_c_void_p,
+                    (c_void_p * len(mesh_constraints))(
+                        *[item._ptr for item in mesh_constraints]
+                    ),
+                )
+                if mesh_constraints
+                else _error("List is empty")
+            ),
+            material._ptr,
+            body._ptr,
+        )
+        output = c_void_p()
+        _lib.opensolid_Scene3d_body_NonEmptyMeshConstraint_Scene3dMaterial_Body3d(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Scene3d.Entity(ptr=output)
+
+    @staticmethod
+    def group(entities: list[Scene3d.Entity]) -> Scene3d.Entity:
+        """Group several entities into a single one.
+
+        Useful to allow multiple entities to be transformed as a group.
+        """
+        inputs = _list_argument(
+            _List_c_void_p,
+            (c_void_p * len(entities))(*[item._ptr for item in entities]),
+        )
+        output = c_void_p()
+        _lib.opensolid_Scene3d_group_ListScene3dEntity(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Scene3d.Entity(ptr=output)
+
+    @staticmethod
+    def metal(base_color: Color, roughness: float) -> Scene3d.Material:
+        """Create a metallic material with the given color and roughness."""
+        inputs = _Tuple2_c_void_p_c_double(base_color._ptr, roughness)
+        output = c_void_p()
+        _lib.opensolid_Scene3d_metal_Color_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Scene3d.Material(ptr=output)
+
+    @staticmethod
+    def nonmetal(base_color: Color, roughness: float) -> Scene3d.Material:
+        """Create a non-metallic material with the given color and roughness."""
+        inputs = _Tuple2_c_void_p_c_double(base_color._ptr, roughness)
+        output = c_void_p()
+        _lib.opensolid_Scene3d_nonmetal_Color_Float(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return Scene3d.Material(ptr=output)
+
+    @staticmethod
+    def write_glb(
+        path: str, ground_plane: Plane3d, entities: list[Scene3d.Entity]
+    ) -> None:
+        """Write a scene to a binary glTF file.
+
+        The given plane will be used as the ground plane, with:
+        - the origin of the plane being the global origin,
+        - the normal direction of the plane being the global up direction (positive Y in glTF), and
+        - the positive X direction of the plane being the 'forwards' direction (positive Z in glTF).
+        """
+        inputs = _Tuple3_Text_c_void_p_List_c_void_p(
+            _str_to_text(path),
+            ground_plane._ptr,
+            _list_argument(
+                _List_c_void_p,
+                (c_void_p * len(entities))(*[item._ptr for item in entities]),
+            ),
+        )
+        output = _Result_c_int64()
+        _lib.opensolid_Scene3d_writeGLB_Text_Plane3d_ListScene3dEntity(
+            ctypes.byref(inputs), ctypes.byref(output)
+        )
+        return None if output.field0 == 0 else _error(_text_to_str(output.field1))
+
+    class Entity:
+        """A scene entity such as a mesh or group."""
+
+        def __init__(self, *, ptr: c_void_p) -> None:
+            self._ptr = ptr
+
+        def __del__(self) -> None:
+            """Free the underlying Haskell value."""
+            _lib.opensolid_release(self._ptr)
+
+    class Material:
+        """A material applied to a mesh."""
 
         def __init__(self, *, ptr: c_void_p) -> None:
             self._ptr = ptr
@@ -6725,6 +8285,123 @@ def _drawing2d_no_fill() -> Drawing2d.Attribute:
 Drawing2d.no_fill = _drawing2d_no_fill()
 
 
+def _axis2d_x() -> Axis2d:
+    output = c_void_p()
+    _lib.opensolid_Axis2d_x(c_void_p(), ctypes.byref(output))
+    return Axis2d(ptr=output)
+
+
+Axis2d.x = _axis2d_x()
+
+
+def _axis2d_y() -> Axis2d:
+    output = c_void_p()
+    _lib.opensolid_Axis2d_y(c_void_p(), ctypes.byref(output))
+    return Axis2d(ptr=output)
+
+
+Axis2d.y = _axis2d_y()
+
+
+def _uvaxis_u() -> Axis2d:
+    output = c_void_p()
+    _lib.opensolid_UvAxis_u(c_void_p(), ctypes.byref(output))
+    return Axis2d(ptr=output)
+
+
+UvAxis.u = _uvaxis_u()
+
+
+def _uvaxis_v() -> Axis2d:
+    output = c_void_p()
+    _lib.opensolid_UvAxis_v(c_void_p(), ctypes.byref(output))
+    return Axis2d(ptr=output)
+
+
+UvAxis.v = _uvaxis_v()
+
+
+def _plane3d_xy() -> Plane3d:
+    output = c_void_p()
+    _lib.opensolid_Plane3d_xy(c_void_p(), ctypes.byref(output))
+    return Plane3d(ptr=output)
+
+
+Plane3d.xy = _plane3d_xy()
+
+
+def _plane3d_yx() -> Plane3d:
+    output = c_void_p()
+    _lib.opensolid_Plane3d_yx(c_void_p(), ctypes.byref(output))
+    return Plane3d(ptr=output)
+
+
+Plane3d.yx = _plane3d_yx()
+
+
+def _plane3d_zx() -> Plane3d:
+    output = c_void_p()
+    _lib.opensolid_Plane3d_zx(c_void_p(), ctypes.byref(output))
+    return Plane3d(ptr=output)
+
+
+Plane3d.zx = _plane3d_zx()
+
+
+def _plane3d_xz() -> Plane3d:
+    output = c_void_p()
+    _lib.opensolid_Plane3d_xz(c_void_p(), ctypes.byref(output))
+    return Plane3d(ptr=output)
+
+
+Plane3d.xz = _plane3d_xz()
+
+
+def _plane3d_yz() -> Plane3d:
+    output = c_void_p()
+    _lib.opensolid_Plane3d_yz(c_void_p(), ctypes.byref(output))
+    return Plane3d(ptr=output)
+
+
+Plane3d.yz = _plane3d_yz()
+
+
+def _plane3d_zy() -> Plane3d:
+    output = c_void_p()
+    _lib.opensolid_Plane3d_zy(c_void_p(), ctypes.byref(output))
+    return Plane3d(ptr=output)
+
+
+Plane3d.zy = _plane3d_zy()
+
+
+def _vectorcurve2d_zero() -> VectorCurve2d:
+    output = c_void_p()
+    _lib.opensolid_VectorCurve2d_zero(c_void_p(), ctypes.byref(output))
+    return VectorCurve2d(ptr=output)
+
+
+VectorCurve2d.zero = _vectorcurve2d_zero()
+
+
+def _displacementcurve2d_zero() -> DisplacementCurve2d:
+    output = c_void_p()
+    _lib.opensolid_DisplacementCurve2d_zero(c_void_p(), ctypes.byref(output))
+    return DisplacementCurve2d(ptr=output)
+
+
+DisplacementCurve2d.zero = _displacementcurve2d_zero()
+
+
+def _uvregion_unit() -> UvRegion:
+    output = c_void_p()
+    _lib.opensolid_UvRegion_unit(c_void_p(), ctypes.byref(output))
+    return UvRegion(ptr=output)
+
+
+UvRegion.unit = _uvregion_unit()
+
+
 __all__ = [
     "Angle",
     "AngleCurve",
@@ -6733,19 +8410,31 @@ __all__ = [
     "AreaCurve",
     "AreaRange",
     "AreaVector2d",
+    "Axis2d",
+    "Body3d",
     "Bounds2d",
     "Color",
     "Curve",
+    "Curve2d",
     "Direction2d",
     "Displacement2d",
+    "DisplacementCurve2d",
     "Drawing2d",
     "Length",
     "LengthCurve",
     "LengthRange",
+    "Mesh",
+    "Plane3d",
     "Point2d",
     "Range",
+    "Region2d",
+    "Scene3d",
     "Tolerance",
+    "UvAxis",
     "UvBounds",
+    "UvCurve",
     "UvPoint",
+    "UvRegion",
     "Vector2d",
+    "VectorCurve2d",
 ]

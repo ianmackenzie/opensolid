@@ -19,9 +19,9 @@ data Uniform = Uniform deriving (Eq, Show)
 
 data Affine = Affine deriving (Eq, Show)
 
-class IsRigid tag
+class IsOrthonormal tag => IsRigid tag
 
-class IsOrthonormal tag
+class IsUniform tag => IsOrthonormal tag
 
 class IsUniform tag
 

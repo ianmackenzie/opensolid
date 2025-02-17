@@ -23,6 +23,10 @@ import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Area (Area)
 import OpenSolid.Area qualified as Area
+import OpenSolid.Axis2d (Axis2d)
+import OpenSolid.Axis2d qualified as Axis2d
+import OpenSolid.Body3d (Body3d)
+import OpenSolid.Body3d qualified as Body3d
 import OpenSolid.Bounds2d (Bounds2d)
 import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.Color (Color)
@@ -30,6 +34,8 @@ import OpenSolid.Color qualified as Color
 import OpenSolid.Curve (Curve)
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve.Zero qualified as Curve.Zero
+import OpenSolid.Curve2d (Curve2d)
+import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Direction2d (Direction2d)
 import OpenSolid.Direction2d qualified as Direction2d
 import OpenSolid.Drawing2d qualified as Drawing2d
@@ -38,16 +44,28 @@ import OpenSolid.FFI qualified as FFI
 import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
+import OpenSolid.Mesh qualified as Mesh
 import OpenSolid.Pair qualified as Pair
+import OpenSolid.Plane3d (Plane3d)
+import OpenSolid.Plane3d qualified as Plane3d
 import OpenSolid.Point2d (Point2d)
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
 import OpenSolid.Range (Range)
 import OpenSolid.Range qualified as Range
+import OpenSolid.Region2d (Region2d)
+import OpenSolid.Region2d qualified as Region2d
+import OpenSolid.Scene3d qualified as Scene3d
+import OpenSolid.Transform qualified as Transform
+import OpenSolid.Transform2d (Transform2d)
+import OpenSolid.Transform2d qualified as Transform2d
 import OpenSolid.Units (Meters, Radians, SquareMeters)
 import OpenSolid.Vector2d (Vector2d)
 import OpenSolid.Vector2d qualified as Vector2d
+import OpenSolid.VectorCurve2d (VectorCurve2d)
+import OpenSolid.VectorCurve2d qualified as VectorCurve2d
+import Prelude (flip)
 
 data Space
 
@@ -102,6 +120,18 @@ classes =
   , areaCurve
   , angleCurve
   , drawing2d
+  , axis2d
+  , uvAxis
+  , plane3d
+  , vectorCurve2d
+  , displacementCurve2d
+  , curve2d
+  , uvCurve
+  , region2d
+  , uvRegion
+  , body3d
+  , mesh
+  , scene3d
   ]
 
 length :: Class
@@ -577,6 +607,7 @@ point2d =
     , minusSelf
     , minus @(Vector2d (Space @ Meters)) Self
     , plus @(Vector2d (Space @ Meters)) Self
+    , minus @(Curve2d (Space @ Meters)) Self
     ]
 
 uvPoint :: Class
@@ -639,7 +670,7 @@ curve =
     , factory1 "Constant" "Value" Curve.constant $(docs 'Curve.constant)
     , member0 "Squared" Curve.squared $(docs 'Curve.squared)
     , member0 "Sqrt" Curve.sqrt $(docs 'Curve.sqrt)
-    , member1 "Evaluate" "Parameter Value" (\t c -> Curve.evaluate c t) $(docs 'Curve.evaluate)
+    , member1 "Evaluate" "Parameter Value" (flip Curve.evaluate) $(docs 'Curve.evaluate)
     , memberU0 "Zeros" Curve.zeros $(docs 'Curve.zeros)
     , memberU0 "Is Zero" (~= 0.0) "Check if a curve is zero everywhere, within the current tolerance."
     , negateSelf
@@ -677,7 +708,7 @@ angleCurve =
     , factory1 "Constant" "Value" Curve.constant $(docs 'Curve.constant)
     , member0 "Sin" Curve.sin $(docs 'Curve.sin)
     , member0 "Cos" Curve.cos $(docs 'Curve.cos)
-    , member1 "Evaluate" "Parameter Value" (\t c -> Curve.evaluate c t) $(docs 'Curve.evaluate)
+    , member1 "Evaluate" "Parameter Value" (flip Curve.evaluate) $(docs 'Curve.evaluate)
     , memberR0 "Zeros" Curve.zeros $(docs 'Curve.zeros)
     , memberR0 "Is Zero" (~= Angle.zero) "Check if a curve is zero everywhere, within the current tolerance."
     , negateSelf
@@ -700,7 +731,7 @@ lengthCurve =
     "A parametric curve definining a length in terms of a parameter value."
     [ constant "Zero" (Curve.zero @Meters) $(docs 'Curve.zero)
     , factory1 "Constant" "Value" Curve.constant $(docs 'Curve.constant)
-    , member1 "Evaluate" "Parameter Value" (\t c -> Curve.evaluate c t) $(docs 'Curve.evaluate)
+    , member1 "Evaluate" "Parameter Value" (flip Curve.evaluate) $(docs 'Curve.evaluate)
     , memberM0 "Zeros" Curve.zeros $(docs 'Curve.zeros)
     , memberM0 "Is Zero" (~= Length.zero) "Check if a curve is zero everywhere, within the current tolerance."
     , negateSelf
@@ -725,7 +756,7 @@ areaCurve =
     "A parametric curve definining an area in terms of a parameter value."
     [ constant "Zero" (Curve.zero @SquareMeters) $(docs 'Curve.zero)
     , factory1 "Constant" "Value" Curve.constant $(docs 'Curve.constant)
-    , member1 "Evaluate" "Parameter Value" (\t c -> Curve.evaluate c t) $(docs 'Curve.evaluate)
+    , member1 "Evaluate" "Parameter Value" (flip Curve.evaluate) $(docs 'Curve.evaluate)
     , memberSM0 "Zeros" Curve.zeros $(docs 'Curve.zeros)
     , memberSM0 "Is Zero" (~= Area.zero) "Check if a curve is zero everywhere, within the current tolerance."
     , negateSelf
@@ -754,12 +785,224 @@ drawing2d =
     [ static2 "To SVG" "View Box" "Entities" Drawing2d.toSvg $(docs 'Drawing2d.toSvg)
     , static2 "Polygon" "Attributes" "Vertices" Drawing2d.polygon $(docs 'Drawing2d.polygon)
     , static3 "Circle" "Attributes" "Radius" "Center Point" Drawing2d.circle $(docs 'Drawing2d.circle)
+    , static3 "Curve" "Attributes" "Max Error" "Curve" Drawing2d.curve $(docs 'Drawing2d.curve)
     , constant "Black Stroke" Drawing2d.blackStroke $(docs 'Drawing2d.blackStroke)
     , static1 "Stroke Color" "Color" Drawing2d.strokeColor $(docs 'Drawing2d.strokeColor)
     , constant "No Fill" Drawing2d.noFill $(docs 'Drawing2d.noFill)
     , static1 "Fill Color" "Color" Drawing2d.fillColor $(docs 'Drawing2d.fillColor)
     , nested @(Drawing2d.Entity Space) "A drawing entity such as a shape or group." []
     , nested @(Drawing2d.Attribute Space) "A drawing attribute such as fill color or stroke width." []
+    ]
+
+axis2d :: Class
+axis2d =
+  class_ @(Axis2d (Space @ Meters)) $(docs ''Axis2d) $
+    [ constant "X" (Axis2d.x @Space @Meters) $(docs 'Axis2d.x)
+    , constant "Y" (Axis2d.y @Space @Meters) $(docs 'Axis2d.y)
+    ]
+      + orthonormalTransformations2d Axis2d.transformBy
+
+uvAxis :: Class
+uvAxis =
+  class_ @(Axis2d (Space @ Unitless)) $(docs ''Axis2d) $
+    [ constant "U" (Axis2d.x @Space @Meters) "The U axis."
+    , constant "V" (Axis2d.y @Space @Meters) "The V axis."
+    ]
+
+plane3d :: Class
+plane3d =
+  class_ @(Plane3d (Space @ Meters) (Defines Space)) $(docs ''Plane3d) $
+    [ constant "XY" (Plane3d.xy @Space @Meters) $(docs 'Plane3d.xy)
+    , constant "YX" (Plane3d.yx @Space @Meters) $(docs 'Plane3d.yx)
+    , constant "ZX" (Plane3d.zx @Space @Meters) $(docs 'Plane3d.zx)
+    , constant "XZ" (Plane3d.xz @Space @Meters) $(docs 'Plane3d.xz)
+    , constant "YZ" (Plane3d.yz @Space @Meters) $(docs 'Plane3d.yz)
+    , constant "ZY" (Plane3d.zy @Space @Meters) $(docs 'Plane3d.zy)
+    ]
+
+vectorCurve2d :: Class
+vectorCurve2d =
+  class_ @(VectorCurve2d (Space @ Unitless))
+    "A parametric curve defining a 2D unitless vector in terms of a parameter value."
+    [ constant "Zero" (VectorCurve2d.zero @Space @Unitless) $(docs 'VectorCurve2d.zero)
+    , factory1 "Constant" "Value" VectorCurve2d.constant $(docs 'VectorCurve2d.constant)
+    , factory2 "XY" "X Component" "Y Component" VectorCurve2d.xy $(docs 'VectorCurve2d.xy)
+    , member1 "Evaluate" "Parameter Value" (flip VectorCurve2d.evaluate) $(docs 'VectorCurve2d.evaluate)
+    ]
+
+displacementCurve2d :: Class
+displacementCurve2d =
+  class_ @(VectorCurve2d (Space @ Meters))
+    "A parametric curve defining a 2D displacement vector in terms of a parameter value."
+    [ constant "Zero" (VectorCurve2d.zero @Space @Meters) $(docs 'VectorCurve2d.zero)
+    , factory1 "Constant" "Value" VectorCurve2d.constant $(docs 'VectorCurve2d.constant)
+    , factory2 "XY" "X Component" "Y Component" VectorCurve2d.xy $(docs 'VectorCurve2d.xy)
+    , member1 "Evaluate" "Parameter Value" (flip VectorCurve2d.evaluate) $(docs 'VectorCurve2d.evaluate)
+    ]
+
+-- Require that a particular value type,
+-- plus all the argument types used in its transformation functions,
+-- all have FFI instances
+type Transformation2d value space units =
+  ( FFI value
+  , FFI (Qty units)
+  , FFI (Vector2d (space @ units))
+  , FFI (Direction2d space)
+  , FFI (Point2d (space @ units))
+  , FFI (Axis2d (space @ units))
+  )
+
+rigidTransformations2d ::
+  Transformation2d value space units =>
+  (Transform2d.Rigid (space @ units) -> value -> value) ->
+  List (Member value)
+rigidTransformations2d transformBy =
+  [ member1 "Translate By" "Displacement" (Transform2d.translateByImpl transformBy) "Translate by the given displacement."
+  , member2 "Translate In" "Direction" "Distance" (Transform2d.translateInImpl transformBy) "Translate in the given direction by the given distance."
+  , member2 "Translate Along" "Axis" "Distance" (Transform2d.translateAlongImpl transformBy) "Translate along the given axis by the given distance."
+  , member2 "Rotate Around" "Point" "Angle" (Transform2d.rotateAroundImpl transformBy) "Rotate around the given point by the given angle."
+  ]
+
+orthonormalTransformations2d ::
+  Transformation2d value space units =>
+  (forall tag. Transform.IsOrthonormal tag => Transform2d tag (space @ units) -> value -> value) ->
+  List (Member value)
+orthonormalTransformations2d transformBy =
+  member1 "Mirror Across" "Axis" (Transform2d.mirrorAcrossImpl transformBy) "Mirror across the given axis."
+    : rigidTransformations2d transformBy
+
+uniformTransformations2d ::
+  Transformation2d value space units =>
+  (forall tag. Transform.IsUniform tag => Transform2d tag (space @ units) -> value -> value) ->
+  List (Member value)
+uniformTransformations2d transformBy =
+  member2 "Scale About" "Point" "Scale" (Transform2d.scaleAboutImpl transformBy) "Scale uniformly about the given point by the given scaling factor."
+    : orthonormalTransformations2d transformBy
+
+affineTransformations2d ::
+  ( FFI value
+  , FFI (Vector2d (space @ units))
+  , FFI (Qty units)
+  , FFI (Direction2d space)
+  , FFI (Axis2d (space @ units))
+  , FFI (Point2d (space @ units))
+  ) =>
+  (forall tag. Transform2d tag (space @ units) -> value -> value) ->
+  List (Member value)
+affineTransformations2d transformBy =
+  member2 "Scale Along" "Axis" "Scale" (Transform2d.scaleAlongImpl transformBy) "Scale (stretch) along the given axis by the given scaling factor."
+    : uniformTransformations2d transformBy
+
+curve2d :: Class
+curve2d =
+  class_ @(Curve2d (Space @ Meters)) $(docs ''Curve2d) $
+    [ factory1 "Constant" "Point" Curve2d.constant $(docs 'Curve2d.constant)
+    , factory2 "XY" "X Coordinate" "Y Coordinate" Curve2d.xy $(docs 'Curve2d.xy)
+    , factory2 "Line" "Start Point" "End Point" Curve2d.line $(docs 'Curve2d.line)
+    , factoryM3 "Arc" "Start Point" "End Point" "Swept Angle" Curve2d.arc $(docs 'Curve2d.arc)
+    , factory4 "Polar Arc" "Center Point" "Radius" "Start Angle" "End Angle" Curve2d.polarArc $(docs 'Curve2d.polarArc)
+    , factory3 "Swept Arc" "Center Point" "Start Point" "Swept Angle" Curve2d.sweptArc $(docs 'Curve2d.sweptArc)
+    , factoryM4 "Corner Arc" "Corner Point" "Incoming Direction" "Outgoing Direction" "Radius" Curve2d.cornerArc $(docs 'Curve2d.cornerArc)
+    , factory1 "Bezier" "Control Points" Curve2d.bezier $(docs 'Curve2d.bezier)
+    , factory4 "Hermite" "Start Point" "Start Derivatives" "End Point" "End Derivatives" Curve2d.hermite $(docs 'Curve2d.hermite)
+    , member0 "Start Point" Curve2d.startPoint $(docs 'Curve2d.startPoint)
+    , member0 "End Point" Curve2d.endPoint $(docs 'Curve2d.endPoint)
+    , member1 "Evaluate" "Parameter Value" (flip Curve2d.evaluate) $(docs 'Curve2d.evaluate)
+    , member0 "Derivative" Curve2d.derivative $(docs 'Curve2d.derivative)
+    , member0 "Reverse" Curve2d.reverse $(docs 'Curve2d.reverse)
+    , member0 "X Coordinate" Curve2d.xCoordinate $(docs 'Curve2d.xCoordinate)
+    , member0 "Y Coordinate" Curve2d.yCoordinate $(docs 'Curve2d.yCoordinate)
+    , plus @(VectorCurve2d (Space @ Meters)) Self
+    , minus @(VectorCurve2d (Space @ Meters)) Self
+    , minusSelf
+    , minus @(Point2d (Space @ Meters)) Self
+    ]
+      + affineTransformations2d Curve2d.transformBy
+
+uvCurve :: Class
+uvCurve =
+  class_ @(Curve2d (Space @ Unitless)) $(docs ''Curve2d) $
+    [ factory1 "Constant" "Point" Curve2d.constant $(docs 'Curve2d.constant)
+    , factory2 "UV" "U Coordinate" "V Coordinate" Curve2d.xy $(docs 'Curve2d.xy)
+    , factory2 "Line" "Start Point" "End Point" Curve2d.line $(docs 'Curve2d.line)
+    , factoryU3 "Arc" "Start Point" "End Point" "Swept Angle" Curve2d.arc $(docs 'Curve2d.arc)
+    , factory4 "Polar Arc" "Center Point" "Radius" "Start Angle" "End Angle" Curve2d.polarArc $(docs 'Curve2d.polarArc)
+    , factory3 "Swept Arc" "Center Point" "Start Point" "Swept Angle" Curve2d.sweptArc $(docs 'Curve2d.sweptArc)
+    , factoryU4 "Corner Arc" "Corner Point" "Incoming Direction" "Outgoing Direction" "Radius" Curve2d.cornerArc $(docs 'Curve2d.cornerArc)
+    , factory1 "Bezier" "Control Points" Curve2d.bezier $(docs 'Curve2d.bezier)
+    , factory4 "Hermite" "Start Point" "Start Derivatives" "End Point" "End Derivatives" Curve2d.hermite $(docs 'Curve2d.hermite)
+    , member0 "Start Point" Curve2d.startPoint $(docs 'Curve2d.startPoint)
+    , member0 "End Point" Curve2d.endPoint $(docs 'Curve2d.endPoint)
+    , member1 "Evaluate" "Parameter Value" (flip Curve2d.evaluate) $(docs 'Curve2d.evaluate)
+    , member0 "Derivative" Curve2d.derivative $(docs 'Curve2d.derivative)
+    , member0 "Reverse" Curve2d.reverse $(docs 'Curve2d.reverse)
+    , member0 "U Coordinate" Curve2d.xCoordinate $(docs 'Curve2d.xCoordinate)
+    , member0 "V Coordinate" Curve2d.yCoordinate $(docs 'Curve2d.yCoordinate)
+    , plus @(VectorCurve2d (Space @ Unitless)) Self
+    , minus @(VectorCurve2d (Space @ Unitless)) Self
+    , minusSelf
+    , minus @(Point2d (Space @ Unitless)) Self
+    ]
+      + affineTransformations2d Curve2d.transformBy
+
+region2d :: Class
+region2d =
+  class_ @(Region2d (Space @ Meters)) $(docs ''Region2d) $
+    [ staticM1 "Bounded By" "Curves" (Region2d.boundedBy @Space @Meters) $(docs 'Region2d.boundedBy)
+    , member0 "Outer Loop" Region2d.outerLoop $(docs 'Region2d.outerLoop)
+    , member0 "Inner Loops" Region2d.innerLoops $(docs 'Region2d.innerLoops)
+    , member0 "Boundary Curves" Region2d.boundaryCurves $(docs 'Region2d.boundaryCurves)
+    ]
+      + affineTransformations2d Region2d.transformBy
+
+uvRegion :: Class
+uvRegion =
+  class_ @(Region2d (Space @ Unitless)) $(docs ''Region2d) $
+    [ constant "Unit" Region2d.unit $(docs 'Region2d.unit)
+    , staticU1 "Bounded By" "Curves" (Region2d.boundedBy @Space @Unitless) $(docs 'Region2d.boundedBy)
+    , member0 "Outer Loop" Region2d.outerLoop $(docs 'Region2d.outerLoop)
+    , member0 "Inner Loops" Region2d.innerLoops $(docs 'Region2d.innerLoops)
+    , member0 "Boundary Curves" Region2d.boundaryCurves $(docs 'Region2d.boundaryCurves)
+    ]
+      + affineTransformations2d Region2d.transformBy
+
+body3d :: Class
+body3d =
+  class_ @(Body3d (Space @ Meters)) $(docs ''Body3d) $
+    [ staticM3 "Extruded" "Sketch Plane" "Profile" "Distance" (Body3d.extruded @Space @Meters @Space) $(docs 'Body3d.extruded)
+    , staticM4 "Revolved" "Sketch Plane" "Profile" "Axis" "Angle" (Body3d.revolved @Space @Meters @Space) $(docs 'Body3d.revolved)
+    ]
+
+data Mesh_
+
+instance FFI Mesh_ where
+  representation = FFI.classRepresentation "Mesh"
+
+mesh :: Class
+mesh =
+  class_ @Mesh_
+    "Meshing-related functionality."
+    [ nested @(Mesh.Constraint Meters) $(docs ''Mesh.Constraint) []
+    , static1 "Max Error" "Error" (Mesh.maxError @Meters) $(docs 'Mesh.maxError)
+    , static1 "Max Size" "Size" (Mesh.maxSize @Meters) $(docs 'Mesh.maxSize)
+    ]
+
+data Scene3d_
+
+instance FFI Scene3d_ where
+  representation = FFI.classRepresentation "Scene3d"
+
+scene3d :: Class
+scene3d =
+  class_ @Scene3d_
+    "A set of functions for constructing 3D scenes."
+    [ staticM3 "Body" "Mesh Constraints" "Material" "Body" (Scene3d.body @Space) $(docs 'Scene3d.body)
+    , static1 "Group" "Entities" (Scene3d.group @Space) $(docs 'Scene3d.group)
+    , static2 "Metal" "Base Color" "Roughness" Scene3d.metal $(docs 'Scene3d.metal)
+    , static2 "Nonmetal" "Base Color" "Roughness" Scene3d.nonmetal $(docs 'Scene3d.nonmetal)
+    , static3 "Write GLB" "Path" "Ground Plane" "Entities" (Scene3d.writeGlb @Space) $(docs 'Scene3d.writeGlb)
+    , nested @(Scene3d.Entity Space) "A scene entity such as a mesh or group." []
+    , nested @Scene3d.Material "A material applied to a mesh." []
     ]
 
 ----- CLASS MEMBERS -----
@@ -770,15 +1013,22 @@ class_ classDocs members = buildClass classDocs members [] [] [] Nothing Nothing
 data Member value where
   Const :: FFI result => Text -> result -> Text -> Member value
   Static1 :: (FFI a, FFI result) => Text -> Text -> (a -> result) -> Text -> Member value
+  StaticU1 :: (FFI a, FFI result) => Text -> Text -> (Tolerance Unitless => a -> result) -> Text -> Member value
+  StaticM1 :: (FFI a, FFI result) => Text -> Text -> (Tolerance Meters => a -> result) -> Text -> Member value
   Static2 :: (FFI a, FFI b, FFI result) => Text -> Text -> Text -> (a -> b -> result) -> Text -> Member value
   Static3 :: (FFI a, FFI b, FFI c, FFI result) => Text -> Text -> Text -> Text -> (a -> b -> c -> result) -> Text -> Member value
+  StaticU3 :: (FFI a, FFI b, FFI c, FFI result) => Text -> Text -> Text -> Text -> (Tolerance Unitless => a -> b -> c -> result) -> Text -> Member value
+  StaticM3 :: (FFI a, FFI b, FFI c, FFI result) => Text -> Text -> Text -> Text -> (Tolerance Meters => a -> b -> c -> result) -> Text -> Member value
   Static4 :: (FFI a, FFI b, FFI c, FFI d, FFI result) => Text -> Text -> Text -> Text -> Text -> (a -> b -> c -> d -> result) -> Text -> Member value
+  StaticU4 :: (FFI a, FFI b, FFI c, FFI d, FFI result) => Text -> Text -> Text -> Text -> Text -> (Tolerance Unitless => a -> b -> c -> d -> result) -> Text -> Member value
+  StaticM4 :: (FFI a, FFI b, FFI c, FFI d, FFI result) => Text -> Text -> Text -> Text -> Text -> (Tolerance Meters => a -> b -> c -> d -> result) -> Text -> Member value
   Member0 :: (FFI value, FFI result) => Text -> (value -> result) -> Text -> Member value
   MemberU0 :: (FFI value, FFI result) => Text -> (Tolerance Unitless => value -> result) -> Text -> Member value
   MemberR0 :: (FFI value, FFI result) => Text -> (Tolerance Radians => value -> result) -> Text -> Member value
   MemberM0 :: (FFI value, FFI result) => Text -> (Tolerance Meters => value -> result) -> Text -> Member value
   MemberSM0 :: (FFI value, FFI result) => Text -> (Tolerance SquareMeters => value -> result) -> Text -> Member value
   Member1 :: (FFI a, FFI value, FFI result) => Text -> Text -> (a -> value -> result) -> Text -> Member value
+  Member2 :: (FFI a, FFI b, FFI value, FFI result) => Text -> Text -> Text -> (a -> b -> value -> result) -> Text -> Member value
   Equality :: Eq value => Member value
   Comparison :: Ord value => Member value
   Negate :: Negation value => Member value
@@ -799,14 +1049,41 @@ factory2 = Static2
 factory3 :: (FFI a, FFI b, FFI c, FFI value) => Text -> Text -> Text -> Text -> (a -> b -> c -> value) -> Text -> Member value
 factory3 = Static3
 
+factoryU3 :: (FFI a, FFI b, FFI c, FFI value) => Text -> Text -> Text -> Text -> (Tolerance Unitless => a -> b -> c -> value) -> Text -> Member value
+factoryU3 = StaticU3
+
+factoryM3 :: (FFI a, FFI b, FFI c, FFI value) => Text -> Text -> Text -> Text -> (Tolerance Meters => a -> b -> c -> value) -> Text -> Member value
+factoryM3 = StaticM3
+
+factory4 :: (FFI a, FFI b, FFI c, FFI d, FFI value) => Text -> Text -> Text -> Text -> Text -> (a -> b -> c -> d -> value) -> Text -> Member value
+factory4 = Static4
+
+factoryU4 :: (FFI a, FFI b, FFI c, FFI d, FFI value) => Text -> Text -> Text -> Text -> Text -> (Tolerance Unitless => a -> b -> c -> d -> value) -> Text -> Member value
+factoryU4 = StaticU4
+
+factoryM4 :: (FFI a, FFI b, FFI c, FFI d, FFI value) => Text -> Text -> Text -> Text -> Text -> (Tolerance Meters => a -> b -> c -> d -> value) -> Text -> Member value
+factoryM4 = StaticM4
+
 static1 :: (FFI a, FFI result) => Text -> Text -> (a -> result) -> Text -> Member value
 static1 = Static1
+
+staticU1 :: (FFI a, FFI result) => Text -> Text -> (Tolerance Unitless => a -> result) -> Text -> Member value
+staticU1 = StaticU1
+
+staticM1 :: (FFI a, FFI result) => Text -> Text -> (Tolerance Meters => a -> result) -> Text -> Member value
+staticM1 = StaticM1
 
 static2 :: (FFI a, FFI b, FFI result) => Text -> Text -> Text -> (a -> b -> result) -> Text -> Member value
 static2 = Static2
 
 static3 :: (FFI a, FFI b, FFI c, FFI result) => Text -> Text -> Text -> Text -> (a -> b -> c -> result) -> Text -> Member value
 static3 = Static3
+
+staticM3 :: (FFI a, FFI b, FFI c, FFI result) => Text -> Text -> Text -> Text -> (Tolerance Meters => a -> b -> c -> result) -> Text -> Member value
+staticM3 = StaticM3
+
+staticM4 :: (FFI a, FFI b, FFI c, FFI d, FFI result) => Text -> Text -> Text -> Text -> Text -> (Tolerance Meters => a -> b -> c -> d -> result) -> Text -> Member value
+staticM4 = StaticM4
 
 member0 :: (FFI value, FFI result) => Text -> (value -> result) -> Text -> Member value
 member0 = Member0
@@ -825,6 +1102,9 @@ memberSM0 = MemberSM0
 
 member1 :: (FFI a, FFI value, FFI result) => Text -> Text -> (a -> value -> result) -> Text -> Member value
 member1 = Member1
+
+member2 :: (FFI a, FFI b, FFI value, FFI result) => Text -> Text -> Text -> (a -> b -> value -> result) -> Text -> Member value
+member2 = Member2
 
 data Self a = Self
 
@@ -1098,12 +1378,24 @@ buildClass
               nestedClassesAcc
           Static1 name arg1 f staticDocs ->
             addStatic name (StaticFunction1 (FFI.name arg1) f staticDocs)
+          StaticU1 name arg1 f staticDocs ->
+            addStatic name (StaticFunctionU1 (FFI.name arg1) f staticDocs)
+          StaticM1 name arg1 f staticDocs ->
+            addStatic name (StaticFunctionM1 (FFI.name arg1) f staticDocs)
           Static2 name arg1 arg2 f staticDocs ->
             addStatic name (StaticFunction2 (FFI.name arg1) (FFI.name arg2) f staticDocs)
           Static3 name arg1 arg2 arg3 f staticDocs ->
             addStatic name (StaticFunction3 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) f staticDocs)
+          StaticU3 name arg1 arg2 arg3 f staticDocs ->
+            addStatic name (StaticFunctionU3 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) f staticDocs)
+          StaticM3 name arg1 arg2 arg3 f staticDocs ->
+            addStatic name (StaticFunctionM3 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) f staticDocs)
           Static4 name arg1 arg2 arg3 arg4 f staticDocs ->
             addStatic name (StaticFunction4 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) (FFI.name arg4) f staticDocs)
+          StaticU4 name arg1 arg2 arg3 arg4 f staticDocs ->
+            addStatic name (StaticFunctionU4 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) (FFI.name arg4) f staticDocs)
+          StaticM4 name arg1 arg2 arg3 arg4 f staticDocs ->
+            addStatic name (StaticFunctionM4 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) (FFI.name arg4) f staticDocs)
           Member0 name f memberDocs ->
             addMember name (MemberFunction0 f memberDocs)
           MemberU0 name f memberDocs ->
@@ -1116,6 +1408,8 @@ buildClass
             addMember name (MemberFunctionSM0 f memberDocs)
           Member1 name arg1 f memberDocs ->
             addMember name (MemberFunction1 (FFI.name arg1) f memberDocs)
+          Member2 name arg1 arg2 f memberDocs ->
+            addMember name (MemberFunction2 (FFI.name arg1) (FFI.name arg2) f memberDocs)
           Equality ->
             buildClass
               classDocs
