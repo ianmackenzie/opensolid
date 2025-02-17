@@ -14,6 +14,7 @@ module OpenSolid.Camera3d
   , viewDirection
   , viewPlane
   , frame
+  , upDirection
   , focalDistance
   , projection
   , fovAngle
@@ -43,6 +44,7 @@ data ScreenSpace
 data Camera3d (coordinateSystem :: CoordinateSystem) where
   Camera3d ::
     { frame :: Frame3d (space @ units) (Defines ScreenSpace)
+    , upDirection :: Direction3d space
     , focalDistance :: Qty units
     , projection :: Projection
     , fovAngle :: Angle
@@ -71,13 +73,15 @@ height = Height
 
 new ::
   Frame3d (space @ units) (Defines ScreenSpace) ->
+  Direction3d space ->
   Qty units ->
   Projection ->
   FieldOfView units ->
   Camera3d (space @ units)
-new givenFrame givenFocalDistance projection givenFieldOfView =
+new givenFrame givenUpDirection givenFocalDistance projection givenFieldOfView =
   Camera3d
     { frame = givenFrame
+    , upDirection = givenUpDirection
     , focalDistance = givenFocalDistance
     , projection = projection
     , fovAngle = case givenFieldOfView of
@@ -110,7 +114,7 @@ lookAt givenEyePoint givenFocalPoint givenUpDirection givenProjection givenField
             -- Given eye and focal points are coincident,
             -- so choose an arbitrary frame with given up direction
             Frame3d.fromYAxis (Axis3d givenEyePoint givenUpDirection)
-  new computedFrame computedFocalDistance givenProjection givenFieldOfView
+  new computedFrame givenUpDirection computedFocalDistance givenProjection givenFieldOfView
 
 orbit ::
   Plane3d (space @ units) defines ->
@@ -128,7 +132,7 @@ orbit groundPlane givenFocalPoint azimuth elevation distance givenProjection giv
           |> Frame3d.rotateAroundOwn Frame3d.yAxis azimuth
           |> Frame3d.rotateAroundOwn Frame3d.xAxis -elevation
           |> Frame3d.translateInOwn Frame3d.zDirection distance
-  new computedFrame distance givenProjection givenFieldOfView
+  new computedFrame (Plane3d.normalDirection groundPlane) distance givenProjection givenFieldOfView
 
 isometricElevation :: Angle
 isometricElevation = Angle.atan2 1.0 (Float.sqrt 2.0)
