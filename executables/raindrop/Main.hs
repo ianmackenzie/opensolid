@@ -6,9 +6,9 @@ import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.IO qualified as IO
 import OpenSolid.Length qualified as Length
 import OpenSolid.Mesh qualified as Mesh
+import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
-import OpenSolid.Qty qualified as Qty
 import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Stl qualified as Stl
 import OpenSolid.Surface3d (Surface3d)
@@ -51,6 +51,6 @@ bottom = do
 main :: IO ()
 main = Tolerance.using Length.nanometer $ IO.do
   body <- Body3d.boundedBy [bottom, top]
-  let quality = Mesh.Quality{maxError = Qty.infinity, maxSize = Length.centimeters 20.0}
-  let mesh = Body3d.toMesh quality body
+  let constraints = NonEmpty.one (Mesh.maxSize (Length.centimeters 20.0))
+  let mesh = Body3d.toMesh constraints body
   IO.writeFile "executables/raindrop/mesh.stl" (Stl.text Length.inMillimeters mesh)

@@ -1,6 +1,12 @@
+{-# LANGUAGE NoFieldSelectors #-}
+
 module OpenSolid.Mesh
   ( Mesh
-  , Quality (..)
+  , Constraint
+  , maxError
+  , maxSize
+  , Constraints (..)
+  , constraints
   , indexed
   , vertices
   , faceIndices
@@ -16,27 +22,52 @@ import OpenSolid.Array qualified as Array
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Prelude
+import OpenSolid.Qty qualified as Qty
 
-data Mesh vertex = Mesh
-  { vertices :: Array vertex
-  , faceIndices :: List (Int, Int, Int)
-  }
+data Mesh vertex = Mesh (Array vertex) (List (Int, Int, Int))
+  deriving (Eq, Show)
 
-data Quality units = Quality
+data Constraint units
+  = MaxError (Qty units)
+  | MaxSize (Qty units)
+
+maxError :: Qty units -> Constraint units
+maxError = MaxError
+
+maxSize :: Qty units -> Constraint units
+maxSize = MaxSize
+
+data Constraints units = Constraints
   { maxError :: Qty units
   , maxSize :: Qty units
   }
 
+unconstrained :: Constraints units
+unconstrained = Constraints{maxError = Qty.infinity, maxSize = Qty.infinity}
+
+apply :: Constraints units -> Constraint units -> Constraints units
+apply current (MaxError value) = current{maxError = value}
+apply current (MaxSize value) = current{maxSize = value}
+
+constraints :: NonEmpty (Constraint units) -> Constraints units
+constraints nonEmpty = NonEmpty.foldl apply unconstrained nonEmpty
+
 indexed :: Array vertex -> List (Int, Int, Int) -> Mesh vertex
 indexed = Mesh
 
+vertices :: Mesh vertex -> Array vertex
+vertices (Mesh vs _) = vs
+
+faceIndices :: Mesh vertex -> List (Int, Int, Int)
+faceIndices (Mesh _ fs) = fs
+
 faceVertices :: Mesh vertex -> List (vertex, vertex, vertex)
-faceVertices (Mesh vertices faceIndices) = do
-  let toVertices (i, j, k) = (Array.get i vertices, Array.get j vertices, Array.get k vertices)
-  List.map toVertices faceIndices
+faceVertices (Mesh vs fs) = do
+  let toVertices (i, j, k) = (Array.get i vs, Array.get j vs, Array.get k vs)
+  List.map toVertices fs
 
 map :: (a -> b) -> Mesh a -> Mesh b
-map f (Mesh vertices faceIndices) = Mesh (Array.map f vertices) faceIndices
+map f (Mesh vs fs) = Mesh (Array.map f vs) fs
 
 concat :: NonEmpty (Mesh a) -> Mesh a
 concat meshes = do
@@ -51,7 +82,14 @@ collect :: (a -> Mesh b) -> NonEmpty a -> Mesh b
 collect toMesh values = concat (NonEmpty.map toMesh values)
 
 offsetFaceIndices :: Int -> List Int -> List (List (Int, Int, Int)) -> List (List (Int, Int, Int))
-offsetFaceIndices offset (arraySize : remainingArraySizes) (faceIndices : remainingFaceIndices) =
-  List.map (\(i, j, k) -> (i + offset, j + offset, k + offset)) faceIndices
-    : offsetFaceIndices (offset + arraySize) remainingArraySizes remainingFaceIndices
-offsetFaceIndices _ _ _ = []
+offsetFaceIndices _ [] _ = []
+offsetFaceIndices _ _ [] = []
+offsetFaceIndices offset (NonEmpty vertexArraySizes) (NonEmpty faceIndicesLists) =
+  List.map (addOffset offset) (NonEmpty.first faceIndicesLists)
+    : offsetFaceIndices
+      (offset + NonEmpty.first vertexArraySizes)
+      (NonEmpty.rest vertexArraySizes)
+      (NonEmpty.rest faceIndicesLists)
+
+addOffset :: Int -> (Int, Int, Int) -> (Int, Int, Int)
+addOffset offset (i, j, k) = (i + offset, j + offset, k + offset)

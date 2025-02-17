@@ -7,10 +7,10 @@ import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.IO qualified as IO
 import OpenSolid.Length qualified as Length
 import OpenSolid.Mesh qualified as Mesh
+import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Plane3d qualified as Plane3d
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
-import OpenSolid.Qty qualified as Qty
 import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Stl qualified as Stl
 import OpenSolid.Tolerance qualified as Tolerance
@@ -35,6 +35,6 @@ main = Tolerance.using Length.nanometer $ IO.do
       , Curve2d.line p4 p0
       ]
   body <- Body3d.revolved Plane3d.yz profile Axis2d.y (Angle.degrees 270.0)
-  let quality = Mesh.Quality{maxError = Length.millimeters 0.2, maxSize = Qty.infinity}
-  let mesh = Body3d.toMesh quality body
+  let constraints = NonEmpty.one (Mesh.maxError (Length.millimeters 0.2))
+  let mesh = Body3d.toMesh constraints body
   IO.writeFile "executables/funky-moulding/mesh.stl" (Stl.text Length.inMillimeters mesh)

@@ -515,31 +515,36 @@ instance Vertex3d (Vertex (space @ units)) (space @ units) where
 instance Bounded2d (Vertex (space @ units)) UvCoordinates where
   bounds (Vertex uvPoint _) = Bounds2d.constant uvPoint
 
-toMesh :: Tolerance units => Mesh.Quality units -> Body3d (space @ units) -> Mesh (Point3d (space @ units))
-toMesh quality (Body3d boundarySurfaces) = do
+toMesh ::
+  Tolerance units =>
+  NonEmpty (Mesh.Constraint units) ->
+  Body3d (space @ units) ->
+  Mesh (Point3d (space @ units))
+toMesh givenConstraints (Body3d boundarySurfaces) = do
   let boundarySurfaceList = NonEmpty.toList boundarySurfaces
-  let surfaceSegmentsById = Map.fromList (boundarySurfaceSegments quality) boundarySurfaceList
+  let constraints = Mesh.constraints givenConstraints
+  let surfaceSegmentsById = Map.fromList (boundarySurfaceSegments constraints) boundarySurfaceList
   let innerEdgeVerticesById =
         NonEmpty.foldr
-          (addBoundaryInnerEdgeVertices quality surfaceSegmentsById)
+          (addBoundaryInnerEdgeVertices constraints surfaceSegmentsById)
           Map.empty
           boundarySurfaces
   Mesh.collect (boundarySurfaceMesh surfaceSegmentsById innerEdgeVerticesById) boundarySurfaces
 
 boundarySurfaceSegments ::
-  Mesh.Quality units ->
+  Mesh.Constraints units ->
   BoundarySurface (space @ units) ->
   (SurfaceId, Set2d UvBounds UvCoordinates)
-boundarySurfaceSegments quality BoundarySurface{id, surfaceFunctions, uvBounds} =
-  (id, boundarySurfaceSegmentSet quality surfaceFunctions uvBounds)
+boundarySurfaceSegments constraints BoundarySurface{id, surfaceFunctions, uvBounds} =
+  (id, boundarySurfaceSegmentSet constraints surfaceFunctions uvBounds)
 
 boundarySurfaceSegmentSet ::
-  Mesh.Quality units ->
+  Mesh.Constraints units ->
   SurfaceFunctions (space @ units) ->
   UvBounds ->
   Set2d UvBounds UvCoordinates
-boundarySurfaceSegmentSet quality surfaceFunctions uvBounds = do
-  let Mesh.Quality{maxError, maxSize} = quality
+boundarySurfaceSegmentSet constraints surfaceFunctions uvBounds = do
+  let Mesh.Constraints{maxError, maxSize} = constraints
   if surfaceSize surfaceFunctions uvBounds <= maxSize
     && surfaceError surfaceFunctions uvBounds <= maxError
     then Set2d.Leaf uvBounds uvBounds
@@ -547,10 +552,10 @@ boundarySurfaceSegmentSet quality surfaceFunctions uvBounds = do
       let Bounds2d uRange vRange = uvBounds
       let (u1, u2) = Range.bisect uRange
       let (v1, v2) = Range.bisect vRange
-      let set11 = boundarySurfaceSegmentSet quality surfaceFunctions (Bounds2d u1 v1)
-      let set12 = boundarySurfaceSegmentSet quality surfaceFunctions (Bounds2d u1 v2)
-      let set21 = boundarySurfaceSegmentSet quality surfaceFunctions (Bounds2d u2 v1)
-      let set22 = boundarySurfaceSegmentSet quality surfaceFunctions (Bounds2d u2 v2)
+      let set11 = boundarySurfaceSegmentSet constraints surfaceFunctions (Bounds2d u1 v1)
+      let set12 = boundarySurfaceSegmentSet constraints surfaceFunctions (Bounds2d u1 v2)
+      let set21 = boundarySurfaceSegmentSet constraints surfaceFunctions (Bounds2d u2 v1)
+      let set22 = boundarySurfaceSegmentSet constraints surfaceFunctions (Bounds2d u2 v2)
       let set1 = Set2d.Node (Bounds2d u1 vRange) set11 set12
       let set2 = Set2d.Node (Bounds2d u2 vRange) set21 set22
       Set2d.Node uvBounds set1 set2
@@ -576,31 +581,31 @@ surfaceError SurfaceFunctions{fuu, fuv, fvv} uvBounds = do
   SurfaceLinearization.error fuuBounds fuvBounds fvvBounds uvBounds
 
 addBoundaryInnerEdgeVertices ::
-  Mesh.Quality units ->
+  Mesh.Constraints units ->
   Map SurfaceId (Set2d UvBounds UvCoordinates) ->
   BoundarySurface (space @ units) ->
   Map HalfEdgeId (List (Vertex (space @ units))) ->
   Map HalfEdgeId (List (Vertex (space @ units)))
-addBoundaryInnerEdgeVertices quality surfaceSegmentsById boundarySurface accumulated = do
+addBoundaryInnerEdgeVertices constraints surfaceSegmentsById boundarySurface accumulated = do
   let BoundarySurface{edgeLoops} = boundarySurface
-  NonEmpty.foldr (addLoopInnerEdgeVertices quality surfaceSegmentsById) accumulated edgeLoops
+  NonEmpty.foldr (addLoopInnerEdgeVertices constraints surfaceSegmentsById) accumulated edgeLoops
 
 addLoopInnerEdgeVertices ::
-  Mesh.Quality units ->
+  Mesh.Constraints units ->
   Map SurfaceId (Set2d UvBounds UvCoordinates) ->
   NonEmpty (Edge (space @ units)) ->
   Map HalfEdgeId (List (Vertex (space @ units))) ->
   Map HalfEdgeId (List (Vertex (space @ units)))
-addLoopInnerEdgeVertices quality surfaceSegmentsById loop accumulated =
-  NonEmpty.foldr (addInnerEdgeVertices quality surfaceSegmentsById) accumulated loop
+addLoopInnerEdgeVertices constraints surfaceSegmentsById loop accumulated =
+  NonEmpty.foldr (addInnerEdgeVertices constraints surfaceSegmentsById) accumulated loop
 
 addInnerEdgeVertices ::
-  Mesh.Quality units ->
+  Mesh.Constraints units ->
   Map SurfaceId (Set2d UvBounds UvCoordinates) ->
   Edge (space @ units) ->
   Map HalfEdgeId (List (Vertex (space @ units))) ->
   Map HalfEdgeId (List (Vertex (space @ units)))
-addInnerEdgeVertices quality surfaceSegmentsById edge accumulated = do
+addInnerEdgeVertices constraints surfaceSegmentsById edge accumulated = do
   case edge of
     DegenerateEdge{id, uvCurve, point} -> do
       let HalfEdgeId{surfaceId} = id
@@ -619,7 +624,7 @@ addInnerEdgeVertices quality surfaceSegmentsById edge accumulated = do
         (Just surfaceSegments, Just matingSurfaceSegments) -> do
           let edgePredicate =
                 edgeLinearizationPredicate
-                  quality
+                  constraints
                   curve3d
                   uvCurve
                   matingUvCurve
@@ -642,7 +647,7 @@ addInnerEdgeVertices quality surfaceSegmentsById edge accumulated = do
     SecondaryEdge{} -> accumulated
 
 edgeLinearizationPredicate ::
-  Mesh.Quality units ->
+  Mesh.Constraints units ->
   Curve3d (space @ units) ->
   Curve2d UvCoordinates ->
   Curve2d UvCoordinates ->
@@ -653,7 +658,7 @@ edgeLinearizationPredicate ::
   Range Unitless ->
   Bool
 edgeLinearizationPredicate
-  quality
+  constraints
   curve3d
   uvCurve
   matingUvCurve
@@ -678,7 +683,7 @@ edgeLinearizationPredicate
     let edgeLength = Point3d.distanceFrom startPoint endPoint
     let edgeSecondDerivativeBounds = VectorCurve3d.evaluateBounds edgeSecondDerivative tRange
     let edgeSecondDerivativeMagnitude = VectorBounds3d.magnitude edgeSecondDerivativeBounds
-    let Mesh.Quality{maxError, maxSize} = quality
+    let Mesh.Constraints{maxError, maxSize} = constraints
     edgeLength <= maxSize
       && Linearization.error edgeSecondDerivativeMagnitude tRange <= maxError
       && validEdge uvBounds edgeSize surfaceSegments

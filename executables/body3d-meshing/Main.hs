@@ -6,10 +6,10 @@ import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.IO qualified as IO
 import OpenSolid.Length qualified as Length
 import OpenSolid.Mesh qualified as Mesh
+import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Plane3d qualified as Plane3d
 import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
-import OpenSolid.Qty qualified as Qty
 import OpenSolid.Range (Range (Range))
 import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Stl qualified as Stl
@@ -24,6 +24,6 @@ main = Tolerance.using Length.nanometer $ IO.do
   profile <- Region2d.boundedBy [arc, line]
   let extrusionLimits = Range (-0.5 * length) (0.5 * length)
   body <- Body3d.extruded Plane3d.yz profile extrusionLimits
-  let quality = Mesh.Quality{maxError = Qty.infinity, maxSize = Length.centimeters 30.0}
-  let mesh = Body3d.toMesh quality body
+  let constraints = NonEmpty.one (Mesh.maxSize (Length.centimeters 30.0))
+  let mesh = Body3d.toMesh constraints body
   IO.writeFile "executables/body3d-meshing/mesh.stl" (Stl.text Length.inMillimeters mesh)

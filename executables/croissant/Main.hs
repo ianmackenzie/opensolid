@@ -6,8 +6,8 @@ import OpenSolid.Curve qualified as Curve
 import OpenSolid.IO qualified as IO
 import OpenSolid.Length qualified as Length
 import OpenSolid.Mesh qualified as Mesh
+import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Prelude
-import OpenSolid.Qty qualified as Qty
 import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Stl qualified as Stl
 import OpenSolid.Surface3d qualified as Surface3d
@@ -29,6 +29,6 @@ main = Tolerance.using Length.nanometer $ IO.do
   let surfaceFunction = SurfaceFunction3d.xyz x y z
   let surface = Surface3d.parametric surfaceFunction Region2d.unit
   body <- Body3d.boundedBy [surface]
-  let quality = Mesh.Quality{maxError = Qty.infinity, maxSize = Length.centimeters 20.0}
-  let mesh = Body3d.toMesh quality body
+  let constraints = NonEmpty.one (Mesh.maxSize (Length.centimeters 20.0))
+  let mesh = Body3d.toMesh constraints body
   IO.writeFile "executables/croissant/mesh.stl" (Stl.text Length.inMillimeters mesh)
