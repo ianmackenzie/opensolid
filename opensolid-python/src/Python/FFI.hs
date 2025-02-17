@@ -219,7 +219,8 @@ registerType ffiType registry = do
 registerList :: FFI.Type -> FFI.Type -> Registry -> Registry
 registerList listType itemType registry = do
   let listTypeName = typeName listType
-  let declaration = structDeclaration listTypeName ["c_int64", Python.call "POINTER" [typeName itemType]]
+  let declaration =
+        structDeclaration listTypeName ["c_int64", Python.call "POINTER" [typeName itemType]]
   Python.Type.Registry.add listTypeName declaration registry
 
 registerTuple :: FFI.Type -> FFI.Type -> FFI.Type -> List FFI.Type -> Registry -> Registry
@@ -241,8 +242,7 @@ registerMaybe maybeType valueType registry = do
 registerResult :: FFI.Type -> FFI.Type -> Registry -> Registry
 registerResult resultType valueType registry = do
   let resultTypeName = typeName resultType
-  let declaration =
-        structDeclaration resultTypeName ["c_int64", "_Text", typeName valueType]
+  let declaration = structDeclaration resultTypeName ["c_int64", "_Text", typeName valueType]
   registry
     |> registerType valueType
     |> Python.Type.Registry.add resultTypeName declaration
