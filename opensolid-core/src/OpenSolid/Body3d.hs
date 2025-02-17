@@ -9,6 +9,7 @@ module OpenSolid.Body3d
   , revolved
   , boundedBy
   , toMesh
+  , toStl
   )
 where
 
@@ -60,6 +61,7 @@ import OpenSolid.Set2d (Set2d)
 import OpenSolid.Set2d qualified as Set2d
 import OpenSolid.Set3d (Set3d)
 import OpenSolid.Set3d qualified as Set3d
+import OpenSolid.Stl qualified as Stl
 import OpenSolid.Surface3d (Surface3d)
 import OpenSolid.Surface3d qualified as Surface3d
 import OpenSolid.SurfaceFunction qualified as SurfaceFunction
@@ -797,3 +799,11 @@ isValidSteinerPoint edgeSet uvPoint = case edgeSet of
     Range.lowerBound distance >= 0.5 * Bounds2d.diameter nodeBounds
       || (isValidSteinerPoint left uvPoint && isValidSteinerPoint right uvPoint)
   Set2d.Leaf _ edge -> LineSegment2d.distanceTo uvPoint edge >= 0.5 * LineSegment2d.length edge
+
+toStl ::
+  Tolerance units =>
+  NonEmpty (Mesh.Constraint units) ->
+  (Qty units -> Float) ->
+  Body3d (space @ units) ->
+  Text
+toStl constraints units body = Stl.text units (toMesh constraints body)
