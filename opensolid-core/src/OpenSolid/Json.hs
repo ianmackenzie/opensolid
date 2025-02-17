@@ -2,6 +2,9 @@ module OpenSolid.Json
   ( Json (.., OpenSolid.Json.Int, Object)
   , Format
   , Schema
+  , Field
+  , field
+  , optional
   , object
   , text
   , int
@@ -27,6 +30,7 @@ import {-# SOURCE #-} OpenSolid.Json.Schema (Schema)
 import OpenSolid.List qualified as List
 import OpenSolid.Map (Map)
 import OpenSolid.Map qualified as Map
+import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Prelude
 import OpenSolid.Text qualified as Text
 import Prelude qualified
@@ -39,6 +43,8 @@ data Json
   | List (List Json)
   | Map (Map Text Json)
   deriving (Eq, Show)
+
+newtype Field = Field (Maybe (Text, Json))
 
 pattern Int :: Int -> Json
 pattern Int n <- (toInt -> Just n)
@@ -74,8 +80,17 @@ list = List
 listOf :: (a -> Json) -> List a -> Json
 listOf encodeItem items = List (List.map encodeItem items)
 
-object :: List (Text, Json) -> Json
-object fields = Map (Map.fromKeyValuePairs fields)
+field :: Text -> Json -> Field
+field name value = Field (Just (name, value))
+
+optional :: Text -> Maybe Json -> Field
+optional name maybeValue = Field (Maybe.map (name,) maybeValue)
+
+keyValuePair :: Field -> Maybe (Text, Json)
+keyValuePair (Field kv) = kv
+
+object :: List Field -> Json
+object fields = Map (Map.fromKeyValuePairs (Maybe.collect keyValuePair fields))
 
 map :: Map Text Json -> Json
 map = Map
