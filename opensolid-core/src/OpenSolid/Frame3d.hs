@@ -30,9 +30,20 @@ module OpenSolid.Frame3d
   , placeIn
   , relativeTo
   , inverse
+  , moveTo
+  , transformBy
+  , translateBy
+  , translateIn
+  , translateAlong
+  , rotateAround
+  , translateByOwn
+  , translateInOwn
+  , translateAlongOwn
+  , rotateAroundOwn
   )
 where
 
+import OpenSolid.Angle (Angle)
 import OpenSolid.Axis3d (Axis3d (Axis3d))
 import OpenSolid.Axis3d qualified as Axis3d
 import OpenSolid.Basis3d (Basis3d)
@@ -47,7 +58,9 @@ import OpenSolid.Primitives
   , Frame3d (Frame3d)
   , PlanarBasis3d (PlanarBasis3d)
   , Plane3d (Plane3d)
+  , Vector3d
   )
+import OpenSolid.Transform3d qualified as Transform3d
 
 originPoint :: Frame3d (space @ units) defines -> Point3d (space @ units)
 originPoint (Frame3d p0 _) = p0
@@ -150,3 +163,70 @@ relativeTo globalFrame frame =
 
 inverse :: Frame3d (global @ units) (Defines local) -> Frame3d (local @ units) (Defines global)
 inverse frame = xyz |> relativeTo frame
+
+moveTo ::
+  Point3d (space @ units) ->
+  Frame3d (space @ units) defines ->
+  Frame3d (space @ units) defines
+moveTo newOriginPoint (Frame3d _ b) = Frame3d newOriginPoint (Basis3d.coerce b)
+
+transformBy ::
+  Transform3d.Rigid (space @ units) ->
+  Frame3d (space @ units) defines ->
+  Frame3d (space @ units) defines
+transformBy transform (Frame3d p0 b) =
+  Frame3d (Point3d.transformBy transform p0) (Basis3d.transformBy transform b)
+
+translateBy ::
+  Vector3d (space @ units) ->
+  Frame3d (space @ units) defines ->
+  Frame3d (space @ units) defines
+translateBy = Transform3d.translateByImpl transformBy
+
+translateIn ::
+  Direction3d space ->
+  Qty units ->
+  Frame3d (space @ units) defines ->
+  Frame3d (space @ units) defines
+translateIn = Transform3d.translateInImpl transformBy
+
+translateAlong ::
+  Axis3d (space @ units) ->
+  Qty units ->
+  Frame3d (space @ units) defines ->
+  Frame3d (space @ units) defines
+translateAlong = Transform3d.translateAlongImpl transformBy
+
+rotateAround ::
+  Axis3d (space @ units) ->
+  Angle ->
+  Frame3d (space @ units) defines ->
+  Frame3d (space @ units) defines
+rotateAround = Transform3d.rotateAroundImpl transformBy
+
+translateByOwn ::
+  (Frame3d (space @ units) defines -> Vector3d (space @ units)) ->
+  Frame3d (space @ units) defines ->
+  Frame3d (space @ units) defines
+translateByOwn = Transform3d.translateByOwnImpl transformBy
+
+translateInOwn ::
+  (Frame3d (space @ units) defines -> Direction3d space) ->
+  Qty units ->
+  Frame3d (space @ units) defines ->
+  Frame3d (space @ units) defines
+translateInOwn = Transform3d.translateInOwnImpl transformBy
+
+translateAlongOwn ::
+  (Frame3d (space @ units) defines -> Axis3d (space @ units)) ->
+  Qty units ->
+  Frame3d (space @ units) defines ->
+  Frame3d (space @ units) defines
+translateAlongOwn = Transform3d.translateAlongOwnImpl transformBy
+
+rotateAroundOwn ::
+  (Frame3d (space @ units) defines -> Axis3d (space @ units)) ->
+  Angle ->
+  Frame3d (space @ units) defines ->
+  Frame3d (space @ units) defines
+rotateAroundOwn = Transform3d.rotateAroundOwnImpl transformBy
