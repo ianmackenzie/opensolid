@@ -792,6 +792,7 @@ instance
 
 ----- Axis2d -----
 
+-- | An axis in 2D, defined by an origin point and direction.
 data Axis2d (coordinateSystem :: CoordinateSystem) where
   Axis2d ::
     Point2d (space @ units) ->
@@ -1703,6 +1704,12 @@ deriving instance Show (Axis3d (space @ units))
 type role Plane3d nominal nominal
 
 type Plane3d :: CoordinateSystem -> LocalSpace -> Type
+
+{-| A plane in 3D, defined by an origin point and two perpendicular X and Y directions.
+
+The normal direction  of the plane is then defined as
+the cross product of its X and Y directions.
+-}
 data Plane3d coordinateSystem defines where
   Plane3d ::
     Point3d (space @ units) ->

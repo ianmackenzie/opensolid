@@ -44,9 +44,11 @@ direction (Axis2d _ d) = d
 normalDirection :: Axis2d (space @ units) -> Direction2d space
 normalDirection axis = Direction2d.perpendicularTo (direction axis)
 
+-- | The X axis.
 x :: Axis2d (space @ units)
 x = Axis2d Point2d.origin Direction2d.x
 
+-- | The Y axis.
 y :: Axis2d (space @ units)
 y = Axis2d Point2d.origin Direction2d.y
 

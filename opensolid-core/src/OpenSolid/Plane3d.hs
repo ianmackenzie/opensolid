@@ -42,21 +42,51 @@ import OpenSolid.Vector3d (Vector3d)
 through :: Point3d (space @ units) -> Direction3d space -> Plane3d (space @ units) defines
 through p0 n = Plane3d p0 (PlanarBasis3d.fromNormalDirection n)
 
+{-| The XY plane.
+
+A plane whose X direction is the global X direction
+and whose Y direction is the global Y direction.
+-}
 xy :: Plane3d (space @ units) (Defines local)
 xy = Plane3d Point3d.origin PlanarBasis3d.xy
 
+{-| The YX plane.
+
+A plane whose X direction is the global Y direction
+and whose Y direction is the global X direction.
+-}
 yx :: Plane3d (space @ units) (Defines local)
 yx = Plane3d Point3d.origin PlanarBasis3d.yx
 
+{-| The ZX plane.
+
+A plane whose X direction is the global Z direction
+and whose Y direction is the global X direction.
+-}
 zx :: Plane3d (space @ units) (Defines local)
 zx = Plane3d Point3d.origin PlanarBasis3d.zx
 
+{-| The XZ plane.
+
+A plane whose X direction is the global X direction
+and whose Y direction is the global Z direction.
+-}
 xz :: Plane3d (space @ units) (Defines local)
 xz = Plane3d Point3d.origin PlanarBasis3d.xz
 
+{-| The YZ plane.
+
+A plane whose X direction is the global Y direction
+and whose Y direction is the global Z direction.
+-}
 yz :: Plane3d (space @ units) (Defines local)
 yz = Plane3d Point3d.origin PlanarBasis3d.yz
 
+{-| The ZY plane.
+
+A plane whose X direction is the global Z direction
+and whose Y direction is the global Y direction.
+-}
 zy :: Plane3d (space @ units) (Defines local)
 zy = Plane3d Point3d.origin PlanarBasis3d.zy
 
