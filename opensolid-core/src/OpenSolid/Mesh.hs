@@ -23,10 +23,13 @@ import OpenSolid.Bounds2d (Bounded2d)
 import OpenSolid.Bounds2d qualified as Bounds2d
 import OpenSolid.Bounds3d (Bounded3d)
 import OpenSolid.Bounds3d qualified as Bounds3d
+import OpenSolid.FFI (FFI)
+import OpenSolid.FFI qualified as FFI
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
+import OpenSolid.Units (Meters)
 import OpenSolid.Vertex2d (Vertex2d)
 import OpenSolid.Vertex2d qualified as Vertex2d
 import OpenSolid.Vertex3d (Vertex3d)
@@ -44,6 +47,9 @@ instance Vertex3d vertex (space @ units) => Bounded3d (Mesh vertex) (space @ uni
 data Constraint units
   = MaxError (Qty units)
   | MaxSize (Qty units)
+
+instance FFI (Constraint Meters) where
+  representation = FFI.nestedClassRepresentation "Mesh" "Constraint"
 
 maxError :: Qty units -> Constraint units
 maxError = MaxError

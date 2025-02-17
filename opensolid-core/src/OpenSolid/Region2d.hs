@@ -46,6 +46,8 @@ import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Direction2d (Direction2d)
 import OpenSolid.Estimate (Estimate)
 import OpenSolid.Estimate qualified as Estimate
+import OpenSolid.FFI (FFI)
+import OpenSolid.FFI qualified as FFI
 import OpenSolid.Float qualified as Float
 import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Frame2d qualified as Frame2d
@@ -64,6 +66,7 @@ import OpenSolid.SurfaceParameter (UvCoordinates)
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform2d (Transform2d)
 import OpenSolid.Transform2d qualified as Transform2d
+import OpenSolid.Units (Meters)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2d (Vector2d)
 import OpenSolid.VectorCurve2d qualified as VectorCurve2d
@@ -75,6 +78,12 @@ data Region2d (coordinateSystem :: CoordinateSystem)
 
 type Loop (coordinateSystem :: CoordinateSystem) =
   NonEmpty (Curve2d coordinateSystem)
+
+instance FFI (Region2d (space @ Meters)) where
+  representation = FFI.classRepresentation "Region2d"
+
+instance FFI (Region2d (space @ Unitless)) where
+  representation = FFI.classRepresentation "UvRegion"
 
 instance HasUnits (Region2d (space @ units)) units (Region2d (space @ Unitless))
 

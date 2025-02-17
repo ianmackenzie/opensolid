@@ -28,6 +28,8 @@ import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Curve3d (Curve3d)
 import OpenSolid.Curve3d qualified as Curve3d
 import OpenSolid.Domain1d qualified as Domain1d
+import OpenSolid.FFI (FFI)
+import OpenSolid.FFI qualified as FFI
 import OpenSolid.Float qualified as Float
 import OpenSolid.Frame2d qualified as Frame2d
 import OpenSolid.Frame3d qualified as Frame3d
@@ -70,6 +72,7 @@ import OpenSolid.SurfaceFunction3d qualified as SurfaceFunction3d
 import OpenSolid.SurfaceLinearization qualified as SurfaceLinearization
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvCoordinates, UvPoint)
 import OpenSolid.Tolerance qualified as Tolerance
+import OpenSolid.Units (Meters)
 import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.VectorBounds2d qualified as VectorBounds2d
@@ -85,6 +88,9 @@ import OpenSolid.Vertex3d qualified as Vertex3d
 
 newtype Body3d (coordinateSystem :: CoordinateSystem)
   = Body3d (NonEmpty (BoundarySurface coordinateSystem))
+
+instance FFI (Body3d (space @ Meters)) where
+  representation = FFI.classRepresentation "Body3d"
 
 data BoundarySurface (coordinateSystem :: CoordinateSystem) where
   BoundarySurface ::

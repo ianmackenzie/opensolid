@@ -803,6 +803,12 @@ deriving instance Eq (Axis2d (space @ units))
 
 deriving instance Show (Axis2d (space @ units))
 
+instance FFI (Axis2d (space @ Meters)) where
+  representation = FFI.classRepresentation "Axis2d"
+
+instance FFI (Axis2d (space @ Unitless)) where
+  representation = FFI.classRepresentation "UvAxis"
+
 ----- Frame2d -----
 
 type Frame2d :: CoordinateSystem -> LocalSpace -> Type
@@ -899,6 +905,15 @@ data Vector3d (coordinateSystem :: CoordinateSystem) where
 deriving instance Eq (Vector3d (space @ units))
 
 deriving instance Show (Vector3d (space @ units))
+
+instance FFI (Vector3d (space @ Unitless)) where
+  representation = FFI.classRepresentation "Vector3d"
+
+instance FFI (Vector3d (space @ Meters)) where
+  representation = FFI.classRepresentation "Displacement3d"
+
+instance FFI (Vector3d (space @ SquareMeters)) where
+  representation = FFI.classRepresentation "AreaVector3d"
 
 instance HasUnits (Vector3d (space @ units)) units (Vector3d (space @ Unitless))
 
@@ -1095,6 +1110,9 @@ newtype Direction3d (space :: Type) = Unit3d (Vector3d (space @ Unitless))
 pattern Direction3d :: Float -> Float -> Float -> Direction3d space
 pattern Direction3d dx dy dz <- Unit3d (Vector3d dx dy dz)
 
+instance FFI (Direction3d space) where
+  representation = FFI.classRepresentation "Direction3d"
+
 instance HasUnits (Direction3d space) Unitless (Direction3d space)
 
 instance space1 ~ space2 => Units.Coercion (Direction3d space1) (Direction3d space2) where
@@ -1178,6 +1196,9 @@ data Point3d (coordinateSystem :: CoordinateSystem) where
 deriving instance Eq (Point3d (space @ units))
 
 deriving instance Show (Point3d (space @ units))
+
+instance FFI (Point3d (space @ Meters)) where
+  representation = FFI.classRepresentation "Point3d"
 
 instance HasUnits (Point3d (space @ units)) units (Point3d (space @ Unitless))
 
@@ -1597,6 +1618,9 @@ data Bounds3d (coordinateSystem :: CoordinateSystem) where
 
 deriving instance Show (Bounds3d (space @ units))
 
+instance FFI (Bounds3d (space @ Meters)) where
+  representation = FFI.classRepresentation "Bounds3d"
+
 instance HasUnits (Bounds3d (space @ units)) units (Bounds3d (space @ Unitless))
 
 class Bounded3d a (coordinateSystem :: CoordinateSystem) | a -> coordinateSystem where
@@ -1699,6 +1723,9 @@ deriving instance Eq (Axis3d (space @ units))
 
 deriving instance Show (Axis3d (space @ units))
 
+instance FFI (Axis3d (space @ Meters)) where
+  representation = FFI.classRepresentation "Axis3d"
+
 ----- Plane3d -----
 
 type role Plane3d nominal nominal
@@ -1720,6 +1747,9 @@ deriving instance Eq (Plane3d (space @ units) defines)
 
 deriving instance Show (Plane3d (space @ units) defines)
 
+instance FFI (Plane3d (space @ Meters) defines) where
+  representation = FFI.classRepresentation "Plane3d"
+
 ----- Frame3d -----
 
 type Frame3d :: CoordinateSystem -> LocalSpace -> Type
@@ -1729,6 +1759,9 @@ data Frame3d coordinateSystem defines where
 deriving instance Eq (Frame3d (space @ units) defines)
 
 deriving instance Show (Frame3d (space @ units) defines)
+
+instance FFI (Frame3d (space @ Meters) defines) where
+  representation = FFI.classRepresentation "Frame3d"
 
 instance
   (space1 ~ space2, defines1 ~ defines2) =>

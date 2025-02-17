@@ -106,6 +106,8 @@ import OpenSolid.Error qualified as Error
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Expression.Curve2d qualified as Expression.Curve2d
+import OpenSolid.FFI (FFI)
+import OpenSolid.FFI qualified as FFI
 import OpenSolid.Float qualified as Float
 import OpenSolid.Frame2d (Frame2d)
 import OpenSolid.Frame2d qualified as Frame2d
@@ -137,6 +139,7 @@ import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform2d (Transform2d)
 import OpenSolid.Transform2d qualified as Transform2d
+import OpenSolid.Units (Meters)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2d (Vector2d)
 import OpenSolid.Vector2d qualified as Vector2d
@@ -180,6 +183,12 @@ data Curve2d (coordinateSystem :: CoordinateSystem) where
     Curve2d (space @ units)
 
 deriving instance Show (Curve2d (space @ units))
+
+instance FFI (Curve2d (space @ Meters)) where
+  representation = FFI.classRepresentation "Curve2d"
+
+instance FFI (Curve2d (space @ Unitless)) where
+  representation = FFI.classRepresentation "UvCurve"
 
 instance HasUnits (Curve2d (space @ units)) units (Curve2d (space @ Unitless))
 
