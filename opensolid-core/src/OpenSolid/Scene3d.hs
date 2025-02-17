@@ -20,6 +20,8 @@ import OpenSolid.Array qualified as Array
 import OpenSolid.Bounds3d (Bounds3d (Bounds3d))
 import OpenSolid.Bounds3d qualified as Bounds3d
 import OpenSolid.Color (Color)
+import OpenSolid.FFI (FFI)
+import OpenSolid.FFI qualified as FFI
 import OpenSolid.Frame3d (Frame3d)
 import OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.Int qualified as Int
@@ -59,6 +61,12 @@ data Material = Material
   }
 
 data Ground
+
+instance FFI (Entity space) where
+  representation = FFI.nestedClassRepresentation "Scene3d" "Entity"
+
+instance FFI Material where
+  representation = FFI.nestedClassRepresentation "Scene3d" "Material"
 
 mesh :: Vertex3d.HasNormal vertex (space @ Meters) => Material -> Mesh vertex -> Entity space
 mesh = Mesh
