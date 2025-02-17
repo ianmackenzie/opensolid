@@ -19,13 +19,27 @@ where
 
 import OpenSolid.Array (Array)
 import OpenSolid.Array qualified as Array
+import OpenSolid.Bounds2d (Bounded2d)
+import OpenSolid.Bounds2d qualified as Bounds2d
+import OpenSolid.Bounds3d (Bounded3d)
+import OpenSolid.Bounds3d qualified as Bounds3d
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Prelude
 import OpenSolid.Qty qualified as Qty
+import OpenSolid.Vertex2d (Vertex2d)
+import OpenSolid.Vertex2d qualified as Vertex2d
+import OpenSolid.Vertex3d (Vertex3d)
+import OpenSolid.Vertex3d qualified as Vertex3d
 
 data Mesh vertex = Mesh (Array vertex) (List (Int, Int, Int))
   deriving (Eq, Show)
+
+instance Vertex2d vertex (space @ units) => Bounded2d (Mesh vertex) (space @ units) where
+  bounds mesh = Bounds2d.hullN (NonEmpty.map Vertex2d.position (Array.toNonEmpty (vertices mesh)))
+
+instance Vertex3d vertex (space @ units) => Bounded3d (Mesh vertex) (space @ units) where
+  bounds mesh = Bounds3d.hullN (NonEmpty.map Vertex3d.position (Array.toNonEmpty (vertices mesh)))
 
 data Constraint units
   = MaxError (Qty units)
