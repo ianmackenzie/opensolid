@@ -10,6 +10,7 @@ module OpenSolid.Bounds3d
   , hull2
   , hull3
   , hull4
+  , hullN
   , aggregate2
   , exclusion
   , inclusion
@@ -164,6 +165,31 @@ hull4 (Point3d x1 y1 z1) (Point3d x2 y2 z2) (Point3d x3 y3 z3) (Point3d x4 y4 z4
   let minZ = Qty.min (Qty.min (Qty.min z1 z2) z3) z4
   let maxZ = Qty.max (Qty.max (Qty.max z1 z2) z3) z4
   Bounds3d (Range minX maxX) (Range minY maxY) (Range minZ maxZ)
+
+-- | Construct a bounding box containing all points in the given non-empty list.
+hullN :: NonEmpty (Point3d (space @ units)) -> Bounds3d (space @ units)
+hullN (Point3d x0 y0 z0 :| rest) = accumulateHull x0 x0 y0 y0 z0 z0 rest
+
+accumulateHull ::
+  Qty units ->
+  Qty units ->
+  Qty units ->
+  Qty units ->
+  Qty units ->
+  Qty units ->
+  List (Point3d (space @ units)) ->
+  Bounds3d (space @ units)
+accumulateHull xLow xHigh yLow yHigh zLow zHigh remaining = case remaining of
+  [] -> Bounds3d (Range xLow xHigh) (Range yLow yHigh) (Range zLow zHigh)
+  Point3d x y z : following ->
+    accumulateHull
+      (Qty.min xLow x)
+      (Qty.max xHigh x)
+      (Qty.min yLow y)
+      (Qty.max yHigh y)
+      (Qty.min zLow z)
+      (Qty.max zHigh z)
+      following
 
 diameter :: Bounds3d (space @ units) -> Qty units
 diameter (Bounds3d x y z) = Qty.hypot3 (Range.width x) (Range.width y) (Range.width z)
