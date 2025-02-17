@@ -1,0 +1,5 @@
+#!/bin/bash
+
+set -euo pipefail
+
+cabal run --enable-profiling --profiling-detail=late-toplevel $1 -- +RTS -pj -RTS

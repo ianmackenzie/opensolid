@@ -1,5 +1,0 @@
-#!/bin/bash
-
-set -euo pipefail
-
-stack run --profile sandbox -- +RTS -pj -RTS
