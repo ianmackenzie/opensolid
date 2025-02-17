@@ -13,6 +13,7 @@ module OpenSolid.SurfaceFunction3d
   )
 where
 
+import OpenSolid.Arithmetic qualified as Arithmetic
 import OpenSolid.Bounds3d (Bounds3d)
 import OpenSolid.Bounds3d qualified as Bounds3d
 import OpenSolid.Composition
@@ -133,6 +134,41 @@ instance
     (SurfaceFunction3d (space1 @ units1))
   where
   f - v = f - VectorSurfaceFunction3d.constant v
+
+instance
+  (space1 ~ space2, units1 ~ units2) =>
+  Subtraction
+    (SurfaceFunction3d (space1 @ units1))
+    (SurfaceFunction3d (space2 @ units2))
+    (VectorSurfaceFunction3d (space1 @ units1))
+  where
+  Parametric expression1 - Parametric expression2 = VectorSurfaceFunction3d.Parametric (expression1 - expression2)
+  f1 - f2 = VectorSurfaceFunction3d.new (Arithmetic.Difference f1 f2)
+
+instance
+  VectorSurfaceFunction3d.Interface
+    (Arithmetic.Difference (SurfaceFunction3d (space @ units)) (SurfaceFunction3d (space @ units)))
+    (space @ units)
+  where
+  evaluateImpl (Arithmetic.Difference f1 f2) uvPoint =
+    evaluate f1 uvPoint - evaluate f2 uvPoint
+
+  evaluateBoundsImpl (Arithmetic.Difference f1 f2) uvBounds =
+    evaluateBounds f1 uvBounds - evaluateBounds f2 uvBounds
+
+  derivativeImpl parameter (Arithmetic.Difference f1 f2) =
+    derivative parameter f1 - derivative parameter f2
+
+  transformByImpl transform (Arithmetic.Difference f1 f2) =
+    -- Note the slight hack here:
+    -- the definition of VectorSurfaceFunction3d.Interface states that the units of the transform
+    -- do *not* have to match the units of the vector surface function,
+    -- because vectors and vector surfaces ignore translation
+    -- (and the units of the transform are just the units of its translation part).
+    -- This would in general mean that we couldn't apply the given transform to a SurfaceFunction3d,
+    -- but in this case it's safe since any translation will cancel out
+    -- when the two surface functions are subtracted from each other.
+    transformBy (Units.coerce transform) f1 - transformBy (Units.coerce transform) f2
 
 instance
   uvCoordinates ~ UvCoordinates =>
