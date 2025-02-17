@@ -2,6 +2,7 @@ module OpenSolid.Curve
   ( Curve (Parametric)
   , Zero
   , Interface (..)
+  , isEndpoint
   , evaluate
   , evaluateBounds
   , derivative
@@ -178,6 +179,9 @@ instance Interface (Curve units) units where
   evaluateImpl = evaluate
   evaluateBoundsImpl = evaluateBounds
   derivativeImpl = derivative
+
+isEndpoint :: Float -> Bool
+isEndpoint tValue = tValue == 0.0 || tValue == 1.0
 
 new :: Interface curve units => curve -> Curve units
 new = Curve
