@@ -1,6 +1,10 @@
 module OpenSolid.Surface3d
   ( Surface3d
   , parametric
+  , planar
+  , extruded
+  , translational
+  , ruled
   , function
   , domain
   , outerLoop
@@ -20,6 +24,7 @@ import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Curve3d (Curve3d)
 import OpenSolid.Curve3d qualified as Curve3d
 import OpenSolid.Domain1d qualified as Domain1d
+import OpenSolid.Frame2d qualified as Frame2d
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.Fuzzy qualified as Fuzzy
 import OpenSolid.LineSegment2d (LineSegment2d)
@@ -28,11 +33,15 @@ import OpenSolid.List qualified as List
 import OpenSolid.Mesh (Mesh)
 import OpenSolid.Mesh qualified as Mesh
 import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.Plane3d (Plane3d)
+import OpenSolid.Plane3d qualified as Plane3d
 import OpenSolid.Point2d (Point2d (Point2d))
+import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Point3d (Point3d)
 import OpenSolid.Polygon2d (Polygon2d (Polygon2d))
 import OpenSolid.Polygon2d qualified as Polygon2d
 import OpenSolid.Prelude
+import OpenSolid.Qty qualified as Qty
 import OpenSolid.Range (Range)
 import OpenSolid.Range qualified as Range
 import OpenSolid.Region2d (Region2d)
@@ -46,6 +55,7 @@ import OpenSolid.SurfaceFunction3d qualified as SurfaceFunction3d
 import OpenSolid.SurfaceLinearization qualified as SurfaceLinearization
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvCoordinates, UvPoint)
 import OpenSolid.Tolerance qualified as Tolerance
+import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.VectorBounds3d qualified as VectorBounds3d
 import OpenSolid.VectorCurve3d (VectorCurve3d)
 import OpenSolid.VectorCurve3d qualified as VectorCurve3d
@@ -61,6 +71,41 @@ parametric ::
   Region2d UvCoordinates ->
   Surface3d (space @ units)
 parametric = Surface3d
+
+planar ::
+  Plane3d (space @ units) (Defines local) ->
+  Region2d (local @ units) ->
+  Surface3d (space @ units)
+planar plane region = do
+  let regionBounds = Region2d.bounds region
+  let (width, height) = Bounds2d.dimensions regionBounds
+  let centerPoint = Bounds2d.centerPoint regionBounds
+  let centerFrame = Frame2d.atPoint centerPoint
+  let regionSize = Qty.max width height
+  let centeredRegion = Region2d.relativeTo centerFrame region
+  let normalizedRegion = Region2d.convert (1.0 ./. regionSize) centeredRegion
+  let p0 = Point2d.placeOn plane centerPoint
+  let vx = regionSize * Plane3d.xDirection plane
+  let vy = regionSize * Plane3d.yDirection plane
+  let planeFunction = p0 + SurfaceFunction.u * vx + SurfaceFunction.v * vy
+  parametric planeFunction normalizedRegion
+
+extruded :: Curve3d (space @ units) -> Vector3d (space @ units) -> Surface3d (space @ units)
+extruded curve displacement =
+  parametric (curve . SurfaceFunction.u + SurfaceFunction.v * displacement) Region2d.unit
+
+translational ::
+  Curve3d (space @ units) ->
+  VectorCurve3d (space @ units) ->
+  Surface3d (space @ units)
+translational uCurve vCurve =
+  parametric (uCurve . SurfaceFunction.u + vCurve . SurfaceFunction.v) Region2d.unit
+
+ruled :: Curve3d (space @ units) -> Curve3d (space @ units) -> Surface3d (space @ units)
+ruled bottom top = do
+  let f1 = bottom . SurfaceFunction.u
+  let f2 = top . SurfaceFunction.u
+  parametric (f1 + SurfaceFunction.v * (f2 - f1)) Region2d.unit
 
 function :: Surface3d (space @ units) -> SurfaceFunction3d (space @ units)
 function (Surface3d f _) = f
