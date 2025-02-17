@@ -70,6 +70,8 @@ import OpenSolid.SurfaceFunction3d qualified as SurfaceFunction3d
 import OpenSolid.SurfaceLinearization qualified as SurfaceLinearization
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V), UvBounds, UvCoordinates, UvPoint)
 import OpenSolid.Tolerance qualified as Tolerance
+import OpenSolid.Vector3d (Vector3d)
+import OpenSolid.Vector3d qualified as Vector3d
 import OpenSolid.VectorBounds2d qualified as VectorBounds2d
 import OpenSolid.VectorBounds3d qualified as VectorBounds3d
 import OpenSolid.VectorCurve3d (VectorCurve3d)
@@ -99,6 +101,8 @@ newtype SurfaceId = SurfaceId Int deriving (Eq, Ord, Show)
 data SurfaceFunctions (coordinateSystem :: CoordinateSystem) where
   SurfaceFunctions ::
     { f :: SurfaceFunction3d (space @ units)
+    , fu :: VectorSurfaceFunction3d (space @ units)
+    , fv :: VectorSurfaceFunction3d (space @ units)
     , fuu :: VectorSurfaceFunction3d (space @ units)
     , fuv :: VectorSurfaceFunction3d (space @ units)
     , fvv :: VectorSurfaceFunction3d (space @ units)
@@ -468,7 +472,7 @@ toSurfaceFunctions f = do
   let fuu = VectorSurfaceFunction3d.derivative U fu
   let fuv = VectorSurfaceFunction3d.derivative V fu
   let fvv = VectorSurfaceFunction3d.derivative V fv
-  SurfaceFunctions{f, fuu, fuv, fvv}
+  SurfaceFunctions{f, fu, fv, fuu, fuv, fvv}
 
 cornerSurfaceId :: Corner (space @ units) -> SurfaceId
 cornerSurfaceId Corner{surfaceId} = surfaceId
@@ -523,7 +527,7 @@ toMesh ::
   Tolerance units =>
   NonEmpty (Mesh.Constraint units) ->
   Body3d (space @ units) ->
-  Mesh (Point3d (space @ units))
+  Mesh (Point3d (space @ units), Vector3d (space @ Unitless))
 toMesh givenConstraints (Body3d boundarySurfaces) = do
   let boundarySurfaceList = NonEmpty.toList boundarySurfaces
   let constraints = Mesh.constraints givenConstraints
@@ -720,7 +724,7 @@ boundarySurfaceMesh ::
   Map SurfaceId (Set2d UvBounds UvCoordinates) ->
   Map HalfEdgeId (List (Vertex (space @ units))) ->
   BoundarySurface (space @ units) ->
-  Mesh (Point3d (space @ units))
+  Mesh (Point3d (space @ units), Vector3d (space @ Unitless))
 boundarySurfaceMesh surfaceSegmentsById innerEdgeVerticesById boundarySurface = do
   let BoundarySurface{id, surfaceFunctions, handedness, edgeLoops} = boundarySurface
   let boundaryPolygons = NonEmpty.map (toPolygon innerEdgeVerticesById) edgeLoops
@@ -745,12 +749,18 @@ boundarySurfaceMesh surfaceSegmentsById innerEdgeVerticesById boundarySurface = 
       let boundaryVertexLoops = NonEmpty.map Polygon2d.vertices boundaryPolygons
       -- Decent refinement option: (Just (List.length steinerPoints, steinerVertex))
       let vertexMesh = CDT.unsafe boundaryVertexLoops steinerVertices Nothing
-      let points = Array.map Vertex3d.position (Mesh.vertices vertexMesh)
+      let pointsAndNormals = Array.map (pointAndNormal surfaceFunctions) (Mesh.vertices vertexMesh)
       let faceIndices =
             case handedness of
               Positive -> Mesh.faceIndices vertexMesh
               Negative -> List.map (\(i, j, k) -> (k, j, i)) (Mesh.faceIndices vertexMesh)
-      Mesh.indexed points faceIndices
+      Mesh.indexed pointsAndNormals faceIndices
+
+pointAndNormal :: SurfaceFunctions (space @ units) -> Vertex (space @ units) -> (Point3d (space @ units), Vector3d (space @ Unitless))
+pointAndNormal SurfaceFunctions{fu, fv} (Vertex uvPoint point) = do
+  let fuValue = VectorSurfaceFunction3d.evaluate fu uvPoint
+  let fvValue = VectorSurfaceFunction3d.evaluate fv uvPoint
+  (point, Vector3d.normalize (fuValue .><. fvValue))
 
 toPolygon ::
   Map HalfEdgeId (List (Vertex (space @ units))) ->
