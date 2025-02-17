@@ -74,6 +74,10 @@ instance FFI Material where
 mesh :: Vertex3d.HasNormal vertex (space @ Meters) => Material -> Mesh vertex -> Entity space
 mesh = Mesh
 
+{-| Render the given body with the given material.
+
+The body will first be converted to a mesh using the given constraints.
+-}
 body ::
   Tolerance Meters =>
   NonEmpty (Mesh.Constraint Meters) ->
@@ -82,6 +86,10 @@ body ::
   Entity space
 body meshConstraints material givenBody = mesh material (Body3d.toMesh meshConstraints givenBody)
 
+{-| Group several entities into a single one.
+
+Useful to allow multiple entities to be transformed as a group.
+-}
 group :: List (Entity space) -> Entity space
 group = Group
 
@@ -96,12 +104,18 @@ placeIn frame entity = Placed frame entity
 relativeTo :: Frame3d (global @ Meters) (Defines local) -> Entity global -> Entity local
 relativeTo frame = placeIn (Frame3d.inverse frame)
 
+-- | Create a metallic material with the given color and roughness.
 metal :: Color -> Float -> Material
 metal baseColor roughness = Material{baseColor, roughness, metallic = 1.0}
 
+-- | Create a non-metallic material with the given color and roughness.
 nonmetal :: Color -> Float -> Material
 nonmetal baseColor roughness = Material{baseColor, roughness, metallic = 0.0}
 
+{-| Convert a scene to binary glTF format.
+
+Same as 'writeGlb' except it just returns the raw binary data instead of writing to a file.
+-}
 toGlb :: Plane3d (space @ Meters) (Defines Ground) -> List (Entity space) -> Builder
 toGlb groundPlane givenEntities = do
   let globalFrame = Frame3d.fromZxPlane groundPlane
@@ -125,6 +139,13 @@ toGlb groundPlane givenEntities = do
     bufferByteLength
     bufferBuilder
 
+{-| Write a scene to a binary glTF file.
+
+The given plane will be used as the ground plane, with:
+- the origin of the plane being the global origin,
+- the normal direction of the plane being the global up direction (positive Y in glTF), and
+- the positive X direction of the plane being the 'forwards' direction (positive Z in glTF).
+-}
 writeGlb :: Text -> Plane3d (space @ Meters) (Defines Ground) -> List (Entity space) -> IO ()
 writeGlb path groundPlane givenEntities =
   Builder.writeFile (Text.unpack path) (toGlb groundPlane givenEntities)
