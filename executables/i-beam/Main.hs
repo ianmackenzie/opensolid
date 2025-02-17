@@ -56,4 +56,4 @@ main = Tolerance.using Length.nanometer IO.do
   let color = Color.rgb 0.913 0.921 0.925
   let material = Material.metal color 0.3
   let entity = Scene3d.mesh mesh material
-  IO.writeBinaryFile "executables/i-beam/mesh.glb" (Scene3d.toGlb Plane3d.xy [entity])
+  Scene3d.writeGlb "executables/i-beam/mesh.glb" Plane3d.xy [entity]

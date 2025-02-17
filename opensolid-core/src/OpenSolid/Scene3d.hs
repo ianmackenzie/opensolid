@@ -6,10 +6,12 @@ module OpenSolid.Scene3d
   , placeIn
   , relativeTo
   , toGlb
+  , writeGlb
   )
 where
 
 import Data.ByteString.Builder (Builder)
+import Data.ByteString.Builder qualified as Builder
 import Data.Monoid qualified
 import OpenSolid.Array qualified as Array
 import OpenSolid.Bounds3d (Bounds3d (Bounds3d))
@@ -29,6 +31,7 @@ import OpenSolid.Range (Range (Range))
 import OpenSolid.Scene3d.Gltf qualified as Gltf
 import OpenSolid.Scene3d.Material (Material)
 import OpenSolid.Scene3d.Material qualified as Material
+import OpenSolid.Text qualified as Text
 import OpenSolid.Transform3d qualified as Transform3d
 import OpenSolid.Units (Meters)
 import OpenSolid.Vertex3d (Vertex3d)
@@ -66,7 +69,7 @@ placeIn frame entity = Placed frame entity
 relativeTo :: Frame3d (global @ Meters) (Defines local) -> Entity global -> Entity local
 relativeTo frame = placeIn (Frame3d.inverse frame)
 
-toGlb :: Plane3d (space @ Meters) (Defines Ground) -> List (Entity space) -> ByteString
+toGlb :: Plane3d (space @ Meters) (Defines Ground) -> List (Entity space) -> Builder
 toGlb groundPlane givenEntities = do
   let globalFrame = Frame3d.fromZxPlane groundPlane
   let entities = List.map (relativeTo globalFrame) givenEntities
@@ -76,17 +79,22 @@ toGlb groundPlane givenEntities = do
   let bufferByteLength = Int.sumOf meshByteLength meshes
   let encodedMeshes = encodeMeshes 0 0 meshes
   let bufferObject = Json.object [Json.field "byteLength" $ Json.int bufferByteLength]
-  let fields =
-        [ Json.field "scene" $ Json.int 0
-        , Json.field "scenes" $ Json.list [sceneObject]
-        , Json.field "nodes" $ Json.listOf meshNode encodedMeshes
-        , Json.field "meshes" $ Json.listOf meshObject encodedMeshes
-        , Json.field "bufferViews" $ Json.list (List.collect bufferViews encodedMeshes)
-        , Json.field "accessors" $ Json.list (List.collect accessors encodedMeshes)
-        , Json.field "materials" $ Json.listOf materialObject encodedMeshes
-        , Json.field "buffers" $ Json.list [bufferObject]
-        ]
-  Gltf.toByteString fields bufferByteLength bufferBuilder
+  Gltf.builder
+    [ Json.field "scene" $ Json.int 0
+    , Json.field "scenes" $ Json.list [sceneObject]
+    , Json.field "nodes" $ Json.listOf meshNode encodedMeshes
+    , Json.field "meshes" $ Json.listOf meshObject encodedMeshes
+    , Json.field "bufferViews" $ Json.list (List.collect bufferViews encodedMeshes)
+    , Json.field "accessors" $ Json.list (List.collect accessors encodedMeshes)
+    , Json.field "materials" $ Json.listOf materialObject encodedMeshes
+    , Json.field "buffers" $ Json.list [bufferObject]
+    ]
+    bufferByteLength
+    bufferBuilder
+
+writeGlb :: Text -> Plane3d (space @ Meters) (Defines Ground) -> List (Entity space) -> IO ()
+writeGlb path groundPlane givenEntities =
+  Builder.writeFile (Text.unpack path) (toGlb groundPlane givenEntities)
 
 data EncodedMesh = EncodedMesh
   { bufferViews :: List Json
