@@ -33,6 +33,9 @@ cradle:
     - path: "executables/funky-moulding/Main.hs"
       component: "executables:exe:funky-moulding"
 
+    - path: "executables/i-beam/Main.hs"
+      component: "executables:exe:i-beam"
+
     - path: "opensolid-api/src"
       component: "lib:opensolid-api"
 

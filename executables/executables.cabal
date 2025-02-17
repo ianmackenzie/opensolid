@@ -133,3 +133,10 @@ executable funky-moulding
   hs-source-dirs: funky-moulding
   build-depends:
     opensolid-core
+
+executable i-beam
+  import: config
+  main-is: Main.hs
+  hs-source-dirs: i-beam
+  build-depends:
+    opensolid-core
