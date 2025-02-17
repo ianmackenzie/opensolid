@@ -11,6 +11,7 @@ where
 
 import OpenSolid.Bounds3d (Bounds3d)
 import OpenSolid.Expression (Expression)
+import OpenSolid.Frame3d (Frame3d)
 import OpenSolid.Point3d (Point3d)
 import OpenSolid.Prelude
 import {-# SOURCE #-} OpenSolid.SurfaceFunction (SurfaceFunction)
@@ -55,6 +56,10 @@ data SurfaceFunction3d (coordinateSystem :: CoordinateSystem) where
     SurfaceFunction3d (space @ units) ->
     VectorSurfaceFunction3d (space @ units) ->
     SurfaceFunction3d (space @ units)
+  PlaceIn ::
+    Frame3d (global @ units) (Defines local) ->
+    SurfaceFunction3d (local @ units) ->
+    SurfaceFunction3d (global @ units)
   Transformed ::
     Transform3d tag (space @ units) ->
     SurfaceFunction3d (space @ units) ->

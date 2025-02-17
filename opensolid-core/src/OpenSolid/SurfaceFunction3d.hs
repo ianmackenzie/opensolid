@@ -7,6 +7,8 @@ module OpenSolid.SurfaceFunction3d
   , evaluate
   , evaluateBounds
   , derivative
+  , placeIn
+  , relativeTo
   , transformBy
   )
 where
@@ -17,6 +19,8 @@ import OpenSolid.Composition
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Expression.Surface3d qualified as Expression.Surface3d
+import OpenSolid.Frame3d (Frame3d)
+import OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.Point3d (Point3d)
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
@@ -70,6 +74,10 @@ data SurfaceFunction3d (coordinateSystem :: CoordinateSystem) where
     SurfaceFunction3d (space @ units) ->
     VectorSurfaceFunction3d (space @ units) ->
     SurfaceFunction3d (space @ units)
+  PlaceIn ::
+    Frame3d (global @ units) (Defines local) ->
+    SurfaceFunction3d (local @ units) ->
+    SurfaceFunction3d (global @ units)
   Transformed ::
     Transform3d tag (space @ units) ->
     SurfaceFunction3d (space @ units) ->
@@ -196,6 +204,7 @@ evaluate function uvPoint = case function of
       (SurfaceFunction.evaluate z uvPoint)
   Sum f1 f2 -> evaluate f1 uvPoint + VectorSurfaceFunction3d.evaluate f2 uvPoint
   Difference f1 f2 -> evaluate f1 uvPoint - VectorSurfaceFunction3d.evaluate f2 uvPoint
+  PlaceIn frame f -> Point3d.placeIn frame (evaluate f uvPoint)
   Transformed transform f -> Point3d.transformBy transform (evaluate f uvPoint)
 
 evaluateBounds :: SurfaceFunction3d (space @ units) -> UvBounds -> Bounds3d (space @ units)
@@ -212,6 +221,7 @@ evaluateBounds function uvBounds = case function of
     evaluateBounds f1 uvBounds + VectorSurfaceFunction3d.evaluateBounds f2 uvBounds
   Difference f1 f2 ->
     evaluateBounds f1 uvBounds - VectorSurfaceFunction3d.evaluateBounds f2 uvBounds
+  PlaceIn frame f -> Bounds3d.placeIn frame (evaluateBounds f uvBounds)
   Transformed transform f -> Bounds3d.transformBy transform (evaluateBounds f uvBounds)
 
 derivative ::
@@ -230,8 +240,8 @@ derivative parameter function = case function of
       (SurfaceFunction.derivative parameter z)
   Sum f1 f2 -> derivative parameter f1 + VectorSurfaceFunction3d.derivative parameter f2
   Difference f1 f2 -> derivative parameter f1 - VectorSurfaceFunction3d.derivative parameter f2
-  Transformed transform f ->
-    VectorSurfaceFunction3d.transformBy transform (derivative parameter f)
+  PlaceIn frame f -> VectorSurfaceFunction3d.placeIn frame (derivative parameter f)
+  Transformed transform f -> VectorSurfaceFunction3d.transformBy transform (derivative parameter f)
 
 transformBy ::
   Transform3d tag (space @ units) ->
@@ -244,5 +254,21 @@ transformBy transform function = case function of
   XYZ{} -> Transformed transform function
   Sum f1 f2 -> transformBy transform f1 + VectorSurfaceFunction3d.transformBy transform f2
   Difference f1 f2 -> transformBy transform f1 - VectorSurfaceFunction3d.transformBy transform f2
+  PlaceIn{} -> Transformed transform function
   Transformed existing f ->
     Transformed (Transform3d.toAffine transform . Transform3d.toAffine existing) f
+
+placeIn ::
+  Frame3d (global @ units) (Defines local) ->
+  SurfaceFunction3d (local @ units) ->
+  SurfaceFunction3d (global @ units)
+placeIn frame f = case f of
+  Parametric expression -> Parametric (Expression.Surface3d.placeIn frame expression)
+  Coerce function -> Coerce (placeIn (Units.coerce frame) function)
+  function -> PlaceIn frame function
+
+relativeTo ::
+  Frame3d (global @ units) (Defines local) ->
+  SurfaceFunction3d (global @ units) ->
+  SurfaceFunction3d (local @ units)
+relativeTo frame = placeIn (Frame3d.inverse frame)
