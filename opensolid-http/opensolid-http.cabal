@@ -27,7 +27,6 @@ common config
     case-insensitive,
     http-types,
     opensolid-core,
-    opensolid-json,
     text,
     wai,
     warp,

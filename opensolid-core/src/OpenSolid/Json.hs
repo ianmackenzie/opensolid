@@ -8,6 +8,7 @@ module OpenSolid.Json
   , float
   , bool
   , list
+  , listOf
   , map
   , encode
   , decode
@@ -67,8 +68,11 @@ bool = Bool
 text :: Text -> Json
 text = Text
 
-list :: (a -> Json) -> List a -> Json
-list encodeItem items = List (List.map encodeItem items)
+list :: List Json -> Json
+list = List
+
+listOf :: (a -> Json) -> List a -> Json
+listOf encodeItem items = List (List.map encodeItem items)
 
 object :: List (Text, Json) -> Json
 object fields = Map (Map.fromKeyValuePairs fields)

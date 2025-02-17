@@ -146,7 +146,7 @@ decodeList decodeItem json = case json of
 list :: Format item -> Format (List item)
 list (Format encodeItem decodeItem itemSchema) =
   Format
-    { encode = Json.list encodeItem
+    { encode = Json.listOf encodeItem
     , decode = decodeList decodeItem
     , schema = Json.Schema.array{Json.Schema.items = Just itemSchema}
     }
@@ -158,7 +158,7 @@ toNonEmpty [] = Failure "List is empty"
 nonEmpty :: Format item -> Format (NonEmpty item)
 nonEmpty (Format encodeItem decodeItem itemSchema) =
   Format
-    { encode = NonEmpty.toList >> Json.list encodeItem
+    { encode = NonEmpty.toList >> Json.listOf encodeItem
     , decode = decodeList decodeItem >> Result.andThen toNonEmpty
     , schema = Json.Schema.array{Json.Schema.items = Just itemSchema, Json.Schema.minItems = Just 1}
     }
