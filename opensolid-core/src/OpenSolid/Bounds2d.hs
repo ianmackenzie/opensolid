@@ -59,9 +59,9 @@ import OpenSolid.Point3d (Point3d (Point3d))
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
 import OpenSolid.Primitives
-  ( Basis3d (Basis3d)
-  , Bounds2d (Bounds2d)
+  ( Bounds2d (Bounds2d)
   , Bounds3d (Bounds3d)
+  , PlanarBasis3d (PlanarBasis3d)
   , Plane3d (Plane3d)
   )
 import OpenSolid.Qty qualified as Qty
@@ -362,7 +362,7 @@ placeOn ::
   Bounds2d (local @ units) ->
   Bounds3d (space @ units)
 placeOn plane (Bounds2d x y) = do
-  let Plane3d _ (Basis3d i j _) = plane
+  let Plane3d _ (PlanarBasis3d i j) = plane
   let Direction3d ix iy iz = i
   let Direction3d jx jy jz = j
   let xMid = Range.midpoint x

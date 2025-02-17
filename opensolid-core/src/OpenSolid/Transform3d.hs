@@ -41,9 +41,9 @@ import {-# SOURCE #-} OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude hiding (identity)
 import OpenSolid.Primitives
   ( Axis3d (Axis3d)
-  , Basis3d (Basis3d)
   , Direction3d (Unit3d)
   , Frame3d
+  , PlanarBasis3d (PlanarBasis3d)
   , Plane3d (Plane3d)
   , Point3d (Point3d)
   , Transform3d (Transform3d)
@@ -131,7 +131,8 @@ scaleAlong (Axis3d originPoint direction) scale = do
   withFixedPoint originPoint vx vy vz
 
 mirrorAcross :: Plane3d (space @ units) defines -> Orthonormal (space @ units)
-mirrorAcross (Plane3d p0 (Basis3d _ _ (Unit3d (Vector3d nx ny nz)))) = do
+mirrorAcross (Plane3d p0 (PlanarBasis3d i j)) = do
+  let Vector3d nx ny nz = i >< j
   let axx = 1.0 - 2.0 * nx * nx
   let ayy = 1.0 - 2.0 * ny * ny
   let azz = 1.0 - 2.0 * nz * nz

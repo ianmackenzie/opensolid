@@ -26,16 +26,16 @@ module OpenSolid.Basis3d
   )
 where
 
-import OpenSolid.Direction3d (Direction3d (Direction3d))
+import OpenSolid.Direction3d (Direction3d)
 import OpenSolid.Direction3d qualified as Direction3d
 import OpenSolid.Float qualified as Float
+import OpenSolid.PlanarBasis3d qualified as PlanarBasis3d
 import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Basis3d (Basis3d)
-  , Direction3d (Unit3d)
   , Frame3d (Frame3d)
+  , PlanarBasis3d (PlanarBasis3d)
   , Transform3d
-  , Vector3d (Vector3d)
   )
 import OpenSolid.Transform qualified as Transform
 
@@ -78,39 +78,19 @@ flipY (Basis3d dx dy dz) = Basis3d dx -dy dz
 flipZ :: Basis3d space defines -> Basis3d space defines
 flipZ (Basis3d dx dy dz) = Basis3d dx dy -dz
 
-perpendicularDirections :: Direction3d space -> (Direction3d space, Direction3d space)
-perpendicularDirections direction = do
-  let Direction3d dx dy dz = direction
-  let absX = Float.abs dx
-  let absY = Float.abs dy
-  let absZ = Float.abs dz
-  let v1 =
-        if
-          | absX <= absY && absX <= absZ -> do
-              let scale = Float.hypot2 dy dz
-              Vector3d 0.0 (-dz / scale) (dy / scale)
-          | absY <= absX && absY <= absZ -> do
-              let scale = Float.hypot2 dx dz
-              Vector3d (dz / scale) 0.0 (-dx / scale)
-          | otherwise -> do
-              let scale = Float.hypot2 dx dy
-              Vector3d (-dy / scale) (dx / scale) 0.0
-  let v2 = direction >< v1
-  (Unit3d v1, Unit3d v2)
-
 fromXDirection :: Direction3d space -> Basis3d space defines
 fromXDirection dx = do
-  let (dy, dz) = perpendicularDirections dx
+  let PlanarBasis3d dy dz = PlanarBasis3d.fromNormalDirection dx
   Basis3d dx dy dz
 
 fromYDirection :: Direction3d space -> Basis3d space defines
 fromYDirection dy = do
-  let (dz, dx) = perpendicularDirections dy
+  let PlanarBasis3d dz dx = PlanarBasis3d.fromNormalDirection dy
   Basis3d dx dy dz
 
 fromZDirection :: Direction3d space -> Basis3d space defines
 fromZDirection dz = do
-  let (dx, dy) = perpendicularDirections dz
+  let PlanarBasis3d dx dy = PlanarBasis3d.fromNormalDirection dz
   Basis3d dx dy dz
 
 handedness :: Basis3d space defines -> Sign

@@ -38,9 +38,9 @@ import OpenSolid.Float qualified as Float
 import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Basis2d (Basis2d)
-  , Basis3d (Basis3d)
   , Direction2d (Unit2d)
   , Frame2d (Frame2d)
+  , PlanarBasis3d (PlanarBasis3d)
   , Plane3d (Plane3d)
   , VectorBounds2d (VectorBounds2d)
   , VectorBounds3d
@@ -226,7 +226,7 @@ placeOn ::
   Plane3d (space @ originPointUnits) (Defines local) ->
   VectorBounds2d (local @ units) ->
   VectorBounds3d (space @ units)
-placeOn (Plane3d _ (Basis3d i j _)) (VectorBounds2d x y) = x * i + y * j
+placeOn (Plane3d _ (PlanarBasis3d i j)) (VectorBounds2d x y) = x * i + y * j
 
 convert ::
   Qty (units2 :/: units1) ->

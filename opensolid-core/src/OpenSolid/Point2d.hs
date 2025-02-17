@@ -43,8 +43,8 @@ import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Axis2d (Axis2d)
   , Basis2d (Basis2d)
-  , Basis3d (Basis3d)
   , Frame2d (Frame2d)
+  , PlanarBasis3d (PlanarBasis3d)
   , Plane3d (Plane3d)
   , Point2d (Point2d)
   , Point3d
@@ -156,7 +156,7 @@ placeOn ::
   Plane3d (space @ units) (Defines localSpace) ->
   Point2d (localSpace @ units) ->
   Point3d (space @ units)
-placeOn (Plane3d originPoint (Basis3d i j _)) (Point2d px py) = originPoint + px * i + py * j
+placeOn (Plane3d originPoint (PlanarBasis3d i j)) (Point2d px py) = originPoint + px * i + py * j
 
 convert :: Qty (units2 :/: units1) -> Point2d (space @ units1) -> Point2d (space @ units2)
 convert factor (Point2d px py) = Point2d (px !* factor) (py !* factor)

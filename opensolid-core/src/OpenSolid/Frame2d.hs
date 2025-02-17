@@ -30,11 +30,10 @@ import OpenSolid.Point2d qualified as Point2d
 import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Basis2d (Basis2d)
-  , Basis3d (Basis3d)
   , Frame2d (Frame2d)
+  , PlanarBasis3d (PlanarBasis3d)
   , Plane3d (Plane3d)
   )
-import OpenSolid.Qty qualified as Qty
 
 originPoint :: Frame2d (space @ units) defines -> Point2d (space @ units)
 originPoint (Frame2d p0 _) = p0
@@ -95,12 +94,8 @@ placeOn ::
   Frame2d (local @ units) defines ->
   Plane3d (space @ units) defines
 placeOn plane (Frame2d p0 (Basis2d i j)) = do
-  let Plane3d _ (Basis3d _ _ k) = plane
   Plane3d (Point2d.placeOn plane p0) $
-    Basis3d
-      (Direction2d.placeOn plane i)
-      (Direction2d.placeOn plane j)
-      (Qty.sign (i >< j) * k)
+    PlanarBasis3d (Direction2d.placeOn plane i) (Direction2d.placeOn plane j)
 
 inverse :: Frame2d (global @ units) (Defines local) -> Frame2d (local @ units) (Defines global)
 inverse frame = xy |> relativeTo frame

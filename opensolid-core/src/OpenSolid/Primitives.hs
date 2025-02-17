@@ -1149,6 +1149,16 @@ instance
   where
   Unit3d vector1 >< Unit3d vector2 = vector1 >< vector2
 
+----- PlanarBasis3d -----
+
+type PlanarBasis3d :: Type -> LocalSpace -> Type
+data PlanarBasis3d space defines where
+  PlanarBasis3d :: Direction3d space -> Direction3d space -> PlanarBasis3d space defines
+
+deriving instance Eq (PlanarBasis3d space defines)
+
+deriving instance Show (PlanarBasis3d space defines)
+
 ----- Basis3d -----
 
 type Basis3d :: Type -> LocalSpace -> Type
@@ -1696,7 +1706,7 @@ type Plane3d :: CoordinateSystem -> LocalSpace -> Type
 data Plane3d coordinateSystem defines where
   Plane3d ::
     Point3d (space @ units) ->
-    Basis3d space defines ->
+    PlanarBasis3d space defines ->
     Plane3d (space @ units) defines
 
 deriving instance Eq (Plane3d (space @ units) defines)

@@ -51,6 +51,7 @@ import OpenSolid.Primitives
   , Basis3d (Basis3d)
   , Direction3d
   , Frame3d (Frame3d)
+  , PlanarBasis3d (PlanarBasis3d)
   , Plane3d (Plane3d)
   , Point2d (Point2d)
   , Point3d (Point3d)
@@ -100,7 +101,7 @@ xyz :: Qty units -> Qty units -> Qty units -> Point3d (space @ units)
 xyz = Point3d
 
 xyOn :: Plane3d (space @ units) (Defines local) -> Qty units -> Qty units -> Point3d (space @ units)
-xyOn (Plane3d p0 (Basis3d i j _)) px py = p0 + px * i + py * j
+xyOn (Plane3d p0 (PlanarBasis3d i j)) px py = p0 + px * i + py * j
 
 apply :: (Float -> Qty units) -> Float -> Float -> Float -> Point3d (space @ units)
 apply units px py pz = Point3d (units px) (units py) (units pz)
@@ -151,7 +152,7 @@ projectInto ::
   Plane3d (space @ units) (Defines localSpace) ->
   Point3d (space @ units) ->
   Point2d (localSpace @ units)
-projectInto (Plane3d p0 (Basis3d i j _)) p = let d = p - p0 in Point2d (d <> i) (d <> j)
+projectInto (Plane3d p0 (PlanarBasis3d i j)) p = let d = p - p0 in Point2d (d <> i) (d <> j)
 
 convert :: Qty (units2 :/: units1) -> Point3d (space @ units1) -> Point3d (space @ units2)
 convert factor (Point3d px py pz) = Point3d (px !* factor) (py !* factor) (pz !* factor)

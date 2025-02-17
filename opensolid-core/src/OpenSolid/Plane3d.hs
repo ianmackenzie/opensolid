@@ -29,8 +29,8 @@ where
 
 import OpenSolid.Angle (Angle)
 import OpenSolid.Axis3d (Axis3d)
-import OpenSolid.Basis3d qualified as Basis3d
 import OpenSolid.Direction3d (Direction3d)
+import OpenSolid.PlanarBasis3d qualified as PlanarBasis3d
 import OpenSolid.Point3d (Point3d)
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
@@ -40,37 +40,37 @@ import OpenSolid.Transform3d qualified as Transform3d
 import OpenSolid.Vector3d (Vector3d)
 
 through :: Point3d (space @ units) -> Direction3d space -> Plane3d (space @ units) defines
-through p0 n = Plane3d p0 (Basis3d.fromZDirection n)
+through p0 n = Plane3d p0 (PlanarBasis3d.fromNormalDirection n)
 
 xy :: Plane3d (space @ units) (Defines local)
-xy = Plane3d Point3d.origin Basis3d.xyz
+xy = Plane3d Point3d.origin PlanarBasis3d.xy
 
 yx :: Plane3d (space @ units) (Defines local)
-yx = Plane3d Point3d.origin Basis3d.yxNegativeZ
+yx = Plane3d Point3d.origin PlanarBasis3d.yx
 
 zx :: Plane3d (space @ units) (Defines local)
-zx = Plane3d Point3d.origin Basis3d.zxy
+zx = Plane3d Point3d.origin PlanarBasis3d.zx
 
 xz :: Plane3d (space @ units) (Defines local)
-xz = Plane3d Point3d.origin Basis3d.xzNegativeY
+xz = Plane3d Point3d.origin PlanarBasis3d.xz
 
 yz :: Plane3d (space @ units) (Defines local)
-yz = Plane3d Point3d.origin Basis3d.yzx
+yz = Plane3d Point3d.origin PlanarBasis3d.yz
 
 zy :: Plane3d (space @ units) (Defines local)
-zy = Plane3d Point3d.origin Basis3d.zyNegativeX
+zy = Plane3d Point3d.origin PlanarBasis3d.zy
 
 originPoint :: Plane3d (space @ units) defines -> Point3d (space @ units)
 originPoint (Plane3d p0 _) = p0
 
 normalDirection :: Plane3d (space @ units) defines -> Direction3d space
-normalDirection (Plane3d _ basis) = Basis3d.zDirection basis
+normalDirection (Plane3d _ basis) = PlanarBasis3d.normalDirection basis
 
 xDirection :: Plane3d (space @ units) defines -> Direction3d space
-xDirection (Plane3d _ basis) = Basis3d.xDirection basis
+xDirection (Plane3d _ basis) = PlanarBasis3d.xDirection basis
 
 yDirection :: Plane3d (space @ units) defines -> Direction3d space
-yDirection (Plane3d _ basis) = Basis3d.yDirection basis
+yDirection (Plane3d _ basis) = PlanarBasis3d.yDirection basis
 
 placeIn ::
   Frame3d (global @ units) (Defines local) ->
@@ -79,7 +79,7 @@ placeIn ::
 placeIn frame (Plane3d p0 basis) =
   Plane3d
     (Point3d.placeIn frame p0)
-    (Basis3d.placeIn frame basis)
+    (PlanarBasis3d.placeIn frame basis)
 
 relativeTo ::
   Frame3d (global @ units) (Defines local) ->
@@ -88,7 +88,7 @@ relativeTo ::
 relativeTo frame (Plane3d p0 basis) =
   Plane3d
     (Point3d.relativeTo frame p0)
-    (Basis3d.relativeTo frame basis)
+    (PlanarBasis3d.relativeTo frame basis)
 
 transformBy ::
   Transform.IsOrthonormal tag =>
@@ -96,9 +96,7 @@ transformBy ::
   Plane3d (space @ units) defines ->
   Plane3d (space @ units) defines
 transformBy transform (Plane3d p0 basis) =
-  Plane3d
-    (Point3d.transformBy transform p0)
-    (Basis3d.transformBy transform basis)
+  Plane3d (Point3d.transformBy transform p0) (PlanarBasis3d.transformBy transform basis)
 
 translateBy :: Vector3d (space @ units) -> Plane3d (space @ units) defines -> Plane3d (space @ units) defines
 translateBy = Transform3d.translateByImpl transformBy
