@@ -20,6 +20,18 @@ module OpenSolid.Camera3d
   , fovAngle
   , fovHeight
   , frustumSlope
+  , moveTo
+  , placeIn
+  , relativeTo
+  , transformBy
+  , translateBy
+  , translateIn
+  , translateAlong
+  , rotateAround
+  , translateByOwn
+  , translateInOwn
+  , translateAlongOwn
+  , rotateAroundOwn
   )
 where
 
@@ -27,6 +39,7 @@ import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Axis3d (Axis3d (Axis3d))
 import OpenSolid.Direction3d (Direction3d)
+import OpenSolid.Direction3d qualified as Direction3d
 import OpenSolid.Float qualified as Float
 import OpenSolid.Frame3d (Frame3d)
 import OpenSolid.Frame3d qualified as Frame3d
@@ -37,6 +50,8 @@ import OpenSolid.Point3d (Point3d)
 import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
 import OpenSolid.Tolerance qualified as Tolerance
+import OpenSolid.Transform3d qualified as Transform3d
+import OpenSolid.Vector3d (Vector3d)
 import OpenSolid.Vector3d qualified as Vector3d
 
 data ScreenSpace
@@ -167,3 +182,102 @@ frustumSlope camera = Angle.tan (0.5 * fovAngle camera)
 
 fovHeight :: Camera3d (space @ units) -> Qty units
 fovHeight camera = 2.0 * focalDistance camera * frustumSlope camera
+
+moveTo ::
+  Point3d (space @ units) ->
+  Camera3d (space @ units) ->
+  Camera3d (space @ units)
+moveTo newEyePoint Camera3d{frame, upDirection, focalDistance, projection, fovAngle} =
+  Camera3d
+    { frame = Frame3d.moveTo newEyePoint frame
+    , upDirection
+    , focalDistance
+    , projection
+    , fovAngle
+    }
+
+placeIn ::
+  Frame3d (global @ units) (Defines local) ->
+  Camera3d (local @ units) ->
+  Camera3d (global @ units)
+placeIn givenFrame Camera3d{frame, upDirection, focalDistance, projection, fovAngle} =
+  Camera3d
+    { frame = Frame3d.placeIn givenFrame frame
+    , upDirection = Direction3d.placeIn givenFrame upDirection
+    , focalDistance
+    , projection
+    , fovAngle
+    }
+
+relativeTo ::
+  Frame3d (global @ units) (Defines local) ->
+  Camera3d (global @ units) ->
+  Camera3d (local @ units)
+relativeTo givenFrame = placeIn (Frame3d.inverse givenFrame)
+
+transformBy ::
+  Transform3d.Rigid (space @ units) ->
+  Camera3d (space @ units) ->
+  Camera3d (space @ units)
+transformBy transform Camera3d{frame, upDirection, focalDistance, projection, fovAngle} =
+  Camera3d
+    { frame = Frame3d.transformBy transform frame
+    , upDirection = Direction3d.transformBy transform upDirection
+    , focalDistance
+    , projection
+    , fovAngle
+    }
+
+translateBy ::
+  Vector3d (space @ units) ->
+  Camera3d (space @ units) ->
+  Camera3d (space @ units)
+translateBy = Transform3d.translateByImpl transformBy
+
+translateIn ::
+  Direction3d space ->
+  Qty units ->
+  Camera3d (space @ units) ->
+  Camera3d (space @ units)
+translateIn = Transform3d.translateInImpl transformBy
+
+translateAlong ::
+  Axis3d (space @ units) ->
+  Qty units ->
+  Camera3d (space @ units) ->
+  Camera3d (space @ units)
+translateAlong = Transform3d.translateAlongImpl transformBy
+
+rotateAround ::
+  Axis3d (space @ units) ->
+  Angle ->
+  Camera3d (space @ units) ->
+  Camera3d (space @ units)
+rotateAround = Transform3d.rotateAroundImpl transformBy
+
+translateByOwn ::
+  (Camera3d (space @ units) -> Vector3d (space @ units)) ->
+  Camera3d (space @ units) ->
+  Camera3d (space @ units)
+translateByOwn = Transform3d.translateByOwnImpl transformBy
+
+translateInOwn ::
+  (Camera3d (space @ units) -> Direction3d space) ->
+  Qty units ->
+  Camera3d (space @ units) ->
+  Camera3d (space @ units)
+translateInOwn = Transform3d.translateInOwnImpl transformBy
+
+translateAlongOwn ::
+  (Camera3d (space @ units) -> Axis3d (space @ units)) ->
+  Qty units ->
+  Camera3d (space @ units) ->
+  Camera3d (space @ units)
+translateAlongOwn = Transform3d.translateAlongOwnImpl transformBy
+
+rotateAroundOwn ::
+  (Camera3d (space @ units) -> Axis3d (space @ units)) ->
+  Angle ->
+  Camera3d (space @ units) ->
+  Camera3d (space @ units)
+rotateAroundOwn = Transform3d.rotateAroundOwnImpl transformBy
