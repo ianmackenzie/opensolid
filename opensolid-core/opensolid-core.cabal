@@ -106,6 +106,7 @@ library
     OpenSolid.Bool
     OpenSolid.Bounds2d
     OpenSolid.Bounds3d
+    OpenSolid.Camera3d
     OpenSolid.Color
     OpenSolid.Composition
     OpenSolid.CoordinateSystem
