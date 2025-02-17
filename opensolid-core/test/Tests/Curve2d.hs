@@ -10,7 +10,6 @@ import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve.Zero qualified as Curve.Zero
 import OpenSolid.Curve2d (Curve2d)
 import OpenSolid.Curve2d qualified as Curve2d
-import OpenSolid.Curve2d.IntersectionPoint (IntersectionPoint (IntersectionPoint))
 import OpenSolid.Curve2d.IntersectionPoint qualified as IntersectionPoint
 import OpenSolid.Curve2d.OverlappingSegment (OverlappingSegment (OverlappingSegment))
 import OpenSolid.Direction2d qualified as Direction2d
@@ -139,8 +138,8 @@ crossingIntersection = Test.verify "crossingIntersection" Test.do
   intersections <- Curve2d.intersections arc1 arc2
   let expectedIntersectionPoints =
         NonEmpty.two
-          (IntersectionPoint 0.0 0.0 IntersectionPoint.Crossing Positive)
-          (IntersectionPoint 0.5 0.5 IntersectionPoint.Crossing Negative)
+          (IntersectionPoint.crossing 0.0 0.0 Positive)
+          (IntersectionPoint.crossing 0.5 0.5 Negative)
   case intersections of
     Nothing -> Test.fail "Should have found some intersection points"
     Just (Curve2d.IntersectionPoints actualIntersectionPoints) ->
@@ -153,8 +152,7 @@ tangentIntersection = Test.verify "tangentIntersection" Test.do
   let arc1 = Curve2d.polarArc Point2d.origin Length.meter Angle.zero Angle.pi
   let arc2 = Curve2d.polarArc (Point2d.meters 0.0 1.5) (Length.meters 0.5) -Angle.pi Angle.zero
   intersections <- Curve2d.intersections arc1 arc2
-  let expectedIntersectionPoints =
-        NonEmpty.one (IntersectionPoint 0.5 0.5 IntersectionPoint.Tangent Positive)
+  let expectedIntersectionPoints = NonEmpty.one (IntersectionPoint.tangent 0.5 0.5 Positive)
   case intersections of
     Nothing -> Test.fail "Should have found some intersection points"
     Just (Curve2d.IntersectionPoints actualIntersectionPoints) ->

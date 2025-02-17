@@ -1,32 +1,38 @@
 module OpenSolid.Curve2d.IntersectionPoint
-  ( IntersectionPoint (IntersectionPoint, t1, t2, kind, sign)
-  , Kind (Crossing, Tangent)
+  ( IntersectionPoint (..)
   , crossing
   , tangent
+  , continuation
+  , parameterValues
   )
 where
 
 import OpenSolid.Prelude
 
-data IntersectionPoint = IntersectionPoint
-  { t1 :: Float
-  , t2 :: Float
-  , kind :: Kind
-  , sign :: Sign
-  }
+data IntersectionPoint
+  = Crossing Float Float Sign
+  | Tangent Float Float Sign
+  | Continuation Float Float
   deriving (Eq, Ord, Show)
 
-data Kind = Crossing | Tangent deriving (Eq, Ord, Show)
-
 instance ApproximateEquality IntersectionPoint IntersectionPoint Unitless where
-  intersection1 ~= intersection2 =
-    t1 intersection1 ~= t1 intersection2
-      && t2 intersection1 ~= t2 intersection2
-      && kind intersection1 == kind intersection2
-      && sign intersection1 == sign intersection2
+  Crossing u1 v1 sign1 ~= Crossing u2 v2 sign2 = u1 ~= u2 && v1 ~= v2 && sign1 == sign2
+  Crossing{} ~= _ = False
+  Tangent u1 v1 sign1 ~= Tangent u2 v2 sign2 = u1 ~= u2 && v1 ~= v2 && sign1 == sign2
+  Tangent{} ~= _ = False
+  Continuation u1 v1 ~= Continuation u2 v2 = u1 ~= u2 && v1 ~= v2
+  Continuation{} ~= _ = False
 
 crossing :: Float -> Float -> Sign -> IntersectionPoint
-crossing t1 t2 sign = IntersectionPoint{t1, t2, sign, kind = Crossing}
+crossing = Crossing
 
 tangent :: Float -> Float -> Sign -> IntersectionPoint
-tangent t1 t2 sign = IntersectionPoint{t1, t2, sign, kind = Tangent}
+tangent = Tangent
+
+continuation :: Float -> Float -> IntersectionPoint
+continuation = Continuation
+
+parameterValues :: IntersectionPoint -> (Float, Float)
+parameterValues (Crossing t1 t2 _) = (t1, t2)
+parameterValues (Tangent t1 t2 _) = (t1, t2)
+parameterValues (Continuation t1 t2) = (t1, t2)
