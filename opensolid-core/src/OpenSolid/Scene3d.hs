@@ -2,6 +2,7 @@ module OpenSolid.Scene3d
   ( Entity
   , Material
   , mesh
+  , body
   , group
   , transformBy
   , placeIn
@@ -17,6 +18,8 @@ import Data.ByteString.Builder (Builder)
 import Data.ByteString.Builder qualified as Builder
 import Data.Monoid qualified
 import OpenSolid.Array qualified as Array
+import OpenSolid.Body3d (Body3d)
+import OpenSolid.Body3d qualified as Body3d
 import OpenSolid.Bounds3d (Bounds3d (Bounds3d))
 import OpenSolid.Bounds3d qualified as Bounds3d
 import OpenSolid.Color (Color)
@@ -70,6 +73,14 @@ instance FFI Material where
 
 mesh :: Vertex3d.HasNormal vertex (space @ Meters) => Material -> Mesh vertex -> Entity space
 mesh = Mesh
+
+body ::
+  Tolerance Meters =>
+  NonEmpty (Mesh.Constraint Meters) ->
+  Material ->
+  Body3d (space @ Meters) ->
+  Entity space
+body meshConstraints material givenBody = mesh material (Body3d.toMesh meshConstraints givenBody)
 
 group :: List (Entity space) -> Entity space
 group = Group
