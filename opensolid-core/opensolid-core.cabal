@@ -181,7 +181,6 @@ library
     OpenSolid.Region2d.BoundedBy
     OpenSolid.Result
     OpenSolid.Scene3d
-    OpenSolid.Scene3d.Gltf
     OpenSolid.Set2d
     OpenSolid.Set3d
     OpenSolid.Sign
@@ -240,6 +239,7 @@ library
     OpenSolid.Primitives
     OpenSolid.Quadrature
     OpenSolid.Random.Internal
+    OpenSolid.Scene3d.Gltf
     OpenSolid.SurfaceFunction.Internal
     OpenSolid.SurfaceFunction.PartialZeros
     OpenSolid.SurfaceFunction.SaddleRegion
