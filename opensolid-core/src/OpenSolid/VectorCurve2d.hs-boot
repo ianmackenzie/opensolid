@@ -43,19 +43,7 @@ instance Show (VectorCurve2d (space @ units))
 
 instance Negation (VectorCurve2d (space @ units))
 
-instance
-  Multiplication'
-    Sign
-    (VectorCurve2d (space @ units))
-    (VectorCurve2d (space @ (Unitless :*: units)))
-
 instance Multiplication Sign (VectorCurve2d (space @ units)) (VectorCurve2d (space @ units))
-
-instance
-  Multiplication'
-    (VectorCurve2d (space @ units))
-    Sign
-    (VectorCurve2d (space @ (units :*: Unitless)))
 
 instance Multiplication (VectorCurve2d (space @ units)) Sign (VectorCurve2d (space @ units))
 

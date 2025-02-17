@@ -145,15 +145,6 @@ instance
   Negative * function = -function
 
 instance
-  Multiplication'
-    Sign
-    (VectorSurfaceFunction3d (space @ units))
-    (VectorSurfaceFunction3d (space @ (Unitless :*: units)))
-  where
-  Positive .*. function = Units.coerce function
-  Negative .*. function = Units.coerce -function
-
-instance
   Multiplication
     (VectorSurfaceFunction3d (space @ units))
     Sign
@@ -161,15 +152,6 @@ instance
   where
   function * Positive = function
   function * Negative = -function
-
-instance
-  Multiplication'
-    (VectorSurfaceFunction3d (space @ units))
-    Sign
-    (VectorSurfaceFunction3d (space @ (units :*: Unitless)))
-  where
-  function .*. Positive = Units.coerce function
-  function .*. Negative = Units.coerce -function
 
 instance
   ( space ~ space_
@@ -470,31 +452,13 @@ instance
   space ~ space_ =>
   DotMultiplication (VectorSurfaceFunction3d (space @ units)) (Direction3d space_) (SurfaceFunction units)
   where
-  lhs <> rhs = Units.specialize (lhs .<>. rhs)
-
-instance
-  space ~ space_ =>
-  DotMultiplication'
-    (VectorSurfaceFunction3d (space @ units))
-    (Direction3d space_)
-    (SurfaceFunction (units :*: Unitless))
-  where
-  function .<>. direction = function .<>. Vector3d.unit direction
+  lhs <> rhs = lhs <> Vector3d.unit rhs
 
 instance
   space ~ space_ =>
   DotMultiplication (Direction3d space) (VectorSurfaceFunction3d (space_ @ units)) (SurfaceFunction units)
   where
-  lhs <> rhs = Units.specialize (lhs .<>. rhs)
-
-instance
-  space ~ space_ =>
-  DotMultiplication'
-    (Direction3d space)
-    (VectorSurfaceFunction3d (space_ @ units))
-    (SurfaceFunction (Unitless :*: units))
-  where
-  direction .<>. function = Vector3d.unit direction .<>. function
+  lhs <> rhs = Vector3d.unit lhs <> rhs
 
 instance
   uvCoordinates ~ UvCoordinates =>

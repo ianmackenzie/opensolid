@@ -213,17 +213,9 @@ instance Multiplication Sign (Curve units) (Curve units) where
   Positive * curve = curve
   Negative * curve = -curve
 
-instance Multiplication' Sign (Curve units) (Curve (Unitless :*: units)) where
-  Positive .*. curve = Units.coerce curve
-  Negative .*. curve = Units.coerce -curve
-
 instance Multiplication (Curve units) Sign (Curve units) where
   curve * Positive = curve
   curve * Negative = -curve
-
-instance Multiplication' (Curve units) Sign (Curve (units :*: Unitless)) where
-  curve .*. Positive = Units.coerce curve
-  curve .*. Negative = Units.coerce -curve
 
 instance units ~ units_ => Addition (Curve units) (Curve units_) (Curve units) where
   Parametric lhs + Parametric rhs = Parametric (lhs + rhs)

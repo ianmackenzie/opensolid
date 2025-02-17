@@ -140,17 +140,9 @@ instance units ~ units_ => Intersects (Range units) (Range units_) units where
 instance Negation (Range units) where
   negate (Range low high) = Range_ (negate high) (negate low)
 
-instance Multiplication' Sign (Range units) (Range (Unitless :*: units)) where
-  Positive .*. range = Units.coerce range
-  Negative .*. range = Units.coerce -range
-
 instance Multiplication Sign (Range units) (Range units) where
   Positive * range = range
   Negative * range = -range
-
-instance Multiplication' (Range units) Sign (Range (units :*: Unitless)) where
-  range .*. Positive = Units.coerce range
-  range .*. Negative = Units.coerce -range
 
 instance Multiplication (Range units) Sign (Range units) where
   range * Positive = range

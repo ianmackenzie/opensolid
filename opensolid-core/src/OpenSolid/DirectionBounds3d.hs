@@ -58,28 +58,12 @@ instance
   value * DirectionBounds3d vectorBounds = value * vectorBounds
 
 instance
-  Multiplication'
-    (Qty units)
-    (DirectionBounds3d space)
-    (VectorBounds3d (space @ (units :*: Unitless)))
-  where
-  value .*. DirectionBounds3d vectorBounds = value .*. vectorBounds
-
-instance
   Multiplication
     (DirectionBounds3d space)
     (Qty units)
     (VectorBounds3d (space @ units))
   where
   DirectionBounds3d vectorBounds * value = vectorBounds * value
-
-instance
-  Multiplication'
-    (DirectionBounds3d space)
-    (Qty units)
-    (VectorBounds3d (space @ (Unitless :*: units)))
-  where
-  DirectionBounds3d vectorBounds .*. value = vectorBounds .*. value
 
 instance
   Multiplication
@@ -90,28 +74,12 @@ instance
   range * DirectionBounds3d vectorBounds = range * vectorBounds
 
 instance
-  Multiplication'
-    (Range units)
-    (DirectionBounds3d space)
-    (VectorBounds3d (space @ (units :*: Unitless)))
-  where
-  range .*. DirectionBounds3d vectorBounds = range .*. vectorBounds
-
-instance
   Multiplication
     (DirectionBounds3d space)
     (Range units)
     (VectorBounds3d (space @ units))
   where
   DirectionBounds3d vectorBounds * range = vectorBounds * range
-
-instance
-  Multiplication'
-    (DirectionBounds3d space)
-    (Range units)
-    (VectorBounds3d (space @ (Unitless :*: units)))
-  where
-  DirectionBounds3d vectorBounds .*. range = vectorBounds .*. range
 
 instance
   space1 ~ space2 =>
@@ -122,28 +90,9 @@ instance
 
 instance
   space1 ~ space2 =>
-  DotMultiplication'
-    (DirectionBounds3d space1)
-    (DirectionBounds3d space2)
-    (Range (Unitless :*: Unitless))
-  where
-  DirectionBounds3d vectorBounds1 .<>. DirectionBounds3d vectorBounds2 =
-    vectorBounds1 .<>. vectorBounds2
-
-instance
-  space1 ~ space2 =>
   DotMultiplication (DirectionBounds3d space1) (VectorBounds3d (space2 @ units)) (Range units)
   where
   DirectionBounds3d vectorBounds1 <> vectorBounds2 = vectorBounds1 <> vectorBounds2
-
-instance
-  space1 ~ space2 =>
-  DotMultiplication'
-    (DirectionBounds3d space1)
-    (VectorBounds3d (space2 @ units))
-    (Range (Unitless :*: units))
-  where
-  DirectionBounds3d vectorBounds1 .<>. vectorBounds2 = vectorBounds1 .<>. vectorBounds2
 
 instance
   space1 ~ space2 =>
@@ -153,27 +102,9 @@ instance
 
 instance
   space1 ~ space2 =>
-  DotMultiplication'
-    (VectorBounds3d (space1 @ units))
-    (DirectionBounds3d space2)
-    (Range (units :*: Unitless))
-  where
-  vectorBounds1 .<>. DirectionBounds3d vectorBounds2 = vectorBounds1 .<>. vectorBounds2
-
-instance
-  space1 ~ space2 =>
   DotMultiplication (DirectionBounds3d space1) (Direction3d space2) (Range Unitless)
   where
   DirectionBounds3d vectorBounds <> direction = vectorBounds <> direction
-
-instance
-  space1 ~ space2 =>
-  DotMultiplication'
-    (DirectionBounds3d space1)
-    (Direction3d space2)
-    (Range (Unitless :*: Unitless))
-  where
-  DirectionBounds3d vectorBounds .<>. direction = vectorBounds .<>. direction
 
 instance
   space1 ~ space2 =>
@@ -183,42 +114,15 @@ instance
 
 instance
   space1 ~ space2 =>
-  DotMultiplication'
-    (Direction3d space1)
-    (DirectionBounds3d space2)
-    (Range (Unitless :*: Unitless))
-  where
-  direction .<>. DirectionBounds3d vectorBounds = direction .<>. vectorBounds
-
-instance
-  space1 ~ space2 =>
   DotMultiplication (DirectionBounds3d space1) (Vector3d (space2 @ units)) (Range units)
   where
   DirectionBounds3d vectorBounds <> vector = vectorBounds <> vector
 
 instance
   space1 ~ space2 =>
-  DotMultiplication'
-    (DirectionBounds3d space1)
-    (Vector3d (space2 @ units))
-    (Range (Unitless :*: units))
-  where
-  DirectionBounds3d vectorBounds .<>. vector = vectorBounds .<>. vector
-
-instance
-  space1 ~ space2 =>
   DotMultiplication (Vector3d (space1 @ units)) (DirectionBounds3d space2) (Range units)
   where
   vector <> DirectionBounds3d vectorBounds = vector <> vectorBounds
-
-instance
-  space1 ~ space2 =>
-  DotMultiplication'
-    (Vector3d (space1 @ units))
-    (DirectionBounds3d space2)
-    (Range (units :*: Unitless))
-  where
-  vector .<>. DirectionBounds3d vectorBounds = vector .<>. vectorBounds
 
 instance
   space1 ~ space2 =>
@@ -232,31 +136,12 @@ instance
 
 instance
   space1 ~ space2 =>
-  CrossMultiplication'
-    (DirectionBounds3d space1)
-    (DirectionBounds3d space2)
-    (VectorBounds3d (space1 @ (Unitless :*: Unitless)))
-  where
-  DirectionBounds3d vectorBounds1 .><. DirectionBounds3d vectorBounds2 =
-    vectorBounds1 .><. vectorBounds2
-
-instance
-  space1 ~ space2 =>
   CrossMultiplication
     (DirectionBounds3d space1)
     (VectorBounds3d (space2 @ units))
     (VectorBounds3d (space1 @ units))
   where
   DirectionBounds3d vectorBounds1 >< vectorBounds2 = vectorBounds1 >< vectorBounds2
-
-instance
-  space1 ~ space2 =>
-  CrossMultiplication'
-    (DirectionBounds3d space1)
-    (VectorBounds3d (space2 @ units))
-    (VectorBounds3d (space1 @ (Unitless :*: units)))
-  where
-  DirectionBounds3d vectorBounds1 .><. vectorBounds2 = vectorBounds1 .><. vectorBounds2
 
 instance
   space1 ~ space2 =>
@@ -269,30 +154,12 @@ instance
 
 instance
   space1 ~ space2 =>
-  CrossMultiplication'
-    (VectorBounds3d (space1 @ units))
-    (DirectionBounds3d space2)
-    (VectorBounds3d (space1 @ (units :*: Unitless)))
-  where
-  vectorBounds1 .><. DirectionBounds3d vectorBounds2 = vectorBounds1 .><. vectorBounds2
-
-instance
-  space1 ~ space2 =>
   CrossMultiplication
     (DirectionBounds3d space1)
     (Direction3d space2)
     (VectorBounds3d (space1 @ Unitless))
   where
   DirectionBounds3d vectorBounds >< direction = vectorBounds >< direction
-
-instance
-  space1 ~ space2 =>
-  CrossMultiplication'
-    (DirectionBounds3d space1)
-    (Direction3d space2)
-    (VectorBounds3d (space1 @ (Unitless :*: Unitless)))
-  where
-  DirectionBounds3d vectorBounds .><. direction = vectorBounds .><. direction
 
 instance
   space1 ~ space2 =>
@@ -305,15 +172,6 @@ instance
 
 instance
   space1 ~ space2 =>
-  CrossMultiplication'
-    (Direction3d space1)
-    (DirectionBounds3d space2)
-    (VectorBounds3d (space1 @ (Unitless :*: Unitless)))
-  where
-  direction .><. DirectionBounds3d vectorBounds = direction .><. vectorBounds
-
-instance
-  space1 ~ space2 =>
   CrossMultiplication
     (DirectionBounds3d space1)
     (Vector3d (space2 @ units))
@@ -323,30 +181,12 @@ instance
 
 instance
   space1 ~ space2 =>
-  CrossMultiplication'
-    (DirectionBounds3d space1)
-    (Vector3d (space2 @ units))
-    (VectorBounds3d (space1 @ (Unitless :*: units)))
-  where
-  DirectionBounds3d vectorBounds .><. vector = vectorBounds .><. vector
-
-instance
-  space1 ~ space2 =>
   CrossMultiplication
     (Vector3d (space1 @ units))
     (DirectionBounds3d space2)
     (VectorBounds3d (space1 @ units))
   where
   vector >< DirectionBounds3d vectorBounds = vector >< vectorBounds
-
-instance
-  space1 ~ space2 =>
-  CrossMultiplication'
-    (Vector3d (space1 @ units))
-    (DirectionBounds3d space2)
-    (VectorBounds3d (space1 @ (units :*: Unitless)))
-  where
-  vector .><. DirectionBounds3d vectorBounds = vector .><. vectorBounds
 
 unsafe :: VectorBounds3d (space @ Unitless) -> DirectionBounds3d space
 unsafe = DirectionBounds3d

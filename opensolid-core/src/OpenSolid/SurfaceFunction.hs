@@ -181,17 +181,9 @@ instance Multiplication Sign (SurfaceFunction units) (SurfaceFunction units) whe
   Positive * function = function
   Negative * function = -function
 
-instance Multiplication' Sign (SurfaceFunction units) (SurfaceFunction (Unitless :*: units)) where
-  Positive .*. function = Units.coerce function
-  Negative .*. function = Units.coerce -function
-
 instance Multiplication (SurfaceFunction units) Sign (SurfaceFunction units) where
   function * Positive = function
   function * Negative = -function
-
-instance Multiplication' (SurfaceFunction units) Sign (SurfaceFunction (units :*: Unitless)) where
-  function .*. Positive = Units.coerce function
-  function .*. Negative = Units.coerce -function
 
 instance
   units ~ units_ =>

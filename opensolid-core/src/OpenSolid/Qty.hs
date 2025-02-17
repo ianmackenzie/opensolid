@@ -46,7 +46,7 @@ import OpenSolid.Random.Internal qualified as Random
 import {-# SOURCE #-} OpenSolid.Range (Range)
 import {-# SOURCE #-} OpenSolid.Range qualified as Range
 import OpenSolid.Sign (Sign (Negative, Positive))
-import OpenSolid.Units (Unitless, (:*:), (:/:))
+import OpenSolid.Units ((:*:), (:/:))
 import OpenSolid.Units qualified as Units
 import System.Random qualified
 import Prelude qualified
@@ -76,20 +76,10 @@ instance Negation (Qty units) where
   {-# INLINE negate #-}
   negate (Qty x) = Qty (Prelude.negate x)
 
-instance Multiplication' Sign (Qty units) (Qty (Unitless :*: units)) where
-  {-# INLINEABLE (.*.) #-}
-  Positive .*. value = Units.coerce value
-  Negative .*. value = Units.coerce -value
-
 instance Multiplication Sign (Qty units) (Qty units) where
   {-# INLINEABLE (*) #-}
   Positive * value = value
   Negative * value = -value
-
-instance Multiplication' (Qty units) Sign (Qty (units :*: Unitless)) where
-  {-# INLINEABLE (.*.) #-}
-  value .*. Positive = Units.coerce value
-  value .*. Negative = Units.coerce -value
 
 instance Multiplication (Qty units) Sign (Qty units) where
   {-# INLINEABLE (*) #-}

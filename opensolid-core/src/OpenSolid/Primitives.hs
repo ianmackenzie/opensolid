@@ -46,27 +46,9 @@ instance
 instance Negation (Vector2d (space @ units)) where
   negate (Vector2d vx vy) = Vector2d (negate vx) (negate vy)
 
-instance
-  Multiplication'
-    Sign
-    (Vector2d (space @ units))
-    (Vector2d (space @ (Unitless :*: units)))
-  where
-  Positive .*. vector = Units.coerce vector
-  Negative .*. vector = Units.coerce -vector
-
 instance Multiplication Sign (Vector2d (space @ units)) (Vector2d (space @ units)) where
   Positive * vector = vector
   Negative * vector = -vector
-
-instance
-  Multiplication'
-    (Vector2d (space @ units))
-    Sign
-    (Vector2d (space @ (units :*: Unitless)))
-  where
-  vector .*. Positive = Units.coerce vector
-  vector .*. Negative = Units.coerce -vector
 
 instance Multiplication (Vector2d (space @ units)) Sign (Vector2d (space @ units)) where
   vector * Positive = vector
@@ -177,21 +159,9 @@ instance
 
 instance
   space1 ~ space2 =>
-  DotMultiplication' (Vector2d (space1 @ units)) (Direction2d space2) (Qty (units :*: Unitless))
-  where
-  v .<>. Unit2d d = v .<>. d
-
-instance
-  space1 ~ space2 =>
   DotMultiplication (Vector2d (space1 @ units)) (Direction2d space2) (Qty units)
   where
   v <> Unit2d d = v <> d
-
-instance
-  space1 ~ space2 =>
-  DotMultiplication' (Direction2d space1) (Vector2d (space2 @ units)) (Qty (Unitless :*: units))
-  where
-  Unit2d d .<>. v = d .<>. v
 
 instance
   space1 ~ space2 =>
@@ -216,21 +186,9 @@ instance
 
 instance
   space1 ~ space2 =>
-  CrossMultiplication' (Vector2d (space1 @ units)) (Direction2d space2) (Qty (units :*: Unitless))
-  where
-  v1 .><. Unit2d v2 = v1 .><. v2
-
-instance
-  space1 ~ space2 =>
   CrossMultiplication (Vector2d (space1 @ units)) (Direction2d space2) (Qty units)
   where
   v1 >< Unit2d v2 = v1 >< v2
-
-instance
-  space1 ~ space2 =>
-  CrossMultiplication' (Direction2d space1) (Vector2d (space2 @ units)) (Qty (Unitless :*: units))
-  where
-  Unit2d v1 .><. v2 = v1 .><. v2
 
 instance
   space1 ~ space2 =>
@@ -280,42 +238,14 @@ instance Multiplication (Direction2d space) Sign (Direction2d space) where
   direction * Positive = direction
   direction * Negative = -direction
 
-instance
-  Multiplication'
-    (Qty units)
-    (Direction2d space)
-    (Vector2d (space @ (units :*: Unitless)))
-  where
-  scale .*. Unit2d v = scale .*. v
-
 instance Multiplication (Qty units) (Direction2d space) (Vector2d (space @ units)) where
   scale * Unit2d v = scale * v
-
-instance
-  Multiplication'
-    (Direction2d space)
-    (Qty units)
-    (Vector2d (space @ (Unitless :*: units)))
-  where
-  Unit2d v .*. scale = v .*. scale
 
 instance Multiplication (Direction2d space) (Qty units) (Vector2d (space @ units)) where
   Unit2d v * scale = v * scale
 
-instance
-  space1 ~ space2 =>
-  DotMultiplication' (Direction2d space1) (Direction2d space2) (Qty (Unitless :*: Unitless))
-  where
-  Unit2d v1 .<>. Unit2d v2 = v1 .<>. v2
-
 instance space1 ~ space2 => DotMultiplication (Direction2d space1) (Direction2d space2) Float where
   Unit2d v1 <> Unit2d v2 = v1 <> v2
-
-instance
-  space1 ~ space2 =>
-  CrossMultiplication' (Direction2d space1) (Direction2d space2) (Qty (Unitless :*: Unitless))
-  where
-  Unit2d v1 .><. Unit2d v2 = v1 .><. v2
 
 instance
   space1 ~ space2 =>
@@ -465,27 +395,9 @@ instance
 instance Negation (VectorBounds2d (space @ units)) where
   negate (VectorBounds2d x y) = VectorBounds2d (negate x) (negate y)
 
-instance
-  Multiplication'
-    Sign
-    (VectorBounds2d (space @ units))
-    (VectorBounds2d (space @ (Unitless :*: units)))
-  where
-  Positive .*. vectorBounds = Units.coerce vectorBounds
-  Negative .*. vectorBounds = Units.coerce -vectorBounds
-
 instance Multiplication Sign (VectorBounds2d (space @ units)) (VectorBounds2d (space @ units)) where
   Positive * vectorBounds = vectorBounds
   Negative * vectorBounds = -vectorBounds
-
-instance
-  Multiplication'
-    (VectorBounds2d (space @ units))
-    Sign
-    (VectorBounds2d (space @ (units :*: Unitless)))
-  where
-  vectorBounds .*. Positive = Units.coerce vectorBounds
-  vectorBounds .*. Negative = Units.coerce -vectorBounds
 
 instance Multiplication (VectorBounds2d (space @ units)) Sign (VectorBounds2d (space @ units)) where
   vectorBounds * Positive = vectorBounds
@@ -679,27 +591,9 @@ instance
 
 instance
   space1 ~ space2 =>
-  DotMultiplication'
-    (Direction2d space1)
-    (VectorBounds2d (space2 @ units))
-    (Range (Unitless :*: units))
-  where
-  Unit2d vector .<>. vectorBounds = vector .<>. vectorBounds
-
-instance
-  space1 ~ space2 =>
   DotMultiplication (VectorBounds2d (space1 @ units)) (Direction2d space2) (Range units)
   where
   vectorBounds <> Unit2d vector = vectorBounds <> vector
-
-instance
-  space1 ~ space2 =>
-  DotMultiplication'
-    (VectorBounds2d (space1 @ units))
-    (Direction2d space2)
-    (Range (units :*: Unitless))
-  where
-  vectorBounds .<>. Unit2d vector = vectorBounds .<>. vector
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -760,27 +654,9 @@ instance
 
 instance
   space1 ~ space2 =>
-  CrossMultiplication'
-    (Direction2d space1)
-    (VectorBounds2d (space2 @ units))
-    (Range (Unitless :*: units))
-  where
-  Unit2d vector .><. vectorBounds = vector .><. vectorBounds
-
-instance
-  space1 ~ space2 =>
   CrossMultiplication (VectorBounds2d (space1 @ units)) (Direction2d space2) (Range units)
   where
   vectorBounds >< Unit2d vector = vectorBounds >< vector
-
-instance
-  space1 ~ space2 =>
-  CrossMultiplication'
-    (VectorBounds2d (space1 @ units))
-    (Direction2d space2)
-    (Range (units :*: Unitless))
-  where
-  vectorBounds .><. Unit2d vector = vectorBounds .><. vector
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -1042,27 +918,9 @@ instance
 instance Negation (Vector3d (space @ units)) where
   negate (Vector3d vx vy vz) = Vector3d (negate vx) (negate vy) (negate vz)
 
-instance
-  Multiplication'
-    Sign
-    (Vector3d (space @ units))
-    (Vector3d (space @ (Unitless :*: units)))
-  where
-  Positive .*. vector = Units.coerce vector
-  Negative .*. vector = Units.coerce -vector
-
 instance Multiplication Sign (Vector3d (space @ units)) (Vector3d (space @ units)) where
   Positive * vector = vector
   Negative * vector = -vector
-
-instance
-  Multiplication'
-    (Vector3d (space @ units))
-    Sign
-    (Vector3d (space @ (units :*: Unitless)))
-  where
-  vector .*. Positive = Units.coerce vector
-  vector .*. Negative = Units.coerce -vector
 
 instance Multiplication (Vector3d (space @ units)) Sign (Vector3d (space @ units)) where
   vector * Positive = vector
@@ -1177,21 +1035,9 @@ instance
 
 instance
   space ~ space_ =>
-  DotMultiplication' (Vector3d (space @ units)) (Direction3d space_) (Qty (units :*: Unitless))
-  where
-  v1 .<>. Unit3d v2 = v1 .<>. v2
-
-instance
-  space ~ space_ =>
   DotMultiplication (Vector3d (space @ units)) (Direction3d space_) (Qty units)
   where
   v1 <> Unit3d v2 = v1 <> v2
-
-instance
-  space ~ space_ =>
-  DotMultiplication' (Direction3d space) (Vector3d (space_ @ units)) (Qty (Unitless :*: units))
-  where
-  Unit3d v1 .<>. v2 = v1 .<>. v2
 
 instance
   space ~ space_ =>
@@ -1227,27 +1073,9 @@ instance
 
 instance
   space ~ space_ =>
-  CrossMultiplication'
-    (Vector3d (space @ units))
-    (Direction3d space_)
-    (Vector3d (space @ (units :*: Unitless)))
-  where
-  v1 .><. Unit3d v2 = v1 .><. v2
-
-instance
-  space ~ space_ =>
   CrossMultiplication (Vector3d (space @ units)) (Direction3d space_) (Vector3d (space @ units))
   where
   v1 >< Unit3d v2 = v1 >< v2
-
-instance
-  space ~ space_ =>
-  CrossMultiplication'
-    (Direction3d space)
-    (Vector3d (space_ @ units))
-    (Vector3d (space @ (Unitless :*: units)))
-  where
-  Unit3d v1 .><. v2 = v1 .><. v2
 
 instance
   space ~ space_ =>
@@ -1303,24 +1131,8 @@ instance Multiplication' (Direction3d space) Sign (Direction3d space) where
 instance Multiplication (Qty units) (Direction3d space) (Vector3d (space @ units)) where
   scale * Unit3d vector = scale * vector
 
-instance
-  Multiplication'
-    (Qty units)
-    (Direction3d space)
-    (Vector3d (space @ (units :*: Unitless)))
-  where
-  scale .*. Unit3d vector = scale .*. vector
-
 instance Multiplication (Direction3d space) (Qty units) (Vector3d (space @ units)) where
   Unit3d vector * scale = vector * scale
-
-instance
-  Multiplication'
-    (Direction3d space)
-    (Qty units)
-    (Vector3d (space @ (Unitless :*: units)))
-  where
-  Unit3d vector .*. scale = vector .*. scale
 
 instance Multiplication (Range units) (Direction3d space) (VectorBounds3d (space @ units)) where
   range * Unit3d vector = range * vector
@@ -1333,27 +1145,9 @@ instance space1 ~ space2 => DotMultiplication (Direction3d space1) (Direction3d 
 
 instance
   space1 ~ space2 =>
-  DotMultiplication'
-    (Direction3d space1)
-    (Direction3d space2)
-    (Qty (Unitless :*: Unitless))
-  where
-  Unit3d vector1 .<>. Unit3d vector2 = vector1 .<>. vector2
-
-instance
-  space1 ~ space2 =>
   CrossMultiplication (Direction3d space1) (Direction3d space2) (Vector3d (space1 @ Unitless))
   where
   Unit3d vector1 >< Unit3d vector2 = vector1 >< vector2
-
-instance
-  space1 ~ space2 =>
-  CrossMultiplication'
-    (Direction3d space1)
-    (Direction3d space2)
-    (Vector3d (space1 @ (Unitless :*: Unitless)))
-  where
-  Unit3d vector1 .><. Unit3d vector2 = vector1 .><. vector2
 
 ----- Basis3d -----
 
@@ -1467,27 +1261,9 @@ instance
 instance Negation (VectorBounds3d (space @ units)) where
   negate (VectorBounds3d x y z) = VectorBounds3d (negate x) (negate y) (negate z)
 
-instance
-  Multiplication'
-    Sign
-    (VectorBounds3d (space @ units))
-    (VectorBounds3d (space @ (Unitless :*: units)))
-  where
-  Positive .*. vectorBounds = Units.coerce vectorBounds
-  Negative .*. vectorBounds = Units.coerce -vectorBounds
-
 instance Multiplication Sign (VectorBounds3d (space @ units)) (VectorBounds3d (space @ units)) where
   Positive * vectorBounds = vectorBounds
   Negative * vectorBounds = -vectorBounds
-
-instance
-  Multiplication'
-    (VectorBounds3d (space @ units))
-    Sign
-    (VectorBounds3d (space @ (units :*: Unitless)))
-  where
-  vectorBounds .*. Positive = Units.coerce vectorBounds
-  vectorBounds .*. Negative = Units.coerce -vectorBounds
 
 instance Multiplication (VectorBounds3d (space @ units)) Sign (VectorBounds3d (space @ units)) where
   vectorBounds * Positive = vectorBounds
@@ -1681,27 +1457,9 @@ instance
 
 instance
   space ~ space_ =>
-  DotMultiplication'
-    (Direction3d space)
-    (VectorBounds3d (space_ @ units))
-    (Range (Unitless :*: units))
-  where
-  Unit3d vector .<>. vectorBounds = vector .<>. vectorBounds
-
-instance
-  space ~ space_ =>
   DotMultiplication (VectorBounds3d (space @ units)) (Direction3d space_) (Range units)
   where
   vectorBounds <> Unit3d vector = vectorBounds <> vector
-
-instance
-  space ~ space_ =>
-  DotMultiplication'
-    (VectorBounds3d (space @ units))
-    (Direction3d space_)
-    (Range (units :*: Unitless))
-  where
-  vectorBounds .<>. Unit3d vector = vectorBounds .<>. vector
 
 instance
   (Units.Product units1 units2 units3, space ~ space_) =>
@@ -1784,30 +1542,12 @@ instance
 
 instance
   space1 ~ space2 =>
-  CrossMultiplication'
-    (Direction3d space1)
-    (VectorBounds3d (space2 @ units))
-    (VectorBounds3d (space1 @ (Unitless :*: units)))
-  where
-  Unit3d vector .><. vectorBounds = vector .><. vectorBounds
-
-instance
-  space1 ~ space2 =>
   CrossMultiplication
     (VectorBounds3d (space1 @ units))
     (Direction3d space2)
     (VectorBounds3d (space1 @ units))
   where
   vectorBounds >< Unit3d vector = vectorBounds >< vector
-
-instance
-  space1 ~ space2 =>
-  CrossMultiplication'
-    (VectorBounds3d (space1 @ units))
-    (Direction3d space2)
-    (VectorBounds3d (space1 @ (units :*: Unitless)))
-  where
-  vectorBounds .><. Unit3d vector = vectorBounds .><. vector
 
 instance
   (Units.Product units1 units2 units3, space ~ space_) =>

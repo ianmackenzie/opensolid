@@ -105,19 +105,7 @@ instance Show (VectorCurve3d (space @ units))
 
 instance Negation (VectorCurve3d (space @ units))
 
-instance
-  Multiplication'
-    Sign
-    (VectorCurve3d (space @ units))
-    (VectorCurve3d (space @ (Unitless :*: units)))
-
 instance Multiplication Sign (VectorCurve3d (space @ units)) (VectorCurve3d (space @ units))
-
-instance
-  Multiplication'
-    (VectorCurve3d (space @ units))
-    Sign
-    (VectorCurve3d (space @ (units :*: Unitless)))
 
 instance Multiplication (VectorCurve3d (space @ units)) Sign (VectorCurve3d (space @ units))
 

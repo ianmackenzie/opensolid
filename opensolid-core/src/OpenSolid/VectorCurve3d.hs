@@ -187,27 +187,9 @@ instance Multiplication Sign (VectorCurve3d (space @ units)) (VectorCurve3d (spa
   Positive * curve = curve
   Negative * curve = -curve
 
-instance
-  Multiplication'
-    Sign
-    (VectorCurve3d (space @ units))
-    (VectorCurve3d (space @ (Unitless :*: units)))
-  where
-  Positive .*. curve = Units.coerce curve
-  Negative .*. curve = Units.coerce -curve
-
 instance Multiplication (VectorCurve3d (space @ units)) Sign (VectorCurve3d (space @ units)) where
   curve * Positive = curve
   curve * Negative = -curve
-
-instance
-  Multiplication'
-    (VectorCurve3d (space @ units))
-    Sign
-    (VectorCurve3d (space @ (units :*: Unitless)))
-  where
-  curve .*. Positive = Units.coerce curve
-  curve .*. Negative = Units.coerce -curve
 
 instance
   ( space ~ space_
@@ -431,31 +413,13 @@ instance
   space1 ~ space2 =>
   DotMultiplication (VectorCurve3d (space1 @ units)) (Direction3d space2) (Curve units)
   where
-  lhs <> rhs = Units.specialize (lhs .<>. rhs)
-
-instance
-  space1 ~ space2 =>
-  DotMultiplication'
-    (VectorCurve3d (space1 @ units))
-    (Direction3d space2)
-    (Curve (units :*: Unitless))
-  where
-  curve .<>. direction3d = curve .<>. Vector3d.unit direction3d
+  lhs <> rhs = lhs <> Vector3d.unit rhs
 
 instance
   space1 ~ space2 =>
   DotMultiplication (Direction3d space1) (VectorCurve3d (space2 @ units)) (Curve units)
   where
-  lhs <> rhs = Units.specialize (lhs .<>. rhs)
-
-instance
-  space1 ~ space2 =>
-  DotMultiplication'
-    (Direction3d space1)
-    (VectorCurve3d (space2 @ units))
-    (Curve (Unitless :*: units))
-  where
-  direction3d .<>. curve = Vector3d.unit direction3d .<>. curve
+  lhs <> rhs = Vector3d.unit lhs <> rhs
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -519,16 +483,7 @@ instance
     (Direction3d space2)
     (VectorCurve3d (space1 @ units))
   where
-  lhs >< rhs = Units.specialize (lhs .><. rhs)
-
-instance
-  space1 ~ space2 =>
-  CrossMultiplication'
-    (VectorCurve3d (space1 @ units))
-    (Direction3d space2)
-    (VectorCurve3d (space1 @ (units :*: Unitless)))
-  where
-  curve .><. direction3d = curve .><. Vector3d.unit direction3d
+  lhs >< rhs = lhs >< Vector3d.unit rhs
 
 instance
   space1 ~ space2 =>
@@ -537,16 +492,7 @@ instance
     (VectorCurve3d (space2 @ units))
     (VectorCurve3d (space1 @ units))
   where
-  lhs >< rhs = Units.specialize (lhs .><. rhs)
-
-instance
-  space1 ~ space2 =>
-  CrossMultiplication'
-    (Direction3d space1)
-    (VectorCurve3d (space2 @ units))
-    (VectorCurve3d (space1 @ (Unitless :*: units)))
-  where
-  direction3d .><. curve = Vector3d.unit direction3d .><. curve
+  lhs >< rhs = Vector3d.unit lhs >< rhs
 
 instance
   unitless ~ Unitless =>

@@ -133,15 +133,6 @@ instance
   Negative * function = -function
 
 instance
-  Multiplication'
-    Sign
-    (VectorSurfaceFunction2d (space @ units))
-    (VectorSurfaceFunction2d (space @ (Unitless :*: units)))
-  where
-  Positive .*. function = Units.coerce function
-  Negative .*. function = Units.coerce -function
-
-instance
   Multiplication
     (VectorSurfaceFunction2d (space @ units))
     Sign
@@ -149,15 +140,6 @@ instance
   where
   function * Positive = function
   function * Negative = -function
-
-instance
-  Multiplication'
-    (VectorSurfaceFunction2d (space @ units))
-    Sign
-    (VectorSurfaceFunction2d (space @ (units :*: Unitless)))
-  where
-  function .*. Positive = Units.coerce function
-  function .*. Negative = Units.coerce -function
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -402,16 +384,7 @@ instance
     (Direction2d space2)
     (SurfaceFunction units)
   where
-  lhs >< rhs = Units.specialize (lhs .><. rhs)
-
-instance
-  space1 ~ space2 =>
-  CrossMultiplication'
-    (VectorSurfaceFunction2d (space1 @ units))
-    (Direction2d space2)
-    (SurfaceFunction (units :*: Unitless))
-  where
-  function .><. direction = function .><. Vector2d.unit direction
+  lhs >< rhs = lhs >< Vector2d.unit rhs
 
 instance
   space1 ~ space2 =>
@@ -420,16 +393,7 @@ instance
     (VectorSurfaceFunction2d (space2 @ units))
     (SurfaceFunction units)
   where
-  lhs >< rhs = Units.specialize (lhs .><. rhs)
-
-instance
-  space1 ~ space2 =>
-  CrossMultiplication'
-    (Direction2d space1)
-    (VectorSurfaceFunction2d (space2 @ units))
-    (SurfaceFunction (Unitless :*: units))
-  where
-  direction .><. function = Vector2d.unit direction .<>. function
+  lhs >< rhs = Vector2d.unit lhs >< rhs
 
 data DotProduct' space units1 units2
   = DotProduct'
@@ -510,16 +474,7 @@ instance
     (Direction2d space2)
     (SurfaceFunction units)
   where
-  lhs <> rhs = Units.specialize (lhs .<>. rhs)
-
-instance
-  space1 ~ space2 =>
-  DotMultiplication'
-    (VectorSurfaceFunction2d (space1 @ units))
-    (Direction2d space2)
-    (SurfaceFunction (units :*: Unitless))
-  where
-  function .<>. direction = function .<>. Vector2d.unit direction
+  lhs <> rhs = lhs <> Vector2d.unit rhs
 
 instance
   space1 ~ space2 =>
@@ -528,16 +483,7 @@ instance
     (VectorSurfaceFunction2d (space2 @ units))
     (SurfaceFunction units)
   where
-  lhs <> rhs = Units.specialize (lhs .<>. rhs)
-
-instance
-  space1 ~ space2 =>
-  DotMultiplication'
-    (Direction2d space1)
-    (VectorSurfaceFunction2d (space2 @ units))
-    (SurfaceFunction (Unitless :*: units))
-  where
-  direction .<>. function = Vector2d.unit direction .<>. function
+  lhs <> rhs = Vector2d.unit lhs <> rhs
 
 instance
   uvCoordinates ~ UvCoordinates =>
