@@ -1116,61 +1116,47 @@ scaleAlong ::
 scaleAlong = Transform2d.scaleAlongImpl transformBy
 
 translateByOwn ::
-  ( Curve2d (space @ units) ->
-    Vector2d (space @ units)
-  ) ->
+  (Curve2d (space @ units) -> Vector2d (space @ units)) ->
   Curve2d (space @ units) ->
   Curve2d (space @ units)
 translateByOwn = Transform2d.translateByOwnImpl transformBy
 
 translateInOwn ::
-  ( Curve2d (space @ units) ->
-    Direction2d space
-  ) ->
+  (Curve2d (space @ units) -> Direction2d space) ->
   Qty units ->
   Curve2d (space @ units) ->
   Curve2d (space @ units)
 translateInOwn = Transform2d.translateInOwnImpl transformBy
 
 translateAlongOwn ::
-  ( Curve2d (space @ units) ->
-    Axis2d (space @ units)
-  ) ->
+  (Curve2d (space @ units) -> Axis2d (space @ units)) ->
   Qty units ->
   Curve2d (space @ units) ->
   Curve2d (space @ units)
 translateAlongOwn = Transform2d.translateAlongOwnImpl transformBy
 
 rotateAroundOwn ::
-  ( Curve2d (space @ units) ->
-    Point2d (space @ units)
-  ) ->
+  (Curve2d (space @ units) -> Point2d (space @ units)) ->
   Angle ->
   Curve2d (space @ units) ->
   Curve2d (space @ units)
 rotateAroundOwn = Transform2d.rotateAroundOwnImpl transformBy
 
 mirrorAcrossOwn ::
-  ( Curve2d (space @ units) ->
-    Axis2d (space @ units)
-  ) ->
+  (Curve2d (space @ units) -> Axis2d (space @ units)) ->
   Curve2d (space @ units) ->
   Curve2d (space @ units)
 mirrorAcrossOwn = Transform2d.mirrorAcrossOwnImpl transformBy
 
 scaleAboutOwn ::
-  ( Curve2d (space @ units) ->
-    Point2d (space @ units)
-  ) ->
+  (Curve2d (space @ units) -> Point2d (space @ units)) ->
   Float ->
   Curve2d (space @ units) ->
   Curve2d (space @ units)
 scaleAboutOwn = Transform2d.scaleAboutOwnImpl transformBy
 
 scaleAlongOwn ::
-  ( Curve2d (space @ units) ->
-    Axis2d (space @ units)
-  ) ->
+  (Curve2d (space @ units) -> Axis2d (space @ units)) ->
   Float ->
   Curve2d (space @ units) ->
   Curve2d (space @ units)
