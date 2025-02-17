@@ -7,7 +7,7 @@ where
 import OpenSolid.Point3d (Point3d)
 import OpenSolid.Prelude
 
-class Vertex3d vertex (coordinateSystem :: CoordinateSystem) | vertex -> coordinateSystem where
+class Eq vertex => Vertex3d vertex (coordinateSystem :: CoordinateSystem) | vertex -> coordinateSystem where
   position :: vertex -> Point3d coordinateSystem
 
 instance Vertex3d (Point3d (space @ units)) (space @ units) where

@@ -508,6 +508,8 @@ toMatingEdge id1 curve1 HalfEdge{id = id2, curve3d = curve2, uvCurve}
 data Vertex (coordinateSystem :: CoordinateSystem) where
   Vertex :: UvPoint -> Point3d (space @ units) -> Vertex (space @ units)
 
+deriving instance Eq (Vertex (space @ units))
+
 instance Vertex2d (Vertex (space @ units)) UvCoordinates where
   position (Vertex uvPoint _) = uvPoint
 
