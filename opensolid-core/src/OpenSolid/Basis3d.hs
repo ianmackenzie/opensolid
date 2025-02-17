@@ -7,9 +7,6 @@ module OpenSolid.Basis3d
   , yxNegativeZ
   , zyNegativeX
   , xzNegativeY
-  , flipX
-  , flipY
-  , flipZ
   , fromXDirection
   , fromYDirection
   , fromZDirection
@@ -68,15 +65,6 @@ zyNegativeX = Basis3d Direction3d.z Direction3d.y Direction3d.negativeX
 
 xzNegativeY :: Basis3d space defines
 xzNegativeY = Basis3d Direction3d.x Direction3d.z Direction3d.negativeY
-
-flipX :: Basis3d space defines -> Basis3d space defines
-flipX (Basis3d dx dy dz) = Basis3d -dx dy dz
-
-flipY :: Basis3d space defines -> Basis3d space defines
-flipY (Basis3d dx dy dz) = Basis3d dx -dy dz
-
-flipZ :: Basis3d space defines -> Basis3d space defines
-flipZ (Basis3d dx dy dz) = Basis3d dx dy -dz
 
 fromXDirection :: Direction3d space -> Basis3d space defines
 fromXDirection dx = do
