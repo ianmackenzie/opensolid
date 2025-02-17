@@ -1,16 +1,10 @@
-{-# OPTIONS_GHC -Wno-unused-imports -Wno-unused-local-binds #-}
-
 module Main (main) where
 
-import OpenSolid.Angle qualified as Angle
 import OpenSolid.Axis2d qualified as Axis2d
 import OpenSolid.Body3d qualified as Body3d
-import OpenSolid.Bounds2d (Bounds2d (Bounds2d))
-import OpenSolid.Camera3d qualified as Camera3d
 import OpenSolid.Color qualified as Color
 import OpenSolid.Curve2d qualified as Curve2d
 import OpenSolid.Direction2d qualified as Direction2d
-import OpenSolid.Drawing2d qualified as Drawing2d
 import OpenSolid.IO qualified as IO
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
@@ -18,13 +12,11 @@ import OpenSolid.Mesh qualified as Mesh
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Plane3d qualified as Plane3d
 import OpenSolid.Point2d qualified as Point2d
-import OpenSolid.Point3d qualified as Point3d
 import OpenSolid.Prelude
 import OpenSolid.Range (Range (Range))
 import OpenSolid.Region2d qualified as Region2d
 import OpenSolid.Scene3d qualified as Scene3d
 import OpenSolid.Scene3d.Material qualified as Material
-import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
 
 main :: IO ()
