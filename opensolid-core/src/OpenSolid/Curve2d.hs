@@ -1061,12 +1061,14 @@ transformBy transform curve = case curve of
   Transformed existing c ->
     Transformed (Transform2d.toAffine transform . Transform2d.toAffine existing) c
 
+-- | Translate by the given displacement.
 translateBy ::
   Vector2d (space @ units) ->
   Curve2d (space @ units) ->
   Curve2d (space @ units)
 translateBy = Transform2d.translateByImpl transformBy
 
+-- | Translate in the given direction by the given distance.
 translateIn ::
   Direction2d space ->
   Qty units ->
@@ -1074,6 +1076,7 @@ translateIn ::
   Curve2d (space @ units)
 translateIn = Transform2d.translateInImpl transformBy
 
+-- | Translate along the given axis by the given distance.
 translateAlong ::
   Axis2d (space @ units) ->
   Qty units ->
@@ -1081,6 +1084,7 @@ translateAlong ::
   Curve2d (space @ units)
 translateAlong = Transform2d.translateAlongImpl transformBy
 
+-- | Rotate around the given point by the given angle.
 rotateAround ::
   Point2d (space @ units) ->
   Angle ->
@@ -1088,12 +1092,14 @@ rotateAround ::
   Curve2d (space @ units)
 rotateAround = Transform2d.rotateAroundImpl transformBy
 
+-- | Mirror across the given axis.
 mirrorAcross ::
   Axis2d (space @ units) ->
   Curve2d (space @ units) ->
   Curve2d (space @ units)
 mirrorAcross = Transform2d.mirrorAcrossImpl transformBy
 
+-- | Scale uniformly about the given point by the given scaling factor.
 scaleAbout ::
   Point2d (space @ units) ->
   Float ->
@@ -1101,6 +1107,7 @@ scaleAbout ::
   Curve2d (space @ units)
 scaleAbout = Transform2d.scaleAboutImpl transformBy
 
+-- | Scale (stretch) along the given axis by the given scaling factor.
 scaleAlong ::
   Axis2d (space @ units) ->
   Float ->
