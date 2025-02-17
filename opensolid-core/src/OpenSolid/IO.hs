@@ -14,6 +14,7 @@ module OpenSolid.IO
   , Bind ((>>=))
   , succeed
   , onError
+  , attempt
   , mapError
   , addContext
   , printLine
@@ -101,6 +102,9 @@ sleep duration = Control.Concurrent.threadDelay (Float.round (Duration.inMicrose
 onError :: (Text -> IO a) -> IO a -> IO a
 onError callback io =
   System.IO.Error.catchIOError io (System.IO.Error.ioeGetErrorString >> Text.pack >> callback)
+
+attempt :: IO a -> IO (Result Text a)
+attempt io = map Success io |> onError (succeed . Failure)
 
 mapError :: (Text -> Text) -> IO a -> IO a
 mapError function = onError (function >> fail)
