@@ -56,14 +56,4 @@ main = Tolerance.using Length.nanometer IO.do
   let color = Color.rgb 0.913 0.921 0.925
   let material = Material.metal color 0.3
   let entity = Scene3d.mesh mesh material
-  let camera =
-        Camera3d.orbit
-          Plane3d.xy
-          Point3d.origin
-          (Angle.degrees -45.0)
-          Camera3d.isometricElevation
-          (Length.meters 1.0)
-          Camera3d.Perspective
-          (Camera3d.angle (Angle.degrees 30.0))
-  IO.writeBinaryFile "executables/i-beam/mesh.glb" $
-    Scene3d.toGlb Plane3d.xy camera (Length.centimeters 10.0) [entity]
+  IO.writeBinaryFile "executables/i-beam/mesh.glb" (Scene3d.toGlb Plane3d.xy [entity])

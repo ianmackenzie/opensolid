@@ -11,18 +11,14 @@ where
 
 import Data.ByteString.Builder (Builder)
 import Data.Monoid qualified
-import OpenSolid.Angle qualified as Angle
 import OpenSolid.Array qualified as Array
 import OpenSolid.Bounds3d (Bounds3d (Bounds3d))
 import OpenSolid.Bounds3d qualified as Bounds3d
-import OpenSolid.Camera3d (Camera3d)
-import OpenSolid.Camera3d qualified as Camera3d
 import OpenSolid.Frame3d (Frame3d)
 import OpenSolid.Frame3d qualified as Frame3d
 import OpenSolid.Int qualified as Int
 import OpenSolid.Json (Json)
 import OpenSolid.Json qualified as Json
-import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
 import OpenSolid.Mesh (Mesh)
@@ -70,33 +66,12 @@ placeIn frame entity = Placed frame entity
 relativeTo :: Frame3d (global @ Meters) (Defines local) -> Entity global -> Entity local
 relativeTo frame = placeIn (Frame3d.inverse frame)
 
-toGlb ::
-  Plane3d (space @ Meters) (Defines Ground) ->
-  Camera3d (space @ Meters) ->
-  Length ->
-  List (Entity space) ->
-  ByteString
-toGlb groundPlane givenCamera clipDistance givenEntities = do
+toGlb :: Plane3d (space @ Meters) (Defines Ground) -> List (Entity space) -> ByteString
+toGlb groundPlane givenEntities = do
   let globalFrame = Frame3d.fromZxPlane groundPlane
-  let camera = Camera3d.relativeTo globalFrame givenCamera
-  -- TODO support orthographic cameras?
-  let cameraObject =
-        Json.object
-          [ Json.field "type" $ Json.text "perspective"
-          , Json.field "perspective" $
-              Json.object
-                [ Json.field "yfov" $ Json.float (Angle.inRadians (Camera3d.fovAngle camera))
-                , Json.field "znear" $ Json.float (Length.inMeters clipDistance)
-                ]
-          ]
-  let cameraNode =
-        Json.object
-          [ Json.field "camera" $ Json.int 0
-          , Gltf.matrixField (Camera3d.frame camera)
-          ]
   let entities = List.map (relativeTo globalFrame) givenEntities
   let meshes = gltfMeshes Frame3d.xyz (group entities)
-  let sceneObject = Json.object [Json.field "nodes" $ Json.listOf Json.int [0 .. List.length meshes]]
+  let sceneObject = Json.object [Json.field "nodes" $ Json.listOf Json.int [0 .. List.length meshes - 1]]
   let bufferBuilder = Data.Monoid.mconcat (List.map meshBuilder meshes)
   let bufferByteLength = Int.sumOf meshByteLength meshes
   let encodedMeshes = encodeMeshes 0 0 meshes
@@ -104,12 +79,11 @@ toGlb groundPlane givenCamera clipDistance givenEntities = do
   let fields =
         [ Json.field "scene" $ Json.int 0
         , Json.field "scenes" $ Json.list [sceneObject]
-        , Json.field "cameras" $ Json.list [cameraObject]
-        , Json.field "nodes" $ Json.list (cameraNode : List.map meshNode encodedMeshes)
-        , Json.field "meshes" $ Json.list (List.map meshObject encodedMeshes)
+        , Json.field "nodes" $ Json.listOf meshNode encodedMeshes
+        , Json.field "meshes" $ Json.listOf meshObject encodedMeshes
         , Json.field "bufferViews" $ Json.list (List.collect bufferViews encodedMeshes)
         , Json.field "accessors" $ Json.list (List.collect accessors encodedMeshes)
-        , Json.field "materials" $ Json.list (List.map materialObject encodedMeshes)
+        , Json.field "materials" $ Json.listOf materialObject encodedMeshes
         , Json.field "buffers" $ Json.list [bufferObject]
         ]
   Gltf.toByteString fields bufferByteLength bufferBuilder
