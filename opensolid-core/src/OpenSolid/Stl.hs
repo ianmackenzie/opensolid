@@ -8,8 +8,10 @@ import OpenSolid.Prelude
 import OpenSolid.Text qualified as Text
 import OpenSolid.Vector3d (Vector3d (Vector3d))
 import OpenSolid.Vector3d qualified as Vector3d
+import OpenSolid.Vertex3d (Vertex3d)
+import OpenSolid.Vertex3d qualified as Vertex3d
 
-text :: (Qty units -> Float) -> Mesh (Point3d (space @ units)) -> Text
+text :: Vertex3d vertex (space @ units) => (Qty units -> Float) -> Mesh vertex -> Text
 text units mesh =
   Text.multiline
     [ "solid"
@@ -17,11 +19,11 @@ text units mesh =
     , "endsolid"
     ]
 
-facet ::
-  (Qty units -> Float) ->
-  (Point3d (space @ units), Point3d (space @ units), Point3d (space @ units)) ->
-  Text
-facet units (p0, p1, p2) = do
+facet :: Vertex3d vertex (space @ units) => (Qty units -> Float) -> (vertex, vertex, vertex) -> Text
+facet units (v0, v1, v2) = do
+  let p0 = Vertex3d.position v0
+  let p1 = Vertex3d.position v1
+  let p2 = Vertex3d.position v2
   let crossProduct = (p1 - p0) .><. (p2 - p0)
   let Vector3d nx ny nz = Vector3d.normalize crossProduct
   Text.multiline
