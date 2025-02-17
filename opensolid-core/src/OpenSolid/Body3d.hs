@@ -749,18 +749,23 @@ boundarySurfaceMesh surfaceSegmentsById innerEdgeVerticesById boundarySurface = 
       let boundaryVertexLoops = NonEmpty.map Polygon2d.vertices boundaryPolygons
       -- Decent refinement option: (Just (List.length steinerPoints, steinerVertex))
       let vertexMesh = CDT.unsafe boundaryVertexLoops steinerVertices Nothing
-      let pointsAndNormals = Array.map (pointAndNormal surfaceFunctions) (Mesh.vertices vertexMesh)
+      let pointsAndNormals =
+            Array.map (pointAndNormal surfaceFunctions handedness) (Mesh.vertices vertexMesh)
       let faceIndices =
             case handedness of
               Positive -> Mesh.faceIndices vertexMesh
               Negative -> List.map (\(i, j, k) -> (k, j, i)) (Mesh.faceIndices vertexMesh)
       Mesh.indexed pointsAndNormals faceIndices
 
-pointAndNormal :: SurfaceFunctions (space @ units) -> Vertex (space @ units) -> (Point3d (space @ units), Vector3d (space @ Unitless))
-pointAndNormal SurfaceFunctions{fu, fv} (Vertex uvPoint point) = do
+pointAndNormal ::
+  SurfaceFunctions (space @ units) ->
+  Sign ->
+  Vertex (space @ units) ->
+  (Point3d (space @ units), Vector3d (space @ Unitless))
+pointAndNormal SurfaceFunctions{fu, fv} handedness (Vertex uvPoint point) = do
   let fuValue = VectorSurfaceFunction3d.evaluate fu uvPoint
   let fvValue = VectorSurfaceFunction3d.evaluate fv uvPoint
-  (point, Vector3d.normalize (fuValue .><. fvValue))
+  (point, handedness * Vector3d.normalize (fuValue .><. fvValue))
 
 toPolygon ::
   Map HalfEdgeId (List (Vertex (space @ units))) ->
