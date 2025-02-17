@@ -625,7 +625,7 @@ constant :: Vector2d (space @ units) -> VectorCurve2d (space @ units)
 constant = Parametric . Expression.constant
 
 -- | Create a curve from its X and Y component curves.
-xy :: Curve units -> Curve units -> VectorCurve2d (space @ units)
+xy :: forall space units. Curve units -> Curve units -> VectorCurve2d (space @ units)
 xy (Curve.Parametric x) (Curve.Parametric y) = Parametric (Expression.xy x y)
 xy x y = XY x y
 

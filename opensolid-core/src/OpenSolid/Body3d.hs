@@ -208,6 +208,7 @@ instance Bounded3d (Corner (space @ units)) (space @ units) where
 
 -- | Create an extruded body from a sketch plane and profile.
 extruded ::
+  forall space units local.
   Tolerance units =>
   Plane3d (space @ units) (Defines local) ->
   Region2d (local @ units) ->
@@ -220,6 +221,7 @@ extruded sketchPlane profile (Range d1 d2) = do
   translational sketchPlane profile (VectorCurve3d.line v1 v2)
 
 translational ::
+  forall space units local.
   Tolerance units =>
   Plane3d (space @ units) (Defines local) ->
   Region2d (local @ units) ->
@@ -248,6 +250,7 @@ A positive angle will result in a counterclockwise revolution around the axis,
 and a negative angle will result in a clockwise revolution.
 -}
 revolved ::
+  forall space units local.
   Tolerance units =>
   Plane3d (space @ units) (Defines local) ->
   Region2d (local @ units) ->

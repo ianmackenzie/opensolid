@@ -106,6 +106,7 @@ However, the curves must not overlap or intersect (other than at endpoints)
 and there must not be any gaps between them.
 -}
 boundedBy ::
+  forall space units.
   Tolerance units =>
   List (Curve2d (space @ units)) ->
   Result BoundedBy.Error (Region2d (space @ units))
